@@ -77,7 +77,15 @@ const BoTextureArray* BosonEffectPropertiesParticle::getTextures(const QString& 
     BoTextureArray* t = new BoTextureArray(absFiles, BoTexture::Particle);
 
     mTextureArrays.insert(name, t);
+
+    // AB: this makes boson crash on destruction, as the texture arrays access
+    // the texture manager which accesses the BosonConfig object which already
+    // has been destructed
+    // to fix this:
+    // REMOVE THE GLOBAL OBJECT !!!
+#if 0
     mTextureArrays.setAutoDelete(true);
+#endif
   }
   return mTextureArrays[name];
 }
