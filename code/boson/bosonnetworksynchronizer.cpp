@@ -47,6 +47,7 @@
 #include <qvaluelist.h>
 #include <qmap.h>
 #include <qintdict.h>
+#include <qdom.h>
 
 
 // debugging code to find a network bug. will be removed soon
@@ -1411,7 +1412,63 @@ bool BosonNetworkSyncer::receiveNetworkRequestSync(QDataStream&)
 
 bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 {
- boWarning() << k_funcinfo << "TODO: load game from stream" << endl;
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
+ QString xml;
+ stream >> xml;
+
+ QDomDocument doc;
+ if (!doc.setContent(xml)) {
+	boError() << k_funcinfo << "unable to load XML from stream" << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ {
+	QDomElement players = root.namedItem("Players").toElement();
+	if (players.isNull()) {
+		boError() << k_funcinfo << "no Players tag found" << endl;
+		return false;
+	}
+	KPlayer* kplayer = mGame->playerList()->first();
+	QDomNode n = players.firstChild();
+	for (; !n.isNull(); n = n.nextSibling(), kplayer = mGame->playerList()->next()) {
+		QDomElement player = n.toElement();
+		if (player.isNull()) {
+			return false;
+		}
+		if (!kplayer) {
+			BO_NULL_ERROR(kplayer);
+			return false;
+		}
+		bool ok;
+		unsigned int index = player.attribute("PlayerId").toUInt(&ok);
+		if (!ok) {
+			return false;
+		}
+		if ((int)index != mGame->playerList()->findRef(kplayer)) {
+			boError() << k_funcinfo << "unexpected PlayerId attribute " << index << " expected " << mGame->playerList()->findRef(kplayer) << endl;
+			return false;
+		}
+		QDomNode upgrades = player.namedItem("Upgrades");
+		if (!upgrades.isNull()) {
+			// AB: Player::loadFromXML() doesn't really load the
+			// upgrades. it rather applies them only. this means
+			// that if the same data is loaded twice, the method
+			// will behave as if two identical upgrades would have
+			// been researched.
+			// so we have to avoid loading the upgrades.
+			player.removeChild(upgrades);
+		}
+		if (!((Player*)kplayer)->loadFromXML(player)) {
+			boError() << k_funcinfo << "could not load player " << kplayer->id() << " at index " << index << endl;
+			return false;
+		}
+	}
+ }
+
 
  return true;
 }
@@ -1424,8 +1481,39 @@ void BosonNetworkSyncer::setGameLocked(bool l)
 QByteArray BosonNetworkSyncer::createSyncMessage()
 {
  QByteArray b;
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return b;
+ }
+
+ QDomDocument doc;
+ QDomElement root = doc.createElement("Sync");
+ doc.appendChild(root);
+ {
+	QDomElement players = doc.createElement("Players");
+	KGame::KGamePlayerList* list = mGame->playerList();
+	for (KPlayer* p = list->first(); p; p = list->next()) {
+		QDomElement player = doc.createElement("Player");
+		Player* p2 = (Player*)p;
+		if (!p2->saveAsXML(player)) {
+			boError() << k_funcinfo << "unable to save player " << p->id() << endl;
+			return b;
+		}
+	}
+	root.appendChild(players);
+ }
+
+ // TODO: fix upgrade loading (they are saved, but atm can't be loaded from xml)
+ // TODO: save BosonCanvas (including all items)
+ // TODO: save Boson (especially random number - we probably need a design
+ // change for the random number class here)
+
+ boWarning() << k_funcinfo << "TODO: save the whole canvas to the xml document" << endl;
+ boWarning() << k_funcinfo << "TODO: save the Boson object to the xml document" << endl;
+
+
  QDataStream stream(b, IO_WriteOnly);
- boWarning() << k_funcinfo << "TODO: save the game to the stream" << endl;
+ stream << doc.toString();
 
  return b;
 }
