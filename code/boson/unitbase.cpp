@@ -1,6 +1,7 @@
 
 
 #include "unitbase.h"
+
 #include "unitproperties.h"
 #include "player.h"
 #include "speciestheme.h"
