@@ -68,10 +68,10 @@
 #include "bosonwidgetbase.moc"
 
 #define ID_DEBUG_KILLPLAYER 0
-#define ID_DEBUG_ADD_5000_MINERALS 1
+#define ID_DEBUG_ADD_10000_MINERALS 1
 #define ID_DEBUG_ADD_1000_MINERALS 2
 #define ID_DEBUG_SUB_1000_MINERALS 3
-#define ID_DEBUG_ADD_5000_OIL 4
+#define ID_DEBUG_ADD_10000_OIL 4
 #define ID_DEBUG_ADD_1000_OIL 5
 #define ID_DEBUG_SUB_1000_OIL 6
 
@@ -684,6 +684,16 @@ void BosonWidgetBase::initKActions()
  works->setChecked(false);
  connect(works, SIGNAL(toggled(bool)),
 		displayManager(), SLOT(slotSetDebugItemWorks(bool)));
+ KToggleAction* camera = new KToggleAction(i18n("Debug camera"),
+		KShortcut(), 0, 0, actionCollection(), "debug_camera");
+ camera->setChecked(false);
+ connect(camera, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugCamera(bool)));
+ KToggleAction* rendercounts = new KToggleAction(i18n("Debug Rendering counts"),
+		KShortcut(), 0, 0, actionCollection(), "debug_rendercounts");
+ rendercounts->setChecked(false);
+ connect(rendercounts, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugRenderCounts(bool)));
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
@@ -893,8 +903,8 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 	case ID_DEBUG_KILLPLAYER:
 		boGame->sendMessage(b, BosonMessage::IdKillPlayer);
 		break;
-	case ID_DEBUG_ADD_5000_MINERALS:
-		stream << (Q_INT32)5000;
+	case ID_DEBUG_ADD_10000_MINERALS:
+		stream << (Q_INT32)10000;
 		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
 		break;
 	case ID_DEBUG_ADD_1000_MINERALS:
@@ -909,8 +919,8 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 		stream << (Q_INT32)1000;
 		boGame->sendMessage(b, BosonMessage::IdModifyOil);
 		break;
-	case ID_DEBUG_ADD_5000_OIL:
-		stream << (Q_INT32)5000;
+	case ID_DEBUG_ADD_10000_OIL:
+		stream << (Q_INT32)10000;
 		boGame->sendMessage(b, BosonMessage::IdModifyOil);
 		break;
 	case ID_DEBUG_SUB_1000_OIL:
@@ -950,10 +960,10 @@ void BosonWidgetBase::slotPlayerJoinedGame(KPlayer* player)
  connect(menu->popupMenu(), SIGNAL(activated(int)),
 		this, SLOT(slotDebugPlayer(int)));
  menu->popupMenu()->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
- menu->popupMenu()->insertItem(i18n("Minerals += 5000"), ID_DEBUG_ADD_5000_MINERALS);
+ menu->popupMenu()->insertItem(i18n("Minerals += 10000"), ID_DEBUG_ADD_10000_MINERALS);
  menu->popupMenu()->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
  menu->popupMenu()->insertItem(i18n("Minerals -= 1000"), ID_DEBUG_SUB_1000_MINERALS);
- menu->popupMenu()->insertItem(i18n("Oil += 5000"), ID_DEBUG_ADD_5000_OIL);
+ menu->popupMenu()->insertItem(i18n("Oil += 10000"), ID_DEBUG_ADD_10000_OIL);
  menu->popupMenu()->insertItem(i18n("Oil += 1000"), ID_DEBUG_ADD_1000_OIL);
  menu->popupMenu()->insertItem(i18n("Oil -= 1000"), ID_DEBUG_SUB_1000_OIL);
 

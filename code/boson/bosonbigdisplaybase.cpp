@@ -80,13 +80,10 @@
 #define CAMERA_MAX_Z FAR - 50
 #define CAMERA_MAX_RADIUS 80
 
-#define BO_LIGHT 1
 #define CLEAR_DEPTH 1.0f
 
-#ifdef BO_LIGHT
 #warning move to class !
 static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
-#endif
 
 #include <GL/glu.h>
 
@@ -127,9 +124,9 @@ public:
 	void init()
 	{
 		mLookAt.set(0, 0, 0);
-		mPosZ = 10.0;
+		mPosZ = 8.0;
 		mRotation = 0.0;
-		mRadius = 0.0;
+		mRadius = 5.0;
 		mMapWidth = 0.0;
 		mMapHeight = 0.0;
 	}
@@ -185,13 +182,10 @@ public:
 		mMapWidth = w;
 		mMapHeight = h;
 	}
-//	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
-//	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
+
 	void setZ(GLfloat z) { mPosZ = z; }
 	void setRotation(GLfloat r) { mRotation = r; }
 	void setRadius(GLfloat r) { mRadius = r; }
-//	GLfloat x() const { return mCenterX; }
-//	GLfloat y() const { return mCenterY; }
 	GLfloat z() const { return mPosZ; }
 	GLfloat rotation() const { return mRotation; }
 	GLfloat radius() const { return mRadius; }
@@ -454,9 +448,14 @@ public:
 	bool mDebugShowCellGrid;
 	bool mDebugMatrices;
 	bool mDebugItemWorks;
+	bool mDebugCamera;
+	bool mDebugRenderCounts;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
+
+	unsigned int mRenderedItems;  // units rendered when paintGL was last called
+	unsigned int mRenderedCells;  // same, but for cells
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -494,6 +493,8 @@ void BosonBigDisplayBase::init()
  d->mDebugShowCellGrid = false;
  d->mDebugMatrices = false;
  d->mDebugItemWorks = false;
+ d->mDebugRenderCounts = false;
+ d->mDebugCamera = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -591,7 +592,6 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
-#ifdef BO_LIGHT
  float lightAmb[] = {0.8, 0.8, 0.8, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
 
@@ -601,7 +601,6 @@ void BosonBigDisplayBase::initializeGL()
 
  // light makes things slower!
  glEnable(GL_LIGHT0);
-#endif
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -748,16 +747,15 @@ void BosonBigDisplayBase::paintGL()
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
-#ifdef BO_LIGHT
  if (boConfig->useLight()) {
 	glEnable(GL_LIGHTING);
+	glEnable(GL_NORMALIZE);
  }
-#endif
 
  boProfiling->renderUnits(true);
  BoItemList* allItems = mCanvas->allItems();
  BoItemList::Iterator it = allItems->begin();
- unsigned int renderedUnits = 0;
+ d->mRenderedItems = 0;
 
  // AB: this are problematic for triangle strips! they need to be in a special
  // format to make culling work!
@@ -863,12 +861,12 @@ void BosonBigDisplayBase::paintGL()
 	}
 
 	glTranslatef(-x, -y, -z);
-	renderedUnits++;
+	d->mRenderedItems++;
  }
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
- boProfiling->renderUnits(false, renderedUnits);
+ boProfiling->renderUnits(false, d->mRenderedItems);
 
  if (checkError()) {
 	boError() << k_funcinfo << "after unit rendering" << endl;
@@ -970,6 +968,7 @@ void BosonBigDisplayBase::paintGL()
 
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
+ glDisable(GL_NORMALIZE);
 
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect
 
@@ -1181,31 +1180,48 @@ void BosonBigDisplayBase::renderText()
 	glRasterPos2i(x, y);
 	glCallLists(realCoords.length(), GL_UNSIGNED_BYTE, (GLubyte*)realCoords.latin1());
  }
+ x = border;
+ y = d->mViewport[3] - border;
  if (d->mDebugItemWorks) {
 	QMap<int, int> workCounts = *canvas()->workCounts();
-	int x = border;
-	int y = d->mViewport[3] - border;
 	renderString(x, y, i18n("Item work statistics:"));
 	y -= d->mDefaultFont->height();
 	renderString(x, y, i18n("Total items: %1").arg(canvas()->allItemsCount()));
 	y -= d->mDefaultFont->height();
 	renderString(x, y, i18n("-1 (items): %1").arg(workCounts[-1]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkNone: %1").arg(workCounts[(int)UnitBase::WorkNone]));
+	renderString(x, y, i18n("Doing nothing:     %1").arg(workCounts[(int)UnitBase::WorkNone]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkMove: %1").arg(workCounts[(int)UnitBase::WorkMove]));
+	renderString(x, y, i18n("Moving or turning: %1").arg(workCounts[(int)UnitBase::WorkMove] +
+			workCounts[(int)UnitBase::WorkTurn]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkAttack: %1").arg(workCounts[(int)UnitBase::WorkAttack]));
+	renderString(x, y, i18n("Attacking:         %1").arg(workCounts[(int)UnitBase::WorkAttack]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkConstructed: %1").arg(workCounts[(int)UnitBase::WorkConstructed]));
+	renderString(x, y, i18n("Other:             %1").arg(workCounts[(int)UnitBase::WorkConstructed] +
+			workCounts[(int)UnitBase::WorkDestroyed] + workCounts[(int)UnitBase::WorkFollow] +
+			workCounts[(int)UnitBase::WorkPlugin]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkDestroyed: %1").arg(workCounts[(int)UnitBase::WorkDestroyed]));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkFollow: %1").arg(workCounts[(int)UnitBase::WorkFollow]));
+ }
+ if (d->mDebugCamera) {
+	renderString(x, y, i18n("Camera:"));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkPlugin: %1").arg(workCounts[(int)UnitBase::WorkPlugin]));
+	const BoVector3 lookAt = camera()->lookAt();
+	renderString(x, y, i18n("LookAt: (%1; %2; %3)").arg(lookAt.x()).arg(lookAt.y()).arg(lookAt.z()));
 	y -= d->mDefaultFont->height();
-	renderString(x, y, i18n("WorkTurn: %1").arg(workCounts[(int)UnitBase::WorkTurn]));
+	renderString(x, y, i18n("Radius: %1").arg(camera()->radius()));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Height: %1").arg(camera()->z()));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Rotation: %1").arg(camera()->rotation()));
+	y -= d->mDefaultFont->height();
+	y -= d->mDefaultFont->height();
+ }
+ if (d->mDebugRenderCounts) {
+	renderString(x, y, i18n("Items rendered: %1").arg(d->mRenderedItems));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Cells rendered: %1").arg(d->mRenderedCells));
+	y -= d->mDefaultFont->height();
  }
 
 // now the chat messages
@@ -1273,6 +1289,7 @@ void BosonBigDisplayBase::renderCells()
  GLuint texture = 0;
  int tile = -1;
  int heightMapWidth = map->width() + 1;
+ d->mRenderedCells = 0;
 // int heightMapHeight = map->height() + 1;
  for (int i = 0; i < d->mRenderCellsCount; i++) {
 	Cell* c = d->mRenderCells[i];
@@ -1306,9 +1323,11 @@ void BosonBigDisplayBase::renderCells()
 		glTexCoord2fv(textureUpperRight);
 		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)]);
 	glEnd();
+	d->mRenderedCells++;
  }
  if (d->mDebugShowCellGrid) {
 	glDisable(GL_LIGHTING);
+	glDisable(GL_NORMALIZE);
 	glDisable(GL_DEPTH_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glColor3ub(255, 255, 255);
@@ -1331,6 +1350,7 @@ void BosonBigDisplayBase::renderCells()
 	glEnable(GL_DEPTH_TEST);
 	if (boConfig->useLight()) {
 		glEnable(GL_LIGHTING);
+		glEnable(GL_NORMALIZE);
 	}
  }
 }
@@ -1426,6 +1446,7 @@ void BosonBigDisplayBase::renderParticles()
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
  glDisable(GL_LIGHTING); // warning: this functions leaves light at *disabled* !
+ glDisable(GL_NORMALIZE);
 
  // Matrix stuff for aligned particles
  BoVector3 x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
@@ -2577,10 +2598,8 @@ void BosonBigDisplayBase::cameraChanged()
 		lookatX, lookatY, lookatZ,
 		upX, upY, upZ);
 
-#ifdef BO_LIGHT
  // Reposition light
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-#endif
 
  if (checkError()) {
 	boError() << k_funcinfo << "after gluLookAt()" << endl;
@@ -3009,6 +3028,16 @@ void BosonBigDisplayBase::setDebugMatrices(bool debug)
 void BosonBigDisplayBase::setDebugItemWorks(bool debug)
 {
  d->mDebugItemWorks = debug;
+}
+
+void BosonBigDisplayBase::setDebugCamera(bool debug)
+{
+ d->mDebugCamera = debug;
+}
+
+void BosonBigDisplayBase::setDebugRenderCounts(bool debug)
+{
+ d->mDebugRenderCounts = debug;
 }
 
 void BosonBigDisplayBase::setToolTipCreator(int type)
