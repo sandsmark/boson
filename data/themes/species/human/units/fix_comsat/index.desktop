@@ -2,7 +2,7 @@
 IsFacility=true
 TerrainType=0
 Name=Comsat
-Id=0
+Id=14
 Health=150
 MineralCost=200
 Producer=10
