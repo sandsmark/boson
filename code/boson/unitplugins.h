@@ -38,12 +38,13 @@ class Boson;
  **/
 class UnitPlugin
 {
-	public:
+public:
 	enum UnitPlugins {
 		PluginStart = 0, // MUST be the first!
 		Production = 1,
 		Repair = 2,
 		Harvester = 3,
+		Weapon = 4, // note: this won't end up in Unit::plugin()! weapons are stored separately. also note that rtti==Weapon is *not* unique! they have their own class and rttis - see BosonWeapon
 
 		PluginEnd // MUST be the last entry!
 	};

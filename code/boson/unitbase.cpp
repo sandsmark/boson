@@ -39,6 +39,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  }
  mProperties = new KGamePropertyHandler();
  mProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
+ mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
@@ -70,6 +71,11 @@ UnitBase::~UnitBase()
 {
 // boDebug() << k_funcinfo << endl;
  dataHandler()->clear();
+ if (mWeaponProperties) {
+	// don't call weaponDataHandler() in d'tor, if it wasn't called before
+	// (will create a datahandler)
+	weaponDataHandler()->clear();
+ }
 // boDebug() << k_funcinfo << " done" << endl;
 }
 
@@ -84,6 +90,7 @@ void UnitBase::initStatic()
  addPropertyId(IdWork, QString::fromLatin1("Work"));
  addPropertyId(IdAdvanceWork, QString::fromLatin1("AdvanceWork"));
  addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
+ addPropertyId(IdShieldReloadCounter, QString::fromLatin1("ShieldReloadCounter"));
 }
 
 void UnitBase::registerData(KGamePropertyBase* prop, int id, bool local)
@@ -169,6 +176,11 @@ bool UnitBase::save(QDataStream& stream)
  // they might be one day..
  stream << (Q_UINT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
+ if (mWeaponProperties) {
+	// call weaponDataHandler() only, if it was called in c'tor, as it is
+	// created here otherwise
+	ret = ret && weaponDataHandler()->save(stream);
+ }
  stream << (Q_UINT32)id();
  return ret;
 }
@@ -184,6 +196,11 @@ bool UnitBase::load(QDataStream& stream)
  }
  mUnitProperties = speciesTheme()->unitProperties(typeId);
  bool ret = dataHandler()->load(stream);
+  if (mWeaponProperties) {
+	// call weaponDataHandler() only, if it was called in c'tor, as it is
+	// created here otherwise
+	ret = ret && weaponDataHandler()->load(stream);
+ }
  stream >> id;
  mId = id;
  return ret;
@@ -284,3 +301,14 @@ void UnitBase::reloadShields(int by)
 	mShieldReloadCounter = mShieldReloadCounter + by;
  }
 }
+
+KGamePropertyHandler* UnitBase::weaponDataHandler()
+{
+ if (mWeaponProperties) {
+	return mWeaponProperties;
+ }
+ mWeaponProperties = new KGamePropertyHandler();
+ mWeaponProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
+ return mWeaponProperties;
+}
+
