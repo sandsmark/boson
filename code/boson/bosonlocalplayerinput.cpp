@@ -284,6 +284,26 @@ void BosonLocalPlayerInput::attack(QPtrList<Unit> units, Unit* target)
   sendInput(msg);
 }
 
+void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, int x, int y)
+{
+  boDebug() << k_funcinfo << endl;
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  // tell the clients we want to drop bomb:
+  stream << (Q_UINT32)BosonMessage::MoveDropBomb;
+  // tell place
+  stream << (Q_INT32)x;
+  stream << (Q_INT32)y;
+  // tell them how many units attack:
+  stream << (Q_UINT32)1;
+  stream << (Q_UINT32)u->id();
+  stream << (Q_UINT32)weapon;
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(msg);
+}
+
 void BosonLocalPlayerInput::repair(QPtrList<Unit> units, Unit* repairyard)
 {
   boDebug() << k_funcinfo << endl;

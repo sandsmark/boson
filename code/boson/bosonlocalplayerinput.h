@@ -57,6 +57,7 @@ class BosonLocalPlayerInput : public KGameIO
     void moveWithAttack(QPtrList<Unit> units, int x, int y);
     void build(ProductionType type, Unit* factory, int x, int y);
     void attack(QPtrList<Unit> units, Unit* target);
+    void dropBomb(Unit* u, int weapon, int x, int y);
     void repair(QPtrList<Unit> units, Unit* repairyard);
     void refine(QPtrList<Unit> units, Unit* refinery);
     void follow(QPtrList<Unit> units, Unit* target);

@@ -48,6 +48,7 @@ protected:
 	bool actionMoveWithAttack(const BoVector3& pos);
 	bool actionMoveWithoutAttack(const BoVector3& pos);
 	bool actionAttack(const BoVector3& pos);
+	bool actionDropBomb(const BoVector3& pos);
 	bool actionBuild(const BoVector3& pos);
 	bool actionFollow(const BoVector3& pos);
 	bool actionRepair(const BoVector3& pos);
@@ -57,6 +58,7 @@ protected:
 	CanSelectUnit canSelect(Unit* unit) const;
 
 private:
+	int weaponId;
 };
 
 #endif

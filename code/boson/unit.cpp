@@ -68,6 +68,7 @@ public:
 	KGameProperty<int> mWantedRotation;
 	KGameProperty<int> mMoveAttacking;
 	KGameProperty<int> mSearchPath;
+	KGameProperty<int> mSlowDownAtDestination;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -110,12 +111,14 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mWantedRotation, IdWantedRotation);
  registerData(&d->mMoveAttacking, IdMoveAttacking);
  registerData(&d->mSearchPath, IdSearchPath);
+ registerData(&d->mSlowDownAtDestination, IdSlowDownAtDestination);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
  d->mMoveRange.setLocal(0);
  d->mWantedRotation.setLocal(0);
  d->mMoveAttacking.setLocal(0);
  d->mSearchPath.setLocal(0);
+ d->mSlowDownAtDestination.setLocal(1);
 
  setAnimated(true);
 
@@ -171,6 +174,7 @@ void Unit::initStatic()
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
  addPropertyId(IdMoveAttacking, QString::fromLatin1("MoveAttacking"));
  addPropertyId(IdSearchPath, QString::fromLatin1("SearchPath"));
+ addPropertyId(IdSlowDownAtDestination, QString::fromLatin1("SlowDownAtDestination"));
 
  // MobileUnit
  addPropertyId(IdMovingFailed, QString::fromLatin1("MovingFailed"));
@@ -732,9 +736,15 @@ void Unit::moveTo(const QPoint& pos, bool attack)
  }
 }
 
-bool Unit::moveTo(float x, float y, int range, bool attack)
+bool Unit::moveTo(float x, float y, int range, bool attack, bool slowDownAtDest)
 {
-
+ // If we're moving already, we don't want to set our speed to 0
+ // Set slowDownAtDestination temporarily to false to achieve that.
+ // Maybe also when advanceWork() == WorkMove ?
+ boDebug() << k_funcinfo << "work(): " << work() << "; advanceWork(): " << advanceWork() << endl;
+ if(work() == WorkMove) {
+	d->mSlowDownAtDestination = 0;
+ }
  stopMoving();
 
  if (range == -1) {
@@ -773,6 +783,11 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 	d->mMoveAttacking = 1;
  } else {
 	d->mMoveAttacking = 0;
+ }
+ if (slowDownAtDest) {
+	d->mSlowDownAtDestination = 1;
+ } else {
+	d->mSlowDownAtDestination = 0;
  }
 
  return true;
@@ -1256,10 +1271,16 @@ void Unit::loadWeapons()
 
  // since we use an array and not a list we need to count the weapons first.
  int count = 0;
+ bool hasbomb = false;
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  for (; it.current(); ++it) {
 	if (it.current()->pluginType() == PluginProperties::Weapon) {
 		count++;
+		// Check for bombing weapons and create bombing plugin if necessary
+		if (!hasbomb && ((BosonWeaponProperties*)it.current())->shotType() == BosonShot::Bomb) {
+			d->mPlugins.append(new BombingPlugin(this));
+			hasbomb = true;
+		}
 	}
  }
  if (count > MAX_WEAPONS_PER_UNIT) {
@@ -1295,6 +1316,11 @@ bool Unit::canShootAt(Unit *u)
 int Unit::moveAttacking() const
 {
  return d->mMoveAttacking;
+}
+
+int Unit::slowDownAtDestination() const
+{
+ return d->mSlowDownAtDestination;
 }
 
 int Unit::distance(const Unit* u) const
@@ -1478,6 +1504,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // x and y are center of the unit here
  int x = (int)(BosonItem::x() + width() / 2);
  int y = (int)(BosonItem::y() + height() / 2);
+ /*boDebug(401) << k_funcinfo << "pos: (" << x << "; " << y << ")" <<
+    "; wp: (" << wp.x() << "; " << wp.y() << "); wpc: " << waypointCount() << endl;*/
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
@@ -1508,7 +1536,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
  // If we're close to destination, decelerate, otherwise accelerate
  // TODO: we should also slow down when turning at waypoint.
- if (QMAX(QABS(x - destinationX()), QABS(y - destinationY())) <= decelerationDistance()) {
+ if (slowDownAtDestination() && QMAX(QABS(x - destinationX()), QABS(y - destinationY())) <= decelerationDistance()) {
 /*	boDebug(401) << "MOVING: " << "decelerating; pos: (" << x << ", " << y << "); dest: (" <<
 			destinationX() << ", " << destinationY() << "); dist: " <<
 			QMAX(QABS(x - destinationX()), QABS(y - destinationY())) << "; decel. dist: " <<
@@ -1518,6 +1546,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  } else {
 	accelerate();
  }
+ /*boDebug() << k_funcinfo << "Speed is now " << speed() << "; exact pos: (" <<
+    BosonItem::x() << "; " << BosonItem::y() << ")" << endl;*/
 
  // Try to go to same x and y coordinates as waypoint's coordinates
  // First x coordinate
@@ -1526,6 +1556,10 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  float xspeed = 0;
  float yspeed = 0;
  float dist = (int)speed();
+ if (dist < 1) {
+	// speed() was 0.something. Make dist 1
+	dist = 1;
+ }
  float xdiff, ydiff;
 
  xdiff = wp.x() - x;
@@ -1544,6 +1578,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  }
 
 
+ //boDebug() << k_funcinfo << "Setting velocity to (" << xspeed << "; " << yspeed << ")" << endl;
  // Set velocity for actual moving
  setVelocity(xspeed, yspeed, 0.0);
  setMoving(true);
@@ -1811,7 +1846,9 @@ void MobileUnit::stopMoving()
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
  d->mWayPointReached = false;
- setSpeed(0);
+ if (slowDownAtDestination()) {
+	setSpeed(0);
+ }
 }
 
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
