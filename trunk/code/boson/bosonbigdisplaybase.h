@@ -32,6 +32,7 @@ class PlayerIO;
 class Unit;
 class UnitProperties;
 class BoGameCamera;
+class BoAutoGameCamera;
 class BosonBigDisplayInputBase;
 class BoItemList;
 class BosonItem;
@@ -257,6 +258,7 @@ public:
 	void loadFromXML(const QDomElement& root);
 
 	BoGameCamera* camera() const;
+	BoAutoGameCamera* autoCamera() const;
 	void advanceCamera();
 
 	void changeGroundRenderer(int renderer);

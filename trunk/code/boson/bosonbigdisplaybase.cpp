@@ -50,6 +50,7 @@
 #include "bogltooltip.h"
 #include "bosongroundtheme.h"
 #include "bocamera.h"
+#include "boautocamera.h"
 #include "bogroundrenderer.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
@@ -1181,8 +1182,8 @@ void BosonBigDisplayBase::renderText()
 	text += i18n("Radius: %1\n").arg(camera()->radius());
 	text += i18n("Height: %1\n").arg(camera()->z());
 	text += i18n("Rotation: %1\n").arg(camera()->rotation());
-	text += i18n("Time: %1/%2\n").arg(camera()->remainingTime()).arg(camera()->commitTime());
-	text += i18n("% moved: %1\n").arg(camera()->movedAmount() * 100);
+	text += i18n("Time: %1/%2\n").arg(autoCamera()->remainingTime()).arg(autoCamera()->commitTime());
+	text += i18n("% moved: %1\n").arg(autoCamera()->movedAmount() * 100);
 
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
@@ -1556,10 +1557,10 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 1; // no effect, btw
 		}
-		camera()->changeZ(delta, true);
+		camera()->changeZ(delta);
 		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 		break;
@@ -1569,7 +1570,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 10;
 		}
-		camera()->changeRotation(delta, true);
+		camera()->changeRotation(delta);
 		cameraChanged();
 		break;
 	default:
@@ -1593,16 +1594,16 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	// during a game.
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.startZoom();
-		camera()->changeZ(d->mMouseMoveDiff.dy(), true);
+		camera()->changeZ(d->mMouseMoveDiff.dy());
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
 		d->mMouseMoveDiff.startRotate();
-		camera()->changeRotation(d->mMouseMoveDiff.dx(), true);
-		camera()->changeRadius(d->mMouseMoveDiff.dy(), true);
+		camera()->changeRotation(d->mMouseMoveDiff.dx());
+		camera()->changeRadius(d->mMouseMoveDiff.dy());
 		cameraChanged();
 	}
  } else if (buttonState & LEFT_BUTTON) {
@@ -1643,10 +1644,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
-		camera()->changeLookAt(BoVector3(dx, dy, 0), true);
+		camera()->changeLookAt(BoVector3(dx, dy, 0));
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z(), true);
+			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
 		}
 		cameraChanged();
 	} else {
@@ -1855,7 +1856,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center 
- camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0), true);
+ camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
  cameraChanged();
 }
 
@@ -2234,7 +2235,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		camera()->changeLookAt(BoVector3(dx, dy, 0), true);
+		camera()->changeLookAt(BoVector3(dx, dy, 0));
 		cameraChanged();
 	}
  }
@@ -2245,7 +2246,7 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
  GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
- camera()->changeLookAt(BoVector3(x, y, 0), true);
+ camera()->changeLookAt(BoVector3(x, y, 0));
  cameraChanged();
 }
 
@@ -2349,7 +2350,7 @@ void BosonBigDisplayBase::cameraChanged()
  }
  makeCurrent();
 
- d->mCamera.applyCameraToScene();
+ camera()->applyCameraToScene();
 
  // Reposition light
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
@@ -2391,9 +2392,14 @@ BoGameCamera* BosonBigDisplayBase::camera() const
  return &d->mCamera;
 }
 
+BoAutoGameCamera* BosonBigDisplayBase::autoCamera() const
+{
+ return camera()->autoGameCamera();
+}
+
 const BoVector3& BosonBigDisplayBase::cameraLookAtPos() const
 {
- return d->mCamera.lookAt();
+ return camera()->lookAt();
 }
 
 bool BosonBigDisplayBase::checkError() const
@@ -2794,8 +2800,8 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 
 void BosonBigDisplayBase::advanceCamera()
 {
- if (camera()->commitTime() > 0) {
-	camera()->advance();
+ if (autoCamera()->commitTime() > 0) {
+	autoCamera()->advance();
 	cameraChanged();
  }
 }

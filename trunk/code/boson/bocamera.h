@@ -25,6 +25,8 @@
 #include <GL/gl.h>
 
 class QDomElement;
+class BoAutoCamera;
+class BoAutoGameCamera;
 
 /**
  * Camera class for Boson
@@ -34,89 +36,75 @@ class QDomElement;
 class BoCamera
 {
   public:
-    enum MoveMode { Linear = 1, Sinusoidal = 2, SinusoidStart = 3, SinusoidEnd = 4 };
-
     BoCamera();
     BoCamera(const BoCamera& c)
     {
       *this = c;
     }
 
-    virtual ~BoCamera()
-    {
-    }
 
-   /**
-    * Apply the camera to the scene by doing the necessary OpenGL
-    * transformation on the modelview matrix.
-    *
-    * This will first load the identity matrix, so any previous changes are
-    * lost. use glPushMatrix()/glPopMatrix() if you need your old settings
-    * back at a later point.
-    **/
+    virtual ~BoCamera();
+
+    /**
+     * Set the auto camera. A BoCamera object has always exactly one auto
+     * camera. The previously set auto camera will get deleted, if existing.
+     *
+     * Note that multiple calls to this are perfectly valid (and necessary for
+     * derived classes, as the c'tor of BoCamera sets a default auto camera)
+     *
+     * This class takes ownership of the auto camera and will delete it on
+     * destruction.
+     **/
+    void setAutoCamera(BoAutoCamera*);
+    BoAutoCamera* autoCamera() const { return mAutoCamera; }
+
+    /**
+     * Apply the camera to the scene by doing the necessary OpenGL
+     * transformation on the modelview matrix.
+     *
+     * This will first load the identity matrix, so any previous changes are
+     * lost. use glPushMatrix()/glPopMatrix() if you need your old settings
+     * back at a later point.
+     **/
     void applyCameraToScene();
-
-
-    /**
-     * Advances camera. This smoothly (and linearly) applies changes made to
-     * camera.
-     **/
-    void advance();
-    virtual bool advance2();
-
-    /**
-     * Commits changes made to camera in ticks game ticks. If ticks <= 0, then
-     * changes will take effect immediately.
-     **/
-    void commitChanges(int ticks);
-
-    void setMoveMode(MoveMode mode);
-
-    int commitTime() const { return mCommitTime; }
-    int remainingTime() const { return mRemainingTime; }
-    float movedAmount() const { return mMovedAmount; }
 
 
     BoCamera& operator=(const BoCamera& c);
 
-
     /**
-    * Set the gluLookAt() paremeters directly. Note that when you use
-    * this @ref radius and @ref rotation will remain undefined.
-    **/
+     * Set the gluLookAt() paremeters directly. Note that when you use
+     * this @ref radius and @ref rotation will remain undefined.
+     **/
     void setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up);
 
     /**
-    * @return The eye vector (camera position), as it can get used by
-    * gluLookAt().
-    **/
+     * @return The eye vector (camera position), as it can get used by
+     * gluLookAt().
+     **/
     const BoVector3& cameraPos();
 
     /**
-    * @return The up vector, as it can get used by gluLookAt(). The up
-    * vector is the vector pointing straight "up" from the position of the
-    * camera. it can change when the camera is rotated.
-    **/
+     * @return The up vector, as it can get used by gluLookAt(). The up
+     * vector is the vector pointing straight "up" from the position of the
+     * camera. it can change when the camera is rotated.
+     **/
     const BoVector3& up();
 
 
     // These will _move_ given things by given values
-    // Also, they don't commit changes
-    // If now is true, value is changed immediately (only this value, if other
-    //  changes are being committed at the same time, they won't be cancelled)
-    void changeLookAt(const BoVector3& diff, bool now = false);
+    void changeLookAt(const BoVector3& diff);
 
     // these will change the up and cameraPos vectors!
     /**
      * Set lookAt point of camera
      * Changes are not commited
      **/
-    void setLookAt(const BoVector3& pos, bool now = false);
+    void setLookAt(const BoVector3& pos);
 
     /**
-    * @return The point we are looking at. This is the lookAt vector, as it
-    * can get used by gluLookAt().
-    **/
+     * @return The point we are looking at. This is the lookAt vector, as it
+     * can get used by gluLookAt().
+     **/
     const BoVector3& lookAt() const  { return mLookAt; }
 
     virtual bool loadFromXML(const QDomElement& root);
@@ -131,36 +119,27 @@ class BoCamera
     virtual void checkPosition() = 0;
 
     /**
-    * Update the parameters for gluLookAt() (@ref cameraPos
-    * and @ref up) according to the new values from @ref radius,
-    * @ref rotation and @ref lookAt.
-    * Don't call this manually, call @ref setPositionDirty instead. This will
-    * be automatically called by @ref cameraPos and @ref up, if it's dirty.
-    **/
+     * Update the parameters for gluLookAt() (@ref cameraPos
+     * and @ref up) according to the new values from @ref radius,
+     * @ref rotation and @ref lookAt.
+     * Don't call this manually, call @ref setPositionDirty instead. This will
+     * be automatically called by @ref cameraPos and @ref up, if it's dirty.
+     **/
     virtual void updatePosition() = 0;
-    virtual void resetDifferences();
-
-//    void checkRotation();
 
     void setPositionDirty(bool dirty = true) { mPosDirty = dirty; }
     bool positionDirty() const { return mPosDirty; }
 
-  protected:
-    MoveMode moveMode() const { return mMoveMode; }
-    float moveFactor() const;
   private:
     void init();
 
   private:
+    friend class BoAutoCamera;
+    BoAutoCamera* mAutoCamera;
     BoVector3 mLookAt;
     BoVector3 mUp;
     BoVector3 mCameraPos;
     bool mPosDirty;
-
-    BoVector3 mLookAtDiff;
-    int mCommitTime, mRemainingTime;
-    MoveMode mMoveMode;
-    float mMovedAmount;
 };
 
 /**
@@ -187,11 +166,12 @@ class BoGameCamera : public BoCamera
     }
 
     /**
-     * Advances camera. This smoothly (and linearly) applies changes made to
-     * camera.
+     * @return @ref autoCamera casted to a @ref BoAutoGameCamera.
      **/
-    virtual bool advance2();
-
+    BoAutoGameCamera* autoGameCamera() const
+    {
+      return (BoAutoGameCamera*)autoCamera();
+    }
 
     BoGameCamera& operator=(const BoGameCamera& c);
 
@@ -202,12 +182,9 @@ class BoGameCamera : public BoCamera
 
 
     // These will _move_ given things by given values
-    // Also, they don't commit changes
-    // If now is true, value is changed immediately (only this value, if other
-    //  changes are being committed at the same time, they won't be cancelled)
-    void changeZ(GLfloat diff, bool now = false);
-    void changeRadius(GLfloat diff, bool now = false);
-    void changeRotation(GLfloat diff, bool now = false);
+    void changeZ(GLfloat diff);
+    void changeRadius(GLfloat diff);
+    void changeRotation(GLfloat diff);
 
     // these will change the up and cameraPos vectors!
     /**
@@ -215,7 +192,7 @@ class BoGameCamera : public BoCamera
      * it's 0, camera will look along y-axis.
      * Changes are not commited
      **/
-    void setRotation(GLfloat r, bool now = false);
+    void setRotation(GLfloat r);
     /**
      * Set distance between look-at point and camera's position on xy-plane.
      * It means that if there would be a cylinder which lower center point would
@@ -223,25 +200,35 @@ class BoGameCamera : public BoCamera
      * somewhere along the edge of upper cap of this cylinder.
      * Changes are not commited
      **/
-    void setRadius(GLfloat r, bool now = false);
+    void setRadius(GLfloat r);
     /**
      * Set distance between lookAt point and camera in z-axis
      * Changes are not commited
      **/
-    void setZ(GLfloat z, bool now = false);
+    void setZ(GLfloat z);
 
     GLfloat z() const  { return mPosZ; }
     GLfloat rotation() const  { return mRotation; }
     GLfloat radius() const  { return mRadius; }
 
     /**
-    * Set limits for the camera. The camera tries not to move beyond the
-    * given rectangle.
-    **/
+     * Set limits for the camera. The camera tries not to move beyond the
+     * given rectangle.
+     **/
     void setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
+
+
+    /**
+     * @internal
+     * Calculate the new z value, according to the camera restrictions.
+     *
+     * This is used by @ref changeZ as well as by the @ref BoAutoGameCamera.
+     **/
+    float calculateNewZ(float diff) const;
+    float calculateNewRadius(GLfloat diff) const;
 
 
   protected:
@@ -252,14 +239,13 @@ class BoGameCamera : public BoCamera
     virtual void checkPosition();
 
     /**
-    * Update the parameters for gluLookAt() (@ref cameraPos
-    * and @ref up) according to the new values from @ref radius,
-    * @ref rotation and @ref lookAt.
-    * Don't call this manually, call @ref setPositionDirty instead. This will
-    * be automatically called by @ref cameraPos and @ref up, if it's dirty.
-    **/
+     * Update the parameters for gluLookAt() (@ref cameraPos
+     * and @ref up) according to the new values from @ref radius,
+     * @ref rotation and @ref lookAt.
+     * Don't call this manually, call @ref setPositionDirty instead. This will
+     * be automatically called by @ref cameraPos and @ref up, if it's dirty.
+     **/
     virtual void updatePosition();
-    virtual void resetDifferences();
 
     void checkRotation();
 
@@ -268,15 +254,12 @@ class BoGameCamera : public BoCamera
     static void initStatic();
 
   private:
+    friend class BoAutoGameCamera;
     GLfloat mPosZ;
     GLfloat mRotation;
     GLfloat mRadius;
 
     GLfloat mMinX, mMaxX, mMinY, mMaxY;
-
-    GLfloat mPosZDiff;
-    GLfloat mRotationDiff;
-    GLfloat mRadiusDiff;
 };
 
 #endif

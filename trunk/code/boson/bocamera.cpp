@@ -19,6 +19,7 @@
 
 #include "bocamera.h"
 
+#include "boautocamera.h"
 #include "defines.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
@@ -45,25 +46,34 @@ BoCamera& BoCamera::operator=(const BoCamera& c)
   mUp = c.mUp;
   mCameraPos = c.mCameraPos;
 
-  mLookAtDiff = c.mLookAtDiff;
-  mCommitTime = c.mCommitTime;
-  mRemainingTime = c.mRemainingTime;
-  mMoveMode = c.mMoveMode;
-  mMovedAmount = c.mMovedAmount;
+  setAutoCamera(new BoAutoCamera(*c.autoCamera()));
 
   setPositionDirty();
 
   return *this;
 }
 
+BoCamera::~BoCamera()
+{
+  delete mAutoCamera;
+}
+
 void BoCamera::init()
 {
+  mAutoCamera = 0;
   mLookAt.set(0.0f, 0.0f, 0.0f);
-  mMoveMode = Linear;
-
-  resetDifferences();
 
   setPositionDirty();
+  setAutoCamera(new BoAutoCamera(this));
+}
+
+void BoCamera::setAutoCamera(BoAutoCamera* a)
+{
+  if (mAutoCamera)
+  {
+    delete mAutoCamera;
+  }
+  mAutoCamera = a;
 }
 
 void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
@@ -74,18 +84,11 @@ void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos,
   // checkPosition();
 }
 
-void BoCamera::changeLookAt(const BoVector3& diff, bool now)
+void BoCamera::changeLookAt(const BoVector3& diff)
 {
-  if(now)
-  {
-    mLookAt += diff;
-    checkPosition();
-    setPositionDirty();
-  }
-  else
-  {
-    mLookAtDiff = diff;
-  }
+  mLookAt += diff;
+  checkPosition();
+  setPositionDirty();
 }
 
 bool BoCamera::loadFromXML(const QDomElement& root)
@@ -154,126 +157,12 @@ const BoVector3& BoCamera::up()
   return mUp;
 }
 
-void BoCamera::setLookAt(const BoVector3& pos, bool now)
+void BoCamera::setLookAt(const BoVector3& pos)
 {
-  if(now)
-  {
-    mLookAt = pos;
-    checkPosition();
-    setPositionDirty();
-  }
-  else
-  {
-    mLookAtDiff = pos - mLookAt;
-  }
+  mLookAt = pos;
+  checkPosition();
+  setPositionDirty();
 }
-
-void BoCamera::commitChanges(int ticks)
-{
-  mCommitTime = ticks;
-  mRemainingTime = ticks;
-  mMovedAmount = 0.0f;
-  if(ticks <= 0)
-  {
-    // Advance immediately. commitTime still has to be at least 1
-    mCommitTime = 1;
-    mRemainingTime = 1;
-    advance();
-  }
-}
-
-void BoCamera::setMoveMode(MoveMode mode)
-{
-  boDebug(230) << k_funcinfo << "mode: " << mode << endl;
-  mMoveMode = mode;
-}
-
-float BoCamera::moveFactor() const
-{
-  float factor = 1.0f;
-  if(moveMode() == Sinusoidal)
-  {
-    // FIXME: make this more simple!
-    factor = (-cos((mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else if(moveMode() == SinusoidEnd)
-  {
-    // FIXME: make this more simple!
-    factor = -cos(M_PI_2 + (mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI_2) - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else
-  {
-    factor = 1.0 / mCommitTime;
-    boDebug(230) << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  return factor;
-}
-
-void BoCamera::advance()
-{
-  if(remainingTime() <= 0)
-  {
-    return;
-  }
-  bool changed = advance2();
-
-  if(!changed)
-  {
-//    boError(230) << k_funcinfo << "remainingTime: " << reaminingTime() << ", but no changes ?!" << endl;
-    mRemainingTime = 0;
-    mCommitTime = 0;
-    mMovedAmount = 0.0f;
-  }
-  else
-  {
-    setPositionDirty();
-    mRemainingTime--;
-    if(mRemainingTime == 0)
-    {
-      // Failsafe
-      resetDifferences();
-    }
-  }
-}
-
-bool BoCamera::advance2()
-{
-  if(remainingTime() <= 0)
-  {
-    return false;
-  }
-
-  boDebug(230) << k_funcinfo << "mRemainingTime: " << remainingTime() << endl;
-
-  // How much of differences to add
-  float factor = moveFactor();
-  mMovedAmount += factor;
-  boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
-  bool changed = false;
-
-  if(!mLookAtDiff.isNull())
-  {
-    // How much lookAt point will move
-    BoVector3 lookAtChange(mLookAtDiff * factor);
-    // Change lookAt point and difference
-    mLookAt.add(lookAtChange);
-    checkPosition();
-    changed = true;
-  }
-
-  return changed;
-}
-
-void BoCamera::resetDifferences()
-{
-  mLookAtDiff.reset();
-  mCommitTime = 0;
-  mRemainingTime = 0;
-  mMovedAmount = 0.0f;
-}
-
 
 
 BoGameCamera::BoGameCamera()
@@ -281,6 +170,7 @@ BoGameCamera::BoGameCamera()
 {
   init();
 }
+
 BoGameCamera::BoGameCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
         : BoCamera()
 {
@@ -296,14 +186,12 @@ BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
   mRotation = c.mRotation;
   mRadius = c.mRadius;
 
-  mPosZDiff = c.mPosZDiff;
-  mRotationDiff = c.mRotationDiff;
-  mRadiusDiff = c.mRadiusDiff;
-
   mMinX = c.mMinX;
   mMaxX = c.mMaxX;
   mMinY = c.mMinY;
   mMaxY = c.mMaxY;
+  setAutoCamera(new BoAutoGameCamera(*c.autoGameCamera()));
+
   return *this;
 }
 
@@ -369,10 +257,9 @@ void BoGameCamera::updatePosition()
   setPositionDirty(false);
 }
 
-void BoGameCamera::changeZ(GLfloat diff, bool now)
+float BoGameCamera::calculateNewZ(GLfloat diff) const
 {
   // FIXME: z limits should depend on the ground height
-  // Make sure new z-coordinate is within limits
   float newz = mPosZ + diff;
   if(newz < CAMERA_MIN_Z)
   {
@@ -382,26 +269,26 @@ void BoGameCamera::changeZ(GLfloat diff, bool now)
   {
     newz = CAMERA_MAX_Z;
   }
+  return newz;
+}
+
+void BoGameCamera::changeZ(GLfloat diff)
+{
+  // FIXME: z limits should depend on the ground height
+  // Make sure new z-coordinate is within limits
+  float newz = calculateNewZ(diff);
+
   // Change radius too, so that camera angle will remain same
   // TODO: maybe provide another method for that, e.g. changeZWithRadius().
   //  Then changeZ() would change _only_ z
   float factor = newz / mPosZ;
-  if(now)
-  {
-    mPosZ = newz;
-    mRadius = radius() * factor;
-    setPositionDirty();
-  }
-  else
-  {
-    mPosZDiff = newz;
-    mRadiusDiff = radius() * factor;
-  }
+  mPosZ = newz;
+  mRadius = radius() * factor;
+  setPositionDirty();
 }
 
-void BoGameCamera::changeRadius(GLfloat diff, bool now)
+float BoGameCamera::calculateNewRadius(GLfloat diff) const
 {
-  // How much radius is changed depends on z position
   float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;
   // Make sure radius is within limits
   if(radius < 0.0f)
@@ -412,30 +299,32 @@ void BoGameCamera::changeRadius(GLfloat diff, bool now)
   {
     radius = mPosZ;
   }
-  // Update
-  if(now)
-  {
-    mRadius = radius;
-    setPositionDirty();
-  }
-  else
-  {
-    mRadiusDiff = radius;
-  }
+  return radius;
 }
 
-void BoGameCamera::changeRotation(GLfloat diff, bool now)
+void BoGameCamera::changeRadius(GLfloat diff)
 {
-  if(now)
+  // How much radius is changed depends on z position
+  float radius = calculateNewRadius(diff);
+  // Make sure radius is within limits
+  if(radius < 0.0f)
   {
-    mRotation += diff;
-    checkRotation();
-    setPositionDirty();
+    radius = 0.0f;
   }
-  else
+  else if(radius > mPosZ)
   {
-    mRotationDiff = diff;
+    radius = mPosZ;
   }
+  // Update
+  mRadius = radius;
+  setPositionDirty();
+}
+
+void BoGameCamera::changeRotation(GLfloat diff)
+{
+  mRotation += diff;
+  checkRotation();
+  setPositionDirty();
 }
 
 void BoGameCamera::checkPosition()
@@ -534,46 +423,24 @@ bool BoGameCamera::loadFromXML(const QDomElement& root)
   return ret;
 }
 
-void BoGameCamera::setRadius(GLfloat r, bool now)
+void BoGameCamera::setRadius(GLfloat r)
 {
-  if(now)
-  {
-    mRadius = r;
-    setPositionDirty();
-  }
-  else
-  {
-    mRadiusDiff = r - mRadius;
-  }
+  mRadius = r;
+  setPositionDirty();
 }
 
-void BoGameCamera::setRotation(GLfloat r, bool now)
+void BoGameCamera::setRotation(GLfloat r)
 {
   boDebug(230) << k_funcinfo << endl;
-  if(now)
-  {
-    mRotation = r;
-    checkRotation();
-    setPositionDirty();
-  }
-  else
-  {
-    mRotationDiff = r - mRotation;
-    boDebug(230) << k_funcinfo << "rotation diff set to: " << mRotationDiff << endl;
-  }
+  mRotation = r;
+  checkRotation();
+  setPositionDirty();
 }
 
-void BoGameCamera::setZ(GLfloat z, bool now)
+void BoGameCamera::setZ(GLfloat z)
 {
-  if(now)
-  {
-    mPosZ = z;
-    setPositionDirty();
-  }
-  else
-  {
-    mPosZDiff = z - mPosZ;
-  }
+  mPosZ = z;
+  setPositionDirty();
 }
 
 void BoGameCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
@@ -584,49 +451,6 @@ void BoGameCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat
   mMinY = minY;
   mMaxY = maxY;
 }
-
-bool BoGameCamera::advance2()
-{
-  bool changed = BoCamera::advance2();
-  if(remainingTime() <= 0)
-  {
-    return changed;
-  }
-
-  // How much of differences to add
-  float factor = moveFactor();
-
-  if(mPosZDiff)
-  {
-    float diff = (mPosZDiff * factor);
-    mPosZ += diff;
-    changed = true;
-  }
-
-  if(mRotationDiff)
-  {
-    float diff = (mRotationDiff * factor);
-    mRotation += diff;
-    checkRotation();
-    changed = true;
-  }
-
-  if(mRadiusDiff)
-  {
-    float diff = (mRadiusDiff * factor);
-    mRadius += diff;
-    changed = true;
-  }
-  return changed;
-}
-
-void BoGameCamera::resetDifferences()
-{
-  mPosZDiff = 0;
-  mRotationDiff = 0;
-  mRadiusDiff = 0;
-}
-
 
 
 /*
