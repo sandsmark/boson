@@ -43,7 +43,7 @@ orderWin::orderWin(fieldMap *f, QWidget *parent, const char *name)
 	,fixSelected( 0L )
 	,field(f)
 {
-QString path(kapp->kde_datadir() + "/boson/pics/misc/overview_none.xpm" );
+QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
 setFrameStyle(QFrame::Sunken | QFrame::Panel);
 setLineWidth(5);
@@ -57,6 +57,9 @@ stack->setGeometry(10,10,180,110);
 
 /* stack/one */
 view_none = new QPixmap(path);
+if (view_none->isNull())
+	printf("orderWin::orderWin : Can't load overview_none \n");
+
 view_one = new QLabel(stack,"preview");
 view_one->setPixmap(*view_none);
 stack->addWidget(view_one, VIEW_ONE);

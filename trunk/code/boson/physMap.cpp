@@ -47,19 +47,19 @@ mobile.setAutoDelete(true);
 facility.setAutoDelete(true);
 
 /* Themes selection (should be moved thereafter) */
-gpp.ground	= new groundTheme("ben");
+gpp.ground	= new groundTheme("earth");
 	if (!gpp.ground->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading groundTheme,\nsome images will show up awfully"),
 		KMsgBox::EXCLAMATION);
 
-gpp.species[1]	= new speciesTheme("Blue");
+gpp.species[1]	= new speciesTheme("blue_human");
 	if (!gpp.species[1]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
 		KMsgBox::EXCLAMATION);
 
-gpp.species[0]	= new speciesTheme("Red");
+gpp.species[0]	= new speciesTheme("red_human");
 	if (!gpp.species[0]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
 		i18n("Error while loading \"red\" specie theme,\nsome images will show up awfully"),

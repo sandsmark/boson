@@ -25,8 +25,8 @@ enum groundType {
 	GROUND_FACILITY = -2,
 	GROUND_UNKNOWN = -1,
 
-//	GROUND_DEEP_WATER = 0,
-	GROUND_WATER = 0,
+	GROUND_DEEP_WATER = 0,
+	GROUND_WATER = 1,
 	GROUND_GRASS,
 	GROUND_DESERT,
 
@@ -37,6 +37,8 @@ enum groundType {
 enum transType {
 	TRANS_GW,
 	TRANS_GD,
+	TRANS_WD,
+	TRANS_DWD,
 	};
 
 

@@ -39,7 +39,8 @@ groundTheme::groundTheme(char *themeName)
 {
 int i ; 
 QProgressDialog progress("Loading ground theme...", 0, PROGRESS_N, NULL, "progress.groundTheme", true);
-QString path(kapp->kde_datadir() + "/boson/pics/groundThemes/" + themeName + "/" );
+QString path(kapp->kde_datadir() + "/boson/themes/grounds/" + themeName + "/" );
+QString transS;
 
 allLoaded = true;
 progress.setProgress(0);
@@ -55,9 +56,12 @@ for (i=0; i< groundTransPropNb; i++) {
 	assert(groundTransProp[i].to>=0);
 	assert(groundTransProp[i].to<GROUND_LAST);
 
+	transS	= groundProp[groundTransProp[i].from].name;
+	transS += "_";
+	transS += groundProp[groundTransProp[i].to].name;
+
 	if (!loadTransition(GROUND_LAST + i * TILES_PER_TRANSITION ,
-		path + groundProp[groundTransProp[i].from].name +
-		"_"  + groundProp[groundTransProp[i].to].name,
+		path + transS + "/" + transS ,
 		progress ))
 	     allLoaded = false;
 	}
@@ -72,7 +76,7 @@ if (!allLoaded) logf(LOG_ERROR, "groundTheme : not all loaded !");
 
 bool groundTheme::loadGround(int i, const QString &path, QProgressDialog &progress)
 {
-  	groundPix[i] = new QwSpritePixmapSequence(path+".bmp",0);
+  	groundPix[i] = new QwSpritePixmapSequence(path+".%.2d.bmp",0l, 4);
 /*	boAssert(BO_TILE_SIZE == pixmap[i]->width());
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
 ///orzel : do some boAssert with QwSpritePixmapSequence sizes... 
@@ -86,9 +90,9 @@ bool groundTheme::loadTransition(int i, const QString &path, QProgressDialog &pr
 	int j;
 	bool ret = true;
 	static const char *trans_ext[TILES_PER_TRANSITION] = {
-		"_ul", "_ur", "_dl", "_dr", 
-		"_up", "_down", "_left", "_right", 
-		"_uli", "_uri", "_dli", "_dri", 
+		".01", ".03", ".07", ".05",
+		".02", ".06", ".08", ".04",
+		".09", ".10", ".12", ".11"
 		};
 
 	for (j=0; j<TILES_PER_TRANSITION; j++)
