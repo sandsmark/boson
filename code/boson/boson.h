@@ -447,7 +447,6 @@ signals:
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
-	Unit* createUnit(unsigned long int unitType, Player* owner);
 
 	unsigned long int nextUnitId();
 
