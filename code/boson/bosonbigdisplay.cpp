@@ -554,24 +554,22 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				d->mSelection->hasMineralHarvester()) ||
 				(unit->unitProperties()->canRefineOil() &&
 				d->mSelection->hasOilHarvester())) {
-			kdDebug() << "TODO: goto refinery" << endl;
 			// go to the refinery
-			/*
 			bool minerals = unit->unitProperties()->canRefineMinerals();
 			QPtrList<Unit> allUnits = d->mSelection->allUnits();
 			QPtrList<Unit> list;
-			QPtrListIterator<Unit> it(allUnits);
-			while (it.current()) {
-				if (it.current()->unitProperties()->canMineMinerals() && minerals) {
-					list.append(it.current());
-				} else if (it.current()->unitProperties()->canMineOil() && !minerals) {
-					list.append(it.current());
+			QPtrListIterator<Unit> unitsIt(allUnits);
+			while (unitsIt.current()) {
+				if (unitsIt.current()->unitProperties()->canMineMinerals() && minerals) {
+					list.append(unitsIt.current());
+				} else if (unitsIt.current()->unitProperties()->canMineOil() && !minerals) {
+					list.append(unitsIt.current());
 				}
-				++it;
+				++unitsIt;
 			}
 			if (!list.count()) {
 				kdError() << k_lineinfo << "MoveRefine: empty list!!" << endl;
-				break;
+				return;
 			}
 			QPtrListIterator<Unit> it(list);
 			stream << (Q_UINT32)BosonMessage::MoveRefine;
@@ -587,9 +585,9 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 			send = true;
 			Unit* u = d->mSelection->leader();
 			if (unit->owner() == d->mLocalPlayer) {
-				boMusic->playSound(u, Unit::SoundOrderRefine);
+				//TODO
+//				boMusic->playSound(u, Unit::SoundOrderRefine);
 			}
-			*/
 		} else {
 			// selection and clicked unit both are friendly
 			// no repairyard and no refinery

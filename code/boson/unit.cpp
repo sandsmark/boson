@@ -1008,8 +1008,12 @@ void MobileUnit::advanceRefine()
  }
  if (resourcesMined() == 0) {
 	kdDebug() << k_funcinfo << "refining done" << endl;
-	setWork(WorkMine);
-	mineAt(QPoint(resourcesX(), resourcesY()));
+	if (resourcesX() != -1 && resourcesY() != -1) {
+		setWork(WorkMine);
+		mineAt(QPoint(resourcesX(), resourcesY()));
+	} else {
+		setWork(WorkNone);
+	}
 	return;
  }
  if (!refinery()) {
@@ -1017,28 +1021,29 @@ void MobileUnit::advanceRefine()
 	QPtrList<Unit> list = owner()->allUnits();
 	QPtrListIterator<Unit> it(list);
 	const UnitProperties* prop = unitProperties();
-	while (it.current() && !refinery()) {
+	Facility* ref = 0;
+	while (it.current() && !ref) {
 		const UnitProperties* unitProp = it.current()->unitProperties();
 		if (!it.current()->isFacility()) {
 			++it;
 			continue;
 		}
 		if (prop->canMineMinerals() && unitProp->canRefineMinerals()) {
-			setRefinery((Facility*)it.current());
+			ref = (Facility*)it.current();
 		} else if (prop->canMineOil() && unitProp->canRefineOil()) {
-			setRefinery((Facility*)it.current());
+			ref = (Facility*)it.current();
 		}
 		++it;
 	}
-	if (!refinery()) {
+	if (!ref) {
 		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
 		setWork(WorkNone);
-		return;
 	} else {
-		kdDebug() << k_funcinfo << "refinery: " << refinery()->id() << endl;
+		kdDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
+		refineAt(ref);
 	}
- }
- if (refinery()) {
+	return;
+ } else {
 	if (isNextTo(refinery())) {
 		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
 		d->mHarvesterProperties->mResourcesMined = resourcesMined() - step;
@@ -1050,18 +1055,7 @@ void MobileUnit::advanceRefine()
 			owner()->statistics()->increaseRefinedOil(step);
 		}
 	} else {
-		// move...
-		kdDebug() << k_funcinfo << "move to refinery " << refinery()->id() << endl;
-		if (!moveTo(refinery()->x(), refinery()->y())) {
-			kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
-			setWork(WorkNone);
-		} else {
-			setAdvanceWork(WorkMove);
-		}
 	}
- } else {
-	kdWarning() << k_funcinfo << "Invalid target unit " << refinery()->id() << endl;
-	setWork(WorkNone);
  }
 }
 
@@ -1104,6 +1098,29 @@ void MobileUnit::mineAt(const QPoint& pos)
  d->mHarvesterProperties->mResourcesY = pos.y();
 }
 
+void MobileUnit::refineAt(Facility* refinery)
+{
+ if (!refinery) {
+	kdError() << k_funcinfo << "NULL refinery" << endl;
+	return;
+ }
+ if (!refinery->unitProperties()->canRefineMinerals() &&
+		!refinery->unitProperties()->canRefineOil()) {
+	kdError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
+ }
+ kdDebug() << k_funcinfo << endl;
+ setRefinery(refinery);
+ setWork(WorkRefine);
+ // move...
+ kdDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
+ if (!moveTo(refinery->x(), refinery->y())) {
+	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+	setWork(WorkNone);
+ } else {
+	setAdvanceWork(WorkMove);
+ }
+}
+
 Facility* MobileUnit::refinery() const
 {
  if (!target() || !target()->isFacility()) {
@@ -1143,7 +1160,7 @@ QRect MobileUnit::boundingRect() const
 	kdWarning() << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
 	return QCanvasSprite::boundingRect();
  }
- return QRect((int)x() + (width() - BO_TILE_SIZE) / 2, (int)y() + (height() - BO_TILE_SIZE) / 2, BO_TILE_SIZE, BO_TILE_SIZE);
+ return QRect(x(), y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
 /////////////////////////////////////////////////
