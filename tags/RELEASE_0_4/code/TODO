@@ -1,0 +1,116 @@
+TODO:
+
+
+Generic :
+=========
+
+editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
+ben's bug
+bug : quad on water on other's view ( x,y not synced between two clients)
+
+units construction : progressbar on unit_constructor, then autoput of the unit
+fine-graining for *Theme.cpp : distinc loading of overview..
+boson : check validity before a turnTo
+units : revoir le design global
+speciesTheme : different bitmap for Overview and sequences
+fine-grained groundTheme loading
+selectPart shouldn't be splitted
+QCanvas : shouldn't segfault when pixmap loading has failed
+
+move boson/handleGameMessage into field
+creating things only if ressources permit it (presently, the server already refuse to build)
+positionning rect in editor/boson
+
+
+move boson.h into bosonapp.h (socket handling / generic stuff)
+	      and boWindow.h (KTMainWindow ...)
+
+positionning rect in editor/boson
+read/save Options has been removed (was using an olg buggy kdevelop code)
+bug : mobile on very-bottom-right can't be selected [still exact?]
+smoother moves (using float instead of int for VirtualSprite?)
+black background ??
+change miniDisplay to be gpp-indep, then move it to visual
+move logfile initialisation into common/
+fullscreenmode
+Initial dialog:
+	give 'world' name
+	give 'species' names
+	version check whithin the ask_connect msg
+Unit drawing into minimap : moving, etc...
+does units::rect need to be virtual anymore ?
+server : check that each unit does max 1 move each jiffie
+different subclass for my_units and other_units in client
+move visual.h/game.h to global.h
+merge mainView and bosonView/editorView
+fog of war
+
+graphism 
+	>now, we have: The picture, the health bar, the status, the progress bar,
+	>Damage (number, not a bar), Amor (number, not a bar), Speed (number, not
+	>a bar). I that fills it up, cool. If its too much, I don't care, we can
+	>cut speed...
+	>
+
+mouse handling :
+	When you select a unit and rightclick somewhere on the radarmap, it will go there.
+	When you left click-and-hold and drag on the radarmap, you see that part
+	on the right window.
+
+
+boson:
+	checkMove should handle the new 'direction'
+
+visual:
+	merge boshot and speciesTheme pixmap loading stuff
+
+editor:
+	close -> how to say KTMW that there's no mainWidget anymore ? 
+	predefined 'template' for construction.
+
+
+0.5 release:
+============
+client and server should be peer-killed proof
+
+0.8 release: (first public release)
+============
+
+list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
+
+	mailing-list
+	web-site
+	kde-announce
+	upload to upload.kde.org/
+	slashdot	www.slahdot.net
+	freshmeat	www.freshmeat.org
+	linuxGames
+	happypenguin
+
+register the website to :
+	yahoo
+	... ? 
+	
+
+
+1.0 release :
+=============
+theme editor
+map editor
+server can handle multiple game
+
+===================================
+
+Even more :
+	Torus Map, where everybody's point of view is in the center of the miniMap in the beginning.
+	Chatting
+	Computer player (AI)
+	Speed optimisation
+	'forgotten' fog of war
+	Game recording for post-analyse
+	kind of acceleration to make starting moves smoother ? (ben)
+	what about drag and dropping units ? :-)
+	theme is configured in a file (explaining, for example, how many
+		different implementation there are for a given pixmap)
+
+
