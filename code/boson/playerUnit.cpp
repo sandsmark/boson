@@ -106,7 +106,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 #define SQ(x)			( (x) * (x) )
 
 
-bool playerMobUnit::getWantedMove(QPoint &wstate)
+bool playerMobUnit::getWantedMove(QPoint &wmove)
 {
 
 
@@ -167,7 +167,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
  				if (failed_move>4) state = MUS_NONE; // prevent 'keep on trying when it can obviously not go further'
 				return false;
 			}
-			asked = wstate = nr.topLeft();	
+			asked = wmove = nr.topLeft();	
 			asked_state = MUS_MOVING; 	///orzel:  asked_state still useful here ?
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 			if (!path.addCheckLoop(asked)) {

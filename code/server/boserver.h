@@ -68,6 +68,8 @@ class BosonServer : public KMainWindow, public boFile
 	void		placeMob(serverMobUnit *);
 	void		placeFix(serverFacility *);
 	groundType	groundAt(QPoint pos) {return cell(pos.x(), pos.y()).ground(); }
+	int		maxX() { return map_width; }
+	int		maxY() { return map_height; }
 
   protected:
   void	initLog(void);
