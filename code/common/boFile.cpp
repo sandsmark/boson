@@ -32,6 +32,7 @@
 #define		TAG_MAP		(0xad)
 #define		TAG_PEOPLE	(0xf0)
 #define		TAG_FIELD	"boeditor_magic_0_3"
+#define		TAG_FIELD_LEN	18			// len of the above
 
 
 boFile::boFile()
@@ -49,7 +50,8 @@ boFile::~boFile()
 
 bool boFile::openRead(const char *filename)
 {
-	char *magic;
+	char magic[ TAG_FIELD_LEN+4 ];	// paranoiac spaces
+	int	i;
 
 	/* open  stream */
 	f = new QFile(filename);
@@ -61,14 +63,24 @@ bool boFile::openRead(const char *filename)
 
 
 	/* magic */
-	*stream >> magic;
+	// Qt marshalling for a string is 4-byte-len + data
+	*stream >> i;
+	if ( TAG_FIELD_LEN+1 != i ) {
+		logf(LOG_ERROR, "boFile : Magic doesn't match(len), check file name");
+		return false;
+	}
 
-	if (strcmp(magic, TAG_FIELD)) {
-		logf(LOG_ERROR, "boFile : Magic doesn't match, check file name");
-		delete magic;
+	for (i=0; i< TAG_FIELD_LEN+1 ; i++) { 
+		Q_INT8	b;
+		*stream >> b;
+		magic[i] = b;
+	}
+
+	if (strncmp(magic, TAG_FIELD, TAG_FIELD_LEN) ) {
+		logf(LOG_ERROR, "boFile : Magic doesn't match(string), check file name");
 		return false;
 		}
-	delete magic;
+	
 
 	/* read  Header */
 	*stream >> nbPlayer;
@@ -194,8 +206,7 @@ void boFile::load(cell_t &c)
 	}
 	
 	*stream >> g;
-	boAssert( IS_VALID_GROUND(g) || GROUND_UNKNOWN == g);
-		// GROUND_UNKNOWN are thoes cell behind big transitions (2x2)
+	boAssert( IS_VALID_GROUND(g));
 	
 	*stream >> b;
 	boAssert( b<4);
