@@ -26,6 +26,7 @@ class KGameIO;
 
 class Unit;
 class UnitBase;
+class UnitProperties;
 class Player;
 class KPlayer;
 class KGame;
@@ -89,7 +90,20 @@ public:
 
 	void setCursor(BosonCursor* cursor);
 
-	void setActive();
+	/**
+	 * Called by @ref BoDisplayManager.
+	 * 
+	 * Do NOT call directly!
+	 **/
+	void setActive(bool);
+
+	/**
+	 * Emit @ref signalMakeActive to inform @ref BosonWidget and @ref
+	 * BoDisplayManager that this display should become the active display.
+	 *
+	 * Use this if you want to change the active status of the display!
+	 **/
+	void makeActive();
 
 public slots:
 	/**
@@ -181,6 +195,16 @@ protected:
 	 * Add a unit to the selection list
 	 **/
 	void addUnitSelection(Unit* unit);
+
+	/**
+	 * Select all units (of the local player) that have this unit properties
+	 * (i.e. are of the same type)
+	 * @return TRUE if we were successfull, or FALSE if the player is not
+	 * meant to select ALL units of this type. E.g. for facilities where it
+	 * doesn't make sense. THe unit that was clicked is meant to be selected
+	 * then.
+	 **/
+	bool selectAll(const UnitProperties* prop);
 
 	/**
 	 * Draw the selection rect from @ref selectionStart to @ref selectionEnd

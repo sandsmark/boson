@@ -2,7 +2,6 @@ Game TODOs
 - waypoints
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- left dbl-click should select ALL units of that type
 - scroll if cursor at the edge of the window
 - rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
   and. We could also use QCanvas::drawForeground() to get rid of the
@@ -61,6 +60,10 @@ General TODOs
   a nice idea!
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
   somehow if it isn't
+- use mouse wheel (scrolling in command frame)
+- sometimes when splitting displays (maybe only when splitting vertically) it
+  happens that no mouse IO is being added (and is therefore unusable and
+  unremovable
 
 Data TODOs
 - sound for minimap activated/deactivated

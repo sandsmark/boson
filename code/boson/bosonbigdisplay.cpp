@@ -160,7 +160,17 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
  wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
-		setActive();
+	{
+		makeActive();
+		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+		if (unit) {
+			if (!selectAll(unit->unitProperties())) {
+				clearSelection();
+				addUnitSelection(unit);
+			}
+		}
+		break;
+	}
 	case QEvent::Wheel:
 		break;
 	case QEvent::MouseButtonRelease:
@@ -229,7 +239,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		break;
 	}
 	case QEvent::MouseButtonPress:
-		setActive();
+		makeActive();
 		if (e->button() == LeftButton) {
 			startSelection(pos);
 		} else if (e->button() == MidButton) {
@@ -367,6 +377,32 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
  }
 }
 
+bool BosonBigDisplay::selectAll(const UnitProperties* prop)
+{
+// AB: currently disabled, until selections are fixed
+return false;
+
+ if (!d->mLocalPlayer) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return false;
+ }
+ clearSelection();
+ QPtrList<Unit> list = d->mLocalPlayer->allUnits();
+ if (prop->isFacility()) {
+	// we don't select all facilities, but only the one that was
+	// double-clicked. it makes no sense for facilities
+	return false;
+ }
+ QPtrListIterator<Unit> it(list);
+ while (it.current()) {
+	if (it.current()->unitProperties() == prop) {
+		addUnitSelection(it.current());
+	}
+	++it;
+ }
+ return true;
+}
+
 const QPoint& BosonBigDisplay::selectionStart() const
 {
  return d->mSelectionStart;
@@ -460,10 +496,6 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
  if (selection().isEmpty()) {
-	return;
- }
- if (selectionMode() == SelectNone) {
-	kdError() << k_funcinfo << ": SelectNone" << endl;
 	return;
  }
  Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
@@ -572,7 +604,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
  wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
-		setActive();
+		makeActive();
 	case QEvent::Wheel:
 		break;
 	case QEvent::MouseButtonRelease:
@@ -600,7 +632,7 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 		break;
 	}
 	case QEvent::MouseButtonPress:
-		setActive();
+		makeActive();
 		if (e->button() == LeftButton) {
 			if (((BosonCanvas*)canvas())->findUnitAt(pos)) {
 				startSelection(pos);
@@ -765,9 +797,20 @@ void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
  }
 }
 
-void BosonBigDisplay::setActive()
+void BosonBigDisplay::makeActive()
 {
  emit signalMakeActive(this);
+}
+
+void BosonBigDisplay::setActive(bool a)
+{
+ if (a) {
+	qApp->setGlobalMouseTracking(true);
+	qApp->installEventFilter(this);
+ } else {
+	qApp->setGlobalMouseTracking(false);
+	qApp->removeEventFilter(this);
+ }
 }
 
 void BosonBigDisplay::setContentsPos(int x, int y)

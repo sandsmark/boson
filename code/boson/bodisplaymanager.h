@@ -57,9 +57,15 @@ public:
 
 	BosonBigDisplay* addInitialDisplay();
 
-	void setActiveDisplay(BosonBigDisplay*);
+	/**
+	 * @return The currently active display. Use @ref
+	 * BosonBigDisplay::makeActive to change it
+	 **/
 	BosonBigDisplay* activeDisplay() const;
 
+	/**
+	 * @return A list containing ALL displays. Try to avoid this function.
+	 **/
 	QPtrList<BosonBigDisplay> displays() const;
 
 	/**
@@ -85,10 +91,23 @@ public slots:
 	void slotEditorWillPlaceCell(int);
 	void slotEditorWillPlaceUnit(int unitType, UnitBase* fac, KPlayer*);
 
+signals:
+	/**
+	 * Emitted when the currently active display changes.
+	 * @param active The currently (newly) active display. See @ref
+	 * activeDisplay
+	 * @param old The previously active display (if any) or NULL if
+	 * there was no.
+	 **/
+	void signalActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old);
+
 protected:
 	BosonBigDisplay* addDisplay(QWidget* parent);
-	BoBox* findBox(BosonBigDisplay*);
+	BoBox* findBox(BosonBigDisplay*) const;
 	void recreateLayout();
+
+protected slots:
+	void slotMakeActiveDisplay(BosonBigDisplay*);
 
 private:
 	class BoDisplayManagerPrivate;
