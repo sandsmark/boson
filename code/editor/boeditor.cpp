@@ -103,26 +103,26 @@ void BoEditorApp::disableCommand(int id_)
 
 void BoEditorApp::init(char *filename )
 { 
-
+  field = 0;
   currentFile = new QString();
-  if (filename) *currentFile = filename;
-  else *currentFile = kapp->kde_datadir() + "/boson/map/editor_test.bpf";
+
   ///////////////////////////////////////////////////////////////////
   // set up the base application features
   initMenuBar();
   initToolBars();
   initStatusBar();
-  initView();
 
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar items at startup
   disableCommand(ID_FILE_SAVE);
-//  disableCommand(ID_FILE_SAVE_AS);
+  disableCommand(ID_FILE_SAVE_AS);
   disableCommand(ID_FILE_CLOSE);
   disableCommand(ID_FILE_PRINT);
 
   disableCommand(ID_EDIT_CUT);
   disableCommand(ID_EDIT_COPY);
+  
+  if (filename) doLoad(QString(filename));
 }
 
 
@@ -279,22 +279,37 @@ void BoEditorApp::initStatusBar()
 
 }
 
-void BoEditorApp::initView()
-{ 
+void BoEditorApp::slotFileClose()
+{
+	if (!field) return;
+	
+	if (field->isModified())
+		switch (KMsgBox::yesNoCancel(this, "File not saved", 
+				"Current file isn't saved\n"
+				"Do you want to save it, discard change, or cancel ?", 0,
+				"Save It", "Discard Changes" )) {
+			case 1: // save it
+				slotFileSave();
+				break;
+			case 3: //cancel
+				return;
+				break;
+		}
+	delete mainview;
+	delete field;
 
-/* the physical map is created when a game is created */
-	vfield = field = new editorField();
-	assert (true == field->Load(*currentFile));
+	field = 0;
+	*currentFile = "";
 
-/* a mainView is each window containing : field, mini, order...
-   this one is the first one, other can pop up as well */
 
-	mainView *mainview = new mainView(field, this, "main_view_0");
-	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
-	resize(800,628);
-	setView(mainview);
+	enableCommand(ID_FILE_NEW);
+	enableCommand(ID_FILE_OPEN);
+	enableCommand(ID_FILE_RECENT);
+	disableCommand(ID_FILE_SAVE);
+	disableCommand(ID_FILE_SAVE_AS);
+	disableCommand(ID_FILE_CLOSE);
+
 }
-
 
 
 void BoEditorApp::resizeEvent(QResizeEvent *evt)
@@ -444,17 +459,38 @@ void BoEditorApp::slotFileNewWindow()
 
 void BoEditorApp::slotFileNew()
 {
-
-//	if(field->isModified() && dlgModified() )
+	if(field && field->isModified()) {
+  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
+	}
+	/* the physical map is created when a game is created */
+	vfield = field = new editorField();
+	assert (true == field->New(100,100, "scenario name (will be configurable)")); // XXX should be configurable
 	
-//	doc->newDocument();		
-//	setCaption(kapp->appName()+": "+doc->getTitle());
+	*currentFile = "";
+
+
+	/* a mainView is each window containing : field, mini, order...
+	   this one is the first one, other can pop up as well */
+
+	mainview = new mainView(field, this, "main_view_0");
+	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
+	setView(mainview);
+	resize(800,628);
+
+	mainview->show();
+	updateRects();
+
+	enableCommand(ID_FILE_SAVE);
+	enableCommand(ID_FILE_SAVE_AS);
+	enableCommand(ID_FILE_CLOSE);
+
+
 }
 
 void BoEditorApp::slotFileOpen()
 {
-	if(field->isModified()) {
+	if(field && field->isModified()) {
   		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
@@ -462,30 +498,63 @@ void BoEditorApp::slotFileOpen()
 	QString fileToOpen=KFileDialog::getOpenFileName(QDir::homeDirPath(), "", this, i18n("Open File..."));
 	if(!fileToOpen.isEmpty()){
 		QFileInfo saveAsInfo(fileToOpen);
-
-		field->Load(fileToOpen);
+		doLoad(fileToOpen);
 		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
 		addRecentFile(fileToOpen);
 	}
+
+	enableCommand(ID_FILE_SAVE);
+	enableCommand(ID_FILE_SAVE_AS);
+	enableCommand(ID_FILE_CLOSE);
 }
 
+
+void BoEditorApp::doLoad(QString newname)
+{ 
+
+	slotFileClose();
+	/* the physical map is created when a game is created */
+	vfield = field = new editorField();
+
+	*currentFile = newname;
+	assert (true == field->Load(*currentFile));
+	
+
+
+	/* a mainView is each window containing : field, mini, order...
+	   this one is the first one, other can pop up as well */
+
+	mainview = new mainView(field, this, "main_view_0");
+	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
+	resize(800,628);
+	setView(mainview);
+
+	mainview->show();
+	updateRects();
+}
 
 
 void BoEditorApp::slotFileOpenRecent(int id_)
 {
 
-	if(field->isModified()) {
+	if(field && field->isModified()) {
   		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
 
-	field->Load(recentList->at(id_));
+	*currentFile = recentList->at(id_);
+	field->Load( *currentFile);
 	setCaption(kapp->appName()+": "+recentList->at(id_));
+
+	enableCommand(ID_FILE_SAVE);
+	enableCommand(ID_FILE_SAVE_AS);
+	enableCommand(ID_FILE_CLOSE);
 }
 
 void BoEditorApp::slotFileSave()
 {
-	if (currentFile)
+	if (!field) return;
+	if (!currentFile->isEmpty())
 		field->Save(*currentFile);
 	else slotFileSaveAs();
 }
@@ -503,10 +572,6 @@ void BoEditorApp::slotFileSaveAs()
 	}
 }
 
-void BoEditorApp::slotFileClose()
-{
-	//close();
-}
 
 void BoEditorApp::slotEditDestroy()
 {

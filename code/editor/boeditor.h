@@ -43,6 +43,9 @@
 #include "editorField.h"
 #include "mainView.h"
 
+
+class mainView;
+
 /**
   * This Class is the base class for your application. It sets up the main
   * window and reads the config file as well as providing a menubar, toolbar
@@ -107,8 +110,6 @@ protected:
   void initToolBars();
   /** setup the statusbar */
   void initStatusBar(); 
-  /** setup the mainview*/
-  void initView();
   /** resizeEvent for the main view */
   virtual void resizeEvent(QResizeEvent *evt);
   /** add filename to the recentList */
@@ -172,9 +173,12 @@ private:
     KToolBar::BarPosition tool_bar_0_pos; 
 
 
+
+    void doLoad(QString newname);
 /* The map which handle grouds and units*/
     editorField		*field;
     QString		*currentFile;
+    mainView		*mainview;
 
 };   
  
