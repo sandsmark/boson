@@ -331,7 +331,10 @@ void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
 		conf->setGroup(QString("Weapon_%1").arg(weaponcounter++));
 	}
 	it.current()->savePlugin(conf);
+	++it;
  }
+ conf->setGroup("Boson Unit");
+ conf->writeEntry("Weapons", weaponcounter);
 }
 
 void UnitProperties::saveTextureNames(KSimpleConfig* conf)
@@ -601,6 +604,16 @@ void UnitProperties::addTextureMapping(QString shortname, QString longname)
 void UnitProperties::addSound(int event, QString filename)
 {
  d->mSounds.insert(event, filename);
+}
+
+void UnitProperties::setDestroyedParticleSystemIds(QValueList<unsigned long int> ids)
+{
+ d->mDestroyedParticleSystemIds = ids;
+}
+
+QValueList<unsigned long int> UnitProperties::destroyedParticleSystemIds() const
+{
+ return d->mDestroyedParticleSystemIds;
 }
 
 void UnitProperties::reset()

@@ -107,9 +107,11 @@ class BosonWeaponProperties : public PluginProperties
     void setCanShootAtLandUnits(bool can)  { mCanShootAtLandUnits = can; };
     void setSpeed(unsigned long int speed)  { mSpeed = speed; };
     void setModelFileName(QString file)  { mModelFileName = file; };
-    void setShootParticleSystem(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
-    void setFlyParticleSystem(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
-    void setHitParticleSystem(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
+    void setShootParticleSystemIds(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
+    void setFlyParticleSystemIds(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
+    void setHitParticleSystemIds(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
+
+    void reset();
 
     friend class BoUnitEditor;
 
