@@ -42,11 +42,10 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 		y		= my / BO_TILE_SIZE;
 
 
-	boAssert(x>=0);
-	boAssert(x<field->width());
-	boAssert(y>=0);
-	boAssert(y<field->height());
-
+	if ( x<0 || y<0 || x>= field->maxX || y>=field->maxY ) {
+		logf(LOG_ERROR, "actionClicked with x,y = %d,%d, aborting", x, y);
+		return;
+	}
 	
 	switch (otype){
 		case OT_NONE:
