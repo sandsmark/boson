@@ -120,14 +120,15 @@ echo "
 counter();
 counter2($filename);
 
-// "Valid html" logo
-/*echo "
+echo "
 <br>
-<!-- We have Valid HTML 4.01! -->
 <a href=\"http://www.sourceforge.net/projects/boson\" target=\"_blank\">
   <img style=\"border:0;width:114px;height:34px\"
        src=\"${basedir}pictures/sflogo.png\"
-       alt=\"SF Project Home\"></a><br><br>
+       alt=\"SF Project Home\"></a><br><br>";
+
+/*echo "
+<!-- We have Valid HTML 4.01! -->
 <a href=\"http://validator.w3.org/check/referer\" target=\"_blank\">
 <img border=\"0\" src=\"${basedir}pictures/valid-html401.png\"
     alt=\"Valid HTML 4.01!\" height=\"31\" width=\"88\"></a><br>
