@@ -5,14 +5,11 @@ Name=Sam Site
 Id=6
 Health=100
 MineralCost=200
-WeaponRange=5
-WeaponDamage=15
-Reload=15
-CanShootAtAirUnits=true
-CanShootAtLandUnits=false
 Producer=10
 Requirements=5,14,2
 ProductionTime=70
+DestroyedParticles=1001
+Weapons=1004
 
 [Boson Facility]
 ConstructionSteps=14

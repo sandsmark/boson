@@ -6,10 +6,9 @@ Id=10002
 Health=150
 MineralCost=300
 Producer=0
-CanShootAtAirUnits=false
-CanShootAtLandUnits=false
 Requirements=8,3
 ProductionTime=60
+DestroyedParticles=1001
 
 [Boson Mobile Unit]
 Speed=3
