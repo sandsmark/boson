@@ -636,7 +636,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
  if (canvas()) {
 	// update the minimap
-	cameraChanged();
+	camera()->setCameraChanged(true);
  }
 
  if (checkError()) {
@@ -688,6 +688,11 @@ void BosonBigDisplayBase::paintGL()
  // instead of alpha blending. The later is typically faster and may actually
  // look better in some situations. [L,S]
  // --> what is this "stippling" and can we use it?
+
+ // If camera has been changed since last rendering, we need to reapply it
+ if (camera()->isCameraChanged()) {
+	cameraChanged();
+ }
 
  boProfiling->renderClear(true);
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -883,6 +888,7 @@ void BosonBigDisplayBase::renderItems()
 
 	unsigned int lod = 0;
 	if (useLOD) {
+		// TODO: we could compare squared distances here and get rid of sqrt()
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
 		lod = item->preferredLod(dist);
 	}
@@ -1341,10 +1347,16 @@ void BosonBigDisplayBase::renderText()
  }
  if (boConfig->debugOpenGLCamera()) {
 	const BoVector3 lookAt = camera()->lookAt();
+	const BoVector3 cameraPos = camera()->cameraPos();
+	const BoVector3 up = camera()->up();
 	QString text;
 	text += i18n("Camera:\n");
 	text += i18n("LookAt: (%1; %2; %3)\n").arg(lookAt.x()).
 			arg(lookAt.y()).arg(lookAt.z());
+	text += i18n("CameraPos: (%1; %2; %3)\n").arg(cameraPos.x()).
+			arg(cameraPos.y()).arg(cameraPos.z());
+	text += i18n("Up: (%1; %2; %3)\n").arg(up.x()).
+			arg(up.y()).arg(up.z());
 	text += i18n("Radius: %1\n").arg(camera()->radius());
 	text += i18n("Height: %1\n").arg(camera()->z());
 	text += i18n("Rotation: %1\n").arg(camera()->rotation());
@@ -1789,12 +1801,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.start(LEFT_BUTTON);
 		camera()->changeZ(d->mMouseMoveDiff.dy());
-		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
 		d->mMouseMoveDiff.start(RIGHT_BUTTON);
 		camera()->changeRotation(d->mMouseMoveDiff.dx());
 		camera()->changeRadius(d->mMouseMoveDiff.dy());
-		cameraChanged();
 	}
  } else if (buttonState & LEFT_BUTTON) {
 	if (!displayInput()->actionLocked()) {
@@ -1835,7 +1845,6 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
 		camera()->changeLookAt(BoVector3(dx, dy, 0));
-		cameraChanged();
 	} else {
 		d->mMouseMoveDiff.stop();
 	}
@@ -2069,7 +2078,6 @@ void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center
  camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
- cameraChanged();
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
@@ -2179,6 +2187,7 @@ void BosonBigDisplayBase::quitGame()
  d->mRenderedCells = 0;
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
  d->mCamera = BoGameCamera(canvas());
+ d->mCamera.setCameraChanged(false);  // to prevent generating cell list and all that stuff
  if (d->mGLMiniMap) {
 	d->mGLMiniMap->quitGame();
  }
@@ -2453,7 +2462,6 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
 		camera()->changeLookAt(BoVector3(dx, dy, 0));
-		cameraChanged();
 	}
  }
 }
@@ -2465,7 +2473,6 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
  camera()->changeLookAt(BoVector3(x, y, 0));
- cameraChanged();
 }
 
 void BosonBigDisplayBase::rotateLeft(float factor)
@@ -2483,7 +2490,6 @@ void BosonBigDisplayBase::rotateRight(float factor)
 void BosonBigDisplayBase::rotate(float delta)
 {
  camera()->changeRotation(delta);
- cameraChanged();
 }
 
 void BosonBigDisplayBase::zoomIn(float factor)
@@ -2511,7 +2517,6 @@ void BosonBigDisplayBase::zoom(float delta)
  BO_CHECK_NULL_RET(canvas()->map());
 
  camera()->changeZ(delta);
- cameraChanged();
 }
 
 void BosonBigDisplayBase::createRenderItemList()
@@ -2604,7 +2609,6 @@ void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, flo
 void BosonBigDisplayBase::setCamera(const BoGameCamera& camera)
 {
  d->mCamera = camera;
- cameraChanged();
 }
 
 void BosonBigDisplayBase::cameraChanged()
@@ -2959,7 +2963,6 @@ void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
  QDomElement cam = root.namedItem(QString::fromLatin1("Camera")).toElement();
  if (!cam.isNull()) {
 	camera()->loadFromXML(cam);
-	cameraChanged();
  } else {
 	boError(260) << k_funcinfo << "no camera" << endl;
  }
@@ -3103,7 +3106,6 @@ void BosonBigDisplayBase::advanceCamera()
 {
  if (autoCamera()->commitTime() > 0) {
 	autoCamera()->advance();
-	cameraChanged();
  }
 }
 
@@ -3267,7 +3269,6 @@ void BosonBigDisplayBase::generateMovieFrame(const QByteArray& data, BoPixmapRen
 	return;
  }
  camera()->loadFromXML(cameraElement);
- cameraChanged(); // will also call generateCellList().
 
 
  // remove _all_ items from the canvas.

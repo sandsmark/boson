@@ -73,14 +73,19 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"playerUnitsOfType", py_playerUnitsOfType, METH_VARARGS, 0 },
   { (char*)"playerUnitsOfTypeCount", py_playerUnitsOfTypeCount, METH_VARARGS, 0 },
   // Camera
-  { (char*)"moveCamera", py_moveCamera, METH_VARARGS, 0 },
-  { (char*)"moveCameraBy", py_moveCameraBy, METH_VARARGS, 0 },
   { (char*)"setCameraRotation", py_setCameraRotation, METH_VARARGS, 0 },
   { (char*)"setCameraRadius", py_setCameraRadius, METH_VARARGS, 0 },
   { (char*)"setCameraZ", py_setCameraZ, METH_VARARGS, 0 },
   { (char*)"setCameraMoveMode", py_setCameraMoveMode, METH_VARARGS, 0 },
+  { (char*)"setCameraLookAt", py_setCameraLookAt, METH_VARARGS, 0 },
+  { (char*)"setCameraPos", py_setCameraPos, METH_VARARGS, 0 },
+  { (char*)"setCameraUp", py_setCameraUp, METH_VARARGS, 0 },
+  { (char*)"setCameraLimits", py_setCameraLimits, METH_VARARGS, 0 },
+  { (char*)"setCameraFreeMode", py_setCameraFreeMode, METH_VARARGS, 0 },
   { (char*)"commitCameraChanges", py_commitCameraChanges, METH_VARARGS, 0 },
+  { (char*)"cameraLookAt", py_cameraLookAt, METH_VARARGS, 0 },
   { (char*)"cameraPos", py_cameraPos, METH_VARARGS, 0 },
+  { (char*)"cameraUp", py_cameraUp, METH_VARARGS, 0 },
   { (char*)"cameraRotation", py_cameraRotation, METH_VARARGS, 0 },
   { (char*)"cameraRadius", py_cameraRadius, METH_VARARGS, 0 },
   { (char*)"cameraZ", py_cameraZ, METH_VARARGS, 0 },
@@ -732,7 +737,7 @@ PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
   return QValueListToPyList(&units);
 }
 
-PyObject* PythonScript::py_allPlayerUnitsCount(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_allPlayerUnitsCount(PyObject*, PyObject* args)
 {
   int id;
   if(!PyArg_ParseTuple(args, (char*)"i", &id))
@@ -743,7 +748,7 @@ PyObject* PythonScript::py_allPlayerUnitsCount(PyObject* self, PyObject* args)
   return Py_BuildValue((char*)"i", BosonScript::allPlayerUnitsCount(id));
 }
 
-PyObject* PythonScript::py_playerUnitsOfType(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_playerUnitsOfType(PyObject*, PyObject* args)
 {
   int id, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &type))
@@ -756,7 +761,7 @@ PyObject* PythonScript::py_playerUnitsOfType(PyObject* self, PyObject* args)
   return QValueListToPyList(&units);
 }
 
-PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject*, PyObject* args)
 {
   int id, type;
   if(!PyArg_ParseTuple(args, (char*)"ii", &id, &type))
@@ -770,30 +775,6 @@ PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject* self, PyObject* args
 
 
 /*****  Camera functions  *****/
-
-PyObject* PythonScript::py_moveCamera(PyObject*, PyObject* args)
-{
-  float x, y, z;
-  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
-  {
-    return 0;
-  }
-  BosonScript::moveCamera(BoVector3(x, y, z));
-  Py_INCREF(Py_None);
-  return Py_None;
-}
-
-PyObject* PythonScript::py_moveCameraBy(PyObject*, PyObject* args)
-{
-  float x, y, z;
-  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
-  {
-    return 0;
-  }
-  BosonScript::moveCameraBy(BoVector3(x, y, z));
-  Py_INCREF(Py_None);
-  return Py_None;
-}
 
 PyObject* PythonScript::py_setCameraRotation(PyObject*, PyObject* args)
 {
@@ -843,6 +824,66 @@ PyObject* PythonScript::py_setCameraMoveMode(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_setCameraLookAt(PyObject*, PyObject* args)
+{
+  float x, y, z;
+  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
+  {
+    return 0;
+  }
+  BosonScript::setCameraLookAt(BoVector3(x, y, z));
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setCameraPos(PyObject*, PyObject* args)
+{
+  float x, y, z;
+  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
+  {
+    return 0;
+  }
+  BosonScript::setCameraPos(BoVector3(x, y, z));
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setCameraUp(PyObject*, PyObject* args)
+{
+  float x, y, z;
+  if(!PyArg_ParseTuple(args, (char*)"fff", &x, &y, &z))
+  {
+    return 0;
+  }
+  BosonScript::setCameraUp(BoVector3(x, y, z));
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setCameraLimits(PyObject*, PyObject* args)
+{
+  int on;
+  if(!PyArg_ParseTuple(args, (char*)"i", &on))
+  {
+    return 0;
+  }
+  BosonScript::setCameraLimits((bool)on);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setCameraFreeMode(PyObject*, PyObject* args)
+{
+  int on;
+  if(!PyArg_ParseTuple(args, (char*)"i", &on))
+  {
+    return 0;
+  }
+  BosonScript::setCameraFreeMode((bool)on);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
 {
   int ticks;
@@ -855,9 +896,21 @@ PyObject* PythonScript::py_commitCameraChanges(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_cameraLookAt(PyObject*, PyObject*)
+{
+  BoVector3 pos = BosonScript::cameraLookAt();
+  return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
+}
+
 PyObject* PythonScript::py_cameraPos(PyObject*, PyObject*)
 {
   BoVector3 pos = BosonScript::cameraPos();
+  return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
+}
+
+PyObject* PythonScript::py_cameraUp(PyObject*, PyObject*)
+{
+  BoVector3 pos = BosonScript::cameraUp();
   return Py_BuildValue((char*)"[f, f, f]", pos.x(), pos.y(), pos.z());
 }
 

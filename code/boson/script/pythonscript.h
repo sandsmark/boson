@@ -92,16 +92,21 @@ class PythonScript : public BosonScript
 
 
     // Camera
-    static PyObject* py_moveCamera(PyObject* self, PyObject* args);
-    static PyObject* py_moveCameraBy(PyObject* self, PyObject* args);
     static PyObject* py_setCameraRotation(PyObject* self, PyObject* args);
     static PyObject* py_setCameraRadius(PyObject* self, PyObject* args);
     static PyObject* py_setCameraZ(PyObject* self, PyObject* args);
     static PyObject* py_setCameraMoveMode(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraLookAt(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraPos(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraUp(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraLimits(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraFreeMode(PyObject* self, PyObject* args);
 
     static PyObject* py_commitCameraChanges(PyObject* self, PyObject* args);
 
+    static PyObject* py_cameraLookAt(PyObject* self, PyObject* args);
     static PyObject* py_cameraPos(PyObject* self, PyObject* args);
+    static PyObject* py_cameraUp(PyObject* self, PyObject* args);
     static PyObject* py_cameraRotation(PyObject* self, PyObject* args);
     static PyObject* py_cameraRadius(PyObject* self, PyObject* args);
     static PyObject* py_cameraZ(PyObject* self, PyObject* args);
