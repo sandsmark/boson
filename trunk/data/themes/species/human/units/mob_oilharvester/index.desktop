@@ -13,3 +13,4 @@ CanGoOnLand=true
 CanGoOnWater=false
 CanMineMinerals=false
 CanMineOil=true
+MaxResources=100

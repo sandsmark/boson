@@ -120,6 +120,11 @@ CanMineMinerals=boolean - Whether this unit can mine minerals.
                           Default is false.
 CanMineOil=boolean   - Whether this unit can mine oil.
                        Default is false .
+MaxResources=number  - The maximal amount of resourced that can be mined until
+                       the unit needs to return to a refinery. Always 0 if
+                       CanMineMinerals and CanMineOil are false.
+                       Default is 100 if either CanMineMinerals or CanMineOil 
+                       is true.
 
 -------------------------------------------------------------------------------
 
