@@ -180,7 +180,7 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  QString textureName = Bo3DSLoad::textureName(mesh, m3ds);
 
- BoMesh* boMesh = new BoMesh(mesh->faces);
+ BoMesh* boMesh = new BoMesh(mesh->faces); // allocates mesh->faces * 3 points!
  mMesh2Mesh.insert(mesh, boMesh);
  mData->addMesh(boMesh);
 
@@ -206,9 +206,9 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  boMesh->setIsTeamColor(Bo3DSLoad::isTeamColor(mesh));
 
- boMesh->allocatePoints(mesh->points);
  loadVertices(boMesh, mesh);
  loadTexels(boMesh, mesh, Bo3DSLoad::material(mesh, m3ds));
+ boMesh->calculateNormals(); // TODO: move to BosonModel. no need to do this in the fileloading class.
 
  loadFaces(boMesh, mesh);
 }
@@ -418,7 +418,7 @@ void Bo3DSLoad::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMes
 	}
  }
 
- boDebug() << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
+ boDebug(100) << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
 }
 
 bool Bo3DSLoad::isTeamColor(const Lib3dsMesh* mesh)
@@ -493,10 +493,13 @@ void Bo3DSLoad::loadVertices(BoMesh* boMesh, Lib3dsMesh* mesh)
 
  BoVector3 vector;
  BoVector3 v;
- for (unsigned int i = 0; i < mesh->points; i++) {
-	vector.set(mesh->pointL[i].pos);
-	matrix.transform(&v, &vector);
-	boMesh->setVertex(i, v);
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* f = &mesh->faceL[i];
+	for (int j = 0; j < 3; j++) {
+		vector.set(mesh->pointL[ f->points[j] ].pos);
+		matrix.transform(&v, &vector);
+		boMesh->setVertex(i * 3 + j, v);
+	}
  }
 }
 
@@ -514,6 +517,10 @@ void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* mat
 	return;
  }
  if (!material) {
+	return;
+ }
+ if (mesh->texels != mesh->points) {
+	boError(100) << k_funcinfo << "texels != points" << endl;
 	return;
  }
 
@@ -571,10 +578,13 @@ void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* mat
  // all texel coordinates have to be transformed using this matrix.
  BoVector3 a;
  BoVector3 b;
- for (unsigned int i = 0; i < mesh->texels; i++) {
-	a.set(mesh->texelL[i][0], mesh->texelL[i][1], 0.0);
-	texMatrix.transform(&b, &a);
-	boMesh->setTexel(i, b);
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* f = &mesh->faceL[i];
+	for (int j = 0; j < 3; j++) {
+		a.set(mesh->texelL[f->points[j]][0], mesh->texelL[f->points[j]][1], 0.0);
+		texMatrix.transform(&b, &a);
+		boMesh->setTexel(i * 3 + j, b);
+	}
  }
 }
 
@@ -583,12 +593,12 @@ void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
  BO_CHECK_NULL_RET(boMesh);
  BO_CHECK_NULL_RET(mesh);
  for (unsigned int i = 0; i < mesh->faces; i++) {
-	Lib3dsFace* f = &mesh->faceL[i];
-	int points[3];
+	// note: this face has nothing to do with mesh->face[i] !!
 	BoFace face;
-	points[0] = f->points[0];
-	points[1] = f->points[1];
-	points[2] = f->points[2];
+	int points[3];
+	points[0] = i * 3 + 0;
+	points[1] = i * 3 + 1;
+	points[2] = i * 3 + 2;
 	face.setPointIndex(points);
 	boMesh->setFace(i, face);
  }

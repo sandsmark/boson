@@ -977,7 +977,7 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
 		continue;
 	}
 	for (unsigned int j = 0; j < mesh->points(); j++) {
-		BoVector3 vector(mesh->point(j));
+		BoVector3 vector(mesh->vertex(j));
 		m->transform(&v, &vector);
 		helper->addPoint(v);
 	}
@@ -1057,10 +1057,7 @@ void BosonModel::mergeArrays()
  unsigned int size = 0;
  QIntDictIterator<BoMesh> it(d->mMeshes);
  for (; it.current(); ++it) {
-	// 3 vertices per point + 2 texels per point
-	// note that we waste some space here - some objects are not textured.
-	// but when we allocate this  way we can render more efficient.
-	size += it.current()->points() * 5;
+	size += it.current()->points() * BoMesh::pointSize();
  }
 
  d->mPoints = new float[size];
@@ -1106,7 +1103,9 @@ void BosonModel::enablePointer()
  // then we could replace the index of one of them by the index of the other one
  //
  // TODO: performance: interleaved arrays
- glVertexPointer(3, GL_FLOAT, 5 * sizeof(float), d->mPoints);
- glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), d->mPoints + 3);
+ int stride = BoMesh::pointSize() * sizeof(float);
+ glVertexPointer(3, GL_FLOAT, stride, d->mPoints + BoMesh::vertexPos());
+ glTexCoordPointer(2, GL_FLOAT, stride, d->mPoints + BoMesh::texelPos());
+ glNormalPointer(GL_FLOAT, stride, d->mPoints + BoMesh::normalPos());
 }
 

@@ -29,6 +29,8 @@
 
 #include <GL/gl.h>
 
+#define AB_DEBUG_1 0
+
 class BoundingObject
 {
 public:
@@ -215,11 +217,11 @@ public:
 	{
 		QPtrListIterator<BoNode> it(mAllNodes);
 		for (; it.current(); ++it) {
-			boDebug() << "adjacent to " << it.current()->debugString() << " (Face " << mAllNodes.find(it.current()) + 1 << "):" << endl;
+			boDebug(100) << "adjacent to " << it.current()->debugString() << " (Face " << mAllNodes.find(it.current()) + 1 << "):" << endl;
 			QPtrList<BoNode> a = adjacent(it.current());
 			QPtrListIterator<BoNode> it2(a);
 			for (; it2.current(); ++it2) {
-				boDebug() << it2.current()->debugString() << " (Face " << mAllNodes.find(it2.current()) + 1 << ")" << endl;
+				boDebug(100) << it2.current()->debugString() << " (Face " << mAllNodes.find(it2.current()) + 1 << ")" << endl;
 			}
 
 		}
@@ -252,7 +254,6 @@ BoFace::BoFace()
 BoFace& BoFace::operator=(const BoFace& face)
 {
  setPointIndex(face.pointIndex());
-
  return *this;
 }
 
@@ -369,7 +370,6 @@ public:
 		mPointsCacheCount = 0;
 
 		mBoundingObject = 0;
-
 	}
 	int mType;
 	BoNode* mNodes;
@@ -387,6 +387,7 @@ public:
 	unsigned int mPointCount;
 	float* mAllocatedPoints;
 	float* mPoints;
+	unsigned int mPointsMovedBy; // if you use that you are either debugging or doing something wrong.
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
@@ -402,7 +403,6 @@ public:
 	float mMaxZ;
 
 	BoundingObject* mBoundingObject;
-
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -431,6 +431,7 @@ void BoMesh::init()
  d->mIsTeamColor = false;
  d->mDisplayList = 0;
  d->mPointCount = 0;
+ d->mPointsMovedBy = 0;
 
  d->mMinX = 0.0f;
  d->mMaxX = 0.0f;
@@ -438,6 +439,29 @@ void BoMesh::init()
  d->mMaxY = 0.0f;
  d->mMinZ = 0.0f;
  d->mMaxZ = 0.0f;
+}
+
+int BoMesh::pointSize()
+{
+ // 3 vertex components, 3 normal components, 2 texel components
+ // note that this means that we have a normal for every vertex (lot of redundant
+ // data)!
+ return (3 + 3 + 2);
+}
+
+int BoMesh::vertexPos()
+{
+ return 0;
+}
+
+int BoMesh::texelPos()
+{
+ return 3;
+}
+
+int BoMesh::normalPos()
+{
+ return 5;
 }
 
 void BoMesh::setMaterial(BoMaterial* mat)
@@ -470,7 +494,7 @@ void BoMesh::createFaces(unsigned int faces)
  // Every node represents exactly one face. Nodes represent the "connections" of
  // faces.
  if (d->mAllNodes.count() > 0) {
-	boDebug() << "nodes already created. deleting." << endl;
+	boDebug(100) << "nodes already created. deleting." << endl;
 	d->mAllNodes.clear();
  }
  for (unsigned int face = 0; face < faces; face++) {
@@ -478,6 +502,12 @@ void BoMesh::createFaces(unsigned int faces)
 	d->mAllNodes.append(node);
  }
 
+ // every face (triangle) has 3 points.
+ // note that when we use GL_TRIANGLE_STRIP one day we might be able to reduce
+ // the number of allocated points. but here in createFace() we should still
+ // allocate facesCount() * 3 - we would replace the array once the mesh is
+ // stripified.
+ allocatePoints(facesCount() * 3);
 }
 
 void BoMesh::setFace(int index, const BoFace& face)
@@ -527,7 +557,7 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
  if (call > max) {
 	max = call;
  }
- boDebug() << k_funcinfo << "- call " << call << " max=" << max << endl;
+ boDebug(100) << k_funcinfo << "- call " << call << " max=" << max << endl;
  if (call == 11) {
 	return true;
  }
@@ -591,7 +621,7 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 				relevantPoint = i;
 			}
 			if (relevantPoint < 0) {
-				boDebug() << k_funcinfo << "no relevant point found" << endl;
+				boDebug(100) << k_funcinfo << "no relevant point found" << endl;
 				continue;
 			}
 			next->setRelevantPoint(relevantPoint);
@@ -689,10 +719,10 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 	}
 	x++;
  }
-// boDebug() << "no next in adjacent count=" << adjacent.count()  << endl;
+// boDebug(100) << "no next in adjacent count=" << adjacent.count()  << endl;
 
 
- boDebug() << k_funcinfo << "none found (call " << call << ")" << endl;
+ boDebug(100) << k_funcinfo << "none found (call " << call << ")" << endl;
  call--;
  return false;
 }
@@ -706,7 +736,7 @@ void BoMesh::connectNodes()
 	boError() << k_funcinfo << "no nodes for mesh" << endl;
 	return;
  }
- boDebug() << k_funcinfo << "trying to connect nodes" << endl;
+ boDebug(100) << k_funcinfo << "trying to connect nodes" << endl;
 
  QPtrList<BoNode> allNodes = d->mAllNodes;
 
@@ -720,7 +750,7 @@ void BoMesh::connectNodes()
  bool ok = connectNodes(&database, allNodes, &connected, 0);
 
  if (!ok) {
-	boDebug() << k_funcinfo << "no connected nodes" << endl;
+	boDebug(100) << k_funcinfo << "no connected nodes" << endl;
 	disconnectNodes();
 	addNodes();
 	return;
@@ -866,15 +896,17 @@ void BoMesh::allocatePoints(unsigned int points)
 	d->mPoints = 0;
  }
  d->mPointCount = points;
- // note that some space is wasted - some objects are not textured. but we can
- // render more efficient this way.
- d->mAllocatedPoints = boMem->allocateFloatArray(d->mPointCount * 5);
+
+ // note that a lot of space is wasted - some objects are not textured, all
+ // vertices have normals, ...
+ // but we can render more efficient this way.
+ d->mAllocatedPoints = boMem->allocateFloatArray(d->mPointCount * pointSize());
  d->mPoints = d->mAllocatedPoints;
 
  // AB: we initialize the array elements now. this is close to useless since we
  // overwrite it later anyway. but valgrind complains for meshes that don't use
  // textures (since we copy uninitialized values around).
- for (unsigned int i = 0; i < points * 5; i++) {
+ for (unsigned int i = 0; i < points * pointSize(); i++) {
 	d->mAllocatedPoints[i] = 0.0f;
  }
 }
@@ -885,9 +917,18 @@ void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
  if (index >= points()) {
 	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- d->mPoints[index * 5 + 0] = vertex[0];
- d->mPoints[index * 5 + 1] = vertex[1];
- d->mPoints[index * 5 + 2] = vertex[2];
+ d->mPoints[index * pointSize() + vertexPos() + 0] = vertex[0];
+ d->mPoints[index * pointSize() + vertexPos() + 1] = vertex[1];
+ d->mPoints[index * pointSize() + vertexPos() + 2] = vertex[2];
+}
+
+BoVector3 BoMesh::vertex(unsigned int p) const
+{
+ if (p >= points()) {
+	boError() << k_funcinfo << "invalid point " << p << endl;
+	return BoVector3();
+ }
+ return BoVector3(&d->mPoints[p * pointSize() + vertexPos()]);
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
@@ -896,8 +937,101 @@ void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
  if (index >= points()) {
 	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- d->mPoints[index * 5 + 3] = texel[0];
- d->mPoints[index * 5 + 4] = texel[1];
+ d->mPoints[index * pointSize() + texelPos() + 0] = texel[0];
+ d->mPoints[index * pointSize() + texelPos() + 1] = texel[1];
+}
+
+void BoMesh::setNormal(unsigned int index, const BoVector3& normal)
+{
+ BO_CHECK_NULL_RET(d->mPoints);
+ index = index - index % 3;
+ if (index >= points() - 2) {
+	boError() << k_funcinfo << "invalid index " << index << " max=" << points() - 2 << endl;
+ }
+
+ // atm all vertices of a face share the same (surface-)normal. this might
+ // change!
+ for (unsigned int i = index; i < index + 3; i++) {
+	d->mPoints[i * pointSize() + normalPos() + 0] = normal[0];
+	d->mPoints[i * pointSize() + normalPos() + 1] = normal[1];
+	d->mPoints[i * pointSize() + normalPos() + 2] = normal[2];
+ }
+
+ // AB: some comments on our current data structure:
+ // we store the normals in d->mPoints, together with vertices and texels. so we
+ // can easily use glDrawElements() and even interleaved arrays. this should
+ // increase speed slightly, but most probably really slightly only. I am not
+ // sure whether the decision was a good idea, because:
+ // - in order to use glDrawElements() we need to be able to use *one* index to
+ // reference vertex/texel and normal coordinates. this means we cannot "share"
+ // vertices anymore between different faces. a face can't use the same index
+ // anymore, even if (for one point) vertex and texel is equal - as the normal
+ // won't be equal. this increases memory usage greatly!
+ // - we need to store the normal for *every* vertex, not just for every face
+ // (i.e. every third vertex). again a lot of wasted memory.
+ //
+ // I decided for this because of several reasons:
+ // - it might be possible that we *will* use a different normal for every
+ // vertex one day. a surface is meant to look "flat" if we use one normal only
+ // but "curved" if every vertex has it's own normal.
+ // - we have a bigger set of options available. we can use glDrawElements()
+ // just as well as glVertex(), glNormal(), ...
+ //   -> this allows more flexible code and (as long as we use glDrawElements()
+ //   only) more readable code. This is something *very* important to me!
+ //   (especially as I am still working on normals and lighting. it's not
+ //   working yet, so having more flexibility and more readable code is
+ //   important)
+ // - it is slightly faster
+ // note that it is really only slightly faster. The main advantagea of
+ // glDrawElements() to a loop of glNormal(); glArrayElement(); are cache
+ // issues. that might s(!) ave us a few ms/s but nothing really important.
+ // alone it would not be worth the additional memory usage!
+}
+
+BoVector3 BoMesh::normal(unsigned int p) const
+{
+ if (p >= points()) {
+	boError() << k_funcinfo << "invalid point " << p << endl;
+	return BoVector3();
+ }
+ return BoVector3(&d->mPoints[p * pointSize() + normalPos()]);
+}
+
+void BoMesh::calculateNormals()
+{
+ // we don't use lib3ds' normals so that we can easily support file formats that
+ // dont store the normals. furthermore we depend on less external data :)
+ for (unsigned int face = 0; face < facesCount(); face++) {
+	unsigned int index = face * 3;
+	BoVector3 a(vertex(face * 3 + 0));
+	BoVector3 b(vertex(face * 3 + 1));
+	BoVector3 c(vertex(face * 3 + 2));
+#if AB_DEBUG_1
+	boDebug() << k_funcinfo << index << ": a=" << a.debugString() << endl;
+	boDebug() << k_funcinfo << index << ": b=" << b.debugString() << endl;
+	boDebug() << k_funcinfo << index << ": c=" << c.debugString() << endl;
+#endif
+
+	// AB: we use the same order as lib3ds does. check whether this is the
+	// correct order.
+	BoVector3 p, q;
+	p = c - b;
+	q = a - b;
+#if AB_DEBUG_1
+	boDebug() << k_funcinfo << index << ": p=" << p.debugString() << endl;
+	boDebug() << k_funcinfo << index << ": q=" << q.debugString() << endl;
+#endif
+	BoVector3 normal = BoVector3::crossProduct(p, q);
+#if AB_DEBUG_1
+	boDebug() << k_funcinfo << index << ": normal1=" << normal.debugString() << endl;
+#endif
+	normal.normalize();
+#if AB_DEBUG_1
+	boDebug() << k_funcinfo << index << ": normal2=" << normal.debugString() << endl;
+#endif
+
+	setNormal(index, normal);
+ }
 }
 
 void BoMesh::renderMesh(const QColor* teamColor)
@@ -934,8 +1068,10 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	if (!d->mPointsCache || d->mPointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
+#if 0
+		// AB: the code below is obsolete. it assumes that the normal is
+		// *not* in d->mPoints but in the face only.
 		if (type() != GL_TRIANGLES) {
-			// TODO: glNormal() calls!
 			glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
 		} else {
 			glBegin(type());
@@ -946,6 +1082,31 @@ void BoMesh::renderMesh(const QColor* teamColor)
 			BoNode* node = nodes();
 			while (node) {
 				const int* points = node->pointIndex();
+				const float* normal;
+				if (BoMaterial::normals() == 0) {
+					normal = normal(points[0]);
+				} else {
+					BoVector3 v, w;
+					if (BoMaterial::normals() == 1 || BoMaterial::normals() == 3) {
+						v = vertex(points[2] - d->mPointsMovedBy) - vertex(points[1] - d->mPointsMovedBy);
+						w = vertex(points[0] - d->mPointsMovedBy) - vertex(points[1] - d->mPointsMovedBy);
+					} else if (BoMaterial::normals() == 2 || BoMaterial::normals() == 4) {
+						v = vertex(points[1] - d->mPointsMovedBy) - vertex(points[0] - d->mPointsMovedBy);
+						w = vertex(points[2] - d->mPointsMovedBy) - vertex(points[0] - d->mPointsMovedBy);
+					} else {
+						boError() << k_funcinfo << "normals setting: " << BoMaterial::normals() << endl;
+					}
+					BoVector3 norm;
+					if (BoMaterial::normals() == 1 || BoMaterial::normals() == 2) {
+						norm = BoVector3::crossProduct(v, w);
+					} else if (BoMaterial::normals() == 3 || BoMaterial::normals() == 4) {
+						norm = BoVector3::crossProduct(w, v);
+					}
+					norm.normalize();
+					normal = norm.data();
+				}
+
+				glNormal3fv(normal);
 				glArrayElement(points[0]);
 				glArrayElement(points[1]);
 				glArrayElement(points[2]);
@@ -959,7 +1120,15 @@ void BoMesh::renderMesh(const QColor* teamColor)
 #endif
 			glEnd();
 
+			// reset the normal...
+			// (better solution: don't enable light when rendering
+			// selection rect!)
+			const float n[] = { 0.0f, 0.0f, 1.0f };
+			glNormal3fv(n);
 		}
+#else
+		glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+#endif
 	}
  }
 
@@ -1000,7 +1169,7 @@ void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 		return;
 	}
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(100) << k_funcinfo << endl;
 
  glNewList(d->mDisplayList, GL_COMPILE);
  renderMesh(teamColor);
@@ -1010,15 +1179,6 @@ void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 unsigned int BoMesh::points() const
 {
  return d->mPointCount;
-}
-
-BoVector3 BoMesh::point(unsigned int p) const
-{
- if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << endl;
-	return BoVector3();
- }
- return BoVector3(&d->mPoints[p * 5]);
 }
 
 bool BoMesh::isTeamColor() const
@@ -1054,11 +1214,9 @@ void BoMesh::movePoints(float* array, int index)
  }
  // now we move the vertices and texture coordinates to the new array
  for (unsigned int i = 0; i < points(); i++) {
-	array[(index + i) * 5 + 0] = d->mPoints[i * 5 + 0];
-	array[(index + i) * 5 + 1] = d->mPoints[i * 5 + 1];
-	array[(index + i) * 5 + 2] = d->mPoints[i * 5 + 2];
-	array[(index + i) * 5 + 3] = d->mPoints[i * 5 + 3];
-	array[(index + i) * 5 + 4] = d->mPoints[i * 5 + 4];
+	for (int j = 0; j < pointSize(); j++) {
+		array[(index + i) * pointSize() + j] = d->mPoints[i * pointSize() + j];
+	}
  }
 #warning FIXME: memory fragmentation
  // we allocate a lot of floats and free them later (moving the values to
@@ -1069,7 +1227,8 @@ void BoMesh::movePoints(float* array, int index)
  // this is the important place)
  boMem->freeFloatArray(d->mAllocatedPoints);
  d->mAllocatedPoints = 0;
- d->mPoints = array + index * 5;
+ d->mPoints = array + index * pointSize();
+ d->mPointsMovedBy = index;
  if (d->mPointsCache) {
 	// we need to regenerate the cache
 	createPointCache();
@@ -1094,12 +1253,12 @@ void BoMesh::createPointCache()
  int nodesCount = 0;
  // count the number of nodes in our list.
  // note that we mustn't assume that all nodes are in that list!
- for (; node; node = node->next()) {
+ for (node = nodes(); node; node = node->next()) {
 	nodesCount++;
  }
  node = nodes();
  if (type() == GL_TRIANGLE_STRIP) {
-	boDebug() << "creating _STRIP" << endl;
+	boDebug(100) << "creating _STRIP" << endl;
 	if (!node->next()) {
 		boError() << k_funcinfo << "less than 2 nodes in mesh! this is not supported" << endl;
 		return;
@@ -1146,21 +1305,21 @@ void BoMesh::createPointCache()
 	d->mPointsCacheCount = nodesCount * 3;
 	d->mPointsCache = boMem->allocateUIntArray(d->mPointsCacheCount);
 	int element = 0;
-	for (; node; node = node->next()) {
+	for (node = nodes(); node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
 			d->mPointsCache[element] = (unsigned int)node->pointIndex()[i];
 			element++;
 		}
 	}
  } else {
-	boError() << k_funcinfo << "Invalid type: " << type() << endl;
+	boError(100) << k_funcinfo << "Invalid type: " << type() << endl;
  }
 }
 
 void BoMesh::calculateMaxMin()
 {
  // NOT time critical! (called on startup only)
- BoVector3 v = point(0);
+ BoVector3 v = vertex(0);
  d->mMinZ = v.z();
  d->mMaxZ = v.z();
  d->mMinX = v.x();
@@ -1168,7 +1327,7 @@ void BoMesh::calculateMaxMin()
  d->mMinY = v.y();
  d->mMaxY = v.y();
  for (unsigned int i = 0; i < points(); i++) {
-	v = point(i);
+	v = vertex(i);
 	if (v.x() < d->mMinX) {
 		d->mMinX = v.x();
 	} else if (v.x() > d->mMaxX) {

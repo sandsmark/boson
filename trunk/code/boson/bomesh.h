@@ -163,6 +163,24 @@ public:
 	~BoMesh();
 
 	/**
+	 * The size of a single points (vertex and texel and normal). Size means
+	 * the number of floats here.
+	 **/
+	static int pointSize();
+
+	/**
+	 * @return The position of the vertex in a point (see @ref pointSize)
+	 */
+	static int vertexPos();
+
+	static int texelPos();
+
+	/**
+	 * @return The position of the normal in a point (see @ref pointSize)
+	 */
+	static int normalPos();
+
+	/**
 	 * Use material @p mat when rendering this mesh.
 	 **/
 	void setMaterial(BoMaterial* mat);
@@ -183,12 +201,6 @@ public:
 	void setFace(int index, const BoFace& face);
 
 	/**
-	 * Prepare to load the points, i.e. allocate memory for them. You can
-	 * set them using @ref setVertex and @ref setTexel.
-	 **/
-	void allocatePoints(unsigned int points);
-
-	/**
 	 * Move the points from the local array to the specified array. This
 	 * will copy all points (vertices and texture coordinates). The points
 	 * are inserted starting at @p index - all local indices are changed
@@ -204,6 +216,9 @@ public:
 	 * You must call @ref allocatePoints before calling this!
 	 **/
 	void setVertex(unsigned int index, const BoVector3&);
+	void setNormal(unsigned int index, const BoVector3&);
+
+	void calculateNormals();
 
 	/**
 	 * The third coordinate is discarded.
@@ -291,7 +306,15 @@ public:
 	/**
 	 * Create a BoVector3 at index @p p
 	 **/
-	BoVector3 point(unsigned int p) const;
+	BoVector3 vertex(unsigned int p) const;
+
+	/**
+	 * @return The normal of of the point at @p p. Note that the normal
+	 * applies to the entire face, which consists of all three points at
+	 * (p - p % 3) to (p - p % 3 + 2)
+	 **/
+	BoVector3 normal(unsigned int p) const;
+
 	unsigned int points() const;
 
 	/**
@@ -349,6 +372,13 @@ protected:
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
 	bool checkVisible();
+
+	/**
+	 * Prepare to load the points, i.e. allocate memory for them. You can
+	 * set them using @ref setVertex and @ref setTexel.
+	 **/
+	void allocatePoints(unsigned int points);
+
 
 private:
 	void init();
