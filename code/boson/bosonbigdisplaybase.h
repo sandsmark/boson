@@ -183,6 +183,7 @@ public:
 	void setUpdateInterval(unsigned int ms);
 
 	void setDebugMapCoordinates(bool debug);
+	void setDebugShowCellGrid(bool debug);
 
 	/**
 	 * Scroll by a certain distance.

@@ -520,6 +520,15 @@ void BoDisplayManager::slotSetDebugMapCoordinates(bool debug)
  }
 }
 
+void BoDisplayManager::slotSetDebugShowCellGrid(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugShowCellGrid(debug);
+	++it;
+ }
+}
+
 void BoDisplayManager::unlockAction()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);

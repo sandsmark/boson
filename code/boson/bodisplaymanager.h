@@ -165,6 +165,7 @@ public slots:
 	void slotUnitRemoved(Unit* u);
 
 	void slotSetDebugMapCoordinates(bool);
+	void slotSetDebugShowCellGrid(bool);
 
 signals:
 	/**
