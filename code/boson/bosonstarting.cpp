@@ -39,7 +39,7 @@
 #include "bowater.h"
 
 #include <klocale.h>
-#include <kgame/kmessageserver.h>
+#include <kgame/kmessageclient.h>
 
 #include <qtimer.h>
 #include <qdom.h>
@@ -446,14 +446,10 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 	d->mStartingCompletedMessage.insert(sender, buffer);
  }
 
- if (!boGame->isMaster()) {
-	return;
- }
  if (!boGame->isAdmin()) {
-	boError() << k_funcinfo << "MASTER, but not ADMIN! not supported" << endl;
 	return;
  }
- QValueList<Q_UINT32> clients = boGame->messageServer()->clientIDs();
+ QValueList<Q_UINT32> clients = boGame->messageClient()->clientList();
  if (clients.count() > d->mStartingCompleted.count()) {
 	return;
  }
