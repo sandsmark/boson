@@ -53,7 +53,7 @@ BosonApp::BosonApp(char *servername)
 
   ///////////////////////////////////////////////////////////////////
   // read the config file options
-  readOptions();
+  //readOptions();
 
   ///////////////////////////////////////////////////////////////////
   // call init() to invoke all other construction parts
@@ -93,16 +93,6 @@ void BosonApp::init(char *servername )
   initStatusBar();
   initView();
   initSocket(servername);
-
-  ///////////////////////////////////////////////////////////////////
-  // enable bars dependend on config file setups
-  if (!bViewToolbar_0)
-    enableToolBar(KToolBar::Hide,0);
-  if (!bViewStatusbar)
-    enableStatusBar(KStatusBar::Hide);
-
-  menu_bar->setMenuBarPos(menu_bar_pos);
-  tool_bar_0->setBarPos(tool_bar_0_pos);
 
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar items at startup
@@ -316,6 +306,7 @@ void BosonApp::initView()
    this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
+	resize(780, 580);
 	setView(mainview);
 }
 
@@ -325,7 +316,6 @@ void BosonApp::resizeEvent(QResizeEvent *evt)
 {
     KTMainWindow::resizeEvent(evt);
 
-    rMainGeom= this->geometry();
     updateRects();
 }
 
@@ -379,6 +369,7 @@ bool BosonApp::queryExit()
     return false;
 }
 
+/*
 void BosonApp::saveOptions()
 {
   KConfig *config = kapp->getConfig();
@@ -411,6 +402,7 @@ void BosonApp::readOptions()
   tool_bar_0_pos = (KToolBar::BarPosition)config->readNumEntry("ToolBar_0_Pos", KToolBar::Right);
 
 }
+*/
 
 
 /////////////////////////////////////////////////////////////////////
@@ -424,7 +416,7 @@ void BosonApp::slotAppExit()
   // exits the Application
   if(this->queryExit())
     {
-      saveOptions();
+      //saveOptions();
       KTMainWindow::deleteAll();
       kapp->quit();
     }
