@@ -78,6 +78,7 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
  }
 
  bool resetColor = false; // needs to be true after we changed the current color
+ bool resetCullFace = false;
 
  // AB: we have *lots* of faces! in numbers the maximum i found
  // so far (only a short look) was about 25 toplevel nodes and
@@ -97,10 +98,17 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 			resetColor = true;
 		}
 	}
- } else if (mesh->material()->textureName().isEmpty()){
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor3fv(mesh->material()->diffuse().data());
-	resetColor = true;
+ } else {
+	BoMaterial* mat = mesh->material();
+	if (mat->textureName().isEmpty()) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3fv(mat->diffuse().data());
+		resetColor = true;
+	}
+	if (mat->twoSided()) {
+		glDisable(GL_CULL_FACE);
+		resetCullFace = true;
+	}
  }
 
  unsigned int renderedPoints = 0;
@@ -147,6 +155,10 @@ unsigned int BoMeshRendererImmediate::render(const QColor* teamColor, BoMesh* me
 	// we need to reset the color (mainly for the placement preview)
 	glPopAttrib();
 	resetColor = false;
+ }
+ if (resetCullFace) {
+	 glEnable(GL_CULL_FACE);
+	 resetCullFace = false;
  }
 
  // we need this currently, because of the selection rects. we should avoid
