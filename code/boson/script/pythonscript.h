@@ -130,6 +130,7 @@ class PythonScript : public BosonScript
     static PyObject* py_startBenchmark(PyObject* self, PyObject* args);
     static PyObject* py_endBenchmark(PyObject* self, PyObject* args);
     static PyObject* py_setRandomSeed(PyObject* self, PyObject* args);
+    static PyObject* py_addParticleSystem(PyObject* self, PyObject* args);
 
   protected:
     static PyObject* QValueListToPyList(QValueList<int>* list);

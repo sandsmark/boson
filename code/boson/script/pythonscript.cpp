@@ -101,6 +101,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"startBenchmark", py_startBenchmark, METH_VARARGS, 0 },
   { (char*)"endBenchmark", py_endBenchmark, METH_VARARGS, 0 },
   { (char*)"setRandomSeed", py_setRandomSeed, METH_VARARGS, 0 },
+  { (char*)"addParticleSystem", py_addParticleSystem, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -215,10 +216,12 @@ void PythonScript::loadScript(QString file)
   if(!pName)
   {
     boError() << k_funcinfo << "pName is NULL" << endl;
+    Py_DECREF(pName);
     freePythonLock();
     return;
   }
   PyObject* pModule = PyImport_Import(pName);
+  Py_DECREF(pName);
   if(!pModule)
   {
     PyErr_Print();
@@ -1039,6 +1042,19 @@ PyObject* PythonScript::py_setRandomSeed(PyObject*, PyObject* args)
     return 0;
   }
   BosonScript::setRandomSeed(seed);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_addParticleSystem(PyObject*, PyObject* args)
+{
+  int player, id;
+  float x, y, z, rot = 0.0f;
+  if(!PyArg_ParseTuple(args, (char*)"ii(fff)|f", &player, &id, &x, &y, &z, &rot))
+  {
+    return 0;
+  }
+  BosonScript::addParticleSystem(player, id, BoVector3(x, y, z), rot);
   Py_INCREF(Py_None);
   return Py_None;
 }
