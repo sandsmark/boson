@@ -189,7 +189,7 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 	switch (m->msgid - KGameMessage::IdUser) {
 		case BosonMessage::AdvanceN:
 			mAdvanceMessageWaiting++;
-			boWarning(300) << k_funcinfo << "advance message got delayed @" << mBoson->advanceCallsCount() << endl;
+			boWarning(300) << k_funcinfo << "advance message got delayed at advance call " << mBoson->advanceCallsCount() << endl;
 			break;
 		default:
 			break;
