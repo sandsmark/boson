@@ -26,12 +26,10 @@
 #define SP_CORNER_LEN	25
 #define SP_CORNER_POS	8
 #define SP_W		(PART_NB*2)
-#define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
+#define SP_H		(SP_CORNER_LEN + SP_CORNER_POS)
 
 #define POWER_LEVELS 15// AB: is in common/unit.h - the number of frames for the SelectPart, each with less power
 #define PART_NB (POWER_LEVELS)
-
-static void drawSelectBox(QPainter &painter, bool bw, int power = 0);
 
 QCanvasPixmapArray * SelectPart::mPartUp = 0l;
 QCanvasPixmapArray * SelectPart::mPartDown = 0l;
@@ -87,24 +85,24 @@ int SelectPart::frames()
 /*
  *  Drawing functions
  */
-void drawSelectBox(QPainter &painter, bool bw, int power)
+void SelectPart::drawSelectBox(QPainter &painter, bool mask, int power)
 {
  int len = 2 * ( PART_NB - 1 - power );
 
- if (bw) {
+ if (mask) {
 	// mask
 	// "scrollbar"
-	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::white);
+	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::color1);
 	// selection corner
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
-			SP_CORNER_LEN, SP_THICK, Qt::white);
+			SP_CORNER_LEN, SP_THICK, Qt::color1);
 	painter.fillRect(SP_W - SP_THICK, SP_CORNER_POS,
-			SP_THICK, SP_CORNER_LEN, Qt::white);
+			SP_THICK, SP_CORNER_LEN, Qt::color1);
  } else {
 	// read rendering 
 	/* "scrollbar" */
-	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::red);
-	painter.fillRect(len, 0, SP_W - len,2 * SP_THICK, Qt::green);
+	painter.fillRect(0, 0, len, 2 * SP_THICK, Qt::red);
+	painter.fillRect(len, 0, SP_W - len, 2 * SP_THICK, Qt::green);
 	/* selection corner */
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
 			SP_CORNER_LEN, SP_THICK, Qt::white);
@@ -116,32 +114,30 @@ void drawSelectBox(QPainter &painter, bool bw, int power)
 
 QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
 {
+ QValueList<QPixmap> pixmaps;
+ QPointArray points(PART_NB);
  QPainter painter;
 
  /* draw the mask */
  QBitmap mask (SP_W, SP_H);
- mask.fill(Qt::black);
-
  painter.begin(&mask);
  if (SelectPart::PartDown == type) {
 	painter.rotate(180);
 	painter.translate(-SP_W + 1, -SP_H + 1);
  }
+ mask.fill(Qt::color0);
  drawSelectBox(painter, true); 
  painter.end();
 
  QPixmap pix(SP_W, SP_H);
- QValueList<QPixmap> pixmaps;
- QPointArray points(PART_NB);
-
  for(int i = 0; i < PART_NB; i++) {
 	/* draw it */
-	pix.fill();
+	pix.fill(Qt::white);
 
 	painter.begin(&pix);
 	if (SelectPart::PartDown == type) {
 		painter.rotate(180);
-		painter.translate(-SP_W+1, -SP_H+1);
+		painter.translate(-SP_W + 1, -SP_H + 1);
 	}
 	drawSelectBox(painter, false, i);
 	painter.end();
