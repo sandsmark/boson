@@ -40,7 +40,7 @@ Align=true
 Texture=explosion.png
 
 [BigExplosion]
-Id=1003
+Id=1010
 MinVelocity=-2.5,-2.5,0
 MaxVelocity=2.5,2.5,2.2
 MinPos=-0.25,-0.25,0.2
@@ -49,17 +49,17 @@ StartColor=1.0,0.6,0.1,0.25
 EndColor=1.0,0.05,0.0,0.1
 MinLife=0.6
 MaxLife=0.8
-MaxNum=400
+MaxNum=500
 InitNum=250
 BlendFunc=GL_ONE
-Rate=250
+Rate=400
 Size=1.0
-SystemLife=0.5
+SystemLife=0.7
 Align=true
 Texture=explosion.png
 
 [BigBallExplosion]
-Id=1004
+Id=1011
 MinVelocity=-2.5,-2.5,0
 MaxVelocity=2.5,2.5,2.2
 MinPos=-0.25,-0.25,0.2
@@ -68,12 +68,12 @@ StartColor=1.0,0.6,0.1,0.25
 EndColor=1.0,0.05,0.0,0.1
 MinLife=0.6
 MaxLife=0.8
-MaxNum=400
+MaxNum=500
 InitNum=250
 BlendFunc=GL_ONE
-Rate=250
+Rate=400
 Size=1.0
-SystemLife=0.5
+SystemLife=0.7
 Align=true
 Texture=explosion.png
 Normalize=true
@@ -124,11 +124,30 @@ Texture=explosion.png
 
 [GeneralSmoke]
 Id=3001
-MinVelocity=-0.3,-0.3,0.4
-MaxVelocity=0.3,0.3,1.0
+MinVelocity=-0.3,-0.3,0.2
+MaxVelocity=0.3,0.3,0.4
 MinPos=-0.2,-0.2,-0.1
 MaxPos=0.2,0.2,0.35
-StartColor=0.2,0.2,0.2,0.7
+StartColor=0.3,0.3,0.3,0.3
+EndColor=0.4,0.4,0.4,0.0
+MinLife=2.0
+MaxLife=3.0
+MaxNum=200
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=35
+Size=1.0
+SystemLife=20
+Align=true
+Texture=smoke.png
+
+[DarkSmoke]
+Id=3002
+MinVelocity=-0.3,-0.3,0.2
+MaxVelocity=0.3,0.3,0.4
+MinPos=-0.2,-0.2,-0.1
+MaxPos=0.2,0.2,0.35
+StartColor=0.2,0.2,0.2,0.3
 EndColor=0.2,0.2,0.2,0.0
 MinLife=2.0
 MaxLife=3.0
@@ -142,12 +161,12 @@ Align=true
 Texture=smoke.png
 
 [LightSmoke]
-Id=3002
-MinVelocity=-0.3,-0.3,0.4
-MaxVelocity=0.3,0.3,1.0
+Id=3003
+MinVelocity=-0.3,-0.3,0.2
+MaxVelocity=0.3,0.3,0.4
 MinPos=-0.2,-0.2,-0.1
 MaxPos=0.2,0.2,0.35
-StartColor=0.4,0.4,0.4,0.6
+StartColor=0.4,0.4,0.4,0.3
 EndColor=0.5,0.5,0.5,0.0
 MinLife=2.0
 MaxLife=3.0
@@ -161,12 +180,12 @@ Align=true
 Texture=smoke.png
 
 [BigSmoke]
-Id=3003
-MinVelocity=-0.5,-0.5,0.4
-MaxVelocity=0.5,0.5,1.0
+Id=3010
+MinVelocity=-0.5,-0.5,0.2
+MaxVelocity=0.5,0.5,0.5
 MinPos=-0.5,-0.5,-0.1
 MaxPos=0.5,0.5,0.35
-StartColor=0.3,0.3,0.3,0.7
+StartColor=0.3,0.3,0.3,0.3
 EndColor=0.4,0.4,0.4,0.0
 MinLife=2.0
 MaxLife=3.2
@@ -179,7 +198,24 @@ SystemLife=10
 Align=true
 Texture=smoke.png
 
-
+[BigDarkSmoke]
+Id=3011
+MinVelocity=-0.5,-0.5,0.2
+MaxVelocity=0.5,0.5,0.5
+MinPos=-0.5,-0.5,-0.1
+MaxPos=0.5,0.5,0.35
+StartColor=0.2,0.2,0.2,0.3
+EndColor=0.2,0.2,0.2,0.0
+MinLife=2.0
+MaxLife=3.2
+MaxNum=160
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=50
+Size=1.0
+SystemLife=10
+Align=true
+Texture=smoke.png
 
 [GeneralShockWave]
 Id=4001

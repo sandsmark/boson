@@ -13,7 +13,7 @@ Shield=35
 ProductionTime=120
 Weapons=1
 SightRange=9
-DestroyedParticles=1002
+DestroyedParticles=1002,3001
 
 [Boson Mobile Unit]
 Speed=4

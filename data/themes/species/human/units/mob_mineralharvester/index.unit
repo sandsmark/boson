@@ -9,7 +9,7 @@ OilCost=5
 Producer=0
 Requirements=13,3
 ProductionTime=50
-DestroyedParticles=1001
+DestroyedParticles=1001,3001
 
 [Boson Mobile Unit]
 Speed=4
