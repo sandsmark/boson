@@ -58,8 +58,6 @@ public:
 		mSmokeParticleSystem = 0;
 		mActiveWeapon = 0;
 	}
-	KGamePropertyInt mDirection;
-
 	KGamePropertyList<QPoint> mWaypoints;
 	KGameProperty<int> mMoveDestX;
 	KGameProperty<int> mMoveDestY;
@@ -97,14 +95,12 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  // depend in any way on the .3ds file or another OpenGL thing.
  setSize(prop->unitWidth(), prop->unitHeight());
 
- registerData(&d->mDirection, IdDirection);
  registerData(&d->mWaypoints, IdWaypoints);
  registerData(&d->mMoveDestX, IdMoveDestX);
  registerData(&d->mMoveDestY, IdMoveDestY);
  registerData(&d->mMoveRange, IdMoveRange);
  registerData(&d->mWantedRotation, IdWantedRotation);
 
- d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
