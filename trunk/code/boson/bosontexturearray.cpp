@@ -103,26 +103,32 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // (usually!!) - so don't change it :)
 
  if (useMipmaps) {
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// note: GL_*_MIPMAP_* is slower! GL_NEAREST would be fastest
+	// AB: a config option would be nice here - slow machines use other
+	// values than fast machines
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // note: this makes mipmaps senseless!
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
 			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
+	//FIXME: how to apply minification and magnification filters??
 	if (error) {
 		kdWarning() << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
 	}
  } else {
+	// AB: we dont build mipmaps for cell and cursor textures (e.g.) those
+	// are not so much quality relevant - so we use GL_NEAREST for both,
+	// minification and magnification. this is said to be faster than
+	// GL_LINEAR
+	// TODO: performance: combine several textures into a single one and
+	// adjust the coordinates in glTexCoord
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(), 
 			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
 			buffer.bits());
-
-	// FIXME: performance: GL_NEAREST is said to be fastest, GL_LINEAR
-	// second fastest
-	// TODO: performance: combine several textures into a single one and
-	// adjust the coordinates in glTexCoord
-	// TODO: performance: glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
-	// is fast - do we loose anything from it? is this the correct file to
-	// place it in? can it go to initializeGL() ?
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
  }
 
  error = glGetError();
