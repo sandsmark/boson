@@ -286,6 +286,7 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
  mMinPlayers = field->scenario()->minPlayers();
  mMaxPlayers = field->scenario()->maxPlayers();
+ boDebug() << "minPlayers: " << mMinPlayers << " ; maxPlayers: " << mMaxPlayers << endl;
 
  BPFDescription* description = field->description();
  if (!description) {
