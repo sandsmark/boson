@@ -241,6 +241,11 @@ switch(tag) {
 		field->move(data->move);
 		break;
 
+	case MSG_UNIT_SHOOT :
+		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
+		field->shoot(data->shoot);
+		break;
+
 	}
 
 

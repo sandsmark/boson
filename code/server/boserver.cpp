@@ -201,7 +201,8 @@ if ( ! (tag>MSG_END_SOCKET_LAYER && tag<MSG_END_DIALOG_LAYER)) {
 
 switch(state) {
 	default:
-		UNKNOWN_TAG(state);
+		logf(LOG_ERROR, "handleDialogMessage : unknown state received : %d", state);
+		break;
 
 	case SS_INIT :
 		if (MSG_DLG_ASK == tag) {
@@ -268,7 +269,8 @@ if (oldState != state)
 void BosonServer::handleGameMessage(int playerId, bosonMsgTag tag, int blen, bosonMsgData *data)
 {
 	uint i;
-	serverMobUnit *mob;
+	serverMobUnit	*mob;
+	serverFacility	*fix;
 	/* static to cut off heap allocation overhead */
 	static facilityMsg_t	_facility;
 	static mobileMsg_t	_mobile;
@@ -280,7 +282,20 @@ if ( ! tag>MSG_END_DIALOG_LAYER) {
 
 switch(tag) {
 	default :
-		UNKNOWN_TAG(-3535);
+		logf(LOG_ERROR, "handleGameMessage : unknown tag received : %d", tag);
+		break;
+
+	case MSG_UNIT_SHOOT :
+		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
+		mob = mobile.find(data->shoot.target_key);
+		fix = facility.find(data->shoot.target_key);
+		if (mob)
+			mob->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
+		else if
+			(fix) fix->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
+		else	logf(LOG_ERROR, "handleGameMessage : unexpected target_key in shootMsg_t : %d", data->shoot.target_key);
+
+		break;
 
 	case MSG_MOBILE_CONSTRUCT :
 		ASSERT_DATA_BLENGHT(sizeof(data->construct));
