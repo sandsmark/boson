@@ -44,7 +44,7 @@ public:
 	}
 
 	bool mCanProduce;
-	QValueList<int> mProduceList;
+	QValueList<int> mProducerList;
 };
 
 class UnitProperties::UnitPropertiesPrivate
@@ -113,8 +113,10 @@ void UnitProperties::loadUnitType(const QString& fileName)
  isFacility = conf.readBoolEntry("IsFacility", false);
 
  if (isFacility) {
+	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
 	loadFacilityProperties(&conf);
  } else {
+	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)mTerrain);
 	loadMobileProperties(&conf);
  }
 }
@@ -135,7 +137,7 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Facility");
  d->mFacilityProperties = new FacilityProperties;
  d->mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
- d->mFacilityProperties->mProduceList = conf->readIntListEntry("ProduceList");
+ d->mFacilityProperties->mProducerList = conf->readIntListEntry("ProducerList");
 }
 
 bool UnitProperties::isMobile() const
@@ -200,12 +202,12 @@ bool UnitProperties::canProduce() const
  return d->mFacilityProperties->mCanProduce;
 }
 
-QValueList<int> UnitProperties::produceList() const
+QValueList<int> UnitProperties::producerList() const
 {
  if (!d->mFacilityProperties) {
 	return QValueList<int>();
  }
- return d->mFacilityProperties->mProduceList;
+ return d->mFacilityProperties->mProducerList;
 }
 
 unsigned int UnitProperties::productionTime() const

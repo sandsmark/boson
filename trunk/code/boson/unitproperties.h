@@ -38,9 +38,24 @@ public:
 	 * soon as the d pointer is removed. Don't use outside this class!
 	 **/
 	enum TerrainType {
-		Land=0,
-		Water=1,
-		Air=2
+		Land = 0,
+		Water = 1,
+		Air = 2
+	};
+
+	/**
+	 * Which type of factory can produce a unit.
+	 *
+	 * Note that the names (e.g. WarFactory) have <em>nothin</em> to do with
+	 * the actual factory names! I.e. other facilities can also be a
+	 * producer called "WarFactory", too!
+	 **/
+	enum Producer {
+		WarFactory = Land,
+		Shipyard = Water,
+		Airport = Air, // grrr - I have no good idea for a name... "airport" is definitely wrong as a producer name
+		Barracks = 3,
+		CommandBunker = 10
 	};
 	
 	UnitProperties();
@@ -192,10 +207,16 @@ public:
 	bool canMineOil() const;
 
 	/**
-	 * @return A list of units which can be produced by this facility (if
+	 * @return A list of all @ref producer IDs this unit can produce (if
 	 * any).
 	 **/
-	QValueList<int> produceList() const;
+	QValueList<int> producerList() const;
+
+	/**
+	 * @return Which type of factory can produce this unit. See
+	 * data/themes/species/human/units/README for more in this.
+	 **/
+	unsigned int producer() const { return mProducer; }
 
 	/**
 	 * @return The path to the unit files. That is the directory where the
@@ -234,6 +255,7 @@ private:
 	unsigned int mSightRange;
 	long int mDamage;
 	unsigned int mReload;
+	unsigned int mProducer;
 	unsigned int mProductionTime;
 	unsigned long int mMineralCost;
 	unsigned long int mOilCost;

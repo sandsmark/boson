@@ -1030,7 +1030,7 @@ int Facility::currentProduction() const
 
 void Facility::addProduction(int unitType)
 {
- if (!unitProperties()->produceList().contains(unitType)) {
+ if (!speciesTheme()->productions(unitProperties()->producerList()).contains(unitType)) {
 	kdError() << id() << " cannot produce " << unitType << endl;
 	return;
  }
