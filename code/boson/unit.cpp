@@ -916,13 +916,13 @@ void MobileUnit::advanceMine()
 
  int x = (int)(QCanvasSprite::x() + width() / 2);
  int y = (int)(QCanvasSprite::y() + height() / 2);
- if (destinationX() / BO_TILE_SIZE != x / BO_TILE_SIZE ||
-		destinationY() / BO_TILE_SIZE != y / BO_TILE_SIZE) {
+ QPoint wp = currentWaypoint();
+ if (waypointCount() > 1 || x != wp.x() || y != wp.y()) {
 
 // if (!canMine(boCanvas()->cellAt((Unit*)this))) { // FIXME: the player ordered to go to a certain place, not to *any* cell we can mine at...
 	kdDebug() << "moving to mining..." << endl;
-	kdDebug() << destinationX() / BO_TILE_SIZE << "    " << x / BO_TILE_SIZE << endl;
-	kdDebug() << destinationY() / BO_TILE_SIZE << "    " << y / BO_TILE_SIZE << endl;
+//	kdDebug() << destinationX() / BO_TILE_SIZE << "    " << x / BO_TILE_SIZE << endl;
+//	kdDebug() << destinationY() / BO_TILE_SIZE << "    " << y / BO_TILE_SIZE << endl;
 	advanceMove();
 	advanceMoveCheck();
 	return;

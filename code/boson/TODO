@@ -70,7 +70,8 @@ General TODOs
   somehow if it isn't
 
 Data TODOs
-- general sound (e.g. speech) - in progress
+- sound for minimap activated/deactivated
+- sound for destroyed facilities - shouldn't be speech i guess
 - make use of biglogo.png
 - shipyard
 - airport 
