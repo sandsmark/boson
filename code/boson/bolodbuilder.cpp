@@ -46,7 +46,7 @@ BoLODBuilder::BoLODBuilder(const BoMesh* mesh, const BoMeshLOD* fullDetail)
  boDebug(120) << k_funcinfo << "mesh has " << pointCount() << " vertices in " << facesCount() <<
 		" faces" << endl;
 
- BosonProfiler profiler(703);
+ BosonProfiler profiler(BosonProfiling::BuildLOD);
 
  buildLOD();
 
@@ -113,7 +113,7 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
  boDebug(120) << k_funcinfo << "factor is " << percents[lod] <<
 		"; target is " << (int)(pointCount() * percents[lod]) << " of " << pointCount() << " vertices" <<
 		"; max cost is " << maxcosts[lod] << endl;
- BosonProfiler profiler(702);
+ BosonProfiler profiler(BosonProfiling::GenerateLOD);
  QValueList<BoFace> faceList;
  if (lod == 0) {
 	boWarning(100) << k_funcinfo << "lod==0 doesn't make any sense here!" << endl;

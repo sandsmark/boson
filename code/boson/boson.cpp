@@ -2395,7 +2395,7 @@ void Boson::makeGameLog()
  QTextStream ts(log, IO_WriteOnly);
  writeGameLog(ts);
 // boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
- BosonProfiler p(1745);
+ BosonProfiler p(BosonProfiling::MakeGameLog);
  QByteArray comp = qCompress(log);
  d->mGameLogs.append(comp);
 // boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
@@ -2404,7 +2404,7 @@ void Boson::makeGameLog()
 
 void Boson::writeGameLog(QTextStream& log)
 {
- BosonProfiler p(1744);
+ BosonProfiler p(BosonProfiling::WriteGameLog);
 
  log << "Advance calls count: " << advanceCallsCount() << endl;
  QPtrListIterator<KPlayer> it(*playerList());
@@ -2419,7 +2419,7 @@ void Boson::writeGameLog(QTextStream& log)
 
 void Boson::saveGameLogs(const QString& prefix)
 {
- BosonProfiler p(1743);
+ BosonProfiler p(BosonProfiling::SaveGameLogs);
 
  // Write gamelog
  QFile gl(prefix + ".gamelog");

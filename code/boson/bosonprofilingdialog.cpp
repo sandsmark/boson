@@ -573,6 +573,21 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 	case BosonProfiling::FindPath:
 		name = i18n("FindPath");
 		break;
+	case BosonProfiling::WriteGameLog:
+		name = i18n("WriteGameLog");
+		break;
+	case BosonProfiling::SaveGameLogs:
+		name = i18n("SaveGameLogs");
+		break;
+	case BosonProfiling::MakeGameLog:
+		name = i18n("MakeGameLog");
+		break;
+	case BosonProfiling::GenerateLOD:
+		name = i18n("GenerateLOD");
+		break;
+	case BosonProfiling::BuildLOD:
+		name = i18n("BuildLOD");
+		break;
 	default:
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;
