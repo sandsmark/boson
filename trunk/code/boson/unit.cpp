@@ -239,7 +239,7 @@ void Unit::setHealth(unsigned long int h)
  updateSelectBox();
  if (isDestroyed()) {
 	unselect();
-	setAnimationMode(AnimationWreckage);
+	setAnimationMode(UnitAnimationWreckage);
  }
 }
 
@@ -310,11 +310,85 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  float oldX = x();
  float oldY = y();
 
+ float rotateX = 0.0f;
+ float rotateY = 0.0f;
+ updateZ(moveX, moveY, &moveZ, &rotateX, &rotateY);
+ setXRotation(rotateX);
+ setYRotation(rotateY);
+
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->unitMoved(this, oldX, oldY);
  /*if (smokeParticleSystem()) {
 	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
  }*/
+}
+void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX, float* rotateY)
+{
+ // rotation is not yet implemented here
+ *rotateX = 0.0f;
+ *rotateY = 0.0f;
+
+ float* heightMap = canvas()->heightMap();
+ BO_CHECK_NULL_RET(heightMap);
+ int heightMapWidth = canvas()->mapWidth() + 1;
+
+
+ // FIXME: currently this is a 2-minute implementation. we simply ensure
+ // that he unit is always on top of all cells it occupies.
+ // This should be taken into account when calculating the moving
+ // distance. Also it should be rotated. e.g. if 3 of 4 corners are at
+ // 0.0 and the forth corner is at 1.0 then it currently has z=1.0, but
+ // it should be rotated as real units would be.
+ // facilities are a special case - we have not yet fully decided what
+ // will happen if they are not on a "flat" surface. probably they won't
+ // get rotated, but will have a "box" below them which make the surface
+ // flat (i.e. the current implementation will remain for facilities).
+ // but thats not fully sure.
+
+ // we emulate cells() here. this is a) faster and we can b) prevent some
+ // redundant checls (even faster).
+ int left, top, right, bottom;
+ leftTopCell(&left, &top, leftEdge() + moveByX, topEdge() + moveByY);
+ rightBottomCell(&right, &bottom, rightEdge() + moveByX, bottomEdge() + moveByY);
+ right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
+
+ // ensure that the values are valid
+ bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
+ left = QMAX(left, 0);
+ top = QMAX(top, 0);
+ right = QMAX(left, right);
+ bottom = QMAX(top, bottom);
+
+ // we need left/right and upper/lower corner. so:
+ right++;
+ bottom++;
+
+ // a final sanity check:
+ if (right >= heightMapWidth) {
+	boError() << k_funcinfo << "invalid right corner: " << right << endl;
+	return;
+ }
+ if (bottom >= (int)canvas()->mapHeight() + 1) {
+	boError() << k_funcinfo << "invalid bottom corner: " << bottom << endl;
+	return;
+ }
+
+ float newZ = heightMap[top * heightMapWidth + left];
+ for (int x = left; x <= right; x++) {
+	for (int y = top; y <= bottom; y++) {
+		if (heightMap[y * heightMapWidth + x] > newZ) {
+			newZ = heightMap[y * heightMapWidth + x];
+		}
+	}
+ }
+
+ if (isFlying()) {
+	if (newZ < z() + *moveByZ) {
+		// don't touch moveByZ.
+		return;
+	}
+ }
+ *moveByZ = newZ - z();
 }
 
 void Unit::advance(unsigned int advanceCount)
@@ -1570,7 +1644,7 @@ void Facility::setConstructionStep(unsigned int step)
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
-	setAnimationMode(AnimationIdle);
+	setAnimationMode(UnitAnimationIdle);
 	setActiveParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
 	canvas()->addParticleSystems(*activeParticleSystems());
  }

@@ -23,7 +23,6 @@
 #include "bosonmodel.h"
 #include "bosonparticlesystemproperties.h"
 #include "bodebug.h"
-#include "unit.h" // FIXME this is for animation ids only
 
 #include <qintdict.h>
 #include <qdict.h>
@@ -248,8 +247,8 @@ void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& color)
  // made.
  KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.unit"));
  cfg.setGroup("OpenGL");
- m->loadAnimationMode(Unit::AnimationIdle, &cfg, QString::fromLatin1("Idle"));
- m->loadAnimationMode(Unit::AnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
+ m->loadAnimationMode(UnitAnimationIdle, &cfg, QString::fromLatin1("Idle"));
+ m->loadAnimationMode(UnitAnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
 
 
  m->finishLoading();

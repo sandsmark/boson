@@ -131,4 +131,17 @@ enum CameraAction {
 };
 
 
+enum UnitAnimationModes {
+	// the numbers are just cosmetic and do not need to be in order.
+	// the idle mode is an exception - it MUST be 0.
+	// AB: TODO: add BosonItem::disableAnimation for the
+	// construction animations! they are done differently
+	UnitAnimationIdle = 0, // default mode
+	UnitAnimationMove = 1,
+	UnitAnimationMine = 2,
+	UnitAnimationRefine = 3,
+	UnitAnimationWreckage = 100
+};
+
 #endif
+
