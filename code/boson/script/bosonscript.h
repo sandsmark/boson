@@ -229,8 +229,8 @@ class BosonScript
 
 
     // Camera
-    static void moveCamera(BoVector3 pos);
-    static void moveCameraBy(BoVector3 pos);
+    static void moveCamera(const BoVector3& pos);
+    static void moveCameraBy(const BoVector3& pos);
     static void setCameraRotation(float r);
     static void setCameraRadius(float r);
     static void setCameraZ(float z);
