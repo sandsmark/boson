@@ -594,6 +594,10 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 
 void Unit::setAdvanceWork(WorkType w)
 {
+ // velicities should be 0 anyway - this is the final fallback in case it was 
+ // missing by any reason
+ setXVelocity(0);
+ setYVelocity(0);
  if (w != advanceWork() || isDestroyed()) {
 	boCanvas()->setWorkChanged(this);
  }
@@ -903,6 +907,7 @@ void MobileUnit::advanceMoveCheck()
 	if(d->mPathRecalculated >= 2) {
 		kdDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
+		return;
 	}
 	if (d->mMovingFailed >= recalculate) {
 		kdDebug() << "recalculating path" << endl;

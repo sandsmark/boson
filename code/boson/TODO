@@ -15,8 +15,8 @@ Game TODOs
   repaint for setGrayOut() and setProductionCount()
 - BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
   hurts performance. But it is necessary for slow game speed :(
-- refine minerals/oil
-- mine/harvest minerals/oil is only at an experimantal state
+- mine/harvest minerals/oil is only at an experimantal state ; same about
+  refining
 - oil towers: they should be placed on an oil field. oil tankers go to the
   towers and receive the oil from them, which they take to the refinery
 - pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
@@ -27,10 +27,6 @@ Game TODOs
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
 - pause
-- sprite cursor seems to lead to crashes sometimes when moving the mouse (very
-  seldom only)
-- don't display the firepower-bar (i.e. reload bar) when the unit/facility
-  cannot shoot
 - display "filling" status of harvesters instead of firepower. use different
   colors!
 
