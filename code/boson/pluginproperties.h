@@ -56,7 +56,7 @@ public:
 		Harvester = 2,
 		Refinery = 3,
 		Weapon = 4,
-		RessourceMine = 5
+		ResourceMine = 5
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -212,18 +212,18 @@ private:
 	bool mCanRefineOil;
 };
 
-class RessourceMineProperties : public PluginProperties
+class ResourceMineProperties : public PluginProperties
 {
 public:
-	RessourceMineProperties(const UnitProperties* parent);
-	~RessourceMineProperties();
+	ResourceMineProperties(const UnitProperties* parent);
+	~ResourceMineProperties();
 
 	static QString propertyGroup();
 
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
 	virtual void savePlugin(KSimpleConfig* config);
-	virtual int pluginType() const { return RessourceMine; }
+	virtual int pluginType() const { return ResourceMine; }
 
 	bool canProvideMinerals() const { return mMinerals; }
 	bool canProvideOil() const { return mOil; }

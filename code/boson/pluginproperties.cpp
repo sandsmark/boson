@@ -208,28 +208,28 @@ void RefineryProperties::savePlugin(KSimpleConfig* config)
 }
 
 
-RessourceMineProperties::RessourceMineProperties(const UnitProperties* parent)
+ResourceMineProperties::ResourceMineProperties(const UnitProperties* parent)
 	: PluginProperties(parent)
 {
  mMinerals = false;
  mOil = false;
 }
 
-RessourceMineProperties::~RessourceMineProperties()
+ResourceMineProperties::~ResourceMineProperties()
 {
 }
 
-QString RessourceMineProperties::name() const
+QString ResourceMineProperties::name() const
 {
- return i18n("Ressource Mine Plugin");
+ return i18n("Resource Mine Plugin");
 }
 
-QString RessourceMineProperties::propertyGroup()
+QString ResourceMineProperties::propertyGroup()
 {
- return QString::fromLatin1("RessourceMinePlugin");
+ return QString::fromLatin1("ResourceMinePlugin");
 }
 
-void RessourceMineProperties::loadPlugin(KSimpleConfig* config)
+void ResourceMineProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
@@ -240,7 +240,7 @@ void RessourceMineProperties::loadPlugin(KSimpleConfig* config)
  mOil = config->readBoolEntry("CanProvideOil", false);
 }
 
-void RessourceMineProperties::savePlugin(KSimpleConfig* config)
+void ResourceMineProperties::savePlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
 	boError() << k_funcinfo << "unit has no harvester plugin" << endl;

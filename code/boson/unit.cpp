@@ -149,8 +149,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	boWarning() << k_funcinfo << "TODO: refinery plugin" << endl;
 //	d->mPlugins.append(new RefinePlugin(this));
  }
- if (prop->properties(PluginProperties::RessourceMine)) {
-	d->mPlugins.append(new RessourceMinePlugin(this));
+ if (prop->properties(PluginProperties::ResourceMine)) {
+	d->mPlugins.append(new ResourceMinePlugin(this));
  }
 
  loadWeapons();
@@ -201,8 +201,8 @@ void Unit::initStatic()
  addPropertyId(IdBombingPosX, QString::fromLatin1("BombingPosX"));
  addPropertyId(IdBombingPosY, QString::fromLatin1("BombingPosY"));
  addPropertyId(IdMinePlacingCounter, QString::fromLatin1("MinePlacingCounter"));
- addPropertyId(IdRessourceMineMinerals, QString::fromLatin1("RessourceMineMinerals"));
- addPropertyId(IdRessourceMineOil, QString::fromLatin1("RessourceMineOil"));
+ addPropertyId(IdResourceMineMinerals, QString::fromLatin1("ResourceMineMinerals"));
+ addPropertyId(IdResourceMineOil, QString::fromLatin1("ResourceMineOil"));
 
  mInitialized = true;
 }
