@@ -42,6 +42,7 @@
 #include "bolight.h"
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
+#include "bopui/bopui.h"
 #include "info/boinfo.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
@@ -58,10 +59,7 @@
 #include <kmessagebox.h>
 
 #include <qtimer.h>
-#include <qhbox.h>
 #include <qlayout.h>
-#include <qpushbutton.h>
-#include <qcheckbox.h>
 #include <qinputdialog.h>
 
 #include <GL/glu.h>
@@ -75,6 +73,9 @@
 
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
+
+#define PU_USE_NONE
+#include <plib/pu.h>
 
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
@@ -145,6 +146,8 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mCamera = new BoCamera;
  mLight = 0;
 
+ mPUILayout = new BoPUIVLayout(this, "topLayout");
+
 
  connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
@@ -211,8 +214,100 @@ void ModelPreview::initializeGL()
  setUpdatesEnabled(false);
  mUpdateTimer->start(GL_UPDATE_TIMER);
 
+ initPUIGUI();
 
  recursive = false;
+}
+
+void ModelPreview::initPUIGUI()
+{
+ puInit();
+ puSetWindow(winId());
+
+ BoPUINumInput* fovy = new BoPUINumInput(this);
+ BoPUINumInput* frame = new BoPUINumInput(this);
+ BoPUINumInput* lod = new BoPUINumInput(this);
+ connect(this, SIGNAL(signalFovYChanged(float)), fovy, SLOT(setValue(float)));
+ connect(fovy, SIGNAL(signalValueChanged(float)), this, SLOT(slotFovYChanged(float)));
+ connect(this, SIGNAL(signalLODChanged(float)), lod, SLOT(setValue(float)));
+ connect(this, SIGNAL(signalMaxLODChanged(float)), lod, SLOT(slotSetMaxValue(float)));
+ connect(lod, SIGNAL(signalValueChanged(float)), this, SLOT(slotLODChanged(float)));
+ connect(this, SIGNAL(signalMaxFramesChanged(float)), frame, SLOT(slotSetMaxValue(float)));
+ connect(this, SIGNAL(signalFrameChanged(float)), frame, SLOT(setValue(float)));
+ connect(frame, SIGNAL(signalValueChanged(float)), this, SLOT(slotFrameChanged(float)));
+ fovy->setLabel(i18n("FovY"));
+ fovy->setStepSize(1.0f);
+ fovy->setRange(MIN_FOVY, MAX_FOVY);
+ lod->setLabel(i18n("LOD"));
+ lod->setStepSize(1.0f);
+ lod->setRange(0.0f, 0.0f);
+ frame->setLabel(i18n("Frame"));
+ frame->setStepSize(1.0f);
+ frame->setRange(0.0f, 0.0f);
+
+ BoPUIPushButton* hide = new BoPUIPushButton(i18n("Hide"), this);
+ BoPUIPushButton* hideOthers = new BoPUIPushButton(i18n("Hide others"), this);
+ BoPUIPushButton* unhideAll = new BoPUIPushButton(i18n("UnHide all"), this);
+ connect(hide, SIGNAL(signalClicked()), this, SLOT(slotHideSelectedMesh()));
+ connect(hideOthers, SIGNAL(signalClicked()), this, SLOT(slotHideUnSelectedMeshes()));
+ connect(unhideAll, SIGNAL(signalClicked()), this, SLOT(slotUnHideAllMeshes()));
+
+ BoPUICheckBox* placement = new BoPUICheckBox(i18n("Show placement preview"), this);
+ BoPUICheckBox* disallowPlacement= new BoPUICheckBox(i18n("Disallow placement"), this);
+ BoPUICheckBox* wireframe = new BoPUICheckBox(i18n("Show wireframe"), this);
+ BoPUICheckBox* construction = new BoPUICheckBox(i18n("Show construction"), this);
+ BoPUICheckBox* axis = new BoPUICheckBox(i18n("Render axis"), this);
+ BoPUICheckBox* grid = new BoPUICheckBox(i18n("Render grid"), this);
+ BoPUICheckBox* light = new BoPUICheckBox(i18n("Enable Light"), boConfig->useLight(), this);
+ BoPUICheckBox* materials= new BoPUICheckBox(i18n("Enable Materials"), boConfig->useMaterials(), this);
+ connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
+ connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
+ connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
+ connect(construction, SIGNAL(signalToggled(bool)), this, SLOT(slotConstructionChanged(bool)));
+ connect(axis, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderAxisChanged(bool)));
+ connect(grid, SIGNAL(signalToggled(bool)), this, SLOT(slotRenderGridChanged(bool)));
+ connect(light, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableLight(bool)));
+ connect(materials, SIGNAL(signalToggled(bool)), this, SLOT(slotEnableMaterials(bool)));
+
+ BoPUICameraWidget* camera = new BoPUICameraWidget(this);
+ camera->setCamera(mCamera);
+ connect(this, SIGNAL(signalCameraChanged()), camera, SLOT(slotUpdateFromCamera()));
+
+ BoPUIPushButton* defaults = new BoPUIPushButton(i18n("Reset Defaults"), this);
+ connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
+
+
+ BoPUIHLayout* hideLayout = new BoPUIHLayout(0, "hideLayout");
+ hideLayout->addWidget(hide);
+ hideLayout->addWidget(hideOthers);
+ hideLayout->addWidget(unhideAll);
+
+ BoPUIHLayout* placementLayout = new BoPUIHLayout(0, "placementLayout");
+ placementLayout->addWidget(placement);
+ placementLayout->addWidget(disallowPlacement);
+
+ BoPUIVLayout* layout = new BoPUIVLayout(0, "layout");
+ layout->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
+ layout->addSpacing(60); // distance from "mesh under cursor" text
+ layout->addWidget(fovy);
+ layout->addWidget(frame);
+ layout->addWidget(lod);
+ layout->addSpacing(20);
+ layout->addLayout(hideLayout);
+ layout->addSpacing(20);
+ layout->addLayout(placementLayout);
+ layout->addWidget(wireframe);
+ layout->addWidget(construction);
+ layout->addWidget(axis);
+ layout->addWidget(grid);
+ layout->addWidget(light);
+ layout->addWidget(materials);
+ layout->addSpacing(50);
+ layout->addWidget(camera);
+ layout->addWidget(defaults);
+
+ mPUILayout->addLayout(layout);
+ mPUILayout->doLayout();
 }
 
 void ModelPreview::setFont(const BoFontInfo& font)
@@ -235,6 +330,8 @@ void ModelPreview::resizeGL(int w, int h)
  glLoadIdentity();
  gluPerspective(mFovY, (float)w / (float)h, NEAR, FAR);
  glMatrixMode(GL_MODELVIEW);
+
+ mPUILayout->doLayout();
 }
 
 void ModelPreview::paintGL()
@@ -274,6 +371,8 @@ void ModelPreview::paintGL()
  glDisable(GL_DEPTH_TEST);
 
  renderText();
+ puSetWindow(winId());
+ puDisplay();
 }
 
 void ModelPreview::renderAxii()
@@ -490,6 +589,8 @@ void ModelPreview::renderText()
 {
  BO_CHECK_NULL_RET(mDefaultFont);
 
+ glColor3f(0.0, 0.0, 0.0);
+
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
  glLoadIdentity();
@@ -607,8 +708,10 @@ void ModelPreview::setModel(BosonModel* model)
 {
  mModel = model;
  if (mModel) {
-	emit signalMaxFramesChanged(mModel->frames() - 1);
-	emit signalMaxLODChanged(mModel->lodCount() - 1);
+	emit signalMaxFramesChanged((int)(mModel->frames() - 1));
+	emit signalMaxFramesChanged((float)(mModel->frames() - 1));
+	emit signalMaxLODChanged((int)(mModel->lodCount() - 1));
+	emit signalMaxLODChanged((float)(mModel->lodCount() - 1));
  }
 }
 
@@ -766,6 +869,26 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
+ puSetWindow(winId());
+ int puButton;
+ switch (e->button()) {
+	case QMouseEvent::LeftButton:
+		puButton = PU_LEFT_BUTTON;
+		break;
+	case QMouseEvent::RightButton:
+		puButton = PU_RIGHT_BUTTON;
+		break;
+	case QMouseEvent::MidButton:
+		puButton = PU_MIDDLE_BUTTON;
+		break;
+	default:
+		puButton = PU_NOBUTTON;
+		break;
+ }
+ if (puMouse(puButton, PU_DOWN, e->x(), e->y())) {
+	e->accept();
+	return;
+ }
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		break;
@@ -779,6 +902,26 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
 
 void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
+ puSetWindow(winId());
+ int puButton;
+ switch (e->button()) {
+	case QMouseEvent::LeftButton:
+		puButton = PU_LEFT_BUTTON;
+		break;
+	case QMouseEvent::RightButton:
+		puButton = PU_RIGHT_BUTTON;
+		break;
+	case QMouseEvent::MidButton:
+		puButton = PU_MIDDLE_BUTTON;
+		break;
+	default:
+		puButton = PU_NOBUTTON;
+		break;
+ }
+ if (puMouse(puButton, PU_UP, e->x(), e->y())) {
+	e->accept();
+	return;
+ }
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		selectMesh(mMeshUnderMouse);
@@ -798,6 +941,8 @@ void ModelPreview::selectMesh(int mesh)
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
+ puSetWindow(winId());
+ puMouse(e->x(), e->y());
  mMouseMoveDiff->moveEvent(e);
  if (e->state() & LeftButton) {
  } else if (e->state() & RightButton) {
@@ -858,11 +1003,33 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
  updateCamera(eye, lookAt, up);
 }
 
+void ModelPreview::keyPressEvent(QKeyEvent* e)
+{
+ puSetWindow(winId());
+ if (puKeyboard(e->ascii(), PU_DOWN)) {
+	e->accept();
+ } else {
+	BosonGLWidget::keyPressEvent(e);
+ }
+}
+
+void ModelPreview::keyReleaseEvent(QKeyEvent* e)
+{
+ puSetWindow(winId());
+ if (puKeyboard(e->ascii(), PU_UP)) {
+	e->accept();
+ } else {
+	BosonGLWidget::keyReleaseEvent(e);
+ }
+}
+
+
 void ModelPreview::slotFrameChanged(int f)
 {
  if (f != 0) {
 	if (!mModel || f < 0) {
-		emit signalFrameChanged(0);
+		emit signalFrameChanged((int)0);
+		emit signalFrameChanged((float)0.0f);
 		return;
 	}
 	int frames = 0;
@@ -872,7 +1039,8 @@ void ModelPreview::slotFrameChanged(int f)
 		frames = mModel->frames();
 	}
 	if (f >= frames) {
-		emit signalFrameChanged(frames - 1);
+		emit signalFrameChanged((int)(frames - 1));
+		emit signalFrameChanged((float)(frames - 1));
 		return;
 	}
   }
@@ -883,11 +1051,13 @@ void ModelPreview::slotLODChanged(int l)
 {
  if (l != 0) {
 	if (!mModel || l < 0) {
-		emit signalLODChanged(0);
+		emit signalLODChanged((int)0);
+		emit signalLODChanged((float)0.0f);
 		return;
 	}
 	if ((unsigned int)l + 1 > mModel->lodCount()) {
-		emit signalLODChanged(mModel->lodCount() - 1);
+		emit signalLODChanged((int)(mModel->lodCount() - 1));
+		emit signalLODChanged((float)(mModel->lodCount() - 1));
 		return;
 	}
   }
@@ -982,6 +1152,7 @@ void ModelPreview::slotHideUnSelectedMeshes()
 
 void ModelPreview::slotUnHideAllMeshes()
 {
+ boDebug() << k_funcinfo << endl;
  if (!haveModel()) {
 	return;
  }
@@ -993,6 +1164,16 @@ void ModelPreview::slotUnHideAllMeshes()
  for (unsigned int i = 0; i < f->meshCount(); i++) {
 	hideMesh(i, false);
  }
+}
+
+void ModelPreview::slotEnableLight(bool e)
+{
+ boConfig->setUseLight(e);
+}
+
+void ModelPreview::slotEnableMaterials(bool e)
+{
+ boConfig->setUseMaterials(e);
 }
 
 
@@ -1012,41 +1193,17 @@ RenderMain::RenderMain()
  QWidget* w = new QWidget(this);
  QHBoxLayout* layout = new QHBoxLayout(w);
 
- mConfig = new PreviewConfig(w);
- layout->addWidget(mConfig, 0);
- mConfig->show();
  mPreview = new ModelPreview(w);
  layout->addWidget(mPreview, 1);
  mPreview->show();
 
- connect(mPreview, SIGNAL(signalCameraChanged()), mConfig, SLOT(slotCameraChanged()));
- mConfig->setCamera(mPreview->camera());
-
  mPreview->initGL();
- mLightWidget = new BoLightCameraWidget(0, true);
+ mLightWidget = new BoLightCameraWidget1(0, true);
  mLightWidget->hide();
  mLightWidget->setLight(mPreview->light(), mPreview->context());
 
  mMaterialWidget = new BoMaterialWidget(0);
  mMaterialWidget->hide();
-
-
- connectBoth(mConfig, mPreview, SIGNAL(signalFovYChanged(float)), SLOT(slotFovYChanged(float)));
- connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
- connectBoth(mConfig, mPreview, SIGNAL(signalLODChanged(int)), SLOT(slotLODChanged(int)));
- connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
- connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
- connect(mPreview, SIGNAL(signalMaxLODChanged(int)), mConfig, SLOT(slotMaxLODChanged(int)));
- connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
- connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
- connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
- connect(mConfig, SIGNAL(signalConstructionChanged(bool)), mPreview, SLOT(slotConstructionChanged(bool)));
- connect(mConfig, SIGNAL(signalRenderAxisChanged(bool)), mPreview, SLOT(slotRenderAxisChanged(bool)));
- connect(mConfig, SIGNAL(signalRenderGridChanged(bool)), mPreview, SLOT(slotRenderGridChanged(bool)));
- connect(mConfig, SIGNAL(signalHideMesh()), mPreview, SLOT(slotHideSelectedMesh()));
- connect(mConfig, SIGNAL(signalHideOthers()), mPreview, SLOT(slotHideUnSelectedMeshes()));
- connect(mConfig, SIGNAL(signalUnHideAll()), mPreview, SLOT(slotUnHideAllMeshes()));
- connect(mPreview, SIGNAL(signalMeshSelected(int)), mConfig, SLOT(slotMeshSelected(int)));
 
 
  mPreview->slotResetView();
@@ -1146,7 +1303,6 @@ bool RenderMain::loadCamera(KCmdLineArgs* args)
  quat.matrix().toGluLookAt(&lookAt, &up, cameraPos);
 
  mPreview->camera()->setGluLookAt(cameraPos, lookAt, up);
- mConfig->slotCameraChanged();
 
  return true;
 }
@@ -1498,7 +1654,7 @@ void RenderMain::uncheckAllBut(KAction* action)
 	KAction* a = (KAction*)it.currentKey();
 	if (a == action) {
 		continue;
- }
+	}
 	if (!a->isA("KSelectAction")) {
 		continue;
 	}
@@ -1563,127 +1719,6 @@ void RenderMain::slotChangeFont()
 	mPreview->setFont(f);
 	boConfig->setStringValue("GLFont", mPreview->fontInfo().toString());
  }
-}
-
-PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
-{
- bool slider = false; // FIXME: there seems to be a bug with the slider. when you slide between e.g. -1.0->0.0 or so then there seem to be recursive setValue() calls which block the UI for some seconds
- QVBoxLayout* topLayout = new QVBoxLayout(this);
- mFovY = new KMyFloatNumInput(this);
- mFovY->setRange(MIN_FOVY, MAX_FOVY, 1.0, slider);
- connect(mFovY, SIGNAL(valueChanged(float)), this, SIGNAL(signalFovYChanged(float)));
- mFovY->setLabel(i18n("FovY"));
- topLayout->addWidget(mFovY);
- topLayout->addStretch(1);
-
- mFrame = new KIntNumInput(this);
- mFrame->setLabel(i18n("Frame"));
- mFrame->setRange(0, 0);
- connect(mFrame, SIGNAL(valueChanged(int)), this, SIGNAL(signalFrameChanged(int)));
- topLayout->addWidget(mFrame);
- topLayout->addStretch(1);
-
- mLOD = new KIntNumInput(this);
- mLOD->setLabel(i18n("LOD"));
- mLOD->setRange(0, 0);
- connect(mLOD, SIGNAL(valueChanged(int)), this, SIGNAL(signalLODChanged(int)));
- topLayout->addWidget(mLOD);
- topLayout->addStretch(1);
-
- QHBox* hideBox = new QHBox(this);
- mHideMesh = new QPushButton(i18n("Hide"), hideBox);
- mHideMesh->setEnabled(false);
- mHideOthers = new QPushButton(i18n("Hide others"), hideBox);
- mHideOthers->setEnabled(false);
- mUnHideAll = new QPushButton(i18n("UnHide all"), hideBox);
- connect(mHideMesh, SIGNAL(clicked()), this, SIGNAL(signalHideMesh()));
- connect(mHideOthers, SIGNAL(clicked()), this, SIGNAL(signalHideOthers()));
- connect(mUnHideAll, SIGNAL(clicked()), this, SIGNAL(signalUnHideAll()));
- topLayout->addWidget(hideBox);
- topLayout->addStretch(1);
-
- QWidget* placement = new QWidget(this);
- QHBoxLayout* placementLayout = new QHBoxLayout(placement);
- mPlacementPreview = new QCheckBox(i18n("Show placement preview"), placement);
- connect(mPlacementPreview, SIGNAL(toggled(bool)), this, SIGNAL(signalPlacementPreviewChanged(bool)));
- placementLayout->addWidget(mPlacementPreview);
- mDisallowPlacement = new QCheckBox(i18n("Disallow placement"), placement);
- connect(mDisallowPlacement, SIGNAL(toggled(bool)), this, SIGNAL(signalDisallowPlacementChanged(bool)));
- placementLayout->addWidget(mDisallowPlacement);
- topLayout->addWidget(placement);
-
- mWireFrame = new QCheckBox(i18n("Show wireframe"), this);
- connect(mWireFrame, SIGNAL(toggled(bool)), this, SIGNAL(signalWireFrameChanged(bool)));
- topLayout->addWidget(mWireFrame);
-
- mConstruction = new QCheckBox(i18n("Show construction"), this);
- connect(mConstruction, SIGNAL(toggled(bool)), this, SIGNAL(signalConstructionChanged(bool)));
- topLayout->addWidget(mConstruction);
-
- mRenderAxis = new QCheckBox(i18n("Render axis"), this);
- connect(mRenderAxis, SIGNAL(toggled(bool)), this, SIGNAL(signalRenderAxisChanged(bool)));
- topLayout->addWidget(mRenderAxis);
-
- mRenderGrid = new QCheckBox(i18n("Render grid"), this);
- connect(mRenderGrid, SIGNAL(toggled(bool)), this, SIGNAL(signalRenderGridChanged(bool)));
- topLayout->addWidget(mRenderGrid);
-
- mEnableLight = new QCheckBox(i18n("Enable Light"), this);
- connect(mEnableLight, SIGNAL(toggled(bool)), this, SLOT(slotEnableLightChanged(bool)));
- topLayout->addWidget(mEnableLight);
- mEnableLight->setChecked(BORENDER_DEFAULT_LIGHT_ENABLED);
- slotEnableLightChanged(mEnableLight->isChecked());
-
- mEnableMaterials = new QCheckBox(i18n("Enable Materials"), this);
- connect(mEnableMaterials, SIGNAL(toggled(bool)), this, SLOT(slotEnableMaterialsChanged(bool)));
- topLayout->addWidget(mEnableMaterials);
- mEnableMaterials->setChecked(BORENDER_DEFAULT_MATERIALS_ENABLED);
- slotEnableMaterialsChanged(mEnableMaterials->isChecked());
-
- mCameraWidget = new BoCameraWidget(this, "bocamerawidget");
- topLayout->addWidget(mCameraWidget);
- mCameraWidget->show();
-
- QPushButton* defaults = new QPushButton(i18n("Reset Defaults"), this);
- connect(defaults, SIGNAL(clicked()), this, SIGNAL(signalResetDefaults()));
- topLayout->addStretch(1);
- topLayout->addSpacing(10);
- topLayout->addWidget(defaults);
-}
-
-PreviewConfig::~PreviewConfig()
-{
-}
-
-void PreviewConfig::setCamera(BoCamera* camera)
-{
- mCameraWidget->setCamera(camera);
-}
-
-void PreviewConfig::slotCameraChanged()
-{
- mCameraWidget->slotUpdateFromCamera();
-}
-
-void PreviewConfig::slotMeshSelected(int mesh)
-{
- if (mesh < 0) {
-	mHideMesh->setEnabled(false);
-	mHideOthers->setEnabled(false);
- } else {
-	mHideMesh->setEnabled(true);
-	mHideOthers->setEnabled(true);
- }
-}
-
-void PreviewConfig::slotEnableLightChanged(bool e)
-{
- boConfig->setUseLight(e);
-}
-
-void PreviewConfig::slotEnableMaterialsChanged(bool e)
-{
- boConfig->setUseMaterials(e);
 }
 
 int main(int argc, char **argv)

@@ -130,7 +130,7 @@ public:
 
 	bool mGrabMovie;
 
-	BoLightCameraWidget* mLightWidget;
+	BoLightCameraWidget1* mLightWidget;
 };
 
 BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
@@ -835,7 +835,7 @@ void BoDisplayManager::slotShowLight0Widget()
 	return;
  }
  delete d->mLightWidget;
- d->mLightWidget = new BoLightCameraWidget(0, true);
+ d->mLightWidget = new BoLightCameraWidget1(0, true);
  d->mLightWidget->show();
  d->mLightWidget->setLight(d->mActiveDisplay->light(0), d->mActiveDisplay->context());
 }

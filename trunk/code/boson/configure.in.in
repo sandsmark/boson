@@ -247,4 +247,77 @@ XRRConfigSizes(conf, &count);
 ])
 AC_BOSON_CHECK_XRANDR
 
+AC_DEFUN([AC_CHECK_PLIB_HEADERS],
+[
+  dnl We require at least 1.8.3 - note that previous version will never be
+  dnl supported, as I don't want _any_ dependency on glut (due to licensing
+  dnl reasons)
+  AC_MSG_CHECKING([for plib headers])
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_TRY_COMPILE([
+#include <plib/ul.h>
+	],
+	[],
+	bo_have_plib="yes",
+	bo_have_plib="no"
+  )
+  if test "x$bo_have_plib" != "xyes" ; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([plib/ul.h was not found. Install the plib development files - see http://plib.sf.net])
+  fi
+  AC_TRY_COMPILE([
+#include <plib/ul.h>
+	],
+	[
+#if PLIB_VERSION < (1*100 + 8*10 + 3)
+#error Installed plib version too old. Require at least 1.8.3
+#endif
+	],
+	bo_have_plib="yes",
+	bo_have_plib="no"
+  )
+
+  if test "x$bo_have_plib" != "xyes" ; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([plib version too old. Install more recent plib development files - see http://plib.sf.net])
+  else
+	AC_MSG_RESULT([$bo_have_plib])
+  fi
+  AC_LANG_RESTORE
+])
+AC_CHECK_PLIB_HEADERS
+
+AC_DEFUN([AC_CHECK_PLIB_LIBS],
+[
+  AC_MSG_CHECKING([for plib libraries])
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  bo_save_ldflags="$LDFLAGS"
+  bo_save_cxxflags="$CXXFLAGS"
+  LIB_PLIB="-lplibul -lplibpu -lplibfnt -lplibpuaux -lplibsg"
+  LDFLAGS="$LDFLAGS $LIB_PLIB -lGL"
+  CXXFLAGS="$CFLAGS $X_INCLUDES"
+  bo_have_plib=""
+  AC_TRY_LINK(
+	[
+#include <plib/ul.h>
+	], [
+ulClock c;
+	],
+	[bo_have_plib="yes"],
+	[bo_have_plib="no"]
+  )
+  if test "x$bo_have_plib" != "xyes" ; then
+	AC_MSG_RESULT([no])
+	AC_MSG_ERROR([linking to plib libraries failed. Install the plib libraries - see http://plib.sf.net])
+  else
+	AC_MSG_RESULT([$bo_have_plib])
+  fi
+  AC_LANG_RESTORE
+  LDFLAGS="$bo_save_ldflags"
+  CXXFLAGS="$bo_save_cxxflags"
+  AC_SUBST(LIB_PLIB)
+])
+AC_CHECK_PLIB_LIBS
 

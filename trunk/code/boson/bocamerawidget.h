@@ -338,5 +338,286 @@ private:
 
 };
 
+class BosonGLWidgetLight;
+class BoPUILightCameraWidget;
+
+// AB: dummy class, dummy name. this is just a widget that contains a GL widget
+// which contains the actual BoPUILightCameraWidget.
+class BoLightCameraWidget1 : public QWidget
+{
+	Q_OBJECT
+public:
+	BoLightCameraWidget1(QWidget* parent = 0, bool showGlobalValues = false);
+	~BoLightCameraWidget1();
+
+	void setLight(BoLight* light, BoContext* context);
+
+private:
+	BosonGLWidgetLight* mWidget;
+	BoPUILightCameraWidget* mLightWidget;
+};
+
+#include "bopui/bopui.h"
+
+class BoPUICameraConfigWidgetBase;
+
+
+class BoPUICameraWidgetPrivate;
+class BoPUICameraWidget : public BoPUIWidget
+{
+	Q_OBJECT
+public:
+	BoPUICameraWidget(QObject* parent, const char* name = 0);
+	~BoPUICameraWidget();
+
+	void setCamera(BoCamera* camera);
+
+public slots:
+	void slotUpdateFromCamera();
+
+protected:
+	void addConfigWidget(const QString& name, BoPUICameraConfigWidgetBase* widget);
+
+
+private:
+	BoPUICameraWidgetPrivate* d;
+};
+
+class BoPUICameraConfigWidgetBase : public BoPUIWidget
+{
+	Q_OBJECT
+public:
+	BoPUICameraConfigWidgetBase(QObject* parent, const char* name = 0);
+	~BoPUICameraConfigWidgetBase()
+	{
+	}
+	virtual void setCamera(BoCamera* camera)
+	{
+		mCamera = camera;
+	}
+
+	bool updatesBlocked() const
+	{
+		return mUpdatesBlocked;
+	}
+
+	/**
+	 * @return The @ref BoCamera::CameraType value that is required by this
+	 * widget. Simply use @ref BoCamera::Camera if you have no special
+	 * requirements.
+	 **/
+	virtual int needCameraType() const = 0;
+
+	BoCamera* camera() const
+	{
+		return mCamera;
+	}
+
+	virtual void updateFromCamera() = 0;
+
+protected:
+	/**
+	 * If @p block is TRUE @ref updateFromCamera won't be called until you
+	 * call this function with @p block = FALSE again.
+	 *
+	 * You should use this when you emit @ref signalCameraChanged from your
+	 * implementation, unless you now exactly that no rounding errors will
+	 * influence you (you will never know that).
+	 **/
+	void blockUpdates(bool block)
+	{
+		mUpdatesBlocked = block;
+	}
+
+	void emitSignalCameraChanged()
+	{
+		blockUpdates(true);
+		emit signalCameraChanged();
+
+		// we want to update the matrix widget even if signals are
+		// blocked.
+		updateMatrixWidget();
+		blockUpdates(false);
+	}
+
+	/**
+	 * Update the matrix widget, if this widget has one. The matrix widget
+	 * is even updated if updates are blocked.
+	 **/
+	virtual void updateMatrixWidget() {}
+
+signals:
+	void signalCameraChanged();
+
+private:
+	BoCamera* mCamera;
+	bool mUpdatesBlocked;
+};
+
+
+class BoPUIGLUCameraWidgetPrivate;
+class BoPUIGLUCameraWidget : public BoPUICameraConfigWidgetBase
+{
+	Q_OBJECT
+public:
+	BoPUIGLUCameraWidget(QObject* parent, const char* name = 0);
+	~BoPUIGLUCameraWidget();
+
+	virtual int needCameraType() const;
+
+	virtual void updateFromCamera();
+
+protected slots:
+	void slotLookAtChanged();
+	void slotCameraPosChanged();
+	void slotUpChanged();
+
+protected:
+	virtual void updateMatrixWidget();
+
+private:
+	BoPUIGLUCameraWidgetPrivate* d;
+};
+
+class BoPUIPlainCameraWidgetPrivate;
+class BoPUIPlainCameraWidget : public BoPUICameraConfigWidgetBase
+{
+	Q_OBJECT
+public:
+	BoPUIPlainCameraWidget(QObject* parent, const char* name = 0);
+	~BoPUIPlainCameraWidget();
+
+	virtual int needCameraType() const;
+
+	/**
+	 * Warning: this is a complex method! It depends on a lot of maths!
+	 * There is most probably an easier way of doing this - one that is even
+	 * better and safer (concerning invalid values). But I considered this a
+	 * good opportunity to get some practice in OpenGL maths.
+	 *
+	 * This method takes the cameraPos, lookAt and up vectors from @ref
+	 * BoCamera and tries to convert it into angles for glRotate(). Every
+	 * glRotate() call is about one of the x-,y-,z-axis.
+	 **/
+	virtual void updateFromCamera();
+
+protected slots:
+	void slotCameraChanged();
+	void slotTranslateFirstChanged();
+	void slotShowMatricesChanged(bool show);
+
+protected:
+	virtual void updateMatrixWidget();
+
+	bool translateFirst() const;
+
+private:
+	BoPUIPlainCameraWidgetPrivate* d;
+};
+
+class BoPUIGameCameraWidgetPrivate;
+class BoPUIGameCameraWidget : public BoPUICameraConfigWidgetBase
+{
+	Q_OBJECT
+public:
+	BoPUIGameCameraWidget(QObject* parent, const char* name = 0);
+	~BoPUIGameCameraWidget();
+
+	virtual int needCameraType() const;
+	virtual void updateFromCamera();
+
+	BoGameCamera* gameCamera() const
+	{
+		return (BoGameCamera*)camera();
+	}
+
+protected slots:
+	void slotLookAtChanged();
+	void slotRotationChanged();
+	void slotRadiusChanged();
+
+	void slotToggleGameRestrictions();
+
+private:
+	BoPUIGameCameraWidgetPrivate* d;
+};
+
+
+class BoPUIOrbiterCameraWidgetPrivate;
+class BoPUIOrbiterCameraWidget : public BoPUICameraConfigWidgetBase
+{
+	Q_OBJECT
+public:
+	BoPUIOrbiterCameraWidget(QObject* parent, const char* name = 0);
+	~BoPUIOrbiterCameraWidget();
+
+	virtual void setCamera(BoCamera* camera);
+
+	virtual int needCameraType() const;
+
+	virtual void updateFromCamera();
+
+protected slots:
+	void slotCameraChanged();
+
+protected:
+	virtual void updateMatrixWidget();
+
+private:
+	BoPUIOrbiterCameraWidgetPrivate* d;
+};
+
+
+class BoPUILightCameraWidget : public BoPUIWidget
+{
+	Q_OBJECT
+public:
+	/**
+	 * @param showGlobalValues If TRUE this will allow you to edit the
+	 * global light values, i.e. the light model (see man glLightModel). You
+	 * should ensure that only one widget is allowed to modify the global
+	 * values, to avoid unsynchronized valus.
+	 **/
+	BoPUILightCameraWidget(QObject* parent = 0, bool showGlobalValues = false);
+	~BoPUILightCameraWidget();
+
+	void setLight(BoLight* light, BoContext* context);
+
+private slots:
+	void slotLightChanged();
+	void slotLightModelChanged();
+
+private:
+	BoLightCamera* mCamera;
+	BoPUICameraWidget* mCameraWidget;
+	BoLight* mLight;
+	BoContext* mContext;
+	bool mBlockLightChanges;
+	bool mShowGlobalValues;
+
+	BoPUICheckBox* mDirectional;
+	BoPUINumInput* mConstantAttenuation;
+	BoPUINumInput* mLinearAttenuation;
+	BoPUINumInput* mQuadraticAttenuation;
+	BoPUINumInput* mAmbientR;
+	BoPUINumInput* mAmbientG;
+	BoPUINumInput* mAmbientB;
+	BoPUINumInput* mAmbientA;
+	BoPUINumInput* mDiffuseR;
+	BoPUINumInput* mDiffuseG;
+	BoPUINumInput* mDiffuseB;
+	BoPUINumInput* mDiffuseA;
+	BoPUINumInput* mSpecularR;
+	BoPUINumInput* mSpecularG;
+	BoPUINumInput* mSpecularB;
+	BoPUINumInput* mSpecularA;
+
+	BoPUINumInput* mGlobalAmbientR;
+	BoPUINumInput* mGlobalAmbientG;
+	BoPUINumInput* mGlobalAmbientB;
+	BoPUINumInput* mGlobalAmbientA;
+
+};
+
 #endif
 

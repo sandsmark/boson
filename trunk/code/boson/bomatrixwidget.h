@@ -86,5 +86,50 @@ private:
 	int mPrecision;
 };
 
+#include "bopui/bopui.h"
+
+class BoPUIMatrixWidgetPrivate;
+class BoPUIMatrixWidget : public BoPUIWidget
+{
+	Q_OBJECT
+public:
+	BoPUIMatrixWidget(QObject* parent = 0, const char* name = 0);
+	~BoPUIMatrixWidget();
+
+	void setMatrix(const BoMatrix* m);
+	void setMatrix(const BoMatrix& m);
+	void setMatrix(Lib3dsMatrix m);
+	void setIdentity();
+	void clear();
+
+	const BoMatrix& matrix() const;
+
+	void mark(unsigned int i);
+	void unmark(unsigned int i);
+
+	void setPrecision(int prec = 6) { mPrecision = prec; }
+	int precision() const { return mPrecision; }
+
+	/**
+	 * Compare the of this widget matrix with @p matrix and @ref mark all
+	 * elements, that don't match.
+	 *
+	 * @param diff The maximal differences that is treated as "equal". A
+	 * perfect match happens rarely with floating point numbers, so using
+	 * 0.0f is usually a bad idea.
+	 **/
+	bool compareMatrices(const BoMatrix& matrix, float diff = 0.001f);
+
+	/**
+	 * @overload
+	 * This will use the matrix of @p widget as 2nd matrix and @ref mark the
+	 * elements in both widgets.
+	 **/
+	bool compareMatrices(BoPUIMatrixWidget* widget, float diff = 0.001f);
+
+private:
+	BoPUIMatrixWidgetPrivate* d;
+	int mPrecision;
+};
 
 #endif
