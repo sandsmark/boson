@@ -15,3 +15,7 @@ subdirs
 config.cache
 config.log
 config.status
+autom4te.cache
+equivs
+fake_qt2_mt
+stamp-h1
