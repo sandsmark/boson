@@ -473,7 +473,7 @@ void BosonBigDisplayBase::paintGL()
 
  glEnable(GL_TEXTURE_2D);
  // hmm.. I don't want to enable the depth buffer for cell-drawing, but otherwise we seem to have some overlapping on scrolling
-// glEnable(GL_DEPTH_TEST); // if we enable this we need to change the z-positions of cells and/or units
+ glEnable(GL_DEPTH_TEST); // if we enable this we need to change the z-positions of cells and/or units
  if (!d->mMapDisplayList) {
 	generateMapDisplayList();
 	if (!d->mMapDisplayList) {
@@ -487,7 +487,7 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "cells rendered" << endl;
  }
 
- glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
+// glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  //wow.. we have a LOT of space for tuning here!
@@ -520,7 +520,9 @@ void BosonBigDisplayBase::paintGL()
 		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 		glPushMatrix();
-		glScalef(w, h, 1.0);
+		if (w != 1.0 || h != 1.0) {
+			glScalef(w, h, 1.0);
+		}
 		glCallList(item->selectBox()->displayList());
 		glPopMatrix();
 	}
