@@ -599,6 +599,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int radius) const
 {
+ radius -= 10;  // hack, but prevents nearby units from getting damaged in some conditions
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
  BoItemList l = collisions(QRect(
