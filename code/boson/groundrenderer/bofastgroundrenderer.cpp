@@ -130,6 +130,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 	}
 	glEnd();
  }
+ delete[] cellTextures;
 
  glDisable(GL_BLEND);
 }
