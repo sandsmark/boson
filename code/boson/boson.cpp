@@ -1646,11 +1646,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			stream >> height;
 			// note: cornerX == mapWidth() and cornerY == mapHeight()
 			// are valid!
-			if (cornerX < 0 || (unsigned int)(cornerX - 1) >= d->mCanvas->mapWidth()) {
+			if (cornerX < 0 || (unsigned int)cornerX > d->mCanvas->mapWidth()) {
 				boError() << k_funcinfo << "invalid x coordinate " << cornerX << endl;
 				continue;
 			}
-			if (cornerY < 0 || (unsigned int)(cornerY - 1) >= d->mCanvas->mapHeight()) {
+			if (cornerY < 0 || (unsigned int)cornerY > d->mCanvas->mapHeight()) {
 				boError() << k_funcinfo << "invalid y coordinate " << cornerY << endl;
 				continue;
 			}

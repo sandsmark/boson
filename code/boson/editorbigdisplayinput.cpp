@@ -333,13 +333,13 @@ bool EditorBigDisplayInput::actionChangeHeight(const BoVector3& canvasVector, bo
  int cornerX = 0;
  int cornerY = 0;
  // we need the corner that was clicked, not the cell!
- if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE) {
+ if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE / 2) {
 	// a right corner
 	cornerX = cellX + 1;
  } else {
 	cornerX = cellX;
  }
- if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE) {
+ if (((int)canvasVector.y()) % BO_TILE_SIZE >= BO_TILE_SIZE / 2) {
 	cornerY = cellY + 1;
  } else {
 	cornerY = cellY;
