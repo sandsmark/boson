@@ -425,6 +425,35 @@ public:
 	Q_UINT32 sender;
 	Q_UINT32 clientId;
 	unsigned int advanceCallsCount;
+	QTime mTime;
+
+	/**
+	 * Construct a new message. The tinmstamp is set to the current time.
+	 * @param _advanceCallsCount See @ref Boson::advanceCallsCount. This
+	 * parameter is optional as it is informational only (not an actual part
+	 * of the message, but handy for debugging/logging).
+	 **/
+	BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0)
+		: byteArray(_message),
+		msgid(msgid),
+		receiver(_receiver),
+		sender(_sender),
+		clientId(_clientId),
+		advanceCallsCount(_advanceCallsCount)
+	{
+		mTime = QTime::currentTime();
+	}
+
+	BoMessage(QDataStream& stream, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0)
+		: byteArray(((QBuffer*)stream.device())->readAll()),
+		msgid(msgid),
+		receiver(_receiver),
+		sender(_sender),
+		clientId(_clientId),
+		advanceCallsCount(_advanceCallsCount)
+	{
+		mTime = QTime::currentTime();
+	}
 
 	QString debug(KGame* game)
 	{
@@ -576,12 +605,7 @@ public:
 	bool processMessage(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 	{
 		if (mIsLocked || mDelayedWaiting) {
-			BoMessage* m = new BoMessage;
-			m->byteArray = ((QBuffer*)stream.device())->readAll();
-			m->msgid = msgid;
-			m->receiver = r;
-			m->sender = s;
-			m->clientId = clientId;
+			BoMessage* m = new BoMessage(stream, msgid, r, s, clientId);
 			boDebug() << k_funcinfo << "delayed " << m->debug(mBoson) << endl;
 			mDelayedMessages.enqueue(m);
 			mDelayedWaiting = true;
@@ -2048,13 +2072,7 @@ void Boson::slotReceiveAdvance()
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
  // Log message
- BoMessage* log = new BoMessage;
- log->byteArray = ((QBuffer*)stream.device())->buffer();
- log->msgid = msgid;
- log->receiver = r;
- log->sender = s;
- log->clientId = clientId;
- log->advanceCallsCount = advanceCallsCount();
+ BoMessage* log = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
  d->mMessageLogger.append(log);
 
  if (!d->mMessageDelayer->processMessage(stream, msgid, r, s, clientId)) {
