@@ -26,8 +26,7 @@
 
 #include "boaudiothread.h"
 #include "boaudiocommand.h"
-#include "bosonaudiointerface.h"
-#include "../boversion.h"
+#include "../boson/boversion.h"
 
 #include <stdlib.h>
 #include <unistd.h>
