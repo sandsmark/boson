@@ -26,6 +26,7 @@
 #include "unitproperties.h"
 #include "bosoncanvas.h"
 #include "bosonconfig.h"
+#include "bosonscenario.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -154,6 +155,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			if (unit->unitProperties()->isMobile()) {
 				unitsToMove.append(unit);
 			}
+		}
+		if (unitsToMove.count() == 0) {
+			kdWarning() << k_lineinfo << "no unit to move" << endl;
+			break;
 		}
 		if(mode == GroupMoveFollow) {
 			if(unitsToMove.count() == 1) {
@@ -817,32 +822,20 @@ Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
 
 Unit* Boson::addUnit(QDomElement& node, Player* p)
 {
- int unitType = node.attribute("UnitType").toInt();
- int x = node.attribute("x").toInt();
- int y = node.attribute("y").toInt();
+ int unitType = 0;
+ unsigned int x = 0;
+ unsigned int y = 0;
+ if (!BosonScenario::loadBasicUnit(node, unitType, x, y)) {
+	kdError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
+	return 0;
+ }
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
- if (node.hasAttribute("Health")) {
-	unit->setHealth(node.attribute("Health").toUInt());
- }
- if (node.hasAttribute("Armor")) {
-	unit->setArmor(node.attribute("Armor").toUInt());
- }
- if (node.hasAttribute("Shields")) {
-	unit->setShields(node.attribute("Shields").toUInt());
- }
- if (unit->isFacility()) {
-	Facility* fac = (Facility*)unit;
-	if (node.hasAttribute("ConstructionCompleted")) {
-		fac->setConstructionStep(fac->constructionSteps() - 1);
-	} else if (node.hasAttribute("ConstructionStep")) {
-		fac->setConstructionStep(node.attribute("ConstructionStep").toUInt());
-	}
- } else {
-	MobileUnit* mob = (MobileUnit*)unit;
-	if (node.hasAttribute("Speed")) {
-		((MobileUnit*)unit)->setSpeed(node.attribute("Speed").toDouble());
-	}
+ if (!BosonScenario::loadUnit(node, unit)) {
+	kdWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
+	// don't return - the error should be on every client so with some luck
+	// the player will never know that we had a problem here. Just a few
+	// (non-critical) values were not loaded.
  }
  
  emit signalAddUnit(unit, x, y);

@@ -22,9 +22,12 @@
 #include <qstring.h>
 #include <qptrlist.h>
 
-class UnitBase;
 class Boson;
 class Player;
+class UnitBase;
+class Unit;
+class Facility;
+class MobileUnit;
 
 class QStringList;
 class QIODevice;
@@ -42,37 +45,52 @@ public:
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 
+	/**
+	 * Load the scenario from node. 
+	 *
+	 * Note that this is not actually loaded, but should be fully parsed
+	 * only (errors are reported). Actually we copy the node to a local xml
+	 * document which is loaded in @ref startScenario.
+	 **/
 	bool loadScenario(QDomElement& node);
 
+	/**
+	 * Save the local xml document (i.e. the scenario) to root.
+	 **/
 	bool saveScenario(QDomElement& root);
 
+	/**
+	 * Clear the local xml document and apply the scenario that is
+	 * currently in boson.
+	 **/
 	void applyScenario(Boson* boson);
 	
 	/**
 	 * Add all available player units to the game, add minerals, ...
-	 *
-	 * This is like calling @ref initPlayer for all players 
-	 * (0..maxPlayers()).
 	 **/
 	void startScenario(Boson* boson);
 
 	bool isValid() const;
 
+
+
+	static bool saveUnit(QDomElement& node, Unit* unit);
+	static bool loadUnit(QDomElement& node, Unit* unit);
+
+	static bool saveBasicUnit(QDomElement& node, int unitType, unsigned int x, unsigned int y);
+	static bool loadBasicUnit(QDomElement& node, int& unitType, unsigned int& x, unsigned int& y);
+
+	static bool savePlayer(QDomElement& node, Player* p);
+	static bool loadPlayer(QDomElement& node, Player* p);
+
 protected:
-	/**
-	 * Add the units of this player to boson, add minerals, ... 
-	 *
-	 * See @ref Boson::slotSendAddUnit
-	 * @param player Player number. 0..maxPlayers() 
-	 **/
-	void initPlayer(Boson* boson, int playerNumber);
-
 	bool saveScenarioSettings(QDomElement&);
-	bool savePlayers(QDomElement&);
-
 	bool loadScenarioSettings(QDomElement&);
-	bool loadPlayers(QDomElement&);
-	bool loadPlayer(QDomElement&);
+
+	static bool saveFacility(QDomElement&, Facility*);
+	static bool loadFacility(QDomElement&, Facility*);
+	static bool saveMobile(QDomElement&, MobileUnit*);
+	static bool loadMobile(QDomElement&, MobileUnit*);
 
 private:
 	void init();
