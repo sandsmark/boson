@@ -36,8 +36,10 @@
 #include "bosoncanvasstatistics.h"
 #include "bodebug.h"
 #include "boson.h"
+#include "bosonpropertyxml.h"
 
 #include <klocale.h>
+#include <kgame/kgamepropertyhandler.h>
 
 #include <qpointarray.h>
 #include <qdatastream.h>
@@ -73,6 +75,8 @@ public:
 	{
 		mStatistics = 0;
 		mMap = 0;
+
+		mProperties = 0;
 	}
 	BosonCanvasStatistics* mStatistics;
 
@@ -90,6 +94,17 @@ public:
 	// another list (once slotAdvance() reaches its end)
 	QMap<int, QPtrList<BosonItem> > mWork2AdvanceList;
 	QPtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
+
+	KGamePropertyHandler* mProperties;
+
+	// AB: we _really_ need ulong here. for _very_ long games (maybe more
+	// than a few days playing without break and a lot of shots) we might
+	// even exceed that.
+	// at the moment we won't be able to have so long games and won't have
+	// _that_ big battles. in the future (if we maybe add even more items)
+	// we might use unsigned long long for this.
+	// but for now we are safe.
+	KGameProperty<unsigned long int> mNextItemId;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -106,6 +121,10 @@ void BosonCanvas::init()
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
  d->mStatistics = new BosonCanvasStatistics(this);
+ d->mProperties = new KGamePropertyHandler(this);
+ d->mNextItemId.registerData(IdNextItemId, d->mProperties,
+		KGamePropertyBase::PolicyLocal, "NextItemId");
+ d->mNextItemId.setLocal(0);
 }
 
 BosonCanvas::~BosonCanvas()
@@ -133,6 +152,7 @@ void BosonCanvas::quitGame()
 	(*it).clear();
  }
  d->mChangeAdvanceList.clear();
+ d->mNextItemId = 0;
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -1069,6 +1089,16 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		itemCount++;
 	}
  }
+ QDomElement handler = root.namedItem("DataHandler").toElement();
+ if (handler.isNull()) {
+	boError() << k_funcinfo << "DataHandler not found" << endl;
+	return false;
+ }
+ BosonPropertyXML propertyXML;
+ if (!propertyXML.loadFromXML(handler, d->mProperties)) {
+	boError() << k_funcinfo << "unable to load the datahandler" << endl;
+	return false;
+ }
  boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
  return true;
 }
@@ -1185,11 +1215,10 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 		}
 	}
 	if (id == 0) {
-		id = boGame->nextUnitId();
+		id = nextItemId();
 	}
 
 	// FIXME: I think we should move addUnit() to bosoncanvas.
-	// probably do the same with signalAddUnit() and nextUnitId().
 	//
 	// AB: TODO: createNewUnit() - which includes owner->addUnit()
 	// AB: maybe drop create_New_Item completely and move all it does to
@@ -1281,6 +1310,13 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	}
 	items.appendChild(item);
  }
+
+ BosonPropertyXML propertyXML;
+ QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+ if (!propertyXML.saveAsXML(handler, d->mProperties)) {
+	boError() << k_funcinfo << "unable to save the datahandler" << endl;
+	return false;
+ }
  return true;
 }
 
@@ -1347,7 +1383,7 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
 
 BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& type, const BoVector3& pos)
 {
- BosonItem* item = createItem(rtti, owner, type, pos, boGame->nextUnitId());
+ BosonItem* item = createItem(rtti, owner, type, pos, nextItemId());
  if (!item) {
 	return 0;
  }
@@ -1508,4 +1544,10 @@ BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, un
  return s;
 }
 
+unsigned long int BosonCanvas::nextItemId()
+{
+ // note that per definition 0 is an invalid item ID!
+ d->mNextItemId = d->mNextItemId + 1;
+ return d->mNextItemId;
+}
 

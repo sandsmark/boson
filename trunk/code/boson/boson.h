@@ -49,7 +49,6 @@ public:
 	enum PropertyIds {
 		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h> - better: KGamePropertyBase::IdUser+...
 		IdGamePaused = 10001,
-		IdNextUnitId = 10005,
 		IdAdvanceCount = 10010,
 		IdAdvanceFlag = 10011,
 		IdAdvanceCallsCount = 10020
@@ -260,8 +259,6 @@ public:
 	 **/
 	void startScenario(BosonStarting*);
 
-
-	unsigned long int nextUnitId();
 
 public: // small KGame extenstions for boson
 	/**

@@ -56,6 +56,14 @@ public:
 	bool saveAsXML(QDomElement& root, const KGamePropertyHandler* dataHandler);
 	bool loadFromXML(const QDomElement& root, KGamePropertyHandler* dataHandler);
 
+	static QString propertyValue(const QDomElement& root, unsigned long int id);
+
+	/**
+	 * @return TRUE when the property got removed, FALSE if it does not
+	 * exist at all.
+	 **/
+	static bool removeProperty(QDomElement& root, unsigned long int id);
+
 signals:
 	/**
 	 * The type of the value for @ref propertyValue is unknwon, so this

@@ -35,6 +35,8 @@
 
 #include <klocale.h>
 
+#include <qpair.h>
+
 UnitPlugin::UnitPlugin(Unit* unit)
 {
  mUnit = unit;

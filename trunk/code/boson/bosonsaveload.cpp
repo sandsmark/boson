@@ -337,6 +337,9 @@ QString BosonSaveLoad::saveKGameAsXML()
 	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
 	return QString::null;
  }
+ // IdGameStatus must _not_ be saved. it must remain in Init state when loading,
+ // until loading is completed.
+ propertyXML.removeProperty(handler, KGamePropertyBase::IdGameStatus);
  root.appendChild(handler);
 
  // here we could add additional data for the Boson object.
@@ -635,6 +638,9 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  if (!loadVersionFromXML(kgameXML)) {
 	return false;
  }
+ if (!loadKGameFromXML(kgameXML)) {
+	return false;
+ }
 
  // we may need to fix these issues:
  // KGame::loadgame() also loads KGame::d->mUniquePlayerNumber !!
@@ -668,12 +674,6 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  // Load canvas (items - i.e. units and shots)
  if (!loadCanvasFromXML(canvasXML)) {
 	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
-	return false;
- }
-
- // _first_ load canvas, _then_ kgame.xml - nextUnitId must be loaded after all
- // units have been loaded
- if (!loadKGameFromXML(kgameXML)) {
 	return false;
  }
 
@@ -726,7 +726,6 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 	return false;
  }
  QDomElement root = doc.documentElement();
- bool ok = false;
 
  // load the datahandler
  QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
@@ -737,26 +736,13 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 	return false;
  }
  BosonCustomPropertyXML propertyXML;
+ propertyXML.removeProperty(handler, KGamePropertyBase::IdGameStatus); // just in case - should not be there at all
  if (!propertyXML.loadFromXML(handler, d->mBoson->dataHandler())) {
 	boError() << k_funcinfo << "unable to load KGame data handler" << endl;
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Error while loading DataHandler of kgame.xml"));
 	d->mLoadingStatus = InvalidXML;
 	return false;
  }
-#warning dont load gamestatus!
- // FIXME: the property handler also loads KGame::gameStatus(), but it must
- // remain in Init state until we completed loading!
- // this is a workaround for this problem:
- {
-	// set gameStatus to Init. Will be set to Run later
-	QByteArray b;
-	QDataStream s(b, IO_WriteOnly);
-	KGameMessage::createPropertyHeader(s, KGamePropertyBase::IdGameStatus);
-	s << (int)KGame::Init;
-	QDataStream readStream(b, IO_ReadOnly);
-	d->mBoson->dataHandler()->processMessage(readStream, d->mBoson->dataHandler()->id(), false);
- }
-
  return true;
 }
 
