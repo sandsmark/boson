@@ -24,7 +24,7 @@
 class Player;
 class Unit;
 class Facility;
-class QCanvas;
+class BosonCanvas;
 class QDomElement;
 class BosonPlayField;
 
@@ -55,8 +55,8 @@ public:
 	Boson(QObject* parent, const QString& fileName);
 	~Boson();
 
-	void setCanvas(QCanvas*);
-	void setMap(BosonPlayField*);
+	void setCanvas(BosonCanvas*);
+	void setPlayField(BosonPlayField*);
 
 	void setLocalPlayer(Player*);
 	Player* localPlayer();
@@ -109,6 +109,7 @@ public:
 
 	virtual bool save(QDataStream& stream, bool saveplayers = true);
 	virtual bool load(QDataStream& stream, bool reset = true);
+	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
 	LoadingStatus loadingStatus();
 
