@@ -123,7 +123,7 @@ void bosonCanvas::unHideFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
-	assert(m.who < nb_player);
+	assert(m.who < (uint) nb_player);
 	f = facility.find(m.key);
 	if (f) f->doShow();
 	else logf(LOG_ERROR, "bosonCanvas::unHideFix : can't find m.key");
@@ -136,7 +136,7 @@ void bosonCanvas::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
-	assert(m.who < nb_player);
+	assert(m.who < (uint) nb_player);
 
 	f = new playerFacility(&m);
 	facility.insert(m.key, f);
