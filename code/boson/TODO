@@ -89,6 +89,8 @@ General TODOs
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
+- support different hotspot for different cursor mode (attack,move,...) but
+  *not* for different frames in a single frame
 
 Data TODOs
 - sound for minimap activated/deactivated

@@ -291,12 +291,14 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 
 BosonBigDisplayBase::~BosonBigDisplayBase()
 {
+ kdDebug() << k_funcinfo << endl;
  quitGame();
  delete mSelection;
  delete d->mChat;
 // delete d->mUnitTips;
  delete d->mDefaultFont;
  delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonBigDisplayBase::init()
