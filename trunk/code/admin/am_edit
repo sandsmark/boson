@@ -1766,8 +1766,8 @@ sub tag_BOSONDOCFILES ()
         }
         $lines .= "\n$htmlfile: \$(top_srcdir)/doc/$kdelang/includes $wmlfile\n";
         $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n";
-        $lines .= "\t  PERLLIB=\"\$\$PERLLIB:\$(top_srcdir)/doc/$kdelang\" \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
-        $lines .= "\t  echo PERLLIB=\"\$\$PERLLIB:\$(top_srcdir)/doc/$kdelang\" \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\t  PERLLIB=\"\$\$PERLLIB:\$(top_srcdir)/doc/$kdelang\" TOP_SRCDIR=\"\$(top_srcdir)\" \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+	$lines .= "\t  echo TOP_SRCDIR=\"\$(top_srcdir)\" PERLLIB=\"\$\$PERLLIB:\$(top_srcdir)/doc/$kdelang\" \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
         $lines .= "\tfi\n";
         $lines .= "\n";
     }
