@@ -11,13 +11,11 @@ Editor (map, unit, scenario) TODOs
 - unit editor (should be quite easy cause of config files) - mostly done
 - unit editor: check if images are in the directory, provide possibility to copy
   them
-- add hidden.*.bmp to data files
 
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done
 - selection rect is not working correctly if zooming in
-- rename Unit->UnitBase ; VisualUnit->Unit
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)
 - bosoncommandframe: a qgridlayout with a orderbutton count of (16?) - must be dividable by 3. the
@@ -30,3 +28,4 @@ General TODOs
 Data TODOs
 - replace .bmp files by .png ones
 - fix the pixmap naming: file.00nn.bmp -> file-00nn.png
+- add hidden.*.bmp to data files
