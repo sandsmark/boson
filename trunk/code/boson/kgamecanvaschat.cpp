@@ -74,11 +74,11 @@ void KGameCanvasChat::setChat(KGameChat* chat)
  if (!d->mChat) {
 	return;
  }
+#ifndef BETA1
  if (!d->mChat->game()) {
 	kdError() << k_funcinfo << "oops! the chat widget has no KGame!" << endl;
 	return;
  }
-#ifndef BETA1
  setKGame(d->mChat->game());
 #endif
 }
