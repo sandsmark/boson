@@ -700,6 +700,8 @@ void BosonWidgetBase::initKActions()
 		this, SLOT(slotSetDebugFPS(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
+ (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
+		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
 
 
  KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
@@ -1141,6 +1143,9 @@ void BosonWidgetBase::slotRunScriptLine(const QString& line)
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
 {
+ BosonProfiler p(901);
+ d->mScript->advance();
+ boDebug() << k_funcinfo << "Took " << p.stop() << " us" << endl;
 }
 
 void BosonWidgetBase::initScripts()
@@ -1160,5 +1165,12 @@ void BosonWidgetBase::initScripts()
  // Init script for local player
  d->mScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
  // No script will be loaded
+ d->mScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
+ d->mScript->init();
+}
+
+void BosonWidgetBase::slotDumpGameLog()
+{
+ boGame->saveGameLogs("boson");
 }
 

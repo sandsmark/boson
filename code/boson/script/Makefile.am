@@ -9,4 +9,4 @@ libbosonscript_la_SOURCES = bosonscript.cpp pythonscript.cpp
 METASOURCES = AUTO
 
 scriptsdir = $(kde_datadir)/boson/scripts
-scripts_DATA = boson-script.py utils.py
+scripts_DATA = boson-script.py localplayer-script.py utils.py
