@@ -20,7 +20,7 @@
 
 
 /*****  Variables  *****/
-$filename="story-20021108.php";
+$filename="story-20030331.php";
 $basedir="../";
 
 /*****  Some includes  *****/
