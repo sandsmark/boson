@@ -31,6 +31,60 @@ class BoVector3;
 
 class QRect;
 
+/**
+ * Contains statistics about the most recently rendered frame
+ **/
+class BoGroundRendererStatistics
+{
+public:
+	BoGroundRendererStatistics()
+	{
+		clear();
+	}
+	~BoGroundRendererStatistics()
+	{
+	}
+
+	void clear()
+	{
+		mRenderedCells = 0;
+		mRenderedQuads = 0;
+		mUsedTextures = 0;
+	}
+
+	QString statisticsData() const;
+
+	void setRenderedCells(unsigned int c)
+	{
+		mRenderedCells = c;
+	}
+	void setRenderedQuads(unsigned int q)
+	{
+		mRenderedQuads = q;
+	}
+	void setUsedTextures(unsigned int t)
+	{
+		mUsedTextures = t;
+	}
+
+	unsigned int renderedCells() const
+	{
+		return mRenderedCells;
+	}
+	unsigned int renderedQuads() const
+	{
+		return mRenderedQuads;
+	}
+	unsigned int usedTextures() const
+	{
+		return mUsedTextures;
+	}
+private:
+	unsigned int mRenderedCells;
+	unsigned int mRenderedQuads;
+	unsigned int mUsedTextures;
+};
+
 class BoGroundRenderer : public QObject
 {
 	Q_OBJECT
@@ -104,6 +158,11 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map) = 0;
 
+	QString statisticsData() const;
+	BoGroundRendererStatistics* statistics() const
+	{
+		return mStatistics;
+	}
 
 protected:
 	/**
@@ -175,6 +234,7 @@ private:
 	const int* mViewport;
 	const float* mViewFrustum;
 	class PlayerIO* mLocalPlayerIO;
+	BoGroundRendererStatistics* mStatistics;
 
 	//AB: we should use a float* here which can be used as vertex array. we
 	//should store x,y,z and texture x,y there. for this we need to have

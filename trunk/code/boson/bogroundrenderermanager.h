@@ -104,6 +104,8 @@ public:
 		unsetCurrentPlugin();
 	}
 
+	QString currentStatisticsData() const;
+
 protected:
 	BoGroundRenderer* createRenderer(const QString& name);
 

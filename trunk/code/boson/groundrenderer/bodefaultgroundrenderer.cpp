@@ -65,13 +65,21 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  // Maybe it should be set back to GL_LESS later?
  glDepthFunc(GL_LEQUAL);
 
+ unsigned int usedTextures = 0;
+ unsigned int renderedQuads = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	if (i == 1) {
 		glEnable(GL_BLEND);
 	}
 	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i));
-	renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
+	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
+	if (quads != 0) {
+		usedTextures++;
+	}
+	renderedQuads += quads;
  }
+ statistics()->setRenderedQuads(renderedQuads);
+ statistics()->setUsedTextures(usedTextures);
 
  if (boConfig->enableColormap()) {
 	glPushAttrib(GL_ENABLE_BIT);
@@ -85,15 +93,14 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  glDisable(GL_BLEND);
 }
 
-extern unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
-
-void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
+unsigned int BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
 {
  // Texture offsets
  const int offsetCount = 5;
  const float offset = 1.0f / (float)offsetCount;
  const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };  // texOffsets[x] = offset * x
 
+ unsigned int renderedQuads = 0;
  glBegin(GL_QUADS);
 
  for (int i = 0; i < count; i++) {
@@ -151,11 +158,13 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	glNormal3fv(normalMap + (y * cornersWidth + (x + 1)) * 3);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
-	glstat_terrain_faces++;
-	glstat_terrain_vertices += 4;
+
+	renderedQuads++;
  }
  glEnd();
  BoMaterial::setDefaultAlpha(1.0f);
+
+ return renderedQuads;
 }
 
 void BoDefaultGroundRenderer::renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap)
@@ -194,8 +203,6 @@ void BoDefaultGroundRenderer::renderCellColors(Cell** cells, int count, int widt
 
 	glColor4ub(color[0], color[1], color[2], alpha);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight + 0.05);
-	glstat_terrain_faces++;
-	glstat_terrain_vertices += 4;
  }
  glEnd();
 }

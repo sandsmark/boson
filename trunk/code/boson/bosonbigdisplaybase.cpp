@@ -96,9 +96,6 @@
 #include <GL/glext.h>
 #endif
 
-unsigned int glstat_terrain_faces, glstat_terrain_vertices;
-
-
 /**
  * @return A string that displays @p plane. The plane consists of a normal
  * vector in the first 3 numbers and the distance from the origin in the 4th
@@ -713,7 +710,6 @@ void BosonBigDisplayBase::paintGL()
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
  d->mRenderedParticles = 0;
- glstat_terrain_faces = glstat_terrain_vertices = 0;
 
  glColor3ub(255, 255, 255);
 
@@ -1433,9 +1429,11 @@ void BosonBigDisplayBase::renderText()
  if (boConfig->debugRenderCounts()) {
 	QString text;
 	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
-	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
-	text += i18n("  Faces/Vertices (cells): %1/%2\n").arg(glstat_terrain_faces).arg(glstat_terrain_vertices);
 	text += i18n("Particles rendered: %1").arg(d->mRenderedParticles);
+	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+
+	text = i18n("Ground renderer statistics:\n");
+	text += BoGroundRendererManager::manager()->currentStatisticsData();
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
 	text = i18n("Mesh renderer statistics:\n");

@@ -48,11 +48,14 @@ BoGroundRenderer::BoGroundRenderer()
  mRenderCells = 0;
  mRenderCellsSize = 0;
  mRenderCellsCount = 0;
+
+ mStatistics = new BoGroundRendererStatistics();
 }
 
 BoGroundRenderer::~BoGroundRenderer()
 {
  delete[] mRenderCells;
+ delete mStatistics;
 }
 
 void BoGroundRenderer::setRenderCells(Cell** renderCells, int renderCellsSize)
@@ -102,6 +105,7 @@ void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatr
 unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 {
  BO_CHECK_NULL_RET0(map);
+ BO_CHECK_NULL_RET0(statistics());
 
  if (renderCellsCount() == 0) {
 	// this happens either when we have to generate the list first or if no
@@ -116,6 +120,8 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  BO_CHECK_NULL_RET0(map);
  BO_CHECK_NULL_RET0(map->heightMap());
 
+ statistics()->clear();
+
  const float* heightMap = map->heightMap();
  int heightMapWidth = map->width() + 1;
 
@@ -129,6 +135,12 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  renderCellGrid(renderCells, cellsCount, heightMap, heightMapWidth);
 
  delete[] renderCells;
+
+ statistics()->setRenderedCells(cellsCount);
+ if (statistics()->renderedQuads() == 0) {
+	// fill only, if the renderer didn't do itself
+	statistics()->setRenderedQuads(cellsCount);
+ }
 
  return cellsCount;
 }
@@ -206,5 +218,22 @@ Cell** BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
  }
  *cells = cellsCount;
  return renderCells;
+}
+
+QString BoGroundRenderer::statisticsData() const
+{
+ if (!mStatistics) {
+	return i18n("No statistics available");
+ }
+ return mStatistics->statisticsData();
+}
+
+QString BoGroundRendererStatistics::statisticsData() const
+{
+ QString data = i18n("Cells rendered: %1 (quads: %2)").arg(renderedCells()).arg(renderedQuads());
+ if (renderedQuads() > 0 && usedTextures() > 0) {
+	data += i18n("\n Used Textures: %1").arg(usedTextures());
+ }
+ return data;
 }
 
