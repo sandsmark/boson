@@ -210,7 +210,7 @@ void EditorWidget::slotSavePlayFieldAs()
 	fileName += ".bpf";
  }
  if (info.exists()) {
-	int r = KMessageBox::warningContinueCancel(this, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
+	int r = KMessageBox::warningYesNoCancel(this, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
 	if (r != KMessageBox::Yes) {
 		return;
 	}
