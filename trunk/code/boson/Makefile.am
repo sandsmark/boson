@@ -68,6 +68,7 @@ libboson_la_SOURCES = \
 	bomatrixwidget.cpp \
 	bosonglminimap.cpp \
 	bosonglwidget.cpp \
+	bosonufoglwidget.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
 	bocamerawidget.cpp \

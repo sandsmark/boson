@@ -76,10 +76,10 @@
 #define BORENDER_DEFAULT_LIGHT_ENABLED true
 #define BORENDER_DEFAULT_MATERIALS_ENABLED true
 
+
 // TODO (libufo):
 // - find out whether a mouse event was taken and stop processing it in
 //   mouse*Event()
-
 
 
 static const char *description =
@@ -123,7 +123,8 @@ static KCmdLineOptions options[] =
 void postBosonConfigInit();
 
 
-ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent) : BosonGLWidget(parent)
+ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent)
+	: BosonUfoGLWidget(parent)
 {
  mSpecies = species;
  mUpdateTimer = new QTimer(this);
@@ -154,7 +155,6 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
 
  mCamera = new BoCamera;
  mLight = 0;
- mUfoManager = 0;
 
  mFovY = 60.0f;
 
@@ -236,15 +236,10 @@ void ModelPreview::initUfoGUI()
 	return;
  }
  initialized = true;
- if (mUfoManager) {
-	boError() << k_funcinfo << "UFO manager not NULL" << endl;
-	return;
- }
-
- mUfoManager = new BoUfoManager(width(), height());
+ initUfo();
 
  BoUfoVBox* topWidget = new BoUfoVBox();
- mUfoManager->contentWidget()->addWidget(topWidget);
+ ufoManager()->contentWidget()->addWidget(topWidget);
 
 
  mMeshUnderMouseLabel = new BoUfoLabel();
@@ -347,8 +342,8 @@ void ModelPreview::initUfoGUI()
 
 
 
- BoUfoActionCollection::initActionCollection(mUfoManager);
- BoUfoActionCollection* actionCollection = mUfoManager->actionCollection();
+ BoUfoActionCollection::initActionCollection(ufoManager());
+ BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
 
  BoUfoActionMenu* modelMenu = new BoUfoActionMenu(i18n("&Model"),
@@ -455,19 +450,12 @@ const BoFontInfo& ModelPreview::fontInfo() const
 
 void ModelPreview::resizeGL(int w, int h)
 {
- makeCurrent();
  glViewport(0, 0, w, h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
  gluPerspective(mFovY, (float)w / (float)h, NEAR, FAR);
  glMatrixMode(GL_MODELVIEW);
-
- if (mUfoManager) {
-	mUfoManager->postResizeEvent(width(), height());
-
-	// AB: is this necessary? if so then it should be in postResizeEvent() !
-	mUfoManager->contentWidget()->invalidate();
- }
+ BosonUfoGLWidget::resizeGL(w, h);
 }
 
 void ModelPreview::paintGL()
@@ -508,24 +496,13 @@ void ModelPreview::paintGL()
 
  renderText();
 
- if (mUfoManager) {
-	static int id = boProfiling->requestEventId("libufo-events");
-	static int idEvents = boProfiling->requestEventId("libufo-events");
-	static int idRendering = boProfiling->requestEventId("libufo-rendering");
-	BosonProfiler prof(-id);
-	BosonProfiler profEvents(-idEvents);
-	mUfoManager->dispatchEvents();
-	long int events = profEvents.elapsed();
-	BosonProfiler profRendering(-idRendering);
-	mUfoManager->render();
-	long int rendering = profRendering.elapsed();
+ if (ufoManager()) {
+	ufoManager()->dispatchEvents();
+	ufoManager()->render();
 
 	// AB: libufo resets our viewport, but doesn't fix it again
+	// FIXME: is this still required for current libufo?
 	glViewport(0, 0, width(), height());
-
-	long int total = prof.elapsed();
-
-//	boDebug() << k_funcinfo << "libufo took: " << total << " , events:" << events << " rendering: " << rendering << endl;
  }
 }
 
@@ -1064,9 +1041,7 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
-	mUfoManager->postMousePressEvent(e);
- }
+ BosonUfoGLWidget::mousePressEvent(e);
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		break;
@@ -1080,9 +1055,7 @@ void ModelPreview::mousePressEvent(QMouseEvent* e)
 
 void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
-	mUfoManager->postMouseReleaseEvent(e);
- }
+ BosonUfoGLWidget::mouseReleaseEvent(e);
  switch (e->button()) {
 	case QMouseEvent::LeftButton:
 		selectMesh(mMeshUnderMouse);
@@ -1103,9 +1076,7 @@ void ModelPreview::selectMesh(int mesh)
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
-	mUfoManager->postMouseMoveEvent(e);
- }
+ BosonUfoGLWidget::mouseMoveEvent(e);
  mMouseMoveDiff->moveEvent(e);
 
 
@@ -1147,9 +1118,7 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 void ModelPreview::wheelEvent(QWheelEvent* e)
 {
  BO_CHECK_NULL_RET(camera());
- if (mUfoManager) {
-	mUfoManager->postWheelEvent(e);
- }
+ BosonUfoGLWidget::wheelEvent(e);
  float delta = e->delta() / 120;
  if (e->orientation() == Horizontal) {
  } else {
@@ -1170,31 +1139,6 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
  lookAt.add(orientation * -delta);
  updateCamera(eye, lookAt, up);
 }
-
-void ModelPreview::keyPressEvent(QKeyEvent* e)
-{
- if (mUfoManager) {
-	mUfoManager->postKeyPressEvent(e);
- }
-//f (puKeyboard(e->ascii(), PU_DOWN)) {
-//	e->accept();
-// else {
-	BosonGLWidget::keyPressEvent(e);
-//
-}
-
-void ModelPreview::keyReleaseEvent(QKeyEvent* e)
-{
- if (mUfoManager) {
-	mUfoManager->postKeyReleaseEvent(e);
- }
-// if (puKeyboard(e->ascii(), PU_UP)) {
-//	e->accept();
-// } else {
-	BosonGLWidget::keyReleaseEvent(e);
-// }
-}
-
 
 void ModelPreview::slotFrameChanged(int f)
 {

@@ -26,7 +26,7 @@
 #include "bosonwidgets/bonuminput.h"
 #include "bomatrixwidget.h"
 #include "boorbiterwidget.h"
-#include "bosonglwidget.h" // BoContext
+#include "bosonufoglwidget.h"
 #include "bolight.h"
 
 #include <qlayout.h>
@@ -1280,12 +1280,12 @@ void BoUfoLightCameraWidget::slotLightModelChanged()
  }
 }
 
-class BosonGLWidgetLight : public BosonGLWidget
+
+class BosonGLWidgetLight : public BosonUfoGLWidget
 {
 public:
-	BosonGLWidgetLight(QWidget* parent) : BosonGLWidget(parent)
+	BosonGLWidgetLight(QWidget* parent) : BosonUfoGLWidget(parent)
 	{
-		mUfoManager = 0;
 		mTopWidget = 0;
 
 		setMouseTracking(true);
@@ -1303,16 +1303,9 @@ public:
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3ub(255, 255, 255);
-		if (mUfoManager) {
-			mUfoManager->dispatchEvents();
-			mUfoManager->render();
-		}
-	}
-	virtual void makeCurrent()
-	{
-		BosonGLWidget::makeCurrent();
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
+		if (ufoManager()) {
+			ufoManager()->dispatchEvents();
+			ufoManager()->render();
 		}
 	}
 
@@ -1339,79 +1332,11 @@ protected:
 		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-		mUfoManager = new BoUfoManager(width(), height());
-		mTopWidget = mUfoManager->contentWidget();
+		initUfo();
+		mTopWidget = ufoManager()->contentWidget();
 //		mTopWidget->setLayoutClass(BoUfoWidget::UVBoxLayout);
 		recursive = false;
 	}
-	virtual void resizeGL(int w, int h)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postResizeEvent(width(), height());
-
-			// FIXME is this required? if so do it in
-			// postResizeEvent()
-			mUfoManager->contentWidget()->invalidate();
-		}
-		repaint(false);
-	}
-
-	virtual void mousePressEvent(QMouseEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postMousePressEvent(e);
-		}
-		repaint(false);
-	}
-	virtual void mouseReleaseEvent(QMouseEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postMouseReleaseEvent(e);
-		}
-		repaint(false);
-	}
-	virtual void mouseMoveEvent(QMouseEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postMouseMoveEvent(e);
-		}
-		repaint(false);
-	}
-	virtual void wheelEvent(QWheelEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postWheelEvent(e);
-		}
-		repaint(false);
-	}
-	virtual void keyPressEvent(QKeyEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postKeyPressEvent(e);
-		}
-		BosonGLWidget::keyPressEvent(e);
-		e->ignore();
-		repaint(false);
-	}
-	virtual void keyReleaseEvent(QKeyEvent* e)
-	{
-		if (mUfoManager) {
-			mUfoManager->makeContextCurrent();
-			mUfoManager->postKeyReleaseEvent(e);
-		}
-		BosonGLWidget::keyPressEvent(e);
-		e->ignore();
-		repaint(false);
-	}
-
-private:
-	BoUfoManager* mUfoManager;
 };
 
 BoLightCameraWidget1::BoLightCameraWidget1(QWidget* parent, bool showGlobalValues)
