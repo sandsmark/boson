@@ -37,8 +37,7 @@ class editorBigDisplay : public visualBigDisplay
 public:
 	editorBigDisplay(visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
-protected:
-	virtual void mousePressEvent(QMouseEvent *e);
+	virtual void actionClicked(int, int);		// selecting, moving...
 
 private slots:
 	void setCell(int);

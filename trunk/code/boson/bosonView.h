@@ -30,8 +30,6 @@ class bosonView : public visualView
 public:
 	bosonView(visualField *, QObject *parent=0, const char *name=0L);
 
-	/* from display classes */
-	void leftClicked(int, int);		// selecting, moving...
 	/* to handle orderButton 'clicked' event */
 	void u_goto(void);
 };

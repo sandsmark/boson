@@ -180,3 +180,71 @@ void visualBigDisplay::unSelectAll(void)
 }
 
 
+void visualBigDisplay::mousePressEvent(QMouseEvent *e)
+{
+	int x, y;
+	
+	
+	x = e->x();
+	y = e->y();
+	
+	if (e->button() & MidButton) {
+		emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
+		return;
+		}
+
+	/* Now we transpose coo into the map referential */
+	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
+	
+	if (e->button() & LeftButton) {	
+		/* Control -> multiselection, else... */
+		if (! (e->state()&ControlButton)) {
+			unSelectAll();
+			}
+	
+		QwSpriteFieldGraphic *sfg = view->field->findUnitAt( x, y);
+
+		if (!sfg) {
+			// nothing has been found : it's a ground-click
+			// Here, we have to draw a "selection box"...
+			view->setSelectionMode( SELECT_RECT);
+			oldX = selectX = e->x();
+			oldY = selectY = e->y();
+			unSelectFix();
+			return;
+		}
+	
+	
+		if ( IS_MOBILE(sfg->rtti())) {
+			visualMobUnit *m = (visualMobUnit *) sfg;
+	
+			unSelectFix();
+			if ((e->state()&ControlButton) && view->mobSelected.find(m->key))
+				unSelectMob(m->key);
+			else
+				view->selectMob(m->key, m);
+
+			return;
+		}
+
+		if ( IS_FACILITY(sfg->rtti())) {
+			visualFacility *f = (visualFacility *) sfg;
+			unSelectAll();		// anyway 
+			view->selectFix(f);
+
+			return;
+		}
+
+		// should never be reached !
+		logf(LOG_ERROR, "visual/fieldEvent.c, unexpeted field->findUnitAt() result");
+	
+	} // LeftButton 
+
+	if (e->button() & RightButton) {
+		actionClicked( x, y);
+		return;
+		}
+	
+}
+
+
