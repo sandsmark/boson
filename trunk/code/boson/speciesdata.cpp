@@ -233,7 +233,7 @@ bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
 		}
 	}
 	if (!found) {
-		boError() << k_funcinfo << "Cannot find model file file for " << prop->typeId() << endl;
+		boError(260) << k_funcinfo << "Cannot find model file file for " << prop->typeId() << endl;
 		return false;
 	}
 
@@ -242,7 +242,7 @@ bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
 	if (m) {
 		d->mUnitModels.insert(prop->typeId(), m);
 	} else {
-		boError() << k_funcinfo << "NULL model created" << endl;
+		boError(260) << k_funcinfo << "NULL model created" << endl;
 		return false;
 	}
  }
@@ -288,7 +288,7 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 {
  TeamColorData* data = teamColorData(teamColor);
  if (!data) {
-	boError() << k_funcinfo << "NULL teamcolor data" << endl;
+	boError(260) << k_funcinfo << "NULL teamcolor data" << endl;
 	return false;
  }
  unsigned long int type = prop->typeId();
@@ -296,11 +296,11 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 
 // big overview
  if (data->mBigOverview[type]) {
-	boError() << k_funcinfo << "BigOverview of " << type << " already there" << endl;
+	boError(260) << k_funcinfo << "BigOverview of " << type << " already there" << endl;
  } else {
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-big.png", image)) {
-		boError() << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
+		boError(260) << k_funcinfo << "Can't load " << path + "overview-big.png" << endl;
 		image = QImage(100, 100, 32);
 		image.fill(Qt::red.rgb());
 	}
@@ -312,11 +312,11 @@ bool SpeciesData::loadUnitOverview(const UnitProperties* prop, const QColor& tea
 
 // small overview
  if (data->mSmallOverview[type]) {
-	boError() << k_funcinfo << "SmallOverview of " << type << " already there" << endl;
+	boError(260) << k_funcinfo << "SmallOverview of " << type << " already there" << endl;
  } else {
 	QImage image;
 	if (!loadUnitImage(teamColor, path + "overview-small.png", image)) {
-		boError() << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
+		boError(260) << k_funcinfo << "Can't load " << path + "overview-small.png" << endl;
 		image = QImage(50, 50, 32);
 		image.fill(Qt::red.rgb());
 	}
@@ -343,19 +343,19 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
  h = image.height();
 
  if (image.depth() != 32) {
-	boError() << k_funcinfo << fileName << "depth != 32" << endl;
+	boError(260) << k_funcinfo << fileName << "depth != 32" << endl;
  }
  if (w < 32) {
-	boError() << k_funcinfo << fileName << "w < 32" << endl;
+	boError(260) << k_funcinfo << fileName << "w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	boError() << k_funcinfo << fileName << "h < 32" << endl;
+	boError(260) << k_funcinfo << fileName << "h < 32" << endl;
 	return false;
  }
 
  if (image.isNull()) {
-	boError() << k_funcinfo << "NULL image" << endl;
+	boError(260) << k_funcinfo << "NULL image" << endl;
 	return false;
  }
 
@@ -369,7 +369,7 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
  }
 
  if (image.isNull() || w < 32 || h < 32)  {
-	boError() << k_funcinfo << "image is null" << endl;
+	boError(260) << k_funcinfo << "image is null" << endl;
 	return false;
  }
 
@@ -433,7 +433,7 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 {
  QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
  if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no objects.boson file found at " << fileName << endl;
+	boDebug(260) << k_funcinfo << "no objects.boson file found at " << fileName << endl;
 	// We assume that this theme has no objects and don't complain
 	return true;
  }
@@ -441,15 +441,15 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
  KSimpleConfig cfg(fileName);
  QStringList objects = cfg.groupList();
  if (objects.isEmpty()) {
-	boWarning() << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
+	boWarning(260) << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
 	return true;
  }
 
- boDebug() << k_funcinfo << "Loading " << objects.count()
+ boDebug(260) << k_funcinfo << "Loading " << objects.count()
 		<< " objects from config file" << endl;
  QStringList::Iterator it;
  for (it = objects.begin(); it != objects.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading object from group " << *it << endl;
+	boDebug(260) << k_funcinfo << "Loading object from group " << *it << endl;
 
 	cfg.setGroup(*it);
 
@@ -477,27 +477,27 @@ void SpeciesData::loadActions()
 
  QString fileName = themePath() + QString::fromLatin1("actions.boson");
  if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no actions.boson file found at " << fileName << endl;
+	boDebug(260) << k_funcinfo << "no actions.boson file found at " << fileName << endl;
 	return;
  }
 
  KSimpleConfig cfg(fileName);
  QStringList actions = cfg.groupList();
  if (actions.isEmpty()) {
-	boWarning() << k_funcinfo << "No actions found in objects file (" << fileName << ")" << endl;
+	boWarning(260) << k_funcinfo << "No actions found in objects file (" << fileName << ")" << endl;
 	return;
  }
 
- boDebug() << k_funcinfo << "Loading " << actions.count()
+ boDebug(260) << k_funcinfo << "Loading " << actions.count()
 		<< " actions from config file" << endl;
  QStringList::Iterator it;
  for (it = actions.begin(); it != actions.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading action from group " << *it << endl;
+	boDebug(260) << k_funcinfo << "Loading action from group " << *it << endl;
 	BoAction* action = new BoAction(&cfg, *it, this);
 	if (!d->mActions.find(action->id())) {
 		d->mActions.insert(action->id(), action);
 	} else {
-		boError() << k_funcinfo << "action with id " << action->id() << " already there!" << endl;
+		boError(260) << k_funcinfo << "action with id " << action->id() << " already there!" << endl;
 	}
  }
 }

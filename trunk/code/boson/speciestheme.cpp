@@ -215,29 +215,29 @@ bool SpeciesTheme::loadTechnologies()
 {
  QFile f(themePath() + "index.technologies");
  if(!f.exists()) {
-	boWarning() << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
+	boWarning(260) << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
 	// We assume that this theme has no technologies and still return true
 	return true;
  }
  KSimpleConfig cfg(f.name());
  QStringList techs = cfg.groupList();
  if(techs.isEmpty()) {
-	boWarning() << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
+	boWarning(260) << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
 	return true;
  }
  QStringList::Iterator it;
  for(it = techs.begin(); it != techs.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading upgrade from group " << *it << endl;
+	boDebug(260) << k_funcinfo << "Loading upgrade from group " << *it << endl;
 	UpgradeProperties* tech = new UpgradeProperties(this);
 	if (!tech->load(&cfg, *it)) {
-		boError() << k_funcinfo << *it << " could not be loaded" << endl;
+		boError(260) << k_funcinfo << *it << " could not be loaded" << endl;
 		delete tech;
 		continue;
 	}
 	if (!d->mTechnologies.find(tech->id())) {
 		d->mTechnologies.insert(tech->id(), tech);
 	} else {
-		boError() << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
+		boError(260) << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
 		delete tech;
 	}
  }
