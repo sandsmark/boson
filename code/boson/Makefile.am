@@ -84,9 +84,16 @@ boson_SOURCES = \
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
+		$(top_builddir)/boson/items/libbosonitems.la \
+		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
+		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
+		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lGLU -l3ds \
 		-lkio $(LIB_KDEUI)
 bounit_SOURCES = \
+		$(BOSON_SRC) \
 		bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
 
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
