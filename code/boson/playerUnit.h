@@ -104,7 +104,6 @@ private :
 /* moving */
 	int 		dest_x, dest_y;
 	state_t		asked;
-	int		present_dx, present_dy;
 	mobUnitState	asked_state;
 
 };
