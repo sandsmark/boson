@@ -19,9 +19,16 @@
 
 #include "bosoncommandwidget.h"
 
+#include "bosontiles.h"
+#include "unit.h"
+#include "player.h"
+#include "speciestheme.h"
+#include "unitproperties.h"
+
 #include <kprogress.h>
 #include <kpixmap.h>
 #include <kpixmapeffect.h>
+#include <klocale.h>
 
 #include <qpixmap.h>
 #include <qbitmap.h>
@@ -30,12 +37,6 @@
 #include <qlabel.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
-
-#include "bosontiles.h"
-#include "unit.h"
-#include "player.h"
-#include "speciestheme.h"
-#include "unitproperties.h"
 
 #include "bosoncommandwidget.moc"
 
@@ -224,7 +225,8 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 			<< endl;
 	return;
  }
- setToolTip(prop->name());
+ setToolTip(i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(
+			prop->mineralCost()).arg(prop->oilCost()));
  
  d->mUnitType = unitType;
  d->mOwner = owner;
