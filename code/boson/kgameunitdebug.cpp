@@ -95,6 +95,7 @@ public:
 		mBoson = 0;
 		mUnitList = 0;
 		mProperties = 0;
+		mWeaponProperties = 0;
 		mWaypoints = 0;
 		mProduction = 0;
 		mUnitsInRange = 0;
@@ -106,6 +107,7 @@ public:
 
 	KListView* mUnitList;
 	KListView* mProperties;
+	KListView* mWeaponProperties;
 	KListBox* mWaypoints;
 	KListView* mProduction;
 	KListView* mUnitsInRange;
@@ -161,7 +163,8 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  connect(d->mUnitList, SIGNAL(contextMenuRequested(QListViewItem*, const QPoint&, int)),
 		this, SLOT(slotUnitListMenu(QListViewItem*, const QPoint&, int)));
 
- QWidget* propertiesBox = new QWidget(splitter);
+ QSplitter* propertiesSplitter = new QSplitter(Vertical, splitter);
+ QWidget* propertiesBox = new QWidget(propertiesSplitter);
  QVBoxLayout* propertiesLayout = new QVBoxLayout(propertiesBox);
  QLabel* propertiesTitle = new QLabel(i18n("Properties"), propertiesBox);
  propertiesLayout->addWidget(propertiesTitle, 0);
@@ -171,6 +174,17 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mProperties->addColumn(i18n("Id"));
  d->mProperties->addColumn(i18n("Value"));
  propertiesLayout->addWidget(d->mProperties, 1);
+
+ QWidget* weaponPropertiesBox = new QWidget(propertiesSplitter);
+ QVBoxLayout* weaponPropertiesLayout = new QVBoxLayout(weaponPropertiesBox);
+ QLabel* weaponPropertiesTitle = new QLabel(i18n("Weapon Properties"), weaponPropertiesBox);
+ weaponPropertiesLayout->addWidget(weaponPropertiesTitle, 0);
+ d->mWeaponProperties = new KListView(weaponPropertiesBox);
+ d->mWeaponProperties->setAllColumnsShowFocus(true);
+ d->mWeaponProperties->addColumn(i18n("Property"));
+ d->mWeaponProperties->addColumn(i18n("Id"));
+ d->mWeaponProperties->addColumn(i18n("Value"));
+ weaponPropertiesLayout->addWidget(d->mWeaponProperties, 1);
 
  QVBox* vbox = new QVBox(splitter);
  QWidget* waypointBox = new QWidget(vbox);
@@ -225,6 +239,7 @@ KGameUnitDebug::~KGameUnitDebug()
  d->mUnits.clear();
  d->mItems.clear();
  d->mProperties->clear();
+ d->mWeaponProperties->clear();
  d->mWaypoints->clear();
  d->mProduction->clear();
  d->mUnitsInRange->clear();
@@ -245,6 +260,7 @@ void KGameUnitDebug::slotUpdate()
  d->mUnits.clear();
  d->mItems.clear();
  d->mProperties->clear();
+ d->mWeaponProperties->clear();
  d->mWaypoints->clear();
  d->mProduction->clear();
  d->mUnitsInRange->clear();
@@ -395,26 +411,48 @@ void KGameUnitDebug::slotUnitSelected(QListViewItem* item)
 void KGameUnitDebug::updateProperties(Unit* unit)
 {
  d->mProperties->clear();
+ d->mWeaponProperties->clear();
  if (!unit) {
 	return;
  }
 
- KGamePropertyHandler* dataHandler = unit->dataHandler();
  BosonCustomPropertyXML propertyXML;
- QIntDict<KGamePropertyBase>& dict = dataHandler->dict();
- QIntDictIterator<KGamePropertyBase> it(dict);
- while (it.current()) {
-	QString name = dataHandler->propertyName(it.current()->id());
-	QString id = QString::number(it.current()->id());
-	QString value = propertyXML.propertyValue(it.current());
-	QListViewItemNumber* item = new QListViewItemNumber(d->mProperties);
-	if (name.isEmpty()) {
-		name = i18n("Unknown");
+ {
+	KGamePropertyHandler* dataHandler = unit->dataHandler();
+	QIntDict<KGamePropertyBase>& dict = dataHandler->dict();
+	QIntDictIterator<KGamePropertyBase> it(dict);
+	while (it.current()) {
+		QString name = dataHandler->propertyName(it.current()->id());
+		QString id = QString::number(it.current()->id());
+		QString value = propertyXML.propertyValue(it.current());
+		QListViewItemNumber* item = new QListViewItemNumber(d->mProperties);
+		if (name.isEmpty()) {
+			name = i18n("Unknown");
+		}
+		item->setText(0, name);
+		item->setText(1, id);
+		item->setText(2, value);
+		++it;
 	}
-	item->setText(0, name);
-	item->setText(1, id);
-	item->setText(2, value);
-	++it;
+ }
+
+ {
+	KGamePropertyHandler* weaponDataHandler = unit->weaponDataHandler();
+	QIntDict<KGamePropertyBase>& dict = weaponDataHandler->dict();
+	QIntDictIterator<KGamePropertyBase> it(dict);
+	while (it.current()) {
+		QString name = weaponDataHandler->propertyName(it.current()->id());
+		QString id = QString::number(it.current()->id());
+		QString value = propertyXML.propertyValue(it.current());
+		QListViewItemNumber* item = new QListViewItemNumber(d->mWeaponProperties);
+		if (name.isEmpty()) {
+			name = i18n("Unknown");
+		}
+		item->setText(0, name);
+		item->setText(1, id);
+		item->setText(2, value);
+		++it;
+	}
  }
 }
 
