@@ -475,7 +475,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
 	boError() << k_funcinfo << "no root element found in kgame.xml" << endl;
 	return false;
  }
- kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION_0_9);
+ kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
  QCString kgameXML = kgameDoc.toCString();
 
  fileList.remove("map");
