@@ -83,15 +83,15 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+	virtual void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
 
 	// action*() methods family. These methods were previously integrated into
 	//  actionClicked(), but now it's broken into multiple methods
 	bool actionMine(QDataStream& stream, const QPoint& pos);
-	void actionMove(QDataStream& stream, const QPoint& pos);
+	bool actionMove(QDataStream& stream, const QPoint& pos);
 	bool actionBuild(QDataStream& stream, const QPoint& pos);
-	void actionAttack(QDataStream& stream, const QPoint& pos);
-	void actionRepair(QDataStream& stream, const QPoint& pos);
+	bool actionAttack(QDataStream& stream, const QPoint& pos);
+	bool actionRepair(QDataStream& stream, const QPoint& pos);
 	bool actionRefine(QDataStream& stream, const QPoint& pos);
 
 	virtual void updateCursor();

@@ -33,6 +33,7 @@ class KGameChat;
 class BosonCursor;
 class BoSelection;
 class BoAction;
+class BosonCanvas;
 
 class QLabel;
 
@@ -83,6 +84,8 @@ class BosonBigDisplayBase : public QCanvasView
 public:
 	BosonBigDisplayBase(QCanvas* c, QWidget* parent);
 	virtual ~BosonBigDisplayBase();
+
+	BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
 
 	/**
 	 * Remove the IO of any previously existing @ref localPlayer (if any)

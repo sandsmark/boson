@@ -93,40 +93,50 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 	return;
  }
 
- if(d->mLockCursor) {
-	if(d->mCursorType == CursorMove) {
-		if(selection()->hasMobileUnit()) {
-			actionMove(stream, action->pos());
-			send = true;
+ if (d->mLockCursor) {
+	switch (d->mCursorType) {
+		case CursorMove:
+			if (selection()->hasMobileUnit()) {
+				if (!actionMove(stream, action->pos())) {
+					return;
+				}
+				send = true;
+			}
+			break;
+		case CursorAttack:
+		{
+			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action->pos());
+			if (unit) {
+				if (!actionAttack(stream, action->pos())) {
+					return;
+				}
+				send = true;
+			}
+			break;
 		}
-	}
-	else if(d->mCursorType == CursorAttack) {
-		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action->pos());
-		if(unit) {
-			actionAttack(stream, action->pos());
-			send = true;
-		}
-	}
-	else {
-		kdError() << k_funcinfo << "Unknown cursortype for locked cursor: " << d->mCursorType << endl;
+		default:
+			kdError() << k_funcinfo << "Unknown cursortype for locked cursor: " << d->mCursorType << endl;
+			break;
 	}
 	d->mLockCursor = false;
 	return;
  }
 
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(action->pos());
+ Unit* unit = boCanvas()->findUnitAt(action->pos());
  if (!unit) {
 	if (selection()->hasMobileUnit()) { // move the selection to pos
 		if (selection()->count() == 1) {
 			// there are special things to do for a single selected unit
 			// (e.g. mining if the unit is a harvester)
-			if(actionMine(stream, action->pos())) {
+			if (actionMine(stream, action->pos())) {
 				send = true;
 				return;
 			}
 		}
 
-		actionMove(stream, action->pos());
+		if (!actionMove(stream, action->pos())) {
+			return;
+		}
 		send = true;
 	} else { // place constructions
 		// FIXME: another option: add the waypoint to the facility and
@@ -141,7 +151,9 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 	if ((localPlayer()->isEnemy(unit->owner()) || action->forceAttack()) &&
 			selection()->canShootAt(unit)) {
 		// attack the unit
-		actionAttack(stream, action->pos());
+		if (!actionAttack(stream, action->pos())) {
+			return;
+		}
 		send = true;
 
 	} else if (localPlayer()->isEnemy(unit->owner())) {
@@ -155,11 +167,10 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 			// (not yet implemented) //FIXME
 			// note that currently the unit can go to every friendly
 			// player, even non-local players
-			actionRepair(stream, action->pos());
+			if (!actionRepair(stream, action->pos())) {
+				return;
+			}
 			send = true;
-			// TODO:
-//			Unit* u = selection()->leader();
-//			boMusic->playSound(u, Unit::SoundOrderRepair);
 		} else if ((unit->unitProperties()->canRefineMinerals() &&
 				selection()->hasMineralHarvester()) ||
 				(unit->unitProperties()->canRefineOil() &&
@@ -169,9 +180,6 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				return;
 			}
 			send = true;
-			// TODO:
-//			Unit* u = selection()->leader();
-//			boMusic->playSound(u, Unit::SoundOrderRefine);
 		} else {
 			// selection and clicked unit both are friendly
 			// no repairyard and no refinery
@@ -194,7 +202,7 @@ bool BosonBigDisplay::actionMine(QDataStream& stream, const QPoint& pos)
  return false;
 }
 
-void BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& pos)
+bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& pos)
 {
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
@@ -216,6 +224,7 @@ void BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& pos)
  if (unit->owner() == localPlayer()) {
 	boMusic->playSound(unit, Unit::SoundOrderMove);
  }
+ return true;
 }
 
 bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& pos)
@@ -226,7 +235,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& pos)
 	return false;
  }
 
- if (!((BosonCanvas*)canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), pos, fac)) {
+ if (!(boCanvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), pos, fac)) {
 	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
@@ -240,9 +249,9 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& pos)
  return true;
 }
 
-void BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& pos)
+bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& pos)
 {
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+ Unit* unit = boCanvas()->findUnitAt(pos);
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
  // tell the clients we want to attack:
@@ -260,11 +269,12 @@ void BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& pos)
  if (u->owner() == localPlayer()) {
 	boMusic->playSound(u, Unit::SoundOrderAttack);
  }
+ return true;
 }
 
-void BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& pos)
+bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& pos)
 {
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+ Unit* unit = boCanvas()->findUnitAt(pos);
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
@@ -290,11 +300,15 @@ void BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& pos)
 	stream << (Q_ULONG)it.current()->id();
 	++it;
  }
+// TODO:
+// Unit* u = selection()->leader();
+// boMusic->playSound(u, Unit::SoundOrderRepair);
+ return true;
 }
 
 bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& pos)
 {
- Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+ Unit* unit = boCanvas()->findUnitAt(pos);
  bool minerals = unit->unitProperties()->canRefineMinerals();
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
@@ -325,6 +339,9 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& pos)
 	stream << (Q_ULONG)it.current()->id();
 	++it;
  }
+// TODO:
+// Unit* u = selection()->leader();
+// boMusic->playSound(u, Unit::SoundOrderRefine);
  return true;
 }
 
