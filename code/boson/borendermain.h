@@ -148,8 +148,6 @@ signals:
 	void signalMeshSelected(int);
 
 
-	void signalChangeVertexPointSize();
-	void signalChangeGridUnitSize();
 	void signalChangeBackgroundColor();
 	void signalShowLightWidget();
 	void signalShowMaterialsWidget();
@@ -211,9 +209,14 @@ public slots:
 	void slotEnableLight(bool);
 	void slotEnableMaterials(bool);
 	void slotShowVertexPoints(bool);
+	void slotChangeVertexPointSize();
+	void slotChangeGridUnitSize();
 
 	void slotUnitChanged(int);
 	void slotObjectChanged(int);
+
+	void slotSetVertexPointSize(int);
+	void slotSetGridUnitSize(float);
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -368,6 +371,8 @@ private:
 	BoLightCameraWidget1* mLightWidget;
 	BoMaterialWidget* mMaterialWidget;
 };
+
+
 
 #endif
 
