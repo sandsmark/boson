@@ -75,45 +75,47 @@ class BosonWeaponProperties : public PluginProperties
      * The damage this unit makes to other units. Negative values means
      * repairing
      **/
-    long int damage() const  { return mDamage; };
+    inline long int damage() const  { return mDamage; };
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    float damageRange() const  { return mDamageRange; };
+    inline float damageRange() const  { return mDamageRange; };
     /**
      * @return Full damage range of missile of this unit, e.g. range in what
      *  units will be damaged by damage value (farther they'll be damaged less)
      **/
-    float fullDamageRange() const  { return mFullDamageRange; };
+    inline float fullDamageRange() const  { return mFullDamageRange; };
     /**
      * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    float speed() const  { return mSpeed; };
+    inline float speed() const  { return mSpeed; };
     /**
      * @return Acceleration speed of missile of this unit
      **/
-    float accelerationSpeed() const  { return mAccelerationSpeed; };
+    inline float accelerationSpeed() const  { return mAccelerationSpeed; };
     /**
      * @return Filename of 3d model of shot of this weapon.
      * Only used in unit editor
      **/
-    QString modelFileName() const  { return mModelFileName; };
+    inline QString modelFileName() const  { return mModelFileName; };
     /**
      * @return Name of unit. You can show it to user
      **/
-    QString weaponName() const  { return mName; };
+    inline QString weaponName() const  { return mName; };
     /**
      * @return Offset of this weapon
      * Offset is relative to the center point of unit and is used when creating
      * new shot.
      **/
-    BoVector3 offset() const  { return mOffset;};
+    inline BoVector3 offset() const  { return mOffset; };
+
+    inline BosonShot::Type shotType() const  { return mShotType; };
     /**
      * @return Height of parable that shot of this weapon flies along
      * Note that this is height per cell, it should be multiplied by distance of
      * shot to get final height.
      **/
-    float height() const  { return mHeight; };
+    inline float height() const  { return mHeight; };
 
     inline BosonModel* model() const  { return mModel; };
 
@@ -136,6 +138,7 @@ class BosonWeaponProperties : public PluginProperties
      * @param pos Position (center point) of attacker. Note that offset is added to this value
      * @param target Position of shot's target point
      * @return Created shot. Note that it's not added to canvas.
+     * Note that pos or target may not be used depending on shot's type
      **/
     BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
@@ -189,6 +192,7 @@ class BosonWeaponProperties : public PluginProperties
     float mSpeed;
     float mAccelerationSpeed;
     float mHeight;
+    BosonShot::Type mShotType;
     BosonModel* mModel;
     QString mModelFileName;
     QString mName;

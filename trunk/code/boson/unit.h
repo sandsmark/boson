@@ -65,7 +65,6 @@ public:
 		IdSearchPath = UnitBase::IdLast + 8,
 
 		// properties in MobileUnit
-		IdSpeed = UnitBase::IdLast + 50,
 		IdMovingFailed = UnitBase::IdLast + 51,
 		IdPathRecalculated = UnitBase::IdLast + 52,
 		IdPathAge = UnitBase::IdLast + 53,
@@ -503,9 +502,6 @@ public:
 	 * turns to random direction and true, otherwise returns false.
 	 **/
 	bool checkWaypoint(const QPoint& wp);
-
-	virtual int rotationSpeed() const;
-	virtual void setRotationSpeed(int s);
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

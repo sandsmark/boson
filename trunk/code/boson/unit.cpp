@@ -172,7 +172,6 @@ void Unit::initStatic()
  addPropertyId(IdSearchPath, QString::fromLatin1("SearchPath"));
 
  // MobileUnit
- addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
  addPropertyId(IdMovingFailed, QString::fromLatin1("MovingFailed"));
  addPropertyId(IdPathRecalculated, QString::fromLatin1("PathRecalculated"));
  addPropertyId(IdPathAge, QString::fromLatin1("PathAge"));
@@ -467,7 +466,7 @@ bool Unit::attackEnemyUnitsInRange()
 		float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
-			if (QABS(rotation() - rot) > rotationSpeed()) {
+			if (QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
 				turnTo((int)rot);
 				setAdvanceWork(WorkTurn);
 				return true;
@@ -613,7 +612,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  if (isMobile()) {
 	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
-		if(QABS(rotation() - rot) > rotationSpeed()) {
+		if(QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
 			turnTo((int)rot);
 			setAdvanceWork(WorkTurn);
 			return;
@@ -675,13 +674,13 @@ void Unit::advanceTurn(unsigned int)
 	turncw = !turncw;
  }
 
- if (a <= rotationSpeed()) {
+ if (a <= unitProperties()->rotationSpeed()) {
 	dir = d->mWantedRotation;
  } else {
 	if (turncw) {
-		dir += rotationSpeed();
+		dir += unitProperties()->rotationSpeed();
 	} else {
-		dir -= rotationSpeed();
+		dir -= unitProperties()->rotationSpeed();
 	}
  }
  // Check for overflows
@@ -1740,6 +1739,16 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
 	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
+
+ bool ok;
+ float speed;
+ speed = root.attribute("Speed").toFloat(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+	return false;
+ }
+ setSpeed(speed);
+
  return true;
 }
 
@@ -1750,6 +1759,10 @@ bool MobileUnit::load(QDataStream& stream)
 	return false;
  }
 
+ float speed;
+ stream >> speed;
+ setSpeed(speed);
+
  return true;
 }
 
@@ -1759,6 +1772,9 @@ bool MobileUnit::saveAsXML(QDomElement& root)
 	boError() << k_funcinfo << "Unit not saved properly" << endl;
 	return false;
  }
+
+ root.setAttribute("Speed", speed());
+
  return true;
 }
 
@@ -1768,6 +1784,8 @@ bool MobileUnit::save(QDataStream& stream)
 	boError() << k_funcinfo << "Unit not saved properly" << endl;
 	return false;
  }
+
+ stream << speed();
 
  return true;
 }
@@ -1824,15 +1842,6 @@ bool MobileUnit::checkWaypoint(const QPoint& wp)
 	return true;
  }
  return false;
-}
-
-int MobileUnit::rotationSpeed() const
-{
- return int(maxSpeed() * 2);
-}
-
-void MobileUnit::setRotationSpeed(int s)
-{
 }
 
 

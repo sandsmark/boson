@@ -33,32 +33,34 @@ class BosonWeaponProperties;
 class QDomElement;
 
 
-/**
+/** @short Base class for shots
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonShot : public BosonItem
 {
   public:
+    enum Type { Bullet = 0, Missile, Explosion, Mine };
+
     /**
-     * @param prop The kind of weapon that fired this shot
      * @param owner The player that shot. This is usually @ref Unit::owner of
      * the unit that is attacking.
      * @param canvas The @ref BosonCanvas object
+     * @param prop The kind of weapon that fired this shot. Can be skipped
      **/
-    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target);
-    /**
-     * Constructs new BosonShot without initializing it.
-     * You should call @ref loadFromXML after it.
-     **/
-    BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas);
-
-//    inline BoVector3 pos()  { return mPos; }
+    BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop = 0);
 
     Player* owner() const { return mOwner; }
     inline const BosonWeaponProperties* properties() const  { return mProp; };
 
+    virtual long int damage() const;
+    virtual float damageRange() const;
+    virtual float fullDamageRange() const;
+
     inline bool isActive() const  { return mActive; };
+
     inline virtual int rtti() const  { return RTTI::Shot; }
+    inline virtual int type() const = 0;
 
     /**
      * A shot is always moving, so this does a permanent @ref
@@ -80,34 +82,134 @@ class BosonShot : public BosonItem
       advanceMoveCheck();
     }
 
-    void advanceMoveInternal();
-    void advanceMoveCheck();
-
-    bool saveAsXML(QDomElement& root);
-    bool loadFromXML(const QDomElement& root);
-    void save(QDataStream& stream);
-    void load(QDataStream& stream);
-
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
 
     virtual void explode();
 
   protected:
     virtual const QColor* teamColor() const;
 
+    inline void setActive(bool a)  { mActive = a; };
+    inline void setProperties(const BosonWeaponProperties* p)  { mProp = p; };
+
+    virtual void advanceMoveInternal() {};
+    virtual void advanceMoveCheck();
+
+    virtual void moveToTarget() {};
+
+  private:
+    bool mActive;
+    Player* mOwner;
+    const BosonWeaponProperties* mProp;
+};
+
+
+class BosonShotBullet : public BosonShot
+{
+  public:
+    BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 target);
+    BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+
+    // Bullets won't be saved becaused they will immediately "explode" and
+    //  become inactive
+    virtual bool saveAsXML(QDomElement&) { return true; };
+    virtual bool loadFromXML(const QDomElement&) { setActive(false); return true; };
+    virtual void save(QDataStream&) {};
+    virtual void load(QDataStream&) { setActive(false); };
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return 0; };
+
+    inline virtual int type() const { return BosonShot::Bullet; };
+
+  protected:
+    virtual void moveToTarget();
+
+  private:
+    BoVector3 mTarget;
+};
+
+
+class BosonShotMissile : public BosonShot
+{
+  public:
+    BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target);
+    BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
+
+    inline virtual int type() const { return BosonShot::Missile; };
+
+  protected:
+    virtual void advanceMoveInternal();
+
+    virtual void moveToTarget();
+
   private:
     BoVector3 mVelo;
     BoVector3 mTarget;
-    bool mActive;
     float mTotalDist;
     float mPassedDist;
     float mZ;
     float mParticleVelo;
     float mMaxHeight;
-    Player* mOwner;
-    const BosonWeaponProperties* mProp;
     QPtrList<BosonParticleSystem>* mFlyParticleSystems;
 };
+
+
+class BosonShotExplosion : public BosonShot
+{
+  public:
+    BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVector3 pos, long int damage, float damagerange, float fulldamagerange, int delay);
+    BosonShotExplosion(Player* owner, BosonCanvas* canvas);
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return 0; };
+
+    inline virtual int type() const { return BosonShot::Explosion; };
+
+    virtual long int damage() const  { return mDamage; };
+    virtual float damageRange() const  { return mDamageRange; };
+    virtual float fullDamageRange() const  { return mFullDamageRange; };
+
+  protected:
+    virtual void advanceMoveInternal();
+
+  private:
+    long int mDamage;
+    float mDamageRange;
+    float mFullDamageRange;
+    int mDelay;
+};
+
+/*
+class BosonShotMine : public BosonShot
+{
+  public:
+    BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target);
+    BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+
+    virtual bool saveAsXML(QDomElement& root);
+    virtual bool loadFromXML(const QDomElement& root);
+    virtual void save(QDataStream& stream);
+    virtual void load(QDataStream& stream);
+
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const;
+
+    inline virtual int type() const { return BosonShot::Mine; };
+};
+*/
 
 #endif // BOSONSHOT_H
 /*

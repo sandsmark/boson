@@ -200,6 +200,12 @@ public:
 	float decelerationSpeed() const;
 
 	/**
+	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
+	 * this is a facility. See @ref isFacility
+	 **/
+	float rotationSpeed() const;
+
+	/**
 	 * @return Whether this unit can go over land
 	 **/
 	bool canGoOnLand() const; // FIXME is there a shorter and better name?
@@ -386,6 +392,7 @@ protected:
 	void setSpeed(float speed);
 	void setAccelerationSpeed(float speed);
 	void setDecelerationSpeed(float speed);
+	void setRotationSpeed(float speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
 
