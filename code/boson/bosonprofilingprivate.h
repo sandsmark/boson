@@ -64,6 +64,35 @@ public:
 	{
 		mUnitCount = 0;
 	}
+	QValueList<unsigned long int> values() const
+	{
+		QValueList<unsigned long int> values;
+		values.append(mFunction.diff()); // MUST be the first entry!
+		values.append(mUnits.diff()); // MUST be the second entry!
+		values.append(mClear.diff());
+		values.append(mCells.diff());
+		values.append(mMissiles.diff());
+		values.append(mParticles.diff());
+		values.append(mFOW.diff());
+		values.append(mText.diff());
+		return values;
+	}
+	static QValueList<QString> names()
+	{
+		// note that count AND order must match count and order of
+		// values() exactly!
+		QValueList<QString> names;
+		names.append(i18n("Function"));
+		names.append(i18n("Units"));
+		names.append(i18n("Clearing"));
+		names.append(i18n("Cells"));
+		names.append(i18n("Missiles"));
+		names.append(i18n("Particles"));
+		names.append(i18n("FOW"));
+		names.append(i18n("Text"));
+		return names;
+	}
+
 	unsigned long int dFunction() const { return mFunction.diff(); }
 	unsigned long int dClear() const { return mClear.diff(); }
 	unsigned long int dCells() const { return mCells.diff(); }

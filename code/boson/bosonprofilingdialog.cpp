@@ -319,6 +319,21 @@ private:
 	QLabel* mGameSpeedLabel;
 };
 
+template<class T> class DelPointerArray
+{
+public:
+	DelPointerArray(T* p)
+	{
+		mPointer = p;
+	}
+	~DelPointerArray()
+	{
+		delete[] mPointer;
+	}
+	T* mPointer;
+};
+
+
 class BosonProfilingDialogPrivate
 {
 public:
@@ -587,40 +602,40 @@ void BosonProfilingDialog::resetRenderPage()
  d->mRenderSummary->clear();
  BosonProfilingPrivate* pd = d->data()->d;
  QPtrListIterator<RenderGLTimes> it(pd->mRenderTimes);
+ QValueList<QString> renderNames = RenderGLTimes::names();
+ unsigned long long* renderSums = new unsigned long long[renderNames.count()];
+ DelPointerArray<unsigned long long> delit(renderSums);
+ for (unsigned int i = 0; i < renderNames.count(); i++) {
+	renderSums[i] = 0;
+ }
+
+ int unitCount = 0;
  int i = 0;
- // average values:
- long int aClear = 0;
- long int aCells = 0;
- long int aUnits = 0;
- unsigned int aUnitCount = 0; // hmm average for this does not really make sense
- long int aMissiles = 0;
- long int aParticles = 0;
- long int aFOW = 0;
- long int aText = 0;
- unsigned long int aFunction = 0;
  for (; it.current(); ++it, i++) {
-	unsigned long int func = it.current()->dFunction();
+	QValueList<unsigned long int> values = it.current()->values();
+
+	unsigned long int func = values[0];
 	QListViewItemNumber* item = new QListViewItemNumber(d->mRender);
 	item->setText(0, QString::number(i));
-	initRenderItem(item, i18n("Function"), it.current()->dFunction(), func);
-	aFunction += it.current()->dFunction();
+	initRenderItem(item, renderNames[0], values[0], func);
 
-	initRenderItem(new QListViewItemNumber(item), i18n("Clearing"), it.current()->dClear(), func);
-	aClear += it.current()->dClear();
-	initRenderItem(new QListViewItemNumber(item), i18n("Cells"), it.current()->dCells(), func);
-	aCells += it.current()->dCells();
-	initRenderItem(new QListViewItemNumber(item), i18n("Units (%1)").arg(it.current()->mUnitCount), it.current()->dUnits(), func);
-	aUnitCount += it.current()->mUnitCount;
-	aUnits += it.current()->dUnits();
-	initRenderItem(new QListViewItemNumber(item), i18n("Missiles"), it.current()->dMissiles(), func);
-	aMissiles += it.current()->dMissiles();
-	initRenderItem(new QListViewItemNumber(item), i18n("Particles"), it.current()->dParticles(), func);
-	aParticles += it.current()->dParticles();
-	initRenderItem(new QListViewItemNumber(item), i18n("FOW"), it.current()->dFOW(), func);
-	aFOW += it.current()->dFOW();
-	initRenderItem(new QListViewItemNumber(item), i18n("Text"), it.current()->dText(), func);
-	aText += it.current()->dText();
-	item->setOpen(true);
+	renderSums[0] += values[0];
+	for (unsigned int i = 1; i < renderNames.count(); i++) {
+		QString name = renderNames[i];
+		if (i == 1) {
+			// the second entry is the unit value.
+			// here the unit count can be very useful
+			name = i18n("Units (%1)").arg(it.current()->mUnitCount);
+		}
+		renderSums[i] += values[i];
+
+		initRenderItem(new QListViewItemNumber(item),
+				name, values[i], func);
+
+	}
+	// for average and sum values we need to know how many units
+	// have been rendered
+	unitCount += it.current()->mUnitCount;
  }
 
  unsigned int count = pd->mRenderTimes.count();
@@ -630,18 +645,29 @@ void BosonProfilingDialog::resetRenderPage()
 	d->mRenderSummary->apply();
 	return;
  }
- unsigned long int func = aFunction / count;
+ unsigned long int func = renderSums[0] / count;
  QListViewItemNumber* average = new QListViewItemNumber(d->mRender);
  average->setText(0, i18n("Average - use with care"));
- initRenderItem(average, i18n("Function"), aFunction / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Clearing"), aClear / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Cells"), aCells / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Units (%1)").arg(aUnitCount / count), aUnits / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Missiles"), aMissiles / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Particles"), aParticles / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("FOW"), aFOW / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Text"), aText / count, func);
+ initRenderItem(average, renderNames[0], renderSums[0] / count, func);
+
+ QListViewItemNumber* sum = new QListViewItemNumber(d->mRender);
+ sum->setText(0, i18n("Sum"));
+ initRenderItem(sum, renderNames[0], renderSums[0], renderSums[0]);
+
+ for (unsigned int i = 1; i < renderNames.count(); i++) {
+	QString name = renderNames[i];
+	QString nameAverage = renderNames[i];
+	if (i == 1) {
+		name = i18n("Units (%1)").arg(unitCount);
+		nameAverage = i18n("Units (%1)").arg(unitCount / count);
+	}
+	initRenderItem(new QListViewItemNumber(average),
+			nameAverage, renderSums[i] / count, func);
+	initRenderItem(new QListViewItemNumber(sum),
+			name, renderSums[i], renderSums[0]);
+ }
  average->setOpen(true);
+ sum->setOpen(true);
 
 
  d->mRenderSummary->set(&pd->mRenderTimes.first()->mFunction.mData[0],
@@ -657,20 +683,6 @@ void BosonProfilingDialog::resetRenderPage()
 
 
 // ensure that an allocated pointer is really deleted when the function returns
-template<class T> class DelPointerArray
-{
-public:
-	DelPointerArray(T* p)
-	{
-		mPointer = p;
-	}
-	~DelPointerArray()
-	{
-		delete[] mPointer;
-	}
-	T* mPointer;
-};
-
 class ProfileSum
 {
 public:
