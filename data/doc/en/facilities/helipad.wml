@@ -1,4 +1,0 @@
-#include "facilities.wml" type="Facilities" name="Helipad" \
-        description="A Helipad is needed to build a <a href='samsite.html'>Sam-Site.</a>" \
-        name2="helipad" type2="fix" \
-        before_url="repairpad.html" before_text="Repair Pad" after_url="turret.html" after_text="Turret" up_url="index.html"

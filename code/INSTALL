@@ -1,36 +1,24 @@
 
-This is about how to install the *CVS* version of boson!
 
-Well.. basically, you need
 
-    code/
-    data/
-    tools/
+Well.. basically, you should do 
 
-from boson CVS.
-see
-
-    http://sourceforge.net/projects/boson
-
-for more info about how to get the CVS modules.
 
 Making the game :
 =================
+You shouldn't be root to make the game.
 
-You should _not_ be root to make the game.
+Type : "./configure; make"
 
-Enter the code dir (cd code) and link the admin/ dir from the tools dir:
-	ln -s ../tools/admin admin
-(you have to adjust the path if tools is not in ..)
-Remember to set $KDEDIR correctly before starting configure. On most systems 
-this should be /opt/kde or /opt/kde3. Some systems might use /usr though.. so on
-my system this would read:
-    export KDEDIR=/opt/kde3
-Configure the whole stuff by entering 'make -f Makefile.cvs && ./configure'
-    (try 'bash configure' if './configure' doesn't work)
-compile the game by typing 'make'
-    This step is the one that is long to finish
+If it ever complain about "./configure: Command not found", it means
+that you don't have it. Probably that you've downloaded a alpha version,
+usually not intended for end-user. You can still try to compile it, but you
+will need some program like "autoconf" or "automake".
 
+		=========================================
+				Try to do
+			make -f Makefile.orzel
+		=========================================
 
 Installing the game :
 =====================
@@ -38,21 +26,7 @@ You have to be _root_ to install it.
 type : "make install"
 
 
-Installing data :
-=================
-
-Data are in the CVS module "data/"
-
-Enter the data dir (cd data) and link the admin/ dir from the tools dir:
-	ln -s ../tools/admin admin
-(you have to adjust the path if tools is not in ..)
-Now do the same steps as above:
-	make -f Makefile.cvs && ./configure && make
-	make install
-The first line should be executed as user. The second line is probably executed
-as root - depends on your KDE installation (root is normal but mine isn't :-))
-
-Here follows the extended help about making/installing boson:
+Here follow the extended help about making/installing boson:
 
 
 Basic Installation

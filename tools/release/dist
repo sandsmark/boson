@@ -1,26 +1,25 @@
 #!/bin/bash
 
 BOSON_BASE="$HOME/kde/boson/release/head"
-BOSON_TOOLS="$BOSON_BASE/tools"
 BOSON_CODE="$BOSON_BASE/code"
 BOSON_DATA="$BOSON_BASE/data"
 BOSON_MUSIC="$BOSON_BASE/music"
 
-BOSON_RELEASE="BOSON_0_8_RELEASE"
+#BOSON_RELEASE="BOSON_0_6_1_RELEASE"
 
 # Configuration ends here
 
 BO_VERSION=$1
 DEST_BASE="$PWD/$BO_VERSION"
-DEST_ALL="$DEST_BASE/all/boson-all-$BO_VERSION"
-DEST_CODE="$DEST_BASE/code/boson-code-$BO_VERSION"
-DEST_DATA="$DEST_BASE/data/boson-data-$BO_VERSION"
-DEST_MUSIC="$DEST_BASE/music/boson-music-$BO_VERSION"
+DEST_ALL="$DEST_BASE/all/boson"
+DEST_CODE="$DEST_BASE/code/code"
+DEST_DATA="$DEST_BASE/data/data"
+DEST_MUSIC="$DEST_BASE/music/music"
 
 function clean_all()
 {
  echo "WARNING: this will do a"
- echo "      make -f $BOSON_TOOLS/admin/Makefile.common cvs-clean"
+ echo "      make -f $BOSON_CODE/admin/Makefile.common cvs-clean"
  echo "in the following directories:"
  for i in $BOSON_CODE $BOSON_DATA ; do
 	echo "$i"
@@ -31,7 +30,7 @@ function clean_all()
 	echo "Stopping"
 	exit 1
  fi
- admindir="$BOSON_TOOLS/admin"
+ admindir="$BOSON_CODE/admin"
  echo "Doing cvs-clean now!"
  for i in $BOSON_CODE $BOSON_DATA ; do
 	echo "In $i"
@@ -44,8 +43,6 @@ function copy_code()
  echo "Copying code"
  cp -a $BOSON_CODE/* $DEST_ALL/
  cp -a $BOSON_CODE/* $DEST_CODE/
- cp -a $BOSON_TOOLS/admin $DEST_CODE/
- cp -a $BOSON_TOOLS/admin $DEST_ALL/
 }
 
 function copy_data()
@@ -67,7 +64,7 @@ function copy_data()
  cp -rd $BOSON_DATA/* $DEST_DATA/
 
 
- cp -a $BOSON_TOOLS/admin $DEST_DATA/
+ cp -r $BOSON_CODE/admin $DEST_DATA/
 # cp $BOSON_CODE/Makefile.cvs $DEST_DATA/
 }
 
@@ -97,7 +94,7 @@ function copy_music()
  done
 # echo "SUBDIRS=music" > $DEST_MUSIC/data/Makefile.am
  cp $BOSON_DATA/music/Makefile.am $DEST_MUSIC/music/
- cp -r $BOSON_TOOLS/admin $DEST_MUSIC/
+ cp -r $BOSON_CODE/admin $DEST_MUSIC/
  cp $BOSON_CODE/Makefile.cvs $DEST_MUSIC/
  cp $BOSON_CODE/Makefile.am $DEST_MUSIC/
  #TODO: use a modified version of this! we really don't need to check for this stuff
@@ -145,8 +142,6 @@ if [ ! -d "$BOSON_MUSIC" ]; then
 fi
 
 if [ "x$BOSON_RELEASE" != "x" ]; then
-	echo "Updating $BOSON_TOOLS"
-	cd $BOSON_TOOLS && cvs up -r $BOSON_RELEASE
 	echo "Updating $BOSON_CODE"
 	cd $BOSON_CODE && cvs up -r $BOSON_RELEASE
 	echo "Updating $BOSON_DATA"
@@ -205,18 +200,18 @@ done
 
 # create the packages
 cd $DEST_ALL/../
-tar cjvf boson-all-$BO_VERSION.tar.bz2 boson-all-$BO_VERSION/ > /dev/null || exit 1
+tar cjvf boson-all-$BO_VERSION.tar.bz2 boson/ > /dev/null || exit 1
 mv boson-all-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_CODE/../
-tar cjvf boson-code-$BO_VERSION.tar.bz2 boson-code-$BO_VERSION/ > /dev/null || exit 1
+tar cjvf boson-code-$BO_VERSION.tar.bz2 code/ > /dev/null || exit 1
 mv boson-code-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_DATA/../
-tar cjvf boson-data-$BO_VERSION.tar.bz2 boson-data-$BO_VERSION/ > /dev/null || exit 1
+tar cjvf boson-data-$BO_VERSION.tar.bz2 data/ > /dev/null || exit 1
 mv boson-data-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_MUSIC/../
-tar cjvf boson-music-$BO_VERSION.tar.bz2 boson-music-$BO_VERSION/ > /dev/null || exit 1
+tar cjvf boson-music-$BO_VERSION.tar.bz2 music/ > /dev/null || exit 1
 mv boson-music-$BO_VERSION.tar.bz2 $DEST_BASE/
 

@@ -1,0 +1,11 @@
+# KDE Config File  
+[KDE Desktop Entry]
+Type=Application
+Exec=boson  
+Icon=boson.xpm
+DocPath=boson/index.html
+Comment=
+Comment[de]=
+Terminal=0
+Name=boson
+Name[de]=boson

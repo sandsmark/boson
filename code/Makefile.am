@@ -1,22 +1,22 @@
-SUBDIRS = $(TOPSUBDIRS)
+####### kdevelop will overwrite this part!!! (begin)##########
 
-$(top_srcdir)/configure.in: configure.in.in $(top_srcdir)/subdirs
-	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in ;
+SUBDIRS = common map server boson
 
-$(top_srcdir)/subdirs:
-	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common subdirs
+EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO 
 
-$(top_srcdir)/acinclude.m4: $(top_srcdir)/admin/acinclude.m4.in $(top_srcdir)/admin/libtool.m4.in
-	@cd $(top_srcdir) && cat admin/acinclude.m4.in admin/libtool.m4.in > acinclude.m4
+MAKE = /usr/bin/nice -20 make -j 3
 
-MAINTAINERCLEANFILES = subdirs configure.in acinclude.m4 configure.files 
+orzel.clean : maintainer-clean
+	rm -f configure Makefile{,.in}
+	rm -Rf */.deps
+	rm -f */Makefile{,.in}
+	rm -f `find -name core`
+	rm -f `find -name boson-client.log`
+	rm -f `find -name boson-server.log`
+#	cd .. && tar cvf /work/save/boson/
 
-package-messages:
-	$(MAKE) -f admin/Makefile.common package-messages
-	$(MAKE) -C po merge
+####### kdevelop will overwrite this part!!! (end)############
+# not a GNU package. You can remove this line, if 
+# have all needed files, that a GNU package needs
+AUTOMAKE_OPTIONS = foreign 
 
-EXTRA_DIST = admin 
-
-dist-hook:
-	cd $(top_distdir) && perl admin/am_edit -padmin
-	cd $(top_distdir) && $(MAKE) -f admin/Makefile.common subdirs

@@ -1,4 +1,0 @@
-#include "facilities.wml" type="Units" name="Grizzly" \
-        description="The Grizzly is a big good armored tank." \
-        name2="grizzly" type2="mob" \
-        before_url="oilharvester.html" before_text="Oil Harvester" after_url="leopard.html" after_text="Leopard" up_url="index.html"

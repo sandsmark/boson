@@ -3,7 +3,7 @@ Remember to update/check before releasing:
 - change version number:
   - code/configure.in.in
   - data/configure.in.in
-  - main.cpp,bounitmain.cpp,bocursormain.cpp,boprofilingmain.cpp,borendermain.cpp,bouniteditor.ui
+  - main.cpp,editor.cpp,bounitmain.cpp
   - *.cpp *.h --> grep 
   - code/ChangeLog: echo "version foobar has been released on ..."
 - code/boson/data/boson.lsm: Version, Entered-Date, Primary-site, Alternate-site, maybe. Keywords and Platform
@@ -69,14 +69,12 @@ Make Announcements (major releases):
 - sf.net project news
 - freshmeat
 - freehackers.org
+- dot.kde.org
 - kdenews.unixcode.org
 - kde-announce@mail.kde.org
 - games.kde.org
 - linuxgames.com
 - holarse.de
-- happypenguins.org
-- do NOT announce on dot.kde.org (they wait a long time and then post a quicky
-  only)
 
 Make Announcements (minor releases):
 ------------------------------------
@@ -93,6 +91,5 @@ We depend on:
 - maybe kdebase3
  --> never tried without kdebase!
 - lib3ds
-- OpenGL
 - wml (compilation only! - for docs)
 

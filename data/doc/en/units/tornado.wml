@@ -1,5 +1,0 @@
-#include "facilities.wml" type="Units" name="Tornado" \
-        description="An Tornadois a very powerful unit.<br> \
-                You can bring the enemy Tornados down with the <a href='../facilities/samsite.html'>Sam-Site</a>." \
-        name2="tornado" type2="mob" \
-        before_url="ferry.html" before_text="Ferry" after_url="transall.html" after_text="Transall" up_url="index.html"
