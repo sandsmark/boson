@@ -51,6 +51,8 @@ public:
 	BosonMap(QObject* parent = 0);
 	~BosonMap();
 
+	bool createNewMap(unsigned int width, unsigned int height, BosonGroundTheme* theme);
+
 	/**
 	 * @return vertical cell count
 	 **/
@@ -148,10 +150,9 @@ public:
 	QByteArray saveHeightMapImage();
 
 	/**
-	 * @return TRUE if the current map is valid i.e. can be transmitted
-	 * savely using @ref saveMapGeo
+	 * @return TRUE if the current map geo is valid.
 	 **/
-	bool isValid() const;
+	static bool isValidMapGeo(unsigned int width, unsigned int height);
 
 	/**
 	 * You should rather use @ref cell ! If you use this, you need to ensure
@@ -198,12 +199,6 @@ public:
 	void setHeightAtCorner(int x, int y, float height);
 
 	float cellAverageHeight(int x, int y);
-
-	/**
-	 * @return The number of different textures used in this map. See also
-	 * @ref texMap
-	 **/
-	unsigned int textureCount() const { return mTextureCount; }
 
 	/**
 	 * @return The internal texmap array, which defines how much percent
@@ -348,6 +343,11 @@ protected:
 	bool saveCells(QDataStream& stream);
 	bool saveHeightMap(QDataStream& stream);
 
+	/**
+	 * Save @p heightMap into @p stream.
+	 * @param heightMap A heightmap array that is big enough for a @p
+	 * mapWidth * @p mapHeight map.
+	 **/
 	static bool saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap);
 
 	/**
@@ -408,13 +408,11 @@ private:
 	BosonMapPrivate* d;
 	Cell* mCells;
 	float* mHeightMap;
-	unsigned int mTextureCount;
 	unsigned char* mTexMap;
 	bool mModified;
 
 	unsigned int mMapWidth;
 	unsigned int mMapHeight;
-
 	BosonGroundTheme* mGroundTheme;
 };
 

@@ -67,10 +67,73 @@ void BosonMap::init()
  mHeightMap = 0;
  mGroundTheme = 0;
  mTexMap = 0;
- mTextureCount = 0;
  mMapWidth = 0;
  mMapHeight = 0;
  setModified(false);
+}
+
+bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGroundTheme* theme)
+{
+ if (!isValidMapGeo(width, height)) {
+	boError() << k_funcinfo << width << " * " << height << " is no valid map geo!" << endl;
+	return false;
+ }
+ if (!theme) {
+	BO_NULL_ERROR(theme);
+	return false;
+ }
+ mMapWidth = width;
+ mMapHeight = height;
+ mGroundTheme = theme;
+
+ mHeightMap = new float[cornerArrayPos(width, height) + 1];
+ mTexMap = new unsigned char[texMapArrayPos(theme->textureCount() - 1, width, height) + 1];
+ for (unsigned int x = 0; x < width + 1; x++) {
+	for (unsigned y = 0; y < height + 1; y++) {
+		mHeightMap[cornerArrayPos(x, y)] = 0.0f;
+		mTexMap[texMapArrayPos(0, x, y)] = 255;
+		for (unsigned int i = 1; i < theme->textureCount(); i++) {
+			mTexMap[texMapArrayPos(i, x, y)] = 0;
+		}
+	}
+ }
+ bool ret = generateCellsFromTexMap();
+ if (!ret) {
+	boError() << k_funcinfo << "unable to generate cells from texmap" << endl;
+	// don't return yet! (must delete the arrays)
+ }
+
+ // the map is saved completely first, and then loaded from the stream.
+ // we do this to catch errors early.
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ if (ret) {
+	ret = saveCompleteMap(stream);
+ }
+
+ delete[] mHeightMap;
+ mHeightMap = 0;
+ delete[] mTexMap;
+ mTexMap = 0;
+ delete[] mCells;
+ mCells = 0;
+
+ if (!ret) {
+	boError() << k_funcinfo << "map could not be saved to stream" << endl;
+	mMapWidth = 0;
+	mMapHeight = 0;
+	mGroundTheme = 0;
+	return false;
+ }
+
+ QDataStream readStream(buffer, IO_ReadOnly);
+ ret = loadCompleteMap(readStream);
+ if (!ret) {
+	boError() << k_funcinfo << "unable to load previously saved map from stream! looks like an internal error" << endl;
+	return ret;
+ }
+
+ return ret;
 }
 
 bool BosonMap::loadMapFromFile(const QByteArray& map)
@@ -101,26 +164,16 @@ bool BosonMap::loadMapFromFile(const QByteArray& map)
 	boWarning() << k_funcinfo << "stream is not at end after groundTheme!" << endl;
  }
  return true;
- // AB: cells are NOT loaded here anymore!
-#if 0
- if (!loadCells(stream)) {
-	boError() << k_funcinfo << "Could not load map cells" << endl;
-	return false;
- }
- return true;
-#endif
 }
 
 
 bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
- if (!loadMapGeo(stream)) {
-	boError() << k_funcinfo << "Could not load map geo" << endl;
-	return false;
- }
- if (!loadGroundTheme(stream)) {
-	boError() << k_funcinfo << "Could not load the ground theme" << endl;
+ QByteArray mapBuffer;
+ stream >> mapBuffer;
+ if (!loadMapFromFile(mapBuffer)) {
+	boError() << k_funcinfo << "Could not load basic map" << endl;
 	return false;
  }
  if (!loadHeightMap(stream)) {
@@ -153,25 +206,8 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  stream >> mapWidth;
  stream >> mapHeight;
 
- // check 'realityness'
- if (mapWidth < 10) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "mapWidth < 10" << endl;
-	return false;
- }
- if (mapHeight < 10) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "mapHeight < 10" << endl;
-	return false;
- }
- if (mapWidth > MAX_MAP_WIDTH) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "mapWidth > " << MAX_MAP_WIDTH << endl;
-	return false;
- }
- if (mapHeight > MAX_MAP_HEIGHT) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
+ if (!isValidMapGeo(mapWidth, mapHeight)) {
+	boError()<< k_funcinfo << "map geo is not valid: " << mapWidth << "x" << mapHeight << endl;
 	return false;
  }
 
@@ -195,7 +231,6 @@ bool BosonMap::loadGroundTheme(QDataStream& stream)
  QString id;
  stream >> id;
  mGroundTheme = (BosonGroundTheme*)BosonData::bosonData()->groundTheme(id);
- boDebug() << k_funcinfo << mGroundTheme << endl;
  if (!mGroundTheme) {
 	boError() << k_funcinfo << "Cannot find groundTheme with id=" << id << endl;
 	return false;
@@ -375,8 +410,8 @@ bool BosonMap::loadTexMap(QDataStream& stream)
 	boError() << k_funcinfo << "width=" << width() << " height=" << height() << endl;
 	return false;
  }
- if (!mGroundTheme) {
-	BO_NULL_ERROR(mGroundTheme);
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
 	return false;
  }
  boDebug() << k_funcinfo << "loading texmap from stream" << endl;
@@ -394,17 +429,35 @@ bool BosonMap::loadTexMap(QDataStream& stream)
  }
  Q_UINT32 textures;
  stream >> textures;
- mTextureCount = textures;
- if (mTextureCount < 1) {
-	boError() << k_funcinfo << textures << " textures is not possible" << endl;
+ if (textures == 0) {
+	boError() << k_funcinfo << "0 textures is not possible" << endl;
+	return false;
+ }
+ if (textures > groundTheme()->textureCount()) {
+	boError() << k_funcinfo << "textureCount from map stream must not be greater than texture count from groundTheme!"
+			<< " textureCount=" << textures
+			<< " theme textureCount=" << groundTheme()->textureCount()
+			<< endl;
 	return false;
  }
  if (stream.atEnd()) {
 	boError() << k_funcinfo << "stream at end" << endl;
 	return false;
  }
- mTexMap = new unsigned char[texMapArrayPos(mTextureCount - 1, width(), height())];
- for (unsigned int i = 0; i < mTextureCount; i++) {
+ // we allocate memory for all possible textures, even if this map doesn't use
+ // them all. we also have to initialize all textures.
+ // one day we may want to change this to save a few kb of memory on some maps
+ // (none yet)
+ mTexMap = new unsigned char[texMapArrayPos(groundTheme()->textureCount() - 1, width(), height())];
+ for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
+	for (unsigned int x = 0; x < width() + 1; x++) {
+		for (unsigned int y = 0; y < height() + 1; y++) {
+			mTexMap[texMapArrayPos(i, x, y)] = 0;
+		}
+	}
+ }
+ // now load all textures that are actually used here.
+ for (unsigned int i = 0; i < textures; i++) {
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			Q_UINT8 c;
@@ -424,16 +477,16 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 	BO_NULL_ERROR(mTexMap);
 	return false;
  }
- if (!mGroundTheme) {
-	BO_NULL_ERROR(mGroundTheme);
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
 	return false;
  }
- if (mGroundTheme->textureCount() > 100) {
+ if (groundTheme()->textureCount() > 100) {
 	// this *cant* be true (would be > 100*500*500 bytes on a 500x500 map)
-	boError() << k_funcinfo << "texture count > 100: " << mTextureCount << " - won't save anything." << endl;
+	boError() << k_funcinfo << "texture count > 100: " << groundTheme()->textureCount() << " - won't save anything." << endl;
 	return false;
  }
- if (mGroundTheme->textureCount() < 1) {
+ if (groundTheme()->textureCount() < 1) {
 	boError() << k_funcinfo << "need at least one texture!" << endl;
 	return false;
  }
@@ -442,10 +495,10 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 
  // there is a groundTheme identifier in the "map" file, but an invalid texture
  // count would suck greatly (->crash). so we stream it.
- stream << (Q_UINT32)mGroundTheme->textureCount();
+ stream << (Q_UINT32)groundTheme()->textureCount();
 
  // now the actual texmap for this texture
- for (unsigned int i = 0; i < mGroundTheme->textureCount(); i++) {
+ for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
 			stream << (Q_UINT8)mTexMap[texMapArrayPos(i, x, y)];
@@ -457,6 +510,8 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 
 bool BosonMap::saveMapToFile(QDataStream& stream)
 {
+ stream << BOSONMAP_MAP_MAGIC_COOKIE;
+ stream << (Q_UINT32)BOSONMAP_VERSION;
  if (!saveMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
@@ -465,13 +520,6 @@ bool BosonMap::saveMapToFile(QDataStream& stream)
 	boError() << k_funcinfo << "Could not save groundTheme" << endl;
 	return false;
  }
-#if 0
- // obsolete.
- if (!saveCells(stream)) {
-	boError() << k_funcinfo << "Could not save map cells" << endl;
-	return false;
- }
-#endif
  return true;
 }
 
@@ -480,14 +528,15 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
  // AB: we may have a problem here - this stream is meant to be sent through
  // network, but it is very big! (sometimes several MB)
  // we should compress it!
- if (!saveMapGeo(stream)) {
-	boError() << k_funcinfo << "Could not save map geo" << endl;
+
+ QByteArray buffer;
+ QDataStream mapStream(buffer, IO_WriteOnly);
+ if (!saveMapToFile(mapStream)) { // AB: bad name. we don't actually save to file - it is just the "map" file in the .bpf file that is created in that function
+	boError() << k_funcinfo << "Could not save basic map" << endl;
 	return false;
  }
- if (!saveGroundTheme(stream)) {
-	boError() << k_funcinfo << "Could not save groundTheme" << endl;
-	return false;
- }
+ stream << buffer;
+
  if (!saveHeightMap(stream)) {
 	boError() << k_funcinfo << "Could not save height map" << endl;
 	return false;
@@ -504,7 +553,7 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
 
 bool BosonMap::saveMapGeo(QDataStream& stream)
 {
- if (!isValid()) {
+ if (!isValidMapGeo(width(), height())) {
 	boError() << k_funcinfo << "Map geo is not valid" << endl;
 	return false;
  }
@@ -516,11 +565,11 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 
 bool BosonMap::saveGroundTheme(QDataStream& stream)
 {
- if (!mGroundTheme) {
-	BO_NULL_ERROR(mGroundTheme);
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
 	return false;
  }
- if (mGroundTheme->identifier().isEmpty()) {
+ if (groundTheme()->identifier().isEmpty()) {
 	// we might use an empty identifier to store the complete theme into the
 	// stream (including textures). Advantage: someone (3rd party) who
 	// designs a map doesn't need to install his custom groundTheme, but can
@@ -528,7 +577,7 @@ bool BosonMap::saveGroundTheme(QDataStream& stream)
 	boError() << k_funcinfo << "empty groundTheme identifier" << endl;
 	return false;
  }
- stream << mGroundTheme->identifier();
+ stream << groundTheme()->identifier();
  return true;
 }
 
@@ -650,35 +699,25 @@ void BosonMap::createCells()
  }
 }
 
-bool BosonMap::isValid() const
+bool BosonMap::isValidMapGeo(unsigned int width, unsigned int height)
 {
- if (width() < 10) {
+ // check 'realityness'
+ if (width < 10) {
 	boError() << k_funcinfo << "width < 10" << endl;
 	return false;
  }
- if (width() > MAX_MAP_WIDTH) {
+ if (width > MAX_MAP_WIDTH) {
 	boError() << k_funcinfo << "mapWidth > " << MAX_MAP_WIDTH << endl;
 	return false;
  }
- if (height() < 10) {
+ if (height < 10) {
 	boError() << k_funcinfo << "height < 10" << endl;
 	return false;
  }
- if (height() > MAX_MAP_HEIGHT) {
+ if (height > MAX_MAP_HEIGHT) {
 	boError() << k_funcinfo << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
- if (!mCells) {
-	boError() << k_funcinfo << "NULL cells" << endl;
-	return false;
- }
- if (!mHeightMap) {
-	boError() << k_funcinfo << "NULL heightmap" << endl;
-	return false;
- }
-
- //TODO: check cells!
-
  return true;
 }
 
@@ -791,8 +830,8 @@ void BosonMap::resize(unsigned int width, unsigned int height)
 
 BosonTextureArray* BosonMap::textures() const
 {
- BO_CHECK_NULL_RET0(mGroundTheme);
- return mGroundTheme->textures();
+ BO_CHECK_NULL_RET0(groundTheme());
+ return groundTheme()->textures();
 }
 
 
@@ -803,7 +842,8 @@ void BosonMap::fill(unsigned int texture)
 	return;
  }
  BO_CHECK_NULL_RET(mTexMap);
- if (texture >= textureCount()) {
+ BO_CHECK_NULL_RET(groundTheme());
+ if (texture >= groundTheme()->textureCount()) {
 	boError() << k_funcinfo << "invalid texture " << texture << endl;
 	return;
  }
@@ -811,7 +851,7 @@ void BosonMap::fill(unsigned int texture)
  // initialize to 0 first
  for (unsigned int x = 0; x < width() + 1; x++) {
 	for (unsigned int y = 0; y < height() + 1; y++) {
-		for (unsigned int i = 0; i < textureCount(); i++) {
+		for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
 			mTexMap[texMapArrayPos(0, x, y)] = 0;
 		}
 	}
@@ -891,13 +931,16 @@ bool BosonMap::importTexMap(const QImage* img, int texturesPerComponent, bool us
 	boError() << k_funcinfo << "invalid texturesPerComponent: " << texturesPerComponent << endl;
 	return false;
  }
- if ((unsigned int)texturesPerComponent * (useAlpha ? 4 : 3)> textureCount()) {
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
+ }
+ if ((unsigned int)texturesPerComponent * (useAlpha ? 4 : 3) > groundTheme()->textureCount()) {
 	boWarning() << k_funcinfo << "this map doesn't have " 
 			<< texturesPerComponent * (useAlpha ? 4 : 3)
-			<< " textures. reset to " << textureCount() << " textures, i.e. "
-			<< textureCount() / (useAlpha ? 4 : 3) 
+			<< " textures. reset to " << groundTheme()->textureCount() << " textures, i.e. "
+			<< groundTheme()->textureCount() / (useAlpha ? 4 : 3) 
 			<< " textures per component" << endl;
-	texturesPerComponent = textureCount() / (useAlpha ? 4 : 3);
+	texturesPerComponent = groundTheme()->textureCount() / (useAlpha ? 4 : 3);
  }
 
  if (texturesPerComponent != 1) {
@@ -944,16 +987,21 @@ int BosonMap::heightToPixel(float height)
 bool BosonMap::generateCellsFromTexMap()
 {
  boDebug() << k_funcinfo << endl;
+ if (!groundTheme()) {
+	BO_NULL_ERROR(groundTheme());
+	return false;
+ }
  if (mCells) {
 	boWarning() << k_funcinfo << "cells already constructed!" << endl;
 	delete[] mCells;
+	mCells = 0;
  }
  if (width() * height() <= 0) {
 	boError() << k_funcinfo << "invalid map size - width=" << width() << " height=" << height() << endl;
 	return false;
  }
  createCells();
- if (mGroundTheme->textureCount() == 0) {
+ if (groundTheme()->textureCount() == 0) {
 	boError() << k_funcinfo << "0 textures in map" << endl;
 	return false;
  }
@@ -967,11 +1015,11 @@ bool BosonMap::generateCellsFromTexMap()
 
 QRgb BosonMap::miniMapColor(unsigned int texture) const
 {
- if (!mGroundTheme) {
+ if (!groundTheme()) {
 	boWarning() << k_funcinfo << "NULL groundTheme" << endl;
 	return 0;
  }
- return mGroundTheme->miniMapColor(texture);
+ return groundTheme()->miniMapColor(texture);
 }
 
 void BosonMap::recalculateCell(int x, int y)
@@ -979,7 +1027,7 @@ void BosonMap::recalculateCell(int x, int y)
  Cell* c = cell(x, y);
  BO_CHECK_NULL_RET(c);
  BO_CHECK_NULL_RET(mTexMap);
- BO_CHECK_NULL_RET(mGroundTheme);
+ BO_CHECK_NULL_RET(groundTheme());
  if (x < 0 || (uint)x >= width()) {
 	boError() << k_funcinfo << "invalid x: " << x << endl;
 	return;
@@ -996,8 +1044,8 @@ void BosonMap::recalculateCell(int x, int y)
 
  // every (!) cell has exactly 4 corners. every corner has
  // textureCount() alpha values.
- int* alpha = new int[4 * textureCount()];
- for (unsigned int i = 0; i < textureCount(); i++) {
+ int* alpha = new int[4 * groundTheme()->textureCount()];
+ for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
 	// top-left corner
 	alpha[4 * i] = (int)texMapAlpha(i, x, y);
 	// top-right corner
@@ -1012,8 +1060,8 @@ void BosonMap::recalculateCell(int x, int y)
 			// no need to do anything.
 			continue;
 		}
-		int l = (int)mGroundTheme->amountOfLand(i);
-		int w = (int)mGroundTheme->amountOfWater(i);
+		int l = (int)groundTheme()->amountOfLand(i);
+		int w = (int)groundTheme()->amountOfWater(i);
 		if (l != 0) {
 			land += (int)(l * a / 255);
 		}
@@ -1056,6 +1104,7 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	boError() << k_funcinfo << "must not be called in gameMode" << endl;
 	return;
  }
+ BO_CHECK_NULL_RET(groundTheme());
  if (x < 0 || (uint)x >= width()) {
 	boError() << k_funcinfo << "invalid x coordinate: " << x << endl;
 	return;
@@ -1064,15 +1113,15 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	boError() << k_funcinfo << "invalid y coordinate: " << y << endl;
 	return;
  }
- if (texCount > textureCount()) {
-	boError() << k_funcinfo << "invalid textureCount " << texCount << " must be <= " << textureCount() << endl;
+ if (texCount > groundTheme()->textureCount()) {
+	boError() << k_funcinfo << "invalid textureCount " << texCount << " must be <= " << groundTheme()->textureCount() << endl;
 	return;
  }
  BO_CHECK_NULL_RET(alpha);
  BO_CHECK_NULL_RET(textures);
  for (unsigned int i = 0; i < texCount; i++) {
 	unsigned int texture = textures[i];
-	if (texture >= textureCount()) {
+	if (texture >= groundTheme()->textureCount()) {
 		boError() << k_funcinfo << "invalid texture " << texture << endl;
 		continue;
 	}

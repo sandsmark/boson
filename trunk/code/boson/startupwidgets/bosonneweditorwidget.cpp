@@ -137,8 +137,9 @@ void BosonNewEditorWidget::initSpecies()
 
 void BosonNewEditorWidget::initTilesets()
 {
- QStringList list;
- list.append(QString::fromLatin1("earth"));
+ // AB: atm we use identifiers for the combobox only. one day we may want to add
+ // names for them, too
+ QStringList list = BosonData::bosonData()->availableGroundThemes();
  mChangeTileset->insertStringList(list);
 }
 
@@ -160,15 +161,49 @@ void BosonNewEditorWidget::slotNetStart()
  QString playFieldIdentifier = d->mItem2Map[mChooseBosonMap->currentItem()];
 
  if (playFieldIdentifier.isNull()) { // "New Map" selected
+	unsigned int width = mChangeMaxWidth->value();
+	unsigned int height = mChangeMaxWidth->value();
+	if (!BosonMap::isValidMapGeo(width, height)) {
+		boError() << k_funcinfo << "invalid map geo" << endl;
+		KMessageBox::sorry(this, i18n("The desired map geo is not valid\nWidth=%1\nHeight=%2").arg(width).arg(height));
+		return;
+	}
+	QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
+	int themeIndex = mChangeTileset->currentItem();
+	if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
+		boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
+		if (themeIndex < 0) {
+			KMessageBox::sorry(this, i18n("Please select a ground theme / tileset first"));
+		} else {
+			KMessageBox::sorry(this, i18n("The selected groundTheme / tileset at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
+		}
+		return;
+	}
+	QString themeId = boData->availableGroundThemes()[themeIndex];
+	BosonGroundTheme* theme = boData->groundTheme(themeId);
+	if (!theme) {
+		BO_NULL_ERROR(theme);
+		KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
+		return;
+	}
 	BosonMap* map = new BosonMap(0);
+	if (!map->createNewMap(width, height, theme)) {
+		boError() << k_funcinfo << "map could not be created" << endl;
+		KMessageBox::sorry(this, i18n("An error occured while creating a new map"));
+		delete map;
+		return;
+	}
 
-	// TODO: fill widget (i.e. fill with grass, water, ... by default)
-	map->resize(mChangeMaxWidth->value(), mChangeMaxHeight->value());
 	map->fill((int)Cell::GroundGrass);
 
 	QByteArray b;
 	QDataStream stream(b, IO_WriteOnly);
-	map->saveCompleteMap(stream);
+	if (!map->saveCompleteMap(stream)) {
+		boError() << k_funcinfo << "could not save new map to stream" << endl;
+		KMessageBox::sorry(this, i18n("An error occured while saving the new map to a stream"));
+		delete map;
+		return;
+	}
 
 	// WARNING: this is a hack! the message should contain the *map* only,
 	// not the scenario. I do not yet know how the scenario will be handled
@@ -265,7 +300,7 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
  mChangeMaxWidth->setValue(map->width());
-  mChangeMaxWidthNumInput->setValue(map->width());
+ mChangeMaxWidthNumInput->setValue(map->width());
  mChangeMaxHeight->setValue(map->height());
  mChangeMaxHeightNumInput->setValue(map->height());
  mChangeTileset->setCurrentItem(0); // TODO - we do not yet support more than one :(
