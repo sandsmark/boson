@@ -44,10 +44,16 @@ void BoMeshRendererImmediate::setModel(BosonModel* model)
 
 void BoMeshRendererImmediate::initFrame()
 {
- glPushAttrib(GL_POLYGON_BIT); // GL_CULL_FACE
+ glPushAttrib(GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT);
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
+
+ // AB: we enable the alpha test and discard any texture fragments which are
+ // greater 0.0 - this allows transparent textures (_not_ translucent - a
+ // fragment must either be visible or invisible)
+ glEnable(GL_ALPHA_TEST);
+ glAlphaFunc(GL_GREATER, 0.0f);
 }
 
 void BoMeshRendererImmediate::deinitFrame()

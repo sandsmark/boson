@@ -161,13 +161,19 @@ void BoMeshRendererVertexArray::setModel(BosonModel* model)
 
 void BoMeshRendererVertexArray::initFrame()
 {
- glPushAttrib(GL_POLYGON_BIT); // glEnable(GL_CULL_FACE)
+ glPushAttrib(GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT);
 
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_NORMAL_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+ // AB: we enable the alpha test and discard any texture fragments which are
+ // greater 0.0 - this allows transparent textures (_not_ translucent - a
+ // fragment must either be visible or invisible)
+ glEnable(GL_ALPHA_TEST);
+ glAlphaFunc(GL_GREATER, 0.0f);
 
  mPreviousModel = 0;
 }
@@ -226,10 +232,13 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 			resetColor = true;
 		}
 	}
- } else if (mesh->material()->textureName().isEmpty()){
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor3fv(mesh->material()->diffuse().data());
-	resetColor = true;
+ } else {
+	BoMaterial* mat = mesh->material();
+	if (mat->textureName().isEmpty()) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3fv(mesh->material()->diffuse().data());
+		resetColor = true;
+	}
  }
  unsigned int renderedPoints = 0;
 
