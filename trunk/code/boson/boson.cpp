@@ -968,15 +968,14 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			boError() << k_lineinfo << "Cannot go to enemy refinery" << endl;
 			break;
 		}
-		Unit* refinery = findUnit(refineryId, refineryOwner);
-		if (!refinery) {
+		Unit* refineryUnit = findUnit(refineryId, refineryOwner);
+		if (!refineryUnit) {
 			boError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
 			break;
 		}
-#warning TODO
-//		if (!refinery->plugin(UnitPlugin::Refinery)) {
-		if (!refinery->isFacility()) { // FIXME do not depend on facility!
-			boWarning() << k_lineinfo << "refinery must be a facility" << endl;
+		RefineryPlugin* refinery = (RefineryPlugin*)refineryUnit->plugin(UnitPlugin::Refinery);
+		if (!refinery) {
+			boWarning() << k_lineinfo << "refinery must be a refinery " << endl;
 			break;
 		}
 		for (unsigned int i = 0; i < unitCount; i++) {
@@ -998,7 +997,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				boError() << k_lineinfo << "must be a harvester" << endl;
 				continue;
 			}
-			h->refineAt((Facility*)refinery);
+			h->refineAt(refinery);
 		}
 		break;
 	}
