@@ -479,6 +479,13 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 	mGroundRenderer->insertItem(BoGroundRenderer::rttiToName(i));
  }
  mGroundRenderer->setCurrentItem(0);
+
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Level of detail"), hbox);
+ mLOD = new QComboBox(hbox);
+ mLOD->insertItem(i18n("All details (default)"));
+ mLOD->insertItem(i18n("Lowest details"));
+ mLOD->setCurrentItem(0);
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -536,6 +543,7 @@ void OpenGLOptions::apply()
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
  boConfig->setUseLight(mUseLight->isChecked());
  boConfig->setUseMaterials(mUseMaterials->isChecked());
+ boConfig->setUIntValue("UseLOD", lod());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -550,6 +558,7 @@ void OpenGLOptions::setDefaults()
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
  mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+ setLOD(0);
 }
 
 void OpenGLOptions::load()
@@ -563,6 +572,7 @@ void OpenGLOptions::load()
  mUseLight->setChecked(boConfig->useLight());
  mUseMaterials->setChecked(boConfig->useMaterials());
  mGroundRenderer->setCurrentItem(boConfig->uintValue("GroundRenderer"));
+ setLOD(boConfig->uintValue("UseLOD", 0));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -670,6 +680,32 @@ void OpenGLOptions::setMipmapMinificationFilter(int f)
 void OpenGLOptions::setAlignSelectionBoxes(bool align)
 {
  mAlignSelectBoxes->setChecked(align);
+}
+
+unsigned int OpenGLOptions::lod() const
+{
+ switch (mLOD->currentItem()) {
+	case 0:
+		return 0;
+	default:
+	case 1:
+		// just a random, very high, number.
+		// this will result in lowest details possible.
+		return 5000;
+ }
+ return 0;
+}
+
+void OpenGLOptions::setLOD(unsigned int l)
+{
+ switch (l) {
+	case 0:
+		mLOD->setCurrentItem(0);
+		break;
+	default:
+		mLOD->setCurrentItem(1);
+		break;
+ }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -77,6 +77,11 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
  }
 
 #if 1
+ if (lod == 1) {
+	// don't render mesh at all.
+	return faceList;
+ }
+
  boWarning() << k_funcinfo << "not yet implemented: LOD " << lod << endl;
  faceList = generateLOD(0);
 #else
