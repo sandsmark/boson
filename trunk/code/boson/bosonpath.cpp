@@ -70,6 +70,9 @@
 
 #define NEWER_PF_STYLE
 
+// If this is defined, BoLineVisualization will be used to show found paths
+//#define VISUALIZE_PATHS
+
 
 BosonBigDisplayBase* BosonPath::mDisplay = 0;
 BosonCanvas* BosonPath::mCanvas = 0;
@@ -684,6 +687,7 @@ bool BosonPath::findSlowPath()
       path.append(wp);
     }
 
+#ifdef VISUALIZE_PATHS  
   if(mDisplay && mCanvas)
   {
     float x, y;
@@ -700,6 +704,7 @@ bool BosonPath::findSlowPath()
     }
     mDisplay->addLineVisualization(viz);
   }
+#endif
 
 
     if(pathfound == FullPath || pathfound == AlternatePath)
@@ -1306,16 +1311,15 @@ void BosonPathRegion::calculateCosts(unsigned int index)
     boError(510) << k_funcinfo << "Invalid neighbor index: " << index << "; count: " << neighbors.count() << endl;
     return;
   }
-  // Reset number of border cells first
-  neighbors[index].bordercells = 0;
 
-  // FIXME: I believe this can be done _much_ faster
-  // Find number of cells in this region that have neighbor cells in another
-  //  region. You can move to that other region via those cells
   // THIS IS SLOOOOW!!! cellsOccupiedStatusChanged() for a single cell took
   //  about 15ms on average and about 13ms of it was spent recalculating region
   //  costs. So now we don't use this anymore.
-  /*for(int y = sector->y; y < (sector->y + sector->h); y++)
+  /* // Reset number of border cells first
+  neighbors[index].bordercells = 0;
+  // Find number of cells in this region that have neighbor cells in another
+  //  region. You can move to that other region via those cells
+  for(int y = sector->y; y < (sector->y + sector->h); y++)
   {
     for(int x = sector->x; x < (sector->x + sector->w); x++)
     {
@@ -1855,6 +1859,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     tm_copypath = pr.elapsed();
 
 
+#ifdef VISUALIZE_PATHS  
     // Add LineVisualization stuff
     if(mDisplay && mCanvas)
     {
@@ -1873,6 +1878,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       }
       mDisplay->addLineVisualization(viz);
     }
+#endif
     tm_viz = pr.elapsed();
   }
 
@@ -2729,6 +2735,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     info->destRegion = n.region;
     tm_copypath = pr.elapsed();
 
+#ifdef VISUALIZE_PATHS  
     // Add LineVisualization stuff
     if(mDisplay && mCanvas)
     {
@@ -2744,6 +2751,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
       }
       mDisplay->addLineVisualization(viz);
     }
+#endif
     tm_viz = pr.elapsed();
   }
 
