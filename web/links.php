@@ -33,15 +33,10 @@ sidebar_end();
 main_area_begin();
 
 // Contacts
-draw_box("Links");
-echo "
-    Here you will find some (hopefully) useful links:<br>
-    <a href=\"http://www.kde.org/\">KDE homepage</a> Boson uses KDE<br>
-    <a href=\"http://www.trolltech.com\">Trolltech (creators of QT)</a> Boson also uses Qt<br>
-    <a href=\"http://www.freehackers.org/about/content.html\">Other free software</a><br>
-    <a href=\"http://www.freecraft.org/\">Freecraft homepage</a> Freecraft is another RTS for Linux<br>
-    <a href=\"http://sourceforge.net\">SF.net</a> Boson uses SourceForge.net's services<br>
-";
+draw_bigbox_begin("Links");
+draw_bigbox_text("Here you will find some (hopefully) useful links:<br><br><a href=\"http://www.kde.org/\">KDE homepage</a> Boson uses KDE<br><a href=\"http://www.trolltech.com\">Trolltech (creators of QT)</a> Boson also uses Qt<br><a href=\"http://www.freehackers.org/about/content.html\">Other free software</a><br><a href=\"http://www.freecraft.org/\">Freecraft homepage</a> Freecraft is another RTS for Linux<br><a href=\"http://sourceforge.net\">SF.net</a> Boson uses SourceForge.net's services<br>");
+draw_bigbox_end();
+
 main_area_end();
 main_table_end();
 

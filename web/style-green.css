@@ -5,6 +5,7 @@
 body {
   color: #00ff00;
   background-color: #000000;
+  font-family: helvetica,arial;
 }
 
 /** Stupid buggy Konqueror */
@@ -15,18 +16,18 @@ td {
 
 /** Links **/
 a {
-  color: #60ff60;
+  color: #40ff40;
   background-color: transparent;
-  text-decoration: none;
+  text-decoration: underline;
 }
 a:visited {
   background-color: transparent;
-  color: #60d060;
+  color: #40d040;
 }
 a:hover {
-  background-color: transparent;
-  color: #ffffff;
-  text-decoration: underline;
+  background-color: #204020;
+  color: #00ff00;
+  text-decoration: none;
 }
 
 
@@ -83,6 +84,7 @@ td.boxcell {
 }
 
 .bigboxtext {
+  margin-left: 5px;
 }
 
 table.bigbox {
@@ -155,6 +157,7 @@ td.sidebarboxcell {
 }
 
 .newstext {
+  margin-left: 5px;
 }
 
 
@@ -226,6 +229,9 @@ a.copyright:hover {
 }
 
 pre {
-  background-color: transparent;
+  background-color: #103010;
   color: #a0d0a0;
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
