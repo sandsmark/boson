@@ -1223,7 +1223,7 @@ void Unit::turnTo(int deg)
  d->mWantedRotation = deg;
 }
 
-QPtrList<BosonParticleSystem>* Unit::particleSystems()
+QPtrList<BosonParticleSystem>* Unit::particleSystems() const
 {
  return &(d->mParticleSystems);
 }

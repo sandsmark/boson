@@ -218,6 +218,7 @@ BosonConfig::BosonConfig(KConfig* conf)
 
  mDisableSound = false;
  mLoadTiles = true;
+ mAIDelay = 3.0;
 
  // load from config
  reset(conf);

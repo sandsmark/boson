@@ -83,7 +83,7 @@ class BosonShot : public BosonItem
     void save(QDataStream& stream);
     void load(QDataStream& stream);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() { return &mFlyParticleSystems; };
+    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
 
   private:
     BoVector3 mVelo;
@@ -96,7 +96,7 @@ class BosonShot : public BosonItem
     float mMaxHeight;
     Player* mOwner;
     const BosonWeaponProperties* mProp;
-    QPtrList<BosonParticleSystem> mFlyParticleSystems;
+    QPtrList<BosonParticleSystem>* mFlyParticleSystems;
 };
 
 #endif // BOSONSHOT_H

@@ -342,7 +342,7 @@ public:
 	 * @return List of active particle systems this unit has.
 	 * This may include e.g. smoke for factories.
 	 **/
-	virtual QPtrList<BosonParticleSystem>* particleSystems();
+	virtual QPtrList<BosonParticleSystem>* particleSystems() const;
 	void setParticleSystems(QPtrList<BosonParticleSystem> list);
 
 	void loadWeapons();

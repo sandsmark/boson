@@ -293,6 +293,9 @@ public:
 	 **/
 	bool loadTiles() const { return mLoadTiles; }
 
+	float aiDelay() const { return mAIDelay; }
+  void setAiDelay(float delay) { mAIDelay = delay; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -355,6 +358,7 @@ private:
 	bool mDisableSound;
 	DebugMode mDebugMode;
 	bool mLoadTiles;
+	float mAIDelay;
 };
 
 #endif
