@@ -12,7 +12,8 @@ MOBILE_UNITS = \
 	mob_tiger \
 	mob_tornado \
 	mob_transall \
-	mob_warthog
+	mob_warthog \
+	mob_wolf
 FACILITIES = \
 	fix_commandbunker \
 	fix_comsat \
