@@ -49,7 +49,7 @@ BosonShotProperties::BosonShotProperties(SpeciesTheme* theme, KSimpleConfig* cfg
   }
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mSpeed = cfg->readLongNumEntry("Speed", 0);
-  mDamageRange = cfg->readUnsignedLongNumEntry("DamageRange", 1);
+  mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mFlyParticleSystems = Bo::loadParticleSystemProperties(cfg, "FlyParticles", theme);
   kdDebug() << "    " << k_funcinfo << "There are " << mFlyParticleSystems.count() << " particle systems in fly list" << endl;
   mHitParticleSystems = Bo::loadParticleSystemProperties(cfg, "HitParticles", theme);
@@ -119,6 +119,7 @@ BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y
   mActive = true;
   move(x, y, z);
   setAnimated(true);
+  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
   attacker->canvas()->addParticleSystems(mFlyParticleSystems);
 }
@@ -142,4 +143,33 @@ void BosonShot::advance(unsigned int phase)
   {
     mActive = false;
   }
+}
+
+float BosonShot::rotationToPoint(float x, float y)
+{
+  float add = 0;
+  if(x > 0)
+  {
+    if(y < 0)
+    {
+      add = 0;
+    }
+    else
+    {
+      add = 90;
+    }
+  }
+  else
+  {
+    if(y > 0)
+    {
+      add = 180;
+    }
+    else
+    {
+      add = 270;
+    }
+  }
+
+  return (atan(QABS(x) / QABS(y)) * (360 / 6.2831853)) + add;
 }

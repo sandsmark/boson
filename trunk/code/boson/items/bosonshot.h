@@ -56,7 +56,7 @@ class BosonShotProperties
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    unsigned long int damageRange() const { return mDamageRange; };
+    float damageRange() const { return mDamageRange; };
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
@@ -81,7 +81,7 @@ class BosonShotProperties
         //{ if(mHitParticleSystem) return mHitParticleSystem->newSystem(x, y, z); };
 
   private:
-    unsigned long int mDamageRange;
+    float mDamageRange;
     long int mDamage;
     unsigned long int mSpeed;
     unsigned long int mId;
@@ -112,6 +112,8 @@ class BosonShot : public BosonItem
     inline bool isActive() const  { return mActive; };
 
     inline virtual int rtti() const  { return RTTI::Shot; }
+    
+    float rotationToPoint(float x, float y);
 
   protected:
     BoVector3 mVelo;
