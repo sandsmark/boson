@@ -45,93 +45,53 @@ draw_bigbox_begin("Status");
 draw_bigbox_text("Most recent version, 0.10, was released on 2nd May 2004.
   <br><br>");
 
-//draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
+draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
-/*draw_bigbox_text("What has been changed since 0.9.1:
+draw_bigbox_text("What has been changed since 0.10:
 <ul>
  <h3>General</h3>
  <ul>
-    <li>Resolution changing using Xrandr is supported (XFree 4.3 required)</li>
-    <li>Dependency changes:</li>
-    <ul>
-    <li>Added: <a href=\"http://www.openal.org/\" target=\"_blank\">OpenAL</a></li>
-    <li>Removed: arts, kdemultimedia, kdegames</li>
-    </ul>
+    <li>Start of porting boson to plib (far from being complete !)</li>
+    <li>Added a network sync protocol, now it is possible to <i>check</i> if the clients are in sync</li>
+    <li>Improvements to effects system (load/save, species independent, delaying)</li>
  </ul>
 
- <h3>Sound</h3>
+<!-- <h3>Sound</h3>
  <ul>
-     <li>Sound is played using OpenAL now (if you use arts you need a patched OpenAL,
-     or use \"artsshell suspend ; boson\")</li>
-     <li>Dependency on arts and kdemultimedia removed</li>
-     <li>Sound is enabled by default again</li>
-</ul>
+     <li></li>
+</ul> -->
 
  <h3>Rendering</h3>
  <ul>
-    <li>Use vertex arrays and vertex buffer objects by default if possible,
-    increases speed by a few FPS</li>
-    <li>First steps for transparent textures (transparent surfaces support), this not completed</li>
-    <li>New effects system which replaces particle systems. At the moment this is an
-    internal change only</li>
-    <li>Units are correctly rotated, depending on the slope of the terrain that
-    they're on</li>
-    <li>Performance improvements</li>
+    <li>Basic support for animated water (lakes and oceans are possible), not included in editor yet</li>
+    <li>Many improvements for textured fonts (wrapping, colors, blending)</li>
+    <li>Effects for the effects system introduced in 0.10 (bullet trail, lights)</li>
  </ul>
 
  <h3>Game</h3>
  <ul>
-    <li>OpenGL minimap</li>
-    <li>Support for harvesting</li>
-    <li>New pathfinding code</li>
-    <li>Special pathfinding code for flying units</li>
-    <li>The game starts only once all clients have loaded their game data</li>
-    <li>Neutral player and species has been added. You cannot play this, it is
-    meant for civilian units or things like trees and so on</li>
-    <li>Oil tower is a neutral unit now</li>
-    <li>Day/night support, the default AI script now triggers day/night changes</li>
-    <li>Flying units can't fly on unpassable cells (slope > 45 degrees)</li>
-    <li>Take unit's size into account when calculating unit's distance from explosions</li>
+    <li>Support for winning conditions</li>
  </ul>
 
- <h3>Scripts / AI</h3>
+<!-- <h3>Scripts / AI</h3>
  <ul>
-    <li>AI now produces units and supports mining, thanks to Carlo (aka alea)</li>
-    <li>New ai script functions</li>
-    <li>Free mode and no-limits mode for camera (to get used by scripts)</li>
-</ul>
+    <li></li>
+</ul> -->
 
  <h3>Editor</h3>
  <ul>
-     <li>Added height icon</li>
-     <li>Bugfixes</li>
+     <li>Basic widget to edit conditions</li>
  </ul>
 
  <h3>Data</h3>
  <ul>
-     <li>Some neutral objects added (mineralmine, trees, stone, house...)</li>
-     <li>New explosions</li>
-     <li>Two textured fonts added</li>
-     <li>Scaled down some textures</li>
-     <li>General map changes</li>
-     <li>New map: We are under attack</li>
-     <li>Documentation updates</li>
+     <li>Added textured fonts from plib</li>
  </ul>
 
  <h3>Internal</h3>
  <ul>
-    <li>Very basic support for ac3d models</li>
-    <li>Support for textured fonts. They are faster, more powerful and stable.
-    Thanks a lot to <a href=\"http://plib.sf.net\" target=\"_blank\">plib</a> where this code has
-    been shamelessy stolen</li>
-    <li>Texture compression is used, if available which can reduce texture size an
-    therefore improve speed</li>
-    <li>The path a unit is using is displayed when it is selected</li>
-    <li>The menu is properly removed when a game is ended, fixing menu duplication
-    (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\" target=\"_blank\">66715</a>)</li>
-    <li>Boson now provides it's own copy of kgame</li>
-    <li><a href=\"http://boson.halux2001.de/handbook/en/faq.html#gen_3\" target=\"_blank\">Emergency save</a> added, it saves all game data. A developer can now look at a replay of this session</li>
-    <li>Gcc 3.4 fixes</li>
+    <li>Default font is textured</li>
+    <li>Added a memory manager for debugging</li>
  </ul>
 
 
@@ -141,7 +101,7 @@ draw_bigbox_text("Most recent version, 0.10, was released on 2nd May 2004.
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
- ");*/
+ ");
 draw_bigbox_end();
 main_area_end();
 
