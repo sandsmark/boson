@@ -241,8 +241,15 @@ void EditorWidget::slotSavePlayField()
 {
 }
 
-void EditorWidget::slotChangeLocalPlayer(int)
+void EditorWidget::slotChangeLocalPlayer(int index)
 {
+ Player* p = 0;
+ p = d->mPlayers[index];
+ if (p) {
+	emit signalChangeLocalPlayer(p);
+ } else {
+	kdWarning() << k_funcinfo << "NULL player for index " << index << endl;
+ }
 }
 
 void EditorWidget::slotPlaceFacilities()

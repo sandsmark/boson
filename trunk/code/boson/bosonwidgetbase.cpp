@@ -154,7 +154,7 @@ void BosonWidgetBase::init()
  initCommandFrame();
  initDisplayManager();
  initMap();
- if(!mLoading) {
+ if (!mLoading) {
 	initPlayer();
  }
 
@@ -254,11 +254,11 @@ void BosonWidgetBase::initPlayer()
 	kdError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- if(!mLoading) {
+ if (!mLoading) {
 	for (unsigned int i = 0; i < game()->playerCount(); i++) {
 		Player* p = (Player*)game()->playerList()->at(i);
 		if (p) {
-			p->initMap(playField()->map());
+			p->initMap(playField()->map(), game()->gameMode());
 		}
 	}
  }
@@ -951,5 +951,18 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
 BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
 {
  return d->mCommandFrame;
+}
+
+void BosonWidgetBase::setLocalPlayer(Player* p, bool init)
+{
+ mLocalPlayer = p;
+
+ if (init) {
+	if (!p) {
+		kdError() << k_funcinfo << "NULL player" << endl;
+		return;
+	}
+	initPlayer();
+ }
 }
 

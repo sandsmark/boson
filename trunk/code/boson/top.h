@@ -195,9 +195,10 @@ protected:
 	 **/
 	void showHideMenubar();
 
-	void changeLocalPlayer(Player* p);
+	void changeLocalPlayer(Player* p, bool init = true);
 
 protected slots:
+	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
 	void slotCanvasTilesLoading(int);
 	void slotCanvasTilesLoaded();
 	void slotReceiveMap(const QByteArray& buffer);

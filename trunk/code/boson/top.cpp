@@ -231,7 +231,7 @@ void TopWidget::initBoson()
 void TopWidget::initPlayer()
 {
  Player* p = new Player;
- changeLocalPlayer(p);
+ slotChangeLocalPlayer(p);
 }
 
 void TopWidget::initPlayField()
@@ -360,12 +360,13 @@ void TopWidget::initBosonWidget(bool loading)
 	EditorWidget* w = new EditorWidget(this, mWs, loading);
 	d->mBosonWidget = w;
  }
- d->mBosonWidget->setLocalPlayer(player());
+ changeLocalPlayer(player(), false);
  d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
  mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
 
+ connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)), this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
  connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(slotGameOver()));
  connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
@@ -552,7 +553,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 	//  (It's not known yet)
 	delete mPlayer;
 	mPlayer = 0;
-	changeLocalPlayer(0);
+	slotChangeLocalPlayer(0);
 
 	// Open file and QDataStream on it
 	QFile f(mLoadingFileName);
@@ -665,8 +666,8 @@ void TopWidget::loadGameData3() // FIXME rename!
 	if (!mBoson->localPlayer()) {
 		kdWarning() << k_funcinfo << "NULL player" << endl;
 	}
-	changeLocalPlayer(mBoson->localPlayer());
-	d->mBosonWidget->initPlayer();
+	slotChangeLocalPlayer(mBoson->localPlayer());
+//	d->mBosonWidget->initPlayer();
  }
 
  int progress = 0;
@@ -712,14 +713,11 @@ void TopWidget::loadGameData3() // FIXME rename!
 
  // Show BosonWidgetBase
  showBosonWidget();
- if (d->mNewGame) {
-	delete d->mNewGame;
-	d->mNewGame = 0;
- }
- if (d->mStartEditor) {
-	delete d->mStartEditor;
-	d->mStartEditor = 0;
- }
+ delete d->mNewGame;
+ d->mNewGame = 0;
+ delete d->mStartEditor;
+ d->mStartEditor = 0;
+
  // Init some stuff
  statusBar()->show();
  d->mBosonWidget->initGameMode();
@@ -1178,11 +1176,12 @@ void TopWidget::showHideMenubar()
 
 
 
-void TopWidget::changeLocalPlayer(Player* p)
+void TopWidget::changeLocalPlayer(Player* p, bool init)
 {
+ // AB: note that both, p == 0 AND p == mPlayer are valid and must be executed!
  mPlayer = p;
  if (d->mBosonWidget) {
-	d->mBosonWidget->setLocalPlayer(p);
+	d->mBosonWidget->setLocalPlayer(p, init);
  }
 }
 

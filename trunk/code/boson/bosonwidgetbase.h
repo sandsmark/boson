@@ -73,7 +73,7 @@ public:
 	 **/
 	virtual ~BosonWidgetBase();
 
-	void setLocalPlayer(Player* p) { mLocalPlayer = p; }
+	void setLocalPlayer(Player* p, bool init);
 
 	TopWidget* top() const { return mTop; }
 	BosonCanvas* canvas() const;
@@ -175,6 +175,8 @@ signals:
 	void signalEndGame();
 
 	void signalCheckDockStatus();
+
+	void signalChangeLocalPlayer(Player* p);
 
 protected slots:
 	void slotChatDockHidden();
