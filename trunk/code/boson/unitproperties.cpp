@@ -83,7 +83,7 @@ public:
 UnitProperties::UnitProperties(bool fullmode)
 {
  init();
- mFullMode = fullmode
+ mFullMode = fullmode;
 }
 
 UnitProperties::UnitProperties(SpeciesTheme* theme)
