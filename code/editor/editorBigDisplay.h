@@ -41,14 +41,14 @@ public:
 
 private slots:
 	void setSelectedObject	(object_type, int);
-	void setWho		(int w) { who = w; }
+	void setWho		(uint w) { who = w; }
 
 private:
 	cell_t		c;
 	mobType		m;
 	facilityType	f;
 	object_type	otype;
-	int		who;
+	uint		who;
 };
 
 #endif // EDITORBIGDISPLAY_H

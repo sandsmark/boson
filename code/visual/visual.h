@@ -30,7 +30,7 @@ class visualCanvas;
 
 extern	visualCanvas	*vcanvas;
 extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
-extern	int		nb_player;
+extern	uint		nb_player;
 	
 
 #endif // VISUAL_H 
