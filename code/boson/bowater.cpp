@@ -26,7 +26,6 @@
 #include "bosonmap.h"
 #include "bodebug.h"
 #include "info/boinfo.h"
-#include "perlinnoise.h"
 #include "botexture.h"
 #include "bo3dtools.h"
 #include "bolight.h"
