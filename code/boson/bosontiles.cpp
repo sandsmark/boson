@@ -261,7 +261,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
-	kdDebug() << "process events" << endl;
+//	kdDebug() << "process events" << endl;
 	qApp->processEvents(10);
  }
 }

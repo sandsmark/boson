@@ -77,7 +77,7 @@ public:
 	 * loaded it is removed from the list.
 	 *
 	 * Note that the files are played in random order!
-	 * @prarm files List of absolute file names
+	 * @param files List of absolute file names
 	 **/
 	void startLoop(const QStringList& files);
 

@@ -73,7 +73,7 @@ class QCursor;
 * call @ref setWidgetCursor after @ref setCursor. You don't need this though -
 * but you enable your users to use a normal @ref QCursor instead of sprites.
 *
-* @section Files
+* @sect Files
 * You need to provide pixmaps for the sprite-cursor and you can provide pixmaps
 * for the X/QT cursor. Please note that the X/QT cursors need to be black/white!
 *
