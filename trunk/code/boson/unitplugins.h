@@ -300,7 +300,7 @@ public:
 	int resourcesY() const { return mResourcesY; }
 	unsigned int resourcesMined() const { return mResourcesMined; }
 
-	void mineAt(const QPoint& pos);
+	void mineAt(const ResourceMinePlugin* resource);
 	void refineAt(Unit* refinery);
 
 	void setRefinery(Unit* refinery);

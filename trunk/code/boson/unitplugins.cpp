@@ -609,8 +609,8 @@ void HarvesterPlugin::advanceRefine()
  boDebug() << k_funcinfo << endl;
  if (resourcesMined() == 0) {
 	boDebug() << k_funcinfo << "refining done" << endl;
-	if (resourcesX() != -1 && resourcesY() != -1) {
-		mineAt(QPoint(resourcesX(), resourcesY()));
+	if (mResourceMine) {
+		mineAt(mResourceMine);
 	} else {
 		unit()->setWork(Unit::WorkNone);
 		unit()->setAdvanceWork(Unit::WorkNone);
@@ -689,17 +689,19 @@ void HarvesterPlugin::advanceRefine()
  }
 }
 
-void HarvesterPlugin::mineAt(const QPoint& pos)
+void HarvesterPlugin::mineAt(const ResourceMinePlugin* resource)
 {
  //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
  boDebug() << k_funcinfo << endl;
+ QPoint pos((int)resource->unit()->x(), (int)resource->unit()->y());
  unit()->moveTo(pos);
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
  mResourcesX = pos.x();
  mResourcesY = pos.y();
+
  mHarvestingType = 1;
- mRefinery = 0l;  // This is needed for searching closest refinery in the future
+ mRefinery = 0;  // we'll search the closest refinery after mining
 }
 
 
