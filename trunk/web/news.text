@@ -1,4 +1,14 @@
 [article]
+id=031105
+date=November 5th 2003 16:54
+title=0.9 screenshots and poll
+text=
+    Some screenshots of 0.9 are now <a href="screenshots.php">available</a>.<br>
+    We also have new poll about 0.9: what new feature do you like most.<br>
+    Last poll showed that our users want more frequent releases, we'll try to do
+    so in the future.<br><br>
+
+[article]
 id=031103
 date=November 3rd 2003 00:13
 title=Boson 0.9 finally released!

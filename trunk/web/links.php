@@ -48,7 +48,9 @@ draw_bigbox_text("Here you will find some (hopefully) useful links:<br><br>
   <a href=\"http://www.kde.org/\" target=\"_blank\">KDE homepage</a> Boson uses KDE<br>
   <a href=\"http://www.trolltech.com\" target=\"_blank\">Trolltech (creators of QT)</a> Boson also uses Qt<br>
   <a href=\"http://www.freehackers.org/about/content.html\" target=\"_blank\">freehackers.org</a>Other free software<br>
-  <a href=\"http://www.freecraft.org/\" target=\"_blank\">Freecraft homepage</a> Freecraft is another RTS for Linux<br>
+  <a href=\"http://www.nongnu.org/stratagus/\" target=\"_blank\">Stratagus</a> an real-time strategy gaming engine, successor of FreeCraft<br>
+  <a href=\"http://www.shadowconflict.com/projectinferno/\" target=\"_blank\">Project Inferno</a> an Open Source Real Time Strategy Engine<br>
+  <a href=\"http://freecnc-sf.holarse.net/\" target=\"_blank\">FreeCNC</a> Command & Conquer clone for Unices<br>
   <a href=\"http://sourceforge.net\" target=\"_blank\">SF.net</a> SourceForge.net<br>");
 draw_bigbox_end();
 
