@@ -40,8 +40,6 @@ public:
 	{
 	}
 
-	QString mName;//note: do NOT send over network (i18n)!
-
 	KGamePropertyHandler mProperties;
 
 	KGameProperty<unsigned long int> mHealth;
@@ -109,8 +107,9 @@ UnitBase::~UnitBase()
 // kdDebug() << k_funcinfo << " done" << endl;
 }
 
+
 const QString& UnitBase::name() const
-{ // FIXME: remove
+{
  if (!unitProperties()) {
 	return QString::null;
  }
@@ -244,7 +243,7 @@ bool UnitBase::load(QDataStream& stream)
  return ret;
 }
 
-const UnitProperties* UnitBase::unitProperties() const
+inline const UnitProperties* UnitBase::unitProperties() const
 {
  SpeciesTheme* theme = speciesTheme();
  if (!theme) {
@@ -254,7 +253,7 @@ const UnitProperties* UnitBase::unitProperties() const
  return theme->unitProperties(type());
 }
 
-SpeciesTheme* UnitBase::speciesTheme() const
+inline SpeciesTheme* UnitBase::speciesTheme() const
 {
  if (!owner()) {
 	kdWarning() << k_funcinfo << ": NULL owner" << endl;
@@ -263,17 +262,18 @@ SpeciesTheme* UnitBase::speciesTheme() const
  return owner()->speciesTheme();
 }
 
-bool UnitBase::isFacility() const
+inline bool UnitBase::isFacility() const
 {
  return unitProperties()->isFacility();
 }
 
-bool UnitBase::isMobile() const
+inline bool UnitBase::isMobile() const
 {
  return unitProperties()->isMobile();
 }
 
-bool UnitBase::isFlying() const
+inline bool UnitBase::isFlying() const
 {
  return (unitProperties() ? unitProperties()->isAircraft() : false);
 }
+
