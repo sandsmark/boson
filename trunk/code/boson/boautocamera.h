@@ -54,6 +54,7 @@ class BoAutoCamera
     {
     }
 
+    void setCamera(BoCamera* c) { mCamera = c; }
     BoCamera* camera() const { return mCamera; }
 
     /**

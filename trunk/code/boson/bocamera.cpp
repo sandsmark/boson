@@ -69,11 +69,12 @@ void BoCamera::init()
 
 void BoCamera::setAutoCamera(BoAutoCamera* a)
 {
+  delete mAutoCamera;
+  mAutoCamera = a;
   if (mAutoCamera)
   {
-    delete mAutoCamera;
+    mAutoCamera->setCamera(this);
   }
-  mAutoCamera = a;
 }
 
 void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
