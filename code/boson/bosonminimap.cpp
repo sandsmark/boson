@@ -42,6 +42,8 @@ public:
 	{
 		mMapWidth = -1;
 		mMapHeight = -1;
+
+		mPointSize = 0;
 	}
 
 	int mMapWidth;
@@ -68,6 +70,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
 
 BosonMiniMap::~BosonMiniMap()
 {
+ delete mGround;
  delete d;
 }
 
