@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONWIDGET_H__
-#define __BOSONWIDGET_H__
+#ifndef BOSONWIDGET_H
+#define BOSONWIDGET_H
 
 #include <qwidget.h>
 #include <qdatastream.h>
@@ -246,4 +246,4 @@ private:
 	BosonWidgetPrivate* d;
 };
 
-#endif // __BOSONWIDGET_H__
+#endif

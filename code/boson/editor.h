@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __EDITOR_H__
-#define __EDITOR_H__
+#ifndef EDITOR_H
+#define EDITOR_H
 
 #include "topbase.h"
 
@@ -88,4 +88,4 @@ private:
 	EditorPrivate* d;
 };
 
-#endif // __EDITOR_H__
+#endif

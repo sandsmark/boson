@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __PLAYER_H__
-#define __PLAYER_H__
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include <kgame/kplayer.h>
 

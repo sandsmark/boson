@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONMESSAGE_H__
-#define __BOSONMESSAGE_H__
+#ifndef BOSONMESSAGE_H
+#define BOSONMESSAGE_H
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>

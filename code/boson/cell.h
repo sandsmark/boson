@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __CELL_H__
-#define __CELL_H__
+#ifndef CELL_H
+#define CELL_H
 
 class UnitProperties;
 

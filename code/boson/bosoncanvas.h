@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONCANVAS_H__
-#define __BOSONCANVAS_H__
+#ifndef BOSONCANVAS_H
+#define BOSONCANVAS_H
 
 #include <qcanvas.h>
 

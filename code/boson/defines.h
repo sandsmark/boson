@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __DEFINES_H__
-#define __DEFINES_H__
+#ifndef DEFINES_H
+#define DEFINES_H
 
 #include "../config.h"
 

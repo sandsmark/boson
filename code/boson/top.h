@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __TOP_H__
-#define __TOP_H__
+#ifndef TOP_H
+#define TOP_H
 
 #include "topbase.h"
 
@@ -63,4 +63,4 @@ private:
 private:
 };
 
-#endif // __TOP_H__
+#endif

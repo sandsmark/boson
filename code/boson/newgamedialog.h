@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __NEWGAMEDIALOG_H__
-#define __NEWGAMEDIALOG_H__
+#ifndef NEWGAMEDIALOG_H
+#define NEWGAMEDIALOG_H
 
 #include <kgame/kgamedialog.h>
 

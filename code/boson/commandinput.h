@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __COMMANDINPUT_H__
-#define __COMMANDINPUT_H__
+#ifndef COMMANDINPUT_H
+#define COMMANDINPUT_H
 
 #include <kgame/kgameio.h>
 

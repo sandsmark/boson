@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __GAMEOVERDIALOG_H__
-#define __GAMEOVERDIALOG_H__
+#ifndef GAMEOVERDIALOG_H
+#define GAMEOVERDIALOG_H
 
 #include <kdialogbase.h>
 
