@@ -87,11 +87,10 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 		if (u->isFlying() != flying) {
 			continue;
 		}
-		if (u->isMoving()) {
-			if (includeMoving) {
-				return true;
+		if (!includeMoving) {
+			if (u->isMoving()) {
+				continue;
 			}
-			continue;
 		}
 		return true;
 	}
