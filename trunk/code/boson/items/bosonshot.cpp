@@ -89,11 +89,11 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 }
 
-void BosonShot::advance(unsigned int phase)
+// move the shot by one step
+// (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
+void BosonShot::advanceMoveInternal()
 {
   mStep++;
-  // Call BosonItem advance method
-  BosonItem::advance(phase);
   // Calculate parable height at current step
   float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
@@ -123,6 +123,36 @@ void BosonShot::advance(unsigned int phase)
   {
     mActive = false;
   }
+}
+
+//AB: note this this is primary optimized for SAFETY, NOT for performance. it is
+//optimized for performance in the second place!
+void BosonShot::advanceMoveCheck()
+{
+  float velocityX = xVelocity();
+  float velocityY = yVelocity();
+  float xPos = x() + xVelocity();
+  float yPos = y() + yVelocity();
+  // ensure that the next position will be valid
+  if(xPos < 0 || xPos >= canvas()->mapWidth() * BO_TILE_SIZE)
+  {
+    velocityX = 0.0f;
+    xPos = x();
+    if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+    {
+      boError() << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
+    }
+  }
+  if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+  {
+    velocityY = 0.0f;
+    yPos = y();
+    if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+    {
+      boError() << k_funcinfo << "Internal error! yPos is still invalid: " << yPos << endl;
+    }
+  }
+  setVelocity(velocityX, velocityY, zVelocity());
 }
 
 /*

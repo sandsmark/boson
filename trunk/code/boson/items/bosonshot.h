@@ -45,8 +45,6 @@ class BosonShot : public BosonItem
      **/
     BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target);
 
-    virtual void advance(unsigned int phase);
-
 //    inline BoVector3 pos()  { return mPos; }
 
     Player* owner() const { return mOwner; }
@@ -56,7 +54,28 @@ class BosonShot : public BosonItem
     inline bool isActive() const  { return mActive; };
     inline virtual int rtti() const  { return RTTI::Shot; }
 
-  protected:
+    /**
+     * A shot is always moving, so this does a permanent @ref
+     * advanceMoveInternal and @ref advanceMoveCheck.
+     **/
+    inline virtual void advanceMoveFunction(unsigned int)
+    {
+      advanceMoveInternal();
+      advanceMoveCheck();
+    }
+    /**
+     * See @ref advanceMoveFunction. This does exactly the same.
+     **/
+    inline virtual void advanceMoveFunction2(unsigned int)
+    {
+      advanceMoveInternal();
+      advanceMoveCheck();
+    }
+
+    void advanceMoveInternal();
+    void advanceMoveCheck();
+
+  private:
     BoVector3 mVelo;
     unsigned int mStep;
     unsigned int mTotalSteps;
