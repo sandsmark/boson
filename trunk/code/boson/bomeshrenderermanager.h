@@ -122,6 +122,8 @@ public:
 	 **/
 	void removeModel(BosonModel*);
 
+	QString currentStatisticsData() const;
+
 protected:
 	BoMeshRenderer* createRenderer(const QString& name);
 

@@ -47,7 +47,7 @@ void BoMeshRendererSemiImmediate::setModel(BosonModel* model)
  glTexCoordPointer(2, GL_FLOAT, stride, points + BoMesh::texelPos());
 }
 
-void BoMeshRendererSemiImmediate::startModelRendering()
+void BoMeshRendererSemiImmediate::initFrame()
 {
  glPushAttrib(GL_POLYGON_BIT); // GL_CULL_FACE
 
@@ -58,7 +58,7 @@ void BoMeshRendererSemiImmediate::startModelRendering()
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BoMeshRendererSemiImmediate::stopModelRendering()
+void BoMeshRendererSemiImmediate::deinitFrame()
 {
  glPopAttrib();
 
@@ -66,7 +66,7 @@ void BoMeshRendererSemiImmediate::stopModelRendering()
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
+unsigned int BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod)
 {
  unsigned int* pointsCache = lod->pointsCache();
  unsigned int pointsCacheCount = lod->pointsCacheCount();
@@ -75,7 +75,7 @@ void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, 
 
  if (!nodes) {
 	// nothing to do.
-	return;
+	return 0;
  }
 
  bool resetColor = false; // needs to be true after we changed the current color
@@ -104,14 +104,13 @@ void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, 
 	resetColor = true;
  }
 
+ unsigned int renderedPoints = 0;
  {
 	if (!pointsCache || pointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
 		glBegin(type);
 
-		int vertices = 0;
-		int faces = 0;
 		BoFaceNode* node = nodes;
 		while (node) {
 			const BoFace* face = node->face();
@@ -125,18 +124,12 @@ void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, 
 			glNormal3fv(face->normal(2).data());
 			glArrayElement(points[2]);
 
-			vertices += 3;
-			faces++;
+			renderedPoints += 3;
 
 			node = node->next();
 		}
 
 		glEnd();
-#if 0
-		// FIXME for meshrenderer
-		glstat_item_vertices += vertices;
-		glstat_item_faces += faces;
-#endif
 
 		// reset the normal...
 		// (better solution: don't enable light when rendering
@@ -159,6 +152,7 @@ void BoMeshRendererSemiImmediate::render(const QColor* teamColor, BoMesh* mesh, 
  if (mesh->material()) {
 	mesh->material()->deactivate();
  }
+ return renderedPoints;
 }
 
 

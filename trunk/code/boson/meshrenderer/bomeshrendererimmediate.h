@@ -28,13 +28,12 @@ public:
 	BoMeshRendererImmediate();
 	~BoMeshRendererImmediate();
 
-	virtual void startModelRendering();
-	virtual void stopModelRendering();
-
 	virtual void setModel(BosonModel* model);
 
 protected:
-	virtual void render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
+	virtual void initFrame();
+	virtual void deinitFrame();
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
 
 #if 0
 	// immediate mode doesn't need extra data, so we use the default

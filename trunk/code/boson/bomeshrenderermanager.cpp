@@ -136,3 +136,12 @@ void BoMeshRendererManager::deinitializePlugin()
  }
 }
 
+QString BoMeshRendererManager::currentStatisticsData() const
+{
+ BoMeshRenderer* current = currentRenderer();
+ if (!current) {
+	return QString::null;
+ }
+ return current->statisticsData();
+}
+

@@ -47,11 +47,10 @@ public:
 
 	virtual void setModel(BosonModel*);
 
-	virtual void startModelRendering();
-	virtual void stopModelRendering();
-
 protected:
-	virtual void render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
+	virtual void initFrame();
+	virtual void deinitFrame();
+	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
 
 	virtual BoMeshRendererModelData* createModelData() const;
 	virtual BoMeshRendererMeshData* createMeshData() const;
