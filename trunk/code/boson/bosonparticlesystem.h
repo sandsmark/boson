@@ -148,6 +148,31 @@ class BosonParticleSystem
     inline BoVector3 position() { return mPos; };
 
     /**
+     * Sets current velocity of particles in this system.
+     * Note that if you use custom update or init functions you can specify
+     * velocity for each particle directly and this may not have any effect
+     * then.
+     * @param v New velocity of particles in this system
+     **/
+    inline void setVelocity(BoVector3 v) { mVelo = v; };
+    /**
+     * @return Current velocity of particles in this system
+     **/
+    inline BoVector3 velocity() { return mVelo; };
+
+    /**
+     * Sets color of particles in this system.
+     * Note that new color is only applied to particles which will be inited
+     * after calling this method, it doesn't change color of active particles.
+     * @param v New color of particles in this system
+     **/
+    inline void setColor(BoVector4 c) { mColor = c; };
+    /**
+     * @return Color of particles in this system
+     **/
+    inline BoVector4 color() { return mColor; };
+
+    /**
      * @return Average size of particles in this system
      **/
     inline float size() { return mSize; };

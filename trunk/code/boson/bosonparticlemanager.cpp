@@ -89,7 +89,7 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   }
   else if(type == Fire)
   {
-    maxnum = 200;
+    maxnum = 120;
     initnum = 0;
     rate = 30;
     size = 1.0;
@@ -100,7 +100,7 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   }
   else if(type == SmallSmoke)
   {
-    maxnum = 75;
+    maxnum = 125;
     initnum = 0;
     rate = 25;
     size = 0.7;
@@ -139,12 +139,12 @@ void BosonParticleManager::initSmokeParticle(BosonParticleSystem*, BosonParticle
   particle->pos = BoVector3(getFloat(-0.2, 0.2), getFloat(-0.2, 0.2), getFloat(-0.1, 0.25));
 }
 
-void BosonParticleManager::initSmallSmokeParticle(BosonParticleSystem*, BosonParticle* particle)
+void BosonParticleManager::initSmallSmokeParticle(BosonParticleSystem* s, BosonParticle* particle)
 {
   particle->life = getFloat(1.5, 2.3);
   particle->maxage = particle->life;
   particle->velo = BoVector3(getFloat(0.05, 0.55), getFloat(-0.15, 0.45), getFloat(0.4, 1.0));
-  particle->color = BoVector4(0.7, 0.7, 0.7, 0.7);
+  //particle->color = BoVector4(0.7, 0.7, 0.7, 0.25);
   particle->pos = BoVector3(getFloat(-0.1, 0.1), getFloat(-0.1, 0.1), getFloat(0.5, 0.6));
 }
 
@@ -157,11 +157,11 @@ void BosonParticleManager::initShotParticle(BosonParticleSystem*, BosonParticle*
   particle->pos = BoVector3(getFloat(-0.1, 0.1), getFloat(-0.1, 0.1), getFloat(0.5, 0.6));
 }
 
-void BosonParticleManager::initFireParticle(BosonParticleSystem*, BosonParticle* particle)
+void BosonParticleManager::initFireParticle(BosonParticleSystem* s, BosonParticle* particle)
 {
   particle->life = getFloat(1.5, 2.0);
   particle->maxage = particle->life;
-  particle->velo = BoVector3(0.0, 0.0, getFloat(0.8, 1.2));
+  particle->velo = BoVector3(0.0, 0.0, s->velocity()[2] + getFloat(0.0, 0.4));
   particle->color = BoVector4(1.0, 0.3, 0.15, 0.3);
   particle->pos = BoVector3(getFloat(-0.05, 0.05), getFloat(-0.05, 0.05), getFloat(0.5, 0.6));
 }
