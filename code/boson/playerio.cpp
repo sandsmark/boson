@@ -48,6 +48,16 @@ PlayerIO::~PlayerIO()
  delete d;
 }
 
+const QString& PlayerIO::name() const
+{
+ return player()->name();
+}
+
+unsigned long int PlayerIO::playerId() const
+{
+ return player()->id();
+}
+
 bool PlayerIO::hasRtti(int rtti) const
 {
  return player()->hasRtti(rtti);
@@ -143,7 +153,7 @@ bool PlayerIO::hasMiniMap() const
  return player()->hasMiniMap();
 }
 
-bool PlayerIO::isEnemy(Player* p) const
+bool PlayerIO::isEnemy(const Player* p) const
 {
  return player()->isEnemy(p);
 }
@@ -171,7 +181,7 @@ bool PlayerIO::isNeutral(const Unit* unit) const
 
 bool PlayerIO::isAllied(const Player* p) const
 {
- return player()->Allied(p);
+ return player()->isAllied(p);
 }
 
 bool PlayerIO::isAllied(const Unit* unit) const
