@@ -312,6 +312,11 @@ AC_DEFUN(AC_BOSON_CHECK_XRANDR,
 Display* dpy = 0;
 int ev, er;
 XRRQueryExtension(dpy, &ev, &er);
+
+XRRScreenConfiguration* conf = 0; // NULL invalid, but who cares here
+int count;
+// this line fails for XFree86 4.2
+XRRConfigSizes(conf, &count);
 	],
 	[bo_xrandr_extension=yes],
 	[bo_xrandr_extension=no]
