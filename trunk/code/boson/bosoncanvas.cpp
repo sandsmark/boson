@@ -482,9 +482,12 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
 
 QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
 {
+ QValueList<Unit*> list;
+ if (!cell(x, y)) {
+	return list;
+ }
  QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
 			BO_TILE_SIZE, BO_TILE_SIZE));
- QValueList<Unit*> list;
  for (unsigned int i = 0; i < l.count(); i++) {
 	if (!RTTI::isUnit(l[i]->rtti())) {
 		// this item is not important for us here
@@ -502,25 +505,28 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
 
 bool BosonCanvas::cellOccupied(int x, int y)
 {
-	return !(unitsAtCell(x, y).isEmpty());
-	// alternative version (faster but duplicated code):
-	/*
-	QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-			BO_TILE_SIZE, BO_TILE_SIZE));
-	if(list.isEmpty())
-		return false;
-	for (unsigned int i = 0; i < list.count(); i++)
-	{
-		if (!RTTI::isUnit(list[i]->rtti()))
-			continue;
-		Unit* u = (Unit*)list[i];
-		if(u->isDestroyed())
-			continue;
-		if(u->isFlying())
-			continue;
-		return true;
-	}
+ if (!cell(x, y)) {
+	return true;
+ }
+ return !(unitsAtCell(x, y).isEmpty());
+ // alternative version (faster but duplicated code):
+ /*
+ QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+		BO_TILE_SIZE, BO_TILE_SIZE));
+ if(list.isEmpty()) {
 	return false;
-	*/
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	if (!RTTI::isUnit(list[i]->rtti()))
+		continue;
+	Unit* u = (Unit*)list[i];
+	if(u->isDestroyed())
+		continue;
+	if(u->isFlying())
+		continue;
+	return true;
+ }
+ return false;
+ */
 }
 
