@@ -213,10 +213,14 @@ bool SpeciesTheme::loadUnit(int type)
 	kdError() << "Could not load unit type " << type << endl;
 	return false;
  }
- loadUnitGraphics(prop);
+ bool ret = loadUnitGraphics(prop);
 
+ if (!ret) {
+	return false;
+ }
  BosonSound* sound = boMusic->bosonSound(themePath());
  sound->addUnitSounds(prop);
+ return true;
 }
 
 QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
