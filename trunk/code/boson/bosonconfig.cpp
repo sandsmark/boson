@@ -161,6 +161,29 @@ void BosonConfig::saveCursorMode(CursorMode mode, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
+QString BosonConfig::readCursorDir(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ QString dir = conf->readEntry("CursorDir", QString::null); // QString::null causes slotChangeCursor() to use BosonCursor::defaultTheme
+ conf->setGroup(oldGroup);
+ return dir;
+}
+
+void BosonConfig::saveCursorDir(const QString& dir, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("CursorDir", dir);
+ conf->setGroup(oldGroup);
+}
+
 GroupMoveMode BosonConfig::readGroupMoveMode(KConfig* conf)
 {
  if (!conf) {

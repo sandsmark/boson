@@ -20,6 +20,7 @@
 #include "bosoncursor.h"
 
 #include <ksimpleconfig.h>
+#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #include <kcursor.h>
@@ -73,6 +74,25 @@ QPoint BosonCursor::pos() const
  return QCursor::pos();
 }
 
+QStringList BosonCursor::availableThemes()
+{
+ QStringList list = KGlobal::dirs()->findAllResources("data",
+		"boson/themes/cursors/*/index.desktop");
+ QStringList retList;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	retList.append(list[i].left(list[i].length() - strlen("/index.desktop")));
+ }
+
+ return retList;
+}
+
+QString BosonCursor::defaultTheme()
+{
+ QString cursorDir = KGlobal::dirs()->findResourceDir("data",
+		"boson/themes/cursors/default/index.desktop") +
+		QString::fromLatin1("boson/themes/cursors/default");
+ return cursorDir;
+}
 
 /////////////////////////////////////////
 /////// BosonNormalCursor ///////////////
@@ -329,6 +349,7 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
  }
  QCanvasPixmapArray* array = 0;
  KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
+ kdDebug() << baseDir << endl;
  if (!c.hasGroup("Boson Cursor")) {
 	kdWarning() << k_funcinfo << "index.desktop is missing default group - sprite cursor disabled" << endl;
  } else {

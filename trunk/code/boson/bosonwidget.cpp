@@ -117,6 +117,7 @@ public:
 	KGameChat* mChat;
 
 	BosonCursor* mCursor;
+	QString mCursorTheme; // path to cursor pixmaps
 
 	QPtrDict<KGameMouseIO> mIOList;
 };
@@ -128,6 +129,43 @@ BosonWidget::BosonWidget(QWidget* parent)
 
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
+}
+
+BosonWidget::~BosonWidget()
+{
+ kdDebug() << k_funcinfo << endl;
+ if (d->mCursor->isA("BosonSpriteCursor")) {
+	boConfig->saveCursorMode(CursorSprite);
+ } else if (d->mCursor->isA("BosonExperimentalCursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
+ } else if (d->mCursor->isA("BosonKDECursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
+ } else {
+	boConfig->saveCursorMode(CursorNormal);
+ }
+ boConfig->saveCursorDir(d->mCursorTheme);
+ d->mIOList.clear();
+ delete d->mUnitTips;
+ d->mDisplayList.clear();
+ d->mBigDisplay = 0;
+ delete d->mCursor;
+
+// delete the destroyed units first
+ d->mCanvas->deleteDestroyed();
+// now delte all KGame stuff. Also removed player and therefore the rest of the
+// units.  Otherwise this is deleted later, when all units are already cleared by
+// QCanvas (->crash)
+ delete d->mBoson;
+ delete d->mCanvas;
+ if (d->mMap) {
+	delete d->mMap;
+ }
+ if (d->mScenario) {
+	delete d->mScenario;
+ }
+ 
+ delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::init()
@@ -179,7 +217,7 @@ void BosonWidget::init()
  connect(d->mBoson, SIGNAL(signalNewGroup(Unit*, QPtrList<Unit>)),
 		d->mCanvas, SLOT(slotNewGroup(Unit*, QPtrList<Unit>)));
 
- slotChangeCursor(boConfig->readCursorMode());
+ slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
  slotChangeGroupMove(boConfig->readGroupMoveMode());
 
  addBigDisplay();
@@ -233,43 +271,6 @@ void BosonWidget::initChat()
  d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
  d->mChat->hide();
  d->mBigDisplay->setKGameChat(d->mChat);
-}
-
-
-BosonWidget::~BosonWidget()
-{
- kdDebug() << k_funcinfo << endl;
- if (d->mCursor->isA("BosonSpriteCursor")) {
-	boConfig->saveCursorMode(CursorSprite);
- } else if (d->mCursor->isA("BosonExperimentalCursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
- } else if (d->mCursor->isA("BosonKDECursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
- } else {
-	boConfig->saveCursorMode(CursorNormal);
- }
- d->mIOList.clear();
- delete d->mUnitTips;
- d->mDisplayList.clear();
- d->mBigDisplay = 0;
- delete d->mCursor;
-
-// delete the destroyed units first
- d->mCanvas->deleteDestroyed();
-// now delte all KGame stuff. Also removed player and therefore the rest of the
-// units.  Otherwise this is deleted later, when all units are already cleared by
-// QCanvas (->crash)
- delete d->mBoson;
- delete d->mCanvas;
- if (d->mMap) {
-	delete d->mMap;
- }
- if (d->mScenario) {
-	delete d->mScenario;
- }
- 
- delete d;
- kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::addLocalPlayer()
@@ -536,8 +537,8 @@ void BosonWidget::slotGamePreferences()
 
 // note: this is difficult for several views! probably d->mBigDisplay should be
 // the primary view then.
- connect(dlg, SIGNAL(signalCursorChanged(int)),
-		this, SLOT(slotChangeCursor(int)));
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SLOT(slotChangeCursor(int, const QString&)));
 
  connect(dlg, SIGNAL(signalGroupMoveChanged(int)),
 		this, SLOT(slotChangeGroupMove(int)));
@@ -684,7 +685,7 @@ void BosonWidget::startGame()
 
 void BosonWidget::startEditor()
 {
- slotChangeCursor(CursorNormal);
+ slotChangeCursor(CursorNormal, boConfig->readCursorDir());
  connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 	
@@ -1173,7 +1174,7 @@ void BosonWidget::slotRemoveActiveView()
  d->mBigDisplay = d->mDisplayList.first();
 }
 
-void BosonWidget::slotChangeCursor(int mode)
+void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
  // note: this doesn't make sense here when we use several views!
  BosonCursor* b;
@@ -1200,12 +1201,15 @@ void BosonWidget::slotChangeCursor(int mode)
 	d->mDisplayList.at(i)->setCursor(d->mCursor);
  }
 
- QString cursorDir = KGlobal::dirs()->findResourceDir("data", 
-		"boson/themes/cursors/move/index.desktop") +
-		QString::fromLatin1("boson/themes/cursors");
+ QString cursorDir = cursorDir_;
+ if (cursorDir == QString::null) { 
+	cursorDir = BosonCursor::defaultTheme();
+ }
+
  d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
  d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
  d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
+ d->mCursorTheme = cursorDir;
 // d->mCursor->setWidgetCursor(d->mBigDisplay);
 
  // some cursors need special final initializations. do them now
