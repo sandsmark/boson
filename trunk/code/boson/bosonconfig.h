@@ -95,6 +95,7 @@ public:
 
 	bool value() const { return mValue; }
 	void setValue(bool v) { mValue = v; }
+	bool defaultValue() const { return mDefaultValue; }
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -103,6 +104,7 @@ public:
 
 private:
 	bool mValue;
+	bool mDefaultValue;
 };
 
 class BoConfigIntEntry : public BoConfigEntry
@@ -111,8 +113,9 @@ public:
 	BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue, bool saveConfig = true);
 	virtual ~BoConfigIntEntry() {}
 
-	unsigned int value() const { return mValue; }
+	int value() const { return mValue; }
 	void setValue(int v) { mValue = v; }
+	int defaultValue() const { return mDefaultValue; }
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -121,6 +124,7 @@ public:
 
 private:
 	int mValue;
+	int mDefaultValue;
 };
 
 class BoConfigUIntEntry : public BoConfigEntry
@@ -131,6 +135,7 @@ public:
 
 	unsigned int value() const { return mValue; }
 	void setValue(unsigned int v) { mValue = v; }
+	unsigned int defaultValue() const { return mDefaultValue; }
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -138,6 +143,7 @@ public:
 	virtual int type() const { return UInt; }
 
 private:
+	unsigned int mDefaultValue;
 	unsigned int mValue;
 };
 
@@ -149,6 +155,7 @@ public:
 
 	double value() const { return mValue; }
 	void setValue(double v) { mValue = v; }
+	double defaultValue() const { return mDefaultValue; }
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -156,6 +163,7 @@ public:
 	virtual int type() const { return Double; }
 
 private:
+	double mDefaultValue;
 	double mValue;
 };
 
@@ -167,6 +175,7 @@ public:
 
 	const QString& value() const { return mValue; }
 	void setValue(const QString& v) { mValue = v; }
+	const QString& defaultValue() const { return mDefaultValue; }
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -174,6 +183,7 @@ public:
 	virtual int type() const { return String; }
 
 private:
+	QString mDefaultValue;
 	QString mValue;
 };
 
@@ -186,6 +196,7 @@ public:
 	QColor value() const;
 	void setValue(unsigned int rgb ) { mRGBValue = rgb; }
 	void setValue(const QColor& v);
+	QColor defaultValue() const;
 
 	virtual void save(KConfig* conf);
 	virtual void load(KConfig* conf);
@@ -193,6 +204,7 @@ public:
 	virtual int type() const { return Color; }
 
 private:
+	unsigned int mDefaultRGBValue;
 	unsigned int mRGBValue;
 };
 
@@ -380,6 +392,12 @@ public:
 	void setIntListValue(const QString& key, const QValueList<int>& v);
 
 	/**
+	 * Set the value of the config entry @p key (see @ref value) to the
+	 * default value that was given to the constructor of that config entry.
+	 **/
+	void resetValueToDefault(const QString& key);
+
+	/**
 	 * @return The (dynamic) entry for @p key, or NULL if no such key was
 	 * ever added using @ref addDynamicEntry.
 	 **/
@@ -438,6 +456,20 @@ public:
 	 * the correct type exists.
 	 **/
 	QValueList<int> intListValue(const QString& key, const QValueList<int>& _default) const;
+
+	/**
+	 * @return The default value of the entry @p key, if existing, otherwise
+	 * @p _default
+	 **/
+	bool boolDefaultValue(const QString& key, bool _default = false) const;
+	int intDefaultValue(const QString& key, int _default = 0) const;
+	unsigned int uintDefaultValue(const QString& key, unsigned int _default = 0) const;
+	const QString& stringDefaultValue(const QString& key, const QString& _default = QString::null) const;
+	double doubleDefaultValue(const QString& key, double _default = 0.0) const;
+	QColor colorDefaultValue(const QString& key) const;
+	QColor colorDefaultValue(const QString& key, const QColor& _default) const;
+	QValueList<int> intListDefaultValue(const QString& key) const;
+	QValueList<int> intListDefaultValue(const QString& key, const QValueList<int>& _default) const;
 
 
 public:
