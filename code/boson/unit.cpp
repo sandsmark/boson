@@ -975,7 +975,7 @@ BoItemList Unit::unitsInRange(unsigned long int range) const
  // collisions() does this anyway.
  QRect rect;
  rect.setCoords(left - range, top - range, right + range, bottom + range);
- BoItemList items = collisions()->collisions(rect, (BosonItem*)this, false);
+ BoItemList items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
  items.remove((BosonItem*)this);
 
  BoItemList inRange;
