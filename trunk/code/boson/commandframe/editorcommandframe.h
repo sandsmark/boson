@@ -40,15 +40,13 @@ class EditorCommandFrame : public BosonCommandFrameBase
 {
 	Q_OBJECT
 public:
-
-	EditorCommandFrame(QWidget* parent);
 	~EditorCommandFrame();
 
-	void setGroundTheme(BosonGroundTheme* theme);
+	virtual void setGroundTheme(BosonGroundTheme* theme);
 
-	void placeGround();
-	void placeMobiles(Player* owner);
-	void placeFacilities(Player* owner);
+	virtual void placeGround();
+	virtual void placeMobiles(Player* owner);
+	virtual void placeFacilities(Player* owner);
 
 public slots:
 	virtual void slotSetButtonsPerRow(int b);
@@ -92,6 +90,10 @@ protected slots:
 	void slotUpdate();
 
 	void slotUpdateUnitConfig();
+
+private:
+	friend BosonCommandFrameBase* BosonCommandFrameBase::createCommandFrame(QWidget*, bool);
+	EditorCommandFrame(QWidget* parent);
 
 private:
 	void init();

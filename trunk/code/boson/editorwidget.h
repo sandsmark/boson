@@ -28,7 +28,6 @@ class KActionCollection;
 class BosonCursor;
 class BosonCanvas;
 class BosonCommandFrameBase;
-class EditorCommandFrame;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -118,8 +117,6 @@ protected:
 	virtual void startScenarioAndGame();
 
 	void savePlayField(const QString& fileName);
-
-	EditorCommandFrame* editorCmdFrame() const;
 
 private:
 	class EditorWidgetPrivate;

@@ -31,6 +31,7 @@ class BosonOrderButton;
 class BoSelection;
 class BoUnitDisplayBase;
 class BosonOrderWidget;
+class BosonGroundTheme;
 
 class KPlayer;
 class QVBox;
@@ -45,9 +46,14 @@ class BosonCommandFrameBase : public QFrame
 {
 	Q_OBJECT
 public:
-
 	BosonCommandFrameBase(QWidget* parent);
 	~BosonCommandFrameBase();
+
+	/**
+	 * Create a cmdframe. The cmdframe will be a @ref BosonCommandFrame if
+	 * @p game is TRUE and a @ref EditorCommandFrame if @p game is FALSE.
+	 **/
+	static BosonCommandFrameBase* createCommandFrame(QWidget* parent, bool game);
 
 	/**
 	 * @param p The player whose units can be produced here.
@@ -98,6 +104,28 @@ public:
 	 * @return Current selection
 	 **/
 	BoSelection* selection() const;
+
+	/**
+	 * Editor mode only.
+	 **/
+	virtual void setGroundTheme(BosonGroundTheme*) {}
+
+	/**
+	 * Editor mode only. Display "place ground" widgets.
+	 **/
+	virtual void placeGround() {}
+
+	/**
+	 * Editor mode only. Place all mobile units for the specified player
+	 * into the command frame.
+	 **/
+	virtual void placeMobiles(Player*) {}
+
+	/**
+	 * Editor mode only. Place all facilities for the specified player
+	 * into the command frame.
+	 **/
+	virtual void placeFacilities(Player*) {}
 
 public slots:
 	/**
