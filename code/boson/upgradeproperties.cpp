@@ -26,6 +26,7 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "bosonweapon.h"
+#include "bosoncanvas.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -518,6 +519,8 @@ void UpgradeProperties::applyPropertyToUnits(float oldvalue,
       else if(type == SightRange)
       {
         u->setSightRange(u->unitProperties()->sightRange());
+        // Update unit's sight
+        u->canvas()->updateSight(u, u->x(), u->y());
       }
       else
       {
