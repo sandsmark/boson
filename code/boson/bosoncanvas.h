@@ -79,17 +79,6 @@ public:
 	unsigned int mapHeight() const;
 	unsigned int mapWidth() const;
 
-	/**
-	 * Load the tileset - see @ref BosonTiles
-	 *
-	 * Note that the actual loading happens in @ref slotLoadTiles using
-	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
-	 * use @ref QApplication::processEvents
-	 * @param tileFile currently always "earth.png
-	 * @param withtimer whether to use timer
-	 **/
-	void loadTiles(const QString& tileFile, bool withtimer = true);
-
 	virtual void addAnimation(BosonSprite* item);
 	virtual void removeAnimation(BosonSprite* item);
 
@@ -223,15 +212,6 @@ signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitDestroyed(Unit* unit);
 	void signalOutOfGame(Player*);
-	void signalTilesLoading(int);
-	void signalTilesLoaded();
-
-protected slots:
-	/**
-	 * ad the tileset that has been specified using @ref loadTiles. We use
-	 * this slot to provide a non-blocking tile loading.
-	 **/
-	void slotLoadTiles();
 
 protected:
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }

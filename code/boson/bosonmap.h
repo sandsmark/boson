@@ -132,11 +132,25 @@ public:
 	void setTileSet(BosonTiles* t);
 	BosonTiles* tileSet() const { return mTiles; }
 
+	/**
+	 * Load the tileset - see @ref BosonTiles
+	 *
+	 * Note that the actual loading happens in @ref slotLoadTiles using
+	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
+	 * use @ref QApplication::processEvents
+	 * @param tiles currently always "earth.png", currently
+	 * @param withtimer whether to use timer
+	 **/
+	void loadTiles(const QString& tiles, bool withtimer = true);
+
 public slots:
 	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 
 signals:
 	void signalTileSetChanged(BosonTiles*);
+
+	void signalTilesLoading(int);
+	void signalTilesLoaded();
 
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
@@ -167,6 +181,13 @@ protected:
 	 * validity string/header.
 	 **/
 	void saveValidityHeader(QDataStream& stream);
+
+protected slots:
+	/**
+	 * Load the tileset that has been specified using @ref loadTiles. We use
+	 * this slot to provide a non-blocking tile loading.
+	 **/
+	void slotLoadTiles();
 
 private:
 	void init();
