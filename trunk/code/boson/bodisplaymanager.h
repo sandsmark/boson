@@ -44,13 +44,6 @@ class BoDisplayManager : public QWidget
 {
 	Q_OBJECT
 public:
-	enum ScrollDirection {
-		ScrollUp = 0,
-		ScrollRight = 1,
-		ScrollDown = 2,
-		ScrollLeft = 3
-	};
-
 	/**
 	 * @param gameMode controls whether to create @ref BosonBigDisplay or
 	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
@@ -68,21 +61,6 @@ public:
 	BosonBigDisplayBase* activeDisplay() const;
 
 	/**
-	 * @return A list containing ALL displays. Try to avoid this function.
-	 **/
-//	QPtrList<BosonBigDisplayBase> displays() const;
-
-	/**
-	 * Set the cursor for all displays
-	 **/
-	void setCursor(BosonCursor* cursor);
-
-	/**
-	 * Set the local playerIO for all displays
-	 **/
-	void setLocalPlayerIO(PlayerIO* playerIO);
-
-	/**
 	 * Make the displaymanager use this canvas (e.g. the selections need
 	 * this).
 	 *
@@ -91,8 +69,6 @@ public:
 	void setCanvas(BosonCanvas* canvas);
 
 	void quitGame();
-
-	void addChatMessage(const QString& text);
 
 	/**
 	 * See @ref BosonBigDisplayInputBase::unlockAction
@@ -164,7 +140,6 @@ public slots:
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
-	void slotUnitChanged(Unit* unit);
 
 	void slotUnitRemoved(Unit* u);
 
@@ -207,8 +182,6 @@ public slots:
 	void slotChangeFont(const BoFontInfo& font);
 
 	void slotSetGrabMovie(bool grab);
-
-	void slotShowLight0Widget();
 
 signals:
 	/**

@@ -53,6 +53,7 @@
 #include "bogroundrenderermanager.h"
 #include "boglstatewidget.h"
 #include "boconditionwidget.h"
+#include "bocamerawidget.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -106,6 +107,8 @@ public:
 		mScript = 0;
 
 		mCanvas = 0;
+
+		mLightWidget = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
@@ -123,6 +126,8 @@ public:
 	BosonScript* mScript;
 
 	BosonCanvas* mCanvas;
+
+	BoLightCameraWidget1* mLightWidget;
 };
 
 BosonWidgetBase::BosonWidgetBase(QWidget* parent)
@@ -139,12 +144,13 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
 BosonWidgetBase::~BosonWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
+ delete d->mLightWidget;
  if (factory()) {
 	// remove the bosonwidget-specific menus from the XML GUI (menubar,
 	// toolbar, ...)
 	factory()->removeClient(this);
  }
- if (mDisplayManager) {
+ if (displayManager()) {
 	// we do NOT delete the display manager here
 	setDisplayManager(0);
  }
@@ -225,22 +231,24 @@ void BosonWidgetBase::initConnections()
 
 void BosonWidgetBase::initDisplayManager()
 {
-#warning do NOT do these connections here!
+ BO_CHECK_NULL_RET(displayManager());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ BO_CHECK_NULL_RET(display);
  // dont do the connect()s here, as some objects might not be deleted and
  // therefore we do the same connect twice if an endgame() occurs!
- connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
+ connect(displayManager(), SIGNAL(signalSelectionChanged(BoSelection*)),
 		cmdFrame(), SLOT(slotSelectionChanged(BoSelection*)));
  connect(cmdFrame(), SIGNAL(signalSelectUnit(Unit*)),
-		mDisplayManager, SLOT(slotActiveSelectSingleUnit(Unit*)));
+		displayManager(), SLOT(slotActiveSelectSingleUnit(Unit*)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		mDisplayManager, SLOT(slotAdvance(unsigned int, bool)));
+		displayManager(), SLOT(slotAdvance(unsigned int, bool)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvance(unsigned int, bool)));
 
- displayManager()->setLocalPlayerIO(localPlayerIO()); // this does nothing.
+ display->setLocalPlayerIO(localPlayerIO()); // this does nothing.
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
-		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
+		display, SLOT(slotUnitChanged(Unit*)));
 }
 
 
@@ -277,11 +285,10 @@ void BosonWidgetBase::initPlayer()
 void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  BO_CHECK_NULL_RET(displayManager());
+ BO_CHECK_NULL_RET(displayManager()->activeDisplay());
 
  // Init all bigdisplays // AB: there is only one now
- if (displayManager()->activeDisplay()) {
-	initBigDisplay(displayManager()->activeDisplay());
- }
+ initBigDisplay(displayManager()->activeDisplay());
 
  initLayout();
  startScenarioAndGame();
@@ -320,7 +327,7 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 	b->setDisplayInput(i);
  }
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)),
-		mDisplayManager, SIGNAL(signalLockAction(bool)));
+		displayManager(), SIGNAL(signalLockAction(bool)));
  b->setCanvas(canvas());
 
  // FIXME: this should be done by this->setLocalPlayer(), NOT here!
@@ -363,14 +370,15 @@ void BosonWidgetBase::changeCursor(BosonCursor* cursor)
  }
  delete mCursor;
  mCursor = cursor;
- displayManager()->setCursor(mCursor);
+ displayManager()->activeDisplay()->setCursor(mCursor);
 }
 
 void BosonWidgetBase::slotHack1()
 {
- QSize size = displayManager()->activeDisplay()->size();
- displayManager()->activeDisplay()->resize(size.width() - 1, size.height() - 1);
- displayManager()->activeDisplay()->resize(size);
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ QSize size = display->size();
+ display->resize(size.width() - 1, size.height() - 1);
+ display->resize(size);
 }
 
 void BosonWidgetBase::slotItemAdded(BosonItem* item)
@@ -453,7 +461,7 @@ void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QS
  // for system messages)
  d->mChat->chatWidget()->addSystemMessage(fromName, text);
 
- displayManager()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+ displayManager()->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
 
 void BosonWidgetBase::slotUnfogAll(Player* pl)
@@ -513,25 +521,25 @@ void BosonWidgetBase::initKActions()
  a = new KAction(i18n("Scroll Up"), scrollUp, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_up");
- scrollMapper->setMapping(a, BoDisplayManager::ScrollUp);
+ scrollMapper->setMapping(a, ScrollUp);
  KShortcut scrollDown(Qt::Key_Down);
  scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
  a = new KAction(i18n("Scroll Down"), scrollDown, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_down");
- scrollMapper->setMapping(a, BoDisplayManager::ScrollDown);
+ scrollMapper->setMapping(a, ScrollDown);
  KShortcut scrollLeft(Qt::Key_Left);
  scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
  a = new KAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_left");
- scrollMapper->setMapping(a, BoDisplayManager::ScrollLeft);
+ scrollMapper->setMapping(a, ScrollLeft);
  KShortcut scrollRight(Qt::Key_Right);
  scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
  a = new KAction(i18n("Scroll Right"), scrollRight, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_right");
- scrollMapper->setMapping(a, BoDisplayManager::ScrollRight);
+ scrollMapper->setMapping(a, ScrollRight);
  KShortcut rotateLeft(Qt::Key_Q);
  a = new KAction(i18n("Rotate Left"), rotateLeft, displayManager(),
 		SLOT(slotRotateLeft()), actionCollection(),
@@ -666,7 +674,7 @@ void BosonWidgetBase::initKActions()
 		"debug_show_opengl_states");
  (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
 		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
- (void)new KAction(i18n("Light0..."), KShortcut(), displayManager(),
+ (void)new KAction(i18n("Light0..."), KShortcut(), this,
 		SLOT(slotShowLight0Widget()), actionCollection(),
 		"debug_light0");
  (void)new KAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
@@ -693,6 +701,8 @@ void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
  boDebug() << k_funcinfo << endl;
+ delete d->mLightWidget;
+ d->mLightWidget = 0;
  boGame->quitGame();
  d->mCanvas = 0;
  boDebug() << k_funcinfo << "done" << endl;
@@ -900,7 +910,7 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
  if (mLocalPlayer) {
 	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
 	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
-			mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
+			displayManager(), SLOT(slotAction(const BoSpecificAction&)));
 	mLocalPlayer->addGameIO(input);
 	if (!cmdFrame()) {
 		boError() << k_funcinfo << "cmdFrame() is NULL - this should not be possible here!" << endl;
@@ -909,7 +919,7 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
 	}
  }
  if (displayManager()) {
-	displayManager()->setLocalPlayerIO(localPlayer()->playerIO());
+	displayManager()->activeDisplay()->setLocalPlayerIO(localPlayer()->playerIO());
  }
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game object" << endl;
@@ -1155,6 +1165,18 @@ void BosonWidgetBase::initScripts()
 void BosonWidgetBase::slotDumpGameLog()
 {
  boGame->saveGameLogs("boson");
+}
+
+void BosonWidgetBase::slotShowLight0Widget()
+{
+ BO_CHECK_NULL_RET(displayManager());
+ BO_CHECK_NULL_RET(displayManager()->activeDisplay());
+ BosonBigDisplayBase* display = displayManager()->activeDisplay();
+ delete d->mLightWidget;
+ d->mLightWidget = new BoLightCameraWidget1(0, true);
+ d->mLightWidget->show();
+ d->mLightWidget->setLight(display->light(0), display->context());
+
 }
 
 void BosonWidgetBase::slotReloadModelTextures()

@@ -28,7 +28,6 @@
 #include "bosoncanvas.h"
 #include "bodebug.h"
 #include "boaction.h"
-#include "bocamerawidget.h"
 
 #include <klocale.h>
 
@@ -50,8 +49,6 @@ public:
 		mLayout = 0;
 
 		mActiveDisplay = 0;
-
-		mLightWidget = 0;
 	}
 
 	QVBoxLayout* mLayout;
@@ -61,15 +58,12 @@ public:
 	QIntDict<BoSelection> mSelectionGroups;
 
 	bool mGrabMovie;
-
-	BoLightCameraWidget1* mLightWidget;
 };
 
 BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
 {
  d = new BoDisplayManagerPrivate;
  d->mGrabMovie = false;
- d->mLightWidget = 0;
 
  d->mSelectionGroups.setAutoDelete(true);
  for (int i = 0; i < 10; i++) {
@@ -81,7 +75,6 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
 BoDisplayManager::~BoDisplayManager()
 {
  boDebug() << k_funcinfo << endl;
- delete d->mLightWidget;
  d->mSelectionGroups.clear();
  boDebug() << k_funcinfo << "deleting display" << endl;
  delete d->mActiveDisplay;
@@ -160,19 +153,6 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  return b;
 }
 
-void BoDisplayManager::setCursor(BosonCursor* cursor)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->setCursor(cursor);
-}
-
-void BoDisplayManager::setLocalPlayerIO(PlayerIO* io)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- boDebug() << k_funcinfo << endl;
- d->mActiveDisplay->setLocalPlayerIO(io);
-}
-
 void BoDisplayManager::setCanvas(BosonCanvas* c)
 {
  boDebug() << k_funcinfo << endl;
@@ -188,8 +168,6 @@ void BoDisplayManager::setCanvas(BosonCanvas* c)
 void BoDisplayManager::quitGame()
 {
  boDebug() << k_funcinfo << endl;
- delete d->mLightWidget;
- d->mLightWidget = 0;
  if (d->mActiveDisplay) {
 	d->mActiveDisplay->quitGame();
  }
@@ -382,26 +360,11 @@ void BoDisplayManager::slotDeleteSelectedUnits()
  activeDisplay()->displayInput()->deleteSelectedUnits();
 }
 
-void BoDisplayManager::addChatMessage(const QString& text)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->addChatMessage(text);
-}
-
 void BoDisplayManager::slotUnitRemoved(Unit* u)
 {
  for(int i = 0; i < 10; i++) {
 	d->mSelectionGroups[i]->removeUnit(u);
  }
-}
-
-void BoDisplayManager::slotUnitChanged(Unit* unit)
-{
- // this slot is meant for the case that unit has been destroyed but is
- // selected. we don't check for unit->isDestroyed() here (which would be
- // faster) but forward the pointer to the displays, to avoid including unit.h
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->slotUnitChanged(unit);
 }
 
 void BoDisplayManager::unlockAction()
@@ -602,16 +565,5 @@ void BoDisplayManager::grabMovieFrame()
 	allMovieFrames.clear();
  }
 #endif
-}
-
-void BoDisplayManager::slotShowLight0Widget()
-{
- if (!d->mActiveDisplay) {
-	return;
- }
- delete d->mLightWidget;
- d->mLightWidget = new BoLightCameraWidget1(0, true);
- d->mLightWidget->show();
- d->mLightWidget->setLight(d->mActiveDisplay->light(0), d->mActiveDisplay->context());
 }
 
