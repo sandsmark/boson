@@ -88,8 +88,8 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 		case OT_UNIT:
 			mobileMsg_t	mob;
 			mob.who		= who;
-			mob.x		= mx;
-			mob.y		= my;
+			mob.x		= x;
+			mob.y		= y;
 			mob.type	= m;
 			_canvas->createMobUnit(mob);
 			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
