@@ -80,6 +80,18 @@ public:
 		IdPluginProperyLast
 	};
 
+	enum AnimationModes {
+		// the numbers are just cosmetic and do not need to be in order.
+		// the idle mode is an exception - it MUST be 0.
+		// AB: TODO: add BosonItem::disableAnimation for the
+		// construction animations! they are done differently
+		AnimationIdle = 0, // default mode
+		AnimationMove = 1,
+		AnimationMine = 2,
+		AnimationRefine = 3,
+		AnimationWreckage = 100
+	};
+
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
 

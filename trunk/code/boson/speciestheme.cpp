@@ -20,7 +20,7 @@
 #include "speciestheme.h"
 
 #include "defines.h"
-#include "unitbase.h"
+#include "unit.h"
 #include "unitproperties.h"
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
@@ -39,7 +39,6 @@
 #include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
-#include <qgl.h>
 
 /**
  * By any reason QPixmap uses the alpha mask if existing, even if a custom 
@@ -72,8 +71,6 @@ public:
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<BosonModel> mUnitModels;
-
-	// TODO: the shots have no OpenGL implementation yet!
 
 	QIntDict<QPixmap> mActionPixmaps;
 
@@ -553,56 +550,6 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
  return true;
 }
 
-/*
-bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
-{
- QImage image(fileName);
- const QRgb backGround = qRgb(255, 0, 255) & RGB_MASK;
-
- if (image.isNull()) {
-	kdError() << k_funcinfo << "Could not load " << fileName << endl;
-	return false;
- }
- if (image.width() < 25) {
-	kdError() << fileName << "width < 25" << endl;
-	return false;
- }
- if (image.height() < 25) {
-	kdError() << fileName << "height < 25" << endl;
-	return false;
- }
- if (image.depth() != 32) {
-	kdError() << fileName << "depth != 32" << endl;
- }
-
- QImage mask(image.width(), image.height(), 1, 2, QImage::LittleEndian);
- if (mask.isNull()) {
-	kdError() << k_funcinfo << "NULL mask" << endl;
-	return false;
- }
- mask.setColor(0, 0xffffff);
- mask.setColor(1, 0);
- mask.fill(0xff);
-
- for (int y = 0; y < image.height(); y++) {
-	unsigned char* yp = mask.scanLine(y);
-	QRgb* p = (QRgb*)image.scanLine(y);
-	for (int x = 0; x < image.width(); x++, p++) {
-		if ( (*p & 0x00fff0ff) == backGround) { // set transparent
-			*(yp + (x >> 3)) &= ~(1 << (x & 7));
-			continue;
-		}
-	}
-
- }
- QBitmap m;
- pix.convertFromImage(image);
- m.convertFromImage(mask);
- pix.setMask(m);
- return true;
-}
-*/
-
 void SpeciesTheme::loadNewUnit(UnitBase* unit)
 {
  if (!unit) {
@@ -621,12 +568,6 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setWeaponRange(prop->weaponRange()); // seems to cause a KGame error sometimes
  unit->setWeaponDamage(prop->weaponDamage());
  unit->setSightRange(prop->sightRange());
-
- // what will we do with the name?
- // maybe soemthing like unit->setProperties(prop);? so UnitBase::name() 
- // could return UnitProperties::name()
- // but don't use unit->setName("blah") as the name is equal for all units of
- // one type and therefore much memory consumption!
 
  if (prop->isMobile()) {
 	unit->setSpeed(prop->speed());
@@ -859,6 +800,16 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  if (prop->isFacility()) {
 	m->generateConstructionLists();
  }
+
+ // now we load animation information. this is just which frame is used for
+ // which animation mode - no frame/node/display list modifying needs to be
+ // made.
+ KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.desktop"));
+ cfg.setGroup("OpenGL");
+ m->loadAnimationMode(Unit::AnimationIdle, &cfg, QString::fromLatin1("Idle"));
+ m->loadAnimationMode(Unit::AnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));
+
+
  m->finishLoading();
  d->mUnitModels.insert(prop->typeId(), m);
 }

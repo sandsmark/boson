@@ -27,8 +27,35 @@
 #include <lib3ds/types.h>
 
 class BosonModelTextures;
+class KSimpleConfig;
 class QColor;
 
+/**
+ * This class represents the Frame* entries in the index.desktop files. Here you
+ * can find where this animation starts and ends and so.
+ * See @ref BosonModel::insertAnimationMode
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ * @short Information about an animation mode.
+ **/
+class BosonAnimation
+{
+public:
+	BosonAnimation(int start, unsigned int range, unsigned int speed)
+	{
+		mStart = start;
+		mRange = range;
+		mSpeed = speed;
+	}
+
+	inline int start() const { return mStart; }
+	inline unsigned int range() const { return mRange; }
+	inline unsigned int speed() const { return mSpeed; }
+
+private:
+	int mStart;
+	unsigned int mRange;
+	unsigned int mSpeed;
+};
 
 class BoFrame
 {
@@ -103,6 +130,42 @@ public:
 	void setLongNames(QMap<QString, QString> names) { mTextureNames = names; }
 
 	static void reloadAllTextures();
+
+	/**
+	 * Add an animation mode with the identitfier @p mode, starting at frame
+	 * number @p start with the number of frames @p range. The frame should
+	 * change after @p speed advance calls.
+	 *
+	 * Note that one mode with id 0 is already added. This mode has default
+	 * settings start=0,range=1,speed=1, this is the only mode that can be
+	 * replaced by calling insertAnimationMode. You must not use invalid
+	 * settings for this mode!
+	 *
+	 * @param start The first frame (note that counting starts with 0) of
+	 * this animation. Use -1 to disable this mode (i.e. mode 0 will be used
+	 * instead)
+	 * @param range How many frames are in this animation. 0 to disable
+	 * this mode (i.e. use mode 0)
+	 * @param speed How many advance calls have to be made until the frame
+	 * changes to the next frame. 1 is the fastest speed - use 0 to disable
+	 * this mode and use mode 0 instead.
+	 **/
+	void insertAnimationMode(int mode, int start, unsigned int range, unsigned int speed);
+
+	/**
+	 * Load an animation mode from a config file. This is a frontend to @ref
+	 * insertAnimationMode.
+	 * @param config The config file to load from
+	 * @param name The name of the mode as it is used in the config file
+	 * (e.g. "Idle" for entries like "FrameStartIdle")
+	 **/
+	void loadAnimationMode(int mode, KSimpleConfig* config, const QString& name);
+
+	/**
+	 * @return The animation assigned to @p mode. See @ref
+	 * insertAnimationMode. 
+	 **/
+	BosonAnimation* animation(int mode) const { return mAnimations[mode]; }
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
@@ -187,6 +250,8 @@ private:
 	QIntDict<BoFrame> mConstructionSteps;
 	QValueList<GLuint> mNodeDisplayLists;
 	QColor* mTeamColor;
+
+	QIntDict<BosonAnimation> mAnimations;
 
 	float mWidth;
 	float mHeight;

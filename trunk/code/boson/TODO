@@ -107,6 +107,7 @@ General TODOs
 - unit editor does not support plugins
 - Don't load UnitProperties and technologies and other stuff in SpeciesTheme
   constructor
+- ./configure allows --without-gl
 
 Data TODOs
 - sound for minimap activated/deactivated

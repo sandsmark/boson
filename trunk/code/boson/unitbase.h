@@ -350,7 +350,7 @@ private:
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 
-	KGamePropertyHandler mProperties;
+	KGamePropertyHandler* mProperties;
 
 	const UnitProperties* mUnitProperties;
 

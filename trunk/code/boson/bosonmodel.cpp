@@ -24,6 +24,7 @@
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
 
+#include <ksimpleconfig.h>
 #include <kdebug.h>
 
 #include <qimage.h>
@@ -172,9 +173,13 @@ void BosonModel::init()
  mHeight = 0;
  mFrames.setAutoDelete(true);
  mConstructionSteps.setAutoDelete(true);
+ mAnimations.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
 	mModelTextures = new BosonModelTextures();
  }
+
+ // add the default mode 0
+ insertAnimationMode(0, 0, 1, 1);
 }
 
 BosonModel::~BosonModel()
@@ -191,6 +196,7 @@ BosonModel::~BosonModel()
  for (; it != mNodeDisplayLists.end(); ++it) {
 	glDeleteLists((*it), 1);
  }
+ mAnimations.clear();
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -766,5 +772,46 @@ void BosonModel::reloadAllTextures()
 	return;
  }
  mModelTextures->reloadTextures();
+}
+
+void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, unsigned int speed)
+{
+ if (mode == 0) {
+	// mode == 0 is a special mode. we default to it when everything fails,
+	// so this *must* be valid.
+	if (start < 0 || range == 0 || speed == 0) {
+		kdWarning() << k_funcinfo << "invalid values for default mode! start=" << start << ",range=" << range << ",speed=" << speed << endl;
+		start = 0;
+		range = 1;
+		speed = 1;
+	}
+	if (mAnimations[0]) {
+		// default mode already there - replace it!
+		mAnimations.remove(0);
+	}
+ } else {
+	if (start < 0 || range == 0 || speed == 0) {
+		return;
+	}
+ }
+ BosonAnimation* anim = new BosonAnimation(start, range, speed);
+ mAnimations.insert(mode, anim);
+}
+
+void BosonModel::loadAnimationMode(int mode, KSimpleConfig* conf, const QString& name)
+{
+ int start = -1;
+ unsigned int range = 0;
+ unsigned int speed = 0;
+ // different default values for mode 0:
+ if (mode == 0) {
+	start = 0;
+	range = 1;
+	speed = 1;
+ }
+ start = conf->readNumEntry(QString::fromLatin1("FrameStart") + name, start);
+ range = conf->readUnsignedNumEntry(QString::fromLatin1("FrameRange") + name, range);
+ speed = conf->readUnsignedNumEntry(QString::fromLatin1("FrameSpeed") + name, speed);
+ insertAnimationMode(mode, start, range, speed);
 }
 

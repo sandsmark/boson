@@ -20,6 +20,7 @@
 #define BOSONSPRITE_H
 
 #include "../defines.h"
+#include "../bosonmodel.h"
 
 #include <GL/gl.h>
 
@@ -29,6 +30,7 @@ class BosonModel;
 class BoFrame;
 class QPointArray;
 class QRect;
+
 
 /**
  * This is the base class for all visual items, i.e. a OpenGL objects in boson.
@@ -176,9 +178,7 @@ public:
 		mYVelocity = vy;
 	}
 
-	void setFrame(int _frame);
-	inline int frame() const { return mFrame; }
-	unsigned int frameCount() const;
+	void setAnimationMode(int mode);
 
 
 	/**
@@ -187,12 +187,23 @@ public:
 	 * @ref BosonCanvas::addAnimation and @ref BosonCanvas::slotAdvance
 	 **/
 	void setAnimated(bool a);
-	inline bool isAnimated() const { return mIsAnimated; }
+
+	/**
+	 * Increase the animation timer and once it exceeds the @ref
+	 * BoAnimation::speed set a new frame.
+	 **/
+	void animate();
 
 	/**
 	 * See @ref Unit::advance
+	 *
+	 * This advance implementation manages the animation of the item. Call
+	 * it in your implementation, if you want to provide animations!
 	 **/
-	virtual void advance(unsigned int ) {}
+	inline virtual void advance(unsigned int )
+	{
+		animate();
+	}
 
 	/**
 	 * See @ref Unit::advanceFunction
@@ -239,7 +250,7 @@ public:
 	 **/
 	inline float rotation() const { return mRotation; }
 
-	inline void setRotation(float r) { mRotation = r; }
+	void setRotation(float r) { mRotation = r; }
 
 
 
@@ -260,6 +271,18 @@ public:
 	 **/
 	virtual void unselect();
 
+private:
+	/**
+	 * Change the currently displayed frame. Note that you can't set the
+	 * construction frames here, as they are generated on the fly and don't
+	 * reside as an actual frame in the .3ds file.
+	 *
+	 * You usually don't want to call this, but rather @ref setAnimationMode
+	 * instead.
+	 **/
+	void setFrame(int _frame);
+	inline int frame() const { return mFrame; }
+	unsigned int frameCount() const;
 
 private:
 	inline void setX(float x) { mX = x; }
@@ -269,27 +292,30 @@ private:
 	void setCurrentFrame(BoFrame* frame);
 
 private:
+	BosonCanvas* mCanvas;
+	BosonModel* mModel;
+	BosonAnimation* mCurrentAnimation;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
-	BosonCanvas* mCanvas;
 	float mX;
 	float mY;
 	float mZ;
 	int mWidth;
 	int mHeight;
-	float mRotation;
-
-	float mGLDepthMultiplier;
-	GLuint mDisplayList;
-	unsigned int mFrame;
-	unsigned int mGLConstructionStep;
 
 	float mXVelocity;
 	float mYVelocity;
 
-	BosonModel* mModel;
+// OpenGL values. should not be used for pathfinding and so on. Most stoff
+// shouldn't be stored in save() either
+	float mRotation;
+	float mGLDepthMultiplier;
+	GLuint mDisplayList;
+	unsigned int mGLConstructionStep;
+	unsigned int mFrame;
+	unsigned int mAnimationCounter;
 
-	// these are for OpenGL performance only. no need to store on save() and
+	// these are for OpenGL performance only. no need to store in save() and
 	// don't use for anything except OpenGL!
 //	float mCenterX;
 //	float mCenterY;
