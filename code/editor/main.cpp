@@ -19,19 +19,34 @@
  ***************************************************************************/
 
 #include "boeditor.h" 
+#include <klocale.h>
+#include <kcmdlineargs.h>
+#include <kaboutdata.h>
  
 int main(int argc, char* argv[])
 { 
-	KApplication app(argc,argv,"BoEditor");  
+	KAboutData aboutData(
+		"boeditor"
+		, I18N_NOOP("Boson level editor")
+		, "0.5" // XXX should use the #define somewhere
+		, I18N_NOOP("A level editor for the boson game")
+		, KAboutData::License_GPL
+		, "(c) 1999-2000, The boson team"
+		, 0l
+		, "http://aquila.rezel.enst.fr/boson"
+		, "boson-fb@yalbi.com" );
+	   
+	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
+	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
+		                                                              
+	KCmdLineArgs::init( argc, argv, &aboutData );
+
+	KApplication app;  
  
-/*	if (app.isRestored())
-		RESTORE(BoEditorApp);
-	else { */
-		BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
-		app.setMainWidget(boEditor);
-		app.setTopWidget(boEditor);
-		boEditor->show();
-//		}  
+	BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
+	app.setMainWidget(boEditor);
+	app.setTopWidget(boEditor);
+	boEditor->show();
 
 	return app.exec();
 }  

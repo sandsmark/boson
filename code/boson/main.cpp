@@ -18,22 +18,39 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <klocale.h>
+#include <kcmdlineargs.h>
+#include <kaboutdata.h>
 #include "boson.h" 
  
 int main(int argc, char* argv[])
 { 
-	KApplication app(argc,argv,"Boson");  
- 
-/*	if (app.isRestored())
-		RESTORE(BosonApp);
-	else { */
-		BosonApp* boson = new BosonApp();
+
+	KAboutData aboutData(
+		"boson"
+		, I18N_NOOP("Boson game")
+		, "0.5" // XXX should use the #define somewhere
+		, I18N_NOOP("A realtime strategy game for KDE")
+		, KAboutData::License_GPL
+		, "(c) 1999-2000, The boson team"
+		, 0l
+		, "http://aquila.rezel.enst.fr/boson"
+		, "boson-fb@yalbi.com" );
+	   
+	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
+	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
+		                                                              
+	KCmdLineArgs::init( argc, argv, &aboutData );
+
+
+	KApplication app;  
+
+	BosonApp* boson = new BosonApp();
 //orzel : can't give the servername as argument...
-//	       	(argc>1)?argv[1]:0l);
-		app.setMainWidget(boson);
-		app.setTopWidget(boson);
-		boson->show();
-//		}  
+//     	(argc>1)?argv[1]:0l);
+	app.setMainWidget(boson);
+	app.setTopWidget(boson);
+	boson->show();
 
 	return app.exec();
 }  

@@ -60,7 +60,7 @@ enum transition_t {
 	TRANS_ULI,	// up left inverted
 	TRANS_URI,	// up right inverted
 	TRANS_DLI,	// down left inverted
-	TRANS_DRI,	// down right inverted
+	TRANS_DRI	// down right inverted
 	};
 
 
@@ -99,7 +99,7 @@ enum transition_t {
 
 /* Transition description */
 struct groundTransProperties_t {
-	char		*name;
+	const char	*name;
 	groundType	from, to;
 	};
 extern const groundTransProperties_t groundTransProp[];
@@ -108,7 +108,7 @@ extern const int groundTransPropNb;
 
 /* Ground Properties */
 struct groundProperties_t {
-	char	*name;
+	const char	*name;
 	};
 extern const groundProperties_t groundProp[GROUND_LAST];
 extern const int groundPropNb;

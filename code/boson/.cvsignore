@@ -10,4 +10,5 @@ boson-client.log
 boson
 *.bpf
 diff
+.libs
 

@@ -37,12 +37,12 @@
  * playerMobUnit
  */
 
-const static int pos_x[12] = 
+static const int pos_x[12] = 
 	{  34,  77,  98,  94,  64,  17, -34, -77, -98, -94, -64, -17};
-const static int pos_y[12] = 
+static const int pos_y[12] = 
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
-playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
+playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
 	: visualMobUnit(msg,parent,name)
 	, state(MUS_NONE)
 {
@@ -437,7 +437,7 @@ bool playerMobUnit::near(int d)
 /*
  * playerFacility
  */
-playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
+playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent, const char *name)
 	: visualFacility(msg,parent,name)
 {
 }

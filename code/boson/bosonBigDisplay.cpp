@@ -25,7 +25,7 @@
 #include "game.h"
 
 
-bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent=0, const char *name=0L, WFlags f=0)
+bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent, const char *name, WFlags f)
 	:visualBigDisplay(v,parent,name,f)
 {
 

@@ -79,7 +79,7 @@ protected:
 	enum {
 		None,		// nothing has happened
 		Read,		// a file is being read
-		Write,		// a file is being written
+		Write		// a file is being written
 	}		BFstate;
 	QDataStream	*stream;
 	QFile		*f;

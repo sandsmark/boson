@@ -21,9 +21,11 @@
 #include <qbitarray.h>
 
 #include <QwSpriteField.h>
-
+#include <qstring.h>
+#include <qstringlist.h>
 
 #include <kstddirs.h>
+#include <kinstance.h>
 
 #include "common/log.h"
 #include "groundTheme.h"
@@ -38,7 +40,19 @@ groundTheme::groundTheme(char *themeName)
 	boAssert (TRANS_LAST  == groundTransPropNb);
 
 	groundPix	= new (QwSpritePixmapSequence *)[NB_GROUND_TILES];
-	themePath	= new QString(locate ( "data", "boson/themes/grounds/") + themeName + "/" );
+//	themePath	= new QString( "/opt/be/share/apps/boson/themes/grounds/earth/");
+
+	QStringList candidates = KGlobal::instance()->dirs()->resourceDirs("data");
+	for (QStringList::ConstIterator it = candidates.begin(); it != candidates.end(); it++) {
+		QString a = *it;
+		printf("try : %s\n", (char*) a.latin1() );
+	}
+
+	themePath	= new QString (KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") );
+	*themePath	+= "boson/themes/grounds/";
+	*themePath	+= themeName;
+	*themePath	+= "/";
+
 	pixLoaded	= new QBitArray(NB_GROUND_TILES);
 
 	for (i=0; i< TRANS_LAST; i++) { // pre-load transitions name

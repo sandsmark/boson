@@ -50,7 +50,7 @@ enum facilityType {
 	FACILITY_REFINERY,
 	FACILITY_REPAIRPAD,
 	FACILITY_TURRET,
-	FACILITY_LAST,
+	FACILITY_LAST
 	};
 
 
@@ -80,7 +80,7 @@ typedef unsigned int uint;
 
 struct unitProperties_t {
 /* from here.... */
-	char 	*name;		// The name of the funny thing...
+	const char 	*name;		// The name of the funny thing...
 	int	width;
 	int	height;
 	int	visibility;	// how far it can see
@@ -99,7 +99,7 @@ struct unitProperties_t {
 //struct mobileProperties_t : public unitProperties_t {
 struct mobileProperties_t {
 /* from here.... */
-	char 	*name;		// The name of the funny thing...
+	const char 	*name;		// The name of the funny thing...
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
@@ -135,7 +135,7 @@ extern const int mobilePropNb;
  */
 struct facilityProperties_t  {
 /* from here.... */
-	char 	*name;		// Guess it, geek..
+	const char 	*name;		// Guess it, geek..
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
