@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 #include "../defines.h"
 #include "../cell.h"
 #include "../bo3dtools.h"
+#include "../bosonconfig.h" // WARNING: groundrenderer needs to be re-installed if bosonconfig.h changes!
+#include "../botexture.h"
+#include "../playerio.h"
 #include <bodebug.h>
 
 // not nice in this file. we need it for boGame->status() == KGame::Init
@@ -41,9 +44,8 @@
 
 static int g_cellsVisibleCalls = 0;
 
-static float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map);
-
-
+// Whether to use glTexSubImage2D() to update texture. It seems to be buggy.
+#define USE_TEXSUBIMAGE
 
 /**
  * This class takes care of building a list (an array in this case) of cells
@@ -62,14 +64,41 @@ public:
 		mMaxX = 0;
 		mMinY = 0;
 		mMaxY = 0;
+
+		mLODObject = 0;
+		setLODObject(new BoGroundRendererCellListLOD());
 	}
-	virtual ~CellListBuilder() {}
+	virtual ~CellListBuilder()
+	{
+		delete mLODObject;
+	}
+
+	/**
+	 * Set an LOD object. This object is used to decide whether (and when)
+	 * LOD should be used.
+	 *
+	 * The object is deleted on destruction of this object.
+	 **/
+	void setLODObject(BoGroundRendererCellListLOD* lod)
+	{
+		delete mLODObject;
+		mLODObject = lod;
+		if (mLODObject) {
+			mLODObject->setViewFrustum(viewFrustum());
+		}
+	}
 
 	void copyHeightMap(float* heightMap, const BosonMap* map);
 
 	void setViewport(const int* p) { mViewport = p; }
 	const int* viewport() const { return mViewport; }
-	void setViewFrustum(const float* f) { mViewFrustum = f; }
+	void setViewFrustum(const float* f)
+	{
+		mViewFrustum = f;
+		if (mLODObject) {
+			mLODObject->setViewFrustum(viewFrustum());
+		}
+	}
 	const float* viewFrustum() const { return mViewFrustum; }
 
 	/**
@@ -92,11 +121,73 @@ protected:
 	int mMaxX;
 	int mMinY;
 	int mMaxY;
+	BoGroundRendererCellListLOD* mLODObject;
 
 private:
 	const float* mViewFrustum;
 	const int* mViewport;
 };
+
+
+class FogTexture
+{
+public:
+	FogTexture()
+	{
+		mFogTexture = 0;
+		mFogTextureData = 0;
+		mFogTextureDataW = 0;
+		mFogTextureDataH = 0;
+		mLastMapWidth = 0;
+		mLastMapHeight = 0;
+		mFogTextureDirty = false;
+		mFogTextureDirtyAreaX1 = 0;
+		mFogTextureDirtyAreaX2 = 0;
+		mFogTextureDirtyAreaY1 = 0;
+		mFogTextureDirtyAreaY2 = 0;
+	}
+	~FogTexture()
+	{
+		delete mFogTextureData;
+		delete mFogTexture;
+	}
+
+	void start(const BosonMap* map);
+	void stop(const BosonMap* map);
+	void cellChanged(int x, int y);
+	void setLocalPlayerIO(PlayerIO* io)
+	{
+		mLocalPlayerIO = io;
+	}
+	PlayerIO* localPlayerIO() const
+	{
+		return mLocalPlayerIO;
+	}
+
+protected:
+	void initFogTexture(const BosonMap* map);
+
+	/**
+	 * Updates fog texture if it's dirty
+	 **/
+	void updateFogTexture();
+
+private:
+	BoTexture* mFogTexture;
+	unsigned char* mFogTextureData;
+	int mFogTextureDataW;
+	int mFogTextureDataH;
+	unsigned int mLastMapWidth;
+	unsigned int mLastMapHeight;
+	bool mFogTextureDirty;
+	int mFogTextureDirtyAreaX1;
+	int mFogTextureDirtyAreaY1;
+	int mFogTextureDirtyAreaX2;
+	int mFogTextureDirtyAreaY2;
+
+	PlayerIO* mLocalPlayerIO;
+};
+
 
 /**
  * This class uses a tree find out whether cells are visible. Whenever @ref
@@ -147,14 +238,6 @@ protected:
 	void addCells(int* cells, const BoQuadTreeNode* node, int depth);
 
 	void recreateTree(const BosonMap* map);
-
-	/**
-	 * @return TRUE if the @p node is supposed to be displayed as a single
-	 * quad. This is either the case if the node contains exactly one cell
-	 * only, or if the distance from the player is high enough for this
-	 * level of detail.
-	 **/
-	bool doLOD(const BoQuadTreeNode* node) const;
 
 	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map);
 
@@ -297,31 +380,6 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  return renderCells;
 }
 
-bool CellListBuilderTree::doLOD(const BoQuadTreeNode* node) const
-{
- if (!node) {
-	return false;
- }
- const int count = node->nodeSize();
- if (count == 1) {
-	return true;
- }
- const float* plane = &viewFrustum()[5 * 4]; // NEAR plane
-
- // FIXME: distanceFromPlane() tests the distance of all 4 corners of the rect
- // only. this is perfectly legal if the whole rect is inside the viewfrustum,
- // however if it is partially visible only, this may not be sufficient!
- float d = distanceFromPlane(plane, node, mMap);
- if (d > 240.0f && count <= 64 ||
-		d > 120.0f && count <= 16 ||
-		d > 40.0f && count <= 8 ||
-		d > 20.0f && count <= 2) {
-//	boDebug() << d << endl;
-	return true;
- }
- return false;
-}
-
 void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int depth)
 {
  if (!node) {
@@ -331,7 +389,7 @@ void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int d
  const int t = node->top();
  const int r = node->right();
  const int b = node->bottom();
- if (doLOD(node)) {
+ if (mLODObject && mLODObject->doLOD(mMap, node)) {
 	BoGroundRenderer::setCell(cells, mCount, l, t, r - l + 1, b - t + 1);
 	mCount++;
 	if ((int)mLeafs.size() < depth + 1) {
@@ -427,7 +485,7 @@ void CellListBuilderTree::addVisibleCells(int* cells, const BoQuadTreeNode* node
  }
  bool partially = false;
  if (cellsVisible(node, &partially)) {
-	if (!partially || doLOD(node)) {
+	if (!partially || (mLODObject && mLODObject->doLOD(mMap, node))) {
 		// all cells visible
 		addCells(cells, node, depth);
 	} else {
@@ -447,7 +505,33 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  mRoot = BoQuadTreeNode::createTree(map->width(), map->height());
 }
 
-static float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map)
+
+bool BoGroundRendererCellListLOD::doLOD(const BosonMap* map, const BoQuadTreeNode* node) const
+{
+ if (!node) {
+	return false;
+ }
+ const int count = node->nodeSize();
+ if (count == 1) {
+	return true;
+ }
+ const float* plane = &viewFrustum()[5 * 4]; // NEAR plane
+
+ // FIXME: distanceFromPlane() tests the distance of all 4 corners of the rect
+ // only. this is perfectly legal if the whole rect is inside the viewfrustum,
+ // however if it is partially visible only, this may not be sufficient!
+ float d = distanceFromPlane(plane, node, map);
+ if (d > 240.0f && count <= 64 ||
+		d > 120.0f && count <= 16 ||
+		d > 40.0f && count <= 8 ||
+		d > 20.0f && count <= 2) {
+//	boDebug() << d << endl;
+	return true;
+ }
+ return false;
+}
+
+float BoGroundRendererCellListLOD::distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map) const
 {
  const int l = node->left();
  const int t = node->top();
@@ -472,6 +556,184 @@ static float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, c
 }
 
 
+void FogTexture::start(const BosonMap* map)
+{
+ if (boConfig->boolValue("TextureFOW")) {
+	// Enable fog texture (TU 1)
+	initFogTexture(map);
+	boTextureManager->activateTextureUnit(1);
+	updateFogTexture();
+	boTextureManager->bindTexture(mFogTexture);
+	// Use automatic texcoord generation to map fog texture to cells
+	const float texPlaneS[] = { 1.0f / mFogTextureDataW, 0.0, 0.0, 0.0 };
+	const float texPlaneT[] = { 0.0, 1.0f / mFogTextureDataH, 0.0, 0.0 };
+	glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+	glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
+	glTexGenfv(GL_S, GL_OBJECT_PLANE, texPlaneS);
+	glTexGenfv(GL_T, GL_OBJECT_PLANE, texPlaneT);
+	glEnable(GL_TEXTURE_GEN_S);
+	glEnable(GL_TEXTURE_GEN_T);
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();
+	// This compensates for the border that we add to the texture
+	glTranslatef(1.0f / mFogTextureDataW, 1.0f / mFogTextureDataH, 0.0);
+	glScalef(1, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	boTextureManager->activateTextureUnit(0);
+ }
+}
+
+void FogTexture::stop(const BosonMap*)
+{
+ if (boConfig->boolValue("TextureFOW")) {
+	// end using fog texture
+	boTextureManager->activateTextureUnit(1);
+	boTextureManager->unbindTexture();
+	{
+		glDisable(GL_TEXTURE_GEN_S);
+		glDisable(GL_TEXTURE_GEN_T);
+	}
+	boTextureManager->activateTextureUnit(0);
+ }
+}
+
+void FogTexture::initFogTexture(const BosonMap* map)
+{
+ if (mLastMapWidth != map->width() || mLastMapHeight != map->height()) {
+	// Map size has changed. Delete fog texture (new one will be created)
+	delete mFogTextureData;
+	delete mFogTexture;
+	mFogTextureData = 0;
+	mFogTexture = 0;
+ }
+ if (!mFogTextureData) {
+	// Init fog texture
+	// +2 because we want 1-pixel border
+	mLastMapWidth = map->width();
+	mLastMapHeight = map->height();
+	int w = BoTexture::nextPower2(mLastMapWidth + 2);
+	int h = BoTexture::nextPower2(mLastMapHeight + 2);
+	boDebug() << "FOGTEX: " << k_funcinfo << "w: " << w << "; h: " << h  << endl;
+	mFogTextureDataW = w;
+	mFogTextureDataH = h;
+	mFogTextureData = new unsigned char[w * h * 4];
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			mFogTextureData[(y * w + x) * 4 + 0] = 0;
+			mFogTextureData[(y * w + x) * 4 + 1] = 0;
+			mFogTextureData[(y * w + x) * 4 + 2] = 0;
+			mFogTextureData[(y * w + x) * 4 + 3] = 255;
+		}
+	}
+	for (unsigned int y = 1; y <= mLastMapHeight; y++) {
+		for (unsigned int x = 1; x <= mLastMapWidth; x++) {
+			unsigned char value = 0;
+			if (!localPlayerIO()->isFogged(x - 1, y - 1)) {
+				value = 255;
+			}
+			mFogTextureData[(y * w + x) * 4 + 0] = value;
+			mFogTextureData[(y * w + x) * 4 + 1] = value;
+			mFogTextureData[(y * w + x) * 4 + 2] = value;
+			mFogTextureData[(y * w + x) * 4 + 3] = 255;
+		}
+	}
+	mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
+			BoTexture::FilterLinear | BoTexture::FormatRGBA);
+
+	mFogTextureDirty = false;
+
+	// Update dirty area
+	mFogTextureDirtyAreaX1 = 1000000;
+	mFogTextureDirtyAreaY1 = 1000000;
+	mFogTextureDirtyAreaX2 = -1;
+	mFogTextureDirtyAreaY2 = -1;
+ }
+}
+
+void FogTexture::updateFogTexture()
+{
+ if (!mFogTextureDirty) {
+	// No need to update
+	return;
+ }
+
+#ifdef USE_TEXSUBIMAGE
+ mFogTexture->bind();
+ // Because of (possible) texture compression, we can't update a single pixel
+ //  of the texture. Instead, we have to update the whole 4x4 block that the
+ //  pixel is in.
+ int blockx1 = (mFogTextureDirtyAreaX1 + 1) / 4;
+ int blocky1 = (mFogTextureDirtyAreaY1 + 1) / 4;
+ int blockx2 = (mFogTextureDirtyAreaX2 + 1) / 4;
+ int blocky2 = (mFogTextureDirtyAreaY2 + 1) / 4;
+ unsigned int x = blockx1 * 4;
+ unsigned int y = blocky1 * 4;
+ int w = (blockx2 - blockx1 + 1) * 4;
+ int h = (blocky2 - blocky1 + 1) * 4;
+ // Create temporary array for the 4x4 block
+ unsigned char blockdata[w * h * 4];
+ // Copy data from mFogTextureData to blockdata
+ for(int i = 0; i < w; i++) {
+	for(int j = 0; j < h; j++) {
+		// Use black if the point is not on the map
+		if (((x + i) >= mLastMapWidth) || ((y + j) >= mLastMapHeight)) {
+			blockdata[((j * w) + i) * 4 + 0] = blockdata[((j * w) + i) * 4 + 1] =
+					blockdata[((j * w) + i) * 4 + 2] = blockdata[((j * w) + i) * 4 + 3] = 0;
+		}
+		blockdata[((j * w) + i) * 4 + 0] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 0];
+		blockdata[((j * w) + i) * 4 + 1] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 1];
+		blockdata[((j * w) + i) * 4 + 2] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 2];
+		blockdata[((j * w) + i) * 4 + 3] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 3];
+	}
+ }
+ // Update texture
+ glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, blockdata);
+
+#else
+ delete mFogTexture;
+ // Create new fog texture
+ mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
+		BoTexture::FilterLinear | BoTexture::FormatRGBA);
+#endif
+
+ mFogTextureDirty = false;
+
+ // Update dirty area
+ mFogTextureDirtyAreaX1 = 1000000;
+ mFogTextureDirtyAreaY1 = 1000000;
+ mFogTextureDirtyAreaX2 = -1;
+ mFogTextureDirtyAreaY2 = -1;
+}
+
+void FogTexture::cellChanged(int x, int y)
+{
+ if (!boConfig->boolValue("TextureFOW")) {
+	return;
+ }
+ if (!mFogTextureData) {
+	return;
+ }
+ unsigned char value = 0;
+ if (!localPlayerIO()->isFogged(x, y)) {
+	value = 255;
+ }
+
+ // 'x + 1' and 'y + 1' because we use 1-texel border
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 0] = value;
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
+
+ // Fog texture is now dirty
+ mFogTextureDirty = true;
+
+ // Update dirty area
+ mFogTextureDirtyAreaX1 = QMIN(mFogTextureDirtyAreaX1, x);
+ mFogTextureDirtyAreaY1 = QMIN(mFogTextureDirtyAreaY1, y);
+ mFogTextureDirtyAreaX2 = QMAX(mFogTextureDirtyAreaX2, x);
+ mFogTextureDirtyAreaY2 = QMAX(mFogTextureDirtyAreaY2, y);
+}
+
+
 
 BoGroundRendererBase::BoGroundRendererBase()
 {
@@ -479,15 +741,22 @@ BoGroundRendererBase::BoGroundRendererBase()
  mMap = 0;
  mHeightMap2 = 0;
  mCellListBuilder = new CellListBuilderTree();
+ mFogTexture = new FogTexture();
 }
 
 BoGroundRendererBase::~BoGroundRendererBase()
 {
  boDebug() << k_funcinfo << endl;
+ delete mFogTexture;
  delete mCellListBuilder;
 #if FIX_EDGES
  delete[] mHeightMap2;
 #endif
+}
+
+void BoGroundRendererBase::setLODObject(BoGroundRendererCellListLOD* lod)
+{
+ mCellListBuilder->setLODObject(lod);
 }
 
 void BoGroundRendererBase::generateCellList(const BosonMap* map)
@@ -531,6 +800,12 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 #endif
 }
 
+void BoGroundRendererBase::cellFogChanged(int x, int y)
+{
+ mFogTexture->setLocalPlayerIO(localPlayerIO());
+ mFogTexture->cellChanged(x, y);
+}
+
 QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) const
 {
  QString s;
@@ -566,5 +841,16 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 // s += QString("distance from FAR plane: %1\n").arg(Bo3dTools::distanceFromPlane(farPlane, pos), 6, 'f', 3);
 
  return s;
+}
+
+void BoGroundRendererBase::renderVisibleCellsStart(const BosonMap* map)
+{
+ mFogTexture->setLocalPlayerIO(localPlayerIO());
+ mFogTexture->start(map);
+}
+
+void BoGroundRendererBase::renderVisibleCellsStop(const BosonMap* map)
+{
+ mFogTexture->stop(map);
 }
 

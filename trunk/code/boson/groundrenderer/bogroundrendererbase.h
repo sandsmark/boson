@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,10 @@ typedef BoVector3<float> BoVector3Float;
 
 class QRect;
 class CellListBuilder;
+class FogTexture;
+class BoQuadTreeNode;
+class BoGroundRendererCellListLOD;
+
 
 class BoGroundRendererBase : public BoGroundRenderer
 {
@@ -48,7 +52,21 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map);
 
+	virtual void cellFogChanged(int x, int y);
+
 	virtual QString debugStringForPoint(const BoVector3Fixed& pos) const;
+
+	/**
+	 * Set an LOD object. This object is used to decide whether (and when)
+	 * LOD should be used.
+	 *
+	 * The object is deleted on destruction of this object.
+	 **/
+	void setLODObject(BoGroundRendererCellListLOD* lod);
+
+protected:
+	virtual void renderVisibleCellsStart(const BosonMap* map);
+	virtual void renderVisibleCellsStop(const BosonMap* map);
 
 protected:
 	float* mHeightMap2;
@@ -56,7 +74,53 @@ protected:
 private:
 	CellListBuilder* mCellListBuilder;
 	const BosonMap* mMap;
+
+	FogTexture* mFogTexture;
 };
+
+
+/**
+ * Helper class for building the list of visible cells. An object of this class
+ * is queried to find out whether LOD should be applied or not.
+ *
+ * The default implementation should be sufficient usually.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoGroundRendererCellListLOD
+{
+public:
+	BoGroundRendererCellListLOD()
+	{
+		mViewFrustum = 0;
+	}
+
+	/**
+	 * Called by the cell list builder. No need to call yourself.
+	 **/
+	void setViewFrustum(const float* f)
+	{
+		mViewFrustum = f;
+	}
+	const float* viewFrustum() const
+	{
+		return mViewFrustum;
+	}
+
+	float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map) const;
+
+	/**
+	 * @return TRUE if the @p node is supposed to be displayed as a single
+	 * quad. This is either the case if the node contains exactly one cell
+	 * only, or if the distance from the player is high enough for this
+	 * level of detail.
+	 **/
+	virtual bool doLOD(const BosonMap* map, const BoQuadTreeNode* node) const;
+
+protected:
+	const float* mViewFrustum;
+};
+
 
 #endif
 

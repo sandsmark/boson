@@ -88,6 +88,22 @@ private:
 	unsigned int mUsedTextures;
 };
 
+/**
+ * @short Class that handles terrain rendering.
+ *
+ * The main method here is @ref renderCells that is called by boson. This
+ * method makes sure that a list of visible cells is available that should be
+ * rendered and calls @ref renderVisibleCells that should render these cells.
+ *
+ * @ref renderVisibleCells is implemented by derived classes, that is by the
+ * plugin library. This way it can easily be changed with little recompilation
+ * and even without restarting boson.
+ *
+ * Note this class is supposed to be an interface only. Most rendering should go
+ * to derived classes in the plugin.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoGroundRenderer : public QObject
 {
 	Q_OBJECT
@@ -162,10 +178,8 @@ public:
 
 	/**
 	 * Call this when fogged status of a cell changes.
-	 * This updates the fog texture accordingly.
 	 **/
-	void cellChanged(int x, int y);
-	void initFogTexture(const BosonMap* map);
+	virtual void cellFogChanged(int x, int y);
 
 protected:
 	/**
@@ -229,13 +243,13 @@ protected:
 		return mViewFrustum;
 	}
 
-	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map) = 0;
-
 	/**
-	 * Updates fog texture if it's dirty
+	 * Actually render the currently visible cells. Implemented by the
+	 * plugin.
 	 **/
-	void updateFogTexture();
-
+	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map) = 0;
+	virtual void renderVisibleCellsStart(const BosonMap* map) { Q_UNUSED(map) }
+	virtual void renderVisibleCellsStop(const BosonMap* map) { Q_UNUSED(map) }
 
 private:
 	const BoMatrix* mModelviewMatrix;
@@ -252,18 +266,6 @@ private:
 	int* mRenderCells;
 	int mRenderCellsSize; // max. number of cells in the array
 	unsigned int mRenderCellsCount; // actual number of cells in the array
-
-	BoTexture* mFogTexture;
-	unsigned char* mFogTextureData;
-	int mFogTextureDataW;
-	int mFogTextureDataH;
-	unsigned int mLastMapWidth;
-	unsigned int mLastMapHeight;
-	bool mFogTextureDirty;
-	int mFogTextureDirtyAreaX1;
-	int mFogTextureDirtyAreaY1;
-	int mFogTextureDirtyAreaX2;
-	int mFogTextureDirtyAreaY2;
 };
 
 #endif

@@ -3603,7 +3603,7 @@ void BosonBigDisplayBase::slotFog(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
-	r->cellChanged(x, y);
+	r->cellFogChanged(x, y);
  }
 }
 
@@ -3611,7 +3611,7 @@ void BosonBigDisplayBase::slotUnfog(int x, int y)
 {
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (r) {
-	r->cellChanged(x, y);
+	r->cellFogChanged(x, y);
  }
 }
 
