@@ -227,8 +227,8 @@ switch(state) {
 			data->accepted.who_you_are = playerId;
 			data->accepted.missing_player = nbPlayer - 1;;
 			data->accepted.total_player = nbPlayer;
-			data->accepted.sizeX = map_height;
-			data->accepted.sizeY = map_width;;
+			data->accepted.sizeX = map_width;;
+			data->accepted.sizeY = map_height;
 			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
 			break;
 			}
