@@ -31,6 +31,10 @@ visualTopLevel::visualTopLevel( const char *name, WFlags f)
 	/* map geometry */
 	viewL = viewH = 5; ///orzel : senseless, will be set by mainMap later
 	viewX = viewY = 0;
+
+	connect(vcanvas, SIGNAL(mobileDestroyed(int)), this, SLOT(mobileDestroyed(int)));
+	connect(vcanvas, SIGNAL(fixDestroyed(int)), this, SLOT(fixDestroyed(int)));
+
 }
 
 
@@ -83,6 +87,11 @@ void visualTopLevel::checkMove()
 	viewY = QMAX(viewY, 0);
 }
 
+void visualTopLevel::fixDestroyed(int k)
+{
+	if (fixSelected->key == k) unSelectFix();
+}
+
 
 visualFacility * visualTopLevel::unSelectFix(void)
 {
@@ -98,9 +107,18 @@ visualFacility * visualTopLevel::unSelectFix(void)
 }
 
 
+void visualTopLevel::mobileDestroyed(int k)
+{
+	unSelectMob(k);
+}
+
 visualMobUnit *visualTopLevel::unSelectMob(long key)
 {
 	visualMobUnit *m = mobSelected[key];
+	if (!m) {
+		logf(LOG_INFO, "asdflkjasdfkahujsdf");
+		return;
+	}
 	mobSelected.remove(key);
 	m->unSelect();
 
