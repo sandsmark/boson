@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -114,8 +114,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
 
- mMouseDiffX = 0;
- mMouseDiffY = 0;
+ mMouseMoveDiff = new BoMouseMoveDiff;
 
  mRotateX = mRotateY = mRotateZ = 0.0;
  mPlacementPreview = false;
@@ -144,6 +143,7 @@ ModelPreview::~ModelPreview()
  qApp->setGlobalMouseTracking(false);
  resetModel();
  delete mUpdateTimer;
+ delete mMouseMoveDiff;
 }
 
 void ModelPreview::initializeGL()
@@ -179,9 +179,9 @@ void ModelPreview::paintGL()
 
 #if 1
  glTranslatef(-mCameraX, -mCameraY, -mCameraZ);
- glRotatef(mRotateX, 1.0, 0.0, 0.0);
- glRotatef(mRotateY, 0.0, 1.0, 0.0);
- glRotatef(mRotateZ, 0.0, 0.0, 1.0);
+ BoQuaternion q;
+ q.setRotation(mRotateX, mRotateY, mRotateZ);
+ glMultMatrixf(q.matrix().data());
 #else
  camera()->applyCameraToScene();
 #endif
@@ -248,6 +248,10 @@ void ModelPreview::renderModel(int mode)
 		// FIXME: this isn't good here...
 		mModel->enablePointer();
 
+		if (mode == GL_SELECT) {
+			glDisable(GL_BLEND);
+			glDisable(GL_TEXTURE_2D);
+		}
 		f->renderFrame(0, mCurrentLOD, mode);
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
@@ -445,6 +449,7 @@ void ModelPreview::renderMeshSelection()
  glDisable(GL_TEXTURE_2D);
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+ glColor3ub(0, 255, 0);
  glEnable(GL_TEXTURE_2D);
  glPopMatrix();
  glColor3ub(255, 255, 255);
@@ -694,37 +699,60 @@ bool ModelPreview::eventFilter(QObject* o, QEvent* e)
 
 void ModelPreview::mousePressEvent(QMouseEvent* e)
 {
- delete mMouseDiffX;
- delete mMouseDiffY;
- mMouseDiffX = new int;
- mMouseDiffY = new int;
- *mMouseDiffX = e->x();
- *mMouseDiffY = e->y();
+ switch (e->button()) {
+	case QMouseEvent::LeftButton:
+		break;
+	case QMouseEvent::RightButton:
+		mMouseMoveDiff->moveEvent(e->pos());
+		break;
+	default:
+		break;
+ }
 }
 
 void ModelPreview::mouseReleaseEvent(QMouseEvent* )
 {
- delete mMouseDiffX;
- delete mMouseDiffY;
- mMouseDiffX = 0;
- mMouseDiffY = 0;
-
  mSelectedMesh = mMeshUnderMouse;
 }
 
 void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 {
- if (!mMouseDiffX || !mMouseDiffY) {
-	return;
- }
+ mMouseMoveDiff->moveEvent(e);
  if (e->state() & LeftButton) {
 	if (e->state() & ControlButton) {
-		int dx = e->x() - *mMouseDiffX;
-		int dy = e->y() - *mMouseDiffY;
+		int dx = mMouseMoveDiff->dx();
+		int dy = mMouseMoveDiff->dy();
 		emit signalRotateXChanged(mRotateX + (float)(dx) / 2);
 		emit signalRotateYChanged(mRotateY + (float)(dy) / 2);
 	} else {
 	}
+ } else if (e->state() & RightButton) {
+	// dx == rot. around x axis. this is equal to d_y_ mouse movement.
+	int dx = mMouseMoveDiff->dy();
+	int dy = mMouseMoveDiff->dx(); // rotation around y axis
+
+	BoQuaternion q;
+	q.setRotation(mRotateX, mRotateY, mRotateZ);
+	BoMatrix m = q.matrix();
+
+	float a, b, c;
+	BoQuaternion q2;
+	q2.setRotation(dx, dy, 0);
+
+	// AB: we want a rotation around x/y axii in the global, fixed
+	// coordinate system, whereas OpenGL would usually do rotations around
+	// the local (to the objects) coordinate systems. Remember: you can
+	// think about coordinate systems as "fixed", if you simple inverse the
+	// order of all OpenGL operations (B,A instead of A,B).
+	// So we simply need to _pre_multiply the rotation diff, instead of post
+	// multiply.
+	q2.multiply(q);
+
+	q2.toRotation(&a, &b, &c);
+
+	signalRotateXChanged(a);
+	signalRotateYChanged(b);
+	signalRotateZChanged(c);
  }
 }
 
@@ -1072,9 +1100,9 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addStretch(1);
 
 
- mRotateX = new KMyIntNumInput(this);
- mRotateY = new KMyIntNumInput(this);
- mRotateZ = new KMyIntNumInput(this);
+ mRotateX = new KMyFloatNumInput(this);
+ mRotateY = new KMyFloatNumInput(this);
+ mRotateZ = new KMyFloatNumInput(this);
  mRotateX->setLabel(i18n("Rotation around X-axis"));
  mRotateY->setLabel(i18n("Rotation around Y-axis"));
  mRotateZ->setLabel(i18n("Rotation around Z-axis"));

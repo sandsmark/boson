@@ -136,98 +136,6 @@ private:
 	bool mVisible;
 };
 
-class MouseMoveDiff
-{
-public:
-	enum Mode {
-		ModeNone = 0,
-		ModeRMBMove = 1,
-		ModeRotate = 2,
-		ModeZoom = 3
-	} MouseMoveMode;
-	
-	MouseMoveDiff()
-	{
-		mMode = ModeNone;
-		mX = 0;
-		mY = 0;
-		mOldX = 0;
-		mOldY = 0;
-	}
-
-	inline void moveToPos(const QPoint& pos)
-	{
-		moveToPos(pos.x(), pos.y());
-	}
-	inline void moveToPos(int x, int y)
-	{
-		mOldX = mX;
-		mOldY = mY;
-		mX = x;
-		mY = y;
-	}
-
-	void startRMBMove()
-	{
-		mMode = ModeRMBMove;
-	}
-	void startRotate()
-	{
-		mMode = ModeRotate;
-	}
-	void startZoom()
-	{
-		mMode = ModeZoom;
-	}
-	void stop()
-	{
-		mMode = ModeNone;
-	}
-	int x() const
-	{
-		return mX;
-	}
-	int y() const
-	{
-		return mY;
-	}
-	int oldX() const
-	{
-		return mOldX;
-	}
-	int oldY() const
-	{
-		return mOldY;
-	}
-	int dx() const
-	{
-		return (mX - mOldX);
-	}
-	int dy() const
-	{
-		return (mY - mOldY);
-	}
-	
-	bool isStopped() const
-	{
-		return mode() == ModeNone;
-	}
-	void setMode(Mode mode)
-	{
-		mMode = mode;
-	}
-	Mode mode() const
-	{
-		return mMode;
-	}
-
-private:
-	Mode mMode;
-	int mX;
-	int mY;
-	int mOldX;
-	int mOldY;
-};
 
 class PlacementPreview
 {
@@ -382,7 +290,7 @@ public:
 	unsigned int mFrameCount;
 
 	SelectionRect mSelectionRect;
-	MouseMoveDiff mMouseMoveDiff;
+	BoMouseMoveDiff mMouseMoveDiff;
 
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
@@ -503,6 +411,12 @@ void BosonBigDisplayBase::initializeGL()
 	// already called initializeGL()
 	return;
  }
+
+ // AB: WARNING you must _not_ assume this gets called once only!
+ // this can get called once per context! i.e. when frames for the movie are
+ // generated, then this will get called as well!
+ // (keep this in mind when allocating memory)
+
  if (!context()) {
 	boError() << k_funcinfo << "NULL context" << endl;
 	return;
@@ -577,22 +491,28 @@ void BosonBigDisplayBase::initializeGL()
  gettimeofday(&time, 0);
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 
- if (!directRendering()) {
-	// baad.
-	boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
-	KMessageBox::information(this, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
- }
-
  // this needs to be done in initializeGL():
+ delete d->mDefaultFont;
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
 
- boDebug() << k_funcinfo << "starting timer" << endl;
- // start rendering (will also start the timer if necessary)
- QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 
- // update system information (we initializeGL() must have been called before
- // this makes sense)
- BoInfo::boInfo()->update(this);
+ if (!context()->deviceIsPixmap()) {
+	if (!directRendering()) {
+		// baad.
+		boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
+		KMessageBox::information(this, i18n("Direct rendering is NOT enabled - boson will run very slow. You should ensure that direct rendering is enabled!"));
+	}
+
+	boDebug() << k_funcinfo << "starting timer" << endl;
+	// start rendering (will also start the timer if necessary)
+	QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
+
+	// update system information (we initializeGL() must have been called before
+	// this makes sense)
+	BoInfo::boInfo()->update(this);
+ }
+
+ recursive = false;
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -1493,7 +1413,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		} else if (e->button() == RIGHT_BUTTON) {
 			if (boConfig->rmbMove()) {
 				//AB: this might be obsolete..
-				d->mMouseMoveDiff.moveToPos(e->pos()); // set position, but do not yet start!
+				d->mMouseMoveDiff.moveEvent(e->pos()); // set position, but do not yet start!
 			}
 		}
 		e->accept();
@@ -1585,7 +1505,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 {
  float posX, posY, posZ;
  event.worldPos(&posX, &posY, &posZ);
- d->mMouseMoveDiff.moveToPos(event.widgetPos());
+ d->mMouseMoveDiff.moveEvent(event.widgetPos());
  if (event.altButton()) {
 	// The Alt button is the camera modifier in boson.
 	// Better don't do important stuff (like unit movement
@@ -1593,7 +1513,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 	// the focus to the menu which might be very confusing
 	// during a game.
 	if (buttonState & LEFT_BUTTON) {
-		d->mMouseMoveDiff.startZoom();
+		d->mMouseMoveDiff.start(LEFT_BUTTON);
 		camera()->changeZ(d->mMouseMoveDiff.dy());
 		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
@@ -1601,7 +1521,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
-		d->mMouseMoveDiff.startRotate();
+		d->mMouseMoveDiff.start(RIGHT_BUTTON);
 		camera()->changeRotation(d->mMouseMoveDiff.dx());
 		camera()->changeRadius(d->mMouseMoveDiff.dy());
 		cameraChanged();
@@ -1639,7 +1559,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
 //		QCursor::setPos(pos);
 
 		// modifiers are ignored.
-		d->mMouseMoveDiff.startRMBMove();
+		d->mMouseMoveDiff.start(RIGHT_BUTTON);
 		GLfloat dx, dy;
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
@@ -1673,7 +1593,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
  displayInput()->updateCursor();
 }
 
-void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoMouseEvent& event, QDataStream&, bool*)
+void BosonBigDisplayBase::mouseEventRelease(ButtonState button, const BoMouseEvent& event, QDataStream&, bool*)
 {
  switch (button) {
 	case LEFT_BUTTON:
@@ -1960,7 +1880,6 @@ void BosonBigDisplayBase::quitGame()
  d->mSelectionRect.setVisible(false);
  d->mSelectionRect.setEndWidgetPos(d->mSelectionRect.startPos());
  d->mMouseMoveDiff.stop();
- d->mMouseMoveDiff.moveToPos(0, 0);
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
@@ -2397,11 +2316,6 @@ BoAutoGameCamera* BosonBigDisplayBase::autoCamera() const
  return camera()->autoGameCamera();
 }
 
-const BoVector3& BosonBigDisplayBase::cameraLookAtPos() const
-{
- return camera()->lookAt();
-}
-
 bool BosonBigDisplayBase::checkError() const
 {
  bool ret = true;
@@ -2771,6 +2685,68 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 {
  boDebug() << k_funcinfo << "Grabbing movie frame..." << endl;
 
+#if 0
+ QByteArray data;
+ QDataStream stream(data, IO_WriteOnly);
+ QDomDocument doc("BosonMovie");
+ QDomElement root = doc.createElement("BosonMovie");
+ doc.appendChild(root);
+ {
+	QDomElement c = doc.createElement("Camera");
+	root.appendChild(c);
+	camera()->saveAsXML(c);
+ }
+
+ createRenderItemList();
+ {
+	QMap<unsigned int, QDomElement> owner2Items;
+	for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
+		QDomElement items = doc.createElement(QString::fromLatin1("Items"));
+		items.setAttribute(QString::fromLatin1("OwnerId"), p->id());
+		root.appendChild(items);
+		owner2Items.insert(p->id(), items);
+	}
+
+	BoItemList::Iterator it;
+	for (it = d->mRenderItemList->begin(); it != d->mRenderItemList->end(); ++it) {
+		BosonItem* i = *it;
+		QDomElement items;
+		if (RTTI::isShot(i->rtti())) {
+			BosonShot* s = (BosonShot*)i;
+			if (!s->owner()) {
+				BO_NULL_ERROR(s->owner());
+				continue;
+			}
+			unsigned int id = s->owner()->id();
+			items = owner2Items[id];
+		} else if (RTTI::isUnit(i->rtti())) {
+			Unit* u = (Unit*)i;
+			if (!u->owner()) {
+				BO_NULL_ERROR(u->owner());
+				continue;
+			}
+			unsigned int id = u->owner()->id();
+			items = owner2Items[id];
+		}
+		if (items.isNull()) {
+			boError() << k_funcinfo << "no Items element found" << endl;
+			continue;
+		}
+		QDomElement item = doc.createElement("Item");
+		if (!i->saveAsXML(item)) {
+			boError() << k_funcinfo << "error saving item" << endl;
+			continue;
+		}
+		items.appendChild(item);
+	}
+ }
+
+
+
+ stream << doc.toString();
+
+ return data;
+#else
  // Repaint
  slotUpdateGL();
  glFinish();
@@ -2797,6 +2773,7 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
  io.setQuality(90);
  io.write();
  return ba;
+#endif
 }
 
 void BosonBigDisplayBase::advanceCamera()
@@ -2829,5 +2806,148 @@ void BosonBigDisplayBase::changeGroundRenderer(int renderer)
  d->mGroundRenderer->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
  d->mGroundRenderer->setViewFrustum(d->mViewFrustum);
  d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
+}
+
+void BosonBigDisplayBase::generateMovieFrames(const QValueList<QByteArray>& data, const QString& directory)
+{
+ if (data.count() == 0) {
+	return;
+ }
+#if 0
+ BO_CHECK_NULL_RET(d->mGroundRenderer);
+ QDir dir(directory);
+ if (!dir.exists()) {
+	boError() << k_funcinfo << "direcotry " << directory << " does not exist" << endl;
+	return;
+ }
+ // TODO QDir has no isWritable() :-(
+#if 0
+ if (!dir.isWritable()) {
+	boError() << k_funcinfo << "directory " << dir.absPath() << " is not writable!" << endl;
+	return;
+ }
+#endif
+ if (data.count() > 999999999) {
+	// currently filenames are fixed to 8 digits, so we cannot have more
+	// files.
+	boError() << k_funcinfo << "too many files!" << endl;
+	return;
+ }
+ QString prefix = "boson-movie";
+ QString suffix = ".jpg";
+ bool ok = false;
+
+ // try to find a filename prefix for data.count() files.
+ unsigned int tries = 0;
+ do {
+	tries++;
+	QString prefix2 = prefix;
+	if (tries > 1) {
+		prefix2 += "_";
+		prefix2 += QString::number(tries);
+	}
+	QString file;
+	bool success = true;
+	for (unsigned int i = 0; i < data.count() && success; i++) {
+		file.sprintf("%s-%08d%s", prefix2.latin1(), i, suffix.latin1());
+		if (dir.exists(file)) {
+			success = false;
+		}
+	}
+	if (success) {
+		ok = true;
+		prefix = prefix2;
+	}
+
+ } while (!ok && tries < 100);
+ if (!ok) {
+	boError() << k_funcinfo << "could not find usable filename prefix for " << data.count() << " files" << endl;
+	return;
+ }
+
+ // TODO: we should save the game here and load it again when we are done.
+ // all units will be removed from the game when generating the frames...
+ //
+ // maybe we just use a different canvas?
+
+ BosonCanvas* old = mCanvas;
+
+ // WARNING: units that are added to the canvas get added to the player, too!
+ // --> we must remove them asap again, as game can continue
+ mCanvas = new BosonCanvas(this);
+ mCanvas->setMap(old->map());
+
+ // now generate the frames
+ BoPixmapRenderer* renderer = new BoPixmapRenderer(this);
+ for (unsigned int i = 0; i < data.count(); i++) {
+	QString file;
+	file.sprintf("%s-%08d%s", prefix.latin1(), i, suffix.latin1());
+	file = dir.filePath(file);
+	renderer->startPixmap();
+	generateMovieFrame(data[i], renderer);
+	renderer->pixmapDone(file);
+	renderer->flush();
+ }
+ delete renderer;
+ delete mCanvas;
+ mCanvas = old;
+#endif
+}
+
+void BosonBigDisplayBase::generateMovieFrame(const QByteArray& data, BoPixmapRenderer* renderer)
+{
+#if 0
+ if (data.size() == 0) {
+	return;
+ }
+ if (!renderer) {
+	return;
+ }
+ BO_CHECK_NULL_RET(d->mGroundRenderer);
+
+ QDataStream stream(data, IO_ReadOnly);
+ QString xml;
+ stream >> xml;
+ if (xml.isEmpty()) {
+	boError() << "empty xml string" << endl;
+	return;
+ }
+ QDomDocument doc;
+ doc.setContent(xml);
+ QDomElement root = doc.documentElement();
+
+ QDomNodeList list;
+ list = root.elementsByTagName("Camera");
+ if (list.count() == 0) {
+	boError() << k_funcinfo << "no camera node" << endl;
+	return;
+ }
+ QDomElement cameraElement = list.item(0).toElement();
+ if (cameraElement.isNull()) {
+	boError() << k_funcinfo << "invalid camera element" << endl;
+	return;
+ }
+ camera()->loadFromXML(cameraElement);
+ cameraChanged(); // will also call generateCellList().
+
+
+ // remove _all_ items from the canvas.
+ canvas()->allItems()->clear();
+ mCanvas->loadFromXML(root);
+
+ // remove _all_ particle systems from the canvas
+ canvas()->particleSystems()->clear();
+// canvas()->particleSystems()->append(data.particleSystems); // TODO
+
+ // AB: placement preview, cursor and selection rect are not rendered into the
+ // movie
+
+ // TODO: text
+ // --> player data must be saved! - e.g. minerals/oil
+ // localPlayer()->load(data.localPlayer);
+
+
+ slotUpdateGL();
+#endif
 }
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 #define MAX_CAMERA_Z 100.0
 
 
-
+class BoMouseMoveDiff;
 class SpeciesTheme;
 class UnitProperties;
 class BosonModel;
@@ -223,9 +223,7 @@ private:
 	bool mDisallowPlacement;
 	bool mWireFrame;
 
-	// mouse move:
-	int* mMouseDiffX;
-	int* mMouseDiffY;
+	BoMouseMoveDiff* mMouseMoveDiff;
 
 	BoCamera* mCamera;
 };
@@ -267,9 +265,9 @@ protected slots:
 
 private:
 	KMyFloatNumInput* mFovY;
-	KMyIntNumInput* mRotateX;
-	KMyIntNumInput* mRotateY;
-	KMyIntNumInput* mRotateZ;
+	KMyFloatNumInput* mRotateX;
+	KMyFloatNumInput* mRotateY;
+	KMyFloatNumInput* mRotateZ;
 	KMyFloatNumInput* mCameraX;
 	KMyFloatNumInput* mCameraY;
 	KMyFloatNumInput* mCameraZ;
