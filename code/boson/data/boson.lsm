@@ -1,6 +1,6 @@
 Begin3
 Title:          Boson 
-Version:        0.6
+Version:        0.6.1
 Entered-date:   10JUN02
 Description:    network real time strategy game (warcraft-like), whithout AI.
 Keywords:       server, warcraft, strategy, game, KDE, X11, Qt, RTS
@@ -8,10 +8,8 @@ Author:         Thomas Capricelli <orzel@yalbi.com>
                 Andreas Beckermann <b_mann@gmx.de>
 Maintained-by:  Andreas Beckermann <b_mann@gmx.de>
 Primary-site:   boson.eu.org /download/
-                27M   boson-all-0.6.tar.bz2
-                510kB boson-code-0.6.tar.bz2
-                10M   boson-data-0.6.tar.bz2
-                16M   boson-music-0.6.tar.bz2
+                27M   boson-all-0.6.1.tar.bz2
+                510kB boson-code-0.6.1.tar.bz2
 Alternate-site: ftp.kde.org /pub/kde/unstable/apps/KDE3.x/games/
 Home-page:      http://boson.eu.org/
 Original-site:  
