@@ -1769,6 +1769,11 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       {
         continue;
       }
+      // Make sure cell's passability is what we need
+      if(cellPassability(n2.x, n2.y) != info->passability)
+      {
+        continue;
+      }
       // Check if it's in correct region
       BosonPathRegion* r = cellRegion(n2.x, n2.y);
       if(r != currentregion)
@@ -2313,6 +2318,7 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 
 bool BosonPath2::rangeCheck(BosonPathInfo* info)
 {
+  // ONLY FOR FLYING UNITS!
   // This method checks if it's possible to go to better place than where unit
   //  currently is.
   // It returns true if it is possible to get to better place, otherwise false
@@ -3037,7 +3043,8 @@ BosonPathHighLevelPath* BosonPath2::findCachedHighLevelPath(BosonPathInfo* info)
   QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
   while(it.current())
   {
-    if(it.current()->valid && (it.current()->startRegion == info->startRegion) && (info->possibleDestRegions.contains(it.current()->destRegion)))
+    if(it.current()->valid && (it.current()->passability == info->passability) &&
+        (it.current()->startRegion == info->startRegion) && (info->possibleDestRegions.contains(it.current()->destRegion)))
     {
       return it.current();
     }
@@ -3120,7 +3127,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
       n2.region = n.region->neighbors[i].region;
 
       // Check if this node is suitable for us
-      if(((n2.region->passabilityType == Land) && (!info->canMoveOnLand)) || ((n2.region->passabilityType == Water) && (!info->canMoveOnWater)))
+      if(n2.region->passabilityType != info->passability)
       {
         // Unit cannot move in this region
         visited[n2.region->id] = true;
@@ -3317,6 +3324,15 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
     boError(510) << k_funcinfo << "Land units that can move on both water and land aren't supported yet!!!" << endl;
     return;
   }
+  // Find unit's passability type.
+  if(info->canMoveOnWater)
+  {
+    info->passability = Water;
+  }
+  else
+  {
+    info->passability = Land;
+  }
   QPtrList<BosonPathRegion> destRegions;
   BosonPathRegion* r;
   for(int y = miny; y <= maxy; y++)
@@ -3327,6 +3343,11 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
       if(!r)
       {
         // Occupied or unpassable cell
+        continue;
+      }
+      if(r->passabilityType != info->passability)
+      {
+        // Wrong passability
         continue;
       }
       if(r->group == startGrp)
@@ -3464,8 +3485,9 @@ BosonPath2::PassabilityType BosonPath2::cellPassability(int x, int y)
   {
     return NotPassable;
   }
-  else if(cell(x, y)->amountOfLand() >= 128)
+  else if(cell(x, y)->amountOfLand() >= 154)
   {
+    // Cell is passable by land units if it has at least 60% of land
     return Land;
   }
   else
