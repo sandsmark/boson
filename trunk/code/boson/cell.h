@@ -184,7 +184,8 @@ public:
 	 * not.
 	 * @return @ref BoItemList::isOccupied
 	 **/
-	inline bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
+	inline bool isOccupied(Unit* forUnit, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
+	inline bool isOccupied(bool includeMoving = true) const { return mItems.isOccupied(includeMoving); }
 
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
