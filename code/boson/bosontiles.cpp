@@ -157,7 +157,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
  QString tile;
  QImage p;
  for (int i = 0; i < 4; i++) {
-	tile.sprintf("-%.2d.bmp", i);
+	tile.sprintf("-%.2d.png", i);
 	QString file = path + tile;
 	p.load(file);
 	if (p.isNull()) {
