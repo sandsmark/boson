@@ -16,7 +16,6 @@ Game TODOs
 - don't allow to build units when player has not enough minerals/oil
 - auto positioning of produced units
 - display progress of unit production
-- center cell at mosue pos with mmb
 - RMB + mouse move => move map
 
 
