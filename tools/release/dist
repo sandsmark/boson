@@ -238,3 +238,8 @@ cd $DEST_MUSIC/../
 tar cjvf boson-music-$BO_VERSION.tar.bz2 boson-music-$BO_VERSION/ > /dev/null || exit 1
 mv boson-music-$BO_VERSION.tar.bz2 $DEST_BASE/
 
+echo "Packaging should be completed now (unless you see any errors above, that could not get catched!"
+echo "You will find the packages (.tar.bz2 files) in $DEST_BASE"
+echo "Test the packages before uploading!!"
+echo "FIXME: can we leave boson-all*/debian as-is or should it be removed?"
+
