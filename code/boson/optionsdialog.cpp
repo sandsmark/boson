@@ -80,6 +80,8 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  initCursorPage();
  initPathfindingPage();
  initScrollingPage();
+
+ connect(this, SIGNAL(defaultClicked()), this, SLOT(slotSetDefaults()));
 }
 
 OptionsDialog::~OptionsDialog()
@@ -116,7 +118,7 @@ void OptionsDialog::initGeneralPage()
 		this, SLOT(slotCmdBackgroundChanged(int)));
 
  d->mMiniMapScale = new KDoubleNumInput(1.0, vbox);
- d->mMiniMapScale->setRange(1.0, 5.0, 0.5);
+ d->mMiniMapScale->setRange(1.0, 5.0, 1);
  d->mMiniMapScale->setLabel(i18n("Mini Map Scale Factor"));
  connect(d->mMiniMapScale, SIGNAL(valueChanged(double)), 
 		this, SIGNAL(signalMiniMapScaleChanged(double)));
@@ -298,3 +300,16 @@ void OptionsDialog::setCursorEdgeSensity(int v)
  d->mCursorEdgeSensity->setValue(v);
 }
 
+void OptionsDialog::slotSetDefaults()
+{
+ // FIXME: these values are copied from BosonConfig
+ //  Probably we should have some #define's with default values somewhere
+ setGameSpeed(5);
+ setArrowScrollSpeed(10);
+ setMiniMapScale(2.0);
+ setRMBScrolling(true);
+ setMMBScrolling(true);
+ setCursor(CursorSprite);
+ setCursorEdgeSensity(20);
+ setGroupMove(GroupMoveOld);
+}
