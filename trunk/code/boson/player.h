@@ -86,7 +86,6 @@ public:
 
 	bool saveAsXML(QDomElement& element);
 	bool loadFromXML(const QDomElement& element);
-	bool loadUnitsFromXML(const QDomElement& element);
 
 	virtual bool load(QDataStream& stream);
 	bool loadUnits(QDataStream& stream); // must be done after the map was initialized

@@ -21,6 +21,8 @@
 
 #include <qdatastream.h>
 
+template<class T> class QValueList;
+
 class BosonFileConverter
 {
 public:
@@ -37,6 +39,15 @@ public:
 	 * by boson 0.9 (AB: not yet released, so this is CVS only...)
 	 **/
 	bool convertMapFile_From_0_8_To_0_9(const QByteArray& map, QByteArray* newMap, QByteArray* texMap);
+
+	/**
+	 * Convert a set of files (kgame.xml, players.xml, canvas.xml,
+	 * external.xml, map - in this order!) from boson 0.8 to boson 0.9.
+	 *
+	 * @param list A reference to the list of files. This will be modified
+	 * to the 0.9 file format or left untouched on error.
+	 **/
+	bool convertSaveGame_From_0_8_To_0_9(QValueList<QByteArray>& list);
 
 };
 

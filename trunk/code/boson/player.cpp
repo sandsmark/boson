@@ -706,20 +706,6 @@ bool Player::saveAsXML(QDomElement& root)
  }
  root.appendChild(handler);
 
- // save units
- QDomElement units = doc.createElement(QString::fromLatin1("Units"));
- QPtrListIterator<Unit> it(d->mUnits);
- for (; it.current(); ++it) {
-	Unit* u = it.current();
-	QDomElement unit = doc.createElement(QString::fromLatin1("Unit"));
-	if (!u->saveAsXML(unit)) {
-		boError() << k_funcinfo << "Could not save unit " << u->id() << endl;
-		continue;
-	}
-	units.appendChild(unit);
- }
- root.appendChild(units);
-
  // Save speciestheme
  if (speciesTheme()) {
 	root.setAttribute(QString::fromLatin1("SpeciesTheme"), speciesTheme()->identifier());
@@ -823,77 +809,6 @@ bool Player::loadFromXML(const QDomElement& root)
  }
 
  boDebug(260) << k_funcinfo << "done" << endl;
- return true;
-}
-
-bool Player::loadUnitsFromXML(const QDomElement& root)
-{
- if (root.isNull()) {
-	boError(260) << k_funcinfo << "NULL root node" << endl;
-	return false;
- }
- QDomElement units = root.namedItem(QString::fromLatin1("Units")).toElement();
- if (units.isNull()) {
-	boWarning(260) << k_funcinfo << "no units for player " << id() << endl;
-	return true;
- }
- QDomNodeList list = units.elementsByTagName(QString::fromLatin1("Unit"));
- if (list.count() == 0) {
-	boWarning(260) << k_funcinfo << "no units for player " << id() << endl;
-	return true;
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	if (e.isNull()) {
-		boError(260) << k_funcinfo << i << " is not an element" << endl;
-		return false;
-	}
-	if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
-		boError(260) << k_funcinfo << "missing attribute: UnitType for Unit " << i << endl;
-		continue;
-	}
-	if (!e.hasAttribute(QString::fromLatin1("Id"))) {
-		boError(260) << k_funcinfo << "missing attribute: Id for Unit " << i << endl;
-		continue;
-	}
-	if (!e.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
-		boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Unit " << i << endl;
-		continue;
-	}
-	bool ok = false;
-	unsigned long int type;
-	unsigned long int id;
-	int dataHandlerId;
-	type = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid UnitType number for Unit " << i << endl;
-		continue;
-	}
-	id = e.attribute(QString::fromLatin1("Id")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Id number for Unit " << i << endl;
-		continue;
-	}
-	dataHandlerId = e.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid DataHandlerId number for Unit " << i << endl;
-		continue;
-	}
-
-	// Create unit with Boson
-	Unit* unit = ((Boson*)game())->loadUnit(type, this);
-
-	// Set additional properties
-	addUnit(unit, dataHandlerId);
-	unit->setId(id);
-
-	// Call unit's loading methods
-	if (!unit->loadFromXML(e)) {
-		boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
-		// no need to return
-		// also it is dangerous now, as we already called addUnit()!
-	}
- }
  return true;
 }
 

@@ -372,8 +372,8 @@ protected:
 	void removeFromAdvanceLists(BosonItem* item);
 
 
-	bool loadUnitFromXML(const QDomElement& unit);
-	bool loadShotFromXML(const QDomElement& shot);
+	bool loadUnitFromXML(const QDomElement& unit, Player* owner);
+	bool loadShotFromXML(const QDomElement& shot, Player* owner);
 
 private:
 	void init();

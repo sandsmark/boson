@@ -23,9 +23,12 @@
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"
+#include "bosonsaveload.h"
 
 #include <qdatastream.h>
 #include <qcolor.h>
+#include <qvaluelist.h>
+#include <qdom.h>
 
 #define BOSONMAP_VERSION BosonMap::mapFileFormatVersion()
 
@@ -101,6 +104,128 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
 
 
  return ret;
+}
+
+bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QValueList<QByteArray>& fileList)
+{
+ // converting a set of files from a .bsg archive from boson 0.8 to 0.9
+ // "map" remains unmodified, same for "external.xml" (at the
+ // moment at least - development process not yet completed). in kgame.xml we
+ // need to update the savegame version.
+ // the important part is "players.xml" and "canvas.xml".
+ //
+ // The structure of canvas.xml has changed and all Unit tags from players.xml
+ // are moved to canvas.xml.
+ // Thanks to XML this should be pretty simple to update.
+
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ if (!kgameDoc.setContent(QString(fileList[0]))) {
+	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
+	return false;
+ }
+ if (!playersDoc.setContent(QString(fileList[1]))) {
+	boError() << k_funcinfo << "unable to load players.xml" << endl;
+	return false;
+ }
+ if (!canvasDoc.setContent(QString(fileList[2]))) {
+	boError() << k_funcinfo << "unable to load canvas.xml" << endl;
+	return false;
+ }
+
+ // this does two things now
+ // 1. parse the players.xml file and add "Items" tag to canvas.xml for every
+ // player found.
+ // 2. while we are on it add all "Unit" nodes to canvas.xml and remove them
+ // from players.xml
+ QDomElement playersRoot = playersDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomNodeList list = playersDoc.elementsByTagName(QString::fromLatin1("Player"));
+ QMap<unsigned int, QDomElement> canvasOwner2Items;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement player = list.item(i).toElement();
+	if (player.isNull()) {
+		continue;
+	}
+	if (!player.hasAttribute(QString::fromLatin1("Id"))) {
+		boError() << k_funcinfo << "Player tag " << i << " has not Id attribute" << endl;
+		continue;
+	}
+	QDomElement items = canvasDoc.createElement(QString::fromLatin1("Items"));
+	items.setAttribute(QString::fromLatin1("OwnerId"), player.attribute(QString::fromLatin1("Id")));
+	canvasRoot.appendChild(items);
+	canvasOwner2Items.insert(items.attribute(QString::fromLatin1("OwnerId")).toUInt(), items);
+
+	QDomElement unitsTag = player.namedItem(QString::fromLatin1("Units")).toElement();
+	if (unitsTag.isNull()) {
+		boError() << k_funcinfo << "not valid Units tag found for player " << i << endl;
+		continue;
+	}
+	QDomNodeList units = unitsTag.elementsByTagName(QString::fromLatin1("Unit"));
+	for (unsigned int j = 0; j < units.count(); j++) {
+		QDomElement unit = units.item(j).toElement();
+		if (unit.isNull()) {
+			continue;
+		}
+		items.appendChild(unit.cloneNode(true));
+		unitsTag.removeChild(unit);
+	}
+	player.removeChild(unitsTag);
+ }
+
+
+ // now we parse the canvas.xml and move the "Shot" tags into the "Items" tags.
+ // players.xml is not touched.
+ QDomElement shotsTag = canvasRoot.namedItem(QString::fromLatin1("Shots")).toElement();
+ if (shotsTag.isNull()) {
+	boError() << k_funcinfo << "not Shots tag in canvas.xml" << endl;
+	return false;
+ }
+ list = shotsTag.elementsByTagName(QString::fromLatin1("Shot"));
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement shot = list.item(i).toElement();
+	if (shot.isNull()) {
+		continue;
+	}
+	bool ok = false;
+	if (!shot.hasAttribute(QString::fromLatin1("Owner"))) {
+		boError() << k_funcinfo << "Shot tag has no Owner attribute" << endl;
+		continue;
+	}
+	unsigned int id = shot.attribute(QString::fromLatin1("Owner")).toULong(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Shot tag has no valid Owner attribute (" << shot.attribute(QString::fromLatin1("Owner")) << ")" << endl;
+		continue;
+	}
+	QDomElement items = canvasOwner2Items[id];
+	if (items.isNull()) {
+		boError() << k_funcinfo << "could not find owner " << id << endl;
+		continue;
+	}
+	shotsTag.removeChild(shot);
+	items.appendChild(shot);
+	shot.removeAttribute(QString::fromLatin1("Owner"));
+ }
+ canvasRoot.removeChild(shotsTag);
+
+ QCString playersXML = playersDoc.toCString();
+ QCString canvasXML = canvasDoc.toCString();
+
+ // finally we need to update the savegame version.
+ QDomElement kgameRoot = kgameDoc.documentElement();
+
+#warning TODO: Update to current values once 0.9 gets released
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x00)
+
+ kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION_0_9);
+
+ QCString kgameXML = kgameDoc.toCString();
+ fileList[0] = kgameXML;
+ fileList[1] = playersXML;
+ fileList[2] = canvasXML;
+
+ return true;
 }
 
 
