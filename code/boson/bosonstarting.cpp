@@ -407,9 +407,9 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement p = list.item(i).toElement();
 	bool ok = false;
-	unsigned int id = p.attribute("Id").toUInt(&ok);
+	unsigned int id = p.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "invalid Id" << endl;
+		boError(260) << k_funcinfo << "invalid PlayerId" << endl;
 		return false;
 	}
 	QString species = p.attribute(QString::fromLatin1("SpeciesTheme"));
@@ -636,7 +636,7 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 		return false;
 	}
 	root.setAttribute("PlayerId", QString::number(actualIds[id]));
-	
+
  }
  return true;
 }
