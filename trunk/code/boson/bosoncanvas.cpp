@@ -598,13 +598,29 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
  if (damage < 0) {
 	target->setHealth(target->health() + ((unsigned long)-damage));
  } else {
-	target->setHealth((target->health() > (unsigned long)damage) ? target->health() - damage : 0);
+	// Usually, target's armor is substracted from attacker's weaponDamage, but
+	//  if target has only little health left, then armor doesn't have full effect
+	int health = (int)target->health();
+	if (health <= (int)(target->unitProperties()->health() / 10.0)) {
+		// If unit has only 10% or less of it's hitpoint left, armor has no effect (it's probably destroyed)
+	} else if (health <= (int)(target->unitProperties()->health() / 2.5)) {
+		// Unit has 40% or less of hitpoints left. Only half of armor is "working"
+		damage -= (int)(target->armor() / 2.0);
+	} else {
+		damage -= target->armor();
+	}
+	if(damage < 0) {
+		damage = 0;
+	}
+	health -= damage;
+	target->setHealth((health >= 0) ? health : 0);
  }
- 
+
  if (target->isDestroyed()) {
 	destroyUnit(target); // display the explosion ; not the shoot
  } else {
-	(void) new BoShot(target, attackedBy, this);
+	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
+//	(void) new BoShot(target, attackedBy, this);
  }
  boMusic->playSound(attackedBy, Unit::SoundShoot);
 }
@@ -627,7 +643,8 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	unit->setWork(UnitBase::WorkDestroyed);
 	owner->unitDestroyed(unit); // remove from player without deleting
 	boMusic->playSound(unit, Unit::SoundReportDestroyed);
-	(void) new BoShot(unit, 0, this, true);
+	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
+//	(void) new BoShot(unit, 0, this, true);
 	emit signalUnitDestroyed(unit);
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
