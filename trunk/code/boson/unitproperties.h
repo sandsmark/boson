@@ -74,7 +74,8 @@ public:
 		Barracks = 3,
 		CommandBunker = 10
 	};
-	
+
+	UnitProperties();
 	UnitProperties(SpeciesTheme*);
 
 	/**
@@ -82,6 +83,26 @@ public:
 	 **/
 	UnitProperties(SpeciesTheme*, const QString& fileName);
 	~UnitProperties();
+
+
+	/**
+	 * Load the file. This sets all values of UnitProperties. All values are
+	 * readOnly, as UnitProperties is meant to change never.
+	 *
+	 * The file should contain units/your_unit_dir/index.unit at the end
+	 * and should be an absolute path.
+	 **/
+	void loadUnitType(const QString& fileName, bool full = true);
+
+	/**
+	 * Save UnitProperties to the file. This sets all values of UnitProperties. All values are
+	 * readOnly, as UnitProperties is meant to change never.
+	 *
+	 * The file should contain units/your_unit_dir/index.desktop at the end
+	 * and should be an absolute path.
+	 **/
+	void saveUnitType(const QString& fileName);
+
 
 	/**
 	 * @return The @ref SpeciesTheme this property belongs to.
@@ -93,7 +114,7 @@ public:
 	 * this unit occupies * BO_TILE_SIZE
 	 **/
 	unsigned int unitWidth() const { return mUnitWidth; }
-	
+
 	/**
 	 * @return The unrotated height of the unit. The value is number of cells
 	 * this unit occupies * BO_TILE_SIZE
@@ -105,7 +126,7 @@ public:
 	 * is number of cells this unit occupies * BO_TILE_SIZE
 	 **/
 	unsigned int unitDepth() const { return mUnitDepth; }
-	
+
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
 	 **/
@@ -151,15 +172,6 @@ public:
 	 * "Ship"
 	 **/
 	const QString& name() const { return mName; };
-
-	/**
-	 * Load the file. This sets all values of UnitProperties. All values are
-	 * readOnly, as UnitProperties is meant to change never.
-	 *
-	 * The file should contain units/your_unit_dir/index.unit at the end
-	 * and should be an absolute path.
-	 **/
-	void loadUnitType(const QString& fileName);
 
 	/**
 	 * @return If this is a mobile unit. Better use @ref Unit::isMobile()
@@ -314,6 +326,36 @@ protected:
 	void loadTextureNames(KSimpleConfig* conf);
 	void loadSoundNames(KSimpleConfig* conf);
 	void loadWeapons(KSimpleConfig* conf);
+
+	void saveMobileProperties(KSimpleConfig* conf);
+	void saveFacilityProperties(KSimpleConfig* conf);
+	void saveAllPluginProperties(KSimpleConfig* conf);
+	void saveTextureNames(KSimpleConfig* conf);
+	void saveSoundNames(KSimpleConfig* conf);
+
+	// Methods to set values. They are only meant to be used by upgrades and unit
+	//  editor. Don't use them unless you know what you are doing
+	void setName(QString name)  { mName = name; };
+	void setUnitPath(QString unitPath)  { mUnitPath = unitPath; };
+	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
+	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
+	void setUnitDepth(unsigned int unitDepth)  { mUnitDepth = unitDepth; };
+	void setHealth(unsigned long int health)  { mHealth = health; };
+	void setSightRange(unsigned int sightRange)  { mSightRange = sightRange; };
+	void setProducer(unsigned int producer)  { mProducer = producer; };
+	void setProductionTime(unsigned int productionTime)  { mProductionTime = productionTime; };
+	void setMineralCost(unsigned long int mineralCost)  { mMineralCost = mineralCost; };
+	void setOilCost(unsigned long int oilCost)  { mOilCost = oilCost; };
+	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; };
+	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; };
+	void setRequirements(QValueList<unsigned long int> requirements)  { mRequirements = requirements; };
+	void setArmor(unsigned long int armor)  { mArmor = armor; };
+	void setShields(unsigned long int shields)  { mShields = shields; };
+	void setLongTextureNames(QMap<QString, QString> textureNames)  { mTextureNames = textureNames; };
+	void setSounds(QMap<int, QString> sounds)  { mSounds = sounds; };
+
+	friend class BoUnitEditor;
+
 private:
 	SpeciesTheme* mTheme;
 
@@ -351,7 +393,6 @@ private:
 
 	QPtrList<UpgradeProperties> mUpgrades;
 	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
-	//QPtrList<BosonWeaponProperties> mWeapons;
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 };

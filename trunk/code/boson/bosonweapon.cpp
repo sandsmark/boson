@@ -61,6 +61,11 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   mModel = speciesTheme()->objectModel(cfg->readEntry("Model", "missile.3ds"));
 }
 
+void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
+{
+  /// TODO!!!
+}
+
 BosonShot* BosonWeaponProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
 {
   return new BosonShot(this, attacker, x, y, z, tx, ty, tz);

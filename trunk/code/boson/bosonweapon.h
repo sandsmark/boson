@@ -84,6 +84,7 @@ class BosonWeaponProperties : public PluginProperties
 
     virtual QString name() const;
     virtual void loadPlugin(KSimpleConfig* config);
+    virtual void savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; };
 
   private:

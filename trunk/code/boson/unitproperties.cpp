@@ -56,6 +56,13 @@ public:
 };
 
 
+UnitProperties::UnitProperties()
+{
+ mTheme = 0;
+ mMobileProperties = 0;
+ mFacilityProperties = 0;
+}
+
 UnitProperties::UnitProperties(SpeciesTheme* theme)
 {
  mTheme = theme;
@@ -68,19 +75,17 @@ UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
  mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
- //mWeapons.setAutoDelete(true);
 
- loadUnitType(fileName);
+ loadUnitType(fileName, true);
 }
 
 UnitProperties::~UnitProperties()
 {
- //mWeapons.clear();
  delete mMobileProperties;
  delete mFacilityProperties;
 }
 
-void UnitProperties::loadUnitType(const QString& fileName)
+void UnitProperties::loadUnitType(const QString& fileName, bool full)
 {
  bool isFacility;
  KSimpleConfig conf(fileName);
@@ -99,11 +104,11 @@ void UnitProperties::loadUnitType(const QString& fileName)
 	mTerrain = (TerrainType)0;
  }
  mUnitWidth = (unsigned int)(conf.readDoubleNumEntry("UnitWidth", 1.0) * BO_TILE_SIZE);
- mUnitHeight= (unsigned int)(conf.readDoubleNumEntry("UnitHeight", 1.0) * BO_TILE_SIZE);
+ mUnitHeight = (unsigned int)(conf.readDoubleNumEntry("UnitHeight", 1.0) * BO_TILE_SIZE);
  mUnitDepth = (unsigned int)(conf.readDoubleNumEntry("UnitDepth", 1.0) * BO_TILE_SIZE);
  mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
- mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100);
+ mMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5);
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
@@ -113,7 +118,9 @@ void UnitProperties::loadUnitType(const QString& fileName)
  isFacility = conf.readBoolEntry("IsFacility", false);
  mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
 
- mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+ if (full) {
+	mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+ }
 
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
@@ -128,6 +135,44 @@ void UnitProperties::loadUnitType(const QString& fileName)
  loadSoundNames(&conf);
  loadUpgrades(&conf);
  loadWeapons(&conf);
+}
+
+void UnitProperties::saveUnitType(const QString& fileName)
+{
+ KSimpleConfig conf(fileName);
+ conf.setGroup(QString::fromLatin1("Boson Unit"));
+
+ conf.writeEntry("Id", typeId());
+ conf.writeEntry("TerrainType", (int)mTerrain);
+ conf.writeEntry("UnitWidth", (double)mUnitWidth / BO_TILE_SIZE);
+ conf.writeEntry("UnitHeight", (double)mUnitHeight / BO_TILE_SIZE);
+ conf.writeEntry("UnitDepth", (double)mUnitDepth / BO_TILE_SIZE);
+ conf.writeEntry("Name", mName);
+ conf.writeEntry("Health", mName);
+ conf.writeEntry("MineralCost", mMineralCost);
+ conf.writeEntry("OilCost", mOilCost);
+ conf.writeEntry("SightRange", mSightRange);
+ conf.writeEntry("ProductionTime", mProductionTime);
+ conf.writeEntry("Shield", mShields);
+ conf.writeEntry("Armor", mArmor);
+ conf.writeEntry("SupportMiniMap", mSupportMiniMap);
+ conf.writeEntry("IsFacility", isFacility());
+ BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", mRequirements);
+ conf.writeEntry("Producer", mProducer);
+
+ /// TODO
+//	mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+
+ if (isFacility()) {
+	saveFacilityProperties(&conf);
+ } else {
+	saveMobileProperties(&conf);
+ }
+
+ saveAllPluginProperties(&conf);  // This saves weapons too
+ saveTextureNames(&conf);
+ saveSoundNames(&conf);
+// saveUpgrades(&conf); // TODO
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -152,8 +197,8 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  mFacilityProperties = new FacilityProperties;
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
- mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
- mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", 20);
+ mFacilityProperties->mCanRefineOil = conf->readBoolEntry("CanRefineOil", false);
+ mFacilityProperties->mConstructionFrames = conf->readUnsignedNumEntry("ConstructionSteps", 20);
 }
 
 void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
@@ -227,6 +272,58 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 		mCanShootAtLandUnits = true;
 	}
  }
+}
+
+void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
+{
+ conf->setGroup("Boson Mobile Unit");
+ conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
+ conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
+ conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
+}
+
+void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
+{
+ conf->setGroup("Boson Facility");
+ conf->writeEntry("CanRefineMinerals", mFacilityProperties->mCanRefineMinerals);
+ conf->writeEntry("CanRefineOil", mFacilityProperties->mCanRefineOil);
+ conf->writeEntry("ConstructionSteps", mFacilityProperties->mConstructionFrames);
+}
+
+void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
+{
+ QPtrListIterator<PluginProperties> it(mPlugins);
+ while (it.current()) {
+	it.current()->savePlugin(conf);
+ }
+}
+
+void UnitProperties::saveTextureNames(KSimpleConfig* conf)
+{
+ if (mTextureNames.count() == 0) {
+	return;
+ }
+ conf->setGroup("Textures");
+ QMap<QString, QString>::Iterator it;
+ QStringList textures;
+ for(it = mTextureNames.begin(); it != mTextureNames.end(); ++it) {
+	textures.append(it.key());
+	conf->writeEntry(it.key(), it.data());
+ }
+ conf->writeEntry("Textures", textures);
+}
+
+void UnitProperties::saveSoundNames(KSimpleConfig* conf)
+{
+ mSounds.clear();
+ conf->setGroup("Sounds");
+ conf->writeEntry("Shoot", mSounds[SoundShoot]);
+ conf->writeEntry("OrderMove", mSounds[SoundOrderMove]);
+ conf->writeEntry("OrderAttack", mSounds[SoundOrderAttack]);
+ conf->writeEntry("OrderSelect", mSounds[SoundOrderSelect]);
+ conf->writeEntry("ReportProduced", mSounds[SoundReportProduced]);
+ conf->writeEntry("ReportDestroyed", mSounds[SoundReportDestroyed]);
+ conf->writeEntry("ReportUnderAttack", mSounds[SoundReportUnderAttack]);
 }
 
 bool UnitProperties::isMobile() const
