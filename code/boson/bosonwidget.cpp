@@ -192,7 +192,7 @@ void BosonWidget::init()
 
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
- d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ d->mBoson->slotSetGameSpeed(0); // pause
 
  d->mCommandPos = CmdFrameLeft;
  d->mChatPos = ChatFrameBottom;
@@ -522,8 +522,11 @@ void BosonWidget::slotGamePreferences()
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
+
+// TODO: not in editor mode!! in editor the game is always paused!
  connect(dlg, SIGNAL(signalSpeedChanged(int)),
 		d->mBoson, SLOT(slotSetGameSpeed(int)));
+
  connect(dlg, SIGNAL(signalCommandFramePositionChanged(int)),
 		this, SLOT(slotCommandFramePosition(int)));
  connect(dlg, SIGNAL(signalChatFramePositionChanged(int)),
@@ -669,6 +672,11 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
 
+void BosonWidget::startGame()
+{
+ d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
+}
+
 void BosonWidget::startEditor()
 {
  slotChangeCursor(CursorNormal);
@@ -696,6 +704,9 @@ void BosonWidget::startEditor()
 
 // start the chosen scenario
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
+
+// as BosonCanvas::advance() is disabled:
+ d->mCanvas->setUpdatePeriod(500); // AB: too high?
 }
 
 void BosonWidget::slotLoadMap(const QString& map)

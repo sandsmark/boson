@@ -41,6 +41,8 @@ Top::Top() : TopBase()
 
  initStatusBar();
 
+ bosonWidget()->startGame();
+
  bosonWidget()->slotNewGame(); // adds a local player, too
 }
 

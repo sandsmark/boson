@@ -480,7 +480,13 @@ void Boson::startGame()
  setGameStatus(KGame::Run);
  if (isServer()) {
 	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
-	d->mGameTimer->start(gameSpeed());
+	if (gameSpeed() != 0) {
+		if (!d->mGameTimer->isActive()) {
+			d->mGameTimer->start(gameSpeed());
+		} else {
+			kdWarning() << "timer was already active!" << endl;
+		}
+	}
  } else {
 	kdWarning() << "is not server - cannot start the game!" << endl;
  }
@@ -563,6 +569,7 @@ int Boson::gameSpeed() const
 
 void Boson::slotSetGameSpeed(int speed)
 {
+kdDebug() << k_funcinfo << speed << endl;
  if (d->mGameSpeed == speed) {
 	return; // do not restart timer
  }
@@ -570,14 +577,16 @@ void Boson::slotSetGameSpeed(int speed)
 	kdError() << "Invalid speed value " << speed << endl;
 	return;
  }
- if (speed > MIN_GAME_SPEED || speed < MAX_GAME_SPEED) {
+ if ((speed > MIN_GAME_SPEED || speed < MAX_GAME_SPEED) && speed != 0) {
 	kdWarning() << "unexpected speed " << speed << endl;
  }
 // kdDebug() << k_funcinfo << ": " << speed << endl;
  d->mGameSpeed = speed;
  if (d->mGameTimer->isActive()) {
 	d->mGameTimer->stop();
-	d->mGameTimer->start(gameSpeed());
+	if (speed != 0) {
+		d->mGameTimer->start(gameSpeed());
+	}
  }
 }
 
