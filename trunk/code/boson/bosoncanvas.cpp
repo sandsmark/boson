@@ -286,9 +286,9 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 //			boDebug() << k_funcinfo << "can go on " << x << "," << y << endl;
 		}
 		x++;
-	} while (x * BO_TILE_SIZE <= rect.right());
+	} while (x * BO_TILE_SIZE < rect.right());
 	y++;
- } while (y * BO_TILE_SIZE <= rect.bottom());
+ } while (y * BO_TILE_SIZE < rect.bottom());
 
  return true;
 }
@@ -748,16 +748,19 @@ void BosonCanvas::addToCells(BosonItem* item)
  }
 }
 
-bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
+bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& pos, ProductionPlugin* factory) const
 {
  int width = prop->unitWidth();
- int height= prop->unitHeight();
- if (!width) {
+ int height = prop->unitHeight();
+ if (width == 0) {
 	boError() << k_funcinfo << "null width for " << prop->typeId() << endl;
 	return false;
  }
- if (!height) {
+ if (height == 0) {
 	boError() << k_funcinfo << "null height for " << prop->typeId() << endl;
+	return false;
+ }
+ if (!onCanvas(pos * BO_TILE_SIZE)) {
 	return false;
  }
  QRect r(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE, width, height);

@@ -266,18 +266,18 @@ bool BosonBigDisplayInput::actionBuild(QDataStream& stream, const QPoint& canvas
 	return false;
  }
 
- QPoint pos = canvasPos / BO_TILE_SIZE;
  const UnitProperties* prop = localPlayer()->unitProperties(production->currentProductionId());
  if (!prop) {
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
- if (!canvas()->canPlaceUnitAt(prop, pos, production)) {
+ if (!canvas()->canPlaceUnitAt(prop, canvasPos, production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
  }
 
+ QPoint pos = canvasPos / BO_TILE_SIZE;
  // create the new unit
  stream << (Q_UINT32)BosonMessage::MoveBuild;
  stream << (Q_UINT32)production->completedProductionType();
@@ -470,7 +470,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
  // note: this applies to mobiles as well as for facilities!
  // (mobiles are usually auto placed, but manual placement might get used if
  // auto-placement failed)
- bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos() / BO_TILE_SIZE, pp));
+ bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos(), pp));
 
 }
 

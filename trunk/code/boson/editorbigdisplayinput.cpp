@@ -149,6 +149,9 @@ EditorBigDisplayInput::~EditorBigDisplayInput()
 void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
  boDebug() << k_funcinfo << endl;
+ if (!canvas()->onCanvas(action.canvasPos())) {
+	return;
+ }
  if (actionLocked()) {
 	if (actionType() == ActionBuild) {
 		if (actionPlace(stream, action.canvasPos())) {
@@ -186,7 +189,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
 		boError() << k_funcinfo << "invalid unittype " << d->mPlacement.unitType() << endl;
 		return false;
 	}
-	if (!canvas()->canPlaceUnitAt(prop, QPoint(x, y), 0)) {
+	if (!canvas()->canPlaceUnitAtCell(prop, QPoint(x, y), 0)) {
 		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;
@@ -289,9 +292,12 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
 		bigDisplay()->setPlacementPreviewData(0, false);
 		return;
 	}
-	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
 	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
-	bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
+
+	bool canPlace = canvas()->canPlaceUnitAt(prop, cursorCanvasPos(), 0);
+	bigDisplay()->setPlacementPreviewData(prop, canPlace);
+
+	QPoint p = cursorCanvasPos() / BO_TILE_SIZE;
  } else if (d->mPlacement.isCell()) {
 	if (d->mPlacement.cell() < 0) {
 		boError() << k_funcinfo << "invalid cell" << endl;

@@ -265,6 +265,12 @@ public:
 	 **/
 	float* pointArray() const;
 
+	/**
+	 * Enable @ref pointArray pointer to be used for vertex arrays. The
+	 * client state must have been set already.
+	 **/
+	void enablePointer();
+
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!

@@ -198,8 +198,7 @@ void ModelPreview::paintGL()
 		}
 
 		// FIXME: this isn't good here...
-		glVertexPointer(3, GL_FLOAT, 5  * sizeof(float), mModel->pointArray());
-		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), mModel->pointArray() + 3);
+		mModel->enablePointer();
 
 		f->renderFrame();
 		if (mPlacementPreview) {
