@@ -34,7 +34,7 @@
  #define USE_STL 1
 #endif
 
-#ifdef USE_STL
+#if USE_STL
  #include <vector>
  using std::vector;
  using std::greater;
@@ -104,12 +104,12 @@ class BosonPath
   private:
     class Marking;
     /// TODO: QTL impl.
-#ifdef USE_STL
+#if USE_STL
     greater<PathNode> comp;
 #endif
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
-#ifdef USE_STL
+#if USE_STL
     void getFirst(vector<PathNode>&, PathNode& n);
 #else
     void getFirst(QValueList<PathNode>&, PathNode& n);
