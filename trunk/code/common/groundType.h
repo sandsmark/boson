@@ -37,7 +37,7 @@ enum groundType {
 enum transType {
 	TRANS_GW = 0,
 	TRANS_GD,
-	TRANS_WD,
+	TRANS_DW,
 	TRANS_DWD,
 	TRANS_LAST
 	};
