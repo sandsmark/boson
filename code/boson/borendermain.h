@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #define BORENDERMAIN_H
 
 #include "bodebugdcopiface.h"
-#include "bosonglwidget.h"
+#include "bosonufoglwidget.h"
 
 #include <qptrlist.h>
 #include <qptrdict.h>
@@ -53,6 +53,7 @@ class KCmdLineArgs;
 class QCheckBox;
 class BoFontInfo;
 class BoUfoManager;
+class BoUfoLabel;
 class BoUfoAction;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
@@ -101,7 +102,7 @@ private slots:
 // this is mostly due to the current libufo conversion.
 // once that is completed we should change the general class design of this
 // program, to reflect the new facts.
-class ModelPreview : public BosonGLWidget
+class ModelPreview : public BosonUfoGLWidget
 {
 	Q_OBJECT
 public:
@@ -220,8 +221,6 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
 	virtual void wheelEvent(QWheelEvent*);
-	virtual void keyPressEvent(QKeyEvent* e);
-	virtual void keyReleaseEvent(QKeyEvent* e);
 
 	void renderAxii();
 	void renderModel(int mode = -1);
@@ -243,6 +242,8 @@ protected:
 	void updateCamera(const BoVector3Float& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3Float& cameraPos, const BoMatrix& rotationMatrix);
 	void updateCamera(const BoVector3Float& cameraPos, const BoVector3Float& lookAt, const BoVector3Float& up);
+
+	void updateMeshUnderMouseLabel();
 
 	/**
 	 * Use -1 to select nothing.
@@ -275,8 +276,9 @@ private:
 	int mCurrentLOD;
 	int mMeshUnderMouse;
 	int mSelectedMesh;
+	BoUfoLabel* mMeshUnderMouseLabel;
+	BoUfoLabel* mSelectedMeshLabel;
 
-	BoUfoManager* mUfoManager;
 	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!
