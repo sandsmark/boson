@@ -160,6 +160,7 @@ void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
  kdDebug() << k_funcinfo << endl;
  if (!selection || selection->count() == 0) {
 	slotShowSingleUnit(0);
+	setAction(0);
  } else if (selection->count() == 1) {
 	slotShowSingleUnit(selection->leader());
 	setAction(selection->leader());
