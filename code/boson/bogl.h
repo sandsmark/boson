@@ -36,6 +36,7 @@
 
 // Include OpenGL headers
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 #undef GLsizeiptrARB
 
