@@ -27,6 +27,7 @@
 #include "bosonglwidget.h"
 #include "bodebug.h"
 #include "bomesh.h"
+#include "bomemorytrace.h"
 
 #include <ksimpleconfig.h>
 #include <kstaticdeleter.h>
@@ -646,6 +647,7 @@ void BosonModel::loadModel()
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
 	return;
  }
+ boMem->startCatching();
  boProfiling->start(BosonProfiling::LoadModel);
  d->mLoader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
 
@@ -694,6 +696,7 @@ void BosonModel::loadModel()
  d->mLoader = 0;
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
 
+ boMem->stopCatching("BosonModel::loadModel()");
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
