@@ -78,6 +78,9 @@ signals:
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
+	virtual void slotPlayerJoinedGame(KPlayer*);
+	virtual void slotPlayerLeftGame(KPlayer*);
+
 	void slotOutOfGame(Player* p);
 
 	void slotSavePlayFieldAs();

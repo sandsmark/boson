@@ -133,8 +133,13 @@ public slots:
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
-
+	
 	void slotInitFogOfWar();
+
+protected slots:
+	virtual void slotPlayerJoinedGame(KPlayer*);
+	virtual void slotPlayerLeftGame(KPlayer*);
+
 	void slotHack1();
 
 signals:
@@ -236,7 +241,12 @@ private:
 	void initCommandFrame();
 	void initLayout();
 
-	void initDebugPlayersMenu();
+	/**
+	 * Initialize the debug player menu and the usual player menu in editor
+	 * mode. This iterates all available players and calls @ref
+	 * slotPlayerJoinedGame on them
+	 **/
+	void initPlayersMenu();
 
 private:
 	class BosonWidgetBasePrivate;

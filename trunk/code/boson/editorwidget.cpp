@@ -36,6 +36,7 @@
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
+#include <kfiledialog.h>
 #include <klocale.h>
 #include <kaction.h>
 #include <kdeversion.h>
@@ -99,6 +100,10 @@ void EditorWidget::initConnections()
 // connect(canvas(), SIGNAL(signalOutOfGame(Player*)),
 //		this, SLOT(slotOutOfGame(Player*)));
 
+ connect(game(), SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+ connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)),
+		this, SLOT(slotPlayerLeftGame(KPlayer*)));
 }
 
 void EditorWidget::initPlayer()
@@ -194,6 +199,14 @@ void EditorWidget::saveConfig()
 
 void EditorWidget::slotSavePlayFieldAs()
 {
+ QString startIn; // shall we provide this??
+ QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
+ if (fileName != QString::null) {
+	if (QFileInfo(fileName).extension().isEmpty()) {
+		fileName += ".bpf";
+	}
+//	editorSavePlayField(fileName); //TODO
+ }
 }
 
 void EditorWidget::slotSavePlayField()
@@ -233,4 +246,47 @@ void EditorWidget::setBosonXMLFile()
  BosonWidgetBase::setBosonXMLFile();
  setXMLFile("editorui.rc", true);
 }
+
+void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
+{
+ kdDebug() << k_funcinfo << endl;
+ if (!player) {
+	return;
+ }
+ BosonWidgetBase::slotPlayerJoinedGame(player);
+ Player* p = (Player*)player;
+ QStringList players = d->mPlayerAction->items();
+ d->mPlayers.insert(players.count(), p);
+ players.append(p->name());
+ d->mPlayerAction->setItems(players);
+
+ // dunno if this makes sense - but currently one cannot add more players so we
+ // just activate the player that was added last.
+ d->mPlayerAction->setCurrentItem(players.count() - 1);
+ slotChangeLocalPlayer(d->mPlayerAction->currentItem());
+}
+
+void EditorWidget::slotPlayerLeftGame(KPlayer* player)
+{
+ if (!player) {
+	return;
+ }
+ BosonWidgetBase::slotPlayerLeftGame(player);
+ Player* p = (Player*)p;
+ QIntDictIterator<Player> it(d->mPlayers);
+ while (it.current() && it.current() != player) {
+	++it;
+ }
+ if (!it.current()) {
+	kdError() << k_funcinfo << ": player not found" << endl;
+	return;
+ }
+ QStringList players = d->mPlayerAction->items();
+
+ players.remove(players.at(it.currentKey()));
+ d->mPlayers.remove(it.currentKey());
+
+ d->mPlayerAction->setItems(players);
+}
+
 
