@@ -12,3 +12,6 @@ Requirements=4,5,2
 
 [ProductionPlugin]
 ProducerList=0
+
+[Sounds]
+OrderSelect=order_select_warfactory

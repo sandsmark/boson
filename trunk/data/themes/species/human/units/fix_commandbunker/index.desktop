@@ -12,3 +12,6 @@ CanProduce=true
 
 [ProductionPlugin]
 ProducerList=10
+
+[Sounds]
+OrderSelect=order_select_cmdbunker
