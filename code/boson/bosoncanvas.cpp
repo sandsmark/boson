@@ -1635,23 +1635,12 @@ bool BosonCanvas::saveItemsAsXML(QDomElement& root) const
 
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
 	QDomElement items;
-	if (RTTI::isShot(i->rtti())) {
-		BosonShot* s = (BosonShot*)i;
-		if (!s->owner()) {
-			BO_NULL_ERROR(s->owner());
-			return false;
-		}
-		unsigned int id = s->owner()->id();
-		items = owner2Items[id];
-	} else if (RTTI::isUnit(i->rtti())) {
-		Unit* u = (Unit*)i;
-		if (!u->owner()) {
-			BO_NULL_ERROR(u->owner());
-			return false;
-		}
-		unsigned int id = u->owner()->id();
-		items = owner2Items[id];
+	if (!i->owner()) {
+		BO_NULL_ERROR(i->owner());
+		return false;
 	}
+	unsigned int id = i->owner()->id();
+	items = owner2Items[id];
 	if (items.isNull()) {
 		boError() << k_funcinfo << "no Items element found" << endl;
 		return false;
