@@ -102,7 +102,7 @@ public:
 		}
 		KPlayObjectFactory factory(mParent->server().server());
 		mPlayObject = factory.createPlayObject(file(), true);
-		if (mPlayObject && mPlayObject->isNull()) {
+		if (mPlayObject && !mPlayObject->isNull()) {
 			mPlayed = false;
 		} else {
 			delete mPlayObject;
@@ -205,7 +205,7 @@ void BosonSound::addUnitSounds(const UnitProperties* prop)
 
 void BosonSound::loadDefaultEvent(int event, const QString& filter)
 {
- if (d->mDefaultSounds[event].count() > 0) {
+ if (d->mDefaultSounds.contains(event)) {
 	return;
  }
  if (server().server().isNull()) {
@@ -309,7 +309,7 @@ void BosonSound::play(Unit* unit, int event)
  if (list.count() > 0) {
 	int no = kapp->random() % list.count();
 	p = list.at(no);
- } else if (d->mDefaultSounds[event].count() > 0) {
+ } else if (d->mDefaultSounds.contains(event) && d->mDefaultSounds[event].count() > 0) {
 	int no = kapp->random() % d->mDefaultSounds[event].count();
 	p = d->mDefaultSounds[event].at(no);
  }
