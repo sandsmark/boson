@@ -400,13 +400,7 @@ public:
 	 * pixmap of the facility is shown.
 	 * @return The number of available construction steps for a facility.
 	 **/
-	static int constructionSteps();
-
-	/**
-	 * @return How many advance calls are needed to increase @ref
-	 * constructionSteps
-	 **/
-	static int constructionDelay();
+	unsigned int constructionSteps() const;
 
 	/**
 	 * Please note that the construction state of a unit specifies if a unit

@@ -1171,7 +1171,7 @@ public:
 		mProductionPlugin = 0;
 	}
 
-	KGamePropertyInt mConstructionState; // state of *this* unit
+	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
 	ProductionPlugin* mProductionPlugin;
 	RepairPlugin* mRepairPlugin;
 };
@@ -1197,9 +1197,9 @@ Facility::~Facility()
  delete d;
 }
 
-int Facility::constructionSteps()
+unsigned int Facility::constructionSteps() const
 {
- return FACILITY_CONSTRUCTION_STEPS;
+ return unitProperties()->constructionSteps();
 }
 
 void Facility::advanceConstruction()
@@ -1208,11 +1208,10 @@ void Facility::advanceConstruction()
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
+ if (d->mConstructionState < constructionSteps() - 1) {
 	d->mConstructionState = d->mConstructionState + 1;
-	if (d->mConstructionState % constructionDelay() == 0) {
-		setFrame(d->mConstructionState / constructionDelay());
-	}
+	setFrame(d->mConstructionState);
+	kdDebug() << k_funcinfo << "frame: " << frame() << " cout=" << frameCount()<< endl;
  } else {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
@@ -1240,7 +1239,7 @@ bool Facility::isConstructionComplete() const
  if (work() == WorkConstructed) {
 	return false;
  }
- if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
+ if (d->mConstructionState < constructionSteps() - 1) {
 	return false;
  }
  return true;
@@ -1248,7 +1247,7 @@ bool Facility::isConstructionComplete() const
 
 double Facility::constructionProgress() const
 {
- unsigned int constructionTime = (constructionSteps() - 1) * constructionDelay();
+ unsigned int constructionTime = constructionSteps() - 1;
  double percentage = (double)(d->mConstructionState * 100) / (double)constructionTime;
  return percentage;
 }
@@ -1271,23 +1270,18 @@ void Facility::moveTo(float x, float y, int range)
  Unit::moveTo(x, y, range);
 }
 
-int Facility::constructionDelay()
-{
- return 5;
-}
-
 void Facility::setConstructionStep(unsigned int step)
 {
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if ((int)step >= constructionSteps()) {
+ if (step >= constructionSteps()) {
 	step = PIXMAP_FIX_DESTROYED - 1;
  }
  setFrame(step);
- d->mConstructionState = step * constructionDelay();
- if ((int)step == constructionSteps() - 1) {
+ d->mConstructionState = step;
+ if (step == constructionSteps() - 1) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
  }
@@ -1295,6 +1289,6 @@ void Facility::setConstructionStep(unsigned int step)
 
 unsigned int Facility::currentConstructionStep() const
 {
- return (unsigned int)frame();
+ return d->mConstructionState;
 }
 
