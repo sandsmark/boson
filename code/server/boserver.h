@@ -39,7 +39,7 @@
 #include "serverUnit.h"	// for Facility
 #include "../common/log.h"
 //#include "unit.h"		// for mobUnit
-#include "../map/playField.h"
+#include "../common/playField.h"
 #include "connect.h"
 #include "player.h"
 
@@ -50,6 +50,12 @@ class mobUnit;
 
 ///orzel : plus temporaire que cette merde, tu meurs :
 #define MAX_UNIT	40
+
+struct serverMap {
+	serverCell	**cells;
+	int		width;
+	int		height;
+	};
 
 
 /** 
@@ -105,7 +111,7 @@ class BosonServer : public KTMainWindow
 
 //  int		maxX, maxY;
 //  serverCell	**cells; 
-  bosonMap 	map;
+  serverMap 	map;
   origPeople	people;
 
   QIntDict<serverMobUnit>	mobile;
