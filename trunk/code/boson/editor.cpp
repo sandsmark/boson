@@ -138,10 +138,7 @@ Editor::Editor() : TopBase()
 {
  d = new EditorPrivate;
 
- QToolBar* t = new QToolBar(i18n("CommandToolBar"), this, QMainWindow::Left);// FIXME: config (left)
- QVBox* frame = new QVBox(t);
- bosonWidget()->addMiniMap(frame);
- bosonWidget()->addEditorCommandFrame(frame);
+ bosonWidget()->addEditorCommandFrame(commandFrame());
  connect(bosonWidget(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(bosonWidget(), SIGNAL(signalPlayerLeftGame(KPlayer*)), 
