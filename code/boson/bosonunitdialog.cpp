@@ -266,7 +266,7 @@ void BosonUnitDialog::initPropertiesPage()
  d->mWeaponRange = new KIntNumInput(d->mUnitProperties);
  d->mWeaponRange->setLabel(i18n("Weapon Range"), AlignVCenter);
  layout->addMultiCellWidget(d->mWeaponRange, 7, 7, 0, 1);
- QWhatsThis::add(d->mWeaponRange, i18n("<p>How far can your unit shoot? This is a pixel value. Use a value > 0 if your unit can shoot.</p>"
+ QWhatsThis::add(d->mWeaponRange, i18n("<p>How far can your unit shoot? This is a cell value, not pixel value. Use a value > 0 if your unit can shoot.</p>"
 			"<p>Please note that repairing is also some kind of shooting (with negative damage). Repairing is not yet supported - but you can already specify a value here.</p>"));
 
  d->mSightRange = new KIntNumInput(d->mUnitProperties);
