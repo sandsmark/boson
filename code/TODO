@@ -8,9 +8,7 @@ Generic :
 
 QCanvas : shouldn't segfault when pixmap loading has failed
 
-
 move boson/handleGameMessage into field
-some WARNING / ERROR in logs
 creating things only if ressources permit it (presently, the server already refuse to build)
 positionning rect in editor/boson
 move boson.h into bosonapp.h (socket handling / generic stuff)
@@ -47,8 +45,7 @@ mouse handling :
 	on the right window.
 
 
-game:
-	after 'hiding' feature, use BIG explosion on 'destroyed' msg
+visual:
 	merge boshot and speciesTheme pixmap loading stuff
 
 editor:
