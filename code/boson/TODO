@@ -46,16 +46,10 @@ Game TODOs
   then. we need to provide some config entries for indes.unit for this,
   specifying the frame number when armor changes. note that the frame number for
   this must NOT depend on the .3ds file!
-- does load() and save() also work with plugins? they use the same dataHandler()
-  as units do - but at least the current plugin must be stored/loaded
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
 - BUG: units go through near clip and are "broken" when you zoom in above some
   tall facility or aircraft
-- move the addToCells() call from Unit::moveBy() to BosonItem::moveBy()!
-- a savegame dialog. most RTS game don't ask the player to handle filenames but
-  rather provide a list of savegames with additional information, such as date,
-  map, players, ...
 - maintaining two different files for one map sucks. we should be able to place
   all map_name.boson data into the .bpf file, too. xml supports i18n, too!
 - particles: there are only very few different textures used by particles
@@ -95,16 +89,13 @@ General TODOs
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
 - unit editor does not support plugins
-- Don't load UnitProperties and technologies and other stuff in SpeciesTheme
-  constructor
 - ./configure allows --without-gl
 
 Data TODOs
-- sound for minimap activated/deactivated
 - sound for destroyed facilities - shouldn't be speech i guess
 - missile sound - e.g. for the samsite
 - shipyard
-- airport 
+- airport
 - rewrite installation code:
   -> when a dir is renamed currently the old remains on disk and therefore is
      read by the game
