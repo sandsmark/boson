@@ -69,6 +69,7 @@ public:
 		IdRange = KGamePropertyBase::IdUser + 9,
 		IdSightRange = KGamePropertyBase::IdUser + 11,
 		IdDeletionTimer = KGamePropertyBase::IdUser + 12,
+		IdReloadState = KGamePropertyBase::IdUser + 13,
 		//...
 		IdLast
 	};
@@ -277,6 +278,22 @@ public:
 	 * @return true if unit is moving (work() == WorkMove || work() == WorkMoveInGroup)
 	 **/
 	inline bool isMoving() { return (work() == WorkMove || work() == WorkMoveInGroup); };
+
+	/**
+	 * @return THe reload state of the weapon. If this is 0 the unit can
+	 * shoot, otherwise not.
+	 **/
+	inline unsigned int reloadState() const;
+
+	/**
+	 * Reduces @ref reloadState by 1 until it reaches 0.
+	 **/
+	void reloadWeapon();
+
+	/**
+	 * Set @ref reloadState to @ref UnitProperties::reload
+	 **/
+	void resetReload();
 
 
 private:

@@ -42,6 +42,7 @@ public:
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
 	KGameProperty<unsigned int> mDeletionTimer;
+	KGameProperty<unsigned int> mReloadState;
 };
 
 
@@ -68,6 +69,8 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Damage");
  mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
+ d->mReloadState.registerData(IdReloadState, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "ReloadState");
  d->mDeletionTimer.registerData(IdDeletionTimer, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "DeletionTimer");
  d->mDeletionTimer.setEmittingSignal(false);
@@ -81,6 +84,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mDamage.setLocal(0);
  mRange.setLocal(0);
  mSightRange.setLocal(0);
+ d->mReloadState.setLocal(0);
  d->mDeletionTimer.setLocal(0);
 }
 
@@ -196,3 +200,21 @@ unsigned int UnitBase::deletionTimer() const
 {
  return d->mDeletionTimer;
 }
+
+unsigned int UnitBase::reloadState() const
+{
+ return d->mReloadState;
+}
+
+void UnitBase::reloadWeapon()
+{
+ if (d->mReloadState > 0) {
+	d->mReloadState = d->mReloadState - 1;
+ }
+}
+
+void UnitBase::resetReload()
+{
+ d->mReloadState = unitProperties()->reload();
+}
+
