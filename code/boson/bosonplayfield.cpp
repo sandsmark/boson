@@ -26,6 +26,7 @@
 #include "bodebug.h"
 #include "bofile.h"
 #include "bosonprofiling.h"
+#include "bosoncampaign.h"
 #include "bpfdescription.h"
 #include "defines.h"
 
@@ -119,31 +120,50 @@ bool BosonPlayField::preLoadAllPlayFields()
  // TODO: ensure that UI doesn't block (i.e. call process events)
  BosonProfiler profiler(BosonProfiling::PreLoadPlayFields);
  if (BosonData::bosonData()->availablePlayFields().count() > 0) {
-	boWarning() << k_funcinfo << "playFields already loaded" << endl;
+		boWarning() << k_funcinfo << "playFields already loaded" << endl;
 	return true;
  }
- QStringList list = findAvailablePlayFields();
- if (list.isEmpty()) {
-	boWarning() << k_funcinfo << "Cannot find any playFields" << endl;
-	return false;
- }
- QStringList::Iterator it;
- for (it = list.begin(); it != list.end(); ++it) {
-	// this will also preload the playfield!
-	BosonPlayFieldData* data = new BosonPlayFieldData(*it, new BosonPlayField());
-	if (data->idString().isEmpty()) {
-		boError() << k_funcinfo << *it << " could not be loaded" << endl;
-		delete data;
+ QStringList campaigns = findAvailableCampaigns();
+ QStringList::Iterator campaignIt;
+ for (campaignIt = campaigns.begin(); campaignIt != campaigns.end(); ++campaignIt) {
+	QString campaignName = *campaignIt;
+	if (BosonData::bosonData()->availableCampaigns().contains(*campaignIt)) {
+		if ((*campaignIt).isEmpty()) {
+			boError() << k_funcinfo << "trying to insert default campaing (random maps) twice!" << endl;
+		} else {
+			boError() << k_funcinfo << "trying to insert campaign " << *campaignIt << " twice!" << endl;
+		}
 		continue;
 	}
-	if (!BosonData::bosonData()->insertPlayField(data)) {
-		boDebug() << k_funcinfo << "could not insert playField "
-				<< data->idString()
-				<< " (maybe already inserted)" << endl;
-		delete data;
-		continue;
+	QStringList list = findPlayFieldsOfCampaign(*campaignIt);
+	QStringList::Iterator it;
+	BosonCampaign* campaign = new BosonCampaign(*campaignIt, *campaignIt);
+	for (it = list.begin(); it != list.end(); ++it) {
+		BosonPlayField* playField = new BosonPlayField();
+		// this will also preload the playfield!
+		BosonPlayFieldData* data = new BosonPlayFieldData(*it, playField);
+		if (data->idString().isEmpty()) {
+			boError() << k_funcinfo << *it << " could not be loaded" << endl;
+			delete data;
+			continue;
+		}
+		if (!BosonData::bosonData()->insertPlayField(data)) {
+			boDebug() << k_funcinfo << "could not insert playField "
+					<< data->idString()
+					<< " (maybe already inserted)" << endl;
+			delete data;
+			continue;
+		}
+		campaign->addPlayField(playField);
+	}
+	if (!campaign->playFieldCount() == 0) {
+		boWarning() << k_funcinfo << "could not load any playfields for campaign " << *campaignIt << endl;
+	}
+	if (!BosonData::bosonData()->insertCampaign(BosonCampaign::campaignDataObject(campaign))) {
+		boWarning() << k_funcinfo << "error on inserting campaign " << *campaignIt << endl;
 	}
  }
+
  if (BosonData::bosonData()->availablePlayFields().count() == 0) {
 	boError() << k_funcinfo << "no playFields could be loaded!" << endl;
 	return false;
@@ -664,6 +684,40 @@ QStringList BosonPlayField::findAvailablePlayFields()
  QStringList list = BosonData::availableFiles(QString::fromLatin1("maps/*.bpf"));
  QStringList campaignMaps = BosonData::availableFiles(QString::fromLatin1("maps/*/*.bpf"));
  list += campaignMaps;
+ return list;
+}
+
+QStringList BosonPlayField::findAvailableCampaigns()
+{
+ QStringList list;
+ list.append(QString::null);
+ QStringList files = BosonData::availableFiles(QString::fromLatin1("maps/*/*.bpf"));
+ QStringList::Iterator it = files.begin();
+ for (; it != files.end(); ++it) {
+	int slash = (*it).findRev('/');
+	QString path = (*it).left(slash);
+	slash = path.findRev('/');
+
+	// WARNING: here we assume one directory level only! it must be
+	// maps/*/*.bpf, _NOT_ maps/*/*/*.bpf or similar.
+	QString campaign = path.mid(slash + 1);
+	if (!list.contains(campaign)) {
+		list.append(campaign);
+	}
+ }
+ return list;
+}
+
+QStringList BosonPlayField::findPlayFieldsOfCampaign(const QString& campaign)
+{
+ // at this point we assume that "campaign" is the name of the campaign
+ // directory! we do not (yet?) use an identifier here!
+ QStringList list;
+ if (campaign.isEmpty()) {
+	list = BosonData::availableFiles(QString::fromLatin1("maps/*.bpf"));
+ } else {
+	list = BosonData::availableFiles(QString::fromLatin1("maps/%1/*.bpf").arg(campaign));
+ }
  return list;
 }
 

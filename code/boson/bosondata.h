@@ -26,6 +26,7 @@
 class QStringList;
 class BosonGroundTheme;
 class BosonPlayField;
+class BosonCampaign;
 template<class T> class BoGlobalObject;
 
 class BosonDataObject
@@ -116,6 +117,10 @@ public:
 	bool loadPlayField(const QString& id);
 	BosonPlayField* playField(const QString& id) const;
 	QStringList availablePlayFields() const;
+
+	bool insertCampaign(BosonDataObject* object);
+	BosonCampaign* campaign(const QString& id) const;
+	QStringList availableCampaigns() const;
 
 	/**
 	 * @return A list of available files that match @p searchPattern. See
