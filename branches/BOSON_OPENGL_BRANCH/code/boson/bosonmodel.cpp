@@ -30,11 +30,13 @@
 
 BosonModel::BosonModel(GLuint list)
 {
+ init();
  mDisplayList = list;
 }
 
 BosonModel::BosonModel(const QString& f)
 {
+ init();
  QString file = f;
 // QString file = "/home/guest/3ds/3ds/andi3d/sphere.3DS"; // AB: temporary for debugging
  m3ds = lib3ds_file_load(file);
@@ -59,6 +61,12 @@ BosonModel::BosonModel(const QString& f)
 	return;
  }
  kdDebug() << k_funcinfo << "loaded from " << file << endl;
+}
+
+void BosonModel::init()
+{
+ m3ds = 0;
+ mDisplayList = 0;
 }
 
 BosonModel::~BosonModel()

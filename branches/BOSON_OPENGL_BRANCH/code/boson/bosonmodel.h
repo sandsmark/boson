@@ -47,6 +47,9 @@ public:
 	void renderNode(Lib3dsNode* node);
 
 private:
+	void init();
+
+private:
 	GLuint mDisplayList;
 	Lib3dsFile* m3ds;
 };
