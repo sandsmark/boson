@@ -243,8 +243,8 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
  }
- mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.02);
- mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 0.05);
+ mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.1);
+ mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 0.2);
  mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 2));
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
