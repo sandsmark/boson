@@ -136,8 +136,11 @@ BosonWidget::~BosonWidget()
  kdDebug() << k_funcinfo << endl;
 
  // TODO: this doesn't work
-// if(d->mLayoutCreated)
+ if(d->mLayoutCreated) {
+	kdDebug() << "writing dock config" << endl;
 //	d->mTop->writeDockConfig(kapp->config(), QString("BosonDockConfig"));
+////	d->mTop->writeDockConfig();
+ }
 
  delete d->mCommandFrameDock;
  delete d->mChatDock;
@@ -451,12 +454,11 @@ void BosonWidget::initLayout()
  d->mCommandFrameDock->manualDock(d->mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
  d->mChatDock->manualDock(d->mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
  d->mCommandFrameDock->show();  // We show only commandframe by dafault, not chat
- // Following DOES NOT WORK and I have no idea why...
-// d->mTop->readDockConfig(kapp->config(), QString("BosonDockConfig"));
 
  d->mTopLayout = new QVBoxLayout(this);
  d->mTopLayout->addWidget(displaymanager());
  d->mTopLayout->activate();
+ d->mTop->loadGameDockConfig();
 }
 
 void BosonWidget::slotDebug()
@@ -808,9 +810,6 @@ void BosonWidget::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidget::initKeys()
 {
-// TODO KKeyDialog::configure() doesn't save this automatically :-(
-// so we need to do ourselfes. maybe just provide an xml file in c'tor or
-// something like this?
  d->mActionCollection = new KActionCollection(this);
 #ifdef OLD_KACTION
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, this,
@@ -839,7 +838,6 @@ void BosonWidget::initKeys()
 		SLOT(slotScroll(int)), d->mActionCollection,
 		QString("scroll_right {%1}").arg(ScrollRight));
 #endif
-
  d->mActionCollection->readShortcutSettings(QString::null, kapp->config());
 }
 
