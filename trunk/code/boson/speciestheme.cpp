@@ -283,26 +283,26 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  h = image.height();
 
  if (image.depth() != 32) {
-	kdError() << k_funcinfo << fileName << ": depth != 32" << endl;
+	kdError() << k_funcinfo << fileName << "depth != 32" << endl;
  }
  if (w < 32) {
-	kdError() << k_funcinfo << fileName << ": w < 32" << endl;
+	kdError() << k_funcinfo << fileName << "w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	kdError() << k_funcinfo << fileName << ": h < 32" << endl;
+	kdError() << k_funcinfo << fileName << "h < 32" << endl;
 	return false;
  }
 
  if (image.isNull()) {
-	kdError() << k_funcinfo << ": NULL image" << endl;
+	kdError() << k_funcinfo << "NULL image" << endl;
 	return false;
  }
 
  if (withMask) {
 	mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
 	if (mask->isNull()) {
-		kdError() << k_funcinfo << ": NULL mask" << endl;
+		kdError() << k_funcinfo << "NULL mask" << endl;
 		return false;
 	}
 	mask->setColor( 0, 0xffffff );
@@ -310,6 +310,9 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 	mask->fill(0xff); 
  }
  if (withMask) {
+	const int teamRed = teamColor().red();
+	const int teamGreen = teamColor().green();
+	const int teamBlue = teamColor().blue();
 	for ( y = 0; y < h; y++ ) {
 		yp = mask->scanLine(y);	// mask
 		p  = (QRgb *)image.scanLine(y);	// image
@@ -327,22 +330,60 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
 					// alpha == 0 means "fill completely
 					// with team color", alpha == 255 means
 					// "don't fill with team color".
+
+					// basically a gradient from *p to teamColor.rgb()
+
 #if 1
-					float factor = ((float)(-qAlpha(*p)+255))/255;
-					int dred = qRed(*p) - qRed(teamColor().rgb());
-					int dblue = qBlue(*p) - qBlue(teamColor().rgb());
-					int dgreen = qGreen(*p) - qGreen(teamColor().rgb());
-					dred *= (int)factor;
-					dgreen *= (int)factor;
-					dblue *= (int)factor;
-					unsigned int c = qRgb(qRed(*p)-dred, qGreen(*p)-dgreen, qBlue(*p)-dblue);
-					*p = c;
-#elif 2
-					int d = (int)teamColor().rgb() - *p;
-					d *= (int)factor;
-					*p = *p + d;
+					// mostly from KPixmapEffect::gradient():
+					int red = qRed(*p);
+					int green = qGreen(*p);
+					int blue = qBlue(*p);
+
+					int dred = -teamRed + red;
+					int dgreen = -teamGreen + green;
+					int dblue = -teamBlue + blue;
+
+					int rl = teamRed << 16;
+					int gl = teamGreen << 16;
+					int bl = teamBlue << 16;
+
+					int rcdelta = ((1<<16) / 255) * dred;
+					int gcdelta = ((1<<16) / 255) * dgreen;
+					int bcdelta = ((1<<16) / 255) * dblue;
+
+					rl += rcdelta * qAlpha(*p);
+					gl += gcdelta * qAlpha(*p);
+					bl += bcdelta * qAlpha(*p);
+
+					*p = qRgb(rl>>16, gl>>16, bl>>16);
 #else
-					*p = teamColor().rgb();
+					// this is exactly the same as above -
+					// but alpha==255 means "no teamcolor"
+					// (as above) and alpha==254 means "full
+					// team color"! necessary for testing
+					// :-(
+					int red = qRed(*p);
+					int green = qGreen(*p);
+					int blue = qBlue(*p);
+
+					int dred = teamRed - red;
+					int dgreen = teamGreen - green;
+					int dblue = teamBlue - blue;
+
+					int rl = red << 16;
+					int gl = green << 16;
+					int bl = blue << 16;
+
+					int rcdelta = ((1<<16) / 255) * dred;
+					int gcdelta = ((1<<16) / 255) * dgreen;
+					int bcdelta = ((1<<16) / 255) * dblue;
+
+					rl += rcdelta * qAlpha(*p);
+					gl += gcdelta * qAlpha(*p);
+					bl += bcdelta * qAlpha(*p);
+
+					*p = qRgb(rl>>16, gl>>16, bl>>16);
+
 #endif
 				} else if ( ((qRed(*p) > 0x80) &&
 						(qGreen(*p) < 0x70) &&
