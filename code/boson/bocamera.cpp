@@ -508,7 +508,7 @@ void BoCamera::advance()
 
   if(!changed)
   {
-    boError() << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
+//    boError() << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
     mRemainingTime = 0;
     mCommitTime = 0;
     mMovedAmount = 0.0f;
