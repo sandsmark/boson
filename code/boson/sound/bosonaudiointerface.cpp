@@ -19,8 +19,8 @@
 
 #include "bosonaudiointerface.h"
 
-#include "boaudiocommand.h"
-#include "boaudioprocesscontroller.h"
+#include <boaudiocommand.h>
+
 
 #include "bodebug.h"
 #include "../bosonconfig.h"
@@ -36,6 +36,18 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
+// AB: the process was _required_ required when we used arts for sound, as arts
+// sucks so badly (often the game froze for a moment until the sound got played)
+// for OpenAL this should not be necessary and therefore is _NOT_ recommended.
+// most probably we will remove this option in the future.
+#define USE_PROCESS 0
+
+#if USE_PROCESS
+#include "boaudioprocesscontroller.h"
+#else
+#include <bosonaudio.h>
+#endif
+
 static BoGlobalObject<BosonAudioInterface> globalAudio(BoGlobalObjectBase::BoGlobalAudio);
 
 class BosonAudioInterfacePrivate
@@ -45,13 +57,21 @@ public:
 	{
 		mMusicInterface = 0;
 
+#if USE_PROCESS
 		mProcess = 0;
+#else
+		mAudio = 0;
+#endif
 	}
 
 	BosonMusicInterface* mMusicInterface;
 	QDict<BosonSoundInterface> mBosonSoundInterfaces;
 
+#if USE_PROCESS
 	BoAudioProcessController* mProcess;
+#else
+	BosonAudio* mAudio;
+#endif
 
 	bool mPlayMusic;
 	bool mPlaySound;
@@ -73,14 +93,8 @@ BosonAudioInterface::BosonAudioInterface()
 	d->mPlaySound = false;
 	return;
  }
-#if KDE_VERSION < 301
- boWarning(200) << k_funcinfo << "Won't play audio on KDE < 3.0.1" << endl;
- d->mPlayMusic = false;
- d->mPlaySound = false;
- boConfig->setDisableSound(true);
- return;
-#endif
 
+#if USE_PROCESS
  d->mProcess = new BoAudioProcessController();
  bool ok = d->mProcess->start();
  if (ok) {
@@ -101,6 +115,11 @@ BosonAudioInterface::BosonAudioInterface()
  }
 
  boDebug(200) << k_funcinfo << "audio process started." << endl;
+#else
+ boDebug(200) << k_funcinfo << "construct BosonAudio object" << endl;
+ d->mAudio = BosonAudio::create();
+ boDebug(200) << k_funcinfo << "BosonAudio object constructed" << endl;
+#endif
 
  sendCommand(new BoAudioCommand(BoAudioCommand::CreateMusicObject));
 }
@@ -110,7 +129,11 @@ BosonAudioInterface::~BosonAudioInterface()
  d->mBosonSoundInterfaces.clear();
  delete d->mMusicInterface;
 
+#if USE_PROCESS
  delete d->mProcess;
+#else
+ delete d->mAudio;
+#endif
 
  delete d;
 }
@@ -122,9 +145,15 @@ BosonAudioInterface* BosonAudioInterface::bosonAudioInterface()
 
 void BosonAudioInterface::sendCommand(BoAudioCommand* command)
 {
+#if USE_PROCESS
  if (d->mProcess) {
 	d->mProcess->sendCommand(command);
  }
+#else
+ if (d->mAudio) {
+	d->mAudio->executeCommand(command);
+ }
+#endif
 }
 
 bool BosonAudioInterface::music() const

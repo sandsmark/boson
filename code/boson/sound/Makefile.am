@@ -5,8 +5,10 @@ noinst_LTLIBRARIES = libbosonsoundinterface.la
 METASOURCES = AUTO
 
 libbosonsoundinterface_la_SOURCES = \
-	boaudioprocesscontroller.cpp \
 	bosonaudiointerface.cpp
+#	boaudioprocesscontroller.cpp
+
 libbosonsoundinterface_la_LIBADD = \
-		$(top_builddir)/bosound/libbosonsoundcommon.la
+		$(top_builddir)/bosound/libbosonsoundcommon.la \
+		$(top_builddir)/bosound/libbosonsound.la
 
