@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -68,6 +68,104 @@ UpgradeProperties::UpgradeProperties(const SpeciesTheme* theme)
 UpgradeProperties::~UpgradeProperties()
 {
   delete d;
+}
+
+void UpgradeProperties::resetUpgradeableUnitProperties(Player* player)
+{
+  if(!player || !player->speciesTheme())
+  {
+    return;
+  }
+  QValueList<const UnitProperties*> list = player->speciesTheme()->allUnits();
+  QValueList<const UnitProperties*>::Iterator it;
+  for(it = list.begin(); it != list.end(); ++it)
+  {
+    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties((*it)->typeId());
+    for(int i = 0; i < LastUpgrade; i++)
+    {
+      switch((UpgradeType)i)
+      {
+        // AB: do NOT add a default!
+        // -> I want a compiler warning if something is missing here
+#define RESET(name, enumName) case enumName: prop->resetUpgradedValue_##name(); break;
+
+        RESET(health, Health);
+        RESET(armor, Armor);
+        RESET(shields, Shields);
+        RESET(mineralCost, MineralCost);
+        RESET(oilCost, OilCost);
+        RESET(sightRange, SightRange);
+        RESET(productionTime, ProductionTime);
+        RESET(speed, Speed);
+
+#undef RESET
+
+        case WeaponDamage:
+        case WeaponDamageRange:
+        case WeaponFullDamageRange:
+        case WeaponReload:
+        case WeaponRange:
+        case WeaponSpeed:
+          break;
+
+        case LastUpgrade:
+          break;
+      }
+    }
+  }
+}
+
+void UpgradeProperties::resetUpgradeableWeaponProperties(Player* player)
+{
+  if(!player || !player->speciesTheme())
+  {
+    return;
+  }
+  QValueList<const UnitProperties*> list = player->speciesTheme()->allUnits();
+  QValueList<const UnitProperties*>::Iterator it;
+  for(it = list.begin(); it != list.end(); ++it)
+  {
+    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties((*it)->typeId());
+    for (int weaponid = 1; true; weaponid++)
+    {
+      BosonWeaponProperties* wep = const_cast<BosonWeaponProperties*>(prop->weaponProperties(weaponid));
+      if(!wep)
+      {
+        break;
+      }
+      for(int i = 0; i < LastUpgrade; i++)
+      {
+        switch((UpgradeType)i)
+        {
+          // AB: do NOT add a default!
+          // -> I want a compiler warning if something is missing here
+
+#define RESET(name, enumName) case enumName: wep->resetUpgradedValue_##name(); break;
+
+          RESET(damage, WeaponDamage);
+          RESET(damageRange, WeaponDamageRange);
+          RESET(fullDamageRange, WeaponFullDamageRange);
+          RESET(reloadingTime, WeaponReload);
+          RESET(range, WeaponRange);
+          RESET(speed, WeaponSpeed);
+
+#undef RESET
+
+          case Health:
+          case Armor:
+          case Shields:
+          case MineralCost:
+          case OilCost:
+          case SightRange:
+          case ProductionTime:
+          case Speed:
+            break;
+          case LastUpgrade:
+            break;
+        }
+      }
+    }
+  }
 }
 
 bool UpgradeProperties::canBeResearched(Player* player) const
@@ -204,10 +302,6 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
 
   boDebug(600) << "    " << my_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " properites. weaponid: " << weaponid << endl;
   QValueList<unsigned long int>::Iterator it;
-  unsigned long int oldvalueuint = 0;
-  bofixed oldvaluef = 0;
-  unsigned long int newvalueuint = 0;
-  bofixed newvaluef = 0;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
@@ -217,66 +311,34 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
       // Not a weapon upgrade
       switch(type)
       {
-        case Health:
-        {
-          oldvalueuint = prop->health();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setHealth(newvalueuint);
-          break;
-        }
-        case Armor:
-        {
-          oldvalueuint = prop->armor();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setArmor(newvalueuint);
-          break;
-        }
-        case Shields:
-        {
-          oldvalueuint = prop->shields();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setShields(newvalueuint);
-          break;
-        }
-        case MineralCost:
-        {
-          oldvalueuint = prop->mineralCost();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setMineralCost(newvalueuint);
-          break;
-        }
-        case OilCost:
-        {
-          oldvalueuint = prop->oilCost();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setOilCost(newvalueuint);
-          break;
-        }
-        case SightRange:
-        {
-          oldvalueuint = prop->sightRange();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setSightRange(newvalueuint);
-          break;
-        }
-        case ProductionTime:
-        {
-          oldvalueuint = prop->productionTime();
-          newvalueuint = applyValue(data, oldvalueuint);
-          prop->setProductionTime(newvalueuint);
-          break;
-        }
-        case Speed:
-        {
-          oldvaluef = prop->speed();
-          newvaluef = applyValue(data, oldvalueuint);
-          prop->setSpeed(newvaluef);
-          break;
-        }
+
+/**
+ * This macro creates the case entries.
+ * @param name is the name of the property. We require that there is a method in
+ * @ref UnitProperties with that name returning the current value and that
+ * a corresponding setUpgradedValue_name exists.
+ * @param enumName is the name of the type enum
+ **/
+#define APPLY(name, enumName) \
+          case enumName: \
+          { \
+            prop->setUpgradedValue_##name(applyValue(data, prop->name())); \
+            break; \
+          }
+
+        APPLY(health, Health);
+        APPLY(armor, Armor);
+        APPLY(shields, Shields);
+        APPLY(mineralCost, MineralCost);
+        APPLY(oilCost, OilCost);
+        APPLY(sightRange, SightRange);
+        APPLY(productionTime, ProductionTime);
+        APPLY(speed, Speed);
+
+#undef APPLY
+
         default:
         {
-          oldvalueuint = 0;
-          oldvaluef = 0;
           boError(600) << my_funcinfo << "Invalid UpgradeType: " << type << endl;
           break;
         }
@@ -284,6 +346,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
     }
     else
     {
+      unsigned long int oldvalueuint = 0;
+      bofixed oldvaluef = 0;
       // It's a weapon upgrade
       // Weapon's ids actually start from 1. So we add 1 to weaponid here
       BosonWeaponProperties* wep = const_cast<BosonWeaponProperties*>(prop->weaponProperties(weaponid + 1));
@@ -294,42 +358,23 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
       }
       switch(type)
       {
-        case WeaponDamage:
-        {
-          oldvalueuint = wep->damage();
-          wep->setDamage(applyValue(data, oldvalueuint));
-          break;
-        }
-        case WeaponDamageRange:
-        {
-          oldvaluef = wep->damageRange();
-          wep->setDamageRange(applyValue(data, oldvalueuint));
-          break;
-        }
-        case WeaponFullDamageRange:
-        {
-          oldvaluef = wep->fullDamageRange();
-          wep->setFullDamageRange(applyValue(data, oldvalueuint));
-          break;
-        }
-        case WeaponReload:
-        {
-          oldvalueuint = wep->reloadingTime();
-          wep->setReloadingTime(applyValue(data, oldvalueuint));
-          break;
-        }
-        case WeaponRange:
-        {
-          oldvalueuint = wep->range();
-          wep->setRange(applyValue(data, oldvalueuint));
-          break;
-        }
-        case WeaponSpeed:
-        {
-          oldvaluef = wep->speed();
-          wep->setSpeed(applyValue(data, oldvaluef));
-          break;
-        }
+
+/**
+ * This macro is similar to the one above for non-weapon properties
+ **/
+#define APPLY(name, enumName) \
+          case enumName: \
+          { \
+            wep->setUpgradedValue_##name(applyValue(data, wep->name())); \
+            break; \
+          }
+
+        APPLY(damage, WeaponDamage);
+        APPLY(damageRange, WeaponDamageRange);
+        APPLY(fullDamageRange, WeaponFullDamageRange);
+        APPLY(reloadingTime, WeaponReload);
+        APPLY(range, WeaponRange);
+        APPLY(speed, WeaponSpeed);
         default:
         {
           oldvalueuint = 0;
@@ -338,7 +383,6 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
           break;
         }
       }
-      
     }
   }
 

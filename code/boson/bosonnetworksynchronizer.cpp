@@ -1452,16 +1452,6 @@ bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
 			boError() << k_funcinfo << "unexpected PlayerId attribute " << index << " expected " << mGame->playerList()->findRef(kplayer) << endl;
 			return false;
 		}
-		QDomNode upgrades = player.namedItem("Upgrades");
-		if (!upgrades.isNull()) {
-			// AB: Player::loadFromXML() doesn't really load the
-			// upgrades. it rather applies them only. this means
-			// that if the same data is loaded twice, the method
-			// will behave as if two identical upgrades would have
-			// been researched.
-			// so we have to avoid loading the upgrades.
-			player.removeChild(upgrades);
-		}
 		if (!((Player*)kplayer)->loadFromXML(player)) {
 			boError() << k_funcinfo << "could not load player " << kplayer->id() << " at index " << index << endl;
 			return false;

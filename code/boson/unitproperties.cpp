@@ -65,30 +65,6 @@ public:
 	BoVector3Fixed mHitPoint;  // FIXME: better name
 };
 
-class UnitProperties::MobileProperties
-{
-public:
-	MobileProperties()
-	{
-	}
-
-	bofixed mSpeed;
-	bofixed mAccelerationSpeed;
-	bofixed mDecelerationSpeed;
-	int mRotationSpeed;
-	bool mCanGoOnLand;
-	bool mCanGoOnWater;
-};
-
-class UnitProperties::FacilityProperties
-{
-public:
-	FacilityProperties()
-	{
-	}
-
-	unsigned int mConstructionFrames;
-};
 
 
 UnitProperties::UnitProperties(bool fullmode)
@@ -114,16 +90,13 @@ void UnitProperties::init()
 {
  d = new UnitPropertiesPrivate;
  mTheme = 0;
- mMobileProperties = 0;
- mFacilityProperties = 0;
+ mIsFacility = false;
  mProduceAction = 0;
  d->mPlugins.setAutoDelete(true);
 }
 
 UnitProperties::~UnitProperties()
 {
- delete mMobileProperties;
- delete mFacilityProperties;
  delete mProduceAction;
  delete d;
 }
@@ -158,16 +131,17 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
  mUnitDepth = conf.readDoubleNumEntry("UnitDepth", 1.0);
  d->mName = conf.readEntry("Name", i18n("Unknown"));
- mHealth = conf.readUnsignedLongNumEntry("Health", 100);
- mMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
- mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
- mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5);
- mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
- mShields = conf.readUnsignedLongNumEntry("Shield", 0);
- mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
+ m_productionTime.init(conf.readUnsignedNumEntry("ProductionTime", 100));
+ m_health.init(conf.readUnsignedLongNumEntry("Health", 100));
+ m_mineralCost.init(conf.readUnsignedLongNumEntry("MineralCost", 100));
+ m_oilCost.init(conf.readUnsignedLongNumEntry("OilCost", 0));
+ m_sightRange.init(conf.readUnsignedLongNumEntry("SightRange", 5));
+ m_shields.init(conf.readUnsignedLongNumEntry("Shield", 0));
+ m_armor.init(conf.readUnsignedLongNumEntry("Armor", 0));
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
+
  mExplodingDamage = conf.readLongNumEntry("ExplodingDamage", 0);
  mExplodingDamageRange = conf.readDoubleNumEntry("ExplodingDamageRange", 0);
  mExplodingFragmentCount = conf.readUnsignedNumEntry("ExplodingFragmentCount", 0);
@@ -189,12 +163,16 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mConstructedEffects = BosonEffectProperties::loadEffectProperties(d->mConstructedEffectIds);
  }
 
+ mIsFacility = isFacility;
+
+ // AB: note that we need to load _both_ in order to initialize all variables.
+ loadFacilityProperties(&conf);
+ loadMobileProperties(&conf);
+
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
-	loadFacilityProperties(&conf);
  } else {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)mTerrain);
-	loadMobileProperties(&conf);
  }
 
  loadAllPluginProperties(&conf);
@@ -216,13 +194,13 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("UnitHeight", (double)mUnitHeight);
  conf.writeEntry("UnitDepth", (double)mUnitDepth);
  conf.writeEntry("Name", d->mName);
- conf.writeEntry("Health", mHealth);
- conf.writeEntry("MineralCost", mMineralCost);
- conf.writeEntry("OilCost", mOilCost);
- conf.writeEntry("SightRange", mSightRange);
- conf.writeEntry("ProductionTime", mProductionTime);
- conf.writeEntry("Shield", mShields);
- conf.writeEntry("Armor", mArmor);
+ conf.writeEntry("Health", health());
+ conf.writeEntry("MineralCost", mineralCost());
+ conf.writeEntry("OilCost", oilCost());
+ conf.writeEntry("SightRange", sightRange());
+ conf.writeEntry("ProductionTime", productionTime());
+ conf.writeEntry("Shield", shields());
+ conf.writeEntry("Armor", armor());
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
@@ -249,27 +227,23 @@ void UnitProperties::saveUnitType(const QString& fileName)
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- createMobileProperties();
- mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0) / 48.0f;
- if (mMobileProperties->mSpeed < 0) {
-	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
+ m_speed.init(conf->readDoubleNumEntry("Speed", 0) / 48.0f);
+ if (speed() < 0) {
+	boWarning() << k_funcinfo << "Invalid Speed value: " << speed() <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
-	mMobileProperties->mSpeed = 0;
+	m_speed.init(0);
  }
- mMobileProperties->mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
- mMobileProperties->mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
- mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 48.0f * 2));
- mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
-		(isLand() || isAircraft()));
- mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
-		(isShip() || isAircraft()));
+ mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
+ mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
+ mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(speed() * 48.0f * 2));
+ mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
+ mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
- createFacilityProperties();
- mFacilityProperties->mConstructionFrames = conf->readUnsignedNumEntry("ConstructionSteps", 20);
+ mConstructionFrames = conf->readUnsignedNumEntry("ConstructionSteps", 20);
 }
 
 void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
@@ -394,18 +368,18 @@ void UnitProperties::loadActions()
 void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
- conf->writeEntry("AccelerationSpeed", (double)mMobileProperties->mAccelerationSpeed);
- conf->writeEntry("DecelerationSpeed", (double)mMobileProperties->mDecelerationSpeed);
- conf->writeEntry("RotationSpeed", mMobileProperties->mRotationSpeed);
- conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
- conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
+ conf->writeEntry("Speed", (double)speed() * 48.0);
+ conf->writeEntry("AccelerationSpeed", (double)mAccelerationSpeed);
+ conf->writeEntry("DecelerationSpeed", (double)mDecelerationSpeed);
+ conf->writeEntry("RotationSpeed", mRotationSpeed);
+ conf->writeEntry("CanGoOnLand", mCanGoOnLand);
+ conf->writeEntry("CanGoOnWater", mCanGoOnWater);
 }
 
 void UnitProperties::saveFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
- conf->writeEntry("ConstructionSteps", mFacilityProperties->mConstructionFrames);
+ conf->writeEntry("ConstructionSteps", mConstructionFrames);
 }
 
 void UnitProperties::saveAllPluginProperties(KSimpleConfig* conf)
@@ -510,70 +484,60 @@ void UnitProperties::setRequirements(QValueList<unsigned long int> requirements)
  d->mRequirements = requirements;
 }
 
-bool UnitProperties::isMobile() const
-{
- return (mMobileProperties != 0);
-}
-
-bool UnitProperties::isFacility() const
-{
- return (mFacilityProperties != 0);
-}
-
 bofixed UnitProperties::speed() const
 {
- if (!mMobileProperties) {
-	return bofixed();
+ if (!isMobile()) {
+	return bofixed(0);
  }
- return mMobileProperties->mSpeed;
+ return m_speed;
 }
 
 bofixed UnitProperties::accelerationSpeed() const
 {
- if (!mMobileProperties) {
+ if (!isMobile()) {
 	return bofixed();
  }
- return mMobileProperties->mAccelerationSpeed;
+ return mAccelerationSpeed;
 }
 
 bofixed UnitProperties::decelerationSpeed() const
 {
- if (!mMobileProperties) {
+ if (!isMobile()) {
 	return bofixed();
  }
- return mMobileProperties->mDecelerationSpeed;
+ return mDecelerationSpeed;
 }
 
 int UnitProperties::rotationSpeed() const
 {
- if (!mMobileProperties) {
+ if (!isMobile()) {
 	return 0;
  }
- return mMobileProperties->mRotationSpeed;
+ return mRotationSpeed;
 }
 
 bool UnitProperties::canGoOnLand() const
 {
- if (!mMobileProperties) {
+ if (!isMobile()) {
 	return true; // even facilities can go there.
  }
- return mMobileProperties->mCanGoOnLand;
+ return mCanGoOnLand;
 }
 
 bool UnitProperties::canGoOnWater() const
 {
- if (!mMobileProperties) {
+ if (!isMobile()) {
 	return false;
  }
- return mMobileProperties->mCanGoOnWater;
+ return mCanGoOnWater;
 }
 
 unsigned int UnitProperties::constructionSteps() const
 {
- if (!mFacilityProperties) {
+ if (!isFacility()) {
 	return 0;
  }
- return mFacilityProperties->mConstructionFrames;
+ return mConstructionFrames;
 }
 
 const PluginProperties* UnitProperties::properties(int pluginType) const
@@ -625,20 +589,6 @@ void UnitProperties::clearPlugins(bool deleteweapons)
  } else {
 	d->mPlugins.clear();
  }
- delete mMobileProperties;
- mMobileProperties = 0;
- delete mFacilityProperties;
- mFacilityProperties = 0;
-}
-
-void UnitProperties::createMobileProperties()
-{
- mMobileProperties = new MobileProperties;
-}
-
-void UnitProperties::createFacilityProperties()
-{
- mFacilityProperties = new FacilityProperties;
 }
 
 void UnitProperties::addPlugin(PluginProperties* prop)
@@ -648,50 +598,43 @@ void UnitProperties::addPlugin(PluginProperties* prop)
 
 void UnitProperties::setConstructionSteps(unsigned int steps)
 {
- if (mFacilityProperties) {
-	mFacilityProperties->mConstructionFrames = steps;
- }
-}
-
-void UnitProperties::setSpeed(bofixed speed)
-{
- if (mMobileProperties) {
-	mMobileProperties->mSpeed = speed;
+ if (isFacility()) {
+	mConstructionFrames = steps;
  }
 }
 
 void UnitProperties::setAccelerationSpeed(bofixed speed)
 {
- if (mMobileProperties) {
-	mMobileProperties->mAccelerationSpeed = speed;
+ if (isMobile()) {
+	mAccelerationSpeed = speed;
  }
 }
 
 void UnitProperties::setDecelerationSpeed(bofixed speed)
 {
- if (mMobileProperties) {
-	mMobileProperties->mDecelerationSpeed = speed;
+ if (isMobile()) {
+	mDecelerationSpeed = speed;
  }
 }
 
 void UnitProperties::setRotationSpeed(int speed)
 {
- if (mMobileProperties) {
-	mMobileProperties->mRotationSpeed = speed;
+ if (isMobile()) {
+	mRotationSpeed = speed;
  }
 }
 
 void UnitProperties::setCanGoOnLand(bool c)
 {
- if (mMobileProperties) {
-	mMobileProperties->mCanGoOnLand = c;
+ if (isMobile()) {
+	mCanGoOnLand = c;
  }
 }
 
 void UnitProperties::setCanGoOnWater(bool c)
 {
- if (mMobileProperties) {
-	mMobileProperties->mCanGoOnWater = c;
+ if (isMobile()) {
+	mCanGoOnWater = c;
  }
 }
 
@@ -740,13 +683,14 @@ void UnitProperties::reset()
  mUnitHeight = 1.0f;
  mUnitDepth = 1.0;
  d->mName = i18n("Unknown");
- mHealth = 100;
- mMineralCost = 100;
- mOilCost = 0;
- mSightRange = 5;
- mProductionTime = 100;
- mShields = 0;
- mArmor = 0;
+ m_health.init(100);
+ m_mineralCost.init(100);
+ m_oilCost.init(0);
+ m_sightRange.init(5);
+ m_productionTime.init(100);
+ m_shields.init(0);
+ m_armor.init(0);
+ m_speed.init(0);
  mSupportMiniMap = false;
  d->mRequirements.clear();
  d->mDestroyedEffectIds.clear();
@@ -755,19 +699,13 @@ void UnitProperties::reset()
  mProducer = 0;
  mExplodingDamage = 0;
  mExplodingDamageRange = 0;
- // Delete old mobile/facility properties
- delete mMobileProperties;
- mMobileProperties = 0;
- delete mFacilityProperties;
- mFacilityProperties = 0;
  // Mobile stuff (because unit is mobile by default)
- createMobileProperties();
- mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
- mMobileProperties->mAccelerationSpeed = 0.5;
- mMobileProperties->mDecelerationSpeed = 1.0;
- mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed);
- mMobileProperties->mCanGoOnLand = true;
- mMobileProperties->mCanGoOnWater = false;
+ mIsFacility = false;
+ mAccelerationSpeed = 0.5;
+ mDecelerationSpeed = 1.0;
+ mRotationSpeed = (int)(2 * speed());
+ mCanGoOnLand = true;
+ mCanGoOnWater = false;
  // Sounds
  d->mSounds.clear();
  d->mSounds.insert(SoundOrderMove, "order_move");

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,6 +52,9 @@ class UpgradeProperties
     UpgradeProperties(const SpeciesTheme* theme);
     virtual ~UpgradeProperties();
 
+    static void resetUpgradeableUnitProperties(Player* player);
+    static void resetUpgradeableWeaponProperties(Player* player);
+
     /**
      * Load upgrade properties
      **/
@@ -65,10 +68,16 @@ class UpgradeProperties
 
     /**
      * One of the most important methods in this class
-     * It applies upgrade to units and UnitProperties
+     * It applies upgrade to UnitProperties
      * @param player owner of this class (and UnitProperties)
      **/
     virtual void apply(Player* player) const;
+
+    /**
+     * Apply the upgrade to all Units of the player. This must not be called
+     * more than once per upgrade. Don't call this when loading a game (the
+     * properties of the units are already changed then).
+     **/
     virtual void applyToUnits(Player* player) const;
 
 
@@ -114,7 +123,10 @@ class UpgradeProperties
     enum UpgradeType { Health = 0, Armor, Shields, MineralCost, OilCost, SightRange,
         ProductionTime, Speed,
         WeaponDamage, WeaponDamageRange, WeaponFullDamageRange, WeaponReload,
-        WeaponRange, WeaponSpeed };
+        WeaponRange, WeaponSpeed,
+
+        LastUpgrade // MUST be last entry in the list!
+    };
     enum ValueType { Absolute = 0, Relative, Percent };
 
     void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
