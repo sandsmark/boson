@@ -391,9 +391,10 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
 
 void Unit::advance(unsigned int advanceCount)
 { // time critical function !!!
+// Mostly animation:
+ BosonItem::advance(advanceCount);
+ 
  if (isDestroyed()) {
-	// FIXME: won't this make problems with wreckage animations? We should call
-	//  BosonItem::advance() in any way (even if we're destroyed)
 	return;
  }
  // Reload weapons
@@ -408,9 +409,6 @@ void Unit::advance(unsigned int advanceCount)
  if (shields() < unitProperties()->shields()) {
 	reloadShields(); // AB: maybe we make that method inline one day.
  }
-
-// Mostly animation:
- BosonItem::advance(advanceCount);
 }
 
 void Unit::advanceNone(unsigned int advanceCount)

@@ -737,7 +737,7 @@ void BosonCanvas::removeUnit(Unit* unit)
 	return;
  }
  Player* owner = unit->owner();
- unit->setAnimated(false);
+ //unit->setAnimated(false);
  unit->setHealth(0); // in case of an accidental change before
  unit->setWork(UnitBase::WorkDestroyed);
  owner->unitDestroyed(unit); // remove from player without deleting
