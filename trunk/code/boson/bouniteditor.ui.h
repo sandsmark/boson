@@ -335,7 +335,7 @@ void BoUnitEditor::slotCanProduceChanged()
 
 void BoUnitEditor::slotUpdateUnitProperties()
 {
-    mUnit->clearPlugins();
+    mUnit->clearPlugins(false);
     // General page
     mUnit->setName(mUnitName->text());
     mUnit->setId(mUnitId->value());
@@ -451,7 +451,7 @@ void BoUnitEditor::slotUpdateWidgets()
     mWeaponGroup->setEnabled(false);
     mCurrentWeapon = -1;
     QPtrListIterator<PluginProperties> it(*(mUnit->plugins()));
-    while(it.current() != 0l) {
+    while(it.current()) {
 	if(it.current()->pluginType() == PluginProperties::Weapon) {
 	    BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());
 	    mWeapons.insert(weaponcounter, w);
@@ -515,7 +515,9 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setSpeed(mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
     w->setMaxHeight(mWeaponMaxHeight->value());
-    w->setOffset(BoVector3(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value()));
+    BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
+    offset.scale(BO_TILE_SIZE);
+    w->setOffset(offset);
     w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
     w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
     w->setHitParticleSystemIds(stringToList(mWeaponHitParticles->text()));
@@ -579,9 +581,9 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponModel->setText(w->modelFileName());
     mWeaponMaxHeight->setValue(w->maxHeight());
     BoVector3 o = w->offset();
-    mWeaponOffsetX->setValue(o[0]);
-    mWeaponOffsetY->setValue(o[1]);
-    mWeaponOffsetZ->setValue(o[2]);
+    mWeaponOffsetX->setValue(o[0] / BO_TILE_SIZE);
+    mWeaponOffsetY->setValue(o[1] / BO_TILE_SIZE);
+    mWeaponOffsetZ->setValue(o[2] / BO_TILE_SIZE);
     mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
     mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
     mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));
