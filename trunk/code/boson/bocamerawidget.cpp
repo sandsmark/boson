@@ -1097,6 +1097,9 @@ void BoLightCameraWidget::setLight(BoLight* light, BoContext* context)
  mSpecularG->setValue(mLight->specular().y());
  mSpecularB->setValue(mLight->specular().z());
  mSpecularA->setValue(mLight->specular().w());
+ mConstantAttenuation->setEnabled(!mDirectional->isChecked());
+ mLinearAttenuation->setEnabled(!mDirectional->isChecked());
+ mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
  mBlockLightChanges = false;
 }
 
@@ -1126,5 +1129,10 @@ void BoLightCameraWidget::slotLightChanged()
  if (old) {
 	old->makeCurrent();
  }
+
+ // when directional light is enabled attenuation is per definition disabled
+ mConstantAttenuation->setEnabled(!mDirectional->isChecked());
+ mLinearAttenuation->setEnabled(!mDirectional->isChecked());
+ mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
 }
 
