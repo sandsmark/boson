@@ -169,6 +169,15 @@ public:
 	void addFaces();
 
 	/**
+	 * Generate a point list (as it can be used by glDrawElements()) from
+	 * the node list (see @ref faces).
+	 *
+	 * This cache will be invalid once @ref connectFaces or @ref addFaces
+	 * gets called (i.e. the order of points get changed in any way).
+	 **/
+	void createPointCache();
+
+	/**
 	 * Delete all faces. See @ref faces
 	 * @obsolete
 	 **/
@@ -208,7 +217,6 @@ public:
 	bool textured() const;
 
 	void renderMesh();
-	void renderMeshPoints();
 	void renderPoint(int index);
 
 	// AB: these are bad. we should remove then - then we could load the

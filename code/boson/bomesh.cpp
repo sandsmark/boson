@@ -215,6 +215,9 @@ public:
 
 		mAllocatedPoints = 0;
 		mPoints = 0;
+
+		mPointsCache = 0;
+		mPointsCacheCount = 0;
 	}
 	int mType;
 	BoNode* mFaces;
@@ -230,6 +233,12 @@ public:
 	unsigned int mPointCount;
 	float* mPoints;
 	float* mAllocatedPoints;
+
+	// the list of points in the final order (after connectFaces() or
+	// addFaces() was called). iterating through faces() is equalivent (for
+	// some modes the BoNode::relevantPoint() will have to be used though)
+	unsigned int* mPointsCache;
+	unsigned int mPointsCacheCount;
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -739,62 +748,18 @@ void BoMesh::renderMesh()
 	glBindTexture(GL_TEXTURE_2D, textureObject());
  }
 
- glBegin(type());
- renderMeshPoints();
- glEnd();
+
+ if (!d->mPointsCache || d->mPointsCacheCount == 0) {
+	boError() << k_funcinfo << "no point cache!" << endl;
+ } else {
+	glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+ }
+
 
  if (resetColor) {
 	// we need to reset the color (mainly for the placement preview)
 	glPopAttrib();
 	resetColor = false;
- }
-}
-
-void BoMesh::renderMeshPoints()
-{
- BO_CHECK_NULL_RET(d->mPoints);
- BoNode* node = faces();
- if (!node) {
-	boError() << k_funcinfo << "NULL node" << endl;
-	return;
- }
- if (points() < 1) {
-	return;
- }
- if (type() == GL_TRIANGLE_STRIP && false) {
-	boWarning() << k_funcinfo << "obsolete - TODO: use vertex arrays" << endl;
-	boDebug() << "painting _STRIP" << endl;
-	if (!node->next()) {
-		boError() << k_funcinfo << "less than 2 faces in mesh! this is not supported" << endl;
-		return;
-	}
-	int firstPoint;
-	int secondPoint;
-	int thirdPoint;
-	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
-
-	renderPoint(node->pointIndex()[firstPoint]);
-	renderPoint(node->pointIndex()[secondPoint]);
-	renderPoint(node->pointIndex()[thirdPoint]);
-
-	// we skip the entire first face. all points have been rendered above.
-	node = node->next();
-	for (; node; node = node->next()) {
-		int point = node->relevantPoint();
-		if (point < 0 || point > 2) {
-			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
-			continue;
-		}
-		renderPoint(node->pointIndex()[point]);
-	}
- } else {
-//	int* indices = new int[points() * 3];
-	for (; node; node = node->next()) {
-		for (int i = 0; i < 3; i++) {
-			glArrayElement(node->pointIndex()[i]);
-		}
-	}
-//	delete[] indices;
  }
 }
 
@@ -899,5 +864,88 @@ void BoMesh::movePoints(float* array, int index)
  delete[] d->mAllocatedPoints;
  d->mAllocatedPoints = 0;
  d->mPoints = array + index * 5;
+ if (d->mPointsCache) {
+	// we need to regenerate the cache
+	createPointCache();
+ }
+}
+
+void BoMesh::createPointCache()
+{
+ delete[] d->mPointsCache;
+ d->mPointsCache = 0;
+ d->mPointsCacheCount = 0;
+ BoNode* node = faces();
+ if (!node) {
+	boError() << k_funcinfo << "NULL node" << endl;
+	return;
+ }
+ if (points() < 1) {
+	return;
+ }
+ int facesCount = 0;
+ // count the number of nodes in our list.
+ // note that we mustn't assume that all nodes are in that list!
+ for (; node; node = node->next()) {
+	facesCount++;
+ }
+ node = faces();
+ if (type() == GL_TRIANGLE_STRIP) {
+	boDebug() << "creating _STRIP" << endl;
+	if (!node->next()) {
+		boError() << k_funcinfo << "less than 2 faces in mesh! this is not supported" << endl;
+		return;
+	}
+	int firstPoint;
+	int secondPoint;
+	int thirdPoint;
+	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
+	if (firstPoint < 0 || (unsigned int)firstPoint >= points()) {
+		boError() << k_funcinfo << "invalid first point " << firstPoint << endl;
+		return;
+	}
+	if (secondPoint < 0 || (unsigned int)secondPoint >= points()) {
+		boError() << k_funcinfo << "invalid second point" << secondPoint << endl;
+		return;
+	}
+	if (thirdPoint < 0 || (unsigned int)thirdPoint >= points()) {
+		boError() << k_funcinfo << "invalid third point" << thirdPoint << endl;
+		return;
+	}
+
+	// 3 basic points + one point per remaining face
+	d->mPointsCacheCount = 3 + (facesCount - 3) * 1;
+	d->mPointsCache = new unsigned int[d->mPointsCacheCount];
+
+	d->mPointsCache[0] = (unsigned int)node->pointIndex()[firstPoint];
+	d->mPointsCache[1] = (unsigned int)node->pointIndex()[secondPoint];
+	d->mPointsCache[2] = (unsigned int)node->pointIndex()[thirdPoint];
+
+	int element = 3;
+	// we skip the entire first face. all points have been rendered above.
+	node = node->next();
+	for (; node; node = node->next()) {
+		int point = node->relevantPoint();
+		if (point < 0 || point > 2) {
+			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
+			continue;
+		}
+		d->mPointsCache[element] = (unsigned int)node->pointIndex()[point];
+		element++;
+	}
+ } else if (type() == GL_TRIANGLES) {
+	// 3 points per face
+	d->mPointsCacheCount = facesCount * 3;
+	d->mPointsCache = new unsigned int[d->mPointsCacheCount];
+	int element = 0;
+	for (; node; node = node->next()) {
+		for (int i = 0; i < 3; i++) {
+			d->mPointsCache[element] = (unsigned int)node->pointIndex()[i];
+			element++;
+		}
+	}
+ } else {
+	boError() << k_funcinfo << "Invalid type: " << type() << endl;
+ }
 }
 

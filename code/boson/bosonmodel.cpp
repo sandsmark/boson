@@ -387,6 +387,7 @@ void BosonModel::loadModel()
 #else
 	mesh->addFaces();
 #endif
+	mesh->createPointCache();
  }
 
 
