@@ -1235,7 +1235,7 @@ void Unit::playSound(UnitSoundEvent event)
 
 void Unit::turnTo(int deg)
 {
-// boDebug() << k_funcinfo << deg << endl;
+ boDebug() << k_funcinfo << id() << ": turning to " << deg << endl;
  d->mWantedRotation = deg;
 }
 
@@ -1470,6 +1470,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  if ((wp.x() == -1) && (wp.y() == -1)) {
 	stopMoving();
 	if (work() == WorkNone) {
+		boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
 		// Turn a bit
 		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
 		// Check for overflows
@@ -1478,7 +1479,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 		} else if (turn > 360) {
 			turn -= 360;
 		}
-		Unit::turnTo(int(turn));
+		Unit::turnTo(turn);
 		setWork(WorkTurn);
 	}
 	return;
@@ -1516,6 +1517,25 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	}
 
 	wp = currentWaypoint();
+	// FIXME: code duplication. But it must be done here to prevent trying to go
+	//  to -1; -1 coordinates and ending up with wrong rotation
+	if ((wp.x() == -1) && (wp.y() == -1)) {
+		stopMoving();
+		if (work() == WorkNone) {
+			boDebug() << k_funcinfo << id() << ": stopping moving. Turning" << endl;
+			// Turn a bit
+			int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
+			// Check for overflows
+			if (turn < 0) {
+				turn += 360;
+			} else if (turn > 360) {
+				turn -= 360;
+			}
+			Unit::turnTo(turn);
+			setWork(WorkTurn);
+		}
+		return;
+	}
 	d->mWayPointReached = false;
  }
 
