@@ -119,11 +119,11 @@ void BosonBigDisplay::init()
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
 
- d->mMinerals = new QCanvasText(canvas());
+ d->mMinerals = new QCanvasText(QString::null, canvas());
  d->mMinerals->setZ(Z_CANVASTEXT);
  d->mMinerals->setColor(white);
  d->mMinerals->show();
- d->mOil = new QCanvasText(canvas());
+ d->mOil = new QCanvasText(QString::null, canvas());
  d->mOil->setZ(Z_CANVASTEXT);
  d->mOil->setColor(white);
  d->mOil->show();
