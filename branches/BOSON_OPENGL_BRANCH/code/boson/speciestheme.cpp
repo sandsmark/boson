@@ -41,11 +41,12 @@
 #include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
+#include <qfile.h> // FIXME: remove! it is just a temporary hack for QFile::exists() below
 
 #ifndef NO_GL
 #include <qgl.h>
 
-#define USE_3DS_FILES 0
+#define USE_3DS_FILES 1
 
 int SpeciesTheme::mThemeNumber = 0;
 
@@ -942,13 +943,26 @@ void SpeciesTheme::loadUnitTextures(int unitType, QValueList<QImage> list)
 void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
 #if USE_3DS_FILES
- QString fileName = prop->unitPath() + QString::fromLatin1("unit.3ds");
- BosonModel* m = new BosonModel(fileName);
+ BosonModel* m = 0;
+ if (QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
+	m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"));
+ } else {
+	GLuint list = createDisplayList(prop->typeId());
+	m = new BosonModel(list);
+ }
 #else
- BosonTextureArray* texArray = textureArray(prop->typeId());
+ QLuint list = createDisplayList(prop->typeId());
+ BosonModel* m = new BosonModel(list);
+#endif
+ d->mUnitModels.insert(prop->typeId(), m);
+}
+
+GLuint SpeciesTheme::createDisplayList(int typeId)
+{
+ BosonTextureArray* texArray = textureArray(typeId);
  if (!texArray) {
 	kdError() << k_funcinfo << "NULL textures" << endl;
-	return;
+	return 0;
  }
  float width = ((float)texArray->width(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
  float height = ((float)texArray->height(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
@@ -956,7 +970,7 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  GLuint tex = texArray->texture(0); // this doesn't support directions!!
  if (tex == 0) {
 	kdWarning() << k_funcinfo << "invalid texture" << endl;
-	return;
+	return 0;
  }
 
  GLuint list = glGenLists(1);
@@ -971,9 +985,8 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 
 	glEnd();
  glEndList();
- BosonModel* m = new BosonModel(list);
-#endif
- d->mUnitModels.insert(prop->typeId(), m);
+
+ return list;
 }
 
 #endif // !NO_OPENGL

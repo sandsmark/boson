@@ -20,11 +20,14 @@
 #define BOSONMODEL_H
 
 #include <qvaluelist.h>
-#include <qpointarray.h>
+#include <qmap.h>
+//#include <qpointarray.h>
 #include <GL/gl.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
+
+class BosonTextureArray;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -36,7 +39,7 @@ public:
 	 * Construct a model using an already created display list
 	 **/
 	BosonModel(GLuint list);
-	BosonModel(const QString& file);
+	BosonModel(const QString& dir, const QString& file);
 	~BosonModel();
 
 	inline GLuint displayList() const 
@@ -44,7 +47,18 @@ public:
 		return mDisplayList;
 	}
 
+protected:
+	void loadTextures();
+	void createDisplayLists();
 	void renderNode(Lib3dsNode* node);
+
+	/**
+	 * Convert a 3ds texture name to a clean name. That means call
+	 * QString::lower() on it, currently.
+	 **/
+	QString cleanTextureName(const char*);
+	const QString& baseDirectory() const { return mDirectory; }
+	QString textureDirectory() const;
 
 private:
 	void init();
@@ -52,5 +66,9 @@ private:
 private:
 	GLuint mDisplayList;
 	Lib3dsFile* m3ds;
+	QMap<QString, GLuint> mTextures;
+	BosonTextureArray* mTextureArray;
+	QString mDirectory;
 };
 #endif
+
