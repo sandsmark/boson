@@ -30,6 +30,7 @@
 #include <qdatastream.h>
 #include <qdom.h>
 
+#include <kapplication.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
@@ -243,16 +244,7 @@ bool BosonMap::loadCells(QDataStream& stream)
 		if (!loadCell(stream, groundType, version)) {
 			return false;
 		}
-		Cell* c = cell(i, j);
-		if (!c) {
-			boError() << k_funcinfo << "NULL cell" << endl;
-			continue;
-		}
-		if ((Cell::GroundType)groundType == Cell::GroundUnknown) {
-			boWarning() << "Unknown ground?! x=" << i << ",y=" 
-					<< j << endl;
-		}
-		c->makeCell(groundType, version);
+		slotChangeCell(i, j, groundType, version);
 	}
  }
  return true;
@@ -350,7 +342,7 @@ bool BosonMap::loadCells(QDomElement& node)
  }
  for (unsigned int i = 0; i < width(); i++) {
 	for (unsigned int j = 0; j < height(); j++) {
-		saveCell(stream, groundType[i + j * width()], 
+		saveCell(stream, groundType[i + j * width()],
 				version[i + j * width()]);
 	}
  }
@@ -552,9 +544,11 @@ void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
 	boError() << "Invalid cell x=" << x << ",y=" << y << endl;
 	return;
  }
- if (c->groundType() != groundType || c->version() != b) {
-	c->makeCell(groundType, b);
+ if ((Cell::GroundType)groundType == Cell::GroundUnknown) {
+	boWarning() << k_funcinfo << "Unknown ground?! x=" << x << ",y=" << y
+			<< endl;
  }
+ c->makeCell(groundType, b);
 }
 
 void BosonMap::loadTiles(const QString& tiles, bool withtimer)
@@ -589,4 +583,41 @@ void BosonMap::slotLoadTiles()
  emit signalTileSetChanged(mTiles);
 }
 
+void BosonMap::resize(unsigned int width, unsigned int height)
+{
+ if (!width || !height) {
+	boError() << k_funcinfo << "invalid map dimensions: " << width << "x" << height << endl;
+	return;
+ }
+ if (mCells) {
+	// TODO: store old cells, create new ones and apply values from old to
+	// new cells.
+	boError() << k_funcinfo << "only resizing from NULL cells is implemented!" << endl;
+	return;
+ }
+
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+
+ // WARNING: this is close to duplicated code. try to merge with saveMapGeo() !
+ stream << (Q_INT32)width;
+ stream << (Q_INT32)height;
+
+ QDataStream readStream(buffer, IO_ReadOnly);
+ loadMapGeo(readStream);
+}
+
+void BosonMap::fill(int ground)
+{
+ if (!mCells) {
+	boError() << k_funcinfo << "NULL cells" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < width(); i++) {
+	for (unsigned int j = 0; j < height(); j++) {
+		int version = kapp->random() % 4; // note: this is a bad thing for network (although version doesn't influence game logic)
+		slotChangeCell(i, j, ground, version);
+	}
+ }
+}
 

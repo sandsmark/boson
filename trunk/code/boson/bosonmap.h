@@ -140,6 +140,18 @@ public:
 	 **/
 	void loadTiles(const QString& tiles, bool withtimer = true);
 
+	/**
+	 * Resize the map. Currently this works only if the cells have
+	 * <em>not</em> yet been created.
+	 **/
+	void resize(unsigned int width, unsigned int height);
+
+	/**
+	 * Fill all cells with @p ground.
+	 * @param ground See @ref Cell::GroundType
+	 **/
+	void fill(int ground);
+
 public slots:
 	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 
