@@ -49,8 +49,10 @@ bosonTopLevel::bosonTopLevel(BosonApp * /*parent*/, const char *name, WFlags f)
 	qhb   = new QHBox(ksb, "unitsInfoBox");
 	label = new QLabel(" Mobiles : ", qhb);
 	label = new QLabel("?", qhb);
+	connect(bocanvas , SIGNAL(mobileNbUpdated(int)), label, SLOT(setNum(int)));
 	label = new QLabel("  Facilities : ", qhb);
 	label = new QLabel("?", qhb);
+	connect(bocanvas , SIGNAL(facilityNbUpdated(int)), label, SLOT(setNum(int)));
 	ksb->addWidget(qhb);
 
 	qhb   = new QHBox(ksb, "ressourcesInfoBox");
