@@ -161,6 +161,9 @@ public:
 
 	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
+
+	unsigned int mGLUpdateInterval;
+	int mVersion;
 };
 
 #endif

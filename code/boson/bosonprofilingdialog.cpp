@@ -142,6 +142,13 @@ public:
 		column++;
 		topLayout->addWidget(mFPSLabel, row, column);
 		column++;
+
+		label = new QLabel(i18n("Update interval: "), this);
+		mUpdateIntervalLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mUpdateIntervalLabel, row, column);
+		column++;
 	}
 	~RenderSummary()
 	{
@@ -149,11 +156,17 @@ public:
 
 	void clear()
 	{
+		mStartSec = 0;
+		mStartUSec = 0;
+		mEndSec = 0;
+		mEndUSec = 0;
+		mCount = 0;
 		mStartLabel->setText("");
 		mEndLabel->setText("");
 		mSeconds->setText("");
 		mCountLabel->setText("");
 		mFPSLabel->setText("");
+		mUpdateIntervalLabel->setText("");
 	}
 
 	void set(struct timeval* start, struct timeval* end, int count)
@@ -162,26 +175,52 @@ public:
 			clear();
 			return;
 		}
+		mStartSec = start->tv_sec;
+		mStartUSec = start->tv_usec;
+		mEndSec = end->tv_sec;
+		mEndUSec = end->tv_usec;
+		mCount = count;
+	}
+	void setUpdateInterval(int i)
+	{
+		mUpdateInterval = i;
+	}
+
+	void apply()
+	{
 		QDateTime s, e;
-		s.setTime_t(start->tv_sec);
-		e.setTime_t(end->tv_sec);
+		s.setTime_t(mStartSec);
+		e.setTime_t(mEndSec);
 		mStartLabel->setText(s.time().toString());
 		mEndLabel->setText(e.time().toString());
-		mCountLabel->setText(QString::number(count));
+		mCountLabel->setText(QString::number(mCount));
 
-		double diff = (end->tv_sec - start->tv_sec) * 1000000 + (end->tv_usec - start->tv_usec);
+		double diff = (mEndSec - mStartSec) * 1000000 + (mEndUSec - mStartUSec);
 		diff /= 1000000;
 		mSeconds->setText(QString::number(diff));
-		double fps = ((double)count) / diff;
+		double fps = ((double)mCount) / diff;
 		mFPSLabel->setText(QString::number(fps));
+
+		if (mUpdateInterval == -1) {
+			mUpdateIntervalLabel->setText("(unknown)");
+		} else {
+			mUpdateIntervalLabel->setText(QString::number(mUpdateInterval));
+		}
 	}
 
 private:
+	long mStartSec;
+	long mStartUSec;
+	long mEndSec;
+	long mEndUSec;
+	int mCount;
+	int mUpdateInterval;
 	QLabel* mStartLabel;
 	QLabel* mEndLabel;
 	QLabel* mSeconds;
 	QLabel* mCountLabel;
 	QLabel* mFPSLabel;
+	QLabel* mUpdateIntervalLabel;
 };
 
 class BosonProfilingDialog::BosonProfilingDialogPrivate
@@ -450,6 +489,7 @@ void BosonProfilingDialog::resetRenderPage()
  unsigned int count = pd->mRenderTimes.count();
  if (!count) {
 	d->mRenderSummary->set(0, 0, 0);
+	d->mRenderSummary->setUpdateInterval(-1);
 	return;
  }
  unsigned long int func = aFunction / count;
@@ -469,6 +509,12 @@ void BosonProfilingDialog::resetRenderPage()
  d->mRenderSummary->set(&pd->mRenderTimes.first()->mFunction.mData[0],
 		&pd->mRenderTimes.last()->mFunction.mData[1],
 		pd->mRenderTimes.count());
+ if (pd->mVersion <= 0x06) {
+	d->mRenderSummary->setUpdateInterval(-1);
+ } else {
+	d->mRenderSummary->setUpdateInterval(pd->mGLUpdateInterval);
+ }
+ d->mRenderSummary->apply();
 }
 
 void BosonProfilingDialog::slotResetSlotAdvancePage()
