@@ -45,6 +45,7 @@ class editorField : public visualField, public boFile
 
 public:
   editorField(QObject *parent=0, const char *name=0L);
+  ~editorField() { freeRessources(); }
 
   void createMobUnit(mobileMsg_t &);
   void destroyMobUnit(destroyedMsg_t &);
