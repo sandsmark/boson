@@ -109,23 +109,23 @@ bool BosonStarting::start()
  emit signalLoadingSetAdmin(boGame->isAdmin());
  emit signalLoadingPlayersCount(boGame->playerList()->count());
 
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
  if (!boGame) {
 	boError() << k_funcinfo << "NULL boson object" << endl;
 	return false;
  }
  if (boGame->gameStatus() != KGame::Init) {
-	boError() << k_funcinfo
+	boError(270) << k_funcinfo
 		<< "Boson must be in init status to receive map!" << endl
 		<< "Current status: " << boGame->gameStatus() << endl;
 	return false;
  }
  if (boGame->playerCount() < 2) {
-	boError() << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
+	boError(270) << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
 	return false;
  }
  if (!mDestPlayField) {
-	boError() << k_funcinfo << "NULL playfield" << endl;
+	boError(270) << k_funcinfo << "NULL playfield" << endl;
 	return false;
  }
  // mDestPlayField should be empty - ensure this by deleting the map
@@ -141,28 +141,28 @@ bool BosonStarting::start()
 	return false;
  }
  if (!mDestPlayField->loadPlayField(files)) {
-	boError() << k_funcinfo << "error loading the playfield" << endl;
+	boError(270) << k_funcinfo << "error loading the playfield" << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "playfield loaded" << endl;
+ boDebug(270) << k_funcinfo << "playfield loaded" << endl;
 
  boGame->setPlayField(mDestPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
  boGame->lock();
  if (!loadTiles()) {
-	boError() << k_funcinfo << "Could not load tiles" << endl;
+	boError(270) << k_funcinfo << "Could not load tiles" << endl;
 	boGame->unlock();
 	return false;
  }
  if (!loadGameData3()) {
-	boError() << k_funcinfo << "loading game data failed" << endl;
+	boError(270) << k_funcinfo << "loading game data failed" << endl;
 	boGame->unlock();
 	return false;
  }
  emit signalLoadingType(BosonLoadingWidget::StartingGame);
  if (!startScenario()) {
-	boError() << k_funcinfo << "starting scenario failed" << endl;
+	boError(270) << k_funcinfo << "starting scenario failed" << endl;
 	boGame->unlock();
 	return false;
  }
@@ -222,15 +222,15 @@ bool BosonStarting::loadTiles()
  // can safely use checkEvents() here
 
  if (!boGame) {
-	boError() << k_funcinfo << "NULL boson object" << endl;
+	boError(270) << k_funcinfo << "NULL boson object" << endl;
 	return false;
  }
  if (!playField()) {
-	boError() << k_funcinfo << "NULL playField" << endl;
+	boError(270) << k_funcinfo << "NULL playField" << endl;
 	return false;
  }
  if (!playField()->map()) {
-	boError() << k_funcinfo << "NULL map" << endl;
+	boError(270) << k_funcinfo << "NULL map" << endl;
 	return false;
  }
  boProfiling->start(BosonProfiling::LoadTiles);
@@ -253,7 +253,7 @@ bool BosonStarting::loadGameData3() // FIXME rename!
  boProfiling->start(BosonProfiling::LoadGameData3);
 
  if (!loadPlayerData()) { // FIXME: most of the stuff below should be in this method, too!
-	boError() << k_funcinfo << "player loading failed" << endl;
+	boError(270) << k_funcinfo << "player loading failed" << endl;
 	return false;
  }
 
@@ -261,11 +261,8 @@ bool BosonStarting::loadGameData3() // FIXME rename!
 
  checkEvents();
 
- // emits a signal using a QTimer only - it returns immediately.
- boGame->initFogOfWar(this);
-
  boProfiling->stop(BosonProfiling::LoadGameData3);
- boDebug() << k_funcinfo << "done" << endl;
+ boDebug(270) << k_funcinfo << "done" << endl;
  return true;
 }
 
