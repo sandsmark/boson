@@ -18,6 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>	// exit()
 #include <qimage.h>
 #include <qstring.h>
 
@@ -28,6 +29,7 @@ QImage		theBig( BIG_W*BO_TILE_SIZE, BIG_H*BO_TILE_SIZE, 32);
 QString		themePath;
 QString		transName[TRANS_LAST];
 FILE		*logfile = (FILE *) 0L;	// log.h
+bool		_debug = false;
 
 void begin (const char *themeName)
 {
@@ -46,7 +48,7 @@ void begin (const char *themeName)
 		transName[i] = themePath +  transS + "/" + transS;
 	}
 
-	theBig.fill( 0x00ff0000); // red filling
+	theBig.fill( 0x00000000); // black filling, FOW _is_ black
 }
 
 void end(void)
@@ -57,15 +59,24 @@ void end(void)
 void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 {
 	int x = GET_BIG_X(z), y = GET_BIG_Y(z);
-	int i,j;
 
+#if 0
 	printf("\nputOne(%d), on %d,%d (%d,%d)", z, x, y, x/BO_TILE_SIZE, y/BO_TILE_SIZE);
 	if (xoffset || yoffset)
 		printf(", offset : %d,%d", xoffset, yoffset);
+#endif
 
-	for(i=0; i< BO_TILE_SIZE; i++)
-		for(j=0; j< BO_TILE_SIZE; j++)
-			theBig.setPixel( x+i, y+j, p.pixel(i+xoffset,j+yoffset) );
+	if (_debug) { // draw a rectangle on top of that
+		int i;
+		for(i=0; i< BO_TILE_SIZE; i++) {
+			p.setPixel( xoffset+ 0,			yoffset + i, 0x00ff0000 );
+			p.setPixel( xoffset+ BO_TILE_SIZE-1,	yoffset + i, 0x00ff0000 );
+			p.setPixel( xoffset+ i,			yoffset + 0, 0x00ff0000 );
+			p.setPixel( xoffset+ i,			yoffset + BO_TILE_SIZE-1, 0x00ff0000 );
+		}
+	}
+
+	bitBlt(&theBig, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
 void loadGround(int j, const QString &path)
@@ -135,8 +146,20 @@ int main (int argc, char **argv)
 	logf(LOG_ERROR, "logfile : using stderr");
 	logf(LOG_INFO, "========= New Log File ==============");
 
-	begin("earth");
 
+	if (argc>2) {
+		puts("usage: createGround [-d]\n-d is for a debugging earth.png");
+		exit(1);
+	}
+	if (argc>1)
+		if ( !strncmp(argv[1], "-d", 2)) {
+			logf(LOG_INFO, "DEBUG MODE ON");
+			_debug = true;
+		} else {
+			puts("\nunrecognised optoin\n\nusage: createGround [-d]\n-d is for a debugging earth.png");
+			exit(1);
+		}
+	begin("earth");
 	for (i=0; i< GROUND_LAST; i++) // load non-transitions
 		loadGround(i, themePath + groundProp[i].name);
 		;
@@ -149,6 +172,7 @@ int main (int argc, char **argv)
 	}
 
 	end();
+
 	printf("\n");
 	return 0;
 }
