@@ -196,9 +196,16 @@ public:
 	/**
 	 * @return Height at point x,y (in canvas coordinates)
 	 * This is calculated from heights at the corners of the cell that the point
-	 * is on
+	 * is on. Water surface level is also taken insto account
 	 **/
 	float heightAtPoint(float x, float y) const;
+
+	/**
+	 * @return Height at point x,y (in canvas coordinates)
+	 * This is calculated from heights at the corners of the cell that the point
+	 *  is on. Note that this method _does not_ take water level into account.
+	 **/
+	float terrainHeightAtPoint(float x, float y) const;
 
 	void addAnimation(BosonItem* item);
 	void removeAnimation(BosonItem* item);
