@@ -189,6 +189,9 @@ public:
 
 	double fps() const;
 
+	void mapChanged();
+
+
 public slots:
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
@@ -281,9 +284,11 @@ protected:
 	float sphereInFrustum(float x, float y, float z, float radius) const;
 
 	void setCamera(const Camera& c);
+	Camera* camera();
 	GLfloat centerX() const;
 	GLfloat centerY() const;
 	GLfloat cameraZ() const;
+	void cameraChanged();
 
 	bool checkError() const;
 

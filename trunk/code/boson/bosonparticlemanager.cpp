@@ -344,6 +344,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonPart
   particle->maxage = particle->life;
   particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
       getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
+  particle->velo.add(wind());
   if(mNormalize)
   {
     particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
