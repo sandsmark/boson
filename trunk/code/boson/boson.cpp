@@ -1619,17 +1619,6 @@ void Boson::initFogOfWar(BosonStarting* starting)
  QTimer::singleShot(0, this, SIGNAL(signalInitFogOfWar()));
 }
 
-void Boson::startScenario(BosonStarting* starting)
-{
- if (!starting) { // ensure that this is actually called from BosonStarting
-	return;
- }
- if (isRunning()) {
-	return;
- }
- QTimer::singleShot(0, this, SIGNAL(signalStartScenario()));
-}
-
 bool Boson::isServer() const
 {
  return isAdmin(); // or isMaster() ??
