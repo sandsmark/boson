@@ -265,7 +265,9 @@ void Unit::setHealth(unsigned long int h)
  updateSelectBox();
  if (isDestroyed()) {
 	unselect();
-	itemRenderer()->setAnimationMode(UnitAnimationWreckage);
+	if (itemRenderer()) {
+		itemRenderer()->setAnimationMode(UnitAnimationWreckage);
+	}
  }
 }
 
@@ -2318,13 +2320,17 @@ void Facility::setConstructionStep(unsigned int step)
  }
  // warning: constructionSteps() and BosonModel::constructionSteps() are
  // *totally* different values!!
- itemRenderer()->setGLConstructionStep(step, constructionSteps()); // the displayed construction step. note that currentConstructionStep() is a *different* value!
+ if (itemRenderer()) {
+	itemRenderer()->setGLConstructionStep(step, constructionSteps()); // the displayed construction step. note that currentConstructionStep() is a *different* value!
+ }
  d->mConstructionStep = step;
  if (step == constructionSteps()) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
-	itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	if (itemRenderer()) {
+		itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	}
 	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  }
 }
@@ -2344,7 +2350,9 @@ bool Facility::loadFromXML(const QDomElement& root)
  if (d->mConstructionStep > constructionSteps()) {
 	d->mConstructionStep = constructionSteps();
  }
- itemRenderer()->setGLConstructionStep(d->mConstructionStep, constructionSteps());
+ if (itemRenderer()) {
+	 itemRenderer()->setGLConstructionStep(d->mConstructionStep, constructionSteps());
+ }
 
  // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
  // effects in loadFromXML() - then these lines are obsolete.
