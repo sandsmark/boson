@@ -302,6 +302,7 @@ BosonCursor* BoCursorCollection::loadCursor(int mode, const QString& cursorDir_,
 	boError() << k_funcinfo << "oops - loading CursorKDE failed. THIS MUST NEVER HAPPEN!" << endl;
 	return 0;
  }
+ (mCursors[mode]).insert(cursorDir, b);
 
  return b;
 }
