@@ -17,4 +17,4 @@ DestroyedParticles=1011,3010
 ConstructionSteps=15
 
 [ProductionPlugin]
-ProducerList=0
+ProducerList=3

@@ -1,7 +1,7 @@
 [Boson Unit]
 IsFacility=true
 TerrainType=0
-Name=Sam Site
+Name=Sam-Site
 Id=6
 Health=100
 MineralCost=200
@@ -16,7 +16,7 @@ Weapons=1
 ConstructionSteps=14
 
 [Weapon_0]
-Name=surface-to-air missiles
+Name=Surface-to-air missiles
 Range=6
 Reload=30
 CanShootAtAirUnits=true
