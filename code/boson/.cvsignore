@@ -12,3 +12,5 @@ bosonsearchpathswidget.cpp
 bosonsearchpathswidget.h
 bouniteditor.cpp
 bouniteditor.h
+bounit_meta_unload.cpp
+*.bsg
