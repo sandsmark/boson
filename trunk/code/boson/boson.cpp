@@ -640,6 +640,62 @@ private:
 };
 
 
+/**
+ * @short This class keeps a log of all messages received by now
+ **/
+// AB: after a certain time / number of messages we should delete old messages,
+// in order to save memory
+class BoMessageLogger
+{
+public:
+	BoMessageLogger()
+	{
+		mLoggedMessages.setAutoDelete(true);
+	}
+	~BoMessageLogger()
+	{
+		mLoggedMessages.clear();
+	}
+
+	/**
+	 * Append @p message to the log. Note that ownership is taken, i.e. you
+	 * must not delete it after calling this!
+	 **/
+	void append(BoMessage* message)
+	{
+		mLoggedMessages.append(message);
+	}
+
+	bool saveGameLog(QIODevice* logDevice)
+	{
+		if (!logDevice) {
+			BO_NULL_ERROR(logDevice);
+			return false;
+		}
+		if (!logDevice->isOpen()) {
+			boError() << k_funcinfo << "device not open" << endl;
+			return false;
+		}
+		QTextStream log(logDevice);
+		QPtrListIterator<BoMessage> it(mLoggedMessages);
+		while (it.current()) {
+			const BoMessage* m = it.current();
+			log << "Msg: " << m->advanceCallsCount << "  "
+					<< m->msgid << "  "
+					<< m->sender << " "
+					<< m->receiver << " "
+					<< m->clientId << "  ";
+			log.writeRawBytes(m->byteArray.data(), m->byteArray.size());
+			log << endl;
+			++it;
+		}
+		return true;
+	}
+
+private:
+	QPtrList<BoMessage> mLoggedMessages;
+};
+
 
 class Boson::BosonPrivate
 {
@@ -673,7 +729,7 @@ public:
 	BosonSaveLoad::LoadingStatus mLoadingStatus;
 
 	QValueList<QByteArray> mGameLogs;
-	QValueList<BoMessage> mLoggedMessages;
+	BoMessageLogger mMessageLogger;
 
 	BoAdvance* mAdvance;
 	BoMessageDelayer* mMessageDelayer;
@@ -1992,14 +2048,14 @@ void Boson::slotReceiveAdvance()
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
  // Log message
- BoMessage log;
- log.byteArray = ((QBuffer*)stream.device())->buffer();
- log.msgid = msgid;
- log.receiver = r;
- log.sender = s;
- log.clientId = clientId;
- log.advanceCallsCount = advanceCallsCount();
- d->mLoggedMessages.append(log);
+ BoMessage* log = new BoMessage;
+ log->byteArray = ((QBuffer*)stream.device())->buffer();
+ log->msgid = msgid;
+ log->receiver = r;
+ log->sender = s;
+ log->clientId = clientId;
+ log->advanceCallsCount = advanceCallsCount();
+ d->mMessageLogger.append(log);
 
  if (!d->mMessageDelayer->processMessage(stream, msgid, r, s, clientId)) {
 	// the message got delayed. don't deliver it now.
@@ -2439,14 +2495,9 @@ void Boson::saveGameLogs(const QString& prefix)
 	boError() << k_funcinfo << "Can't open output file '" << prefix << ".netlog' for writing!" << endl;
 	return;
  }
- QTextStream log(&nl);
- QValueList<BoMessage>::iterator nit;
- for (nit = d->mLoggedMessages.begin(); nit != d->mLoggedMessages.end(); nit++) {
-	BoMessage m = *nit;
-	log << "Msg: " << m.advanceCallsCount << "  " << m.msgid << "  " << m.sender << " " << m.receiver <<
-			" " << m.clientId << "  ";
-	log.writeRawBytes(m.byteArray.data(), m.byteArray.size());
-	log << endl;
+ if (!d->mMessageLogger.saveGameLog(&nl)) {
+	boError() << k_funcinfo << "unable to write message log" << endl;
+	return;
  }
  nl.close();
 
