@@ -18,8 +18,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <assert.h>
-
 #include <qpixmap.h>
 
 #include "../common/log.h"
@@ -88,8 +86,8 @@ void visualMiniDisplay::paintEvent(QPaintEvent *evt)
 void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 {
 	QPainter p;
-	assert(i<view->maxX());
-	assert(j<view->maxY());
+	boAssert(i<view->maxX());
+	boAssert(j<view->maxY());
 
 	//printf("visualMiniDisplay::newCell : receiving %d\n", (int)g);
 
