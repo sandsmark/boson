@@ -45,6 +45,8 @@ class serverCell;
 class Unit;
 class Facility;
 class mobUnit;
+class serverMobUnit;
+class serverFacility;
 
 
 /** 
@@ -59,6 +61,9 @@ class BosonServer : public KTMainWindow, public boFile
   ~BosonServer();
 
   void	handleDialogMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
+
+  void		placeMob(serverMobUnit *);
+  void		placeFix(serverFacility *);
 
   protected:
   void	initLog(void);
@@ -88,7 +93,7 @@ class BosonServer : public KTMainWindow, public boFile
 
   bool		loadGround();
   bool		loadUnits();
-
+  
   serverState	state;
   KServerSocket	*socket;
   uint		confirmedJiffies;

@@ -100,13 +100,14 @@ QwSpriteFieldGraphic * visualField::findUnitAt(int x, int y)
 groundType visualField::findGroundAt(int x, int y)
 {
         Pix p;
-	Cell *c;
+	groundType g;
  
         for( p = topAt(x,y); p; next(p))
                 if (IS_GROUND(at(p)->rtti()) && exact(p))  {
-			c = ((Cell*)at(p));
+			g = ((visualCell*)at(p))->getGroundType();
+//			printf("rtti: %d, rtti-S_GROUND : %d g : %d\n", at(p)->rtti(), at(p)->rtti()- S_GROUND,  g);
                         end(p);
-			return c->getGroundType();;
+			return g;
 		}
 	logf(LOG_ERROR, "can't find ground in visualField::findGroundAt");
 	return GROUND_UNKNOWN;

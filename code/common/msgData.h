@@ -62,6 +62,12 @@ struct shootMsg_t	{ int key, target_key; };
 struct ressMsg_t	{ uint oil, mineral; };
 /* MSG_UNIT_POWER */
 struct powerMsg_t	{ int key, power; };
+/* MSG_UNIT_HARVEST */
+struct harvestMsg_t	{ int key; };
+/* MSG_UNIT_HARVEST_END */
+struct harvestEndMsg_t	{ int key; };
+/* MSG_UNIT_RESS */
+struct unitRessMsg_t	{ int key; uint contain; };
 
 typedef union {
 /* Dialog layer */
@@ -79,6 +85,9 @@ typedef union {
 	shootMsg_t	shoot;
 	ressMsg_t	ressources;
 	powerMsg_t	power;
+	harvestMsg_t	harvest;
+	harvestEndMsg_t	harvestEnd;
+	unitRessMsg_t	unitRess;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */
@@ -191,7 +200,10 @@ enum bosonMsgTag {
 
 /* Player's units management */
 	MSG_UNIT_POWER,
-	MSG_UNIT_DAMAGE,
+//	MSG_UNIT_DAMAGE,
+	MSG_UNIT_HARVEST,		// unit request 'harvesting'
+	MSG_UNIT_RESS,			// update unite ressources (contain..)
+	MSG_UNIT_HARVEST_END,		// unit request the end of 'harvesting', should be at the 'base'
 
 /* Player's facilities management */
 	MSG_FACILITY_POWER,

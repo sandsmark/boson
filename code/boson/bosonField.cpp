@@ -62,7 +62,15 @@ void bosonField::createMob(mobileMsg_t &m)
 
 	assert(m.who < BOSON_MAX_PLAYERS);
 
-	u = new playerMobUnit(&m);
+	switch (m.type) {
+		default:
+			u = new playerMobUnit(&m);
+			break;
+		case MOB_HARVESTER:
+			u = new harvesterUnit(&m);
+			break;
+	};
+
 	mobile.insert(m.key, u);
 
 	emit updateMobile(u);
@@ -163,6 +171,14 @@ void bosonField::shooted(powerMsg_t &m)
 }
 
 
+void bosonField::updateRess(unitRessMsg_t &m)
+{
+	playerMobUnit	* mob = mobile.find(m.key);
+	
+	if (mob) {
+		mob->updateContain(m.contain);
+	} else logf(LOG_ERROR, "bosonField::updateRess : unexpected key in unitRessMsg_t : %d", m.key);
+}
 
 
 void bosonField::shoot(shootMsg_t &m)

@@ -34,16 +34,21 @@ class selectPart_down;
 class visualUnit : public QwSprite
 {
 public:
-	visualUnit(QwSpritePixmapSequence* s) : QwSprite(s)
-		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; }
+	visualUnit(int k, QwSpritePixmapSequence* s) : QwSprite(s), key(k)
+		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; }
 	
-	void  unSelect();
+	void	unSelect();
+	void	updateContain(uint c) { contain = c;}
 
 protected:
 	int		power;
 	/* attachement */
 	selectPart_up	*sp_up;
 	selectPart_down	*sp_down;
+	
+public:
+	int	key;
+	uint	contain;
 };
 
 class visualMobUnit : public mobUnit, public visualUnit

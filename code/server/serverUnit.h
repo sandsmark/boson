@@ -32,11 +32,16 @@ class boBuffer;
 
 class serverUnit {
  public:
-	serverUnit(boBuffer *b, int x, int y) { buffer = b; __x=x; __y=y; state = 0; power = MAX_POWER; }
+	serverUnit(int k, boBuffer *b, int x, int y)
+		{ key = k; buffer = b; __x=x; __y=y; state = 0; power = MAX_POWER; contain = 0; counter = -1; }
+	
+	void	increaseContain(void );
 
  protected:
  int		__x, __y;
  int		power;
+ int		contain;
+ int		key;
 
  boBuffer	*buffer;
  int		state;
@@ -55,18 +60,38 @@ public:
   serverMobUnit(boBuffer *, mobileMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
- void 	reportCreated(int player);
- void 	reportDestroyed(int player);
-// void 	reportCreated(boBuffer *);
-// void 	reportDestroyed(boBuffer *);
+	void 	reportCreated(void);
+	void 	reportDestroyed(void);
+	void 	reportCreated(int player);
+	void 	reportDestroyed(int player);
 
 /* request */
- void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
+	void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
 
- bool shooted();
+	virtual void	getWantedAction(void) {};
+	bool	shooted(void);
+ 
+protected:
+
 
 };
  
+
+class serverHarvester : public serverMobUnit
+{
+	Q_OBJECT
+
+public:
+	serverHarvester(boBuffer *b, mobileMsg_t *msg, QObject* parent = 0L, const char *name=0L)
+		:serverMobUnit( b, msg, parent, name) { base_x = msg->x; base_y = msg->y; }
+	
+	void	emptying(void);
+	virtual void	getWantedAction(void);
+
+private:
+	bool	atHome(void) { return ( _x() == base_x && _y() == base_y ) ; }
+	int	base_x, base_y;
+};
 
 
 /*
@@ -80,15 +105,15 @@ class serverFacility : public Facility, public serverUnit, public knownBy
   serverFacility(boBuffer *, facilityMsg_t *msg, QObject* parent = 0L, const char *name=0L);
  virtual	int _x(void) {return __x;}
  virtual	int _y(void) {return __y;}
- void 	reportCreated(int player);
- void 	reportDestroyed(int player);
-// void 	reportCreated(int player);
-// void 	reportDestroyed(boBuffer *);
+	void	reportDestroyed(void);
+	void 	reportCreated(int player);
+	void 	reportDestroyed(int player);
 
 /* request */
- void getWantedAction();
-
- bool shooted();
+	void	getWantedAction(void);
+	bool	shooted(void);
+ 
+ protected:
 };
  
 

@@ -90,42 +90,55 @@ for (i=im ; i<=iM; i++)
 
 void BosonServer::createMobUnit(mobileMsg_t &data)
 {
-serverMobUnit	*u;
-ulong	k = 0l;
-int	i,j, i2,j2;
-int	xx, yy;
+	serverMobUnit	*u;
 
-logf(LOG_GAME_HIGH, "BosonServer::createMobUnit called");
+	logf(LOG_GAME_HIGH, "BosonServer::createMobUnit called");
 
-data.key = key;
-assert(data.who< BOSON_MAX_CONNECTION);
-assert(player[data.who].socketState==SSS_CONNECT_OK);
+	data.key = key;
+	assert(data.who< BOSON_MAX_CONNECTION);
+	assert(player[data.who].socketState==SSS_CONNECT_OK);
 
-u = new serverMobUnit(player[data.who].buffer, &data);
+	switch(data.type) {
+		default:
+			u = new serverMobUnit(player[data.who].buffer, &data);
+			break;
+		case MOB_HARVESTER:
+			u = new serverHarvester(player[data.who].buffer, &data);
+			break;
+	};
 
-/* who is interested in knowing u's arrival */
-xx = data.x / BO_TILE_SIZE;
-yy = data.y / BO_TILE_SIZE;
-/* puts("hop1");
-printf("type is %d, width is %d\n", type, mobileProp[type].width);
-printf("u= %p\n", u); */
-i2 = (u->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
-j2 = (u->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
-/*i2 = j2 = 1; 
-puts("hop2"); */
-k = getPlayerMask(data.who);
-for (i=0; i<i2; i++)
-	for (j=0; j<j2; j++)
-		k |= cells[xx+i][yy+j].known;
-u->setKnown(k);
 
-/* telling them */
-u->sendToKnown(MSG_MOBILE_CREATED, sizeof(data), (bosonMsgData *)&data);
-
-mobile.insert ( key++, u);
-checkUnitVisibility(u);
+	placeMob(u);
+	mobile.insert ( key++, u);
+	checkUnitVisibility(u);
 }
 
+
+/*
+ * basic placing function
+ * should be smarter by veryfing that (x,y) is free, and else
+ * try 'around' that place.
+ */
+void BosonServer::placeMob(serverMobUnit *u)
+{
+	ulong		k = 0l;
+	int		i,j, i2,j2;
+	int		xx, yy;
+
+	/* who is interested in knowing u's arrival */
+	xx = u->_x() / BO_TILE_SIZE;
+	yy = u->_y() / BO_TILE_SIZE;
+	i2 = (u->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (u->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;
+	k = getPlayerMask(u->who);
+	for (i=0; i<i2; i++)
+		for (j=0; j<j2; j++)
+			k |= cells[xx+i][yy+j].known;
+	u->setKnown(k);
+
+	/* telling them */
+	u->reportCreated();
+}
 
 
 void BosonServer::createFixUnit(facilityMsg_t &data)
@@ -160,15 +173,24 @@ facility.insert ( key++, f);
 checkUnitVisibility(f);
 }
 
+/*
+ * should be done the same way as placeMob()
+ */
+void BosonServer::placeFix(serverFacility *)
+{
+	logf(LOG_ERROR, "Arghhhhhhhhhh... unimplemented placeFix called");
+}
 
 
 void BosonServer::requestAction()
 {
-//QIntDictIterator<serverMobUnit> mobIt(mobile);
-QIntDictIterator<serverFacility> fixIt(facility);
+	QIntDictIterator<serverMobUnit> mobIt(mobile);
+	QIntDictIterator<serverFacility> fixIt(facility);
 
-for (fixIt.toFirst(); fixIt; ++fixIt)
-	fixIt.current()->getWantedAction();
+	for (fixIt.toFirst(); fixIt; ++fixIt)
+		fixIt.current()->getWantedAction();
+	for (mobIt.toFirst(); mobIt; ++mobIt)
+		mobIt.current()->getWantedAction();
 }
 
 void BosonServer::checkKnownState()

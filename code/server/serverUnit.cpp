@@ -23,8 +23,9 @@
 #include "../common/bobuffer.h"
 
 #include "serverUnit.h"
+#include "boserver.h"
+#include "player.h"
 #include "game.h"
-
 
 /*
  *  KNOWN_BY
@@ -47,6 +48,16 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
  * class serverUnit
  */
 
+void serverUnit::increaseContain(void)
+{
+	unitRessMsg_t	m;
+
+	contain ++;
+
+	m.key = key; m.contain = contain;
+	sendMsg(buffer, MSG_UNIT_RESS, sizeof(m), &m);
+
+}
 
 /*
  *  MOBILE 
@@ -54,25 +65,16 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 
 serverMobUnit::serverMobUnit(boBuffer *b, mobileMsg_t *msg, QObject* parent, const char *name)
 	:mobUnit(msg,parent,name)
-	,serverUnit(b,msg->x, msg->y)
+	,serverUnit(msg->key, b,msg->x, msg->y)
 {
 }
 
-bool serverMobUnit::shooted()
+bool serverMobUnit::shooted(void)
 {
 	if (--power <=0) {
 
-		destroyedMsg_t  destroyed;
-
 		/* tell everybody that we no longer exist */
-		destroyed.key = key;
-		destroyed.x = __x;
-		destroyed.y = __y;
-	
-		logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
-
-		sendToKnown( MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
-		
+		reportDestroyed();
 		return true;
 
 	} else {
@@ -82,11 +84,12 @@ bool serverMobUnit::shooted()
 		_power.key	= key;
 		_power.power	= power;
 		sendToKnown( MSG_UNIT_POWER, sizeof(_power), &_power);
-		
 		return false;
 	}
 
 }
+
+
 
 void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 {
@@ -103,6 +106,19 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 	sendToKnown( MSG_MOBILE_MOVE_C, sizeof(msg), (bosonMsgData*)(&msg));
 }
 
+void serverMobUnit::reportCreated(void)
+{
+	mobileMsg_t     mobile;
+		
+	mobile.who = who; 
+	mobile.key = key;
+	mobile.x = __x;
+	mobile.y = __y;
+	mobile.type = type;
+
+	sendToKnown( MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
+}
+
 
 void serverMobUnit::reportCreated(int i)
 {
@@ -116,6 +132,21 @@ void serverMobUnit::reportCreated(int i)
 
 	sendMsg ( player[i].buffer, MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
 }
+
+
+void serverMobUnit::reportDestroyed(void)
+{
+	destroyedMsg_t  destroyed;
+
+	destroyed.key = key;
+	destroyed.x = __x;
+	destroyed.y = __y;
+
+	logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
+
+	sendToKnown( MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
+}
+
 
 void serverMobUnit::reportDestroyed(int i)
 {
@@ -132,6 +163,39 @@ void serverMobUnit::reportDestroyed(int i)
 
 
 
+/*
+ * HARVESTER
+ */
+void serverHarvester::getWantedAction(void)
+{
+	if (counter<0) return;
+
+	boAssert(counter<=EMPTYING_DURATION);
+	if ( ! --counter ) {
+
+		counter = -1; // not needed anymore
+		server->placeMob(this); // replace it
+
+		/* actual transfer */
+		contain = 0;
+		player[who].changeRessources(0, contain);
+		}
+
+}
+
+void serverHarvester::emptying(void)
+{
+	if (!atHome()) {
+		logf(LOG_ERROR, "serverHarvesting::emptying while not at home, refused");
+		printf("base is %d,%d, we are at %d,%d\n", base_x, base_y, _x(), _y());
+		return;
+	}
+	/* destroy (hide) the client harvester */
+	reportDestroyed();
+	counter = EMPTYING_DURATION;
+
+}
+
 
 
 /*
@@ -140,43 +204,32 @@ void serverMobUnit::reportDestroyed(int i)
 
 serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg, QObject* parent, const char *name)
 	:Facility(msg,parent,name)
-	,serverUnit(b,msg->x * BO_TILE_SIZE, msg->y * BO_TILE_SIZE)
+	,serverUnit(msg->key, b,msg->x * BO_TILE_SIZE, msg->y * BO_TILE_SIZE)
 {
 	counter = BUILDING_SPEED;
 }
 
-bool serverFacility::shooted()
+bool serverFacility::shooted(void)
 {
 	if (--power <=0) {
 
-		destroyedMsg_t  destroyed;
-
-		/* tell everybody that we no longer exist */
-		destroyed.key = key;
-		destroyed.x = __x;
-		destroyed.y = __y;
-	
-		logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
-
-		sendToKnown( MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
-
+		reportDestroyed();
 		return true;
 
 	} else {
 		/* broadcast the info */
 		powerMsg_t	_power;
-		
+	
 		_power.key	= key;
 		_power.power	= power;
 		sendToKnown( MSG_UNIT_POWER, sizeof(_power), &_power);
-
 		return false;
 	}
 
 }
 
 
-void serverFacility::getWantedAction()
+void serverFacility::getWantedAction(void)
 {
 	fixChangedMsg_t msg;
 
@@ -205,6 +258,19 @@ void serverFacility::reportCreated(int i)
 	sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(facility), &facility);
 }
 
+void serverFacility::reportDestroyed(void)
+{
+
+	destroyedMsg_t  destroyed;
+
+	destroyed.key = key;
+	destroyed.x = __x;
+	destroyed.y = __y;
+
+	logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
+
+	sendToKnown( MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
+}
 
 void serverFacility::reportDestroyed(int i)
 {

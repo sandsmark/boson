@@ -24,8 +24,11 @@
 #include "../common/map.h"
 #include "../common/log.h"
 
+#include "visualCell.h"
+
 #include "selectPart.h"
 #include "playerUnit.h"
+#include "bosonField.h"
 //#include "speciesTheme.h"
 #include "game.h"
 
@@ -261,7 +264,7 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 		else return false;		// not yet
 
 	// ok, let's shoot it
-	msg->shoot.target_key = target->key;
+	msg->shoot.target_key = ((visualUnit *)target)->key;
 	return true;
 }
 
@@ -392,6 +395,14 @@ void playerMobUnit::shooted(int _power)
 }
   
 
+bool playerMobUnit::near(int d)
+{
+	int a = _x() - dest_x;
+	int b = _y() - dest_y;
+	
+	return (a*a + b*b) < (d*d);
+}
+
 
 /*
  * playerFacility
@@ -445,4 +456,85 @@ void playerFacility::shooted(int _power)
 	if (sp_up) sp_up->frame(_power);
 }
   
+
+
+/*
+ * harvester 
+ */
+
+bool harvesterUnit::getWantedMove(bosonMsgData *msg)
+{
+	bool ret = false;
+
+	switch(hstate) {
+		case standBy:
+			return false;
+			break;
+		case comingBack:
+			if ( _x() == base_x && _y() == base_y) {
+				/* we are back : empty the harvester */ 
+				puts("harvester : arrived home");
+				harvestEndMsg_t    he;
+				he.key = key;
+				sendMsg(buffer, MSG_UNIT_HARVEST_END, sizeof(he), &he);
+				hstate = standBy;	// we should be hidden() by server,
+						  	//but we mark ourselves as 'standBy'
+			}
+			return playerMobUnit::getWantedMove(msg);
+			break;
+		case goingTo:
+			ret = playerMobUnit::getWantedMove(msg);
+			if (near (100) && underlyingGround() == GROUND_GRASS_OIL ) {
+				hstate = harvesting;
+				puts("harvester : change to \"harvesting\" state");
+			} else // nothing to harvest
+			if ( near (5) ) { 
+				// orzel : look around for another cell to harvest
+				hstate = standBy;
+				printf("harvester : change to \"standby\" state, underlying is %d, not %d\n", underlyingGround(), GROUND_GRASS_OIL);
+				return false;
+			}
+			else return ret; // continue
+			// no break; 
+		case harvesting:
+			if ( contain < 200 ) {
+				harvestMsg_t    harvest;
+				harvest.key = key;
+				sendMsg(buffer, MSG_UNIT_HARVEST, sizeof(harvest), &harvest);
+			} else {
+				hstate = comingBack;
+				puts("harvester : change to \"comingBack\" state");
+				playerMobUnit::u_goto(base_x, base_y); // go to base station
+			}
+			// send a message "i'm harvesting there"
+			// check "contain" ...
+			break;
+	};
+	return  ret;
+}
+
+bool harvesterUnit::getWantedShoot(bosonMsgData *)
+{
+	return false;
+}
+
+void harvesterUnit::u_goto(int mx, int my)
+{
+	hstate = goingTo;
+	puts("harvester : change to \"goingTo\" state");
+	playerMobUnit::u_goto(mx, my);
+}
+
+/*
+ * can't be inline
+ * cause then, playerUnit.h include bosonField.h which include 
+ * playerUnit.h.... and it won't compile
+ */
+
+groundType harvesterUnit::underlyingGround(void)
+{
+	return field->findGroundAt( _x()+10,_y()+10);
+}
+
+
 

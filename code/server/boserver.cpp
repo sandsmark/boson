@@ -298,6 +298,26 @@ switch(tag) {
 		logf(LOG_ERROR, "handleGameMessage : unknown tag received : %d", tag);
 		break;
 
+	case MSG_UNIT_HARVEST :
+		ASSERT_DATA_BLENGHT(sizeof(data->harvest));
+		mob = mobile.find(data->harvest.key);
+		if (mob) {
+			if (mob->getType() == MOB_HARVESTER) {
+				mob->increaseContain();
+			} else logf(LOG_ERROR, "noharvester unit trying to harvest");
+		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestMsg_t : %d", data->harvest.key);
+		break;
+
+	case MSG_UNIT_HARVEST_END :
+		ASSERT_DATA_BLENGHT(sizeof(data->harvestEnd));
+		mob = mobile.find(data->harvestEnd.key);
+		if (mob) {
+			if (mob->getType() == MOB_HARVESTER) {
+				((serverHarvester*)mob)->emptying();
+			} else logf(LOG_ERROR, "noharvester unit trying to harvestEnd");
+		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestEndMsg_t : %d", data->harvest.key);
+		break;
+
 	case MSG_UNIT_SHOOT :
 		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
 		mob = mobile.find(data->shoot.target_key);
