@@ -24,6 +24,8 @@
 #include "bosontexturearray.h"
 #include "bodebug.h"
 
+#include <qdom.h>
+
 #include <GL/gl.h>
 #include <math.h>
 
@@ -281,6 +283,24 @@ void BosonParticleSystem::setRotation(GLfloat angle, GLfloat x, GLfloat y, GLflo
       }
     }
   }
+}
+
+bool BosonParticleSystem::saveAsXML(QDomElement& root) const
+{
+  root.setAttribute(QString::fromLatin1("Count"), mNum);
+  return true;
+}
+
+bool BosonParticleSystem::loadFromXML(const QDomElement& root)
+{
+  bool ok = false;
+  int count = root.attribute(QString::fromLatin1("Count")).toInt(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "invalid value for count attribute of BosonParticleSystem" << endl;
+    return false;
+  }
+  createParticles(count);
+  return true;
 }
 
 

@@ -752,7 +752,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 			boDebug() << k_funcinfo << "Setting age to 0 for particle system" << it.current() << endl;
 			it.current()->setAge(0);
 		}
-		unit->particleSystems()->clear();
+		unit->clearParticleSystems();
 	}
 
 	// the unit is added to a list - now displayed as a wreckage only.
@@ -1054,9 +1054,30 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ if (!loadItemsFromXML(root)) {
+	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
+	return false;
+ }
 
+ QDomElement handler = root.namedItem("DataHandler").toElement();
+ if (handler.isNull()) {
+	boError(260) << k_funcinfo << "DataHandler not found" << endl;
+	return false;
+ }
+ BosonPropertyXML propertyXML;
+ if (!propertyXML.loadFromXML(handler, d->mProperties)) {
+	boError(260) << k_funcinfo << "unable to load the datahandler" << endl;
+	return false;
+ }
+ boDebug(260) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
+{
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
- unsigned int itemCount = 0;
+ QValueList<QDomElement> allItemElements;
+ QValueList<BosonItem*> allItems;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement items = list.item(i).toElement();
 	if (items.isNull()) {
@@ -1087,40 +1108,47 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		if (item.isNull()) {
 			continue;
 		}
-		if (!loadItemFromXML(item, owner)) {
-			boError(260) << k_funcinfo << "Item " << j << " was not loaded correctly" << endl;
+		BosonItem* i = createItemFromXML(item, owner);
+		if (!i) {
+			boError(260) << k_funcinfo << "failed creating item " << j << endl;
 			continue;
 		}
-		itemCount++;
+		allItemElements.append(item);
+		allItems.append(i);
 	}
  }
- QDomElement handler = root.namedItem("DataHandler").toElement();
- if (handler.isNull()) {
-	boError() << k_funcinfo << "DataHandler not found" << endl;
+ if (allItemElements.count() != allItems.count()) {
+	boError(260) << k_funcinfo << "item count != element count" << endl;
 	return false;
  }
- BosonPropertyXML propertyXML;
- if (!propertyXML.loadFromXML(handler, d->mProperties)) {
-	boError() << k_funcinfo << "unable to load the datahandler" << endl;
-	return false;
+ boDebug(260) << k_funcinfo << "created " << allItems.count() << " items" << endl;
+ unsigned int itemCount = 0;
+ for (unsigned int i = 0; i < allItems.count(); i++) {
+	QDomElement e = allItemElements[i];
+	BosonItem* item = allItems[i];
+	if (!loadItemFromXML(e, item)) {
+		boError(260) << k_funcinfo << "failed loading item" << endl;
+		continue;
+	}
+	itemCount++;
  }
  boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
  return true;
 }
 
-bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
+BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner)
 {
  if (item.isNull()) {
-	return false;
+	return 0;
  }
  if (!owner) {
-	return false;
+	return 0;
  }
  bool ok = false;
  int rtti = item.attribute(QString::fromLatin1("Rtti")).toInt(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Rtti attribute of Item is not a valid number" << endl;
-	return false;
+	return 0;
  }
 
  unsigned long int type = 0;
@@ -1131,7 +1159,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	// check for deprecated attributes
 	if (!item.hasAttribute(QString::fromLatin1("UnitType"))) {
 		boError(260) << k_funcinfo << "missing attribute: Type for Item tag" << endl;
-		return false;
+		return 0;
 	} else {
 		type = item.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
 	}
@@ -1140,7 +1168,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
  }
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid Type number for Item tag" << endl;
-	return false;
+	return 0;
  }
 
  if (item.hasAttribute(QString::fromLatin1("Group"))) {
@@ -1160,7 +1188,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
  }
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid Group number for Item tag" << endl;
-	return false;
+	return 0;
  }
 
  if (item.hasAttribute(QString::fromLatin1("GroupType"))) {
@@ -1173,19 +1201,19 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
  }
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid GroupType number for Item tag" << endl;
-	return false;
+	return 0;
  }
 
  BoVector3 pos;
  pos.setX(item.attribute("x").toFloat(&ok));
  if (!ok) {
 	boError() << k_funcinfo << "x attribute for Item tag missing or invalid" << endl;
-	return false;
+	return 0;
  }
  pos.setY(item.attribute("y").toFloat(&ok));
  if (!ok) {
 	boError() << k_funcinfo << "y attribute for Item tag missing or invalid" << endl;
-	return false;
+	return 0;
  }
  pos.setZ(item.attribute("z").toFloat(&ok));
  if (!ok) {
@@ -1193,34 +1221,35 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	pos.setZ(0.0f);
  }
 
+
+ unsigned long int id = 0;
+ if (!item.hasAttribute(QString::fromLatin1("Id"))) {
+	boError(260) << k_funcinfo << "missing attribute: Id for Item tag" << endl;
+	return 0;
+ }
+ // AB: "0" indicates that we want boson to assign an Id. the tag must be prsent.
+ id = item.attribute(QString::fromLatin1("Id")).toULong(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
+	return 0;
+ }
+ if (id == 0) {
+	id = nextItemId();
+ }
+
  if (RTTI::isUnit(rtti)) {
-	if (!item.hasAttribute(QString::fromLatin1("Id"))) {
-		boError(260) << k_funcinfo << "missing attribute: Id for Item tag" << endl;
-		return false;
-	}
 	if (!item.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
 		boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Item tag" << endl;
-		return false;
+		return 0;
 	}
-	unsigned long int id = 0;
 	int dataHandlerId = -1;
 
-	// AB: "0" indicates that we want boson to assign an Id. the tag must
-	// always be present.
-	id = item.attribute(QString::fromLatin1("Id")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
-		return false;
-	}
 	if (item.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
 		dataHandlerId = item.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
 		if (!ok) {
 			boError(260) << k_funcinfo << "Invalid DataHandlerId number for Item tag" << endl;
-			return false;
+			return 0;
 		}
-	}
-	if (id == 0) {
-		id = nextItemId();
 	}
 
 	// FIXME: I think we should move addUnit() to bosoncanvas.
@@ -1239,32 +1268,38 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 		u->speciesTheme()->loadNewUnit(u);
 	}
 
-	// Call unit's loading methods
-	if (!u->loadFromXML(item)) {
-		boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
-		// no need to return false
-		// also it is dangerous now, as we already called addUnit()!
-	}
-
-	return true;
+	return (BosonItem*)u;
  } else if (RTTI::isShot(rtti)) {
-	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, ItemType(type, group, groupType), pos);
+	BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, ItemType(type, group, groupType), pos, id);
 	if (!s) {
 		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
-		return false;
+		return 0;
 	}
-	if (!s->loadFromXML(item)) {
-		boWarning(260) << k_funcinfo << "Could not load shot correctly" << endl;
-		delete s;
-		return false;
-	}
-	ok = true;
-	return true;
+	return (BosonItem*)s;
  } else {
 	boError(260) << k_funcinfo << "unknown Rtti " << rtti << endl;
+	return 0;
+ }
+ return 0;
+}
+
+bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
+{
+ if (!item) {
 	return false;
  }
- return false;
+ if (!item->loadFromXML(element)) {
+	boError(260) << k_funcinfo << "Could not load item correctly" << endl;
+	if (RTTI::isUnit(item->rtti())) {
+		// need to remove from player again
+		Player* owner = ((Unit*)item)->owner();
+		if (owner) {
+			owner->unitDestroyed((Unit*)item);
+		}
+	}
+	return false;
+ }
+ return true;
 }
 
 bool BosonCanvas::saveAsXML(QDomElement& root)

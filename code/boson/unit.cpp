@@ -1228,14 +1228,20 @@ void Unit::turnTo(int deg)
  d->mWantedRotation = deg;
 }
 
-QPtrList<BosonParticleSystem>* Unit::particleSystems() const
+const QPtrList<BosonParticleSystem>* Unit::particleSystems() const
 {
  return &(d->mParticleSystems);
 }
 
-void Unit::setParticleSystems(QPtrList<BosonParticleSystem> list)
+void Unit::clearParticleSystems()
+{
+ d->mParticleSystems.clear();
+}
+
+void Unit::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
 {
  d->mParticleSystems = list;
+ canvas()->addParticleSystems(d->mParticleSystems);
 }
 
 void Unit::loadWeapons()
@@ -1396,7 +1402,6 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  ((Boson*)owner->game())->slotUpdateProductionOptions();
 
  setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
- canvas->addParticleSystems(*particleSystems());
 
  setRotation((float)(owner->game()->random()->getLong(359)));
  setMaxSpeed(prop->speed());
@@ -1966,7 +1971,6 @@ void Facility::setConstructionStep(unsigned int step)
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	setAnimationMode(UnitAnimationIdle);
 	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
-	canvas()->addParticleSystems(*particleSystems());
  }
 }
 
@@ -1994,7 +1998,6 @@ bool Facility::loadFromXML(const QDomElement& root)
  // particles in loadFromXML() - then these lines are obsolete.
  if (d->mConstructionStep == constructionSteps()) {
 	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
-	canvas()->addParticleSystems(*particleSystems());
  }
 
  return true;
