@@ -21,10 +21,26 @@
 
 #define BOSON_VERSION_MAJOR 0x00
 #define BOSON_VERSION_MINOR 0x09
-#define BOSON_VERSION_MICRO 0x00
-#define BOSON_VERSION_STRING "0.9"
+#define BOSON_VERSION_MICRO 0x01
+#define BOSON_VERSION_STRING "0.9.1pre"
 
 #define BOSON_VERSION ((BOSON_VERSION_MAJOR << 16) | (BOSON_VERSION_MINOR << 8) | BOSON_VERSION_MICRO)
+
+// savegame versions
+#define BOSON_MAKE_SAVEGAME_FORMAT_VERSION( a,b,c ) ( ((a) << 16) | ((b) << 8) | (c) )
+
+// below we have a collection of "historic" versions, which will _never_ change
+// again. they can be used for file converters.
+
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_8 \
+	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x01, 0x12) )
+
+// version from boson 0.8.128 (development version that got never released)
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_8_128 \
+	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x02, 0x00) )
+
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 \
+	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x02, 0x01) )
 
 #endif
 
