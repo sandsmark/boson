@@ -106,7 +106,7 @@ public:
 
 		mCurrentFile = 0;
 	}
-	BoInfo* data() { return mInfo ? mInfo : BoInfo::boInfo(); }
+	const BoInfo* data() { return mInfo ? mInfo : BoInfo::boInfo(); }
 
 	BoInfo* mInfo;
 

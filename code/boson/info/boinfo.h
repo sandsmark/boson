@@ -251,7 +251,7 @@ public:
 	 * @return A string describing the kde version (@ref KDE::versionString
 	 * as in kdeversion.h)
 	 **/
-	QString kdeVersionString(bool runtime = true)
+	QString kdeVersionString(bool runtime = true) const
 	{
 		return getString(KDEVersionString + (runtime ? 0 : CompileOffset));
 	}
@@ -306,6 +306,12 @@ public:
 	{
 		return getString(OpenGLRendererString);
 	}
+
+	/**
+	 * @return A list of available OpenGL extensions. This <em>could</em> be
+	 * used to do certain tasks only if the extension is available. But if
+	 * we actually want to do that we should cache the list somewhere.
+	 **/
 	QStringList openGLExtensions() const;
 
 	/**
@@ -553,7 +559,7 @@ public:
 	// - texture RAM
 	// - gfx card RAM
 	// - RAM in general
-	// - is GLX module loaded in XFree86Config ?
+	// - is GLX module loaded in XFree86Config ? --> extensions list
 	//   --> same about GLcore and so
 	// 
 protected:
