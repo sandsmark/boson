@@ -62,6 +62,10 @@ public:
   void requestAction(void);
   void updateRess(unitRessMsg_t &);
 
+
+	/** third (and last) communication layer : game */
+	void handleGameMessage(bosonMsgTag, int, bosonMsgData *);
+
 	/** configure the cell at the given point (i,j) */
   	void	setCell(int i, int j, cell_t c);	// not virtual !
 	/** return the cell at (x,y) */
@@ -79,6 +83,10 @@ public:
 	//private :
 	QIntDict<playerMobUnit>	mobile;
 	QIntDict<playerFacility> facility;
+
+signals:
+	void	oilUpdated(int);
+	void	mineralUpdated(int);
 
 private:
 	Cell	*cells;
