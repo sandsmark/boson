@@ -1746,8 +1746,6 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
 // (void)BoUfoStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection);
 // d->mActionMenubar = BoUfoStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection);
 // d->mActionStatusbar = BoUfoStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection);
-
- // Sound & Music
  BoUfoToggleAction* sound = new BoUfoToggleAction(i18n("Soun&d"),
 		KShortcut(), this, SLOT(slotToggleSound()),
 		actionCollection, "options_sound");
@@ -1790,7 +1788,6 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  connect(movie, SIGNAL(signalToggled(bool)),
 		this, SIGNAL(signalSetGrabMovie(bool)));
 
- // Debug
  BoUfoToggleAction* resources = new BoUfoToggleAction(i18n("Show resources"),
 		KShortcut(), 0, 0, actionCollection, "show_resources");
  resources->setChecked(true);
