@@ -71,6 +71,9 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	, state(MUS_NONE)
 {
 	turnTo(random()%DIRECTION_STEPS);
+
+	// CELLS
+	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 }
 
 
@@ -107,24 +110,13 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 
 		case MUS_TURNING:
 		case MUS_MOVING:
-//			printf("position : %d, %d", asked.x(), asked.y());
-//			printf(", dv : %d, %d", dv.x(), dv.y());
 			if (target && boGridDist(dv)<=range) {// near enough the target to shot it
 				state = MUS_NONE;
 				return false;
 			}
-			/* old code 
-			if ( abs(dv.x()) > abs(dv.y()) )
-				if (dv.x()>0)
-					asked += QPoint(1,0);
-				else
-					asked += QPoint(-1,0);
-			else
-				if (dv.y()>0)
-					asked += QPoint(0,1);
-				else
-					asked += QPoint(0,-1);
-			*/
+			//
+			// "Raw" move algorithm
+			//
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
 				local = asked + QPoint( (dv.x()>0)?1:-1, 0); // try first along the x axis
@@ -146,11 +138,10 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			wstate = asked = local;
 			wstate = asked;
 			asked_state = MUS_MOVING;
-//			printf(", asking for : %d, %d\n", asked.x(), asked.y());
 			return true;
 	}
 
-	// should not be reached :
+	// dead code : should not be reached :
 	return false;
 
 /*
@@ -328,7 +319,14 @@ void playerMobUnit::do_moveTo(QPoint npos)
 	boAssert(int(x())%BO_TILE_SIZE==0);
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
+
+	bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+
 	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
+
+	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR&goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+
+	// CELLS
 
 	emit sig_moveTo(npos);
 
@@ -456,6 +454,9 @@ void playerMobUnit::destroy(void)
 playerFacility::playerFacility(facilityMsg_t *msg)
 	: visualFacility(msg)
 {
+	// CELLS 
+	bocanvas->setCellFlag ( gridRect(), Cell::building_f );
+
 }
 
 playerFacility::~playerFacility()
