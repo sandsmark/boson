@@ -63,6 +63,15 @@ draw_bigbox_text("You don't need music package to play Boson, but it's
     <a href=\"http://prdownloads.sourceforge.net/boson/boson-music-0.6.1.tar.bz2?download\">here</a>
     (17 004 KB) or via SF.net's web interface from
     <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=98577\">here</a><br>");
+
+draw_bigbox_subheader("Gentoo");
+draw_bigbox_text("A boson ebuild is available in the standard gentoo portage and is tested
+    against gcc-2.95.3 (gentoo 1.2 and previous) and gcc-3.2 (gentoo 1.4 and following).
+    Please just issue a 
+    <pre> emerge boson <pre>
+    as root on your gentoo box to get boson downloaded, compiled and installed
+    ");
+
 draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by Boson team and are
     inofficial.<br>
