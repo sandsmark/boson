@@ -163,6 +163,8 @@ void BoEditorApp::do_open(QString name)
 	if (!ecanvas->Load(filename)) {
 		// it failed : turning back to nothing
 		logf(LOG_ERROR, "haven't been abled to open %s", name.latin1() );
+		QString msg = i18n("Can't open the file %1").arg(name);
+		KMessageBox::sorry(0, msg, i18n("Can't open file") );
 		filename = QString::null;
 		return;
 	}
