@@ -66,10 +66,14 @@ public:
 	 * Load tiles from dir. This creates a pixmap which can be used as a
 	 * ground in boson from a lot of small pixmaps (tiles).
 	 *
-	 * Don't use this if youre actualle playing boson but just to create
+	 * Don't use this if youre actually playing boson but just to create
 	 * the pixmap.
+	 * @param dir The directory where all the small tiles are for the
+	 * pixmap. See data/themes/grounds/README
+	 * @param debug Generate a normal pixmap if FALSE or one with a frame
+	 * around every tile if TRUE
 	 **/
-	bool loadTiles(const QString& dir);
+	bool loadTiles(const QString& dir, bool debug = false);
 
 	/**
 	 * Save a pixmap created using @ref loadTiles.
@@ -85,6 +89,7 @@ protected:
 
 	bool loadGround(int j, const QString& path);
 	bool loadTransition(const QString& dir, int gt);
+
 	void putOne(int z, QImage& p, int xoffset = 0, int yoffset = 0);
 
 	/**
@@ -98,6 +103,8 @@ protected:
 	
 private:
 	QImage* mTilesImage; // only used by loadTiles()
+
+	bool mDebug; // used in putOne()
 };
 
 #endif

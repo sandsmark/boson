@@ -54,6 +54,7 @@ protected:
 	 **/
 	void readProperties(KConfig *);
 
+	void createTiles(bool debug);
 
 private slots:
 	void slotFileNew();
@@ -62,6 +63,7 @@ private slots:
 	void slotSaveScenarioAs();
 	void slotCreateUnit();
 	void slotCreateTiles();
+	void slotCreateDebugTiles();
 
 	void slotConfigureKeys();
 

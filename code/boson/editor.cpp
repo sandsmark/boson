@@ -264,6 +264,14 @@ void Editor::initKAction()
 		  SLOT(slotCreateTiles()), actionCollection(),
 		  "editor_create_tiles");
 
+#if HAVE_KSHORTCUT
+ (void)new KAction(i18n("&Generate Custom Tiles Ground (Debug mode)"), KShortcut(), this,
+#else
+ (void)new KAction(i18n("&Generate Custom Tiles Ground (Debug mode)"), QKeySequence(), this,
+#endif
+		  SLOT(slotCreateDebugTiles()), actionCollection(),
+		  "editor_create_debug_tiles");
+
  KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
  KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
@@ -382,6 +390,16 @@ void Editor::slotCreateUnit()
 
 void Editor::slotCreateTiles()
 {
+ createTiles(false);
+}
+
+void Editor::slotCreateDebugTiles()
+{
+ createTiles(true);
+}
+
+void Editor::createTiles(bool debug)
+{
  QString dir = KFileDialog::getExistingDirectory();
  if (dir.isNull()) {
 	return;
@@ -390,7 +408,7 @@ void Editor::slotCreateTiles()
  if (dir.right(1) != QString::fromLatin1("/")) {
 	dir += QString::fromLatin1("/");
  }
- if (!newTiles.loadTiles(dir)) {
+ if (!newTiles.loadTiles(dir, debug)) {
 	kdError() << "Could not load tiles from " << dir << endl;
 	KMessageBox::sorry(this, i18n("Error loading tiles from %1").arg(dir));
 	return;
