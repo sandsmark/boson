@@ -47,7 +47,7 @@ draw_bigbox_text("Here you will find some (hopefully) useful links<br><br>");
 draw_bigbox_subheader("Misc");
 draw_bigbox_text("
   <a href=\"http://sf.net/projects/boson/\" target=\"_blank\">Boson at SourceForge</a> Boson uses SourceForge.net's services<br>
-  <a href=\"http://boson.halux2001.de/handbook/en\" target=\"_blank\">The Boson handbook</a>Generated from cvs<br>
+  <a href=\"http://boson.halux2001.de/handbook/en\" target=\"_blank\"> The Boson handbook</a><br>
   <a href=\"http://www.kde.org/\" target=\"_blank\">KDE homepage</a> Boson uses KDE<br>
   <a href=\"http://www.trolltech.com\" target=\"_blank\">Trolltech (creators of QT)</a> Boson also uses Qt<br>
   <a href=\"http://www.freehackers.org/about/content.html\" target=\"_blank\">freehackers.org</a> Other free software<br>
