@@ -232,6 +232,7 @@ void Unit::setTarget(Unit* target)
 			d->mActiveWeapon = it.current();
 			return;
 		}
+		++it;
 	}
  }
  kdDebug() << k_funcinfo << "No weapon found, setting active weapon to NULL" << endl;
