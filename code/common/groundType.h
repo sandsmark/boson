@@ -80,15 +80,22 @@ enum transition_t {
 #define SMALL_TILES_PER_TRANSITION	12
 #define BIG_TILES_PER_TRANSITION	16
 #define TILES_PER_TRANSITION		(SMALL_TILES_PER_TRANSITION+4*BIG_TILES_PER_TRANSITION)
+// number of different QPixmap use for ground
 #define NB_GROUND_TILES			(GROUND_LAST + TRANS_LAST * TILES_PER_TRANSITION)
 
+
+// conversion ref/tiles -> number
 #define GET_TRANS_NUMBER(transRef,transTile)	\
 	( (groundType)  ( GROUND_LAST + (TILES_PER_TRANSITION*(transRef)) + (transTile) ))
 #define GET_BIG_TRANS_NUMBER(transRef,transTile) \
 	GET_TRANS_NUMBER(transRef, SMALL_TILES_PER_TRANSITION + 4*(transTile))
 
+// conversion number -> ref/tiles
+// only valid if g is really a transition 
 #define GET_TRANS_REF(g)	(((g)-GROUND_LAST) / TILES_PER_TRANSITION )
 #define GET_TRANS_TILE(g)	(((g)-GROUND_LAST) % TILES_PER_TRANSITION )
+
+// self-explaining names
 #define IS_TRANS(g)		( (g) >= GROUND_LAST && (g)< NB_GROUND_TILES )
 #define IS_SMALL_TRANS(g)	( IS_TRANS((g)) && (GET_TRANS_TILE(g) <  SMALL_TILES_PER_TRANSITION))
 #define IS_BIG_TRANS(g)		( IS_TRANS((g)) && (GET_TRANS_TILE(g) >= SMALL_TILES_PER_TRANSITION))
@@ -101,6 +108,7 @@ enum transition_t {
 
 	//
 	//  cell_t needs to be a scalar type cause QCanvas uses a 'int'
+	//  so we can't use a class..
 	//
 #ifndef byte
 typedef unsigned char byte;
