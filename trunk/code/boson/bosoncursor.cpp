@@ -373,7 +373,7 @@ BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QStr
 
  if (images.count() > 0) {
 	BosonSpriteCursorData* data = new BosonSpriteCursorData;
-	data->mArray = new BosonTextureArray(images);
+	data->mArray = new BosonTextureArray(images, false);
 	data->mHotspotX = hotspotX;
 	data->mHotspotY = hotspotY;
 	return data;
