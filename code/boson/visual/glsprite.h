@@ -33,8 +33,6 @@ public:
 	GLSprite(BosonModel* mode, BosonCanvas*);
 	virtual ~GLSprite();
 
-	virtual void setCanvas(BosonCanvas*);
-
 	BosonCanvas* canvas() const { return mCanvas; }
 
 	/**
@@ -45,10 +43,6 @@ public:
 	inline float x() const { return mX; }
 	inline float y() const { return mY; }
 	inline float z() const { return mZ; }
-
-	inline void setX(float x) { mX = x; }
-	inline void setY(float y) { mY = y; }
-	inline void setZ(float z) { mZ = z; }
 
 	inline BosonModel* model() const { return mModel; }
 
@@ -76,7 +70,7 @@ public:
 
 	void setGLConstructionStep(unsigned int step);
 
-	void setDisplayList(GLuint l) 
+	inline void setDisplayList(GLuint l)
 	{
 		mDisplayList = l;
 	}
@@ -90,11 +84,10 @@ public:
 	QRect boundingRectAdvanced() const;
 
 
-	virtual void setAnimated(bool a) = 0;
-	
-	void move(float x, float y) { move(x, y, z()); }
-	void move(float nx, float ny, float nz) { moveBy(nx - x(), ny - y(), nz - z()); }
-	void moveBy(float dx, float dy) { moveBy(dx, dy, 0.0); }
+	inline void move(float nx, float ny, float nz)
+	{
+		moveBy(nx - x(), ny - y(), nz - z());
+	}
 	virtual void moveBy(float dx, float dy, float dz)
 	{
 		// in Unit we MUST add a addToCells() / removeFromCells() !!
@@ -104,7 +97,8 @@ public:
 			setZ(z() + dz);
 		}
 	}
-	void move(float x, float y, float z, int _frame)
+
+	void setFrame(int _frame)
 	{
 		if (mGLConstructionStep < model()->constructionSteps()) {
 			// this unit (?) has not yet been constructed
@@ -113,7 +107,6 @@ public:
 			// from Unit::constructionStep() !
 			_frame = frame();
 		}
-		move(x, y, z);
 
 		// FIXME: this if is pretty much nonsense, since e.g. frame()
 		// might be 0 and _frame, too - but the frame still changed,
@@ -128,15 +121,8 @@ public:
 			}
 		}
 	}
-
 	inline int frame() const { return mFrame; }
-	void setFrame(int frame) { move(x(), y(), z(), frame); }
 	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
-	inline void setCurrentFrame(BoFrame* frame)
-	{
-		setDisplayList(frame->displayList());
-		setGLDepthMultiplier(frame->depthMultiplier());
-	}
 
 	inline float xVelocity() const { return mXVelocity; }
 	inline float yVelocity() const { return mYVelocity; }
@@ -170,6 +156,17 @@ public:
 	inline float rotation() const { return mRotation; }
 
 	inline void setRotation(float r) { mRotation = r; }
+
+private:
+	inline void setX(float x) { mX = x; }
+	inline void setY(float y) { mY = y; }
+	inline void setZ(float z) { mZ = z; }
+
+	inline void setCurrentFrame(BoFrame* frame)
+	{
+		setDisplayList(frame->displayList());
+		setGLDepthMultiplier(frame->depthMultiplier());
+	}
 
 private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use

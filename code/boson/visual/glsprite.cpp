@@ -69,11 +69,6 @@ QRect GLSprite::boundingRectAdvanced() const
 		(int)(height() + yVelocity()));
 }
 
-void GLSprite::setCanvas(BosonCanvas* c)
-{
- mCanvas = c;
-}
-
 void GLSprite::setWidth(int w)
 {
  mWidth = w;

@@ -114,7 +114,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  if (isFlying()) {
 	// FIXME i guess we can store z-position as opengl coordinates
 	// instead...
-	setZ(2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE); // FIXME - hardcoded
+	moveBy(0.0, 0.0, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE); // FIXME - hardcoded
  }
 
 // create the plugins
@@ -199,7 +199,8 @@ void Unit::setHealth(unsigned long int h)
  updateSelectBox();
  if (isDestroyed()) {
 	unselect();
-	setFrame(frameCount() - 1);
+#warning FIXME
+	setFrame(frameCount() - 1); // FIXME: this is not true anymore! we need some kind of special frame for a destroyed unit!
 	setAnimated(false);
  }
 }

@@ -221,7 +221,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 	return;
  }
 
- unit->move(x, y);
+ unit->move(x, y, unit->z());
 // unit->show();
 }
 
