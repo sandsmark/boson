@@ -28,6 +28,7 @@
 #include "bofile.h"
 #include "player.h"
 #include "bodebug.h"
+#include "bosonfileconverter.h"
 
 // FIXME do not include
 #include <startupwidgets/bosonloadingwidget.h>
@@ -43,8 +44,8 @@
 
 // Saving format version
 #define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
-#define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x01
-#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x12
+#define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x02
+#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x00
 #define BOSON_SAVEGAME_FORMAT_VERSION \
 	BOSON_MAKE_SAVEGAME_FORMAT_VERSION \
 		( \
@@ -471,7 +472,16 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
 
  if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
 	boDebug(260) << "trying to load a savegame from boson 0.8" << endl;
-	return false;
+	BosonFileConverter converter;
+	QValueList<QByteArray> list = fileList;
+	bool ok = converter.convertSaveGame_From_0_8_To_0_9(list);
+	if (!ok) {
+		boError(260) << "File converting failed. cannot load this file." << endl;
+		addLoadError(SaveLoadError::InvalidFileFormat, i18n("Failed converting savegame from boson 0.8. Unable to load this file."));
+		d->mLoadingStatus = InvalidFileFormat;
+		return false;
+	}
+	return loadFromFile(list);
  }
  if (version != latestSavegameVersion()) {
 	boError(260) << k_funcinfo << "version " << version << " could not be converted to current savegame format." << endl;
@@ -537,6 +547,7 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
 	return false;
  }
 
+ // we may need to fix these issues:
  // KGame::loadgame() also loads KGame::d->mUniquePlayerNumber !!
  // KGame::loadgame() also loads a seed for KGame::random() (not so important)
 
@@ -565,52 +576,7 @@ bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
 
  boDebug(260) << k_funcinfo << "loading units" << endl;
 
- // construct a list of all players first
- // WARNING: HACK!
- // we are assuming that the players in the playerList() are inserted in exactly
- // the same order as they appear in the XML file.
- // we can assume so, as this code was splitted from loadPlayersXML().
- // we will soon move units to canvas.xml, so this hack will be removed soon.
- QMap<Player*, QDomElement> player2Element;
- QDomDocument doc(QString::fromLatin1("Boson"));
- if (!loadXMLDoc(&doc, playersXML)) {
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("parsing error while reading players.xml"));
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomElement root = doc.documentElement();
- QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Player"));
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement player = list.item(i).toElement();
-	if (player.isNull()) {
-		boError(260) << k_funcinfo << "NULL player node" << endl;
-		continue;
-	}
-	KPlayer* kp = d->mBoson->playerList()->first();
-	for (unsigned int j = 0; kp != 0 && j != i; j++) {
-		kp = d->mBoson->playerList()->next();
-	}
-	Player* p = (Player*)kp;
-	if (!p) {
-		boError(260) << k_funcinfo << "Oops - NULL player found for XML element" << endl;
-		continue;
-	}
-	player2Element.insert(p, player);
- }
-
-
- QMap<Player*, QDomElement>::Iterator it;
- for (it = player2Element.begin(); it != player2Element.end(); ++it) {
-	Player* p = it.key();
-	if (!p->speciesTheme()) {
-		boError() << k_funcinfo << "NULL speciesTheme" << endl;
-		continue;
-	}
-	QDomElement e = it.data();
-	p->loadUnitsFromXML(e);
- }
-
- // Load canvas (shots)
+ // Load canvas (items - i.e. units and shots)
  if (!loadCanvasFromXML(canvasXML)) {
 	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
 	return false;

@@ -52,7 +52,8 @@ public:
 		LoadBSGFileError = 2,
 		LoadInvalidXML = 3,
 		LoadPlayersError = 4,
-		LoadInvalidVersion = 5
+		LoadInvalidVersion = 5,
+		InvalidFileFormat = 6
 	};
 
 	/**

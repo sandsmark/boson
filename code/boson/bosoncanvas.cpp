@@ -1069,47 +1069,119 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 
- // Load shots
- QDomElement shots = root.namedItem(QString::fromLatin1("Shots")).toElement();
- if (shots.isNull()) {
-	boWarning(260) << k_funcinfo << "no shots " << endl;
-	return true;
- }
- QDomNodeList list = shots.elementsByTagName(QString::fromLatin1("Shot"));
- if (list.count() == 0) {
-	// It's ok to have no shots
-	return true;
- }
 
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Items"));
  for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	if (e.isNull()) {
-		boError(260) << k_funcinfo << i << " is not an element" << endl;
-		return false;
-	}
-	bool ok = loadShotFromXML(e);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Shot " << i << " was not loaded correctly" << endl;
+	QDomElement items = list.item(i).toElement();
+	if (items.isNull()) {
+		boError(260) << k_funcinfo << "Items tag is not an element" << endl;
 		continue;
+	}
+	bool ok = false;
+	unsigned int ownerId = items.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "OwnerId of Items Tag " << i << " is not a valid number" << endl;
+		continue;
+	}
+	Player* owner = (Player*)boGame->findPlayer(ownerId);
+	if (!owner) {
+		boError(260) << k_funcinfo << "player with Id=" << ownerId << " can not be found" << endl;
+		continue;
+	}
+
+	// FIXME: the target must be loaded after _all_ units are loaded
+	QDomNodeList unitList = items.elementsByTagName(QString::fromLatin1("Unit"));
+	for (unsigned int j = 0; j < unitList.count(); j++) {
+		QDomElement unit = unitList.item(j).toElement();
+		if (unit.isNull()) {
+			continue;
+		}
+		bool ok = loadUnitFromXML(unit, owner);
+		if (!ok) {
+			boError(260) << k_funcinfo << "Unit " << j << " was not loaded correctly" << endl;
+			continue;
+		}
+	}
+
+	QDomNodeList shotList = items.elementsByTagName(QString::fromLatin1("Shot"));
+	for (unsigned int j = 0; j < shotList.count(); j++) {
+		QDomElement shot = shotList.item(j).toElement();
+		if (shot.isNull()) {
+			continue;
+		}
+		bool ok = loadShotFromXML(shot, owner);
+		if (!ok) {
+			boError(260) << k_funcinfo << "Shot " << j << " was not loaded correctly" << endl;
+			continue;
+		}
 	}
  }
  return true;
 }
 
-bool BosonCanvas::loadUnitFromXML(const QDomElement& unit)
+bool BosonCanvas::loadUnitFromXML(const QDomElement& unit, Player* owner)
 {
  if (unit.isNull()) {
 	return false;
  }
+ if (!owner) {
+	return false;
+ }
+ if (!unit.hasAttribute(QString::fromLatin1("UnitType"))) {
+	boError(260) << k_funcinfo << "missing attribute: UnitType for Unit tag" << endl;
+	return false;
+ }
+ if (!unit.hasAttribute(QString::fromLatin1("Id"))) {
+	boError(260) << k_funcinfo << "missing attribute: Id for Unit tag" << endl;
+	return false;
+ }
+ if (!unit.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
+	boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Unit tag" << endl;
+	return false;
+ }
+ bool ok = false;
+ unsigned long int type;
+ unsigned long int id;
+ int dataHandlerId;
+ type = unit.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid UnitType number for Unit tag" << endl;
+	return false;
+ }
+ id = unit.attribute(QString::fromLatin1("Id")).toULong(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid Id number for Unit tag" << endl;
+	return false;
+ }
+ dataHandlerId = unit.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid DataHandlerId number for Unit tag" << endl;
+	return false;
+ }
+
+ // Create unit with Boson
+ Unit* u = boGame->loadUnit(type, owner);
+
+ // Set additional properties
+ owner->addUnit(u, dataHandlerId);
+ u->setId(id);
+
+ // Call unit's loading methods
+ if (!u->loadFromXML(unit)) {
+	boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
+	// no need to return false
+	// also it is dangerous now, as we already called addUnit()!
+ }
+
  return true;
 }
-bool BosonCanvas::loadShotFromXML(const QDomElement& shot)
+
+bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
 {
  if (shot.isNull()) {
 	return false;
  }
- if (!shot.hasAttribute(QString::fromLatin1("Owner"))) {
-	boError(260) << k_funcinfo << "missing attribute: Owner for Shot tag" << endl;
+ if (!owner) {
 	return false;
  }
  if (!shot.hasAttribute(QString::fromLatin1("Type"))) {
@@ -1118,12 +1190,7 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot)
  }
 
  bool ok = false;
- unsigned long int type, unitid, weaponid, ownerid;
- ownerid = shot.attribute(QString::fromLatin1("Owner")).toULong(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "Invalid Owner number for Shot tag" << endl;
-	return false;
- }
+ unsigned long int type, unitid, weaponid;
  type = shot.attribute(QString::fromLatin1("Type")).toULong(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid Type number for Shot tag" << endl;
@@ -1131,12 +1198,6 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot)
  }
 
  const BosonWeaponProperties* weapon = 0;
- Player* owner = (Player*)(boGame->findPlayer(ownerid));
- if (!owner) {
-	boError() << k_funcinfo << "No player with id " << ownerid << endl;
-	return false;
- }
-
  if (type == BosonShot::Bullet || type == BosonShot::Missile) {
 	// Bullet and missile always have properties, others don't
 	if (!shot.hasAttribute(QString::fromLatin1("UnitType"))) {
@@ -1160,7 +1221,7 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot)
 
 	SpeciesTheme* theme = owner->speciesTheme();
 	if (!theme) {
-		boError() << k_funcinfo << "No theme for player " << ownerid << endl;
+		boError() << k_funcinfo << "No theme for player " << owner->id() << endl;
 		return false;
 	}
 	const UnitProperties* prop = theme->unitProperties(unitid);
@@ -1203,26 +1264,58 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
 
- // Save shots
  QDomDocument doc = root.ownerDocument();
- QDomElement shots = doc.createElement(QString::fromLatin1("Shots"));
- BosonShot* s;
+ QMap<unsigned int, QDomElement> owner2Items;
+ for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
+	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
+	items.setAttribute(QString::fromLatin1("OwnerId"), p->id());
+	root.appendChild(items);
+	owner2Items.insert(p->id(), items);
+ }
+
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	QDomElement items;
 	if (RTTI::isShot(i->rtti())) {
-		s = (BosonShot*)i;
-		if (!s->isActive()) {
+		BosonShot* s = (BosonShot*)i;
+		if (!s->owner()) {
+			BO_NULL_ERROR(s->owner());
+			continue;
+		}
+		unsigned int id = s->owner()->id();
+		items = owner2Items[id];
+	} else if (RTTI::isUnit(i->rtti())) {
+		Unit* u = (Unit*)i;
+		if (!u->owner()) {
+			BO_NULL_ERROR(u->owner());
+			continue;
+		}
+		unsigned int id = u->owner()->id();
+		items = owner2Items[id];
+	}
+	if (items.isNull()) {
+		boError() << k_funcinfo << "no Items element found" << endl;
+		continue;
+	}
+	if (RTTI::isShot(i->rtti())) {
+		if (!((BosonShot*)i)->isActive()) {
 			continue;
 		}
 		QDomElement shot = doc.createElement(QString::fromLatin1("Shot"));
-		if (!s->saveAsXML(shot)) {
-			boError() << k_funcinfo << "Could not save shot " << s << endl;
+		if (!i->saveAsXML(shot)) {
+			boError() << k_funcinfo << "Could not save shot " << i << endl;
 			continue;
 		}
-		shot.setAttribute("Owner", (unsigned int)s->owner()->id());
-		shots.appendChild(shot);
+		items.appendChild(shot);
+	} else if (RTTI::isUnit(i->rtti())) {
+		Unit* u = (Unit*)i;
+		QDomElement unit = doc.createElement(QString::fromLatin1("Unit"));
+		if (!i->saveAsXML(unit)) {
+			boError() << k_funcinfo << "Could not save unit " << u->id() << endl;
+			continue;
+		}
+		items.appendChild(unit);
 	}
  }
- root.appendChild(shots);
  return true;
 }
 
