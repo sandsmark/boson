@@ -65,7 +65,7 @@ class BoVector3
      **/
     inline void set(GLfloat x, GLfloat y, GLfloat z)
     {
-      mData[0] = x;  mData[1] = y;  mData[2] = z; 
+      mData[0] = x;  mData[1] = y;  mData[2] = z;
     }
     /**
      * @overload
@@ -1349,6 +1349,16 @@ class Bo3dTools
      * @p error, or an empty string if there is no error.
      **/
     static bool checkError(GLenum* error = 0, QString* errorString = 0, QString* errorName = 0);
+
+    /**
+     * @return OpenGL blending function given in QString.
+     * str can be one of "GL_SRC_APLHA", "GL_ONE_MINUS_SRC_ALPHA", "GL_ONE",
+     *  "GL_ZERO", "GL_DST_COLOR", "GL_ONE_MINUS_DST_COLOR", "GL_DST_APLHA",
+     *  "GL_ONE_MINUS_DST_ALPHA", "GL_SRC_ALPHA_SATURATE", "GL_SRC_COLOR",
+     *  "GL_ONE_MINUS_SRC_COLOR". If str is not one of these, GL_INVALID_ENUM
+     *  is returned
+     **/
+    static GLenum string2GLBlendFunc(const QString& str);
 };
 
 
