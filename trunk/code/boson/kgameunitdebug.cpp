@@ -244,7 +244,7 @@ void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
  item->setText(d->mWidth, QString::number(unit->width()));
  item->setText(d->mHeight, QString::number(unit->height()));
 
- BoRect r = unit->boundingRect();
+ BoRectFixed r = unit->boundingRect();
  item->setText(d->mBoundingRect, QString("%1,%2,%3,%4").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()));
 }
 
@@ -287,7 +287,7 @@ void KGameUnitDebug::updateWaypoints(QListViewItem* item)
 	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
- QValueList<BoVector2> points = unit->waypointList();
+ QValueList<BoVector2Fixed> points = unit->waypointList();
  for (unsigned int i = 0; i < points.count(); i++) {
 	(void)new QListBoxText(d->mWaypoints, i18n("x=%1 y=%2").arg(points[i].x()).arg(points[i].y()));
  }

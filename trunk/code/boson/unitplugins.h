@@ -36,8 +36,11 @@ class Player;
 class PluginProperties;
 class Boson;
 class BosonItem;
-class BoVector2;
 class BosonWeapon;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 
 class QDomElement;
 
@@ -369,7 +372,7 @@ public:
 
 	virtual int pluginType() const { return Bombing; }
 
-	void bomb(int weaponId, BoVector2 pos);
+	void bomb(int weaponId, BoVector2Fixed pos);
 
 	virtual void advance(unsigned int);
 

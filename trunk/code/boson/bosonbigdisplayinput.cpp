@@ -343,7 +343,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
- if (!canvas()->canPlaceUnitAt(prop, BoVector2(canvasVector.x(), canvasVector.y()), production)) {
+ if (!canvas()->canPlaceUnitAt(prop, BoVector2Fixed(canvasVector.x(), canvasVector.y()), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
@@ -535,7 +535,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
  // note: this applies to mobiles as well as for facilities!
  // (mobiles are usually auto placed, but manual placement might get used if
  // auto-placement failed)
- bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos(), pp));
+ bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, BoVector2Fixed(cursorCanvasPos().x(), cursorCanvasPos().y()), pp));
 
 }
 

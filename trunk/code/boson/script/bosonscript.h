@@ -26,7 +26,11 @@ class Boson;
 class BosonCanvas;
 class Boson;
 class BoVector4;
-class BoVector2;
+class bofixed;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 
 class QString;
 class QDataStream;
@@ -148,14 +152,14 @@ class BosonScript
      * At most radius tiles are searched.
      * If n is 0, all visible mineral mines in given are returned.
      **/
-    static QValueList<BoVector2> nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
+    static QValueList<BoVector2Fixed> nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
     /**
      * Finds n nearest oil locations to point (x, y), that are visible to
      * player with id playerId.
      * At most radius tiles are searched.
      * If n is 0, all visible oil mines in given are returned.
      **/
-    static QValueList<BoVector2> nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
+    static QValueList<BoVector2Fixed> nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
 
 
     // Units
@@ -220,7 +224,7 @@ class BosonScript
     /**
      * @return Position of unit with id id
      **/
-    static BoVector2 unitPosition(int id);
+    static BoVector2Fixed unitPosition(int id);
     /**
      * @return Id of the owner of unit with id id
      **/

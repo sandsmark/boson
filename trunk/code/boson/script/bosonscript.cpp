@@ -235,12 +235,12 @@ void BosonScript::addOil(int playerId, int amount)
   game()->sendMessage(b, BosonMessage::IdModifyOil);
 }
 
-QValueList<BoVector2> BosonScript::nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+QValueList<BoVector2Fixed> BosonScript::nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
-    return QValueList<BoVector2>();
+    return QValueList<BoVector2Fixed>();
   }
 
   Player* p = (Player*)(game()->findPlayer(playerId));
@@ -248,18 +248,18 @@ QValueList<BoVector2> BosonScript::nearestMineralLocations(int playerId, int x, 
   if(!p)
   {
     boError() << k_funcinfo << "No player with id " << playerId << endl;
-    return QValueList<BoVector2>();
+    return QValueList<BoVector2Fixed>();
   }
 
   return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Minerals);
 }
 
-QValueList<BoVector2> BosonScript::nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+QValueList<BoVector2Fixed> BosonScript::nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
-    return QValueList<BoVector2>();
+    return QValueList<BoVector2Fixed>();
   }
 
   Player* p = (Player*)(game()->findPlayer(playerId));
@@ -267,7 +267,7 @@ QValueList<BoVector2> BosonScript::nearestOilLocations(int playerId, int x, int 
   if(!p)
   {
     boError() << k_funcinfo << "No player with id " << playerId << endl;
-    return QValueList<BoVector2>();
+    return QValueList<BoVector2Fixed>();
   }
 
   return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Oil);
@@ -285,7 +285,7 @@ void BosonScript::moveUnit(int player, int id, float x, float y)
   // We want to move without attacking
   stream << (Q_UINT8)0;
   // tell them where to move to:
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units:
   stream << (Q_UINT32)1;
   // Unit id
@@ -305,7 +305,7 @@ void BosonScript::moveUnitWithAttacking(int player, int id, float x, float y)
   // We want to move with attacking
   stream << (Q_UINT8)1;
   // tell them where to move to:
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units:
   stream << (Q_UINT32)1;
   // Unit id
@@ -399,7 +399,7 @@ void BosonScript::dropBomb(int player, int id, int weapon, float x, float y)
 
   stream << (Q_UINT32)BosonMessage::MoveDropBomb;
   // tell place
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units attack:
   stream << (Q_UINT32)1;
   stream << (Q_UINT32)id;
@@ -437,7 +437,7 @@ void BosonScript::spawnUnit(int player, int type, float x, float y)
   stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)type;
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -456,7 +456,7 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   stream << (Q_UINT32)BosonMessage::MoveTeleport;
   stream << (Q_UINT32)player;
   stream << (Q_UINT32)id;
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(player, msg);
@@ -491,7 +491,7 @@ QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2)
     return list;
   }
   BosonCollisions* c = canvas()->collisions();
-  BoItemList* l = c->collisionsAtCells(BoRect(BoVector2(x1, y1), BoVector2(x2, y2)));
+  BoItemList* l = c->collisionsAtCells(BoRectFixed(BoVector2Fixed(x1, y1), BoVector2Fixed(x2, y2)));
   for(BoItemList::Iterator it = l->begin(); it != l->end(); ++it)
   {
     if(RTTI::isUnit((*it)->rtti()))
@@ -512,22 +512,22 @@ bool BosonScript::cellOccupied(int x, int y)
   return canvas()->cellOccupied(x, y);
 }
 
-BoVector2 BosonScript::unitPosition(int id)
+BoVector2Fixed BosonScript::unitPosition(int id)
 {
   if(!game())
   {
     boError() << k_funcinfo << "NULL game" << endl;
-    return BoVector2(-1, -1);
+    return BoVector2Fixed(-1, -1);
   }
 
   Unit* u = game()->findUnit(id, 0);
   if(!u)
   {
     boError() << k_funcinfo << "No unit with id" << id << endl;
-    return BoVector2(-1, -1);
+    return BoVector2Fixed(-1, -1);
   }
 
-  return BoVector2(u->x(), u->y());
+  return BoVector2Fixed(u->x(), u->y());
 }
 
 int BosonScript::unitOwner(int id)
@@ -1133,8 +1133,8 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
 #ifdef PATHFINDER_TNG
  boDebug() << k_funcinfo << "Trying searching script path" << endl;
  BosonPathInfo i;
- i.start = BoVector2(x1, y1);
- i.dest = BoVector2(x2, y2);
+ i.start = BoVector2Fixed(x1, y1);
+ i.dest = BoVector2Fixed(x2, y2);
  boDebug() << k_funcinfo << "Let's go!" << endl;
  canvas()->pathfinder()->findPath(&i);
  boDebug() << k_funcinfo << "script path searching complete" << endl;

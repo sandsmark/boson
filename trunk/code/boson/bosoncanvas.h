@@ -164,7 +164,7 @@ public:
 	 * the ground <em>not</em> for collisions with other units. See @ref Unit for
 	 * this.
 	 **/
-	bool canGo(const UnitProperties* prop, const BoRect& rect) const;
+	bool canGo(const UnitProperties* prop, const BoRectFixed& rect) const;
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
@@ -359,14 +359,14 @@ public:
 	 * mobile units in BUILD_RANGE of the facility.
 	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
 	 **/
-	bool canPlaceUnitAt(const UnitProperties* unit, const BoVector2& pos, ProductionPlugin* factory) const;
+	bool canPlaceUnitAt(const UnitProperties* unit, const BoVector2Fixed& pos, ProductionPlugin* factory) const;
 
 	void quitGame();
 
 	void addToCells(BosonItem* u);
 	void removeFromCells(BosonItem* u);
 
-	bool onCanvas(const BoVector2& pos) const;
+	bool onCanvas(const BoVector2Fixed& pos) const;
 	bool onCanvas(const BoVector3& pos) const;
 	bool onCanvas(bofixed x, bofixed y) const
 	{

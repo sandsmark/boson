@@ -482,12 +482,12 @@ PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<BoVector2> locations = BosonScript::nearestMineralLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = BosonScript::nearestMineralLocations(player, x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
   int i = 0;
-  QValueList<BoVector2>::Iterator it;
+  QValueList<BoVector2Fixed>::Iterator it;
   for(it = locations.begin(); it != locations.end(); ++it)
   {
     // We use tuples for positions
@@ -509,12 +509,12 @@ PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
     return 0;
   }
 
-  QValueList<BoVector2> locations = BosonScript::nearestOilLocations(player, x, y, n, radius);
+  QValueList<BoVector2Fixed> locations = BosonScript::nearestOilLocations(player, x, y, n, radius);
 
   PyObject* pylist = PyList_New(locations.count());
 
   int i = 0;
-  QValueList<BoVector2>::Iterator it;
+  QValueList<BoVector2Fixed>::Iterator it;
   for(it = locations.begin(); it != locations.end(); ++it)
   {
     // We use tuples for positions
@@ -724,7 +724,7 @@ PyObject* PythonScript::py_unitPosition(PyObject*, PyObject* args)
     return 0;
   }
 
-  BoVector2 pos = BosonScript::unitPosition(id);
+  BoVector2Fixed pos = BosonScript::unitPosition(id);
 
   return Py_BuildValue((char*)"(ff)", (float)pos.x(), (float)pos.y());
 }

@@ -37,8 +37,8 @@ class BosonItemPropertyHandler;
 class Player;
 class BoVector3;
 class BosonItemRenderer;
-class BoVector2;
-class BoRect;
+template<class T> class BoVector2;
+template<class T> class BoRect;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -243,10 +243,10 @@ public:
 
 	inline bofixed centerX() const { return x() + width() / 2; };
 	inline bofixed centerY() const { return y() + height() / 2; };
-	BoVector2 center() const;
+	BoVector2<bofixed> center() const;
 
-	BoRect boundingRect() const;
-	BoRect boundingRectAdvanced() const;
+	BoRect<bofixed> boundingRect() const;
+	BoRect<bofixed> boundingRectAdvanced() const;
 
 	/**
 	 * Move the item to @p nx, @p ny, @p nz. Note that it is moved without
@@ -391,7 +391,7 @@ public:
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
 	 **/
-	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect& rect, int mapWidth, int mapHeight);
+	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRect<bofixed>& rect, int mapWidth, int mapHeight);
 
 	/**
 	 * @return Whether this unit collides with given unit.

@@ -279,12 +279,12 @@ void ProductionPlugin::advance(unsigned int)
 					currentx++;
 				}
 
-				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2(currentx, currenty), this)) {
+				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), BoVector2Fixed(currentx, currenty), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
 					//depend on Facility! should be Unit
-					((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2(currentx, currenty));
+					((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2Fixed(currentx, currenty));
 					return;
 				}
 			}
@@ -386,7 +386,7 @@ void RepairPlugin::repair(Unit* u)
 		u->setWork(Unit::WorkNone);
 	} else {
 		u->setWork(Unit::WorkMove);
-		u->addWaypoint(BoVector2(unit()->x(), unit()->y()));
+		u->addWaypoint(BoVector2Fixed(unit()->x(), unit()->y()));
 	}
  } else {
 	if (!unit()->moveTo(u->x(), u->y(), 1)) {
@@ -394,7 +394,7 @@ void RepairPlugin::repair(Unit* u)
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
-		unit()->addWaypoint(BoVector2(u->x(), u->y()));
+		unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	}
  }
 }
@@ -647,7 +647,7 @@ void HarvesterPlugin::advanceMine()
 		unit()->setWork(Unit::WorkNone);
 		return;
 	}
-	unit()->addWaypoint(BoVector2(u->x(), u->y()));
+	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -715,7 +715,7 @@ void HarvesterPlugin::advanceRefine()
 		unit()->setWork(Unit::WorkNone);
 		return;
 	}
-	unit()->addWaypoint(BoVector2(u->x(), u->y()));
+	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
@@ -840,7 +840,7 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
- unit()->addWaypoint(BoVector2(resource->unit()->x(), resource->unit()->y()));
+ unit()->addWaypoint(BoVector2Fixed(resource->unit()->x(), resource->unit()->y()));
  mResourceMine = resource;
 
  mHarvestingType = 1;
@@ -868,7 +868,7 @@ void HarvesterPlugin::refineAt(RefineryPlugin* refinery)
  }
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
- unit()->addWaypoint(BoVector2(refinery->unit()->x(), refinery->unit()->y()));
+ unit()->addWaypoint(BoVector2Fixed(refinery->unit()->x(), refinery->unit()->y()));
  mRefinery = refinery;
 
  mHarvestingType = 2; // refining
@@ -957,7 +957,7 @@ BombingPlugin::~BombingPlugin()
 {
 }
 
-void BombingPlugin::bomb(int weaponId, BoVector2 pos)
+void BombingPlugin::bomb(int weaponId, BoVector2Fixed pos)
 {
  boDebug() << k_funcinfo << "wep: " << weaponId << "; pos: (" << pos.x() << "; " << pos.y() << ")" << endl;
  BosonWeapon* w = unit()->weapon(weaponId);
@@ -1006,7 +1006,7 @@ void BombingPlugin::advance(unsigned int)
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(BoVector2(mPosX, mPosY));
+		unit()->addWaypoint(BoVector2Fixed(mPosX, mPosY));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
@@ -1046,7 +1046,7 @@ void BombingPlugin::advance(unsigned int)
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(BoVector2(newx, newy));
+		unit()->addWaypoint(BoVector2Fixed(newx, newy));
 		unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 	}
 	mWeapon = 0;
@@ -1172,7 +1172,7 @@ void MiningPlugin::advance(unsigned int)
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
 		if (unit()->moveTo(newx, newy)) {
-			unit()->addWaypoint(BoVector2(newx, newy));
+			unit()->addWaypoint(BoVector2Fixed(newx, newy));
 			unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 			couldmove = true;
 			break;

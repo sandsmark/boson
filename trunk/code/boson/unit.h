@@ -34,8 +34,10 @@ class RepairPlugin;
 class BosonWeapon;
 class BosonPathInfo;
 class BoVector3;
-class BoVector2;
-class BoRect;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 class QDomElement;
@@ -269,9 +271,9 @@ public:
 	/**
 	 * Add pos to the waypoint list.
 	 **/
-	void addWaypoint(const BoVector2& pos);
+	void addWaypoint(const BoVector2Fixed& pos);
 
-	const BoVector2& currentWaypoint() const;
+	const BoVector2Fixed& currentWaypoint() const;
 	unsigned int waypointCount() const;
 	/**
 	 * Removes all waypoints from the list.
@@ -286,12 +288,12 @@ public:
 	/**
 	 * @return A list of all waypoints for debugging
 	 **/
-	const QValueList<BoVector2>& waypointList() const;
+	const QValueList<BoVector2Fixed>& waypointList() const;
 
 	/**
 	 * @return List of path-points
 	 **/
-	const QValueList<BoVector2>& pathPointList() const;
+	const QValueList<BoVector2Fixed>& pathPointList() const;
 
 	/**
 	 * Move this unit to a specified point. Also make sure that previous
@@ -300,7 +302,7 @@ public:
 	 * @param pos The point on the canvas to move to.
 	 * @param attack If this is true, unit will stop and attack any enemy units in range while moving
 	 **/
-	virtual void moveTo(const BoVector2& pos, bool attack = false);
+	virtual void moveTo(const BoVector2Fixed& pos, bool attack = false);
 
 
 	// TODO: maybe make this protected?
@@ -481,7 +483,7 @@ protected:
 	 * Adds so-called path point for this unit.
 	 * Path points are like waypoints, except that they are internal.
 	 **/
-	void addPathPoint(const BoVector2& pos);
+	void addPathPoint(const BoVector2Fixed& pos);
 	/**
 	 * @return Number of path-points
 	 **/
@@ -489,7 +491,7 @@ protected:
 	/**
 	 * @return Current path-point (where unit should go next)
 	 **/
-	const BoVector2& currentPathPoint();
+	const BoVector2Fixed& currentPathPoint();
 	/**
 	 * Clears list of path-points
 	 **/
@@ -574,7 +576,7 @@ public:
 	 **/
 	void repairAt(Facility* repairYard);
 
-	virtual BoRect boundingRect() const;
+	virtual BoRectFixed boundingRect() const;
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);
@@ -590,7 +592,7 @@ public:
 	 *
 	 * @return How much is moved (will be <= maxdist)
 	 **/
-	bofixed moveTowardsPoint(const BoVector2& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
+	bofixed moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
 
 	virtual void newPath();
 
@@ -598,7 +600,7 @@ public:
 	 * Check if pathpoint p marks end of the path. If yes, then it stops unit,
 	 * turns to random direction and true, otherwise returns false.
 	 **/
-	bool checkPathPoint(const BoVector2& p);
+	bool checkPathPoint(const BoVector2Fixed& p);
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path

@@ -568,7 +568,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
  a.advance(d->mAnimList, advanceCallsCount, advanceFlag);
 }
 
-bool BosonCanvas::canGo(const UnitProperties* prop, const BoRect& rect) const
+bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) const
 {
 // boDebug() << k_funcinfo << endl;
  if (rect.left() < 0 || rect.top() < 0 ||
@@ -1063,7 +1063,7 @@ void BosonCanvas::addToCells(BosonItem* item)
  }
 }
 
-bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2& pos, ProductionPlugin* factory) const
+bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixed& pos, ProductionPlugin* factory) const
 {
  bofixed width = prop->unitWidth();
  bofixed height = prop->unitHeight();
@@ -1078,7 +1078,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2& po
  if (!onCanvas(pos)) {
 	return false;
  }
- BoRect r(pos, BoVector2(width, height));
+ BoRectFixed r(pos, BoVector2Fixed(width, height));
  if (!canGo(prop, r)) {
 	return false;
  }
@@ -1699,7 +1699,7 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
  }
 }
 
-bool BosonCanvas::onCanvas(const BoVector2& pos) const
+bool BosonCanvas::onCanvas(const BoVector2Fixed& pos) const
 {
  return onCanvas(pos.x(), pos.y());
 }

@@ -152,7 +152,7 @@ void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bof
  BO_CHECK_NULL_RET(unit);
  bofixed right = QMIN(x + unit->width(), bofixed(map()->width()));
  bofixed bottom = QMIN(y + unit->height(), bofixed(map()->height()));
- BosonItem::makeCells(map()->cells(), cells, BoRect(x, y, right, bottom), map()->width(), map()->height());
+ BosonItem::makeCells(map()->cells(), cells, BoRectFixed(x, y, right, bottom), map()->width(), map()->height());
 }
 
 

@@ -88,7 +88,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		bool attack;
 		Q_UINT8 attackcode;
-		BoVector2 pos;
+		BoVector2Fixed pos;
 		Q_UINT32 unitCount;
 		stream >> attackcode;
 		if (attackcode == 0) {
@@ -538,7 +538,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		Q_UINT32 productionType;
 		Q_ULONG factoryId;
 		Q_UINT32 owner;
-		BoVector2 pos;
+		BoVector2Fixed pos;
 
 		stream >> productionType;
 
@@ -662,7 +662,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		boDebug() << k_funcinfo << "MoveDropBomb action" << endl;
 		Q_UINT32 unitCount;
-		BoVector2 pos;
+		BoVector2Fixed pos;
 		Q_UINT32 unitId, weaponId;
 
 		stream >> pos;
@@ -697,7 +697,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		Q_UINT32 unitId;
 		Q_UINT32 owner;
-		BoVector2 pos;
+		BoVector2Fixed pos;
 
 		stream >> owner;
 		stream >> unitId;
@@ -747,7 +747,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		Q_UINT32 unitType;
 		Q_UINT32 owner;
-		BoVector2 pos;
+		BoVector2Fixed pos;
 
 		stream >> owner;
 		stream >> unitType;
@@ -771,7 +771,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
 		bofixed width = prop->unitWidth();
 		bofixed height = prop->unitHeight();
-		BoRect r(pos, pos + BoVector2(width, height));
+		BoRectFixed r(pos, pos + BoVector2Fixed(width, height));
 		if (!canvas()->canGo(prop, r)) {
 			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
 			break;

@@ -36,7 +36,10 @@
 class BosonPathInfo;
 class BoVector3;
 class BoVector4;
-class BoVector2;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 
 
 /***  OLD PATHFINDER  ***/
@@ -58,7 +61,6 @@ class Unit;
 class Player;
 class BosonBigDisplayBase;
 class BosonCanvas;
-class BoVector2;
 
 class PathNode;
 
@@ -98,10 +100,10 @@ class BosonPath
      * @param goalx the x <em>coordinate</em> of the goal. Not the cell!
      * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
      **/
-    static QValueList<BoVector2> findPath(BosonPathInfo* info);
+    static QValueList<BoVector2Fixed> findPath(BosonPathInfo* info);
 
     enum ResourceType { Minerals, Oil, EnemyBuilding, EnemyUnit };
-    static QValueList<BoVector2> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
+    static QValueList<BoVector2Fixed> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
 
     /**
      * Returns lenght of path (in tiles)
@@ -117,7 +119,7 @@ class BosonPath
     /**
      * In this list are waypoints of path
      */
-    QValueList<BoVector2> path;
+    QValueList<BoVector2Fixed> path;
 
   private:
     class Marking;
@@ -329,7 +331,7 @@ class BosonPath2
      *  region has this cell (usually because cell is occupied or not passable)
      **/
     BosonPathRegion* cellRegion(int x, int y);
-    BosonPathRegion* cellRegion(const BoVector2& p)  { return cellRegion((int)p.x(), (int)p.y()); }
+    BosonPathRegion* cellRegion(const BoVector2Fixed& p)  { return cellRegion((int)p.x(), (int)p.y()); }
     /**
      * @return passability type of given cell
      **/
@@ -583,11 +585,11 @@ class BosonPathInfo
     unsigned int hlstep;
 
     // Low-level path, containing waypoints
-    QValueVector<BoVector2> llpath;
+    QValueVector<BoVector2Fixed> llpath;
 
     // Start and destination point
-    BoVector2 start;
-    BoVector2 dest;
+    BoVector2Fixed start;
+    BoVector2Fixed dest;
 
     // Range, in cells
     // If range is 0, we try to get as close to destination point as possible,
