@@ -22,7 +22,7 @@
 
 #include "bo3dtools.h"
 
-class BosonParticleSystemProperties;
+#include "bosonparticlesystemproperties.h"
 
 
 /**
@@ -62,6 +62,7 @@ class BosonParticle
     float size;  // Current size
     float life;  // How many remaining seconds particles has left to live, before it dies
     float maxage;
+    GLuint tex;  // Current texture. This is cached here for performance reasons
 };
 
 /**
@@ -101,7 +102,7 @@ class BosonParticleSystem
      * @param updateFunc This function, if specified, is called every time particle is updated
      **/
     BosonParticleSystem(int maxnum, int initialnum, float size,
-        float createrate, bool align, float maxradius, int texture,
+        float createrate, bool align, float maxradius, BosonParticleTextureArray textures,
         BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
         const BosonParticleSystemProperties* prop = 0);
     /**
@@ -118,7 +119,8 @@ class BosonParticleSystem
      * @param updateFunc This function, if specified, is called every time particle is updated
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, float maxradius, int texture, const BosonParticleSystemProperties* prop);
+        bool align, float maxradius, BosonParticleTextureArray textures,
+        const BosonParticleSystemProperties* prop);
     /**
      * Destructs BosonParticleSystem. This deleted all particles
      **/
@@ -264,7 +266,7 @@ class BosonParticleSystem
     float mCreateCache;  // Number of particles to create during next update
     bool mAlign;  // Whether to align particles to camera
     float mRadius;  // Radius of bounding sphere
-    int mTexture;  // Texture of particles
+    BosonParticleTextureArray mTextures;  // Textures of particles
     BoVector3 mPos;
     BoVector3 mVelo;
     BoVector3 mRot;
