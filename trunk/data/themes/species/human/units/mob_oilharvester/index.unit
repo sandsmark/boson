@@ -5,18 +5,19 @@ Speed=4
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=
 DestroyedParticles=1001,3001,6001,7001
-ExplodingDamage=100
-ExplodingDamageRange=1.5
+ExplodingDamage=200
+ExplodingDamageRange=2
 Health=150
 HitPoint=0,0,0.62
 Id=10002
 IsFacility=false
-MineralCost=80
+MineralCost=700
 Name=Oil Harvester
-OilCost=5
+OilCost=600
 Producer=0
-ProductionTime=300
+ProductionTime=500
 Requirements=8,3
 Shield=0
 SightRange=5

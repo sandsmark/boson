@@ -5,18 +5,19 @@ Speed=4
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=
 DestroyedParticles=1001,3001,6001,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=140
-HitPoint=0,0,0.50
+Health=200
+HitPoint=0,0,0.5
 Id=10003
 IsFacility=false
-MineralCost=350
+MineralCost=1000
 Name=Mineral Harvester
-OilCost=100
+OilCost=300
 Producer=0
-ProductionTime=350
+ProductionTime=600
 Requirements=13,3
 Shield=0
 SightRange=5

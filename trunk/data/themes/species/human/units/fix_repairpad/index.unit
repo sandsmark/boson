@@ -5,18 +5,19 @@ ConstructionSteps=18
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=
 DestroyedParticles=1010,3010,6010,7010
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=300
+Health=350
 HitPoint=0,0,0.1
 Id=9
 IsFacility=true
-MineralCost=350
+MineralCost=500
 Name=Repair Pad
-OilCost=200
+OilCost=250
 Producer=10
-ProductionTime=300
+ProductionTime=600
 Requirements=5,2,12,3
 Shield=0
 SightRange=5

@@ -5,18 +5,19 @@ ConstructionSteps=10
 
 [Boson Unit]
 Armor=0
+ConstructedParticles=
 DestroyedParticles=1011,3011,6011,7010
 ExplodingDamage=120
 ExplodingDamageRange=1.5
-Health=80
+Health=150
 HitPoint=-0.1,0.1,0.92
 Id=7
 IsFacility=true
-MineralCost=100
+MineralCost=200
 Name=Oil Tower
-OilCost=50
+OilCost=150
 Producer=10
-ProductionTime=100
+ProductionTime=300
 Requirements=8
 Shield=0
 SightRange=5
