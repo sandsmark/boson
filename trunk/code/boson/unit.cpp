@@ -163,8 +163,7 @@ void Unit::updateSelectBox()
  if (d->mSelectBoxUp) {
 	unsigned long int maxHealth = unitProperties()->health();
 	double div = (double)health() / maxHealth;
-	int frame = (int)((double)(SelectPart::frames() - 1) * div);
-	d->mSelectBoxUp->setFrame(frame);
+	d->mSelectBoxUp->update(div);
 	d->mSelectBoxUp->show();
  }
  if (d->mSelectBoxDown) {
