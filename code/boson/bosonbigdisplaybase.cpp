@@ -3160,9 +3160,8 @@ void BosonBigDisplayBase::setInputInitialized(bool initialized)
 
 void BosonBigDisplayBase::advanceCamera()
 {
-  if(camera()->commitTime() > 0)
-  {
-    camera()->advance();
-    cameraChanged();
-  }
+ if (camera()->commitTime() > 0) {
+	camera()->advance();
+	cameraChanged();
+ }
 }
