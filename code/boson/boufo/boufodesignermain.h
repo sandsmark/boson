@@ -164,6 +164,7 @@ signals:
 
 protected:
 	void setClassLabel(const QString& text);
+	void createProperties(const QDomElement& root);
 
 protected slots:
 	void slotItemRenamed(QListViewItem* item, int col);
