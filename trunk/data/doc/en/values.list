@@ -1,6 +1,9 @@
 Health
 MineralCost
 OilCost
-WeaponRange
-WeaponDamage
+Speed
+Weapon
+Range
 Reload
+Damage
+DamageRange

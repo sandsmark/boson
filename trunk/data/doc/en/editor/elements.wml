@@ -24,6 +24,8 @@
     <h4>The player</h4>
     <p>
     You have to switch between the players. You can only create facilities for one player at one time.
+    Don't forget to change the player while building units and buildings.<br>
+    If you create or change the map the player doesn't matter.    
     </p>
-#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="facilities.html" after_text="Building facilities"
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="map.html" after_text="Working with the map"
 #include "footer.wml"
