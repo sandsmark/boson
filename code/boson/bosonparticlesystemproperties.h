@@ -42,26 +42,6 @@ template<class T> class QValueList;
 
 
 /**
- * Little helper class to store all textures and number of them for particle system
- * @author Rivo Laks <rivolaks@hot.ee>
- **/
-class BosonParticleTextureArray
-{
-  public:
-    BosonParticleTextureArray(unsigned int count)
-    {
-      mTextureCount = count;
-      mTextureIds = new GLuint[mTextureCount];
-    }
-    ~BosonParticleTextureArray()
-    {
-      delete[] mTextureIds;
-    }
-    unsigned int mTextureCount;
-    GLuint* mTextureIds;
-};
-
-/**
  * @short Class that holds properties for a particle system and loads them from config file
  *
  * This class loads properties such as minimum and maximum velocity, size,
@@ -106,11 +86,11 @@ class BosonParticleSystemProperties
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
 
   protected:
-    static QDict<BosonParticleTextureArray> mTextureArrays;
+    static QDict<BosonTextureArray> mTextureArrays;
     static QString mTexturePath;
 
   protected:
-    static const BosonParticleTextureArray* getTextures(const QString& name);
+    static const BosonTextureArray* getTextures(const QString& name);
     void load(KSimpleConfig* cfg, const QString& group);
     void reset();
 
@@ -130,7 +110,7 @@ class BosonParticleSystemProperties
     bool mMoveParticlesWithSystem;
     QString mTextureName;
     QString mGLBlendFuncStr;
-    const BosonParticleTextureArray* mTextures;
+    const BosonTextureArray* mTextures;
     unsigned long int mId;
     static KRandomSequence* mRandom;
 };
