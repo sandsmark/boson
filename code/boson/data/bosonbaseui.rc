@@ -25,6 +25,7 @@
       <Action name="debug_lazy_reload_meshrenderer" />
       <Action name="debug_lazy_reload_groundrenderer" />
     </Menu>
+    <Action name="debug_crash_boson" />
     <Menu name="debug_colormap"><text>&amp;Color map</text>
       <Action name="debug_colormap_enable" />
     </Menu>

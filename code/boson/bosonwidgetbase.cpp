@@ -685,6 +685,9 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("Reload &groundrenderer plugin"), KShortcut(), this,
 		SLOT(slotReloadGroundRenderer()), actionCollection(),
 		"debug_lazy_reload_groundrenderer");
+ (void)new KAction(i18n("Crash boson"), KShortcut(), this,
+		SLOT(slotCrashBoson()), actionCollection(),
+		"debug_crash_boson");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
@@ -1218,3 +1221,9 @@ void BosonWidgetBase::initMap()
 {
  // implemented by EditorWidget
 }
+
+void BosonWidgetBase::slotCrashBoson()
+{
+ ((QObject*)0)->name();
+}
+
