@@ -13,18 +13,27 @@ except ImportError:
 
 cycle = 0
 enable = 1
+# How many cycles does one day last?
+duration = 2400  # that's 2 minutes
 
 
-def init(cycle = 0):
+def init(startcycle = 0):
   # Init lighting
+  global cycle
+  cycle = startcycle
   advanceDay(cycle)
 
 
 def setEnabled(e):
+  global enable
   if e != 0 and e != 1:
     print "Error: dayandnight.setEnabled(): e must be 0 or 1!"
     return
   enable = e
+
+def setDayDuration(d):
+  global duration
+  duration = d
 
 
 def advance():
@@ -37,12 +46,10 @@ def advance():
 ### Simulates day and night
 def advanceDay(cycle):
   # Make sure day and night cycle is enabled
-  global enable
+  global enable, duration
   if enable == 0:
     return
 
-  # How many cycles does one day last?
-  duration = 2400  # that's 2 minutes
   # Light is updated every updatetime advance calls
   updatetime = 5
 
