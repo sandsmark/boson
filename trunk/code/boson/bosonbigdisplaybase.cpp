@@ -1537,7 +1537,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	// The Alt button is the camera modifier in boson.
 	// Better don't do important stuff (like unit movement
 	// or selections) here, since a single push on Alt gives
-	// the focus to the mneu which might be very confusing
+	// the focus to the menu which might be very confusing
 	// during a game.
 	if (buttonState & LEFT_BUTTON) {
 		camera()->changeZ(d->mMouseMoveDiff.dy());
@@ -1548,14 +1548,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		cameraChanged();
 	}
  } else if (buttonState & LEFT_BUTTON) {
-	if (action.controlButton()) {
-		// not yet used
-	} else {
-		// selection rect gets drawn for both - shift
-		// down and no modifier pressed.
-		d->mSelectionRect.setVisible(true);
-		moveSelectionRect(posX, posY, posZ);
-	}
+	// selection rect gets drawn.
+	// modifiers are ignored
+	d->mSelectionRect.setVisible(true);
+	moveSelectionRect(posX, posY, posZ);
  } else if (buttonState & RIGHT_BUTTON) {
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
 	// map is moved in all cases (currently - we have some
@@ -1575,6 +1571,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 //		a = true;
 //		QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
 //		QCursor::setPos(pos);
+
+		// modifiers are ignored.
 		d->mMouseMoveDiff.startRMBMove();
 		GLdouble dx, dy;
 		int moveX = d->mMouseMoveDiff.dx();
@@ -1585,12 +1583,19 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	} else {
 		d->mMouseMoveDiff.stop();
 	}
+ } else if (buttonState & MidButton) {
+	// currently unused
  }
  QPoint widgetPos = mapFromGlobal(QCursor::pos());
  GLdouble x = 0.0, y = 0.0, z = 0.0;
  mapCoordinates(widgetPos, &x, &y, &z);
  worldToCanvas(x, y, z, &(d->mCanvasPos));
  displayInput()->updatePlacementPreviewData();
+
+ // AB: we might want to use a timer here instead - then we would also be able
+ // to change the cursor type when units move under the cursor. i don't want to
+ // call updateCursor() from BosonCanvas::slotAdvance() as it would get called
+ // too often then
  displayInput()->updateCursor();
 }
 
@@ -1603,10 +1608,14 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
 			// basically the same as a normal RMB
 			displayInput()->actionClicked(action, stream, send);
 		} else if (action.shiftButton()) {
-			// unused
+			QRect rect = selectionRectCanvas();
+			displayInput()->unselectArea(rect);
+			d->mSelectionRect.setVisible(false);
 		} else if (action.controlButton()) {
 			removeSelectionRect(false);
 		} else {
+			// select the unit(s) below the cursor/inside the
+			// selection rect
 			removeSelectionRect(true);
 		}
 		break;
@@ -1650,8 +1659,8 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoAc
 	{
 		// we ignore UnitAction is locked here
 		// currently!
-		bool replace = !(action.controlButton());
-		bool onScreenOnly = (action.shiftButton());
+		bool replace = !action.controlButton();
+		bool onScreenOnly = !action.shiftButton();
 		Unit* unit = canvas()->findUnitAt(action.canvasPos());
 		if (unit) {
 			if (onScreenOnly) {
@@ -2006,7 +2015,6 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		boError() << k_funcinfo << canvasPos.x() << "," << canvasPos.y() << " is no on the canvas!" << endl;
 		return;
 	}
-#warning FIMXE
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
 	// maybe in selectSingle() or so.

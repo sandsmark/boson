@@ -147,6 +147,20 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
  }
 }
 
+void BosonBigDisplayInputBase::unselectArea(const QRect& rect)
+{
+ BoItemList list;
+ list = canvas()->collisions(rect);
+ BoItemList::Iterator it;
+ for (it = list.begin(); it != list.end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	Unit* u = (Unit*)*it;
+	selection()->removeUnit(u);
+ }
+}
+
 void BosonBigDisplayInputBase::selectUnits(QPtrList<Unit> unitList, bool replace)
 {
  boDebug() << k_funcinfo << endl;
