@@ -719,6 +719,8 @@ void BosonBigDisplayBase::initializeGL()
 
 void BosonBigDisplayBase::initUfoGUI()
 {
+ glPushAttrib(GL_ALL_ATTRIB_BITS);
+
  initUfo();
 
  // AB: note that BoUfo widgets differ from usual Qt widgets API-wise.
@@ -837,6 +839,8 @@ void BosonBigDisplayBase::initUfoGUI()
 
 
  // TODO: tooltips ?
+
+ glPopAttrib();
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -4427,7 +4431,9 @@ void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
 		// TODO: maybe we should just add particleDist() to bounding sphere radius
 		//  of the system?
 		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-			if (!s->testFogged() || localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
+			if (!s->testFogged() ||
+					(canvas()->onCanvas((int)s->position().x(), -(int)s->position().y()) &&
+					localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y()))) {
 				v->mParticles.append(s);
 				v->mAll.append(it.current());
 			}
