@@ -210,7 +210,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	types[i].mAmountOfLand = (unsigned char)conf.readUnsignedNumEntry("AmountOfLand", 0);
 	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
 	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
-	types[i].mMiniMapColor = qRgb(color.x(), color.y(), color.z());
+	types[i].mMiniMapColor = qRgb((int)color.x(), (int)color.y(), (int)color.z());
 
 	// ensure correct values:
 	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
