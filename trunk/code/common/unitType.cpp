@@ -52,7 +52,7 @@ mobileProperties_t mobileProp[] = {
 	uint	cost_oil;	// how much oil does it cost ?
 */
 	
-#define EX(s) (s*BO_TILE_SIZE)
+#define EX(s) ((s)*BO_TILE_SIZE)
 facilityProperties_t facilityProp[] = {
 	{"comsat"	, EX(2), EX(2), 7,  0,	300, 100},	// FACILITY_COMSAT
 	{"helipad"	, EX(2), EX(2), 6,  0,	300, 100},	// FACILITY_HELIPAD

@@ -18,7 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "../common/log.h"
+#include "common/log.h"
 
 #include "selectPart.h"
 

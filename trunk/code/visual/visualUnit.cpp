@@ -18,11 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include <stdlib.h>	// int abs(int);
-//#include <assert.h>
-
-#include "../common/map.h"
-#include "../common/log.h"
+#include "common/map.h"
+#include "common/log.h"
 
 #include "visualUnit.h"
 #include "speciesTheme.h"
@@ -76,7 +73,7 @@ visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 
 visualMobUnit::~visualMobUnit()
 {
-	unSelect();
+	unSelect(); // destroy selectPart
 }
 
 
@@ -111,7 +108,7 @@ visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent=0L, const cha
 
 visualFacility::~visualFacility()
 {
-	unSelect();
+	unSelect(); // destroy selectPart
 }
 
 

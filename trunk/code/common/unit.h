@@ -23,9 +23,8 @@
 
 #include <qobject.h>
 
-#include "../common/unitType.h"
-#include "../common/msgData.h"
-//#include "../common/map.h"
+#include "common/unitType.h"
+#include "common/msgData.h"
 
 
 #define  MAX_POWER 9

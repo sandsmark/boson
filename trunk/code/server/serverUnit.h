@@ -21,8 +21,8 @@
 #ifndef SERVERUNIT_H 
 #define SERVERUNIT_H 
 
-#include "../common/unit.h"
-#include "../common/msgData.h"
+#include "common/unit.h"
+#include "common/msgData.h"
 #include "knownBy.h"
 
 

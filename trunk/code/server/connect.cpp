@@ -24,7 +24,7 @@
 #include "connect.h"
 #include "game.h"
 
-#include "../common/bobuffer.h"
+#include "common/bobuffer.h"
 
 void Player::handleSocketMessage(KSocket *s)
 {

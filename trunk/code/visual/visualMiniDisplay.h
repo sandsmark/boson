@@ -21,7 +21,7 @@
 #ifndef VISUALMINIDISPLAY_H 
 #define VISUALMINIDISPLAY_H 
 
-#include "../common/groundType.h"
+#include "common/groundType.h"
 
 #include <qframe.h> ///orzel qwidget.h
 

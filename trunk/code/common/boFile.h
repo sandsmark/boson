@@ -23,8 +23,8 @@
 
 #include <qstring.h>
 
-#include "../common/unitType.h"
-#include "../common/groundType.h"
+#include "common/unitType.h"
+#include "common/groundType.h"
 
 
 class QDataStream;
@@ -59,7 +59,7 @@ protected :
 	QString		_worldName;
 	int		map_width;
 	int		map_height;
-	int		nbPlayer;
+	uint		nbPlayer;
 	int		nbMobiles;
 	int		nbFacilities;
 

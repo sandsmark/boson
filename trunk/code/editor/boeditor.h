@@ -38,7 +38,7 @@
 #include <kmsgbox.h>
 
 // application specific includes
-#include "../common/msgData.h"
+#include "common/msgData.h"
 
 #include "editorField.h"
 #include "mainView.h"

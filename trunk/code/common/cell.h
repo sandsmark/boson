@@ -25,7 +25,7 @@
 #include <config.h>
 #endif 
 
-#include "../common/groundType.h"
+#include "common/groundType.h"
 
 #ifndef byte
 typedef unsigned char byte;

@@ -111,12 +111,6 @@ public:
 	virtual void	setSelected(QPixmap *)=0; //null -> nothing is selected
 	virtual void	setOrders(int what , int who=-1)=0;
 
-	/*
-public slots:
-	void leftClicked(int, int);		// selecting, moving...
-	void u_goto(void);
-	*/
-
 public: ///orzel : bof...
 	visualFacility		*fixSelected;
 	QIntDict<visualMobUnit>	mobSelected;

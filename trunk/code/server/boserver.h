@@ -32,10 +32,10 @@
 #include <ksock.h>
 #include <ktmainwindow.h>
 
-#include "../common/boconfig.h"
-#include "../common/unitType.h"
-#include "../common/log.h"
-#include "../common/boFile.h"
+#include "common/boconfig.h"
+#include "common/unitType.h"
+#include "common/log.h"
+#include "common/boFile.h"
 
 #include "serverUnit.h"		// for Facility
 #include "connect.h"

@@ -20,25 +20,10 @@
 
 #include <qpixmap.h>
 
-#include "../common/log.h"
+#include "common/log.h"
 
 #include "visualMiniDisplay.h"
 #include "visualView.h"
-
-
-
-/*
-#include <qpainter.h>
-#include <qpixmap.h>
-#include <qcolor.h>
-
-#include "../common/map.h"
-
-#include "miniMap.h"
-#include "visualCell.h"
-#include "speciesTheme.h"
-#include "groundTheme.h"
- */ 
 
 visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *name=0L)
 	: QWidget(parent, name)

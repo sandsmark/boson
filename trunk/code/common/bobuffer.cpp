@@ -38,6 +38,13 @@ boBuffer::boBuffer(int s, unsigned int size)
 
 }
 
+
+boBuffer::~boBuffer()
+{
+	delete [] data;
+}
+
+
 void boBuffer::flush(void)
 {
 	int i;
@@ -69,3 +76,5 @@ void boBuffer::packInt(int *tab, unsigned int len)
 	unsigned int i;
 	for(i=0; i<len; i++) packInt(tab[i]);
 }
+
+

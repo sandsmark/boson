@@ -28,9 +28,9 @@
 
 #include <kapp.h>
 
-#include "../common/log.h"
-#include "../common/unit.h"
-#include "../common/map.h"
+#include "common/log.h"
+#include "common/unit.h"
+#include "common/map.h"
 
 #include "speciesTheme.h"
 
@@ -251,6 +251,9 @@ return true;
 }
 
 
+/*
+ *   Big Overviews
+ */
 QPixmap	* speciesTheme::getBigOverview(mobType unit)
 {
 	if (!mobiles->testBit(unit))
@@ -271,6 +274,9 @@ QPixmap	* speciesTheme::getBigOverview(facilityType unit)
 }
 
 
+/*
+ *   Small Overviews
+ */
 QPixmap	* speciesTheme::getSmallOverview(mobType unit)
 {
 	if (!mobiles->testBit(unit))
@@ -291,6 +297,9 @@ QPixmap	* speciesTheme::getSmallOverview(facilityType unit)
 }
 
 
+/*
+ *   Main Pixmaps
+ */
 QwSpritePixmapSequence *speciesTheme::getPixmap(mobType unit)
 {
 	if (!mobiles->testBit(unit))

@@ -36,8 +36,8 @@
 
 
 #define IS_MOBILE(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_FACILITY) )
-#define IS_FACILITY(rtti)	( ((rtti) >= S_FACILITY)  && ((rtti) < S_SHOT     ) )
-#define IS_UNIT(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_SHOT     ) )
+#define IS_FACILITY(rtti)	( ((rtti) >= S_FACILITY)  && ((rtti) < S_SHOT    ) )
+#define IS_UNIT(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_SHOT    ) )
 #define IS_GROUND(rtti)		( ((rtti) >= S_GROUND  )  && ((rtti) < S_MOBILE  && IS_VALID_GROUND((rtti)-S_GROUND)   ) )
 
 #endif // SPRITES_H

@@ -23,12 +23,10 @@
 
 #include <qintdict.h>
 
-#include "../common/msgData.h"
-//#include "../common/unitType.h"
-#include "../common/unit.h"	// Facility
+#include "common/msgData.h"
+#include "common/unit.h"	// Facility
 
 #include "playerUnit.h"		// playerMobUnit
-//#include "playerCell.h"
 #include "visualField.h"
 
 class QRect;

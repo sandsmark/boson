@@ -25,8 +25,8 @@
 
 #include <kmsgbox.h>
 
-#include "../common/boconfig.h"
-#include "../common/log.h"
+#include "common/boconfig.h"
+#include "common/log.h"
 
 #include "boson.h"
 #include "ressource.h"

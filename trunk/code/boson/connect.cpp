@@ -24,8 +24,8 @@
 #include "boson.h"
 #include "connect.h"
 
-#include "../common/log.h"
-#include "../common/bobuffer.h"
+#include "common/log.h"
+#include "common/bobuffer.h"
 
 #include "game.h"
 

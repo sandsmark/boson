@@ -23,7 +23,7 @@
 
 #include <QwSpriteField.h>
 
-#include "../common/unit.h"
+#include "common/unit.h"
 #include "sprites.h"
 
 

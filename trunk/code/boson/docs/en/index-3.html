@@ -22,50 +22,21 @@
 
 <P>
 <P>In this section, we will explain you the basis to actually be able to play Boson.
-The first thing to know is that, because of the lack of any IA player (artificial intelligence),
+The first thing to know is that, because of the lack of any AI player (artificial intelligence),
 you won't be able to play alone. You need to have at least another player to play against.
 <P>
-<H3><A NAME="ss3.1">3.1 Launching the server </A>
+<P>
+<H3><A NAME="ss3.1">3.1 Launching Boson</A>
 </H3>
 
+<P>When you first launch boson (usually by clicking on the K-menu/Game/Boson), you are
+presented with a blank window. 
+<P>Every player uses the  <CODE>connect to Server</CODE> item in the <CODE>file</CODE> menu.
+<P>One (and only one) of the players have to start a server, the name of the server will then be
+the name of its computer.
+<P>Other players have to enter the name of the server in the dialog box, and then hit <CODE>connect</CODE>
 <P>
-<P>The <CODE>server</CODE> is the central piece of the game, the place where everything is coordinated, and the
-link between the different players. It must be launched on one and only one computer. Let's say for
-the example that this computer is called 'eagle'
-<P>If you have successfully installed boson, you should have a program called <CODE>boserver</CODE>. 
-This is the first program to launch so that every single player may connect to it.
-<P>You should run it in <CODE>background</CODE>, typing
-<BLOCKQUOTE><CODE>
-<PRE>
-[eagle]% boserver&amp;
-</PRE>
-</CODE></BLOCKQUOTE>
-<P>You can also click on <CODE>boserver</CODE>, in the <CODE>K-Menu</CODE>, under the group <CODE>Games</CODE>.
-<P>Don't worry about the still naked interface of it, just hide it if you don't like it, there's nothing
-in the window, but it _does_ do a lot of things behing.
-<P>
-<H3><A NAME="ss3.2">3.2 Launching Boson</A>
-</H3>
-
-<P>
-<P>Every single player should perform this step on his computer. There is no problem if
-one of them is on the same computer as the server.
-<P>
-<BLOCKQUOTE><CODE>
-<PRE>
-[gauss]% boson eagle&amp;
-</PRE>
-</CODE></BLOCKQUOTE>
-<P>By giving the <CODE>eagle</CODE> argument to boson, you tell him on which computer he can find the server
-in order to connect to it.
-<P>You can also click on <CODE>boson</CODE>, in the <CODE>K-Menu</CODE>, under the group <CODE>Games</CODE>, but doing this way
-you won't be able to give any argument, so that boson will try to connect to the same computer. You can do this
-only if the boserver has been launched on _your_ computer.
-<P>There will soon be <CODE>icons</CODE>-to-click-on-to-get-things-simplier, but until then, you need
-to performs all of those steps.
-<P>
-<P>
-<H3><A NAME="ss3.3">3.3 User input </A>
+<H3><A NAME="ss3.2">3.2 User interaction </A>
 </H3>
 
 <P>
@@ -74,12 +45,12 @@ to performs all of those steps.
 Left-click on a facility or a mobile unit to select it.
 If you left-click on the ground and drag the mouse (while still having the button down), it will draw
 a selection rectangle that will select everything in it when you release the button.
+<P>When a unit or a facility is selected, the lower bar is as big as is the energy of the selected item. The more
+red it is, the less energy it has. When the energy becomes null, the item is destroyed.
 <P>The right-button let you do <CODE>actions</CODE> : on the ground it will make a mobile unit to move there,
 on a <CODE>friend</CODE> mobile unit, it will follow it, on a <CODE>ennemy</CODE>, it will attack it.
-Note that so far, only <CODE>move</CODE> is implemented :-)
-<P>
 <P>The middle-button is used to move across the map. By middle-clicking on any place, the point you've clicked on
-will become the new center of the map. If you click on the center, if will do nothing. If you click on the border, you'll make
+will become the new center of the map. If you click on the center, it will do nothing. If you click on the border, you'll make
 a big jump.
 <P>
 <P>

@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -32,14 +32,11 @@
 
 #include <kapp.h>
 
-#include "../common/log.h"
-#include "../visual/groundTheme.h"
-#include "../visual/speciesTheme.h"
+#include "common/log.h"
+#include "groundTheme.h"
+#include "speciesTheme.h"
 
 #include "editorView.h"
-//#include "visualView.h"
-//#include "visualBigDisplay.h"
-//#include "speciesTheme.h"
 #include "visual.h"
 
 #define VIEW_ONE	1
@@ -95,10 +92,10 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	qcb_transRef = new QComboBox(this, "qcb_transRef");
 	qcb_transRef->setGeometry(130,82,100,30);
 
-	qcb_transRef->insertItem("grass/water", TRANS_GW);
-	qcb_transRef->insertItem("grass/desert", TRANS_GD);
-	qcb_transRef->insertItem("desert/water", TRANS_DW);
-	qcb_transRef->insertItem("deep water", TRANS_DWD);
+	qcb_transRef->insertItem("grass/water",		TRANS_GW);
+	qcb_transRef->insertItem("grass/desert",	TRANS_GD);
+	qcb_transRef->insertItem("desert/water",	TRANS_DW);
+	qcb_transRef->insertItem("deep water",		TRANS_DWD);
 
 	connect(qcb_transRef, SIGNAL(activated(int)), this, SLOT(setTransRef(int)));
 	

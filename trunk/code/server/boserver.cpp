@@ -25,9 +25,9 @@
 #include <kapp.h>
 #include <kmsgbox.h>
 
-#include "../common/bobuffer.h"
-#include "../common/unitType.h"
-#include "../common/map.h"	 ///orzel: temp, pour la creation...
+#include "common/bobuffer.h"
+#include "common/unitType.h"
+#include "common/map.h"	 ///orzel: temp, pour la creation...
 
 #include "boserver.h"
 #include "game.h"
@@ -259,7 +259,7 @@ switch(state) {
 
 				/* Beginning of synchronization */
 				jiffies	= 1;
-				confirmedJiffies= 0;
+				confirmedJiffies= 0u;
 				data->jiffies	= jiffies;
 				boAssert(jiffies == 1); ///orzel : well...
 				for(i=0; i<nbPlayer; i++) {

@@ -23,7 +23,7 @@
 
 #include <QwSpriteField.h>
 
-#include "../common/cell.h"
+#include "common/cell.h"
 
 #include "sprites.h"
 
