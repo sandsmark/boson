@@ -973,7 +973,7 @@ void BosonBigDisplayBase::renderItems()
 	if (RTTI::isUnit(item->rtti())) {
 		u = (Unit*)item;
 	}
-	
+
 	if (u && u->waypointList().count() > 0) {
 		// render a line from the current position of the unit to the
 		// point it is moving to.
@@ -1404,8 +1404,7 @@ void BosonBigDisplayBase::renderText()
  if (boGame->gamePaused()) {
 	QString pause = i18n("The game is paused");
 	w = d->mDefaultFont->width(pause);
-	glRasterPos2i(d->mViewport[2] / 2 - w / 2, d->mViewport[3] / 2);
-	glCallLists(pause.length(), GL_UNSIGNED_BYTE, (GLubyte*)pause.latin1());
+	d->mDefaultFont->renderText(d->mViewport[2] / 2 - w / 2, d->mViewport[3] / 2, pause, d->mViewport[2] / 2 + w / 2, false);
  }
  if (d->mToolTips->showTip()) {
 	QPoint pos = mapFromGlobal(QCursor::pos());
