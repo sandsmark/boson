@@ -4,3 +4,6 @@
     allow from localhost
 </Files>
 
+<Files "wiki">
+    SetHandler application/x-httpd-php
+</Files>
