@@ -952,7 +952,6 @@ BoMeshLOD::BoMeshLOD()
  mPointsCache = 0;
  mPointsCacheCount = 0;
  d->mAllNodes.setAutoDelete(true);
- mDisplayList = 0;
 
  mType = GL_TRIANGLES;
 }
@@ -961,9 +960,6 @@ BoMeshLOD::~BoMeshLOD()
 {
  d->mAllNodes.clear();
  delete[] mPointsCache;
- if (mDisplayList) {
-	glDeleteLists(mDisplayList, 1);
- }
  delete d;
 }
 
@@ -1562,42 +1558,6 @@ void BoMesh::renderVertexPoints(unsigned int _lod)
  glEnd();
 }
 
-// there MUST be a valid context set already!!
-void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
-{
- for (unsigned int i = 0; i < d->mLODCount; i++) {
-	loadDisplayList(d->mLODs[i], teamColor, reload);
- }
-}
-
-void BoMesh::loadDisplayList(BoMeshLOD* lod, const QColor* teamColor, bool reload)
-{
- BO_CHECK_NULL_RET(lod);
-
- if (!lod->displayList()) {
-	lod->setDisplayList(glGenLists(1));
-	if (lod->displayList() == 0) {
-		boError() << k_funcinfo << "NULL display list generated" << endl;
-		return;
-	}
- } else {
-	if (reload) {
-		// it is important that the list is deleted, but the
-		// newly generated list must have the *same* number as
-		// it had before!
-		glDeleteLists(lod->displayList(), 1);
-	} else {
-		boWarning() << k_funcinfo << "mesh was already loaded!" << endl;
-		return;
-	}
- }
- boDebug(100) << k_funcinfo << endl;
-
- glNewList(lod->displayList(), GL_COMPILE);
- renderMesh(teamColor);
- glEndList();
-}
-
 unsigned int BoMesh::points() const
 {
  return d->mMeshPoints.points();
@@ -1611,16 +1571,6 @@ bool BoMesh::isTeamColor() const
 void BoMesh::setIsTeamColor(bool c)
 {
  d->mIsTeamColor = c;
-}
-
-GLuint BoMesh::displayList(unsigned int lod) const
-{
- BoMeshLOD* l = levelOfDetail(lod);
- if (!l) {
-	boError(100) << k_funcinfo << "NULL lod " << lod << endl;
-	return 0;
- }
- return l->displayList();
 }
 
 unsigned int BoMesh::movePoints(float* array, int index)
