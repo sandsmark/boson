@@ -43,7 +43,6 @@ General TODOs
   version. We need the revision number of each file - how to do add this
   automatically?
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
-- MiniMap: darker green
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
 
