@@ -314,7 +314,7 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
  }
  
  // and another hack..
- setMinimumSize(QSize(400,400));
+// setMinimumSize(QSize(400,400));
 
 
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));

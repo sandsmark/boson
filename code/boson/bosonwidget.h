@@ -141,6 +141,7 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 	void slotInitFogOfWar();
+	void slotHack1();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)

@@ -471,6 +471,18 @@ void BosonWidget::slotStartScenario()
 		game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
 	}
  }
+
+ #warning FIXME
+ // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
+ // I can't find out where the problem resides :-(
+ QTimer::singleShot(500, this, SLOT(slotHack1()));
+}
+
+void BosonWidget::slotHack1()
+{
+ QSize size = mDisplayManager->activeDisplay()->size();
+ mDisplayManager->activeDisplay()->resize(size.width() - 1, size.height() - 1);
+ mDisplayManager->activeDisplay()->resize(size);
 }
 
 void BosonWidget::slotGamePreferences()
