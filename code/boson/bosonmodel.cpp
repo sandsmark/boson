@@ -496,9 +496,18 @@ QString BosonModel::cachedModelFilename(const QCString& md5, const QString& orig
 		return QString::null;
 	}
 	cachedmodel += QString("model-%1.bmf").arg(md5);
+	// Find path to bobmfconverter binary
+	QString converter = KGlobal::dirs()->findResource("exe", "bobmfconverter");
+	if (converter.isNull()) {
+		converter = KGlobal::dirs()->findExe("bobmfconverter");
+		if (converter.isNull()) {
+			boError() << k_funcinfo << "Couldn't find bobmfconverter!" << endl;
+			return QString::null;
+		}
+	}
 	// Create KProcess object
 	KProcess proc;
-	proc << "bobmfconverter";
+	proc << converter;
 	// Add default cmdline args
 	proc << "-lods" << "5" <<  "-keepframes" <<  "-texnametolower" <<  "-useboth";
 	proc << "-o" << cachedmodel;
