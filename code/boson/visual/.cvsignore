@@ -1,3 +1,8 @@
 Makefile
 Makefile.in
-
+.deps
+.libs
+*.moc
+*.lo
+libbosonvisual.la
+libbosonvisual_la_meta_unload.*
