@@ -43,6 +43,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
   { (char*)"oil", py_oil, METH_VARARGS, 0 },
   { (char*)"addOil", py_addOil, METH_VARARGS, 0 },
+  { (char*)"nearestMineralLocations", py_nearestMineralLocations, METH_VARARGS, 0 },
+  { (char*)"nearestOilLocations", py_nearestOilLocations, METH_VARARGS, 0 },
   // Units
   { (char*)"moveUnit", py_moveUnit, METH_VARARGS, 0 },
   { (char*)"moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, 0 },
@@ -351,6 +353,60 @@ PyObject* PythonScript::py_addOil(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_nearestMineralLocations(PyObject*, PyObject* args)
+{
+  int player, x, y, n, radius;
+  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
+  {
+    return 0;
+  }
+
+  QValueList<QPoint> locations = BosonScript::nearestMineralLocations(player, x, y, n, radius);
+
+  PyObject* pylist = PyList_New(locations.count());
+
+  int i = 0;
+  QValueList<QPoint>::Iterator it;
+  for(it = locations.begin(); it != locations.end(); ++it)
+  {
+    // We use tuples for positions
+    PyObject* pos = PyTuple_New(2);
+    PyTuple_SetItem(pos, 0, PyInt_FromLong((*it).x()));
+    PyTuple_SetItem(pos, 1, PyInt_FromLong((*it).y()));
+    PyList_SetItem(pylist, i, pos);
+    i++;
+  }
+
+  return pylist;
+}
+
+PyObject* PythonScript::py_nearestOilLocations(PyObject*, PyObject* args)
+{
+  int player, x, y, n, radius;
+  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &x, &y, &n, &radius))
+  {
+    return 0;
+  }
+
+  QValueList<QPoint> locations = BosonScript::nearestOilLocations(player, x, y, n, radius);
+
+  PyObject* pylist = PyList_New(locations.count());
+
+  int i = 0;
+  QValueList<QPoint>::Iterator it;
+  for(it = locations.begin(); it != locations.end(); ++it)
+  {
+    // We use tuples for positions
+    PyObject* pos = PyTuple_New(2);
+    PyTuple_SetItem(pos, 0, PyInt_FromLong((*it).x()));
+    PyTuple_SetItem(pos, 1, PyInt_FromLong((*it).y()));
+    PyList_SetItem(pylist, i, pos);
+    i++;
+  }
+
+  return pylist;
+}
+
 
 /*****  Unit functions  *****/
 PyObject* PythonScript::py_moveUnit(PyObject*, PyObject* args)
@@ -423,7 +479,7 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_setUnitRotation(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_setUnitRotation(PyObject*, PyObject* args)
 {
   int player, id;
   float rot;
@@ -758,21 +814,21 @@ PyObject* PythonScript::py_aiDelay(PyObject*, PyObject*)
 }
 
 /*****  Other functions  *****/
-PyObject* PythonScript::py_startBenchmark(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_startBenchmark(PyObject*, PyObject*)
 {
   BosonScript::startBenchmark();
   Py_INCREF(Py_None);
   return Py_None;
 }
 
-PyObject* PythonScript::py_endBenchmark(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_endBenchmark(PyObject*, PyObject*)
 {
   BosonScript::endBenchmark();
   Py_INCREF(Py_None);
   return Py_None;
 }
 
-PyObject* PythonScript::py_setRandomSeed(PyObject* self, PyObject* args)
+PyObject* PythonScript::py_setRandomSeed(PyObject*, PyObject* args)
 {
   int seed;
   if(!PyArg_ParseTuple(args, (char*)"i", &seed))

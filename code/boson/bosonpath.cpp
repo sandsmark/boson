@@ -24,6 +24,7 @@
 #include "defines.h"
 #include "player.h"
 #include "bodebug.h"
+#include "boson.h"
 #include "unitproperties.h"
 #include "bosonprofiling.h"
 
@@ -145,6 +146,118 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
   return points;
 }
 
+QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
+{
+  QValueList<QPoint> locations;
+
+  QValueList<PathNode> open;
+  PathNode node, n2;
+  bool* visited = new bool[(2 * radius + 1) * (2 * radius + 1)];
+  // Init VISITED set to false
+  for(int i = 0; i < (2 * radius + 1) * (2 * radius + 1); i++)
+  {
+    visited[i] = false;
+  }
+#define VISITED(nx, ny)  visited[(ny - y + radius) * (2 * radius + 1) + (nx - x + radius)]
+
+  BosonCanvas* canvas = boGame->canvas(); // FIXME: is this good?
+
+  node.x = x;
+  node.y = y;
+  node.level = 0;
+  open.append(node);
+  VISITED(node.x, node.y) = true;
+
+  int found = 0;
+
+
+  while(!open.isEmpty())
+  {
+    // Get first node of OPEN
+    getFirst(open, node);
+
+    // Check it's children and add them to OPEN list
+    for(int dir = 0; dir < 8; dir++)
+    {
+      // Find next child node:
+      Direction d = (Direction)dir;
+      // First, set new node's position to be old's one
+      n2.x = node.x;
+      n2.y = node.y;
+      // then call method to modify position accordingly to direction
+      neighbor(n2.x, n2.y, d);
+
+      // Check if new node is within given radius
+      n2.level = QMAX(QABS(x - n2.x), QABS(y - n2.y));
+      if(n2.level > radius)
+      {
+        continue;
+      }
+
+      // Make sure that position is valid
+      if(!canvas->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
+      {
+        //boWarning() << k_lineinfo << "not on canvas" << endl;
+        continue;
+      }
+
+      // Check if cell is already in OPEN
+      if(VISITED(n2.x, n2.y))
+      {
+        continue;
+      }
+
+      // Add node to OPEN
+      open.append(n2);
+      VISITED(n2.x, n2.y) = true;
+
+      // Check if cell is fogged or not
+      if(player->isFogged(n2.x, n2.y))
+      {
+        continue;
+      }
+
+      // If it's not fogged, maybe it's what we're looking for
+      if(type == Minerals)
+      {
+        if(canvas->cell(n2.x, n2.y)->hasMinerals())
+        {
+          locations.append(QPoint(n2.x, n2.y));
+          found++;
+        }
+      }
+      else if(type == Oil)
+      {
+        if(canvas->cell(n2.x, n2.y)->hasOil())
+        {
+          locations.append(QPoint(n2.x, n2.y));
+          found++;
+        }
+      }
+      else if(type == EnemyBuilding)
+      {
+        // TODO!
+      }
+      else if(type == EnemyUnit)
+      {
+        // TODO!
+      }
+
+      if(found >= n)
+      {
+        return locations;
+      }
+
+    }
+  }
+
+  boDebug() << k_funcinfo << "Found only " << found << " of " << n << " locations" << endl;
+  return locations;
+
+#undef VISITED
+}
+
+
 int pathSlow = 0, pathRange = 0, pathFast = 0;
 
 bool BosonPath::findPath()
@@ -264,6 +377,10 @@ bool BosonPath::findFastPath()
     // Check if we can move to waypoint
     // If cost is bigger than MAX_FAST_PF_COST, then we return false and it will
     //  be handled in slow pathfinder instead.
+    if(! mUnit->canvas()->onCanvas(lastx * BO_TILE_SIZE, lasty * BO_TILE_SIZE))
+    {
+      return false;
+    }
     if(cost(lastx, lasty) > MAX_FAST_PF_COST)
     {
       // Path can't be found using fast method
