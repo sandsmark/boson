@@ -66,10 +66,12 @@ a.sidebardownloadlink:hover {
 
 table.box {
   background-color: #004000;
+  color: #00ff00;
 }
 
 td.boxcell {
   background-color: #202020;
+  color: #00ff00;
 }
 
 .bigboxtitle {
@@ -85,50 +87,61 @@ td.boxcell {
 
 table.bigbox {
   background-color: #004000;
+  color: #00ff00;
 }
 
 td.bigboxtitlecell {
   background-color: #202020;
+  color: #00ff00;
 }
 
 td.bigboxcell {
   background-color: #081808;
+  color: #00ff00;
 }
 
 table.bigboxarea {
   background-color: #081808;
+  color: #00ff00;
 }
 
 td.bigboxsubheadercell {
   background-color: #303030;
+  color: #00ff00;
 }
 
 
 /** Main area **/
 table.main {
   background-color: #000000;
+  color: #00ff00;
 }
 
 td.mainarea {
   background-color: #000000;
+  color: #00ff00;
 }
 
 
 /** Sidebar **/
 table.sidebar {
   background-color: #000000;
+  color: #00ff00;
 }
 
 table.sidebarbox {
   background-color: #004000;
+  color: #00ff00;
 }
 
 td.sidebarboxtitlecell {
   background-color: #202020;
+  color: #00ff00;
 }
 
 td.sidebarboxcell {
   background-color: #081808;
+  color: #00ff00;
 }
 
 
