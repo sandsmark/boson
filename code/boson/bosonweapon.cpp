@@ -266,6 +266,11 @@ QMap<int, QString> BosonWeaponProperties::sounds() const
 
 void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault)
 {
+  if(!speciesTheme())
+  {
+    // No speciestheme. We're probably in unit editor
+    return;
+  }
   if(!cfg->hasKey(key) && !useDefault)
   {
     return;
