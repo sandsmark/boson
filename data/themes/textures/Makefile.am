@@ -1,6 +1,8 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
         black.jpg \
+        broken1.jpg \
+        broken2.jpg \
         camo1.jpg \
         camo2.jpg \
         camo3.jpg \
@@ -34,6 +36,9 @@ texture_DATA = \
 	metal13.jpg \
 	metal14.jpg \
 	metal15.jpg \
+        metal16.jpg \
+        metal17.jpg \
+        metal18.jpg \
 	metal2.jpg \
 	metal3.jpg \
 	metal4.jpg \
@@ -61,8 +66,6 @@ texture_DATA = \
 	wheel1.jpg \
 	window1.jpg \
 	window2.jpg \
-	broken1.jpg \
-	broken2.jpg
 
 # no further editing need here
 
