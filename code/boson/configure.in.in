@@ -122,6 +122,3 @@ AC_DEFUN(AC_BOSON_PREFIX,
 ])
 AC_BOSON_PREFIX
 
-dnl Script stuff
-dnl Check for Python
-KDE_CHECK_PYTHON

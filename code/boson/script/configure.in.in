@@ -1,0 +1,3 @@
+dnl Check for Python
+KDE_CHECK_PYTHON
+
