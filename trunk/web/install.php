@@ -62,16 +62,16 @@ draw_bigbox_text("Note that these instructions only apply if you're using a sour
 
 draw_bigbox_subheader("If you downloaded the big package");
 
-draw_bigbox_text("<pre>$ tar xjvf boson-all-0.7.tar.bz2
+draw_bigbox_text("</p><pre>$ tar xjvf boson-all-0.7.tar.bz2
 $ cd boson
 $ ./configure
 $ make
 $ su
-# make install</pre><br>");
+# make install</pre><br><p class=\"bigboxtext\">");
 
 draw_bigbox_subheader("If you downloaded code, data and music separately");
 
-draw_bigbox_text("<pre>$ tar xjvf boson-code-0.7.tar.bz2
+draw_bigbox_text("</p><pre>$ tar xjvf boson-code-0.7.tar.bz2
 $ cd code$ ./configure
 $ make
 $ su
@@ -87,7 +87,7 @@ $ cd music
 $ ./configure
 $ make
 $ su
-# make install</pre>
+# make install</pre><p class=\"bigboxtext\">
   After you've done it, Boson should be installed! Happy playing!");
 
 draw_bigbox_end();

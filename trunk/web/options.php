@@ -82,7 +82,14 @@ draw_bigbox_text("Here you can change the color scheme of this homepage.
 
 draw_bigbox_text("Your style:");
 
-draw_bigbox_text(" <form class=\"style\" action=\"$filename\" method=\"get\"><select size=\"1\" name=\"style\"><option value='green'>Green/black style (default)</option><option value='blue'>Blue style</option></select><input type=\"submit\" value=\"Change!\">");
+draw_bigbox_text("
+	</p>
+	<form class=\"style\" action=\"$filename\" method=\"get\">
+	<select size=\"1\" name=\"style\">
+	<option value='green'>Green/black style (default)</option>
+	<option value='blue'>Blue style</option></select>
+	<input type=\"submit\" value=\"Change!\">
+	</form><p class=\"bigboxtext\">");
 
 draw_bigbox_end();
 
