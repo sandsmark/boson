@@ -39,5 +39,5 @@ Pixmap=attack.png
 Text=AttackGround (weapon)
 
 [ActionLayMine]
-Pixmap=attack.png
-Text=Lay mine (weapon)
+Pixmap=mine.png
+Text=Lay mine
