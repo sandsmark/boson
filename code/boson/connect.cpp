@@ -196,6 +196,11 @@ switch(tag) {
 			);
 		field->createFix(data->facility);
 		break;
+
+	case MSG_FACILITY_UNHIDDEN :
+		ASSERT_DATA_BLENGHT(sizeof(data->facility));
+		field->unHideFix(data->facility);
+		break;
 		
 	case MSG_UNIT_POWER:
 		ASSERT_DATA_BLENGHT(sizeof(data->power));
@@ -221,11 +226,25 @@ switch(tag) {
 		break;
 
 
+	case MSG_FACILITY_HIDDEN :
+		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
+		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
+		field->hideFix(data->destroyed);
+		break;
+
+
 	case MSG_FACILITY_DESTROYED :
 		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
 		logf(LOG_GAME_HIGH, "Facility(%d) destroyed", data->destroyed.key);
 		field->destroyFix(data->destroyed);
 		break;
+
+
+	case MSG_MOBILE_UNHIDDEN :
+		ASSERT_DATA_BLENGHT(sizeof(data->mobile));
+		field->unHideMob(data->mobile);
+		break;
+
 
 
 	case MSG_MOBILE_CREATED :
@@ -238,6 +257,11 @@ switch(tag) {
 			data->mobile.y
 			);
 		field->createMob(data->mobile);
+		break;
+
+	case MSG_MOBILE_HIDDEN :
+		ASSERT_DATA_BLENGHT(sizeof(data->destroyed));
+		field->hideMob(data->destroyed);
 		break;
 
 	case MSG_MOBILE_DESTROYED :
