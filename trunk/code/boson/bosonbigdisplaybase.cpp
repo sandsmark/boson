@@ -1095,11 +1095,11 @@ void BosonBigDisplayBase::renderParticles()
  }
 
  // We sort out non-visible systems ourselves
- QPtrListIterator<BosonParticleSystem> allit(*(canvas()->particleSystems()));
+ QPtrListIterator<BosonParticleSystem> allIt(*(canvas()->particleSystems()));
  QPtrList<BosonParticleSystem> visible;
- BosonParticleSystem* s;
- while ((s = allit.current()) != 0) {
-	++allit;
+ BosonParticleSystem* s = 0;
+ for (; allIt.current(); ++allIt) {
+	s = allIt.current();
 	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
@@ -1131,9 +1131,10 @@ void BosonBigDisplayBase::renderParticles()
 	float x, y, z;
 	d->mParticleList.clear();
 	// Add all particles to the list
-	QPtrListIterator<BosonParticleSystem> visibleit(visible);
-	while ((s = visibleit.current()) != 0) {
-		++visibleit;
+	QPtrListIterator<BosonParticleSystem> visibleIt(visible);
+	s = 0;
+	for (; visibleIt.current(); ++visibleIt) {
+		s = visibleIt.current();
 		for (int i = 0; i < s->mMaxNum; i++) {
 			if (s->mParticles[i].life > 0.0) {
 				p = &(s->mParticles[i]);
@@ -1371,7 +1372,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		makeActive();
 		if (e->button() == LeftButton) {
 			bool replace = !(e->state() & ShiftButton);
-			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
+			Unit* unit = canvas()->findUnitAt(canvasPos);
 			if (unit) {
 				if (!selectAll(unit->unitProperties(), replace)) {
 					selectSingle(unit, replace);
