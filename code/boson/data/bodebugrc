@@ -54,6 +54,10 @@ InfoOutput=4
 [310]
 InfoOutput=4
 
+# Event is off by default
+[360]
+InfoOutput=4
+
 # BoScript if off by default
 [700]
 InfoOutput=4
