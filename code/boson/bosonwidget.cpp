@@ -478,7 +478,7 @@ void BosonWidget::recreateMap()
  d->mCanvas->setMap(d->mMap);
  d->mMiniMap->setMap(d->mMap);
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+		d->mMap, SLOT(changeCell(int, int, int, unsigned char)));
 }
 
 void BosonWidget::addEditorCommandFrame()
