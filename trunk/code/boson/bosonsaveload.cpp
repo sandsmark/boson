@@ -421,17 +421,6 @@ QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 	root.appendChild(element);
  }
 
- // save the ID of the local player
- if (localPlayer) {
-	root.setAttribute(QString::fromLatin1("LocalPlayerId"), (unsigned int)localPlayer->id());
- } else {
-	// this might be the case for network games.
-	// (when a player enters the game it is saved on the ADMIN and loaded on
-	// the new client).
-	// But currently we don't use XML for that. Maybe we will never do.
-	boWarning() << k_funcinfo << "NULL local player" << endl;
- }
-
  return doc.toCString();
 }
 
@@ -509,20 +498,6 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	return false;
  }
  QDomElement root = doc.documentElement();
- if (!root.hasAttribute(QString::fromLatin1("LocalPlayerId"))) {
-	boError(270) << k_funcinfo << "missing attribute: LocalPlayerId" << endl;
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Missing attribute LocalPlayerId in players.xml"));
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- bool ok = false;
- unsigned int localId = root.attribute(QString::fromLatin1("LocalPlayerId")).toUInt(&ok);
- if (!ok) {
-	boError(270) << k_funcinfo << "invalid LocalPlayerId: " << root.attribute(QString::fromLatin1("LocalPlayerId")) << endl;
-	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Invalid value for LocalPlayerId in players.xml"));
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Player"));
  if (list.count() < 1) {
 	boError(270) << k_funcinfo << "no Player tags in file" << endl;
@@ -536,6 +511,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	QDomElement player;
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();
+		bool ok = false;
 		unsigned int id = e.attribute(QString::fromLatin1("Id")).toUInt(&ok);
 		if (!ok) {
 			boError(270) << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
@@ -565,17 +541,8 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 			return false;
 		}
 	}
-	if (p->id() == localId) {
-		localPlayer = p;
-	}
 	p->loadFromXML(player);
  }
- if (!localPlayer) {
-	boWarning(270) << k_funcinfo << "local player NOT found" << endl;
-	addLoadError(SaveLoadError::LoadPlayersError, i18n("No local player found"));
- }
-// d->mBoson->setLocalPlayer(localPlayer);// AB: do we need this?
-
  return true;
 }
 
@@ -632,7 +599,6 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	return false;
  }
  QDomElement playersRoot = playersDoc.documentElement();
- playersRoot.removeAttribute("LocalPlayerId");
  QDomNodeList playerList = playersRoot.elementsByTagName("Player");
  if (playerList.count() == 0) {
 	boError() << k_funcinfo << "no players in game" << endl;

@@ -45,7 +45,6 @@ public:
 	 **/
 	void setNewGameData(const QByteArray& data);
 
-	void setLocalPlayer(Player* p) { mPlayer = p; }
 	void setPlayFieldId(const QString& id) { mPlayFieldId = id; }
 	void setEditorMap(const QByteArray& buffer);
 
@@ -135,7 +134,6 @@ private:
 
 	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;
-	Player* mPlayer;
 
 	QString mPlayFieldId; // which playfield will get started. note: only ADMIN should use the id!
 	                      // all other clients should receive the data from
