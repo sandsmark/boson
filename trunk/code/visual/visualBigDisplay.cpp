@@ -53,53 +53,6 @@ visualBigDisplay::~visualBigDisplay()
 }
 
 
-QRect visualBigDisplay::viewArea() const
-{
-//printf("visualBigDisplay::viewArea = %d.%d, %dx%d\n", BO_TILE_SIZE * vtl->X(), BO_TILE_SIZE * vtl->Y(), width(), height());
-return QRect(BO_TILE_SIZE * vtl->X(), BO_TILE_SIZE * vtl->Y(), width(), height());
-boAssert(width() / BO_TILE_SIZE == vtl->L());
-boAssert(height() / BO_TILE_SIZE == vtl->H());
-}
-
-void visualBigDisplay::flush(const  QRect & area)
-{
-/* nothing special.. */
-///orzel : to change is some kind of off-screen buffering is used
-}
-
-void visualBigDisplay::beginPainter (QPainter &p)
-{
-///orzel : to change if some kind of off-screen buffering is used
-
-p.begin(this);
-p.translate( - BO_TILE_SIZE * vtl->X(), - BO_TILE_SIZE * vtl->Y());
-p.setBackgroundColor(black);
-
-boAssert(p.backgroundColor() == black);
-
-//p.setBackgroundMode(OpaqueMode);
-}
-
-
-/*
-void visualBigDisplay::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
-{
-	QRect r(cx,cy,cw,ch);
-	if (canvas()) {
-
-///orzel : should be removed :
-//		r = rect();
-//printf("r = %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
-		r.moveBy(vtl->X() * BO_TILE_SIZE, vtl->Y() * BO_TILE_SIZE);
-//printf("visualBigDisplay::paintEvents, moved : %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
-		canvas()->drawArea(r,p,!repaint_from_moving);
-		repaint_from_moving = FALSE;
-
-	} else {
-		p->eraseRect(r);
-} 
-*/
-
 void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 {
 	QPainter p;
@@ -178,6 +131,8 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 
 void visualBigDisplay::resizeEvent(QResizeEvent *e)
 {
+	QCanvasView::resizeEvent(e);
+
 	emit reSizeView (	(width()+BO_TILE_SIZE-1)/BO_TILE_SIZE,
 				(height()+BO_TILE_SIZE-1)/BO_TILE_SIZE  );
 }
