@@ -373,7 +373,8 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	boError() << k_funcinfo << "Could not load playfield information" << endl;
 	return false;
  }
- QByteArray descriptionXML = mFile->descriptionData();
+ QMap<QString, QByteArray> descriptions = mFile->descriptionsData();
+ QByteArray descriptionXML = descriptions["C/description.xml"];
  if (descriptionXML.size() == 0 && !mFile->hasMapDirectory()) {
 	boError() << k_funcinfo << "old savegame format not supported." << endl;
 	return false;
@@ -741,10 +742,22 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	return false;
  }
 
- QByteArray descriptionXML = mFile->descriptionData();
- if (descriptionXML.size() == 0) {
+ QMap<QString, QByteArray> descriptions = mFile->descriptionsData();
+ if (!descriptions.contains("C/description.xml")) {
+	boError() << k_funcinfo << "no C/description.xml file found" << endl;
+	return false;
+ }
+ if (descriptions["C/description.xml"].size() == 0) {
 	boError() << k_funcinfo << "empty default description.xml" << endl;
 	return false;
+ }
+ for (QMap<QString, QByteArray>::iterator it = descriptions.begin(); it != descriptions.end(); ++it) {
+	destFiles.insert(it.key(), it.data());
+ }
+
+ QMap<QString, QByteArray> scripts = mFile->scriptsData();
+ for (QMap<QString, QByteArray>::iterator it = scripts.begin(); it != scripts.end(); ++it) {
+	destFiles.insert(it.key(), it.data());
  }
 
  QByteArray externalXML = mFile->externalData();
@@ -755,7 +768,6 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  destFiles.insert("players.xml", playersXML);
  destFiles.insert("canvas.xml", canvasXML);
  destFiles.insert("kgame.xml", kgameXML);
- destFiles.insert("C/description.xml", descriptionXML);
  if (externalXML.size() != 0) {
 	// AB: externalXML is optional only. only for loading games.
 	destFiles.insert("external.xml", externalXML);
