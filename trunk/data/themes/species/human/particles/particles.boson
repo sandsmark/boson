@@ -13,7 +13,7 @@ InitNum=200
 BlendFunc=GL_ONE
 Rate=150
 Size=1.0
-Age=0.3
+SystemLife=0.3
 Align=true
 Texture=explosion.png
 
@@ -35,14 +35,14 @@ InitNum=100
 BlendFunc=GL_ONE
 Rate=150
 Size=1.0
-Age=0.3
+SystemLife=0.3
 Align=true
 Texture=explosion.png
 
 [BigExplosion]
 Id=1003
-MinVelo=-2.5,-2.5,0
-MaxVelo=2.5,2.5,2.2
+MinVelocity=-2.5,-2.5,0
+MaxVelocity=2.5,2.5,2.2
 MinPos=-0.25,-0.25,0.2
 MaxPos=0.25,0.25,0.9
 StartColor=1.0,0.6,0.1,0.25
@@ -52,11 +52,33 @@ MaxLife=0.8
 MaxNum=400
 InitNum=250
 BlendFunc=GL_ONE
-Rate=200
+Rate=250
 Size=1.0
-Age=0.3
+SystemLife=0.5
 Align=true
 Texture=explosion.png
+
+[BigBallExplosion]
+Id=1004
+MinVelocity=-2.5,-2.5,0
+MaxVelocity=2.5,2.5,2.2
+MinPos=-0.25,-0.25,0.2
+MaxPos=0.25,0.25,0.9
+StartColor=1.0,0.6,0.1,0.25
+EndColor=1.0,0.05,0.0,0.1
+MinLife=0.6
+MaxLife=0.8
+MaxNum=400
+InitNum=250
+BlendFunc=GL_ONE
+Rate=250
+Size=1.0
+SystemLife=0.5
+Align=true
+Texture=explosion.png
+Normalize=true
+MinScale=0.5
+MaxScale=3.0
 
 
 
@@ -75,7 +97,7 @@ InitNum=100
 BlendFunc=GL_ONE
 Rate=0
 Size=0.5
-Age=0
+SystemLife=0
 Align=true
 Texture=explosion.png
 
@@ -94,7 +116,7 @@ InitNum=20
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=0
 Size=0.3
-Age=0
+SystemLife=0
 Align=true
 Texture=explosion.png
 
@@ -115,7 +137,7 @@ InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=35
 Size=1.0
-Age=10
+SystemLife=10
 Align=true
 Texture=smoke.png
 
@@ -134,7 +156,26 @@ InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=35
 Size=1.0
-Age=20
+SystemLife=20
+Align=true
+Texture=smoke.png
+
+[BigSmoke]
+Id=3003
+MinVelocity=-0.5,-0.5,0.4
+MaxVelocity=0.5,0.5,1.0
+MinPos=-0.5,-0.5,-0.1
+MaxPos=0.5,0.5,0.35
+StartColor=0.3,0.3,0.3,0.7
+EndColor=0.4,0.4,0.4,0.0
+MinLife=2.0
+MaxLife=3.2
+MaxNum=160
+InitNum=0
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=50
+Size=1.0
+SystemLife=10
 Align=true
 Texture=smoke.png
 
@@ -177,7 +218,7 @@ InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=25
 Size=0.7
-Age=3600
+SystemLife=3600
 Align=true
 Texture=smoke.png
 
@@ -196,7 +237,7 @@ InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=25
 Size=0.7
-Age=3600
+SystemLife=3600
 Align=true
 Texture=smoke.png
 
@@ -208,15 +249,37 @@ MinVelocity=-1.3,-1.3,0
 MaxVelocity=1.3,1.3,1.2
 MinPos=-0.1,-0.1,0.2
 MaxPos=0.1,0.1,0.7
-StartColor=0.5,0.5,0.5,0.25
-EndColor=0.7,0.7,0.7,0.0
+StartColor=0.6,0.6,0.6,0.15
+EndColor=0.8,0.8,0.8,0.0
 MinLife=0.4
 MaxLife=1.6
-MaxNum=60
-InitNum=40
+MaxNum=45
+InitNum=30
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=20
 Size=0.9
-Age=0.5
+SystemLife=0.5
 Align=true
-Texture=explosion.png
+Texture=smoke.png
+
+[BigExplosionSmoke]
+Id=6002
+MinVelocity=-2.2,-2.2,0
+MaxVelocity=2.2,2.2,1.8
+MinPos=-0.15,-0.15,0.2
+MaxPos=0.15,0.15,0.7
+StartColor=0.6,0.6,0.6,0.2
+EndColor=0.8,0.8,0.8,0.0
+MinLife=0.4
+MaxLife=1.6
+MaxNum=60
+InitNum=45
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=30
+Size=0.9
+SystemLife=0.6
+Align=true
+Texture=smoke.png
+Normalize=true
+MinScale=0.3
+MaxScale=2.6
