@@ -26,6 +26,9 @@ Game TODOs
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
+- production lists need some work. there are already plans for this... i just
+  don't have the time at the moment. will do so soon
+- show the minimap only when the player has a radar station
 
 
 Editor (map, unit, scenario) TODOs
@@ -69,6 +72,9 @@ General TODOs
   a nice idea!
 - boson is crashing if BosonCursor (e.g. the sprite one) cannot load the pixmaps
   successfully - should be fixed, but not yet tested
+- shipyard
+- make sure that kdemultimedia is supported - perhaps disable .ogg support
+  somehow if it isn't
 
 Data TODOs
 - general sound (e.g. speech) - in progress
