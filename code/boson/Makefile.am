@@ -25,7 +25,7 @@ INCLUDES= -I../visual $(all_includes)
 
 
 bin_PROGRAMS = boson 
-SUBDIRS = docs 
+SUBDIRS = 
 
 METASOURCES = AUTO
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
