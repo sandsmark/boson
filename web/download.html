@@ -2,7 +2,7 @@
 
 <html>
 <head>
- <title>Boson</title>
+ <title>Boson - Download</title>
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
  <link rel="stylesheet" type="text/css" href="./style.css">
 </head>
@@ -35,8 +35,8 @@
 <table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" width="100%">
 
   <tr valign="top"><td bgcolor="#ffffff" class="boxtext" width="100%">
-  &nbsp;-&nbsp;Infos<br />
-  &nbsp;-&nbsp;<a href="download.html">Download</a><br />
+  &nbsp;-&nbsp;<a href="index.html">Infos</a><br />
+  &nbsp;-&nbsp;Download<br />
   &nbsp;-&nbsp;<a href="screenshots.html">Screenshots</a><br />
   &nbsp;-&nbsp;<a href="status.html">Status</a><br />
   &nbsp;-&nbsp;<a href="contact.html">Contact us</a><br />
@@ -54,7 +54,7 @@
 
 <tr><td align="left" height="20">
 <font size="3" color="#363636"> <b>&nbsp;
-  <a name="n1">Information on Boson</a>
+  <a name="n1">Download Boson</a>
 </b></font>
 </td></tr>
 
@@ -62,25 +62,110 @@
 
 <br /><br /> <font size="3" color="#505050">
 
-
 <h3><i>
-What is Boson ?
+RPM / binary releases
 </i></h3>
 
-
-
-Boson is a real-time strategy game, like Command&amp;Conquer(tm) or StarCraft(tm).
-It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames, kde and
-Qt libraries.
-<p>
-A minimum of two players is required, since there is no artificial intelligence yet.
+None yet, and unlikely to exist soon. We don't expect any RPM/binary release until the 1.0. Anyway,
+if you feel like building a RPM for boson, we'll be happy to put a link here.
+<a href="mailto:orzel@kde.org">Contact me</a>
 
 
 <h3><i>
-Licensing
+Tarballs
 </i></h3>
 
-Boson's Code and Graphics are published under the GNU General Public License (GPL).
+No tarballs are released yet, you'll have to wait for the next official release (labelled 0.6)
+
+
+<h3><i>
+CVS - Bleeding edge development version
+</i></h3>
+You can get the code using these commands: 
+
+<center><table border=1>
+<tr> <td>
+	cvs -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson login <br />
+	cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co code <br />
+</td> </tr>
+</table></center>
+ 
+Please just press the Enter key when you are prompted for a password. 
+As soon as you have checked out the sources you can simply do a 
+
+<center><table border=1>
+<tr> <td>
+	cd code <br />
+	cvs -z3 up -Pd <br />
+</td> </tr>
+</table></center>
+
+to update the sources. No need to login again.
+
+
+
+<h3><i>
+Compilation
+</i></h3>
+To compile boson use something like 
+
+
+
+<center><table border=1>
+<tr> <td>
+
+	cd code <br />
+	./configure --prefix=/opt/kde3  <br />
+	make  <br />
+
+</td> </tr>
+</table></center>
+ 
+You need to be root to install boson: 
+ 
+<center><table border=1>
+<tr> <td>
+	su  <br />
+	make install  <br />
+</td> </tr>
+</table></center>
+ 
+
+
+
+<h3><i>
+Graphics
+</i></h3> 
+
+The graphics packages for Boson provide all the neccessary graphics files to
+play boson, including ground, species and GUI graphics. Just like for the
+sources we use CVS for these so-called data files. We don't provide packages at
+this time as there are quite often (very small) changes to some files and you would
+have to download the entire package again.  So please use CVS for this as well. When
+there are changes to the packages, CVS will only updates the changed parts.
+
+<p>To checkout the data files (veery big package! currently about 24MB).
+(you need to be already logged, see the <i>cvs section</i>) : 
+<center><table border=1>
+<tr> <td>
+	cvs -z3 -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson co data <br />
+</td> </tr>
+</table></center>
+
+<p>Installing the graphics follow exactly the same rules as the code :
+<center><table border=1>
+<tr> <td>
+ ./configure --prefix=/opt/kde3 
+	make <br />
+	su <br />
+	make install <br />
+</td> </tr>
+</table></center>
+ 
+See Sources for details - and don't forget to read the README file! 
+ 
+
+
 
 
 <!-- /MAIN BODY -->
