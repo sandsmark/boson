@@ -2773,6 +2773,7 @@ QByteArray BosonBigDisplayBase::grabMovieFrame()
 
  // Repaint
  slotUpdateGL();
+ glFinish();
 
  // Slots in Qt can be called in any order, so it is possible that particle
  //  systems haven't been advanced yet. If particles' dirty flag would remain
