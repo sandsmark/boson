@@ -19,6 +19,7 @@
 #include "bosonbigdisplay.h"
 #include "bosonbigdisplay.moc"
 
+#include "boson.h"
 #include "unit.h"
 #include "unitplugins.h"
 #include "bosoncanvas.h"
@@ -152,7 +153,9 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			boError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
 			break;
 	}
-	unlockAction();
+	if (*send) {
+		unlockAction();
+	}
 	return;
  }
 
@@ -294,8 +297,14 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
  }
 
  QPoint pos = canvasPos / BO_TILE_SIZE;
- if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProductionId()), pos, production)) {
+ const UnitProperties* prop = localPlayer()->unitProperties(production->currentProductionId());
+ if (!prop) {
+	boError() << k_funcinfo << "NULL unit properties" << endl;
+	return false;
+ }
+ if (!canvas()->canPlaceUnitAt(prop, pos, production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
+	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
  }
 

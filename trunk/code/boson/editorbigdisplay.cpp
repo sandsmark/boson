@@ -189,6 +189,14 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 
 bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
 {
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas())
+	return false;
+ }
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer())
+	return false;
+ }
  bool ret = false;
  int x = canvasPos.x() / BO_TILE_SIZE;
  int y = canvasPos.y() / BO_TILE_SIZE;
@@ -197,28 +205,47 @@ bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
 		boError() << k_funcinfo << "NULL owner" << endl;
 		return false;
 	}
-	boDebug() << "place unit " << d->mPlacement.unitType() << endl;
+	const UnitProperties* prop = localPlayer()->unitProperties(d->mPlacement.unitType());
+	if (!prop) {
+		boError() << k_funcinfo << "invalid unittype " << d->mPlacement.unitType() << endl;
+		return false;
+	}
+	if (!canvas()->canPlaceUnitAt(prop, QPoint(x, y), 0)) {
+		boDebug() << k_funcinfo << "Can't place unit at " << x << " " << y << endl;
+		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
+	} else {
+	
+		boDebug() << "place unit " << d->mPlacement.unitType() << endl;
 
-	stream << (Q_UINT32)BosonMessage::MoveEditor;
-	stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
-	stream << (Q_INT32)d->mPlacement.owner()->id();
-	stream << (Q_INT32)d->mPlacement.unitType();
-	stream << (Q_INT32)x;
-	stream << (Q_INT32)y;
-	ret = true;
-//	setModified(true); // TODO: in BosonPlayField
+		stream << (Q_UINT32)BosonMessage::MoveEditor;
+		stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
+		stream << (Q_INT32)d->mPlacement.owner()->id();
+		stream << (Q_INT32)d->mPlacement.unitType();
+		stream << (Q_INT32)x;
+		stream << (Q_INT32)y;
+		ret = true;
+	}
  } else if (d->mPlacement.isCell()) {
-	unsigned char version = kapp->random() % 4;
-	boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
+	if (canvas()->cellOccupied(x, y)) {
+		// AB: this is not very user friendly.
+		// we should check whether a unit can go on the new cell type
+		// and if it can we should allow placing!!
+		// only warn and abort if it can't go there // TODO
+		boGame->slotAddChatSystemMessage(i18n("Remove the unit first"));
+		ret = false;
+	} else {
+		unsigned char version = kapp->random() % 4;
+		boDebug() << k_funcinfo << "place ground " << d->mPlacement.cell() << ",version=" << version << endl;
 
-	stream << (Q_UINT32)BosonMessage::MoveEditor;
-	stream << (Q_UINT32)BosonMessage::MovePlaceCell;
-	stream << (Q_INT32)d->mPlacement.cell();
-	stream << (Q_UINT8)version;
-	stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
-	stream << (Q_INT32)x;
-	stream << (Q_INT32)y;
-	ret = true;
+		stream << (Q_UINT32)BosonMessage::MoveEditor;
+		stream << (Q_UINT32)BosonMessage::MovePlaceCell;
+		stream << (Q_INT32)d->mPlacement.cell();
+		stream << (Q_UINT8)version;
+		stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
+		stream << (Q_INT32)x;
+		stream << (Q_INT32)y;
+		ret = true;
+	}
  }
  if (ret) {
 	// TODO: in BosonPlayField (call it when the message is received?
