@@ -1483,7 +1483,8 @@ BosonPath2::~BosonPath2()
 void BosonPath2::init()
 {
   boDebug(510) << k_funcinfo << endl;
-  BosonProfiler profiler(10076);
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler profiler(profilerId);
   initCellPassability();
   initSectors();
   initRegions();
@@ -1591,7 +1592,8 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 {
   long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
   boDebug(510) << k_funcinfo << "HL path has " << info->hlpath->path.count() << " steps, using step " << info->hlstep << " atm" << endl;
-  BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'l' + 'o');
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler pr(profilerId);
   BosonPathRegion* currentregion = info->hlpath->path[info->hlstep];
   BosonPathRegion* nextRegion = 0;
   if(info->hlstep + 1 == info->hlpath->path.count())
@@ -1915,7 +1917,8 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   boDebug(510) << k_funcinfo << "area: (" << x1 << "x" << y1 << "-" << x2 << "x" << y2 << ")" << endl;
   long int tm_calcsectorarea, tm_regionlist, tm_hlpathinvalidate, tm_regionreinit, tm_recalcneighbor,
       tm_regionlists2, tm_recalcregioncosts, tm_regiongroups, tm_end;
-  BosonProfiler profiler(10085);
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler profiler(profilerId);
 
   // Calculate changed area in sector coords
   int sx1, sy1, sx2, sy2;
@@ -2361,7 +2364,8 @@ void BosonPath2::initRegionCosts(QPtrVector<BosonPathRegion>& regions)
 void BosonPath2::colorizeRegions()
 {
   long int e1, e2, e3;
-  BosonProfiler p(51070);
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler p(profilerId);
   // We colorize regions with 6 colors
   const unsigned char colors[7][3] = {
     { 255,   0,   0 },
@@ -2553,7 +2557,8 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 {
   boDebug(510) << k_funcinfo << endl;
   long int tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
-  BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'h' + 'i');
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler pr(profilerId);
   // List of open nodes
   BosonPathHeap<BosonPathHighLevelNode> open;
 
@@ -2788,7 +2793,8 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
     return;
   }
 //  info->destRegion = cellRegion(info->dest / BO_TILE_SIZE);
-  BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'h' + 'i' + 'g' + 'o' + 'a' + 'l');
+  static int profilerId = -boProfiling->requestEventId("Stupid profiling name");
+  BosonProfiler pr(profilerId);
   BosonPathRegionGroup* startGrp = info->startRegion->group;
 
   int destx = (info->dest / BO_TILE_SIZE).x();
