@@ -52,6 +52,23 @@ bosonCanvas::~bosonCanvas()
 }
 
 
+void bosonCanvas::setCellFlag(QRect r, uint flag)
+{
+	int i,j;
+	for(i=r.left(); i<=r.right(); i++)
+		for(j=r.top(); j<=r.bottom(); j++)
+			bocanvas->cell(i,j).setFlag( flag);
+}
+
+void bosonCanvas::unsetCellFlag(QRect r, uint flag)
+{
+	int i,j;
+	for(i=r.left(); i<=r.right(); i++)
+		for(j=r.top(); j<=r.bottom(); j++)
+			bocanvas->cell(i,j).unsetFlag( flag);
+}
+
+
 void bosonCanvas::hideMob(destroyedMsg_t &m)
 {
 	playerMobUnit *u;
@@ -110,8 +127,8 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 		return;
 	}
 
-	boCheck(m.x, mob->x());
-	boCheck(m.y, mob->y());
+	if ( QPoint(m.x, m.y) != f->gridRect().topLeft() )
+		logf(LOG_WARNING, "Assertion failed file %s, line %d", __FILE__, __LINE__);
 
 	QPoint p  = mob->center();
 	new boShot ( p.x(), p.y(), mob->z(), boShot::SHOT_UNIT);

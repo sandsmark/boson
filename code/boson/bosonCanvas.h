@@ -69,6 +69,8 @@ public:
 			{return cells[ x + y * maxX ]; }
 	/** convenient function */
 	Cell	&cell(QPoint p ) { return cell(p.x(), p.y()); }
+	void 	setCellFlag(QRect r, uint flag);
+	void 	unsetCellFlag(QRect r, uint flag);
 
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }
