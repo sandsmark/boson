@@ -36,10 +36,10 @@
 
 mobileProperties_t mobileProp[] = {
 	{"ship",		96, 96,  2, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
-	{"quad",		32, 32,  3, 2,		200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
-	{"oilharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
-	{"mineralharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
-	{"aircraft",		72, 72,  3, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"quad",		48, 48,  3, 2,	200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
+	{"oilharvester",	48, 48,  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
+	{"mineralharvester",	48, 48,  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"aircraft",		96, 96,  3, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 //	                        width    visibility     mineral   speed
 //	                            height  range            oil     goFlag
@@ -66,8 +66,11 @@ facilityProperties_t facilityProp[] = {
 	{"oiltower"	, EX(1), EX(1), 2,  0,	300, 100},	// FACILITY_OILTOWER
 	{"refinery"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_REFINERY
 	{"repairpad"	, EX(2), EX(2), 4,  0,	300, 100},	// FACILITY_REPAIRPAD
-	{"turret"	, EX(1), EX(1), 5, 90,	300, 100},	// FACILITY_TURRET
+	{"turret"	, EX(1), EX(1), 5,  5,	300, 100},	// FACILITY_TURRET
 	};
+//	                                        mineral
+//	                  width         visibility
+//	                         height     range     oil
 #undef EX
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));
