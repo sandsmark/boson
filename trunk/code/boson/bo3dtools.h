@@ -151,7 +151,7 @@ class BoVector3
 
     //AB: this calls sqrt() and therefore is slow!
     /**
-     * @return The length of the vector.
+     * @return The length (aka magnitude) of the vector.
      *
      * The length of a vector v is defined as sqrt(v[0]^2 + v[1]^2 + v[2]^2) (in
      * case of 3d).
@@ -319,10 +319,18 @@ class BoVector3
     /**
      * @return TRUE when the coordinates of this vector equal x,y and z,
      * otherwise FALSE.
+     * @param diff The maximal difference that the elements may have to be
+     * treated as "equal". note that 0.0 is a bad idea, since rounding errors
+     * are _very_ probable!
      **/
-    inline bool isEqual(float x, float y, float z) const
+    inline bool isEqual(float x, float y, float z, float diff = 0.001) const
     {
-      return mData[0] == x && mData[1] == y && mData[2] == z;
+      float v2[3];
+      v2[0] = x;
+      v2[1] = y;
+      v2[2] = z;
+      return BoVector3::isEqual(mData, v2);
+      return true;
     }
 
     /**
@@ -331,14 +339,14 @@ class BoVector3
      * Same as above, except that it takes an array of 3 floats, such as e.g.
      * Lib3dsVector.
      **/
-    inline bool isEqual(const float* v) const { return isEqual(v[0], v[1], v[2]); }
+    inline bool isEqual(const float* v, float diff = 0.001) const { return isEqual(v[0], v[1], v[2], diff); }
 
     /**
      * @overload
      **/
-    inline bool isEqual(const BoVector3& v) const
+    inline bool isEqual(const BoVector3& v, float diff = 0.001) const
     {
-      return isEqual(v.data());
+      return isEqual(v.data(), diff);
     }
 
     /**
@@ -348,9 +356,37 @@ class BoVector3
      * this static method without a BoVector3 instance - useful for comparing
      * Lib3dsVectors.
      **/
-    static bool isEqual(const float* v1, const float* v2)
+    static bool isEqual(const float* v1, const float* v2, float diff = 0.001)
     {
-      return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] == v2[2];
+      // avoid fabsf() as we don't include math.h
+      float d1 = v1[0] - v2[0];
+      float d2 = v1[1] - v2[1];
+      float d3 = v1[2] - v2[2];
+      if (d1 < 0.0f)
+      {
+        d1 = -d1;
+      }
+      if (d2 < 0.0f)
+      {
+        d2 = -d2;
+      }
+      if (d3 < 0.0f)
+      {
+        d3 = -d3;
+      }
+      if (d1 > diff)
+      {
+        return false;
+      }
+      if (d2 > diff)
+      {
+        return false;
+      }
+      if (d3 > diff)
+      {
+        return false;
+      }
+      return true;
     }
 
     /**
@@ -751,8 +787,11 @@ class BoMatrix
 
     /**
      * @return TRUE when.. well, when this matrix is equal to @p matrix
+     * @param diff The maximal difference that the elements may have to be
+     * treated as "equal". note that 0.0 is a bad idea, since rounding errors
+     * are _very_ probable!
      **/
-    bool isEqual(const BoMatrix& matrix) const;
+    bool isEqual(const BoMatrix& matrix, float diff = 0.001) const;
 
     /**
      * @return The element at index @p i in the internal array. See @ref

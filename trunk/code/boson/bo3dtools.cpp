@@ -412,11 +412,11 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
 }
 
-bool BoMatrix::isEqual(const BoMatrix& matrix) const
+bool BoMatrix::isEqual(const BoMatrix& matrix, float diff) const
 {
   for (int i = 0; i < 16; i++)
   {
-    if (mData[i] != matrix.mData[i])
+    if (fabsf(mData[i] - matrix.mData[i]) > diff)
     {
       return false;
     }
