@@ -1,6 +1,5 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
-	swtchbrd.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
@@ -8,7 +7,13 @@ texture_DATA = \
 	doors2.jpg \
 	doors3.jpg \
 	doors4.jpg \
+	doors5.jpg \
 	metal1.jpg \
+	metal10.jpg \
+	metal11.jpg \
+	metal12.jpg \
+	metal13.jpg \
+	metal14.jpg \
 	metal2.jpg \
 	metal3.jpg \
 	metal4.jpg \
@@ -16,16 +21,21 @@ texture_DATA = \
 	metal6.jpg \
 	metal7.jpg \
 	metal8.jpg \
+	metal9.jpg \
+	mslback1.jpg \
+	mslfrnt1.jpg \
 	roof1.jpg \
-	tnkhull1.jpg \
-	tracks.jpg \
-	trtside.jpg \
-	vehlcamo.jpg \
-	wall1.jpg \
-	wall2.jpg \
-	wheel.jpg \
+	stairs1.jpg
+	swtchbrd.jpg
+	tnkhull1.jpg
+	tracks.jpg
+	trtside.jpg
+	vehlcamo.jpg
+	wall1.jpg
+	wall2.jpg
+	wheel.jpg
 	wheel1.jpg
-
+	window1.jpg
 
 # no further editing need here
 
