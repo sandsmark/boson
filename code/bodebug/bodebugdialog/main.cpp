@@ -19,6 +19,9 @@
 
 #include "bodebugdialog.h"
 #include "bolistdebugdialog.h"
+
+#include <config.h>
+
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <kstandarddirs.h>
@@ -86,6 +89,8 @@ int main(int argc, char ** argv)
   KUniqueApplication::addCmdLineOptions();
   KUniqueApplication app;
   KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+
+  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
 
   QStringList areaList ( readAreaList() );
   BoAbstractDebugDialog * dialog;
