@@ -44,6 +44,7 @@ libboson_la_SOURCES = \
 	bosoncanvasstatistics.cpp \
 	bosoncollisions.cpp \
 	boson.cpp \
+	bomessage.cpp \
 	bosonsaveload.cpp \
 	speciestheme.cpp \
 	speciesdata.cpp \
