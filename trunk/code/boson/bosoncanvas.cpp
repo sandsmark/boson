@@ -265,10 +265,10 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 			return false;
 		}
 		if (!newCell->canGo(prop)) {
-			boDebug() << "can  not go on " << x << "," << y << endl;
+			boDebug() << k_funcinfo << "can not go on " << x << "," << y << endl;
 			return false;
 		} else {
-//			boDebug() << "can go on " << x << "," << y << endl;
+//			boDebug() << k_funcinfo << "can go on " << x << "," << y << endl;
 		}
 		x++;
 	} while (x * BO_TILE_SIZE <= rect.right());
@@ -491,7 +491,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	return;
  }
  if (!d->mDestroyedUnits.contains(unit)) {
-	boDebug() << "destroy unit " << unit->id() << endl;
+	boDebug() << k_funcinfo << "destroy unit " << unit->id() << endl;
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 
@@ -507,7 +507,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 
 	QPtrListIterator<BosonParticleSystem> it(*(unit->activeParticleSystems()));
 	for (; it.current(); ++it) {
-		boDebug() << "Setting age to 0 for particle system" << it.current() << endl;
+		boDebug() << k_funcinfo << "Setting age to 0 for particle system" << it.current() << endl;
 		it.current()->setAge(0);
 	}
 	unit->activeParticleSystems()->clear();
@@ -635,7 +635,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int 
 //	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (x * x + y * y + z * z <= radius * radius) {
-//		boDebug() << "adding " << u->id() << endl;
+//		boDebug() << k_funcinfo << "adding " << u->id() << endl;
 		list.append(u);
 	}
  }
@@ -695,7 +695,7 @@ void BosonCanvas::killPlayer(Player* player)
  }
  player->setMinerals(0);
  player->setOil(0);
- boDebug() << "player " << player->id() << " is out of game" << endl;
+ boDebug() << k_funcinfo << "player " << player->id() << " is out of game" << endl;
  emit signalOutOfGame(player);
 }
 
