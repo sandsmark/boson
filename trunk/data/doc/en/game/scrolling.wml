@@ -42,7 +42,9 @@
 
     <h4>5. Mouse wheel scrolling</h4>
     <p>
-      You can scroll with the mouse wheel, hold the Alt key for horizontal scrolling.
+      You need to configure Boson for mouse scrolling. Go to the "Settings" menu and select
+      "Configure Boson". Change "Mouse wheel action" under the "Scrolling" tab to "Move camera".<br>
+      Now you can scroll with your mouse wheel, hold down the Alt key for horizontal scrolling.
     </p>
     
     <h4>6. Cursor at the Edge of the window</h4>
