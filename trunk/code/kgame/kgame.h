@@ -687,7 +687,7 @@ protected:
      * {
      *   Q_INT32 move;
      *   msg >>  move;
-     *   kdDebug() << "  Player " << player->id() << " moved to " << move <<
+     *   boDebug() << "  Player " << player->id() << " moved to " << move <<
      *   endl;
      *   return true;
      * }

@@ -26,6 +26,7 @@ libkgame_la_LIBADD = $(LIB_KDEUI)
 
 libkgameinclude_HEADERS = $(KMESSAGE_H) $(KGAME_H) $(DIALOGS_H) $(LIBKDEGAMES_H)
 
-INCLUDES = $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
+
 METASOURCES = AUTO
 

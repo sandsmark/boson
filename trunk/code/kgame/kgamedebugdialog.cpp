@@ -28,7 +28,7 @@
 #include <klistview.h>
 #include <klistbox.h>
 #include <klocale.h>
-#include <kdebug.h>
+#include <bodebug.h>
 
 #include <qlayout.h>
 #include <qstring.h>
@@ -350,7 +350,7 @@ void KGameDebugDialog::slotUpdateGameData()
 			handler->propertyName(it.current()->id()),
 			handler->propertyValue(it.current()), 
 			policy);
-//	kdDebug(11001) << k_funcinfo << ": checking for all game properties: found property name " << name << endl;
+//	boDebug(11001) << k_funcinfo << ": checking for all game properties: found property name " << name << endl;
 	++it;
  }
 }
@@ -364,7 +364,7 @@ void KGameDebugDialog::slotUpdatePlayerData(QListBoxItem* item)
  KPlayer* p = d->mGame->findPlayer(item->text().toInt());
 
  if (!p) {
-	kdError(11001) << k_funcinfo << ": cannot find player" << endl;
+	boError(11001) << k_funcinfo << ": cannot find player" << endl;
 	return;
  }
 
@@ -456,7 +456,7 @@ void KGameDebugDialog::slotUnsetKGame()
 void KGameDebugDialog::addPlayer(KPlayer* p)
 {
  if (!p) {
-	kdError(11001) << "trying to add NULL player" << endl;
+	boError(11001) << "trying to add NULL player" << endl;
 	return;
  }
 
