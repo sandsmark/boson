@@ -39,28 +39,13 @@ BoCamera::BoCamera()
   init();
 }
 
-BoCamera::BoCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
-{
-  init();
-  setMoveRect(minX, maxX, minY, maxY);
-}
-
 BoCamera& BoCamera::operator=(const BoCamera& c)
 {
-  mPosZ = c.mPosZ;
   mLookAt = c.mLookAt;
-  mRotation = c.mRotation;
-  mRadius = c.mRadius;
-
-  mMinX = c.mMinX;
-  mMaxX = c.mMaxX;
-  mMinY = c.mMinY;
-  mMaxY = c.mMaxY;
+  mUp = c.mUp;
+  mCameraPos = c.mCameraPos;
 
   mLookAtDiff = c.mLookAtDiff;
-  mPosZDiff = c.mPosZDiff;
-  mRotationDiff = c.mRotationDiff;
-  mRadiusDiff = c.mRadiusDiff;
   mCommitTime = c.mCommitTime;
   mRemainingTime = c.mRemainingTime;
   mMoveMode = c.mMoveMode;
@@ -73,12 +58,7 @@ BoCamera& BoCamera::operator=(const BoCamera& c)
 
 void BoCamera::init()
 {
-  initStatic();
-  setMoveRect(-100000, 100000, -100000, 100000); // just very big values
   mLookAt.set(0.0f, 0.0f, 0.0f);
-  mPosZ = 8.0f;
-  mRotation = 0.0f;
-  mRadius = 5.0f;
   mMoveMode = Linear;
 
   resetDifferences();
@@ -86,7 +66,257 @@ void BoCamera::init()
   setPositionDirty();
 }
 
-void BoCamera::initStatic()
+void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
+{
+  mLookAt = lookAt;
+  mCameraPos = cameraPos;
+  mUp = up;
+  // checkPosition();
+}
+
+void BoCamera::changeLookAt(const BoVector3& diff, bool now)
+{
+  if(now)
+  {
+    mLookAt += diff;
+    checkPosition();
+    setPositionDirty();
+  }
+  else
+  {
+    mLookAtDiff = diff;
+  }
+}
+
+bool BoCamera::loadFromXML(const QDomElement& root)
+{
+  bool ok;
+  float lookatx, lookaty, lookatz;
+  lookatx = root.attribute("LookAtX").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for LookAtX tag" << endl;
+    lookatx = 0.0f;
+  }
+  lookaty = root.attribute("LookAtY").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for LookAtY tag" << endl;
+    lookaty = 0.0f;
+  }
+  lookatz = root.attribute("LookAtZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError(230) << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
+    lookatz = 0.0f;
+  }
+  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
+  mLookAt.set(lookatx, lookaty, lookatz);
+  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
+  setPositionDirty();
+  return true;
+ }
+
+bool BoCamera::saveAsXML(QDomElement& root)
+{
+ root.setAttribute("LookAtX", lookAt().x());
+ root.setAttribute("LookAtY", lookAt().y());
+ root.setAttribute("LookAtZ", lookAt().z());
+ // TODO: save diffs too?
+ return true;
+}
+
+void BoCamera::applyCameraToScene()
+{
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
+      lookAt().x(), lookAt().y(), lookAt().z(),
+      up().x(), up().y(), up().z());
+}
+
+const BoVector3& BoCamera::cameraPos()
+{
+  if(positionDirty())
+  {
+    updatePosition();
+  }
+  return mCameraPos;
+}
+
+const BoVector3& BoCamera::up()
+{
+  if(positionDirty())
+  {
+    updatePosition();
+  }
+  return mUp;
+}
+
+void BoCamera::setLookAt(const BoVector3& pos, bool now)
+{
+  if(now)
+  {
+    mLookAt = pos;
+    checkPosition();
+    setPositionDirty();
+  }
+  else
+  {
+    mLookAtDiff = pos - mLookAt;
+  }
+}
+
+void BoCamera::commitChanges(int ticks)
+{
+  mCommitTime = ticks;
+  mRemainingTime = ticks;
+  mMovedAmount = 0.0f;
+  if(ticks <= 0)
+  {
+    // Advance immediately. commitTime still has to be at least 1
+    mCommitTime = 1;
+    mRemainingTime = 1;
+    advance();
+  }
+}
+
+void BoCamera::setMoveMode(MoveMode mode)
+{
+  boDebug(230) << k_funcinfo << "mode: " << mode << endl;
+  mMoveMode = mode;
+}
+
+float BoCamera::moveFactor() const
+{
+  float factor = 1.0f;
+  if(moveMode() == Sinusoidal)
+  {
+    // FIXME: make this more simple!
+    factor = (-cos((mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
+    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
+  else if(moveMode() == SinusoidEnd)
+  {
+    // FIXME: make this more simple!
+    factor = -cos(M_PI_2 + (mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI_2) - mMovedAmount;
+    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
+  else
+  {
+    factor = 1.0 / mCommitTime;
+    boDebug(230) << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
+  return factor;
+}
+
+void BoCamera::advance()
+{
+  if(remainingTime() <= 0)
+  {
+    return;
+  }
+  bool changed = advance2();
+
+  if(!changed)
+  {
+//    boError(230) << k_funcinfo << "remainingTime: " << reaminingTime() << ", but no changes ?!" << endl;
+    mRemainingTime = 0;
+    mCommitTime = 0;
+    mMovedAmount = 0.0f;
+  }
+  else
+  {
+    setPositionDirty();
+    mRemainingTime--;
+    if(mRemainingTime == 0)
+    {
+      // Failsafe
+      resetDifferences();
+    }
+  }
+}
+
+bool BoCamera::advance2()
+{
+  if(remainingTime() <= 0)
+  {
+    return false;
+  }
+
+  boDebug(230) << k_funcinfo << "mRemainingTime: " << remainingTime() << endl;
+
+  // How much of differences to add
+  float factor = moveFactor();
+  mMovedAmount += factor;
+  boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
+  bool changed = false;
+
+  if(!mLookAtDiff.isNull())
+  {
+    // How much lookAt point will move
+    BoVector3 lookAtChange(mLookAtDiff * factor);
+    // Change lookAt point and difference
+    mLookAt.add(lookAtChange);
+    checkPosition();
+    changed = true;
+  }
+
+  return changed;
+}
+
+void BoCamera::resetDifferences()
+{
+  mLookAtDiff.reset();
+  mCommitTime = 0;
+  mRemainingTime = 0;
+  mMovedAmount = 0.0f;
+}
+
+
+
+BoGameCamera::BoGameCamera()
+        : BoCamera()
+{
+  init();
+}
+BoGameCamera::BoGameCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
+        : BoCamera()
+{
+  init();
+  setMoveRect(minX, maxX, minY, maxY);
+}
+
+
+BoGameCamera& BoGameCamera::operator=(const BoGameCamera& c)
+{
+  BoCamera::operator=(c);
+  mPosZ = c.mPosZ;
+  mRotation = c.mRotation;
+  mRadius = c.mRadius;
+
+  mPosZDiff = c.mPosZDiff;
+  mRotationDiff = c.mRotationDiff;
+  mRadiusDiff = c.mRadiusDiff;
+
+  mMinX = c.mMinX;
+  mMaxX = c.mMaxX;
+  mMinY = c.mMinY;
+  mMaxY = c.mMaxY;
+  return *this;
+}
+
+void BoGameCamera::init()
+{
+  initStatic();
+  setMoveRect(-100000, 100000, -100000, 100000); // just very big values
+  mPosZ = 8.0f;
+  mRotation = 0.0f;
+  mRadius = 5.0f;
+}
+
+void BoGameCamera::initStatic()
 {
   static bool initialized = false;
   if(initialized)
@@ -102,33 +332,44 @@ void BoCamera::initStatic()
       CAMERA_MAX_RADIUS));
 }
 
-float BoCamera::minCameraZ()
+float BoGameCamera::minCameraZ()
 {
   initStatic();
   return (float)boConfig->doubleValue("CameraMinZ");
 }
 
-float BoCamera::maxCameraZ()
+float BoGameCamera::maxCameraZ()
 {
   initStatic();
   return (float)boConfig->doubleValue("CameraMaxZ");
 }
 
-float BoCamera::maxCameraRadius()
+float BoGameCamera::maxCameraRadius()
 {
   initStatic();
   return (float)boConfig->doubleValue("CameraMaxRadius");
 }
 
-void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
+void BoGameCamera::updatePosition()
 {
-  mLookAt = lookAt;
-  mCameraPos = cameraPos;
-  mUp = up;
-  // checkPosition();
+  float diffX = 0.0f;
+  float diffY = 0.0f;
+  float radius = this->radius();
+  if(radius <= 0.02f)
+  {
+    // If radius is 0, up vector will be wrong so we change it
+    radius = 0.02f;
+  }
+  Bo3dTools::pointByRotation(&diffX, &diffY, rotation(), radius);
+
+  BoVector3 cameraPos(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());
+  BoVector3 up(-diffX, -diffY, 0.0f);
+  setGluLookAt(lookAt(), cameraPos, up);
+
+  setPositionDirty(false);
 }
 
-void BoCamera::changeZ(GLfloat diff, bool now)
+void BoGameCamera::changeZ(GLfloat diff, bool now)
 {
   // FIXME: z limits should depend on the ground height
   // Make sure new z-coordinate is within limits
@@ -158,7 +399,7 @@ void BoCamera::changeZ(GLfloat diff, bool now)
   }
 }
 
-void BoCamera::changeRadius(GLfloat diff, bool now)
+void BoGameCamera::changeRadius(GLfloat diff, bool now)
 {
   // How much radius is changed depends on z position
   float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;
@@ -183,7 +424,7 @@ void BoCamera::changeRadius(GLfloat diff, bool now)
   }
 }
 
-void BoCamera::changeRotation(GLfloat diff, bool now)
+void BoGameCamera::changeRotation(GLfloat diff, bool now)
 {
   if(now)
   {
@@ -197,42 +438,78 @@ void BoCamera::changeRotation(GLfloat diff, bool now)
   }
 }
 
-void BoCamera::changeLookAt(const BoVector3& diff, bool now)
+void BoGameCamera::checkPosition()
 {
-  if(now)
+  // note that we use this in setGluLooKAt() as well, so don't use radius() and
+  // rotation() here!
+  bool changed = false;
+
+  // workaround. AB: i believe cameraPos() and up() must be const.
+  bool dirty = positionDirty();
+  setPositionDirty(false);
+  BoVector3 cameraPos_ = cameraPos();
+  BoVector3 lookAt_ = lookAt();
+  BoVector3 up_ = up();
+  setPositionDirty(dirty);
+
+  if(lookAt().x() < mMinX)
   {
-    mLookAt += diff;
-    checkPosition();
-    setPositionDirty();
+    lookAt_.setX(mMinX);
+    changed = true;
   }
-  else
+  else if(lookAt().x() > mMaxX)
   {
-    mLookAtDiff = diff;
+    lookAt_.setX(mMaxX);
+    changed = true;
+  }
+  if(lookAt().y() < mMinY)
+  {
+    lookAt_.setY(mMinY);
+    changed = true;
+  }
+  else if(lookAt().y() > mMaxY)
+  {
+    lookAt_.setY(mMaxY);
+    changed = true;
+  }
+  if(changed)
+  {
+    setGluLookAt(lookAt_, cameraPos_, up_);
+    setPositionDirty();
   }
 }
 
-void BoCamera::loadFromXML(const QDomElement& root)
+void BoGameCamera::checkRotation()
 {
+  if(mRotation > 360.0f)
+  {
+    mRotation -= 360.0f;
+    setPositionDirty();
+  }
+  else if(mRotation < 0.0f)
+  {
+    mRotation += 360.0f;
+    setPositionDirty();
+  }
+}
+
+
+
+bool BoGameCamera::saveAsXML(QDomElement& root)
+{
+ BoCamera::saveAsXML(root);
+ root.setAttribute("PosZ", z());
+ root.setAttribute("Rotation", rotation());
+ root.setAttribute("Radius", radius());
+ // TODO: save diffs too?
+ return true;
+}
+
+bool BoGameCamera::loadFromXML(const QDomElement& root)
+{
+  bool ret = loadFromXML(root);
+
   bool ok;
-  float lookatx, lookaty, lookatz;
-  lookatx = root.attribute("LookAtX").toFloat(&ok);
-  if(!ok)
-  {
-    boError(230) << k_funcinfo << "Invalid value for LookAtX tag" << endl;
-    lookatx = 0.0f;
-  }
-  lookaty = root.attribute("LookAtY").toFloat(&ok);
-  if(!ok)
-  {
-    boError(230) << k_funcinfo << "Invalid value for LookAtY tag" << endl;
-    lookaty = 0.0f;
-  }
-  lookatz = root.attribute("LookAtZ").toFloat(&ok);
-  if(!ok)
-  {
-    boError(230) << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
-    mPosZ = 0.0f;
-  }
   mPosZ = root.attribute("PosZ").toFloat(&ok);
   if(!ok)
   {
@@ -253,117 +530,11 @@ void BoCamera::loadFromXML(const QDomElement& root)
     radius = 0.0f;
   }
   mRadius = radius;
-  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
-  mLookAt.set(lookatx, lookaty, lookatz);
-  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
   setPositionDirty();
- }
-
-void BoCamera::saveAsXML(QDomElement& root)
-{
- root.setAttribute("LookAtX", lookAt().x());
- root.setAttribute("LookAtY", lookAt().y());
- root.setAttribute("LookAtZ", lookAt().z());
- root.setAttribute("PosZ", z());
- root.setAttribute("Rotation", rotation());
- root.setAttribute("Radius", radius());
- // TODO: save diffs too?
+  return ret;
 }
 
-void BoCamera::checkPosition()
-{
-  // note that we use this in setGluLooKAt() as well, so don't use radius() and
-  // rotation() here!
-  bool changed = false;
-  if(lookAt().x() < mMinX)
-  {
-    mLookAt.setX(mMinX);
-    changed = true;
-  }
-  else if(lookAt().x() > mMaxX)
-  {
-    mLookAt.setX(mMaxX);
-    changed = true;
-  }
-  if(lookAt().y() < mMinY)
-  {
-    mLookAt.setY(mMinY);
-    changed = true;
-  }
-  else if(lookAt().y() > mMaxY)
-  {
-    mLookAt.setY(mMaxY);
-    changed = true;
-  }
-  if(changed)
-  {
-    setPositionDirty();
-  }
-}
-
-void BoCamera::checkRotation()
-{
-  if(mRotation > 360.0f)
-  {
-    mRotation -= 360.0f;
-    setPositionDirty();
-  }
-  else if(mRotation < 0.0f)
-  {
-    mRotation += 360.0f;
-    setPositionDirty();
-  }
-}
-
-void BoCamera::applyCameraToScene()
-{
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
-      lookAt().x(), lookAt().y(), lookAt().z(),
-      up().x(), up().y(), up().z());
-}
-
-void BoCamera::updatePosition()
-{
-  float diffX = 0.0f;
-  float diffY = 0.0f;
-  float radius = this->radius();
-  if(radius <= 0.02f)
-  {
-    // If radius is 0, up vector will be wrong so we change it
-    radius = 0.02f;
-  }
-  Bo3dTools::pointByRotation(&diffX, &diffY, rotation(), radius);
-
-  // Position of camera
-  mCameraPos.set(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());
-  // up vector (points straight up in viewport)
-  mUp.set(-diffX, -diffY, 0.0f);
-
-  mPosDirty = false;
-}
-
-const BoVector3& BoCamera::cameraPos()
-{
-  if(mPosDirty)
-  {
-    updatePosition();
-  }
-  return mCameraPos;
-}
-
-const BoVector3& BoCamera::up()
-{
-  if(mPosDirty)
-  {
-    updatePosition();
-  }
-  return mUp;
-}
-
-void BoCamera::setRadius(GLfloat r, bool now)
+void BoGameCamera::setRadius(GLfloat r, bool now)
 {
   if(now)
   {
@@ -376,7 +547,7 @@ void BoCamera::setRadius(GLfloat r, bool now)
   }
 }
 
-void BoCamera::setRotation(GLfloat r, bool now)
+void BoGameCamera::setRotation(GLfloat r, bool now)
 {
   boDebug(230) << k_funcinfo << endl;
   if(now)
@@ -392,21 +563,7 @@ void BoCamera::setRotation(GLfloat r, bool now)
   }
 }
 
-void BoCamera::setLookAt(const BoVector3& pos, bool now)
-{
-  if(now)
-  {
-    mLookAt = pos;
-    checkPosition();
-    setPositionDirty();
-  }
-  else
-  {
-    mLookAtDiff = pos - mLookAt;
-  }
-}
-
-void BoCamera::setZ(GLfloat z, bool now)
+void BoGameCamera::setZ(GLfloat z, bool now)
 {
   if(now)
   {
@@ -419,7 +576,7 @@ void BoCamera::setZ(GLfloat z, bool now)
   }
 }
 
-void BoCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
+void BoGameCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
 {
   boDebug(230) << k_funcinfo << "(" << minX << "; " << maxX << ";  " << minY << "; " << maxY << ")" << endl;
   mMinX = minX;
@@ -428,67 +585,16 @@ void BoCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat max
   mMaxY = maxY;
 }
 
-void BoCamera::commitChanges(int ticks)
+bool BoGameCamera::advance2()
 {
-  mCommitTime = ticks;
-  mRemainingTime = ticks;
-  mMovedAmount = 0.0f;
-  if(ticks <= 0)
+  bool changed = BoCamera::advance2();
+  if(remainingTime() <= 0)
   {
-    // Advance immediately. commitTime still has to be at least 1
-    mCommitTime = 1;
-    mRemainingTime = 1;
-    advance();
+    return changed;
   }
-}
-
-void BoCamera::setMoveMode(MoveMode mode)
-{
-  boDebug(230) << k_funcinfo << "mode: " << mode << endl;
-  mMoveMode = mode;
-}
-
-void BoCamera::advance()
-{
-  if(mRemainingTime <= 0)
-  {
-    return;
-  }
-
-  boDebug(230) << k_funcinfo << "mRemainingTime: " << mRemainingTime << endl;
 
   // How much of differences to add
-  float factor;
-  if(mMoveMode == Sinusoidal)
-  {
-    // FIXME: make this more simple!
-    factor = (-cos((mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else if(mMoveMode == SinusoidEnd)
-  {
-    // FIXME: make this more simple!
-    factor = -cos(M_PI_2 + (mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI_2) - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else
-  {
-    factor = 1.0 / mCommitTime;
-    boDebug(230) << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  mMovedAmount += factor;
-  boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
-  bool changed = false;
-
-  if(!mLookAtDiff.isNull())
-  {
-    // How much lookAt point will move
-    BoVector3 lookAtChange(mLookAtDiff * factor);
-    // Change lookAt point and difference
-    mLookAt.add(lookAtChange);
-    checkPosition();
-    changed = true;
-  }
+  float factor = moveFactor();
 
   if(mPosZDiff)
   {
@@ -511,33 +617,18 @@ void BoCamera::advance()
     mRadius += diff;
     changed = true;
   }
-
-  if(!changed)
-  {
-//    boError(230) << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
-    mRemainingTime = 0;
-    mCommitTime = 0;
-    mMovedAmount = 0.0f;
-  }
-  else
-  {
-    setPositionDirty();
-    mRemainingTime--;
-    if(mRemainingTime == 0)
-    {
-      // Failsafe
-      resetDifferences();
-    }
-  }
+  return changed;
 }
 
-void BoCamera::resetDifferences()
+void BoGameCamera::resetDifferences()
 {
-  mLookAtDiff.reset();
   mPosZDiff = 0;
   mRotationDiff = 0;
   mRadiusDiff = 0;
-  mCommitTime = 0;
-  mRemainingTime = 0;
-  mMovedAmount = 0.0f;
 }
+
+
+
+/*
+ * vim: et sw=2
+ */

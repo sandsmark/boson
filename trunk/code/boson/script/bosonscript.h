@@ -24,7 +24,7 @@ class BoVector3;
 class BosonBigDisplayBase;
 class Player;
 class Boson;
-class BoCamera;
+class BoGameCamera;
 class BosonCanvas;
 class Boson;
 
@@ -90,7 +90,7 @@ class BosonScript
 
     static BosonBigDisplayBase* display()  { return mDisplay; }
     static Boson* game()  { return mGame; };
-    static BoCamera* camera();
+    static BoGameCamera* camera();
     static BosonCanvas* canvas()  { return mCanvas; }
 
 
