@@ -67,7 +67,9 @@ triggers and events will be written and a usable ai can be developed.
 The website for the Boson project is:
 http://boson.sf.net
 
-This documented may be downloaded from said site
+This documented is located in the CVS repository under code/boson/docs/scripting_engine
+
+IRC Contacts for boson are irc.openprojects.net:6667  #boson
 
 1b) Purpose
 To provide a blueprint for the programmers of boson that will provide level
@@ -133,6 +135,8 @@ they understand that it's because they have a bad strategy.
 
 Since the scripting engine is time oriented it will need to be given a game time
 from the game engine...
+
+One of the things that the engines should do for ai's is to connect through KGAMIO's so that player and ai's are handled the same.
 
 2b) How engine reads scripts
 Different scripts have different layouts... or xml tags... An AI personality
