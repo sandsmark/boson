@@ -20,7 +20,6 @@ FACILITIES = \
 	fix_helipad \
 	fix_mineralrefinery \
 	fix_oilrefinery \
-	fix_oiltower \
 	fix_powerplant \
 	fix_repairpad \
 	fix_samsite \

@@ -1,5 +1,12 @@
 MOBILE_UNITS =
-FACILITIES = barn1 broken_tree haystack1 rock1 tree1 tree2
+FACILITIES = \
+	barn1 \
+	broken_tree \
+	haystack1 \
+	rock1 \
+	tree1 \
+	tree2 \
+	oiltower
 
 unitsdir = $(kde_datadir)/boson/themes/species/neutral/units
 
