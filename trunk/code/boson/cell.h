@@ -121,14 +121,6 @@ public:
 		
 
 	/**
-	 * @return The number of different groundTypes.
-	 **/
-	static int groundTypeCount()
-	{
-		return GroundLast;
-	}
-
-	/**
 	 * @return The number of the tile in the tile file (earth.png)
 	 **/
 	static int tile(int groundType, unsigned char version)
