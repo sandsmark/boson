@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -182,15 +182,6 @@ signals:
 	void signalSaveExternalStuff(QDataStream& stream);
 	void signalLoadExternalStuffFromXML(const QDomElement& root);
 	void signalSaveExternalStuffAsXML(QDomElement& root);
-
-	void signalLoadingPlayersCount(int count);
-	void signalLoadingPlayer(int current);
-	void signalLoadingType(int type);
-
-	/**
-	 * Request for loading the data files of @p player
-	 **/
-	void signalLoadPlayerData(Player* player);
 
 protected:
 	friend class BosonStarting;
