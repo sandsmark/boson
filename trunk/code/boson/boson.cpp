@@ -1826,6 +1826,15 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
  return true;
 }
 
+
+/**
+ * AB:
+ * @li BosonCanvas::createNewItem()
+ * @li UnitBase::setId
+ * @li Boson::signalAddUnit
+ * @li Unit::setGLConstructionStep
+ * @li Unit::setAnimationMode
+ ***/
 Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
  BO_CHECK_NULL_RET0(d->mCanvas);
@@ -1841,12 +1850,12 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return 0;
  }
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, unitType);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType));
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
  }
- unit->setId(nextUnitId());
+// unit->setId(nextUnitId());
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  if (!gameMode()) {
 	// editor won't display the construction, but always completed
@@ -1860,6 +1869,15 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
  return unit;
 }
 
+/**
+ * AB:
+ * @li BosonCanvas::createNewItem()
+ * @li UnitBase::setId
+ * @li BosonScenario::loadUnit  <--
+ * @li Boson::signalAddUnit
+ * @li Unit::setGLConstructionStep
+ * @li Unit::setAnimationMode
+ **/
 Unit* Boson::addUnit(QDomElement& node, Player* p)
 {
  BO_CHECK_NULL_RET0(d->mCanvas);
@@ -1870,12 +1888,12 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	boError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
 	return 0;
  }
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, unitType);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType));
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
  }
- unit->setId(nextUnitId());
+// unit->setId(nextUnitId());
  if (!BosonScenario::loadUnit(node, unit)) {
 	boWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
 	// don't return - the error should be on every client so with some luck
