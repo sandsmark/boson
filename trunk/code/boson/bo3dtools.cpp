@@ -230,7 +230,7 @@ void BoMatrix::transform(BoVector4* vector, BoVector4* input)
 
 bool BoMatrix::invert(BoMatrix* inverse) const
 {
- // shamelessy stolen from mesa/math/m_math.c
+ // shamelessy stolen from mesa/src/math/m_math.c
  // invert_matrix_general
 
 #define SWAP_ROWS(a, b) { GLfloat *_tmp = a; (a)=(b); (b)=_tmp; }
@@ -346,6 +346,15 @@ bool BoMatrix::invert(BoMatrix* inverse) const
 
 #undef MAT
 #undef SWAP_ROWS
+}
+
+void BoMatrix::translate(GLfloat x, GLfloat y, GLfloat z)
+{
+ // shamelessy stolen from mesa/src/math/m_math.c
+ mData[12] = mData[0] * x + mData[4] * y + mData[8]  * z + mData[12];
+ mData[13] = mData[1] * x + mData[5] * y + mData[9]  * z + mData[13];
+ mData[14] = mData[2] * x + mData[6] * y + mData[10] * z + mData[14];
+ mData[15] = mData[3] * x + mData[7] * y + mData[11] * z + mData[15];
 }
 
 void BoMatrix::debugMatrix(const GLfloat* m)

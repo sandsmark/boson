@@ -193,7 +193,6 @@ class BoMatrix
     {
       loadMatrix(matrix);
     }
-    ~BoMatrix() { }
 
     void loadIdentity()
     {
@@ -261,6 +260,12 @@ class BoMatrix
         }
       }
       return true;
+    }
+
+    void translate(GLfloat x, GLfloat y, GLfloat z);
+    inline void translate(BoVector3 v)
+    {
+      translate(v.x(), v.y(), v.z());
     }
 
     /**
