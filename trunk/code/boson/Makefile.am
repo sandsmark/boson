@@ -148,6 +148,7 @@ boson_SOURCES = \
 		bosonbigdisplayinputbase.cpp \
 		bosonbigdisplayinput.cpp \
 		editorbigdisplayinput.cpp \
+		bosonmenuinput.cpp \
 		bogltooltip.cpp \
 		bosonglminimap.cpp \
 		bosonufominimap.cpp \

@@ -94,6 +94,7 @@
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
+#include "bosonmenuinput.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -145,15 +146,6 @@
 #if HAVE_GL_GLEXT_H
 #include <GL/glext.h>
 #endif
-
-
-#define ID_DEBUG_KILLPLAYER 0
-#define ID_DEBUG_ADD_10000_MINERALS 1
-#define ID_DEBUG_ADD_1000_MINERALS 2
-#define ID_DEBUG_SUB_1000_MINERALS 3
-#define ID_DEBUG_ADD_10000_OIL 4
-#define ID_DEBUG_ADD_1000_OIL 5
-#define ID_DEBUG_SUB_1000_OIL 6
 
 
 /**
@@ -1488,9 +1480,9 @@ public:
 	{
 		return mCanvasPos;
 	}
-	void setCanvasPos(const BoVector2Fixed& pos)
+	void setCanvasVector(const BoVector3Fixed& pos)
 	{
-		mCanvasPos = pos;
+		mCanvasPos = BoVector2Fixed(pos.x(), pos.y());
 	}
 
 	void setCanPlace(bool canPlace)
@@ -1581,18 +1573,7 @@ public:
 
 		mUfoGameWidget = 0;
 
-#if 0
-		mActionMenubar = 0;
-#endif
-		mActionStatusbar = 0;
-		mActionDebugPlayers = 0;
-		mActionChat = 0;
-		mActionFullScreen = 0;
-		mActionEditorPlayer = 0;
-		mActionEditorPlace = 0;
-
-		mSelectMapper = 0;
-		mCreateMapper = 0;
+		mMenuInputData = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -1649,20 +1630,7 @@ public:
 
 	BosonUfoGameWidget* mUfoGameWidget;
 
-#if 0
-	QGuardedPtr<BoUfoToggleAction> mActionMenubar;
-#endif
-	QGuardedPtr<BoUfoToggleAction> mActionStatusbar;
-	QGuardedPtr<BoUfoActionMenu> mActionDebugPlayers;
-	QGuardedPtr<BoUfoToggleAction> mActionChat;
-	QGuardedPtr<BoUfoToggleAction> mActionFullScreen;
-	QGuardedPtr<BoUfoSelectAction> mActionEditorPlayer;
-	QGuardedPtr<BoUfoSelectAction> mActionEditorPlace;
-	QGuardedPtr<BoUfoToggleAction> mActionEditorChangeHeight;
-	QPtrList<KPlayer> mEditorPlayers;
-	QPtrDict<KPlayer> mActionDebugPlayer2Player;
-	QSignalMapper* mSelectMapper;
-	QSignalMapper* mCreateMapper;
+	BosonMenuInputData* mMenuInputData;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -1991,391 +1959,6 @@ void BosonBigDisplayBase::initUfoGUI()
  // TODO: tooltips ?
 
  glPopAttrib();
-}
-
-void BosonBigDisplayBase::initUfoActions(bool gameMode)
-{
- BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
- BO_CHECK_NULL_RET(actionCollection);
-
- // AB: note that we have all actions from TopWidget, BosonWidgetBase,
- // BosonWidget and EditorWidget here.
- // in game mode all editor actions should be hidden and vice versa, as the
- // ui.rc files don't list them
- //
- //
-
- // TODO: help menu
-
-
- QSignalMapper* scrollMapper = new QSignalMapper(this);
- connect(scrollMapper, SIGNAL(mapped(int)), this, SLOT(slotScroll(int)));
- BoUfoAction* a;
- KShortcut scrollUp(Qt::Key_Up);
- scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
- a = new BoUfoAction(i18n("Scroll Up"), scrollUp, scrollMapper,
-		SLOT(map()), actionCollection,
-		"scroll_up");
- scrollMapper->setMapping(a, ScrollUp);
- KShortcut scrollDown(Qt::Key_Down);
- scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
- a = new BoUfoAction(i18n("Scroll Down"), scrollDown, scrollMapper,
-		SLOT(map()), actionCollection,
-		"scroll_down");
- scrollMapper->setMapping(a, ScrollDown);
- KShortcut scrollLeft(Qt::Key_Left);
- scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
- a = new BoUfoAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
-		SLOT(map()), actionCollection,
-		"scroll_left");
- scrollMapper->setMapping(a, ScrollLeft);
- KShortcut scrollRight(Qt::Key_Right);
- scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
- a = new BoUfoAction(i18n("Scroll Right"), scrollRight, scrollMapper,
-		SLOT(map()), actionCollection,
-		"scroll_right");
- scrollMapper->setMapping(a, ScrollRight);
- KShortcut rotateLeft(Qt::Key_Q);
- a = new BoUfoAction(i18n("Rotate Left"), rotateLeft, this,
-		SLOT(slotRotateLeft()), actionCollection,
-		"rotate_left");
- KShortcut rotateRight(Qt::Key_E);
- a = new BoUfoAction(i18n("Rotate Right"), rotateRight, this,
-		SLOT(slotRotateRight()), actionCollection,
-		"rotate_right");
- KShortcut zoomIn(Qt::Key_F);
- a = new BoUfoAction(i18n("Zoom In"), zoomIn, this,
-		SLOT(slotZoomIn()), actionCollection,
-		"zoom_in");
- KShortcut zoomOut(Qt::Key_V);
- a = new BoUfoAction(i18n("Zoom out"), zoomOut, this,
-		SLOT(slotZoomOut()), actionCollection,
-		"zoom_out");
-
-
-
- // Settings
-// (void)BoUfoStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection);
-// d->mActionMenubar = BoUfoStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection);
- d->mActionStatusbar = BoUfoStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection);
- BoUfoToggleAction* sound = new BoUfoToggleAction(i18n("Soun&d"),
-		KShortcut(), this, SLOT(slotToggleSound()),
-		actionCollection, "options_sound");
- sound->setChecked(boConfig->sound());
- BoUfoToggleAction* music = new BoUfoToggleAction(i18n("M&usic"), KShortcut(),
-		this, SLOT(slotToggleMusic()),
-		actionCollection, "options_music");
- music->setChecked(boConfig->music());
- (void)new BoUfoAction(i18n("Maximal entries per event..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingEventEntries()), actionCollection, "options_profiling_max_event_entries");
- (void)new BoUfoAction(i18n("Maximal advance call entries..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingAdvanceEntries()), actionCollection, "options_profiling_max_advance_entries");
- (void)new BoUfoAction(i18n("Maximal rendering entries..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingRenderingEntries()), actionCollection, "options_profiling_max_rendering_entries");
-
-
- // Display
- d->mActionFullScreen = BoUfoStdAction::fullScreen(this, SLOT(slotToggleFullScreen()), actionCollection);
- d->mActionFullScreen->setChecked(false);
-
- // Debug
- (void)new BoUfoAction(i18n("&Profiling..."), KShortcut(), this,
-		SLOT(slotProfiling()), actionCollection, "debug_profiling");
- (void)new BoUfoAction(i18n("&Debug KGame..."), KShortcut(), this,
-		SLOT(slotDebugKGame()), actionCollection, "debug_kgame");
- (void)new BoUfoAction(i18n("Debug &BoDebug log..."), KShortcut(), this,
-		SLOT(slotBoDebugLogDialog()), actionCollection, "debug_bodebuglog");
- (void)new BoUfoAction(i18n("sleep() 1s"), KShortcut(), this,
-		SLOT(slotSleep1s()), actionCollection, "debug_sleep_1s");
-
- (void)new BoUfoAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R),
-		this, SLOT(slotResetViewProperties()), actionCollection, "game_reset_view_properties");
-
-
- d->mActionChat = new BoUfoToggleAction(i18n("Show Cha&t"),
-		KShortcut(Qt::CTRL+Qt::Key_C), this, SIGNAL(signalToggleChatVisible()),
-		actionCollection, "options_show_chat");
- d->mActionChat->setChecked(d->mUfoGameWidget->isChatVisible());
-
- (void)new BoUfoAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
-		this, SLOT(slotGrabScreenshot()), actionCollection, "game_grab_screenshot");
- (void)new BoUfoAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
-		this, SLOT(slotGrabProfiling()), actionCollection, "game_grab_profiling");
- BoUfoToggleAction* movie = new BoUfoToggleAction(i18n("Grab &Movie"),
-		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection, "game_grab_movie");
- movie->setChecked(false);
- connect(movie, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetGrabMovie(bool)));
-
- BoUfoToggleAction* resources = new BoUfoToggleAction(i18n("Show resources"),
-		KShortcut(), 0, 0, actionCollection, "show_resources");
- resources->setChecked(true);
- connect(resources, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetShowResources(bool)));
- BoUfoToggleAction* mapCoordinates = new BoUfoToggleAction(i18n("Debug &map coordinates"),
-		KShortcut(), 0, 0, actionCollection, "debug_map_coordinates");
- mapCoordinates->setChecked(false);
- connect(mapCoordinates, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugMapCoordinates(bool)));
- BoUfoToggleAction* PFData = new BoUfoToggleAction(i18n("Debug pathfinder data"),
-		KShortcut(), 0, 0, actionCollection, "debug_pf_data");
- PFData->setChecked(false);
- connect(PFData, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugPFData(bool)));
- BoUfoToggleAction* cellGrid = new BoUfoToggleAction(i18n("Show Cell &Grid"),
-		KShortcut(), 0, 0, actionCollection, "debug_cell_grid");
- cellGrid->setChecked(false);
- connect(cellGrid, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugShowCellGrid(bool)));
- BoUfoToggleAction* matrices = new BoUfoToggleAction(i18n("Debug Ma&trices"),
-		KShortcut(), 0, 0, actionCollection, "debug_matrices");
- matrices->setChecked(false);
- connect(matrices, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugMatrices(bool)));
- BoUfoToggleAction* works = new BoUfoToggleAction(i18n("Debug Item works"),
-		KShortcut(), 0, 0, actionCollection, "debug_works");
- works->setChecked(false);
- connect(works, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugItemWorks(bool)));
- BoUfoToggleAction* camera = new BoUfoToggleAction(i18n("Debug camera"),
-		KShortcut(), 0, 0, actionCollection, "debug_camera");
- camera->setChecked(false);
- connect(camera, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugCamera(bool)));
- BoUfoToggleAction* renderCounts = new BoUfoToggleAction(i18n("Debug Rendering counts"),
-		KShortcut(), 0, 0, actionCollection, "debug_rendercounts");
- renderCounts->setChecked(false);
- connect(renderCounts, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugRenderCounts(bool)));
- BoUfoToggleAction* cheating = new BoUfoToggleAction(i18n("Enable &Cheating"),
-		KShortcut(), 0, 0, actionCollection, "debug_enable_cheating");
- connect(cheating, SIGNAL(signalToggled(bool)), this, SLOT(slotToggleCheating(bool)));
- BoUfoToggleAction* wireFrames = new BoUfoToggleAction(i18n("Render &Wireframes"),
-		KShortcut(), 0, 0, actionCollection, "debug_wireframes");
- connect(wireFrames, SIGNAL(signalToggled(bool)), this, SLOT(slotSetDebugWireFrames(bool)));
- wireFrames->setChecked(false);
- slotSetDebugWireFrames(false);
- BoUfoToggleAction* boundingboxes = new BoUfoToggleAction(i18n("Render item's bounding boxes"),
-		KShortcut(), 0, 0, actionCollection, "debug_boundingboxes");
- boundingboxes->setChecked(false);
- connect(boundingboxes, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugBoundingBoxes(bool)));
- BoUfoToggleAction* fps = new BoUfoToggleAction(i18n("Debug FPS"),
-		KShortcut(), 0, 0, actionCollection, "debug_fps");
- fps->setChecked(false);
- connect(fps, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetDebugFPS(bool)));
- BoUfoToggleAction* debugAdvanceCalls = new BoUfoToggleAction(i18n("Debug &Advance calls"),
-		KShortcut(), 0, 0, actionCollection, "debug_advance_calls");
- connect(debugAdvanceCalls, SIGNAL(signalToggled(bool)), this, SLOT(slotSetDebugAdvanceCalls(bool)));
- BoUfoToggleAction* debugTextureMemory = new BoUfoToggleAction(i18n("Debug &Texture Memory"),
-		KShortcut(), 0, 0, actionCollection, "debug_texture_memory");
- connect(debugTextureMemory, SIGNAL(signalToggled(bool)), this, SLOT(slotSetDebugTextureMemory(bool)));
- (void)new BoUfoAction(i18n("&Unfog"), KShortcut(), this,
-		SLOT(slotUnfogAll()), actionCollection, "debug_unfog");
- (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,
-		SLOT(slotDumpGameLog()), actionCollection, "debug_gamelog");
- BoUfoToggleAction* enableColorMap = new BoUfoToggleAction(i18n("Enable colormap"),
-		KShortcut(), 0, 0, actionCollection, "debug_colormap_enable");
- enableColorMap->setChecked(false);
- connect(enableColorMap, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotSetEnableColorMap(bool)));
- (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
-		SLOT(slotEditConditions()), actionCollection,
-		"debug_edit_conditions");
-
-
- BoUfoSelectAction* debugMode = new BoUfoSelectAction(i18n("Mode"), 0, 0,
-		actionCollection, "debug_mode");
- connect(debugMode, SIGNAL(signalActivated(int)), this, SLOT(slotSetDebugMode(int)));
- QStringList l;
- l.append(i18n("Normal"));
- l.append(i18n("Debug Selection"));
- debugMode->setItems(l);
- debugMode->setCurrentItem(0);
-
- (void)new BoUfoAction(i18n("Show OpenGL states"), KShortcut(), this,
-		SLOT(slotShowGLStates()), actionCollection,
-		"debug_show_opengl_states");
- (void)new BoUfoAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
-		SLOT(slotReloadMeshRenderer()), actionCollection,
-		"debug_lazy_reload_meshrenderer");
- (void)new BoUfoAction(i18n("Reload &groundrenderer plugin"), KShortcut(), this,
-		SLOT(slotReloadGroundRenderer()), actionCollection,
-		"debug_lazy_reload_groundrenderer");
- (void)new BoUfoAction(i18n("Light0..."), KShortcut(), this,
-		SLOT(slotShowLight0Widget()), actionCollection,
-		"debug_light0");
- (void)new BoUfoAction(i18n("Crash boson"), KShortcut(), this,
-		SLOT(slotCrashBoson()), actionCollection,
-		"debug_crash_boson");
-#ifdef BOSON_USE_BOMEMORY
- (void)new BoUfoAction(i18n("Debug M&emory"), KShortcut(), this,
-		SLOT(slotDebugMemory()), actionCollection,
-		"debug_memory");
-#endif
- createDebugPlayersMenu();
-
-
- QStringList files;
- files.append(boData->locateDataFile("boson/topui.rc"));
- files.append(boData->locateDataFile("boson/bosonbaseui.rc"));
- if (gameMode) {
-	initUfoGameActions();
-	files.append(boData->locateDataFile("boson/bosonui.rc"));
- } else {
-	initUfoEditorActions();
-	files.append(boData->locateDataFile("boson/editorui.rc"));
- }
-
- cheating->setChecked(DEFAULT_CHEAT_MODE);
- slotToggleCheating(DEFAULT_CHEAT_MODE);
- d->mActionStatusbar->setChecked(true);
- slotToggleStatusbar();
-
- actionCollection->createGUI(files);
-}
-
-void BosonBigDisplayBase::initUfoGameActions()
-{
- BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
- BO_CHECK_NULL_RET(actionCollection);
-
- (void)BoUfoStdAction::gameQuit(this, SIGNAL(signalQuit()), actionCollection);
- (void)BoUfoStdAction::gameEnd(this, SIGNAL(signalEndGame()), actionCollection);
- (void)BoUfoStdAction::gameSave(this, SIGNAL(signalSaveGame()), actionCollection);
- (void)BoUfoStdAction::gamePause(boGame, SLOT(slotTogglePause()), actionCollection);
- (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection);
- (void)new BoUfoAction(i18n("Center &Home Base"),
-		KShortcut(Qt::Key_H),
-		this, SLOT(slotCenterHomeBase()),
-		actionCollection, "game_center_base");
- (void)new BoUfoAction(i18n("Sync Network"),
-		KShortcut(),
-		this, SLOT(slotSyncNetwork()),
-		actionCollection, "debug_sync_network");
-
-
- delete d->mSelectMapper;
- d->mSelectMapper = new QSignalMapper(this);
- delete d->mCreateMapper;
- d->mCreateMapper = new QSignalMapper(this);
- connect(d->mSelectMapper, SIGNAL(mapped(int)),
-		d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
- connect(d->mCreateMapper, SIGNAL(mapped(int)),
-		d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
-
- for (int i = 0; i < 10; i++) {
-	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
-			Qt::Key_0 + i, d->mSelectMapper,
-			SLOT(map()), actionCollection,
-			QString("select_group_%1").arg(i));
-	d->mSelectMapper->setMapping(a, i);
-	a = new BoUfoAction(i18n("Create Group %1").arg(i == 0 ? 10 : i),
-			Qt::CTRL + Qt::Key_0 + i, d->mCreateMapper,
-			SLOT(map()), actionCollection,
-			QString("create_group_%1").arg(i));
-	d->mCreateMapper->setMapping(a, i);
- }
-
-}
-
-void BosonBigDisplayBase::initUfoEditorActions()
-{
- BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
- BO_CHECK_NULL_RET(actionCollection);
-
-
- BoUfoStdAction::fileSaveAs(this, SLOT(slotEditorSavePlayFieldAs()), actionCollection, "file_save_playfield_as");
- BoUfoAction* close = BoUfoStdAction::fileClose(this, SIGNAL(signalEndGame()), actionCollection);
-
- // TODO
-// close->setText(i18n("&End Editor"));
- BoUfoStdAction::fileQuit(this, SIGNAL(signalQuit()), actionCollection);
- (void)BoUfoStdAction::preferences(this, SLOT(slotPreferences()), actionCollection);
-
- d->mActionEditorPlayer = new BoUfoSelectAction(i18n("&Player"), 0, 0, actionCollection, "editor_player");
- connect(d->mActionEditorPlayer, SIGNAL(signalActivated(int)),
-		this, SLOT(slotEditorChangeLocalPlayer(int)));
-
- QStringList list;
- list.append(i18n("&Facilities"));
- list.append(i18n("&Mobiles"));
- list.append(i18n("&Ground"));
- d->mActionEditorPlace = new BoUfoSelectAction(i18n("Place"), 0, 0, actionCollection, "editor_place");
- connect(d->mActionEditorPlace, SIGNAL(signalActivated(int)),
-		this, SLOT(slotEditorPlace(int)));
- d->mActionEditorPlace->setItems(list);
-
- KShortcut s;
- s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
- s.append(KKeySequence(QKeySequence(Qt::Key_D)));
- (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(s), this,
-		SLOT(slotEditorDeleteSelectedUnits()), actionCollection,
-		"editor_delete_selected_unit");
-
- (void)new BoUfoAction(i18n("Map &description"), KShortcut(), this,
-		SLOT(slotEditorEditMapDescription()), actionCollection,
-		"editor_map_description");
- (void)new BoUfoAction(i18n("Edit &Minerals"), KShortcut(), this,
-		SLOT(slotEditorEditPlayerMinerals()), actionCollection,
-		"editor_player_minerals");
- (void)new BoUfoAction(i18n("Edit &Oil"), KShortcut(), this,
-		SLOT(slotEditorEditPlayerOil()), actionCollection,
-		"editor_player_oil");
- d->mActionEditorChangeHeight = new BoUfoToggleAction(i18n("Edit &Height"),
-		KShortcut(), this, 0, actionCollection, "editor_height");
- connect(d->mActionEditorChangeHeight, SIGNAL(signalToggled(bool)),
-		this, SLOT(slotEditorEditHeight(bool)));
- (void)new BoUfoAction(i18n("&Import height map"), KShortcut(), this,
-		SLOT(slotEditorImportHeightMap()), actionCollection,
-		"editor_import_heightmap");
- (void)new BoUfoAction(i18n("&Export height map"), KShortcut(), this,
-		SLOT(slotEditorExportHeightMap()), actionCollection,
-		"editor_export_heightmap");
- (void)new BoUfoAction(i18n("I&mport texmap"), KShortcut(), this,
-		SLOT(slotEditorImportTexMap()), actionCollection,
-		"editor_import_texmap");
- (void)new BoUfoAction(i18n("E&xport texmap"), KShortcut(), this,
-		SLOT(slotEditorExportTexMap()), actionCollection,
-		"editor_export_texmap");
- (void)new BoUfoAction(i18n("Edit global conditions"), KShortcut(), this,
-		SLOT(slotEditConditions()), actionCollection,
-		"editor_edit_conditions");
-
-// KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection); // FIXME: slotEditorPreferences()
-
- createEditorPlayerMenu();
- d->mActionEditorPlace->setCurrentItem(0);
- slotEditorPlace(0);
-}
-
-void BosonBigDisplayBase::createEditorPlayerMenu()
-{
- BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(d->mActionEditorPlayer);
- QPtrList<KPlayer> players = *boGame->playerList();
- QPtrListIterator<KPlayer> it(players);
- QStringList items;
- int current = -1;
- while (it.current()) {
-	d->mEditorPlayers.append(it.current());
-	items.append(it.current()->name());
-	if (localPlayerIO()) {
-		if (it.current() == (KPlayer*)localPlayerIO()->player()) {
-			current = items.count() - 1;
-		}
-	}
-	++it;
- }
- d->mActionEditorPlayer->setItems(items);
-
- if (current >= 0) {
-	d->mActionEditorPlayer->setCurrentItem(current);
-
-	// AB: this causes a recursion
-//	slotEditorChangeLocalPlayer(current);
- }
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -2881,8 +2464,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 
 void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& boEvent, QDataStream&, bool*)
 {
-#warning FIXME: d->mCanvasPos/Vector are not fixed when zooming with wheel
-
  int action;
  if (boEvent.shiftButton()) {
 	action = boConfig->mouseWheelShiftAction();
@@ -2999,10 +2580,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& ev
  } else if (buttonState & MidButton) {
 	// currently unused
  }
- QPoint widgetPos = mapFromGlobal(QCursor::pos());
- GLfloat x = 0.0, y = 0.0, z = 0.0;
- mapCoordinates(widgetPos, &x, &y, &z);
- worldToCanvas(x, y, z, &(d->mCanvasVector)); // AB: are these already real z coordinates?
+ updateCursorCanvasVector();
  displayInput()->updatePlacementPreviewData();
 
  // AB: we might want to use a timer here instead - then we would also be able
@@ -3209,22 +2787,6 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 PlayerIO* BosonBigDisplayBase::localPlayerIO() const
 {
  return d->mLocalPlayerIO;
-}
-
-void BosonBigDisplayBase::slotCenterHomeBase()
-{
- boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(localPlayerIO());
- slotReCenterDisplay(localPlayerIO()->homeBase());
-}
-
-void BosonBigDisplayBase::slotResetViewProperties()
-{
- BO_CHECK_NULL_RET(canvas());
- d->mFovY = 60.0;
- d->mAspect = 1.0;
- setCamera(BoGameCamera(canvas()));
- resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
@@ -3447,39 +3009,9 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  camera()->changeLookAt(BoVector3Float(x, y, 0));
 }
 
-void BosonBigDisplayBase::slotRotateLeft(float factor)
-{
- BO_CHECK_NULL_RET(camera());
- rotate(factor);
-}
-
-void BosonBigDisplayBase::slotRotateRight(float factor)
-{
- BO_CHECK_NULL_RET(camera());
- rotate(-factor);
-}
-
 void BosonBigDisplayBase::rotate(float delta)
 {
  camera()->changeRotation(delta);
-}
-
-void BosonBigDisplayBase::slotZoomIn(float factor)
-{
- BO_CHECK_NULL_RET(camera());
-
- float delta = factor; // ?
-
- zoom(-delta);
-}
-
-void BosonBigDisplayBase::slotZoomOut(float factor)
-{
- BO_CHECK_NULL_RET(camera());
-
- float delta = factor; // ?
-
- zoom(delta);
 }
 
 void BosonBigDisplayBase::zoom(float delta)
@@ -3487,8 +3019,6 @@ void BosonBigDisplayBase::zoom(float delta)
  BO_CHECK_NULL_RET(camera());
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(canvas()->map());
-
-#warning FIXME: d->mCanvasPos, d->mCanvasVector
 
  camera()->changeZ(delta);
 }
@@ -3558,6 +3088,8 @@ void BosonBigDisplayBase::cameraChanged()
  mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
  mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
  emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
+
+ updateCursorCanvasVector();
 }
 
 BoGameCamera* BosonBigDisplayBase::camera() const
@@ -3746,7 +3278,7 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
 	d->mPlacementPreview.setData(prop, m);
  }
  d->mPlacementPreview.setCanPlace(canPlace);
- d->mPlacementPreview.setCanvasPos(BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()));
+ d->mPlacementPreview.setCanvasVector(cursorCanvasVector());
 }
 
 void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount, unsigned char* alpha, bool canPlace)
@@ -3767,7 +3299,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount,
  }
  d->mPlacementPreview.setData(textureCount, alpha);
  d->mPlacementPreview.setCanPlace(canPlace);
- d->mPlacementPreview.setCanvasPos(BoVector2Fixed(cursorCanvasVector().x(), cursorCanvasVector().y()));
+ d->mPlacementPreview.setCanvasVector(cursorCanvasVector());
 }
 
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
@@ -4695,13 +4227,159 @@ void BosonBigDisplayBase::resetGameMode()
 
  d->mUfoGameWidget->setGameMode(true);
 
- // TODO: delete BoUfoActions
+ delete d->mMenuInputData;
  BoUfoActionCollection* c = ufoManager()->actionCollection();
  ufoManager()->setActionCollection(0);
  delete c;
  c = 0;
  BoUfoActionCollection::initActionCollection(ufoManager());
  ufoManager()->actionCollection()->setAccelWidget(this);
+
+
+
+ d->mMenuInputData = new BosonMenuInputData(ufoManager()->actionCollection());
+ connect(d->mMenuInputData, SIGNAL(signalRotateLeft()),
+		this, SLOT(slotRotateLeft()));
+ connect(d->mMenuInputData, SIGNAL(signalRotateRight()),
+		this, SLOT(slotRotateRight()));
+ connect(d->mMenuInputData, SIGNAL(signalZoomIn()),
+		this, SLOT(slotZoomOut()));
+ connect(d->mMenuInputData, SIGNAL(signalToggleStatusbar(bool)),
+		this, SIGNAL(signalToggleStatusbar(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalToggleSound()),
+		this, SLOT(slotToggleSound()));
+ connect(d->mMenuInputData, SIGNAL(signalToggleMusic()),
+		this, SLOT(slotToggleMusic()));
+ connect(d->mMenuInputData, SIGNAL(signalToggleFullScreen(bool)),
+		this, SLOT(slotToggleFullScreen(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalToggleChatVisible()),
+		this, SIGNAL(signalToggleChatVisible()));
+ connect(d->mMenuInputData, SIGNAL(signalChangeMaxProfilingEventEntries()),
+		this, SLOT(slotChangeMaxProfilingEventEntries()));
+ connect(d->mMenuInputData, SIGNAL(signalChangeMaxProfilingAdvanceEntries()),
+		this, SLOT(slotChangeMaxProfilingAdvanceEntries()));
+ connect(d->mMenuInputData, SIGNAL(signalChangeMaxProfilingRenderingEntries()),
+		this, SLOT(slotChangeMaxProfilingRenderingEntries()));
+ connect(d->mMenuInputData, SIGNAL(signalProfiling()),
+		this, SLOT(slotProfiling()));
+ connect(d->mMenuInputData, SIGNAL(signalDebugKGame()),
+		this, SLOT(slotDebugKGame()));
+ connect(d->mMenuInputData, SIGNAL(signalBoDebugLogDialog()),
+		this, SLOT(slotBoDebugLogDialog()));
+ connect(d->mMenuInputData, SIGNAL(signalSleep1s()),
+		this, SLOT(slotSleep1s()));
+ connect(d->mMenuInputData, SIGNAL(signalResetViewProperties()),
+		this, SLOT(slotResetViewProperties()));
+ connect(d->mMenuInputData, SIGNAL(signalGrabScreenshot()),
+		this, SLOT(slotGrabScreenshot()));
+ connect(d->mMenuInputData, SIGNAL(signalGrabProfiling()),
+		this, SLOT(slotGrabProfiling()));
+ connect(d->mMenuInputData, SIGNAL(signalSetGrabMovie(bool)),
+		this, SLOT(slotSetGrabMovie(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetShowResources(bool)),
+		this, SLOT(slotSetShowResources(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugMapCoordinates(bool)),
+		this, SLOT(slotSetDebugMapCoordinates(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugPFData(bool)),
+		this, SLOT(slotSetDebugPFData(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugShowCellGrid(bool)),
+		this, SLOT(slotSetDebugShowCellGrid(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugMatrices(bool)),
+		this, SLOT(slotSetDebugMatrices(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugItemWorks(bool)),
+		this, SLOT(slotSetDebugItemWorks(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugCamera(bool)),
+		this, SLOT(slotSetDebugCamera(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugRenderCounts(bool)),
+		this, SLOT(slotSetDebugRenderCounts(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugWireFrames(bool)),
+		this, SLOT(slotSetDebugWireFrames(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugBoundingBoxes(bool)),
+		this, SLOT(slotSetDebugBoundingBoxes(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugFPS(bool)),
+		this, SLOT(slotSetDebugFPS(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugAdvanceCalls(bool)),
+		this, SLOT(slotSetDebugAdvanceCalls(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugTextureMemory(bool)),
+		this, SLOT(slotSetDebugTextureMemory(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetEnableColorMap(bool)),
+		this, SLOT(slotSetEnableColorMap(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalSetDebugMode(int)),
+		this, SLOT(slotSetDebugMode(int)));
+ connect(d->mMenuInputData, SIGNAL(signalDebugKillPlayer(Q_UINT32)),
+		this, SLOT(slotDebugKillPlayer(Q_UINT32)));
+ connect(d->mMenuInputData, SIGNAL(signalDebugModifyMinerals(Q_UINT32, int)),
+		this, SLOT(slotDebugModifyMinerals(Q_UINT32, int)));
+ connect(d->mMenuInputData, SIGNAL(signalDebugModifyOil(Q_UINT32, int)),
+		this, SLOT(slotDebugModifyOil(Q_UINT32, int)));
+ connect(d->mMenuInputData, SIGNAL(signalToggleCheating(bool)),
+		this, SLOT(slotToggleCheating(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalUnfogAll()),
+		this, SLOT(slotUnfogAll()));
+ connect(d->mMenuInputData, SIGNAL(signalDumpGameLog()),
+		this, SLOT(slotDumpGameLog()));
+ connect(d->mMenuInputData, SIGNAL(signalEditConditions()),
+		this, SLOT(slotEditConditions()));
+ connect(d->mMenuInputData, SIGNAL(signalShowGLStates()),
+		this, SLOT(slotShowGLStates()));
+ connect(d->mMenuInputData, SIGNAL(signalReloadMeshRenderer()),
+		this, SLOT(slotReloadMeshRenderer()));
+ connect(d->mMenuInputData, SIGNAL(signalReloadGroundRenderer()),
+		this, SLOT(slotReloadGroundRenderer()));
+ connect(d->mMenuInputData, SIGNAL(signalShowLight0Widget()),
+		this, SLOT(slotShowLight0Widget()));
+ connect(d->mMenuInputData, SIGNAL(signalCrashBoson()),
+		this, SLOT(slotCrashBoson()));
+ connect(d->mMenuInputData, SIGNAL(signalDebugMemory()),
+		this, SLOT(slotDebugMemory()));
+ connect(d->mMenuInputData, SIGNAL(signalEndGame()),
+		this, SIGNAL(signalEndGame()));
+ connect(d->mMenuInputData, SIGNAL(signalQuit()),
+		this, SIGNAL(signalQuit()));
+ connect(d->mMenuInputData, SIGNAL(signalPreferences()),
+		this, SLOT(slotPreferences()));
+
+ // game signals
+ connect(d->mMenuInputData, SIGNAL(signalSaveGame()),
+		this, SIGNAL(signalSaveGame()));
+ connect(d->mMenuInputData, SIGNAL(signalCenterHomeBase()),
+		this, SLOT(slotCenterHomeBase()));
+ connect(d->mMenuInputData, SIGNAL(signalSyncNetwork()),
+		this, SLOT(slotSyncNetwork()));
+ connect(d->mMenuInputData, SIGNAL(signalSelectSelectionGroup(int)),
+		d->mSelectionGroups, SLOT(slotSelectSelectionGroup(int)));
+ connect(d->mMenuInputData, SIGNAL(signalCreateSelectionGroup(int)),
+		d->mSelectionGroups, SLOT(slotCreateSelectionGroup(int)));
+
+ // editor signals
+ connect(d->mMenuInputData, SIGNAL(signalEditorSavePlayFieldAs()),
+		this, SLOT(slotEditorSavePlayFieldAs()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+		this, SIGNAL(signalEditorChangeLocalPlayer(Player*)));
+ connect(d->mMenuInputData, SIGNAL(signalEditorShowPlaceFacilities()),
+		this, SLOT(slotEditorShowPlaceFacilities()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorShowPlaceMobiles()),
+		this, SLOT(slotEditorShowPlaceMobiles()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorShowPlaceGround()),
+		this, SLOT(slotEditorShowPlaceGround()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorDeleteSelectedUnits()),
+		this, SLOT(slotEditorDeleteSelectedUnits()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorEditMapDescription()),
+		this, SLOT(slotEditorEditMapDescription()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorEditPlayerMinerals()),
+		this, SLOT(slotEditorEditPlayerMinerals()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorEditPlayerOil()),
+		this, SLOT(slotEditorEditPlayerOil()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorEditHeight(bool)),
+		this, SLOT(slotEditorEditHeight(bool)));
+ connect(d->mMenuInputData, SIGNAL(signalEditorImportHeightMap()),
+		this, SLOT(slotEditorImportHeightMap()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorExportHeightMap()),
+		this, SLOT(slotEditorExportHeightMap()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorImportTexMap()),
+		this, SLOT(slotEditorImportTexMap()));
+ connect(d->mMenuInputData, SIGNAL(signalEditorExportTexMap()),
+		this, SLOT(slotEditorExportTexMap()));
 }
 
 void BosonBigDisplayBase::setGameMode(bool mode)
@@ -4709,7 +4387,240 @@ void BosonBigDisplayBase::setGameMode(bool mode)
  BO_CHECK_NULL_RET(ufoManager());
  resetGameMode();
  d->mUfoGameWidget->setGameMode(mode);
- initUfoActions(mode);
+ d->mMenuInputData->initUfoActions(mode);
+}
+
+
+static QString findSaveFileName(const QString& prefix, const QString& suffix)
+{
+ QString file;
+ for (int i = 0; i < 1000; i++) {
+	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
+	if (!QFile::exists(file)) {
+		return QFileInfo(file).absFilePath();
+		return file;
+	}
+ }
+ return QString::null;
+}
+
+void BosonBigDisplayBase::slotScroll(int dir)
+{
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		scrollBy(0, -boConfig->arrowKeyStep());
+		break;
+	case ScrollRight:
+		scrollBy(boConfig->arrowKeyStep(), 0);
+		break;
+	case ScrollDown:
+		scrollBy(0, boConfig->arrowKeyStep());
+		break;
+	case ScrollLeft:
+		scrollBy(-boConfig->arrowKeyStep(), 0);
+		break;
+	default:
+		return;
+ }
+}
+
+
+void BosonBigDisplayBase::slotPreferencesApply()
+{
+ // apply all options from boConfig to boson, that need to be applied. all
+ // options that are stored in boConfig only don't need to be touched.
+ // AB: cursor is still a special case and not handled here.
+ // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
+ // be managed here!
+ boDebug() << k_funcinfo << endl;
+ setUpdateInterval(boConfig->updateInterval());
+ setToolTipCreator(boConfig->toolTipCreator());
+ setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
+}
+
+void BosonBigDisplayBase::slotUpdateOpenGLSettings()
+{
+ updateOpenGLSettings();
+}
+
+void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+ if (boGame) {
+	if (!boGame->gameMode()) {
+		// editor mode
+		mode = CursorKDE;
+	}
+ }
+ d->mCursorCollection->changeCursor(mode, cursorDir);
+}
+
+void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name)
+{
+ // we don't use i18n() for debug messages... not worth the work
+ switch (msgid) {
+	case BosonMessage::ChangeSpecies:
+		name = "Change Species";
+		break;
+	case BosonMessage::ChangePlayField:
+		name = "Change PlayField";
+		break;
+	case BosonMessage::ChangeTeamColor:
+		name = "Change TeamColor";
+		break;
+	case BosonMessage::AdvanceN:
+		name = "Advance";
+		break;
+	case BosonMessage::IdChat:
+		name = "Chat Message";
+		break;
+	case BosonMessage::IdGameIsStarted:
+		name = "Game is started";
+		break;
+	case BosonMessage::MoveMove:
+		name = "PlayerInput: Move";
+		break;
+	case BosonMessage::MoveAttack:
+		name = "PlayerInput: Attack";
+		break;
+	case BosonMessage::MoveBuild:
+		name = "PlayerInput: Build";
+		break;
+	case BosonMessage::MoveProduce:
+		name = "PlayerInput: Produce";
+		break;
+	case BosonMessage::MoveProduceStop:
+		name = "PlayerInput: Produce Stop";
+		break;
+	case BosonMessage::MoveMine:
+		name = "PlayerInput: Mine";
+		break;
+	case BosonMessage::UnitPropertyHandler:
+	default:
+		// a unit property was changed
+		// all ids > UnitPropertyHandler will be a unit property. we
+		// don't check further...
+		break;
+ }
+// boDebug() << name << endl;
+}
+
+void BosonBigDisplayBase::grabMovieFrameAndSave()
+{
+ if (!d->mGrabMovie) {
+	return;
+ }
+ QByteArray shot = grabMovieFrame();
+
+ if (shot.size() == 0) {
+	return;
+ }
+
+ // Save frame
+ static int frame = -1;
+ QString file;
+ if (frame == -1) {
+	int i;
+	for (i = 0; i <= 10000; i++) {
+		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
+		if (!QFile::exists(file)) {
+			frame = i;
+			break;
+		}
+	}
+	if (i == 10000) {
+		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+		frame = 50000;
+	}
+ }
+ file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
+ file = QFileInfo(file).absFilePath();
+
+ //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
+ bool ok = QPixmap(shot).save(file, "JPEG", 90);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	return;
+ }
+ boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
+
+#if 0
+ static QValueList<QByteArray> allMovieFrames;
+ allMovieFrames.append(shot);
+
+
+ // TODO: use a shortcut for this. do not do this after a certain number of
+ // frames, but when a key was pressed.
+ if (allMovieFrames.count() == 10) {
+	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
+	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
+	allMovieFrames.clear();
+ }
+#endif
+}
+
+void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
+{
+ // AB: note that in the big display no game logic must be done!
+ // -> this slotAdvance() is here for certain optimizations on rendering, not
+ //    for advancing the game itself
+ setParticlesDirty(true);
+ advanceCamera();
+ advanceLineVisualization();
+ grabMovieFrameAndSave();
+}
+
+void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)
+{
+ if (!displayInput()) {
+	return;
+ }
+ displayInput()->action(action);
+}
+
+void BosonBigDisplayBase::updateCursorCanvasVector()
+{
+ QPoint widgetPos = mapFromGlobal(QCursor::pos());
+ GLfloat x = 0.0, y = 0.0, z = 0.0;
+ mapCoordinates(widgetPos, &x, &y, &z);
+ worldToCanvas(x, y, z, &(d->mCanvasVector)); // AB: are these already real z coordinates?
+}
+
+
+
+
+
+
+
+
+void BosonBigDisplayBase::slotRotateLeft(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+ rotate(factor);
+}
+
+void BosonBigDisplayBase::slotRotateRight(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+ rotate(-factor);
+}
+
+void BosonBigDisplayBase::slotZoomIn(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = factor; // ?
+
+ zoom(-delta);
+}
+
+void BosonBigDisplayBase::slotZoomOut(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = factor; // ?
+
+ zoom(delta);
 }
 
 void BosonBigDisplayBase::slotToggleSound()
@@ -4724,16 +4635,103 @@ void BosonBigDisplayBase::slotToggleMusic()
  boConfig->setMusic(boAudio->music());
 }
 
-void BosonBigDisplayBase::slotToggleFullScreen()
+void BosonBigDisplayBase::slotToggleFullScreen(bool fullScreen)
 {
- if (!d->mActionFullScreen) {
-	return;
- }
- if (d->mActionFullScreen->isChecked()) {
+ if (fullScreen) {
 	BoFullScreen::enterMode(-1);
  } else {
 	BoFullScreen::leaveFullScreen();
  }
+}
+
+void BosonBigDisplayBase::slotChangeMaxProfilingEventEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingEventEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
+		i18n("Maximal number of profiling entries per event"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingEventEntries(max);
+	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
+ }
+}
+
+void BosonBigDisplayBase::slotChangeMaxProfilingAdvanceEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingAdvanceEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
+		i18n("Maximal number of profiled advance calls"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingAdvanceEntries(max);
+	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
+ }
+}
+
+void BosonBigDisplayBase::slotChangeMaxProfilingRenderingEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingRenderingEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
+		i18n("Maximal number of profiled frames"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingRenderingEntries(max);
+	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
+ }
+}
+
+void BosonBigDisplayBase::slotProfiling()
+{
+ BosonProfilingDialog* dialog = new BosonProfilingDialog(0, false);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ dialog->show();
+}
+
+void BosonBigDisplayBase::slotDebugKGame()
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this, false);
+
+ QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KGameUnitDebug* units = new KGameUnitDebug(b);
+ units->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
+ KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ player->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
+ KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
+ messages->setBoson(boGame);
+
+#if 0
+ if (boGame->playField()) {
+	BosonMap* map = boGame->playField()->map();
+	if (!map) {
+		boError() << k_funcinfo << "NULL map" << endl;
+		return;
+	}
+	b = dlg->addVBoxPage(i18n("Debug &Cells"));
+
+	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
+	// time and memory to be initialized on big maps (on list item per cell,
+	// on a 500x500 map thats a lot)
+	KGameCellDebug* cells = new KGameCellDebug(b);
+	cells->setMap(map);
+ }
+#endif
+
+ connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
+		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+ dlg->show();
 }
 
 void BosonBigDisplayBase::slotBoDebugLogDialog()
@@ -4749,47 +4747,18 @@ void BosonBigDisplayBase::slotBoDebugLogDialog()
 #endif
 }
 
-void BosonBigDisplayBase::slotProfiling()
-{
- BosonProfilingDialog* dialog = new BosonProfilingDialog(0, false);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- dialog->show();
-}
-
 void BosonBigDisplayBase::slotSleep1s()
 {
  sleep(1);
 }
 
-static QString findSaveFileName(const QString& prefix, const QString& suffix)
+void BosonBigDisplayBase::slotResetViewProperties()
 {
- QString file;
- for (int i = 0; i < 1000; i++) {
-	file.sprintf("%s-%03d.%s", prefix.latin1(), i, suffix.latin1());
-	if (!QFile::exists(file)) {
-		return QFileInfo(file).absFilePath();
-		return file;
-	}
- }
- return QString::null;
-}
-
-void BosonBigDisplayBase::slotGrabProfiling()
-{
- QString file = findSaveFileName("boprofiling", "boprof");
- if (file.isNull()) {
-	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
-	return;
- }
- // TODO: chat message about file location!
- boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
- bool ok = boProfiling->saveToFile(file);
- if (!ok) {
-	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
-	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
- } else {
-	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
- }
+ BO_CHECK_NULL_RET(canvas());
+ d->mFovY = 60.0;
+ d->mAspect = 1.0;
+ setCamera(BoGameCamera(canvas()));
+ resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotGrabScreenshot()
@@ -4816,9 +4785,32 @@ void BosonBigDisplayBase::slotGrabScreenshot()
  }
 }
 
-void BosonBigDisplayBase::slotSetEnableColorMap(bool enable)
+void BosonBigDisplayBase::slotGrabProfiling()
 {
- boConfig->setEnableColormap(enable);
+ QString file = findSaveFileName("boprofiling", "boprof");
+ if (file.isNull()) {
+	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+	return;
+ }
+ // TODO: chat message about file location!
+ boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
+ bool ok = boProfiling->saveToFile(file);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
+	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
+ } else {
+	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
+ }
+}
+
+void BosonBigDisplayBase::slotSetGrabMovie(bool grab)
+{
+ d->mGrabMovie = grab;
+}
+
+void BosonBigDisplayBase::slotSetShowResources(bool show)
+{
+ boConfig->setShowResources(show);
 }
 
 void BosonBigDisplayBase::slotSetDebugMapCoordinates(bool debug)
@@ -4856,6 +4848,11 @@ void BosonBigDisplayBase::slotSetDebugRenderCounts(bool debug)
  boConfig->setDebugRenderCounts(debug);
 }
 
+void BosonBigDisplayBase::slotSetDebugWireFrames(bool on)
+{
+ boConfig->setWireFrames(on);
+}
+
 void BosonBigDisplayBase::slotSetDebugBoundingBoxes(bool debug)
 {
  boConfig->setDebugBoundingBoxes(debug);
@@ -4876,19 +4873,9 @@ void BosonBigDisplayBase::slotSetDebugTextureMemory(bool debug)
  boConfig->setDebugTextureMemory(debug);
 }
 
-void BosonBigDisplayBase::slotSetDebugWireFrames(bool on)
+void BosonBigDisplayBase::slotSetEnableColorMap(bool enable)
 {
- boConfig->setWireFrames(on);
-}
-
-void BosonBigDisplayBase::slotSetShowResources(bool show)
-{
- boConfig->setShowResources(show);
-}
-
-void BosonBigDisplayBase::slotDumpGameLog()
-{
- boGame->saveGameLogs("boson");
+ boConfig->setEnableColormap(enable);
 }
 
 void BosonBigDisplayBase::slotSetDebugMode(int index)
@@ -4896,53 +4883,80 @@ void BosonBigDisplayBase::slotSetDebugMode(int index)
  boConfig->setDebugMode((BosonConfig::DebugMode)index);
 }
 
-void BosonBigDisplayBase::slotShowGLStates()
+void BosonBigDisplayBase::slotDebugKillPlayer(Q_UINT32 playerId)
 {
- boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
- w->show();
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ boGame->sendMessage(b, BosonMessage::IdKillPlayer);
 }
 
-void BosonBigDisplayBase::slotReloadMeshRenderer()
+void BosonBigDisplayBase::slotDebugModifyMinerals(Q_UINT32 playerId, int amount)
 {
- bool unusable = false;
- bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ stream << (Q_INT32)amount;
+ boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+}
+
+void BosonBigDisplayBase::slotDebugModifyOil(Q_UINT32 playerId, int amount)
+{
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)playerId;
+ stream << (Q_INT32)amount;
+ boGame->sendMessage(b, BosonMessage::IdModifyOil);
+}
+
+void BosonBigDisplayBase::slotToggleCheating(bool on)
+{
+ if (!ufoManager() || !ufoManager()->actionCollection()) {
 	return;
  }
- boError() << "meshrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
- }
+ ufoManager()->actionCollection()->setActionEnabled("debug_unfog", on);
+ ufoManager()->actionCollection()->setActionEnabled("debug_players", on);
 }
 
-void BosonBigDisplayBase::slotReloadGroundRenderer()
+void BosonBigDisplayBase::slotUnfogAll(Player* pl)
 {
- bool unusable = false;
- bool r = BoGroundRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
+ // AB: disabled, because we cannot use player.h here.
+ // see also comment in slotEditorEditPlayerMinerals()
+#if 0
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
- boError() << "groundrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed but library should still be usable"));
+ if (!boGame->playField()) {
+	boError() << k_funcinfo << "NULL playField" << endl;
+	return;
  }
+ BosonMap* map = boGame->playField()->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ QPtrList<KPlayer> list;
+ if (!pl) {
+	list = *boGame->playerList();
+ } else {
+	list.append(pl);
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Player* p = (Player*)list.at(i);
+	for (unsigned int x = 0; x < map->width(); x++) {
+		for (unsigned int y = 0; y < map->height(); y++) {
+			p->unfog(x, y);
+		}
+	}
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
+ }
+#endif
 }
 
-void BosonBigDisplayBase::slotCrashBoson()
+void BosonBigDisplayBase::slotDumpGameLog()
 {
- ((QObject*)0)->name();
-}
-
-void BosonBigDisplayBase::slotSyncNetwork()
-{
- boGame->syncNetwork();
+ boGame->saveGameLogs("boson");
 }
 
 void BosonBigDisplayBase::slotEditConditions()
@@ -5011,33 +5025,43 @@ void BosonBigDisplayBase::slotEditConditions()
  }
 }
 
-void BosonBigDisplayBase::slotScroll(int dir)
+void BosonBigDisplayBase::slotShowGLStates()
 {
- switch ((ScrollDirection)dir) {
-	case ScrollUp:
-		scrollBy(0, -boConfig->arrowKeyStep());
-		break;
-	case ScrollRight:
-		scrollBy(boConfig->arrowKeyStep(), 0);
-		break;
-	case ScrollDown:
-		scrollBy(0, boConfig->arrowKeyStep());
-		break;
-	case ScrollLeft:
-		scrollBy(-boConfig->arrowKeyStep(), 0);
-		break;
-	default:
-		return;
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
+}
+
+void BosonBigDisplayBase::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
  }
 }
 
-void BosonBigDisplayBase::slotToggleCheating(bool on)
+void BosonBigDisplayBase::slotReloadGroundRenderer()
 {
- if (!ufoManager() || !ufoManager()->actionCollection()) {
+ bool unusable = false;
+ bool r = BoGroundRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
 	return;
  }
- ufoManager()->actionCollection()->setActionEnabled("debug_unfog", on);
- ufoManager()->actionCollection()->setActionEnabled("debug_players", on);
+ boError() << "groundrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed but library should still be usable"));
+ }
 }
 
 void BosonBigDisplayBase::slotShowLight0Widget()
@@ -5046,6 +5070,11 @@ void BosonBigDisplayBase::slotShowLight0Widget()
  d->mLightWidget = new BoLightCameraWidget1(0, true);
  d->mLightWidget->show();
  d->mLightWidget->setLight(light(0), context());
+}
+
+void BosonBigDisplayBase::slotCrashBoson()
+{
+ ((QObject*)0)->name();
 }
 
 void BosonBigDisplayBase::slotDebugMemory()
@@ -5061,190 +5090,43 @@ void BosonBigDisplayBase::slotDebugMemory()
 #endif
 }
 
-void BosonBigDisplayBase::createDebugPlayersMenu()
-{
- // note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
- if (d->mActionDebugPlayers) {
-	boError() << k_funcinfo << "menu already created" << endl;
-	return;
- }
- BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(ufoManager());
- BO_CHECK_NULL_RET(ufoManager()->actionCollection());
- d->mActionDebugPlayers = new BoUfoActionMenu(i18n("Players"),
-		ufoManager()->actionCollection(), "debug_players");
-
- QPtrList<KPlayer> players = *boGame->playerList();
- QPtrListIterator<KPlayer> it(players);
- for (; it.current(); ++it) {
-	KPlayer* player = it.current();
-	BoUfoActionMenu* menu = new BoUfoActionMenu(player->name(),
-			ufoManager()->actionCollection(),
-			QString("debug_players_%1").arg(player->name()));
-
-	connect(menu, SIGNAL(signalActivated(int)),
-			this, SLOT(slotDebugPlayer(int)));
-	menu->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
-	menu->insertItem(i18n("Minerals += 10000"), ID_DEBUG_ADD_10000_MINERALS);
-	menu->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
-	menu->insertItem(i18n("Minerals -= 1000"), ID_DEBUG_SUB_1000_MINERALS);
-	menu->insertItem(i18n("Oil += 10000"), ID_DEBUG_ADD_10000_OIL);
-	menu->insertItem(i18n("Oil += 1000"), ID_DEBUG_ADD_1000_OIL);
-	menu->insertItem(i18n("Oil -= 1000"), ID_DEBUG_SUB_1000_OIL);
-
-	d->mActionDebugPlayers->insert(menu);
-	d->mActionDebugPlayer2Player.insert(menu, player);
- }
-}
-
-void BosonBigDisplayBase::slotDebugPlayer(int index)
-{
- BO_CHECK_NULL_RET(sender());
- if (!sender()->inherits("BoUfoActionMenu")) {
-	boError() << k_funcinfo << "sender() is not a BoUfoActionMenu" << endl;
-	return;
- }
- QPtrDictIterator<KPlayer> it(d->mActionDebugPlayer2Player);
- BoUfoActionMenu* menu = (BoUfoActionMenu*)sender();
- KPlayer* p = 0;
- while (it.current() && !p) {
-	BoUfoActionMenu* m = (BoUfoActionMenu*)it.currentKey();
-	if (m == menu) {
-		p = it.current();
-	}
-	++it;
- }
-
- if (!p) {
-	boError() << k_funcinfo << "player not found" << endl;
-	return;
- }
-
- QByteArray b;
- QDataStream stream(b, IO_WriteOnly);
- stream << (Q_UINT32)p->id();
- switch (index) {
-	case ID_DEBUG_KILLPLAYER:
-		boGame->sendMessage(b, BosonMessage::IdKillPlayer);
-		break;
-	case ID_DEBUG_ADD_10000_MINERALS:
-		stream << (Q_INT32)10000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_ADD_1000_MINERALS:
-		stream << (Q_INT32)1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_SUB_1000_MINERALS:
-		stream << (Q_INT32)-1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
-		break;
-	case ID_DEBUG_ADD_1000_OIL:
-		stream << (Q_INT32)1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	case ID_DEBUG_ADD_10000_OIL:
-		stream << (Q_INT32)10000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	case ID_DEBUG_SUB_1000_OIL:
-		stream << (Q_INT32)-1000;
-		boGame->sendMessage(b, BosonMessage::IdModifyOil);
-		break;
-	default:
-		boError() << k_funcinfo << "unknown index " << index << endl;
-		break;
- }
-}
-
-
-void BosonBigDisplayBase::slotChangeMaxProfilingEventEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingEventEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
-		i18n("Maximal number of profiling entries per event"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingEventEntries(max);
-	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
- }
-}
-
-void BosonBigDisplayBase::slotChangeMaxProfilingAdvanceEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingAdvanceEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
-		i18n("Maximal number of profiled advance calls"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingAdvanceEntries(max);
-	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
- }
-}
-
-void BosonBigDisplayBase::slotChangeMaxProfilingRenderingEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingRenderingEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
-		i18n("Maximal number of profiled frames"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingRenderingEntries(max);
-	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
- }
-}
-
-void BosonBigDisplayBase::slotToggleStatusbar()
-{
- BO_CHECK_NULL_RET(d->mActionStatusbar);
- emit signalToggleStatusbar(d->mActionStatusbar->isChecked());
-}
-
-void BosonBigDisplayBase::slotDebugKGame()
+void BosonBigDisplayBase::slotPreferences()
 {
  if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
+	boWarning() << k_funcinfo << "NULL boGame object" << endl;
 	return;
  }
- KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this, false);
+ OptionsDialog* dlg = new OptionsDialog(!boGame->gameMode(), this);
+ dlg->setGame(boGame);
+ dlg->setPlayer(localPlayerIO()->player());
+ dlg->slotLoad();
 
- QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
- KGameUnitDebug* units = new KGameUnitDebug(b);
- units->setBoson(boGame);
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
 
- b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
- KGamePlayerDebug* player = new KGamePlayerDebug(b);
- player->setBoson(boGame);
+ connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SLOT(slotChangeCursor(int, const QString&)));
+// connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
+//		this, SLOT(slotCmdBackgroundChanged(const QString&)));
+ connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
+		this, SLOT(slotUpdateOpenGLSettings()));
+ connect(dlg, SIGNAL(signalApply()),
+		this, SLOT(slotPreferencesApply()));
+// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
 
- b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
- KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
- messages->setBoson(boGame);
-
-#if 0
- if (boGame->playField()) {
-	BosonMap* map = boGame->playField()->map();
-	if (!map) {
-		boError() << k_funcinfo << "NULL map" << endl;
-		return;
-	}
-	b = dlg->addVBoxPage(i18n("Debug &Cells"));
-
-	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
-	// time and memory to be initialized on big maps (on list item per cell,
-	// on a 500x500 map thats a lot)
-	KGameCellDebug* cells = new KGameCellDebug(b);
-	cells->setMap(map);
- }
-#endif
-
- connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
-		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
  dlg->show();
+}
+
+void BosonBigDisplayBase::slotCenterHomeBase()
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(localPlayerIO());
+ slotReCenterDisplay(localPlayerIO()->homeBase());
+}
+
+void BosonBigDisplayBase::slotSyncNetwork()
+{
+ boGame->syncNetwork();
 }
 
 void BosonBigDisplayBase::slotEditorSavePlayFieldAs()
@@ -5271,41 +5153,19 @@ void BosonBigDisplayBase::slotEditorSavePlayFieldAs()
  }
 }
 
-void BosonBigDisplayBase::slotEditorChangeLocalPlayerHack()
+void BosonBigDisplayBase::slotEditorShowPlaceFacilities()
 {
- slotEditorChangeLocalPlayer(0);
+ d->mUfoGameWidget->slotShowPlaceFacilities(localPlayerIO());
 }
 
-void BosonBigDisplayBase::slotEditorChangeLocalPlayer(int index)
+void BosonBigDisplayBase::slotEditorShowPlaceMobiles()
 {
- Player* p = 0;
- p = (Player*)d->mEditorPlayers.at(index);
+ d->mUfoGameWidget->slotShowPlaceMobiles(localPlayerIO());
+}
 
- static Player* senderPlayer = 0;
- if (sender() && sender()->inherits("BoUfoAction")) {
-
-	// AB: when changing the local player we delete the whole menu and
-	// recreate it.
-	// however we must not do that when called while dispatching ufo events
-	// (calling this slot usually results from a menu item click!).
-	// therefore we delay changing the local player using a QTimer.
-
-	boDebug() << k_funcinfo << "calling again indirectly using a QTimer..." << endl;
-	senderPlayer = p;
-	QTimer::singleShot(0, this, SLOT(slotEditorChangeLocalPlayerHack()));
-	return;
- }
- boDebug() << k_funcinfo << "sender() is NULL - we were probably called indirectly using a QTimer - continue..." << endl;
- p = senderPlayer;
- if (p) {
-	emit signalEditorChangeLocalPlayer((Player*)p);
-	BO_CHECK_NULL_RET(d->mActionEditorPlace);
-	if (d->mActionEditorPlace->currentItem() >= 0) {
-		slotEditorPlace(d->mActionEditorPlace->currentItem());
-	}
- } else {
-	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
- }
+void BosonBigDisplayBase::slotEditorShowPlaceGround()
+{
+ d->mUfoGameWidget->slotShowPlaceGround();
 }
 
 void BosonBigDisplayBase::slotEditorDeleteSelectedUnits()
@@ -5329,22 +5189,68 @@ void BosonBigDisplayBase::slotEditorEditMapDescription()
  delete dialog;
 }
 
-void BosonBigDisplayBase::slotEditorPlace(int index)
+void BosonBigDisplayBase::slotEditorEditPlayerMinerals()
 {
- boDebug() << k_funcinfo << "index: " << index << endl;
- switch (index) {
-	case 0:
-		d->mUfoGameWidget->slotShowPlaceFacilities(localPlayerIO());
-		break;
-	case 1:
-		d->mUfoGameWidget->slotShowPlaceMobiles(localPlayerIO());
-		break;
-	case 2:
-		d->mUfoGameWidget->slotShowPlaceGround();
-		break;
-	default:
-		boError() << k_funcinfo << "Invalid index " << index << endl;
-		return;
+ // atm disabled, as we must not include player.h in this file
+ // these methods (e.g. all editor dependent methods) should get moved to a
+ // different file anyway.
+ // maybe all game/editor menu items will be handled by a dedicated KGameIO
+ // class.
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->minerals());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	// cancel pressed
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setMinerals(v);
+#endif
+}
+
+void BosonBigDisplayBase::slotEditorEditPlayerOil()
+{
+ // atm disabled, as we must not include player.h in this file
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->oil());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setOil(v);
+#endif
+}
+
+void BosonBigDisplayBase::slotEditorEditHeight(bool on)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ if (on) {
+	BoSpecificAction action;
+	action.setType(ActionChangeHeight);
+	displayInput()->action(action);
+ } else {
+	displayInput()->unlockAction();
  }
 }
 
@@ -5477,289 +5383,6 @@ void BosonBigDisplayBase::slotEditorExportTexMap()
  }
 }
 
-void BosonBigDisplayBase::slotEditorEditHeight(bool on)
-{
- BO_CHECK_NULL_RET(displayInput());
- if (on) {
-	BoSpecificAction action;
-	action.setType(ActionChangeHeight);
-	displayInput()->action(action);
- } else {
-	displayInput()->unlockAction();
- }
-}
-
-void BosonBigDisplayBase::slotEditorEditPlayerMinerals()
-{
- // atm disabled, as we must not include player.h in this file
- // these methods (e.g. all editor dependent methods) should get moved to a
- // different file anyway.
- // maybe all game/editor menu items will be handled by a dedicated KGameIO
- // class.
-#if 0
- BO_CHECK_NULL_RET(localPlayer());
- bool ok = false;
- QString value = QString::number(localPlayer()->minerals());
- QIntValidator val(this);
- val.setBottom(0);
- val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
- if (!ok) {
-	// cancel pressed
-	return;
- }
- boDebug() << k_funcinfo << value << endl;
- unsigned long int v = value.toULong(&ok);
- if (!ok) {
-	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
-	return;
- }
- localPlayer()->setMinerals(v);
-#endif
-}
-
-void BosonBigDisplayBase::slotEditorEditPlayerOil()
-{
- // atm disabled, as we must not include player.h in this file
-#if 0
- BO_CHECK_NULL_RET(localPlayer());
- bool ok = false;
- QString value = QString::number(localPlayer()->oil());
- QIntValidator val(this);
- val.setBottom(0);
- val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
- value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
- if (!ok) {
-	return;
- }
- boDebug() << k_funcinfo << value << endl;
- unsigned long int v = value.toULong(&ok);
- if (!ok) {
-	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
-	return;
- }
- localPlayer()->setOil(v);
-#endif
-}
-
-void BosonBigDisplayBase::slotPreferences()
-{
- if (!boGame) {
-	boWarning() << k_funcinfo << "NULL boGame object" << endl;
-	return;
- }
- OptionsDialog* dlg = new OptionsDialog(!boGame->gameMode(), this);
- dlg->setGame(boGame);
- dlg->setPlayer(localPlayerIO()->player());
- dlg->slotLoad();
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
-
- connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
-		this, SLOT(slotChangeCursor(int, const QString&)));
-// connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
-//		this, SLOT(slotCmdBackgroundChanged(const QString&)));
- connect(dlg, SIGNAL(signalOpenGLSettingsUpdated()),
-		this, SLOT(slotUpdateOpenGLSettings()));
- connect(dlg, SIGNAL(signalApply()),
-		this, SLOT(slotPreferencesApply()));
-// connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
-//		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
-
- dlg->show();
-}
-
-void BosonBigDisplayBase::slotPreferencesApply()
-{
- // apply all options from boConfig to boson, that need to be applied. all
- // options that are stored in boConfig only don't need to be touched.
- // AB: cursor is still a special case and not handled here.
- // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
- // be managed here!
- boDebug() << k_funcinfo << endl;
- setUpdateInterval(boConfig->updateInterval());
- setToolTipCreator(boConfig->toolTipCreator());
- setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
-}
-
-void BosonBigDisplayBase::slotUpdateOpenGLSettings()
-{
- updateOpenGLSettings();
-}
-
-void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
-{
- boDebug() << k_funcinfo << endl;
- if (boGame) {
-	if (!boGame->gameMode()) {
-		// editor mode
-		mode = CursorKDE;
-	}
- }
- d->mCursorCollection->changeCursor(mode, cursorDir);
-}
-
-void BosonBigDisplayBase::slotUnfogAll(Player* pl)
-{
- // AB: disabled, because we cannot use player.h here.
- // see also comment in slotEditorEditPlayerMinerals()
-#if 0
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (!boGame->playField()) {
-	boError() << k_funcinfo << "NULL playField" << endl;
-	return;
- }
- BosonMap* map = boGame->playField()->map();
- if (!map) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- QPtrList<KPlayer> list;
- if (!pl) {
-	list = *boGame->playerList();
- } else {
-	list.append(pl);
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < map->width(); x++) {
-		for (unsigned int y = 0; y < map->height(); y++) {
-			p->unfog(x, y);
-		}
-	}
-	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
- }
-#endif
-}
-
-void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name)
-{
- // we don't use i18n() for debug messages... not worth the work
- switch (msgid) {
-	case BosonMessage::ChangeSpecies:
-		name = "Change Species";
-		break;
-	case BosonMessage::ChangePlayField:
-		name = "Change PlayField";
-		break;
-	case BosonMessage::ChangeTeamColor:
-		name = "Change TeamColor";
-		break;
-	case BosonMessage::AdvanceN:
-		name = "Advance";
-		break;
-	case BosonMessage::IdChat:
-		name = "Chat Message";
-		break;
-	case BosonMessage::IdGameIsStarted:
-		name = "Game is started";
-		break;
-	case BosonMessage::MoveMove:
-		name = "PlayerInput: Move";
-		break;
-	case BosonMessage::MoveAttack:
-		name = "PlayerInput: Attack";
-		break;
-	case BosonMessage::MoveBuild:
-		name = "PlayerInput: Build";
-		break;
-	case BosonMessage::MoveProduce:
-		name = "PlayerInput: Produce";
-		break;
-	case BosonMessage::MoveProduceStop:
-		name = "PlayerInput: Produce Stop";
-		break;
-	case BosonMessage::MoveMine:
-		name = "PlayerInput: Mine";
-		break;
-	case BosonMessage::UnitPropertyHandler:
-	default:
-		// a unit property was changed
-		// all ids > UnitPropertyHandler will be a unit property. we
-		// don't check further...
-		break;
- }
-// boDebug() << name << endl;
-}
-
-void BosonBigDisplayBase::slotSetGrabMovie(bool grab)
-{
- d->mGrabMovie = grab;
-}
-
-void BosonBigDisplayBase::grabMovieFrameAndSave()
-{
- if (!d->mGrabMovie) {
-	return;
- }
- QByteArray shot = grabMovieFrame();
-
- if (shot.size() == 0) {
-	return;
- }
-
- // Save frame
- static int frame = -1;
- QString file;
- if (frame == -1) {
-	int i;
-	for (i = 0; i <= 10000; i++) {
-		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
-		if (!QFile::exists(file)) {
-			frame = i;
-			break;
-		}
-	}
-	if (i == 10000) {
-		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
-		frame = 50000;
-	}
- }
- file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
- file = QFileInfo(file).absFilePath();
-
- //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
- bool ok = QPixmap(shot).save(file, "JPEG", 90);
- if (!ok) {
-	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
-	return;
- }
- boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
-
-#if 0
- static QValueList<QByteArray> allMovieFrames;
- allMovieFrames.append(shot);
 
 
- // TODO: use a shortcut for this. do not do this after a certain number of
- // frames, but when a key was pressed.
- if (allMovieFrames.count() == 10) {
-	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
-	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
-	allMovieFrames.clear();
- }
-#endif
-}
-
-void BosonBigDisplayBase::slotAdvance(unsigned int, bool)
-{
- // AB: note that in the big display no game logic must be done!
- // -> this slotAdvance() is here for certain optimizations on rendering, not
- //    for advancing the game itself
- setParticlesDirty(true);
- advanceCamera();
- advanceLineVisualization();
- grabMovieFrameAndSave();
-}
-
-void BosonBigDisplayBase::slotAction(const BoSpecificAction& action)
-{
- if (!displayInput()) {
-	return;
- }
- displayInput()->action(action);
-}
 
