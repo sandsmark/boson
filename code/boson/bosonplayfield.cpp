@@ -364,28 +364,9 @@ bool BosonPlayField::loadScenarioFromFile(const QByteArray& xml)
 	boError() << k_funcinfo << "empty byte array" << endl;
 	return false;
  }
- QDomDocument doc("BosonScenario");
- QString errorMsg;
- int lineNo, columnNo;
- if (!doc.setContent(xml, &errorMsg, &lineNo, &columnNo)) {
-	boError() << k_funcinfo << "Parse error in line " << lineNo << ",column " << columnNo
-			<< " error message: " << errorMsg << endl;
-	return false;
- }
- QDomElement root = doc.documentElement();
-
- if (root.childNodes().count() < 2) { // at least scenario settings and one player (will always be more)
-	boError() << k_funcinfo << "No scenario found in file" << endl;
-	return false;
- }
  delete mScenario;
  mScenario = new BosonScenario();
- bool ret = mScenario->loadScenario(root);
- if (!ret) {
-	boError() << k_funcinfo << "Could not load scenario" << endl;
-	return false;
- }
- return ret;
+ return mScenario->loadScenarioFromDocument(QString(xml));
 }
 
 bool BosonPlayField::savePlayField(const QString& fileName)
@@ -494,14 +475,7 @@ QString BosonPlayField::saveScenarioToFile()
 	boError() << k_funcinfo << "NULL scenario" << endl;
 	return QString::null;
  }
- QDomDocument doc("BosonScenario");
- QDomElement root = doc.createElement("BosonScenario");
- doc.appendChild(root);
- if (!mScenario->saveScenario(root)) {
-	boError() << k_funcinfo << "Error saving scenario" << endl;
-	return QString::null;
- }
- return doc.toString();
+ return mScenario->saveScenarioToDocument();
 }
 
 bool BosonPlayField::loadMap(QDataStream& stream)
