@@ -20,6 +20,7 @@
 #define BOSONCURSOR_H
 
 #include <qobject.h>
+#include "defines.h"
 
 class QCanvas;
 class QCanvasPixmapArray;
@@ -27,6 +28,14 @@ class QCanvasSprite;
 class QPoint;
 class QWidget;
 class QCursor;
+class BosonCanvas;
+
+
+// AB: we'll leave the QCanvas code in this file, even if its unused, so that
+// someone else can use it if he/she wants
+// #define QCANVAS_CURSOR
+// #define GL_CURSOR
+
 
 /**
  * UPDATE (02/03/09): the documentation is kind of obsolete. We use derived
@@ -197,6 +206,9 @@ public:
 	static QStringList availableThemes();
 	static QString defaultTheme();
 
+signals:
+	void signalUpdate();
+
 private:
 	int mMode;
 };
@@ -236,55 +248,10 @@ public:
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 };
 
-
-class BosonSpriteCursor : public BosonCursor
-{
-	Q_OBJECT
-public:
-	BosonSpriteCursor();
-	virtual ~BosonSpriteCursor();
-	
-	virtual void setCursor(int mode);
-	virtual void setWidgetCursor(QWidget* w);
-	QCanvasSprite* cursorSprite() const;
-
-	/**
-	 * Set the canvas for the sprite cursor. 
-	 * @param mode The initial mode. See @ref insertMode
-	 * @param z The z-coordinate of the sprite. Should be as high as
-	 * possible.
-	 **/
-	void setCanvas(QCanvas* canvas, int mode, int z = 100000);
-
-	virtual void move(double x, double y);
-
-	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
-
-	virtual void hideCursor();
-
-	virtual void showCursor();
-
-	virtual bool insertMode(int mode, QString baseDir, QString cursor);
-
-	/**
-	 * @return The position of the cursor on the canvas
-	 **/
-	virtual QPoint pos() const;
-
-protected slots:
-	void slotAdvance();
-
-protected:
-	QCanvasPixmapArray* loadSpriteCursor(QString baseDir, QString cursor);
-
-private:
-	class BosonSpriteCursorPrivate;
-	BosonSpriteCursorPrivate* d;
-};
-
+#if 0
 class BosonExperimentalCursor : public BosonCursor
 {
-	Q_OBJECT
+//	Q_OBJECT // moc is stupid
 public:
 	BosonExperimentalCursor();
 	virtual ~BosonExperimentalCursor();
@@ -307,7 +274,7 @@ public:
 	inline virtual QRect oldCursor() const;
 
 
-protected slots:
+//protected slots: // grr... moc is really stupid
 	void slotAdvance();
 
 protected:
@@ -320,5 +287,69 @@ private:
 	class BosonExperimentalCursorPrivate;
 	BosonExperimentalCursorPrivate* d;
 };
+#endif // 0
+
+
+#ifndef NO_OPENGL
+#include <GL/gl.h>
+class BosonTextureArray;
+#endif
+
+class BosonSpriteCursor : public BosonCursor
+{
+	Q_OBJECT
+public:
+	BosonSpriteCursor();
+	virtual ~BosonSpriteCursor();
+	
+	virtual void setCursor(int mode);
+	virtual void setWidgetCursor(QWidget* w);
+
+	/**
+	 * Set the canvas for the sprite cursor. 
+	 * @param mode The initial mode. See @ref insertMode
+	 * @param z The z-coordinate of the sprite. Should be as high as
+	 * possible.
+	 **/
+	void setCanvas(BosonCanvas* canvas, int mode, int z = 100000);
+
+	// TODO: use float instead of double
+	virtual void move(double x, double y);
+
+	virtual void hideCursor();
+
+	virtual void showCursor();
+
+	virtual bool insertMode(int mode, QString baseDir, QString cursor);
+
+#ifndef NO_OPENGL
+	bool insertMode(int mode, BosonTextureArray* pixmaps);
+	GLuint currentTexture() const;
+	void setCurrentTextureArray(BosonTextureArray* array);
+#else
+	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
+	QCanvasSprite* cursorSprite() const;
+	/**
+	 * @return The position of the cursor on the canvas
+	 **/
+	virtual QPoint pos() const;
+
+#endif
+
+protected slots:
+	void slotAdvance();
+
+protected:
+#ifndef NO_OPENGL
+	BosonTextureArray* loadSpriteCursor(QString baseDir, QString cursor);
+#else
+	QCanvasPixmapArray* loadSpriteCursor(QString baseDir, QString cursor);
+#endif
+
+private:
+	class BosonSpriteCursorPrivate;
+	BosonSpriteCursorPrivate* d;
+};
+
 
 #endif

@@ -22,8 +22,6 @@
 #include "speciestheme.h"
 #include "unit.h"
 
-#include "defines.h"
-
 #define SHOT_DELAY 0 // number of advance() calls without changing frames
 
 class BoShot::BoShotPrivate
@@ -40,8 +38,12 @@ public:
 	int mDelay;
 };
 
-BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
-		: QCanvasSprite(0, c)
+BoShot::BoShot(Unit* target, Unit* attacker, BosonCanvas* c, bool destroyed)
+#ifndef NO_OPENGL
+		: BosonSprite(0, c)
+#else
+		: BosonSprite(0, c)
+#endif
 {
  d = new BoShotPrivate;
  d->mCounter = 0;
@@ -71,6 +73,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
 	return;
  }
 
+#ifdef NO_OPENGL // TODO: fix for OpenGL!!
  QCanvasPixmapArray* sequence = 0;
  if (destroyed) {
 	int version = 0; // TODO: random (see KGame::random())
@@ -99,9 +102,10 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
 	return;
  }
  setSequence(sequence);
- 
+#endif
+
  setFrame(0);
- show();
+ setVisible(true);
  setAnimated(true);
 }
 
@@ -132,5 +136,6 @@ void BoShot::deleteMe()
  kdDebug() << k_funcinfo << endl;
  ((BosonCanvas*)canvas())->deleteShot(this);
  setAnimated(false);
- hide();
+ setVisible(false);
 }
+

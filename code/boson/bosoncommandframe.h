@@ -164,6 +164,11 @@ signals:
 	 **/
 	void signalCellSelected(int groundType);
 
+	/**
+	 * Center the base of the local player
+	 **/
+	void signalCenterBase();
+
 protected slots:
 	void slotProduceUnit(int unitType);
 	void slotStopProduction(int unitType);

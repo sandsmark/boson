@@ -248,8 +248,6 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonMiniMap::slotMoveRect(int x, int y)
 {
- x /= BO_TILE_SIZE;
- y /= BO_TILE_SIZE;
  if((x != d->mSelectionPos.x()) || (y != d->mSelectionPos.y())) {
 	d->mSelectionPos = QPoint(x, y);
 	d->mPixmap->repaint(false);
@@ -295,7 +293,7 @@ void BosonMiniMap::initMap()
  mUseFog = oldFog;
 }
 
-void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
+void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 {
  if (!mMap) {
 	kdError() << k_funcinfo << "NULL map" << endl;

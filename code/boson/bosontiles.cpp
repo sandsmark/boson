@@ -19,6 +19,8 @@
 #include "bosontiles.h"
 #include "bosontiles.moc"
 
+#include "bosontexturearray.h"
+
 #include "defines.h"
 
 #include <kdebug.h>
@@ -27,16 +29,21 @@
 #include <qapplication.h>
 #include <qpixmap.h>
 
+#include <qgl.h>
+
+
 BosonTiles::BosonTiles() : QObject()
 {
  mTilesImage = new QImage(big_w() * BO_TILE_SIZE, big_h() * BO_TILE_SIZE, 32);
+ mTextures = 0;
 }
 
 BosonTiles::~BosonTiles()
 {
  delete mTilesImage;
+ delete mTextures;
 }
-
+/*
 QPixmap BosonTiles::plainTile(Cell::GroundType type)
 {
  if (type <= Cell::GroundUnknown || type >= Cell::GroundLast) {
@@ -60,7 +67,8 @@ QPixmap BosonTiles::small(int smallNo, Cell::TransType trans, bool inverted)
 {
  return tile(Cell::smallTileNumber(smallNo, trans, inverted));
 }
-	
+*/
+
 QPixmap BosonTiles::tile(int g)
 {
  QPixmap p;
@@ -121,8 +129,14 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  mDebug = debug;
  // Variables for progress information
  mLoaded = 0;
- mSignalCounter = 0;
  mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
+
+
+ // AB: note that most of the texture-loading code is a hack here. this class
+ // was never meant to use textures...
+ // we simply place every image to mTextureImages in putOn(). Then we init
+ // mTextures.
+ mTextureImages.clear();
 
  for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
 	if (!loadGround(i, dir + groundType2Name((Cell::GroundType)i))) {
@@ -142,6 +156,11 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 		}
 	}
  }
+
+ delete mTextures;
+ mTextures = new BosonTextureArray(mTextureImages);
+ mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
+
  emit signalTilesLoaded();
  return true;
 }
@@ -176,10 +195,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
 		mLoaded += 3;
 	}
  }
- mSignalCounter++;
- if((mSignalCounter % 10) == 0)
- {
-	mSignalCounter = 0;
+ if((mLoaded % 10) == 0) {
 	emit signalTilesLoading(mLoaded);
  }
  return true;
@@ -191,6 +207,8 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 // true puts some extra information on it)
  int x = BosonTiles::big_x(z);
  int y = BosonTiles::big_y(z);
+
+ mTextureImages.append(p);
 
  
  #define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )

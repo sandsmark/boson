@@ -21,11 +21,13 @@
 
 #include "unitbase.h"
 #include "global.h"
+#include "visual/bosonsprite.h"
 
 #include <qcanvas.h>
 
 class Player;
 class BosonCanvas;
+class BoItemList;
 class UnitProperties;
 class Cell;
 class Facility;
@@ -42,7 +44,7 @@ class RepairPlugin;
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Unit : public UnitBase, public QCanvasSprite
+class Unit : public UnitBase, public BosonSprite
 {
 public:
 	enum PropertyIds {
@@ -79,7 +81,7 @@ public:
 		SoundReportUnderAttack = 6
 	};
 
-	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
@@ -91,7 +93,12 @@ public:
 	void select();
 	void unselect();
 
-	virtual void moveBy(double x, double y);
+	/**
+	 * Note that we use float all over in boson, since mesa uses float
+	 * internally. We won't gain precision by double but we will lose some
+	 * performance
+	 **/
+	virtual void moveBy(float x, float y, float z);
 
 	/**
 	 * There is not much to do here. Keep the stuff in this function as
@@ -222,7 +229,7 @@ public:
 	 * attack. -1 keeps the previously set range.
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(double x, double y, int range = 0);
+	bool moveTo(float x, float y, int range = 0);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
@@ -232,7 +239,7 @@ public:
 	void stopAttacking();
 
 	void moveInGroup();
-	void leaderMoved(double , double ) {};
+	void leaderMoved(float , float ) {};
 	void setGroupLeader(bool leader);
 
 	virtual bool save(QDataStream& stream);
@@ -244,19 +251,17 @@ public:
 	 * @return All units except this that are in @ref weaponRange of this
 	 * unit.
 	 **/
-	QCanvasItemList unitsInRange() const;
+	BoItemList unitsInRange() const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 **/
-	QCanvasItemList enemyUnitsInRange() const;
+	BoItemList enemyUnitsInRange() const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
 	 **/
 	virtual void setAdvanceWork(WorkType w);
-
-	virtual bool collidesWith(const QCanvasItem* item) const;
 
 	int destinationX() const;
 	int destinationY() const;
@@ -305,11 +310,11 @@ private:
 class MobileUnit : public Unit
 {
 public:
-	MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~MobileUnit();
 
-	virtual void setSpeed(double s);
-	virtual double speed() const;
+	virtual void setSpeed(float s);
+	virtual float speed() const;
 
 	/**
 	 * Turn to direction. This sets a new frame according to the new
@@ -322,7 +327,7 @@ public:
 	 **/
 	void turnTo();
 
-	void leaderMoved(double x, double y);
+	void leaderMoved(float x, float y);
 
 	virtual void advanceMine();
 	virtual void advanceRefine();
@@ -400,7 +405,7 @@ private:
 class Facility : public Unit
 {
 public:
-	Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas);
+	Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Facility();
 
 	/**
@@ -447,7 +452,7 @@ public:
 	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
-	virtual void moveTo(double x, double y, int range = 0);
+	virtual void moveTo(float x, float y, int range = 0);
 
 	/**
 	 * Advance the construction animation. This is usually called when

@@ -19,16 +19,23 @@
 #ifndef BOSHOT_H
 #define BOSHOT_H
 
+#include "defines.h"
+
 #include "rtti.h"
 
-#include <qcanvas.h>
-
+class BosonCanvas;
 class Unit;
+
+#ifndef NO_OPENGL
+#warning BoShot has not yet been implemented for OpenGL
+#endif
+
+#include "visual/bosonsprite.h"
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoShot : public QCanvasSprite
+class BoShot : BosonSprite
 {
 public:
 	/**
@@ -39,7 +46,7 @@ public:
 	 * animations.
 	 * @param canvas Guess what?
 	 **/
-	BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed = false);
+	BoShot(Unit* target, Unit* attacker, BosonCanvas* canvas, bool destroyed = false);
 	virtual ~BoShot();
 
 	virtual int rtti() const { return RTTI::BoShot; }
@@ -55,3 +62,4 @@ private:
 };
 
 #endif
+

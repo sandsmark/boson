@@ -22,10 +22,13 @@
 #include "cell.h"
 
 #include <qobject.h>
+#include <qvaluelist.h>
 
 class QImage;
 class QPixmap;
 class QString;
+
+class BosonTextureArray;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -45,6 +48,7 @@ public:
 
 	~BosonTiles();
 
+/*
 	QPixmap plainTile(Cell::GroundType type);
 
 	QPixmap big1(int bigNo, Cell::TransType trans, bool inverted); // bigNo = 0..4
@@ -52,6 +56,7 @@ public:
 	QPixmap big2(int bigNo, Cell::TransType trans, bool inverted); // bigNo = 0..4
 
 	QPixmap small(int smallNo, Cell::TransType trans, bool inverted);
+	*/
 	
 	// call this like the original fillGroundPixmap() in editorTopLevel.cpp
 	QPixmap tile(int g);
@@ -75,6 +80,11 @@ public:
 	bool save(const QString& fileName);
 
 	QPixmap pixmap() const;
+
+	inline BosonTextureArray* textures() const 
+	{
+		return mTextures;
+	}
 
 protected:
 	static int big_x(int g);
@@ -103,10 +113,11 @@ signals:
 
 private:
 	QImage* mTilesImage;
+	QValueList<QImage> mTextureImages;
+	BosonTextureArray* mTextures;
 
 	bool mDebug; // used in putOne()
 	int mLoaded; // Number of tiles loaded
-	int mSignalCounter;
 };
 
 #endif

@@ -157,16 +157,6 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
  mSpecies = new SpeciesTheme(species, teamColor);
 }
 
-QCanvasPixmapArray* Player::pixmapArray(int unitType) const
-{
- if (!speciesTheme()) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
-	return 0;
- }
- return speciesTheme()->pixmapArray(unitType);
-}
-
-
 void Player::addUnit(Unit* unit)
 {
  d->mUnitPropID++;// used for ID of KGamePropertyHandler

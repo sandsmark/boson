@@ -18,8 +18,8 @@
 */
 #include "cell.h"
 
-#include "unitproperties.h"
 #include "defines.h"
+#include "unitproperties.h"
 
 #include <kdebug.h>
 

@@ -18,9 +18,9 @@
 */
 #include "boson.h"
 
+#include "defines.h"
 #include "bosonmessage.h"
 #include "player.h"
-#include "defines.h"
 #include "unit.h"
 #include "unitplugins.h"
 #include "speciestheme.h"
@@ -52,7 +52,7 @@
 // debug output from it in bug reports, so please do not define this.
 // on the other hand i often need to test a few things where i don't need those
 // messages. defining this lets easily disable the debug output.
-//#define NO_ADVANCE_DEBUG
+#define NO_ADVANCE_DEBUG
 
 // Saving format version (000005 = 00.00.05)
 #define BOSON_SAVEGAME_FORMAT_VERSION 000005
@@ -74,7 +74,7 @@ public:
 	{
 		mGameTimer = 0;
 		mCanvas = 0;
-		mMap = 0;
+		mPlayField = 0;
 		mPlayer = 0;
 
 		mAdvanceDividerCount = 0;
@@ -93,8 +93,8 @@ public:
 	bool mIsLocked;
 	bool mDelayedWaiting; // FIXME bad name!
 
-	QCanvas* mCanvas; // this pointer is anti-OO IMHO
-	BosonPlayField* mMap;
+	BosonCanvas* mCanvas; // this pointer is anti-OO IMHO
+	BosonPlayField* mPlayField;
 	Player* mPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
 	
@@ -152,15 +152,15 @@ Boson::~Boson()
  delete d;
 }
 
-void Boson::setCanvas(QCanvas* c)
+void Boson::setCanvas(BosonCanvas* c)
 {
  d->mCanvas = c;
 }
 
-void Boson::setMap(BosonPlayField* m)
+void Boson::setPlayField(BosonPlayField* p)
 {
  kdDebug() << k_funcinfo << endl;
- d->mMap = m;
+ d->mPlayField = p;
 }
 
 Player* Boson::localPlayer()
@@ -904,8 +904,8 @@ KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
  p->setGame(this);
- if(d->mMap->map()) {
-	p->initMap(d->mMap->map());
+ if(d->mPlayField->map()) {
+	p->initMap(d->mPlayField->map());
  }
  connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
 		this, SIGNAL(signalAddUnit(Unit*, int, int)));
@@ -1259,7 +1259,7 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
  stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
 
  // Save map
- d->mMap->saveMap(stream);
+ d->mPlayField->saveMap(stream);
 
  // Save local player (only id)
  stream << d->mPlayer->id();

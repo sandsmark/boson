@@ -75,7 +75,7 @@ public:
 	ConstructUnit mConstruction;
 };
 
-EditorBigDisplay::EditorBigDisplay(QCanvas* c, QWidget* parent) 
+EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent) 
 		: BosonBigDisplayBase(c, parent)
 {
  init();
@@ -111,12 +111,12 @@ void EditorBigDisplay::setLocalPlayer(Player* p)
  }
 }
 
-void EditorBigDisplay::actionClicked(const BoAction* action, QDataStream& , bool& )
-//void EditorBigDisplay::editorActionClicked(const BoAction* action)
+void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& , bool* )
+//void EditorBigDisplay::editorActionClicked(const BoAction& action)
 {
 // kdDebug() << k_funcinfo << endl;
- int x = action->pos().x() / BO_TILE_SIZE;
- int y = action->pos().y() / BO_TILE_SIZE;
+ int x = action.canvasPos().x() / BO_TILE_SIZE;
+ int y = action.canvasPos().y() / BO_TILE_SIZE;
  if (d->mConstruction.unitType > -1) {
 	if (!d->mConstruction.owner) {
 		kdWarning() << k_funcinfo << "NO OWNER" << endl;

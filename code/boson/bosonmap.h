@@ -28,6 +28,7 @@ class Boson;
 class QDomElement;
 class QStringList;
 class QDataStream;
+class BosonTiles;
 
 /**
  * DOC is OBSOLETE
@@ -117,6 +118,14 @@ public:
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
 
+	/**
+	 * Tiles are loaded externally, so they need to be placed into the map.
+	 *
+	 * See BosonCanvas, where tile loading takes place (currently)
+	 **/
+	void setTileSet(BosonTiles* t) { mTiles = t; }
+	BosonTiles* tileSet() const { return mTiles; }
+
 public slots:
 	void changeCell(int x, int y, int groundType, unsigned char b);
 
@@ -160,6 +169,8 @@ private:
 
 	unsigned int mMapWidth;
 	unsigned int mMapHeight;
+
+	BosonTiles* mTiles;
 };
 
 #endif

@@ -30,6 +30,7 @@
 #include "bosontiles.h"
 #include "bodisplaymanager.h"
 #include "speciestheme.h"
+#include "boitemlist.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -81,6 +82,10 @@ public:
 	{
 		run();
 	}
+	BosonTiles* tileSet() const
+	{
+		return mTiles;
+	}
 
 protected:
 	virtual void run()
@@ -105,19 +110,36 @@ private:
 	QPixmap* mTile;
 	BosonCanvas* mCanvas;
 	BosonTiles* mTiles;
-	friend class BosonCanvas;  // Then BosonCanvas can access mTiles
 };
 
-class FogOfWar : public QCanvasSprite
+class FogOfWar 
+#ifndef NO_OPENGL
+#warning FOW is not yet implemented for OpenGL
+#else
+: public QCanvasSprite
+#endif
 {
 public:
-	FogOfWar(QCanvasPixmapArray* a, QCanvas* c) : QCanvasSprite(a, c) {}
+	FogOfWar(QCanvasPixmapArray* a, BosonCanvas* c) 
+#ifndef NO_OPENGL
+		// TODO
+#else
+		: QCanvasSprite(a, (QCanvas*)c) 
+#endif
+	{
+	}
 	virtual int rtti() const { return RTTI::FogOfWar; }
 
 	virtual bool collidesWith(const QCanvasItem*) const
 	{
 		return false;
 	}
+
+#ifndef NO_OPENGL
+	void setVisible(bool) {}
+	void move(float , float ) { }
+	void setZ(float) { }
+#endif
 };
 
 class BosonCanvas::BosonCanvasPrivate
@@ -136,7 +158,7 @@ public:
 	QPixmap mPix;
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrList<BoShot> mDeleteShot;
-	QPtrDict<QCanvasSprite> mFogOfWar;
+	QPtrDict<FogOfWar> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
 	BoDisplayManager* mDisplayManager;
 
@@ -144,7 +166,7 @@ public:
 
 	QPtrList<Unit> mWorkChanged; // Unit::setAdvanceWork() has been called on these units.
 
-	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::slotAdvance()
+	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
 	QPtrList<Unit> mWorkNone;
 	QPtrList<Unit> mWorkProduce;
 	QPtrList<Unit> mWorkMove;
@@ -155,21 +177,20 @@ public:
 
 	QValueList<UnitGroup> mGroups;
 
+	BoItemList mAllItems;
+
 	TileLoader* mLoader;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
-		: QCanvas(parent, "BosonCanvas")
+#ifndef NO_OPENGL
+		: CanvasHack(parent, "BosonCanvas")
+#else
+		: CanvasHack(parent, "BosonCanvas")
+
+#endif
 {
  init();
-}
-
-BosonCanvas::BosonCanvas(QPixmap p, unsigned int w, unsigned int h) 
-		: QCanvas(p, w, h, BO_TILE_SIZE, BO_TILE_SIZE)
-{
- init();
-
- d->mPix = p;
 }
 
 void BosonCanvas::init()
@@ -180,7 +201,7 @@ void BosonCanvas::init()
  d->mDeleteShot.setAutoDelete(true);
 
  d->mLoader = new TileLoader(this);
- connect(d->mLoader->mTiles, SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
+ connect(d->mLoader->tileSet(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
 }
 
 BosonCanvas::~BosonCanvas()
@@ -233,7 +254,9 @@ void BosonCanvas::setTileSet(QPixmap* p)
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
+#ifdef NO_OPENGL
  setTiles(*p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
+#endif
  
  for (unsigned int i = 0; i < d->mMap->width(); i++) {
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
@@ -245,7 +268,6 @@ void BosonCanvas::setTileSet(QPixmap* p)
 		slotAddCell(i, j, c->groundType(), c->version());
 	}
  }
- update();
  emit signalTilesLoaded();
 }
 
@@ -265,7 +287,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 	return;
  }
  
- double z = 0;
+ float z = 0.0;
  if ((unit->unitProperties()->isFacility())) {
 	z = Z_FACILITY;
  } else if (unit->unitProperties()->isAircraft()) {
@@ -276,14 +298,12 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
  unit->setZ(z);
  unit->move(x, y);
  unit->show();
-
- update();
 }
 
 Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 {
- QCanvasItemList list = collisions(pos);
- QCanvasItemList::Iterator it;
+ BoItemList list = bosonCollisions(pos);
+ BoItemList::Iterator it;
 
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -320,7 +340,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 // the unit to the workChanged list and after all of the advance calls we change
 // the lists.
 	
- QPtrListIterator<QCanvasItem> animIt(d->mAnimList);
+ QPtrListIterator<BosonSprite> animIt(d->mAnimList);
  while (animIt.current()) {
 	// the only thing done here is to increase the reload counter. perhaps
 	// we should add a separate list containing all units which are
@@ -497,29 +517,32 @@ void BosonCanvas::slotLoadTiles()
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
  d->mLoader->start();
+ d->mMap->setTileSet(d->mLoader->tileSet());
 }
 
 void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
 {
+#ifdef NO_OPENGL
  int tile = Cell::tile(groundType, version);
  if (tile < 0 || tile >= (int)d->mMap->width() * (int)d->mMap->height()) {
 	kdWarning() << "Invalid tile " << tile << endl;
 	return;
  }
  setTile(x, y, tile);
+#endif
 }
 
-void BosonCanvas::addAnimation(QCanvasItem* item)
+void BosonCanvas::addAnimation(BosonSprite* item)
 {
  d->mAnimList.append(item);
 }
 
-void BosonCanvas::removeAnimation(QCanvasItem* item)
+void BosonCanvas::removeAnimation(BosonSprite* item)
 {
  d->mAnimList.removeRef(item);
 }
 
-void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
+void BosonCanvas::unitMoved(Unit* unit, float oldX, float oldY)
 {
  updateSight(unit, oldX, oldY);
 	
@@ -530,7 +553,7 @@ void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
  emit signalUnitMoved(unit, oldX, oldY);
 }
 
-void BosonCanvas::leaderMoved(Unit* unit, double oldX, double oldY)
+void BosonCanvas::leaderMoved(Unit* unit, float oldX, float oldY)
 {
  QValueListIterator<UnitGroup> it;
  for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
@@ -578,9 +601,9 @@ void BosonCanvas::slotNewGroup(Unit* leader, QPtrList<Unit> members)
  d->mGroups.append(group);
 }
 
-void BosonCanvas::updateSight(Unit* unit, double, double)
+void BosonCanvas::updateSight(Unit* unit, float , float)
 {
-// TODO: use the double parameters - check whether the player can still see
+// TODO: use the float parameters - check whether the player can still see
 // these coordinates and if not out fog on them again. Remember to check for -1
 // (new unit placed)!
 
@@ -677,7 +700,7 @@ Cell* BosonCanvas::cellAt(Unit* unit) const
  return cellAt(unit->x() + unit->width() / 2, unit->y() + unit->width() / 2);
 }
 
-Cell* BosonCanvas::cellAt(double x, double y) const
+Cell* BosonCanvas::cellAt(float x, float y) const
 {
  return cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 }
@@ -685,6 +708,16 @@ Cell* BosonCanvas::cellAt(double x, double y) const
 BosonMap* BosonCanvas::map() const
 {
  return d->mMap;
+}
+
+unsigned int BosonCanvas::mapWidth() const
+{
+ return map() ? map()->width() : 0;
+}
+
+unsigned int BosonCanvas::mapHeight() const
+{
+ return map() ? map()->height() : 0;
 }
 
 void BosonCanvas::fogLocal(int x, int y)
@@ -707,10 +740,10 @@ void BosonCanvas::fogLocal(int x, int y)
 	kdError() << "tried adding fog of war twice!!!!" << endl;
 	return;
  }
- QCanvasSprite* fog = new FogOfWar(d->mFogPixmap, this);
+ FogOfWar* fog = new FogOfWar(d->mFogPixmap, this);
  fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  fog->setZ(Z_FOG_OF_WAR);
- fog->show();
+ fog->setVisible(true);
  d->mFogOfWar.insert(c, fog);
 }
 
@@ -723,10 +756,10 @@ void BosonCanvas::unfogLocal(int x, int y)
 	return;
  }
 
- QCanvasSprite* s = d->mFogOfWar.take(c);
- if (s) {
-	s->hide();
-	delete s;
+ FogOfWar* f = d->mFogOfWar.take(c);
+ if (f) {
+	f->setVisible(false);
+	delete f;
  }
 }
 
@@ -768,21 +801,12 @@ void BosonCanvas::initFogOfWar(Player* p)
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
- QCanvasItemList l = collisions(QRect(
+kdDebug() << k_funcinfo << endl;
+ BoItemList l = bosonCollisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
 		pos.x() + radius,
 		pos.y() + radius));
-#else
- QCanvasItemList l = collisions(QRect(
-		(pos.x() - radius > 0) ? pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? pos.y() - radius : 0,
-		pos.x() + radius - 1,
-		pos.y() + radius - 1));
-#endif
-		
 			
  QValueList<Unit*> list;
  for (unsigned int i = 0; i < l.count(); i++) {
@@ -940,9 +964,17 @@ void BosonCanvas::deleteShot(BoShot* s)
 
 void BosonCanvas::update()
 {
+#ifdef NO_OPENGL
  QCanvas::update();
  d->mDisplayManager->paintResources();
  d->mDisplayManager->paintChatMessages();
+#endif
+
+ // TODO: only if canvas is changed
+ // maybe only if relevant parts are changed
+ // AB: we don't do this anymore here. we use an update timer which updates the
+ // screen in a certain interval instead.
+// d->mDisplayManager->slotUpdateCanvas();
 }
 
 void BosonCanvas::killPlayer(Player* player)
@@ -956,39 +988,29 @@ void BosonCanvas::killPlayer(Player* player)
  emit signalOutOfGame(player);
 }
 
-void BosonCanvas::removeFromCells(Unit* u)
+void BosonCanvas::removeFromCells(BosonSprite* item)
 {
- int x = u->leftEdge() / BO_TILE_SIZE;
- int y = u->topEdge() / BO_TILE_SIZE;
- int w = u->width() / BO_TILE_SIZE;
- int h = u->height() / BO_TILE_SIZE;
- for (int i = x; i < x + w; i++) {
-	for (int j = y; j < y + h; j++) {
-		Cell* c = cell(i, j);
-		if (!c) {
-			kdError() << k_funcinfo << "NULL cell - x=" << i << ",y=" << j << ",id=" << u->id() << endl;
-			continue;
-		}
-		c->removeUnit(u);
+ QPointArray cells = item->cells();
+ for (unsigned int i = 0; i < cells.count(); i++) {
+	Cell* c = cell(cells[i].x(), cells[i].y());
+	if (!c) {
+		kdError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		continue;
 	}
+	c->removeItem(item);
  }
 }
 
-void BosonCanvas::addToCells(Unit* u)
+void BosonCanvas::addToCells(BosonSprite* item)
 {
- int x = u->leftEdge() / BO_TILE_SIZE;
- int y = u->topEdge() / BO_TILE_SIZE;
- int w = u->width() / BO_TILE_SIZE;
- int h = u->height() / BO_TILE_SIZE;
- for (int i = x; i < x + w; i++) {
-	for (int j = y; j < y + h; j++) {
-		Cell* c = cell(i, j);
-		if (!c) {
-			kdError() << k_funcinfo << "NULL cell - x=" << i << ",y=" << j << ",id=" << u->id() << endl;
-			continue;
-		}
-		c->addUnit(u);
+ QPointArray cells = item->cells();
+ for (unsigned int i = 0; i < cells.count(); i++) {
+	Cell* c = cell(cells[i].x(), cells[i].y());
+	if (!c) {
+		kdError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		continue;
 	}
+	c->addItem(item);
  }
 }
 
@@ -999,17 +1021,16 @@ void BosonCanvas::setDisplayManager(BoDisplayManager* m)
 
 bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, Facility* factory) const
 {
- QCanvasPixmapArray* a = prop->theme()->pixmapArray(prop->typeId());
- if (!a) {
-	kdError() << k_funcinfo << "Cannot fine pixmap array for " << prop->typeId() << endl;
+ int width = prop->theme()->unitWidth(prop->typeId());
+ int height= prop->theme()->unitHeight(prop->typeId());
+ if (!width) {
+	kdError() << k_funcinfo << "null width for " << prop->typeId() << endl;
 	return false;
  }
- if (!a->image(0)) {
-	kdError() << k_funcinfo << "Cannot find first pixmap for " << prop->typeId() << endl;
+ if (!height) {
+	kdError() << k_funcinfo << "null height for " << prop->typeId() << endl;
 	return false;
  }
- int width = a->image(0)->width();
- int height = a->image(0)->height();
  QRect r(pos.x(), pos.y(), width, height);
  if (!canGo(prop, r)) {
 	return false;
@@ -1041,4 +1062,95 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, 
  }
  return false;
 }
+
+BosonTiles* BosonCanvas::tileSet() const
+{
+ return d->mLoader->tileSet();
+}
+
+BoItemList BosonCanvas::allBosonItems() const
+{
+ return d->mAllItems;
+}
+
+void BosonCanvas::addItem(BosonSprite* item)
+{
+ d->mAllItems.append(item);
+}
+
+void BosonCanvas::removeItem(BosonSprite* item)
+{
+ d->mAllItems.remove(item);
+}
+
+BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSprite* item, bool exact) const
+{
+// AB: item can be NULL, too!
+ BoItemList collisions;
+ BoItemList seen;
+ const BoItemList* cellItems;
+ Cell* c;
+ for (unsigned int i = 0; i < cells.count(); i++) {
+	c = cell(cells[i].x(), cells[i].y());
+	if (!c) {
+		kdWarning() << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
+		continue;
+	}
+	cellItems = c->items();
+	BoItemList::ConstIterator it;
+	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
+		BosonSprite* s = *it;
+		if (s != item) {
+			if (seen.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) { 
+				seen.append(s);
+				collisions.append(s);
+			}
+		}
+	}
+ }
+ return collisions;
+}
+
+BoItemList BosonCanvas::bosonCollisions(const QRect& r) const
+{
+ // r is canvas coordinates!
+ QPointArray cells;
+ int left, right, top, bottom;
+ left = QMAX(r.left() / BO_TILE_SIZE, 0);
+ right = QMIN(r.right() / BO_TILE_SIZE, QMAX((int)mapWidth() - 1, 0));
+ top = QMAX(r.top() / BO_TILE_SIZE, 0);
+ bottom = QMIN(r.bottom() / BO_TILE_SIZE, QMAX((int)mapHeight() - 1, 0));
+ int size = (right - left + 1) * (bottom - top + 1);
+ if (size <= 0) {
+	return BoItemList();
+ }
+ cells.resize(size);
+ int n = 0;
+ for (int i = left; i <= right; i++) {
+	for (int j = top; j <= bottom; j++) {
+		cells[n++] = QPoint(i, j);
+	}
+ }
+ return bosonCollisions(cells, 0, true);// FIXME: exact = true has no effect
+}
+
+BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
+{
+ // pos is canvas coordinates!
+ QPointArray cells(1);
+ cells[0] = pos / BO_TILE_SIZE;
+ kdDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
+ return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
+}
+
+#ifndef NO_OPENGL
+void BosonCanvas::resize(int w, int h)
+{
+ if (width() == w && height() == h) {
+	return;
+ }
+ mWidth = w;
+ mHeight = h;
+}
+#endif
 

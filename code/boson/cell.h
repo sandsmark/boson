@@ -175,16 +175,12 @@ public:
 
 	static int getTransTile(int g);
 
-	/**
-	 * Add a unit to this cell. All this function does is to increase the
-	 * value returned by @ref unitCount by one.
-	 **/
-	inline void addUnit(QCanvasItem* u) { mItems.appendUnit(u); }
+	inline void addItem(BosonSprite* u) { mItems.appendItem(u); }
 
 	/**
-	 * Remove a previously added unit from the cell
+	 * Remove a previously added item from the cell
 	 **/
-	inline void removeUnit(QCanvasItem* u) { mItems.removeUnit(u); }
+	inline void removeItem(BosonSprite* u) { mItems.removeItem(u); }
 
 
 	/**

@@ -19,11 +19,11 @@
 
 #include "bosonmusic.h"
 
+#include "defines.h"
 #include "unit.h"
 #include "speciestheme.h"
 #include "bosonsound.h"
 #include "bosonconfig.h"
-#include "defines.h"
 
 #include <kglobal.h>
 #include <kstandarddirs.h>

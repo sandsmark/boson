@@ -158,7 +158,7 @@ public:
 	 * @return The speed of the mobiel unit. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	double speed() const;
+	float speed() const;
 
 	/**
 	 * @return Whether this unit can go over land

@@ -20,6 +20,7 @@
 #include "bosonnewgamewidget.h"
 #include "bosonnewgamewidget.moc"
 
+#include "defines.h"
 #include "bosonconfig.h"
 #include "bosonmessage.h"
 #include "player.h"
@@ -30,7 +31,6 @@
 #include "bosonplayfield.h"
 #include "speciestheme.h"
 #include "bosonscenario.h"
-#include "defines.h"
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>
@@ -384,10 +384,10 @@ void BosonNewGameWidget::slotMyMapChanged(int index)
   stream << mMapIndex2Identifier[index];
   game()->sendMessage(buffer, BosonMessage::ChangePlayField);
   // Init map to be able to check max/min players count
-  kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playfield() << endl;
-  map()->loadPlayField(BosonPlayField::playFieldFileName(playfield()));
-  mMinPlayers = map()->scenario()->minPlayers();
-  mMaxPlayers = map()->scenario()->maxPlayers();
+  kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
+  playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
+  mMinPlayers = playField()->scenario()->minPlayers();
+  mMaxPlayers = playField()->scenario()->maxPlayers();
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
@@ -589,24 +589,24 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
   mAdmin = admin;
 }
 
-QString& BosonNewGameWidget::playfield()
+QString BosonNewGameWidget::playFieldString() const
 {
   return mMapIndex2Identifier[mMap];
 }
 
-inline Boson* BosonNewGameWidget::game()
+inline Boson* BosonNewGameWidget::game() const
 {
   return mTop->game();
 }
 
-inline Player* BosonNewGameWidget::player()
+inline Player* BosonNewGameWidget::player() const
 {
   return mTop->player();
 }
 
-inline BosonPlayField* BosonNewGameWidget::map()
+inline BosonPlayField* BosonNewGameWidget::playField() const
 {
-  return mTop->map();
+  return mTop->playField();
 }
 
 void BosonNewGameWidget::sendNewGame() 

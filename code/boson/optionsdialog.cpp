@@ -56,6 +56,7 @@ public:
 
 	KIntNumInput* mArrowSpeed;
 	KIntNumInput* mGameSpeed;
+	KIntNumInput* mUpdateInterval;
 	QComboBox* mCmdBackground;
 	QComboBox* mGroupMove;
 	KDoubleNumInput* mMiniMapScale;
@@ -104,6 +105,12 @@ void OptionsDialog::initGeneralPage()
  d->mGameSpeed->setLabel(i18n("Game Speed"));
  connect(d->mGameSpeed, SIGNAL(valueChanged(int)), 
 		this, SLOT(slotSpeedChanged(int)));
+
+ d->mUpdateInterval = new KIntNumInput(50, vbox);
+ d->mUpdateInterval->setRange(10, 5000);
+ d->mUpdateInterval->setLabel(i18n("Update Interval (low values hurt performance)"));
+ connect(d->mUpdateInterval, SIGNAL(valueChanged(int)),
+		this, SLOT(slotUpdateIntervalChanged(int)));
 
  QHBox* hbox = new QHBox(vbox);
 
@@ -201,9 +208,20 @@ void OptionsDialog::slotSpeedChanged(int value)
  emit signalSpeedChanged(value);
 }
 
+void OptionsDialog::slotUpdateIntervalChanged(int value)
+{
+ emit signalUpdateIntervalChanged((unsigned int)value);
+}
+
 void OptionsDialog::setGameSpeed(int speed)
 {
  d->mGameSpeed->setValue(speed);
+}
+
+void OptionsDialog::setUpdateInterval(int i)
+{
+kdDebug() << k_funcinfo << i << endl;
+ d->mUpdateInterval->setValue(i);
 }
 
 void OptionsDialog::setArrowScrollSpeed(int value)

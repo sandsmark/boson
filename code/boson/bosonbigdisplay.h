@@ -32,7 +32,6 @@ class KGame;
 class KGameChat;
 class BosonCursor;
 class BoSelection;
-class BoAction;
 
 class QLabel;
 
@@ -60,10 +59,10 @@ class BosonBigDisplay : public BosonBigDisplayBase
 {
 	Q_OBJECT
 public:
-	BosonBigDisplay(QCanvas* c, QWidget* parent);
+	BosonBigDisplay(BosonCanvas* c, QWidget* parent);
 	virtual ~BosonBigDisplay();
 
-	virtual void setLocalPlayer(Player* p);
+//	virtual void setLocalPlayer(Player* p);
 	
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
@@ -82,7 +81,7 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+	void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
 
 	virtual void updateCursor();
 
