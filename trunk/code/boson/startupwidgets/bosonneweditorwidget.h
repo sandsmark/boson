@@ -43,7 +43,7 @@ protected slots: // implementations for the .ui slots
 	// his widget. nearly all must be transferred over network before the
 	// actual action is performed!
 	virtual void slotPlayFieldChanged(QListViewItem*);
-	virtual void slotTilesetChanged(int);
+	virtual void slotGroundThemeChanged(int);
 	virtual void slotMaxPlayersChanged(int);
 	virtual void slotMaxWidthChanged(int);
 	virtual void slotMaxHeightChanged(int);

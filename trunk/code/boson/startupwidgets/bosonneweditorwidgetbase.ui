@@ -415,7 +415,7 @@
         <sender>mChangeTileset</sender>
         <signal>activated(int)</signal>
         <receiver>BosonNewEditorWidgetBase</receiver>
-        <slot>slotTilesetChanged(int)</slot>
+        <slot>slotGroundThemeChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChooseBosonMap</sender>
@@ -471,7 +471,7 @@
 </forwards>
 <slots>
     <slot access="protected" specifier="pure virtual">slotPlayFieldChanged(QListViewItem*)</slot>
-    <slot access="protected" specifier="pure virtual">slotTilesetChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotGroundThemeChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxPlayersChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxWidthChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxHeightChanged(int)</slot>

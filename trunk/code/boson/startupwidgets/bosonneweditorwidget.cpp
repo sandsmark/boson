@@ -327,9 +327,9 @@ void BosonNewEditorWidget::slotPlayFieldChanged(QListViewItem* item)
  networkInterface()->sendChangePlayField(d->mItem2Map[item]);
 }
 
-void BosonNewEditorWidget::slotTilesetChanged(int)
+void BosonNewEditorWidget::slotGroundThemeChanged(int)
 {
- boDebug() << k_funcinfo << "only one tileset supported currently :(" << endl;
+ boDebug() << k_funcinfo << "only one groundTheme supported currently :(" << endl;
 }
 
 void BosonNewEditorWidget::slotMaxPlayersChanged(int)
