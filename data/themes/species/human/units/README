@@ -32,9 +32,10 @@ See ../particles/REAMDE for a description.
 
 Additionally all units have index.unit file in their directories. This file
 describes the unit - if you are familar with KConfig syntax you'll know how to
-edit them. There is also a bounit program which is able to edit these files with
-a GUI. But please note that currently a lot of options are not present there
-(due to the fact that i'm implementing lots of more features at the moment).
+edit them.
+
+There is also a bounit program which is able to edit these files with a GUI. It
+should support most of options (excluding OpenGL frames).
 
 The rest of this file is about the index.unit.
 It has first a common group shared by all units:
