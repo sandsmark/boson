@@ -60,12 +60,12 @@ draw_bigbox_text("This is a list of features that I consider as
 	<ul>
 	  <li>Port to OpenGL</li>
 	  <li>Full 3D support using .3ds models</li>
-	  <li>Explosions using particle effects</li>
+	  <li>Explosions and smoke using particle effects</li>
 	  <li>Lots of good documentations. Facility values are dynamically integrated in the docs and there is also a technology tree now.</li>
 	  <li>Improved pathfinding</li>
 	  <li>Experimental support for visible missiles</li>
-	  <li>Greatly improved configurability for the cursor (including GUI for
-	  the config files)</li>
+	  <li>Greatly improved configurability for the cursor (including GUI for the config files)</li>
+	  <li>New OpenGL options in the config dialog.</li>
 	  <li>Options dialog has an Apply button - configs change when they are
 	  pplied only, not immediately. There are also defaults for every entry.</li>
 	  <li>Experimental support for unit animations (currenlty comsat only)</li>
