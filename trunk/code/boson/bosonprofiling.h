@@ -290,21 +290,54 @@ QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t);
  * The event MyProfilingEvent will now give useful data on the time spent in
  * profileMe().
  *
- * If you have a better name for this class: feel free to tell me!
+ * Note that MyProfilingEvent needs to be a constant number, i.e. it must always
+ * be the same when calling the function multiple times. Also it must be unique
+ * to this function. You can easily achieve this by the following code:
+ * <pre>
+ * static int MyProfilingEvent = boProfiling->requestEventId("My Event");
+ * </pre>
+ *
+ * Often you don't want to save the whole event, but need the profiled time
+ * only, i.e. you want to use @ref elapsed once and then forget it. This can
+ * easily be done by the following code:
+ * <pre>
+ * static int eventid = -boProfiling->requestEventId("My Event"); // note the "-" !
+ * BosonProfiler profiler(eventid);
+ * doStuff();
+ *
+ * // display the elapsed time (warning: the boDebug() call takes much time, so the data may be inaccurate
+ * boDebug() << profiler.elapsed() << endl;
+ * </pre>
+ *
+ * @short Convenience class for profiling events
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonProfiler
 {
 public:
+	/**
+	 * Start profiling using @p event. This is equivalent to using @ref
+	 * BosonProfiling::start and @ref BosonProfiling::stop with that event
+	 * id, if it is >= 0.
+	 *
+	 * If @p event is negative, the profiling data are <em>not</em>saved on
+	 * destruction, i.e. the appendToList parameter of @ref
+	 * BosonProfiling::stop is false. This can be very useful if you don't
+	 * need to display the data in a dialog later, but need the value of
+	 * @ref elapsed once only.
+	 **/
 	BosonProfiler(int event)
 		: mEvent(event),
-		mEventStopped(false)
+		mEventStopped(false),
+		mAppendToList(event >= 0)
 	{
 		boProfiling->start(mEvent);
 	}
+
 	~BosonProfiler()
 	{
 		if (!mEventStopped) {
-			boProfiling->stop(mEvent);
+			stop();
 		}
 	}
 
@@ -316,7 +349,7 @@ public:
 	long int stop()
 	{
 		mEventStopped = true;
-		return boProfiling->stop(mEvent);
+		return boProfiling->stop(mEvent, mAppendToList);
 	}
 
 	/**
@@ -330,6 +363,7 @@ public:
 private:
 	int mEvent;
 	bool mEventStopped;
+	bool mAppendToList;
 };
 
 
