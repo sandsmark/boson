@@ -1,0 +1,15 @@
+Music in Boson
+
+As of today (2002/01/06) boson supports music.
+There are already several tracks available - see http://boson.eu.org/download/index.html
+They were made by Nils Trzebin and you can also get them from the boson music
+website at http://www.rebellion-scs.de/boson/
+
+To install them just create a new directory here (in data/music/) and edit
+data/music/Makefile.am: music_DATA is a space separated list that should contain
+all of the directories you are going to install, e.g.:
+music_DATA = Jungle Progressive
+
+now re-run make (perhaps also cd data/ ; make -f Makefile.cvs ; ./configure) and
+make install. That's it.
+
