@@ -2,11 +2,13 @@
     <h1>
       Units - Oil harvester
     </h1>
+    <p>&nbsp;</p>
     <table border="0">
 	<tr>
 		<td><img src="oil_harvester.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		The Oil Harvester transports oil from the <a href="../facilities/refinery.html">Oil Towers </a>to the
+		<a href="../facilities/refinery.html">Mineral Refinery</a>.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>

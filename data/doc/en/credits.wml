@@ -2,6 +2,7 @@
     <h1>
       Credits
     </h1>
+    <p>&nbsp;</p>
 	<table border="0">
 		<th align="left">Code</th>
 		<tr><td width="350">Initial design and implementation</td><td><a href="mailto:orzel@kde.org">Thomas Capricelli</a></td></tr>

@@ -2,11 +2,12 @@
     <h1>
       Units - Ship
     </h1>
+    <p>&nbsp;</p>
     <table border="0">
 	<tr>
 		<td><img src="ship.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		A ship is only useful if you fight against other ships. You can destroy them with your <a href="aircraft.html">aircrafts</a>.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
