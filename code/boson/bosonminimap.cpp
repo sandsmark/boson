@@ -214,7 +214,7 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
- d->mPixmap->repaint(false);
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
@@ -350,7 +350,7 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const 
 		updateCell(x, y);
 	}
  }
- d->mPixmap->repaint(false);
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::updateCell(int x, int y)
@@ -398,7 +398,7 @@ void BosonMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, c
  d->mSelectionRect.setPoint(6, bottomLeft);
  d->mSelectionRect.setPoint(7, topLeft);
 
- d->mPixmap->repaint(false);
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::setCanvas(BosonCanvas* c)
@@ -428,7 +428,7 @@ void BosonMiniMap::initMap()
  }
  mUseFog = oldFog;
  setUpdatesEnabled(true);
- repaint(false);
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
@@ -515,7 +515,7 @@ void BosonMiniMap::slotShowMap(bool s)
  d->mZoomOut->setEnabled(s);
  d->mZoomDefault->setEnabled(s);
  d->mShowMap = s;
- d->mPixmap->repaint();
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::slotZoomIn()
@@ -524,7 +524,7 @@ void BosonMiniMap::slotZoomIn()
 	return;
  }
  boConfig->setMiniMapZoom(boConfig->miniMapZoom() + ZOOM_STEP);
- d->mPixmap->repaint();
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::slotZoomOut()
@@ -533,13 +533,13 @@ void BosonMiniMap::slotZoomOut()
 	return;
  }
  boConfig->setMiniMapZoom(boConfig->miniMapZoom() - ZOOM_STEP);
- d->mPixmap->repaint();
+ repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::slotZoomDefault()
 {
  boConfig->setMiniMapZoom(1.0);
- d->mPixmap->repaint();
+ repaintMiniMapPixmap();
 }
 
 bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
@@ -683,7 +683,7 @@ void BosonMiniMap::setPixmapTheme(const QString& theme)
  }
 
  if (!d->mShowMap) {
-	d->mPixmap->repaint();
+	repaintMiniMapPixmap();
  }
 }
 
@@ -702,3 +702,9 @@ QPixmap BosonMiniMap::pixmapFromTheme(const QString& file, const QString& theme)
  return QPixmap(f);
 }
 
+void BosonMiniMap::repaintMiniMapPixmap()
+{
+ if (isUpdatesEnabled()) {
+	d->mPixmap->repaint(false);
+ }
+}
