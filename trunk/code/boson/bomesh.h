@@ -27,6 +27,7 @@
 
 class BoMesh;
 class BoAdjacentDataBase;
+class QColor;
 
 class BoNode
 {
@@ -123,12 +124,7 @@ public:
 	BoMesh(Lib3dsMesh* mesh);
 	~BoMesh();
 
-	/**
-	 * Load the texels with their (final) coordinates.
-	 **/
-	void loadTexels();
-
-	void loadVertices();
+	void loadPoints();
 
 	/**
 	 * Try to connect all faces in @ref mesh, so that we can use
@@ -169,6 +165,8 @@ public:
 	void setMaterial(Lib3dsMaterial* mat);
 	void setTextured(bool isTextured);
 	void setTextureObject(GLuint tex);
+	GLuint textureObject() const;
+	bool textured() const;
 
 	Lib3dsMesh* mesh() const;
 
@@ -179,7 +177,28 @@ public:
 	void renderMesh();
 	void renderPoint(int index);
 
+	// AB: these are bad. we should remove then - then we could load the
+	// meshes only once and reuse them for every player who shares this
+	// species.
+	void loadDisplayList(bool reload = false);
+	GLuint displayList() const;
+	void setTeamColor(const QColor&);
+
+
+	/**
+	 * Create a BoVector3 at index @p p
+	 **/
+	BoVector3 point(unsigned int p) const;
+	unsigned int points() const;
+
 protected:
+	/**
+	 * Load the texels with their (final) coordinates.
+	 **/
+	void loadTexels();
+
+	void loadVertices();
+
 	void createNodes();
 	bool connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const;
 

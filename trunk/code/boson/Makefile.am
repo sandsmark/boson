@@ -50,6 +50,7 @@ BOSON_SRC = \
 	gameoverdialog.cpp \
 	unitplugins.cpp \
 	bosontexturearray.cpp \
+	bo3dsload.cpp \
 	bosonmodel.cpp \
 	bosonglfont.cpp \
 	bosonglchat.cpp \
