@@ -55,7 +55,7 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 BosonMap::~BosonMap()
 {
  delete[] mCells;
- delete[] mHeightMap;
+ delete mHeightMap;
  delete mTexMap;
  delete d;
 }
@@ -86,13 +86,8 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  mMapHeight = height;
  mGroundTheme = theme;
 
- mHeightMap = new float[cornerArrayPos(width, height) + 1];
+ mHeightMap = new BoHeightMap(width + 1, height + 1);
  mTexMap = new BoTexMap(theme->textureCount(), width + 1, height + 1);
- for (unsigned int x = 0; x < width + 1; x++) {
-	for (unsigned y = 0; y < height + 1; y++) {
-		mHeightMap[cornerArrayPos(x, y)] = 0.0f;
-	}
- }
  bool ret = generateCellsFromTexMap();
  if (!ret) {
 	boError() << k_funcinfo << "unable to generate cells from texmap" << endl;
@@ -107,7 +102,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 	ret = saveCompleteMap(stream);
  }
 
- delete[] mHeightMap;
+ delete mHeightMap;
  mHeightMap = 0;
  delete mTexMap;
  mTexMap = 0;
@@ -212,11 +207,10 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  mMapHeight = mapHeight; // vertical cell count
 
  delete[] mCells;
- delete[] mHeightMap;
- delete mTexMap;
-
- mHeightMap = 0;
  mCells = 0;
+ delete mHeightMap;
+ mHeightMap = 0;
+ delete mTexMap;
  mTexMap = 0;
 
  return true;
@@ -373,14 +367,16 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
 {
  if (mHeightMap) {
 	boWarning() << k_funcinfo << "heightmap already present - deleting" << endl;
-	delete[] mHeightMap;
+	delete mHeightMap;
 	mHeightMap = 0;
  }
- mHeightMap = new float[(width() + 1) * (height() + 1)];
+ mHeightMap = new BoHeightMap(width() + 1, height() + 1);
  boDebug() << k_funcinfo << "loading height map from network stream" << endl;
  for (unsigned int x = 0; x < width() + 1; x++) {
 	for (unsigned int y = 0; y < height() + 1; y++) {
-		stream >> mHeightMap[y * (width() + 1) + x];
+		float h;
+		stream >> h;
+		mHeightMap->setHeightAt(x, y, h);
 	}
  }
  return true;
@@ -588,7 +584,7 @@ bool BosonMap::saveCells(QDataStream& stream)
 
 bool BosonMap::saveHeightMap(QDataStream& stream)
 {
- return saveHeightMap(stream, width(), height(), mHeightMap);
+ return saveHeightMap(stream, width(), height(), mHeightMap->heightMap());
 }
 
 bool BosonMap::saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap)
@@ -642,7 +638,7 @@ QByteArray BosonMap::saveHeightMapImage()
 	for (int y = 0; y < image.height(); y++) {
 		uint* p = (uint*)image.scanLine(y);
 		for (int x = 0; x < image.width(); x++) {
-			float value = mHeightMap[y * (width() + 1) + x];
+			float value = mHeightMap->heightAt(x, y);
 			int v = BosonMap::heightToPixel(value);
 			*p = qRgb(v, v, v);
 			p++;
@@ -743,35 +739,13 @@ float BosonMap::heightAtCorner(int x, int y) const
 	boError() << k_funcinfo << "NULL height map" << endl;
 	return 1.0f;
  }
- // note: isValidCell(x,y) might return false, even though the coordinates are
- // valid.
- // if x=width() and y=height() we will return the lower right corner of the
- // cell at x=width()-1 and y=height()-1.
- // This value is equal to the upper left corner of x=width() and y=height() if
- // such a cell would exist.
- if (x < 0 || (unsigned int)(x + 1) >= width()) {
-	return 1.0f;
- }
- if (y < 0 || (unsigned int)(y + 1) >= height()) {
-	return 1.0f;
- }
- return mHeightMap[cornerArrayPos(x, y)];
+ return mHeightMap->heightAt(x, y);
 }
 
 void BosonMap::setHeightAtCorner(int x, int y, float h)
 {
  BO_CHECK_NULL_RET(mHeightMap);
- if (x < 0 || (unsigned int)(x + 1) >= width()) {
-	return;
- }
- if (y < 0 || (unsigned int)(y + 1) >= height()) {
-	return;
- }
-
- // AB: see pixelToHeight() for explanation on these restrictions
- h = QMIN(h, 15.0f);
- h = QMAX(h, -10.5f);
- mHeightMap[y * (width() + 1) + x] = h;
+ mHeightMap->setHeightAt(x, y, h);
 }
 
 void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater)
