@@ -48,16 +48,13 @@ The entries marked with * are mandatory.
 IsFacility=boolean
         True if this is a facility, false if this is a mobile unit.
         Default is false.
-
 * Name=Text
         The Name of the unit. Should be short, no more than 2 or 3
         words. One if possible.
         Default is "Unknown".
-
 * Id=Number
         A unique (!) ID for this unit. Must be > 0.
         No default!
-
 UnitWidth=Number
         The width of the unit in cells.
         You can use floating point numbers - e.g. 1.5 will make
@@ -65,7 +62,6 @@ UnitWidth=Number
         Please don't use values like 1.3333 (might cause rounding
         trouble) or 1.23876381687 (nonsense value).
         Default is 1.0
-
 UnitHeight=Number
         The height of the unit in cells.
         You can use floating point numbers - e.g. 1.5 will make
@@ -73,7 +69,6 @@ UnitHeight=Number
         Please don't use values like 1.3333 (might cause rounding
         trouble) or 1.23876381687 (nonsense value).
         Default is 1.0
-
 UnitDepth=Number
         The height in z-direction of the unit in cells.
         You can use floating point numbers - e.g. 1.5 will make
@@ -81,68 +76,54 @@ UnitDepth=Number
         Please don't use values like 1.3333 (might cause rounding
         trouble) or 1.23876381687 (nonsense value).
         Default is 1.0
-
 Health=Number
         Health, power, whatever. Make this greater and the unit will
         live longer.
         Must be > 0. Default is 100.
-
 Shield=Number
         Not yet supported.
         Default is 0.
-
 Armor=Number
         Not yet supported.
         Default is 0.
-
 MineralCost=Number
         How much mineral do you have to pay if you build this?
         Must be >= 0. Default is 100.
-
 OilCost=Number
         How much oil do you have to pay if you build this?
         Must be >= 0. Default is 0.
-
 SightRange=Number
         The sight range of this unit.
         the sight range is how far (in cells!) this unit can see.
         Must be >= 0. Default is 5 (currently).
-
 WeaponDamage=Number
         The damage this unit makes to other units when firing. Can
         also be negative - the unit repairs then.
         Default is 0.
-
 WeaponRange=Number
         The weapon range of this unit.
         Note: when WeaponDamage <= 0 this has no effect!
         Must be >= 0. Default is 0.
-
 Reload=Number
         The time to reload the weapon. "Time" means number of
         advance calls (default is 1 per 50ms = 20 calls/sec).
         Must be >= 0. Default is 0.
-
 TerrainType=Number
         The default terrain type of the unit. One of 0 (Land),
         1 (Water) or 2 (Air).
         You must decide for one - even if the unit is some kind
         of mixture. If so you will probably use Land (0).
         Must be 0, 1 or 2. The default is 0 (=Land Unit)
-
 ProductionTime=Number
         The number of advance calls needed to produce this unit
         Must be >= 0. Default is (currently) 100.
-
 CanShootAtAirUnits=bool
         Can this unit shoot at aircrafts?
         Default true for TerrainType=2, otherwise false.
-
 CanShootAtLandUnits=bool
         Can this unit shoot at ground units? True or False.
         Default is true for TerrainType=0 or TerrainType=1,
         otherwise false.
-
 Producer=Number
         Specifies which kind of factory is able to produce this
         unit. Possible values are: 0=war factory (heavy land
@@ -155,13 +136,11 @@ Producer=Number
         factories will also depend on the Producer type.
         The default is the value of "TerrainType" for mobile units
         and 10 (= command bunker) for facilities.
-
 SupportMiniMap=bool
         If true then this player has a minimap when he has a unit
         of this type. The minimap disappears when all units of the
         player which have SupportMiniMap=true are gone.
         Default is false.
-
 Requirements=List
         List is comma separated list of unit IDs. Player must have
         built all those units before he can build this unit.
@@ -190,12 +169,10 @@ Speed=Number
         pixels per advance call. This is a double number so values
         like "0.452463" are possible as well.
         Must be >= 0. Default is 0
-
 CanGoOnLand=boolean
         Whether this unit can go over land.
         This is true by default for TerrainType = Land or
         Aircraft.
-
 CanGoOnWater=boolean
         Whether this unit can go over water.
         This is true by default for TerrainType = Water or
@@ -226,7 +203,6 @@ Textures=List
         need to have an entry in this group (if it isn't
         there it is ignored. no error).
         Defaul is an empty list
-
 texture.jpg=LongName.jpg
         "texture.jpg" is the "short name" of the texture,
         i.e. the name as listed in the model (.3ds) file. It
@@ -261,25 +237,20 @@ FrameSpeedIdle=5
 FrameStartIdle=Number
         (see above for general information)
         Default is 0.
-
 FrameRangeIdle=Number
         (see above for general information)
         Default is 1.
-
 FrameSpeedIdle=Number
         (see above for general information)
         Default is 1.
         The "Idle" action specifies the frames/animation
         of the unit when it does nothing, i.e. is idle.
-
 FrameStartWreckage=Number
         (see above for general information)
         Default is -1.
-
 FrameRangeWreckage=Number
         (see above for general information)
         Default is 0.
-
 FrameSpeedWreckage=Number
         (see above for general information)
         Default is 0.
@@ -322,11 +293,9 @@ For mineral/oil miners. Well - doesn't make any sense for facilities :-)
 CanMineMinerals=boolean
         Whether this unit can mine minerals.
         Default is false.
-
 CanMineOil=boolean
         Whether this unit can mine oil.
         Default is false .
-
 MaxResources=number
         The maximal amount of resourced that can be mined until
         the unit needs to return to a refinery.
@@ -337,7 +306,6 @@ MaxResources=number
 CanRefineOil=Boolean
         True if this is an oilrefinery.
         Default is false
-
 CanRefineMinerals=Boolean
         True if this is a mineralrefinery.
         Default is false
