@@ -168,7 +168,7 @@ void CursorPreview::mouseMoveEvent(QMouseEvent* )
 
 int main(int argc, char **argv)
 {
- KAboutData about("bounit",
+ KAboutData about("bocursor",
 		I18N_NOOP("Boson Cursor Editor"),
 		version,
 		description,
