@@ -32,7 +32,7 @@
 #include "gameoverdialog.h"
 #include "bodebug.h"
 #include "commandframe/bosoncommandframe.h"
-#include "sound/bosonmusic.h"
+#include "sound/bosonaudiointerface.h"
 
 #include <kstdgameaction.h>
 #include <klocale.h>

@@ -5,5 +5,8 @@ noinst_LTLIBRARIES = libbosonsound.la
 METASOURCES = AUTO
 
 libbosonsound_la_SOURCES = \
+	boaudiothread.cpp \
+	bosonaudio.cpp \
+	bosonaudiointerface.cpp \
 	bosonsound.cpp \
 	bosonmusic.cpp

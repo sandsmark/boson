@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,67 +19,84 @@
 #ifndef BOSONSOUND_H
 #define BOSONSOUND_H
 
+#include "bosonaudiointerface.h"
+
 #include <qptrlist.h>
 #include <qmap.h>
 
 #include <arts/kartsserver.h>
 
-class QString;
 class KArtsServer;
 class BoPlayObject;
+class BosonAudio;
+class QString;
 class QStringList;
 class QDir;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
- * @short 
  **/
-class BosonSound
+class BosonSound : public BosonAbstractSoundInterface
 {
 public:
-	BosonSound();
-	~BosonSound();
+	// warning: parent does NOT take ownership
+	BosonSound(BosonAudio* parent);
+	virtual ~BosonSound();
+
+	// obsolete. remove.
+	void play(const QString& name)
+	{
+		playSound(name);
+	}
+	void play(int id)
+	{
+		playSound(id);
+	}
+
+	/**
+	 * See @ref BosonAudio::setSound
+	 **/
+	virtual void setSound(bool s);
+
+	/**
+	 * @return BosonAudio::sound
+	 **/
+	virtual bool sound() const;
 
 	/**
 	 * @param Sound name as returned by @ref UnitProperties::sound
 	 **/
-	void play(const QString& name);
-	void play(int id);
+	virtual void playSound(const QString& name);
+	virtual void playSound(int id);
 
 	/**
-	 * Add a sounds to BosonSound. Calls @ref addEvent for every entry in
-	 * sounds.
-	 * @param speciesPath Path to the species directory. See @ref
-	 * SpeciesTheme::themePath
-	 * @param sounds lists of sound names in speciesPath/sounds/. Note that
-	 * BosonSound will add a _n.ogg, where n (or nn) is a number.
-	 **/
-	void addUnitSounds(const QString& speciesPath, const QStringList& sounds);
-
-	/**
-	 * Add general sounds. These are not unit specific sounds but something
-	 * independant. Examples may be status reports ("you are under attack")
-	 * or a radar sound or something like this.
-	 * @param speciesPath Path to the species directory. See @ref
-	 * SpeciesTheme::themePath
-	 * @param sounds A list of id<->sound name pairs.
-	 **/
-	void addSounds(const QString& speciesPath, QMap<int, QString> sounds);
-
-	/**
-	 * @return boMusic->server(); see @ref BosonMusic::server
+	 * @return See @ref BosonAudio::server
 	 **/
 	KArtsServer& server() const;
 
 	Arts::StereoEffectStack effectStack();
+
+	/**
+	 * Note that several files for a single event (i.e. with the same name)
+	 * can be added! They are different versions of the same event then.
+	 * @param name First part of filename. E.g. "shoot" if "shoot_nn.ogg" is
+	 * the filename, where nn is 00-number of available files.
+	 * @param file The actual (absolute) filename.
+	 **/
+	virtual void addEventSound(const QString& name, const QString& file);
+
+	/**
+	 * A "general" event, not depending on units. See also @ref
+	 * BosonAbstractSoundInterface::addEventSound.
+	 **/
+	virtual void addEventSound(int id, const QString& file);
 
 protected:
 	/**
 	 * @param name First part of filename. E.g. "shoot" if "shoot_nn.ogg" is
 	 * the filename, where nn is 00-number of available files.
 	 **/
-	void addEvent(const QString& dir, const QString& name);
-	void addEventSound(const QString& name, const QString& file);
+//	void addEvent(const QString& dir, const QString& name);
 
 private:
 	typedef QPtrList<BoPlayObject> SoundList;

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,14 +19,15 @@
 #ifndef BOSONMUSIC_H
 #define BOSONMUSIC_H
 
+#include "bosonaudiointerface.h"
+
 #include <qobject.h>
 
 class QStringList;
 class KArtsServer;
 class BosonSound;
+class BosonAudio;
 class Unit;
-
-#define boMusic BosonMusic::bosonMusic()
 
 /**
  * Music support. Not much to describe here...
@@ -36,65 +37,46 @@ class Unit;
  * @author Andreas Beckermann <b_mann@gmx.de>
  * @short Music support
  **/
-class BosonMusic : public QObject
+class BosonMusic : public QObject, public BosonAbstractMusicInterface
 {
 	Q_OBJECT
+	// AB: note that QObject derived classes in threads other the GUI thread
+	// are possible, even if they are not a perfect solution. we must take
+	// care that no events are sent/received.
+	// this isn't a problem for us, since we only use the slot mechanism
+	// from QObject here.
 public:
-	BosonMusic(QObject* parent = 0);
-	~BosonMusic();
+	BosonMusic(BosonAudio* parent);
+	virtual ~BosonMusic();
 
-	/**
-	 * @return BoGlobal::boGlobal()->bosonMusic();
-	 **/
-	static BosonMusic* bosonMusic();
+	virtual void setMusic(bool m);
+	virtual bool music() const;
+
+	 // obsolete. remove!
+	void play()
+	{
+		playMusic();
+	}
 
 	/**
 	 * Play a previously loaded file. See @ref load
 	 **/
-	void play();
+	virtual void playMusic();
+	virtual void stopMusic();
 
-	void stop();
+	virtual void startMusicLoop();
+	virtual void addToMusicList(const QString& file);
+	virtual void clearMusicList();
 
+	virtual bool isLoop() const; // FIXME: do we need this? should be in the interface only
+
+protected:
 	/**
 	 * Load a file
 	 * @param file Absolute path to the file
 	 * @return True if file was loaded successfully, otherwise false
 	 **/
-	bool load(const QString& file);
-
-	/**
-	 * @return All music files that could be found. Note that this start at
-	 * the boson/music dir and is recursively. MP3 files are searched as
-	 * well as OGG files.
-	 **/
-	QStringList availableMusic() const;
-
-	/**
-	 * Equivalent to startLoop(availableMusic())
-	 **/
-	void startLoop();
-
-	/**
-	 * Start to play files in a loop. If a file from the list could not be
-	 * loaded it is removed from the list.
-	 *
-	 * Note that the files are played in random order!
-	 * @param files List of absolute file names
-	 **/
-	void startLoop(const QStringList& files);
-
-	bool isLoop() const;
-
-	bool sound() const;
-	bool music() const;
-
-	void setMusic(bool);
-	void setSound(bool);
-
-	BosonSound* bosonSound(const QString& species) const;
-	BosonSound* addSounds(const QString& species);
-
-	KArtsServer& server() const;
+	bool loadMusic(const QString& file);
 
 protected slots:
 	void slotUpdateTicker();

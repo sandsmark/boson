@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,9 +20,8 @@
 #include "bosonsound.h"
 
 #include "../defines.h"
-#include "../bosonconfig.h"
 #include "bodebug.h"
-#include "bosonmusic.h"
+#include "bosonaudio.h"
 
 #include <kapplication.h>
 #include <kmimetype.h>
@@ -192,8 +191,12 @@ class BosonSound::BosonSoundPrivate
 public:
 	BosonSoundPrivate()
 	{
+		mParent = 0;
+
 		mId = -1;
 	}
+
+	BosonAudio* mParent;
 
 	QIntDict<BoPlayObject> mSounds;
 
@@ -205,17 +208,16 @@ public:
 
 	long mId;
 
-	bool mPlaySounds;
-
 };
 
-BosonSound::BosonSound()
+BosonSound::BosonSound(BosonAudio* parent)
 {
  d = new BosonSoundPrivate;
+ d->mParent = parent;
  d->mSounds.setAutoDelete(true);
 
 #if KDE_VERSION < 301
- d->mPlaySounds = false;
+ setSound(false);
  return;
 #endif
 /*
@@ -223,7 +225,6 @@ BosonSound::BosonSound()
  d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
  if (d->mAmanPlay.isNull()) {
 	boError(200) << k_lineinfo << "Synth_AMAN_Play is NULL" << endl;
-	d->mPlaySounds = false; // something evil happened...
 	return;
  }
  d->mAmanPlay.title("boson");
@@ -233,7 +234,6 @@ BosonSound::BosonSound()
  d->mEffectStack = Arts::DynamicCast(server().server().createObject("Arts::StereoEffectStack"));
  if (d->mEffectStack.isNull()) {
 	boError(200) << k_lineinfo << "NULL effect stack" << endl;
-	d->mPlaySounds = false; // something evil happened...
 	return;
  }
  d->mEffectStack.start();
@@ -244,13 +244,10 @@ BosonSound::BosonSound()
  d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
  if (d->mVolumeControl.isNull()) {
 	boError(200) << k_funcinfo << "NULL volume control" << endl;
-	d->mPlaySounds = false; // something evil happened...
  }
  d->mVolumeControl.start();
  d->mId = d->mEffectStack.insertBottom(d->mVolumeControl, "VolumeControl");
 */
-
- d->mPlaySounds = true;
 }
 
 BosonSound::~BosonSound()
@@ -269,94 +266,7 @@ BosonSound::~BosonSound()
 
 KArtsServer& BosonSound::server() const
 {
- return boMusic->server();
-}
-
-void BosonSound::addUnitSounds(const QString& speciesPath, const QStringList& sounds)
-{
- if (boConfig->disableSound()) {
-	return;
- }
- if (speciesPath.isEmpty()) {
-	return;
- }
- if (sounds.count() == 0) {
-	return;
- }
- QString path = speciesPath;
- if (path.right(1) != QString::fromLatin1("/")) {
-	path += QString::fromLatin1("/");
- }
- path += QString::fromLatin1("sounds/");
- QStringList::ConstIterator it = sounds.begin();
- for (; it != sounds.end(); ++it) {
-	if (!(*it).isEmpty()) {
-		addEvent(path, *it);
-	}
- }
-}
-
-void BosonSound::addSounds(const QString& speciesPath, QMap<int, QString> sounds)
-{
-#if KDE_VERSION < 301
- return;
-#endif
- if (boConfig->disableSound()) {
-	return;
- }
- QString path = speciesPath;
- if (path.right(1) != QString::fromLatin1("/")) {
-	path += QString::fromLatin1("/");
- }
- path += QString::fromLatin1("sounds/");
-
- // TODO: support for different versions
- // currently we support only a single version per sound here. let's do it just
- // like for unit sounds and add _n.ogg to the sound names!
- QDir directory(path);
- directory.setNameFilter(QString("*.ogg;*.wav"));
- QStringList allFiles = directory.entryList();
- if (allFiles.isEmpty()) {
-	boWarning(200) << k_funcinfo << "no sound files found - is the data module installed?" << endl;
-	return;
- }
- QMap<int, QString>::Iterator it = sounds.begin();
- for (; it != sounds.end(); ++it) {
-	if (d->mSounds.find(it.key())) {
-		continue;
-	}
-//	QStringList list = list.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(*it))); // support for _n.ogg
-	QStringList list = allFiles.grep(QRegExp(QString("^%1\\....").arg(*it))); // support for .ogg only
-	if (list.isEmpty()) {
-		continue;
-	}
-	QString file = path + list.first();
-
-	BoPlayObject* playObject = new BoPlayObject(this, file);
-	if (!playObject->isNull()) {
-		d->mSounds.insert(it.key(), playObject);
-	} else {
-		boWarning(200) << k_funcinfo << "NULL sound " << file << endl;
-		delete playObject;
-	}
-
- }
-
-
-
-}
-
-void BosonSound::addEvent(const QString& dir, const QString& name)
-{
- QDir directory(dir);
- directory.setNameFilter(QString("%1_*.ogg;%2_*.wav").arg(name).arg(name));
- QStringList list = directory.entryList();
- // for "oder_select" we'd also get "order_select_cmdbunker_0.wav" which is
- // wrong. so:
- list = list.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(name)));
- for (unsigned int i = 0; i < list.count(); i++) {
-	addEventSound(name, directory.absPath() + QString::fromLatin1("/") + list[i]);
- }
+ return d->mParent->server();
 }
 
 void BosonSound::addEventSound(const QString& name, const QString& file)
@@ -364,9 +274,6 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
 #if KDE_VERSION < 301
  return;
 #endif
- if (boConfig->disableSound()) {
-	return;
- }
  QPtrList<BoPlayObject> list = d->mUnitSounds[name];
  QPtrListIterator<BoPlayObject> it(list);
  for (; it.current(); ++it) {
@@ -385,33 +292,38 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
  }
 }
 
-void BosonSound::play(int id)
+void BosonSound::addEventSound(int id, const QString& file)
 {
- if (boConfig->disableSound()) {
+ // we are lacking support for multiple files per id!
+ // such as we have for order_move_nn.ogg, where nn is the number of the
+ // version.
+ if (d->mSounds.find(id)) {
 	return;
  }
- if (!d->mPlaySounds) { 
-	return; // something evil happened to our sound server...
+ boDebug(200) << k_funcinfo << "loading " << file << endl;
+ BoPlayObject* playObject = new BoPlayObject(this, file);
+ if (!playObject->isNull()) {
+	d->mSounds.insert(id, playObject);
+ } else {
+	boWarning(200) << k_funcinfo << "NULL sound " << file << endl;
+	delete playObject;
  }
- if (!boConfig->sound()) {
+}
+
+void BosonSound::playSound(int id)
+{
+ if (!sound()) {
 	return;
  }
- boDebug(200) << k_funcinfo << "id: " << id << endl;
  BoPlayObject* p = d->mSounds[id];
  if (p && !p->isNull()) {
 	p->playFromBeginning();
  }
 }
 
-void BosonSound::play(const QString& name)
+void BosonSound::playSound(const QString& name)
 {
- if (boConfig->disableSound()) {
-	return;
- }
- if (!d->mPlaySounds) {
-	return; // something evil happened to our sound server...
- }
- if (!boConfig->sound()) {
+ if (!sound()) {
 	return;
  }
  QPtrList<BoPlayObject>& list = d->mUnitSounds[name];
@@ -434,5 +346,15 @@ void BosonSound::play(const QString& name)
 Arts::StereoEffectStack BosonSound::effectStack()
 {
  return d->mEffectStack;
+}
+
+void BosonSound::setSound(bool s)
+{
+ d->mParent->setSound(s);
+}
+
+bool BosonSound::sound() const
+{
+ return d->mParent->sound();
 }
 
