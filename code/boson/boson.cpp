@@ -202,14 +202,20 @@ void Boson::removeAllPlayers()
 
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 {
- if (!gameMode()) {
-	kdWarning() << k_funcinfo << "Not in game mode!" << endl;
-	return true;
- }
  Player* player = (Player*)p;
  if (player->isOutOfGame()) {
 	kdWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
 	return true;
+ }
+ if (!gameMode()) {
+	// editor mode sends an additional entry safety id, just in case we
+	// might have constructed a wrong display or so
+	Q_UINT32 editor;
+	stream >> editor;
+	if (editor != BosonMessage::MoveEditor) {
+		kdError() << k_funcinfo << "Not an editor message, elthough we're in editor mode!" << endl;
+		return true;
+	}
  }
  Q_UINT32 msgid;
  stream >> msgid;
@@ -743,6 +749,54 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MovePlaceUnit:
+	{
+		Q_UINT32 unitType;
+		Q_UINT32 owner;
+		Q_INT32 x;
+		Q_INT32 y;
+
+		stream >> owner;
+		stream >> unitType;
+		stream >> x;
+		stream >> y;
+
+		KPlayer* p = 0;
+		if (owner >= 1024) { // a KPlayer ID
+			p = findPlayer(owner);
+		} else {
+			p = playerList()->at(owner);
+		}
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+
+		addUnit(unitType, (Player*)p, x, y);
+		break;
+	}
+	case BosonMessage::MovePlaceCell:
+	{
+		Q_INT32 tile;
+		Q_UINT8 version;
+		Q_INT8 isBigTrans;
+		Q_INT32 x;
+		Q_INT32 y;
+
+		stream >> tile;
+		stream >> version;
+		stream >> isBigTrans;
+		stream >> x;
+		stream >> y;
+		
+		emit signalChangeCell(x, y, tile, (unsigned char)version);
+		if (isBigTrans) {
+			emit signalChangeCell(x + 1, y, tile + 1, (unsigned char)version);
+			emit signalChangeCell(x, y + 1, tile + 2, (unsigned char)version);
+			emit signalChangeCell(x + 1, y + 1, tile + 3, (unsigned char)version);
+		}
+		break;
+	}
 	default:
 		kdWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;
@@ -756,7 +810,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
  switch (msgid) {
 	case BosonMessage::AddUnit:
 	{
-		Q_INT32 owner;
+		Q_UINT32 owner;
 		Q_UINT32 unitType;
 		Q_INT32 x;
 		Q_INT32 y;
@@ -781,7 +835,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	}
 	case BosonMessage::AddUnitsXML:
 	{
-		Q_INT32 owner;
+		Q_UINT32 owner;
 		stream >> owner;
 
 		QString xmlDocument;
@@ -1104,7 +1158,7 @@ void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* ow
 
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_INT32)owner->id();
+ stream << (Q_UINT32)owner->id();
  stream << (Q_UINT32)unitType;
  stream << (Q_INT32)x;
  stream << (Q_INT32)y;
@@ -1126,7 +1180,7 @@ void Boson::sendAddUnits(const QString& xmlDocument, Player* owner)
  }
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_INT32)owner->id();
+ stream << (Q_UINT32)owner->id();
  stream << xmlDocument;
  sendMessage(buffer, BosonMessage::AddUnitsXML);
 }
@@ -1162,6 +1216,10 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	return false;
  }
  Unit* unit = addUnit(unitType, p, x, y);
+ if (!unit) {
+	kdError() << k_funcinfo << "NULL unit" << endl;
+	return false;
+ }
  if (unit->isFacility()) {
 	p->statistics()->addProducedFacility((Facility*)unit, factory);
  } else {
@@ -1176,6 +1234,18 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 
 Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
+ if (x < 0 || (unsigned int)x >= d->mCanvas->mapWidth()) {
+	kdError() << k_funcinfo << "Invalid x-coordinate " << x << endl;
+	return 0;
+ }
+ if (y < 0 || (unsigned int)y >= d->mCanvas->mapHeight()) {
+	kdError() << k_funcinfo << "Invalid y-coordinate " << y << endl;
+	return 0;
+ }
+ if (!p) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return 0;
+ }
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);

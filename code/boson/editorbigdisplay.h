@@ -81,10 +81,6 @@ public:
 
 public slots:
 
-signals:
-	void signalAddCell(int x, int y, int groundType, unsigned char version);
-	void signalBuildUnit(int type, int x, int y, Player* owner); // editor mode only
-
 protected:
 	/**
 	 * Called when the user right-clicks on the big display.

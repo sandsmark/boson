@@ -114,6 +114,8 @@ void EditorWidget::initConnections()
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
+ connect(game(), SIGNAL(signalChangeCell(int,int,int,unsigned char)),
+		playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
 void EditorWidget::initMap()
