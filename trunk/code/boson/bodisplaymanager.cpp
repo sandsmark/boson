@@ -19,6 +19,7 @@
 
 #include "bodisplaymanager.h"
 
+#include "no_player.h"
 #include "defines.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplayinputbase.h"
@@ -332,12 +333,12 @@ void BoDisplayManager::setCursor(BosonCursor* cursor)
  }
 }
 
-void BoDisplayManager::setLocalPlayer(Player* p)
+void BoDisplayManager::setLocalPlayerIO(PlayerIO* io)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	boDebug() << k_funcinfo << endl;
-	it.current()->setLocalPlayer(p);
+	it.current()->setLocalPlayerIO(io);
 	++it;
  }
 }

@@ -28,7 +28,7 @@
 #include "bosonmessage.h"
 #include "boson.h"
 #include "bosoncursor.h"
-#include "player.h"
+#include "playerio.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"
 #include "unit.h"
@@ -37,6 +37,7 @@
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
 #include "bosonweapon.h"
+#include "no_player.h"
 
 #include <klocale.h>
 
@@ -57,7 +58,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 // computer player
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  if (selection()->isEmpty()) {
 	return;
  }
@@ -125,9 +126,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
  }
 
  Unit* unit = 0;
- if (!localPlayer()->isFogged((int)(event.canvasVector().x() / BO_TILE_SIZE), (int)(event.canvasVector().y() / BO_TILE_SIZE))) {
-	unit = canvas()->findUnitAt(event.canvasVector());
- }
+ unit = localPlayerIO()->findUnitAt(canvas(), event.canvasVector()); // also checks for canSee()
  if (!unit) {
 	//FIXME: first check if a the unit can produce! even mobile units can
 	//have the production plugin!!
@@ -161,18 +160,18 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 		// now ! (ActionBuild)
 	}
  } else { // there is a unit - attack it?
-	if ((localPlayer()->isEnemy(unit->owner()) || event.forceAttack()) &&
+	if ((localPlayerIO()->isEnemy(unit) || event.forceAttack()) &&
 			selection()->canShootAt(unit)) {
 		// attack the unit
 		if (!actionAttack(event.canvasVector())) {
 			return;
 		}
 
-	} else if (localPlayer()->isEnemy(unit->owner())) {
+	} else if (localPlayerIO()->isEnemy(unit)) {
 		// a non-friendly unit, but the selection cannot shoot
 		// we probably won't do anything here
 		// IDEA: what about "I cannot shoot that!" sound?
-	} else if (localPlayer()->isAllied(unit->owner())) {
+	} else if (localPlayerIO()->isAllied(unit)) {
 		// click on a friendly unit
 		if (unit->isFacility() && unit->plugin(UnitPlugin::Repair)) {
 			// some kind of repairyard - repair all units
@@ -202,7 +201,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 			// (at least no valid)
 			// add other possibilities here
 		}
-	} else if (localPlayer()->isNeutral(unit->owner())) {
+	} else if (localPlayerIO()->isNeutral(unit)) {
 		// click on a neutral unit
 		// note: this is NOT a friendly unit, so we won' repair it or
 		// so. but we won't shoot at it either (by default).
@@ -270,8 +269,8 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector
 	BO_NULL_ERROR(selection());
 	return false;
  }
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!localPlayerInput()) {
@@ -281,7 +280,7 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  localPlayerInput()->moveWithoutAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
- if (selection()->leader()->owner() == localPlayer()) {
+ if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderMove);
  }
  return true;
@@ -289,8 +288,8 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector
 
 bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!selection()) {
@@ -304,7 +303,7 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  localPlayerInput()->moveWithAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
- if (selection()->leader()->owner() == localPlayer()) {
+ if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderMove);
  }
  return true;
@@ -312,8 +311,8 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
 
 bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!localPlayerInput()) {
@@ -338,7 +337,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 	return false;
  }
 
- const UnitProperties* prop = localPlayer()->unitProperties(production->currentProductionId());
+ const UnitProperties* prop = localPlayerIO()->unitProperties(production->currentProductionId());
  if (!prop) {
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
@@ -357,8 +356,8 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 
 bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!localPlayerInput()) {
@@ -376,7 +375,7 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
  Unit* unit = canvas()->findUnitAt(canvasVector);
  localPlayerInput()->attack(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
- if (u->owner() == localPlayer()) {
+ if (localPlayerIO()->ownsUnit(u)) {
 	u->playSound(SoundOrderAttack);
  }
  return true;
@@ -384,8 +383,8 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
 
 bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!localPlayerInput()) {
@@ -400,7 +399,7 @@ bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
  // z is ignored
  localPlayerInput()->dropBomb(selection()->leader(), weaponId, (int)canvasVector.x(), (int)canvasVector.y());
  weaponId = -1;
- if (selection()->leader()->owner() == localPlayer()) {
+ if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderAttack);
  }
  return true;
@@ -483,8 +482,8 @@ bool BosonBigDisplayInput::actionRefine(const BoVector3& canvasVector)
 
 bool BosonBigDisplayInput::actionFollow(const BoVector3& canvasVector)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (!selection()) {
@@ -502,7 +501,7 @@ bool BosonBigDisplayInput::actionFollow(const BoVector3& canvasVector)
  Unit* unit = canvas()->findUnitAt(canvasVector);
  localPlayerInput()->follow(selection()->allUnits(), unit);
  Unit* u = selection()->leader();
- if (u->owner() == localPlayer()) {
+ if (localPlayerIO()->ownsUnit(u)) {
 	u->playSound(SoundOrderMove);
  }
  return true;
@@ -510,7 +509,7 @@ bool BosonBigDisplayInput::actionFollow(const BoVector3& canvasVector)
 
 void BosonBigDisplayInput::updatePlacementPreviewData()
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
  bigDisplay()->setPlacementPreviewData(0, false);
@@ -520,19 +519,15 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
  if (!selection() || selection()->isEmpty() || !selection()->leader()) {
 	return;
  }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
  Unit* leader = selection()->leader();
- if (leader->owner() != localPlayer()) {
+ if (localPlayerIO()->ownsUnit(leader)) {
 	return;
  }
  ProductionPlugin* pp = (ProductionPlugin*)leader->plugin(UnitPlugin::Production);
  if (!pp || pp->completedProductionId() == 0 || pp->completedProductionType() != ProduceUnit) {
 	return;
  }
- const UnitProperties* prop = localPlayer()->unitProperties(pp->completedProductionId());
+ const UnitProperties* prop = localPlayerIO()->unitProperties(pp->completedProductionId());
  if (!prop) {
 	return;
  }
@@ -546,7 +541,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
 void BosonBigDisplayInput::action(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
 
  switch (action.type()) {
@@ -580,7 +575,7 @@ void BosonBigDisplayInput::updateCursor()
 	boError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
  }
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
 
@@ -599,9 +594,9 @@ void BosonBigDisplayInput::updateCursor()
 	return;
  }
 
- if (!selection()->isEmpty() && selection()->leader()->owner() == localPlayer()) {
+ if (!selection()->isEmpty() && localPlayerIO()->ownsUnit(selection()->leader())) {
 	Unit* leader = selection()->leader();
-	if (localPlayer()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE)) {
+	if (localPlayerIO()->isFogged(cursorCanvasVector())) {
 		if (leader->isMobile()) {
 			setCursorType(CursorMove);
 		} else {
@@ -610,7 +605,7 @@ void BosonBigDisplayInput::updateCursor()
 	} else {
 		Unit* unit = canvas()->findUnitAt(cursorCanvasVector());
 		if (unit) {
-			if (unit->owner() == localPlayer()) {
+			if (localPlayerIO()->ownsUnit(unit)) {
 				setCursorType(CursorDefault);
 				// we might add something like 
 				// if (leader->isDamaged() && unit->canRepair())
@@ -643,7 +638,7 @@ BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* un
  if (unit->isDestroyed()) {
 	return CanSelectDestroyed;
  }
- if (unit->owner() != localPlayer()) {
+ if (localPlayerIO() && localPlayerIO()->ownsUnit(unit)) {
 	// we can select this unit, but only as a single unit.
 	return CanSelectSingleOk;
  }
@@ -655,8 +650,8 @@ BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* un
 
 bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 {
- if (!localPlayer()) {
-	BO_NULL_ERROR(localPlayer());
+ if (!localPlayerIO()) {
+	BO_NULL_ERROR(localPlayerIO());
 	return false;
  }
  if (prop->isFacility()) {
@@ -664,7 +659,7 @@ bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 	// double-clicked. it makes no sense for facilities
 	return false;
  }
- QPtrList<Unit> allUnits = *(localPlayer()->allUnits());
+ QPtrList<Unit> allUnits = *(localPlayerIO()->allMyUnits());
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {
@@ -684,7 +679,7 @@ bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 
 void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(selection());
  if (selection()->isEmpty()) {
 	return;

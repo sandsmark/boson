@@ -67,25 +67,17 @@ BosonCollisions* BosonBigDisplayInputBase::collisions() const
  return canvas()->collisions();
 }
 
-Player* BosonBigDisplayInputBase::localPlayer() const
-{
- return bigDisplay()->localPlayer();
-}
-
 PlayerIO* BosonBigDisplayInputBase::localPlayerIO() const
 {
- if (!localPlayer()) {
-	return 0;
- }
- return localPlayer()->playerIO();
+ return bigDisplay()->localPlayerIO();
 }
 
 BosonLocalPlayerInput* BosonBigDisplayInputBase::localPlayerInput() const
 {
- if (!localPlayer()) {
+ if (!localPlayerIO()) {
 	return 0;
  }
- return (BosonLocalPlayerInput*)localPlayer()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+ return (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
 }
 
 const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const

@@ -26,6 +26,7 @@ class BosonBigDisplayBase;
 class UnitBase;
 class BosonCursor;
 class Player;
+class PlayerIO;
 class Unit;
 class BosonCanvas;
 class BoSelection;
@@ -90,9 +91,9 @@ public:
 	void setCursor(BosonCursor* cursor);
 
 	/**
-	 * Set the local player for all displays
+	 * Set the local playerIO for all displays
 	 **/
-	void setLocalPlayer(Player* player);
+	void setLocalPlayerIO(PlayerIO* playerIO);
 
 	/**
 	 * Make the displaymanager use this canvas (e.g. the selections need

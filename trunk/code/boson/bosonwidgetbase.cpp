@@ -236,7 +236,7 @@ void BosonWidgetBase::initDisplayManager()
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvance(unsigned int, bool)));
 
- displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
+ displayManager()->setLocalPlayerIO(localPlayer()->playerIO()); // this does nothing.
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
@@ -326,7 +326,7 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 
  // FIXME: this should be done by this->setLocalPlayer(), NOT here!
  // (setLocalPlayer() is also called when changing player in editor mode)
- b->setLocalPlayer(localPlayer()); // AB: this will also add the mouseIO!
+ b->setLocalPlayerIO(localPlayer()->playerIO()); // AB: this will also add the mouseIO!
 
  b->setCursor(mCursor);
  b->setKGameChat(d->mChat->chatWidget());
@@ -826,7 +826,8 @@ void BosonWidgetBase::slotCmdFrameDockHidden()
 
 void BosonWidgetBase::setBosonXMLFile()
 {
- setXMLFile(locate("config", "ui/ui_standards.rc", instance()));
+ QString file = locate("config", "ui/ui_standards.rc", instance());
+ setXMLFile(file);
  setXMLFile("bosonbaseui.rc", true);
 }
 
@@ -900,7 +901,7 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
 	}
  }
  if (displayManager()) {
-	displayManager()->setLocalPlayer(localPlayer());
+	displayManager()->setLocalPlayerIO(localPlayer()->playerIO());
  }
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game object" << endl;

@@ -50,7 +50,6 @@ public:
 	BoSelection* selection() const;
 	BosonCanvas* canvas() const;
 	BosonCollisions* collisions() const;
-	Player* localPlayer() const;
 	PlayerIO* localPlayerIO() const;
 	BosonLocalPlayerInput* localPlayerInput() const;
 
