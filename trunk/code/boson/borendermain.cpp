@@ -1764,6 +1764,13 @@ int main(int argc, char **argv)
  kapp->setMainWidget(main);
  main->show();
 
+ // the VBO meshrenderer (which isn't used by borender by default!) requires
+ // this call. otherwise we get an undefined reference on plugin loading.
+ // I have _no_ idea why this is required, as it's basically a noop.
+ (void)BoInfo::boInfo();
+ // Init BoTexture stuff
+ boTextureManager->initOpenGL();
+
  QString theme;
  unsigned long int typeId = 0;
  QString unit;
@@ -1852,12 +1859,6 @@ int main(int argc, char **argv)
 
  args->clear();
 
- // the VBO meshrenderer (which isn't used by borender by default!) requires
- // this call. otherwise we get an undefined reference on plugin loading.
- // I have _no_ idea why this is required, as it's basically a noop.
- (void)BoInfo::boInfo();
- // Init BoTexture stuff
- boTextureManager->initOpenGL();
  return app.exec();
 }
 
