@@ -28,8 +28,6 @@
 #include <math.h>
 #include <GL/glu.h>
 
-#include <lib3ds/mesh.h>
-
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)
 // And radians to degrees conversion
