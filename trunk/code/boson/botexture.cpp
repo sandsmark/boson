@@ -407,8 +407,6 @@ unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int
     GLenum format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
     int bpp = (format == GL_RGB) ? 3 : 4;
     unsigned char* scaledImage = new unsigned char[newW * newH * bpp];
-    boDebug() << k_funcinfo << "Scaling texture from " << width << "x" << height <<
-        " to " << newW << "x" << newH << endl;
     int error = gluScaleImage(format, width, height, GL_UNSIGNED_BYTE, data,
         newW, newH, GL_UNSIGNED_BYTE, scaledImage);
     if(error)
@@ -915,8 +913,6 @@ void BoTextureManager::unregisterTexture(BoTexture* tex)
   if(tex->loaded())
   {
     mUsedTextureMemory = QMAX(0, mUsedTextureMemory - tex->memoryUsed());
-    boDebug() << k_funcinfo << "About " << mUsedTextureMemory / 1024.0 <<
-        " kb of memory is now used by " << mTextures.count() - 1 << " textures" << endl;
   }
 
   mTextures.remove(tex);
@@ -928,8 +924,6 @@ void BoTextureManager::textureLoaded(BoTexture* tex, bool firsttime)
   {
     // Increase amount of used texture memory
     mUsedTextureMemory += tex->memoryUsed();
-    boDebug() << k_funcinfo << "About " << mUsedTextureMemory / 1024.0 <<
-        " kb of memory is now used by " << mTextures.count() << " textures" << endl;
   }
 }
 
