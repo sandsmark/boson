@@ -419,13 +419,13 @@ void RenderMain::slotObjectChanged(int index)
  SpeciesTheme* s = mAction2Species[a];
  BO_CHECK_NULL_RET(s);
  boDebug() << k_funcinfo << index << endl;
- QString objectModel = s->allObjectModels()[index];
- if (objectModel.isEmpty()) {
-	boError() << k_funcinfo << "Can't find " << objectModel << " (==" << index << ")" << endl;
+ QString object = s->allObjects()[index];
+ if (object.isEmpty()) {
+	boError() << k_funcinfo << "Can't find " << object << " (==" << index << ")" << endl;
 	return;
  }
- boDebug() << k_funcinfo << objectModel << endl;
- changeObject(s, objectModel);
+ boDebug() << k_funcinfo << object << endl;
+ changeObject(s, object);
 }
 
 void RenderMain::slotDebugModels()
@@ -562,7 +562,7 @@ void RenderMain::initKAction()
 		list.append(units[j]->name());
 	}
 	selectUnit->setItems(list);
-	selectObject->setItems(s->allObjectModels());
+	selectObject->setItems(s->allObjects());
  }
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),

@@ -42,8 +42,8 @@ template<class TYPE> class UpgradePropertiesValue
 
     virtual void loadValue(KSimpleConfig* cfg, QString key) = 0;
     virtual QString loadBaseValue(KSimpleConfig* cfg, QString key);
-    void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        UpgradeType type);
+    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
+        UpgradeType type) = 0;
     void applyPropertyToUnits(TYPE oldvalue, unsigned long int typeId,
         Player* player, UpgradeType type);
     TYPE applyValue(TYPE applyTo);
@@ -57,12 +57,16 @@ class UpgradePropertiesUIntValue : public UpgradePropertiesValue<unsigned long i
 {
   public:
     virtual void loadValue(KSimpleConfig* cfg, QString key);
+    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
+        UpgradeType type);
 };
 class UpgradePropertiesFloatValue : public UpgradePropertiesValue<float>
 {
   public:
     virtual void loadValue(KSimpleConfig* cfg, QString key);
-};
+    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
+        UpgradeType type);
+ };
 
 /**
  * @short Base class for properties of upgrades and technologies

@@ -110,14 +110,18 @@ public:
 	void loadParticleSystemProperties();
 
 	/**
+	 * Load the objects specified in $speciesdir/objects/objects.boson
+	 **/
+	void loadObjects(const QColor& teamColor);
+
+	/**
 	 * @return The unit model for @p unitType. Will <em>not</em> load the
 	 * model - see @ref loadUnitModel
 	 **/
 	BosonModel* unitModel(unsigned long int unitType, const QColor& teamColor) const;
 
 	/**
-	 * @return The specified object model from @p file. Loads the model if
-	 * necessary.
+	 * @return The specified object model with id @name.
 	 **/
 	BosonModel* objectModel(const QString& file, const QColor& teamColor);
 

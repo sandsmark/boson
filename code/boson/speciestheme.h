@@ -103,6 +103,8 @@ public:
 
 	void loadParticleSystems();
 
+	void loadObjects();
+
 	const BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
 
 	/**
@@ -126,7 +128,7 @@ public:
 	 **/
 	static QString unitModelFile();
 
-	BosonModel* objectModel(const QString& file);
+	BosonModel* objectModel(const QString& name);
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the
@@ -205,10 +207,10 @@ public:
 	QValueList<const UnitProperties*> allUnits() const;
 
 	/**
-	 * @return The filenames of all models for this themes, as they could
+	 * @return The names of all objects of this theme, as they could
 	 * be provided to @ref objectModel
 	 **/
-	QStringList allObjectModels() const;
+	QStringList allObjects() const;
 
 	/**
 	 * @return A list of all units that have a @ref UnitProperties::producer

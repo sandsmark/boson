@@ -242,7 +242,7 @@ void UpgradePropertiesFloatValue::loadValue(KSimpleConfig* cfg, QString key)
   }
 }
 
-template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList<unsigned long int>* typeIds,
+void UpgradePropertiesUIntValue::applyProperty(QValueList<unsigned long int>* typeIds,
     Player* player, UpgradeType type)
 {
   if(!specified)
@@ -251,8 +251,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
   }
   boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
   QValueList<unsigned long int>::Iterator it;
-#warning oldvalue might be used initialized. FIX THIS !!
-  TYPE oldvalue;
+  unsigned long int oldvalue;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
     boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
@@ -301,9 +300,43 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList
         prop->setProductionTime(applyValue(prop->productionTime()));
         break;
       }
+      default:
+      {
+        boError() << k_funcinfo << "Invalid UpgradeType: " << type << endl;
+        break;
+      }
+    }
+    // Apply to already existing units
+    boDebug() << "    " << k_funcinfo << "Applying to existing units with typeid " << *it << endl;
+    applyPropertyToUnits(oldvalue, *it, player, type);
+  }
+}
+
+void UpgradePropertiesFloatValue::applyProperty(QValueList<unsigned long int>* typeIds,
+    Player* player, UpgradeType type)
+{
+  if(!specified)
+  {
+    return;
+  }
+  boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
+  QValueList<unsigned long int>::Iterator it;
+  float oldvalue;
+  for(it = typeIds->begin(); it != typeIds->end(); it++)
+  {
+    boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
+    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
+    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->typeId() << "; name: " << prop->name() << endl;
+    switch(type)
+    {
       case Speed:
       {
         prop->setSpeed(applyValue(prop->speed()));
+        break;
+      }
+      default:
+      {
+        boError() << k_funcinfo << "Invalid UpgradeType: " << type << endl;
         break;
       }
     }
@@ -348,7 +381,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYP
       {
         // Health is special: we have to take old health into account as well
         //int oldhealth = u->health();
-        u->setHealth((u->health() / (float)oldvalue) * u->unitProperties()->health());
+        u->setHealth((long unsigned int)((u->health() / (float)oldvalue) * u->unitProperties()->health()));
         /*boDebug() << "        " << k_funcinfo << "Applying to unit with id " << u->id() <<
             "; old: " << oldhealth << "; old max: " << oldvalue << "; new max: " <<
             u->unitProperties()->health() << "; new health: " << u->health() << endl;*/
@@ -356,7 +389,7 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYP
       else if(type == Shields)
       {
         // Shields are also quite special, but not that special, so we use simpler approach here
-        u->setShields(u->unitProperties()->shields() - (oldvalue - u->shields()));
+        u->setShields((long unsigned int)(u->unitProperties()->shields() - (oldvalue - u->shields())));
       }
       else if(type == Armor)
       {

@@ -40,11 +40,14 @@
 #include <qheader.h>
 #include <qsplitter.h>
 #include <qvbox.h>
+#include <qstringlist.h>
+#include <ksimpleconfig.h>
 
 #include <klistbox.h>
 #include <klistview.h>
 #include <klocale.h>
 #include <kpopupmenu.h>
+#include <kstandarddirs.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -567,9 +570,26 @@ void KGameModelDebug::addTheme(SpeciesTheme* theme)
 	QString file = (*it)->unitPath() + SpeciesTheme::unitModelFile();
 	addModel(file, (*it)->name());
  }
- QStringList objects = theme->allObjectModels();
- for (unsigned int i = 0; i < objects.count(); i++) {
-	addModel(theme->themePath() + QString::fromLatin1("objects/") + objects[i], objects[i]);
+ 
+ // FIXME: duplicated code
+ QString fileName = theme->themePath() + QString::fromLatin1("objects/objects.boson");
+ if (!KStandardDirs::exists(fileName)) {
+	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
+	// We assume that this theme has no objects and don't complain
+	return;
+ }
+
+ KSimpleConfig cfg(fileName);
+ QStringList objects = cfg.groupList();
+ QStringList::Iterator oit;
+ for (oit = objects.begin(); oit != objects.end(); ++oit) {
+	cfg.setGroup(*oit);
+	float width, height;
+	QString file;
+	width = (float)cfg.readDoubleNumEntry("Width", 1.0);
+	height = (float)cfg.readDoubleNumEntry("Height", 1.0);
+	file = cfg.readEntry("File", "missile.3ds");
+	addModel(theme->themePath() + QString::fromLatin1("objects/") + file, *oit);
  }
 }
 

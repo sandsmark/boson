@@ -185,21 +185,27 @@ void BosonLoadingWidget::update()
       text = i18n("Loading map tiles...");
       break;
     }
-    case LoadParticleSystems:
+    case LoadObjects:
     {
       setProgress(3000 + (mCurrentPlayer * 2000));
+      text = i18n("Loading datas for player %1 of %2 (objects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      break;
+    }
+    case LoadParticleSystems:
+    {
+      setProgress(3000 + (mCurrentPlayer * 2000) + 50);
       text = i18n("Loading datas for player %1 of %2 (particle systems)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadUnitConfigs:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000) + 100);
+      setProgress(3000 + (mCurrentPlayer * 2000) + 150);
       text = i18n("Loading datas for player %1 of %2 (unit config files)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadUnits:
     {
-      setProgress((int)(3000 + (mCurrentPlayer * 2000) + 150 + (mCurrentUnit / (float)mTotalUnits * 1750)));
+      setProgress((int)(3000 + (mCurrentPlayer * 2000) + 250 + (mCurrentUnit / (float)mTotalUnits * 1650)));
       text = i18n("Loading datas for player %1 of %2 (unit model %3 of %4)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers).arg(mCurrentUnit + 1).arg(mTotalUnits);
       break;
     }
