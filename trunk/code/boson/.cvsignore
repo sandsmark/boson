@@ -23,3 +23,4 @@ boinfo
 *.bpf
 boson-*.jpg
 *.boprof
+*.lo
