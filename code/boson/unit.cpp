@@ -138,7 +138,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  d = new UnitPrivate;
  mCurrentPlugin = 0;
  mAdvanceFunction = &Unit::advanceIdle;
- mAdvanceFunction2 = &Unit:: advanceIdle;
+ mAdvanceFunction2 = &Unit::advanceIdle;
  d->mPlugins.setAutoDelete(true);
  d->mPlugins.clear();
 
@@ -498,7 +498,7 @@ void Unit::advanceIdle(unsigned int advanceCallsCount)
  if (!unitProperties()->canShoot() ||!d->mWeapons[0]) {
 	// this unit does not have any weapons, so it will never shoot anyway.
 	// no need to call advanceIdle() again
-//	setAdvanceWork(WorkNone);
+	setAdvanceWork(WorkNone);
 	return;
  }
 
