@@ -84,6 +84,8 @@ public:
 	 **/
 	virtual void deleteSelectedUnits();
 
+	virtual void unitAction(int actionType);
+
 public slots:
 
 protected:
@@ -99,14 +101,15 @@ protected:
 	 * @param send Set to true if you actually want to send the stream
 	 **/
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
-//	void editorActionClicked(const BoAction* action);//note: original editorActionClicked() didn't have stream or send parameters.
+	bool actionPlace(QDataStream& stream, const QPoint& canvasPos);
 
 	/**
 	 * In editor mode this does just nothing.
 	 **/
 	virtual void updateCursor() {}
 
-	virtual bool actionLocked() const { return false; }
+	virtual bool actionLocked() const;
+	virtual UnitAction actionType() const;
 
 	/**
 	 * Editor mode can select just everything, even destroyed units
@@ -116,7 +119,8 @@ protected:
 	virtual CanSelectUnit canSelect(Unit* unit) const { Q_UNUSED(unit); return CanSelectMultipleOk; }
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
-	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const;
+
+	virtual void updatePlacementPreviewData();
 
 //	void addMouseIO(Player* p);
 

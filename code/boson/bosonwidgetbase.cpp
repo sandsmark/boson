@@ -220,6 +220,8 @@ void BosonWidgetBase::initDisplayManager()
  mDisplayManager = new BoDisplayManager(canvas(), this, boGame->gameMode());
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
+ connect(cmdFrame(), SIGNAL(signalAction(int)),
+		displayManager(), SLOT(slotUnitAction(int)));
 
  displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
 }

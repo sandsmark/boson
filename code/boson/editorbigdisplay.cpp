@@ -133,6 +133,9 @@ public:
 	KGameMouseIO* mMouseIO;
 
 	Placement mPlacement;
+
+	bool mActionLocked;
+	UnitAction mActionType;
 };
 
 EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent) 
@@ -171,12 +174,28 @@ void EditorBigDisplay::setLocalPlayer(Player* p)
 void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
 // boDebug() << k_funcinfo << endl;
- int x = action.canvasPos().x() / BO_TILE_SIZE;
- int y = action.canvasPos().y() / BO_TILE_SIZE;
+ if (actionLocked()) {
+	if (actionType() == ActionBuild) {
+		if (actionPlace(stream, action.canvasPos())) {
+			*send = true;
+		}
+		return;
+	}
+ }
+ if (actionPlace(stream, action.canvasPos())) {
+	*send = true;
+ }
+}
+
+bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
+{
+ bool ret = false;
+ int x = canvasPos.x() / BO_TILE_SIZE;
+ int y = canvasPos.y() / BO_TILE_SIZE;
  if (d->mPlacement.isUnit()) {
 	if (!d->mPlacement.owner()) { // TODO
-		boError() << k_funcinfo << "NO OWNER" << endl;
-		return;
+		boError() << k_funcinfo << "NULL owner" << endl;
+		return false;
 	}
 	boDebug() << "place unit " << d->mPlacement.unitType() << endl;
 
@@ -186,8 +205,7 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 	stream << (Q_INT32)d->mPlacement.unitType();
 	stream << (Q_INT32)x;
 	stream << (Q_INT32)y;
-	*send = true;
-
+	ret = true;
 //	setModified(true); // TODO: in BosonPlayField
  } else if (d->mPlacement.isCell()) {
 	unsigned char version = kapp->random() % 4;
@@ -200,10 +218,13 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 	stream << (Q_INT8)Cell::isBigTrans(d->mPlacement.cell());
 	stream << (Q_INT32)x;
 	stream << (Q_INT32)y;
-	*send = true;
-
-//	setModified(true); // TODO: in BosonPlayField (call it when the message is received?
+	ret = true;
  }
+ if (ret) {
+	// TODO: in BosonPlayField (call it when the message is received?
+	// setModified(true);
+ }
+ return ret;
 }
 
 /*
@@ -295,36 +316,44 @@ bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-BosonBigDisplayBase::PlacementPreview EditorBigDisplay::placementPreview() const
+void EditorBigDisplay::updatePlacementPreviewData()
 {
- PlacementPreview p;
- p.draw = false;
- if (d->mPlacement.isUnit()) {
-	if (!d->mPlacement.owner()) {
-		boError() << k_funcinfo << "NO OWNER" << endl;
-		return p;
-	}
-	const UnitProperties* u = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
-	p.w = u->unitWidth() / (float)BO_TILE_SIZE;
-	p.h = u->unitHeight() / (float)BO_TILE_SIZE;
-	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
-	p.x = pos.x();
-	p.y = pos.y();
-
-
-	// Check if unit can be placed to cursor position.
-	// FIXME: this code is taken from BosonCanvas::canPlaceUnitAt()
-	QRect r(p.x * BO_TILE_SIZE, p.y * BO_TILE_SIZE, p.w * BO_TILE_SIZE, p.h * BO_TILE_SIZE);
-	if(p.x < 0 || p.y < 0 || (p.x + p.w) > canvas()->mapWidth() || (p.y + p.h) > canvas()->mapHeight()) {
-		p.canPlace = false;
-	} else {
-		if (!canvas()->canGo(u, r) || canvas()->cellsOccupied(r)) {
-			p.canPlace = false;
-		} else {
-			p.canPlace = true;
-		}
-	}
-	p.draw = true;
+ if (!d->mPlacement.isUnit()) {
+	setPlacementPreviewData(0, false);
+	return;
  }
- return p;
+ if (!d->mPlacement.owner()) {
+	boError() << k_funcinfo << "NULL owner" << endl;
+	setPlacementPreviewData(0, false);
+	return;
+ }
+ const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
+ QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+ setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
 }
+
+
+void EditorBigDisplay::unitAction(int actionType)
+{
+ boDebug() << k_funcinfo << actionType << endl;
+ switch (actionType) {
+	case ActionBuild:
+		d->mActionType = ActionBuild;
+		d->mActionLocked = true;
+		break;
+	default:
+		d->mActionLocked = false;
+		break;
+ }
+}
+
+bool EditorBigDisplay::actionLocked() const
+{
+ return d->mActionLocked;
+}
+
+UnitAction EditorBigDisplay::actionType() const
+{
+ return d->mActionType;
+}
+
