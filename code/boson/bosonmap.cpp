@@ -16,7 +16,7 @@
 
 #include "defines.h"
 
-#define TAG_FIELD "boeditor_magic_0_3"
+#define TAG_FIELD "boeditor_magic_0_6"
 #define TAG_FIELD_LEN 18 // len of above
 #define TAG_CELL (0xde)
 
