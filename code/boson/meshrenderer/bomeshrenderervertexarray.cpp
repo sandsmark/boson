@@ -180,11 +180,11 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 	BO_NULL_ERROR(lod);
 	return 0;
  }
- if (!lod->pointsCache()) {
-	BO_NULL_ERROR(lod->pointsCache());
+ if (lod->pointsCacheCount() == 0) {
 	return 0;
  }
- if (lod->pointsCacheCount() == 0) {
+ if (!lod->pointsCache()) {
+	BO_NULL_ERROR(lod->pointsCache());
 	return 0;
  }
  BoMeshRendererMeshLODDataVA* lodData = (BoMeshRendererMeshLODDataVA*)lod->meshRendererMeshLODData();

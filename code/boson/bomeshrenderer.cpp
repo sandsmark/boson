@@ -207,7 +207,9 @@ void BoMeshRenderer::renderMesh(const QColor* teamColor, BoMesh* mesh, unsigned 
 	return;
  }
  unsigned int renderedPoints = render(teamColor, mesh, lod);
- currentStatistics()->addMesh(renderedPoints);
+ if (renderedPoints > 0) {
+	currentStatistics()->addMesh(renderedPoints);
+ }
 }
 
 void BoMeshRenderer::initializeData(BosonModel* model)
