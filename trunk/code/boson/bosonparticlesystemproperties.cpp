@@ -109,7 +109,7 @@ void BosonParticleSystemProperties::reset()
   mMaxNum = 100;
   mInitNum = 0;
   mGLBlendFuncStr = "GL_ONE_MINUS_SRC_ALPHA";
-  mRate = 0,
+  mRate = 0;
   mStartSize = 1;
   mEndSize = 1;
   mAge = 0;
