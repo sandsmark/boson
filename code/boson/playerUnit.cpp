@@ -141,9 +141,16 @@ bool playerMobUnit::checkMove(int dx, int dy)
 	int ty;
 	int g;
 
-	if (goFlag() == BO_GO_AIR) return true; // flyers can go everywhere...
-
 	Pix p = neighbourhood( x()+dx, y()+dy);
+	
+	if (goFlag() == BO_GO_AIR) { // we are a flyer
+		for(; p; next(p) ) {
+			ty = at(p)->rtti();
+			if ( (ty < S_FACILITY) && !(ty < S_MOBILE) && (BO_GO_AIR == mobileProp[ty-S_MOBILE].goFlag) && exact(p))
+				return false; // another flyer is around
+		}
+		return true; // nothing else in the aire here
+	}
 
 //	printf("%p would hit :", this);
 	for(; p; next(p) )
