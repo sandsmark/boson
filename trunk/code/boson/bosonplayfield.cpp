@@ -483,69 +483,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  return ret;
 }
 
-bool BosonPlayField::savePlayField(const QString& fileName)
-{
- // TODO: use KMessageBox here? or maybe add an errorMessage parameter which can
- // be displayed as a msg box in the calling method
- if (!mMap) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return false;
- }
- boError() << k_funcinfo << "saving to files is broken at the moment!" << endl;
- return false;
- QFileInfo fileInfo(fileName);
-
- if (!mDescription) {
-	BO_NULL_ERROR(mDescription);
-	return false;
- }
- if (mDescription->name().isEmpty()) {
-	mDescription->setName(fileInfo.baseName());
- }
- QString description = saveDescriptionToFile();
- if (description.isEmpty()) {
-	boError() << k_funcinfo << "Unable to save description" << endl;
-	return false;
- }
- QByteArray map = saveMapToFile();
- if (map.isEmpty()) {
-	boError() << k_funcinfo << "Unable to save map" << endl;
-	return false;
- }
- boError() << k_funcinfo << "scenario saving is broken currently!" << endl;
- return false;
- QString scenario;
-#if 0
- scenario = saveScenarioToFile();
- if (scenario.isEmpty()) {
-	boError() << k_funcinfo << "Unable to save scenario" << endl;
-	return false;
- }
-#endif
- boDebug() << k_funcinfo << "Save height map" << endl;
- QByteArray heightMap = mMap->saveHeightMapImage();
- if (heightMap.size() == 0) {
-	boError() << k_funcinfo << "Unable to save height map" << endl;
-	return false;
- }
- boDebug() << k_funcinfo << "Save height map done" << endl;
- QByteArray texMap = saveTexMapToFile();
- if (map.isEmpty()) {
-	boError() << k_funcinfo << "Unable to save texmap" << endl;
-	return false;
- }
-
- BPFFile f(fileName, false);
- f.writeFile(QString::fromLatin1("map"), map);
- f.writeFile(QString::fromLatin1("texmap"), texMap);
- f.writeFile(QString::fromLatin1("scenario.xml"), scenario);
- f.writeFile(QString::fromLatin1("heightmap.png"), heightMap);
- f.writeFile(QString::fromLatin1("description.xml"), description, QString::fromLatin1("C"));
-
- mMap->setModified(false);
- return true;
-}
-
 QString BosonPlayField::saveDescriptionToFile()
 {
  if (!mDescription) {
