@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data 
+SUBDIRS = data visual
 #boson editor
 
 bin_PROGRAMS = boson bounit 
@@ -62,7 +62,6 @@ COMMON_SRC = \
 	bosonmusic.cpp \
 	selectbox.cpp \
 	commandinput.cpp \
-	kgamecanvaschat.cpp \
 	bosoncursor.cpp \
 	bosonsound.cpp \
 	unitgroup.cpp \
@@ -80,7 +79,7 @@ BOUNIT_SRC = \
 	bounitmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
+boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 
 #boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
