@@ -26,11 +26,9 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
-#include "bosonconfig.h"
 #include "bosonscenario.h"
 #include "bosonstatistics.h"
 #include "bosonplayfield.h"
-#include "bosonmap.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -904,7 +902,7 @@ KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
  p->setGame(this);
- if(d->mPlayField->map()) {
+ if(d->mPlayField && d->mPlayField->map()) {
 	p->initMap(d->mPlayField->map());
  }
  connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
@@ -1258,15 +1256,23 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
  // Version information (for future format changes and backwards compatibility)
  stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
 
- // Save map
- d->mPlayField->saveMap(stream);
-
- // Save local player (only id)
- stream << d->mPlayer->id();
+ if (gameStatus() != KGame::Init) {
+	kdDebug() << k_funcinfo << "Saveing started game" << endl;
+	stream << (Q_INT8)true;
+	// Save map
+	d->mPlayField->saveMap(stream);
+	
+	// Save local player (only id)
+	stream << d->mPlayer->id();
+ } else {
+	stream << (Q_INT8)false;
+	kdDebug() << k_funcinfo << "Saveing not-yet started game" << endl;
+ }
 
  // Save KGame stuff
  if(!KGame::save(stream, saveplayers)) {
 	kdError() << k_funcinfo << "Can't save KGame!" << endl;
+	return false;
  }
 
  kdDebug() << k_funcinfo << " done" << endl;
@@ -1275,6 +1281,13 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
 
 bool Boson::load(QDataStream& stream, bool reset)
 {
+// we can't use this directly cause of a KGame bug :-(
+ return loadgame(stream, false, reset);
+}
+
+bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
+{
+ // network is false for normal game-loading
  kdDebug() << k_funcinfo << endl;
  d->mLoadingStatus = LoadingInProgress;
 
@@ -1304,30 +1317,37 @@ bool Boson::load(QDataStream& stream, bool reset)
 	return false;
  }
 
- // Load map
- BosonPlayField* f = new BosonPlayField;
- f->loadMap(stream);
- QByteArray buffer;
- QDataStream mapstream(buffer, IO_WriteOnly);
- f->saveMap(mapstream);
- delete f;
+ Q_UINT32 localId = 0;
+ Q_INT8 started; // network players usually connect before starting a game
+ stream >> started;
+ if (started) {
+	kdDebug() << k_funcinfo << "Loading a previously saved game" << endl;
+	// Load map
+	BosonPlayField* f = new BosonPlayField;
+	f->loadMap(stream);
+	QByteArray buffer;
+	QDataStream mapstream(buffer, IO_WriteOnly);
+	f->saveMap(mapstream);
+	delete f;
 
- emit signalInitMap(buffer);
+	emit signalInitMap(buffer);
 
- // Load local player's id
- Q_UINT32 localId;
- stream >> localId;
+	// Load local player's id
+	stream >> localId;
+ }
 
  // Load KGame stuff
- if(!KGame::load(stream, reset)) {
+ if(!KGame::loadgame(stream, network, reset)) {
 	// KGame loading error
 	kdError() << k_funcinfo << "KGame loading error" << endl;
 	d->mLoadingStatus = KGameError;
 	return false;
  }
 
- // Set local player
- d->mPlayer = (Player*)findPlayer(localId);
+ if (!started) {
+	// Set local player
+	d->mPlayer = (Player*)findPlayer(localId);
+ }
 
  // Set game status to Init. It will be set to Run in TopWidget
  setGameStatus(Init);
