@@ -34,169 +34,223 @@
 
 BoCamera::BoCamera()
 {
- init();
+  init();
 }
 
-BoCamera::BoCamera(GLfloat mapWidth, GLfloat mapHeight)
+BoCamera::BoCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
 {
- init();
- setMapSize(mapWidth, mapHeight);
+  init();
+  setMoveRect(minX, maxX, minY, maxY);
 }
 
 BoCamera& BoCamera::operator=(const BoCamera& c)
 {
- mPosZ = c.mPosZ;
- mMapWidth = c.mMapWidth;
- mMapHeight = c.mMapHeight;
- setLookAt(c.lookAt());
- setRotation(c.rotation());
- setRadius(c.radius());
- return *this;
+  mPosZ = c.mPosZ;
+  mLookAt = c.mLookAt;
+  mRotation = c.mRotation;
+  mRadius = c.mRadius;
+
+  mMinX = c.mMinX;
+  mMaxX = c.mMaxX;
+  mMinY = c.mMinY;
+  mMaxY = c.mMaxY;
+
+  mLookAtDiff = c.mLookAtDiff;
+  mPosZDiff = c.mPosZDiff;
+  mRotationDiff = c.mRotationDiff;
+  mRadiusDiff = c.mRadiusDiff;
+  mCommitTime = c.mCommitTime;
+
+  setPositionDirty();
+
+  return *this;
 }
 
 void BoCamera::init()
 {
- initStatic();
- mLookAt.set(0.0f, 0.0f, 0.0f);
- mPosZ = 8.0f;
- mRotation = 0.0f;
- mRadius = 5.0f;
- mMapWidth = 0.0f;
- mMapHeight = 0.0f;
- updateFromRadiusAndRotation();
+  initStatic();
+  setMoveRect(-100000, 100000, -100000, 100000); // just very big values
+  mLookAt.set(0.0f, 0.0f, 0.0f);
+  mPosZ = 8.0f;
+  mRotation = 0.0f;
+  mRadius = 5.0f;
+
+  resetDifferences();
+
+  setPositionDirty();
 }
 
 void BoCamera::initStatic()
 {
- static bool initialized = false;
- if (initialized) {
-	return;
- }
- initialized = true;
- boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMinZ",
-		CAMERA_MIN_Z));
- boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxZ",
-		CAMERA_MAX_Z));
- boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxRadius",
-		CAMERA_MAX_RADIUS));
+  static bool initialized = false;
+  if(initialized)
+  {
+    return;
+  }
+  initialized = true;
+  boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMinZ",
+      CAMERA_MIN_Z));
+  boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxZ",
+      CAMERA_MAX_Z));
+  boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "CameraMaxRadius",
+      CAMERA_MAX_RADIUS));
 }
 
 float BoCamera::minCameraZ()
 {
- initStatic();
- return (float)boConfig->doubleValue("CameraMinZ");
+  initStatic();
+  return (float)boConfig->doubleValue("CameraMinZ");
 }
 
 float BoCamera::maxCameraZ()
 {
- initStatic();
- return (float)boConfig->doubleValue("CameraMaxZ");
+  initStatic();
+  return (float)boConfig->doubleValue("CameraMaxZ");
 }
 
 float BoCamera::maxCameraRadius()
 {
- initStatic();
- return (float)boConfig->doubleValue("CameraMaxRadius");
+  initStatic();
+  return (float)boConfig->doubleValue("CameraMaxRadius");
 }
 
 void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
 {
- mLookAt = lookAt;
- mCameraPos = cameraPos;
- mUp = up;
-// checkPosition();
+  mLookAt = lookAt;
+  mCameraPos = cameraPos;
+  mUp = up;
+  // checkPosition();
 }
 
-void BoCamera::setLookAt(const BoVector3& pos)
+void BoCamera::changeZ(GLfloat diff, bool now)
 {
- mLookAt = pos;
- updateFromRadiusAndRotation(); // cameraPos and up vectors will/may change as well
- checkPosition();
+  // FIXME: z limits should depend on the ground height
+  // Make sure new z-coordinate is within limits
+  float newz = mPosZ + diff;
+  if(newz < CAMERA_MIN_Z)
+  {
+    newz = CAMERA_MIN_Z;
+  }
+  else if(newz > CAMERA_MAX_Z)
+  {
+    newz = CAMERA_MAX_Z;
+  }
+  // Change radius too, so that camera angle will remain same
+  // TODO: maybe provide another method for that, e.g. changeZWithRadius().
+  //  Then changeZ() would change _only_ z
+  float factor = newz / mPosZ;
+  if(now)
+  {
+    mPosZ = newz;
+    mRadius = radius() * factor;
+    setPositionDirty();
+  }
+  else
+  {
+    mPosZDiff = newz;
+    mRadiusDiff = radius() * factor;
+  }
 }
 
-void BoCamera::changeZ(GLfloat diff)
+void BoCamera::changeRadius(GLfloat diff, bool now)
 {
- float newz = mPosZ + diff;
- if (newz < CAMERA_MIN_Z) {
-	newz = CAMERA_MIN_Z;
- } else if (newz > CAMERA_MAX_Z) {
-	newz = CAMERA_MAX_Z;
- }
- float factor = newz / mPosZ;
- mPosZ = newz;
- setRadius(radius() * factor);
+  // How much radius is changed depends on z position
+  float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;
+  // Make sure radius is within limits
+  if(radius < 0.0f)
+  {
+    radius = 0.0f;
+  }
+  else if(radius > mPosZ)
+  {
+    radius = mPosZ;
+  }
+  // Update
+  if(now)
+  {
+    mRadius = radius;
+    setPositionDirty();
+  }
+  else
+  {
+    mRadiusDiff = radius;
+  }
 }
 
-void BoCamera::changeRadius(GLfloat diff)
+void BoCamera::changeRotation(GLfloat diff, bool now)
 {
- float radius = this->radius() + mPosZ / CAMERA_MAX_RADIUS * diff;  // How much radius is changed depends on z position
- if (radius < 0.0f) {
-	radius = 0.0f;
- } else if (radius > mPosZ) {
-	radius = mPosZ;
- }
- setRadius(radius);
+  if(now)
+  {
+    mRotation += diff;
+    checkRotation();
+    setPositionDirty();
+  }
+  else
+  {
+    mRotationDiff = diff;
+  }
 }
 
-void BoCamera::changeRotation(GLfloat diff)
+void BoCamera::changeLookAt(const BoVector3& diff, bool now)
 {
- float rotation = this->rotation() + diff;
- if (rotation < 0.0f) {
-	rotation += 360.0f;
- } else if (rotation > 360.0f) {
-	rotation -= 360.0f;
- }
- setRotation(rotation);
-}
-
-void BoCamera::moveLookAtBy(GLfloat x, GLfloat y, GLfloat z)
-{
- BoVector3 v = lookAt();
- v.add(BoVector3(x, y, z));
- setLookAt(v);
- checkPosition();
+  if(now)
+  {
+    mLookAt += diff;
+    checkPosition();
+    setPositionDirty();
+  }
+  else
+  {
+    mLookAtDiff = diff;
+  }
 }
 
 void BoCamera::loadFromXML(const QDomElement& root)
 {
- bool ok;
- float lookatx, lookaty, lookatz;
- lookatx = root.attribute("LookAtX").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
-	lookatx = 0.0f;
- }
- lookaty = root.attribute("LookAtY").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
-	lookaty = 0.0f;
- }
- lookatz = root.attribute("LookAtZ").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
-	mPosZ = 0.0f;
- }
- mPosZ = root.attribute("PosZ").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
-	mPosZ = 0.0f;
- }
- float rotation= root.attribute("Rotation").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
-	rotation = 0.0f;
- }
- setRotation(rotation);
- float radius = root.attribute("Radius").toFloat(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
-	radius = 0.0f;
- }
- setRadius(radius);
- boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
- BoVector3 newLookAt(lookatx, lookaty, lookatz);
- setLookAt(newLookAt);
- boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
+  bool ok;
+  float lookatx, lookaty, lookatz;
+  lookatx = root.attribute("LookAtX").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
+    lookatx = 0.0f;
+  }
+  lookaty = root.attribute("LookAtY").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
+    lookaty = 0.0f;
+  }
+  lookatz = root.attribute("LookAtZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
+    mPosZ = 0.0f;
+  }
+  mPosZ = root.attribute("PosZ").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
+    mPosZ = 0.0f;
+  }
+  float rotation = root.attribute("Rotation").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
+    rotation = 0.0f;
+  }
+  mRotation = rotation;
+  float radius = root.attribute("Radius").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
+    radius = 0.0f;
+  }
+  mRadius = radius;
+  boDebug(260) << k_funcinfo << "Setting lookat to (" << lookatx << ", " << lookaty << ", " << lookatz << ")" << endl;
+  mLookAt.set(lookatx, lookaty, lookatz);
+  boDebug(260) << k_funcinfo << "lookat is now (" << lookAt().x() << ", " << lookAt().y() << ", " << lookAt().z() << ")" << endl;
+  setPositionDirty();
  }
 
 void BoCamera::saveAsXML(QDomElement& root)
@@ -207,77 +261,264 @@ void BoCamera::saveAsXML(QDomElement& root)
  root.setAttribute("PosZ", z());
  root.setAttribute("Rotation", rotation());
  root.setAttribute("Radius", radius());
+ // TODO: save diffs too?
 }
 
 void BoCamera::checkPosition()
 {
- // note that we use this in setGluLooKAt() as well, so don't use radius() and
- // rotation() here!
- if (!mMapWidth || !mMapHeight) {
-	return;
- }
- if (lookAt().x() < 0.0f) {
-	BoVector3 v = lookAt();
-	v.setX(0.0f);
-	setLookAt(v);
- } else if (lookAt().x() > mMapWidth) {
-	BoVector3 v = lookAt();
-	v.setX(mMapWidth);
-	setLookAt(v);
- }
- if (lookAt().y() > 0.0f) {
-	BoVector3 v = lookAt();
-	v.setY(0.0f);
-	setLookAt(v);
- } else if (lookAt().y() < -mMapHeight) {
-	BoVector3 v = lookAt();
-	v.setY(-mMapHeight);
-	setLookAt(v);
- }
+  // note that we use this in setGluLooKAt() as well, so don't use radius() and
+  // rotation() here!
+  bool changed = false;
+  if(lookAt().x() < mMinX)
+  {
+    mLookAt.setX(mMinX);
+    changed = true;
+  }
+  else if(lookAt().x() > mMaxX)
+  {
+    mLookAt.setX(mMaxX);
+    changed = true;
+  }
+  if(lookAt().y() < mMinY)
+  {
+    mLookAt.setY(mMinY);
+    changed = true;
+  }
+  else if(lookAt().y() > mMaxY)
+  {
+    mLookAt.setY(mMaxY);
+    changed = true;
+  }
+  if(changed)
+  {
+    setPositionDirty();
+  }
+}
+
+void BoCamera::checkRotation()
+{
+  if(mRotation > 360.0f)
+  {
+    mRotation -= 360.0f;
+    setPositionDirty();
+  }
+  else if(mRotation < 0.0f)
+  {
+    mRotation += 360.0f;
+    setPositionDirty();
+  }
 }
 
 void BoCamera::applyCameraToScene()
 {
- glMatrixMode(GL_MODELVIEW);
- glLoadIdentity();
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
 
- gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
-		lookAt().x(), lookAt().y(), lookAt().z(),
-		up().x(), up().y(), up().z());
+  gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
+      lookAt().x(), lookAt().y(), lookAt().z(),
+      up().x(), up().y(), up().z());
 }
 
-void BoCamera::updateFromRadiusAndRotation()
+void BoCamera::updatePosition()
 {
- float diffX = 0.0f;
- float diffY = 0.0f;
- float radius = this->radius();
- if (radius <= 0.02f) {
-	// If radius is 0, up vector will be wrong so we change it
-	radius = 0.02f;
- }
- pointByRotation(&diffX, &diffY, this->rotation(), radius);
- float eyeX, eyeY, eyeZ;  // Position of camera
- eyeX = lookAt().x() + diffX;
- eyeY = lookAt().y() + diffY;
- eyeZ = lookAt().z() + z();
- float upX, upY, upZ;  // up vector (points straight up in viewport)
- upX = -diffX;
- upY = -diffY;
- upZ = 0.0f;
+  float diffX = 0.0f;
+  float diffY = 0.0f;
+  float radius = this->radius();
+  if(radius <= 0.02f)
+  {
+    // If radius is 0, up vector will be wrong so we change it
+    radius = 0.02f;
+  }
+  pointByRotation(&diffX, &diffY, rotation(), radius);
 
- mCameraPos.set(eyeX, eyeY, eyeZ);
- mUp.set(upX, upY, upZ);
+  // Position of camera
+  mCameraPos.set(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());
+  // up vector (points straight up in viewport)
+  mUp.set(-diffX, -diffY, 0.0f);
+
+  mPosDirty = false;
 }
 
-void BoCamera::setRadius(GLfloat r)
+const BoVector3& BoCamera::cameraPos()
 {
- mRadius = r;
- updateFromRadiusAndRotation();
+  if(mPosDirty)
+  {
+    updatePosition();
+  }
+  return mCameraPos;
 }
 
-void BoCamera::setRotation(GLfloat r)
+const BoVector3& BoCamera::up()
 {
- mRotation = r;
- updateFromRadiusAndRotation();
+  if(mPosDirty)
+  {
+    updatePosition();
+  }
+  return mUp;
 }
 
+void BoCamera::setRadius(GLfloat r, bool now)
+{
+  if(now)
+  {
+    mRadius = r;
+    setPositionDirty();
+  }
+  else
+  {
+    mRadiusDiff = r - mRadius;
+  }
+}
+
+void BoCamera::setRotation(GLfloat r, bool now)
+{
+  boDebug() << k_funcinfo << endl;
+  if(now)
+  {
+    mRotation = r;
+    checkRotation();
+    setPositionDirty();
+  }
+  else
+  {
+    mRotationDiff = r - mRotation;
+    boDebug() << k_funcinfo << "rotation diff set to: " << mRotationDiff << endl;
+  }
+}
+
+void BoCamera::setLookAt(const BoVector3& pos, bool now)
+{
+  if(now)
+  {
+    mLookAt = pos;
+    checkPosition();
+    setPositionDirty();
+  }
+  else
+  {
+    mLookAtDiff = pos - mLookAt;
+  }
+}
+
+void BoCamera::setZ(GLfloat z, bool now)
+{
+  if(now)
+  {
+    mPosZ = z;
+    setPositionDirty();
+  }
+  else
+  {
+    mPosZDiff = z - mPosZ;
+  }
+}
+
+void BoCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
+{
+  boDebug() << k_funcinfo << "(" << minX << "; " << maxX << ";  " << minY << "; " << maxY << ")" << endl;
+  mMinX = minX;
+  mMaxX = maxX;
+  mMinY = minY;
+  mMaxY = maxY;
+}
+
+void BoCamera::commitChanges(int ticks)
+{
+  mCommitTime = ticks;
+  if(ticks <= 0)
+  {
+    // Advance immediately. commitTime still has to be at least 1
+    mCommitTime = 1;
+    advance();
+  }
+}
+
+void BoCamera::advance()
+{
+  if(mCommitTime <= 0)
+  {
+    return;
+  }
+
+  boDebug() << k_funcinfo << "mCommitTime: " << mCommitTime << endl;
+
+  if(mCommitTime == 1)
+  {
+    boDebug() << k_funcinfo << "commitTime is 1" << endl;
+    // Special case, can be done quickly
+    mLookAt.add(mLookAtDiff);
+    mPosZ += mPosZDiff;
+    mRotation += mRotationDiff;
+    mRadius += mRadiusDiff;
+    checkRotation();
+    setPositionDirty();
+    resetDifferences();
+    return;
+  }
+
+  // How much of differences to add
+  float factor = 1.0 / mCommitTime;
+  boDebug() << k_funcinfo << "factor: " << factor << endl;
+  bool changed = false;
+
+  if(!mLookAtDiff.isNull())
+  {
+    // How much lookAt point will move
+    BoVector3 lookAtChange(mLookAtDiff * factor);
+    // Change lookAt point and difference
+    mLookAt.add(lookAtChange);
+    mLookAtDiff += -lookAtChange;
+    checkPosition();
+    changed = true;
+  }
+
+  if(mPosZDiff)
+  {
+    float diff = (mPosZDiff * factor);
+    mPosZ += diff;
+    mPosZDiff -= diff;
+    changed = true;
+  }
+
+  if(mRotationDiff)
+  {
+    float diff = (mRotationDiff * factor);
+    mRotation += diff;
+    mRotationDiff -= diff;
+    checkRotation();
+    changed = true;
+  }
+
+  if(mRadiusDiff)
+  {
+    float diff = (mRadiusDiff * factor);
+    mRadius += diff;
+    mRadiusDiff -= diff;
+    changed = true;
+  }
+
+  if(!changed)
+  {
+    boError() << k_funcinfo << "commitTime: " << mCommitTime << ", but no changes ?!" << endl;
+    mCommitTime = 0;
+  }
+  else
+  {
+    setPositionDirty();
+    mCommitTime--;
+    if(mCommitTime == 0)
+    {
+      // Failsafe
+      resetDifferences();
+    }
+  }
+}
+
+void BoCamera::resetDifferences()
+{
+  mLookAtDiff.reset();
+  mPosZDiff = 0;
+  mRotationDiff = 0;
+  mRadiusDiff = 0;
+  mCommitTime = 0;
+}

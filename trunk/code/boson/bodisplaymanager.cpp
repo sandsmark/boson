@@ -403,6 +403,7 @@ void BoDisplayManager::slotAdvance(unsigned int, bool)
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->setParticlesDirty(true);
+	it.current()->advanceCamera();
 	++it;
  }
 }
