@@ -68,7 +68,6 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvbox.h>
-#include <qinputdialog.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -90,8 +89,6 @@ public:
 		mStarting = 0;
 
 		mIface = 0;
-
-		mChatDock = 0;
 	}
 
 	BosonStartupWidget* mStartup;
@@ -106,8 +103,6 @@ public:
 	BosonStarting* mStarting;
 
 	BoDebugDCOPIface* mIface;
-
-	KDockWidget* mChatDock;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -117,7 +112,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
  mMainDock->setEnableDocking(KDockWidget::DockNone);
- initGameDockWidgets(false);
 
  boAudio->setSound(boConfig->sound());
  boAudio->setMusic(boConfig->music());
@@ -195,51 +189,6 @@ void TopWidget::initDisplayManager()
  d->mDisplayManager->hide();
 }
 
-void TopWidget::initGameDockWidgets(bool display)
-{
- if (!d->mChatDock) {
-	d->mChatDock = createDockWidget("chat_dock", 0, 0, i18n("Chat"));
- }
-
- d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
- d->mChatDock->setDockSite(KDockWidget::DockNone);
-
- // we are initializing, so we should do the initial docking positions as well.
- // will be overridden once a dock layout is loaded.
- d->mChatDock->manualDock(getMainDockWidget(), KDockWidget::DockBottom, 80);
-
- if (!display) {
-	hideGameDockWidgets();
- } else {
-	makeDockVisible(d->mChatDock);
- }
-}
-
-void TopWidget::slotLoadBosonGameDock()
-{
- if (!kapp->config()->hasGroup("BosonGameDock")) {
-	boDebug() << k_funcinfo << "dock config does not exist" << endl;
-	// Dock config isn't saved (probably first start). Hide chat dock (we only
-	//  show commandframe by default)
-	makeDockInvisible(d->mChatDock);
-	if (d->mDisplayManager) {
-		d->mDisplayManager->updateGeometry();  // Hack? Bug in BoDisplayManager?
-	}
- } else {
-//	boDebug() << k_funcinfo << "dock config exists, loading" << endl;
-	// AB: obsolete
- }
-}
-
-void TopWidget::hideGameDockWidgets(bool deinit)
-{
- makeDockInvisible(d->mChatDock);
-
- if (deinit) {
-	d->mChatDock->setWidget(0);
- }
-}
-
 void TopWidget::saveProperties(KConfig *config)
 {
  // the 'config' object points to the session managed
@@ -264,20 +213,9 @@ void TopWidget::readProperties(KConfig *config)
 void TopWidget::initKActions()
 {
  // note: boGame and similar are *not* yet constructed!
- // Main actions: Game start/end and quit
-
- //FIXME: slotNewGame() is broken - endGame() is enough for now.
-// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection());
-// (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
  d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
- (void)new KAction(i18n("Maximal entries per event..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingEventEntries()), actionCollection(), "options_profiling_max_event_entries");
- (void)new KAction(i18n("Maximal advance call entries..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingAdvanceEntries()), actionCollection(), "options_profiling_max_advance_entries");
- (void)new KAction(i18n("Maximal rendering entries..."), KShortcut(), this,
-		SLOT(slotChangeMaxProfilingRenderingEntries()), actionCollection(), "options_profiling_max_rendering_entries");
 
  // Debug
  (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
@@ -380,8 +318,6 @@ void TopWidget::initBosonWidget()
 	d->mBosonWidget = w;
  }
 
- connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()),
-		this, SLOT(slotLoadBosonGameDock()));
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
 		this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mBosonWidget, SIGNAL(signalEndGame()),
@@ -399,7 +335,7 @@ void TopWidget::initBosonWidget()
 
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
- d->mBosonWidget->init(d->mChatDock); // this depends on several virtual methods and therefore can't be called in the c'tor
+ d->mBosonWidget->init(0); // this depends on several virtual methods and therefore can't be called in the c'tor
 
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
@@ -434,8 +370,6 @@ void TopWidget::slotStartNewGame()
  slotChangeLocalPlayer(0);
 
  d->mStartup->showLoadingWidget();
-
- initGameDockWidgets(false); // dock the widgets to their default location and hide them
 
  initBosonWidget();
 
@@ -567,7 +501,6 @@ void TopWidget::endGame()
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info
- hideGameDockWidgets(true);
  delete d->mStarting;
  d->mStarting = 0;
  boDebug() << k_funcinfo << "done" << endl;
@@ -1049,43 +982,4 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
  changeLocalPlayer(p);
 }
 
-
-void TopWidget::slotChangeMaxProfilingEventEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingEventEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
-		i18n("Maximal number of profiling entries per event"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingEventEntries(max);
-	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
- }
-}
-
-void TopWidget::slotChangeMaxProfilingAdvanceEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingAdvanceEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
-		i18n("Maximal number of profiled advance calls"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingAdvanceEntries(max);
-	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
- }
-}
-
-void TopWidget::slotChangeMaxProfilingRenderingEntries()
-{
- bool ok = true;
- unsigned int max = boConfig->maxProfilingRenderingEntries();
- max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
-		i18n("Maximal number of profiled frames"),
-		(int)max, 0, 100000, 1, &ok, this);
- if (ok) {
-	boConfig->setMaxProfilingRenderingEntries(max);
-	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
- }
-}
 

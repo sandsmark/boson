@@ -106,6 +106,7 @@
 #include <qsignalmapper.h>
 #include <qlayout.h>
 #include <qptrdict.h>
+#include <qinputdialog.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1754,6 +1755,13 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
 		this, SLOT(slotToggleMusic()),
 		actionCollection, "options_music");
  music->setChecked(boConfig->music());
+ (void)new BoUfoAction(i18n("Maximal entries per event..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingEventEntries()), actionCollection, "options_profiling_max_event_entries");
+ (void)new BoUfoAction(i18n("Maximal advance call entries..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingAdvanceEntries()), actionCollection, "options_profiling_max_advance_entries");
+ (void)new BoUfoAction(i18n("Maximal rendering entries..."), KShortcut(), this,
+		SLOT(slotChangeMaxProfilingRenderingEntries()), actionCollection, "options_profiling_max_rendering_entries");
+
 
  // Display
  d->mActionFullScreen = BoUfoStdAction::fullScreen(this, SLOT(slotToggleFullScreen()), actionCollection);
@@ -3419,6 +3427,9 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
 {
+#warning FIXME
+ // FIXME: KGameChat should not be used anymore. we should use an ufo widget
+ // only
  d->mChat->setChat(chat);
  d->mUfoChat->setChat(chat);
 }
@@ -5199,6 +5210,45 @@ void BosonBigDisplayBase::slotDebugPlayer(int index)
  }
 }
 
+
+void BosonBigDisplayBase::slotChangeMaxProfilingEventEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingEventEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling event entries"),
+		i18n("Maximal number of profiling entries per event"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingEventEntries(max);
+	boProfiling->setMaxEventEntries(boConfig->maxProfilingEventEntries());
+ }
+}
+
+void BosonBigDisplayBase::slotChangeMaxProfilingAdvanceEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingAdvanceEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling advance entries"),
+		i18n("Maximal number of profiled advance calls"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingAdvanceEntries(max);
+	boProfiling->setMaxAdvanceEntries(boConfig->maxProfilingAdvanceEntries());
+ }
+}
+
+void BosonBigDisplayBase::slotChangeMaxProfilingRenderingEntries()
+{
+ bool ok = true;
+ unsigned int max = boConfig->maxProfilingRenderingEntries();
+ max = (unsigned int)QInputDialog::getInteger(i18n("Profiling rendering entries"),
+		i18n("Maximal number of profiled frames"),
+		(int)max, 0, 100000, 1, &ok, this);
+ if (ok) {
+	boConfig->setMaxProfilingRenderingEntries(max);
+	boProfiling->setMaxRenderingEntries(boConfig->maxProfilingRenderingEntries());
+ }
+}
 
 
 
