@@ -25,6 +25,7 @@
 #include "bo3dtools.h"
 #include "bosonwidgets/bonuminput.h"
 #include "bomatrixwidget.h"
+#include "boorbiterwidget.h"
 
 #include <qlayout.h>
 #include <qvgroupbox.h>
@@ -94,7 +95,9 @@ BoCameraWidget::BoCameraWidget(QWidget* parent, const char* name) : QWidget(pare
  BoGameCameraWidget* bosonCamera = new BoGameCameraWidget(d->mTab, "gamecamera");
  BoGLUCameraWidget* gluLookAtCamera = new BoGLUCameraWidget(d->mTab, "glulookatcamera");
  BoPlainCameraWidget* plainCamera = new BoPlainCameraWidget(d->mTab, "plaincamera");
+ BoOrbiterCameraWidget* orbiterCamera = new BoOrbiterCameraWidget(d->mTab, "orbitercamera");
 
+ addConfigWidget(i18n("Orbiter camera"), orbiterCamera);
  addConfigWidget(i18n("Game camera"), bosonCamera);
  addConfigWidget(i18n("translate/rotate camera"), plainCamera);
  addConfigWidget(i18n("gluLookAt camera"), gluLookAtCamera);
@@ -881,3 +884,68 @@ void extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z)
 
 }
 
+
+
+
+
+
+
+
+
+class BoOrbiterCameraWidgetPrivate
+{
+public:
+	BoOrbiterCameraWidgetPrivate()
+	{
+		mOrbiter = 0;
+	}
+	BoOrbiterWidget* mOrbiter;
+};
+
+BoOrbiterCameraWidget::BoOrbiterCameraWidget(QWidget* parent, const char* name)
+	: BoCameraConfigWidgetBase(parent, name)
+{
+ d = new BoOrbiterCameraWidgetPrivate;
+
+ QVBoxLayout* layout = new QVBoxLayout(this);
+ d->mOrbiter = new BoOrbiterWidget(this);
+ layout->addWidget(d->mOrbiter, 1);
+}
+
+BoOrbiterCameraWidget::~BoOrbiterCameraWidget()
+{
+ delete d;
+}
+
+int BoOrbiterCameraWidget::needCameraType() const
+{
+ return BoCamera::Camera;
+}
+
+void BoOrbiterCameraWidget::updateFromCamera()
+{
+ BO_CHECK_NULL_RET(camera());
+ d->mOrbiter->slotUpdateGL();
+
+// BoMatrix rotationMatrix = camera()->rotationMatrix();
+// BoVector3 cameraPos = camera()->cameraPos();
+
+}
+
+void BoOrbiterCameraWidget::updateMatrixWidget()
+{
+}
+
+
+void BoOrbiterCameraWidget::slotCameraChanged()
+{
+ BO_CHECK_NULL_RET(camera());
+
+ emitSignalCameraChanged();
+}
+
+void BoOrbiterCameraWidget::setCamera(BoCamera* camera)
+{
+ BoCameraConfigWidgetBase::setCamera(camera);
+ d->mOrbiter->setCamera(camera);
+}

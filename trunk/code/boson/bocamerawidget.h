@@ -68,7 +68,7 @@ public:
 	~BoCameraConfigWidgetBase()
 	{
 	}
-	void setCamera(BoCamera* camera)
+	virtual void setCamera(BoCamera* camera)
 	{
 		mCamera = camera;
 	}
@@ -240,6 +240,30 @@ protected:
 
 private:
 	BoPlainCameraWidgetPrivate* d;
+};
+
+class BoOrbiterCameraWidgetPrivate;
+class BoOrbiterCameraWidget : public BoCameraConfigWidgetBase
+{
+	Q_OBJECT
+public:
+	BoOrbiterCameraWidget(QWidget* parent, const char* name = 0);
+	~BoOrbiterCameraWidget();
+
+	virtual void setCamera(BoCamera* camera);
+
+	virtual int needCameraType() const;
+
+	virtual void updateFromCamera();
+
+protected slots:
+	void slotCameraChanged();
+
+protected:
+	virtual void updateMatrixWidget();
+
+private:
+	BoOrbiterCameraWidgetPrivate* d;
 };
 
 #endif
