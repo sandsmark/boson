@@ -111,38 +111,4 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  boConfig->setCursorDir(cursorDir);
 }
 
-void BosonWidget::startScenarioAndGame()
-{
- BosonWidgetBase::startScenarioAndGame();
- if (boGame->isAdmin()) {
-	if (boGame->gameSpeed() == 0) {
-		// don't do this if gameSpeed() != 0, as it was set already
-		// (e.g. due to a savegame)
-		boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
-	}
- }
- boMusic->startLoop();
-}
-
-void BosonWidget::saveConfig()
-{
-  // note: the game is *not* saved here! just general settings like game speed,
-  // player name, ...
- boDebug() << k_funcinfo << endl;
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
- BosonWidgetBase::saveConfig();
-
- BosonConfig::saveLocalPlayerName(localPlayer()->name());
- BosonConfig::saveGameSpeed(boGame->gameSpeed());
-// boConfig->save(editor); //FIXME
- boDebug() << k_funcinfo << "done" << endl;
-}
-
 

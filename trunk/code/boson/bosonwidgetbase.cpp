@@ -414,6 +414,21 @@ void BosonWidgetBase::quitGame()
 
 void BosonWidgetBase::saveConfig()
 {
+ boDebug() << k_funcinfo << endl;
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+ if (boGame->gameMode()) {
+	BosonConfig::saveLocalPlayerName(localPlayer()->name());
+	BosonConfig::saveGameSpeed(boGame->gameSpeed());
+ } else {
+ }
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidgetBase::startScenarioAndGame()
@@ -428,6 +443,17 @@ void BosonWidgetBase::startScenarioAndGame()
 	BosonBigDisplayBase* display = displayManager()->activeDisplay();
 	BO_CHECK_NULL_RET(display);
 	display->slotCenterHomeBase();
+ }
+
+ if (boGame->gameMode()) {
+	if (boGame->isAdmin()) {
+		if (boGame->gameSpeed() == 0) {
+			// don't do this if gameSpeed() != 0, as it was set already
+			// (e.g. due to a savegame)
+			boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+		}
+	}
+	boMusic->startLoop();
  }
 }
 
