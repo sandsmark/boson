@@ -123,6 +123,10 @@ counter();
 echo "
 <br>
 <!-- We have Valid HTML 4.01! -->
+<a href=\"http://www.sourceforge.net/projects/boson\" target=\"_blank\">
+  <img style=\"border:0;width:114px;height:34px\"
+       src=\"${basedir}pictures/sflogo.png\"
+       alt=\"SF Project Home\"></a><br><br>
 <a href=\"http://validator.w3.org/check/referer\" target=\"_blank\">
 <img border=\"0\" src=\"${basedir}pictures/valid-html401.png\"
     alt=\"Valid HTML 4.01!\" height=\"31\" width=\"88\"></a><br>
@@ -131,6 +135,7 @@ echo "
   <img style=\"border:0;width:88px;height:31px\"
        src=\"${basedir}pictures/valid-css.png\"
        alt=\"Valid CSS!\"></a>";
+
 // Copyright
 echo "
 <br><br>
