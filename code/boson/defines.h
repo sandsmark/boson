@@ -118,7 +118,7 @@
 // not in BosonConfig (not necessarily in OptionsDialog):
 #define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)
 #define DEFAULT_GROUND_RENDERER "BoDefaultGroundRenderer"
-#define DEFAULT_MESH_RENDERER "BoMeshRendererVBO"
+#define DEFAULT_MESH_RENDERER "BoMeshRendererVertexArray"
 
 #endif
 
