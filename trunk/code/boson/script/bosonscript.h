@@ -183,6 +183,10 @@ class BosonScript
      * @return List containing ids of all players in the game
      **/
     static QValueList<int> allPlayers();
+    /**
+     * @return Whether player with given id is neutral player
+     **/
+    static bool isNeutral(int playerId);
 
 
     // Resources
@@ -442,6 +446,7 @@ class BosonScript
     static void unfogPlayer(int playerid);
     static void unfogAllPlayers();
     void setAcceptUserInput(bool accept);
+    static void addChatMessage(const QString& from, const QString& message);
 
 
   protected:

@@ -197,6 +197,25 @@ QValueList<int> BosonScript::allPlayers()
   return players;
 }
 
+bool BosonScript::isNeutral(int playerId)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;  // What to return here?
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return false;
+  }
+
+  return p->isNeutralPlayer();
+}
+
 /*****  Resource methods  *****/
 unsigned long int BosonScript::minerals(int playerId)
 {
@@ -1473,6 +1492,17 @@ void BosonScript::unfogAllPlayers()
 void BosonScript::setAcceptUserInput(bool accept)
 {
   interface()->setAcceptUserInput(accept);
+}
+
+void BosonScript::addChatMessage(const QString& from, const QString& message)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  game()->slotAddChatSystemMessage(from, message);
 }
 
 

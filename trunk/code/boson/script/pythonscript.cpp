@@ -45,6 +45,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   // Players
   { (char*)"areEnemies", py_areEnemies, METH_VARARGS, 0 },
   { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
+  { (char*)"isNeutral", py_isNeutral, METH_VARARGS, 0 },
   // Resources
   { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
   { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
@@ -137,6 +138,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unfogPlayer", py_unfogPlayer, METH_VARARGS, 0 },
   { (char*)"unfogAllPlayers", py_unfogAllPlayers, METH_VARARGS, 0 },
   { (char*)"setAcceptUserInput", py_setAcceptUserInput, METH_VARARGS, 0 },
+  { (char*)"addChatMessage", py_addChatMessage, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -796,6 +798,17 @@ PyObject* PythonScript::py_allPlayers(PyObject*, PyObject*)
   QValueList<int> players = BosonScript::allPlayers();
 
   return QValueListToPyList(&players);
+}
+
+PyObject* PythonScript::py_isNeutral(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::isNeutral(id) ? 1 : 0);
 }
 
 
@@ -1895,6 +1908,18 @@ PyObject* PythonScript::py_setAcceptUserInput(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_addChatMessage(PyObject* self, PyObject* args)
+{
+  char* from = 0;
+  char* message = 0;
+  if(!PyArg_ParseTuple(args, (char*)"ss", &from, &message))
+  {
+    return 0;
+  }
+  BosonScript::addChatMessage(QString(from), QString(message));
+  Py_INCREF(Py_None);
+  return Py_None;
+}
 
 /*****  Non-script functions  *****/
 

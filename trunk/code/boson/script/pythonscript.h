@@ -64,6 +64,7 @@ class PythonScript : public BosonScript
     // Players
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);
     static PyObject* py_allPlayers(PyObject* self, PyObject* args);
+    static PyObject* py_isNeutral(PyObject* self, PyObject* args);
 
 
     // Resources
@@ -176,6 +177,7 @@ class PythonScript : public BosonScript
     static PyObject* py_unfogPlayer(PyObject* self, PyObject* args);
     static PyObject* py_unfogAllPlayers(PyObject* self, PyObject* args);
     static PyObject* py_setAcceptUserInput(PyObject* self, PyObject* args);
+    static PyObject* py_addChatMessage(PyObject* self, PyObject* args);
 
   protected:
     static PyObject* QValueListToPyList(QValueList<int>* list);
