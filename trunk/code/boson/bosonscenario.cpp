@@ -23,18 +23,11 @@
 #include "boson.h"
 
 #include <kdebug.h>
-#include <kstandarddirs.h>
-#include <kfilterdev.h>
-#include <ksimpleconfig.h>
 
-#include <qfile.h>
 #include <qdatastream.h>
 #include <qdom.h>
 
 #include "defines.h"
-
-#define TAG_FIELD "bosonscenario_magic_0_6"
-#define TAG_UNIT (0xba)
 
 class ScenarioUnit
 {
@@ -243,8 +236,6 @@ public:
 		mMinPlayers = 0;
 	}
 	
-	QString mFileName;
-
 	int mMaxPlayers; // -1 == unlimited
 	unsigned int mMinPlayers;
 
@@ -254,12 +245,6 @@ public:
 BosonScenario::BosonScenario()
 {
  init();
-}
-
-BosonScenario::BosonScenario(const QString& fileName)
-{
- init();
- loadScenario(fileName);
 }
 
 BosonScenario::~BosonScenario()
@@ -273,41 +258,9 @@ void BosonScenario::init()
  d = new BosonScenarioPrivate;
 }
 
-QString BosonScenario::defaultScenario()
+bool BosonScenario::loadScenario(QDomElement& root)
 {
-// TODO: search for locally available scenarios!
- return QString::fromLatin1("Basic");
-}
-
-bool BosonScenario::loadScenario(const QString& fileName)
-{
- QIODevice* dev = KFilterDev::deviceForFile(fileName);
- if (!dev) {
-	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
-	return false;
- }
- if (!dev->open(IO_ReadOnly)) {
-	kdError() << k_funcinfo << ": Could not open " << fileName << endl;
-	delete dev;
-	return false;
- }
- QByteArray buffer = dev->readAll();
- dev->close();
- delete dev;
- d->mFileName = fileName;
-
-
- QDomDocument doc("BosonScenario");
- QString errorMsg;
- int lineNo;
- int columnNo;
- if (!doc.setContent(buffer, false, &errorMsg, &lineNo, &columnNo)) {
-	kdError() << "Parse error in line " << lineNo << ",column " << columnNo
-			<< " error message: " << errorMsg << endl;
-	return false;
- }
  QDomNodeList list;
- QDomElement root = doc.documentElement();
  list = root.elementsByTagName("ScenarioSettings");
  if (list.count() != 1) {
 	kdError() << "Cannot have ScenarioSettings " << list.count() 
@@ -343,34 +296,9 @@ bool BosonScenario::loadScenario(const QString& fileName)
  return false;
 }
 
-bool BosonScenario::saveScenario(const QString& fileName)
+bool BosonScenario::saveScenario(QDomElement& root)
 {
- QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
- if (!dev) {
-	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
-	return false;
- }
- if (!dev->open(IO_WriteOnly)) {
-	kdError() << k_funcinfo << ": Could not open " << fileName << endl;
-	delete dev;
-	return false;
- }
- saveXMLScenario(dev);
- dev->close();
- delete dev;
- return true;
-}
-
-bool BosonScenario::saveXMLScenario(QIODevice* dev)
-{
- if (!dev) {
-	kdError() << k_funcinfo << ": NULL device" << endl;
-	return false;
- }
- QDomDocument doc("BosonScenario");
- QDomElement root = doc.createElement("BosonScenario");
- doc.appendChild(root);
-
+ QDomDocument doc = root.ownerDocument();
  QDomElement settings = doc.createElement("ScenarioSettings");
  root.appendChild(settings);
  
@@ -386,8 +314,6 @@ bool BosonScenario::saveXMLScenario(QIODevice* dev)
 	return false;
  }
 
- QString xml = doc.toString();
- dev->writeBlock(xml.data(), xml.length()); // FIXME: or xml.latin1() // or something else?
  return true;
 }
 
@@ -591,54 +517,3 @@ void BosonScenario::startScenario(Boson* boson)
  }
 }
 
-QStringList BosonScenario::availableScenarios()
-{
- QStringList list = KGlobal::dirs()->findAllResources("data",
-		"boson/scenario/*.desktop");
- if (list.isEmpty()) {
-	kdError() << "Cannot find any scenario?!" << endl;
-	return list;
- }
- QStringList validList;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
-	fileName += QString::fromLatin1(".bsc");
-	if (QFile::exists(fileName)) {
-		validList.append(list[i]);
-	}
- }
- return validList;
-}
-
-QStringList BosonScenario::availableScenarios(const QString& mapIdentifier)
-{
- QStringList list = availableScenarios();
- QStringList validScenarios; // scenarios for mapIdentifier
- for (unsigned int i = 0; i < list.count(); i++) {
-	KSimpleConfig cfg(list[i]);
-	cfg.setGroup("Boson Scenario");
-	if (cfg.readEntry("Map", "Unknown") == mapIdentifier) {
-		validScenarios.append(list[i]);
-	}
- }
- return validScenarios;
-}
-
-QString BosonScenario::scenarioFileName(const QString& identifier)
-{
- QStringList list = availableScenarios();
- for (unsigned int i = 0; i < list.count(); i++) {
-	KSimpleConfig cfg(list[i]);
-	cfg.setGroup("Boson Scenario");
-	if (cfg.readEntry("Identifier") == identifier) {
-		QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
-		fileName += QString::fromLatin1(".bsc");
-		if (QFile::exists(fileName)) {
-			return fileName;
-		} else {
-			kdError() << "Cannot find " << fileName << " for valid .desktop file" << endl;
-		}
-	}
- }
- return QString::null;
-}

@@ -37,32 +37,15 @@ class BosonScenario
 {
 public:
 	BosonScenario();
-	BosonScenario(const QString& fileName);
 	~BosonScenario();
-
-	static QStringList availableScenarios();
-	static QStringList availableScenarios(const QString& map);
 
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 
-	/**
-	 * Load the specified scenario from a file. Note that this is just about
-	 * the units - you have to load the map separately using @ref BosonMap!
-	 *
-	 * Note that BosonScenario does <em>not</em> check whether the scenario is
-	 * valid for the current map!
-	 * @param fileName the absolute filename of the map file.
-	 **/
-	bool loadScenario(const QString& fileName);
+	bool loadScenario(QDomElement& node);
 
-	bool saveScenario(const QString& fileName);
+	bool saveScenario(QDomElement& root);
 	
-	/**
-	 * @return The (hardcoded) default map
-	 **/
-	static QString defaultScenario();
-
 	/**
 	 * Add all available player units to the game, add minerals, ...
 	 *
@@ -73,8 +56,6 @@ public:
 
 	bool isValid() const;
 
-	static QString scenarioFileName(const QString& scenarioIdentifier);
-
 protected:
 	/**
 	 * Add the units of this player to boson, add minerals, ... 
@@ -84,11 +65,6 @@ protected:
 	 **/
 	void initPlayer(Boson* boson, int playerNumber);
 
-	/**
-	 * Save the scenario as XML to dev
-	 **/
-	bool saveXMLScenario(QIODevice* dev);
-	
 	bool saveScenarioSettings(QDomElement&);
 	bool savePlayers(QDomElement&);
 

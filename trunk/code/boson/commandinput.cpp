@@ -72,7 +72,7 @@ void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* own
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduce;
  stream << (Q_UINT32)owner->id();
- stream << (Q_UINT32)factory->id();
+ stream << (Q_ULONG)factory->id();
  stream << (Q_INT32)unitType;
 
  QDataStream msg(b, IO_ReadOnly);
@@ -102,7 +102,7 @@ void CommandInput::slotStopProduction(int unitType, UnitBase* factory, KPlayer* 
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduceStop;
  stream << (Q_UINT32)owner->id();
- stream << (Q_UINT32)factory->id();
+ stream << (Q_ULONG)factory->id();
  stream << (Q_INT32)unitType;
 
  QDataStream msg(b, IO_ReadOnly);

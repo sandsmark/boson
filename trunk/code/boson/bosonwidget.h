@@ -34,6 +34,7 @@ class BosonCommandFrame;
 class BosonBigDisplay;
 class Unit;
 class Player;
+class BosonMap;
 
 /**
  * This is the actual main widget of boson for both, the game and the editor
@@ -110,14 +111,15 @@ public:
 
 	void setShowChat(bool s);
 
+	void editorSavePlayField(const QString& fileName);
+
 public slots:
 	void slotDebug();
 	void slotNewGame();
 	void slotGamePreferences();
 	void slotEndGame();
 
-	void slotLoadMap(const QString& map);
-	void slotLoadScenario(const QString& scenario);
+	void slotLoadPlayField(const QString& identifier);
 	void slotChangeLocalPlayer(int playerNumber);
 
 	/**
@@ -125,9 +127,6 @@ public slots:
 	 * shall be changed (mobile -> facilities or the other way round)
 	 **/
 	void slotEditorConstructionChanged(int index);
-
-	void slotEditorSaveMap(const QString& fileName);
-	void slotEditorSaveScenario(const QString& fileName);
 
 	void slotToggleSound();
 	void slotToggleMusic();
@@ -210,11 +209,6 @@ protected:
 
 	void quitGame();
 
-	/**
-	 * Delete an existing @ref BosonMap object and create a new one. You
-	 * will have to call @ref BosonMap::loadMap before using it!
-	 **/
-	void recreateMap();
 
 	void recreateLayout(int chatFramePos);
 
@@ -233,6 +227,13 @@ protected slots:
 	void slotReceiveMap(const QByteArray& map);
 
 	void slotAddComputerPlayer(Player*);
+
+	/**
+	 * Delete an existing @ref BosonMap object and create a new one. You
+	 * will have to call @ref BosonMap::loadMap before using it!
+	 **/
+	void slotNewMap(BosonMap* map);
+
 
 private:
 	void init();

@@ -59,8 +59,7 @@ protected:
 private slots:
 	void slotFileNew();
 
-	void slotSaveMapAs();
-	void slotSaveScenarioAs();
+	void slotSavePlayFieldAs();
 	void slotCreateUnit();
 	void slotCreateTiles();
 	void slotCreateDebugTiles();
@@ -70,12 +69,6 @@ private slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotPlayerLeftGame(KPlayer* p);
 	void slotGameStarted();
-
-	/**
-	 * The kind of the editor is to be changed. Either map or scenario
-	 * editor (currently).
-	 **/
-	void slotChangeEdit(int);
 
 	void slotPlaceFacilities();
 	void slotPlaceMobiles();

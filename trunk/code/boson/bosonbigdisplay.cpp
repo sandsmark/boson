@@ -464,7 +464,20 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
  }
  Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
  if (!unit) {
-	if ((selection().first()->unitProperties()->isMobile())) { // move the selection to pos
+	if ((selection().first()->isMobile())) { // move the selection to pos
+		if (selection().count() == 1) {
+			// there are special things to do for a single selected unit
+			// (e.g. mining if the unit is a harvester)
+			MobileUnit* u = (MobileUnit*)selection().first();
+			if (u->canMine(((BosonCanvas*)canvas())->cellAt(pos.x(), pos.y()))) {
+				stream << (Q_UINT32)BosonMessage::MoveMine;
+				stream << (Q_ULONG)u->id();
+				stream << pos;
+				send = true;
+				return;
+			}
+		}
+
 		QPtrListIterator<Unit> it(selection());
 		// tell the clients we want to move units:
 		stream << (Q_UINT32)BosonMessage::MoveMove;
@@ -495,7 +508,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		}
 		// create the new unit
 		stream << (Q_UINT32)BosonMessage::MoveBuild;
-		stream << (Q_UINT32)fac->id();
+		stream << (Q_ULONG)fac->id();
 		stream << (Q_UINT32)fac->owner()->id();
 		stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
 		stream << (Q_INT32)pos.y() / BO_TILE_SIZE;

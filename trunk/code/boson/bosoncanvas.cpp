@@ -340,7 +340,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		(*groupIt).advanceGroupMove();
 	}
  }
- if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
+ if (d->mWorkMine.count() > 0 && (advanceCount % 1) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkMine);
 	while (it.current()) {
 		it.current()->advanceMine();
@@ -611,7 +611,7 @@ Cell* BosonCanvas::cellAt(Unit* unit) const
  if (!unit) {
 	return 0;
  }
- return cellAt(unit->x(), unit->y());
+ return cellAt(unit->x() + unit->width() / 2, unit->y() + unit->width() / 2);
 }
 
 Cell* BosonCanvas::cellAt(double x, double y) const

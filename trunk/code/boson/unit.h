@@ -27,6 +27,7 @@
 class Player;
 class BosonCanvas;
 class UnitProperties;
+class Cell;
 
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
@@ -46,11 +47,13 @@ public:
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
-		IdMovingFailed = UnitBase::IdLast + 5,
+		IdMob_MovingFailed = UnitBase::IdLast + 5,
+		IdMob_ResourcesMined = UnitBase::IdLast + 6,
 		IdFix_ConstructionState = UnitBase::IdLast + 20,
 		IdFix_Productions = UnitBase::IdLast + 21,
-		IdFix_ProductionState = UnitBase::IdLast + 22
+		IdFix_ProductionState = UnitBase::IdLast + 22,
 
+		IdUnitPropertyLast
 	};
 
 	enum UnitSound {
@@ -112,7 +115,7 @@ public:
 	/**
 	 * Mine, mine, mine ...
 	 **/
-	virtual void advanceMine();
+	virtual void advanceMine() { }
 
 	/**
 	 * Attack a unit. The target was set before using @ref setTarget
@@ -224,6 +227,9 @@ public:
 
 	virtual bool collidesWith(const QCanvasItem* item) const;
 
+	int destinationX() const;
+	int destinationY() const;
+
 protected:
 	void shootAt(Unit* target);
 
@@ -277,13 +283,24 @@ public:
 
 	void leaderMoved(double x, double y);
 
-protected:
+	virtual void advanceMine();
 	virtual void advanceMove(); // move one step futher to path
 	/**
 	 * Move according to the velocity of leader
 	 **/
 	virtual void advanceGroupMove(Unit* leader);
 	virtual void advanceMoveCheck();
+
+	/**
+	 * @return The number of resources that have been mined by this unit.
+	 **/
+	unsigned int resourcesMined() const;
+
+	/**
+	 * @return TRUE if this unit can mine the minerals at cell (if any), 
+	 * otherwise FALSE.
+	 **/
+	bool canMine(Cell* cell) const;
 
 private:
 	// a d pointer is probably not very good here - far too much memory consumption

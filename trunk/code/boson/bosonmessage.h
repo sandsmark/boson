@@ -28,8 +28,7 @@ public:
 	enum BosonMessages {
 		InitMap = 0, // for new game dialog
 		ChangeSpecies = 1, // for new game dialog
-		ChangeMap = 2, // for new game dialog
-		ChangeScenario = 3, // for new game dialog
+		ChangePlayField = 2, // for new game dialog
 		ChangeTeamColor = 4, // for new game dialog
 		IdInitFogOfWar = 10,
 		IdStartScenario = 11,
@@ -45,6 +44,7 @@ public:
 		MoveBuild = 102, // build a unit - better name: MovePlace. This is used when the unit was produces and is now placed on the ground
 		MoveProduce = 103, // start to produce a unit. Sent when a cmd widget is clicked
 		MoveProduceStop = 104, // stop a production. Either pause it or abort it completely
+		MoveMine = 105,
 
 
 		// the last message ID:

@@ -104,8 +104,6 @@ class Editor::EditorPrivate
 public:
 	EditorPrivate()
 	{
-		mEdit = 0;
-
 		mPlayerAction = 0;
 		mCellsAction = 0;
 
@@ -116,8 +114,6 @@ public:
 		mActionCellBig1 = 0;
 		mActionCellBig2 = 0;
 	}
-
-	KSelectAction* mEdit;
 
 	KSelectAction* mPlayerAction;
 	KSelectAction* mCellsAction;
@@ -166,22 +162,10 @@ void Editor::initKAction()
  KStdAction::openNew(this, SLOT(slotFileNew()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
- (void)new KAction(i18n("Save &Map as..."), KShortcut(), this,
-		SLOT(slotSaveMapAs()), actionCollection(),
-		"file_save_map_as");
+ (void)new KAction(i18n("Save &PlayField as..."), KShortcut(), this,
+		SLOT(slotSavePlayFieldAs()), actionCollection(),
+		"file_save_playfield_as");
 
- (void)new KAction(i18n("Save &Scenario as..."), KShortcut(), this,
-		SLOT(slotSaveScenarioAs()), actionCollection(), 
-		"file_save_scenario_as");
-
- d->mEdit = new KSelectAction(i18n("&Edit"), KShortcut(), actionCollection(), "editor_edit");
- connect(d->mEdit, SIGNAL(activated(int)), this, SLOT(slotChangeEdit(int)));
- QStringList list;
- list.append(i18n("&Map"));
- list.append(i18n("&Scenario"));
- d->mEdit->setItems(list);
- list.clear();
- 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		bosonWidget(), SLOT(slotChangeLocalPlayer(int)));
@@ -254,7 +238,7 @@ void Editor::readProperties(KConfig *config)
  }
 }
 
-void Editor::slotSaveMapAs()
+void Editor::slotSavePlayFieldAs()
 {
  QString startIn; // shall we provide this??
  QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
@@ -262,22 +246,7 @@ void Editor::slotSaveMapAs()
 	if (QFileInfo(fileName).extension().isEmpty()) {
 		fileName += ".bpf";
 	}
-	bosonWidget()->slotEditorSaveMap(fileName);
- }
-}
-
-void Editor::slotSaveScenarioAs()
-{
- // FIXME: you need an already saved map here!!
- // check for isChanged() or so!
-
- QString startIn; // shall we provide this??
- QString fileName = KFileDialog::getSaveFileName(startIn, "*.bsc", this);
- if (fileName != QString::null) {
-	if (QFileInfo(fileName).extension().isEmpty()) {
-		fileName += ".bsc";
-	}
-	bosonWidget()->slotEditorSaveScenario(fileName);
+	bosonWidget()->editorSavePlayField(fileName);
  }
 }
 
@@ -374,35 +343,6 @@ void Editor::createTiles(bool debug)
  newTiles.save(fileName);
 }
 
-void Editor::slotChangeEdit(int e)
-{
- kdDebug() << k_funcinfo << endl;
- // e == 0 is map editor
- // e == 1 is scenario editor
- if (bosonWidget()->isModified()) {
-	KMessageBox::sorry(this, i18n("Please save the current file first"));
-	if (e == 0) {
-		d->mEdit->setCurrentItem(1);
-	} else {
-		d->mEdit->setCurrentItem(1);
-	}
-	return;
- }
- d->mActionFacilities->setEnabled(e == 1);
- d->mActionMobiles->setEnabled(e == 1);
- d->mActionCellSmall->setEnabled(e == 0);
- d->mActionCellPlain->setEnabled(e == 0);
- d->mActionCellBig1->setEnabled(e == 0);
- d->mActionCellBig2->setEnabled(e == 0);
- d->mMapMode = (e == 0);
- if (e == 0) {
-	d->mActionCellSmall->activate();
- } else {
-	d->mActionFacilities->activate();
- }
- bosonWidget()->displayAllItems(e == 1);
-}
-
 void Editor::slotPlaceFacilities()
 {
  if (!d->mMapMode) {
@@ -448,6 +388,4 @@ void Editor::slotPlaceCellBig2()
 void Editor::slotGameStarted()
 {
  bosonWidget()->setModified(false);
- d->mEdit->setCurrentItem(0); // TODO: use BosonConfig
- slotChangeEdit(0); 
 }
