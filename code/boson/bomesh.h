@@ -344,8 +344,6 @@ public:
 
 	int type() const;
 
-	BoNode* nodes() const;
-
 	/**
 	 * Set whether this mesh is a teamcolor object or not.
 	 **/
@@ -452,6 +450,7 @@ protected:
 	// change if we draw this mesh now.
 	bool checkVisible();
 
+	BoNode* nodes() const;
 
 private:
 	void init();
