@@ -143,13 +143,6 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 
  mCells = new QPtrVector<Cell>();
  mRenderer = new BosonItemRenderer(this);
-
- if (mCanvas) {
-	mCanvas->addItem(this);
- } else {
-	BO_NULL_ERROR(mCanvas);
- }
-
 }
 
 BosonItem::~BosonItem()
