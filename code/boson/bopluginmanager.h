@@ -20,13 +20,106 @@
 #define BOPLUGINMANAGER_H
 
 #include <qobject.h>
+#include <config.h> // USE_BO_PLUGINS
 
 class BoPluginManagerPrivate;
 
 /**
+ * @internal
+ * Do not use this macro yourself. Use BOPLUGIN_MANAGER instead.
+ **/
+#define BOPLUGIN_MANAGER_LIBNAME(className, libName) \
+	QString className::libname() const { return #libName; }
+
+/**
+ * @internal
+ * Do not use this macro yourself. Use BOPLUGIN_MANAGER instead.
+ **/
+#if USE_BO_PLUGINS
+#define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
+	void className::initWithoutLibrary() { }
+#else
+#define BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName) \
+	extern "C" { void* init_##libName(); }  \
+	void className::initWithoutLibrary() \
+		{ \
+			init_##libName(); \
+		}
+#endif
+
+/**
+ * This macro should be in the .cpp file of the plugin manager of your plugin,
+ * that is of the class that derives from @ref BoPluginManager.
+ *
+ * It implements @ref BoPluginManager::libname and @ref
+ * BoPluginManager::initWithoutLibrary.
+ * @param className The class name of the plugin manager (for example @ref
+ *        BoMeshRendererManager)
+ * @param libName The name of the library (without .so suffix) that provides the
+ *        plugin. For example libbomeshrendererplugin
+ **/
+#define BOPLUGIN_MANAGER(className, libName) \
+		BOPLUGIN_MANAGER_LIBNAME(className, libName) \
+		BOPLUGIN_MANAGER_INITWITHOUTLIBRARY(className, libName)
+
+/**
+ * Every boson plugin must provide at least two plain C functions, which are the
+ * interface to the plugin.
+ * <li>init_libname() where "libname" is the name of the library, without the
+ *     .la (but including the "lib"). This function must return a pointer to the
+ *     factory of the plugin, which must be derived from @ref KLibFactory.
+ * <li>version_libname() where "libname" is equal to the one above. This returns
+ *     simply BOSON_VERSION from boversion.h. This function is used by the plugin
+ *     loader to find out whether the plugin can be used.
+ *
+ * Both of these functions are automatically added by this macro. Make sure that
+ * you #include <boversion.h> ! (or tell me how to do that in a macro).
+ *
+ * Place this macro into the .cpp file of the factory of your plugin.
+ **/
+// AB: probably add a #include <boversion.h> to the file defining this macro
+#define BO_EXPORT_PLUGIN_FACTORY( libname, factory ) \
+	extern "C" { \
+		void* init_##libname() { return new factory; } \
+		int version_##libname() { return BOSON_VERSION; } \
+	}
+
+
+
+
+/**
+ * If you want to create a new class in a plugin, for example a new
+ * groundrenderer or a new meshrenderer:
+ * @li Write the class in the plugin directory (e.g. boson/meshrenderer/) and
+ *     add it to the Makefile.am
+ * @li Add it to the factory class of that plugin (e.g.
+ *     boson/meshrenderer/bomeshrendererfactory.cpp)
+ * @li Make sure that your new class derives from the base class that every
+ *     class in that plugin needs to derive from. This class is the interface to
+ *     the application and therefore is different for every plugin (for example
+ *     @ref BoMeshRenderer for the meshrenderer plugin). Note that this class is
+ *     declared in a file outside the plugin directory.
+ *
+ * If you want to create a new plugin:
+ * (note that these docs were written long after I wrote the last plugin. it
+ * might be possible that I miss some things here)
+ * @li Create a base class for your plugin. All methods that the application
+ *     should be able to call in your plugin must be declared in this class
+ *     (pure virtual usually). This is the interface class that the application
+ *     will use.
+ * @li Create a manager class (such as @ref BoMeshRendererManager) deriving from
+ *     @ref BoPluginManager and implement the required methods. Add the
+ *     BOPLUGIN_MANAGER macro to the .cpp file.
+ * @li Create a new directory and add it to the Makefile.am.
+ * @li Create a a factory class deriving from @ref KLibFactory. Add the
+ *     BO_EXPORT_PLUGIN_FACTORY macro to the .cpp file.
+ * @li AB: note sure here: create a class deriving from @ref BoPluginInformation
+ *     and name it BoPluginInformation_libname, where libname is the name of
+ *     your library.
+ * @li That's it. Query your manager class for a new plugin and you'll get it.
+ *
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-//template<class Type> class BoPluginManager
 class BoPluginManager
 {
 public:
@@ -89,7 +182,23 @@ protected:
 	 **/
 	virtual QString configKey() const = 0;
 
+	/**
+	 * @return The name of the library without .so suffix. Could be used as
+	 * parameter to @ref QLibrary.
+	 **/
 	virtual QString libname() const = 0;
+
+	/**
+	 * This method calls the init function of the plugin that is normally
+	 * called right after loading the library. This method calls the
+	 * function directly, that is without loading the library and resolving
+	 * the symbol, therefore the library must be linked directly to the
+	 * program.
+	 *
+	 * This method is a no-op if the program is compiled with plugin
+	 * support.
+	 **/
+	virtual void initWithoutLibrary() = 0;
 
 	virtual void initializePlugin() = 0;
 	virtual void deinitializePlugin() = 0;

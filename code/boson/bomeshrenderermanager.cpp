@@ -40,6 +40,8 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
+BOPLUGIN_MANAGER(BoMeshRendererManager, libbomeshrendererplugin)
+
 BoMeshRendererManager* BoMeshRendererManager::mManager = 0;
 static KStaticDeleter<BoMeshRendererManager> sd;
 
@@ -109,11 +111,6 @@ BoMeshRenderer* BoMeshRendererManager::createRenderer(const QString& name)
 QString BoMeshRendererManager::configKey() const
 {
  return QString::fromLatin1("MeshRenderer");
-}
-
-QString BoMeshRendererManager::libname() const
-{
- return "libbomeshrendererplugin";
 }
 
 void BoMeshRendererManager::initializePlugin()

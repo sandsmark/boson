@@ -23,29 +23,6 @@
 #include "../bogroundrenderer.h"
 #include "../bopluginmanager.h"
 
-// AB: we should move this macro to a more generic place
-
-/**
- * Every boson plugin must provide at least two plain C functions, which are the
- * interface to the plugin.
- * <li>init_libname() where "libname" is the name of the library, without the
- * .la (but including the "lib"). This function must return a pointer to the
- * factory of the plugin, which must be derived from @ref KLibFactory.
- * <li>version_libname() where "libname" is equal to the one above. This returns
- * simply BOSON_VERSION from boversion.h. This function is used by the plugin
- * loader to find out whether the plugin can be used.
- *
- * Both of these functions are automatically added by this macro. Make sure that
- * you #include <boversion.h> ! (or tell me how to do that in a macro)
- **/
-// AB: probably add a #include <boversion.h> to the file defining this macro
-#define BO_EXPORT_PLUGIN_FACTORY( libname, factory ) \
-	extern "C" { \
-		void* init_##libname() { return new factory; } \
-		int version_##libname() { return BOSON_VERSION; } \
-	}
-
-
 class BoGroundRendererFactory : public KLibFactory
 {
 	Q_OBJECT

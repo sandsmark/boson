@@ -1,8 +1,23 @@
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
-boson_plugin_LTLIBRARIES = libbogroundrendererplugin.la
+if include_plugins
+GROUNDRENDERER_PLUGIN=libbogroundrendererplugin.la
+else
+GROUNDRENDERER_LIB=libbogroundrenderer.la
+endif
+
+noinst_LTLIBRARIES = $(GROUNDRENDERER_LIB)
+boson_plugin_LTLIBRARIES = $(GROUNDRENDERER_PLUGIN)
 
 libbogroundrendererplugin_la_SOURCES = \
+		bogroundrendererfactory.cpp \
+		bodefaultgroundrenderer.cpp \
+		bofastgroundrenderer.cpp \
+		boveryfastgroundrenderer.cpp \
+		bogroundrendererbase.cpp \
+		boquadtreenode.cpp
+
+libbogroundrenderer_la_SOURCES = \
 		bogroundrendererfactory.cpp \
 		bodefaultgroundrenderer.cpp \
 		bofastgroundrenderer.cpp \
