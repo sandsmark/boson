@@ -281,23 +281,9 @@ void BosonWidgetBase::initPlayer()
  slotUnitCountChanged(localPlayer());
 }
 
-void BosonWidgetBase::initLocalPlayerInput()
-{
- BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
- input->setCommandFrame(cmdFrame());
-
- localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
- localPlayer()->addGameIO(input);
-
- connect(localPlayerInput(), SIGNAL(signalAction(const BoSpecificAction&)),
-		mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
-}
-
 void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  BO_CHECK_NULL_RET(displayManager());
-
- initLocalPlayerInput();
 
  // Init all bigdisplays
  QPtrListIterator<BosonBigDisplayBase> it(*displayManager()->displayList());
@@ -352,7 +338,11 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)),
 		mDisplayManager, SIGNAL(signalLockAction(bool)));
  b->setCanvas(canvas());
+
+ // FIXME: this should be done by this->setLocalPlayer(), NOT here!
+ // (setLocalPlayer() is also called when changing player in editor mode)
  b->setLocalPlayer(localPlayer()); // AB: this will also add the mouseIO!
+
  b->setCursor(mCursor);
  b->setKGameChat(d->mChat->chatWidget());
 
@@ -902,7 +892,24 @@ BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
 
 void BosonWidgetBase::setLocalPlayer(Player* p)
 {
+ if (mLocalPlayer) {
+	KGameIO* oldIO = mLocalPlayer->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+	if (oldIO) {
+		mLocalPlayer->removeGameIO(oldIO);
+	}
+ }
  mLocalPlayer = p;
+ if (mLocalPlayer) {
+	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
+			mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
+	mLocalPlayer->addGameIO(input);
+	if (!cmdFrame()) {
+		boError() << k_funcinfo << "cmdFrame() is NULL - this should not be possible here!" << endl;
+	} else {
+		input->setCommandFrame(cmdFrame());
+	}
+ }
  if (displayManager()) {
 	displayManager()->setLocalPlayer(localPlayer());
  }

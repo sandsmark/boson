@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,6 +42,8 @@ class BosonNewGameWidget : public BosonNewGameWidgetBase
 public:
 	BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* parent);
 	~BosonNewGameWidget();
+
+	void setLocalPlayer(Player* p);
 
 	/**
 	 * This is the command line interface for adding a computer player. This
@@ -154,7 +156,7 @@ protected:
 
 	BosonStartupNetwork* networkInterface() const { return mNetworkInterface; }
 private:
-	void initPlayer();
+	void initLocalPlayer();
 	void initPlayFields();
 	void initPlayFields(BosonCampaign*, QListViewItem*);
 	void initSpecies();

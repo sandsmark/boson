@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@
 #include <qpopupmenu.h>
 #include <qcursor.h>
 #include <qobjectlist.h>
+#include <qguardedptr.h>
 
 #include <stdlib.h>
 
@@ -58,6 +59,8 @@ public:
 		mLogoPix = 0;
 
 		mNetworkInterface = 0;
+
+		mLocalPlayer = 0;
 	}
 
 	QWidgetStack* mWidgetStack;
@@ -66,6 +69,8 @@ public:
 	QPixmap* mLogoPix;
 
 	BosonStartupNetwork* mNetworkInterface;
+
+	QGuardedPtr<Player> mLocalPlayer;
 };
 
 BosonStartupWidget::BosonStartupWidget(QWidget* parent) : QWidget(parent)
@@ -110,6 +115,15 @@ BosonStartupWidget::~BosonStartupWidget()
  delete d->mLogoPix;
  delete d->mBackgroundPix;
  delete d;
+}
+
+void BosonStartupWidget::setLocalPlayer(Player* p)
+{
+ d->mLocalPlayer = p;
+ BosonNewGameWidget* w = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ if (w) {
+	w->setLocalPlayer(d->mLocalPlayer);
+ }
 }
 
 void BosonStartupWidget::slotLoadGame()
@@ -267,11 +281,9 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 		connect(startGame, SIGNAL(signalShowNetworkOptions()),
 				this, SLOT(slotShowNetworkOptions()));
 
-		// the new game widget requires a local player. this gets added
-		// here.
-		// note that the player will get added once we return to the
-		// event loop only, NOT immediately!
-		emit signalAddLocalPlayer();
+		// AB: this does nothing, as d->mLocalPlayer is NULL. but maybe
+		// that will change.
+		startGame->setLocalPlayer(d->mLocalPlayer);
 
 		w = startGame;
 		break;
@@ -312,6 +324,14 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
  initBackgroundOrigin(w);
 
  d->mWidgetStack->addWidget(w, (int)widgetId);
+
+ if (widgetId == IdNewGame) {
+	// the new game widget requires a local player. this gets added
+	// here.
+	// note that the new player ends up in boGame->playerList() once we
+	// return to the event loop only, NOT immediately
+	emit signalAddLocalPlayer();
+ }
 }
 
 BosonLoadingWidget* BosonStartupWidget::loadingWidget() const

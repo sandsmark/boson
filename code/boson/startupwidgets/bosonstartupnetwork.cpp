@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,22 +102,6 @@ void BosonStartupNetwork::slotPlayerJoinedGame(KPlayer* p)
  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
-
- // warning: we are assuming here that if playerCount() == 1 then the *local*
- // player just entered the game.
- // currently we can safely assume this, but it might be dangerous for network
- // games. im not really sure how playerCount() gets handled for deactivated
- // players in KGame (i.e. when the local player enters another game and so)
- if (boGame->playerCount() == 1) {
-	boDebug() << k_funcinfo << "first player entered game - this must be the local player!" << endl;
-	if (boGame->localPlayer() && (Player*)p != boGame->localPlayer()) {
-		boWarning() << k_funcinfo << "seems not to be the local player!! expecting another player..." << endl;
-	} else {
-		// first unset any previous local player, then set the new local player
-		emit signalSetLocalPlayer(0);
-		emit signalSetLocalPlayer((Player*)p);
-	}
- }
 
  emit signalPlayerJoinedGame(p);
 }
