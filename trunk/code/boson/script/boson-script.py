@@ -174,7 +174,7 @@ def mine():
     if BoScript.canUnitMineOil(u) and BoScript.unitWork(u)==0:
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestOilLocations(player,pos[0],pos[1],1,150)
+      oil=BoScript.nearestOilLocations(player,int(pos[0]),int(pos[1]),1,150)
       boprint("debug", "Mine oil  %s" % oil)
       if len(oil) > 0:
         BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
@@ -183,7 +183,7 @@ def mine():
     elif BoScript.canUnitMineMinerals(u) and BoScript.unitWork(u)==0 :
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestMineralLocations(player,pos[0],pos[1],1,150)
+      oil=BoScript.nearestMineralLocations(player,int(pos[0]),int(pos[1]),1,150)
       boprint("debug", "Mine mineral %s" % oil)
       if len(oil) > 0:
         BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
