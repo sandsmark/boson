@@ -1,0 +1,4 @@
+debian/tmp/usr/games/bodebugdialog
+debian/tmp/usr/share/apps/boson/*
+debian/tmp/etc/kde3/*
+debian/tmp/usr/lib/kde3/plugins/designer/*
