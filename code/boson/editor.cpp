@@ -332,7 +332,7 @@ void Editor::slotPlayerLeftGame(KPlayer* player)
 	++it;
  }
  if (!it.current()) {
-	kdError() << "player not found" << endl;
+	kdError() << k_funcinfo << ": player not found" << endl;
 	return;
  }
  QStringList players = d->mPlayerAction->items();

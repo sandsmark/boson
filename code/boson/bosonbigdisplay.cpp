@@ -201,11 +201,11 @@ void BosonBigDisplay::clearSelection()
 void BosonBigDisplay::addUnitSelection(VisualUnit* unit)
 {
  if (!unit) {
-	kdError() << "NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (unit->owner() != d->mLocalPlayer) {
-	kdDebug() << "BosonBigDisplay::addUnitSelection(): not owner" << endl;
+	kdDebug() << k_funcinfo << ": not owner" << endl;
 	return;
  }
  if (d->mSelectionList.contains(unit)) {
@@ -249,12 +249,12 @@ void BosonBigDisplay::selectArea(const QRect& rect)
 
 void BosonBigDisplay::drawSelectionRect()
 {
-//kdDebug() << "paintrect" << endl;
+// kdDebug() << k_funcinfo << endl;
  d->mIsSelecting = !d->mIsSelecting;
  QPen pen(red, 2); // FIXME: hardcoded
  QPainter painter;
  if (!painter.begin(viewport())) {
-	kdError() << "Cannot begin" << endl;
+	kdError() << k_funcinfo << ": Cannot begin" << endl;
 	return;
  }
  painter.setPen(pen);
@@ -291,7 +291,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	return;
  }
  if (selectionMode() == SelectNone) {
-	kdError() << "SelectNone" << endl;
+	kdError() << k_funcinfo << ": SelectNone" << endl;
 	return;
  }
  VisualUnit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
@@ -317,7 +317,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 			stream << (Q_UINT32)BosonMessage::MoveConstruct;
 			stream << (Q_UINT32)fac->id();
 			stream << (Q_UINT32)fac->owner()->id();
-			kdDebug() << fac->id() << endl;
+//			kdDebug() << fac->id() << endl;
 			stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
 			stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
 			send = true;
@@ -386,13 +386,13 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 
 void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 {
-// kdDebug() << "BosonBigDisplay::editorActionClicked()" << endl;
+// kdDebug() << k_funcinfo << endl;
  int x = pos.x() / BO_TILE_SIZE;
  int y = pos.y() / BO_TILE_SIZE;
 // FIXME: should be done on left click?
  if (d->mConstruction.unitType > -1) {
 	if (!d->mConstruction.owner) {
-		kdWarning() << "NO OWNER" << endl;
+		kdWarning() << k_funcinfo << ": NO OWNER" << endl;
 //		return;
 	}
 	
@@ -410,12 +410,12 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* factory, Player* owner)
 {
  if (!owner) {
-	kdDebug() << "slotWillConstructUnit(): NULL owner" << endl;
+	kdDebug() << k_funcinfo << ": NULL owner" << endl;
 	d->mConstruction.groundType = -1;
 	d->mConstruction.unitType = -1;
 	return;
  }
- kdDebug() << unitType << endl;
+// kdDebug() << unitType << endl;
  d->mConstruction.unitType = unitType;
  d->mConstruction.factory = factory;
  d->mConstruction.owner = owner;
@@ -436,10 +436,10 @@ void BosonBigDisplay::slotWillPlaceCell(int groundType, unsigned char version)
 void BosonBigDisplay::slotUnitChanged(VisualUnit* unit)
 {
  if (!unit) {
-	kdError() << "NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
-// kdDebug() << "display: unit changed" << endl;
+// kdDebug() << k_funcinfo << endl;
  if (selection().contains(unit)) {
 //	kdDebug() << "is selected" << endl;
 	if (unit->isDestroyed()) {

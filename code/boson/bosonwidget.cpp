@@ -236,7 +236,7 @@ void BosonWidget::addComputerPlayer(const QString& name)
 void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
 {
  if (!p) {
-	kdError() << "BosonWidget::slotPlayerJoinedGame(): NULL player" << endl;
+	kdError() << k_funcinfo << ": NULL player" << endl;
 	return;
  }
  // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
@@ -280,7 +280,7 @@ void BosonWidget::slotArrowScrollChanged(int speed)
 
 void BosonWidget::slotNewGame()
 {
-// kdDebug() << "BosonWidget::slotNewGame()" << endl;
+// kdDebug() << k_funcinfo << endl;
  if (d->mBoson->isRunning()) {
 	if (KMessageBox::questionYesNo(this, i18n("Quit the running game?"))
 			!= KMessageBox::Yes) {
@@ -355,9 +355,9 @@ void BosonWidget::slotStartGame()
 
 void BosonWidget::slotStartScenario()
 {
- kdDebug() << "start scenario" << endl;
+// kdDebug() << k_funcinfo << endl;
  if (!d->mScenario) {
-	kdError() << "NULL scenario" << endl;
+	kdError() << k_funcinfo << ": NULL scenario" << endl;
 	return;
  }
  d->mScenario->startScenario(d->mBoson);
@@ -397,12 +397,12 @@ void BosonWidget::slotGamePreferences()
 void BosonWidget::slotAddUnit(VisualUnit* unit, int, int)
 {
  if (!unit) {
-	kdError() << "BosonWidget::slotAddUnit(): NULL unit" << endl;
+	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
  Player* player = unit->owner();
  if (!player) {
-	kdError() << "BosonWidget::slotAddUnit(): NULL owner" << endl;
+	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
  d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name()); // doesn't add if this tip was added before
@@ -434,7 +434,7 @@ void BosonWidget::slotEndGame()
 void BosonWidget::slotEditorConstructionChanged(int index)
 { // called by the map editor only
 // FIXME
- kdDebug() << "slotEditorConstructionChanged()" << endl;
+// kdDebug() << k_funcinfo << endl;
  if (d->mLocalPlayer) {
 	kdDebug() << "local player: " << d->mLocalPlayer->id() << endl;
  }
@@ -506,7 +506,7 @@ void BosonWidget::slotLoadMap(const QString& map)
 // network. It is initialized (i.e. the cells are shown in the canvas) when the
 // data is received from network, in slotReceiveMap()
  if (!d->mBoson->isAdmin()) {
-	kdWarning() << "BosonWidget::slotLoadMap(): not ADMIN" << endl;
+	kdWarning() << k_funcinfo << ": not ADMIN" << endl;
 	return;
  }
  recreateMap();
@@ -531,7 +531,7 @@ void BosonWidget::slotLoadMap(const QString& map)
 void BosonWidget::slotLoadScenario(const QString& scenario)
 {
  if (!d->mBoson->isAdmin()) {
-	kdWarning() << "BosonWidget::slotLoadScenario(): not ADMIN" << endl;
+	kdWarning() << k_funcinfo << ": not ADMIN" << endl;
 	return;
  }
  if (d->mScenario) {
@@ -559,12 +559,12 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  d->mMiniMap->initMap();
  d->mCanvas->initMap(tiles);
 
- kdDebug() << "slotReceiveMap done" << endl;
+ kdDebug() << k_funcinfo << " done" << endl;
 }
 
 void BosonWidget::slotChangeLocalPlayer(int index)
 {
-// kdDebug() << "slotChangeLocalPlayer " << index << endl;
+// kdDebug() << k_funcinfo << endl;
  Player* p = (Player*)d->mBoson->playerList()->at(index);
  changeLocalPlayer(p);
  d->mCommandFrame->slotEditorConstruction(-1, d->mLocalPlayer);
@@ -586,7 +586,7 @@ void BosonWidget::slotAddComputerPlayer()
 void BosonWidget::slotEditorSaveMap(const QString& fileName)
 {
  if (!d->mMap) {
-	kdError() << "BosonWidget::slotEditorSaveMap(): NULL map" << endl;
+	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  // TODO: let the user choose - binary or XML.
@@ -596,7 +596,7 @@ void BosonWidget::slotEditorSaveMap(const QString& fileName)
 void BosonWidget::slotEditorSaveScenario(const QString& fileName)
 {
  if (!d->mScenario) {
-	kdError() << "BosonWidget::slotEditorSaveScenario(): NULL scenario" << endl;
+	kdError() << k_funcinfo << ": NULL scenario" << endl;
 	return;
  }
  // TODO: let the user choose - binary or XML? XML is far better here. binary is
@@ -607,7 +607,7 @@ void BosonWidget::slotEditorSaveScenario(const QString& fileName)
 void BosonWidget::slotAddCell(int x, int y, int type, unsigned char b)
 {
  if (!d->mMap) {
-	kdError() << "NULL map" << endl;
+	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  d->mMap->changeCell(x, y, type, b);
@@ -618,11 +618,11 @@ void BosonWidget::saveConfig()
  // note: the game is *not* saved here! just general settings like game speed,
  // player name, ...
  if (!d->mBoson) {
-	kdError() << "NULL game" << endl;
+	kdError() << k_funcinfo << ": NULL game" << endl;
 	return;
  }
  if (!d->mLocalPlayer) {
-	kdError() << "NULL local player" << endl;
+	kdError() << k_funcinfo << ": NULL local player" << endl;
 	return;
  }
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
@@ -632,7 +632,7 @@ void BosonWidget::saveConfig()
 void BosonWidget::slotChangeSpecies(const QString& directory)
 {
  if (!d->mLocalPlayer) {
-	kdError() << "slotChangeSpecies(): no local player!" << endl;
+	kdError() << k_funcinfo << ": no local player!" << endl;
 	return;
  }
  d->mLocalPlayer->loadTheme(directory, SpeciesTheme::defaultColor());

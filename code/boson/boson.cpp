@@ -76,7 +76,7 @@ void Boson::setCanvas(QCanvas* c)
 
 void Boson::quitGame()
 {
-// kdDebug() << "Boson::quitGame" << endl;
+// kdDebug() << k_funcinfo << endl;
 // reset everything
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
@@ -88,7 +88,7 @@ void Boson::quitGame()
 	removePlayer(list.take(0)); // might not be necessary - sends remove over network
 	systemRemovePlayer(list.take(0), true); // remove immediately, even befroe network removing is received.
  }
-// kdDebug() << "Boson::quitGame done" << endl;
+// kdDebug() << k_funcinfo << " done" <<  endl;
 }
 
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
@@ -96,7 +96,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  Player* player = (Player*)p;
  Q_UINT32 msgid;
  stream >> msgid;
-// kdDebug() << "playerInput " << msgid << endl;
+// kdDebug() << k_funcinfo << ": " << msgid << endl;
  switch (msgid) {
 	case BosonMessage::MoveMove:
 	{
@@ -278,12 +278,12 @@ void Boson::slotSendAdvance()
 VisualUnit* Boson::createUnit(int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << "NULL owner" << endl;
+	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return 0;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << "Boson::createUnit(): No theme for this player" << endl;
+	kdError() << k_funcinfo << ": No theme for this player" << endl;
 	return 0; // BAAAAD - will crash
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
@@ -298,7 +298,7 @@ VisualUnit* Boson::createUnit(int unitType, Player* owner)
  } else if (prop->isFacility()) {
 	unit = new VisualFacility(unitType, owner, d->mCanvas);
  } else { // should be impossible
-	kdError() << "Internal Error at unit type " << unitType << endl;
+	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
  owner->addUnit(unit); // can also be in VisualUnit c'tor - is this clean?
@@ -332,7 +332,7 @@ VisualUnit* Boson::findUnit(unsigned long int id, Player* searchIn) const
 
 KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 {
- kdDebug() << "Boson::createPlayer(): rtti=" << rtti << ",io=" << io 	
+ kdDebug() << k_funcinfo << ": rtti=" << rtti << ",io=" << io 	
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
 // connect(p, SIGNAL(signalLoadUnit(int, unsigned long int, Player*)), 
@@ -357,7 +357,7 @@ void Boson::slotSetGameSpeed(int speed)
  if (speed > MIN_GAME_SPEED || speed < MAX_GAME_SPEED) {
 	kdWarning() << "unexpected speed " << speed << endl;
  }
-// kdDebug() << "Boson::setGameSpeed " << speed << endl;
+// kdDebug() << k_funcinfo << ": " << speed << endl;
  d->mGameSpeed = speed;
  if (d->mGameTimer->isActive()) {
 	d->mGameTimer->stop();
@@ -381,11 +381,11 @@ void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
 	return;
  }
  if (!owner) {
-	kdWarning() << "NULL owner! using first player" << endl;
+	kdWarning() << k_funcinfo << ": NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
  }
  if (!owner) { // no player here
-	kdError() << "NULL owner" << endl;
+	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
 
@@ -402,30 +402,31 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 {
  *remove = false;
  if (!player) {
-	kdError() << "NULL player" << endl;
+	kdError() << k_funcinfo << ": NULL player" << endl;
 	return;
  }
  if (!isAdmin()) {
-	kdError() << "Boson::slotReplacePlayerIO(): only ADMIN can do this" << endl; 
+	kdError() << k_funcinfo << ": only ADMIN can do this" << endl; 
 	return;
  }
- kdDebug() << "slotReplacePlayer()" << endl;
+// kdDebug() << k_funcinfo << endl;
 }
 
 bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
 {
  if (!factory) {
-	kdError() << "NULL factory cannot produce" << endl;
+	kdError() << k_funcinfo << ": NULL factory cannot produce" << endl;
 	return false;
  }
  Player* p = factory->owner();
  if (!p) {
-	kdError() << "NULL owner" << endl;
+	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return false;
  }
  QCanvasPixmapArray* a = p->speciesTheme()->pixmapArray(unitType);
  if (!a) {
-	kdError() << "NULL pximap array for " << unitType << endl;
+	kdError() << k_funcinfo << ": NULL pximap array for " << unitType 
+			<< endl;
 	return false;
  }
  QRect rect = (QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,

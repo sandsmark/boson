@@ -56,12 +56,12 @@ VisualUnit::VisualUnit(int type, Player* owner, QCanvas* canvas)
 
 VisualUnit::~VisualUnit()
 {
-//kdDebug() << "~VisualUnit()" << endl;
+// kdDebug() << k_funcinfo << endl;
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
  delete d;
-//kdDebug() << "~VisualUnit() done" << endl;
+// kdDebug() << k_funcinfo << " done" << endl;
 }
 
 void VisualUnit::select()
@@ -182,7 +182,7 @@ void VisualUnit::moveBy(double moveX, double moveY)
 
 void VisualUnit::advance(int phase)
 { // time critical function !!!
-// kdDebug() << "VisualUnit::advance() id=" << id() << endl;
+// kdDebug() << k_funcinfo << " id=" << id() << endl;
  if (isDestroyed()) {
 	return;
  }
@@ -204,7 +204,7 @@ void VisualUnit::advance(int phase)
 	} else if (work() == WorkConstructed) {
 		beConstructed();
 	} else if (work() == WorkNone) {
-		kdDebug() << "VisualUnit::advance(): work==WorkNone" << endl;
+		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
 	} else {
 		kdError() << "work: " << work() << endl;
 	}
@@ -358,7 +358,7 @@ bool VisualUnit::inRange(VisualUnit* target) const
 void VisualUnit::attackUnit(VisualUnit* target)
 {
  if (!target) {
-	kdError() << "VisualUnit::attackUnit(): cannot attack NULL target" << endl;
+	kdError() << k_funcinfo << ": cannot attack NULL target" << endl;
 	return;
  }
  if (target->isDestroyed()) {
@@ -423,7 +423,7 @@ QCanvasItemList VisualUnit::enemyUnitsInRange() const
  QCanvasItemList enemy;
  QCanvasItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
-	if (((VisualUnit*)(*it))->owner() != this) {
+	 if (((VisualUnit*)(*it))->owner() != owner()) {
 		enemy.append(*it);
 	}
  }
@@ -457,7 +457,7 @@ VisualMobileUnit::~VisualMobileUnit()
 
 void VisualMobileUnit::advanceMove()
 {
-// kdDebug() << "advanceMove()" << endl;
+// kdDebug() << k_funcinfo << endl;
 
 // TODO turnTo()
 // FIXME this is still the initial implementation and all but good... should be
@@ -465,7 +465,7 @@ void VisualMobileUnit::advanceMove()
 
  if (waypointCount() == 0) {
 	// shouldn't happen - work() should be WorkNone here
-	kdWarning() << "VisualUnit::advanceMove(): no waypoints?!" << endl;
+	kdWarning() << k_funcinfo << ": no waypoints?!" << endl;
 	stopMoving(); // should have been called before already
 	return;
  }

@@ -78,16 +78,16 @@ QString BosonScenario::defaultScenario()
 
 bool BosonScenario::loadScenario(const QString& fileName)
 {
- kdDebug() << "BosonScenario::loadScenario " << fileName << endl;
+// kdDebug() << k_funcinfo << endl;
 
  // open stream
  QIODevice* dev = KFilterDev::deviceForFile(fileName);
  if (!dev) {
-	kdError() << "BosonScenario: NULL device for " << fileName << endl;
+	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
 	return false;
  }
  if (!dev->open(IO_ReadOnly)) {
-	kdError() << "BosonScenario: Could not open " << fileName << endl;
+	kdError() << k_funcinfo << ": Could not open " << fileName << endl;
 	delete dev;
 	return false;
  }
@@ -161,11 +161,11 @@ bool BosonScenario::saveScenario(const QString& fileName, bool binary)
  if (binary) {
 	QIODevice* dev = KFilterDev::deviceForFile(fileName);
 	if (!dev) {
-		kdError() << "BosonScenario: NULL device for " << fileName << endl;
+		kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
 		return false;
 	}
 	if (!dev->open(IO_WriteOnly)) {
-		kdError() << "BosonScenario: Could not open " << fileName << endl;
+		kdError() << k_funcinfo << ": Could not open " << fileName << endl;
 		delete dev;
 		return false;
 	}
@@ -179,11 +179,11 @@ bool BosonScenario::saveScenario(const QString& fileName, bool binary)
  // now save the file
  QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
  if (!dev) {
-	kdError() << "BosonScenario: NULL device for " << fileName << endl;
+	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
 	return false;
  }
  if (!dev->open(IO_WriteOnly)) {
-	kdError() << "BosonScenario: Could not open " << fileName << endl;
+	kdError() << k_funcinfo << ": Could not open " << fileName << endl;
 	delete dev;
 	return false;
  }
@@ -213,7 +213,7 @@ bool BosonScenario::saveScenario(QDataStream& stream)
 bool BosonScenario::saveXMLScenario(QIODevice* dev)
 {
  if (!dev) {
-	kdError() << "NULL device" << endl;
+	kdError() << k_funcinfo << ": NULL device" << endl;
 	return false;
  }
  QDomDocument doc("BosonScenario");
@@ -282,17 +282,17 @@ bool BosonScenario::loadScenarioSettings(QDataStream& stream)
  stream >> maxPlayers;
  
  if (minPlayers < 1) {
-	kdError() << "BosonScenario::loadScenarioSettings(): broken scenario file!" << endl;
+	kdError() << k_funcinfo << ": broken scenario file!" << endl;
 	kdError() << "minPlayers < 1" << endl;
 	return false;
  }
  if (maxPlayers > BOSON_MAX_PLAYERS) {
-	kdError() << "BosonScenario::loadScenarioSettings(): broken scenario file!" << endl;
+	kdError() << k_funcinfo << ": broken scenario file!" << endl;
 	kdError() << "maxPlayers > " << BOSON_MAX_PLAYERS << endl;
 	return false;
  }
  if ((int)minPlayers > maxPlayers) {
-	kdError() << "BosonScenario::loadScenarioSettings(): broken scenario file!" << endl;
+	kdError() << k_funcinfo << ": broken scenario file!" << endl;
 	kdError() << "minPlayers > maxPlayers" << endl;
 	return false;
  }
@@ -313,7 +313,7 @@ bool BosonScenario::saveScenarioSettings(QDataStream& stream)
 bool BosonScenario::loadPlayers(QDataStream& stream)
 {
  if (!d->mUnits) {
-	kdError() << "NULL units" << endl;
+	kdError() << k_funcinfo << ": NULL units" << endl;
 	return false;
  }
  for (int i = 0; i < d->mMaxPlayers; i++) {
@@ -328,7 +328,7 @@ bool BosonScenario::loadPlayers(QDataStream& stream)
 bool BosonScenario::loadPlayers(QDomElement& node)
 {
  if (!d->mUnits) {
-	kdError() << "NULL units" << endl;
+	kdError() << k_funcinfo << ": NULL units" << endl;
 	return false;
  }
  QDomNodeList list = node.elementsByTagName("Player");
@@ -438,11 +438,11 @@ bool BosonScenario::savePlayer(QDomElement& node, unsigned int playerNumber)
  node.setAttribute("PlayerNumber", playerNumber);
 
  if (!d->mUnits) {
-	kdError() << "NULL units" << endl;
+	kdError() << k_funcinfo << ": NULL units" << endl;
 	return false;
  }
  if (d->mUnits->count() <= playerNumber) {
-	kdError() << "Unknown player " << playerNumber << endl;
+	kdError() << k_funcinfo << ": Unknown player " << playerNumber << endl;
 	return false;
  }
  QValueList<ScenarioUnit>::Iterator it;
@@ -482,7 +482,7 @@ bool BosonScenario::verifyScenario(QDataStream& stream)
  // Qt marshalling for a string is 4-byte-len + data
  stream >> i;
  if (length + 1 != i) {
-//	kdError() << "BosonScenario::verifyScenario(): Magic doesn't match(len), check file name" << endl;
+//	kdError() << k_funcinfo << ": Magic doesn't match(len), check file name" << endl;
 	delete[] magic;
 	return false;
  }
@@ -494,7 +494,7 @@ bool BosonScenario::verifyScenario(QDataStream& stream)
  }
 
  if (!QString::compare(magic, TAG_FIELD)) {
-//	kdError() << "BosonScenario::verifyScenario(): Magic doesn't match(string), check file name" << endl;
+//	kdError() << k_funcinfo << ": Magic doesn't match(string), check file name" << endl;
 	delete[] magic;
 	return false;
  }
@@ -505,13 +505,13 @@ bool BosonScenario::verifyScenario(QDataStream& stream)
 bool BosonScenario::loadPlayer(QDataStream& stream, unsigned int playerNumber)
 {
  if (!d->mUnits) {
-	kdError() << "BosonScenario::loadPlayer(): Unit array not yet created" 
+	kdError() << k_funcinfo << ": Unit array not yet created" 
 			<< endl;
 	return false;
  }
  if ((int)playerNumber >= maxPlayers()) {
-	kdError() << "BosonScenario::loadPlayer(): don't know player " 
-			<< playerNumber << endl;
+	kdError() << k_funcinfo << ": don't know player " << playerNumber 
+			<< endl;
 	return false;
  }
  Q_UINT32 unitCount;
@@ -544,11 +544,11 @@ bool BosonScenario::loadPlayer(QDataStream& stream, unsigned int playerNumber)
 bool BosonScenario::savePlayer(QDataStream& stream, unsigned int playerNumber)
 {
  if (!d->mUnits) {
-	kdError() << "NULL units" << endl;
+	kdError() << k_funcinfo << ": NULL units" << endl;
 	return false;
  }
  if (d->mUnits->count() >= playerNumber) {
-	kdError() << "Unknown player " << playerNumber << endl;
+	kdError() << k_funcinfo << ": Unknown player " << playerNumber << endl;
 	return false;
  }
  stream << (Q_UINT32)d->mUnits[playerNumber].count();
@@ -566,7 +566,7 @@ bool BosonScenario::savePlayer(QDataStream& stream, unsigned int playerNumber)
 bool BosonScenario::isValid() const
 {
  if (d->mMinPlayers != (uint)d->mMaxPlayers) { // FIXME
-	kdError() << "internal error" << endl;
+	kdError() << k_funcinfo << ": internal error" << endl;
 	return false;
  }
  if (d->mMinPlayers < 1) {
@@ -598,19 +598,19 @@ int BosonScenario::maxPlayers() const
 void BosonScenario::addPlayerUnits(Boson* boson, int playerNumber)
 {
  if (!boson) {
-	kdError() << "BosonScenario::addPlayerUnits(): NULL game" << endl;
+	kdError() << k_funcinfo << ": NULL game" << endl;
 	return;
  }
  Player* p = (Player*)boson->playerList()->at(playerNumber);
  if (!p) {
-	kdError() << "BosonScenario::addPlayerUnits(): NULL player" << endl;
+	kdError() << k_funcinfo << ": NULL player" << endl;
 	return;
  }
- kdDebug() << "BosonScenario::addPlayerUnits of player " << playerNumber 
-		<< "==" << p->id() << endl;
+ kdDebug() << k_funcinfo << " player " << playerNumber << "==" << p->id() 
+		<< endl;
  if ((int)d->mUnits->count() < playerNumber) {
-	kdError() << "BosonScenario::addPlayerUnits(): don't have player " 
-			<< playerNumber << endl;
+	kdError() << k_funcinfo << ": don't have player " << playerNumber 
+			<< endl;
 	return;
  }
  unsigned int unitCount = d->mUnits[playerNumber].count();
@@ -623,11 +623,11 @@ void BosonScenario::addPlayerUnits(Boson* boson, int playerNumber)
 void BosonScenario::addUnit(Boson* boson, Player* owner, int unitType, int x, int y)
 {
  if (!boson) {
-	kdError() << "BosonScenario::addUnit(): NULL game" << endl;
+	kdError() << k_funcinfo << ": NULL game" << endl;
 			return;
  }
  if (!owner) {
-	kdError() << "BosonScenario::addUnit(): NULL player" << endl;
+	kdError() << k_funcinfo << ": NULL player" << endl;
 	return;
  }
  boson->slotSendAddUnit(unitType, x, y, owner);
@@ -639,7 +639,7 @@ void BosonScenario::startScenario(Boson* boson)
 	return;
  }
  if (!boson) {
-	kdError() << "BosonScenario::addPlayerUnits(): NULL game" << endl;
+	kdError() << k_funcinfo << ": NULL game" << endl;
 	return;
  }
  for (int i = 0; i < maxPlayers(); i++) {

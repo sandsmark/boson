@@ -128,7 +128,7 @@ bool BosonTiles::loadTiles(const QString& dir)
 bool BosonTiles::save(const QString& fileName)
 {
  if (!mTilesImage) {
-	kdError() << "NULL image" << endl;
+	kdError() << k_funcinfo << ": NULL image" << endl;
 	return false;
  }
  return mTilesImage->save(fileName, "PNG");
@@ -143,7 +143,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
 	QString file = path + tile;
 	p.load(file);
 	if (p.isNull()) {
-		kdError() << "BosonTiles::loadGround(): couldn't load image " << file << endl;
+		kdError() << k_funcinfo << ": couldn't load image " << file << endl;
 		return false;
 	}
 	putOne(4 * j + i, p);
@@ -234,7 +234,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 			SETPIXEL3(7,7);
 			break;
 		default:
-			kdError() << "Unexpected value in BosonTiles::putOne()" << endl;
+			kdError() << k_funcinfo << ": Unexpected value" << endl;
 			return;
 	}
 

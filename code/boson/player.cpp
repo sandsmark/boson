@@ -41,7 +41,7 @@ Player::Player() : KPlayer()
 
 Player::~Player()
 {
- kdDebug() << "~Player" << endl;
+ kdDebug() << k_funcinfo << endl;
  d->mUnits.clear();
 // kdDebug() << "clear handler" << endl;
  dataHandler()->clear();
@@ -149,7 +149,7 @@ void Player::loadTheme(const QString& species, const QRgb& teamColor)
 QCanvasPixmapArray* Player::pixmapArray(int unitType) const
 {
  if (!d->mSpecies) {
-	kdError() << "Player::pixmapArray(): NULL theme" << endl;
+	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return 0;
  }
  return d->mSpecies->pixmapArray(unitType);
@@ -172,7 +172,7 @@ void Player::addUnit(VisualUnit* unit)
 void Player::unitDestroyed(VisualUnit* unit)
 {
  if (!unit) {
-	kdError() << "Player::unitDestroyed(): Cannot remove NULL unit" << endl;
+	kdError() << k_funcinfo << ": Cannot remove NULL unit" << endl;
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
@@ -186,7 +186,7 @@ SpeciesTheme* Player::speciesTheme() const
 void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 {
  if (!prop) {
-	kdError() << "NULL property" << endl;
+	kdError() << k_funcinfo << ": NULL property" << endl;
 	return;
  }
 
@@ -204,7 +204,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 
  if (!unit) {
 //	KGamePropertyHandler* h = (KGamePropertyHandler*)sender();
-	kdError() << "Player::slotUnitPropertyChanged(): NULL unit" << endl;
+	kdError() << k_funcinfo << ": NULL unit" << endl;
 //	kdDebug() << h->id() << endl;
 	kdDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
@@ -259,7 +259,7 @@ bool Player::save(QDataStream& stream)
 	kdError() << "Couldn't save player" << endl;
 	return false;
  }
-// kdDebug() << "Player::save()" << endl;
+// kdDebug() << k_funcinfo < endl;
  Q_UINT32 unitCount = d->mUnits.count();
  stream << unitCount;
  for (unsigned int i = 0; i < unitCount; i++) {
@@ -284,7 +284,7 @@ bool Player::load(QDataStream& stream)
 	kdError() << "Couldn't load player" << endl;
 	return false;
  }
-// kdDebug() << "Player::load()" << endl;
+// kdDebug() << k_funcinfo < endl;
  Q_UINT32 unitCount;
  stream >> unitCount;
  //perhaps:
@@ -325,7 +325,7 @@ void Player::sendStopMoving(VisualUnit* unit)
 const UnitProperties* Player::unitProperties(int unitType) const
 {
  if (!speciesTheme()) {
-	kdError() << "NULL theme" << endl;
+	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return 0;
  }
  return speciesTheme()->unitProperties(unitType);

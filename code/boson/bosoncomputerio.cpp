@@ -20,7 +20,7 @@ BosonComputerIO::~BosonComputerIO()
 
 void BosonComputerIO::reaction()
 {
- kdDebug() << "BosonComputerIO::reaction()" << endl;
+// kdDebug() << k_funcinfo << endl;
 
 }
 

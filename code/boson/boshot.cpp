@@ -29,12 +29,12 @@ BoShot::BoShot(VisualUnit* target, VisualUnit* attacker, QCanvas* canvas, bool d
  d->mDelay = SHOT_DELAY;
 
  if (!target) {
-	kdError() << "BoShot::BoShot(): NULL target" << endl;
+	kdError() << k_funcinfo << ": NULL target" << endl;
 	delete this;
 	return;
  }
  if (!attacker) {
-	kdError() << "BoShot::BoShot(): NULL attacker" << endl;
+	kdError() << k_funcinfo << ": NULL attacker" << endl;
 	delete this;
 	return;
  }
@@ -42,7 +42,7 @@ BoShot::BoShot(VisualUnit* target, VisualUnit* attacker, QCanvas* canvas, bool d
 
  SpeciesTheme* theme = attacker->speciesTheme();
  if (!theme) {
-	kdError() << "BoShot::BoShot(): NULL attacker theme" << endl;
+	kdError() << k_funcinfo << ": NULL attacker theme" << endl;
 	delete this;
 	return;
  }
@@ -70,9 +70,9 @@ BoShot::BoShot(VisualUnit* target, VisualUnit* attacker, QCanvas* canvas, bool d
 	setZ(target->z() + 1);
  }
  if (!sequence) {
-	kdError() << "BoShot::BoShot(): NULL sequence" << endl;
-		delete this;
-		return;
+	kdError() << k_funcinfo << ": NULL sequence" << endl;
+	delete this;
+	return;
  }
  setSequence(sequence);
  

@@ -197,25 +197,22 @@ void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
 	return;
  }
  if (unit->isDestroyed()) {
-	kdWarning() << "BosonCommandFrame::slotShowSingleUnit: unit is "
-			<< "destroyed" << endl;
+	kdWarning() << k_funcinfo << ": unit is destroyed" << endl;
 	return;
  }
  if (!unit->owner()) {
-	kdError() << "BosonCommandFrame::slotShowSingleUnit: unit has no owner" 
-			<< endl;
+	kdError() << k_funcinfo << ": unit has no owner" << endl;
 	return;
  }
  SpeciesTheme* theme = unit->owner()->speciesTheme();
  if (!theme) {
-	kdError() << "BosonCommandFrame::slotShowSingleUnit: owner has no "
-			<< "species theme" << endl;
+	kdError() << k_funcinfo << ": owner has no species theme" << endl;
 	return;
  }
  QPixmap* p = theme->bigOverview(unit->type());
  if (!p) {
-	kdError() << "BosonCommandFrame::slotShowSingleUnit: unit has no big"
-			<< "overview in this theme" << endl;
+	kdError() << k_funcinfo << ": unit has no big overview in this theme" 
+			<< endl;
 	return;
  }
 
@@ -232,19 +229,19 @@ void BosonCommandFrame::slotSetConstruction(VisualUnit* unit)
  }
  Player* owner = unit->owner();
  if (!owner) {
-	kdError() << "BosonComandFrame::slotSetConstruction(): no owner" << endl;
+	kdError() << k_funcinfo << ": no owner" << endl;
 	return;
  }
 
  // don't display construction items of units of other players. 
  if (owner != d->mOwner) {
-	kdDebug() << "BosonCommandFrame::slotSetConstruction(): we are not the owner" << endl;
+	kdDebug() << k_funcinfo << ": we are not the owner" << endl;
 	return;
  }
 
  const UnitProperties* prop = unit->unitProperties();
  if (!prop) {
-	kdError() << "slotSetConstruction(): NULL unitProperties" << endl;
+	kdError() << k_funcinfo << ": NULL unitProperties" << endl;
 	return;
  }
  if (!prop->canProduce()) {
@@ -272,7 +269,7 @@ void BosonCommandFrame::hideOrderButtons()
 void BosonCommandFrame::setOrderPixmap(unsigned int id, const QPixmap& p)
 {
  if (!d->mOrderButton[id]) {
-	kdError() << "cannot find order button " << id << endl;
+	kdError() << k_funcinfo << "cannot find order button " << id << endl;
 	return;
  }
  d->mOrderButton[id]->setPixmap(p);
@@ -283,7 +280,7 @@ void BosonCommandFrame::setOrderPixmap(unsigned int id, const QPixmap& p)
 void BosonCommandFrame::setOrderTooltip(unsigned int id, const QString& text)
 {
  if (!d->mOrderButton[id]) {
-	kdError() << "cannot find order button " << id << endl;
+	kdError() << k_funcinfo << "cannot find order button " << id << endl;
 	return;
  }
  QToolTip::remove(d->mOrderButton[id]);
@@ -301,19 +298,18 @@ void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* own
 void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << "BosonComandFrame::setOrderButton(): no owner" << endl;
+	kdError() << k_funcinfo << ": no owner" << endl;
 	return;
  }
  if (!owner->speciesTheme()) {
-	kdError() << "BosonCommandFrame::setOrderButton(): player has no "
-			<< " species theme" << endl;
+	kdError() << k_funcinfo << ": player has no species theme" << endl;
 	return;
  }
 
  QPixmap* small = owner->speciesTheme()->smallOverview(unitType);
  if (!small) {
-	kdError() << "BosonCommandFrame::setOrderButton(): cannot find small "
-			<< "overview for " << unitType << endl;
+	kdError() << k_funcinfo << ": cannot find small overview for " 
+			<< unitType << endl;
 	return;
  }
  setOrderPixmap(button, *small);
@@ -321,7 +317,8 @@ void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player
 
  const UnitProperties* prop = owner->speciesTheme()->unitProperties(unitType);
  if (!prop) {
-	kdError() << "No unit properties for " << unitType << endl;
+	kdError() << k_funcinfo << "No unit properties for " << unitType 
+			<< endl;
 	return;
  }
  setOrderTooltip(button, prop->name());
@@ -353,12 +350,12 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 	return;
  }
  if (!owner) {
-	kdError() << "NULL owner" << endl;
+	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << "NULL theme" << endl;
+	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return;
  }
  d->mOrderType = (OrderType)index;
@@ -376,8 +373,7 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 		setOrderButtons(theme->allFacilities(), owner);
 		break;
 	default:
-		kdError() << "BosonCommandFrame::slotEditorConstruction(): "
-				<< "Invalid index " << index << endl;
+		kdError() << k_funcinfo << "Invalid index " << index << endl;
 		return;
  }
 }
@@ -387,7 +383,7 @@ void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
  QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(fileName));
  d->mTiles = new BosonTiles(themePath);
  if (d->mTiles->isNull()) {
-	kdError() << "Could not load " << fileName << endl;
+	kdError() << k_funcinfo << "Could not load " << fileName << endl;
 	return;
  }
 }

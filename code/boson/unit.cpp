@@ -85,10 +85,10 @@ Unit::Unit(int type)
 
 Unit::~Unit()
 {
-// kdDebug() << "~Unit" << endl;
+// kdDebug() << k_funcinfo << endl;
  dataHandler()->clear();
  delete d;
-// kdDebug() << "~Unit done" << endl;
+// kdDebug() << k_funcinfo << " done" << endl;
 }
 
 const QString& Unit::name() const
@@ -235,7 +235,7 @@ const UnitProperties* Unit::unitProperties() const
 {
  SpeciesTheme* theme = speciesTheme();
  if (!theme) {
-	kdError() << "Unit::unitProperties(): NULL theme" << endl;
+	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return 0;
  }
  return theme->unitProperties(type());
@@ -244,7 +244,7 @@ const UnitProperties* Unit::unitProperties() const
 SpeciesTheme* Unit::speciesTheme() const
 {
  if (!owner()) {
-	kdWarning() << "Unit::speciesTheme(): NULL owner" << endl;
+	kdWarning() << k_funcinfo << ": NULL owner" << endl;
 	return 0;
  }
  return owner()->speciesTheme();

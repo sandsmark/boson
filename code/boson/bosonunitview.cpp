@@ -106,11 +106,11 @@ void BosonUnitView::setUnit(VisualUnit* unit)
 	return;
  }
  if (!unit->owner()) {
-	kdError() << "no owner" << endl;
+	kdError() << k_funcinfo << ": no owner" << endl;
 	return;
  }
  if (!unit->owner()->speciesTheme()) {
-	kdError() << "No speciesTheme" << endl;
+	kdError() << k_funcinfo << ": No speciesTheme" << endl;
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
@@ -123,7 +123,7 @@ void BosonUnitView::setUnit(VisualUnit* unit)
 
  const UnitProperties* prop = unit->unitProperties();
  if (!prop) {
-	kdError() << "NULL unit properties" << endl;
+	kdError() << k_funcinfo << ": NULL unit properties" << endl;
 	return;
  }
  if (prop->isMobile()) {
