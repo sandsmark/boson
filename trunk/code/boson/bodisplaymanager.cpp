@@ -143,7 +143,9 @@ BoDisplayManager::~BoDisplayManager()
 {
  kdDebug() << k_funcinfo << endl;
  d->mSelectionGroups.clear();
+ kdDebug() << k_funcinfo << "clearing display list" << endl;
  d->mDisplayList.clear();
+ kdDebug() << k_funcinfo << "clearing box list" << endl;
  d->mBoxList.clear();
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;

@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONCOMMANDFRAME_H
-#define BOSONCOMMANDFRAME_H
+#ifndef EDITORCOMMANDFRAME_H
+#define EDITORCOMMANDFRAME_H
 
 #include "bosoncommandframebase.h"
 
@@ -35,13 +35,13 @@ class KPlayer;
  * @short The frame where you can order units
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCommandFrame : public BosonCommandFrameBase
+class EditorCommandFrame : public BosonCommandFrameBase
 {
 	Q_OBJECT
 public:
 
-	BosonCommandFrame(QWidget* parent);
-	~BosonCommandFrame();
+	EditorCommandFrame(QWidget* parent);
+	~EditorCommandFrame();
 
 public slots:
 	virtual void slotSetButtonsPerRow(int b);
@@ -74,8 +74,8 @@ private:
 	void init();
 
 private:
-	class BosonCommandFramePrivate;
-	BosonCommandFramePrivate* d;
+	class EditorCommandFramePrivate;
+	EditorCommandFramePrivate* d;
 };
 
 #endif

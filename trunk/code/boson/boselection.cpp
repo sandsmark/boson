@@ -35,7 +35,8 @@ BoSelection::~BoSelection()
 
 void BoSelection::copy(BoSelection* selection)
 {
- clear();
+ // this function does not emit any signal!
+ clear(false);
  if (!selection) {
 	return;
  }
@@ -46,7 +47,7 @@ void BoSelection::copy(BoSelection* selection)
  }
 }
 
-void BoSelection::clear()
+void BoSelection::clear(bool emitSignal)
 {
  if (isEmpty()) {
 	return;
@@ -56,8 +57,9 @@ void BoSelection::clear()
 	remove(it.current());
  }
  mSelection.clear();
-
- emit signalSingleUnitSelected(0);
+ if (emitSignal) {
+	emit signalSelectionChanged(this);
+ }
 }
 
 void BoSelection::add(Unit* unit)
@@ -87,9 +89,9 @@ void BoSelection::selectUnit(Unit* unit)
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;
  }
- clear();
+ clear(false);
  add(unit);
- emit signalSingleUnitSelected(unit);
+ emit signalSelectionChanged(this);
 }
 
 void BoSelection::selectUnits(QPtrList<Unit> list)
@@ -101,7 +103,7 @@ void BoSelection::selectUnits(QPtrList<Unit> list)
 	selectUnit(list.first());
 	return;
  }
- clear();
+ clear(false);
  Player* p = 0;
  QPtrListIterator<Unit> it(list);
  while (it.current() && it.current()->owner()) {
@@ -114,15 +116,15 @@ void BoSelection::selectUnits(QPtrList<Unit> list)
 	
 	}
 	add(it.current());
-	emit signalSelectUnit(it.current());
 	++it;
  }
+ emit signalSelectionChanged(this);
 }
 
 void BoSelection::removeUnit(Unit* unit)
 {
  remove(unit);
- emit signalUnselectUnit(unit);
+ emit signalSelectionChanged(this);
 }
 
 void BoSelection::remove(Unit* unit)
@@ -227,6 +229,6 @@ void BoSelection::activate(bool on)
 		it.current()->unselect();
 		++it;
 	}
-	emit signalSingleUnitSelected(0);
+	emit signalSelectionChanged(this);
  }
 }

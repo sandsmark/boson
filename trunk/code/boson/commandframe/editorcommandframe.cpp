@@ -17,11 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosoncommandframe.h"
-#include "bosoncommandframe.moc"
+#include "editorcommandframe.h"
+#include "editorcommandframe.moc"
 
 #include "bosonorderwidget.h"
-#include "boactionswidget.h"
 #include "../unit.h"
 #include "../unitplugins.h"
 #include "../player.h"
@@ -38,163 +37,40 @@
 #include <qlabel.h>
 #include <qvbox.h>
 
-class BoHarvesterWidget : public BoUnitDisplayBase
+class EditorCommandFrame::EditorCommandFramePrivate
 {
 public:
-	BoHarvesterWidget(BosonCommandFrame* cmdFrame, QWidget* parent) : BoUnitDisplayBase(cmdFrame, parent)
-	{
-		QHBoxLayout* layout = new QHBoxLayout(this);
-
-		mMinerType = new QLabel(this);
-		layout->addWidget(mMinerType);
-		
-		layout->addStretch(1);
-
-		mProgress = new KGameProgress(this);
-		layout->addWidget(mProgress);
-	}
-
-	~BoHarvesterWidget()
+	EditorCommandFramePrivate()
 	{
 	}
 
-protected:
-	virtual bool display(Unit* unit)
-	{
-		
-		HarvesterPlugin* miner = (HarvesterPlugin*)unit->plugin(UnitPlugin::Harvester);
-		if (miner) {
-			setMiner(miner);
-			return true;
-		}
-		return false;
-	}
-
-	void setMiner(HarvesterPlugin* h)
-	{
-		if (!h || (!h->canMineMinerals() && !h->canMineOil())) {
-			return;
-		}
-		if (h->canMineMinerals()) {
-			mMinerType->setText(i18n("Mineral Filling:"));
-		} else {
-			mMinerType->setText(i18n("Oil Filling:"));
-		}
-
-		unsigned int max = h->maxResources();
-		unsigned int r = h->resourcesMined();
-		double p = (double)(r * 100) / (double)max;
-		mProgress->setValue((int)p);
-	}
-
-	virtual bool useUpdateTimer()
-	{
-		Unit* u = 0;
-		if (!u) {
-			return false;
-		}
-		if (u->currentPluginType() == UnitPlugin::Harvester) {
-			return true;
-		}
-		return false;
-	}
-
-private:
-	QLabel* mMinerType;
-	KGameProgress* mProgress;
 };
 
-class BoConstructionProgress : public BoUnitDisplayBase
-{
-public:
-	BoConstructionProgress(BosonCommandFrame* cmdFrame, QWidget* parent) : BoUnitDisplayBase(cmdFrame, parent)
-	{
-		QHBoxLayout* layout = new QHBoxLayout(this);
-		QLabel* label = new QLabel(i18n("Construction:"), this);
-		layout->addWidget(label);
-
-		layout->addStretch(1);
-
-		mProgress = new KGameProgress(this);
-		layout->addWidget(mProgress);
-	}
-
-	~BoConstructionProgress()
-	{
-	}
-	void setValue(int v)
-	{
-		mProgress->setValue(v);
-	}
-protected:
-	virtual bool display(Unit* unit)
-	{
-		if (!unit->isFacility()) {
-			return false;
-		}
-		Facility* fac = (Facility*)unit;
-		if (fac->isConstructionComplete()) {
-			return false;
-		}
-		setValue((int)fac->constructionProgress());
-		return true;
-	}
-
-private:
-	KGameProgress* mProgress;
-};
-
-
-class BosonCommandFrame::BosonCommandFramePrivate
-{
-public:
-	BosonCommandFramePrivate()
-	{
-		mConstructionProgress = 0;
-		mMinerWidget = 0;
-		mUnitActions = 0;
-	}
-
-	BoConstructionProgress* mConstructionProgress;
-	BoHarvesterWidget* mMinerWidget;
-	BoActionsWidget* mUnitActions;
-};
-
-BosonCommandFrame::BosonCommandFrame(QWidget* parent) : BosonCommandFrameBase(parent)
+EditorCommandFrame::EditorCommandFrame(QWidget* parent) : BosonCommandFrameBase(parent)
 {
  init();
-
 }
 
-void BosonCommandFrame::init()
+void EditorCommandFrame::init()
 {
- d = new BosonCommandFramePrivate;
-
-// the construction progress
- d->mConstructionProgress = new BoConstructionProgress(this, unitDisplayBox());
-
-// the miner display (minerals/oil)
- d->mMinerWidget = new BoHarvesterWidget(this, unitDisplayBox());
-
-
-// this should be at the end of unitDisplayBox():
- d->mUnitActions = new BoActionsWidget(unitDisplayBox());
+ d = new EditorCommandFramePrivate;
+ orderWidget()->initEditor();
 
 // the order buttons
+/*
  connect(orderWidget(), SIGNAL(signalProduceUnit(unsigned long int)),
 		this, SLOT(slotProduceUnit(unsigned long int)));
  connect(orderWidget(), SIGNAL(signalStopProduction(unsigned long int)),
 		this, SLOT(slotStopProduction(unsigned long int)));
- connect(d->mUnitActions, SIGNAL(signalAction(int)),
-		this, SIGNAL(signalAction(int)));
+*/
 }
 
-BosonCommandFrame::~BosonCommandFrame()
+EditorCommandFrame::~EditorCommandFrame()
 {
  delete d;
 }
 
-void BosonCommandFrame::setAction(Unit* unit)
+void EditorCommandFrame::setAction(Unit* unit)
 {
  kdDebug() << k_funcinfo << endl;
  BosonCommandFrameBase::setAction(unit);
@@ -206,7 +82,7 @@ void BosonCommandFrame::setAction(Unit* unit)
 	return;
  }
  Player* owner = unit->owner();
-
+/*
  if (d->mConstructionProgress->showUnit(unit)) {
 	startStopUpdateTimer();
 	return;
@@ -243,14 +119,16 @@ void BosonCommandFrame::setAction(Unit* unit)
  }
  d->mMinerWidget->showUnit(selectedUnit());
  startStopUpdateTimer();
+ */
 }
 
-void BosonCommandFrame::slotUpdate()
+void EditorCommandFrame::slotUpdate()
 {
  BosonCommandFrameBase::slotUpdate();
  if (!selectedUnit()) {
 	return;
  }
+ /*
  if (!d->mConstructionProgress->isHidden()) {
 	if (d->mConstructionProgress->showUnit(selectedUnit())) {
 		if (!selectedUnit()->isFacility()) {
@@ -270,9 +148,10 @@ void BosonCommandFrame::slotUpdate()
 		slotUpdateProduction(selectedUnit());
 	}
  }
+ */
 }
 
-bool BosonCommandFrame::checkUpdateTimer() const
+bool EditorCommandFrame::checkUpdateTimer() const
 {
  if (!selectedUnit()) {
 	return false;
@@ -280,27 +159,15 @@ bool BosonCommandFrame::checkUpdateTimer() const
  if (BosonCommandFrameBase::checkUpdateTimer()) {
 	return true;
  }
- if (!orderWidget()->isHidden()) {
-	ProductionPlugin* production = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
-	if (production && production->hasProduction()) {
-		return true;
-	}
- }
  return false;
 }
 
-void BosonCommandFrame::showUnitActions(Unit* unit)
+void EditorCommandFrame::showUnitActions(Unit* unit)
 {
- if (!unit) {
-	d->mUnitActions->hide();
- } else {
-	d->mUnitActions->showUnitActions(unit);
-	d->mUnitActions->show();
- }
 }
 
-void BosonCommandFrame::slotSetButtonsPerRow(int b)
+void EditorCommandFrame::slotSetButtonsPerRow(int b)
 {
  BosonCommandFrameBase::slotSetButtonsPerRow(b);
- d->mUnitActions->setButtonsPerRow(b);
+// d->mUnitActions->setButtonsPerRow(b);
 }

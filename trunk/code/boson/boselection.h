@@ -42,8 +42,11 @@ public:
 
 	/**
 	 * Clear the selection and unselect all units.
+	 * @param emitSignal Also emit @ref signalSelectionChanged if TRUE,
+	 * otherwise don't emit it. Used internally, since the selection is
+	 * cleared before it is changed.
 	 **/
-	void clear();
+	void clear(bool emitSignal = true);
 
 	/**
 	 * Select a list of units
@@ -123,31 +126,9 @@ protected:
 	
 signals:
 	/**
-	 * Emitted when a single unit (i.e. @ref count is 1) is selected. This
-	 * may also happen when all except one units of a selection are
-	 * destroyed.
-	 *
-	 * The game should display the image and further information about this
-	 * unit and also order buttons (e.g. productions) which are suitable for
-	 * the unit.
+	 * @param selection this
 	 **/
-	void signalSingleUnitSelected(Unit* unit);
-
-	/**
-	 * Emitted when a unit is removed from the selection. See @ref
-	 * removeUnit. Note that this is <em>not</em> emitted when the list is
-	 * cleared (see @ref clear)
-	 **/
-	void signalUnselectUnit(Unit* unit);
-
-	/**
-	 * Emitted when a new unit is added to the selection. This is done for
-	 * every unit in a list.
-	 *
-	 * Note that this is not emitted when only a single unit is selected.
-	 * See also @ref signalSingleUnitSelected
-	 **/
-	void signalSelectUnit(Unit* unit);
+	void signalSelectionChanged(BoSelection* selection);
 
 private:
 	bool mIsActivated;

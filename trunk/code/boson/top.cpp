@@ -33,7 +33,6 @@
 #include "bosonplayfield.h"
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
-#include "bosonmap.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
 #include "bodisplaymanager.h"
@@ -50,7 +49,6 @@
 #include <kdebug.h>
 #include <kkeydialog.h>
 #include <kmenubar.h>
-#include <kpopupmenu.h>
 #include <kmessagebox.h>
 #include <kconfig.h>
 #include <kstandarddirs.h>
@@ -60,11 +58,8 @@
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
-#include <qptrdict.h>
-#include <qobjectlist.h>
 #include <qfile.h>
 
-#define ID_DEBUG_KILLPLAYER 0
 #define ID_WIDGETSTACK_WELCOME 1
 #define ID_WIDGETSTACK_NEWGAME 2
 #define ID_WIDGETSTACK_STARTEDITOR 3
@@ -94,14 +89,7 @@ public:
 
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionMenubar;
-	KToggleAction* mActionChat;
-	KToggleAction* mActionCmdFrame;
-	KActionMenu* mActionDebugPlayers;
-	KSelectAction* mActionZoom;
 	KToggleAction* mActionFullScreen;
-	KActionCollection* mGameActions;
-
-	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
 	QTimer mFpstimer;
 
@@ -141,7 +129,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
  initMusic();
 
- initActions();
+ initKActions();
  initStatusBar();
 
  // "re" is not entirely correct ;)
@@ -161,7 +149,6 @@ TopWidget::~TopWidget()
  kdDebug() << "endGame()" << endl;
  endGame();
  kdDebug() << "endGame() done" << endl;
- d->mPlayers.clear();
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
 }
@@ -187,33 +174,19 @@ void TopWidget::readProperties(KConfig *config)
  }
 }
 
-void TopWidget::initActions()
+void TopWidget::initKActions()
 {
  // note: mBoson and similar are *not* yet constructed!
  // Main actions: Game start/end and quit
- // FIXME: d->mGameActions actions should go into BosonWidget directly!
- d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
 
  //FIXME: slotNewGame() is broken - endGame() is enough for now.
-// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
- (void)KStdGameAction::end(this, SLOT(slotEndGame()), d->mGameActions);
- (void)KStdGameAction::save(this, SLOT(slotSaveGame()), d->mGameActions);
-// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions); // FIXME: NO! mBoson is not yet constructed!
- (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
+// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); 
+// (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
  (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
-// (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), d->mGameActions);
  d->mActionMenubar = KStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection());
- d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), d->mGameActions); // TODO: we can use the statusbar in the welcome widget, too!
-
- // Dockwidgets show/hide
- d->mActionChat = new KToggleAction(i18n("Show &Chat"),
-		KShortcut(Qt::CTRL+Qt::Key_C), this, SLOT(slotToggleChat()),
-		d->mGameActions, "options_show_chat");
- d->mActionCmdFrame = new KToggleAction(i18n("Show C&ommandframe"),
-		KShortcut(Qt::CTRL+Qt::Key_F), this, SLOT(slotToggleCmdFrame()),
-		d->mGameActions, "options_show_cmdframe");
+ d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
 
  // Sound & Music
  KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
@@ -223,48 +196,12 @@ void TopWidget::initActions()
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
  music->setChecked(boMusic->music());
 
- // Debug - no i18n!
- (void)new KAction("Debug", KShortcut(), this,
-		SLOT(slotDebug()), d->mGameActions, "debug_kgame");
- (void)new KAction("Profiling", KShortcut(), this,
-		SLOT(slotProfiling()), d->mGameActions, "debug_profiling");
- (void)new KAction("Unfog", KShortcut(), this,
-		SLOT(slotUnfogAll()), d->mGameActions, "debug_unfog");
- KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), d->mGameActions, "debug_mode");
- connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
- QStringList l;
- l.append("Normal");
- l.append("Debug Selection");
- debugMode->setItems(l);
- debugMode->setCurrentItem(0);
- d->mActionDebugPlayers = new KActionMenu("Players", d->mGameActions, "debug_players");
-
- // Zoom
- d->mActionZoom = new KSelectAction(i18n("&Zoom"), KShortcut(), d->mGameActions, "options_zoom");
- connect(d->mActionZoom, SIGNAL(activated(int)), this, SLOT(slotZoom(int)));
- QStringList items;
- items.append(QString::number(50));
- items.append(QString::number(100));
- items.append(QString::number(150));
- items.append(i18n("Free Zoom"));
- d->mActionZoom->setItems(items);
-
  // Display
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
 
-#if KDE_VERSION >= 310
- actionCollection()->addDocCollection(d->mGameActions);
-#else
- KActionPtrList list = d->mGameActions->actions();
- KActionPtrList::Iterator it = list.begin();
- for (; it != list.end(); ++it) {
-	actionCollection()->insert(*it);
- }
-#endif
-
- createGUI("bosonui.rc", false);
+ createGUI("topui.rc", false);
 
  hideMenubar();
 }
@@ -292,7 +229,8 @@ void TopWidget::initBoson()
 
 void TopWidget::initPlayer()
 {
- mPlayer = new Player;
+ Player* p = new Player;
+ changeLocalPlayer(p);
 }
 
 void TopWidget::initPlayField()
@@ -334,29 +272,6 @@ void TopWidget::enableGameActions(bool enable)
 {
  if(enable && ! d->mBosonWidget) {
 	kdWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
- }
- KActionPtrList list = d->mGameActions->actions();
- KActionPtrList::Iterator it;
- for (it = list.begin(); it != list.end(); ++it) {
-	(*it)->setEnabled(enable);
- }
-}
-
-void TopWidget::initDebugPlayersMenu()
-{
- QPtrListIterator<KPlayer> it(*(mBoson->playerList()));
- while (it.current()) {
-	// note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
-	KActionMenu* menu = new KActionMenu(it.current()->name(), this, QString("debug_players_%1").arg(it.current()->name()));
-
-	connect(menu->popupMenu(), SIGNAL(activated(int)),
-			this, SLOT(slotDebugPlayer(int)));
-	menu->popupMenu()->insertItem("Kill Player", ID_DEBUG_KILLPLAYER);
-
-	d->mActionDebugPlayers->insert(menu);
-	d->mPlayers.insert(menu, it.current());
-
- ++it;
  }
 }
 
@@ -436,15 +351,22 @@ void TopWidget::initBosonWidget(bool loading)
 	return;
  }
  if (game()->gameMode()) {
-	d->mBosonWidget = new BosonWidget(this, mWs, loading);
+	BosonWidget* w = new BosonWidget(this, mWs, loading);
+	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
+	connect(w, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
+	d->mBosonWidget = w;
  } else {
-	d->mBosonWidget = new EditorWidget(this, mWs, loading);
+	EditorWidget* w = new EditorWidget(this, mWs, loading);
+	d->mBosonWidget = w;
  }
+ d->mBosonWidget->setLocalPlayer(player());
  d->mBosonWidget->init(); // this depends on several virtual methods and therefore can't be called in the c'tor
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
  mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
 
+ connect(d->mBosonWidget, SIGNAL(signalEndGame()), this, SLOT(slotEndGame()));
+ connect(d->mBosonWidget, SIGNAL(signalQuit()), this, SLOT(slotGameOver()));
  connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
  connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
  connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
@@ -518,6 +440,20 @@ void TopWidget::slotStartGame()
  mLoading = false;
  showLoadingWidget();
  loadGameData1();
+}
+
+void TopWidget::slotSaveGame()
+{
+ QString file = KFileDialog::getSaveFileName(QString::null, "*.bsg|Boson SaveGame", this);
+ if(file == QString::null) {
+	return;
+ }
+
+ QFile f(file);
+ f.open(IO_WriteOnly);
+ QDataStream s(&f);
+ mBoson->save(s, true);
+ f.close();
 }
 
 void TopWidget::slotLoadGame()
@@ -612,6 +548,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 	//  (It's not known yet)
 	delete mPlayer;
 	mPlayer = 0;
+	changeLocalPlayer(0);
 
 	// Open file and QDataStream on it
 	QFile f(mLoadingFileName);
@@ -705,7 +642,7 @@ void TopWidget::loadGameData3() // FIXME rename!
  //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
  //  it now
  if(mLoading) {
-	mPlayer = mBoson->localPlayer();
+	changeLocalPlayer(mBoson->localPlayer());
 	d->mBosonWidget->initPlayer();
  }
 
@@ -763,13 +700,8 @@ void TopWidget::loadGameData3() // FIXME rename!
  statusBar()->show();
  d->mBosonWidget->initGameMode();
  enableGameActions(true);
- initDebugPlayersMenu();
- checkDockStatus();
  d->mFpstimer.start(1000);
  connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
-
- connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
- connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
 
  // FIXME: why isn't this where d->mBosonWidget new'ed ???
  if (game()->gameMode()) {
@@ -864,34 +796,6 @@ void TopWidget::slotToggleMusic()
  boConfig->setMusic(boMusic->music());
 }
 
-void TopWidget::slotToggleChat()
-{
- d->mBosonWidget->toggleChatVisible();
- checkDockStatus();
-}
-
-void TopWidget::slotToggleCmdFrame()
-{
- d->mBosonWidget->toggleCmdFrameVisible();
- checkDockStatus();
-}
-
-void TopWidget::checkDockStatus()
-{
- d->mActionChat->setChecked(d->mBosonWidget->isChatVisible());
- d->mActionCmdFrame->setChecked(d->mBosonWidget->isCmdFrameVisible());
-}
-
-void TopWidget::slotChatDockHidden()
-{
- d->mActionChat->setChecked(false);
-}
-
-void TopWidget::slotCmdFrameDockHidden()
-{
- d->mActionCmdFrame->setChecked(false);
-}
-
 void TopWidget::slotConfigureKeys()
 {
  KKeyDialog dlg(true, this);
@@ -904,19 +808,6 @@ void TopWidget::slotConfigureKeys()
  dlg.configure(true);
 }
 
-void TopWidget::slotDebugMode(int index)
-{
- boConfig->setDebugMode((BosonConfig::DebugMode)index);
-}
-
-void TopWidget::slotZoom(int index)
-{
-kdDebug() << "zoom index=" << index << endl;
- float percent = d->mActionZoom->items()[index].toFloat(); // bahh!!! 
- float factor = (float)percent / 100;
- d->mBosonWidget->setZoomFactor(factor);
-}
-
 void TopWidget::slotToggleFullScreen()
 {
  if (d->mActionFullScreen->isChecked()) {
@@ -926,21 +817,11 @@ void TopWidget::slotToggleFullScreen()
  }
 }
 
-void TopWidget::slotEndGame()
-{
- int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
-		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
- if(answer == KMessageBox::No) {
-	return;
- }
- slotGameOver();
-}
-
 void TopWidget::endGame()
 {
  kdDebug() << k_funcinfo << endl;
  if (d->mBosonWidget) {
-	d->mBosonWidget->slotEndGame();
+	d->mBosonWidget->quitGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
 	d->mFpstimer.stop();
 	disconnect(&d->mFpstimer, 0, 0, 0);
@@ -976,36 +857,6 @@ void TopWidget::slotGameOver()
 {
  endGame();
  reinitGame();
-}
-
-void TopWidget::slotGamePreferences()
-{
-	kdWarning() << k_funcinfo << "obsolete" << endl;
-// d->mBosonWidget->slotGamePreferences();
-}
-
-void TopWidget::slotDebug()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotDebug();
-}
-
-void TopWidget::slotProfiling()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotProfiling();
-}
-
-void TopWidget::slotUnfogAll()
-{
- if (!d->mBosonWidget) {
-	return;
- }
- d->mBosonWidget->slotUnfogAll();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
@@ -1076,34 +927,6 @@ void TopWidget::slotToggleMenubar()
 	menuBar()->hide();
  }
 */
-}
-
-void TopWidget::slotDebugPlayer(int index)
-{
- QPtrDictIterator<KPlayer> it(d->mPlayers);
- KPopupMenu* menu = (KPopupMenu*)sender();
- KPlayer* p = 0;
- while (it.current() && !p) {
-	KActionMenu* m = (KActionMenu*)it.currentKey();
-	if (m->popupMenu() == menu) {
-		p = it.current();
-	}
-	++it;
- }
-
- if (!p) {
-	kdError() << k_funcinfo << "player not found" << endl;
-	return;
- }
-
- switch (index) {
-	case ID_DEBUG_KILLPLAYER:
-		d->mBosonWidget->debugKillPlayer(p);
-		break;
-	default:
-		kdError() << k_funcinfo << "unknown index " << index << endl;
-		break;
- }
 }
 
 void TopWidget::loadGameDockConfig()
@@ -1194,7 +1017,7 @@ bool TopWidget::queryExit()
  switch (mWs->id(w)) {
 	case ID_WIDGETSTACK_BOSONWIDGET:
 		d->mBosonWidget->saveConfig();
-		d->mBosonWidget->slotEndGame();
+		d->mBosonWidget->quitGame();
 		saveGameDockConfig();
 		return true;
 	case ID_WIDGETSTACK_NEWGAME:
@@ -1251,20 +1074,6 @@ void TopWidget::raiseWidget(int id)
 		break;
  }
  mWs->raiseWidget(id);
-}
-
-void TopWidget::slotSaveGame()
-{
- QString file = KFileDialog::getSaveFileName(QString::null, "*.bsg|Boson SaveGame", this);
- if(file == QString::null) {
-	return;
- }
-
- QFile f(file);
- f.open(IO_WriteOnly);
- QDataStream s(&f);
- mBoson->save(s, true);
- f.close();
 }
 
 void TopWidget::slotUpdateFPS()
@@ -1341,5 +1150,25 @@ void TopWidget::showHideMenubar()
 		kdDebug() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
+}
+
+
+
+void TopWidget::changeLocalPlayer(Player* p)
+{
+ mPlayer = p;
+ if (d->mBosonWidget) {
+	d->mBosonWidget->setLocalPlayer(p);
+ }
+}
+
+void TopWidget::slotEndGame()
+{
+ int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
+		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
+ if(answer == KMessageBox::No) {
+	return;
+ }
+ slotGameOver();
 }
 

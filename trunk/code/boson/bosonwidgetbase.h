@@ -29,7 +29,7 @@ class KActionCollection;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrame;
+class BosonCommandFrameBase;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -58,7 +58,7 @@ class BosonPlayField;
  * connected by BosonWidgetBase to the necessary slots - probably mainly to @ref
  * Boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
- **/
+ */
 class BosonWidgetBase : public QWidget, virtual public KXMLGUIClient
 {
 	Q_OBJECT
@@ -73,13 +73,15 @@ public:
 	 **/
 	virtual ~BosonWidgetBase();
 
+	void setLocalPlayer(Player* p) { mLocalPlayer = p; }
+
 	TopWidget* top() const { return mTop; }
 	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Boson* game() const;
 	BosonPlayField* playField() const;
-	Player* player() const;
+	Player* localPlayer() const { return mLocalPlayer; }
 
 	void initGameMode();
 
@@ -96,8 +98,6 @@ public:
 
 	bool isCmdFrameVisible() const;
 	bool isChatVisible() const;
-	void toggleCmdFrameVisible();
-	void toggleChatVisible();
 	void setChatVisible(bool visible);
 	void setCmdFrameVisible(bool visible);
 
@@ -113,12 +113,10 @@ public:
 
 	void init();
 	virtual void initPlayer();
+	virtual void quitGame();
 
 public slots:
-	void slotDebug();
-	void slotProfiling();
 //	void slotPreferences();
-	void slotEndGame();
 
 	void slotToggleSound();
 	void slotToggleMusic();
@@ -162,12 +160,29 @@ signals:
 
 	void signalMoveCommandFrame(int);
 
-	void signalChatDockHidden();
-	void signalCmdFrameDockHidden();
-
 	void signalGameOver();
 
+	/**
+	 * Emitted when the user wants to quit the game and has confirmed the
+	 * "are you sure" messagebox.
+	 **/
+	void signalQuit();
+	void signalEndGame();
+
+	void signalCheckDockStatus();
+
 protected slots:
+	void slotChatDockHidden();
+	void slotCmdFrameDockHidden();
+
+	void slotDebug();
+	void slotDebugMode(int);
+	void slotDebugPlayer(int);
+	void slotProfiling();
+	void slotZoom(int);
+	void slotToggleCmdFrameVisible();
+	void slotToggleChatVisible();
+
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
 
@@ -197,6 +212,7 @@ protected slots:
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
 protected:
+	void checkDockStatus();
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
 	void initBigDisplay(BosonBigDisplayBase*);
@@ -205,10 +221,11 @@ protected:
 
 	BosonCursor* cursor() const { return mCursor; }
 
-	virtual BosonCommandFrame* createCommandFrame(QWidget* parent) = 0;
+	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent) = 0;
 
 	virtual void initKActions();
 	virtual void initConnections();
+	virtual void setBosonXMLFile();
 
 private:
 	void initChat();
@@ -219,10 +236,13 @@ private:
 	void initCommandFrame();
 	void initLayout();
 
+	void initDebugPlayersMenu();
 
 private:
 	class BosonWidgetBasePrivate;
 	BosonWidgetBasePrivate* d;
+
+	Player* mLocalPlayer;
 
 	BosonCursor* mCursor;
 

@@ -21,7 +21,7 @@
 
 #include "bosonmessage.h"
 #include "unitbase.h"
-#include "commandframe/bosoncommandframe.h"
+#include "commandframe/bosoncommandframebase.h"
 
 #include <kdebug.h>
 #include <kgame/kplayer.h>
@@ -39,7 +39,7 @@ CommandInput::~CommandInput()
 {
 }
 
-void CommandInput::setCommandFrame(BosonCommandFrame* f)
+void CommandInput::setCommandFrame(BosonCommandFrameBase* f)
 {
  connect(f, SIGNAL(signalProduceUnit(unsigned long int, UnitBase*, KPlayer*)),
 		this, SLOT(slotProduceUnit(unsigned long int, UnitBase*, KPlayer*)));
