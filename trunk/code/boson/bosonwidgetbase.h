@@ -272,6 +272,7 @@ protected slots:
 	void slotSetDebugRenderCounts(bool);
 	void slotSetDebugBoundingBoxes(bool);
 	void slotSetDebugFPS(bool);
+	void slotSetShowResources(bool show);
 
 protected:
 	void setLocalPlayerRecursively(Player* p);
