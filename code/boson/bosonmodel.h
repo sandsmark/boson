@@ -123,7 +123,7 @@ public:
 	/**
 	 * @param lod See @ref BoMesh::renderMesh
 	 **/
-	void renderFrame(const QColor* teamColor, unsigned int lod = 0);
+	void renderFrame(const QColor* teamColor, unsigned int lod = 0, int mode = GL_RENDER);
 
 	void mergeMeshes();
 	void sortByDepth();
