@@ -91,8 +91,8 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 	asked.x = x();
 	asked.y = y();
-	asked.dir = direction;
-	
+
+	/*
 	switch(state){
 		default:
 			logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
@@ -112,28 +112,14 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 			vp2 = VECT_PRODUCT( asked.dir);
 			//printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
 			if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
-				/**
-				 * different sign : this is the end of TURNING, go to MOVING
-				 */
+				 // different sign : this is the end of TURNING, go to MOVING
+
 				asked.dir =   (abs(vp1) > abs(vp2))? asked.dir:direction; // choose the more accurate
 				state = MUS_MOVING;
 				//puts("going to MUS_MOVING");
 			} else if (asked.dir != direction) {
 				wstate = asked;
 				return true;
-				/*
-			       	if (checkMove(asked) ) {
-					wstate = asked;
-					return true;
-				}
-				asked.dir += 6; // XXX big hack
-				asked.dir %= 12;
-
-			       	if (checkMove(asked) ) {
-					wstate = asked;
-					return true;
-				}
-				*/
 			} else {
 				logf(LOG_ERROR, "moving algorithm error #1");
 				return false;
@@ -153,7 +139,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 			if (target && SQ(range) > SQ(ldx) + SQ(ldy) ) // we are near enough to shoot at the target
 				return false;
 
-		/* choose direction */
+		// choose direction 
 			vp1 = VECT_PRODUCT(getLeft(2));
 			vp2 = VECT_PRODUCT(direction);
 			vp3 = VECT_PRODUCT(getRight(2));
@@ -161,7 +147,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 			if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
 				asked.dir =  ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
-		/* choose dx/dy */
+		// choose dx/dy 
 			if ( ( SQ(ldx) + SQ(ldy) ) < SQ(mobileProp[type].speed) ) { ///orzel should be square
 				setXVelocity( ldx); setYVelocity( ldy);
 				}
@@ -170,12 +156,12 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 			wstate = asked;
 
-		/* try and try again ... */
+		// try and try again ... 
 			asked_state = MUS_MOVING;
 			if (checkMove( asked)) return true;
 
 			if ( fabs(xVelocity() ) > fabs(yVelocity() ) )  {
-				/* we are going mainly along x axis, so try that first*/
+				// we are going mainly along x axis, so try that first
 				wstate.y = y();
 				if (checkMove(wstate)) return true;
 				wstate = asked;
@@ -185,7 +171,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 				wstate = asked;
 
 			} else {
-				/* we are going mainly along y axis, so try that first*/
+				// we are going mainly along y axis, so try that first
 				wstate.x = x();
 				if (checkMove(wstate)) return true;
 				wstate = asked;
@@ -194,7 +180,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 				if (checkMove(wstate)) return true;
 			}
 
-			/* failed : can't move any more */
+			// failed : can't move any more
 			asked_state = state = MUS_NONE;
 //			logf(LOG_INFO, "ckeckMove failed : mobile[%p] will try later", this);
 			state = MUS_MOVING_WAIT;
@@ -205,6 +191,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 		}
 
 	logf(LOG_ERROR, "unhandled state in getWantedMove()");
+	*/
 	return false;
 }
 
@@ -311,7 +298,6 @@ void playerMobUnit::getWantedAction()
 	if (getWantedMove(ns)) {
 		data.move.newx		= ns.x;
 		data.move.newy		= ns.y;
-		data.move.direction	= ns.dir;
 		data.move.key		= key;
 		sendMsg(buffer, MSG_MOBILE_MOVE_R, MSG(data.move) );
 	}
@@ -362,10 +348,8 @@ void playerMobUnit::doMoveTo(state_t ns)
 	int dx = ns.x - x();
 	int dy = ns.y - y();
 
-	move(ns.x, ns.y);
+	move(BO_TILE_SIZE*ns.x, BO_TILE_SIZE*ns.y);
 	emit sig_moveTo(ns.x, ns.y);
-
-	turnTo(ns.dir);
 
 
 	if (sp_up) sp_up->moveBy(dx,dy);
@@ -390,8 +374,6 @@ void playerMobUnit::s_moveTo(state_t ns)
 
 	if (ns.x!=asked.x || ns.y!=asked.y)
 		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected dx,dy");
-	if (ns.dir != asked.dir)
-		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected direction");
 
 	doMoveTo(ns);
 

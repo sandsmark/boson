@@ -185,7 +185,6 @@ void bosonCanvas::move(moveMsg_t &msg)
 
 	ns.x = msg.newx;
 	ns.y = msg.newy;
-	ns.dir = msg.direction;
 	m->s_moveTo(ns);
 }
 
