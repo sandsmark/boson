@@ -30,6 +30,7 @@
 #include "../bosonplayfield.h"
 #include "../bpfdescription.h"
 #include "../bosonscenario.h"
+#include "../bosonwidgets/bosonplayfieldview.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
@@ -38,7 +39,6 @@
 #include <kgame/kgamechat.h>
 #include <ksimpleconfig.h>
 #include <kmessagebox.h>
-#include <klistview.h>
 #include <klistbox.h>
 #include <ktextbrowser.h>
 #include <kcombobox.h> // can we use qcombobox instead?
