@@ -52,11 +52,9 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Status");
-draw_bigbox_text("Boson is currently still under heavy development.<br><br>
-  We're heading for release of version 0.8, which will probably be released
-  in late March.<br><br>");
+draw_bigbox_text("Boson is currently still under heavy development.<br><br>");
 
-draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
+/*draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
@@ -108,7 +106,7 @@ draw_bigbox_text("This is a list of features that we consider as
   
   
   </blockquote>
-  ");
+  ");*/
 draw_bigbox_end();
 main_area_end();
 main_table_end();
