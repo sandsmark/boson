@@ -136,9 +136,10 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
- boProfiling->start(BosonProfiling::SlotAdvance);
+ boProfiling->advance(true, advanceCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
+ boProfiling->advanceFunction(true);
  if (advanceFlag) {
 	// note: the advance methods must not change the advanceFunction()s
 	// here!
@@ -170,12 +171,18 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		++animIt;
 	}
  }
+ boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
- deleteUnusedShots();
+ boProfiling->advanceDeleteUnusedShots(true);
+ deleteUnusedShots(); //AB: do we *have* to do this in every advance call???
+ boProfiling->advanceDeleteUnusedShots(false);
 
+ boProfiling->advanceParticles(true);
  updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
+ boProfiling->advanceParticles(false);
 
+ boProfiling->advanceMaximalAdvanceCount(true);
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
 	boDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
 	// there are 2 different timers for deletion of canvas items.
@@ -189,7 +196,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	QPtrList<Unit> deleteList;
 	while (deletionIt.current()) {
 		deletionIt.current()->increaseDeletionTimer();
-		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) { 
+		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
 			deleteList.append(deletionIt.current());
 		}
 		++deletionIt;
@@ -202,7 +209,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		delete u;
 	}
  }
- boProfiling->stop(BosonProfiling::SlotAdvance);
+ boProfiling->advanceMaximalAdvanceCount(false);
+ boProfiling->advance(false, advanceCount);
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const

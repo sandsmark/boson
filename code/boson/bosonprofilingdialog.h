@@ -40,16 +40,19 @@ public:
 protected:
 	void initLoadUnitPage();
 	void initRenderPage();
+	void initSlotAdvancePage();
 	void initEventsPage();
 	void initFilesPage();
 
 	void reset();
 	void resetLoadUnitPage();
 	void resetRenderPage();
+	void resetSlotAdvancePage();
 	void resetEventsPage();
 	void resetFilesPage();
 
 	void initRenderItem(QListViewItem* item, const QString& type, long int time, long int function);
+	void initSlotAdvanceItem(QListViewItem* item, unsigned int advanceCount, const QString& type, long int time, long int function);
 	QString profilingName(int profilingEvent) const;
 
 protected slots:
