@@ -936,6 +936,7 @@ void BosonNewGameWidget::slotConnectedToServer()
 		mPlayers->setSelected((QListBoxItem*)it.currentKey(), true);
 		break;
 	}
+	++it;
  }
  mPlayers->ensureCurrentVisible();
 }
