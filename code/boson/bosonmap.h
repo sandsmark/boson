@@ -123,6 +123,8 @@ public:
 
 	void changeCell(int x, int y, int groundType, unsigned char b);
 
+	static QString mapFileName(const QString& mapIdentifier);
+
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
 

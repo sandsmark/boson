@@ -101,7 +101,7 @@ public:
 	/**
 	 * @return The name of the species (NOT i18n'ed!) - currently "human"
 	 **/
-	const QString& species() const;
+//	const QString& species() const;
 
 	/**
 	 * @return the path to the species theme (ending with
@@ -143,6 +143,8 @@ public:
 	 * @return The directory of the default species ("human")
 	 **/
 	static QString defaultSpecies();
+
+	static QString speciesDirectory(const QString& identifier);
 	
 
 protected:

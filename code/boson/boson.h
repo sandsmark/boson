@@ -72,6 +72,16 @@ signals:
 
 	void signalInitMap(const QByteArray&);
 
+	/**
+	 * Emitted when a new map in the new game dialog is selected
+	 **/
+	void signalMapChanged(const QString& mapIdentifier);
+
+	/**
+	 * Emitted when a new scenario in the new game dialog is selected
+	 **/
+	void signalScenarioChanged(const QString& scenarioIdentifier);
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

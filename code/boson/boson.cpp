@@ -248,6 +248,36 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::IdStartScenario:
 		emit signalStartScenario();
 		break;
+	case BosonMessage::ChangeSpecies:
+	{
+		Q_UINT32 id;
+		QString species;
+		QRgb color;
+		stream >> id;
+		stream >> species;
+		stream >> color;
+		Player* p = (Player*)findPlayer(id);
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << id << endl;
+			return;
+		}
+		p->loadTheme(SpeciesTheme::speciesDirectory(species), color);
+		break;
+	}
+	case BosonMessage::ChangeMap:
+	{
+		QString map;
+		stream >> map;
+		emit signalMapChanged(map);
+		break;
+	}
+	case BosonMessage::ChangeScenario:
+	{
+		QString scenario;
+		stream >> scenario;
+		emit signalScenarioChanged(scenario);
+		break;
+	}
 	default:
 		kdWarning() << "unhandled msgid " << msgid << endl;
 		break;

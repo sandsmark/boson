@@ -679,3 +679,21 @@ QStringList BosonScenario::availableScenarios(const QString& mapIdentifier)
  return validScenarios;
 }
 
+QString BosonScenario::scenarioFileName(const QString& identifier)
+{
+ QStringList list = availableScenarios();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	KSimpleConfig cfg(list[i]);
+	cfg.setGroup("Boson Scenario");
+	if (cfg.readEntry("Identifier") == identifier) {
+		QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
+		fileName += QString::fromLatin1(".bsc");
+		if (QFile::exists(fileName)) {
+			return fileName;
+		} else {
+			kdError() << "Cannot find " << fileName << " for valid .desktop file" << endl;
+		}
+	}
+ }
+ return QString::null;
+}

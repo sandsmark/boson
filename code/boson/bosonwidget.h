@@ -68,9 +68,10 @@ signals:
 
 protected slots:
 	void slotStartScenario();
-	void slotChangeSpecies(const QString& speciesDirectory);
+	void slotSendChangeSpecies(const QString& species);
 
 protected:
+	void changeSpecies(const QString& species);
 	void addLocalPlayer();
 
 	void addDummyComputerPlayer(const QString& name); // used by editor only

@@ -151,6 +151,10 @@ void BosonWidget::init()
 		this, SLOT(slotReceiveMap(const QByteArray&)));
  connect(d->mBoson, SIGNAL(signalStartScenario()),
 		this, SLOT(slotStartScenario()));
+ connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
+		this, SLOT(slotLoadMap(const QString&)));
+ connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
+		this, SLOT(slotLoadScenario(const QString&)));
 
 
  connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
@@ -227,7 +231,7 @@ void BosonWidget::addDummyComputerPlayer(const QString& name)
  Player* p = new Player;
  p->setName(name);
  d->mBoson->addPlayer(p);
- p->loadTheme(SpeciesTheme::defaultSpecies(), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
+ p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
 }
 
 void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
@@ -294,12 +298,14 @@ void BosonWidget::slotNewGame()
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
 // connect(bosonConfig, SIGNAL(signalAddComputerPlayer()),
 //		this, SLOT(slotAddComputerPlayer()));
- connect(bosonConfig, SIGNAL(signalMapChanged(const QString&)),
-		this, SLOT(slotLoadMap(const QString&)));
- connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
-		this, SLOT(slotLoadScenario(const QString&)));
+ connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
+		bosonConfig, SLOT(slotMapChanged(const QString&)));
+ connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
+		bosonConfig, SLOT(slotScenarioChanged(const QString&)));
+// connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
+//		this, SLOT(slotLoadScenario(const QString&)));
  connect(bosonConfig, SIGNAL(signalSpeciesChanged(const QString&)),
-		this, SLOT(slotChangeSpecies(const QString&)));
+		this, SLOT(slotSendChangeSpecies(const QString&)));
 
  // add a connection and a chat widget
  dialog->addGameConfig(bosonConfig);
@@ -328,6 +334,7 @@ void BosonWidget::slotNewGame()
  // show the dialog
  dialog->show();
  bosonConfig->slotMapChanged(0);
+// connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)), dialog, SLOT(show()));
 }
 
 void BosonWidget::slotStartGame()
@@ -516,7 +523,7 @@ void BosonWidget::slotLoadMap(const QString& map)
  recreateMap();
  // load the map into d->mMap
  kdDebug() << "load map " << map << endl;
- if (!d->mMap->loadMap(map)) {
+ if (!d->mMap->loadMap(BosonMap::mapFileName(map))) {
 	return;
  }
 
@@ -542,7 +549,8 @@ void BosonWidget::slotLoadScenario(const QString& scenario)
 	delete d->mScenario;
  }
  d->mScenario = new BosonScenario;
- d->mScenario->loadScenario(scenario);
+ d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
+// d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
  d->mBoson->setMinPlayers(d->mScenario->minPlayers());
  d->mBoson->setMaxPlayers(d->mScenario->maxPlayers());
 }
@@ -631,16 +639,25 @@ void BosonWidget::saveConfig()
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
 }
 
-void BosonWidget::slotChangeSpecies(const QString& directory)
+void BosonWidget::slotSendChangeSpecies(const QString& species)
 {
  if (!d->mLocalPlayer) {
-	kdError() << k_funcinfo << ": no local player!" << endl;
+	kdError() << k_funcinfo << "NULL localplayer" << endl;
 	return;
  }
- d->mLocalPlayer->loadTheme(directory, SpeciesTheme::defaultColor());
+// kdDebug() << "new species: " << species << endl;
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_UINT32)d->mLocalPlayer->id();
+ stream << species;
+ stream << SpeciesTheme::defaultColor();
+ d->mBoson->sendMessage(buffer, BosonMessage::ChangeSpecies);
+ // the species is actually loaded in the class Boson when the message is
+ // received
 }
 
 void BosonWidget::zoom(const QWMatrix& m)
 {
  d->mBigDisplay->setWorldMatrix(m);
 }
+

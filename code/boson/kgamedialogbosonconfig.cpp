@@ -3,6 +3,9 @@
 #include "bosonmap.h"
 #include "bosonscenario.h"
 #include "speciestheme.h"
+#include "bosonmessage.h"
+
+#include <kgame/kgame.h>
 
 #include <klocale.h>
 #include <kdebug.h>
@@ -39,9 +42,10 @@ public:
 
 	QMap<int, QString> mScenarioIndex2FileName; // index -> *.bsc filename
 	QMap<int, QString> mScenarioIndex2Comment ; // index -> scenario comment
+	QMap<int, QString> mScenarioIndex2Identifier; // index -> scenario identifier
 
-	QMap<int, QString> mSpeciesIndex2Directory;
 	QMap<int, QString> mSpeciesIndex2Comment;
+	QMap<int, QString> mSpeciesIndex2Identifier;
 
 	QComboBox* mMapCombo;
 	QComboBox* mScenarioCombo;
@@ -97,13 +101,24 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
 	kdWarning() << "Only admin can change the map" << endl;
 	return;
  }
- if (index >= (int)d->mMapIndex2FileName.count()) {
+ if (index >= (int)d->mMapIndex2Identifier.count()) {
 	kdError() << "invalid index " << index << endl;
 	return;
  }
+ if (!game()) {
+	kdError() << k_lineinfo << "Cannot send message" << endl;
+	return;
+ }
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << d->mMapIndex2Identifier[index];
+ game()->sendMessage(buffer, BosonMessage::ChangeMap);
+}
 
+void KGameDialogBosonConfig::slotMapChanged(const QString& identifier)
+{
  // update possible scenario files:
- QStringList list = BosonScenario::availableScenarios(d->mMapIndex2Identifier[index]);
+ QStringList list = BosonScenario::availableScenarios(identifier);
  d->mScenarioCombo->clear();
  d->mScenarioIndex2Comment.clear();
  d->mScenarioIndex2FileName.clear();
@@ -112,6 +127,7 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
 	cfg.setGroup("Boson Scenario");
 	d->mScenarioCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 	d->mScenarioIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
+	d->mScenarioIndex2Identifier.insert(i, cfg.readEntry("Identifier", i18n("None")));
 	QString fileName = list[i].left(list[i].length() - strlen(".desktop")) + QString::fromLatin1(".bsc");
 	d->mScenarioIndex2FileName.insert(i, fileName);
  }
@@ -121,7 +137,6 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
 	KMessageBox::sorry(this, i18n("No valid scenario files for this map!"));
 	return;
  }
- emit signalMapChanged(d->mMapIndex2FileName[index]);
  d->mScenarioCombo->setCurrentItem(0);
  slotScenarioChanged(0);
 }
@@ -132,15 +147,22 @@ void KGameDialogBosonConfig::slotScenarioChanged(int index)
 	kdWarning() << "Only admin can change the map" << endl;
 	return;
  }
- if (index >= (int)d->mScenarioIndex2FileName.count()) {
+ if (index >= (int)d->mScenarioIndex2Identifier.count()) {
 	kdError() << "invalid index " << index << endl;
 	return;
  }
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << d->mScenarioIndex2Identifier[index];
+ game()->sendMessage(buffer, BosonMessage::ChangeScenario);
+}
 
+void KGameDialogBosonConfig::slotScenarioChanged(const QString& identifier)
+{
  // update possible species:
  d->mPlayerSpecies->clear();
  d->mSpeciesIndex2Comment.clear();
- d->mSpeciesIndex2Directory.clear();
+ d->mSpeciesIndex2Identifier.clear();
  //TODO: some scenarios might not provide all species!
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -148,13 +170,12 @@ void KGameDialogBosonConfig::slotScenarioChanged(int index)
 	cfg.setGroup("Boson Species");
 	d->mPlayerSpecies->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 	d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-	QString dir = list[i].left(list[i].length() - strlen("index.desktop"));
-	d->mSpeciesIndex2Directory.insert(i, dir);
+	d->mSpeciesIndex2Identifier.insert(i, cfg.readEntry("Identifier", "Unknown"));
  }
  d->mPlayerSpecies->setCurrentItem(0);
  slotSpeciesChanged(0);
  
- emit signalScenarioChanged(d->mScenarioIndex2FileName[index]);
+// emit signalScenarioChanged(d->mScenarioIndex2FileName[index]);
 }
 
 void KGameDialogBosonConfig::slotStartGame()
@@ -168,6 +189,6 @@ void KGameDialogBosonConfig::slotSpeciesChanged(int index)
  if (index < 0) {
 	return;
  }
- emit signalSpeciesChanged(d->mSpeciesIndex2Directory[index]);
+ emit signalSpeciesChanged(d->mSpeciesIndex2Identifier[index]);
 }
 

@@ -245,6 +245,7 @@ void BosonCanvas::addAnimation(QCanvasItem* item)
 
 void BosonCanvas::removeAnimation(QCanvasItem* item)
 {
+ kdDebug() << "remove Anim" << endl;
  d->mAnimList.removeRef(item);
 }
 
