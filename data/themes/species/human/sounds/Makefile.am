@@ -9,7 +9,9 @@ order_sounds = \
 report_sounds = \
 	report_destroyed_0.ogg \
 	report_produced_0.ogg \
-	report_underattack_0.ogg
+	report_underattack_0.ogg \
+	report_minimap_activated.ogg \
+	report_minimap_deactivated.ogg
 
 sounds_DATA = \
 	radar_pulse.wav \
