@@ -951,9 +951,6 @@ void TopWidget::changeLocalPlayer(Player* p)
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
  }
- // AB: d->mBosonWidget->setLocalPlayer() also calls Boson::setLocalPlayer(),
- // but it is NULL when the startup widgets call it
- boGame->setLocalPlayer(p);
  if (d->mBosonWidget) {
 	d->mBosonWidget->setLocalPlayer(p);
  }
