@@ -70,37 +70,17 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <li>Resolution changing using Xrandr supported</li>
  <li>Use vertex arrays and vertex buffer objects by default if possible. This
  increases speed by a few FPS.</li>
+ <li>Sound is played using OpenAL now. Dependancy on arts and kdemultimedia
+ removed.</li>
 </ul>");
-/*
+
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-    <li>Fixing all critical bugs</li>
-  </ul>
-  <h2><a name=\"done\"></a>DONE</h2>
-
-  <h4>Internal</h4>
-  <ul>
-  </ul>
-
-  <h4>Rendering</h4>
-  <ul>
-  </ul>
-
-
-  <h4>Game</h4>
-  <ul>
-  </ul>
-
-  <h4>Data</h4>
-  <ul>
-  </ul>
-
-  <h4>Editor</h4>
-  <ul>
+    <li>Write a configure script that checks for OpenAL presence (and disables
+    sound if it is not available)</li>
   </ul>");
-*/
 draw_bigbox_end();
 main_area_end();
 
