@@ -56,6 +56,7 @@
 #include <qhbox.h>
 #include <qvbox.h>
 #include <qguardedptr.h>
+#include <qwidgetstack.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -67,6 +68,8 @@ class TopWidget::TopWidgetPrivate
 public:
 	TopWidgetPrivate()
 	{
+		mWidgetStack = 0;
+
 		mStartup = 0;
 
 		mDisplay = 0;
@@ -79,6 +82,8 @@ public:
 
 		mStatusBarHandler = 0;
 	}
+
+	QWidgetStack* mWidgetStack;
 
 	BosonStartupWidget* mStartup;
 
@@ -95,18 +100,17 @@ public:
 	BoStatusBarHandler* mStatusBarHandler;
 };
 
-TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
+TopWidget::TopWidget() : KMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
 
- mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
- mMainDock->setDockSite(KDockWidget::DockCorner);
- mMainDock->setEnableDocking(KDockWidget::DockNone);
+ d->mWidgetStack = new QWidgetStack(this);
+ setCentralWidget(d->mWidgetStack);
 
  boAudio->setSound(boConfig->sound());
  boAudio->setMusic(boConfig->music());
 
- d->mStartup = new BosonStartupWidget(mMainDock);
+ d->mStartup = new BosonStartupWidget(d->mWidgetStack);
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
 		this, SLOT(slotAddLocalPlayer()));
  connect(d->mStartup, SIGNAL(signalResetGame()),
@@ -124,10 +128,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  connect(&d->mStatusBarTimer, SIGNAL(timeout()),
 		d->mStatusBarHandler, SLOT(slotUpdateStatusBar()));
 
- mMainDock->setWidget(d->mStartup);
-
- setView(mMainDock);
- setMainDockWidget(mMainDock);
+ d->mWidgetStack->addWidget(d->mStartup);
 
  d->mIface = new BoDebugDCOPIface();
 
@@ -168,7 +169,9 @@ QString TopWidget::checkInstallation()
 
 void TopWidget::initDisplayManager()
 {
- d->mDisplay = new BosonBigDisplayBase(mMainDock);
+ d->mDisplay = new BosonBigDisplayBase(d->mWidgetStack);
+ d->mDisplay->show();
+ d->mWidgetStack->addWidget(d->mDisplay);
 
  connect(d->mDisplay, SIGNAL(signalToggleStatusbar(bool)),
 		d->mStatusBarHandler, SLOT(slotToggleStatusbar(bool)));
@@ -183,7 +186,7 @@ void TopWidget::initDisplayManager()
 		this, SLOT(slotSaveGame()));
 
 
- d->mDisplay->hide();
+// d->mDisplay->hide();
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -340,11 +343,11 @@ void TopWidget::slotCancelLoadSave()
  if (boGame && boGame->gameStatus() != KGame::Init) {
 	// called from a running game - but the player doesn't want to load/save a
 	// game anymore
-	if (d->mStartup) {
-		d->mStartup->hide();
-	}
-	d->mDisplay->show();
-	mMainDock->setWidget(d->mDisplay);
+//	if (d->mStartup) {
+//		d->mStartup->hide();
+//	}
+//	d->mDisplay->show();
+	d->mWidgetStack->raiseWidget(d->mDisplay);
  } else {
 	if (!d->mStartup) {
 		boError() << k_funcinfo << "NULL startup widget??" << endl;
@@ -411,8 +414,8 @@ void TopWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
- d->mDisplay->hide();
- mMainDock->setWidget(d->mStartup);
+// d->mDisplay->hide();
+ d->mWidgetStack->raiseWidget(d->mStartup);
 }
 
 bool TopWidget::queryClose()
@@ -449,9 +452,9 @@ bool TopWidget::queryExit()
 	endGame();
 	return true;
  }
- if (mMainDock->getWidget() != d->mStartup) {
+ if (d->mWidgetStack->visibleWidget() != d->mStartup) {
 	boWarning() << k_funcinfo << "oops! - game in init mode but no startup widget on top!" << endl;
-	boDebug() << k_funcinfo << "maindock's widget: " << mMainDock->getWidget() << endl;
+	boDebug() << k_funcinfo << "widgetstack's widget: " << d->mWidgetStack->visibleWidget() << endl;
 	boDebug() << k_funcinfo << "startup widget: " << d->mStartup << endl;
 	return true;
  }
@@ -604,9 +607,9 @@ void TopWidget::slotGameStarted()
  d->mStatusBarHandler->setCanvas(boGame->canvas());
  d->mDisplay->setCanvas(boGame->canvasNonConst());
 
- mMainDock->setWidget(d->mDisplay);
- d->mDisplay->show();
- d->mStartup->hide();
+ d->mWidgetStack->raiseWidget(d->mDisplay);
+// d->mDisplay->show();
+// d->mStartup->hide();
  setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
  setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 
@@ -628,7 +631,7 @@ void TopWidget::slotGameStarted()
 	d->mDisplay->setInputInitialized(true);
  }
  d->mDisplay->setLocalPlayerIO(d->mLocalPlayer->playerIO());
- d->mDisplay->show();
+// d->mDisplay->show();
 
  // Center home base if new game was started. If game is loaded, camera was
  //  already loaded as well
@@ -681,9 +684,9 @@ void TopWidget::slotLoadGame(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotLoadGame();
- d->mStartup->show();
- d->mDisplay->hide();
- mMainDock->setWidget(d->mStartup);
+// d->mStartup->show();
+// d->mDisplay->hide();
+ d->mWidgetStack->raiseWidget(d->mStartup);
 }
 
 void TopWidget::slotSaveGame()
@@ -694,9 +697,9 @@ void TopWidget::slotSaveGame()
 	return;
  }
  d->mStartup->slotSaveGame();
- d->mStartup->show();
- d->mDisplay->hide();
- mMainDock->setWidget(d->mStartup);
+// d->mStartup->show();
+// d->mDisplay->hide();
+ d->mWidgetStack->raiseWidget(d->mStartup);
 }
 
 void TopWidget::slotNewGame(KCmdLineArgs* args)
@@ -780,7 +783,7 @@ void TopWidget::saveConfig()
 
 
 
-BoStatusBarHandler::BoStatusBarHandler(KDockMainWindow* w, QObject* parent)
+BoStatusBarHandler::BoStatusBarHandler(KMainWindow* w, QObject* parent)
 	: QObject(parent)
 {
  mMainWindow = w;
