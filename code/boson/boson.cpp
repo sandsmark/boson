@@ -40,7 +40,6 @@
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
-#include <kdeversion.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamemessage.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -70,135 +69,6 @@
 Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
-
-
-#if KDE_VERSION <= KDE_MAKE_VERSION(3,1,4)
-#include <kgame/kmessageio.h>
-#include <kmessagebox.h>
-#include <qsocket.h>
-static QMap<KMessageSocket*, BoMyKMessageSocket*> KMessageSocket2BoMyKMessageSocket;
-static QMap<QSocket*, KMessageSocket*> QSocket2KMessageSocket;
-
-static void fixKMessageSocketIsRecursive()
-{
- if (!boGame) {
-	return;
- }
- const QObjectList* list = QObject::objectTrees();
- QObjectListIt it(*list);
- for (; it.current(); ++it) {
-	if (qstrcmp((*it)->className(), "KMessageSocket") != 0) {
-		continue;
-	}
-	boDebug() << k_funcinfo << "found a KMessageSocket" << endl;
-	if (KMessageSocket2BoMyKMessageSocket.contains((KMessageSocket*)(*it))) {
-		boDebug() << k_funcinfo << "KMessageSocket already fixed" << endl;
-		continue;
-	}
-	boDebug() << k_funcinfo << "fixing KMessageSocket" << endl;
-	BoMyKMessageSocket* s = new BoMyKMessageSocket();
-	QSocket* sock = 0;
-	const QObjectList* list2 = QObject::objectTrees();
-	QObjectListIt it2(*list2);
-	for (; it2.current() && !sock; ++it2) {
-		if (qstrcmp((*it2)->className(), "QSocket") != 0) {
-			continue;
-		}
-		if (QSocket2KMessageSocket[(QSocket*)(*it2)] != 0) {
-			continue;
-		}
-		if (sock) {
-			boError() << k_funcinfo << "already a QSocket object found! baaaaaad! your netowork will probably be broken!" << endl;
-			KMessageBox::sorry(0, i18n("A workaround for a bug in libkdegames from KDE < 3.2 failed. Your network will be broken."));
-		}
-		sock = (QSocket*)(*it2);
-	}
-
-	if (!sock) {
-		boError() << k_funcinfo << "QSocket object not found" << endl;
-		return;
-	}
-
-	s->setSocket((KMessageSocket*)(*it), sock);
-	KMessageSocket2BoMyKMessageSocket.insert((KMessageSocket*)(*it), s);
-	QSocket2KMessageSocket.insert(sock, (KMessageSocket*)(*it));
- }
-}
-
-void BoMyKMessageSocket::setSocket(KMessageSocket* s, QSocket* sock)
-{
- mSocket = s;
- mSocketSocket = sock;
- connect(this, SIGNAL(signalReceived(const QByteArray&)), mSocket, SIGNAL(received(const QByteArray&)));
-
- disconnect(mSocketSocket, SIGNAL(readyRead()), mSocket, SLOT(processNewData()));
- connect(mSocketSocket, SIGNAL(readyRead()), this, SLOT(slotProcessNewData()));
- mNextBlockLength = 0;
- mAwaitingHeader = 0;
-}
-
-void BoMyKMessageSocket::slotProcessNewData()
-{
- BO_CHECK_NULL_RET(mSocket);
- static bool isRecursive = false;
- if (isRecursive) {
-	return;
- }
-
- isRecursive = true;
-
- QDataStream str(mSocketSocket);
- while (mSocketSocket->bytesAvailable() > 0) {
-	if (mAwaitingHeader) {
-		// Header = magic number + packet length = 5 bytes
-		if (mSocketSocket->bytesAvailable() < 5) {
-			isRecursive = false;
-			return;
-		}
-
-		// Read the magic number first. If something unexpected is found,
-		// start over again, ignoring the data that was read up to then.
-
-		Q_UINT8 v;
-		str >> v;
-		if (v != 'M') {
-			kdWarning(11001) << k_funcinfo << "Received unexpected data, magic number wrong!" << endl;
-			continue;
-		}
-
-		str >> mNextBlockLength;
-		mAwaitingHeader = false;
-	} else {
-		// Data not completly read => wait for more
-		if (mSocketSocket->bytesAvailable() < (Q_ULONG) mNextBlockLength) {
-			isRecursive = false;
-			return;
-		}
-
-		QByteArray msg (mNextBlockLength);
-		str.readRawBytes (msg.data(), mNextBlockLength);
-
-		// send the received message
-		emit signalReceived (msg);
-
-		// Waiting for the header of the next message
-		mAwaitingHeader = true;
-	}
- }
-
- isRecursive = false;
-}
-
-#else
-void BoMyKMessageSocket::setSocket(KMessageSocket* s, QSocket* sock)
-{
-}
-void BoMyKMessageSocket::slotProcessNewData()
-{
- // nothing. KMessageSocket is fixed in this version.
-}
-#endif
-
 
 /**
  * @short Class that maintains advance messages and advance calls.
@@ -1927,11 +1797,6 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
  if (!p) {
 	return;
  }
-#if KDE_VERSION <= KDE_MAKE_VERSION(3,1,4)
- // this is an UGLY hack to make sure that network is working correctly.
- // we've had a KMessageSocket bug in kdegames < 3.2
- fixKMessageSocketIsRecursive();
-#endif
  KGameIO* io = p->findRttiIO(KGameIO::ComputerIO);
  if (io) {
 	// note the IO is added on only *one* client!
