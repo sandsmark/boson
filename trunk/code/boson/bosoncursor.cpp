@@ -85,20 +85,22 @@ void BosonCursor::setCursor(int mode)
  if (d->mMode == mode) {
 	return;
  }
+ kdDebug() << k_funcinfo << mode << endl;
  d->mMode = (int)mode;
 #ifndef NO_PIXMAP_CURSOR
  d->mAnimateTimer.stop();
  if (mode > 0) {
 	QCanvasPixmapArray* a = d->mCursorPixmaps[d->mMode];
-	if (!a) {
-		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
-		d->mCursor->hide();
-	} else {
+	d->mCursor->hide();
+	if (a) {
 		d->mCursor->setSequence(a);
-	}
-	d->mCursor->show();
-	if (d->mCursor->frameCount() > 1) {
-		d->mAnimateTimer.start(100);
+		d->mCursor->setFrame(0);
+		d->mCursor->show();
+		if (d->mCursor->frameCount() > 1) {
+			d->mAnimateTimer.start(100);
+		}
+	} else {
+		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
 	}
  } else {
 	d->mCursor->hide();
@@ -108,13 +110,18 @@ void BosonCursor::setCursor(int mode)
 // our own stuff!
  d->mCursor->setAnimated(false);
 #endif
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonCursor::setWidgetCursor(QWidget* w)
 {
 #ifndef NO_PIXMAP_CURSOR
- w->setCursor(QCursor::BlankCursor);
+ if (w->cursor().shape() != Qt::BlankCursor) {
+	kdDebug() << k_funcinfo << endl;
+	w->setCursor(Qt::BlankCursor);
+ }
 #else
+ kdDebug() << k_funcinfo << endl;
  w->setCursor(cursor());
 #endif
 }
