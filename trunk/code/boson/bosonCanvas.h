@@ -89,6 +89,8 @@ public:
 signals:
 	void	oilUpdated(int);
 	void	mineralUpdated(int);
+	void	mobileNbUpdated(int);
+	void	facilityNbUpdated(int);
 	void	pingUpdated(int);
 
 private:

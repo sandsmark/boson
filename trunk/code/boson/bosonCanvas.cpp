@@ -40,8 +40,6 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 {
 	mobile.resize(149);
 	facility.resize(149);
-//	mobile.setAutoDelete(TRUE);
-//	facility.setAutoDelete(TRUE);   
 
 
 	// ping initialisation, not relevant
@@ -142,6 +140,7 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 	mobile.insert(m.key, u);
 
 	emit updateMobile(u);
+	emit mobileNbUpdated(mobile.count());
 }
 
 
@@ -163,6 +162,7 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 
 	mob->destroy();
 	boAssert( mobile.remove(m.key) == true );
+	emit mobileNbUpdated(mobile.count());
 }
 
 
@@ -200,7 +200,7 @@ void bosonCanvas::createFix(facilityMsg_t &m)
 	facility.insert(m.key, f);
 
 	emit updateFix(f);
-	
+	emit facilityNbUpdated(facility.count());
 }
 
 
@@ -222,6 +222,7 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 
 	f->destroy();
 	boAssert( facility.remove(msg.key) == true);
+	emit facilityNbUpdated(facility.count());
 }
 
 
