@@ -86,6 +86,7 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 
 	counter = 0; setFrame( 0);		// position the first image of the animation
 	move(_x, _y); setZ( _z + 1);	// position in the canvas
+	show();
 	startTimer(60);			// begin animation, 60 ms/frame
 }
 
