@@ -186,6 +186,9 @@ QValueList<unsigned long int> UpgradePropertiesBase::readUIntList(KSimpleConfig*
   return list;
 }
 
+#warning FIXME
+// AB: I HATE macros
+
 // I do not usually like macros, but this is one place where I feel that macros
 //  are good. Parameters:
 // list: property will be applied to all unitproperties in list
