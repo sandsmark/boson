@@ -120,13 +120,6 @@ static ufo::UMod_t convertQtMouseButtonToUfo(int button)
  return ubutton;
 }
 
-// convert keyboard modifiers
-static ufo::UMod_t convertQtKeyStateToUfo(int state)
-{
-#warning TODO
- return ufo::UMod::NoModifier;
-}
-
 static ufo::UKeyCode_t convertQtKeyToUfo(int key)
 {
  ufo::UKeyCode_t uk = ufo::UKey::UK_UNKOWN;
@@ -547,90 +540,205 @@ void BoUfoManager::render()
 // -> libufo sets a different viewport, but doesn't reset to the original one
 }
 
-void BoUfoManager::postResizeEvent(int w, int h)
+bool BoUfoManager::sendEvent(QEvent* e)
 {
- BO_CHECK_NULL_RET(context());
+ switch (e->type()) {
+	case QEvent::Wheel:
+		return sendWheelEvent((QWheelEvent*)e);
+	case QEvent::MouseMove:
+		return sendMouseMoveEvent((QMouseEvent*)e);
+	case QEvent::MouseButtonPress:
+		return sendMousePressEvent((QMouseEvent*)e);
+	case QEvent::MouseButtonRelease:
+		return sendMouseReleaseEvent((QMouseEvent*)e);
+	case QEvent::KeyPress:
+		return sendKeyPressEvent((QKeyEvent*)e);
+	case QEvent::KeyRelease:
+		return sendKeyReleaseEvent((QKeyEvent*)e);
+	default:
+		break;
+ }
+ return false;
+}
+
+bool BoUfoManager::sendResizeEvent(int w, int h)
+{
+ if (!context()) {
+	BO_NULL_ERROR(conext());
+	return false;
+ }
  boDebug() << k_funcinfo << w << "x" << h << endl;
  ufo::URectangle deviceRect(0, 0, w, h);
  ufo::URectangle contextRect(0, 0, w, h);
  context()->setDeviceBounds(deviceRect);
  context()->setContextBounds(contextRect);
+ return true;
 }
 
-void BoUfoManager::postMousePressEvent(QMouseEvent* e)
+bool BoUfoManager::sendMousePressEvent(QMouseEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(context());
- BO_CHECK_NULL_RET(display());
+ boDebug() << k_funcinfo << endl;
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
  ufo::UMod_t button = convertQtMouseButtonToUfo(e->button());
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
- display()->pushMouseButtonDown(context(), modifiers, e->x(), e->y(), button);
+
+ bool ret = display()->dispatchMouseButtonDown(context(), e->x(), e->y(), button);
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
-void BoUfoManager::postMouseReleaseEvent(QMouseEvent* e)
+bool BoUfoManager::sendMouseReleaseEvent(QMouseEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(context());
- BO_CHECK_NULL_RET(display());
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
  ufo::UMod_t button = convertQtMouseButtonToUfo(e->button());
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
- display()->pushMouseButtonUp(context(), modifiers, e->x(), e->y(), button);
+
+ bool ret = display()->dispatchMouseButtonUp(context(), e->x(), e->y(), button);
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
-void BoUfoManager::postMouseMoveEvent(QMouseEvent* e)
+bool BoUfoManager::sendMouseMoveEvent(QMouseEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(context());
- BO_CHECK_NULL_RET(display());
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
- display()->pushMouseMove(context(), modifiers, e->x(), e->y());
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
+
+ bool ret = display()->dispatchMouseMove(context(), e->x(), e->y());
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
-void BoUfoManager::postWheelEvent(QWheelEvent* e)
+bool BoUfoManager::sendWheelEvent(QWheelEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(context());
- BO_CHECK_NULL_RET(display());
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
  int wheelNum = 0;
  if (e->orientation() == Qt::Vertical) {
 	wheelNum = 0;
  } else {
 	wheelNum = 1;
  }
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
- ufo::UMouseWheelEvent* ue = new ufo::UMouseWheelEvent(
+ ufo::UMouseWheelEvent* event = new ufo::UMouseWheelEvent(
 		rootPane(),
 		ufo::UEvent::MouseWheel,
-		modifiers,
+		display()->getModState(),
 		ufo::UPoint(e->x(), e->y()),
 		e->delta(),
 		wheelNum);
- display()->pushEvent(ue);
+ event->reference();
+ display()->dispatchEvent(event);
+ bool ret = event->isConsumed();
+ event->unreference();
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
-void BoUfoManager::postKeyPressEvent(QKeyEvent* e)
+bool BoUfoManager::sendKeyPressEvent(QKeyEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(display());
- BO_CHECK_NULL_RET(context());
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(display());
- BO_CHECK_NULL_RET(context());
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
  ufo::UKeyCode_t key = convertQtKeyToUfo(e->key());
  wchar_t keyChar = e->ascii(); // AB: I have no idea what I am doing here
- display()->pushKeyDown(context(), modifiers, key, keyChar);
+
+ bool ret = display()->dispatchKeyDown(context(), key, keyChar);
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
-void BoUfoManager::postKeyReleaseEvent(QKeyEvent* e)
+bool BoUfoManager::sendKeyReleaseEvent(QKeyEvent* e)
 {
- BO_CHECK_NULL_RET(e);
- BO_CHECK_NULL_RET(display());
- BO_CHECK_NULL_RET(context());
- ufo::UMod_t modifiers = convertQtKeyStateToUfo(e->state());
+ if (!e) {
+	BO_NULL_ERROR(e);
+	return false;
+ }
+ if (!context()) {
+	BO_NULL_ERROR(context());
+	return false;
+ }
+ if (!display()) {
+	BO_NULL_ERROR(display());
+	return false;
+ }
  ufo::UKeyCode_t key = convertQtKeyToUfo(e->key());
  wchar_t keyChar = e->ascii(); // AB: I have no idea what I am doing here
- display()->pushKeyUp(context(), modifiers, key, keyChar);
+
+ bool ret = display()->dispatchKeyUp(context(), key, keyChar);
+ if (ret) {
+	e->accept();
+ } else {
+	e->ignore();
+ }
+ return ret;
 }
 
 
@@ -827,6 +935,9 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 	default:
 	case NoLayout:
 		setLayout(0);
+		break;
+	case UFlowLayout:
+		setLayout(new ufo::UFlowLayout());
 		break;
 	case UHBoxLayout:
 //		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
@@ -1173,6 +1284,12 @@ void BoUfoSlider::init(Qt::Orientation o)
  setValue(50);
 }
 
+void BoUfoSlider::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mSlider->setOpaque(o);
+}
+
 void BoUfoSlider::uslotValueChanged(ufo::USlider*, int)
 {
  emit signalValueChanged(value());
@@ -1231,6 +1348,12 @@ void BoUfoProgress::init(Qt::Orientation o)
  mProgress->updateUI();
  setOrientation(o);
  widget()->add(mProgress);
+}
+
+void BoUfoProgress::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mProgress->setOpaque(o);
 }
 
 void BoUfoProgress::setOrientation(Orientation o)
@@ -1300,6 +1423,14 @@ void BoUfoNumInput::init()
 
  setRange(0.0f, 100.0f);
  setValue(50.0f);
+}
+
+void BoUfoNumInput::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mLabel->setOpaque(o);
+ mSlider->setOpaque(o);
+ mLineEdit->setOpaque(o);
 }
 
 void BoUfoNumInput::slotSliderChanged(float v)
@@ -1409,6 +1540,12 @@ void BoUfoPushButton::init()
  CONNECT_UFO_TO_QT(BoUfoPushButton, mButton, Highlighted);
 }
 
+void BoUfoPushButton::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mButton->setOpaque(o);
+}
+
 void BoUfoPushButton::uslotActivated(ufo::UActionEvent*)
 {
  emit signalActivated();
@@ -1503,6 +1640,12 @@ void BoUfoLineEdit::init()
  CONNECT_UFO_TO_QT(BoUfoLineEdit, mLineEdit, Activated);
 }
 
+void BoUfoLineEdit::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mLineEdit->setOpaque(o);
+}
+
 void BoUfoLineEdit::uslotActivated(ufo::UActionEvent*)
 {
  emit signalActivated();
@@ -1534,6 +1677,12 @@ void BoUfoTextEdit::init()
  setLayoutClass(UHBoxLayout);
  mTextEdit = new ufo::UTextEdit();
  widget()->add(mTextEdit);
+}
+
+void BoUfoTextEdit::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mTextEdit->setOpaque(o);
 }
 
 void BoUfoTextEdit::setMinimumSize(const ufo::UDimension& s)
@@ -1579,6 +1728,12 @@ void BoUfoComboBox::init()
  CONNECT_UFO_TO_QT(BoUfoComboBox, mComboBox, SelectionChanged);
 }
 
+void BoUfoComboBox::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mComboBox->setOpaque(o);
+}
+
 void BoUfoComboBox::uslotActivated(ufo::UComboBox*, int i)
 {
  emit signalActivated(i);
@@ -1621,6 +1776,12 @@ void BoUfoListBox::init()
  CONNECT_UFO_TO_QT(BoUfoListBox, mListBox, SelectionChanged);
 }
 
+void BoUfoListBox::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mListBox->setOpaque(o);
+}
+
 void BoUfoListBox::uslotSelectionChanged(ufo::UListBox*, int first, int last)
 {
  emit signalSelectionChanged(first, last);
@@ -1659,6 +1820,12 @@ void BoUfoLabel::init()
  widget()->add(mLabel);
  mLabel->setOpaque(false);
  setForegroundColor(QColor(255, 255, 255));
+}
+
+void BoUfoLabel::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mLabel->setOpaque(o);
 }
 
 void BoUfoLabel::setMinimumSize(const ufo::UDimension& s)
@@ -1743,6 +1910,12 @@ void BoUfoCheckBox::init()
  CONNECT_UFO_TO_QT(BoUfoCheckBox, mCheckBox, Highlighted);
 }
 
+void BoUfoCheckBox::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ mCheckBox->setOpaque(o);
+}
+
 void BoUfoCheckBox::uslotActivated(ufo::UActionEvent*)
 {
  emit signalActivated();
@@ -1821,6 +1994,14 @@ void BoUfoMatrix::init()
  }
 }
 
+void BoUfoMatrix::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ for (int i = 0; i < 16; i++) {
+	mMatrix[i]->setOpaque(o);
+ }
+}
+
 void BoUfoMatrix::setMatrix(const float* m)
 {
  for (int i = 0; i < 16; i++) {
@@ -1890,6 +2071,17 @@ void BoUfoTabWidget::init()
  topLayoutWidget->addWidget(d->mButtonsWidget);
  topLayoutWidget->addWidget(d->mTabLayoutWidget);
  d->mCurrentTab = -1;
+}
+
+void BoUfoTabWidget::setOpaque(bool o)
+{
+ BoUfoWidget::setOpaque(o);
+ for (QIntDictIterator<BoUfoPushButton> it(d->mButtons); it.current(); ++it) {
+	it.current()->setOpaque(o);
+ }
+ for (QIntDictIterator<BoUfoWidget> it(d->mTabs); it.current(); ++it) {
+	it.current()->setOpaque(o);
+ }
 }
 
 int BoUfoTabWidget::addTab(BoUfoWidget* widget, const QString& label)

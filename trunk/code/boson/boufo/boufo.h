@@ -45,6 +45,7 @@ namespace ufo {
 	class UDrawable;
 	class UImage;
 	class UImageIO;
+	class UPoint;
 
 	class UWidget;
 	class UButton;
@@ -87,7 +88,7 @@ public:
  * Most of this is straight forward, but some important things are to be
  * mentioned:
  *
- * libufo maintains an event queue (just like e.g. Qt). Whenever you post/push
+ * libufo maintains an event queue (just like e.g. Qt). Whenever you push
  * an event to a libufo class, you need to dispatch the events before they take
  * effect. You can do this using @ref dispatchEvent. Since we usually re-render
  * the screen in certain intervals in boson, it may be convenient for you to
@@ -190,16 +191,21 @@ public:
 		return mMenuBar;
 	}
 
-	void postResizeEvent(int w, int h);
+	bool sendResizeEvent(int w, int h);
 
 	// TODO: find out whether the event is taken by UFO and return true if
 	// that is the case (other GUI elements can ignore it)
-	void postMousePressEvent(QMouseEvent* e);
-	void postMouseReleaseEvent(QMouseEvent* e);
-	void postMouseMoveEvent(QMouseEvent* e);
-	void postWheelEvent(QWheelEvent* e);
-	void postKeyPressEvent(QKeyEvent* e);
-	void postKeyReleaseEvent(QKeyEvent* e);
+	bool sendMousePressEvent(QMouseEvent* e);
+	bool sendMouseReleaseEvent(QMouseEvent* e);
+	bool sendMouseMoveEvent(QMouseEvent* e);
+	bool sendWheelEvent(QWheelEvent* e);
+	bool sendKeyPressEvent(QKeyEvent* e);
+	bool sendKeyReleaseEvent(QKeyEvent* e);
+
+	/**
+	 * Convenience method that uses the above methods.
+	 **/
+	bool sendEvent(QEvent* e);
 
 private:
 	ufo::UXDisplay* mDisplay;
@@ -351,6 +357,7 @@ public:
 
 	enum LayoutClass {
 		NoLayout = 0,
+		UFlowLayout,
 		UHBoxLayout,
 		UVBoxLayout,
 		UBorderLayout
@@ -549,6 +556,8 @@ public:
 	 **/
 	QString iconFile() const;
 
+	virtual void setOpaque(bool o);
+
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
@@ -596,6 +605,8 @@ public:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
+	virtual void setOpaque(bool o);
+
 signals:
 	void signalActivated();
 	void signalClicked(); // equivalent to signalActivated()
@@ -634,6 +645,8 @@ public:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
+	virtual void setOpaque(bool o);
+
 signals:
 	void signalActivated();
 	void signalHighlighted();
@@ -665,6 +678,8 @@ public:
 
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
+
+	virtual void setOpaque(bool o);
 
 signals:
 	void signalActivated();
@@ -699,6 +714,8 @@ public:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 
+	virtual void setOpaque(bool o);
+
 private:
 	void init();
 
@@ -722,6 +739,8 @@ public:
 
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
+
+	virtual void setOpaque(bool o);
 
 signals:
 	void signalActivated(int);
@@ -753,6 +772,8 @@ public:
 
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
+
+	virtual void setOpaque(bool o);
 
 signals:
 	void signalSelectionChanged(int firstIndex, int lastIndex);
@@ -818,6 +839,8 @@ public:
 	float maximumValue() const { return mMax; }
 	float stepSize() const { return mStep; }
 
+	virtual void setOpaque(bool o);
+
 signals:
 	void signalValueChanged(int);
 	void signalFloatValueChanged(float);
@@ -857,6 +880,8 @@ public:
 	double minimumValue() const;
 	double maximumValue() const;
 
+	virtual void setOpaque(bool o);
+
 private:
 	void init(Qt::Orientation);
 
@@ -890,6 +915,8 @@ public:
 	void setStepSize(float);
 	void setRange(float min, float max);
 
+	virtual void setOpaque(bool o);
+
 public slots:
 	void setValue(float);
 	void slotSetMaxValue(float);
@@ -922,6 +949,8 @@ public:
 	 **/
 	void setMatrix(const float*);
 
+	virtual void setOpaque(bool o);
+
 private:
 	void init();
 
@@ -944,6 +973,8 @@ public:
 	BoUfoWidget* currentTab() const;
 
 	int findId() const;
+
+	virtual void setOpaque(bool o);
 
 protected slots:
 	void slotButtonClicked();

@@ -54,13 +54,13 @@ void BosonUfoGLWidget::makeCurrent()
  }
 }
 
-void BosonUfoGLWidget::resizeGL(int w, int h)
+void BosonUfoGLWidget::resizeGL(int , int )
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postResizeEvent(width(), height());
+	mUfoManager->sendResizeEvent(width(), height());
 
-	// AB: is this necessary? if so then it should be in postResizeEvent() !
+	// AB: is this necessary? if so then it should be in sendResizeEvent() !
 	mUfoManager->contentWidget()->invalidate();
  }
  update();
@@ -68,65 +68,57 @@ void BosonUfoGLWidget::resizeGL(int w, int h)
 
 void BosonUfoGLWidget::mousePressEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postMousePressEvent(e);
+	mUfoManager->sendMousePressEvent(e);
+	update();
  }
- update();
 }
 
 void BosonUfoGLWidget::mouseReleaseEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postMouseReleaseEvent(e);
+	mUfoManager->sendMouseReleaseEvent(e);
+	update();
  }
- update();
 }
 
 void BosonUfoGLWidget::mouseMoveEvent(QMouseEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postMouseMoveEvent(e);
+	mUfoManager->sendMouseMoveEvent(e);
+	update();
  }
- update();
 }
 
 void BosonUfoGLWidget::wheelEvent(QWheelEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postWheelEvent(e);
+	mUfoManager->sendWheelEvent(e);
+	update();
  }
- update();
 }
 
 void BosonUfoGLWidget::keyPressEvent(QKeyEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postKeyPressEvent(e);
+	mUfoManager->sendKeyPressEvent(e);
+	update();
  }
-// if (puKeyboard(e->ascii(), PU_DOWN)) {
-//	e->accept();
-// else {
-	BosonGLWidget::keyPressEvent(e);
-//
- update();
+ BosonGLWidget::keyPressEvent(e);
 }
 
 void BosonUfoGLWidget::keyReleaseEvent(QKeyEvent* e)
 {
- if (mUfoManager) {
+ if (mUfoManager && mSendEvents) {
 	makeCurrent();
-	mUfoManager->postKeyReleaseEvent(e);
+	mUfoManager->sendKeyReleaseEvent(e);
+	update();
  }
-// if (puKeyboard(e->ascii(), PU_UP)) {
-//	e->accept();
-// } else {
-	BosonGLWidget::keyReleaseEvent(e);
-// }
- update();
+ BosonGLWidget::keyReleaseEvent(e);
 }
 
