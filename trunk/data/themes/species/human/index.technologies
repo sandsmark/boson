@@ -19,3 +19,16 @@ Pixmap=testtech2.png
 RequireUnits=12,5,3
 ApplyToFacilities=true
 Armor=2
+
+[Leopard upgrade]
+Id=1234
+Name=Upgrade Leopard tanks
+MineralCost=2500
+OilCost=700
+Producer=0
+ProductionTime=100
+Pixmap=testtech.png
+ApplyToTypes=10008
+RequireUnits=12,10008
+Health=320
+Armor=+20
