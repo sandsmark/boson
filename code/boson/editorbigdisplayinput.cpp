@@ -198,6 +198,10 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 	BO_NULL_ERROR(localPlayer())
 	return false;
  }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  bool ret = false;
  int x = (int)(canvasVector.x()) / BO_TILE_SIZE;
  int y = (int)(canvasVector.y()) / BO_TILE_SIZE;
@@ -310,6 +314,10 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 bool EditorBigDisplayInput::actionChangeHeight(const BoVector3& canvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
 	return false;
