@@ -626,13 +626,17 @@ void BosonNewGameWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 		// If client isn't admin, it can't select the map, but we still have to
 		//  indicate selected map, so we temporarily set selection mode to single
 		mSelectMap->setSelectionMode(QListView::Single);
+		mSelectMap->blockSignals(true);
 		mSelectMap->clearSelection();
 		mSelectMap->setSelected(item, true);
+		mSelectMap->blockSignals(false);
 		mSelectMap->setSelectionMode(QListView::NoSelection);
 	} else {
+		mSelectMap->blockSignals(true);
 		mSelectMap->setSelected(item, true);
+		mSelectMap->blockSignals(false);
 	}
-  mSelectMap->ensureItemVisible(item);
+	mSelectMap->ensureItemVisible(item);
  }
  mMinPlayers = field->information()->minPlayers();
  mMaxPlayers = field->information()->maxPlayers();
