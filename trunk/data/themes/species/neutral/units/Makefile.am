@@ -7,6 +7,12 @@ FACILITIES = \
 	tree1 \
 	tree2 \
 	tree3 \
+	tree4 \
+	tree4-big \
+	tree4-small \
+	tree5 \
+	tree5-big \
+	tree5-small \
 	oiltower \
 	mineralmine
 
