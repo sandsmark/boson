@@ -44,30 +44,37 @@ public:
 	 **/
 	~TopWidget();
 
-	Boson* game() { return mBoson; };
-	Player* player() { return mPlayer; };
-	BosonPlayField* map() { return mMap; };
-	BosonCanvas* canvas() { return mCanvas; };
+	Boson* game() const { return mBoson; };
+	Player* player() const { return mPlayer; };
+	BosonPlayField* map() const { return mMap; };
+	BosonCanvas* canvas() const { return mCanvas; };
 
-	/**
-	  *
-	  */
+	void loadGameDockConfig();
+	void saveGameDockConfig();
+
 public slots:
-	/** Called when user clicks "start new game" button
-	  * This shows BosonStartGameWidget from where you can start new game
-	  */
+	/** 
+	 * Called when user clicks "start new game" button
+	 * This shows BosonStartGameWidget from where you can start new game
+	 **/
 	void slotNewGame();
-	/** Quits Boson
-	  * If there is game running, it first end the game and then quits
-	  */
+	
+	/** 
+	 * Quits Boson
+	 * If there is game running, it first end the game and then quits
+	 **/
 	void slotQuit();
-	/** Starts loading new game. Called when user clicks "Start game" button in
-	  * BosonStartGameWidget
-	  */
+	
+	/**
+	 * Starts loading new game. Called when user clicks "Start game" button in
+	 * BosonStartGameWidget
+	 **/
 	void slotStartGame();
-	/** Shows BosonWelcomeWidget
-	  * From there, user can start new game or quit
-	  */
+	
+	/**
+	 * Shows BosonWelcomeWidget
+	 * From there, user can start new game or quit
+	 **/
 	void slotShowMainMenu();
 	/** Shows game server options */
 	void slotShowServerOptions();

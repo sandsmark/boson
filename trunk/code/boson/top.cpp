@@ -91,11 +91,11 @@ public:
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 };
 
-TopWidget::TopWidget() : KDockMainWindow(0l, "topwindow")
+TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
- mGame = false;
  d = new TopWidgetPrivate;
- mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
+ mGame = false;
+ mMainDock = createDockWidget("mainDock1", 0, this, i18n("Map"));
  mWs = new QWidgetStack(mMainDock);
  mMainDock->setWidget(mWs);
  mMainDock->setDockSite(KDockWidget::DockCorner);
@@ -118,13 +118,10 @@ TopWidget::TopWidget() : KDockMainWindow(0l, "topwindow")
  enableGameActions(false);
  initStatusBar();
  showWelcomeWidget();
-
-// readDockConfig(kapp->config(), "TopDockConfig");
 }
 
 TopWidget::~TopWidget()
 {
-// writeDockConfig(kapp->config(), "TopDockConfig");
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -408,6 +405,11 @@ void TopWidget::slotNewGame()
 
 void TopWidget::slotQuit()
 {
+// FIXME saveGameDockConfig() is just wrong here. we have to ensure that there
+// is actually a game running (not newgame widget or so) and it also has to be
+// called when the player clicks e.g. on the "x", not only when menu->quit is
+// clicked
+ saveGameDockConfig();
  // First delete all widgets to give them change to save config
  if(d->mBosonwidget) {
 	d->mBosonwidget->slotEndGame();
@@ -745,4 +747,18 @@ void TopWidget::slotDebugPlayer(int index)
 		kdError() << k_funcinfo << "unknown index " << index << endl;
 		break;
  }
+}
+
+void TopWidget::loadGameDockConfig()
+{
+ // readDockConfig() is broken.
+ // it uses frameGeometry() to save the geometry which is correct. but then it
+ // uses setGeometry() to load it again, and since this doesn't work correctly
+ // with titlebar and frame we need to adjust here
+// readDockConfig(kapp->config(), "BosonGameDock"); // FIXME
+}
+
+void TopWidget::saveGameDockConfig()
+{
+ writeDockConfig(kapp->config(), "BosonGameDock");
 }
