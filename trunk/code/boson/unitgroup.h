@@ -52,10 +52,16 @@ class UnitGroup
     void leaderDestroyed();
     void leaderStopped();
     bool isLeader(Unit* unit);
+    void advanceGroupMove();
+    void setDeleteGroup(bool d) { mDelete = d; }
+    bool deleteGroup() const { return mDelete; }
+
   private:
     QPtrList<Unit> mMembers;
     Unit* mLeader;
     bool mMoving;
+
+    bool mDelete;
 };
 
 #endif

@@ -34,6 +34,7 @@
 #include <qptrdict.h>
 #include <qbitmap.h>
 #include <qdatetime.h>
+//#include <qpainter.h>
 
 #include "defines.h"
 
@@ -59,6 +60,7 @@ public:
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrDict<QCanvasSprite> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
+	QPtrList<QCanvasView> mViewList;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -99,10 +101,11 @@ void BosonCanvas::init()
 
 BosonCanvas::~BosonCanvas()
 {
-// if (d->mFogPixmap) {
-//	delete d->mFogPixmap;
-// }
  quitGame();
+ if (d->mFogPixmap) {
+	delete d->mFogPixmap;
+	d->mFogPixmap = 0;
+ }
  delete d;
 }
 
@@ -224,11 +227,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	animIt.current()->advance(0);
 	++animIt;
  }
- animIt.toFirst();
- while (animIt.current()) {
-	animIt.current()->advance(1);
-	++animIt;
- }
 
  if (d->mWorkNone.count() > 0 && (advanceCount % 50) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkNone);
@@ -244,12 +242,16 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkMove.count() > 0 && (advanceCount % 1) == 0) { // always true
+ if ((d->mWorkMove.count() > 0 || d->mGroups.count() > 0) && (advanceCount % 1) == 0) { // always true
 	QPtrListIterator<Unit> it(d->mWorkMove);
 	while (it.current()) {
 		it.current()->advanceMove(); // move
 		it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
 		++it;
+	}
+	QValueList<UnitGroup>::Iterator groupIt;
+	for (groupIt = d->mGroups.begin(); groupIt != d->mGroups.end(); ++groupIt) {
+		(*groupIt).advanceGroupMove();
 	}
  }
  if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
@@ -272,6 +274,11 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		it.current()->advanceConstruction();
 		++it;
 	}
+ }
+ animIt.toFirst();
+ while (animIt.current()) {
+	animIt.current()->advance(1);
+	++animIt;
  }
 
  changeWork();
@@ -398,10 +405,8 @@ void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
 void BosonCanvas::leaderMoved(Unit* unit, double oldX, double oldY)
 {
  QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
- {
-	if((*it).isLeader(unit))
-	{
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
+	if((*it).isLeader(unit)) {
 		(*it).leaderMoved(unit->x() - oldX, unit->y() - oldY);
 		break;
 	}
@@ -412,10 +417,8 @@ void BosonCanvas::leaderMoved(Unit* unit, double oldX, double oldY)
 void BosonCanvas::leaderDestroyed(Unit* unit)
 {
  QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
- {
-	if((*it).isLeader(unit))
-	{
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
+	if((*it).isLeader(unit)) {
 		(*it).leaderDestroyed();
 		return;
 	}
@@ -425,12 +428,10 @@ void BosonCanvas::leaderDestroyed(Unit* unit)
 void BosonCanvas::leaderStopped(Unit* unit)
 {
  QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
- {
-	if((*it).isLeader(unit))
-	{
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
+	if((*it).isLeader(unit)) {
 		(*it).leaderStopped();
-		d->mGroups.remove(it);
+		(*it).setDeleteGroup(true);
 		return;
 	}
  }
@@ -441,8 +442,8 @@ void BosonCanvas::slotNewGroup(Unit* leader, QPtrList<Unit> members)
  UnitGroup group(true);
  group.setLeader(leader);
  Unit *unit;
- for(unit = members.first(); unit; unit = members.next())
- {
+ leader->setWork(UnitBase::WorkMoveInGroup);
+ for(unit = members.first(); unit; unit = members.next()) {
 	unit->setWork(UnitBase::WorkMoveInGroup);
 	group.addMember(unit);
  }
@@ -818,8 +819,47 @@ void BosonCanvas::changeWork()
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
 			break;
+		case UnitBase::WorkMoveInGroup:
+			// already in d->mGroups
+			break;
 	}
  }
  d->mWorkChanged.clear();
+
+
+ unsigned int i = 0;
+ while (i < d->mGroups.count()) {
+	if (d->mGroups[i].deleteGroup()) {
+		d->mGroups.remove(d->mGroups.at(i));
+	} else {
+		i++;
+	}
+ }
 }
 
+
+// Testing code
+void BosonCanvas::drawForeground(QPainter& p, const QRect&)
+{
+// maybe paint the "Minerals: " and "Oil: " texts here? same with chat messages?
+// we can also (and probably will) paint the fog of war here.
+/*
+ QCanvasView* v = d->mViewList.first();
+ int x = v->contentsX() + v->visibleWidth() - 200;
+ int y = v->contentsY()+50;
+ p.drawText(x, y, "Test");
+// update();
+ */
+}
+
+void BosonCanvas::addView(QCanvasView* v)
+{
+ QCanvas::addView(v);
+ d->mViewList.append(v);
+}
+
+void BosonCanvas::removeView(QCanvasView* v)
+{
+ QCanvas::removeView(v);
+ d->mViewList.removeRef(v);
+}

@@ -154,6 +154,10 @@ public:
 
 	void setWorkChanged(Unit* u, int);
 
+
+	virtual void addView(QCanvasView*);
+	virtual void removeView(QCanvasView*);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -190,6 +194,8 @@ protected:
 	 * @param oldWork See @ref UnitBase::WorkType
 	 **/
 	void changeWork();
+
+	virtual void drawForeground(QPainter&, const QRect&);
 	
 protected slots:
 
