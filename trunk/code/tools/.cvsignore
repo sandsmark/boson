@@ -11,4 +11,8 @@ boson-client.log
 *.bpf
 diff
 .libs
+earth.png
+.*.swp
+stats
+createGround
 
