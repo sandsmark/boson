@@ -51,6 +51,7 @@
 #define Z_FACILITY 300
 #define Z_DESTROYED_MOBILE 200
 #define Z_DESTROYED_FACILITY 100
+#define Z_FOG_OF_WAR 50000
 
 #define BUILD_RANGE 10 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 

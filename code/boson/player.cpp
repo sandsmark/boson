@@ -242,6 +242,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	case UnitBase::IdType: // FIXME: can this change at all? (currently not)
 	case UnitBase::IdCost:
 	case UnitBase::IdRange:
+	case UnitBase::IdSightRange:
 	case Unit::IdReloadState:
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
@@ -250,7 +251,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 		emit signalUnitChanged(unit);
 		break;
 	default:
-		kdDebug() << "Unknown property ID " << prop->id() << endl;
+		kdDebug() << k_funcinfo << "Unknown property ID " << prop->id() << endl;
 		break;
  }
 }

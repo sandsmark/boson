@@ -67,6 +67,8 @@ public:
 
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
+
+	void setLocalPlayer(Player*);
 	
 	/**
 	 * @param tileFile currently always "earth.png

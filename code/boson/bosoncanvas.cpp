@@ -43,6 +43,7 @@ public:
 	BosonCanvasPrivate()
 	{
 		mMap = 0;
+		mLocalPlayer = 0;
 	}
 	
 	QPixmap mPix;
@@ -51,6 +52,7 @@ public:
 	QPtrList<Unit> mDestroyedUnits;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
+	Player* mLocalPlayer; // also just a pointer
 
 	Arts::SimpleSoundServer* mSoundServer;
 };
@@ -237,6 +239,9 @@ void BosonCanvas::initMap(const QString& tileFile)
 			continue;
 		}
 		slotAddCell(i, j, c->groundType(), c->version());
+		// FIXME: if (editor) {
+		c->fog(this, i, j);
+		// }
 	}
  }
  update();
@@ -280,33 +285,36 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
 // these coordinates and if not out fog on them again. Remember to check for -1
 // (new unit placed)!
 
-// if (unit->owner != d->mLocalPlayer) {
-//	return;
-// }
+ if (unit->owner() != d->mLocalPlayer) {
+	return;
+ }
  unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
  unsigned int x = unit->boundingRect().center().x() / BO_TILE_SIZE;
  unsigned int y = unit->boundingRect().center().y() / BO_TILE_SIZE;
 
- unsigned int left = (x > sight) ? (x - sight) : 0;
- unsigned int top = (y > sight) ? (y - sight) : 0;
- unsigned int right = (x + sight > d->mMap->width() - 1) ?  d->mMap->width() - 1 :
-		x + sight;
- unsigned int bottom = (y + sight > d->mMap->height() - 1) ?  d->mMap->height() - 1 :
-		y + sight;
+ int left = ((x > sight) ? (x - sight) : 0) - x;
+ int top = ((y > sight) ? (y - sight) : 0) - y;
+ int right = ((x + sight > d->mMap->width() - 1) ?  d->mMap->width() - 1 :
+		x + sight) - x;
+ int bottom = ((y + sight > d->mMap->height() - 1) ?  d->mMap->height() - 1 :
+		y + sight) - y;
  
  sight *= sight;
+// kdDebug() << k_funcinfo << endl;
+// kdDebug() << "left=" << left << ",right=" << right << endl;
+// kdDebug() << "top=" << top << ",bottom=" << bottom << endl;
 
- for (unsigned int i = left; i < right; i++) {
-	for (unsigned int j = bottom; j < top; j++) {
-		Cell* c = cell(i, j);
-		if (i*i + j*j < sight) {
+ for (int i = left; i < right; i++) {
+	for (int j = top; j < bottom; j++) {
+		Cell* c = cell(x + i, y + j);
+		if (i*i + j*j < (int)sight) {
 			if (!c) {
 				kdError() << k_lineinfo << "invalid cell " 
-						<< x << "," << y << endl;
+						<< x + i << "," << y + j << endl;
 				continue;
 			}
 			c->unfog();
-			emit signalUnfog(i, j); // minimap
+			emit signalUnfog(x + i, y + j); // minimap
 		} else {
 			//TODO
 			// cell(i, j) is not in sight anymore. Check if any
@@ -378,3 +386,9 @@ BosonMap* BosonCanvas::map() const
 {
  return d->mMap;
 }
+
+void BosonCanvas::setLocalPlayer(Player* p)
+{
+ d->mLocalPlayer = p;
+}
+
