@@ -315,7 +315,7 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
 
   // Initialization
   move(pos[0], pos[1], pos[2]);
-  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
+  setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
   mPassedDist = 0;
 }
@@ -349,7 +349,7 @@ void BosonShotMissile::advanceMoveInternal()
   float zvelo = mVelo[2] * speed() + (addZ - mZ);
   mZ = addZ;
   setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
-  setXRotation(rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
+  setXRotation(Bo3dTools::rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
 
   // Check if missile is still active
   BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
@@ -466,7 +466,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
+  setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
@@ -500,7 +500,7 @@ void BosonShotMissile::load(QDataStream& stream)
   stream >> speed;
 
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
+  setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
@@ -871,7 +871,7 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
   canvas->addParticleSystems(*mParticleSystems);
 
   move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
-  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   setVisible(true);
 }
 
@@ -935,7 +935,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   }
 
   mVelo.set(velox, veloy, veloz);
-  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   mUnitProperties = owner()->speciesTheme()->unitProperties((unsigned long int)props);
   if(!mUnitProperties)
   {
@@ -972,7 +972,7 @@ void BosonShotFragment::load(QDataStream& stream)
 
 
   mVelo.set(velox, veloy, veloz);
-  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
   mUnitProperties = owner()->speciesTheme()->unitProperties(props);
   if(!mUnitProperties)
   {
