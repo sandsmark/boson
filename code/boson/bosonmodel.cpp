@@ -679,7 +679,13 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		glPushMatrix();
 		glLoadIdentity(); // should already be there
 		Lib3dsTextureMap* t = &mat->texture1_map;
-		if (t->scale[0] || t->scale[1]) {
+		if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
+			// 3ds does these things pretty unhandy. it doesn't
+			// scale as opengl does, but rather emulates scaling the
+			// texture itself (i.e. when the texture is centered on
+			// an object it will still be centered after scaling).
+			// so we need to translate them before scaling.
+			glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
 			glScalef(t->scale[0], t->scale[1], 1.0);
 		}
 		glTranslatef(t->offset[0], t->offset[1], 0.0);
@@ -735,7 +741,6 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				// therefore 0.0
 				BoVector3 a;
 				BoVector3 b;
-				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
 #if NO_OPTIMIZE
 				b.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
 #else

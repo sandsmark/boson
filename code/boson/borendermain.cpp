@@ -78,7 +78,7 @@ static KCmdLineOptions options[] =
     { "rotate-z <number>", I18N_NOOP("Rotation around the Z-axis"), 0 },
     { "fovy <number>", I18N_NOOP("Field of view (zooming)"), "60.0" },
     { "f", 0, 0 },
-    { "frame <number>", I18N_NOOP("Intitially displayed frame"), 0 },
+    { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
     { 0, 0, 0 }
 };
 
