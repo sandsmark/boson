@@ -1,0 +1,17 @@
+
+
+all: Makefile
+	make all
+	cd map && ./boeditor
+
+Makefile: configure
+	./configure
+
+configure: Makefile.in
+	autoconf
+
+Makefile.in: Makefile.am
+	aclocal
+	autoheader
+	automake
+	perl automoc
