@@ -64,6 +64,7 @@ BosonTextureArray::~BosonTextureArray()
 {
 // boDebug(110) << k_funcinfo << endl;
  if (mTextures && mCount) {
+	glBindTexture(GL_TEXTURE_2D, 0); // in case we want to delete currently bound texture
 	for (unsigned int i = 0; i < mCount; i++) {
 		BoTextureInfo* t = mAllTextures.take(mTextures[i]);
 		delete t;
