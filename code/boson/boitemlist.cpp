@@ -71,12 +71,9 @@ QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit
 bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 {
  // Note that some code here is taken from units() (code duplication), but it
- //  makes this method much faster
- 
- bool flying = false;
- if (forUnit) {
-	flying = forUnit->isFlying();
- }
+ // makes this method much faster
+
+ bool flying = forUnit->isFlying();
 
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -87,6 +84,27 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 		if (u->isFlying() != flying) {
 			continue;
 		}
+		if (!includeMoving) {
+			if (u->isMoving()) {
+				continue;
+			}
+		}
+		return true;
+	}
+ }
+
+ return false;
+}
+
+bool BoItemList::isOccupied(bool includeMoving) const
+{
+ // AB: this is basically the same as the above isOccupied, but it doesn't take
+ // a forUnit param. we have even more code duplication here, but this is
+ // necessary, since isOccupied is used by pathfinding and must be fast.
+
+ for (ConstIterator it = begin(); it != end(); ++it) {
+	if (RTTI::isUnit((*it)->rtti())) {
+		Unit* u = (Unit*)*it;
 		if (!includeMoving) {
 			if (u->isMoving()) {
 				continue;

@@ -79,16 +79,22 @@ public:
 	QValueList<BosonItem*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
 
 	/**
-	 * Please note that this function might get performance improvements!
-	 * (see code)
-	 * 
 	 * @param forUnit the unit for which we test whether this is occupied.
 	 * If non-null then it gets removed from the list of units.
 	 * @param includeMoving Consider moving units as collisions, if TRUE,
 	 * otherwise not
-	 * @return if items(true, flying).count() != 0 
+	 * @return Whether the cell is occupied for the specified unit.
 	 **/
-	bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const;
+	bool isOccupied(Unit* forUnit, bool includeMoving = true) const;
+
+	/**
+	 * Basically the same as the above, but this one returns true whenever a
+	 * unit is on the cell, even if it is flying.
+	 * @param includeMoving Consider moving units as collisions, if TRUE,
+	 * otherwise not
+	 * @return TRUE if there are units on the cell, otherwise FALSE.
+	 **/
+	bool isOccupied(bool includeMoving = true) const;
 
 protected:
 	/**

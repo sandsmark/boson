@@ -257,6 +257,11 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
 // boDebug() << k_funcinfo << endl;
+ if (rect.x() < 0 || rect.y() < 0 ||
+		rect.x() + rect.width() >= mapWidth() * BO_TILE_SIZE ||
+		rect.y() + rect.height() >= mapHeight() * BO_TILE_SIZE) {
+	return false;
+ }
  int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
  do {
 	int x = rect.x() / BO_TILE_SIZE;
@@ -681,7 +686,7 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) con
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
-bool BosonCanvas::cellsOccupied(const QRect& rect, Unit* unit, bool excludeMoving) const
+bool BosonCanvas::cellsOccupied(const QRect& rect) const
 {
  const int left = rect.left() / BO_TILE_SIZE;
  const int top = rect.top() / BO_TILE_SIZE;
@@ -690,7 +695,7 @@ bool BosonCanvas::cellsOccupied(const QRect& rect, Unit* unit, bool excludeMovin
 
  for (int x = left; x < right; x++) {
 	for (int y = top; y < bottom; y++) {
-		if (cellOccupied(x, y, unit, excludeMoving)) {
+		if (cellOccupied(x, y)) {
 			return true;
 		}
 	}
