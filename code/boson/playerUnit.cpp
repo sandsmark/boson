@@ -50,7 +50,7 @@ void bosonUnit::u_attack(bosonUnit *u)
 
 	if (u == this) {
 		/* attacking myself */
-		logf(LOG_INFO, "%p attacking itself, aborting", this);
+		logf(LOG_WARNING, "%p attacking itself, aborting", this);
 		target = 0;
 		return;
 	}
