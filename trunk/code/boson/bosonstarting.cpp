@@ -36,7 +36,6 @@
 #include <klocale.h>
 
 #include <qtimer.h>
-#include <qfile.h>
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent)
 {
@@ -152,11 +151,6 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
 	return false;
  }
 
- // Open file and QDataStream on it
- QFile f(loadingFileName);
- f.open(IO_ReadOnly);
- QDataStream s(&f);
-
  // Load game
  emit signalLoadingShowProgressBar(false);
  emit signalLoadingSetLoading(true);
@@ -165,12 +159,10 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  connect(boGame, SIGNAL(signalLoadingPlayersCount(int)), this, SIGNAL(signalLoadingPlayersCount(int)));
  connect(boGame, SIGNAL(signalLoadingPlayer(int)), this, SIGNAL(signalLoadingPlayer(int)));
  boGame->lock();
- bool loaded = boGame->load(s, true);
+ bool loaded = boGame->loadFromFile(loadingFileName);
  slotLoadTiles();
  boGame->unlock();
 
- // Close file
- f.close();
  mLoading = false;
 
  startGame();
@@ -386,6 +378,8 @@ void BosonStarting::loadPlayerData()
 
 void BosonStarting::slotLoadPlayerData(Player* p)
 {
+ BO_CHECK_NULL_RET(p);
+ boDebug() << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
  emit signalLoadingType(BosonLoadingWidget::LoadParticleSystems);
  p->speciesTheme()->loadParticleSystems();

@@ -28,12 +28,15 @@
 #include "boson.h"
 #include "upgradeproperties.h"
 #include "unitpropertyhandler.h"
+#include "bosonpropertyxml.h"
 #include "bodebug.h"
 
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
 
 #include <qbitarray.h>
+#include <qdom.h>
+#include <qtextstream.h>
 
 #include "player.moc"
 
@@ -298,11 +301,15 @@ bool Player::save(QDataStream& stream)
  Q_UINT32 unitPropId = d->mUnitPropID;
  stream << unitPropId;
 
+
+ // AB: see load()
+ /*
  // Save fog
  stream << d->mFogged;
 
  // Save statistics
  d->mStatistics->save(stream);
+ */
 
  /// TODO: save researched technologies!!!
 
@@ -355,11 +362,17 @@ bool Player::load(QDataStream& stream)
  stream >> unitPropId;
  d->mUnitPropID = unitPropId;
 
+ // these are necessary for loading games only. for that we use loadFromXML()
+ // now. note that Player::load() still gets called when a player enters a
+ // network game - we may want to fix this in order to enable players to join an
+ // already running game!
+ /*
  // Load fog
  stream >> d->mFogged;
 
- // Save statistics
+ // Load statistics
  d->mStatistics->load(stream);
+ */
 
  return true;
 }
@@ -680,5 +693,267 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 bool Player::advanceFlag() const
 {
  return ((Boson*)game())->advanceFlag();
+}
+
+bool Player::saveAsXML(QDomElement& root)
+{
+ // AB: probably we'll never use this... (KGame should take care of the id)
+ root.setAttribute(QString::fromLatin1("Id"), id());
+
+ root.setAttribute(QString::fromLatin1("NetworkPriority"), networkPriority());
+
+ QDomDocument doc = root.ownerDocument();
+
+ // store the dataHandler()
+ BosonPropertyXML propertyXML;
+ QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+ if (!propertyXML.saveAsXML(handler, dataHandler())) {
+	boError() << k_funcinfo << "Unable to save datahandler of player " << id() << endl;
+	return false;
+ }
+ root.appendChild(handler);
+
+ // save units
+ QDomElement units = doc.createElement(QString::fromLatin1("Units"));
+ QPtrListIterator<Unit> it(d->mUnits);
+ for (; it.current(); ++it) {
+	Unit* u = it.current();
+	QDomElement unit = doc.createElement(QString::fromLatin1("Unit"));
+	if (!u->saveAsXML(unit)) {
+		boError() << k_funcinfo << "Could not save unit " << u->id() << endl;
+		continue;
+	}
+	units.appendChild(unit);
+ }
+ root.appendChild(units);
+
+ // Save speciestheme
+ if (speciesTheme()) {
+	root.setAttribute(QString::fromLatin1("SpeciesTheme"), speciesTheme()->identifier());
+	root.setAttribute(QString::fromLatin1("TeamColor"), (unsigned int)speciesTheme()->teamColor().rgb());
+ } else {
+	// the attributes won't be there
+	boWarning() << k_funcinfo << "NULL speciestheme while saving into XML" << endl;
+ }
+
+ // Save unitpropID
+ root.setAttribute(QString::fromLatin1("UnitPropId"), (unsigned int)d->mUnitPropID);
+
+ // Save fog
+ saveFogOfWar(root);
+
+ // Save statistics
+ QDomElement statistics = doc.createElement(QString::fromLatin1("Statistics"));
+ d->mStatistics->save(statistics);
+ root.appendChild(statistics);
+
+ return true;
+}
+
+bool Player::loadFromXML(const QDomElement& root)
+{
+ boDebug(260) << k_funcinfo << endl;
+ // this does NOT load the units!
+
+ bool ok = false;
+ int id = root.attribute(QString::fromLatin1("Id")).toInt(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Id was no valid number" << endl;
+	return false;
+ }
+ Q_UNUSED(id);
+// setId(id); // AB: KGame should take care of this. we should not need this. (remember that we depend on KGame::d->mUniquePlayerNumber to be in sync!)
+ int networkPriority = root.attribute(QString::fromLatin1("NetworkPriority")).toInt(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "NetworkPriority was no valid number" << endl;
+	return false;
+ }
+ setNetworkPriority(networkPriority);
+
+ boDebug(260) << k_funcinfo << "load data handler" << endl;
+ // load the data handler
+ BosonPropertyXML propertyXML;
+ QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
+ if (!propertyXML.loadFromXML(handler, dataHandler())) {
+	boError(260) << k_funcinfo << "unable to load player data handler (player=" << this->id() << ")" << endl;
+	return false;
+ }
+
+ // note: this does NOT load the units.
+
+
+ boDebug(260) << k_funcinfo << "loading speciesTheme" << endl;
+ QString speciesIdentifier;
+ QColor color;
+ if (root.hasAttribute(QString::fromLatin1("SpeciesTheme"))) {
+	speciesIdentifier = root.attribute(QString::fromLatin1("SpeciesTheme"));
+ }
+ if (root.hasAttribute(QString::fromLatin1("TeamColor"))) {
+	unsigned int c = root.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid TeamColor value" << endl;
+	} else {
+		color.setRgb(c);
+	}
+ }
+ if (speciesIdentifier.isNull()) {
+	// migh be valid if we ever use this for network loading, too!
+	boError(260) << k_funcinfo << "No SpeciesTheme" << endl;
+	return false;
+ } else {
+	boDebug(260) << k_funcinfo << "speciesTheme: " << speciesIdentifier << endl;
+	// TODO: check whether this theme actually exists and could be loaded
+	loadTheme(SpeciesTheme::speciesDirectory(speciesIdentifier), color);
+ }
+
+ d->mUnitPropID = root.attribute(QString::fromLatin1("UnitPropId")).toUInt(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid UnitPropId value" << endl;
+	return false;
+ }
+
+
+ // Load fog
+ boDebug(260) << k_funcinfo << "loading fow" << endl;
+ loadFogOfWar(root);
+
+ // Load statistics
+ QDomElement statistics = root.namedItem(QString::fromLatin1("Statistics")).toElement();
+ if (statistics.isNull()) {
+	boWarning() << k_funcinfo << "No Statistics tag" << endl;
+	// dont return
+ } else {
+	d->mStatistics->load(statistics);
+ }
+
+ boDebug(260) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool Player::loadUnitsFromXML(const QDomElement& root)
+{
+ if (root.isNull()) {
+	boError(260) << k_funcinfo << "NULL root node" << endl;
+	return false;
+ }
+ QDomElement units = root.namedItem(QString::fromLatin1("Units")).toElement();
+ if (units.isNull()) {
+	boWarning(260) << k_funcinfo << "no units for player " << id() << endl;
+	return true;
+ }
+ QDomNodeList list = units.elementsByTagName(QString::fromLatin1("Unit"));
+ if (list.count() == 0) {
+	boWarning(260) << k_funcinfo << "no units for player " << id() << endl;
+	return true;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return false;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
+		boError(260) << k_funcinfo << "missing attribute: UnitType for Unit " << i << endl;
+		continue;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("Id"))) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Unit " << i << endl;
+		continue;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
+		boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Unit " << i << endl;
+		continue;
+	}
+	bool ok = false;
+	unsigned long int type;
+	unsigned long int id;
+	int dataHandlerId;
+	type = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid UnitType number for Unit " << i << endl;
+		continue;
+	}
+	id = e.attribute(QString::fromLatin1("Id")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id number for Unit " << i << endl;
+		continue;
+	}
+	dataHandlerId = e.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid DataHandlerId number for Unit " << i << endl;
+		continue;
+	}
+
+	// Create unit with Boson
+	Unit* unit = ((Boson*)game())->loadUnit(type, this);
+
+	// Set additional properties
+	d->mUnits.append(unit);
+	unit->dataHandler()->registerHandler(dataHandlerId, this,
+			SLOT(sendProperty(int, QDataStream&, bool*)),
+			SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+	unit->setId(id);
+
+	// Call unit's loading methods
+	if (!unit->loadFromXML(e)) {
+		boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
+	}
+
+	// Increase unit count
+	if (unit->isMobile()) {
+		d->mMobilesCount++;
+	} else {
+		d->mFacilitiesCount++;
+	}
+ }
+ return true;
+}
+
+void Player::saveFogOfWar(QDomElement& root) const
+{
+ // AB: I've tried several ways of doing this but couldn't find the solution. so
+ // now we simply stream every single bit as a complete byte. not good, but
+ // works
+ // also note that i don't want to do the bit magic myself, as i want to avoid
+ // this trouble with strings/xml and e.g. \0
+ QDomDocument doc = root.ownerDocument();
+ QDomElement fog = doc.createElement(QString::fromLatin1("Fogged"));
+ QString text;
+ QTextOStream s(&text);
+ s << (Q_UINT32)d->mFogged.size();
+ s << ' ';
+ for (unsigned int i = 0; i < d->mFogged.size(); i++) {
+	s << (char)(d->mFogged.testBit(i) ? '1' : '0');
+ }
+ QDomCDATASection fow = doc.createCDATASection(text);
+ fog.appendChild(fow);
+ root.appendChild(fog);
+}
+
+void Player::loadFogOfWar(const QDomElement& root)
+{
+ QDomElement element = root.namedItem(QString::fromLatin1("Fogged")).toElement();
+ if (element.isNull()) {
+	boError() << k_funcinfo << "No Fogged tag found" << endl;
+	d->mFogged.fill(true);
+	return;
+ }
+ QString text = element.text();
+ if (text.isEmpty()) {
+	boError() << k_funcinfo << "no content for Fogged tag found" << endl;
+	d->mFogged.fill(true);
+	return;
+ }
+ QTextIStream s(&text);
+ Q_UINT32 size;
+ s >> size;
+ char space;
+ s >> space;
+ d->mFogged.resize(size);
+ for (unsigned int i = 0; i < size; i++) {
+	char bit;
+	s >> bit;
+	d->mFogged.setBit(i, bit == '1');
+ }
 }
 

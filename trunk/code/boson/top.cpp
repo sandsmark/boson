@@ -58,7 +58,6 @@
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
-#include <qfile.h>
 
 #include <config.h>
 
@@ -481,7 +480,7 @@ void TopWidget::slotSaveGame(const QString& fileName, const QString& description
  if (file.findRev('.') == -1) {
 	file += ".bsg";
  }
- if (QFile::exists(file)) {
+ if (KStandardDirs::exists(file)) {
 	int r = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
 	if (r != KMessageBox::Yes) {
 		return;
@@ -489,11 +488,7 @@ void TopWidget::slotSaveGame(const QString& fileName, const QString& description
  }
 
  boDebug() << k_funcinfo << file << endl;
- QFile f(file);
- f.open(IO_WriteOnly);
- QDataStream s(&f);
- bool ok = boGame->save(s, true);
- f.close();
+ bool ok = boGame->saveToFile(file);
 
  if (ok) {
 	slotCancelLoadSave();

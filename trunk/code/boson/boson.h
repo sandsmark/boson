@@ -26,6 +26,7 @@ class Unit;
 class ProductionPlugin;
 class BosonCanvas;
 class QDomElement;
+class QDomDocument;
 class BosonPlayField;
 class QDataStream;
 
@@ -136,6 +137,9 @@ public:
 		return mGameMode;
 	}
 
+	bool loadFromFile(const QString& file);
+	bool saveToFile(const QString& file);
+
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
 	virtual bool load(QDataStream& stream, bool reset = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
@@ -182,11 +186,6 @@ public:
 	 * @return Latest Boson savegame format version
 	 **/
 	unsigned long int latestSavegameVersion();
-
-	/**
-	 * @return Boson savegame format version of currently loaded game
-	 **/
-	unsigned long int currentSavegameVersion();
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -358,6 +357,17 @@ protected:
 	 * This is used by @ref BosonScenario.
 	 **/
 	Unit* addUnit(QDomElement& node, Player* owner);
+
+	QString saveKGameAsXML();
+	QString savePlayersAsXML();
+	bool loadKGameFromXML(const QString&);
+
+	/**
+	 * Load the XML file in @p xml into @p doc and display an error message
+	 * if an error occured.
+	 * @return TRUE on success
+	 **/
+	bool loadXMLDoc(QDomDocument* doc, const QString& xml);
 
 protected slots:
 	/**
