@@ -84,6 +84,8 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
  BosonModel* m = new BosonModel(themePath + QString::fromLatin1("/objects/"), file, width, height);
  m->loadModel();
 
+ m->finishLoading();
+
  return m;
 }
 
