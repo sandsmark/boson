@@ -638,7 +638,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				BoVector3 a;
 				BoVector3 b;
 				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
-				myTransform(b.data(), texMatrix.data(), a.data());
+				texMatrix.transform(&b, &a);
 				tex[i][0] = b[0];
 				tex[i][1] = b[1];
 			}
