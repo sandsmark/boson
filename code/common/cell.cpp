@@ -28,18 +28,19 @@
 bool Cell::canGo(uint goFlag, groundType g)
 {
 
+	// air/requested and air
+	if ( BO_GO_AIR == goFlag) { 
+	//	printf("flying\n");
+		return !flying_unit() && ! (request_flying_f&flags);
+	}
+
+	// field/requested
 	if (flags&request_f) {
 	//	printf("requested cell\n");
 		return false;
 	}
 
-	// ... in the air
-	if ( BO_GO_AIR == goFlag) { 
-	//	printf("flying\n");
-		return flying_unit();
-	}
-
-	// on field
+	// field
 	if ( building() || field_unit() ) {
 	//	printf("building/field_unit\n");
 		return false;
