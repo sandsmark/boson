@@ -24,6 +24,11 @@
 #include <qptrlist.h>
 
 #include <lib3ds/mesh.h>
+#include <lib3ds/material.h>
+#include <lib3ds/file.h>
+#include <lib3ds/matrix.h>
+#include <lib3ds/vector.h>
+
 #include <GL/gl.h>
 
 class BoAdjacentDataBase
@@ -215,28 +220,49 @@ public:
 	{
 		mFaces = 0;
 		mMesh = 0;
+		mMaterial = 0;
+
+		mTexels = 0;
+		mVertices = 0;
 	}
 	int mType;
 	BoNode* mFaces;
+	bool mTextured;
 
 	Lib3dsMesh* mMesh;
+	Lib3dsMaterial* mMaterial;
+	GLuint mTexture;
 
 	QPtrList<BoNode> mAllNodes;
+
+	//  TODO: combine with vertex data into a single array! we can optimize
+	//  vertex arrays this way!
+	float* mTexels;
+	float* mVertices;
 };
 
 BoMesh::BoMesh(Lib3dsMesh* mesh)
 {
- d = new BoMeshPrivate;
- d->mType = GL_TRIANGLES;
+ init();
  d->mMesh = mesh;
- d->mAllNodes.setAutoDelete(true);
  createNodes();
 }
 
 BoMesh::~BoMesh()
 {
  d->mAllNodes.clear();
+ delete[] d->mTexels;
+ delete[] d->mVertices;
  delete d;
+}
+
+void BoMesh::init()
+{
+ d = new BoMeshPrivate;
+ d->mAllNodes.setAutoDelete(true);
+ d->mType = GL_TRIANGLES;
+ d->mTextured = false;
+ d->mTexture = 0;
 }
 
 void BoMesh::createNodes()
@@ -622,4 +648,243 @@ Lib3dsMesh* BoMesh::mesh() const
 {
  return d->mMesh;
 }
+
+QString BoMesh::textureName(Lib3dsMesh* mesh, Lib3dsFile* file)
+{
+ if (!mesh || mesh->faces == 0) {
+	return QString::null;
+ }
+ if (mesh->texels == 0) {
+	return QString::null;
+ }
+ Lib3dsMaterial* mat = BoMesh::material(mesh, file);
+ if (!mat) {
+	return QString::null;
+ }
+ if (BoMesh::isTeamColor(mesh)) {
+	// teamcolor objects are not textured.
+	return QString::null;
+ }
+
+ // this is the texture map of the object.
+ // t->name is the (file-)name and in
+ // mesh->texelL you can find the texture
+ // coordinates for glTexCoord*()
+ // note that mesh->texels can be 0 - then the
+ // mesh doesn't have any texture. otherwise it
+ // must be equal to mesh->points
+ Lib3dsTextureMap* t = &mat->texture1_map;
+
+ // AB: note that we use BosonModel::cleanTextureName() for the final name. here
+ // we return the name from the 3ds file only.
+ return QString(t->name);
+}
+
+Lib3dsMaterial* BoMesh::material(Lib3dsMesh* mesh, Lib3dsFile* file)
+{
+if (!mesh || mesh->faces == 0) {
+	return 0;
+ }
+ // AB: all faces in this mesh must use the same material!
+ Lib3dsFace* f = &mesh->faceL[0];
+ Lib3dsMaterial* mat = 0;
+ if (f->material[0]) {
+	mat = lib3ds_file_material_by_name(file, f->material);
+ }
+ return mat;
+}
+
+bool BoMesh::isTeamColor(const Lib3dsMesh* mesh)
+{
+ if (!mesh) {
+	BO_NULL_ERROR(mesh);
+	return false;
+ }
+ if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+	return true;
+ }
+ return false;
+}
+
+void BoMesh::setMaterial(Lib3dsMaterial* mat)
+{
+ d->mMaterial = mat;
+}
+
+void BoMesh::setTextured(bool tex)
+{
+ d->mTextured = tex;
+}
+
+void BoMesh::setTextureObject(GLuint tex)
+{
+ d->mTexture = tex;
+}
+
+void BoMesh::loadVertices()
+{
+ BO_CHECK_NULL_RET(mesh());
+ if (mesh()->faces == 0) {
+	return;
+ }
+ if (d->mVertices) {
+	boWarning() << k_funcinfo << "vertices already loaded" << endl;
+	delete[] d->mVertices;
+ }
+ d->mVertices = new float[mesh()->points * 3];
+ Lib3dsMatrix invMeshMatrix;
+ lib3ds_matrix_copy(invMeshMatrix, mesh()->matrix);
+ lib3ds_matrix_inv(invMeshMatrix);
+ BoMatrix matrix(&invMeshMatrix[0][0]);
+
+ BoVector3 vector;
+ BoVector3 v;
+ for (unsigned int i = 0; i < mesh()->points; i++) {
+	vector.set(mesh()->pointL[i].pos);
+	matrix.transform(&v, &vector);
+	d->mVertices[i * 3] = v[0];
+	d->mVertices[i * 3 + 1] = v[1];
+	d->mVertices[i * 3 + 2] = v[2];
+ }
+}
+
+void BoMesh::loadTexels()
+{
+ BO_CHECK_NULL_RET(mesh());
+ if (d->mTexels) {
+	boWarning() << k_funcinfo << "texels already loaded" << endl;
+	delete[] d->mTexels;
+ }
+ if (mesh()->texels == 0) {
+	return;
+ }
+ if (!d->mMaterial) {
+	return;
+ }
+ if (!d->mTextured) {
+	return;
+ }
+ d->mTexels = new float[mesh()->texels * 2];
+
+
+ BoMatrix texMatrix;
+ // *ggg* this is a nice workaround.
+ // it's hard to do this with a Lib3dsMatrix by several
+ // reasons - so we do these calculations in OpenGL
+ // (*NOT* in a display list - immediate mode) and then
+ // get the texture matrix.
+ // With this matrix we can easily calculate the actual
+ // texture coordinates.
+ // btw: this means that all calculations are done only
+ // once (on startup) and therefore we'll have some
+ // speedup
+
+ // AB: this part isn't time critical anymore. you can
+ // call even OpenGL commands without runtime slowdowns.
+ // We calculate the actual texture map coordinates only
+ // once and then use the final calculations in the
+ // display list.
+ glMatrixMode(GL_TEXTURE);
+ glPushMatrix();
+ glLoadIdentity(); // should already be there
+ Lib3dsTextureMap* t = &d->mMaterial->texture1_map;
+ if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
+	// 3ds does these things pretty unhandy. it doesn't
+	// scale as opengl does, but rather emulates scaling the
+	// texture itself (i.e. when the texture is centered on
+	// an object it will still be centered after scaling).
+	// so we need to translate them before scaling.
+	glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
+	glScalef(t->scale[0], t->scale[1], 1.0);
+ }
+ if (t->rotation != 0.0) {
+	glRotatef(-t->rotation, 0.0, 0.0, 1.0);
+ }
+ glTranslatef(-t->offset[0], -t->offset[1], 0.0);
+ glTranslatef(mesh()->map_data.pos[0], mesh()->map_data.pos[1], mesh()->map_data.pos[2]);
+ float scale = mesh()->map_data.scale;
+ if (scale != 0.0 && scale != 1.0) {
+	// doesn't seem to be used in our models
+	glScalef(scale, scale, 1.0);
+ }
+ texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
+ if (texMatrix.isNull()) {
+	boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
+	texMatrix.loadIdentity();
+ }
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+
+
+ // now we have the final texture matrix in texMatrix.
+ // all texel coordinates have to be transformed using this matrix.
+ BoVector3 a;
+ BoVector3 b;
+ for (unsigned int i = 0; i < mesh()->texels; i++) {
+	a.set(mesh()->texelL[i][0], mesh()->texelL[i][1], 0.0);
+	texMatrix.transform(&b, &a);
+	d->mTexels[i * 2] = b[0];
+	d->mTexels[i * 2 + 1] = b[1];
+ }
+}
+
+void BoMesh::renderMesh()
+{
+ // TODO: count number of nodes in this mesh and compare to mesh->faces
+ BO_CHECK_NULL_RET(mesh());
+ BO_CHECK_NULL_RET(d->mVertices);
+ BoNode* node = faces();
+ if (!node) {
+	boError() << k_funcinfo << "NULL node" << endl;
+	return;
+ }
+ if (type() == GL_TRIANGLE_STRIP && false) {
+	 boDebug() << "painting _STRIP" << endl;
+	if (!node->next()) {
+		boError() << k_funcinfo << "less than 2 faces in mesh " << mesh()->name << "! this is not supported" << endl;
+		return;
+	}
+	int firstPoint;
+	int secondPoint;
+	int thirdPoint;
+	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
+
+	renderPoint(node->face()->points[firstPoint]);
+	renderPoint(node->face()->points[secondPoint]);
+	renderPoint(node->face()->points[thirdPoint]);
+
+	// we skip the entire first face. all points have been rendered above.
+	node = node->next();
+	for (; node; node = node->next()) {
+		int point = node->relevantPoint();
+		if (point < 0 || point > 2) {
+			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
+			continue;
+		}
+		renderPoint(node->face()->points[point]);
+	}
+ } else {
+	for (; node; node = node->next()) {
+		for (int i = 0; i < 3; i++) {
+			renderPoint(node->face()->points[i]);
+		}
+	}
+ }
+}
+
+void BoMesh::renderPoint(int point)
+{
+ if (point < 0 || (unsigned int)point >= mesh()->points) {
+	boError() << k_funcinfo << "invalid point " << point << endl;
+	return;
+ }
+
+ if (d->mTexels) {
+	 // basiclly this is a
+	 // glTexCoord2f(d->mTexels[point*2], d->mTexels[point*2+1])
+	glTexCoord2fv(d->mTexels + 2 * point);
+ }
+ glVertex3fv(d->mVertices + 3 * point);
+}
+
 

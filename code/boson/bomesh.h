@@ -124,6 +124,13 @@ public:
 	~BoMesh();
 
 	/**
+	 * Load the texels with their (final) coordinates.
+	 **/
+	void loadTexels();
+
+	void loadVertices();
+
+	/**
 	 * Try to connect all faces in @ref mesh, so that we can use
 	 * GL_TRIANGLE_STRIP. If that doesn't work this function will add all
 	 * faces completely instead. See @ref addFaces
@@ -159,11 +166,25 @@ public:
 
 	BoNode* faces() const;
 
+	void setMaterial(Lib3dsMaterial* mat);
+	void setTextured(bool isTextured);
+	void setTextureObject(GLuint tex);
+
 	Lib3dsMesh* mesh() const;
+
+	static Lib3dsMaterial* material(Lib3dsMesh* mesh, Lib3dsFile* file);
+	static QString textureName(Lib3dsMesh* mesh, Lib3dsFile* file);
+	static bool isTeamColor(const Lib3dsMesh* mesh);
+
+	void renderMesh();
+	void renderPoint(int index);
 
 protected:
 	void createNodes();
 	bool connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const;
+
+private:
+	void init();
 
 private:
 	BoMeshPrivate* d;

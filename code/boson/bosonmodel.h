@@ -221,13 +221,6 @@ protected:
 	 * @param reload See @ref loadNodes
 	 **/
 	void loadNode(Lib3dsNode* node, bool reload);
-	/**
-	 * Used by @ref loadNode. This renders the specified mesh, so that it
-	 * can be stored into the display list.
-	 * @param textured TRUE if this is a textured mesh. WARNING:
-	 * textureMatrix can be non-NULL even, when textured is FALSE!
-	 **/
-	void renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib3dsMatrix invMeshMatrix, BoMatrix* textureMatrix);
 
 	/**
 	 * Render the specified node according to the values for the current
@@ -255,8 +248,6 @@ protected:
 	 * directory
 	 **/
 	const QString& baseDirectory() const;
-
-	void renderPoint(Lib3dsMesh* mesh, Lib3dsFace* face, int point, bool textured, Lib3dsMatrix invMeshMatrix, const BoMatrix* textureMatrix);
 
 public:
 	/**
@@ -289,8 +280,6 @@ public:
 	 **/
 	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
-
-	static bool isTeamColor(const Lib3dsMesh* mesh);
 
 private:
 	void init();
