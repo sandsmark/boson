@@ -1251,6 +1251,11 @@ void BosonBigDisplayBase::renderParticles()
  //boDebug(150) << k_funcinfo << "        Particles drawing: " << end.tv_usec - tmsort.tv_usec << " us" << endl;
 }
 
+// one day we might support swapping LMB and RMB so let's use defines already to
+// make that easier.
+#define LEFT_BUTTON LeftButton
+#define RIGHT_BUTTON RightButton
+
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
  GLdouble posX = 0.0;
@@ -1263,51 +1268,67 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  QPoint canvasPos;
  worldToCanvas(posX, posY, posZ, &canvasPos);
 
+ // our actions are done on Button*Release*, not Press. That conflicts with
+ // DblClick, so we store whether the last Press event was an actual press event
+ // or a double click.
+ static ButtonState isDoubleClick = NoButton;
+
  switch (e->type()) {
 	case QEvent::Wheel:
 	{
 		QWheelEvent* wheel = (QWheelEvent*)e;
 		float delta = -wheel->delta() / 120;//120: see QWheelEvent::delta()
-		if (boConfig->mouseWheelAction() == CameraMove) {
-			int x, y;
-
-			if (wheel->state() & ControlButton) {
-				x = width();
-				y = height();
-			} else {
-				x = 20;
-				y = 20;
-				delta *= QApplication::wheelScrollLines();
-			}
-
-			if (wheel->orientation() == Horizontal) {
-				x *= (int)delta;
-				y = 0;
-			} else {
-				x = 0;
-				y *= (int)delta;
-			}
-			scrollBy(x, y);
-		} else if (boConfig->mouseWheelAction() == CameraZoom) {
-			float zoom;
-			if (wheel->state() & ControlButton) {
-				zoom = delta * 3;
-			} else {
-				zoom = delta * 1;
-			}
-			camera()->changeZ(zoom);
-			cameraChanged();
-		} else if (boConfig->mouseWheelAction() == CameraRotate) {
-			float rotate;
-			if (wheel->state() & ControlButton) {
-				rotate = delta * 30;
-			} else {
-				rotate = delta * 10;
-			}
-			camera()->changeRotation(rotate);
-			cameraChanged();
+		int action;
+		if (e->state() & ShiftButton) {
+			action = boConfig->mouseWheelShiftAction();
 		} else {
-			boWarning() << k_funcinfo << "Invalid mouseWheelAction: " << boConfig->mouseWheelAction() << endl;
+			action = boConfig->mouseWheelAction();
+		}
+		switch (action) {
+			case CameraMove:
+			{
+				int scrollX, scrollY;
+				if (wheel->state() & ControlButton) {
+					scrollX = width();
+					scrollY = height();
+				} else {
+					scrollX = 20;
+					scrollY = 20;
+					delta *= QApplication::wheelScrollLines();
+				}
+				if (wheel->orientation() == Horizontal) {
+					scrollX *= (int)delta;
+					scrollY = 0;
+				} else {
+					scrollX = 0;
+					scrollY *= (int)delta;
+				}
+				scrollBy(scrollX, scrollY);
+				break;
+			}
+			case CameraZoom:
+				if (wheel->state() & ControlButton) {
+					delta *= 3;
+				} else {
+					delta *= 1; // no effect, btw
+				}
+				camera()->changeZ(delta);
+				cameraChanged();
+				break;
+			case CameraRotate:
+				if (wheel->state() & ControlButton) {
+					delta *= 30;
+				} else {
+					delta *= 10;
+				}
+				camera()->changeRotation(delta);
+				cameraChanged();
+				break;
+			default:
+			{
+				boWarning() << k_funcinfo << "invalid wheel action: " << action << endl;
+				break;
+			}
 		}
 		e->accept();
 		break;
@@ -1315,21 +1336,22 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseMove:
 	{
 		d->mMouseMoveDiff.moveToPos(e->pos());
+		isDoubleClick = NoButton; // when the mouse was pressed twice but the second press is hold down and moved then it isn't a double click anymore.
 		if (e->state() & AltButton) {
 			// The Alt button is the camera modifier in boson.
 			// Better don't do important stuff (like unit movement
 			// or selections) here, since a single push on Alt gives
 			// the focus to the mneu which might be very confusing
 			// during a game.
-			if (e->state() & LeftButton) {
+			if (e->state() & LEFT_BUTTON) {
 				camera()->changeZ(d->mMouseMoveDiff.dy());
 				cameraChanged();
-			} else if (e->state() & RightButton) {
+			} else if (e->state() & RIGHT_BUTTON) {
 				camera()->changeRotation(d->mMouseMoveDiff.dx());
 				camera()->changeRadius(d->mMouseMoveDiff.dy());
 				cameraChanged();
 			}
-		} else if (e->state() & LeftButton) {
+		} else if (e->state() & LEFT_BUTTON) {
 			if (e->state() & ControlButton) {
 				// not yet used
 			} else {
@@ -1338,7 +1360,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				d->mSelectionRect.setVisible(true);
 				moveSelectionRect(posX, posY, posZ);
 			}
-		} else if (e->state() & RightButton) {
+		} else if (e->state() & RIGHT_BUTTON) {
 			// RMB+MouseMove does *not* depend on CTRL or Shift. the
 			// map is moved in all cases (currently - we have some
 			// free buttons here :))
@@ -1379,46 +1401,19 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	}
 	case QEvent::MouseButtonDblClick:
 		makeActive();
-		if (e->button() == LeftButton) {
-			bool replace = !(e->state() & ShiftButton);
-			Unit* unit = canvas()->findUnitAt(canvasPos);
-			if (unit) {
-				if (!selectAll(unit->unitProperties(), replace)) {
-					selectSingle(unit, replace);
-				}
-			}
-		}
+		isDoubleClick = e->button();
+		// actual actions will happen on ButtonRelease!
 		e->accept();
 		break;
 	case QEvent::MouseButtonPress:
 		makeActive();
-		if (e->button() == LeftButton) {
+		// no action should happen here!
+		isDoubleClick = NoButton;
+		if (e->button() == LEFT_BUTTON) {
 			d->mSelectionRect.setStart(posX, posY, posZ);
-			if (actionLocked()) {
-				// If action is locked then it means that user clicked on an action
-				// button and wants to perform specific action
-				// AB: IMHO this fits better in RMB-Pressed.
-				// mixing LMB and RMB for actions is very
-				// confusing
-				bool send = false;
-				BoAction action;
-				action.setWorldPos(posX, posY, posZ);
-				action.setCanvasPos(canvasPos);
-				actionClicked(action, stream, &send);
-				if (send) {
-					*eatevent = true;
-				}
-			} else {
-			}
 		} else if (e->button() == MidButton) {
-			if (boConfig->mmbMove()) {
-				int cellX, cellY;
-				cellX = (int)(posX / BO_GL_CELL_SIZE);
-				cellY = (int)(-posY / BO_GL_CELL_SIZE);
-				slotReCenterDisplay(QPoint(cellX, cellY));
-				updateCursor();
-			}
-		} else if (e->button() == RightButton) {
+			// nothing to be done here
+		} else if (e->button() == RIGHT_BUTTON) {
 			if (boConfig->rmbMove()) {
 				//AB: this might be obsolete..
 				d->mMouseMoveDiff.moveToPos(e->pos()); // set position, but do not yet start!
@@ -1427,35 +1422,68 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		e->accept();
 		break;
 	case QEvent::MouseButtonRelease:
-		if (e->state() & AltButton) {
-			// the camera modifier. no cleanups to be done.
-		} else if (e->button() == LeftButton) {
-			if (e->state() & ControlButton) {
-				// unused
-			} else if (e->state() & ShiftButton) {
-				removeSelectionRect(false);
-			} else {
-				removeSelectionRect(true);
-			}
-		} else if (e->button() == RightButton) {
-			if (d->mMouseMoveDiff.isRMBMove()) {
-				d->mMouseMoveDiff.stop();
-			} else {
-				//TODO: port editor to KGameIO - otherwise
-				//eatevent and send are useless
-
-				// AB: is *eatevent the correct parameter? KGame should
-				// *not* send the stream if this is false!
-				bool send = false;
-				BoAction action;
-				action.setCanvasPos(canvasPos);
-				action.setWorldPos(posX, posY, posZ);
-				if (e->state() & ControlButton) {
-					action.setForceAttack(true);
+		if (e->button() == isDoubleClick) {
+			if (e->button() == LEFT_BUTTON) {
+				// we ignore UnitAction is locked here
+				// currently!
+				Unit* unit = canvas()->findUnitAt(canvasPos);
+				bool replace = !(e->state() & ControlButton);
+				bool onScreenOnly = (e->state() & ShiftButton);
+				if (unit) {
+					if (onScreenOnly) {
+						boDebug() << "TODO: select only those that are currently on the screen!" << endl;
+					}
+					if (!selectAll(unit->unitProperties(), replace)) {
+						selectSingle(unit, replace);
+					}
 				}
-				actionClicked(action, stream, &send);
-				if (send) {
-					*eatevent = true;
+			} else {
+				// we ignore all other (RMB, MMB) for now. we
+				// might use this one day.
+			}
+		} else {
+			if (e->button() == LEFT_BUTTON) {
+				if (actionLocked()) {
+					// basically the same as a normal RMB
+					bool send = false;
+					BoAction action;
+					action.setCanvasPos(canvasPos);
+					action.setWorldPos(posX, posY, posZ);
+					actionClicked(action, stream, &send);
+					if (send) {
+						*eatevent = true;
+					}
+				} else if (e->state() & ShiftButton) {
+					// unused
+				} else if (e->state() & ControlButton) {
+					removeSelectionRect(false);
+				} else {
+					removeSelectionRect(true);
+				}
+			} else if (e->button() == MidButton) {
+				// we ignore all modifiers here, currently.
+				if (boConfig->mmbMove()) {
+					int cellX, cellY;
+					cellX = (int)(posX / BO_GL_CELL_SIZE);
+					cellY = (int)(-posY / BO_GL_CELL_SIZE);
+					slotReCenterDisplay(QPoint(cellX, cellY));
+					updateCursor();
+				}
+			} else if (e->button() == RIGHT_BUTTON) {
+				if (d->mMouseMoveDiff.isRMBMove()) {
+					d->mMouseMoveDiff.stop();
+				} else {
+					bool send = false;
+					BoAction action;
+					action.setCanvasPos(canvasPos);
+					action.setWorldPos(posX, posY, posZ);
+					if (e->state() & ControlButton) {
+						action.setForceAttack(true);
+					}
+					actionClicked(action, stream, &send);
+					if (send) {
+						*eatevent = true;
+					}
 				}
 			}
 		}
