@@ -55,14 +55,14 @@ class BosonServer : public KTMainWindow, public boFile
   Q_OBJECT
 
  public:
-  BosonServer(const char *mapfile, const char *name=0L);
+  BosonServer(int port, const char *mapfile, const char *name=0L);
   ~BosonServer();
 
   void	handleDialogMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
 
   protected:
   void	initLog(void);
-  void	initSocket(void);
+  void	initSocket(int port);
   void	handleGameMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
 
   void	initMap(const char *);
