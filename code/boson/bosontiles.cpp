@@ -122,6 +122,13 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  if (dir.right(1) != QString::fromLatin1("/")) {
 	dir += QString::fromLatin1("/");
  }
+ if (mTilesDir == dir) {
+	boDebug() << k_funcinfo << "already loaded from " << dir << ". skipping..." << endl;
+	// we have already loaded this. no need to do it again.
+	emit signalTilesLoaded();
+	return true;
+ }
+ mTilesDir = dir;
  mDebug = debug;
  // Variables for progress information
  mLoaded = 0;

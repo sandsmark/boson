@@ -128,6 +128,8 @@ private:
 
 	bool mDebug; // used in putOne()
 	int mLoaded; // Number of tiles loaded
+
+	QString mTilesDir;
 };
 
 #endif
