@@ -25,7 +25,6 @@
 class QString;
 class Boson;
 class Player;
-class BosonPlayField;
 class BosonCanvas;
 class BosonWidgetBase;
 class KCmdLineArgs;
@@ -303,7 +302,6 @@ private:
 	void initBoson();
 	void initCanvas();
 	void initPlayer();
-	void initPlayField();
 	void initKActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);
@@ -316,8 +314,6 @@ private:
 
 private:
 	KDockWidget* mMainDock;
-
-	BosonPlayField* mPlayField;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;

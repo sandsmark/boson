@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,12 +54,11 @@ BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
  d = new BosonStartingPrivate;
  mDestPlayField = 0;
- mNewPlayField = 0; // in case we are starting a new map
 }
 
 BosonStarting::~BosonStarting()
 {
- delete mNewPlayField;
+ delete mDestPlayField;
  delete d;
 }
 
@@ -124,13 +123,9 @@ bool BosonStarting::start()
 	boError(270) << k_funcinfo << "not enough players in game. there must be at least a real player and a (internal) neutral player" << endl;
 	return false;
  }
- if (!mDestPlayField) {
-	boError(270) << k_funcinfo << "NULL playfield" << endl;
-	return false;
- }
- // mDestPlayField should be empty - ensure this by deleting the map
- mDestPlayField->deleteMap();
 
+ delete mDestPlayField;
+ mDestPlayField = new BosonPlayField(0);
 
  // AB: Receiving the map is obsolete.
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);

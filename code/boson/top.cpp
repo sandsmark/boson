@@ -120,7 +120,6 @@ public:
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 {
  d = new TopWidgetPrivate;
- mPlayField = 0;
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
@@ -374,12 +373,6 @@ void TopWidget::initPlayer()
  slotChangeLocalPlayer(p);
 }
 
-void TopWidget::initPlayField()
-{
- delete mPlayField;
- mPlayField = new BosonPlayField(this);
-}
-
 void TopWidget::initCanvas()
 {
  boGame->createCanvas();
@@ -521,8 +514,6 @@ void TopWidget::slotStartNewGame()
  saveInitialDockConfig();
 
  d->mStartup->showLoadingWidget();
-
- d->mStarting->setDestPlayField(mPlayField);
 
  initCanvas();
  initGameDockWidgets(false); // dock the widgets to their default location and hide them
@@ -681,9 +672,9 @@ void TopWidget::endGame()
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info
- delete mPlayField;
- mPlayField = 0;
  hideGameDockWidgets(true);
+ delete d->mStarting;
+ d->mStarting = 0;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -716,7 +707,6 @@ void TopWidget::reinitGame()
 		this, SLOT(slotStartingFailed()));
 
  initBoson();
- initPlayField();
 
  d->mActionStatusbar->setChecked(false);
  slotToggleStatusbar();

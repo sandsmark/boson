@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,15 +45,6 @@ public:
 	 **/
 	void setNewGameData(const QByteArray& data);
 
-	/**
-	 * The playfield that gets assigned here should be an <em>empty</em>
-	 * playfield. It is <em>not</em> the playfield that gets loaded, but
-	 * rather the place where it gets loaded to.
-	 *
-	 * Use @ref setPlayFieldId to specify the playfield that should get
-	 * loaded.
-	 **/
-	void setDestPlayField(BosonPlayField* f) { mDestPlayField = f; }
 	void setLocalPlayer(Player* p) { mPlayer = p; }
 	void setPlayFieldId(const QString& id) { mPlayFieldId = id; }
 	void setEditorMap(const QByteArray& buffer);
@@ -155,7 +146,6 @@ private:
 
 	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;
-	BosonPlayField* mNewPlayField;
 	Player* mPlayer;
 
 	QString mPlayFieldId; // which playfield will get started. note: only ADMIN should use the id!
