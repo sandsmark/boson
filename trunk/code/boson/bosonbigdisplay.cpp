@@ -460,43 +460,44 @@ void BosonBigDisplay::addMouseIO(Player* p)
 
 void BosonBigDisplay::slotUnitAction(int actionType)
 {
- if(actionType == (int)ActionMove) {
-	d->mCursorType = CursorMove;
- }
- else if(actionType == (int)ActionAttack) {
-	d->mCursorType = CursorAttack;
- }
- else if(actionType == (int)ActionStop) {
-	if(selection()->isEmpty()) {
-		kdError() << k_funcinfo << "Selection is empty!" << endl;
+ switch ((UnitAction)actionType) {
+	case ActionMove:
+		d->mCursorType = CursorMove;
+		break;
+	case ActionAttack:
+		d->mCursorType = CursorAttack;
+		break;
+	case ActionStop:
+	{
+		if(selection()->isEmpty()) {
+			kdError() << k_funcinfo << "Selection is empty!" << endl;
+			return;
+		}
+		// Stop all selected units
+		// I REALLY hope I'm doing this correctly
+		// TODO: should be in actionStop()
+		QPtrList<Unit> list = selection()->allUnits();
+		QPtrListIterator<Unit> it(list);
+		QByteArray b;
+		QDataStream stream(b, IO_WriteOnly);
+
+		// tell the clients we want to move units:
+		stream << (Q_UINT32)BosonMessage::MoveStop;
+		// tell them how many units:
+		stream << (Q_UINT32)list.count();
+		while (it.current()) {
+			// tell them which unit to move:
+			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+			++it;
+		}
+		QDataStream msg(b, IO_WriteOnly);
+		localPlayer()->forwardInput(msg);
+		d->mLockCursor = false;
 		return;
 	}
-	// Stop all selected units
-	// I REALLY hope I'm doing this correctly
-	// TODO: should be in actionStop()
-	QPtrList<Unit> list = selection()->allUnits();
-	QPtrListIterator<Unit> it(list);
-	QByteArray b;
-	QDataStream stream(b, IO_WriteOnly);
-
-	// tell the clients we want to move units:
-	stream << (Q_UINT32)BosonMessage::MoveStop;
-	// tell them how many units:
-	stream << (Q_UINT32)list.count();
-	while (it.current()) {
-		// tell them which unit to move:
-		stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
-		++it;
-	}
-
-	QDataStream msg(b, IO_WriteOnly);
-	localPlayer()->forwardInput(msg);
-	d->mLockCursor = false;
-	return;
- }
- else {
-	kdError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
-	return;
+	default:
+		kdError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
+		return;
  }
  d->mLockCursor = true;
 }
