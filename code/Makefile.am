@@ -1,5 +1,5 @@
 
-SUBDIRS = common server visual boson map
+SUBDIRS = common server visual boson map editor
 
 EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO 
 
