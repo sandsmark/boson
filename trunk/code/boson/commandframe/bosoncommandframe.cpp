@@ -147,6 +147,79 @@ private:
 	KGameProgress* mProgress;
 };
 
+class BoResourceMineWidget: public BoUnitDisplayBase
+{
+public:
+	BoResourceMineWidget(BosonCommandFrame* cmdFrame, QWidget* parent) : BoUnitDisplayBase(cmdFrame, parent)
+	{
+		QVBoxLayout* layout = new QVBoxLayout(this);
+
+		mMinerals = new QLabel(this);
+		mOil = new QLabel(this);
+
+		layout->addWidget(mMinerals);
+		layout->addWidget(mOil);
+	}
+
+	~BoResourceMineWidget()
+	{
+	}
+
+protected:
+	virtual bool display(Unit* unit)
+	{
+		ResourceMinePlugin* mine = (ResourceMinePlugin*)unit->plugin(UnitPlugin::ResourceMine);
+		if (mine) {
+			setMine(mine);
+			return true;
+		}
+		return false;
+	}
+
+	void setMine(ResourceMinePlugin* m)
+	{
+		if (!m || (!m->canProvideMinerals() && !m->canProvideOil())) {
+			return;
+		}
+		if (m->canProvideMinerals()) {
+			mMinerals->show();
+		} else {
+			mMinerals->hide();
+		}
+		if (m->canProvideOil()) {
+			mOil->show();
+		} else {
+			mOil->hide();
+		}
+		if (m->minerals() >= 0) {
+			mMinerals->setText(i18n("Minerals: %1").arg(m->minerals()));
+		} else {
+			mMinerals->setText(i18n("Minerals: unlimited"));
+		}
+		if (m->oil() >= 0) {
+			mOil->setText(i18n("Oil: %1").arg(m->oil()));
+		} else {
+			mOil->setText(i18n("Oil: unlimited"));
+		}
+	}
+
+	virtual bool useUpdateTimer()
+	{
+		Unit* u = 0;
+		if (!u) {
+			return false;
+		}
+		if (u->currentPluginType() == UnitPlugin::ResourceMine) {
+			return true;
+		}
+		return false;
+	}
+
+private:
+	QLabel* mMinerals;
+	QLabel* mOil;
+};
+
 
 class BosonCommandFrame::BosonCommandFramePrivate
 {
