@@ -51,10 +51,14 @@ class UnitGroup
     void leaderMoved(int x, int y);
     void leaderDestroyed();
     void leaderStopped();
-    bool isLeader(Unit* unit);
+    bool isLeader(Unit* unit) { return (mLeader == unit); }
+
     void advanceGroupMove();
+
     void setDeleteGroup(bool d) { mDelete = d; }
     bool deleteGroup() const { return mDelete; }
+
+    Unit* leader() const { return mLeader; }
 
   private:
     QPtrList<Unit> mMembers;

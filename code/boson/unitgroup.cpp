@@ -65,15 +65,6 @@ void UnitGroup::leaderDestroyed()
   mLeader->setGroupLeader(true);
 }
 
-bool UnitGroup::isLeader(Unit* unit)
-{
-  if(unit->id() == mLeader->id()) 
-  {
-    return true;
-  }
-  return false;
-}
-
 void UnitGroup::leaderStopped()
 {
   QPtrListIterator<Unit> it(mMembers);
