@@ -68,8 +68,12 @@ public:
 	 * completely for starting a playField only.
 	 * @param identifier The filename without suffix. As returned by @ref
 	 * availablePlayFields.
+	 *
+	 * @param file The fileName of the playField. Can be QString::null if
+	 * @ref preLoadPlayField has been called already, i.e. @ref isPreLoaded
+	 * is true.
 	 **/
-	bool loadPlayField(const QString& identifier);
+	bool loadPlayField(const QString& file);
 
 	/**
 	 * Load the important data (description for example) from the playField.
@@ -132,6 +136,7 @@ public:
 
 	BosonMap* map() const { return mMap; }
 	BosonScenario* scenario() const { return mScenario; }
+	const QString& identifier() const { return mIdentifier; }
 
 	void quit();
 

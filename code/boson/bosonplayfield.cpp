@@ -84,6 +84,10 @@ void BosonPlayField::preLoadAllPlayFields()
 	return;
  }
  for (unsigned int i = 0; i < list.count(); i++) {
+	if (mPlayFields->find(BPFFile::fileNameToIdentifier(list[i]))) {
+		continue;
+	}
+	boDebug() << k_funcinfo << list[i] << endl;
 	BosonPlayField* playField = new BosonPlayField();
 	bool ok = playField->preLoadPlayField(list[i]);
 	if (!ok) {
@@ -191,10 +195,6 @@ bool BosonPlayField::loadPlayField(const QString& file)
  }
  if (!mFile) {
 	boError() << k_funcinfo << "NULL file" << endl;
-	return false;
- }
- if (mFile->fileName() != file) {
-	boError() << k_funcinfo << "conflicting filenames: " << file << "!=" << mFile->fileName() << endl;
 	return false;
  }
 

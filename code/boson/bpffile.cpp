@@ -33,8 +33,7 @@ BPFFile::BPFFile(const QString& file, bool readOnly) : KTar(file, QString::fromL
  } else {
 	open(IO_WriteOnly);
  }
- QFileInfo fileInfo(fileName());
- mIdentifier = fileInfo.fileName();
+ mIdentifier = fileNameToIdentifier(fileName());
 }
 
 BPFFile::~BPFFile()
@@ -125,5 +124,11 @@ QByteArray BPFFile::fileData(const QString& fileName) const
  }
  b = ((const KArchiveFile*)file)->data();
  return b;
+}
+
+QString BPFFile::fileNameToIdentifier(const QString& fileName)
+{
+ QFileInfo fileInfo(fileName);
+ return fileInfo.fileName();
 }
 
