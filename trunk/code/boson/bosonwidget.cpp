@@ -305,6 +305,10 @@ void BosonWidget::slotStartGame()
 	kdWarning() << "not server" << endl;
 	return;
  }
+ if (d->mBoson->gameStatus() == KGame::Run) {
+	kdWarning() << "game already running" << endl;
+	return;
+ }
  // it would be great this way:
  // - new game dialog gives the possibility to select a map. The selected map is
  // first shown as a preview

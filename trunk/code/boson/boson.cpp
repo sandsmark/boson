@@ -102,13 +102,17 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			VisualUnit* unit = findUnit(unitId, player);
 			if (!unit) {
 				kdDebug() << "unit " << unitId << " not found for this player" << endl;
-				break;
+				continue;
 			}
-			kdDebug() << "move " << unitId << endl;
 			if (unit->owner() != player) {
 				kdDebug() << "unit " << unitId << ": only owner can move units!" << endl;
-				break;
+				continue;
 			}
+			if (unit->isDestroyed()) {
+				kdDebug() << "cannot move destroyed units" << endl;
+				continue;
+			}
+			kdDebug() << "move " << unitId << endl;
 			if (unit->unitProperties()->isMobile()) {
 				unit->moveTo(pos);
 			}
@@ -139,7 +143,15 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			VisualUnit* unit = findUnit(unitId, player);
 			if (!unit) {
 				kdDebug() << "unit " << unitId << " not found for this player" << endl;
-				break;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				kdDebug() << "cannot attack with destroyed units" << endl;
+				continue;
+			}
+			if (attackedUnit->isDestroyed()) {
+				kdDebug() << "no sense in attacking destroyed units" << endl;
+				continue;
 			}
 			if (unit->range() > 0 && unit->damage() > 0) {
 				kdDebug() << unitId << " attacks " << attackedUnitId << endl;
@@ -324,12 +336,6 @@ void Boson::slotSetGameSpeed(int speed)
 	d->mGameTimer->start(gameSpeed());
  }
 }
-
-/*
-void Boson::slotCreateUnit(VisualUnit*& unit, int unitType, Player* owner)
-{ // request from a Player to create a unit
- unit = createUnit(unitType, owner);
-}*/
 
 void Boson::slotSave(QDataStream& stream)
 { // save non-KGameProperty datas here

@@ -67,7 +67,7 @@ VisualUnit::~VisualUnit()
 void VisualUnit::select()
 {
  if (isDestroyed()) {
-	return;
+	return; // shall we really return?
  }
  if (d->mSelectBoxUp || d->mSelectBoxDown) {
 	// the box was already created
@@ -103,7 +103,10 @@ VisualUnit* VisualUnit::target() const
 void VisualUnit::setTarget(VisualUnit* target)
 {
  d->mTarget = target;
- if (target != 0) {
+ if (!target) {
+	return;
+ }
+ if (!target->isDestroyed()) {
 	setWork(WorkAttack);
  }
 }
@@ -120,6 +123,16 @@ void VisualUnit::setHealth(unsigned long int h)
  }
  Unit::setHealth(h);
  updateSelectBox();
+ if (isDestroyed()) {
+	unselect();
+	setFrame(frameCount() - 1);
+	if (unitProperties()->isMobile()) {
+		setZ(Z_DESTROYED_MOBILE);
+	} else {
+		setZ(Z_DESTROYED_FACILITY);
+	}
+	setAnimated(false);
+ }
 }
 
 void VisualUnit::updateSelectBox()
@@ -154,6 +167,9 @@ void VisualUnit::moveBy(double moveX, double moveY)
 void VisualUnit::advance(int phase)
 { // time critical function !!!
 // kdDebug() << "VisualUnit::advance() id=" << id() << endl;
+ if (isDestroyed()) {
+	return;
+ }
  if (phase == 0) {
 	// collision detection should be done here as far as i understand
 	// do not move the item/unit here!
@@ -331,9 +347,14 @@ void VisualUnit::attackUnit(VisualUnit* target)
 	kdError() << "VisualUnit::attackUnit(): cannot attack NULL target" << endl;
 	return;
  }
+ if (target->isDestroyed()) {
+	kdDebug() << "Target is destroyed!" << endl;
+	stopAttacking();
+	return;
+ }
  if (!inRange(target)) {
 	if (!canvas()->allItems().contains(target)) {
-		kdDebug() << "Unit seems to be destroyed!" << endl;
+		kdDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
