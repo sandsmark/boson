@@ -51,6 +51,9 @@
 
 #define MAX_PATH_AGE 5
 
+#define USE_SMOOTH_HEIGHT
+
+
 bool Unit::mInitialized = false;
 
 class Unit::UnitPrivate
@@ -340,6 +343,7 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
  *rotateX = 0.0f;
  *rotateY = 0.0f;
 
+#ifndef USE_SMOOTH_HEIGHT
  const float* heightMap = canvas()->heightMap();
  BO_CHECK_NULL_RET(heightMap);
  int heightMapWidth = canvas()->mapWidth() + 1;
@@ -393,6 +397,9 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
 		}
 	}
  }
+#else
+ float newZ = canvas()->heightAtPoint(x() + moveByX + width() / 2, y() + moveByY + height() / 2);
+#endif
 
  if (isFlying()) {
 	newZ += 2.0f;  // Flying units are always 2 units above the ground
