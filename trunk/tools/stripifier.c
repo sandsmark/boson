@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "stripifier.h"
 
 #include <lib3ds/file.h>
 #include <lib3ds/material.h>
@@ -42,44 +43,12 @@ void optimizePoints(Lib3dsMesh* mesh);
 void optimizeFaces(Lib3dsMesh* mesh);
 void dumpFace(Lib3dsFace* face, int newline);
 void dumpMesh(Lib3dsMesh* mesh);
+void stripify(struct Face* faces, int facesCount);
+void makeStrip(struct Face* face, struct Face* prev, struct Face* prev2, struct List* strip);
 
 int debug;
 int first_mesh_only;
-
-
-/**
- * Generic linked list with one data variable. nothing special here. Use
- * @ref new_list_item() to create a new entry
- **/
-struct List {
-	struct List* next;
-	int data;
-};
-struct List* new_list_item(struct List* previous);
-/**
- * Append to @p list and return the beginning of the list (handy when @p list is
- * NULL!)
- **/
-struct List* append_to_list(struct List* list, int data);
-void free_list_item(struct List* list);
-void debug_list(struct List* list);
-
-
-/**
- * This struct represents a face and its adjacent faces. The variables f1, f2,
- * f3 are linked lists that contain all all faces that are adjacent to the
- * points (0 and 1 for f1 ; 0 and 2 for f2 ; 1 and 2 for f3).
- **/
-struct Face {
-	struct List* f1; // adjacent at points 0-1
-	struct List* f2; // adjacent at points 0-2
-	struct List* f3; // adjacent at points 1-2
-	int index; // index of this mesh.
-};
-struct Face* new_face_item();
-void dumpAdjacent(Lib3dsMesh* mesh, struct Face* faces, int facesCount);
-void dumpFaceList(Lib3dsMesh* mesh, struct List* first);
-void stripify(struct Face* faces, int facesCount);
+struct StripifyData stripifyData;
 
 struct List* new_list_item(struct List* previous)
 {
@@ -122,6 +91,7 @@ void free_list_item(struct List* list)
  free_list_item(list->next);
  free(list);
 }
+
 void debug_list(struct List* list)
 {
  struct List* l = list;
@@ -135,6 +105,18 @@ void debug_list(struct List* list)
  printf("\n");
 }
 
+int has_item(struct List* list, int data)
+{
+ struct List* l = list;
+ while (l) {
+	if (l->data == data) {
+		return 1;
+	}
+	l = l->next;
+ }
+ return 0;
+}
+
 struct Face* new_face_item(int face_index)
 {
  struct Face* f = (struct Face*)malloc(sizeof(struct Face));
@@ -144,6 +126,7 @@ struct Face* new_face_item(int face_index)
  f->index = face_index;
  return f;
 }
+
 
 
 int main(int argc, const char** argv)
@@ -156,6 +139,11 @@ int main(int argc, const char** argv)
 
  debug = 0;
  first_mesh_only = 0;
+
+ stripifyData.allFaces = 0;
+ stripifyData.allFacesCount = 0;
+ stripifyData.facesTaken = 0;
+ stripifyData.usedFacesCount = 0;
 
  arg = 0;
  for (i = 1; i < argc; i++) {
@@ -427,18 +415,6 @@ void dumpAdjacent(Lib3dsMesh* mesh, struct Face* faces, int facesCount)
  }
 }
 
-void stripify(struct Face* faces, int facesCount)
-{
- struct List* list = 0;
- if (debug) {
-	printf("stripify %d faces...\n", facesCount);
-	printf("(not yet implemented)\n");
- }
- list = new_list_item(0);
-
- free_list_item(list);
-}
-
 void dumpFace(Lib3dsFace* f, int newline)
 {
  printf("%d %d %d", f->points[0],f->points[1], f->points[2]);
@@ -682,5 +658,124 @@ int isPointEqual(Lib3dsMesh* mesh, int p1, int p2)
 	printf("points are equal: %d %d\n", p1, p2);
  }
  return 1;
+}
+
+void newStripifyData(struct StripifyData* data, struct Face* faces, int facesCount)
+{
+ // do NOT free data->allFaces! should be done elsewhere
+ free(data->facesTaken);
+ data->allFaces = faces;
+ data->allFacesCount = facesCount;
+ data->usedFacesCount = 0;
+ data->facesTaken = (int*)malloc(sizeof(int) * facesCount);
+ int i = 0;
+ for (i = 0; i < facesCount; i++) {
+	data->facesTaken[i] = 0;
+ }
+}
+
+void markFaceUsed(struct StripifyData* data, int face)
+{
+ if (!data) {
+	printf("NULL data\n");
+	return;
+ }
+ if (face < 0 || face >= data->allFacesCount) {
+	printf("ERROR: invalid face %d\n", face);
+	return;
+ }
+ if (data->facesTaken[face] == 0) {
+	data->usedFacesCount++;
+ }
+ data->facesTaken[face] = 1;
+}
+
+void stripify(struct Face* faces, int facesCount)
+{
+ struct List* list = 0;
+ if (debug) {
+	printf("stripify %d faces...\n", facesCount);
+	printf("(not yet implemented)\n");
+ }
+ if (facesCount <= 1) {
+	printf("Done - no faces to be stripified.\n");
+	return;
+ }
+ list = new_list_item(0);
+
+ // AB: it doesn't matter which face we start with. we always have to provide
+ // code for all cases:
+ // - the face has no adjacent faces
+ // - it has one adjacent faces (end/start of a strip)
+ // - it has two adjacent faces (inside a strip)
+ // - it has more than two adjacent faces (pick two)
+ // also we can never know in which direction is possible at all. faces (1,2,3)
+ // and (1,2,4) are adjacent, but when we start with (1,2,3), we would need a
+ // face with points (2,3,x) next. eventually we will always end up in such a
+ // situation, it doesn't matter if we pick a random face as "first" or one with
+ // only 1 adjacent face (if present).
+ newStripifyData(&stripifyData, faces, facesCount);
+ struct Face* face = &faces[0];
+ list->data = 0;
+
+ makeStrip(face, 0, 0, list);
+
+ free_list_item(list);
+}
+
+void makeStrip(struct Face* face, struct Face* prev, struct Face* prev2, struct List* strip)
+{
+ if (!face) {
+	return;
+ }
+ markFaceUsed(&stripifyData, face->index);
+ int next = -1;
+ if (!prev) { // implies prev2 == 0
+	// we just pick a random adjacent face that is still available.
+	struct List* l;
+	l = face->f1;
+	while (next == -1 && l) {
+		if (stripifyData.facesTaken[l->data] == 0) {
+			next = l->data;
+		}
+		l = l->next;
+	}
+	l = face->f2;
+	while (next == -1 && l) {
+		if (stripifyData.facesTaken[l->data] == 0) {
+			next = l->data;
+		}
+		l = l->next;
+	}
+	l = face->f3;
+	while (next == -1 && l) {
+		if (stripifyData.facesTaken[l->data] == 0) {
+			next = l->data;
+		}
+		l = l->next;
+	}
+ } else {
+	if (prev2) {
+		if (has_item(prev2->f1, prev->index)) {
+			// we came from prev2 to prev through f1 (0-1)
+			// => we must have come from prev to face through either through f2 (0-2) or through f3 (0-3)
+			if (has_item(prev->f2, face->index)) {
+			} else if (has_item(prev->f3, face->index)) {
+			} else {
+				printf("EVIL ERROR! prev is not a valid previous of face\n");
+				exit(1);
+			}
+		}
+	}
+ }
+ if (next >= 0) {
+	printf("appending %d to strip after %d\n", next, face->index);
+	append_to_list(strip, next);
+	makeStrip(&stripifyData.allFaces[next], face, prev, strip);
+ } else {
+	printf("strip ends here: ");
+	debug_list(strip);
+	return;
+ }
 }
 
