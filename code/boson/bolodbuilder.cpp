@@ -464,11 +464,11 @@ void BoLODBuilder::buildLOD()
 	collapse(mn, mn->collapse);
  }
  //boDebug(120) << k_funcinfo << "lists generated" << endl;
- if (mFaces.count() == 0) {
+ if (mFaces.count() != 0) {
 	boError(120) << k_funcinfo << mFaces.count() << " faces still in list!" << endl;
 	mFaces.deleteAllItems();
  }
- if (mVertices.count() == 0) {
+ if (mVertices.count() != 0) {
 	boError(120) << k_funcinfo << mVertices.count() << " vertices still in list!" << endl;
 	mVertices.deleteAllItems();
  }
