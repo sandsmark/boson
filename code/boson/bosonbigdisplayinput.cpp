@@ -332,6 +332,10 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
  if (!factory) {
 	return false;
  }
+
+ bofixed x = rintf(canvasVector.x());
+ bofixed y = rintf(canvasVector.y());
+
  // FIXME: lot of this code should probably be moved to BosonLocalPlayerInput
  ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
  if (!production || !production->hasProduction() || production->completedProductionId() <= 0) {
@@ -343,15 +347,14 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
 	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
- if (!canvas()->canPlaceUnitAt(prop, BoVector2Fixed(canvasVector.x(), canvasVector.y()), production)) {
+ if (!canvas()->canPlaceUnitAt(prop, BoVector2Fixed(x, y), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
  }
 
  // create the new unit
- localPlayerInput()->build(production->completedProductionType(), factory,
-		canvasVector.x(), canvasVector.y());
+ localPlayerInput()->build(production->completedProductionType(), factory, x, y);
  return true;
 }
 
