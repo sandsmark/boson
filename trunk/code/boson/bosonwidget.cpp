@@ -180,6 +180,10 @@ void BosonWidget::slotStartScenario()
 {
  BosonWidgetBase::slotStartScenario();
  boMusic->startLoop();
+
+ if (boGame->isAdmin()) {
+	boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ }
 }
 
 void BosonWidget::slotGamePreferences()

@@ -797,7 +797,6 @@ void BosonWidgetBase::saveConfig()
 void BosonWidgetBase::slotStartScenario()
 {
  playField()->scenario()->startScenario(boGame);
- boMusic->startLoop();
 
  // This DOES NOT work correctly
  boGame->startGame(); // correct here? should be so.
@@ -805,9 +804,6 @@ void BosonWidgetBase::slotStartScenario()
  // as soon as this message is received the game is actually started
  if (boGame->isAdmin()) {
 	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
-	if (boGame->gameMode()) {
-		boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
-	}
  }
  displayManager()->slotCenterHomeBase();
 
