@@ -131,6 +131,10 @@ void BosonStartupNetwork::slotPlayerLeftGame(KPlayer* p)
 void BosonStartupNetwork::sendNewGame(bool editor)
 {
  BO_CHECK_NULL_RET(mGame);
+ if (!mGame->isAdmin()) {
+	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
+	return;
+ }
  if (editor) {
 	mGame->sendMessage(0, BosonMessage::IdNewEditor);
  } else {
