@@ -46,12 +46,12 @@ direction = 1;
 }
 
 
-QRect playerMobUnit::rect(void)
+/*QRect playerMobUnit::rect(void)
 {
 QRect r = mobUnit::rect();
 r.moveBy(x(), y());
 return r;
-}
+} */
 
 int playerMobUnit::getWantedMove(int &dx, int &dy)
 {
@@ -145,12 +145,12 @@ moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 }
 
 
-QRect playerFacility::rect(void)
+/*QRect playerFacility::rect(void)
 {
 QRect r = Facility::rect();
 r.moveBy(x(), y());
 return r;
-}
+}*/
 
 void playerFacility::s_setState(int s)
 {

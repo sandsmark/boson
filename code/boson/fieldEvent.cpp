@@ -34,23 +34,23 @@ int x, y;
 
 bool found = FALSE;
 
-x = e->x() / BO_TILE_SIZE;
-y = e->y() / BO_TILE_SIZE;
+//x = e->x() / BO_TILE_SIZE;
+//y = e->y() / BO_TILE_SIZE;
+x = e->x();
+y = e->y();
 
 if (e->button() & RightButton) {
-	emit relativeReCenterView(x,y);
+	emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
 	return;
 	}
 
 if (e->button() & LeftButton) {	
 	/* Here we transpose coo into the map referential */
-	x += view->X(); y += view->Y();
+	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
 
 
 	if (SELECT_MOVE == order->getSelectionMode()) {
-		order->leftClicked(
-			e->x() + BO_TILE_SIZE * view->X()  ,
-			e->y() + BO_TILE_SIZE * view->Y()  );
+		order->leftClicked( x, y);
 		return;
 		}
 
@@ -65,11 +65,15 @@ if (e->button() & LeftButton) {
 	playerMobUnit	*m;
 	playerFacility	*f;
 
+//printf("\n\nselection , x=%d,y=%d\n", x, y);
 	for (fixIt.toFirst(); fixIt; ++fixIt) {
 		f = fixIt.current();
-//printf("\n\tFix at (%d,%d)+(%d,%d)", f->x, f->y, f->getWidth(), f->getHeight());
-	/*	if (x>=f->_x() && x<f->_x() + f->getWidth() &&
-		    y>=f->_y() && y<f->_y() + f->getHeight() ) { */
+/*		printf("f->rect() : (x,y)=%d,%d, (w,h)=%d,%d\n", 
+			f->rect().x(),
+			f->rect().y(),
+			f->rect().width(),
+			f->rect().height()
+			); */
 		if (f->rect().contains( QPoint( x, y) )) {
 			unSelectAll();
 			order->selectFix(f);
@@ -78,11 +82,14 @@ if (e->button() & LeftButton) {
 			}
 		}
 
-	/* Attention : Referential geometry is changed here !! (expanded) */
-	x = e->x() + BO_TILE_SIZE * view->X();
-	y = e->y() + BO_TILE_SIZE * view->Y();
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
 		m = mobIt.current();
+/*		printf("m->rect() : (x,y)=%d,%d, (w,h)=%d,%d\n", 
+			m->rect().x(),
+			m->rect().y(),
+			m->rect().width(),
+			m->rect().height()
+			); */
 		if (m->rect().contains( QPoint( x, y) )) {
 	/*	if (x>=m->_x() && x<m->_x() + m->getWidth() &&
 		    y>=m->_y() && y<m->_y() + m->getHeight() ) { */
