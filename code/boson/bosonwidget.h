@@ -85,6 +85,8 @@ protected slots:
 	void slotPlayerKilled(Player* p);
 	void slotGameOverDialogFinished();
 
+	void slotSyncNetwork();
+
 protected:
 	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent);
 

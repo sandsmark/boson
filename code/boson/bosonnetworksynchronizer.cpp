@@ -34,6 +34,7 @@
 #include <bodebug.h>
 
 #include <kgame/kmessageclient.h>
+#include <kgame/kgamemessage.h>
 
 #include <kmdcodec.h>
 #include <klocale.h>
@@ -79,6 +80,10 @@
 class BoAwaitAck
 {
 public:
+	BoAwaitAck()
+	{
+	}
+
 	void sendLog(Boson* game, const QByteArray& log, unsigned long int syncId)
 	{
 		if (!game->isAdmin()) {
@@ -91,7 +96,7 @@ public:
 		QDataStream stream(buffer, IO_WriteOnly);
 		stream << (Q_UINT32)syncId;
 		stream << md5.hexDigest();
-		game->sendMessage(buffer, BosonMessage::IdNetworkSync);
+		game->sendMessage(buffer, BosonMessage::IdNetworkSyncCheck);
 		mClientsLeft = game->messageClient()->clientList();
 		return;
 	}
@@ -108,9 +113,20 @@ public:
 	{
 		return mLog;
 	}
+
+	void addOutOfSyncClient(Q_UINT32 client)
+	{
+		mOutOfSyncClients.append(client);
+	}
+	QValueList<Q_UINT32> outOfSyncClients() const
+	{
+		return mOutOfSyncClients;
+	}
+
 private:
 	QByteArray mLog;
 	QValueList<Q_UINT32> mClientsLeft;
+	QValueList<Q_UINT32> mOutOfSyncClients;
 };
 
 
@@ -124,7 +140,7 @@ private:
  * can be sent as often as possible without causing performance or bandwidth
  * problems.
  **/
-class BoSyncMessageBase
+class BoSyncCheckMessageBase
 {
 public:
 	/**
@@ -166,7 +182,7 @@ protected:
 	virtual QString findLogError(const QByteArray& b1, const QByteArray& b2) const = 0;
 };
 
-QString BoSyncMessageBase::findError(const QByteArray& b1, const QByteArray& b2)
+QString BoSyncCheckMessageBase::findError(const QByteArray& b1, const QByteArray& b2)
 {
  KMD5 md5(b1);
  KMD5 md5_2(b2);
@@ -196,10 +212,10 @@ QString BoSyncMessageBase::findError(const QByteArray& b1, const QByteArray& b2)
 }
 
 
-class BoGameSyncMessage : public BoSyncMessageBase
+class BoGameSyncCheckMessage : public BoSyncCheckMessageBase
 {
 public:
-	BoGameSyncMessage() : BoSyncMessageBase()
+	BoGameSyncCheckMessage() : BoSyncCheckMessageBase()
 	{
 		mGame = 0;
 	}
@@ -239,10 +255,10 @@ private:
 	Boson* mGame;
 };
 
-class BoPlayerSyncMessage : public BoSyncMessageBase
+class BoPlayerSyncCheckMessage : public BoSyncCheckMessageBase
 {
 public:
-	BoPlayerSyncMessage() : BoSyncMessageBase()
+	BoPlayerSyncCheckMessage() : BoSyncCheckMessageBase()
 	{
 		mGame = 0;
 	}
@@ -294,10 +310,10 @@ protected:
 private:
 	Boson* mGame;
 };
-class BoPathSyncMessage : public BoSyncMessageBase
+class BoPathSyncCheckMessage : public BoSyncCheckMessageBase
 {
 public:
-	BoPathSyncMessage() : BoSyncMessageBase()
+	BoPathSyncCheckMessage() : BoSyncCheckMessageBase()
 	{
 		mMap = 0;
 		mPathFinder = 0;
@@ -332,12 +348,6 @@ protected:
 			stream << (Q_INT32)r->neighbors[i].region->id;
 			stream << (bofixed)r->neighbors[i].cost;
 			stream << (Q_INT32)r->neighbors[i].bordercells;
-		}
-		if (r->group) {
-			// TODO
-		}
-		if (r->parent) {
-			// TODO?
 		}
 #endif
 		return true;
@@ -380,7 +390,7 @@ private:
 	BosonPath2* mPathFinder;
 };
 
-QByteArray BoPathSyncMessage::makeLog()
+QByteArray BoPathSyncCheckMessage::makeLog()
 {
  QByteArray b;
  // TODO: do NOT stream all sectors! (too much data)
@@ -431,7 +441,7 @@ QByteArray BoPathSyncMessage::makeLog()
  return b;
 }
 
-QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
+QString BoPathSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
  boDebug(370) << k_funcinfo << endl;
  QDataStream s1(b1, IO_ReadOnly);
@@ -504,10 +514,10 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 
 
 #define PATH_LOG NET_DEBUG
-class BoCanvasSyncMessage : public BoSyncMessageBase
+class BoCanvasSyncCheckMessage : public BoSyncCheckMessageBase
 {
 public:
-	BoCanvasSyncMessage() : BoSyncMessageBase()
+	BoCanvasSyncCheckMessage() : BoSyncCheckMessageBase()
 	{
 		mGame = 0;
 		mCanvas = 0;
@@ -537,6 +547,10 @@ public:
 		int itemCount = mCanvas->allItems()->count();
 		int size = 40;
 		if (itemCount == 0 || itemCount <= size) {
+			return makeLog(-1, -1);
+		}
+		if (mInterval == 0) {
+			// interval == 0 means log everything.
 			return makeLog(-1, -1);
 		}
 
@@ -780,7 +794,7 @@ private:
 	unsigned int mInterval;
 };
 
-QByteArray BoCanvasSyncMessage::makeLog(int start, int count)
+QByteArray BoCanvasSyncCheckMessage::makeLog(int start, int count)
 {
  if (start < 0 || count < 0) {
 	start = 0;
@@ -821,10 +835,10 @@ QByteArray BoCanvasSyncMessage::makeLog(int start, int count)
 
 
 
-class BoLongSyncMessage : public BoSyncMessageBase
+class BoLongSyncCheckMessage : public BoSyncCheckMessageBase
 {
 public:
-	BoLongSyncMessage() : BoSyncMessageBase()
+	BoLongSyncCheckMessage() : BoSyncCheckMessageBase()
 	{
 		mMessageLogger = 0;
 		mGame = 0;
@@ -855,13 +869,13 @@ private:
 	BoMessageLogger* mMessageLogger;
 	Boson* mGame;
 
-	BoPlayerSyncMessage mPlayerSync;
-	BoCanvasSyncMessage mCanvasSync;
-	BoGameSyncMessage mBosonSync;
-	BoPathSyncMessage mPathSync;
+	BoPlayerSyncCheckMessage mPlayerSync;
+	BoCanvasSyncCheckMessage mCanvasSync;
+	BoGameSyncCheckMessage mBosonSync;
+	BoPathSyncCheckMessage mPathSync;
 };
 
-QByteArray BoLongSyncMessage::makeLog()
+QByteArray BoLongSyncCheckMessage::makeLog()
 {
  QMap<QString, QByteArray> streams;
 
@@ -891,7 +905,7 @@ QByteArray BoLongSyncMessage::makeLog()
  return b;
 }
 
-QString BoLongSyncMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
+QString BoLongSyncCheckMessage::findLogError(const QByteArray& b1, const QByteArray& b2) const
 {
  QDataStream s1(b1, IO_ReadOnly);
  QDataStream s2(b2, IO_ReadOnly);
@@ -904,26 +918,26 @@ QString BoLongSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 	error = i18n("Different streams count: %1, but should be %2").arg(streams2.count()).arg(streams.count());
 	return error;
  }
- BoGameSyncMessage gameSync;
+ BoGameSyncCheckMessage gameSync;
  error = gameSync.findError(streams["BosonStream"], streams2["BosonStream"]);
  if (!error.isNull()) {
 	return error;
  }
 
 #if NET_DEBUG_2
- BoPathSyncMessage pathSync;
+ BoPathSyncCheckMessage pathSync;
  error = pathSync.findError(streams["PathStream"], streams2["PathStream"]);
  if (!error.isNull()) {
 	return error;
  }
 #endif
- BoCanvasSyncMessage canvasSync;
+ BoCanvasSyncCheckMessage canvasSync;
  error = canvasSync.findError(streams["CanvasStream"], streams2["CanvasStream"]);
  if (!error.isNull()) {
 	return error;
  }
 
- BoPlayerSyncMessage playerSync;
+ BoPlayerSyncCheckMessage playerSync;
  error = playerSync.findError(streams["PlayersStream"], streams2["PlayersStream"]);
  if (!error.isNull()) {
 	return error;
@@ -940,38 +954,255 @@ public:
 	BosonNetworkSynchronizerPrivate()
 	{
 	}
-	QPtrQueue<QByteArray> mLogs;
-	QIntDict<BoAwaitAck> mAwaitAcks;
+	BosonNetworkSyncChecker mSyncChecker;
+	BosonNetworkSyncer mSyncer;
 };
 
 BosonNetworkSynchronizer::BosonNetworkSynchronizer()
 {
- mAdvanceMessageCounter = 0;
- mSyncId = 0;
- mGame = 0;
- mMessageLogger = 0;
  d = new BosonNetworkSynchronizerPrivate;
- d->mLogs.setAutoDelete(true);
- d->mAwaitAcks.setAutoDelete(true);
+ d->mSyncChecker.setParent(this);
+ d->mSyncer.setParent(this);
+ mGame = 0;
 }
 
 BosonNetworkSynchronizer::~BosonNetworkSynchronizer()
 {
- d->mLogs.clear();
  delete d;
 }
 
 void BosonNetworkSynchronizer::setGame(Boson* game)
 {
  mGame = game;
+ d->mSyncChecker.setGame(mGame);
+ d->mSyncer.setGame(mGame);
 }
 
 void BosonNetworkSynchronizer::setMessageLogger(BoMessageLogger* logger)
 {
- mMessageLogger = logger;
+ d->mSyncChecker.setMessageLogger(logger);
 }
 
 void BosonNetworkSynchronizer::receiveAdvanceMessage(BosonCanvas* canvas)
+{
+ d->mSyncChecker.receiveAdvanceMessage(canvas);
+}
+
+bool BosonNetworkSynchronizer::receiveNetworkSyncCheck(QDataStream& stream)
+{
+ return d->mSyncChecker.receiveNetworkSyncCheck(stream);
+}
+
+bool BosonNetworkSynchronizer::receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender)
+{
+ return d->mSyncChecker.receiveNetworkSyncCheckAck(stream, sender);
+}
+
+bool BosonNetworkSynchronizer::receiveNetworkRequestSync(QDataStream& stream)
+{
+ return d->mSyncer.receiveNetworkRequestSync(stream);
+}
+
+bool BosonNetworkSynchronizer::receiveNetworkSync(QDataStream& stream)
+{
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
+ bool synced = d->mSyncer.receiveNetworkSync(stream);
+ if (!synced) {
+	// the game is most probably really unusable now, because this can
+	// happen only if something could not be loaded - but we have already
+	// started loading (and therefore deleted old data).
+	boError() << k_funcinfo << "loading from sync message failed. game unusable now" << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "sync message successfully loaded" <<endl;
+
+ forceCompleteSyncCheckAndUnlockGame(mGame->canvasNonConst());
+
+ return true;
+}
+
+bool BosonNetworkSynchronizer::receiveNetworkSyncUnlockGame(QDataStream& stream)
+{
+ Q_UNUSED(stream);
+ if (!d->mSyncer.gameLocked()) {
+	boError() << k_funcinfo << "cannot unlock game - game not locked" << endl;
+	return false;
+ }
+ d->mSyncer.setGameLocked(false);
+ return true;
+}
+
+void BosonNetworkSynchronizer::syncCheckingCompleted(const QValueList<Q_UINT32>& outOfSyncClients)
+{
+ if (!outOfSyncClients.isEmpty()) {
+	boDebug() << k_funcinfo << outOfSyncClients.count() << " clients out of sync" << endl;
+ }
+ if (d->mSyncer.gameLocked()) {
+	if (outOfSyncClients.isEmpty()) {
+		addChatSystemMessage(i18n("Network Sync completed. Clients are in sync now. Unpause the game to continue"));
+	} else {
+		addChatSystemMessage(i18n("Network Sync completed, however there are still %1 clients out of sync. Sync failed, the game is probably broken permanently for you now. Sorry.").arg(outOfSyncClients.count()));
+		// AB: we are out of sync, but if the player wants to, he can
+		// still continue the game by unpausing it. we don't prevent him
+		// from doing so (maybe he's lucky and we succeed at syncing
+		// later)
+	}
+
+	// we need to send a last message to network in order to continue the
+	// game.
+	// all messages after this point will be delivered again!
+	unlockGame();
+ }
+}
+
+void BosonNetworkSynchronizer::syncNetwork()
+{
+ BO_CHECK_NULL_RET(mGame);
+ boDebug() << k_funcinfo << endl;
+ if (!mGame->isAdmin()) {
+	boWarning() << k_funcinfo << "may be called by ADMIN only" << endl;
+	return;
+ }
+ if (d->mSyncer.gameLocked()) {
+	boError() << k_funcinfo << "game is already locked" << endl;
+	return;
+ }
+
+ // note that Boson::gamePaused() stays at false even after this call. it will
+ // return true only once the property has been received from network.
+ // however the game timer is stopped immediately, so no new advance messages
+ // are sent.
+ mGame->forcePauseGame();
+
+ // on receiving of this message we generate the sync message.
+ // the clients will load their game from the sync message and
+ // then they'll hopefully be in sync again
+ mGame->sendMessage(0, BosonMessage::IdNetworkRequestSync);
+}
+
+void BosonNetworkSynchronizer::unlockGame()
+{
+ BO_CHECK_NULL_RET(mGame);
+ // this is being called when sync is completed.
+ // note that we don't know whether syncing was successfull.
+ // now we undo the locking that was made by lockGame().
+ //
+ // note that we keep the game in paused mode - the player needs to unpause
+ // manually. this is primarily intended to give him a chance to read whether
+ // syncing succeeded.
+
+ // AB: game timer will be restarted automatically when unpausing the game.
+
+ if (!mGame->isAdmin()) {
+	// AB: this is never reached. this is called only for ADMIN.
+	return;
+ }
+ mGame->sendMessage(0, BosonMessage::IdNetworkSyncUnlockGame);
+}
+
+void BosonNetworkSynchronizer::forceCompleteSyncCheckAndUnlockGame(BosonCanvas* canvas)
+{
+ // AB: note that the game is unlocked once all clients returned an
+ // ACK message (positive or negative)
+
+ BO_CHECK_NULL_RET(canvas);
+ if (!d->mSyncer.gameLocked()) {
+	boError() << k_funcinfo << "game not locked. aborting." << endl;
+	return;
+ }
+
+ if (d->mSyncChecker.hasLogs()) {
+	// AB: this must never happen. when this method is called the message
+	// queue (in Boson) must be empty, so there can't be any SyncCheck
+	// message in the air. but once the SyncCheck message is received, the
+	// log is removed from the queue. so the queue must be empty at this
+	// point, or there must be a bug.
+
+	boWarning() << k_funcinfo << "log queue is not empty. clearing it now." << endl;
+	d->mSyncChecker.clearLogs();
+ }
+
+ // AB: this makes (and if ADMIN sends) a sync check message. when all ACKs have
+ // been received, the game is unlocked again.
+ d->mSyncChecker.forceCompleteSyncCheck(canvas);
+}
+
+void BosonNetworkSynchronizer::addChatSystemMessage(const QString& msg)
+{
+ BO_CHECK_NULL_RET(mGame);
+ mGame->slotAddChatSystemMessage(i18n("NetworkSync"), msg);
+}
+
+bool BosonNetworkSynchronizer::acceptNetworkTransmission(int msgid) const
+{
+ if (!d->mSyncer.gameLocked()) {
+	// accept all messages. sync not active.
+	return true;
+ }
+
+ // we are in a network sync run. only certain messages are allowed right now
+ if (msgid < KGameMessage::IdUser) {
+	return false;
+ }
+ switch (msgid - KGameMessage::IdUser) {
+	case BosonMessage::IdNetworkSync:
+	case BosonMessage::IdNetworkSyncCheck:
+	case BosonMessage::IdNetworkSyncCheckACK:
+	case BosonMessage::IdNetworkSyncUnlockGame:
+		return true;
+	default:
+		return false;
+ }
+ return false;
+}
+
+
+
+
+
+class BosonNetworkSyncCheckerPrivate
+{
+public:
+	BosonNetworkSyncCheckerPrivate()
+	{
+	}
+	QPtrQueue<QByteArray> mLogs;
+	QIntDict<BoAwaitAck> mAwaitAcks;
+};
+
+BosonNetworkSyncChecker::BosonNetworkSyncChecker()
+{
+ mParent = 0;
+ mAdvanceMessageCounter = 0;
+ mSyncId = 0;
+ mGame = 0;
+ mMessageLogger = 0;
+ d = new BosonNetworkSyncCheckerPrivate;
+ d->mLogs.setAutoDelete(true);
+ d->mAwaitAcks.setAutoDelete(true);
+}
+
+BosonNetworkSyncChecker::~BosonNetworkSyncChecker()
+{
+ d->mLogs.clear();
+ d->mAwaitAcks.clear();
+ delete d;
+}
+
+bool BosonNetworkSyncChecker::hasLogs() const
+{
+ return !d->mLogs.isEmpty();
+}
+
+void BosonNetworkSyncChecker::clearLogs()
+{
+ d->mLogs.clear();
+}
+
+void BosonNetworkSyncChecker::receiveAdvanceMessage(BosonCanvas* canvas)
 {
  BO_CHECK_NULL_RET(mGame);
  BO_CHECK_NULL_RET(mMessageLogger);
@@ -982,14 +1213,21 @@ void BosonNetworkSynchronizer::receiveAdvanceMessage(BosonCanvas* canvas)
  unsigned int shortInterval = 10; // every 2,5s
  unsigned int longInterval = 100; // every 25s
  if (mAdvanceMessageCounter % shortInterval == 5) {
-	QByteArray log = createLongSyncLog(canvas, mAdvanceMessageCounter, shortInterval);
+	QByteArray log = createLongSyncCheckLog(canvas, mAdvanceMessageCounter, shortInterval);
 	storeLogAndSend(log);
  }
  if (mAdvanceMessageCounter % longInterval == 50) {
  }
 }
 
-void BosonNetworkSynchronizer::storeLogAndSend(const QByteArray& log)
+void BosonNetworkSyncChecker::forceCompleteSyncCheck(BosonCanvas* canvas)
+{
+ BO_CHECK_NULL_RET(canvas);
+ QByteArray log = createCompleteSyncCheckLog(canvas);
+ storeLogAndSend(log);
+}
+
+void BosonNetworkSyncChecker::storeLogAndSend(const QByteArray& log)
 {
  d->mLogs.enqueue(new QByteArray(log));
  if (mGame->isAdmin()) {
@@ -1000,7 +1238,7 @@ void BosonNetworkSynchronizer::storeLogAndSend(const QByteArray& log)
  }
 }
 
-bool BosonNetworkSynchronizer::receiveNetworkSyncMessage(QDataStream& stream)
+bool BosonNetworkSyncChecker::receiveNetworkSyncCheck(QDataStream& stream)
 {
  if (!mGame) {
 	return false;
@@ -1039,8 +1277,16 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncMessage(QDataStream& stream)
  return true;
 }
 
-bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT32 sender)
+bool BosonNetworkSyncChecker::receiveNetworkSyncCheckAck(QDataStream& stream, Q_UINT32 sender)
 {
+ if (!mParent) {
+	BO_NULL_ERROR(mParent);
+	return false;
+ }
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
  if (!mGame->isAdmin()) {
 	boError(370) << k_funcinfo << "Only ADMIN is allowed to call this" << endl;
 	return false;
@@ -1062,9 +1308,12 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT
 	boWarning(370) << k_funcinfo << "network out of sync for client " << sender << endl;
 	addChatSystemMessage(i18n("Network out of sync for client %1").arg(sender));
 	if (await) {
+		await->addOutOfSyncClient(sender);
+
+		// try to find the error
 		QByteArray correct = await->log();
 		QByteArray broken = brokenLog;
-		BoLongSyncMessage longSync;
+		BoLongSyncCheckMessage longSync;
 		QString error = longSync.findError(correct, broken);
 		addChatSystemMessage(i18n("Error message: %1").arg(error));
 		boDebug(370) << k_funcinfo << "Error message: " << error << endl;
@@ -1073,6 +1322,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT
 
  if (await) {
 	if (await->receiveAck(sender)) {
+		mParent->syncCheckingCompleted(await->outOfSyncClients());
 		d->mAwaitAcks.remove(id);
 		await = 0;
 	}
@@ -1083,7 +1333,7 @@ bool BosonNetworkSynchronizer::receiveNetworkSyncAck(QDataStream& stream, Q_UINT
  return verify;
 }
 
-void BosonNetworkSynchronizer::sendAck(const QCString& md5, bool verify, unsigned int syncId, const QByteArray& origLog)
+void BosonNetworkSyncChecker::sendAck(const QCString& md5, bool verify, unsigned int syncId, const QByteArray& origLog)
 {
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
@@ -1093,29 +1343,92 @@ void BosonNetworkSynchronizer::sendAck(const QCString& md5, bool verify, unsigne
  if (!verify) {
 	stream << origLog;
  }
- mGame->sendMessage(buffer, BosonMessage::IdNetworkSyncACK);
+ mGame->sendMessage(buffer, BosonMessage::IdNetworkSyncCheckACK);
 }
 
-
-QByteArray BosonNetworkSynchronizer::createLongSyncLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const
+QByteArray BosonNetworkSyncChecker::createCompleteSyncCheckLog(BosonCanvas* canvas) const
 {
- static int myProfilingId = boProfiling->requestEventId("CreateLongSyncLog");
+ // AB: we do no (yet?) have a dedicated class for this. we just use the normal
+ // BoLongSyncCheckMessage, but we don't use any limits (i.e. we log _all_ units, not
+ // just a few)
+ BoLongSyncCheckMessage m;
+ m.setGame(mGame);
+ m.setMessageLogger(mMessageLogger);
+ m.setCanvas(canvas, 0, 0); // AB: use advancemessagecount==interval==0 to log everything
+ return m.makeLog();
+}
+
+QByteArray BosonNetworkSyncChecker::createLongSyncCheckLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const
+{
+ static int myProfilingId = boProfiling->requestEventId("CreateLongSyncCheckLog");
  BosonProfiler profiler(myProfilingId);
 
- BoLongSyncMessage m;
+ BoLongSyncCheckMessage m;
  m.setGame(mGame);
  m.setMessageLogger(mMessageLogger);
  m.setCanvas(canvas, advanceMessageCounter, interval);
  return m.makeLog();
 }
 
-void BosonNetworkSynchronizer::addChatSystemMessage(const QString& msg)
+
+
+BosonNetworkSyncer::BosonNetworkSyncer()
 {
- BO_CHECK_NULL_RET(mGame);
- mGame->slotAddChatSystemMessage(i18n("NetworkSync"), msg);
+ mParent = 0;
+ mGame = 0;
+ mGameLocked = false;
 }
 
+BosonNetworkSyncer::~BosonNetworkSyncer()
+{
+}
 
+bool BosonNetworkSyncer::receiveNetworkRequestSync(QDataStream&)
+{
+ if (!mGame) {
+	BO_NULL_ERROR(mGame);
+	return false;
+ }
+
+ // this locks message delivery
+ setGameLocked(true);
+
+ // make sure the message queue is empty
+ mGame->clearDelayedMessages();
+
+ if (!mGame->isAdmin()) {
+	return true;
+ }
+ QByteArray syncBuffer = createSyncMessage();
+ if (syncBuffer.size() == 0) {
+	boError() << k_funcinfo << "could not create sync message." << endl;
+	setGameLocked(false);
+	return false;
+ }
+ mGame->sendMessage(syncBuffer, BosonMessage::IdNetworkSync);
+ return true;
+}
+
+bool BosonNetworkSyncer::receiveNetworkSync(QDataStream& stream)
+{
+ boWarning() << k_funcinfo << "TODO: load game from stream" << endl;
+
+ return true;
+}
+
+void BosonNetworkSyncer::setGameLocked(bool l)
+{
+ mGameLocked = l;
+}
+
+QByteArray BosonNetworkSyncer::createSyncMessage()
+{
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ boWarning() << k_funcinfo << "TODO: save the game to the stream" << endl;
+
+ return b;
+}
 
 
 

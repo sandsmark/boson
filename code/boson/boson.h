@@ -23,6 +23,7 @@
 #include <sys/time.h>
 
 class Player;
+class PlayerIO;
 class Unit;
 class ProductionPlugin;
 class BosonCanvas;
@@ -108,6 +109,8 @@ public:
 
 	void setPlayField(BosonPlayField*);
 	BosonPlayField* playField() const;
+
+	PlayerIO* findPlayerIO(Q_UINT32 id) const;
 
 	/**
 	 * Set the object that will get used to start the game. Some starting
@@ -282,6 +285,9 @@ public:
 	void writeGameLog(QTextStream& log);
 	bool saveGameLogs(const QString& prefix);
 
+	void syncNetwork();
+	void clearDelayedMessages();
+	void forcePauseGame();
 
 	/**
 	 * Start the scenario. This must not be called anymore, once a game is

@@ -55,8 +55,11 @@ public:
 		AdvanceN = 50, // call BosonCanvas::advance() N times
 
 		IdChat = 70, // a chat message
-		IdNetworkSync = 80,
-		IdNetworkSyncACK = 81,
+		IdNetworkSyncCheck = 80,
+		IdNetworkSyncCheckACK = 81,
+		IdNetworkRequestSync = 82,
+		IdNetworkSync = 83,
+		IdNetworkSyncUnlockGame = 84,
 
 	// Player Moves aka Player Input:
 		MoveMove = 100, // Unit(s) is/are moved

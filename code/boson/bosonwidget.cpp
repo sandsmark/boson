@@ -221,7 +221,7 @@ void BosonWidget::initKActions()
 			QString("create_group_%1").arg(i));
 	createMapper->setMapping(a, i);
  }
- (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
+ (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H),
 		this, SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
 // (void)KStdAction::gameNew(this, SLOT(), actionCollection()); //TODO
  (void)KStdGameAction::save(this, SIGNAL(signalSaveGame()), actionCollection());
@@ -231,6 +231,8 @@ void BosonWidget::initKActions()
 
  (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
 
+ (void)new KAction(i18n("Sync Network"), KShortcut(),
+		this, SLOT(slotSyncNetwork()), actionCollection(), "debug_sync_network");
 }
 
 void BosonWidget::saveConfig()
@@ -261,6 +263,11 @@ void BosonWidget::slotGameOverDialogFinished()
  // we must not emit directly, as it'd delete the BosonWidget and therefore the
  // GameOverDialog, but that is later deleted through the event loop
  QTimer::singleShot(0, this, SIGNAL(signalGameOver()));
+}
+
+void BosonWidget::slotSyncNetwork()
+{
+ boGame->syncNetwork();
 }
 
 void BosonWidget::setBosonXMLFile()
