@@ -227,6 +227,9 @@ class BoWaterManager
     void initDefaultWaterLevel(float level);
     void initCellMaps();  // FIXME: name
     void initOpenGL();
+    // Loads necessary textures (envmap, bumpmaps). Call this when config has
+    //  changed.
+    void loadNecessaryTextures();
 
     void setMap(BosonMap* map);
     float groundHeight(int x, int y) const;
@@ -339,10 +342,6 @@ class BoWaterManager
 
     // Inits OpenGL rendering environment (e.g. textures).
     void initRenderEnvironment();
-
-    // Loads necessary textures (envmap, bumpmaps). Call this when config has
-    //  changed.
-    void loadNecessaryTextures();
 
   private:
     static BoWaterManager* mManager;

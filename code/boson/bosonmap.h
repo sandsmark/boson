@@ -761,8 +761,6 @@ public:
 
 
 public slots:
-	void slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater);
-
 	/**
 	 * Change the alpha value of the texmap at @þ x, @p y for @þ texture.
 	 *
@@ -796,11 +794,6 @@ signals:
 	void signalCellChanged(int x, int y);
 
 protected:
-	bool loadCell(QDataStream& stream, unsigned char* amountOfLand, unsigned char* amountOfLand) const;
-
-	void saveCell(QDataStream& stream, unsigned char amountOfLand, unsigned char amountOfWater);
-
-	bool saveCells(QDataStream& stream);
 	bool saveHeightMap(QDataStream& stream);
 
 	/**
@@ -814,29 +807,7 @@ protected:
 
 	bool loadGroundTheme(const QString& id);
 
-	/**
-	 * Load the cells from the stream.
-	 * @param stream The stream to read from
-	 **/
-	bool loadCells(QDataStream& stream);
-
 	bool loadHeightMap(QDataStream& stream);
-
-	/**
-	 * Recalculate the amountOfLand/Water values for the cell at @þ x,@p y.
-	 *
-	 * These values are based on the alpha values in the textures at all 4
-	 * corners of the cell.
-	 *
-	 * This should be called on map construction only (see @ref
-	 * generateCellsFromTexMap), except in editor mode.
-	 *
-	 * Also note that the calculated values for this cell are <em>not</em>
-	 * fully network safe! The ADMIN will calculate these values and send
-	 * them out through network (see @ref loadCompleteMap), so that all
-	 * clients will use the same values.
-	 **/
-	void recalculateCell(int x, int y);
 
 	/**
 	 * Create the map array accordint to @ref width and @ref height.

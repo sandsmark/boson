@@ -37,22 +37,6 @@ public:
 	inline int x() const { return mX; }
 	inline int y() const { return mY; }
 
-	/**
-	 * Use this to initialize the cell. You should call this only once in
-	 * the game (when creating the map). In the editor this is called
-	 * whenever the cell changes.
-	 **/
-	void makeCell(unsigned char amountOfLand, unsigned char amountOfWater);
-
-
-	inline unsigned char amountOfLand() const { return mAmountOfLand; }
-	inline unsigned char amountOfWater() const { return mAmountOfWater; }
-
-	/**
-	 * @return Whether the specified unit can go over this ground. Note
-	 * that this does <em>not</em> check whether the cell is occupied.
-	 **/
-	bool canGo(const UnitProperties* unit) const;
 
 	/**
 	 * The moving cost of a cell is the value that should influence the
@@ -102,10 +86,10 @@ public:
 	unsigned int unitCount() const { return mItems.count(); }
 
 	inline void setRegion(BosonPathRegion* r) { mRegion = r; }
-	inline BosonPathRegion* region() { return mRegion; }
+	inline BosonPathRegion* region() const { return mRegion; }
 
 	inline void setPassable(bool p) { mPassable = p; }
-	inline bool passable() { return mPassable; }
+	inline bool passable() const { return mPassable; }
 
 
 private:
@@ -113,10 +97,6 @@ private:
 	int mY;
 
 	BoItemList mItems;
-
-	// specify the amount of water/land on this tile. 0==0%, 127==50%, 255==100%
-	unsigned char mAmountOfLand;
-	unsigned char mAmountOfWater;
 
 	BosonPathRegion* mRegion;
 

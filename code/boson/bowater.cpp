@@ -97,6 +97,7 @@ void BoLake::init(BoWaterManager* _manager, float _level)
   level = _level;
   minx = 0; miny = 0;
   maxx = 0; maxy = 0;
+  originx = -1; originy = -1;
   cornercount = 0;
   corners = 0;
   waveVector.set(0.866, 0.5, 0.3);
@@ -131,6 +132,8 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
   const int xoffsets[] = {  0,  1,  1,  1,  0, -1, -1, -1};
   const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 
+  originx = x;
+  originy = y;
   minx = 10000; miny = 10000;
   maxx = -1; maxy = -1;
   cornercount = 0;
@@ -365,6 +368,8 @@ BoWaterManager::~BoWaterManager()
 {
   mLakes.clear();
   delete[] mUnderwater;
+  delete[] mCellPassable;
+  delete[] mCellVisible;
   //delete[] mWaterDepth;
   delete mWaterTex;
   delete mWaterBump;
@@ -517,7 +522,7 @@ void BoWaterManager::initCellMaps()
   }
 
   // Some parameters
-  const float max_passable_water_depth = 0.4;
+  const float max_passable_water_depth = 0.2;
   const float min_solid_water_depth = 2.0f;
   // Go through all lakes
   QPtrListIterator<BoLake> it(mLakes);
@@ -581,6 +586,12 @@ void BoWaterManager::initCellMaps()
 
 void BoWaterManager::initOpenGL()
 {
+  if(mOpenGLInited)
+  {
+    boDebug() << k_funcinfo << "OpenGL already inited, returning" << endl;
+    return;
+  }
+
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
   QStringList extensions = BoInfo::boInfo()->openGLExtensions();
 
@@ -746,9 +757,6 @@ void BoWaterManager::initOpenGL()
   mEnableVBO = false;
   mEnableSpecular = true;
 
-
-  // Load textures
-  loadNecessaryTextures();
 
   setDirty(true);
   mOpenGLInited = true;
@@ -2374,6 +2382,12 @@ void BoWaterManager::initRenderEnvironment()
 
 void BoWaterManager::loadNecessaryTextures()
 {
+  if(mLakes.count() == 0)
+  {
+    // If we don't have any lakes, we don't need textures either.
+    return;
+  }
+
   // Find out texture path
   QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/grounds/earth/water/water.jpg");
   if(path.isNull())

@@ -525,8 +525,9 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 	boError() << k_funcinfo << "Could not load texmap" << endl;
 	return false;
  }
- if (!loadCells(stream)) {
-	boError() << k_funcinfo << "Could not load map cells" << endl;
+ createCells();
+ if (!mCells) {
+	boError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
  // should this be done somewhere else?
@@ -571,27 +572,6 @@ bool BosonMap::loadGroundTheme(const QString& id)
 	return false;
  }
  emit signalGroundThemeChanged(mGroundTheme);
- return true;
-}
-
-bool BosonMap::loadCells(QDataStream& stream)
-{
- createCells();
- if (!mCells) {
-	boError() << k_funcinfo << "NULL cells" << endl;
-	return false;
- }
-// load all cells:
- for (unsigned int i = 0; i < width(); i++) {
-	for (unsigned int j = 0; j < height(); j++) {
-		unsigned char amountOfLand = 0;
-		unsigned char amountOfWater = 0;
-		if (!loadCell(stream, &amountOfLand, &amountOfWater)) {
-			return false;
-		}
-		slotChangeCell(i, j, amountOfLand, amountOfWater);
-	}
- }
  return true;
 }
 
@@ -807,29 +787,6 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
  if (!saveTexMap(stream)) {
 	boError() << k_funcinfo << "Could not save texmap" << endl;
  }
- if (!saveCells(stream)) {
-	boError() << k_funcinfo << "Could not save map cells" << endl;
-	return false;
- }
- return true;
-}
-
-bool BosonMap::saveCells(QDataStream& stream)
-{
- for (unsigned int i = 0; i < width(); i++) {
-	for (unsigned int j = 0; j < height(); j++) {
-		Cell* c = cell(i, j);
-		if (!c) {
-			boError() << k_funcinfo << "NULL Cell" << endl;
-			// do not abort - otherwise all clients receiving this
-			// stream are completely broken as we expect
-			// width()*height() cells
-			saveCell(stream, 0, 0);
-		} else {
-			saveCell(stream, c->amountOfLand(), c->amountOfWater());
-		}
-	}
- }
  return true;
 }
 
@@ -941,7 +898,7 @@ void BosonMap::createCells()
  }
  mCells = new Cell[width() * height()];
  for (unsigned int x = 0; x < width(); x++) {
-	for (unsigned y = 0; y < height(); y++) {
+	for (unsigned int y = 0; y < height(); y++) {
 		Cell* c = cell(x, y);
 		if (!c) {
 			boError() << k_funcinfo << "Evil internal error!" << endl;
@@ -972,24 +929,6 @@ bool BosonMap::isValidMapGeo(unsigned int width, unsigned int height)
 	return false;
  }
  return true;
-}
-
-bool BosonMap::loadCell(QDataStream& stream, unsigned char* amountOfLand, unsigned char* amountOfWater) const
-{
- Q_UINT8 land;
- Q_UINT8 water;
- stream >> land;
- stream >> water;
-
- (*amountOfLand) = land;
- (*amountOfWater) = water;
- return true;
-}
-
-void BosonMap::saveCell(QDataStream& stream, unsigned char amountOfLand, unsigned char amountOfWater)
-{
- stream << (Q_UINT8)amountOfLand;
- stream << (Q_UINT8)amountOfWater;
 }
 
 Cell* BosonMap::cell(int x, int y) const
@@ -1026,22 +965,6 @@ void BosonMap::setHeightAtCorner(int x, int y, float h)
  //  updated.
  recalculateNormalsInRect(QMAX(0, x - 1), QMAX(0, y - 1),
 		QMIN((int)width(), x + 1), QMIN((int)height(), y + 1));
-}
-
-void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater)
-{
-//boDebug() << x << " -> " << y << endl;
-//boDebug() << width() << " " << height() << endl;
- Cell* c = cell(x, y);
- if (!c) {
-	boError() << k_funcinfo << "Invalid cell x=" << x << ",y=" << y << endl;
-	return;
- }
- if ((int)amountOfLand + (int)amountOfWater > 255) {
-	boWarning() << k_funcinfo << "invalid amounts of land/water: " << amountOfLand << "/" << amountOfWater << endl;
-	// we do not return - we have to keep in sync with network
- }
- c->makeCell(amountOfLand, amountOfWater);
 }
 
 void BosonMap::resize(unsigned int width, unsigned int height)
@@ -1126,11 +1049,6 @@ bool BosonMap::generateCellsFromTexMap()
 	boError() << k_funcinfo << "0 textures in map" << endl;
 	return false;
  }
- for (unsigned int x = 0; x < width(); x++) {
-	for (unsigned int y = 0; y < height(); y++) {
-		recalculateCell(x, y);
-	}
- }
  return true;
 }
 
@@ -1141,76 +1059,6 @@ QRgb BosonMap::miniMapColor(unsigned int texture) const
 	return 0;
  }
  return groundTheme()->miniMapColor(texture);
-}
-
-void BosonMap::recalculateCell(int x, int y)
-{
- Cell* c = cell(x, y);
- BO_CHECK_NULL_RET(c);
- BO_CHECK_NULL_RET(mTexMap);
- BO_CHECK_NULL_RET(groundTheme());
- if (x < 0 || (uint)x >= width()) {
-	boError() << k_funcinfo << "invalid x: " << x << endl;
-	return;
- }
- if (y < 0 || (uint)y >= height()) {
-	boError() << k_funcinfo << "invalid y: " << y << endl;
-	return;
- }
-
- // how much land/water is on the cell. maximum is 255 per corner, i.e. 255*4
- // sum of both must be <= 4*255
- int land = 0;
- int water = 0;
-
- // every (!) cell has exactly 4 corners. every corner has
- // textureCount() alpha values.
- int* alpha = new int[4 * groundTheme()->textureCount()];
- for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
-	// top-left corner
-	alpha[4 * i] = (int)texMapAlpha(i, x, y);
-	// top-right corner
-	alpha[4 * i + 1] = (int)texMapAlpha(i, x + 1, y);
-	// bottom-left corner
-	alpha[4 * i + 2] = (int)texMapAlpha(i, x, y + 1);
-	// bottom-right corener
-	alpha[4 * i + 3] = (int)texMapAlpha(i, x + 1, y + 1);
-	for (int j = 0; j < 4; j++) {
-		int a = alpha[4 * i + j];
-		if (a == 0) {
-			// no need to do anything.
-			continue;
-		}
-		int l = (int)groundTheme()->amountOfLand(i);
-		int w = (int)groundTheme()->amountOfWater(i);
-		if (l != 0) {
-			land += (int)(l * a / 255);
-		}
-		if (w != 0) {
-			water += (int)(w * a / 255);
-		}
-	}
- }
- delete[] alpha;
- alpha = 0;
-
- if (land + water == 0) {
-	boWarning() << k_funcinfo << "land + water == 0 for cell at "
-			<< x << "," << y << endl;
-	land = 0;
-	water = 4 * 255;
- }
-
- // in the optimal case sum should be 4 * 255 (as of 4 corners).
- // but we can't be 100% sure (bugs, rounding errors).
- // also we have to scale the numbers down (4*255 to 255)
- int sum = land + water;
- unsigned char amountOfLand = (unsigned char)(land * 255 / sum);
- unsigned char amountOfWater = (unsigned char)(water * 255 / sum);
-
- // amountOfLand + amountOfWater must be 255.
- amountOfLand += (255 - amountOfLand - amountOfWater);
- slotChangeCell(x, y, amountOfLand, amountOfWater);
 }
 
 void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned int* textures, unsigned char* alpha)
@@ -1279,7 +1127,6 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 		cellsX[count] = x - 1;
 		cellsY[count] = y - 1;
 		count++;
-		recalculateCell(x - 1, y - 1);
 	} else { // somewhere between top and bottom
 		cellsX[count] = x - 1;
 		cellsY[count] = y;
@@ -1324,8 +1171,6 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	count = 4;
  }
  for (unsigned int i = 0; i < count; i++) {
-	recalculateCell(cellsX[i], cellsY[i]);
-
 	// update minimap
 	// we may want to group these cells into a single array to save some
 	// speed once the editor is able to modify several cells at once.
@@ -1458,5 +1303,4 @@ void BosonMap::createColorMap()
  }
  boDebug() << k_funcinfo << "done" << endl;
 }
-
 

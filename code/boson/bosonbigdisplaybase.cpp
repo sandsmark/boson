@@ -606,6 +606,8 @@ void BosonBigDisplayBase::initializeGL()
 	BoInfo::boInfo()->update(this);
  }
 
+ boWaterManager->initOpenGL();
+
  recursive = false;
 }
 

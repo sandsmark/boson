@@ -145,18 +145,6 @@ public:
 
 	BosonCanvasStatistics* canvasStatistics() const;
 
-	/**
-	 * Create the @ref Cell array
-	 **/
-	void createCells(int w, int h);
-
-	/**
-	 * Initialize this @ref Cell.
-	 *
-	 * All this currently does is to set the tile. See @ref QCanvas::setTile
-	 **/
-	void initCell(int x, int y);
-
 	void initPathfinder();
 	BosonPath2* pathfinder();
 
@@ -172,8 +160,8 @@ public:
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
-	 * the ground (see @ref Cell) <em>not</em> for collisions with other
-	 * units. See @ref Unit for this.
+	 * the ground <em>not</em> for collisions with other units. See @ref Unit for
+	 * this.
 	 **/
 	bool canGo(const UnitProperties* prop, const QRect& rect) const;
 

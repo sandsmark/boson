@@ -25,6 +25,8 @@
 #include "unit.h"
 #include "bosoncanvas.h"
 #include "bosonmap.h"
+#include "bowater.h"
+#include "unitproperties.h"
 
 #include <qptrvector.h>
 #include <qptrlist.h>
@@ -274,7 +276,19 @@ bool PlayerIO::canGo(const UnitProperties* prop, const Cell* cell, bool _default
  if (!canSee(cell)) {
 	return _default;
  }
- return cell->canGo(prop);
+ if (!cell->passable()) {
+	return false;
+ }
+ if (prop->isAircraft()) {
+	// Aircrafts can go everywhere (except for unpassable cells)
+	return true;
+ } else {
+	if (boWaterManager->cellPassable(cell->x(), cell->y())) {
+		return prop->canGoOnLand();
+	} else {
+		return prop->canGoOnWater();
+	}
+ }
 }
 
 bool PlayerIO::canGo(const Unit* unit, const Cell* cell, bool _default) const
