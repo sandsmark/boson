@@ -21,6 +21,9 @@
 
 #include <assert.h>
 
+#include <kmessagebox.h>
+#include <ksock.h>
+
 #include "boson.h"
 #include "connect.h"
 
@@ -33,6 +36,23 @@
 #include "game.h"
 
 
+void BosonApp::connectionLost(KSocket *s)
+{
+	boAssert ( s == Socket);
+
+	delete Socket;
+
+  	KMessageBox::error(0l,
+			"Connection with the server has been lost\n"
+			"Game is over :-(",
+			"Server Connection Error");
+	
+	socketState	= PSS_CONNECT_DOWN;
+	State		= PS_NO_CONNECT;
+}
+
+
+
 void BosonApp::handleSocketMessage(KSocket *s)
 {
 playerSocketState oldState = socketState;
@@ -40,7 +60,7 @@ bosonMsgTag	tag;
 bosonMsgData	data;
 int		blen;
 
-assert ( s == Socket);
+boAssert ( s == Socket);
 recvMsg (buffer, tag, blen, &data);
 
 if ( tag == MSG_END_SOCKET_LAYER) {

@@ -55,6 +55,9 @@ protected slots:
 	/** socket initialisation : try to connect to the BosonServer */
 	void initSocket(char *servername=0l);
 
+	/** slots used when the connection is lost, whoever detected this */
+	void connectionLost(KSocket *s);
+
 	/** second communication layer : client/server */
 	void handleDialogMessage(bosonMsgTag, int, bosonMsgData *);
 	/** third (and last) communication layer : game */
