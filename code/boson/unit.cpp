@@ -48,7 +48,7 @@
 
 #include "defines.h"
 
-#define TURN_STEP 5
+#define MAX_PATH_AGE 5
 
 bool Unit::mInitialized = false;
 
@@ -175,6 +175,7 @@ void Unit::initStatic()
  addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
  addPropertyId(IdMovingFailed, QString::fromLatin1("MovingFailed"));
  addPropertyId(IdPathRecalculated, QString::fromLatin1("PathRecalculated"));
+ addPropertyId(IdPathAge, QString::fromLatin1("PathAge"));
 
  // Facility
  addPropertyId(IdConstructionStep, QString::fromLatin1("ConstructionStep"));
@@ -823,6 +824,8 @@ void Unit::newPath()
  }
  if (waypointCount() == 0)
  {
+	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached
+	boError() << k_funcinfo << "!!!!! No valid points in path !!!!! Fix pathfinder !!!!!" << endl;
 	addWaypoint(QPoint(-1, -1));
  }
  return;
@@ -1332,6 +1335,10 @@ public:
 	KGameProperty<float> mSpeed;
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
+	// Maybe it would be better to move this to Unit? Currently we have to reset
+	//  it every time we search a new path. Then we could do it directly in
+	//  newPath()
+	KGameProperty<unsigned int> mPathAge;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1341,13 +1348,16 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  registerData(&d->mSpeed, IdSpeed);
  registerData(&d->mMovingFailed, IdMovingFailed);
  registerData(&d->mPathRecalculated, IdPathRecalculated);
+ registerData(&d->mPathRecalculated, IdPathAge);
 
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
  d->mPathRecalculated.setLocal(0);
+ d->mPathAge.setLocal(0);
 
  d->mMovingFailed.setEmittingSignal(false);
  d->mPathRecalculated.setEmittingSignal(false);
+ d->mPathAge.setEmittingSignal(false);
 
  setWork(WorkNone);
 
@@ -1373,6 +1383,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
  if (mSearchPath) {
 	newPath();
+	d->mPathAge = 0;
 	mSearchPath = false;
 	// Do we have to return here?
 	return;
@@ -1382,8 +1393,11 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// Waypoints were PolicyClean previously but are now PolicyLocal so they
 	//  should arrive immediately. If there are no waypoints but advanceMove is
 	//  called, then probably there's an error somewhere
+	// Also, there must now be point -1; -1 at the end of the path, so something
+	//  is wrong here
 	boError(401) << k_funcinfo << "unit " << id() << ": No waypoints" << endl;
-	stopMoving();
+	newPath();
+	d->mPathAge = 0;
 	return;
  }
 
@@ -1424,10 +1438,23 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  }
 
  QPoint wp = currentWaypoint(); // where we go to
- // If both waypoint's coordinates are -1, then it means that path to
- //  destination can't be found and we should stop
+ // If both waypoint's coordinates are -1, then it means that either path to
+ //  destination can't be found or that we're already at the goal point. Either
+ //  way, we stop moving
  if ((wp.x() == -1) && (wp.y() == -1)) {
 	stopMoving();
+	if (work() == WorkNone) {
+		// Turn a bit
+		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
+		// Check for overflows
+		if (turn < 0) {
+			turn += 360;
+		} else if (turn > 360) {
+			turn -= 360;
+		}
+		Unit::turnTo(int(turn));
+		setWork(WorkTurn);
+	}
 	return;
  }
 
@@ -1439,31 +1466,22 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
-	//boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
 
 	if (waypointCount() == 0) {
 		//boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
-		stopMoving();
-		if (work() == WorkNone) {
-			// Turn a bit
-			int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
-			// Check for overflows
-			if (turn < 0) {
-				turn += 360;
-			} else if (turn > 360) {
-				turn -= 360;
-			}
-			Unit::turnTo(int(turn));
-			setWork(WorkTurn);
+		newPath();
+		d->mPathAge = 0;
+	} else {
+		// Path is recalculated every MAX_PATH_AGE waypoints
+		d->mPathAge = d->mPathAge + 1;
+		if (d->mPathAge >= MAX_PATH_AGE) {
+			boDebug(401) << k_funcinfo << "Searching new path (update)" << endl;
+			newPath();
+			d->mPathAge = 0;
 		}
-		return;
 	}
-
-	// We now recalc path _every_ time we reach waypoint
-	//  Units will then react more quickly when other units move and block their
-	//  way for example
-	newPath();
 
 	wp = currentWaypoint();
  }
@@ -1532,6 +1550,7 @@ void MobileUnit::advanceMoveCheck()
 	
 	if (d->mPathRecalculated >= 2) {
 		boDebug(401) << k_funcinfo << "unit: " << id() << ": Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
+		// TODO: wait some time (~10 secs) and then try again.
 		stopMoving();
 		return;
 	}
@@ -1542,6 +1561,7 @@ void MobileUnit::advanceMoveCheck()
 		// over network and do not take immediate effect.
 
 		newPath();
+		d->mPathAge = 0;
 		d->mMovingFailed = 0;
 		d->mPathRecalculated = d->mPathRecalculated + 1;
 	}

@@ -24,6 +24,7 @@
 #include "defines.h"
 #include "player.h"
 #include "bodebug.h"
+#include "unitproperties.h"
 
 #include <qpoint.h>
 #include <sys/time.h> // only for debug
@@ -185,11 +186,15 @@ bool BosonPath::findFastPath()
   int tox, toy;
   bool movebyx, movebyy;
   int steps;
+  int length = QMAX(4, mUnit->unitProperties()->sightRange());
 
   lastx = mStartx;
   lasty = mStarty;
 
-  for(steps = 0; steps < SEARCH_STEPS; steps++)
+  // FIXME: it'd be best if we'd search unit->sightRange() steps here, but we
+  //  don't have unit available here currently and I'm too lazy to change it
+  //  right now...
+  for(steps = 0; steps < length; steps++)
   {
     // Calculate, how many steps to go in each direction
     tox = QABS(lastx - mGoalx);
@@ -277,6 +282,8 @@ bool BosonPath::findFastPath()
     wp.setX(-2);
     wp.setY(-2);
     path.push_back(wp);
+  } else {
+    path.push_back(QPoint(-1, -1));  // This means that end of path has been reached
   }
 
   //gettimeofday(&time2, 0);
@@ -567,6 +574,12 @@ bool BosonPath::findSlowPath()
     if(pathfound != FullPath && pathfound != AlternatePath)
     {
       path.push_back(QPoint(-2, -2));
+    }
+    else
+    {
+      // Point with coordinates -1; -1 means that end of the path has been
+      //  reached and unit should stop
+      path.push_back(QPoint(-1, -1));
     }
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<

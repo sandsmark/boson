@@ -39,7 +39,7 @@
  #include <queue>
 #endif
 
-#define SEARCH_STEPS 10  // How many steps of path to find
+#define SEARCH_STEPS 25  // How many steps of path to find
 
 
 class Unit;
