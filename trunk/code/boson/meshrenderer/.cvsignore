@@ -6,3 +6,5 @@ Makefile.in
 *.lo
 libbomeshrendererplugin.la
 libbomeshrendererplugin_la_meta_unload.*
+libbomeshrenderer.la
+libbomeshrenderer_la_meta_unload.*
