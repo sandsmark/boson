@@ -22,6 +22,7 @@
 
 #include "bosonbigdisplay.h"
 #include "player.h"
+#include "defines.h"
 
 #include <klocale.h>
 
@@ -332,6 +333,7 @@ void BoDisplayManager::recreateLayout()
 
 void BoDisplayManager::paintResources()
 {
+#ifndef NO_BOSON_CANVASTEXT
 //FIXME: paint on upper right display, not on active
  BosonBigDisplay* b = activeDisplay();
  if (!b) {
@@ -364,6 +366,8 @@ void BoDisplayManager::paintResources()
  painter.drawText(x, y, w, metrics.height(), AlignLeft, oilText);
  painter.drawText(x, y, w, metrics.height(), AlignRight, minerals);
  painter.end();
+ kdDebug() << k_funcinfo << endl;
+#endif
 }
 
 void BoDisplayManager::paintChatMessages()
