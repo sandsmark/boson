@@ -427,11 +427,6 @@ bool BosonCommandFrameBase::checkUpdateTimer() const
  return use;
 }
 
-void BosonCommandFrameBase::slotSetButtonsPerRow(int b)
-{
- selectionWidget()->setButtonsPerRow(b);
-}
-
 void BosonCommandFrameBase::reparentMiniMap(QWidget* map)
 {
  if (!map) {

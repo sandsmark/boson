@@ -149,12 +149,6 @@ bool EditorCommandFrame::checkUpdateTimer() const
  return false;
 }
 
-void EditorCommandFrame::slotSetButtonsPerRow(int b)
-{
- BosonCommandFrameBase::slotSetButtonsPerRow(b);
- d->mPlacementWidget->setButtonsPerRow(b);
-}
-
 void EditorCommandFrame::setGroundTheme(BosonGroundTheme* theme)
 {
  d->mPlacementWidget->setGroundTheme(theme);

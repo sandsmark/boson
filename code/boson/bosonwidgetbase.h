@@ -148,8 +148,6 @@ public slots:
 	void slotToggleSound();
 	void slotToggleMusic();
 
-	void slotSetCommandButtonsPerRow(int b);
-
 	/**
 	 * Unfogs the map for the specified player
 	 * @param player The player that shall see the map or NULL for all

@@ -48,9 +48,6 @@ public:
 	virtual void placeMobiles(Player* owner);
 	virtual void placeFacilities(Player* owner);
 
-public slots:
-	virtual void slotSetButtonsPerRow(int b);
-
 protected:
 	/**
 	 * Set the plugins. See @ref BosonCommandFrameBase::setSelectedUnit

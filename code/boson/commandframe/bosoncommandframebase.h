@@ -48,7 +48,7 @@ class BosonCommandFrameBase : public QFrame
 	Q_OBJECT
 public:
 	BosonCommandFrameBase(QWidget* parent);
-	~BosonCommandFrameBase();
+	virtual ~BosonCommandFrameBase();
 
 	/**
 	 * Create a cmdframe. The cmdframe will be a @ref BosonCommandFrame if
@@ -77,7 +77,7 @@ public:
 
 	/**
 	 * @internal
-	 * Used by BoUnitDisplayBase only. 
+	 * Used by BoUnitDisplayBase only.
 	 **/
 	void addUnitDisplayWidget(BoUnitDisplayBase*);
 
@@ -130,12 +130,6 @@ public:
 	virtual void placeFacilities(Player*) {}
 
 public slots:
-	/**
-	 * Derived classes should apply this value also to the unit actions
-	 * widget (see @ref showUnitActions)
-	 **/
-	virtual void slotSetButtonsPerRow(int b);
-
 	/**
 	 * Should be called when the production of the factory changes, i.e. is
 	 * stopped/paused or started.

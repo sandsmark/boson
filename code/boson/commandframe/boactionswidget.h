@@ -43,7 +43,6 @@ public:
 	 * Hide all buttons
 	 **/
 	void hideButtons();
-	void setButtonsPerRow(int);
 
 	/**
 	 * Adds buttons of actions unit can do (such as attack, move or stop)

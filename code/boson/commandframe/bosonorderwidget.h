@@ -66,11 +66,6 @@ public:
 	void hideOrderButtons();
 
 	/**
-	 * Display @p number buttons per row
-	 **/
-	void setButtonsPerRow(int number);
-
-	/**
 	 * This function is used to display production options (e.g. when the
 	 * unit has a @ref ProductionPlugin or in editor mode units should get
 	 * placed). The list contains actions that will be shown

@@ -294,8 +294,6 @@ public:
 	double miniMapScale() const { return mMiniMapScale->value(); }
 	void setMiniMapZoom(double z) { mMiniMapZoom->setValue(z); }
 	double miniMapZoom() const { return mMiniMapZoom->value(); }
-	void setCommandButtonsPerRow(int b) { mCommandButtonsPerRow->setValue(b); }
-	int commandButtonsPerRow() const { return mCommandButtonsPerRow->value(); }
 	void setChatScreenRemoveTime(unsigned int s) { mChatScreenRemoveTime->setValue(s); }
 	unsigned int chatScreenRemoveTime() const { return mChatScreenRemoveTime->value(); }
 	void setChatScreenMaxItems(int max) { mChatScreenMaxItems->setValue(max); }
@@ -544,10 +542,6 @@ public:
 	static void writeFloatNumList(QValueList<float> list, KConfig* cfg, const QString key);
 
 
-protected:
-	int readCommandButtonsPerRow(KConfig* conf);
-	void saveCommandButtonsPerRow(KConfig* conf);
-
 private:
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
@@ -561,7 +555,6 @@ private:
 	BoConfigBoolEntry* mShowMenubarInGame;
 	BoConfigBoolEntry* mShowMenubarOnStartup;
 	BoConfigBoolEntry* mModelTexturesMipmaps;
-	BoConfigIntEntry* mCommandButtonsPerRow;
 	BoConfigIntEntry* mChatScreenMaxItems;
 	BoConfigUIntEntry* mChatScreenRemoveTime;
 	BoConfigUIntEntry* mArrowKeyStep;
