@@ -25,6 +25,8 @@
 UnitGroup::UnitGroup(bool moving)
 {
   mMoving = moving;
+
+  mDelete = false;
 }
 
 UnitGroup::~UnitGroup()
@@ -65,8 +67,10 @@ void UnitGroup::leaderDestroyed()
 
 bool UnitGroup::isLeader(Unit* unit)
 {
-  if(unit->id() == mLeader->id())
+  if(unit->id() == mLeader->id()) 
+  {
     return true;
+  }
   return false;
 }
 
@@ -78,5 +82,19 @@ void UnitGroup::leaderStopped()
   {
     ++it;
     member->stopMoving();
+  }
+}
+
+void UnitGroup::advanceGroupMove()
+{
+  kdDebug() << k_funcinfo << endl;
+  mLeader->advanceMove();
+  mLeader->advanceMoveCheck();
+  QPtrListIterator<Unit> it(mMembers);
+  while(it.current())
+  {
+    it.current()->advanceGroupMove(mLeader);
+    it.current()->advanceMoveCheck();
+    ++it;
   }
 }
