@@ -363,7 +363,7 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 
  initLayout();
  startScenarioAndGame();
- boScript->loadScript("script/boson-script.py");
+ boScript->loadScript(locate("data", "boson/scripts/boson-script.py"));
  boScript->init();
 }
 
