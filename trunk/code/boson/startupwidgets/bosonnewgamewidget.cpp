@@ -255,6 +255,7 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
  while (it.current()) {
 	if (it.current() == p) {
 		mConnectPlayers->removeItem(mConnectPlayers->index((QListBoxItem*)it.currentKey()));
+		d->mItem2Player.remove(it.currentKey());
 		initColors();
 		return;
 	}
