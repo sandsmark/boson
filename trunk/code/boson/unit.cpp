@@ -49,6 +49,7 @@ public:
 	KGamePropertyList<QPoint> mWaypoints;
 	KGameProperty<int> mMoveDestX;
 	KGameProperty<int> mMoveDestY;
+	KGameProperty<int> mMoveRange;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -74,11 +75,14 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 		KGamePropertyBase::PolicyLocal, "MoveDestX");
  d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MoveDestY");
+ d->mMoveRange.registerData(IdMoveRange, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "MoveRange");
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
+ d->mMoveRange.setLocal(0);
 
  KSpriteToolTip::add(rtti(), unitProperties()->name());
 }
@@ -120,6 +124,11 @@ int Unit::destinationX() const
 int Unit::destinationY() const
 {
  return d->mMoveDestY;
+}
+
+int Unit::moveRange() const
+{
+ return d->mMoveRange;
 }
 
 Unit* Unit::target() const
@@ -272,7 +281,7 @@ void Unit::advanceAttack()
 		return;
 	}
 	kdDebug() << "unit not in range - moving..." << endl;
-	if (!moveTo(target()->x(), target()->y())) {
+	if (!moveTo(target()->x(), target()->y(), weaponRange())) {
 		setWork(WorkNone);
 	} else {
 		setAdvanceWork(WorkMove);
@@ -315,24 +324,27 @@ unsigned int Unit::waypointCount() const
 void Unit::moveTo(const QPoint& pos)
 {
  d->mTarget = 0;
- if(moveTo(pos.x(), pos.y())) {
+ if(moveTo(pos.x(), pos.y(), 0)) {
 	setWork(WorkMove);
  } else {
 	setWork(WorkNone);
  }
 }
 
-bool Unit::moveTo(int x, int y)
+bool Unit::moveTo(int x, int y, int range)
 {
  stopMoving();
 
+ if (range == -1) {
+	range = d->mMoveRange;
+ }
  if(!owner()->isFogged(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
 	// No pathfinding if goal not reachable or occupied and we can see it
 	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
 		return false;
 	}
 	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
-		if (work() != WorkAttack && work() != WorkRefine) {
+		if (range == 0) {
 			return false;
 		}
 		// if work() != WorkMove then we probably actually want to move
@@ -342,6 +354,7 @@ bool Unit::moveTo(int x, int y)
 
  d->mMoveDestX = x;
  d->mMoveDestY = y;
+ d->mMoveRange = range;
 
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
@@ -364,24 +377,17 @@ void Unit::newPath()
 			d->mMoveDestY / BO_TILE_SIZE);
 	if(!destCell || (!destCell->canGo(unitProperties())) ||
 			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && 
-			(work() != WorkAttack && work() != WorkRefine))) {
+			moveRange() == 0)) {
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
 		clearWaypoints(true);
 		addWaypoint(QPoint(-1, -1));
-//		kdDebug()<< "nope" << endl;
 		return;
 	}
  }
- int range = 0;
  // Only go until enemy is in range if we are attacking
- if(work() == WorkAttack) {
-	range = weaponRange();
- } else if (work() == WorkRefine) {
-	range = 1;
- }
- QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, range);
+ QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, d->mMoveRange);
  clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
@@ -802,7 +808,7 @@ void MobileUnit::advanceMove()
  // Check if we can actually go to waypoint (maybe it was fogged)
  if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		(boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-		(work() != WorkAttack && work() != WorkAttack)) || 
+		moveRange() == 0) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdDebug() << "cannot go to waypoint, finding new path" << endl;
 	kdDebug() << "waypoint is at (" << wp.x() << ", " << wp.y() << "), my pos: (" << x() << ", " << y() << ")" << endl;
@@ -837,7 +843,7 @@ void MobileUnit::advanceMove()
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
 	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-			(work() != WorkAttack && work() != WorkRefine)) ||
+			moveRange() == 0) || 
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 		setXVelocity(0);
 		setYVelocity(0);
@@ -1126,7 +1132,7 @@ void MobileUnit::refineAt(Facility* refinery)
  setWork(WorkRefine);
  // move...
  kdDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
- if (!moveTo(refinery->x(), refinery->y())) {
+ if (!moveTo(refinery->x(), refinery->y(), 1)) {
 	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
 	setWork(WorkNone);
  } else {
@@ -1279,13 +1285,13 @@ void Facility::setTarget(Unit* u)
  Unit::setTarget(u);
 }
 
-void Facility::moveTo(int x, int y)
+void Facility::moveTo(int x, int y, int range)
 {
  if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
 	return;
  }
- Unit::moveTo(x, y);
+ Unit::moveTo(x, y, range);
 }
 
 int Facility::constructionDelay()

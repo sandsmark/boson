@@ -50,11 +50,12 @@ public:
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
-		IdMob_MovingFailed = UnitBase::IdLast + 5,
-		IdMob_ResourcesMined = UnitBase::IdLast + 6,
-		IdMob_ResourcesX= UnitBase::IdLast + 7,
-		IdMob_ResourcesY= UnitBase::IdLast + 8,
-		IdFix_ConstructionState = UnitBase::IdLast + 20,
+		IdMoveRange = UnitBase::IdLast + 5,
+		IdMob_MovingFailed = UnitBase::IdLast + 20,
+		IdMob_ResourcesMined = UnitBase::IdLast + 21,
+		IdMob_ResourcesX= UnitBase::IdLast + 22,
+		IdMob_ResourcesY= UnitBase::IdLast + 23,
+		IdFix_ConstructionState = UnitBase::IdLast + 30,
 
 		IdUnitPropertyLast
 	};
@@ -214,9 +215,13 @@ public:
 	 * the @ref setAnimated was already called.
 	 * @param x The destination x-coordinate on the canvas
 	 * @param y The destination y-coordinate on the canvas
+	 * @param range Number of tiles around the destination the unit is
+	 * allowed to go to. You must use range > 0 e.g. if destination is
+	 * occupied and you should use e.g. @ref weaponRange if the unit should
+	 * attack. -1 keeps the previously set range.
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(int x, int y);
+	bool moveTo(int x, int y, int range = 0);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
@@ -254,6 +259,7 @@ public:
 
 	int destinationX() const;
 	int destinationY() const;
+	int moveRange() const;
 
 	/**
 	 * @return TRUE if this unit is next to unit (i.e. less than one cell
@@ -434,7 +440,7 @@ public:
 	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
-	virtual void moveTo(int x, int y);
+	virtual void moveTo(int x, int y, int range = 0);
 
 	/**
 	 * Advance the construction animation. This is usually called when

@@ -237,12 +237,14 @@ void RepairPlugin::repair(Unit* u)
 {
  kdDebug() << k_funcinfo << endl;
  if (unit()->isFacility()) {
-	if (!u->moveTo(unit()->x(), unit()->y())) {
+	if (!u->moveTo(unit()->x(), unit()->y(), 1)) {
 		kdDebug() << u->id() << " cannot find a way to repairyard" << endl;
 		u->setWork(Unit::WorkNone);
+	} else {
+		u->setWork(Unit::WorkMove);
 	}
  } else {
-	if (!unit()->moveTo(u->x(), u->y())) {
+	if (!unit()->moveTo(u->x(), u->y(), 1)) {
 		kdDebug() << "Cannot find way to " << u->id() << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
@@ -262,12 +264,21 @@ void RepairPlugin::repairInRange()
  for (unsigned int i = 0; i < list.count(); i++) {
 	Unit* u = (Unit*)list[i];
 	if (u->health() >= u->unitProperties()->health()) {
-		
 		continue;
 	}
 	if (!unit()->owner()->isEnemy(u->owner())) {
-		kdDebug() << "repair" << u->id() << endl;
-		u->setHealth(u->unitProperties()->health());
+		kdDebug() << "repair " << u->id() << endl;
+		int diff = u->health() - u->unitProperties()->health();
+		if (diff > 0) {
+			kdError() << k_funcinfo << "health > maxhealth" << endl;
+			continue;
+		}
+		if (diff < unit()->weaponDamage()) {
+			// usually the case
+			u->setHealth(u->health() - unit()->weaponDamage());
+		} else {
+			u->setHealth(u->health() - diff);
+		}
 		return; // only one unit at once
 	}
  }
