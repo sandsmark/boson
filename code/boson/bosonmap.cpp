@@ -107,26 +107,19 @@ bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
 		kdError() << "Error loading map cells" << endl;
 		return false;
 	}
-	saveMap("/home/andi/mmm.xml", false);
 	return true;
  }
 
  // load XML file
  QDomDocument doc("BosonMap");
- kdDebug() << d->mFileName << endl;
- QFile f(d->mFileName);
- f.open(IO_ReadOnly);
- 
-// if (!doc.setContent(buffer)) {
  QString errorMsg;
  int lineNo;
  int columnNo;
- if (!doc.setContent(&f, false, &errorMsg, &lineNo, &columnNo)) {
+ if (!doc.setContent(buffer, false, &errorMsg, &lineNo, &columnNo)) {
 	kdError() << "Parse error in line " << lineNo << ",column " << columnNo
 			<< " error message: " << errorMsg << endl;
 	return false;
  }
- f.close();
  QDomNodeList list;
  QDomElement root = doc.documentElement();
  list = root.elementsByTagName("MapGeo");
@@ -173,7 +166,7 @@ bool BosonMap::verifyMap(QDataStream& stream)
  // Qt marshalling for a string is 4-byte-len + data
  stream >> i;
  if (TAG_FIELD_LEN + 1 != i) {
-//	kdError() << "BosonMap::loadMap(): Magic doesn't match(len), check file name" << endl;
+//	kdError() << "BosonMap::loadMap(): Magic doesn't match(len), check file name" << endl;// not an error - probably an XML file
 	return false;
  }
 
@@ -194,6 +187,7 @@ void BosonMap::saveValidityHeader(QDataStream& stream)
 { // TODO: use QString for this
  // magic 
  // Qt marshalling for a string is 4-byte-len + data
+
  stream << (Q_INT32)(TAG_FIELD_LEN - 1);
 
  for (int i = 0; i <= TAG_FIELD_LEN; i++) {
@@ -203,21 +197,12 @@ void BosonMap::saveValidityHeader(QDataStream& stream)
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
 {
- Q_UINT32 players; // obsolete
  Q_INT32 mapWidth;
  Q_INT32 mapHeight;
-
- stream >> players; // obsolete
 
  stream >> mapWidth;
  stream >> mapHeight;
  
- stream >> players; // obsolete
- stream >> players; // obsolete
- QString x;
- stream >> x; // obsolete
-
-
  // check 'realityness'
  if (mapWidth < 10) {
 	kdError() << "BosonMap::loadMap(): broken map file!" << endl;
@@ -363,12 +348,8 @@ bool BosonMap::loadMapGeo(QDomElement& node)
 // lets use the same function as for loading the binary file:
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- stream << (Q_UINT32)1; // obsolete
  stream << width;
  stream << height;
- stream << (Q_UINT32)1; // obsolete
- stream << (Q_UINT32)1; // obsolete
- stream << QString(""); // obsolete
 
  QDataStream readStream(buffer, IO_ReadOnly);
  return loadMapGeo(readStream);
@@ -495,12 +476,8 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 	return false;
  }
  kdDebug() << "save map geo" << endl;
- stream << (Q_UINT32)1; // obsolete
  stream << (Q_INT32)width();
  stream << (Q_INT32)height();
- stream << (Q_UINT32)1; // obsolete
- stream << (Q_UINT32)1; // obsolete
- stream << QString(""); // obsolete
  return true;
 }
 
