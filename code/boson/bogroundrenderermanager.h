@@ -61,7 +61,6 @@ public:
 	{
 		return makePluginCurrent(className);
 	}
-	bool makeRendererIdCurrent(int id); // obsolete
 
 	/**
 	 * Check for @ref currentRenderer being NULL and try to load a default

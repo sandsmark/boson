@@ -3360,30 +3360,6 @@ void BosonBigDisplayBase::updateOpenGLSettings()
  }
 }
 
-void BosonBigDisplayBase::changeGroundRenderer(int renderer)
-{
- bool ret = BoGroundRendererManager::manager()->makeRendererIdCurrent(renderer);
- BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
- if (!ret) {
-	if (r) {
-		KMessageBox::sorry(this, i18n("Unable to load renderer with id=%1. Continue with old renderer.").arg(renderer));
-	} else {
-		BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
-		r = BoGroundRendererManager::manager()->currentRenderer();
-		if (!r) {
-			KMessageBox::sorry(this, i18n("Unable to load any ground renderer, check your installation! Quitting now."));
-			exit(1);
-		}
-	}
-	return;
- }
- if (!r) {
-	KMessageBox::sorry(this, i18n("New ground renderer has been loaded successfully, but can't be accessed. Weird bug - please report (including debug output on konsole)!\nQuitting now"));
-	exit(1);
-	return;
- }
-}
-
 void BosonBigDisplayBase::generateMovieFrames(const QValueList<QByteArray>& data, const QString& directory)
 {
  if (data.count() == 0) {
