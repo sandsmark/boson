@@ -19,7 +19,7 @@
 #ifndef TOP_H
 #define TOP_H
 
-#include <kdockwidget.h>
+#include <kmainwindow.h>
 #include <kdeversion.h>
 
 class QString;
@@ -37,7 +37,7 @@ class KGamePropertyBase;
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class TopWidget : public KDockMainWindow
+class TopWidget : public KMainWindow
 {
 	Q_OBJECT
 public:
@@ -181,8 +181,6 @@ private:
 	void initBoson();
 
 private:
-	KDockWidget* mMainDock;
-
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;
 };
@@ -191,7 +189,7 @@ class BoStatusBarHandler : public QObject
 {
 	Q_OBJECT
 public:
-	BoStatusBarHandler(KDockMainWindow*, QObject* parent);
+	BoStatusBarHandler(KMainWindow*, QObject* parent);
 	~BoStatusBarHandler() { }
 
 	void setLocalPlayer(Player*);
@@ -259,7 +257,7 @@ protected slots:
 private:
 	void initStatusBar();
 
-	KDockMainWindow* mMainWindow;
+	KMainWindow* mMainWindow;
 	Player* mLocalPlayer;
 };
 
