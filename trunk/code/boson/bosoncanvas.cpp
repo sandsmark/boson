@@ -1071,7 +1071,8 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	}
 	Player* owner = (Player*)boGame->findPlayer(ownerId);
 	if (!owner) {
-		boError(260) << k_funcinfo << "player with Id=" << ownerId << " can not be found" << endl;
+		// AB: this is totally valid. less players in game, than in the
+		// file.
 		continue;
 	}
 
