@@ -73,14 +73,14 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 			if (oldPos!=selectPos)
 				drawRectSelect(selectPos, oldPos, p);
 			/* draw present rect */
-			oldPos = QPoint (e->x(), e->y());
+			oldPos = e->pos();
 			if (oldPos!=selectPos)
 				drawRectSelect(selectPos, oldPos, p);
 			p.end();
 			break;
 
 		case visualTopLevel::SELECT_FILL:
-			selectPos = QPoint (e->x(), e->y()) + vtl->_pos() * BO_TILE_SIZE;
+			selectPos = e->pos() + vtl->_pos() * BO_TILE_SIZE;
 			if (oldPos == selectPos)
 				return;
 			oldPos = selectPos;
@@ -91,7 +91,7 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 			p.begin( viewport() );
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
-			selectPos = QPoint( e->x() - e->x()%BO_TILE_SIZE , e->y() - e->y()%BO_TILE_SIZE );
+			selectPos = e->pos() - QPoint( e->x()%BO_TILE_SIZE , e->y()%BO_TILE_SIZE );
 			p.drawRect(oldPos.x(), oldPos.y(), putSize.width(), putSize.height() );
 //			printf("viewportMouseMoveEvent : SELECT_PUT\n"); fflush (stdout);
 			oldPos = selectPos;
@@ -153,7 +153,7 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 
 void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 {
-	QPoint pos(e->x(), e->y());
+	QPoint pos = e->pos();
 	
 	if (e->button() & MidButton) {
 		emit relativeReCenterView( pos/BO_TILE_SIZE );
@@ -172,7 +172,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	if (e->button() & LeftButton) {	
 
 		if (vtl->selectionMode() == visualTopLevel::SELECT_PUT) {
-			object_put( QPoint(e->x(), e->y()) );
+			object_put( e->pos() );
 			return;
 		}
 
@@ -190,7 +190,7 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 				return;
 			// else :
 			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
-			selectPos = oldPos = QPoint (e->x(), e->y());
+			selectPos = oldPos = e->pos();
 			vtl->unSelectFix();
 			return;
 		}
