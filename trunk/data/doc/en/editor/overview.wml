@@ -87,5 +87,5 @@
     of Boson: <a href="http://boson.eu.org/wiki/Main/Events" target="_blank">http://boson.eu.org/wiki/Main/Events</a>
     </p>
 
-#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="map.html" after_text="Working with the map" up_url="index.html"
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="facilities.html" after_text="Building facilities and units" up_url="index.html"
 #include "footer.wml"

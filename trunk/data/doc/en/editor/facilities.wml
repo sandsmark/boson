@@ -9,5 +9,5 @@
     You can build them like in a normal boson game, but you are able to drop them between two cells
     if you hold down the Ctrl key.<br>
     </p>
-#include "nav.wml" before_url="map.html" before_text="Working with the map" after_url="../faq.html" after_text="FAQ" up_url="index.html"
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="../faq.html" after_text="FAQ" up_url="index.html"
 #include "footer.wml"
