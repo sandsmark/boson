@@ -443,7 +443,7 @@ void SpeciesData::loadParticleSystemProperties()
 	if (!d->mParticleProperties.find(particleprop->id())) {
 		d->mParticleProperties.insert(particleprop->id(), particleprop);
 	} else {
-		boError() << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
+		boError(150) << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
 	}
  }
 }
