@@ -28,6 +28,7 @@ class QWheelEvent;
 class QKeyEvent;
 class QDomNamedNodeMap;
 template<class T1, class T2> class QMap;
+template<class T1> class QValueList;
 
 class BoUfoActionCollection;
 class BoUfoMenuBar;
@@ -47,6 +48,8 @@ namespace ufo {
 	class UImage;
 	class UImageIO;
 	class UPoint;
+	class UFontInfo;
+	class UFont;
 
 	class UWidget;
 	class UButton;
@@ -218,6 +221,13 @@ public:
 	 * Convenience method that uses the above methods.
 	 **/
 	bool sendEvent(QEvent* e);
+
+	void setUfoToolkitProperty(const QString& key, const QString& value);
+	QString ufoToolkitProperty(const QString& key) const;
+	QMap<QString, QString> toolkitProperties() const;
+
+	QValueList<ufo::UFontInfo> listFonts();
+	QValueList<ufo::UFontInfo> listFonts(const ufo::UFontInfo&);
 
 private:
 	ufo::UXDisplay* mDisplay;
@@ -586,6 +596,9 @@ public:
 
 	virtual void setOpaque(bool o);
 
+	static void setDefaultForegroundColor(const QColor& color);
+	static const QColor& defaultForegroundColor();
+
 protected:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
@@ -596,6 +609,8 @@ private:
 private:
 	ufo::ULabel* mLabel;
 	QString mIconFile;
+
+	static QColor mDefaultForegroundColor;
 };
 
 class BoUfoPushButton : public BoUfoWidget
@@ -772,6 +787,16 @@ public:
 
 	virtual void setOpaque(bool o);
 
+	int currentItem() const;
+	void setCurrentItem(int i);
+	QString currentText() const;
+
+	QStringList items() const;
+	void setItems(const QStringList& items);
+	void clear();
+	unsigned int count() const;
+
+
 signals:
 	void signalActivated(int);
 	void signalHighlighted(int);
@@ -792,6 +817,14 @@ private:
 class BoUfoListBox : public BoUfoWidget
 {
 	Q_OBJECT
+	Q_PROPERTY(SelectionMode selection READ selectionMode WRITE setSelectionMode);
+	Q_ENUMS(SelectionMode);
+public:
+	enum SelectionMode {
+		NoSelection,
+		SingleSelection,
+		MultiSelection
+	};
 public:
 	BoUfoListBox();
 
@@ -805,8 +838,40 @@ public:
 
 	virtual void setOpaque(bool o);
 
+	int selectedItem() const;
+	void setItemSelected(int index, bool select);
+	QString selectedText() const;
+	bool isSelected(int index) const;
+	void unselectAll();
+
+	// this exists because of libufo only. use setItemSelected() instead!
+	void setSelectedItem(int index);
+
+	/**
+	 * @return A list with the indices of all selected items
+	 **/
+	QValueList<unsigned int> selectedItems() const;
+
+	/**
+	 * @return A list with the text of all selected items
+	 **/
+	QStringList selectedItemsText() const;
+
+	/**
+	 * @return TRUE if there is currently one item with @p text selected
+	 **/
+	bool isTextSelected(const QString& text) const;
+
+	QStringList items() const;
+	void setItems(const QStringList& items);
 	void clear();
 	unsigned int count() const;
+
+
+	// note: libufo does not yet implement MultiSelection
+	void setSelectionMode(SelectionMode mode);
+	SelectionMode selectionMode() const;
+
 
 signals:
 	void signalSelectionChanged(int firstIndex, int lastIndex);
