@@ -268,13 +268,6 @@ unsigned int BoMeshRendererVertexArray::render(const QColor* teamColor, BoMesh* 
 	resetCullFace = false;
  }
 
- // we need this currently, because of the selection rects. we should avoid
- // this.
- // maybe place BoMaterial::deactivate() into SelectBox ?
- if (mesh->material()) {
-	mesh->material()->deactivate();
- }
-
  return renderedPoints;
 }
 
