@@ -96,6 +96,13 @@ void BosonStarting::startNewGame()
 	if (!mPlayFieldId.isNull()) {
 		boDebug() << k_funcinfo << "use " << mPlayFieldId << endl;
 		loadField = boData->playField(mPlayFieldId);
+		if (!loadField->isPreLoaded()) {
+			boError() << k_funcinfo << "playfield " << mPlayFieldId
+					<< " has not yet been preloaded" << endl;
+			emit signalStartingFailed();
+			return;
+
+		}
 	} else {
 		// here we should be in editor mode creating a new map
 		boDebug() << k_funcinfo << "editor mode: create new map" << endl;
@@ -111,7 +118,7 @@ void BosonStarting::startNewGame()
 		emit signalStartingFailed();
 		return;
 	}
-	if (!loadField->loadPlayField(mPlayFieldId)) {
+	if (!loadField->loadPlayField(QString::null)) {
 		boError() << k_funcinfo << "unable to load playfield " << mPlayFieldId << endl;
 		emit signalStartingFailed();
 		return;
