@@ -1125,7 +1125,7 @@ void BosonModel::computeBoundingObjects()
 
 void BosonModel::generateLOD()
 {
- unsigned int lodCount = boConfig->boolValue("DefaultLodCount");
+ unsigned int lodCount = boConfig->intValue("DefaultLodCount");
  if (lodCount == 0) {
 	boWarning() << k_funcinfo << "LOD count of 0 is not allowed" << endl;
 	lodCount = 1;
