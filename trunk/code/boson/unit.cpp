@@ -35,10 +35,13 @@
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
+#include <krandomsequence.h>
 
 #include <qpointarray.h>
 
 #include "defines.h"
+
+#define TURN_STEP 5
 
 class Unit::UnitPrivate
 {
@@ -62,6 +65,7 @@ public:
 	Unit* mTarget;
 
 	int shieldReloadCounter; // FIXME: should be a KGameProperty! And in UnitBase...
+	int wantedDirection;
 
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
 };
@@ -380,6 +384,56 @@ void Unit::advancePlugin(unsigned int advanceCount)
 	setWork(WorkNone);
  } else {
 	currentPlugin()->advance(advanceCount);
+ }
+}
+
+void Unit::advanceTurn(unsigned int)
+{
+ int dir = (int)rotation(); // wanted heading
+ bool turnright; // direction of turning
+ // Find out direction of turning
+ // TODO: maybe we can cache it somewhere so we'd only have to calculate it
+ //  when we want to turn. OTOH, it shouldn't be very expensive calculation
+ if(dir >= 180) {
+	if((d->wantedDirection < dir) && (d->wantedDirection >= dir - 180)) {
+		turnright = false;
+	} else {
+		turnright = true;
+	}
+ } else {
+	if((d->wantedDirection > dir) && (d->wantedDirection <= dir + 180)) {
+		turnright = true;
+	} else {
+		turnright = false;
+	}
+ }
+
+ // FIXME: This algorithm _sucks_. Replace it with something better
+ for(int i = 0; i < TURN_STEP; i++) {
+	if(dir == d->wantedDirection) {
+		break;
+	}
+	if(turnright) {
+		dir += 1;
+	} else {
+		dir -= 1;
+	}
+	// Check for overflows
+	if(dir < 0) {
+		dir += 360;
+	} else if(dir > 360) {
+		dir -= 360;
+	}
+ }
+
+ setRotation((float)dir);
+
+ if(d->wantedDirection == dir) {
+	if (work() == WorkTurn) {
+		setWork(WorkNone);
+	} else if (advanceWork() != work()) {
+		setAdvanceWork(work());
+	}
  }
 }
 
@@ -716,6 +770,9 @@ void Unit::setAdvanceWork(WorkType w)
 	case WorkPlugin:
 		setAdvanceFunction(&Unit::advancePlugin, owner()->advanceFlag());
 		break;
+	case WorkTurn:
+		setAdvanceFunction(&Unit::advanceTurn, owner()->advanceFlag());
+		break;
  }
 }
 
@@ -762,6 +819,12 @@ void Unit::playSound(UnitSoundEvent event)
  speciesTheme()->playSound(this, event);
 }
 
+void Unit::turnTo(int deg)
+{
+ kdDebug() << k_funcinfo << deg << endl;
+ d->wantedDirection = deg;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -799,6 +862,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  d->mPathRecalculated.setEmittingSignal(false);
 
  setWork(WorkNone);
+
+ setRotation((float)(owner->game()->random()->getLong(359)));
 }
 
 MobileUnit::~MobileUnit()
@@ -881,6 +946,16 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	if(waypointCount() == 0) {
 		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		stopMoving();
+		// Turn a bit
+		int turn = (int)rotation() + (owner()->game()->random()->getLong(90) - 45);
+		// Check for overflows
+		if(turn < 0) {
+			turn += 360;
+		} else if(turn > 360) {
+			turn -= 360;
+		}
+		Unit::turnTo(int(turn));
+		setWork(WorkTurn);
 		return;
 	}
 
@@ -1009,7 +1084,11 @@ void MobileUnit::turnTo(Direction direction)
  }
  // At the moment, all units are facing south by default, but currect would be
  //  north so change direction hack as soon as it's fixed
- setRotation((float)((((int)direction + 4) % 8) * -45));
+ float dir = (int)direction * 45;
+ if(rotation() != dir) {
+	Unit::turnTo(dir);
+	setAdvanceWork(WorkTurn);
+ }
 }
 
 void MobileUnit::turnTo()

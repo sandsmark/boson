@@ -78,13 +78,13 @@ public:
 	 *
 	 * Possible value are
 	 * @li WorkNone - The unit does nothing
-	 * WorkPlugin
 	 * @li WorkMove A unit is currently moving
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
 	 * @li WorkDestroyed - Is destroyed
 	 * @li WorkFollow - Is following another unit
 	 * @li WorkPlugin - a @ref UnitPlugin is currently used
+	 * @li WorkTurn - is turning
 	 **/
 	enum WorkType {
 		WorkNone = 0,
@@ -93,7 +93,8 @@ public:
 		WorkConstructed = 5,
 		WorkDestroyed = 6,
 		WorkFollow = 8,
-		WorkPlugin = 9
+		WorkPlugin = 9,
+		WorkTurn = 10
 	};
 	
 	UnitBase(const UnitProperties* prop);

@@ -592,7 +592,7 @@ void BosonBigDisplayBase::paintGL()
 	}
 	glTranslatef(x, y, z);
 	glPushMatrix();
-	glRotatef(item->rotation(), 0.0, 0.0, 1.0);
+	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
 
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected

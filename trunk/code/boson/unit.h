@@ -216,6 +216,12 @@ public:
 	virtual void advancePlugin(unsigned int advanceCount);
 
 	/**
+	 * Called when unit has to turn to some direction. It smootly turns unit
+	 * until it has wanted direction
+	 **/
+	virtual void advanceTurn(unsigned int);
+
+	/**
 	 * @return the @ref ProductionPlugin if this unit is able to produce
 	 * units (this means: the @ref UnitProperties allow productions and the
 	 * unit is e.g. fully constructed). Note that a @ref MobileUnit can not
@@ -287,6 +293,11 @@ public:
 	 * @return true if unit can go to destination, false otherwise
 	 **/
 	bool moveTo(float x, float y, int range = 0);
+
+	/**
+	 * Turns unit smoothly to given degrees
+	 **/
+	virtual void turnTo(int degrees);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
