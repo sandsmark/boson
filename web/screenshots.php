@@ -52,28 +52,28 @@ draw_bigbox_begin("Screenshots");
 echo "
 <!-- Screenshots section -->
 <tr>";
+echo "
+    <tr><td>
+      Click on the thumbnails to see bigger versions. Screenshots taken from CVS
+      are from development version and unit models and other things are not
+      final<br><br>
+    </td><td></td></tr>";
 /** Add screenshots here!
 **  To add screenshot, call
 **  draw_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
 **  Note that filenames do not contain directory
 **/
-draw_screenshot("Here you can see a attack of a aircraft while rotating the camera. Note that
-    this screenshot is taken from development version and unit models and other
-    things are not final.",
+draw_screenshot("Here you can see a attack of a aircraft while rotating the
+    camera. Also, you can see new particle effects.",
     "NEW: 09. Sep. 2002 (CVS)", "thumb_war1.png", "war1.png");
-draw_screenshot("The Big War - Note that
-    this screenshot is taken from development version and unit models and other
-    things are not final.",
+draw_screenshot("The Big War - showing more particle effects, units and gameplay.",
     "NEW: 09. Sep. 2002 (CVS)", "thumb_war2.png", "war2.png");
 echo "
 </tr>
 <tr>";
-draw_screenshot("This shows new OpenGL support and camera rotation. Note that
-    this screenshot is taken from development version and unit models and other
-    things are not final.",
+draw_screenshot("This shows new OpenGL support and camera rotation.",
     "17. Aug. 2002 (CVS)", "thumb_gl1.png", "gl_boson1.png");
-draw_screenshot("Buildings are getting constructed. Note that this screenshot is
-    taken from development version and unit models and other things are not final.",
+draw_screenshot("Buildings are getting constructed.",
     "17. Aug. 2002 (CVS)", "thumb_gl2.png", "gl_boson2.png");
 echo "
 </tr>

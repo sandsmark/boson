@@ -44,6 +44,16 @@ news_box_begin();
 **  To add an article, call
 **  news_article(<title>, <date added>, <full text>);
 **/
+news_article("More eyecandy", "September 10th 2002 20:00",
+    "Boson now has particle effects! This means that shots and explosions work
+    again! Also, we have smoke clouds for destroyed units and flames for
+    half-destroyed facilities. Go to <a href=\"screenshots.php\">screenshots
+    page</a> and check out new screenshots showing explosions and smoke! Or even
+    better, update your CVS copy. If you don't have CVS copy, go to
+    <a href=\"download.php#cvs\">download page</a> for instructions on how to get
+    one!<br>
+    Also, here are some updates to this page (mostly style) by Ben.<br>
+    We hope you like it!<br><br>");
 news_article("New features!", "September 2nd 2002 18:08",
     "I promised to add new features and here comes the first one: you can now
     change style of this homepage. Just go to <a href=\"options.php\">options
