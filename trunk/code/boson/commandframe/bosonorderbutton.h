@@ -179,6 +179,8 @@ class BoOrderButtonButton : public BoUfoPushButton
 public:
 	BoOrderButtonButton() : BoUfoPushButton()
 	{
+		connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
+				this, SLOT(slotMouseReleaseEvent(QMouseEvent*)));
 		mGrayOut = false;
 		mProductionCount = 0;
 	}
@@ -192,7 +194,7 @@ signals:
 	void rightClicked();
 
 protected slots:
-	void slotMouseReleaseEvent(ufo::UMouseEvent*);
+	void slotMouseReleaseEvent(QMouseEvent*);
 
 protected:
 	void addProductionCount(QPixmap* pix);
