@@ -38,4 +38,7 @@
 # AbortFatal=1
 #
 
+# Advance is off by default
+[300]
+InfoOutput=4
 
