@@ -57,6 +57,7 @@ signals:
 	void	sig_moveTo(QPoint npos); // never emitted for a facility !
 	void	dying(bosonUnit *);
 protected:
+	bool	_getWantedShoot(class Unit *&);
 	/* attack */
 	bosonUnit 	*target;
 	int		shoot_timer;
@@ -102,10 +103,12 @@ public:
 			playerMobUnit(mobileMsg_t *);
 
 	void		getWantedAction();
-	void		shooted(int _power);
-	void		destroy(void);
-/* Server orders */
+	// Server orders
+	void		s_shooted(int _power);
+	void		s_destroy(void);
 	void		s_moveTo(QPoint nstate);
+
+	// QCanvas stuff
 	virtual	int	rtti() const { return _destroyed?0:visualMobUnit::rtti(); }
 
 protected:
@@ -184,12 +187,20 @@ public:
 	~playerFacility();
 
 	void	getWantedAction();
+
+	// QCanvas Stuff
 	virtual	int rtti() const { return _destroyed?0:visualFacility::rtti(); }
 
-/* Server orders */
+	// User orders 
+	/** user asked to attack the given unit */
+	virtual void	u_attack(bosonUnit *); // reimplemented from bosonUnit
+
+	// Server orders
 	void	s_setState(int );
-	void	shooted(int _power);
-	void	destroy(void);
+	void	s_shooted(int _power);
+	void	s_destroy(void);
+protected:
+	virtual bool	getWantedShoot(bosonMsgData *);
 
 };
 
