@@ -28,6 +28,7 @@
 
 #include <qdom.h>
 #include <qdatastream.h>
+#include <qfileinfo.h>
 
 #include <kstandarddirs.h>
 #include <kstaticdeleter.h>
@@ -294,7 +295,11 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "NULL scenario" << endl;
 	return false;
  }
+ QFileInfo fileInfo(fileName);
 
+ if (mName.isEmpty()) {
+	mName = fileInfo.fileName();
+ }
  QString description = saveDescriptionXML();
  if (description.isEmpty()) {
 	boError() << k_funcinfo << "Unable to save description" << endl;
@@ -311,7 +316,7 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	return false;
  }
 
- QString topDir = fileName;
+ QString topDir = fileInfo.fileName();
  if (topDir.right(7) == QString::fromLatin1(".tar.gz")) {
 	// might be the case for debugging
 	topDir = topDir.left(topDir.length() - 7);
@@ -321,7 +326,6 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  }
 
  BPFFile* f = new BPFFile(fileName, false);
-// BPFFile* f = new BPFFile("/home/andi/44/ab1.bpf.tar.gz", false);
 
 #warning TODO
  QString user = "foobar";
