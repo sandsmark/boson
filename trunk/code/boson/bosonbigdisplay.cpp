@@ -204,7 +204,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				break;
 			}
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
-			if (unit) {
+			if (unit && !unit->isDestroyed()) {
 				if (unit->owner() == d->mLocalPlayer) {
 					d->mCursor->setCursor(CursorDefault);
 					d->mCursor->setWidgetCursor(this);
@@ -243,7 +243,7 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
 {
  // LMB clicked - either select the unit or start a selection rect
  Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
- if (!unit) {
+ if (!unit || unit->isDestroyed()) {
 	// nothing has been found : it's a ground-click
 	// Here, we have to draw a "selection box"...
 	setSelectionMode(SelectRect);
@@ -628,6 +628,9 @@ void BosonBigDisplay::slotUnitChanged(Unit* unit)
 		d->mSelectionList.removeRef(unit);
 		unit->unselect();
 		emit signalUnselectUnit(unit);
+		if (selection().isEmpty()) {
+			setSelectionMode(SelectNone);
+		}
 	}
 	if (selectionMode() == SelectSingle) {
 //		kdDebug() << "is only unit" << endl;
