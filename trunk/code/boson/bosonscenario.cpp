@@ -593,7 +593,7 @@ bool BosonScenarioBuilder::startScenario(Boson* boson)
 		playerNumber = 0;
 	}
 	if ((int)playerNumber >= mScenario->maxPlayers()) {
-		boError(250) << k_funcinfo << "don't know player " << playerNumber 
+		boError(250) << k_funcinfo << "don't know player " << playerNumber
 				<< endl;
 		return false;
 	}
@@ -603,28 +603,50 @@ bool BosonScenarioBuilder::startScenario(Boson* boson)
 
  boDebug(250) << k_funcinfo << "players done" << endl;
  for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
-	bool ok = false;
-	QDomElement node = list.item(i).toElement();
+	unsigned long int minerals = 0;
+	unsigned long int oil = 0;
+
+	QDomElement player = list.item(i).toElement();
+	if (player.isNull()) {
+		boError(250) << k_funcinfo << "NULL element for player " << i << endl;
+		return false;
+	}
 	Player* p = (Player*)boson->playerList()->at(playerOrder[i]);
+	if (!p) {
+		boError(250) << k_funcinfo << "NULL player at " << i << endl;
+		return false;
+	}
 
-	p->setOil(node.attribute("Oil").toULong());
-	QDomElement m = node.elementsByTagName("Minerals").item(0).toElement();
-	unsigned long int minerals = m.text().toULong(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid minerals" << endl;
+	QDomElement element;
+
+	element = player.namedItem("Minerals").toElement();
+	if (element.isNull()) {
 		minerals = 0;
+	} else {
+		bool ok = false;
+		minerals = element.text().toULong(&ok);
+		if (!ok) {
+			boError(250) << k_funcinfo << "Invalid Minerals tag" << endl;
+			minerals = 0;
+		}
 	}
-	p->setMinerals(minerals);
 
-	QDomElement o = node.elementsByTagName("Oil").item(0).toElement();
-	unsigned long int oil = o.text().toULong(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid oil" << endl;
-		oil= 0;
+	element = player.namedItem("Oil").toElement();
+	if (element.isNull()) {
+		oil = 0;
+	} else {
+		bool ok = false;
+		oil = element.text().toULong(&ok);
+		if (!ok) {
+			boError(250) << k_funcinfo << "Invalid Oil tag" << endl;
+			oil = 0;
+		}
 	}
+
+	p->setMinerals(minerals);
 	p->setOil(oil);
 
-	bool ret = loadPlayer(node, p);
+	bool ret = loadPlayer(player, p);
 	if (!ret) {
 		boError(250) << k_funcinfo << "error loading player " << i << endl;
 		return ret;
