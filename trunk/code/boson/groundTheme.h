@@ -41,7 +41,6 @@ class groundTheme
   groundTheme(char *themeName);
   ~groundTheme();
 
-//	QPixmap		*getPixmap(groundType gt) { return pixmap[gt]; }
 	QwSpritePixmapSequence
 		*getPixmap(groundType gt) { return groundPix[gt]; }
 	bool		isOk(void){ return allLoaded; }
@@ -52,7 +51,6 @@ class groundTheme
 
   bool		allLoaded;
   QPixmap	*no_pixmap;	///orzel : beurk .. no_pixmap == pixmap[-1]... a revoir
-//  QPixmap	*pixmap[GROUND_LAST + 8 * 5]; ///orzel : max 5 transitions
 
   QwSpritePixmapSequence
 		*groundPix[GROUND_LAST + TILES_PER_TRANSITION * 5]; ///orzel : max 5 transitions

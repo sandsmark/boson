@@ -40,12 +40,12 @@ int i ;
 QProgressDialog progress("Loading ground theme...", 0, PROGRESS_N, NULL, "progress.groundTheme", true);
 QString path(kapp->kde_datadir() + "/boson/pics/groundThemes/" + themeName + "/" );
 
-allLoaded = TRUE;
+allLoaded = true;
 progress.setProgress(0);
 progress.show();
 for (i=0; i< groundPropNb; i++)
 	if (!loadGround(i, path + groundProp[i].name, progress))
-		allLoaded = FALSE;
+		allLoaded = false;
 
 for (i=0; i< groundTransPropNb; i++) {
 
@@ -55,21 +55,19 @@ for (i=0; i< groundTransPropNb; i++) {
 	assert(groundTransProp[i].to<GROUND_LAST);
 
 	if (!loadTransition(GROUND_LAST + i * TILES_PER_TRANSITION ,
-		path +
-		groundProp[groundTransProp[i].from].name + "_" +
-		groundProp[groundTransProp[i].to].name,
+		path + groundProp[groundTransProp[i].from].name +
+		"_"  + groundProp[groundTransProp[i].to].name,
 		progress ))
 	     allLoaded = false;
 	}
 
-//progress.setProgress(i++);
 no_pixmap = new QPixmap(BO_TILE_SIZE,BO_TILE_SIZE);
 no_pixmap->fill(black);
 
 progress.setProgress(PROGRESS_N);
 
 if (!allLoaded) puts("groundTheme : not all loaded !");
-	else printf(	"groundTheme : %d ground tiles loaded\n"
+	else printf(	"\ngroundTheme : %d ground tiles loaded\n"
 			"              %d transition tiles loaded\n",
 	groundPropNb, groundTransPropNb);
 
@@ -77,18 +75,12 @@ if (!allLoaded) puts("groundTheme : not all loaded !");
 
 bool groundTheme::loadGround(int i, const QString &path, QProgressDialog &progress)
 {
-//printf("Loading %s ...", (path+".xpm").data());
   	groundPix[i] = new QwSpritePixmapSequence(path+".bmp",0);
-//	pixmap[i] = new QPixmap(path + ".xpm");
 /*	boAssert(BO_TILE_SIZE == pixmap[i]->width());
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
 ///orzel : do some boAssert with QwSpritePixmapSequence sizes... 
 	progress.setProgress(i);
-/*	if (pixmap[i]->isNull()) {
-		printf("GroundTheme : Can't load %s ...\n", (path+".xpm").data());
-		return false;
-		} */
-///orzel : idem : do some test about loading, ok or ko ??
+	if (groundPix[i]->image(0).isNull()) return false;
 	return true;
 }
 

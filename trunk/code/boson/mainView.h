@@ -40,7 +40,6 @@ private:
     miniMap		*mini;
     fieldMap		*field;
     viewMap		*view;
-//physMap		*phys;
 /* Window to send order to the selected unities */
     orderWin		*order;
 };

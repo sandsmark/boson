@@ -74,6 +74,9 @@ class playerMobUnit : public mobUnit, public QwSprite
   /* toute la gestion du but, chemin pris, etc... */
 };
 
+
+
+
 class playerFacility : public Facility, public QwSprite
 {
 

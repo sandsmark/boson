@@ -37,10 +37,6 @@
 #include "orderWin.h"
 #include "game.h"
 
-///// orzel : TEMPORAIRE que c'en est grave : 
-//#define	MAX_PLAYER	2
-//#define MAX_UNIT	20
-
 class Cell;
 class Unit;
 class groundTheme;
@@ -81,11 +77,6 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
 
 /* display */
   void drawCell(int i, int j, QPainter *p=0L);
-//  void drawMobile(playerMobUnit *, QPainter *p=0L);
-//  void drawFix(Facility *, QPainter *p=0L);
-
-//  QPixmap	*getPixmap(playerMobUnit *mob) {return gameProperties.species[mob->who]->getPixmap(mob); }
-//  QPixmap	*getPixmap(Facility *fix) { return gameProperties.species[fix->who]->getPixmap(fix); }
   void drawSelected(void);
   void drawSelected(QPainter *p);
   void drawRelative(int x, int y, QPixmap *p, QPainter *p=0L);
@@ -100,18 +91,6 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
   void	unSelectMob(long key);
   void	unSelectFix(void);
   void	unSelectAll(void);
-
-
-/*  int	coo2index(int x, int y)
-	{ return maxY*x+y;}
-  void	index2coo(uint index, int &x, int &y)
-	{ x = index / maxY; y = index % maxY; } */
-
-
- public slots:
-//  void drawCell(int i, int j) {drawCell(i,j,0L); }
-//  void drawMobile(playerMobUnit *mob) {drawMobile(mob,0L); }
-//  void drawFix(Facility *fix) {drawFix(fix,0L); }
 
  private:
 

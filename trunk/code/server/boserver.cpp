@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include "boserver.h"
 
+#include "../common/bobuffer.h"
+
 ///orzel: temp, pour la creation...
 #include "../map/map.h"
 

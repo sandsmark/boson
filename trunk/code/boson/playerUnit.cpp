@@ -23,7 +23,6 @@
 
 #include "playerUnit.h"
 #include "speciesTheme.h"
-
 #include "game.h"
 
 #include "../map/map.h"
@@ -38,20 +37,12 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 	, QwSprite(gameProperties.species[msg->who]->getPixmap(msg->type))
 	, state(MUS_NONE)
 {
-z(Z_MOBILE);
-moveTo(msg->x, msg->y);
-
-//direction = 10;
-direction = 1;
+	z(Z_MOBILE);
+	moveTo(msg->x, msg->y);
+	
+	//direction = 10;
+	direction = 1;
 }
-
-
-/*QRect playerMobUnit::rect(void)
-{
-QRect r = mobUnit::rect();
-r.moveBy(x(), y());
-return r;
-} */
 
 int playerMobUnit::getWantedMove(int &dx, int &dy)
 {
@@ -82,7 +73,7 @@ switch(state){
 
 int playerMobUnit::getWantedAction()
 {
-return 0; // no action
+	return 0; // no action
 }
 
 
@@ -121,17 +112,19 @@ asked_dx = asked_dy = 0; // so that willBe returns the good position
 
 void playerMobUnit::u_goto(int mx, int my) // not the same as QwSprite::moveTo
 {
-dest_x = mx; dest_y = my;
-if (x()!=dest_x || y()!=dest_y) state = MUS_MOVING;
+	dest_x = mx; dest_y = my;
+	if (x()!=dest_x || y()!=dest_y) state = MUS_MOVING;
 
-//printf("u_goto from %p, x.y = %d.%d, MOVING=%s\n", this, mx, my, (state==MUS_MOVING)?"yes":"no");
-///orzel : moving across complicated environment algorithm
+	//printf("u_goto from %p, x.y = %d.%d, MOVING=%s\n", this, mx, my, (state==MUS_MOVING)?"yes":"no");
+	///orzel : moving across complicated environment algorithm
 }
+
 
 void playerMobUnit::u_stop(void)
 {
-state = MUS_NONE;
+	state = MUS_NONE;
 }
+
 
 /*
  * playerFacility
@@ -140,20 +133,13 @@ playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const cha
 	: Facility(msg,parent,name)
 	, QwSprite(gameProperties.species[msg->who]->getPixmap(msg->type))
 {
-z(Z_FACILITY);
-moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
+	z(Z_FACILITY);
+	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 }
 
 
-/*QRect playerFacility::rect(void)
-{
-QRect r = Facility::rect();
-r.moveBy(x(), y());
-return r;
-}*/
-
 void playerFacility::s_setState(int s)
 {
-boAssert(frame()==s-1);
-frame(s);
+	boAssert(frame()==s-1);
+	frame(s);
 }

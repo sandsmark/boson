@@ -18,27 +18,26 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <assert.h>
+
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qcolor.h>
-#include <assert.h>
+
 #include "../common/log.h"
+#include "../map/map.h"
+
 #include "miniMap.h"
 #include "playerCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "viewMap.h"
-#include "../map/map.h"
 #include "game.h"
 
 void miniMap::paintEvent(QPaintEvent *evt)
 {
 QPainter p;
-/*
-QRect r = evt->rect();
-int i,j;
-int im,iM,jm,jM;
-*/
+
 
 p.begin(this);
 
@@ -65,7 +64,7 @@ assert(j<view->maxY());
 
 if (g>= GROUND_LAST)
 	g = groundTransProp[(g-GROUND_LAST)/TILES_PER_TRANSITION].from;
-			//(g-GROUND_LAST)/8 is the # of transition
+
 p.begin(ground);
 switch(g) {
 	default:

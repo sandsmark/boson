@@ -25,17 +25,21 @@
 #include "../common/msgData.h"
 #include "knownBy.h"
 
+
 #define BUILDING_SPEED	40
-
-
 class boBuffer;
+
 
 class serverUnit {
  public:
-	serverUnit(int x, int y) { __x=x; __y=y; }
+	serverUnit(boBuffer *b, int x, int y) { buffer = b; __x=x; __y=y; state = 0; }
 
  protected:
-	int __x, __y;
+ int		__x, __y;
+
+ boBuffer	*buffer;
+ int		state;
+ int		counter;
 };
 
 /*
@@ -54,12 +58,10 @@ public:
 /* request */
  void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
 
-private:
- boBuffer *buffer;
- int	state;
- int 	counter;
 };
  
+
+
 /*
  *  FACILITY
  */
@@ -74,11 +76,6 @@ class serverFacility : public Facility, public serverUnit, public knownBy
 
 /* request */
  void getWantedAction();
-
-private:
- boBuffer *buffer;
- int    state;
- int 	counter;
 };
  
 

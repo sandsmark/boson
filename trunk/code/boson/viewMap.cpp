@@ -23,12 +23,10 @@
 viewMap::viewMap(physMap *p, QObject *parent, const char *name=0L)
 	: QObject(parent, name)
 {
-/* map geometry */
-//viewL = (width() + 32 - 1) / 32;
-//viewH = (height() + 32 - 1) / 32;
-viewL = viewH = 5; ///orzel : arbitraire, doit etre fixe par un mainMap..
-viewX = viewY = 0;
-phys = p;
+	/* map geometry */
+	viewL = viewH = 5; ///orzel : arbitraire, doit etre fixe par un mainMap..
+	viewX = viewY = 0;
+	phys = p;
 }
 
 viewMap::~viewMap()
@@ -37,50 +35,29 @@ viewMap::~viewMap()
 
 void viewMap::reCenterView(int x, int y)
 {
-int oldX = viewX, oldY = viewY;
+	int oldX = viewX, oldY = viewY;
 
-viewX  = x - viewL/2;
-viewY  = y - viewH/2;
+	viewX  = x - viewL/2;
+	viewY  = y - viewH/2;
 
-viewX = QMIN(viewX, phys->maxX - viewL);
-viewY = QMIN(viewY, phys->maxY - viewH);
+	viewX = QMIN(viewX, phys->maxX - viewL);
+	viewY = QMIN(viewY, phys->maxY - viewH);
 
-viewX = QMAX(viewX, 0);
-viewY = QMAX(viewY, 0);
+	viewX = QMAX(viewX, 0);
+	viewY = QMAX(viewY, 0);
 
-if (viewX != oldX || viewY != oldY) {
-//	repaint(FALSE);
-	emit repaint(FALSE);
-	}
+	if (viewX != oldX || viewY != oldY) {
+		emit repaint(FALSE);
+		}
 }
-
-/*(void viewMap::relativeReCenterView(int x, int y)
-{
-int oldX = viewX, oldY = viewY;
-
-viewX  += x - viewL/2;
-viewY  += y - viewH/2;
-
-viewX = QMIN(viewX, phys->maxX - viewL);
-viewY = QMIN(viewY, phys->maxY - viewH);
-
-viewX = QMAX(viewX, 0);
-viewY = QMAX(viewY, 0);
-
-if (viewX != oldX || viewY != oldY) {
-//	repaint(FALSE);
-	emit repaint(FALSE);
-	}
-} */
-
 
 void viewMap::reSizeView(int l, int h)
 {
-int	Xcenter = viewX + viewL/2,
-	Ycenter = viewY + viewH/2;
+	int	Xcenter = viewX + viewL/2,
+		Ycenter = viewY + viewH/2;
 
-viewL = l;
-viewH = h;
+	viewL = l;
+	viewH = h;
 
-reCenterView(Xcenter, Ycenter);
+	reCenterView(Xcenter, Ycenter);
 }

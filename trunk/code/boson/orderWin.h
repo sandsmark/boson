@@ -63,8 +63,6 @@ public:
 	playerFacility	*unSelectFix(void);
 	playerMobUnit	*unSelectMob(long key);
 	void		unSelectAll(void);
-//  void	unSelectAll(void);
-
 
 /* to handle orderButton 'clicked' event */
 public slots:
@@ -91,10 +89,7 @@ private:
 	fieldMap	*field;
 
 /* GUI */
-//	QVBoxLayout	*globalLay;
 	QPushButton	*orderButton[ORDER_BUTTONS_NB];
-
-/* ordering buttons */
 };
 
 

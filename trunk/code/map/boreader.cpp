@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 //#include <qdatastream.h>
+#include <stdio.h>
 #include "playField.h"
 #include "map.h"
 

@@ -71,12 +71,7 @@ class BosonServer : public KTMainWindow
   void	handleGameMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
 
   void	initMap(const char *);
-/*
-  uint	coo2index(int x, int y)
-	{ return map.height*x+y;}
-  void	index2coo(uint index, int &x, int &y)
-	{ x = index / map.height; y = index % map.height; } ///orzel: should removed, ugly
-*/
+
   void	createMobUnit(uint who, uint x, uint y, mobType);
   void	createFixUnit(uint who, uint x, uint y, facilityType);
 	

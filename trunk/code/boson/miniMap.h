@@ -23,17 +23,7 @@
 
 
 #include <qframe.h> ///orzel qwidget.h
-//#include <qintdict.h>
-
-//#include "../common/msgData.h"
-//#include "../common/groundType.h"
-//#include "../common/unitType.h"
-//#include "../common/unit.h"	// Facility
 #include "playerUnit.h"		// playerMobUnit
-
-///// orzel : TEMPORAIRE que c'en est grave : 
-//#define	MAX_PLAYER	2
-//#define MAX_UNIT	20
 
 class Cell;
 class Unit;
@@ -58,27 +48,16 @@ class miniMap : public QWidget
 
  public slots:
   void newCell(int,int, groundType);
-/*  void drawCell(int i, int j) {drawCell(i,j,0L); }
-  void drawMobile(playerMobUnit *mob) {drawMobile(mob,0L); }
-  void drawFix(Facility *fix) {drawFix(fix,0L); } */
-//  void drawCell(int i, int j);
   void drawMobile(playerMobUnit *mob);
   void drawFix(playerFacility *fix);
 
  protected:
- /* void drawCell(int i, int j, QPainter *p=0L);
-  void drawMobile(playerMobUnit *, QPainter *p=0L);
-  void drawFix(Facility *, QPainter *p=0L); */
-//  void drawRelative(int x, int y, QPixmap *p, QPainter *p=0L);
   void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
 //  void drawRectSelect(int, int, int, int, QPainter &);
 
 /* events */
   virtual void paintEvent(QPaintEvent *evt);
   virtual void mousePressEvent(QMouseEvent *e);
-//  virtual void mouseMoveEvent(QMouseEvent *e);
-//  virtual void mouseReleaseEvent(QMouseEvent *e);
-//  virtual void resizeEvent(QResizeEvent *e);
 
  private:
 

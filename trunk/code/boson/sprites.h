@@ -1,5 +1,5 @@
 /***************************************************************************
-                         game.h  -  description                              
+                         sprites.h  -  description                              
                              -------------------                                         
 
     version              :                                   
@@ -27,7 +27,9 @@
 #define	S_FACILITY	(S_BASE+3)
 
 
-#define Z_MOBILE	(+1)
+#define Z_FLYING	(+10)
+#define Z_MOBILE	(+5)
+#define Z_SAILING	(+2)
 #define Z_FACILITY	(+0)
 #define Z_GROUND	(-1)
 
