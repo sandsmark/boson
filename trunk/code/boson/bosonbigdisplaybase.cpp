@@ -410,6 +410,8 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
  }
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
+ connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+		mSelection, SLOT(slotRemoveItem(BosonItem*)));
 
  slotResetViewProperties();
 }
