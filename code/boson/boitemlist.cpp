@@ -62,6 +62,17 @@ void BoItemList::registerList()
  }
 }
 
+BosonItem* BoItemList::findItem(unsigned long int id) const
+{
+ ConstIterator it = begin();
+ for (; it != end(); ++it) {
+	if ((*it)->id() == id) {
+		return *it;
+	}
+ }
+ return 0;
+}
+
 QValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const
 {
  QValueList<BosonItem*> list;
