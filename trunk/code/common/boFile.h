@@ -21,6 +21,8 @@
 #ifndef BOFILE_H 
 #define BOFILE_H 
 
+#include <qstring.h>
+
 #include "../common/unitType.h"
 #include "../common/groundType.h"
 
@@ -30,6 +32,7 @@ class QFile;
 class mobileMsg_t;
 class facilityMsg_t;
 class Cell;
+//class QString;
 
 
 #define stateAssert(s)								\
@@ -53,6 +56,7 @@ protected :
 	bool	Close();
 
 /* header */
+	QString		worldName;
 	int		map_width;
 	int		map_height;
 	int		nbPlayer;
