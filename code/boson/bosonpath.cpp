@@ -560,7 +560,9 @@ bool BosonPath::findSlowPath()
     // If no full path was found, then we add another point with coordinates
     //  -2; -2 to the path, indicating that this is just partial path.
     if(pathfound != FullPath && pathfound != AlternatePath)
+    {
       path.push_back(QPoint(-2, -2));
+    }
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
     //    time2.tv_usec - time1.tv_usec << "microsec." << endl;
@@ -815,6 +817,12 @@ bool BosonPath::inRange(int x, int y)
 {
   /// TODO: maybe use different check (not manhattan dist.)
   if(QABS(x - mGoalx) > mRange || QABS(y - mGoaly) > mRange)
+  {
     return false;
+  }
   return true;
 }
+
+/*
+ * vim: et sw=2
+ */

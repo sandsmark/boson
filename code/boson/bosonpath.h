@@ -156,3 +156,7 @@ class BosonPath
 
 
 #endif // BOSONPATH_H
+
+/*
+ * vim: et sw=2
+ */
