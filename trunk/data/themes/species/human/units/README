@@ -248,6 +248,8 @@ Note that units may have only one repairing weapon. If you specify multiple
 repairing weapons, only first the one is used.
 -------------------------------------------------------------------------------
 [Weapon_x]
+Name=Text
+        At the moment this is only for the handbook.
 Damage=Number
         The damage this unit makes to other units when firing.
         Can also be negative - the unit repairs then.
