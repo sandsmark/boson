@@ -1166,3 +1166,15 @@ int Facility::constructionDelay()
 {
  return 5;
 }
+
+void Facility::setConstructionStep(unsigned int step)
+{
+ if (step >= constructionSteps()) {
+	step = PIXMAP_FIX_DESTROYED - 1;
+ }
+ setFrame(step);
+ d->mConstructionState = step * constructionDelay();
+ if (step == constructionSteps() - 1) {
+	setWork(WorkNone);
+ }
+}

@@ -326,6 +326,15 @@ public:
 	inline double constructionProgress() const;
 
 	/**
+	 * Used by to initialize the scenario. A scenario file can specify that
+	 * a facility is already completed - to do so we can
+	 * setContructionStep(constructionSteps() - 1).
+	 *
+	 * This should <em>not</em> be called once the game is started
+	 **/
+	void setConstructionStep(unsigned int step);
+
+	/**
 	 * @return Whether there are any productions pending for this unit.
 	 * Always FALSE if unitProperties()->canProduce() is FALSE.
 	 **/
