@@ -3,6 +3,7 @@ Boson Scripting Bible
 $Id$
 $Date$
 $Revision$
+
 Submitted by: Kal Kolberg
 Written: November 8th, 2002
 Copyright: Kal Kolberg (c) 2002 kolberg@cyberdawgs.com
