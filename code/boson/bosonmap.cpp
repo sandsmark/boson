@@ -362,6 +362,7 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
 
  mHeightMap = new BoHeightMap(width + 1, height + 1);
  mTexMap = new BoTexMap(theme->textureCount(), width + 1, height + 1);
+ mTexMap->fill(0);
  bool ret = generateCellsFromTexMap();
  if (!ret) {
 	boError() << k_funcinfo << "unable to generate cells from texmap" << endl;
@@ -396,6 +397,28 @@ bool BosonMap::createNewMap(unsigned int width, unsigned int height, BosonGround
  if (!ret) {
 	boError() << k_funcinfo << "unable to load previously saved map from stream! looks like an internal error" << endl;
 	return ret;
+ }
+
+ // check whether map was loaded successfully
+ if (!mGroundTheme || !mCells || !mHeightMap || !mTexMap) {
+	boError() << k_funcinfo << "map was not loaded correctly" << endl;
+	return false;
+ }
+ if (mGroundTheme != theme) {
+	boError() << k_funcinfo << "incorrect theme loaded: " << mGroundTheme << " != " << theme << endl;
+	return false;
+ }
+ if (this->width() != width) {
+	boError() << k_funcinfo << "invalid width loaded" << endl;
+	return false;
+ }
+ if (this->height() != height) {
+	boError() << k_funcinfo << "invalid height loaded" << endl;
+	return false;
+ }
+ if (mTexMap->textureCount() != mGroundTheme->textureCount()) {
+	boError() << k_funcinfo << "texmap has invalid texture count for this groundtheme!" << endl;
+	return false;
  }
 
  return ret;
