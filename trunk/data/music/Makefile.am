@@ -9,7 +9,7 @@ uninstall-local:
 # enabled again for testing...
 install-data-local:
 	@$(mkinstalldirs) $(DESTDIR)$(musicdir)
-	@dirs=`find -name index.desktop` ;\
+	@dirs=`find -name index.desktop -or -name index.music ` ;\
 	if test -n "$$dirs" ; then \
 	for i in $$dirs ; do \
 		i=`dirname $$i`; \
