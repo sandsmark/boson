@@ -591,8 +591,8 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const BoRectFixed& rect) con
 		rect.bottom() > mapHeight()) {
 	return false;
  }
- int right = lround(rect.right());
- int bottom = lround(rect.bottom());
+ int right = (int)ceil(rect.right());
+ int bottom = (int)ceil(rect.bottom());
  int y = (int)rect.y(); // what about modulu? do we care ?
  do {
 	int x = (int)rect.x();

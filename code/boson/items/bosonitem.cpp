@@ -190,8 +190,8 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRectF
  BO_CHECK_NULL_RET(allCells);
  int left = QMAX((int)rect.left(), 0);
  int top = QMAX((int)rect.top(), 0);
- int right = QMIN(ceil(rect.right()), mapWidth);
- int bottom = QMIN(ceil(rect.bottom()), mapHeight);
+ int right = QMIN((int)ceil(rect.right()), mapWidth);
+ int bottom = QMIN((int)ceil(rect.bottom()), mapHeight);
 
  // AB: WARNING: we do direct array/pointer calculations here, so
  // right/bottom/left/top MUST be valid for the allCells array!
