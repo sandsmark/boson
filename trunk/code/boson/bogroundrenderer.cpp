@@ -391,8 +391,8 @@ void BoGroundRenderer::initFogTexture(const BosonMap* map)
 			mFogTextureData[(y * w + x) * 4 + 3] = 255;
 		}
 	}
-	for (unsigned int y = 1; y <= mLastMapWidth; y++) {
-		for (unsigned int x = 1; x <= mLastMapHeight; x++) {
+	for (unsigned int y = 1; y <= mLastMapHeight; y++) {
+		for (unsigned int x = 1; x <= mLastMapWidth; x++) {
 			unsigned char value = 0;
 			if (!localPlayerIO()->isFogged(x - 1, y - 1)) {
 				value = 255;
