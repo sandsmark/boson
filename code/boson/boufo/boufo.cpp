@@ -726,6 +726,68 @@ void BoUfoWidget::addSpacing(int spacing)
  widget()->add(w);
 }
 
+void BoUfoWidget::setVerticalAlignment(int a)
+{
+ if (a & Qt::AlignTop) {
+	widget()->setVerticalAlignment(ufo::AlignTop);
+ } else if (a & Qt::AlignBottom) {
+	widget()->setVerticalAlignment(ufo::AlignBottom);
+ } else if (a & Qt::AlignVCenter) {
+	widget()->setVerticalAlignment(ufo::AlignCenter);
+ }
+}
+
+int BoUfoWidget::verticalAlignment() const
+{
+ ufo::Alignment v = widget()->getVerticalAlignment();
+ int a;
+ switch (v) {
+	case ufo::AlignTop:
+		a = Qt::AlignTop;
+		break;
+	case ufo::AlignBottom:
+		a = Qt::AlignBottom;
+		break;
+	default:
+	case ufo::AlignCenter:
+		a = Qt::AlignVCenter;
+		break;
+ }
+ return a;
+}
+
+void BoUfoWidget::setHorizontalAlignment(int a)
+{
+ if (a & Qt::AlignLeft) {
+	widget()->setHorizontalAlignment(ufo::AlignLeft);
+ } else if (a & Qt::AlignRight) {
+	widget()->setVerticalAlignment(ufo::AlignRight);
+ } else if (a & Qt::AlignHCenter) {
+	widget()->setVerticalAlignment(ufo::AlignCenter);
+ } else {
+	boWarning() << k_funcinfo << "invalid value " << a << endl;
+ }
+}
+
+int BoUfoWidget::horizontalAlignment() const
+{
+ ufo::Alignment h = widget()->getHorizontalAlignment();
+ int a;
+ switch (h) {
+	case ufo::AlignLeft:
+		a = Qt::AlignLeft;
+		break;
+	case ufo::AlignRight:
+		a = Qt::AlignRight;
+		break;
+	default:
+	case ufo::AlignCenter:
+		a = Qt::AlignHCenter;
+		break;
+ }
+ return a;
+}
+
 void BoUfoWidget::setLayoutClass(LayoutClass layout)
 {
  switch (layout) {
@@ -955,7 +1017,7 @@ BoUfoWidget::~BoUfoWidget()
  // AB: do NOT delete the mWidget!
  // we are child of mWidget, not the other way round.
 
- boDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  if (mBackgroundImageDrawable) {
 	mBackgroundImageDrawable->unreference();
  }

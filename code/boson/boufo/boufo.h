@@ -338,6 +338,8 @@ class BoUfoWidget : public QObject
 	Q_PROPERTY(int preferredWidth READ preferredWidth WRITE setPreferredWidth);
 	Q_PROPERTY(int preferredHeight READ preferredHeight WRITE setPreferredHeight);
 	Q_PROPERTY(QString backgroundImageFile READ backgroundImageFile WRITE setBackgroundImageFile);
+	Q_PROPERTY(int verticalAlignment READ verticalAlignment WRITE setVerticalAlignment);
+	Q_PROPERTY(int horizontalAlignment READ horizontalAlignment WRITE setHorizontalAlignment);
 	Q_ENUMS(LayoutClass);
 public:
 	// AB: we must not use a QObject parent here. otherwise garbage
@@ -355,6 +357,19 @@ public:
 	{
 		return mWidget;
 	}
+
+	/**
+	 * Set the vertical alignment, see @ref
+	 * ufo::UWidget::setVerticalAlignment. @p alignment should be a value
+	 * from @ref Qt::AlignmentFlags that describes a vertical alignment
+	 *
+	 * It seems that these alignment flags are hints to the layout manager
+	 * in libufo.
+	 **/
+	void setVerticalAlignment(int alignment);
+	void setHorizontalAlignment(int alignment);
+	int verticalAlignment() const;
+	int horizontalAlignment() const;
 
 	/**
 	 * Convenience method for @ref setBackground with a drawable that paints
