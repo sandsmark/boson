@@ -115,7 +115,7 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
- slotCommandFramePosition(BosonConfig::commandFramePosition());
+// slotCommandFramePosition(BosonConfig::commandFramePosition());
  d->mMusic->setSound(BosonConfig::sound());
  d->mMusic->setMusic(BosonConfig::music());
 
@@ -130,11 +130,6 @@ BosonWidget::BosonWidget(QWidget* parent)
  connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 
-}
-
-void BosonWidget::insertCommandFrame(BosonCommandFrame* frame)
-{
- d->mFrameLayout->addWidget(frame);
 }
 
 void BosonWidget::init()
@@ -581,7 +576,7 @@ void BosonWidget::addEditorCommandFrame()
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
- insertCommandFrame(d->mCommandFrame);
+ slotCommandFramePosition(BosonConfig::commandFramePosition());
 }
 
 void BosonWidget::addGameCommandFrame()
@@ -596,7 +591,7 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
- insertCommandFrame(d->mCommandFrame);
+ slotCommandFramePosition(BosonConfig::commandFramePosition());
 }
 
 void BosonWidget::startEditor()
@@ -830,7 +825,7 @@ void BosonWidget::slotCommandFramePosition(int pos)
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mFrameLayout = new QVBoxLayout();
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
- insertCommandFrame(d->mCommandFrame);
+ d->mFrameLayout->addWidget(d->mCommandFrame);
  if (pos == OptionsDialog::Left) {
 	d->mTopLayout->addLayout(d->mFrameLayout);
 	d->mTopLayout->addWidget(d->mBigDisplay);

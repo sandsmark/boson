@@ -108,7 +108,7 @@ public:
 	QMap<int, int> mOrder2Type; // map order button -> unitType
 };
 
-BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent)
+BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent, "cmd frame")
 {
  init();
  if (editor) {
