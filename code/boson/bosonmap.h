@@ -691,7 +691,7 @@ public:
 	 **/
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
-	float cellAverageHeight(int x, int y);
+	float cellAverageHeight(int x, int y) const;
 
 
 
