@@ -28,6 +28,7 @@
 #include "boorbiterwidget.h"
 #include "bosonufoglwidget.h"
 #include "bolight.h"
+#include <bogl.h>
 
 #include <qlayout.h>
 #include <qvgroupbox.h>
@@ -43,8 +44,6 @@
 #include <klocale.h>
 
 #include <math.h>
-#include <GL/glu.h>
-#include <GL/gl.h>
 
 // boson's game restrictions
 #define MIN_LOOKAT_X -50.0f

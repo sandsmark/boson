@@ -19,10 +19,10 @@
 #ifndef BOBMFLOAD_H
 #define BOBMFLOAD_H
 
+#include <bogl.h>
+
 #include <qstring.h>
 #include <qvaluevector.h>
-
-#include <GL/gl.h>
 
 class KSimpleConfig;
 class QString;

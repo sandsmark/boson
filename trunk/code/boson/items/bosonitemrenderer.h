@@ -20,8 +20,7 @@
 #define BOSONITEMRENDERER_H
 
 #include "../defines.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qglobal.h>
 

@@ -23,7 +23,7 @@
 class BosonItem;
 class BosonCanvas;
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 class BoTexture;
 

@@ -21,8 +21,7 @@
 #define BOCAMERA_H
 
 #include "bo3dtools.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 class QDomElement;
 class BoAutoCamera;

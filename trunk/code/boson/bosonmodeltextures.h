@@ -19,7 +19,7 @@
 #ifndef BOSONMODELTEXTURES_H
 #define BOSONMODELTEXTURES_H
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 class QImage;
 class QString;

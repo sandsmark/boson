@@ -23,7 +23,7 @@ noinst_LTLIBRARIES = \
 		libbo3dsdebug.la
 bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
 
-INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes)
 
 
 libboson_la_SOURCES = \
@@ -114,12 +114,12 @@ libboson_la_SOURCES = \
 	bodebuglogdialog.cpp \
 	bowater.cpp \
 	botexture.cpp \
-	bobmfload.cpp \
-	bogl.cpp
+	bobmfload.cpp
 
 
 libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
@@ -181,6 +181,7 @@ libboprofiling_la_SOURCES = \
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
 		$(top_builddir)/boson/libboprofiling.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(LIB_BOMEMORY) \
 		$(LIB_KDEUI) \
@@ -197,6 +198,7 @@ libbocursor_la_SOURCES = \
 		bosonglwidget.cpp
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/libbocursor.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
@@ -225,6 +227,7 @@ libboinfo_la_SOURCES = \
 boinfo_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boinfo_LDADD = \
 		$(top_builddir)/boson/libboinfo.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(LIB_BOMEMORY) \
@@ -243,6 +246,7 @@ libbo3dsdebug_la_SOURCES = \
 bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
 		$(top_builddir)/boson/libbo3dsdebug.la \
+		$(top_builddir)/bogl/libbogl.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_BOMEMORY) \

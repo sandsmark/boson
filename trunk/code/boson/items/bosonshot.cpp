@@ -30,6 +30,7 @@
 #include "../boson.h"
 #include "../speciestheme.h"
 #include "../unit.h"
+#include <bogl.h>
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
@@ -37,8 +38,6 @@
 
 #include <qptrlist.h>
 #include <qdom.h>
-
-#include <GL/gl.h>
 
 #include <math.h>
 

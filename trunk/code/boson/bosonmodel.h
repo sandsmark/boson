@@ -19,7 +19,7 @@
 #ifndef BOSONMODEL_H
 #define BOSONMODEL_H
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 class KSimpleConfig;
 class QColor;

@@ -21,6 +21,7 @@
 #include "boglstatewidget.moc"
 
 #include "info/boglquerystates.h"
+#include <bogl.h>
 
 #include <bodebug.h>
 
@@ -35,7 +36,6 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 
-#include <GL/gl.h>
 #include <stdlib.h>
 
 class BoGLStateWidgetPrivate

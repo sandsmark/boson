@@ -21,8 +21,7 @@
 
 #include "bosonconfig.h"
 #include "botexture.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 BoMaterial* BoMaterial::mCurrentMaterial = 0;
 BoMaterial BoMaterial::mDefaultMaterial = BoMaterial();

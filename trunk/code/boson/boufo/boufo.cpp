@@ -17,6 +17,8 @@
     Boston, MA 02111-1307, USA.
 */
 
+#include <bogl.h>
+
 // AB: first include the ufo headers, otherwise we conflict with Qt
 #include <ufo/ufo.hpp>
 #include <ufo/gl/ugl_image.hpp>
@@ -51,8 +53,6 @@
 #include <qgl.h>
 
 #include <bodebug.h>
-
-#include <GL/gl.h>
 
 QColor BoUfoLabel::mDefaultForegroundColor = Qt::black;
 

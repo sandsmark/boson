@@ -20,11 +20,11 @@
 #ifndef BO3DTOOLS_H
 #define BO3DTOOLS_H
 
-#include <GL/gl.h>
 #include <math.h>
 
 #include "defines.h"
 #include "bomath.h"
+#include <bogl.h>
 
 class QString;
 class KConfig;

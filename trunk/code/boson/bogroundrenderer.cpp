@@ -29,12 +29,12 @@
 #include "bomaterial.h"
 #include "bowater.h"
 #include "botexture.h"
+#include <bogl.h>
 
 #include "playerio.h"
 
 #include <klocale.h>
 
-#include <GL/gl.h>
 #include <math.h>
 
 

@@ -21,8 +21,7 @@
 #define BOMESH_H
 
 #include "bo3dtools.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qstring.h>
 

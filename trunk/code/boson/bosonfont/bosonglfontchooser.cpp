@@ -26,6 +26,7 @@
 #include "bosonglfont.h"
 #include "../bosonglwidget.h"
 #include "../bo3dtools.h"
+#include <bogl.h>
 
 #include <knuminput.h>
 #include <kdialogbase.h>
@@ -42,7 +43,6 @@
 #include <qlayout.h>
 
 #include <GL/glx.h>
-#include <GL/glu.h>
 #include <X11/Xlib.h>
 #include <math.h>
 

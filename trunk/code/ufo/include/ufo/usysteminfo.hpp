@@ -48,8 +48,7 @@
 #if defined(UFO_GFX_X11)
 
 #include <X11/Xlib.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <bogl.h>
 #include <GL/glx.h>
 
 namespace ufo {

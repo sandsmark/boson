@@ -24,8 +24,6 @@
 #include <qstring.h>
 #include <qcolor.h>
 
-#include <GL/gl.h>
-
 class BosonTextureArray;
 class BosonModel;
 class BosonSoundInterface;

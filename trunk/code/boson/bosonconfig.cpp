@@ -21,6 +21,7 @@
 #include "boglobal.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include <bogl.h>
 
 #include <qptrlist.h>
 #include <qdict.h>
@@ -29,7 +30,6 @@
 #include <kapplication.h>
 #include <klocale.h>
 
-#include <GL/gl.h>
 #include <stdlib.h>
 
 class BoGlobalConfigObject : public BoGlobalObject<BosonConfig>

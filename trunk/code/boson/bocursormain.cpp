@@ -31,6 +31,7 @@
 #include "boapplication.h"
 #include "boglobal.h"
 #include "botexture.h"
+#include <bogl.h>
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -40,7 +41,6 @@
 #include <qcursor.h>
 #include <qtimer.h>
 
-#include <GL/glu.h>
 
 static void postBosonConfigInit();
 

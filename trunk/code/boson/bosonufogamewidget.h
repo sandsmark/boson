@@ -20,7 +20,7 @@
 #define BOSONUFOGAMEWIDGET_H
 
 #include "boufo/boufo.h"
-#include <GL/gl.h>
+#include <bogl.h>
 
 class BosonGLMiniMap;
 class BoSelection;

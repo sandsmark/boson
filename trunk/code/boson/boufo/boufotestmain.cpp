@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <bogl.h>
+
 //#include <ufo/ufo.hpp>
 //#include <ufo/ux/ux.hpp>
 #include "boufo.h"
@@ -31,7 +33,6 @@
 #include <qtimer.h>
 #include <qdatetime.h>
 
-#include <GL/glu.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -39,7 +40,7 @@
 BoUfoTest::BoUfoTest(QWidget* parent, const char* name) : QGLWidget(parent, name)
 {
  setMouseTracking(true);
- setMinimumSize(200, 200);
+ setMinimumSize(800, 200);
 
  mUfoManager = 0;
 
@@ -93,8 +94,8 @@ void BoUfoTest::initializeGL()
  mContentWidget->addWidget(label2);
  label2->setText(s);
 
- ufo::UDimension dim = label2->widget()->getPreferredSize();
- printf("label2 preferred size: %d,%d\n", dim.w, dim.h);
+// ufo::UDimension dim = label2->widget()->getPreferredSize();
+// printf("label2 preferred size: %d,%d\n", dim.w, dim.h);
 #endif
 
 #if 0
@@ -107,11 +108,13 @@ void BoUfoTest::initializeGL()
 
 #endif // MULTILINE_TEST
 
+#define FONT_SELECTION_TEST 1
+#if FONT_SELECTION_TEST
  BoUfoInternalFrame* frame = new BoUfoInternalFrame(mUfoManager, "Font selection");
  BoUfoFontSelectionWidget* selection = new BoUfoFontSelectionWidget(mUfoManager);
  frame->addWidget(selection);
-// frame->setSize(frame->preferredWidth(), frame->preferredHeight());
  frame->setSize(frame->preferredWidth(), frame->preferredHeight());
+#endif // FONT_SELECTION_TEST
 
  recursive = false;
  initialized = true;

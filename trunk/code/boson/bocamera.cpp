@@ -48,7 +48,7 @@
 #define NEW_Z_CALCULATIONS
 
 
-#include <GL/glu.h>
+#include <bogl.h>
 
 #include <math.h>
 

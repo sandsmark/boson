@@ -28,9 +28,9 @@
 #include "../bomaterial.h"
 #include "../boson.h"
 #include "../botexture.h"
+#include <bogl.h>
 #include <bodebug.h>
 
-#include <GL/gl.h>
 #include <math.h>
 
 

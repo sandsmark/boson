@@ -3,7 +3,7 @@
 
 SUBDIRS = .
 
-INCLUDES = -I$(top_srcdir)/ufo/include $(all_includes)
+INCLUDES = -I$(top_srcdir)/ufo/include -I$(top_srcdir)/bogl $(all_includes)
 
 noinst_LTLIBRARIES = libwidgets.la
 

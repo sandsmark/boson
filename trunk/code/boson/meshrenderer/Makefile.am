@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes)
 
 if include_plugins
 MESHRENDERER_PLUGIN=libbomeshrendererplugin.la

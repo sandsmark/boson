@@ -24,10 +24,9 @@
 #include "bo3dtools.h"
 #include "bocamera.h"
 #include "defines.h"
+#include <bogl.h>
 
 #include <math.h>
-#include <GL/glu.h>
-#include <GL/gl.h>
 
 static void paintBox(float size)
 {

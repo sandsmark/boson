@@ -17,11 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bogl.h"
-
 #include "botexture.h"
-
-#include <GL/glu.h>
 
 #include <qstring.h>
 #include <qimage.h>

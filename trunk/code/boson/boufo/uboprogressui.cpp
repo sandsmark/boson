@@ -25,6 +25,7 @@
 #include "uboprogressui.h"
 
 #include "uboprogress.h"
+#include <bogl.h>
 
 #include <ufo/ui/uuimanager.hpp>
 #include <ufo/ui/ustyle.hpp>
@@ -32,7 +33,6 @@
 #include <ufo/gl/ugl_driver.hpp>
 #include <ufo/font/ufont.hpp>
 #include <ufo/util/udimension.hpp>
-#include <GL/gl.h>
 
 
 using namespace ufo;

@@ -30,6 +30,7 @@
 #include "../boson.h"
 #include "../botexture.h"
 #include "../bosonconfig.h"
+#include <bogl.h>
 #include <bodebug.h>
 
 #warning remove
@@ -37,7 +38,6 @@
 
 #include <qimage.h>
 
-#include <GL/gl.h>
 #include <math.h>
 
 class BoVeryFastGroundRendererCellListLOD : public BoGroundRendererCellListLOD

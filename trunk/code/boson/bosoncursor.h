@@ -20,8 +20,8 @@
 #define BOSONCURSOR_H
 
 #include "defines.h"
+#include <bogl.h>
 #include <qobject.h>
-#include <GL/gl.h>
 
 class QPoint;
 class QWidget;
