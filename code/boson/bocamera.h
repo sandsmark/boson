@@ -42,6 +42,16 @@ public:
 		*this = c;
 	}
 
+	/**
+	 * Apply the camera to the scene by doing the necessary OpenGL
+	 * transformation on the modelview matrix.
+	 *
+	 * This will first load the identity matrix, so any previous changes are
+	 * lost. use glPushMatrix()/glPopMatrix() if you need your old settings
+	 * back at a later point.
+	 **/
+	void applyCameraToScene();
+
 	BoCamera& operator=(const BoCamera& c);
 
 	static int minCameraZ();
@@ -94,6 +104,11 @@ public:
 		return mRadius;
 	}
 
+	const BoVector3& cameraPos() const
+	{
+		return mCameraPos;
+	}
+
 protected:
 	void checkPosition();
 
@@ -107,6 +122,8 @@ private:
 
 	GLfloat mRotation;
 	GLfloat mRadius;
+
+	BoVector3 mCameraPos;
 
 	// AB: why float?
 	GLfloat mMapWidth;

@@ -393,8 +393,6 @@ public:
 	QPoint mCanvasPos; // obsolete
 	BoVector3 mCanvasVector;
 
-	BoVector3 mCameraPos;
-
 	BoParticleList mParticleList;
 	bool mParticlesDirty;
 
@@ -1416,9 +1414,9 @@ void BosonBigDisplayBase::renderParticles()
 				p = &(s->mParticles[i]);
 				// Calculate distance from camera. Note that for performance reasons,
 				//  we don't calculate actual distance, but square of it.
-				x = p->pos.x() - d->mCameraPos.x();
-				y = p->pos.y() - d->mCameraPos.y();
-				z = p->pos.z() - d->mCameraPos.z();
+				x = p->pos.x() - d->mCamera.cameraPos().x();
+				y = p->pos.y() - d->mCamera.cameraPos().y();
+				z = p->pos.z() - d->mCamera.cameraPos().z();
 				p->distance = (x*x + y*y + z*z);
 				// Append to list
 				d->mParticleList.append(p);
@@ -2676,33 +2674,7 @@ void BosonBigDisplayBase::cameraChanged()
  }
  makeCurrent();
 
- glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
- glLoadIdentity();
-
- float diffX, diffY;
- float radius = camera()->radius();
- if (radius <= 0.02) {
-	// If radius is 0, up vector will be wrong so we change it
-	radius = 0.02;
- }
- pointByRotation(&diffX, &diffY, camera()->rotation(), radius);
- float lookatX, lookatY, lookatZ;  // Point that we look at
- lookatX = camera()->lookAt().x();
- lookatY = camera()->lookAt().y();
- lookatZ = 0.0;
- float eyeX, eyeY, eyeZ;  // Position of camera
- eyeX = lookatX + diffX;
- eyeY = lookatY + diffY;
- eyeZ = lookatZ + camera()->z();
- d->mCameraPos.set(eyeX, eyeY, eyeZ);
- float upX, upY, upZ;  // up vector (points straight up in viewport)
- upX = -diffX;
- upY = -diffY;
- upZ = 0.0;
-
- gluLookAt(eyeX, eyeY, eyeZ,
-		lookatX, lookatY, lookatZ,
-		upX, upY, upZ);
+ d->mCamera.applyCameraToScene();
 
  // Reposition light
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
