@@ -1196,11 +1196,11 @@ void BosonMap::slotChangeTexMap(int x, int y, unsigned int texCount, unsigned in
 	return;
  }
  BO_CHECK_NULL_RET(groundTheme());
- if (x < 0 || (uint)x >= width()) {
+ if (x < 0 || (uint)x > width()) {
 	boError() << k_funcinfo << "invalid x coordinate: " << x << endl;
 	return;
  }
- if (y < 0 || (uint)y >= height()) {
+ if (y < 0 || (uint)y > height()) {
 	boError() << k_funcinfo << "invalid y coordinate: " << y << endl;
 	return;
  }
