@@ -14,7 +14,7 @@ BO_DOCS=index.wml attacking.wml buildfac.wml buildunit.wml cursor.wml \
                 technologies.wml equipment.wml
 
 # list additional data here - these files will get installed
-doc_DATA=default.gif move.gif attack.gif
+doc_DATA=
 
 # Condiguration ends here!
 
