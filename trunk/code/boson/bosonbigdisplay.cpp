@@ -233,14 +233,18 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		if (e->button() == LeftButton) {
 			startSelection(pos);
 		} else if (e->button() == MidButton) {
-			int oldX = contentsX();
-			int oldY = contentsY();
-			center(pos.x(), pos.y());
-			QPoint p = d->mCursor->pos();
-			d->mCursor->move(p.x() + contentsX() - oldX,
-					p.y() + contentsY() - oldY);
-			d->mCursor->setWidgetCursor(viewport());
-			canvas()->update();
+			if (boConfig->mmbMove()) {
+				//TODO can we move the cursor-replacing code
+				//directly into center() ?
+				int oldX = contentsX();
+				int oldY = contentsY();
+				center(pos.x(), pos.y());
+				QPoint p = d->mCursor->pos();
+				d->mCursor->move(p.x() + contentsX() - oldX,
+						p.y() + contentsY() - oldY);
+				d->mCursor->setWidgetCursor(viewport());
+				canvas()->update();
+			}
 		} else if (e->button() == RightButton) {
 			d->mRMBMove = pos;
 		}
@@ -602,7 +606,9 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 				startSelection(pos);
 			}
 		} else if (e->button() == MidButton) {
-			center(pos.x(), pos.y());
+			if (boConfig->mmbMove()) {
+				center(pos.x(), pos.y());
+			}
 		} else if (e->button() == RightButton) {
 			d->mRMBMove = pos;
 		}

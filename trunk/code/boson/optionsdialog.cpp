@@ -30,6 +30,7 @@
 
 #include <qlabel.h>
 #include <qcombobox.h>
+#include <qcheckbox.h>
 #include <qvbox.h>
 
 #include "optionsdialog.moc"
@@ -49,6 +50,10 @@ public:
 		
 		mCursor = 0;
 		mCursorTheme = 0;
+
+		mRMBScrolling = 0;
+		mMMBScrolling = 0;
+		mCursorEdgeSensity = 0;
 	}
 
 	KIntNumInput* mArrowSpeed;
@@ -63,6 +68,10 @@ public:
 	QComboBox* mCursorTheme;
 	QStringList mCursorThemes;
 	QStringList mCmdBackgrounds;
+
+	QCheckBox* mRMBScrolling;
+	QCheckBox* mMMBScrolling;
+	KIntNumInput* mCursorEdgeSensity;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -74,6 +83,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  initGeneralPage();
  initCursorPage();
  initPathfindingPage();
+ initScrollingPage();
 }
 
 OptionsDialog::~OptionsDialog()
@@ -186,6 +196,27 @@ void OptionsDialog::initPathfindingPage()
  setGroupMove(boConfig->readGroupMoveMode());
 }
 
+void OptionsDialog::initScrollingPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("&Scrolling"));
+ QHBox* hbox = new QHBox(vbox);
+ (void)new QLabel(i18n("Enable Right Mouse Button Scrolling"), hbox);
+ d->mRMBScrolling = new QCheckBox(hbox);
+ connect(d->mRMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotRMBScrollingToggled(bool)));
+ 
+ hbox = new QHBox(vbox);
+ (void)new QLabel(i18n("Enable Middle Mouse Button Scrolling"), hbox);
+ d->mMMBScrolling = new QCheckBox(hbox);
+ connect(d->mMMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotMMBScrollingToggled(bool)));
+ 
+ hbox = new QHBox(vbox);
+ (void)new QLabel(i18n("Sensity of cursor at edge of the windo Scrolling (0 for disabled)"), hbox);
+ d->mCursorEdgeSensity = new KIntNumInput(hbox);
+ d->mCursorEdgeSensity->setRange(0, 50);
+ connect(d->mCursorEdgeSensity, SIGNAL(valueChanged(int)), this, SLOT(slotCursorEdgeSensityChanged(int)));
+
+}
+
 void OptionsDialog::slotSpeedChanged(int value)
 {
 // value is not actually the new speed but the value supplied by the input
@@ -277,3 +308,37 @@ void OptionsDialog::slotCmdBackgroundChanged(int index)
  index--;
  emit signalCmdBackgroundChanged(d->mCmdBackgrounds[index]);
 }
+
+void OptionsDialog::slotRMBScrollingToggled(bool on)
+{
+ boConfig->setRMBMove(on);
+}
+
+void OptionsDialog::slotMMBScrollingToggled(bool on)
+{
+ boConfig->setMMBMove(on);
+}
+
+void OptionsDialog::slotCursorEdgeSensityChanged(int v)
+{
+ if (v < 0) {
+	v = 0;
+ }
+ boConfig->setCursorEdgeSensity(v);
+}
+
+void OptionsDialog::setRMBScrolling(bool on)
+{
+ d->mRMBScrolling->setChecked(on);
+}
+
+void OptionsDialog::setMMBScrolling(bool on)
+{
+ d->mMMBScrolling->setChecked(on);
+}
+
+void OptionsDialog::setCursorEdgeSensity(int v)
+{
+ d->mCursorEdgeSensity->setValue(v);
+}
+
