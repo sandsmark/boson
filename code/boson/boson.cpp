@@ -1639,36 +1639,6 @@ void Boson::slotSendAdvance()
  d->mAdvance->sendAdvance();
 }
 
-Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
-{
- if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return 0;
- }
- SpeciesTheme* theme = owner->speciesTheme();
- if (!theme) {
-	boError() << k_funcinfo << "No theme for this player" << endl;
-	return 0; // BAAAAD - will crash
- }
- const UnitProperties* prop = theme->unitProperties(unitType);
- if (!prop) {
-	boError() << "Unknown unitType " << unitType << endl;
-	return 0;
- }
-
- Unit* unit = 0;
- if (prop->isMobile()) {
-	unit = new MobileUnit(prop, owner, d->mCanvas);
- } else if (prop->isFacility()) {
-	unit = new Facility(prop, owner, d->mCanvas);
- } else { // should be impossible
-	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
-	return 0;
- }
-
- return unit;
-}
-
 unsigned long int Boson::nextUnitId()
 {
  d->mNextUnitId = d->mNextUnitId + 1;
