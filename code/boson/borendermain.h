@@ -53,6 +53,7 @@ class KCmdLineArgs;
 class QCheckBox;
 class BoFontInfo;
 class BoUfoManager;
+class BoUfoAction;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
 
@@ -95,11 +96,16 @@ private slots:
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
+// AB: this is not a "preview" anymore. it contains a lot of the actual control
+// code (such as the menubar).
+// this is mostly due to the current libufo conversion.
+// once that is completed we should change the general class design of this
+// program, to reflect the new facts.
 class ModelPreview : public BosonGLWidget
 {
 	Q_OBJECT
 public:
-	ModelPreview(QWidget*);
+	ModelPreview(const QPtrList<SpeciesTheme>&, QWidget*);
 	~ModelPreview();
 
 	virtual void initializeGL();
@@ -154,6 +160,9 @@ signals:
 	void signalReloadModelTextures();
 	void signalReloadMeshRenderer();
 
+	void signalUnitChanged(SpeciesTheme*, int);
+	void signalObjectChanged(SpeciesTheme*, int);
+
 public slots:
 	void slotResetView();
 	void slotFovYChanged(float f)
@@ -201,6 +210,9 @@ public slots:
 	void slotEnableLight(bool);
 	void slotEnableMaterials(bool);
 	void slotShowVertexPoints(bool);
+
+	void slotUnitChanged(int);
+	void slotObjectChanged(int);
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -250,6 +262,8 @@ protected:
 	void updateCursorDisplay(const QPoint& pos);
 	int pickObject(const QPoint& pos);
 
+	void uncheckAllBut(BoUfoAction*); // BAH!
+
 private:
 	void initUfoGUI();
 
@@ -278,6 +292,9 @@ private:
 
 	BoCamera* mCamera;
 	BoLight* mLight;
+
+	QPtrList<SpeciesTheme> mSpecies;
+	QPtrDict<SpeciesTheme> mAction2Species;
 };
 
 /**
@@ -323,7 +340,9 @@ protected:
 
 protected slots:
 	void slotUnitChanged(int);
+	void slotUnitChanged(SpeciesTheme*, int);
 	void slotObjectChanged(int);
+	void slotObjectChanged(SpeciesTheme*, int);
 	void slotDebugModels();
 	void slotDebugMemory();
 	void slotDebugSpecies();

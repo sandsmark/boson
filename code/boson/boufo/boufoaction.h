@@ -63,7 +63,7 @@ public slots:
 protected:
 	void addWidget(ufo::UWidget*);
 	void removeWidget(ufo::UWidget*);
-	QPtrList<ufo::UWidget> widgets() const;
+	const QPtrList<ufo::UWidget>& widgets() const;
 
 signals:
 	void signalActivated();
@@ -121,11 +121,37 @@ public:
 	void insert(BoUfoAction* a);
 	void remove(BoUfoAction* a);
 
+	virtual void clear();
+
 protected:
 	void redoMenus();
+	const QPtrList<BoUfoAction>& actions() const;
 
 private:
 	BoUfoActionMenuPrivate* d;
+};
+
+class BoUfoSelectActionPrivate;
+class BoUfoSelectAction : public BoUfoActionMenu
+{
+	Q_OBJECT
+public:
+	BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
+	~BoUfoSelectAction();
+
+	virtual void clear();
+
+	void setItems(const QStringList&);
+	void setCurrentItem(int);
+
+protected slots:
+	void slotItemActivated();
+
+signals:
+	void signalActivated(int);
+
+private:
+	BoUfoSelectActionPrivate* d;
 };
 
 class BoUfoActionCollectionPrivate;
@@ -231,7 +257,7 @@ public:
 	void createUfoSubMenu(ufo::UWidget*);
 
 protected:
-	QValueList<BoUfoMenuBarItem*>& items() const;
+	const QValueList<BoUfoMenuBarItem*>& items() const;
 
 private:
 	BoUfoMenuBarMenuPrivate* d;
