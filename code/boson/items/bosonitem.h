@@ -271,11 +271,6 @@ public:
 	 **/
 	void renderItem(unsigned int lod = 0);
 
-	inline GLuint displayList() const
-	{
-		return mDisplayList;
-	}
-
 	/**
 	 * @return The select box of this item, or NULL if it is not selected.
 	 * See @ref isSelected.
@@ -586,16 +581,6 @@ private:
 	void setCurrentFrame(BoFrame* frame);
 
 	/**
-	 * Cache the display list from the current frame. Don't use this
-	 * directly - use @ref setCurrentFrame (or rather @ref setFrame) instead.
-	 **/
-	inline void setDisplayList(GLuint l)
-	{
-		mDisplayList = l;
-	}
-
-
-	/**
 	 * Add the item to the cells on the canvas. This should get called
 	 * whenever the item has been moved in any way (i.e. also when its size
 	 * was changed)
@@ -641,7 +626,6 @@ private:
 	float mYRotation;
 	float mGLDepthMultiplier;
 	BoFrame* mCurrentFrame;
-	GLuint mDisplayList;
 	unsigned int mGLConstructionStep;
 	unsigned int mFrame;
 	unsigned int mAnimationCounter;

@@ -46,10 +46,6 @@
 // i am expecting the strips to be faster
 #define USE_STRIP 0
 
-// we use vertex arrays - we can also use display lists to make it faster.
-// they are disabled currently cause plain vertex arrays are more flexible.
-#define USE_DISPLAYLISTS 0
-
 // some testings for me. this is here for my own use only currently.
 // #define AB_TEST 1
 
@@ -268,7 +264,6 @@ BoFrame::BoFrame()
 BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCount)
 {
  init();
- mDisplayList = f.mDisplayList;
  mDepthMultiplier = f.mDepthMultiplier;
  mRadius = f.mRadius;
 
@@ -295,7 +290,6 @@ BoFrame::BoFrame(const BoFrame& f, unsigned int firstMesh, unsigned int meshCoun
 BoFrame::BoFrame(const BoFrame& f, unsigned int* meshes, unsigned int meshCount)
 {
  init();
- mDisplayList = f.mDisplayList;
  mDepthMultiplier = f.mDepthMultiplier;
  mRadius = f.mRadius;
  copyMeshes(f, meshes, meshCount);
@@ -303,7 +297,6 @@ BoFrame::BoFrame(const BoFrame& f, unsigned int* meshes, unsigned int meshCount)
 
 void BoFrame::init()
 {
- mDisplayList = 0;
  mDepthMultiplier = 0.0f;
  mRadius = 0.0f;
  mMatrices = 0;
@@ -314,9 +307,6 @@ void BoFrame::init()
 
 BoFrame::~BoFrame()
 {
- if (mDisplayList != 0) {
-	glDeleteLists(mDisplayList, 1);
- }
  if (mMatrices) {
 	for (unsigned int i = 0; i < mMeshCount; i++) {
 		delete mMatrices[i];
@@ -441,15 +431,7 @@ void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod, int mode)
 	if (mode == GL_SELECT) {
 		glLoadName(i);
 	}
-#if USE_DISPLAYLISTS
-	// FIXME: LOD
-	if (mesh->displayList()) {
-		glCallList(mesh->displayList());
-	} else
-#endif
-	{
-		mesh->renderMesh(teamColor, lod);
-	}
+	mesh->renderMesh(teamColor, lod);
 	glPopMatrix();
  }
 }
@@ -594,7 +576,6 @@ public:
 
 	QPtrVector<BoMaterial> mAllMaterials;
 
-	QValueList<GLuint> mNodeDisplayLists;
 	QPtrVector<BoFrame> mConstructionSteps;
 	QIntDict<BosonAnimation> mAnimations;
 	QMap<QString, QString> mTextureNames;
@@ -638,11 +619,6 @@ BosonModel::~BosonModel()
  d->mFrames.clear();
  boDebug(100) << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
  d->mConstructionSteps.clear();
- boDebug(100) << k_funcinfo << "delete " << d->mNodeDisplayLists.count() << " child display lists" << endl;
- QValueList<GLuint>::Iterator it = d->mNodeDisplayLists.begin();
- for (; it != d->mNodeDisplayLists.end(); ++it) {
-	glDeleteLists((*it), 1);
- }
  d->mAnimations.clear();
  boDebug(100) << k_funcinfo << "delete meshes" << endl;
  d->mMeshes.clear();
@@ -856,77 +832,6 @@ bool BosonModel::loadModelData(BosonModelLoaderData* data)
  data->clearMaterials(false);
 
  return true;
-}
-
-void BosonModel::createDisplayLists(const QColor* teamColor)
-{
-#if !USE_DISPLAYLISTS
- return;
-#endif
-
-#warning TODO: different teamcolors!
- // we need to maintain an internal map for the displaylists and the teamcolor!
- // createDisplayLists() will get called several times with different teamColor
- // params!
-
- if (d->mFrames.isEmpty()) {
-	boWarning() << k_funcinfo << "no frames" << endl;
-	return;
- }
-
- glEnableClientState(GL_VERTEX_ARRAY);
- glEnableClientState(GL_TEXTURE_COORD_ARRAY);
- // a display list makes our vertex pointer totally useless! the data are
- // evaluated *now* when we compile the list - not later anymore!
- enablePointer();
-
-
- // AB: instead of creating display lists for every mesh we could generate a
- // single display list per frame containing all of the data. this would save
- // several glCallLists() calls and might be faster - but takes a lot more
- // memory for many frames
- boDebug(100) << k_funcinfo << "creating lists for " << meshCount() << " meshes" << endl;
- for (unsigned int i = 0; i < meshCount(); i++) {
-	BoMesh* m = mesh(i);
-	if (!m) {
-		BO_NULL_ERROR(m);
-		continue;
-	}
-	m->loadDisplayList(teamColor);
- }
-
- boDebug(100) << k_funcinfo << "creating " << d->mFrames.count() << " lists" << endl;
- GLuint listBase = glGenLists(d->mFrames.count() + d->mConstructionSteps.count());
- if (listBase == 0) {
-	boError(100) << k_funcinfo << "NULL display lists created" << endl;
-	return;
- }
-
- GLuint list = listBase;
- for (unsigned int i = 0; i < frames(); i++) {
-	BoFrame* f = frame(i);
-
-	glNewList(list, GL_COMPILE);
-	f->renderFrame(teamColor);
-	glEndList();
-	f->setDisplayList(list);
-
-	list++;
- }
- for (unsigned int i = 0; i < constructionSteps(); i++) {
-	BoFrame* step = constructionStep(i);
-
-	glNewList(list, GL_COMPILE);
-	step->renderFrame(teamColor);
-	glEndList();
-	step->setDisplayList(list);
-
-	list++;
- }
-
- glDisableClientState(GL_VERTEX_ARRAY);
- glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
 }
 
 void BosonModel::generateConstructionFrames()

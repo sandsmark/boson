@@ -224,7 +224,6 @@ void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamCo
 	// we only need to load the display lists here, as everything else
 	// doesn't depend on the teamcolor :)
  }
- m->createDisplayLists(&teamColor);
 }
 
 BosonModel* SpeciesData::unitModel(unsigned long int unitType) const
@@ -482,10 +481,8 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 		m = factory.createObjectModel(&cfg, themePath());
 		d->mObjectModels.insert(*it, m);
 	} else {
-		// nothing special to do here - just load the additional display
-		// lists for the new teamcolor.
+		// nothing special to do here
 	}
-	m->createDisplayLists(&teamColor);
  }
 }
 
