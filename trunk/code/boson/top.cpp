@@ -505,7 +505,7 @@ void TopWidget::loadGameData2()
 void TopWidget::loadGameData3()
 {
  // Load unit pixmaps
- d->mLoading->setProgress(4000);
+ d->mLoading->setProgress(3000);
  d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
  checkEvents();
  // First get all id's of units
@@ -514,12 +514,9 @@ void TopWidget::loadGameData3()
  QValueList<int>::iterator it;
  int current = 0;
  int total = unitIds.count();
- kdDebug() << k_funcinfo << "total units: " << total << endl;
  for(it = unitIds.begin(); it != unitIds.end(); ++it) {
 	current++;
 	player()->speciesTheme()->loadUnit(*it);
-	kdDebug() << k_funcinfo << " Unit " << current << " of " << total << " loaded, setting progress to " <<
-			3000 + ((double)current / total * 1600) << endl;
 	d->mLoading->setProgress(3000 + ((double)current / total * 1600));
  }
 
@@ -531,14 +528,13 @@ void TopWidget::loadGameData3()
 	mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
 	mBoson->sendMessage(0, BosonMessage::IdStartScenario);
  }
-// checkEvents();
  d->mLoading->setProgress(4700);
  d->mLoading->setLoading(BosonLoadingWidget::StartingGame);
+ checkEvents();
 
  showBosonWidget();
  delete d->mNewGame;
  d->mNewGame = 0;
-// checkEvents();
  statusBar()->show();
  d->mBosonwidget->initGameMode();
  enableGameActions(true);
@@ -549,7 +545,6 @@ void TopWidget::loadGameData3()
  connect(d->mBosonwidget, SIGNAL(signalFacilitiesCount(int)), this, SIGNAL(signalSetFacilitiesCount(int)));
  connect(d->mBosonwidget, SIGNAL(signalOilUpdated(int)), this, SIGNAL(signalOilUpdated(int)));
  connect(d->mBosonwidget, SIGNAL(signalMineralsUpdated(int)), this, SIGNAL(signalMineralsUpdated(int)));
-// initStatusBar();
 
  connect(d->mBosonwidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonwidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
@@ -562,14 +557,14 @@ void TopWidget::loadGameData3()
 
 void TopWidget::slotCanvasTilesLoading(int progress)
 {
- d->mLoading->setProgress(600 + (progress / 1244.0 * 2400));
+ d->mLoading->setProgress(600 + (progress / 1244.0 * 2200));
  // No checkEvents() here as events are already processed in BosonTiles::???
 }
 
 void TopWidget::slotCanvasTilesLoaded()
 {
  checkEvents();
- d->mLoading->setProgress(4000);
+ d->mLoading->setProgress(3000);
  QTimer::singleShot(0, this, SLOT(loadGameData3()));
 }
 
