@@ -481,11 +481,11 @@ void BosonProfilingDialog::initItemAdvanceWidget(QWidget* widget)
  QLabel* itemAdvanceLabel = new QLabel(i18n("Values per item:"), widget);
  d->mItemAdvance = new KListView(widget);
  d->mItemAdvance->setRootIsDecorated(true);
- d->mItemAdvance->addColumn(i18n("Rtti"));
+ d->mItemAdvance->addColumn(i18n("Advance Count"));
  d->mItemAdvance->addColumn(i18n("IsUnit"));
  d->mItemAdvance->addColumn(i18n("ID"));
  d->mItemAdvance->addColumn(i18n("Work"));
- d->mItemAdvance->addColumn(i18n("Advance Count"));
+ d->mItemAdvance->addColumn(i18n("Rtti"));
  d->mItemAdvance->addColumn(i18n("Type"));
  d->mItemAdvance->addColumn(i18n("Time"));
  d->mItemAdvance->addColumn(i18n("Time (ms)"));
@@ -852,13 +852,16 @@ void BosonProfilingDialog::resetItemAdvanceWidget()
  if (pd->mSlotAdvanceTimes.isEmpty()) {
 	return;
  }
+ QValueList<QString> itemAdvanceNames = ProfileItemAdvance::names();
 
 
- QMemArray<unsigned long int> itemAdvanceSums(ProfileItemAdvance::names().count());
+ QMemArray<unsigned long int> itemAdvanceSums(itemAdvanceNames.count());
  int itemAdvanceCount = 0;
- for (unsigned int i = 0; i < itemAdvanceSums.count(); i++) {
+ for (unsigned int i = 0; i < itemAdvanceNames.count(); i++) {
 	itemAdvanceSums[i] = 0;
  }
+ QMap< int, QMemArray<unsigned long int> > advanceSumsByWork;
+ QMap< int, int > advanceSumsByWorkCount;
 
  QPtrListIterator<ProfileSlotAdvance> it(pd->mSlotAdvanceTimes);
  for (; it.current(); ++it) {
@@ -869,29 +872,63 @@ void BosonProfilingDialog::resetItemAdvanceWidget()
 	// here...
 	for (; itemsIt.current(); ++itemsIt) {
 		QValueList<unsigned long int> values = itemsIt.current()->values();
+		if (!advanceSumsByWork.contains((*itemsIt)->mWork)) {
+			QMemArray<unsigned long int> *a = &advanceSumsByWork[(*itemsIt)->mWork];
+			a->resize(itemAdvanceNames.count());
+			for (unsigned int i = 0; i < itemAdvanceNames.count(); i++) {
+				(*a)[i] = 0;
+			}
+			advanceSumsByWorkCount[(*itemsIt)->mWork] = 0;
+		}
+		QMemArray<unsigned long int> *a = &advanceSumsByWork[(*itemsIt)->mWork];
 		for (unsigned int i = 0; i < values.count(); i++) {
 			itemAdvanceSums[i] += values[i];
+			(*a)[i] += values[i];
 		}
 		itemAdvanceCount++;
+		advanceSumsByWorkCount[(*itemsIt)->mWork]++;
 	}
  }
 
- unsigned int count = pd->mSlotAdvanceTimes.count();
- if (!count) {
+ if (!pd->mSlotAdvanceTimes.count()) {
 	// hmm we already checked above?!
 	boError() << k_funcinfo << "internal error - count == 0" << endl;
 	return;
  }
- // item advance summary
  if (!itemAdvanceCount) {
 	return;
  }
- QValueList<QString> itemAdvanceNames = ProfileItemAdvance::names();
  for (unsigned int i = 1; i < itemAdvanceSums.count(); i++) {
 	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i], itemAdvanceSums[0]);
 	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i] / itemAdvanceCount, itemAdvanceSums[0] / itemAdvanceCount);
  }
- // item advance summary (end)
+
+
+ QListViewItemNumber* averageByWork = new QListViewItemNumber(d->mItemAdvance);
+ QListViewItemNumber* sumByWork = new QListViewItemNumber(d->mItemAdvance);
+ initItemAdvanceItemSummary(averageByWork, i18n("Average by work"), "", 0 , 1);
+ initItemAdvanceItemSummary(sumByWork, i18n("Sum by work"), "", 0 , 1);
+ QMap< int, QMemArray<unsigned long int> >::Iterator workIt = advanceSumsByWork.begin();
+ for (; workIt != advanceSumsByWork.end(); ++workIt) {
+	QListViewItemNumber* average = new QListViewItemNumber(averageByWork);
+	QListViewItemNumber* sum = new QListViewItemNumber(sumByWork);
+	QString labelAverage;
+	QString labelSum;
+	int count = advanceSumsByWorkCount[workIt.key()];
+	if (workIt.key() == -1) {
+		labelAverage = i18n("Average Non-Units (%1 items)").arg(count);
+		labelSum = i18n("Sum Non-Units (%1 items)").arg(count);
+	} else {
+		labelAverage = i18n("Average (%1 units)").arg(count);
+		labelSum = i18n("Sum (%1 units)").arg(count);
+	}
+	initItemAdvanceItemSummary(average, labelAverage, itemAdvanceNames[0], (*workIt)[0] / count , (*workIt)[0] / count, workIt.key());
+	initItemAdvanceItemSummary(sum, labelSum, itemAdvanceNames[0], (*workIt)[0], (*workIt)[0], workIt.key());
+	for (unsigned int i = 1; i < itemAdvanceSums.count(); i++) {
+		initItemAdvanceItemSummary(new QListViewItemNumber(average), labelAverage, itemAdvanceNames[i], (*workIt)[i] / count , (*workIt)[0] / count, workIt.key());
+		initItemAdvanceItemSummary(new QListViewItemNumber(sum), labelSum, itemAdvanceNames[i], (*workIt)[i], (*workIt)[0], workIt.key());
+	}
+ }
 
 }
 
@@ -937,22 +974,26 @@ void BosonProfilingDialog::initItemAdvanceItem(QListViewItemNumber* item, Profil
 	id = i18n("-");
 	work = i18n("-");
  }
- item->setText(0, QString::number(a->mRtti));
+ item->setText(0, QString::number(advanceCount));
  item->setText(1, isUnit);
  item->setText(2, id);
+ item->setText(4, QString::number(a->mRtti));
  item->setText(3, work);
- item->setText(4, QString::number(advanceCount));
  item->setText(5, type);
  item->setTime(6, time, function);
 }
 
-void BosonProfilingDialog::initItemAdvanceItemSummary(QListViewItemNumber* item, const QString& description, const QString& type, unsigned long int time, unsigned long int function)
+void BosonProfilingDialog::initItemAdvanceItemSummary(QListViewItemNumber* item, const QString& description, const QString& type, unsigned long int time, unsigned long int function, int work)
 {
- item->setText(0, i18n("-"));
+ item->setText(0, description);
  item->setText(1, i18n("-"));
  item->setText(2, i18n("-"));
- item->setText(3, i18n("-"));
- item->setText(4, description);
+ if (work < 0) {
+	item->setText(3, i18n("-"));
+ } else {
+	item->setText(3, QString::number(work));
+ }
+ item->setText(4, i18n("-"));
  item->setText(5, type);
  item->setTime(6, time, function);
 }
