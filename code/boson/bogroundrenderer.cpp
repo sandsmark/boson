@@ -912,11 +912,14 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 
  // This macro sets alpha value to alpha for material diffuse and ambient
  //  colors. It's better than using glColorMaterial() because we can now use
- //  correct color components for diffuse color and correct alpha for ambient color
+ //  correct color components for diffuse color and correct alpha for ambient
+ //  color.
+ // glColor() call is for rendering with lighting disabled
 #define SETALPHA(alpha)  ambient.setW(alpha / 255.0); \
 		diffuse.setW(alpha / 255.0); \
 		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data()); \
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data());
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data()); \
+		glColor4ub(255, 255, 255, alpha);
 
  BoVector4 ambient(0.2f, 0.2f, 0.2f, 1.0f);
  BoVector4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
@@ -951,25 +954,21 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	int texy = offsetCount - (y % offsetCount) - 1;
 
 	SETALPHA(upperLeftAlpha);
-	glColor4ub(255, 255, 255, upperLeftAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	SETALPHA(lowerLeftAlpha);
-	glColor4ub(255, 255, 255, lowerLeftAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + x].data());
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 	SETALPHA(lowerRightAlpha);
-	glColor4ub(255, 255, 255, lowerRightAlpha);
 	glNormal3fv(normalMap[(y + 1) * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
 	SETALPHA(upperRightAlpha);
-	glColor4ub(255, 255, 255, upperRightAlpha);
 	glNormal3fv(normalMap[y * cornersWidth + (x + 1)].data());
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
