@@ -284,7 +284,11 @@ sub processMakefile ($)
     $tmp   .= "\t$automkCall\n\tcd \$(top_srcdir) && perl $thisProg $printname\n\n";
     appendLines($tmp);
 
-    make_meta_classes();
+#
+# october 28th, 2000
+# orzel : remove this ugly stuff, make boeditor to segfault in _meta_unload stuff on exit
+#
+#    make_meta_classes();
     tag_FINAL() if ($use_final);
 
     my $final_lines = "final:\n\t\$(MAKE) ";
