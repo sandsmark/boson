@@ -9,5 +9,6 @@ Producer=10
 Requirements=5
 
 [Boson Facility]
-CanProduce=true
+
+[ProductionPlugin]
 ProducerList=0

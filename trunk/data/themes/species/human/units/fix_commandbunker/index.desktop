@@ -9,4 +9,6 @@ Producer=10
 
 [Boson Facility]
 CanProduce=true
+
+[ProductionPlugin]
 ProducerList=10
