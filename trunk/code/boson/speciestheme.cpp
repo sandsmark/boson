@@ -25,7 +25,6 @@
 #include "unitproperties.h"
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
-#include "bosonmodel.h"
 #include "upgradeproperties.h"
 #include "bodebug.h"
 #include "bosonweapon.h"
