@@ -164,8 +164,8 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mExplodingFragmentFlyEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyEffects");
  d->mExplodingFragmentHitEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitEffects");
  if (mFullMode) {
-	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds, mTheme);
-	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds, mTheme);
+	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds);
+	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
  }
  d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
  d->mHitPoint.cellToCanvas();
@@ -173,8 +173,8 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
  if (mFullMode) {
-	d->mDestroyedEffects = BosonEffectProperties::loadEffectProperties(d->mDestroyedEffectIds, mTheme);
-	d->mConstructedEffects = BosonEffectProperties::loadEffectProperties(d->mConstructedEffectIds, mTheme);
+	d->mDestroyedEffects = BosonEffectProperties::loadEffectProperties(d->mDestroyedEffectIds);
+	d->mConstructedEffects = BosonEffectProperties::loadEffectProperties(d->mConstructedEffectIds);
  }
 
  if (isFacility) {

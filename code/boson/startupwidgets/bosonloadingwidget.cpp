@@ -147,6 +147,12 @@ void BosonLoadingWidget::update()
       text = i18n("Loading map tiles...");
       break;
     }
+    case LoadEffects:
+    {
+      setProgress(650);
+      text = i18n("Loading effects...");
+      break;
+    }
     case LoadActions:
     {
       setProgress(700 + (mCurrentPlayer * 2000));
@@ -157,12 +163,6 @@ void BosonLoadingWidget::update()
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 25);
       text = i18n("%1 (objects)...").arg(mLoadingPlayerText);
-      break;
-    }
-    case LoadEffects:
-    {
-      setProgress(700 + (mCurrentPlayer * 2000) + 75);
-      text = i18n("%1 (effects)...").arg(mLoadingPlayerText);
       break;
     }
     case LoadUnitConfigs:

@@ -1037,12 +1037,12 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
 	return false;
  }
-#if 0
+/*
  if (!loadEffectsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
 	// AB: do NOT return. this is NOT critical.
  }
-#endif
+*/
 
  QDomElement handler = root.namedItem("DataHandler").toElement();
  if (handler.isNull()) {
@@ -1293,38 +1293,105 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
  return true;
 }
 
-#if 0
 bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 {
- // TODO!
+ QDomElement effects = root.namedItem("Effects").toElement();
+ if (effects.isNull()) {
+	boError(260) << k_funcinfo << "Effects tag not found" << endl;
+	return false;
+ }
+
  bool ret = true;
- QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Effect"));
+ QDomNodeList list = effects.elementsByTagName(QString::fromLatin1("Effect"));
+
  for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
+	QDomElement effect = list.item(i).toElement();
 	bool ok = false;
+
+	unsigned int propId = 0;
 	unsigned int ownerId = 0;
-	BosonItem* owner = 0;
-	ownerId = root.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
-	if (!ownerId) {
+
+	ownerId = effect.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
+	if (!ownerId || !ok) {
 		boError() << k_funcinfo << "invalid number for OwnerId" << endl;
 		ret = false;
 		continue;
 	}
-	if (!owner) {
-		boError() << k_funcinfo << "could not find item " << ownerId << endl;
+	propId = effect.attribute(QString::fromLatin1("PropId")).toUInt(&ok);
+	if (!propId || !ok) {
+		boError() << k_funcinfo << "invalid number for PropId" << endl;
 		ret = false;
 		continue;
 	}
-	SpeciesTheme* theme = 0;
-	if (!theme) {
-		boError() << k_funcinfo << "could not find speciestheme" << endl;
+
+	Player* owner = (Player*)boGame->findPlayer(ownerId);
+	if (!owner) {
+		// AB: this is totally valid. less players in game, than in the
+		// file.
+		// This is from loadItemsFromXML(), is this still valid here?
+		continue;
+	}
+	const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(propId);
+	if (!prop) {
+		boError() << k_funcinfo << "Null effect properties with id " << propId << endl;
+		ret = false;
+		continue;
+	}
+
+	BoVector3 pos, rot;
+	pos.setX(effect.attribute("Posx").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Posx attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+	pos.setY(effect.attribute("Posy").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Posy attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+	pos.setZ(effect.attribute("Posz").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Posz attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+	rot.setX(effect.attribute("Rotx").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Rotx attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+	rot.setY(effect.attribute("Roty").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Roty attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+	rot.setZ(effect.attribute("Rotz").toFloat(&ok));
+	if (!ok) {
+		boError() << k_funcinfo << "Rotz attribute for Effect tag missing or invalid" << endl;
+		ret = false;
+		continue;
+	}
+
+	BosonEffect* e = prop->newEffect(pos, rot);
+	if(!e)
+	{
+		boWarning() << k_funcinfo << "NULL effect created! id: " << propId << "; owner: " << ownerId << endl;
+		ret = false;
+		continue;
+	}
+	if(!e->loadFromXML(effect))
+	{
 		ret = false;
 		continue;
 	}
  }
+
  return ret;
 }
-#endif
 
 bool BosonCanvas::saveAsXML(QDomElement& root)
 {
@@ -1376,15 +1443,19 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	}
 	items.appendChild(item);
  }
-#if 0
+
+/*
+ // Save effects
+ QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
+ root.appendChild(effects);
  QPtrListIterator<BosonEffect> effectIt(d->mEffects);
  while (effectIt.current()) {
 	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
 	effectIt.current()->saveAsXML(e);
-	root.appendChild(e);
+	effects.appendChild(e);
 	++effectIt;
  }
-#endif
+*/
 
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));

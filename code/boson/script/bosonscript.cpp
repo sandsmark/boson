@@ -1275,7 +1275,7 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
 #endif
 }
 
-void BosonScript::addEffect(int player, unsigned int id, BoVector3 pos, float zrot)
+void BosonScript::addEffect(unsigned int id, BoVector3 pos, float zrot)
 {
   if(!game())
   {
@@ -1283,18 +1283,10 @@ void BosonScript::addEffect(int player, unsigned int id, BoVector3 pos, float zr
     return;
   }
 
-  Player* p = (Player*)(game()->findPlayer(player));
-
-  if(!p)
-  {
-    boError() << k_funcinfo << "No player with id " << player << endl;
-    return;
-  }
-
-  const BosonEffectProperties* prop = p->speciesTheme()->effectProperties(id);
+  const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(id);
   if(!prop)
   {
-    boError() << k_funcinfo << "No effect properties with id " << id << " for player " << player << endl;
+    boError() << k_funcinfo << "No effect properties with id " << id << endl;
     return;
   }
   QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3(0, 0, zrot));

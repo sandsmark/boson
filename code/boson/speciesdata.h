@@ -28,7 +28,6 @@ class BosonModel;
 class BosonSound;
 class UnitProperties;
 class UnitBase;
-class BosonEffectProperties;
 class BosonWeaponProperties;
 class BoAction;
 
@@ -104,12 +103,6 @@ public:
 	bool loadUnitOverview(const UnitProperties* prop, const QColor& teamColor);
 
 	/**
-	 * Load the @ref BosonEffectProperties for all effect
-	 * speciefied in the effects.boson file of this theme.
-	 **/
-	void loadEffectProperties();
-
-	/**
 	 * Load the objects specified in $speciesdir/objects/objects.boson
 	 **/
 	void loadObjects(const QColor& teamColor);
@@ -132,7 +125,6 @@ public:
 
 	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
 	QPixmap* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
-	const BosonEffectProperties* effectProperties(unsigned long int id) const;
 	const BoAction* action(const QString& name) const;
 
 	/**

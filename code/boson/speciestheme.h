@@ -33,7 +33,6 @@ class UnitProperties;
 class UnitBase;
 class Unit;
 class UpgradeProperties;
-class BosonEffectProperties;
 class BosonWeaponProperties;
 class SpeciesData;
 class BoAction;
@@ -96,13 +95,9 @@ public:
 	 **/
 	bool loadTechnologies();
 
-	void loadEffects();
-
 	void loadObjects();
 
 	void loadActions();
-
-	const BosonEffectProperties* effectProperties(unsigned long int id);
 
 	/**
 	 * @return The i18n'ed name of the specified unit action. Can be used

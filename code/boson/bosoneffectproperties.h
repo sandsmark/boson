@@ -25,6 +25,7 @@
 
 #include <qptrlist.h>
 #include <qvaluelist.h>
+#include <qintdict.h>
 
 
 class BosonEffectProperties;
@@ -35,14 +36,36 @@ class SpeciesTheme;
 class SpeciesData;
 
 
+
+#define boEffectPropertiesManager BosonEffectPropertiesManager::bosonEffectPropertiesManager()
 /**
- * @short Factory class for loading effect properties
+ * @short Manages effect properties
+ *
+ * This class holds list of all available effect properties, provides access to
+ *  them and takes care of loading them.
+ *
+ * Reason for this class is that effects are now species-independant and thus
+ *  cannot be managed by SpeciesTheme.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BosonEffectPropertiesFactory
+class BosonEffectPropertiesManager
 {
   public:
+    BosonEffectPropertiesManager();
+    ~BosonEffectPropertiesManager();
+
+    static BosonEffectPropertiesManager* bosonEffectPropertiesManager();
+
+    /**
+    * Load the @ref BosonEffectProperties for all effect
+    * speciefied in the effects.boson file of this theme.
+    **/
+    void loadEffectProperties();
+
+    const BosonEffectProperties* effectProperties(unsigned long int id) const;
+
+  protected:
     /**
      * Loads effect properties from given KSimpleConfig object, using given
      *  group.
@@ -53,8 +76,12 @@ class BosonEffectPropertiesFactory
      **/
     static BosonEffectProperties* newEffectProperties(const QString& type);
 
-  protected:
     static BosonEffectProperties* newParticleEffectProperties(const QString& type);
+
+  private:
+    QIntDict<BosonEffectProperties> mEffectProperties;
+
+    static BosonEffectPropertiesManager* mManager;
 };
 
 
@@ -89,9 +116,9 @@ class BosonEffectProperties
 
     /**
      * Use this, if your effect properties need 2-level loading.
-     * When this is called, all effect properties will be loaded.
+     * When this is called, all effect properties will have been loaded.
      **/
-    virtual bool finishLoading(const SpeciesData* theme)  { return true; }
+    virtual bool finishLoading(const BosonEffectPropertiesManager* manager)  { return true; }
 
 
     /**
@@ -119,6 +146,7 @@ class BosonEffectProperties
     float delay() const  { return mDelay; }
 
 
+    // TODO: Maybe move those to BosonEffectPropertiesManager?
     /**
      * Static helper method for getting list of effect properties.
      * @return List of BosonEffectProperties with ids loaded from given kconfig
@@ -126,12 +154,12 @@ class BosonEffectProperties
      * E.g. if you have "MyKey=1,2,4", then effect properties with ids 1, 2 and
      *  4 are returned.
      **/
-    static QPtrList<BosonEffectProperties> loadEffectProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme);
+    static QPtrList<BosonEffectProperties> loadEffectProperties(KSimpleConfig* cfg, QString key);
     /**
      * Same as above, but uses already specified list of ids instead of loading
      *  them.
      **/
-    static QPtrList<BosonEffectProperties> loadEffectProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
+    static QPtrList<BosonEffectProperties> loadEffectProperties(QValueList<unsigned long int> ids);
 
     /**
      * Static helper method to create new effects.
@@ -346,7 +374,7 @@ class BosonEffectPropertiesCollection : public BosonEffectProperties
 
 
     virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
-    virtual bool finishLoading(const SpeciesData* theme);
+    virtual bool finishLoading(const BosonEffectPropertiesManager* theme);
 
 
     /**

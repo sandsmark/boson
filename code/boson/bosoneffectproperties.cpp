@@ -22,6 +22,8 @@
 
 
 #include <ksimpleconfig.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
 
 #include <qstring.h>
 
@@ -32,9 +34,105 @@
 #include "speciesdata.h"
 
 
-/*****  BosonEffectPropertiesFactory  *****/
+/*****  BosonEffectPropertiesManager  *****/
 
-BosonEffectProperties* BosonEffectPropertiesFactory::loadEffectProperties(KSimpleConfig* cfg, const QString& group)
+BosonEffectPropertiesManager* BosonEffectPropertiesManager::mManager = 0;
+
+BosonEffectPropertiesManager::BosonEffectPropertiesManager()
+{
+  mEffectProperties.setAutoDelete(true);
+}
+
+BosonEffectPropertiesManager::~BosonEffectPropertiesManager()
+{
+  mEffectProperties.clear();
+}
+
+BosonEffectPropertiesManager* BosonEffectPropertiesManager::bosonEffectPropertiesManager()
+{
+  if(!mManager)
+  {
+    mManager = new BosonEffectPropertiesManager();
+  }
+  return mManager;
+}
+
+void BosonEffectPropertiesManager::loadEffectProperties()
+{
+  if(mEffectProperties.count() > 0)
+  {
+    // already loaded???
+    boWarning() << k_funcinfo << mEffectProperties.count() << " effects already loaded!" << endl;
+    return;
+  }
+
+  QString path = KGlobal::dirs()->findResourceDir("data", "boson/themes/effects/effects.boson");
+  if(path.isNull())
+  {
+    boWarning() << k_funcinfo << "No effects.boson file found!" << endl;
+    return;
+  }
+  path += "boson/themes/effects/";
+  QString fileName = path + "effects.boson";
+  boDebug() << k_funcinfo << "Using " << fileName << endl;
+
+  BosonEffect::initStatic(path + "particles/");
+
+  KSimpleConfig cfg(fileName);
+  QStringList effects = cfg.groupList();
+  if(effects.isEmpty())
+  {
+    boWarning() << k_funcinfo << "No effects found in effects file (" << fileName << ")" << endl;
+    return;
+  }
+  boDebug(150) << k_funcinfo << "Loading " << effects.count()
+      << " effects from config file" << endl;
+  QStringList::Iterator it;
+  for(it = effects.begin(); it != effects.end(); ++it)
+  {
+    boDebug(150) << k_funcinfo << "Loading effect from group " << *it << endl;
+    BosonEffectProperties* effectprop = loadEffectProperties(&cfg, *it);
+    if(!effectprop)
+    {
+      // Error has already been given
+      continue;
+    }
+    if(!mEffectProperties.find(effectprop->id()))
+    {
+      mEffectProperties.insert(effectprop->id(), effectprop);
+    }
+    else
+    {
+      boError(150) << k_funcinfo << "effect with id " << effectprop->id() << " already there!" << endl;
+    }
+  }
+  // BosonEffectProperties (more specifically, collection properties) need
+  //  2-stage loading
+  QIntDictIterator<BosonEffectProperties> eit(mEffectProperties);
+  while(eit.current())
+  {
+    eit.current()->finishLoading(this);
+    ++eit;
+  }
+}
+
+
+const BosonEffectProperties* BosonEffectPropertiesManager::effectProperties(unsigned long int id) const
+{
+  if(id == 0)
+  {
+    // We don't print error here because 0 means "none" in configurations
+    return 0;
+  }
+  if(!mEffectProperties[id])
+  {
+    boError() << k_funcinfo << "oops - no effect properties for " << id << endl;
+    return 0;
+  }
+  return mEffectProperties[id];
+}
+
+BosonEffectProperties* BosonEffectPropertiesManager::loadEffectProperties(KSimpleConfig* cfg, const QString& group)
 {
   cfg->setGroup(group);
 
@@ -71,7 +169,7 @@ BosonEffectProperties* BosonEffectPropertiesFactory::loadEffectProperties(KSimpl
   return prop;
 }
 
-BosonEffectProperties* BosonEffectPropertiesFactory::newEffectProperties(const QString& type)
+BosonEffectProperties* BosonEffectPropertiesManager::newEffectProperties(const QString& type)
 {
   if(type.left(8) == "Particle")
   {
@@ -104,7 +202,7 @@ BosonEffectProperties* BosonEffectPropertiesFactory::newEffectProperties(const Q
   }
 }
 
-BosonEffectProperties* BosonEffectPropertiesFactory::newParticleEffectProperties(const QString& type)
+BosonEffectProperties* BosonEffectPropertiesManager::newParticleEffectProperties(const QString& type)
 {
   if(type == "ParticleGeneric")
   {
@@ -163,18 +261,18 @@ bool BosonEffectProperties::load(KSimpleConfig* cfg, const QString& group, bool 
   return true;
 }
 
-QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme)
+QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(KSimpleConfig* cfg, QString key)
 {
-  return loadEffectProperties(BosonConfig::readUnsignedLongNumList(cfg, key), theme);
+  return loadEffectProperties(BosonConfig::readUnsignedLongNumList(cfg, key));
 }
 
-QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme)
+QPtrList<BosonEffectProperties> BosonEffectProperties::loadEffectProperties(QValueList<unsigned long int> ids)
 {
   QPtrList<BosonEffectProperties> props;
   QValueList<unsigned long int>::Iterator it;
   for(it = ids.begin(); it != ids.end(); it++)
   {
-    props.append(theme->effectProperties(*it));
+    props.append(boEffectPropertiesManager->effectProperties(*it));
   }
   return props;
 }
@@ -462,13 +560,12 @@ bool BosonEffectPropertiesCollection::load(KSimpleConfig* cfg, const QString& gr
   return true;
 }
 
-bool BosonEffectPropertiesCollection::finishLoading(const SpeciesData* theme)
+bool BosonEffectPropertiesCollection::finishLoading(const BosonEffectPropertiesManager* manager)
 {
-  // Properties objects haven't been loaded yet, see comment in load()
   QValueList<unsigned long int>::Iterator it;
   for(it = mEffectIds.begin(); it != mEffectIds.end(); it++)
   {
-    mEffects.append(theme->effectProperties(*it));
+    mEffects.append(manager->effectProperties(*it));
   }
   return true;
 }

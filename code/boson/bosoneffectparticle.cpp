@@ -42,6 +42,11 @@ BosonEffectParticle::BosonEffectParticle(const BosonEffectPropertiesParticle* pr
 
 bool BosonEffectParticle::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffect::saveAsXML(root))
+  {
+    return false;
+  }
+
   // Save mBlendFunc
   // Save mParticleDist
   // Save mParticleCount
@@ -50,6 +55,11 @@ bool BosonEffectParticle::saveAsXML(QDomElement& root) const
 
 bool BosonEffectParticle::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -223,7 +233,7 @@ void BosonEffectParticleGeneric::setRotation(const BoVector3& rotation)
   mMatrix.rotate(rotation.x(), 1.0f, 0.0f, 0.0f);
   mMatrix.rotate(rotation.y(), 0.0f, 1.0f, 0.0f);
 
-  mRotation = rotation;
+  BosonEffect::setRotation(rotation);
 
   mRotated = true;
 }
@@ -301,11 +311,21 @@ void BosonEffectParticleGeneric::updateParticle(BosonGenericParticle* particle, 
 
 bool BosonEffectParticleGeneric::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffectParticle::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectParticleGeneric::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffectParticle::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -439,6 +459,8 @@ void BosonEffectParticleTrail::setRotation(const BoVector3& rotation)
   mMatrix.rotate(-rotation.z(), 0.0f, 0.0f, 1.0f);
   mMatrix.rotate(rotation.x(), 1.0f, 0.0f, 0.0f);
   mMatrix.rotate(rotation.y(), 0.0f, 1.0f, 0.0f);
+
+  BosonEffect::setRotation(rotation);
 }
 
 void BosonEffectParticleTrail::setPosition(const BoVector3& pos)
@@ -485,11 +507,21 @@ void BosonEffectParticleTrail::updateParticle(BosonTrailParticle* particle, floa
 
 bool BosonEffectParticleTrail::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffectParticle::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectParticleTrail::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffectParticle::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
