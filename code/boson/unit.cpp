@@ -1243,12 +1243,12 @@ int Facility::constructionDelay()
 
 void Facility::setConstructionStep(unsigned int step)
 {
- if (step >= constructionSteps()) {
+ if ((int)step >= constructionSteps()) {
 	step = PIXMAP_FIX_DESTROYED - 1;
  }
  setFrame(step);
  d->mConstructionState = step * constructionDelay();
- if (step == constructionSteps() - 1) {
+ if ((int)step == constructionSteps() - 1) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
  }
