@@ -1951,7 +1951,6 @@ void BosonBigDisplayBase::generateCellList()
  }
 
  // re-generate the list of to-be-rendered cells:
-// d->mRenderCells.clear();
  Cell* allCells = map->cells();
  if (!allCells) {
 	boError() << k_funcinfo << "NULL cells!" << endl;
@@ -1998,7 +1997,9 @@ void BosonBigDisplayBase::generateCellList()
  int cellMaxY = (int)(maxY / BO_GL_CELL_SIZE) + 1;
 
  int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
+ size = QMIN((int)(map->width() * map->height()), size);
  if (size > d->mRenderCellsSize) {
+	boDebug() << k_funcinfo << "resize cells array - new size: " << size << endl;
 	delete[] d->mRenderCells;
 	d->mRenderCells = new Cell*[size];
 	d->mRenderCellsSize = size;
