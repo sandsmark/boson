@@ -25,6 +25,7 @@
 
 BoMaterial* BoMaterial::mCurrentMaterial = 0;
 unsigned int BoMaterial::mCurrentTexture = 0;
+BoMaterial BoMaterial::mDefaultMaterial = BoMaterial();
 
 BoMaterial::BoMaterial()
 {
@@ -71,16 +72,13 @@ void BoMaterial::activate(BoMaterial* mat)
 	return;
  }
  if (!mat) {
-	BoMaterial m;
-	activate(&m);
+	activate(&mDefaultMaterial);
 	mCurrentMaterial = mat;
 	return;
  }
 
- if (mat->textureObject() != mCurrentTexture) {
-	glBindTexture(GL_TEXTURE_2D, mat->textureObject());
-	mCurrentTexture = mat->textureObject();
- }
+ glBindTexture(GL_TEXTURE_2D, mat->textureObject());
+ mCurrentTexture = mat->textureObject();
 
  if (boConfig->useLight() && boConfig->useMaterials()) { // useMaterials() is about OpenGL materials, not about the rest of BoMaterial (e.g. textures)
 	// AB: my OpenGL sample code uses GL_FRONT, so I do as well. I think as back
@@ -92,5 +90,15 @@ void BoMaterial::activate(BoMaterial* mat)
  }
 
  mCurrentMaterial = mat;
+}
+
+void BoMaterial::setDefaultAlpha(float alpha)
+{
+ mDefaultMaterial.mDiffuse.setW(alpha);
+ mDefaultMaterial.mAmbient.setW(alpha);
+ if (!mCurrentMaterial) {
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mDefaultMaterial.mAmbient.data());
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mDefaultMaterial.mDiffuse.data());
+ }
 }
 

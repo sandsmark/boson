@@ -95,9 +95,17 @@ public:
 	void setTextureObject(unsigned int t) { mTextureObject = t; }
 	unsigned int textureObject() const { return mTextureObject; }
 
+	/**
+	 * Set the alpha value of the default material (See @ref activate with
+	 * material = 0). If the default material is the current material, the
+	 * new alpha value is applied.
+	 **/
+	static void setDefaultAlpha(float alpha);
+
 private:
 	static BoMaterial* mCurrentMaterial;
 	static unsigned int mCurrentTexture;
+	static BoMaterial mDefaultMaterial;
 
 private:
 	QString mName;
@@ -132,7 +140,6 @@ private:
 	// idea (yet) what they are for. maybe they will get added one day.
 	QString mTextureName;
 	unsigned int mTextureObject;
-
 };
 
 #endif
