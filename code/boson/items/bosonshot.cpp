@@ -84,6 +84,11 @@ void BosonShot::advance(unsigned int phase)
   QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
   while(it.current())
   {
+    if(it.current() == 0)
+    {
+      mFlyParticleSystems.remove(it);
+      break;
+    }
     it.current()->moveParticles(move);
     ++it;
   }
