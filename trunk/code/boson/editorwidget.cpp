@@ -343,3 +343,9 @@ void EditorWidget::slotGameStarted()
  slotPlace(0);
 }
 
+void EditorWidget::slotStartScenario()
+{
+ BosonWidgetBase::slotStartScenario();
+ slotChangeLocalPlayer(0);
+ d->mPlayerAction->setCurrentItem(0);
+}
