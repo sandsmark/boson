@@ -157,15 +157,15 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
  // First we test z-coordinate
- if (!(QMAX(z(), item->z()) <= QMIN(z() + depth(), item->z() + item->depth()))) {
+ if (QMAX(z(), item->z()) > QMIN(z() + depth(), item->z() + item->depth())) {
 	// z-coordinates doesn't intersect. Then items doesn't collide either
   return false;
  }
 
  // Then bounding rect intersect test
  // Taken from QRect::intersects() but I didn't use this method for speed reasons
- if (!((QMAX(x(), item->x()) <= QMIN(x() + width() - 1, item->x() + item->width() - 1)) &&
-		(QMAX(y(), item->y()) <= QMIN(y() + height() - 1, item->y() + item->height() - 1)))) {
+ if ((QMAX(x(), item->x()) > QMIN(x() + width() - 1, item->x() + item->width() - 1)) ||
+		(QMAX(y(), item->y()) > QMIN(y() + height() - 1, item->y() + item->height() - 1))) {
 	// Bounding rects does not intersect
 	return false;
  }
@@ -181,6 +181,8 @@ bool BosonItem::bosonCollidesWith(BosonItem* item) const
  // Units are special because they must be able to move diagonally. When moving
  //  diagonally, it's ok if their bounding boxes intersect on xy plane. Then we
  //  check if this item's center isn't inside other item's bounding rect
+ // FIXME: maybe we need same for items. ATM, units can't diagonally cross tiles
+ //  with mines
  return item->boundingRectAdvanced().contains(boundingRectAdvanced().center(), true);
 }
 

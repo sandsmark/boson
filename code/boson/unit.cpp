@@ -1379,6 +1379,9 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  canvas->addParticleSystems(*particleSystems());
 
  setRotation((float)(owner->game()->random()->getLong(359)));
+ setMaxSpeed(prop->speed());
+ setAccelerationSpeed(prop->accelerationSpeed());
+ setDecelerationSpeed(prop->decelerationSpeed());
 }
 
 MobileUnit::~MobileUnit()
