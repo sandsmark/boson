@@ -20,12 +20,16 @@
 
 #include <klocale.h>
 #include <kstdaction.h>
+#include <kmessagebox.h>
+#include <kfiledialog.h>
+
 
 #include "common/boconfig.h"
 #include "common/log.h"
 
 #include "boeditor.h"
 #include "editorTopLevel.h"
+#include "editorCanvas.h"
 #include "visual.h"
 
 /*
@@ -34,6 +38,10 @@
 visualCanvas		*vcanvas = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
+
+extern editorCanvas	*ecanvas;
+
+#define UNKNOWN_NAME  "orzel_unknown_name"
 
 BoEditorApp::BoEditorApp()
 {
@@ -46,6 +54,7 @@ BoEditorApp::BoEditorApp()
 	}
 	logf(LOG_INFO, "========= New Log File ==============");
 
+	filename = QString::null;
 	/* application initialisation */
 	init();
 
@@ -71,6 +80,7 @@ void BoEditorApp::init()
 	/* standard actions */
 	ADD_ACTION(openNew);
 	ADD_ACTION(open);
+	ADD_ACTION(close);
 	ADD_ACTION(openRecent);
 	ADD_ACTION(save);
 	ADD_ACTION(saveAs);
@@ -91,22 +101,81 @@ void BoEditorApp::slot_newWindow()
 
 void BoEditorApp::slot_openNew()
 {
+	filename = UNKNOWN_NAME;
 }
 
 void BoEditorApp::slot_open()
 {
+	if (!filename.isNull() && !slot_close()) return;
+
+	QString name = KFileDialog::getOpenFileName( "/opt/be/share/apps/boson/map", "*.bpf" , 0 ); //XXX path still hardcoded
+	if ( name.isEmpty() ) return;
+
+	filename = name;
+	boAssert(filename != QString::null);
+
+	boAssert(ecanvas);
+	ecanvas->Load(filename);
+}
+
+bool BoEditorApp::slot_close()
+{
+	/* already closed ? */
+	if (filename.isNull()) return true;
+	
+	/* modified ? */
+	if (ecanvas->isModified())
+		switch (KMessageBox::warningYesNoCancel(0, // 0 means app-level messagebox
+				"The current file has been modified\n"
+				"Do you want to save it ?")) {
+			case KMessageBox::Yes:
+				if (!slot_save()) return false;
+				break;
+			case KMessageBox::No:
+				/* discar changes */
+				break;
+			default:
+			case KMessageBox::Cancel:
+				return false;
+		}
+
+	/* actually close the file */
+//	delete ecanvas; ecanvas = 0l;
+//XXX	handle windows here
+//	delete mainWidget; mainWidget = 0l;
+	filename = QString::null;
+	return true;
 }
 
 void BoEditorApp::slot_openRecent()
 {
 }
 
-void BoEditorApp::slot_save()
+bool BoEditorApp::slot_save()
 {
+	if (filename == UNKNOWN_NAME)
+		return slot_saveAs();
+
+	/* actual saving */
+	return ecanvas->Save(filename);
 }
 
-void BoEditorApp::slot_saveAs()
+bool BoEditorApp::slot_saveAs()
 {
+	QString name;
+	name = KFileDialog::getSaveFileName( filename.isNull()?QString("/tmp"):filename, "*", 0l ); //XXX hardcoded path
+	if ( name.isEmpty() ) return false;
+
+	/* already exists */
+	QFileInfo info( name );
+	QString msg = i18n("A document with this name already exists.\n" "Do you want to overwrite it?" );
+	if( info.exists()  && KMessageBox::Yes != KMessageBox::warningYesNo( 0, msg, i18n("Save As") ))
+		return false;
+
+	/* it's ok */
+	filename = name;
+	boAssert(filename != QString::null); // recursion with ::slot_save
+	return slot_save();	// save it
 }
 
 void BoEditorApp::slot_quit()

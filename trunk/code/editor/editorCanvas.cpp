@@ -32,6 +32,8 @@ editorCanvas::editorCanvas(QPixmap p)
 	mobiles.setAutoDelete(TRUE);
 	facilities.setAutoDelete(TRUE);   
 	key = 253;
+
+	modified = false;
 }
 
 
@@ -150,7 +152,6 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 			setCell( i, j, cell ( fill_ground, (3*i+5*j)%4 ));
 
 	modified = true;
-	
 	return true;
 }
 

@@ -60,14 +60,18 @@ public slots:
 	/** open a file and load it into the document*/
 	void slot_open();
 
+	/** close the current document
+	 * return false when the document can't be closed */
+	bool slot_close();
+
 	/** open a recent file */
 	void slot_openRecent();
 
 	/** save a document */
-	void slot_save();
+	bool slot_save();
 
 	/** save a document by a new filename*/
-	void slot_saveAs();
+	bool slot_saveAs();
 
 	/** quit the application  */
 	void slot_quit();
@@ -76,6 +80,8 @@ private:
 	void init(void); // internal
 
 	KActionCollection m_actions;
+
+	QString		filename;
 };
 
 #endif // BOSON_H

@@ -34,6 +34,7 @@
 
 /* log.h , should be moved to common !! */
 FILE *logfile = (FILE *) 0L;
+editorCanvas *ecanvas;
  
 extern QPixmap *bigBackground;
 
@@ -86,7 +87,6 @@ int main(int argc, char* argv[])
 
 
 	/* the canvas is created when a game is created */
-	editorCanvas *ecanvas;
 	vcanvas = ecanvas = new editorCanvas(*bigBackground);
 	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
