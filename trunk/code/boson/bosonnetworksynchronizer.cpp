@@ -340,7 +340,7 @@ protected:
 		Q_UINT32 health, health2;
 		unstreamUnit(s1, id, work, health);
 		unstreamUnit(s2, id2, work2, health2);
-#define CHECK(x,x2) if (x != x2) { return i18n("Different units in canvas log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
+#define CHECK(x,x2) if (x != x2) { return i18n("Different units in canvas log: variable %1: found %2, expected %3 (compared units %4 and %5").arg(#x).arg(x2).arg(x).arg(id).arg(id2); }
 		CHECK(id, id2);
 		CHECK(work, work2);
 		CHECK(health, health2);
