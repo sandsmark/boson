@@ -47,19 +47,11 @@ enum Direction {
 	DirNone = 100 // used by BosonPath
 };
 
-/**
- * This enum specifies what kind of unit/tile is ordered by an order button in
- * the command frame.
- **/
-enum OrderType {
-	OrderFacilities = 0,
-	OrderMobiles = 1,
-	OrderPlainTiles = 2,
-	OrderSmall = 3,
-	OrderBig1 = 4,
-	OrderBig2 = 5,
-	
-	OrderLast // should always be the last item - used by loops
+enum CellType {
+	CellPlain = 2,
+	CellSmall = 3,
+	CellBig1 = 4,
+	CellBig2 = 5
 };
 
 enum CursorType {

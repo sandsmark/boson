@@ -380,6 +380,10 @@ void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
  if (mUnit) {
 	unset();
  }
+ if (!tileSet) {
+	kdError() << k_funcinfo << "NULL tileset" << endl;
+	return;
+ }
  mUnit = 0;
 
  mTileNumber = tileNo;

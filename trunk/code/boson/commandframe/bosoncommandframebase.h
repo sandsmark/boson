@@ -80,19 +80,6 @@ public:
 
 public slots:
 	/**
-	 * Called by @ref Editor when selecting a menu entry. Uses @ref
-	 * OrderType to translate index
-	 **/
-	void slotEditorProduction(int index, Player* owner);
-
-	/**
-	 * Load the tile file (currenlty earth.png). Only used by the editor as
-	 * the name implies.
-	 **/
-	void slotEditorLoadTiles(const QString& fileName);
-
-
-	/**
 	 * Derived classes should apply this value also to the unit actions
 	 * widget (see @ref showUnitActions)
 	 **/

@@ -129,11 +129,14 @@ public:
 	 *
 	 * See BosonCanvas, where tile loading takes place (currently)
 	 **/
-	void setTileSet(BosonTiles* t) { mTiles = t; }
+	void setTileSet(BosonTiles* t);
 	BosonTiles* tileSet() const { return mTiles; }
 
 public slots:
 	void changeCell(int x, int y, int groundType, unsigned char b);
+
+signals:
+	void signalTileSetChanged(BosonTiles*);
 
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);

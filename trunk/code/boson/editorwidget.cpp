@@ -23,6 +23,7 @@
 #include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
+#include "bosonmap.h"
 #include "player.h"
 #include "bosonmessage.h"
 #include "bosonplayfield.h"
@@ -106,6 +107,17 @@ void EditorWidget::initConnections()
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
 }
 
+void EditorWidget::initMap()
+{
+ BosonWidgetBase::initMap();
+ if (!playField() || !playField()->map()) {
+	kdError() << k_funcinfo << endl;
+	return;
+ }
+ connect(playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
+		this, SLOT(slotTileSetChanged(BosonTiles*)));
+}
+
 void EditorWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
@@ -117,8 +129,8 @@ void EditorWidget::initPlayer()
 BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 {
  EditorCommandFrame* frame = new EditorCommandFrame(parent);
- connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
-		frame, SLOT(slotUpdateProduction(Unit*)));
+// connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
+//		frame, SLOT(slotUpdateProduction(Unit*)));
 
  //AB: can we use the same input for the editor?
  d->mCmdInput = new CommandInput;
@@ -227,18 +239,23 @@ void EditorWidget::slotPlaceMobiles()
 
 void EditorWidget::slotPlaceCellSmall()
 {
+ editorCmdFrame()->placeCells(CellSmall);
 }
 
 void EditorWidget::slotPlaceCellPlain()
 {
+	kdDebug() << k_funcinfo << endl;
+ editorCmdFrame()->placeCells(CellPlain);
 }
 
 void EditorWidget::slotPlaceCellBig1()
 {
+ editorCmdFrame()->placeCells(CellBig1);
 }
 
 void EditorWidget::slotPlaceCellBig2()
 {
+ editorCmdFrame()->placeCells(CellBig2);
 }
 
 void EditorWidget::setBosonXMLFile()
@@ -266,6 +283,11 @@ void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
  slotChangeLocalPlayer(d->mPlayerAction->currentItem());
 }
 
+EditorCommandFrame* EditorWidget::editorCmdFrame() const
+{
+ return (EditorCommandFrame*)cmdFrame();
+}
+
 void EditorWidget::slotPlayerLeftGame(KPlayer* player)
 {
  if (!player) {
@@ -289,4 +311,11 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
  d->mPlayerAction->setItems(players);
 }
 
+void EditorWidget::slotTileSetChanged(BosonTiles* t)
+{
+ if (!editorCmdFrame()) {
+	return;
+ }
+ editorCmdFrame()->setTileSet(t);
+}
 

@@ -57,6 +57,7 @@ void BosonMap::init()
 {
  d = new BosonMapPrivate;
  mCells = 0;
+ mTiles = 0;
  setModified(false);
 }
 
@@ -547,5 +548,11 @@ void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
  if (c->groundType() != groundType || c->version() != b) {
 	c->makeCell(groundType, b);
  }
+}
+
+void BosonMap::setTileSet(BosonTiles* t)
+{
+ mTiles = t;
+ emit signalTileSetChanged(t);
 }
 

@@ -237,49 +237,6 @@ void BosonCommandFrameBase::hideActions()
  showUnitActions(0);
 }
 
-void BosonCommandFrameBase::slotEditorProduction(int index, Player* owner)
-{
- d->mOrderWidget->hideOrderButtons();
- if (index == -1) {
-	return;
- }
- if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- SpeciesTheme* theme = owner->speciesTheme();
- if (!theme) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
-	return;
- }
- d->mOrderWidget->setOrderType(index);
- switch (index) {
-	case OrderPlainTiles:
-	case OrderSmall:
-	case OrderBig1:
-	case OrderBig2:
-		d->mOrderWidget->slotRedrawTiles();
-		d->mOrderWidget->show();
-		break;
-	case OrderMobiles:
-		d->mOrderWidget->setOrderButtons(theme->allMobiles(), owner);
-		d->mOrderWidget->show();
-		break;
-	case OrderFacilities:
-		d->mOrderWidget->setOrderButtons(theme->allFacilities(), owner);
-		d->mOrderWidget->show();
-		break;
-	default:
-		kdError() << k_funcinfo << "Invalid index " << index << endl;
-		return;
- }
-}
-
-void BosonCommandFrameBase::slotEditorLoadTiles(const QString& fileName)
-{
- d->mOrderWidget->editorLoadTiles(fileName);
-}
-
 void BosonCommandFrameBase::setLocalPlayer(Player* p)
 {
  d->mOwner = p;

@@ -378,7 +378,6 @@ void BosonBigDisplayBase::init()
 // setMinimumSize(QSize(400,400));
 
  glInit();
-// generateMapDisplayList();
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
@@ -1479,7 +1478,7 @@ void BosonBigDisplayBase::generateCellList()
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- BosonTiles* tiles = mCanvas->tileSet();
+ BosonTiles* tiles = map->tileSet();
  if (!tiles) {
 	kdError() << k_funcinfo << "NULL tiles" << endl;
 	return;

@@ -20,6 +20,7 @@
 #define EDITORCOMMANDFRAME_H
 
 #include "bosoncommandframebase.h"
+#include "../global.h"
 
 class Unit;
 class UnitBase;
@@ -28,6 +29,7 @@ class Player;
 class BosonOrderButton;
 class BoSelection;
 class BoUnitDisplayBase;
+class BosonTiles;
 
 class KPlayer;
 
@@ -42,6 +44,13 @@ public:
 
 	EditorCommandFrame(QWidget* parent);
 	~EditorCommandFrame();
+
+	void setTileSet(BosonTiles* t);
+
+	/**
+	 * @param owner necessary for units (mobile and facilities) only.
+	 **/
+	void placeCells(CellType type);
 
 public slots:
 	virtual void slotSetButtonsPerRow(int b);

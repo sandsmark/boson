@@ -782,18 +782,18 @@ bool BosonWidgetBase::isChatVisible() const
 
 void BosonWidgetBase::setCmdFrameVisible(bool visible)
 {
- if(visible && d->mCommandFrameDock->mayBeShow()) {
+ if (visible && d->mCommandFrameDock->mayBeShow()) {
 	d->mCommandFrameDock->show();
- } else if(! visible && d->mCommandFrameDock->mayBeHide()) {
+ } else if (! visible && d->mCommandFrameDock->mayBeHide()) {
 	d->mCommandFrameDock->hide();
  }
 }
 
 void BosonWidgetBase::setChatVisible(bool visible)
 {
- if(visible && d->mChatDock->mayBeShow()) {
+ if (visible && d->mChatDock->mayBeShow()) {
 	d->mChatDock->show();
- } else if(! visible && d->mChatDock->mayBeHide()) {
+ } else if (! visible && d->mChatDock->mayBeHide()) {
 	d->mChatDock->hide();
  }
 }
@@ -958,5 +958,10 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
  d->mActionDebugPlayers->remove(menu);
  d->mPlayers.remove(player);
  delete menu;
+}
+
+BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
+{
+ return d->mCommandFrame;
 }
 

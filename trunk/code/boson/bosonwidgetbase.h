@@ -225,17 +225,18 @@ protected:
 	void changeCursor(BosonCursor* cursor);
 
 	BosonCursor* cursor() const { return mCursor; }
+	BosonCommandFrameBase* cmdFrame() const;
 
 	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent) = 0;
 
 	virtual void initKActions();
 	virtual void initConnections();
+	virtual void initMap();
 	virtual void setBosonXMLFile();
 
 private:
 	void initChat();
 
-	void initMap();
 	void initMiniMap();
 	void initDisplayManager();
 	void initCommandFrame();
