@@ -203,6 +203,7 @@ private:
 
 class BosonNormalCursor : public BosonCursor
 {
+	Q_OBJECT
 public:
 	BosonNormalCursor();
 	virtual ~BosonNormalCursor();
@@ -224,6 +225,7 @@ private:
 
 class BosonKDECursor : public BosonCursor
 {
+	Q_OBJECT
 public:
 	BosonKDECursor();
 	virtual ~BosonKDECursor();
