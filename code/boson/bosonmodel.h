@@ -107,8 +107,36 @@ protected:
 
 protected:
 	void loadTextures();
+	/**
+	 * Call @ref loadNode for all nodes in this model - also the child
+	 * nodes.
+	 **/
+	void loadNodes();
+
+	/**
+	 * Generate the "normal" display lists, for all frames. This includes
+	 * all nodes of the file. See also @ref generateConstructionLists, which
+	 * doesn't use all nodes.
+	 **/
 	void createDisplayLists();
+
+	/**
+	 * Generate the display list for this node, including all child nodes.
+	 * The resulting display list will be placed into node->user.d
+	 **/
+	void loadNode(Lib3dsNode* node);
+
+	/**
+	 * Render the specified node according to the values for the current
+	 * frame. You should call lib3ds_file_eval(frameNumber) before calling
+	 * renderNode().
+	 *
+	 * Note that only one node (+ all child nodes) will be rendered - you
+	 * should iterate all toplevel nodes and call renderNode() for all of
+	 * them usually.
+	 **/
 	void renderNode(Lib3dsNode* node);
+
 	void computeBoundings(Lib3dsNode* node, BoHelper* helper);
 
 	/**

@@ -207,8 +207,6 @@ void BosonModel::loadModel()
 	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
-// kdDebug() << k_funcinfo << "current frame: " << m3ds->current_frame << endl;
- lib3ds_file_eval(m3ds, m3ds->current_frame);
 
  Lib3dsNode* node = m3ds->nodes;
  if (!node) {
@@ -220,6 +218,7 @@ void BosonModel::loadModel()
  loadTextures();
  boProfiling->stop(BosonProfiling::LoadModelTextures);
  boProfiling->start(BosonProfiling::LoadModelDisplayLists);
+ loadNodes();
  createDisplayLists();
  boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
 
@@ -278,22 +277,18 @@ void BosonModel::createDisplayLists()
  for (int i = 0; i < m3ds->frames; i++) {
 	Lib3dsNode* p;
 	m3ds->current_frame = i;
+
 	// prepare the file for rendering the next frame.
-	// Note: as far as I understund the lib3ds code this does *not* change
+	// Note: as far as I understand the lib3ds code this does *not* change
 	// the object itself, but rather node->data.object.*
 	// this means for us that we can continue to use the display lists in
 	// node->user.d ; but we *have* to ensure that the new values from
 	// node->data are used, i.e. they are not stored in that display list.
 	// they should reside in the final list.
+	// UPDATE: this is achieved by calling loadNode() before renderNode().
+	// loadNode() generates the user.d display lists, renderNode() renders
+	// the nodes with the recent positions for the frame from node->data
 	lib3ds_file_eval(m3ds, m3ds->current_frame);
-
-	// we render the same node twice - the first run creates the display
-	// lists, the second just calls glCallList().
-	// In the second call we store all display lists in a single list, which
-	// gets finally called in boson.
-	for (p = m3ds->nodes; p; p = p->next) {
-		renderNode(p);
-	}
 
 	// ok, this way (iterating all nodes again) is not really efficient. but
 	// it is done only once, so it does not really matter. and it is worth
@@ -358,8 +353,10 @@ void BosonModel::generateConstructionLists()
 	kdError() << k_funcinfo << "NULL file" << endl;
 	return;
  }
+ // construction lists are always generated from the 1st frame!
  m3ds->current_frame = 0;
  lib3ds_file_eval(m3ds, m3ds->current_frame);
+
  BoFrame* frame0 = mFrames[0];
  if (!frame0) {
 	kdError() << k_funcinfo << "No frame was loaded yet!" << endl;
@@ -450,15 +447,25 @@ void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper
  }
 }
 
-// AB: note that this function was nearly completely copied from the lib3ds
-// examples!
-// i.e. it is very bad and probably too slow for us.
-void BosonModel::renderNode(Lib3dsNode* node)
+void BosonModel::loadNodes()
+{
+ if (!QGLContext::currentContext()) {
+	kdError() << k_funcinfo << "NULL current context" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << "loading all nodes" << endl;
+ Lib3dsNode* p;
+ for (p = m3ds->nodes; p; p = p->next) {
+	loadNode(p);
+ }
+}
+
+void BosonModel::loadNode(Lib3dsNode* node)
 {
  {
 	Lib3dsNode* p;
 	for (p = node->childs; p; p = p->next) {
-		renderNode(p);
+		loadNode(p);
 	}
  }
  if (node->type == LIB3DS_OBJECT_NODE) {
@@ -646,9 +653,24 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		}
 		glEndList();
 	}
+ }
+}
+
+void BosonModel::renderNode(Lib3dsNode* node)
+{
+ {
+	Lib3dsNode* p;
+	for (p = node->childs; p; p = p->next) {
+		renderNode(p);
+	}
+ }
+ if (node->type == LIB3DS_OBJECT_NODE) {
+	if (strcmp(node->name, "$$$DUMMY") == 0) {
+		return;
+	}
 	if (node->user.d) {
 		glPushMatrix();
-		Lib3dsObjectData* d = &node->data.object; // these can get changed in different frames even for the same nodes. so we can't place the following parts into the display lists for the nodes themselves.
+		Lib3dsObjectData* d = &node->data.object; // these can get changed in different frames even for the same nodes. so we can't place the following parts into the display lists for the nodes themselves (see loadNode())
 		
 		// I assume thats e.g. the rotation of the node. maybe
 		// even scaling.
@@ -657,7 +679,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		// the pivot point is the center of the object, I guess.
 		glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
 
-		// finally call the list
+		// finally call the list, which was created in loadNode()
 		glCallList(node->user.d);
 
 		glPopMatrix();
@@ -732,5 +754,6 @@ void BosonModel::myTransform(GLfloat* r, GLfloat* m, GLfloat* v)
  for (int i = 0; i < 4; i++) {
 	r[i] = M(i, 0) * v[0] + M(i, 1) * v[1] + M(i, 2) * v[2] + M(i, 3) * v[3];
  }
+#undef M
 }
 
