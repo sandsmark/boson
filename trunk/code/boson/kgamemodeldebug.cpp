@@ -363,6 +363,9 @@ public:
 		mRotX = (QLabel*)addWidget(i18n("X Rotation"), new QLabel(this));
 		mRotY = (QLabel*)addWidget(i18n("Y Rotation"), new QLabel(this));
 		mRotZ = (QLabel*)addWidget(i18n("Z Rotation"), new QLabel(this));
+		QToolTip::add(mRotX, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+		QToolTip::add(mRotY, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
+		QToolTip::add(mRotZ, i18n("The rotation in readable angles, calculated from the quaternion.\n"));
 		mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
 		QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
 
@@ -399,8 +402,9 @@ public:
 			pos = QString("(%1,%2,%3)").arg(d->pos[0]).arg(d->pos[1]).arg(d->pos[2]);
 			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]).arg(d->rot[3]);
 
-			float rX = 0.0f, rY = 0.0f, rZ = 0.0f, angle = 0.0f;
+			float rX = 0.0f, rY = 0.0f, rZ = 0.0f;
 #if 0
+			float angle = 0.0f;
 			quatToAxisRotation(d->rot, &rX, &rY, &rZ, &angle);
 			rotAngle = QString("(%1,%2,%3) -> %4 degrees").arg(rX).arg(rY).arg(rZ).arg(angle);
 #endif
@@ -894,6 +898,7 @@ void KGameModelDebug::initNodePage()
 
 
  d->mCurrentFrame = new KIntNumInput(d->mNodePage);
+ d->mCurrentFrame->setLabel(i18n("Frame"));
  connect(d->mCurrentFrame, SIGNAL(valueChanged(int)),
 		this, SLOT(slotFrameChanged(int)));
  l->addWidget(d->mCurrentFrame);
@@ -1033,7 +1038,7 @@ void KGameModelDebug::updateNodePage()
 	return;
  }
  slotConstructNodeList();
- d->mCurrentFrame->setRange(0, d->m3ds->frames);
+ d->mCurrentFrame->setRange(0, d->m3ds->frames - 1);
  slotFrameChanged(0);
 }
 
@@ -1189,6 +1194,10 @@ void KGameModelDebug::slotFrameChanged(int frame)
 	return;
  }
  boDebug() << k_funcinfo << endl;
+ if (frame >= d->m3ds->frames) {
+	boWarning() << k_funcinfo << "invalid frame " << frame << endl;
+	return;
+ }
  lib3ds_file_eval(d->m3ds, frame);
  d->m3ds->current_frame = frame;
 
