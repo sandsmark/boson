@@ -49,7 +49,7 @@ public:
 	 * Appends item d to the vector.
 	 * If vector is too small, it will be resized
 	 **/
-	inline void appendItem(const type* d)
+	void appendItem(const type* d)
 	{
 		if (count() == size()) {
 			resize(size() ? (size() * 2) : 8);
@@ -66,7 +66,7 @@ public:
 		removeItem(findRef(d));
 	}
 
-	inline void removeItem(unsigned int i)
+	void removeItem(unsigned int i)
 	{
 		remove(i);
 		if (i < count()) {
@@ -77,7 +77,7 @@ public:
 	/**
 	 * Deletes all items in the vector and sets autoDelete to false
 	 **/
-	inline void deleteAllItems()
+	void deleteAllItems()
 	{
 		setAutoDelete(true);
 		clear();
