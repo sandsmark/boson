@@ -255,9 +255,6 @@ public:
 	unsigned long int armor() const;
 	void setArmor(unsigned long int armor);
 
-	virtual int rotationSpeed() const { return 0; }
-	virtual void setRotationSpeed(int) {}
-
 	/**
 	 * The type of the unit as described in the index.unit file of this
 	 * unit. See also @ref UnitProperties::typeId

@@ -50,9 +50,15 @@ QString BosonWeaponProperties::name() const
 void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 {
   mName = cfg->readEntry("Name", "");
+  mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
   mSpeed = (float)(cfg->readDoubleNumEntry("Speed", 0));
+  if(mSpeed == 0 && mShotType == BosonShot::Missile)
+  {
+    boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
+    mShotType = BosonShot::Bullet;
+  }
   mAccelerationSpeed = (float)(cfg->readDoubleNumEntry("AccelerationSpeed", 0.2));
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
@@ -142,7 +148,26 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
     boError() << k_funcinfo << "NULL attacker" << endl;
     return 0;
   }
-  return new BosonShot(this, attacker->owner(), attacker->canvas(), pos + mOffset, target);
+  BosonShot* s;
+  if(shotType() == BosonShot::Bullet)
+  {
+    s = new BosonShotBullet(attacker->owner(), attacker->canvas(), this, target);
+  }
+  else if(shotType() == BosonShot::Missile)
+  {
+    s = new BosonShotMissile(attacker->owner(), attacker->canvas(), this, pos + mOffset, target);
+  }
+  else if(shotType() == BosonShot::Mine)
+  {
+    // Not yet supported
+    return 0;
+  }
+  else
+  {
+    boError() << k_funcinfo << "Invalid shotType: " << shotType() << endl;
+    return 0;
+  }
+  return s;
 }
 
 QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoVector3 pos, float rotation) const
@@ -297,7 +322,7 @@ void BosonWeapon::shoot(const BoVector3& target)
     return;
   }
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
-  canvas()->newShot(mProp->newShot(unit(), pos, target));
+  mProp->newShot(unit(), pos, target);
   canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, unit()->rotation()));
   mProp->playSound(SoundWeaponShoot);
   mReloadCounter = mProp->reloadingTime();

@@ -64,6 +64,7 @@ public:
 	float mSpeed;
 	float mAccelerationSpeed;
 	float mDecelerationSpeed;
+	int mRotationSpeed;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
 };
@@ -221,13 +222,14 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  createMobileProperties();
  mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
- mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.5);
- mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 1.0);
  if (mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
  }
+ mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.5);
+ mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 1.0);
+ mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", mMobileProperties->mSpeed * 2);
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
  mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
@@ -332,6 +334,7 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
  conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
  conf->writeEntry("AccelerationSpeed", (double)mMobileProperties->mAccelerationSpeed);
  conf->writeEntry("DecelerationSpeed", (double)mMobileProperties->mDecelerationSpeed);
+ conf->writeEntry("RotationSpeed", mMobileProperties->mRotationSpeed);
  conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
 }
@@ -463,6 +466,14 @@ float UnitProperties::decelerationSpeed() const
  return mMobileProperties->mDecelerationSpeed;
 }
 
+float UnitProperties::rotationSpeed() const
+{
+ if (!mMobileProperties) {
+	return 0;
+ }
+ return mMobileProperties->mRotationSpeed;
+}
+
 bool UnitProperties::canGoOnLand() const
 {
  if (!mMobileProperties) {
@@ -583,6 +594,27 @@ void UnitProperties::setSpeed(float speed)
  }
 }
 
+void UnitProperties::setAccelerationSpeed(float speed)
+{
+ if (mMobileProperties) {
+	mMobileProperties->mAccelerationSpeed = speed;
+ }
+}
+
+void UnitProperties::setDecelerationSpeed(float speed)
+{
+ if (mMobileProperties) {
+	mMobileProperties->mDecelerationSpeed = speed;
+ }
+}
+
+void UnitProperties::setRotationSpeed(float speed)
+{
+ if (mMobileProperties) {
+	mMobileProperties->mRotationSpeed = speed;
+ }
+}
+
 void UnitProperties::setCanGoOnLand(bool c)
 {
  if (mMobileProperties) {
@@ -660,15 +692,18 @@ void UnitProperties::reset()
  // Delete old mobile/facility properties
  if (mMobileProperties) {
 	delete mMobileProperties;
+	mMobileProperties = 0;
  }
  if (mFacilityProperties) {
 	delete mFacilityProperties;
+	mFacilityProperties = 0;
  }
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
  mMobileProperties->mAccelerationSpeed = 0.5;
  mMobileProperties->mDecelerationSpeed = 1.0;
+ mMobileProperties->mRotationSpeed = 2 * mMobileProperties->mSpeed;
  mMobileProperties->mCanGoOnLand = true;
  mMobileProperties->mCanGoOnWater = false;
  // Sounds

@@ -543,7 +543,7 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
  }
 }
 
-void BosonCanvas::newShot(BosonShot* shot)
+void BosonCanvas::newShot(BosonShot*)
 {
  boDebug(350) << k_funcinfo << endl;
 }
@@ -562,14 +562,16 @@ void BosonCanvas::shotHit(BosonShot* s)
 		++it;
 	}
  }
- // Add hit particle systems
- addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
+ if (s->properties()) {
+	// Add hit particle systems
+	addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
 
- // Play hit sound
- s->properties()->playSound(SoundWeaponHit);
+	// Play hit sound
+	s->properties()->playSound(SoundWeaponHit);
+ }
 
- explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(),
-		s->properties()->fullDamageRange(), s->owner());
+ explosion(BoVector3(s->x(), s->y(), s->z()), s->damage(), s->damageRange(),
+		s->fullDamageRange(), s->owner());
 }
 
 void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner)
@@ -717,7 +719,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
 	if(unit->unitProperties()->explodingDamage() > 0) {
 		// Do we want ability to set fullDamageRange here?
-		explosion(pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), 0, unit->owner());
+		new BosonShotExplosion(unit->owner(), this, pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), 0, 10);
 	}
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
@@ -1017,9 +1019,13 @@ bool BosonCanvas::save(QDataStream& stream)
 		if (!s->isActive()) {
 			continue;
 		}
+		stream << (Q_UINT32)s->type();
 		stream << (Q_UINT32)s->owner()->id();
-		stream << (Q_UINT32)s->properties()->unitProperties()->typeId();
-		stream << (Q_UINT32)s->properties()->id();
+		if (s->type() == BosonShot::Bullet || s->type() == BosonShot::Missile) {
+			// Bullet and missile always have properties, others don't
+			stream << (Q_UINT32)s->properties()->unitProperties()->typeId();
+			stream << (Q_UINT32)s->properties()->id();
+		}
 		s->save(stream);
 	}
  }
@@ -1035,13 +1041,25 @@ bool BosonCanvas::load(QDataStream& stream)
 
  BosonShot* s;
  Player* p;
- Q_UINT32 playerid, unitpropid, propid;
+ Q_UINT32 type, playerid, unitpropid, propid;
  for (unsigned int i = 0; i < shotscount; i++) {
 	boDebug() << k_funcinfo << "Loading shot" << endl;
-	stream >> playerid >> unitpropid >> propid;
+	stream >> type >> playerid;
+	if (type == BosonShot::Bullet || type == BosonShot::Missile) {
+		// Bullet and missile always have properties, others don't
+		stream >> unitpropid >> propid;
+	}
 	p = (Player*)boGame->findPlayer(playerid);
-	s = new BosonShot(p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid),
-			p, this);
+	if (type == BosonShot::Bullet) {
+		s = new BosonShotBullet(p, this, p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid));
+	} else if(type == BosonShot::Missile) {
+		s = new BosonShotMissile(p, this, p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid));
+	} else if(type == BosonShot::Explosion) {
+		s = new BosonShotExplosion(p, this);
+	} else {
+		boError() << k_funcinfo << "Invalid type: " << type << endl;
+		continue;
+	}
 	s->load(stream);
  }
  return true;
@@ -1076,58 +1094,83 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		boError(260) << k_funcinfo << "missing attribute: Owner for Shot " << i << endl;
 		continue;
 	}
-	if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
-		boError(260) << k_funcinfo << "missing attribute: UnitType for Shot " << i << endl;
+	if (!e.hasAttribute(QString::fromLatin1("Type"))) {
+		boError(260) << k_funcinfo << "missing attribute: Type for Shot " << i << endl;
 		continue;
 	}
-	if (!e.hasAttribute(QString::fromLatin1("WeaponType"))) {
-		boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot " << i << endl;
-		continue;
-	}
+
 	bool ok = false;
-	unsigned long int type, weaponid, ownerid;
+	unsigned long int type, unitid, weaponid, ownerid;
 	ownerid = e.attribute(QString::fromLatin1("Owner")).toULong(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "Invalid Owner number for Shot " << i << endl;
 		continue;
 	}
-	type = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	type = e.attribute(QString::fromLatin1("Type")).toULong(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid UnitType number for Shot " << i << endl;
-		continue;
-	}
-	weaponid = e.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot " << i << endl;
+		boError(260) << k_funcinfo << "Invalid Type number for Shot " << i << endl;
 		continue;
 	}
 
+	const BosonWeaponProperties* weapon;
 	Player* owner = (Player*)(boGame->findPlayer(ownerid));
 	if (!owner) {
 		boError() << k_funcinfo << "No player with id " << ownerid << endl;
 	}
-	SpeciesTheme* theme = owner->speciesTheme();
-	if (!theme) {
-		boError() << k_funcinfo << "No theme for player " << ownerid << endl;
+
+	if (type == BosonShot::Bullet || type == BosonShot::Missile) {
+		// Bullet and missile always have properties, others don't
+		if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
+			boError(260) << k_funcinfo << "missing attribute: UnitType for Shot " << i << endl;
+			continue;
+		}
+		if (!e.hasAttribute(QString::fromLatin1("WeaponType"))) {
+			boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot " << i << endl;
+			continue;
+		}
+		unitid = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+		if (!ok) {
+			boError(260) << k_funcinfo << "Invalid UnitType number for Shot " << i << endl;
+			continue;
+		}
+		weaponid = e.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+		if (!ok) {
+			boError(260) << k_funcinfo << "Invalid WeaponType number for Shot " << i << endl;
+			continue;
+		}
+
+		SpeciesTheme* theme = owner->speciesTheme();
+		if (!theme) {
+			boError() << k_funcinfo << "No theme for player " << ownerid << endl;
+			continue;
+		}
+		const UnitProperties* prop = theme->unitProperties(unitid);
+		if (!prop) {
+			boError() << "Unknown unitType " << unitid << endl;
+			return 0;
+		}
+		weapon = prop->weaponProperties(weaponid);
+		if (!weapon) {
+			boError() << "Unknown weaponType " << weaponid << " for unitType " << unitid << endl;
+			return 0;
+		}
+	}
+
+	BosonShot* s;
+	if (type == BosonShot::Bullet) {
+		s = new BosonShotBullet(owner, this, weapon);
+	} else if(type == BosonShot::Missile) {
+		s = new BosonShotMissile(owner, this, weapon);
+	} else if(type == BosonShot::Explosion) {
+		s = new BosonShotExplosion(owner, this);
+	} else {
+		boError() << k_funcinfo << "Invalid type: " << type << endl;
 		continue;
 	}
-	const UnitProperties* prop = theme->unitProperties(type);
-	if (!prop) {
-		boError() << "Unknown unitType " << type << endl;
-		return 0;
-	}
-	const BosonWeaponProperties* weapon = prop->weaponProperties(weaponid);
-	if (!weapon) {
-		boError() << "Unknown weaponType " << weaponid << " for unitType " << type << endl;
-		return 0;
-	}
-
-	BosonShot* shot = new BosonShot(weapon, owner, this);
-
 	// Call shot's loading methods
-	if (!shot->loadFromXML(e)) {
+	if (!s->loadFromXML(e)) {
 		boWarning(260) << k_funcinfo << "Could not load shot " << i << " correctly" << endl;
-		delete shot;
+		delete s;
 		continue;
 	}
  }

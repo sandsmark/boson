@@ -36,118 +36,38 @@
 
 #include <math.h>
 
+/*****  BosonShot  *****/
 
-BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target) :
+BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonItem(prop ? prop->model() : 0, canvas)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
-  //boDebug(350) << "    pos: (" << pos.x() << "; " << pos.y() << "; " << pos.z() << ");  target: (" <<
-  //    target.x() << "; " << target.y() << "; " << target.z() << "); this=" << this << endl;
   mOwner = owner;
   mProp = prop;
-  mTarget = target;
-  mFlyParticleSystems = 0;
   // FIXME: can't we use values from objects config file here?
   setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
+
   // At first shot is invisible. It will be set visible when it's advanced. This
   //  is needed because x rotation isn't calculated in constructor and it would
   //  be wrong until missile is advanced.
   setVisible(false);
-  if (!mProp)
-  {
-    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
-    return;
-  }
+
   if (!mOwner)
   {
     boError(350) << k_funcinfo << "NULL owner!" << endl;
+    setActive(false);
     return;
   }
   if (!canvas)
   {
     boError(350) << k_funcinfo << "NULL canvas" << endl;
+    setActive(false);
     return;
   }
-  if(!canvas->onCanvas((int)pos[0], (int)pos[1]))
-  {
-    boError(350) << k_funcinfo << "invalid start position" << endl;
-    mActive = false;
-    return;
-  }
-  if(prop->speed() == 0)
-  {
-    // This shot is bullet, not missile - it has infinite speed and it reaches
-    //  it's target immideately. No need to calculate anything.
-    boDebug(350) << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
-    explode();
-    return;
-  }
-  // First set the velocity to length of whole trip (for calculations)
-  mVelo = target - pos;
-  mVelo.setZ(0.0);
-
-  mTotalDist = mVelo.length();
-
-  // Speeds
-  setAccelerationSpeed(prop->accelerationSpeed());
-  setMaxSpeed(prop->speed());
-
-  // Maximum height missile can have
-  mMaxHeight = prop->height() * (mTotalDist / BO_TILE_SIZE);
-  // Set correct base velocity. Note that this must be multiplied with speed()
-  //  to get actual velocity for given speed
-  mVelo.setZ(target.z() - pos.z());
-  mVelo.scale(1 / mTotalDist);
-
-  // Particle systems
-  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(prop->newFlyParticleSystems(pos, 0.0));
-  canvas->addParticleSystems(*mFlyParticleSystems);
-  // FIXME: name: it has nothing to do with particles anymore
-  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 
   // Initialization
   mActive = true;
-  move(pos[0], pos[1], pos[2]);
   setAnimated(true);
-  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
-  mZ = 0; // For parable calculations only, must be 0 at the beginning
-  mPassedDist = 0;
-}
-
-BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas) :
-    BosonItem(prop ? prop->model() : 0, canvas)
-{
-  mOwner = owner;
-  mProp = prop;
-  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
-  mFlyParticleSystems = 0;
-}
-
-// move the shot by one step
-// (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
-void BosonShot::advanceMoveInternal()
-{
-  setVisible(true);
-  // Always accelerate
-  accelerate();
-  // Increase distance that missile has flied
-  mPassedDist += speed();
-  // Calculate parable height at current step
-  float factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
-  factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
-  // How much will be added to current z position
-  float addZ = (mMaxHeight * factor);
-  float zvelo = mVelo[2] * speed() + (addZ - mZ);
-  mZ = addZ;
-  setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
-  setXRotation(rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
-
-  // Check if missile is still active
-  BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
-  if(dist.dotProduct() <= speed() * speed())
-  {
-    explode();
-  }
 }
 
 //AB: note this this is primary optimized for SAFETY, NOT for performance. it is
@@ -156,6 +76,10 @@ void BosonShot::advanceMoveCheck()
 {
   float velocityX = xVelocity();
   float velocityY = yVelocity();
+  if(!velocityX && !velocityY)
+  {
+    return;
+  }
   float xPos = x() + xVelocity();
   float yPos = y() + yVelocity();
   // ensure that the next position will be valid
@@ -187,24 +111,9 @@ const QColor* BosonShot::teamColor() const
 
 bool BosonShot::saveAsXML(QDomElement& root)
 {
-  root.setAttribute("UnitType", (unsigned int)mProp->unitProperties()->typeId());
-  root.setAttribute("WeaponType", (unsigned int)mProp->id());
-  root.setAttribute("Owner", (unsigned int)mOwner->id());
-
-  // Too many attributes?
   root.setAttribute("x", x());
   root.setAttribute("y", y());
   root.setAttribute("z", z());
-  root.setAttribute("xVelo", mVelo.x());
-  root.setAttribute("yVelo", mVelo.y());
-  root.setAttribute("zVelo", mVelo.z());
-  root.setAttribute("Targetx", mTarget.x());
-  root.setAttribute("Targety", mTarget.y());
-  root.setAttribute("Targetz", mTarget.z());
-  root.setAttribute("TotalDist", mTotalDist);
-  root.setAttribute("PassedDist", mPassedDist);
-  root.setAttribute("mZ", mZ);
-  root.setAttribute("MaxHeight", mMaxHeight);
   return true;
 }
 
@@ -214,8 +123,6 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   float x;
   float y;
   float z;
-  float xvelo, yvelo, zvelo;
-  float targetx, targety, targetz;
   x = root.attribute("x").toFloat(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for x tag" << endl;
@@ -231,6 +138,224 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Invalid value for z tag" << endl;
     return false;
   }
+
+  mActive = true; // Inactive shots won't be saved
+  move(x, y, z);
+
+  // Is it ok to do these here?
+  setAnimated(true);
+  return true;
+}
+
+void BosonShot::save(QDataStream& stream)
+{
+  stream << (float)x();
+  stream << (float)y();
+  stream << (float)z();
+}
+
+void BosonShot::load(QDataStream& stream)
+{
+  float x, y, z;
+  stream >> x >> y >> z;
+
+  mActive = true; // Inactive shots won't be saved
+  move(x, y, z);
+
+  // Is it ok to do these here?
+  setAnimated(true);
+}
+
+void BosonShot::explode()
+{
+ mActive = false;
+ moveToTarget();
+ setVelocity(0, 0, 0);
+ setVisible(false);
+ canvas()->shotHit(this);
+}
+
+long int BosonShot::damage() const
+{
+  return properties()->damage();
+};
+
+float BosonShot::damageRange() const
+{
+  return properties()->damageRange();
+};
+
+float BosonShot::fullDamageRange() const
+{
+  return properties()->fullDamageRange();
+};
+
+
+
+/*****  BosonShotBullet  *****/
+
+BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 target) :
+    BosonShot(owner, canvas, prop)
+{
+  if (!properties())
+  {
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
+    setActive(false);
+    return;
+  }
+
+  mTarget = target;
+
+  explode();
+}
+
+BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+    BosonShot(owner, canvas, prop)
+{
+  if (!properties())
+  {
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
+    setActive(false);
+    return;
+  }
+}
+
+void BosonShotBullet::moveToTarget()
+{
+  move(mTarget.x(), mTarget.y(), mTarget.z());
+}
+
+
+/*****  BosonShotMissile  *****/
+
+BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, BoVector3 pos, BoVector3 target) :
+    BosonShot(owner, canvas, prop)
+{
+  boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
+  //boDebug(350) << "    pos: (" << pos.x() << "; " << pos.y() << "; " << pos.z() << ");  target: (" <<
+  //    target.x() << "; " << target.y() << "; " << target.z() << "); this=" << this << endl;
+  mFlyParticleSystems = 0;
+  mTarget = target;
+  if (!properties())
+  {
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
+    setActive(false);
+    return;
+  }
+  if(!canvas->onCanvas((int)pos[0], (int)pos[1]))
+  {
+    boError(350) << k_funcinfo << "invalid start position" << endl;
+    setActive(false);
+    return;
+  }
+
+  // First set the velocity to length of whole trip (for calculations)
+  mVelo = target - pos;
+  mVelo.setZ(0.0);
+
+  mTotalDist = mVelo.length();
+
+  // Speeds
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
+
+  // Maximum height missile can have
+  mMaxHeight = properties()->height() * (mTotalDist / BO_TILE_SIZE);
+  // Set correct base velocity. Note that this must be multiplied with speed()
+  //  to get actual velocity for given speed
+  mVelo.setZ(target.z() - pos.z());
+  mVelo.scale(1 / mTotalDist);
+
+  // Particle systems
+  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(properties()->newFlyParticleSystems(pos, 0.0));
+  canvas->addParticleSystems(*mFlyParticleSystems);
+  // FIXME: name: it has nothing to do with particles anymore
+  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+
+  // Initialization
+  move(pos[0], pos[1], pos[2]);
+  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
+  mZ = 0; // For parable calculations only, must be 0 at the beginning
+  mPassedDist = 0;
+}
+
+BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+    BosonShot(owner, canvas, prop)
+{
+  if (!properties())
+  {
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
+    setActive(false);
+    return;
+  }
+  mFlyParticleSystems = 0;
+}
+
+// move the shot by one step
+// (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
+void BosonShotMissile::advanceMoveInternal()
+{
+  setVisible(true);
+  // Always accelerate
+  accelerate();
+  // Increase distance that missile has flied
+  mPassedDist += speed();
+  // Calculate parable height at current step
+  float factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
+  factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
+  // How much will be added to current z position
+  float addZ = (mMaxHeight * factor);
+  float zvelo = mVelo[2] * speed() + (addZ - mZ);
+  mZ = addZ;
+  setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
+  setXRotation(rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
+
+  // Check if missile is still active
+  BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
+  if(dist.dotProduct() <= speed() * speed())
+  {
+    explode();
+  }
+}
+
+bool BosonShotMissile::saveAsXML(QDomElement& root)
+{
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("UnitType", (unsigned int)properties()->unitProperties()->typeId());
+  root.setAttribute("WeaponType", (unsigned int)properties()->id());
+
+  // Too many attributes?
+  root.setAttribute("xVelo", mVelo.x());
+  root.setAttribute("yVelo", mVelo.y());
+  root.setAttribute("zVelo", mVelo.z());
+  root.setAttribute("Targetx", mTarget.x());
+  root.setAttribute("Targety", mTarget.y());
+  root.setAttribute("Targetz", mTarget.z());
+  root.setAttribute("TotalDist", mTotalDist);
+  root.setAttribute("PassedDist", mPassedDist);
+  root.setAttribute("mZ", mZ);
+  root.setAttribute("MaxHeight", mMaxHeight);
+  root.setAttribute("Speed", speed());
+  return true;
+}
+
+bool BosonShotMissile::loadFromXML(const QDomElement& root)
+{
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+  float xvelo, yvelo, zvelo;
+  float targetx, targety, targetz;
+  float speed;
 
   xvelo = root.attribute("xVelo").toFloat(&ok);
   if (!ok) {
@@ -283,58 +408,151 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Invalid value for MaxHeight tag" << endl;
     return false;
   }
+  speed = root.attribute("Speed").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
+    return false;
+  }
 
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  mActive = true; // Inactive shots won't be saved
-  move(x, y, z);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
-  setAnimated(true);
-  canvas()->newShot(this);
+  setSpeed(speed);
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
   return true;
 }
 
-void BosonShot::save(QDataStream& stream)
+void BosonShotMissile::save(QDataStream& stream)
 {
-  stream << (float)x();
-  stream << (float)y();
-  stream << (float)z();
+  BosonShot::save(stream);
+
   stream << mVelo;
   stream << mTarget;
   stream << (float)mTotalDist;
   stream << (float)mPassedDist;
   stream << (float)mZ;
   stream << (float)mMaxHeight;
+  stream << speed();
 }
 
-void BosonShot::load(QDataStream& stream)
+void BosonShotMissile::load(QDataStream& stream)
 {
-  float x, y, z;
-  float rot;
+  BosonShot::load(stream);
 
-  stream >> x >> y >> z;
+  float speed;
+
   stream >> mVelo;
   stream >> mTarget;
   stream >> mTotalDist >> mPassedDist;
   stream >> mZ >> mMaxHeight;
+  stream >> speed;
 
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
-  mActive = true; // Inactive shots won't be saved
-  move(x, y, z);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
-  setRotation(rot);
-  setAnimated(true);
-  canvas()->newShot(this);
+  setSpeed(speed);
+  setAccelerationSpeed(properties()->accelerationSpeed());
+  setMaxSpeed(properties()->speed());
 }
 
-void BosonShot::explode()
+void BosonShotMissile::moveToTarget()
 {
- mActive = false;
  move(mTarget.x(), mTarget.y(), mTarget.z());
- setVelocity(0, 0, 0);
- setVisible(false);
- canvas()->shotHit(this);
+}
+
+
+/*****  BosonShotExplosion  *****/
+
+BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVector3 pos, long int damage, float damagerange, float fulldamagerange, int delay) :
+    BosonShot(owner, canvas, 0)
+{
+  mDamage = damage;
+  mDamageRange = damagerange;
+  mFullDamageRange = fulldamagerange;
+  mDelay = delay;
+  move(pos.x(), pos.y(), pos.z());
+}
+
+BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
+    BosonShot(owner, canvas, 0)
+{
+}
+
+bool BosonShotExplosion::saveAsXML(QDomElement& root)
+{
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("Damage", (int)mDamage);
+  root.setAttribute("DamageRange", mDamageRange);
+  root.setAttribute("FullDamageRange", mFullDamageRange);
+  root.setAttribute("Delay", mDelay);
+  return true;
+}
+
+bool BosonShotExplosion::loadFromXML(const QDomElement& root)
+{
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error while loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+
+  mDamage = (long int)root.attribute("Damage").toInt(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for Damage tag" << endl;
+    return false;
+  }
+  mDamageRange = root.attribute("DamageRange").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for DamageRange tag" << endl;
+    return false;
+  }
+  mFullDamageRange = root.attribute("FullDamageRange").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for FullDamageRange tag" << endl;
+    return false;
+  }
+  mDelay = root.attribute("Delay").toInt(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for Delay tag" << endl;
+    return false;
+  }
+
+  return true;
+}
+
+void BosonShotExplosion::save(QDataStream& stream)
+{
+  BosonShot::save(stream);
+  stream << mDamage;
+  stream << mDamageRange;
+  stream << mFullDamageRange;
+  stream << mDelay;
+}
+
+void BosonShotExplosion::load(QDataStream& stream)
+{
+  BosonShot::load(stream);
+  stream >> mDamage;
+  stream >> mDamageRange;
+  stream >> mFullDamageRange;
+  stream >> mDelay;
+}
+
+void BosonShotExplosion::advanceMoveInternal()
+{
+  mDelay--;
+  if(mDelay <= 0)
+  {
+    explode();
+  }
 }
 
 
