@@ -22,7 +22,6 @@ BOEDITOR_SRC = editor.cpp bosonunitdialog.cpp
 COMMON_SRC = \
 	cell.cpp unitproperties.cpp unitbase.cpp \
 	kspritetooltip.cpp \
-	selectpart.cpp \
 	bosonmap.cpp \
 	bosonscenario.cpp \
 	bosoncanvas.cpp \
@@ -47,7 +46,8 @@ COMMON_SRC = \
 	newgamedialog.cpp \
 	topbase.cpp \
 	bosoncommandwidget.cpp \
-	bosonmusic.cpp
+	bosonmusic.cpp \
+	selectbox.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
