@@ -34,7 +34,7 @@ class QComboBox;
 class QCheckBox;
 
 /**
- * @pshort Base widget for pages of the @ref OptionsDialog
+ * @short Base widget for pages of the @ref OptionsDialog
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class OptionsWidget
