@@ -50,7 +50,7 @@ public:
   QMap<QString, QString> mEntryList;
 };
 
-UpgradeProperties::UpgradeProperties(SpeciesTheme* theme)
+UpgradeProperties::UpgradeProperties(const SpeciesTheme* theme)
 {
   d = new UpgradePropertiesPrivate;
 

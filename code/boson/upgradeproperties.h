@@ -48,7 +48,7 @@ class UpgradeProperties
      * Constructs UpgradeProperties
      * You should call @ref load after that.
      **/
-    UpgradeProperties(SpeciesTheme* theme);
+    UpgradeProperties(const SpeciesTheme* theme);
     virtual ~UpgradeProperties();
 
     /**
@@ -165,7 +165,7 @@ class UpgradeProperties
     bool mApplyToFacilities;
     bool mApplyToMobiles;
     BoAction* mProduceAction;
-    SpeciesTheme* mTheme;
+    const SpeciesTheme* mTheme;
 };
 
 #endif // UPGRADEPROPERTIES_H
