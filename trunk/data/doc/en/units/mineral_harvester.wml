@@ -19,5 +19,5 @@ use get_values;
 get_values->getval("mob", "mineralharvester");
 :>
     
-#include "nav.wml" before_url="../index.html" before_text="Units" after_url="oil_harvester.html" after_text="Oil Harvester" up_url="index.html"
+#include "nav.wml" before_url="index.html" before_text="Units" after_url="oil_harvester.html" after_text="Oil Harvester" up_url="index.html"
 #include "footer.wml"
