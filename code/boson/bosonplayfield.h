@@ -22,7 +22,6 @@
 #include <qobject.h>
 
 class BosonMap;
-class BosonScenario;
 class Boson;
 class BPFFile;
 class BPFDescription;
@@ -140,16 +139,7 @@ public:
 	 **/
 	QByteArray exportTexMap(unsigned int texture) const;
 
-	/**
-	 * Remember to call @ref applyScenario first! The @ref
-	 * BosonMap is updated automatically whenever a cell is added, but the
-	 * unit list is not.
-	 **/
 	bool savePlayField(const QString& fileName);
-
-	// AB: rename to savePlayFieldForRemote() if possible
-	bool saveAdminPlayField(QDataStream& stream) const;
-	bool loadPlayFieldFromAdmin(QDataStream& stream);
 
 	// AB: do we still need these?
 	bool savePlayFieldForRemote(QDataStream& stream) const;
@@ -162,19 +152,12 @@ public:
 	void changeMap(BosonMap* map);
 
 	/**
-	 * Make @p s the new scenario of this playfield. Called by the editor
-	 * only.
-	 **/
-	void changeScenario(BosonScenario* s);
-
-	/**
 	 * Make @p d the new description of this playfield. Called by the editor
 	 * only.
 	 **/
 	void changeDescription(BPFDescription* d);
 
 	BosonMap* map() const { return mMap; }
-	BosonScenario* scenario() const { return mScenario; }
 	BPFDescription* description() const { return mDescription; }
 	const QString& identifier() const { return mIdentifier; }
 
@@ -187,8 +170,6 @@ public:
 	{
 		return mPlayFieldInformation;
 	}
-
-	void applyScenario(Boson* boson);
 
 	/**
 	 * This simply deletes the map. This may be useful for game starting, as
@@ -256,12 +237,10 @@ protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
 	bool loadMapFromFile_0_8(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
-	bool loadScenarioFromFile(const QByteArray& xml);
 
 	QString saveDescriptionToFile();
 	QByteArray saveMapToFile();
 	QByteArray saveTexMapToFile();
-	QString saveScenarioToFile();
 
 	bool saveMap(QDataStream& stream) const;
 	bool saveDescription(QDataStream& stream) const;
@@ -293,7 +272,6 @@ protected:
 private:
 	BosonMap* mMap;
 	BosonPlayFieldInformation* mPlayFieldInformation;
-	BosonScenario* mScenario;
 	BPFDescription* mDescription;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
 	bool mLoaded;
