@@ -28,6 +28,7 @@
 #include "playerio.h"
 #include "unitproperties.h"
 #include "script/bosonscript.h"
+#include "speciestheme.h"
 
 #include <klocale.h>
 
@@ -259,13 +260,13 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 				i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()),
 				playerIO()->player());
 	}
- } else if (event->name() == "AllUnitsDestroyed") {
  } else if (event->name() == "LostMinimap") {
 	playerIO()->speciesTheme()->playSound(SoundReportMinimapDeactivated);
 	playerIO()->emitSignalShowMiniMap(false);
  } else if (event->name() == "GainedMinimap") {
-	speciesTheme()->playSound(SoundReportMinimapActivated);
+	playerIO()->speciesTheme()->playSound(SoundReportMinimapActivated);
 	playerIO()->emitSignalShowMiniMap(true);
+ } else if (event->name() == "AllUnitsDestroyed") {
  }
 }
 
