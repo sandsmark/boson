@@ -1756,7 +1756,7 @@ QString Boson::saveKGameAsXML()
  root.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION);
 
  // store the dataHandler()
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, dataHandler())) { // AB: we should exclude gameStatus from this! we should stay in KGame::Init! -> add a BosonPropertyXML::remove() or so
 	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
@@ -1945,7 +1945,7 @@ bool Boson::loadKGameFromXML(const QString& xml)
 	boError() << k_funcinfo << "No DataHandler tag found" << endl;
 	return false;
  }
- BosonPropertyXML propertyXML;
+ BosonCustomPropertyXML propertyXML;
  if (!propertyXML.loadFromXML(handler, dataHandler())) {
 	boError() << k_funcinfo << "unable to load KGame data handler" << endl;
 	return false;
