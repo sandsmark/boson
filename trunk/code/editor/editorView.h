@@ -25,6 +25,7 @@
 #include <visualView.h>
 #include "../common/groundType.h"
 
+class QCheckBox;
 class QPushButton;
 class QPixmap;
 class playerFacility;
@@ -108,6 +109,7 @@ private:
 	} which;
 	object_type	otype;
 	int		who;
+	QCheckBox	*invertBox;
 };
 
 

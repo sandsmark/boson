@@ -49,7 +49,6 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	:visualView(p,parent,name)
 {
 	int		i;
-	QCheckBox	*qcheck;
 	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
@@ -79,12 +78,9 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 
 
 /* QCheckBoxes */
-	qcheck = new QCheckBox("Invert", this, "checkbox inverted");
-	qcheck->setGeometry(130,10,80,30);
-	connect(qcheck, SIGNAL(toggled(bool)), this, SLOT(setInverted(bool)));
-//	qcheck = new QCheckBox("Big tiles", this, "checkbox bigtiles");
-//	qcheck->setGeometry(130,40,80,30);
-//	connect(qcheck, SIGNAL(toggled(bool)), this, SLOT(setBigSize(bool)));
+	invertBox = new QCheckBox("Invert", this, "checkbox inverted");
+	invertBox->setGeometry(130,10,80,30);
+	connect(invertBox, SIGNAL(toggled(bool)), this, SLOT(setInverted(bool)));
 
 /* QComboBoxes */
 	qcb_which = new QComboBox(this, "qcb_which");
@@ -285,27 +281,35 @@ void editorView::setOrders(int whatb , int who)
 		case W_UNITS:
 			i = mobilePropNb;
 			qcb_transRef->hide();
+			invertBox->hide();
 			qcb_who->show();
+
 			break;
 		case W_FACILITIES:
 			i = facilityPropNb;
 			qcb_transRef->hide();
+			invertBox->hide();
 			qcb_who->show();
 			break;
 		case W_BIG_GROUND_1:
 		case W_BIG_GROUND_2:
 			j = 4;
-			qcb_transRef->show();
 			qcb_who->hide();
+			qcb_transRef->show();
+			invertBox->show();
 			break;
 		case W_SMALL_GROUND:
 			i = 9;
-			qcb_transRef->show();
 			qcb_who->hide();
+			qcb_transRef->show();
+			invertBox->show();
 			break;
 		default : 
 			logf(LOG_ERROR, "editorView::setOrders : unhandled which in switch");
 	} // switch(which)
+	
+	boAssert(i<=TILES_NB);
+	boAssert(j<=BIG_TILES_NB);
 
 	for (i--; i>=0; i--)
 			tiles[i]->show();
