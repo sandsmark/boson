@@ -58,6 +58,7 @@ public:
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMoveRange = UnitBase::IdLast + 5,
 		IdWantedRotation = UnitBase::IdLast + 6,
+		IdMoveAttacking = UnitBase::IdLast + 6,
 
 		// properties in MobileUnit
 		IdSpeed = UnitBase::IdLast + 50,
@@ -275,8 +276,9 @@ public:
 	 * @ref work is cleared. After the path is found the unit starts to get
 	 * animated and to move to the destination.
 	 * @param pos The point on the canvas to move to.
+	 * @param attack If this is true, unit will stop and attack any enemy units in range while moving
 	 **/
-	virtual void moveTo(const QPoint& pos);
+	virtual void moveTo(const QPoint& pos, bool attack = false);
 	
 	/**
 	 * Nearly similar to the above version (actually this is called by the
@@ -290,9 +292,10 @@ public:
 	 * allowed to go to. You must use range > 0 e.g. if destination is
 	 * occupied and you should use e.g. @ref weaponRange if the unit should
 	 * attack. -1 keeps the previously set range.
+	 * @param attack Whether to stop and attack any enemy units in range while moving
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(float x, float y, int range = 0);
+	bool moveTo(float x, float y, int range = 0, bool attack = false);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -348,6 +351,12 @@ public:
 
 	bool canShootAt(Unit* u);
 
+	/**
+	 * Attack enemy units in range
+	 * @return whether there was any enemy in range
+	 **/
+	bool attackEnemyUnitsInRange();
+
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);
 
@@ -380,6 +389,10 @@ protected:
 	virtual void advanceMoveCheck() { }
 
 	BosonWeapon* activeWeapon() const;
+	/**
+	 * @return Whether unit should attack any enemy units in range while moving
+	 **/
+	int moveAttacking() const;
 
 protected:
 	bool mSearchPath;

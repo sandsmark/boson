@@ -63,6 +63,7 @@ public:
 	KGameProperty<int> mMoveDestY;
 	KGameProperty<int> mMoveRange;
 	KGameProperty<int> mWantedRotation;
+	KGameProperty<int> mMoveAttacking;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
 	// saves all KGameProperty objects. If non-KGameProperty properties are
@@ -106,12 +107,14 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mMoveDestY, IdMoveDestY);
  registerData(&d->mMoveRange, IdMoveRange);
  registerData(&d->mWantedRotation, IdWantedRotation);
+ registerData(&d->mMoveAttacking, IdMoveAttacking);
 
  setAnimated(true);
  d->mMoveDestX.setLocal(0);
  d->mMoveDestY.setLocal(0);
  d->mMoveRange.setLocal(0);
  d->mWantedRotation.setLocal(0);
+ d->mMoveAttacking.setLocal(0);
 
  // TODO: the tooltips do not yet work with OpenGL!!
 // KSpriteToolTip::add(rtti(), unitProperties()->name());
@@ -161,6 +164,7 @@ void Unit::initStatic()
  addPropertyId(IdMoveDestY, QString::fromLatin1("MoveDestY"));
  addPropertyId(IdMoveRange, QString::fromLatin1("MoveRange"));
  addPropertyId(IdWantedRotation, QString::fromLatin1("WantedRotation"));
+ addPropertyId(IdMoveAttacking, QString::fromLatin1("MoveAttacking"));
 
  // MobileUnit
  addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
@@ -354,11 +358,14 @@ void Unit::advanceNone(unsigned int advanceCount)
  if (advanceCount % 10 != 0) {
 	return;
  }
+ 
+ attackEnemyUnitsInRange();
+}
 
+bool Unit::attackEnemyUnitsInRange()
+{
+ bool shotAtAnything = false;
  if (unitProperties()->canShoot()) {
-	// FIXME: isn't there any better way to do this than to iterate through all
-	//  weapons? Maybe cache maximal range of weapons and check if units are in
-	//  range of this...
 	BoItemList list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
 	BosonWeapon* w;
 	if(list.count() > 0) {
@@ -407,7 +414,7 @@ void Unit::advanceNone(unsigned int advanceCount)
 						if (QABS(rotation() - rot) > (2 * speed())) {
 							turnTo((int)rot);
 							setAdvanceWork(WorkTurn);
-							return;
+							return true;
 						} else {
 							// If we can get wanted rotation with only little turning, then we don't call turnTo()
 							setRotation(rot);
@@ -415,18 +422,12 @@ void Unit::advanceNone(unsigned int advanceCount)
 					}
 				}
 				shootAt(w, bestunit);
+				shotAtAnything = true;
 			}
 		}
 	}
- }/* else if (weaponDamage() < 0) {
-	if (!repairPlugin()) {
-		boWarning() << k_funcinfo << "weaponDamage < 0 but no repair plugin??" << endl;
-		return;
-	}
-	repairPlugin()->repairInRange();
- }*/ else {
-	// weaponDamage() == 0 - what can be done here?
  }
+ return shotAtAnything;
 }
 
 void Unit::advanceAttack(unsigned int advanceCount)
@@ -572,17 +573,17 @@ unsigned int Unit::waypointCount() const
  return d->mWaypoints.count();
 }
 
-void Unit::moveTo(const QPoint& pos)
+void Unit::moveTo(const QPoint& pos, bool attack)
 {
  d->mTarget = 0;
- if (moveTo(pos.x(), pos.y(), 0)) {
+ if (moveTo(pos.x(), pos.y(), 0, attack)) {
 	setWork(WorkMove);
  } else {
 	setWork(WorkNone);
  }
 }
 
-bool Unit::moveTo(float x, float y, int range)
+bool Unit::moveTo(float x, float y, int range, bool attack)
 {
  stopMoving();
 
@@ -605,12 +606,15 @@ bool Unit::moveTo(float x, float y, int range)
  d->mMoveDestY = (int)y;
  d->mMoveRange = range;
 
- // AB: FIXME: UnitGroups doesn't exist anymore! maybe we can search path here,
- // now?
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
- // AB: UnitGroup is obsolete - can we search path here now?
  mSearchPath = true;
+
+ if (attack) {
+	d->mMoveAttacking = 1;
+ } else {
+	d->mMoveAttacking = 0;
+ }
 
  return true;
 }
@@ -1025,6 +1029,11 @@ BosonWeapon* Unit::activeWeapon() const
  return d->mActiveWeapon;
 }
 
+int Unit::moveAttacking() const
+{
+ return d->mMoveAttacking;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -1103,6 +1112,12 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
+	}
+ } else if (moveAttacking()) {
+	// Check for any enemy units in range
+	if (attackEnemyUnitsInRange()) {
+		boDebug() << k_funcinfo << "Enemy units found in range, attacking" << endl;
+		return;
 	}
  }
 

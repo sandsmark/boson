@@ -106,6 +106,9 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 				if (actionAttack(stream, action.canvasPos())) {
 					*send = true;
 				}
+			} else {
+				actionAttackPos(stream, action.canvasPos());
+				*send = true;
 			}
 			break;
 		}
@@ -159,6 +162,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			}
 		}
 
+		// TODO: let player choose whether to move or attack at RMB
 		if (!actionMove(stream, action.canvasPos())) {
 			return;
 		}
@@ -243,6 +247,8 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
  QPtrListIterator<Unit> it(list);
  // tell the clients we want to move units:
  stream << (Q_UINT32)BosonMessage::MoveMove;
+ // We want to move without attacking
+ stream << (Q_UINT8)false;
  // tell them where to move to:
  stream << canvasPos;
  // tell them how many units:
@@ -308,6 +314,33 @@ bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
 	u->playSound(SoundOrderAttack);
+ }
+ return true;
+}
+
+bool BosonBigDisplay::actionAttackPos(QDataStream& stream, const QPoint& canvasPos)
+{
+ QPtrList<Unit> list = selection()->allUnits();
+ QPtrListIterator<Unit> it(list);
+ // tell the clients we want to move units:
+ stream << (Q_UINT32)BosonMessage::MoveMove;
+ // We want to move with attacking
+ stream << (Q_UINT8)true;
+ // tell them where to move to:
+ stream << canvasPos;
+ // tell them how many units:
+ stream << (Q_UINT32)list.count();
+ Unit* unit = 0;
+ while (it.current()) {
+	if (!unit) {
+		unit = it.current();
+	}
+	// tell them which unit to move:
+	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+	++it;
+ }
+ if (unit->owner() == localPlayer()) {
+	unit->playSound(SoundOrderAttack);
  }
  return true;
 }
