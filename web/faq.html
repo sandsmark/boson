@@ -49,7 +49,12 @@
 
 	<FONT FACE="helvetica" SIZE="2">
 
-	Why not ? The code is heavily based on qt/kde libraries, but as many people have already asked for a gtk port, I will surely separate boson in the future : the core, toolkit-agnostic, and the GUI part (one for kde, one for gtk..). The main purpose is to have a playable game, though, and this won't be done before 1.0, at best.
+	Even in the lowest level, boson code make a heavy use of Qt. So it's quite hard to make a generic <b>RTS</b> core engine that is toolkit agnostic.
+
+	<br>
+	<br>
+	I have plans to make the server Qt-independant, using only standart C component, and no GUI (graphical
+user interface), so that the server may be used on any unix-like computer.
 
 	</FONT>
 
@@ -84,6 +89,9 @@
 	<FONT FACE="helvetica" SIZE="2">
 
 	As far as I know, a boson is a sub-particle. Well... the name was chosen in a hurry, and I don't have time to find a better one. Feel free to make any proposal to the <a href="mailto:boson@egroups.fr">boson mailing list</A>.
+	<P>
+	By the way, we are looking for a new name, as www.boson.org has been stolen by a bad guy who wants us
+to pay 500$.
 
 	</FONT>
 
@@ -117,7 +125,8 @@
 
 	<FONT FACE="helvetica" SIZE="2">
 
-	Presently, I'm using kde 1.x and qt 1.4x for the development. As soon as I will have a almost stable kde2/qt2, I will begin the port to it. (the one I have is still.. well.. not for daily use yet). boson 1.0 will need qt2/kde2, that's for sure.
+	Have a look at the <a href="roadmap.html">roadmap</a>, it's planned for the next release <b>0.5</b>
+	From then on, all boson version will need QT2.1 and KDE 2.0 libraries.
 
 	</FONT>
 
