@@ -114,22 +114,3 @@ QCanvasItem * visualCanvas::findUnitAt(int x, int y)
 	return NULL;
 }
 
-
-groundType visualCanvas::findGroundAt(int x, int y)
-{
-	groundType g;
- 
-	/* XXXX
-        for( p = topAt(x,y); p; next(p))
-                if (IS_GROUND(at(p)->rtti()) && exact(p))  {
-			g = ((visualCell*)at(p))->getGroundType();
-//			printf("rtti: %d, rtti-S_GROUND : %d g : %d\n", at(p)->rtti(), at(p)->rtti()- S_GROUND,  g);
-                        end(p);
-			return g;
-		}
-	logf(LOG_ERROR, "can't find ground in visualCanvas::findGroundAt");
-	*/
-	return GROUND_UNKNOWN;
-}
-
-

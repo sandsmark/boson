@@ -488,10 +488,11 @@ void playerFacility::shooted(int _power)
   
 
 
+#define underlyingGround() vcanvas->groundAt( _x()+10, _y()+10)
+
 /*
  * harvester 
  */
-
 bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 {
 	bool ret = false;
@@ -557,17 +558,4 @@ void harvesterUnit::u_goto(int mx, int my)
 //	puts("harvester : change to \"goingTo\" state");
 	playerMobUnit::u_goto(mx, my);
 }
-
-/*
- * can't be inline
- * cause then, playerUnit.h include bosonField.h which include 
- * playerUnit.h.... and it won't compile
- */
-
-groundType harvesterUnit::underlyingGround(void)
-{
-	return bocanvas->findGroundAt( _x()+10,_y()+10);
-}
-
-
 
