@@ -144,7 +144,7 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 			*/
 		}
 
-		if (boConfig->RMBMovesWithAttack()) {
+		if (boConfig->boolValue("RMBMovesWithAttack")) {
 			if (!actionMoveWithAttack(event.canvasVector())) {
 				return;
 			}

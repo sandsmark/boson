@@ -298,103 +298,8 @@ public:
 // below we have config options that are stored in this class (and saved in
 // save())
 public:
-	void setSound(bool s) { mSound->setValue(s); }
-	bool sound() const { return mSound->value(); }
-	void setMusic(bool m) { mMusic->setValue(m); }
-	bool music() const { return mMusic->value(); }
-	void setRMBMove(bool m) { mRMBMove->setValue(m); }
-	bool rmbMove() const { return mRMBMove->value(); }
-	void setMMBMove(bool m) { mMMBMove->setValue(m); }
-	bool mmbMove() const { return mMMBMove->value(); }
-	void setShowMenubarInGame(bool s) { mShowMenubarInGame->setValue(s); }
-	bool showMenubarInGame() const { return mShowMenubarInGame->value(); }
-	void setShowMenubarOnStartup(bool s) { mShowMenubarOnStartup->setValue(s); }
-	bool showMenubarOnStartup() const { return mShowMenubarOnStartup->value(); }
-	void setArrowKeyStep(unsigned int k) { mArrowKeyStep->setValue(k); }
-	unsigned int arrowKeyStep() const { return mArrowKeyStep->value(); }
-	void setUpdateInterval(unsigned int i) { mUpdateInterval->setValue(i); }
-	unsigned int updateInterval() const { return mUpdateInterval->value(); }
-	void setMiniMapScale(double s) { mMiniMapScale->setValue(s); }
-	double miniMapScale() const { return mMiniMapScale->value(); }
-	void setMiniMapZoom(double z) { mMiniMapZoom->setValue(z); }
-	double miniMapZoom() const { return mMiniMapZoom->value(); }
-	void setChatScreenRemoveTime(unsigned int s) { mChatScreenRemoveTime->setValue(s); }
-	unsigned int chatScreenRemoveTime() const { return mChatScreenRemoveTime->value(); }
-	void setChatScreenMaxItems(int max) { mChatScreenMaxItems->setValue(max); }
-	int chatScreenMaxItems() const { return mChatScreenMaxItems->value(); }
-	void setAlignSelectionBoxes(bool enable) { mAlignSelectionBoxes->setValue(enable); }
-	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
-	void setRMBMovesWithAttack(bool attack) { mRMBMovesWithAttack->setValue(attack); }
-	bool RMBMovesWithAttack() const { return (mRMBMovesWithAttack->value()); }
-	void setMouseWheelAction(CameraAction action) { mMouseWheelAction->setValue((int)action); }
-	CameraAction mouseWheelAction() const { return (CameraAction)(mMouseWheelAction->value()); }
-	void setMouseWheelShiftAction(CameraAction action) { mMouseWheelShiftAction->setValue((int)action); }
-	CameraAction mouseWheelShiftAction() const { return (CameraAction)(mMouseWheelShiftAction->value()); }
-	void setDeactivateWeaponSounds(bool deactivate) { mDeactivateWeaponSounds->setValue(deactivate); }
-	bool deactivateWeaponSounds() const { return mDeactivateWeaponSounds->value(); }
-	void setUseLOD(bool use) { mUseLOD->setValue(use); }
-	bool useLOD() const { return mUseLOD->value(); }
-	void setUseVBO(bool use) { mUseVBO->setValue(use); }
-	bool useVBO() const { return mUseVBO->value(); }
-	void setWaterWaves(bool on) { mWaterWaves->setValue(on); }
-	bool waterWaves() const { return mWaterWaves->value(); }
-	void setWaterReflections(bool on) { mWaterReflections->setValue(on); }
-	bool waterReflections() const { return mWaterReflections->value(); }
-	void setWaterTranslucency(bool on) { mWaterTranslucency->setValue(on); }
-	bool waterTranslucency() const { return mWaterTranslucency->value(); }
-	void setWaterBumpmapping(bool on) { mWaterBumpmapping->setValue(on); }
-	bool waterBumpmapping() const { return mWaterBumpmapping->value(); }
-	void setWaterAnimatedBumpmaps(bool on) { mWaterAnimatedBumpmaps->setValue(on); }
-	bool waterAnimatedBumpmaps() const { return mWaterAnimatedBumpmaps->value(); }
-	int textureFilter() const { return mTextureFilter->value(); }
-	void setTextureFilter(int f) { mTextureFilter->setValue(f); }
-	void setTextureCompression(bool on) { mTextureCompression->setValue(on); }
-	bool textureCompression() const { return mTextureCompression->value(); }
-	void setTextureColorMipmaps(bool on) { mTextureColorMipmaps->setValue(on); }
-	bool textureColorMipmaps() const { return mTextureColorMipmaps->value(); }
-	void setTextureAnisotropy(int a) { mTextureAnisotropy->setValue(a); }
-	int textureAnisotropy() const { return mTextureAnisotropy->value(); }
-	void setMaxProfilingEventEntries(unsigned int max) { mMaxProfilingEventEntries->setValue(max); }
-	unsigned int maxProfilingEventEntries() const { return mMaxProfilingEventEntries->value(); }
-	void setMaxProfilingAdvanceEntries(unsigned int max) { mMaxProfilingAdvanceEntries->setValue(max); }
-	unsigned int maxProfilingAdvanceEntries() const { return mMaxProfilingAdvanceEntries->value(); }
-	void setMaxProfilingRenderingEntries(unsigned int max) { mMaxProfilingRenderingEntries->setValue(max); }
-	unsigned int maxProfilingRenderingEntries() const { return mMaxProfilingRenderingEntries->value(); }
-
-
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
-
-	/**
-	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
-	 * be in range of m pixels to an edge of the window. 0 to disable
-	 **/
-	void setCursorEdgeSensity(unsigned int m) { mCursorEdgeSensity->setValue(m); }
-	unsigned int cursorEdgeSensity() const { return mCursorEdgeSensity->value(); }
-
-	bool useLight() const { return mUseLight->value(); }
-	void setUseLight(bool l) const { return mUseLight->setValue(l); }
-
-	bool useMaterials() const { return mUseMaterials->value(); }
-	void setUseMaterials(bool l) const { return mUseMaterials->setValue(l); }
-
-	void setCursorMode(int mode) { mCursorMode->setValue(mode); }
-	int cursorMode() const { return mCursorMode->value(); }
-
-	void setCursorDir(const QString& dir) { mCursorDir->setValue(dir); }
-	QString cursorDir() const { return mCursorDir->value(); }
-
-	void setToolTipUpdatePeriod(int ms) { mToolTipUpdatePeriod->setValue(ms); }
-	int toolTipUpdatePeriod() const { return mToolTipUpdatePeriod->value(); }
-
-	void setToolTipCreator(int type) { mToolTipCreator->setValue(type); }
-	int toolTipCreator() const { return mToolTipCreator->value(); }
-
-	void setGameLogInterval(int interval) { mGameLogInterval->setValue(interval); }
-	int gameLogInterval() const { return mGameLogInterval->value(); }
-
-
-
 
 
 	/**
@@ -470,6 +375,11 @@ public:
 	void setColorValue(const QString& key, const QColor& value);
 
 	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigIntListEntry objects.
+	 **/
+	void setIntListValue(const QString& key, const QValueList<int>& v);
+
+	/**
 	 * @return The (dynamic) entry for @p key, or NULL if no such key was
 	 * ever added using @ref addDynamicEntry.
 	 **/
@@ -517,6 +427,18 @@ public:
 	 **/
 	QColor colorValue(const QString& key, const QColor& _default) const;
 
+	/**
+	 * @return The value of the entry @p key, or an empty list if no entry
+	 * of the correct type exists.
+	 **/
+	QValueList<int> intListValue(const QString& key) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default if no entry of
+	 * the correct type exists.
+	 **/
+	QValueList<int> intListValue(const QString& key, const QValueList<int>& _default) const;
+
 
 public:
 	void save(bool editor = false, KConfig* conf = 0);
@@ -541,50 +463,6 @@ public:
 private:
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
-
-	// note that ALL BoConfigEntry objects must be new'ed in the
-	// BosonConfig c'tor !
-	BoConfigBoolEntry* mSound;
-	BoConfigBoolEntry* mMusic;
-	BoConfigBoolEntry* mMMBMove;
-	BoConfigBoolEntry* mRMBMove;
-	BoConfigBoolEntry* mShowMenubarInGame;
-	BoConfigBoolEntry* mShowMenubarOnStartup;
-	BoConfigBoolEntry* mModelTexturesMipmaps;
-	BoConfigIntEntry* mChatScreenMaxItems;
-	BoConfigUIntEntry* mChatScreenRemoveTime;
-	BoConfigUIntEntry* mArrowKeyStep;
-	BoConfigUIntEntry* mCursorEdgeSensity;
-	BoConfigUIntEntry* mUpdateInterval;
-	BoConfigDoubleEntry* mMiniMapScale;
-	BoConfigDoubleEntry* mMiniMapZoom;
-	BoConfigIntListEntry* mUnitSoundsDeactivated;
-	BoConfigBoolEntry* mAlignSelectionBoxes;
-	BoConfigBoolEntry* mRMBMovesWithAttack;
-	BoConfigIntEntry* mMouseWheelAction;
-	BoConfigIntEntry* mMouseWheelShiftAction;
-	BoConfigBoolEntry* mDeactivateWeaponSounds;
-	BoConfigBoolEntry* mUseLight;
-	BoConfigBoolEntry* mUseMaterials;
-	BoConfigStringEntry* mCursorDir;
-	BoConfigIntEntry* mCursorMode;
-	BoConfigIntEntry* mToolTipUpdatePeriod;
-	BoConfigIntEntry* mToolTipCreator;
-	BoConfigIntEntry* mGameLogInterval;
-	BoConfigBoolEntry* mUseLOD;
-	BoConfigBoolEntry* mUseVBO;
-	BoConfigBoolEntry* mWaterWaves;
-	BoConfigBoolEntry* mWaterReflections;
-	BoConfigBoolEntry* mWaterTranslucency;
-	BoConfigBoolEntry* mWaterBumpmapping;
-	BoConfigBoolEntry* mWaterAnimatedBumpmaps;
-	BoConfigIntEntry* mTextureFilter;
-	BoConfigBoolEntry* mTextureCompression;
-	BoConfigBoolEntry* mTextureColorMipmaps;
-	BoConfigIntEntry* mTextureAnisotropy;
-	BoConfigUIntEntry* mMaxProfilingEventEntries;
-	BoConfigUIntEntry* mMaxProfilingAdvanceEntries;
-	BoConfigUIntEntry* mMaxProfilingRenderingEntries;
 };
 
 #endif

@@ -302,8 +302,8 @@ void ModelPreview::initUfoGUI()
  BoUfoCheckBox* construction = new BoUfoCheckBox(i18n("Show construction"));
  BoUfoCheckBox* axis = new BoUfoCheckBox(i18n("Render axis"));
  BoUfoCheckBox* grid = new BoUfoCheckBox(i18n("Render grid"));
- BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->useLight());
- BoUfoCheckBox* materials = new BoUfoCheckBox(i18n("Enable Materials"), boConfig->useMaterials());
+ BoUfoCheckBox* light = new BoUfoCheckBox(i18n("Enable Light"), boConfig->boolValue("UseLight"));
+ BoUfoCheckBox* materials = new BoUfoCheckBox(i18n("Enable Materials"), boConfig->boolValue("UseMaterials"));
  connect(placement, SIGNAL(signalToggled(bool)), this, SLOT(slotPlacementPreviewChanged(bool)));
  connect(disallowPlacement, SIGNAL(signalToggled(bool)), this, SLOT(slotDisallowPlacementChanged(bool)));
  connect(wireframe, SIGNAL(signalToggled(bool)), this, SLOT(slotWireFrameChanged(bool)));
@@ -493,7 +493,7 @@ void ModelPreview::paintGL()
 	renderAxii();
  }
 
- if (boConfig->useLight()) {
+ if (boConfig->boolValue("UseLight")) {
 	glEnable(GL_LIGHTING);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -1619,12 +1619,12 @@ void ModelPreview::slotUnHideAllMeshes()
 
 void ModelPreview::slotEnableLight(bool e)
 {
- boConfig->setUseLight(e);
+ boConfig->setBoolValue("UseLight", e);
 }
 
 void ModelPreview::slotEnableMaterials(bool e)
 {
- boConfig->setUseMaterials(e);
+ boConfig->setBoolValue("UseMaterials", e);
 }
 
 

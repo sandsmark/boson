@@ -232,7 +232,7 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_DEPTH_TEST);
-	if (boConfig->useLight()) {
+	if (boConfig->boolValue("UseLight")) {
 		glEnable(GL_LIGHTING);
 		glEnable(GL_NORMALIZE);
 	}

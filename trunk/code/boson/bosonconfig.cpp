@@ -261,46 +261,45 @@ BosonConfig::BosonConfig(KConfig* conf)
  // there
  d->mDynamicEntries.setAutoDelete(false);
 
- mSound = new BoConfigBoolEntry(this, "Sound", DEFAULT_SOUND);
- mMusic = new BoConfigBoolEntry(this, "Music", DEFAULT_MUSIC);
- mMMBMove = new BoConfigBoolEntry(this, "MMBMove", DEFAULT_USE_MMB_MOVE);
- mRMBMove = new BoConfigBoolEntry(this, "RMBMove", DEFAULT_USE_RMB_MOVE);
- mShowMenubarInGame = new BoConfigBoolEntry(this, "ShowMenubarInGame", true);
- mShowMenubarOnStartup = new BoConfigBoolEntry(this, "ShowMenubarOnStartup", false);
- mArrowKeyStep = new BoConfigUIntEntry(this, "ArrowKeyStep", DEFAULT_ARROW_SCROLL_SPEED);
- mCursorEdgeSensity = new BoConfigUIntEntry(this, "CursorEdgeSensity", DEFAULT_CURSOR_EDGE_SENSITY);
- mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", DEFAULT_UPDATE_INTERVAL);
- mMiniMapScale = new BoConfigDoubleEntry(this, "MiniMapScale", DEFAULT_MINIMAP_SCALE);
- mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
- mChatScreenRemoveTime = new BoConfigUIntEntry(this, "ChatScreenRemoveTime", DEFAULT_CHAT_SCREEN_REMOVE_TIME);
- mChatScreenMaxItems = new BoConfigIntEntry(this, "ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
- mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
- mAlignSelectionBoxes = new BoConfigBoolEntry(this, "AlignSelectionBoxes", DEFAULT_ALIGN_SELECTION_BOXES);
- mRMBMovesWithAttack = new BoConfigBoolEntry(this, "RMBMovesWithAttack", DEFAULT_RMB_MOVES_WITH_ATTACK);
- mMouseWheelAction = new BoConfigIntEntry(this, "MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
- mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
- mDeactivateWeaponSounds = new BoConfigBoolEntry(this, "DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
- mUseLight = new BoConfigBoolEntry(this, "UseLight", DEFAULT_USE_LIGHT);
- mUseMaterials = new BoConfigBoolEntry(this, "UseMaterials", DEFAULT_USE_MATERIALS);
- mCursorMode = new BoConfigIntEntry(this, "CursorMode", (int)DEFAULT_CURSOR);
- mCursorDir = new BoConfigStringEntry(this, "CursorDir", DEFAULT_CURSOR_DIR);
- mToolTipUpdatePeriod = new BoConfigIntEntry(this, "ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);
- mToolTipCreator = new BoConfigIntEntry(this, "ToolTipCreator", DEFAULT_TOOLTIP_CREATOR);
- mGameLogInterval = new BoConfigIntEntry(this, "GameLogInterval", 10);
- mUseLOD = new BoConfigBoolEntry(this, "UseLOD", DEFAULT_USE_LOD);
- mUseVBO = new BoConfigBoolEntry(this, "UseVBO", DEFAULT_USE_VBO);
- mWaterWaves = new BoConfigBoolEntry(this, "WaterWaves", DEFAULT_WATER_WAVES);
- mWaterReflections = new BoConfigBoolEntry(this, "WaterReflections", DEFAULT_WATER_REFLECTIONS);
- mWaterTranslucency = new BoConfigBoolEntry(this, "WaterTranslucency", DEFAULT_WATER_TRANSLUCENCY);
- mWaterBumpmapping = new BoConfigBoolEntry(this, "WaterBumpmapping", DEFAULT_WATER_BUMPMAPPING);
- mWaterAnimatedBumpmaps = new BoConfigBoolEntry(this, "WaterAnimatedBumpmaps", DEFAULT_WATER_ANIMATED_BUMPMAPS);
- mTextureFilter = new BoConfigIntEntry(this, "TextureFilter", DEFAULT_TEXTURE_FILTER);
- mTextureCompression = new BoConfigBoolEntry(this, "TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
- mTextureColorMipmaps = new BoConfigBoolEntry(this, "TextureColorMipmaps", false);
- mTextureAnisotropy = new BoConfigIntEntry(this, "TextureAnisotropy", 1);
- mMaxProfilingEventEntries = new BoConfigUIntEntry(this, "MaxProfilingEventEntries", 4000);
- mMaxProfilingAdvanceEntries = new BoConfigUIntEntry(this, "MaxProfilingAdvanceEntries", 1000);
- mMaxProfilingRenderingEntries = new BoConfigUIntEntry(this, "MaxProfilingRenderingEntries", 300);
+
+ addDynamicEntryBool("Sound", DEFAULT_SOUND);
+ addDynamicEntryBool("Music", DEFAULT_MUSIC);
+ addDynamicEntryBool("MMBMove", DEFAULT_USE_MMB_MOVE);
+ addDynamicEntryBool("RMBMove", DEFAULT_USE_RMB_MOVE);
+ addDynamicEntryUInt("ArrowKeyStep", DEFAULT_ARROW_SCROLL_SPEED);
+ addDynamicEntryUInt("CursorEdgeSensity", DEFAULT_CURSOR_EDGE_SENSITY);
+ addDynamicEntryUInt("GLUpdateInterval", DEFAULT_UPDATE_INTERVAL);
+ addDynamicEntryDouble("MiniMapScale", DEFAULT_MINIMAP_SCALE);
+ addDynamicEntryDouble("MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
+ addDynamicEntryUInt("ChatScreenRemoveTime", DEFAULT_CHAT_SCREEN_REMOVE_TIME);
+ addDynamicEntryInt("ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
+ addDynamicEntryIntList("DeactivateUnitSounds", QValueList<int>());
+ addDynamicEntryBool("AlignSelectionBoxes", DEFAULT_ALIGN_SELECTION_BOXES);
+ addDynamicEntryBool("RMBMovesWithAttack", DEFAULT_RMB_MOVES_WITH_ATTACK);
+ addDynamicEntryInt("MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
+ addDynamicEntryInt("MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
+ addDynamicEntryBool("DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
+ addDynamicEntryBool("UseLight", DEFAULT_USE_LIGHT);
+ addDynamicEntryBool("UseMaterials", DEFAULT_USE_MATERIALS);
+ addDynamicEntryInt("CursorMode", (int)DEFAULT_CURSOR);
+ addDynamicEntryString("CursorDir", DEFAULT_CURSOR_DIR);
+ addDynamicEntryInt("ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);
+ addDynamicEntryInt("ToolTipCreator", DEFAULT_TOOLTIP_CREATOR);
+ addDynamicEntryInt("GameLogInterval", 10);
+ addDynamicEntryBool("UseLOD", DEFAULT_USE_LOD);
+ addDynamicEntryBool("UseVBO", DEFAULT_USE_VBO);
+ addDynamicEntryBool("WaterWaves", DEFAULT_WATER_WAVES);
+ addDynamicEntryBool("WaterReflections", DEFAULT_WATER_REFLECTIONS);
+ addDynamicEntryBool("WaterTranslucency", DEFAULT_WATER_TRANSLUCENCY);
+ addDynamicEntryBool("WaterBumpmapping", DEFAULT_WATER_BUMPMAPPING);
+ addDynamicEntryBool("WaterAnimatedBumpmaps", DEFAULT_WATER_ANIMATED_BUMPMAPS);
+ addDynamicEntryInt("TextureFilter", DEFAULT_TEXTURE_FILTER);
+ addDynamicEntryBool("TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
+ addDynamicEntryBool("TextureColorMipmaps", false);
+ addDynamicEntryInt("TextureAnisotropy", 1);
+ addDynamicEntryUInt("MaxProfilingEventEntries", 4000);
+ addDynamicEntryUInt("MaxProfilingAdvanceEntries", 1000);
+ addDynamicEntryUInt("MaxProfilingRenderingEntries", 300);
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
@@ -686,16 +685,18 @@ void BosonConfig::save(bool /*editor*/, KConfig* conf)
 
 void BosonConfig::setUnitSoundActivated(UnitSoundEvent e, bool activated)
 {
+ QValueList<int> l = intListValue("DeactivateUnitSounds");
  if (activated) {
-	mUnitSoundsDeactivated->remove((int)e);
+	l.remove((int)e);
  } else {
-	mUnitSoundsDeactivated->append((int)e);
+	l.append((int)e);
  }
+ setIntListValue("DeactivateUnitSounds", l);
 }
 
 bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
 {
- return !mUnitSoundsDeactivated->contains((int)e);
+ return !intListValue("DeactivateUnitSounds").contains((int)e);
 }
 
 QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(const KConfig* cfg, const QString key)
@@ -884,6 +885,17 @@ void BosonConfig::setColorValue(const QString& key, const QColor& v)
  ((BoConfigColorEntry*)entry)->setValue(v);
 }
 
+void BosonConfig::setIntListValue(const QString& key, const QValueList<int>& v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::IntList) {
+	boError() << k_funcinfo << key << "is not an IntList entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigIntListEntry*)entry)->setValue(v);
+}
+
 bool BosonConfig::boolValue(const QString& key, bool _default) const
 {
  BoConfigEntry* entry = value(key);
@@ -971,5 +983,24 @@ QColor BosonConfig::colorValue(const QString& key, const QColor& _default) const
 	return _default;
  }
  return ((BoConfigColorEntry*)entry)->value();
+}
+
+QValueList<int> BosonConfig::intListValue(const QString& key) const
+{
+ return intListValue(key, QValueList<int>());
+}
+
+QValueList<int> BosonConfig::intListValue(const QString& key, const QValueList<int>& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::IntList) {
+	boError() << k_funcinfo << key << "is not a IntList entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigIntListEntry*)entry)->value();
 }
 

@@ -439,23 +439,23 @@ void BosonGLMiniMap::setImageTheme(const QString& theme)
 
 void BosonGLMiniMap::slotZoomIn()
 {
- if (boConfig->miniMapZoom() + ZOOM_STEP > 3.0) {
+ if (boConfig->doubleValue("MiniMapZoom") + ZOOM_STEP > 3.0) {
 	return;
  }
- boConfig->setMiniMapZoom(boConfig->miniMapZoom() + ZOOM_STEP);
+ boConfig->setDoubleValue("MiniMapZoom", boConfig->doubleValue("MiniMapZoom") + ZOOM_STEP);
 }
 
 void BosonGLMiniMap::slotZoomOut()
 {
- if (boConfig->miniMapZoom() - ZOOM_STEP <= 0.1) {
+ if (boConfig->doubleValue("MiniMapZoom") - ZOOM_STEP <= 0.1) {
 	return;
  }
- boConfig->setMiniMapZoom(boConfig->miniMapZoom() - ZOOM_STEP);
+ boConfig->setDoubleValue("MiniMapZoom", boConfig->doubleValue("MiniMapZoom") - ZOOM_STEP);
 }
 
 void BosonGLMiniMap::slotZoomDefault()
 {
- boConfig->setMiniMapZoom(1.0);
+ boConfig->setDoubleValue("MiniMapZoom", 1.0);
 }
 
 QImage BosonGLMiniMap::imageFromTheme(const QString& file, const QString& theme) const
