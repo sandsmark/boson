@@ -48,27 +48,28 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProper
     BosonItem(prop ? prop->model() : 0, canvas)
 {
   mOwner = owner;
-  mProp = prop;
-
   init();
+
+  mProp = prop;
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model) :
     BosonItem(model, canvas)
 {
   mOwner = owner;
-  mProp = 0;
-
   init();
+
+  mProp = 0;
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
     BosonItem(0, canvas)
 {
+  boDebug() << k_funcinfo << endl;
   mOwner = owner;
-  mProp = 0;
-
   init();
+
+  mProp = 0;
 }
 
 void BosonShot::init()
@@ -146,11 +147,18 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("z", z());
 
   root.setAttribute("Type", type());
+
+  // the unittype defines the group of the shot (through the weapons of that
+  // unit), the weapon ID defines the type inside the group.
+  unsigned int unitType = 0;
+  unsigned int weaponId = 0;
   if(properties())
   {
-    root.setAttribute("UnitType", (unsigned int)properties()->unitProperties()->typeId());
-    root.setAttribute("WeaponType", (unsigned int)properties()->id());
+    unitType = properties()->unitProperties()->typeId();
+    weaponId = properties()->id();
   }
+  root.setAttribute("Group", unitType);
+  root.setAttribute("GroupType", weaponId);
   return true;
 }
 

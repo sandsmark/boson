@@ -740,7 +740,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
-		BosonShotExplosion* e = (BosonShotExplosion*)createShot(BosonShot::Explosion, 0, 0, unit->owner());
+		BosonShotExplosion* e = (BosonShotExplosion*)createItem(RTTI::Shot, unit->owner(), BosonShot::Explosion, 0, 0);
 		// Do we want ability to set fullDamageRange here?
 		if (e) {
 			e->activate(pos, prop->explodingDamage(), prop->explodingDamageRange(), 0.0f, 10);
@@ -748,7 +748,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		BosonShotFragment* f = (BosonShotFragment*)createShot(BosonShot::Fragment, 0, 0, unit->owner());
+		BosonShotFragment* f = (BosonShotFragment*)createItem(RTTI::Shot, unit->owner(), BosonShot::Fragment, 0, 0);
 		if (f) {
 			f->activate(pos, unit->unitProperties());
 		}
@@ -1065,21 +1065,21 @@ bool BosonCanvas::load(QDataStream& stream)
  for (unsigned int i = 0; i < shotscount; i++) {
 	boDebug() << k_funcinfo << "Loading shot" << endl;
 	stream >> type >> playerid;
+	unitpropid = 0;
+	propid = 0;
 	if (type == BosonShot::Bullet || type == BosonShot::Missile) {
 		// Bullet and missile always have properties, others don't
 		stream >> unitpropid >> propid;
-	}
-	p = (Player*)boGame->findPlayer(playerid);
-	if (type == BosonShot::Bullet) {
-		s = createShot(type, unitpropid, propid, p);
-	} else if(type == BosonShot::Missile) {
-		s = createShot(type, unitpropid, propid, p);
-	} else if(type == BosonShot::Explosion) {
-		s = createShot(type, 0, 0, p);
-	} else {
+	} else if (type != BosonShot::Explosion) {
 		boError() << k_funcinfo << "Invalid type: " << type << endl;
 		continue;
 	}
+	p = (Player*)boGame->findPlayer(playerid);
+	if (!p) {
+		BO_NULL_ERROR(p);
+		continue;
+	}
+	s = (BosonShot*)createItem(RTTI::Shot, p, type, unitpropid, propid);
 	s->load(stream);
  }
  return true;
@@ -1217,8 +1217,8 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
 
  bool ok = false;
  unsigned long int type = 0;
- unsigned long int unitid = 0;
- unsigned long int weaponid = 0;
+ unsigned long int group = 0;
+ unsigned long int groupType = 0;
  type = shot.attribute(QString::fromLatin1("Type")).toULong(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid Type number for Shot tag" << endl;
@@ -1226,24 +1226,38 @@ bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
  }
 
  const BosonWeaponProperties* weapon = 0;
- if (shot.hasAttribute(QString::fromLatin1("UnitType"))) {
-	unitid = shot.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+ if (shot.hasAttribute(QString::fromLatin1("Group"))) {
+	group = shot.attribute(QString::fromLatin1("Group")).toULong(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid UnitType number for Shot tag" << endl;
+		boError(260) << k_funcinfo << "Invalid Group number for Item tag" << endl;
+		return false;
+	}
+ } else if (shot.hasAttribute(QString::fromLatin1("UnitType"))) {
+	// compatibility
+	group = shot.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid UnitType number for Item tag" << endl;
 		return false;
 	}
  }
- if (shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
-	weaponid = shot.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+ if (shot.hasAttribute(QString::fromLatin1("GroupType"))) {
+	groupType = shot.attribute(QString::fromLatin1("GroupType")).toULong(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot tag" << endl;
+		boError(260) << k_funcinfo << "Invalid GroupType number for Item tag" << endl;
+		return false;
+	}
+ } else if (shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
+	// compatibility
+	groupType = shot.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid WeaponType number for Item tag" << endl;
 		return false;
 	}
  }
 
- BosonShot* s = createShot(type, unitid, weaponid, owner);
+ BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, type, group, groupType);
  if (!s) {
-	boError() << k_funcinfo << "Invalid shot - type=" << type << " unitid=" << unitid << " weaponid=" << weaponid << endl;
+	boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
 	return false;
  }
  if (!s->loadFromXML(shot)) {
@@ -1367,17 +1381,19 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
-BosonItem* BosonCanvas::createItem(int rtti, unsigned long int type, Player* owner)
+BosonItem* BosonCanvas::createItem(int rtti, Player* owner, unsigned long int type, unsigned long int group, unsigned long int groupType)
 {
  if (RTTI::isUnit(rtti)) {
-	return (BosonItem*)createUnit(type, owner);
+	Q_UNUSED(group);
+	Q_UNUSED(groupType);
+	return (BosonItem*)createUnit(owner, type);
  } else if (RTTI::isShot(rtti)) {
-//	return (BosonItem*)createShot(type, owner);
+	return (BosonItem*)createShot(owner, type, group, groupType);
  }
  return 0;
 }
 
-Unit* BosonCanvas::createUnit(unsigned long int unitType, Player* owner)
+Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 {
  BO_CHECK_NULL_RET0(owner);
  SpeciesTheme* theme = owner->speciesTheme();
@@ -1409,7 +1425,7 @@ Unit* BosonCanvas::createUnit(unsigned long int unitType, Player* owner)
  return unit;
 }
 
-BosonShot* BosonCanvas::createShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId, Player* owner)
+BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId)
 {
  BO_CHECK_NULL_RET0(owner);
  BosonShot* s = 0;
