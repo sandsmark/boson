@@ -30,7 +30,7 @@
 
 // Camera limits
 #define CAMERA_MIN_Z BO_GL_NEAR_PLANE + 3
-#define CAMERA_MAX_Z BO_GL_FAR_PLANE - 50
+#define CAMERA_MAX_Z 100
 #define CAMERA_MAX_RADIUS 80
 
 #include <GL/glu.h>
