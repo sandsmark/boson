@@ -7,6 +7,7 @@
 #include "unitproperties.h"
 #include "bosonunitview.h"
 #include "cell.h"
+#include "bosontiles.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -23,6 +24,7 @@
 #include <qtooltip.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
+#include <qmap.h>
 
 #include "defines.h"
 
@@ -30,218 +32,6 @@
 
 #define ORDERS_PER_COLUMN 3
 #define ORDER_SPACING 3
-
-class BosonCommandTiles : public QPixmap
-{
-public:
-	BosonCommandTiles(const QString& fileName) : QPixmap(fileName)
-	{
-	}
-	~BosonCommandTiles()
-	{
-	}
-	enum Transition {
-		TransUpLeft = 0,
-		TransUpRight,
-		TransDownLeft,
-		TransDownRight,
-
-		TransUp,
-		TransDown,
-		TransLeft,
-		TransRight,
-
-		TransUpLeftInverted,
-		TransUpRightInverted,
-		TransDownLeftInverted,
-		TransDownRightInverted
-	};
-
-	enum TransType {
-		TransGrassWater = 0,
-		TransGrassDesert,
-		TransDesertWater,
-		TransDeepWater,
-		TransLast
-	};
-
-	QPixmap plainTile(Cell::GroundType type)
-	{
-		if (type <= Cell::GroundUnknown || type >= Cell::GroundLast) {
-			kdError() << "invalid groundtype " << (int)type << endl;
-			return QPixmap();
-		}
-		return tile((int)type);
-	}
-
-	QPixmap big1(int bigNo, TransType trans, bool inverted) // bigNo = 0..4
-	{
-		return tile(getBigTransNumber(trans, (inverted ? 4 : 0) + bigNo));
-	}
-
-	QPixmap big2(int bigNo, TransType trans, bool inverted) // bigNo = 0..4
-	{
-		return tile(getBigTransNumber(trans, (inverted ? 12 : 8) + bigNo));
-	}
-
-	QPixmap small(int smallNo, TransType trans, bool inverted)
-	{
-		switch (smallNo) {
-			case 0:
-				return tile(getTransNumber(trans,
-						inverted ? TransUpLeftInverted
-						: TransUpLeft));
-			case 1:
-				return tile(getTransNumber(trans, inverted ? 
-						TransDown : TransUp));
-			case 2:
-				return tile(getTransNumber(trans,
-						inverted ? TransUpRightInverted
-						: TransUpRight));
-			case 3:
-				return tile(getTransNumber(trans,
-						inverted ? TransRight
-						: TransLeft));
-			case 4:
-				return tile(getTransNumber(trans,
-						inverted ? to(trans)
-						: from(trans)));
-			case 5:
-				return tile(getTransNumber(trans,
-						inverted ? TransLeft
-						: TransRight));
-			case 6:
-				return tile(getTransNumber(trans,
-						inverted ? TransDownLeftInverted
-						: TransDownLeft));
-			case 7:
-				return tile(getTransNumber(trans,
-						inverted ? TransUp
-						: TransDown));
-			case 8:
-				return tile(getTransNumber(trans,
-						inverted ? TransDownRightInverted
-						: TransDownRight));
-			default:
-				kdError() << "Unknwon small tile " << smallNo << endl;
-				return QPixmap();
-		}
-	}
-	
-	// call this like the original fillGroundPixmap() in editorTopLevel.cpp
-	QPixmap tile(int g)
-	{
-		QPixmap p;
-		if (isBigTrans(g)) {
-			p.resize(2 * BO_TILE_SIZE, 2 * BO_TILE_SIZE);
-		} else {
-			p.resize(BO_TILE_SIZE, BO_TILE_SIZE);
-		}
-
-		g<<=2;
-
-		bitBlt(&p, 0, 0, this, big_x(g), big_y(g), BO_TILE_SIZE, BO_TILE_SIZE);
-
-		// a big tile is 2*2 normal tiles - the upper left was painted
-		// above. The following will paint the remaining 3 rects
-		if (isBigTrans(g>>2)) {
-			g+=4;
-			bitBlt(&p, BO_TILE_SIZE, 0, this, big_x(g), big_y(g),
-					BO_TILE_SIZE, BO_TILE_SIZE);
-			g+=4;
-			bitBlt(&p, 0, BO_TILE_SIZE, this, big_x(g), big_y(g),
-					BO_TILE_SIZE, BO_TILE_SIZE);
-			g+=4;
-			bitBlt(&p, BO_TILE_SIZE, BO_TILE_SIZE, this, big_x(g),
-			big_y(g), BO_TILE_SIZE, BO_TILE_SIZE);
-		}
-
-		return p;
-
-	}
-
-protected:
-	int big_w() const { return 32; }
-	int big_x(int g) const { return ((g % big_w()) * BO_TILE_SIZE); }
-	int big_y(int g) const { return ((g / big_w()) * BO_TILE_SIZE); }
-	static int smallTilesPerTransition() { return 12; }
-	static int bigTilesPerTransition() { return 16; }
-	static int tilesPerTransition() 
-	{
-		return smallTilesPerTransition() + 4 * bigTilesPerTransition();
-	}
-	static int groundTilesNumber() 
-	{
-		return Cell::GroundLast + TransLast * tilesPerTransition(); 
-	}
-	static int getTransNumber(TransType transRef, int transTile)
-	{
-		return Cell::GroundLast + tilesPerTransition() * (int)transRef + transTile;
-	}
-	static int getBigTransNumber(TransType transRef, int transTile)
-	{
-		return getTransNumber(transRef, smallTilesPerTransition() + 4 * transTile);
-	}
-	static int getTransRef(int g) 
-	{
-		return ((g - Cell::GroundLast) / tilesPerTransition()); 
-	}
-	static int getTransTile(int g)
-	{
-		return ((g - Cell::GroundLast) % tilesPerTransition());
-	}
-	static bool isTrans(int g)
-	{
-		return (g >= Cell::GroundLast && g < groundTilesNumber());
-	}
-	static bool isSmallTrans(int g)
-	{
-		return (isTrans(g) && getTransTile(g) < smallTilesPerTransition());
-	}
-	static bool isBigTrans(int g)
-	{
-		return (isTrans(g) && getTransTile(g) >= smallTilesPerTransition());
-	}
-
-
-
-
-	Cell::GroundType from(TransType trans) const
-	{
-		switch (trans) {
-			case TransGrassWater:
-				return Cell::GroundGrass;
-			case TransGrassDesert:
-				return Cell::GroundGrass;
-			case TransDesertWater:
-				return Cell::GroundDesert;
-			case TransDeepWater:
-				return Cell::GroundDeepWater;
-			default:
-				kdError() << "Unknown trans " << (int)trans << endl;
-				return Cell::GroundUnknown;
-		}
-	}
-
-	Cell::GroundType to(TransType trans) const
-	{
-		switch (trans) {
-			case TransGrassWater:
-				return Cell::GroundWater;
-			case TransGrassDesert:
-				return Cell::GroundDesert;
-			case TransDesertWater:
-				return Cell::GroundWater;
-			case TransDeepWater:
-				return Cell::GroundWater;
-			default:
-				kdError() << "Unknown trans " << (int)trans
-						<< endl;
-				return Cell::GroundUnknown;
-		}
-	}
-
-};
 
 class OrderScrollView : public QScrollView
 {
@@ -288,7 +78,7 @@ public:
 
 	BosonUnitView* mUnitView;
 
-	BosonCommandTiles* mTiles;
+	BosonTiles* mTiles;
 
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
@@ -296,6 +86,8 @@ public:
 	BosonCommandFrame::OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
 	Player* mOwner;
+
+	QMap<int, int> mOrder2Type; // map order button -> unitType
 };
 
 BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent)
@@ -350,10 +142,10 @@ void BosonCommandFrame::initEditor()
 {
  d->mTransRef = new QComboBox(this);
  connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
- d->mTransRef->insertItem(i18n("Grass/Water"), (int)BosonCommandTiles::TransGrassWater);
- d->mTransRef->insertItem(i18n("Grass/Desert"), (int)BosonCommandTiles::TransGrassDesert);
- d->mTransRef->insertItem(i18n("Desert/Water"), (int)BosonCommandTiles::TransDesertWater);
- d->mTransRef->insertItem(i18n("Deep Water"), (int)BosonCommandTiles::TransDeepWater);
+ d->mTransRef->insertItem(i18n("Grass/Water"), (int)BosonTiles::TransGrassWater);
+ d->mTransRef->insertItem(i18n("Grass/Desert"), (int)BosonTiles::TransGrassDesert);
+ d->mTransRef->insertItem(i18n("Desert/Water"), (int)BosonTiles::TransDesertWater);
+ d->mTransRef->insertItem(i18n("Deep Water"), (int)BosonTiles::TransDeepWater);
 
  d->mInverted = new QCheckBox(this);
  d->mInverted->setText(i18n("Invert"));
@@ -533,6 +325,11 @@ void BosonCommandFrame::setOrderButton(unsigned int button, int unitType, Player
 	return;
  }
  setOrderPixmap(button, *small);
+ d->mOrder2Type.insert(button, unitType);
+ if (button == 0) {
+	d->mOwner = owner; // we need the owner to emit the correct signal. The
+	                   // editor depends on this value.
+ }
 
  const UnitProperties* prop = owner->speciesTheme()->unitProperties(unitType);
  if (!prop) {
@@ -546,6 +343,7 @@ void BosonCommandFrame::slotHandleOrder(int index)
 {
  switch (d->mOrderType) {
 	case PlainTiles:
+		emit signalCellSelected(0, '0');
 		break;
 	case Small:
 		break;
@@ -554,12 +352,8 @@ void BosonCommandFrame::slotHandleOrder(int index)
 	case Big2:
 		break;
 	case Facilities:
-		#warning Unit::facilityType is obsolete
-//		emit signalUnitSelected((int)Unit::facilityType(index), 0, d->mOwner);
-		break;
 	case Mobiles:
-		#warning Unit::mobileType is obsolete
-//		emit signalUnitSelected((int)Unit::mobileType(index), 0, d->mOwner);
+		emit signalUnitSelected(d->mOrder2Type[index], 0, d->mOwner);
 		break;
 	default:
 		kdError() << "unexpected construction index " << index << endl;
@@ -571,6 +365,7 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 {
  if (index == -1) {
 	hideOrderButtons();
+	return;
  }
  if (!owner) {
 	kdError() << "NULL owner" << endl;
@@ -605,7 +400,7 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
 {
  QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(fileName));
- d->mTiles = new BosonCommandTiles(themePath);
+ d->mTiles = new BosonTiles(themePath);
  if (d->mTiles->isNull()) {
 	kdError() << "Could not load " << fileName << endl;
 	return;
@@ -615,7 +410,7 @@ void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
 void BosonCommandFrame::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
- BosonCommandTiles::TransType trans = (BosonCommandTiles::TransType)d->mTransRef->currentItem();
+ BosonTiles::TransType trans = (BosonTiles::TransType)d->mTransRef->currentItem();
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
  switch (d->mOrderType) {
@@ -623,8 +418,10 @@ void BosonCommandFrame::slotRedrawTiles()
 		hideOrderButtons();
 		initOrderButtons(Cell::GroundLast - 1);
 		for (int i = 0; i < 5; i++) {
-			QPixmap p = d->mTiles->plainTile((Cell::GroundType)(i + 1));
+			int groundType = i + 1;
+			QPixmap p = d->mTiles->plainTile((Cell::GroundType)groundType);
 			setOrderPixmap(i, p);
+			d->mOrder2Type.insert(i, groundType);
 		}
 		break;
 	case Small:

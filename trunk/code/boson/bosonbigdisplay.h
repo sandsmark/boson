@@ -39,6 +39,8 @@ public slots:
 	 **/
 	void slotWillConstructUnit(int unitType, VisualUnit* facility, Player* owner);
 
+	void slotWillPlaceCell(int groundType, unsigned char version);
+
 	void slotUnitChanged(VisualUnit* unit);
 
 signals:

@@ -24,7 +24,7 @@ COMMON_SRC = unit.cpp unitproperties.cpp cell.cpp \
 	bosoncommandframe.cpp kgamedialogbosonconfig.cpp \
 	bosonbigdisplay.cpp bosonminimap.cpp bosonunitview.cpp \
 	kgameunitdebug.cpp bosonwidget.cpp \
-	editorinput.cpp boshot.cpp
+	editorinput.cpp boshot.cpp bosontiles.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl $(LIB_KDEUI)
