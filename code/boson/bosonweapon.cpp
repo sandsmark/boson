@@ -181,6 +181,7 @@ BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _u
   }
   registerWeaponData(weaponNumber, &mReloadCounter, IdReloadCounter);
   mReloadCounter.setLocal(0);
+  mReloadCounter.setEmittingSignal(false);
 }
 
 BosonWeapon::~BosonWeapon()
