@@ -54,57 +54,19 @@ main_area_begin();
 draw_bigbox_begin("Status");
 draw_bigbox_text("Boson is currently still under heavy development.<br><br>");
 
-/*draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
+draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
-    nothing ;-) - expect 0.8 release soon!
+  <ul>
+    <li>New ground texturing. We will use only a few textures instead of several
+    hundreds, effectively reducing texture space by several MB.</li>
+  </ul>
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
-  <h4>Internal</h4>
   <ul>
-    <li>Height map for 3d-terrain</li>
-    <li>New map file format (.tar.gz instead of .gz)</li>
-    <li>Preload map information on startup</li>
-    <li>Decrease size of textures (fixes problems for 24bpp and 32bpp)</li>
-    <li>Don't draw invisible particles</li>
-    <li>Particles are drawn depth-sorted</li>
-    <li>Big performance improvements</li>
-    <li>Binary map format (decreases size of map files a lot, especially for big maps)</li>
-    <li>Some new startup widgets</li>
-    <li>New save game format</li>
+    <li>Units can be rendered as wireframes</li>
   </ul>
-  <h4>Game</h4>
-  <ul>
-    <li>Technology upgrades are working now and were improved</li>
-    <li>Added minimap image for disabled minimap</li>
-    <li>Weapon specific sound support</li>
-    <li>Smoke support for powerplant, oilrefinery, mineral refinery etc.</li>
-    <li>Particle system improvements</li>
-    <li>Damaged units are getting darker</li>
-    <li>Save screenshots as jpg and show the full path as a chat message</li>
-    <li>New minimap zooming buttons</li>
-    <li>Light support</li>
-    <li>Fixed texture coordinates bug (meaning: it looks better)</li>
-  </ul>
-  <h4>Data</h4>
-  <ul>
-    <li>New unit: Ferry</li>
-    <li>Unit models improvements</li>
-    <li>Warfactory is now Weapons Factory</li>
-    <li>Handbook switched from png to jpg images</li>
-  </ul>
-  <h4>Editor</h4>
-  <ul>
-    <li>Many bugs are fixed</li>
-    <li>Buildings are placed in constructed mode</li>
-    <li>Better support for big maps</li>
-    <li>Support for changing map name and description</li>
-    <li>Height map supports</li>
-  </ul>
-  
-  
-  
   </blockquote>
   ");*/
 draw_bigbox_end();
