@@ -23,6 +23,7 @@ libbogroundrenderer_la_SOURCES = \
 		bodefaultgroundrenderer.cpp \
 		bofastgroundrenderer.cpp \
 		boveryfastgroundrenderer.cpp \
+		boquickgroundrenderer.cpp \
 		bogroundrendererbase.cpp \
 		boquadtreenode.cpp
 
