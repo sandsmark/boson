@@ -25,6 +25,7 @@ texture_DATA = \
 	doors3.jpg \
 	doors4.jpg \
 	doors5.jpg \
+	doors6.jpg \
 	grid1.jpg \
 	metal1.jpg \
 	metal10.jpg \
@@ -58,7 +59,8 @@ texture_DATA = \
 	wall3.jpg \
 	wheel.jpg \
 	wheel1.jpg \
-	window1.jpg
+	window1.jpg \
+	window2.jpg
 
 # no further editing need here
 
