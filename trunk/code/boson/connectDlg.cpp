@@ -20,6 +20,7 @@
 
 #include <stdlib.h>	// atoi
 #include <netdb.h>	// gethostbyname()
+#include <unistd.h>	// gethostname()
 
 #include <qpushbutton.h>
 #include <qlineedit.h>
@@ -45,6 +46,7 @@ connectDlg::connectDlg(char *servername ,QWidget *parent, const char *name)
 {
         QPushButton	*button;
 	QLabel		*label;
+	char		host[2000];
 
 	/* layout */
 	resize( 390, 340 );
@@ -64,12 +66,16 @@ connectDlg::connectDlg(char *servername ,QWidget *parent, const char *name)
 	connect( button, SIGNAL(clicked()), SLOT(reject()) );
 
 	/* server params */
+	if (gethostname(host, 1999)) {
+		logf(LOG_ERROR, "can't get hostname, using \"aquila\"");
+		strcpy(host, "aquila.rezel.enst.fr");
+	}
 
 	label = new QLabel("Boson Server :", this);
 	label->setGeometry( 10,200, 140,30 );
 	label->setAlignment(AlignVCenter | AlignRight);
 	e_server = new QLineEdit(this);
-	e_server->setText(servername?servername:"aquila.rezel.enst.fr");
+	e_server->setText(servername?servername:host);
 	e_server->setGeometry( 160,200, 220,30 );
 	e_server->setMaxLength(50);
 
