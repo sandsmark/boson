@@ -450,6 +450,7 @@ public:
 	void setVisible(bool);
 	void show() { setVisible(true); }
 	void hide() { setVisible(false); }
+	bool isVisible() const;
 
 
 	void loadPropertiesFromXML(const QDomNamedNodeMap&);
