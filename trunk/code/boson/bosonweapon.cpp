@@ -54,7 +54,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mName = cfg->readEntry("Name", "");
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
-  m_reloadingTime.init(cfg->readUnsignedNumEntry("Reload", 0));
+  // Reload interval is converted from seconds to advance calls here
+  m_reloadingTime.init((int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f));
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
   m_speed.init(cfg->readDoubleNumEntry("Speed", 0) / 20.0f);
@@ -117,7 +118,8 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   // Group must have been set before
   cfg->writeEntry("Name", mName);
   cfg->writeEntry("Range", range());
-  cfg->writeEntry("Reload", reloadingTime());
+  // Reload interval is converted from advance calls to seconds here
+  cfg->writeEntry("Reload", reloadingTime() / 20.0f);
  // We multiply speeds with 20 because speeds in config files are cells/second,
  //  but here we have cells/advance calls
   cfg->writeEntry("Speed", speed() * 20.0f);
