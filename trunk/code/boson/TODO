@@ -16,8 +16,6 @@ Game TODOs
 - don't allow to build units when player has not enough minerals/oil
 - fullscreen mode
 - scroll if cursor at the edge of the window
-- sam batteries must not attack land units ; land units must not attack
-  aircrafts
 
 
 Editor (map, unit, scenario) TODOs
