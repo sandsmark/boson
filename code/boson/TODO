@@ -14,3 +14,4 @@
 - unit editor: check if images are in the directory, provide possibility to copy
   them
 - make player color selectable in the new game dialog
+- use different cursors for moving, attacking, ...
