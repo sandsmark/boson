@@ -542,9 +542,9 @@ bool BosonPath::findSlowPath()
     // Write normal-ordered path to path
     // We first add waypoint with coordinates of center of tile unit currently
     //  is on. This helps to get rid of some collisions.
-    wp.setX(mStartx * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    wp.setY(mStarty * BO_TILE_SIZE + BO_TILE_SIZE / 2);
-    path.push_back(wp);
+    //wp.setX(mStartx * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    //wp.setY(mStarty * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    //path.push_back(wp);
     for(int i = temp.size() - 1; i >= 0; --i)
     {
       wp.setX(temp[i].x());
