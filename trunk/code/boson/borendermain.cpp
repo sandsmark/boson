@@ -49,7 +49,7 @@
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
 
-static const char *version = "v0.7pre";
+static const char *version = "v0.7";
 
 static KCmdLineOptions options[] =
 {
