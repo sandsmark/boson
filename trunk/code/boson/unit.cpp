@@ -10,6 +10,8 @@
 
 #include <kgame/kgamepropertylist.h>
 
+#include <unistd.h>
+
 #include "defines.h"
 
 
@@ -157,7 +159,7 @@ void Unit::moveBy(double moveX, double moveY)
  double oldX = x();
  double oldY = y();
  QCanvasSprite::moveBy(moveX, moveY);
-
+/*
 // FIXME 
  QCanvasItemList list = collisions(true);
  if (!list.isEmpty()) {
@@ -167,14 +169,14 @@ void Unit::moveBy(double moveX, double moveY)
 			if (!((Unit*)*it)->isDestroyed()) {
 				kdWarning() << "collided with " << list.count() 
 						<< " units" << endl;
-				kdWarning() << "moving back and stopping moving" << endl;
+				kdWarning() << "moving back and stop moving" << endl;
 				QCanvasSprite::moveBy(-moveX, -moveY);
 				stopMoving();
 				return; // No need to move select boxes by zero
 			}
 		}
 	}
- }
+ }*/
 
 
  if (d->mSelectBoxUp) {
@@ -253,11 +255,12 @@ void Unit::moveTo(const QPoint& pos)
  d->mTarget = 0;
  clearWaypoints();
  // Find our position
- QRect currentPos = boundingRect();
- int x = currentPos.center().x();
- int y = currentPos.center().y();
+// QRect currentPos = boundingRect();
+// int x = currentPos.center().x();
+// int y = currentPos.center().y();
  // Find path to target
- BosonPath path(this, x / BO_TILE_SIZE, y / BO_TILE_SIZE,
+ QValueList<QPoint> path = BosonPath::findPath(this, pos.x(), pos.y());
+/* BosonPath path(this, x / BO_TILE_SIZE, y / BO_TILE_SIZE,
 		pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
  if (path.findPath()) {
 	kdDebug() << k_lineinfo << "found path :-))" << endl;
@@ -268,9 +271,14 @@ void Unit::moveTo(const QPoint& pos)
  for(vector<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it) {
 	kdDebug() << "adding waypoint" << endl;
 	addWaypoint((*it));
+ }*/
+ for (int unsigned i = 0; i < path.count(); i++) {
+	 addWaypoint(path[i]);
  }
- setWork(WorkMove);
- setAnimated(true);
+ if (path.count() > 0) {
+	setWork(WorkMove);
+	setAnimated(true);
+ }
 }
 
 void Unit::clearWaypoints()
@@ -285,6 +293,7 @@ const QPoint& Unit::currentWaypoint() const
 
 void Unit::stopMoving(bool send)
 {
+ kdDebug() << "stopMoving" << endl;
  clearWaypoints();
  setWork(WorkNone);
  setAnimated(false); // do not call advance() anymore - is more efficient
@@ -320,7 +329,7 @@ void Unit::stopMoving(bool send)
  // it as soon as it's sure that we don't need it anymore. Will save a lot of
  // network traffik!
  if (send) {
-	owner()->sendStopMoving(this);
+//	owner()->sendStopMoving(this);
  }
 }
 
@@ -494,9 +503,9 @@ void MobileUnit::advanceMove()
  QRect position = boundingRect(); // where we currently are.
  int x = position.center().x();
  int y = position.center().y();
- int xspeed = 0;
- int yspeed = 0;
- kdDebug() << "advancemove" << endl;
+ double xspeed = 0;
+ double yspeed = 0;
+// kdDebug() << "advancemove" << endl;
 
  // First check if we're at waypoint
  if((x == wp.x()) && (y == wp.y()))
@@ -519,7 +528,7 @@ void MobileUnit::advanceMove()
  if(abs(wp.x() - x) < speed()) {
 	xspeed = wp.x() - x;
  } else {
-	xspeed = (double)speed();
+	xspeed = speed();
 	if(wp.x() < x) {
 		xspeed = -xspeed;
 	}
@@ -556,10 +565,18 @@ void MobileUnit::advanceMove()
  }
 
  // Set velocity for actual moving
- kdDebug() << k_funcinfo << "setting velocity: x=" << xspeed << ", y=" << yspeed << endl;
+// kdDebug() << k_funcinfo << "setting velocity: x=" << xspeed << ", y=" << yspeed << endl;
  setVelocity(xspeed, yspeed);
 
  // Check for units on way
+ QValueList<Unit*> collisionList = unitCollisions();
+ for (int unsigned i = 0; i < collisionList.count(); i++) {
+	if (collidesWith(collisionList[i])) {
+		kdWarning() << id() << " colliding with unit" << endl;
+		// just stop. Do not (yet) search new path
+		stopMoving();
+	}
+ }
 /* QCanvasItemList collisionList = collisions(exact);
  if(! collisionList.isEmpty())
  {
