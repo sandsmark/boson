@@ -94,8 +94,8 @@
     <p>
     Note, this things will make Boson slower!<br>
     NVIDIA:<br>
-    <code>__GL_FSAA_MODE=5</code><br>
-    <code>__GL_DEFAULT_LOG_ANISO=3</code><br>
+    <code>__GL_FSAA_MODE=X</code><br>
+    <code>__GL_DEFAULT_LOG_ANISO=X</code><br>
     Export this as variables on your console before starting Boson.<br>
     You will have to look at your NVIDIA driver documentation for the
     correct values since the are different from card to card.<br>
