@@ -218,11 +218,9 @@ void BosonWidgetBase::initMap()
  displayManager()->mapChanged();
 // boGame->setPlayField(playField()); // already done on startup in BosonStarting
 
-#ifdef PATHFINDER_TNG
  boDebug() << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
  canvas()->initPathfinder();
  boDebug() << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
-#endif
 
 
  // AB: note that this meets the name "initMap" only slightly. We can't do this
