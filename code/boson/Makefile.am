@@ -2,11 +2,11 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data items commandframe sound startupwidgets
+SUBDIRS = data items commandframe sound startupwidgets bodebug
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender
 
-INCLUDES = -I$(kde_includes)/arts $(all_includes)
+INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
 
 BOSON_SRC = \
 	top.cpp  \
@@ -62,14 +62,12 @@ BOSON_SRC = \
 	bosonparticlesystem.cpp \
 	bosonparticlemanager.cpp \
 	bosonstarting.cpp \
-	bosonweapon.cpp \
-	bodebug.cpp
+	bosonweapon.cpp
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \
 	bosonprofiling.cpp \
-	boprofilingmain.cpp \
-	bodebug.cpp
+	boprofilingmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \
@@ -77,28 +75,40 @@ boson_LDADD = \
 		$(top_builddir)/boson/sound/libbosonsound.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		-lGLU -l3ds \
 		$(LIB_KDEUI)
-boson_SOURCES = $(BOSON_SRC)\
+boson_SOURCES = \
+		$(BOSON_SRC)\
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-bounit_LDADD = -lkio $(LIB_KDEUI)
-bounit_SOURCES = bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
+bounit_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
+		-lkio $(LIB_KDEUI)
+bounit_SOURCES = \
+		bounitmain.cpp bosonsearchpathswidget.ui bouniteditor.ui
 
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boprofiling_LDADD = -lkio $(LIB_KDEUI)
-boprofiling_SOURCES = $(BOPROFILING_SRC)
+boprofiling_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
+		-lkio $(LIB_KDEUI)
+boprofiling_SOURCES = \
+		$(BOPROFILING_SRC)
 
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-bocursor_LDADD = -lkio $(LIB_KDEUI) -lGLU
-bocursor_SOURCES = bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
-		bosontexturearray.cpp bosonconfig.cpp \
-		bodebug.cpp
+bocursor_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
+		-lkio $(LIB_KDEUI) -lGLU
+bocursor_SOURCES = \
+		$(COMMON_SRC) \
+		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
+		bosontexturearray.cpp bosonconfig.cpp
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
@@ -106,7 +116,8 @@ borender_LDADD = \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		-lGLU -l3ds \
 		$(LIB_KDEUI)
-borender_SOURCES = $(BOSON_SRC) \
+borender_SOURCES = \
+		$(BOSON_SRC) \
 		kgamemodeldebug.cpp \
 		borendermain.cpp
 

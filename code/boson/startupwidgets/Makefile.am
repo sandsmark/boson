@@ -1,4 +1,4 @@
-INCLUDES = $(all_includes)
+INCLUDES = -I$(top_srcdir)/boson/bodebug $(all_includes)
 
 noinst_LTLIBRARIES = libbosonstartupwidgets.la
 

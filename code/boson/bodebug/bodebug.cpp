@@ -29,6 +29,8 @@
 #undef boBacktrace
 #endif
 
+#include "bodebugdcopiface.h"
+
 #include "kapplication.h"
 #include "kglobal.h"
 #include "kinstance.h"
@@ -166,7 +168,6 @@ struct boDebugPrivate {
 static boDebugPrivate *boDebug_data = 0;
 static KStaticDeleter<boDebugPrivate> pcd;
 
-#include <kdebug.h>
 static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char *data)
 {
   if ( !boDebug_data )
@@ -411,6 +412,12 @@ QString boBacktrace(int levels)
 QString boBacktrace()
 {
     return boBacktrace(-1 /*all*/);
+}
+
+void boClearDebugConfig()
+{
+    delete boDebug_data->config;
+    boDebug_data->config = 0;
 }
 
 // Needed for --enable-final

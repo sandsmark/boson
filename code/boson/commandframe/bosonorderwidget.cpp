@@ -29,7 +29,7 @@
 #include "../bosontiles.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>

@@ -26,7 +26,7 @@
 #include "../unitproperties.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
-#include "../bodebug.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 

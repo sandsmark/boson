@@ -420,6 +420,13 @@ bodbgstream boError(bool cond, int area = 0);
 bodbgstream boFatal(int area = 0);
 bodbgstream boFatal(bool cond, int area = 0);
 
+/**
+ * Deletes the bodebugrc cache and therefore forces bodebug to reread the
+ * config file
+ */
+void boClearDebugConfig();
+
+
 #ifdef NDEBUG
 #define boDebug bondDebug
 #define boBacktrace bondBacktrace

@@ -25,6 +25,7 @@
 #include "bosonconfig.h"
 #include "global.h"
 #include "bodebug.h"
+#include "bodebugdcopiface.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
@@ -53,6 +54,7 @@ CursorPreview::CursorPreview(QWidget* parent) : QGLWidget(parent)
  setMouseTracking(true);
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+ mIface = new BoDebugDCOPIface();
 }
 
 CursorPreview::~CursorPreview()
@@ -204,7 +206,10 @@ int main(int argc, char **argv)
  w->show();
 
  args->clear();
+
+ BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  int r = app.exec();
+ delete iface;
  delete editor;
  delete preview;
  delete w;

@@ -279,6 +279,8 @@ RenderMain::RenderMain()
  setCentralWidget(w);
 
  initKAction();
+
+ mIface = new BoDebugDCOPIface();
 }
 
 RenderMain::~RenderMain()

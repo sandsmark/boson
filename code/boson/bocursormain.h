@@ -22,6 +22,7 @@
 #include <qgl.h>
 
 class BosonCursor;
+class BoDebugDCOPIface;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -49,6 +50,7 @@ protected:
 private:
 	BosonCursor* mCursor;
 	QTimer* mUpdateTimer;
+	BoDebugDCOPIface* mIface;
 };
 
 #endif

@@ -20,6 +20,8 @@
 #include "bosonprofilingdialog.h"
 #include "bosonprofiling.h"
 
+#include "bodebugdcopiface.h"
+
 #include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -73,8 +75,11 @@ int main(int argc, char **argv)
 	}
  }
 
+ BoDebugDCOPIface* iface = new BoDebugDCOPIface();
  args->clear();
- return app.exec();
+ int r = app.exec();
+ delete iface;
+ return r;
 }
 
 
