@@ -138,6 +138,9 @@ void BosonModel::loadTextures()
  for (mat = m3ds->materials; mat; mat = mat->next) {
 	Lib3dsTextureMap* t = &mat->texture1_map;
 	QString texName = cleanTextureName(t->name);
+	if (texName.isEmpty()) {
+		continue;
+	}
 	QImage image(textureDirectory() + texName);
 	if (image.isNull()) {
 		kdError() << k_funcinfo << "NULL image: " << textureDirectory() + texName << endl;
