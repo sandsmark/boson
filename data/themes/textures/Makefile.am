@@ -58,11 +58,14 @@ texture_DATA = \
 	metal25.jpg \
 	metal26.jpg \
 	metal27.jpg \
+	metal28.jpg \
+	metal29.jpg \
 	minerals.jpg \
 	missile1.jpg \
 	mslback1.jpg \
 	mslfrnt1.jpg \
 	pipe2.jpg \
+	ring1.jpg \
 	roof1.jpg \
 	roof2.jpg \
 	shockwav.jpg \
@@ -90,7 +93,8 @@ texture_DATA = \
 	treetop1.jpg \
 	hay1.jpg \
 	hay2.jpg \
-	water1.jpg
+	water1.jpg \
+	mine1.jpg
 
 # no further editing need here
 
