@@ -210,7 +210,11 @@ bool SpeciesTheme::loadTechnologies()
  for(it = techs.begin(); it != techs.end(); ++it) {
 	boDebug() << k_funcinfo << "Loading upgrade from group " << *it << endl;
 	UpgradeProperties* tech = new UpgradeProperties(this);
-	tech->load(&cfg, *it);
+	if (!tech->load(&cfg, *it)) {
+		boError() << k_funcinfo << *it << " could not be loaded" << endl;
+		delete tech;
+		continue;
+	}
 	if (!d->mTechnologies.find(tech->id())) {
 		d->mTechnologies.insert(tech->id(), tech);
 	} else {
