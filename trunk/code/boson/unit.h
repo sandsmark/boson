@@ -313,7 +313,7 @@ public:
 	 * Just stop moving. Don't call this if you don't want to stop attacking
 	 * as well! This sets @ref work to @ref WorkNone
 	 **/
-	void stopMoving();
+	virtual void stopMoving();
 	void stopAttacking();
 
 	virtual bool save(QDataStream& stream);
@@ -454,11 +454,10 @@ public:
 
 	virtual QRect boundingRect() const;
 
-	virtual void clearWaypoints();
-	virtual void waypointDone();
-
 	virtual bool load(QDataStream& stream);
 	virtual bool save(QDataStream& stream);
+
+	virtual void stopMoving();
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

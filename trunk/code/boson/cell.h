@@ -184,7 +184,7 @@ public:
 	/**
 	 * Remove a previously added item from the cell
 	 **/
-	inline void removeItem(BosonItem* u) { mItems.removeItem(u); }
+	inline uint removeItem(BosonItem* u) { return mItems.removeItem(u); }
 
 
 	/**
@@ -193,8 +193,6 @@ public:
 	 * @return @ref BoItemList::isOccupied
 	 **/
 	inline bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
-
-	inline void willBeOccupiedBy(Unit* unit) { return mItems.willBeOccupiedBy(unit); }; // FIXME: better name?
 
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }

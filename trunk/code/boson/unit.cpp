@@ -784,7 +784,7 @@ BoItemList Unit::unitsInRange(BosonWeapon* w) const
  }
  cells.resize(size);
  int n = 0;
- for (int i = left; i <= right; i++) { 
+ for (int i = left; i <= right; i++) {
 	for (int j = top; j <= bottom; j++) {
 		cells[n++] = QPoint(i, j);
 	}
@@ -999,14 +999,11 @@ public:
 	KGameProperty<float> mSpeed;
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
-
-	bool mTargetCellMarked;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
- d->mTargetCellMarked = false;
 
  registerData(&d->mSpeed, IdSpeed);
  registerData(&d->mMovingFailed, IdMovingFailed);
@@ -1178,7 +1175,7 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
- boDebug(401) << k_funcinfo << endl;
+ boDebug(401) << k_funcinfo << "unit: " << id() << endl;
  if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	boDebug(401) << k_funcinfo << "collisions" << endl;
@@ -1193,12 +1190,12 @@ void MobileUnit::advanceMoveCheck()
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
 	if (d->mPathRecalculated >= 2) {
-		boDebug(401) << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
+		boDebug(401) << k_funcinfo << "unit: " << id() << ": Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
 		return;
 	}
 	if (d->mMovingFailed >= recalculate) {
-		boDebug(401) << "recalculating path" << endl;
+		boDebug(401) << "unit: " << id() << ": recalculating path" << endl;
 		// you must not do anything that changes local variables directly here!
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.
@@ -1208,13 +1205,10 @@ void MobileUnit::advanceMoveCheck()
 		d->mPathRecalculated = d->mPathRecalculated + 1;
 	}
 	return;
- } else if (!d->mTargetCellMarked) {
-	canvas()->cell(currentWaypoint().x() / BO_TILE_SIZE, currentWaypoint().y() / BO_TILE_SIZE)->willBeOccupiedBy(this);
-	d->mTargetCellMarked = true;
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
- boDebug(401) << k_funcinfo << "done" << endl;
+ boDebug(401) << k_funcinfo << "unit: " << id() << ": done" << endl;
 }
 
 void MobileUnit::setSpeed(float speed)
@@ -1317,18 +1311,6 @@ QRect MobileUnit::boundingRect() const
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
-void MobileUnit::clearWaypoints()
-{
- Unit::clearWaypoints();
- d->mTargetCellMarked = false;
-}
-
-void MobileUnit::waypointDone()
-{
- Unit::waypointDone();
- d->mTargetCellMarked = false;
-}
-
 bool MobileUnit::load(QDataStream& stream)
 {
  if (!Unit::load(stream)) {
@@ -1348,6 +1330,15 @@ bool MobileUnit::save(QDataStream& stream)
 
  return true;
 }
+
+void MobileUnit::stopMoving()
+{
+ Unit::stopMoving();
+ // Reset moveCheck variables
+ d->mMovingFailed = 0;
+ d->mPathRecalculated = 0;
+}
+
 
 /////////////////////////////////////////////////
 // Facility
