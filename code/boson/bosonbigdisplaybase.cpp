@@ -224,8 +224,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				if (send) {
 					*eatevent = true;
 				}
-			}
-			else {
+			} else {
 				startSelection(pos);
 			}
 		} else if (e->button() == MidButton) {

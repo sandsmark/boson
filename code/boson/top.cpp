@@ -19,6 +19,7 @@
 #include "top.h"
 #include "top.moc"
 
+#include "defines.h"
 #include "bosonwidget.h"
 #include "bosonwelcomewidget.h"
 #include "bosonnewgamewidget.h"
@@ -34,7 +35,6 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
-#include "defines.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -592,8 +592,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 		checkEvents();
 	}
 	d->mLoading->setLoading(BosonLoadingWidget::ReceiveMap);
- }
- else {
+ } else {
 	// We are loading a saved game
 	// Delete mPlayer aka local player because it will be set later by Boson
 	//  (It's not known yet)
@@ -622,18 +621,15 @@ void TopWidget::loadGameData1() // FIXME rename!
 		if(status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
 			text = i18n("This file is not Boson SaveGame!");
 			caption = i18n("Invalid file format!");
-		}
-		else if(status == Boson::InvalidVersion) {
+		} else if(status == Boson::InvalidVersion) {
 			text = i18n("This file has unsupported saving format!\n"
 					"Probably it is saved with too old version of Boson");
 			caption = i18n("Unsupported file format version!");
-		}
-		else if(status == Boson::KGameError) {
+		} else if(status == Boson::KGameError) {
 			text = i18n("Error loading saved game!");
 			caption = i18n("An error occured while loading saved game!\n"
 					"Probably the game wasn't saved properly");
-		}
-		else {
+		} else {
 			// This should never be reached
 			kdError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
 		}
@@ -671,7 +667,6 @@ void TopWidget::loadGameData2() //FIXME rename!
  // Load map tiles. This takes most time
  d->mLoading->setProgress(600);
  d->mLoading->setLoading(BosonLoadingWidget::LoadTiles);
- checkEvents();
  connect(mCanvas, SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
  connect(mCanvas, SIGNAL(signalTilesLoaded()), this, SLOT(slotCanvasTilesLoaded()));
  checkEvents();
@@ -805,7 +800,7 @@ void TopWidget::slotReceiveMap(const QByteArray& buffer)
  disconnect(mBoson, SIGNAL(signalInitMap(const QByteArray&)), this, SLOT(slotReceiveMap(const QByteArray&)));
  QDataStream stream(buffer, IO_ReadOnly);
  mPlayField->loadMap(stream);
- mBoson->setMap(mPlayField);
+ mBoson->setPlayField(mPlayField);
 
  d->mLoading->setProgress(300);
 
