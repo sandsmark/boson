@@ -37,7 +37,7 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, bosonMsgData *data)
 	for ( i=0; k; i++,k>>=1) {
 		boAssert(i<3);
 		if (k&1l) sendMsg (
-			gpp.player[i].buffer, tag, blen, data);
+			player[i].buffer, tag, blen, data);
 		}
 }
 
@@ -78,7 +78,7 @@ void serverMobUnit::reportCreated(int i)
 	data.mobile.y = __y;
 	data.mobile.type = type;
 
-	sendMsg ( gpp.player[i].buffer, MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
+	sendMsg ( player[i].buffer, MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
 }
 
 void serverMobUnit::reportDestroyed(int i)
@@ -89,7 +89,7 @@ void serverMobUnit::reportDestroyed(int i)
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
 
-	sendMsg ( gpp.player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
 }
 
 
@@ -134,7 +134,7 @@ void serverFacility::reportCreated(int i)
 	data.facility.type = type;
 	data.facility.state = state;
 
-	sendMsg ( gpp.player[i].buffer, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
+	sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
 }
 
 
@@ -146,7 +146,7 @@ void serverFacility::reportDestroyed(int i)
 	data.destroyed.x = __x;
 	data.destroyed.y = __y;
 
-	sendMsg ( gpp.player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
 }
 
 

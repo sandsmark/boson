@@ -96,16 +96,16 @@ int i;
 QString buf;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++)
-   if (gpp.player[i].socket == s) {
+   if (player[i].socket == s) {
 
-	gpp.player[i].socketState = SSS_NO_CONNECT;
-	delete gpp.player[i].buffer;
+	player[i].socketState = SSS_NO_CONNECT;
+	delete player[i].buffer;
 	delete s;
-	assert(gpp.nbConnected>0);
+	assert(nbConnected>0);
 
-	buf.sprintf("%d players connected", --gpp.nbConnected);
+	buf.sprintf("%d players connected", --nbConnected);
 	l_connected->setText(buf);
-	if (gpp.nbConnected<1) {
+	if (nbConnected<1) {
 		state = SS_INIT ;
   		l_state->setText("Waiting for first connection");
 	}
