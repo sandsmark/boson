@@ -63,12 +63,12 @@ public:
 	int moveCost() const; // leave signed, maybe we can use negative values for roads one day?
 
 
-	inline void addItem(BosonItem* u) { mItems.appendItem(u); }
+	inline void addItem(BosonItem* u) { mItems.append(u); }
 
 	/**
 	 * Remove a previously added item from the cell
 	 **/
-	inline uint removeItem(BosonItem* u) { return mItems.removeItem(u); }
+	inline uint removeItem(BosonItem* u) { return mItems.remove(u); }
 
 
 	/**

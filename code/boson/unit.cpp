@@ -1081,7 +1081,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
  QRect rect;
  rect.setCoords(left - range, top - range, right + range, bottom + range);
  BoItemList* items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
- items->removeItem((BosonItem*)this);
+ items->remove((BosonItem*)this);
 
  BoItemList* inRange = new BoItemList();
  BoItemList::Iterator it = items->begin();
@@ -1099,7 +1099,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
 	// pythagoras)
-	inRange->appendItem(*it);
+	inRange->append(*it);
  }
  return inRange;
 }
@@ -1113,7 +1113,7 @@ BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
  for (; it != units->end(); ++it) {
 	u = (Unit*)*it;
 	if (owner()->isEnemy(u->owner())) {
-		enemy->appendItem(u);
+		enemy->append(u);
 	}
  }
  return enemy;
