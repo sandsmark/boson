@@ -29,6 +29,7 @@ class BosonCanvas;
 class BosonCollisions;
 class BoMouseEvent;
 class Player;
+class PlayerIO;
 class Unit;
 class UnitProperties;
 class BoItemList;
@@ -50,6 +51,7 @@ public:
 	BosonCanvas* canvas() const;
 	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
+	PlayerIO* localPlayerIO() const;
 
 	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
 

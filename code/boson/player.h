@@ -30,6 +30,7 @@ class UnitProperties;
 class BosonMap;
 class BosonStatistics;
 class ProductionPlugin;
+class PlayerIO;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -45,6 +46,8 @@ public:
 	};
 	Player();
 	virtual ~Player();
+
+	PlayerIO* playerIO() const;
 
 	/**
 	 * Quit the current game for this player. This will reset some variables

@@ -29,8 +29,11 @@
 #include "bodebug.h"
 #include "rtti.h"
 #include "player.h"
+#include "playerio.h"
 #include "unit.h"
 #include "items/bosonitem.h"
+
+#warning TODO: the input classes should touch PlayerIO only, not Player directly!
 
 BosonBigDisplayInputBase::BosonBigDisplayInputBase(BosonBigDisplayBase* parent) : QObject(parent)
 {
@@ -69,6 +72,14 @@ Player* BosonBigDisplayInputBase::localPlayer() const
  return bigDisplay()->localPlayer();
 }
 
+PlayerIO* BosonBigDisplayInputBase::localPlayerIO() const
+{
+ if (!localPlayer()) {
+	return 0;
+ }
+ return localPlayer()->playerIO();
+}
+
 const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const
 {
  return bigDisplay()->cursorCanvasPos();
@@ -104,7 +115,7 @@ void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
 
 void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(itemsInArea);
@@ -136,7 +147,7 @@ void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}
-	if (localPlayer()->isFogged((int)(*it)->x() / BO_TILE_SIZE, (int)(*it)->y() / BO_TILE_SIZE)) {
+	if (!localPlayerIO()->canSee(*it)) {
 		continue;
 	}
 	Unit* unit = (Unit*)*it;

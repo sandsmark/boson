@@ -27,6 +27,7 @@
 #include "bosonunitview.h"
 #include "../unit.h"
 #include "../player.h"
+#include "../playerio.h"
 #include "../speciestheme.h"
 #include "../boselection.h"
 #include "../unitplugins.h"
@@ -268,17 +269,12 @@ void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
 	hidePluginWidgets();
 	return;
  }
- Player* owner = unit->owner();
- if (!owner) {
-	boError(220) << k_funcinfo << "NULL owner" << endl;
-	return;
- }
  if (!unit->speciesTheme()) {
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
- if (owner != localPlayer()) {
+ if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
 	// hmm.. is this correct? maybe display for plugins anyway? dont know...
 	hidePluginWidgets();
 	selectionWidget()->hideOrderButtons();
@@ -315,13 +311,21 @@ Player* BosonCommandFrameBase::localPlayer() const
  return d->mOwner;
 }
 
-void BosonCommandFrameBase::slotPlaceUnit(const BoSpecificAction& action)
+PlayerIO* BosonCommandFrameBase::localPlayerIO() const
 {
  if (!localPlayer()) {
-	boError(220) << k_funcinfo << "NULL local player" << endl;
+	return 0;
+ }
+ return localPlayer()->playerIO();
+}
+
+void BosonCommandFrameBase::slotPlaceUnit(const BoSpecificAction& action)
+{
+ if (!localPlayerIO()) {
+	boError(220) << k_funcinfo << "NULL local player IO" << endl;
 	return;
  }
- emit signalPlaceUnit(action.productionId(), localPlayer());
+ emit signalPlaceUnit(action.productionId(), localPlayerIO()->player());
  BoSpecificAction a;
  a.setType(ActionPlacementPreview);
  emit signalAction(a);
@@ -340,8 +344,8 @@ void BosonCommandFrameBase::slotProduce(const BoSpecificAction& _action)
  boDebug(220) << k_funcinfo << endl;
  BoSpecificAction action = _action;
  if (selectedUnit()) {
-	if (localPlayer() != selectedUnit()->owner()) {
-		boError(220) << k_funcinfo << "local owner != selected unit owner" << endl;
+	if (!localPlayerIO() || !localPlayerIO()->ownsUnit(selectedUnit())) {
+		boError(220) << k_funcinfo << "local player doesn't own selected unit" << endl;
 		return;
 	}
 	// FIXME: is there any way not to hardcode this
