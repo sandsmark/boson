@@ -141,6 +141,9 @@ BosonParticleSystemProperties::~BosonParticleSystemProperties()
 
 BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos) const
 {
+  /// FIXME: 5 is radius of bounding sphere of particle system. This MUST be
+  //  calculated, not hardcoded. And for some systems (e.g. missile's trails),
+  //  we can't use it because it can't be precalculated (not here at least)
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       5, mTextures, this);
   s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2] / BO_TILE_SIZE));
@@ -176,12 +179,12 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
   // Note that we use our own texture array here, not the one stored in
   //  BosonParticleSystem (which is only used for drawing). It doesn't matter,
   //  because they are identical (in theory ;-)) anyway.
-  int t = (int)((1.0 - factor) * (mTextures.mTextureCount + 1));
+  int t = (int)((1.0 - factor) * (mTextures.mTextureCount + 1)); // +1 for last texture to be shown
   if(t >= mTextures.mTextureCount)
   {
-    t = mTextures.mTextureCount;
+    t = mTextures.mTextureCount - 1;
   }
-  particle->tex = mTextures.mTextureIds[t]; // +1 for last texture to be shown
+  particle->tex = mTextures.mTextureIds[t];
 }
 
 QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme)

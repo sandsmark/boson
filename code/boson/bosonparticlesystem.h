@@ -20,10 +20,34 @@
 #ifndef BOSONPARTICLESYSTEM_H
 #define BOSONPARTICLESYSTEM_H
 
+#include <qptrlist.h>
+
 #include "bo3dtools.h"
 
 #include "bosonparticlesystemproperties.h"
 
+
+/**
+ * @short Class for drawing particles
+ * This class is used to draw particles properly. It first sorts all particles
+ * by depth and then draws them in this order.
+ *
+ * @see BosonParticleSystem
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoParticleManager : public QPtrList<BosonParticle>
+{
+  public:
+    BoParticleManager() {};
+    ~BoParticleManager() {};
+    void draw(QPtrList<BosonParticleSystem>* systems, const BoVector3& camera);
+    virtual int compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2);
+    void viewportChanged()  { mViewportDirty = true; };
+
+  private:
+    BoVector3 mCameraPos;
+    bool mViewportDirty;
+};
 
 /**
  * @short This class represents a single particle.
@@ -39,13 +63,10 @@ class BosonParticle
 {
   public:
     /**
-     * Constructs particle. All properties are resetted (set to zero)
+     * Constructs particle. Only life is set to -1, other variables remain
+     * uninitialized (call @ref reset to reset them).
      **/
     BosonParticle();
-    /**
-     * Constructs particle and sets properties to given arguments
-     **/
-    BosonParticle(BoVector4 color, BoVector3 pos, BoVector3 velo, float size, float life = 0);
     ~BosonParticle();
 
     /**
@@ -54,6 +75,9 @@ class BosonParticle
      * @param elapsed How much time in seconds has elapsed since last update.
      **/
     void update(float elapsed);
+    /**
+     * Resets all variables. Usually there is no need to call this
+     **/
     void reset();
 
     BoVector4 color;  // Current color of particle
@@ -63,6 +87,8 @@ class BosonParticle
     float life;  // How many remaining seconds particles has left to live, before it dies
     float maxage;
     GLuint tex;  // Current texture. This is cached here for performance reasons
+    BosonParticleSystem* system;  // Parent of this particle
+    float distance;  // Distance from camera. This is cached here to improve performance
 };
 
 /**
@@ -78,6 +104,9 @@ class BosonParticle
  * is updated or initialized (resetted). If you want even more flexibility, then
  * you can write you own subclass; most important methods are virtual, so you
  * can change them if you really want to.
+ *
+ * FIXME: some docus here are obsolete
+ *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonParticleSystem
@@ -137,8 +166,10 @@ class BosonParticleSystem
      * custom blending functions (see @ref setBlendFunc), you may want to reset
      * blending functions after calling this.
      **/
-    virtual void draw();
-    
+    virtual void draw(QPtrListIterator<BosonParticle>& iterator);
+
+    virtual void preDraw();
+
     /**
      * Moves all active particles by v
      **/
@@ -277,6 +308,10 @@ class BosonParticleSystem
     float mParticleAge;  // How many seconds particles live
 
     const BosonParticleSystemProperties* mProp;
+
+    BoVector3 nw, ne, sw, se;  // Coordinates of particle base vertexes
+
+    friend class BoParticleManager;
 };
 
 #endif // BOSONPARTICLESYSTEM_H

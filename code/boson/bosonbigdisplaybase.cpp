@@ -368,6 +368,7 @@ public:
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
+		mParticleManager = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -410,6 +411,9 @@ public:
 	bool mIsQuit;
 
 	QPoint mCanvasPos;
+
+	BoParticleManager* mParticleManager;
+	BoVector3 mCameraPos;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -497,7 +501,7 @@ void BosonBigDisplayBase::initializeGL()
  }
  */
  glClearColor(0.0, 0.0, 0.0, 0.0);
- glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
+ glShadeModel(GL_SMOOTH); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this (and its enabled by default)
 
  // for anti-aliased lines (currently unused):
@@ -509,6 +513,15 @@ void BosonBigDisplayBase::initializeGL()
 
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
+ float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
+ float lightDif[] = {1.0, 1.0, 1.0, 1.0};
+ float lightPos[] = {-500.0, 300.0, 200.0, 1.0};
+ glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
+ glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
+ glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+ glEnable(GL_LIGHT0);
+ //glEnable(GL_LIGHTING);
+
  if (checkError()) {
 	boError() << k_funcinfo << endl;
  }
@@ -519,6 +532,8 @@ void BosonBigDisplayBase::initializeGL()
 
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
+
+ d->mParticleManager = new BoParticleManager;
 
  // the actual GL initializing should be done now.
  d->mInitialized = true;
@@ -793,11 +808,10 @@ void BosonBigDisplayBase::paintGL()
  
  // Render particle systems
  boProfiling->renderParticles(true);
- int count = canvas()->particleSystemsCount();
- if (count > 0) {
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
+ if (canvas()->particleSystemsCount() > 0) {
+	// We sort out non-visible systems ourselves
 	QPtrListIterator<BosonParticleSystem> it(*(canvas()->particleSystems()));
+	QPtrList<BosonParticleSystem> visible;
 	BosonParticleSystem* s;
 	while ((s = it.current()) != 0) {
 		++it;
@@ -815,13 +829,22 @@ void BosonBigDisplayBase::paintGL()
 			// accuracy of opengl coordinates is needed.
 			int cellX = (int)s->position()[0];
 			int cellY = -((int)s->position()[1]);
+			// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
 			if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
-				s->draw();
+				visible.append(s);
 			}
 		}
 	}
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_BLEND);
+	if(visible.count() > 0) {
+		glEnable(GL_DEPTH_TEST);
+		glDepthMask(GL_FALSE);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_BLEND);
+		d->mParticleManager->draw(&visible, d->mCameraPos);
+		glDepthMask(GL_TRUE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_BLEND);
+	}
  }
  boProfiling->renderParticles(false);
 
@@ -1755,6 +1778,7 @@ void BosonBigDisplayBase::cameraChanged()
  eyeX = lookatX + diffX;
  eyeY = lookatY + diffY;
  eyeZ = lookatZ + camera()->z();
+ d->mCameraPos.set(eyeX, eyeY, eyeZ);
  float upX, upY, upZ;  // up vector (points straight up in viewport)
  upX = -diffX;
  upY = -diffY;

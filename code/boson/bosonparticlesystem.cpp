@@ -25,21 +25,101 @@
 
 #include <GL/gl.h>
 
+
+/*****  BoParticleManager  *****/
+
+void BoParticleManager::draw(QPtrList<BosonParticleSystem>* systems, const BoVector3& camera)
+{
+  if(systems->count() == 0)
+  {
+    return;
+  }
+  mCameraPos = camera;
+  clear();
+  // Add all particles to the list
+  QPtrListIterator<BosonParticleSystem> it(*systems);
+  BosonParticleSystem* s;
+  float x, y, z;
+  BosonParticle* p;
+  while((s = it.current()) != 0)
+  {
+    ++it;
+    for(int i = 0; i < s->mMaxNum; i++)
+    {
+      if(s->mParticles[i].life > 0.0)
+      {
+        p = &(s->mParticles[i]);
+        // Calculate distance from camera. Note that for performance reasons,
+        //  we don't calculate actual distance, but square of it.
+        x = p->pos.x() - mCameraPos.x();
+        y = p->pos.y() - mCameraPos.y();
+        z = p->pos.z() - mCameraPos.z();
+        p->distance = (x*x + y*y + z*z);
+        // Append to list
+        append(p);
+      }
+    }
+  }
+
+  if(count() == 0)
+  {
+    return;
+  }
+
+  // Sort the list
+  sort();
+
+  // Call pre-draw methods
+  it.toFirst();
+  while((s = it.current()) != 0)
+  {
+    ++it;
+    s->preDraw();
+  }
+
+  /// Draw particles
+  QPtrListIterator<BosonParticle> i(*this);
+  //boDebug() << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
+  while((p = i.current()) != 0)
+  {
+    // To make things faster (again), we call BosonParticleSystem::draw() only
+    //  when particle system of current particle changes.
+    //boDebug() << k_funcinfo << "Drawing loop; current particle's distance: " << p->distance << endl;
+    p->system->draw(i);
+  }
+  //boDebug() << k_funcinfo << "Drawing completed" << endl;
+  glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
+}
+
+int BoParticleManager::compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2)
+//int BoParticleManager::compareItems(BosonParticle* item1, BosonParticle* item2)
+{
+  float d1, d2;
+  d1 = ((BosonParticle*)item1)->distance;
+  d2 = ((BosonParticle*)item2)->distance;
+  //boDebug() << k_funcinfo << "d1: " << d1 << "; d2: " << d2 << endl;
+  if(d1 > d2)
+  {
+    return -1;
+  }
+  else if(d1 == d2)
+  {
+    return 0;
+  }
+  else
+  {
+    return 1;
+  }
+}
+
+
+
 /*****  BosonParticle  *****/
 
 BosonParticle::BosonParticle()
 {
-  reset();
-}
-
-BosonParticle::BosonParticle(BoVector4 c, BoVector3 p, BoVector3 v, float s, float l)
-{
-  color = c;
-  pos = p;
-  velo = v;
-  size = s;
-  life = l;
-  maxage = l;
+  // Only reset life
+  life = -1.0;
 }
 
 BosonParticle::~BosonParticle()
@@ -54,6 +134,9 @@ void BosonParticle::reset()
   size = 0;
   life = -1.0;
   maxage = 0;
+  tex = 0;
+  system = 0l;
+  distance = 0.0;
 }
 
 void BosonParticle::update(float elapsed)
@@ -202,30 +285,12 @@ void BosonParticleSystem::update(float elapsed)
 
 //#define NEW_TRANFORM_CODE
 
-void BosonParticleSystem::draw()
+void BosonParticleSystem::preDraw()
 {
-//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
-  // Complex method. Parts of this method are taken from Plib project (plib.sf.net)
-  // Return if there are no living particles
-  if(mNum <= 0)
-  {
-    return;
-  }
-
-  // Some variables first
-  BoVector3 nw, ne, sw, se;  // Coordinates of particle vertexes
-  
-  // Matrix transformations first
-  glPushMatrix();
-  glTranslatef(mPos[0], mPos[1], mPos[2]);
-  glRotatef(mRot[0], 1.0, 0.0, 0.0);
-  glRotatef(mRot[1], 0.0, 1.0, 0.0);
-  glRotatef(mRot[2], 0.0, 0.0, 1.0);
-
+  // TODO: perf: this method should have an argument 'bool camerachanged' and we
+  //  should recalculate this stuff only if it's true.
   // Align if needed
-#ifdef NEW_TRANFORM_CODE
-  BoMatrix matrix(GL_MODELVIEW_MATRIX);
-#else
+#ifndef NEW_TRANFORM_CODE
   float size = mSize / 2.0;
   if(mAlign)
   {
@@ -249,22 +314,54 @@ void BosonParticleSystem::draw()
     sw.set(-size, size, 0);
   }
 #endif
+}
+
+void BosonParticleSystem::draw(QPtrListIterator<BosonParticle>& it)
+{
+//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
+  // Complex method. Parts of this method are taken from Plib project (plib.sf.net)
+  // Return if there are no living particles
+  if(mNum <= 0)
+  {
+    return;
+  }
+
+#ifdef NEW_TRANSFORM_CODE
+  BoMatrix matrix(GL_MODELVIEW_MATRIX);  // FIXME: this must be cached too!
+#endif
+
+  // Matrix transformations first
+  // TODO: we must in the future use matrix inside BosonParticleSystem for
+  //  particle coordinate calculations. This would enable us to reenable wind
+  //  and maybe we'd also get rid of these things here
+  glPushMatrix();
+  glTranslatef(mPos[0], mPos[1], mPos[2]);
+  glRotatef(mRot[0], 1.0, 0.0, 0.0);
+  glRotatef(mRot[1], 0.0, 1.0, 0.0);
+  glRotatef(mRot[2], 0.0, 0.0, 1.0);
 
   // Update particles
 //  int num = 0;
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
+  // TODO: perf: how much would it make things faster if we'd cache current OGL
+  //  blend function somewhere and only change it if necessary?
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
   
   // FIXME: between glBegin() and glEnd() there should be as little code as
   // possible, i.e. try to get around the loop and so.
-  // FIXME: can't we use a display list here?
   // FIXME: maybe we can use vertex arrays here?
   GLuint lasttex = 0;
   glBegin(GL_QUADS);
-  for(int i = 0; i < mMaxNum; i++)
+  BosonParticle* p;
+  while((p = it.current()) != 0)
   {
+    // Don't draw other systems' particles
+    if(p->system != this)
+    {
+      break;
+    }
     // Don't draw dead particles
-    if(mParticles[i].life <= 0.0)
+    if(p->life <= 0.0)
     {
       continue;
     }
@@ -273,36 +370,40 @@ void BosonParticleSystem::draw()
 
 #ifdef NEW_TRANFORM_CODE
     BoVector3 center;
-    matrix.transform(&center, &(mParticles[i].pos));
+    matrix.transform(&center, &(p->pos));
 
-    a = center + BoVector3(-mParticles[i].size, mParticles[i].size, 0);
-    b = center + BoVector3(mParticles[i].size, mParticles[i].size, 0);
-    c = center + BoVector3(mParticles[i].size, -mParticles[i].size, 0);
-    d = center + BoVector3(-mParticles[i].size, -mParticles[i].size, 0);
+    a = center + BoVector3(-(p->size), p->size, 0);
+    b = center + BoVector3(p->size, p->size, 0);
+    c = center + BoVector3(p->size, -(p->size), 0);
+    d = center + BoVector3(-(p->size), -(p->size), 0);
 #else
-    a.setScaledSum(mParticles[i].pos, nw, mParticles[i].size);
-    b.setScaledSum(mParticles[i].pos, ne, mParticles[i].size);
-    c.setScaledSum(mParticles[i].pos, se, mParticles[i].size);
-    d.setScaledSum(mParticles[i].pos, sw, mParticles[i].size);
+    a.setScaledSum(p->pos, nw, p->size);
+    b.setScaledSum(p->pos, ne, p->size);
+    c.setScaledSum(p->pos, se, p->size);
+    d.setScaledSum(p->pos, sw, p->size);
 #endif
 
-    if(lasttex != mParticles[i].tex)
+    // TODO: perf: we would also store last used texture in BoParticleManager
+    //  and only change it if necessary (also see above about blend func)
+    if(lasttex != p->tex)
     {
       // This is ugly but it makes things faster
+      //boDebug() << k_funcinfo << "Different texture: last: " << lasttex << "; new: " << p->tex << endl;
+      lasttex = p->tex;
       glEnd();
-      glBindTexture(GL_TEXTURE_2D, mParticles[i].tex);  // FIXME: multiple textures support!!!
+      glBindTexture(GL_TEXTURE_2D, p->tex);
       glBegin(GL_QUADS);
     }
-    glColor4fv(mParticles[i].color.data());
+    glColor4fv(p->color.data());
     glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
     glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
     glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
     glTexCoord2f(0.0, 0.0);  glVertex3fv(d.data());
 //    num++;
+    ++it;
   }
   glEnd();
 
-  glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
   glPopMatrix();
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
 }
@@ -315,6 +416,7 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   particle->size = mSize;
   particle->velo = mVelo;
   particle->tex = mTextures.mTextureIds[0];
+  particle->system = this;
   if(mProp)
   {
     mProp->initParticle(this, particle);
