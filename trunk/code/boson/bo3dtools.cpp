@@ -585,6 +585,23 @@ float Bo3dTools::rad2deg(float rad)
   return rad * RAD2DEG;
 }
 
+float Bo3dTools::sphereInFrustum(double* viewFrustum, const BoVector3& pos, float radius)
+{
+  // FIXME: performance: we might unroll the loop and then make this function
+  // inline. We call it pretty often!
+  float distance;
+  for(int p = 0; p < 6; p++)
+  {
+    distance = viewFrustum[p * 4 + 0] * pos[0] + viewFrustum[p * 4 + 1] * pos[1] +
+        viewFrustum[p * 4 + 2] * pos[2] + viewFrustum[p * 4 + 3];
+    if(distance <= -radius)
+    {
+      return 0;
+    }
+  }
+  return distance + radius;
+}
+
 
 /*
  * vim:et sw=2
