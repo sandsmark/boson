@@ -462,9 +462,9 @@ void BosonProfilingDialog::initSlotAdvanceWidget(QWidget* widget)
  d->mSlotAdvance->addColumn(i18n("Time (s)"));
  d->mSlotAdvance->addColumn(i18n("%"));
  QHBox* slotAdvanceControlBox = new QHBox(widget);
- d->mSlotAdvanceSumAverageOnly = new QCheckBox(i18n("Average only"), slotAdvanceControlBox);
+ d->mSlotAdvanceSumAverageOnly = new QCheckBox(i18n("Average and sum only"), slotAdvanceControlBox);
  d->mSlotAdvanceSumAverageOnly->setChecked(true);
- d->mSlotAdvanceSumAverageForCount = new QCheckBox(i18n("Average for AdvanceCount"), slotAdvanceControlBox);
+ d->mSlotAdvanceSumAverageForCount = new QCheckBox(i18n("Average and sum for AdvanceCount"), slotAdvanceControlBox);
  d->mSlotAdvanceSumAverageForCount->setChecked(true);
 
  d->mSlotAdvanceSummary = new SlotAdvanceSummary(widget);
@@ -795,12 +795,17 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
  }
 
  QListViewItemNumber* average = new QListViewItemNumber(d->mSlotAdvance);
+ QListViewItemNumber* sum = new QListViewItemNumber(d->mSlotAdvance);
  average->setText(0, i18n("Average - use with care"));
+ sum->setText(0, i18n("Sum"));
  initSlotAdvanceItem(average, -1, slotAdvanceValueNames[0], slotAdvanceSums[0].average(), slotAdvanceSums[0].average());
+ initSlotAdvanceItem(sum, -1, slotAdvanceValueNames[0], slotAdvanceSums[0].sum(), slotAdvanceSums[0].sum());
  for (unsigned int i = 1; i < slotAdvanceValueNames.count(); i++) { // we skip the function entry!
 	initSlotAdvanceItem(new QListViewItemNumber(average), -1, slotAdvanceValueNames[i], slotAdvanceSums[i].average(), slotAdvanceSums[0].average());
+	initSlotAdvanceItem(new QListViewItemNumber(sum), -1, slotAdvanceValueNames[i], slotAdvanceSums[i].sum(), slotAdvanceSums[0].sum());
  }
  average->setOpen(true);
+ sum->setOpen(true);
 
  // a separate summary for ever advance count. we do special things there, e.g.
  // shots are delete for MAXIMAL_ADVANCE_COUNT only. so this might be useful to
@@ -819,11 +824,17 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
 
 	for (unsigned int i = 0; i < advanceCalls.count(); i++) {
 		QListViewItemNumber* average = new QListViewItemNumber(d->mSlotAdvance);
+		QListViewItemNumber* sum = new QListViewItemNumber(d->mSlotAdvance);
 		average->setText(0, i18n("Average - use with care"));
+		sum->setText(0, i18n("Sum"));
 		initSlotAdvanceItem(average, advanceCalls[i],
 				slotAdvanceValueNames[0],
 				slotAdvanceSums[0].average(advanceCalls[i]),
 				slotAdvanceSums[0].average(advanceCalls[i]));
+		initSlotAdvanceItem(sum, advanceCalls[i],
+				slotAdvanceValueNames[0],
+				slotAdvanceSums[0].sum(advanceCalls[i]),
+				slotAdvanceSums[0].sum(advanceCalls[i]));
 		for (unsigned int j = 1; j < slotAdvanceValueNames.count(); j++) {
 			if (!slotAdvanceSums[j].hasAdvanceCall(advanceCalls[i])) {
 				continue;
@@ -833,8 +844,12 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
 					slotAdvanceValueNames[j],
 					slotAdvanceSums[j].average(advanceCalls[i]),
 					slotAdvanceSums[0].average(advanceCalls[i]));
+			initSlotAdvanceItem(new QListViewItemNumber(sum),
+					advanceCalls[i],
+					slotAdvanceValueNames[j],
+					slotAdvanceSums[j].sum(advanceCalls[i]),
+					slotAdvanceSums[0].sum(advanceCalls[i]));
 		}
-
 	}
  }
 
