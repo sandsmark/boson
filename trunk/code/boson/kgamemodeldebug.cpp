@@ -1302,7 +1302,7 @@ void BoNodeObjectDataWidget::setNodeObjectData(Lib3dsObjectData* d)
 	bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0], 0, 'f', prec).arg(d->bbox_min[1], 0, 'f', prec).arg(d->bbox_min[2], 0, 'f', prec);
 	bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0], 0, 'f', prec).arg(d->bbox_max[1], 0, 'f', prec).arg(d->bbox_max[2], 0, 'f', prec);
 	pos = QString("(%1,%2,%3)").arg(d->pos[0], 0, 'f', prec).arg(d->pos[1], 0, 'f', prec).arg(d->pos[2], 0, 'f', prec);
-	rot = QString("(%1,%2,%3,%4)").arg(d->rot[0], 0, 'f', prec).arg(d->rot[1], 0, 'f', prec).arg(d->rot[2], 0, 'f', prec).arg(d->rot[3], 0, 'f', prec);
+	rot = QString("((%1,%2,%3),%4))").arg(d->rot[0], 0, 'f', prec).arg(d->rot[1], 0, 'f', prec).arg(d->rot[2], 0, 'f', prec).arg(d->rot[3], 0, 'f', prec);
 
 	float rX = 0.0f, rY = 0.0f, rZ = 0.0f;
 #if 0
