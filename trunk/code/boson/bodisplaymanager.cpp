@@ -559,69 +559,6 @@ void BoDisplayManager::slotUnitChanged(Unit* unit)
  }
 }
 
-void BoDisplayManager::slotSetDebugMapCoordinates(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugMapCoordinates(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugShowCellGrid(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugShowCellGrid(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugMatrices(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugMatrices(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugItemWorks(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugItemWorks(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugCamera(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugCamera(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugRenderCounts(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugRenderCounts(debug);
-	++it;
- }
-}
-
-void BoDisplayManager::slotSetDebugBoundingBoxes(bool debug)
-{
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	it.current()->setDebugBoundingBoxes(debug);
-	++it;
- }
-}
-
 void BoDisplayManager::unlockAction()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);

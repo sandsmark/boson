@@ -235,6 +235,15 @@ protected slots:
 	 **/
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
 
+
+	void slotSetDebugMapCoordinates(bool);
+	void slotSetDebugShowCellGrid(bool);
+	void slotSetDebugMatrices(bool);
+	void slotSetDebugItemWorks(bool);
+	void slotSetDebugCamera(bool);
+	void slotSetDebugRenderCounts(bool);
+	void slotSetDebugBoundingBoxes(bool);
+
 protected:
 	void setLocalPlayerRecursively(Player* p);
 	void checkDockStatus();

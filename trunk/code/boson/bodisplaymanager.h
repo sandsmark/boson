@@ -212,14 +212,6 @@ public slots:
 
 	void slotAction(BoSpecificAction);
 
-	void slotSetDebugMapCoordinates(bool);
-	void slotSetDebugShowCellGrid(bool);
-	void slotSetDebugMatrices(bool);
-	void slotSetDebugItemWorks(bool);
-	void slotSetDebugCamera(bool);
-	void slotSetDebugRenderCounts(bool);
-	void slotSetDebugBoundingBoxes(bool);
-
 signals:
 	/**
 	 * Emitted when the currently active display changes.

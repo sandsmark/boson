@@ -586,13 +586,6 @@ public:
 	PlacementPreview mPlacementPreview;
 	BoGLToolTip* mToolTips;
 
-	bool mDebugMapCoordinates;
-	bool mDebugShowCellGrid;
-	bool mDebugMatrices;
-	bool mDebugItemWorks;
-	bool mDebugCamera;
-	bool mDebugRenderCounts;
-	bool mDebugBoundingBoxes;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -632,13 +625,6 @@ void BosonBigDisplayBase::init()
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
  d->mParticlesDirty = true;
- d->mDebugMapCoordinates = false;
- d->mDebugShowCellGrid = false;
- d->mDebugMatrices = false;
- d->mDebugItemWorks = false;
- d->mDebugRenderCounts = false;
- d->mDebugBoundingBoxes = false;
- d->mDebugCamera = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -1059,7 +1045,7 @@ void BosonBigDisplayBase::renderItems()
 
 	glTranslatef(-x, -y, -z);
 
-	if (d->mDebugBoundingBoxes) {
+	if (boConfig->debugBoundingBoxes()) {
 		// Corners of bb of item
 		BoVector3 c1(item->x(), item->y(), item->z());
 		c1.canvasToWorld();
@@ -1218,6 +1204,7 @@ void BosonBigDisplayBase::renderSelectionRect()
 
 void BosonBigDisplayBase::renderText()
 {
+ BO_CHECK_NULL_RET(localPlayer());
  glListBase(d->mDefaultFont->displayList());
  const int border = 5;
 
@@ -1231,7 +1218,7 @@ void BosonBigDisplayBase::renderText()
  int y = d->mViewport[3] - border;
  y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
- if (d->mDebugMapCoordinates) {
+ if (boConfig->debugMapCoordinates()) {
 	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
 			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
 			arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
@@ -1256,7 +1243,7 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
- if (d->mDebugMatrices) {
+ if (boConfig->debugOpenGLMatrices()) {
 	int x = border;
 	int y = d->mViewport[3] - border;
 	BoMatrix model(d->mModelviewMatrix);
@@ -1323,7 +1310,7 @@ void BosonBigDisplayBase::renderText()
  }
  x = border;
  y = d->mViewport[3] - border;
- if (d->mDebugItemWorks) {
+ if (boConfig->debugItemWorkStatistics()) {
 	QMap<int, int> workCounts = *canvas()->workCounts();
 	QString text;
 	text += i18n("Item work statistics:\n");
@@ -1344,7 +1331,7 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
  }
- if (d->mDebugCamera) {
+ if (boConfig->debugOpenGLCamera()) {
 	const BoVector3 lookAt = camera()->lookAt();
 	QString text;
 	text += i18n("Camera:\n");
@@ -1357,7 +1344,7 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 	y -= d->mDefaultFont->height();
  }
- if (d->mDebugRenderCounts) {
+ if (boConfig->debugRenderCounts()) {
 	QString text;
 	text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
 	text += i18n("Cells rendered: %1\n").arg(d->mRenderedCells);
@@ -1466,7 +1453,7 @@ void BosonBigDisplayBase::renderCells()
  glDisable(GL_BLEND);
  glEnable(GL_DEPTH_TEST);
 
- if (d->mDebugShowCellGrid) {
+ if (boConfig->debugShowCellGrid()) {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_DEPTH_TEST);
@@ -1546,6 +1533,7 @@ void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap,
 
 void BosonBigDisplayBase::renderParticles()
 {
+ BO_CHECK_NULL_RET(localPlayer());
  // Return if there aren't any particle systems
  if (canvas()->particleSystemsCount() == 0) {
 	return;
@@ -2396,6 +2384,8 @@ void BosonBigDisplayBase::moveSelectionRect(const QPoint& widgetPos)
 void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
  BO_CHECK_NULL_RET(displayInput());
+ // only PlayerIO should be allowed to select units! there we should always
+ // check whether a unit is fogged or not before selecting it!
  if (d->mSelectionRect.isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
@@ -2420,7 +2410,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	}
 	BoVector3 canvasVector;
 	worldToCanvas(x, y, z, &canvasVector);
-	Unit* unit = 0l;
+	Unit* unit = 0;
 	if (!canvas()->onCanvas(canvasVector)) {
 		boError() << k_funcinfo << canvasVector.x() << "," << canvasVector.y() << " is not on the canvas!" << endl;
 		return;
@@ -2436,7 +2426,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		displayInput()->selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
-		if (localPlayer() == unit->owner()) {
+		if (unit->owner() == localPlayer()) {
 			unit->playSound(SoundOrderSelect);
 		}
 	} else {
@@ -3199,41 +3189,6 @@ void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
 BosonBigDisplayInputBase* BosonBigDisplayBase::displayInput() const
 {
  return d->mInput;
-}
-
-void BosonBigDisplayBase::setDebugMapCoordinates(bool debug)
-{
- d->mDebugMapCoordinates = debug;
-}
-
-void BosonBigDisplayBase::setDebugShowCellGrid(bool debug)
-{
- d->mDebugShowCellGrid = debug;
-}
-
-void BosonBigDisplayBase::setDebugMatrices(bool debug)
-{
- d->mDebugMatrices = debug;
-}
-
-void BosonBigDisplayBase::setDebugItemWorks(bool debug)
-{
- d->mDebugItemWorks = debug;
-}
-
-void BosonBigDisplayBase::setDebugCamera(bool debug)
-{
- d->mDebugCamera = debug;
-}
-
-void BosonBigDisplayBase::setDebugRenderCounts(bool debug)
-{
- d->mDebugRenderCounts = debug;
-}
-
-void BosonBigDisplayBase::setDebugBoundingBoxes(bool debug)
-{
- d->mDebugBoundingBoxes = debug;
 }
 
 void BosonBigDisplayBase::setToolTipCreator(int type)

@@ -640,32 +640,32 @@ void BosonWidgetBase::initKActions()
 		KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
  mapCoordinates->setChecked(false);
  connect(mapCoordinates, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugMapCoordinates(bool)));
+		this, SLOT(slotSetDebugMapCoordinates(bool)));
  KToggleAction* cellGrid = new KToggleAction(i18n("Show Cell &Grid"),
 		KShortcut(), 0, 0, actionCollection(), "debug_cell_grid");
  cellGrid->setChecked(false);
  connect(cellGrid, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugShowCellGrid(bool)));
+		this, SLOT(slotSetDebugShowCellGrid(bool)));
  KToggleAction* matrices = new KToggleAction(i18n("Debug Ma&trices"),
 		KShortcut(), 0, 0, actionCollection(), "debug_matrices");
  matrices->setChecked(false);
  connect(matrices, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugMatrices(bool)));
+		this, SLOT(slotSetDebugMatrices(bool)));
  KToggleAction* works = new KToggleAction(i18n("Debug Item works"),
 		KShortcut(), 0, 0, actionCollection(), "debug_works");
  works->setChecked(false);
  connect(works, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugItemWorks(bool)));
+		this, SLOT(slotSetDebugItemWorks(bool)));
  KToggleAction* camera = new KToggleAction(i18n("Debug camera"),
 		KShortcut(), 0, 0, actionCollection(), "debug_camera");
  camera->setChecked(false);
  connect(camera, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugCamera(bool)));
+		this, SLOT(slotSetDebugCamera(bool)));
  KToggleAction* rendercounts = new KToggleAction(i18n("Debug Rendering counts"),
 		KShortcut(), 0, 0, actionCollection(), "debug_rendercounts");
  rendercounts->setChecked(false);
  connect(rendercounts, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugRenderCounts(bool)));
+		this, SLOT(slotSetDebugRenderCounts(bool)));
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
@@ -678,7 +678,7 @@ void BosonWidgetBase::initKActions()
 		KShortcut(), 0, 0, actionCollection(), "debug_boundingboxes");
  boundingboxes->setChecked(false);
  connect(boundingboxes, SIGNAL(toggled(bool)),
-		displayManager(), SLOT(slotSetDebugBoundingBoxes(bool)));
+		this, SLOT(slotSetDebugBoundingBoxes(bool)));
 
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
@@ -1101,5 +1101,40 @@ void BosonWidgetBase::slotApplyOptions()
  displayManager()->slotUpdateIntervalChanged(boConfig->updateInterval()); // FIXME: no slot anymore
  displayManager()->setToolTipCreator(boConfig->toolTipCreator());
  displayManager()->setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
+}
+
+void BosonWidgetBase::slotSetDebugMapCoordinates(bool debug)
+{
+ boConfig->setDebugMapCoordinates(debug);
+}
+
+void BosonWidgetBase::slotSetDebugShowCellGrid(bool debug)
+{
+ boConfig->setDebugShowCellGrid(debug);
+}
+
+void BosonWidgetBase::slotSetDebugMatrices(bool debug)
+{
+ boConfig->setDebugOpenGLMatrices(debug);
+}
+
+void BosonWidgetBase::slotSetDebugItemWorks(bool debug)
+{
+ boConfig->setDebugItemWorkStatistics(debug);
+}
+
+void BosonWidgetBase::slotSetDebugCamera(bool debug)
+{
+ boConfig->setDebugOpenGLCamera(debug);
+}
+
+void BosonWidgetBase::slotSetDebugRenderCounts(bool debug)
+{
+ boConfig->setDebugRenderCounts(debug);
+}
+
+void BosonWidgetBase::slotSetDebugBoundingBoxes(bool debug)
+{
+ boConfig->setDebugBoundingBoxes(debug);
 }
 

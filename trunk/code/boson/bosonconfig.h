@@ -308,6 +308,27 @@ public:
 	void setWireFrames(bool on) { mWireFrames = on; }
 	bool wireFrames() const { return mWireFrames; }
 
+	void setDebugOpenGLMatrices(bool debug) { mDebugOpenGLMatrices = debug; }
+	bool debugOpenGLMatrices() const { return mDebugOpenGLMatrices; }
+
+	void setDebugMapCoordinates(bool debug) { mDebugMapCoordinates = debug; }
+	bool debugMapCoordinates() const { return mDebugMapCoordinates; }
+
+	void setDebugShowCellGrid(bool debug) { mDebugShowCellGrid = debug; }
+	bool debugShowCellGrid() const { return mDebugShowCellGrid; }
+
+	void setDebugItemWorkStatistics(bool debug) { mDebugItemWorkStatistics = debug; }
+	bool debugItemWorkStatistics() const { return mDebugItemWorkStatistics; }
+
+	void setDebugOpenGLCamera(bool debug) { mDebugOpenGLCamera = debug; }
+	bool debugOpenGLCamera() const { return mDebugOpenGLCamera; }
+
+	void setDebugRenderCounts(bool debug) { mDebugRenderCounts = debug; }
+	bool debugRenderCounts() const { return mDebugRenderCounts; }
+
+	void setDebugBoundingBoxes(bool debug) { mDebugBoundingBoxes = debug; }
+	bool debugBoundingBoxes() const { return mDebugBoundingBoxes; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -374,6 +395,13 @@ private:
 	float mAIDelay;
 	bool mWantDirect;
 	bool mWireFrames;
+	bool mDebugOpenGLMatrices;
+	bool mDebugMapCoordinates;
+	bool mDebugShowCellGrid;
+	bool mDebugItemWorkStatistics;
+	bool mDebugOpenGLCamera;
+	bool mDebugRenderCounts;
+	bool mDebugBoundingBoxes;
 };
 
 #endif
