@@ -220,6 +220,15 @@ QPoint PlayerIO::homeBase() const
 		(int)commandCenter->y());
 }
 
+BosonItem* PlayerIO::findItemAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const
+{
+ BO_CHECK_NULL_RET0(canvas);
+ if (canSee(canvasVector)) {
+	return canvas->findItemAt(canvasVector);
+ }
+ return 0;
+}
+
 Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const
 {
  BO_CHECK_NULL_RET0(canvas);
