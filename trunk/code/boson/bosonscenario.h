@@ -108,7 +108,7 @@ public:
 	/**
 	 * Add all available player units to the game, add minerals, ...
 	 **/
-	void startScenario(Boson* boson);
+	bool startScenario(Boson* boson) const;
 
 	bool isValid() const;
 

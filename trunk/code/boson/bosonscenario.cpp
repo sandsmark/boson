@@ -40,12 +40,12 @@
 class BosonScenarioBuilder
 {
 public:
-	BosonScenarioBuilder(BosonScenario* s)
+	BosonScenarioBuilder(const BosonScenario* s)
 	{
 		mScenario = s;
 	}
 
-	bool startScenario(Boson* boson);
+	bool startScenario(Boson* boson) const;
 
 	static bool loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
 	static bool loadUnit(const QDomElement& node, Unit* unit);
@@ -54,7 +54,7 @@ protected:
 	static bool loadMobile(const QDomElement& node, MobileUnit* mob);
 	static bool loadFacility(const QDomElement& node, Facility* fac);
 
-	bool loadPlayer(const QDomElement& node, Player* p);
+	bool loadPlayer(const QDomElement& node, Player* p) const;
 
 private:
 	const BosonScenario* mScenario;
@@ -302,10 +302,10 @@ int BosonScenario::maxPlayers() const
  return d->mMaxPlayers;
 }
 
-void BosonScenario::startScenario(Boson* boson)
+bool BosonScenario::startScenario(Boson* boson) const
 {
  BosonScenarioBuilder builder(this);
- builder.startScenario(boson);
+ return builder.startScenario(boson);
 }
 
 bool BosonScenario::initializeScenario()
@@ -549,7 +549,7 @@ bool BosonScenario::saveMobile(QDomElement& node, const MobileUnit* mob)
 }
 
 
-bool BosonScenarioBuilder::startScenario(Boson* boson)
+bool BosonScenarioBuilder::startScenario(Boson* boson) const
 {
  if (!mScenario) {
 	BO_NULL_ERROR(mScenario);
@@ -601,7 +601,7 @@ bool BosonScenarioBuilder::startScenario(Boson* boson)
  }
 
 
- boDebug(250) << k_funcinfo << "players done" << endl;
+ boDebug(250) << k_funcinfo << "player order done" << endl;
  for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
 	unsigned long int minerals = 0;
 	unsigned long int oil = 0;
@@ -656,7 +656,7 @@ bool BosonScenarioBuilder::startScenario(Boson* boson)
  return true;
 }
 
-bool BosonScenarioBuilder::loadPlayer(const QDomElement& node, Player* p)
+bool BosonScenarioBuilder::loadPlayer(const QDomElement& node, Player* p) const
 {
  QDomNodeList list = node.elementsByTagName("Unit");
 
