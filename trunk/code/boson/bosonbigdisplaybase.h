@@ -344,6 +344,8 @@ protected slots:
 
 	void slotMouseIODestroyed();
 
+	void slotInitMiniMapFogOfWar();
+
 protected:
 	/**
 	 * Here the defined action for a wheel event should happen. See
@@ -419,6 +421,8 @@ protected:
 	 * Called by @ref paintGL only to render text on the screen
 	 **/
 	void renderText();
+
+	void renderMiniMap();
 
 	/**
 	 * Called by @ref paintGL only to render the cells on the screen

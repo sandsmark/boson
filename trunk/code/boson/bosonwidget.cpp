@@ -20,7 +20,6 @@
 #include "bosonwidget.h"
 
 #include "defines.h"
-#include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
@@ -72,8 +71,6 @@ void BosonWidget::initDisplayManager()
  BosonWidgetBase::initDisplayManager();
  connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
 		displayManager(), SLOT(slotUnitRemoved(Unit*)));
- connect(minimap(), SIGNAL(signalMoveSelection(int, int)),
-		displayManager(), SLOT(slotMoveActiveSelection(int, int)));
 }
 
 void BosonWidget::initConnections()
@@ -94,15 +91,6 @@ void BosonWidget::initPlayer()
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
-
- connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
-		this, SLOT(slotUnfog(int, int)));
- connect(localPlayer(), SIGNAL(signalFog(int, int)),
-		this, SLOT(slotFog(int, int)));
- connect(localPlayer(), SIGNAL(signalShowMiniMap(bool)),
-		minimap(), SLOT(slotShowMap(bool)));
-
- minimap()->slotShowMap(localPlayer()->hasMiniMap());
 }
 
 BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
@@ -192,7 +180,7 @@ void BosonWidget::slotPlayerKilled(Player* p)
  //  use it instead
  int inGame = 0;
  Player* winner = 0;
- for (unsigned int i = 0; i < boGame->playerList()->count(); i++) {
+ for (unsigned int i = 0; i < boGame->playerList()->count() - 1; i++) { // AB: playerList()->count()-1 is the neutral player, it is never the winner
 	if (!((Player*)boGame->playerList()->at(i))->isOutOfGame()) {
 		winner = (Player*)boGame->playerList()->at(i);
 		inGame++;

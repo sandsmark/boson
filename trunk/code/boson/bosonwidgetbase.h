@@ -39,7 +39,6 @@ class Unit;
 class Player;
 class BoDisplayManager;
 class Boson;
-class BosonMiniMap;
 class BosonPlayField;
 class OptionsDialog;
 class BosonLocalPlayerInput;
@@ -50,7 +49,7 @@ class BosonItem;
  *
  * [obsolete docs got deleted]
  *
- * BosonMiniMap and BosonCommandFrame are in KDockWidgets, which you can drag
+ * BosonCommandFrame is in a KDockWidget, which you can drag
  * around and place to wherever you want
  *
  * The @ref BosonCommandFrame is currently a quite tricky part as the frame
@@ -109,10 +108,9 @@ public:
 	void setLocalPlayer(Player* p, bool init);
 
 	BosonCanvas* canvas() const;
-	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Player* localPlayer() const { return mLocalPlayer; }
-	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
+	BosonLocalPlayerInput* localPlayerInput() const;
 
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame
@@ -156,6 +154,7 @@ public slots:
 	void slotUnfogAll(Player* player = 0);
 
 	void slotDumpGameLog();
+	void slotReloadModelTextures();
 
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
@@ -247,9 +246,6 @@ protected slots:
 	void slotCmdBackgroundChanged(const QString& file);
 
 
-	void slotUnfog(int x, int y);
-	void slotFog(int x, int y);
-
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
@@ -318,7 +314,6 @@ protected:
 private:
 	void initChat(KDockWidget* chatDock);
 
-	void initMiniMap();
 	void initCommandFrame(KDockWidget* commandFrameDock);
 	void initLayout();
 	void initLocalPlayerInput();
@@ -339,7 +334,6 @@ private:
 
 	BosonCursor* mCursor;
 
-	BosonMiniMap* mMiniMap;
 	BoDisplayManager* mDisplayManager;
 	BosonLocalPlayerInput* mLocalPlayerInput;
 };

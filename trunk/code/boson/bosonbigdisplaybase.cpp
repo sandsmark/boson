@@ -52,6 +52,8 @@
 #include "boautocamera.h"
 #include "bogroundrenderer.h"
 #include "bolight.h"
+#include "bosonglminimap.h"
+#include "bomaterial.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
 
@@ -269,6 +271,8 @@ public:
 		mRenderItemList = 0;
 
 		mGroundRenderer = 0;
+
+		mGLMiniMap = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -326,6 +330,8 @@ public:
 	BoGroundRenderer* mGroundRenderer;
 
 	QIntDict<BoLight> mLights;
+
+	BosonGLMiniMap* mGLMiniMap;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -346,6 +352,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete d->mChat;
  delete d->mDefaultFont;
  delete d->mToolTips;
+ delete d->mGLMiniMap;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -373,6 +380,9 @@ void BosonBigDisplayBase::init()
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
  d->mChat = new BosonGLChat(this);
  d->mToolTips = new BoGLToolTip(this);
+ d->mGLMiniMap = new BosonGLMiniMap(this);
+ connect(boGame, SIGNAL(signalCellChanged(int,int)),
+		d->mGLMiniMap, SLOT(slotUpdateCell(int,int)));
 
  for (int i = 0; i < 4; i++) {
 	d->mViewport[i] = 0;
@@ -416,7 +426,44 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		mSelection, SLOT(slotRemoveItem(BosonItem*)));
+ if (d->mGLMiniMap) {
+	if (previousCanvas) {
+		disconnect(previousCanvas, 0, d->mGLMiniMap, 0);
+		disconnect(d->mGLMiniMap, 0, previousCanvas, 0);
+	}
+	disconnect(d->mGLMiniMap, 0, this, 0);
+	disconnect(d->mGLMiniMap, 0, displayInput(), 0);
+	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, float, float)),
+		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, float, float)));
+	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
+		d->mGLMiniMap, SLOT(slotUnitDestroyed(Unit*)));
+ // AB: from bosonwidgetbase.cpp:
+ /*
+ connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
+		minimap(), SLOT(slotMoveRect(
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
+ // I guess we can do this by simply forwarding the view frustum to the minimap
+ // when rendering?
+ */
+
+	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
+			this, SLOT(slotReCenterDisplay(const QPoint&)));
+	connect(d->mGLMiniMap, SIGNAL(signalMoveSelection(int, int)),
+			displayInput(), SLOT(slotMoveSelection(int, int)));
+ }
+
  slotResetViewProperties();
+
+ BO_CHECK_NULL_RET(mCanvas->map());
+ boDebug() << k_funcinfo << endl;
+ BosonMap* map = mCanvas->map();
+ initializeGL();
+ if (d->mGLMiniMap) {
+	d->mGLMiniMap->createMap(map, d->mViewport);
+ } else {
+	BO_NULL_ERROR(d->mGLMiniMap);
+ }
 }
 
 void BosonBigDisplayBase::initializeGL()
@@ -728,6 +775,7 @@ void BosonBigDisplayBase::paintGL()
 
  glEnable(GL_TEXTURE_2D);
 // glEnable(GL_BLEND);
+ renderMiniMap();
 
  renderCursor();
 
@@ -867,6 +915,7 @@ void BosonBigDisplayBase::renderItems()
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
  it = selectedItems->begin();
+ BoMaterial::deactivate();
  while (it != selectedItems->end()) {
 	BosonItem* item = *it;
 	if (!item->isSelected()) {
@@ -1235,6 +1284,11 @@ void BosonBigDisplayBase::renderText()
  }
 }
 
+void BosonBigDisplayBase::renderMiniMap()
+{
+ d->mGLMiniMap->renderMiniMap();
+}
+
 void BosonBigDisplayBase::renderCells()
 {
  BO_CHECK_NULL_RET(canvas());
@@ -1420,10 +1474,23 @@ int BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, cons
 #define LEFT_BUTTON LeftButton
 #define RIGHT_BUTTON RightButton
 
-void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
+void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
 // AB: maybe we could move this function to the displayInput directly!
  BO_CHECK_NULL_RET(displayInput());
+ if (e->type() != QEvent::Wheel) {
+	bool send = false;
+	bool taken = false;
+	if (!taken && d->mGLMiniMap) {
+		taken = d->mGLMiniMap->mouseEvent(io, stream, e, &send);
+	}
+	if (taken) {
+		if (send) {
+			*eatevent = true;
+		}
+		return;
+	}
+ }
  GLfloat posX = 0.0;
  GLfloat posY = 0.0;
  GLfloat posZ = 0.0;
@@ -1805,14 +1872,18 @@ void BosonBigDisplayBase::setActive(bool a)
 void BosonBigDisplayBase::setLocalPlayer(Player* p)
 {
  boDebug() << k_funcinfo << endl;
- if (d->mLocalPlayer == p) {
-	boDebug() << k_funcinfo << "player already set. nothing to do." << endl;
-	return;
- }
- if (localPlayer()) {
+ if (localPlayer() && p) {
+	// note that we do this even if p == d->mLocalPlayer.
+	// we do this to guarantee that _all_ objects are properly initialized
+	// with the new player, even if they did not exist yet when the player was set
+	// the first time
 	boDebug() << k_funcinfo << "already a local player present! unset..." << endl;
+	setLocalPlayer(0);
  }
+
+ Player* previousPlayer = localPlayer();
  d->mLocalPlayer = p;
+
  if (d->mGroundRenderer) {
 	d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
  }
@@ -1820,10 +1891,33 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  delete d->mMouseIO;
  d->mMouseIO = 0;
 
+ if (d->mGLMiniMap) {
+	if (previousPlayer) {
+		disconnect(previousPlayer, 0, d->mGLMiniMap, 0);
+	}
+	if (localPlayer()) {
+		connect(localPlayer(), SIGNAL(signalFog(int, int)),
+				d->mGLMiniMap, SLOT(slotFog(int, int)));
+		connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
+				d->mGLMiniMap, SLOT(slotUnfog(int, int)));
+		if (boGame->gameMode()) {
+			connect(localPlayer(), SIGNAL(signalShowMiniMap(bool)),
+					d->mGLMiniMap, SLOT(slotShowMiniMap(bool)));
+			d->mGLMiniMap->slotShowMiniMap(localPlayer()->hasMiniMap());
+		} else {
+			d->mGLMiniMap->slotShowMiniMap(true);
+		}
+	}
+	d->mGLMiniMap->setLocalPlayerIO(localPlayerIO());
+ }
  if (!localPlayer()) {
 	return;
  }
  addMouseIO(localPlayer());
+
+ if (canvas()) {
+	slotInitMiniMapFogOfWar();
+ }
 }
 
 Player* BosonBigDisplayBase::localPlayer() const
@@ -1939,6 +2033,9 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  boDebug() << k_funcinfo << endl;
+ setLocalPlayer(0);
+ setCanvas(0);
+
  // these are the important things - they *must* be cleared in order to avoid
  // crashes
  d->mToolTips->hideTip();
@@ -1966,6 +2063,9 @@ void BosonBigDisplayBase::quitGame()
  d->mRenderedCells = 0;
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
  d->mCamera = BoGameCamera();
+ if (d->mGLMiniMap) {
+	d->mGLMiniMap->quitGame();
+ }
 
  setInputInitialized(false);
 }
@@ -2645,6 +2745,11 @@ void BosonBigDisplayBase::mapChanged()
  BO_CHECK_NULL_RET(canvas());
  boDebug() << k_funcinfo << endl;
  camera()->setMoveRect(0, canvas()->mapWidth(), -(canvas()->mapHeight()), 0);
+ if (d->mGLMiniMap) {
+	d->mGLMiniMap->createMap(canvas()->map(), d->mViewport);
+ } else {
+	BO_NULL_ERROR(d->mGLMiniMap);
+ }
 }
 
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
@@ -3130,6 +3235,16 @@ QImage BosonBigDisplayBase::screenShot()
  }
  delete[] buffer;
  return image;
+}
+
+void BosonBigDisplayBase::slotInitMiniMapFogOfWar()
+{
+ BO_CHECK_NULL_RET(d->mGLMiniMap);
+ if (boGame->gameMode()) {
+	d->mGLMiniMap->initFogOfWar(localPlayerIO());
+ } else {
+	d->mGLMiniMap->initFogOfWar(0);
+ }
 }
 
 void BosonBigDisplayBase::setFont(const BoFontInfo& font)

@@ -20,7 +20,6 @@
 #include "bosonwidgetbase.h"
 
 #include "defines.h"
-#include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "bosonsaveload.h"
@@ -43,6 +42,7 @@
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
 #include "bosoncomputerio.h"
+#include "bosonmodeltextures.h"
 #include "commandframe/bosoncommandframebase.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
@@ -116,11 +116,9 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
  d = new BosonWidgetBasePrivate;
  d->mInitialized = false;
 
- mMiniMap = 0;
  mDisplayManager = 0;
  mCursor = 0;
  mLocalPlayer = 0;
- mLocalPlayerInput = 0;
 }
 
 BosonWidgetBase::~BosonWidgetBase()
@@ -131,8 +129,6 @@ BosonWidgetBase::~BosonWidgetBase()
 	setDisplayManager(0);
  }
  d->mPlayers.clear();
- // LocalPlayerInput has been deleted already
- mLocalPlayerInput = 0;
 
  delete mCursor;
  delete d->mCommandFrame;
@@ -163,6 +159,14 @@ BosonCanvas* BosonWidgetBase::canvas() const
  return boGame->canvasNonConst();
 }
 
+BosonLocalPlayerInput* BosonWidgetBase::localPlayerInput() const
+{
+ if (!localPlayer()) {
+	return 0;
+ }
+ return (BosonLocalPlayerInput*)localPlayer()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+}
+
 #include <kstandarddirs.h> //locate()
 void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 {
@@ -172,7 +176,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 	return;
  }
  d->mInitialized = true;
- initMiniMap();
  initChat(chatDock);
  initCommandFrame(commandFrameDock);
  initDisplayManager();
@@ -206,8 +209,6 @@ void BosonWidgetBase::initMap()
  }
  BosonMap* map = boGame->playField()->map();
  canvas()->setMap(map);
- minimap()->setMap(map);
- minimap()->initMap();
  displayManager()->mapChanged();
 // boGame->setPlayField(playField()); // already done on startup in BosonStarting
 
@@ -222,18 +223,6 @@ void BosonWidgetBase::initMap()
 	}
  }
 
-}
-
-void BosonWidgetBase::initMiniMap()
-{
- mMiniMap = new BosonMiniMap(0);
- minimap()->hide();
- minimap()->setBackgroundOrigin(WindowOrigin);
-
- connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
-		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
- connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
-		minimap(), SLOT(slotUnitDestroyed(Unit*)));
 }
 
 void BosonWidgetBase::initConnections()
@@ -267,12 +256,6 @@ void BosonWidgetBase::initDisplayManager()
  // therefore we do the same connect twice if an endgame() occurs!
  connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
 		cmdFrame(), SLOT(slotSelectionChanged(BoSelection*)));
- connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
-		minimap(), SLOT(slotMoveRect(
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
- connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-		mDisplayManager, SLOT(slotReCenterActiveDisplay(const QPoint&)));
  connect(cmdFrame(), SIGNAL(signalSelectUnit(Unit*)),
 		mDisplayManager, SLOT(slotActiveSelectSingleUnit(Unit*)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
@@ -329,11 +312,11 @@ void BosonWidgetBase::initPlayer()
 
 void BosonWidgetBase::initLocalPlayerInput()
 {
- mLocalPlayerInput = new BosonLocalPlayerInput();
- localPlayerInput()->setCommandFrame(cmdFrame());
+ BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+ input->setCommandFrame(cmdFrame());
 
  localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
- localPlayer()->addGameIO(localPlayerInput());
+ localPlayer()->addGameIO(input);
 
  connect(localPlayerInput(), SIGNAL(signalAction(const BoSpecificAction&)),
 		mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
@@ -395,7 +378,6 @@ void BosonWidgetBase::initCommandFrame(KDockWidget* commandFrameDock)
 {
  d->mCommandFrame = createCommandFrame(commandFrameDock);
  commandFrameDock->setWidget(d->mCommandFrame);
- d->mCommandFrame->reparentMiniMap(minimap());
 
  connect(commandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
  connect(commandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));
@@ -460,21 +442,6 @@ void BosonWidgetBase::slotUnitRemoved(Unit* unit)
  slotUnitCountChanged(unit->owner());
 }
 
-void BosonWidgetBase::slotFog(int x, int y)
-{
- // very time critical function!!
-
- // slotFog() and slotUnfog() exist here so that we need only a single slot
- // instead of two (on ein minimap and one to actually create/remove the fog)
- // should save some performance (at least I hope)
- minimap()->slotFog(x, y); // FIXME: no need for slot
-}
-
-void BosonWidgetBase::slotUnfog(int x, int y)
-{
- minimap()->slotUnfog(x, y); // FIXME: no need for slot
-}
-
 void BosonWidgetBase::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
 {
  if (p != localPlayer()) {
@@ -495,11 +462,6 @@ void BosonWidgetBase::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer
 
 void BosonWidgetBase::slotInitFogOfWar()
 {
- if (boGame->gameMode()) {
-	minimap()->initFogOfWar(localPlayer());
- } else {
-	minimap()->initFogOfWar(0);
- }
 }
 
 bool BosonWidgetBase::sound() const
@@ -554,8 +516,6 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
  } else {
 	list.append(pl);
  }
- bool minimapUpdatesEnabled = minimap()->isUpdatesEnabled();
- minimap()->setUpdatesEnabled(false);
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
@@ -565,8 +525,6 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 	}
 	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
- minimap()->setUpdatesEnabled(minimapUpdatesEnabled);
- minimap()->update();
 }
 
 void BosonWidgetBase::slotSplitDisplayHorizontal()
@@ -740,6 +698,9 @@ void BosonWidgetBase::initKActions()
  debugMode->setCurrentItem(0);
  d->mActionDebugPlayers = new KActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
+
+ (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
+		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
@@ -954,9 +915,6 @@ void BosonWidgetBase::setLocalPlayer(Player* p, bool init) //AB: probably init =
 void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 {
  mLocalPlayer = p;
- if (minimap()) {
-	minimap()->setLocalPlayer(localPlayer());
- }
  if (displayManager()) {
 	displayManager()->setLocalPlayer(localPlayer());
  }
@@ -1119,7 +1077,6 @@ void BosonWidgetBase::slotApplyOptions()
  // AB: FIXME: cmdbackground is not yet stored in boConfig! that option should
  // be managed here!
  boDebug() << k_funcinfo << endl;
- minimap()->repaint(); // it automatically uses the new scaling factor
  displayManager()->slotUpdateIntervalChanged(boConfig->updateInterval()); // FIXME: no slot anymore
  displayManager()->setToolTipCreator(boConfig->toolTipCreator());
  displayManager()->setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
@@ -1204,5 +1161,11 @@ void BosonWidgetBase::initScripts()
 void BosonWidgetBase::slotDumpGameLog()
 {
  boGame->saveGameLogs("boson");
+}
+
+void BosonWidgetBase::slotReloadModelTextures()
+{
+ BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
+ BosonModelTextures::modelTextures()->reloadTextures();
 }
 

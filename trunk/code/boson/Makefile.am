@@ -33,7 +33,7 @@ BOSON_COMMON_SRC = \
 	playerio.cpp \
 	bo3dtools.cpp \
 	bomatrixwidget.cpp \
-	bosonminimap.cpp \
+	bosonglminimap.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \

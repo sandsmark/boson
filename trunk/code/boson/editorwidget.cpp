@@ -20,7 +20,6 @@
 #include "editorwidget.h"
 
 #include "defines.h"
-#include "bosonminimap.h"
 #include "boson.h"
 #include "bosonmap.h"
 #include "player.h"
@@ -126,8 +125,6 @@ void EditorWidget::initMap()
 
  connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
 		map, SLOT(slotChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)));
- connect(map, SIGNAL(signalCellChanged(int,int)),
-		minimap(), SLOT(slotUpdateCell(int,int)));
 
  // AB: maybe we don't need the connect() above concerning groundtheme. it can't
  // be changed once the map is started
@@ -142,7 +139,8 @@ void EditorWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
 
- minimap()->slotShowMap(true);
+ // FIXME: GL minimap!
+// minimap()->slotShowMap(true);
 }
 
 BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
