@@ -117,7 +117,7 @@ visualMobUnit *visualTopLevel::unSelectMob(long key)
 	visualMobUnit *m = mobSelected[key];
 	if (!m) {
 		logf(LOG_INFO, "asdflkjasdfkahujsdf");
-		return;
+		return 0l;
 	}
 	mobSelected.remove(key);
 	m->unSelect();
