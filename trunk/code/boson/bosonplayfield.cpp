@@ -207,7 +207,6 @@ bool BosonPlayField::loadScenario(QDomElement& root)
 void BosonPlayField::loadMap(QDataStream& stream)
 {
  delete mMap;
- mMap = 0;
  mMap = new BosonMap(this);
  mMap->loadMapGeo(stream);
  mMap->loadCells(stream);
