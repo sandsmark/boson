@@ -502,3 +502,12 @@ void BoDisplayManager::slotUnitRemoved(Unit* u)
 	d->mSelectionGroups[i]->removeUnit(u);
  }
 }
+
+void BoDisplayManager::mapChanged()
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->mapChanged();
+	++it;
+ }
+}

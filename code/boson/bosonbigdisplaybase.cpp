@@ -102,6 +102,8 @@ public:
 		mPosZ = c.mPosZ;
 		mRot = c.mRot;
 		mRadius = c.mRadius;
+		mMapWidth = c.mMapWidth;
+		mMapHeight = c.mMapHeight;
 		return *this;
 	}
 
@@ -109,7 +111,70 @@ public:
 	{
 		mCenterX = x;
 		mCenterY = y;
+		checkPosition();
 		mPosZ = QMAX(CAMERA_MIN_Z, QMIN(CAMERA_MAX_Z, z));
+	}
+	void changeZ(GLfloat diff)
+	{
+		float newz = mPosZ + diff;
+		if(newz < CAMERA_MIN_Z) {
+			newz = CAMERA_MIN_Z;
+		} else if(newz > CAMERA_MAX_Z) {
+			newz = CAMERA_MAX_Z;
+		}
+		float factor = newz / mPosZ;
+		mPosZ = newz;
+		mRadius = mRadius * factor;
+	}
+	void changeRadius(GLfloat diff)
+	{
+		float radius = mRadius + mPosZ / CAMERA_MAX_RADIUS * diff;  // How much radius is changed depends on z position
+		if(radius < 0) {
+			radius = 0;
+		} else if(radius > mPosZ) {
+			radius = mPosZ;
+		}
+		mRadius = radius;
+	}
+	void changeRotation(GLfloat diff)
+	{
+		float rot = mRot + diff;
+		if(rot < 0) {
+			rot += 360;
+		} else if(rot > 360) {
+			rot -= 360;
+		}
+		mRot = rot;
+	}
+	void moveBy(GLfloat x, GLfloat y)
+	{
+		mCenterX += x;
+		mCenterY += y;
+		checkPosition();
+	}
+	void move(GLfloat x, GLfloat y)
+	{
+		mCenterX = x;
+		mCenterY = y;
+		checkPosition();
+	}
+	void setMapSize(GLfloat w, GLfloat h)
+	{
+		mMapWidth = w;
+		mMapHeight = h;
+	}
+	void checkPosition()
+	{
+		if(mCenterX < 0) {
+			mCenterX = 0;
+		} else if(mCenterX > mMapWidth) {
+			mCenterX = mMapWidth;
+		}
+		if(mCenterY > 0) {
+			mCenterY = 0;
+		} else if(mCenterY < -mMapHeight) {
+			mCenterY = -mMapHeight;
+		}
 	}
 	void setX(GLfloat x) { setPos(x, mCenterY, mPosZ); }
 	void setY(GLfloat y) { setPos(mCenterX, y, mPosZ); }
@@ -129,6 +194,9 @@ private:
 
 	GLfloat mRot;
 	GLfloat mRadius;
+
+	GLfloat mMapWidth;
+	GLfloat mMapHeight;
 };
 //int a1, a2;
 
@@ -474,7 +542,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 
  // update the minimap
- setCamera(d->mCamera);
+ cameraChanged();
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -554,7 +622,7 @@ void BosonBigDisplayBase::paintGL()
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
- // is called only whenever setCamera() is called.
+ // is called only whenever cameraChanged() is called.
  glPushMatrix();
 
  // FIXME: put these next to gluLookAt()
@@ -650,7 +718,7 @@ void BosonBigDisplayBase::paintGL()
 			glScalef(w, h, depth);
 		}
 		if(boConfig->alignSelectionBoxes()) {
-			glRotatef(d->mCamera.rotation(), 0.0, 0.0, 1.0);
+			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 		}
 		glCallList(item->selectBox()->displayList());
 		glPopMatrix();
@@ -919,38 +987,13 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			// the focus to the mneu which might be very confusing
 			// during a game.
 			if (e->state() & LeftButton) {
-				Camera camera = d->mCamera;
-				float newz = cameraZ() + d->mMouseMoveDiff.dy();
-				if(newz < CAMERA_MIN_Z) {
-					newz = CAMERA_MIN_Z;
-				} else if(newz > CAMERA_MAX_Z) {
-					newz = CAMERA_MAX_Z;
-				}
-				float factor = newz / cameraZ();
-				camera.setZ(newz);
-				camera.setRadius(camera.radius() * factor);
-				setCamera(camera);
-				boDebug() << "posZ: " << d->mCamera.z() << endl;
+				camera()->changeZ(d->mMouseMoveDiff.dy());
+				cameraChanged();
+				boDebug() << "posZ: " << camera()->z() << endl;
 			} else if (e->state() & RightButton) {
-				Camera camera = d->mCamera;
-				float radius, rot;
-				radius = camera.radius() + camera.z() / CAMERA_MAX_RADIUS * d->mMouseMoveDiff.dy();
-				if(radius < 0) {
-					radius = 0;
-				} else if(radius > camera.z()) {
-					radius = camera.z();
-				}
-				rot = camera.rotation() + d->mMouseMoveDiff.dx();
-				if(rot < 0) {
-					rot += 360;
-				} else if(rot > 360) {
-					rot -= 360;
-				}
-				camera.setRotation(rot);
-				camera.setRadius(radius);
-//				a1 += d->mMouseMoveDiff.dx();
-//				a2 += d->mMouseMoveDiff.dy();
-				setCamera(camera);
+				camera()->changeRotation(d->mMouseMoveDiff.dx());
+				camera()->changeRadius(d->mMouseMoveDiff.dy());
+				cameraChanged();
 			}
 		} else if (e->state() & LeftButton) {
 			if (e->state() & ControlButton) {
@@ -985,10 +1028,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveX = d->mMouseMoveDiff.dx();
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
-				Camera camera = d->mCamera;
-				camera.setX(centerX() + dx);
-				camera.setY(centerY() + dy);
-				setCamera(camera);
+				camera()->moveBy(dx, dy);
+				cameraChanged();
 			} else {
 				d->mMouseMoveDiff.stop();
 			}
@@ -1166,6 +1207,7 @@ void BosonBigDisplayBase::slotResetViewProperties()
  d->mFovY = 60.0;
  d->mAspect = 1.0;
  setCamera(Camera());
+ camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
  resizeGL(d->mViewport[2], d->mViewport[3]);
 // a1 = 0;
 // a2 = 0;
@@ -1174,10 +1216,8 @@ void BosonBigDisplayBase::slotResetViewProperties()
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center 
- Camera camera = d->mCamera;
- camera.setX(((float)pos.x()) * BO_GL_CELL_SIZE);
- camera.setY(-((float)pos.y()) * BO_GL_CELL_SIZE);
- setCamera(camera);
+ camera()->move(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE);
+ cameraChanged();
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
@@ -1516,10 +1556,8 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		Camera camera = d->mCamera;
-		camera.setX(centerX() + x);
-		camera.setY(centerY() + y);
-		setCamera(camera);
+		camera()->moveBy(x, y);
+		cameraChanged();
 	}
  }
 }
@@ -1529,10 +1567,8 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
  GLdouble x, y;
  mapDistance(dx, dy, &x, &y);
- Camera camera = d->mCamera;
- camera.setX(centerX() + x);
- camera.setY(centerY() + y);
- setCamera(camera);
+ camera()->moveBy(x, y);
+ cameraChanged();
 }
 
 void BosonBigDisplayBase::generateCellList()
@@ -1577,22 +1613,27 @@ void BosonBigDisplayBase::generateCellList()
 
 void BosonBigDisplayBase::setCamera(const Camera& camera)
 {
+ d->mCamera = camera;
+ cameraChanged();
+}
+
+void BosonBigDisplayBase::cameraChanged()
+{
  if (!d->mInitialized) {
 	glInit();
  }
  makeCurrent();
- d->mCamera = camera;
 
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
 
  float diffX, diffY;
- float radius = d->mCamera.radius();
+ float radius = camera()->radius();
  if(radius <= 0.02) {
 	// If radius is 0, up vector will be wrong so we change it
 	radius = 0.02;
  }
- pointByRotation(diffX, diffY, d->mCamera.rotation(), radius);
+ pointByRotation(diffX, diffY, camera()->rotation(), radius);
  float lookatX, lookatY, lookatZ;  // Point that we look at
  lookatX = centerX();
  lookatY = centerY();
@@ -1630,6 +1671,11 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
  mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
  emit signalChangeViewport(cellTL, cellTR, cellBL, cellBR);
+}
+
+Camera* BosonBigDisplayBase::camera()
+{
+ return &(d->mCamera);
 }
 
 GLfloat BosonBigDisplayBase::centerX() const
@@ -1934,3 +1980,7 @@ void BosonBigDisplayBase::selectSingle(Unit* unit, bool replace)
  selection()->selectUnit(unit, replace);
 }
 
+void BosonBigDisplayBase::mapChanged()
+{
+ camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
+}

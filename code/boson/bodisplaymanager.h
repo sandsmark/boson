@@ -98,6 +98,7 @@ public:
 	BosonBigDisplayBase* splitActiveDisplayHorizontal();
 
 	void addChatMessage(const QString& text);
+	void mapChanged();
 
 public slots:
 	/**
