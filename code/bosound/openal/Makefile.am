@@ -9,7 +9,5 @@ libbosonsoundal_la_SOURCES = \
 	bosonsound.cpp \
 	bosonmusic.cpp
 
-libbosonsoundal_la_LIBADD = \
-		$(top_builddir)/bosound/libbosonsoundcommon.la
 
 
