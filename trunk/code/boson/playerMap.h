@@ -1,9 +1,9 @@
 /***************************************************************************
-                          physMap.h  -  description                              
+                          playerMap.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Thu Sep  9 01:27:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,48 +18,35 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PHYS_MAP_H 
-#define PHYS_MAP_H 
+#ifndef PLAYER_MAP_H 
+#define PLAYER_MAP_H 
 
-
-#include <qobject.h>
 #include <qintdict.h>
 
-#include <QwSpriteField.h>
-
 #include "../common/msgData.h"
-#include "../common/groundType.h"
-#include "../common/unitType.h"
+//#include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
 
 #include "playerUnit.h"		// playerMobUnit
-#include "playerCell.h"
+//#include "playerCell.h"
+#include "physMap.h"
 
 class QRect;
 class QPainter;
 class Cell;
 class Unit;
-class groundTheme;
-class speciesTheme;
+
 
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class physMap : public QObject, public QwSpriteField
+class playerMap : public physMap
 {
   Q_OBJECT
 
  public:
-  physMap(uint l, uint h, QObject *parent=0, const char *name=0L);
-  ~physMap();
-
-/* geometry ? , still public */
-  int		maxX, maxY;	// size of the map
-///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
-
-/* modify contents */
-  void setCell(int i, int j, groundType g);
+  playerMap(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
   void destroyMob(destroyedMsg_t &);
@@ -73,12 +60,6 @@ class physMap : public QObject, public QwSpriteField
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }
 
-  signals:
-  void newCell(int,int, groundType g);
-  void updateMobile(playerMobUnit *); ///orzel : outdated by Qw ?
-  void updateFix(playerFacility *); ///orzel : outdated by Qw ?
-
-//  private:
   public: ///orzel : temp
 
   QIntDict<playerMobUnit>	mobile;
@@ -86,6 +67,6 @@ class physMap : public QObject, public QwSpriteField
 
 };
 
-#endif // PHYS_MAP_H
+#endif // PLAYER_MAP_H
 
 

@@ -24,8 +24,9 @@
 
 #include "../common/cell.h"
 #include "../common/unitType.h"
+#include "../common/unit.h"
 
-#include "playerUnit.h"
+//#include "playerUnit.h"
 
 class QPixmap;
 class QwSpritePixmapSequence;
@@ -48,13 +49,13 @@ class speciesTheme
   QPixmap	*getBigOverview(mobType unit) { return mobBigOverview[unit]; }
   QPixmap	*getBigOverview(facilityType unit) { return fixBigOverview[unit];}
 
-  QPixmap	*getBigOverview(playerMobUnit *u) { return getBigOverview(u->getType()); }
+  QPixmap	*getBigOverview(mobUnit *u) { return getBigOverview(u->getType()); }
   QPixmap	*getBigOverview(Facility *u) { return getBigOverview(u->getType()); }
 
   QPixmap	*getSmallOverview(mobType unit) { return mobSmallOverview[unit]; }
   QPixmap	*getSmallOverview(facilityType unit) { return fixSmallOverview[unit];}
 
-  QPixmap	*getSmallOverview(playerMobUnit *u) { return getSmallOverview(u->getType()); }
+  QPixmap	*getSmallOverview(mobUnit *u) { return getSmallOverview(u->getType()); }
   QPixmap	*getSmallOverview(Facility *u) { return getSmallOverview(u->getType()); }
 
   bool		isOk(void) { return allLoaded; }

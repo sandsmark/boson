@@ -18,39 +18,77 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <assert.h>
+
 #include <qpainter.h>
 #include <qpixmap.h>
-//#include <qcolor.h>
+#include <qcolor.h>
 
-//#include "../common/log.h"
+#include "../common/log.h"
 #include "../map/map.h"
 
 #include "miniMap.h"
-//#include "playerCell.h"
-//#include "speciesTheme.h"
-//#include "groundTheme.h"
-//#include "viewMap.h"
-#include "playerUnit.h"
-#include "game.h"
+#include "visualCell.h"
+#include "speciesTheme.h"
+#include "groundTheme.h"
+#include "viewMap.h"
 
-
-void miniMap::drawMobile(playerMobUnit *unit)
+void miniMap::paintEvent(QPaintEvent *evt)
 {
 	QPainter p;
+
+	p.begin(this);
+
+	/* map is buffered */
+	p.drawPixmap(0,0,*ground);
+
+	/* the little rectangle */
+	p.setPen(white);
+	p.setRasterOp(XorROP);
+	p.drawRect(view->X(), view->Y(), view->L()-1, view->H()-1);
+
+	p.end();
+
+}
+
+void miniMap::newCell(int i, int j, groundType g) //, QPainter *p)
+{
+	QPainter p;
+	assert(i<view->maxX());
+	assert(j<view->maxY());
+
+	//printf("miniMap::newCell : receiving %d\n", (int)g);
+
+
+	if (IS_TRANS(g))
+		g = groundTransProp[ GET_TRANS_REF(g) ].from;
+
 	p.begin(ground);
-	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
+	switch(g) {
+		default:
+			logf(LOG_ERROR, "miniMap::drawCell : unexpected groundType");
+		case GROUND_WATER :
+			setPoint( i, j, blue, &p);
+			break;
+		case GROUND_GRASS :
+			setPoint( i, j, green, &p);
+			break;
+		case GROUND_DESERT :
+			setPoint( i, j, darkYellow, &p);
+			break;
+
+		}
 	p.end();
 	repaint(FALSE);
 }
 
-
-void miniMap::drawFix(playerFacility *fix)
+void miniMap::setPoint(int x, int y, const QColor &color, QPainter *p)
 {
-	QPainter p;
-	p.begin(ground);
-	setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-	p.end();
-	repaint(FALSE);
+	if (!p) {
+		logf(LOG_ERROR, "setPoint: p == 0...");
+		return;
+		}
+	p->setPen(color);
+	p->drawPoint(x,y);
 }
-
 

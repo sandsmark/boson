@@ -1,9 +1,9 @@
 /***************************************************************************
-                          fieldMap.cpp  -  description                              
+                         visual.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Wed Sep 08 00:40:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,41 +18,25 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <assert.h>
+#ifndef VISUAL_H 
+#define VISUAL_H 
 
-#include <kapp.h>
+#include "../common/boconfig.h"
 
-#include "../common/log.h"
+class groundTheme;
+class speciesTheme;
 
-#include "fieldMap.h"
-#include "playerCell.h"
-#include "speciesTheme.h"
-#include "groundTheme.h"
-#include "viewMap.h"
-  
+class visualProperties_t {
 
-fieldMap::fieldMap(orderWin *o, viewMap *v, QWidget*parent, const char *name, WFlags f)
-	: QWidget(parent, name, f)
-	, QwAbsSpriteFieldView(v->phys)
-{
+public:
+	groundTheme	*ground;
+	speciesTheme	*species[BOSON_MAX_PLAYERS];
+	int		nb_player;
+	
+};
 
-//setBackgroundColor(black);
-//setBackgroundMode(fixedColor);
 
-/* related orderWindows */
-order = o;
+extern visualProperties_t vpp;
 
-/* the viewMap */
-view = v;
 
-// connect(, SIGNAL(), this, SLOT());
-connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
-connect(this, SIGNAL(relativeReCenterView(int, int)), view, SLOT(relativeReCenterView(int, int)));
-connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
-
-}
-
-fieldMap::~fieldMap()
-{
-	QwAbsSpriteFieldView::view(0);
-}
+#endif // VISUAL_H 

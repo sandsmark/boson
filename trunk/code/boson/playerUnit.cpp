@@ -24,12 +24,10 @@
 #include "../map/map.h"
 #include "../common/log.h"
 
-#include "playerUnit.h"
-#include "speciesTheme.h"
-#include "game.h"
 #include "selectPart.h"
-
-#define PF_DELTA	5   // facilities selection box are DELTA pixels more inside rect()
+#include "playerUnit.h"
+//#include "speciesTheme.h"
+#include "game.h"
 
 /*
  * playerMobUnit
@@ -41,24 +39,11 @@ const static int pos_y[12] =
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
-	: mobUnit(msg,parent,name)
-	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
+	: visualMobUnit(msg,parent,name)
 	, state(MUS_NONE)
 {
-
-	z(Z_MOBILE + 3 * type);
-	moveTo(msg->x, msg->y);
-
 	asked_dx = asked_dy = 0;
-
-	sp_down = 0l; sp_up = 0l;
-	
 	turnTo(4); ///orzel : should be random
-}
-
-playerMobUnit::~playerMobUnit()
-{
-unSelect();
 }
 
 
@@ -66,76 +51,76 @@ unSelect();
 
 int playerMobUnit::getWantedMove(int &dx, int &dy, int &dir)
 {
-int ldx, ldy;
-int vp1, vp2, vp3;
-int newdir;
+	int ldx, ldy;
+	int vp1, vp2, vp3;
+	int newdir;
 
-switch(state){
-	default:
-		logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
-		return 0;
-		break;
+	switch(state){
+		default:
+			logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
+			return 0;
+			break;
 
-	case MUS_NONE:
-		return 0;
-		break;
+		case MUS_NONE:
+			return 0;
+			break;
 
-	case MUS_TURNING:
-		assert(direction>=0); assert(direction<12);
-		ldx = dest_x - x(); ldy = dest_y - y();
-		vp1 = VECT_PRODUCT(direction);
-		// turning 
-		newdir =  (vp1<0)?getLeft():getRight();
-		vp2 = VECT_PRODUCT( newdir);
-		//printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
-		if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
-			newdir =   (abs(vp1) > abs(vp2))? newdir:direction;
-			state = MUS_MOVING;
-			//puts("going to MUS_MOVING");
-			}
-		if (newdir != direction) {
-			turnTo(newdir); ///orzel : is this really useful
-			dx = dy = 0; dir = direction;
-			return 1;
-			}
-		turnTo(newdir); // turning anyway
-		return 0; // no move asked
-		break;
+		case MUS_TURNING:
+			assert(direction>=0); assert(direction<12);
+			ldx = dest_x - x(); ldy = dest_y - y();
+			vp1 = VECT_PRODUCT(direction);
+			// turning 
+			newdir =  (vp1<0)?getLeft():getRight();
+			vp2 = VECT_PRODUCT( newdir);
+			//printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
+			if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
+				newdir =   (abs(vp1) > abs(vp2))? newdir:direction;
+				state = MUS_MOVING;
+				//puts("going to MUS_MOVING");
+				}
+			if (newdir != direction) {
+				turnTo(newdir); ///orzel : is this really useful
+				dx = dy = 0; dir = direction;
+				return 1;
+				}
+			turnTo(newdir); // turning anyway
+			return 0; // no move asked
+			break;
 
-	case MUS_MOVING:
-		ldx = dest_x - x() ; ldy= dest_y - y();
-		vp1 = VECT_PRODUCT(getLeft(2));
-		vp2 = VECT_PRODUCT(direction);
-		vp3 = VECT_PRODUCT(getRight(2));
-//		printf("vp1 = %d, ", vp1); printf("vp2 = %d, ", vp2); printf("vp3 = %d\n", vp3);
-		if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
-			turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
+		case MUS_MOVING:
+			ldx = dest_x - x() ; ldy= dest_y - y();
+			vp1 = VECT_PRODUCT(getLeft(2));
+			vp2 = VECT_PRODUCT(direction);
+			vp3 = VECT_PRODUCT(getRight(2));
+//			printf("vp1 = %d, ", vp1); printf("vp2 = %d, ", vp2); printf("vp3 = %d\n", vp3);
+			if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
+				turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
 
-		if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
-			asked_dx = ldx; asked_dy = ldy;
-			}
-		dx = asked_dx ; dy = asked_dy; dir = direction;
+			if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) { ///orzel should be square
+				asked_dx = ldx; asked_dy = ldy;
+				}
+			dx = asked_dx ; dy = asked_dy; dir = direction;
 
-		if (checkMove( asked_dx, asked_dy)) return 1;
+			if (checkMove( asked_dx, asked_dy)) return 1;
 
-		if (asked_dy && checkMove( 0, asked_dy)) {
-			dx = asked_dx = 0;
-			return 1;
-			}
-		if (asked_dx && checkMove( asked_dx, 0)) {
-			dy = asked_dy = 0;
-			return 1;
-			}
+			if (asked_dy && checkMove( 0, asked_dy)) {
+				dx = asked_dx = 0;
+				return 1;
+				}
+			if (asked_dx && checkMove( asked_dx, 0)) {
+				dy = asked_dy = 0;
+				return 1;
+				}
 
-		/* failed : can't move any more */
-		state = MUS_NONE;
-		asked_dx = asked_dy = 0; // so that willBe returns the good position
-		//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
-		logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
-		return 0; 
+			/* failed : can't move any more */
+			state = MUS_NONE;
+			asked_dx = asked_dy = 0; // so that willBe returns the good position
+			//logf(LOG_GAME_LOW, "ckeckMove failed stopping: mobile[%p] has stopped\n", this);
+			logf(LOG_WARNING, "ckeckMove failed : mobile[%p] has stopped\n", this);
+			return 0; 
 
-		break;
-	}
+			break;
+		}
 }
 
 
@@ -225,31 +210,6 @@ int playerMobUnit::getWantedAction()
 
 
 
-
-/***** selection *********/
-void playerMobUnit::select()
-{
-	QRect	r = rect();
-
-	boAssert(!sp_up);
-	boAssert(!sp_down);
-
-	sp_up = new selectPart_up(5, z());
-	sp_up->moveTo(r.right(), r.top());
-	sp_down = new selectPart_down(4, z());
-	sp_down->moveTo(r.left(), r.bottom());
-}
-
-
-void playerMobUnit::unSelect()
-{
-	if (sp_up) delete sp_up;
-	if (sp_down) delete sp_down;
-	sp_down = 0l;
-	sp_up = 0l;
-}
-
-
 /***** server orders *********/
 void playerMobUnit::doMoveBy(int dx, int dy)
 {
@@ -324,20 +284,10 @@ void playerMobUnit::u_stop(void)
  * playerFacility
  */
 playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L)
-	: Facility(msg,parent,name)
-	, QwSprite(gpp.species[msg->who]->getPixmap(msg->type))
+	: visualFacility(msg,parent,name)
 {
-	z(Z_FACILITY);
 	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 	frame(msg->state);
-
-	sp_down = 0l; sp_up = 0l;
-}
-
-
-playerFacility::~playerFacility()
-{
-	unSelect();
 }
 
 
@@ -348,25 +298,3 @@ void playerFacility::s_setState(int s)
 }
 
 
-/***** selection *********/
-void playerFacility::select()
-{
-	QRect	r = rect();
-
-	boAssert(!sp_up);
-	boAssert(!sp_down);
-
-	sp_up = new selectPart_up(3, z());
-	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
-	sp_down = new selectPart_down(2, z());
-	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
-}
-
-
-void playerFacility::unSelect()
-{
-	if (sp_up) delete sp_up;
-	if (sp_down) delete sp_down;
-	sp_down = 0l;
-	sp_up = 0l;
-}

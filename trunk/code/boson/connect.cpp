@@ -127,8 +127,8 @@ switch(state) {
 				data->accepted.sizeX,
 				data->accepted.sizeY);
 			gpp.who_am_i	= data->accepted.who_you_are;
-			gpp.nb_player	= data->accepted.total_player;
-			gpp.myspecies	= gpp.species[data->accepted.who_you_are];
+			vpp.nb_player	= data->accepted.total_player;
+			gpp.myspecies	= vpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
 			state = PS_NO_CONNECT;

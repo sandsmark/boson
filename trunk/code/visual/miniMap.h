@@ -1,5 +1,5 @@
 /***************************************************************************
-                          playerCell.h  -  description                              
+                          miniMap.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,29 +18,54 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLAYER_CELL_H 
-#define PLAYER_CELL_H 
+#ifndef MINI_MAP_H 
+#define MINI_MAP_H 
 
-#include <QwSpriteField.h>
+#include "../common/groundType.h"
 
-#include "../common/cell.h"
+#include <qframe.h> ///orzel qwidget.h
 
-#include "sprites.h"
+class Cell;
+class Unit;
+class QPixmap;
+class visualCell;
+class viewMap;
+class playerMobUnit;
+class playerFacility;
 
 /** 
-  * This class represents one cell of the main game board
+  * This is the little map, which "zoom" the battle field
   */
-
-class playerCell : public Cell, public QwSprite
+class miniMap : public QWidget
 {
 
+  Q_OBJECT
 
 public:
-  playerCell(groundType g, int i, int j);
+  miniMap(viewMap *v, QWidget *parent=0, const char *name=0L);
 
-/* Qw stuff */
-  virtual int rtti() const { return S_GROUND + ground; }
+signals:
+  void	reCenterView(int x, int y);
+  void  reSizeView(int l, int h);
+
+public slots:
+  void newCell(int,int, groundType);
+  void drawMobile(playerMobUnit *mob);
+  void drawFix(playerFacility *fix);
+
+protected:
+  void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+
+/* events */
+  virtual void paintEvent(QPaintEvent *evt);
+  virtual void mousePressEvent(QMouseEvent *e);
+
+private:
+
+  viewMap	*view;
+  QPixmap	*ground;
 
 };
 
-#endif // PLAYER_CELL_H
+#endif // MINI_MAP_H
+

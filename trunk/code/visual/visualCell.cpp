@@ -1,5 +1,5 @@
 /***************************************************************************
-                          viewMap.h  -  description                              
+                          visualCell.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,50 +18,19 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VIEW_MAP_H 
-#define VIEW_MAP_H 
+#include "../map/map.h"
 
-#include "physMap.h"
+#include "groundTheme.h"
+#include "visualCell.h"
+#include "visual.h"
 
-/** 
-  * This class is the global object concerning a view : where, how large..
-  * It's used by mainMap and miniMap
-  *
-  */
-class viewMap : public QObject
+
+visualCell::visualCell(groundType g, int i, int j)
+	: Cell(g)
+	, QwSprite(vpp.ground->getPixmap(g))
 {
-  Q_OBJECT
 
- public:
-  viewMap(physMap *, QObject *parent=0, const char *name=0L);
-
-  int X(void) { return viewX; }
-  int Y(void) { return viewY; }
-
-  int L(void) { return viewL; }
-  int H(void) { return viewH; }
-
-  int maxX(void) { return (phys)?phys->maxX:0; }
-  int maxY(void) { return (phys)?phys->maxY:0; }
-
-///orzel : should be moved private ?
-  physMap	*phys;
-
- signals:
-  void repaint(bool);
-
- public slots:
-  void reCenterView(int x, int y);
-  void relativeReCenterView(int x, int y) {reCenterView(x+viewX, y+viewY);}
-  void reSizeView(int l, int h);
-
- private:
-  int		viewL, viewH;	// size of the viewing window
-  int		viewX, viewY;	// relative position of the upper-left corner
-
-
-};
-
-#endif // VIEW_MAP_H
-
+	z(Z_GROUND);
+	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
+}
 

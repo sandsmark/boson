@@ -3,7 +3,7 @@
 #                            -------------------                                         
 #
 #   version              : $Id$
-#   begin                : before CVS was used :-)
+#   begin                : Wed Sep  8 00:21:24 CET 1999
 #                                          
 #   copyright            : (C) 1999 by Thomas Capricelli                         
 #   email                : capricel@enst.fr                                     
@@ -19,46 +19,21 @@
 ############################################################################
 
 # include files
-INCLUDES= -I../visual $(all_includes)
+INCLUDES= $(all_includes)
 
 # compilation
 CXXFLAGS = -pipe -Wall -g # -O2
-#	MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
-#	CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
 
-
-bin_PROGRAMS = boson 
-SUBDIRS = docs 
-
-
-#boson
-boson_METASOURCES = USE_AUTOMOC
-boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boson_SOURCES = boson.cpp connect.cpp fieldEvent.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp orderWin.cpp playerMap.cpp playerUnit.cpp
-boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkfm -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 $(LIBSOCKET)
-
-
-#(un)install stuff
-install-data-local:
-	$(mkinstalldirs) $(kde_appsdir)/
-	$(INSTALL_DATA) boson.kdelnk $(kde_appsdir)/Games/boson.kdelnk
-	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) boson.xpm $(kde_icondir)/boson.xpm
-	$(mkinstalldirs) $(kde_minidir)/
-	$(INSTALL_DATA) mini-boson.xpm $(kde_minidir)/mini-boson.xpm
-
-uninstall-local:
-	-rm -f $(kde_appsdir)/boson.kdelnk
-	-rm -f $(kde_icondir)/boson.xpm
-	-rm -f $(kde_minidir)/mini-boson.xpm
-
+# libbovisual.a
+noinst_LIBRARIES = libbovisual.a
+libbovisual_a_SOURCES = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp
+libbovisual_a_METASOURCES = USE_AUTOMOC
 
 #garbage
 CLEANFILES = $(boson_METASOURCES) boson-*.log
 
-EXTRA_DIST = boson.cpp connect.cpp fieldEvent.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp orderWin.cpp playerMap.cpp playerUnit.cpp boson.h connect.h game.h mainView.h orderType.h orderWin.h playerMap.h playerUnit.h ressource.h
-
+EXTRA_DIST = fieldDisplay.cpp fieldMap.cpp groundTheme.cpp miniDisplay.cpp miniEvent.cpp miniMap.cpp physMap.cpp selectPart.cpp speciesTheme.cpp viewMap.cpp visualCell.cpp visualUnit.cpp fieldMap.h groundTheme.h miniMap.h physMap.h selectPart.h speciesTheme.h sprites.h viewMap.h visual.h visualCell.h visualUnit.h
 
 # make messages.po. Move this one to ../po/ and "make merge" in po
 # the -x is for skipping messages already translated in kdelibs

@@ -18,9 +18,10 @@ dnl everything to compile and run a KDE program is already checked
 dnl add here all your Makefiles. This are created by configure
 AC_OUTPUT(Makefile \
 	common/Makefile \
-	map/Makefile \
 	server/Makefile \
+	visual/Makefile \
 	boson/Makefile \
 	boson/docs/Makefile \
 	boson/docs/en/Makefile \
+	map/Makefile \
 )

@@ -21,24 +21,19 @@
 #ifndef BOSON_GAME_H 
 #define BOSON_GAME_H 
 
-#include "../common/boconfig.h"
+#include "../visual/visual.h"
 
-class groundTheme;
-class speciesTheme;
 
-class gameProperties_t {
+//class bosonProperties_t : public visualProperties_t {
+class bosonProperties_t {
 
 public:
-  groundTheme	*ground;
-  speciesTheme	*species[BOSON_MAX_PLAYERS];
-  speciesTheme	*myspecies;
-  int		who_am_i;
-  int		nb_player;
-	
+	speciesTheme	*myspecies;
+	int		who_am_i;
 };
 
 
-extern gameProperties_t gpp;
+extern bosonProperties_t gpp;
 
 
 #endif // BOSON_GAME_H 

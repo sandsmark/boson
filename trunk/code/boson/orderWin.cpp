@@ -130,7 +130,7 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 void orderWin::selectFix(playerFacility *f)
 {
 fixSelected = f; fixSelected->select();
-view_one->setPixmap(*gpp.species[f->who]->getBigOverview(f));
+view_one->setPixmap(*vpp.species[f->who]->getBigOverview(f));
 logf(LOG_GAME_LOW, "select facility");
 
 }
@@ -154,7 +154,7 @@ else {
 	}
 
 mobSelected.insert(key, m); m->select();
-view_one->setPixmap(*gpp.species[m->who]->getBigOverview(m));
+view_one->setPixmap(*vpp.species[m->who]->getBigOverview(m));
 logf(LOG_GAME_LOW, "select mobile");
 }
 

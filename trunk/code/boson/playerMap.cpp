@@ -1,9 +1,9 @@
 /***************************************************************************
-                          physMap.cpp  -  description                              
+                          playerMap.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Thu Sep  9 01:27:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -20,61 +20,23 @@
 
 #include <assert.h>
 
-#include <kapp.h>
-#include <kmsgbox.h>
+//#include <kapp.h>
+//#include <kmsgbox.h>
 
 #include "../common/log.h"
-#include "../common/boconfig.h"
+#include "../common/boconfig.h" // MAX_PLAYERS
 #include "../map/map.h"
 
-#include "physMap.h"
-#include "speciesTheme.h"
-#include "groundTheme.h"
-#include "game.h"
+#include "playerMap.h"
   
-physMap::physMap(uint w, uint h, QObject *parent, const char *name=0L)
-	: QObject(parent, name)
-	, QwSpriteField (w * BO_TILE_SIZE ,h * BO_TILE_SIZE)
-{
-
-/* map geometry */
-maxX = w; maxY = h;
-
-/* Dictionaries */
-mobile.resize(23);
-facility.resize(23);
-mobile.setAutoDelete(true);
-facility.setAutoDelete(true);
-
-/* Themes selection (should be moved thereafter) */
-gpp.ground	= new groundTheme("earth");
-	if (!gpp.ground->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading groundTheme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-
-gpp.species[1]	= new speciesTheme("blue_human");
-	if (!gpp.species[1]->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-
-gpp.species[0]	= new speciesTheme("red_human");
-	if (!gpp.species[0]->isOk()) KMsgBox::message(0l,
-		i18n("Pixmap loading error"),
-		i18n("Error while loading \"red\" specie theme,\nsome images will show up awfully"),
-		KMsgBox::EXCLAMATION);
-
-
-}
-
-
-physMap::~physMap()
+playerMap::playerMap(uint w, uint h, QObject *parent, const char *name=0L)
+	: physMap(w,h,parent,name)
 {
 }
 
 
-void physMap::setCell(int i, int j, groundType g)
+/*
+void playerMap::setCell(int i, int j, groundType g)
 {
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());
@@ -83,9 +45,10 @@ void physMap::setCell(int i, int j, groundType g)
 
 	emit newCell(i,j,g);
 }
+*/
 
 
-void physMap::createMob(mobileMsg_t &m)
+void playerMap::createMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
@@ -98,7 +61,7 @@ void physMap::createMob(mobileMsg_t &m)
 }
 
 
-void physMap::destroyMob(destroyedMsg_t &m)
+void playerMap::destroyMob(destroyedMsg_t &m)
 {
 	playerMobUnit *mob ;
 	
@@ -108,14 +71,14 @@ void physMap::destroyMob(destroyedMsg_t &m)
 		boAssert(m.y == mob->y());
 		}
 	else {
-		logf(LOG_ERROR, "physMap::destroyMob : can't find m.key");
+		logf(LOG_ERROR, "playerMap::destroyMob : can't find m.key");
 		return;
 		}
 
 	boAssert( mobile.remove(m.key) == true );
 }
 
-void physMap::createFix(facilityMsg_t &m)
+void playerMap::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
@@ -128,7 +91,7 @@ void physMap::createFix(facilityMsg_t &m)
 }
 
 
-void physMap::destroyFix(destroyedMsg_t &m)
+void playerMap::destroyFix(destroyedMsg_t &m)
 {
 	playerFacility * f;
 	
@@ -138,7 +101,7 @@ void physMap::destroyFix(destroyedMsg_t &m)
 		boAssert(m.y == f->x());
 		}
 	else {
-		logf(LOG_ERROR, "physMap::destroyFix : can't find m.key");
+		logf(LOG_ERROR, "playerMap::destroyFix : can't find m.key");
 		return;
 		}
 
@@ -146,12 +109,12 @@ void physMap::destroyFix(destroyedMsg_t &m)
 }
 
 
-void physMap::move(moveMsg_t &m)
+void playerMap::move(moveMsg_t &m)
 {
 	mobile.find(m.key)->s_moveBy(m.dx, m.dy, m.direction);
 }
 
-void physMap::requestAction(boBuffer *buffer)
+void playerMap::requestAction(boBuffer *buffer)
 {
 	QIntDictIterator<playerMobUnit> mobIt(mobile);
 	//QIntDictIterator<playerFacility> fixIt(facility);

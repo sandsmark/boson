@@ -2,7 +2,6 @@
 
 all: Makefile
 	make all
-	cd map && ./boeditor
 
 Makefile: configure
 	./configure
