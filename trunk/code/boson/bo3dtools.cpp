@@ -1330,6 +1330,12 @@ bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3Float& min
   return true;
 }
 
+bool Bo3dTools::boProject(const BoGLMatrices& m, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
+{
+  return boProject(m.modelviewMatrix(), m.projectionMatrix(), m.viewport(),
+      x, y, z, pos);
+}
+
 bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
 {
   // AB: once again - most credits go to mesa :)
@@ -1358,6 +1364,12 @@ bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& proje
   // return the actual window y
   pos->setY(viewport[3] - pos->y());
   return true;
+}
+
+bool Bo3dTools::boUnProject(const BoGLMatrices& m, const QPoint& pos, BoVector3Float* ret, float z)
+{
+  return boUnProject(m.modelviewMatrix(), m.projectionMatrix(), m.viewport(),
+      pos, ret, z);
 }
 
 bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* ret, float z)
