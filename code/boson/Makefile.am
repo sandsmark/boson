@@ -6,6 +6,7 @@ SUBDIRS = data \
 	meshrenderer \
 	groundrenderer
 
+noinst_LTLIBRARIES = libboson.la
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/bodebug $(all_includes)
@@ -114,44 +115,34 @@ BOPROFILING_SRC= \
 	bosonprofiling.cpp \
 	boprofilingmain.cpp
 
-boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
-boson_LDADD = \
+libboson_la_SOURCES = $(BOSON_COMMON_SRC)
+libboson_la_LIBADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		$(LIB_KGAME) \
-		$(GLLIB) -l3ds \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
+		$(GLLIB) -l3ds \
 		$(LIB_XRANDR)
+
+boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
+boson_LDADD = \
+		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		$(top_builddir)/boson/libboson.la
 boson_SOURCES = \
-		$(BOSON_COMMON_SRC)\
 		top.cpp  \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
-		$(top_builddir)/bodebug/libbodebug.la \
-		$(top_builddir)/boson/items/libbosonitems.la \
-		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
-		$(top_builddir)/boson/info/libbosoninfo.la \
-		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
-		$(top_builddir)/boson/script/libbosonscript.la \
-		$(top_builddir)/boson/bosonfont/libbosonfont.la \
-		$(LIB_KGAME) \
-		$(GLLIB) -l3ds \
-		$(LIB_KDEUI) \
-		$(LIB_KIO) \
-		$(LIB_XRANDR)
+		$(top_builddir)/boson/libboson.la
 bounit_SOURCES = \
-		$(BOSON_COMMON_SRC) \
 		bounitmain.cpp bosonsearchpathswidget.ui \
 		bouniteditor.ui
 
@@ -179,21 +170,8 @@ bocursor_SOURCES = \
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
-		$(top_builddir)/bodebug/libbodebug.la \
-		$(top_builddir)/boson/items/libbosonitems.la \
-		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
-		$(top_builddir)/boson/info/libbosoninfo.la \
-		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
-		$(top_builddir)/boson/script/libbosonscript.la \
-		$(top_builddir)/boson/bosonfont/libbosonfont.la \
-		$(LIB_KGAME) \
-		$(GLLIB) -l3ds \
-		$(LIB_KDEUI) \
-		$(LIB_KIO) \
-		$(LIB_XRANDR)
+		$(top_builddir)/boson/libboson.la
 borender_SOURCES = \
-		$(BOSON_COMMON_SRC) \
 		kgamemodeldebug.cpp \
 		kgamespeciesdebug.cpp \
 		borendermain.cpp
