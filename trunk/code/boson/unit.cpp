@@ -69,13 +69,15 @@ public:
 	// changed before all players entered the game we'll have a broken
 	// network game.
 	Unit* mTarget;
-
-	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
-
-	BosonParticleSystem* mSmokeParticleSystem;
-
-	QPtrList<BosonWeapon> mWeapons;
 	BosonWeapon* mActiveWeapon;
+
+	// these must NOT be touched (items added or removed) after the c'tor.
+	// loading code will depend in this list to be at the c'tor state!
+	QPtrList<UnitPlugin> mPlugins;
+	QPtrList<BosonWeapon> mWeapons;
+
+	// OpenGL only:
+	BosonParticleSystem* mSmokeParticleSystem;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -148,7 +150,6 @@ void Unit::initStatic()
  // we initialize the properties for Unit, MobileUnit, Facility and the plugins
  // here
  // Unit
- addPropertyId(IdDirection, QString::fromLatin1("Direction"));
  addPropertyId(IdWaypoints, QString::fromLatin1("Waypoints"));
  addPropertyId(IdMoveDestX, QString::fromLatin1("MoveDestX"));
  addPropertyId(IdMoveDestY, QString::fromLatin1("MoveDestY"));
@@ -892,7 +893,7 @@ void Unit::loadWeapons()
 {
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
  while (it.current()) {
-	if(it.current()->pluginType() == PluginProperties::Weapon) {
+	if (it.current()->pluginType() == PluginProperties::Weapon) {
 		d->mWeapons.append(new BosonWeapon((BosonWeaponProperties*)(it.current()), this));
 	}
 	++it;
@@ -1435,12 +1436,3 @@ void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
  d->mFlamesParticleSystem = s;
 }
 
-void Facility::deleteParticleSystems()
-{
-/* if (d->mFlamesParticleSystem) {
-	delete d->mFlamesParticleSystem;
- }
- if (d->mSmokeParticleSystem) {
-	delete d->mSmokeParticleSystem;
- }*/
-}

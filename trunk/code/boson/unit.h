@@ -548,7 +548,6 @@ public:
 
 	BosonParticleSystem* flamesParticleSystem() const;
 	void setFlamesParticleSystem(BosonParticleSystem* s);
-	void deleteParticleSystems();
 
 private:
 	class FacilityPrivate;
