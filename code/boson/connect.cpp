@@ -242,9 +242,7 @@ switch(tag) {
 
 	case MSG_MAP_DISCOVERED :
 		ASSERT_DATA_BLENGHT(sizeof(data->coo));
-		logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d",
-			data->coo.x, data->coo.y, (int)data->coo.c );
-		setCell(data->coo.x, data->coo.y, data->coo.c);
+		msg_map_discovered(data->coo);
 		return;
 		break;
 

@@ -80,7 +80,7 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h, uint np)
 	//
 	// cells
 	//
-	cells = new Cell[w*h];
+	cells = new bosonCell[w*h];
 
 	//
 	// sound initialisation 
@@ -345,5 +345,55 @@ void bosonCanvas::play(char *filename)
 //	logf(LOG_INFO, "(sound) playing : %s", path.latin1());
 	soundserver->play(path.latin1());
 }
+
+/*
+ * server-originated messages handling
+ */
+
+void bosonCanvas::msg_map_discovered(cooMsg_t coo)
+{
+	int i, j;
+
+	logf(LOG_GAME_LOW, "received MSG_MAP_DISCOVERED : (%d,%d) = %d", coo.x, coo.y, (int)coo.c );
+
+	setCell(coo.x, coo.y, coo.c);
+
+	// handles this cell and all neighbour cells
+	for(i=-1; i<2; i++)
+		for(j=-1; j<2; j++)
+			handleFOW(coo.x+i,coo.y+j);
+
+}
+
+
+void bosonCanvas::handleFOW(int x, int y)
+{
+	int i, j;
+
+	if (!isValid(x,y)) return;
+
+	if (cell(x,y).isFogged()) {
+		if (cellKnown(x,y)) cell(x,y).unFog();
+		return;
+	}
+	// the cell is unFogged after this line
+
+
+	// we 'fog' cells that
+	//  1) are unknown
+	//  _and_
+	//  2) have some known ground next to it
+	if (cellKnown(x,y)) return;
+	for(i=x-1; i<x+2; i++)
+		for(j=y-1; j<y+2; j++) {
+			if (!isValid(i,j)) break;
+			if (cellKnown(i,j)) {
+				cell(x,y).fog(x,y);
+				return;
+			} // if
+		} // for
+}
+
+
 
 

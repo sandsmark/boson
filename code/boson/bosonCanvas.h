@@ -27,10 +27,10 @@
 
 #include "common/msgData.h"
 #include "common/unit.h"	// Facility
-#include "common/cell.h"
 
 #include "playerUnit.h"		// playerMobUnit
 #include "visualCanvas.h"
+#include "bosonCell.h"
 
 class QRect;
 class QPainter;
@@ -78,7 +78,7 @@ public:
 	// CellMap functions
 	virtual enum groundType	groundAt(QPoint p) { return ::ground( (cell_t)tile(p.x(), p.y()) ); }
 	/** return the cell at (i,j) */
-	virtual Cell	&ccell(int i, int j) { return cells[i+j*_width]; }
+	virtual Cell&	ccell(int i, int j) { return cells[i+j*_width]; }
 
 	/* concerning contents */
 	playerFacility *getFacility(long key) { return facility.find(key); }
@@ -90,6 +90,16 @@ public:
 	QIntDict<playerMobUnit>	mobile;
 	QIntDict<playerFacility> facility;
 
+private:
+	/* following are handler for all the messages coming from the server */
+	void msg_map_discovered(cooMsg_t m);
+
+
+	/** used to handle for of war */
+	void		handleFOW(int, int);
+	bosonCell&	cell(int i, int j) { return cells[i+j*_width]; }
+	bool		cellKnown(int i, int j) { return tile(i,j)!=0;}
+
 signals:
 	void	oilUpdated(int);
 	void	mineralUpdated(int);
@@ -98,7 +108,7 @@ signals:
 	void	pingUpdated(int);
 
 private:
-	Cell	*cells;
+	bosonCell	*cells;
 	time_t	ping;
 	time_t	last_sync;
 	int	radar_pulse;
