@@ -110,7 +110,7 @@ public:
 	 **/
 	static QString unitActionName(UnitAction action);
 
-	BoAction* action(const QString& name);
+	BoAction* action(const QString& name) const;
 
 	QPixmap* pixmap(const QString& name);
 
