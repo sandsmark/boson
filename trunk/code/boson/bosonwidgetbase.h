@@ -203,7 +203,6 @@ protected slots:
 
 	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
 
-	void slotArrowScrollChanged(int speed);
 	void slotAddUnit(Unit* unit, int x, int y);
 	void slotRemoveUnit(Unit* unit);
 

@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "bosonconfig.h"
+#include "defines.h"
 
 #include <kconfig.h>
 #include <kapplication.h>
@@ -185,18 +186,18 @@ BosonConfig::BosonConfig(KConfig* conf)
  d = new BosonConfigPrivate;
  d->mConfigEntries.setAutoDelete(true);
 
- mSound = new BoConfigBoolEntry(this, "Sound", true);
- mMusic = new BoConfigBoolEntry(this, "Music", true);
- mMMBMove = new BoConfigBoolEntry(this, "MMBMove", true);
- mRMBMove = new BoConfigBoolEntry(this, "RMBMove", true);
+ mSound = new BoConfigBoolEntry(this, "Sound", DEFAULT_SOUND);
+ mMusic = new BoConfigBoolEntry(this, "Music", DEFAULT_MUSIC);
+ mMMBMove = new BoConfigBoolEntry(this, "MMBMove", DEFAULT_USE_MMB_MOVE);
+ mRMBMove = new BoConfigBoolEntry(this, "RMBMove", DEFAULT_USE_RMB_MOVE);
  mShowMenubarInGame = new BoConfigBoolEntry(this, "ShowMenubarInGame", true);
  mShowMenubarOnStartup = new BoConfigBoolEntry(this, "ShowMenubarOnStartup", false);
- mCommandButtonsPerRow = new BoConfigIntEntry(this, "CommandButtonsPerRow", 3);
- mArrowKeyStep = new BoConfigUIntEntry(this, "ArrowKeyStep", 10);
- mCursorEdgeSensity = new BoConfigUIntEntry(this, "CursorEdgeSensity", 20);
- mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", 25);
- mMiniMapScale = new BoConfigDoubleEntry(this, "MiniMapScale", 2.0);
- mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", 1.0);
+ mCommandButtonsPerRow = new BoConfigIntEntry(this, "CommandButtonsPerRow", DEFAULT_CMD_BUTTONS_PER_ROW);
+ mArrowKeyStep = new BoConfigUIntEntry(this, "ArrowKeyStep", DEFAULT_ARROW_SCROLL_SPEED);
+ mCursorEdgeSensity = new BoConfigUIntEntry(this, "CursorEdgeSensity", DEFAULT_CURSOR_EDGE_SENSITY);
+ mUpdateInterval = new BoConfigUIntEntry(this, "GLUpdateInterval", DEFAULT_UPDATE_INTERVAL);
+ mMiniMapScale = new BoConfigDoubleEntry(this, "MiniMapScale", DEFAULT_MINIMAP_SCALE);
+ mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
  mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
 
  mDebugMode = DebugNormal;
@@ -316,7 +317,7 @@ int BosonConfig::readGameSpeed(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int speed = conf->readNumEntry("Speed", 5);
+ int speed = conf->readNumEntry("Speed", DEFAULT_GAME_SPEED);
  conf->setGroup(oldGroup);
  return speed;
 }
@@ -328,7 +329,7 @@ CursorMode BosonConfig::readCursorMode(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int mode = conf->readNumEntry("CursorMode", CursorSprite);
+ int mode = conf->readNumEntry("CursorMode", DEFAULT_CURSOR);
  conf->setGroup(oldGroup);
  return (CursorMode)mode;
 }

@@ -207,22 +207,12 @@ void BosonWidget::slotGamePreferences()
  }
 
  OptionsDialog* dlg = new OptionsDialog(this);
+ dlg->setGame(game());
+ dlg->setPlayer(localPlayer());
+ dlg->slotLoad();
+
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
- dlg->setGameSpeed(game()->gameSpeed());
- dlg->setArrowScrollSpeed(boConfig->arrowKeyStep());
- dlg->setMiniMapScale(boConfig->miniMapScale());
- dlg->setRMBScrolling(boConfig->rmbMove());
- dlg->setMMBScrolling(boConfig->mmbMove());
  dlg->setCursor(mode);
- dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
- dlg->setUpdateInterval(boConfig->updateInterval());
- dlg->setUnitSoundsDeactivated(boConfig);
-
- connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
-		this, SLOT(slotArrowScrollChanged(int)));
-
- connect(dlg, SIGNAL(signalSpeedChanged(int)),
-		game(), SLOT(slotSetGameSpeed(int)));
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
