@@ -67,7 +67,13 @@ protected:
 	 * QString::lower() on it, currently.
 	 **/
 	QString cleanTextureName(const char*);
+
+	/**
+	 * @return The directory that contains the .3ds file. Usually the unit
+	 * directory
+	 **/
 	const QString& baseDirectory() const { return mDirectory; }
+
 	QString textureDirectory() const;
 
 private:

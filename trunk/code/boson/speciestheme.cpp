@@ -183,7 +183,7 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
  loadUnitTextures(prop->typeId(), imageList);
  loadUnitModel(prop);
 
-// big overview 
+// big overview
  if (d->mBigOverview[type]) {
 	kdError() << "BigOverview of " << type << " already there" << endl;
  } else {
@@ -196,7 +196,7 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 	d->mBigOverview.insert(type, p);
  }
 
-// small overview 
+// small overview
  if (d->mSmallOverview[type]) {
 	kdError() << "SmallOverview of " << type << " already there" << endl;
  } else {
