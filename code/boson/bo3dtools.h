@@ -357,7 +357,7 @@ class BoVector3
      * this static method without a BoVector3 instance - useful for comparing
      * Lib3dsVectors.
      **/
-    static bool isEqual(float* v1, float* v2)
+    static bool isEqual(const float* v1, const float* v2)
     {
       return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] && v2[2];
     }
