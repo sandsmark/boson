@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@
 #ifndef BOGROUNDRENDERER_H
 #define BOGROUNDRENDERER_H
 
+#include <qobject.h>
+
 class Cell;
 class PlayerIO;
 class QString;
@@ -29,9 +31,9 @@ class BoVector3;
 
 class QRect;
 
-class BoGroundRendererPrivate;
-class BoGroundRenderer
+class BoGroundRenderer : public QObject
 {
+	Q_OBJECT
 public:
 	enum Renderer {
 		// note that the numbers must be in order! (i.e. 0, 1, 2, ...)
@@ -46,13 +48,13 @@ public:
 	BoGroundRenderer();
 	virtual ~BoGroundRenderer();
 
-	virtual int rtti() const = 0;
-
 	/**
 	 * This takes an @rtti (see @ref Renderer) and converts it into a @ref
 	 * QString.
 	 **/
 	static QString rttiToName(int rtti);
+
+	virtual int rtti() const = 0;
 
 	/**
 	 * Apply pointers for all OpenGL matrices to this class. You must not
@@ -64,15 +66,10 @@ public:
 	 * @param viewFrustum A pointer to the view frustum which must be a 6*4
 	 * array. Do <em>not</em> use this class after freeing the pointer
 	 **/
-	void setViewFrustum(const float* viewFrustum);
-
-
-	/**
-	 * @return How many cells got actually rendered. (note: a single cell
-	 * could have been rendered three times, always with a different
-	 * texture, but will occur only once here!)
-	 **/
-	unsigned int renderCells(const BosonMap* map);
+	void setViewFrustum(const float* viewFrustum)
+	{
+		mViewFrustum = viewFrustum;
+	}
 
 	/**
 	 * Render a grid for all cells in @p cells.
@@ -82,12 +79,37 @@ public:
 	 **/
 	void renderCellGrid(Cell** cells, int cellsCount, const float* heightMap, int heightMapWidth);
 
-	void setLocalPlayerIO(PlayerIO* p);
-	PlayerIO* localPlayerIO() const;
 
 	/**
+	 * @return How many cells got actually rendered. (note: a single cell
+	 * could have been rendered three times, always with a different
+	 * texture, but will occur only once here!)
+	 **/
+	unsigned int renderCells(const BosonMap* map);
+
+	void setLocalPlayerIO(PlayerIO* p)
+	{
+		mLocalPlayerIO = p;
+	}
+
+	PlayerIO* localPlayerIO() const
+	{
+		return mLocalPlayerIO;
+	}
+
+	/**
+	 * Generate a list of cells that are (or may) be visible at the moment.
+	 * @param map The map that contains the @ref Cell pointers. Use 0 to
+	 * delete the current list of cells.
+	 **/
+	virtual void generateCellList(const BosonMap* map) = 0;
+
+
+protected:
+	/**
 	 * This generates an array of visible cells for the @p playerIO. It works
-	 * on the list previously created by @ref generateCellList.
+	 * on the list previously created by @ref generateCellList. (i.e. on
+	 * @ref renderCells)
 	 *
 	 * This mainly checks for whether the cells are fogged.
 	 *
@@ -96,19 +118,28 @@ public:
 	 **/
 	Cell** createVisibleCellList(int* cellCount, PlayerIO* playerIO);
 
+	void setRenderCells(Cell** renderCells, int renderCellsSize);
+	void setRenderCellsCount(unsigned int count);
+
 	/**
-	 * Generate a list of cells that are (or may) be visible at the moment.
-	 * @param map The map that contains the @ref Cell pointers. Use 0 to
-	 * delete the current list of cells.
+	 * @return The array containing the cells that will be rendered. The
+	 * array can take up to @ref renderCellsSize elements, but only the
+	 * first @ref renderCellsCount elements are actually used. The rest can
+	 * (and should) be NULL.
 	 **/
-	void generateCellList(const BosonMap* map);
+	Cell** renderCells() const
+	{
+		return mRenderCells;
+	}
 
-protected:
-	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
-
-	const float* viewFrustum() const;
-
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map) = 0;
+	/**
+	 * @return The size of the @ref renderCells array (NOT the number of
+	 * elements in it! See @ref renderCellsCount)
+	 **/
+	int renderCellsSize() const
+	{
+		return mRenderCellsSize;
+	}
 
 	/**
 	 * @return The number of cells that were marked to be rendered by @ref
@@ -119,46 +150,53 @@ protected:
 		return mRenderCellsCount;
 	}
 
+	const BoMatrix* modelviewMatrix() const
+	{
+		return mModelviewMatrix;
+	}
+	const BoMatrix* projectionMatrix() const
+	{
+		return mProjectionMatrix;
+	}
+	const int* viewport() const
+	{
+		return mViewport;
+	}
+	const float* viewFrustum() const
+	{
+		return mViewFrustum;
+	}
+
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map) = 0;
+
 private:
-	BoGroundRendererPrivate* d;
-	unsigned int mRenderCellsCount;
+	const BoMatrix* mModelviewMatrix;
+	const BoMatrix* mProjectionMatrix;
+	const int* mViewport;
+	const float* mViewFrustum;
+	class PlayerIO* mLocalPlayerIO;
 
+	//AB: we should use a float* here which can be used as vertex array. we
+	//should store x,y,z and texture x,y there. for this we need to have
+	//cells in a single texture!
+	//--> then we could also use GL_QUAD_STRIP
+	Cell** mRenderCells;
+	int mRenderCellsSize; // max. number of cells in the array
+	unsigned int mRenderCellsCount; // actual number of cells in the array
 };
 
-class BoDefaultGroundRenderer : public BoGroundRenderer
+class BoGroundRendererInformation : public QObject
 {
+	Q_OBJECT
 public:
-	BoDefaultGroundRenderer();
-	virtual ~BoDefaultGroundRenderer();
-
-	virtual int rtti() const { return Default; }
-
-protected:
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
-
-private:
-	/**
-	 * Render the @p cells with the current texture.
-	 *
-	 * This is used for texture mixing (blending must be enabled) - first
-	 * the cells are rendered with the first texture, then with the
-	 * second, ...
-	 *
-	 * One could optimize this by using multitexturing for example!
-	 **/
-	void renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
-	void renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
+	BoGroundRendererInformation() : QObject()
+	{
+	}
+	~BoGroundRendererInformation()
+	{
+	}
+	virtual QStringList groundRenderers() const = 0;
 };
 
-class BoFastGroundRenderer : public BoGroundRenderer
-{
-public:
-	BoFastGroundRenderer();
-	virtual ~BoFastGroundRenderer();
-
-	virtual int rtti() const { return Fast; }
-
-	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
-};
 #endif
 

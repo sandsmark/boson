@@ -51,6 +51,7 @@
 #include "bocamera.h"
 #include "boautocamera.h"
 #include "bogroundrenderer.h"
+#include "bogroundrenderermanager.h"
 #include "bolight.h"
 #include "bosonglminimap.h"
 #include "bomaterial.h"
@@ -80,6 +81,7 @@
 #endif
 //#include <iostream.h>
 #include <math.h>
+#include <stdlib.h>
 
 
 #include "bosontexturearray.h"
@@ -276,8 +278,6 @@ public:
 
 		mRenderItemList = 0;
 
-		mGroundRenderer = 0;
-
 		mGLMiniMap = 0;
 	}
 
@@ -333,8 +333,6 @@ public:
 	unsigned int mRenderedCells;  // same, but for cells
 	unsigned int mRenderedParticles;
 
-	BoGroundRenderer* mGroundRenderer;
-
 	QIntDict<BoLight> mLights;
 
 	BosonGLMiniMap* mGLMiniMap;
@@ -359,7 +357,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  BoFullScreen::enterOriginalMode();
 
  quitGame();
- delete d->mGroundRenderer;
+ BoGroundRendererManager::manager()->unsetCurrentRenderer();
  delete d->mRenderItemList;
  delete mSelection;
  delete d->mChat;
@@ -406,7 +404,6 @@ void BosonBigDisplayBase::init()
 	}
  }
 
- d->mGroundRenderer = 0;
  changeGroundRenderer(boConfig->uintValue("GroundRenderer", DEFAULT_GROUND_RENDERER));
 
  setUpdatesEnabled(false);
@@ -1391,8 +1388,8 @@ void BosonBigDisplayBase::renderCells()
  BO_CHECK_NULL_RET(canvas()->map());
  BosonMap* map = canvas()->map();
 
- BO_CHECK_NULL_RET(d->mGroundRenderer);
- d->mRenderedCells = d->mGroundRenderer->renderCells(map);
+ BO_CHECK_NULL_RET(BoGroundRendererManager::manager()->currentRenderer());
+ d->mRenderedCells = BoGroundRendererManager::manager()->currentRenderer()->renderCells(map);
 
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
@@ -2005,8 +2002,9 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  Player* previousPlayer = localPlayer();
  d->mLocalPlayer = p;
 
- if (d->mGroundRenderer) {
-	d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
+ BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
+ if (BoGroundRendererManager::manager()->currentRenderer()) {
+	 BoGroundRendererManager::manager()->currentRenderer()->setLocalPlayerIO(localPlayerIO());
  }
 
  delete d->mMouseIO;
@@ -2636,12 +2634,13 @@ void BosonBigDisplayBase::cameraChanged()
  d->mModelviewMatrix.loadMatrix(GL_MODELVIEW_MATRIX);
 
  extractFrustum(); // modelview matrix changed
- if (d->mGroundRenderer) {
+ BoGroundRenderer* renderer = BoGroundRendererManager::manager()->currentRenderer();
+ if (renderer) {
 	BosonMap* map = 0;
 	if (canvas()) {
 		map = canvas()->map();
 	}
-	d->mGroundRenderer->generateCellList(map);
+	renderer->generateCellList(map);
  }
 
  d->mParticlesDirty = true;
@@ -3135,26 +3134,32 @@ void BosonBigDisplayBase::updateOpenGLSettings()
 
 void BosonBigDisplayBase::changeGroundRenderer(int renderer)
 {
- if (d->mGroundRenderer && d->mGroundRenderer->rtti() == renderer) {
+ bool ret = BoGroundRendererManager::manager()->makeRendererCurrent(renderer);
+ BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+ if (!ret) {
+	if (r) {
+		KMessageBox::sorry(this, i18n("Unable to load renderer with id=%1. Continue with old renderer.").arg(renderer));
+	} else {
+ 		BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
+		r = BoGroundRendererManager::manager()->currentRenderer();
+		if (!r) {
+			KMessageBox::sorry(this, i18n("Unable to load any ground renderer, check your installation! Quitting now."));
+			exit(1);
+		}
+	}
 	return;
  }
- delete d->mGroundRenderer;
- d->mGroundRenderer = 0;
-
- switch (renderer) {
-	default:
-	case BoGroundRenderer::Last:
-		boWarning() << k_funcinfo << "unknwon renderer: " << renderer << endl;
-	case BoGroundRenderer::Default:
-		d->mGroundRenderer = new BoDefaultGroundRenderer();
-		break;
-	case BoGroundRenderer::Fast:
-		d->mGroundRenderer = new BoFastGroundRenderer();
-		break;
+ if (!r) {
+	KMessageBox::sorry(this, i18n("New ground renderer has been loaded successfully, but can't be accessed. Weird bug - please report (including debug output on konsole)!\nQuitting now"));
+	exit(1);
+	return;
  }
- d->mGroundRenderer->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
- d->mGroundRenderer->setViewFrustum(d->mViewFrustum);
- d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
+
+ // AB: these should be stored in the manager class and applied to the renderer
+ // whenever it changes
+ r->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
+ r->setViewFrustum(d->mViewFrustum);
+ r->setLocalPlayerIO(localPlayerIO());
 }
 
 void BosonBigDisplayBase::generateMovieFrames(const QValueList<QByteArray>& data, const QString& directory)

@@ -320,6 +320,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
  addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVBO"));
+ addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", "BoDefaultGroundRenderer"));
 
  // load from config
  reset(conf);
