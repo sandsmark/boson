@@ -104,8 +104,9 @@ void SelectPart::drawSelectBox(QPainter &painter, bool mask, int frame)
  } else {
 	// read rendering 
 	// "scrollbar" - or rather "health bar"
-//	int a = barWidth(0); // why is this hack necessary????
-	KPixmap pix(QPixmap(barWidth(0), barHeight())); 
+	int a = barWidth(0); // why is this hack necessary????
+	KPixmap pix(QPixmap(a, barHeight())); 
+//	KPixmap pix(QPixmap(barWidth(0), barHeight())); // not working by any reason
 	pix.fill(Qt::green);
 	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
 			KPixmapEffect::HorizontalGradient);
