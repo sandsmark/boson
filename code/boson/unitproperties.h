@@ -23,6 +23,8 @@
 
 #include <qvaluelist.h>
 
+class SpeciesTheme;
+
 class KSimpleConfig;
 
 /**
@@ -58,14 +60,19 @@ public:
 		CommandBunker = 10
 	};
 	
-	UnitProperties();
+	UnitProperties(SpeciesTheme*);
 
 	/**
 	 * @param fileName The filename of the config file for this unit type
 	 **/
-	UnitProperties(const QString& fileName);
+	UnitProperties(SpeciesTheme*, const QString& fileName);
 	~UnitProperties();
 
+	/**
+	 * @return The @ref SpeciesTheme this property belongs to.
+	 **/
+	SpeciesTheme* theme() const { return mTheme; }
+	
 	/**
 	 * @return Default health aka power aka whatever of this unit.
 	 **/
@@ -270,6 +277,8 @@ protected:
 private:
 	class UnitPropertiesPrivate;
 	UnitPropertiesPrivate* d;
+
+	SpeciesTheme* mTheme;
 
 	QString mName;
 	QString mUnitPath; // the path to the unit files

@@ -448,7 +448,7 @@ void BosonUnitDialog::slotChangeUnitDir()
 	return;
  }
  delete d->mUnit;
- d->mUnit = new UnitProperties;
+ d->mUnit = new UnitProperties(0);
  d->mUnit->loadUnitType(file);
 
  loadProperties();

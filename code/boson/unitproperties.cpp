@@ -18,6 +18,9 @@
 */
 #include "unitproperties.h"
 
+#include <qcanvas.h>
+#include "speciestheme.h"
+
 #include <ksimpleconfig.h>
 #include <klocale.h>
 #include <kdebug.h>
@@ -61,16 +64,18 @@ public:
 	unsigned long int mShields;
 };
 
-UnitProperties::UnitProperties()
+UnitProperties::UnitProperties(SpeciesTheme* theme)
 {
  d = new UnitPropertiesPrivate;
+ mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
 }
 
-UnitProperties::UnitProperties(const QString& fileName)
+UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
 {
  d = new UnitPropertiesPrivate;
+ mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
 
