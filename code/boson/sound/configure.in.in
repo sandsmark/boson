@@ -23,14 +23,16 @@ dnl Ok, libogg is there. now check whether we have mpeglib with .ogg support
 dnl AB: if OGGPlayObject.mcopclass oor libarts_mpeglib.la gets ever renamed we
 dnl     will have some trouble. We also don't support any other ogg
 dnl     implementation for arts (mpeglib is currently the only one anyway)
-if test x$ogg_vorbis = xyes; then
-   AC_FIND_FILE(mcop/OGGPlayObject.mcopclass, [$kde_libdirs], oggplayobject)
-   if test "$oggplayobject" = NO ; then
-     AC_MSG_WARN(Your mpeglib installation lacks ogg support. Please
-     install kdemultimedia/mpeglib with ogg support in order to hear sounds.)
-     ogg_vorbis=no
-   fi
-fi
+dnl UPDATE there are currently other ogg playobjects, too. since mpeglib sucks
+dnl anyway (speed,stability) i removed this test.
+dnl if test x$ogg_vorbis = xyes; then
+dnl    AC_FIND_FILE(mcop/OGGPlayObject.mcopclass, [$kde_libdirs], oggplayobject)
+dnl    if test "$oggplayobject" = NO ; then
+dnl      AC_MSG_WARN(Your mpeglib installation lacks ogg support. Please
+dnl      install kdemultimedia/mpeglib with ogg support in order to hear sounds.)
+dnl      ogg_vorbis=no
+dnl    fi
+dnl fi
 
 if test x$ogg_vorbis = xyes; then
   AC_LANG_SAVE
