@@ -32,6 +32,7 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QRadioButton;
+class QSpacerItem;
 
 class TopWidget;
 class Boson;
@@ -43,21 +44,7 @@ class BosonNetworkOptionsWidget : public QWidget
     BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent);
     ~BosonNetworkOptionsWidget();
 
-    QLabel* header;
-    QLabel* netstatustext;
-    QLabel* netstatuslabel;
-    QPushButton* disconnectbutton;
-    QGroupBox* netconfgroupbox;
-    QButtonGroup* connectionstylegroup;
-    QRadioButton* creategamebutton;
-    QRadioButton* joingamebutton;
-    QLabel* portlabel;
-    QLineEdit* hostedit;
-    KIntNumInput* portedit;
-    QLabel* hostlabel;
-    QPushButton* startnetworkbutton;
-    QPushButton* cancelbutton;
-    QPushButton* okbutton;
+    void setLogoSpacer(int height);
 
   public slots:
     void slotDisconnect();
@@ -68,17 +55,34 @@ class BosonNetworkOptionsWidget : public QWidget
   signals:
     void signalOkClicked();
 
-  protected:
-    QVBoxLayout* BosonNetworkOptionsWidgetLayout;
-    QHBoxLayout* Layout10;
-    QVBoxLayout* Layout8;
-    QHBoxLayout* Layout1;
-    QHBoxLayout* Layout2;
-    QVBoxLayout* netconfgroupboxLayout;
-    QVBoxLayout* Layout7;
-    QVBoxLayout* connectionstylegroupLayout;
-    QGridLayout* Layout6;
-    QHBoxLayout* Layout13;
+  private:
+    QLabel* mHeader;
+    QLabel* mNetStatusText;
+    QLabel* mNetStatusLabel;
+    QPushButton* mDisconnectButton;
+    QGroupBox* mNetConfGroupBox;
+    QButtonGroup* mConnectionStyleGroup;
+    QRadioButton* mCreateGameButton;
+    QRadioButton* mJoinGameButton;
+    QLabel* mPortLabel;
+    QLineEdit* mHostEdit;
+    KIntNumInput* mPortEdit;
+    QLabel* mHostLabel;
+    QPushButton* mStartNetworkButton;
+    QPushButton* mCancelButton;
+    QPushButton* mOkButton;
+
+    QVBoxLayout* mBosonNetworkOptionsWidgetLayout;
+    QHBoxLayout* mLayout10;
+    QVBoxLayout* mLayout8;
+    QHBoxLayout* mLayout1;
+    QHBoxLayout* mLayout2;
+    QVBoxLayout* mNetConfGroupBoxLayout;
+    QVBoxLayout* mLayout7;
+    QVBoxLayout* mConnectionStyleGroupLayout;
+    QGridLayout* mLayout6;
+    QHBoxLayout* mLayout13;
+    QSpacerItem* mLogoSpacer;
 
   private:
     void setConnected(bool connected, bool master);

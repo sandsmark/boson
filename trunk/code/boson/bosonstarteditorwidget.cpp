@@ -54,6 +54,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  mBosonStartEditorWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonStartEditorWidgetLayout");
 
  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
+ mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
 
  mStartGameLayout = new QHBoxLayout( 0, 0, 6, "startgamelayout"); 
 
@@ -141,4 +142,10 @@ void BosonStartEditorWidget::sendNewGame()
  game()->sendMessage(0, BosonMessage::IdNewEditor);
 }
 
+void BosonStartEditorWidget::setLogoSpacer(int height)
+{
+ mLogoSpacer->changeSize( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
+}
+
 #endif //!NO_EDITOR
+

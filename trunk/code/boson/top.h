@@ -134,6 +134,12 @@ protected:
 
 	void endGame();
 
+	/**
+	 * Load the background for the newgames, welcome and similar widgets.
+	 * not used for the game widget.
+	 **/
+	void loadWidgetBackground(QWidget* widget);
+
 protected slots:
 	void slotCanvasTilesLoading(int);
 	void slotCanvasTilesLoaded();

@@ -77,6 +77,9 @@ General TODOs
   displaying the resources of the player. up to now all implementations flicker
   in any way...
 - use KDock for the dispalys
+- color combobox should have same width as other comboboxes
+- hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
+  BackgroundOrigin
 
 Data TODOs
 - sound for minimap activated/deactivated

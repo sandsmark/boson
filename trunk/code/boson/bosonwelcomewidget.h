@@ -27,6 +27,7 @@ class QHBoxLayout;
 class QGridLayout;
 class QLabel;
 class QPushButton;
+class QSpacerItem;
 
 class BosonWelcomeWidget : public QWidget
 {
@@ -34,6 +35,8 @@ class BosonWelcomeWidget : public QWidget
   public:
     BosonWelcomeWidget(QWidget* parent);
     ~BosonWelcomeWidget();
+
+    void setLogoSpacer(int height);
 
   signals:
     void signalNewGame();
@@ -44,6 +47,7 @@ class BosonWelcomeWidget : public QWidget
     QVBoxLayout* mBosonWelcomeWidgetLayout;
     QVBoxLayout* mMainLayout;
     QHBoxLayout* mLowerLayout;
+    QSpacerItem* mLogoSpacer;
 
   private:
     QPushButton* mNewGameButton;
