@@ -78,6 +78,8 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 
+#include <unistd.h>
+
 
 #define ID_DEBUG_KILLPLAYER 0
 #define ID_DEBUG_ADD_10000_MINERALS 1
