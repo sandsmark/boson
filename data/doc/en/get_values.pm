@@ -31,7 +31,7 @@ sub getval() {
         @CONTENT2 = <FILE2>;
         close(FILE2);
 
-        print "<table border=\"1\" style=\"border-width:0;\" cellpadding=\"15\"><tr valign=\"top\"><td><table border=\"0\">\n";
+        print "<table border=\"0\"><tr valign=\"top\"><td><table border=\"0\" class=\"values\">\n";
 
         my $line;
         my $line2;
@@ -107,7 +107,7 @@ sub getval() {
         my %weapon3_hash;
         
         if (@boson_unit >= 1) {
-            print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n";
+            print "<tr><td colspan=\"2\" class=\"thumb_header\"><b>Unit Properties</b></td></tr>\n";
             foreach $line (@boson_unit) {
                 foreach $line2 (@CONTENT2) {
                     $line2 =~ s/\s//g;
@@ -128,8 +128,8 @@ sub getval() {
         }
 
         if (@weapon1 >= 1) {
-            print "</table><td><table>";
-            print "<tr><td colspan=\"2\"><b>Weapon 1</b></td></tr>\n";
+            print "</table><td><table class=\"values\">";
+            print "<tr><td colspan=\"2\" class=\"thumb_header\"><b>Weapon 1</b></td></tr>\n";
             foreach $line (@weapon1) {
                 foreach $line2 (@CONTENT2) {
                     $line2 =~ s/\s//g;
@@ -150,8 +150,8 @@ sub getval() {
         }
 
         if (@weapon2 >= 1) {
-            print "</table><td><table>";
-            print "<tr><td colspan=\"2\"><b>Weapon 2</b></td></tr>\n";
+            print "</table><td><table class=\"values\">";
+            print "<tr><td colspan=\"2\" class=\"thumb_header\"><b>Weapon 2</b></td></tr>\n";
             foreach $line (@weapon2) {
                 foreach $line2 (@CONTENT2) {
                     $line2 =~ s/\s//g;
@@ -172,8 +172,8 @@ sub getval() {
         }
 
         if (@weapon3 >= 1) {
-            print "</table><td><table>";
-            print "<tr><td colspan=\"2\"><b>Weapon 3</b></td></tr>\n";
+            print "</table><td><table class=\"values\">";
+            print "<tr><td colspan=\"2\" class=\"thumb_header\"><b>Weapon 3</b></td></tr>\n";
             foreach $line (@weapon3) {
                 foreach $line2 (@CONTENT2) {
                     $line2 =~ s/\s//g;
@@ -221,7 +221,7 @@ sub getIndexVals() {
         
         @searchValues = ("Health", "OilCost", "MineralCost");
 
-        print "<table border=\"0\" width=\"130\" class=\"thumbs\">\n";
+        print "<table border=\"0\" width=\"130\" class=\"values\">\n";
 
         my $line;
         my $found_value;

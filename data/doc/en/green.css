@@ -18,11 +18,18 @@ table.thumbs {
   color: #00ff00;
 }
 
+table.values {
+  background-color: #004000;
+  color: #00ff00;
+}
+
 .thumb_header {
   background-color: #202020;
   color: #00ff00;
   font-weight: bold;
 }
+
+
 /** Links **/
 a {
   color: #40d040;
