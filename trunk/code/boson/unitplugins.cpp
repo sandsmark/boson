@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -238,10 +238,14 @@ void ProductionPlugin::advance(unsigned int)
 			return;
 		}
 		if (speciesTheme()->unitProperties(id)->isFacility()) {
-			game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()));
+			game()->slotAddChatSystemMessage(
+					i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()),
+					player());
 			return;
 		} else {
-			game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()));
+			game()->slotAddChatSystemMessage(
+					i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()),
+					player());
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
