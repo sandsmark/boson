@@ -3,20 +3,19 @@ CXXFLAGS = -pipe -Wall -g # -O2
 #MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
 #CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
-libbomap_la_SOURCES =  playField.cpp serverCell.cpp
-#libboson_la_LIBADD   =  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
+#libbomap_la_SOURCES =  playField.cpp
 
-boeditor_SOURCES = boeditor.cpp serverCell.h serverCell.cpp
+boeditor_SOURCES = boeditor.cpp
 #boeditor_LDADD   = ./libbomap.la ../server/serverCell.o ../common/libboson.la -lqt
-boeditor_LDADD   = ./libbomap.la  ../common/libboson.la -lqt
+boeditor_LDADD   = ../common/libboson.la -lqt
 
-boreader_SOURCES = boreader.cpp
+#boreader_SOURCES = boreader.cpp playField.cpp
 #boreader_LDADD   = ./libbomap.la ../server/serverCell.o ../common/libboson.la -lqt
-boreader_LDADD   = ./libbomap.la ../common/libboson.la -lqt
+#boreader_LDADD   = ../common/libboson.la -lqt
 
 SUBDIRS = 
 
-EXTRA_DIST =  playField.cpp playField.h map.h boeditor.cpp boeditor.h
+EXTRA_DIST =  map.h boeditor.cpp boeditor.h
 
 ####### kdevelop will overwrite this part!!! (end)############
 # this 10 paths are KDE specific. Use them:
@@ -37,19 +36,20 @@ INCLUDES= $(all_includes)
 # claim, which subdirectories you want to install
 # you can add here more. This one gets installed 
 #bin_PROGRAMS = libboson.la
-lib_LTLIBRARIES = libbomap.la
+#lib_LTLIBRARIES = libbomap.la
 
-libbomap_la_METASOURCES = USE_AUTOMOC
+#libbomap_la_METASOURCES = USE_AUTOMOC
 
 
-bin_PROGRAMS = boeditor boreader
+bin_PROGRAMS = boeditor #boreader
 
 boeditor_METASOURCES = USE_AUTOMOC
 # the library search path. 
-libbomap_la_LDFLAGS = $(all_libraries) #$(KDE_RPATH)
+#libbomap_la_LDFLAGS = $(all_libraries) #$(KDE_RPATH)
 
 # them while "make clean", use CLEANFILES
-DISTCLEANFILES = $(libbomap_la_METASOURCES) basic.bpf
+#DISTCLEANFILES = $(libbomap_la_METASOURCES) basic.bpf
+DISTCLEANFILES = basic.bpf
 
 # make messages.po. Move this one to ../po/ and "make merge" in po
 # the -x is for skipping messages already translated in kdelibs
