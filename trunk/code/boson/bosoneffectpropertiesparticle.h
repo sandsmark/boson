@@ -90,6 +90,9 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
     virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
 
 
+    int initialParticles() const  { return mInitNum; }
+
+
     /**
      * Initializes given particle
      **/

@@ -27,7 +27,9 @@
 class QDomElement;
 class KRandomSequence;
 class QString;
+class BosonEffectProperties;
 class BosonEffectPropertiesFade;
+class BosonEffectPropertiesFog;
 class BosonEffectPropertiesLight;
 class BoLight;
 
@@ -51,7 +53,7 @@ class BosonEffect
         Particle, ParticleGeneric, ParticleTrail };
 
 
-    BosonEffect();
+    BosonEffect(const BosonEffectProperties* prop = 0);
     virtual ~BosonEffect();
 
     /**
@@ -88,10 +90,11 @@ class BosonEffect
     /**
      * Updates the effect.
      * This can be used for dynamic effects, such as particle systems, which
-     * change over time. Default implementation does nothing.
+     *  change over time.
+     * Default implementation decreases delay and calls @ref start once it's 0.
      * @param elapsed number of seconds elapsed since the last time that update() was called
      **/
-    virtual void update(float elapsed)  {}
+    virtual void update(float elapsed);
 
 
     /**
@@ -106,6 +109,21 @@ class BosonEffect
      *  when it's last particle has died.
      **/
     virtual void makeObsolete()  { mActive = false; }
+    /**
+     * @return Whether the effect has been started.
+     * This is used for delayed effect. If you set effect's delay to e.g. 1
+     *  second, then after the effect is created, nothing will be done for 1
+     *  second. After that, effect is "started".
+     * Non-started effects will not be rendered.
+     **/
+    bool hasStarted() const  { return mStarted; }
+    /**
+     * Called when effect is started (see @ref hasStarted for description about
+     *  what "started" means). Reimplement if necessary (e.g. to create intial
+     *  particles in particle effect).
+     * Default implementation just sets started status to true.
+     **/
+    virtual void start();
 
 
     virtual bool saveAsXML(QDomElement& root) const = 0;
@@ -129,6 +147,11 @@ class BosonEffect
   protected:
     BoVector3 mPosition;
     bool mActive;
+    bool mStarted;
+    float mDelay;
+    // TODO: maybe remove mProperties pointers from subclasses and use only
+    //  this one?
+    const BosonEffectProperties* mGeneralProperties;
 
 
     static KRandomSequence* mRandom;
@@ -139,7 +162,7 @@ class BosonEffect
 /**
  * @short Fog effect
  *
- * This is usual fog effect, you caan specify color of the fog and distances
+ * This is usual fog effect, you can specify color of the fog and distances
  *  where the fog starts and ends. Everything in the world will be then fogged
  *  according to their distance from the camera (linear fog model is used).
  *
@@ -153,7 +176,10 @@ class BosonEffect
 class BosonEffectFog : public BosonEffect
 {
   public:
-    //BosonEffectFog(BosonEffectPropertiesFog* prop);
+    /**
+     * Constructs new fog effect.
+     **/
+    BosonEffectFog(const BosonEffectPropertiesFog* prop);
     /**
      * Constructs new fog effect.
      **/
@@ -193,6 +219,7 @@ class BosonEffectFog : public BosonEffect
 
 
   protected:
+    const BosonEffectPropertiesFog* mProperties;
     float mStart;
     float mEnd;
     float mRadius;
@@ -298,6 +325,8 @@ class BosonEffectLight : public BosonEffect
 
 
     virtual void update(float elapsed);
+
+    virtual void start();
 
     virtual void setPosition(const BoVector3& pos);
 
