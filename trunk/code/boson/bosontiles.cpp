@@ -157,7 +157,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
  QString tile;
  QImage p;
  for (int i = 0; i < 4; i++) {
-	tile.sprintf(".%.2d.bmp", i);
+	tile.sprintf("-%.2d.bmp", i);
 	QString file = path + tile;
 	p.load(file);
 	if (p.isNull()) {
@@ -333,45 +333,45 @@ QString BosonTiles::trans_ext(int t)
  */
  QString s;
  if (t > 11) {
-	s.sprintf(".%.2d", t + 1);
+	s.sprintf("_%.2d", t + 1);
  } else {
 	// AB: this is unclean. can we do  this without switch, i.e. like above?
 	switch (t) {
 		case 0:
-			s.sprintf(".%.2d", 1);
+			s.sprintf("_%.2d", 1);
 			break;
 		case 1:
-			s.sprintf(".%.2d", 3);
+			s.sprintf("_%.2d", 3);
 			break;
 		case 2:
-			s.sprintf(".%.2d", 7);
+			s.sprintf("_%.2d", 7);
 			break;
 		case 3:
-			s.sprintf(".%.2d", 5);
+			s.sprintf("_%.2d", 5);
 			break;
 		case 4:
-			s.sprintf(".%.2d", 2);
+			s.sprintf("_%.2d", 2);
 			break;
 		case 5:
-			s.sprintf(".%.2d", 6);
+			s.sprintf("_%.2d", 6);
 			break;
 		case 6:
-			s.sprintf(".%.2d", 8);
+			s.sprintf("_%.2d", 8);
 			break;
 		case 7:
-			s.sprintf(".%.2d", 4);
+			s.sprintf("_%.2d", 4);
 			break;
 		case 8:
-			s.sprintf(".%.2d", 9);
+			s.sprintf("_%.2d", 9);
 			break;
 		case 9:
-			s.sprintf(".%.2d", 10);
+			s.sprintf("_%.2d", 10);
 			break;
 		case 10:
-			s.sprintf(".%.2d", 12);
+			s.sprintf("_%.2d", 12);
 			break;
 		case 11:
-			s.sprintf(".%.2d", 11);
+			s.sprintf("_%.2d", 11);
 			break;
 
 	}
