@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,9 @@
 #include "global.h"
 
 class BosonConfig;
+class OptionsWidget;
+class Player;
+class Boson;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -35,28 +38,12 @@ public:
 	OptionsDialog(QWidget* parent, bool modal = false);
 	~OptionsDialog();
 
-	/**
-	 * Set the shown value for the game speed. Note that this value is the
-	 * time between 2 advance calls in ms while the dialog
-	 * does not show anything in ms. The dialog values are just the
-	 * opposite: higher values mean higher speed.
-	 **/
-	void setGameSpeed(int ms);
-	void setUpdateInterval(int ms);
-
-	void setArrowScrollSpeed(int);
+	void setGame(Boson* boson);
+	void setPlayer(Player* localPlayer);
 
 	void setCursor(CursorMode mode);
-	void setMiniMapScale(double s);
-
-	void setRMBScrolling(bool);
-	void setMMBScrolling(bool);
-	void setCursorEdgeSensity(int);
-	void setUnitSoundsDeactivated(BosonConfig* conf);
 
 signals:
-	void signalArrowScrollChanged(int);
-	void signalSpeedChanged(int);
 	void signalUpdateIntervalChanged(unsigned int);
 
 	void signalCursorChanged(int index, const QString& cursorDir);
@@ -64,30 +51,23 @@ signals:
 	void signalCmdBackgroundChanged(const QString& file);
 	void signalMiniMapScaleChanged(double);
 
+public slots:
+	void slotLoad();
+
 protected slots:
-	/**
-	 * @param ms The new game speed in ms
-	 **/
-	void slotSpeedChanged(int ms);
+	virtual void slotOk();
+	virtual void slotApply();
+	virtual void slotDefault();
 
-	void slotUpdateIntervalChanged(int ms);
-
-	void slotCursorChanged(int index);
-	void slotCursorThemeChanged(int index);
-
-	void slotCmdBackgroundChanged(int index);
-
-	void slotRMBScrollingToggled(bool);
-	void slotMMBScrollingToggled(bool);
-	void slotCursorEdgeSensityChanged(int);
-	void slotSetDefaults();
-	void slotUnitSoundDeactivated(bool off);
 
 protected:
 	void initGeneralPage();
 	void initCursorPage();
 	void initScrollingPage();
 	void initSoundsPage();
+	void initOpenGLPage();
+
+	void addOptions(OptionsWidget* o);
 
 private:
 	class OptionsDialogPrivate;

@@ -44,6 +44,7 @@ BOSON_SRC = \
 	bosontiles.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
+	optionswidgets.cpp \
 	bosoncomputerio.cpp \
 	kgamedialogcomputerconfig.cpp \
 	bosonpath.cpp \

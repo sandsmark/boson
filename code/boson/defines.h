@@ -26,40 +26,43 @@
 
 
 #define BOSON_COOKIE 992
-
-
-// obsolete
-#define PIXMAP_PER_MOBILE 9 // 8 different directions + 1 "destroyed" pix
-#define PIXMAP_PER_FIX 5 // number of construction steps + 1 "destroyed" pix
-#define PIXMAP_FIX_DESTROYED (PIXMAP_PER_FIX - 1)
-#define PIXMAP_MOBILE_DESTROYED (PIXMAP_PER_MOBILE - 1)
-#define FACILITY_CONSTRUCTION_STEPS (PIXMAP_PER_FIX - 1)
-#define SHOT_FRAMES 5
-#define MOBILE_SHOT_FRAMES 16
-#define FACILITY_SHOT_FRAMES 16
-#define MOBILE_SHOT_NB 4 // FIXME hardcoded
-#define FACILITY_SHOT_NB 4// FIXME hardcoded
-// obsolete (end)
+#define BOSON_PORT 5454
 
 #define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested
 
-#define MAX_MAP_HEIGHT 500
-#define MAX_MAP_WIDTH 500
-
 #define MAX_GAME_SPEED 25 // the advance period - lower means faster
 #define MIN_GAME_SPEED 2 // the advance period - higher means slower
-#define DEFAULT_GAME_SPEED 70
 
 #define REMOVE_WRECKAGES_TIME 20 // remove wreckages after a certain time
+
+#define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
 #define BOSON_MINIMUM_WIDTH 640
 #define BOSON_MINIMUM_HEIGHT 480
 
-#define BUILD_RANGE 5 * BO_TILE_SIZE // units can be placed within 10 tiles from its factory
 
-#define BOSON_PORT 5454
+// random values for map - must be replaced by useful values! afaics these are
+// cell values
+#define MAX_MAP_HEIGHT 500
+#define MAX_MAP_WIDTH 500
+
+
+// default values
+// used for both BosonConfig and OptionsDialog
+#define DEFAULT_SOUND true
+#define DEFAULT_MUSIC true
+#define DEFAULT_USE_RMB_MOVE true
+#define DEFAULT_USE_MMB_MOVE true
+#define DEFAULT_GAME_SPEED 5
+#define DEFAULT_CURSOR CursorSprite
+#define DEFAULT_CURSOR_EDGE_SENSITY 20
+#define DEFAULT_ARROW_SCROLL_SPEED 10
+#define DEFAULT_CMD_BUTTONS_PER_ROW 3
+#define DEFAULT_MINIMAP_SCALE 2.0
+#define DEFAULT_MINIMAP_ZOOM 1.0
+#define DEFAULT_UPDATE_INTERVAL 20
 
 #endif
 

@@ -374,11 +374,6 @@ void BosonWidgetBase::slotProfiling()
  dlg->exec();
 }
 
-void BosonWidgetBase::slotArrowScrollChanged(int speed)
-{
- boConfig->setArrowKeyStep(speed);
-}
-
 void BosonWidgetBase::slotMiniMapScaleChanged(double scale)
 {
  boConfig->setMiniMapScale(scale);

@@ -18,6 +18,7 @@
 */
 #include "optionsdialog.h"
 #include "bosonconfig.h"
+#include "optionswidgets.h"
 
 #include "bosoncursor.h"
 #include "defines.h"
@@ -32,6 +33,7 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qvbox.h>
+#include <qptrlist.h>
 
 #include "optionsdialog.moc"
 
@@ -40,39 +42,14 @@ class OptionsDialog::OptionsDialogPrivate
 public:
 	OptionsDialogPrivate()
 	{
-		mArrowSpeed = 0;
-		mGameSpeed = 0;
-		mCmdBackground = 0;
-		mMiniMapScale = 0;
-		
-		mCursor = 0;
-		mCursorTheme = 0;
-
-		mRMBScrolling = 0;
-		mMMBScrolling = 0;
-		mCursorEdgeSensity = 0;
+		mCursorOptions = 0;
 	}
-
-	KIntNumInput* mArrowSpeed;
-	KIntNumInput* mGameSpeed;
-	KIntNumInput* mUpdateInterval;
-	QComboBox* mCmdBackground;
-	KDoubleNumInput* mMiniMapScale;
-	
-	QComboBox* mCursor;
-	QComboBox* mCursorTheme;
-	QStringList mCursorThemes;
-	QStringList mCmdBackgrounds;
-
-	QCheckBox* mRMBScrolling;
-	QCheckBox* mMMBScrolling;
-	KIntNumInput* mCursorEdgeSensity;
-
-	QMap<QCheckBox*, UnitSoundEvent> mCheckBox2UnitSoundEvent;
+	QPtrList<OptionsWidget> mOptionsWidgets;
+	CursorOptions* mCursorOptions;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
-		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Default,
+		: KDialogBase(Tabbed, i18n("Boson Options"), Ok|Apply|Default,
 		Cancel, parent, "bosonoptionsdialog", modal, true)
 {
  d = new OptionsDialogPrivate;
@@ -81,8 +58,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  initCursorPage();
  initScrollingPage();
  initSoundsPage();
-
- connect(this, SIGNAL(defaultClicked()), this, SLOT(slotSetDefaults()));
+ initOpenGLPage();
 }
 
 OptionsDialog::~OptionsDialog()
@@ -93,277 +69,100 @@ OptionsDialog::~OptionsDialog()
 void OptionsDialog::initGeneralPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&General"));
-
- d->mArrowSpeed = new KIntNumInput(10, vbox);
- d->mArrowSpeed->setRange(1, 200);
- d->mArrowSpeed->setLabel(i18n("Arrow key steps"));
- connect(d->mArrowSpeed, SIGNAL(valueChanged(int)),
-		this, SIGNAL(signalArrowScrollChanged(int)));
-
- d->mGameSpeed = new KIntNumInput(10, vbox);
- d->mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
- d->mGameSpeed->setLabel(i18n("Game speed"));
- connect(d->mGameSpeed, SIGNAL(valueChanged(int)),
-		this, SLOT(slotSpeedChanged(int)));
-
- d->mUpdateInterval = new KIntNumInput(50, vbox);
- d->mUpdateInterval->setRange(2, 400);
- d->mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
- connect(d->mUpdateInterval, SIGNAL(valueChanged(int)),
-		this, SLOT(slotUpdateIntervalChanged(int)));
-
- QHBox* hbox = new QHBox(vbox);
-
- hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Command frame background pixmap"), hbox);
- d->mCmdBackground = new QComboBox(hbox);
- d->mCmdBackgrounds = KGlobal::dirs()->findAllResources("data", "boson/themes/ui/*/cmdpanel*.png");
- d->mCmdBackground->insertItem(i18n("None"));
- //TODO: display filename only... - not the complete path
- d->mCmdBackground->insertStringList(d->mCmdBackgrounds);
- connect(d->mCmdBackground, SIGNAL(activated(int)), 
-		this, SLOT(slotCmdBackgroundChanged(int)));
-
- d->mMiniMapScale = new KDoubleNumInput(1.0, vbox);
- d->mMiniMapScale->setRange(1.0, 5.0, 1);
- d->mMiniMapScale->setLabel(i18n("Mini Map scale factor"));
- connect(d->mMiniMapScale, SIGNAL(valueChanged(double)), 
+ GeneralOptions* o = new GeneralOptions(vbox);
+ connect(o, SIGNAL(signalMiniMapScaleChanged(double)),
 		this, SIGNAL(signalMiniMapScaleChanged(double)));
+ connect(o, SIGNAL(signalCmdBackgroundChanged(const QString&)),
+		this, SIGNAL(signalCmdBackgroundChanged(const QString&)));
+ addOptions(o);
 }
 
 void OptionsDialog::initCursorPage()
 {
  QVBox* vbox = addVBoxPage(i18n("C&ursor"));
- QHBox* hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Cursor"), hbox);
- d->mCursor = new QComboBox(hbox);
- d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
- d->mCursor->insertItem(i18n("B/W Cursor"), CursorNormal);
- d->mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
- connect(d->mCursor, SIGNAL(activated(int)),
-		this, SLOT(slotCursorChanged(int)));
-
- hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Cursor theme"), hbox);
- d->mCursorTheme = new QComboBox(hbox);
- QStringList list = BosonCursor::availableThemes();
- for (int i = 0; i < (int)list.count(); i++) {
-	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.desktop"));
-	if (!cfg.hasGroup("Boson Cursor")) {
-		kdWarning() << "invalid cursor " << list[i] << endl;
-	} else {
-		cfg.setGroup("Boson Cursor");
-		QString name = cfg.readEntry("Name", i18n("Unknown"));
-		d->mCursorTheme->insertItem(name);
-		d->mCursorThemes.append(list[i]);
-	}
- }
- connect(d->mCursorTheme, SIGNAL(activated(int)),
-		this, SLOT(slotCursorThemeChanged(int)));
-
-
- setCursor(CursorSprite);
+ CursorOptions* o = new CursorOptions(vbox);
+ connect(o, SIGNAL(signalCursorChanged(int, const QString&)),
+		this, SIGNAL(signalCursorChanged(int, const QString&)));
+ addOptions(o);
+ d->mCursorOptions = o;
 }
 
 void OptionsDialog::initScrollingPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&Scrolling"));
- QHBox* hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Enable right mouse button scrolling"), hbox);
- d->mRMBScrolling = new QCheckBox(hbox);
- connect(d->mRMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotRMBScrollingToggled(bool)));
-
- hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Enable middle mouse button scrolling"), hbox);
- d->mMMBScrolling = new QCheckBox(hbox);
- connect(d->mMMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotMMBScrollingToggled(bool)));
-
- hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Sensity of cursor at edge of the window scrolling (0 for disabled)"), hbox);
- d->mCursorEdgeSensity = new KIntNumInput(hbox);
- d->mCursorEdgeSensity->setRange(0, 50);
- connect(d->mCursorEdgeSensity, SIGNAL(valueChanged(int)), this, SLOT(slotCursorEdgeSensityChanged(int)));
-
+ ScrollingOptions* o = new ScrollingOptions(vbox);
+ addOptions(o);
 }
 
 void OptionsDialog::initSoundsPage()
 {
  QVBox* vbox = addVBoxPage(i18n("S&ounds"));
- (void)new QLabel(i18n("Disable the following unit sounds (please send a bug report if you can think of more descriptive names):"), vbox);
- QCheckBox* c;
- c = new QCheckBox(i18n("Shoot"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundShoot);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Order Move"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderMove);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Order Attack"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderAttack);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Order Select"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundOrderSelect);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Report Produced"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundReportProduced);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Report Destroyed"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundReportDestroyed);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
- c = new QCheckBox(i18n("Report Under Attack"), vbox);
- d->mCheckBox2UnitSoundEvent.insert(c, SoundReportUnderAttack);
- connect(c, SIGNAL(toggled(bool)), this, SLOT(slotUnitSoundDeactivated(bool)));
-
-
+ SoundOptions* o = new SoundOptions(vbox);
+ addOptions(o);
 }
 
-void OptionsDialog::slotSpeedChanged(int value)
+void OptionsDialog::initOpenGLPage()
 {
- emit signalSpeedChanged(value);
+ QVBox* vbox = addVBoxPage(i18n("&OpenGL"));
+ OpenGLOptions* o = new OpenGLOptions(vbox);
+ connect(o, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
+		this, SIGNAL(signalUpdateIntervalChanged(unsigned int)));
+ addOptions(o);
 }
 
-void OptionsDialog::slotUpdateIntervalChanged(int value)
+void OptionsDialog::addOptions(OptionsWidget* o)
 {
- emit signalUpdateIntervalChanged((unsigned int)value);
+ d->mOptionsWidgets.append(o);
 }
 
-void OptionsDialog::setGameSpeed(int speed)
+void OptionsDialog::setGame(Boson* game)
 {
- d->mGameSpeed->setValue(speed);
+ QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ for (; it.current(); ++it) {
+	it.current()->setGame(game);
+ }
 }
 
-void OptionsDialog::setUpdateInterval(int i)
+void OptionsDialog::setPlayer(Player* p)
 {
-kdDebug() << k_funcinfo << i << endl;
- d->mUpdateInterval->setValue(i);
-}
-
-void OptionsDialog::setArrowScrollSpeed(int value)
-{
- d->mArrowSpeed->setValue(value);
+ QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ for (; it.current(); ++it) {
+	it.current()->setLocalPlayer(p);
+ }
 }
 
 void OptionsDialog::setCursor(CursorMode mode)
 {
- d->mCursor->setCurrentItem(mode);
+ d->mCursorOptions->setCursor(mode);
 }
 
-void OptionsDialog::setMiniMapScale(double scale)
+void OptionsDialog::slotLoad()
 {
- d->mMiniMapScale->setValue(scale);
-}
-
-void OptionsDialog::slotCursorChanged(int index)
-{
- if (!d->mCursorTheme) {
-	return;
- }
- if (index < 0) {
-	return;
- }
- if (d->mCursorTheme->currentItem() >= 0) {
-	emit signalCursorChanged(index, d->mCursorThemes[d->mCursorTheme->currentItem()]);
- } else {
-	emit signalCursorChanged(index, BosonCursor::defaultTheme());
+ QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ for (; it.current(); ++it) {
+	it.current()->load();
  }
 }
 
-void OptionsDialog::slotCursorThemeChanged(int index)
+void OptionsDialog::slotDefault()
 {
- if (d->mCursor) {
-	return;
- }
- if (index < 0) {
-	return;
- }
- if (d->mCursor->currentItem() < 0) {
-	return;
- }
-
- emit signalCursorChanged(d->mCursor->currentItem(), d->mCursorThemes[index]);
-}
-
-void OptionsDialog::slotCmdBackgroundChanged(int index)
-{
- QString file;
- if (index <= 0) {
-	emit signalCmdBackgroundChanged(file);
-	return;
- }
- index--;
- emit signalCmdBackgroundChanged(d->mCmdBackgrounds[index]);
-}
-
-void OptionsDialog::slotRMBScrollingToggled(bool on)
-{
- boConfig->setRMBMove(on);
-}
-
-void OptionsDialog::slotMMBScrollingToggled(bool on)
-{
- boConfig->setMMBMove(on);
-}
-
-void OptionsDialog::slotCursorEdgeSensityChanged(int v)
-{
- if (v < 0) {
-	v = 0;
- }
- boConfig->setCursorEdgeSensity(v);
-}
-
-void OptionsDialog::setRMBScrolling(bool on)
-{
- d->mRMBScrolling->setChecked(on);
-}
-
-void OptionsDialog::setMMBScrolling(bool on)
-{
- d->mMMBScrolling->setChecked(on);
-}
-
-void OptionsDialog::setCursorEdgeSensity(int v)
-{
- d->mCursorEdgeSensity->setValue(v);
-}
-
-void OptionsDialog::setUnitSoundsDeactivated(BosonConfig* conf)
-{
- if (!conf) {
-	return;
- }
- QMap<QCheckBox*, UnitSoundEvent>::Iterator it = d->mCheckBox2UnitSoundEvent.begin();
- for (; it != d->mCheckBox2UnitSoundEvent.end(); ++it) {
-	it.key()->setChecked(!boConfig->unitSoundActivated(it.data()));
+ QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ for (; it.current(); ++it) {
+	it.current()->setDefaults();
  }
 }
 
-void OptionsDialog::slotUnitSoundDeactivated(bool off)
+void OptionsDialog::slotOk()
 {
- QCheckBox* s = (QCheckBox*)sender(); // a little bit hackiish...
- if (!s) {
-	kdWarning() << k_funcinfo << "NULL sender()" << endl;
-	return;
- }
- if (!d->mCheckBox2UnitSoundEvent.contains(s)) {
-	kdWarning() << k_funcinfo << "Unknown checkbox" << endl;
-	return;
- }
- UnitSoundEvent e = d->mCheckBox2UnitSoundEvent[s];
- boConfig->setUnitSoundActivated(e, !off);
+ slotApply();
+ accept();
 }
 
-void OptionsDialog::slotSetDefaults()
+void OptionsDialog::slotApply()
 {
- // FIXME: these values are copied from BosonConfig
- //  Probably we should have some #define's with default values somewhere
- setGameSpeed(5);
- setArrowScrollSpeed(10);
- setMiniMapScale(2.0);
- setRMBScrolling(true);
- setMMBScrolling(true);
- setCursor(CursorSprite);
- slotCursorChanged((int)CursorSprite);
- setCursorEdgeSensity(20);
- setUpdateInterval(25);
+ QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
+ for (; it.current(); ++it) {
+	it.current()->apply();
+ }
 }
 
