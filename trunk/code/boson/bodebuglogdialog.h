@@ -34,6 +34,9 @@ public:
 
 	void setMessages(const QPtrList<BoDebugMessage>& m);
 
+protected slots:
+	void slotMessageSelected(QListViewItem*);
+
 private:
 	BoDebugLogWidgetPrivate* d;
 };
