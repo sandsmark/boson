@@ -1075,20 +1075,23 @@ public:
 
 		QFontMetrics metrics(font());
 		setShowToolTips(true);
-		addColumn(i18n("Face"));
-		addColumn(i18n("Point1"));
-		addColumn(i18n("Point2"));
-		addColumn(i18n("Point3"));
+		faceIndexColumn = addColumn(i18n("Face"));
+		pointColumn[0] = addColumn(i18n("Point1"));
+		pointColumn[1] = addColumn(i18n("Point2"));
+		pointColumn[2] = addColumn(i18n("Point3"));
+		texelColumn[0] = addColumn(i18n("Texel1"));
+		texelColumn[1] = addColumn(i18n("Texel2"));
+		texelColumn[2] = addColumn(i18n("Texel3"));
 
 		// we try to keep the size as low as possible here - the list is
 		// too wide anyway.
 		// the titles won't be displayed, but the content should display
 		// fine at least in most cases.
-		addColumn(i18n("Material"), metrics.width(i18n("Material")));
-		addColumn(i18n("Flags"), metrics.width(QString::number(11)));
-		addColumn(i18n("Smoothing"), metrics.width(QString::number(1111)));
-		addColumn(i18n("Normal"), metrics.width(QString::number(11111)));
-		addColumn(i18n("Boson Normal"), metrics.width(QString::number(11111)));
+		materialColumn = addColumn(i18n("Material"), metrics.width(i18n("Material")));
+		flagsColumn = addColumn(i18n("Flags"), metrics.width(QString::number(11)));
+		smoothingColumn = addColumn(i18n("Smoothing"), metrics.width(QString::number(1111)));
+		normalColumn = addColumn(i18n("Normal"), metrics.width(QString::number(11111)));
+		bosonNormalColumn = addColumn(i18n("Boson Normal"), metrics.width(QString::number(11111)));
 
 		setAllColumnsShowFocus(true);
 		resize(100, height());
@@ -1121,14 +1124,14 @@ public:
 		} else {
 			no.sprintf("%02d", index);
 		}
-		item->setText(0, no);
+		item->setText(faceIndexColumn, no);
 
 		setPoints(item, face, mesh);
-		item->setText(4, face->material);
+		item->setText(materialColumn, face->material);
 		QString flags = QString::number(face->flags);
-		item->setText(5, flags);
-		item->setText(6, QString::number(face->smoothing));
-		item->setText(7, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+		item->setText(flagsColumn, flags);
+		item->setText(smoothingColumn, QString::number(face->smoothing));
+		item->setText(normalColumn, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
 
 		return item;
 	}
@@ -1163,12 +1166,28 @@ protected:
 				} else {
 					v = meshVertex[j];
 				}
-				item->setText(j + 1, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
+				item->setText(pointColumn[j], QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
 			} else {
 				QString index;
 				index.sprintf("%03d", face->points[j]);
-				item->setText(j+ 1, index);
+				item->setText(pointColumn[j], index);
 			}
+
+			QString texel;
+			if (mesh->texels == 0) {
+				texel = i18n("None");
+			} else if (mesh->texels != mesh->points) {
+				texel = i18n("Invalid Texel count");
+			} else {
+				// TODO: boson coordinates. we do some pretty
+				// funny things to the original coordinates and
+				// I know that they sometimes are not correct.
+				// we should allow displaying them here..
+				int p = face->points[j];
+				Lib3dsTexel* t = mesh->texelL;
+				texel = QString("%1;%2").arg(t[p][0]).arg(t[p][1]);
+			}
+			item->setText(texelColumn[j], texel);
 		}
 
 		BoVector3 p, q;
@@ -1178,12 +1197,22 @@ protected:
 		if (normal.length() != 0.0f) {
 			normal.normalize();
 		}
-		item->setText(8, QString("%1;%2;%3").arg(normal[0]).arg(normal[1]).arg(normal[2]));
+		item->setText(bosonNormalColumn, QString("%1;%2;%3").arg(normal[0]).arg(normal[1]).arg(normal[2]));
 	}
 
 private:
 	bool mUseLib3dsCoordinates;
 	bool mShowPointIndices;
+
+	// column indices:
+	int faceIndexColumn;
+	int pointColumn[3];
+	int texelColumn[3];
+	int materialColumn;
+	int flagsColumn;
+	int smoothingColumn;
+	int normalColumn;
+	int bosonNormalColumn;
 };
 
 BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
@@ -1554,11 +1583,11 @@ void KGameModelDebug::initMeshPage()
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
  QVBox* modelInfo = new QVBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
  QHBox* faces = new QHBox(modelInfo);
- (void)new QLabel(i18n("Mesh Faces: "), faces);
+ (void)new QLabel(i18n("Total Mesh Faces: "), faces);
  d->mMeshFacesCountLabel = new QLabel(faces);
  QToolTip::add(d->mMeshFacesCountLabel, i18n("This is the total number of faces in (different) meshes. Note that every mesh can appear several times in a model, so this number is <em>not</em> the total number of faces in the model!"));
  QHBox* vertices = new QHBox(modelInfo);
- (void)new QLabel(i18n("Mesh Vertices (Faces * 3): "), vertices);
+ (void)new QLabel(i18n("Total Mesh Vertices (Faces * 3): "), vertices);
  d->mMeshVertexCountLabel = new QLabel(vertices);
 
  QVBox* faceView = new QVBox(splitter);
