@@ -605,8 +605,7 @@ void BosonBigDisplayBase::initializeGL()
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 
  if (!directRendering()) {
-	// i guess this should be normal for nvidia cards? can someone with a
-	// nvidia card confirm this?
+	// baad.
 	boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
  }
 
