@@ -138,7 +138,7 @@ void BoCondition::processEvent(const BoEvent* event)
  processEvent(event);
 }
 
-bool BoCondition::save(QDomElement& root) const
+bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  QDomDocument doc = root.ownerDocument();
  QDomElement eventsLeft = doc.createElement("Events");
@@ -146,7 +146,7 @@ bool BoCondition::save(QDomElement& root) const
  QPtrListIterator<BoEventMatching> it(d->mEvents);
  while (it.current()) {
 	QDomElement m = doc.createElement("EventMatching");
-	if (!it.current()->save(m)) {
+	if (!it.current()->save(m, playerId2Index)) {
 		boError() << k_funcinfo << "cannot save EventMatching" << endl;
 		return false;
 	}

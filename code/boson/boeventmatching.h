@@ -19,11 +19,11 @@
 #ifndef BOEVENTMATCHING_H
 #define BOEVENTMATCHING_H
 
-//#include "boevent.h"
-
+class Boson;
 class BoEvent;
 class QCString;
 class QDomElement;
+template<class T1, class T2> class QMap;
 
 class BoEventMatching
 {
@@ -51,7 +51,7 @@ public:
 		return mIgnoreData2;
 	}
 
-	bool save(QDomElement& root) const;
+	bool save(QDomElement& root, const QMap<int, int>* playerId2Index) const;
 	bool load(const QDomElement& root);
 
 	bool matches(const BoEvent* event) const;

@@ -26,11 +26,13 @@
 #include "bosonpropertyxml.h"
 #include "bodebug.h"
 
-#include <kgameproperty.h>
-#include <kgamepropertyhandler.h>
+#include <kgame/kgameproperty.h>
+#include <kgame/kgamepropertyhandler.h>
+#include <kgame/kplayer.h> // KPlayer::id()
 
 #include <qdom.h>
 #include <qvaluevector.h>
+#include <qmap.h>
 
 #include <stdlib.h>
 
@@ -50,10 +52,9 @@ public:
 	QValueVector<QCString> mEventNames;
 };
 
-BoEventManager::BoEventManager(Boson* boson) : QObject(boson)
+BoEventManager::BoEventManager(QObject* parent) : QObject(parent)
 {
  d = new BoEventManagerPrivate;
- mGame = boson;
  d->mEvents.setAutoDelete(true);
 
  d->mProperties = new KGamePropertyHandler(this);
@@ -107,10 +108,18 @@ bool BoEventManager::saveAsXML(QDomElement& root) const
 
  QDomElement events = doc.createElement(QString::fromLatin1("EventQueue"));
  root.appendChild(events);
+
+ QMap<int, int> playerId2Index;
+ QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
+ while (playerIt.current()) {
+	int index = boGame->playerList()->findRef(playerIt.current());
+	playerId2Index.insert(playerIt.current()->id(), index);
+	++playerIt;
+ }
  QPtrListIterator<BoEvent> it(d->mEvents);
  while (it.current()) {
 	QDomElement e = doc.createElement(QString::fromLatin1("Event"));
-	if (!it.current()->save(e)) {
+	if (!it.current()->save(e, &playerId2Index)) {
 		boError(360) << k_funcinfo << "error saving event" << endl;
 		return false;
 	}

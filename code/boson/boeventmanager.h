@@ -37,7 +37,7 @@ public:
 		IdNextEvent = 500
 	};
 public:
-	BoEventManager(Boson* boson);
+	BoEventManager(QObject* parent);
 	~BoEventManager();
 
 	bool knowEventName(const QCString& name) const;
@@ -74,7 +74,6 @@ protected:
 
 private:
 	BoEventManagerPrivate* d;
-	Boson* mGame;
 };
 
 #endif

@@ -746,9 +746,9 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	event.setAttribute("UnitId", 0);
 	event.setAttribute("DelayedDelivery", 0);
 	event.setAttribute("HasLocation", 0);
-	event.setAttribute("LocationX", 0.0);
-	event.setAttribute("LocationY", 0.0);
-	event.setAttribute("LocationZ", 0.0);
+	event.setAttribute("Location.x", 0.0);
+	event.setAttribute("Location.y", 0.0);
+	event.setAttribute("Location.z", 0.0);
 	matching.appendChild(event);
 	events.appendChild(matching);
 

@@ -19,12 +19,12 @@
 
 #include "boevent.h"
 
-#include "boson.h"
 #include "bodebug.h"
 #include "boeventmatching.h"
 
 #include <qdom.h>
 #include <qptrlist.h>
+#include <qmap.h>
 
 BoEvent::BoEvent(const QCString& name)
 {
@@ -51,7 +51,7 @@ BoEvent::~BoEvent()
 {
 }
 
-bool BoEvent::save(QDomElement& root) const
+bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  root.setAttribute("RTTI", rtti());
  root.setAttribute("Name", name());
@@ -59,19 +59,26 @@ bool BoEvent::save(QDomElement& root) const
  root.setAttribute("UnitId", QString::number(unitId()));
  root.setAttribute("DelayedDelivery", QString::number(delayedDelivery()));
  root.setAttribute("HasLocation", QString::number((int)hasLocation()));
- root.setAttribute("LocationX", QString::number(location().x()));
- root.setAttribute("LocationY", QString::number(location().y()));
- root.setAttribute("LocationZ", QString::number(location().z()));
+ if (!location().saveAsXML(root, "Location")) {
+	boError(360) << k_funcinfo << endl;
+	return false;
+ }
  if (mHasPlayerId) {
 	// just like in BosonCanvas, we save the _index_, not the ID. but load()
 	// will expect the _ID_, so there must be some class filling in the
 	// correct value before load() is called.
-	KPlayer* p = boGame->findPlayer(playerId());
-	if (!p) {
-		BO_NULL_ERROR(p);
-		return false;
+	int index;
+	if (!playerId2Index) {
+		// here we save the actual Id (which is the index already)
+		// -> not used by the game itself
+		index = playerId();
+	} else {
+		if (!playerId2Index->contains(playerId())) {
+			boError(360) << k_funcinfo << "map does not contain playerId" << playerId() << endl;
+			return false;
+		}
+		index = (*playerId2Index)[playerId()];
 	}
-	int index = boGame->playerList()->findRef(p);
 	root.setAttribute("PlayerId", QString::number(index));
  }
  return true;
@@ -110,19 +117,8 @@ bool BoEvent::load(const QDomElement& root)
 	boError(360) << k_funcinfo << "Invalid HasLocation" << endl;
 	return false;
  }
- mLocation.setX((bool)root.attribute("LocationX").toFloat(&ok));
- if (!ok) {
-	boError(360) << k_funcinfo << "Invalid LocationX" << endl;
-	return false;
- }
- mLocation.setY((bool)root.attribute("LocationY").toFloat(&ok));
- if (!ok) {
-	boError(360) << k_funcinfo << "Invalid LocationY" << endl;
-	return false;
- }
- mLocation.setZ((bool)root.attribute("LocationZ").toFloat(&ok));
- if (!ok) {
-	boError(360) << k_funcinfo << "Invalid LocationZ" << endl;
+ if (!mLocation.loadFromXML(root, "Location")) {
+	boError(360) << k_funcinfo << "unable to load Location" << endl;
 	return false;
  }
  return true;
@@ -193,11 +189,11 @@ BoGenericULongEvent::~BoGenericULongEvent()
 {
 }
 
-bool BoGenericULongEvent::save(QDomElement& root) const
+bool BoGenericULongEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  root.setAttribute("Data1", QString::number(mData1));
  root.setAttribute("Data2", QString::number(mData2));
- return BoEvent::save(root);
+ return BoEvent::save(root, playerId2Index);
 }
 
 bool BoGenericULongEvent::load(const QDomElement& root)
@@ -252,11 +248,11 @@ BoGenericStringEvent::~BoGenericStringEvent()
 {
 }
 
-bool BoGenericStringEvent::save(QDomElement& root) const
+bool BoGenericStringEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
  root.setAttribute("Data1", mData1);
  root.setAttribute("Data2", mData2);
- return BoEvent::save(root);
+ return BoEvent::save(root, playerId2Index);
 }
 
 bool BoGenericStringEvent::load(const QDomElement& root)
