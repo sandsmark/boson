@@ -14,6 +14,8 @@
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
     <Action name="editor_map_description" />
+    <Action name="editor_player_minerals" />
+    <Action name="editor_player_oil" />
   </Menu>
 </MenuBar>
 <ToolBar>
