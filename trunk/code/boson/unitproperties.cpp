@@ -125,6 +125,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
 	loadMobileProperties(&conf);
  }
 
+ loadAllPluginProperties(&conf);
  loadTextureNames(&conf);
 }
 
