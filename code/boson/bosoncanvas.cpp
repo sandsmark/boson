@@ -886,18 +886,23 @@ BoItemList BosonCanvas::collisionsAtCells(const QPointArray& cells, const BosonI
  Cell* c = 0;
  BoItemList::ConstIterator it;
  BosonItem* s;
+ if (!map()) {
+	BO_NULL_ERROR(map());
+	return collisions;
+ }
+ Cell* allCells = map()->cells();
+ if (!allCells) {
+	BO_NULL_ERROR(allCells);
+	return collisions;
+ }
  for (unsigned int i = 0; i < cells.count(); i++) {
-	c = cell(cells[i].x(), cells[i].y());
-	if (!c) {
-		boWarning(310) << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
-		if (cells[i].x() < 0) {
-			boError(310) << k_funcinfo << "x < 0 - please check the calling funktion! this shouldn't happen!" << endl;
-		}
-		if (cells[i].y() < 0) {
-			boError(310) << k_funcinfo << "y < 0 - please check the calling funktion! this shouldn't happen!" << endl;
-		}
+	int x = cells[i].x();
+	int y = cells[i].y();
+	if (!map()->isValidCell(x, y)) {
+		boError() << "invalid cell coordinates: " << x << "," << y << endl;
 		continue;
 	}
+	c = allCells + map()->cellArrayPos(x, y);
 	cellItems = c->items();
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
 		s = *it;
