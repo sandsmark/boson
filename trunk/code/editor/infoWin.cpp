@@ -84,3 +84,10 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	}
 }
 
+
+void infoWin::setSelected(QPixmap *p)
+{
+	view_one->setPixmap( p?*p:*view_none);
+}
+
+
