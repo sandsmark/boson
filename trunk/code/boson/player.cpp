@@ -10,8 +10,6 @@
 #include <kgame/kgamemessage.h>
 
 #include <qcanvas.h>
-//#include <qintdict.h>
-//#include <qptrdict.h>
 
 #include "player.moc"
 
@@ -37,7 +35,6 @@ Player::Player() : KPlayer()
  d = new PlayerPrivate;
  d->mUnits.setAutoDelete(true);
  setAsyncInput(true);
-// loadTheme("human");
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
 }
@@ -298,21 +295,10 @@ bool Player::load(QDataStream& stream)
 	unsigned long int id;
 	stream >> type;
 	stream >> id;
-/*
-	VisualUnit* unit = 0;
-	emit signalCreateUnit(unit, type, this);
 
-	unit->load(stream);
-	addUnit(unit);// FIXME: d->mUnitPropId*/
-
-// id is changed 3 (three) times ?!?!? 
 	emit signalLoadUnit(type, id, this);
 	VisualUnit* unit = findUnit(id);
 	unit->load(stream);
-	if (unit->id() != id) {
-		kdWarning() << "hu??" << endl;
-		unit->setId(id);
-	}
  }
  return true;
 }
