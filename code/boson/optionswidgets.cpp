@@ -765,7 +765,7 @@ void OpenGLOptions::apply()
 				kapp->exit(1);
 			}
 		} else {
-			boConfig->setStringValue("MeshRenderer", mMeshRenderer->currentText());
+			boConfig->setStringValue("MeshRenderer", BoMeshRendererManager::manager()->currentRendererName());
 		}
 	}
  }
