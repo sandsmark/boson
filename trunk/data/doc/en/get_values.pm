@@ -221,7 +221,7 @@ sub getIndexVals() {
         
         @searchValues = ("Health", "OilCost", "MineralCost");
 
-        print "<table border=\"0\">\n";
+        print "<table border=\"0\" width=\"130\" class=\"thumbs\">\n";
 
         my $line;
         my $found_value;
