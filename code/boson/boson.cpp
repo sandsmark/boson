@@ -270,7 +270,7 @@ void BoAdvance::receiveAdvanceCall()
  // same interval.
  //
  // Please remember that there are several additional tasks that need to be done
- // - e.g. unit moving, OpenGL rendering, ... so 
+ // - e.g. unit moving, OpenGL rendering, ... so
  if (mAdvanceDividerCount + 1 == mAdvanceDivider)  {
 	boDebug(300) << k_funcinfo << "delayed messages: "
 			<< mBoson->delayedMessageCount() << endl;
@@ -956,7 +956,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			if (unitId == attackedUnitId) {
 				// can become possible one day - e.g. when
 				// repairing a unit
-				boWarning() << "Can not (yet) attack myself" 
+				boWarning() << "Can not (yet) attack myself"
 						<< endl;
 				continue;
 			}
@@ -1573,7 +1573,21 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 
 		BoVector3 pos((float)cellX * BO_TILE_SIZE, (float)cellY * BO_TILE_SIZE, 0.0f);
-		d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
+		Unit* u = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
+		// Facilities will be fully constructed by default
+		if (u->isFacility()) {
+			((Facility*)u)->setConstructionStep(((Facility*)u)->constructionSteps());
+		}
+		// Resource mines will have 20000 minerals / 10000 oil by default
+		if (u->plugin(UnitPlugin::ResourceMine)) {
+			ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+			if (res->canProvideMinerals()) {
+				res->setMinerals(20000);
+			}
+			if (res->canProvideOil()) {
+				res->setOil(10000);
+			}
+		}
 		break;
 	}
 	case BosonMessage::MoveChangeTexMap:
@@ -1970,7 +1984,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	return;
  }
  if (!isAdmin()) {
-	boError() << k_funcinfo << "only ADMIN can do this" << endl; 
+	boError() << k_funcinfo << "only ADMIN can do this" << endl;
 	return;
  }
 // boDebug() << k_funcinfo << endl;
