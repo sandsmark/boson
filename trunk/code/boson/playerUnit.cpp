@@ -83,7 +83,7 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 
 bool playerMobUnit::checkMove(QPoint pos)
 {
-	return bocanvas->cell(pos).canGo(type);
+	return bocanvas->cell(pos).canGo( goFlag() );
 }
 
 
