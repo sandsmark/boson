@@ -22,6 +22,7 @@
 #define SPECIESTHEME_H 
 
 #include <qstring.h>
+#include <qcolor.h>
 
 #include "common/unitType.h"
 #include "common/unit.h"
@@ -37,7 +38,7 @@ class QCanvasPixmapArray;
 class speciesTheme
 {
 public:
-	speciesTheme(char *themeName, QRgb c);
+	speciesTheme(char *themeName, QRgb c=qRgb(0,0,0) );
 	~speciesTheme();
 
 	QCanvasPixmapArray *getPixmap(mobType unit);
