@@ -51,7 +51,6 @@
 #include "bomeshrenderermanager.h"
 #include "bogroundrenderermanager.h"
 #include "boglstatewidget.h"
-#include "boconditionwidget.h"
 #include "bocamerawidget.h"
 #include "boeventlistener.h"
 #include "bowater.h"
@@ -169,13 +168,6 @@ void BosonWidgetBase::init(KDockWidget* )
  initDisplayManager();
 
  initConnections();
- actionCollection()->setWidget(this); // needs to be called *before* initKActions()
- // XMLClient stuff. needs to be called *after* initKActions().
- setBosonXMLFile();
-// setXML(top()->domDocument().toString());
- setXMLGUIBuildDocument(QDomDocument());
- // XMLClient stuff ends. note that there is a factory()->addClient() in
- // TopWidget!
 
  setFocusPolicy(StrongFocus); // accept key event
 // setFocus(); // nonsense, since its still hidden
@@ -210,6 +202,10 @@ void BosonWidgetBase::initDisplayManager()
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		display, SLOT(slotUnitChanged(Unit*)));
+
+ connect(display, SIGNAL(signalEndGame()), this, SIGNAL(signalEndGame()));
+ connect(display, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
+
 }
 
 void BosonWidgetBase::initChat(KDockWidget* )
@@ -485,13 +481,6 @@ void BosonWidgetBase::startScenarioAndGame()
 	BO_CHECK_NULL_RET(display);
 	display->slotCenterHomeBase();
  }
-}
-
-void BosonWidgetBase::setBosonXMLFile()
-{
- QString file = locate("config", "ui/ui_standards.rc", instance());
- setXMLFile(file);
- setXMLFile("bosonbaseui.rc", true);
 }
 
 void BosonWidgetBase::setLocalPlayer(Player* p)

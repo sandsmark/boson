@@ -23,7 +23,6 @@
 
 class KPlayer;
 class KGamePropertyBase;
-class KActionCollection;
 
 class BosonCursor;
 class BosonCanvas;
@@ -67,21 +66,9 @@ signals:
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
-	virtual void slotPlayerJoinedGame(KPlayer*);
-	virtual void slotPlayerLeftGame(KPlayer*);
-
-	void slotSavePlayFieldAs();
-	void slotSavePlayField();
-	void slotChangeLocalPlayer(int);
-	void slotPlace(int index);
-	void slotEditMapDescription();
 	void slotEditPlayerMinerals();
 	void slotEditPlayerOil();
 	void slotEditHeight(bool);
-	void slotImportHeightMap();
-	void slotExportHeightMap();
-	void slotImportTexMap();
-	void slotExportTexMap();
 
 	void slotLockAction(bool);
 
@@ -90,13 +77,9 @@ protected slots:
 	void slotEditorPreferences();
 
 protected:
-	virtual void initKActions();
 	virtual void initDisplayManager();
 	virtual void initConnections();
-	virtual void setBosonXMLFile();
 	virtual void startScenarioAndGame();
-
-	void savePlayField(const QString& fileName);
 
 private:
 	class EditorWidgetPrivate;
