@@ -4,18 +4,28 @@
 
 case "$1" in
  help|-help|--help)
-	echo -f "file.wml - Make only one file"
+	echo "$0 -f file.wml - Make only one file"
+	echo "$0 -d dir - Make only one directory"
 	;;
  -f)	
 	wmk -f $2 --include `pwd`/includes
 	;;
+ -d)
+	clear
+	echo "Generating html files from wml source"
+	echo "*************************************"
+	echo ""
+	wmk $2 -F includes -a --include `pwd`/includes
+	echo ""
+	echo "*************************************"
+	;;
  *)	
 	clear
-	echo "Making html files from wml source"
+	echo "Generating html files from wml source"
 	echo "*************************************"
 	echo ""
 	wmk -F includes -a --include `pwd`/includes
 	echo ""
-        echo "*************************************"
+	echo "*************************************"
 	;;
 esac

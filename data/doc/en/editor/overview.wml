@@ -1,0 +1,13 @@
+#include "top.wml"
+
+    <h1>
+      Overview
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+    The Boson editor allows you to create new maps and edit unit or facilities properties.<br>
+    This is a step by step manual to create a new map but it starts with some theory about a game editor.<br><br>
+    </p>
+    
+#include "nav.wml" before_url="index.html" before_text="The Boson editor" after_url="elements.html" after_text="Elements of a game"
+#include "footer.wml"

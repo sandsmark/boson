@@ -1,0 +1,23 @@
+#include "top.wml"
+    <h1>
+      The Boson editor
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+	The editor allows you to create your own boson maps and games.
+    </p>
+    <h3>
+      Contents:
+    </h3>
+    <dl>
+      <dd>
+        <dl>
+		<dt>5.1 <a href="overview.html">Overview</a></dt>
+		<dt>5.2 <a href="elements.html">Elements of a game</a></dt>
+        </dl>
+      </dd>
+    </dl>
+    
+
+#include "nav.wml" before_url="../units/aircraft.html" before_text="Aircraft" after_url="overview.html" after_text="Overview"        
+#include "footer.wml"

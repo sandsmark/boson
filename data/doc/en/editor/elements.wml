@@ -1,0 +1,25 @@
+#include "top.wml"
+
+    <h1>
+      Elements of a game
+    </h1>
+    <p>&nbsp;</p>
+    <h4>The map</h4>
+    <p>
+    The map consists of many small parts, like cards in a board game. For example, a desert:<br>
+     If you put many "sand cards" together and add some "stone cards" between them you will get a desert.
+    </p><p>&nbsp;</p>
+    
+    <h4>The goal</h4>
+    <p>
+    There are no changeable targets yet.
+    </p><p>&nbsp;</p>
+    
+    <h4>Structure of a map</h4>
+    <p>
+    For a good game you need a good strucktured map.<br>
+    You can add canyons to place units and for a good battle field, lakes for the ships and so on.
+    </p><p>&nbsp;</p>
+    
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="" after_text=""
+#include "footer.wml"
