@@ -457,6 +457,8 @@ void BosonStartupWidget::initBackgroundOrigin(QWidget* widget)
  // (hack end)
 }
 
+// this shows the welcome widget and emits signalResetGame(), i.e. resets the
+// game!
 void BosonStartupWidget::slotShowWelcomeWidget()
 {
  showWidget(IdWelcome);
