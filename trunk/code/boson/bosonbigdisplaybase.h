@@ -33,6 +33,7 @@ class Camera;
 
 class KGameChat;
 class KGameIO;
+template<class T> class QPtrList;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de
@@ -129,6 +130,18 @@ public:
 	BoSelection* selection() const { return mSelection; }
 
 	/**
+	 * Select a single unit. You should prefer this to a direct @ref
+	 * BoSelection::selectUnit
+	 **/
+	void selectSingle(Unit* unit, bool replace);
+
+	/**
+	 * Select a list of units. You should prefer this to a direct @ref
+	 * BoSelection::selectUnits
+	 **/
+	void selectUnits(QPtrList<Unit>, bool replace);
+
+	/**
 	 * Final cleanups. Mainly clear the selection.
 	 **/
 	void quitGame();
@@ -204,6 +217,14 @@ protected slots:
 	void slotCursorEdgeTimeout();
 
 protected:
+	enum CanSelectUnit {
+		CanSelectMultipleOk = 0, // the unit can be selected - multiple selections allowed
+		CanSelectSingleOk = 1, // the unit can be selected - only single selection allowed (e.g. for facilities)
+		CanSelectDestroyed = 2, // can't be selected - is destroyed
+		CanSelectError = 3 // can't be selected - unknown reason
+	};
+
+protected:
 	virtual void initializeGL();
 	virtual void resizeGL(int w, int h);
 	virtual void paintGL();
@@ -268,7 +289,15 @@ protected:
 
 	float calcFPS();
 
-	bool selectAll(const UnitProperties* prop, bool replace);
+	/**
+	 * Select all units of the specified type.
+	 *
+	 * The editor implementation will select <em>all</em> units of this
+	 * type, the game implementation only the units of the local player.
+	 * @return TRUE if the selection was successful, otherwise FALSE (e.g.
+	 * if the unit type is a facility in game mode)
+	 **/
+	virtual bool selectAll(const UnitProperties* prop, bool replace) = 0;
 
 	/**
 	 * Select units in the curren selection rect
@@ -310,6 +339,7 @@ protected:
 	void addMouseIO(Player* p);
 
 	virtual bool actionLocked() const = 0;
+	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
 
 private:
 	void init();

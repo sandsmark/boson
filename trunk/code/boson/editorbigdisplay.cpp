@@ -20,8 +20,10 @@
 #include "editorbigdisplay.moc"
 
 #include "unit.h"
+#include "unitproperties.h"
 #include "bosoncanvas.h"
 #include "player.h"
+#include "boson.h"
 #include "cell.h"
 #include "bosonmessage.h"
 #include "global.h"
@@ -273,11 +275,34 @@ void EditorBigDisplay::deleteSelectedUnits()
 	return;
  }
  QPtrList<Unit> units = selection()->allUnits();
+ selection()->clear();
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it) {
 	canvas()->removeUnit(it.current());
  }
  units.setAutoDelete(true);
  units.clear();
+}
+
+bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
+{
+ QPtrList<Unit> list;
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	QPtrList<Unit> allUnits = ((Player*)boGame->playerList()->at(i))->allUnits();
+	QPtrListIterator<Unit> it(allUnits);
+	while (it.current()) {
+		if (it.current()->unitProperties()->typeId() == prop->typeId()) {
+			if (canSelect(it.current()) == CanSelectMultipleOk) {
+				list.append(it.current());
+			}
+		}
+		++it;
+	}
+ }
+ if (list.count() > 0) {
+	selectUnits(list, replace);
+	return true;
+ }
+ return false;
 }
 

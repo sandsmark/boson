@@ -98,6 +98,8 @@ protected:
 	virtual void updateCursor();
 
 	virtual bool actionLocked() const;
+	virtual CanSelectUnit canSelect(Unit* unit) const;
+	virtual bool selectAll(const UnitProperties* prop, bool replace);
 
 //	void addMouseIO(Player* p);
 
