@@ -954,18 +954,6 @@ void TopWidget::changeLocalPlayer(Player* p)
  boDebug() << k_funcinfo << p << endl;
 
  // AB: note that both, p == 0 AND p == currentplayer are valid and must be executed!
- if (d->mStarting) {
-	// AB: 04/04/01: this is useless.
-	// the local player in BosonStarting is used for loading the general
-	// sounds only, the LocalPlayerId, which is set in the players.xml file,
-	// is read by BosonStarting (but not used there) and BosonSaveLoad only.
-	// the latter uses it to find the local player object, but never uses
-	// that.
-	// so all that this does, is to make us pass some NULL checks. if we
-	// would remove the NULL checks and then remove the local player here
-	// completely, we would still have the same functionality.
-	d->mStarting->setLocalPlayer(p);
- }
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;

@@ -288,17 +288,6 @@ bool BosonStarting::loadPlayerData()
 	++it;
  }
 
- if (!mPlayer) {
-	boError(270) << k_funcinfo << "NULL player!" << endl;
-	return false;
- }
-
- // these are sounds like minimap activated.
- // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
- // too?
- // FIXME: do we need to support player-independant sounds?
- emit signalLoadingType(BosonLoadingWidget::LoadGeneralData);
- mPlayer->speciesTheme()->loadGeneralSounds();
  boDebug(270) << k_funcinfo << "done" << endl;
  return true;
 }
@@ -321,6 +310,10 @@ void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
  loadUnitDatas(p);
  emit signalLoadingType(BosonLoadingWidget::LoadTechnologies);
  p->speciesTheme()->loadTechnologies();
+
+ // AB: atm only the sounds of the local player are required, but I believe this
+ // can easily change.
+ p->speciesTheme()->loadGeneralSounds();
 }
 
 void BosonStarting::loadUnitDatas(Player* p)
@@ -346,10 +339,6 @@ void BosonStarting::loadUnitDatas(Player* p)
 // the files again. but we need a qtimer::singleshot on the way to here..
 bool BosonStarting::startScenario(const QMap<QString, QByteArray>& files)
 {
- if (!mPlayer) {
-	BO_NULL_ERROR(mPlayer);
-	return false;
- }
  if (!boGame) {
 	BO_NULL_ERROR(boGame);
 	return false;
@@ -476,7 +465,6 @@ bool BosonStarting::startScenario(const QMap<QString, QByteArray>& files)
 	e.setAttribute("Id", actualId);
 
  }
- playersRoot.setAttribute("LocalPlayerId", mPlayer->id());
  playersXML = playersDoc.toCString();
  canvasXML = canvasDoc.toCString();
 
@@ -515,12 +503,6 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 	boError(260) << k_funcinfo << "no players in savegame" << endl;
 	return false;
  }
- bool ok = false;
- unsigned int localId = playersRoot.attribute("LocalPlayerId").toUInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "no LocalPlayerId" << endl;
-	return false;
- }
  boDebug(260) << k_funcinfo << "adding " << list.count() << " players" << endl;
  BosonSaveLoad load(boGame);
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -530,6 +512,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 	// -­> makes the code easier to be used in newgames, too and we will
 	// support network then.
 	QDomElement p = list.item(i).toElement();
+	bool ok = false;
 	unsigned int id = p.attribute("Id").toUInt(&ok);
 	if (!ok) {
 		boError(260) << k_funcinfo << "invalid Id" << endl;
@@ -553,9 +536,6 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		return false;
 	}
 	Player* player = (Player*)boGame->createPlayer(0, 0, false);
-	if (id == localId) {
-
-	}
 	player->setId(id);
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
 
