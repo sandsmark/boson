@@ -13,6 +13,7 @@
 #include <qimage.h>
 #include <qbitmap.h>
 #include <qintdict.h>
+#include <qdir.h>
 
 class SpeciesThemePrivate
 {
@@ -35,8 +36,6 @@ public:
 	QIntDict<QCanvasPixmapArray> mFacilityBigShot;
 	QIntDict<QCanvasPixmapArray> mMobileBigShot;
 
-	QString mSpecies;
-
 	unsigned int mMobileCount;
 	unsigned int mFacilityCount;
 };
@@ -55,7 +54,7 @@ QRgb    default_color[BOSON_MAX_PLAYERS] = {
 	qRgb(0,127,127),
 };
 
-SpeciesTheme::SpeciesTheme(const QString& species, QRgb teamColor)
+SpeciesTheme::SpeciesTheme(const QString& speciesDir, QRgb teamColor)
 {
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
@@ -65,8 +64,8 @@ SpeciesTheme::SpeciesTheme(const QString& species, QRgb teamColor)
  d->mBigOverview.setAutoDelete(true);
  d->mSprite.setAutoDelete(true);
  
- if (!loadTheme(species, teamColor)) {
-	kdError() << "Theme " << species << " not properly loaded" << endl;
+ if (!loadTheme(speciesDir, teamColor)) {
+	kdError() << "Theme " << speciesDir << " not properly loaded" << endl;
  }
 }
 
@@ -93,11 +92,6 @@ void SpeciesTheme::reset()
  }
 }
 
-const QString& SpeciesTheme::species() const
-{
- return d->mSpecies;
-}
-
 QRgb SpeciesTheme::teamColor() const
 {
  return d->mTeamColor;
@@ -114,19 +108,14 @@ const QString& SpeciesTheme::themePath() const
  return d->mThemePath;
 }
 
-bool SpeciesTheme::loadTheme(const QString& species, QRgb teamColor)
+bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
 {
- kdDebug() << "loadtheme " << species << endl;
- d->mSpecies = species;
  if (teamColor == qRgb(0,0,0)) { // no color specified
 	d->mTeamColor = defaultColor();
  } else {
 	d->mTeamColor = teamColor;
  }
-
- d->mThemePath = KGlobal::dirs()->findResourceDir("data", "boson/themes/species/") + "boson/themes/species/";
- d->mThemePath += species;
- d->mThemePath += "/";
+ d->mThemePath += speciesDir;
  kdDebug() << "theme path: " << d->mThemePath << endl;
 
  // the initial values for the units - config files :-)
@@ -427,9 +416,22 @@ void SpeciesTheme::readUnitConfigs()
 			<< endl;
 	return;
  }
- QStringList list = KGlobal::dirs()->findAllResources("data", 
-		QString("boson/themes/species/%1/units/*/index.desktop").arg(
-		species()), false, true);
+ QDir dir(themePath());
+ dir.cd(QString::fromLatin1("units"));
+ QStringList dirList = dir.entryList(QDir::Dirs);
+ QStringList list;
+ for (unsigned int i = 0; i < dirList.count(); i++) {
+	if (dirList[i] == QString::fromLatin1("..") ||
+			dirList[i] == QString::fromLatin1(".")) {
+		continue;
+	}
+	QString file = dir.path() + QString::fromLatin1("/") + dirList[i] + 
+			QString::fromLatin1("/index.desktop");
+	if (QFile::exists(file)) {
+		list.append(file);
+	}
+ }
+ 
  if (list.isEmpty()) {
 	kdError() << "No Units found in this theme" << endl;
 	return;
@@ -550,8 +552,7 @@ bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 	if (!loadShotPixmap(fileName.arg(number), p)) {
 		kdError() << "SpeciesTheme::loadBigShot(): Could not load" 
 				<< fileName.arg(number) << endl;
-		return false;
-	}
+		return false; }
 	pixList.append(p);
 	points.setPoint(i, p.width() >> 1, p.height() >> 1);
  }
@@ -577,4 +578,23 @@ QCanvasPixmapArray* SpeciesTheme::bigShot(bool isFacility, unsigned int version)
  } else {
 	return d->mMobileBigShot.find(version);
  }
+}
+
+QStringList SpeciesTheme::availableSpecies()
+{
+ QStringList list = KGlobal::dirs()->findAllResources("data", 
+		"boson/themes/species/*/index.desktop");
+ if (list.isEmpty()) {
+	kdWarning() << "No species found!" << endl;
+	return list;
+ }
+ return list;
+}
+
+QString SpeciesTheme::defaultSpecies()
+{
+ QString s = KGlobal::dirs()->findResourceDir("data", 
+		"boson/themes/species/human/index.desktop");
+ s += QString::fromLatin1("boson/themes/species/human/");
+ return s;
 }

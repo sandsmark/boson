@@ -7,6 +7,7 @@
 
 class QPixmap;
 class QCanvasPixmapArray;
+class QStringList;
 class UnitProperties;
 class Unit;
 
@@ -131,6 +132,17 @@ public:
 	bool loadShot();
 	bool loadBigShot(bool isFacility, unsigned int version);
 
+	/**
+	 * @return A list of all possible species. Note that the list contains
+	 * the index.dektop files - so remove index.desktop from every entry to
+	 * get the actual species directory.
+	 **/
+	static QStringList availableSpecies();
+
+	/**
+	 * @return The directory of the default species ("human")
+	 **/
+	static QString defaultSpecies();
 	
 
 protected:

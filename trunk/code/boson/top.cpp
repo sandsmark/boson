@@ -59,6 +59,7 @@ Top::Top()
 
 Top::~Top()
 {
+ d->mBosonWidget->saveConfig();
  delete d;
 }
 

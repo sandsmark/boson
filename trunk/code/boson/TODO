@@ -13,3 +13,4 @@
 - map editor: big tiles are currently placed as small ones only
 - unit editor: check if images are in the directory, provide possibility to copy
   them
+- make player color selectable in the new game dialog

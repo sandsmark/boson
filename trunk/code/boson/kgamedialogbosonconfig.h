@@ -16,12 +16,15 @@ signals:
 	void signalAddComputerPlayer();
 	void signalMapChanged(const QString& fileName);
 	void signalScenarioChanged(const QString& fileName);
+	void signalSpeciesChanged(const QString& directory);
 
 public slots:
 	void slotMapChanged(int index);
 
 protected slots:
+	void slotStartGame();
 	void slotScenarioChanged(int index);
+	void slotSpeciesChanged(int index);
 
 private:
 	KGameDialogBosonConfigPrivate* d;

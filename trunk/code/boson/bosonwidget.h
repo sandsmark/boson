@@ -33,6 +33,8 @@ public:
 
 	void startEditor();
 
+	void saveConfig();
+
 public slots:
 	void slotDebug();
 	void slotNewGame();
@@ -58,6 +60,7 @@ signals:
 
 protected slots:
 	void slotStartScenario();
+	void slotChangeSpecies(const QString& speciesDirectory);
 
 protected:
 	void changeLocalPlayer(Player* p);
@@ -73,8 +76,6 @@ protected:
 
 	void addEditorCommandFrame();
 	void addGameCommandFrame();
-
-	void saveConfig();
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);

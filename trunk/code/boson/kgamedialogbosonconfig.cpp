@@ -2,6 +2,7 @@
 
 #include "bosonmap.h"
 #include "bosonscenario.h"
+#include "speciestheme.h"
 
 #include <klocale.h>
 #include <kdebug.h>
@@ -14,6 +15,8 @@
 #include <qcombobox.h>
 #include <qlayout.h>
 #include <qmap.h>
+#include <qhbox.h>
+#include <qlabel.h>
 
 #include "kgamedialogbosonconfig.moc"
 
@@ -22,15 +25,23 @@ class KGameDialogBosonConfigPrivate
 public:
 	KGameDialogBosonConfigPrivate()
 	{
+		mPlayerSpecies = 0;
+		
 		mMapCombo = 0;
+		mScenarioCombo = 0;
 	}
 
-	QMap<int, QString> mMapIndex2Comment; // index -> map comment
+	QComboBox* mPlayerSpecies;
+
 	QMap<int, QString> mMapIndex2FileName; // index -> *.bpf file
+	QMap<int, QString> mMapIndex2Comment; // index -> map comment
 	QMap<int, QString> mMapIndex2Identifier; // index -> map identifier
 
 	QMap<int, QString> mScenarioIndex2FileName; // index -> *.bsc filename
 	QMap<int, QString> mScenarioIndex2Comment ; // index -> scenario comment
+
+	QMap<int, QString> mSpeciesIndex2Directory;
+	QMap<int, QString> mSpeciesIndex2Comment;
 
 	QComboBox* mMapCombo;
 	QComboBox* mScenarioCombo;
@@ -40,6 +51,11 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
 		: KGameDialogGeneralConfig(parent, true)
 {
  d = new KGameDialogBosonConfigPrivate;
+
+ QHBox* speciesWidget = new QHBox(this);
+ (void)new QLabel(i18n("Your species"), this);
+ d->mPlayerSpecies = new QComboBox(speciesWidget);
+ connect(d->mPlayerSpecies, SIGNAL(activated(int)), this, SLOT(slotSpeciesChanged(int)));
 
  QVGroupBox* mapBox = new QVGroupBox(i18n("Map and Scenario"), this);
  d->mMapCombo = new QComboBox(mapBox);
@@ -65,7 +81,7 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
 		this, SIGNAL(signalAddComputerPlayer())); // TODO: name, difficulty, ...
 
  QPushButton* startGame = new QPushButton(i18n("&Start Game"), this);
- connect(startGame, SIGNAL(pressed()), this, SIGNAL(signalStartGame()));
+ connect(startGame, SIGNAL(pressed()), this, SLOT(slotStartGame()));
 }
 
 KGameDialogBosonConfig::~KGameDialogBosonConfig()
@@ -89,6 +105,8 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
  // update possible scenario files:
  QStringList list = BosonScenario::availableScenarios(d->mMapIndex2Identifier[index]);
  d->mScenarioCombo->clear();
+ d->mScenarioIndex2Comment.clear();
+ d->mScenarioIndex2FileName.clear();
  for (unsigned int i = 0; i < list.count(); i++) {
 	KSimpleConfig cfg(list[i]);
 	cfg.setGroup("Boson Scenario");
@@ -118,7 +136,38 @@ void KGameDialogBosonConfig::slotScenarioChanged(int index)
 	kdError() << "invalid index " << index << endl;
 	return;
  }
- kdDebug() << d->mScenarioIndex2FileName[index] << endl;
+
+ // update possible species:
+ d->mPlayerSpecies->clear();
+ d->mSpeciesIndex2Comment.clear();
+ d->mSpeciesIndex2Directory.clear();
+ //TODO: some scenarios might not provide all species!
+ QStringList list = SpeciesTheme::availableSpecies();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	KSimpleConfig cfg(list[i]);
+	cfg.setGroup("Boson Species");
+	d->mPlayerSpecies->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
+	d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
+	QString dir = list[i].left(list[i].length() - strlen("index.desktop"));
+	d->mSpeciesIndex2Directory.insert(i, dir);
+ }
+ d->mPlayerSpecies->setCurrentItem(0);
+ slotSpeciesChanged(0);
+ 
  emit signalScenarioChanged(d->mScenarioIndex2FileName[index]);
+}
+
+void KGameDialogBosonConfig::slotStartGame()
+{
+ submitToKGame(game(), owner()); // emulate a apply click first
+ emit signalStartGame();
+}
+
+void KGameDialogBosonConfig::slotSpeciesChanged(int index)
+{
+ if (index < 0) {
+	return;
+ }
+ emit signalSpeciesChanged(d->mSpeciesIndex2Directory[index]);
 }
 
