@@ -18,10 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdlib.h>  // random
+#include <stdlib.h>		// random
+
+#include <klocale.h>		// i18n()
+#include <kmessagebox.h>	// KMessageBox::information()
 
 #include "common/log.h"
-
+#include "visual/speciesTheme.h"
 #include "editorCanvas.h"
 
 editorCanvas::editorCanvas(QPixmap p)
@@ -48,18 +51,23 @@ bool editorCanvas::Load(QString filename)
 
 	if (!openRead(filename.data())) return false;
 
-	/* QCanvas configuratoin */
+	// QCanvas configuratoin
 	resize(map_width, map_height);
+
+	// Themes
+	for (uint i=0; i<nb_player(); i++)
+		loadSpecyTheme(i);
+
 	emit syncMini();	// let the miniMap synchronized with the new parameters
 
-	/* initialisation */
+	// initialisation
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
 			boFile::load( c);
 			setCell( i, j, c); // XXX can't this loading be done in visual now ? 
 		}
 	
-	/* checking */
+	// checking
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
 			boAssert ( ground (tile(i,j)) );
@@ -92,6 +100,11 @@ bool editorCanvas::Save(QString filename)
 	facilityMsg_t	fix;
 	QIntDictIterator<visualMobUnit> mobIt(mobiles);
 	QIntDictIterator<visualFacility> fixIt(facilities);
+
+	if (nbPlayer<2) {
+  		KMessageBox::information(0, i18n("You need at least two players to get a usable scenario"), i18n("Not enough player") );
+		logf(LOG_INFO, "tried to save with %d player only", nbPlayer);
+	}
 
 	nbMobiles = (int)mobiles.count();
 	nbFacilities = (int)facilities.count();
@@ -128,7 +141,7 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	freeRessources();
 
 	/* boFile configuration */
-	nbPlayer = 2;  // XXX still hardcoded .......
+	nbPlayer = 0;	// nobody at beginning
 	map_width = w;
 	map_height = h;
 	_worldName = name;
@@ -200,4 +213,28 @@ void editorCanvas::changeCell(int x, int y, cell_t c)
 			visualCanvas::setCell(x+1,y+1,c);
 	}
 }
+
+
+void editorCanvas::addPlayer(void)
+{
+	boAssert(nbPlayer<BOSON_MAX_PLAYERS-1);
+	loadSpecyTheme(nbPlayer);
+	nbPlayer++;
+}
+
+
+void editorCanvas::loadSpecyTheme(uint i)
+{
+	if (species[i]) return;	// already there
+
+	logf(LOG_INFO, "Loading speciesTheme[%d]", i);
+	species[i]	= new speciesTheme("human");
+	/* XXX todo: test if the theme has been loaded
+		if (!species[1]->isOk()) KMsgBox::message(0l,
+			i18n("Pixmap loading error"),
+			i18n("Error while loading \"blue\" specie theme,\nsome images will show up awfully"),
+			KMsgBox::EXCLAMATION);
+	*/
+}
+
 

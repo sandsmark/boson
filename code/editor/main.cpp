@@ -34,14 +34,11 @@
 #include "editorCanvas.h"
 #include "editorTopLevel.h"
 #include "boeditor.h"
-#include "visual.h"
+#include "game.h"
 
 
 /* log.h , should be moved to common !! */
 FILE *logfile = (FILE *) 0L;
-editorCanvas *ecanvas;
- 
-extern QPixmap *bigBackground;
 
 int main(/*int argc, char* argv[] */)
 { 

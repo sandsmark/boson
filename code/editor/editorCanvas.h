@@ -60,6 +60,10 @@ public:
 	/* concerning contents */
 	visualFacility	*getFacility(long key) { return facilities.find(key); }
 	void		changeCell(int x, int y, cell_t c);
+	void		addPlayer(void);
+
+protected:
+	void	loadSpecyTheme(uint i);
 
 public:
 //private:
