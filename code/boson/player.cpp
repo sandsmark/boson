@@ -454,8 +454,7 @@ void Player::fog(int x, int y)
  unsigned int index = x + d->mMap->width() * y;
  if (index >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
-			<< d->mFogged.size() << ")" << endl
-			<< "backtrace: " << boBacktrace() << endl;
+			<< d->mFogged.size() << ")" << endl;
 	return;
  }
  bool isFogged = d->mFogged.at(index);
@@ -483,8 +482,7 @@ void Player::unfog(int x, int y)
  unsigned int index = x + d->mMap->width() * y;
  if (index >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
-			<< d->mFogged.size() << ")" << endl
-			<< "backtrace: " << boBacktrace() << endl;
+			<< d->mFogged.size() << ")" << endl;
 	return;
  }
  bool isFogged = d->mFogged.at(index);
@@ -506,8 +504,7 @@ bool Player::isFogged(int x, int y) const
 {
  if (x + d->mMap->width() * y >= d->mFogged.size()) {
 	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
-			<< d->mFogged.size() << ")" << endl
-			<< "backtrace: " << boBacktrace() << endl;
+			<< d->mFogged.size() << ")" << endl;
 	return true;
  }
  return d->mFogged.at(x + d->mMap->width() * y);
