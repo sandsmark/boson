@@ -3,11 +3,11 @@ IsFacility=false
 TerrainType=0
 Name=Tank
 Id=10005
-Health=100
-MineralCost=100
-Range=100
-Damage=100
-Reload=50
+Health=200
+MineralCost=250
+Range=3
+Damage=35
+Reload=30
 Producer=0
 
 [Boson Mobile Unit]

@@ -3,11 +3,11 @@ IsFacility=false
 TerrainType=1
 Name=Ship
 Id=10000
-Health=100
-MineralCost=100
-Range=100
-Damage=40
-Reload=30
+Health=120
+MineralCost=200
+Range=5
+Damage=25
+Reload=20
 Producer=1
 
 [Boson Mobile Unit]
