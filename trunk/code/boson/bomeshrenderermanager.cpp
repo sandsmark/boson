@@ -60,7 +60,11 @@ BoMeshRendererManager::BoMeshRendererManager() : BoPluginManager()
 
 BoMeshRendererManager::~BoMeshRendererManager()
 {
+ boDebug() << k_funcinfo << endl;
  unloadLibrary();
+ if (d->mAllModels.count() != 0) {
+	boWarning() << k_funcinfo << "model list not empty" << endl;
+ }
  delete d;
 }
 
