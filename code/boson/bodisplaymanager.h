@@ -79,7 +79,7 @@ public:
 	/**
 	 * @return A list containing ALL displays. Try to avoid this function.
 	 **/
-	QPtrList<BosonBigDisplayBase> displays() const;
+//	QPtrList<BosonBigDisplayBase> displays() const;
 
 	/**
 	 * Set the cursor for all displays

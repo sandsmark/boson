@@ -191,10 +191,11 @@ BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
  return d->mActiveDisplay;
 }
 
+/*
 QPtrList<BosonBigDisplayBase> BoDisplayManager::displays() const
 {
  return d->mDisplayList;
-}
+}*/
 
 void BoDisplayManager::removeActiveDisplay()
 {
