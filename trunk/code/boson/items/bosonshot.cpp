@@ -522,16 +522,25 @@ void BosonShotMissile::moveToTarget()
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVector3 pos, long int damage, float damagerange, float fulldamagerange, int delay) :
     BosonShot(owner, canvas)
 {
-  mDamage = damage;
-  mDamageRange = damagerange;
-  mFullDamageRange = fulldamagerange;
-  mDelay = delay;
-  move(pos.x(), pos.y(), pos.z());
+  activate(pos, damage, damagerange, fulldamagerange, delay);
 }
 
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
     BosonShot(owner, canvas)
 {
+  mDamage = 0;
+  mDamageRange = 0.0f;
+  mFullDamageRange = 0.0f;
+  mDelay = 0;
+}
+
+void BosonShotExplosion::activate(const BoVector3& pos, long int damage, float damagerange, float fulldamagerange, int delay)
+{
+  mDamage = damage;
+  mDamageRange = damagerange;
+  mFullDamageRange = fulldamagerange;
+  mDelay = delay;
+  move(pos.x(), pos.y(), pos.z());
 }
 
 bool BosonShotExplosion::saveAsXML(QDomElement& root)
@@ -867,7 +876,6 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
     const UnitProperties* unitproperties) :
     BosonShot(owner, canvas, model)
 {
-  boDebug() << k_funcinfo << "New FRGAMENT" << endl;
   mUnitProperties = unitproperties;
 
   KRandomSequence* r = owner->game()->random();
@@ -888,6 +896,8 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
     BosonShot(owner, canvas, model)
 {
+  mParticleSystems = 0;
+  mUnitProperties = 0;
 }
 
 bool BosonShotFragment::saveAsXML(QDomElement& root)
