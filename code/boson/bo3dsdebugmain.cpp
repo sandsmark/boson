@@ -47,8 +47,8 @@ static KCmdLineOptions options[] =
 
 int main(int argc, char ** argv)
 {
- KAboutData data("kgamemodeldebug",
-		I18N_NOOP("Boson .3ds file debuig dialog"),
+ KAboutData data("bo3dsdebug",
+		I18N_NOOP("Boson .3ds file debug dialog"),
 		version,
 		description,
 		KAboutData::License_GPL,
