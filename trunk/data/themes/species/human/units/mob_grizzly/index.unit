@@ -46,6 +46,7 @@ FlyParticles=5001,5010
 Height=0.25
 HitParticles=2001
 MaxHeight=1
+Model=missile
 Name=Missiles
 Offset=0,0,0.6
 Range=5

@@ -59,4 +59,5 @@ ShootParticles=
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=8
+Speed=0
+Type=0

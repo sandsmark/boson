@@ -44,14 +44,14 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
+AccelerationSpeed=5
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=40
 DamageRange=1
 FlyParticles=
-Height=0.25
+Height=0.1
 HitParticles=2001
-MaxHeight=1
 Name=Cannon
 Offset=0,0,0
 Range=5
@@ -60,5 +60,5 @@ ShootParticles=
 SoundFly=
 SoundHit=hit
 SoundShoot=shoot
-Speed=0
+Speed=10
 Model=bullet
