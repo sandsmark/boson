@@ -486,8 +486,8 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
- BoVector4 lightDif(0.8f, 0.8f, 0.8f, 1.0f);
- BoVector4 lightAmb(0.2f, 0.2f, 0.2f, 1.0f);
+ BoVector4 lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+ BoVector4 lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
  BoVector4 lightPos(-6000.0, 3000.0, 10000.0, 1.0);
 
  BoLight* l = newLight();
