@@ -333,12 +333,12 @@ bool BoInfo::getBool(int key) const
 
 QStringList BoInfo::openGLExtensions() const
 {
- return QStringList::split(' ', getString(OpenGLExtensionsString));
+ return QStringList::split('\n', getString(OpenGLExtensionsString));
 }
 
 QStringList BoInfo::gluExtensions() const
 {
- return QStringList::split(' ', getString(GLUExtensionsString));
+ return QStringList::split('\n', getString(GLUExtensionsString));
 }
 
 void BoInfo::glXVersion(int* major, int* minor) const
@@ -369,12 +369,12 @@ QString BoInfo::osVersion() const
 
 QStringList BoInfo::glXClientExtensions() const
 {
- return QStringList::split(' ', getString(GLXClientExtensionsString));
+ return QStringList::split('\n', getString(GLXClientExtensionsString));
 }
 
 QStringList BoInfo::glXServerExtensions() const
 {
- return QStringList::split(' ', getString(GLXServerExtensionsString));
+ return QStringList::split('\n', getString(GLXServerExtensionsString));
 }
 
 QString BoInfo::keyToName(int key)

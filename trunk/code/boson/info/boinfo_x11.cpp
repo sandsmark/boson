@@ -33,13 +33,18 @@
 void BoInfo::updateOpenGLInfo(BosonGLWidget* widget)
 {
  // OpenGL (warning: we don't have compile-time versions here!)
+ QString extensions;
  widget->makeCurrent();
  insert(BoInfo::OpenGLVersionString, (const char*)glGetString(GL_VERSION));
  insert(BoInfo::OpenGLVendorString, (const char*)glGetString(GL_VENDOR));
  insert(BoInfo::OpenGLRendererString, (const char*)glGetString(GL_RENDERER));
- insert(BoInfo::OpenGLExtensionsString, (const char*)glGetString(GL_EXTENSIONS));
+ extensions = (const char*)glGetString(GL_EXTENSIONS);
+ extensions.replace(' ', '\n');
+ insert(BoInfo::OpenGLExtensionsString, extensions);
  insert(BoInfo::GLUVersionString, (const char*)gluGetString(GLU_VERSION));
- insert(BoInfo::GLUExtensionsString, (const char*)gluGetString(GLU_EXTENSIONS));
+ extensions = (const char*)gluGetString(GLU_EXTENSIONS);
+ extensions.replace(' ', '\n');
+ insert(BoInfo::GLUExtensionsString, extensions);
 
  if (!widget) {
 	// it *may* be possible that GL/GLU infos are valid (don't depend on
@@ -56,10 +61,14 @@ void BoInfo::updateOpenGLInfo(BosonGLWidget* widget)
  insert(BoInfo::GLXVersionMinor, (int)glxminor);
  insert(BoInfo::GLXClientVersionString, (const char*)glXGetClientString(widget->x11Display(), GLX_VERSION));
  insert(BoInfo::GLXClientVendorString, (const char*)glXGetClientString(widget->x11Display(), GLX_VENDOR));
- insert(BoInfo::GLXClientExtensionsString, (const char*)glXGetClientString(widget->x11Display(), GLX_EXTENSIONS));
+ extensions = (const char*)glXGetClientString(widget->x11Display(), GLX_EXTENSIONS);
+ extensions.replace(' ', '\n');
+ insert(BoInfo::GLXClientExtensionsString, extensions);
  insert(BoInfo::GLXServerVersionString, (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_VERSION));
  insert(BoInfo::GLXServerVendorString, (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_VENDOR));
- insert(GLXServerExtensionsString, (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_EXTENSIONS));
+ extensions.replace(' ', '\n');
+ extensions = (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_EXTENSIONS);
+ insert(GLXServerExtensionsString, extensions);
  insert(BoInfo::IsDirect, (bool)widget->directRendering());
 
  insert(BoInfo::HaveOpenGLData, (bool)true);
@@ -107,7 +116,7 @@ void BoInfo::updateXInfo(QWidget* widget)
  if (extensionsList) {
 	// this list may contain interesting infos, such as whether the GLX
 	// module is available and so.
-	// I believe this is the list of *loaded* modules, so we can actually
+	// I believe this is the list of *loaded* extensions , so we can actually
 	// use it to check whether glx/dri/whatever is loaded. (at least for me
 	// XINERAMA does not appear in the list, and it actually doesn't get
 	// loaded)
@@ -115,9 +124,9 @@ void BoInfo::updateXInfo(QWidget* widget)
 	// Please mail me if that is wrong!
 	QString string;
 	for (int i = 0; i < n; i++) {
-		string = extensionsList[i];
+		string += extensionsList[i];
 		if (i != n - 1) {
-			string += QString::fromLatin1(" ");
+			string += '\n';
 		}
 	}
 	// AB: xdpyinfo.c does not free this, since "XLib can depend on contents
