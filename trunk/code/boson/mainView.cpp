@@ -42,7 +42,7 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(mini);
 
 /* The order Window : overview and orders buttons */
-		order = new orderWin(field,this, "orderwin");
+		order = new orderWin(this, "orderwin");
 		leftLayout->addWidget(order, 10);
 
 /* This is the main map, the game area */

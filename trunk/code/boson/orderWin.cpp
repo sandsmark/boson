@@ -31,17 +31,17 @@
 #include "../common/log.h"
 
 #include "orderWin.h"
-#include "fieldMap.h"
+//#include "fieldMap.h"
+#include "speciesTheme.h"
 #include "game.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-orderWin::orderWin(fieldMap *f, QWidget *parent, const char *name)
+orderWin::orderWin(QWidget *parent, const char *name)
 	:QFrame(parent, name)
 	,selectionMode(SELECT_NONE)
 	,fixSelected( 0L )
-	,field(f)
 {
 QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
