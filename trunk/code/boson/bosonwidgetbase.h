@@ -190,6 +190,8 @@ protected slots:
 
 	void slotAdvance(unsigned int, bool);
 
+	void slotCrashBoson();
+
 signals:
 	// hmm.. these *never* get emitted?
 	// // hmm.. these *never* get emitted?!!
