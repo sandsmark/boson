@@ -126,6 +126,13 @@ public:
 
 	QValueList<Unit*> unitsAtCell(int x, int y);
 
+	/**
+	 * Returns whether cell is occupied (there is non-destroyed mobile or
+	 * facility on it) or not
+	 * Note that if there is aircraft on this tile, it returns false
+	 **/
+	bool cellOccupied(int x, int y);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
