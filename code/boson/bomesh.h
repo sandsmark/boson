@@ -346,12 +346,6 @@ public:
 	static int texelPos();
 
 	/**
-	 * @return How many LOD levels mesh has by default
-	 */
-	static unsigned int defaultLodCount();
-
-
-	/**
 	 * Prepare to load the points, i.e. allocate memory for them. You can
 	 * set them using @ref setVertex and @ref setTexel.
 	 **/
@@ -556,8 +550,10 @@ public:
 
 	/**
 	 * Called by @ref BosonModel to generate LODs for the mesh.
+	 * @param lodCount How many levels of detail will be generated. Must be
+	 * at least 1 and must be the same value for all meshes in the model.
 	 **/
-	void generateLOD();
+	void generateLOD(unsigned int lodCount);
 
 	unsigned int facesCount(unsigned int lod) const;
 

@@ -120,6 +120,7 @@ signals:
 	void signalLODChanged(int);
 
 	void signalMaxFramesChanged(int);
+	void signalMaxLODChanged(int);
 
 	void signalMeshSelected(int);
 
@@ -265,6 +266,7 @@ protected slots:
 	void slotLODChanged(int l) { mFrame->setValue(l); }
 
 	void slotMaxFramesChanged(int max) { mFrame->setRange(0, max); }
+	void slotMaxLODChanged(int max) { mLOD->setRange(0, max); }
 
 private:
 	KMyFloatNumInput* mFovY;

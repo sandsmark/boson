@@ -492,6 +492,11 @@ public:
 	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
 
 	/**
+	 * @return See @ref BosonModel::lodCount.
+	 **/
+	unsigned int lodCount() const;
+
+	/**
 	 * @return unit's current rotation around z-axis. This is used for rotating
 	 * unit to correct direction when moving. Note that this value
 	 * <em>mustn't</em> be used for pathfinding and similar actions, as of

@@ -539,6 +539,7 @@ void ModelPreview::setModel(BosonModel* model)
  mModel = model;
  if (mModel) {
 	emit signalMaxFramesChanged(mModel->frames() - 1);
+	emit signalMaxLODChanged(mModel->lodCount() - 1);
  }
 }
 
@@ -816,8 +817,8 @@ void ModelPreview::slotLODChanged(int l)
 		emit signalLODChanged(0);
 		return;
 	}
-	if ((unsigned int)l + 1 > BosonModel::defaultLodCount()) {
-		emit signalLODChanged(BosonModel::defaultLodCount() - 1);
+	if ((unsigned int)l + 1 > mModel->lodCount()) {
+		emit signalLODChanged(mModel->lodCount() - 1);
 		return;
 	}
   }
@@ -958,6 +959,7 @@ RenderMain::RenderMain()
  connectBoth(mConfig, mPreview, SIGNAL(signalLODChanged(int)), SLOT(slotLODChanged(int)));
  connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
  connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
+ connect(mPreview, SIGNAL(signalMaxLODChanged(int)), mConfig, SLOT(slotMaxLODChanged(int)));
  connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
  connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
@@ -1397,7 +1399,7 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
 
  mLOD = new KIntNumInput(this);
  mLOD->setLabel(i18n("LOD"));
- mLOD->setRange(0, BosonModel::defaultLodCount() - 1);
+ mLOD->setRange(0, 0);
  connect(mLOD, SIGNAL(valueChanged(int)), this, SIGNAL(signalLODChanged(int)));
  topLayout->addWidget(mLOD);
  topLayout->addStretch(1);

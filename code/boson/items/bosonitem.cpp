@@ -546,3 +546,11 @@ bool BosonItem::loadFromXML(const QDomElement& root)
  return true;
 }
 
+unsigned int BosonItem::lodCount() const
+{
+ if (!mModel) {
+	return 1;
+ }
+ return mModel->lodCount();
+}
+
