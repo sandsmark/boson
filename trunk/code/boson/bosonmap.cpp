@@ -282,12 +282,8 @@ bool BosonMap::importHeightMapImage(const QImage& image)
 bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 {
  boDebug() << k_funcinfo << endl;
- if (width() == 0) {
-	boError() << k_funcinfo << "width() == 0" << endl;
-	return false;
- }
- if (height() == 0) {
-	boError() << k_funcinfo << "height() == 0" << endl;
+ if (!isValidMapGeo(width(), height())) {
+	boError() << k_funcinfo << "invalid map geo" << endl;
 	return false;
  }
  if (heightMapBuffer.size() == 0) {
