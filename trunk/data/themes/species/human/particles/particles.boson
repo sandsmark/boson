@@ -198,7 +198,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=10
 StartSize=0.15
 EndSize=0.5
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -218,7 +218,7 @@ BlendFunc=GL_ONE
 Rate=20
 StartSize=0.15
 EndSize=0.25
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=explosion
 
@@ -316,7 +316,7 @@ BlendFunc=GL_ONE
 Rate=12
 StartSize=0.4
 EndSize=0.05
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=flames
 
@@ -338,7 +338,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=2
 StartSize=0.05
 EndSize=0.5
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -379,7 +379,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=2
 StartSize=0.05
 EndSize=0.5
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -406,7 +406,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=2
 StartSize=0.6
 EndSize=1
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -427,7 +427,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=20
 StartSize=0.1
 EndSize=0.05
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -548,7 +548,7 @@ BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=10
 StartSize=0.3
 EndSize=0.8
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=smoke
 
@@ -568,7 +568,7 @@ BlendFunc=GL_ONE
 Rate=20
 StartSize=0.25
 EndSize=0.4
-SystemLife=3600
+SystemLife=-1
 Align=true
 Texture=explosion
 
