@@ -421,6 +421,7 @@ bool HarvesterPlugin::saveAsXML(QDomElement& root) const
 	refineryId = mRefinery->id();
  }
  root.setAttribute(QString::fromLatin1("Refinery"), refineryId);
+ return true;
 }
 
 bool HarvesterPlugin::loadFromXML(const QDomElement& root)
