@@ -2,7 +2,7 @@ Game TODOs
 - waypoints
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- BosonPath doesn't honor fog of war
+- remove wreckages after a certain timeout
 - left dbl-click should select ALL units of that type
 - auto-attacking when unit is in range
 - end of game - winner ; statistics
@@ -12,7 +12,7 @@ Game TODOs
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
 - display how many (and which) units are still in queue for production
-- BosonPath needs to be improved greatly
+- BosonPath needs to be improved greatly - in progress
 - AI
 - BosonCanvas::unitsAtCell() uses QCanvas::collisions() and is therefore quite
   slow. it is used by BosonPath which is not (yet) time critical but it can be
@@ -21,6 +21,8 @@ Game TODOs
   (coordinates, rect, whatever) of the cell(s) is occupied by the unit. This
   would improve the speed heavily but adding a QPtrList to every cell would be
   terrible for memory usage... it *might* be worth...
+- follow-mode for units
+- _much_ better moving for multiple units in group
 
 
 Editor (map, unit, scenario) TODOs
@@ -59,6 +61,7 @@ General TODOs
   this)
 - remove QFile from unit.cpp
 - decrease game speed ; increase unit speed. Saves cpu power
+- add check for STL to configure script
 
 Data TODOs
 - general sound (e.g. speech)
