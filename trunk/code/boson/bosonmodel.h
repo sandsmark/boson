@@ -107,6 +107,22 @@ public:
 	 **/
 	BoMatrix* matrix(int index) const;
 
+	/**
+	 * Mark the mesh at @p indes (see @ref setMesh) as hidden, if @p hidden
+	 * is TRUE. It will not be rendered, unless this is called again with @p
+	 * hidden = FALSE (the default).
+	 **/
+	void setHidden(unsigned int index, bool hidden);
+
+	/**
+	 * @return Whether the mesh is hidden (i.e. should not be rendered) or
+	 * not. By default it is not hidden.
+	 */
+	inline bool hidden(unsigned int index) const
+	{
+		return mHidden[index];
+	}
+
 	void setDisplayList(GLuint l) { mDisplayList = l; }
 	GLuint displayList() const { return mDisplayList; }
 	float depthMultiplier() const { return mDepthMultiplier; }
@@ -139,6 +155,7 @@ private:
 	unsigned int mMeshCount;
 	BoMatrix** mMatrices;
 	BoMesh** mMeshes;
+	bool* mHidden;
 };
 
 class BosonModelPrivate;
