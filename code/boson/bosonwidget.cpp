@@ -275,8 +275,7 @@ void BosonWidget::initKActions()
 		displayManager(), SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
 // (void)KStdAction::gameNew(this, SLOT(), actionCollection()); //TODO
  (void)KStdGameAction::save(this, SIGNAL(signalSaveGame()), actionCollection());
-// (void)KStdGameAction::pause(this, SLOT(slotPause()), actionCollection());
-// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
+ (void)KStdGameAction::pause(boGame, SLOT(slotTogglePause()), actionCollection());
  (void)KStdGameAction::end(this, SIGNAL(signalEndGame()), actionCollection());
  (void)KStdGameAction::quit(this, SIGNAL(signalQuit()), actionCollection());
 

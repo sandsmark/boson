@@ -174,6 +174,7 @@ public:
 	QPtrList<KGameComputerIO> mComputerIOList;
 	
 	KGamePropertyInt mGameSpeed;
+	KGamePropertyBool mGamePaused;
 
 	KGameProperty<unsigned long int> mNextUnitId;
 	KGameProperty<unsigned int> mAdvanceCount;
@@ -214,6 +215,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GameSpeed");
+ d->mGamePaused.registerData(IdGamePaused, dataHandler(),
+		KGamePropertyBase::PolicyClean, "GamePaused");
  d->mNextUnitId.registerData(IdNextUnitId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "NextUnitId");
  d->mAdvanceCount.registerData(IdAdvanceCount, dataHandler(),
@@ -223,6 +226,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mNextUnitId.setLocal(0);
  d->mAdvanceCount.setLocal(0);
  d->mGameSpeed.setLocal(0);
+ d->mGamePaused.setLocal(false);
  d->mAdvanceFlag.setLocal(0);
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 
@@ -1205,6 +1209,11 @@ int Boson::gameSpeed() const
  return d->mGameSpeed;
 }
 
+bool Boson::gamePaused() const
+{
+ return d->mGamePaused;
+}
+
 void Boson::slotSetGameSpeed(int speed)
 {
  boDebug() << k_funcinfo << " speed = " << speed << endl;
@@ -1218,10 +1227,19 @@ void Boson::slotSetGameSpeed(int speed)
  if ((speed < MIN_GAME_SPEED || speed > MAX_GAME_SPEED) && speed != 0) {
 	boWarning() << "unexpected speed " << speed << " - pausing" << endl;
 	d->mGameSpeed = 0;
+	// we don't have a manual pause, so don't set d->mGamePaused!
 	return;
  }
  boDebug() << k_funcinfo << "Setting speed to " << speed << endl;
  d->mGameSpeed = speed;
+}
+
+void Boson::slotTogglePause()
+{
+ boDebug() << k_funcinfo << endl;
+ // note that this won't take immediate effect. the variable will change once it
+ // is received from network!
+ d->mGamePaused = !gamePaused();
 }
 
 void Boson::slotPropertyChanged(KGamePropertyBase* p)
@@ -1243,6 +1261,17 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 					d->mGameTimer->start(ADVANCE_INTERVAL);
 				}
 			}
+		}
+		break;
+	case IdGamePaused:
+		boDebug() << k_funcinfo << "game paused changed! now=" << d->mGamePaused << endl;
+		if (d->mGamePaused) {
+			slotAddChatSystemMessage(i18n("The game is paused now!"));
+			d->mGameTimer->stop();
+		} else if (d->mGameSpeed > 0) {
+			boDebug() << k_funcinfo << "starting timer again" << endl;
+			slotAddChatSystemMessage(i18n("The game is not paused anymore"));
+			d->mGameTimer->start(ADVANCE_INTERVAL);
 		}
 		break;
 	default:

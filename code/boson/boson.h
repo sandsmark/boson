@@ -43,9 +43,10 @@ class Boson : public KGame
 public:
 	enum PropertyIds {
 		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h> - better: KGamePropertyBase::IdUser+...
-		IdNextUnitId = 10001,
-		IdAdvanceCount = 10002,
-		IdAdvanceFlag = 10003
+		IdGamePaused = 10001,
+		IdNextUnitId = 10005,
+		IdAdvanceCount = 10010,
+		IdAdvanceFlag = 10011
 	};
 
 	/**
@@ -86,6 +87,7 @@ public:
 	void startGame();
 
 	int gameSpeed() const;
+	bool gamePaused() const;
 	bool isServer() const;
 
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
@@ -177,6 +179,7 @@ public:
 
 public slots:
 	void slotSetGameSpeed(int speed);
+	void slotTogglePause();
 
 	/**
 	 * Doesn't actually add a unit to the game but sends a message to the
