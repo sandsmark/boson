@@ -20,10 +20,8 @@
 #include "bosontiles.moc"
 
 #include "bosontexturearray.h"
-
+#include "bodebug.h"
 #include "defines.h"
-
-#include <kdebug.h>
 
 #include <qimage.h>
 #include <qapplication.h>
@@ -44,7 +42,7 @@ BosonTiles::~BosonTiles()
 QPixmap BosonTiles::plainTile(Cell::GroundType type)
 {
  if (type <= Cell::GroundUnknown || type >= Cell::GroundLast) {
-	kdError() << "invalid groundtype " << (int)type << endl;
+	boError() << "invalid groundtype " << (int)type << endl;
 	return QPixmap();
  }
  return tile((int)type);
@@ -181,7 +179,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
 	QString file = path + tile;
 	p.load(file);
 	if (p.isNull()) {
-		kdError() << k_funcinfo << "couldn't load image " << file << endl;
+		boError() << k_funcinfo << "couldn't load image " << file << endl;
 		return false;
 	}
 	putOne(4 * j + i, p);
@@ -281,7 +279,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 			SETPIXEL3(7,7);
 			break;
 		default:
-			kdError() << k_funcinfo << "Unexpected value" << endl;
+			boError() << k_funcinfo << "Unexpected value" << endl;
 			return;
 	}
 
@@ -293,7 +291,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
-//	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
+//	boDebug() << "process events; mLoaded = " << mLoaded << endl;
 	qApp->processEvents(10);
  }
 }
@@ -316,7 +314,7 @@ QString BosonTiles::groundType2Name(Cell::GroundType g)
 	case Cell::GroundGrassOil:
 		return QString::fromLatin1("grass_oil");
 	default:
-		kdError() << "Invalid GroundType " << (int)g << endl;
+		boError() << "Invalid GroundType " << (int)g << endl;
 		break;
  }
  return QString::fromLatin1("");
@@ -337,7 +335,7 @@ bool BosonTiles::loadTransition(const QString& dir, int gt)
 
 
  if (!Cell::isTrans(gt)) {
-	kdError() << "No transition " << gt << endl;
+	boError() << "No transition " << gt << endl;
 	return false;
  }
 

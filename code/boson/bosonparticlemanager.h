@@ -95,7 +95,7 @@ class BosonParticleSystemProperties
     
     unsigned long int id()  { return mId; };
     
-    static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(KConfig* cfg, QString key, SpeciesTheme* theme);
+    static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme);
 
   protected:
     static void addTexture(QString name);

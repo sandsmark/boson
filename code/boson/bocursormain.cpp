@@ -24,12 +24,12 @@
 #include "bosoncursor.h"
 #include "bosonconfig.h"
 #include "global.h"
+#include "bodebug.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qgl.h>
 #include <qlayout.h>
@@ -137,7 +137,7 @@ void CursorPreview::slotChangeCursor(int mode, const QString& cursorDir_)
 	ok = false;
  }
  if (!ok) {
-	kdError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
+	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
 	delete b;
 	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
 		// load fallback cursor

@@ -40,13 +40,13 @@
 #include "global.h"
 #include "top.h"
 #include "bosonbigdisplaybase.h"
+#include "bodebug.h"
 #include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
 #include <klocale.h>
 #include <kaction.h>
-#include <kdebug.h>
 #include <kconfig.h>
 #include <kdockwidget.h>
 #include <kstdgameaction.h>
@@ -112,7 +112,7 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent, bool loading)
 
 BosonWidgetBase::~BosonWidgetBase()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mPlayers.clear();
  if (mTop && mTop->factory()) {
 	mTop->factory()->removeClient(this);
@@ -123,7 +123,7 @@ BosonWidgetBase::~BosonWidgetBase()
  delete mDisplayManager;
 
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 BosonCanvas* BosonWidgetBase::canvas() const
@@ -168,7 +168,7 @@ void BosonWidgetBase::init()
 
 void BosonWidgetBase::initMap()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
  canvas()->setMap(playField()->map());
  minimap()->setMap(playField()->map());
@@ -179,7 +179,7 @@ void BosonWidgetBase::initMap()
  // when players are initialized, as the map must be known to them once we start
  // loading the units (for *loading* games)
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-	kdDebug() << "init map for player " << i << endl;
+	boDebug() << "init map for player " << i << endl;
 	Player* p = (Player*)boGame->playerList()->at(i);
 	if (p) {
 		p->initMap(playField()->map(), boGame->gameMode());
@@ -254,9 +254,9 @@ void BosonWidgetBase::initChat()
 
 void BosonWidgetBase::initPlayer()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL local player" << endl;
+	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
 
@@ -284,7 +284,7 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 {
  if (!b) {
-	kdError() << k_funcinfo << "NULL display" << endl;
+	boError() << k_funcinfo << "NULL display" << endl;
 	return;
  }
  b->setLocalPlayer(localPlayer());
@@ -336,7 +336,7 @@ void BosonWidgetBase::initLayout()
 void BosonWidgetBase::changeCursor(BosonCursor* cursor)
 {
  if (!cursor) {
-	kdError() << k_funcinfo << "NULL cursor" << endl;
+	boError() << k_funcinfo << "NULL cursor" << endl;
 	return;
  }
  delete mCursor;
@@ -389,12 +389,12 @@ void BosonWidgetBase::slotHack1()
 void BosonWidgetBase::slotAddUnit(Unit* unit, int, int)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  Player* p = unit->owner();
  if (!p) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (p != localPlayer()) {
@@ -500,7 +500,7 @@ void BosonWidgetBase::slotSetCommandButtonsPerRow(int b)
 void BosonWidgetBase::slotUnfogAll(Player* pl)
 {
  if (!playField()->map()) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  QPtrList<KPlayer> list;
@@ -538,7 +538,7 @@ void BosonWidgetBase::slotRemoveActiveDisplay()
 void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
 {
  if (!active) {
-	kdWarning() << k_funcinfo << "NULL display" << endl;
+	boWarning() << k_funcinfo << "NULL display" << endl;
 	return;
  }
 
@@ -571,7 +571,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
  // note: all other bigdisplays should unselect now.
 
  if (!localPlayer()) {
-	kdWarning() << k_funcinfo << "NULL localplayer" << endl;
+	boWarning() << k_funcinfo << "NULL localplayer" << endl;
 	return;
  }
 
@@ -600,7 +600,7 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
  }
  QPixmap p(file);
  if (p.isNull()) {
-	kdError() << k_funcinfo << "Could not load " << file << endl;
+	boError() << k_funcinfo << "Could not load " << file << endl;
 	d->mCommandFrame->unsetPalette();
 	return;
  }
@@ -735,7 +735,7 @@ void BosonWidgetBase::slotDebugRequestIdName(int msgid, bool , QString& name)
 		// don't check further...
 		break;
  }
-// kdDebug() << name << endl;
+// boDebug() << name << endl;
 }
 
 void BosonWidgetBase::quitGame()
@@ -797,18 +797,18 @@ void BosonWidgetBase::saveConfig()
 {
  // note: the game is *not* saved here! just general settings like game speed,
  // player name, ...
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!boGame) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL local player" << endl;
+	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
 
 // boConfig->save(editor); //FIXME - what is this for?
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidgetBase::slotStartScenario()
@@ -840,7 +840,7 @@ void BosonWidgetBase::slotDebugMode(int index)
 
 void BosonWidgetBase::slotZoom(int index)
 {
-kdDebug() << "zoom index=" << index << endl;
+boDebug() << "zoom index=" << index << endl;
  float percent = d->mActionZoom->items()[index].toFloat(); // bahh!!! 
  float factor = (float)percent / 100;
  setZoomFactor(factor);
@@ -869,7 +869,7 @@ void BosonWidgetBase::slotDebugPlayer(int index)
  }
 
  if (!p) {
-	kdError() << k_funcinfo << "player not found" << endl;
+	boError() << k_funcinfo << "player not found" << endl;
 	return;
  }
 
@@ -878,7 +878,7 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 		debugKillPlayer(p);
 		break;
 	default:
-		kdError() << k_funcinfo << "unknown index " << index << endl;
+		boError() << k_funcinfo << "unknown index " << index << endl;
 		break;
  }
 }
@@ -928,7 +928,7 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
 	}
  }
  if (!menu) {
-	kdWarning() << k_funcinfo << "NULL player debug menu" << endl;
+	boWarning() << k_funcinfo << "NULL player debug menu" << endl;
 	return;
  }
  d->mActionDebugPlayers->remove(menu);
@@ -949,7 +949,7 @@ void BosonWidgetBase::setLocalPlayer(Player* p, bool init) //AB: probably init =
 
  if (init) {
 	if (!p) {
-		kdDebug() << k_funcinfo << "NULL player" << endl;
+		boDebug() << k_funcinfo << "NULL player" << endl;
 		
 		return;
 	}

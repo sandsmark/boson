@@ -28,6 +28,7 @@
 #include "bosoncursor.h"
 #include "player.h"
 #include "boselection.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 
@@ -36,8 +37,6 @@
 #include <qvbox.h>
 #include <qpainter.h>
 #include <qintdict.h>
-
-#include <kdebug.h>
 
 class BoBox : public QWidget
 {
@@ -58,7 +57,7 @@ public:
 	void insert(unsigned int index, BosonBigDisplayBase* display)
 	{
 		if (hasDisplay(display)) {
-			kdError() << k_funcinfo << "already have that display" << endl;
+			boError() << k_funcinfo << "already have that display" << endl;
 			remove(display);
 		}
 		mDisplays.insert(index, display);
@@ -68,7 +67,7 @@ public:
 	void remove(BosonBigDisplayBase* b)
 	{
 		if (!hasDisplay(b)) {
-			kdError() << k_funcinfo << "don't have that display" << endl;
+			boError() << k_funcinfo << "don't have that display" << endl;
 			return;
 		}
 		mDisplays.removeRef(b);
@@ -141,14 +140,14 @@ BoDisplayManager::BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool ga
 
 BoDisplayManager::~BoDisplayManager()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mSelectionGroups.clear();
- kdDebug() << k_funcinfo << "clearing display list" << endl;
+ boDebug() << k_funcinfo << "clearing display list" << endl;
  d->mDisplayList.clear();
- kdDebug() << k_funcinfo << "clearing box list" << endl;
+ boDebug() << k_funcinfo << "clearing box list" << endl;
  d->mBoxList.clear();
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
@@ -156,7 +155,7 @@ void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
  if (display == d->mActiveDisplay) {
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  BosonBigDisplayBase* old = d->mActiveDisplay;
  d->mActiveDisplay = display;
  
@@ -170,7 +169,7 @@ void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
 void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 {
  if (!display) {
-	kdWarning() << k_funcinfo << "NULL display" << endl;
+	boWarning() << k_funcinfo << "NULL display" << endl;
 	return;
  }
  display->setActive(active);
@@ -201,7 +200,7 @@ QPtrList<BosonBigDisplayBase> BoDisplayManager::displays() const
 void BoDisplayManager::removeActiveDisplay()
 {
  if (d->mDisplayList.count() <  2) {
-	kdWarning() << k_funcinfo << "need at lest two displays" << endl;
+	boWarning() << k_funcinfo << "need at lest two displays" << endl;
 	return;
  }
  if (!d->mActiveDisplay) {
@@ -218,7 +217,7 @@ void BoDisplayManager::removeActiveDisplay()
  }
  BoBox* box = findBox(old);
  if (!box) {
-	kdError() << k_funcinfo << "Cannot find parent box" << endl;
+	boError() << k_funcinfo << "Cannot find parent box" << endl;
 	return;
  }
 
@@ -240,13 +239,13 @@ BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayVertical()
  if (!activeDisplay()) {
 	return 0;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  
 // we are not actually splitting the view but the entire row...
 // ok splitting the view only is a TODO. but not an important one
  int index = d->mBoxList.findRef(findBox(activeDisplay()));
  if (index < 0) {
-	kdDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
+	boDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
 	return 0;
  }
  BoBox* box = new BoBox(this);
@@ -263,10 +262,10 @@ BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayHorizontal()
  if (!activeDisplay()) {
 	return 0;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  BoBox* box = findBox(activeDisplay());
  if (!box) {
-	kdDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
+	boDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
 	return 0;
  }
  BosonBigDisplayBase* b = addDisplay(box);
@@ -277,7 +276,7 @@ BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayHorizontal()
 BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 {
  if (d->mDisplayList.count() != 0) {
-	kdError() << k_funcinfo << "already have displays" << endl;
+	boError() << k_funcinfo << "already have displays" << endl;
 	return 0;
  }
  BoBox* box = new BoBox(this);
@@ -292,10 +291,10 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 {
  if (!parent) {
-	kdError() << k_funcinfo << "parent must not be 0" << endl;
+	boError() << k_funcinfo << "parent must not be 0" << endl;
 	return 0;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  //TODO: what about editor widgets??
  BosonBigDisplayBase* b = 0;
  if (mGameMode) {
@@ -323,7 +322,7 @@ void BoDisplayManager::setLocalPlayer(Player* p)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-	kdDebug() << k_funcinfo << endl;
+	boDebug() << k_funcinfo << endl;
 	it.current()->setLocalPlayer(p);
 	++it;
  }
@@ -413,15 +412,15 @@ void BoDisplayManager::slotResetViewProperties()
 void BoDisplayManager::slotSelectGroup(int number)
 {
  if (number < 0 || number >= 10) {
-	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	boError() << k_funcinfo << "Invalid group " << number << endl;
 	return;
  }
  if (!d->mSelectionGroups[number]) {
-	kdError() << k_funcinfo << "NULL group " << number << endl;
+	boError() << k_funcinfo << "NULL group " << number << endl;
 	return;
  }
  if (!activeDisplay()) {
-	kdError() << k_funcinfo << "NULL active display" << endl;
+	boError() << k_funcinfo << "NULL active display" << endl;
 	return;
  }
  activeDisplay()->selection()->copy(d->mSelectionGroups[number]);
@@ -430,15 +429,15 @@ void BoDisplayManager::slotSelectGroup(int number)
 void BoDisplayManager::slotCreateGroup(int number)
 {
  if (number < 0 || number >= 10) {
-	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	boError() << k_funcinfo << "Invalid group " << number << endl;
 	return;
  }
  if (!d->mSelectionGroups[number]) {
-	kdError() << k_funcinfo << "NULL group " << number << endl;
+	boError() << k_funcinfo << "NULL group " << number << endl;
 	return;
  }
  if (!activeDisplay()) {
-	kdError() << k_funcinfo << "NULL active display" << endl;
+	boError() << k_funcinfo << "NULL active display" << endl;
 	return;
  }
  d->mSelectionGroups[number]->copy(activeDisplay()->selection());
@@ -447,11 +446,11 @@ void BoDisplayManager::slotCreateGroup(int number)
 void BoDisplayManager::slotClearGroup(int number)
 {
  if (number < 0 || number >= 10) {
-	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	boError() << k_funcinfo << "Invalid group " << number << endl;
 	return;
  }
  if (!d->mSelectionGroups[number]) {
-	kdError() << k_funcinfo << "NULL group " << number << endl;
+	boError() << k_funcinfo << "NULL group " << number << endl;
 	return;
  }
  d->mSelectionGroups[number]->clear();
@@ -465,7 +464,7 @@ void BoDisplayManager::slotUnitAction(int action)
 void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
 {
  if (!activeDisplay()) {
-	kdError() << k_funcinfo << "NULL active display" << endl;
+	boError() << k_funcinfo << "NULL active display" << endl;
 	return;
  }
  activeDisplay()->placeUnit(unitType, owner);
@@ -474,7 +473,7 @@ void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
 void BoDisplayManager::slotPlaceCell(int tile)
 {
  if (!activeDisplay()) {
-	kdError() << k_funcinfo << "NULL active display" << endl;
+	boError() << k_funcinfo << "NULL active display" << endl;
 	return;
  }
  activeDisplay()->placeCell(tile);

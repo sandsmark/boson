@@ -26,7 +26,6 @@
 #include <qpixmap.h>
 
 #include <kstandarddirs.h>
-#include <kdebug.h>
 #include <kmessagebox.h>
 #include <klocale.h>
 

@@ -30,10 +30,10 @@
 #include "global.h"
 #include "boselection.h"
 #include "defines.h"
+#include "bodebug.h"
 //#include "kspritetooltip.h"//TODO
 
 #include <kgame/kgameio.h>
-#include <kdebug.h>
 #include <klocale.h>
 
 // this just stores a *selection* for placement. This means e.g. if you click
@@ -170,15 +170,15 @@ void EditorBigDisplay::setLocalPlayer(Player* p)
 
 void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  int x = action.canvasPos().x() / BO_TILE_SIZE;
  int y = action.canvasPos().y() / BO_TILE_SIZE;
  if (d->mPlacement.isUnit()) {
 	if (!d->mPlacement.owner()) { // TODO
-		kdError() << k_funcinfo << "NO OWNER" << endl;
+		boError() << k_funcinfo << "NO OWNER" << endl;
 		return;
 	}
-	kdDebug() << "place unit " << d->mPlacement.unitType() << endl;
+	boDebug() << "place unit " << d->mPlacement.unitType() << endl;
 
 	stream << (Q_UINT32)BosonMessage::MoveEditor;
 	stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
@@ -190,7 +190,7 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
 
 //	setModified(true); // TODO: in BosonPlayField
  } else if (d->mPlacement.isCell()) {
-	kdDebug() << "place ground " << d->mPlacement.cell() << endl;
+	boDebug() << "place ground " << d->mPlacement.cell() << endl;
 
 	unsigned char version = 0; // FIXME: random()%4;
 
@@ -223,11 +223,11 @@ void EditorBigDisplay::addMouseIO(Player* p)
 {
 //AB: make sure that both editor and game mode can share the same IO !
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (d->mMouseIO) {
-	kdError() << "This view already has a mouse io!!" << endl;
+	boError() << "This view already has a mouse io!!" << endl;
 	return;
  }
  d->mMouseIO = new KGameMouseIO(viewport(), true);
@@ -244,22 +244,22 @@ void EditorBigDisplay::addMouseIO(Player* p)
 void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (owner != localPlayer()) {
-	kdError() << k_funcinfo << "owner != localplayer" << endl;
+	boError() << k_funcinfo << "owner != localplayer" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << owner->id() << "==" << owner->name() << endl;
+ boDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << owner->id() << "==" << owner->name() << endl;
  d->mPlacement.placeUnit(unitType, owner);
 }
 
 void EditorBigDisplay::placeCell(int tile)
 {
- kdDebug() << k_funcinfo << "now placing cell: " << tile << endl;
+ boDebug() << k_funcinfo << "now placing cell: " << tile << endl;
  if (tile < 0) {
-	kdError() << k_funcinfo << "invalid tile " << tile << endl;
+	boError() << k_funcinfo << "invalid tile " << tile << endl;
 	return;
  }
  d->mPlacement.placeCell(tile);

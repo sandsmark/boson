@@ -19,21 +19,20 @@
 
 #include "bosonparticlemanager.h"
 
-#include <qstring.h>
-#include <qimage.h>
-
-#include <kdebug.h>
-#include <ksimpleconfig.h>
-#include <kconfig.h>
-
-#include <GL/gl.h>
-
 #include "bosonparticlesystem.h"
 #include "bosontexturearray.h"
 #include "bosonconfig.h"
 #include "defines.h"
 #include "speciestheme.h"
+#include "bodebug.h"
 
+#include <qstring.h>
+#include <qimage.h>
+
+#include <ksimpleconfig.h>
+#include <kconfig.h>
+
+#include <GL/gl.h>
 
 /*****  BosonParticleManager  *****/
 
@@ -132,7 +131,7 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
 
 void BosonParticleManager::initExplosionParticle(BosonParticleSystem*, BosonParticle* particle)
 {
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "initing particle" << endl;
+//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "initing particle" << endl;
   particle->life = getFloat(0.5, 0.7);  // Particle's lifetime is between 0.5 and 0.7 seconds
   particle->maxage = particle->life;
   particle->velo = BoVector3(getFloat(-1.6, 1.6), getFloat(-1.6, 1.6), getFloat(0, 1.4));  // Random velocity (per second)
@@ -236,7 +235,7 @@ void BosonParticleSystemProperties::addTexture(QString name)
 {
   if(!mTextures.contains(name))
   {
-    kdDebug() << k_funcinfo << "Adding texture with name " << name << " to textures map" << endl;
+    boDebug() << k_funcinfo << "Adding texture with name " << name << " to textures map" << endl;
     GLuint tex;
     glGenTextures(1, &tex);
     QImage image(mTexturePath + "/" + name);
@@ -266,7 +265,7 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mId = cfg->readUnsignedLongNumEntry("Id", 0);
   if(mId == 0)
   {
-    kdError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
+    boError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
   }
   /** Veeery ugly code
   mMinXVelo = (float)(cfg->readDoubleNumEntry("MinXVelo", 0));
@@ -311,7 +310,7 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   }
   else
   {
-    kdError() << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
+    boError() << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
     mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
   }
   mRate = (float)(cfg->readDoubleNumEntry("Rate", 0));
@@ -361,7 +360,7 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
   particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
 }
 
-QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KConfig* cfg, QString key, SpeciesTheme* theme)
+QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme)
 {
   QPtrList<BosonParticleSystemProperties> props;
   if(!cfg->hasKey(key))
@@ -376,3 +375,4 @@ QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParti
   }
   return props;
 }
+

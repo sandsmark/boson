@@ -21,9 +21,7 @@
 
 #include "bo3dtools.h"
 #include "bosonparticlemanager.h"
-
-#include <kdebug.h>
-#include <iostream.h>
+#include "bodebug.h"
 
 #include <GL/gl.h>
 
@@ -125,7 +123,7 @@ void BosonParticleSystem::init(int initialnum)
   // Create initial particles
   mNum = 0;
   createParticles(initialnum);
-//  kdDebug() << k_funcinfo << "Created " << mNum << " initial particles" << endl;
+//  boDebug() << k_funcinfo << "Created " << mNum << " initial particles" << endl;
 }
 
 void BosonParticleSystem::createParticles(int count)
@@ -151,7 +149,7 @@ BosonParticleSystem::~BosonParticleSystem()
 
 void BosonParticleSystem::update(float elapsed)
 {
-/*  kdDebug() << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; createRate: " << mCreateRate <<
+/*  boDebug() << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; createRate: " << mCreateRate <<
       "; createCache: " << mCreateCache << "; will add " << elapsed * mCreateRate <<
       " to create cache (total will be = " << mCreateCache + (elapsed * mCreateRate) << ")" << endl;*/
   mCreateCache += (elapsed * mCreateRate);
@@ -187,7 +185,7 @@ void BosonParticleSystem::update(float elapsed)
   // Create some new ones if needed
   if((mCreateCache >= 1.0) && (mAge >= 0.0))
   {
-//    kdDebug() << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
+//    boDebug() << k_funcinfo << "createCache >= 1.0 (" << mCreateCache << "); trying to create new particles" << endl;
     for(int i = 0; (i < mMaxNum) && (mCreateCache >= 1.0); i++)
     {
       if(mParticles[i].life <= 0.0)
@@ -198,13 +196,13 @@ void BosonParticleSystem::update(float elapsed)
         mNum++;
       }
     }
-//    kdDebug() << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
+//    boDebug() << k_funcinfo << "Created " << created << " new particles; createCache is now " << mCreateCache << endl;
   }
 }
 
 void BosonParticleSystem::draw()
 {
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
+//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing " << mNum << " particles" << endl;
   // Complex method. Parts of this method are taken from Plib project (plib.sf.net)
   // Return if there are no living particles
   if(mNum <= 0)
@@ -242,7 +240,7 @@ void BosonParticleSystem::draw()
   // Update particles
 //  int num = 0;
   glPushMatrix();
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
+//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
   glTranslatef(mPos[0], mPos[1], mPos[2]);
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
@@ -263,7 +261,7 @@ void BosonParticleSystem::draw()
 
     glColor4fv(mParticles[i].color.data());
     if(i == 20)
-/*    kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing 20. particle; vertex coordinates: "
+/*    boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing 20. particle; vertex coordinates: "
     << "(" << a[0] << "; " << a[1] << "; " << a[2] << ");  "
     << "(" << b[0] << "; " << b[1] << "; " << b[2] << ");  "
     << "(" << c[0] << "; " << c[1] << "; " << c[2] << ");  "
@@ -278,7 +276,7 @@ void BosonParticleSystem::draw()
   glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
   glEnd();
   glPopMatrix();
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
+//  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
 }
 
 void BosonParticleSystem::initParticle(BosonParticle* particle)

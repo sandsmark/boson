@@ -21,13 +21,13 @@
 
 #include "../defines.h"
 #include "../bosonconfig.h"
+#include "../bodebug.h"
 #include "bosonsound.h"
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
 #include <kstaticdeleter.h>
-#include <kdebug.h>
 
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
@@ -82,7 +82,7 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
  d->mLoop = false;
  d->mBosonSound.setAutoDelete(true);
  if (d->mServer.server().isNull()) {
-	kdWarning() << "Cannot access KArtsServer - sound disabled" << endl;
+	boWarning() << "Cannot access KArtsServer - sound disabled" << endl;
 	// TODO: message box
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
@@ -93,16 +93,16 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 	query.supports("Extension", "ogg");
 	std::vector<Arts::TraderOffer>* offers = query.query();
 	if (offers->empty()) {
-		kdWarning() << "Your arts installation does not support .ogg files! Disabling sounds now..." << endl;
+		boWarning() << "Your arts installation does not support .ogg files! Disabling sounds now..." << endl;
 		// TODO: message box
 		d->mPlayMusic = false;
 		d->mPlaySound = false;
 		boConfig->setDisableSound(true);
 	} else {
-		kdDebug() << k_funcinfo << "ogg support seems to be ok" << endl;
+		boDebug() << k_funcinfo << "ogg support seems to be ok" << endl;
 		std::vector<Arts::TraderOffer>::iterator it;
 		for (it = offers->begin(); it != offers->end(); it++) {
-			kdDebug() << "ogg offer: " << it->interfaceName().c_str() << endl;
+			boDebug() << "ogg offer: " << it->interfaceName().c_str() << endl;
 		}
 	}
 	delete offers;
@@ -111,12 +111,12 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 
 BosonMusic::~BosonMusic()
 {
-kdDebug() << k_funcinfo << endl;
+boDebug() << k_funcinfo << endl;
  d->mBosonSound.clear();
  delete d->mTicker;
  if (d->mPlayObject) {
 	if (!d->mPlayObject->isNull()) {
-		kdDebug() << "halting music file" << endl;
+		boDebug() << "halting music file" << endl;
 		d->mPlayObject->halt();
 	}
 	delete d->mPlayObject;
@@ -157,7 +157,7 @@ bool BosonMusic::load(const QString& file)
  if (boConfig->disableSound()) {
 	return false;
  }
- kdDebug() << k_funcinfo << file << endl;
+ boDebug() << k_funcinfo << file << endl;
  delete d->mPlayObject;
  KPlayObjectFactory factory(server().server());
  d->mPlayObject = factory.createPlayObject(file, true);
@@ -179,7 +179,7 @@ QStringList BosonMusic::availableMusic() const
  list += KGlobal::dirs()->findAllResources("data",
 		"boson/music/*.ogg", true);
  if (list.isEmpty()) {
-	kdDebug() << "no music found" << endl;
+	boDebug() << "no music found" << endl;
 	return list;
  }
  return list;

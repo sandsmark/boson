@@ -21,13 +21,13 @@
 
 #include "bosontexturearray.h"
 #include "bosonconfig.h"
+#include "bodebug.h"
 
 #include <qimage.h>
 #include <qgl.h>
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
-#include <kdebug.h>
 
 class BosonModelTextures::BosonModelTexturesPrivate
 {
@@ -58,18 +58,18 @@ BosonModelTextures::~BosonModelTextures()
 {
  // should not do anything. all models should get deleted first and when all
  // models are removed all textures should have been deleted, too
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (d->mName2Texture.count() != 0) {
-	kdWarning() << k_funcinfo << "Not all textures have been deleted yet!!" << endl;
+	boWarning() << k_funcinfo << "Not all textures have been deleted yet!!" << endl;
  }
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonModelTextures::insert(BosonModel* model, const QString& textureName)
 {
  if (!model) {
-	kdError() << k_funcinfo << "NULL model" << endl;
+	boError() << k_funcinfo << "NULL model" << endl;
 	return;
  }
  GLuint tex = 0;
@@ -87,7 +87,7 @@ void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
 {
  QImage image(texturePath() + textureName);
  if (image.isNull()) {
-	kdError() << k_funcinfo << "Could not load " << textureName << " from " << texturePath() << endl;
+	boError() << k_funcinfo << "Could not load " << textureName << " from " << texturePath() << endl;
 	image = QImage(64, 64, 32);
 	image.fill(Qt::red.rgb());
  }
@@ -97,7 +97,7 @@ void BosonModelTextures::loadTexture(const QString& textureName, GLuint tex)
 void BosonModelTextures::removeModel(BosonModel* model)
 {
  if (!model) {
-	kdError() << k_funcinfo << "NULL model" << endl;
+	boError() << k_funcinfo << "NULL model" << endl;
 	return;
  }
  QValueList<GLuint> remove;
@@ -121,7 +121,7 @@ void BosonModelTextures::removeModel(BosonModel* model)
 void BosonModelTextures::removeTexture(GLuint tex)
 {
  if (d->mModels[tex].count() != 0) {
-	kdError() << k_funcinfo << "There are still models referencing this texture! Deleting anyway..." << endl;
+	boError() << k_funcinfo << "There are still models referencing this texture! Deleting anyway..." << endl;
  }
  d->mModels.remove(tex);
  QMap<QString, GLuint>::Iterator it = d->mName2Texture.begin();
@@ -130,7 +130,7 @@ void BosonModelTextures::removeTexture(GLuint tex)
  }
  d->mName2Texture.remove(it);
  glDeleteTextures(1, &tex);
- kdDebug() << k_funcinfo << tex << " has been deleted" << endl;
+ boDebug() << k_funcinfo << tex << " has been deleted" << endl;
 }
 
 GLuint BosonModelTextures::texture(const QString& texName) const

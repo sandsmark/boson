@@ -30,8 +30,8 @@
 #include "bosonstatistics.h"
 #include "cell.h"
 #include "upgradeproperties.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <klocale.h>
 
 UnitPlugin::UnitPlugin(Unit* unit)
@@ -106,12 +106,12 @@ unsigned long int ProductionPlugin::completedProductionId() const
  }
  if(completedProductionType() == ProduceUnit) {
 	if (mProductionState < speciesTheme()->unitProperties(id)->productionTime()) {
-		kdDebug() << "not yet completed: " << id << endl;
+		boDebug() << "not yet completed: " << id << endl;
 		return 0;
 	}
  } else {
 	if (mProductionState < speciesTheme()->technology(id)->productionTime()) {
-		kdDebug() << "not yet completed: " << id << endl;
+		boDebug() << "not yet completed: " << id << endl;
 		return 0;
 	}
  }
@@ -127,17 +127,17 @@ void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 {
  ProductionProperties* p = (ProductionProperties*)unit()->unitProperties()->properties(PluginProperties::Production);
  if (!p) {
-	kdError() << k_funcinfo << "NULL production properties" << endl;
+	boError() << k_funcinfo << "NULL production properties" << endl;
 	return;
  }
  if(type == ProduceUnit) {
 	if (!speciesTheme()->productions(p->producerList()).contains(id)) {
-		kdError() << k_funcinfo << " cannot produce unit with id " << id << endl;
+		boError() << k_funcinfo << " cannot produce unit with id " << id << endl;
 		return;
 	}
  } else if(type == ProduceTech) {
 	if (!speciesTheme()->technologies(p->producerList()).contains(id)) {
-		kdError() << k_funcinfo << " cannot produce technology with id " << id << endl;
+		boError() << k_funcinfo << " cannot produce technology with id " << id << endl;
 		return;
 	}
  }
@@ -164,7 +164,7 @@ void ProductionPlugin::removeProduction(ProductionType type, unsigned long int i
 {
  for (unsigned int i = 0; i < productionList().count(); i++) {
 	if ((mProductions[i].first == type) && (mProductions[i].second == id)) {
-		kdDebug() << k_funcinfo << "remove; type: " << type << ", id: " << id << endl;
+		boDebug() << k_funcinfo << "remove; type: " << type << ", id: " << id << endl;
 		mProductions.remove(mProductions.at(i));
 		return;
 	}
@@ -179,7 +179,7 @@ double ProductionPlugin::productionProgress() const
  } else if(currentProductionType() == ProduceTech) {
 	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
  } else {
-	kdDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
+	boDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
  }
  double percentage = (double)(mProductionState * 100) / (double)productionTime;
  return percentage;
@@ -188,12 +188,12 @@ double ProductionPlugin::productionProgress() const
 bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 {
  if (!hasProduction() || completedProductionId() <= 0) {
-	kdDebug() << k_lineinfo << "no completed construction" << endl;
+	boDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
 
  if(completedProductionType() != ProduceUnit) {
-	kdDebug() << k_funcinfo << "Current production is not unit!" << endl;
+	boDebug() << k_funcinfo << "Current production is not unit!" << endl;
 	return false;  // Maybe return true, so that tech. is researched? OTOH, this should never be reached anyway ;-)
  }
 
@@ -201,7 +201,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 
  const UnitProperties* prop = speciesTheme()->unitProperties(currentProductionId());
  if (!prop) {
-	kdError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
+	boError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
 	return false;
  }
  if (prop->isFacility()) {
@@ -209,7 +209,7 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 	// facility on map
 	for (unsigned int i = 0; i < list.count(); i++) {
 		if (list[i]->isFacility() && list[i]->owner() == player()) {
-			kdDebug() << "Facility in BUILD_RANGE" << endl;
+			boDebug() << "Facility in BUILD_RANGE" << endl;
 			// TODO: also check whether a unit is already at that position!!
 			return true;
 		}
@@ -248,11 +248,11 @@ void ProductionPlugin::advance(unsigned int)
  } else if(currentProductionType() == ProduceTech) {
 	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
  } else {
-	kdDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
+	boDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
  }
  if (mProductionState <= productionTime) {
 	if (mProductionState == productionTime) {
-		kdDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
+		boDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
 		mProductionState = mProductionState + 1;
 
 		if(currentProductionType() != ProduceUnit) {
@@ -269,7 +269,7 @@ void ProductionPlugin::advance(unsigned int)
 		// No auto-placing for facilities
 		const UnitProperties* prop = speciesTheme()->unitProperties(id);
 		if (!prop) {
-			kdError() << k_lineinfo << "Unknown id " << id << endl;
+			boError() << k_lineinfo << "Unknown id " << id << endl;
 			return;
 		}
 		if (speciesTheme()->unitProperties(id)->isFacility()) {
@@ -318,7 +318,7 @@ void ProductionPlugin::advance(unsigned int)
 				}
 			}
 		}
-		kdDebug() << "Cannot find free cell around facility :-(" << endl;
+		boDebug() << "Cannot find free cell around facility :-(" << endl;
 		game()->slotAddChatSystemMessage(i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
 	} else {
 		mProductionState = mProductionState + 1;
@@ -344,17 +344,17 @@ RepairPlugin::~RepairPlugin()
 
 void RepairPlugin::repair(Unit* u)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (unit()->isFacility()) {
 	if (!u->moveTo(unit()->x(), unit()->y(), 1)) {
-		kdDebug() << u->id() << " cannot find a way to repairyard" << endl;
+		boDebug() << u->id() << " cannot find a way to repairyard" << endl;
 		u->setWork(Unit::WorkNone);
 	} else {
 		u->setWork(Unit::WorkMove);
 	}
  } else {
 	if (!unit()->moveTo(u->x(), u->y(), 1)) {
-		kdDebug() << "Cannot find way to " << u->id() << endl;
+		boDebug() << "Cannot find way to " << u->id() << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
@@ -364,7 +364,7 @@ void RepairPlugin::repair(Unit* u)
 
 void RepairPlugin::repairInRange()
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  //TODO: support for friendly non-player (i.e. allied) units
 
  // TODO: once we started repairing a unit also repair it in the next call,
@@ -376,10 +376,10 @@ void RepairPlugin::repairInRange()
 		continue;
 	}
 	if (!player()->isEnemy(u->owner())) {
-		kdDebug() << "repair " << u->id() << endl;
+		boDebug() << "repair " << u->id() << endl;
 		int diff = u->health() - u->unitProperties()->health();
 		if (diff > 0) {
-			kdError() << k_funcinfo << "health > maxhealth" << endl;
+			boError() << k_funcinfo << "health > maxhealth" << endl;
 			continue;
 		}*/
 /*		if (diff < unit()->weaponDamage()) {
@@ -429,7 +429,7 @@ void HarvesterPlugin::advanceMine()
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
-	kdError() << k_funcinfo << "NULL harvester properties" << endl;
+	boError() << k_funcinfo << "NULL harvester properties" << endl;
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
@@ -448,24 +448,24 @@ void HarvesterPlugin::advanceMine()
 		} else if (prop->canMineOil()) {
 			player()->statistics()->increaseMinedOil(step);
 		}
-		kdDebug() << "resources mined: " << resourcesMined() << endl;
+		boDebug() << "resources mined: " << resourcesMined() << endl;
 	} else {
-		kdDebug() << k_funcinfo << "cannot mine here" << endl;
+		boDebug() << k_funcinfo << "cannot mine here" << endl;
 		unit()->setWork(Unit::WorkNone);
 		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
 	}
  } else {
-	kdDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
+	boDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
 	mHarvestingType = 2; // refining
  }
 }
 
 void HarvesterPlugin::advanceRefine()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (resourcesMined() == 0) {
-	kdDebug() << k_funcinfo << "refining done" << endl;
+	boDebug() << k_funcinfo << "refining done" << endl;
 	if (resourcesX() != -1 && resourcesY() != -1) {
 		mineAt(QPoint(resourcesX(), resourcesY()));
 	} else {
@@ -480,7 +480,7 @@ void HarvesterPlugin::advanceRefine()
 	QPtrListIterator<Unit> it(list);
 	const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
 	if (!prop) {
-		kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+		boError() << k_funcinfo << "NULL harvester plugin" << endl;
 		unit()->setWork(Unit::WorkNone);
 		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
@@ -500,11 +500,11 @@ void HarvesterPlugin::advanceRefine()
 		++it;
 	}
 	if (!ref) {
-		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
+		boDebug() << k_funcinfo << "no suitable refinery found" << endl;
 		unit()->setWork(Unit::WorkNone);
 		unit()->setAdvanceWork(Unit::WorkNone);
 	} else {
-		kdDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
+		boDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
 		refineAt(ref);
 	}
 	return;
@@ -514,7 +514,7 @@ void HarvesterPlugin::advanceRefine()
 		mResourcesMined = resourcesMined() - step;
 		const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
 		if (!prop) {
-			kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+			boError() << k_funcinfo << "NULL harvester plugin" << endl;
 			unit()->setWork(Unit::WorkNone);
 			return;
 		}
@@ -527,7 +527,7 @@ void HarvesterPlugin::advanceRefine()
 		}
 	} else {
 		if (!unit()->moveTo(refinery()->x(), refinery()->y(), 1)) {
-			kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+			boDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
 			unit()->setWork(Unit::WorkNone);
 			unit()->setAdvanceWork(Unit::WorkNone);
 		} else {
@@ -540,7 +540,7 @@ void HarvesterPlugin::advanceRefine()
 void HarvesterPlugin::mineAt(const QPoint& pos)
 {
  //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  unit()->moveTo(pos);
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
@@ -554,21 +554,21 @@ void HarvesterPlugin::mineAt(const QPoint& pos)
 void HarvesterPlugin::refineAt(Unit* refinery)
 {
  if (!refinery) {
-	kdError() << k_funcinfo << "NULL refinery" << endl;
+	boError() << k_funcinfo << "NULL refinery" << endl;
 	return;
  }
  if (!refinery->unitProperties()->canRefineMinerals() &&
 		!refinery->unitProperties()->canRefineOil()) {
-	kdError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
+	boError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  setRefinery(refinery);
  unit()->setPluginWork(pluginType());
  mHarvestingType = 2; // refining
  // move...
- kdDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
+ boDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
  if (!unit()->moveTo(refinery->x(), refinery->y(), 1)) {
-	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
+	boDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
 	unit()->setWork(Unit::WorkNone);
 	unit()->setAdvanceWork(Unit::WorkNone);
  } else {

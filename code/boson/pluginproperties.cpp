@@ -21,10 +21,10 @@
 
 #include "unitproperties.h"
 #include "speciestheme.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <ksimpleconfig.h>
-#include <kdebug.h>
 
 PluginProperties::PluginProperties(const UnitProperties* parent)
 {
@@ -63,7 +63,7 @@ QString RepairProperties::name() const
 void RepairProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	kdError() << k_funcinfo << "unit has no repair plugin" << endl;
+	boError() << k_funcinfo << "unit has no repair plugin" << endl;
 	return;
  }
  config->setGroup(propertyGroup());
@@ -92,7 +92,7 @@ QString ProductionProperties::name() const
 void ProductionProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	kdError() << k_funcinfo << "unit has no production plugin" << endl;
+	boError() << k_funcinfo << "unit has no production plugin" << endl;
 	return;
  }
  config->setGroup(propertyGroup());
@@ -124,7 +124,7 @@ QString HarvesterProperties::name() const
 void HarvesterProperties::loadPlugin(KSimpleConfig* config)
 {
  if (!config->hasGroup(propertyGroup())) {
-	kdError() << k_funcinfo << "unit has no harvester plugin" << endl;
+	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
 	return;
  }
  config->setGroup(propertyGroup());
@@ -132,7 +132,7 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
  mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
  mCanMineOil = config->readBoolEntry("CanMineOil", false);
  if (mCanMineMinerals && mCanMineOil) {
-	kdWarning() << k_funcinfo << "units can't mine minerals *and* oil" << endl;
+	boWarning() << k_funcinfo << "units can't mine minerals *and* oil" << endl;
 	mCanMineOil = false;
  }
  mMaxResources= config->readUnsignedNumEntry("MaxResources", 100);

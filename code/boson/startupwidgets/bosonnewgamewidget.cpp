@@ -31,11 +31,11 @@
 #include "../bosonplayfield.h"
 #include "../speciestheme.h"
 #include "../bosonscenario.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamechat.h>
-#include <kdebug.h>
 #include <ksimpleconfig.h>
 #include <kmessagebox.h>
 
@@ -60,7 +60,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 
   if (!boGame)
   {
-    kdError() << k_funcinfo << "NULL Boson object" << endl;
+    boError() << k_funcinfo << "NULL Boson object" << endl;
     return;
   }
 
@@ -267,8 +267,8 @@ void BosonNewGameWidget::initKGame()
   //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
   //  players (it's a bug actually)
   boGame->setMaxPlayers(BOSON_MAX_PLAYERS);
-  kdDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
-  kdDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
+  boDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
+  boDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 }
 
 void BosonNewGameWidget::initPlayer()
@@ -277,7 +277,7 @@ void BosonNewGameWidget::initPlayer()
   /*player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
   {
-    kdDebug() << "Speciestheme loaded, id: " << player()->speciesTheme()->identifier() << endl;
+    boDebug() << "Speciestheme loaded, id: " << player()->speciesTheme()->identifier() << endl;
     mPlayercolor = player()->teamColor();
   }
   else
@@ -287,11 +287,11 @@ void BosonNewGameWidget::initPlayer()
   }
   boGame->addPlayer(player());*/
 
-  kdDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
+  boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
   player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
   {
-    kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
+    boDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
   }
   mPlayercolor = boConfig->readLocalPlayerColor();
   player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
@@ -379,12 +379,12 @@ void BosonNewGameWidget::slotMyMapChanged(int index)
 {
   if (!boGame->isAdmin())
   {
-    kdWarning() << "Only admin can change the map" << endl;
+    boWarning() << "Only admin can change the map" << endl;
     return;
   }
   if (index >= (int)mMapIndex2Identifier.count())
   {
-    kdError() << k_funcinfo << "invalid index " << index << endl;
+    boError() << k_funcinfo << "invalid index " << index << endl;
     return;
   }
   QByteArray buffer;
@@ -399,7 +399,7 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
 {
   if (index >= (int)mSpeciesIndex2Identifier.count())
   {
-    kdError() << k_funcinfo << "invalid index " << index << endl;
+    boError() << k_funcinfo << "invalid index " << index << endl;
     return;
   }
   QByteArray buffer;
@@ -414,7 +414,7 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
+  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
   QListBoxText* t = new QListBoxText(p->name());
   mItem2Player.insert(t, p);
   mPlayersList->insertItem(t);
@@ -427,7 +427,7 @@ void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 
 void BosonNewGameWidget::slotPlayerLeftGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
+  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
   this->disconnect(p);
   QPtrDictIterator<KPlayer> it(mItem2Player);
   while(it.current())
@@ -479,7 +479,7 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
       if(boGame->isAdmin())
       {
         // Init map to be able to check max/min players count
-        kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
+        boDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
         playField()->loadPlayField(BosonPlayField::playFieldFileName(playFieldString()));
         mMinPlayers = playField()->scenario()->minPlayers();
         mMaxPlayers = playField()->scenario()->maxPlayers();
@@ -487,7 +487,7 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
       return;
     }
   }
-  kdDebug() << k_funcinfo << " No such map: " << id << endl;
+  boDebug() << k_funcinfo << " No such map: " << id << endl;
 }
 
 void BosonNewGameWidget::slotSpeciesChanged(Player*)

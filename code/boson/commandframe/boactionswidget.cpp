@@ -26,9 +26,9 @@
 #include "../unitproperties.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qlayout.h>
 #include <qintdict.h>
@@ -109,7 +109,7 @@ void BoActionsWidget::hideButtons()
 
 void BoActionsWidget::showUnitActions(Unit* unit)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!unit) {
 	return;
  }
@@ -118,7 +118,7 @@ void BoActionsWidget::showUnitActions(Unit* unit)
  hideButtons();
 
  // Order of action buttons: move, attack, stop. Nothing else yet.
- if(unit->isMobile()) {
+ if (unit->isMobile()) {
 	// If it's mobile, it can move
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(ActionMove, unit->owner());
@@ -129,14 +129,14 @@ void BoActionsWidget::showUnitActions(Unit* unit)
 	button++;
  }
 
- if(unit->unitProperties()->canShoot()) {
+ if (unit->unitProperties()->canShoot()) {
 	// It can shoot
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(ActionAttack, unit->owner());
 	button++;
  }
 
- if(unit->plugin(UnitPlugin::Harvester)) {
+ if (unit->plugin(UnitPlugin::Harvester)) {
 	// it can harvest
 	/// IDEA: maybe have different icons for mine oil and mine minerals
 	resetButton(d->mOrderButton[button]);
@@ -145,13 +145,13 @@ void BoActionsWidget::showUnitActions(Unit* unit)
  }
 
  // If it can't move or attack, then there's no sense in having stop
- if(button != 0) {
+ if (button != 0) {
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(ActionStop, unit->owner());
 	button++;
  }
 
- if(unit->plugin(UnitPlugin::Repair)) {
+ if (unit->plugin(UnitPlugin::Repair)) {
 	// it can harvest
 	/// IDEA: maybe have different icons for mine oil and mine minerals
 	resetButton(d->mOrderButton[button]);

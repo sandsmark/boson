@@ -21,11 +21,11 @@
 
 #include "rtti.h"
 #include "bosontexturearray.h"
+#include "bodebug.h"
 
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kcursor.h>
-#include <kdebug.h>
 
 #include <qwidget.h>
 #include <qbitmap.h>
@@ -110,7 +110,7 @@ void BosonNormalCursor::setCursor(int mode)
 
 void BosonNormalCursor::setWidgetCursor(QWidget* w)
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  w->setCursor(cursor());
 }
 
@@ -126,7 +126,7 @@ QCursor BosonNormalCursor::cursor() const
 bool BosonNormalCursor::insertMode(int mode, QCursor* cursor)
 {
  if (d->mQCursors[mode]) {
-	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
+	boWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
 	d->mQCursors.remove(mode);
  }
  if (cursor) {
@@ -181,7 +181,7 @@ void BosonKDECursor::setCursor(int mode)
 
 void BosonKDECursor::setWidgetCursor(QWidget* w)
 {
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  w->setCursor(cursor());
 }
 
@@ -253,19 +253,19 @@ void BosonOpenGLCursor::setCursor(int mode)
  }
  BosonCursor::setCursor(mode);
  d->mAnimateTimer.stop();
-// kdDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  if (cursorMode() >= 0) {
 	BosonOpenGLCursorData* data;
 	data = d->mCursors[cursorMode()];
 	if (data) {
-//		kdDebug() << k_funcinfo << mode << endl;
+//		boDebug() << k_funcinfo << mode << endl;
 		if (!data->mArray || !data->mArray->isValid()) {
-			kdError() << k_funcinfo << "array not valid for mode=" << mode << endl;
+			boError() << k_funcinfo << "array not valid for mode=" << mode << endl;
 			return;
 		}
 		setCurrentData(data);
 	} else {
-		kdWarning() << k_funcinfo << "NULL array for " << mode << endl;
+		boWarning() << k_funcinfo << "NULL array for " << mode << endl;
 	}
  }
 }
@@ -275,7 +275,7 @@ void BosonOpenGLCursor::setWidgetCursor(QWidget* w)
  // TODO: check if the cursor data (i.e. textures are valid - otherwise display
  // a default cursor!)
  if (w->cursor().shape() != Qt::BlankCursor) {
-//	kdDebug() << k_funcinfo << endl;
+//	boDebug() << k_funcinfo << endl;
 	w->setCursor(Qt::BlankCursor);
  }
 }
@@ -283,7 +283,7 @@ void BosonOpenGLCursor::setWidgetCursor(QWidget* w)
 bool BosonOpenGLCursor::insertMode(int mode, BosonOpenGLCursorData* data)
 {
  if (d->mCursors[mode]) {
-	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
+	boWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
 	d->mCursors.remove(mode);
  }
  if (data) {
@@ -326,9 +326,9 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
 	baseDir += QString::fromLatin1("/");
  }
  KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
- kdDebug() << baseDir << endl;
+ boDebug() << baseDir << endl;
  if (!c.hasGroup("Boson Cursor")) {
-	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
+	boWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
 	return 0;
  }
  c.setGroup("Boson Cursor");
@@ -357,7 +357,7 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
 	QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
 	QImage image;
 	if (!image.load(file)) {
-		kdError() << k_funcinfo << "Could not load " << file << endl;
+		boError() << k_funcinfo << "Could not load " << file << endl;
 		// TODO: load dummy image
 	}
 	images.append(image);
@@ -373,7 +373,7 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
 	data->mRotateDegree = rotateDegree;
 	return data;
  } else {
-	kdError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
+	boError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
  }
  return 0;
 }
@@ -384,12 +384,12 @@ void BosonOpenGLCursor::setCurrentData(BosonOpenGLCursorData* data)
 	return;
  }
  if (!data) {
-	kdWarning() << k_funcinfo << "NULL data" << endl;
+	boWarning() << k_funcinfo << "NULL data" << endl;
 	mCurrentData = 0;
 	return;
  }
  if (!data->mArray || !data->mArray->isValid()) {
-	kdError() << k_funcinfo << "invalid texture array" << endl;
+	boError() << k_funcinfo << "invalid texture array" << endl;
 	return;
  }
  mCurrentData = data;

@@ -30,10 +30,10 @@
 #include "../boselection.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
+#include "../bodebug.h"
 
 #include <klocale.h>
 #include <kgameprogress.h>
-#include <kdebug.h>
 
 #include <qlayout.h>
 #include <qlabel.h>
@@ -197,13 +197,13 @@ BosonCommandFrame::~BosonCommandFrame()
 
 void BosonCommandFrame::setAction(Unit* unit)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  BosonCommandFrameBase::setAction(unit);
  if (!selectedUnit()) {
 	return;
  }
  if (selectedUnit() != unit) {
-	kdError() << k_funcinfo << "selectedUnit() != unit" << endl;
+	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
 	return;
  }
  Player* owner = unit->owner();
@@ -217,13 +217,13 @@ void BosonCommandFrame::setAction(Unit* unit)
  // TODO: these can be displayed (at least most of them) for groups, too!
  showUnitActions(unit);
 
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
  if (selectedUnit()->plugin(UnitPlugin::Production)) {
 	if (!selectedUnit()->properties(PluginProperties::Production)) {
 		// must not happen if the units has the production
 		// plugin
-		kdError() << k_funcinfo << "no production properties!" << endl;
+		boError() << k_funcinfo << "no production properties!" << endl;
 		return;
 	}
 	ProductionProperties* pp = (ProductionProperties*)selectedUnit()->properties(PluginProperties::Production);
@@ -278,7 +278,7 @@ void BosonCommandFrame::slotUpdate()
 		if (!selectedUnit()->isFacility()) {
 			// can't happen, since d->mConstructionProgress already
 			// checks this
-			kdError() << k_funcinfo << "No facility" << endl;
+			boError() << k_funcinfo << "No facility" << endl;
 			return;
 		}
 	} else {

@@ -32,10 +32,10 @@
 #include "global.h"
 #include "kspritetooltip.h"
 #include "boselection.h"
+#include "bodebug.h"
 #include "defines.h"
 
 #include <kgame/kgameio.h>
-#include <kdebug.h>
 #include <klocale.h>
 
 #include <qptrlist.h>
@@ -87,7 +87,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
  if (!selection()) {
-	kdError() << k_funcinfo << "NULL selection" << endl;
+	boError() << k_funcinfo << "NULL selection" << endl;
 	return;
  }
  if (selection()->isEmpty()) {
@@ -139,7 +139,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			break;
 		}
 		default:
-			kdError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
+			boError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
 			break;
 	}
 	d->mLockAction = false;
@@ -278,7 +278,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
  }
 
  if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProductionId()), canvasPos, production)) {
-	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
+	boDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
 
@@ -323,7 +323,7 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
  QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {
 	if (it.current()->health() < it.current()->unitProperties()->health()) {
-		kdDebug() << "repair " << it.current()->id() << endl;
+		boDebug() << "repair " << it.current()->id() << endl;
 		list.append(it.current());
 	}
 	++it;
@@ -353,7 +353,7 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
 // if (!unit->properites(PluginProperties::Refine)) {
-//	kdError() << k_funcinfo << unit->id() << "cannot refine" << endl;
+//	boError() << k_funcinfo << unit->id() << "cannot refine" << endl;
 //	return;
 // }
 // bool minerals = (RefineProperties*)unit)->properties(PluginProperties::Refine)->canRefineMinerals();
@@ -373,7 +373,7 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 	++unitsIt;
  }
  if (!list.count()) {
-	kdError() << k_lineinfo << "MoveRefine: empty list!!" << endl;
+	boError() << k_lineinfo << "MoveRefine: empty list!!" << endl;
 	return false;
  }
  QPtrListIterator<Unit> it(list);
@@ -445,11 +445,11 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
 void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
 {
  if (!localPlayer()) {
-	kdError() << "NULL local player" << endl;
+	boError() << "NULL local player" << endl;
 	return;
  }
  if (!selection()) {
-	kdError() << k_funcinfo << "NULL selection" << endl;
+	boError() << k_funcinfo << "NULL selection" << endl;
 	return;
  }
  if (selection()->isEmpty()) {
@@ -471,7 +471,7 @@ void BosonBigDisplay::updateCursor()
 {
  BosonCursor* c = cursor();
  if (!c) {
-	kdError() << k_funcinfo << "NULL cursor!!" << endl;
+	boError() << k_funcinfo << "NULL cursor!!" << endl;
 	return;
  }
 
@@ -523,11 +523,11 @@ void BosonBigDisplay::addMouseIO(Player* p)
 {
 //AB: make sure that both editor and game mode can share the same IO !
  if (!localPlayer()) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (d->mMouseIO) {
-	kdError() << "This view already has a mouse io!!" << endl;
+	boError() << "This view already has a mouse io!!" << endl;
 	return;
  }
  d->mMouseIO = new KGameMouseIO(viewport(), true);
@@ -554,7 +554,7 @@ void BosonBigDisplay::unitAction(int actionType)
 	case ActionStop:
 	{
 		if(selection()->isEmpty()) {
-			kdError() << k_funcinfo << "Selection is empty!" << endl;
+			boError() << k_funcinfo << "Selection is empty!" << endl;
 			return;
 		}
 		// Stop all selected units
@@ -581,7 +581,7 @@ void BosonBigDisplay::unitAction(int actionType)
 		return;
 	}
 	default:
-		kdError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
+		boError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
 		return;
  }
  d->mActionType = (UnitAction)actionType;

@@ -25,8 +25,8 @@
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
 #include "../bosonweapon.h"
+#include "../bodebug.h"
 
-#include <kdebug.h>
 #include <ksimpleconfig.h>
 
 #include <GL/gl.h>
@@ -37,26 +37,26 @@
 BosonShot::BosonShot(const BosonWeaponProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz) :
     BosonItem(prop->model(), attacker->canvas())
 {
-  kdDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
+  boDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mOwner = attacker->owner();
   mProp = prop;
   if(prop->speed() == 0)
   {
     // This shot is bullet, not missile - it has infinite speed and it reaches
     //  it's target immideately. No need to calculate anything.
-    kdDebug() << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
+    boDebug() << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
     move(tx, ty, tz);
     mActive = false;
     return;
   }
   mVelo.set(tx - x, ty - y, tz - z);
   mLength = mVelo.length();
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
+  //boDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
   mTotalSteps = (int)ceilf(mLength / prop->speed());
   mStep = 0;
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
+  //boDebug() << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
   mVelo.scale(prop->speed() / mLength);
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
+  //boDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   mActive = true;
   move(x, y, z);
   setAnimated(true);

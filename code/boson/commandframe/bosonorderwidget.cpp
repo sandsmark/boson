@@ -29,10 +29,10 @@
 #include "../bosontiles.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
+#include "../bodebug.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qlayout.h>
 #include <qintdict.h>
@@ -152,7 +152,7 @@ void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned
  if (factory) {
 	production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 	if (!production) {
-		kdDebug() << k_funcinfo << "factory cannot produce" << endl;
+		boDebug() << k_funcinfo << "factory cannot produce" << endl;
 	} else if (production->hasProduction()) {
 		type = production->currentProductionType();
 		id = production->currentProductionId();
@@ -193,7 +193,7 @@ void BosonOrderWidget::hideOrderButtons()
 void BosonOrderWidget::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
@@ -233,7 +233,7 @@ void BosonOrderWidget::slotRedrawTiles()
 		}
 		break;
 	default:
-		kdError() << "unexpected production index " << d->mCellType << endl;
+		boError() << "unexpected production index " << d->mCellType << endl;
 		break;
  }
 }
@@ -262,34 +262,34 @@ void BosonOrderWidget::showUnit(Unit* unit)
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandUnitSelected) {
 		if (d->mOrderButton[i]->unit() == unit) {
-			kdDebug() << "unit already displayed - update..." << endl;
+			boDebug() << "unit already displayed - update..." << endl;
 			d->mOrderButton[i]->slotUnitChanged(unit);
 			return;
 		}
 	} else if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandNothing) {
-//		kdDebug() << "show unit at " << i << endl;
+//		boDebug() << "show unit at " << i << endl;
 		d->mOrderButton[i]->setUnit(unit);
 		return;
 	}
  }
  ensureButtons(d->mOrderButton.count() + 1);
-// kdDebug() << "display unit" << endl;
+// boDebug() << "display unit" << endl;
  d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
 }
 
 void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
 {
  if (!factory->isFacility()) {
-	kdError() << k_lineinfo << "NOT factory" << endl;
+	boError() << k_lineinfo << "NOT factory" << endl;
 	return;
  }
  ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
  if (!production) {
-	kdError() << k_funcinfo << factory->id() << " cannot produce" << endl;
+	boError() << k_funcinfo << factory->id() << " cannot produce" << endl;
 	return;
  }
  if (!production->hasProduction()) {
-	kdDebug() << k_funcinfo << "no production" << endl;
+	boDebug() << k_funcinfo << "no production" << endl;
 	return;
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {

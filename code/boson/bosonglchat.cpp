@@ -22,6 +22,7 @@
 
 #include "bosonconfig.h"
 #include "bosonglfont.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <kgame/kgame.h>
@@ -69,7 +70,7 @@ void BosonGLChat::setChat(KGameChat* chat)
 	return;
  }
  if (!mChat->game()) {
-	kdError() << k_funcinfo << "oops! the chat widget has no KGame!" << endl;
+	boError() << k_funcinfo << "oops! the chat widget has no KGame!" << endl;
 	return;
  }
  setKGame(mChat->game());
@@ -111,7 +112,7 @@ void BosonGLChat::slotUnsetKGame()
 void BosonGLChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT32, Q_UINT32 sender)
 {
  if (!game()) {
-	kdError() << k_funcinfo << "Set a KGame first" << endl;
+	boError() << k_funcinfo << "Set a KGame first" << endl;
 	return;
  }
  if (msgid != messageId()) {
@@ -127,7 +128,7 @@ void BosonGLChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT
 void BosonGLChat::addMessage(unsigned int p, const QString& text)
 {
  if (!game()) {
-	kdError() << k_funcinfo << "Set a KGame first" << endl;
+	boError() << k_funcinfo << "Set a KGame first" << endl;
 	return;
  }
  addMessage(game()->findPlayer(p), text);
@@ -136,11 +137,11 @@ void BosonGLChat::addMessage(unsigned int p, const QString& text)
 void BosonGLChat::addMessage(KPlayer* p, const QString& text)
 {
  if (!p) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (!mChat) {
-	kdError() << k_funcinfo << "NULL chat" << endl;
+	boError() << k_funcinfo << "NULL chat" << endl;
  }
  addMessage(i18n("%1: %2").arg(p->name()).arg(text));
 }
@@ -193,7 +194,7 @@ void BosonGLChat::renderMessages(int x, int y, BosonGLFont* font)
 {
 // TODO: line break?
  if (!font) {
-	kdError() << k_funcinfo << "NULL font" << endl;
+	boError() << k_funcinfo << "NULL font" << endl;
 	return;
  }
  // AB: this is a redundant call, since we use the same in BosonBigDisplayBase::paintGL().

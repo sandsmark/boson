@@ -23,6 +23,7 @@
 #include "unit.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"
+#include "bodebug.h"
 
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
@@ -67,11 +68,11 @@ void BoSelection::clear(bool emitSignal)
 void BoSelection::add(Unit* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (unit->isDestroyed()) {
-	kdDebug() << k_funcinfo << "unit destroyed" << endl;
+	boDebug() << k_funcinfo << "unit destroyed" << endl;
 	return;
  }
  if (mSelection.containsRef(unit)) {
@@ -89,7 +90,7 @@ void BoSelection::add(Unit* unit)
 void BoSelection::selectUnit(Unit* unit, bool replace)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
  }
  if (replace) {
 	clear(false);
@@ -136,7 +137,7 @@ void BoSelection::removeUnit(Unit* unit)
 void BoSelection::remove(Unit* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  mSelection.removeRef(unit);

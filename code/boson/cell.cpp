@@ -20,8 +20,7 @@
 
 #include "defines.h"
 #include "unitproperties.h"
-
-#include <kdebug.h>
+#include "bodebug.h"
 
 Cell::Cell()
 {
@@ -50,14 +49,14 @@ void Cell::makeCell(int groundType, unsigned char version)
  setGroundType((GroundType)groundType);
  setVersion(version);
  if (groundType == GroundUnknown) {
-	kdError() << "unknown ground?!" << endl;
+	boError() << "unknown ground?!" << endl;
  }
 }
 
 bool Cell::canGo(const UnitProperties* prop) const
 { // probably a time critical function!
  if (!prop) {
-	kdError() << k_funcinfo << "NULL unit properties" << endl;
+	boError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
  if (isPlain(groundType())) {
@@ -66,7 +65,7 @@ bool Cell::canGo(const UnitProperties* prop) const
 	TransType g = (TransType)getTransRef(groundType());
 	return (canGo(prop, from(g)) && canGo(prop, to(g)));
  } else {
-	kdWarning() << "neither plain nor transition" << endl;
+	boWarning() << "neither plain nor transition" << endl;
 	return false;
  }
 }
@@ -87,7 +86,7 @@ bool Cell::canGo(const UnitProperties* prop, GroundType ground)
 	case GroundWater:
 		return prop->canGoOnWater();
 	default:
-		kdWarning() << "unknown groundType " << ground << endl;
+		boWarning() << "unknown groundType " << ground << endl;
 		return false;
  }
  return false; // never reached, btw
@@ -144,7 +143,7 @@ Cell::GroundType Cell::from(TransType trans)
 	case TransDeepWater:
 		return GroundDeepWater;
 	default:
-		kdError() << "Unknown trans " << (int)trans << endl;
+		boError() << "Unknown trans " << (int)trans << endl;
 		return GroundUnknown;
  }
 }
@@ -160,7 +159,7 @@ Cell::GroundType Cell::to(TransType trans)
 	case TransDeepWater:
 		return GroundWater;
 	default:
-		kdError() << "Unknown trans " << (int)trans
+		boError() << "Unknown trans " << (int)trans
 				<< endl;
 		return GroundUnknown;
  }
@@ -237,7 +236,7 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
 				TransDownRightInverted : TransDownRight);
 		break;
 	default:
-		kdError() << "Unknwon small tile " << smallNo << endl;
+		boError() << "Unknwon small tile " << smallNo << endl;
 		return 0;
  }
  return tileNo;
@@ -274,7 +273,7 @@ int Cell::moveCost() const
 		break;
 	case GroundUnknown:
 	default:
-		kdWarning() << k_funcinfo << "invalid ground" << endl;
+		boWarning() << k_funcinfo << "invalid ground" << endl;
 		cost = 0;
 		break;
  }

@@ -28,6 +28,7 @@
 #include "boson.h"
 #include "upgradeproperties.h"
 #include "unitplugins.h"
+#include "bodebug.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
@@ -82,25 +83,25 @@ Player::Player() : KPlayer()
 
 Player::~Player()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  quitGame(true);
  dataHandler()->clear(); // this must not be in quitGame()
  delete mSpecies;
  delete d;
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void Player::quitGame(bool destruct)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
  mOutOfGame = false;
  d->mMap = 0;
 
- kdDebug() << k_funcinfo << "clearing units" << endl;
+ boDebug() << k_funcinfo << "clearing units" << endl;
  d->mUnits.clear();
- kdDebug() << k_funcinfo << "units cleared" << endl;
+ boDebug() << k_funcinfo << "units cleared" << endl;
  delete d->mStatistics;
  d->mStatistics = 0;
 
@@ -162,7 +163,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  switch (msgid) {
 	// nothing done here currently
 	default:
-		kdWarning() << k_funcinfo << "Unknown message " << msgid << endl;
+		boWarning() << k_funcinfo << "Unknown message " << msgid << endl;
 		break;
  }
 }
@@ -196,7 +197,7 @@ void Player::addUnit(Unit* unit)
 void Player::unitDestroyed(Unit* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << "Cannot remove NULL unit" << endl;
+	boError() << k_funcinfo << "Cannot remove NULL unit" << endl;
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
@@ -216,7 +217,7 @@ void Player::unitDestroyed(Unit* unit)
 void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 {
  if (!prop) {
-	kdError() << k_funcinfo << "NULL property" << endl;
+	boError() << k_funcinfo << "NULL property" << endl;
 	return;
  }
 
@@ -226,15 +227,15 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  for (unit = d->mUnits.first(); unit && !found; unit = d->mUnits.next()) {
 	if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
 		found = true;
-//		kdDebug() << "found unit " << unit->id() << endl;
+//		boDebug() << "found unit " << unit->id() << endl;
 		break;
 	}
  }
 // (evil hack end)
 
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
-	kdDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
+	boDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
  }
 
@@ -271,9 +272,9 @@ bool Player::save(QDataStream& stream)
 {
 // we need save() and load() for the new game dialog. The units part should be
 // unused, only the species theme should be necessary.
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!KPlayer::save(stream)) {
-	kdError() << k_funcinfo << "Couldn't save KPlayer" << endl;
+	boError() << k_funcinfo << "Couldn't save KPlayer" << endl;
 	return false;
  }
 
@@ -317,7 +318,7 @@ bool Player::saveUnits(QDataStream& stream)
 	stream << (int)unit->dataHandler()->id();
 
 	if (!unit->save(stream)) {
-		kdError() << k_funcinfo << "Error while saving unit with id=" << unit->id() << endl;
+		boError() << k_funcinfo << "Error while saving unit with id=" << unit->id() << endl;
 		return false;
 	}
  }
@@ -326,9 +327,9 @@ bool Player::saveUnits(QDataStream& stream)
 
 bool Player::load(QDataStream& stream)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!KPlayer::load(stream)) {
-	kdError() << k_funcinfo << "Couldn't load KPlayer" << endl;
+	boError() << k_funcinfo << "Couldn't load KPlayer" << endl;
 	return false;
  }
 
@@ -387,7 +388,7 @@ bool Player::loadUnits(QDataStream& stream)
 	emit signalUnitLoaded(unit, (int)x, (int)y);
 	// Call unit's loading methods
 	if (!unit->load(stream)) {
-		kdError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
+		boError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
 		return false;
 	}
 
@@ -409,14 +410,14 @@ QPtrList<Unit> Player::allUnits() const
 const UnitProperties* Player::unitProperties(unsigned long int unitType) const
 {
  if (!speciesTheme()) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
+	boError() << k_funcinfo << "NULL theme" << endl;
 	return 0;
  }
 
  // TODO: remove this check as soon as the reason for the current crash on
  // building-placing (02/01/12) is found and fixed
  if (!speciesTheme()->unitProperties(unitType)) {
-	kdError() << k_lineinfo << "NULL unit properties (VERY EVIL BUG!!)" << endl;
+	boError() << k_lineinfo << "NULL unit properties (VERY EVIL BUG!!)" << endl;
  }
  return speciesTheme()->unitProperties(unitType);
 }
@@ -442,16 +443,16 @@ void Player::fog(int x, int y)
 	return;
  }
  if (x + d->mMap->width() * y >= d->mFogged.size()) {
-	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return;
  }
-//kdDebug() << k_funcinfo << x << "," << y << endl;
+//boDebug() << k_funcinfo << x << "," << y << endl;
  d->mFogged.setBit(x + d->mMap->width() * y);
  // emit signal (actual fog on map + minimap)
  // TODO: any way to emit only for the local player?
  emit signalFog(x, y);
-//kdDebug() << k_funcinfo << "done " << endl;
+//boDebug() << k_funcinfo << "done " << endl;
 }
 
 void Player::unfog(int x, int y)
@@ -459,9 +460,9 @@ void Player::unfog(int x, int y)
  if (!d->mMap) {
 	return;
  }
-//kdDebug() << k_funcinfo << x << "," << y << endl;
+//boDebug() << k_funcinfo << x << "," << y << endl;
  if (x + d->mMap->width() * y >= d->mFogged.size()) {
-	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return;
  }
@@ -469,13 +470,13 @@ void Player::unfog(int x, int y)
  // emit signal (actual fog on map + minimap)
  // TODO: any way to emit only for the local player?
  emit signalUnfog(x, y);
-//kdDebug() << k_funcinfo << "done " << endl;
+//boDebug() << k_funcinfo << "done " << endl;
 }
 
 bool Player::isFogged(int x, int y) const
 {
  if (x + d->mMap->width() * y >= d->mFogged.size()) {
-	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+	boError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
 			<< d->mFogged.size() << ")" << endl;
 	return true;
  }
@@ -522,7 +523,7 @@ bool Player::hasMiniMap() const
 void Player::facilityCompleted(Facility* fac)
 {
  if (!fac) {
-	kdError() << k_funcinfo << "NULL facility" << endl;
+	boError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
  if (fac->unitProperties()->supportMiniMap()) {
@@ -634,12 +635,12 @@ bool Player::hasTechnology(unsigned long int id) const
 
 void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 {
- kdDebug() << k_funcinfo << "id: " << id << endl;
+ boDebug() << k_funcinfo << "id: " << id << endl;
  // Check if it isn't researched already
  QIntDictIterator<TechnologyProperties> it(speciesTheme()->technologyList());
  while (it.current()) {
 	if (((unsigned long int)(it.currentKey()) == id) && (it.current()->isResearched())) {
-		kdError() << k_funcinfo << "Technology " << it.current() << " already researched!" << endl;
+		boError() << k_funcinfo << "Technology " << it.current() << " already researched!" << endl;
 		return;
 	}
 	++it;
@@ -658,7 +659,7 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 	QPtrList<UpgradeProperties> ulist = speciesTheme()->nonConstUnitProperties(*pit)->unresearchedUpgrades();
 	for (upgrade = ulist.first(); upgrade; upgrade = ulist.next()) {
 		if (upgrade->canBeResearched(this)) {
-			kdDebug() << k_funcinfo << "    Applying upgrade for UP " << *pit << " with id " << upgrade->id() << endl;
+			boDebug() << k_funcinfo << "    Applying upgrade for UP " << *pit << " with id " << upgrade->id() << endl;
 			upgrade->setResearched(true);
 			upgrade->apply(this);
 			speciesTheme()->nonConstUnitProperties(*pit)->upgradeResearched( upgrade);

@@ -22,8 +22,8 @@
 #include "bosonmessage.h"
 #include "unitbase.h"
 #include "commandframe/bosoncommandframebase.h"
+#include "bodebug.h"
 
-#include <kdebug.h>
 #include <kgame/kplayer.h>
 
 #include "commandinput.moc"
@@ -39,7 +39,7 @@ CommandInput::~CommandInput()
 void CommandInput::setCommandFrame(BosonCommandFrameBase* f)
 {
  if (!f) {
-	kdError() << k_funcinfo << "NULL command frame" << endl;
+	boError() << k_funcinfo << "NULL command frame" << endl;
 	return;
  }
  connect(f, SIGNAL(signalProduce(ProductionType, unsigned long int, UnitBase*, KPlayer*)),
@@ -51,22 +51,22 @@ void CommandInput::setCommandFrame(BosonCommandFrameBase* f)
 void CommandInput::slotProduce(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (!game()) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (!factory) {
-	kdError() << k_funcinfo << "NULL factory" << endl;
+	boError() << k_funcinfo << "NULL factory" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduce;
@@ -83,22 +83,22 @@ void CommandInput::slotProduce(ProductionType type, unsigned long int id, UnitBa
 void CommandInput::slotStopProduction(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
-	kdError() << k_funcinfo << "NULL player" << endl;
+	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (!game()) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (!factory) {
-	kdError() << k_funcinfo << "NULL factory" << endl;
+	boError() << k_funcinfo << "NULL factory" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduceStop;

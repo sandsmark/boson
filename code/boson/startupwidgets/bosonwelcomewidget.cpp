@@ -25,7 +25,6 @@
 #include <klocale.h>
 #include <kstandarddirs.h>
 #include <kbugreport.h>
-#include <kdebug.h>
 
 #include <qlabel.h>
 #include <qpushbutton.h>

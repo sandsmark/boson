@@ -23,11 +23,11 @@
 #include "unitplugins.h"
 #include "player.h"
 #include "boitemlist.h"
+#include "bodebug.h"
 
 #include <klistview.h>
 #include <klistbox.h>
 #include <klocale.h>
-#include <kdebug.h>
 #include <kgame/kgamepropertyhandler.h>
 
 #include <qlayout.h>
@@ -204,7 +204,7 @@ void KGameUnitDebug::slotUpdate()
  QPtrListIterator<Unit> it(units);
  while (it.current()) {
 	if (d->mUnits.find(it.current()->id())) {
-		kdError() << "Cannot double-add id " << it.current()->id() << endl;
+		boError() << "Cannot double-add id " << it.current()->id() << endl;
 	} else {
 		Unit* unit = it.current();
 		d->mUnits.insert(unit->id(), unit);
@@ -258,7 +258,7 @@ void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	}
  }
  if (!unit) {
-	kdWarning() << k_funcinfo << "unit not found" << endl;
+	boWarning() << k_funcinfo << "unit not found" << endl;
 	return;
  }
 
@@ -278,7 +278,7 @@ void KGameUnitDebug::updateWaypoints(QListViewItem* item)
  int id = item->text(0).toInt();
  Unit* unit = d->mUnits[id];
  if (!unit) {
-	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
  QValueList<QPoint> points = unit->waypointList();
@@ -296,7 +296,7 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
  int id = item->text(0).toInt();
  Unit* unit = d->mUnits[id];
  if (!unit) {
-	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
  ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
@@ -322,7 +322,7 @@ void KGameUnitDebug::updateUnitsInRange(QListViewItem* item)
  int id = item->text(0).toInt();
  Unit* unit = d->mUnits[id];
  if (!unit) {
-	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
  /*BoItemList inRange = unit->unitsInRange();
@@ -359,7 +359,7 @@ void KGameUnitDebug::updateUnitCollisions(QListViewItem* item)
  int id = item->text(0).toInt();
  Unit* unit = d->mUnits[id];
  if (!unit) {
-	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
  QValueList<Unit*> collisionsFalse = unit->unitCollisions(false);
@@ -391,7 +391,7 @@ void KGameUnitDebug::updateCells(QListViewItem* item)
  int id = item->text(0).toInt();
  Unit* unit = d->mUnits[id];
  if (!unit) {
-	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	boWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
  QPointArray cells = unit->cells();

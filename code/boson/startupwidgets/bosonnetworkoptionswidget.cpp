@@ -21,12 +21,12 @@
 #include "bosonnetworkoptionswidget.moc"
 
 #include "../boson.h"
+#include "../bodebug.h"
 #include "../defines.h"
 
 #include <knuminput.h>
 #include <klocale.h>
 #include <kmessagebox.h>
-#include <kdebug.h>
 
 #include <qbuttongroup.h>
 #include <qgroupbox.h>
@@ -45,7 +45,7 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
 {
   if (!boGame)
   {
-    kdError() << k_funcinfo << "NULL Boson object" << endl;
+    boError() << k_funcinfo << "NULL Boson object" << endl;
     return;
   }
 

@@ -35,10 +35,10 @@
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "startupwidgets/bosonloadingwidget.h"
+#include "bodebug.h"
 
 #include <kapplication.h>
 #include <klocale.h>
-#include <kdebug.h>
 #include <kconfig.h>
 
 #include <qcursor.h>
@@ -56,7 +56,7 @@ BosonStarting::BosonStarting(QObject* parent) : QObject(parent)
 
 void BosonStarting::startNewGame()
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  mLoading = false; // we are starting a new game
  mLoadingWidget->setProgress(0);
  mLoadingWidget->showProgressBar(true);
@@ -85,7 +85,7 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  //  starting new game
  mLoading = true;
  if (loadingFileName == QString::null) {
-	kdError() << k_funcinfo << "Cannot load game with NULL filename" << endl;
+	boError() << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	//TODO: set Boson::loadingStatus()
 	return false;
  }
@@ -107,7 +107,7 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  f.close();
  mLoading = false;
 
- kdDebug() << k_funcinfo << "mit signalStartGame()" << endl;
+ boDebug() << k_funcinfo << "mit signalStartGame()" << endl;
  emit signalStartGame(); // FIXME - also in loadgamedata3
  emit signalStartGameLoadWorkaround();
  return loaded;
@@ -127,22 +127,22 @@ void BosonStarting::slotTilesLoading(int tiles)
 
 void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 {
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (!boGame) {
-	kdError() << k_funcinfo << "NULL boson object" << endl;
+	boError() << k_funcinfo << "NULL boson object" << endl;
 	return;
  }
 
  // usually we must be in Init state to receive this. But loading code also
  // loads the gameStatus, so we won't be in Init state in that case.
  if (boGame->gameStatus() != KGame::Init) {
-	kdError() << k_funcinfo
+	boError() << k_funcinfo
 		<< "Boson must be in init status to receive map!" << endl
 		<< "Current status: " << boGame->gameStatus() << endl;
 	return;
  }
  if (!mPlayField) {
-	kdError() << k_funcinfo << "NULL playfield" << endl;
+	boError() << k_funcinfo << "NULL playfield" << endl;
 	emit signalStartingFailed(); // TODO: display welcome widget or so
 	return;
  }
@@ -150,7 +150,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 
  QDataStream stream(buffer, IO_ReadOnly);
  if (!mPlayField->loadMap(stream)) {
-	kdError() << k_funcinfo << "Broken map file at this point?!" << endl;
+	boError() << k_funcinfo << "Broken map file at this point?!" << endl;
 	return;
  }
  boGame->setPlayField(mPlayField);
@@ -187,15 +187,15 @@ void BosonStarting::slotLoadTiles()
  // can safely use checkEvents() here
 
  if (!boGame) {
-	kdError() << k_funcinfo << "NULL boson object" << endl;
+	boError() << k_funcinfo << "NULL boson object" << endl;
 	return;
  }
  if (!playField()) {
-	kdError() << k_funcinfo << "NULL playField" << endl;
+	boError() << k_funcinfo << "NULL playField" << endl;
 	return;
  }
  if (!playField()->map()) {
-	kdError() << k_funcinfo << "NULL map" << endl;
+	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  boGame->lock();
@@ -275,7 +275,7 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
  mLoadingWidget->setProgress(progress);
  mLoadingWidget->setLoading(BosonLoadingWidget::StartingGame);
 
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
 	emit signalStartGame();
  }
@@ -288,11 +288,11 @@ void BosonStarting::loadPlayerData()
  //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
  //  it now
  int progress = 0;
- kdDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (mLoading) {
-	kdDebug() << k_funcinfo << "set local player for loaded games now" << endl;
+	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
 	if (!boGame->localPlayer()) {
-		kdWarning() << k_funcinfo << "NULL player" << endl;
+		boWarning() << k_funcinfo << "NULL player" << endl;
 		return;
 	}
 #warning FIXME for LOADING code
@@ -324,7 +324,7 @@ void BosonStarting::loadPlayerData()
  // FIXME: do we need to support player-independant sounds?
  mPlayer->speciesTheme()->loadGeneralSounds();
  mLoadingWidget->setProgress(progress);
- kdDebug() << k_funcinfo << "done" << endl;
+ boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonStarting::loadUnitDatas(Player* p, int progress)

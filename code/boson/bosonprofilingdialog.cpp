@@ -21,12 +21,12 @@
 
 #include "bosonprofiling.h"
 #include "bosonprofilingprivate.h"
+#include "bodebug.h"
 
 #include <klocale.h>
 #include <klistview.h>
 #include <kfiledialog.h>
 #include <kmessagebox.h>
-#include <kdebug.h>
 
 #include <qlabel.h>
 #include <qvbox.h>
@@ -315,7 +315,7 @@ void BosonProfilingDialog::resetFilesPage()
 void BosonProfilingDialog::initRenderItem(QListViewItem* item, const QString& type, long int time, long int function)
 {
  if (!function) {
-	kdError() << k_funcinfo << "function == 0" << endl;
+	boError() << k_funcinfo << "function == 0" << endl;
 	return;
  }
  item->setText(1, type);

@@ -9,4 +9,8 @@ KDE_ICON = boson
 rcdir = $(kde_datadir)/boson
 rc_DATA = topui.rc bosonbaseui.rc bosonui.rc editorui.rc borenderui.rc
 
-EXTRA_DIST = $(apps_DATA)
+# this is pretty similar to the kdebug stuff in kdelibs/kdecore
+bodebugdir = $(kde_confdir)
+bodebug_DATA = bodebugrc bodebug.areas
+
+EXTRA_DIST = $(apps_DATA) $(bodebug_DATA)

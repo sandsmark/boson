@@ -27,6 +27,7 @@
 #include "../unitproperties.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
+#include "../bodebug.h"
 
 #include <kgameprogress.h>
 #include <kpixmap.h>
@@ -103,14 +104,14 @@ protected:
 					TechnologyProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
 					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
 				} else {
-					kdWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
+					boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
 					return QString::null;
 				}
 				break;
 			}
 			case BosonOrderButton::CommandUnitSelected:
 				if (!commandWidget()->unit()) {
-					kdWarning() << k_funcinfo << "CommandUnitSelected, but NULL unit" << endl;
+					boWarning() << k_funcinfo << "CommandUnitSelected, but NULL unit" << endl;
 					return QString::null;
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
@@ -340,7 +341,7 @@ void BosonOrderButton::setUnit(Unit* unit)
 void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (mUnit) {
@@ -372,7 +373,7 @@ void BosonOrderButton::setAction(UnitAction action, Player* owner)
  mAction = (int)action;
 
  if (!owner->speciesTheme()->actionPixmap(action)) {
-	kdError() << k_funcinfo << "NULL pixmap for action " << action << endl;
+	boError() << k_funcinfo << "NULL pixmap for action " << action << endl;
 	return;
  }
  setPixmap(*owner->speciesTheme()->actionPixmap(action));
@@ -389,7 +390,7 @@ void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
 	unset();
  }
  if (!tileSet) {
-	kdError() << k_funcinfo << "NULL tileset" << endl;
+	boError() << k_funcinfo << "NULL tileset" << endl;
 	return;
  }
  mUnit = 0;
@@ -409,7 +410,7 @@ void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
 void BosonOrderButton::displayUnitPixmap(Unit* unit) 
 {
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  displayUnitPixmap(unit->type(), unit->owner());
@@ -418,12 +419,12 @@ void BosonOrderButton::displayUnitPixmap(Unit* unit)
 void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QPixmap* small = owner->speciesTheme()->smallOverview(unitType);
  if (!small) {
-	kdError() << k_funcinfo << "Cannot find small overview for "
+	boError() << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;
 	return;
  }
@@ -433,12 +434,12 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* own
 void BosonOrderButton::displayTechPixmap(unsigned long int id, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QPixmap* small = owner->speciesTheme()->techPixmap(id);
  if (!small) {
-	kdError() << k_funcinfo << "Cannot find pixmap for  " << id << endl;
+	boError() << k_funcinfo << "Cannot find pixmap for  " << id << endl;
 	return;
  }
  setPixmap(*small);
@@ -454,7 +455,7 @@ void BosonOrderButton::slotClicked()
 {
  switch (commandType()) {
 	case CommandNothing:
-		kdWarning() << "Invalud Command Type \"Nothing\"" << endl;
+		boWarning() << "Invalud Command Type \"Nothing\"" << endl;
 		break;
 	case CommandCell:
 		emit signalPlaceCell(tile());
@@ -464,7 +465,7 @@ void BosonOrderButton::slotClicked()
 		break;
 	case CommandUnitSelected:
 		if (!unit()) {
-			kdError() << k_lineinfo << "NULL unit" << endl;
+			boError() << k_lineinfo << "NULL unit" << endl;
 		} else {
 			// select this unit only, i.e. unselect all others
 			emit signalSelectUnit(unit());
@@ -474,7 +475,7 @@ void BosonOrderButton::slotClicked()
 		emit signalAction(mAction);
 		break;
 	default:
-		kdError() << "Unknown Command Type " << commandType() << endl;
+		boError() << "Unknown Command Type " << commandType() << endl;
 		break;
  }
 }
@@ -496,7 +497,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
 	return;
  }
  if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
+	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (unit->isDestroyed()) {
@@ -505,7 +506,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
  }
  double h = (double)unit->health() * 100 / (double)unit->unitProperties()->health();
  if (unit->health() > unit->unitProperties()->health()) {
-	kdWarning() << k_lineinfo << "health > possible health" << endl;
+	boWarning() << k_lineinfo << "health > possible health" << endl;
  }
  mHealth->setValue((int)h);
 
@@ -531,11 +532,11 @@ void BosonOrderButton::unset()
 void BosonOrderButton::advanceProduction(double percentage)
 {
  if (!mProductionOwner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
+	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (mProductionId <= 0) {
-	kdError() << k_funcinfo << "production id: " << mProductionId << endl;
+	boError() << k_funcinfo << "production id: " << mProductionId << endl;
 	return;
  }
  QPixmap* pix;
@@ -545,7 +546,7 @@ void BosonOrderButton::advanceProduction(double percentage)
 	pix = mProductionOwner->speciesTheme()->techPixmap(mProductionId);
  }
  if (!pix) {
-	kdError() << k_funcinfo << "NULL pixmap for " << mProductionId << endl;
+	boError() << k_funcinfo << "NULL pixmap for " << mProductionId << endl;
 	return;
  }
  QPixmap small(*pix);

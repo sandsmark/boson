@@ -22,9 +22,9 @@
 #include "bosoncomputerio.h"
 #include "speciestheme.h"
 #include "boson.h"
+#include "bodebug.h"
 
 #include <klocale.h>
-#include <kdebug.h>
 
 #include <qpushbutton.h>
 #include <qlabel.h>
@@ -70,7 +70,7 @@ void KGameDialogComputerConfig::slotAddComputerPlayer()
 {
  Boson* g = (Boson*)game();
  if (!g) {
-	kdError() << k_funcinfo << "NULL game" << endl;
+	boError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
 
