@@ -47,6 +47,7 @@ COMMON_SRC = \
 	bosonminimap.cpp \
 	bosonunitview.cpp \
 	kgameunitdebug.cpp \
+	kgameplayerdebug.cpp \
 	bodisplaymanager.cpp \
 	bosonwidget.cpp \
 	boshot.cpp \
