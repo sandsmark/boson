@@ -191,7 +191,7 @@ void Unit::advance(int phase)
 	return;
  }
  if (phase == 0) {
-	// collision detection should be done here as far as i understand
+/*	// collision detection should be done here as far as i understand
 	// do not move the item/unit here!
 
 	// perhaps test if there is a enemy unit in weapon range (x() - range()
@@ -209,6 +209,7 @@ void Unit::advance(int phase)
 	} else if (work() == WorkConstructed) {
 		advanceConstruction();
 	} else if (work() == WorkNone) {
+//		advanceNone();//TODO
 //		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
 		QCanvasItemList list = enemyUnitsInRange();
 		if (!list.isEmpty()) {
@@ -217,6 +218,7 @@ void Unit::advance(int phase)
 	} else {
 		kdError() << "work: " << work() << endl;
 	}
+	*/
 	if (d->mReloadState > 0) {
 		d->mReloadState = d->mReloadState - 1;
 	}
@@ -227,6 +229,29 @@ void Unit::advance(int phase)
  }
 }
 
+
+void Unit::advanceMine()
+{
+ kdDebug() << "mining not yet implemented" << endl;
+ setWork(WorkNone);
+}
+
+void Unit::advanceNone()
+{
+// this is called when the unit has nothing specific to do. Usually we just want
+// to fire at every enemy in range.
+// kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
+ QCanvasItemList list = enemyUnitsInRange();
+ if (!list.isEmpty()) {
+	shootAt((Unit*)list[0]);
+ }
+}
+
+
+void Unit::advanceAttack()
+{
+ attackUnit(target());
+}
 
 void Unit::addWaypoint(const QPoint& pos)
 {
@@ -526,6 +551,13 @@ unsigned int Unit::reloadState() const
  return d->mReloadState;
 }
 
+void Unit::setWork(WorkType w)
+{
+ if (w != work()) {
+	boCanvas()->setWorkChanged(this, work());
+ }
+ UnitBase::setWork(w);
+}
 
 
 
@@ -833,10 +865,10 @@ int Facility::constructionSteps()
 
 void Facility::advanceConstruction()
 {
- if (d->mConstructionState < (constructionSteps() - 1) * unitProperties()->constructionDelay()) {
+ if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
 	d->mConstructionState = d->mConstructionState + 1;
-	if (d->mConstructionState % unitProperties()->constructionDelay() == 0) {
-		setFrame(d->mConstructionState / unitProperties()->constructionDelay());
+	if (d->mConstructionState % constructionDelay() == 0) {
+		setFrame(d->mConstructionState / constructionDelay());
 	}
  } else {
 //	setAnimated(false);
@@ -1047,7 +1079,7 @@ bool Facility::completedConstruction() const
  if (work() == WorkConstructed) {
 	return false;
  }
- if (d->mConstructionState < (constructionSteps() - 1) * unitProperties()->constructionDelay()) {
+ if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
 	return false;
  }
  return true;
@@ -1069,4 +1101,9 @@ void Facility::moveTo(int x, int y)
 	return;
  }
  Unit::moveTo(x, y);
+}
+
+int Facility::constructionDelay()
+{
+ return 50;
 }

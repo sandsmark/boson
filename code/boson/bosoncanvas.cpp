@@ -32,6 +32,7 @@
 
 #include <qptrdict.h>
 #include <qbitmap.h>
+#include <qdatetime.h>
 
 #include "defines.h"
 
@@ -54,12 +55,21 @@ public:
 	}
 	
 	QPixmap mPix;
-	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::advance()
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrDict<QCanvasSprite> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
+
+	QMap<Unit*, int> mWorkChanged; // Unit::setWork() has been called on these units
+
+	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::slotAdvance()
+	QPtrList<Unit> mWorkNone;
+	QPtrList<Unit> mWorkProduce;
+	QPtrList<Unit> mWorkMove;
+	QPtrList<Unit> mWorkMine;
+	QPtrList<Unit> mWorkAttack;
+	QPtrList<Unit> mWorkConstructed;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -109,8 +119,13 @@ void BosonCanvas::deleteDestroyed()
 
 void BosonCanvas::loadTiles(const QString& name)
 {
+QTime time;
+QTime allTime;
+time.start();
+allTime.start();
  QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(name));
  QPixmap p(themePath);
+kdDebug() << k_funcinfo << "pixmap loading time: " << time.elapsed() << endl;
  if (p.isNull()) {
 	kdError() << k_funcinfo << ": Could not load " << name << endl;
 	return;
@@ -123,7 +138,10 @@ void BosonCanvas::loadTiles(const QString& name)
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
+time.restart();
  setTiles(p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
+kdDebug() << k_funcinfo << "setTiles time: " << time.elapsed() << endl;
+kdDebug() << k_funcinfo << "elapsed time: " << allTime.elapsed() << endl;
 }
 
 Cell* BosonCanvas::cell(int x, int y) const
@@ -172,37 +190,111 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 
 void BosonCanvas::advance()
 {
+// we use slotAdvance() now.
+ kdError() << k_funcinfo << "is obsolete!!" << endl;
+}
+
+void BosonCanvas::slotAdvance(unsigned int advanceCount)
+{
 // we cannot use QCanvas::advance() as it advances the animated items in an
 // internal "animDict". this is sorted by pointer addresses and therefore the
 // members differ on every client. So we implement our own advance() as well as
 // addAnimation()/removeAnimation(). We create our own animDict which is sorted
 // by id :-)
 // why does QCanvas use a QPtrDict? we use a QPtrList...
- QPtrListIterator<QCanvasItem> it(d->mAnimList);
- while (it.current()) {
-	it.current()->advance(0);
-	++it;
+
+// update (02/03/14): for performance reasons we use several lists now. Every
+// UnitBase::WorkType has an own list which is iterated and the units are
+// advanced according to advanceCount. E.g. we don't need to call
+// advanceProduce()*every* advance call but we *need* to call advanceMove()
+// every advance call (if the unit is moving). Their lists must not be changed
+// while they are iterated. So we test if the work was changed and if so we add
+// the unit to the workChanged list and after all of the advance calls we change
+// the lists.
+	
+ QPtrListIterator<QCanvasItem> animIt(d->mAnimList);
+ while (animIt.current()) {
+	animIt.current()->advance(0);
+	++animIt;
  }
- it.toFirst();
- while (it.current()) {
-	it.current()->advance(1);
-	++it;
+ animIt.toFirst();
+ while (animIt.current()) {
+	animIt.current()->advance(1);
+	++animIt;
  }
- QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
- QPtrList<Unit> deleteList;
- while (deletionIt.current()) {
-	deletionIt.current()->increaseDeletionTimer();
-	if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) { 
-		deleteList.append(deletionIt.current());
+
+ if (d->mWorkNone.count() > 0 && advanceCount != 300) {
+	QPtrListIterator<Unit> it(d->mWorkNone);
+	while (it.current()) {
+		it.current()->advanceNone();
+		++it;
 	}
-	++deletionIt;
  }
+ if (d->mWorkProduce.count() > 0 && advanceCount != 300) {
+	QPtrListIterator<Unit> it(d->mWorkProduce);
+	while (it.current()) {
+		it.current()->advanceProduction();
+		++it;
+	}
+ }
+ if (d->mWorkMove.count() > 0 && advanceCount != 400) {
+	QPtrListIterator<Unit> it(d->mWorkMove);
+	while (it.current()) {
+		it.current()->advanceMove(); // move
+		it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
+		++it;
+	}
+ }
+ if (d->mWorkMine.count() > 0 && advanceCount != 400) {
+	QPtrListIterator<Unit> it(d->mWorkMine);
+	while (it.current()) {
+		it.current()->advanceMine();
+		++it;
+	}
+ }
+ if (d->mWorkAttack.count() > 0 && advanceCount != 400) {
+	QPtrListIterator<Unit> it(d->mWorkAttack);
+	while (it.current()) {
+		it.current()->advanceAttack();
+		++it;
+	}
+ }
+ if (d->mWorkConstructed.count() > 0 && advanceCount != 400) {
+	QPtrListIterator<Unit> it(d->mWorkConstructed);
+	while (it.current()) {
+		it.current()->advanceConstruction();
+		++it;
+	}
+ }
+
+ changeWork();
+
+ if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
+//TODO: ensure that these units are in *no* list!
+	kdDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
+	// there are 2 different timers for deletion of canvas items.
+	// The first is done in BosonCanvas - we only delete anything when
+	// advanceCount == MAXIMAL_ADVANCE_COUNT.
+	// The second is unit based. every MAXIMAL_ADVANCE_COUNT advance calls
+	// we increase the deletion timer of the unit and delete it when
+	// REMOVE_WRECKAGES_TIME is reached. This way we don't see all wreckages
+	// diappear at once...
+	QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
+	QPtrList<Unit> deleteList;
+	while (deletionIt.current()) {
+		deletionIt.current()->increaseDeletionTimer();
+		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) { 
+			deleteList.append(deletionIt.current());
+		}
+		++deletionIt;
+	}
  
- while (deleteList.count() > 0) {
-	Unit* u = deleteList.first();
-	deleteList.removeRef(u);
-	d->mDestroyedUnits.removeRef(u);
-	delete u;
+	while (deleteList.count() > 0) {
+		Unit* u = deleteList.first();
+		deleteList.removeRef(u);
+		d->mDestroyedUnits.removeRef(u);
+		delete u;
+	}
  }
 
  update();
@@ -238,12 +330,19 @@ void BosonCanvas::setMap(BosonMap* map)
 void BosonCanvas::initMap(const QString& tileFile)
 {
 kdDebug() << k_funcinfo << endl;
+QTime allTime;
+QTime time;
+time.start();
+allTime.start();
  if (!d->mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
+kdDebug() << k_funcinfo << "map resized - time elapsed:" << time.elapsed() << endl;
+time.restart();
  loadTiles(tileFile);
+kdDebug() << k_funcinfo << "tiles loaded- time elapsed:" << time.elapsed() << endl;
  for (unsigned int i = 0; i < d->mMap->width(); i++) {
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
@@ -255,6 +354,7 @@ kdDebug() << k_funcinfo << endl;
 	}
  }
  update();
+kdDebug() << k_funcinfo << "elapsed time: " << allTime.elapsed() << endl;
 }
 
 void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
@@ -363,6 +463,8 @@ void BosonCanvas::destroyUnit(Unit* unit)
  // the unit is added to a list - now displayed as a wreckage only.
  if (!d->mDestroyedUnits.contains(unit)) {
 	d->mDestroyedUnits.append(unit);
+	unit->setWork(UnitBase::WorkNone); // maybe add a WorkDestroyed? no need to currently
+	unit->setAnimated(false);
 	unit->owner()->unitDestroyed(unit); // remove from player without deleting
 	kdDebug() << "destroy unit " << unit->id() << endl;
 	boMusic->playSound(unit, Unit::SoundReportDestroyed);
@@ -593,4 +695,72 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
 	return true;
  }
  return false;
+}
+
+
+void BosonCanvas::setWorkChanged(Unit* u, int oldWork)
+{
+ if (d->mWorkChanged.contains(u)) {
+	d->mWorkChanged.remove(u);
+ }
+ d->mWorkChanged.insert(u, oldWork);
+}
+
+void BosonCanvas::changeWork()
+{
+ if (d->mWorkChanged.count() == 0) {
+	return;
+ }
+ QMap<Unit*, int>::Iterator it;
+ for (it = d->mWorkChanged.begin(); it != d->mWorkChanged.end(); ++it) {
+	Unit* u = it.key();
+	switch (it.data()) { // oldwork
+		case UnitBase::WorkNone:
+			d->mWorkNone.removeRef(u);
+			break;
+		case UnitBase::WorkProduce:
+			d->mWorkProduce.removeRef(u);
+			break;
+		case UnitBase::WorkMove:
+			d->mWorkMove.removeRef(u);
+			break;
+		case UnitBase::WorkMine:
+			d->mWorkMine.removeRef(u);
+			break;
+		case UnitBase::WorkAttack:
+			d->mWorkAttack.removeRef(u);
+			break;
+		case UnitBase::WorkConstructed:
+			d->mWorkConstructed.removeRef(u);
+			break;
+	}
+	if (d->mDestroyedUnits.contains(u)) {
+		continue;
+	}
+	if (u->isDestroyed()) {
+		kdWarning() << k_funcinfo << "is already destroyed" << endl;
+		continue;
+	}
+	switch (u->work()) {
+		case UnitBase::WorkNone:
+			d->mWorkNone.append(u);
+			break;
+		case UnitBase::WorkProduce:
+			d->mWorkProduce.append(u);
+			break;
+		case UnitBase::WorkMove:
+			d->mWorkMove.append(u);
+			break;
+		case UnitBase::WorkMine:
+			d->mWorkMine.append(u);
+			break;
+		case UnitBase::WorkAttack:
+			d->mWorkAttack.append(u);
+			break;
+		case UnitBase::WorkConstructed:
+			d->mWorkConstructed.append(u);
+			break;
+	}
+ }
+ d->mWorkChanged.clear();
 }

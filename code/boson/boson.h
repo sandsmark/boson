@@ -35,7 +35,8 @@ class Boson : public KGame
 public:
 	enum PropertyIds {
 		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h> - better: KGamePropertyBase::IdUser+...
-		IdNextUnitId = 10001
+		IdNextUnitId = 10001,
+		IdAdvanceCount = 10002
 	};
 	
 	Boson(QObject* parent);
@@ -101,8 +102,12 @@ signals:
 
 	/**
 	 * Order the canvas to call @ref QCanvas::advance
+	 * @param advanceCount The number of this advance call. This is used to
+	 * decide what should be done - e.g. there is no need to check for new
+	 * enemies every advance call. This value is increased after the signal
+	 * was emitted and reset to 0 when a certain value is reached.
 	 **/
-	void signalAdvance();
+	void signalAdvance(unsigned int advanceCount);
 
 	void signalInitMap(const QByteArray&);
 

@@ -99,7 +99,7 @@ public:
 	/**
 	 * Change what this unit is currently doing.
 	 **/
-	inline void setWork(WorkType w) { mWork= w; }
+	virtual void setWork(WorkType w) { mWork= w; }
 
 	/**
 	 * @return What this unit is currently doing. See @ref WorkTyp on

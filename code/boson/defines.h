@@ -31,6 +31,8 @@
 #define PIXMAP_MOBILE_DESTROYED (PIXMAP_PER_MOBILE - 1)
 #define FACILITY_CONSTRUCTION_STEPS PIXMAP_FIX_DESTROYED
 
+#define MAXIMAL_ADVANCE_COUNT 200 // maximal value of advanceCount param emitted by Boson::signalAdvance
+
 #define SHOT_FRAMES 5
 #define MOBILE_SHOT_FRAMES 16
 #define FACILITY_SHOT_FRAMES 16
@@ -48,7 +50,7 @@
 #define MIN_GAME_SPEED 800 // the advance period - higher means slower
 #define DEFAULT_GAME_SPEED 70
 
-#define REMOVE_WRECKAGES_TIME 200 // remove wreckages after a certain number of advance calls
+#define REMOVE_WRECKAGES_TIME 20 // remove wreckages after a certain time
 
 
 #define Z_MOBILE 400

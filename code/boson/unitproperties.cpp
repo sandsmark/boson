@@ -208,14 +208,6 @@ QValueList<int> UnitProperties::produceList() const
  return d->mFacilityProperties->mProduceList;
 }
 
-int UnitProperties::constructionDelay() const
-{
- if (!d->mFacilityProperties) {
-	return 0;
- }
- return 50; // default
-}
-
 unsigned int UnitProperties::productionTime() const
 {
  return mProductionTime;

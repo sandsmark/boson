@@ -75,7 +75,60 @@ public:
 
 	virtual void moveBy(double x, double y);
 
+	/**
+	 * There is not much to do here. Keep the stuff in this function as
+	 * simple as possible as it's called for <em>every</em> unit on
+	 * <em>every</em> advance call. An example of what could be done here is
+	 * to increase the realod state.
+	 * 
+	 * The really interesting things get done in the advanceXYZ() functions
+	 * below. They are called from @ref BosonCanvas::slotAdvance(). For
+	 * every @ref UnitBase::WorkType there is at least one advance function which
+	 * implements its behaviour.
+	 * @param phase 0 is most game logic, 1 is nothing but moving. Collision
+	 * detection, path finding and all like this should be done in phase 0
+	 **/
 	virtual void advance(int phase);
+
+	/**
+	 * Move the unit. By default this does nothing. Reimplemented in @ref
+	 * MobileUnit
+	 **/
+	virtual void advanceMove() { }
+	
+	/**
+	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
+	 * calculated by @ref advanceMove was actually valid.
+	 **/
+	virtual void advanceMoveCheck() { }
+
+	/**
+	 * Mine, mine, mine ...
+	 **/
+	virtual void advanceMine();
+
+	/**
+	 * Attack a unit. The target was set before using @ref setTarget
+	 **/
+	virtual void advanceAttack();
+
+	/**
+	 * This is called when there is nothing else to do for this unit.
+	 * Usually the unit will check for enemy units in range and fire at
+	 * them.
+	 **/
+	virtual void advanceNone();
+
+	/**
+	 * Move the construction animation one step forward. Does nothing by
+	 * default - reimplemented in @ref Facility
+	 **/
+	virtual void advanceConstruction() { }
+
+	/**
+	 * Produce a unit. Reimplemented in @ref Facility.
+	 **/
+	virtual void advanceProduction() { }
 
 	void attackUnit(Unit* target);
 	
@@ -126,13 +179,16 @@ public:
 
 	void updateSelectBox();
 
-
 	QCanvasItemList unitsInRange() const;
 	QCanvasItemList enemyUnitsInRange() const;
 
-
 	inline unsigned int reloadState() const;
 
+	/**
+	 * Calls @ref BosonCanvas setWorkChanged
+	 **/
+	virtual void setWork(WorkType w);
+	
 protected:
 	void shootAt(Unit* target);
 
@@ -141,21 +197,6 @@ protected:
 	 * destryed units, ...
 	 **/
 	QValueList<Unit*> unitCollisions(bool exact = false) const;
-
-	/**
-	 * Move the unit. By default this does nothing. Reimplemented in @ref
-	 * MobileUnit
-	 **/
-	virtual void advanceMove() { }
-	virtual void advanceMoveCheck() { }
-
-	/**
-	 * Move the construction animation one step forward. Does nothing by
-	 * default - reimplemented in Facility
-	 **/
-	virtual void advanceConstruction() { }
-
-	virtual void advanceProduction() { }
 
 	int mPathrecalc;
 	int mMoveDestX, mMoveDestY;
@@ -223,6 +264,12 @@ public:
 	 * @return The number of available construction steps for a facility.
 	 **/
 	static int constructionSteps();
+
+	/**
+	 * @return How many advance calls are needed to increase @ref
+	 * constructionSteps
+	 **/
+	static int constructionDelay();
 
 	/**
 	 * Please note that the construction state of a unit specifies if a unit
@@ -294,7 +341,6 @@ public:
 	 **/
 	virtual void moveTo(int x, int y);
 
-protected:
 	virtual void advanceProduction();
 
 	/**
@@ -302,6 +348,8 @@ protected:
 	 * placing the unit until thje construction is completed.
 	 **/
 	virtual void advanceConstruction();
+
+protected:
 
 private:
 	class FacilityPrivate;

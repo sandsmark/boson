@@ -23,6 +23,8 @@ Game TODOs
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
+- transmit waypoints over network (PolicyClean). Use BosonPath only on the
+  owner client
 
 
 Editor (map, unit, scenario) TODOs
@@ -30,7 +32,10 @@ Editor (map, unit, scenario) TODOs
 - unit editor (should be quite easy cause of config files) - mostly done
 - unit editor: check if images are in the directory, provide possibility to copy
   them
-- fix mouse cursor
+- fix mouse cursor (kind of done - maybe add another cursor which uses standard
+  X cursors, like arrowCursor)
+- use another options dialog. we MUST NOT provide the possibility to change the
+  game speed!!
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done

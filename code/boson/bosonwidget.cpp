@@ -148,8 +148,8 @@ void BosonWidget::init()
 
  d->mBoson = new Boson(this);
  d->mBoson->setCanvas(d->mCanvas); // should not be stored here - but seems to be necessary :-(
- connect(d->mBoson, SIGNAL(signalAdvance()),
-		d->mCanvas, SLOT(advance()));
+ connect(d->mBoson, SIGNAL(signalAdvance(unsigned int)),
+		d->mCanvas, SLOT(slotAdvance(unsigned int)));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		d->mCanvas, SLOT(slotAddUnit(Unit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
