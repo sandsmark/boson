@@ -962,13 +962,8 @@ void BombingPlugin::bomb(int weaponId, float x, float y)
  }
 
  // This is where unit has to be when making the drop
- // FIXME: REWRITE MOVING CODE OF Unit!!!
- // This is probably one of the worst examples of hacks used to work around
- //  problems with moving code. I want to be able to just write
- //  unit()->move(x, y) and unit would go exactly to (x, y) without any trouble.
- //  But ATM this isn't possible.
- mPosX = (int)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2 - unit()->width() / 2/* + w->offset().x()*/);
- mPosY = (int)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2 - unit()->height() / 2/* + w->offset().y()*/);
+ mPosX = cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2;
+ mPosY = cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2;
  boDebug() << k_funcinfo << "Drop-point: (" << mPosX << "; " << mPosY << ")" << endl;
  mWeapon = w;
 
@@ -980,21 +975,21 @@ void BombingPlugin::advance(unsigned int)
  boDebug() << k_funcinfo << endl;
 
  // Check if we're at the drop point
- float dist = QMAX(QABS(unit()->x() - mPosX), QABS(unit()->y() - mPosY));
+ // Unit's center point
+ float unitx = unit()->x() + unit()->width() / 2;
+ float unity = unit()->y() + unit()->height() / 2;
+ float dist = QMAX(QABS(unitx - mPosX), QABS(unity - mPosY));
  boDebug() << k_funcinfo << "dist: " << dist << endl;
- boDebug() << k_funcinfo << "my pos is: (" << unit()->x() << "; " << unit()->y() << ");  drop-point is: (" << mPosX << "; " << mPosX << ")" << endl; // ";  movedest is: (" << d->mMoveDestX << "; " << d->mMoveDestY << ")" << endl;
-// int x = (int)(BosonItem::x() + width() / 2);
-// int y = (int)(BosonItem::y() + height() / 2);
- if ((unit()->x() != mPosX) || (unit()->y() != mPosY)) {
-// if ((x() != d->mMoveDestX) || (y() != d->mMoveDestY)) {
-// if (dist > 2) {
+ boDebug() << k_funcinfo << "my pos is: (" << unitx << "; " << unity << ");  drop-point is: (" << mPosX << "; " << mPosY << ")" << endl;
+ if ((unitx != mPosX) || (unity != mPosY)) {
 	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
 	if (!unit()->moveTo(mPosX, mPosY, 0)) {
 		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
-		unit()->addWaypoint(QPoint(mPosX, mPosY));
+		unit()->pathInfo()->moveAttacking = false;
+		unit()->addWaypoint(QPoint((int)mPosX, (int)mPosY));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
@@ -1009,8 +1004,8 @@ void BombingPlugin::advance(unsigned int)
 	// Go away from bomb's explosion radius
 	float dist = mWeapon->properties()->damageRange() * BO_TILE_SIZE + unit()->width() / 2;
   boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
-	float newx = unit()->x();
-	float newy = unit()->y();
+	float newx = unitx;
+	float newy = unity;
 	// TODO: quite messy code, maybe it can be cleaned up somehow
 	int rot = (int)unit()->rotation() % 360;
 	if (rot >= 45 && rot <= 135) {
@@ -1025,14 +1020,16 @@ void BombingPlugin::advance(unsigned int)
 	}
 
 	// Make sure coords are valid
-	newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE));
-	newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE));
+	newx = QMAX(unit()->width() / 2, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE - unit()->width() / 2));
+	newy = QMAX(unit()->height() / 2, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE - unit()->height() / 2));
 
   boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
 	if (!unit()->moveTo(newx, newy)) {
 		boWarning() << k_funcinfo << "Aargh! Can't move away from drop-point!" << endl;
 		unit()->setWork(Unit::WorkNone);
 	} else {
+		unit()->pathInfo()->moveAttacking = false;
+		unit()->addWaypoint(QPoint((int)newx, (int)newy));
 		unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
 	}
 	mWeapon = 0;

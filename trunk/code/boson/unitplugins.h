@@ -252,7 +252,7 @@ public:
 
 	/**
 	 * Order to repair unit. For a repairyard this means the unit will move
-	 * to the repairyard and once it is in range it'll be repaired. 
+	 * to the repairyard and once it is in range it'll be repaired.
 	 *
 	 * For mobile repair-units this means that the <em>repairing</em> (i.e.
 	 * the one that has this plugin) moves to unit and repairs it.
@@ -378,8 +378,8 @@ public:
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
-	KGameProperty<int> mPosX;
-	KGameProperty<int> mPosY;
+	KGameProperty<float> mPosX;
+	KGameProperty<float> mPosY;
 };
 
 /**

@@ -480,6 +480,7 @@ bool Unit::attackEnemyUnitsInRange()
  // TODO: Note that this is not completely realistic nor good: it may be good to
  //  e.g. not waste some weapon with very big damage and reload values for very
  //  weak unit. So there room left for improving :-)
+ bool targetfound = false;
  BoPointerIterator<BosonWeapon> wit(d->mWeapons);
  for (; *wit; ++wit) {
 	BosonWeapon* w = *wit;
@@ -502,6 +503,7 @@ bool Unit::attackEnemyUnitsInRange()
 			return false;
 		}
 	}
+	targetfound = true;
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
 	if (isMobile()) {
@@ -529,7 +531,7 @@ bool Unit::attackEnemyUnitsInRange()
 	}
  }
 
- return true;
+ return targetfound;
 }
 
 Unit* Unit::bestEnemyUnitInRange()
@@ -929,7 +931,8 @@ void Unit::newPath()
  }
 
  // Pathfinder always adds our current position as the first point of the path.
- if (currentPathPoint() / BO_TILE_SIZE == pathInfo()->start / BO_TILE_SIZE) {
+ // Note that last pathpoint must always remain there (and pf end point)
+ if (pathPointCount() > 2 && (currentPathPoint() / BO_TILE_SIZE == pathInfo()->start / BO_TILE_SIZE)) {
 	pathPointDone();
  }
 
@@ -1684,6 +1687,16 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
 	// Take next pathpoint
+	if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
+		if (xspeed || yspeed) {
+			// Current pathpoint marks the end of the path, but we've moved already.
+			// We can't just stop moving here, because then velocity would be set to 0
+			//  and we'd never move this last step.
+			// So we just break here, move this last step, and next time we'll return
+			//  here, we'll stop moving.
+			break;
+		}
+	}
 	if (checkPathPoint(currentPathPoint())) {
 		break;
 	}
@@ -1692,6 +1705,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 		// Probably end of the path was reached.
 		// Last pathpoint had to be PF_END_CODE; PF_END_CODE, so checkPathPoint()
 		//  already stopped movement, so we can just return here
+		// Note that xspeed and yspeed are 0 (checked above), so we won't miss any
+		//  last steps
 		return;
 	}
 
@@ -1724,7 +1739,6 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  d->lastyvelo = yspeed;
  setMovingStatus(Moving);
 
- // FIXME: turnTo() supports only 45*x degree angles
  turnTo();
 }
 
