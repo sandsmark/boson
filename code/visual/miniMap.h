@@ -30,8 +30,8 @@ class Unit;
 class QPixmap;
 class visualCell;
 class viewMap;
-class playerMobUnit;
-class playerFacility;
+class visualMobUnit;
+class visualFacility;
 
 /** 
   * This is the little map, which "zoom" the battle field
@@ -50,8 +50,8 @@ signals:
 
 public slots:
   void newCell(int,int, groundType);
-  void drawMobile(playerMobUnit *mob);
-  void drawFix(playerFacility *fix);
+  void drawMobile(visualMobUnit *mob);
+  void drawFix(visualFacility *fix);
 
 protected:
   void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
