@@ -242,8 +242,7 @@ void BoFrame::sortByDepth()
  }
 
  // meshes is now sorted by maxZ.
- QPtrListIterator<BoMesh> it(meshes);
- for (int i = 0; it.current(); ++it) {
+ for (unsigned int i = 0; i < meshes.count(); i++) {
 	BoMesh* mesh = meshes.at(i);
 	BoMatrix* matrix = matrices.at(i);
 	if (!mesh || !matrix) {
