@@ -136,7 +136,7 @@ BosonWidget::~BosonWidget()
  } else if (d->mCursor->isA("BosonExperimentalCursor")) {
 	boConfig->saveCursorMode(CursorExperimental);
  } else if (d->mCursor->isA("BosonKDECursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
+	boConfig->saveCursorMode(CursorKDE);
  } else {
 	boConfig->saveCursorMode(CursorNormal);
  }
