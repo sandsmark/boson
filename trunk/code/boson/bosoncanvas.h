@@ -408,6 +408,11 @@ public:
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root);
 
+	/**
+	 * Valid in editor mode only. Delete the specified items.
+	 **/
+	void deleteItems(const QValueList<unsigned long int>& items);
+
 public slots:
 	/**
 	 * @param See @ref Boson::signalAdvance

@@ -387,22 +387,26 @@ void EditorBigDisplayInput::deleteSelectedUnits()
 {
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
-#if 0
+ boDebug() << k_funcinfo << endl;
  if (selection()->isEmpty()) {
 	boDebug() << k_funcinfo << "no unit selected" << endl;
 	return;
  }
  QPtrList<Unit> units = selection()->allUnits();
  selection()->clear();
+ QByteArray b;
+ QDataStream s(b, IO_WriteOnly);
+ s << (Q_UINT32)BosonMessage::MoveEditor;
+ s << (Q_UINT32)BosonMessage::MoveDeleteItems;
+ s << (Q_UINT32)units.count();
  QPtrListIterator<Unit> it(units);
+ QPtrList<BosonItem> items;
  for (; it.current(); ++it) {
-	canvas()->removeUnit(it.current());
+	s << (Q_ULONG)it.current()->id();
  }
 
- // AB: do NOT call this directly. send a message - probably destroy the units,
- // dont delete them directly.
- canvas()->deleteUnits(&units);
-#endif
+ QDataStream msg(b, IO_ReadOnly);
+ localPlayerInput()->sendInput(msg);
 }
 
 void EditorBigDisplayInput::updatePlacementPreviewData()

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,6 +80,7 @@ public:
 		MovePlaceUnit = 201,
 		MoveChangeTexMap = 202,
 		MoveChangeHeight = 203,
+		MoveDeleteItems = 204,
 
 
 	// the last message ID:

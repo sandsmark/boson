@@ -919,7 +919,6 @@ void BosonCanvas::deleteItem(BosonItem* item)
 #endif
  }
 
- removeAnimation(item);
  removeItem(item);
 
  // actually delete it
@@ -1408,6 +1407,27 @@ void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
 bool BosonCanvas::onCanvas(const BoVector3& pos) const
 {
  return onCanvas((int)pos.x(), (int)pos.y());
+}
+
+void BosonCanvas::deleteItems(const QValueList<unsigned long int>& _ids)
+{
+ if (!boGame || boGame->gameMode()) {
+	boError() << k_funcinfo << "not in editor mode" << endl;
+	return;
+ }
+ QValueList<unsigned long int> ids = _ids;
+ BoItemList::Iterator it;
+ while (!ids.isEmpty()) {
+	unsigned long int id = ids.first();
+	ids.pop_front();
+	BosonItem* item = 0;
+	for (it = d->mAllItems.begin(); !item && it != d->mAllItems.end(); ++it) {
+		if (id == (*it)->id()) {
+			item = (*it);
+		}
+	}
+	deleteItem(item);
+ }
 }
 
 void BosonCanvas::deleteItems(BoItemList& items)
