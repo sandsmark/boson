@@ -300,14 +300,13 @@ public:
 	int resourcesY() const { return mResourcesY; }
 	unsigned int resourcesMined() const { return mResourcesMined; }
 
-	void mineAt(const ResourceMinePlugin* resource);
+	void mineAt(ResourceMinePlugin* resource);
 	void refineAt(Unit* refinery);
 
 	void setRefinery(Unit* refinery);
 
-	bool canMine(Cell* cell) const; // obsolete
-	bool canMine(Unit*) const;
-	bool canMine(ResourceMinePlugin*) const;
+	bool canMine(const Unit*) const;
+	bool canMine(const ResourceMinePlugin*) const;
 
 	inline Unit* refinery() const { return mRefinery; }
 
@@ -340,6 +339,11 @@ public:
 	virtual bool loadFromXML(const QDomElement& root);
 
 	virtual void itemRemoved(BosonItem*);
+
+protected:
+	bool isAtResourceMine() const;
+	bool isAtRefinery() const;
+	bool isNextTo(const Unit* unit) const;
 
 private:
 	KGameProperty<int> mResourcesX;
@@ -434,6 +438,20 @@ public:
 	 **/
 	int oil() const;
 
+	/**
+	 * Mine minerals. The amount of @ref minerals is (if limited) reduced
+	 * by the returned value.
+	 * @return The amount of mined minerals
+	 **/
+	unsigned int mineMinerals(const HarvesterPlugin* harvester);
+
+	/**
+	 * Mine oil. The amount of @ref oil is (if limited) reduced
+	 * by the returned value.
+	 * @return The amount of mined oil
+	 **/
+	unsigned int mineOil(const HarvesterPlugin* harvester);
+
 	void setMinerals(int m);
 	void setOil(int m);
 
@@ -448,6 +466,13 @@ public:
 	bool canProvideOil() const;
 
 	virtual void itemRemoved(BosonItem*);
+
+protected:
+	/**
+	 * @return The amount of resources that @ref mineMinerals or @ref
+	 * mineOil will mine.
+	 **/
+	unsigned int mineStep(const HarvesterPlugin* harvester, int resourcesAvailable) const;
 
 private:
 	KGameProperty<int> mOil;
