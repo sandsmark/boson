@@ -28,27 +28,21 @@
 
 
 /**
- * @short Class for drawing particles
- * This class is used to draw particles properly. It first sorts all particles
- * by depth and then draws them in this order.
+ * @short List of particles
+ * This is simply QPtrList of particles. Only reimplemented method is
+ * compareItems, which enables you to sort the list by distance from camera.
  *
+ * @see BosonParticle
  * @see BosonParticleSystem
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoParticleManager : public QPtrList<BosonParticle>
+class BoParticleList : public QPtrList<BosonParticle>
 {
   public:
-    BoParticleManager();
-    ~BoParticleManager() {};
-    void draw(QPtrList<BosonParticleSystem>* systems, const BoVector3& camera);
+    /**
+     * Compares two particles by distance using @ref BosonParticle::distance
+     */
     virtual int compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2);
-    void viewportChanged()  { mViewportDirty = true; particlesMoved(); };
-    void particlesMoved()  { mParticlesDirty = true; };
-
-  private:
-    BoVector3 mCameraPos;
-    bool mViewportDirty;
-    bool mParticlesDirty;
 };
 
 /**
@@ -162,15 +156,6 @@ class BosonParticleSystem
      * and if age is more than 0.
      **/
     virtual void update(float elapsed);
-    /**
-     * Draws all particles.
-     * Note that blending must be enabled before you call this and if you use
-     * custom blending functions (see @ref setBlendFunc), you may want to reset
-     * blending functions after calling this.
-     **/
-    virtual void draw(QPtrListIterator<BosonParticle>& iterator);
-
-    virtual void preDraw();
 
     /**
      * Moves all active particles by v
@@ -313,7 +298,7 @@ class BosonParticleSystem
 
     BoVector3 nw, ne, sw, se;  // Coordinates of particle base vertexes
 
-    friend class BoParticleManager;
+    friend class BosonBigDisplayBase;
 };
 
 #endif // BOSONPARTICLESYSTEM_H
