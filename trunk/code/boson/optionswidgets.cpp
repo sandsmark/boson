@@ -663,19 +663,22 @@ void OpenGLOptions::apply()
 
  QString changesThatNeedRestart;
  bool resetTexParameter = false;
+ bool reloadTextures = false;
  boConfig->setUpdateInterval((unsigned int)mUpdateInterval->value());
  if (boConfig->textureFilter() != textureFilter()) {
 	boConfig->setTextureFilter(textureFilter());
 	resetTexParameter = true;
+	// TODO: reload only if mipmapping was turned on/off
+	reloadTextures = true;
  }
 
  if(boConfig->textureCompression() != mUseCompressedTextures->isChecked()) {
 	boConfig->setTextureCompression(mUseCompressedTextures->isChecked());
-	changesThatNeedRestart += i18n("* Texture compression\n");
+	reloadTextures = true;
  }
  if(boConfig->textureColorMipmaps() != mUseColoredMipmaps->isChecked()) {
 	boConfig->setTextureColorMipmaps(mUseColoredMipmaps->isChecked());
-	changesThatNeedRestart += i18n("* Colored mipmaps\n");
+	reloadTextures = true;
  }
 
  if(!changesThatNeedRestart.isEmpty()) {
@@ -687,6 +690,10 @@ void OpenGLOptions::apply()
 	// as no problems appear
 	boDebug(210) << k_funcinfo << "resetting all textures parameters" << endl;
 	boTextureManager->textureFilterChanged();
+ }
+ if (reloadTextures) {
+	boDebug(210) << k_funcinfo << "reloading all textures" << endl;
+	boTextureManager->reloadTextures();
  }
 
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
