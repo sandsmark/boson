@@ -33,7 +33,7 @@ template<class T> class QValueList;
 class BosonTextureArray
 {
 public:
-	BosonTextureArray(QValueList<QImage> images, bool useMipmaps = true);
+	BosonTextureArray(QValueList<QImage> images, bool useMipmaps = true, bool useAlpha = false);
 	BosonTextureArray();
 
 	/**
@@ -69,9 +69,9 @@ public:
 	 * 256x256. If the width or height do not meet the 2^m condition the
 	 * image is scaled.
 	 **/
-	bool createTextures(QValueList<QImage> images, bool useMipmaps = true);
+	bool createTextures(QValueList<QImage> images, bool useMipmaps = true, bool useAlpha = false);
 	
-	static bool createTexture(const QImage& image, GLuint texture, bool useMipmaps = true);
+	static bool createTexture(const QImage& image, GLuint texture, bool useMipmaps = true, bool useAlpha = false);
 
 	/**
 	 * Set the texture parameter (i.e. magnification and minification

@@ -138,7 +138,7 @@ BosonOpenGLCursorData::~BosonOpenGLCursorData()
 
 bool BosonOpenGLCursorData::computeDisplayLists(QValueList<QImage> images)
 {
- mTextureArray = new BosonTextureArray(images, false);
+ mTextureArray = new BosonTextureArray(images, false, true);
  if (!mTextureArray->isValid() || mTextureArray->count() == 0) {
 	return false;
  }
