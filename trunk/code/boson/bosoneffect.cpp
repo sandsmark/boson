@@ -27,6 +27,7 @@
 
 #include "bosoneffectpropertiesparticle.h"
 #include "bodebug.h"
+#include "bolight.h"
 
 
 // Static initialization stuff
@@ -137,6 +138,97 @@ bool BosonEffectFade::saveAsXML(QDomElement& root) const
 }
 
 bool BosonEffectFade::loadFromXML(const QDomElement& root)
+{
+  return true;
+}
+
+
+
+/*****  BosonEffectLight  *****/
+
+BosonEffectLight::BosonEffectLight(const BosonEffectPropertiesLight* prop) : BosonEffect()
+{
+  mProperties = prop;
+  mTimeLeft = prop->life();
+
+  mLight = new BoLight();
+  if(mLight->id() == -1)
+  {
+    // Id -1 means that light could not be created. Probably maximum number of
+    //  lights is already in use
+    delete mLight;
+    mLight = 0;
+    mActive = false;
+    mTimeLeft = 0.0f;
+  }
+  if(mLight)
+  {
+    mLight->setEnabled(true);
+    mLight->setDirectional(false);
+  }
+}
+
+BosonEffectLight::~BosonEffectLight()
+{
+  delete mLight;
+}
+
+void BosonEffectLight::update(float elapsed)
+{
+  mTimeLeft -= elapsed;
+  if(mTimeLeft <= 0)
+  {
+    mActive = false;
+    delete mLight;
+    mLight = 0;
+    return;
+  }
+  if(!mLight)
+  {
+    return;
+  }
+
+  float factor = mTimeLeft / mProperties->life();  // This goes from 1 to 0 during effect's lifetime
+  BoVector4 ambient, diffuse, specular;
+  BoVector3 attenuation;
+  ambient.setBlended(mProperties->startAmbient(), factor, mProperties->endAmbient(), 1.0 - factor);
+  diffuse.setBlended(mProperties->startDiffuse(), factor, mProperties->endDiffuse(), 1.0 - factor);
+  specular.setBlended(mProperties->startSpecular(), factor, mProperties->endSpecular(), 1.0 - factor);
+  attenuation.setBlended(mProperties->startAttenuation(), factor, mProperties->endAttenuation(), 1.0 - factor);
+  mLight->setAmbient(ambient);
+  mLight->setDiffuse(diffuse);
+  mLight->setSpecular(specular);
+  mLight->setAttenuation(attenuation);
+}
+
+void BosonEffectLight::setPosition(const BoVector3& pos)
+{
+  // Add properties->position() to given pos
+  BoVector3 newpos = pos + mProperties->position();
+  BosonEffect::setPosition(newpos);
+  if(mLight)
+  {
+    mLight->setPosition3(newpos);
+  }
+}
+
+void BosonEffectLight::makeObsolete()
+{
+  if(mTimeLeft > 0)
+  {
+    return;
+  }
+  mActive = false;
+  delete mLight;
+  mLight = 0;
+}
+
+bool BosonEffectLight::saveAsXML(QDomElement& root) const
+{
+  return true;
+}
+
+bool BosonEffectLight::loadFromXML(const QDomElement& root)
 {
   return true;
 }

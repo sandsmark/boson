@@ -28,6 +28,8 @@ class QDomElement;
 class KRandomSequence;
 class QString;
 class BosonEffectPropertiesFade;
+class BosonEffectPropertiesLight;
+class BoLight;
 
 
 /**
@@ -44,7 +46,7 @@ class BosonEffect
     /**
      * Describes type of the effect
      */
-    enum Type { Fog, Fade, Collection,
+    enum Type { Fog, Fade, Collection, Light,
         // All particle effect subtypes _must_ come after Particle!
         Particle, ParticleGeneric, ParticleTrail };
 
@@ -267,6 +269,57 @@ class BosonEffectFade : public BosonEffect
     BoVector4 mColor;
     BoVector4 mGeometry;
     int mBlendFunc[2];
+};
+
+
+
+/**
+ * @short Effect for using real OpenGL lights.
+ *
+ * With this effect, you can add real dynamic OpenGL lights to the scene.
+ * Note though, that you there is a limit for how many lights can be in scene
+ *  at once and that too many lights can result in noticeable slowdowns. So
+ *  it's best to use them only for few things, when you really need them, and
+ *  make their lifetime short.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectLight : public BosonEffect
+{
+  public:
+    /**
+     * Construct new light effect using specified properties
+     **/
+    BosonEffectLight(const BosonEffectPropertiesLight* prop);
+    virtual ~BosonEffectLight();
+
+
+    virtual Type type() const  { return Light; }
+
+
+    virtual void update(float elapsed);
+
+    virtual void setPosition(const BoVector3& pos);
+
+    /**
+     * Make light obsolete (meaning that it will be deleted in the next advance
+     *  call).
+     * Note that this only has effect for effects with infinite lifetime (-1),
+     *  for others, it does nothing.
+     **/
+    virtual void makeObsolete();
+
+
+    const BoLight* light() const  { return mLight; }
+
+    virtual bool saveAsXML(QDomElement& root) const;
+    virtual bool loadFromXML(const QDomElement& root);
+
+
+  protected:
+    const BosonEffectPropertiesLight* mProperties;
+    float mTimeLeft;
+    BoLight* mLight;
 };
 
 #endif  //BOSONEFFECT_H

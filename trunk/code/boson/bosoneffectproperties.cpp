@@ -85,6 +85,10 @@ BosonEffectProperties* BosonEffectPropertiesFactory::newEffectProperties(const Q
   {
     return new BosonEffectPropertiesFade();
   }
+  else if(type == "Light")
+  {
+    return new BosonEffectPropertiesLight();
+  }
   else if(type == "Collection")
   {
     return new BosonEffectPropertiesCollection();
@@ -311,6 +315,59 @@ BosonEffect* BosonEffectPropertiesFade::newEffect(const BoVector3& pos, const Bo
   BosonEffectFade* fade = new BosonEffectFade(this);
   fade->setPosition(pos);
   return fade;
+}
+
+
+
+/*****  BosonEffectPropertiesLight  *****/
+
+BosonEffectPropertiesLight::BosonEffectPropertiesLight() : BosonEffectProperties()
+{
+  reset();
+}
+
+void BosonEffectPropertiesLight::reset()
+{
+  // Reset all variables to their default values
+  mStartAmbientColor.reset();
+  mStartDiffuseColor.reset();
+  mStartSpecularColor.reset();
+  mEndAmbientColor.reset();
+  mEndDiffuseColor.reset();
+  mEndSpecularColor.reset();
+  mStartAttenuation.reset();
+  mEndAttenuation.reset();
+  mPosition.reset();
+  mLife = 0.0f;
+}
+
+bool BosonEffectPropertiesLight::load(KSimpleConfig* cfg, const QString& group, bool inherited)
+{
+  if(!BosonEffectProperties::load(cfg, group, inherited))
+  {
+    return false;
+  }
+
+  mStartAmbientColor = BosonConfig::readBoVector4Entry(cfg, "StartAmbient", mStartAmbientColor);
+  mStartDiffuseColor = BosonConfig::readBoVector4Entry(cfg, "StartDiffuse", mStartDiffuseColor);
+  mStartSpecularColor = BosonConfig::readBoVector4Entry(cfg, "StartSpecular", mStartSpecularColor);
+  mEndAmbientColor = BosonConfig::readBoVector4Entry(cfg, "EndAmbient", mEndAmbientColor);
+  mEndDiffuseColor = BosonConfig::readBoVector4Entry(cfg, "EndDiffuse", mEndDiffuseColor);
+  mEndSpecularColor = BosonConfig::readBoVector4Entry(cfg, "EndSpecular", mEndSpecularColor);
+  mStartAttenuation = BosonConfig::readBoVector3Entry(cfg, "StartAttenuation", mStartAttenuation);
+  mEndAttenuation = BosonConfig::readBoVector3Entry(cfg, "EndAttenuation", mEndAttenuation);
+  mPosition = BosonConfig::readBoVector3Entry(cfg, "Position", mPosition);
+  mLife = (float)(cfg->readDoubleNumEntry("Life", mLife));
+  return true;
+}
+
+BosonEffect* BosonEffectPropertiesLight::newEffect(const BoVector3& pos, const BoVector3&) const
+{
+  BoVector3 worldpos = pos;
+  worldpos.canvasToWorld();
+  BosonEffectLight* light = new BosonEffectLight(this);
+  light->setPosition(worldpos);
+  return light;
 }
 
 

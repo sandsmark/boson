@@ -24,6 +24,7 @@
 
 
 template<class T> class QValueVector;
+class BoLight;
 
 /**
  *
@@ -31,14 +32,20 @@ template<class T> class QValueVector;
 class BoLightManager
 {
   public:
+    static BoLight* createLight();
+    static void deleteLight(int id);
+    static BoLight* light(int id);
+
     static int nextFreeId();
-    static void setIdUsed(int id, bool used);
+    // TODO: make this private?
+    static void setLight(int id, BoLight* light);
+    static const QValueVector<BoLight*>* lights();
 
   private:
     static void init();
 
     static bool mInited;
-    static QValueVector<bool> mIds;
+    static QValueVector<BoLight*> mLights;
 };
 
 /**

@@ -336,8 +336,6 @@ public:
 	unsigned int mRenderedCells;  // same, but for cells
 	unsigned int mRenderedParticles;
 
-	QIntDict<BoLight> mLights;
-
 	BosonGLMiniMap* mGLMiniMap;
 
 	QValueList<BoLineVisualization> mLineVisualizationList;
@@ -2734,10 +2732,11 @@ void BosonBigDisplayBase::cameraChanged()
 
  d->mParticlesDirty = true;
 
- QIntDictIterator<BoLight> it(d->mLights);
- while (it.current()) {
-	it.current()->refreshPosition();
-	++it;
+ const QValueVector<BoLight*>* lights = BoLightManager::lights();
+ for (unsigned int i = 0; i < lights->size(); i++) {
+	if (lights->at(i) != 0) {
+	  lights->at(i)->refreshPosition();
+	}
  }
 
  QPoint cellTL; // topleft cell
@@ -3375,25 +3374,17 @@ void BosonBigDisplayBase::generateMovieFrame(const QByteArray& data, BoPixmapRen
 
 BoLight* BosonBigDisplayBase::light(int id) const
 {
- return d->mLights[id];
+ return BoLightManager::light(id);
 }
 
 BoLight* BosonBigDisplayBase::newLight()
 {
- BoLight* light = new BoLight;
- if(light->id() == -1) {
-	// Light could not be created
-	delete light;
-	return 0;
- }
- d->mLights.insert(light->id(), light);
- return light;
+ return BoLightManager::createLight();
 }
 
 void BosonBigDisplayBase::removeLight(int id)
 {
- BoLight* l = d->mLights.take(id);
- delete l;
+ BoLightManager::deleteLight(id);
 }
 
 QImage BosonBigDisplayBase::screenShot()
