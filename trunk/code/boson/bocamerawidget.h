@@ -21,258 +21,17 @@
 #define BOCAMERAWIDGET_H
 
 #include <qwidget.h>
+#include "bopui/bopui.h"
 
 class BoCamera;
 class BoGameCamera;
-class BoCameraConfigWidgetBase;
 class BoVector3;
 class BoLight;
-class BoContext;
 class BoLightCamera;
-class BoFloatNumInput;
-class QCheckBox;
+class BoContext;
 
-class BoCameraWidgetPrivate;
-
-/**
- * The camera widget lets the user configure the @ref BoCamera widget in
- * different ways. Every way is defined by a @ref BoCameraConfigWidgetBase
- * derived class, some of which may be relevant to the game camera only (such as
- * @ref BoGameCameraWidget).
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoCameraWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	BoCameraWidget(QWidget* parent, const char* name = 0);
-	~BoCameraWidget();
-
-	void setCamera(BoCamera* camera);
-
-public slots:
-	void slotUpdateFromCamera();
-
-protected:
-	void addConfigWidget(const QString& name, BoCameraConfigWidgetBase* widget);
-
-
-private:
-	BoCameraWidgetPrivate* d;
-};
-
-/**
- * Base class for all widgets that allow manipulating the camera.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoCameraConfigWidgetBase : public QWidget
-{
-	Q_OBJECT
-public:
-	BoCameraConfigWidgetBase(QWidget* parent, const char* name = 0);
-	~BoCameraConfigWidgetBase()
-	{
-	}
-	virtual void setCamera(BoCamera* camera)
-	{
-		mCamera = camera;
-	}
-
-	bool updatesBlocked() const
-	{
-		return mUpdatesBlocked;
-	}
-
-	/**
-	 * @return The @ref BoCamera::CameraType value that is required by this
-	 * widget. Simply use @ref BoCamera::Camera if you have no special
-	 * requirements.
-	 **/
-	virtual int needCameraType() const = 0;
-
-	BoCamera* camera() const
-	{
-		return mCamera;
-	}
-
-	virtual void updateFromCamera() = 0;
-
-protected:
-	/**
-	 * If @p block is TRUE @ref updateFromCamera won't be called until you
-	 * call this function with @p block = FALSE again.
-	 *
-	 * You should use this when you emit @ref signalCameraChanged from your
-	 * implementation, unless you now exactly that no rounding errors will
-	 * influence you (you will never know that).
-	 **/
-	void blockUpdates(bool block)
-	{
-		mUpdatesBlocked = block;
-	}
-
-	void emitSignalCameraChanged()
-	{
-		blockUpdates(true);
-		emit signalCameraChanged();
-
-		// we want to update the matrix widget even if signals are
-		// blocked.
-		updateMatrixWidget();
-		blockUpdates(false);
-	}
-
-	/**
-	 * Update the matrix widget, if this widget has one. The matrix widget
-	 * is even updated if updates are blocked.
-	 **/
-	virtual void updateMatrixWidget() {}
-
-signals:
-	void signalCameraChanged();
-
-private:
-	BoCamera* mCamera;
-	bool mUpdatesBlocked;
-};
-
-class BoGameCameraWidgetPrivate;
-/**
- * This is the camera configuration as it is used in boson by default.
- * it depends on lookAt vector, radius and rotation only.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoGameCameraWidget : public BoCameraConfigWidgetBase
-{
-	Q_OBJECT
-public:
-	BoGameCameraWidget(QWidget* parent, const char* name = 0);
-	~BoGameCameraWidget();
-
-	virtual int needCameraType() const;
-	virtual void updateFromCamera();
-
-	BoGameCamera* gameCamera() const
-	{
-		return (BoGameCamera*)camera();
-	}
-
-protected slots:
-	void slotLookAtChanged();
-	void slotRotationChanged();
-	void slotRadiusChanged();
-
-	void slotToggleGameRestrictions();
-
-private:
-	BoGameCameraWidgetPrivate* d;
-};
-
-class BoGLUCameraWidgetPrivate;
-/**
- * Direct manipulation of gluLookAt() through the three vectors lookAt,
- * cameraPos and up.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoGLUCameraWidget : public BoCameraConfigWidgetBase
-{
-	Q_OBJECT
-public:
-	BoGLUCameraWidget(QWidget* parent, const char* name = 0);
-	~BoGLUCameraWidget();
-
-	virtual int needCameraType() const;
-
-	virtual void updateFromCamera();
-
-protected slots:
-	void slotLookAtChanged();
-	void slotCameraPosChanged();
-	void slotUpChanged();
-
-protected:
-	virtual void updateMatrixWidget();
-
-private:
-	BoGLUCameraWidgetPrivate* d;
-};
-
-class BoPlainCameraWidgetPrivate;
-/**
- * This widget consists of glTranslate() and glRotate() calls only.
- *
- * The widget allows to modify the rotation about the x-,y-,z-axis and the
- * camera position. It will then generate values for gluLookAt(), so that it
- * will behave as if the following code would have been executed
- * <pre>
- * glRotatef(rotationX, 1.0, 0.0, 0.0);
- * glRotatef(rotationY, 0.0, 1.0, 0.0);
- * glRotatef(rotationZ, 0.0, 0.0, 1.0);
- * glTranslatef(-cameraPosX, -cameraPosY, -cameraPosZ);
- * </pre>
- * (remember that -cameraPosX comes from the fact that we are moving the
- * coordinate system, not the camera, in OpenGL. it is the same call that
- * gluLookAt() uses)
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoPlainCameraWidget : public BoCameraConfigWidgetBase
-{
-	Q_OBJECT
-public:
-	BoPlainCameraWidget(QWidget* parent, const char* name = 0);
-	~BoPlainCameraWidget();
-
-	virtual int needCameraType() const;
-
-	/**
-	 * Warning: this is a complex method! It depends on a lot of maths!
-	 * There is most probably an easier way of doing this - one that is even
-	 * better and safer (concerning invalid values). But I considered this a
-	 * good opportunity to get some practice in OpenGL maths.
-	 *
-	 * This method takes the cameraPos, lookAt and up vectors from @ref
-	 * BoCamera and tries to convert it into angles for glRotate(). Every
-	 * glRotate() call is about one of the x-,y-,z-axis.
-	 **/
-	virtual void updateFromCamera();
-
-protected slots:
-	void slotCameraChanged();
-	void slotTranslateFirstChanged();
-	void slotShowMatricesChanged(bool show);
-
-protected:
-	virtual void updateMatrixWidget();
-
-	bool translateFirst() const;
-
-private:
-	BoPlainCameraWidgetPrivate* d;
-};
-
-class BoOrbiterCameraWidgetPrivate;
-class BoOrbiterCameraWidget : public BoCameraConfigWidgetBase
-{
-	Q_OBJECT
-public:
-	BoOrbiterCameraWidget(QWidget* parent, const char* name = 0);
-	~BoOrbiterCameraWidget();
-
-	virtual void setCamera(BoCamera* camera);
-
-	virtual int needCameraType() const;
-
-	virtual void updateFromCamera();
-
-protected slots:
-	void slotCameraChanged();
-
-protected:
-	virtual void updateMatrixWidget();
-
-private:
-	BoOrbiterCameraWidgetPrivate* d;
-};
+class BosonGLWidgetLight;
+class BoPUILightCameraWidget;
 
 /**
  * This widget allows configuring all aspects of a light (ambient, diffuse,
@@ -284,65 +43,9 @@ private:
  * This widget does NOT provide a separate camera configuration widget and
  * therefore it is not derived of @ref BoCameraConfigWidgetBase. Instead it
  * <em>uses</em> the other camera widget and therefore it contains a @ref
- * BoCameraWidget object.
+ * BoPUICameraWidget object.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoLightCameraWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	/**
-	 * @param showGlobalValues If TRUE this will allow you to edit the
-	 * global light values, i.e. the light model (see man glLightModel). You
-	 * should ensure that only one widget is allowed to modify the global
-	 * values, to avoid unsynchronized valus.
-	 **/
-	BoLightCameraWidget(QWidget* parent = 0, bool showGlobalValues = false);
-	~BoLightCameraWidget();
-
-	void setLight(BoLight* light, BoContext* context);
-
-private slots:
-	void slotLightChanged();
-	void slotLightModelChanged();
-
-private:
-	BoLightCamera* mCamera;
-	BoCameraWidget* mCameraWidget;
-	BoLight* mLight;
-	BoContext* mContext;
-	bool mBlockLightChanges;
-	bool mShowGlobalValues;
-
-	QCheckBox* mDirectional;
-	BoFloatNumInput* mConstantAttenuation;
-	BoFloatNumInput* mLinearAttenuation;
-	BoFloatNumInput* mQuadraticAttenuation;
-	BoFloatNumInput* mAmbientR;
-	BoFloatNumInput* mAmbientG;
-	BoFloatNumInput* mAmbientB;
-	BoFloatNumInput* mAmbientA;
-	BoFloatNumInput* mDiffuseR;
-	BoFloatNumInput* mDiffuseG;
-	BoFloatNumInput* mDiffuseB;
-	BoFloatNumInput* mDiffuseA;
-	BoFloatNumInput* mSpecularR;
-	BoFloatNumInput* mSpecularG;
-	BoFloatNumInput* mSpecularB;
-	BoFloatNumInput* mSpecularA;
-
-	BoFloatNumInput* mGlobalAmbientR;
-	BoFloatNumInput* mGlobalAmbientG;
-	BoFloatNumInput* mGlobalAmbientB;
-	BoFloatNumInput* mGlobalAmbientA;
-
-};
-
-class BosonGLWidgetLight;
-class BoPUILightCameraWidget;
-
-// AB: dummy class, dummy name. this is just a widget that contains a GL widget
-// which contains the actual BoPUILightCameraWidget.
 class BoLightCameraWidget1 : public QWidget
 {
 	Q_OBJECT
@@ -357,12 +60,16 @@ private:
 	BoPUILightCameraWidget* mLightWidget;
 };
 
-#include "bopui/bopui.h"
 
 class BoPUICameraConfigWidgetBase;
-
-
 class BoPUICameraWidgetPrivate;
+/**
+ * The camera widget lets the user configure the @ref BoCamera widget in
+ * different ways. Every way is defined by a @ref BoPUICameraConfigWidgetBase
+ * derived class, some of which may be relevant to the game camera only (such as
+ * @ref BoPUIGameCameraWidget).
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoPUICameraWidget : public BoPUIWidget
 {
 	Q_OBJECT
@@ -383,6 +90,10 @@ private:
 	BoPUICameraWidgetPrivate* d;
 };
 
+/**
+ * Base class for all widgets that allow manipulating the camera.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoPUICameraConfigWidgetBase : public BoPUIWidget
 {
 	Q_OBJECT
@@ -456,6 +167,11 @@ private:
 
 
 class BoPUIGLUCameraWidgetPrivate;
+/**
+ * Direct manipulation of gluLookAt() through the three vectors lookAt,
+ * cameraPos and up.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoPUIGLUCameraWidget : public BoPUICameraConfigWidgetBase
 {
 	Q_OBJECT
@@ -480,6 +196,23 @@ private:
 };
 
 class BoPUIPlainCameraWidgetPrivate;
+/**
+ * This widget consists of glTranslate() and glRotate() calls only.
+ *
+ * The widget allows to modify the rotation about the x-,y-,z-axis and the
+ * camera position. It will then generate values for gluLookAt(), so that it
+ * will behave as if the following code would have been executed
+ * <pre>
+ * glRotatef(rotationX, 1.0, 0.0, 0.0);
+ * glRotatef(rotationY, 0.0, 1.0, 0.0);
+ * glRotatef(rotationZ, 0.0, 0.0, 1.0);
+ * glTranslatef(-cameraPosX, -cameraPosY, -cameraPosZ);
+ * </pre>
+ * (remember that -cameraPosX comes from the fact that we are moving the
+ * coordinate system, not the camera, in OpenGL. it is the same call that
+ * gluLookAt() uses)
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoPUIPlainCameraWidget : public BoPUICameraConfigWidgetBase
 {
 	Q_OBJECT
@@ -516,6 +249,11 @@ private:
 };
 
 class BoPUIGameCameraWidgetPrivate;
+/**
+ * This is the camera configuration as it is used in boson by default.
+ * it depends on lookAt vector, radius and rotation only.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoPUIGameCameraWidget : public BoPUICameraConfigWidgetBase
 {
 	Q_OBJECT
