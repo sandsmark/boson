@@ -525,13 +525,17 @@ void BosonScript::placeProduction(int player, int factoryid, float x, float y)
   if(prod->completedProductionType() != ProduceUnit)
   {
     boError() << k_lineinfo << "not producing unit!" << endl;
-    break;
+    return;
+#warning fixme
+//    break;
   }
   int unitType = prod->completedProductionId();
   if (unitType <= 0) {
     // hope this is working...
     boWarning() << k_lineinfo << "not yet completed" << endl;
-    break;
+    return;
+#warning fixme
+//    break;
   }
   //game()->buildProducedUnit(prod, unitType, BoVector2Fixed(x, y));
 
