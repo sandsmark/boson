@@ -23,15 +23,19 @@ INCLUDES= $(all_includes)
 
 LDFLAGS =  -s 
 
-noinst_PROGRAMS = boeditor
+noinst_PROGRAMS = createGround boeditor
 
 
 #boeditor
 #boeditor_METASOURCES = USE_AUTOMOC
 boeditor_SOURCES = boeditor.cpp
-boeditor_LDADD   = ../common/libboson.a -lkdecore -lkde-qt-addon -lqt # -lXext -lX11 $(LIBSOCKET)
+boeditor_LDADD   = ../common/libboson.a -lkdecore -lkde-qt-addon -lqt
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
+
+createGround_SOURCES = createGround.cpp
+createGround_LDADD   = ../common/libboson.a -lqt
+createGround_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
 #basic.bpf
 data_DATA = basic.bpf
@@ -41,6 +45,6 @@ basic.bpf : boeditor
 
 
 #garbage
-EXTRA_DIST =  map.h boeditor.cpp boeditor.h
+EXTRA_DIST =  map.h boeditor.cpp boeditor.h createGround.cpp
 CLEANFILES = basic.bpf
 
