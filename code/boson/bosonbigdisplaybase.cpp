@@ -1811,13 +1811,10 @@ void BosonBigDisplayBase::initUfoGUI()
 
 #warning FIXME: we dont call addWidget() on this - is this still deleted?
  d->mToolTipLabel = new BoUfoLabel();
- boDebug() << k_funcinfo << "1" << endl;
+ d->mToolTipLabel->setForegroundColor(Qt::white);
  d->mToolTips->setLabel(d->mToolTipLabel);
- boDebug() << k_funcinfo << "2" << endl;
  BO_CHECK_NULL_RET(ufoManager()->layeredPaneWidget());
- // AB: without the layer and position parameters this seems to crash!
- ufoManager()->layeredPaneWidget()->addLayer(d->mToolTipLabel, 101, 1);
- boDebug() << k_funcinfo << "3" << endl;
+ ufoManager()->layeredPaneWidget()->addLayer(d->mToolTipLabel);
 
  // TODO: tooltips ?
 

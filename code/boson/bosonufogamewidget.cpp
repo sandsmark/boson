@@ -137,7 +137,11 @@ BosonUfoGameWidget::BosonUfoGameWidget(const BoMatrix& modelview, const BoMatrix
 {
  d = new BosonUfoGameWidgetPrivate(modelview, projection, viewFrustum, viewport);
  d->mDisplay = display;
+
+ QColor defaultColor = BoUfoLabel::defaultForegroundColor();
+ BoUfoLabel::setDefaultForegroundColor(Qt::white);
  initUfoWidgets();
+ BoUfoLabel::setDefaultForegroundColor(defaultColor);
 }
 
 BosonUfoGameWidget::~BosonUfoGameWidget()
