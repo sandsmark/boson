@@ -551,6 +551,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderUnits(true);
  BoItemList allItems = mCanvas->allBosonItems();
  BoItemList::Iterator it = allItems.begin();
+ unsigned int renderedUnits = 0;
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
@@ -612,8 +613,9 @@ void BosonBigDisplayBase::paintGL()
 	}
 
 	glTranslatef(-x, -y, -z);
+	renderedUnits++;
  }
- boProfiling->renderUnits(false);
+ boProfiling->renderUnits(false, renderedUnits);
 
  if (checkError()) {
 	kdError() << k_funcinfo << "when units rendered" << endl;

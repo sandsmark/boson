@@ -38,6 +38,7 @@ QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
  s << (Q_LONG)t.mClear;
  s << (Q_LONG)t.mCells;
  s << (Q_LONG)t.mUnits;
+ s << (Q_UINT32)t.mUnitCount;
  s << (Q_LONG)t.mFOW;
  s << (Q_LONG)t.mText;
  s << (Q_LONG)t.mFunction;
@@ -49,18 +50,21 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  Q_LONG clear;
  Q_LONG cells;
  Q_LONG units;
+ Q_UINT32 unitCount;
  Q_LONG fow;
  Q_LONG text;
  Q_LONG function;
  s >> clear;
  s >> cells;
  s >> units;
+ s >> unitCount;
  s >> fow;
  s >> text;
  s >> function;
  t.mClear = clear;
  t.mCells = cells;
  t.mUnits = units;
+ t.mUnitCount = unitCount;
  t.mFOW = fow;
  t.mText = text;
  t.mFunction = function;
@@ -135,7 +139,7 @@ void BosonProfiling::renderCells(bool start)
  }
 }
 
-void BosonProfiling::renderUnits(bool start)
+void BosonProfiling::renderUnits(bool start, unsigned int units)
 {
  if (start) {
 	gettimeofday(&d->mTimeRenderPart, 0);
@@ -143,6 +147,7 @@ void BosonProfiling::renderUnits(bool start)
 	struct timeval time;
 	gettimeofday(&time, 0);
 	d->mCurrentRenderTimes.mUnits = COMPARE_TIMES(d->mTimeRenderPart, time);
+	d->mCurrentRenderTimes.mUnitCount = units;
  }
 }
 
