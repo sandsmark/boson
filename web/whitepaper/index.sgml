@@ -1,0 +1,155 @@
+<!doctype linuxdoc system>
+<article>
+<title>Boson internals
+<author>Thomas Capricelli <tt>capricel@enst.fr</tt>
+<date>Version 0.1 , Mon Oct 25 15:44:00 CEST 1999
+
+<abstract>
+This Handbook describes the internal structure of the Boson code.
+</abstract>
+
+<toc>
+
+
+<sect>Introduction
+<p>
+
+This document describes the internals of the boson souce code. My wish is that developers will
+keep it up-to-date while changing the code.
+
+Please contact <htmlurl url="mailto:capricel@enst.fr" name="capricel@enst.fr"> for any boson code 
+related topic.
+<p>
+
+
+<sect>Source topology
+<p>
+
+<img src=boson_topology.jpg>
+
+<itemize>
+	<item>The <tt/common/ directory is the one with all common definition/declaration, such
+as network messages tags, and common class for units/facilities.
+	<item>The <tt/server/ directory : guess it.
+	<item>The <tt/visual/ directory is the common rendering code, shared between boson and the editor.
+	<item>The <tt/boson/ directory is the client.
+	<item>The <tt/editor/ directory is the code for the editor.
+	<item>The <tt/map/ directory is the former place to generate maps, and is now use for test suites.
+</itemize>
+
+<sect>The network layer
+<p>
+
+<sect1>Overview
+<p>
+	As in all communication protocol, the boson communication protocol is built using different
+<tt/layers/, each of which has its own purpose, and communicates with other layers.
+
+<img src=boson_layers.jpg>
+
+<p>
+	The <tt/socket layer/ is used to open the communication, close it, and when 
+a resynchronization is needed (last one not yet implemented). This is the lowest level layers.
+<p>
+	The <tt/dialog layer/ is to establish the communication between the client(boson), and
+the server. This is the place where you are while waiting other players to come in your game.
+	Typical messages are "Can I play in the current game ?", "yes, please wait for other
+player", "no/why you can't".
+	Messages not yet implemented : "Which games are available?", "this is the one I want".
+<p>
+	The <tt/game layer/ is the layer where all game-related messages are exchanged, such as 
+"unit U move at place X,Y", "build FF at place X,Y", "U1 attack U2", and so on.
+
+<sect1>The boBuffer
+<p>
+	During the game, a lot of very small messages are exchanged, and this is not well-suited for
+the TCP/IP protocol we use. (TCP/IP is the internet protocol). This is why we use the boBuffer. The 
+boBuffer is filled with all messages that other entities are willing to send, and, during synchronization,
+the boBuffer is sent (the proper word is <tt/flushed/) to the peer (the client or the server). This way, we
+send bigger packets less often.
+
+<sect1>Synchronization
+<p>
+	To keep all programs synchronized (the server and all players), we have this simple synchronization
+algorithm :
+<itemize>
+	<item>The <tt/server/ flushes his buffers, and then send a MSG_TIME_INCREASE message to every
+player.
+	<item>When receiving this message, every player is supposed to flush its own buffers, and then
+send a MSG_TIME_CONFIRM message.
+	<item>When the server has had confirmation of every player, it may now increase the <tt/time/ 
+value and the algorithm can loop.
+</itemize>
+
+	Those who are curious will have noticed a usleep() call before the algorithm actually loop. This
+is to prevent a network overload that would be the consequence of to much
+MSG_TIME_INCREASE/MSG_TIME_CONFIRM messages on a quite quick network (typically local networks).
+
+
+<sect>Visual : how the rendering works in boson
+<p>
+	The usual way of handling the representation of a memory-stored data is to have two 
+different <tt/objects/ : basically, a DATA object that handles the data stored internally, and a
+VIEW object that represents this data to the user. By having two different VIEWs attached to the same 
+DATA, the user may have two different point of view of the same DATA. (For exemple, in a spreadsheet, it
+would be two different window opened on different part of the same document.)
+<p>
+
+	Boson uses a three-level similar paradigm. Levels are called <tt/Field/, <tt/View/, <tt/Display/.
+<p>
+<img src=boson_visual.jpg>
+
+	The <tt/Field/ is the raw data, namely the double-array to handle the different cells that
+compose the background of the game, and the units arrays which contain the different units (mobiles and
+facilities) in use in the current game.
+<p>
+	For any opened view, the user is at a given position, using a given
+window-size : this is abstracted by the <tt/View/ object. This object also takes care of the  
+<tt/selections/ (selected units, or facility).
+<p>
+	Then, for every  <tt/View/, two different <tt/Display/ are used
+to render the scene on the screen, the BigDisplay (the one you can see in the screenshot, where everything
+happens), and the MiniDisplay, which is the map on the upper-left corner.
+<p>
+	By having different <tt/View/, the player will be able to have a window on his base station, another
+one on the battlefield, and a third one on another battlefield, for example.
+<p>
+	The <tt/mainView/ widget is the one that allocates the <tt/View/, the <tt/BigDisplay/, the
+<tt/MiniDisplay/ and an additional <tt/infoWin/ widget and display them in the window you get when
+playing. The infoWin is just a display widget, the one you see on the lower-left corner and which is
+not really done yet.
+
+<sect>Questions and Answers<p>
+
+<sect1> asdfasdf ??
+<p>
+	Answer Answer Answer Answer Answer
+<p>
+
+Please contact :
+<htmlurl url="mailto:capricel@enst.fr" name="Thomas Capricelli"> if
+you have any questions related to the code, I will be happy to add it here if it's a frequently 
+asked one.
+
+<sect>Copyright<p>
+
+Boson Copyright 1999 Thomas Capricelli , capricel@enst.fr<p>
+Boson-pics Copyright 1999 Benjamin Adler , benAdler@gmx.net
+
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+<p>
+</article>
