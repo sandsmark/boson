@@ -37,7 +37,8 @@ class BoVector3
 {
   public:
     BoVector3()  { reset(); };
-    BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); };
+    BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); }
+    BoVector3(GLfloat* data) { set(data[0], data[1], data[2]); }
     ~BoVector3() {};
 
     inline void reset()  { mData[0] = mData[1] = mData[2] = 0; };
