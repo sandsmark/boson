@@ -384,9 +384,9 @@ void BosonWidget::initBigDisplay(BosonBigDisplayBase* b)
 
  connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotSetAction(Unit*)));
-
  connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
+
  connect(b->selection(), SIGNAL(signalSelectUnit(Unit*)),
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
