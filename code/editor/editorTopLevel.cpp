@@ -81,6 +81,10 @@ editorTopLevel::editorTopLevel( BoEditorApp *app,  const char *name, WFlags f)
 		i18n("&Destroy objects"), Qt::CTRL + Qt::Key_E,
 		this, SLOT(slot_editDestroy()),
 		actionCollection(), "edit_destroy");
+	(void) new KAction(
+		i18n("&Add a new player"), Qt::CTRL + Qt::Key_A,
+		this, SLOT(slot_addPlayer()),
+		actionCollection(), "edit_add_player");
 	ADD_ACTION(close);
 //	ADD_ACTION(showToolbar);
 
@@ -416,6 +420,7 @@ void editorTopLevel::makeCommandGui(void)
 	qcb_who = new QComboBox(mainFrame, "qcb_who");
 	qcb_who->setGeometry(130,82,90,30);
 
+	//XXXX
 	qcb_who->insertItem("User 0", 0);
 	qcb_who->insertItem("User 1", 1);
 //	qcb_who->insertItem("User 2", 2);
@@ -460,6 +465,16 @@ void editorTopLevel::makeCommandGui(void)
 	setOrders	(W_SMALL_PLAIN);
 
 	
+}
+
+
+void editorTopLevel::slot_addPlayer(void)
+{
+	otype = OT_FACILITY;
+	setSelected( species[who]->getBigOverview(FACILITY_CMDBUNKER) );
+	emit setSelectedObject (otype, FACILITY_CMDBUNKER);	// need to be after the setSelected
+	mw.bigDisplay()->ready4put( QSize (facilityProp[FACILITY_CMDBUNKER].width, facilityProp[FACILITY_CMDBUNKER].height) );
+	setSelectionMode( editorTopLevel::SELECT_PUT);
 }
 
 

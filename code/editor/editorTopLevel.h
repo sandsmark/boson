@@ -61,6 +61,7 @@ class editorTopLevel : public visualTopLevel
 	Q_OBJECT
 	
 	friend mainWidget;
+	friend editorBigDisplay;
 public:
 	editorTopLevel(BoEditorApp *app, const char *name = "boeditor", WFlags f = WDestructiveClose );
 
@@ -76,6 +77,7 @@ signals:
 
 public slots:
 	void slot_editDestroy(void);
+	void slot_addPlayer(void);
 	void slot_close(void);
 
 protected:
