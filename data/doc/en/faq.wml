@@ -1,31 +1,34 @@
 #include "top.wml"
     <h1>
-      Frequently asked questions
+      Frequently Asked Questions (FAQ)
     </h1>
     <p>&nbsp;</p>
     <p>
       Here you will find answers for most of your questions.
     </p>
-    <ol>
-      <li><a href="#1">- When is Boson finished ?</a></li>
-      <li><a href="#2">- Why is Boson so slow ?</a></li>
-      <li><a href="#3">- How can I submit a bug report ?</a></li>
-      <li><a href="#4">- Are there other supported languages than english ?</a></li>
-      <li><a href="#5">- Boson crashes my computer, what can I do ?</a></li>
-    </ol>
+    <h4>General</h4>
+      <a href="#gen_1">- When is Boson finished ?</a><br>
+      <a href="#gen_2">- Why is Boson so slow ?</a><br>
+      <a href="#gen_3">- How can I submit a bug report ?</a><br>
+      <a href="#gen_98">- Are there other supported languages than english ?</a><br>
+      <a href="#gen_99">- Boson crashed my computer, what can I do ?</a><br>
+    <h4>Game</h4>
+      <a href="#game_4">- Where is the menubar ?</a><br>
     
-    <p>&nbsp;</p>
-    <a name="1">- When is Boson finished ?</a>
+    <br>
+    <h4>General</h4>
+    <a name="gen_1">- When is Boson finished ?</a>
     <p>When it's done.</p>
+    <br>
     
-    <p>&nbsp;</p>
-    <a name="2">- Why is boson so slow ?</a>
+    <a name="gen_2">- Why is boson so slow ?</a>
     <p>
     There may be many reasons, some things that can help:<br>
     - Check your hardware: <a href="started.html">here</a><br>
     - Try resizing the window and/or make it smaller<br>
     - Increase the update interval in the Boson settings<br>
     - Change the color depth of your XServer to 16bit<br>
+    - If you use a very big map (300x300 and more) things can be slow down<br>
     - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
     - If you are using a Nvidia card you can use a script called<a href="http://boson.sourceforge.net/download/nvcheck.sh"> nvcheck.sh</a>
     to check your driver installation.<br>
@@ -35,24 +38,36 @@
         If you get a yes, 3D accelleration should be ok. If this says "No", you are running software OpenGL and this is very slow.
         </blockquote>
     </p>
+    <br>
 
-    <p>&nbsp;</p>
-    <a name="3">- How can I submit a bug report ?</a>
-    <p>You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
-    Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.</p>
+    <a name="gen_3">- How can I submit a bug report ?</a>
+    <p>
+    You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
+    Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.<br>
+    Please include a stacktrace if you have one. Also, if self compiled, configuring with --enable-debug=full helps us.
+    </p>
+    <br>
     
-    <p>&nbsp;</p>
-    <a name="4">- Are there other supported languages than english ?</a>
+    <a name="gen_98">- Are there other supported languages than english ?</a>
     <p>No, Boson is a game in development, text changes very often. It is hard to maintain different languages yet.
     </p>
-
-    <p>&nbsp;</p>
-    <a name="5">- Boson crashes my computer, what can I do ?</a>
+    <br>
+    
+    <a name="gen_99">- Boson crashed my computer, what can I do ?</a>
     <p>It looks like some people have a problem with a Boson/KDE/OpenGL/malloc/driver combination.<br>
     If you have total crashes or kernel memory errors please start Boson under an other window manager like fvwm2 or failsave.<br>
     The system crashes should go away but please contact us because we need more people with the same problem.<br>
     A possible fix might be a kernel update to 2.4.20+.
     </p>
+    <br>
+
+    <h3>Game</h3>
+    <a name="game_4">- Where is the menubar ?</a>
+    <p>
+    To enable the application menubar press the left mouse button on the welcome screen and click on "Show Menubar".
+    </p>
+    <br>
+
 
 #include "nav.wml" before_url="editor/facilities.html" before_text="Building facilities" after_url="credits.html" after_text="Credits" up_url="index.html"
 #include "footer.wml"
