@@ -85,7 +85,6 @@ public:
 	}
 };
 
-
 /**
  * Builds LOD (Level Of Detail) mesh from full-detail mesh.
  *
@@ -107,6 +106,28 @@ public:
 	 * use 0 here).
 	 **/
 	QValueList<BoFace> generateLOD(unsigned int lod);
+
+	/**
+	 * Set additional data about the model that this mesh is in.
+	 *
+	 * Note that these data make use of the mesh matrices, i.e. they use the
+	 * final outlook of the model, whereas the rest of the LOD code is (atm)
+	 * based on the coordinates without the matrices only.
+	 *
+	 * @param thisVolume The volume of this mesh (the one the LOD builder
+	 * works on)
+	 * @param thisMaxSurface The max surface of this mesh (the one the LOD builder
+	 * works on)
+	 * @param modelVolume The volume of the model. Usually for simplicity
+	 * reasons the volume of the bounding box is used here only.
+	 * @param modelMaxSurface The maximal surface (i.e. either w*h or
+	 * w*depth or h*depth) of the model. Usually for simplicity reasons we
+	 * use the max surface of the bounding box only.
+	 * @param largesMeshVolume The volume of the largest mesh in the model
+	 * @param largesMeshSurface The maximal surface of the meshes in the
+	 * model
+	 **/
+	void setModelData(float thisVolume, float thisMaxSurface, float modelVolume, float modelMaxSurface, float largesMeshVolume, float largestMeshSurface);
 
 protected:
 	/**
@@ -147,6 +168,13 @@ private:
 	QValueVector<int> mMap;
 	QValueVector<int> mOrder;
 	QValueVector<float> mCost;
+
+	float mThisVolume;
+	float mThisMaxSurface;
+	float mModelVolume;
+	float mModelMaxSurface;
+	float mLargestMeshVolume;
+	float mLargestMeshSurface;
 };
 
 #endif

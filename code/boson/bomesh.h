@@ -28,6 +28,7 @@ class BoAdjacentDataBase;
 class BoMeshLOD;
 class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
+class BosonModel;
 class QColor;
 
 template<class T> class QValueVector;
@@ -445,7 +446,7 @@ public:
 	 **/
 	const QString& name() const;
 
-	void renderMesh(const QColor* color, unsigned int lod = 0);
+	void renderMesh(const BoMatrix* matrix, const QColor* color, unsigned int lod = 0);
 
 	/**
 	 * Render the bounding object (usually a mesh) of this mesh
@@ -525,7 +526,7 @@ public:
 	 * This method is equivalent to calling @ref minX, @ref maxX, ... for
 	 * all specified parameters.
 	 **/
-	void getBoundingBox(float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ);
+	void getBoundingBox(float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ) const;
 
 	/**
 	 * @overloaded
@@ -535,7 +536,7 @@ public:
 	 * @param vertices Must be an array of 8. The vertices of the bounding
 	 * box are returned here.
 	 **/
-	void getBoundingBox(BoVector3* vertices);
+	void getBoundingBox(BoVector3* vertices) const;
 
 	/**
 	 * Return the bounding box after transforming the mesh by @p matrix. See
@@ -550,7 +551,7 @@ public:
 	 * you should transform all vertices (see @ref vertex) by @ref matrix
 	 * and find the min/max values from all resulting vertices.
 	 **/
-	void getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ);
+	void getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ) const;
 
 	/**
 	 * Compute a bounding object (usually a box) for the mesh.
@@ -562,7 +563,7 @@ public:
 	 * @param lodCount How many levels of detail will be generated. Must be
 	 * at least 1 and must be the same value for all meshes in the model.
 	 **/
-	void generateLOD(unsigned int lodCount);
+	void generateLOD(unsigned int lodCount, const BosonModel* parent);
 
 	unsigned int facesCount(unsigned int lod) const;
 

@@ -25,6 +25,7 @@
 #include "bolodbuilder.h"
 #include "bomeshrenderermanager.h"
 #include "bomeshrenderer.h"
+#include "bosonmodel.h"
 
 #include <qptrlist.h>
 #include <qcolor.h>
@@ -1481,14 +1482,26 @@ void BoMesh::calculateNormals(unsigned int _lod)
  }
 }
 
-void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
+void BoMesh::renderMesh(const BoMatrix* matrix, const QColor* teamColor, unsigned int _lod)
 {
  BoMeshRenderer* renderer = BoMeshRendererManager::manager()->currentRenderer();
  if (!renderer) {
 	BO_NULL_ERROR(renderer);
 	return;
  }
+ if (!matrix) {
+	BO_NULL_ERROR(matrix);
+	return;
+ }
+ BoMeshLOD* lod = levelOfDetail(_lod);
+ if (lod && lod->pointsCacheCount() == 0) {
+	// nothing to render at this lod. avoid the multmatrix
+	return;
+ }
+ glPushMatrix();
+ glMultMatrixf(matrix->data());
  renderer->renderMesh(teamColor, this, _lod);
+ glPopMatrix();
 }
 
 void BoMesh::renderBoundingObject()
@@ -1661,7 +1674,7 @@ void BoMesh::computeBoundingObject()
  d->mBoundingObject = builder.generateBoundingObject(this);
 }
 
-void BoMesh::generateLOD(unsigned int LODCount)
+void BoMesh::generateLOD(unsigned int LODCount, const BosonModel* model)
 {
  // LODCount must ALWAYS be greate or equal to 1, as 0 is the default (full
  // detailed) LOD, which must always be present.
@@ -1704,6 +1717,53 @@ void BoMesh::generateLOD(unsigned int LODCount)
  d->mLODCount = LODCount;
 
  BoLODBuilder builder(this, lod[0]);
+
+ // fill the builder with data about the model
+ if (model->frame(0)) {
+	// WARNING we operate on frame 0 only - this might cause trouble, when
+	// meshes are getting larger (by scaling them) in later frames!
+	BoFrame* frame0 = model->frame(0);
+	float maxModelSurface = 0.0f;
+	float modelVolume = 0.0f;
+	float volume = 0.0f;
+	float maxSurface = 0.0f; // max surface of _this_ mesh
+	float largestMeshVolume = 0.0f;
+	float largestMeshSurface = 0.0f;
+
+	float depthMultiplier = frame0->depthMultiplier(); // height in z direction
+
+	maxModelSurface = model->width() * model->height();
+	modelVolume = model->width() * model->height() * depthMultiplier;
+	maxModelSurface = QMAX(maxModelSurface, model->width() * depthMultiplier);
+	maxModelSurface = QMAX(maxModelSurface, model->height() * depthMultiplier);
+
+	float minX, minY, minZ;
+	float maxX, maxY, maxZ;
+	for (unsigned int i = 0; i < frame0->meshCount(); i++) {
+		const BoMesh* mesh = frame0->mesh(i);
+		const BoMatrix* matrix = frame0->matrix(i);
+		mesh->getBoundingBox(*matrix, &minX, &maxX, &minY, &maxY, &minZ, &maxZ);
+		float lengthX = maxX - minX;
+		float lengthY = maxY - minY;
+		float lengthZ = maxZ - minZ;
+		float s = lengthX * lengthY;
+		s = QMAX(s, lengthX * lengthZ);
+		s = QMAX(s, lengthY * lengthZ);
+		float v = lengthX * lengthY * lengthZ;
+		if (mesh == this) {
+			maxSurface = s;
+			volume = v;
+		}
+		largestMeshVolume = QMAX(largestMeshVolume, v);
+		largestMeshSurface = QMAX(largestMeshSurface, s);
+	}
+
+
+	builder.setModelData(volume, maxSurface, modelVolume, maxModelSurface, largestMeshVolume, largestMeshSurface);
+ } else {
+	BO_NULL_ERROR(model->frame(0));
+ }
+
  for (unsigned int i = oldCount; i < LODCount; i++) {
 	QValueList<BoFace> faces = builder.generateLOD(i);
 	if (faces.count() > 0) {
@@ -1773,7 +1833,7 @@ void BoMesh::setMeshRendererMeshData(BoMeshRendererMeshData* data)
  mMeshRendererMeshData = data;
 }
 
-void BoMesh::getBoundingBox(float* _minX, float* _maxX, float* _minY, float* _maxY, float* _minZ, float* _maxZ)
+void BoMesh::getBoundingBox(float* _minX, float* _maxX, float* _minY, float* _maxY, float* _minZ, float* _maxZ) const
 {
  *_minX = minX();
  *_minY = minY();
@@ -1783,7 +1843,7 @@ void BoMesh::getBoundingBox(float* _minX, float* _maxX, float* _minY, float* _ma
  *_maxZ = maxZ();
 }
 
-void BoMesh::getBoundingBox(BoVector3* vertices)
+void BoMesh::getBoundingBox(BoVector3* vertices) const
 {
  float minX, minY, minZ;
  float maxX, maxY, maxZ;
@@ -1798,7 +1858,7 @@ void BoMesh::getBoundingBox(BoVector3* vertices)
  vertices[7].set(maxX, maxY, maxZ);
 }
 
-void BoMesh::getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ)
+void BoMesh::getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ) const
 {
  BoVector3 _vertices[8];
  BoVector3 vertices[8];
