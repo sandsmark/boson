@@ -206,9 +206,10 @@ void BosonMiniMap::calculateGround(int x, int y)
 		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
 		alphaSum += alpha;
 
-		int red = qRed(map()->miniMapColor(i));
-		int green = qGreen(map()->miniMapColor(i));
-		int blue = qBlue(map()->miniMapColor(i));
+		QRgb rgb = map()->miniMapColor(i);
+		int red = qRed(rgb);
+		int green = qGreen(rgb);
+		int blue = qBlue(rgb);
 		cornerRed += red * alpha / 255;
 		cornerGreen += green * alpha / 255;
 		cornerBlue += blue * alpha / 255;
