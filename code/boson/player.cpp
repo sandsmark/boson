@@ -281,6 +281,8 @@ bool Player::save(QDataStream& stream)
 
 bool Player::load(QDataStream& stream)
 {
+// Player::load() is unused!
+
  if (!KPlayer::load(stream)) {
 	kdError() << "Couldn't load player" << endl;
 	return false;

@@ -57,7 +57,7 @@ signals:
 	 **/
 	void signalSizeChanged(int w, int h);
 
-	void signalEditorAddUnit(int type, int x, int y, int owner);
+//	void signalEditorAddUnit(int type, int x, int y, int owner);
 //	void signalEditorConstruction(int unitType, Player* owner);
 	void signalAddCell(int x, int y, int groundType, unsigned char version);
 	

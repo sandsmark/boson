@@ -14,8 +14,7 @@ class Boson : public KGame
 	Q_OBJECT
 public:
 	enum PropertyIds {
-//		IdGameSpeed = KGamePropertyBase::IdUser + 1
-		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h>
+		IdGameSpeed = 10000, // dont wanna #include <kgameproperty.h> - better: KGamePropertyBase::IdUser+...
 		IdNextUnitId = 10001
 	};
 	
@@ -23,24 +22,30 @@ public:
 	Boson(QObject* parent, const QString& fileName);
 	~Boson();
 
+	void setCanvas(QCanvas*); 
 	
 	void quitGame();
-	bool isServer() const;
 	void startGame();
 
-	void setCanvas(QCanvas*); // not nice - used for adding a unit only
+	int gameSpeed() const;
+	bool isServer() const;
 
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
-
-	int gameSpeed() const;
 
 	VisualUnit* createUnit(int unitType, Player* owner); // public for Player::load
 
 public slots:
 	void slotSetGameSpeed(int speed);
 
-	void slotConstructUnit(int unitType, VisualUnit* facility, Player* owner);
-	void slotConstructUnit(int unitType, int x, int y, Player* owner);
+	/**
+	 * Doesn't actually add a unit to the game but sends a message to the
+	 * network. The actual adding is done in @ref slotNetworkData
+	 * @param unitType The type of the unit (see @ref UnitProperties::typeId) to be added
+	 * @param x The x-coordinate (on the canvas) of the unit
+	 * @param y The y-coordinate (on the canvas) of the unit
+	 * @param owner The owner of the new unit.
+	 **/
+	void slotSendAddUnit(int unitType, int x, int y, Player* owner);
 
 signals:
 	/**
@@ -58,7 +63,7 @@ signals:
 	void signalInitMap(const QByteArray&);
 
 protected:
-	bool playerInput(QDataStream& stream, KPlayer* player);
+	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
 	unsigned long int nextUnitId();
 
@@ -72,19 +77,6 @@ protected:
 
 protected slots:
 	/**
-	 * Doesn't actually add a unit to the game but sends a message to the
-	 * network. The actual adding is done in @ref slotNetworkData
-	 * @param unitType The type of the unit (see @ref UnitProperties::typeId) to be added
-	 * @param x The x-coordinate (on the canvas) of the unit
-	 * @param y The y-coordinate (on the canvas) of the unit
-	 * @param owner The owner of the unit. Can either be
-	 * 0..BOSON_MAX_PLAYERS-1 or KPlayer style ids. I recommend to use
-	 * @ref KPlayer::id if possible
-	 **/
-	void slotAddUnit(int unitType, int x, int y, int owner);
-	void slotLoadUnit(int unitType, unsigned long int id, Player* owner); // doesn't call setId()
-
-	/**
 	 * A network message arrived. Most game logic stuff is done here as
 	 * nearly all functions just send a network request instead of doing the
 	 * task theirselfes. This way we ensure that a task happens on
@@ -97,8 +89,6 @@ protected slots:
 	 * QCanvas::advance ist called.
 	 **/
 	void slotSendAdvance();
-
-//	void slotCreateUnit(VisualUnit*& unit, int unitType, Player* owner);
 
 	void slotSave(QDataStream& stream);
 	void slotLoad(QDataStream& stream);

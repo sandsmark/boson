@@ -166,7 +166,6 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	{
 		kdDebug() << "moveConstruct" << endl;
 		Q_UINT32 factoryId;
-//		Q_INT32 unitType;
 		Q_UINT32 owner;
 		Q_INT32 x;
 		Q_INT32 y;
@@ -174,7 +173,6 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> owner;
 		stream >> x;
 		stream >> y;
-//		stream >> unitType;
 		
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
@@ -197,18 +195,6 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		break;
  }
  return true;
-}
-
-void Boson::slotLoadUnit(int unitType, unsigned long int id, Player* owner)
-{
- if (!owner) {
-	kdError() << "Cannot find player " << owner << endl;
-	return;
- }
- kdDebug() << "slotLoadUnit" << endl;
- VisualUnit* unit = createUnit(unitType, owner);
- unit->setId(id);
- emit signalAddUnit(unit, 0, 0); // FIXME x=0, y=0 ??
 }
 
 void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 )
@@ -335,10 +321,8 @@ KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
  kdDebug() << "Boson::createPlayer(): rtti=" << rtti << ",io=" << io 	
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
-// connect(p, SIGNAL(signalCreateUnit(VisualUnit*&, int, Player*)), 
-//		this, SLOT(slotCreateUnit(VisualUnit*&, int, Player*)));
- connect(p, SIGNAL(signalLoadUnit(int, unsigned long int, Player*)), 
-		this, SLOT(slotLoadUnit(int, unsigned long int, Player*)));
+// connect(p, SIGNAL(signalLoadUnit(int, unsigned long int, Player*)), 
+//		this, SLOT(slotLoadUnit(int, unsigned long int, Player*)));
  return p;
 }
 
@@ -377,17 +361,11 @@ void Boson::slotLoad(QDataStream& stream)
  kdDebug() << "next id: " << d->mNextUnitId << endl;
 }
 
-void Boson::slotConstructUnit(int unitType, VisualUnit* facility, Player* owner)
-{
- if (!facility) { 
-	kdError() << "NULL facility" << endl;
+void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
+{ // used by the editor directly
+ if (!isServer()) {
 	return;
  }
- slotConstructUnit(unitType, facility->x(), facility->y(), owner);
-}
-
-void Boson::slotConstructUnit(int unitType, int x, int y, Player* owner)
-{ // used by the editor directly
  if (!owner) {
 	kdWarning() << "NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
@@ -397,21 +375,12 @@ void Boson::slotConstructUnit(int unitType, int x, int y, Player* owner)
 	return;
  }
 
- slotAddUnit(unitType, x, y, owner->id());
-}
-
-void Boson::slotAddUnit(int unitType, int x, int y, int owner)
-{ // kind of obsolete - move stuff to slotConstructUnit
- if (!isServer()) {
-	return;
- }
-
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_INT32)unitType;
  stream << (Q_INT32)x;
  stream << (Q_INT32)y;
- stream << (Q_INT32)owner;
+ stream << (Q_INT32)owner->id();
  sendMessage(buffer, BosonMessage::AddUnit);
 }
 

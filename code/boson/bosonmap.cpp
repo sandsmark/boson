@@ -524,7 +524,7 @@ void BosonMap::addUnit(Boson* boson, Player* owner, int unitType, int x, int y)
 	kdError() << "BosonMap::addUnit(): NULL player" << endl;
 	return;
  }
- boson->slotConstructUnit(unitType, x, y, owner);
+ boson->slotSendAddUnit(unitType, x, y, owner);
 }
 
 void BosonMap::startMap(Boson* boson)
