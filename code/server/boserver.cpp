@@ -168,7 +168,7 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 	/* Memorize it */
 	player[i].socketState = SSS_INIT;
 	player[i].socket = newConnection;
-	player[i].buffer = new boBuffer(newConnection->socket(), BOSON_BUFFER_SIZE );
+	player[i].buffer = new boBuffer(newConnection->socket());
 	player[i].lastConfirmedJiffies = 0;
 
 	logf(LOG_INFO, "New incoming connection, put in slot[%d]", i);
