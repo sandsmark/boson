@@ -212,7 +212,22 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonPress:
 		makeActive();
 		if (e->button() == LeftButton) {
-			startSelection(pos);
+			if(actionLocked()) {
+				// If action is locked then it means that user clicked on an action
+				//  button and wants to perform specific action
+				bool send = false;
+				// pos must be viewportToContents'ed and mapped using
+				// the inverse matrix!
+				BoAction action;
+				action.setPos(pos);
+			 	actionClicked(&action, stream, send);
+				if (send) {
+					*eatevent = true;
+				}
+			}
+			else {
+				startSelection(pos);
+			}
 		} else if (e->button() == MidButton) {
 			if (boConfig->mmbMove()) {
 				//TODO can we move the cursor-replacing code

@@ -247,6 +247,8 @@ protected:
 
 	void addMouseIO(Player* p);
 
+	virtual bool actionLocked() = 0;
+
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);//FIXME: make virtual?
 

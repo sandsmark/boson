@@ -22,6 +22,7 @@
 #include <qstring.h>
 #include <qcolor.h>
 #include <qvaluelist.h>
+#include "global.h"
 
 class UnitProperties;
 class UnitBase;
@@ -74,6 +75,12 @@ public:
 	bool loadUnitGraphics(const UnitProperties* prop);
 
 	/**
+	 * Load pixmaps of available actions (attack, move...). This must be done
+	 * before @ref actionPixmap can return anything useful
+	 **/
+	bool loadActionGraphics();
+
+	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
 	 * this unitType. See also @ref UnitProperties::typeId
 	 **/
@@ -104,6 +111,11 @@ public:
 	 * @ref UnitProperties::typeId
 	 **/
 	QPixmap* smallOverview(int unitType);
+
+	/**
+	 * @return Pixmap for specified action
+	 **/
+	QPixmap* actionPixmap(UnitAction action);
 
 	/**
 	 * @return The color of the team of this player. See also @ref

@@ -64,6 +64,7 @@ public:
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<QCanvasPixmapArray> mSprite;
+	QIntDict<QPixmap> mActionPixmaps;
 
 	QIntDict<QCanvasPixmapArray> mFacilityBigShot;
 	QIntDict<QCanvasPixmapArray> mMobileBigShot;
@@ -94,6 +95,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mSprite.setAutoDelete(true);
+ d->mActionPixmaps.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
  mShot = 0;
  
@@ -117,6 +119,7 @@ void SpeciesTheme::reset()
  d->mUnitProperties.clear();
  d->mFacilityBigShot.clear();
  d->mMobileBigShot.clear();
+ d->mActionPixmaps.clear();
  delete mShot;
  mShot = 0;
 }
@@ -141,6 +144,11 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
 
  // the initial values for the units - config files :-)
  readUnitConfigs();
+
+ // action pixmaps - it doesn't hurt
+ if(!loadActionGraphics()) {
+	kdError() << k_funcinfo << "Couldn't load action pixmaps" << endl;
+ }
 
  if (!loadShot()) {
 	kdError() << "Could not load shot sequence" << endl;
@@ -223,6 +231,38 @@ bool SpeciesTheme::loadUnit(int type)
  return true;
 }
 
+bool SpeciesTheme::loadActionGraphics()
+{
+ // Keep this code in sync with UnitAction enum in global.h!
+ // TODO: make this configurable (introduce index.desktop or ui.desktop in
+ //  theme path)
+ QString actionPath = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/attack.png");
+ actionPath += "boson/themes/ui/standard/";
+ kdDebug() << k_funcinfo << "action Path: " << actionPath << endl;
+
+ QPixmap* attack = new QPixmap(actionPath + "attack.png");
+ d->mActionPixmaps.insert((int)ActionAttack, attack);
+ if(!attack) {
+	kdError() << k_funcinfo << "NULL attack pixmap!" << endl;
+	return false;
+ }
+
+ QPixmap* move = new QPixmap(actionPath + "move.png");
+ d->mActionPixmaps.insert((int)ActionMove, move);
+ if(!move) {
+	kdError() << k_funcinfo << "NULL move pixmap!" << endl;
+	return false;
+ }
+
+ QPixmap* stop = new QPixmap(actionPath + "stop.png");
+ d->mActionPixmaps.insert((int)ActionStop, stop);
+ if(!stop) {
+	kdError() << k_funcinfo << "NULL stop pixmap!" << endl;
+	return false;
+ }
+ return true;
+}
+
 QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
 {
  QCanvasPixmapArray* array = d->mSprite[unitType];
@@ -268,7 +308,11 @@ QPixmap* SpeciesTheme::smallOverview(int unitType)
  return pix;
 }
 
-
+QPixmap* SpeciesTheme::actionPixmap(UnitAction action)
+{
+ // Check for NULL?
+ return d->mActionPixmaps[(int)action];
+}
 
 bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool withMask, bool with_team_color)
 {

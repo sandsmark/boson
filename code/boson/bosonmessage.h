@@ -58,6 +58,7 @@ public:
 		MoveMine = 105,
 		MoveRepair = 106,
 		MoveRefine = 107,
+		MoveStop = 108,  // Stop unit(s) from moving or attacking
 
 
 	// the last message ID:
