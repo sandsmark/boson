@@ -76,14 +76,14 @@ BOPROFILING_SRC= \
 	bosonprofiling.cpp \
 	boprofilingmain.cpp
 
-botriangles_test_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-botriangles_test_LDADD = \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
-		$(LIB_QT) $(LIB_KDECORE) \
-		-l3ds
-botriangles_test_SOURCES = \
-		bomesh.cpp bo3dtools.cpp bosonconfig.cpp \
-		botriangles_test.cpp
+#botriangles_test_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+#botriangles_test_LDADD = \
+#		$(top_builddir)/boson/bodebug/libbodebug.la \
+#		$(LIB_QT) $(LIB_KDECORE) \
+#		-l3ds
+#botriangles_test_SOURCES = \
+#		bomesh.cpp bo3dtools.cpp bosonconfig.cpp \
+#		botriangles_test.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \
