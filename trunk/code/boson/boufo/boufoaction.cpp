@@ -1274,7 +1274,16 @@ const BoUfoStdActionInfo g_actionInfo[] = {
 	{ BoUfoStdAction::KeyBindings, KStdAccel::AccelNone, 0, "options_configure_keybinding", I18N_NOOP("Configure S&hortcuts..."), 0, "configure_shortcuts"},
 	{ BoUfoStdAction::Preferences, KStdAccel::AccelNone, 0, "options_configure", I18N_NOOP("&Configure %1..."), 0, "configure"},
 
-	{ BoUfoStdAction::FullScreen, KStdAccel::FullScreen, 0, "fullscreen", I18N_NOOP("F&ull Screen Mode"), 0, "window_fullscreen"},
+
+	// TODO: In KDE > 3.3 there is a "fullscreen" action in
+	// ui_standards.rc. Use it!
+	// -> For that we need to make sure that an action that appears in two
+	// different files will appear only once in the resulting file after
+	// merging, otherwise the fullscreen menu item will appear twice for
+	// some people (once from ui_standards.rc and once from our own *ui.rc
+	// file) or not at all (if we remove it from our files, it won't appear
+	// for people with KDE <= 3.3)
+	{ BoUfoStdAction::FullScreen, KStdAccel::FullScreen, 0, "window_fullscreen", I18N_NOOP("F&ull Screen Mode"), 0, "window_fullscreen"},
 };
 
 const BoUfoStdActionInfo* infoPtr(BoUfoStdAction::StdAction id)
