@@ -642,6 +642,8 @@ void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
 	mScaleTrack->loadTrack(d->scl_track);
 	mHideTrack->loadTrack(d->hide_track);
 	mMorphTrack->loadTrack(d->morph_track);
+ } else {
+	emit signalDisplayTrack(0);
  }
  mPositionLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mPositionTrack->flags()).arg(mPositionTrack->keyCount()));
  mRotationLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mRotationTrack->flags()).arg(mRotationTrack->keyCount()));
@@ -649,12 +651,27 @@ void BoNodeTracksWidget::setNodeObjectData(Lib3dsObjectData* d)
  mHideLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mHideTrack->flags()).arg(mHideTrack->keyCount()));
  mMorphLabel->setText(i18n("Flag: %1 Key Number: %2").arg(mMorphTrack->flags()).arg(mMorphTrack->keyCount()));
 
- mPosition->setOn(false);
- mRotation->setOn(false);
- mScale->setOn(false);
- mHide->setOn(false);
- mMorph->setOn(false);
- emit signalDisplayTrack(0);
+ if (mPosition->isOn()) {
+	mPosition->toggle();
+	mPosition->toggle();
+ }
+ if (mRotation->isOn()) {
+	mRotation->toggle();
+	mRotation->toggle();
+ }
+ if (mScale->isOn()) {
+	mScale->toggle();
+	mScale->toggle();
+ }
+ if (mHide->isOn()) {
+	mHide->toggle();
+	mHide->toggle();
+ }
+ if (mMorph->isOn()) {
+	mMorph->toggle();
+	mMorph->toggle();
+ }
+
 }
 
 BoTrackWidget::BoTrackWidget(QWidget* parent) : QWidget(parent)
@@ -1735,6 +1752,7 @@ void KGameModelDebug::updateNodePage()
 	return;
  }
  slotConstructNodeList();
+ d->mNodeView->setCurrentItem(d->mNodeView->firstChild());
  d->mCurrentFrame->setRange(0, d->m3ds->frames - 1);
  slotFrameChanged(0);
 
@@ -1847,6 +1865,11 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
  d->mFaceList->clear();
  d->mListItem2Face.clear();
 
+ if (!item) {
+	boDebug() << k_funcinfo << "NULL item" << endl;
+	return;
+ }
+
  Lib3dsMesh* mesh = d->mListItem2Mesh[item];
  if (!mesh) {
 	boWarning() << k_funcinfo << "NULL mesh" << endl;
@@ -1906,12 +1929,18 @@ void KGameModelDebug::slotDisplayMaterial(QListBoxItem* item)
 
 void KGameModelDebug::slotDisplayNode(QListViewItem* item)
 {
+ if (!item) {
+	boDebug() << k_funcinfo << "NULL item" << endl;
+	return;
+ }
+ item->setSelected(true);
  Lib3dsNode* node = d->mListItem2Node[item];
 
  if (!node) {
 	boWarning() << k_funcinfo << "NULL node" << endl;
 	return;
  }
+ boDebug() << k_funcinfo << node->name << endl;
 
  d->mNodeMatrix->setMatrix(node->matrix);
  d->mNodeObjectData->setNodeObjectData(&node->data.object);
@@ -1922,7 +1951,7 @@ void KGameModelDebug::slotFrameChanged(int frame)
  if (!d->m3ds) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << frame << endl;
  if (frame >= d->m3ds->frames) {
 	boWarning() << k_funcinfo << "invalid frame " << frame << endl;
 	return;
