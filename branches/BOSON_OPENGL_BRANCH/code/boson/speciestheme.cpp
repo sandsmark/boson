@@ -559,7 +559,7 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
 				} else if ( ((qRed(*p) > 0x80) &&
 						(qGreen(*p) < 0x70) &&
 						(qBlue(*p) < 0x70))) {
-					continue;
+//					continue; // FIXME: this should not be used.. but somehow I have problems with the above, currently :(
 					*p = teamColor().rgb();
 				}
 			}
