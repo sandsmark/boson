@@ -653,8 +653,6 @@ void BosonWidgetBase::initKActions()
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
  (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
 		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
- (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
-		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
  KToggleAction* enablecolormap = new KToggleAction(i18n("Enable colormap"),
 		KShortcut(), 0, 0, actionCollection(), "debug_colormap_enable");
  enablecolormap->setChecked(false);
