@@ -203,7 +203,7 @@ void ModelPreview::paintGL()
 		// FIXME: this isn't good here...
 		mModel->enablePointer();
 
-		f->renderFrame();
+		f->renderFrame(0);
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.
@@ -245,6 +245,7 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
 	boError() << k_funcinfo << "empty filename" << endl;
 	return;
  }
+ s->loadObjects();
  mModel = s->objectModel(file);
  if (!mModel) {
 	boError() << k_funcinfo << "NULL model" << endl;
