@@ -6,8 +6,8 @@
 function draw_box($title)
 {
 echo "
-<table cellspacing=\"1\" cellpadding=\"2\" bgcolor=\"#8080ff\" width=\"100%\">
-  <tr><td bgcolor=\"#b0b0ff\">
+<table cellspacing=\"1\" cellpadding=\"2\" width=\"100%\" class=\"box\">
+  <tr><td class=\"boxcell\">
     <font class=\"boxtitle\">&nbsp;&nbsp;$title</font>
   </td></tr>
 </table>";
@@ -19,13 +19,13 @@ echo "
 function draw_bigbox_begin($title)
 {
 echo "
-<table cellspacing=\"1\" cellpadding=\"2\" bgcolor=\"#8080ff\" width=\"100%\">
-  <tr><td bgcolor=\"#b0b0ff\">
+<table cellspacing=\"1\" cellpadding=\"2\" width=\"100%\" class=\"bigbox\">
+  <tr><td class=\"bigboxtitlecell\">
     <font class=\"bigboxtitle\">&nbsp;&nbsp;$title</font>
   </td></tr>
-  <tr><td bgcolor=\"#e0e0ff\" align=\"center\">
+  <tr><td align=\"center\" class=\"bigboxcell\">
     <br>
-    <table cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"#e0e0ff\" width=\"99%\">";
+    <table cellspacing=\"0\" cellpadding=\"0\" width=\"99%\" class=\"bigboxarea\">";
 }
 
 /**
@@ -47,7 +47,7 @@ echo "
 function draw_bigbox_subheader($text, $style = "bigboxsubheader")
 {
 echo "
-      <tr><td bgcolor=\"#c0c0ff\">
+      <tr><td class=\"bigboxsubheadercell\">
         <font class=\"$style\">&nbsp;$text</font>
       </td></tr>";
 }

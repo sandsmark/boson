@@ -5,7 +5,7 @@ function news_article($title, $date, $fulltext)
 echo "
       <!-- News item with title $title -->";
 echo "
-      <tr><td bgcolor=\"#c0c0ff\">
+      <tr><td class=\"bigboxsubheadercell\">
         <font class=\"newstitle\">&nbsp;$title</font><font class=\"newsdate\">&nbsp;&nbsp;$date</font>
       </td></tr>";
 draw_bigbox_text($fulltext, "newstext");
