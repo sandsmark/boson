@@ -300,7 +300,11 @@ void BosonCommandWidget::setUnit(Unit* unit)
 
  show();
  d->mHealth->show();
- d->mReload->show(); // TODO don't show if unit cannot shoot
+ if (mUnit->unitProperties()->canShoot()) {
+	d->mReload->show();
+ } else {
+	d->mReload->hide();
+ }
 
  setProductionCount(0);
  setGrayOut(false);
