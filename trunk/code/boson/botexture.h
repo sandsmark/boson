@@ -345,6 +345,27 @@ class BoTextureManager
 
     void textureFilterChanged();
 
+    /**
+     * @return The amount of memory that is used for all textures currently
+     * loaded.
+     * Note that this is just an <em>approximated</em> value, the actual memory
+     * usage depends on the implementation of the graphics card driver. See also
+     * @ref BoTexture::memoryUsed
+     **/
+    int usedTextureMemory() const
+    {
+      return mUsedTextureMemory;
+    }
+
+    /**
+     * @return The number of textures currently registered. See also @ref
+     * BoTexture
+     **/
+    unsigned int textureCount() const
+    {
+      return mTextures.count();
+    }
+
 
   private:
     static BoTextureManager* mManager;
@@ -376,3 +397,7 @@ class BoTextureManager
 };
 
 #endif // BOTEXTURE_H
+
+/*
+ * vim: et sw=2
+ */

@@ -311,6 +311,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugBoundingBoxes = false;
  mDebugFPS = false;
  mDebugAdvanceCalls = false;
+ mDebugTextureMemory = false;
  mShowResources = true;
  mEnableColormap = false;
  mDisableModelLoading = false;

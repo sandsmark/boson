@@ -340,6 +340,7 @@ public:
 		mOpenGLCamera = 0;
 		mRenderCounts = 0;
 		mAdvanceCalls = 0;
+		mTextureMemory = 0;
 		mGamePaused = 0;
 		mUfoChat = 0;
 		mUfoMiniMap = 0;
@@ -430,6 +431,7 @@ public:
 	BoUfoLabel* mOpenGLCamera;
 	BoUfoLabel* mRenderCounts;
 	BoUfoLabel* mAdvanceCalls;
+	BoUfoLabel* mTextureMemory;
 	BoUfoLabel* mGamePaused;
 	BosonUfoChat* mUfoChat;
 	BosonUfoMiniMap* mUfoMiniMap;
@@ -835,6 +837,9 @@ void BosonBigDisplayBase::initUfoGUI()
 
  d->mAdvanceCalls = new BoUfoLabel();
  northWest->addWidget(d->mAdvanceCalls);
+
+ d->mTextureMemory = new BoUfoLabel();
+ northWest->addWidget(d->mTextureMemory);
 
  // FIXME: this is supposed to be in the center of the screen, but the "center"
  // constraint on a UBorderLayout is not sufficient for that.
@@ -1511,6 +1516,7 @@ void BosonBigDisplayBase::updateUfoLabels()
  updateUfoLabelOpenGLCamera();
  updateUfoLabelRenderCounts();
  updateUfoLabelAdvanceCalls();
+ updateUfoLabelTextureMemory();
  d->mGamePaused->setVisible(boGame->gamePaused());
 }
 
@@ -1727,6 +1733,19 @@ void BosonBigDisplayBase::updateUfoLabelAdvanceCalls()
  text += i18n("Advance message interval: %1 ms\n").arg(Boson::advanceMessageInterval());
  text += i18n("Game speed (advance calls per advance message): %1\n").arg(boGame->gameSpeed());
  d->mAdvanceCalls->setText(text);
+}
+
+void BosonBigDisplayBase::updateUfoLabelTextureMemory()
+{
+ if (!boConfig->debugTextureMemory()) {
+	d->mTextureMemory->setVisible(false);
+	return;
+ }
+ d->mTextureMemory->setVisible(true);
+ QString text;
+ text += i18n("Texture memory in use (approximately): %1 kb\n").arg(boTextureManager->usedTextureMemory() / 1024);
+ text += i18n(" in %1 texures\n").arg(boTextureManager->textureCount());
+ d->mTextureMemory->setText(text);
 }
 
 void BosonBigDisplayBase::renderText()
