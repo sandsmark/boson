@@ -65,6 +65,8 @@ protected slots:
 	void slotPlayerJoinedGame(KPlayer*);
 	void slotPlayFieldChanged(const QString& id);
 
+	void slotUnsetKGame();
+
 signals:
 	void signalPlayerNameChanged(Player* player);
 	void signalPlayerJoinedGame(KPlayer* player);
