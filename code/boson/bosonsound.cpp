@@ -111,6 +111,10 @@ public:
 		Arts::Synth_BUS_UPLINK uplink = Arts::DynamicCast(
 				mParent->server().server().createObject(
 				"Arts::Synth_BUS_UPLINK"));
+		if (uplink.isNull()) {
+			kdError() << k_funcinfo << "NULL uplink" << endl;
+			return;
+		}
 		uplink.busname("out_soundcard");
 		Arts::connect(result, "left", uplink, "left");
 		Arts::connect(result, "right", uplink, "right");
