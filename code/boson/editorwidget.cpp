@@ -235,7 +235,7 @@ void EditorWidget::savePlayField(const QString& fileName)
 
 void EditorWidget::slotSavePlayField()
 {
- kdWarning() << k_funcinfo << "not yet implemented" << endl;
+ boWarning() << k_funcinfo << "not yet implemented" << endl;
 }
 
 void EditorWidget::slotChangeLocalPlayer(int index)

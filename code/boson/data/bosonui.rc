@@ -3,6 +3,8 @@
 <MenuBar>
   <Menu name="game"><text>&amp;Game</text>
     <Action name="game_center_base" />
+    <Action name="game_reset_view_properties" />
+    <Action name="game_grab_screenshot" />
   </Menu>
 </MenuBar>
 </kpartgui>
