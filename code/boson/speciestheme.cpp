@@ -546,6 +546,19 @@ QValueList<int> SpeciesTheme::allMobiles() const
  return list;
 }
 
+QValueList<int> SpeciesTheme::productions(QValueList<int> producers) const
+{
+ QValueList<int> list;
+ QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ while (it.current()) {
+	if (producers.contains(it.current()->producer())) {
+		list.append(it.current()->typeId());
+	}
+	++it;
+ }
+ return list;
+}
+
 bool SpeciesTheme::loadShot()
 {
  if (mShot) {

@@ -251,7 +251,11 @@ void BosonCommandFrame::slotSetProduction(Unit* unit)
  }
  Player* owner = unit->owner();
  if (!owner) {
-	kdError() << k_funcinfo << ": no owner" << endl;
+	kdError() << k_funcinfo << "no owner" << endl;
+	return;
+ }
+ if (!unit->speciesTheme()) {
+	kdError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
@@ -271,7 +275,8 @@ void BosonCommandFrame::slotSetProduction(Unit* unit)
  if (!prop->canProduce()) {
 	return;
  }
- QValueList<int> produceList = prop->produceList();
+ QValueList<int> produceList = unit->speciesTheme()->productions(prop->producerList());
+ 
  setOrderButtons(produceList, owner, (Facility*)unit);
  d->mFactory = unit;
  

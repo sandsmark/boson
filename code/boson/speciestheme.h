@@ -159,6 +159,12 @@ public:
 	QValueList<int> allMobiles() const;
 
 	/**
+	 * @return A list of all units that have a @ref UnitProperties::producer
+	 * specified in producerList.
+	 **/
+	QValueList<int> productions(QValueList<int> producerList) const;
+
+	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
 	 **/
 	void reset();
