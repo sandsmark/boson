@@ -141,6 +141,7 @@ public:
 	}
 
 	/**
+	 * @obsolete
 	 * @return The content of the map file. This is obsolete - the map file
 	 * as used in boson 0.8 got split into several files (see @ref
 	 * BosonFileConverter). The map file as used in 0.8.128 is now stored as
@@ -157,6 +158,9 @@ public:
 	 **/
 	QByteArray mapXMLData() const
 	{
+		if (!hasMapDirectory()) {
+			return QByteArray();
+		}
 		return fileData(QString::fromLatin1("map.xml"), QString::fromLatin1("map"));
 	}
 
@@ -192,10 +196,28 @@ public:
 
 	/**
 	 * @return The content of the scenario.xml file
+	 *
+	 * @obsolete. Has been replaced by @ref canvasData and @ref playersData
 	 **/
 	QByteArray scenarioData() const
 	{
 		return fileData(QString::fromLatin1("scenario.xml"));
+	}
+
+	/**
+	 * @return The content of the canvas.xml file
+	 **/
+	QByteArray canvasData() const
+	{
+		return fileData(QString::fromLatin1("canvas.xml"));
+	}
+
+	/**
+	 * @return The content of the players.xml file
+	 **/
+	QByteArray playersData() const
+	{
+		return fileData(QString::fromLatin1("players.xml"));
 	}
 
 	/**

@@ -35,6 +35,53 @@ class QDomElement;
 class QDataStream;
 
 /**
+ * CLass that provides information about the playfield, such as map size and
+ * winning conditions.
+ *
+ * These information can be displayed on the startup widgets.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonPlayFieldInformation
+{
+public:
+	BosonPlayFieldInformation();
+	~BosonPlayFieldInformation();
+
+	unsigned int mapWidth() const
+	{
+		return mMapWidth;
+	}
+	unsigned int mapHeight() const
+	{
+		return mMapHeight;
+	}
+
+	unsigned int minPlayers() const
+	{
+		return mMinPlayers;
+	}
+	int maxPlayers() const
+	{
+		return mMaxPlayers;
+	}
+
+	bool loadInformation(BPFFile* file);
+
+protected:
+	bool loadPlayersInformation(const QByteArray& xml);
+	bool loadMapInformation(const QByteArray& xml);
+
+private:
+	unsigned int mMapWidth;
+	unsigned int mMapHeight;
+	// AB: add description data ?
+
+	unsigned int mMinPlayers;
+	int mMaxPlayers;
+};
+
+
+/**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonPlayField : public QObject
@@ -224,6 +271,7 @@ protected:
 
 private:
 	BosonMap* mMap;
+	BosonPlayFieldInformation* mPlayFieldInformation;
 	BosonScenario* mScenario;
 	BPFDescription* mDescription;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())

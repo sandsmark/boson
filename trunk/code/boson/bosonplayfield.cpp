@@ -43,6 +43,7 @@
 // the version of the stream that the ADMIN sends to start a game
 #define BO_ADMIN_STREAM_VERSION (Q_UINT32)0x01
 
+
 class BosonPlayFieldData : public BosonDataObject
 {
 public:
@@ -96,6 +97,111 @@ bool BosonPlayFieldData::load()
 }
 
 
+
+BosonPlayFieldInformation::BosonPlayFieldInformation()
+{
+ mMapWidth = 0;
+ mMapHeight = 0;
+ mMinPlayers = 0;
+ mMaxPlayers = 0;
+}
+
+BosonPlayFieldInformation::~BosonPlayFieldInformation()
+{
+}
+
+bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
+{
+ if (!file) {
+	BO_NULL_ERROR(file);
+	return false;
+ }
+ QByteArray mapXML;
+ QByteArray playersXML;
+ if (!file->hasMapDirectory()) {
+	// a missing map/ directory means that we have an old file. convert it
+	// to out new format.
+	// this might be pretty slow!
+	boWarning() << k_funcinfo << "loading old file format in " << file->fileName() << endl;
+	QByteArray scenarioXML = file->scenarioData();
+	BosonFileConverter converter;
+	QByteArray canvasXML;
+	if (!converter.convertScenario_From_0_8_To_0_9(scenarioXML, &playersXML, &canvasXML)) {
+		boError() << k_funcinfo << "failed converting from 0.8 file format" << endl;
+		return false;
+	}
+	if (playersXML.size() == 0) {
+		boError() << k_funcinfo << "empty playersXML after successfull conversion. code bug?" << endl;
+		return false;
+	}
+
+	mapXML = file->mapXMLData();
+	if (mapXML.size() == 0) {
+		QByteArray map = file->mapData();
+		if (map.size() == 0) {
+			boError() << k_funcinfo << "neither map nor map.xml found. broken file." << endl;
+			return false;
+		}
+		if (!file->hasFile("texmap")) {
+			boWarning() << k_funcinfo << "converting map from boson 0.8 - this will take some time!" << endl;
+			QByteArray texMap;
+			if (!converter.convertMapFile_From_0_8_To_0_9(map, &mapXML, &texMap)) {
+				boError() << k_funcinfo << "failed converting from 0.8 file" << endl;
+				return false;
+			}
+		} else {
+			boDebug() << k_funcinfo << "converting map from boson 0.8.128 to map.xml" << endl;
+			if (!converter.convertMapFile_From_0_8_128_To_0_9(map, &mapXML)) {
+				boError() << k_funcinfo << "failed converting from 0.8.128 file" << endl;
+				return false;
+			}
+		}
+	}
+ } else {
+	playersXML = file->playersData();
+ }
+
+ if (!loadPlayersInformation(playersXML)) {
+	boError() << k_funcinfo << "unable to load players information" << endl;
+	return false;
+ }
+ if (!loadMapInformation(mapXML)) {
+	boError() << k_funcinfo << "unable to load canvas information" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+bool BosonPlayFieldInformation::loadPlayersInformation(const QByteArray& xml)
+{
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument doc(QString::fromLatin1("Players"));
+ if (!doc.setContent(QCString(xml), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ return true;
+}
+
+bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
+{
+ QString errorMsg;
+ int line = 0, column = 0;
+ QDomDocument doc(QString::fromLatin1("BosonMap"));
+ if (!doc.setContent(QCString(xml), &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "unable to set XML content - error in line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ return true;
+}
+
+
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
  mMap = 0;
@@ -103,6 +209,7 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
  mFile = 0;
  mPreLoaded = false;
  mLoaded = false;
+ mPlayFieldInformation = new BosonPlayFieldInformation();
  mDescription = new BPFDescription();
 }
 
@@ -114,6 +221,7 @@ BosonPlayField::~BosonPlayField()
  delete mScenario;
  delete mDescription;
  delete mFile;
+ delete mPlayFieldInformation;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -212,6 +320,10 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  mFile = new BPFFile(file, true);
  if (!mFile->checkTar()) {
 	boError() << k_funcinfo << "Oops - broken file " << file << endl;
+	return false;
+ }
+ if (!mPlayFieldInformation->loadInformation(mFile)) {
+	boError() << k_funcinfo << "Could not load playfield information" << endl;
 	return false;
  }
  if (!loadDescriptionFromFile(mFile->descriptionData())) {
