@@ -121,17 +121,17 @@ void BosonStartEditorWidget::slotCancel()
  emit signalCancelled();
 }
 
-inline Boson* BosonStartEditorWidget::game() const
+Boson* BosonStartEditorWidget::game() const
 {
  return mTop->game();
 }
 
-inline Player* BosonStartEditorWidget::player() const
+Player* BosonStartEditorWidget::player() const
 {
  return mTop->player();
 }
 
-inline BosonPlayField* BosonStartEditorWidget::playField() const
+BosonPlayField* BosonStartEditorWidget::playField() const
 {
  return mTop->playField();
 }

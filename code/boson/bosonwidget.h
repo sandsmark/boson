@@ -81,12 +81,12 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
-	inline BosonCanvas* canvas() const;
+	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
 	inline BoDisplayManager* displaymanager() const { return mDisplayManager; }
-	inline Boson* game() const;
-	inline BosonPlayField* playField() const;
-	inline Player* player() const;
+	Boson* game() const;
+	BosonPlayField* playField() const;
+	Player* player() const;
 
 	void initGameMode();
 

@@ -589,7 +589,7 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
   return dist;
 }
 
-inline void BosonPath::neighbor(int& x, int& y, Direction d)
+void BosonPath::neighbor(int& x, int& y, Direction d)
 {
   if((d == NorthEast) || (d == North) || (d == NorthWest))
   {
@@ -653,9 +653,9 @@ float BosonPath::cost(int x, int y)
 }
 
 #ifdef USE_STL
-inline void BosonPath::getFirst(vector<PathNode>& v, PathNode& n)
+void BosonPath::getFirst(vector<PathNode>& v, PathNode& n)
 #else
-inline void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
+void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
 #endif
 {
   n = v.front();
@@ -668,7 +668,7 @@ inline void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
 #endif
 }
 
-inline Direction BosonPath::reverseDir(Direction d)
+Direction BosonPath::reverseDir(Direction d)
 {
   return (Direction)(((int)d + 4) % 8);
 }
@@ -692,7 +692,7 @@ void BosonPath::debug() const
  kdDebug() << k_funcinfo << "(end)" << endl;
 }
 
-inline bool BosonPath::inRange(int x, int y)
+bool BosonPath::inRange(int x, int y)
 {
   /// TODO: maybe use different check (not manhattan dist.)
   if(QABS(x - mGoalx) > mRange || QABS(y - mGoaly) > mRange)

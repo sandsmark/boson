@@ -601,17 +601,17 @@ QString BosonNewGameWidget::playFieldString() const
   return mMapIndex2Identifier[mMap];
 }
 
-inline Boson* BosonNewGameWidget::game() const
+Boson* BosonNewGameWidget::game() const
 {
   return mTop->game();
 }
 
-inline Player* BosonNewGameWidget::player() const
+Player* BosonNewGameWidget::player() const
 {
   return mTop->player();
 }
 
-inline BosonPlayField* BosonNewGameWidget::playField() const
+BosonPlayField* BosonNewGameWidget::playField() const
 {
   return mTop->playField();
 }
