@@ -219,8 +219,7 @@ public:
 	bool canGoOnWater() const;
 
 	/**
-	 * @return Whether this is an aircraft unit. Currently there is only
-	 * one.
+	 * @return Whether this is an aircraft unit.
 	 **/
 	bool isAircraft() const { return mTerrain == Air; }
 
