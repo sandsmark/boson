@@ -113,7 +113,7 @@ void OptionsDialog::initGeneralPage()
 
 void OptionsDialog::initCursorPage()
 {
- QVBox* vbox = addVBoxPage(i18n("&Cursor"));
+ QVBox* vbox = addVBoxPage(i18n("C&ursor"));
  QHBox* hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Cursor"), hbox);
  d->mCursor = new QComboBox(hbox);
