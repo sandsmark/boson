@@ -122,7 +122,7 @@ my $rect_inside_spacing = 3; # spacing from rect to the text inside the rect
 $count = 0;
 
 my $image = Image::Magick->new(size=>$imagewidth."x".$imageheight);
-$image->Read('xc:white');
+$image->Read('xc:black');
 
 my %xposition; # id of unit -> x position of units' rectangle
 my %yposition; # id of unit -> y position of bottom of units' rectangle
@@ -264,7 +264,7 @@ sub draw_line($$$$)
 	my $towidth = $boxwidth{$to_id};
 	$fromx = $fromx + $fromwidth/2;
 	$tox = $tox + $towidth/2;
-	$image->Draw(primitive=>'line', stroke=>'black', points=>"$fromx,$fromy $tox,$toy");
+	$image->Draw(primitive=>'line', stroke=>'orange', points=>"$fromx,$fromy $tox,$toy");
 }
 
 sub print_mesg()
