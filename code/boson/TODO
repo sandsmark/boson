@@ -9,10 +9,8 @@ Game TODOs
   QCanvas: when the widget is scrolled QCanvas does not use double buffering
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
-- BosonPath needs to be improved greatly - in progress
 - AI
 - follow-mode for units
-- _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
 - BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
@@ -30,6 +28,8 @@ Game TODOs
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
 - pause
+- Improve pathfinding for groups - if unit can't go to goal, it should go to
+  some other tile near goal
 
 
 Editor (map, unit, scenario) TODOs
@@ -43,6 +43,8 @@ Editor (map, unit, scenario) TODOs
   game speed!!
 - don't load BosonTiles twice: once for QCanvas::setTiles and once for
   BoOrderWidget
+- write EditorWidget for editor which should replace BosonWidget that doesn't
+  support editor anymore
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done
