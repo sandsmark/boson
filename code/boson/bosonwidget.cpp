@@ -18,6 +18,7 @@
 #include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
+#include "bosoncomputerio.h"
 
 #include "defines.h"
 
@@ -225,6 +226,9 @@ void BosonWidget::addComputerPlayer(const QString& name)
 {
  Player* p = new Player;
  p->setName(name);
+ BosonComputerIO* io = new BosonComputerIO();
+ io->setReactionPeriod(50); // FIXME hardcoded
+ p->addGameIO(io); // FIXME: NOT in editor mode!
  d->mBoson->addPlayer(p);
  p->loadTheme(SpeciesTheme::defaultSpecies(), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
 }

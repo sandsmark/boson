@@ -47,6 +47,8 @@ public slots:
 	 **/
 	void slotSendAddUnit(int unitType, int x, int y, Player* owner);
 
+	void slotAdvanceComputerPlayers();
+
 signals:
 	/**
 	 * Start a scenario. This should be done after loading map and scenario
@@ -102,6 +104,9 @@ protected slots:
 	void slotLoad(QDataStream& stream);
 
 	void slotReplacePlayerIO(KPlayer* player, bool* remove);
+
+	void slotPlayerJoinedGame(KPlayer*);
+	void slotPlayerLeftGame(KPlayer*);
 
 private:
 	BosonPrivate* d;

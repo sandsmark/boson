@@ -350,12 +350,9 @@ bool VisualUnit::load(QDataStream& stream)
 
 bool VisualUnit::inRange(VisualUnit* target) const
 {
- QRect r = boundingRect();
- r.setTop((r.top() > (int)range()) ? r.top() - range() : 0);
- r.setBottom(r.bottom() + range());
- r.setRight(r.right() + range());
- r.setLeft((r.left() > (int)range()) ? r.left() - range() : 0);
- return canvas()->collisions(r).contains(target);
+ // maybe we should use an own algorithm here - can be faster than this generic
+ // one
+ return unitsInRange().contains(target);
 }
 
 void VisualUnit::attackUnit(VisualUnit* target)
@@ -394,6 +391,44 @@ void VisualUnit::attackUnit(VisualUnit* target)
  }
 }
 
+
+QCanvasItemList VisualUnit::unitsInRange() const
+{
+ // TODO: we use a *rect* for the range this is extremely bad.
+ // ever heard about pythagoras ;-) ?
+ 
+ QRect r = boundingRect();
+ r.setTop((r.top() > (int)range()) ? r.top() - range() : 0);
+ r.setBottom(r.bottom() + range());
+ r.setRight(r.right() + range());
+ r.setLeft((r.left() > (int)range()) ? r.left() - range() : 0);
+
+ QCanvasItemList items = canvas()->collisions(r);
+ QCanvasItemList inRange;
+ QCanvasItemList::Iterator it = items.begin();
+ for (; it != items.end(); ++it) {
+	if ((*it)->rtti() >= RTTI::UnitStart) {
+		// TODO: remove the items from inRange which are not actually in range (hint:
+		// pythagoras)
+		inRange.append(*it);
+	}
+	++it;
+ }
+ return inRange;
+}
+
+QCanvasItemList VisualUnit::enemyUnitsInRange() const
+{
+ QCanvasItemList units = unitsInRange();
+ QCanvasItemList enemy;
+ QCanvasItemList::Iterator it = units.begin();
+ for (; it != units.end(); ++it) {
+	if (((VisualUnit*)(*it))->owner() != this) {
+		enemy.append(*it);
+	}
+ }
+ return enemy;
+}
 
 
 
