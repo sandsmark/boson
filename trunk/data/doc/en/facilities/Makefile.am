@@ -20,7 +20,7 @@ mineral_refinery.png oiltower.png powerplant.png prison.png \
 oil_refinery.png repairpad.png samsite.png techcenter.png turret.png \
 tree.png warfactory.png
 
-# Condiguration ends here!
+# Configuration ends here!
 
 docdir=$(kde_htmldir)/$(KDE_LANG)/boson/$(BO_DOC_DIR)
 
