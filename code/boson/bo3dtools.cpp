@@ -162,6 +162,16 @@ void BoVector3::save(KConfig* cfg, QString key)
   BosonConfig::writeFloatNumList(list, cfg, key);
 }
 
+QString BoVector3::debugString(const BoVector3& v)
+{
+  return QString("%1,%2,%3").arg(v.x()).arg(v.y()).arg(v.z());
+}
+
+void BoVector3::debugVector(const BoVector3& v)
+{
+  boDebug() << "vector: " << debugString(v) << endl;
+}
+
 QDataStream& operator<<(QDataStream& s, const BoVector3& v)
 {
   return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2];
@@ -191,6 +201,16 @@ BoVector4 BoVector4::load(KConfig* cfg, QString key)
     return BoVector4();
   }
   return BoVector4(list[0], list[1], list[2], list[3]);
+}
+
+QString BoVector4::debugString(const BoVector4& v)
+{
+  return QString("%1,%2,%3,%4").arg(v.x()).arg(v.y()).arg(v.z()).arg(v.w());
+}
+
+void BoVector4::debugVector(const BoVector4& v)
+{
+  boDebug() << "vector: " << debugString(v) << endl;
 }
 
 
