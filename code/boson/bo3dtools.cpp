@@ -379,7 +379,7 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
  mag = (GLfloat) sqrt( x*x + y*y + z*z ); // AB: mesa uses GL_SQRT here
 
- if (mag <= 1.0e-4) 
+ if (mag <= 1.0e-4)
  {
    // generate an identity matrix and return
    loadIdentity();
@@ -622,7 +622,7 @@ void BoMatrix::extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z) 
  up.setY(foo1 / z[2]);
 
  up.setX((up.y() * z[0] + x[2]) / z[1]);
- 
+
 }
 
 
@@ -1209,6 +1209,60 @@ bool Bo3dTools::checkError(GLenum* error, QString* errorString, QString* errorNa
   }
   return ret;
 }
+
+GLenum Bo3dTools::string2GLBlendFunc(const QString& str)
+{
+  if(str == "GL_SRC_ALPHA")
+  {
+    return GL_SRC_ALPHA;
+  }
+  else if(str == "GL_ONE_MINUS_SRC_ALPHA")
+  {
+    return GL_ONE_MINUS_SRC_ALPHA;
+  }
+  else if(str == "GL_ONE")
+  {
+    return GL_ONE;
+  }
+  else if(str == "GL_ZERO")
+  {
+    return GL_ZERO;
+  }
+  else if(str == "GL_DST_COLOR")
+  {
+    return GL_DST_COLOR;
+  }
+  else if(str == "GL_ONE_MINUS_DST_COLOR")
+  {
+    return GL_ONE_MINUS_DST_COLOR;
+  }
+  else if(str == "GL_DST_ALPHA")
+  {
+    return GL_DST_ALPHA;
+  }
+  else if(str == "GL_ONE_MINUS_DST_ALPHA")
+  {
+    return GL_ONE_MINUS_DST_ALPHA;
+  }
+  else if(str == "GL_SRC_ALPHA_SATURATE")
+  {
+    return GL_SRC_ALPHA_SATURATE;
+  }
+  else if(str == "GL_SRC_COLOR")
+  {
+    return GL_SRC_COLOR;
+  }
+  else if(str == "GL_ONE_MINUS_SRC_COLOR")
+  {
+    return GL_ONE_MINUS_SRC_COLOR;
+  }
+  else
+  {
+    // Invalid string was given
+    return GL_INVALID_ENUM;
+  }
+}
+
 
 /*
  * vim:et sw=2
