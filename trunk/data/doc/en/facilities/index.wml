@@ -33,5 +33,5 @@
     </dl>
     
 
-#include "nav.wml" before_url="../game/moving.html" before_text="Moving units" after_url="map.html" after_text="Facilities dependency tree"        
+#include "nav.wml" before_url="../game/moving.html" before_text="Selecting and moving units" after_url="map.html" after_text="Facilities dependency tree"        
 #include "footer.wml"

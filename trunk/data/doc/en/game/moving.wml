@@ -1,13 +1,15 @@
 #include "top.wml"
 
     <h1>
-      Moving Units
+      Selecting and moving Units
     </h1>
     <p>
-	<h4>Moving a unit:</h4>
-	Select a unit and click with the right mouse button on the map or on the minimap.<br><br>
+	<h4>Selecting a unit</h4>
+	There are no special select features yet. Just click on the unit.<br><b>
 	<h4>Grouping units</h4>
-	You can also move more than only one unit. Hold the left mouse button down and now encircle the units you like to move.<br>
+	You can also move more than only one unit. Hold the left mouse button down and now encircle the units you like to select.<br><br>
+	<h4>Moving a unit:</h4>
+	Select a unit or group and click with the right mouse button on the map or on the minimap.<br>
     </p>
     
 #include "nav.wml" before_url="buildunit.html" before_text="Building units" after_url="../facilities/index.html" after_text="Facilities"

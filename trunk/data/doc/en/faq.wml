@@ -8,23 +8,22 @@
     </p>
     <ol>
       <li><a href="#1">When is Boson finished?</a></li>
-      <li><a href="#2">When is Boson finished?</a></li>
-      <li><a href="#3">When is Boson finished?</a></li>
-      <li><a href="#4">When is Boson finished?</a></li>
-      <li><a href="#5">When is Boson finished?</a></li>
+      <li><a href="#2">Why is Boson so slow?</a></li>
     </ol>
     
     <p>&nbsp;</p>
     <a name="1">When is Boson finished?</a>
     <p>When it's done.</p>
-    <a name="2">When is Boson finished?</a>
-    <p>When it's done.</p>
-    <a name="3">When is Boson finished?</a>
-    <p>When it's done.</p>
-    <a name="4">When is Boson finished?</a>
-    <p>When it's done.</p>
-    <a name="5">When is Boson finished?</a>
-    <p>When it's done.</p>
+    
+    <p>&nbsp;</p>
+    <a name="2">Why is boson so slow?</a>
+    <p>
+    There are many reasons, some things that can help:<br>
+    - Check your hardware: <a href="started.html">here</a><br>
+    - Try resizing the window or switch to fullscreen mode<br>
+    - Reduce the update interval in the Boson settings<br>
+    - Change the color depth of your XServer<br>
+    </p>
 
 #include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" 
 #include "footer.wml"
