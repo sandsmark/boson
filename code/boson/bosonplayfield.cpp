@@ -325,11 +325,13 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "Unable to save scenario" << endl;
 	return false;
  }
+ boDebug() << k_funcinfo << "Save height map" << endl;
  QByteArray heightMap = mMap->saveHeightMapImage();
  if (heightMap.size() == 0) {
 	boError() << k_funcinfo << "Unable to save height map" << endl;
 	return false;
  }
+ boDebug() << k_funcinfo << "Save height map done" << endl;
 
  QString topDir = fileInfo.fileName();
  if (topDir.right(7) == QString::fromLatin1(".tar.gz")) {
