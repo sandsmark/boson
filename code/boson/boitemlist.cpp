@@ -23,6 +23,7 @@
 #include "unit.h"
 
 #include <qcanvas.h>
+#include <kdebug.h>
 
 QValueList<QCanvasItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
 {
@@ -75,7 +76,7 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
  //  makes this method much faster
 
  // Flying units never collide - different altitudes
- if(forUnit->isFlying()) {
+ if(forUnit && forUnit->isFlying()) {
 	return false;
  }
 
