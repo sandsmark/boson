@@ -60,16 +60,16 @@ void mainWidget::keyReleaseEvent ( QKeyEvent * e )
 {
 	switch (e->key()) {
 		case Key_Left:
-			etl->relativeMoveView(-ARROW_KEY_STEP,0);
+			etl->relativeMoveView( QPoint(-ARROW_KEY_STEP,0) );
 			break;
 		case Key_Right:
-			etl->relativeMoveView(ARROW_KEY_STEP,0);
+			etl->relativeMoveView( QPoint(ARROW_KEY_STEP,0) );
 			break;
 		case Key_Up:
-			etl->relativeMoveView(0, -ARROW_KEY_STEP);
+			etl->relativeMoveView( QPoint(0, -ARROW_KEY_STEP) );
 			break;
 		case Key_Down:
-			etl->relativeMoveView(0, ARROW_KEY_STEP);
+			etl->relativeMoveView( QPoint(0, ARROW_KEY_STEP) );
 			break;
 	}
 }

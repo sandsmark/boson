@@ -103,9 +103,9 @@ void visualCanvas::setCell(int i, int j, cell_t c)
 
 
 
-QCanvasItem * visualCanvas::findUnitAt(int x, int y)
+QCanvasItem * visualCanvas::findUnitAt(QPoint p)
 {
-	QCanvasItemList list = collisions( QPoint(x,y) );
+	QCanvasItemList list = collisions( p );
 	QCanvasItemList::Iterator it;
 
 	for( it = list.begin(); it != list.end(); ++it )

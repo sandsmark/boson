@@ -51,17 +51,17 @@ public:
 
 
 	/* from display classes */
-	virtual void actionClicked(int, int, int state)=0;	// selecting, moving...
+	virtual void actionClicked(QPoint, int state)=0;	// selecting, moving...
 	virtual QSize sizeHint() const { return QSize(100,100); } // minimum size
 
 signals:
-	void	relativeReCenterView (int x, int y);
-	void	reSizeView (int l, int h);
+	void	relativeReCenterView (QPoint p);
+	void	reSizeView (QSize s);
 
 protected:
 	// display
-	void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp)
-		{ qp.drawRect(x1, y1, x2-x1, y2-y1); }
+	void drawRectSelect(QPoint p1, QPoint p2, QPainter &qp)	// XXX QRect somewhere ?
+		{ qp.drawRect(p1.x(), p1.y(), p2.x()-p1.x(), p2.y()-p1.y()); }
 
 /* events */
 //  virtual void drawContents( QPainter*, int cx, int cy, int cw, int ch );
@@ -74,8 +74,8 @@ protected:
 
   visualTopLevel	*vtl;
 
-  int selectX, selectY;
-  int oldX, oldY;
+	QPoint	oldPos;
+	QPoint	selectPos;
 
 };
 

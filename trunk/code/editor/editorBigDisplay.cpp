@@ -36,11 +36,11 @@ editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n,
 	setWho(0u);
 }
 
-void editorBigDisplay::actionClicked(int mx, int my, int state)
+void editorBigDisplay::actionClicked(QPoint mp, int state)
 {
 	editorCanvas *_canvas	= (((editorCanvas*)vcanvas));
-	int	x		= mx / BO_TILE_SIZE,
-		y		= my / BO_TILE_SIZE;
+	int	x		= mp.x() / BO_TILE_SIZE,
+		y		= mp.y() / BO_TILE_SIZE;
 
 
 	if ( x<0 || y<0 || x>= _canvas->maxX || y>=_canvas->maxY ) {

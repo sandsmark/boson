@@ -40,8 +40,8 @@ visualMiniDisplay::visualMiniDisplay(visualTopLevel *v, QWidget*parent, const ch
 	connect(vcanvas, SIGNAL(syncMini(void)), this, SLOT(sync(void)));
 
 // connect(, SIGNAL(), this, SLOT());
-	connect(this, SIGNAL(reCenterView(int, int)), vtl, SLOT(reCenterView(int, int)));
-//	connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
+	connect(this, SIGNAL(reCenterView(QPoint)), vtl, SLOT(reCenterView(QPoint)));
+//	connect(this, SIGNAL(reSizeView(QSize)), vtl, SLOT(reSizeView(QSize)));
 }
 
 
@@ -118,7 +118,7 @@ void visualMiniDisplay::paintEvent(QPaintEvent *)
 	/* the little rectangle */
 	p.setPen(white);
 	p.setRasterOp(XorROP);
-	p.drawRect(vtl->X(), vtl->Y(), vtl->L()-1, vtl->H()-1);
+	p.drawRect( QRect( vtl->_pos(), vtl->_size()) );
 
 	p.end();
 
@@ -173,13 +173,8 @@ void visualMiniDisplay::setPoint(int x, int y, const QColor &color, QPainter *p)
 
 void visualMiniDisplay::mousePressEvent(QMouseEvent *e)
 {
-	int x, y;
-
-	x = e->x();
-	y = e->y();
-
 	if (e->button() & LeftButton) {
-		emit reCenterView(x,y);
+		emit reCenterView(QPoint(e->x(), e->y()));
 		return;
 		}
 

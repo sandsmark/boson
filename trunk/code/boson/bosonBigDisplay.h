@@ -32,7 +32,7 @@ class bosonBigDisplay : public visualBigDisplay
 public:
 	bosonBigDisplay(bosonTopLevel *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 	/* from display classes */
-	virtual void actionClicked(int, int, int state);	// selecting, moving...
+	virtual void actionClicked(QPoint, int state);	// selecting, moving...
 
 };
 

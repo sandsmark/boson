@@ -132,10 +132,12 @@ void bosonTopLevel::setOrders( int what, int who)
 }
 
 
-void bosonTopLevel::object_put(int x, int y)
+void bosonTopLevel::object_put(QPoint p)
 {
-	construct.x = X() + (x / BO_TILE_SIZE) ;
-	construct.y = Y() + (y / BO_TILE_SIZE) ;
+	p/= BO_TILE_SIZE;
+	p+= viewPos;
+	construct.x = p.x();
+	construct.y = p.y();
 	switch(orderType) {
 		case OT_FACILITY:
 			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, MSG(construct) );
@@ -177,7 +179,7 @@ void bosonTopLevel::setSelected(QPixmap *p)
 
 void bosonTopLevel::updateViews(void)
 {
-	mw.big->setContentsPos( X() * BO_TILE_SIZE, Y() * BO_TILE_SIZE );
+	mw.big->setContentsPos( viewPos.x() * BO_TILE_SIZE, viewPos.y() * BO_TILE_SIZE );
 	mw.big->update();
 	mw.mini->repaint(FALSE);
 }
