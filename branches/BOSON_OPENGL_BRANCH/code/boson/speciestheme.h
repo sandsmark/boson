@@ -87,6 +87,8 @@ public:
 	BosonTextureArray* textureArray(int unitType);
 	GLuint textureNumber(int unitType, int direction);
 	// TODO an OpenGL implementation for shot()
+
+	GLuint displayList(int unitType);
 #else
 	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
@@ -240,6 +242,7 @@ protected:
 
 #ifndef NO_OPENGL
 	void loadUnitTextures(int type, QValueList<QImage> list);
+	void loadUnitModel(const UnitProperties* prop);
 #endif
 
 private:

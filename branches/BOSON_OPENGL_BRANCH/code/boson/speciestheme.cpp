@@ -27,6 +27,7 @@
 
 #ifndef NO_OPENGL
 #include "bosontexturearray.h"
+#include "bosonmodel.h"
 #else
 #include <qcanvas.h>
 #endif
@@ -79,6 +80,7 @@ public:
 	QIntDict<QPixmap> mBigOverview;
 #ifndef NO_OPENGL
 	QIntDict<BosonTextureArray> mSpriteTextures;
+	QIntDict<BosonModel> mUnitModels;
 
 	// TODO: the shots have no OpenGL implementation yet!
 #else
@@ -113,6 +115,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mBigOverview.setAutoDelete(true);
 #ifndef NO_OPENGL
  d->mSpriteTextures.setAutoDelete(true);
+ d->mUnitModels.setAutoDelete(true);
 #else
  d->mSprite.setAutoDelete(true);
  d->mFacilityBigShot.setAutoDelete(true);
@@ -136,7 +139,8 @@ SpeciesTheme::~SpeciesTheme()
 void SpeciesTheme::reset()
 {
 #ifndef NO_OPENGL
- d->mSpriteTextures.setAutoDelete(true);
+ d->mSpriteTextures.clear();
+ d->mUnitModels.clear();
 #else
  d->mSprite.clear();
  d->mFacilityBigShot.clear();
@@ -200,6 +204,7 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
  }
 #ifndef NO_OPENGL
  loadUnitTextures(prop->typeId(), imageList);
+ loadUnitModel(prop);
 #else
  kdDebug() << k_funcinfo << endl;
  QValueList<QPixmap> pixmapList;
@@ -366,6 +371,20 @@ GLuint SpeciesTheme::textureNumber(int unitType, int dir)
  return array->texture(dir);
 }
 
+GLuint SpeciesTheme::displayList(int unitType)
+{
+ BosonModel* model = d->mUnitModels[unitType];
+ if (!model) {
+	loadUnit(unitType);
+	model = d->mUnitModels[unitType];
+ }
+ if (!model) {
+	kdError() << k_funcinfo << "Cannot load display list for " << unitType 
+			<< endl;
+	return 0;
+ }
+ return model->displayList();
+}
 #else
 
 QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
@@ -382,6 +401,7 @@ QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
  }
  return array;
 }
+
 #endif // !NO_OPENGL
 
 QPixmap* SpeciesTheme::bigOverview(int unitType)
@@ -918,5 +938,13 @@ void SpeciesTheme::loadUnitTextures(int unitType, QValueList<QImage> list)
  tex->createTextures(list);
  d->mSpriteTextures.insert(unitType, tex);
 }
+
+void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
+{
+ QString fileName = prop->unitPath() + QString::fromLatin1("unit.3ds");
+ BosonModel* m = new BosonModel(fileName);
+ d->mUnitModels.insert(prop->typeId(), m);
+}
+
 #endif // !NO_OPENGL
 
