@@ -249,12 +249,16 @@ void BosonProfilingDialog::resetRenderPage()
  for (; it != pd->mRenderTimes.end(); ++it, i++) {
 	QListViewItemNumber* item = new QListViewItemNumber(d->mRender);
 	item->setText(0, QString::number(i));
+	item->setText(1, i18n("Function"));
+	item->setText(2, QString::number((*it).mFunction));
+	item->setText(3, QString::number((double)(*it).mFunction / 1000));
+	item->setText(4, QString::number((double)(*it).mFunction / 1000000));
+
 	createRenderItem(item, i18n("Clearing"), (*it).mClear);
 	createRenderItem(item, i18n("Cells"), (*it).mCells);
 	createRenderItem(item, i18n("Units"), (*it).mUnits);
 	createRenderItem(item, i18n("FOW"), (*it).mFOW);
 	createRenderItem(item, i18n("Text"), (*it).mText);
-	createRenderItem(item, i18n("Function"), (*it).mFunction);
 	item->setOpen(true);
  }
 }
