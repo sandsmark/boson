@@ -470,6 +470,7 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 
  boDebug() << k_funcinfo << "received IdGameStartingCompleted from all clients." << endl;
  if (!checkStartingCompletedMessages()) {
+	#warning TODO
 	// TODO: abort game starting.
 	// AB: we cannot use return, as then boson would be in a unusable state
 	// (cannot leave loading widget)
