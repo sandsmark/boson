@@ -23,13 +23,6 @@
 #include "bosonaudio.h"
 
 #include <kapplication.h>
-#include <kmimetype.h>
-#include <kdeversion.h>
-
-#include <arts/kartsserver.h>
-#include <arts/flowsystem.h>
-#include <arts/connect.h>
-#include <arts/artsflow.h>
 
 #include <qstringlist.h>
 #include <qintdict.h>
@@ -37,118 +30,87 @@
 #include <qdir.h>
 #include <qregexp.h>
 
+#include <AL/al.h>
+
 class BoPlayObject
 {
 public:
-#if KDE_VERSION >= 301
 	BoPlayObject(BosonSound* parent, const QString& file)
 	{
 		mFile = file;
 		mParent = parent;
-		mPlayObject = Arts::PlayObject::null();
+		mBuffer = 0;
+		mSource = 0;
+
 		reload();
 	}
 	~BoPlayObject()
 	{
+		// reset OpenAL data
+		resetAL();
 	}
 
 	const QString& file() const { return mFile; }
-	Arts::PlayObject object() const { return mPlayObject; }
 
 	bool isNull() const
 	{
-		return object().isNull();
+		if (alIsBuffer(mBuffer) == AL_FALSE) {
+			return true;
+		}
+		if (alIsSource(mSource) == AL_FALSE) {
+			return true;
+		}
+		return false;
 	}
 
 	void play()
 	{
-		boDebug(200) << k_funcinfo << endl;
+		boDebug(200) << k_funcinfo << file() << endl;
 		if (!isNull()) {
-			object().play();
+			boDebug(200) << "playing " << mSource << endl;
+			alSourcePlay(mSource);
 			mPlayed = true;
 		} else {
 			boDebug(200) << k_funcinfo << "NULL playobject" << endl;
 		}
 	}
 
-	void rewind()
-	{
-		boDebug(200) << k_funcinfo << endl;
-		if (isNull()) {
-			return;
-		}
-		if (!(object().capabilities() & Arts::capSeek)) {
-			boDebug(200) << "cannot seek" << endl;
-			reload();
-			return;
-		}
-		if (position() > 0) {
-			boDebug(200) << "seek" << endl;
-			Arts::poTime begin;
-			begin.seconds = 0;
-			begin.ms = 0;
-			object().seek(begin);
-			if (position() > 0) {
-				boDebug(200) << "seeking did not work :-(" << endl;
-				reload();
-			}
-		}
-	}
 	void reload()
 	{
-		boDebug(200) << k_funcinfo << endl;
-		KMimeType::Ptr mimeType = KMimeType::findByURL(file(), 0, true, true);
-
-		Arts::PlayObject result;
-		if (mParent->server().server().isNull()) {
-			boWarning(200) << k_funcinfo << "NULL server" << endl;
-			return;
+		boDebug(200) << k_funcinfo << file() << endl;
+		if (checkALError()) {
+			boError(200) << k_funcinfo << "an error occured before reloading" << endl;
+			// not a critical error here.
 		}
-		result = mParent->server().server().createPlayObjectForURL(
-				std::string(file().latin1()), std::string(mimeType->name().latin1()),
-				false); // false as we connect it to the soundcard ourselfes
-		if (result.isNull()) {
-			boError(200) << k_funcinfo << "NULL playobject - file="
-					<< file() << " mimetype="
-					<< mimeType->name() << endl;
-			return;
-		}
-
-		Arts::Synth_BUS_UPLINK uplink = Arts::DynamicCast(
-				mParent->server().server().createObject(
-				"Arts::Synth_BUS_UPLINK"));
-		if (uplink.isNull()) {
-			boError(200) << k_funcinfo << "NULL uplink" << endl;
-			return;
-		}
-		uplink.busname("out_soundcard");
-		Arts::connect(result, "left", uplink, "left");
-		Arts::connect(result, "right", uplink, "right");
-		uplink.start();
-		result._node()->start();
-		result._addChild(uplink, "uplink");
-
-// this seems to be our major speed problem. usually it works just fine, but
-// sometimes it takes 1-2 seconds!
-// --> the game freezes for that time
-// UPDATE (03/06/06): all audio code is in it's own process now, so this isn't
-// critical anymore. but still, this is a problem, but boson doesn't freeze
-// anymore.
-		mPlayObject = result;
-
+		resetAL();
 		mPlayed = false;
+		alGenBuffers(1, &mBuffer);
+		alGenSources(1, &mSource);
+		if (checkALError()) {
+			boError(200) << k_funcinfo << "unable to create buffer and source" << endl;
+			return;
+		}
+		if (!mParent->loadFileToBuffer(mBuffer, file())) {
+			boError(200) << k_funcinfo << "unable to load file " << file() << endl;
+			resetAL();
+			return;
+		}
+
+		// AB: note that we store the source in this playobject too atm!
+		// in the future we would like to move the source out of this,
+		// so that multiple sources can use a single playobject (i.e. a
+		// single buffer) !
+		// -> maybe we will even remove the playobjects, but thats in
+		// the future.
+		alSourcei(mSource, AL_BUFFER, mBuffer);
 	}
 
 	void playFromBeginning()
 	{
-		boDebug(200) << k_funcinfo << endl;
+		boDebug(200) << k_funcinfo << file() << endl;
 		if (isNull()) {
 			boWarning(200) << k_funcinfo << "isNull" << endl;
 			return;
-		}
-		if (object().state() != Arts::posIdle) {
-			boDebug(200) << k_funcinfo << "not posIdle" << endl;
-//			return; // AB: ? ??? 
 		}
 		if (mPlayed) {
 			reload();
@@ -157,38 +119,30 @@ public:
 	}
 
 protected:
-	int position()
+	void resetAL()
 	{
-		if (isNull()) {
-			return -1;
+		if (alIsBuffer(mBuffer) == AL_TRUE) {
+			alDeleteBuffers(1, &mBuffer);
 		}
-		if (!(object().capabilities() & Arts::capSeek)) {
-			boDebug(200) << "cannot seek!!" << endl;
-			return -1;
+		mBuffer = 0;
+		if (alIsSource(mSource) == AL_TRUE) {
+			alDeleteSources(1, &mSource);
 		}
-		Arts::poTime t(object().currentTime());
-		boDebug(200) << k_funcinfo << t.ms + t.seconds * 1000 << endl;
-		return t.ms + t.seconds * 1000;
+		mSource = 0;
 	}
+	bool checkALError()
+	{
+		return mParent->checkALError();
+	}
+
 private:
 	BosonSound* mParent;
 
 	QString mFile;
-	Arts::PlayObject mPlayObject;
 	bool mPlayed;
-#else
-#warning KDE versions before 3.0.1 have broken sound support. Sound is disabled.
-	BoPlayObject(BosonSound* , const QString& ) {}
-	~BoPlayObject() {}
-	
-	const QString& file() const { return QString::null; }
-	Arts::PlayObject object() const { return Arts::PlayObject::null(); }
-	bool isNull() const { return true; }
-	void play() {}
-	void playFromBeginning() {}
-	void reload() {}
-	void rewind() {}
-#endif
+
+	ALuint mBuffer;
+	ALuint mSource;
 };
 
 class BosonSound::BosonSoundPrivate
@@ -197,8 +151,6 @@ public:
 	BosonSoundPrivate()
 	{
 		mParent = 0;
-
-		mId = -1;
 	}
 
 	BosonAudio* mParent;
@@ -206,13 +158,6 @@ public:
 	QIntDict<BoPlayObject> mSounds;
 
 	QMap<QString, QPtrList<BoPlayObject> > mUnitSounds;
-
-	Arts::StereoEffectStack mEffectStack; // all effects are placed in the stack. we connect a playobject to this and so the playoubject uses all effects.
-	Arts::StereoVolumeControl mVolumeControl; // changes the volume.
-	Arts::Synth_AMAN_PLAY mAmanPlay; // don't ask me what this is. From natun's code. doesn't work without this.
-
-	long mId;
-
 };
 
 BosonSound::BosonSound(BosonAudio* parent)
@@ -221,38 +166,6 @@ BosonSound::BosonSound(BosonAudio* parent)
  d->mParent = parent;
  d->mSounds.setAutoDelete(true);
 
-#if KDE_VERSION < 301
- setSound(false);
- return;
-#endif
-/*
- // taken from noatun's code:
- d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
- if (d->mAmanPlay.isNull()) {
-	boError(200) << k_lineinfo << "Synth_AMAN_Play is NULL" << endl;
-	return;
- }
- d->mAmanPlay.title("boson");
- d->mAmanPlay.autoRestoreID("boson"); // whatever this is...
- d->mAmanPlay.start();
-
- d->mEffectStack = Arts::DynamicCast(server().server().createObject("Arts::StereoEffectStack"));
- if (d->mEffectStack.isNull()) {
-	boError(200) << k_lineinfo << "NULL effect stack" << endl;
-	return;
- }
- d->mEffectStack.start();
- Arts::connect(d->mEffectStack, d->mAmanPlay);
-*/
- // the volume control
-/*
- d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
- if (d->mVolumeControl.isNull()) {
-	boError(200) << k_funcinfo << "NULL volume control" << endl;
- }
- d->mVolumeControl.start();
- d->mId = d->mEffectStack.insertBottom(d->mVolumeControl, "VolumeControl");
-*/
 }
 
 BosonSound::~BosonSound()
@@ -261,24 +174,11 @@ BosonSound::~BosonSound()
  d->mSounds.clear();
  d->mUnitSounds.clear();
 
- if (d->mId != -1) {
-	d->mEffectStack.remove(d->mId);
- }
- d->mVolumeControl = Arts::StereoVolumeControl::null();
- d->mEffectStack = Arts::StereoEffectStack::null();
  delete d;
-}
-
-KArtsServer& BosonSound::server() const
-{
- return d->mParent->server();
 }
 
 void BosonSound::addEventSound(const QString& name, const QString& file)
 {
-#if KDE_VERSION < 301
- return;
-#endif
  if (file.isEmpty()) {
 	boWarning(200) << k_funcinfo << "cannot add empty filename for event " << name << endl;
 	return;
@@ -357,11 +257,6 @@ void BosonSound::playSound(const QString& name)
  p->playFromBeginning();
 }
 
-Arts::StereoEffectStack BosonSound::effectStack()
-{
- return d->mEffectStack;
-}
-
 void BosonSound::setSound(bool s)
 {
  d->mParent->setSound(s);
@@ -370,5 +265,15 @@ void BosonSound::setSound(bool s)
 bool BosonSound::sound() const
 {
  return d->mParent->sound();
+}
+
+bool BosonSound::loadFileToBuffer(ALuint buffer, const QString& file)
+{
+ return d->mParent->loadFileToBuffer(buffer, file);
+}
+
+bool BosonSound::checkALError()
+{
+ return d->mParent->checkALError();
 }
 

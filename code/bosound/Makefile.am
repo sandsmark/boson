@@ -1,5 +1,7 @@
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
+SUBDIRS = test
+
 noinst_LTLIBRARIES = libbosonsoundcommon.la libbosonsound.la
 bin_PROGRAMS = bosonaudioprocess
 
@@ -19,11 +21,11 @@ libbosonsound_la_LIBADD = \
 
 bosonaudioprocess_LDFLAGS = $(all_libraries)
 bosonaudioprocess_LDADD = \
-		-lqtmcop -lsoundserver_idl \
 		$(top_builddir)/bosound/libbosonsound.la \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(LIB_QT) \
-		-lartskde $(LIBKDECORE)
+		$(LIB_KDECORE) $(LIB_KIO) \
+		-lopenal
 
 bosonaudioprocess_SOURCES = \
 		main.cpp

@@ -19,8 +19,9 @@
 #ifndef BOSONAUDIO_H
 #define BOSONAUDIO_H
 
+#include <AL/altypes.h>
+
 class QStringList;
-class KArtsServer;
 class BosonMusic;
 class BosonSound;
 class QString;
@@ -60,11 +61,8 @@ public:
 	BosonSound* addSounds(const QString& species);
 
 
-	KArtsServer& server() const;
-
 	/**
-	 * @return TRUE if an initialization error occured. E.g. if artsd can't
-	 * be reached or if it lacks support for .ogg files.
+	 * @return TRUE if an initialization error occured.
 	 **/
 	bool isNull() const;
 
@@ -73,12 +71,21 @@ public:
 	void setMusic(bool m);
 	void setSound(bool s);
 
+	bool checkALError();
+
+	bool loadFileToBuffer(ALuint buffer, const QString& file);
+
 private:
 	BosonAudio();
 
 private:
 	BosonAudioPrivate* d;
 	static bool mCreated;
+
+private:
+	// see OpenAL source, linux/src/extenstions/al_ext_mp3.c and al_ext_vorbis.c
+	ALboolean (*alutLoadMP3_LOKI)(ALuint, ALvoid*, ALint);
+	ALboolean (*alutLoadVorbis_LOKI)(ALuint, ALvoid*, ALint);
 };
 
 #endif

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 */
 
 #include "boaudiothread.h"
+#include "boaudiothread.moc"
 
 #include "boaudiocommand.h"
 #include "bosonaudio.h"
@@ -26,54 +27,14 @@
 #include "bodebug.h"
 
 #include <qptrqueue.h>
+#include <qfile.h>
 
 
-/**
- * Shamelessy stolen from Rik Hemsley: http://rikkus.info/kde_mt.html
- **/
-template<class T> class MTQueue
-{
-public:
+static BoAudioCommand* parseCommand(QString command);
+static bool parseInt(QString& command, int* result);
+static bool parseString(QString& command, QString* result);
 
-	MTQueue()
-	{
-	}
-	bool isEmpty()
-	{
-		mMutex.lock();
-		bool empty = mQueue.isEmpty();
-		mMutex.unlock();
-		return empty;
-	}
-
-	void flush()
-	{
-		mMutex.lock();
-		while (!mQueue.isEmpty()) {
-			delete (mQueue.dequeue());
-		}
-		mMutex_.unlock();
-	}
-
-	void enqueue(T * t)
-	{
-		mMutex.lock();
-		mQueue.enqueue(t);
-		mMutex.unlock();
-	}
-
-	T* dequeue()
-	{
-		mMutex.lock();
-		T* i = mQueue.dequeue();
-		mMutex.unlock();
-		return i;
-	}
-
-private:
-	QPtrQueue<T> mQueue;
-	QMutex mMutex;
-};
+static QString g_buffer;
 
 class BoAudioThreadPrivate
 {
@@ -83,14 +44,12 @@ public:
 		mAudio = 0;
 	}
 
-	QMutex mMutex;
-
 	BosonAudio* mAudio;
 
-	MTQueue<BoAudioCommand> mCommandQueue;
+	QPtrQueue<BoAudioCommand> mCommandQueue;
 };
 
-BoAudioThread::BoAudioThread() : QThread()
+BoAudioThread::BoAudioThread()
 {
  d = new BoAudioThreadPrivate;
 
@@ -118,8 +77,6 @@ BosonAudio* BoAudioThread::audio() const
 
 bool BoAudioThread::audioStarted() const
 {
- // do we have to lock the mutex here?
-// lock();
  bool ret = true;
  if (!audio()) {
 	ret = false;
@@ -127,24 +84,18 @@ bool BoAudioThread::audioStarted() const
  if (ret && audio()->isNull()) {
 	ret = false;
  }
-// unlock();
  return ret;
 }
 
-void BoAudioThread::run()
+void BoAudioThread::processCommand()
 {
- boDebug(200) << k_funcinfo << endl;
- while (true) {
-	while (d->mCommandQueue.isEmpty()) {
-		msleep(100); // TODO: increase?
-
-		// maybe we can implement BosonMusic::slotUpdateTicker() at this
-		// point!
+	if (d->mCommandQueue.isEmpty()) {
+		return;
 	}
 	BoAudioCommand* command = dequeueCommand();
 	if (!command) {
 		BO_NULL_ERROR(command);
-		continue;
+		return;
 	}
 	BosonSound* sound = 0;
 	BosonMusic* music = 0;
@@ -172,11 +123,10 @@ void BoAudioThread::run()
 
 	if (!command) {
 		// we don't want to continue with this command by any reason
-		continue;
+		return;
 	}
 	executeCommand(command, audio(), music, sound);
 	delete command;
- }
 }
 
 void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, BosonMusic* music, BosonSound* sound)
@@ -270,16 +220,6 @@ void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, B
  }
 }
 
-void BoAudioThread::lock()
-{
- d->mMutex.lock();
-}
-
-void BoAudioThread::unlock()
-{
- d->mMutex.unlock();
-}
-
 void BoAudioThread::enqueueCommand(BoAudioCommand* command)
 {
  d->mCommandQueue.enqueue(command);
@@ -288,5 +228,138 @@ void BoAudioThread::enqueueCommand(BoAudioCommand* command)
 BoAudioCommand* BoAudioThread::dequeueCommand()
 {
  return d->mCommandQueue.dequeue();
+}
+
+void BoAudioThread::slotReceiveStdin(int sock)
+{
+ if (g_buffer.length() > 2048) {
+	// a command of 2 KB? no, I don't believe this!
+	fprintf(stderr, "command too long\n");
+	g_buffer = QString::null;
+	return;
+ }
+ QFile readFile;
+ readFile.open(IO_ReadOnly | IO_Raw, sock);
+ int ch = readFile.getch();
+ if (ch == -1) {
+	return;
+ }
+ if (ch == '\n') {
+	QString command = g_buffer;
+	g_buffer = QString::null;
+	BoAudioCommand* cmd = parseCommand(command);
+	if (!cmd) {
+		fprintf(stderr, "parsing error on command %s\n", command.latin1());
+	} else {
+		enqueueCommand(cmd);
+	}
+ } else {
+	g_buffer.append((char)ch);
+ }
+ processCommand();
+}
+
+BoAudioCommand* parseCommand(QString command)
+{
+ // first the type
+ int type = 0;
+ int isSound = 0;
+ QString species;
+ int dataInt = 0;
+ QString dataString1;
+ QString dataString2;
+
+ // AB: _all_ commands start with the type (number) - see BoAudioCommand::Command
+ bool ok = parseInt(command, &type);
+ if (!ok) {
+	fprintf(stderr, "Could not parse type\n");
+	return 0;
+ }
+
+ // the second argument is _always_ a 0 (music message) or a 1 (sound message).
+ ok = parseInt(command, &isSound);
+ if (!ok) {
+	fprintf(stderr, "Could not parse sound/music tag\n");
+	return 0;
+ }
+ if (isSound == 0) {
+	// it is a music message.
+	isSound = false;
+ } else if (isSound == 1) {
+	isSound = true;
+	ok = parseString(command, &species);
+	if (!ok) {
+		fprintf(stderr, "Could not parse species\n");
+		return 0;
+	}
+ } else {
+	fprintf(stderr, "Invalid sound/music tag %d\n", isSound);
+ }
+
+ ok = parseInt(command, &dataInt);
+ if (!ok) {
+	fprintf(stderr, "Could not parse dataInt\n");
+	return 0;
+ }
+ ok = parseString(command, &dataString1);
+ if (!ok) {
+	fprintf(stderr, "Could not parse dataString1\n");
+	return 0;
+ }
+ ok = parseString(command, &dataString2);
+ if (!ok) {
+	fprintf(stderr, "Could not parse dataString2\n");
+	return 0;
+ }
+
+ BoAudioCommand* cmd = 0;
+ if (isSound) {
+	cmd = new BoAudioCommand(type, species, dataInt, dataString1, dataString2);
+ } else {
+	cmd = new BoAudioCommand(type, dataInt, dataString1, dataString2);
+ }
+ return cmd;
+}
+
+bool parseInt(QString& command, int* result)
+{
+ bool ok = false;
+ QString s;
+ int index = command.find(' ');
+ if (index >= 0) {
+	s = command.left(index);
+ } else {
+	s = command;
+ }
+ if (s.isEmpty()) {
+	fprintf(stderr, "Could not parse integer - command: %s\n", command.latin1());
+	return 0;
+ }
+ *result = s.toInt(&ok);
+ if (!ok) {
+	fprintf(stderr, "Parsed value not an integer - command: %s\n", command.latin1());
+ }
+ if (index >= 0) {
+	command = command.right(command.length() - index - 1);
+ } else {
+	command = QString::null;
+ }
+ return ok;
+}
+
+bool parseString(QString& command, QString* result)
+{
+ QString s;
+ int index = command.find(' ');
+ if (index >= 0) {
+	s = command.left(index);
+	command = command.right(command.length() - index - 1);
+ } else {
+	s = command;
+	command = QString::null;
+ }
+ // note: an empty string is perfectly valid!
+ *result = s;
+ return true;
 }
 
