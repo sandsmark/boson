@@ -97,8 +97,7 @@ echo "
 <a href=\"http://jigsaw.w3.org/css-validator/\">
   <img style=\"border:0;width:88px;height:31px\"
        src=\"${basedir}pictures/valid-css.png\"
-       alt=\"Valid CSS!\">
- </a>";
+       alt=\"Valid CSS!\"></a>";
 // Copyright
 echo "
 <br><br>
