@@ -39,6 +39,7 @@
 #include "bosonstarting.h"
 #include "boevent.h"
 #include "boeventmanager.h"
+#include "boeventlistener.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -2684,5 +2685,17 @@ BoEventManager* Boson::eventManager() const
 void Boson::queueEvent(BoEvent* event)
 {
  eventManager()->queueEvent(event);
+}
+
+bool Boson::loadCanvasConditions(const QDomElement& root)
+{
+ BoEventListener* listener = canvasNonConst()->eventListener();
+ return listener->loadConditions(root);
+}
+
+bool Boson::saveCanvasConditions(QDomElement& root) const
+{
+ const BoEventListener* listener = canvas()->eventListener();
+ return listener->saveConditions(root);
 }
 

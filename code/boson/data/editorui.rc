@@ -21,6 +21,7 @@
     <Action name="editor_map_description" />
     <Action name="editor_player_minerals" />
     <Action name="editor_player_oil" />
+    <Action name="editor_edit_conditions" />
   </Menu>
 </MenuBar>
 <ToolBar>

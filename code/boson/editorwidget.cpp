@@ -208,6 +208,9 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("E&xport texmap"), KShortcut(), this,
 		SLOT(slotExportTexMap()), actionCollection(),
 		"editor_export_texmap");
+ (void)new KAction(i18n("Edit global conditions"), KShortcut(), this,
+		SLOT(slotEditConditions()), actionCollection(),
+		"editor_edit_conditions");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
