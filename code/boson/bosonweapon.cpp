@@ -168,19 +168,19 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   {
     shottype == "Bullet";
   }
-  else if(mShotType = BosonShot::Rocket)
+  else if(mShotType == BosonShot::Rocket)
   {
     shottype == "Rocket";
   }
-  else if(mShotType = BosonShot::Missile)
+  else if(mShotType == BosonShot::Missile)
   {
     shottype == "Missile";
   }
-  else if(mShotType = BosonShot::Mine)
+  else if(mShotType == BosonShot::Mine)
   {
     shottype == "Mine";
   }
-  else if(mShotType = BosonShot::Bomb)
+  else if(mShotType == BosonShot::Bomb)
   {
     shottype == "Bomb";
   }
