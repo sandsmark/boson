@@ -13,7 +13,6 @@ public:
 
 signals:
 	void signalStartGame();
-	void signalAddComputerPlayer();
 	void signalMapChanged(const QString& fileName);
 	void signalScenarioChanged(const QString& fileName);
 	void signalSpeciesChanged(const QString& directory);

@@ -76,9 +76,9 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
  connect(d->mScenarioCombo, SIGNAL(activated(int)), 
 		this, SLOT(slotScenarioChanged(int)));
 
- QPushButton* addComputerPlayer = new QPushButton(i18n("&Add Computer Player"), this);
- connect(addComputerPlayer, SIGNAL(pressed()), 
-		this, SIGNAL(signalAddComputerPlayer())); // TODO: name, difficulty, ...
+// QPushButton* addComputerPlayer = new QPushButton(i18n("&Add Computer Player"), this);
+// connect(addComputerPlayer, SIGNAL(pressed()), 
+//		this, SIGNAL(signalAddComputerPlayer())); // TODO: name, difficulty, ...
 
  QPushButton* startGame = new QPushButton(i18n("&Start Game"), this);
  connect(startGame, SIGNAL(pressed()), this, SLOT(slotStartGame()));

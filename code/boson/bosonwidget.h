@@ -28,9 +28,6 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
-	void addLocalPlayer();
-	void addComputerPlayer(const QString& name);
-
 	void startEditor();
 
 	void saveConfig();
@@ -63,6 +60,10 @@ protected slots:
 	void slotChangeSpecies(const QString& speciesDirectory);
 
 protected:
+	void addLocalPlayer();
+
+	void addDummyComputerPlayer(const QString& name); // used by editor only
+
 	void changeLocalPlayer(Player* p);
 	virtual void keyReleaseEvent(QKeyEvent* e);
 
@@ -85,7 +86,7 @@ protected slots:
 
 	void slotReceiveMap(const QByteArray& map);
 
-	void slotAddComputerPlayer();
+	void slotAddComputerPlayer(Player*);
 
 	void slotAddCell(int,int,int,unsigned char);
 

@@ -18,7 +18,7 @@
 #include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
-#include "bosoncomputerio.h"
+#include "kgamedialogcomputerconfig.h"
 
 #include "defines.h"
 
@@ -222,13 +222,10 @@ void BosonWidget::addLocalPlayer()
  changeLocalPlayer(p);
 }
 
-void BosonWidget::addComputerPlayer(const QString& name)
+void BosonWidget::addDummyComputerPlayer(const QString& name)
 {
  Player* p = new Player;
  p->setName(name);
- BosonComputerIO* io = new BosonComputerIO();
- io->setReactionPeriod(50); // FIXME hardcoded
- p->addGameIO(io); // FIXME: NOT in editor mode!
  d->mBoson->addPlayer(p);
  p->loadTheme(SpeciesTheme::defaultSpecies(), SpeciesTheme::defaultColor());// FIXME - should be selectable in new game dialog
 }
@@ -295,8 +292,8 @@ void BosonWidget::slotNewGame()
  // add our costum game config widget
  KGameDialogBosonConfig* bosonConfig = new KGameDialogBosonConfig(0);
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
- connect(bosonConfig, SIGNAL(signalAddComputerPlayer()),
-		this, SLOT(slotAddComputerPlayer()));
+// connect(bosonConfig, SIGNAL(signalAddComputerPlayer()),
+//		this, SLOT(slotAddComputerPlayer()));
  connect(bosonConfig, SIGNAL(signalMapChanged(const QString&)),
 		this, SLOT(slotLoadMap(const QString&)));
  connect(bosonConfig, SIGNAL(signalScenarioChanged(const QString&)),
@@ -310,13 +307,19 @@ void BosonWidget::slotNewGame()
  dialog->addConfigWidget(new KGameDialogConnectionConfig(), page);
  dialog->addConfigWidget(new KGameDialogChatConfig(BosonMessage::IdChat), page);
 
+ KGameDialogComputerConfig* computerConfig = new KGameDialogComputerConfig(0);
+ connect(computerConfig, SIGNAL(signalAddComputerPlayer(Player*)), 
+		this, SLOT(slotAddComputerPlayer(Player*)));
+ QVBox* computerPage = dialog->addConfigPage(computerConfig, i18n("&Computer Player"));
+ dialog->addConnectionList(new KGameDialogConnectionConfig(0), computerPage);
+
  // add a network config
  dialog->addNetworkConfig(new KGameDialogNetworkConfig(0));
 
  // a connection list - aka "ban this player" - also in game page (to see
  // the number of the players when selecting a map)
- page = dialog->configPage(KGameDialog::NetworkConfig);
- dialog->addConnectionList(new KGameDialogConnectionConfig(0), page);
+ QVBox* networkPage = dialog->configPage(KGameDialog::NetworkConfig);
+ dialog->addConnectionList(new KGameDialogConnectionConfig(0), networkPage);
 
  // add a msgserver config
 // dialog->addMsgServerConfig(new KGameDialogMsgServerConfig(0)); // FIXME: do
@@ -488,8 +491,8 @@ void BosonWidget::startEditor()
 // FIXME - the stuff below should be replaced by a proper dialog and config
 // implementation
 
- addComputerPlayer(i18n("Computer 1"));
- addComputerPlayer(i18n("Computer 2"));
+ addDummyComputerPlayer(i18n("Computer 1"));
+ addDummyComputerPlayer(i18n("Computer 2"));
 
  // load default map
  // FIXME: should be loaded by a dialog!
@@ -577,10 +580,9 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
 }
 
-void BosonWidget::slotAddComputerPlayer()
+void BosonWidget::slotAddComputerPlayer(Player* computer)
 {
- // TODO: name, difficulty, ...
- addComputerPlayer(i18n("Computer"));
+ d->mBoson->addPlayer(computer);
 }
 
 void BosonWidget::slotEditorSaveMap(const QString& fileName)
