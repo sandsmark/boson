@@ -116,6 +116,9 @@ int KGameCanvasChat::z() const
 
 void KGameCanvasChat::setKGame(KGame* g)
 {
+ if (g == d->mGame) {
+	return;
+ }
  if (d->mGame) {
 	slotUnsetKGame();
  }
