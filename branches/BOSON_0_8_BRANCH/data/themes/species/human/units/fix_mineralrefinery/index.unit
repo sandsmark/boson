@@ -1,0 +1,40 @@
+[Boson Facility]
+ConstructionSteps=20
+
+[Boson Unit]
+Armor=0
+ConstructedParticles=10001,10002,10003
+DestroyedParticles=1010,3011,6011,7010
+ExplodingDamage=0
+ExplodingDamageRange=0
+Health=400
+HitPoint=-0.2,-0.2,1.21
+Id=13
+IsFacility=true
+MineralCost=1000
+Name=Mineral Refinery
+OilCost=200
+Producer=10
+ProductionTime=700
+Requirements=5,2
+Shield=0
+SightRange=5
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1
+UnitHeight=2
+UnitWidth=2
+Weapons=0
+
+[RefineryPlugin]
+CanRefineMinerals=true
+CanRefineOil=false
+
+[Sounds]
+OrderAttack=order_attack
+OrderMove=order_move
+OrderSelect=order_select
+ReportDestroyed=report_destroyed
+ReportProduced=report_produced
+ReportUnderAttack=report_underattack
+Shoot=shoot

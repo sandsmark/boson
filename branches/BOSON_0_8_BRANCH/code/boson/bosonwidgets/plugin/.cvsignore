@@ -1,0 +1,9 @@
+Makefile
+Makefile.in
+.deps
+.libs
+*.moc
+*.lo
+bosonwidgets.la
+bosonwidgets.la.closure
+bosonwidgets_la_meta_unload.*

@@ -1,0 +1,37 @@
+
+
+a,b,c,...,o are cells.
+00,01,02,...,23 are corners of the cells.
+
+00   01   02   03   04   05
+   a    b    c    d    e
+06   07   08   09   10   11
+   f    g    h    i    j
+12   13   14   15   16   17
+   k    l    m    n    o
+18   19   20   21   22   23
+
+
+if
+Xa = x coordinate of cell a,
+Ya = y coordinate of cell a,
+Xh = x coordinate of cell h,
+Yh = y coordinate of cell h
+w = horizontal cell count + 1 (== 6 == number of horizontal corners)
+h = vertical cell count + 1 (== 4 == number of horizontal corners)
+
+then you can get the coordinates of the corners in the height map like this:
+
+upper left corner of a = Ya * w + Xa           => 0 * 6 + 0 = 00
+lower left corner of a = (Ya+1) * w + Xa       => (0+1) * 6 + 0 = 06
+upper right corner of a = Ya * w + Xa + 1      => 0 * 6 + (0+1) = 01
+lower right corner of a = (Ya+1) * w + Xa + 1  => (0+1) * 6 + (0+1) = 07
+
+another example (more realistic this time):
+
+upper left corner of h = Yh * w + Xh           => 1 * 6 + 2 = 08
+lower left corner of h = (Yh+1) * w + Xh       => (1+1) * 6 + 2 = 14
+upper right corner of h = Yh * w + Xh + 1      => 1 * 6 + (2+1) = 09
+lower right corner of h = (Yh+1) * w + Xh + 1  => (1+1) * 6 + (2+1) = 15
+
+

@@ -1,0 +1,18 @@
+#include "top.wml"
+    <h1>
+      Unit dependency tree
+    </h1>
+
+<:
+use make_tech_tree;
+make_tech_tree->draw_map();
+:>
+
+<p>
+
+<img src="map.jpg" border=0>
+
+</p>
+
+#include "nav.wml" before_url="index.html" before_text="Units" after_url="mineralharvester.html" after_text="Mineral Harvester" up_url="index.html"
+#include "footer.wml"
