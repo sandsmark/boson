@@ -136,6 +136,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
 TopWidget::~TopWidget()
 {
+ d->mPlayers.clear();
+ delete d;
 }
 
 void TopWidget::saveProperties(KConfig *config)
