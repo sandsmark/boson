@@ -33,8 +33,20 @@
 class BoMaterial
 {
 public:
-	BoMaterial();
-	~BoMaterial();
+	BoMaterial()
+	{
+		init();
+	}
+	BoMaterial(const BoMaterial& mat)
+	{
+		init();
+		*this = mat;
+	}
+	~BoMaterial()
+	{
+	}
+
+	BoMaterial& operator=(const BoMaterial& mat);
 
 	static void activate(BoMaterial*);
 	static void deactivate() { activate(0); }
@@ -107,6 +119,9 @@ public:
 	 * new alpha value is applied.
 	 **/
 	static void setDefaultAlpha(float alpha);
+
+private:
+	void init();
 
 private:
 	static BoMaterial* mCurrentMaterial;
