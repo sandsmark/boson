@@ -5,6 +5,7 @@ Makefile
 Makefile.in
 boson-server.log
 boson-client.log
+boson-editor.log
 .deps
 .libs
 *.la
