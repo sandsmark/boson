@@ -90,7 +90,7 @@ bool serverMobUnit::shooted(void)
 }
 
 
-void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId)
+void serverMobUnit::r_moveBy(moveMsg_t &msg, uint playerId)
 {
 
 	/* owner check */

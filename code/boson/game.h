@@ -33,7 +33,7 @@ typedef unsigned int uint;
 #endif
 
 	extern speciesTheme		*myspecy;
-	extern int			who_am_i;
+	extern uint			who_am_i;
 /* The map which handle grouds and units*/
 	extern bosonCanvas		*bocanvas;
 /* synchronization */
