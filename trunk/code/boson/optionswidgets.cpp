@@ -521,10 +521,10 @@ int OpenGLOptions::mipmapMinificationFilter() const
 		e = GL_NEAREST_MIPMAP_LINEAR;
 		break;
 	case 4:
-		e = GL_LINEAR_MIPMAP_LINEAR;
+		e = GL_LINEAR_MIPMAP_NEAREST;
 		break;
 	case 5:
-		e = GL_LINEAR_MIPMAP_NEAREST;
+		e = GL_LINEAR_MIPMAP_LINEAR;
 		break;
  }
  return (int)e;
