@@ -49,6 +49,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"attack", py_attack, METH_VARARGS, 0 },
   { (char*)"stopUnit", py_stopUnit, METH_VARARGS, 0 },
   { (char*)"mineUnit", py_mineUnit, METH_VARARGS, 0 },
+  { (char*)"setUnitRotation", py_setUnitRotation, METH_VARARGS, 0 },
+  { (char*)"dropBomb", py_dropBomb, METH_VARARGS, 0 },
   { (char*)"produceUnit", py_produceUnit, METH_VARARGS, 0 },
   { (char*)"spawnUnit", py_spawnUnit, METH_VARARGS, 0 },
   { (char*)"teleportUnit", py_teleportUnit, METH_VARARGS, 0 },
@@ -410,6 +412,35 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
   }
 
   BosonScript::mineUnit(player, id, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setUnitRotation(PyObject* self, PyObject* args)
+{
+  int player, id;
+  float rot;
+  if(!PyArg_ParseTuple(args, (char*)"iif", &player, &id, &rot))
+  {
+    return 0;
+  }
+
+  BosonScript::setUnitRotation(player, id, rot);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_dropBomb(PyObject*, PyObject* args)
+{
+  int player, id, weapon, x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiiii", &player, &id, &weapon, &x, &y))
+  {
+    return 0;
+  }
+
+  BosonScript::dropBomb(player, id, weapon, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;

@@ -150,6 +150,14 @@ class BosonScript
      **/
     static void mineUnit(int player, int id, int x, int y);
     /**
+     * Sets unit's rotation to rotation
+     **/
+    static void setUnitRotation(int player, int id, float rotation);
+    /**
+     * Drops bomb with given unit with specified weapon to given pos
+     **/
+    static void dropBomb(int player, int id, int weapon, int x, int y);
+    /**
      * Produces unit with type production in factory with id factory
      **/
     static void produceUnit(int player, int factory, int production);

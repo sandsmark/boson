@@ -318,6 +318,38 @@ void BosonScript::mineUnit(int player, int id, int x, int y)
   sendInput(player, msg);
 }
 
+void BosonScript::setUnitRotation(int player, int id, float rotation)
+{
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveRotate;
+  stream << (Q_UINT32)player;
+  stream << (Q_ULONG)id;
+  stream << rotation;
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
+}
+
+void BosonScript::dropBomb(int player, int id, int weapon, int x, int y)
+{
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveDropBomb;
+  // tell place
+  stream << (Q_INT32)x;
+  stream << (Q_INT32)y;
+  // tell them how many units attack:
+  stream << (Q_UINT32)1;
+  stream << (Q_UINT32)id;
+  stream << (Q_UINT32)weapon;
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
+}
+
 void BosonScript::produceUnit(int player, int factory, int production)
 {
   QByteArray b;
@@ -400,7 +432,7 @@ QValueList<int> BosonScript::unitsInRect(int x1, int y1, int x2, int y2)
     return list;
   }
   BosonCollisions* c = canvas()->collisions();
-  BoItemList* l = c->collisionsAtCells(QRect(x1, y1, x2, y2));
+  BoItemList* l = c->collisionsAtCells(QRect(QPoint(x1, y1), QPoint(x2, y2)));
   for(BoItemList::Iterator it = l->begin(); it != l->end(); ++it)
   {
     if(RTTI::isUnit((*it)->rtti()))
