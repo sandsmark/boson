@@ -418,13 +418,13 @@ public:
 	/**
 	 * Convenience method for @ref addDynamicEntry
 	 **/
-	void addDynamicEntryBool(const QString& configKey, bool defaultValue = false, bool saveConfig = true);
-	void addDynamicEntryInt(const QString& configKey, int defaultValue = 0, bool saveConfig = true);
-	void addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue = 0, bool saveConfig = true);
-	void addDynamicEntryDouble(const QString& configKey, double defaultValue = 0.0, bool saveConfig = true);
-	void addDynamicEntryString(const QString& configKey, QString defaultValue = QString::null, bool saveConfig = true);
-	void addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig = true);
-	void addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig = true);
+	BoConfigBoolEntry* addDynamicEntryBool(const QString& configKey, bool defaultValue = false, bool saveConfig = true);
+	BoConfigIntEntry* addDynamicEntryInt(const QString& configKey, int defaultValue = 0, bool saveConfig = true);
+	BoConfigUIntEntry* addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue = 0, bool saveConfig = true);
+	BoConfigDoubleEntry* addDynamicEntryDouble(const QString& configKey, double defaultValue = 0.0, bool saveConfig = true);
+	BoConfigStringEntry* addDynamicEntryString(const QString& configKey, QString defaultValue = QString::null, bool saveConfig = true);
+	BoConfigColorEntry* addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig = true);
+	BoConfigIntListEntry* addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig = true);
 
 	/**
 	 * @return TRUE if a dynamic entry with @p key was added with @ref
