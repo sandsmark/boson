@@ -19,9 +19,9 @@
 
 #include "commandinput.h"
 
-#include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "unitbase.h"
+#include "commandframe/bosoncommandframe.h"
 
 #include <kdebug.h>
 #include <kgame/kplayer.h>

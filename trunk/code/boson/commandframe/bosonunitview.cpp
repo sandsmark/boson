@@ -17,19 +17,18 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "bosonunitview.h"
+#include "bosonunitview.moc"
 
-#include "unitbase.h"
-#include "player.h"
-#include "unitproperties.h"
-#include "speciestheme.h"
-#include "unit.h"
+#include "../unitbase.h"
+#include "../player.h"
+#include "../unitproperties.h"
+#include "../speciestheme.h"
+#include "../unit.h"
 
 #include <klocale.h>
 
 #include <qlabel.h>
 #include <qvbox.h>
-
-#include "bosonunitview.moc"
 
 class BosonUnitView::BosonUnitViewPrivate
 {
@@ -52,7 +51,7 @@ public:
 // this unit view consists of 2 parts 
 // - the big overview (aka 'preview') pixmap
 // - the actual "unit view" - some QLabels describing the selected unit
-BosonUnitView::BosonUnitView(QWidget* parent) : BosonCommandWidget(parent)
+BosonUnitView::BosonUnitView(QWidget* parent) : BosonOrderButton(parent)
 {
  d = new BosonUnitViewPrivate;
  QVBox* v = new QVBox(this);
@@ -72,7 +71,7 @@ BosonUnitView::~BosonUnitView()
 void BosonUnitView::setUnit(Unit* u)
 {
  UnitBase* unit = (UnitBase*)u;
- BosonCommandWidget::setUnit(u);
+ BosonOrderButton::setUnit(u);
  if (!unit) {
 	return;
  }
@@ -127,5 +126,5 @@ void BosonUnitView::slotUnitChanged(Unit* u)
 	return;
  }
  d->mHealth->setText(i18n("Health: %1").arg(u->health()));
- BosonCommandWidget::slotUnitChanged(u);
+ BosonOrderButton::slotUnitChanged(u);
 }

@@ -19,14 +19,14 @@
 #ifndef BOSONUNITVIEW_H
 #define BOSONUNITVIEW_H
 
-#include "bosoncommandwidget.h"
+#include "bosonorderbutton.h"
 
 class Unit;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonUnitView : public BosonCommandWidget
+class BosonUnitView : public BosonOrderButton
 {
 	Q_OBJECT
 public:

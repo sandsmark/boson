@@ -21,7 +21,7 @@
 
 #include <qwidget.h>
 #include <qpushbutton.h>
-#include "global.h"
+#include "../global.h"
 
 class Unit;
 class Player;
@@ -33,12 +33,12 @@ class BoToolTip;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonCommandWidget : public QWidget
+class BosonOrderButton : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonCommandWidget(QWidget* parent);
-	~BosonCommandWidget();
+	BosonOrderButton(QWidget* parent);
+	~BosonOrderButton();
 
 	enum CommandType {
 		CommandNothing = 0,
@@ -180,8 +180,8 @@ private:
 	friend class BoToolTip;
 
 private:
-	class BosonCommandWidgetPrivate;
-	BosonCommandWidgetPrivate* d;
+	class BosonOrderButtonPrivate;
+	BosonOrderButtonPrivate* d;
 
 	Unit* mUnit;
 	// FIXME: use only one int for all command modes

@@ -17,14 +17,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bosoncommandwidget.h"
+#include "bosonorderbutton.h"
+#include "bosonorderbutton.moc"
 
-#include "bosontiles.h"
-#include "unit.h"
-#include "player.h"
-#include "speciestheme.h"
-#include "unitproperties.h"
-#include "defines.h"
+#include "../bosontiles.h"
+#include "../unit.h"
+#include "../player.h"
+#include "../speciestheme.h"
+#include "../unitproperties.h"
+#include "../defines.h"
 
 #include <kgameprogress.h>
 #include <kpixmap.h>
@@ -38,20 +39,18 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 
-#include "bosoncommandwidget.moc"
-
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
 class BoToolTip : public QToolTip
 {
 public:
-	BoToolTip(BosonCommandWidget* parent) : QToolTip(parent)
+	BoToolTip(BosonOrderButton* parent) : QToolTip(parent)
 	{
 	}
 
-	inline BosonCommandWidget* commandWidget() const
+	inline BosonOrderButton* commandWidget() const
 	{
-		return (BosonCommandWidget*)parentWidget();
+		return (BosonOrderButton*)parentWidget();
 	}
 
 protected:
@@ -60,7 +59,7 @@ protected:
 		//TODO: do not re-display if already displayed and text didn't
 		//change
 		QString text;
-		QWidget* w = (commandWidget()->commandType() == BosonCommandWidget::CommandUnitSelected) ? commandWidget()->childAt(pos) : 0;
+		QWidget* w = (commandWidget()->commandType() == BosonOrderButton::CommandUnitSelected) ? commandWidget()->childAt(pos) : 0;
 		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
 			Unit* u = commandWidget()->unit();
 			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
@@ -86,14 +85,14 @@ protected:
 	{
 		QString text;
 		switch (commandWidget()->commandType()) {
-			case BosonCommandWidget::CommandNothing:
+			case BosonOrderButton::CommandNothing:
 				// do not display anything
 				return QString::null;
-			case BosonCommandWidget::CommandCell:
+			case BosonOrderButton::CommandCell:
 				//TODO: place something useful here
 				text = i18n("Tilenumber: %1").arg(commandWidget()->tile());
 				break;
-			case BosonCommandWidget::CommandUnit:
+			case BosonOrderButton::CommandUnit:
 			{
 				if (commandWidget()->unitType() <= 0) {
 					kdWarning() << k_funcinfo << "CommandUnit, but no unittype" << endl;
@@ -107,14 +106,14 @@ protected:
 				text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
 				break;
 			}
-			case BosonCommandWidget::CommandUnitSelected:
+			case BosonOrderButton::CommandUnitSelected:
 				if (!commandWidget()->unit()) {
 					kdWarning() << k_funcinfo << "CommandUnitSelected, but NULL unit" << endl;
 					return QString::null;
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
-			case BosonCommandWidget::CommandAction:
+			case BosonOrderButton::CommandAction:
 				if(commandWidget()->action() == ActionMove) {
 					text = i18n("Move");
 				}
@@ -245,10 +244,10 @@ void BoButton::addProductionCount(QPixmap* pix)
 }
 
 
-class BosonCommandWidget::BosonCommandWidgetPrivate
+class BosonOrderButton::BosonOrderButtonPrivate
 {
 public:
-	BosonCommandWidgetPrivate()
+	BosonOrderButtonPrivate()
 	{
 		mPixmap = 0;
 
@@ -260,9 +259,9 @@ public:
 	BoToolTip* mTip;
 };
 
-BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
+BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
 {
- d = new BosonCommandWidgetPrivate;
+ d = new BosonOrderButtonPrivate;
  mUnit = 0;
  mProductionOwner = 0;
  mUnitType = 0;
@@ -302,14 +301,14 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 }
 
-BosonCommandWidget::~BosonCommandWidget()
+BosonOrderButton::~BosonOrderButton()
 {
  delete d->mTip;
  delete mPixmap;
  delete d;
 }
 
-void BosonCommandWidget::setUnit(Unit* unit)
+void BosonOrderButton::setUnit(Unit* unit)
 {
  if (!unit) {
 	unset();
@@ -335,7 +334,7 @@ void BosonCommandWidget::setUnit(Unit* unit)
  setGrayOut(false);
 }
 
-void BosonCommandWidget::setUnit(unsigned long int unitType, Player* owner)
+void BosonOrderButton::setUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -359,7 +358,7 @@ void BosonCommandWidget::setUnit(unsigned long int unitType, Player* owner)
  // BosonCommandFrame for this!
 }
 
-void BosonCommandWidget::setAction(UnitAction action, Player* owner)
+void BosonOrderButton::setAction(UnitAction action, Player* owner)
 {
  mCommandType = CommandAction;
  mAction = (int)action;
@@ -376,7 +375,7 @@ void BosonCommandWidget::setAction(UnitAction action, Player* owner)
  show();
 }
 
-void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
+void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
 {
  if (mUnit) {
 	unset();
@@ -395,7 +394,7 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
  setGrayOut(false);
 }
 
-void BosonCommandWidget::displayUnitPixmap(Unit* unit) 
+void BosonOrderButton::displayUnitPixmap(Unit* unit) 
 {
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;
@@ -404,7 +403,7 @@ void BosonCommandWidget::displayUnitPixmap(Unit* unit)
  displayUnitPixmap(unit->type(), unit->owner());
 }
 
-void BosonCommandWidget::displayUnitPixmap(unsigned long int unitType, Player* owner)
+void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -419,13 +418,13 @@ void BosonCommandWidget::displayUnitPixmap(unsigned long int unitType, Player* o
  setPixmap(*small);
 }
 
-void BosonCommandWidget::setPixmap(const QPixmap& pixmap)
+void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 {
  mPixmap->setPixmap(pixmap);
  mPixmap->show();
 }
 
-void BosonCommandWidget::slotClicked()
+void BosonOrderButton::slotClicked()
 {
  switch (commandType()) {
 	case CommandNothing:
@@ -456,7 +455,7 @@ void BosonCommandWidget::slotClicked()
  }
 }
 
-void BosonCommandWidget::slotRightClicked()
+void BosonOrderButton::slotRightClicked()
 {
  switch (commandType()) {
 	case CommandUnit:
@@ -467,7 +466,7 @@ void BosonCommandWidget::slotRightClicked()
  }
 }
 
-void BosonCommandWidget::slotUnitChanged(Unit* unit)
+void BosonOrderButton::slotUnitChanged(Unit* unit)
 {
  if (unit != mUnit) {
 	return;
@@ -491,7 +490,7 @@ void BosonCommandWidget::slotUnitChanged(Unit* unit)
 }
 
 
-void BosonCommandWidget::unset()
+void BosonOrderButton::unset()
 {
  if (mUnit) {
 	disconnect(mUnit->owner(), 0, this, 0);
@@ -504,7 +503,7 @@ void BosonCommandWidget::unset()
  mProductionOwner = 0;
 }
 
-void BosonCommandWidget::advanceProduction(double percentage)
+void BosonOrderButton::advanceProduction(double percentage)
 {
  if (!mProductionOwner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -556,12 +555,12 @@ void BosonCommandWidget::advanceProduction(double percentage)
  setPixmap(small);
 }
 
-void BosonCommandWidget::setGrayOut(bool g)
+void BosonOrderButton::setGrayOut(bool g)
 {
  mPixmap->setGrayOut(g);
 }
 
-void BosonCommandWidget::setProductionCount(int count)
+void BosonOrderButton::setProductionCount(int count)
 {
  mPixmap->setProductionCount(count);
 }
