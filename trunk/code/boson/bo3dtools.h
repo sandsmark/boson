@@ -152,6 +152,22 @@ class BoMatrix
     void loadMatrix(GLenum matrix);
     void loadMatrix(const GLfloat* m);
 
+    void setElement(int row, int column, float value)
+    {
+      mData[row + column * 4] = value;
+    }
+
+    /**
+     * @param row 0..3 -> specifies the row (aka line) of the matrix
+     * @param column 0..3 -> specifies the column of the matrix (what a
+     * surprise)
+     * @return The element of the matrix at the specified position
+     **/
+    inline float element(int row, int column) const
+    {
+      return mData[row + column * 4];
+    }
+
     const GLfloat* data() const { return mData; }
     void debugMatrix()
     {
