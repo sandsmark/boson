@@ -37,7 +37,7 @@ class QwSpritePixmapSequence;
 class speciesTheme
 {
 public:
-	speciesTheme(char *themeName);
+	speciesTheme(char *themeName, QRgb c);
 	~speciesTheme();
 
 	QwSpritePixmapSequence *getPixmap(mobType unit);
@@ -59,10 +59,11 @@ public:
 protected:
 	bool 		loadMob(int index);
 	bool		loadFix(int index);
-	bool		loadPixmap(const QString &path, QPixmap *p);
+	bool		loadPixmap(const QString &path, QPixmap **p);
 
 private:
 	QString		*themePath;
+	QRgb		team_color;
 
 	QBitArray	*mobiles, *facilities;
 

@@ -49,7 +49,7 @@ ground	= new groundTheme("earth");
 		KMsgBox::EXCLAMATION);
 */
 
-species[1]	= new speciesTheme("blue_human");
+species[1]	= new speciesTheme("human", qRgb(0, 0, 255) );
 /*
 	if (!species[1]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),
@@ -57,7 +57,7 @@ species[1]	= new speciesTheme("blue_human");
 		KMsgBox::EXCLAMATION);
 */
 
-species[0]	= new speciesTheme("red_human");
+species[0]	= new speciesTheme("human", qRgb( 0, 255, 0) );
 /*
 	if (!species[0]->isOk()) KMsgBox::message(0l,
 		i18n("Pixmap loading error"),

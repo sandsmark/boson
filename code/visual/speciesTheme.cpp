@@ -22,6 +22,7 @@
 #include <qbitmap.h>
 #include <qwmatrix.h>
 #include <qbitarray.h>
+#include <qimage.h>
 
 #include <QwSpriteField.h>
 
@@ -34,8 +35,9 @@
 #include "speciesTheme.h"
 
 
-speciesTheme::speciesTheme(char *themeName)
+speciesTheme::speciesTheme(char *themeName, QRgb color)
 {
+	team_color		= color;
 
 	mobBigOverview		= new (QPixmap*)[mobilePropNb];
 	fixBigOverview		= new (QPixmap*)[facilityPropNb];
@@ -76,7 +78,7 @@ QString		path(*themePath + "/units/" + mobileProp[index].name);
 
 for(j=0; j<12; j++) {
 	sprintf(buffer, "/field.%02d.bmp", j);
-	if ( ! loadPixmap(path + buffer, p)) {
+	if ( ! loadPixmap(path + buffer, &p)) {
 		logf(LOG_ERROR, "SpeciesTheme : Can't load(mob) %s/Field.%02d.bmp ...\n", (const char *)path, j);
 		return false;
 		}
@@ -107,15 +109,73 @@ return true;
 
 
 
-bool speciesTheme::loadPixmap(const QString &path, QPixmap *p)
+bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix)
 {
-	p = new QPixmap(path);
-	if (p->isNull()) 
+	QImage	image(path), *mask;
+	QBitmap	*m;
+	int	x, y, w, h;
+    	uchar	*yp;
+	QRgb	*p;
+	QRgb	background  = qRgb(255,  0, 255) & RGB_MASK ;
+	QRgb	background2 = qRgb(248, 40, 240) & RGB_MASK ;
+	QRgb	team_mask   = qRgb(255, 16,  16) & RGB_MASK;
+	QRgb	team_mask2  = qRgb(248,  0,   0) & RGB_MASK;
+
+
+	
+	w = image.width(); h = image.height();
+
+	boAssert(image.depth()==32);
+	boAssert( w>31 );
+	boAssert( h>31 );
+	
+
+	if (image.isNull() || w < 32 || h < 32) 
 		return false;
-	else {
-		p->setMask( p->createHeuristicMask() );
-		return true;
+	
+	mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
+	boAssert ( ! mask->isNull() );
+	mask->setColor( 0, 0xffffff );
+	mask->setColor( 1, 0 );
+	mask->fill(0xff); 
+	
+	
+
+	for ( y = 0; y < h; y++ ) {
+		yp = mask->scanLine(y);	// mask
+		p  = (QRgb *)image.scanLine(y);	// image
+		for ( x = 0; x < w; x++, p++ ) {
+			if ( (*p & 0x00fff0ff) == background ) {// set transparent 
+				*(yp + (x >> 3)) &= ~(1 << (x & 7));
+				continue;
+			}
+			if ( (*p & 0x00f8f8f8) == background2) {// set transparent 
+				*(yp + (x >> 3)) &= ~(1 << (x & 7));
+				continue;
+			}
+			if ( (*p & 0x00fff8f8) == team_mask ) {// set team color
+				*p = team_color;
+				puts("bof");
+				continue;
+			}
+			if ( (*p & 0x00f8f8f8) == team_mask2) {// set team color
+				*p = team_color;
+				continue;
+			}
+			if ( (qRed(*p) > 0x80) && (qGreen(*p) < 0x70) && (qBlue(*p) < 0x70))
+				*p = team_color;
+		}
 	}
+
+	*pix = new QPixmap;
+	m = new QBitmap;
+	(*pix)->convertFromImage(image);
+	m->convertFromImage(*mask);
+	(*pix)->setMask( *m );
+
+	delete mask;
+
+	return true;
 }
 
 
@@ -134,7 +194,7 @@ QString		path(*themePath + "/facilities/" + facilityProp[i].name);
 
 for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
-	if (!loadPixmap(path + buffer, p)) {
+	if (!loadPixmap(path + buffer, &p)) {
 		logf(LOG_ERROR, "SpeciesTheme : Can't load(fix) %s/Field.%03d.bmp ...\n", (const char *)path, j);
 		return false;
 	}
