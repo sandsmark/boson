@@ -1039,6 +1039,10 @@ BoLightCameraWidget::BoLightCameraWidget(QWidget* parent) : QWidget(parent)
  mSpecularG->setRange(0.0f, 1.0f, 0.1f, false);
  mSpecularB->setRange(0.0f, 1.0f, 0.1f, false);
  mSpecularA->setRange(0.0f, 1.0f, 0.1f, false);
+ connect(mDirectional, SIGNAL(toggled(bool)), this, SLOT(slotLightChanged()));
+ connect(mConstantAttenuation, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mLinearAttenuation, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
+ connect(mQuadraticAttenuation, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
  connect(mAmbientR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
  connect(mAmbientG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
  connect(mAmbientB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
