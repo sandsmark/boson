@@ -30,18 +30,13 @@
 #define SP_W		35
 #define SP_H		(SP_COIN_LEN+SP_COIN_POS)
 
+static void drawSelectBox(QPainter &painter, QColor c1, QColor c2);
+
 QwSpritePixmapSequence * selectPart_up::qsps = 0l;
 QwSpritePixmapSequence * selectPart_down::qsps = 0l;
 
-/*
- *  selectPart 
- */
-selectPart::selectPart()
-{
-}
 
-
-void selectPart::drawSelectBox(QPainter &painter, QColor c1, QColor c2)
+void drawSelectBox(QPainter &painter, QColor c1, QColor c2)
 {
 QPen pen(red);
 	painter.setPen(pen);
@@ -89,11 +84,12 @@ void selectPart_up::initStatic()
 
 	mask = new QBitmap(SP_W, SP_H);
 	mask->fill(black);
+
 	painter.begin(mask);
 	drawSelectBox(painter, white, white);
 	painter.end();
-	pix->setMask(*mask);
 
+	pix->setMask(*mask);
 
 	for(i=0; i<PART_NB; i++) {
 		pix = new QPixmap(*pix);
@@ -102,7 +98,7 @@ void selectPart_up::initStatic()
 		points.append (point);
 		}
 
-	delete mask; ///orzel : shoud I ?
+//	delete mask; ///orzel : shoud I ?
 	qsps = new QwSpritePixmapSequence(pixmaps,points);
 }
 
@@ -142,15 +138,17 @@ void selectPart_down::initStatic()
 	drawSelectBox(painter, red, green);
 	painter.end();
 
+
 	mask = new QBitmap(SP_W, SP_H);
 	mask->fill(black);
+
 	painter.begin(mask);
 	painter.rotate(180);
 	painter.translate(-SP_W+1, -SP_H+1);
 	drawSelectBox(painter, white, white);
 	painter.end();
-	pix->setMask(*mask);
 
+	pix->setMask(*mask);
 
 	for(i=0; i<PART_NB; i++) {
 		pix = new QPixmap(*pix);

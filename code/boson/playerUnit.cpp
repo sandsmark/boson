@@ -29,6 +29,7 @@
 #include "../map/map.h"
 #include "../common/log.h"
 
+#define PF_DELTA	5   // facilities selection box are DELTA pixels more inside rect()
 
 /*
  * playerMobUnit
@@ -151,6 +152,9 @@ void playerMobUnit::select()
 {
 	QRect	r = rect();
 
+	boAssert(!sp_up);
+	boAssert(!sp_down);
+
 	sp_up = new selectPart_up(5);
 	sp_up->moveTo(r.right(), r.top());
 	sp_down = new selectPart_down(4);
@@ -160,8 +164,8 @@ void playerMobUnit::select()
 
 void playerMobUnit::unSelect()
 {
-	delete  sp_up;
-	delete	sp_down;
+	if (sp_up) delete sp_up;
+	if (sp_down) delete sp_down;
 	sp_down = 0l;
 	sp_up = 0l;
 }
@@ -247,6 +251,14 @@ playerFacility::playerFacility(facilityMsg_t *msg, QObject* parent=0L, const cha
 	z(Z_FACILITY);
 	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 	frame(msg->state);
+
+	sp_down = 0l; sp_up = 0l;
+}
+
+
+playerFacility::~playerFacility()
+{
+	unSelect();
 }
 
 
@@ -254,4 +266,28 @@ void playerFacility::s_setState(int s)
 {
 	boAssert(frame()==s-1);
 	frame(s);
+}
+
+
+/***** selection *********/
+void playerFacility::select()
+{
+	QRect	r = rect();
+
+	boAssert(!sp_up);
+	boAssert(!sp_down);
+
+	sp_up = new selectPart_up(3);
+	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
+	sp_down = new selectPart_down(2);
+	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
+}
+
+
+void playerFacility::unSelect()
+{
+	if (sp_up) delete sp_up;
+	if (sp_down) delete sp_down;
+	sp_down = 0l;
+	sp_up = 0l;
 }

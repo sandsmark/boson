@@ -96,15 +96,26 @@ class playerFacility : public Facility, public QwSprite
 
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
+  ~playerFacility();
 //  virtual QRect	rect(void);
   virtual int	_x(void) {return x();}
   virtual int	_y(void) {return y();}
+
+/* attachement */
+  void  select();
+  void  unSelect();
 
 /* Server orders */
   void		s_setState(int );
 
 /* Qw stuff */
   virtual int	rtti() { return S_FACILITY; }
+
+ private:
+/* attachement */
+  selectPart_up *sp_up;
+  selectPart_down *sp_down;
+
 };
 
 #endif // PLAYER_UNIT_H

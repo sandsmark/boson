@@ -27,16 +27,8 @@
 
 #define PART_NB		10
 
-class selectPart : public QwSprite
-{
-public:
-		selectPart();
-  static void	drawSelectBox(QPainter &painter, QColor, QColor);
-};
 
-
-
-class selectPart_up : public selectPart
+class selectPart_up : public QwSprite
 {
 public:
 		selectPart_up(int a);
@@ -49,7 +41,7 @@ private:
 
 
 
-class selectPart_down : public selectPart
+class selectPart_down : public QwSprite
 {
 public:
 		selectPart_down(int);
