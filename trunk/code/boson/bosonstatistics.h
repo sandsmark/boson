@@ -23,6 +23,19 @@ class Unit;
 class Facility;
 class MobileUnit;
 
+/**
+ * Whenever a unit shoots its weapon or whenever a new unit is produced we need
+ * to store that fact that this happened. This is done here, for every player.
+ *
+ * Usually player or a unit of this player calls @ref Player:statistics and
+ * supplies an updated value, e.g. @ref increaseShots when the unit fired its
+ * weapon or @ref increaseMinedMinerals if the unit has mined more minerals.
+ *
+ * All these values are used at the end of the game (in @ref GameOverDialog) to
+ * generate statistics and finally even to generate the points for every player.
+ * @short Statistics about a player for the @ref GameOverDialog
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonStatistics
 {
 public:

@@ -28,6 +28,9 @@
 
 class KPlayer;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonCommandBar : public KToolBar
 {
 	Q_OBJECT
