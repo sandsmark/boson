@@ -22,6 +22,7 @@
 
 #include "bodebug.h"
 #include "boufo/boufoaction.h"
+#include "boufoactionext.h"
 #include "defines.h"
 #include "bosonconfig.h"
 #include "boson.h"
@@ -250,78 +251,42 @@ void BosonMenuInputData::initUfoActions(bool gameMode)
  connect(movie, SIGNAL(signalToggled(bool)),
 		this, SIGNAL(signalSetGrabMovie(bool)));
 
- BoUfoToggleAction* resources = new BoUfoToggleAction(i18n("Show resources"),
+ (void)new BoUfoConfigToggleAction(i18n("Show resources"),
 		KShortcut(), 0, 0, actionCollection(), "show_resources");
- resources->setChecked(true);
- connect(resources, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetShowResources(bool)));
- BoUfoToggleAction* mapCoordinates = new BoUfoToggleAction(i18n("Debug &map coordinates"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug &map coordinates"),
 		KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
- mapCoordinates->setChecked(false);
- connect(mapCoordinates, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugMapCoordinates(bool)));
- BoUfoToggleAction* PFData = new BoUfoToggleAction(i18n("Debug pathfinder data"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug pathfinder data"),
 		KShortcut(), 0, 0, actionCollection(), "debug_pf_data");
- PFData->setChecked(false);
- connect(PFData, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugPFData(bool)));
- BoUfoToggleAction* cellGrid = new BoUfoToggleAction(i18n("Show Cell &Grid"),
+ (void)new BoUfoConfigToggleAction(i18n("Show Cell &Grid"),
 		KShortcut(), 0, 0, actionCollection(), "debug_cell_grid");
- cellGrid->setChecked(false);
- connect(cellGrid, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugShowCellGrid(bool)));
- BoUfoToggleAction* matrices = new BoUfoToggleAction(i18n("Debug Ma&trices"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug Ma&trices"),
 		KShortcut(), 0, 0, actionCollection(), "debug_matrices");
- matrices->setChecked(false);
- connect(matrices, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugMatrices(bool)));
- BoUfoToggleAction* works = new BoUfoToggleAction(i18n("Debug Item works"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug Item works"),
 		KShortcut(), 0, 0, actionCollection(), "debug_works");
- works->setChecked(false);
- connect(works, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugItemWorks(bool)));
- BoUfoToggleAction* camera = new BoUfoToggleAction(i18n("Debug camera"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug camera"),
 		KShortcut(), 0, 0, actionCollection(), "debug_camera");
- camera->setChecked(false);
- connect(camera, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugCamera(bool)));
- BoUfoToggleAction* renderCounts = new BoUfoToggleAction(i18n("Debug Rendering counts"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug Rendering counts"),
 		KShortcut(), 0, 0, actionCollection(), "debug_rendercounts");
- renderCounts->setChecked(false);
- connect(renderCounts, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugRenderCounts(bool)));
  BoUfoToggleAction* cheating = new BoUfoToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(signalToggled(bool)), this,
 		SIGNAL(signalToggleCheating(bool)));
- BoUfoToggleAction* wireFrames = new BoUfoToggleAction(i18n("Render &Wireframes"),
+ (void)new BoUfoConfigToggleAction(i18n("Render &Wireframes"),
 		KShortcut(), 0, 0, actionCollection(), "debug_wireframes");
- connect(wireFrames, SIGNAL(signalToggled(bool)), this,
-		SIGNAL(signalSetDebugWireFrames(bool)));
- BoUfoToggleAction* boundingboxes = new BoUfoToggleAction(i18n("Render item's bounding boxes"),
+ (void)new BoUfoConfigToggleAction(i18n("Render item's bounding boxes"),
 		KShortcut(), 0, 0, actionCollection(), "debug_boundingboxes");
- connect(boundingboxes, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugBoundingBoxes(bool)));
- BoUfoToggleAction* fps = new BoUfoToggleAction(i18n("Debug FPS"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug FPS"),
 		KShortcut(), 0, 0, actionCollection(), "debug_fps");
- connect(fps, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetDebugFPS(bool)));
- BoUfoToggleAction* debugAdvanceCalls = new BoUfoToggleAction(i18n("Debug &Advance calls"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug &Advance calls"),
 		KShortcut(), 0, 0, actionCollection(), "debug_advance_calls");
- connect(debugAdvanceCalls, SIGNAL(signalToggled(bool)), this,
-		SIGNAL(signalSetDebugAdvanceCalls(bool)));
- BoUfoToggleAction* debugTextureMemory = new BoUfoToggleAction(i18n("Debug &Texture Memory"),
+ (void)new BoUfoConfigToggleAction(i18n("Debug &Texture Memory"),
 		KShortcut(), 0, 0, actionCollection(), "debug_texture_memory");
- connect(debugTextureMemory, SIGNAL(signalToggled(bool)), this,
-		SIGNAL(signalSetDebugTextureMemory(bool)));
  (void)new BoUfoAction(i18n("&Unfog"), KShortcut(), this,
 		SIGNAL(signalUnfogAll()), actionCollection(), "debug_unfog");
  (void)new BoUfoAction(i18n("Dump game &log"), KShortcut(), this,
 		SIGNAL(signalDumpGameLog()), actionCollection(), "debug_gamelog");
- BoUfoToggleAction* enableColorMap = new BoUfoToggleAction(i18n("Enable colormap"),
+ (void)new BoUfoConfigToggleAction(i18n("Enable colormap"),
 		KShortcut(), 0, 0, actionCollection(), "debug_colormap_enable");
- connect(enableColorMap, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalSetEnableColorMap(bool)));
  (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
 		SIGNAL(signalEditConditions()), actionCollection(),
 		"debug_edit_conditions");
@@ -780,34 +745,6 @@ void BosonMenuInput::initIO(KPlayer* player)
 		this, SLOT(slotGrabProfiling()));
  connect(mData, SIGNAL(signalSetGrabMovie(bool)),
 		this, SLOT(slotSetGrabMovie(bool)));
- connect(mData, SIGNAL(signalSetShowResources(bool)),
-		this, SLOT(slotSetShowResources(bool)));
- connect(mData, SIGNAL(signalSetDebugMapCoordinates(bool)),
-		this, SLOT(slotSetDebugMapCoordinates(bool)));
- connect(mData, SIGNAL(signalSetDebugPFData(bool)),
-		this, SLOT(slotSetDebugPFData(bool)));
- connect(mData, SIGNAL(signalSetDebugShowCellGrid(bool)),
-		this, SLOT(slotSetDebugShowCellGrid(bool)));
- connect(mData, SIGNAL(signalSetDebugMatrices(bool)),
-		this, SLOT(slotSetDebugMatrices(bool)));
- connect(mData, SIGNAL(signalSetDebugItemWorks(bool)),
-		this, SLOT(slotSetDebugItemWorks(bool)));
- connect(mData, SIGNAL(signalSetDebugCamera(bool)),
-		this, SLOT(slotSetDebugCamera(bool)));
- connect(mData, SIGNAL(signalSetDebugRenderCounts(bool)),
-		this, SLOT(slotSetDebugRenderCounts(bool)));
- connect(mData, SIGNAL(signalSetDebugWireFrames(bool)),
-		this, SLOT(slotSetDebugWireFrames(bool)));
- connect(mData, SIGNAL(signalSetDebugBoundingBoxes(bool)),
-		this, SLOT(slotSetDebugBoundingBoxes(bool)));
- connect(mData, SIGNAL(signalSetDebugFPS(bool)),
-		this, SLOT(slotSetDebugFPS(bool)));
- connect(mData, SIGNAL(signalSetDebugAdvanceCalls(bool)),
-		this, SLOT(slotSetDebugAdvanceCalls(bool)));
- connect(mData, SIGNAL(signalSetDebugTextureMemory(bool)),
-		this, SLOT(slotSetDebugTextureMemory(bool)));
- connect(mData, SIGNAL(signalSetEnableColorMap(bool)),
-		this, SLOT(slotSetEnableColorMap(bool)));
  connect(mData, SIGNAL(signalSetDebugMode(int)),
 		this, SLOT(slotSetDebugMode(int)));
  connect(mData, SIGNAL(signalDebugKillPlayer(Q_UINT32)),
@@ -1127,76 +1064,6 @@ void BosonMenuInput::slotSetGrabMovie(bool grab)
 #if 0
  d->mGrabMovie = grab;
 #endif
-}
-
-void BosonMenuInput::slotSetShowResources(bool show)
-{
- boConfig->setBoolValue("show_resources", show);
-}
-
-void BosonMenuInput::slotSetDebugMapCoordinates(bool debug)
-{
- boConfig->setBoolValue("debug_map_coordinates", debug);
-}
-
-void BosonMenuInput::slotSetDebugPFData(bool debug)
-{
- boConfig->setBoolValue("debug_pf_data", debug);
-}
-
-void BosonMenuInput::slotSetDebugShowCellGrid(bool debug)
-{
- boConfig->setBoolValue("debug_cell_grid", debug);
-}
-
-void BosonMenuInput::slotSetDebugMatrices(bool debug)
-{
- boConfig->setBoolValue("debug_matrices", debug);
-}
-
-void BosonMenuInput::slotSetDebugItemWorks(bool debug)
-{
- boConfig->setBoolValue("debug_works", debug);
-}
-
-void BosonMenuInput::slotSetDebugCamera(bool debug)
-{
- boConfig->setBoolValue("debug_camera", debug);
-}
-
-void BosonMenuInput::slotSetDebugRenderCounts(bool debug)
-{
- boConfig->setBoolValue("debug_rendercounts", debug);
-}
-
-void BosonMenuInput::slotSetDebugWireFrames(bool on)
-{
- boConfig->setBoolValue("debug_wireframes", on);
-}
-
-void BosonMenuInput::slotSetDebugBoundingBoxes(bool debug)
-{
- boConfig->setBoolValue("debug_boundingboxes", debug);
-}
-
-void BosonMenuInput::slotSetDebugFPS(bool debug)
-{
- boConfig->setBoolValue("debug_fps", debug);
-}
-
-void BosonMenuInput::slotSetDebugAdvanceCalls(bool debug)
-{
- boConfig->setBoolValue("debug_advance_calls", debug);
-}
-
-void BosonMenuInput::slotSetDebugTextureMemory(bool debug)
-{
- boConfig->setBoolValue("debug_texture_memory", debug);
-}
-
-void BosonMenuInput::slotSetEnableColorMap(bool enable)
-{
- boConfig->setBoolValue("debug_colormap", enable);
 }
 
 void BosonMenuInput::slotSetDebugMode(int index)

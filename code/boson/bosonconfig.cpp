@@ -335,7 +335,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntryBool("debug_advance_calls", false, false);
  addDynamicEntryBool("debug_texture_memory", false, false);
  addDynamicEntryBool("show_resources", true, false);
- addDynamicEntryBool("debug_colormap", false, false);
+ addDynamicEntryBool("debug_colormap_enable", false, false);
  addDynamicEntryBool("ForceDisableModelLoading", false, false); // command line arg! do NOT save to config
  addDynamicEntryBool("TextureFOW", true, false);
  addDynamicEntryInt("DefaultLodCount", 5, false);
