@@ -288,3 +288,34 @@ void BosonCommandWidget::slotUnitChanged(Unit* unit)
  d->mReload->setValue(r);
 }
 
+int BosonCommandWidget::tile() const
+{
+ if (d->mCommandType == CommandCell) {
+	return d->mTileNumber;
+ } else {
+	return -1;
+ }
+}
+
+int BosonCommandWidget::unitType() const
+{
+ if (d->mCommandType == CommandUnit) {
+	return d->mUnitType;
+ } else {
+	return -1;
+ }
+}
+
+Unit* BosonCommandWidget::unit() const
+{
+ if (d->mCommandType == CommandUnitSelected) {
+	return d->mUnit;
+ } else {
+	return 0;
+ }
+}
+
+BosonCommandWidget::CommandType BosonCommandWidget::commandType() const
+{
+ return d->mCommandType;
+}

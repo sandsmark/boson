@@ -48,6 +48,29 @@ public:
 
 	void setToolTip(const QString& text);
 
+	/**
+	 * @return The displayed unit or 0 if no unit is displayed. See also
+	 * @ref tile and @ref unitType
+	 **/
+	Unit* unit() const;
+
+	/**
+	 * @return The unitType that is displayed or -1 if none. See also @ref
+	 * tile and @ref unit
+	 **/
+	int unitType() const;
+
+	/**
+	 * @return The displayed tilenumber or -1 if none is displayed. See also
+	 * @ref unit and @ref unitType
+	 **/
+	int tile() const;
+
+	CommandType commandType() const;
+
+public slots:
+	void slotUnitChanged(Unit*);
+
 signals:
 	/**
 	 * Emitted when the player clicks on this widget and it is a cell. See
@@ -75,7 +98,6 @@ protected:
 
 protected slots:
 	void slotClicked();
-	void slotUnitChanged(Unit*);
 	
 private:
 	class BosonCommandWidgetPrivate;
