@@ -114,35 +114,15 @@ void UnitProperties::loadUnitType(const QString& fileName)
 	mHealth = 100;
  }
  mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100);
- if(mMineralCost < 0) {
-	kdWarning() << k_funcinfo << "Invalid MineralCost value: " << mMineralCost << " for unit " << typeId() << ", defaulting to 100" << endl;
-	mMineralCost = 100;
- }
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
- if(mOilCost < 0) {
-	kdWarning() << k_funcinfo << "Invalid OilCost value: " << mOilCost << " for unit " << typeId() << ", defaulting to 0" << endl;
-	mOilCost = 100;
- }
  mWeaponDamage = conf.readLongNumEntry("WeaponDamage", 0);
  mWeaponRange = conf.readUnsignedLongNumEntry("WeaponRange", 0);
- if (mWeaponDamage <= 0) {
-	mWeaponRange = 1;
+ if (mWeaponDamage == 0) {
+	mWeaponRange = 0;
  }
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
- if(mSightRange < 0) {
-	kdWarning() << k_funcinfo << "Invalid SightRange value: " << mSightRange << " for unit " << typeId() << ", defaulting to 5" << endl;
-	mSightRange = 5;
- }
  mReload = conf.readUnsignedNumEntry("Reload", 0);
- if(mReload < 0) {
-	kdWarning() << k_funcinfo << "Invalid Reload value: " << mReload << " for unit " << typeId() << ", defaulting to 0" << endl;
-	mReload = 0;
- }
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
- if(mProductionTime < 0) {  // 0 doesn't make much sense here
-	kdWarning() << k_funcinfo << "Invalid ProductionTime value: " << mProductionTime << " for unit " << typeId() << ", defaulting to 100" << endl;
-	mProductionTime = 100;
- }
  d->mShields = conf.readUnsignedLongNumEntry("Shield", 0);
  d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft() && weaponDamage());
@@ -178,11 +158,6 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  mMobileProperties->mCanMineOil = conf->readBoolEntry("CanMineOil", false);
  mMobileProperties->mMaxResources = conf->readUnsignedNumEntry("MaxResources",
 		(canMineMinerals() || canMineOil()) ? 100 : 0);
- if(mMobileProperties->mMaxResources < 0) {
-	kdWarning() << k_funcinfo << "Invalid MaxResources value: " << mMobileProperties->mMaxResources <<
-			" for unit " << typeId() << ", defaulting to 0" << endl;
-	mMobileProperties->mMaxResources = 0;
- }
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
