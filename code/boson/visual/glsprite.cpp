@@ -25,9 +25,6 @@
 GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
 {
  mCanvas = canvas;
- for (int i = 0; i < 3*4; i++) {
-	mVertexPointer[i] = 0.0;
- }
  mX = mY = mZ = 0.0;
 
  mIsVisible = false;
