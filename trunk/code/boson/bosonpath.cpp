@@ -27,6 +27,10 @@
 #include "boson.h"
 #include "unitproperties.h"
 #include "bosonprofiling.h"
+#include "bosonmap.h"
+
+#include <qptrqueue.h>
+
 
 #include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
@@ -1023,13 +1027,6 @@ bool BosonPath::inRange(int x, int y)
 /***********************************************************
 *****           N E W   P A T H F I N D E R
 ***********************************************************/
-
-#include <bosonmap.h>
-#include <cell.h>
-#include <bosonbigdisplaybase.h>
-
-#include <qptrqueue.h>
-
 
 const int xoffsets[] = {  0,  1,  1,  1,  0, -1, -1, -1};
 const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
