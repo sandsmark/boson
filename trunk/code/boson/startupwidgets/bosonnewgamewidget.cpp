@@ -170,6 +170,7 @@ void BosonNewGameWidget::initSpecies()
  d->mSpeciesIndex2Comment.clear();
  d->mSpeciesIndex2Identifier.clear();
   //TODO: some scenarios might not provide all species!
+ int defaultIndex = 0;
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
 	KSimpleConfig cfg(list[i]);
@@ -177,10 +178,13 @@ void BosonNewGameWidget::initSpecies()
 	mChangeSpecies->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 	d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
 	d->mSpeciesIndex2Identifier.insert(i, cfg.readEntry("Identifier", "Unknown"));
+	if (cfg.readEntry("Identifier", "Unknown") == SpeciesTheme::defaultSpecies()) {
+		defaultIndex = i;
+	}
  }
- mChangeSpecies->setCurrentItem(0);
+ mChangeSpecies->setCurrentItem(defaultIndex);
  if (localPlayer()) {
-	slotLocalPlayerSpeciesChanged(0);
+	slotLocalPlayerSpeciesChanged(defaultIndex);
  }
 }
 
