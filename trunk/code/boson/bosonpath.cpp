@@ -275,7 +275,7 @@ bool BosonPath::findSlowPath()
   mPathLength = 0;
   mPathCost = 0;
   PathStyle pathfound = NoPath;
-  Marking mark[mUnit->canvas()->width() / BO_TILE_SIZE][mUnit->canvas()->height() / BO_TILE_SIZE];
+  Marking mark[mUnit->canvas()->mapWidth()][mUnit->canvas()->mapHeight()];
 #ifdef USE_STL
   vector<PathNode> open;
 #else
