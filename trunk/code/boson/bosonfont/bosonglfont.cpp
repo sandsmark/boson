@@ -390,13 +390,13 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
  // we must never ever use more height than height(..) claims we do
  int maxHeight = height(text, maxWidth);
  if (background) {
+	glPushAttrib(GL_ENABLE_BIT);
 	glEnable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 	glRecti(x, y - maxHeight, x + w, y);
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
 	glColor3ub(255, 255, 255);
+	glPopAttrib();
  }
  if (w < maxWidth) {
 	renderStringInternal(x, y - maxHeight, string, len);
