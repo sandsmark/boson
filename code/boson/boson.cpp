@@ -166,16 +166,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				unit->setGroupLeader(true);
 				emit signalNewGroup(unit, unitsToMove);
 			}
-		} else if(mode == GroupMoveOld) {
+		} else if (mode == GroupMoveOld) {
 			Unit* unit;
 			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next()) {
 				unit->moveTo(pos);
 			}
-		} else {
-			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
-		}
-		else if(mode == GroupMoveNew)
-		{
+		} else if (mode == GroupMoveNew) {
 			kdDebug() << k_funcinfo << " : mode == GroupMoveNew" << endl;
 			if(unitsToMove.count() == 1)
 			{
@@ -192,9 +188,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				pos2.setY(pos.y() + (unit->y() - leader->y()));
 				unit->moveTo(pos2);
 			}
-		}
-		else
+		} else {
 			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
+		}
 		break;
 	}
 	case BosonMessage::MoveAttack:
