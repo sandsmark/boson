@@ -880,7 +880,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
 	boWarning() << k_funcinfo << target->id() << " is already destroyed" << endl;
 	return;
  }
- boDebug() << id() << " shoots at unit " << target->id() << endl;
+// boDebug() << id() << " shoots at unit " << target->id() << endl;
  w->shoot(target);
  owner()->statistics()->increaseShots();
 }
@@ -1058,7 +1058,7 @@ void Unit::playSound(UnitSoundEvent event)
 
 void Unit::turnTo(int deg)
 {
- boDebug() << k_funcinfo << deg << endl;
+// boDebug() << k_funcinfo << deg << endl;
  d->mWantedRotation = deg;
 }
 
