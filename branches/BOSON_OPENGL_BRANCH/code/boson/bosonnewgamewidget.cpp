@@ -284,7 +284,9 @@ void BosonNewGameWidget::initPlayer()
   kdDebug() << k_funcinfo << "playerCount(): " << game()->playerCount() << endl;
   player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
+  {
     kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
+  }
   mPlayercolor = boConfig->readLocalPlayerColor();
   player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
   game()->addPlayer(player());
@@ -562,15 +564,21 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
     return;
   }
   if(game()->isAdmin() || !mHighlightedPlayer->isVirtual())
+  {
     mRemovePlayerButton->setEnabled(true);
+  }
   else
+  {
     mRemovePlayerButton->setEnabled(false);
+  }
 }
 
 void BosonNewGameWidget::slotSetAdmin(bool admin)
 {
   if(admin == mAdmin)
+  {
     return;
+  }
   if(admin)
   {
     mMapCombo->show();
