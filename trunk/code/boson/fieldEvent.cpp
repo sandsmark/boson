@@ -2,7 +2,7 @@
                           fieldEvent.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 17, 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -19,10 +19,12 @@
  ***************************************************************************/
 
 #include <qpainter.h>
+
 #include "../common/log.h"
+#include "../map/map.h"
+
 #include "viewMap.h"
 #include "fieldMap.h"
-#include "../map/map.h"
 
 
 static int selectX, selectY;
@@ -34,8 +36,6 @@ int x, y;
 
 bool found = FALSE;
 
-//x = e->x() / BO_TILE_SIZE;
-//y = e->y() / BO_TILE_SIZE;
 x = e->x();
 y = e->y();
 
@@ -91,16 +91,12 @@ if (e->button() & LeftButton) {
 			m->rect().height()
 			); */
 		if (m->rect().contains( QPoint( x, y) )) {
-	/*	if (x>=m->_x() && x<m->_x() + m->getWidth() &&
-		    y>=m->_y() && y<m->_y() + m->getHeight() ) { */
 			unSelectFix();
 		
 			if ((e->state()&ControlButton) && order->mobSelected.find(mobIt.currentKey()))
 				unSelectMob(mobIt.currentKey());
 			else
 				order->selectMob(mobIt.currentKey(), m);
-//				order->mobSelected.insert(mobIt.currentKey(), m);
-//			logf(LOG_INFO, "select mobile");
 			found = TRUE;
 			}
 		}
@@ -179,7 +175,6 @@ for (mobIt.toFirst(); mobIt; ++mobIt) {
 	m = mobIt.current();
 	if (selectX<=m->_x() && oldX>m->_x() + m->getWidth() &&
 	    selectY<=m->_y() && oldY>m->_y() + m->getHeight() && !order->mobSelected.find(mobIt.currentKey()) ) {
-//		order->mobSelected.insert(mobIt.currentKey(), m);
 		order->selectMob(mobIt.currentKey(), m);
 		}
 	}
@@ -219,7 +214,7 @@ order->unSelectAll();
 //logf(LOG_INFO, "deselecting all");
 }
 
-
+///orzel : those two should become inlined in .h
 void fieldMap::unSelectFix(void)
 {
 	order->unSelectFix();

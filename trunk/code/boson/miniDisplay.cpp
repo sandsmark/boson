@@ -2,7 +2,7 @@
                           miniDisplay.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 17, 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -37,7 +37,6 @@
 void miniMap::paintEvent(QPaintEvent *evt)
 {
 QPainter p;
-
 
 p.begin(this);
 
@@ -84,37 +83,33 @@ p.end();
 repaint(FALSE);
 }
 
+
 void miniMap::drawMobile(playerMobUnit *unit)
 {
-QPainter p;
-p.begin(ground);
-setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-p.end();
-repaint(FALSE);
+	QPainter p;
+	p.begin(ground);
+	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
+	p.end();
+	repaint(FALSE);
 }
+
 
 void miniMap::drawFix(playerFacility *fix)
 {
-QPainter p;
-p.begin(ground);
-setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
-p.end();
-repaint(FALSE);
+	QPainter p;
+	p.begin(ground);
+	setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
+	p.end();
+	repaint(FALSE);
 }
+
 
 void miniMap::setPoint(int x, int y, const QColor &color, QPainter *p)
 {
-if (!p) {
-	logf(LOG_ERROR, "setPoint: p == 0...");
-	return;
-	}
-p->setPen(color);
-p->drawPoint(x,y);
+	if (!p) {
+		logf(LOG_ERROR, "setPoint: p == 0...");
+		return;
+		}
+	p->setPen(color);
+	p->drawPoint(x,y);
 }
-/*
-void fieldMap::drawRectSelect(int x1, int y1, int x2, int y2, QPainter &movPainter)
-{
-movPainter.drawRect(x1, y1, x2-x1, y2-y1); // inch Allah
-
-}
-*/

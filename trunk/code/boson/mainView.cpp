@@ -2,7 +2,7 @@
                        boson/boson/mainView.cpp -  description 
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Mon Apr 19 23:56:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -29,30 +29,28 @@
 #include "mainView.h"		// myself
 
 mainView::mainView(physMap *phys, QWidget *parent=0, const char *name=0)
-:QWidget(parent, name)
+	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
 	QVBoxLayout	*leftLayout = new QVBoxLayout();
 
 	topLayout->addLayout(leftLayout,0);
 
-	view = new viewMap(phys); // the view associated with this window
-
-	mini = new miniMap(view, this);
-	mini->setFixedSize(200,200);
-	leftLayout->addWidget(mini);
+		view = new viewMap(phys); // the view associated with this window
+		mini = new miniMap(view, this);
+		mini->setFixedSize(200,200);
+		leftLayout->addWidget(mini);
 
 /* The order Window : overview and orders buttons */
-	order = new orderWin(field,this, "orderwin");
-	leftLayout->addWidget(order, 10);
+		order = new orderWin(field,this, "orderwin");
+		leftLayout->addWidget(order, 10);
 
 /* This is the main map, the game area */
-			field = new fieldMap(order, view, this);
-			topLayout->addWidget(field,10);
+	field = new fieldMap(order, view, this);
+	topLayout->addWidget(field,10);
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);
 	topLayout->activate();
-	//this->resize(700,600);
 }
 

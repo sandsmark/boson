@@ -2,7 +2,7 @@
                           viewMap.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -34,8 +34,6 @@ class viewMap : public QObject
 
  public:
   viewMap(physMap *, QObject *parent=0, const char *name=0L);
-  ~viewMap();
-
 
   int X(void) { return viewX; }
   int Y(void) { return viewY; }
@@ -43,21 +41,21 @@ class viewMap : public QObject
   int L(void) { return viewL; }
   int H(void) { return viewH; }
 
-  int maxX(void) { return phys->maxX; }
-  int maxY(void) { return phys->maxY; }
+  int maxX(void) { return (phys)?phys->maxX:0; }
+  int maxY(void) { return (phys)?phys->maxY:0; }
 
 ///orzel : should be moved private ?
   physMap	*phys;
 
-  signals:
+ signals:
   void repaint(bool);
 
-  public slots:
+ public slots:
   void reCenterView(int x, int y);
   void relativeReCenterView(int x, int y) {reCenterView(x+viewX, y+viewY);}
   void reSizeView(int l, int h);
 
-  private:
+ private:
   int		viewL, viewH;	// size of the viewing window
   int		viewX, viewY;	// relative position of the upper-left corner
 

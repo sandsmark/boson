@@ -2,7 +2,7 @@
                           unitType.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -63,7 +63,7 @@ enum facilityType {
 typedef unsigned int uint;
 #endif
 
-/*
+/**
  * UNIT properties
  */
 
@@ -79,9 +79,10 @@ struct unitProperties_t {
 
 
 
-/*
+/**
  * MOBILE properties
  */
+
 //struct mobileProperties_t : public unitProperties_t {
 struct mobileProperties_t {
 /* from here.... */

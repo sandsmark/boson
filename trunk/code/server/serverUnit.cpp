@@ -2,7 +2,7 @@
                         serverUnit.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -20,6 +20,7 @@
 
 #include "../common/log.h"
 #include "../common/bobuffer.h"
+
 #include "serverUnit.h"
 #include "game.h"
 

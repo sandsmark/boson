@@ -2,7 +2,7 @@
                           miniEvent.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 17, 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -18,24 +18,20 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <qpainter.h>
 
-#include "../common/log.h"
-#include "../map/map.h"
-
-#include "viewMap.h"
 #include "miniMap.h"
 
 
 void miniMap::mousePressEvent(QMouseEvent *e)
 {
-int x, y;
+	int x, y;
 
-x = e->x();
-y = e->y();
+	x = e->x();
+	y = e->y();
 
-if (e->button() & RightButton) {
-	emit reCenterView(x,y);
-	return;
-	}
+	if (e->button() & RightButton) {
+		emit reCenterView(x,y);
+		return;
+		}
+
 }

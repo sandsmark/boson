@@ -2,7 +2,7 @@
                             log.cpp  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Wed Jan 27 16:15:13 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -67,5 +67,7 @@ fprintf(logfile, "\n[%5d] %s : ", id, logLevelName[level]);
 va_start(args, fmt);
 i=vfprintf(logfile, fmt, args);
 va_end(args);
+
+fflush(logfile);
 return i;
 }

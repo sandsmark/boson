@@ -2,7 +2,7 @@
                           unitType.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -38,13 +38,11 @@ mobileProperties_t mobileProp[] = {
 	};
 
 facilityProperties_t facilityProp[] = {
-	{"AirField", 0, 3, 2, 7},
-	{"ComSat", 0, 2, 2, 7},
-	{"HeliPad", 0, 2, 2, 7},
-	{"PowerPlant", 0, 2, 2, 7},
-	{"WarFactory", 0, 2, 2, 7},
-/*	{"carre", 0, 2, 2},
-	{"", 0, 2, 2} */
+	{"AirField"	, 0, 3, 2, 7},			// FACILITY_AIRFIELD
+	{"ComSat"	, 0, 2, 2, 7},			// FACILITY_COMSAT
+	{"HeliPad"	, 0, 2, 2, 7},			// FACILITY_HELIPAD
+	{"PowerPlant"	, 0, 2, 2, 7},			// FACILITY_POWERPLANT
+	{"WarFactory"	, 0, 2, 2, 7}, 			// FACILITY_WAR_FACTORY
 	};
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));

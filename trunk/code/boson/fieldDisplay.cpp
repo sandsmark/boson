@@ -2,7 +2,7 @@
                           fieldDisplay.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 17, 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -18,11 +18,14 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <assert.h>
+
 #include <qpainter.h>
 #include <qcolor.h>
-#include <assert.h>
+
 #include "../common/log.h"
 #include "../map/map.h"
+
 #include "fieldMap.h"
 #include "playerCell.h"
 #include "speciesTheme.h"
@@ -62,6 +65,7 @@ void fieldMap::paintEvent(QPaintEvent *evt)
 {
 	if (viewing) {
 		QRect r = evt->rect();
+///orzel : should be removed :
 		r = rect();
 //printf("r = %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
 		r.moveBy(view->X() * BO_TILE_SIZE, view->Y() * BO_TILE_SIZE);

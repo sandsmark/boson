@@ -2,7 +2,7 @@
                           physMap.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -26,13 +26,14 @@
 #include <qintdict.h>
 
 #include <QwSpriteField.h>
+
 #include "../common/msgData.h"
 #include "../common/groundType.h"
 #include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
+
 #include "playerUnit.h"		// playerMobUnit
 #include "playerCell.h"
-//#include "speciesTheme.h"
 
 class QRect;
 class QPainter;
@@ -40,10 +41,6 @@ class Cell;
 class Unit;
 class groundTheme;
 class speciesTheme;
-
-///// orzel : TEMPORAIRE que c'en est grave : 
-/*#define	MAX_PLAYER	2
-#define MAX_UNIT	20 */
 
 
 /** 

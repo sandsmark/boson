@@ -2,7 +2,7 @@
                          selectPart.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jun 26 16:23:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -38,7 +38,8 @@ QwSpritePixmapSequence * selectPart_down::qsps = 0l;
 
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2)
 {
-QPen pen(red);
+	QPen pen(red);
+
 	painter.setPen(pen);
 	painter.fillRect(0,0,SP_W,SP_THICK,c1);
 	painter.fillRect(

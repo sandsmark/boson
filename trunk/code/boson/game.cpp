@@ -2,7 +2,7 @@
                          game.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Wen Apr 14 20:22:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         

@@ -2,7 +2,7 @@
                          boeditor.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 14 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -20,11 +20,11 @@
 
 #include <stdio.h>
 
-#include "map.h"
-
 #include "../common/playField.h"
 #include "../common/groundType.h"
 #include "../common/cell.h"
+
+#include "map.h"
 
 
 #define MAP_WIDTH	200

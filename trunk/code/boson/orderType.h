@@ -2,7 +2,7 @@
                           orderType.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Wen Apr  7 23:39:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         

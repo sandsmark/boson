@@ -2,7 +2,7 @@
                          playField.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Feb 14 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -82,6 +82,7 @@ class playField //: public  QDataStream
 	bool	load(groundType  &);
 	bool	loadMap();
 	bool	loadPeople();
+
 	void	write(origMobile &);
 	void	write(origFacility &);
 	void	write(groundType &);
@@ -95,11 +96,6 @@ public :
 	int		nbPlayer;
 	bosonMap	map;
 	origPeople	people;
-
-/*	int	nbMobiles;
-	int	nbFacilities;
-	origMobile *mobile;
-	origFacility *facility; */
 
 };
  

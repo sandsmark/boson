@@ -2,7 +2,7 @@
                           cell.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -23,10 +23,5 @@
 Cell::Cell(groundType g)
 {
 	ground = g;
-	destroyed = DESTROYED_NONE ;
-}
-
-
-Cell::~Cell()
-{
+//	destroyed = DESTROYED_NONE ;
 }

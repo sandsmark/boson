@@ -2,7 +2,7 @@
                           fieldMap.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -32,6 +32,7 @@
 #include "../common/groundType.h"
 #include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
+
 #include "speciesTheme.h"
 #include "orderWin.h"
 #include "game.h"
@@ -43,9 +44,6 @@ class QPixmap;
 class playerCell;
 class viewMap;
 
-#define BO_SELECT_MARGIN	(5)	// how far does the selection expanse
-#define BO_SELECT_ROUND		(60)	// how rounded is the selection (see qdrawroundrect.html)
-
 
 /** 
   * This class handles all operations concerning the game Board/Map
@@ -54,20 +52,20 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
 {
   Q_OBJECT
 
- public:
+public:
   fieldMap(orderWin *, viewMap *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
   ~fieldMap();
 
 
 
- signals:
+signals:
   void  relativeReCenterView(int x, int y);
 //  void	reCenterView(int x, int y);
   void  reSizeView(int l, int h);
 
- protected:
-/* Qw virtual functions */
+protected:
 
+/* Qw virtual functions */
   virtual QRect viewArea() const;
   virtual bool preferDoubleBuffering() const {return true;}
   virtual void beginPainter(QPainter &);
@@ -89,7 +87,7 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
   void	unSelectFix(void);
   void	unSelectAll(void);
 
- private:
+private:
 
   viewMap	*view;
 public: ///orzel : what about that ?

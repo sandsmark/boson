@@ -2,7 +2,7 @@
                           miniMap.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -38,36 +38,34 @@ class playerFacility;
   */
 class miniMap : public QWidget
 {
+
   Q_OBJECT
 
- public:
+public:
   miniMap(viewMap *v, QWidget *parent=0, const char *name=0L);
-  ~miniMap();
 
- signals:
+signals:
   void	reCenterView(int x, int y);
   void  reSizeView(int l, int h);
 
- public slots:
+public slots:
   void newCell(int,int, groundType);
   void drawMobile(playerMobUnit *mob);
   void drawFix(playerFacility *fix);
 
- protected:
+protected:
   void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
-//  void drawRectSelect(int, int, int, int, QPainter &);
 
 /* events */
   virtual void paintEvent(QPaintEvent *evt);
   virtual void mousePressEvent(QMouseEvent *e);
 
- private:
+private:
 
   viewMap	*view;
   QPixmap	*ground;
-//  QPainter	*myPainter;
+
 };
 
 #endif // MINI_MAP_H
-
 

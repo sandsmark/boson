@@ -2,7 +2,7 @@
                           boserver.cpp  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -19,13 +19,12 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include "boserver.h"
-#include "game.h"
 
 #include "../common/bobuffer.h"
+#include "../map/map.h"	 ///orzel: temp, pour la creation...
 
-///orzel: temp, pour la creation...
-#include "../map/map.h"
+#include "boserver.h"
+#include "game.h"
 
 FILE *logfile = (FILE *) 0L;
 
@@ -245,7 +244,7 @@ switch(tag) {
 		gpp.player[playerId].lastConfirmedJiffies = gpp.jiffies;
 		confirmedJiffies++;
 		if (confirmedJiffies == gpp.nbPlayer) {
-			usleep(500*100); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
+			usleep(50*1000); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
 
 			/* get all wanted action from everybody */
 			requestAction();

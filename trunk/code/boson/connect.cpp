@@ -2,7 +2,7 @@
                           connect.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -20,12 +20,15 @@
 
 
 #include <assert.h>
+
 #include "boson.h"
 #include "connect.h"
+
 #include "../common/log.h"
 #include "../common/bobuffer.h"
 
 #include "game.h"
+
 
 void BosonApp::handleSocketMessage(KSocket *s)
 {
@@ -123,9 +126,9 @@ switch(state) {
 			logf(LOG_INFO, "Server has accepted our request, map is (%d,%d)",
 				data->accepted.sizeX,
 				data->accepted.sizeY);
-gpp.who_am_i = data->accepted.who_you_are;
-gpp.nb_player = data->accepted.total_player;
-gpp.myspecies = gpp.species[data->accepted.who_you_are];
+			gpp.who_am_i	= data->accepted.who_you_are;
+			gpp.nb_player	= data->accepted.total_player;
+			gpp.myspecies	= gpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
 			state = PS_NO_CONNECT;

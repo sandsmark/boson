@@ -2,7 +2,7 @@
                           speciesTheme.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -22,17 +22,16 @@
 #define SPECIES_THEME_H 
 
 
-//#include <QwSpriteField.h>
-
 #include "../common/cell.h"
 #include "../common/unitType.h"
+
 #include "playerUnit.h"
 
 class QPixmap;
 class QwSpritePixmapSequence;
 
 /** 
-  * This class handles the drawing of the different units for a given specie(s?)
+  * This class handles the drawing of the different units for a given specy(ie?)
   */
 class speciesTheme
 {
@@ -68,8 +67,8 @@ class speciesTheme
   bool		allLoaded;
 
 ///orzel: ugly, will be moved with dynamic allocation in constructors for those tabs
-#define mobilePropNb	10
-#define facilityPropNb	10
+#define mobilePropNb	20
+#define facilityPropNb	20
 
   QPixmap	*mobBigOverview[mobilePropNb];		// pixmaps for the control panel
   QPixmap	*fixBigOverview[facilityPropNb];	// pixmaps for the control panel

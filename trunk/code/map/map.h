@@ -2,7 +2,7 @@
                           map.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Apr 17 23:02:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         

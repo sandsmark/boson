@@ -2,7 +2,7 @@
                           miniMap.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -19,7 +19,9 @@
  ***************************************************************************/
 
 //#include <assert.h>
+
 #include <qpixmap.h>
+
 #include "miniMap.h"
 #include "viewMap.h"
   
@@ -27,28 +29,24 @@
 miniMap::miniMap(viewMap *v, QWidget*parent, const char *name=0L)
 	: QWidget(parent, name)
 {
-physMap *phys = v->phys;
 
+	physMap *phys = v->phys;
 
 /* the viewMap */
-view = v;
+	view = v;
 
 /* create the (back)ground pixmap */
-ground = new QPixmap(v->maxX(), v->maxY());
-ground->fill(black);
+	ground = new QPixmap(v->maxX(), v->maxY());
+	ground->fill(black);
 
 /* make the connection */
-
-connect(phys, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
-connect(phys, SIGNAL(updateMobile(playerMobUnit *)), this, SLOT(drawMobile(playerMobUnit *)));
-connect(phys, SIGNAL(updateFix(playerFacility *)), this, SLOT(drawFix(playerFacility *)));
+	connect(phys, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
+	connect(phys, SIGNAL(updateMobile(playerMobUnit *)), this, SLOT(drawMobile(playerMobUnit *)));
+	connect(phys, SIGNAL(updateFix(playerFacility *)), this, SLOT(drawFix(playerFacility *)));
 
 // connect(, SIGNAL(), this, SLOT());
-connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
-connect(this, SIGNAL(reCenterView(int, int)), view, SLOT(reCenterView(int, int)));
-connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
+	connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
+	connect(this, SIGNAL(reCenterView(int, int)), view, SLOT(reCenterView(int, int)));
+	connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
 }
 
-miniMap::~miniMap()
-{
-}

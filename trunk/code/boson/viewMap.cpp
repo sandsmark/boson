@@ -2,7 +2,7 @@
                           viewMap.cpp  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -20,18 +20,16 @@
 
 #include "viewMap.h"
 
+
 viewMap::viewMap(physMap *p, QObject *parent, const char *name=0L)
 	: QObject(parent, name)
 {
 	/* map geometry */
-	viewL = viewH = 5; ///orzel : arbitraire, doit etre fixe par un mainMap..
+	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
 	viewX = viewY = 0;
 	phys = p;
 }
 
-viewMap::~viewMap()
-{
-}
 
 void viewMap::reCenterView(int x, int y)
 {
@@ -50,6 +48,7 @@ void viewMap::reCenterView(int x, int y)
 		emit repaint(FALSE);
 		}
 }
+
 
 void viewMap::reSizeView(int l, int h)
 {

@@ -2,7 +2,7 @@
                           connect.cpp  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -18,10 +18,11 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <assert.h>
+
 #include "boserver.h"
 #include "connect.h"
 #include "game.h"
-#include <assert.h>
 
 #include "../common/bobuffer.h"
 

@@ -2,7 +2,7 @@
                           player.h  -  description                    
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -23,13 +23,13 @@
 
 Player::Player(void)
 {
-socket = (KSocket *) 0L;
-socketState = SSS_NO_CONNECT;
-name = new QString("Orzel Land");
+	socket = (KSocket *) 0L;
+	socketState = SSS_NO_CONNECT;
+	name = new QString("Orzel Land");
 
-lastConfirmedJiffies = 1;
+	lastConfirmedJiffies = 1;
 
-fixUnitDestroyed = 0;
-mobUnitDestroyed = 0;
-UnitDestroyed = 0;
+	fixUnitDestroyed = 0;
+	mobUnitDestroyed = 0;
+	UnitDestroyed = 0;
 }

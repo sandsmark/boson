@@ -2,7 +2,7 @@
                           unit.h  -  description                              
                              -------------------                                         
 
-    version              :                                   
+    version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
@@ -22,9 +22,9 @@
 #define UNIT_H 
 
 #include <qobject.h>
+
 #include "../common/unitType.h"
 #include "../common/msgData.h"
-
 #include "../map/map.h"
 
 
@@ -48,7 +48,6 @@ class Unit : public QObject
 
  public:
   Unit(QObject* parent=0, const char *name=0L);
-  ~Unit();
 
   virtual	int	_x(void)=0;
   virtual	int	_y(void)=0;
@@ -56,7 +55,6 @@ class Unit : public QObject
   virtual	int	getWidth(void)=0;
   virtual	int	getHeight(void)=0;
   virtual	uint	getVisibility(void)=0;
-  virtual	QRect	rect(void)=0;
 
   int		who;		// who is the owner ?
   protected:
@@ -85,7 +83,7 @@ class mobUnit : public Unit
   virtual	int	getWidth(void) { return mobileProp[type].width;}
   virtual	int	getHeight(void) { return mobileProp[type].height;}
   virtual	uint	getVisibility(void) {return mobileProp[type].visibility; }
-  virtual	QRect	rect(void);
+  		QRect	rect(void);
 
  protected:
   mobType		type;
@@ -106,7 +104,7 @@ class Facility : public Unit
   virtual	int	getWidth(void) { return facilityProp[type].width * BO_TILE_SIZE;}
   virtual	int	getHeight(void) { return facilityProp[type].height * BO_TILE_SIZE;}
   virtual	uint	getVisibility(void) {return facilityProp[type].visibility; }
-  virtual	QRect	rect(void);
+  		QRect	rect(void);
 
  protected:
   facilityType	type;
