@@ -147,8 +147,6 @@ public:
 	{
 		mAdvanceCount.registerData(Boson::IdAdvanceCount, dataHandler,
 				KGamePropertyBase::PolicyLocal, "AdvanceCount");
-		mAdvanceCount.registerData(Boson::IdAdvanceCount, dataHandler,
-				KGamePropertyBase::PolicyLocal, "AdvanceCount");
 		mAdvanceFlag.registerData(Boson::IdAdvanceFlag, dataHandler,
 				KGamePropertyBase::PolicyLocal, "AdvanceFlag");
 		mAdvanceCallsCount.registerData(Boson::IdAdvanceCallsCount, dataHandler,
