@@ -179,3 +179,8 @@ QStringList BosonData::availableCampaigns() const
  return list;
 }
 
+QString BosonData::locateDataFile(const QString& fileName) const
+{
+ return locate("data", fileName);
+}
+

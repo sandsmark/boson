@@ -139,6 +139,14 @@ public:
 	 **/
 	static QStringList availableFiles(const QString& searchPattern, bool recursive = false);
 
+	/**
+	 * Replacmenet for the usual locate("data", fileName);
+	 *
+	 * @return The absolute path for @p fileName, or @ref QString::null, if
+	 * @p fileName can't be found.
+	 **/
+	QString locateDataFile(const QString& fileName) const;
+
 protected:
 	// AB: I am a bit surprised, that g++ accepts this, as BoGlobalObject is
 	// a forwarded template. is this valid c++ ?
