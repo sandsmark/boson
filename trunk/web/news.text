@@ -1,4 +1,18 @@
 [article]
+id=031116
+date=November 16th 2003 18:46
+title=Boson 0.9.1 released
+text=Boson 0.9.1 is now released.<br>
+    It fixes some problems discovered in 0.9, including broken network and crash
+    with NVidia drivers when no usable font was found. We encourage all 0.9
+    users to upgrade!<br>
+    Read the announcement <a href="announces/boson-0.9.1.php">here</a> and then
+    <a href="download.php">download it</a>!<br>
+    Note that data and music packages were not changed, so if you already have
+    0.9, you only need to download code package (and data, if you want to have
+    "0.9.1" instead of "0.9" on startup page ;-))<br><br>
+
+[article]
 id=031105
 date=November 5th 2003 16:54
 title=0.9 screenshots and poll
