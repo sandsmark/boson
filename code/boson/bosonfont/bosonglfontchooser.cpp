@@ -151,7 +151,7 @@ void BosonGLFontPreview::paintGL()
 	boError() << k_funcinfo << "OpenGL error before paintGL(): string=" << errorString << " name=" << errorName << endl;
  }
  glLoadIdentity();
- glColor3ub(255, 0, 0);
+ glColor3ub(255, 255, 255);
  glClear(GL_COLOR_BUFFER_BIT);
  QString text = "foobar";
  int x = width() / 2 - mFont->width(text) / 2;
