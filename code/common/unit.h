@@ -42,7 +42,7 @@ enum workType {
 /*
  * common header for facilityMsg_t and mobileMsg_t  XXX make *Msg_t inherit unitMsg_t...
  */
-struct unitMsg_t    { int who, key, x, y; };
+struct unitMsg_t    { uint who; int key, x, y; };
 
 
 /** 
@@ -57,7 +57,7 @@ public:
 	virtual	uint	getVisibility(void)=0;
 	virtual	QRect	rect(void)=0;
   
-	int		who;		// who is the owner ?
+	uint		who;		// who is the owner ?
 	int		key;
 protected:
 	uint		countDown;	// work countDown;
