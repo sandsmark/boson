@@ -112,7 +112,7 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   {
     maxnum = 500;
     initnum = 500;
-    size = 1.0;
+    size = 0.8;
     initfunc = &initShockWaveParticle;
     blendfunc = GL_ONE;
   }
@@ -184,14 +184,14 @@ void BosonParticleManager::updateFireParticle(BosonParticleSystem*, BosonParticl
 
 void BosonParticleManager::initShockWaveParticle(BosonParticleSystem*, BosonParticle* particle)
 {
-  particle->life = getFloat(0.3, 0.5);
+  particle->life = 0.5;
   particle->maxage = particle->life;
   BoVector3 velo(getFloat(-1, 1), getFloat(-1, 1), getFloat(-0.2, 0.2));  // Extremely big velocity
   velo.normalize();
-  velo.scale(getFloat(3.5, 5));
+  velo.scale(5);
   particle->velo = velo;
   particle->color = BoVector4(0.8, 0.8, 0.8, 0.25);
-  particle->pos = BoVector3(0, 0, getFloat(0.2, 0.7));
+  particle->pos = BoVector3(getFloat(-0.2, 0.2), getFloat(-0.2, 0.2), getFloat(0.0, 0.2));
 }
 
 void BosonParticleManager::updateFadeOutParticle(BosonParticleSystem*, BosonParticle* particle)
