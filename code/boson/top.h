@@ -178,6 +178,8 @@ private:
 	void initLoadingWidget();
 	void showLoadingWidget();
 
+	void raiseWidget(int id);
+
 private:
 	QWidgetStack* mWs;
 	Boson* mBoson;

@@ -39,12 +39,11 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-  mBosonPixmap = new QLabel( this, "bosonpixmap" );
-  mBosonPixmap->setAlignment( int( QLabel::AlignCenter ) );
-  mMainLayout->addWidget( mBosonPixmap );
-  mBosonPixmap->setPixmap(QPixmap(locate("data", "boson/pics/startup.png")));
-  QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  mMainLayout->addItem( spacer_2 );
+  QPixmap startupPix(locate("data", "boson/pics/startup.png"));
+  setErasePixmap(startupPix);
+  setFixedSize(startupPix.size());
+  QSpacerItem* spacer_1 = new QSpacerItem( 20, 420, QSizePolicy::Preferred, QSizePolicy::Minimum );
+  mMainLayout->addItem( spacer_1 );
 
   mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout");
 
