@@ -139,6 +139,12 @@ public:
 	 **/
 	bool cellOccupied(int x, int y);
 
+	/**
+	 * Like previous one, but unit u can be on cell
+	 * Can be used from inside Unit class
+	 */
+	bool cellOccupied(int x, int y, Unit* u);
+
 	void quitGame();
 
 public slots:
