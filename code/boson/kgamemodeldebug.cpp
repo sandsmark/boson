@@ -773,7 +773,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 	switch (track->type()) {
 		case Bo3DSTrackKey::TrackLin1:
 		{
- 			mType->setText(i18n("Lin1 (1 float)"));
+			mType->setText(i18n("Lin1 (1 float)"));
 			// AB: once we found out what the values mean, we should find
 			// usable names
 			mKeys->setColumnText(mKeyData0, i18n("value"));
@@ -783,7 +783,7 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 		}
 		case Bo3DSTrackKey::TrackLin3:
 		{
- 			mType->setText(i18n("Lin3 (3 floats)"));
+			mType->setText(i18n("Lin3 (3 floats)"));
 			mKeys->setColumnText(mKeyData0, i18n("value"));
 			mKeys->setColumnText(mKeyData1, i18n("dd"));
 			mKeys->setColumnText(mKeyData2, i18n("ds"));
@@ -792,18 +792,18 @@ void BoTrackWidget::slotDisplayTrack(Bo3DSTrack* track)
 		case Bo3DSTrackKey::TrackBool:
 		{
 			// no data to be displayed
- 			mType->setText(i18n("Bool"));
+			mType->setText(i18n("Bool"));
 			break;
 		}
 		case Bo3DSTrackKey::TrackMorph:
 		{
- 			mType->setText(i18n("Morph"));
+			mType->setText(i18n("Morph"));
 			mKeys->setColumnText(mKeyData0, i18n("name"));
 			break;
 		}
 		case Bo3DSTrackKey::TrackQuat:
 		{
- 			mType->setText(i18n("Quaternion"));
+			mType->setText(i18n("Quaternion"));
 			mKeys->setColumnText(mKeyData0, i18n("axis"));
 			mKeys->setColumnText(mKeyData1, i18n("angle"));
 			mKeys->setColumnText(mKeyData2, i18n("q"));
@@ -1464,6 +1464,7 @@ public:
 	QPtrDict<Lib3dsMesh> mListItem2Mesh;
 	QPtrDict<Lib3dsFace> mListItem2Face;
 	BoFaceView* mFaceList;
+	KListView* mPointList;
 	QVBox* mConnectableWidget;
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
@@ -1615,6 +1616,15 @@ void KGameModelDebug::initMeshPage()
  d->mHideConnectableWidgets->hide();
 #endif
 
+ QVBox* pointView = new QVBox(splitter);
+ d->mPointList = new KListView(pointView);
+ d->mPointList->setAllColumnsShowFocus(true);
+ d->mPointList->addColumn(i18n("Point"));
+ d->mPointList->addColumn(i18n("x"));
+ d->mPointList->addColumn(i18n("y"));
+ d->mPointList->addColumn(i18n("z"));
+ d->mPointList->addColumn(i18n("Texel x"));
+ d->mPointList->addColumn(i18n("Texel y"));
 
  QVBox* matrixBox = new QVBox(splitter);
  QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Mesh Matrix"), matrixBox);
@@ -1790,6 +1800,7 @@ void KGameModelDebug::updateMeshPage()
 {
  d->mMeshView->clear();
  d->mFaceList->clear();
+ d->mPointList->clear();
  d->mListItem2Mesh.clear();
  d->mListItem2Face.clear();
  d->mMeshMatrix->setIdentity();
@@ -1938,6 +1949,7 @@ void KGameModelDebug::slotShowPointIndices(bool)
 void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 {
  d->mFaceList->clear();
+ d->mPointList->clear();
  d->mListItem2Face.clear();
 
  if (!item) {
@@ -1958,6 +1970,27 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 	Lib3dsFace* face = &mesh->faceL[i];
 	QListViewItem* item = d->mFaceList->addFace(i, face, mesh);
 	d->mListItem2Face.insert(item, face);
+ }
+
+ // points
+ for (unsigned int i = 0; i < mesh->points; i++) {
+	QString no;
+	if (mesh->points >= 1000) {
+		no.sprintf("%04d", i);
+	} else if (mesh->points >= 100) {
+		no.sprintf("%03d", i);
+	} else {
+		no.sprintf("%02d", i);
+	}
+	QListViewItem* item = new QListViewItem(d->mPointList);
+	item->setText(0, no);
+	item->setText(1, QString::number(mesh->pointL[i].pos[0]));
+	item->setText(2, QString::number(mesh->pointL[i].pos[1]));
+	item->setText(3, QString::number(mesh->pointL[i].pos[2]));
+	if (mesh->texels == mesh->points) {
+		item->setText(4, QString::number(mesh->texelL[i][0]));
+		item->setText(5, QString::number(mesh->texelL[i][1]));
+	}
  }
 
  // mesh->matrix
