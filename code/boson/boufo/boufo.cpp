@@ -26,7 +26,6 @@
 #include <ufo/widgets/uslider.hpp>
 #include <ufo/ui/uuidefs.hpp>
 #include "ubolabelui.h"
-//#include "uboboxlayout.h"
 #include "uboprogress.h"
 #include "uboprogressui.h"
 
