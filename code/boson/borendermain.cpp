@@ -103,6 +103,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mRotateX = mRotateY = mRotateZ = 0.0;
  mPlacementPreview = false;
  mDisallowPlacement = false;
+ mWireFrame = false;
 
  connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
  connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
@@ -172,13 +173,19 @@ void ModelPreview::paintGL()
  glEnd();
  */
 
- glEnable(GL_TEXTURE_2D);
+ if (mWireFrame) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+ } else {
+	glEnable(GL_TEXTURE_2D);
+ }
  glEnable(GL_DEPTH_TEST);
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-#warning FIXME?
- // AB: fi these are enabled we can't use triangle strips by any reason.
+ // AB: if these are enabled we can't use triangle strips by any reason.
+ // AB: we don't use triangle strips atm (and there are ways so that we still
+ // can use backface culling). but i leave this out, as borender rendering speed
+ // isn't critical and it may be easier to debug certain things.
 // glEnable(GL_CULL_FACE);
 // glCullFace(GL_BACK);
 
@@ -216,6 +223,7 @@ void ModelPreview::paintGL()
 	}
  }
 
+ glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
@@ -357,6 +365,7 @@ RenderMain::RenderMain()
  connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
  connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
+ connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
 
  mPreview->slotResetView();
 
@@ -677,6 +686,10 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  connect(mDisallowPlacement, SIGNAL(toggled(bool)), this, SIGNAL(signalDisallowPlacementChanged(bool)));
  placementLayout->addWidget(mDisallowPlacement);
  topLayout->addWidget(placement);
+
+ mWireFrame = new QCheckBox(i18n("Show wireframe"), this);
+ connect(mWireFrame, SIGNAL(toggled(bool)), this, SIGNAL(signalWireFrameChanged(bool)));
+ topLayout->addWidget(mWireFrame);
 
  QPushButton* defaults = new QPushButton(i18n("Reset Defaults"), this);
  connect(defaults, SIGNAL(clicked()), this, SIGNAL(signalResetDefaults()));

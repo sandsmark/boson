@@ -167,6 +167,10 @@ public slots:
 	{
 		mDisallowPlacement = on;
 	}
+	void slotWireFrameChanged(bool on)
+	{
+		mWireFrame = on;
+	}
 
 protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
@@ -185,6 +189,7 @@ private:
 
 	bool mPlacementPreview;
 	bool mDisallowPlacement;
+	bool mWireFrame;
 
 	// mouse move:
 	int* mMouseDiffX;
@@ -210,6 +215,7 @@ signals:
 	void signalResetDefaults();
 	void signalPlacementPreviewChanged(bool); // display preview placement - if false display normal model
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
+	void signalWireFrameChanged(bool);
 
 protected slots:
 	void slotFovYChanged(float f) { mFovY->setValue(f); }
@@ -234,6 +240,7 @@ private:
 	KIntNumInput* mFrame;
 	QCheckBox* mPlacementPreview;
 	QCheckBox* mDisallowPlacement;
+	QCheckBox* mWireFrame;
 };
 
 /**
