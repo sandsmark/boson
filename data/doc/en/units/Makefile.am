@@ -16,11 +16,11 @@ BO_DOCS=index.wml tornado.wml mineralharvester.wml \
 # list additional data here - these files will get installed
 doc_DATA=tornado.jpg mineralharvester.jpg oilharvester.jpg \
         ship.jpg ferry.jpg grizzly.jpg leopard.jpg panther.jpg piranha.jpg \
-        tiger.jpg map.jpg \
+        tiger.jpg map.jpg puma.jpg transall.jpg \
         tornado_small.jpg mineralharvester_small.jpg \
         oilharvester_small.jpg ship_small.jpg ferry_small.jpg grizzly_small.jpg \
         leopard_small.jpg panther_small.jpg piranha_small.jpg \
-        tiger_small.jpg map_small.jpg
+        tiger_small.jpg map_small.jpg puma_small.jpg transall_small.jpg
 
 # Condiguration ends here!
 
