@@ -742,7 +742,7 @@ void ToolTipOptions::apply()
  BoToolTipCreatorFactory factory;
  QValueList<int> tips = factory.availableTipCreators();
  int index = mToolTipCreator->currentItem();
- if (index >= 0 && index < tips.count()) {
+ if (index >= 0 && index < (int)tips.count()) {
 	boConfig->setToolTipCreator(tips[index]);
  } else {
 	boWarning() << k_funcinfo << "invalid tooltip creator index=" << index << endl;
