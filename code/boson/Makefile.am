@@ -103,7 +103,7 @@ BOPROFILING_SRC= \
 #		bomesh.cpp bo3dtools.cpp bosonconfig.cpp \
 #		botriangles_test.cpp
 
-boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
