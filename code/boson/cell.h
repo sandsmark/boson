@@ -29,19 +29,6 @@ class UnitProperties;
 class Cell
 {
 public:
-	enum GroundType {
-		GroundUnknown = 0,
-		GroundDeepWater = 1,
-		GroundWater = 2,
-		GroundGrass = 3,
-		GroundDesert = 4,
-		
-		GroundGrassMineral = 5,
-		GroundGrassOil = 6,
-
-		GroundLast = 7
-	};
-
 	Cell();
 	~Cell();
 
@@ -76,23 +63,6 @@ public:
 	int moveCost() const; // leave signed, maybe we can use negative values for roads one day?
 
 
-	/**
-	 * This has nothing to do with @ref GroundType! While @ref GroundType
-	 * contains the basic plain tiles only this can also be a transtition!!
-	 **/
-	inline int groundType() const
-	{
-		return mType;
-	}
-
-	/**
-	 * @return The version of the groundType. 
-	 **/
-	inline unsigned char version() const
-	{
-		return mVersion;
-	}
-
 	inline void addItem(BosonItem* u) { mItems.appendItem(u); }
 
 	/**
@@ -114,24 +84,16 @@ public:
 	// instead of hardcoding them into the ground.
 	// we should iterate through mItems and search for the oil/minerals RTTI
 	// once we have implemented that!
-	bool hasOil() const { return (groundType() == GroundGrassOil); }
-	bool hasMinerals() const { return (groundType() == GroundGrassMineral); }
+//	bool hasOil() const { return (groundType() == GroundGrassOil); }
+//	bool hasMinerals() const { return (groundType() == GroundGrassMineral); }
+	bool hasOil() const { return (false); }
+	bool hasMinerals() const { return (false); }
 
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
 
-protected:
-	void setVersion(unsigned char v)
-	{
-		mVersion = v;
-	}
-
-	void setGroundType(GroundType type);
-
 private:
-	GroundType mType;
-	unsigned char mVersion;
 	int mX;
 	int mY;
 
