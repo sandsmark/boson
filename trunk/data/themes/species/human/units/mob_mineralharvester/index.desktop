@@ -5,6 +5,7 @@ Name=Mineral Harvester
 Id=10003
 Health=150
 MineralCost=300
+OilCost=5
 Producer=0
 Requirements=13,3
 ProductionTime=50

@@ -5,6 +5,7 @@ Name=Techcenter
 Id=12
 Health=300
 MineralCost=400
+OilCost=100
 Producer=10
 Requirements=5,2,3
 UnitWidth=2.0

@@ -5,6 +5,7 @@ Name=Mineral Refinery
 Id=13
 Health=250
 MineralCost=100
+OilCost=0
 Producer=10
 Requirements=5,2
 UnitWidth=2.0

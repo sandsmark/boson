@@ -5,6 +5,7 @@ Name=Sam Site
 Id=6
 Health=100
 MineralCost=200
+OilCost=50
 Producer=10
 Requirements=5,14,2
 ProductionTime=70

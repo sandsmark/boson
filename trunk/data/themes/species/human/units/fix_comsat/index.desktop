@@ -5,6 +5,7 @@ Name=Comsat
 Id=14
 Health=150
 MineralCost=200
+OilCost=50
 Producer=10
 SupportMiniMap=true
 Requirements=5,2,12

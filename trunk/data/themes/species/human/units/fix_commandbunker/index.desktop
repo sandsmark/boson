@@ -5,6 +5,7 @@ Name=Command Bunker
 Id=5
 Health=400
 MineralCost=600
+OilCost=0
 Producer=10
 UnitWidth=3.0
 UnitHeight=3.0

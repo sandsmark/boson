@@ -5,6 +5,7 @@ Name=Oil Harvester
 Id=10002
 Health=150
 MineralCost=300
+OilCost=5
 Producer=0
 Requirements=8,3
 ProductionTime=60

@@ -5,6 +5,7 @@ Name=Oil Tower
 Id=7
 Health=50
 MineralCost=100
+OilCost=0
 Producer=10
 Requirements=8
 ProductionTime=50

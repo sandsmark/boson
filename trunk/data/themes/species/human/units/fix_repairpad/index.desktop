@@ -5,6 +5,7 @@ Name=Repair Pad
 Id=9
 Health=200
 MineralCost=300
+OilCost=200
 Producer=10
 Requirements=5,2,12,3
 UnitWidth=2.0

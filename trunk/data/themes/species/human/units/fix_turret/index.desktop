@@ -5,6 +5,7 @@ Name=Turret
 Id=10
 Health=100
 MineralCost=200
+OilCost=50
 Reload=13
 Producer=10
 Requirements=5,2,3

@@ -5,6 +5,7 @@ Name=War Factory
 Id=3
 Health=300
 MineralCost=400
+OilCost=100
 Producer=10
 Requirements=4,5,2
 UnitWidth=2.0

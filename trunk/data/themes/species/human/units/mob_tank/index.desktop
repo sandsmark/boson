@@ -5,6 +5,7 @@ Name=Tank
 Id=10005
 Health=200
 MineralCost=300
+OilCost=80
 Producer=0
 Requirements=12,3
 Armor=3
