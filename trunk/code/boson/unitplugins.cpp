@@ -1386,11 +1386,21 @@ bool RefineryPlugin::isUsableTo(const HarvesterPlugin* harvester) const
 
 unsigned int RefineryPlugin::refineMinerals(unsigned int minerals)
 {
+ if (!player()) {
+	BO_NULL_ERROR(player());
+	return 0;
+ }
+ player()->setMinerals(player()->minerals() + minerals);
  return minerals;
 }
 
 unsigned int RefineryPlugin::refineOil(unsigned int oil)
 {
+ if (!player()) {
+	BO_NULL_ERROR(player());
+	return 0;
+ }
+ player()->setOil(player()->oil() + oil);
  return oil;
 }
 
