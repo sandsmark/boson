@@ -941,21 +941,21 @@ void TopWidget::slotSaveGame()
  mMainDock->setWidget(d->mStartup);
 }
 
-void TopWidget::slotNewGame()
+void TopWidget::slotNewGame(KCmdLineArgs* args)
 {
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- d->mStartup->slotNewGame();
+ d->mStartup->slotNewGame(args);
 }
 
-void TopWidget::slotStartEditor()
+void TopWidget::slotStartEditor(KCmdLineArgs* args)
 {
  if (!d->mStartup) {
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- d->mStartup->slotStartEditor();
+ d->mStartup->slotStartEditor(args);
 }
 

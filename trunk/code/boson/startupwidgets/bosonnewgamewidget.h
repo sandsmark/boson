@@ -78,8 +78,8 @@ private:
 
 public slots:
 	/**
-	 * :Called when user clicks on "Start game" button
-	 * This widget should then be hided and game should be started
+	 * Called when user clicks on "Start game" button
+	 * This widget should then be hidden and game should be started
 	 **/
 	virtual void slotStart();
 
@@ -95,7 +95,8 @@ public slots:
 	 **/
 	void slotRemovePlayer();
 
-	/** Called when user clicks "Network Options" button
+	/**
+	 * Called when user clicks "Network Options" button
 	 * Hides this widget and shows Network Options widget
 	 **/
 	void slotNetworkOptions();

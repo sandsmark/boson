@@ -24,6 +24,7 @@
 
 class Player;
 class BosonLoadingWidget;
+class KCmdLineArgs;
 
 class BosonStartupWidget : public QWidget
 {
@@ -79,14 +80,14 @@ public slots:
 	 * Mainly used internally. This will display the new game widget (see
 	 * @ref BosonNewGameWidget) where the player can select the playfield.
 	 **/
-	void slotNewGame();
+	void slotNewGame(KCmdLineArgs* args = 0);
 
 	/**
 	 * Mainly used internally. This will display the start editor widget
 	 * (see @ref BosonStartEditorWidget) where player can select the
 	 * playfield to be edited.
 	 **/
-	void slotStartEditor();
+	void slotStartEditor(KCmdLineArgs* args = 0);
 
 signals:
 	/**

@@ -27,7 +27,6 @@
 #include "../speciestheme.h"
 #include "../bosoncomputerio.h"
 #include "../boson.h"
-#include "../top.h"
 #include "../bosonplayfield.h"
 #include "../bosonscenario.h"
 #include "bodebug.h"
@@ -426,6 +425,7 @@ void BosonNewGameWidget::setCurrentPlayField(BosonPlayField* field)
 	boError() << k_funcinfo << "NULL scenario" << endl;
 	return;
  }
+ boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  QStringList list = BosonPlayField::availablePlayFields();
  int index = list.findIndex(field->identifier());
  if (index < 0 || (unsigned int)index > list.count()) {

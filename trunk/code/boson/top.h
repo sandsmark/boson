@@ -27,6 +27,7 @@ class Boson;
 class Player;
 class BosonPlayField;
 class BosonCanvas;
+class KCmdLineArgs;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -72,9 +73,9 @@ public slots:
 	 * Called when user clicks "start new game" button
 	 * This shows BosonStartGameWidget from where you can start new game
 	 **/
-	void slotNewGame();
+	void slotNewGame(KCmdLineArgs* args = 0);
 
-	void slotStartEditor();
+	void slotStartEditor(KCmdLineArgs* args = 0);
 
 	/**
 	 * Starts a new game. Called when user clicks "Start game" button in

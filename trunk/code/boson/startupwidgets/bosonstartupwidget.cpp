@@ -33,6 +33,7 @@
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>
+#include <kcmdlineargs.h>
 
 #include <qwidgetstack.h>
 #include <qpixmap.h>
@@ -108,11 +109,6 @@ BosonStartupWidget::~BosonStartupWidget()
  delete d;
 }
 
-void BosonStartupWidget::slotNewGame()
-{
- showWidget(IdNewGame);
-}
-
 void BosonStartupWidget::slotLoadGame()
 {
  showWidget(IdLoadSaveGame);
@@ -138,9 +134,48 @@ void BosonStartupWidget::slotSaveGame()
  loadSave->updateGames();
 }
 
-void BosonStartupWidget::slotStartEditor()
+void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
+{
+ showWidget(IdNewGame);
+ if (!args) {
+	return;
+ }
+ BosonNewGameWidget* w = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ if (!w) {
+	boError() << k_funcinfo << "Oops - NULL newgame widget" << endl;
+	return;
+ }
+ // here we can check for some things like --playfield and call the functions
+ // e.g.:
+ if (args->isSet("playfield")) {
+	QString identifier = args->getOption("playfield");
+	if (!identifier.right(4) == QString::fromLatin1(".bpf")) {
+		identifier = identifier + QString::fromLatin1(".bpf");
+	}
+	w->sendPlayFieldChanged(identifier);
+ }
+}
+
+void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
 {
  showWidget(IdStartEditor);
+ if (!args) {
+	return;
+ }
+ BosonStartEditorWidget* w = (BosonStartEditorWidget*)d->mWidgetStack->widget(IdStartEditor);
+ if (!w) {
+	boError() << k_funcinfo << "Oops - NULL start editor widget" << endl;
+	return;
+ }
+ // here we can check for some things like --playfield and call the functions
+ // e.g.:
+ if (args->isSet("playfield")) {
+	QString identifier = args->getOption("playfield");
+	if (!identifier.right(4) == QString::fromLatin1(".bpf")) {
+		identifier = identifier + QString::fromLatin1(".bpf");
+	}
+	w->sendPlayFieldChanged(identifier);
+ }
 }
 
 void BosonStartupWidget::showWidget(WidgetId widgetId)

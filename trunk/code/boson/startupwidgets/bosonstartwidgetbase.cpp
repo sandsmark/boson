@@ -50,7 +50,8 @@ BosonStartWidgetBase::~BosonStartWidgetBase()
 
 void BosonStartWidgetBase::initKGame()
 {
- connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
+ connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), 
+		this, SLOT(slotPlayFieldChanged(const QString&)));
 
  // We must manually set maximum players number to some bigger value, because
  //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
@@ -86,6 +87,15 @@ void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 		return;
 	}
 	identifier = list[index];
+ }
+ sendPlayFieldChanged(identifier);
+}
+
+void BosonStartWidgetBase::sendPlayFieldChanged(const QString& identifier)
+{
+ if (!BosonPlayField::availablePlayFields().contains(identifier)) {
+	boError() << k_funcinfo << "Invalid playfied identifier " << identifier << endl;
+	return;
  }
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
