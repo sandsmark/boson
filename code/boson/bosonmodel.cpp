@@ -546,7 +546,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 					tex[i][1] = mesh->texelL[f->points[i]][1];
 				}
 			}
-			if (QString::fromLatin1(mesh->name).lower() == QString::fromLatin1("teamcolor")) {
+			if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
 				myTex = 0; // teamcolor objects are *not* textured
 				if (mTeamColor) {
 					glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
