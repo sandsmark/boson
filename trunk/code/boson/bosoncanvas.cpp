@@ -1150,7 +1150,7 @@ bool BosonCanvas::loadUnitFromXML(const QDomElement& unit, Player* owner)
  if (!owner) {
 	return false;
  }
- if (!unit.hasAttribute(QString::fromLatin1("UnitType"))) {
+ if (!unit.hasAttribute(QString::fromLatin1("Type")) && !unit.hasAttribute(QString::fromLatin1("UnitType"))) {
 	boError(260) << k_funcinfo << "missing attribute: UnitType for Unit tag" << endl;
 	return false;
  }
@@ -1166,10 +1166,13 @@ bool BosonCanvas::loadUnitFromXML(const QDomElement& unit, Player* owner)
  unsigned long int type;
  unsigned long int id;
  int dataHandlerId;
- type = unit.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+ type = unit.attribute(QString::fromLatin1("Type")).toULong(&ok);
  if (!ok) {
-	boError(260) << k_funcinfo << "Invalid UnitType number for Unit tag" << endl;
-	return false;
+	type = unit.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid UnitType number for Unit tag" << endl;
+		return false;
+	}
  }
  id = unit.attribute(QString::fromLatin1("Id")).toULong(&ok);
  if (!ok) {

@@ -476,7 +476,7 @@ bool BosonScenario::loadPlayer(QDomElement& node, Player* p)
 
 bool BosonScenario::saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y)
 {
- node.setAttribute("UnitType", (unsigned int)unitType);
+ node.setAttribute("Type", (unsigned int)unitType);
  node.setAttribute("x", x);
  node.setAttribute("y", y);
  return true;
@@ -484,8 +484,8 @@ bool BosonScenario::saveBasicUnit(QDomElement& node, unsigned long int unitType,
 
 bool BosonScenario::loadBasicUnit(QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y)
 {
- if (!node.hasAttribute("UnitType")) {
-	boError(250) << k_funcinfo << "missing UnitType" << endl;
+ if (!node.hasAttribute("Type") && !node.hasAttribute("UnitType")) {
+	boError(250) << k_funcinfo << "missing Type" << endl;
 	return false;
  }
  if (!node.hasAttribute("x")) {
@@ -497,10 +497,13 @@ bool BosonScenario::loadBasicUnit(QDomElement& node, unsigned long int& unitType
 	return false;
  }
  bool ok = false;
- unitType = node.attribute("UnitType").toInt(&ok);
+ unitType = node.attribute("Type").toInt(&ok);
  if (!ok) {
-	boError(250) << k_funcinfo << "UnitType is no number" << endl;
-	return false;
+	unitType = node.attribute("UnitType").toInt(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "UnitType is no number" << endl;
+		return false;
+	}
  }
  x = node.attribute("x").toUInt(&ok);
  if (!ok) {
