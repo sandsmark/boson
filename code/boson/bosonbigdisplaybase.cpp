@@ -1585,30 +1585,28 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
  QPoint pos = w->mapFromGlobal(QCursor::pos());
 
  const int move = 20; // FIXME hardcoded - use BosonConfig instead
- GLdouble dx, dy;
- mapDistance(move, move, &dx, &dy);
- GLfloat moveX = (GLfloat)dx;
- GLfloat moveY = (GLfloat)dy;
  if (pos.x() <= sensity && pos.x() > -1) {
-	x = -moveX;
+	x = -move;
  } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
-	x = moveX;
+	x = move;
  }
  if (pos.y() <= sensity && pos.y() > -1) {
-	y = -moveY;
+	y = -move;
  } else if (pos.y() >= w->height() - sensity && pos.y() <= w->height()) {
-	y = moveY;
+	y = move;
  }
  if (!x && !y || !sensity) {
 	d->mCursorEdgeTimer.stop();
 	d->mCursorEdgeCounter = 0;
  } else {
+	GLdouble dx, dy;
+	mapDistance(x, y, &dx, &dy);
 	if (!d->mCursorEdgeTimer.isActive()) {
 		d->mCursorEdgeTimer.start(20);
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		camera()->moveBy(x, y);
+		camera()->moveBy(dx, dy);
 		cameraChanged();
 	}
  }

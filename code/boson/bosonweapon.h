@@ -23,6 +23,7 @@
 #include "items/bosonshot.h"
 #include "pluginproperties.h"
 #include "unitplugins.h"
+#include "bo3dtools.h"
 
 #include <qptrlist.h>
 
@@ -75,7 +76,7 @@ class BosonWeaponProperties : public PluginProperties
     unsigned long int speed() const  { return mSpeed; };
     QString modelFileName() const  { return mModelFileName; };
     QString weaponName() const  { return mName; };
-
+    BoVector3 offset() const  { return mOffset;};
     float maxHeight() const  { return mMaxHeight; };
 
     inline SpeciesTheme* theme() const  { return mTheme; };
@@ -110,6 +111,8 @@ class BosonWeaponProperties : public PluginProperties
     void setShootParticleSystemIds(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
     void setFlyParticleSystemIds(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
     void setHitParticleSystemIds(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
+    void setOffset(BoVector3 o)  { mOffset = o; };
+    void setMaxHeight(float maxheight)  { mMaxHeight = maxheight; };
 
     void reset();
 
@@ -135,7 +138,7 @@ class BosonWeaponProperties : public PluginProperties
     QValueList<unsigned long int> mShootParticleSystemIds;
     QValueList<unsigned long int> mFlyParticleSystemIds;
     QValueList<unsigned long int> mHitParticleSystemIds;
-    BoVector3 mShootParticleSystemOffset;
+    BoVector3 mOffset;
 };
 
 

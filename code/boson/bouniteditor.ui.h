@@ -24,6 +24,7 @@
 #include "unitproperties.h"
 #include "bosonweapon.h"
 #include "pluginproperties.h"
+#include "bo3dtools.h"
 
 QString listToString(QValueList<unsigned long int> list)
 {
@@ -235,6 +236,10 @@ void BoUnitEditor::init()
     mWeaponShootParticles->setValidator(v);
     mWeaponFlyParticles->setValidator(v);
     mWeaponHitParticles->setValidator(v);
+    
+    // Clear everything to default values
+    mUnit->reset();
+    slotUpdateWidgets();
 }
 
 void BoUnitEditor::slotHideSearchPaths()
@@ -435,7 +440,7 @@ void BoUnitEditor::slotUpdateWidgets()
     // FIXME: UnitProperties only saves mobile *or* facility properties, but
     //  I'd like to have them both saved
     // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
-    mUnitSpeed->setValue((int)(mUnit->speed()));
+    mUnitSpeed->setValue(mUnit->speed());
     mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
     mUnitCanGoOnWater->setChecked(mUnit->canGoOnLand());
     mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
@@ -510,6 +515,8 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
     w->setSpeed(mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
+    w->setMaxHeight(mWeaponMaxHeight->value());
+    w->setOffset(BoVector3(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value()));
     w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
     w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
     w->setHitParticleSystemIds(stringToList(mWeaponHitParticles->text()));
@@ -571,6 +578,11 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
     mWeaponSpeed->setValue(w->speed());
     mWeaponModel->setText(w->modelFileName());
+    mWeaponMaxHeight->setValue(w->maxHeight());
+    BoVector3 o = w->offset();
+    mWeaponOffsetX->setValue(o[0]);
+    mWeaponOffsetY->setValue(o[1]);
+    mWeaponOffsetZ->setValue(o[2]);
     mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
     mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
     mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));
