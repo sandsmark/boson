@@ -286,8 +286,8 @@ void serverFacility::getWantedAction(void)
 	fixChangedMsg_t msg;
 
 	boAssert(state>=0);
-	boAssert(state<CONSTRUCTION_STEP);
-	if (state!=(CONSTRUCTION_STEP-1) && --counter <1) {
+	boAssert(state<CONSTRUCTION_STEPS);
+	if (state!=(CONSTRUCTION_STEPS-1) && --counter <1) {
 		counter = BUILDING_SPEED;
 		state++;
 		msg.key   = key;

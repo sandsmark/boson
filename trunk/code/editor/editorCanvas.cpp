@@ -185,7 +185,7 @@ void editorCanvas::createFixUnit(facilityMsg_t &msg)
 	visualFacility *f;
 
 	msg.key = key ++;
-	msg.state = CONSTRUCTION_STEP - 1 ;
+	msg.state = CONSTRUCTION_STEPS - 1 ;
 
 	f = new visualFacility(&msg);
 	facilities.insert(msg.key, f);

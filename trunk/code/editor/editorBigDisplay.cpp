@@ -79,7 +79,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			fix.who 	= who;
 			fix.x		= x;
 			fix.y		= y;
-			fix.state	= CONSTRUCTION_STEP-1;
+			fix.state	= CONSTRUCTION_STEPS-1;
 			fix.type	= f; 
 			_canvas->createFixUnit(fix);
 			vtl->setSelectionMode( editorTopLevel::SELECT_PUT);
