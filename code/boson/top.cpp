@@ -591,6 +591,12 @@ void TopWidget::slotToggleFullScreen()
 void TopWidget::endGame()
 {
  boDebug() << k_funcinfo << endl;
+ // This must be done before BosonWidget::quitGame() is called, because latter
+ //  calls boGame->quitGame() which in turn deletes all players and units and if
+ //  something was selected, we would have crash later when trying to unselect them
+ if (d->mDisplayManager) {
+	d->mDisplayManager->quitGame();
+ }
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
@@ -599,9 +605,6 @@ void TopWidget::endGame()
 	if (boGame->gameStatus() != KGame::Init) {
 		saveGameDockConfig();
 	}
- }
- if (d->mDisplayManager) {
-	d->mDisplayManager->quitGame();
  }
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
@@ -660,6 +663,7 @@ void TopWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
+ mMainDock->setWidget(d->mStartup);
  loadInitialDockConfig();
 }
 
