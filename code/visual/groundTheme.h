@@ -28,8 +28,8 @@
 #include "../common/groundType.h"
 
 class QString;
+class QBitArray;
 class QPixmap;
-class QProgressDialog;
 class QwSpritePixmapSequence;
 
 /** 
@@ -37,20 +37,19 @@ class QwSpritePixmapSequence;
   */
 class groundTheme
 {
-  public:
+public:
 	groundTheme(char *themeName);
 
-	bool	isOk(void){ return allLoaded; }
-	QwSpritePixmapSequence
-		*getPixmap(groundType gt) { return groundPix[gt]; }
+	QwSpritePixmapSequence *getPixmap(groundType gt);
 
-  private:
-	bool loadGround		(int i, const QString &path, QProgressDialog &progress);
-	bool loadTransition	(int i, const QString &path, QProgressDialog &progress);
+private:
+	bool loadGround		(int i, const QString &path);
+	bool loadTransition	(int i);
 
-	bool	allLoaded;
-	QwSpritePixmapSequence
-		*groundPix[GROUND_LAST + TILES_PER_TRANSITION * 5]; ///orzel : max 5 transitions
+	QString		*themePath;
+	QBitArray	*transitions;
+
+	QwSpritePixmapSequence **groundPix;
 
 };
 
