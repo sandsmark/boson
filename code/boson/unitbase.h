@@ -22,11 +22,11 @@
 #include "rtti.h"
 
 #include <kgame/kgameproperty.h>
-#include <kgame/kgamepropertyhandler.h>
 
 class QPoint;
 class QRect;
 class QDataStream;
+class KGamePropertyHandler;
 
 class Player;
 class UnitProperties;
@@ -175,7 +175,7 @@ public:
 	 **/
 	void setOwner(Player* owner);
 
-	KGamePropertyHandler* dataHandler() const;
+	KGamePropertyHandler* dataHandler() const { return mProperties; }
 
 	/**
 	 * The ID of the unit. This ID is unique for this game.
