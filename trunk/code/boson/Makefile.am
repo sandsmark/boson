@@ -1,6 +1,6 @@
 ## Makefile.am for boson
 
-SUBDIRS = data bosonwidgets items commandframe sound startupwidgets bodebug info
+SUBDIRS = data bosonwidgets items commandframe bodebug startupwidgets sound info
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
