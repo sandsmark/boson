@@ -66,6 +66,7 @@
 #include "speciesdata.h"
 #include "bowater.h"
 #include "botexture.h"
+#include "boufo/boufo.h"
 
 #include <kgame/kgameio.h>
 
@@ -100,6 +101,8 @@
 #if HAVE_GL_GLEXT_H
 #include <GL/glext.h>
 #endif
+
+#define UFO_LABELS_ONLY 0
 
 class BoVisibleEffects
 {
@@ -315,6 +318,26 @@ public:
 		mGLMiniMap = 0;
 
 		mScriptConnector = 0;
+
+		mResourcesBox = 0;
+		mMineralsLabel = 0;
+		mOilLabel = 0;
+		mFPSLabel = 0;
+		mGroundRendererDebug = 0;
+		mMapCoordinates = 0;
+		mMapCoordinatesWorldLabel = 0;
+		mMapCoordinatesCanvasLabel = 0;
+		mMapCoordinatesWindowLabel = 0;
+		mPathFinderDebug = 0;
+		mMatricesDebug = 0;
+		mMatricesDebugProjection = 0;
+		mMatricesDebugModelview = 0;
+		mMatricesDebugProjMod = 0;
+		mItemWorkStatistics = 0;
+		mOpenGLCamera = 0;
+		mRenderCounts = 0;
+		mAdvanceCalls = 0;
+		mGamePaused = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -378,10 +401,32 @@ public:
 	QValueList<BoLineVisualization> mLineVisualizationList;
 
 	BosonBigDisplayScriptConnector* mScriptConnector;
+
+	BoUfoHBox* mResourcesBox;
+	BoUfoLabel* mMineralsLabel;
+	BoUfoLabel* mOilLabel;
+	BoUfoLabel* mFPSLabel;
+	BoUfoLabel* mGroundRendererDebug;
+	BoUfoVBox* mMapCoordinates;
+	BoUfoLabel* mMapCoordinatesWorldLabel;
+	BoUfoLabel* mMapCoordinatesCanvasLabel;
+	BoUfoLabel* mMapCoordinatesWindowLabel;
+	BoUfoLabel* mPathFinderDebug;
+	BoUfoVBox* mMatricesDebug;
+	BoUfoMatrix* mMatricesDebugProjection;
+	BoUfoMatrix* mMatricesDebugModelview;
+	BoUfoMatrix* mMatricesDebugProjMod;
+	BoUfoMatrix* mMatricesDebugProjModInv;
+	BoUfoLabel* mMatricesDebugText;
+	BoUfoLabel* mItemWorkStatistics;
+	BoUfoLabel* mOpenGLCamera;
+	BoUfoLabel* mRenderCounts;
+	BoUfoLabel* mAdvanceCalls;
+	BoUfoLabel* mGamePaused;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
-		: BosonGLWidget(parent, "bigdisplay", boConfig->wantDirect())
+		: BosonUfoGLWidget(parent, "bigdisplay", boConfig->wantDirect())
 {
  boDebug() << k_funcinfo << endl;
  init();
@@ -661,12 +706,122 @@ void BosonBigDisplayBase::initializeGL()
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
+ initUfoGUI();
+
  recursive = false;
+}
+
+void BosonBigDisplayBase::initUfoGUI()
+{
+ initUfo();
+
+ // AB: note that BoUfo widgets differ from usual Qt widgets API-wise.
+ // You need to create them without a parent and then add them to their parent
+ // widget using parent->addWidget(child). This also adds child to the layout of
+ // parent.
+ // WARNING: ALL widget that are created MUST be added to another widget!
+ // Otherwise the created widget won't be deleted!
+
+ // the contentWidget is the ufo-widget covering the whole Qt-widget. I.e. it
+ // is the complete OpenGL area.
+ BoUfoWidget* contentWidget = ufoManager()->contentWidget();
+
+ // A "UBorderLayout" layout requires it's children to have so-call
+ // "constraints". These specify where the widget is placed (north, south, ...)
+ contentWidget->setLayoutClass(BoUfoWidget::UBorderLayout);
+
+ BoUfoWidget* north = new BoUfoWidget();
+ north->setConstraints("north");
+ contentWidget->addWidget(north);
+ north->setLayoutClass(BoUfoWidget::UBorderLayout);
+
+ BoUfoVBox* northEast = new BoUfoVBox();
+ northEast->setConstraints("east");
+ north->addWidget(northEast);
+
+ BoUfoVBox* northWest = new BoUfoVBox();
+ northWest->setConstraints("west");
+ north->addWidget(northWest);
+
+ BoUfoVBox* northCenter = new BoUfoVBox();
+ northCenter->setConstraints("center");
+ north->addWidget(northCenter);
+
+ d->mResourcesBox = new BoUfoHBox();
+ BoUfoVBox* resourcesLabelsBox = new BoUfoVBox();
+ BoUfoVBox* resourcesValuesBox = new BoUfoVBox();
+ BoUfoLabel* mineralsLabel = new BoUfoLabel(i18n("Minerals:"));
+ BoUfoLabel* oilLabel = new BoUfoLabel(i18n("Oil:"));
+ d->mMineralsLabel = new BoUfoLabel();
+ d->mOilLabel = new BoUfoLabel();
+ resourcesLabelsBox->addWidget(mineralsLabel);
+ resourcesLabelsBox->addWidget(oilLabel);
+ resourcesValuesBox->addWidget(d->mMineralsLabel);
+ resourcesValuesBox->addWidget(d->mOilLabel);
+ d->mResourcesBox->addWidget(resourcesLabelsBox);
+ d->mResourcesBox->addWidget(resourcesValuesBox);
+ northEast->addWidget(d->mResourcesBox);
+
+ d->mFPSLabel = new BoUfoLabel();
+ northEast->addWidget(d->mFPSLabel);
+
+ d->mGroundRendererDebug = new BoUfoLabel();
+ northEast->addWidget(d->mGroundRendererDebug);
+
+ d->mMapCoordinates = new BoUfoVBox();
+ d->mMapCoordinatesWorldLabel = new BoUfoLabel();
+ d->mMapCoordinatesCanvasLabel = new BoUfoLabel();
+ d->mMapCoordinatesWindowLabel = new BoUfoLabel();
+ d->mMapCoordinates->addWidget(d->mMapCoordinatesWorldLabel);
+ d->mMapCoordinates->addWidget(d->mMapCoordinatesCanvasLabel);
+ d->mMapCoordinates->addWidget(d->mMapCoordinatesWindowLabel);
+ northEast->addWidget(d->mMapCoordinates);
+
+ d->mPathFinderDebug = new BoUfoLabel();
+ northEast->addWidget(d->mPathFinderDebug);
+
+ d->mMatricesDebug = new BoUfoVBox();
+ d->mMatricesDebugProjection = new BoUfoMatrix();
+ d->mMatricesDebugModelview = new BoUfoMatrix();
+ d->mMatricesDebugProjMod = new BoUfoMatrix();
+ d->mMatricesDebugProjModInv = new BoUfoMatrix();
+ d->mMatricesDebugText = new BoUfoLabel();
+ d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Projection matrix")));
+ d->mMatricesDebug->addWidget(d->mMatricesDebugProjection);
+ d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Modelview matrix")));
+ d->mMatricesDebug->addWidget(d->mMatricesDebugModelview);
+ d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("Projection * Modelview")));
+ d->mMatricesDebug->addWidget(d->mMatricesDebugProjMod);
+ d->mMatricesDebug->addWidget(new BoUfoLabel(i18n("(Projection * Modelview)^(-1)")));
+ d->mMatricesDebug->addWidget(d->mMatricesDebugProjModInv);
+ d->mMatricesDebug->addWidget(d->mMatricesDebugText);
+ northWest->addWidget(d->mMatricesDebug);
+
+ d->mItemWorkStatistics = new BoUfoLabel();
+ northWest->addWidget(d->mItemWorkStatistics);
+
+ d->mOpenGLCamera = new BoUfoLabel();
+ northWest->addWidget(d->mOpenGLCamera);
+
+ d->mRenderCounts = new BoUfoLabel();
+ northWest->addWidget(d->mRenderCounts);
+
+ d->mAdvanceCalls = new BoUfoLabel();
+ northWest->addWidget(d->mAdvanceCalls);
+
+ d->mGamePaused = new BoUfoLabel(i18n("The game is paused"));
+ northCenter->addWidget(d->mGamePaused);
+
+
+ // TODO: renderTextChat()
+ // TODO: renderTextGamePaused()
+ // TODO: tooltips ?
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
 {
  boDebug() << k_funcinfo << w << " " << h << endl;
+ BosonUfoGLWidget::resizeGL(w, h);
  setViewport(0, 0, (GLsizei)w, (GLsizei)h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -909,6 +1064,16 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderText(false);
 
  glPopMatrix();
+
+ boProfiling->renderUfo(true);
+ if (ufoManager()) {
+	boTextureManager->invalidateCache();
+	glColor3ub(255, 255, 255);
+	updateUfoLabels();
+	ufoManager()->dispatchEvents();
+	ufoManager()->render();
+ }
+ boProfiling->renderUfo(false);
 
  bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
  boProfiling->render(false);
@@ -1241,6 +1406,275 @@ void BosonBigDisplayBase::renderSelectionRect()
  }
 }
 
+void BosonBigDisplayBase::updateUfoLabels()
+{
+ QString minerals = QString::number(localPlayerIO()->minerals());
+ QString oil = QString::number(localPlayerIO()->oil());
+ d->mMineralsLabel->setText(minerals);
+ d->mOilLabel->setText(oil);
+ d->mResourcesBox->setVisible(boConfig->showResources());
+
+ d->mFPSLabel->setText(i18n("FPS: %1").arg(fps()));
+ d->mFPSLabel->setVisible(boConfig->debugFPS());
+
+ bool renderGroundRendererDebug = false;
+ if (renderGroundRendererDebug) {
+	BoVector3Fixed cursor = BoVector3Fixed(cursorCanvasVector().x(), cursorCanvasVector().y(), boGame->canvas()->heightAtPoint(cursorCanvasVector().x(), cursorCanvasVector().y()));
+	cursor.canvasToWorld();
+	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+	if (r) {
+		QString s = r->debugStringForPoint(cursor);
+		d->mGroundRendererDebug->setText(s);
+	} else {
+		BO_NULL_ERROR(s);
+	}
+	d->mGroundRendererDebug->setVisible(true);
+ } else {
+	d->mGroundRendererDebug->setVisible(false);
+ }
+
+
+ if (boConfig->debugMapCoordinates()) {
+	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
+			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
+			arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
+			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3);
+	QString canvas = QString::fromLatin1("Canvas: (%1,%2)").
+			arg((double)cursorCanvasVector().x(), 6, 'f', 3).
+			arg((double)cursorCanvasVector().y(), 6, 'f', 3);
+	QString window = QString::fromLatin1("Window: %1,%2").
+			arg(mapFromGlobal(QCursor::pos()).x(), 4, 10).
+			arg(mapFromGlobal(QCursor::pos()).y(), 4, 10);
+	d->mMapCoordinatesWorldLabel->setText(world);
+	d->mMapCoordinatesCanvasLabel->setText(canvas);
+	d->mMapCoordinatesWindowLabel->setText(window);
+ }
+ d->mMapCoordinates->setVisible(boConfig->debugMapCoordinates());
+
+ updateUfoLabelPathFinderDebug();
+ updateUfoLabelMatricesDebug();
+ updateUfoLabelItemWorkStatistics();
+ updateUfoLabelOpenGLCamera();
+ updateUfoLabelRenderCounts();
+ updateUfoLabelAdvanceCalls();
+ d->mGamePaused->setVisible(boGame->gamePaused());
+}
+
+void BosonBigDisplayBase::updateUfoLabelPathFinderDebug()
+{
+ if (!boConfig->debugPFData()) {
+	d->mPathFinderDebug->setVisible(false);
+	return;
+ }
+ d->mPathFinderDebug->setVisible(true);
+
+ Cell* cellUnderCursor = boGame->canvas()->cellAt(cursorCanvasVector().x(), cursorCanvasVector().y());
+ BosonPathRegion* r = 0;
+ if (cellUnderCursor) {
+	r = cellUnderCursor->region();
+ }
+
+ QString cell = QString::fromLatin1("Cell pos: (%1; %2)")
+		.arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->x()).arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->y());
+ QString cellpassable = QString::fromLatin1("  passable: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->passable() ? "true" : "false"));
+ QString celloccupied = QString::fromLatin1("  occupied: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->isLandOccupied() ? "true" : "false"));
+ QString regid = QString::fromLatin1("Region  : %1").arg((r == 0) ? -1 : r->id);
+ QString regcost = QString::fromLatin1("    cost: %1").arg((r == 0) ? bofixed(-1) : r->cost, 5, 'g', 3);
+ QString regcenter = QString::fromLatin1("  center: (%1; %2)").arg((r == 0) ? bofixed(-1) : r->centerx).arg((r == 0) ? bofixed(-1) : r->centery);
+ QString regcells = QString::fromLatin1("   cells: %1").arg((r == 0) ? -1 : r->cellsCount);
+ QString reggroup = QString::fromLatin1("   group: 0x%1").arg((r == 0) ? 0 : (int)r->group);
+ QString regneighs = QString::fromLatin1("  neighs: %1").arg((r == 0) ? -1 : (int)r->neighbors.count());
+ QString neighbors;
+ if (r && r->neighbors.count() > 0) {
+	for (unsigned int i = 0; i < r->neighbors.count(); i++) {
+		neighbors += QString::fromLatin1("\n  id: %1; border: %2; cost: %3").arg(r->neighbors[i].region->id).arg(r->neighbors[i].bordercells).arg(r->neighbors[i].cost, 5, 'g', 3);
+	}
+ }
+ // We create temporary cellinfo and reginfo strings, because QString support
+ //  only 9 markers in arg() (%1, %2 ... %9)
+ QString cellinfo = QString::fromLatin1("%1\n%2\n%3").arg(cell).arg(cellpassable).arg(celloccupied);
+ QString reginfo = QString::fromLatin1("%1\n%2\n%3\n%4\n%5\n%6%7").arg(regid).arg(regcost).arg(regcenter).arg(regcells).arg(reggroup).arg(regneighs).arg(neighbors);
+ QString text = QString::fromLatin1("%1\n%2").arg(cellinfo).arg(reginfo);
+
+ d->mPathFinderDebug->setText(text);
+}
+
+void BosonBigDisplayBase::updateUfoLabelMatricesDebug()
+{
+ if (!boConfig->debugOpenGLMatrices()) {
+	d->mMatricesDebug->setVisible(false);
+	return;
+ }
+ d->mMatricesDebug->setVisible(true);
+
+ BoMatrix model(d->mModelviewMatrix);
+ BoMatrix proj(d->mProjectionMatrix);
+ BoMatrix projMod(proj);
+ projMod.multiply(model.data());
+ BoMatrix projModInv;
+ projMod.invert(&projModInv); // invert (proj*model)
+
+ d->mMatricesDebugProjection->setMatrix(proj.data());
+ d->mMatricesDebugModelview->setMatrix(model.data());
+ d->mMatricesDebugProjMod->setMatrix(projMod.data());
+ d->mMatricesDebugProjModInv->setMatrix(projModInv.data());
+
+ // some kind of d->mDebugMapCoordinates... but we do our own
+ // calculations instead of gluUnProject.
+ QPoint widgetPos = mapFromGlobal(QCursor::pos());
+ GLint realy = d->mViewport[3] - (GLint)widgetPos.y() - 1;
+ GLfloat depth = 0.0f;
+ glReadPixels(widgetPos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+ BoVector4Float v;
+ v.setX( (GLfloat)((widgetPos.x() - d->mViewport[0]) * 2) / d->mViewport[2] - 1.0f );
+ v.setY( (GLfloat)((realy - d->mViewport[1]) * 2) / d->mViewport[3] - 1.0f );
+ v.setZ(2 * depth - 1.0f);
+ v.setW(1.0f);
+ BoVector4Float result;
+ projModInv.transform(&result, &v);
+
+ // it is a column vector, but we display as a row (so ^T)
+ QString text = i18n("CursorPos = (Projection * Modelview)^(-1) * (%1 , %2 , %3 , %4)^T:").
+		arg(v[0], 6, 'f', 3).
+		arg(v[1], 6, 'f', 3).
+		arg(v[2], 6, 'f', 3).
+		arg(v[3], 6, 'f', 3);
+ QString resultText = i18n("(%1 , %2 , %3 , %3)^T").
+		arg(result[0], 6, 'f', 3).
+		arg(result[1], 6, 'f', 3).
+		arg(result[2], 6, 'f', 3).
+		arg(result[3], 6, 'f', 3);
+ if (result[3] == 0.0f) {
+	d->mMatricesDebugText->setText("ERROR");
+	boError() << k_funcinfo << endl;
+	return;
+ }
+ QString realCoords = i18n("x = %1  ;  y = %2  ;  z = %3").
+		arg(result[0] / result[3]).
+		arg(result[1] / result[3]).
+		arg(result[2] / result[3]);
+
+
+
+ // display the planes. they consist of the normal vector and the
+ // distance from the origin
+ QString planes = i18n("Right Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[0 * 4]));
+ planes += i18n("Left Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[1 * 4]));
+ planes += i18n("Bottom Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[2 * 4]));
+ planes += i18n("Top Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[3 * 4]));
+ planes += i18n("Far Plane: %1\n").arg(planeDebugString(&d->mViewFrustum[4 * 4]));
+ planes += i18n("Near Plane: %1").arg(planeDebugString(&d->mViewFrustum[5 * 4]));
+
+ // AB: this label can be used to measure the performance of displaying multiple
+ // lines in ULabel
+ d->mMatricesDebugText->setText(i18n("%1\n%2\n%3\n\n%4")
+		.arg(text).arg(resultText).arg(realCoords)
+	 	.arg(planes));
+}
+
+void BosonBigDisplayBase::updateUfoLabelItemWorkStatistics()
+{
+ if (!boConfig->debugItemWorkStatistics()) {
+	d->mItemWorkStatistics->setVisible(false);
+	return;
+ }
+ d->mItemWorkStatistics->setVisible(true);
+
+ BosonCanvasStatistics* statistics = canvas()->canvasStatistics();
+ QMap<int, int> workCounts = *statistics->workCounts();
+ QString text;
+ text += i18n("Item work statistics:\n");
+ text += i18n("Total items: %1\n").arg(canvas()->allItemsCount());
+ text += i18n("-1 (items): %1\n").arg(workCounts[-1]),
+ text += i18n("Doing nothing:     %1\n").arg(workCounts[(int)UnitBase::WorkNone]);
+ text += i18n("Moving or turning: %1\n").
+		arg(workCounts[(int)UnitBase::WorkMove] +
+		workCounts[(int)UnitBase::WorkTurn]);
+ text += i18n("Attacking:         %1\n").
+		arg(workCounts[(int)UnitBase::WorkAttack]);
+ text += i18n("Other:             %1\n").
+		arg(workCounts[(int)UnitBase::WorkConstructed] +
+		workCounts[(int)UnitBase::WorkDestroyed] +
+		workCounts[(int)UnitBase::WorkFollow] +
+		workCounts[(int)UnitBase::WorkPlugin]);
+
+ d->mItemWorkStatistics->setText(text);
+}
+
+void BosonBigDisplayBase::updateUfoLabelOpenGLCamera()
+{
+ if (!boConfig->debugOpenGLCamera()) {
+	d->mOpenGLCamera->setVisible(false);
+	return;
+ }
+ d->mOpenGLCamera->setVisible(true);
+
+ const BoVector3Float lookAt = camera()->lookAt();
+ const BoVector3Float cameraPos = camera()->cameraPos();
+ const BoVector3Float up = camera()->up();
+ QString text;
+ text += i18n("Camera:\n");
+ text += i18n("LookAt: (%1; %2; %3)\n").arg(lookAt.x()).
+		arg(lookAt.y()).arg(lookAt.z());
+ text += i18n("CameraPos: (%1; %2; %3)\n").arg(cameraPos.x()).
+		arg(cameraPos.y()).arg(cameraPos.z());
+ text += i18n("Up: (%1; %2; %3)\n").arg(up.x()).
+		arg(up.y()).arg(up.z());
+ text += i18n("Radius: %1\n").arg(camera()->radius());
+ text += i18n("Height: %1\n").arg(camera()->z());
+ text += i18n("Rotation: %1\n").arg(camera()->rotation());
+ text += i18n("Time: %1/%2\n").arg(autoCamera()->remainingTime()).arg(autoCamera()->commitTime());
+ text += i18n("% moved: %1\n").arg(autoCamera()->movedAmount() * 100);
+
+ d->mOpenGLCamera->setText(text);
+}
+
+void BosonBigDisplayBase::updateUfoLabelRenderCounts()
+{
+ if (!boConfig->debugRenderCounts()) {
+	d->mRenderCounts->setVisible(false);
+	return;
+ }
+ d->mRenderCounts->setVisible(true);
+ QString text;
+ text += i18n("Items rendered: %1\n").arg(d->mRenderedItems);
+ text += i18n("Particles rendered: %1\n").arg(d->mRenderedParticles);
+
+ text += i18n("Ground renderer statistics:\n");
+ text += BoGroundRendererManager::manager()->currentStatisticsData();
+ text += i18n("\n");
+
+
+ text += i18n("Mesh renderer statistics:\n");
+ text += BoMeshRendererManager::manager()->currentStatisticsData();
+ text += i18n("\n");
+
+ text += i18n("Water renderer statistics:\n");
+ text += boWaterManager->currentRenderStatisticsData();
+ text += i18n("\n");
+
+ text += i18n("Texture binds: %1 (C: %2; I: %3; W: %4; P: %5)\n")
+		.arg(boTextureManager->textureBinds()).arg(d->mTextureBindsCells).arg(d->mTextureBindsItems).arg(d->mTextureBindsWater).arg(d->mTextureBindsParticles);
+
+ d->mRenderCounts->setText(text);
+}
+
+void BosonBigDisplayBase::updateUfoLabelAdvanceCalls()
+{
+ if (!boConfig->debugAdvanceCalls()) {
+	d->mAdvanceCalls->setVisible(false);
+	return;
+ }
+ d->mAdvanceCalls->setVisible(true);
+ QString text;
+ text += i18n("Advance calls passed: %1\n").arg(boGame->advanceCallsCount());
+ text += i18n("Delayed messages: %1 (delayed advance messages: %2)\n").arg(boGame->delayedMessageCount()).arg(boGame->delayedAdvanceMessageCount());
+ text += i18n("Advance message interval: %1 ms\n").arg(Boson::advanceMessageInterval());
+ text += i18n("Game speed (advance calls per advance message): %1\n").arg(boGame->gameSpeed());
+ d->mAdvanceCalls->setText(text);
+}
+
 void BosonBigDisplayBase::renderText()
 {
  BO_CHECK_NULL_RET(d->mDefaultFont);
@@ -1248,6 +1682,7 @@ void BosonBigDisplayBase::renderText()
  d->mDefaultFont->begin();
  const int border = 5;
 
+#if !UFO_LABELS_ONLY
  // first the resource display
  QString minerals = i18n("Minerals: %1").arg(localPlayerIO()->minerals());
  QString oil = i18n("Oil:      %1").arg(localPlayerIO()->oil());
@@ -1256,7 +1691,7 @@ void BosonBigDisplayBase::renderText()
  int w = QMAX(d->mDefaultFont->width(minerals), d->mDefaultFont->width(oil));
  int x = d->mViewport[2] - w - border;
  int y = d->mViewport[3] - border;
- if(boConfig->showResources()) {
+ if (boConfig->showResources()) {
 	y -= d->mDefaultFont->renderText(x, y, text, width() - x);
  }
 
@@ -1292,10 +1727,13 @@ void BosonBigDisplayBase::renderText()
  y = renderTextOpenGLCamera(x, y);
  y = renderTextRenderCounts(x, y);
  y = renderTextAdvanceCalls(x, y);
+#endif
 
  renderTextChat(border, border);
 
+#if !UFO_LABELS_ONLY
  renderTextGamePaused();
+#endif
  if (d->mToolTips->showTip()) {
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	d->mToolTips->renderToolTip(pos.x(), pos.y(), d->mViewport, d->mDefaultFont);
@@ -1344,18 +1782,18 @@ int BosonBigDisplayBase::renderTextPFData(int x, int y, int w, int border)
  if (!boConfig->debugPFData()) {
 	return y;
  }
- Cell* cellundercursor = boGame->canvas()->cellAt(cursorCanvasVector().x(), cursorCanvasVector().y());
+ Cell* cellUnderCursor = boGame->canvas()->cellAt(cursorCanvasVector().x(), cursorCanvasVector().y());
  BosonPathRegion* r = 0;
- if (cellundercursor) {
-	r = cellundercursor->region();
+ if (cellUnderCursor) {
+	r = cellUnderCursor->region();
  }
 
  QString cell = QString::fromLatin1("Cell pos: (%1; %2)")
-		.arg((cellundercursor == 0) ? -1 : cellundercursor->x()).arg((cellundercursor == 0) ? -1 : cellundercursor->y());
+		.arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->x()).arg((cellUnderCursor == 0) ? -1 : cellUnderCursor->y());
  w = QMAX(w, d->mDefaultFont->width(cell));
- QString cellpassable = QString::fromLatin1("  passable: %1").arg((cellundercursor == 0) ? "n/a" : (cellundercursor->passable() ? "true" : "false"));
+ QString cellpassable = QString::fromLatin1("  passable: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->passable() ? "true" : "false"));
  w = QMAX(w, d->mDefaultFont->width(cellpassable));
- QString celloccupied = QString::fromLatin1("  occupied: %1").arg((cellundercursor == 0) ? "n/a" : (cellundercursor->isLandOccupied() ? "true" : "false"));
+ QString celloccupied = QString::fromLatin1("  occupied: %1").arg((cellUnderCursor == 0) ? "n/a" : (cellUnderCursor->isLandOccupied() ? "true" : "false"));
  w = QMAX(w, d->mDefaultFont->width(celloccupied));
  QString regid = QString::fromLatin1("Region  : %1").arg((r == 0) ? -1 : r->id);
  w = QMAX(w, d->mDefaultFont->width(regid));
@@ -2423,7 +2861,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
- return BosonGLWidget::eventFilter(o, e);
+ return BosonUfoGLWidget::eventFilter(o, e);
 }
 
 void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
@@ -3212,7 +3650,7 @@ void BosonBigDisplayBase::saveAsXML(QDomElement& root)
 
 void BosonBigDisplayBase::showEvent(QShowEvent* e)
 {
- BosonGLWidget::showEvent(e);
+ BosonUfoGLWidget::showEvent(e);
  if (displayInput()) {
 	displayInput()->updateCursor();
  }
