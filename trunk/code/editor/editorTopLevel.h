@@ -42,6 +42,7 @@ class	QVBoxLayout;
 class	QComboBox;
 
 class	mainWidget;
+class	BoEditorApp;
 
 
 enum object_type {
@@ -64,7 +65,7 @@ class editorTopLevel : public visualTopLevel
 	
 	friend mainWidget;
 public:
-	editorTopLevel(const char *name = 0L, WFlags f = WDestructiveClose );
+	editorTopLevel(BoEditorApp *app, const char *name = 0L, WFlags f = WDestructiveClose );
 
 	/*
          * selection handling
