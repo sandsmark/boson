@@ -168,7 +168,7 @@ switch(tag) {
 		phys->requestAction(buffer);
 	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
-		logf(LOG_GAME_LOW, "flush : jiffies++ : %u", jiffies);
+		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
 		phys->update();		// QwSpriteField periodical rendering
 		break;
