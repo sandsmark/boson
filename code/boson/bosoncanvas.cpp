@@ -298,3 +298,16 @@ void BosonCanvas::play(const QString& fileName)
  d->mSoundServer->play(fileName.latin1());
 }
 
+Cell* BosonCanvas::cellAt(VisualUnit* unit) const
+{
+ if (!unit) {
+	return 0;
+ }
+ return cellAt(unit->x(), unit->y());
+}
+
+Cell* BosonCanvas::cellAt(double x, double y) const
+{
+ return cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
+}
+
