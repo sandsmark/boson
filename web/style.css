@@ -1,161 +1,147 @@
-/* daCode http://www.dacode.org/
- * $Id$
- */
+/*****  CSS styles for Boson homepage  *****/
 
-a:link {
-	text-decoration: underline;
-	color:#363636;
+
+/** Links **/
+a {
+  color: #0000a0;
+  background-color: transparent;
+  text-decoration: none;
 }
 a:visited {
-	text-decoration: underline;
-	color:#363636;
+  background-color: transparent;
+  color: #000060;
 }
-a:active {
-	text-decoration: none;
-	color:#d5ae83;
-}
-body {
-	margin-top: 0;
-	margin-left: 0;
-	margin-right: 0;
-	margin-bottom: 0;
-	background-color:#ffffff;
-}
-.titlelink {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	text-decoration: underline;
-	color: #FFFFFF;
-	font-size: 13px
-}
-.newstitle	{ 
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #FFFFFF;
-	text-align: left; 
-	vertical-align: top; 
-	background-color: #736199;
-	font-weight: 600
+a:hover {
+  background-color: transparent;
+  color: #0000d0;
+  text-decoration: underline;
 }
 
-.osdn
-{
-    font-size: 12px;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	text-decoration: none;
-	color: #505050;
+
+/** Sidebar **/
+.sidebarboxtitle {
+  font-weight: bold;
 }
 
-.newstext	{
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #000000;
-	text-align: left; 
-	vertical-align: top 
+.sidebarboxlink {
 }
-.rightnewstext	{
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #000000;
-	text-align: right; 
-	vertical-align: top 
+
+.sidebardownloadversion {
+  font-weight: bold;
 }
-.sboxtext	{
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #000000;
-	text-align: left; 
-	vertical-align: top 
+
+a.sidebardownloadlink {
+  font-weight: bold;
+  background-color: transparent;
+  color: #7b7b7b;
+  text-decoration: none;
 }
-.fortunetext	{
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #000000;
-	text-align: right; 
-	vertical-align: top 
+a.sidebardownloadlink:hover {
+  font-weight: bold;
+  background-color: transparent;
+  color: #505050;
+  text-decoration: underline;
 }
-.newslink	{
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #000000;
-	text-align: left; 
-	vertical-align: top 
+
+
+/** Boxes **/
+.boxtitle {
+  font-weight: bold;
 }
-.newsinfo	{ 
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	color: #333333;
-	text-align: left; 
-	vertical-align: middle; 
-	background-color: #bbbbbb
+
+.bigboxtitle {
+  font-weight: bold;
 }
-.logoinfo	{
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	color: #333333;
-	text-align: center;
-	vertical-align: middle;
+
+.bigboxsubheader {
+  font-weight: bold;
 }
-.boxtext    {
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 11px;
-  	color: #333333; 
-	text-align: left; 
-	vertical-align: top;
-  	background-color: #FFFFFF
+
+.boxtext {
 }
-.boxheader  {  
-	font-family: Verdana, Arial, Helvetica, sans-serif; 
-	font-size: 13px; 
-	font-weight: 600; 
-	color: #363636; 
-	background-color: #d8ecea; 
-	text-align: left
+
+
+/** News **/
+.newstitle {
+  font-weight: bold;
 }
-.commentbox {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 13px;
-	color: #FFFFFF;
-	background-color: #a6bab8;
-	text-align: center;
+
+.newsdate {
+  font-style: italic;
 }
-.commentboxmiddle {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	color: #000000;
-	background-color: #DAE6E6;
-	text-align: center;
+
+.newstext {
 }
-.topbanner {
-	font-size: 11px;
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	text-decoration: none;
-	color: #505050;
+
+
+/** Screenshots **/
+.screenshotdate {
+  font-size: small;
+  font-style: italic;
 }
-.copyrightinfo {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 9px;
-	color: #000000;
-	text-align: center;
-	background-color: #FFFFFF
+
+.screenshotdesc {
 }
-.cal {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	color: #000000;
-	background-color: #FFFFFF;
-	text-align: right;
+
+
+/** Common stuff **/
+.copyright {
+  font-size: small;
+  font-style: italic;
+  background-color: transparent;
+  color: #808080;
 }
-.calmonth {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 11px;
-	color: #000000;
-	background-color: #FFFFFF;
-	text-align: center;
+a.copyright {
+  font-size: small;
+  font-style: italic;
+  background-color: transparent;
+  color: #404040;
+  text-decoration: none;
 }
-.calcurmonth {
-	font-family: Verdana, Arial, Helvetica, sans-serif;
-	font-size: 13px;
-	color: #000000;
-	background-color: #FFFFFF;
-	text-align: center;
+a.copyright:hover {
+  font-size: small;
+  font-style: italic;
+  background-color: transparent;
+  color: #202020;
+  text-decoration: underline;
+}
+
+.elapsedtime {
+  font-size: x-small;
+  font-style: italic;
+  background-color: transparent;
+  color: #a0a0a0;
+}
+.elapsedtimevalue {
+  font-size: x-small;
+  font-style: italic;
+  background-color: transparent;
+  color: #606060;
+}
+
+.lastupdate {
+  font-size: small;
+  background-color: transparent;
+  color: #606060;
+}
+.lastupdatevalue {
+  font-size: small;
+  background-color: transparent;
+  color: #000000;
+}
+
+.counter {
+  font-size: small;
+  background-color: transparent;
+  color: #606060;
+}
+.countervalue {
+  font-size: small;
+  background-color: transparent;
+  color: #000000;
+}
+
+pre {
+  background-color: transparent;
+  color: #606060;
 }
