@@ -25,6 +25,7 @@
 #include "bosonmodel.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
+#include "kgamemodeldebug.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -37,6 +38,7 @@
 #include <kpopupmenu.h>
 #include <klocale.h>
 #include <kstandarddirs.h>
+#include <kdialogbase.h>
 
 #include <qtimer.h>
 #include <qhbox.h>
@@ -301,13 +303,38 @@ void RenderMain::slotUnitChanged(int index)
  KPopupMenu* p = (KPopupMenu*)sender();
  SpeciesTheme* s = mPopup2Species[p];
  kdDebug() << k_funcinfo << index << endl;
- unsigned long int type = allUnits(s)[index];
+ QValueList<const UnitProperties*> props = s->allUnits();
+ if (index >= (int)props.count()) {
+	kdError() << k_funcinfo << "index " << index << " out of range" << endl;
+	return;
+ }
+ unsigned long int type = props[index]->typeId();
  const UnitProperties* prop = s->unitProperties(type);
  if (!prop) {
 	kdError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
 	return;
  }
  changeUnit(s, prop);
+}
+
+void RenderMain::slotDebugModels()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Models"),
+		KDialogBase::Cancel, KDialogBase::Cancel, this,
+		"debugmodelsdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(slotDelayedDestruct()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameModelDebug* models = new KGameModelDebug(w);
+ l->addWidget(models);
+
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current(); ++it) {
+	models->addTheme(it.current());
+ }
+ models->slotUpdate();
+
+ dialog->show();
 }
 
 void RenderMain::changeUnit(const QString& theme, const QString& unit)
@@ -324,10 +351,10 @@ void RenderMain::changeUnit(const QString& theme, const QString& unit)
 	kdError() << k_funcinfo << "Could not find theme " << theme << endl;
 	return;
  }
- QValueList<unsigned long int> units = allUnits(s);
- QValueList<unsigned long int>::Iterator i = units.begin();
+ QValueList<const UnitProperties*> units = s->allUnits();
+ QValueList<const UnitProperties*>::Iterator i = units.begin();
  for (; i != units.end() && !prop; ++i) {
-	const UnitProperties* p = s->unitProperties(*i);
+	const UnitProperties* p = *i;
 	// warning: this might cause trouble once we start translations! but we
 	// also have a way to use IDs directly so this is just a minor problem
 	if (p->name().lower() == unit.lower()) {
@@ -387,26 +414,22 @@ void RenderMain::initKAction()
 			"view_species");
 	menu->popupMenu()->setCheckable(true);
 	mPopup2Species.insert(menu->popupMenu(), s);
-	QValueList<unsigned long int> units = allUnits(s);
 
 	connect(menu->popupMenu(), SIGNAL(activated(int)),
 			this, SLOT(slotUnitChanged(int)));
 
+	QValueList<const UnitProperties*> units = s->allUnits();
 	for (unsigned int j = 0; j < units.count(); j++) {
-		const UnitProperties* prop = s->unitProperties(units[j]);
-		menu->popupMenu()->insertItem(prop->name(), j);
+		menu->popupMenu()->insertItem(units[j]->name(), j);
 	}
  }
+
+ (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
+		actionCollection(), "debug_models");
 
  createGUI(locate("data", "boson/borenderui.rc"));
 }
 
-QValueList<unsigned long int> RenderMain::allUnits(SpeciesTheme* s) const
-{
- QValueList<unsigned long int> units = s->allFacilities();
- units += s->allMobiles();
- return units;
-}
 
 
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)

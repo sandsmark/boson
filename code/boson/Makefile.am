@@ -105,6 +105,7 @@ borender_LDADD = \
 		-lGLU -l3ds \
 		$(LIB_KDEUI)
 borender_SOURCES = $(BOSON_SRC) \
+		kgamemodeldebug.cpp \
 		borendermain.cpp
 
 METASOURCES = AUTO

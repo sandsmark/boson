@@ -132,6 +132,8 @@ bool BosonPlayField::loadPlayField(const QString& file)
 
 bool BosonPlayField::savePlayField(const QString& fileName)
 {
+ // TODO: use KMessageBox here? or maybe add an errorMessage parameter which can
+ // be displayed as a msg box in the calling method
  if (!mMap) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return false;
