@@ -147,12 +147,33 @@ public:
 	 **/
 	bool advanceFlag() const;
 
+	/**
+	 * Toggle the advance flag. See @ref advanceFlag.
+	 **/
 	void toggleAdvanceFlag();
 
 	virtual bool save(QDataStream& stream, bool savePlayers = true);
 
+	/**
+	 * @return The number of delayed messages. When a certain number of
+	 * messages has been delayed you are in serious trouble, as there will
+	 * be a big delay before additional player input can be executed.
+	 **/
+	unsigned int delayedMessageCount() const;
+
+	/**
+	 * @return The global Boson object
+	 **/
 	static Boson* boson() { return mBoson; }
+
+	/**
+	 * Initialize the global Boson object. See also @ref boson.
+	 **/
 	static void initBoson();
+
+	/**
+	 * Clean up the global Boson object.
+	 **/
 	static void deleteBoson();
 
 public slots:

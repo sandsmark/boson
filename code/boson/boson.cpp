@@ -1484,7 +1484,7 @@ void Boson::slotReceiveAdvance()
  // - e.g. unit moving, OpenGL rendering, ... so 
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
 	boDebug(300) << k_funcinfo << "delayed messages: "
-			<< d->mDelayedMessages.count() << endl;
+			<< delayedMessageCount() << endl;
 	unlock();
  } else if (d->mAdvanceDividerCount + 1 < d->mAdvanceDivider) {
 	int next;
@@ -1495,7 +1495,7 @@ void Boson::slotReceiveAdvance()
 	} else {
 		next = 0;
 	}
-	if (d->mDelayedMessages.count() > 20) {
+	if (delayedMessageCount() > 20) {
 		boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
 		next = 0;
 	}
@@ -1784,3 +1784,7 @@ void Boson::slotDebugOutput(const QString& area, const char* data, int level)
  slotAddChatSystemMessage(area, data);
 }
 
+unsigned int Boson::delayedMessageCount() const
+{
+ return d->mDelayedMessages.count();
+}
