@@ -246,12 +246,12 @@ public:
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
-	int particleSystemsCount();
+	int particleSystemsCount() const;
 	void updateParticleSystems(float elapsed);
 	QPtrList<BosonParticleSystem>* particleSystems();
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
-	BoParticleManager* particleManager();
+	BoParticleManager* particleManager() const;
 
 public slots:
 	/**

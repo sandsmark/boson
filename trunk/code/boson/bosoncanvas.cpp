@@ -222,7 +222,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
  boProfiling->advanceMaximalAdvanceCount(true);
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
-	boDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
+	boDebug(300) << "MAXIMAL_ADVANCE_COUNT" << endl;
 	// there are 2 different timers for deletion of canvas items.
 	// The first is done in BosonCanvas - we only delete anything when
 	// advanceCount == MAXIMAL_ADVANCE_COUNT.
@@ -853,7 +853,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
-int BosonCanvas::particleSystemsCount()
+int BosonCanvas::particleSystemsCount() const
 {
  return d->mParticles.count();
 }
@@ -917,7 +917,7 @@ void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems
  }
 }
 
-BoParticleManager* BosonCanvas::particleManager()
+BoParticleManager* BosonCanvas::particleManager() const
 {
  return d->mParticleManager;
 }
