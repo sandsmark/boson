@@ -279,6 +279,7 @@ public:
 	BoLight* newLight();
 	void removeLight(int id);
 
+	void updateOpenGLSettings();
 	void changeGroundRenderer(int renderer);
 
 	/**

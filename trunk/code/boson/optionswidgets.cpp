@@ -530,6 +530,8 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mDefaultLOD->insertItem(i18n("Lowest details"));
  mDefaultLOD->setCurrentItem(0);
  connect(mUseLOD, SIGNAL(toggled(bool)), hbox, SLOT(setEnabled(bool)));
+ mSmoothShading = new QCheckBox(i18n("Smooth shade model"), mAdvanced);
+ mSmoothShading->setChecked(true);
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -593,6 +595,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
+		mSmoothShading->setChecked(true);
+		break;
 	case BestQuality:
 		// we mostly use defaults here.
 		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
@@ -605,6 +609,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
+		mSmoothShading->setChecked(true);
 		break;
 	case Fastest:
 		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
@@ -617,6 +622,7 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mGroundRenderer->setCurrentItem(BoGroundRenderer::Fast);
 		setUseLOD(true);
 		setDefaultLOD(5000);
+		mSmoothShading->setChecked(false);
 		break;
 	
  }
@@ -717,6 +723,10 @@ void OpenGLOptions::apply()
  } else {
 	Bo3dTools::disableReadDepthBufferWorkaround();
  }
+ boConfig->setBoolValue("SmoothShading", mSmoothShading->isChecked());
+
+ emit signalOpenGLSettingsUpdated();
+
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -736,6 +746,7 @@ void OpenGLOptions::setDefaults()
  mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
+ mSmoothShading->setChecked(true);
 }
 
 void OpenGLOptions::load()
@@ -759,6 +770,7 @@ void OpenGLOptions::load()
 	*mFontInfo = BoFontInfo();
  }
  mFont->setText(mFontInfo->guiName());
+ mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
  mFontChanged = false;
 }
 
