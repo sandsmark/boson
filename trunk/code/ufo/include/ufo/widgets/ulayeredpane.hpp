@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -92,25 +92,19 @@ public:
 	void moveToBack(UWidget * w);
 
 
-	/**
-	  * @return
-	  * 	The starting index of the layer within the children vector.
-	  * 	If this is not a valid layer, return the index where this
-	  * 	layer should be inserted.
+	/** @return The (child vector) index at which a <strong>newly</strong>
+	  *  inserted widget is the top most widget within that layer.
 	  */
 	int getLayerBegin(int layer) const;
-	/**
-	  * @return
-	  * 	The ending index of the layer within the children vector.
-	  * 	-1 if this is not a valid layer.
+	/** @return The (child vector) index at which a <strong>newly</strong>
+	  *  inserted widget is the bottom most widget within that layer.
 	  */
 	int getLayerEnd(int layer) const;
-	/** @return the index for a widget which should be added,
-	  * 	relative to the whole children vector
-	  * @param layer
-	  * 	The new layer
-	  * @param position
-	   *	The new position relative to the layer
+	/** @return The (child vector) index for a widget which should be added,
+	  *  relative to the whole children vector
+	  * @param layer The desired layer
+	  * @param position The new position relative to the layer. 
+	  *  Use -1 for appending
 	  */
 	int indexForLayer(int layer, int position) const;
 

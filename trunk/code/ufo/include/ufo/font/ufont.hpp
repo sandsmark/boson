@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -30,7 +30,7 @@
 
 #include "../uobject.hpp"
 
-#include <vector>
+#include <map>
 
 #include "ufontmetrics.hpp"
 #include "ufontinfo.hpp"

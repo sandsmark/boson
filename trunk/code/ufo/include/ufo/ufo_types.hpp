@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -143,24 +143,24 @@ enum FrameStyle {
 	FrameMaximizeBox = 1 << 5,
 	FrameMinMaxBox = FrameMinimizeBox | FrameMaximizeBox,
 	FrameCloseBox = 1 << 6,
-	FrameStyleLast = FrameCloseBox,
+	FrameResizable = 1 << 7,
+	FrameStyleLast = FrameResizable,
 	FrameStyleFlags = FrameNoBorder | FrameNormalBorder | FrameTitleBar |
-		FrameSysMenu | FrameMinMaxBox | FrameCloseBox
+		FrameSysMenu | FrameMinMaxBox | FrameCloseBox | FrameResizable
 };
 
 enum FrameState {
-	FrameResizable = FrameStyleLast << 1,
-	FrameModal = FrameStyleLast << 2,
-	FrameSticky = FrameStyleLast << 3,
-	FrameStaysOnTop = FrameStyleLast << 4,
-	FrameSkipTaskBar = FrameStyleLast << 5,
-	FrameMaximized = FrameStyleLast << 6,
-	FrameMinimized = FrameStyleLast << 7,
-	FrameFullScreen = FrameStyleLast << 8,
-	FrameCreated = FrameStyleLast << 9,
-	FrameVisible = FrameStyleLast << 10,
+	FrameModal = FrameStyleLast << 1,
+	FrameSticky = FrameStyleLast << 2,
+	FrameStaysOnTop = FrameStyleLast << 3,
+	FrameSkipTaskBar = FrameStyleLast << 4,
+	FrameMaximized = FrameStyleLast << 5,
+	FrameMinimized = FrameStyleLast << 6,
+	FrameFullScreen = FrameStyleLast << 7,
+	FrameCreated = FrameStyleLast << 8,
+	FrameVisible = FrameStyleLast << 9,
 	FrameStateLast = FrameVisible,
-	FrameStateFlags = FrameResizable | FrameModal | FrameSticky |
+	FrameStateFlags = FrameModal | FrameSticky |
 		FrameStaysOnTop | FrameSkipTaskBar | FrameMaximized | FrameMinimized |
 		FrameFullScreen | FrameCreated | FrameVisible
 };

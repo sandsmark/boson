@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -33,10 +33,11 @@
 
 #include "ufo/widgets/uinternalframe.hpp"
 #include "ufo/widgets/ulayeredpane.hpp"
+#include "ufo/widgets/udesktoppane.hpp"
 
 #include "ufo/utoolkit.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(URootPane, UWidget)
 //UFO_IMPLEMENT_DYNAMIC_CLASS(URootPane::URootLayout, ULayoutManager)
@@ -102,7 +103,7 @@ URootPane::setContentPane(UWidget * contentPane) {
 
 ULayeredPane *
 URootPane::createLayeredPane() const {
-	ULayeredPane * layeredPane = new ULayeredPane();
+	ULayeredPane * layeredPane = new UDesktopPane();//new ULayeredPane();
 	layeredPane->setOpaque(false);
 	return layeredPane;
 }
@@ -126,12 +127,14 @@ URootPane::getLayeredPane() const {
 
 void
 URootPane::addFrame(UInternalFrame * frame) {
-	m_desktopPane->add(frame, ULayeredPane::FrameLayer);
+	//m_desktopPane->add(frame, ULayeredPane::FrameLayer);
+	(dynamic_cast<UDesktopPane*>(m_desktopPane))->addFrame(frame);
 }
 
 UInternalFrame *
 URootPane::removeFrame(UInternalFrame * frame) {
-	if (m_desktopPane->remove(frame)) {
+	//if (m_desktopPane->remove(frame)) {
+	if ((dynamic_cast<UDesktopPane*>(m_desktopPane))->removeFrame(frame)) {
 		return frame;
 	} else {
 		return NULL;
@@ -180,32 +183,25 @@ URootPane::addedToHierarchy() {
 URootPane::URootLayout::URootLayout(URootPane * rootPane) :
 m_rootPane(rootPane) {}
 
-
 UDimension
-URootPane::URootLayout::getMinimumLayoutSize(const UWidget * parent) const {
-	return getPreferredLayoutSize(parent);
-}
-
-
-UDimension
-URootPane::URootLayout::getPreferredLayoutSize(const UWidget *parent) const {
+URootPane::URootLayout::getPreferredLayoutSize(const UWidget * container,
+		const UDimension & maxSize) const {
 	UDimension contentDim;
 	UDimension menuDim;
 	const UInsets & in = m_rootPane->getInsets();
 
 	if (UMenuBar * mbar = m_rootPane->getMenuBar()) {
-		menuDim = mbar->getPreferredSize();
+		menuDim = mbar->getPreferredSize(maxSize);
 	}
 	if (UWidget * content = m_rootPane->getContentPane()) {
-		contentDim = content->getPreferredSize();
+		contentDim = content->getPreferredSize(maxSize - menuDim);
 	}
 
 	return UDimension(
-		std::max(contentDim.w, menuDim.w) + in.left + in.right,
-		contentDim.h + menuDim.h + in.top + in.bottom
+		std::max(contentDim.w, menuDim.w) + in.getHorizontal(),
+		contentDim.h + menuDim.h + in.getVertical()
 	);
 }
-
 
 void
 URootPane::URootLayout::layoutContainer(const UWidget * parent) {
@@ -217,7 +213,7 @@ URootPane::URootLayout::layoutContainer(const UWidget * parent) {
 	}
 
 	if (UMenuBar * mbar = m_rootPane->getMenuBar()) {
-		const UDimension & menuDim = mbar->getPreferredSize();
+		const UDimension & menuDim = mbar->getPreferredSize(parent->getSize());
 		mbar->setBounds(0, top, dim.w, menuDim.h);
 		top += menuDim.h;
 	}
@@ -225,5 +221,3 @@ URootPane::URootLayout::layoutContainer(const UWidget * parent) {
 		content->setBounds(0, top, dim.w, dim.h - top);
 	}
 }
-
-} // namespace ufo

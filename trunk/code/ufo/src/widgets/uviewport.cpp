@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -48,6 +48,19 @@ public:
 			return UDimension();
 		}
 	}
+	UDimension getPreferredLayoutSize(const UWidget * parent, const UDimension & maxSize) const {
+		const UViewport * viewport = dynamic_cast<const UViewport*>(parent);
+		UWidget * w = viewport->getView();
+		if (w) {
+			if (UScrollableWidget * sw = dynamic_cast<UScrollableWidget*>(w)) {
+				return sw->getPreferredViewportSize();
+			} else {
+				return w->getPreferredSize(maxSize);
+			}
+		} else {
+			return UDimension();
+		}
+	}
 
 	UDimension getMinimumLayoutSize(const UWidget * parent) const {
 		return getPreferredLayoutSize(parent);
@@ -55,22 +68,14 @@ public:
 
 	void layoutContainer(const UWidget * parent) {
 		if (parent->getWidgetCount()) {
-			// clamp to parent size
+			// expand to have at least parent size
 			UDimension size = parent->getInnerSize();
-			// FIXME 
+
 			UDimension childSize = parent->getWidget(0)->getPreferredSize();
-			if (childSize.w < size.w) {
-				childSize.w = size.w;
-			}
-			if (childSize.h < size.h) {
-				childSize.h = size.h;
-			}
-			
+			childSize.expand(size);
+
 			parent->getWidget(0)->setSize(childSize);
 		}
-	}
-	virtual int getLayoutHeightForWidth(const UWidget* , int ) const {
-		return 0;
 	}
 };
 
@@ -91,14 +96,14 @@ void
 UViewport::setView(UWidget * w) {
 	// remove any other widgets
 	removeAll();
-	
+
 	m_view = w;
 
 	if (m_view) {
 		// call the
 		UWidget::addImpl(m_view, NULL, -1);
 	}
-	
+
 	if (dynamic_cast<UScrollableWidget*>(w)) {
 		m_scrollableWidget = true;
 	} else {
@@ -130,7 +135,7 @@ void
 UViewport::setViewBounds(int x, int y, int w, int h) {
 	if (m_view) {
 		m_view->setLocation(UPoint(-x, -y));
-		
+
 	}
 
 	if (m_scrollableWidget && m_view) {
@@ -145,7 +150,7 @@ UViewport::scrollRectToVisible(const URectangle & rect) {
 	if (!m_view) {
 		return;
 	}
-	
+
 	const UPoint & p = m_view->getLocation();
 
 	// x vlaue

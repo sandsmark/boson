@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -134,7 +134,7 @@ UProperties *
 UProperties::getChild(const std::string & keyA) {
 	childMap::const_iterator iter;
 	iter = m_children.find(keyA);
-	
+
 	if (iter != m_children.end()) {
 		return (*iter).second;
 	} else {
@@ -146,7 +146,7 @@ UProperties::getChild(const std::string & keyA) {
 std::vector<std::string>
 UProperties::getChildKeys() {
 	std::vector<std::string> ret;
-	
+
 	for(childMap::const_iterator iter = m_children.begin();
 			iter != m_children.end();
 			++iter) {
@@ -170,7 +170,7 @@ UINIReader::read(std::istream & streamA, UProperties * propA) {
 	char buffer[256];
 
 	//std::cerr << "parsing stream for prop " << propA << std::hex << uint32_t(propA) << std::endl;
-	
+
 	while (streamA) {
 		streamA.getline(buffer, 256);
 
@@ -186,7 +186,7 @@ UINIReader::parse(char * buffer, unsigned int n) {
 
 	char * pArr = buffer;
 	int size = n;
-	
+
 	// remove trailing spaces and comments
 	while (pArr[0] == ' ' && size) {
 		pArr++;
@@ -197,7 +197,7 @@ UINIReader::parse(char * buffer, unsigned int n) {
 	if (pArr[0] == '#') {
 		return;
 	}
-	
+
 	// new element, nested property
 	if (pArr[0] == '[') {
 		int length = 0;
@@ -206,9 +206,9 @@ UINIReader::parse(char * buffer, unsigned int n) {
 		while (pArr[length] != ']' && (size - length) >= 0) {
 			length++;
 		}
-		
+
 		if (size < 0) { return; }
-		
+
 		std::string name(pArr, length);
 		m_nestedProp = m_localProp->getChild(name);
 		if (m_nestedProp == NULL) {
@@ -216,12 +216,12 @@ UINIReader::parse(char * buffer, unsigned int n) {
 			m_localProp->putChild(name, m_nestedProp);
 		}
 	} else {
-		
+
 		std::string test(pArr);
-	
+
 		unsigned int pos = test.find('=');
 		unsigned int end = test.find('#');
-		end = std::min(end, test.length());
+		end = std::min(end, (unsigned int)(test.length()));
 
 		unsigned int endKey = pos;
 		unsigned int beginValue = pos + 1;
@@ -232,11 +232,11 @@ UINIReader::parse(char * buffer, unsigned int n) {
 		while (pArr[beginValue] == ' ') {
 			beginValue++;
 		}
-	
+
 		if (pos != std::string::npos && end > pos) {
-			
+
 			std::string key = test.substr(0, endKey);
-		
+
 			std::string value = test.substr(beginValue, end);
 
 			if (m_nestedProp) {
@@ -251,7 +251,7 @@ UINIReader::parse(char * buffer, unsigned int n) {
 void
 UINIWriter::write(std::ostream & streamA, UProperties * propA) {
 	std::vector<std::string> keys = propA->getKeys();
-	
+
 	for (std::vector<std::string>::const_iterator key_iter = keys.begin();
 			key_iter != keys.end();
 			key_iter++) {
@@ -263,7 +263,7 @@ UINIWriter::write(std::ostream & streamA, UProperties * propA) {
 
 	// and now save recursively the nested property objects
 	std::vector<std::string> childKeys = propA->getChildKeys();
-	
+
 	for(std::vector<std::string>::const_iterator iter = childKeys.begin();
 			iter != childKeys.end();
 			iter++) {
@@ -272,13 +272,12 @@ UINIWriter::write(std::ostream & streamA, UProperties * propA) {
 		streamA << "[" << (*iter) << "]" << std::endl;
 
 		UProperties * child = propA->getChild(*iter);
-		
+
 		child->save(streamA);
 	}
 }
 
-// FIXME !
-// this should really be in other files
+// FIXME: this should really be in other files
 
 #include "ufo/util/upoint.hpp"
 #include "ufo/util/udimension.hpp"
@@ -289,3 +288,19 @@ UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UPointObject, UPoint)
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UDimensionObject, UDimension)
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(URectangleObject, URectangle)
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(UInsetsObject, UInsets)
+
+// FIXME: Use configure detection for limits header
+/*
+#ifdef HAVE_LIMITS
+#include <limits>
+static int ufo_max_int = std::numeric_limits<int>::max();
+#else
+*/
+#include <climits>
+static int ufo_max_int = INT_MAX;
+//#endif
+
+UPoint UPoint::invalid(ufo_max_int, ufo_max_int);
+UDimension UDimension::invalid(ufo_max_int, ufo_max_int);
+UDimension UDimension::maxDimension(ufo_max_int, ufo_max_int);
+URectangle URectangle::invalid(0, 0, ufo_max_int, ufo_max_int);

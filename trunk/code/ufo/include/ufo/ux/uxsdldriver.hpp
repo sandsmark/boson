@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -53,6 +53,7 @@ public: // Implements UVideoDriver
 	virtual bool init();
 	virtual bool isInitialized();
 	virtual void quit();
+	virtual std::string getName();
 
 	virtual void pumpEvents();
 
@@ -85,6 +86,7 @@ private: // Private attributes
 	UXSDLDevice * m_device;
 	bool m_isValid;
 	bool m_isInit;
+	bool m_createdGLDriver;
 };
 
 
@@ -119,6 +121,7 @@ public: // Implements UVideoDevice
 	virtual void setInitialFrameState(uint32_t frameState);
 	virtual uint32_t getFrameState() const;
 
+	virtual void notify(uint32_t type, int arg1, int arg2, int arg3, int arg4);
 private: // Private attributes
 	UXSDLDriver * m_sdldriver;
 	UXFrame * m_frame;

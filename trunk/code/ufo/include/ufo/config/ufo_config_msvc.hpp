@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -82,6 +82,10 @@ inline const Type& min(const Type & a, const Type & b) {
 template <typename Type>
 inline const Type& max(const Type & a, const Type & b) {
 	return a < b ? b : a;
+}
+template <typename Type>
+inline Type abs(const Type & a) {
+	return a > 0 ? a : -a;
 }
 
 	using ::size_t;

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -77,7 +77,7 @@ UBasicButtonUI::uninstallUI(UWidget * w) {
 
 void
 UBasicButtonUI::paint(UGraphics * g, UWidget * w) {
-	UButtonUI::paint(g, w);
+	//UButtonUI::paint(g, w);
 	//g->paintControlBackground(g, w, isActive(), false);
 
 	UButton * button;
@@ -96,6 +96,11 @@ UBasicButtonUI::paint(UGraphics * g, UWidget * w) {
 		viewRect.w -= 2;
 		viewRect.h -= 2;
 	}
+	style->paintControlBackground(g, w,
+		URectangle(UPoint(), button->getSize()), // rect
+		button->isPressed(), // highlight
+		button->isActive() // active
+	);
 
 	if (button->isPressed()) {
 		g->translate(1, 1);//glTranslatef(1, 1, 0);

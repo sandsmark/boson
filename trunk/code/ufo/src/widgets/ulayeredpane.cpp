@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -27,7 +27,7 @@
 
 #include "ufo/widgets/ulayeredpane.hpp"
 
-namespace ufo {
+using namespace ufo;
 
 UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(ULayeredPane, UWidget)
 
@@ -81,18 +81,15 @@ ULayeredPane::setLayer(UWidget * w, int layer, int position) {
 		// no change
 		return ;
 	}
-
+	
 	putLayerProperty(w, layer);
+	// at first, move the widget to the very end of the container.
+	// this way, we do not have to factor in the case when we move
+	// within the same layer (might give wrong results)
+	// Note: This violates the order of child widgets
+	setIndexOf(w, -1);
 	int index = indexForLayer(layer, position);
 	setIndexOf(w, index);
-/*
-	UWidget::addImpl(w, NULL, position);
-	//
-	w->reference();
-	remove(w);
-	add(w, new UInteger(layer), position);
-	w->unreference();
-*/
 }
 
 int
@@ -171,8 +168,10 @@ ULayeredPane::getLayerEnd(int layer) const {
 			break;
 		}
 	}
-	if (layerEnd == -1)
+	// this happens when we have only one layer
+	if (layerEnd == -1) {
 		layerEnd = nWidgets;
+	}
 	return layerEnd;
 }
 
@@ -186,18 +185,22 @@ ULayeredPane::indexForLayer(int layer, int position) const {
 	if (position > -1 && position <= layerEnd - layerBegin) {
 		ret = layerBegin + position;
 	} else {
-		ret = layerEnd + 1;
+		// insert at the end of the given layer
+		ret = layerEnd;
 	}
 
 	// clamp
 	if (layerEnd == layerBegin) {
 		ret = layerEnd;
-	} else if (ret > layerEnd + 1) {
-		ret = layerEnd + 1;
+	} else if (ret > layerEnd) {
+		ret = layerEnd;
+	}
+	
+	//
+	if (ret >= getWidgetCount()) {
+		return -1;
 	}
 
 	// else, position == -1, ..
 	return ret;
 }
-
-} // namespace ufo

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -59,7 +59,7 @@ public: // Implements UGraphics
 
 	virtual URectangle mapToDevice(const URectangle & rect);
 	virtual URectangle mapFromDevice(const URectangle & rect);
-	
+
 	virtual void flush();
 	virtual void clear();
 	virtual UImageIO * dump();
@@ -115,7 +115,7 @@ private:
 	float m_translationX;
 	float m_translationY;
 };
-  
+
 } // namespace ufo
 
 #endif // UGL_GRAPHICS_HPP

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -52,20 +52,16 @@ UBasicLabelUI::paint(UGraphics * g, UWidget * w) {
 	UWidgetUI::paint(g, w);
 
 	ULabel * label;
-	//const UFont * f;
-	//UIcon * icon;
 	const UInsets & insets = w->getInsets();
 
 	label = dynamic_cast<ULabel *>(w);
-	//f = label->getFont();
-	//icon = label->getIcon();
-	
+
 	UStyle * style = w->getUIManager()->getStyle();
 
 	URectangle viewRect(insets.left, insets.top,
 		label->getWidth() - insets.getHorizontal(),
 		label->getHeight() - insets.getVertical());
-	
+
 	style->paintCompoundTextAndIcon(g, label, viewRect,
 		label->getText(), label->getIcon());
 }

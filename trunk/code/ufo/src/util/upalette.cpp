@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -111,6 +111,13 @@ void
 UPalette::setDisabled(const UColorGroup & disabled) {
 	detach();
 	m_disabled = new UColorGroup(disabled);
+}
+
+void
+UPalette::operator=(const UPalette & pal) {
+	m_active = pal.m_active;
+	m_inactive = pal.m_inactive;
+	m_disabled = pal.m_disabled;
 }
 
 bool

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -93,6 +93,7 @@
 #include "widgets/ucheckboxmenuitem.hpp"
 #include "widgets/ucombobox.hpp"
 #include "widgets/ucompound.hpp"
+#include "widgets/udesktoppane.hpp"
 #include "widgets/uinternalframe.hpp"
 #include "widgets/uitem.hpp"
 #include "widgets/ulabel.hpp"

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -29,6 +29,8 @@
 #define UABSTRACTTOOLKIT_HPP
 
 #include "utoolkit.hpp"
+
+#include <map>
 
 namespace ufo {
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -34,6 +34,9 @@
 
 using namespace ufo;
 
+static std::vector<URectangle>
+getBounds(int axis, int hgap, int vgap, const UWidget* container, const URectangle & bounds);
+
 UFO_IMPLEMENT_DYNAMIC_CLASS(UBoxLayout, ULayoutManager)
 
 UBoxLayout::UBoxLayout() : m_axis(XAxis), m_hgap(2), m_vgap(2) {}
@@ -55,100 +58,125 @@ UBoxLayout::UBoxLayout(int axis, int hgap, int vgap)
 UBoxLayout::~UBoxLayout() {}
 
 UDimension
-UBoxLayout::getMinimumLayoutSize(const UWidget * parent) const {
-	UDimension ret;
-	const UInsets & insets = parent->getInsets();
+UBoxLayout::getPreferredLayoutSize(const UWidget * container,
+		const UDimension & maxSize) const {
+	URectangle bounds = container->getInnerBounds();
+	// AB: x, y don't matter in this method
+	bounds.w = maxSize.w;
+	bounds.h = maxSize.h;
+	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds);
+	UDimension ret(0, 0);
 
-	for (unsigned int i = 0; i < parent->getWidgetCount(); i++ ) {
-		UWidget * w = parent->getWidget(i);
 
-		if (w->isVisible()) {
-			const UDimension & size = w->getMinimumSize();
-
-			if (m_axis == XAxis ) {
-				ret.h = std::max(size.h, ret.h);
-				ret.w += size.w;
-
-				ret.w += m_hgap;
-			} else {
-				ret.w = std::max(size.w, ret.w);
-				ret.h += size.h;
-
-				ret.h += m_vgap;
-			}
+	if (container->getWidgetCount() >= 1) {
+		const URectangle& b = childBounds[container->getWidgetCount() - 1];
+		if (m_axis == XAxis) {
+			ret = UDimension(b.x + b.w, maxSize.h);
+		} else {
+			ret = UDimension(maxSize.w, b.y + b.h);
 		}
 	}
-	ret.w += insets.left + insets.right - m_hgap;
-	ret.h += insets.top + insets.bottom + 2 * m_vgap;
+
+#if 1
+	// AB: the above seems not to work correctly (e.g. for menus).
+	// note that with the following code we'll exceed maxSize!
+	if (m_axis == XAxis) {
+		ret.h = 0;
+	} else {
+		ret.w = 0;
+	}
+	for (unsigned int i = 0; i < container->getWidgetCount(); i++) {
+		if (m_axis == XAxis) {
+			ret.h = std::max(ret.h, childBounds[i].h);
+		} else {
+			ret.w = std::max(ret.w, childBounds[i].w);
+		}
+	}
+#endif
+
+
+	// Add (border and other) insets
+	ret += container->getInsets();
 
 	return ret;
 }
 
-UDimension
-UBoxLayout::getPreferredLayoutSize(const UWidget * parent) const {
-	UDimension ret;
-	const UInsets & insets = parent->getInsets();
+std::vector<URectangle>
+getBounds(int axis, int hgap, int vgap, const UWidget * container, const URectangle & bounds) {
+	std::vector<URectangle> ret(container->getWidgetCount());
 
-	for (unsigned int i = 0; i < parent->getWidgetCount(); i++) {
-		UWidget * w = parent->getWidget(i);
+	int x = bounds.x;
+	int y = bounds.y;
+	UDimension dim(bounds.w, bounds.h);
+
+	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+		const UWidget * w = container->getWidget(i);
 
 		if (w->isVisible()) {
-			const UDimension & size = w->getPreferredSize();
-
-			if (m_axis == XAxis) {
-				ret.h = std::max(size.h, ret.h);
-				ret.w += size.w;
-
-				ret.w += m_hgap;
+			if (axis == UBoxLayout::XAxis) {
+				if (x > bounds.x) {
+					x += hgap;
+					if (dim.w >= hgap) {
+						dim.w -= hgap;
+					} else {
+						dim.w = 0;
+					}
+				}
 			} else {
-				ret.w = std::max(size.w, ret.w);
-				ret.h += size.h;
-
-				ret.h += m_vgap;
+				if (y > bounds.y) {
+					y += vgap;
+					if (dim.h >= vgap) {
+						dim.h -= vgap;
+					} else {
+						dim.h = 0;
+					}
+				}
 			}
+
+			UDimension d = w->getPreferredSize(dim);
+			d.clamp(dim);
+
+			ret[i].x = x;
+			ret[i].y = y;
+			if (axis == UBoxLayout::XAxis) {
+				ret[i].w = d.w;
+				ret[i].h = d.h;
+
+				x += d.w;
+				dim.w -= d.w;
+			} else {
+				ret[i].w = d.w;
+				ret[i].h = d.h;
+
+				y += d.h;
+				dim.h -= d.h;
+			}
+		} else {
+			ret[i].x = x;
+			ret[i].y = y;
+			ret[i].w = 0;
+			ret[i].h = 0;
 		}
 	}
-	if (m_axis == XAxis)
-		ret.w -= m_hgap;
-	else
-		ret.h -= m_vgap;
-
-	ret.w += insets.left + insets.right;
-	ret.h += insets.top + insets.bottom;
-
 	return ret;
 }
 
 void
-UBoxLayout::layoutContainer(const UWidget * parent) {
-	URectangle bounds = parent->getInnerBounds();
+UBoxLayout::layoutContainer(const UWidget * container) {
+	const URectangle & bounds = container->getInnerBounds();
+	std::vector<URectangle> childBounds = getBounds(m_axis, m_hgap, m_vgap, container, bounds);
 
-	int x = bounds.x;
-	int y = bounds.y;
-
-	for (unsigned int i = 0 ; i < parent->getWidgetCount() ; i++) {
-		UWidget * w = parent->getWidget(i);
+	for (unsigned int i = 0 ; i < container->getWidgetCount() ; i++) {
+		UWidget * w = container->getWidget(i);
 
 		if (w->isVisible()) {
-			const UDimension & d = w->getPreferredSize();
-
+			const URectangle & b = childBounds[i];
 			if (m_axis == XAxis) {
-				if (x > bounds.x) {
-					x += m_hgap;
-				}
-
-				w->setBounds(x, y, d.w, bounds.h);
-
-				x += d.w;
+				w->setBounds(b.x, b.y, b.w, bounds.h);
 			} else {
-				if (y > bounds.y) {
-					y += m_vgap;
-				}
-
-				w->setBounds(x, y, bounds.w, d.h);
-
-				y += d.h;
+				w->setBounds(b.x, b.y, bounds.w, b.h);
 			}
 		}
 	}
 }
+

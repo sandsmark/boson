@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -73,6 +73,20 @@ UThemeLookAndFeel::getPath() const {
 void
 UThemeLookAndFeel::load(const std::string & themeFile) {
 	m_properties->load(themeFile);
+
+	UProperties * cscheme = m_properties->getChild("Color Scheme");
+	if (cscheme) {
+		// check for light dark mid
+		if (cscheme->get("light") == "") {
+			cscheme->put("light", cscheme->get("alternateBackground"));
+		}
+		if (cscheme->get("dark") == "") {
+			cscheme->put("dark", cscheme->get("activeBackground"));
+		}
+		if (cscheme->get("mid") == "") {
+			cscheme->put("mid", cscheme->get("inactiveBlend"));
+		}
+	}
 /*
 	UProperties * cscheme = m_properties->getChild("Color Scheme");
 	//uDebug() << "themefiles " << themeFile << "\n";
@@ -129,33 +143,43 @@ UThemeLookAndFeel::loadSystemDefaults() {
 		_theme_toString(XGetDefault(display, "Button", "foreground"));
 	std::string buttonBackground =
 		_theme_toString(XGetDefault(display, "Button", "background"));
+	std::string activeForeground =
+		_theme_toString(XGetDefault(display, "Button", "activeForeground"));
+	std::string activeBackground =
+		_theme_toString(XGetDefault(display, "Button", "activeBackground"));
+	std::string alternateBackground =
+		_theme_toString(XGetDefault(display, "Listbox", "selectBackground"));
 	std::string windowForeground =
 		_theme_toString(XGetDefault(display, "Window", "foreground"));
 	std::string windowBackground =
 		_theme_toString(XGetDefault(display, "Window", "background"));
 
 	// uff, randomly chosen
-	cscheme->put("activeForeground", foreground);
-	cscheme->put("inactiveForeground", foreground);
-	cscheme->put("activeBackground", background);
-	cscheme->put("inactiveBackground", background);
-	cscheme->put("activeTitleBtnBg", selectBackground);
-	cscheme->put("inactiveTitleBtnBg", background);
-	cscheme->put("activeBlend", selectBackground);
-	cscheme->put("inactiveBlend", background);
-	cscheme->put("alternateBackground", background);
-	cscheme->put("foreground", foreground);
-	cscheme->put("background", background);
-	cscheme->put("buttonForeground", buttonForeground);
-	cscheme->put("buttonBackground", buttonBackground);
-	cscheme->put("selectForeground", selectForeground);
-	cscheme->put("selectBackground", selectBackground);
-	cscheme->put("windowForeground", windowForeground);
-	cscheme->put("windowBackground", windowBackground);
+#define UFO_PUT_VALID(key, value) \
+if (value != "") { cscheme->put(#key, value); }
+	UFO_PUT_VALID(activeForeground, activeForeground)
+	UFO_PUT_VALID(inactiveForeground, foreground)
+	UFO_PUT_VALID(activeBackground, activeBackground)
+	UFO_PUT_VALID(inactiveBackground, background)
+	UFO_PUT_VALID(activeTitleBtnBg, selectBackground)
+	UFO_PUT_VALID(inactiveTitleBtnBg, selectBackground)
+	UFO_PUT_VALID(activeBlend, selectBackground)
+	UFO_PUT_VALID(inactiveBlend, background)
+	UFO_PUT_VALID(alternateBackground, alternateBackground)
+	UFO_PUT_VALID(foreground, foreground)
+	UFO_PUT_VALID(background, background)
+	UFO_PUT_VALID(buttonForeground, buttonForeground)
+	UFO_PUT_VALID(buttonBackground, buttonBackground)
+	UFO_PUT_VALID(selectForeground, selectForeground)
+	UFO_PUT_VALID(selectBackground, selectBackground)
+	UFO_PUT_VALID(windowForeground, windowForeground)
+	UFO_PUT_VALID(windowBackground, windowBackground)
 
-	cscheme->put("light", selectBackground);
-	cscheme->put("mid", buttonBackground);
-	cscheme->put("dark", selectBackground);
+	UFO_PUT_VALID(light, selectBackground)
+	UFO_PUT_VALID(mid, buttonBackground)
+	UFO_PUT_VALID(dark, selectBackground)
+
+#undef UFO_PUT_VALID
 
 	//XCloseDisplay(display);
 #elif defined(UFO_GFX_WIN32) // UFO_GFX_X11
@@ -219,117 +243,109 @@ UThemeLookAndFeel::destroyPlugin(UPluginBase * plugin) {
 //
 
 UPalette *
-UThemeLookAndFeel::createControlPalette() {
-	return UBasicLookAndFeel::createControlPalette();
-/*
+UThemeLookAndFeel::createPassivePalette() {
+	//return UBasicLookAndFeel::createPassivePalette();
 	UProperties * cscheme = m_properties->getChild("Color Scheme");
 	UColorGroup active(
-		UColor(cscheme->get("selectForeground")), // foreground
-		UColor(cscheme->get("selectBackground")), // background
-		UColor(cscheme->get("activeTitleBtnBg")), // button
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(cscheme->get("background")), // background
+		UColor(cscheme->get("foreground")), // foreground
+		UColor(cscheme->get("text")), // text
 		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
 		UColor(cscheme->get("dark")), // dark
-		UColor(cscheme->get("buttonForeground")), // text
-		UColor(cscheme->get("alternateBackground")) // base
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("selectBackground")), // highlight
+		UColor(cscheme->get("selectForeground")) // highlightedText
 	);
 	UColorGroup inactive(
-		UColor(cscheme->get("buttonForeground")), // foreground
-		UColor(cscheme->get("buttonBackground")), // background
-		UColor(cscheme->get("inactiveTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(cscheme->get("background")), // background
+		UColor(cscheme->get("foreground")), // foreground
 		UColor(cscheme->get("text")), // text
-		UColor(cscheme->get("alternateBackground")) // base
+		UColor(cscheme->get("light")), // light
+		UColor(cscheme->get("dark")), // dark
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("alternateBackground")), // highlight
+		UColor(cscheme->get("activeForeground")) // highlightedText
 	);
 	return new UPalette(active, inactive, inactive);
-	*/
+}
+
+
+UPalette *
+UThemeLookAndFeel::createControlPalette() {
+	//return UBasicLookAndFeel::createControlPalette();
+	UProperties * cscheme = m_properties->getChild("Color Scheme");
+	UColorGroup active(
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(cscheme->get("activeBackground")), // background
+		UColor(cscheme->get("activeForeground")), // foreground
+		UColor(cscheme->get("text")), // text
+		UColor(cscheme->get("light")), // light
+		UColor(cscheme->get("dark")), // dark
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("selectBackground")), // highlight
+		UColor(cscheme->get("selectForeground")) // highlightedText
+	);
+	UColorGroup inactive(
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(cscheme->get("buttonBackground")), // background
+		UColor(cscheme->get("buttonForeground")), // foreground
+		UColor(cscheme->get("text")), // text
+		UColor(cscheme->get("light")), // light
+		UColor(cscheme->get("dark")), // dark
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("alternateBackground")), // highlight
+		UColor(cscheme->get("text")) // highlightedText
+	);
+	return new UPalette(active, inactive, inactive);
 }
 
 UPalette *
-UThemeLookAndFeel::createWindowPalette() {
-	return UBasicLookAndFeel::createWindowPalette();
-}
-/*
-UPalette *
-UThemeLookAndFeel::createTextPalette() {
+UThemeLookAndFeel::createInputPalette() {
+	//return UBasicLookAndFeel::createInputPalette();
 	UProperties * cscheme = m_properties->getChild("Color Scheme");
 	UColorGroup active(
-		UColor(cscheme->get("text")), // foreground
-		UColor("255 255 255"), // background
-		UColor(cscheme->get("activeTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(1.0f, 1.0f, 1.0f), // background
+		UColor(0.0f, 0.0f, 0.0f), // foreground
 		UColor(cscheme->get("text")), // text
-		UColor(cscheme->get("alternateBackground")) // base
+		UColor(cscheme->get("light")), // light
+		UColor(cscheme->get("dark")), // dark
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("selectBackground")), // highlight
+		UColor(cscheme->get("selectForeground")) // highlightedText
 	);
 	UColorGroup inactive(
-		UColor(cscheme->get("text")), // foreground
-		UColor("255 255 255"), // background
-		UColor(cscheme->get("inactiveTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
+		UColor(0.93f, 0.93f, 0.90f), // base
+		UColor(0.0f, 0.0f, 0.0f), // baseFore
+		UColor(1.0f, 1.0f, 1.0f), // background
+		UColor(0.0f, 0.0f, 0.0f), // foreground
 		UColor(cscheme->get("text")), // text
-		UColor(cscheme->get("alternateBackground")) // base
+		UColor(cscheme->get("light")), // light
+		UColor(cscheme->get("dark")), // dark
+		UColor(cscheme->get("mid")), // midLight
+		UColor(cscheme->get("alternateBackground")), // highlight
+		UColor(cscheme->get("text")) // highlightedText
 	);
 	return new UPalette(active, inactive, inactive);
 }
 
 UPalette *
 UThemeLookAndFeel::createMenuPalette() {
-	UProperties * cscheme = m_properties->getChild("Color Scheme");
-	UColorGroup active(
-		UColor(cscheme->get("activeForeground")), // foreground
-		UColor(cscheme->get("activeTitleBtnBg")), // background
-		UColor(cscheme->get("activeTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
-		UColor(cscheme->get("buttonForeground")), // text
-		UColor(cscheme->get("alternateBackground")) // base
-	);
-	UColorGroup inactive(
-		UColor(cscheme->get("buttonForeground")), // foreground
-		UColor(cscheme->get("buttonBackground")), // background
-		UColor(cscheme->get("inactiveTitleBtnBg")), // button
-		UColor(cscheme->get("inactiveLight")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
-		UColor(cscheme->get("mid")), // text
-		UColor(cscheme->get("alternateBackground")) // base
-	);
-	return new UPalette(active, inactive, inactive);
+	return UBasicLookAndFeel::createMenuPalette();
 }
 
 UPalette *
 UThemeLookAndFeel::createWindowPalette() {
-	UProperties * cscheme = m_properties->getChild("Color Scheme");
-	UColorGroup active(
-		UColor(cscheme->get("windowForeground")), // foreground
-		UColor(cscheme->get("activeBackground")), // background
-		UColor(cscheme->get("activeTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
-		UColor(cscheme->get("text")), // text
-		UColor(cscheme->get("alternateBackground")) // base
-	);
-	UColorGroup inactive(
-		UColor(cscheme->get("windowForeground")), // foreground
-		UColor(cscheme->get("inactiveBackground")), // background
-		UColor(cscheme->get("inactiveTitleBtnBg")), // button
-		UColor(cscheme->get("light")), // light
-		UColor(cscheme->get("mid")), // mid
-		UColor(cscheme->get("dark")), // dark
-		UColor(cscheme->get("text")), // text
-		UColor(cscheme->get("alternateBackground")) // base
-	);
-	return new UPalette(active, inactive, inactive);
+	return UBasicLookAndFeel::createWindowPalette();
 }
-*/
+
 
 UFont *
 UThemeLookAndFeel::createControlFont() {
@@ -471,7 +487,7 @@ void
 UThemeLookAndFeel::preinitColors() {
 	UProperties * cscheme = new UProperties();
 	m_properties->putChild("Color Scheme", cscheme);
-
+/*
 	cscheme->put("activeForeground", "255,255,255");
 	cscheme->put("inactiveForeground", "221,221,221");
 	cscheme->put("activeBackground", "65,142,220");
@@ -480,11 +496,29 @@ UThemeLookAndFeel::preinitColors() {
 	cscheme->put("inactiveTitleBtnBg", "167,181,199");
 	cscheme->put("activeBlend", "107,145,184");
 	cscheme->put("inactiveBlend", "157,170,186");
-	cscheme->put("alternateBackground", "238,238,238");
+	cscheme->put("alternateBackground", "107,145,184");//238,238,238");
 	cscheme->put("foreground", "0,0,0");
 	cscheme->put("background", "239,239,239");
 	cscheme->put("buttonForeground", "0,0,0");
 	cscheme->put("buttonBackground", "221,223,228");
+	cscheme->put("selectForeground", "255,255,255");
+	cscheme->put("selectBackground", "103,141,178");
+	cscheme->put("windowForeground", "0,0,0");
+	cscheme->put("windowBackground", "255,255,255");
+*/
+	cscheme->put("activeForeground", "0,0,0");
+	cscheme->put("inactiveForeground", "0,0,0");
+	cscheme->put("activeBackground", "157,170,186");
+	cscheme->put("inactiveBackground", "157,170,186");
+	cscheme->put("activeTitleBtnBg", "127,158,200");
+	cscheme->put("inactiveTitleBtnBg", "167,181,199");
+	cscheme->put("activeBlend", "107,145,184");
+	cscheme->put("inactiveBlend", "157,170,186");
+	cscheme->put("alternateBackground", "107,145,184");//238,238,238");
+	cscheme->put("foreground", "0,0,0");
+	cscheme->put("background", "239,239,239");
+	cscheme->put("buttonForeground", "0,0,0");
+	cscheme->put("buttonBackground", "239,239,245");
 	cscheme->put("selectForeground", "255,255,255");
 	cscheme->put("selectBackground", "103,141,178");
 	cscheme->put("windowForeground", "0,0,0");

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -29,28 +29,40 @@
 #define ULAYOUTMANAGER_HPP
 
 #include "../uobject.hpp"
+#include "../util/udimension.hpp"
 
 namespace ufo {
 
 class UWidget;
-class UDimension;
 
-/**the abstract layout manager class
+/** @short The layout manager handles the size and position of child widgets
+  *  of a container.
   *@author Johannes Schmidt
   */
 
 class UFO_EXPORT ULayoutManager : public UObject {
 	UFO_DECLARE_ABSTRACT_CLASS(ULayoutManager)
 public:
+	/** @return The preferred size of the container using the given
+	  *  maximum dimension.
+	  */
 	virtual UDimension
-	getPreferredLayoutSize(const UWidget * parent) const = 0;
-
+	getPreferredLayoutSize(const UWidget * container,
+		const UDimension & maxSize) const = 0;
+	/** @convenience */
 	virtual UDimension
-	getMinimumLayoutSize(const UWidget * parent) const = 0;
+	getPreferredLayoutSize(const UWidget * container) const {
+		return getPreferredLayoutSize(container, UDimension::maxDimension);
+	}
 
-	virtual void layoutContainer(const UWidget * parent) = 0;
+	/** Relayouts all child widgets within the given container.
+	  */
+	virtual void layoutContainer(const UWidget * container) = 0;
 
-	virtual int getLayoutHeightForWidth(const UWidget * parent, int w) const = 0;
+public: // deprecated
+	/** @deprecated */
+	virtual UDimension
+	getMinimumLayoutSize(const UWidget * container) const { return UDimension(); }
 };
 
 } // namespace ufo

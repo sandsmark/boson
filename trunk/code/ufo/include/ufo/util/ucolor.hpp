@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -33,7 +33,13 @@
 
 namespace ufo {
 
-/** The color class
+/**
+  * This class is not part of the @ref UObject inheritance structure.
+  * Use instead @ref UColorObject if you need a color derived from UObject.
+  *
+  * @short An abstraction of a four float array (red, green, blue and alpha)
+  * describing a color.
+  *
   * @author Johannes Schmidt
   */
 
@@ -70,6 +76,15 @@ public:
 	/** Creates a black color. */
 	UColor();
 	UColor(const UColor & col);
+	/** Creates a color decoding the given string.
+	  * You can either use a hex string if prefixed with '#' or
+	  * a comma or blank space separated list of integer values.
+	  * <p>
+	  * Valid strings are (all white): "#ffffffff", "#0xffffffff",
+	  * "255,255,255,255", "255, 255, 255, 255", "255 255 255 255"
+	  * @param colorString A character string in one of the above
+	  *  representations
+	  */
 	explicit UColor(const std::string & colorString);
 	explicit UColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 	explicit UColor(const uint8_t rgba[], bool hasAlpha = false);
@@ -79,7 +94,7 @@ public:
 	explicit UColor(const float rgba[], bool hasAlpha = false);
 	explicit UColor(double r, double g, double b, double a = 1.0);
 	explicit UColor(const double rgba[], bool hasAlpha = false);
-	
+
 	/** The returned data is in system memory and should not be deleted.
 	  * @return the color values as float array
 	  */
@@ -93,7 +108,7 @@ public:
 	float getGreen() const;
 	float getBlue() const;
 	float getAlpha() const;
-	
+
 	/** returns a darker version of the color. The Alpha value is untouched.
 	  * Multiplies each rgb value with FACTOR.
 	  */
@@ -103,7 +118,9 @@ public:
 	  */
 	UColor brighter() const;
 
+	/** @return True if all color components are exactly 0. */
 	bool isBlack() const;
+	/** @return True if all color components are exactly 1.0f. */
 	bool isWhite() const;
 
 public: // operators
@@ -113,7 +130,8 @@ public: // operators
 	friend std::ostream & operator<<(std::ostream & os, const UColor & col);
 
 private:  // Private attributes
-	/** int and double data was removed.
+	/** A float array representing the color values red, green, blue and alpha
+	  * (in exactly this order).
 	  */
 	float m_farr[4];
 
@@ -123,7 +141,12 @@ private:  // Private attributes
 };
 
 
-class UColorObject : public UColor, public UObject {
+/** A color class derived from @ref UObject and @ref UColor.
+  * It implements the missing @ref UObject methods and borrows all
+  * important methods from @ref UColor .
+  * @author Johannes Schmidt
+  */
+class UFO_EXPORT UColorObject : public UColor, public UObject {
 	UFO_DECLARE_DYNAMIC_CLASS(UColorObject)
 public:
 	UColorObject();
@@ -208,7 +231,7 @@ inline bool operator!=(const UColor & col1, const UColor & col2) {
 
 inline std::ostream &
 operator<<(std::ostream & os, const UColor & col) {
-	return os << "UColor[" 
+	return os << "UColor["
 	<< col.m_farr[0] << ","
 	<< col.m_farr[1] << ","
 	<< col.m_farr[2] << ","

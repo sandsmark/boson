@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -189,8 +189,8 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 		ugl_driver->glColor4f(1, 1, 1, 1);
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glEnable(GL_BLEND);
-			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//ugl_driver->glEnable(GL_BLEND);
+			//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		ugl_driver->glBegin(GL_QUADS);
@@ -207,7 +207,7 @@ UGL_Image::paint(UGraphics * g, const URectangle & rect) const {
 		ugl_driver->glEnd();
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glDisable(GL_BLEND);
+			//ugl_driver->glDisable(GL_BLEND);
 		}
 
 		ugl_driver->glDisable(GL_TEXTURE_2D);
@@ -230,8 +230,8 @@ UGL_Image::paintSubImage(UGraphics * g, const URectangle & rect,
 		ugl_driver->glBindTexture(GL_TEXTURE_2D, m_index);
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glEnable(GL_BLEND);
-			ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			//ugl_driver->glEnable(GL_BLEND);
+			//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		//ugl_driver->glColor4f(1, 1, 1, 1);
@@ -254,7 +254,7 @@ UGL_Image::paintSubImage(UGraphics * g, const URectangle & rect,
 		ugl_driver->glEnd();
 
 		if (m_imageComponents == 2 || m_imageComponents == 4) {
-			ugl_driver->glDisable(GL_BLEND);
+			//ugl_driver->glDisable(GL_BLEND);
 		}
 
 		ugl_driver->glDisable(GL_TEXTURE_2D);
@@ -443,7 +443,7 @@ UGL_Image::createGLTexture(GLubyte * dataA, int componentsA,
 
 		m_isValid = true;
 	} else {*/
-		ugl_driver->glTexImage2D(GL_TEXTURE_2D, 0, internalFormatA, 
+		ugl_driver->glTexImage2D(GL_TEXTURE_2D, 0, internalFormatA,
 		//m_size.w, m_size.h,
 		w, h,
 		             0, m_imageFormat, GL_UNSIGNED_BYTE, imageData);

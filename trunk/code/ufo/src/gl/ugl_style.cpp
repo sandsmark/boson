@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -40,6 +40,7 @@
 #include "ufo/font/ufont.hpp"
 
 #include "ufo/util/ucolor.hpp"
+#include "ufo/util/uinteger.hpp"
 
 #include "ufo/widgets/ucompound.hpp"
 #include "ufo/widgets/ubutton.hpp"
@@ -131,7 +132,20 @@ UGL_Style::paintArrow(UGraphics * g, UWidget * w,
 {
 	int x = rect.x; int y = rect.y;
 	int width = rect.w; int height = rect.h;
-	ugl_driver->glBegin(GL_LINE_LOOP);
+
+	// prettify arrow (anti-aliasing)
+	//ugl_driver->glPushAttrib(GL_COLOR_BUFFER_BIT);
+	//ugl_driver->glEnable(GL_BLEND);
+	//ugl_driver->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (highlighted || activated) {
+		ugl_driver->glPushAttrib(GL_POLYGON_BIT);
+		ugl_driver->glEnable(GL_POLYGON_SMOOTH);
+		ugl_driver->glBegin(GL_TRIANGLES);
+	} else {
+		ugl_driver->glPushAttrib(GL_LINE_BIT);
+		ugl_driver->glEnable(GL_LINE_SMOOTH);
+		ugl_driver->glBegin(GL_LINE_LOOP);
+	}
 	switch (direction) {
 		case Up:
 			ugl_driver->glVertex2i(x, y);
@@ -157,6 +171,8 @@ UGL_Style::paintArrow(UGraphics * g, UWidget * w,
 			break;
 	}
 	ugl_driver->glEnd();
+	// unset smoothness
+	ugl_driver->glPopAttrib();
 }
 
 void
@@ -312,13 +328,17 @@ UGL_Style::paintControlBackground(UGraphics * g, UWidget * w,
 		const URectangle & rect,
 		bool highlighted, bool activated)
 {
+	UColor color;
 	if (highlighted) {
-		ugl_driver->glColor3fv(w->getColorGroup().highlight().getFloat());
+		color = w->getColorGroup().highlight();
 	} else if (activated) {
-		ugl_driver->glColor3fv(w->getColorGroup().highlight().getFloat());
+		// should get the right color group via getColorGroup
+		color = w->getColorGroup().background();
 	} else {
-		ugl_driver->glColor3fv(w->getColorGroup().background().getFloat());
+		color = w->getColorGroup().background();
 	}
+	color.getFloat()[3] = w->getOpacity();
+	ugl_driver->glColor4fv(color.getFloat());
 	ugl_driver->glRecti(rect.x, rect.y, rect.w, rect.h);
 }
 
@@ -384,6 +404,15 @@ void
 UGL_Style::paintBorder(UGraphics * g, UWidget * w,
 		const URectangle & rect, BorderType borderType)
 {
+	if (borderType != UIBorder && w->get("border_color")) {
+		UColorObject * col = dynamic_cast<UColorObject*>(w->get("border_color"));
+		if (col) {
+			ugl_driver->glColor4fv(col->getFloat());
+		}
+	} else {
+		ugl_driver->glColor4fv(w->getColorGroup().foreground().getFloat());
+	}
+
 	switch (borderType) {
 		case RaisedBevelBorder:
 			paintRaisedBevelBorder(g, w, rect);
@@ -622,42 +651,29 @@ void
 UGL_Style::paintLineBorder(UGraphics * g, UWidget * w,
 		const URectangle & rect)
 {
-	// FIXME
-	// get line width from widget properties?
+	// FIXME: line width not taken into account in getBorderInsets
+	bool lineChanged = 0;
+	int lineWith = 1;
 
-	// store old values
-	//GLfloat oldLineWidth;
-	//glGetFloatv(GL_LINE_WIDTH, &oldLineWidth);
-
-	//glLineWidth(m_width);
-
-	// if m_width is even, make translation tp prevent graphic bug
-	//if ( !(m_width % 2) ) {
-	//	x++;
-	//	y++;
-	//	height--;
-	//	width--;
-	//}
-
-	//if (m_color) {
-	//	ugl_driver->glColor3fv(m_color->getFloat());
-	//} else {
-		ugl_driver->glColor3fv(w->getColorGroup().foreground().getFloat());
-	//}
-
-	ugl_driver->glBegin(GL_LINE_STRIP);
-	{
-		ugl_driver->glVertex2i(rect.x, rect.y);
-		ugl_driver->glVertex2i(rect.x, rect.y + rect.h - 1);
-		ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y + rect.h - 1);
-		ugl_driver->glVertex2i(rect.x + rect.w - 1, rect.y);
-		ugl_driver->glVertex2i(rect.x, rect.y);
+	if (UObject * l = w->get("border_line_width")) {
+		UInteger * lineWidth = dynamic_cast<UInteger*>(l);
+		if (lineWidth) {
+			ugl_driver->glPushAttrib(GL_LINE_BIT);
+			ugl_driver->glLineWidth(lineWidth->toInt());
+			lineChanged = true;
+		}
 	}
+
+	ugl_driver->glBegin(GL_LINE_LOOP);
+	ugl_driver->glVertex2i(rect.x, rect.y);
+	ugl_driver->glVertex2i(rect.x, rect.y + rect.h - lineWith);
+	ugl_driver->glVertex2i(rect.x + rect.w - lineWith, rect.y + rect.h - lineWith);
+	ugl_driver->glVertex2i(rect.x + rect.w - lineWith, rect.y);
 	ugl_driver->glEnd();
 
-	//ugl_driver->glLineWidth(oldLineWidth);
-
-	//ugl_driver->glColor3f(1, 1, 1);
+	if (lineChanged) {
+		ugl_driver->glPopAttrib();
+	}
 }
 
 void
@@ -764,9 +780,6 @@ void
 UGL_Style::paintTitledBorder(UGraphics * g, UWidget * w,
 		const URectangle & rect)
 {
-	//ugl_driver->glColor3fv(w->getColorGroup().background().getFloat());
-	ugl_driver->glColor3fv(w->getForegroundColor().getFloat());
-
 	std::string title;
 	if (UString * str = dynamic_cast<UString*>(w->get("border_title"))) {
 		title = *str;
@@ -870,7 +883,7 @@ UGL_Style::paintControlBorder(UGraphics * g, UWidget * w,
 		paintBevel(g, w, rect, Lowered);
 	} else if (isRollover) {
 		paintBevel(g, w, rect, Raised);
-	} else {
+	} else if (w->isOpaque()) {
 		UColor brighter = w->getBackgroundColor().brighter();
 		UColor darker = w->getBackgroundColor().darker();
 
@@ -900,8 +913,48 @@ UGL_Style::paintMenuBorder(UGraphics * g, UWidget * w,
 	if (!(m = dynamic_cast<UMenu*>(w))) {
 		return ;
 	}
-	if (m->isRollover() || m->isPopupMenuVisible()) {
-		paintBevel(g, w, rect, Lowered);
+	//if (m->isRollover()) || m->isPopupMenuVisible()) {
+	//	paintBevel(g, w, rect, Lowered);
+	//}
+	if (m->isPopupMenuVisible()) {
+		UColor brighter = w->getBackgroundColor().brighter();
+		UColor darker = w->getBackgroundColor().darker();
+
+		ugl_driver->glBegin(GL_LINES);
+
+		ugl_driver->glColor3fv(darker.getFloat());
+		ugl_driver->glVertex2f(rect.x, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x, rect.y);
+		ugl_driver->glVertex2f(rect.x, rect.y);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y);
+
+		ugl_driver->glColor3fv(brighter.getFloat());
+		ugl_driver->glVertex2f(rect.x, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y);
+
+		ugl_driver->glEnd();
+	} else if (m->isRollover()) {
+		//paintBevel(g, w, rect, Lowered);
+		UColor brighter = w->getBackgroundColor().brighter();
+		UColor darker = w->getBackgroundColor().darker();
+
+		ugl_driver->glBegin(GL_LINES);
+
+		ugl_driver->glColor3fv(brighter.getFloat());
+		ugl_driver->glVertex2f(rect.x, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x, rect.y);
+		ugl_driver->glVertex2f(rect.x, rect.y);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y);
+
+		ugl_driver->glColor3fv(darker.getFloat());
+		ugl_driver->glVertex2f(rect.x, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y + rect.h - 1);
+		ugl_driver->glVertex2f(rect.x + rect.w - 1, rect.y);
+
+		ugl_driver->glEnd();
 	}
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -110,18 +110,11 @@ class UFO_EXPORT URootLayout : public ULayoutManager {
 	public:
 		URootLayout(URootPane * rootPane);
 
-	public:  // Public methods
+	public: // Implements ULayoutManager
 		virtual UDimension
-		getMinimumLayoutSize(const UWidget * parent) const;
-
-		virtual UDimension
-		getPreferredLayoutSize(const UWidget * parent) const;
+		getPreferredLayoutSize(const UWidget * parent, const UDimension & maxSize) const;
 
 		virtual void layoutContainer(const UWidget * parent);
-		virtual int getLayoutHeightForWidth(const UWidget*, int) const
-		{
-			return 0;
-		}
 	private:  //Private attributes
 		URootPane * m_rootPane;
 	};

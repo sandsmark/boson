@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -94,7 +94,7 @@ following sym links might compromise the system security
 
 			strcpy(buf + dlen, ent->d_name);
 			if (__PHYSFS_platformIsSymLink(buf)) { continue; }
-		} // if 
+		} // if
 */
 		ret.push_back(ent->d_name);
     } // while
@@ -103,7 +103,7 @@ following sym links might compromise the system security
 	HANDLE dir;
 	WIN32_FIND_DATA ent;
 	std::string searchPath(dirName);
-	
+
 	// if there's no '\\' at the end of the path, stick one in there.
 	if (searchPath[searchPath.length() - 1] != '\\') {
 		searchPath.append(1, '\\');
@@ -190,7 +190,7 @@ UFileArchive::getSearchPath() const {
 		ret.append(*iter);
 		++iter;
 	}
-	
+
 	for (; iter != m_archives.end(); ++iter) {
 		ret.append(1, ':').append(*iter);
 	}
@@ -236,9 +236,9 @@ UFileArchive::createFileStream(const std::string & fileNameA,
 		std::string newFileName(*iter);
 		newFileName += '/';
 		newFileName.append(fileNameA);
-		
+
 		file = new std::ifstream(newFileName.c_str(), modeA);
-		
+
 		if (file) {
 			if (*file) { // valid file stream
 				return file;
@@ -272,6 +272,6 @@ UFileArchive::createInstance() {
 	archive->addArchive("./");
 	//archive->addSearchPath(UFO_DATADIR);
 	archive->addSearchPath(UToolkit::getToolkit()->getProperty("data_dir"));
-	
+
 	return archive;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -73,6 +73,7 @@ public:
 	void setDisabled(const UColorGroup & disabled);
 
 public: // Public operators
+	void operator=(const UPalette & pal);
 	bool operator==(const UPalette & pal) const;
 	bool operator!=(const UPalette & pal) const;
 

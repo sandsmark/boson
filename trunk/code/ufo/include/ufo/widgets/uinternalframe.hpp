@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -37,6 +37,7 @@ namespace ufo {
 
 class URootPane;
 class ULayeredPane;
+class UDesktopPane;
 
 /** an internal frame, contains a root pane and optional a menubar
   * @author Johannes Schmidt
@@ -66,18 +67,18 @@ public:
 public: // overrides UWidget
 	/** Brings internal frame to front */
 	virtual void setVisible(bool b);
-	/** Returns true if this frame it the top most frame. */
+	/** Returns true if this frame is the top most frame. */
 	virtual bool isActive() const;
 
 public: // Public methods
 
-	/** returns the root pane object for this frame
+	/** @return The root pane object for this frame
 	  */
 	virtual URootPane * getRootPane() const;
-	/** returns the root pane object for this frame
+	/** @return The content pane object for this frame
 	  */
 	virtual UWidget * getContentPane() const;
-	/** returns the root pane object for this frame
+	/** @return the layered pane object for this frame
 	  */
 	virtual ULayeredPane * getLayeredPane() const;
 
@@ -101,8 +102,12 @@ public: // Public methods
 	  * Not yet implemented.
 	  */
 	void maximize();
+	bool isMaximized() const;
 
-	/** Not yet implemented. */
+	void minimized();
+	bool isMinimized() const;
+
+	/** */
 	void restore();
 
 	/** Sets whether this frame is resizable.
@@ -133,6 +138,9 @@ public: // Public methods
 	virtual void setClosable(bool b);
 	bool isClosable() const;
 
+protected: // Protected methods
+	UDesktopPane * getDesktopPane();
+
 protected:  // Protected attributes
 	/** the root pane object
 	  * @see URootPane
@@ -140,7 +148,7 @@ protected:  // Protected attributes
 	URootPane * m_rootPane;
 	std::string m_title;
 
-	int m_frameStyle;
+	uint32_t m_frameStyle;
 };
 
 } // namespace ufo

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -32,23 +32,30 @@
 
 namespace ufo {
 
-/**a layout which makes a line of all children widgets each with its preferred size.
-  *@author Johannes Schmidt
+/** @short Layouts all child widgets in one continous flow from left to right,
+  *  if necessary in several rows.
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UFlowLayout : public ULayoutManager {
 	UFO_DECLARE_DYNAMIC_CLASS(UFlowLayout)
 public:
+	/** Creates a new flow layout with horizontal and vertical gap of 4 and
+	  * using the alignment of the container. */
 	UFlowLayout();
+	/** Creates a new flow layout with the given horizontal and vertical gap
+	  * and using the alignment of the container. */
 	UFlowLayout(int hgap, int vgap);
 	UFlowLayout(int hgap, int vgap, Alignment hAlign, Alignment vAlign);
 	virtual ~UFlowLayout();
 
-	UDimension getPreferredLayoutSize(const UWidget * parent) const;
-	UDimension getMinimumLayoutSize(const UWidget * parent) const;
+public: // Implements ULayoutManager
+	UDimension getPreferredLayoutSize(const UWidget * parent,
+		const UDimension & maxSize) const;
 
 	void layoutContainer(const UWidget * parent);
 
+public: // Public methods
 	/** Sets the horizontal alignment of widgets within one row
 	  */
 	virtual void setHorizontalAlignment(Alignment newHAlign);
@@ -61,35 +68,21 @@ public:
 	/** Returns the vertical alignment of widgets within one row
 	  */
 	virtual Alignment getVerticalAlignment();
-	virtual int getLayoutHeightForWidth(const UWidget * parent, int w) const
-	{
-		return 0;
-	}
 
 private:  // Private methods
-	/**
-	  * If there is space at the end of a row or space above or below
-	  * a widget, move the widgets from rowStart to rowEnd in the
-	  * parent widget.
-	  * @param parent
-	  *	the container which contains the widget to be moved
-	  * @param x
-	  *	the horizontal position of the row
-	  * @param y
-	  *	the vertical position of the row
-	  * @param width
-	  *	the width of the space at the end of the row
-	  * @param height
-	  *	the height of the row
-	  * @param rowStart
-	  *	the starting index of the widgets of the row
-	  * @param rowEnd
-	  *	the ending index of the widgets of the row
+	/** Realigns the widgets from rowStart to rowEnd within the container
+	  * if the container alignment does not match top left.
+	  * Is called whenever a "row" has been filled.
+	  * @param container The container which contains the widget to be moved
+	  * @param x The horizontal position of the row
+	  * @param y The vertical position of the row
+	  * @param width The width of the row of child widgets
+	  * @param height The height of the row
+	  * @param rowStart The starting index of the widgets of the row
+	  * @param rowEnd The ending index of the widgets of the row
 	  */
 	void moveWidgets(const UWidget * parent,
 		int x, int y, int width, int height, int rowStart, int rowEnd) const;
-
-	UDimension layoutContainerInternal(const UWidget * parent, bool doLayout, int maxWidth) const;
 
 protected:  // Protected attributes
 	/** the horizontal gap between widgets */

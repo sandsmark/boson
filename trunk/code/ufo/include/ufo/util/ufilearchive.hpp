@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -68,7 +68,7 @@ public: // c'tors
 public: // Public methods
 	/** adds some generic search directories */
 	//static void init();
-	
+
 	/** adds a further directory to the search path. */
 	void addArchive(const std::string & arc);
 	/** removes the given directory from the search path */
@@ -87,7 +87,7 @@ public: // Public methods
 	  * @see UString
 	  */
 	std::vector<std::string> getSearchPathAsVector() const;
-	
+
 	/** Checks if a file exists in the archive
 	  * @param fileNameA file to check
 	  * @return true if the file exists

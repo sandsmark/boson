@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -32,12 +32,20 @@
 
 namespace ufo {
 
-/**the layout manager for popup menus
-  *@author Johannes Schmidt
+/**
+  * @short This layout manager lays out all children in one direction: XAxis or YAxis
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UBoxLayout : public ULayoutManager {
 	UFO_DECLARE_DYNAMIC_CLASS(UBoxLayout)
+public:  // Public attributes
+	enum {
+		XAxis,
+		YAxis
+	};
+
 public:
 	UBoxLayout();
 	UBoxLayout(int axis);
@@ -45,20 +53,11 @@ public:
 	UBoxLayout(int axis, int hgap, int vgap);
 	virtual ~UBoxLayout();
 
+public: // Implements ULayoutManager
 	virtual void layoutContainer(const UWidget * parent);
+	virtual UDimension getPreferredLayoutSize(const UWidget * parent,
+		const UDimension & maxSize) const;
 
-	virtual UDimension getPreferredLayoutSize(const UWidget * parent) const;
-
-	virtual UDimension getMinimumLayoutSize(const UWidget * parent) const;
-	virtual int getLayoutHeightForWidth(const UWidget * parent, int w) const
-	{
-		return 0;
-	}
-public:  // Public attributes
-	enum {
-		XAxis,
-		YAxis
-	};
 protected:  // Protected attributes
 	/**  */
 	int m_axis;

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -179,7 +179,9 @@ private:
 #define UFO_DECLARE_ABSTRACT_CLASS(name)
 
 #define UFO_IMPLEMENT_DYNAMIC_CLASS(name, basename)
-#define UFO_IMPLEMENT_ABSRACT_CLASS(name, basename)
+#define UFO_IMPLEMENT_DEFAULT_DYNAMIC_CLASS(name, basename)
+#define UFO_IMPLEMENT_CTOR_DYNAMIC_CLASS(name, basename)
+#define UFO_IMPLEMENT_ABSTRACT_CLASS(name, basename)
 
 #endif // !UFO_RTTI
 
@@ -306,7 +308,7 @@ private:
 
 inline unsigned int
 UObject::hashCode() const {
-	return (unsigned int) this;
+	return (unsigned int)(this);
 }
 
 inline bool

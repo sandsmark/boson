@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -65,6 +65,7 @@ public:
 			, m_mousePress()
 	{
 		sigMousePressed().connect(slot(*this, &TrackWidget::mousePressed));
+		sigMouseReleased().connect(slot(*this, &TrackWidget::mouseReleased));
 		sigMouseDragged().connect(slot(*this, &TrackWidget::mouseDragged));
 		setEventState(UEvent::MouseMoved, true);
 
@@ -75,6 +76,7 @@ public:
 	}
 	~TrackWidget() {
 		sigMousePressed().disconnect(slot(*this, &TrackWidget::mousePressed));
+		sigMouseReleased().disconnect(slot(*this, &TrackWidget::mouseReleased));
 		sigMouseDragged().disconnect(slot(*this, &TrackWidget::mouseDragged));
 
 		m_scrollBar->sigValueChanged().disconnect(slot(*this, &TrackWidget::valueChanged));
@@ -95,6 +97,9 @@ public:
 	void setBounds(int x, int y, int w, int h) {
 		UWidget::setBounds(x, y, w, h);
 		valueChanged(m_scrollBar, m_scrollBar->getValue());
+	}
+	bool isActive() const {
+		return (UWidget::isActive() || m_isDragging);
 	}
 	void valueChanged(UScrollBar * scroll, int value) {
 		int max = m_scrollBar->getMaximum();
@@ -127,7 +132,6 @@ public:
 			m_isDragging = true;
 			m_mousePress = m_rect.getLocation() - pos;
 		} else {
-			m_isDragging = false;
 			// block scrolling
 			int value = m_scrollBar->getValue();
 			int delta = 0;
@@ -173,6 +177,9 @@ public:
 			idelta = int(delta - 0.5f);
 		}
 		m_scrollBar->setValue(m_scrollBar->getValue() + idelta);
+	}
+	void mouseReleased(UMouseEvent * e) {
+		m_isDragging = false;
 	}
 	/*
 	// using the track button to scroll

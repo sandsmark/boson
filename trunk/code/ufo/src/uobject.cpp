@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -41,7 +41,6 @@ using namespace ufo;
 
 
 UClassInfo * UClassInfo::sm_first = NULL;
-//static UHashMap<std::string, UClassInfo*> * sm_classTable = NULL;
 std::map<std::string, UClassInfo*> UClassInfo::sm_classTable;
 
 void
@@ -87,24 +86,7 @@ UClassInfo::findClass(const std::string & className) {
 		return NULL;
 	}
 }
-/*
-UObject *
-UCreateDynamicObject(const std::string & name) {
-	if (sm_classTable[name]) {
-		return (sm_classTable[name])->createObject();
-	} else {
-		for (const UClassInfo * info = UClassInfo::getFirst();
-				info;
-				info = info->getNext() ) {
-			if (info->getClassName() == name) {
-				sm_classTable[name] = const_cast<UClassInfo*>(info);
-				return info->createObject();
-			}
-		}
-		return NULL;
-	}
-}
-*/
+
 #endif // UFO_RTTI
 
 //
@@ -116,26 +98,21 @@ UCreateDynamicObject(const std::string & name) {
 // UObject is the root class for the class info structures
 UFO_IMPLEMENT_DYNAMIC_CLASS(UObject, "")
 
-
 static int nAllocated = 0;
 static int nFreed = 0;
 
 UObject::UObject() {
 	nAllocated++;
 }
-UObject::UObject(const UObject & obj) : UCollectable() { //: m_name(obj.m_name) {
+UObject::UObject(const UObject & obj) : UCollectable() {
 	nAllocated++;
 }
 UObject::~UObject() {
-	//m_sigDelete();
 	releaseAllPointers();
 	nFreed++;
-
-
-	if (isDynamic()) {
-	}
 }
 
+// not to be used
 unsigned int
 UObject::objCount() {
 	return nAllocated - nFreed;

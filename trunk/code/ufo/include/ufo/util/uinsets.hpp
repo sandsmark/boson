@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -33,12 +33,28 @@
 namespace ufo {
 
 /**
-  *@author Johannes Schmidt
+  * Instances of this class are mainly used to describe insets of
+  * widget borders and widget margins.
+  *
+  * This class is not part of the @ref UObject inheritance structure.
+  * Use instead @ref UInsetsObject if you need a color derived from UObject.
+  *
+  * @short This class desribes insets to a rectangle which is used to
+  *  distinguish between the whole rectangle and the actual client size.
+  *
+  * @author Johannes Schmidt
   */
 
 class UFO_EXPORT UInsets {
 public:
+	/** Creates an empty insets object. */
 	UInsets();
+	/** Creates an insets object with the given values.
+	  * @param top The inset at top
+	  * @param top The inset at left
+	  * @param top The inset at bottom
+	  * @param top The inset at right
+	  */
 	UInsets(int top, int left, int bottom, int right);
 
 	int getTop() const;
@@ -51,20 +67,29 @@ public:
 	/** @return The total insets in vertical direction, i.e. top + bottom. */
 	int getVertical() const;
 
+	/** Increases the insets by the given insets, that means add @p add.top
+	  * to this.top etc.
+	  */
 	void grow(const UInsets & add);
 
+	/** @return True if all insets are exactly 0. */
 	bool isEmpty() const;
 
 public: // Public operators
+	/** @return True if one of the insets is non-zero. */
 	bool operator()() { return !(isEmpty()); }
+	/** @return True if all insets are exactly 0. */
 	bool operator!() { return isEmpty(); }
 
-	/** Adds point p to this point
-	  * @return Reference to this point.
+	/** Increases the insets by the given insets, that means add @p add.top
+	  * to this.top etc.
+	  * @return Reference to this insets object.
 	  */
 	UInsets & operator+=(const UInsets & in);
-	/** Subtracts point p from this point
-	  * @return Reference to this point.
+
+	/** Decreases the insets by the given insets, that means substract
+	  * @p add.top to this.top etc.
+	  * @return Reference to this insets object.
 	  */
 	UInsets & operator-=(const UInsets & in);
 

@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -38,9 +38,16 @@ namespace ufo {
 
 class UContext;
 
-/** This class represents the connection to the underlying system. It contains
-  * an event queue and registers all created contexts.
+/** The display object is responsible for creating the video driver
+  * (depending on the arguments given to the constructor) and to handle
+  * the system events send to the created video devices.
   * Usually there exists only one implementation of a Display.
+  *
+  * @short The display represents the connection to the underlying system and
+  *  contains the UFO event queue.
+  *
+  * @see UVideoDriver
+  * @see UVideoDevice
   * @author Johannes Schmidt
   */
 class UFO_EXPORT UDisplay : public UObject {

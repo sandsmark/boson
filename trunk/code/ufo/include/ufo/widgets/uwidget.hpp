@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -29,6 +29,8 @@
 #define UWIDGET_HPP
 
 #include "../uobject.hpp"
+
+#include <map>
 
 // headers in util
 #include "../util/ugeom.hpp"
@@ -141,7 +143,7 @@ public:
 	/** No descriptions */
 	virtual bool isVisible() const;
 	/** mark the widget as visible -- this is the default state.
-	  * If a wiget is not visible, the widget itself and all of its children
+	  * If a wiget is not visible, the widget itsself and all of its children
 	  * will not be painted.
 	  */
 	virtual void setVisible(bool v);
@@ -152,7 +154,7 @@ public:
 	  * Default value is no clipping!
 	  */
 	void setClipping(bool b);
-	/** @return true when clipping is enabled. */
+	/** Returns true when clipping is enabled. */
 	bool hasClipping() const;
 
 	/** Checks whether this widget is enabled or not */
@@ -163,19 +165,23 @@ public:
 	  * Default value is true!
 	  */
 	void setEnabled(bool b);
-	/** @return Whether the widget is opaque or not */
+	/** @return True if this widget if fully opaque (opacity == 1)
+	  * @see getOpacity()
+	  */
 	bool isOpaque() const;
-	/** The "opaque" value is a hint for the UI whether the widget's
-	  * background should be drawn.
-	  * This effect might show unwanted result when used with more complex
-	  * widgets or when using a different look and feel.
-	  * The default value for UWidget::isOpaque is true.
-	  * The default action of the UI is to draw a background using the
-	  * current background color respectively to draw the background drawable
-	  * if available.
-	  * @see setBackground
+	/** Sets the background opacity to 1 (fully opaque) if @p o is true
+	  * otherwise sets the opacity to 0 which means fully transparent.
+	  * The default value is 1.
+	  * @see setOpacity
 	  */
 	virtual void setOpaque(bool o);
+	/** Sets the opacity of the widget background.
+	  * 1.0 means fully opaque which is the default.
+	  * This effect might show unwanted result when used with more complex
+	  * widgets or when using a different look and feel.
+	  */
+	virtual void setOpacity(float f);
+	virtual float getOpacity() const;
 
 	/** Returns whether this widget is active.
 	  * Mostly this means that the current widget has mouse focus.
@@ -239,22 +245,16 @@ public:
 	/** @return The height of this widget */
 	int getHeight() const;
 	/** Sets the location within its parent widget. Calls setBounds. */
-	virtual void setLocation(int x, int y);
+	void setLocation(int x, int y);
 	/** @overload */
-	virtual void setLocation(const UPoint & p);
+	void setLocation(const UPoint & p);
 	/** @return The location within its parent widget */
 	virtual UPoint getLocation() const;
 
-	/**
-	 * @return The height this widget would require if it had @p w width. 0
-	 * If the height of this widget does not depend on the width.
-	 **/
-	virtual int getHeightForWidth(int w) const;
-
 	/** Sets the size of this widget. Calls setBounds.  */
-	virtual void setSize(int w, int h);
+	void setSize(int w, int h);
 	/** @overload */
-	virtual void setSize(const UDimension & d);
+	void setSize(const UDimension & d);
 	/** @return The size of this widget */
 	virtual UDimension getSize() const;
 	/** @return The size minus insets of this widget */
@@ -265,9 +265,9 @@ public:
 	  */
 	virtual void setBounds(int x, int y, int w, int h);
 	/** @overload */
-	virtual void setBounds(const URectangle & b);
+	void setBounds(const URectangle & b);
 	/** @return The bounding rectangle in coordinates of the parent widget. */
-	virtual const URectangle & getBounds() const;
+	virtual URectangle getBounds() const;
 	/** This is a convenience method to get the bounding rectangle in
 	  * coordinates of this widget minus the insets. That means for example
 	  * the rectangle within a custom widget which is not covered by the
@@ -279,6 +279,10 @@ public:
 	  * It takes the root location and the size of this widget.
 	  */
 	URectangle getRootBounds() const;
+	/** Returns the bounding rectangle which should be used for clipping.
+	  * Takes into account if a parent widget does also clipping.
+	  */
+	URectangle getClipBounds() const;
 
 
 
@@ -604,8 +608,9 @@ public:
 	  */
 	int getIndexOf(const UWidget * w) const;
 	/** This methods moves the widget within the children vector.
-	  * The widget @ref w has to a child of this widget
-	  * If index is -1, the widget is moved to back.
+	  * The widget @ref w has to be a child of this widget
+	  * If index is -1 or greater than the child vector size,
+	  * the widget is moved to back.
 	  * @param w The child widget to move
 	  * @param index The new desired index.
 	  */
@@ -646,32 +651,48 @@ public:
 	/// layout functions and size hints
 	///
 
-	/** No descriptions */
+	/** @return The layout manager used by this widget. */
 	ULayoutManager * getLayout() const;
-	/** No descriptions */
+	/** Sets the layout manager for this widget. */
 	void setLayout(ULayoutManager * layout);
 
-	// deprecated
 	/** Sets a hint about the minimum size for the layout manager. */
 	virtual void setMinimumSize(const UDimension & minimumSize);
 	/** @return The minimum size */
 	virtual UDimension getMinimumSize() const;
 
-	/** Sets the preferred size of the widget.
-	  * @param preferredSize
-	  * 	if it is empty, this widget tries to get a valid preferred size from
-	  * 	the ui delegate or the layout manager.
+	/** Sets an explicit preferred size hint for the layout manager of
+	  * the parent widget and overrides the default calculated one.
+	  * If an empty size was given, use the default method to calculate
+	  * the preferred size
+	  * @param preferredSize The size hint used by the parent's layout manager
 	  * @see getPreferredSize
 	  */
 	virtual void setPreferredSize(const UDimension & preferredSize);
-	/**
-	  * @return
-	  * 	If minimum size has been set to empty, return the preferred size
-	  * 	of the ui delegate. If this is also empty, return the preferred size of
-	  * 	the layout manager.
+	/** This method returns a size hint used by the layout manager to compute
+	  * desired extensions of widget and to layout child widgets.
+	  * If an explicit preferred size was set, return that one.
+	  * Otherwise the preferred size is calculated via the UI object,
+	  * the layout manager or other size resources.
+	  * @return The size hint used by the parent's layout manager
 	  * @see setPreferredSize
+	  * @see setUI
 	  */
 	virtual UDimension getPreferredSize() const;
+	/** In difference to @p getPreferredSize, this method does its
+	  * calculations using the given maximal size.
+	  * For example, some widgets may expand their height if the desired
+	  * width would be bigger than the maximal width.
+	  * It is guaranteed that the returned size is smaller than the given
+	  * maximal size.
+	  * If you pass @p UDimension::maxDimension, you should get the same
+	  * return value as with @p getPreferredSize.
+	  * @param maxSize The maximal size for the calculated preferred size
+	  * @return The size hint used by the parent's layout manager
+	  * @see setPreferredSize
+	  * @see setUI
+	  */
+	virtual UDimension getPreferredSize(const UDimension & maxSize) const;
 
 	// deprecated
 	/** Sets the preferred size of the widget. */
@@ -680,9 +701,8 @@ public:
 	virtual UDimension getMaximumSize() const;
 
 	/** puts a property in the local UProperty object
-	  * @param key
-	  *	the key that should be used to save the value
-	  * @param value
+	  * @param key the string key that should be used to save the value
+	  * @param value The object value
 	  *
 	  * @see get
 	  */
@@ -690,17 +710,23 @@ public:
 	/** const int wrapper for put(const std::string &, UObject *);
 	  * @see put
 	  */
-	void put(const std::string & key, const int value);
+	//void put(const std::string & key, int value);
 	/** const std::string wrapper for put(const std::string &, UObject *);
 	  * @see put
 	  */
 	void put(const std::string & key, const std::string & value);
 	/** @return the value object that was set by
 	  *	<code>put(const std::string & key, UObject * value);</code> or NULL
-	  * @param key The key that belongs to the wanted value
+	  * @param key The key that belongs to the desired value
 	  * @see put
 	  */
 	UObject * get(const std::string & key) const;
+	/** This method is for convenience
+	  * @return The string value object that was set by @p put or ""
+	  * @param key The key that belongs to the desired value
+	  * @see put
+	  */
+	std::string getString(const std::string & key) const;
 
 	/** */
 	void setHorizontalAlignment(Alignment alignX);
@@ -926,11 +952,12 @@ private:  // Private attributes
 
 	/** the bounds of this widget relative to its parent */
 	URectangle m_bounds;
+	mutable URectangle m_clipBounds;
 	/** A cache for the root location relative to the top most root pane. */
 	mutable UPoint m_cachedRootLocation;
 	/** Cache for the minimum size */
 	UDimension m_minimumSize;
-	mutable UDimension m_cachedMinimumSize;
+	UDimension m_maximumSize;
 	/** Cache for the preferred size */
 	UDimension m_preferredSize;
 	mutable UDimension m_cachedPreferredSize;
@@ -955,6 +982,8 @@ private:  // Private attributes
 	BorderType m_border;
 
 	UPalette m_palette;
+
+	float m_opacity;
 
 	/** the background color */
 	//const UColor * m_bgColor;
@@ -1226,7 +1255,7 @@ UWidget::setLocation(const UPoint & p) {
 }
 inline UPoint
 UWidget::getLocation() const {
-	return UPoint(m_bounds.x, m_bounds.y );
+	return UPoint(m_bounds.x, m_bounds.y);
 }
 
 inline void
@@ -1241,8 +1270,33 @@ inline UDimension
 UWidget::getSize() const {
 	return UDimension(m_bounds.w, m_bounds.h);
 }
+inline UDimension
+UWidget::getInnerSize() const {
+	UDimension ret(getSize());
+	const UInsets & in = getInsets();
+	ret.w -= in.getHorizontal();
+	ret.h -= in.getVertical();
+	return ret;
+}
 
-
+inline void
+UWidget::setBounds(const URectangle & b) {
+	setBounds(b.x, b.y, b.w, b.h);
+}
+inline URectangle
+UWidget::getInnerBounds() const {
+	URectangle ret(getBounds());
+	const UInsets & in = getInsets();
+	ret.x = in.left;
+	ret.y = in.top;
+	ret.w -= in.getHorizontal();
+	ret.h -= in.getVertical();
+	return ret;
+}
+inline URectangle
+UWidget::getRootBounds() const {
+	return URectangle(getRootLocation(), getSize());
+}
 
 
 inline bool

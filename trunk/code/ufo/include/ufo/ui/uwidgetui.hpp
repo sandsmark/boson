@@ -1,6 +1,6 @@
 /***************************************************************************
     LibUFO - UI For OpenGL
-    copyright         : (C) 2001-2004 by Johannes Schmidt
+    copyright         : (C) 2001-2005 by Johannes Schmidt
     email             : schmidtjf at users.sourceforge.net
                              -------------------
 
@@ -66,12 +66,11 @@ public:
 
 	/** returns the size which the widget prefers to have */
 	virtual UDimension getPreferredSize(const UWidget * w);
+	virtual UDimension getPreferredSize(const UWidget * w, const UDimension & maxSize);
 	/** returns the size which the widget must have in minimum */
 	virtual UDimension getMinimumSize(const UWidget * w);
 	/** returns the size which the widget prefers to have */
 	virtual UDimension getMaximumSize(const UWidget * w);
-
-	virtual int getHeightForWidth(const UWidget * w, int width);
 
 private:  // Private attributes
 	/** the shared widget ui object */

@@ -43,6 +43,8 @@
 
 using namespace ufo;
 
+#define FOO_1 0
+
 
 
 /**
@@ -279,13 +281,38 @@ UBoLabelUI::getLafId() {
 
 UDimension
 UBoLabelUI::getPreferredSize(const UWidget * w) {
+#if 0
+	return getPreferredSize(w, UDimension::invalid);
+#else
+//	printf("UBOLabelUI::getPreferredSize(UWidget*)\n");
 	const ULabel * label = dynamic_cast<const ULabel *>(w);
 	//return UUIUtilities::getCompoundPreferredSize(label);
 	return getStyleCompoundPreferredSize(
 		label,
 		label->getFont(),
 		label->getText(),
-		label->getIcon()
+		label->getIcon(),
+		UDimension::invalid
+	);
+#endif
+}
+
+UDimension
+UBoLabelUI::getPreferredSize(const UWidget * w, const UDimension & maxSize) {
+	const ULabel * label = dynamic_cast<const ULabel *>(w);
+#if FOO_1
+	if (maxSize.isInvalid()) {
+		printf("invalid maxsize\n");
+	}
+#endif
+//	printf("UBOLabelUI::getPreferredSize(UWidget*, UDimension), maxsize=(%d,%d)\n", maxSize.w, maxSize.h);
+	//return UUIUtilities::getCompoundPreferredSize(label);
+	return getStyleCompoundPreferredSize(
+		label,
+		label->getFont(),
+		label->getText(),
+		label->getIcon(),
+		maxSize
 	);
 }
 
@@ -295,7 +322,6 @@ UBoLabelUI::stylePaintCompoundTextAndIcon(UGraphics * g, UCompound * w,
 		UIcon * icon) {
 	// AB: this method is a copy of UGL_Style::paintCompoundTextAndIcon()
 	// it is forked so that line wrapping can be implemented
-
 
 	URectangle viewRect, textRect, iconRect;
 	UInsets insets = w->getInsets();
@@ -572,13 +598,21 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 		const UCompound * w,
 		const UFont * f,
 		const std::string & text,
-		const UIcon * icon)
+		const UIcon * icon,
+		const UDimension& maxSize)
 {
 	// assume that icon is on the left and text on the right side
 	const UFontMetrics * metrics = f->getFontMetrics();
 
 	UDimension textDimension;
-	makeCompoundText(text, metrics, -1, &textDimension);
+	if (maxSize.isInvalid()) {
+		makeCompoundText(text, metrics, -1, &textDimension);
+	} else {
+#if FOO_1
+		printf("maxSize.w=%d\n", maxSize.w);
+#endif
+		makeCompoundText(text, metrics, maxSize.w, &textDimension);
+	}
 
 	// warning these are dangerous. e.g. when width is reduced, then we need
 	// a greater height!
@@ -627,6 +661,8 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 // -> this is copied largely from getStyleCompundPreferredSize(), with minor
 // modifications only.
 // we should merge both methods.
+//
+// obsolete!
 int UBoLabelUI::getHeightForWidth(const UWidget * widget_, int w)
 {
 	const UCompound* widget = dynamic_cast<const UCompound*>(widget_);

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2004 Andreas Beckermann (b_mann@gmx.de)
+    Copyright (C) 2004-2005 Andreas Beckermann (b_mann@gmx.de)
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -26,7 +26,7 @@
 #include <ufo/widgets/uslider.hpp>
 #include <ufo/ui/uuidefs.hpp>
 #include "ubolabelui.h"
-#include "uboboxlayout.h"
+//#include "uboboxlayout.h"
 #include "uboprogress.h"
 #include "uboprogressui.h"
 
@@ -1005,12 +1005,12 @@ void BoUfoWidget::setLayoutClass(LayoutClass layout)
 		setLayout(new ufo::UFlowLayout());
 		break;
 	case UHBoxLayout:
-//		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
-		setLayout(new ufo::UBoBoxLayout(true));
+		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::XAxis));
+//		setLayout(new ufo::UBoBoxLayout(true));
 		break;
 	case UVBoxLayout:
-//		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::YAxis));
-		setLayout(new ufo::UBoBoxLayout(false));
+		setLayout(new ufo::UBoxLayout(ufo::UBoxLayout::YAxis));
+//		setLayout(new ufo::UBoBoxLayout(false));
 		break;
 	case UBorderLayout:
 		setLayout(new ufo::UBorderLayout());

@@ -13,6 +13,7 @@ libwidgets_la_SOURCES = \
 	ucheckboxmenuitem.cpp \
 	ucombobox.cpp \
 	ucompound.cpp \
+	udesktoppane.cpp \
 	uinternalframe.cpp \
 	uitem.cpp \
 	ulabel.cpp \
