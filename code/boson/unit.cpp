@@ -644,9 +644,13 @@ void Unit::advanceAttack(unsigned int advanceCount)
 		return;
 	}
 	boDebug(300) << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	if (range >= 1) {
+		range--;
+	}
 	if (!moveTo(target()->x(), target()->y(), range)) {
 		setWork(WorkNone);
 	} else {
+		addWaypoint(QPoint((int)target()->x(), (int)target()->y()));
 		setAdvanceWork(WorkMove);
 	}
 	return;
@@ -708,6 +712,9 @@ void Unit::advancePlugin(unsigned int advanceCount)
 
 void Unit::advanceTurn(unsigned int)
 {
+ // Unit is still while turning
+ setVelocity(0, 0, 0);
+
  int dir = (int)rotation();
  int a = dir - d->mWantedRotation;  // How many degrees to turn
  bool turncw = false;  // Direction of turning, CW or CCW
@@ -803,6 +810,7 @@ void Unit::resetPathInfo()
  pathInfo()->unit = this;
  pathInfo()->canMoveOnLand = unitProperties()->canGoOnLand();
  pathInfo()->canMoveOnWater = unitProperties()->canGoOnWater();
+ pathInfo()->flying = unitProperties()->isAircraft();
 }
 
 
@@ -918,6 +926,11 @@ void Unit::newPath()
  clearPathPoints();
  for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
 	addPathPoint(pathInfo()->llpath[i]);
+ }
+
+ // Pathfinder always adds our current position as the first point of the path.
+ if (currentPathPoint() / BO_TILE_SIZE == pathInfo()->start / BO_TILE_SIZE) {
+	pathPointDone();
  }
 
  if (pathPointCount() == 0) {
@@ -1785,7 +1798,7 @@ void MobileUnit::advanceMoveCheck()
 				stopMoving();
 				setWork(WorkNone);
 				return;
-			} else if (pathInfo()->waiting % (20 + QMAX(pathInfo()->pathrecalced * 20, 80)) == 0) {
+			} else if (pathInfo()->waiting % (20 + QMIN(pathInfo()->pathrecalced * 20, 80)) == 0) {
 				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
 				//  calls, then 60 etc, but never more than 100 calls.
 				boDebug() << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
@@ -1949,16 +1962,39 @@ void MobileUnit::advanceMoveCheck()
  //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
 }
 
-void MobileUnit::turnTo(Direction direction)
+void MobileUnit::turnTo(int dir)
 {
  if (isDestroyed()) {
 	boError() << k_funcinfo << "unit is already destroyed!" << endl;
 	return;
  }
- float dir = (int)direction * 45;
- if (rotation() != dir) {
-	Unit::turnTo((int)dir);
+ if ((int)rotation() != dir) {
+	// Find out how much we have to turn
+	float delta = rotation() - dir;
+	if (delta < 0) {
+		delta = QABS(delta);
+	}
+	if (delta > 180) {
+		delta = 360 - delta;
+	}
+
+	if(delta < unitProperties()->rotationSpeed()) {
+		// Turn immediately (and hope this method won't be called more than once per
+		//  advance call)
+		setRotation(dir);
+		return;
+	}
+	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
+	// If we're moving, we want to take one more step with current velocity, but
+	//  setAdvanceWork() resets it to 0, so we have this workaround here
+	float xvelo = 0, yvelo = 0;
+	if (advanceWork() == WorkMove) {
+		xvelo = xVelocity();
+		yvelo = yVelocity();
+	}
+	Unit::turnTo(dir);
 	setAdvanceWork(WorkTurn);
+	setVelocity(xvelo, yvelo, 0);
  }
 }
 
@@ -1966,27 +2002,31 @@ void MobileUnit::turnTo()
 {
  float xspeed = xVelocity();
  float yspeed = yVelocity();
- // Set correct frame
+ // Set correct rotation
+ // Try to find rotation fast first
  if ((xspeed == 0) && (yspeed < 0)) { // North
-	turnTo(North);
- } else if ((xspeed > 0) && (yspeed < 0)) { // NE
-	turnTo(NorthEast);
+	turnTo(0);
  } else if ((xspeed > 0) && (yspeed == 0)) { // East
-	turnTo(East);
- } else if ((xspeed > 0) && (yspeed > 0)) { // SE
-	turnTo(SouthEast);
+	turnTo(90);
  } else if ((xspeed == 0) && (yspeed > 0)) { // South
-	turnTo(South);
- } else if ((xspeed < 0) && (yspeed > 0)) { // SW
-	turnTo(SouthWest);
+	turnTo(180);
  } else if ((xspeed < 0) && (yspeed == 0)) { // West
-	turnTo(West);
- } else if ((xspeed < 0) && (yspeed < 0)) { // NW
-	turnTo(NorthWest);
- } else if (xspeed == 0 && yspeed == 0) {
-//	boDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
+	turnTo(270);
+ } else if (QABS(xspeed) == QABS(yspeed)) {
+	if ((xspeed > 0) && (yspeed < 0)) { // NE
+		turnTo(45);
+	} else if ((xspeed > 0) && (yspeed > 0)) { // SE
+		turnTo(135);
+	} else if ((xspeed < 0) && (yspeed > 0)) { // SW
+		turnTo(225);
+	} else if ((xspeed < 0) && (yspeed < 0)) { // NW
+		turnTo(315);
+	} else if(xspeed == 0 && yspeed == 0) {
+//		boDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
+	}
  } else {
-	boDebug() << k_funcinfo << "error when setting frame" << endl;
+	// Slow way - calculate direction
+	turnTo((int)Bo3dTools::rotationToPoint(xspeed, yspeed));
  }
 }
 
@@ -2085,6 +2125,10 @@ void MobileUnit::stopMoving()
 
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
 {
+ // Don't attack other units unless work is WorkMove
+ if (work() != WorkMove) {
+	return false;
+ }
  if (pathInfo()->moveAttacking && attackEnemyUnitsInRange()) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 	setVelocity(0.0, 0.0, 0.0);  // To prevent moving

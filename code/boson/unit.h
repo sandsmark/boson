@@ -572,7 +572,7 @@ public:
 	 * Turn to direction. This sets a new frame according to the new
 	 * direction.
 	 **/
-	void turnTo(Direction direction);
+	virtual void turnTo(int degrees);
 
 	/**
 	 * Call turnTo according to the current speed (you want to use this!)
