@@ -263,13 +263,13 @@ int Cell::moveCost() const
 		cost = 0;
 		break;
 	case GroundDesert:
-		cost = 1;
+		cost = 0;
 		break;
 	case GroundGrassMineral:
 		cost = 3;
 		break;
 	case GroundGrassOil:
-		cost = 2;
+		cost = 3;
 		break;
 	case GroundUnknown:
 	default:

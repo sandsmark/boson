@@ -39,6 +39,9 @@
  #include <queue>
 #endif
 
+#define SEARCH_STEPS 10  // How many steps of path to find
+
+
 class Unit;
 class PathNode;
 class QPoint;
@@ -118,6 +121,7 @@ class BosonPath
 
     bool findFastPath();
     bool findSlowPath();
+    bool rangeCheck();
 
   private:
     int mStartx;
@@ -136,6 +140,18 @@ class BosonPath
     int mPathLength;
     float mPathCost;
     int mRange;
+
+    class BosonPath::Marking
+    {
+      public:
+        Marking() { dir = DirNone; f = -1; g = -1; c = -1; level = -1; }
+        Direction dir;
+        float f;
+        float g;
+        float c; // Cost of cell
+        short int level;
+    };
+    Marking mark[SEARCH_STEPS * 2 + 1][SEARCH_STEPS * 2 + 1];
 };
 
 
