@@ -310,6 +310,7 @@ void OptionsDialog::slotSetDefaults()
  setRMBScrolling(true);
  setMMBScrolling(true);
  setCursor(CursorSprite);
+ slotCursorChanged((int)CursorSprite);
  setCursorEdgeSensity(20);
  setGroupMove(GroupMoveOld);
 }
