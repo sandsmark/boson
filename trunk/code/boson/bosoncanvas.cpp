@@ -1112,7 +1112,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		continue;
 	}
 
-	const BosonWeaponProperties* weapon;
+	const BosonWeaponProperties* weapon = 0;
 	Player* owner = (Player*)(boGame->findPlayer(ownerid));
 	if (!owner) {
 		boError() << k_funcinfo << "No player with id " << ownerid << endl;
