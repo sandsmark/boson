@@ -589,7 +589,7 @@ void MobileUnit::advanceMove()
  // Try to go to same x and y coordinates as waypoint's coordinates
  // First x coordinate
  // Slow down if there is less than speed() pixels to go
- if(abs(wp.x() - x) < speed()) {
+ if(QABS(wp.x() - x) < speed()) {
 	xspeed = wp.x() - x;
  } else {
 	xspeed = speed();
@@ -598,7 +598,7 @@ void MobileUnit::advanceMove()
 	}
  }
  // Same with y coordinate
- if(abs(wp.y() - y) < (double)speed()) {
+ if(QABS(wp.y() - y) < (double)speed()) {
 	yspeed = wp.y() - y;
  } else {
 	yspeed = speed();
