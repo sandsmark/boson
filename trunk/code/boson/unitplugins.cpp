@@ -1313,6 +1313,7 @@ unsigned int ResourceMinePlugin::mineMinerals(const HarvesterPlugin* harvester)
  }
 
  int amount = mineStep(harvester, minerals());
+ // When minerals() == -1, then mine's mineral supply is infinite, so we won't change it.
  if (minerals() >= 0) {
 	setMinerals(minerals() - amount);
  }
@@ -1335,6 +1336,7 @@ unsigned int ResourceMinePlugin::mineOil(const HarvesterPlugin* harvester)
  }
 
  int amount = mineStep(harvester, oil());
+ // When oil() == -1, then mine's oil supply is infinite, so we won't change it.
  if (oil() >= 0) {
 	setOil(oil() - amount);
  }
