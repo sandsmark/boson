@@ -33,6 +33,8 @@
 #include <qptrlist.h>
 #include <qpoint.h>
 #include <qpainter.h>
+#include <qcursor.h>
+#include <qbitmap.h>
 
 #include "bosonbigdisplay.moc"
 
@@ -73,6 +75,9 @@ public:
 
 	ConstructUnit mConstruction;
 	
+	QPixmap mCursorMove;
+	QPixmap mCursorAttack;
+
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
@@ -219,6 +224,7 @@ void BosonBigDisplay::clearSelection()
 	++it;
  }
  d->mSelectionList.clear();
+ setCursor(QCursor());
 }
 
 void BosonBigDisplay::addUnitSelection(Unit* unit)
@@ -236,6 +242,16 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
  }
  d->mSelectionList.append(unit);
  unit->select();
+ switch (selectionMode()) {
+	case SelectRect:
+	case SelectSingle:
+		if (unit->isMobile() && !d->mCursorMove.isNull()) {
+			setCursor(QCursor(d->mCursorMove));
+		}
+		break;
+	default:
+		break;
+ }
 }
 
 const QPoint& BosonBigDisplay::selectionStart() const
@@ -500,5 +516,23 @@ void BosonBigDisplay::resizeContents(int w, int h)
  QWMatrix wm = inverseWorldMatrix();
  QRect br = wm.mapRect(QRect(0,0,width(),height()));
  emit signalSizeChanged(br.width(), br.height());
+}
+
+void BosonBigDisplay::loadCursors(const QString& dir)
+{
+ QString move = dir + QString::fromLatin1("/move.xpm");
+ QString attack = dir + QString::fromLatin1("/attack.xpm");
+ if (d->mCursorMove.load(move)) {
+	QBitmap mask(move);
+	d->mCursorMove.setMask(mask);
+ } else {
+	kdError() << "Cannot load " << move << endl;
+ }
+ if (d->mCursorAttack.load(attack)) {
+	QBitmap mask(attack);
+	d->mCursorAttack.setMask(mask);
+ } else {
+	kdError() << "Cannot load " << attack << endl;
+ }
 }
 
