@@ -114,6 +114,10 @@ void BoAutoCamera::advance()
   }
   bool changed = advance2();
 
+  // FIXME: cache factor!
+  float factor = moveFactor();
+  mMovedAmount += factor;
+
   if(!changed)
   {
 //    boError(230) << k_funcinfo << "remainingTime: " << reaminingTime() << ", but no changes ?!" << endl;
@@ -144,7 +148,6 @@ bool BoAutoCamera::advance2()
 
   // How much of differences to add
   float factor = moveFactor();
-  mMovedAmount += factor;
   boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
   bool changed = false;
 
