@@ -123,6 +123,24 @@ public:
 	int gameSpeed() const;
 	bool gamePaused() const;
 
+	/**
+	 * Add the neutral player. This player contains all "dummy" objects and
+	 * units (such as houses, trees, rocks, civilians, ...) that do nothing
+	 * special, or at least that do not really fight :)
+	 *
+	 * The neutral player is (per definition) the last player in the @ref
+	 * playerList(), i.e. is always at (playerList()->count() - 1). Note
+	 * that the @ref Player::id is <em>not</em> predefined. It can be
+	 * different for every game.
+	 *
+	 * There is only a single neutral player in the game.
+	 *
+	 * This method will send a network message using @ref bosonAddPlayer.
+	 * The player is added once the message is received!
+	 * @return TRUE on success, FALSE on failure
+	 **/
+	bool addNeutralPlayer();
+
 	void removeAllPlayers();
 
 	QValueList<QColor> availableTeamColors() const;

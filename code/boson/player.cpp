@@ -64,6 +64,7 @@ public:
 	QBitArray mFogged; // TODO: use KGameProperty
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
+	KGamePropertyBool mIsNeutral;
 
 	BosonStatistics* mStatistics;
 
@@ -73,7 +74,7 @@ public:
 	PlayerIO* mPlayerIO;
 };
 
-Player::Player() : KPlayer()
+Player::Player(bool isNeutral) : KPlayer()
 {
  boDebug() << k_funcinfo << endl;
  mSpecies = 0;
@@ -94,6 +95,9 @@ Player::Player() : KPlayer()
 		KGamePropertyBase::PolicyLocal, "MineralCost");
  d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "OilCost");
+ d->mIsNeutral.registerData(IdIsNeutral, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "IsNeutral");
+ d->mIsNeutral = isNeutral;
  d->mPlayerIO = new PlayerIO(this);
 
  quitGame(); // this will reset some variables
@@ -108,6 +112,11 @@ Player::~Player()
  delete d->mPlayerIO;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+bool Player::isNeutral() const
+{
+ return d->mIsNeutral;
 }
 
 PlayerIO* Player::playerIO() const
@@ -201,6 +210,12 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
 void Player::loadTheme(const QString& species, const QColor& teamColor)
 {
+ if (species == QString::fromLatin1("Neutral")) {
+	if (!isNeutral()) {
+		boError() << k_funcinfo << "only neutral player can have neutral theme" << endl;
+		return;
+	}
+ }
  delete mSpecies;
  mSpecies = new SpeciesTheme(species, teamColor);
 }
@@ -650,9 +665,16 @@ bool Player::advanceFlag() const
 bool Player::saveAsXML(QDomElement& root)
 {
  BosonProfiler profiler(BosonProfiling::SavePlayerToXML);
+ if (!game() || game()->playerList()) {
+	return false;
+ }
 
  // note: we need to save the index in the list, not the actual id()
  root.setAttribute(QString::fromLatin1("Id"), game()->playerList()->findRef(this));
+
+ if (game()->playerList()->findRef(this) == (int)game()->playerList()->count() - 1) {
+	root.setAttribute(QString::fromLatin1("IsNeutral"), 1);
+ }
 
  root.setAttribute(QString::fromLatin1("NetworkPriority"), networkPriority());
 
@@ -696,6 +718,18 @@ bool Player::loadFromXML(const QDomElement& root)
  // this does NOT load the units!
 
  bool ok = false;
+ if (!game() || !game()->playerList()) {
+	return false;
+ }
+ if (root.hasAttribute("IsNeutral")) {
+	if (root.attribute("IsNeutral").toUInt(&ok) != 1) {
+		boError() << k_funcinfo << "invalid file format: IsNeutral must be 1 if it is present" << endl;
+		return false;
+	} else if (!ok) {
+		boError() << k_funcinfo << "invalid file format: IsNeutral must be a valid number if it is present" << endl;
+		return false;
+	}
+ }
 
  boDebug(260) << k_funcinfo << "load data handler" << endl;
  // load the data handler
