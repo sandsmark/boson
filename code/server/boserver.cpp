@@ -245,7 +245,7 @@ switch(tag) {
 		gpp.player[playerId].lastConfirmedJiffies = gpp.jiffies;
 		confirmedJiffies++;
 		if (confirmedJiffies == gpp.nbPlayer) {
-			usleep(100*100); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
+			usleep(500*100); ///orzel histoire de pas faire peter les jiffies en attendant qu'il y ait un vrai TimeOut
 
 			/* get all wanted action from everybody */
 			requestAction();
@@ -263,7 +263,7 @@ switch(tag) {
 				gpp.player[i].buffer->flush();
 				}
 			/* log */
-			logf(LOG_GAME_LOW, "Jiffies++ : %u", gpp.jiffies);
+			logf(LOG_COMM, "Jiffies++ : %u", gpp.jiffies);
 			}
 		
 		break;
