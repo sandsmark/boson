@@ -969,9 +969,6 @@ void BosonCanvas::changeWork()
  unsigned int i = 0;
  while (i < d->mGroups.count()) {
 	if (d->mGroups[i].deleteGroup()) {
-		if (d->mGroups[i].leader()) {
-			d->mGroups[i].leader()->setGroupLeader(false);
-		}
 		d->mGroups.remove(d->mGroups.at(i));
 	} else {
 		i++;

@@ -165,39 +165,44 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdWarning() << k_lineinfo << "no unit to move" << endl;
 			break;
 		}
-		if(mode == GroupMoveFollow) {
-			if(unitsToMove.count() == 1) {
-				unitsToMove.first()->moveTo(pos);
-			} else {
+		QPtrListIterator<Unit> it(unitsToMove);
+		while (it.current()) {
+			it.current()->stopMoving();
+			++it;
+		}
+		if(unitsToMove.count() == 1) {
+			unitsToMove.first()->moveTo(pos);
+		} else {
+			if(mode == GroupMoveFollow) {
 				Unit* unit = unitsToMove.take(0);
 				unit->moveTo(pos);
 				unit->setGroupLeader(true);
 				emit signalNewGroup(unit, unitsToMove);
+			} else if (mode == GroupMoveOld) {
+				it.toFirst();
+				while (it.current()) {
+					it.current()->moveTo(pos);
+					++it;
+				}
+			} else if (mode == GroupMoveNew) {
+				kdDebug() << k_funcinfo << "mode == GroupMoveNew" << endl;
+				Unit* leader = unitsToMove.take(0);
+				leader->moveTo(pos);
+				Unit* unit;
+				QPoint pos2;
+
+				it.toFirst();
+				while (it.current()) {
+					unit = it.current();
+					unit->moveTo(pos);
+					pos2.setX(pos.x() + (unit->x() - leader->x()));
+					pos2.setY(pos.y() + (unit->y() - leader->y()));
+					unit->moveTo(pos2);
+					++it;
+				}
+			} else {
+				kdError() << k_funcinfo << "wrong GroupMoveMode " << mode << endl;
 			}
-		} else if (mode == GroupMoveOld) {
-			Unit* unit;
-			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next()) {
-				unit->moveTo(pos);
-			}
-		} else if (mode == GroupMoveNew) {
-			kdDebug() << k_funcinfo << " : mode == GroupMoveNew" << endl;
-			if(unitsToMove.count() == 1)
-			{
-				unitsToMove.first()->moveTo(pos);
-				break;
-			}
-			Unit* leader = unitsToMove.take(0);
-			leader->moveTo(pos);
-			Unit* unit;
-			QPoint pos2;
-			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next())
-			{
-				pos2.setX(pos.x() + (unit->x() - leader->x()));
-				pos2.setY(pos.y() + (unit->y() - leader->y()));
-				unit->moveTo(pos2);
-			}
-		} else {
-			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
 		}
 		break;
 	}
@@ -486,11 +491,16 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	}
 	case BosonMessage::Advance:
-		emit signalAdvance(d->mAdvanceCount);
-		d->mAdvanceCount = d->mAdvanceCount + 1;
-		if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
-			d->mAdvanceCount = 0;
-		}
+//		lock();
+//		for (unsigned i = 0; i < 5; i++) {
+			emit signalAdvance(d->mAdvanceCount);
+			d->mAdvanceCount = d->mAdvanceCount + 1;
+			if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
+				d->mAdvanceCount = 0;
+			}
+//			qApp->processEvents(5);
+//		}
+//		unlock();
 		break;
 	case BosonMessage::InitMap:
 		emit signalInitMap(buffer);
