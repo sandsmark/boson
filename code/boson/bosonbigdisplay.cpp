@@ -210,12 +210,17 @@ void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 
 void BosonBigDisplay::removeSelectionRect()
 {
- if (d->mIsSelecting) { // FIXME: can we se selectionMode() for this?
-	// remove the rect:
-	drawSelectionRect();
-	// here as there is a performance problem in
-	// mousemove:
-	selectArea(QRect(selectionStart(), selectionEnd()));
+ if (selectionMode() == SelectRect) {
+	if (d->mIsSelecting) { // AB: might be redundant
+		// remove the rect:
+		drawSelectionRect();
+		// here as there is a performance problem in
+		// mousemove:
+		selectArea(QRect(selectionStart(), selectionEnd()));
+	}
+	if (selection().isEmpty()) {
+		setSelectionMode(SelectNone);
+	}
  }
 }
 
@@ -257,16 +262,6 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
  }
  d->mSelectionList.append(unit);
  unit->select();
- switch (selectionMode()) {
-	case SelectRect:
-	case SelectSingle:
-		if (unit->isMobile() && !d->mCursorMove.isNull()) {
-			setCursor(QCursor(d->mCursorMove));
-		}
-		break;
-	default:
-		break;
- }
 }
 
 const QPoint& BosonBigDisplay::selectionStart() const
