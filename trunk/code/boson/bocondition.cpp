@@ -29,6 +29,31 @@
 #include <qptrlist.h>
 #include <qdom.h>
 
+
+// stores the action that is fired once a condition is fullfilled
+class BoConditionAction
+{
+public:
+	BoConditionAction()
+	{
+		mEventCaused = 0;
+	}
+	~BoConditionAction()
+	{
+		delete mEventCaused;
+	}
+
+	void fire();
+
+	bool saveAction(QDomElement& root, const QMap<int, int>* playerId2Index) const;
+	bool loadAction(const QDomElement& root);
+
+private:
+	BoEvent* mEventCaused;
+	QString mScriptFile;
+	QString mScriptCall;
+};
+
 class BoStatusCondition
 {
 public:
@@ -99,7 +124,7 @@ BoCondition::BoCondition()
  d->mAlternatives.setAutoDelete(true);
  d->mEvents.setAutoDelete(true);
  d->mStatusConditions.setAutoDelete(true);
- mEventCaused = 0;
+ mAction = 0;
 }
 
 BoCondition::~BoCondition()
@@ -108,7 +133,7 @@ BoCondition::~BoCondition()
  d->mEventsLeft.clear();
  d->mEvents.clear();
  d->mStatusConditions.clear();
- delete mEventCaused;
+ delete mAction;
  delete d;
 }
 
@@ -173,15 +198,16 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
 	++statIt;
  }
 
+ if (!mAction) {
+	BO_NULL_ERROR(mAction);
+	return false;
+ }
+
  QDomElement action = doc.createElement("Action");
  root.appendChild(action);
- if (mEventCaused) {
-	QDomElement actionEvent = doc.createElement("Event");
-	action.appendChild(actionEvent);
-	if (!mEventCaused->save(actionEvent, playerId2Index)) {
-		boError() << k_funcinfo << "cannot save event that is caused by condition" << endl;
-		return false;
-	}
+ if (!mAction->saveAction(action, playerId2Index)) {
+	boError() << k_funcinfo << "could not save action" << endl;
+	return false;
  }
 
  return true;
@@ -242,17 +268,11 @@ bool BoCondition::load(const QDomElement& root)
 	boError() << k_funcinfo << "no Action tag" << endl;
 	return false;
  }
- delete mEventCaused;
- mEventCaused = 0;
- QDomElement actionEvent = action.namedItem("Event").toElement();
- if (!actionEvent.isNull()) {
-	mEventCaused = new BoEvent();
-	if (!mEventCaused->load(actionEvent)) {
-		boError() << k_funcinfo << "cannot load event that is caused by condition" << endl;
-		delete mEventCaused;
-		mEventCaused = 0;
-		return false;
-	}
+ delete mAction;
+ mAction = new BoConditionAction();
+ if (!mAction->loadAction(action)) {
+	boError() << k_funcinfo << "unable to load Action" << endl;
+	return false;
  }
 
  return true;
@@ -299,22 +319,8 @@ bool BoCondition::thisConditionDone(BosonScript* script) const
 
 void BoCondition::fireAction()
 {
- BO_CHECK_NULL_RET(mEventCaused);
- boDebug() << k_funcinfo << endl;
- // atm only events are supported. this will change in the future (support
- // calling functions in scripts)
- QDomDocument doc;
- QDomElement root = doc.createElement("Event");
- if (!mEventCaused->save(root, 0)) {
-	boError() << k_funcinfo << "could not save event that is caused by condition" << endl;
-	return;
- }
- BoEvent* e = new BoEvent();
- if (!e->load(root)) {
-	boError() << k_funcinfo << "could not load event that is caused by condition" << endl;
-	return;
- }
- boGame->queueEvent(e);
+ BO_CHECK_NULL_RET(mAction);
+ mAction->fire();
 }
 
 bool BoCondition::requireScript() const
@@ -343,3 +349,152 @@ bool BoCondition::reset()
  }
  return ret;
 }
+
+bool BoConditionAction::saveAction(QDomElement& root, const QMap<int, int>* playerId2Index) const
+{
+ QDomDocument doc = root.ownerDocument();
+ QString type;
+ if (mEventCaused) {
+	type = "Event";
+	QDomElement actionEvent = doc.createElement("Event");
+	root.appendChild(actionEvent);
+	if (!mEventCaused->save(actionEvent, playerId2Index)) {
+		boError() << k_funcinfo << "cannot save event that is caused by condition" << endl;
+		return false;
+	}
+ } else if (!mScriptFile.isEmpty()) {
+	type = "Script";
+	QDomElement file = doc.createElement("ScriptFile");
+	root.appendChild(file);
+	QDomText fileText = doc.createTextNode(mScriptFile);
+	file.appendChild(fileText);
+
+	QDomElement call = doc.createElement("ScriptCall");
+	root.appendChild(call);
+	QDomText callText = doc.createTextNode(mScriptCall);
+	call.appendChild(callText);
+
+	// TODO: parameters
+ }
+
+ if (type.isEmpty()) {
+	boError() << k_funcinfo << "internal error: don't know type of Action" << endl;
+	return false;
+ }
+ root.setAttribute("Type", type);
+ return true;
+}
+
+bool BoConditionAction::loadAction(const QDomElement& root)
+{
+ if (root.isNull()) {
+	boError() << k_funcinfo << "no Action tag" << endl;
+	return false;
+ }
+ QString type = root.attribute("Type");
+ if (type.isEmpty()) {
+	boError() << k_funcinfo << "Action tag has no type" << endl;
+	return false;
+ }
+ delete mEventCaused;
+ mEventCaused = 0;
+ mScriptFile = QString::null;
+ mScriptCall = QString::null;
+
+ if (type == "Event") {
+	QDomElement actionEvent = root.namedItem("Event").toElement();
+	if (actionEvent.isNull()) {
+		mEventCaused = new BoEvent();
+		if (!mEventCaused->load(actionEvent)) {
+			boError() << k_funcinfo << "cannot load event that is caused by condition" << endl;
+			delete mEventCaused;
+			mEventCaused = 0;
+			return false;
+		}
+	}
+ } else if (type == "Script") {
+	QDomElement file = root.namedItem("ScriptFile").toElement();
+	if (file.isNull()) {
+		boError() << k_funcinfo << "Type is Script, but Action has no ScriptFile element" << endl;
+		return false;
+	}
+
+	// the filename of the script must start with
+	// - scripts/ (the $KDEDIR/share/apps/boson/scripts dir is used)
+	// - map_scripts/ (the map_scripts dir in the .bpf/.bsg file is used)
+	// no other prefixes are allowed.
+	mScriptFile = file.text();
+	if (mScriptFile.isEmpty()) {
+		boError() << k_funcinfo << "ScriptFile element has empty text. You must specify the script that contains the function you want to call" << endl;
+		return false;
+	}
+	if (!mScriptFile.startsWith("scripts/") && !mScriptFile.startsWith("map_scripts/")) {
+		boError() << k_funcinfo << "ScriptFile must start with either scripts/ or map_scripts/ - filename: " << mScriptFile << endl;
+		return false;
+	}
+
+	// TODO: check if fileName actually exists!
+	// (might be difficult in the map_scripts case, since we don't have
+	// direct access to that file system)
+	bool file_exists = true;
+	boWarning() << k_funcinfo << "TODO: check if script file actually exists" << endl;
+
+	if (!file_exists) {
+		boError() << k_funcinfo << "ScriptFile " << mScriptFile << " was not found" << endl;
+		return false;
+	}
+
+	QDomElement call = root.namedItem("ScriptCall").toElement();
+	if (call.isNull()) {
+		boError() << k_funcinfo << "Script Action has no ScriptCall element." << endl;
+		return false;
+	}
+	if (call.text().isEmpty()) {
+		boError() << k_funcinfo << "ScriptCall element has empty text. you must specify a call (function)" << endl;
+		return false;
+	}
+	mScriptCall = call.text();
+
+	// TODO: parameters.
+	// AB: they may be implemented using multiple ScriptParameter elements.
+	//  -> attributes may not be sufficient, as a parameter may be something
+	//     else but a constant (i.e. depend on game states)
+	//  -> probably we need to save a QStringList or so containing the
+	//     parameters. maybe we even have to write a BoScriptCall class
+
+ } else {
+	boError() << k_funcinfo << "Action type " << type << " is not supported." << endl;
+	return false;
+ }
+
+ return true;
+}
+
+void BoConditionAction::fire()
+{
+ // atm only events are supported. this will change in the future (support
+ // calling functions in scripts)
+ boDebug() << k_funcinfo << endl;
+ if (mEventCaused) {
+	QDomDocument doc;
+	QDomElement root = doc.createElement("Event");
+	if (!mEventCaused->save(root, 0)) {
+		boError() << k_funcinfo << "could not save event that is caused by condition" << endl;
+		return;
+	}
+	BoEvent* e = new BoEvent();
+	if (!e->load(root)) {
+		boError() << k_funcinfo << "could not load event that is caused by condition" << endl;
+		return;
+	}
+	boGame->queueEvent(e);
+ } else if (!mScriptFile.isEmpty()) {
+	boWarning() << k_funcinfo << "calling script function in " << mScriptFile << endl;
+	boWarning() << k_funcinfo << "calling: " << mScriptCall << endl;
+
+	boError() << k_funcinfo << "not yet implemented" << endl;
+ } else {
+	boError() << k_funcinfo << "not a supported action - loding this object should have failed!" << endl;
+ }
+}
+

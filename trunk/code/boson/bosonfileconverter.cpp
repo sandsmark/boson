@@ -754,6 +754,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	events.appendChild(matching);
 
 	QDomElement action = canvasDoc.createElement("Action");
+	action.setAttribute("Type", "Event");
 	cond.appendChild(action);
 	QDomElement actionEvent = event.cloneNode().toElement();
 	actionEvent.setAttribute("Name", "CustomStringEvent");

@@ -25,6 +25,7 @@ class QDomElement;
 class QDomNodeList;
 
 class BoEvent;
+class BoConditionAction;
 class BosonScript;
 template<class T1, class T2> class QMap;
 
@@ -98,7 +99,7 @@ protected:
 
 private:
 	BoConditionPrivate* d;
-	BoEvent* mEventCaused;
+	BoConditionAction* mAction;
 };
 
 #endif
