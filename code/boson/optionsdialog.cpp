@@ -47,6 +47,7 @@ public:
 	QComboBox* mCommandFrame;
 	QComboBox* mChat;
 	QComboBox* mCursor;
+	QComboBox* mGroupmove;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -102,6 +103,16 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  l->addWidget(d->mCursor);
  connect(d->mCursor, SIGNAL(activated(int)), 
 		this, SIGNAL(signalCursorChanged(int)));
+
+ l = new QHBoxLayout(topLayout);
+ QLabel* groupmoveLabel = new QLabel(i18n("Group Movement"), plainPage());
+ l->addWidget(groupmoveLabel);
+ d->mGroupmove = new QComboBox(plainPage());
+ d->mGroupmove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
+ d->mGroupmove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
+ l->addWidget(d->mGroupmove);
+ connect(d->mGroupmove, SIGNAL(activated(int)),
+		this, SIGNAL(signalGroupMoveChanged(int)));
 
  setCommandFramePosition(CmdFrameLeft);
  setChatFramePosition(ChatFrameBottom);

@@ -194,6 +194,7 @@ protected slots:
 	void slotNotEnoughOil(Player*);
 
 	void slotChangeCursor(int mode);
+	void slotChangeGroupMove(int mode);
 
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);

@@ -39,6 +39,7 @@ public:
 	UnitPrivate()
 	{
 		mSelectBox = 0;
+		mLeader = false;
 	}
 	KGamePropertyInt mDirection;
 	KGameProperty<unsigned int> mReloadState;
@@ -49,6 +50,7 @@ public:
 
 	SelectBox* mSelectBox;
 
+	bool mLeader;
 	Unit* mTarget;
 };
 
@@ -146,6 +148,11 @@ void Unit::setHealth(unsigned long int h)
 		setZ(Z_DESTROYED_FACILITY);
 	}
 	setAnimated(false);
+	if(d->mLeader)
+	{
+		boCanvas()->leaderDestroyed(this);
+		d->mLeader = false;
+	}
  }
 }
 
@@ -183,7 +190,10 @@ void Unit::moveBy(double moveX, double moveY)
  if (d->mSelectBox) {
 	d->mSelectBox->moveBy(moveX, moveY);
  }
- ((BosonCanvas*)canvas())->unitMoved(this, oldX, oldY);
+ if(d->mLeader)
+	boCanvas()->leaderMoved(this, oldX, oldY);
+ else
+	boCanvas()->unitMoved(this, oldX, oldY);
 }
 
 void Unit::advance(int phase)
@@ -342,11 +352,13 @@ void Unit::stopMoving()
 
  // Call this only if we are only moving - stopMoving() is also called e.g. on
  // WorkAttack, when the unit is not yet in range.
- if (work() == WorkMove) {
+ if (isMoving()) {
 	setWork(WorkNone);
  }
  setXVelocity(0);
  setYVelocity(0);
+ if(d->mLeader)
+	boCanvas()->leaderStopped(this);
 // setAnimated(false); // do not call advance() anymore - is more efficient
 }
 
@@ -544,6 +556,17 @@ void Unit::setWork(WorkType w)
  }
  UnitBase::setWork(w);
 }
+
+void Unit::moveInGroup()
+{
+  setWork(WorkMoveInGroup);
+}
+
+void Unit::setGroupLeader(bool leader)
+{
+  d->mLeader = leader;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -794,6 +817,19 @@ void MobileUnit::turnTo()
  } else {
 	kdDebug() << "xspeed == 0 and yspeed == 0 or error when setting frame" << endl;
  }
+}
+
+void MobileUnit::leaderMoved(double x, double y)
+{
+ if(work() == WorkMoveInGroup)
+ {
+	setVelocity(x, y);
+	turnTo();
+	setVelocity(0, 0);
+	moveBy(x, y);
+ }
+ else
+	kdDebug() << "MobileUnit::leaderMoved() called, but work() != WorkMoveInGroup" << endl;
 }
 
 

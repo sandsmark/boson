@@ -68,6 +68,7 @@ signals:
 	void signalChatFramePositionChanged(int index); 
 
 	void signalCursorChanged(int index);
+	void signalGroupMoveChanged(int index);
 
 private:
 	class OptionsDialogPrivate;

@@ -25,6 +25,7 @@
 #include "unitproperties.h"
 #include "boshot.h"
 #include "bosonmusic.h"
+#include "unitgroup.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -70,6 +71,9 @@ public:
 	QPtrList<Unit> mWorkMine;
 	QPtrList<Unit> mWorkAttack;
 	QPtrList<Unit> mWorkConstructed;
+
+	QValueList<UnitGroup> mGroups;
+
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -389,6 +393,60 @@ void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
 
 // used to adjust the mini map
  emit signalUnitMoved(unit, oldX, oldY);
+}
+
+void BosonCanvas::leaderMoved(Unit* unit, double oldX, double oldY)
+{
+ QValueListIterator<UnitGroup> it;
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
+ {
+	if((*it).isLeader(unit))
+	{
+		(*it).leaderMoved(unit->x() - oldX, unit->y() - oldY);
+		break;
+	}
+ }
+ unitMoved(unit, oldX, oldY);
+}
+
+void BosonCanvas::leaderDestroyed(Unit* unit)
+{
+ QValueListIterator<UnitGroup> it;
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
+ {
+	if((*it).isLeader(unit))
+	{
+		(*it).leaderDestroyed();
+		return;
+	}
+ }
+}
+
+void BosonCanvas::leaderStopped(Unit* unit)
+{
+ QValueListIterator<UnitGroup> it;
+ for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it)
+ {
+	if((*it).isLeader(unit))
+	{
+		(*it).leaderStopped();
+		d->mGroups.remove(it);
+		return;
+	}
+ }
+}
+
+void BosonCanvas::slotNewGroup(Unit* leader, QPtrList<Unit> members)
+{
+ UnitGroup group(true);
+ group.setLeader(leader);
+ Unit *unit;
+ for(unit = members.first(); unit; unit = members.next())
+ {
+	unit->setWork(UnitBase::WorkMoveInGroup);
+	group.addMember(unit);
+ }
+ d->mGroups.append(group);
 }
 
 void BosonCanvas::updateSight(Unit* unit, double, double)

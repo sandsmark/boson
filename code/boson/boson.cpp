@@ -25,12 +25,14 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
+#include "bosonconfig.h"
 
 #include <kdebug.h>
 #include <klocale.h>
 #include <kgame/kgameio.h>
 
 #include <qtimer.h>
+#include <qptrlist.h>
 
 #include "boson.moc"
 
@@ -127,9 +129,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 //		kdDebug() << "MoveMove" << endl;
 		QPoint pos;
 		Q_UINT32 unitCount;
+		Q_UINT32 mode;
+		stream >> mode;
 		stream >> pos;
 		stream >> unitCount;
 //		kdDebug() << "unitCount: " << unitCount << endl;
+		QPtrList<Unit> unitsToMove;
 		for (unsigned int i = 0; i < unitCount; i++) {
 			Q_ULONG unitId;
 			stream >> unitId;
@@ -149,10 +154,29 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 //			kdDebug() << "move " << unitId << endl;
 			if (unit->unitProperties()->isMobile()) {
-				unit->moveTo(pos);
+				unitsToMove.append(unit);
 			}
 		}
-		break;
+		if(mode == GroupMoveFollow)
+		{
+			if(unitsToMove.count() == 1)
+				unitsToMove.first()->moveTo(pos);
+			else
+			{
+				Unit* unit = unitsToMove.take(0);
+				unit->moveTo(pos);
+				unit->setGroupLeader(true);
+				emit signalNewGroup(unit, unitsToMove);
+			}
+		}
+		else if(mode == GroupMoveOld)
+		{
+			Unit* unit;
+			for(unit = unitsToMove.first(); unit; unit = unitsToMove.next())
+				unit->moveTo(pos);
+		}
+		else
+			kdError() << k_funcinfo << " : wrong GroupMoveMode : " << mode << endl;
 	}
 	case BosonMessage::MoveAttack:
 	{

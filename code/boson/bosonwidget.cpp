@@ -176,9 +176,12 @@ void BosonWidget::init()
 		this, SLOT(slotNotEnoughMinerals(Player*)));
  connect(d->mBoson, SIGNAL(signalNotEnoughOil(Player*)),
 		this, SLOT(slotNotEnoughOil(Player*)));
+ connect(d->mBoson, SIGNAL(signalNewGroup(Unit*, QPtrList<Unit>)),
+		d->mCanvas, SLOT(slotNewGroup(Unit*, QPtrList<Unit>)));
 
  slotChangeCursor(boConfig->readCursorMode());
- 
+ slotChangeGroupMove(boConfig->readGroupMoveMode());
+
  addBigDisplay();
  initChat();
 
@@ -535,6 +538,9 @@ void BosonWidget::slotGamePreferences()
 // the primary view then.
  connect(dlg, SIGNAL(signalCursorChanged(int)),
 		this, SLOT(slotChangeCursor(int)));
+
+ connect(dlg, SIGNAL(signalGroupMoveChanged(int)),
+		this, SLOT(slotChangeGroupMove(int)));
 
  dlg->show();
 }
@@ -1217,4 +1223,8 @@ void BosonWidget::slotChangeCursor(int mode)
  }
 }
 
+void BosonWidget::slotChangeGroupMove(int mode)
+{
+ boConfig->saveGroupMoveMode((GroupMoveMode)mode);
+}
 

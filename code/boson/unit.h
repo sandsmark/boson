@@ -200,6 +200,10 @@ public:
 	void stopMoving();
 	void stopAttacking();
 
+	void moveInGroup();
+	void leaderMoved(double x, double y) {};
+	void setGroupLeader(bool leader);
+
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
@@ -263,6 +267,8 @@ public:
 	 * Call turnTo according to the current speed (you want to use this!)
 	 **/
 	inline void turnTo();
+
+	void leaderMoved(double x, double y);
 
 protected:
 	virtual void advanceMove(); // move one step futher to path

@@ -471,6 +471,8 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		QPtrListIterator<Unit> it(selection());
 		// tell the clients we want to move units:
 		stream << (Q_UINT32)BosonMessage::MoveMove;
+		// tell which mode we use for moving units
+		stream << (Q_UINT32)boConfig->readGroupMoveMode();
 		// tell them where to move to:
 		stream << pos;
 		// tell them how many units:

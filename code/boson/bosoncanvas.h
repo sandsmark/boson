@@ -89,6 +89,10 @@ public:
 	 **/
 	void unitMoved(Unit* unit, double oldX, double oldY);
 
+	void leaderMoved(Unit* unit, double oldX, double oldY);
+	void leaderDestroyed(Unit* unit);
+	void leaderStopped(Unit* unit);
+
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
 	 **/
@@ -169,7 +173,8 @@ public slots:
 
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
 
-	
+	void slotNewGroup(Unit* leader, QPtrList<Unit> members);
+
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
