@@ -26,8 +26,6 @@ BOEDITOR_SRC = editor.cpp \
 	topbase.cpp
 
 # all used-by-both files.
-# actually editorinput.cpp should be in BOEDITOR_SRC but it is used by
-# bosonwidget.cpp...
 COMMON_SRC = \
 	cell.cpp \
 	unitproperties.cpp \
@@ -70,7 +68,9 @@ COMMON_SRC = \
 	gameoverdialog.cpp \
 	unitplugins.cpp \
 	bosonstarteditorwidget.cpp \
-	bosonstartupbasewidget.cpp
+	bosonstartupbasewidget.cpp \
+	bosonbigdisplaybase.cpp \
+	editorbigdisplay.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

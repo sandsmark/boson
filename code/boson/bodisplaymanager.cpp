@@ -20,6 +20,7 @@
 #include "bodisplaymanager.h"
 #include "bodisplaymanager.moc"
 
+#include "bosonbigdisplaybase.h"
 #include "bosonbigdisplay.h"
 #include "bosonconfig.h"
 #include "player.h"
@@ -45,12 +46,12 @@ public:
 	{
 	}
 
-	bool hasDisplay(BosonBigDisplay* display)
+	bool hasDisplay(BosonBigDisplayBase* display)
 	{
 		return mDisplays.containsRef(display);
 	}
 
-	void insert(unsigned int index, BosonBigDisplay* display)
+	void insert(unsigned int index, BosonBigDisplayBase* display)
 	{
 		if (hasDisplay(display)) {
 			kdError() << k_funcinfo << "already have that display" << endl;
@@ -60,7 +61,7 @@ public:
 		recreateLayout();
 	}
 	
-	void remove(BosonBigDisplay* b)
+	void remove(BosonBigDisplayBase* b)
 	{
 		if (!hasDisplay(b)) {
 			kdError() << k_funcinfo << "don't have that display" << endl;
@@ -75,7 +76,7 @@ public:
 		return mDisplays.count();
 	}
 
-	int find(BosonBigDisplay* b)
+	int find(BosonBigDisplayBase* b)
 	{
 		return mDisplays.findRef(b);
 	}
@@ -85,7 +86,7 @@ protected:
 	{
 		delete mLayout;
 		mLayout = new QHBoxLayout(this);
-		QPtrListIterator<BosonBigDisplay> it(mDisplays);
+		QPtrListIterator<BosonBigDisplayBase> it(mDisplays);
 		while (it.current()) {
 			mLayout->addWidget(it.current());
 			++it;
@@ -94,7 +95,7 @@ protected:
 	}
 
 private:
-	QPtrList<BosonBigDisplay> mDisplays;
+	QPtrList<BosonBigDisplayBase> mDisplays;
 	QHBoxLayout* mLayout;
 };
 
@@ -109,11 +110,11 @@ public:
 		mLayout = 0;
 	}
 
-	QPtrList<BosonBigDisplay> mDisplayList;
+	QPtrList<BosonBigDisplayBase> mDisplayList;
 	QPtrList<BoBox> mBoxList;
 
 	QCanvas* mCanvas;
-	BosonBigDisplay* mActiveDisplay;
+	BosonBigDisplayBase* mActiveDisplay;
 
 	QVBoxLayout* mLayout;
 };
@@ -133,13 +134,13 @@ BoDisplayManager::~BoDisplayManager()
  delete d;
 }
 
-void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplay* display)
+void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
 {
  if (display == d->mActiveDisplay) {
 	return;
  }
  kdDebug() << k_funcinfo << endl;
- BosonBigDisplay* old = d->mActiveDisplay;
+ BosonBigDisplayBase* old = d->mActiveDisplay;
  d->mActiveDisplay = display;
  
  if (old) {
@@ -149,7 +150,7 @@ void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplay* display)
  emit signalActiveDisplay(d->mActiveDisplay, old);
 }
 
-void BoDisplayManager::markActive(BosonBigDisplay* display, bool active)
+void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 {
  if (!display) {
 	kdWarning() << k_funcinfo << "NULL display" << endl;
@@ -167,12 +168,12 @@ void BoDisplayManager::markActive(BosonBigDisplay* display, bool active)
  }
 }
 
-BosonBigDisplay* BoDisplayManager::activeDisplay() const
+BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
 {
  return d->mActiveDisplay;
 }
 
-QPtrList<BosonBigDisplay> BoDisplayManager::displays() const
+QPtrList<BosonBigDisplayBase> BoDisplayManager::displays() const
 {
  return d->mDisplayList;
 }
@@ -186,8 +187,8 @@ void BoDisplayManager::removeActiveDisplay()
  if (!d->mActiveDisplay) {
 	return;
  }
- BosonBigDisplay* old = d->mActiveDisplay;
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ BosonBigDisplayBase* old = d->mActiveDisplay;
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	if (it.current() != old) {
 		it.current()->makeActive();
@@ -214,7 +215,7 @@ void BoDisplayManager::removeActiveDisplay()
  recreateLayout();
 }
 
-BosonBigDisplay* BoDisplayManager::splitActiveDisplayVertical()
+BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayVertical()
 {
  if (!activeDisplay()) {
 	return 0;
@@ -229,7 +230,7 @@ BosonBigDisplay* BoDisplayManager::splitActiveDisplayVertical()
 	return 0;
  }
  BoBox* box = new BoBox(this);
- BosonBigDisplay* b = addDisplay(box);
+ BosonBigDisplayBase* b = addDisplay(box);
  box->insert(0, b);
  box->show();
  d->mBoxList.insert(index + 1, box);
@@ -237,7 +238,7 @@ BosonBigDisplay* BoDisplayManager::splitActiveDisplayVertical()
  return b;
 }
 
-BosonBigDisplay* BoDisplayManager::splitActiveDisplayHorizontal()
+BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayHorizontal()
 {
  if (!activeDisplay()) {
 	return 0;
@@ -248,12 +249,12 @@ BosonBigDisplay* BoDisplayManager::splitActiveDisplayHorizontal()
 	kdDebug() << k_funcinfo << "Cannot find parent box for active display" << endl;
 	return 0;
  }
- BosonBigDisplay* b = addDisplay(box);
+ BosonBigDisplayBase* b = addDisplay(box);
  box->insert(box->find(activeDisplay()) + 1, b);
  return b;
 }
 
-BosonBigDisplay* BoDisplayManager::addInitialDisplay()
+BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 {
  if (d->mDisplayList.count() != 0) {
 	kdError() << k_funcinfo << "already have displays" << endl;
@@ -261,49 +262,52 @@ BosonBigDisplay* BoDisplayManager::addInitialDisplay()
  }
  BoBox* box = new BoBox(this);
  d->mBoxList.append(box);
- BosonBigDisplay* b = addDisplay(box);
+ BosonBigDisplayBase* b = addDisplay(box);
  box->insert(0, b);
  box->show();
  recreateLayout();
  return b;
 }
 
-BosonBigDisplay* BoDisplayManager::addDisplay(QWidget* parent)
+BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 {
  if (!parent) {
 	kdError() << k_funcinfo << "parent must not be 0" << endl;
 	return 0;
  }
  kdDebug() << k_funcinfo << endl;
- BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, parent);
+ //TODO: what about editor widgets??
+ BosonBigDisplayBase* b = new BosonBigDisplay(d->mCanvas, parent);
  d->mDisplayList.append(b);
- connect(b, SIGNAL(signalMakeActive(BosonBigDisplay*)), 
-		this, SLOT(slotMakeActiveDisplay(BosonBigDisplay*)));
+ connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)), 
+		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
  b->show();
  return b;
 }
 
 void BoDisplayManager::slotEditorWillPlaceCell(int c)
 {
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-	it.current()->slotWillPlaceCell(c);
+#warning FIXME
+//	it.current()->slotWillPlaceCell(c);
 	++it;
  }
 }
 
 void BoDisplayManager::slotEditorWillPlaceUnit(int type, UnitBase* fac, KPlayer* p)
 {
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-	it.current()->slotWillConstructUnit(type, fac, p);
+#warning FIXME
+//	it.current()->slotWillConstructUnit(type, fac, p);
 	++it;
  }
 }
 
 void BoDisplayManager::setCursor(BosonCursor* cursor)
 {
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->setCursor(cursor);
 	++it;
@@ -312,7 +316,7 @@ void BoDisplayManager::setCursor(BosonCursor* cursor)
 
 void BoDisplayManager::setLocalPlayer(Player* p)
 {
- QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->setLocalPlayer(p);
 	++it;
@@ -321,14 +325,14 @@ void BoDisplayManager::setLocalPlayer(Player* p)
 
 void BoDisplayManager::quitGame()
 {
-  QPtrListIterator<BosonBigDisplay> it(d->mDisplayList);
+  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->quitGame();
 	++it;
  }
 }
 
-BoBox* BoDisplayManager::findBox(BosonBigDisplay* b) const
+BoBox* BoDisplayManager::findBox(BosonBigDisplayBase* b) const
 {
  QPtrListIterator<BoBox> it(d->mBoxList); 
  while (it.current()) {
@@ -354,7 +358,7 @@ void BoDisplayManager::recreateLayout()
 
 void BoDisplayManager::slotScroll(int dir)
 {
- BosonBigDisplay* active = activeDisplay();
+ BosonBigDisplayBase* active = activeDisplay();
  if (!active) {
 	return;
  }
@@ -380,7 +384,7 @@ void BoDisplayManager::paintResources()
 {
 #ifndef NO_BOSON_CANVASTEXT
 //FIXME: paint on upper right display, not on active
- BosonBigDisplay* b = activeDisplay();
+ BosonBigDisplayBase* b = activeDisplay();
  if (!b) {
 	kdError() << k_funcinfo << "NULL display" << endl;
 	return;

@@ -16,10 +16,13 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONBIGDISPLAY_H
-#define BOSONBIGDISPLAY_H
+#ifndef EDITORBIGDISPLAY_H
+#define EDITORBIGDISPLAY_H
 
 #include "bosonbigdisplaybase.h"
+
+#include <qcanvas.h>
+#include <qptrlist.h>
 
 class KGameIO;
 
@@ -56,19 +59,27 @@ class QLabel;
  * @short The main view of the game
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonBigDisplay : public BosonBigDisplayBase
+class EditorBigDisplay : public BosonBigDisplayBase
 {
 	Q_OBJECT
 public:
-	BosonBigDisplay(QCanvas* c, QWidget* parent);
-	virtual ~BosonBigDisplay();
+	EditorBigDisplay(QCanvas* c, QWidget* parent);
+	virtual ~EditorBigDisplay();
 
 	virtual void setLocalPlayer(Player* p);
 	
 public slots:
-	void slotMoveSelection(int cellX, int cellY);
+
+	/**
+	 * Mark the unitType for construction. Inform boson about this and place
+	 * the unit on the screen if in editor mode - otherwise delay.
+	 **/
+//	void slotWillConstructUnit(int unitType, UnitBase* facility, KPlayer* owner);
+//	void slotWillPlaceCell(int groundType);
 
 signals:
+	void signalAddCell(int x, int y, int groundType, unsigned char version);
+	void signalBuildUnit(int type, int x, int y, Player* owner); // editor mode only
 
 protected:
 	/**
@@ -82,20 +93,22 @@ protected:
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+	virtual void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
+//	void editorActionClicked(const BoAction* action);//note: original editorActionClicked() didn't have stream or send parameters.
 
+	/**
+	 * In editor mode this does just nothing.
+	 **/
 	virtual void updateCursor();
 
 //	void addMouseIO(Player* p);
-
-protected slots:
 
 private:
 	void init();
 
 private:
-	class BosonBigDisplayPrivate;
-	BosonBigDisplayPrivate* d;
+	class EditorBigDisplayPrivate;
+	EditorBigDisplayPrivate* d;
 };
 
 #endif

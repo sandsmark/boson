@@ -372,7 +372,7 @@ void BosonWidget::initGameMode()//FIXME: rename! we don't have a difference to i
  slotStartScenario();
 }
 
-void BosonWidget::initBigDisplay(BosonBigDisplay* b)
+void BosonWidget::initBigDisplay(BosonBigDisplayBase* b)
 {
  if (!b) {
 	kdError() << k_funcinfo << "NULL display" << endl;
@@ -383,7 +383,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
  b->setKGameChat(d->mChat);
 
 
- addMouseIO(b);
  connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 
@@ -393,22 +392,6 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
  b->makeActive();
-}
-
-void BosonWidget::addMouseIO(BosonBigDisplay* b)
-{
- if (d->mIOList[b]) {
-	kdError() << "This view already has a mouse io!!" << endl;
-	return;
- }
- KGameMouseIO* bigDisplayIO =
-		new KGameMouseIO(b->viewport(), true);
- connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&,
-		QMouseEvent*, bool*)),
-		b, SLOT(slotMouseEvent(KGameIO*,
-		QDataStream&, QMouseEvent*, bool*)));
- player()->addGameIO(bigDisplayIO);
- d->mIOList.insert(b, bigDisplayIO);
 }
 
 void BosonWidget::initGameCommandFrame()

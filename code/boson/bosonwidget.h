@@ -28,6 +28,7 @@ class KActionCollection;
 class BosonCanvas;
 class BosonCommandFrame;
 class BosonBigDisplay;
+class BosonBigDisplayBase;
 class Unit;
 class Player;
 class TopWidget;
@@ -215,7 +216,7 @@ protected:
 	void normalizeVPositions();
 	void normalizeHPositions(int vpos);
 
-	void initBigDisplay(BosonBigDisplay*);
+	void initBigDisplay(BosonBigDisplayBase*);
 
 	void initMap();
 	void initMiniMap();
@@ -224,9 +225,6 @@ protected:
 	void initPlayer();
 	void initGameCommandFrame();
 	void initLayout();
-
-	void addMouseIO(BosonBigDisplay*);
-
 
 private:
 	void init();
