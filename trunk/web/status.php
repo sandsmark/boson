@@ -51,7 +51,8 @@ draw_bigbox_text("What has been changed since 0.10:
 <ul>
  <h3>General</h3>
  <ul>
-    <li>Start of porting boson to plib (far from being complete !)</li>
+    <li>Start of porting boson to <a href=\"http://libufo.sourceforge.net\">libufo</a>
+    (far from being complete !)</li>
     <li>Added a network sync protocol, now it is possible to <i>check</i> if the
     clients are in sync. Additionally most sync errors can now be fixed.</li>
     <li>Improvements to effects system (load/save, species independent, delaying)</li>
@@ -102,6 +103,12 @@ draw_bigbox_text("What has been changed since 0.10:
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
+  <ul>
+     <li>Add a configure check for libufo</li>
+     <li>Test the Sync protocol at least once in real life</li>
+     <li>Support calling script functions from BoCondition (optional for
+     release)</li>
+  </ul>
  ");
 draw_bigbox_end();
 main_area_end();
