@@ -149,7 +149,11 @@ void BosonGLChat::addMessage(KPlayer* p, const QString& text)
 
 void BosonGLChat::addMessage(const QString& text)
 {
- if (boConfig->chatScreenMaxItems() >= 0 &&
+ if (boConfig->chatScreenMaxItems() == 0) {
+	// No messages allowed
+	return;
+ }
+ if (boConfig->chatScreenMaxItems() > 0 &&
 		d->mMessages.count() + 1 > (unsigned int)boConfig->chatScreenMaxItems()) {
 	removeFirstMessage();
  }
