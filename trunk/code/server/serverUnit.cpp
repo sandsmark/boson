@@ -115,11 +115,8 @@ void serverMobUnit::reportCreated(int i)
 {
 	mobileMsg_t     mobile;
 		
-	mobile.who = who; 
+	fill(mobile);
 	mobile.key = key;
-	mobile.x = __x;
-	mobile.y = __y;
-	mobile.type = type;
 
 	if ( SEND_TO_KNOWN == i )
 		sendToKnown( MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
@@ -132,11 +129,8 @@ void serverMobUnit::reportUnHidden(int i)
 {
 	mobileMsg_t     mobile;
 		
-	mobile.who = who; 
+	fill(mobile);
 	mobile.key = key;
-	mobile.x = __x;
-	mobile.y = __y;
-	mobile.type = type;
 
 	if ( SEND_TO_KNOWN == i )
 		sendToKnown( MSG_MOBILE_UNHIDDEN, sizeof(mobile), &mobile);
@@ -272,12 +266,9 @@ void serverFacility::getWantedAction(void)
 void serverFacility::reportUnHidden(int i)
 {
 	facilityMsg_t   facility; 
-		
-	facility.who = who; 
+
+	fill(facility);
 	facility.key = key;
-	facility.x = __x;
-	facility.y = __y;
-	facility.type = type;
 	facility.state = state;
 
 	if ( SEND_TO_KNOWN == i )
@@ -292,11 +283,8 @@ void serverFacility::reportCreated(int i)
 {
 	facilityMsg_t     facility;
 		
-	facility.who	= who; 
+	fill(facility);
 	facility.key	= key;
-	facility.x	= __x;
-	facility.y	= __y;
-	facility.type	= type;
 	facility.state	= state;
 
 
