@@ -554,250 +554,252 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		loadNode(p, reload);
 	}
  }
- if (node->type == LIB3DS_OBJECT_NODE) {
-	if (strcmp(node->name, "$$$DUMMY") == 0) {
-		return;
-	}
-	// we create a display list for *every single* node.
-	// This might look like a lot of overhead (both memory and speed - we
-	// need to use glCallList() every time which means more function calls)
-	// but it is actually less - e.g. in animations we don't have separate
-	// display lists for node that didn't change at all (less memory!)
-
-	Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
-	if (!mesh) {
-		return;
-	}
-	if (!node->user.d) {
-		node->user.d = glGenLists(1);
-		if (node->user.d == 0) {
-			boError(100) << k_funcinfo << "NULL display list created" << endl;
-			return;
-		}
-	} else {
-		if (reload) {
-			// it is important that the list is deleted, but the
-			// newly generated list must have the *same* number as
-			// it had before!
-			glDeleteLists(node->user.d, 1);
-		} else {
-			boWarning(100) << k_funcinfo << "node was already loaded before" << endl;
-			return;
-		}
-	}
-
-	unsigned int p;
-	Lib3dsMatrix invMeshMatrix;
-	lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
-	lib3ds_matrix_inv(invMeshMatrix);
-	GLuint myTex = 0;
-	bool resetColor = false; // needs to be true after we changed the current color
-
-	// AB: we have *lots* of faces! in numbers the maximum i found
-	// so far (only a short look) was about 25 toplevel nodes and
-	// rarely child nodes. sometimes 2 child nodes or so - maybe 10
-	// per model (if at all).
-	// but we have up to (short look only) 116 faces *per node*
-	// usually it's about 10-20 faces (minimum) per node!
-	//
-	// so optimization should happen here - if possible at all...
-
-
-	// AB: WARNING: from now on we demand that all faces in a mesh
-	// use the same material and therefore the same texture!
-	// --> maybe we want to change this one day in order to provide
-	// more details or so. but i hope for now we gain some speed of
-	// it. so we can group all faces into a single glBegin() call!
-	Lib3dsMaterial* mat = 0;
-	for (p = 0; p < mesh->faces; ++p) {
-		Lib3dsFace* f = &mesh->faceL[p];
-		Lib3dsMaterial* mat2 = 0;
-		if (f->material[0]) {
-			mat2 = lib3ds_file_material_by_name(m3ds, f->material);
-			if (p == 0) {
-				mat = mat2;
-			}
-			if (mat != mat2) {
-				boWarning(100) << "face " << p << " uses different material than previous faces" << endl;
-			}
-		}
-	}
-
-	if (mat) {
-		// this is the texture map of the object.
-		// t->name is the (file-)name and in
-		// mesh->texelL you can find the texture
-		// coordinates for glTexCoord*()
-		// note that mesh->texels can be 0 - then the
-		// mesh doesn't have any texture. otherwise it
-		// must be equal to mesh->points
-		Lib3dsTextureMap* t = &mat->texture1_map;
-		QString texName = cleanTextureName(t->name);
-		if (texName.isEmpty()) {
-			myTex = 0;
-		} else {
-			myTex = mModelTextures->texture(texName);
-			if (!myTex) {
-				boWarning(100) << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
-			}
-		}
-	} else {
-		//...
-		myTex = 0;
-//		boDebug() << "no mat for " << mesh->name << endl;
-	}
-
-#define NO_OPTIMIZE 1
-#if NO_OPTIMIZE
-	bool popTextureMatrix = false;
-#endif
-
-
-#if NO_OPTIMIZE
-	// now start the actual display list for this node.
-	glNewList(node->user.d, GL_COMPILE);
-#else
-	// AB: the next few lines try to optimize. but there might be a bug.
-	// imagine the texture map gets rotated - we can emulate this by
-	// rotating the texture coordinates as well - but how are the other
-	// coordinates calculated? those that are between the specified texture
-	// coordinates (which are assigned to the vertices)? is the texture
-	// matrix used for them as well? If yes this optimize approach can't
-	// work.
-	// AB: UPDATE: these optimizations do NOT influence the appearance.
-
-	BoMatrix texMatrix;sss
-#endif
-
-	if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
-		myTex = 0; // teamcolor objects are *not* textured
-		if (mTeamColor) {
-			glPushAttrib(GL_CURRENT_BIT);
-			glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
-			resetColor = true;
-		}
-	}
-
-	if (mat && myTex) {
-		// *ggg* this is a nice workaround.
-		// it's hard to do this with a Lib3dsMatrix by several
-		// reasons - so we do these calculations in OpenGL
-		// (*NOT* in a display list - immediate mode) and then
-		// get the texture matrix.
-		// With this matrix we can easily calculate the actual
-		// texture coordinates.
-		// btw: this means that all calculations are done only
-		// once (on startup) and therefore we'll have some
-		// speedup
-
-		// AB: this part isn't time critical anymore. you can
-		// call even OpenGL commands without runtime slowdowns.
-		// We calculate the actual texture map coordinates only
-		// once and then use the final calculations in the
-		// display list.
-		glMatrixMode(GL_TEXTURE);
-		glPushMatrix();
-		glLoadIdentity(); // should already be there
-		Lib3dsTextureMap* t = &mat->texture1_map;
-		if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
-			// 3ds does these things pretty unhandy. it doesn't
-			// scale as opengl does, but rather emulates scaling the
-			// texture itself (i.e. when the texture is centered on
-			// an object it will still be centered after scaling).
-			// so we need to translate them before scaling.
-			glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
-			glScalef(t->scale[0], t->scale[1], 1.0);
-		}
-		if (t->rotation != 0.0) {
-			glRotatef(-t->rotation, 0.0, 0.0, 1.0);
-		}
-		glTranslatef(-t->offset[0], -t->offset[1], 0.0);
-		glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
-		float scale = mesh->map_data.scale;
-		if (scale != 0.0 && scale != 1.0) {
-			// doesn't seem to be used in our models
-			glScalef(scale, scale, 1.0);
-		}
-#if !NO_OPTIMIZE
-		texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
-		if (texMatrix.isNull()) {
-			boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
-			texMatrix.loadIdentity();
-		}
-
-		glPopMatrix();
-#else
-		popTextureMatrix = true;
-#endif
-		glMatrixMode(GL_MODELVIEW);
-	} else {
-		// we use the default identity matrix - this is just "in case".
-		// we must not use this matrix at all!
-	}
-
-#if !NO_OPTIMIZE
-	// now start the actual display list for this node.
-	glNewList(node->user.d, GL_COMPILE);
-#endif
-	d->mNodeDisplayLists.append(node->user.d);
-	glBindTexture(GL_TEXTURE_2D, myTex);
-
-	glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
-	for (p = 0; p < mesh->faces; p++) {
-		Lib3dsFace* f = &mesh->faceL[p];
-		Lib3dsVector v[3];
-		Lib3dsTexel tex[3];
-		for (int i = 0; i < 3; i++) {
-			lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
-			if (mesh->texels != mesh->points) {
-				if (mesh->texels != 0) {
-					boWarning(100) << k_funcinfo << "hmm.. points: " << mesh->points
-							<< " , texels: " << mesh->texels << endl;
-				}
-				myTex = 0;
-			} else if (myTex) {
-				// mesh->texelL[f->points[i]] is our
-				// vector. it has x and y only, z is
-				// therefore 0.0
-				BoVector3 a;
-				BoVector3 b;
-#if NO_OPTIMIZE
-				b.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
-#else
-				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
-				texMatrix.transform(&b, &a);
-#endif
-				tex[i][0] = b[0];
-				tex[i][1] = b[1];
-			}
-		}
-		if (myTex) {
-			glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
-			glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
-			glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
-		} else {
-			glVertex3fv(v[0]);
-			glVertex3fv(v[1]);
-			glVertex3fv(v[2]);
-		}
-		
-	}
-	glEnd();
-#if NO_OPTIMIZE
-	if (popTextureMatrix) {
-		glMatrixMode(GL_TEXTURE);
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-	}
-#endif
-
-	if (resetColor) {
-		// we need to reset the color (mainly for the placement preview)
-		glPopAttrib();
-		resetColor = false;
-	}
-	glEndList();
+ if (node->type != LIB3DS_OBJECT_NODE) {
+	return;
  }
+ if (strcmp(node->name, "$$$DUMMY") == 0) {
+	return;
+ }
+ // we create a display list for *every single* node.
+ // This might look like a lot of overhead (both memory and speed - we
+ // need to use glCallList() every time which means more function calls)
+ // but it is actually less - e.g. in animations we don't have separate
+ // display lists for node that didn't change at all (less memory!)
+
+ Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
+ if (!mesh) {
+	return;
+ }
+ if (!node->user.d) {
+	node->user.d = glGenLists(1);
+	if (node->user.d == 0) {
+		boError(100) << k_funcinfo << "NULL display list created" << endl;
+		return;
+	}
+ } else {
+	if (reload) {
+		// it is important that the list is deleted, but the
+		// newly generated list must have the *same* number as
+		// it had before!
+		glDeleteLists(node->user.d, 1);
+	} else {
+		boWarning(100) << k_funcinfo << "node was already loaded before" << endl;
+		return;
+	}
+ }
+
+ unsigned int p;
+ Lib3dsMatrix invMeshMatrix;
+ lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+ lib3ds_matrix_inv(invMeshMatrix);
+ GLuint myTex = 0;
+ bool resetColor = false; // needs to be true after we changed the current color
+
+ // AB: we have *lots* of faces! in numbers the maximum i found
+ // so far (only a short look) was about 25 toplevel nodes and
+ // rarely child nodes. sometimes 2 child nodes or so - maybe 10
+ // per model (if at all).
+ // but we have up to (short look only) 116 faces *per node*
+ // usually it's about 10-20 faces (minimum) per node!
+ //
+ // so optimization should happen here - if possible at all...
+
+
+ // AB: WARNING: from now on we demand that all faces in a mesh
+ // use the same material and therefore the same texture!
+ // --> maybe we want to change this one day in order to provide
+ // more details or so. but i hope for now we gain some speed of
+ // it. so we can group all faces into a single glBegin() call!
+ Lib3dsMaterial* mat = 0;
+ for (p = 0; p < mesh->faces; ++p) {
+	Lib3dsFace* f = &mesh->faceL[p];
+	Lib3dsMaterial* mat2 = 0;
+	if (f->material[0]) {
+		mat2 = lib3ds_file_material_by_name(m3ds, f->material);
+		if (p == 0) {
+			mat = mat2;
+		}
+		if (mat != mat2) {
+			boWarning(100) << "face " << p << " uses different material than previous faces" << endl;
+		}
+	}
+ }
+
+ if (mat) {
+	// this is the texture map of the object.
+	// t->name is the (file-)name and in
+	// mesh->texelL you can find the texture
+	// coordinates for glTexCoord*()
+	// note that mesh->texels can be 0 - then the
+	// mesh doesn't have any texture. otherwise it
+	// must be equal to mesh->points
+	Lib3dsTextureMap* t = &mat->texture1_map;
+	QString texName = cleanTextureName(t->name);
+	if (texName.isEmpty()) {
+		myTex = 0;
+	} else {
+		myTex = mModelTextures->texture(texName);
+		if (!myTex) {
+			boWarning(100) << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
+		}
+	}
+ } else {
+	//...
+	myTex = 0;
+//	boDebug() << "no mat for " << mesh->name << endl;
+ }
+
+#define NO_OPTIMIZE 0
+#if NO_OPTIMIZE
+ bool popTextureMatrix = false;
+#endif
+
+
+#if NO_OPTIMIZE
+ // now start the actual display list for this node.
+ glNewList(node->user.d, GL_COMPILE);
+#else
+ // AB: the next few lines try to optimize. but there might be a bug.
+ // imagine the texture map gets rotated - we can emulate this by
+ // rotating the texture coordinates as well - but how are the other
+ // coordinates calculated? those that are between the specified texture
+ // coordinates (which are assigned to the vertices)? is the texture
+ // matrix used for them as well? If yes this optimize approach can't
+ // work.
+ // AB: UPDATE: these optimizations do NOT influence the appearance.
+
+ BoMatrix texMatrix;
+#endif
+
+
+ if (mat && myTex) {
+	// *ggg* this is a nice workaround.
+	// it's hard to do this with a Lib3dsMatrix by several
+	// reasons - so we do these calculations in OpenGL
+	// (*NOT* in a display list - immediate mode) and then
+	// get the texture matrix.
+	// With this matrix we can easily calculate the actual
+	// texture coordinates.
+	// btw: this means that all calculations are done only
+	// once (on startup) and therefore we'll have some
+	// speedup
+
+	// AB: this part isn't time critical anymore. you can
+	// call even OpenGL commands without runtime slowdowns.
+	// We calculate the actual texture map coordinates only
+	// once and then use the final calculations in the
+	// display list.
+	glMatrixMode(GL_TEXTURE);
+	glPushMatrix();
+	glLoadIdentity(); // should already be there
+	Lib3dsTextureMap* t = &mat->texture1_map;
+	if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
+		// 3ds does these things pretty unhandy. it doesn't
+		// scale as opengl does, but rather emulates scaling the
+		// texture itself (i.e. when the texture is centered on
+		// an object it will still be centered after scaling).
+		// so we need to translate them before scaling.
+		glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
+		glScalef(t->scale[0], t->scale[1], 1.0);
+	}
+	if (t->rotation != 0.0) {
+		glRotatef(-t->rotation, 0.0, 0.0, 1.0);
+	}
+	glTranslatef(-t->offset[0], -t->offset[1], 0.0);
+	glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
+	float scale = mesh->map_data.scale;
+	if (scale != 0.0 && scale != 1.0) {
+		// doesn't seem to be used in our models
+		glScalef(scale, scale, 1.0);
+	}
+#if !NO_OPTIMIZE
+	texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
+	if (texMatrix.isNull()) {
+		boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
+		texMatrix.loadIdentity();
+	}
+
+	glPopMatrix();
+#else
+	popTextureMatrix = true;
+#endif
+	glMatrixMode(GL_MODELVIEW);
+ } else {
+	// we use the default identity matrix - this is just "in case".
+	// we must not use this matrix at all!
+ }
+
+#if !NO_OPTIMIZE
+ // now start the actual display list for this node.
+ glNewList(node->user.d, GL_COMPILE);
+#endif
+ d->mNodeDisplayLists.append(node->user.d);
+
+ if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+	myTex = 0; // teamcolor objects are *not* textured
+	if (mTeamColor) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
+		resetColor = true;
+	}
+ }
+
+ glBindTexture(GL_TEXTURE_2D, myTex);
+
+ glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
+ for (p = 0; p < mesh->faces; p++) {
+	Lib3dsFace* f = &mesh->faceL[p];
+	Lib3dsVector v[3];
+	Lib3dsTexel tex[3];
+	for (int i = 0; i < 3; i++) {
+		lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
+		if (mesh->texels != mesh->points) {
+			if (mesh->texels != 0) {
+				boWarning(100) << k_funcinfo << "hmm.. points: " << mesh->points
+						<< " , texels: " << mesh->texels << endl;
+			}
+			myTex = 0;
+		} else if (myTex) {
+			// mesh->texelL[f->points[i]] is our
+			// vector. it has x and y only, z is
+			// therefore 0.0
+			BoVector3 a;
+			BoVector3 b;
+#if NO_OPTIMIZE
+			b.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
+#else
+			a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
+			texMatrix.transform(&b, &a);
+#endif
+			tex[i][0] = b[0];
+			tex[i][1] = b[1];
+		}
+	}
+	if (myTex) {
+		glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
+		glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
+		glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
+	} else {
+		glVertex3fv(v[0]);
+		glVertex3fv(v[1]);
+		glVertex3fv(v[2]);
+	}
+ }
+ glEnd();
+#if NO_OPTIMIZE
+ if (popTextureMatrix) {
+	glMatrixMode(GL_TEXTURE);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+ }
+#endif
+
+ if (resetColor) {
+	// we need to reset the color (mainly for the placement preview)
+	glPopAttrib();
+	resetColor = false;
+ }
+ glEndList();
 }
 
 void BosonModel::renderNode(Lib3dsNode* node)
