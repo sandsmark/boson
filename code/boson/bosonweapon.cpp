@@ -52,7 +52,30 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 {
   // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
-  mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
+  // Find out type of the weapon
+  QString shottype = cfg->readEntry("Type", "Missile");
+  if(shottype == "Bullet")
+  {
+    mShotType = BosonShot::Bullet;
+  }
+  else if(shottype == "Missile")
+  {
+    mShotType = BosonShot::Missile;
+  }
+  else if(shottype == "Mine")
+  {
+    mShotType = BosonShot::Mine;
+  }
+  else if(shottype == "Bomb")
+  {
+    mShotType = BosonShot::Bomb;
+  }
+  else
+  {
+    // Default to missile
+    mShotType = BosonShot::Missile;
+  }
+  // Other parameters
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
   // Reload interval is converted from seconds to advance calls here
   m_reloadingTime.init((int)(cfg->readDoubleNumEntry("Reload", 0) * 20.0f));
@@ -116,6 +139,32 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
 {
   // Group must have been set before
+  // Save type
+  QString shottype;
+  if(mShotType = BosonShot::Bullet)
+  {
+    shottype == "Bullet";
+  }
+  else if(mShotType = BosonShot::Missile)
+  {
+    shottype == "Missile";
+  }
+  else if(mShotType = BosonShot::Mine)
+  {
+    shottype == "Mine";
+  }
+  else if(mShotType = BosonShot::Bomb)
+  {
+    shottype == "Bomb";
+  }
+  else
+  {
+    boError() << k_funcinfo << "Invalid shot type: " << mShotType << endl;
+    // Default to missile
+    mShotType = BosonShot::Missile;
+  }
+  cfg->writeEntry("Type", shottype);
+  // Other parameters
   cfg->writeEntry("Name", mName);
   cfg->writeEntry("Range", range());
   // Reload interval is converted from advance calls to seconds here
@@ -148,6 +197,7 @@ void BosonWeaponProperties::reset()
   m_damage.init(0);
   m_damageRange.init(1);
   m_fullDamageRange.init(0.25 * m_damageRange);
+  mShotType = BosonShot::Missile;
   mCanShootAtAirUnits = false;
   mCanShootAtLandUnits = false;
   mHeight = 0.25;
