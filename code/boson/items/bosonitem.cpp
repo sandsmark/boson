@@ -365,7 +365,7 @@ void BosonItem::setSize(int width, int height, float depth)
  addToCells();
 }
 
-void BosonItem::renderItem()
+void BosonItem::renderItem(unsigned int lod)
 {
  BO_CHECK_NULL_RET(mModel);
  BO_CHECK_NULL_RET(mCurrentFrame);
@@ -375,9 +375,10 @@ void BosonItem::renderItem()
 	// AB: we should pick the correct displaylist from a map
 	// teamcolor->displaylist!
 	// not here, but in setDisplayList() or friends
+	// FIXME: LOD
 	glCallList(displayList());
  } else {
-	mCurrentFrame->renderFrame(teamColor());
+	mCurrentFrame->renderFrame(teamColor(), lod);
  }
 }
 

@@ -392,7 +392,7 @@ BoMatrix* BoFrame::matrix(int index) const
  return mMatrices[index];
 }
 
-void BoFrame::renderFrame(const QColor* teamColor)
+void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod)
 {
  for (unsigned int i = 0; i < mMeshCount; i++) {
 	BoMatrix* m = mMatrices[i];
@@ -408,12 +408,13 @@ void BoFrame::renderFrame(const QColor* teamColor)
 	glPushMatrix();
 	glMultMatrixf(m->data());
 #if USE_DISPLAYLISTS
+	// FIXME: LOD
 	if (mesh->displayList()) {
 		glCallList(mesh->displayList());
 	} else
 #endif
 	{
-		mesh->renderMesh(teamColor);
+		mesh->renderMesh(teamColor, lod);
 	}
 	glPopMatrix();
  }
