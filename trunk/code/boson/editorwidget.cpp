@@ -456,6 +456,8 @@ void EditorWidget::slotEditHeight(bool on)
  if (on) {
 	// "unit"action is not a good name anymore...
 	displayManager()->slotUnitAction(ActionChangeHeight);
+ } else {
+	displayManager()->unlockAction();
  }
 }
 
@@ -470,3 +472,4 @@ void EditorWidget::slotLockAction(bool locked)
 	d->mChangeHeight->setChecked(false);
  }
 }
+

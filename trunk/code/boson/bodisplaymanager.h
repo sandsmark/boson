@@ -100,6 +100,11 @@ public:
 	void addChatMessage(const QString& text);
 	void mapChanged();
 
+	/**
+	 * See @ref BosonBigDisplayInputBase::unlockAction
+	 **/
+	void unlockAction();
+
 public slots:
 	/**
 	 * Scroll the active display
