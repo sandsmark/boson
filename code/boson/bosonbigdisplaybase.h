@@ -148,9 +148,10 @@ public:
 	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
 
 
-	// we should probably make these 2 methods protected. i cant imagine any
+	// we should probably make these 4 methods protected. i cant imagine any
 	// useful public use
 	bool mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const;
+	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLdouble* dx, GLdouble* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
 
@@ -177,10 +178,8 @@ public slots:
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 
-	void signalTopLeftCell(int x, int y);
+	void signalChangeViewport(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
-	void signalSizeChanged(int w, int h); //TODO: use cell values
-	
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
 	void slotCursorEdgeTimeout();

@@ -57,8 +57,7 @@ public:
 	int mMapWidth;
 	int mMapHeight;
 
-	QSize mSelectionSize;
-	QPoint mSelectionPos;
+	QPointArray mSelectionRect;
 
 	double mScale;
 	double mZoom;
@@ -100,6 +99,8 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  d->mZoomDefault = new QPushButton(this);
  d->mZoomDefault->setText(i18n("Zoom Default"));
  grid->addWidget(d->mZoomDefault, 4, 2);
+
+ d->mSelectionRect.resize(8);
 
  connect(d->mZoomIn, SIGNAL(clicked()), this, SLOT(slotZoomIn()));
  connect(d->mZoomOut, SIGNAL(clicked()), this, SLOT(slotZoomOut()));
@@ -246,24 +247,21 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
  d->mPixmap->repaint(false);
 }
 
-void BosonMiniMap::slotMoveRect(int x, int y)
+void BosonMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
 {
- if((x != d->mSelectionPos.x()) || (y != d->mSelectionPos.y())) {
-	d->mSelectionPos = QPoint(x, y);
-	d->mPixmap->repaint(false);
- }
-}
+ d->mSelectionRect.setPoint(0, topLeft);
+ d->mSelectionRect.setPoint(1, topRight);
 
-void BosonMiniMap::slotResizeRect(int w, int h)
-{
- // There is bug somewhere and because of this, we need to make selection size
- //  bigger by 2 every time
- w = w / BO_TILE_SIZE + 2;
- h = h / BO_TILE_SIZE + 2;
- if((w != d->mSelectionSize.width()) || (h != d->mSelectionSize.height())) {
-	d->mSelectionSize = QSize(w, h);
-	d->mPixmap->repaint(false);
- }
+ d->mSelectionRect.setPoint(2, topRight);
+ d->mSelectionRect.setPoint(3, bottomRight);
+
+ d->mSelectionRect.setPoint(4, bottomRight);
+ d->mSelectionRect.setPoint(5, bottomLeft);
+
+ d->mSelectionRect.setPoint(6, bottomLeft);
+ d->mSelectionRect.setPoint(7, topLeft);
+
+ d->mPixmap->repaint(false);
 }
 
 void BosonMiniMap::setMap(BosonMap* map)
@@ -454,30 +452,54 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 	// Resize pixmap (slow)
 	createGround();
  }
- QRect selectionRect(d->mSelectionPos, d->mSelectionSize);
- if (zoom() > 1.0) {
-	d->mPainterMoveX = d->mSelectionPos.x() + mapWidth() / zoom() <= mapWidth() ?
-			-d->mSelectionPos.x() :
-			-(mapWidth() - mapWidth() / zoom());
-	d->mPainterMoveY = d->mSelectionPos.y() + mapHeight() / zoom() <= mapHeight() ?
-			-d->mSelectionPos.y() :
-			-(mapHeight() - mapHeight() / zoom());
+
+ // it might be possible that the minimap is bigger than the size of the
+ // displayed map. Then we can display only a part of the pixmap, but we must
+ // ensure that the selectionRect is inside this part.
+ double moveX[4];
+ double moveY[4];
+ for (int i = 0; i < 8; i += 2) {
+	QPoint p = d->mSelectionRect.point(i);
+	if (p.x() + mapWidth() / zoom() <= mapWidth()) {
+		// the point is outside of the display map. move the displayed
+		// map
+		moveX[i / 2] = -p.x();
+	} else {
+		// hmm.. AB: why not 0 ? // FIXME
+		// 0 doesn't work .. why?
+		moveX[i / 2] = -(mapWidth() - mapWidth() / zoom());
+	}
+	if (p.y() + mapHeight() / zoom() <= mapWidth()) {
+		// see above.
+		moveY[i / 2] = -p.y();
+	} else {
+		moveY[i / 2]  = -(mapHeight() - mapHeight() / zoom());
+	}
  }
+ 
+ // TODO: there are four different points which might be out of the display.
+ // check all of them! remeber that it might be that if we move the display so
+ // that the third point can be displayed the second might be out of the
+ // display then!
+ d->mPainterMoveX = moveX[0];
+ d->mPainterMoveY = moveY[0];
+ 
  // Using bitBlt() is MUCH faster than using QPainter::drawPixmap(), especially
  //  when you scale QPainter (difference may be hundreds of times)
  bitBlt(d->mPixmap, 0, 0, ground(), (int)-(d->mPainterMoveX * scale() * zoom()), 
 		(int)-(d->mPainterMoveY * scale() * zoom()),
 		d->mPixmap->width(), d->mPixmap->height());
- 
+
+
  // the little rectangle
  QPainter p;
  p.begin(d->mPixmap);
  p.scale(scale(), scale());
  p.scale(zoom(), zoom());
- p.translate(d->mPainterMoveX, d->mPainterMoveY);
+ p.translate(d->mPainterMoveX, d->mPainterMoveY); // moves the coordinate system, *not* the objects' coordinate system (i.e. different to OpenGL translates)
  p.setPen(white);
  p.setRasterOp(XorROP);
- p.drawRect(selectionRect);
+ p.drawLineSegments(d->mSelectionRect);
 
  p.end();
  return QWidget::eventFilter(o, e);

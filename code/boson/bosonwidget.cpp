@@ -723,17 +723,17 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisp
  }
 
  if (old) {
-	disconnect(old, SIGNAL(signalTopLeftCell(int, int)),
-			minimap(), SLOT(slotMoveRect(int, int)));
-	disconnect(old, SIGNAL(signalSizeChanged(int, int)),
-			minimap(), SLOT(slotResizeRect(int, int)));
+	disconnect(old, SIGNAL(signalChangeViewport(const QPoint&,
+			const QPoint&, const QPoint&, const QPoint&)),
+			minimap(), SLOT(slotMoveRect(const QPoint&,
+			const QPoint&, const QPoint&, const QPoint&)));
 	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 			old, SLOT(slotReCenterDisplay(const QPoint&)));
  }
- connect(active, SIGNAL(signalTopLeftCell(int, int)),
-		minimap(), SLOT(slotMoveRect(int, int)));
- connect(active, SIGNAL(signalSizeChanged(int, int)),
-		minimap(), SLOT(slotResizeRect(int, int)));
+ connect(active, SIGNAL(signalChangeViewport(const QPoint&,const QPoint&,
+		const QPoint&, const QPoint&)),
+		minimap(), SLOT(slotMoveRect(const QPoint&, const QPoint&,
+		const QPoint&, const QPoint&)));
  connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 		active, SLOT(slotReCenterDisplay(const QPoint&)));
 

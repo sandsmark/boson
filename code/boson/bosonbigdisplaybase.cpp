@@ -129,7 +129,7 @@ private:
 	GLfloat mPosX;
 	GLfloat mPosY;
 	GLfloat mPosZ;
-	GLfloat mZoomFactor; //TODO
+	GLfloat mZoomFactor; // we probably won't use this. mPosZ has the same effect and doesn't cause a "fish eye" perspective
 
 	GLfloat mCenterDiffX;
 	GLfloat mCenterDiffY;
@@ -459,7 +459,9 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  d->mEvenFlag = true;
 
 
- emit signalSizeChanged(w, h);
+ // update the minimap
+ setCamera(d->mCamera);
+
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
@@ -523,38 +525,11 @@ void BosonBigDisplayBase::paintGL()
  }
  d->mEvenFlag = !d->mEvenFlag;
  calcFPS();
- /*
- glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
- glLoadIdentity();
 
- float upX, upY, upZ;
- upX = 0.0;
- upY = 1.0;
- upZ = 0.0;
- float centerX, centerY, centerZ;
- centerX = d->mCamera.centerX();
- centerY = d->mCamera.centerY();
- centerZ = -100.0;
-// centerZ = d->mPosZ;
- // TODO: performance: isn't it possible to skip this by using pushMatrix() and
- // popMatrix() a clever way? - afaics OpenGL needs to calculate the inverse at
- // this point...
- gluLookAt(cameraX(), cameraY(), cameraZ(), 
-		centerX, centerY, centerZ, 
-		upX, upY, upZ);
- if (checkError()) {
-	kdError() << k_funcinfo << "after gluLookAt()" << endl;
- }
- */
-
+ // note: we don't call gluLookAt() here because of performance. instead we just
+ // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
+ // is called only whenever setCamera() is called.
  glPushMatrix();
-
- // the gluLookAt() above is the most important call for the modelview matrix.
- // everything else will be discarded by glPushMatrix/glPopMatrix anyway. So we
- // cache the matrix here, for mapCoordinates()
- // FIXME: call this only when the modelview matrix changed, i.e. when the
- // camera changed!
- glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
@@ -1086,6 +1061,22 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdoub
  return true;
 }
 
+bool BosonBigDisplayBase::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
+{
+ GLdouble x, y, z;
+ if (!mapCoordinates(pos, &x, &y, &z)) {
+	return false;
+ }
+ y *= -1;
+ int cellX = (int)(x / BO_GL_CELL_SIZE);
+ int cellY = (int)(y / BO_GL_CELL_SIZE);
+ cellX = QMAX(0, QMIN((int)mCanvas->mapWidth(), cellX));
+ cellY = QMAX(0, QMIN((int)mCanvas->mapHeight(), cellY));
+ cell->setX(cellX);
+ cell->setY(cellY);
+ return true;
+}
+
 void BosonBigDisplayBase::enterEvent(QEvent*)
 {
  if (!cursor()) {
@@ -1385,8 +1376,7 @@ void BosonBigDisplayBase::generateMapDisplayList()
  if (!d->mInitialized) {
 	glInit();
  }
- BosonMap* map = mCanvas->map();
- if (!map) {
+ if (!mCanvas->map()) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -1414,11 +1404,14 @@ void BosonBigDisplayBase::generateMapDisplayList()
  
  GLfloat cellYPos = -BO_GL_CELL_SIZE;
  GLfloat cellXPos = 0.0;
- for (unsigned int cellY = 0; cellY < map->height(); cellY++) {
+ for (unsigned int cellY = 0; cellY < mCanvas->mapHeight(); cellY++) {
 	cellXPos = 0.0;
-	for (unsigned int cellX = 0; cellX < map->width(); cellX++) {
-		Cell* cell = map->cell(cellX, cellY);
-		// we don't check for a NULL cell in favor of performance
+	for (unsigned int cellX = 0; cellX < mCanvas->mapWidth(); cellX++) {
+		Cell* cell = mCanvas->cell(cellX, cellY);
+		if (!cell) {
+			kdWarning() << k_funcinfo << "NULL cell" << endl;
+			continue;
+		}
 		GLuint texture = tiles->textures()->texture(cell->tile());
 		glBindTexture(GL_TEXTURE_2D, texture); // which texture to load
 	
@@ -1494,9 +1487,6 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  centerY = d->mCamera.centerY();
  centerZ = -100.0;
 // centerZ = d->mPosZ;
- // TODO: performance: isn't it possible to skip this by using pushMatrix() and
- // popMatrix() a clever way? - afaics OpenGL needs to calculate the inverse at
- // this point...
  gluLookAt(cameraX(), cameraY(), cameraZ(), 
 		centerX, centerY, centerZ, 
 		upX, upY, upZ);
@@ -1504,18 +1494,20 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
 	kdError() << k_funcinfo << "after gluLookAt()" << endl;
  }
 
+ // the gluLookAt() above is the most important call for the modelview matrix.
+ // everything else will be discarded by glPushMatrix/glPopMatrix anyway (in
+ // paintGL()). So we cache the matrix here, for mapCoordinates()
+ glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
 
-
-#if 0
- // hmm.. TODO !
- int cellX = (int)(x1 / BO_GL_CELL_SIZE);
- int cellY = -(int)(y1 / BO_GL_CELL_SIZE);
- emit signalTopLeftCell(cellX, cellY);
-#endif
-
- // TODO: if z changed also the size changes - the player can see more on the
- // screen. we should emit signalSizeChanged(). that signal should be renamed
- // (signalViewSize() or something)
+ QPoint cellTL; // topleft cell
+ QPoint cellTR; // topright cell
+ QPoint cellBL; // bottomleft cell
+ QPoint cellBR; // bottomright cell
+ mapCoordinatesToCell(QPoint(0, 0), &cellTL);
+ mapCoordinatesToCell(QPoint(0, d->mViewport[3]), &cellBL);
+ mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
+ mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
+ emit signalChangeViewport(cellTL, cellTR, cellBL, cellBR);
 }
 
 GLfloat BosonBigDisplayBase::cameraX() const
