@@ -40,7 +40,6 @@ Editor (map, unit, scenario) TODOs
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done
-- selection rect is not working correctly if zooming in
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
