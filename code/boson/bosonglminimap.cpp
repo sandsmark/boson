@@ -109,6 +109,11 @@ void BosonGLMiniMap::setLocalPlayerIO(PlayerIO* io)
  }
 }
 
+bool BosonGLMiniMap::showMiniMap() const
+{
+ return d->mShowMiniMap;
+}
+
 void BosonGLMiniMap::slotShowMiniMap(bool s)
 {
  d->mShowMiniMap = s;
@@ -626,14 +631,24 @@ bool BosonGLMiniMap::mouseEvent(KGameIO*, QDataStream&, QMouseEvent* e, bool* se
 	return true;
  }
  if (e->button() == Qt::LeftButton) {
-	emit signalReCenterView(cell);
+	emitSignalReCenterView(cell);
 	return true;
  }
  if (e->button() == Qt::RightButton) {
-	emit signalMoveSelection(cell.x(), cell.y());
+	emitSignalMoveSelection(cell);
 	return true;
  }
  return false;
+}
+
+void BosonGLMiniMap::emitSignalReCenterView(const QPoint& cell)
+{
+ emit signalReCenterView(cell);
+}
+
+void BosonGLMiniMap::emitSignalMoveSelection(const QPoint& cell)
+{
+ emit signalMoveSelection(cell.x(), cell.y());
 }
 
 
@@ -782,6 +797,7 @@ void BosonGLMiniMapRenderer::renderGimmicks()
 {
 }
 
+#warning FIXME: renderLogo in libufo
 void BosonGLMiniMapRenderer::renderLogo()
 {
  if (d->mLogo.width() * d->mLogo.height() <= 0 || d->mLogo.isNull()) {
@@ -808,7 +824,10 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  BO_CHECK_NULL_RET(d->mMapTexture);
  BO_CHECK_NULL_RET(d->mGLMapTexture);
  glPushMatrix();
- glLoadIdentity();
+
+ // AB: this is only for pre-ufo use
+// glLoadIdentity();
+
  glPushAttrib(GL_ENABLE_BIT);
  glEnable(GL_TEXTURE_2D);
  d->mModelviewMatrix.loadIdentity();
@@ -832,7 +851,7 @@ void BosonGLMiniMapRenderer::renderMiniMap()
 
 void BosonGLMiniMapRenderer::renderQuad()
 {
- glMultMatrixf(d->mModelviewMatrix.data());
+// glMultMatrixf(d->mModelviewMatrix.data());
  // AB: I'd like to use glTexCoord2i(), but at least ATIs implementation makes a
  // glTexCoord2f(1,1) out of glTexCoord2i(1, 1) which is not what I expect here.
  // so instead we use alpha blending to avoid having large parts of the rendered

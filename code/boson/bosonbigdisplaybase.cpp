@@ -58,6 +58,7 @@
 #include "bomeshrenderermanager.h"
 #include "bolight.h"
 #include "bosonglminimap.h"
+#include "bosonufominimap.h"
 #include "bomaterial.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
@@ -340,6 +341,7 @@ public:
 		mAdvanceCalls = 0;
 		mGamePaused = 0;
 		mUfoChat = 0;
+		mUfoMiniMap = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -426,6 +428,7 @@ public:
 	BoUfoLabel* mAdvanceCalls;
 	BoUfoLabel* mGamePaused;
 	BosonUfoChat* mUfoChat;
+	BosonUfoMiniMap* mUfoMiniMap;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -791,6 +794,10 @@ void BosonBigDisplayBase::initUfoGUI()
  d->mPathFinderDebug = new BoUfoLabel();
  northEast->addWidget(d->mPathFinderDebug);
 
+ d->mUfoMiniMap = new BosonUfoMiniMap();
+ d->mUfoMiniMap->setMiniMap(d->mGLMiniMap);
+ northWest->addWidget(d->mUfoMiniMap);
+
  d->mMatricesDebug = new BoUfoVBox();
  d->mMatricesDebugProjection = new BoUfoMatrix();
  d->mMatricesDebugModelview = new BoUfoMatrix();
@@ -1044,6 +1051,17 @@ void BosonBigDisplayBase::paintGL()
  renderBulletTrailEffects(d->mVisibleEffects);
 
  glDisable(GL_FOG);
+
+ boProfiling->renderUfo(true);
+ if (ufoManager()) {
+	boTextureManager->invalidateCache();
+	glColor3ub(255, 255, 255);
+	updateUfoLabels();
+	ufoManager()->dispatchEvents();
+	ufoManager()->render();
+ }
+ boProfiling->renderUfo(false);
+
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect and minimap
 
  // cursor and text are drawn in a 2D-matrix, so that we can use window
@@ -1058,9 +1076,6 @@ void BosonBigDisplayBase::paintGL()
 
  // alpha blending is used for cursor/text/...
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-// glEnable(GL_BLEND);
- renderMiniMap();
 
  renderFadeEffects(d->mVisibleEffects);
 
@@ -1078,16 +1093,6 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderText(false);
 
  glPopMatrix();
-
- boProfiling->renderUfo(true);
- if (ufoManager()) {
-	boTextureManager->invalidateCache();
-	glColor3ub(255, 255, 255);
-	updateUfoLabels();
-	ufoManager()->dispatchEvents();
-	ufoManager()->render();
- }
- boProfiling->renderUfo(false);
 
  bool showProfilingMessage = boProfiling->renderEntries() < MAX_PROFILING_ENTRIES;
  boProfiling->render(false);
@@ -2311,9 +2316,12 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
  if (e->type() != QEvent::Wheel) {
 	bool send = false;
 	bool taken = false;
+#if 0
+	// AB: we use libufo here, now.
 	if (!taken && d->mGLMiniMap) {
 		taken = d->mGLMiniMap->mouseEvent(io, stream, e, &send);
 	}
+#endif
 	if (taken) {
 		if (send) {
 			*eatevent = true;
