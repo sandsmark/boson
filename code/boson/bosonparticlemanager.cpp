@@ -125,7 +125,7 @@ void BosonParticleManager::initSmokeParticle(BosonParticleSystem*, BosonParticle
 //  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "initing particle" << endl;
   particle->life = getFloat(2.0, 3.0);  // Particle's lifetime is between 0.5 and 2.0 seconds
   particle->maxage = particle->life;
-  particle->velo = BoVector3(getFloat(-0.3, 0.3), getFloat(-0.3, 0.3), getFloat(0.4, 1.0));  // Random velocity (per second)
+  particle->velo = BoVector3(getFloat(0.05, 0.55), getFloat(-0.15, 0.45), getFloat(0.4, 1.0));  // Random velocity (per second)
   particle->color = BoVector4(0.2, 0.2, 0.2, 0.7);
   particle->pos = BoVector3(getFloat(-0.2, 0.2), getFloat(-0.2, 0.2), getFloat(-0.1, 0.25));  // We randomize position little bit
 }
