@@ -163,6 +163,8 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			if (send) {
 				*eatevent = true;
 			}
+		} else if (e->button() == MidButton) {
+			center(pos.x(), pos.y());
 		}
 //		e->accept();
 		break;
@@ -337,7 +339,7 @@ void BosonBigDisplay::drawSelectionRect()
 void BosonBigDisplay::slotReCenterView(const QPoint& pos)
 {
 // pos.x() and pos.y() are the cell numbers! *= BO_TILE_SIZE are the coordinates
- setContentsPos(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE);
+ center(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE);
 }
 
 void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool& send)
@@ -441,6 +443,8 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 			startSelection(pos);
 		} else if (e->button() == RightButton) {
 			editorActionClicked(pos);
+		} else if (e->button() == MidButton) {
+			center(pos.x(), pos.y());
 		}
 		break;
 	default:
