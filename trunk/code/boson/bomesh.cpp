@@ -688,7 +688,7 @@ void BoMesh::allocatePoints(unsigned int points)
  // overwrite it later anyway. but valgrind complains for meshes that don't use
  // textures (since we copy uninitialized values around).
  for (unsigned int i = 0; i < points * 5; i++) {
-	d->mPoints[i] = 0.0f;
+	d->mAllocatedPoints[i] = 0.0f;
  }
 }
 
@@ -898,6 +898,6 @@ void BoMesh::movePoints(float* array, int index)
  }
  delete[] d->mAllocatedPoints;
  d->mAllocatedPoints = 0;
- d->mPoints = array;
+ d->mPoints = array + index * 5;
 }
 
