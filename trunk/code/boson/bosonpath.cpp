@@ -382,8 +382,10 @@ float BosonPath::cost(int x, int y)
   }
 
   // Check if there are units on that tile (slow method?)
-  QCanvasItemList list = mUnit->canvas()->collisions(QRect(x * BO_TILE_SIZE,
-      y * BO_TILE_SIZE, BO_TILE_SIZE, BO_TILE_SIZE));
+  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE - 1, BO_TILE_SIZE - 1);// QT uses QCanvasRectangle::boudingRect() for collision detection - but this @_,+p*@ function adds +1 to width and height !!! (QCanvasRectangle::rect() is ok)
+  // collisions() consitst in this case in a simple
+  // QRect r1=rect,r2=mUnit->boundingRectAdvanced(); return r1.intersects(r2);
+  QCanvasItemList list = mUnit->canvas()->collisions(rect);
   if(! list.isEmpty())
   {
     bool flying = mUnit->isFlying();
