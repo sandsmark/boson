@@ -311,7 +311,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  // get used, but sometimes it is also handy to add them here (e.g. when it
  // isn't 100% clear which class will reference it first).
  addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", DEFAULT_GROUND_RENDERER));
- addDynamicEntry(new BoConfigUIntEntry(this, "UseLOD", 0));
+ addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));
 
  // load from config
  reset(conf);
