@@ -328,8 +328,8 @@ bool Unit::moveTo(int x, int y)
  d->mMoveDestY = y;
 
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
- //  set searchpath to true and find path in MobileUnit::advanceMove()
- searchpath = true;
+ //  set mSearchPath to true and find path in MobileUnit::advanceMove()
+ mSearchPath = true;
 
  return true;
 }
@@ -598,15 +598,13 @@ bool Unit::collidesWith(const QCanvasItem* item) const
 {
  // New collision-check method for units
 
- if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
-	QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
-	return itemrect.intersects(boundingRectAdvanced());
- }
-
- if(! RTTI::isUnit(item->rtti())) {
+ if(!RTTI::isUnit(item->rtti())) {
+	if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
+		QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
+		return itemrect.intersects(boundingRectAdvanced());
+	}
 	return QCanvasSprite::collidesWith(item);
  }
-
 
  // I use centers of units as positions here
  double myx, myy, itemx, itemy;
@@ -688,9 +686,9 @@ void MobileUnit::advanceMove()
  }
 
 
- if(searchpath) {
+ if(mSearchPath) {
 	newPath();
-	searchpath = false;
+	mSearchPath = false;
 	return;
  }
 
