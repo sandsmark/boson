@@ -180,6 +180,8 @@ protected:
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
 
+	void renderModel();
+
 	bool haveModel() const
 	{
 		if (mModel && mCurrentFrame >= 0) {
