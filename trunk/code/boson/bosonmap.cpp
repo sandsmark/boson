@@ -38,19 +38,19 @@
 
 float BoHeightMap::pixelToHeight(int p)
 {
- // we have 255 different values available. we use 0.1 steps, i.e. if
- // the pixel is increased by 1 the height is increased by 0.1.
+ // we have 255 different values available. we use 0.125 steps, i.e. if
+ // the pixel is increased by 1 the height is increased by 0.125.
  // values below 105 cause a negative height, values above 105 a positive
  // height.
- // this means we have a height range from -105/10 to 150/10 aka from -10.5 to
- // 15.0
+ // this means we have a height range from -105/8 to 150/8 aka from -13.125 to
+ // 18.75
 // boDebug() << k_funcinfo << p << "->" << ((float)(p-105))/10 << endl;
- return ((float)(p - 105)) / 10;
+ return ((float)(p - 105)) / 8.0f;
 }
 
 int BoHeightMap::heightToPixel(float height)
 {
- return (int)(height * 10 + 105);
+ return ((int)(height * 8.0f)) + 105;
 }
 
 bool BoHeightMap::save(QDataStream& stream)
