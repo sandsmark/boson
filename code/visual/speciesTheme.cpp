@@ -107,7 +107,7 @@ char		buffer[100];
 QString		path(themePath + "/units/" + mobileProp[index].name);
 
 
-for(j=0; j<12; j++) {
+for(j=0; j<PIXMAP_PER_MOBILE; j++) {
 	sprintf(buffer, "/field.%02d.bmp", j);
 	if ( ! loadPixmap(path + buffer, &p)) {
 		logf(LOG_ERROR, "SpeciesTheme : Can't load(mob) %s/field.%02d.bmp ...\n", (const char *)path, j);
@@ -229,7 +229,7 @@ char		buffer[100];
 
 QString		path(themePath + "/facilities/" + facilityProp[i].name);
 
-for(j=0; j< CONSTRUCTION_STEP ; j++) {
+for(j=0; j< PIXMAP_PER_FIX ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
 	if (!loadPixmap(path + buffer, &p)) {
 		logf(LOG_ERROR, "SpeciesTheme : Can't load(fix) %s/field.%03d.bmp ...\n", (const char *)path, j);
