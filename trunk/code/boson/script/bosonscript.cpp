@@ -658,12 +658,12 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
 
 /*****  Camera methods  *****/
 
-void BosonScript::moveCamera(BoVector3 pos)
+void BosonScript::moveCamera(const BoVector3& pos)
 {
   autoCamera()->setLookAt(pos);
 }
 
-void BosonScript::moveCameraBy(BoVector3 pos)
+void BosonScript::moveCameraBy(const BoVector3& pos)
 {
   autoCamera()->changeLookAt(pos);
 }
