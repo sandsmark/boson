@@ -1754,12 +1754,17 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		break;
 	}
 	case CameraZoom:
+		float z;
 		if (boAction.controlButton()) {
 			delta *= 3;
 		} else {
 			delta *= 1; // no effect, btw
 		}
 		camera()->changeZ(delta);
+		z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		if (camera()->z() < z + CAMERA_MIN_Z) {
+			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		}
 		cameraChanged();
 		break;
 	case CameraRotate:
@@ -1793,6 +1798,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.startZoom();
 		camera()->changeZ(d->mMouseMoveDiff.dy());
+		float z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		if (camera()->z() < z + CAMERA_MIN_Z) {
+			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		}
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
 		d->mMouseMoveDiff.startRotate();
@@ -1823,7 +1832,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 //			a = false;
 //			break;
 //		}
-//		a = true;
+//		a = true;moveLookAtBy
 //		QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
 //		QCursor::setPos(pos);
 
@@ -1836,6 +1845,10 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		// FIXME: we must also change camera's z-coordinate here to ensure that no
 		//  cells go through near clip.
 		camera()->moveLookAtBy(dx, dy, 0);
+		float z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		if (camera()->z() < z + CAMERA_MIN_Z) {
+			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
+		}
 		cameraChanged();
 	} else {
 		d->mMouseMoveDiff.stop();
