@@ -400,6 +400,10 @@ void BosonCanvas::fogLocal(int x, int y)
  if (!d->mFogPixmap) {
 	return;
  }
+ if (d->mFogOfWar[cell(x, y)]) {
+	kdError() << "tried adding fog of war twice!!!!" << endl;
+	return;
+ }
  QCanvasSprite* fog = new FogOfWar(d->mFogPixmap, this);
  fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  fog->setZ(Z_FOG_OF_WAR);
