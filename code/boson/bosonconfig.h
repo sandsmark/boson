@@ -99,6 +99,8 @@ public:
 	double miniMapZoom() const { return mMiniMapZoom; }
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
+	void setRMBMove(bool m) { mRMBMove = m; }
+	bool rmbMove() const { return mRMBMove; }
 
 	DebugMode debugMode() const;
 	/**
@@ -141,6 +143,9 @@ protected:
 	void saveMiniMapZoom(KConfig* conf);
 	double readMiniMapZoom(KConfig* conf);
 
+	void saveRMBMove(KConfig* conf);
+	bool readRMBMove(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -153,6 +158,7 @@ private:
 	double mMiniMapScale;
 	double mMiniMapZoom;
 	unsigned int mArrowKeyStep;
+	bool mRMBMove;
 };
 
 #endif

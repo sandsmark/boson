@@ -181,9 +181,11 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		if (e->state() & LeftButton) {
 			moveSelectionRect(pos);
 		} else if (e->state() & RightButton) {
-			d->mIsRMBMove = true;
-			scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
-			d->mRMBMove = pos;
+			if (boConfig->rmbMove()) {
+				d->mIsRMBMove = true;
+				scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
+				d->mRMBMove = pos;
+			}
 		} else if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
 			if (selection().count() == 0) {
 				kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
@@ -575,9 +577,11 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 		if (e->state() & LeftButton) {
 //			moveSelectionRect(pos);
 		} else if (e->state() & RightButton) {
-			d->mIsRMBMove = true;
-			scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
-			d->mRMBMove = pos;
+			if (boConfig->rmbMove()) {
+				d->mIsRMBMove = true;
+				scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
+				d->mRMBMove = pos;
+			}
 		}
 		break;
 	}
