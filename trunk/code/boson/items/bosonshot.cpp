@@ -81,7 +81,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   move(x, y, z);
   setAnimated(true);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
-  mZ = z;
+  mZ = 0;
   // Particle systems
   mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
   canvas->addParticleSystems(mFlyParticleSystems);
