@@ -76,6 +76,8 @@
 #define CAMERA_MAX_Z FAR - 50
 #define CAMERA_MAX_RADIUS 40
 
+//#define BO_LIGHT 1
+
 
 float textureUpperLeft[2] = { 0.0, 1.0 };
 float textureLowerLeft[2] = { 0.0, 0.0 };
@@ -526,6 +528,7 @@ void BosonBigDisplayBase::initializeGL()
  float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
  float lightPos[] = {-500.0, 300.0, 200.0, 1.0};
+#ifdef BO_LIGHT
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
@@ -534,6 +537,7 @@ void BosonBigDisplayBase::initializeGL()
  // light makes things slower!
  glEnable(GL_LIGHT0);
  glEnable(GL_LIGHTING);
+#endif
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -898,7 +902,10 @@ void BosonBigDisplayBase::paintGL()
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
+
+#ifdef BO_LIGHT
  glEnable(GL_LIGHTING);
+#endif
 
  glPopMatrix();
 
@@ -1175,7 +1182,9 @@ void BosonBigDisplayBase::renderParticles()
  glDepthMask(GL_TRUE);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glDisable(GL_BLEND);
+#ifdef BO_LIGHT
  glEnable(GL_LIGHTING);
+#endif
  //gettimeofday(&end, 0);
  //boDebug(150) << k_funcinfo << "Returning (all particles drawn); time elapsed: " << end.tv_usec - start.tv_usec << " us" << endl;
  //boDebug(150) << k_funcinfo << "        Visibility check:  " << tmvisiblecheck.tv_usec - start.tv_usec << " us" << endl;
