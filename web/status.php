@@ -47,7 +47,6 @@ draw_bigbox_text("This is a list of features that I consider as
 	the list of features for the next release, but just a TODO list!
 	<h2>TODO</h2>
 	<ul>
-	  <li>Unit editor must be updated and it must use UnitProperties</li>
 	  <li>All units must have their own 3D model</li>
 	  <li>Generate the technology tree dynamically for documentation.</li>
 	</ul>
@@ -70,6 +69,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>Map/scenario editor is working again. Maps are at least modifyable,
 	  you can add/delete a few units.</li>
 	  <li>Removed the reloadstate progress bar</li>
+	  <li>Unit editor was updated and is now using UnitProperties</li>
 	</ul>
 	");
 
