@@ -231,7 +231,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 {
  Facility* fac = (Facility*)selection()->leader();
  ProductionPlugin* production = fac->productionPlugin();
- if (!production || !production->hasProduction() || production->completedProduction() < 0) {
+ if (!production || !production->hasProduction() || production->completedProduction() <= 0) {
 	return false;
  }
 

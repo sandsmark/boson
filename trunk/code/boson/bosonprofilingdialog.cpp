@@ -187,7 +187,7 @@ void BosonProfilingDialog::resetLoadUnitPage()
  for (; it != pd->mUnitTimes.end(); ++it) {
 	QListViewItem* unit = new QListViewItem(d->mUnits);
 	QString unitType;
-	unitType.sprintf("%05d", it.key());
+	unitType.sprintf("%05d", (int)it.key());
 	unit->setText(0, unitType);
 	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
 	long int time = 0;
