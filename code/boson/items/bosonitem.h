@@ -207,10 +207,12 @@ public:
 
 	inline float xVelocity() const { return mXVelocity; }
 	inline float yVelocity() const { return mYVelocity; }
-	void setVelocity(float vx, float vy)
+	inline float zVelocity() const { return mZVelocity; }
+	void setVelocity(float vx, float vy, float vz = 0.0)
 	{
 		mXVelocity = vx;
 		mYVelocity = vy;
+		mZVelocity = vz;
 	}
 
 	void setAnimationMode(int mode);
@@ -365,6 +367,7 @@ private:
 
 	float mXVelocity;
 	float mYVelocity;
+	float mZVelocity;
 
 // OpenGL values. should not be used for pathfinding and so on. Most stoff
 // shouldn't be stored in save() either
