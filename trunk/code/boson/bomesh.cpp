@@ -254,6 +254,13 @@ BoFace::BoFace()
 BoFace& BoFace::operator=(const BoFace& face)
 {
  setPointIndex(face.pointIndex());
+#if BOMESH_USE_1_NORMAL_PER_FACE
+ mNormals[0] = face.mNormals[0];
+#else
+ mNormals[0] = face.mNormals[0];
+ mNormals[1] = face.mNormals[1];
+ mNormals[2] = face.mNormals[2];
+#endif
  return *this;
 }
 
@@ -964,6 +971,8 @@ void BoMesh::calculateNormals()
 {
  // we don't use lib3ds' normals so that we can easily support file formats that
  // dont store the normals. furthermore we depend on less external data :)
+ //
+ // note that we calculate 1 normal per face only at the moment!
  for (unsigned int face = 0; face < facesCount(); face++) {
 	unsigned int index = face * 3;
 	BoVector3 a(vertex(face * 3 + 0));
