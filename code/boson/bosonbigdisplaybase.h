@@ -194,6 +194,11 @@ protected:
 	 **/
 	void renderText();
 
+	/**
+	 * Called by @ref paintGL only to render the cells on the screen
+	 **/
+	void renderCells();
+
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -201,7 +206,7 @@ protected:
 	virtual void updateCursor() = 0;
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
 
-	void generateMapDisplayList();
+	void generateCellList();
 
 	/**
 	 * Set a viewport. Basically the same as glViewport, but you should use

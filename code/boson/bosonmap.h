@@ -62,12 +62,12 @@ public:
 	/**
 	 * @return vertical cell count
 	 **/
-	unsigned int height() const { return mMapHeight; }
+	inline unsigned int height() const { return mMapHeight; }
 	
 	/**
 	 * @return Horizonatal cell count
 	 **/
-	unsigned int width() const { return mMapWidth; }
+	inline unsigned int width() const { return mMapWidth; }
 
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
@@ -113,6 +113,13 @@ public:
 	bool isValid() const;
 
 	Cell* cell(int x, int y) const;
+
+	/**
+	 * You should rather use @ref cell ! If you use this, you need to ensure
+	 * yourself, that all cells you want ta access are actually valid.
+	 * @return The internal cell array
+	 **/
+	inline Cell* cells() const { return mCells; }
 
 	void setModified(bool m) { mModified = m; }
 	bool modified() const { return mModified; }
@@ -164,6 +171,7 @@ private:
 private:
 	class BosonMapPrivate;
 	BosonMapPrivate* d;
+	Cell* mCells;
 	bool mModified;
 
 	unsigned int mMapWidth;

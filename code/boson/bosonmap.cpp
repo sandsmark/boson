@@ -37,13 +37,7 @@ class BosonMap::BosonMapPrivate
 public:
 	BosonMapPrivate()
 	{
-		mCells = 0;
 	}
-	
-
-	Cell* mCells;
-
-	bool mIsChanged;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -53,8 +47,8 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 
 BosonMap::~BosonMap()
 {
- if (d->mCells) {
-	delete[] d->mCells;
+ if (mCells) {
+	delete[] mCells;
  }
  delete d;
 }
@@ -62,6 +56,7 @@ BosonMap::~BosonMap()
 void BosonMap::init()
 {
  d = new BosonMapPrivate;
+ mCells = 0;
  setModified(false);
 }
 
@@ -208,17 +203,27 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  mMapWidth = mapWidth; // horizontal cell count
  mMapHeight = mapHeight; // vertical cell count
 
- if (d->mCells) {
+ if (mCells) {
 //	kdDebug() << "cells created before!! try to delete..." << endl;
-	delete[] d->mCells;
+	delete[] mCells;
  }
- d->mCells = new Cell[width() * height()];
+ mCells = new Cell[width() * height()];
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned y = 0; y < height(); y++) {
+		Cell* c = cell(x, y);
+		if (!c) {
+			kdError() << k_funcinfo << "Evil internal error!" << endl;
+			continue;
+		}
+		c->setPosition(x, y);
+	}
+ }
  return true;
 }
 
 bool BosonMap::loadCells(QDataStream& stream)
 {
- if (!d->mCells) {
+ if (!mCells) {
 	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
@@ -385,7 +390,7 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
 
 bool BosonMap::saveCells(QDomElement& node)
 {
- if (!d->mCells) {
+ if (!mCells) {
 	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
@@ -465,7 +470,7 @@ bool BosonMap::isValid() const
 	kdError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
- if (!d->mCells) {
+ if (!mCells) {
 	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
@@ -517,7 +522,7 @@ void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char versi
 
 Cell* BosonMap::cell(int x, int y) const
 {
- if (!d->mCells) {
+ if (!mCells) {
 	kdError() << k_funcinfo << "Cells not yet created" << endl;
 	return 0;
  }
@@ -527,7 +532,7 @@ Cell* BosonMap::cell(int x, int y) const
  if (y < 0 || y >= (int)height()) {
 	return 0;
  }
- return &d->mCells[ x + y * width() ];
+ return &mCells[ x + y * width() ];
 }
 
 void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
@@ -540,7 +545,6 @@ void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
 	return;
  }
  if (c->groundType() != groundType || c->version() != b) {
-	d->mIsChanged = false;
 	c->makeCell(groundType, b);
  }
 }

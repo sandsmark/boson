@@ -26,10 +26,18 @@
 Cell::Cell()
 {
  setGroundType(GroundUnknown);
+ mX = 0;
+ mY = 0;
 }
 
 Cell::~Cell()
 {
+}
+
+void Cell::setPosition(int x, int y)
+{
+ mX = x;
+ mY = y;
 }
 
 void Cell::setGroundType(GroundType t)

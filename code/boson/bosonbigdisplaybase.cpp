@@ -68,15 +68,10 @@
 #define FAR 100.0
 
 
-float textureUpperLeft[2] = { 0.0, 0.0 };
-float textureLowerLeft[2] = { 0.0, 1.0 };
-float textureLowerRight[2] = { 1.0, 1.0 };
-float textureUpperRight[2] = { 1.0, 0.0 };
-float textureCoordPointer[] = { 0.0, 0.0,
-                                0.0, 1.0,
-                                1.0, 1.0,
-                                1.0, 0.0};
-GLubyte unitIndices[] = { 0, 1, 2, 3 };
+float textureUpperLeft[2] = { 0.0, 1.0 };
+float textureLowerLeft[2] = { 0.0, 0.0 };
+float textureLowerRight[2] = { 1.0, 0.0 };
+float textureUpperRight[2] = { 1.0, 1.0 };
 
 class Camera
 {
@@ -134,6 +129,7 @@ private:
 	GLfloat mCenterDiffX;
 	GLfloat mCenterDiffY;
 };
+//int a1, a2;
 
 class SelectionRect
 {
@@ -307,8 +303,8 @@ public:
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
 
-	GLuint mMapDisplayList;
 	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
+	QPtrList<Cell> mRenderCells;
 
 	long long int mFpsTime;
 	double mFps;
@@ -373,8 +369,6 @@ void BosonBigDisplayBase::init()
 	}
  }
 
- d->mMapDisplayList = 0;
-
  if (!isValid()) {
 	kdError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
 	return;
@@ -384,7 +378,7 @@ void BosonBigDisplayBase::init()
 // setMinimumSize(QSize(400,400));
 
  glInit();
- generateMapDisplayList();
+// generateMapDisplayList();
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
@@ -456,6 +450,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  // mapCoordinates()
  glGetDoublev(GL_PROJECTION_MATRIX, d->mProjectionMatrix);
  extractFrustum(); // projection matrix changed
+ generateCellList();
  glMatrixMode(GL_MODELVIEW);
 
 
@@ -544,6 +539,10 @@ void BosonBigDisplayBase::paintGL()
  // is called only whenever setCamera() is called.
  glPushMatrix();
 
+ // FIXME: put these next to gluLookAt()
+// glRotatef(a1, 0.0, 0.0, 1.0);
+// glRotatef(a2, 0.0, 1.0, 0.0);
+
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
  glEnable(GL_BLEND); // AB: once we have 3d models for all units we can get rid of this. we need it for the cursor only then.
@@ -624,7 +623,7 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_BLEND);
  // TODO: disable GL_BLEND for cells? we'll need it for the cursor only
  boProfiling->renderCells(true);
- glCallList(d->mMapDisplayList);
+ renderCells();
  boProfiling->renderCells(false);
 
  if (checkError()) {
@@ -810,6 +809,43 @@ void BosonBigDisplayBase::renderText()
 }
 
 
+void BosonBigDisplayBase::renderCells()
+{
+ BosonTiles* tiles = mCanvas->tileSet();
+ if (!tiles) {
+	kdError() << k_funcinfo << "NULL tiles" << endl;
+	return;
+ }
+ if (!mCanvas->tileSet()->textures()) {
+	mCanvas->tileSet()->generateTextures();
+	if (!mCanvas->tileSet()->textures()) {
+		kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
+		return;
+	}
+ }
+
+ QPtrListIterator<Cell> cellIt(d->mRenderCells);
+ GLuint texture = 0;
+ int tile = -1;
+ for (; cellIt.current(); ++cellIt) {
+	Cell* c = cellIt.current();
+	GLfloat cellXPos = (float)c->x() * BO_GL_CELL_SIZE;
+	GLfloat cellYPos = -(float)c->y() * BO_GL_CELL_SIZE;
+	if (c->tile() != tile) {
+		texture = tiles->textures()->texture(c->tile());
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+	}
+	// FIXME: performance: only a single glBegin(GL_QUADS)!
+	glBegin(GL_QUADS);
+		glTexCoord2fv(textureUpperLeft); glVertex3f(cellXPos, cellYPos, 0.0);
+		glTexCoord2fv(textureLowerLeft); glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, 0.0);
+		glTexCoord2fv(textureLowerRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, 0.0);
+		glTexCoord2fv(textureUpperRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, 0.0);
+	glEnd();
+ }
+}
+
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
  GLdouble posX, posY, posZ;
@@ -861,6 +897,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				Camera camera = d->mCamera;
 				camera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
 				camera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
+//				a1 += d->mMouseMoveDiff.dx();
+//				a2 += d->mMouseMoveDiff.dy();
 				setCamera(camera);
 			} else if (e->state() & ShiftButton) {
 				// move the z-position of the cameraa
@@ -1060,6 +1098,8 @@ void BosonBigDisplayBase::slotResetViewProperties()
  d->mAspect = 1.0;
  setCamera(Camera());
  resizeGL(d->mViewport[2], d->mViewport[3]);
+// a1 = 0;
+// a2 = 0;
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
@@ -1442,15 +1482,19 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  setCamera(camera);
 }
 
-void BosonBigDisplayBase::generateMapDisplayList()
+void BosonBigDisplayBase::generateCellList()
 {
- makeCurrent();
+ // we need to regenerate the cell list whenever the modelview or the projection
+ // matrix changes. then the displayed cells have most probably changed.
+
  // some clever guy made QGLContet::initialized() protected - so we need to
  // implement our own version here :-(
  if (!d->mInitialized) {
 	glInit();
+	return;
  }
- if (!mCanvas->map()) {
+ BosonMap* map = mCanvas->map();
+ if (!map) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -1467,50 +1511,19 @@ void BosonBigDisplayBase::generateMapDisplayList()
 	}
  }
 
-
- GLuint list;
- list = glGenLists(1);
- if (!list) {
-	kdError() << k_funcinfo << "Error generating display list" << endl;
-	return;
- }
- glNewList(list, GL_COMPILE);
- 
- GLfloat cellYPos = -BO_GL_CELL_SIZE;
- GLfloat cellXPos = 0.0;
- for (unsigned int cellY = 0; cellY < mCanvas->mapHeight(); cellY++) {
-	cellXPos = 0.0;
-	for (unsigned int cellX = 0; cellX < mCanvas->mapWidth(); cellX++) {
-		Cell* cell = mCanvas->cell(cellX, cellY);
-		if (!cell) {
-			kdWarning() << k_funcinfo << "NULL cell" << endl;
-			continue;
-		}
-		GLuint texture = tiles->textures()->texture(cell->tile());
-		glBindTexture(GL_TEXTURE_2D, texture); // which texture to load
+ // re-generate the list of to-be-rendered cells:
+ d->mRenderCells.clear();
+ Cell* allCells = map->cells();
+ float radius = sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2));
+ for (unsigned int i = 0; i < map->width() * map->height(); i++) {
+	Cell* c = &allCells[i];
+	GLfloat x = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
+	GLfloat y = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
 	
-		// FIXME: we can improve performance here!
-		// manage different lists for different textures and
-		// iterate them separetely
-		// then we could render them in a single glBegin(GL_QUADS) call
-		// we can't render cells with differnt textures in a single call
-		// :(
-		// FIXME: performance: only a single glBegin(GL_QUADS)!
-		glBegin(GL_QUADS);
-			glTexCoord2fv(textureUpperLeft); glVertex3f(cellXPos, cellYPos, 0.0);
-			glTexCoord2fv(textureLowerLeft); glVertex3f(cellXPos, cellYPos + BO_GL_CELL_SIZE, 0.0);
-			glTexCoord2fv(textureLowerRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos + BO_GL_CELL_SIZE, 0.0);
-			glTexCoord2fv(textureUpperRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, 0.0);
-		glEnd();
-
-		cellXPos += BO_GL_CELL_SIZE;
+	if (sphereInFrustum(x, y, 0.0, radius)) {
+		d->mRenderCells.append(c);
 	}
-	// 0.0,0.0 is bottom-left in opengl, not top-left
-	cellYPos -= BO_GL_CELL_SIZE;
  }
-
- glEndList();
- d->mMapDisplayList = list;
 }
 
 void BosonBigDisplayBase::setCamera(const Camera& camera)
@@ -1533,6 +1546,8 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  centerY = d->mCamera.centerY();
  centerZ = -100.0;
 // centerZ = d->mPosZ;
+// glRotatef(a1, 0.0, 0.0, 1.0);
+// glRotatef(a2, 1.0, 0.0, 0.0);
  gluLookAt(cameraX(), cameraY(), cameraZ(), 
 		centerX, centerY, centerZ, 
 		upX, upY, upZ);
@@ -1545,6 +1560,7 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
  // paintGL()). So we cache the matrix here, for mapCoordinates()
  glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
  extractFrustum(); // modelview matrix changed
+ generateCellList();
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
