@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 #include <kglobal.h>
 #include <kstandarddirs.h>
 
-BoApplication::BoApplication(bool allowStyles)
-	: KApplication(allowStyles)
+BoApplication::BoApplication(bool allowStyles, bool enableGUI)
+	: KApplication(allowStyles, enableGUI)
 {
  // this is for broken installations. people tend to install to /usr/local or
  // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
