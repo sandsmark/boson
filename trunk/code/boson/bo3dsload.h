@@ -51,20 +51,6 @@ public:
 	void finishLoading();
 
 	/**
-	 * @return The frame @p frame that resideds in the .3ds file. These are
-	 * actual animation and model frames, not the construction animation.
-	 *
-	 * See also @ref constructionStep
-	 **/
-	BoFrame* frame(unsigned int frame) const;
-
-	/**
-	 * @return The number of actual frames (i.e. frames that reside in the
-	 * 3ds files. @ref constructionStep frames don't count)
-	 **/
-	unsigned int frames() const;
-
-	/**
 	 * @return The absolute filename to the .3ds file of this model.
 	 **/
 	QString file() const;
