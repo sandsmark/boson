@@ -21,25 +21,46 @@
 #include <kapplication.h>
 #include <kfiledialog.h>
 
-void BoUnitEditor::slotShootAtChanged()
+#include "unitproperties.h"
+#include "bosonweapon.h"
+#include "pluginproperties.h"
+
+QString listToString(QValueList<unsigned long int> list)
 {
-    if(mUnitCanShootLand->isChecked() || mUnitCanShootAir->isChecked()) {
-	mUnitWeaponGroup->setEnabled(true);     
-    } else {
-	mUnitWeaponGroup->setEnabled(false);
+    QString str;
+    QValueList<unsigned long int>::Iterator it;
+    for(it = list.begin(); it != list.end(); ++it) {
+	str = str + "," + QString::number(*it);
     }
+    if(!str.isEmpty()) {
+	str.remove(0, 1);
+    }
+    return str;
 }
+
+QValueList<unsigned long int> stringToList(QString str)
+{
+    QValueList<unsigned long int> list;
+    QStringList strlist = QStringList::split(",", str);
+    QStringList::Iterator it;
+    for(it = strlist.begin(); it != strlist.end(); ++it) {
+	list.append((*it).toULong());
+    }
+    return list;
+}
+
+
 
 void BoUnitEditor::slotTypeChanged()
 {
     if(mUnitTypeFacility->isChecked()) {
 	// Type is facility
-	//mUnitProducingGroup->setEnabled(true);
+	mUnitHarvestGroup->setEnabled(false);
 	mMobileOptions->setEnabled(false);
 	mFacilityOptions->setEnabled(true);
     } else {
 	// Type is mobile
-	//mUnitProducingGroup->setEnabled(false);
+	mUnitHarvestGroup->setEnabled(true);
 	mMobileOptions->setEnabled(true);
 	mFacilityOptions->setEnabled(false);
     }
@@ -48,15 +69,16 @@ void BoUnitEditor::slotTypeChanged()
 void BoUnitEditor::slotUnitSelected( int )
 {
     mEditUnitButton->setEnabled(true);
-    // Store selected unit somewhere
 }
 
 void BoUnitEditor::slotEditUnit()
 {
     // Ask is user wants to save current properties
+    // TODO: check if current properties have changed and don't display this
+    //  msgbox if they haven't
     int answer = KMessageBox::questionYesNoCancel(this,
-		i18n("Do you want to save current unit properties?"),
-		i18n("Save current unit?"));
+						  i18n("Do you want to save current unit properties?"),
+						  i18n("Save current unit?"));
     if(answer == KMessageBox::Cancel) {
 	return;
     } else if(answer == KMessageBox::Yes) {
@@ -69,7 +91,7 @@ void BoUnitEditor::slotEditUnit()
 void BoUnitEditor::slotAddTexture()
 {
     (void)new QListViewItem(mUnitTexturesList, mUnitTextureFrom->text(),
-		mUnitTextureTo->text());
+			    mUnitTextureTo->text());
     mUnitTextureFrom->clear();
     mUnitTextureTo->clear();
 }
@@ -118,7 +140,7 @@ void BoUnitEditor::slotSaveUnit()
     QDir d;
     if(dir.isEmpty()) {
 	dir = KFileDialog::getExistingDirectory(QString::null, 0,
-		i18n("Please select directory for your new unit"));
+						i18n("Please select directory for your new unit"));
 	if(dir.isEmpty()) { // No directory was chosen
 	    return;
 	}
@@ -130,172 +152,33 @@ void BoUnitEditor::slotSaveUnit()
     d.setPath(dir);
     if(!d.exists()) {
 	KMessageBox::error(this, i18n("Directory %1 does not exist!").arg(dir),
-			i18n("Invalid directory"));
+			   i18n("Invalid directory"));
 	return;
     }
     QFileInfo fi(d.absPath());
     if(!fi.isWritable()) {
 	KMessageBox::error(this, i18n("Directory %1 is not writable!").arg(dir),
-			i18n("Directory isn't writable"));
+			   i18n("Directory isn't writable"));
 	return;
     }
-    KSimpleConfig cfg(d.absPath() + "/index.unit");
-    cfg.setGroup("Boson Unit");
-    // General page
-    cfg.writeEntry("Name", mUnitName->text());
-    cfg.writeEntry("Id", mUnitId->value());
-    cfg.writeEntry("IsFacility", mUnitTypeFacility->isChecked());
-    // Properties page
-    cfg.writeEntry("Health", mUnitHealth->value());
-    cfg.writeEntry("Armor", mUnitArmor->value());
-    cfg.writeEntry("Shield", mUnitShields->value());
-    cfg.writeEntry("MineralCost", mUnitMineralCost->value());
-    cfg.writeEntry("OilCost", mUnitOilCost->value());
-    cfg.writeEntry("SightRange", mUnitSight->value());
-    cfg.writeEntry("TerrainType", mUnitTerrain->currentItem());
-    cfg.writeEntry("SupportMiniMap", mUnitSupportMiniMap->isChecked());
-    // Weapon page
-    cfg.writeEntry("CanShootAtLandUnits", mUnitCanShootLand->isChecked());
-    cfg.writeEntry("CanShootAtAirUnits", mUnitCanShootAir->isChecked());
-    if(mUnitWeaponGroup->isEnabled()) {
-	cfg.writeEntry("WeaponRange", mUnitWeaponRange->value());
-	cfg.writeEntry("WeaponDamage", mUnitWeaponDamage->value());
-	cfg.writeEntry("Reload", mUnitWeaponReload->value());
-    }
-    // Plugins page
-    if(mUnitCanProduce->isChecked()) {
-	cfg.setGroup("ProductionPlugin");
-	// We save producer list as string but it *should* be in form of a list
-	cfg.writeEntry("ProducerList", mUnitProducerList->text());
-    } else {
-	// Current plugins detection code sucks. It checks if certain groups exist, so
-	//  we must delete those groups if unit doesn't have plugin
-	cfg.deleteGroup("ProductionPlugin");
-    }
-    if(mUnitCanHarvest->isChecked()) {
-	cfg.setGroup("HarvesterPlugin");
-	cfg.writeEntry("CanMineMinerals", mUnitHarvestMinerals->isChecked());
-	cfg.writeEntry("CanMineOil", mUnitHarvestOil->isChecked());
-	cfg.writeEntry("MaxResources", mUnitMaxResource->value());
-    } else {
-	cfg.deleteGroup("HarvesterPlugin");
-    }
-    if(mUnitCanRepair->isChecked()) {
-	cfg.setGroup("RepairPlugin");
-	// Dummy entry because KConfig doesn't create group without any keys in it
-	cfg.writeEntry("Dummy", "Dummy entry");
-    } else {
-	cfg.deleteGroup("RepairPlugin");
-    }
-    // Producing page
-    cfg.setGroup("Boson Unit");
-    cfg.writeEntry("ProductionTime", mUnitProductionTime->value());
-    cfg.writeEntry("Producer", mUnitProducer->value());
-    cfg.writeEntry("Requirements", mUnitRequirements->text());
-    // Mapping page
-    if(mUnitTexturesList->childCount() > 0) {
-	cfg.setGroup("Textures");
-	QListViewItemIterator it(mUnitTexturesList);
-	QStringList textures;
-	for (; it.current(); ++it) {
-	    cfg.writeEntry(it.current()->text(0), it.current()->text(1));
-	    textures.append(it.current()->text(0));
-	}
-	cfg.writeEntry("Textures", textures);
-    }
-    cfg.setGroup("Sounds");
-    cfg.writeEntry("Shoot", mUnitSoundShoot->text());
-    cfg.writeEntry("OrderMove", mUnitSoundOrderMove->text());
-    cfg.writeEntry("OrderAttack", mUnitSoundOrderAttack->text());
-    cfg.writeEntry("OrderSelect", mUnitSoundOrderSelect->text());
-    cfg.writeEntry("ReportProduced", mUnitSoundReportProduced->text());
-    cfg.writeEntry("ReportDestroyed", mUnitSoundReportDestroyed->text());
-    cfg.writeEntry("ReportUnderAttack", mUnitSoundReportUnderAttack->text());
-    
-    // Save mobile/facility properties
-    if(mUnitTypeMobile->isChecked()) {
-	// Unit is mobile
-	cfg.setGroup("Boson Mobile Unit");
-	cfg.writeEntry("Speed", mUnitSpeed->value());
-	cfg.writeEntry("CanGoOnLand", mUnitCanGoOnLand->isChecked());
-	cfg.writeEntry("CanGoOnWater", mUnitCanGoOnWater->isChecked());
-    } else {
-	// If it's not mobile, it's facility
-	cfg.setGroup("Boson Facility");
-	cfg.writeEntry("CanRefineMinerals", mUnitCanRefineMinerals->isChecked());
-	cfg.writeEntry("CanRefineOil", mUnitCanRefineOil->isChecked());
-	cfg.writeEntry("ConstructionSteps", mUnitConstructionSteps->value());
-    }
+    slotUpdateUnitProperties();
+    mUnit->saveUnitType(d.absPath() + "/index.unit");
 }
 
 void BoUnitEditor::slotNewUnit()
 {
     // Ask is user wants to save current properties
     int answer = KMessageBox::questionYesNoCancel(this,
-		i18n("Do you want to save current unit properties?"),
-		i18n("Save current unit?"));
+						  i18n("Do you want to save current unit properties?"),
+						  i18n("Save current unit?"));
     if(answer == KMessageBox::Cancel) {
 	return;
     } else if(answer == KMessageBox::Yes) {
 	slotSaveUnit();
     }
     // Clear everything to default values
-    slotResetProperties();
-}
-
-void BoUnitEditor::slotResetProperties()
-{
-    // Reset all properties to default values
-    // NOTE: keep this in sync with unitproperties.cpp/whereever defaults are asigned
-    // General page
-    mUnitPath->clear();
-    mUnitName->clear();
-    mUnitId->setValue(0);
-    mUnitTypeMobile->setChecked(true);
-    // Properties page
-    mUnitHealth->setValue(100);
-    mUnitArmor->setValue(0);
-    mUnitShields->setValue(0);
-    mUnitMineralCost->setValue(100);
-    mUnitOilCost->setValue(0);
-    mUnitSight->setValue(5);
-    mUnitTerrain->setCurrentItem(0);
-    mUnitSupportMiniMap->setChecked(false);
-    mUnitSpeed->setValue(0);
-    mUnitCanGoOnLand->setChecked(false);
-    mUnitCanGoOnWater->setChecked(false);
-    mUnitCanRefineMinerals->setChecked(false);
-    mUnitCanRefineOil->setChecked(false);
-    mUnitConstructionSteps->setValue(4);
-    // Weapon page
-    mUnitCanShootLand->setChecked(false);
-    mUnitCanShootAir->setChecked(false);
-    mUnitWeaponRange->setValue(0);
-    mUnitWeaponDamage->setValue(0);
-    mUnitWeaponReload->setValue(0);
-    // Plugins page
-    mUnitCanProduce->setChecked(false);
-    mUnitProducerList->clear();
-    mUnitCanHarvest->setChecked(false);
-    mUnitHarvestMinerals->setChecked(false);
-    mUnitHarvestOil->setChecked(false);
-    mUnitMaxResource->setValue(100);
-    mUnitCanRepair->setChecked(false);
-    // Producer page
-    mUnitProductionTime->setValue(0);
-    mUnitProducer->setValue(0);
-    mUnitRequirements->clear();
-    // Mapping page
-    mUnitTextureFrom->clear();
-    mUnitTextureTo->clear();
-    mUnitTexturesList->clear();
-    mUnitSoundShoot->setText("shoot");
-    mUnitSoundOrderMove->setText("order_move");
-    mUnitSoundOrderAttack->setText("order_attack");
-    mUnitSoundOrderSelect->setText("order_select");
-    mUnitSoundReportProduced->setText("report_produced");
-    mUnitSoundReportDestroyed->setText("report_destoyed");
-    mUnitSoundReportUnderAttack->setText("report_underattack");
+    mUnit->reset();
+    slotUpdateWidgets();
 }
 
 QStringList BoUnitEditor::verifyProperties()
@@ -315,86 +198,9 @@ QStringList BoUnitEditor::verifyProperties()
 
 void BoUnitEditor::slotLoadUnit( QString dir )
 {
-    slotResetProperties();
-    
-    mUnitPath->setText(dir);
-    
-    KSimpleConfig cfg(dir + "/index.unit");
-    cfg.setGroup("Boson Unit");
-    // General page
-    mUnitName->setText(cfg.readEntry("Name", i18n("Unknown")));
-    mUnitId->setValue(cfg.readUnsignedLongNumEntry("Id", 0));
-    bool isFac = cfg.readBoolEntry("IsFacility", false);
-    mUnitTypeFacility->setChecked(isFac);
-    // Properties page
-    mUnitHealth->setValue(cfg.readUnsignedLongNumEntry("Health", 100));
-    mUnitArmor->setValue(cfg.readUnsignedLongNumEntry("Armor", 0));
-    mUnitShields->setValue(cfg.readUnsignedLongNumEntry("Shield", 0));
-    mUnitMineralCost->setValue(cfg.readUnsignedLongNumEntry("MineralCost", 100));
-    mUnitOilCost->setValue(cfg.readUnsignedLongNumEntry("OilCost", 100));
-    mUnitSight->setValue(cfg.readUnsignedLongNumEntry("SightRange", 5));
-    int terrain = cfg.readNumEntry("TerrainType", 0);
-    mUnitTerrain->setCurrentItem(terrain);
-    mUnitSupportMiniMap->setChecked(cfg.readBoolEntry("SupportMiniMap", false));
-    // Yes, we load both mobile *and* facility properties for all units
-    cfg.setGroup("Boson Mobile Unit");
-    // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
-    mUnitSpeed->setValue(cfg.readNumEntry("Speed", 0));
-    mUnitCanGoOnLand->setChecked(cfg.readBoolEntry("CanGoOnLand",
-		(terrain == 2) || (terrain == 0)));
-    mUnitCanGoOnWater->setChecked(cfg.readBoolEntry("CanGoOnWater", 
-		(terrain == 2) || (terrain == 1)));
-    cfg.setGroup("Boson Facility");
-    mUnitCanRefineMinerals->setChecked(cfg.readBoolEntry("CanRefineMinerals", false));
-    mUnitCanRefineOil->setChecked(cfg.readBoolEntry("CanRefineOil", false));
-    // Weapon page
-    cfg.setGroup("Boson Unit");
-    mUnitWeaponRange->setValue(cfg.readUnsignedLongNumEntry("WeaponRange", 0));
-    int wd = cfg.readLongNumEntry("WeaponDamage", 0);
-    mUnitWeaponDamage->setValue(wd);
-    mUnitWeaponReload->setValue(cfg.readUnsignedLongNumEntry("Reload", 0));
-    mUnitCanShootLand->setChecked(cfg.readBoolEntry("CanShootAtLandUnits",
-		(terrain != 2) && wd));
-    mUnitCanShootAir->setChecked(cfg.readBoolEntry("CanShootAtAirUnits",
-		(terrain == 2) && wd));
-    // Plugins page
-    if(cfg.hasGroup("ProductionPlugin")) {
-	cfg.setGroup("ProductionPlugin");
-	mUnitCanProduce->setChecked(true);
-	mUnitProducerList->setText(cfg.readEntry("ProducerList", ""));
-    }
-    if(cfg.hasGroup("HarvesterPlugin")) {
-	cfg.setGroup("HarvesterPlugin");
-	mUnitCanHarvest->setChecked(true);
-	mUnitHarvestMinerals->setChecked(cfg.readBoolEntry("CanMineMinerals", false));
-	mUnitHarvestOil->setChecked(cfg.readBoolEntry("CanMineOil", false));
-	mUnitMaxResource->setValue(cfg.readUnsignedNumEntry("MaxResources", 100));
-    }
-    if(cfg.hasGroup("RepairPlugin")) {
-	mUnitCanRepair->setChecked(true);
-    }
-    // Producing page
-    cfg.setGroup("Boson Unit");
-    mUnitProductionTime->setValue(cfg.readUnsignedLongNumEntry("ProductionTime", 100));
-    mUnitProducer->setValue(cfg.readUnsignedNumEntry("Producer", isFac ? 10 : terrain));
-    mUnitRequirements->setText(cfg.readEntry("Requirements", ""));
-    // Mapping page
-    mUnitTexturesList->clear();
-    if(cfg.hasGroup("Textures")) {
-	QStringList textures = cfg.readListEntry("Textures");
-	for(unsigned int i = 0; i < textures.count(); i++) {
-	    (void)new QListViewItem(mUnitTexturesList, textures[i],
-			cfg.readEntry(textures[i], "none"));
-	}
-    }
-    cfg.setGroup("Sounds");
-    mUnitSoundShoot->setText(cfg.readEntry("Shoot", "shoot"));
-    mUnitSoundOrderMove->setText(cfg.readEntry("OrderMove", "order_move"));
-    mUnitSoundOrderAttack->setText(cfg.readEntry("OrderAttack","order_attack" ));
-    mUnitSoundOrderSelect->setText(cfg.readEntry("OrderSelect", "order_select"));
-    mUnitSoundReportProduced->setText(cfg.readEntry("ReportProduced", "report_produced"));
-    mUnitSoundReportDestroyed->setText(cfg.readEntry("ReporDestroyedt", "report_destroyed"));
-    mUnitSoundReportUnderAttack->setText(cfg.readEntry("ReportUnderAttack", "report_underattack"));
+    mUnit->reset();
+    mUnit->loadUnitType(dir + "/index.unit", false);
+    slotUpdateWidgets();
 }
 
 void BoUnitEditor::slotEditSearchPaths()
@@ -407,7 +213,10 @@ void BoUnitEditor::slotEditSearchPaths()
 
 void BoUnitEditor::init()
 {
+    mUnit = new UnitProperties(false);
     mSearchPaths = new BosonSearchPathsWidget;
+    mWeapons.setAutoDelete(true);
+    mCurrentWeapon = -1;
     connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
     mSearchPaths->hide();
     // Load search paths
@@ -422,6 +231,10 @@ void BoUnitEditor::init()
     QRegExpValidator* v = new QRegExpValidator(QRegExp("[0-9,]*"), this);
     mUnitProducerList->setValidator(v);
     mUnitRequirements->setValidator(v);
+    mUnitDestroyedParticles->setValidator(v);
+    mWeaponShootParticles->setValidator(v);
+    mWeaponFlyParticles->setValidator(v);
+    mWeaponHitParticles->setValidator(v);
 }
 
 void BoUnitEditor::slotHideSearchPaths()
@@ -482,8 +295,8 @@ void BoUnitEditor::slotOpenUnit()
 {
     // Ask is user wants to save current properties
     int answer = KMessageBox::questionYesNoCancel(this,
-		i18n("Do you want to save current unit properties?"),
-		i18n("Save current unit?"));
+						  i18n("Do you want to save current unit properties?"),
+						  i18n("Save current unit?"));
     if(answer == KMessageBox::Cancel) {
 	return;
     } else if(answer == KMessageBox::Yes) {
@@ -511,4 +324,254 @@ void BoUnitEditor::slotCanHarvestChanged()
 void BoUnitEditor::slotCanProduceChanged()
 {
     mUnitProducingGroup->setEnabled(mUnitCanProduce->isChecked());
+}
+
+
+
+
+void BoUnitEditor::slotUpdateUnitProperties()
+{
+    mUnit->clearPlugins();
+    // General page
+    mUnit->setName(mUnitName->text());
+    mUnit->setId(mUnitId->value());
+    mUnit->setUnitWidth(mUnitWidth->value() * BO_TILE_SIZE);
+    mUnit->setUnitHeight(mUnitHeight->value() * BO_TILE_SIZE);
+    mUnit->setUnitDepth(mUnitDepth->value() * BO_TILE_SIZE);
+    
+    // Mobile/facility properties
+    if(mUnitTypeFacility->isChecked()) {
+	mUnit->createFacilityProperties();
+	mUnit->setCanRefineMinerals(mUnitCanRefineMinerals->isChecked());
+	mUnit->setCanRefineOil(mUnitCanRefineOil->isChecked());
+	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
+    } else {
+	mUnit->createMobileProperties();
+	mUnit->setSpeed(mUnitSpeed->value());
+	mUnit->setCanGoOnLand(mUnitCanGoOnLand->isChecked());
+	mUnit->setCanGoOnWater(mUnitCanGoOnWater->isChecked());
+    }
+    // Properties page
+    mUnit->setHealth(mUnitHealth->value());
+    mUnit->setArmor(mUnitArmor->value());
+    mUnit->setShields(mUnitShields->value());
+    mUnit->setMineralCost(mUnitMineralCost->value());
+    mUnit->setOilCost(mUnitOilCost->value());
+    mUnit->setSightRange(mUnitSight->value());
+    mUnit->setTerrainType((UnitProperties::TerrainType)(mUnitTerrain->currentItem()));
+    mUnit->setDestroyedParticleSystemIds(stringToList(mUnitDestroyedParticles->text()));
+    mUnit->setSupportMiniMap(mUnitSupportMiniMap->isChecked());
+    // Weapons page
+    // Sync current weapon first
+    slotUpdateWeaponProps();
+    QPtrListIterator<BosonWeaponProperties> it(mWeapons);
+    while(it.current() != 0) {
+	mUnit->addPlugin(it.current());
+	++it;
+    }
+    // Plugins page
+    if(mUnitCanProduce->isChecked()) {
+	ProductionProperties* p = new ProductionProperties(mUnit);
+	p->setProducerList(stringToList(mUnitProducerList->text()));
+	mUnit->addPlugin(p);
+    }
+    if(mUnitCanHarvest->isChecked()) {
+	HarvesterProperties* p = new HarvesterProperties(mUnit);
+	p->setCanMineMinerals(mUnitHarvestMinerals->isChecked());
+	p->setCanMineOil(mUnitHarvestOil->isChecked());
+	p->setMaxResources(mUnitMaxResource->value());
+	mUnit->addPlugin(p);
+    }
+    if(mUnitCanRepair->isChecked()) {
+	RepairProperties* p = new RepairProperties(mUnit);
+	mUnit->addPlugin(p);
+    }
+    // Producing page
+    mUnit->setProductionTime(mUnitProductionTime->value());
+    mUnit->setProducer(mUnitProducer->value());
+    mUnit->setRequirements(stringToList(mUnitRequirements->text()));
+    // Mapping page
+    if(mUnitTexturesList->childCount() > 0) {
+	QListViewItemIterator it(mUnitTexturesList);
+	QStringList textures;
+	for (; it.current(); ++it) {	    
+	    mUnit->addTextureMapping(it.current()->text(0), it.current()->text(1));
+	}
+    }
+    mUnit->addSound(SoundShoot, mUnitSoundShoot->text());
+    mUnit->addSound(SoundOrderMove, mUnitSoundOrderMove->text());
+    mUnit->addSound(SoundOrderAttack, mUnitSoundOrderAttack->text());
+    mUnit->addSound(SoundOrderSelect, mUnitSoundOrderSelect->text());
+    mUnit->addSound(SoundReportProduced, mUnitSoundReportProduced->text());
+    mUnit->addSound(SoundReportDestroyed, mUnitSoundReportDestroyed->text());
+    mUnit->addSound(SoundReportUnderAttack, mUnitSoundReportUnderAttack->text());
+}
+
+
+void BoUnitEditor::slotUpdateWidgets()
+{
+    // General page
+    mUnitPath->setText(mUnit->unitPath());
+    mUnitName->setText(mUnit->name());
+    mUnitId->setValue(mUnit->typeId());
+    bool isFac = mUnit->isFacility();    
+    mUnitTypeFacility->setChecked(isFac);
+    mUnitTypeMobile->setChecked(!isFac);
+    slotTypeChanged();
+    mUnitWidth->setValue(mUnit->unitWidth() / (double)BO_TILE_SIZE);
+    mUnitHeight->setValue(mUnit->unitHeight() / (double)BO_TILE_SIZE);
+    mUnitDepth->setValue(mUnit->unitDepth() / (double)BO_TILE_SIZE);
+    // Properties page
+    mUnitHealth->setValue(mUnit->health());
+    mUnitArmor->setValue(mUnit->armor());
+    mUnitShields->setValue(mUnit->shields());
+    mUnitMineralCost->setValue(mUnit->mineralCost());
+    mUnitOilCost->setValue(mUnit->oilCost());
+    mUnitSight->setValue(mUnit->sightRange());
+    int terrain = (int)(mUnit->terrainType());
+    mUnitTerrain->setCurrentItem(terrain);
+    mUnitDestroyedParticles->setText(listToString(mUnit->destroyedParticleSystemIds()));
+    mUnitSupportMiniMap->setChecked(mUnit->supportMiniMap());
+    // FIXME: UnitProperties only saves mobile *or* facility properties, but
+    //  I'd like to have them both saved
+    // TODO: This MUST be double, but Designer knows nothing about KDoubleNumInput
+    mUnitSpeed->setValue((int)(mUnit->speed()));
+    mUnitCanGoOnLand->setChecked(mUnit->canGoOnLand());
+    mUnitCanGoOnWater->setChecked(mUnit->canGoOnLand());
+    mUnitCanRefineMinerals->setChecked(mUnit->canRefineMinerals());
+    mUnitCanRefineOil->setChecked(mUnit->canRefineOil());
+    // Weapons
+    mWeapons.clear();
+    mWeaponsList->clear();
+    int weaponcounter = 0;
+    mWeaponGroup->setEnabled(false);
+    mCurrentWeapon = -1;
+    QPtrListIterator<PluginProperties> it(*(mUnit->plugins()));
+    while(it.current() != 0l) {
+	if(it.current()->pluginType() == PluginProperties::Weapon) {
+	    BosonWeaponProperties* w = (BosonWeaponProperties*)(it.current());
+	    mWeapons.insert(weaponcounter, w);
+	    mWeaponsList->insertItem(w->weaponName(), weaponcounter);
+	    weaponcounter++;
+	}
+	++it;
+    }
+    // Plugins page
+    const ProductionProperties* productionProp = (ProductionProperties*)(mUnit->properties(PluginProperties::Production));
+    bool canProduce = (productionProp != 0l);
+    mUnitCanProduce->setChecked(canProduce);
+    mUnitProducingGroup->setEnabled(canProduce);
+    if(canProduce) {
+	mUnitProducerList->setText(listToString(productionProp->producerList()));
+    }
+    const HarvesterProperties* harvesterProp = (HarvesterProperties*)(mUnit->properties(PluginProperties::Harvester));
+    bool canHarvest = (harvesterProp != 0l);
+    mUnitCanHarvest->setChecked(canHarvest);
+    mUnitHarvestGroup->setEnabled(canHarvest);
+    if(canHarvest) {
+	mUnitHarvestMinerals->setChecked(harvesterProp->canMineMinerals());
+	mUnitHarvestOil->setChecked(harvesterProp->canMineOil());
+	mUnitMaxResource->setValue(harvesterProp->maxResources());
+    }
+    bool canRepair = (mUnit->properties(PluginProperties::Repair) != 0l);
+    mUnitCanRepair->setChecked(canRepair);
+    // Producing page
+    mUnitProductionTime->setValue(mUnit->productionTime());
+    mUnitProducer->setValue(mUnit->producer());
+    mUnitRequirements->setText(listToString(mUnit->requirements()));
+    // Mapping page
+    mUnitTexturesList->clear();
+    QMap<QString, QString> textures = mUnit->longTextureNames();
+    QMap<QString, QString>::Iterator tit;
+    for(tit = textures.begin(); tit != textures.end(); ++tit) {
+	(void)new QListViewItem(mUnitTexturesList, tit.key(), tit.data());
+    }
+    mUnitSoundShoot->setText(mUnit->sound(SoundShoot));
+    mUnitSoundOrderMove->setText(mUnit->sound(SoundOrderMove));
+    mUnitSoundOrderAttack->setText(mUnit->sound(SoundOrderAttack));
+    mUnitSoundOrderSelect->setText(mUnit->sound(SoundOrderSelect));
+    mUnitSoundReportProduced->setText(mUnit->sound(SoundReportProduced));
+    mUnitSoundReportDestroyed->setText(mUnit->sound(SoundReportDestroyed));
+    mUnitSoundReportUnderAttack->setText(mUnit->sound(SoundReportUnderAttack));
+}
+
+void BoUnitEditor::slotUpdateWeaponProps()
+{
+    if(mCurrentWeapon == -1) {
+	return;
+    }
+    BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
+    w->setWeaponName(mWeaponName->text());
+    w->setDamage(mWeaponDamage->value());
+    w->setDamageRange(mWeaponDamageRange->value());
+    w->setReloadingTime(mWeaponReload->value());
+    w->setRange(mWeaponRange->value());
+    w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
+    w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
+    w->setSpeed(mWeaponSpeed->value());
+    w->setModelFileName(mWeaponModel->text());
+    w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
+    w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
+    w->setHitParticleSystemIds(stringToList(mWeaponHitParticles->text()));
+}
+
+
+void BoUnitEditor::slotAddWeapon()
+{
+    BosonWeaponProperties* w = new BosonWeaponProperties(mUnit);
+    w->reset();
+    mWeapons.append(w);
+    mWeaponsList->insertItem("New weapon", mWeapons.count() - 1);
+    mWeaponsList->setCurrentItem(mWeapons.count() - 1);
+    slotWeaponSelected(mWeapons.count() - 1);
+}
+
+void BoUnitEditor::slotWeaponSelected( int index )
+{
+    if(mCurrentWeapon != -1) {
+	slotUpdateWeaponProps();
+    }
+    mCurrentWeapon = index;
+    slotUpdateWeaponWidgets();
+}
+
+
+void BoUnitEditor::slotRemoveWeapon()
+{
+    if(mCurrentWeapon == -1) {
+	mWeaponsRemove->setEnabled(false);
+	return;
+    }
+    int item = mCurrentWeapon;
+    mWeaponsList->removeItem(item);
+    mWeapons.remove(item);
+    if(mCurrentWeapon >= (signed int)(mWeaponsList->count())) {
+	mCurrentWeapon--;
+    }
+    slotUpdateWeaponWidgets();
+}
+
+
+void BoUnitEditor::slotUpdateWeaponWidgets()
+{
+    if(mCurrentWeapon == -1) {
+	mWeaponGroup->setEnabled(false);
+	mWeaponsRemove->setEnabled(false);
+	return;
+    }
+    mWeaponGroup->setEnabled(true);
+    mWeaponsRemove->setEnabled(true);
+    BosonWeaponProperties* w = mWeapons.at(mCurrentWeapon);
+    mWeaponName->setText(w->weaponName());
+    mWeaponDamage->setValue(w->damage());
+    mWeaponDamageRange->setValue(w->damageRange());
+    mWeaponReload->setValue(w->reloadingTime());
+    mWeaponRange->setValue(w->range());
+    mWeaponCanShootAtAirUnits->setChecked(w->canShootAtAirUnits());
+    mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
+    mWeaponSpeed->setValue(w->speed());
+    mWeaponModel->setText(w->modelFileName());
+    mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
+    mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
+    mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));
 }
