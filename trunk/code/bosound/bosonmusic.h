@@ -24,7 +24,6 @@
 #include <qobject.h>
 
 class QStringList;
-class KArtsServer;
 class BosonSound;
 class BosonAudio;
 class Unit;
@@ -48,6 +47,8 @@ class BosonMusic : public QObject, public BosonAbstractMusicInterface
 public:
 	BosonMusic(BosonAudio* parent);
 	virtual ~BosonMusic();
+
+	bool checkALError();
 
 	virtual void setMusic(bool m);
 	virtual bool music() const;
@@ -77,6 +78,8 @@ protected:
 	 * @return True if file was loaded successfully, otherwise false
 	 **/
 	bool loadMusic(const QString& file);
+
+	void initMusicSource();
 
 protected slots:
 	void slotUpdateTicker();

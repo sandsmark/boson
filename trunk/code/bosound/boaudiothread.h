@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #ifndef BOAUDIOTHREAD_H
 #define BOAUDIOTHREAD_H
 
-#include <qthread.h>
+#include <qobject.h>
 
 class BosonAudio;
 class BosonSound;
@@ -28,27 +28,20 @@ class BoAudioCommand;
 
 class BoAudioThreadPrivate;
 
+// AB: this is NOT a thread anymore!
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoAudioThread : public QThread
+class BoAudioThread : public QObject
 {
+	Q_OBJECT
 public:
 	BoAudioThread();
-	~BoAudioThread();
+	virtual ~BoAudioThread();
+
+	void processCommand();
 
 	bool audioStarted() const;
-
-	/**
-	 * Lock the thread. This calls @ref QMutex::lock on the @ref QMutex
-	 * object maintained inside this class.
-	 **/
-	void lock();
-
-	/**
-	 * Unlock the @ref QMutex object that was locked by @ref lock.
-	 **/
-	void unlock();
 
 	void enqueueCommand(BoAudioCommand* command);
 
@@ -56,9 +49,10 @@ public:
 	// if they are accessed from the audio thread only then make them
 	// protected and use friends.
 
-protected:
-	virtual void run();
+public slots:
+	void slotReceiveStdin(int);
 
+protected:
 	/**
 	 * @param a See @ref audio
 	 * @param music The music object, if @p command is a music command

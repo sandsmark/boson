@@ -24,9 +24,8 @@
 #include <qptrlist.h>
 #include <qmap.h>
 
-#include <arts/kartsserver.h>
+#include <AL/altypes.h>
 
-class KArtsServer;
 class BoPlayObject;
 class BosonAudio;
 class QString;
@@ -70,13 +69,6 @@ public:
 	virtual void playSound(int id);
 
 	/**
-	 * @return See @ref BosonAudio::server
-	 **/
-	KArtsServer& server() const;
-
-	Arts::StereoEffectStack effectStack();
-
-	/**
 	 * Note that several files for a single event (i.e. with the same name)
 	 * can be added! They are different versions of the same event then.
 	 * @param name First part of filename. E.g. "shoot" if "shoot_nn.ogg" is
@@ -90,6 +82,9 @@ public:
 	 * BosonAbstractSoundInterface::addEventSound.
 	 **/
 	virtual void addEventSound(int id, const QString& file);
+
+	bool loadFileToBuffer(ALuint buffer, const QString& file);
+	bool checkALError();
 
 protected:
 	/**
