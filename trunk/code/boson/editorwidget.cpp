@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -326,11 +326,6 @@ void EditorWidget::slotPlayerJoinedGame(KPlayer* player)
  d->mPlayers.append(p);
  players.append(p->name());
  d->mPlayerAction->setItems(players);
-
- // dunno if this makes sense - but currently one cannot add more players so we
- // just activate the player that was added last.
- d->mPlayerAction->setCurrentItem(players.count() - 1);
- slotChangeLocalPlayer(d->mPlayerAction->currentItem());
 }
 
 void EditorWidget::slotPlayerLeftGame(KPlayer* player)

@@ -324,7 +324,6 @@ private:
 
 	void initCommandFrame(KDockWidget* commandFrameDock);
 	void initLayout();
-	void initLocalPlayerInput();
 	void initScripts();
 
 	/**

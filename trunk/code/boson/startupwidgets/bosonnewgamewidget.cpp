@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@
 #include <qpushbutton.h>
 #include <qlayout.h>
 #include <qpainter.h>
+#include <qguardedptr.h>
 
 
 /**
@@ -113,6 +114,7 @@ class BosonNewGameWidgetPrivate
 public:
 	BosonNewGameWidgetPrivate()
 	{
+		mLocalPlayer = 0;
 	}
 
 	QPtrDict<KPlayer> mItem2Player;
@@ -120,6 +122,8 @@ public:
 
 	QMap<int, QString> mSpeciesIndex2Identifier;
 	QMap<int, QString> mSpeciesIndex2Comment;
+
+	QGuardedPtr<Player> mLocalPlayer;
 };
 
 
@@ -195,7 +199,16 @@ BosonNewGameWidget::~BosonNewGameWidget()
  delete d;
 }
 
-void BosonNewGameWidget::initPlayer()
+void BosonNewGameWidget::setLocalPlayer(Player* p)
+{
+ d->mLocalPlayer = p;
+ if (d->mLocalPlayer && !d->mLocalPlayer->speciesTheme()) {
+	initLocalPlayer();
+	mChat->chatWidget()->setFromPlayer(p);
+ }
+}
+
+void BosonNewGameWidget::initLocalPlayer()
 {
  boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
  if (!localPlayer()) {
@@ -306,7 +319,6 @@ void BosonNewGameWidget::initSpecies()
 	cfg.setGroup("Boson Species");
 	QString identifier = cfg.readEntry("Identifier", "Unknown");
 	if (identifier == QString::fromLatin1("Neutral")) {
-		boDebug() << identifier << "is neutral" << endl;
 		continue;
 	}
 	mPlayerSpecies->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
@@ -427,6 +439,7 @@ void BosonNewGameWidget::slotNetStart()
 void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 {
  boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(p);
  QListBoxPlayerText* t = new QListBoxPlayerText(p->name());
  t->setColor(((Player*)p)->teamColor());
  d->mItem2Player.insert(t, p);
@@ -661,18 +674,6 @@ void BosonNewGameWidget::slotNetPlayerNameChanged(Player* p)
 
 void BosonNewGameWidget::slotNetSetLocalPlayer(Player* p)
 {
- boDebug() << k_funcinfo << endl;
- if (!p) {
-	// AB: a NULL local player is totally valid!
-	// we are meant to unset the player now
-
-	// AB: this is bad... KGameChat doesn't allow NULL players...
-	// how can we unset the player from there?
-	boDebug() << k_funcinfo << "unset local player" << endl;
-	return;
- }
- initPlayer();
- mChat->chatWidget()->setFromPlayer(p);
 }
 
 void BosonNewGameWidget::slotNetSetAdmin(bool admin)
@@ -831,6 +832,7 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
 	mRemovePlayer->setEnabled(false);
 	return;
  }
+ BO_CHECK_NULL_RET(mSelectedPlayer->speciesTheme());
 
  // Update name, color, species
  mPlayerName->setText(mSelectedPlayer->name());
@@ -858,10 +860,7 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
 
 Player* BosonNewGameWidget::localPlayer() const
 {
- // AB: I don't like to using boGame->localPlayer(). i consider this unclean,
- // but it definitely saves a lot of trouble, as we set the localplayer in
- // boGame anyway. no need to duplicate that stuff here.
- return boGame->localPlayer();
+ return d->mLocalPlayer;
 }
 
 void BosonNewGameWidget::slotCancel()

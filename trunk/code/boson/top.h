@@ -235,7 +235,7 @@ protected:
 	void hideGameDockWidgets(bool deinit = false);
 
 protected slots:
-	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
+	void slotChangeLocalPlayer(Player* p);
 	void slotUpdateStatusBar();
 
 	/**
@@ -293,7 +293,6 @@ protected slots:
 private:
 	void initDisplayManager();
 	void initBoson();
-	void initPlayer();
 	void initKActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);

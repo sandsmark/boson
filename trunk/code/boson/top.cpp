@@ -46,6 +46,10 @@
 #include "bosondata.h"
 #include "bosongroundtheme.h"
 #include "bofullscreen.h"
+#include "bosonlocalplayerinput.h"
+
+#include <kgamedebugdialog.h>
+#include <kgameio.h>
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -60,7 +64,6 @@
 #include <kstandarddirs.h>
 #include <kfiledialog.h>
 #include <kglobal.h>
-#include <kgame/kgamedebugdialog.h>
 
 #include <qcursor.h>
 #include <qwidgetstack.h>
@@ -366,13 +369,6 @@ void TopWidget::initBoson()
 		this, SLOT(slotEditorNewMap(const QByteArray&)));
 }
 
-void TopWidget::initPlayer()
-{
- boWarning() << k_funcinfo << endl;
- Player* p = new Player;
- slotChangeLocalPlayer(p);
-}
-
 void TopWidget::initStatusBar()
 {
  KStatusBar* bar = statusBar();
@@ -431,7 +427,6 @@ void TopWidget::initBosonWidget()
  }
  BO_CHECK_NULL_RET(d->mDisplayManager);
  BO_CHECK_NULL_RET(boGame);
-// BO_CHECK_NULL_RET(boGame->canvas());
  if (boGame->gameMode()) {
 	BosonWidget* w = new BosonWidget(mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
@@ -468,15 +463,6 @@ void TopWidget::initBosonWidget()
 
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
- // at this point the startup widget should already have called
- // slotChangeLocalPlayer()! if not .. then we're in trouble here...
- if (!boGame->localPlayer()) {
-	boWarning() << k_funcinfo << "NULL local player - might cause trouble here!" << endl;
-	// do not return, since it might even be allowed for editor (currently
-	// it is not)
- }
- changeLocalPlayer(boGame->localPlayer());
-
  d->mBosonWidget->init(d->mChatDock, d->mCommandFrameDock); // this depends on several virtual methods and therefore can't be called in the c'tor
 
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
@@ -506,6 +492,12 @@ void TopWidget::slotStartNewGame()
  }
  boDebug(270) << k_funcinfo << endl;
 
+ // AB: we need to have boGame->localPlayer() be valid and non-NULL for the
+ // starup widgets (atm).
+ // but for the actual starting process it is much cleaner, if the local player
+ // is NULL and gets applied at the end only.
+ slotChangeLocalPlayer(0);
+
  // Save initial dock config
  saveInitialDockConfig();
 
@@ -515,8 +507,9 @@ void TopWidget::slotStartNewGame()
 
  initBosonWidget();
 
- changeLocalPlayer(boGame->localPlayer());
- d->mBosonWidget->initPlayer();
+ if (d->mBosonWidget->localPlayer()) {
+	boWarning(270) << k_funcinfo << "localPlayer should be NULL until game is started!" << endl;
+ }
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
@@ -964,6 +957,10 @@ void TopWidget::changeLocalPlayer(Player* p)
  if (d->mBosonWidget) {
 	d->mBosonWidget->setLocalPlayer(p);
  }
+
+ // AB: note: the startup widgets don't need to know the new local player
+ // -> they need the unique local player only (new game widget), which is set
+ // right after construction of the player.
 }
 
 void TopWidget::slotEndGame()
@@ -999,10 +996,16 @@ void TopWidget::slotAddLocalPlayer()
  }
  boDebug() << k_funcinfo << endl;
  Player* p = new Player;
+ p->addGameIO(new BosonLocalPlayerInput()); // we can use the RTTI of this to identify the local player
  boGame->bosonAddPlayer(p);
- slotChangeLocalPlayer(p);
+ if (d->mStartup) {
+	// this must be done _now_, we cannot delay it!
+	// -> the newgame widget must know about the local player
+	d->mStartup->setLocalPlayer(p);
+ }
 }
 
+// TODO: when this fails we should go back to the welcome widget!
 void TopWidget::slotGameStarted()
 {
  boDebug(270) << k_funcinfo << endl;
@@ -1013,11 +1016,39 @@ void TopWidget::slotGameStarted()
  }
 
  boDebug(270) << k_funcinfo << "init player" << endl;
- if (!boGame->localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
+ Player* localPlayer = 0;
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	Player* p = (Player*)boGame->playerList()->at(i);
+	if (!p->isVirtual()) {
+		// a non-virtual player is a player that is running on this host
+		// (either the local player or a computer player - never a
+		// network player)
+		if (p->hasRtti(BosonLocalPlayerInput::LocalPlayerInputRTTI)) {
+			if (p->hasRtti(KGameIO::ComputerIO)) {
+				boError(270) << k_funcinfo << "a player must not be both - local player and computer player!" << endl;
+				return;
+			}
+			if (localPlayer) {
+				boError(270) << k_funcinfo << "two local players found?!" << endl;
+				return;
+			}
+			localPlayer = p;
+		}
+	}
+ }
+
+ if (!localPlayer && !boGame->gameMode()) {
+	// pick one player for editor mode
+	localPlayer = (Player*)boGame->playerList()->at(0);
+ }
+ if (!localPlayer) {
+	boError(270) << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- changeLocalPlayer(boGame->localPlayer());
+ if (d->mBosonWidget->localPlayer()) {
+	boWarning(270) << k_funcinfo << "localPlayer should ne NULL here!" << endl;
+ }
+ slotChangeLocalPlayer(localPlayer);
  d->mBosonWidget->initPlayer();
 
  if (d->mBosonWidget->canvas()) {
@@ -1228,5 +1259,10 @@ void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
 		break;
  }
 // boDebug() << name << endl;
+}
+
+void TopWidget::slotChangeLocalPlayer(Player* p)
+{
+ changeLocalPlayer(p);
 }
 
