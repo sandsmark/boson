@@ -405,7 +405,8 @@ function counter2_statspage($pagelink)
   $visitors = mysql_fetch_assoc(mysql_query("SELECT * FROM counter_total WHERE id = 'visitors'"));
   $visits = mysql_fetch_assoc(mysql_query("SELECT * FROM counter_total WHERE id = 'visits'"));
   echo "\n<font class=\"stats_visits\">Visitors: ".$visitors['count']."<br>
-    Visits: ".$visits['count']."</font><br><br>";
+    Visits: ".$visits['count']."<br>
+    (Since 2nd August 2003)</font><br><br>";
 
   counter2_statsbox("Pages", "Page", "Views", "counter_pages", "page", "ORDER BY count DESC", $total,
       "$page?show=pages", 0, true);
