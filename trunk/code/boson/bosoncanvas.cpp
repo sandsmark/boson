@@ -58,6 +58,7 @@ public:
 	
 	QPixmap mPix;
 	QPtrList<Unit> mDestroyedUnits;
+	QPtrList<BoShot> mDeleteShot;
 	QPtrDict<QCanvasSprite> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
 	QPtrList<QCanvasView> mViewList;
@@ -97,24 +98,27 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mFogOfWar.setAutoDelete(true);
  d->mDestroyedUnits.setAutoDelete(false);
+ d->mDeleteShot.setAutoDelete(true);
 }
 
 BosonCanvas::~BosonCanvas()
 {
+kdDebug()<< k_funcinfo << endl;
  quitGame();
  if (d->mFogPixmap) {
 	delete d->mFogPixmap;
 	d->mFogPixmap = 0;
  }
  delete d;
+kdDebug()<< k_funcinfo <<"done"<< endl;
 }
 
 void BosonCanvas::quitGame()
 {
- kdDebug() << k_funcinfo << endl;
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mFogOfWar.clear();
+ d->mDeleteShot.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -309,6 +313,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		d->mDestroyedUnits.removeRef(u);
 		delete u;
 	}
+	d->mDeleteShot.clear();
  }
 
  update();
@@ -838,6 +843,11 @@ void BosonCanvas::changeWork()
 		i++;
 	}
  }
+}
+
+void BosonCanvas::deleteShot(BoShot* s)
+{
+ d->mDeleteShot.append(s);
 }
 
 

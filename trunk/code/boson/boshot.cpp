@@ -18,6 +18,7 @@
 */
 #include "boshot.h"
 
+#include "bosoncanvas.h"
 #include "speciestheme.h"
 #include "unit.h"
 
@@ -39,8 +40,8 @@ public:
 	int mDelay;
 };
 
-BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
-		: QCanvasSprite(0, canvas)
+BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
+		: QCanvasSprite(0, c)
 {
  d = new BoShotPrivate;
  d->mCounter = 0;
@@ -48,7 +49,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
 
  if (!target) {
 	kdError() << k_funcinfo << ": NULL target" << endl;
-	delete this;
+	deleteMe();
 	return;
  }
 
@@ -56,7 +57,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
  if (!destroyed) {
 	if (!attacker) {
 		kdError() << k_funcinfo << ": NULL attacker" << endl;
-		delete this;
+		deleteMe();
 		return;
 	} else {
 		theme = attacker->speciesTheme();
@@ -66,7 +67,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
  }
  if (!theme) {
 	kdError() << k_funcinfo << ": NULL attacker theme" << endl;
-	delete this;
+	deleteMe();
 	return;
  }
 
@@ -94,7 +95,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
  }
  if (!sequence) {
 	kdError() << k_funcinfo << ": NULL sequence" << endl;
-	delete this;
+	deleteMe();
 	return;
  }
  setSequence(sequence);
@@ -122,6 +123,14 @@ void BoShot::advance(int phase)
 		setFrame(d->mCounter);
 		return;
 	}
-	delete this;
+	deleteMe();
  }
+}
+
+void BoShot::deleteMe()
+{
+ kdDebug() << k_funcinfo << endl;
+ ((BosonCanvas*)canvas())->deleteShot(this);
+ setAnimated(false);
+ hide();
 }

@@ -27,6 +27,7 @@ class KPlayer;
 class Player;
 class Unit;
 class UnitProperties;
+class BoShot;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -103,6 +104,8 @@ public:
 	 * The unit will be deleted after a certain time.
 	 **/
 	void destroyUnit(Unit* unit);
+
+	void deleteShot(BoShot*);
 
 	void updateSight(Unit*, double oldX, double oldY);
 

@@ -531,7 +531,6 @@ void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
 
 void BosonCommandFrame::slotUpdate()
 {
- kdDebug() << k_funcinfo << endl;
  if (d->mFacility) {
 	slotShowConstructionProgress(d->mFacility);
 	if (d->mFacility->completedConstruction()) {
