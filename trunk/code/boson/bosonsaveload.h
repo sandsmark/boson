@@ -34,12 +34,14 @@
 class QDomDocument;
 class QDomElement;
 class QDataStream;
+class KPlayer;
 
 class Boson;
 class BosonCanvas;
 class BosonPlayField;
 class Player;
-class KPlayer;
+
+template <class T> class QValueList;
 
 class SaveLoadError
 {
@@ -49,7 +51,8 @@ public:
 		General = 1,
 		LoadBSGFileError = 2,
 		LoadInvalidXML = 3,
-		LoadPlayersError = 4
+		LoadPlayersError = 4,
+		LoadInvalidVersion = 5
 	};
 
 	/**
@@ -199,6 +202,12 @@ signals:
 	void signalInitMap(const QByteArray& map);
 
 protected:
+	/**
+	 * @param files A list of all relevant files in the @ref BSGFile object.
+	 * The kgame.xml _MUST_ be the _FIRST_ entry in this list!
+	 **/
+	bool loadFromFile(const QValueList<QByteArray>& files);
+
 	QString saveKGameAsXML();
 	QString savePlayersAsXML(Player* localPlayer);
 	QString saveCanvasAsXML();
