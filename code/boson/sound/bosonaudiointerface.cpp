@@ -171,8 +171,6 @@ void BosonAudioInterface::setMusic(bool m)
  if (boConfig->disableSound()) {
 	m = false;
  }
- d->mPlayMusic = m;
- sendCommand(new BoAudioCommand(BoAudioCommand::EnableMusic, (int)m));
 
  if (m == music()) {
 	return;
@@ -180,6 +178,8 @@ void BosonAudioInterface::setMusic(bool m)
  if (!d->mMusicInterface) {
 	return;
  }
+ sendCommand(new BoAudioCommand(BoAudioCommand::EnableMusic, (int)m));
+ d->mPlayMusic = m;
  if (music()) {
 	d->mMusicInterface->playMusic();
  } else {
