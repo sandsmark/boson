@@ -107,7 +107,7 @@ class BosonShot : public BosonItem
     inline bool isActive() const  { return mActive; };
 
     inline virtual int rtti() const  { return RTTI::Shot; }
-    inline virtual int type() const = 0;
+    virtual int type() const = 0;
 
     /**
      * A shot is always moving, so this does a permanent @ref
