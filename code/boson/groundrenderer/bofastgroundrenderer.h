@@ -36,9 +36,14 @@ public:
 	BoFastGroundRenderer();
 	virtual ~BoFastGroundRenderer();
 
-	virtual int rtti() const { return Fast; } // obsolete. use className() instead
-
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
+
+protected:
+	void updateMapCache(const BosonMap*);
+
+private:
+	const BosonMap* mCurrentMap;
+	unsigned char* mCellTextures;
 };
 
 #endif

@@ -95,19 +95,6 @@ void BoGroundRenderer::setRenderCellsCount(unsigned int count)
  mRenderCellsCount = count;
 }
 
-QString BoGroundRenderer::rttiToName(int rtti)
-{
- switch ((Renderer)rtti) {
-	case Default:
-		return i18n("Default");
-	case Fast:
-		return i18n("Fast");
-	case Last:
-		return i18n("Invalid entry - please report a bug");
- }
- return i18n("Unknwon (%1)").arg(rtti);
-}
-
 void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport)
 {
  mModelviewMatrix = modelviewMatrix;
