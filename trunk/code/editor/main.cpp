@@ -69,13 +69,14 @@ int main(int argc, char* argv[])
 	printf("loading groundTheme : %s\n", themePath.latin1() );
 	bigBackground = new QPixmap(themePath);
 	if (bigBackground->isNull() ) {
-		printf("can't load earth.jpeg\n");
+		printf("can't load earth.png\n");
 		exit(1);
 	}
 
 
 	/* the canvas is created when a game is created */
 	vcanvas = ecanvas = new editorCanvas(*bigBackground);
+	/// orzel :  not be...... but $KDEDIR and so on
 	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
 
 

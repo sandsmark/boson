@@ -133,7 +133,7 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	printf("loading groundTheme : %s\n", themePath.latin1() );
 	QPixmap *p = new QPixmap(themePath);
 	if (p->isNull() ) {
-		printf("can't load earth.jpeg\n");
+		printf("can't load earth.png\n");
 		exit(1);
 	}
 
