@@ -313,6 +313,11 @@ public:
 	QValueList<unsigned long int> destroyedParticleSystemIds() const;
 
 	const QPtrList<PluginProperties>* plugins() const;
+  
+	/**
+	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
+	 **/
+	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };  
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -410,6 +415,7 @@ private:
 	unsigned long int mShields;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
+  unsigned long int mMaxWeaponRange;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;

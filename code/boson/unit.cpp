@@ -359,38 +359,52 @@ void Unit::advanceNone(unsigned int advanceCount)
 	// FIXME: isn't there any better way to do this than to iterate through all
 	//  weapons? Maybe cache maximal range of weapons and check if units are in
 	//  range of this...
+	BoItemList list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
 	BosonWeapon* w;
-	QPtrListIterator<BosonWeapon> wit(d->mWeapons);
-	while (( w = wit.current()) != 0) {
-		++wit;
-		BoItemList list = enemyUnitsInRange(w);
-		if (list.count() > 0) {
-			Unit* u = 0;
+	if(list.count() > 0) {
+		QPtrListIterator<BosonWeapon> wit(d->mWeapons);
+		while (( w = wit.current()) != 0) {
+			++wit;
+			Unit* bestunit = 0;
+			Unit* bestnonshooting = 0;
 			BoItemList::Iterator it = list.begin();
-			// First check if we have any military units in range
+			Unit* u = 0;
 			for (; it != list.end(); ++it) {
-				if (((Unit*)*it)->unitProperties()->canShoot()) {
-					if (w->canShootAt((Unit*)*it)) {
-						u = (Unit*)(*it);
+				u = ((Unit*)*it);
+				// Quick check if we can shoot at u
+				if (u->isFlying()) {
+					if(!unitProperties()->canShootAtAirUnits()) {
+						continue;
+					}
+				} else {
+					if(!unitProperties()->canShootAtLandUnits()) {
+						continue;
+					}
+				}
+				// Shoot at units that can shoot first, then at units that cannot shoot
+				if (u->unitProperties()->canShoot()) {
+					if (w->canShootAt(u) && inRange(w->properties()->range(), u)) {
+						bestunit = u;
+						break;
+					}
+				} else {
+					// FIXME: duplicated code!
+					if (w->canShootAt((Unit*)*it) && inRange(w->properties()->range(), u)) {
+						bestnonshooting = u;
 						break;
 					}
 				}
 			}
-			// Then check for non-military units
-			if (it == list.end()) {
-				for (it = list.begin(); it != list.end(); ++it) {
-					if (w->canShootAt((Unit*)*it)) {
-						u = (Unit*)(*it);
-						break;
-					}
-				}
+			// If we didn't find any military units to shoot at, we shoot at others (if we found any)
+			if (!bestunit && bestnonshooting) {
+				bestunit = bestnonshooting;
 			}
-			if(u) {
-				if(isMobile()) {
-					float rot = rotationToPoint(u->x() - x(), u->y() - y());
-					if(rot < rotation() - 5 || rot > rotation() + 5) {
+			if (bestunit) {
+				if (isMobile()) {
+					float rot = rotationToPoint(bestunit->x() - x(), bestunit->y() - y());
+					if (rot < rotation() - 5 || rot > rotation() + 5) {
 						// Rotate to face target
-						if(QABS(rotation() - rot) > (2 * speed())) {
+						if (QABS(rotation() - rot) > (2 * speed())) {
 							turnTo((int)rot);
 							setAdvanceWork(WorkTurn);
 							return;
@@ -400,7 +414,7 @@ void Unit::advanceNone(unsigned int advanceCount)
 						}
 					}
 				}
-				shootAt(w, u);
+				shootAt(w, bestunit);
 			}
 		}
 	}
@@ -437,7 +451,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	return;
  }
  boDebug() << "    " << k_funcinfo << "checking if unit's in range" << endl;
- if (!inRange(d->mActiveWeapon, target())) {
+ if (!inRange(d->mActiveWeapon->properties()->range(), target())) {
 	if (!canvas()->allBosonItems().contains(target())) {
 		boDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
@@ -764,11 +778,12 @@ bool Unit::load(QDataStream& stream)
  return true;
 }
 
-bool Unit::inRange(BosonWeapon* w, Unit* target) const
+bool Unit::inRange(unsigned long int r, Unit* target) const
 {
  // maybe we should use an own algorithm here - can be faster than this generic
  // one
- return unitsInRange(w).contains(target);
+ //return unitsInRange(w->properties()->range()).contains(target);
+ return (QMAX(QABS(target->x() - x()), QABS(target->y() - y())) <= r * BO_TILE_SIZE);
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -790,13 +805,13 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
  owner()->statistics()->increaseShots();
 }
 
-BoItemList Unit::unitsInRange(BosonWeapon* w) const
+BoItemList Unit::unitsInRange(unsigned long int r) const
 {
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
 
+ long int range = r; // To get rid of some warnings
  QPointArray cells;
- int range = w->properties()->range();
  int left, right, top, bottom;
  leftTopCell(&left, &top);
  rightBottomCell(&right, &bottom);
@@ -838,9 +853,9 @@ BoItemList Unit::unitsInRange(BosonWeapon* w) const
  return inRange;
 }
 
-BoItemList Unit::enemyUnitsInRange(BosonWeapon* w) const
+BoItemList Unit::enemyUnitsInRange(unsigned long int range) const
 {
- BoItemList units = unitsInRange(w);
+ BoItemList units = unitsInRange(range);
  BoItemList enemy;
  BoItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
@@ -1081,7 +1096,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
-		if (inRange(activeWeapon(), target())) {
+		if (inRange(activeWeapon()->properties()->range(), target())) {
 			boDebug(401) << k_funcinfo << "target is in range now" << endl;
 			stopMoving();
 			return;

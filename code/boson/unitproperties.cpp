@@ -295,11 +295,15 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  int num = conf->readNumEntry("Weapons", 0);
  mCanShootAtAirUnits = false;
  mCanShootAtLandUnits = false;
+ mMaxWeaponRange = 0;
  for (int i = 0; i < num; i++) {
 	conf->setGroup(QString("Weapon_%1").arg(i));
 	BosonWeaponProperties* p = new BosonWeaponProperties(this);
 	p->loadPlugin(conf, mFullMode);
 	d->mPlugins.append(p);
+	if(p->range() > mMaxWeaponRange) {
+		mMaxWeaponRange = p->range();
+	}
 	if (p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
 	}

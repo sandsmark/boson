@@ -234,7 +234,7 @@ public:
 	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
-	bool inRange(BosonWeapon* w, Unit* unit) const;
+	bool inRange(long unsigned int, Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
 	/**
@@ -312,18 +312,17 @@ public:
 	void updateSelectBox();
 
 	/**
-	 * @return All units except this that are in @ref weaponRange of this
-	 * unit.
+	 * @return All units except this that are @ref range or less cells away from this unit
 	 * Note that it doesn't include units on cells that are not visible
 	 * (e.g. fogged) for local player.
 	 **/
-	BoItemList unitsInRange(BosonWeapon* w) const;
+	BoItemList unitsInRange(unsigned long int range) const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 * Note that it doesn't include units on fogged cells (see @ref unitsInRange)
 	 **/
-	BoItemList enemyUnitsInRange(BosonWeapon* w) const;
+	BoItemList enemyUnitsInRange(unsigned long int range) const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
