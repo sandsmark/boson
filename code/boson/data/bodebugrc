@@ -42,6 +42,10 @@
 [120]
 InfoOutput=4
 
+# BoLOD verbose if off by default
+[121]
+InfoOutput=4
+
 # Advance is off by default
 [300]
 InfoOutput=4
