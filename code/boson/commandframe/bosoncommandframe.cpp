@@ -277,7 +277,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
 		BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
 		a.setType(ActionProduceUnit);
 		a.setProductionId(*it);
-    a.setUnit(unit);
+		a.setUnit(unit);
 		actions.append(a);
 	}
  }
@@ -291,7 +291,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
 		BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
 		a.setType(ActionProduceTech);
 		a.setProductionId(*tit);
-    a.setUnit(unit);
+		a.setUnit(unit);
 		actions.append(a);
 	}
  }
