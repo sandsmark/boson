@@ -146,6 +146,8 @@ void bosonTopLevel::_object_put(QPoint p)
 		default:
 			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
 	}
+	setSelectionMode( visualTopLevel::SELECT_NONE);
+	mw.bigDisplay()->viewport()->setMouseTracking(false);
 }
 
 
