@@ -41,13 +41,15 @@ public:
 	virtual void actionClicked(int, int);		// selecting, moving...
 
 private slots:
-	void setSelectedObject(object_type, int);
+	void setSelectedObject	(object_type, int);
+	void setWho		(int w) { who = w; }
 
 private:
 	groundType	g;
 	mobType		m;
 	facilityType	f;
 	object_type	otype;
+	int		who;
 };
 
 #endif // EDITORBIGDISPLAY_H

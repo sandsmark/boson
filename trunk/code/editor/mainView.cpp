@@ -52,6 +52,7 @@ mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 	topLayout->addWidget(big,10);
 
 	connect (view, SIGNAL(setSelectedObject(object_type, int)), big, SLOT(setSelectedObject(object_type, int)));
+	connect (view, SIGNAL(setWho(int)), big, SLOT(setWho(int)));
 
 /* finish the stuff */
 //	leftLayout->addStretch(10);

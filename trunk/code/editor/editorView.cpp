@@ -108,6 +108,17 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 
 	connect(qcb_transRef, SIGNAL(activated(int)), this, SLOT(setTransRef(int)));
 	
+	qcb_who = new QComboBox(this, "qcb_who");
+	qcb_who->setGeometry(130,82,100,30);
+
+	qcb_who->insertItem("User 0", 0);
+	qcb_who->insertItem("User 1", 1);
+//	qcb_who->insertItem("User 2", 2);
+//	qcb_who->insertItem("User 3", 3);
+
+	connect(qcb_who, SIGNAL(activated(int)), this, SLOT(_setWho(int)));
+	
+	
 /* QPushButton */
 	for (i=0; i<TILES_NB; i++){
 		tiles[i] = new QPushButton(this ,"tiles");
@@ -140,6 +151,8 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	trans		= TRANS_GW;
 	setOrders	(0);
 	otype		= OT_NONE;
+	who		= 0;
+	qcb_who->hide();
 }
 
 
@@ -148,6 +161,15 @@ void editorView::setSelected(QPixmap *p)
 	view_one->setPixmap( p?*p:*view_none);
 	emit setSelectedObject (OT_NONE, 0);
 }
+
+
+void editorView::_setWho(int w)
+{
+	who = w;
+	emit setWho(w);
+	redrawTiles();
+}
+
 
 void editorView::setTransRef(int r)
 {
@@ -211,11 +233,11 @@ void editorView::redrawTiles(void)
 
 		case W_FACILITIES:
 			for (i=0; i< facilityPropNb; i++)
-				tiles[i]->setPixmap( *species[0]->getSmallOverview( (facilityType)i ) );
+				tiles[i]->setPixmap( *species[who]->getSmallOverview( (facilityType)i ) );
 			break;
 		case W_UNITS:
 			for (i=0; i< mobilePropNb; i++)
-				tiles[i]->setPixmap( *species[0]->getSmallOverview( (mobType)i ) );
+				tiles[i]->setPixmap( *species[who]->getSmallOverview( (mobType)i ) );
 			break;
 	} // switch()
 
@@ -263,19 +285,23 @@ void editorView::setOrders(int whatb , int who)
 		case W_UNITS:
 			i = mobilePropNb;
 			qcb_transRef->hide();
+			qcb_who->show();
 			break;
 		case W_FACILITIES:
 			i = facilityPropNb;
 			qcb_transRef->hide();
+			qcb_who->show();
 			break;
 		case W_BIG_GROUND_1:
 		case W_BIG_GROUND_2:
 			j = 4;
 			qcb_transRef->show();
+			qcb_who->hide();
 			break;
 		case W_SMALL_GROUND:
 			i = 9;
 			qcb_transRef->show();
+			qcb_who->hide();
 			break;
 		default : 
 			logf(LOG_ERROR, "editorView::setOrders : unhandled which in switch");
@@ -311,7 +337,7 @@ void editorView::handleButton(int but)
 			boAssert(but>=0);
 			boAssert(but<facilityPropNb);
 			otype = OT_FACILITY;
-			setSelected( species[0]->getBigOverview( (facilityType)but ));
+			setSelected( species[who]->getBigOverview( (facilityType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
 			break;
 
@@ -319,7 +345,7 @@ void editorView::handleButton(int but)
 			boAssert(but>=0);
 			boAssert(but<mobilePropNb);
 			otype = OT_UNIT;
-			setSelected( species[0]->getBigOverview( (mobType)but ));
+			setSelected( species[who]->getBigOverview( (mobType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
 			break;
 
