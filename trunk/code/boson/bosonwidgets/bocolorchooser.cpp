@@ -229,6 +229,6 @@ void BoColorChooser::highlightColor(const QColor& color)
 	kdError() << k_funcinfo << "NULL label" << endl;
 	return;
  }
- label->setFrameStyle(QFrame::Box | QFrame::Plain);
+ label->setFrameStyle(QFrame::WinPanel | QFrame::Sunken);
 }
 
