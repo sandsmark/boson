@@ -30,6 +30,9 @@ class BosonParticleSystemProperties;
 class Unit;
 
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonWeaponProperties
 {
   public:
@@ -73,6 +76,9 @@ class BosonWeaponProperties
 };
 
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonWeapon
 {
   public:

@@ -29,6 +29,7 @@ class BosonProfilingDialog;
  * Information about the rendering times. Helper class for @ref BosonProfiling.
  *
  * We avoid functions here in order to make it as fast as possible
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class RenderGLTimes
 {

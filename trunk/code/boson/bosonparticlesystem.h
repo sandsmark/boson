@@ -33,6 +33,7 @@ class BosonParticleSystemProperties;
  * easily access them.
  * Note that velocity is velocity per second and life and maxage are also in seconds
  * @see BosonParticleSystem
+ * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonParticle
 {
@@ -76,6 +77,7 @@ class BosonParticle
  * is updated or initialized (resetted). If you want even more flexibility, then
  * you can write you own subclass; most important methods are virtual, so you
  * can change them if you really want to.
+ * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonParticleSystem
 {

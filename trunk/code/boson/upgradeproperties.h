@@ -173,6 +173,9 @@ class UpgradePropertiesBase
     bool mApplyToMobiles;
 };
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class UpgradeProperties : public UpgradePropertiesBase, public PluginProperties
 {
   public:

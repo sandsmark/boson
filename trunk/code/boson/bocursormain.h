@@ -23,6 +23,9 @@
 
 class BosonCursor;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class CursorPreview : public QGLWidget
 {
 	Q_OBJECT

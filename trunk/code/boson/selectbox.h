@@ -28,6 +28,9 @@ class BosonCanvas;
 
 class BosonTextureArray;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class SelectBoxData
 {
 public:

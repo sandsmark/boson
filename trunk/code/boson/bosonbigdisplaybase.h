@@ -34,6 +34,9 @@ class Camera;
 class KGameChat;
 class KGameIO;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de
+ **/
 class BoAction
 {
 public:

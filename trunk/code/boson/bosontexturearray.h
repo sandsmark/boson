@@ -26,6 +26,10 @@
 class BoTextureInfo;
 
 class QImage;
+
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonTextureArray
 {
 public:

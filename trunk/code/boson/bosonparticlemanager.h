@@ -67,6 +67,9 @@ class KSimpleConfig;
 };*/
 
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonParticleSystemProperties
 {
   public:

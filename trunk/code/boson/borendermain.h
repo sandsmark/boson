@@ -80,6 +80,9 @@ private slots:
 	void slotValueChanged(int v) { emit valueChanged((float)v); }
 };
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class ModelPreview : public QGLWidget
 {
 	Q_OBJECT
@@ -214,6 +217,9 @@ private:
 	KIntNumInput* mFrame;
 };
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class RenderMain : public KMainWindow
 {
  	Q_OBJECT

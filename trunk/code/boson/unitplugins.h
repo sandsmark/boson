@@ -33,6 +33,9 @@ class Player;
 class PluginProperties;
 class Boson;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class UnitPlugin
 {
 	public:
@@ -99,6 +102,9 @@ private:
 	Unit* mUnit;
 };
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class ProductionPlugin : public UnitPlugin
 {
 public:
@@ -186,6 +192,7 @@ private:
  *
  * Nevertheless I don't entegrate the functionality into Unit since it should
  * get some more testing
+ * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class RepairPlugin : public UnitPlugin
 {
@@ -221,6 +228,9 @@ public:
 private:
 };
 
+/*
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class HarvesterPlugin : public UnitPlugin
 {
 public:

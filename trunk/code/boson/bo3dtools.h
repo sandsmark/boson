@@ -22,6 +22,9 @@
 
 #include <GL/gl.h>
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BoVector3
 {
   public:
@@ -55,6 +58,9 @@ class BoVector3
     GLfloat mData[3];
 };
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BoVector4
 {
   public:
