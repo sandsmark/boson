@@ -949,12 +949,19 @@ void BosonBigDisplay::updateCursor()
 			if (unit->owner() == d->mLocalPlayer) {
 				d->mCursor->setCursor(CursorDefault);
 				d->mCursor->setWidgetCursor(this);
-			} else {
-				d->mCursor->setCursor(CursorAttack);
-				d->mCursor->setWidgetCursor(this);
+			} else if(selection()->leader()->unitProperties()->canShoot()) {
+				if((unit->isFlying() && d->mSelection->leader()->unitProperties()->canShootAtAirUnits()) ||
+						(!unit->isFlying() && d->mSelection->leader()->unitProperties()->canShootAtLandUnits())) {
+					d->mCursor->setCursor(CursorAttack);
+					d->mCursor->setWidgetCursor(this);
+				}
 			}
 		} else if (d->mSelection->leader()->isMobile()) {
 			d->mCursor->setCursor(CursorMove);
+			d->mCursor->setWidgetCursor(this);
+			d->mCursor->showCursor();
+		} else {
+			d->mCursor->setCursor(CursorDefault);
 			d->mCursor->setWidgetCursor(this);
 			d->mCursor->showCursor();
 		}
