@@ -1133,9 +1133,7 @@ else
    kde_qt_verstring=$3
 fi
 
-if test $kde_qtver = 3; then
-  kde_qt_dirs="$QTDIR /usr/lib/qt3 /usr/lib/qt"
-fi
+kde_qt_dirs="$QTDIR /usr/lib/qt3 /usr/lib/qt"
 ])
 
 AC_DEFUN(KDE_CHECK_QT_DIRECT,
@@ -1360,11 +1358,7 @@ if test ! "$ac_qt_includes" = "NO"; then
    qt_incdirs="$ac_qt_includes $qt_incdirs"
 fi
 
-if test "$kde_qtver" != "1"; then
-  kde_qt_header=qstyle.h
-else
-  kde_qt_header=qglobal.h
-fi
+kde_qt_header=qstyle.h
 
 AC_FIND_FILE($kde_qt_header, $qt_incdirs, qt_incdir)
 ac_qt_includes="$qt_incdir"
