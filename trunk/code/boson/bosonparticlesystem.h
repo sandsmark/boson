@@ -249,9 +249,9 @@ class BosonParticleSystem
     /**
      * @return Whether this system is active
      * Active means that either this system has at least 1 living (active)
-     * particle or it's age is more than 0 (can create more particles)
+     * particle or it's age is not 0 (can create more particles)
      **/
-    bool isActive()  { return ((mNum > 0) || (mAge > 0)); };
+    bool isActive()  { return ((mNum > 0) || (mAge != 0)); };
 
     /**
      * Sets OpenGL blending function of this system. This function is used in
