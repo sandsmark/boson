@@ -36,7 +36,7 @@ bin_PROGRAMS = boeditor
 #boeditor 
 boeditor_METASOURCES = USE_AUTOMOC
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-boeditor_SOURCES = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorField.cpp editorBigDisplay.cpp
+boeditor_SOURCES = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorField.cpp editorBigDisplay.cpp newDlg.cpp
 boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkfm -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 #$(LIBSOCKET)
 
 
@@ -58,7 +58,7 @@ uninstall-local:
 #garbage
 CLEANFILES = $(boeditor_METASOURCES) boson-*.log
 
-EXTRA_DIST = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorField.cpp editorField.h ressource.h boeditor.h editorView.h mainView.h editorBigDisplay.cpp editorBigDisplay.h
+EXTRA_DIST = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorField.cpp editorField.h ressource.h boeditor.h editorView.h mainView.h editorBigDisplay.cpp editorBigDisplay.h newDlg.h
 
 # make messages.po. Move this one to ../po/ and "make merge" in po
 # the -x is for skipping messages already translated in kdelibs

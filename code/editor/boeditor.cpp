@@ -35,6 +35,7 @@
 #include "ressource.h"
 
 #include "boeditor.h"
+#include "newDlg.h"
 
 
 FILE *logfile = (FILE *) 0L;
@@ -463,9 +464,24 @@ void BoEditorApp::slotFileNew()
   		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
+
+	newDlg	*newdlg = new newDlg(0, "New Scenario"); // 0 -> centered
+	if (newdlg->exec() != QDialog::Accepted) {
+		delete newdlg;
+		return;
+	}
+
 	/* the physical map is created when a game is created */
 	vfield = field = new editorField();
-	assert (true == field->New(100,100, "scenario name (will be configurable)")); // XXX should be configurable
+	if (!field->New(newdlg->sc_width, newdlg->sc_height, newdlg->sc_name)) {
+		delete field;
+		field = 0;
+		delete newdlg;
+  		KMsgBox::message(this, i18n("Warning"),	i18n("Creation of new scenario failed :-((("));	
+		return;
+	}
+
+	delete newdlg;
 	
 	*currentFile = "";
 
@@ -531,6 +547,10 @@ void BoEditorApp::doLoad(QString newname)
 
 	mainview->show();
 	updateRects();
+
+	enableCommand(ID_FILE_SAVE);
+	enableCommand(ID_FILE_SAVE_AS);
+	enableCommand(ID_FILE_CLOSE);
 }
 
 
