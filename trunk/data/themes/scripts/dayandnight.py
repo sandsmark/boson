@@ -51,8 +51,8 @@ def advanceDay(cycle):
 
   # Is it day or night?  (this is basically time)
   # 0 = 1 = midnight (time is 0:00); 0.5 = midday (time is 12:00)
-  # We add (duration / 2) to cycle because we want to start on midday
-  dayfactor = ((cycle + duration / 2) % duration) / float(duration)
+  # We add (duration * 0.25) to cycle because we want to start at morning
+  dayfactor = ((cycle + duration * 0.25) % duration) / float(duration)
   setTime(dayfactor)
 
 # Sets time of day and modifies lighting
@@ -86,8 +86,10 @@ def setTime(dayfactor):
 
   ### Light colors:
   # Base intensities for ambient and diffuse colors
-  baseambient = 0.4  # Ambient color at night (will be 0.65 at midday)
-  basediffuse = 1.3  # Diffuse color at day (will be 0 at night)
+  baseambientday = 0.55  # Ambient color at day
+  baseambientnight = 0.35  # Ambient color at night
+  basediffuseday = 0.8  # Diffuse color at day
+  basediffusenight = 0.15  # Diffuse color at night
 
   # How much sun lights the land. Note that this is 1 if sun is at >=50 degrees,
   #  not at 90 degrees.
@@ -98,15 +100,18 @@ def setTime(dayfactor):
   else:
     # Sun angle is between 50 and 0 (exclusive)
     sunfactor = sin(radians(sunangle / 50 * 90))
+
+  # Calculate base ambient intensity
   # If the sun is shining bright, ambient intensity is quite big (in real world,
   #  it's because of radiosity). Increase it
   # Note that we don't want it to get too high either, because we'd have no
   #  shading then
-  baseambient += sunfactor * 0.25
+  baseambient = baseambientnight + sunfactor * (baseambientday - baseambientnight)
 
+  # Calculate base diffuse intensity
   # Diffuse color is based on the angle of the sun. Note that here, we set
   #  diffuse color to max when sun angle is 60 degrees (max here), not 90.
-  basediffuse = sunfactor * basediffuse
+  basediffuse = basediffusenight + sunfactor * (basediffuseday - basediffusenight)
 
   # Set light colors
   ambient = baseambient, baseambient, baseambient, 1.0
