@@ -270,6 +270,11 @@ protected slots:
 	 **/
 	void slotCheckGameDockStatus();
 
+
+	void slotChangeMaxProfilingEventEntries();
+	void slotChangeMaxProfilingAdvanceEntries();
+	void slotChangeMaxProfilingRenderingEntries();
+
 private:
 	void initDisplayManager();
 	void initBoson();

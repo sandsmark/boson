@@ -201,6 +201,9 @@ void BosonProfiling::init()
  d->mGameSpeed = -1;
  d->mVersion = PROFILING_VERSION;
  d->mNextDynamicEventId = 1;
+ mMaxEventEntries = boConfig->maxProfilingEventEntries();
+ mMaxAdvanceEntries = boConfig->maxProfilingAdvanceEntries();
+ mMaxRenderingEntries = boConfig->maxProfilingRenderingEntries();
 }
 
 BosonProfiling::~BosonProfiling()
@@ -242,7 +245,7 @@ void BosonProfiling::render(bool start)
 		d->mBenchmark->addRender(d->mCurrentRenderTimes);
 	}
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
-	if (d->mRenderTimes.count() > MAX_PROFILING_ENTRIES) {
+	if (d->mRenderTimes.count() > maxRenderingEntries()) {
 		d->mRenderTimes.removeFirst();
 	}
 	d->mCurrentRenderTimes = 0;
@@ -319,7 +322,7 @@ void BosonProfiling::advance(bool start, unsigned int advanceCallsCount)
 		d->mBenchmark->addAdvance(d->mCurrentSlotAdvanceTimes);
 	}
 	d->mSlotAdvanceTimes.append(d->mCurrentSlotAdvanceTimes);
-	if (d->mSlotAdvanceTimes.count() > MAX_PROFILING_ENTRIES) {
+	if (d->mSlotAdvanceTimes.count() > maxAdvanceEntries()) {
 		d->mSlotAdvanceTimes.removeFirst();
 	}
 	if (d->mCurrentSlotAdvanceTimes->mAdvanceCallsCount != advanceCallsCount) {
@@ -405,7 +408,7 @@ long int BosonProfiling::stop(int event, bool appendToList)
 
  if (appendToList) {
 	d->mTimes[event].append(_elapsed);
-	if (d->mTimes[event].count() > MAX_PROFILING_ENTRIES) {
+	if (d->mTimes[event].count() > maxEventEntries()) {
 		d->mTimes[event].remove(d->mTimes[event].begin());
 	}
  }

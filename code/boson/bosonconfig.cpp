@@ -295,6 +295,9 @@ BosonConfig::BosonConfig(KConfig* conf)
  mTextureCompression = new BoConfigBoolEntry(this, "TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
  mTextureColorMipmaps = new BoConfigBoolEntry(this, "TextureColorMipmaps", false);
  mTextureAnisotropy = new BoConfigIntEntry(this, "TextureAnisotropy", 1);
+ mMaxProfilingEventEntries = new BoConfigUIntEntry(this, "MaxProfilingEventEntries", 2000);
+ mMaxProfilingAdvanceEntries = new BoConfigUIntEntry(this, "MaxProfilingAdvanceEntries", 600);
+ mMaxProfilingRenderingEntries = new BoConfigUIntEntry(this, "MaxProfilingRenderingEntries", 300);
 
  mDebugMode = DebugNormal;
 
