@@ -21,18 +21,8 @@
 #include <qimage.h>
 #include <qstring.h>
 
-#include "common/groundType.h"
 #include "common/log.h"
 #include "common/map.h"
-
-#define		BIG_W	32
-#define		BIG_H	( (NB_GROUND_TILES*4 + BIG_W-1) / BIG_W )
-
-/*
- * BIG_W		should be 4*n, cause this way it's easier to watch the generated file
- * NB_GROUND_TILES*4	is 1244 (on may, 14th 200), so BIG_H should be 39
- */
-
 
 QImage		theBig( BIG_W*BO_TILE_SIZE, BIG_H*BO_TILE_SIZE, 32);
 QString		themePath;
