@@ -316,9 +316,6 @@ public:
 	void rotate(float delta);
 
 
-	bool boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
-	bool boUnProject(const QPoint& pos, BoVector3Float* v, float z = -1.0) const;
-
 	// we should probably make these 4 methods protected. i cant imagine any
 	// useful public use
 	/*
@@ -679,14 +676,6 @@ protected:
 	 * but @ref selectionEnd is now x,y,z
 	 **/
 	void moveSelectionRect(const QPoint& widgetPos);
-
-	/**
-	 * Calculate the maximum and minimum world coordinates from the
-	 * specified rectangles.
-	 *
-	 * The rect @p rect is in window coordinates (e.g. the selection rect).
-	 **/
-	void calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const;
 
 	/**
 	 * Remove a currently drawn selection rect and select all units inside

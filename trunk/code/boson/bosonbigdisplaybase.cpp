@@ -157,6 +157,52 @@
 #define ID_DEBUG_SUB_1000_OIL 6
 
 
+/**
+ * Calculate the maximum and minimum world coordinates from the
+ * specified rectangles.
+ *
+ * The rect @p rect is in window coordinates (e.g. the selection rect).
+ **/
+static void calculateWorldRect(const BoGLMatrices& matrices, const QRect& rect, float* minX, float* minY, float* maxX, float* maxY)
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->canvas());
+ const BosonMap* map = boGame->canvas()->map();
+ BO_CHECK_NULL_RET(map);
+ GLfloat posX, posY;
+ GLfloat posZ;
+ Bo3dTools::mapCoordinates(matrices, rect.topLeft(), &posX, &posY, &posZ);
+ *maxX = *minX = posX;
+ *maxY = *minY = -posY;
+ Bo3dTools::mapCoordinates(matrices, rect.topRight(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+ Bo3dTools::mapCoordinates(matrices, rect.bottomLeft(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+ Bo3dTools::mapCoordinates(matrices, rect.bottomRight(), &posX, &posY, &posZ);
+ *maxX = QMAX(*maxX, posX);
+ *maxY = QMAX(*maxY, -posY);
+ *minX = QMIN(*minX, posX);
+ *minY = QMIN(*minY, -posY);
+
+ *maxX = QMAX(0, *maxX);
+ *maxY = QMAX(0, *maxY);
+ *minX = QMAX(0, *minX);
+ *minY = QMAX(0, *minY);
+ *maxX = QMIN((map->width() - 1), *maxX);
+ *minX = QMIN((map->width() - 1), *minX);
+ *maxY = QMIN((map->height() - 1), *maxY);
+ *minY = QMIN((map->height() - 1), *minY);
+ *minY *= -1;
+ *maxY *= -1;
+}
+
+
 class BoCursorCollection
 {
 public:
@@ -286,6 +332,10 @@ BoCursorEdgeScrolling::BoCursorEdgeScrolling(QObject* parent) : QObject(parent)
  connect(mCursorEdgeTimer, SIGNAL(timeout()),
 		this, SLOT(slotCursorEdgeTimeout()));
  qApp->installEventFilter(this);
+}
+
+BoCursorEdgeScrolling::~BoCursorEdgeScrolling()
+{
 }
 
 void BoCursorEdgeScrolling::quitGame()
@@ -1184,11 +1234,119 @@ public:
 		setEndWidgetPos(startPos());
 	}
 
+	/**
+	 * @return A list of items that are currently in the selection rect
+	 **/
+	BoItemList* items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas, const BoGLMatrices& gameGLMatrices) const;
+
 private:
 	QPoint mStartPos;
 	QPoint mEndPos;
 	bool mVisible;
 };
+
+BoItemList* SelectionRect::items(const PlayerIO* localPlayerIO, const BosonCanvas* canvas, const BoGLMatrices& gameGLMatrices) const
+{
+ if (!canvas) {
+	BO_NULL_ERROR(canvas);
+	return new BoItemList();
+ }
+ if (!localPlayerIO) {
+	BO_NULL_ERROR(localPlayerIO);
+	return new BoItemList();
+ }
+ const BosonMap* map = canvas->map();
+ if (!map) {
+	BO_NULL_ERROR(map);
+	return new BoItemList();
+ }
+
+ QRect widgetRect_;
+ widgetRect(&widgetRect_);
+
+ GLfloat maxX, maxY;
+ GLfloat minX, minY;
+ calculateWorldRect(gameGLMatrices, widgetRect_, &minX, &minY, &maxX, &maxY);
+ maxY /= -1.0f;
+ minY /= -1.0f;
+
+ // now the really ugly part starts. we really should improve this.
+ // the rect (pos1, pos2) is the smallest possible 2d rect that contains all
+ // cells (with 2d rect i mean: parallel to x and y world-axis).
+ // but we we need an actual world rect, as the view is most probably rotated
+ // and so a lot of cells that are in the parallel rect are not in the actual
+ // rect.
+ // to achieve this we loop through all cells in the parallel rect and check
+ // whether they are in the actual rect.
+ // someone with some maths knowledge and/or some time can surely speed this up
+ // by using some proper formulas!
+
+ QRect cellRect = QRect(QPoint((int)minX, (int)minY), QPoint((int)maxX, (int)maxY)).normalize();
+ QPoint win;
+ QValueList<const Cell*> cells;
+ for (int x = cellRect.left(); x <= cellRect.right(); x++) {
+	for (int y = cellRect.top(); y <= cellRect.bottom(); y++) {
+		const Cell* c = canvas->cell(x, y);
+		if (!c) {
+			boDebug() << "NULL cell at " << x << "," << y << endl;
+			continue;
+		}
+		// AB: we use z==0.0, that is not really nice here. anyway,
+		// let's wait until it causes trouble.
+		// (read: I don't know which kind of trouble it will cause)
+		GLfloat glx, gly, glz;
+
+		// top left corner of cell
+		glx = x;
+		gly = -y;
+		glz = map->heightAtCorner(x, y);
+		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		if (widgetRect_.contains(win)) {
+			cells.append(c);
+			continue;
+		}
+		// top right corner of cell
+		glx = (x + 1);
+		gly = -y;
+		glz = map->heightAtCorner(x + 1, y);
+		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		if (widgetRect_.contains(win)) {
+			cells.append(c);
+			continue;
+		}
+		// bottom left corner of cell
+		glx = x;
+		gly = -(y + 1);
+		glz = map->heightAtCorner(x, y + 1);
+		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		if (widgetRect_.contains(win)) {
+			cells.append(c);
+			continue;
+		}
+		// bottom right corner of cell
+		glx = (x + 1);
+		gly = -(y + 1);
+		glz = map->heightAtCorner(x + 1, y + 1);
+		Bo3dTools::boProject(gameGLMatrices, glx, gly, glz, &win);
+		if (widgetRect_.contains(win)) {
+			cells.append(c);
+			continue;
+		}
+	}
+ }
+
+ // another ugly part of this function...
+ QPtrVector<const Cell> cellVector(cells.count());
+ QValueList<const Cell*>::Iterator it;
+ int i = 0;
+ for (it = cells.begin(); it != cells.end(); ++it) {
+	cellVector.insert(i, *it);
+	i++;
+ }
+
+ return localPlayerIO->unitsAtCells(&cellVector);
+}
+
 
 
 class PlacementPreview
@@ -2786,7 +2944,7 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button, const BoMouseEve
 			// basically the same as a normal RMB
 			displayInput()->actionClicked(event);
 		} else if (event.shiftButton()) {
-			BoItemList* items = selectionRectItems();
+			BoItemList* items = d->mSelectionRect.items(localPlayerIO(), canvas(), *d->mGameGLMatrices);
 			displayInput()->unselectArea(items);
 			d->mSelectionRect.setVisible(false);
 		} else if (event.controlButton()) {
@@ -3154,13 +3312,11 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
  BO_CHECK_NULL_RET(displayInput());
  BO_CHECK_NULL_RET(localPlayerIO());
-#warning FIXME: move to PlayerIO
- // only PlayerIO should be allowed to select units! there we should always
- // check whether a unit is fogged or not before selecting it!
+
  if (d->mSelectionRect.isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
-	BoItemList* items = selectionRectItems();
+	BoItemList* items = d->mSelectionRect.items(localPlayerIO(), canvas(), *d->mGameGLMatrices);
 	displayInput()->selectArea(items, replace);
 
 	d->mSelectionRect.setVisible(false);
@@ -3185,12 +3341,8 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	if (!canvas()->onCanvas(canvasVector)) {
 		return;
 	}
-	// this is not good: isFogged() should get checked *everywhere* where a
-	// player tries to select a unit!
-	// maybe in selectSingle() or so.
-	if (!localPlayerIO()->isFogged((int)(canvasVector.x()), (int)(canvasVector.y()))) {
-		unit = canvas()->collisions()->findUnitAt(canvasVector);
-	}
+
+	unit = localPlayerIO()->findUnitAt(canvas(), canvasVector);
 	if (unit) {
 		boDebug() << k_funcinfo << "select unit at " << canvasVector.x() << "," << canvasVector.y() << " (canvas)" << endl;
 		displayInput()->selectSingle(unit, replace);
@@ -3207,133 +3359,6 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
  }
 }
 
-
-BoItemList* BosonBigDisplayBase::selectionRectItems()
-{
- if (!canvas()) {
-	return new BoItemList();
- }
- const bool debugMe = false;
-
- QRect widgetRect;
- d->mSelectionRect.widgetRect(&widgetRect);
-
- GLfloat maxX, maxY;
- GLfloat minX, minY;
- calculateWorldRect(widgetRect, &minX, &minY, &maxX, &maxY);
- maxY /= -1.0f;
- minY /= -1.0f;
-
- if (debugMe) {
-	boDebug() << k_funcinfo << "maxX: " << maxX << " maxY: " << maxY
-			<< " minX: " << minX
-			<< " minY: " << minY
-			<< endl;
- }
-
-
- // now the really ugly part starts. we really should improve this.
- // the rect (pos1, pos2) is the smallest possible 2d rect that contains all
- // cells (with 2d rect i mean: parallel to x and y world-axis).
- // but we we need an actual world rect, as the view is most probably rotated
- // and so a lot of cells that are in the parallel rect are not in the actual
- // rect.
- // to achieve this we loop through all cells in the parallel rect and check
- // whether they are in the actual rect.
- // someone with some maths knowledge and/or some time can surely speed this up
- // by using some proper formulas!
-
- QRect cellRect = QRect(QPoint((int)minX, (int)minY), QPoint((int)maxX, (int)maxY)).normalize();
- QPoint win;
- QValueList<Cell*> cells;
- if (debugMe) {
-	boDebug() << k_funcinfo << cellRect.left()
-			<< " " << cellRect.right()
-			<< " " << cellRect.top()
-			<< " " << cellRect.bottom() << endl;
-	boDebug() << "widgetrect: " << widgetRect.left()
-			<< " " << widgetRect.right()
-			<< " " << widgetRect.top()
-			<< " " << widgetRect.bottom() << endl;
- }
- for (int x = cellRect.left(); x <= cellRect.right(); x++) {
-	for (int y = cellRect.top(); y <= cellRect.bottom(); y++) {
-		Cell* c = canvas()->cell(x, y);
-		if (!c) {
-			boDebug() << "NULL cell at " << x << "," << y << endl;
-			continue;
-		}
-		// AB: we use z==0.0, that is not really nice here. anyway,
-		// let's wait until it causes trouble.
-		// (read: I don't know which kind of trouble it will cause)
-		GLfloat glx, gly, glz;
-		// top left corner of cell
-		glx = x;
-		gly = -y;
-		glz = canvas()->map()->heightAtCorner(x, y);
-		boProject(glx, gly, glz, &win);
-		if (widgetRect.contains(win)) {
-			if (debugMe) {
-				boDebug() << "adding cell at " << x << "," << y << endl;
-			}
-			cells.append(c);
-			continue;
-		}
-		// top right corner of cell
-		glx = (x + 1);
-		gly = -y;
-		glz = canvas()->map()->heightAtCorner(x + 1, y);
-		boProject(glx, gly, glz, &win);
-		if (widgetRect.contains(win)) {
-			if (debugMe) {
-				boDebug() << "adding cell at " << x << "," << y << endl;
-			}
-			cells.append(c);
-			continue;
-		}
-		// bottom left corner of cell
-		glx = x;
-		gly = -(y + 1);
-		glz = canvas()->map()->heightAtCorner(x, y + 1);
-		boProject(glx, gly, glz, &win);
-		if (widgetRect.contains(win)) {
-			if (debugMe) {
-				boDebug() << "adding cell at " << x << "," << y << endl;
-			}
-			cells.append(c);
-			continue;
-		}
-		// bottom right corner of cell
-		glx = (x + 1);
-		gly = -(y + 1);
-		glz = canvas()->map()->heightAtCorner(x + 1, y + 1);
-		boProject(glx, gly, glz, &win);
-		if (widgetRect.contains(win)) {
-			if (debugMe) {
-				boDebug() << "adding cell at " << x << "," << y << endl;
-			}
-			cells.append(c);
-			continue;
-		}
-		if (debugMe) {
-			boDebug() << "not adding cell at " << x << "," << y
-					<< " at winx=" << win.x() << " "
-					<< " winy=" << win.y() << endl;
-		}
-	}
- }
-
- // another ugly part of this function...
- QPtrVector<Cell> cellVector(cells.count());
- QValueList<Cell*>::Iterator it;
- int i = 0;
- for (it = cells.begin(); it != cells.end(); ++it) {
-	cellVector.insert(i, *it);
-	i++;
- }
-
- return localPlayerIO()->unitsAtCells(&cellVector);
-}
 
 void BosonBigDisplayBase::addChatMessage(const QString& message)
 {
@@ -3392,46 +3417,6 @@ void BosonBigDisplayBase::zoom(float delta)
 #warning FIXME: d->mCanvasPos, d->mCanvasVector
 
  camera()->changeZ(delta);
-}
-
-// we have this here and in BoGroundRenderer!
-#warning TODO: move to Bo3dTools
-void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const
-{
- BO_CHECK_NULL_RET(canvas());
- const BosonMap* map = canvas()->map();
- BO_CHECK_NULL_RET(map);
- GLfloat posX, posY;
- GLfloat posZ;
- mapCoordinates(rect.topLeft(), &posX, &posY, &posZ);
- *maxX = *minX = posX;
- *maxY = *minY = -posY;
- mapCoordinates(rect.topRight(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
- mapCoordinates(rect.bottomLeft(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
- mapCoordinates(rect.bottomRight(), &posX, &posY, &posZ);
- *maxX = QMAX(*maxX, posX);
- *maxY = QMAX(*maxY, -posY);
- *minX = QMIN(*minX, posX);
- *minY = QMIN(*minY, -posY);
-
- *maxX = QMAX(0, *maxX);
- *maxY = QMAX(0, *maxY);
- *minX = QMAX(0, *minX);
- *minY = QMAX(0, *minY);
- *maxX = QMIN((map->width() - 1), *maxX);
- *minX = QMIN((map->width() - 1), *minX);
- *maxY = QMIN((map->height() - 1), *maxY);
- *minY = QMIN((map->height() - 1), *minY);
- *minY *= -1;
- *maxY *= -1;
 }
 
 void BosonBigDisplayBase::setCamera(const BoGameCamera& camera)
@@ -3758,18 +3743,6 @@ void BosonBigDisplayBase::setToolTipCreator(int type)
 void BosonBigDisplayBase::setToolTipUpdatePeriod(int ms)
 {
  d->mToolTips->setUpdatePeriod(ms);
-}
-
-bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const
-{
- return Bo3dTools::boProject(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
-		x, y, z, pos);
-}
-
-bool BosonBigDisplayBase::boUnProject(const QPoint& pos, BoVector3Float* ret, float z) const
-{
- return Bo3dTools::boUnProject(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
-		pos, ret, z);
 }
 
 void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)

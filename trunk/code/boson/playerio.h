@@ -221,7 +221,7 @@ public:
 	 **/
 	Unit* findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canvasVector) const;
 
-	BoItemList* unitsAtCells(const QPtrVector<Cell>* cells) const;
+	BoItemList* unitsAtCells(const QPtrVector<const Cell>* cells) const;
 
 	void emitSignalShowMiniMap(bool show);
 
