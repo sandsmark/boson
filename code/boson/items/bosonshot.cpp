@@ -72,6 +72,7 @@ void BosonShot::advance(unsigned int phase)
   float factor = mStep / (float)mTotalSteps - 0.5;  // Factor will be in range -0.25 to 0.25
   float newZ = (-4 * (factor * factor) + 1) * BO_TILE_SIZE;
   moveBy(mVelo[0], mVelo[1], mVelo[2] + (newZ - mZ));
+  setXRotation(rotationToPoint(mLength / mTotalSteps, newZ - mZ) - 90 );
   // Move all "fly" particles.
   BoVector3 move(mVelo[0], -(mVelo[1]), mVelo[2] + (newZ - mZ));
   move.scale(1 / (float)BO_TILE_SIZE);
