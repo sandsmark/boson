@@ -237,6 +237,11 @@ public:
 	 **/
 	void playSound(UnitBase* unit, UnitSoundEvent event);
 
+	/**
+	 * Play the specified event for the specified weapon.
+	 **/
+	void playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event);
+
 	void loadGeneralSounds();
 
 	/**

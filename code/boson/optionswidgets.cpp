@@ -347,8 +347,7 @@ SoundOptions::SoundOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
  (void)new QLabel(i18n("Disable the following unit sounds (please send a bug report if you can think of more descriptive names):"), this);
  QCheckBox* c;
- c = new QCheckBox(i18n("Shoot"), this);
- mCheckBox2UnitSoundEvent.insert(c, SoundShoot);
+ weaponsounds = new QCheckBox(i18n("Weapon sounds"), this);
  c = new QCheckBox(i18n("Order Move"), this);
  mCheckBox2UnitSoundEvent.insert(c, SoundOrderMove);
  c = new QCheckBox(i18n("Order Attack"), this);
@@ -374,6 +373,7 @@ void SoundOptions::apply()
  for (; it != mCheckBox2UnitSoundEvent.end(); ++it) {
 	boConfig->setUnitSoundActivated(it.data(), !it.key()->isChecked());
  }
+ boConfig->setDeactivateWeaponSounds(weaponsounds->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -383,11 +383,13 @@ void SoundOptions::setDefaults()
  for (; it != mCheckBox2UnitSoundEvent.end(); ++it) {
 	it.key()->setChecked(false);
  }
+ weaponsounds->setChecked(DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
 }
 
 void SoundOptions::load()
 {
  setUnitSoundsDeactivated(boConfig);
+ weaponsounds->setChecked(boConfig->deactivateWeaponSounds());
 }
 
 void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)

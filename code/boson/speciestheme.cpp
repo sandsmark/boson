@@ -30,6 +30,7 @@
 #include "sound/bosonsound.h"
 #include "upgradeproperties.h"
 #include "bodebug.h"
+#include "bosonweapon.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -155,11 +156,26 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 	boProfiling->loadUnitDone(type);
 	return false;
  }
+ // Load unit sounds
  QStringList sounds;
  QMap<int, QString> unitSounds = prop->sounds();
  QMap<int,QString>::Iterator it = unitSounds.begin();
  for (; it != unitSounds.end(); ++it) {
 	sounds.append(*it);
+ }
+ // Load sounds of weapons of this unit
+ if (prop->canShoot()) {
+	QPtrListIterator<PluginProperties> it(*(prop->plugins()));
+	while (it.current()) {
+		if (it.current()->pluginType() == PluginProperties::Weapon) {
+			QMap<int, QString> weaponSounds = ((BosonWeaponProperties*)it.current())->sounds();
+			QMap<int, QString>::Iterator it = weaponSounds.begin();
+			for (; it != weaponSounds.end(); ++it) {
+				sounds.append(*it);
+			}
+		}
+		++it;
+	}
  }
  mSound->addUnitSounds(themePath(), sounds);
  boProfiling->loadUnitDone(type);
@@ -541,6 +557,20 @@ void SpeciesTheme::playSound(SoundEvent event)
 //	return;
 // }
  sound()->play(event);
+}
+
+void SpeciesTheme::playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event)
+{
+ if (boConfig->disableSound()) {
+	return;
+ }
+ if (!sound()) {
+	return;
+ }
+ if (boConfig->deactivateWeaponSounds()) {
+	return;
+ }
+ sound()->play(weaponprop->sound(event));
 }
 
 void SpeciesTheme::loadGeneralSounds()

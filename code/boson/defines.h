@@ -86,6 +86,7 @@
 #define DEFAULT_RMB_ACTION ActionMove
 #define DEFAULT_MOUSE_WHEEL_ACTION CameraZoom
 #define DEFAULT_MOUSE_WHEEL_SHIFT_ACTION CameraRotate
+#define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
 
 #endif
 

@@ -73,13 +73,18 @@ enum UnitAction {
 };
 
 enum UnitSoundEvent {
-	SoundShoot = 0,
-	SoundOrderMove = 1,
-	SoundOrderAttack = 2,
-	SoundOrderSelect = 3,
-	SoundReportProduced = 4,
-	SoundReportDestroyed = 5,
-	SoundReportUnderAttack = 6
+	SoundOrderMove = 0,
+	SoundOrderAttack = 1,
+	SoundOrderSelect = 2,
+	SoundReportProduced = 3,
+	SoundReportDestroyed = 4,
+	SoundReportUnderAttack = 5
+};
+
+enum WeaponSoundEvent {
+	SoundWeaponShoot = 0,
+	SoundWeaponHit = 1,
+	SoundWeaponFly = 2
 };
 
 enum SoundEvent {

@@ -377,6 +377,9 @@ void BosonCanvas::shotHit(BosonShot* s)
  // Add hit particle systems
  addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
 
+ // Play hit sound
+ s->properties()->playSound(SoundWeaponHit);
+
  explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(), s->owner());
 }
 

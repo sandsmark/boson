@@ -75,6 +75,10 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   {
     mModel = speciesTheme()->objectModel(mModelFileName);
   }
+  mSounds.clear();
+  mSounds.insert(SoundWeaponShoot, cfg->readEntry("SoundShoot", "shoot"));
+  mSounds.insert(SoundWeaponFly, cfg->readEntry("SoundFly", "missile_fly"));
+  mSounds.insert(SoundWeaponHit, cfg->readEntry("SoundHit", "hit"));
 }
 
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
@@ -95,6 +99,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
   BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
+  cfg->writeEntry("SoundShoot", mSounds[SoundWeaponShoot]);
+  cfg->writeEntry("SoundFly", mSounds[SoundWeaponFly]);
+  cfg->writeEntry("SoundHit", mSounds[SoundWeaponHit]);
 }
 
 void BosonWeaponProperties::reset()
@@ -169,6 +176,26 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(BoVec
     ++it;
   }
   return list;
+}
+
+void BosonWeaponProperties::setSound(int event, QString filename)
+{
+  mSounds.insert(event, filename);
+}
+
+QString BosonWeaponProperties::sound(int soundEvent) const
+{
+  return mSounds[soundEvent];
+}
+
+void BosonWeaponProperties::playSound(WeaponSoundEvent event) const
+{
+  speciesTheme()->playSound(this, event);
+}
+
+QMap<int, QString> BosonWeaponProperties::sounds() const
+{
+  return mSounds;
 }
 
 
@@ -259,7 +286,7 @@ void BosonWeapon::shoot(const BoVector3& target)
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
   canvas()->newShot(mProp->newShot(unit(), pos, target));
   canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, unit()->rotation()));
-  unit()->playSound(SoundShoot);  // TODO: weapon-specific sounds
+  mProp->playSound(SoundWeaponShoot);
   mReloadCounter = mProp->reloadingTime();
 }
 
