@@ -36,6 +36,8 @@ class Cell;
 class BosonParticleSystem;
 class QColor;
 template<class T> class QPtrList;
+class QDomElement;
+class QDataStream;
 
 
 /**
@@ -419,6 +421,11 @@ public:
 	 **/
 	virtual void unselect();
 
+	virtual bool save(QDataStream&) = 0;
+	virtual bool load(QDataStream&) = 0;
+	virtual bool saveAsXML(QDomElement&) = 0;
+	virtual bool loadFromXML(const QDomElement&) = 0;
+
 protected:
 	/**
 	 * @return The team color this item should get rendered with. This
@@ -494,7 +501,7 @@ private:
 	float mZ;
 	int mWidth;
 	int mHeight;
-  float mDepth;
+	float mDepth;
 
 	float mXVelocity;
 	float mYVelocity;
