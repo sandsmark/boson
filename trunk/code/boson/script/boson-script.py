@@ -27,9 +27,12 @@ def advance():
   global cycle
   global player
   cycle = cycle + 1
-  if (cycle % 5) == 0:
+  if (cycle % 20) == 0 and BoScript.minerals(player)>500 and BoScript.oil(player)>500:
     boprint("debug", "produced method called, cycle: %s" % cycle)
     produce()
+  if (cycle % 100) == 0:
+    boprint("debug", "mine method called, cycle: %s" % cycle)
+    mine()
 #if (cycle % 20) == 0:
 	#   spawnSomeUnits()
   boprint("debug", "hi! advance")
@@ -92,10 +95,11 @@ def oldAIAdvance():
       boprint("info", "No attacker found, returning")
       return
     u = units[aiunit]
-    if BoScript.isUnitMobile(u) and BoScript.canUnitShoot(u):
-      attacker = u
-      boprint("debug", "attacker set to %s" % attacker)
-      boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
+    if BoScript.isUnitMobile(u):
+      if BoScript.canUnitShoot(u):
+        attacker = u
+        boprint("debug", "attacker set to %s" % attacker)
+        boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
   targetpos = BoScript.unitPosition(aitarget)
   BoScript.moveUnitWithAttacking(player, attacker, targetpos[0], targetpos[1])
 
@@ -129,6 +133,31 @@ def spawnSomeUnits():
   for x in range(4):
     BoScript.spawnUnit(player, 10035, 5, 5 + x * 2)
 
+def mine():  
+  global player
+  units = BoScript.allPlayerUnits(player)
+  for u in units:
+    if BoScript.canUnitMineOil(u) and BoScript.unitWork(u)==0:
+      boprint("debug", "id %s" % u)
+      pos=BoScript.unitPosition(u)
+      oil=BoScript.nearestOilLocations(player,pos[0]/48,pos[1]/48,0,150)
+      boprint("debug", "Mine oil  %s" % oil)
+      if oil:
+        BoScript.moveUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        BoScript.mineUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        boprint("debug", "Mine oil done")
+    elif BoScript.canUnitMineMinerals(u) and BoScript.unitWork(u)==0 :
+      boprint("debug", "id %s" % u)
+      pos=BoScript.unitPosition(u)
+      oil=BoScript.nearestMineralLocations(player,pos[0]/48,pos[1]/48,0,150)
+      boprint("debug", "Mine mineral %s" % oil)
+      if oil:
+        BoScript.moveUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        BoScript.mineUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        boprint("debug", "Mine  minerals done")
+
+
+
 def produce():
   global player,newProd
   units = BoScript.allPlayerUnits(player)
@@ -145,7 +174,12 @@ def produce():
         boprint("debug", "production set to %s type %s " % (len(prod),BoScript.unitType(u)))
         boprint("debug", "production types %s, type %s, count %s" % (prod,p,newProd[u]))
         newProd[u] = newProd[u] + 1
-        if p !=10002 and p != 10003 : BoScript.produceUnit(player,u,p)
+        if p !=10002 and p != 10003 : 
+          BoScript.produceUnit(player,u,p)
+        elif BoScript.playerUnitsOfTypeCount(player,10002)<3 and p ==10002: 
+          BoScript.produceUnit(player,u,p)
+        elif BoScript.playerUnitsOfTypeCount(player,10003)<3 and p ==10003: 
+          BoScript.produceUnit(player,u,p)
       else:
         boprint("debug", "newProd %s " % newProd[u])
         newProd[u] = 0
