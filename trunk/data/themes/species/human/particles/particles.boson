@@ -713,4 +713,24 @@ Mass=0
 Align=true
 Texture=halo
 
+[LeopardShootFlash]
+Id=22010
+MinVelocity=0,0,0
+MaxVelocity=0,0,0
+MinPos=0.0,0.6,0.21
+MaxPos=0.0,0.6,0.21
+StartColor=1.0,0.4,0.1,0.4
+EndColor=1.0,0.2,0.0,0.0
+MinLife=0.6
+MaxLife=0.6
+MaxNum=5
+InitNum=3
+BlendFunc=GL_ONE
+Rate=8
+StartSize=0.1
+EndSize=0.1
+SystemLife=0.25
+Mass=0
+Align=true
+Texture=explosion
 
