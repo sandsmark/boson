@@ -683,7 +683,7 @@ void BoDisplayManager::slotChangeViewport(BosonBigDisplayBase* display, const QP
  emit signalChangeActiveViewport(topLeft, topRight, bottomLeft, bottomRight);
 }
 
-void BoDisplayManager::slotAction(BoSpecificAction action)
+void BoDisplayManager::slotAction(const BoSpecificAction& action)
 {
  BO_CHECK_NULL_RET(activeDisplay());
  BO_CHECK_NULL_RET(activeDisplay()->displayInput());

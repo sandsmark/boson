@@ -35,7 +35,7 @@ public:
 
 	virtual void actionClicked(const BoMouseEvent& event);
 	virtual void updatePlacementPreviewData();
-	virtual void action(BoSpecificAction action);
+	virtual void action(const BoSpecificAction& action);
 	virtual void updateCursor();
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);

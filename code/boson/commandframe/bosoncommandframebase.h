@@ -193,7 +193,7 @@ signals:
 	 * the placement preview, when the player clicks on a constructed
 	 * facility and wants it to be placed on the map.
 	 */
-	void signalAction(BoSpecificAction action);
+	void signalAction(const BoSpecificAction& action);
 
 	/**
 	 * This unit should become the only selected unit. See @ref
@@ -205,12 +205,12 @@ protected slots:
 	/**
 	 * Game mode only. Emit @ref signalProduce.
 	 **/
-	void slotProduce(BoSpecificAction action);
+	void slotProduce(const BoSpecificAction& action);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.
 	 **/
-	void slotPlaceUnit(BoSpecificAction action);
+	void slotPlaceUnit(const BoSpecificAction& action);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceGround.

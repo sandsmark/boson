@@ -210,7 +210,7 @@ public slots:
 	 **/
 	void slotActiveSelectSingleUnit(Unit*);
 
-	void slotAction(BoSpecificAction);
+	void slotAction(const BoSpecificAction&);
 
 signals:
 	/**

@@ -60,7 +60,7 @@ public:
 	virtual void actionClicked(const BoMouseEvent& event);
 
 	virtual void updatePlacementPreviewData();
-	virtual void action(BoSpecificAction action);
+	virtual void action(const BoSpecificAction& action);
 
 	/**
 	 * In editor mode this does just nothing.

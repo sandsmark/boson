@@ -40,10 +40,10 @@ class BoAction
     BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme);
     BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, hotkey*/);
 
-    const QString& id()  { return mId; };
-    int hotkey()  { return mHotkey; };
-    QPixmap* pixmap()  { return mPixmap; };
-    const QString& text()  { return mText; };
+    const QString& id() const { return mId; };
+    int hotkey() const { return mHotkey; };
+    QPixmap* pixmap() const { return mPixmap; };
+    const QString& text() const { return mText; };
 
   private:
     QString mId;  // Id aka name
@@ -83,10 +83,10 @@ class BoSpecificAction
     void operator=(const BoSpecificAction& a);
 
     BoAction* action() const  { return mAction; };
-    const QString& id()  { return mAction->id(); };
-    int hotkey()  { return mAction->hotkey(); };
-    QPixmap* pixmap()  { return mAction->pixmap(); };
-    const QString& text()  { return mAction->text(); };
+    const QString& id() const { return mAction->id(); };
+    int hotkey() const { return mAction->hotkey(); };
+    QPixmap* pixmap() const { return mAction->pixmap(); };
+    const QString& text() const { return mAction->text(); };
 
 
   private:
