@@ -65,6 +65,7 @@
 #include <qptrlist.h>
 #include <qpainter.h>
 #include <qtimer.h>
+#include <qregexp.h>
 
 #include "bosonwidget.moc"
 
@@ -797,7 +798,7 @@ void BosonWidget::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidget::initKeys()
 {
-#ifdef OLD_KACTION
+#if KDE_VERSION < 310 // old kactions
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, mDisplayManager,
 		SLOT(slotScrollUp()), actionCollection(),
 		"scroll_up");
@@ -810,19 +811,46 @@ void BosonWidget::initKeys()
  (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, mDisplayManager,
 		SLOT(slotScrollRight()), actionCollection(),
 		"scroll_right");
-#else
+ QString slotSelect = SLOT(slotSelectGroup());
+ QString slotCreate = SLOT(slotCreateGroup());
+ for (int i = 0; i < 10; i++) {
+	QString s = slotSelect;
+	s = s.replace(QRegExp("slotSelectGroup"), QString("slotSelectGroup%1").arg(i));
+	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
+			Qt::Key_0 + i, mDisplayManager, 
+			s, actionCollection(),
+			QString("select_group_%1").arg(i));
+	s = slotCreate;
+	s = s.replace(QRegExp("slotCreateGroup"), QString("slotCreateGroup%1").arg(i));
+	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
+			Qt::CTRL + Qt::Key_0 + i, mDisplayManager, 
+			s, actionCollection(),
+			QString("create_group_%1").arg(i));
+ }
+#else 
+ // KAction supports slots that take integer parameter :-)
  (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, mDisplayManager,
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_up {%1}").arg(ScrollUp));
+		QString("scroll_up {%1}").arg(BoDisplayManager::ScrollUp));
  (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, mDisplayManager,
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_down {%1}").arg(ScrollDown));
+		QString("scroll_down {%1}").arg(BoDisplayManager::ScrollDown));
  (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, mDisplayManager,
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_left {%1}").arg(ScrollLeft));
+		QString("scroll_left {%1}").arg(BoDisplayManager::ScrollLeft));
  (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, mDisplayManager,
 		SLOT(slotScroll(int)), actionCollection(),
-		QString("scroll_right {%1}").arg(ScrollRight));
+		QString("scroll_right {%1}").arg(BoDisplayManager::ScrollRight));
+ for (int i = 0; i < 10; i++) {
+	(void)new KAction(i18n("Select Group %1").arg(i == 0 ? 10 : i), 
+			Qt::Key_0 + i, mDisplayManager, 
+			SLOT(slotSelectGroup(int)), actionCollection(),
+			QString("select_group {%1}").arg(i));
+	(void)new KAction(i18n("Create Group %1").arg(i == 0 ? 10 : i), 
+			Qt::CTRL + Qt::Key_0 + i, mDisplayManager, 
+			SLOT(slotSelectGroup(int)), actionCollection(),
+			QString("create_group {%1}").arg(i));
+ }
 #endif
  (void)new KAction(i18n("Center &Home Base"), KShortcut(Qt::Key_H), 
 		mDisplayManager, SLOT(slotCenterHomeBase()), actionCollection(), "game_center_base");
