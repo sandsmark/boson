@@ -89,14 +89,6 @@ public:
 	void setMusic(bool);
 	void setSound(bool);
 
-	/**
-	 * Play a single file. This does not really belong to music but rather
-	 * to sound - but a special class fo this would probably too much
-	 * overhead.
-	 * @param file File to be played. Absolute filename.
-	 **/
-	void playSound(const QString& file); // obsolete
-
 	void playSound(Unit* unit, int event);
 	void playSound(const QString& species, int id);
 
