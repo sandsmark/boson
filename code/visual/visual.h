@@ -27,10 +27,13 @@
 //class QPixmap;
 class speciesTheme;
 class visualCanvas;
+class QString;
 
 extern	visualCanvas	*vcanvas;
 extern	speciesTheme	*species[BOSON_MAX_PLAYERS];
 extern	uint		nb_player;
+extern	QString		*dataPath;
+
 	
 
 #endif // VISUAL_H 
