@@ -27,6 +27,7 @@ class UnitBase;
 class Facility;
 class Player;
 class CommandInput;
+class BosonCommandWidget;
 
 class QPixmap;
 class KPlayer;
@@ -67,6 +68,12 @@ public:
 	void initEditor();
 	void editorLoadTiles(const QString& dirName);
 	void setOrderType(int);
+
+	/**
+	 * Resets button by setting it's production count to 0 and making it
+	 * not-grayed-out
+	 **/
+	void resetButton(BosonCommandWidget* button);
 
 protected:
 	void resetLayout();
