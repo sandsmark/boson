@@ -203,7 +203,6 @@ void BosonCanvas::advance()
  while (deleteList.count() > 0) {
 	Unit* u = deleteList.first();
 	deleteList.removeRef(u);
-	kdDebug() << d->mDestroyedUnits.autoDelete() << endl;
 	d->mDestroyedUnits.removeRef(u);
 	delete u;
  }
@@ -580,15 +579,19 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
 	return false;
  }
  for (unsigned int i = 0; i < list.count(); i++) {
-	if (!RTTI::isUnit(list[i]->rtti()))
+	if (!RTTI::isUnit(list[i]->rtti())) {
 		continue;
+	}
 	Unit* u = (Unit*)list[i];
-	if(u->isDestroyed())
+	if(u->isDestroyed()) {
 		continue;
-	if(u->isFlying())
+	}
+	if(u->isFlying()) {
 		continue;
-	if(u->id() == unit->id())
+	}
+	if(u->id() == unit->id()) {
 		continue;
+	}
 	return true;
  }
  return false;
