@@ -93,8 +93,6 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 				this, SIGNAL(signalProduceUnit(unsigned long int)));
 		connect(b, SIGNAL(signalStopProduction(unsigned long int)),
 				this, SIGNAL(signalStopProduction(unsigned long int)));
-		connect(b, SIGNAL(signalAction(int)),
-				this, SIGNAL(signalAction(int)));
 	}
  }
  resetLayout();
