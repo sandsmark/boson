@@ -2033,11 +2033,7 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoMo
 		// currently!
 		bool replace = !event.controlButton();
 		bool onScreenOnly = !event.shiftButton();
-#warning TODO
-#if 0
-		Unit* unit = localPlayerIO()->findUnitAt(event.canvasVector());
-#endif
-		Unit* unit = canvas()->findUnitAt(event.canvasVector());
+		Unit* unit = localPlayerIO()->findUnitAt(canvas(), event.canvasVector());
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << "TODO: select only those that are currently on the screen!" << endl;
