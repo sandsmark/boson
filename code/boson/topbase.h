@@ -24,6 +24,37 @@
 #endif 
 
 #include <kmainwindow.h>
+#include <ktoolbar.h>
+
+class BosonCommandBar : public KToolBar
+{
+	Q_OBJECT
+public:
+	BosonCommandBar(QMainWindow* parent, QMainWindow::ToolBarDock dock);
+	virtual ~BosonCommandBar();
+
+protected:
+	virtual void mousePressEvent(QMouseEvent* e);
+	
+signals:
+	void signalButtonsPerRow(int);
+	
+private:
+	enum {
+		CONTEXT_LEFT = 0,
+		CONTEXT_RIGHT = 1,
+		CONTEXT_FLAT = 2,
+		CONTEXT_BUTTONS_ROW = 10
+	};
+
+private:
+	KPopupMenu* contextMenu();
+
+
+private:
+	KPopupMenu* mContext;
+	
+};
 
 class BosonWidget;
 
@@ -60,6 +91,12 @@ protected:
 
 	BosonWidget* bosonWidget() const { return mBosonWidget; }
 	QFrame* commandFrame() const;
+
+	/**
+	 * Initialize the command frame - currently implemented as a @ref
+	 * KToolBar. Note that this needs to be called after @ref initKAction
+	 **/
+	void initCommandFrame();
 
 private slots:
 	void slotZoom(int index);

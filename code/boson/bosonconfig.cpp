@@ -34,13 +34,19 @@ public:
 
 	bool mSound;
 	bool mMusic;
+	int mCommandButtonsPerRow;
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
 {
  d = new BosonConfigPrivate;
+ 
+ // set the initial defaults
  d->mSound = true;
  d->mMusic = true;
+ d->mCommandButtonsPerRow = 3;
+
+ // load from config
  reset(conf);
 }
 
@@ -192,6 +198,29 @@ bool BosonConfig::sound() const
  return d->mSound;
 }
 
+int BosonConfig::readCommandButtonsPerRow(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ int b = conf->readNumEntry("CommandButtonsPerRow", commandButtonsPerRow());
+ return b;
+}
+
+void BosonConfig::saveCommandButtonsPerRow(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("CommandButtonsPerRow", commandButtonsPerRow());
+}
+
+void BosonConfig::setCommandButtonsPerRow(int b)
+{
+ d->mCommandButtonsPerRow = b;
+}
+
+int BosonConfig::commandButtonsPerRow() const
+{
+ return d->mCommandButtonsPerRow;
+}
+
 void BosonConfig::reset(KConfig* conf)
 {
  if (!conf) {
@@ -202,6 +231,7 @@ void BosonConfig::reset(KConfig* conf)
  // read function
  setMusic(readMusic(conf));
  setSound(readSound(conf));
+ setCommandButtonsPerRow(readCommandButtonsPerRow(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -216,6 +246,9 @@ void BosonConfig::save(KConfig* conf)
  // save function
  saveMusic(conf);
  saveSound(conf);
+ saveCommandButtonsPerRow(conf);
 
  conf->setGroup(oldGroup);
 }
+
+

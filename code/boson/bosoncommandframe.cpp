@@ -27,6 +27,7 @@
 #include "cell.h"
 #include "bosontiles.h"
 #include "bosoncommandwidget.h"
+#include "bosonconfig.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -48,9 +49,6 @@
 #include "defines.h"
 
 #include "bosoncommandframe.moc"
-
-#define ORDERS_PER_ROW 3
-#define ORDER_SPACING 3
 
 class OrderScrollView : public QScrollView
 {
@@ -76,6 +74,7 @@ public:
 	{
 		mScrollView = 0;
 		mOrderWidget = 0;
+		mOrderLayout = 0;
 
 		mUnitView = 0;
 
@@ -89,7 +88,8 @@ public:
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
-	QGrid* mOrderWidget;
+	QWidget* mOrderWidget;
+	QGridLayout* mOrderLayout; 
 	OrderScrollView* mScrollView;
 
 
@@ -131,7 +131,7 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
 // the order buttons
  d->mScrollView = new OrderScrollView(this);
  layout->addWidget(d->mScrollView, 1);
- d->mOrderWidget = new QGrid(ORDERS_PER_ROW, d->mScrollView->viewport());
+ d->mOrderWidget = new QWidget(d->mScrollView->viewport());
  d->mScrollView->addChild(d->mOrderWidget);
  d->mScrollView->viewport()->setBackgroundMode(backgroundMode());
 // d->mOrderWidget->setMinimumWidth(d->mScrollView->viewport()->width()); // might cause problems if scrollview is resized. maybe subclass QScrollView
@@ -186,8 +186,22 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 				this, SLOT(slotProduceUnit(int)));
 	}
  }
+ resetLayout();
 }
 
+void BosonCommandFrame::resetLayout()
+{
+ if (d->mOrderLayout) {
+	delete d->mOrderLayout;
+ }
+ d->mOrderLayout = new QGridLayout(d->mOrderWidget);
+ for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+	BosonCommandWidget* b = d->mOrderButton[i];
+	int buttons = boConfig->commandButtonsPerRow();
+	d->mOrderLayout->addWidget(b, i / buttons, i % buttons);
+ }
+ d->mOrderLayout->activate();
+}
 
 void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
 {
@@ -465,5 +479,11 @@ void BosonCommandFrame::slotProductionCompleted(Facility* f)
 	return;
  }
  slotSetConstruction(f);
+}
+
+void BosonCommandFrame::slotSetButtonsPerRow(int b)
+{
+ boConfig->setCommandButtonsPerRow(b);
+ resetLayout();
 }
 

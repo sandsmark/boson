@@ -75,6 +75,8 @@ public:
 	bool sound() const;
 	void setMusic(bool m);
 	bool music() const;
+	void setCommandButtonsPerRow(int b);
+	int commandButtonsPerRow() const;
 
 	void save(KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -86,6 +88,8 @@ protected:
 	bool readMusic(KConfig* conf);
 	void saveMusic(KConfig* conf);
 
+	int readCommandButtonsPerRow(KConfig* conf);
+	void saveCommandButtonsPerRow(KConfig* conf);
 private:
 	static BosonConfig* mBosonConfig;
 	

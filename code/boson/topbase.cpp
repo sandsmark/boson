@@ -29,6 +29,8 @@
 #include <kaction.h>
 #include <kstdaction.h>
 #include <kdebug.h>
+#include <ktoolbar.h>
+#include <kpopupmenu.h>
 #if HAVE_KSHORTCUT
 #include <kshortcut.h>
 #endif
@@ -39,6 +41,107 @@
 #include <qvbox.h>
 
 #include "topbase.moc"
+
+#define MAX_BUTTONS_PER_ROW 4
+
+BosonCommandBar::BosonCommandBar(QMainWindow* parent, QMainWindow::ToolBarDock dock) 
+		: KToolBar(parent, dock, false, i18n("CommandFrame"), false, false)
+{
+ mContext = 0;
+}
+
+BosonCommandBar::~BosonCommandBar()
+{
+ if (mContext) {
+	delete mContext;
+ }
+}
+
+void BosonCommandBar::mousePressEvent(QMouseEvent* e)
+{
+ // most parts here are from KToolBar::mousePressEvent()
+ // we want a customized toolbar - so wee need to replace it
+ QMainWindow* m = mainWindow();
+ if (!m) {
+	return;
+ }
+ if (!m->dockWindowsMovable()) {
+	return;
+ }
+ if (e->button() == RightButton) {
+	int id = contextMenu()->exec(e->globalPos(), 0);
+	if (id == -1) {
+		return;
+	}
+	switch (id) {
+		case CONTEXT_LEFT:
+			m->moveDockWindow(this, QMainWindow::DockLeft);
+			break;
+		case CONTEXT_RIGHT:
+			m->moveDockWindow(this, QMainWindow::DockRight);
+			break;
+		case CONTEXT_FLAT:
+			m->moveDockWindow(this, QMainWindow::DockMinimized);
+			break;
+		default:
+			if (id >= CONTEXT_BUTTONS_ROW) {
+				int buttons = id - CONTEXT_BUTTONS_ROW;
+				emit signalButtonsPerRow(buttons);
+				break;
+			}
+			kdWarning() << "Unknown id " << id << endl;
+			break;
+	}
+ }
+}
+
+KPopupMenu* BosonCommandBar::contextMenu()
+{
+ if (mContext) {
+	for (int i = CONTEXT_LEFT; i <= CONTEXT_FLAT; i++) {
+		mContext->setItemChecked(i, false);
+	}
+	switch (barPos()) {
+		case KToolBar::Flat:
+			mContext->setItemChecked(CONTEXT_FLAT, true);
+			break;
+		case KToolBar::Right:
+			mContext->setItemChecked(CONTEXT_RIGHT, true);
+			break;
+		case KToolBar::Left:
+			mContext->setItemChecked(CONTEXT_LEFT, true);
+			break;
+		default:
+			break;
+	}
+		for (unsigned int i = 0; i <= MAX_BUTTONS_PER_ROW; i++) { 
+			mContext->setItemChecked(CONTEXT_BUTTONS_ROW + i, 
+					false);
+		}
+		mContext->setItemChecked(CONTEXT_BUTTONS_ROW + 
+				boConfig->commandButtonsPerRow(), true);
+	return mContext;
+ }
+ mContext = new KPopupMenu(0, "context");
+ mContext->insertTitle(i18n("Toolbar Menu")); // CommandFrame menu?
+ KPopupMenu* orient = new KPopupMenu(mContext, "orient");
+ orient->insertItem(i18n("Left"), CONTEXT_LEFT);
+ orient->insertItem(i18n("Right"), CONTEXT_RIGHT);
+ orient->insertSeparator(-1);
+ orient->insertItem(i18n("Flat"), CONTEXT_FLAT);
+
+ // TODO: implement this using KAction! -> put them into the
+ // menubar, too!
+ KPopupMenu* size = new KPopupMenu(mContext, "size");
+ for (int i = 1; i <= MAX_BUTTONS_PER_ROW; i++) {
+	size->insertItem(QString::number(i), CONTEXT_BUTTONS_ROW + i);
+ }
+
+ mContext->insertItem(i18n("Oritentation"), orient);
+ mContext->insertItem(i18n("Buttons per row"), size);
+
+ return contextMenu(); // call again to set defaults
+}
 
 class TopBase::TopBasePrivate
 {
@@ -55,7 +158,7 @@ public:
 	KToggleAction* mChatAction;
 	KSelectAction* mZoomAction;
 
-	QToolBar* mCommandBar;
+	KToolBar* mCommandBar;
 	QVBox* mCommandFrame; // kind of.. also contains the minimap
 };
 
@@ -72,16 +175,6 @@ TopBase::TopBase()
  initKAction();
  initStatusBar();
 
- d->mCommandBar = new QToolBar(i18n("CommandFrame"), this, QMainWindow::Left);
- d->mCommandFrame = new QVBox(d->mCommandBar);
- mBosonWidget->addMiniMap(d->mCommandFrame);
-
- setDockEnabled(d->mCommandBar, DockTop, false);
- setDockEnabled(d->mCommandBar, DockBottom, false);
- connect(mBosonWidget, SIGNAL(signalMoveCommandFrame(int)),
-		this, SLOT(slotMoveCommandFrame(int)));
- slotMoveCommandFrame(BosonConfig::readCommandFramePosition());
- 
  showMaximized();
 }
 
@@ -178,6 +271,26 @@ void TopBase::initStatusBar()
  bar->addWidget(resources);
 
  bar->show();
+}
+
+void TopBase::initCommandFrame()
+{
+kdDebug() << k_funcinfo << endl;
+ d->mCommandBar = new BosonCommandBar(this, QMainWindow::Left);
+ connect(d->mCommandBar, SIGNAL(signalButtonsPerRow(int)),
+		mBosonWidget, SLOT(slotSetCommandButtonsPerRow(int)));
+ d->mCommandBar->setTitle(i18n("Command Frame"));
+ d->mCommandBar->setEnableContextMenu(false);
+ d->mCommandFrame = new QVBox(d->mCommandBar);
+ mBosonWidget->addMiniMap(d->mCommandFrame);
+
+ setDockEnabled(d->mCommandBar, DockTop, false);
+ setDockEnabled(d->mCommandBar, DockBottom, false);
+
+ connect(mBosonWidget, SIGNAL(signalMoveCommandFrame(int)),
+		this, SLOT(slotMoveCommandFrame(int)));
+ slotMoveCommandFrame(BosonConfig::readCommandFramePosition());
+ 
 }
 
 void TopBase::saveProperties(KConfig *config)
