@@ -29,6 +29,7 @@ BOEDITOR_SRC = editor.cpp \
 COMMON_SRC = \
 	cell.cpp \
 	unitproperties.cpp \
+	pluginproperties.cpp \
 	unitbase.cpp \
 	boitemlist.cpp \
 	boselection.cpp \
@@ -80,6 +81,7 @@ COMMON_SRC = \
 
 BOUNIT_SRC = \
 	unitproperties.cpp \
+	pluginproperties.cpp \
 	bosonunitdialog.cpp \
 	bounitmain.cpp
 

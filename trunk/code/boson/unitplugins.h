@@ -23,6 +23,7 @@
 #include <kgame/kgamepropertylist.h>
 
 class Unit;
+class SpeciesTheme;
 
 class ProductionPlugin
 {
@@ -30,6 +31,7 @@ public:
 	ProductionPlugin(Unit* unit);
 	~ProductionPlugin();
 
+	SpeciesTheme* speciesTheme() const;
 	inline Unit* unit() const { return mUnit; }
 
 	/**

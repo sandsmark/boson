@@ -32,6 +32,7 @@
 #include "unitplugins.h"
 #include "boitemlist.h"
 #include "bosonmodel.h"
+#include "pluginproperties.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -632,7 +633,7 @@ bool Unit::isNextTo(Unit* target) const
 // MobileUnit
 /////////////////////////////////////////////////
 
-class HarvesterProperties
+class HarvesterPlugin // FIXME: actually make a plugin!! --> UnitPlugin
 {
 public:
 	KGameProperty<int> mResourcesX;
@@ -653,7 +654,7 @@ public:
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
 
-	HarvesterProperties* mHarvesterProperties;
+	HarvesterPlugin* mHarvesterProperties; // FIXME: make a plugin!! properties is not correct anymore
 	bool mTargetCellMarked;
 };
 
@@ -673,8 +674,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  d->mMovingFailed.setEmittingSignal(false);
  d->mPathRecalculated.setEmittingSignal(false);
 
- if (unitProperties()->canMineMinerals() || unitProperties()->canMineOil()) {
-	d->mHarvesterProperties = new HarvesterProperties;
+ if (unitProperties()->properties(PluginProperties::Harvester)) {
+	d->mHarvesterProperties = new HarvesterPlugin;
 	d->mHarvesterProperties->mResourcesMined.registerData(IdMob_ResourcesMined, dataHandler(), 
 			KGamePropertyBase::PolicyLocal, "ResourcesMined");
 	d->mHarvesterProperties->mResourcesMined.setLocal(0);
@@ -929,18 +930,21 @@ void MobileUnit::turnTo()
 
 void MobileUnit::advanceMine()
 {
+//AB: this should get moved to a UnitPlugin. maybe
+//HarvesterPlugin::advanceMine()
  kdDebug() << k_funcinfo << endl;
  if (!d->mHarvesterProperties) {
 	setWork(WorkNone);
 	return;
  }
- if (resourcesMined() < unitProperties()->maxResources()) {
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+ if (resourcesMined() < prop->maxResources()) {
 	if (canMine(canvas()->cellAt(this))) {
-		const int step = (resourcesMined() + 10 <= unitProperties()->maxResources()) ? 10 : unitProperties()->maxResources() - resourcesMined();
+		const int step = (resourcesMined() + 10 <= prop->maxResources()) ? 10 : prop->maxResources() - resourcesMined();
 		d->mHarvesterProperties->mResourcesMined = resourcesMined() + step;
-		if (unitProperties()->canMineMinerals()) {
+		if (prop->canMineMinerals()) {
 			owner()->statistics()->increaseMinedMinerals(step);
-		} else if (unitProperties()->canMineOil()) {
+		} else if (prop->canMineOil()) {
 			owner()->statistics()->increaseMinedOil(step);
 		}
 		kdDebug() << "resources mined: " << resourcesMined() << endl;
@@ -955,8 +959,10 @@ void MobileUnit::advanceMine()
  }
 }
 
-void MobileUnit::advanceRefine() 
+void MobileUnit::advanceRefine()
 {
+//AB: this should get moved to a UnitPlugin. maybe
+//HarvesterPlugin::advanceRefine()
  kdDebug() << k_funcinfo << endl;
  if (!d->mHarvesterProperties) {
 	setWork(WorkNone);
@@ -976,7 +982,12 @@ void MobileUnit::advanceRefine()
 	// TODO: pick closest refinery
 	QPtrList<Unit> list = owner()->allUnits();
 	QPtrListIterator<Unit> it(list);
-	const UnitProperties* prop = unitProperties();
+	const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+	if (!prop) {
+		kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+		setWork(WorkNone);
+		return;
+	}
 	Facility* ref = 0;
 	while (it.current() && !ref) {
 		const UnitProperties* unitProp = it.current()->unitProperties();
@@ -1003,10 +1014,16 @@ void MobileUnit::advanceRefine()
 	if (isNextTo(refinery())) {
 		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
 		d->mHarvesterProperties->mResourcesMined = resourcesMined() - step;
-		if (unitProperties()->canMineMinerals()) {
+		const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+		if (!prop) {
+			kdError() << k_funcinfo << "NULL harvester plugin" << endl;
+			setWork(WorkNone);
+			return;
+		}
+		if (prop->canMineMinerals()) {
 			owner()->setMinerals(owner()->minerals() + step);
 			owner()->statistics()->increaseRefinedMinerals(step);
-		} else if (unitProperties()->canMineOil()) {
+		} else if (prop->canMineOil()) {
 			owner()->setOil(owner()->oil() + step);
 			owner()->statistics()->increaseRefinedOil(step);
 		}
@@ -1064,11 +1081,15 @@ int MobileUnit::resourcesY() const
 
 bool MobileUnit::canMine(Cell* cell) const
 {
- if (unitProperties()->canMineMinerals() &&
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+ if (!prop) {
+	return false;
+ }
+ if (prop->canMineMinerals() &&
 		cell->groundType() == Cell::GroundGrassMineral) {
 	return true;
  }
- if (unitProperties()->canMineOil() && 
+ if (prop->canMineOil() && 
 		cell->groundType() == Cell::GroundGrassOil) {
 	return true;
  }
@@ -1114,8 +1135,11 @@ Facility* MobileUnit::refinery() const
  if (!target() || !target()->isFacility()) {
 	return 0;
  }
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+ if (!prop) {
+	return 0;
+ }
  Facility* fac = (Facility*)target();
- const UnitProperties* prop = unitProperties();
  const UnitProperties* facProp = fac->unitProperties();
  if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
 	return fac;
@@ -1130,7 +1154,10 @@ void MobileUnit::setRefinery(Facility* refinery)
  if (!refinery) {
 	return;
  }
- const UnitProperties* prop = unitProperties();
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+ if (!prop) {
+	return;
+ }
  const UnitProperties* facProp = refinery->unitProperties();
  if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
 	setTarget(refinery);
@@ -1208,10 +1235,10 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 		KGamePropertyBase::PolicyLocal, "Construction State");
  d->mConstructionState.setLocal(0);
 
- if (prop->canProduce()) {
+ if (prop->properties(PluginProperties::Production)) {
 	d->mProductionPlugin = new ProductionPlugin(this);
  }
- if (unitProperties()->weaponDamage() < 0) {
+ if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
 	d->mRepairPlugin = new RepairPlugin(this);
  }
  setWork(WorkConstructed);

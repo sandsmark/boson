@@ -31,6 +31,7 @@ class QDataStream;
 
 class Player;
 class UnitProperties;
+class PluginProperties;
 class SpeciesTheme;
 
 /**
@@ -270,6 +271,15 @@ public:
 	 * care about crashes as the game will crash anyway.
 	 **/
 	const UnitProperties* unitProperties() const { return mUnitProperties; }
+	
+	/**
+	 * Convenience method for unitProperties()->properties().
+	 *
+	 * Please note that @ref PluginProperties are somewhat different to @ref
+	 * UnitPlugins. You can have @ref PluginProperties without @ref
+	 * UnitPlugins and vice versa.
+	 **/
+	const PluginProperties* properties(int pluginType) const;
 
 	/**
 	 * Convenience method for owner()->speciesTheme().

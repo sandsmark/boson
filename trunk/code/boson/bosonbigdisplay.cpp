@@ -24,6 +24,7 @@
 #include "bosoncanvas.h"
 #include "player.h"
 #include "unitproperties.h"
+#include "pluginproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
 #include "bosoncursor.h"
@@ -315,15 +316,23 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
 bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
+// if (!unit->properites(PluginProperties::Refine)) {
+//	kdError() << k_funcinfo << unit->id() << "cannot refine" << endl;
+//	return;
+// }
+// bool minerals = (RefineProperties*)unit)->properties(PluginProperties::Refine)->canRefineMinerals();
  bool minerals = unit->unitProperties()->canRefineMinerals();
  QPtrList<Unit> allUnits = selection()->allUnits();
  QPtrList<Unit> list;
  QPtrListIterator<Unit> unitsIt(allUnits);
  while (unitsIt.current()) {
-	if (unitsIt.current()->unitProperties()->canMineMinerals() && minerals) {
-		list.append(unitsIt.current());
-	} else if (unitsIt.current()->unitProperties()->canMineOil() && !minerals) {
-		list.append(unitsIt.current());
+	HarvesterProperties* prop = (HarvesterProperties*)unitsIt.current()->properties(PluginProperties::Harvester);
+	if (prop) {
+		if (prop->canMineMinerals() && minerals) {
+			list.append(unitsIt.current());
+		} else if (prop->canMineOil() && !minerals) {
+			list.append(unitsIt.current());
+		}
 	}
 	++unitsIt;
  }

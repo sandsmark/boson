@@ -92,6 +92,7 @@ General TODOs
 - Click+Move in minimap should move the rectangle (aka the screen position)
 - remove zooming support. maybe replace it by simple cameraZ position changes.
   especially remove BosonBigDisplayBase::setZoomFactor() and the menu entry.
+- unit editor does not support plugins
 
 Data TODOs
 - sound for minimap activated/deactivated

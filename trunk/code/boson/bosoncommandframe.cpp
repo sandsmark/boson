@@ -24,6 +24,7 @@
 #include "player.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
+#include "pluginproperties.h"
 #include "bosonunitview.h"
 #include "cell.h"
 #include "bosontiles.h"
@@ -71,7 +72,7 @@ public:
 
 	void setMiner(MobileUnit* miner)
 	{
-		const UnitProperties* prop = miner->unitProperties();
+		const HarvesterProperties* prop = (HarvesterProperties*)miner->properties(PluginProperties::Harvester);
 		if (!prop->canMineMinerals() && !prop->canMineOil()) {
 			return;
 		}
@@ -596,7 +597,14 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	}
 	ProductionPlugin* production = fac->productionPlugin();
 	if (production) {
-		QValueList<unsigned long int> produceList = fac->speciesTheme()->productions(prop->producerList());
+		if (!fac->unitProperties()->properties(PluginProperties::Production)) {
+			// must not happen if the units has the production
+			// plugin
+			kdError() << k_funcinfo << "no production properties!" << endl;
+			return;
+		}
+		ProductionProperties* pp = (ProductionProperties*)fac->unitProperties()->properties(PluginProperties::Production);
+		QValueList<unsigned long int> produceList = fac->speciesTheme()->productions(pp->producerList());
 		// Filter out things that player can't actually build (requirements aren't
 		//  met yet)
 		QValueList<unsigned long int>::Iterator it;
@@ -617,7 +625,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	}
  } else {
 	MobileUnit* mob = (MobileUnit*)d->mSelectedUnit;
-	if (prop->canMineMinerals() || prop->canMineOil()) {
+	if (d->mSelectedUnit->properties(PluginProperties::Harvester)) {
 		d->mMinerWidget->setMiner(mob);
 		d->mMinerWidget->show();
 		if (!d->mUpdateTimer.isActive()) {

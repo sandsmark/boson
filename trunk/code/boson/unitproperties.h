@@ -22,9 +22,11 @@
 #include <qstring.h>
 
 #include <qvaluelist.h>
+#include <qptrlist.h>
 #include <qmap.h>
 
 class SpeciesTheme;
+class PluginProperties;
 
 class KSimpleConfig;
 
@@ -214,41 +216,9 @@ public:
 	 * military unit and is meant to be destroyed first. 
 	 **/
 	bool canShoot() const { return (canShootAtLandUnits() || canShootAtAirUnits()); }
-	
-	/**
-	 * @return Whether this facility (if it is one) can produce anything.
-	 **/
-	bool canProduce() const;
-
-	/**
-	 * @return TRUE if this unit can mine minerals. FALSE otherwise. Also
-	 * FALSE for facilities.
-	 **/
-
-	bool canMineMinerals() const;
-
-	/**
-	 * @return TRUE if this unit can mine oil. FALSE otherwise. Also
-	 * FALSE for facilities.
-	 **/
-	bool canMineOil() const;
 
 	bool canRefineMinerals() const;
 	bool canRefineOil() const;
-
-	/**
-	 * @return The maximal amount of resources (oil or minerals) that can be
-	 * mined until the unit must return to a refinery. The type of resources
-	 * depends on @ref canMineMinerals and @ref canMineOil (only one of them
-	 * can be true)
-	 **/
-	unsigned int maxResources() const;
-
-	/**
-	 * @return A list of all @ref producer IDs this unit can produce (if
-	 * any).
-	 **/
-	QValueList<int> producerList() const;
 
 	/**
 	 * @return Which type of factory can produce this unit. See
@@ -302,12 +272,15 @@ public:
 	 **/
 	QMap<QString, QString> longTextureNames() const { return mTextureNames; }
 
+	const PluginProperties* properties(int pluginType) const;
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
+	void loadAllPluginProperties(KSimpleConfig* conf);
+	void loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
 
 	void loadTextureNames(KSimpleConfig* conf);
-	
 private:
 	SpeciesTheme* mTheme;
 
@@ -335,6 +308,7 @@ private:
 	class FacilityProperties;
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
+	QPtrList<PluginProperties> mPlugins;
 
 	QMap<QString, QString> mTextureNames;
 };

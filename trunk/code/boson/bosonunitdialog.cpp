@@ -19,6 +19,7 @@
 #include "bosonunitdialog.h"
 
 #include "unitproperties.h"
+#include "pluginproperties.h"
 
 #include "global.h"
 #include "defines.h"
@@ -400,7 +401,7 @@ void BosonUnitDialog::initFacilityProperties(QWidget* page)
  d->mUnitFacilityProperties->setEnabled(false);
  QGridLayout* layout = new QGridLayout(d->mUnitFacilityProperties, -1, 2, marginHint(), spacingHint());
 
- QLabel* canProduceLabel = new QLabel(i18n("Can Produce"), d->mUnitFacilityProperties);
+ QLabel* canProduceLabel = new QLabel(i18n("Can Produce (warning - implementation is obsolete)"), d->mUnitFacilityProperties);
  layout->addWidget(canProduceLabel, 0, 0);
  d->mCanProduce = new QCheckBox(d->mUnitFacilityProperties);
  layout->addWidget(d->mCanProduce, 0, 1);
@@ -512,9 +513,10 @@ void BosonUnitDialog::loadMobileProperties()
  d->mSpeed->setValue(d->mUnit->speed());
  d->mCanGoOnLand->setChecked(d->mUnit->canGoOnLand());
  d->mCanGoOnWater->setChecked(d->mUnit->canGoOnWater());
- d->mCanMineMinerals->setChecked(d->mUnit->canMineMinerals());
- d->mCanMineOil->setChecked(d->mUnit->canMineOil());
- d->mMaxResources->setValue(d->mUnit->maxResources());
+ kdWarning() << k_funcinfo << "pluginproperties are not yet supported!" << endl;
+// d->mCanMineMinerals->setChecked(d->mUnit->canMineMinerals());
+// d->mCanMineOil->setChecked(d->mUnit->canMineOil());
+// d->mMaxResources->setValue(d->mUnit->maxResources());
 }
 
 void BosonUnitDialog::loadFacilityProperties()
@@ -522,9 +524,13 @@ void BosonUnitDialog::loadFacilityProperties()
  if (!d->mUnit->isFacility()) {
 	return;
  }
- d->mCanProduce->setChecked(d->mUnit->canProduce());
  QString producerList;
- QValueList<int> list = d->mUnit->producerList();
+ ProductionProperties* prod = (ProductionProperties*)d->mUnit->properties(PluginProperties::Production);
+ QValueList<int> list;
+ d->mCanProduce->setChecked(prod != 0);
+ if (prod) {
+	list = prod->producerList();
+ }
  for (unsigned int i = 0; i < list.count(); i++) {
 	if (producerList.length() > 0) {
 		producerList += QString::fromLatin1(",");
@@ -627,10 +633,10 @@ void BosonUnitDialog::saveMobileProperties(KSimpleConfig* cfg)
  cfg->writeEntry("Speed", (double)d->mSpeed->value());
  cfg->writeEntry("CanGoOnLand", (bool)d->mCanGoOnLand->isChecked());
  cfg->writeEntry("CanGoOnWater", (bool)d->mCanGoOnWater->isChecked());
- cfg->writeEntry("CanMineMinerals", (bool)d->mCanMineMinerals->isChecked());
- cfg->writeEntry("CanMineOil", (bool)d->mCanMineOil->isChecked());
- cfg->writeEntry("MaxResources", (unsigned int)d->mMaxResources->value());
- 
+ kdWarning() << k_funcinfo << "pluginproperties are not yet supported!" << endl;
+// cfg->writeEntry("CanMineMinerals", (bool)d->mCanMineMinerals->isChecked());
+// cfg->writeEntry("CanMineOil", (bool)d->mCanMineOil->isChecked());
+// cfg->writeEntry("MaxResources", (unsigned int)d->mMaxResources->value());
 }
 
 void BosonUnitDialog::saveFacilityProperties(KSimpleConfig* cfg)

@@ -222,3 +222,9 @@ void UnitBase::resetReload()
  d->mReloadState = unitProperties()->reload();
 }
 
+
+const PluginProperties* UnitBase::properties(int pluginType) const
+{
+ return unitProperties()->properties(pluginType);
+}
+
