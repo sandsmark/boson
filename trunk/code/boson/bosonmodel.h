@@ -24,7 +24,7 @@
 
 #include <lib3ds/types.h>
 
-class BosonTextureArray;
+class BosonModelTextures;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -47,7 +47,7 @@ public:
 	/**
 	 * @return The display list of the current @ref frame.
 	 **/
-	inline GLuint displayList() const 
+	inline GLuint displayList() const
 	{
 		return mDisplayList;
 	}
@@ -84,18 +84,15 @@ protected:
 	 **/
 	const QString& baseDirectory() const { return mDirectory; }
 
-	QString textureDirectory() const;
-
 private:
 	void init();
 
 private:
+	Lib3dsFile* m3ds;
+	static BosonModelTextures* mModelTextures;
 	QMap<QString, QString> mTextureNames;
 	GLuint mDisplayList;
-	Lib3dsFile* m3ds;
-	QMap<QString, GLuint> mTextures;
 	QMap<int, GLuint> mFrames;
-	BosonTextureArray* mTextureArray;
 	QString mDirectory;
 	QString mFile;
 	unsigned int mFrame;

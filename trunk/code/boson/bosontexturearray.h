@@ -26,7 +26,7 @@ class QImage;
 class BosonTextureArray
 {
 public:
-	BosonTextureArray(QValueList<QImage> images, GLenum mode = GL_TEXTURE_2D);
+	BosonTextureArray(QValueList<QImage> images);
 	BosonTextureArray();
 
 	/**
@@ -62,7 +62,9 @@ public:
 	 * 256x256. If the width or height do not meet the 2^m condition the
 	 * image is scaled.
 	 **/
-	bool createTextures(QValueList<QImage> images, GLenum mode = GL_TEXTURE_2D);
+	bool createTextures(QValueList<QImage> images);
+	
+	static bool createTexture(const QImage& image, GLuint texture);
 
 	/**
 	 * BosonTextureArray scales images if they don't fit the necessary sizes
@@ -98,7 +100,7 @@ private:
 	 * @return n, if it is an axact power of 2. Otherwise The next bigger
 	 * value. E.g. if you provide 48, this will return 64.
 	 **/
-	int nextPower2(int n) const;
+	static int nextPower2(int n);
 
 	void init();
 
@@ -107,8 +109,6 @@ private:
 	GLuint* mTextures;
 	int* mWidths;
 	int* mHeights;
-
-	GLenum mMode;
 };
 
 #endif
