@@ -52,12 +52,8 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 BosonMap::~BosonMap()
 {
  delete mTiles;
- if (mCells) {
-	delete[] mCells;
- }
- if (mHeightMap) {
-	delete[] mHeightMap;
- }
+ delete[] mCells;
+ delete[] mHeightMap;
  delete d;
 }
 
