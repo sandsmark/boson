@@ -151,15 +151,13 @@ signals:
 	 */
 	void signalAction(int actionType);
 
-protected slots:
 	/**
-	 * If the selected unit is a facility that has not been constructed
-	 * completely (see @ref Unit::isConstructionComplete) show how far the
-	 * construction is currently.
+	 * This unit should become the only selected unit. See @ref
+	 * BosonOrderButton::signalSelectUnit
 	 **/
-//	void slotShowConstructionProgress(Facility* fac);
+	void signalSelectUnit(Unit* unit);
 
-
+protected slots:
 	/**
 	 * Game mode only. Emit @ref signalProduce.
 	 **/

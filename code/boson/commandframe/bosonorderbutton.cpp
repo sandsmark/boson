@@ -465,10 +465,8 @@ void BosonOrderButton::slotClicked()
 		if (!unit()) {
 			kdError() << k_lineinfo << "NULL unit" << endl;
 		} else {
-			// shall we do something here? maybe make this unit the
-			// only selected unit if there are several units
-			// selected? or can we omit this signal?
-//			emit signalUnit(mUnit);
+			// select this unit only, i.e. unselect all others
+			emit signalSelectUnit(unit());
 		}
 		break;
 	case CommandAction:

@@ -556,6 +556,8 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 			const QPoint&, const QPoint&, const QPoint&)));
 	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 			old, SLOT(slotReCenterDisplay(const QPoint&)));
+	connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)), 
+			old->selection(), SLOT(slotSelectSingleUnit(Unit*)));
  }
  connect(active, SIGNAL(signalChangeViewport(const QPoint&,const QPoint&,
 		const QPoint&, const QPoint&)),
@@ -563,6 +565,8 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 		const QPoint&, const QPoint&)));
  connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 		active, SLOT(slotReCenterDisplay(const QPoint&)));
+ connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)), 
+		active->selection(), SLOT(slotSelectSingleUnit(Unit*)));
 
  if (old) {
 	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),
