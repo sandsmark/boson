@@ -821,7 +821,7 @@ void BosonBigDisplayBase::paintGL()
 			// cell-coordinates only is not an option, as the
 			// accuracy of opengl coordinates is needed.
 			int cellX = (int)s->position()[0];
-			int cellY = (int)s->position()[1];
+			int cellY = -(int)s->position()[1];
 			if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
 				s->draw();
 			}
