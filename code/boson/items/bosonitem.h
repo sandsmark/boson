@@ -150,6 +150,13 @@ private:
 class BosonItem : public BosonItemProperties
 {
 public:
+	enum PropertyIds {
+		// BosonItem used IDs from 256 to 511.
+		// all values above 511 are reserved for derived classes, up to
+		// 28671 (28672 and greater might be used by KGame again for
+		// automatic IDs)
+	};
+
 	/**
 	 * Note: when you subclass this class you must set the width/height in
 	 * order to make correct use of it! See @ref setSize

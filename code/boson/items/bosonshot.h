@@ -25,6 +25,8 @@
 #include "bosonitem.h"
 #include <qptrlist.h>
 
+#include <kgame/kgameproperty.h>
+
 class Unit;
 class Player;
 class BosonWeaponProperties;
@@ -45,6 +47,12 @@ template<class T> class QPtrList;
 class BosonShot : public BosonItem
 {
   public:
+    enum PropertyIds
+    {
+        // BosonShot uses IDs from 512 to 1023
+        // (derived classes use 1024 to 28671)
+    };
+
     /**
      * Type of the shot
      **/
@@ -145,6 +153,9 @@ class BosonShot : public BosonItem
 
     virtual void explode();
 
+  private:
+    static void initStatic();
+
   protected:
     virtual const QColor* teamColor() const;
 
@@ -171,6 +182,10 @@ class BosonShot : public BosonItem
 class BosonShotBullet : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+    };
+
     BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
     virtual bool init();
 
@@ -193,6 +208,9 @@ class BosonShotBullet : public BosonShot
     virtual void moveToTarget();
 
   private:
+    static void initStatic();
+
+  private:
     BoVector3Fixed mTarget;
 };
 
@@ -207,6 +225,15 @@ class BosonShotBullet : public BosonShot
 class BosonShotMissile : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+      IdTotalDist = 1024 + 0,
+      IdPassedDist = 1024 + 1,
+      IdZ = 1024 + 2,
+      IdEffectVelocity = 1024 + 3,
+      IdMaxHeight = 1024 + 4
+    };
+
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
     ~BosonShotMissile();
 
@@ -223,13 +250,16 @@ class BosonShotMissile : public BosonShot
     virtual void moveToTarget();
 
   private:
+    static void initStatic();
+
+  private:
     BoVector3Fixed mVelo;
     BoVector3Fixed mTarget;
-    bofixed mTotalDist;
-    bofixed mPassedDist;
-    bofixed mZ;
+    KGameProperty<bofixed> mTotalDist;
+    KGameProperty<bofixed> mPassedDist;
+    KGameProperty<bofixed> mZ;
+    KGameProperty<bofixed> mMaxHeight;
     bofixed mEffectVelo;
-    bofixed mMaxHeight;
 };
 
 
@@ -245,6 +275,14 @@ class BosonShotMissile : public BosonShot
 class BosonShotExplosion : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+      IdDamage = 1024 + 0,
+      IdDamageRange = 1024 + 1,
+      IdFullDamageRange  = 1024 + 2,
+      IdDelay = 1024 + 3
+    };
+
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
     void activate(const BoVector3Fixed& pos, long int damange, bofixed damageRange, bofixed fulldamagerange, int delay);
@@ -262,10 +300,13 @@ class BosonShotExplosion : public BosonShot
     virtual void advanceMoveInternal();
 
   private:
-    long int mDamage;
-    bofixed mDamageRange;
-    bofixed mFullDamageRange;
-    int mDelay;
+    static void initStatic();
+
+  private:
+    KGameProperty<long int> mDamage;
+    KGameProperty<bofixed> mDamageRange;
+    KGameProperty<bofixed> mFullDamageRange;
+    KGameProperty<int> mDelay;
 };
 
 
@@ -280,6 +321,11 @@ class BosonShotExplosion : public BosonShot
 class BosonShotMine : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+      IdActivated = 1024 + 0,
+    };
+
     BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
     virtual bool saveAsXML(QDomElement& root);
@@ -293,7 +339,10 @@ class BosonShotMine : public BosonShot
     virtual void advanceMoveInternal();
 
   private:
-    bool mActivated;
+    static void initStatic();
+
+  private:
+    KGamePropertyBool mActivated;
 };
 
 
@@ -308,6 +357,11 @@ class BosonShotMine : public BosonShot
 class BosonShotBomb : public BosonShot
 {
   public:
+    enum PropertyIds
+    {
+      IdActivated = 1024 + 0,
+    };
+
     BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
     virtual bool saveAsXML(QDomElement& root);
@@ -321,7 +375,10 @@ class BosonShotBomb : public BosonShot
     virtual void advanceMoveInternal();
 
   private:
-    bool mActivated;
+    static void initStatic();
+
+  private:
+    KGamePropertyBool mActivated;
 };
 
 
@@ -355,6 +412,9 @@ class BosonShotFragment : public BosonShot
 
   protected:
     virtual void advanceMoveInternal();
+
+  private:
+    static void initStatic();
 
   private:
     BoVector3Fixed mVelo;

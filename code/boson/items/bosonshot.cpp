@@ -46,12 +46,14 @@
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonItem(owner, canvas)
 {
+  initStatic();
   mProp = prop;
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
     BosonItem(owner, canvas)
 {
+  initStatic();
   mProp = 0;
 }
 
@@ -66,6 +68,16 @@ BosonModel* BosonShot::getModelForItem() const
     return 0;
   }
   return mProp->model();
+}
+
+void BosonShot::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
 }
 
 bool BosonShot::init()
@@ -172,7 +184,6 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error loading BosonItem" << endl;
     return false;
   }
-  bool ok;
   mActive = true; // Inactive shots won't be saved
 
   return true;
@@ -209,6 +220,17 @@ bofixed BosonShot::fullDamageRange() const
 BosonShotBullet::BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
+  initStatic();
+}
+
+void BosonShotBullet::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
 }
 
 bool BosonShotBullet::init()
@@ -255,10 +277,29 @@ void BosonShotBullet::explode()
 BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
+  initStatic();
+  registerData(&mTotalDist, IdTotalDist);
+  registerData(&mPassedDist, IdPassedDist);
+  registerData(&mZ, IdZ);
+  registerData(&mMaxHeight, IdMaxHeight);
 }
 
 BosonShotMissile::~BosonShotMissile()
 {
+}
+
+void BosonShotMissile::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
+  addPropertyId(IdTotalDist, "TotalDist");
+  addPropertyId(IdPassedDist, "PassedDist");
+  addPropertyId(IdZ, "Z");
+  addPropertyId(IdMaxHeight, "MaxHeight");
 }
 
 void BosonShotMissile::init(const BoVector3Fixed& pos, const BoVector3Fixed& target)
@@ -315,7 +356,7 @@ void BosonShotMissile::advanceMoveInternal()
   // Always accelerate
   accelerate();
   // Increase distance that missile has flied
-  mPassedDist += speed();
+  mPassedDist = mPassedDist + speed();
   // Calculate parable height at current step
   bofixed factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
@@ -349,10 +390,6 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
   root.setAttribute("Targetx", mTarget.x());
   root.setAttribute("Targety", mTarget.y());
   root.setAttribute("Targetz", mTarget.z());
-  root.setAttribute("TotalDist", mTotalDist);
-  root.setAttribute("PassedDist", mPassedDist);
-  root.setAttribute("mZ", mZ);
-  root.setAttribute("MaxHeight", mMaxHeight);
   root.setAttribute("Speed", speed());
   return true;
 }
@@ -419,30 +456,6 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
     return false;
   }
 
-  mTotalDist = root.attribute("TotalDist").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for TotalDist tag" << endl;
-    return false;
-  }
-  mPassedDist = root.attribute("PassedDist").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for PassedDist tag" << endl;
-    return false;
-  }
-  mZ = root.attribute("mZ").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for mZ tag" << endl;
-    return false;
-  }
-  mMaxHeight = root.attribute("MaxHeight").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for MaxHeight tag" << endl;
-    return false;
-  }
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
   {
@@ -472,10 +485,30 @@ void BosonShotMissile::moveToTarget()
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
     BosonShot(owner, canvas)
 {
+  initStatic();
+  registerData(&mDamage, IdDamage);
+  registerData(&mDamageRange, IdDamageRange);
+  registerData(&mFullDamageRange, IdFullDamageRange);
+  registerData(&mDelay, IdDelay);
+
   mDamage = 0;
   mDamageRange = 0;
   mFullDamageRange = 0;
   mDelay = 0;
+}
+
+void BosonShotExplosion::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
+  addPropertyId(IdDamage, "Damage");
+  addPropertyId(IdDamageRange, "DamageRange");
+  addPropertyId(IdFullDamageRange, "FullDamageRange");
+  addPropertyId(IdDelay, "Delay");
 }
 
 void BosonShotExplosion::activate(const BoVector3Fixed& pos, long int damage, bofixed damagerange, bofixed fulldamagerange, int delay)
@@ -494,11 +527,6 @@ bool BosonShotExplosion::saveAsXML(QDomElement& root)
     boError() << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
-
-  root.setAttribute("Damage", (int)mDamage);
-  root.setAttribute("DamageRange", mDamageRange);
-  root.setAttribute("FullDamageRange", mFullDamageRange);
-  root.setAttribute("Delay", mDelay);
   return true;
 }
 
@@ -509,40 +537,12 @@ bool BosonShotExplosion::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Error while loading BosonShot" << endl;
     return false;
   }
-
-  bool ok;
-
-  mDamage = (long int)root.attribute("Damage").toInt(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for Damage tag" << endl;
-    return false;
-  }
-  mDamageRange = root.attribute("DamageRange").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for DamageRange tag" << endl;
-    return false;
-  }
-  mFullDamageRange = root.attribute("FullDamageRange").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for FullDamageRange tag" << endl;
-    return false;
-  }
-  mDelay = root.attribute("Delay").toInt(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for Delay tag" << endl;
-    return false;
-  }
-
   return true;
 }
 
 void BosonShotExplosion::advanceMoveInternal()
 {
-  mDelay--;
+  mDelay = mDelay - 1;
   if(mDelay <= 0)
   {
     explode();
@@ -555,6 +555,19 @@ void BosonShotExplosion::advanceMoveInternal()
 BosonShotMine::BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
+  initStatic();
+  registerData(&mActivated, IdActivated);
+}
+
+void BosonShotMine::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
+  addPropertyId(IdActivated, "Activated");
 }
 
 void BosonShotMine::init(const BoVector3Fixed& pos)
@@ -571,8 +584,6 @@ bool BosonShotMine::saveAsXML(QDomElement& root)
     boError() << k_funcinfo << "Error while saving BosonShot" << endl;
     return false;
   }
-
-  root.setAttribute("Activated", mActivated ? "true" : "false");
   return true;
 }
 
@@ -581,23 +592,6 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
   if(!BosonShot::loadFromXML(root))
   {
     boError() << k_funcinfo << "Error while loading BosonShot" << endl;
-    return false;
-  }
-
-  QString activated;
-
-  activated = root.attribute("Activated");
-  if(activated == "true")
-  {
-    mActivated = true;
-  }
-  else if(activated == "false")
-  {
-    mActivated = false;
-  }
-  else
-  {
-    boError() << k_funcinfo << "Invalid value for Activated tag" << endl;
     return false;
   }
 
@@ -637,9 +631,21 @@ void BosonShotMine::advanceMoveInternal()
 BosonShotBomb::BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
+  initStatic();
   // Speeds
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
+}
+
+void BosonShotBomb::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
+  addPropertyId(IdActivated, "Activated");
 }
 
 void BosonShotBomb::init(const BoVector3Fixed& pos)
@@ -659,7 +665,6 @@ bool BosonShotBomb::saveAsXML(QDomElement& root)
     return false;
   }
 
-  root.setAttribute("Activated", mActivated ? "true" : "false");
   root.setAttribute("Speed", speed());
   return true;
 }
@@ -679,22 +684,6 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
   if(!ok)
   {
     boError() << k_funcinfo << "Invalid value for Speed tag" << endl;
-    return false;
-  }
-
-  QString activated;
-  activated = root.attribute("Activated");
-  if(activated == "true")
-  {
-    mActivated = true;
-  }
-  else if(activated == "false")
-  {
-    mActivated = false;
-  }
-  else
-  {
-    boError() << k_funcinfo << "Invalid value for Activated tag" << endl;
     return false;
   }
 
@@ -757,11 +746,22 @@ void BosonShotBomb::advanceMoveInternal()
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas) :
     BosonShot(owner, canvas)
 {
+  initStatic();
   mUnitProperties = 0;
 }
 
 BosonShotFragment::~BosonShotFragment()
 {
+}
+
+void BosonShotFragment::initStatic()
+{
+  static bool initialized = false;
+  if (initialized)
+  {
+    return;
+  }
+  initialized = true;
 }
 
 BosonModel* BosonShotFragment::getModelForItem() const
