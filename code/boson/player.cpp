@@ -545,7 +545,7 @@ int Player::facilitiesCount()
  return d->mFacilitiesCount;
 }
 
-bool Player::canBuild(int unitType)
+bool Player::canBuild(int unitType) const
 {
  QValueList<int> neededTypes = speciesTheme()->unitProperties(unitType)->requisities();
  if(neededTypes.isEmpty()) {
@@ -562,7 +562,7 @@ bool Player::canBuild(int unitType)
  return true;
 }
 
-bool Player::hasUnitWithType(int type)
+bool Player::hasUnitWithType(int type) const
 {
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {

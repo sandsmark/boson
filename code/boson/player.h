@@ -133,12 +133,12 @@ public:
 	 * @return TRUE if this player can build units with type unitType, FALSE
 	 * otherwise
 	 **/
-	bool canBuild(int unitType);
+	bool canBuild(int unitType) const;
 
 	/**
 	 * @return TRUE if player has unit with type type, FALSE otherwise
 	 **/
-	bool hasUnitWithType(int type);
+	bool hasUnitWithType(int type) const;
 
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
