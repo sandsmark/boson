@@ -281,7 +281,9 @@ class MouseMoveDiff
 public:
 	enum Mode {
 		ModeNone = 0,
-		ModeRMBMove = 1
+		ModeRMBMove = 1,
+		ModeRotate = 2,
+		ModeZoom = 3
 	} MouseMoveMode;
 	
 	MouseMoveDiff()
@@ -307,8 +309,15 @@ public:
 
 	void startRMBMove()
 	{
-		// we need this mode setting for rmb moving cause the right mouse button click might be an action as well
 		mMode = ModeRMBMove;
+	}
+	void startRotate()
+	{
+		mMode = ModeRotate;
+	}
+	void startZoom()
+	{
+		mMode = ModeZoom;
 	}
 	void stop()
 	{
@@ -339,11 +348,11 @@ public:
 		return (mY - mOldY);
 	}
 	
-	bool isRMBMove() const
+	bool isStopped() const
 	{
-		return mode() == ModeRMBMove;
+		return mode() == ModeNone;
 	}
-	void setMode(Mode mode) 
+	void setMode(Mode mode)
 	{
 		mMode = mode;
 	}
@@ -1540,9 +1549,11 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	// the focus to the menu which might be very confusing
 	// during a game.
 	if (buttonState & LEFT_BUTTON) {
+		d->mMouseMoveDiff.startZoom();
 		camera()->changeZ(d->mMouseMoveDiff.dy());
 		cameraChanged();
 	} else if (buttonState & RIGHT_BUTTON) {
+		d->mMouseMoveDiff.startRotate();
 		camera()->changeRotation(d->mMouseMoveDiff.dx());
 		camera()->changeRadius(d->mMouseMoveDiff.dy());
 		cameraChanged();
@@ -1638,7 +1649,7 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
 	}
 	case RIGHT_BUTTON:
 	{
-		if (d->mMouseMoveDiff.isRMBMove()) {
+		if (!d->mMouseMoveDiff.isStopped()) {
 			d->mMouseMoveDiff.stop();
 		} else if (displayInput()->actionLocked()) {
 			displayInput()->unlockAction();
