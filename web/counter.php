@@ -677,6 +677,10 @@ function counter2_get_browser($ua)
   {
     return "Netscape";
   }
+  else if(eregi("libwww-perl", $ua))
+  {
+    return "libwww-perl";
+  }
   else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)", $ua))
   {
     return "SearchBot";
