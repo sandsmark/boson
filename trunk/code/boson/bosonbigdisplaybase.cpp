@@ -21,7 +21,6 @@
 #include "bosonbigdisplaybase.moc"
 
 #include "defines.h"
-#include "bosonwidget.h"
 #include "bosoncanvas.h"
 #include "bosoncanvasstatistics.h"
 #include "bosonmap.h"
@@ -66,6 +65,7 @@
 #include <qbuffer.h>
 #include <qimage.h>
 #include <qdir.h>
+#include <qdom.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
