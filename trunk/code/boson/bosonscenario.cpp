@@ -131,10 +131,14 @@ bool BosonScenario::loadScenario(QDomElement& root)
 
 bool BosonScenario::saveScenario(QDomElement& root)
 {
- // we manage our own xml document of the scenario. we simply need to append the
- // root of our own document to the other root.
+ // we manage our own xml document of the scenario. we simply need to append all
+ // childs of our own document to the provided root
  boDebug(250) << k_funcinfo << endl;
- root.appendChild(d->mInternalDoc.documentElement().cloneNode(true));
+
+ QDomNodeList list = d->mInternalDoc.documentElement().childNodes();
+ for (int i = 0; i < list.count(); i++) {
+	root.appendChild(list.item(i).cloneNode(true));
+ }
  return true;
 }
 
