@@ -53,7 +53,8 @@ public:
 	void initCell(int x, int y);
 
 	/**
-	 * @return The unit on this coordinates of the canvas
+	 * @return The unit on this coordinates of the canvas. Won't return a
+	 * destroyed unit (wreckage)
 	 **/
 	Unit* findUnitAt(const QPoint& pos);
 
