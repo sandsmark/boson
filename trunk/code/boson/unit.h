@@ -387,7 +387,7 @@ protected:
 	 **/
 	virtual void advanceMoveCheck() { }
 
-	BosonWeapon* activeWeapon();
+	BosonWeapon* activeWeapon() const;
 
 protected:
 	bool mSearchPath;

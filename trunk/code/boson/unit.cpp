@@ -646,6 +646,8 @@ bool Unit::save(QDataStream& stream)
  //TODO: d->mTarget
  //we should probably add pure virtual methods save() and load() to the plugins,
  //in order to store non-KGameProperty data there, too
+ // note that UnitBase::save() also saves KGameProperty data of plugins and
+ // weapons
  if (!UnitBase::save(stream)) {
 	boError() << "Unit not saved properly" << endl;
 	return false;
@@ -653,6 +655,12 @@ bool Unit::save(QDataStream& stream)
  stream << (float)x();
  stream << (float)y();
  stream << (float)z();
+ // now we need to store the active weapon:
+ int weapon = -1;
+ if (activeWeapon()) {
+	weapon = d->mWeapons.findRef(activeWeapon());
+ }
+ stream << (Q_INT32)weapon;
  return true;
 }
 
@@ -669,10 +677,21 @@ bool Unit::load(QDataStream& stream)
  float x;
  float y;
  float z;
+ Q_INT32 weapon;
 
  stream >> x;
  stream >> y;
  stream >> z;
+ stream >> weapon;
+ if (weapon < 0) {
+	d->mActiveWeapon = 0;
+ } else {
+	if ((unsigned int)weapon >= d->mWeapons.count()) {
+		boError() << k_funcinfo << "Invalid active weapon: " << weapon << endl;
+	} else {
+		d->mActiveWeapon = d->mWeapons.at(weapon);
+	}
+ }
 
  move(x, y, z);
  if (isDestroyed()) {
@@ -922,7 +941,7 @@ bool Unit::canShootAt(Unit *u)
  return false;
 }
 
-BosonWeapon* Unit::activeWeapon()
+BosonWeapon* Unit::activeWeapon() const
 {
  return d->mActiveWeapon;
 }
