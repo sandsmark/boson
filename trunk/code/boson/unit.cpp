@@ -608,19 +608,17 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- if(mPathrecalc == 0)
- {
-	if(! newPath())
-	{
+ if(mPathrecalc == 0) {
+	if(! newPath()) {
 		// Can't go to destination - stop moving;
 		/// TODO: go to tile near destination?
 		kdDebug() << "Can't find new path to destination cell - stopping" << endl;
 		stopMoving();
 		return;
 	}
- }
- else
+ } else {
 	mPathrecalc--;
+ }
 
  if(waypointCount() == 0) {
 	// shouldn't happen - work() should be WorkNone here
@@ -632,11 +630,10 @@ void MobileUnit::advanceMove()
 
  QPoint wp = currentWaypoint(); // where we go to
  // Check if we can actually go to waypoint (maybe it was fogged)
- if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) && !mAttacking) ||
-		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
- {
-	if(! newPath())
-	{
+ if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
+		!mAttacking) || 
+		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
+	if(! newPath()) {
 		stopMoving();
 		return;
 	}
@@ -649,14 +646,12 @@ void MobileUnit::advanceMove()
  double yspeed = 0;
 
  // First check if we're at waypoint
- if((x == wp.x()) && (y == wp.y()))
- {
+ if((x == wp.x()) && (y == wp.y())) {
 	QPoint wp = currentWaypoint(); // where we go to
 
 	kdDebug() << k_funcinfo << ": unit is at waypoint" << endl;
  	waypointDone();
-	if(waypointCount() == 0)
-	{
+	if(waypointCount() == 0) {
 		kdDebug() << k_funcinfo << ": no more waypoints. Stopping moving" << endl;
 		// What to do?
 		stopMoving();
@@ -664,11 +659,10 @@ void MobileUnit::advanceMove()
 	}
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
-	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) && !mAttacking) ||
-			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
-	{
-		if(! newPath())
-		{
+	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this) &&
+			!mAttacking) ||
+			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
+		if(! newPath()) {
 			stopMoving();
 			return;
 		}
@@ -776,19 +770,23 @@ double MobileUnit::speed() const
 
 bool MobileUnit::newPath()
 {
- if(!owner()->isFogged(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE))
- {
+ if(!owner()->isFogged(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE)) {
 	if(! boCanvas()->cell(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE)->
-			canGo(unitProperties()))
+			canGo(unitProperties())) {
 		return false;
-	if(boCanvas()->cellOccupied(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE, this) && !mAttacking)
+	}
+	if(boCanvas()->cellOccupied(mMoveDestX / BO_TILE_SIZE, mMoveDestY / BO_TILE_SIZE,
+			this) && !mAttacking) {
 		return false;
+	}
  }
  QValueList<QPoint> path = BosonPath::findPath(this, mMoveDestX, mMoveDestY);
- if(path.count() < 1) // Is it actually needed?
+ if(path.count() < 1) {// Is it actually needed?
 	return false;
- for (int unsigned i = 0; i < path.count(); i++)
+ }
+ for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
+ }
  mPathrecalc = 50;
  return true;
 }
