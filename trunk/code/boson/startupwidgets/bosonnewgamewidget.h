@@ -165,7 +165,7 @@ signals:
 	void signalSetLocalPlayer(Player* player);
 
 protected:
-	void sendNewGame();
+	virtual void sendNewGame();
 	virtual void setCurrentPlayField(BosonPlayField* field);
 
 	// AB: do NOT move to public!

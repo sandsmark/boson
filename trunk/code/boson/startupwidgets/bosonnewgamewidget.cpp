@@ -543,6 +543,6 @@ void BosonNewGameWidget::sendNewGame()
 {
 // emit signalSetLocalPlayer(mPlayer); // AB: might be obsolete because of signalAddLocalPlayer(). removed for now.
  slotMyNameChanged();
- BosonStartWidgetBase::sendNewGame();
+ boGame->sendMessage(0, BosonMessage::IdNewGame);
 }
 

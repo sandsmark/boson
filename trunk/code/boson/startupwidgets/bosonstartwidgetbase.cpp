@@ -105,8 +105,3 @@ void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
  setCurrentPlayField(field);
 }
 
-void BosonStartWidgetBase::sendNewGame()
-{
- boGame->sendMessage(0, BosonMessage::IdNewGame);
-}
-

@@ -66,12 +66,12 @@ protected:
 	virtual void setCurrentPlayField(BosonPlayField* field) = 0;
 
 	/**
-	 * Start a new game. This sends out a message, so that on the game
-	 * starts on all clients. Derived classes might do some final changes,
-	 * e.g. apply all changes to the textfields in the widget (e.g. player
-	 * name)
+	 * Start a new game. This should send a message out, so that on the game
+	 * starts on all clients (do this for the editor, too!). Derived
+	 * classes also might do some final changes, e.g. apply all changes to
+	 * the textfields in the widget (e.g. player name).
 	 **/
-	virtual void sendNewGame();
+	virtual void sendNewGame() = 0;
 
 protected slots:
 	/**
