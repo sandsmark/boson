@@ -64,116 +64,35 @@ UFlowLayout::~UFlowLayout() {}
 
 UDimension
 UFlowLayout::getMinimumLayoutSize(const UWidget * parent) const {
-	UDimension ret;
-	const UInsets & insets = parent->getInsets();
-	int maxwidth = parent->getWidth() - (insets.left + insets.right);
-
-	int width = 0;
-	int height = 0;
-
-	for (unsigned int i = 0; i < parent->getWidgetCount(); i++ ) {
-		UWidget * w = parent->getWidget(i);
-
-		if (w->isVisible()) {
-			const UDimension & size = w->getMinimumSize();
-			if ( (height == 0) || (( width + size.w + m_hgap ) <= maxwidth )) {
-				width += size.w + m_hgap;
-
-				height = std::max(size.h, height);
-			} else {
-				ret.h += height + m_vgap;
-				ret.w = std::max(ret.w, width);
-
-				height = 0;
-			}
-		}
-	}
-	if (ret.w > maxwidth) {
-		ret.w = maxwidth;
-	}
-
-	ret.h += height;
-
-	ret.w += insets.left + insets.right;
-	ret.h += insets.top + insets.bottom;
-
-	return ret;
+	return layoutContainerInternal(parent, false, parent->getWidth());
 }
 
 UDimension
 UFlowLayout::getPreferredLayoutSize(const UWidget * parent) const {
-	UDimension ret;
-	const UInsets & insets = parent->getInsets();
-	
-/*
-int maxwidth = parent->getWidth() - (insets->left + insets->right);
-	
-	// FIXME !
-	// redesign the whole maxwidth thingie
-	if (maxwidth == 0) { maxwidth = 65536; }
-
-	int width = 0;
-	int height = 0;
-
-	for (unsigned int i = 0; i < parent->getWidgetCount(); i++ ) {
-		UWidget * w = parent->getWidget(i);
-
-		if (w->isVisible()) {
-			const UDimension * size = w->getPreferredSize();
-			if ( (height == 0) || (( width + size->w + m_hgap ) <= maxwidth )) {
-				width += size->w + m_hgap;
-
-				height = std::max( size->h, height);
-			} else {
-				ret->h += height + m_vgap;
-				ret->w = maxwidth;//std::max(ret->w, width);
-
-				height = 0;
-				width = 0;
-			}
-		}
-	}
-	ret->h += height;
-	ret->w += width;
-
-	if (ret->w > maxwidth) {
-		ret->w = maxwidth;
-	}
-
-*/
-	for (unsigned int i = 0; i < parent->getWidgetCount(); i++ ) {
-		UWidget * w = parent->getWidget(i);
-
-		if (w->isVisible()) {
-			const UDimension & size = w->getPreferredSize();
-			ret.w += size.w + m_hgap;
-			ret.h = std::max(size.h, ret.h);
-		}
-	}
-	if (parent->getWidgetCount() > 1) {
-		ret.w -= m_hgap;
-	}
-
-	ret.w += insets.left + insets.right;
-	ret.h += insets.top + insets.bottom;
-
-	return ret;
+	return layoutContainerInternal(parent, false, parent->getWidth());
 }
 
 void
 UFlowLayout::layoutContainer(const UWidget * parent) {
+	layoutContainerInternal(parent, parent, parent->getWidth());
+}
+
+UDimension
+UFlowLayout::layoutContainerInternal(const UWidget * parent, bool doLayout, int maxwidth) const {
+	UDimension ret;
 	const UInsets & insets = parent->getInsets();
 	// the max width of the Container
-	int maxwidth = parent->getWidth() - (insets.left + insets.right);
+	maxwidth = maxwidth - (insets.left + insets.right);
 
 	// first, all widgets are laid out top-left.
 	// if another align is desired, relayout a complete row to the given
 	// layout
-	bool realign = (m_horizontalAlignment != AlignLeft) |
-	               (m_verticalAlignment != AlignTop);
+	bool realign = ((m_horizontalAlignment != AlignLeft) |
+	               (m_verticalAlignment != AlignTop)) &&
+	               doLayout;
 
 	// the max height of a row
-	int height = 0;
+	int rowHeight = 0;
 
 	// the left most x value
 	int left = insets.left;
@@ -190,8 +109,14 @@ UFlowLayout::layoutContainer(const UWidget * parent) {
 
 		if (w->isVisible()) {
 			const UDimension & d = w->getPreferredSize();
+			if (!doLayout) {
+				// make sure that no w->set*() method is called
+				w = 0;
+			}
 			// size is always the preferred size
-			w->setSize(d.w, d.h);
+			if (doLayout) {
+				w->setSize(d.w, d.h);
+			}
 
 			if ((x == left) || ((x + d.w + m_hgap) <= maxwidth)) {
 				if (x > left) {
@@ -200,30 +125,34 @@ UFlowLayout::layoutContainer(const UWidget * parent) {
 					x += m_hgap;
 				}
 
-				w->setLocation(x, y);
+				if (doLayout) {
+					w->setLocation(x, y);
+				}
 
 				// compute x value of the next widget
 				x += d.w;
 				// compute height of the row
-				height = std::max(height, d.h);
+				rowHeight = std::max(rowHeight, d.h);
 			} else {
 				if (realign) {
 					moveWidgets(parent,
-						left, y, maxwidth - x, height,
+						left, y, maxwidth - x, rowHeight,
 						rowStart, i
 					);
 				}
+				ret.w = std::max(ret.w, x);
 				// reset x value to left most
 				x = left;
 				// set y value to y of the next row
-				y += m_vgap + height;
-				
-				
-				w->setLocation(x, y);
+				y += m_vgap + rowHeight;
+
+				if (doLayout) {
+					w->setLocation(x, y);
+				}
 
 				x += d.w;
-				// set height to new row height (height of current widget)
-				height = d.h;
+				// set rowHeight to new row height (height of current widget)
+				rowHeight = d.h;
 
 				rowStart = i;
 			}
@@ -231,10 +160,13 @@ UFlowLayout::layoutContainer(const UWidget * parent) {
 	}
 	if (realign) {
 		moveWidgets(parent,
-			left, y, maxwidth - x, height,
+			left, y, maxwidth - x, rowHeight,
 			rowStart, parent->getWidgetCount()
 		);
 	}
+	ret.w = std::max(ret.w, x);
+	ret.h = y + rowHeight;
+	return ret;
 }
 
 

@@ -89,6 +89,8 @@ private:  // Private methods
 	void moveWidgets(const UWidget * parent,
 		int x, int y, int width, int height, int rowStart, int rowEnd) const;
 
+	UDimension layoutContainerInternal(const UWidget * parent, bool doLayout, int maxWidth) const;
+
 protected:  // Protected attributes
 	/** the horizontal gap between widgets */
 	int m_hgap;
