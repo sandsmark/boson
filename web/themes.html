@@ -38,10 +38,9 @@
 
     <P>All of Boson's graphics will be completely themeable. That means not only that you can change "skins" whenever you like, but it also means that you can combine different themes in one game.</P>
 
-	There are two kind of themes : ground themes to change the look of the place you're fighting on, and
-species themes so that every player may choose his specy. 
+    <P>There are two kind of themes : ground themes to change the look of the place you're fighting on, and species themes so that every player may choose his specy.</P>
 
-    <P>Currently, only one ground theme ("earth") and two species themes ("human_red", "human_blue") are available.
+    <P>Currently, only one ground theme ("earth") and two species themes ("human_red", "human_blue") are available.</P>
 
     <P>To give others a possibility to start creating themes before Boson is released and to make themes-creation in general easier, this page describes the file formats, directory structures and naming conventions.</P>
 
@@ -67,8 +66,7 @@ species themes so that every player may choose his specy.
 
     <BR>
 
-    <P>The best way to understand the tree structure and the naming convention is
-of course to download and unzip the boson-pics-*.tgz file and have a look at it.</P>
+    <P>The best way to understand the tree structure and the naming convention is of course to download and unzip the boson-pics-*.tgz file and have a look at it.</P>
   
     <BR> <BR>
 
@@ -83,8 +81,6 @@ of course to download and unzip the boson-pics-*.tgz file and have a look at it.
         <TD>
 
           <PRE>
-
-
 |-grounds
   |-earth
     |-grass_water
@@ -126,9 +122,6 @@ of course to download and unzip the boson-pics-*.tgz file and have a look at it.
   |-standard
     |-oil
     |-minerals    
-
-
-
            </PRE>
 
           <FONT FACE="helvetica" SIZE="2">
@@ -177,13 +170,13 @@ of course to download and unzip the boson-pics-*.tgz file and have a look at it.
 
     <LI>The size of Unit-bitmaps is pretty much unique and depends solely on the dimensions of the unit.
 
-    <LI>All facilities have six different construction bitmaps. The first bitmap just shows the base of the buildings, in the last bitmap the buildings is completely constructed.
+    <LI>All facilities have four different construction bitmaps. The first bitmap just shows the base of the buildings, in the last bitmap the buildings is completely constructed.
 
     <LI>All buildings are shown from a 20 degree X / 20 degree Y angle (pseudo - isometric view).
 
     <LI>For buildings that need to rotate (i.e. SamSite) and all units, there are 12 different bitmaps for each rotational position (0-11 o'clock) with 30 degrees of difference in each. Units are viewed from the pseudo isometric angle, too.
 
-    <LI>For buildings / facilities, the background needs to be transparent, so that they can be placed on any ground. This is achieved by giving the background a predefined color (R: 250 | G: 40 | B: 240), so that Boson can then create transparency-masks on loading.
+    <LI>For buildings / facilities, the background needs to be transparent, so that they can be placed on any ground. This is achieved by giving the background a predefined color (R: 255 | G: 000 | B: 255), so that Boson can then create transparency-masks on loading.
 
     </UL>
 
@@ -211,7 +204,7 @@ of course to download and unzip the boson-pics-*.tgz file and have a look at it.
   
     <FONT FACE="helvetica" SIZE="2">
 
-    <P>Boson's standard theme has four different grounds (grass, desert, water and deep water). To use all these grounds, we need to create transitions between them (beach between grass and water).
+    <P>Boson's standard theme has four different grounds (grass, desert, water and deep water). To use all these grounds, we need to create transitions between them (beach between grass and water etc.).
 
     </FONT>
 
