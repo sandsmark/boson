@@ -153,7 +153,7 @@ protected:
 	void syncAdvanceFunctions(const QPtrList<BosonItem>& animItems, bool advanceFlag); // MUST be called after advanceFunction() stuff
 	void updateWork2AdvanceList();
 	void maximalAdvanceCountTasks(unsigned int advanceCallsCount); // "maximalAdvanceCount" is nonsense here, but the name has historic reasons
-	void updateEffects(float elapsed);
+	void updateEffects(QPtrList<BosonEffect>& effects, float elapsed);
 
 private:
 	BosonCanvas* mCanvas;
@@ -172,7 +172,7 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem> animItems, unsigned int 
  boProfiling->advanceFunction(false);
 
  boProfiling->advanceEffects(true);
- updateEffects(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
+ updateEffects(mCanvas->d->mEffects, 0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
  boProfiling->advanceWater(true);
  boProfiling->advanceEffects(false);
  boWaterManager->update(0.05);
@@ -431,7 +431,8 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  boProfiling->stop(profilingDeleteShots);
 }
 
-void BoCanvasAdvance::updateEffects(float elapsed)
+// AB: elapsed is unused
+void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapsed)
 {
  static int profilingAdvanceEffects = boProfiling->requestEventId("Advance: updateEffects()");
  BosonProfiler profiler(profilingAdvanceEffects);
@@ -450,10 +451,14 @@ void BoCanvasAdvance::updateEffects(float elapsed)
 		count--;
 	}
  }*/
- for (BosonEffect* e = mCanvas->d->mEffects.first(); e; e = mCanvas->d->mEffects.next()) {
-	e->update(elapsed);
+ for (BosonEffect* e = effects.first(); e; e = effects.next()) {
+	if (!e->hasStarted()) {
+		e->update(elapsed);
+	} else {
+		e->markUpdate();
+	}
 	if (!e->isActive()) {
-		mCanvas->d->mEffects.removeRef(e);
+		effects.removeRef(e);
 	}
  }
 }

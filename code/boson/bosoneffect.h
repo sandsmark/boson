@@ -105,6 +105,8 @@ class BosonEffect
      **/
     virtual void update(float elapsed);
 
+    void doDelayedUpdates();
+
 
     /**
      * @return Whether the effect is active or not
@@ -166,6 +168,10 @@ class BosonEffect
      **/
     static void initStatic(const QString& particletexdir);
 
+    void markUpdate()
+    {
+      mUpdateCounter++;
+    }
 
   protected:
     BoVector3 mPosition;
@@ -177,6 +183,8 @@ class BosonEffect
     // TODO: maybe remove mProperties pointers from subclasses and use only
     //  this one?
     const BosonEffectProperties* mGeneralProperties;
+
+    int mUpdateCounter;
 
 
     static KRandomSequence* mRandom;
@@ -428,5 +436,8 @@ class BosonEffectBulletTrail : public BosonEffect
     BoVector3 mEnd;
 };
 
+/*
+ * vim: et sw=2
+ */
 #endif  //BOSONEFFECT_H
 
