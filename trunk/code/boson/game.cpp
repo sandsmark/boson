@@ -32,11 +32,11 @@ int			nb_player;
  * boson/game.h
  */
 speciesTheme		*myspecy	= 0l;
-int			who_am_i	= 0;
+uint			who_am_i	= 0u;
 /* The map which handle grouds and units*/
 bosonCanvas		*bocanvas	= 0l;
 /* synchronization */
-uint			jiffies		= 0l;
+uint			jiffies		= 0u;
 /* deal with the communication layer */
 KSocket			*Socket		= 0l;
 playerSocketState	socketState	= PSS_INIT;
@@ -44,6 +44,6 @@ playerState		State		= PS_INIT;
 boBuffer		*buffer		= 0l;
 
 /* possesions */
-uint			oil		= 0;
-uint			mineral		= 0;
+uint			oil		= 0u;
+uint			mineral		= 0u;
 

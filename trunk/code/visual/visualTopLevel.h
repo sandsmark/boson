@@ -104,7 +104,7 @@ public:
 public: ///orzel : bof...
 	visualFacility		*fixSelected;
 	QIntDict<visualMobUnit>	mobSelected;
-	int			selectionWho; // -1 is nobody
+	uint			selectionWho; // -1 is nobody
 protected:
 	selectionMode_t		selectionMode;
 
