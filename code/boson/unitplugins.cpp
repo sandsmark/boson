@@ -20,6 +20,7 @@
 
 #include "unit.h"
 #include "unitproperties.h"
+#include "pluginproperties.h"
 #include "speciestheme.h"
 #include "player.h"
 #include "bosoncanvas.h"
@@ -48,6 +49,11 @@ ProductionPlugin::~ProductionPlugin()
 {
 }
 
+SpeciesTheme* ProductionPlugin::speciesTheme() const
+{
+ return unit()->speciesTheme();
+}
+
 unsigned long int ProductionPlugin::completedProduction() const
 {
  if (!hasProduction()) {
@@ -66,7 +72,12 @@ unsigned long int ProductionPlugin::completedProduction() const
 
 void ProductionPlugin::addProduction(unsigned long int unitType)
 {
- if (!unit()->speciesTheme()->productions(unit()->unitProperties()->producerList()).contains(unitType)) {
+ ProductionProperties* p = (ProductionProperties*)unit()->unitProperties()->properties(PluginProperties::Production);
+ if (!p) {
+	kdError() << k_funcinfo << "NULL production properties" << endl;
+	return;
+ }
+ if (!speciesTheme()->productions(p->producerList()).contains(unitType)) {
 	kdError() << k_funcinfo << " cannot produce " << unitType << endl;
 	return;
  }

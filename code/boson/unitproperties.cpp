@@ -19,8 +19,8 @@
 #include "unitproperties.h"
 #include "defines.h"
 
-#include <qcanvas.h>
 #include "speciestheme.h"
+#include "pluginproperties.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -34,11 +34,8 @@ public:
 	}
 
 	float mSpeed;
-	bool mCanGoOnLand; // a nice candidate for bitfields...
+	bool mCanGoOnLand;
 	bool mCanGoOnWater;
-	bool mCanMineMinerals;
-	bool mCanMineOil;
-	unsigned int mMaxResources;
 };
 
 class UnitProperties::FacilityProperties
@@ -48,8 +45,6 @@ public:
 	{
 	}
 
-	bool mCanProduce;
-	QValueList<int> mProducerList;
 	bool mCanRefineMinerals;
 	bool mCanRefineOil;
 	unsigned int mConstructionFrames;
@@ -147,23 +142,39 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 		(isLand() || isAircraft()));
  mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater",
 		(isShip() || isAircraft()));
- mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", 
-		false);
- mMobileProperties->mCanMineOil = conf->readBoolEntry("CanMineOil", false);
- mMobileProperties->mMaxResources = conf->readUnsignedNumEntry("MaxResources",
-		(canMineMinerals() || canMineOil()) ? 100 : 0);
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
  mFacilityProperties = new FacilityProperties;
- mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
- mFacilityProperties->mProducerList = conf->readIntListEntry("ProducerList");
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
  mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
  mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", FACILITY_CONSTRUCTION_STEPS);
+}
+
+void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
+{
+ if (conf->hasGroup("ProductionPlugin")) {
+	loadPluginProperties(new ProductionProperties(this), conf);
+ }
+ if (conf->hasGroup("RepairPlugin")) {
+	loadPluginProperties(new RepairProperties(this), conf);
+ }
+ if (conf->hasGroup("HarvesterPlugin")) {
+	loadPluginProperties(new HarvesterProperties(this), conf);
+ }
+}
+
+void UnitProperties::loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf)
+{
+ if (!prop || !conf) {
+	kdError() << k_funcinfo << "oops" << endl;
+	return;
+ }
+ prop->loadPlugin(conf);
+ mPlugins.append(prop);
 }
 
 void UnitProperties::loadTextureNames(KSimpleConfig* conf)
@@ -217,46 +228,6 @@ bool UnitProperties::canGoOnWater() const
  return mMobileProperties->mCanGoOnWater;
 }
 
-bool UnitProperties::canProduce() const
-{
- if (!mFacilityProperties) {
-	return false;
- }
- return mFacilityProperties->mCanProduce;
-}
-
-QValueList<int> UnitProperties::producerList() const
-{
- if (!mFacilityProperties) {
-	return QValueList<int>();
- }
- return mFacilityProperties->mProducerList;
-}
-
-bool UnitProperties::canMineMinerals() const
-{
- if (!mMobileProperties) {
-	return false;
- }
- return mMobileProperties->mCanMineMinerals;
-}
-
-bool UnitProperties::canMineOil() const
-{
- if (!mMobileProperties) {
-	return false;
- }
- return mMobileProperties->mCanMineOil;
-}
-
-unsigned int UnitProperties::maxResources() const
-{
- if (!canMineMinerals() && !canMineOil()) {
-	return 0;
- }
- return mMobileProperties->mMaxResources;
-}
-
 bool UnitProperties::canRefineMinerals() const
 {
  if (!mFacilityProperties) {
@@ -279,5 +250,16 @@ unsigned int UnitProperties::constructionSteps() const
 	return 0;
  }
  return mFacilityProperties->mConstructionFrames;
+}
+
+const PluginProperties* UnitProperties::properties(int pluginType) const
+{
+ QPtrListIterator<PluginProperties> it(mPlugins);
+ for (; it.current(); ++it) {
+	if (it.current()->pluginType() == pluginType) {
+		return it.current();
+	}
+ }
+ return 0;
 }
 

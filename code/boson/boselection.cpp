@@ -22,6 +22,7 @@
 
 #include "unit.h"
 #include "unitproperties.h"
+#include "pluginproperties.h"
 
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
@@ -150,7 +151,8 @@ bool BoSelection::hasMineralHarvester() const
 {
  QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
-	if (it.current()->unitProperties()->canMineMinerals()) {
+	HarvesterProperties* p = (HarvesterProperties*)it.current()->properties(PluginProperties::Harvester);
+	if (p && p->canMineMinerals()) {
 		return true;
 	}
 	++it;
@@ -162,7 +164,8 @@ bool BoSelection::hasOilHarvester() const
 {
  QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
-	if (it.current()->unitProperties()->canMineOil()) {
+	HarvesterProperties* p = (HarvesterProperties*)it.current()->properties(PluginProperties::Harvester);
+	if (p && p->canMineOil()) {
 		return true;
 	}
 	++it;
