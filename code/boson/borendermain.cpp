@@ -40,7 +40,6 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qlayout.h>
-#include <qlabel.h>
 #include <qpushbutton.h>
 
 #define NEAR 1.0
@@ -53,6 +52,29 @@ static const char *version = "v0.7pre";
 
 static KCmdLineOptions options[] =
 {
+    { "m", 0, 0 },
+    { "maximized", I18N_NOOP("Show maximized"), 0 },
+    { "s", 0, 0 },
+    { "species <identifier>", I18N_NOOP("Species Theme identifier"), 0 },
+    { "u", 0, 0 },
+    { "unit <unit>", I18N_NOOP("Unit"), 0 },
+    { "i", 0, 0 },
+    { "unit-id <typeid>", I18N_NOOP("Unit Type ID"), 0 },
+    { "cx", 0, 0 },
+    { "camera-x <number>", I18N_NOOP("X-Position of the camera"), 0 },
+    { "cy", 0, 0 },
+    { "camera-y <number>", I18N_NOOP("Y-Position of the camera"), 0 },
+    { "cz", 0, 0 },
+    { "camera-z <number>", I18N_NOOP("Z-Position of the camera"), 0 },
+    { "rx", 0, 0 },
+    { "rotate-x <number>", I18N_NOOP("Rotation around the X-axis"), 0 },
+    { "ry", 0, 0 },
+    { "rotate-y <number>", I18N_NOOP("Rotation around the Y-axis"), 0 },
+    { "rz", 0, 0 },
+    { "rotate-z <number>", I18N_NOOP("Rotation around the Z-axis"), 0 },
+    { "fovy <number>", I18N_NOOP("Field of view (zooming)"), "60.0" },
+    { "f", 0, 0 },
+    { "frame <number>", I18N_NOOP("Intitially displayed frame"), 0 },
     { 0, 0, 0 }
 };
 
@@ -275,20 +297,79 @@ void RenderMain::slotUnitChanged(int index)
 	return;
  }
  KPopupMenu* p = (KPopupMenu*)sender();
- kdDebug() << k_funcinfo << index << endl;
-
  SpeciesTheme* s = mPopup2Species[p];
- if (!s) {
-	kdError() << k_funcinfo << "NULL species" << endl;
-	return;
- }
-
+ kdDebug() << k_funcinfo << index << endl;
  unsigned long int type = allUnits(s)[index];
  const UnitProperties* prop = s->unitProperties(type);
  if (!prop) {
 	kdError() << k_funcinfo << "could not find unitproperties for index=" << index << " type=" << type << endl;
 	return;
  }
+ changeUnit(s, prop);
+}
+
+void RenderMain::changeUnit(const QString& theme, const QString& unit)
+{
+ SpeciesTheme* s = 0;
+ const UnitProperties* prop = 0;
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ if (!s) {
+	kdError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ QValueList<unsigned long int> units = allUnits(s);
+ QValueList<unsigned long int>::Iterator i = units.begin();
+ for (; i != units.end() && !prop; ++i) {
+	const UnitProperties* p = s->unitProperties(*i);
+	// warning: this might cause trouble once we start translations! but we
+	// also have a way to use IDs directly so this is just a minor problem
+	if (p->name().lower() == unit.lower()) {
+		prop = p;
+	}
+ }
+ if (!prop) {
+	kdError() << "Could not find unit " << unit << endl;
+ }
+ changeUnit(s, prop);
+}
+
+void RenderMain::changeUnit(const QString& theme, unsigned long int type)
+{
+ SpeciesTheme* s = 0;
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current() && !s; ++it) {
+	if (it.current()->identifier().lower() == theme.lower()) {
+		s = it.current();
+	}
+ }
+ if (!s) {
+	kdError() << k_funcinfo << "Could not find theme " << theme << endl;
+	return;
+ }
+ const UnitProperties* prop = s->unitProperties(type);
+ if (!prop) {
+	kdError() << k_funcinfo << "Could not find unit " << type << endl;
+	return;
+ }
+ changeUnit(s, prop);
+}
+
+void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
+{
+ if (!s) {
+	kdError() << k_funcinfo << "NULL species" << endl;
+	return;
+ }
+ if (!prop) {
+	kdError() << k_funcinfo << "NULL UnitProperties" << endl;
+	return;
+ }
+ // TODO: check/uncheck the menu items!
 
  mPreview->load(s, prop);
 }
@@ -338,39 +419,35 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addStretch(1);
 
 
- QLabel* l = new QLabel(i18n("Rotation"), this);
  mRotateX = new KMyIntNumInput(this);
  mRotateY = new KMyIntNumInput(this);
  mRotateZ = new KMyIntNumInput(this);
- mRotateX->setLabel(i18n("X Rotation"));
- mRotateY->setLabel(i18n("Y Rotation"));
- mRotateZ->setLabel(i18n("Z Rotation"));
+ mRotateX->setLabel(i18n("Rotation around X-axis"));
+ mRotateY->setLabel(i18n("Rotation around Y-axis"));
+ mRotateZ->setLabel(i18n("Rotation around Z-axis"));
  mRotateX->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  mRotateY->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  mRotateZ->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
  connect(mRotateX, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateXChanged(float)));
  connect(mRotateY, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateYChanged(float)));
  connect(mRotateZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateZChanged(float)));
- topLayout->addWidget(l);
  topLayout->addWidget(mRotateX);
  topLayout->addWidget(mRotateY);
  topLayout->addWidget(mRotateZ);
  topLayout->addStretch(1);
 
- l = new QLabel(i18n("Camera Position"), this);
  mCameraX = new KMyFloatNumInput(this);
  mCameraY = new KMyFloatNumInput(this);
  mCameraZ = new KMyFloatNumInput(this);
- mCameraX->setLabel(i18n("X Position"));
- mCameraY->setLabel(i18n("Y Position"));
- mCameraZ->setLabel(i18n("Z Position"));
+ mCameraX->setLabel(i18n("Camera X Position"));
+ mCameraY->setLabel(i18n("Camera Y Position"));
+ mCameraZ->setLabel(i18n("Camera Z Position"));
  mCameraX->setRange(MIN_CAMERA_X, MAX_CAMERA_X, 0.2, slider);
  mCameraY->setRange(MIN_CAMERA_Y, MAX_CAMERA_Y, 0.2, slider);
  mCameraZ->setRange(MIN_CAMERA_Z, MAX_CAMERA_Z, 0.2, slider);
  connect(mCameraX, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraXChanged(float)));
  connect(mCameraY, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraYChanged(float)));
  connect(mCameraZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalCameraZChanged(float)));
- topLayout->addWidget(l);
  topLayout->addWidget(mCameraX);
  topLayout->addWidget(mCameraY);
  topLayout->addWidget(mCameraZ);
@@ -418,6 +495,125 @@ int main(int argc, char **argv)
  RenderMain* main = new RenderMain();
  kapp->setMainWidget(main);
  main->show();
+
+ QString theme;
+ unsigned long int typeId = 0;
+ QString unit;
+
+ if (args->isSet("maximized")) {
+	main->showMaximized();
+ }
+ if (args->isSet("species")) {
+	theme = args->getOption("species");
+ }
+ if (args->isSet("unit")) {
+	if (theme.isEmpty()) {
+		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		return 1;
+	}
+	unit = args->getOption("unit");
+ } else if (args->isSet("unit-id")) {
+	if (theme.isEmpty()) {
+		kdError() << k_funcinfo << "you have to specify both unit-id and species!" << endl;
+		return 1;
+	}
+	QString arg = args->getOption("unit-id");
+	bool ok = false;
+	typeId = arg.toULong(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "unit-id must be a number" << endl;
+		return 1;
+	}
+ }
+ if (!theme.isEmpty()) {
+	if (typeId == 0 && unit.isEmpty()) {
+		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		return 1;
+	} else if (typeId > 0) {
+		main->changeUnit(theme, typeId);
+	} else if (!unit.isEmpty()) {
+		main->changeUnit(theme, unit);
+	} else {
+		kdError() << k_funcinfo << "you have to specify both unit and species!" << endl;
+		return 1;
+	}
+ }
+
+ // AB: currently this makes sense when unit is specified on command line, as
+ // all view parameter are reset on unit loading
+ if (args->isSet("camera-x")) {
+	bool ok = false;
+	float c = args->getOption("camera-x").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "camera-x must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalCameraX(c);
+ }
+ if (args->isSet("camera-y")) {
+	bool ok = false;
+	float c = args->getOption("camera-y").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "camera-y must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalCameraY(c);
+ }
+ if (args->isSet("camera-z")) {
+	bool ok = false;
+	float c = args->getOption("camera-z").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "camera-z must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalCameraZ(c);
+ }
+ if (args->isSet("rotate-x")) {
+	bool ok = false;
+	float r = args->getOption("rotate-x").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "rotate-x must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalRotateX(r);
+ }
+ if (args->isSet("rotate-y")) {
+	bool ok = false;
+	float r = args->getOption("rotate-y").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "rotate-y must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalRotateY(r);
+ }
+ if (args->isSet("rotate-z")) {
+	bool ok = false;
+	float r = args->getOption("rotate-z").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "rotate-z must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalRotateZ(r);
+ }
+ if (args->isSet("fovy")) {
+	bool ok = false;
+	float f = args->getOption("fovy").toFloat(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "fovy must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalFovY(f);
+ }
+ if (args->isSet("frame")) {
+	bool ok = false;
+	int f = args->getOption("frame").toInt(&ok);
+	if (!ok) {
+		kdError() << k_funcinfo << "frame must be a number" << endl;
+		return 1;
+	}
+	main->emitSignalFrame(f);
+ }
+
 
  args->clear();
  return app.exec();

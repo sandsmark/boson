@@ -159,6 +159,7 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent*);
 
 private:
+	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
 	QTimer* mUpdateTimer;
 	BosonModel* mModel;
 	int mCurrentFrame;
@@ -220,13 +221,38 @@ public:
 	RenderMain();
 	~RenderMain();
 
+	void changeUnit(const QString& speciesIdentifier, const QString& unit);
+	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
+
+	void emitSignalFovY(float f) { emit mPreview->signalFovYChanged(f); }
+	void emitSignalRotateX(float r) { emit mPreview->signalRotateXChanged(r); }
+	void emitSignalRotateY(float r) { emit mPreview->signalRotateYChanged(r); }
+	void emitSignalRotateZ(float r) { emit mPreview->signalRotateZChanged(r); }
+	void emitSignalCameraX(float c) { emit mPreview->signalCameraXChanged(c); }
+	void emitSignalCameraY(float c) { emit mPreview->signalCameraYChanged(c); }
+	void emitSignalCameraZ(float c) { emit mPreview->signalCameraZChanged(c); }
+	void emitSignalFrame(int f) { emit mPreview->signalFrameChanged(f); }
+
 protected:
 	void initKAction();
 
+	/**
+	 * @return all units (mobile and fix) in this theme.
+	 **/
 	QValueList<unsigned long int> allUnits(SpeciesTheme*) const;
 
 protected:
+	/**
+	 * Connect both objects to the signal. Both objects need to provide the
+	 * signal and the slot (i.e. it must have the same name/params)
+	 **/
 	void connectBoth(QObject* o1, QObject* o2, const char* signal, const char* slot);
+
+	/**
+	 * Display another unit. This will load the unit from the @ref
+	 * ModelPreview. See @ref ModelPreview::load
+	 **/
+	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
 
 protected slots:
 	void slotUnitChanged(int);
