@@ -68,7 +68,8 @@ draw_bigbox_text("You can download the Boson-movies here.<br>
         but it's good for modem users and for previewing before downloading the
         high-quality version.</li>
     </ul>
-    All movies are encoded using <a href=\"http://www.xvid.org\">XViD codec</a>.
+    All movies are encoded using <a href=\"http://www.xvid.org\">XViD codec</a>.<br>
+    Unfortunately, the movies have no sound.
     <br><br>");
 draw_bigbox_subheader("Movie 1");
 draw_bigbox_text("This is the first movie<br>
