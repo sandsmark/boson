@@ -1494,6 +1494,27 @@ BosonItem* BosonCanvas::createItemFromXML(const QDomElement& item, Player* owner
 		u->speciesTheme()->loadNewUnit(u);
 	}
 
+
+	// AB: some units may depend on properties of other units - e.g. on
+	// whether a unit is constructed completely.
+	// we must make sure that these properties are already loaded, even if
+	// the unit that a unit depends on is loaded later.
+	// I hope loading the DataHandler in advance will solve this problem
+	// (it comes up for harvesters currently, as they require the
+	// refineries/mines to be completely constructed, as Unit::plugin()
+	// returns 0 otherwise)
+	BosonCustomPropertyXML propertyXML;
+	QDomElement handler = item.namedItem(QString::fromLatin1("DataHandler")).toElement();
+	if (handler.isNull()) {
+		boError() << k_funcinfo << "NULL DataHandler tag for item" << endl;
+		delete u;
+		return 0;
+	}
+	if (!propertyXML.loadFromXML(handler, u->dataHandler())) {
+		boError(260) << k_funcinfo << "unable to load item data handler" << endl;
+		return false;
+	}
+
 	return (BosonItem*)u;
  } else if (RTTI::isShot(rtti)) {
 	BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, ItemType(type, group, groupType), pos, id);
