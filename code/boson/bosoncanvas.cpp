@@ -1624,12 +1624,6 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 	return;
  }
 
-#warning PF_TNG: fixme!
- if (u->isFlying()) {
-	// No support for flying units yet
-	return;
- }
-
  if ((oldstatus != UnitBase::Standing) && (newstatus != UnitBase::Standing)) {
 	// Unit was moving and will continue to be moving. No need to do anything
 	return;
@@ -1647,7 +1641,11 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 			boError() << k_funcinfo << "NULL cell at " << i << endl;
 			continue;
 		}
-		c->recalculateLandOccupiedStatus();
+		if (u->isFlying()) {
+			c->recalculateAirOccupiedStatus();
+		} else {
+			c->recalculateLandOccupiedStatus();
+		}
 		x1 = QMIN(x1, c->x());
 		y1 = QMIN(y1, c->y());
 		x2 = QMAX(x2, c->x());
