@@ -1008,7 +1008,7 @@ public:
 			mAdditive->setChecked(m->additive);
 			mUseFalloff->setChecked(m->use_falloff);
 			mSelfIllum->setChecked(m->self_illum);
-			mShading->setText(QString::number(m->shading));
+			mShading->setText(QString::number(m->shading) + i18n(" (%1)").arg(shadingText(m->shading)));
 			mSoften->setChecked(m->soften);
 			mFaceMap->setChecked(m->face_map);
 			mTwoSided->setChecked(m->two_sided);
@@ -1041,6 +1041,24 @@ public:
 	}
 
 protected:
+	QString shadingText(int s) const
+	{
+		switch (s) {
+			case LIB3DS_WIRE_FRAME:
+				return QString("WIRE_FRAME");
+			case LIB3DS_FLAT:
+				return QString("FLAT");
+			case LIB3DS_GOURAUD:
+				return QString("GOURAUD");
+			case LIB3DS_PHONG:
+				return QString("PHONG");
+			case LIB3DS_METAL:
+				return QString("METAL");
+			default:
+				break;
+		}
+		return i18n("Unknown");
+	}
 
 private:
 	QLabel* mAmbient;
