@@ -42,282 +42,133 @@
 #include <qcheckbox.h>
 #include <qmap.h>
 #include <qtimer.h>
+#include <qlabel.h>
 
 #include "defines.h"
 
 #include "bosoncommandframe.moc"
 
-class OrderScrollView : public QScrollView
+class BoConstructionProgress : public QWidget
 {
-//	Q_OBJECT
 public:
-	OrderScrollView(QWidget* parent = 0)  : QScrollView(parent) 
+	BoConstructionProgress(QWidget* parent) : QWidget(parent)
 	{
-		setVScrollBarMode(QScrollView::AlwaysOn);
+		QHBoxLayout* layout = new QHBoxLayout(this);
+		QLabel* label = new QLabel(i18n("Construction Progress:"), this);
+		layout->addWidget(label);
+		mProgress = new KGameProgress(this);
+		layout->addWidget(mProgress);
 	}
 
-	~OrderScrollView() 
+	~BoConstructionProgress()
 	{
 	}
-	
-protected:
-
+	void setValue(int v)
+	{
+		mProgress->setValue(v);
+	}
+private:
+	KGameProgress* mProgress;
 };
 
-class BosonCommandFrame::BosonCommandFramePrivate
+
+class BoOrderWidget::BoOrderWidgetPrivate
 {
 public:
-	BosonCommandFramePrivate()
+	BoOrderWidgetPrivate()
 	{
-		mScrollView = 0;
-		mOrderWidget = 0;
 		mTopLayout = 0;
 		mOrderLayout = 0;
 
-		mUnitView = 0;
-
-		mTiles = 0;
-
 		mTransRef = 0;
 		mInverted = 0;
+		mTiles = 0;
 
-		mOwner = 0;
-		mFactory = 0;
-		mFacility = 0; // TODO: merge with mFactory
-
-		mConstructionProgress = 0;
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
-	QWidget* mOrderWidget;
 	QVBoxLayout* mTopLayout;
 	QGridLayout* mOrderLayout; 
-	OrderScrollView* mScrollView;
-
-
-	BosonUnitView* mUnitView;
-
-	BosonTiles* mTiles;
-
+	
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
+	BosonTiles* mTiles;
 
 	OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
-	Player* mOwner;
-	Unit* mFactory; // the unit that is producing
-	Facility* mFacility;
-
-	QMap<int, int> mOrder2Type; // map order button -> unitType
-
-	KGameProgress* mConstructionProgress;
-
-	QTimer mUpdateTimer;
 };
 
-BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent, "cmd frame")
+BoOrderWidget::BoOrderWidget(bool editor, QWidget* parent) : QWidget(parent)
 {
- init();
+ d = new BoOrderWidgetPrivate;
+
  if (editor) {
 	initEditor();
  }
+}
 
- d->mTopLayout = new QVBoxLayout(this, 5, 5); // FIXME: hardcoded - maybe use KDialog::marginHint(), KDialog::spacingHint()  -> but might be a problem cause we use setLineWidth(5)
+BoOrderWidget::~BoOrderWidget()
+{
+ delete d->mTiles;
+ delete d;
+}
 
- d->mUnitView = new BosonUnitView(this);
- d->mTopLayout->addWidget(d->mUnitView, 0, AlignHCenter);
+void BoOrderWidget::ensureButtons(unsigned int number)
+{
+ if (d->mOrderButton.count() >= number) {
+	return;
+ }
+ for (unsigned int i = 0; i < number; i++) {
+	if (!d->mOrderButton[i]) {
+		BosonCommandWidget* b = new BosonCommandWidget(this);
+		b->hide();
+		b->setBackgroundOrigin(WindowOrigin);
+		d->mOrderButton.insert(i, b);
+		connect(b, SIGNAL(signalPlaceCell(int)), 
+				this, SIGNAL(signalPlaceCell(int)));
+		connect(b, SIGNAL(signalProduceUnit(int)),
+				this, SIGNAL(signalProduceUnit(int)));
+		connect(b, SIGNAL(signalStopProduction(int)),
+				this, SIGNAL(signalStopProduction(int)));
+	}
+ }
+ resetLayout();
+}
 
+void BoOrderWidget::resetLayout()
+{
+ delete d->mOrderLayout;
+ delete d->mTopLayout;
+ d->mTopLayout = new QVBoxLayout(this);
  if (d->mTransRef) {
 	d->mTopLayout->addWidget(d->mTransRef);
  }
  if (d->mInverted) {
 	d->mTopLayout->addWidget(d->mInverted);
  }
-
-
-// the order buttons
- d->mScrollView = new OrderScrollView(this);
- d->mScrollView->setResizePolicy(QScrollView::AutoOneFit);
- d->mTopLayout->addWidget(d->mScrollView, 1);
- d->mOrderWidget = new QWidget(d->mScrollView->viewport());
- d->mScrollView->addChild(d->mOrderWidget);
- d->mScrollView->viewport()->setBackgroundMode(backgroundMode());
- d->mConstructionProgress = new KGameProgress(d->mOrderWidget);
- d->mConstructionProgress->hide();
- 
- setBackgroundOrigin(WindowOrigin);
- d->mScrollView->setBackgroundOrigin(WindowOrigin);
- d->mScrollView->viewport()->setBackgroundOrigin(WindowOrigin);
- d->mOrderWidget->setBackgroundOrigin(WindowOrigin);
- d->mUnitView->setBackgroundOrigin(WindowOrigin);
- d->mConstructionProgress->setBackgroundOrigin(WindowOrigin);
- show();
-}
-
-void BosonCommandFrame::init()
-{
- d = new BosonCommandFramePrivate;
-
- setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
- setMinimumSize(230, 200); // FIXME hardcoded value
-
- connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
-}
-
-void BosonCommandFrame::initEditor()
-{
- d->mTransRef = new QComboBox(this);
- connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
- d->mTransRef->insertItem(i18n("Grass/Water"), (int)Cell::TransGrassWater);
- d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Cell::TransGrassDesert);
- d->mTransRef->insertItem(i18n("Desert/Water"), (int)Cell::TransDesertWater);
- d->mTransRef->insertItem(i18n("Deep Water"), (int)Cell::TransDeepWater);
-
- d->mInverted = new QCheckBox(this);
- d->mInverted->setText(i18n("Invert"));
- connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
-}
-
-BosonCommandFrame::~BosonCommandFrame()
-{
- delete d->mTiles;
- delete d;
-}
-
-void BosonCommandFrame::initOrderButtons(unsigned int no)
-{
- if (d->mOrderButton.count() >= no) {
-	return;
- }
- for (unsigned int i = 0; i < no; i++) {
-	if (!d->mOrderButton[i]) {
-		BosonCommandWidget* b = new BosonCommandWidget(d->mOrderWidget);
-		b->hide();
-		b->setBackgroundOrigin(WindowOrigin);
-		d->mOrderButton.insert(i, b);
-		connect(b, SIGNAL(signalPlaceCell(int)), 
-				this, SIGNAL(signalCellSelected(int)));
-		connect(b, SIGNAL(signalProduceUnit(int)),
-				this, SLOT(slotProduceUnit(int)));
-		connect(b, SIGNAL(signalStopProduction(int)),
-				this, SLOT(slotStopProduction(int)));
-	}
- }
- resetLayout();
-}
-
-void BosonCommandFrame::resetLayout()
-{
- delete d->mOrderLayout;
  int buttons = boConfig->commandButtonsPerRow();
- d->mOrderLayout = new QGridLayout(d->mOrderWidget, -1, -1);
+ d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
+ d->mTopLayout->addStretch(1);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonCommandWidget* b = d->mOrderButton[i];
 	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
  }
  int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
- d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, row, row, 0, buttons - 1);
- d->mOrderLayout->setRowStretch(row + 1, 1);
+// d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, row, row, 0, buttons - 1);
+ d->mOrderLayout->setRowStretch(row, 1);
  d->mOrderLayout->activate();
 }
 
-void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
+void BoOrderWidget::setButtonsPerRow(int b)
 {
- if (!unit) {
-	// display nothing
-	d->mUnitView->setUnit(0);
-	hideOrderButtons();
-	return;
- }
- if (unit->isDestroyed()) {
-	kdWarning() << k_funcinfo << "unit is destroyed" << endl;
-	return;
- }
- if (!unit->owner()) {
-	kdError() << k_funcinfo << "unit has no owner" << endl;
-	return;
- }
- SpeciesTheme* theme = unit->owner()->speciesTheme();
- if (!theme) {
-	kdError() << k_funcinfo << "owner has no species theme" << endl;
-	return;
- }
- QPixmap* p = theme->bigOverview(unit->type());
- if (!p) {
-	kdError() << k_funcinfo << "unit has no big overview in this theme" 
-			<< endl;
-	return;
- }
-
- d->mUnitView->setUnit(unit);
+ boConfig->setCommandButtonsPerRow(b);
+ resetLayout();
 }
 
-void BosonCommandFrame::slotSetProduction(Unit* unit)
+void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
 {
- hideOrderButtons(); // this makes sure that they are even hidden if the unit 
-                     // cannot produce
- if (!unit) {
-	// display nothing
-	return;
- }
- Player* owner = unit->owner();
- if (!owner) {
-	kdError() << k_funcinfo << "no owner" << endl;
-	return;
- }
- if (!unit->speciesTheme()) {
-	kdError() << k_funcinfo << "NULL speciestheme" << endl;
-	return;
- }
-
- // don't display production items of units of other players. 
- if (owner != d->mOwner) {
-	return;
- }
-
- if (!unit->isFacility()) {
-	return;
- }
- if (!((Facility*)unit)->isConstructionComplete()) {
-	slotShowConstructionProgress((Facility*)unit);
-	return;
- }
- const UnitProperties* prop = unit->unitProperties();
- if (!prop->canProduce()) {
-	return;
- }
- QValueList<int> produceList = unit->speciesTheme()->productions(prop->producerList());
- 
- setOrderButtons(produceList, owner, (Facility*)unit);
- d->mFactory = unit;
- 
- d->mOrderType = OrderMobiles; // kind of FIXME: it doesn't matter whether this
-                          // is OrderMobiles or OrderFacilities. The difference
-			  // is only in editor.cpp for the KActions.
- if (((Facility*)unit)->hasProduction()) {
-	d->mUpdateTimer.start(500);
- }
-}
-
-void BosonCommandFrame::hideOrderButtons()
-{
- d->mUpdateTimer.stop();
- d->mConstructionProgress->hide();
- if (d->mFactory) {
-	disconnect(d->mFactory->owner(), 0, this, 0);
- }
- d->mFactory = 0;
- d->mFacility = 0;
- QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
- while (it.current()) {
-	it.current()->setUnit(0);
-	++it;
- }
-}
-
-void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
-{
- initOrderButtons(produceList.count());
+ ensureButtons(produceList.count());
+ hideOrderButtons();
  int unitType = -1;
  if (factory) {
 	if (factory->hasProduction()) {
@@ -344,55 +195,21 @@ void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* own
 		d->mOrderButton[i]->setProductionCount(0);
 		d->mOrderButton[i]->setGrayOut(false);
 	}
+//	d->mOrderButton[i]->show();
  }
+// show();
 }
 
-void BosonCommandFrame::slotEditorProduction(int index, Player* owner)
+void BoOrderWidget::hideOrderButtons()
 {
- hideOrderButtons();
- if (index == -1) {
-	return;
- }
- if (!owner) {
-	kdError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- SpeciesTheme* theme = owner->speciesTheme();
- if (!theme) {
-	kdError() << k_funcinfo << "NULL theme" << endl;
-	return;
- }
- d->mOrderType = (OrderType)index;
- switch (d->mOrderType) {
-	case OrderPlainTiles:
-	case OrderSmall:
-	case OrderBig1:
-	case OrderBig2:
-		slotRedrawTiles(); // rename: redrawtiles
-		break;
-	case OrderMobiles:
-		setOrderButtons(theme->allMobiles(), owner);
-		break;
-	case OrderFacilities:
-		setOrderButtons(theme->allFacilities(), owner);
-		break;
-	default:
-		kdError() << k_funcinfo << "Invalid index " << index << endl;
-		return;
+ QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
+ while (it.current()) {
+	it.current()->setUnit(0);
+	++it;
  }
 }
 
-void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
-{
- QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(fileName));
- d->mTiles = new BosonTiles(themePath);
- if (d->mTiles->isNull()) {
-	kdError() << k_funcinfo << "Could not load " << fileName << endl;
-	return;
- }
-}
-
-void BosonCommandFrame::slotRedrawTiles()
+void BoOrderWidget::slotRedrawTiles()
 {
  bool inverted = d->mInverted->isChecked();
  Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
@@ -401,7 +218,7 @@ void BosonCommandFrame::slotRedrawTiles()
  switch (d->mOrderType) {
 	case OrderPlainTiles:
 		hideOrderButtons();
-		initOrderButtons(Cell::GroundLast - 1);
+		ensureButtons(Cell::GroundLast - 1);
 		for (int i = 0; i < 5; i++) {
 			int groundType = i + 1;
 			d->mOrderButton[i]->setCell(groundType, d->mTiles);
@@ -409,7 +226,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		break;
 	case OrderSmall:
 		hideOrderButtons();
-		initOrderButtons(9);
+		ensureButtons(9);
 		for (int i = 0; i < 9; i++) {
 			int tile = Cell::smallTileNumber(i, trans, inverted);
 			d->mOrderButton[i]->setCell(tile, d->mTiles);
@@ -417,7 +234,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		break;
 	case OrderBig1:
 		hideOrderButtons();
-		initOrderButtons(4);
+		ensureButtons(4);
 		for (int i = 0; i < 4; i++) {
 			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
 					trans, (inverted ? 4 : 0) + i), 
@@ -426,7 +243,7 @@ void BosonCommandFrame::slotRedrawTiles()
 		break;
 	case OrderBig2:
 		hideOrderButtons();
-		initOrderButtons(4);
+		ensureButtons(4);
 		for (int i = 0; i < 4; i++) {
 			d->mOrderButton[i]->setCell(Cell::getBigTransNumber(
 					trans, (inverted ? 12 : 8) + i), 
@@ -434,7 +251,6 @@ void BosonCommandFrame::slotRedrawTiles()
 		}
 		break;
 	case OrderFacilities:
-		break;
 	case OrderMobiles:
 		break;
 	default:
@@ -443,23 +259,27 @@ void BosonCommandFrame::slotRedrawTiles()
  }
 }
 
-void BosonCommandFrame::setLocalPlayer(Player* p)
+void BoOrderWidget::setOrderType(int index)
 {
- d->mOwner = p;
+ d->mOrderType = (OrderType)index;
 }
 
-void BosonCommandFrame::slotProduceUnit(int unitType)
+void BoOrderWidget::initEditor()
 {
- emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
-}
-void BosonCommandFrame::slotStopProduction(int unitType)
-{
- emit signalStopProduction(unitType, d->mFactory, d->mOwner);
+ d->mTransRef = new QComboBox(this);
+ connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
+ d->mTransRef->insertItem(i18n("Grass/Water"), (int)Cell::TransGrassWater);
+ d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Cell::TransGrassDesert);
+ d->mTransRef->insertItem(i18n("Desert/Water"), (int)Cell::TransDesertWater);
+ d->mTransRef->insertItem(i18n("Deep Water"), (int)Cell::TransDeepWater);
+
+ d->mInverted = new QCheckBox(this);
+ d->mInverted->setText(i18n("Invert"));
+ connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
 }
 
-void BosonCommandFrame::slotShowUnit(Unit* unit)
+void BoOrderWidget::showUnit(Unit* unit)
 {
- kdDebug() << k_funcinfo << endl;
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandUnitSelected) {
 		if (d->mOrderButton[i]->unit() == unit) {
@@ -468,21 +288,18 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
 			return;
 		}
 	} else if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandNothing) {
-		kdDebug() << "show unit at " << i << endl;
+//		kdDebug() << "show unit at " << i << endl;
 		d->mOrderButton[i]->setUnit(unit);
 		return;
 	}
  }
- initOrderButtons(d->mOrderButton.count() + 1);
- kdDebug() << "display unit" << endl;
+ ensureButtons(d->mOrderButton.count() + 1);
+// kdDebug() << "display unit" << endl;
  d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
 }
 
-void BosonCommandFrame::productionAdvanced(Unit* factory, double percentage)
+void BoOrderWidget::productionAdvanced(Unit* factory, double percentage)
 {
- if (d->mFactory != factory) {
-	return;
- }
  if (!factory->isFacility()) {
 	kdError() << k_lineinfo << "NOT factory" << endl;
 	return;
@@ -501,6 +318,256 @@ void BosonCommandFrame::productionAdvanced(Unit* factory, double percentage)
  }
 }
 
+void BoOrderWidget::editorLoadTiles(const QString& fileName)
+{
+ QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(fileName));
+ d->mTiles = new BosonTiles(themePath);
+ if (d->mTiles->isNull()) {
+	kdError() << k_funcinfo << "Could not load " << fileName << endl;
+	return;
+ }
+}
+
+
+
+class BosonCommandFrame::BosonCommandFramePrivate
+{
+public:
+	BosonCommandFramePrivate()
+	{
+		mOrderWidget = 0;
+		mTopLayout = 0;
+
+		mUnitView = 0;
+
+		mOwner = 0;
+		mFactory = 0;
+		mFacility = 0; // TODO: merge with mFactory
+
+		mConstructionProgress = 0;
+	}
+
+	QVBoxLayout* mTopLayout;
+
+
+	BosonUnitView* mUnitView;
+
+	QPtrList<QWidget> mActionWidgets;
+	BoOrderWidget* mOrderWidget;
+	BoConstructionProgress* mConstructionProgress;
+
+	Player* mOwner;
+	Unit* mFactory; // the unit that is producing
+	Facility* mFacility;
+
+
+	QTimer mUpdateTimer;
+};
+
+BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent, "cmd frame")
+{
+ init();
+
+ d->mTopLayout = new QVBoxLayout(this, 5, 5); // FIXME: hardcoded - maybe use KDialog::marginHint(), KDialog::spacingHint()  -> but might be a problem cause we use setLineWidth(5)
+
+ d->mUnitView = new BosonUnitView(this);
+ d->mTopLayout->addWidget(d->mUnitView, 0, AlignHCenter);
+ d->mUnitView->setBackgroundOrigin(WindowOrigin);
+
+// we can have several "action" widgets in the frame. some of them just display
+// a status (e.g. the construction progress), some of them actually provide
+// actions (e.g. order buttons)
+ QScrollView* scrollView = new QScrollView(this);
+ scrollView->setResizePolicy(QScrollView::AutoOneFit);
+ d->mTopLayout->addWidget(scrollView, 1);
+ scrollView->setBackgroundOrigin(WindowOrigin);
+ scrollView->viewport()->setBackgroundOrigin(WindowOrigin);
+ scrollView->viewport()->setBackgroundMode(backgroundMode());
+
+ QWidget* actionWidget = new QWidget(scrollView->viewport());
+ scrollView->addChild(actionWidget);
+ QVBoxLayout* actionLayout = new QVBoxLayout(actionWidget);
+
+// the order buttons
+ d->mOrderWidget = new BoOrderWidget(editor, actionWidget);
+ connect(d->mOrderWidget, SIGNAL(signalProduceUnit(int)),
+		this, SLOT(slotProduceUnit(int)));
+ connect(d->mOrderWidget, SIGNAL(signalStopProduction(int)),
+		this, SLOT(slotStopProduction(int)));
+ connect(d->mOrderWidget, SIGNAL(signalPlaceCell(int)),
+		this, SIGNAL(signalCellSelected(int)));
+ actionLayout->addWidget(d->mOrderWidget);
+ d->mOrderWidget->setBackgroundOrigin(WindowOrigin);
+ d->mActionWidgets.append(d->mOrderWidget);
+
+// the construction progress
+ d->mConstructionProgress = new BoConstructionProgress(actionWidget);
+ d->mConstructionProgress->setBackgroundOrigin(WindowOrigin);
+ actionLayout->addWidget(d->mConstructionProgress);
+ d->mConstructionProgress->hide();
+ d->mActionWidgets.append(d->mConstructionProgress);
+
+ actionLayout->addStretch(1);
+ setBackgroundOrigin(WindowOrigin);
+ show();
+}
+
+void BosonCommandFrame::init()
+{
+ d = new BosonCommandFramePrivate;
+
+ setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
+ setMinimumSize(230, 200); // FIXME hardcoded value
+
+ connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
+}
+
+BosonCommandFrame::~BosonCommandFrame()
+{
+ delete d;
+}
+
+void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
+{
+ if (!unit) {
+	// display nothing
+	d->mUnitView->setUnit(0);
+	return;
+ }
+ if (unit->isDestroyed() || !unit->owner()) {
+	d->mUnitView->setUnit(0);
+	return;
+ }
+ d->mUnitView->setUnit(unit);
+}
+
+void BosonCommandFrame::slotSetAction(Unit* unit)
+{
+ // this makes sure that they are even hidden if the unit cannot produce or
+ // something:
+ hideActions();
+ 
+ if (!unit) {
+	// display nothing
+	return;
+ }
+ Player* owner = unit->owner();
+ if (!owner) {
+	kdError() << k_funcinfo << "no owner" << endl;
+	return;
+ }
+ if (!unit->speciesTheme()) {
+	kdError() << k_funcinfo << "NULL speciestheme" << endl;
+	return;
+ }
+
+ // don't display production items of units of other players. 
+ if (owner != d->mOwner) {
+	return;
+ }
+
+ if (unit->isFacility()) {
+	Facility* fac = (Facility*)unit;
+	if (!fac->isConstructionComplete()) {
+		slotShowConstructionProgress(fac);
+		return;
+	}
+	const UnitProperties* prop = unit->unitProperties();
+	if (prop->canProduce()) {
+		QValueList<int> produceList = fac->speciesTheme()->productions(prop->producerList());
+		d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
+		d->mFactory = unit;
+		if (fac->hasProduction()) {
+			d->mUpdateTimer.start(500);
+		}
+		d->mOrderWidget->show();
+		return;
+	}
+ } else {
+//	d->mOrderWidget->show();
+	return;
+ }
+}
+
+void BosonCommandFrame::hideActions()
+{
+ d->mUpdateTimer.stop();
+ if (d->mFactory) {
+	disconnect(d->mFactory->owner(), 0, this, 0);
+ }
+ d->mFactory = 0;
+ d->mFacility = 0;
+ d->mOrderWidget->hideOrderButtons();
+ QPtrListIterator<QWidget> it(d->mActionWidgets);
+ while (it.current()) {
+	it.current()->hide();
+	++it;
+ }
+}
+
+void BosonCommandFrame::slotEditorProduction(int index, Player* owner)
+{
+ d->mOrderWidget->hideOrderButtons();
+ if (index == -1) {
+	return;
+ }
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ SpeciesTheme* theme = owner->speciesTheme();
+ if (!theme) {
+	kdError() << k_funcinfo << "NULL theme" << endl;
+	return;
+ }
+ d->mOrderWidget->setOrderType(index);
+ switch (index) {
+	case OrderPlainTiles:
+	case OrderSmall:
+	case OrderBig1:
+	case OrderBig2:
+		d->mOrderWidget->slotRedrawTiles();
+		d->mOrderWidget->show();
+		break;
+	case OrderMobiles:
+		d->mOrderWidget->setOrderButtons(theme->allMobiles(), owner);
+		d->mOrderWidget->show();
+		break;
+	case OrderFacilities:
+		d->mOrderWidget->setOrderButtons(theme->allFacilities(), owner);
+		d->mOrderWidget->show();
+		break;
+	default:
+		kdError() << k_funcinfo << "Invalid index " << index << endl;
+		return;
+ }
+}
+
+void BosonCommandFrame::slotEditorLoadTiles(const QString& fileName)
+{
+ d->mOrderWidget->editorLoadTiles(fileName);
+}
+
+void BosonCommandFrame::setLocalPlayer(Player* p)
+{
+ d->mOwner = p;
+}
+
+void BosonCommandFrame::slotProduceUnit(int unitType)
+{
+ emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
+}
+void BosonCommandFrame::slotStopProduction(int unitType)
+{
+ emit signalStopProduction(unitType, d->mFactory, d->mOwner);
+}
+
+void BosonCommandFrame::slotShowUnit(Unit* unit)
+{
+ d->mOrderWidget->showUnit(unit);
+ d->mOrderWidget->show();
+}
+
 void BosonCommandFrame::slotFacilityProduces(Facility* f)
 {
  if (!f) {
@@ -508,7 +575,7 @@ void BosonCommandFrame::slotFacilityProduces(Facility* f)
 	return;
  }
  if (d->mFactory == f) {
-	slotSetProduction(f);
+	slotSetAction(f);
  }
 }
 
@@ -519,14 +586,8 @@ void BosonCommandFrame::slotProductionCompleted(Facility* f)
 	return;
  }
  if (d->mFactory == f) {
-	slotSetProduction(f);
+	slotSetAction(f);
  }
-}
-
-void BosonCommandFrame::slotSetButtonsPerRow(int b)
-{
- boConfig->setCommandButtonsPerRow(b);
- resetLayout();
 }
 
 void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
@@ -541,18 +602,24 @@ void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
  d->mUpdateTimer.start(1000);
 }
 
+void BosonCommandFrame::slotSetButtonsPerRow(int b)
+{
+ d->mOrderWidget->setButtonsPerRow(b);
+}
+
 void BosonCommandFrame::slotUpdate()
 {
  if (d->mFacility) {
 	slotShowConstructionProgress(d->mFacility);
 	if (d->mFacility->isConstructionComplete()) {
-		slotSetProduction(d->mFacility);
+		slotSetAction(d->mFacility);
 	}
  } else if (d->mFactory) {
 	if (!((Facility*)d->mFactory)->hasProduction()) {
 		slotProductionCompleted((Facility*)d->mFactory);
 	} else {
-		productionAdvanced(d->mFactory, ((Facility*)d->mFactory)->productionProgress());
+		d->mOrderWidget->productionAdvanced(d->mFactory, 
+				((Facility*)d->mFactory)->productionProgress());
 	}
  } else {
 	d->mUpdateTimer.stop();
