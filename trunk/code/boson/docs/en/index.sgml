@@ -147,7 +147,7 @@ to performs all of those steps.
 
 <sect>Questions and Answers<p>
 
-<sect2>Nothing happens when I click on the K-menu/Games/boson item.
+<sect1>Nothing happens when I click on the K-menu/Games/boson item.
 <p>
 	If you haven't installed the boson-pics-0.1 package, boson will die as soon as launched.
 Install the package. If it's still won't be launched, do it in a terminal emulator (kvt, konsole, xterm)
