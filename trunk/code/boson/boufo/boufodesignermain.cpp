@@ -795,6 +795,72 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
  if (e.isNull()) {
 	return;
  }
+ createProperties(e);
+
+ QString className = e.attribute("ClassName");
+ QMetaObject* metaObject = 0;
+
+ // WARNING: trolltech marks this as internal!
+ // but it is sooo useful
+ metaObject = QMetaObject::metaObject(className);
+
+ if (!metaObject) {
+	boError() << k_funcinfo << "cannot find class " << className << endl;
+	return;
+ }
+
+ QListViewItem* child = mListView->firstChild();
+ for (; child; child = child->nextSibling()) {
+	QString name = child->text(0);
+	int index = metaObject->findProperty(name, true);
+	if (index < 0) {
+		boWarning() << k_funcinfo << "don't know property " << name << " in class " << className << endl;
+		continue;
+	}
+	const QMetaProperty* prop = metaObject->property(index, true);
+	QString value = e.attribute(name);
+	if (prop->isSetType()) {
+		boWarning() << k_funcinfo << "property is a set - this is not supported yet" << endl;
+		// it'll be displayed as normal text.
+
+		// a set can be implemented just like a normal enum, but instead
+		// of radio buttons we use checkboxes (values can be ORed
+		// together).
+		// but we probably don't need that anyway
+	}
+	if (prop->isEnumType() && !prop->isSetType()) {
+		QEnumContainerListItem* item = dynamic_cast<QEnumContainerListItem*>(child);
+		if (!item) {
+			boError() << k_funcinfo << "child is not QEnumContainerListItem, but should be!" << endl;
+			continue;
+		}
+		item->setText(1, value);
+
+		QListViewItem* c = item->firstChild();
+		for (; c; c = c->nextSibling()) {
+			QEnumCheckListItem* check = dynamic_cast<QEnumCheckListItem*>(c);
+			if (!check) {
+				boError() << k_funcinfo << "not a QEnumCheckListItem" << endl;
+				continue;
+			}
+			if (check->text(0) == value) {
+				check->setManualOn(true);
+			}
+		}
+	} else {
+		child->setText(1, value);
+	}
+ }
+ if (className.isEmpty() && e.tagName() == "Widgets") {
+	className = tr("BoUfoWidget (root widget)");
+ }
+ setClassLabel(className);
+}
+
+// this method creates the QListViewItem objects, but does not assign any
+// content to them
+void BoPropertiesWidget::createProperties(const QDomElement& e)
+{
  QString className;
  QMetaObject* metaObject = 0;
  QDomNamedNodeMap attributes = e.attributes();
@@ -810,7 +876,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 	}
  }
  if (!metaObject) {
-	boError() << k_funcinfo << "cannot find clas " << className << endl;
+	boError() << k_funcinfo << "cannot find class " << className << endl;
 	return;
  }
  for (unsigned int i = 0; i < attributes.count(); i++) {
@@ -824,10 +890,6 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 		continue;
 	}
 	const QMetaProperty* prop = metaObject->property(index, true);
-	if (!prop->writable()) {
-		(void)new QListViewItem(mListView, a.name(), a.value());
-		continue;
-	}
 	if (prop->isSetType()) {
 		boWarning() << k_funcinfo << "property is a set - this is not supported yet" << endl;
 		// it'll be displayed as normal text.
@@ -839,15 +901,11 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 	}
 	if (prop->isEnumType() && !prop->isSetType()) {
 		QEnumContainerListItem* item = new QEnumContainerListItem(mListView, a.name());
-		item->setText(1, a.value());
 		item->setOpen(true);
 		QStrList enums = prop->enumKeys();
 		QStrListIterator it(enums);
 		while (it.current()) {
-			QEnumCheckListItem* c = new QEnumCheckListItem(item, QString::fromLatin1(it.current()));
-			if (a.value() == it.current()) {
-				c->setManualOn(true);
-			}
+			(void)new QEnumCheckListItem(item, QString::fromLatin1(it.current()));
 			++it;
 		}
 	} else {
@@ -855,10 +913,7 @@ void BoPropertiesWidget::displayProperties(const QDomElement& e)
 		item->setRenameEnabled(1, true);
 	}
  }
- if (className.isEmpty() && e.tagName() == "Widgets") {
-	className = tr("BoUfoWidget (root widget)");
- }
- setClassLabel(className);
+
 }
 
 void BoPropertiesWidget::slotItemRenamed(QListViewItem* item, int col)
@@ -1137,9 +1192,6 @@ void BoUfoDesignerMain::slotSelectWidget(const QDomElement& widget)
 
 void BoUfoDesignerMain::slotPropertiesChanged(const QDomElement& widget)
 {
- // don't do this in the slot - it deletes items which isn't allowed here.
- // so we use a timer.
-
  QString name = widget.attribute("name");
  QDomNodeList list = mDocument.documentElement().elementsByTagName("Widget");
  for (unsigned int i = 0; i < list.count(); i++) {
@@ -1154,7 +1206,16 @@ void BoUfoDesignerMain::slotPropertiesChanged(const QDomElement& widget)
 	}
  }
 
- QTimer::singleShot(0, this, SLOT(slotUpdateGUI()));
+ // WARNING: we are in a slot here and MUST NOT delete items from mProperties !!
+
+ // here we need to update the preview only, as only a property has changed.
+ // neither the widget hierarchy, nor the available properties have changed.
+ QDomElement root = mDocument.documentElement();
+ QDomElement widgetsRoot;
+ if (!root.isNull()) {
+	widgetsRoot = root.namedItem("Widgets").toElement();
+ }
+ mPreview->updateGUI(widgetsRoot);
 }
 
 void BoUfoDesignerMain::slotTreeHierarchyChanged()
