@@ -43,7 +43,7 @@ BoDefaultGroundRenderer::~BoDefaultGroundRenderer()
 {
 }
 
-void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int cellsCount, const BosonMap* map)
+void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
 {
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);
@@ -95,7 +95,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  glColor4ub(255, 255, 255, 255);
 }
 
-unsigned int BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
+unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
 {
  // Texture offsets
  const int offsetCount = 5;
@@ -106,9 +106,9 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, in
  glBegin(GL_QUADS);
 
  for (int i = 0; i < count; i++) {
-	Cell* c = cells[i];
-	int x = c->x();
-	int y = c->y();
+	int x;
+	int y;
+	BoGroundRenderer::getCell(cells, i, &x, &y);
 
 	int celloffset = y * cornersWidth + x;
 	const unsigned char* texMapUpperLeft = texMapStart + celloffset;
@@ -169,7 +169,7 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, in
  return renderedQuads;
 }
 
-void BoDefaultGroundRenderer::renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap)
+void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width, const unsigned char* colorMap, const float* heightMap)
 {
  const unsigned char alpha = 128;
  int cornersWidth = width + 1;
@@ -177,9 +177,9 @@ void BoDefaultGroundRenderer::renderCellColors(Cell** cells, int count, int widt
  glBegin(GL_QUADS);
 
  for (int i = 0; i < count; i++) {
-	Cell* c = cells[i];
-	int x = c->x();
-	int y = c->y();
+	int x;
+	int y;
+	BoGroundRenderer::getCell(cells, i, &x, &y);
 
 	int coloroffset = y * width + x;
 	int heightoffset = y * cornersWidth + x;

@@ -38,6 +38,7 @@
 #include <GL/gl.h>
 #include <math.h>
 
+
 BoGroundRenderer::BoGroundRenderer()
 {
  mModelviewMatrix = 0;
@@ -59,7 +60,7 @@ BoGroundRenderer::~BoGroundRenderer()
  delete mStatistics;
 }
 
-void BoGroundRenderer::setRenderCells(Cell** renderCells, int renderCellsSize)
+void BoGroundRenderer::setRenderCells(int* renderCells, int renderCellsSize)
 {
  delete[] mRenderCells;
  mRenderCells = renderCells;
@@ -127,7 +128,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  int heightMapWidth = map->width() + 1;
 
  int cellsCount = 0;
- Cell** renderCells = createVisibleCellList(&cellsCount, localPlayerIO());
+ int* renderCells = createVisibleCellList(&cellsCount, localPlayerIO());
  BO_CHECK_NULL_RET0(renderCells);
 
  renderVisibleCells(renderCells, cellsCount, map);
@@ -146,7 +147,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  return cellsCount;
 }
 
-void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, const float* heightMap, int heightMapWidth)
+void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* heightMap, int heightMapWidth)
 {
  BO_CHECK_NULL_RET(cells);
  BO_CHECK_NULL_RET(heightMap);
@@ -166,9 +167,9 @@ void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, const float*
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
 	for (int i = 0; i < cellsCount; i++) {
-		Cell* c = cells[i];
-		int x = c->x();
-		int y = c->y();
+		int x;
+		int y;
+		BoGroundRenderer::getCell(cells, i, &x, &y);
 		const float dist = 0.0f;
 		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
@@ -188,37 +189,43 @@ void BoGroundRenderer::renderCellGrid(Cell** cells, int cellsCount, const float*
 }
 
 
-Cell** BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
+int* BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 {
  BO_CHECK_NULL_RET0(playerIO);
  BO_CHECK_NULL_RET0(cells);
- Cell** renderCells = 0; // FIXME: store two arrays. one with x, one with y coordinate (or both in one array). don't store pointers to Cell
+ int* renderCells = 0;
  if (renderCellsCount() > 0) {
-	renderCells = new Cell*[renderCellsCount()];
+	renderCells = new int[renderCellsCount() * 2];
  } else {
 	// an array of size 0 isn't good.
-	renderCells = new Cell*[1];
-	renderCells[0] = 0;
+	renderCells = new int [2];
+	setCell(renderCells, 0, 0, 0);
  }
  int cellsCount = 0;
  for (unsigned int i = 0; i < renderCellsCount(); i++) {
-	Cell* c = this->renderCells()[i];
-	if (!c) {
+	int x;
+	int y;
+	getCell(this->renderCells(), i, &x, &y);
+	if (x < 0 || y < 0) {
 		continue;
 	}
 
-	if (!boWaterManager->cellVisible(c->x(), c->y())) {
+	if (!boWaterManager->cellVisible(x, y)) {
 		// don't draw anything at all. the cell won't be visible
+
+		// AB: I think this mean there is water rendered at this cell,
+		// so we dont need to render the cell anymore.
 		continue;
 	}
+
 	// AB: better solution: check *before* the cells get assigned to this
 	// class. localPlayerIO() is *very* ugly in this class
-	if (playerIO->isFogged(c->x(), c->y())) {
+	if (playerIO->isFogged(x, y)) {
 		// don't draw anything at all. the cell will just be black,
 		// because of the glClear() call.
 		continue;
 	}
-	renderCells[cellsCount] = c;
+	setCell(renderCells, cellsCount, x, y);
 	cellsCount++;
  }
  *cells = cellsCount;
@@ -231,6 +238,23 @@ QString BoGroundRenderer::statisticsData() const
 	return i18n("No statistics available");
  }
  return mStatistics->statisticsData();
+}
+
+void BoGroundRenderer::setCell(int* renderCells, unsigned int cellCount, int x, int y)
+{
+ renderCells[cellCount * 2 + 0] = x;
+ renderCells[cellCount * 2 + 1] = y;
+}
+
+void BoGroundRenderer::getCell(int* renderCells, unsigned int cellCount, int *x, int *y)
+{
+ *x = renderCells[cellCount * 2 + 0];
+ *y = renderCells[cellCount * 2 + 1];
+}
+
+int* BoGroundRenderer::makeCellArray(unsigned int count)
+{
+ return new int[count * 2];
 }
 
 QString BoGroundRendererStatistics::statisticsData() const
