@@ -239,7 +239,6 @@ void BoUnitEditor::init()
     mUnitLoaded = false; // Bad hack
     mUnit = new UnitProperties(false);
     mSearchPaths = new BosonSearchPathsWidget;
-    mWeapons.setAutoDelete(true);
     mCurrentWeapon = -1;
     connect(mSearchPaths->mOkButton, SIGNAL(clicked()), this, SLOT(slotHideSearchPaths()));
     mSearchPaths->hide();
@@ -266,9 +265,7 @@ void BoUnitEditor::init()
 	mUnit->reset();
     } else {
 	mUnitsList->setSelected(0, true);
-	//slotLoadUnit(mUnits[0]);
     }
-    slotUpdateWidgets();
     mConfigChanged = false;
     updateConfigWidgets();
 }
@@ -437,7 +434,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
     if(mUnitTexturesList->childCount() > 0) {
 	QListViewItemIterator it(mUnitTexturesList);
 	QStringList textures;
-	for (; it.current(); ++it) {	    
+	for (; it.current(); ++it) {
 	    mUnit->addTextureMapping(it.current()->text(0), it.current()->text(1));
 	}
     }
@@ -456,7 +453,6 @@ void BoUnitEditor::slotUpdateUnitProperties()
     hitpoint.cellToCanvas();
     mUnit->setHitPoint(hitpoint);
 }
-
 
 void BoUnitEditor::slotUpdateWidgets()
 {
