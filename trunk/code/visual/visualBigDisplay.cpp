@@ -38,6 +38,8 @@ visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualTopLevel *v, QWidget*p
 //setBackgroundColor(black);
 //setBackgroundMode(fixedColor);
 
+	setSizePolicy( QSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding) );
+
 // QScrollView stuff 
 setResizePolicy(QScrollView::AutoOne);
 setVScrollBarMode( AlwaysOff);

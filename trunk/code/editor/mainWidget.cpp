@@ -24,6 +24,7 @@
 #include <qscrollview.h>
 #include <qpixmap.h>
 #include <qlabel.h>
+#include <qvbox.h>
 
 #include "common/log.h"
 
@@ -33,21 +34,15 @@
 #include "mainWidget.h"		// myself
 
 
-#define COMMAND_FRAME_WIDTH 220
-
-
 mainWidget::mainWidget( editorTopLevel *parent, const char *name)
-	:QWidget(parent, name)
+	:QHBox(parent, name)
 { 
 	etl = parent;
 
-	mini = new visualMiniDisplay( parent, this);
+	QVBox *vb = new QVBox(this);
 	big = new editorBigDisplay( parent, this);
-
-	mini->setGeometry (   0,   0, COMMAND_FRAME_WIDTH, COMMAND_FRAME_WIDTH);
-
-	// big->setGeometry  ( COMMAND_FRAME_WIDTH,  0, width() - COMMAND_FRAME_WIDTH, height() );
-	// etl->mainFrame->setGeometry (  0, COMMAND_FRAME_WIDTH,  COMMAND_FRAME_WIDTH, height() - COMMAND_FRAME_WIDTH);
+	mini = new visualMiniDisplay( parent, vb);
+	mainFrame = new QFrame(vb);
 
 	connect (etl, SIGNAL(setSelectedObject(object_type, int)), big, SLOT(setSelectedObject(object_type, int)));
 	connect (etl, SIGNAL(setWho(int)), big, SLOT(setWho(int)));
@@ -57,12 +52,6 @@ mainWidget::mainWidget( editorTopLevel *parent, const char *name)
 	setFocus();
 
 
-}
-
-void mainWidget::resizeEvent ( QResizeEvent * )
-{
-	big->setGeometry  ( COMMAND_FRAME_WIDTH,  0, width() - COMMAND_FRAME_WIDTH, height() );
-	etl->mainFrame->setGeometry (  0, COMMAND_FRAME_WIDTH, COMMAND_FRAME_WIDTH, height() - COMMAND_FRAME_WIDTH);
 }
 
 #define ARROW_KEY_STEP	2

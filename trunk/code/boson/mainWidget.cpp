@@ -24,6 +24,7 @@
 #include <qscrollview.h>
 #include <qpixmap.h>
 #include <qlabel.h>
+#include <qvbox.h>
 
 #include "common/log.h"
 
@@ -40,27 +41,22 @@
 
 
 mainWidget::mainWidget( bosonTopLevel *parent, const char *name)
-	:QWidget(parent, name)
+	:QHBox(parent, name)
 { 
 	btl = parent;
 
-	mini = new visualMiniDisplay( parent, this);
+	QVBox *vb = new QVBox(this);
 	big = new bosonBigDisplay( parent, this);
+	mini = new visualMiniDisplay( parent, vb);
+	mainFrame = new QFrame(vb);
 
 	mini->setGeometry (   0,   0, 200,200);
 	makeCommandGui();
-	resizeEvent( 0l); // setGeometry
 
 	/* focus handling */
 	setFocusPolicy (StrongFocus);		// accept key event
 	setFocus();
 
-}
-
-void mainWidget::resizeEvent ( QResizeEvent * )
-{
-	big->setGeometry  (200,  0, width() - 200, height() );
-	mainFrame->setGeometry (  0,200, 200, height() - 200);
 }
 
 #define ARROW_KEY_STEP	2
@@ -86,7 +82,9 @@ void mainWidget::keyReleaseEvent ( QKeyEvent * e )
 
 void mainWidget::makeCommandGui(void)
 {
-	mainFrame = new QFrame(this);
+
+	mainFrame->setSizePolicy( QSizePolicy( QSizePolicy::Minimum, QSizePolicy::MinimumExpanding ) );
+	mainFrame->setMinimumSize (220, 200);
 
 	mainFrame->setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	mainFrame->setLineWidth(5);

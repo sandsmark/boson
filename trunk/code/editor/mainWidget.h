@@ -21,7 +21,7 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
-#include <qwidget.h>
+#include <qhbox.h>
 
 #include "common/msgData.h"
 
@@ -29,9 +29,10 @@
 class editorTopLevel;
 class visualMiniDisplay;
 class editorBigDisplay;
+class QFrame;
 
 
-class mainWidget : public QWidget 
+class mainWidget : public QHBox
 {
 	Q_OBJECT
 
@@ -42,12 +43,10 @@ public:
 	void	ressourcesUpdated(void);
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
-	virtual void resizeEvent ( QResizeEvent *e );
-
 
 private:
-
-	editorTopLevel	*etl;
+	QFrame			*mainFrame;
+	editorTopLevel		*etl;
 	visualMiniDisplay	*mini;
 	editorBigDisplay	*big;
 

@@ -37,10 +37,12 @@ class visualFacility;
 class visualMiniDisplay : public QWidget
 {
 
-  Q_OBJECT
+	Q_OBJECT
 
 public:
-  visualMiniDisplay(visualTopLevel *, QWidget *parent=0, const char *name=0L);
+	visualMiniDisplay(visualTopLevel *, QWidget *parent=0, const char *name=0L);
+
+	virtual QSize sizeHint() const { return QSize(_w+5, _h+5); }
 
 signals:
   void	reCenterView(int x, int y);

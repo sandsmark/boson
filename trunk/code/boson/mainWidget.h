@@ -21,7 +21,7 @@
 #ifndef MAINWIDGET_H
 #define MAINWIDGET_H
 
-#include <qwidget.h>
+#include <qhbox.h>
 
 #include "common/msgData.h"
 
@@ -35,7 +35,7 @@ class	QPixmap;
 class	QPushButton;
 class	QFrame;
 
-class mainWidget : public QWidget 
+class mainWidget : public QHBox 
 {
 	Q_OBJECT
 
@@ -45,7 +45,6 @@ public:
 
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
-	virtual void resizeEvent ( QResizeEvent *e );
 
 private:
 
