@@ -100,6 +100,10 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   {
     loadAction(ActionLayMine, cfg, "ActionLayMine", true);
   }
+  else if(shotType() == BosonShot::Bomb)
+  {
+    loadAction(ActionDropBomb, cfg, "ActionDropBomb", true);
+  }
 }
 
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
@@ -375,6 +379,19 @@ bool BosonWeapon::layMine()
   }
   BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, 0);
   pos.setZ(unit()->canvas()->heightAtPoint(pos.x(), pos.y()));
+  shoot(pos, pos);
+  boDebug() << k_funcinfo << "done" << endl;
+  return true;
+}
+
+bool BosonWeapon::dropBomb()
+{
+  boDebug() << k_funcinfo << "" << endl;
+  if (properties()->shotType() != BosonShot::Bomb || !reloaded()) {
+    boDebug() << k_funcinfo << "weapon is not bomb or not reloaded" << endl;
+    return false;
+  }
+  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
   shoot(pos, pos);
   boDebug() << k_funcinfo << "done" << endl;
   return true;
