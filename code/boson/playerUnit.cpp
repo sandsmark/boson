@@ -172,7 +172,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 			if (!path.addCheckLoop(asked)) {
 				// loop
-				logf(LOG_WARNING, "loop detected, stopping");
+				logf(LOG_INFO, "loop detected, stopping");
 				state = MUS_NONE;
 				return false;
 			}
@@ -544,7 +544,7 @@ void playerFacility::destroy(void)
 }
 
 
-#define underlyingGround() vcanvas->groundAt( x()+10, y()+10)
+#define underlyingGround() vcanvas->groundAt( gridRect().topLeft() )
 
 /*
  * harvester 
@@ -573,7 +573,7 @@ bool harvesterUnit::getWantedMove(QPoint &wstate)
 			break;
 		case goingTo:
 			ret = playerMobUnit::getWantedMove(wstate);
-			if ( dest == gridRect().topLeft() && underlyingGround() == GROUND_GRASS_OIL ) {
+			if ( dest == gridRect().topLeft() && underlyingGround() == myHarvestGround() ) {
 				hstate = harvesting;
 //				puts("harvester : change to \"harvesting\" state");
 			} else // nothing to harvest
