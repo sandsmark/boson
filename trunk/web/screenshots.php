@@ -21,7 +21,7 @@ $thumb=$screenshotsdir . $thumbfile;
 $big=$screenshotsdir . $bigfile;
 echo "
 <td align=\"center\" width=\"50%\">
-  <a href=\"$big\"><img border=\"0\" src=\"$thumb\"></a><br>
+  <a href=\"$big\"><img border=\"0\" src=\"$thumb\" alt=\"$date\"></a><br>
   <font class=\"screenshotdate\">$date</font><br>
   <font class=\"screenshotdesc\">$description</font><br><br>
 </td>";
