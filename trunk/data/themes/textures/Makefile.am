@@ -99,7 +99,13 @@ texture_DATA = \
 	water1.jpg \
 	tree-piece-2.png \
 	minmine.jpg \
-	pine1.png
+	pine1.png \
+	crate-cross.jpg \
+	crate-plain.jpg \
+	crate-wooden-1.jpg \
+	barrel-1.jpg \
+	toilet-1.jpg \
+	house-1.jpg
 
 # no further editing need here
 
