@@ -649,7 +649,9 @@ QString BoInfo::valueToString(int key) const
 	case QVariant::List:
 	case QVariant::Map:
 	case QVariant::Palette:
+#if QT_VERSION >= 0x030100
 	case QVariant::Pen:
+#endif
 	case QVariant::Pixmap:
 	case QVariant::Point:
 	case QVariant::PointArray:
