@@ -52,13 +52,16 @@ class BosonMusic::BosonMusicPrivate
 public:
 	BosonMusicPrivate()
 	{
+		mDispatcher = 0;
+		mServer = 0;
+
 		mPlayObject = 0;
 
 		mTicker = 0;
 	}
 
-	KArtsDispatcher mDispatcher;
-	KArtsServer mServer;
+	KArtsDispatcher* mDispatcher;
+	KArtsServer* mServer;
 	KPlayObject* mPlayObject;
 
 	QDict<BosonSound> mBosonSound;
@@ -86,7 +89,9 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 	d->mPlaySound = false;
 	return;
  }
- if (d->mServer.server().isNull()) {
+ d->mDispatcher = new KArtsDispatcher(this);
+ d->mServer = new KArtsServer(this);
+ if (d->mServer->server().isNull()) {
 	boWarning(200) << "Cannot access KArtsServer - sound disabled" << endl;
 	// TODO: message box
 	d->mPlayMusic = false;
@@ -126,6 +131,8 @@ boDebug(200) << k_funcinfo << endl;
 	}
 	delete d->mPlayObject;
  }
+ delete d->mServer;
+ delete d->mDispatcher;
  delete d;
 }
 
@@ -283,6 +290,6 @@ BosonSound* BosonMusic::bosonSound(const QString& species) const
 
 KArtsServer& BosonMusic::server() const
 {
- return d->mServer;
+ return *d->mServer;
 }
 
