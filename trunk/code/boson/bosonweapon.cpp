@@ -55,7 +55,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mSpeed = cfg->readLongNumEntry("Speed", 0);
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
-  mFullDamageRange = (float)(cfg->readDoubleNumEntry("FullDamageRange", 1));
+  mFullDamageRange = (float)(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange));
   if(mFullDamageRange > mDamageRange)
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
