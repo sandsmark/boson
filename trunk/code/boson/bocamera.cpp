@@ -465,6 +465,12 @@ void BoCamera::advance()
     factor = (-cos((mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
     boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
   }
+  else if(mMoveMode == SinusoidEnd)
+  {
+    // FIXME: make this more simple!
+    factor = -cos(M_PI_2 + (mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI_2) - mMovedAmount;
+    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+  }
   else
   {
     factor = 1.0 / mCommitTime;
