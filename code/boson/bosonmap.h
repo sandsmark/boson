@@ -45,6 +45,9 @@ public:
 		mWidth = width;
 		mHeight = height;
 	}
+	virtual ~BoMapCornerArray()
+	{
+	}
 
 	/**
 	 * @return The width of this array, i.e. the number of corners (@ref
@@ -93,7 +96,16 @@ public:
 			: BoMapCornerArray(width, height)
 	{
 		mHeightMap = new float[arrayPos(width - 1, height - 1) + 1];
+		fill(0.0f);
 	}
+
+	virtual ~BoHeightMap()
+	{
+		delete[] mHeightMap;
+	}
+
+	virtual bool save(QDataStream& stream);
+	virtual bool load(QDataStream& stream);
 
 	inline float* heightMap() const { return mHeightMap; }
 
@@ -138,6 +150,18 @@ public:
 			}
 		}
 	}
+
+	/*+
+	 * Convert the pixel value @p into a height (floating point value from
+	 * -10.5 to 15.0). 0.0 is zero height (i.e. the default).
+	 **/
+	static float pixelToHeight(int p);
+
+	/**
+	 * Convert a @p height into a pixel value. See also @ref pixelToHeight.
+	 **/
+	static int heightToPixel(float height);
+
 private:
 	float* mHeightMap;
 };
@@ -514,9 +538,6 @@ public:
 	bool importTexMap(const QImage* image, int texturesPerComponent = 1, bool useAlpha = false);
 	bool importTexMap(const QString& file, int texturesPerComponent = 1, bool useAlpha = false);
 
-	static float pixelToHeight(int p);
-	static int heightToPixel(float height);
-
 	bool generateCellsFromTexMap();
 
 	/**
@@ -585,7 +606,7 @@ protected:
 	 * @param heightMap A heightmap array that is big enough for a @p
 	 * mapWidth * @p mapHeight map.
 	 **/
-	static bool saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap);
+	static bool saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, BoHeightMap* heightMap);
 
 	/**
 	 * Read the map geo from stream. This only reads map size, playercount

@@ -39,6 +39,66 @@
 
 #define BOSONMAP_VERSION 0x01 // current version
 
+float BoHeightMap::pixelToHeight(int p)
+{
+ // we have 255 different values available. we use 0.1 steps, i.e. if
+ // the pixel is increased by 1 the height is increased by 0.1.
+ // values below 105 cause a negative height, values above 105 a positive
+ // height.
+ // this means we have a height range from -105/10 to 150/10 aka from -10.5 to
+ // 15.0
+// boDebug() << k_funcinfo << p << "->" << ((float)(p-105))/10 << endl;
+ return ((float)(p - 105)) / 10;
+}
+
+int BoHeightMap::heightToPixel(float height)
+{
+ return (int)(height * 10 + 105);
+}
+
+bool BoHeightMap::save(QDataStream& stream)
+{
+ if (width() == 0) {
+	boError() << k_funcinfo << "width()==0" << endl;
+	return false;
+ }
+ if (height() == 0) {
+	boError() << k_funcinfo << "height()==0" << endl;
+	return false;
+ }
+ if (!mHeightMap) {
+	BO_NULL_ERROR(mHeightMap);
+	return false;
+ }
+ boDebug() << k_funcinfo << "saving real heightmap to network stream" << endl;
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned int y = 0; y < height(); y++) {
+		float h = heightAt(x, y);
+		stream << (float)h;
+	}
+ }
+ return true;
+}
+
+bool BoHeightMap::load(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ if (!mHeightMap) {
+	BO_NULL_ERROR(mHeightMap);
+	return false;
+ }
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned int y = 0; y < height(); y++) {
+		float h;
+		stream >> h;
+		setHeightAt(x, y, h);
+	}
+ }
+ return true;
+}
+
+
+
 class BosonMap::BosonMapPrivate
 {
 public:
@@ -257,6 +317,9 @@ bool BosonMap::importHeightMapImage(const QImage& image)
  }
  if ((unsigned int)image.width() != width() + 1 ||
 		(unsigned int)image.height() != height() + 1) {
+	boWarning() << k_funcinfo << "image is of size "
+			<< image.width()  << "*" << image.height()
+			<< " we need: " << width() + 1 << "*" << height() + 1 << endl;
 	return false;
  }
  QByteArray b;
@@ -279,15 +342,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
  if (heightMapBuffer.size() == 0) {
 	// initialize the height map with 0.0
 //	boDebug() << k_funcinfo << "loading dummy height map" << endl;
-	float* heightMap = new float[(width() + 1) * (height() + 1)];
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			heightMap[y * (width() + 1) + x] = 0.0f;
-		}
-	}
 	QByteArray buffer;
 	QDataStream writeStream(buffer, IO_WriteOnly);
-	bool ret = saveHeightMap(writeStream, width(), height(), heightMap);
+	BoHeightMap heightMap(width() + 1, height() + 1);
+	bool ret = heightMap.save(writeStream);
 	if (ret) {
 		QDataStream readStream(buffer, IO_ReadOnly);
 		ret = loadHeightMap(readStream);
@@ -297,8 +355,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	} else {
 		boError() << k_funcinfo << "unable to create heightMap stream" << endl;
 	}
-	delete[] heightMap;
-	return true;
+	return ret;
  }
  boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMapBuffer);
@@ -333,7 +390,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
  }
 
 
- float* heightMap = new float[(width() + 1) * (height() + 1)];
+ BoHeightMap heightMap(width() + 1, height() + 1);
  for (unsigned int y = 0; y < height() + 1; y++) {
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
@@ -344,12 +401,12 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	int imageX = 0;
 	unsigned char* line = map.scanLine(y);
 	for (unsigned int x = 0; x < width() + 1; x++, imageX += increment) {
-		heightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
+		heightMap.setHeightAt(x, y, BoHeightMap::pixelToHeight(line[imageX]));
 	}
  }
  QByteArray buffer;
  QDataStream writeStream(buffer, IO_WriteOnly);
- bool ret = saveHeightMap(writeStream, width(), height(), heightMap);
+ bool ret = heightMap.save(writeStream);
  if (ret) {
 	QDataStream readStream(buffer, IO_ReadOnly);
 	ret = loadHeightMap(readStream);
@@ -359,7 +416,6 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
  } else {
 	boError() << k_funcinfo << "unable to create heightMap stream" << endl;
  }
- delete[] heightMap;
  return ret;
 }
 
@@ -372,14 +428,7 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
  }
  mHeightMap = new BoHeightMap(width() + 1, height() + 1);
  boDebug() << k_funcinfo << "loading height map from network stream" << endl;
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		float h;
-		stream >> h;
-		mHeightMap->setHeightAt(x, y, h);
-	}
- }
- return true;
+ return mHeightMap->load(stream);
 }
 
 bool BosonMap::loadTexMap(QDataStream& stream)
@@ -584,35 +633,11 @@ bool BosonMap::saveCells(QDataStream& stream)
 
 bool BosonMap::saveHeightMap(QDataStream& stream)
 {
- return saveHeightMap(stream, width(), height(), mHeightMap->heightMap());
-}
-
-bool BosonMap::saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap)
-{
- if (mapWidth == 0) {
-	boError() << k_funcinfo << "mapWidth==0" << endl;
-	return false;
+ if (!mHeightMap) {
+	BoHeightMap heightMap(width() + 1, height() + 1);
+	return heightMap.save(stream);
  }
- if (mapHeight== 0) {
-	boError() << k_funcinfo << "mapHeight==0" << endl;
-	return false;
- }
- if (!heightMap) {
-	boDebug() << k_funcinfo << "saving dummy heightmap to network stream" << endl;
-	for (unsigned int x = 0; x < mapWidth + 1; x++) {
-		for (unsigned int y = 0; y < mapHeight + 1; y++) {
-			stream << (float)0.0f;
-		}
-	}
-	return true;
- }
- boDebug() << k_funcinfo << "saving real heightmap to network stream" << endl;
- for (unsigned int x = 0; x < mapWidth + 1; x++) {
-	for (unsigned int y = 0; y < mapHeight + 1; y++) {
-		stream << (float)heightMap[y * (mapWidth + 1) + x];
-	}
- }
- return true;
+ return mHeightMap->save(stream);
 }
 
 QByteArray BosonMap::saveHeightMapImage()
@@ -630,7 +655,7 @@ QByteArray BosonMap::saveHeightMapImage()
  boDebug() << k_funcinfo << "heightmap: " << image.width() << "x" << image.height() << endl;
  if (!mHeightMap) {
 	boDebug() << k_funcinfo << "dummy height map..." << endl;
-	int l = BosonMap::heightToPixel(0.0f);
+	int l = BoHeightMap::heightToPixel(0.0f);
 	image.fill(l);
  } else {
 	boDebug() << k_funcinfo << "real height map" << endl;
@@ -639,7 +664,7 @@ QByteArray BosonMap::saveHeightMapImage()
 		uint* p = (uint*)image.scanLine(y);
 		for (int x = 0; x < image.width(); x++) {
 			float value = mHeightMap->heightAt(x, y);
-			int v = BosonMap::heightToPixel(value);
+			int v = BoHeightMap::heightToPixel(value);
 			*p = qRgb(v, v, v);
 			p++;
 		}
@@ -913,23 +938,6 @@ boDebug() << k_funcinfo << endl;
 	}
  }
  return true;
-}
-
-float BosonMap::pixelToHeight(int p)
-{
- // we have 255 different values available. we use 0.1 steps, i.e. if
- // the pixel is increased by 1 the height is increased by 0.1.
- // values below 105 cause a negative height, values above 105 a positive
- // height.
- // this means we have a height range from -105/10 to 150/10 aka from -10.5 to
- // 15.0
-// boDebug() << k_funcinfo << p << "->" << ((float)(p-105))/10 << endl;
- return ((float)(p - 105)) / 10;
-}
-
-int BosonMap::heightToPixel(float height)
-{
- return (int)(height * 10 + 105);
 }
 
 bool BosonMap::generateCellsFromTexMap()
