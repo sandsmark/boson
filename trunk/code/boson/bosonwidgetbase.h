@@ -243,6 +243,7 @@ protected slots:
 	void slotSetDebugCamera(bool);
 	void slotSetDebugRenderCounts(bool);
 	void slotSetDebugBoundingBoxes(bool);
+	void slotSetDebugFPS(bool);
 
 protected:
 	void setLocalPlayerRecursively(Player* p);

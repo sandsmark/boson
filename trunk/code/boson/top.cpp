@@ -345,12 +345,6 @@ void TopWidget::initStatusBar()
  QLabel* shotsLabel = new QLabel(QString::number(0), debug);
  connect(this, SIGNAL(signalShotsUpdated(int)), shotsLabel, SLOT(setNum(int)));
 
- QHBox* fps = new QHBox(bar);
- (void)new QLabel(i18n("FPS: "), fps);
- QLabel* fpsLabel = new QLabel(QString::number(0.0), fps);
- connect(this, SIGNAL(signalFPSUpdated(double)), fpsLabel, SLOT(setNum(double)));
- bar->addWidget(fps);
-
  bar->hide();
 }
 
@@ -874,7 +868,6 @@ void TopWidget::slotUpdateStatusBar()
  BO_CHECK_NULL_RET(mCanvas);
  // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
  // but whenever their value actually changes.
- emit signalFPSUpdated(d->mBosonWidget->displayManager()->fps());
  emit signalParticlesCountUpdated(mCanvas->particleSystemsCount());
  emit signalCanvasItemsCountUpdated(mCanvas->allItemsCount());
  emit signalCanvasAnimationsCountUpdated(mCanvas->animationsCount());

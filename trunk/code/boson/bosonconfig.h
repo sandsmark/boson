@@ -329,6 +329,9 @@ public:
 	void setDebugBoundingBoxes(bool debug) { mDebugBoundingBoxes = debug; }
 	bool debugBoundingBoxes() const { return mDebugBoundingBoxes; }
 
+	void setDebugFPS(bool debug) { mDebugFPS = debug; }
+	bool debugFPS() const { return mDebugFPS; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -402,6 +405,7 @@ private:
 	bool mDebugOpenGLCamera;
 	bool mDebugRenderCounts;
 	bool mDebugBoundingBoxes;
+  bool mDebugFPS;
 };
 
 #endif
