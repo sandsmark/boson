@@ -591,6 +591,50 @@ void Unit::setGroupLeader(bool leader)
  }
 }
 
+bool Unit::collidesWith(const QCanvasItem* item) const
+{
+ // New collision-check method for units
+ // It should be fully working, but if you encounter any problems and want to
+ // use default QCanvasSprite's collision check, then uncomment next line
+ //return QCanvasSprite::collidesWith(item);
+
+ if(! RTTI::isUnit(item->rtti()))
+ {
+	return QCanvasSprite::collidesWith(item);
+ }
+
+ double itemw, itemh;
+ QRect r = item->boundingRect();
+ itemw = r.width();
+ itemh = r.height();
+
+ // I use centers of units as positions here
+ double myx, myy, itemx, itemy;
+ myx = x() + width() / 2.0;
+ myy = y() + height() / 2.0;
+ itemx = item->x() + BO_TILE_SIZE / 2.0;
+ itemy = item->y() + BO_TILE_SIZE / 2.0;
+
+ if(itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE)
+ {
+	double dist = QABS(itemx - myx) + QABS(itemy - myy);
+	return (dist < BO_TILE_SIZE);
+ }
+ else
+ {
+	for(int i = 0; i < itemw; i += BO_TILE_SIZE)
+	{
+		for(int j = 0; j < itemh; j += BO_TILE_SIZE)
+		{
+			double dist = QABS((itemx + i) - myx) + QABS((itemy + j) - myy);
+			if(dist < BO_TILE_SIZE)
+				return true;
+		}
+	}
+	return false;
+ }
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -667,9 +711,8 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- QRect position = boundingRect(); // where we currently are.
- int x = position.center().x();
- int y = position.center().y();
+ int x = (int)(QCanvasSprite::x() + width() / 2);
+ int y = (int)(QCanvasSprite::y() + height() / 2);
  double xspeed = 0;
  double yspeed = 0;
 
@@ -717,7 +760,7 @@ void MobileUnit::advanceMove()
 	}
  }
  // Same with y coordinate
- if(QABS(wp.y() - y) < (double)speed()) {
+ if(QABS(wp.y() - y) < speed()) {
 	yspeed = wp.y() - y;
  } else {
 	yspeed = speed();

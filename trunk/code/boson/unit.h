@@ -225,6 +225,8 @@ public:
 	 **/
 	virtual void setWork(WorkType w);
 
+	virtual bool collidesWith(const QCanvasItem* item) const;
+
 protected:
 	void shootAt(Unit* target);
 
