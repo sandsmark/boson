@@ -1,16 +1,16 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="bosoneditor" version="3">
+<kpartgui name="bosoneditor" version="4">
 <MenuBar>
   <Menu name="file" group="filemenu"><text>&amp;File</text>
     <Action name="file_save_playfield_as" append="save_merge"/>
-    <Action name="game_reset_view_properties" />
-    <Action name="game_grab_screenshot" />
-    <Action name="game_grab_profiling" />
+    <Action name="game_reset_view_properties"/>
+    <Action name="game_grab_screenshot"/>
+    <Action name="game_grab_profiling"/>
   </Menu>
-  <Menu name="editor"><text>&amp;Editor</text>
+  <Menu name="editor" group="editormenu"><text>&amp;Editor</text>
     <Action name="editor_player" />
-    <Action name="editor_place" />
-    <Action name="editor_create_unit" />
+    <Action name="editor_place"  />
+    <Action name="editor_create_unit"  />
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
     <Action name="editor_map_description" />

@@ -1,13 +1,18 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="boson" version="3">
+<kpartgui name="boson" version="4">
 <MenuBar>
   <DefineGroup name="filemenu" />
+  <DefineGroup name="editormenu" />
+  <DefineGroup name="gamemenu" />
+  <DefineGroup name="settingsmenu" />
+  <DefineGroup name="windowmenu" />
+  <DefineGroup name="viewmenu" />
   <DefineGroup name="debugmenu" />
-  <Menu name="settings"><text>&amp;Settings</text>
-    <Action name="options_sound" append="show_merge"/>
-    <Action name="options_music" append="show_merge"/>
+  <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
+    <Action name="options_sound" append="show_merge" />
+    <Action name="options_music" append="show_merge" />
   </Menu>
-  <Menu name="window" append="settings_merge"><text>&amp;Window</text>
+  <Menu name="window" append="settings_merge" group="windowmenu"><text>&amp;Window</text>
     <Action name="window_fullscreen" />
   </Menu>
 </MenuBar>

@@ -1,10 +1,10 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="borender" version="1">
+<kpartgui name="borender" version="2">
 <MenuBar>
-  <Menu name="view"><text>&amp;View</text>
+  <Menu name="view" group="viewmenu"><text>&amp;View</text>
     <Action name="view_species" />
   </Menu>
-  <Menu name="debug"><text>&amp;Debug</text>
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
     <Action name="debug_models" />
   </Menu>
 </MenuBar>
