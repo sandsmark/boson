@@ -52,7 +52,7 @@ public:
 protected:
 	bool chooseContext();
 	void* chooseVisual();
-	void* tryVisual(const QGLFormat& fmt, int bufDepth);
+	void* tryVisual(const QGLFormat& fmt);
 	
 private:
 	class BoContextPrivate;

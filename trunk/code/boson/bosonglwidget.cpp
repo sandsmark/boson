@@ -235,7 +235,7 @@ void BoContext::makeCurrent()
 }
 
 // AB: shamelessy stolen from QGLContext
-void* BoContext::tryVisual(const QGLFormat& f, int bufDepth)
+void* BoContext::tryVisual(const QGLFormat& f)
 {
  int spec[40];
  int i = 0;
@@ -276,13 +276,10 @@ void* BoContext::tryVisual(const QGLFormat& f, int bufDepth)
  }
 #endif
 
- if ( f.doubleBuffer() ) {
-	spec[i++] = GLX_DOUBLEBUFFER;
- }
- if ( f.depth() ) {
-	spec[i++] = GLX_DEPTH_SIZE;
-	spec[i++] = 1;
- }
+ spec[i++] = GLX_DOUBLEBUFFER;
+ spec[i++] = GLX_DEPTH_SIZE;
+ spec[i++] = 1;
+
  if ( f.stereo() ) {
 	spec[i++] = GLX_STEREO;
  }
@@ -290,7 +287,9 @@ void* BoContext::tryVisual(const QGLFormat& f, int bufDepth)
 	spec[i++] = GLX_STENCIL_SIZE;
 	spec[i++] = 1;
  }
- if ( f.rgba() ) {
+
+ {
+	// RGBA stuff
 	spec[i++] = GLX_RGBA;
 	spec[i++] = GLX_RED_SIZE;
 	spec[i++] = 1;
@@ -314,9 +313,6 @@ void* BoContext::tryVisual(const QGLFormat& f, int bufDepth)
 			spec[i++] = 1;
 		}
 	}
- } else {
-	spec[i++] = GLX_BUFFER_SIZE;
-	spec[i++] = bufDepth;
  }
 
  spec[i] = None;
@@ -329,17 +325,11 @@ void* BoContext::chooseVisual()
 {
  QGLFormat fmt;
  fmt.setDoubleBuffer(true);
- static int bufDepths[] = { 8, 4, 2, 1 };	// Try 16, 12 also?
  void* vis = 0;
- int i = 0;
  bool fail = FALSE;
  bool tryDouble = !fmt.doubleBuffer();  // Some GL impl's only have double
  bool triedDouble = FALSE;
- while( !fail && !( vis = tryVisual( fmt, bufDepths[i] ) ) ) {
-	if ( !fmt.rgba() && bufDepths[i] > 1 ) {
-		i++;
-		continue;
-	}
+ while( !fail && !( vis = tryVisual( fmt ) ) ) {
 	if ( tryDouble ) {
 		fmt.setDoubleBuffer( TRUE );
 		tryDouble = FALSE;
@@ -360,18 +350,6 @@ void* BoContext::chooseVisual()
 	}
 	if ( fmt.stencil() ) {
 		fmt.setStencil( FALSE );
-		continue;
-	}
-	if ( fmt.alpha() ) {
-		fmt.setAlpha( FALSE );
-		continue;
-	}
-	if ( fmt.depth() ) {
-		fmt.setDepth( FALSE );
-		continue;
-	}
-	if ( fmt.doubleBuffer() ) {
-		fmt.setDoubleBuffer( FALSE );
 		continue;
 	}
 	fail = true;
