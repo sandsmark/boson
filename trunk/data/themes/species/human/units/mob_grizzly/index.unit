@@ -21,7 +21,7 @@ CanGoOnWater=false
 [Weapon_0]
 Range=6
 Reload=45
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=30
 Speed=8
