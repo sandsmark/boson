@@ -95,8 +95,11 @@ protected:
 protected slots:
 	void slotUpdate();
 
+	void slotUpdateUnitConfig();
+
 private:
 	void init();
+	void initPlugins();
 
 private:
 	class EditorCommandFramePrivate;

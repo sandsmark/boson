@@ -86,6 +86,7 @@ public:
 		mPlacementLayout = 0;
 
 		mUnitView = 0;
+		mUnitViewLayout = 0;
 		mSelectionWidget = 0;
 
 		mUnitActionsBox = 0;
@@ -96,6 +97,7 @@ public:
 
 	QVBoxLayout* mTopLayout;
 	QVBoxLayout* mPlacementLayout; // for editor
+	QVBoxLayout* mUnitViewLayout; // for game mode
 
 	BosonUnitView* mUnitView;
 	BosonOrderWidget* mSelectionWidget;
@@ -126,11 +128,9 @@ BosonCommandFrameBase::BosonCommandFrameBase(QWidget* parent) : QFrame(parent, "
  d->mPlacementLayout = new QVBoxLayout;
  d->mTopLayout->addLayout(d->mPlacementLayout, 2);
 
- // the unit view. this displays the leader of a selection, showing further
- // information about this unit.
- d->mUnitView = new BosonUnitView(this);
- d->mTopLayout->addWidget(d->mUnitView, 0, AlignHCenter);
- d->mUnitView->setBackgroundOrigin(WindowOrigin);
+ // use addUnitView() to actually add the unit view. we reserve a place for it
+ // here.
+ d->mUnitViewLayout = new QVBoxLayout(d->mTopLayout);
 
  // the action buttons (move, attack, stop, ...)
  d->mUnitActionsBox = new QVBox(this);
@@ -245,7 +245,9 @@ void BosonCommandFrameBase::clearSelection()
 void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
 {
  mSelectedUnit = 0;
- d->mUnitView->setUnit(unit); // also for NULL unit
+ if (d->mUnitView) {
+	d->mUnitView->setUnit(unit); // also for NULL unit
+ }
  showUnitActions(unit); // also for NULL unit
  if (!unit) {
 	hidePluginWidgets();
@@ -439,5 +441,14 @@ QScrollView* BosonCommandFrameBase::addPlacementView()
  d->mPlacementLayout->addWidget(scrollView, 1);
  scrollView->show();
  return scrollView;
+}
+
+void BosonCommandFrameBase::addUnitView()
+{
+ // the unit view. this displays the leader of a selection, showing further
+ // information about this unit.
+ d->mUnitView = new BosonUnitView(this);
+ d->mUnitViewLayout->addWidget(d->mUnitView, 0, AlignHCenter);
+ d->mUnitView->setBackgroundOrigin(WindowOrigin);
 }
 

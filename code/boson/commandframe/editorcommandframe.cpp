@@ -21,6 +21,7 @@
 #include "editorcommandframe.moc"
 
 #include "bosonorderwidget.h"
+#include "editorunitconfigwidget.h"
 #include "../unit.h"
 #include "../unitplugins.h"
 #include "../player.h"
@@ -36,6 +37,7 @@
 #include <qlayout.h>
 #include <qvbox.h>
 #include <qscrollview.h>
+#include <qlabel.h>
 
 class EditorCommandFrame::EditorCommandFramePrivate
 {
@@ -43,9 +45,11 @@ public:
 	EditorCommandFramePrivate()
 	{
 		mPlacementWidget = 0;
+		mUnitConfigWidget = 0;
 	}
 
 	BosonOrderWidget* mPlacementWidget;
+	EditorUnitConfigWidget* mUnitConfigWidget;
 };
 
 EditorCommandFrame::EditorCommandFrame(QWidget* parent) : BosonCommandFrameBase(parent)
@@ -63,6 +67,8 @@ void EditorCommandFrame::init()
  d->mPlacementWidget->initEditor();
  scrollView->addChild(d->mPlacementWidget);
 
+ initPlugins();
+
 // the order buttons
  connect(d->mPlacementWidget, SIGNAL(signalProduce(ProductionType, unsigned long int)),
 		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
@@ -73,6 +79,13 @@ void EditorCommandFrame::init()
 EditorCommandFrame::~EditorCommandFrame()
 {
  delete d;
+}
+
+void EditorCommandFrame::initPlugins()
+{
+ d->mUnitConfigWidget = new EditorUnitConfigWidget(this, unitDisplayBox());
+ connect(d->mUnitConfigWidget, SIGNAL(signalUpdateUnit()),
+		this, SLOT(slotUpdateUnitConfig()));
 }
 
 void EditorCommandFrame::showUnitActions(Unit* unit)
@@ -107,6 +120,10 @@ void EditorCommandFrame::setSelectedUnit(Unit* unit)
  }
  if (selectedUnit() != unit) {
 	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
+	return;
+ }
+ if (d->mUnitConfigWidget->showUnit(unit)) {
+	boDebug() << k_funcinfo << "show unit " << endl;
 	return;
  }
 }
@@ -173,5 +190,13 @@ void EditorCommandFrame::placeFacilities(Player* owner)
 	return;
  }
  d->mPlacementWidget->setOrderButtons(ProduceUnit, theme->allFacilities(), owner);
+}
+
+void EditorCommandFrame::slotUpdateUnitConfig()
+{
+ BO_CHECK_NULL_RET(selectedUnit());
+ BO_CHECK_NULL_RET(d->mUnitConfigWidget);
+ // apply changed in the config widget to the unit
+ d->mUnitConfigWidget->updateUnit(selectedUnit());
 }
 

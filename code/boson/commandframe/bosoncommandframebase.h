@@ -159,6 +159,15 @@ protected:
 	 **/
 	QScrollView* addPlacementView();
 
+	/**
+	 * Construct and add a @ref BosonUnitView widget. This is used in game
+	 * mode to display the currently selected unit (inlcuding some
+	 * information like name and id). In editor mode we can easily provide
+	 * these information through the configuration widgets and therefore
+	 * don't need this.
+	 **/
+	void addUnitView();
+
 signals:
 	/**
 	 * Emitted when a unit should be produced.
