@@ -18,6 +18,7 @@
 */
 
 #include "kgameplayerdebug.h"
+#include "kgameplayerdebug.moc"
 
 #include "boson.h"
 #include "player.h"
@@ -130,6 +131,5 @@ void KGamePlayerDebug::slotUpdate()
 	box->setSpeciesIdentifier(player->speciesTheme()->identifier());
 	box->setTeamColor(player->teamColor());
  }
- 
 }
 
