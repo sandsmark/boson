@@ -87,9 +87,9 @@ public:
 	QTimer* mGameTimer;
 
 // stuff for the message-delaying feature
-	QTime mAdvanceDistance;
-	int mAdvanceDivider;
-	int mAdvanceDividerCount;
+	QTime mAdvanceReceived; // when the last advance *message* was received
+	int mAdvanceDivider; // pretty much exactly gameSpeed()
+	int mAdvanceDividerCount; // how many advance *calls* have been made since the last advance *message*
 	int mAdvanceMessageWaiting;
 	QPtrQueue<BoMessage> mDelayedMessages;
 	bool mIsLocked;
@@ -889,9 +889,9 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 #ifndef NO_ADVANCE_DEBUG
 		kdDebug() << "Advance - speed (calls per " << ADVANCE_INTERVAL 
 				<< "ms)=" << gameSpeed() << " elapsed: " 
-				<< d->mAdvanceDistance.elapsed() << endl;
+				<< d->mAdvanceReceived.elapsed() << endl;
 #endif
-		d->mAdvanceDistance.restart();
+		d->mAdvanceReceived.restart();
 		slotReceiveAdvance();
 		break;
 	}
@@ -1355,21 +1355,40 @@ void Boson::slotReceiveAdvance()
  toggleAdvanceFlag();
  emit signalAdvance(d->mAdvanceCount, flag);
 
- d->mAdvanceCount = d->mAdvanceCount + 1;
+ d->mAdvanceCount = d->mAdvanceCount + 1; // this advance count is important for Unit e.g. - but not used in this function.
  if (d->mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
 	d->mAdvanceCount = 0;
  }
+
+ // we also have "mAdvanceDividerCount". the mAdvanceCount is important in Unit,
+ // mAdvanceDividerCount is limited to boson only. some explanations:
+ // Only a single advance message is sent over network every ADVANCE_INTERVAL
+ // ms, independant from the game speed.
+ // This single advance message results in a certain number of advance calls
+ // (btw: in codes, comments, logs and so on I always make a different between
+ // "advance message" and "advance calls" as explained here). mAdvanceDivider is
+ // this number of advance calls to-be-generated and is reset to the gameSpeed()
+ // when the message is received.
+ // The mAdvanceDividerCount is reset to 0 once the advance message is received.
+ //
+ // The code below tries to make one advance call every
+ // ADVANCE_INTERVAL/mAdvanceDivider ms. This means in the ideal case all
+ // advance calls from this and from the next advance message would be in the
+ // same interval.
+ //
+ // Please remember that there are several additional tasks that need to be done
+ // - e.g. unit moving, OpenGL rendering, ... so 
  if (d->mAdvanceDividerCount + 1 == d->mAdvanceDivider)  {
 #ifndef NO_ADVANCE_DEBUG
-	kdDebug() << k_funcinfo << "delayed messages: " 
+	kdDebug() << k_funcinfo << "delayed messages: "
 			<< d->mDelayedMessages.count() << endl;
 #endif
 	unlock();
- } else if (d->mAdvanceDividerCount + 1< d->mAdvanceDivider) {
+ } else if (d->mAdvanceDividerCount + 1 < d->mAdvanceDivider) {
 	int next;
 	if (d->mAdvanceMessageWaiting == 0) {
 		int t = ADVANCE_INTERVAL * d->mAdvanceDividerCount / d->mAdvanceDivider;// time that should have been elapsed
-		int diff = QMAX(5, d->mAdvanceDistance.elapsed() - t + 5); // we are adding 5ms "safety" diff
+		int diff = QMAX(5, d->mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
 		next = QMAX(0, ADVANCE_INTERVAL / d->mAdvanceDivider - diff);
 	} else {
 		next = 0;
