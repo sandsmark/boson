@@ -2,7 +2,9 @@
 
 SUBDIRS = data \
 	bosonwidgets items commandframe startupwidgets sound info script \
-	bosonfont meshrenderer
+	bosonfont \
+	meshrenderer \
+	groundrenderer
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
@@ -46,6 +48,7 @@ BOSON_COMMON_SRC = \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
 	bogroundrenderer.cpp \
+	bogroundrenderermanager.cpp \
 	bocamera.cpp \
 	boautocamera.cpp \
 	bocamerawidget.cpp \
