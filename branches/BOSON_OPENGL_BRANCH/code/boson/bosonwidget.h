@@ -83,7 +83,7 @@ public:
 
 	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
-	inline BoDisplayManager* displaymanager() const { return mDisplayManager; }
+	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Boson* game() const;
 	BosonPlayField* playField() const;
 	Player* player() const;
@@ -122,6 +122,9 @@ public:
 	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
 	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
 	 * and @ref BosonCanvas::loadTiles
+	 *
+	 * Note that this also calls @ref slotChangeCursor in order to load the
+	 * initial cursor.
 	 **/
 	void addInitialDisplay();
 

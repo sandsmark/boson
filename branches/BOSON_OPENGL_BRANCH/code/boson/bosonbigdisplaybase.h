@@ -244,6 +244,7 @@ protected:
 
 #ifndef NO_OPENGL
 	void generateMapDisplayList();
+
 	void setCameraPos(GLfloat x, GLfloat y, GLfloat z);
 	GLfloat cameraX() const;
 	GLfloat cameraY() const;
