@@ -20,7 +20,7 @@ Remember to update/check before releasing:
 - release ONLY from a cvs RELEASE tag! i.e. cvs up -r BOSON_0_6_1_RELEASE for
   0.6.1 release. You can tag the release using cvs -q tag BOSON_0_6_1_RELEASE
   (remember that you need to do a cvs up -r BOSON_0_6_1_RELEASE after doing so)
-  --> you can move the tag with the same command (but adding -F after "tag"), following a specific file.
+  --> you can move the tag with the same command, following a specific file.
 
 
 Special notes about the -music package:
@@ -37,10 +37,6 @@ Release Instructions:
  cvs co -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson -r BOSON_x_y_RELEASE code
  cvs co -d:pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson -r BOSON_x_y_RELEASE data
 # where x and y are the version number (e.g. BOSON_0_7_RELEASE)
- UPDATE: do _NOT_ release from anonymous CVS!
- --> it is usually lagging behind actual developer CVS and might contains
-     obsoleted files
-
  mkdir music ; cd music
  wget http://boson.sf.net/music/foobar.tar.bz2   
 # where foobar are the music files
