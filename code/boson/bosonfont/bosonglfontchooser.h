@@ -33,36 +33,35 @@ class BosonGLFontChooserPrivate;
 
 class BosonGLFontChooser : public BosonGLFontChooserBase
 {
-	Q_OBJECT
+    Q_OBJECT
 public:
-	BosonGLFontChooser(QWidget* parent = 0, const char* name = 0);
-	~BosonGLFontChooser();
+    BosonGLFontChooser(QWidget* parent = 0, const char* name = 0);
+    ~BosonGLFontChooser();
 
-	static int getFont(BoFontInfo& font, QWidget* parent = 0);
+    static int getFont(BoFontInfo& font, QWidget* parent = 0);
 
-	void setFont(const BoFontInfo& font);
+    void setFont(const BoFontInfo& font);
 
-	/**
-	 * @return An object describing the selected font
-	 **/
-	BoFontInfo font() const;
+    /**
+     * @return An object describing the selected font
+     **/
+    BoFontInfo font() const;
 
 protected:
-	void loadFonts();
-	void loadGLXFonts();
-	void loadTXFFonts();
+    void loadFonts();
+    void loadTXFFonts();
 
 
 protected slots:
-	virtual void slotUseTexturedFonts(bool);
-	virtual void slotFontChanged();
-	virtual void slotFontStyleChanged();
-	virtual void slotFontSizeChanged(QListBoxItem*);
-	virtual void slotFontSizeChanged(int);
-	virtual void slotFontPreview();
+    virtual void slotUseTexturedFonts(bool);
+    virtual void slotFontChanged();
+    virtual void slotFontStyleChanged();
+    virtual void slotFontSizeChanged(QListBoxItem*);
+    virtual void slotFontSizeChanged(int);
+    virtual void slotFontPreview();
 
 private:
-	BosonGLFontChooserPrivate* d;
+    BosonGLFontChooserPrivate* d;
 };
 
 #endif

@@ -202,7 +202,6 @@ BosonGLFontChooser::~BosonGLFontChooser()
 void BosonGLFontChooser::loadFonts()
 {
  d->mItem2Font.clear();
- loadGLXFonts();
  loadTXFFonts();
 }
 
@@ -219,36 +218,6 @@ void BosonGLFontChooser::loadTXFFonts()
     BoFontInfo* f = new BoFontInfo();
     f->setName(list[i]);
     f->setTextured(true);
-    d->mItem2Font.insert(t, f);
- }
-}
-
-void BosonGLFontChooser::loadGLXFonts()
-{
- boDebug() << k_funcinfo << endl;
- // dummy implementation. we should list all available fonts that we have a
- // QFont::handle() for.
- QFont font("fixed");
- font.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
- font.setFixedPitch(true); // seems to be necessary on some systems. Do NOT remove that unless you know that it works without on such systems. We use textured fonts for non-fixed width
- if (font.handle() == 0) {
-    boWarning() << k_funcinfo << "handle is 0 - trying to find a usable font..." << endl;
-    int handle = font.handle();
-    int count = 0;
-    char** names = XListFonts(QPaintDevice::x11AppDisplay(), "*.txf", 0xffff, &count);
-    for (int i = 0; i < count && handle == 0; i++) {
-        font.setRawName(names[i]);
-        handle = (int)font.handle();
-    }
-    XFreeFontNames(names);
- }
- if (font.handle() == 0) {
-    boError() << k_funcinfo << "no bitmap font found" << endl;
- } else {
-    QListBoxText* t = new QListBoxText(mFontNameList, font.family());
-    BoFontInfo* f = new BoFontInfo();
-    f->setName(font.rawName());
-    f->setTextured(false);
     d->mItem2Font.insert(t, f);
  }
 }
