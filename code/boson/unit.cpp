@@ -36,6 +36,7 @@
 #include "bosonweapon.h"
 #include "bopointeriterator.h"
 #include "bodebug.h"
+#include "bo3dtools.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -463,7 +464,7 @@ bool Unit::attackEnemyUnitsInRange()
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
 	if (isMobile()) {
-		float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
+		float rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
 			if (QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
@@ -610,7 +611,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  }
 
  if (isMobile()) {
-	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
+	float rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
 		if(QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
 			turnTo((int)rot);
