@@ -317,8 +317,11 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
  boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMap);
  if (!map.isGrayscale()) {
+	// we load a valid height map (i.e. a dummy height map) but still return
+	// false for error checking.
 	boError() << k_funcinfo << "not a grayscale image" << endl;
-	return loadHeightMapImage(QByteArray());
+	loadHeightMapImage(QByteArray());
+	return false;
  }
  if ((unsigned int)map.height() != height() + 1) {
 	boError() << k_funcinfo << "invalid height of heightmap: " <<
@@ -328,7 +331,8 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
  if ((unsigned int)map.width() != width() + 1) {
 	boError() << k_funcinfo << "invalid widthof heightmap: "
 			<< map.width() << " must be: " << width() + 1 << endl;
-	return loadHeightMapImage(QByteArray());
+	loadHeightMapImage(QByteArray());
+	return false;
  }
  int increment = 1;
  if (map.bytesPerLine() > map.width() + 1) {
