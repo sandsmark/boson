@@ -66,7 +66,7 @@ void visualMiniDisplay::sync(void)
 
 			switch(g) {
 				default:
-					logf(LOG_ERROR, "visualMiniDisplay::drawCell : unexpected groundType : %d", g);
+					logf(LOG_ERROR, "visualMiniDisplay::sync : unexpected groundType : %d", g);
 				case GROUND_WATER :
 				case GROUND_WATER_OIL:
 					setPoint( i, j, blue, &p);
@@ -121,7 +121,7 @@ void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 	p.begin(_ground);
 	switch(g) {
 		default:
-			logf(LOG_ERROR, "visualMiniDisplay::drawCell : unexpected groundType : %d", g);
+			logf(LOG_ERROR, "visualMiniDisplay::newCell : unexpected groundType : %d", g);
 		case GROUND_WATER :
 		case GROUND_WATER_OIL:
 			setPoint( i, j, blue, &p);
