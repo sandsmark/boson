@@ -4,6 +4,8 @@ boson_plugin_LTLIBRARIES = libbogroundrendererplugin.la
 
 libbogroundrendererplugin_la_SOURCES = \
 		bogroundrendererfactory.cpp \
+		bodefaultgroundrenderer.cpp \
+		bofastgroundrenderer.cpp \
 		bogroundrendererbase.cpp
 
 pluginsdir = $(kde_datadir)/boson/groundrendererplugins

@@ -16,10 +16,10 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOGROUNDRENDERERBASE_H
-#define BOGROUNDRENDERERBASE_H
+#ifndef BOFASTGROUNDRENDERER_H
+#define BOFASTGROUNDRENDERER_H
 
-#include "../bogroundrenderer.h"
+#include "bogroundrendererbase.h"
 
 class Cell;
 class PlayerIO;
@@ -31,25 +31,16 @@ class BoVector3;
 
 class QRect;
 
-class BoGroundRendererBase : public BoGroundRenderer
+class BoFastGroundRenderer : public BoGroundRendererBase
 {
 	Q_OBJECT
 public:
-	BoGroundRendererBase();
-	virtual ~BoGroundRendererBase();
+	BoFastGroundRenderer();
+	virtual ~BoFastGroundRenderer();
 
+	virtual int rtti() const { return Fast; }
 
-	/**
-	 * Generate a list of cells that are (or may) be visible at the moment.
-	 * @param map The map that contains the @ref Cell pointers. Use 0 to
-	 * delete the current list of cells.
-	 **/
-	virtual void generateCellList(const BosonMap* map);
-
-protected:
-	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
-
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
 };
-
 #endif
 

@@ -20,7 +20,8 @@
 #include "bogroundrendererfactory.h"
 #include "bogroundrendererfactory.moc"
 
-#include "bogroundrendererbase.h"
+#include "bodefaultgroundrenderer.h"
+#include "bofastgroundrenderer.h"
 #include "../boversion.h"
 
 #include <bodebug.h>
