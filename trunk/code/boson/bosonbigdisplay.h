@@ -33,6 +33,7 @@ class KGame;
 class KGameChat;
 class BosonCursor;
 class BoSelection;
+class BoAction;
 
 class QLabel;
 
@@ -176,15 +177,16 @@ protected:
 	 * Called when the user right-clicks on the big display.
 	 * 
 	 * Should e.g. move a unit
-	 * @param point The point where the click was done
+	 * @param action Contains information about the mouse event (position,
+	 * additional buttons, ...)
 	 * @param stream The move should be placed here. A move should
 	 * <em>not</em> be done in this method but rather sent to @ref KGame
 	 * which performs the move on every client
 	 * @param send Set to true if you actually want to send the stream
 	 **/
-	void actionClicked(const QPoint& point, QDataStream& stream, bool& send);
+	void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
 
-	void editorActionClicked(const QPoint& point);
+	void editorActionClicked(const BoAction* action);
 
 	virtual void resizeEvent(QResizeEvent*);
 

@@ -46,6 +46,8 @@ public:
 
 	bool mCanProduce;
 	QValueList<int> mProducerList;
+	bool mCanRefineMinerals;
+	bool mCanRefineOil;
 };
 
 class UnitProperties::UnitPropertiesPrivate
@@ -145,6 +147,9 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  mFacilityProperties = new FacilityProperties;
  mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
  mFacilityProperties->mProducerList = conf->readIntListEntry("ProducerList");
+ mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
+		false);
+ mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
 }
 
 bool UnitProperties::isMobile() const
@@ -244,5 +249,21 @@ unsigned int UnitProperties::maxResources() const
 	return 0;
  }
  return mMobileProperties->mMaxResources;
+}
+
+bool UnitProperties::canRefineMinerals() const
+{
+ if (!mFacilityProperties) {
+	return false;
+ }
+ return mFacilityProperties->mCanRefineMinerals;
+}
+
+bool UnitProperties::canRefineOil() const
+{
+ if (!mFacilityProperties) {
+	return false;
+ }
+ return mFacilityProperties->mCanRefineOil;
 }
 

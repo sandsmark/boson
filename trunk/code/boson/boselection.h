@@ -89,6 +89,30 @@ public:
 	 **/
 	QPtrList<Unit> allUnits() const;
 
+	/**
+	 * @return TRUE if at least one unit in the selection can shoot,
+	 * otherwise FALSE
+	 **/
+	bool canShoot() const;
+
+	/**
+	 * @return TRUE if at least one unit in the selection can shoot at unit,
+	 * otherwise FALSE
+	 **/
+	bool canShootAt(Unit* unit) const;
+
+	/**
+	 * @return TRUE if at least on unit in this selection can mine minerals
+	 * otherwise FALSE.
+	 **/
+	bool hasMineralHarvester() const;
+
+	/**
+	 * @return TRUE if at least on unit in this selection can mine oil 
+	 * otherwise FALSE.
+	 **/
+	bool hasOilHarvester() const;
+
 	void activate(bool on);
 
 protected:

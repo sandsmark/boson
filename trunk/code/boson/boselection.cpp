@@ -21,6 +21,7 @@
 #include "boselection.moc"
 
 #include "unit.h"
+#include "unitproperties.h"
 
 class BoSelection::BoSelectionPrivate
 {
@@ -144,9 +145,35 @@ bool BoSelection::hasMobileUnit() const
 	if (it.current()->isMobile()) {
 		return true;
 	}
+	++it;
  }
  return false;
 }
+
+bool BoSelection::hasMineralHarvester() const
+{
+ QPtrListIterator<Unit> it(d->mSelection);
+ while (it.current()) {
+	if (it.current()->unitProperties()->canMineMinerals()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
+bool BoSelection::hasOilHarvester() const
+{
+ QPtrListIterator<Unit> it(d->mSelection);
+ while (it.current()) {
+	if (it.current()->unitProperties()->canMineOil()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
 
 Unit* BoSelection::leader() const
 {
@@ -164,6 +191,33 @@ QPtrList<Unit> BoSelection::allUnits() const
 bool BoSelection::contains(Unit* unit) const
 {
  return d->mSelection.containsRef(unit);
+}
+
+bool BoSelection::canShoot() const
+{
+ QPtrListIterator<Unit> it(d->mSelection);
+ while (it.current()) {
+	if (it.current()->unitProperties()->canShoot()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
+bool BoSelection::canShootAt(Unit* unit) const
+{
+ QPtrListIterator<Unit> it(d->mSelection);
+ while (it.current()) {
+	const UnitProperties* prop = it.current()->unitProperties();
+	if (unit->isFlying() && prop->canShootAtAirUnits()) {
+		return true;
+	} else if (!unit->isFlying() && prop->canShootAtLandUnits()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
 }
 
 void BoSelection::activate(bool on)
