@@ -1251,8 +1251,7 @@ void BosonBigDisplayBase::renderParticles()
 	s = allIt.current();
 	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-#warning FIXME
-		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
+#if !PLAYERIO
 		if (canvas()->cell(s->x(), s->y())) {
 			if (!localPlayerIO()->isFogged(s->x(), s->y())) {
 				visible.append(s);
@@ -1262,6 +1261,11 @@ void BosonBigDisplayBase::renderParticles()
 			// visual appearance only. note that invalid positions
 			// are BAAAAAAD !!
 		}
+#else
+		if (localPlayerIO()->canSee(s)) {
+				visible.append(s);
+		}
+#endif
 	}
  }
 
@@ -2339,8 +2343,9 @@ void BosonBigDisplayBase::createRenderItemList()
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	const QPtrVector<Cell>* cells = item->cells();
 	bool visible = false;
+#if !PLAYERIO
+	const QPtrVector<Cell>* cells = item->cells();
 	for (unsigned int i = 0; i < cells->count(); i++) {
 		Cell* c = cells->at(i);
 		if (!c) {
@@ -2354,6 +2359,9 @@ void BosonBigDisplayBase::createRenderItemList()
 			break;
 		}
 	}
+#else
+	visible = localPlayerIO()->canSee(item);
+#endif
 	if (visible) {
 		d->mRenderItemList->append(*it);
 	}
