@@ -98,53 +98,43 @@ void SelectBoxData::drawCube()
  glDisable(GL_BLEND);
  glLineWidth(2.0);
 		
-// FIXME: a lot of redundant vertices here!
- // bottom
- glBegin(GL_LINE_LOOP);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 0.0);
-	glVertex3f(1.0, 0.0, 0.0);
- glEnd();
- 
- // top
- glBegin(GL_LINE_LOOP);
-	glVertex3f(0.0, 0.0, 1.0);
-	glVertex3f(0.0, 1.0, 1.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 0.0, 1.0);
- glEnd();
+ const float s = 0.3; // size (width or height depending on direction) of a line
+ glBegin(GL_LINES);
+	// bottom quad
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(s, 0.0, 0.0);
+	glVertex3f(1.0 - s, 0.0, 0.0); glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0); glVertex3f(1.0, s, 0.0);
+	glVertex3f(1.0, 1.0 - s, 0.0); glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0 - s, 1.0, 0.0); glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(s, 1.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(0.0, 1.0 - s, 0.0);
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(0.0, s, 0.0);
 
- // left
- glBegin(GL_LINE_LOOP);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, 1.0, 0.0);
-	glVertex3f(0.0, 1.0, 1.0);
-	glVertex3f(0.0, 0.0, 1.0);
- glEnd();
+	// top quad
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(s, 0.0, 1.0);
+	glVertex3f(1.0 - s, 0.0, 1.0); glVertex3f(1.0, 0.0, 1.0);
+	glVertex3f(1.0, 0.0, 1.0); glVertex3f(1.0, s, 1.0);
+	glVertex3f(1.0, 1.0 - s, 1.0); glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(1.0 - s, 1.0, 1.0); glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(s, 1.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(0.0, 1.0 - s, 1.0);
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(0.0, s, 1.0);
 
- //right
- glBegin(GL_LINE_LOOP);
-	glVertex3f(1.0, 0.0, 0.0);
-	glVertex3f(1.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(1.0, 0.0, 1.0);
- glEnd();
+	// front quad
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(0.0, 0.0, s);
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(0.0, 0.0, 1.0 - s);
+	glVertex3f(1.0, 0.0, 0.0); glVertex3f(1.0, 0.0, s);
+	glVertex3f(1.0, 0.0, 1.0); glVertex3f(1.0, 0.0, 1.0 - s);
 
- // front
- glBegin(GL_LINE_LOOP);
-	glVertex3f(0.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 1.0);
-	glVertex3f(0.0, 1.0, 1.0);
- glEnd();
+	// back quad
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(0.0, 1.0, s);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(0.0, 1.0, 1.0 - s);
+	glVertex3f(1.0, 1.0, 0.0); glVertex3f(1.0, 1.0, s);
+	glVertex3f(1.0, 1.0, 1.0); glVertex3f(1.0, 1.0, 1.0 - s);
 
- // back
- glBegin(GL_LINE_LOOP);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, 1.0, 0.0);
-	glVertex3f(1.0, 1.0, 0.0);
-	glVertex3f(1.0, 0.0, 0.0);
+	// left quad
+	// right quad
+	// --> no need to since, that'll be the same lines as in the other quads
  glEnd();
 
  glLineWidth(1.0);
@@ -158,69 +148,108 @@ void SelectBoxData::drawHealthBar(int frame)
 // double factor = (double)frame / (frames() - 1);
 // return (int)(boxWidth() * factor - 2); // -2: the white frame around the box
  GLfloat length = 1.0 * texLength; // y-direction
- GLfloat w = 0.15;
- GLfloat h = 0.15; // height in z-direction
+ GLfloat hy = 0.15; // height in y-direction
+ GLfloat hz = 0.15; // height in z-direction
  GLfloat depth = 0.15;
-// glDisable(GL_TEXTURE_2D);
  glDisable(GL_BLEND);
 // FIXME: a lot of redundant vertices here!
- glTranslatef(0.0, 0.0, 1.0 - h);
+ glTranslatef(0.0, 1.0 - hy, 1.0 - hz);
 
- // bottom
  glBegin(GL_QUADS);
+	// bottom
 	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, 0.0);
-	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, 0.0);
-	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, 0.0);
- glEnd();
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, 0.0);
  
- // top
- glBegin(GL_QUADS);
-	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, h);
-	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, h);
- glEnd();
+	// top
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, hz);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, hz);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, hz);
 
- // left
- glBegin(GL_QUADS);
+	// front
 	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, hz);
+
+	// back
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, hz);
+
+	// left
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, hz);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(0.0, hy, hz);
+	glVertex3f(0.0, hy, 0.0);
+
+	//right
+	glTexCoord2f(texLength, 0.0);
+	glVertex3f(length, 0.0, 0.0);
+	glVertex3f(length, 0.0, hz);
+	glTexCoord2f(texLength, 1.0);
+	glVertex3f(length, hy, hz);
+	glVertex3f(length, hy, 0.0);
  glEnd();
 
- //right
- glBegin(GL_QUADS);
-	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, 0.0);
-	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, h);
-	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, 0.0);
+ glDisable(GL_TEXTURE_2D);
+ // bottom
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, hy, 0.0);
+	glVertex3f(0.0, hy, 0.0);
  glEnd();
 
+ // top 
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, hz);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(0.0, hy, hz);
+ glEnd();
 
  // front
- glTexCoord2f(0.0, 0.0);
- glBegin(GL_QUADS);
-	glVertex3f(0.0, length, 0.0);
-	glVertex3f(w, length, 0.0);
-	glVertex3f(w, length, h);
-	glVertex3f(0.0, length, h);
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(0.0, 0.0, hz);
  glEnd();
 
  // back
- glTexCoord2f(texLength, 0.0);
- glBegin(GL_QUADS);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, length, 0.0);
-	glVertex3f(w, length, 0.0);
-	glVertex3f(w, 0.0, 0.0);
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, hy, 0.0);
+	glVertex3f(1.0, hy, 0.0);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(0.0, hy, hz);
  glEnd();
 
- glTranslatef(0.0, 0.0, h - 1.0);
+ // left
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, hz);
+	glVertex3f(0.0, hy, hz);
+	glVertex3f(0.0, hy, 0.0);
+ glEnd();
+
+ // right
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(1.0, hy, 0.0);
+ glEnd();
+
+ glTranslatef(0.0, hy - 1.0, hz - 1.0);
  glColor3f(1.0, 1.0, 1.0);
-// glEnable(GL_TEXTURE_2D);
  glEnable(GL_BLEND);
+ glEnable(GL_TEXTURE_2D);
 }
 
 SelectBox::SelectBox(BosonSprite*, BosonCanvas*, bool groupLeader)

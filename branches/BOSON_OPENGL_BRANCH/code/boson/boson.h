@@ -201,8 +201,6 @@ signals:
 	void signalNotEnoughMinerals(Player* p);
 	void signalNotEnoughOil(Player* p);
 
-	void signalNewGroup(Unit* leader, QPtrList<Unit> members);
-
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

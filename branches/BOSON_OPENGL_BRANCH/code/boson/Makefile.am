@@ -65,7 +65,6 @@ COMMON_SRC = \
 	commandinput.cpp \
 	bosoncursor.cpp \
 	bosonsound.cpp \
-	unitgroup.cpp \
 	bosonstatistics.cpp \
 	gameoverdialog.cpp \
 	unitplugins.cpp \

@@ -82,7 +82,6 @@ public:
 	 * @li WorkMine - a mining unit is working...
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
-	 * @li WorkMoveInGroup - Unit is moving in group (following leader)
 	 **/
 	enum WorkType {
 		WorkNone = 0,
@@ -91,9 +90,8 @@ public:
 		WorkMine = 3,
 		WorkAttack = 4,
 		WorkConstructed = 5,
-		WorkMoveInGroup = 6,
-		WorkDestroyed = 7,
-		WorkRefine = 8
+		WorkDestroyed = 6,
+		WorkRefine = 7
 	};
 	
 	UnitBase(const UnitProperties* prop);
@@ -303,11 +301,11 @@ public:
 	unsigned int deletionTimer() const;
 
 	/**
-	 * @return true if unit is moving (work() == WorkMove || work() == WorkMoveInGroup)
+	 * @return true if unit is moving (work() == WorkMove)
 	 **/
 	inline bool isMoving() 
 	{ 
-		return (work() == WorkMove || work() == WorkMoveInGroup); 
+		return (work() == WorkMove);
 	}
 
 	/**

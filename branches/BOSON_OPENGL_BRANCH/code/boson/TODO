@@ -82,10 +82,6 @@ General TODOs
 - sometimes when splitting displays (maybe only when splitting vertically) it
   happens that no mouse IO is being added (and is therefore unusable and
   unremovable
-- canvas text: we want a static non-moving text in the upper right corner
-  displaying the resources of the player. up to now all implementations flicker
-  in any way...  update: do we need it anyway? We have same labels on statusbar
-  and they're ok for me...
 - use KDock for the dispalys
 - color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
@@ -109,4 +105,7 @@ Data TODOs
   QPainter to paint on it?
 - can we use a coded gradient instead of the startup-bg pix? would allow every
   size then
+- background story - especially descriptions of the units
+- maps
+- other species
 

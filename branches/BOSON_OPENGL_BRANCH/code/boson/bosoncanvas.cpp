@@ -26,7 +26,6 @@
 #include "unitproperties.h"
 #include "boshot.h"
 #include "bosonmusic.h"
-#include "unitgroup.h"
 #include "bosontiles.h"
 #include "bodisplaymanager.h"
 #include "speciestheme.h"
@@ -175,8 +174,6 @@ public:
 	QPtrList<Unit> mWorkAttack;
 	QPtrList<Unit> mWorkConstructed;
 
-	QValueList<UnitGroup> mGroups;
-
 	BoItemList mAllItems;
 
 	TileLoader* mLoader;
@@ -228,7 +225,6 @@ void BosonCanvas::quitGame()
  d->mWorkRefine.clear();
  d->mWorkAttack.clear();
  d->mWorkConstructed.clear();
- d->mGroups.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -368,7 +364,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if ((d->mWorkMove.count() > 0 || d->mGroups.count() > 0) && (advanceCount % 1) == 0) { // always true
+ if ((d->mWorkMove.count() > 0) && (advanceCount % 1) == 0) { // always true
 	QPtrListIterator<Unit> it(d->mWorkMove);
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
@@ -376,10 +372,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 			it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
 		}
 		++it;
-	}
-	QValueList<UnitGroup>::Iterator groupIt;
-	for (groupIt = d->mGroups.begin(); groupIt != d->mGroups.end(); ++groupIt) {
-		(*groupIt).advanceGroupMove();
 	}
  }
  if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
@@ -551,54 +543,6 @@ void BosonCanvas::unitMoved(Unit* unit, float oldX, float oldY)
 
 // used to adjust the mini map
  emit signalUnitMoved(unit, oldX, oldY);
-}
-
-void BosonCanvas::leaderMoved(Unit* unit, float oldX, float oldY)
-{
- QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
-	if((*it).isLeader(unit)) {
-		(*it).leaderMoved((int)(unit->x() - oldX), (int)(unit->y() - oldY));
-		break;
-	}
- }
- unitMoved(unit, oldX, oldY);
-}
-
-void BosonCanvas::leaderDestroyed(Unit* unit)
-{
- QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
-	if((*it).isLeader(unit)) {
-		(*it).leaderDestroyed();
-		return;
-	}
- }
-}
-
-void BosonCanvas::leaderStopped(Unit* unit)
-{
- QValueListIterator<UnitGroup> it;
- for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
-	if((*it).isLeader(unit)) {
-		(*it).leaderStopped();
-		(*it).setDeleteGroup(true);
-		return;
-	}
- }
-}
-
-void BosonCanvas::slotNewGroup(Unit* leader, QPtrList<Unit> members)
-{
- UnitGroup group(true);
- group.setLeader(leader);
- Unit *unit;
- leader->setWork(UnitBase::WorkMoveInGroup);
- for(unit = members.first(); unit; unit = members.next()) {
-	unit->setWork(UnitBase::WorkMoveInGroup);
-	group.addMember(unit);
- }
- d->mGroups.append(group);
 }
 
 void BosonCanvas::updateSight(Unit* unit, float , float)
@@ -936,9 +880,6 @@ void BosonCanvas::changeWork()
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
 			break;
-		case UnitBase::WorkMoveInGroup:
-			// already in d->mGroups
-			break;
 		case UnitBase::WorkDestroyed:
 			// nothing to do here. is in d->mDestroyedUnits
 			break;
@@ -946,15 +887,6 @@ void BosonCanvas::changeWork()
  }
  d->mWorkChanged.clear();
 
-
- unsigned int i = 0;
- while (i < d->mGroups.count()) {
-	if (d->mGroups[i].deleteGroup()) {
-		d->mGroups.remove(d->mGroups.at(i));
-	} else {
-		i++;
-	}
- }
 }
 
 void BosonCanvas::deleteShot(BoShot* s)

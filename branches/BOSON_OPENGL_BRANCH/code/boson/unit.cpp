@@ -43,7 +43,6 @@ public:
 	UnitPrivate()
 	{
 		mSelectBox = 0;
-		mLeader = false;
 		mTarget = 0;
 	}
 	KGamePropertyInt mDirection;
@@ -57,7 +56,6 @@ public:
 	// saves all KGameProperty objects. If non-KGameProperty properties are
 	// changed before all players entered the game we'll have a broken
 	// network game.
-	bool mLeader;
 	Unit* mTarget;
 
 	SelectBox* mSelectBox;
@@ -169,10 +167,6 @@ void Unit::setHealth(unsigned long int h)
 		setZ(Z_DESTROYED_FACILITY);
 	}
 	setAnimated(false);
-	if(d->mLeader) {
-		boCanvas()->leaderDestroyed(this);
-		d->mLeader = false;
-	}
  }
 }
 
@@ -354,6 +348,8 @@ bool Unit::moveTo(float x, float y, int range)
  d->mMoveDestY = (int)y;
  d->mMoveRange = range;
 
+ // AB: FIXME: UnitGroups doesn't exist anymore! maybe we can search path here,
+ // now?
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
  mSearchPath = true;
@@ -418,10 +414,6 @@ void Unit::stopMoving()
  }
  setXVelocity(0);
  setYVelocity(0);
- if(d->mLeader) {
-	boCanvas()->leaderStopped(this);
-	d->mLeader = false;
- }
 }
 
 void Unit::stopAttacking()
@@ -610,20 +602,6 @@ void Unit::setAdvanceWork(WorkType w)
 	boCanvas()->setWorkChanged(this);
  }
  UnitBase::setAdvanceWork(w);
-}
-
-void Unit::moveInGroup()
-{
- setWork(WorkMoveInGroup);
-}
-
-void Unit::setGroupLeader(bool leader)
-{
- d->mLeader = leader;
- if (isSelected()) {
-	unselect();
-	select();
- }
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -848,13 +826,6 @@ void MobileUnit::advanceMove()
  turnTo();
 }
 
-void MobileUnit::advanceGroupMove(Unit* leader)
-{
- setXVelocity(leader->xVelocity());
- setYVelocity(leader->yVelocity());
- turnTo();
-}
-
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
@@ -954,16 +925,6 @@ void MobileUnit::turnTo()
 //	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
  } else {
 	kdDebug() << k_funcinfo << "error when setting frame" << endl;
- }
-}
-
-void MobileUnit::leaderMoved(float x, float y)
-{
- if(work() == WorkMoveInGroup) {
-	setVelocity(x, y);
-	turnTo();
- } else {
-	kdError() << k_funcinfo << "work() != WorkMoveInGroup" << endl;
  }
 }
 

@@ -123,11 +123,6 @@ public:
 	virtual void advanceMove() { }
 
 	/**
-	 * Move according to the velocity of the leader
-	 **/
-	virtual void advanceGroupMove(Unit* ) { }
-	
-	/**
 	 * Also reimplemented in @ref MobileUnit. Used to check whether the path
 	 * calculated by @ref advanceMove was actually valid.
 	 **/
@@ -238,10 +233,6 @@ public:
 	void stopMoving();
 	void stopAttacking();
 
-	void moveInGroup();
-	void leaderMoved(float , float ) {};
-	void setGroupLeader(bool leader);
-
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
@@ -329,15 +320,9 @@ public:
 	 **/
 	void turnTo();
 
-	void leaderMoved(float x, float y);
-
 	virtual void advanceMine();
 	virtual void advanceRefine();
 	virtual void advanceMove(); // move one step futher to path
-	/**
-	 * Move according to the velocity of leader
-	 **/
-	virtual void advanceGroupMove(Unit* leader);
 	virtual void advanceMoveCheck();
 
 
