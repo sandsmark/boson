@@ -57,7 +57,7 @@ const BosonParticleTextureArray* BosonParticleSystemProperties::getTextures(cons
     int i = 0;
     for(QStringList::Iterator it = files.begin(); it != files.end(); it++)
     {
-      BosonTextureArray::createTexture(mTexturePath + "/" + *it, t->mTextureIds[i], boConfig->modelTexturesMipmaps());
+      BosonTextureArray::createTexture(mTexturePath + "/" + *it, t->mTextureIds[i], boConfig->modelTexturesMipmaps(), true);
       boDebug(150) << k_funcinfo << "Created new texture from file " << *it  << "; id: " << i << "; OGL name: " << t->mTextureIds[i] << endl;
       i++;
     }
