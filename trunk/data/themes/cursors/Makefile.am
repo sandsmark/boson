@@ -14,11 +14,11 @@ install-data-local:
 		fi ;\
 		echo "installing $$i" ;\
 		mkdir -p $(DESTDIR)$(cursordir)/$$i ;\
-		dirs=`cd $(srcdir)/$$i && find -type d`; \
+		dirs=`cd $(srcdir)/$$i && find . -type d`; \
 		for d in $$dirs; do \
 			mkdir -p $(DESTDIR)$(cursordir)/$$i/$$d; \
 		done; \
-		files=`cd $(srcdir)/$$i && find -type f`; \
+		files=`cd $(srcdir)/$$i && find . -type f`; \
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
 				$(INSTALL_DATA) $(srcdir)/$$i/$$f $(DESTDIR)$(cursordir)/$$i/$$f ;\
