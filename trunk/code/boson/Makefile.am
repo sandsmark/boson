@@ -32,6 +32,7 @@ BOSON_SRC = \
 	speciestheme.cpp \
 	speciesdata.cpp \
 	player.cpp \
+	playerio.cpp \
 	bo3dtools.cpp \
 	bomatrixwidget.cpp \
 	bosonminimap.cpp \

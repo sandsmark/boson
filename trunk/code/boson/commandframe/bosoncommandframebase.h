@@ -27,6 +27,7 @@ class Unit;
 class UnitBase;
 class Facility;
 class Player;
+class PlayerIO;
 class BosonOrderButton;
 class BoSelection;
 class BoUnitDisplayBase;
@@ -60,6 +61,7 @@ public:
 	 **/
 	void setLocalPlayer(Player* p);
 	Player* localPlayer() const;
+	PlayerIO* localPlayerIO() const;
 
 	/**
 	 * Ok, I know this function is a hack. Since we use QToolBar as parent
@@ -207,6 +209,7 @@ protected:
 	void addUnitView();
 
 signals:
+	// AB: maybe use PlayerIO instead of Player parameter
 	void signalPlaceUnit(unsigned long int unitType, Player* owner);
 
 	/**

@@ -19,6 +19,7 @@
 
 #include "player.h"
 
+#include "playerio.h"
 #include "speciestheme.h"
 #include "unit.h"
 #include "unitproperties.h"
@@ -50,6 +51,8 @@ public:
 		mMap = 0;
 
 		mStatistics = 0;
+
+		mPlayerIO = 0;
 	}
 
 	QPtrList<Unit> mUnits;
@@ -65,6 +68,8 @@ public:
 
 	int mMobilesCount;
 	int mFacilitiesCount;
+
+	PlayerIO* mPlayerIO;
 };
 
 Player::Player() : KPlayer()
@@ -88,6 +93,7 @@ Player::Player() : KPlayer()
 		KGamePropertyBase::PolicyLocal, "MineralCost");
  d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "OilCost");
+ d->mPlayerIO = new PlayerIO(this);
 
  quitGame(); // this will reset some variables
 }
@@ -98,8 +104,14 @@ Player::~Player()
  quitGame(true);
  dataHandler()->clear(); // this must not be in quitGame()
  delete mSpecies;
+ delete d->mPlayerIO;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+PlayerIO* Player::playerIO() const
+{
+ return d->mPlayerIO;
 }
 
 void Player::quitGame(bool destruct)

@@ -24,7 +24,7 @@
 #include "boactionswidget.h"
 #include "../unit.h"
 #include "../unitplugins.h"
-#include "../player.h"
+#include "../playerio.h"
 #include "../speciestheme.h"
 #include "../pluginproperties.h"
 #include "../boselection.h"
@@ -237,19 +237,19 @@ void BosonCommandFrame::setProduction(Unit* unit)
  if (!unit) {
 	return;
  }
- Player* owner = unit->owner();
- SpeciesTheme* speciesTheme = unit->speciesTheme();
- if (!owner) {
-	boError(220) << k_funcinfo << "NULL owner" << endl;
+ if (!localPlayerIO()) {
+	boError(220) << k_funcinfo << "NULL localPlayerIO" << endl;
 	return;
  }
+ SpeciesTheme* speciesTheme = unit->speciesTheme();
+ BO_CHECK_NULL_RET(speciesTheme);
  if (!speciesTheme) {
 	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
  // don't display production items of other players
- if (localPlayer() != owner) {
+ if (!localPlayerIO()->ownsUnit(unit)) {
 	return;
  }
 
@@ -273,7 +273,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  QValueList<unsigned long int>::Iterator it;
  it = unitsList.begin();
  for (; it != unitsList.end(); ++it) {
-	if (owner->canBuild(*it)) {
+	if (localPlayerIO()->canBuild(*it)) {
 		BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
 		a.setType(ActionProduceUnit);
 		a.setProductionId(*it);
@@ -287,7 +287,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  // Filter out things that player can't actually build (requirements aren't met yet)
  QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
  for (tit = techList.begin(); tit != techList.end(); tit++) {
-	if ((!speciesTheme->technology(*tit)->isResearched()) && (owner->canResearchTech(*tit))) {
+	if ((!speciesTheme->technology(*tit)->isResearched()) && (localPlayerIO()->canResearchTech(*tit))) {
 		BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
 		a.setType(ActionProduceTech);
 		a.setProductionId(*tit);
@@ -350,7 +350,7 @@ bool BosonCommandFrame::checkUpdateTimer() const
 
 void BosonCommandFrame::showUnitActions(Unit* unit)
 {
- if (!unit || unit->owner() != localPlayer()) {
+ if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
 	d->mUnitActions->hide();
  } else {
 	d->mUnitActions->showUnitActions(unit);
