@@ -49,6 +49,15 @@ news_box_begin();
 **  To add an article, call
 **  news_article(<title>, <date added>, <full text>);
 **/
+news_article("New features!", "2nd September 2002 18:08",
+    "I promised to add new features and here comes the first one: you can now
+    change style of this homepage. Just go to <a href=\"options.php\">options
+    page</a> and select style you like most!<br>
+    Currently, there are only two different styles, but if you want more, you
+    can write one yourself! All you need to do is to write new stylesheet that
+    specifies colors used. It's not hard! You can use style-blue.css as
+    template. When you're done, send them to
+    <a href=\"mailto:rivolaks@hot.ee\">me</a>, I'm happy to put them up here!");
 news_article("New homepage", "1st September 2002 19:22",
     "Boson has now new homepage! This homepage should be much better than old
     one, but it's new, so it may contain some errors (I hope it doesn't though).
