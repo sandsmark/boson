@@ -93,6 +93,7 @@ texture_DATA = \
 	treetop1.jpg \
 	hay1.jpg \
 	hay2.jpg \
+	tnkside1.jpg \
 	water1.jpg
 
 # no further editing need here
