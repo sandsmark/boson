@@ -86,9 +86,6 @@ General TODOs
 - color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin  update: it's not wrong, it's disabled-color
-- BsoonPath::PathNode needs to be public to compile in gcc 2.96
-  Why? It is used internally only... Failing e.g. here:
-  inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 - pixmaps on startup widgets should be centered horizontally
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
@@ -107,3 +104,4 @@ Data TODOs
   QPainter to paint on it?
 - can we use a coded gradient instead of the startup-bg pix? would allow every
   size then
+

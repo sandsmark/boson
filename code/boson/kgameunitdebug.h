@@ -48,6 +48,8 @@ protected slots:
 	void slotUpdate();
 	void updateWaypoints(QListViewItem*);
 	void updateProduction(QListViewItem*);
+	void updateUnitsInRange(QListViewItem*);
+	void updateUnitCollisions(QListViewItem*);
 
 	void slotUnitPropertyChanged(KGamePropertyBase*);
 

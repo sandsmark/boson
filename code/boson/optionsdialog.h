@@ -45,7 +45,6 @@ public:
 	void setArrowScrollSpeed(int);
 
 	void setCursor(CursorMode mode);
-	void setGroupMove(GroupMoveMode mode);
 	void setMiniMapScale(double s);
 
 	void setRMBScrolling(bool);
@@ -58,7 +57,6 @@ signals:
 	void signalUpdateIntervalChanged(unsigned int);
 
 	void signalCursorChanged(int index, const QString& cursorDir);
-	void signalGroupMoveChanged(int index);
 
 	void signalCmdBackgroundChanged(const QString& file);
 	void signalMiniMapScaleChanged(double);
@@ -84,7 +82,6 @@ protected slots:
 protected:
 	void initGeneralPage();
 	void initCursorPage();
-	void initPathfindingPage();
 	void initScrollingPage();
 
 private:

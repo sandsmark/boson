@@ -34,6 +34,8 @@ class Facility;
 class ProductionPlugin;
 class RepairPlugin;
 
+class KGameUnitDebug;
+
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
  * should go to UnitBase directly - except the visual stuff. (UPDATE 01/12/27:
@@ -178,6 +180,7 @@ public:
 	 * soon as it is received from there you can work with it. That means,
 	 * that after calling addWaypoint() @ref waypointCount has not yet been
 	 * increased!
+	 * UPDATE: this documentation is outdated! see source code
 	 **/
 	void addWaypoint(const QPoint& pos);
 	
@@ -189,11 +192,9 @@ public:
 	 * <em>immediately</em> - in contrary to @ref addWaypoint this is not
 	 * sent over network as all function calling clearWaypoints() are
 	 * already called on all clients!
-	 * @param send If FALSE clear the waypoints immediately (like
-	 * PolicyLocal) otherwise send the command over network (like
-	 * PolicyClean)
+	 * UPDATE: this documentation is outdated! see source code
 	 **/
-	void clearWaypoints(bool send = false);
+	void clearWaypoints();
 
 	/**
 	 * Remove the first waypoint from the list. Note that this is done
@@ -297,6 +298,8 @@ protected:
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
+
+	friend class KGameUnitDebug;
 };
 
 
@@ -382,7 +385,7 @@ public:
 	Facility* refinery() const;
 	virtual QRect boundingRect() const;
 
-	virtual void clearWaypoints(bool send = false);
+	virtual void clearWaypoints();
 	virtual void waypointDone();
 
 	virtual bool load(QDataStream& stream);

@@ -22,6 +22,7 @@
 #include "unit.h"
 #include "unitplugins.h"
 #include "player.h"
+#include "boitemlist.h"
 
 #include <klistview.h>
 #include <klistbox.h>
@@ -32,6 +33,9 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qintdict.h>
+#include <qlabel.h>
+#include <qvgroupbox.h>
+#include <qvbox.h>
 
 #include "kgameunitdebug.moc"
 
@@ -50,6 +54,8 @@ public:
 	KListView* mUnitList;
 	KListBox* mWaypoints;
 	KListView* mProduction;
+	KListView* mUnitsInRange;
+	KListView* mUnitCollisions;
 
 	QIntDict<Unit> mUnits;
 	QPtrDict<QListViewItem> mItems;
@@ -96,16 +102,37 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  layout->addWidget(d->mUnitList);
 
  QVBoxLayout* l = new QVBoxLayout(layout);
+ QVBoxLayout* waypointLayout = new QVBoxLayout(l);
+ QLabel* waypointTitle = new QLabel(i18n("Waypoints"), this);
+ waypointLayout->addWidget(waypointTitle, 0);
  d->mWaypoints = new KListBox(this);
  connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateWaypoints(QListViewItem*)));
- l->addWidget(d->mWaypoints);
+ waypointLayout->addWidget(d->mWaypoints, 1);
 
+ QVBoxLayout* productionLayout = new QVBoxLayout(l);
+ QLabel* productionTitle = new QLabel(i18n("Productions"), this);
+ productionLayout->addWidget(productionTitle, 0);
  d->mProduction = new KListView(this);
  d->mProduction->addColumn(i18n("Number"));
  d->mProduction->addColumn(i18n("TypeId"));
  d->mProduction->addColumn(i18n("ETA"));
  connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateProduction(QListViewItem*)));
- l->addWidget(d->mProduction);
+ productionLayout->addWidget(d->mProduction, 1);
+
+ QVGroupBox* collisionsBox = new QVGroupBox(i18n("Collisions"), this);
+ layout->addWidget(collisionsBox);
+ QVBox* inRangeWidget = new QVBox(collisionsBox);
+ (void)new QLabel(i18n("InRange:"), inRangeWidget);
+ d->mUnitsInRange = new KListView(inRangeWidget);
+ d->mUnitsInRange->addColumn(i18n("ID"));
+ d->mUnitsInRange->addColumn(i18n("Enemy"));
+ connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateUnitsInRange(QListViewItem*)));
+ QVBox* unitCollisionsWidget = new QVBox(collisionsBox);
+ (void)new QLabel(i18n("UnitCollisions:"), unitCollisionsWidget);
+ d->mUnitCollisions = new KListView(inRangeWidget);
+ d->mUnitCollisions->addColumn(i18n("ID"));
+ d->mUnitCollisions->addColumn(i18n("Exact"));
+ connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateUnitCollisions(QListViewItem*)));
  
 
 /*
@@ -138,6 +165,7 @@ void KGameUnitDebug::slotUpdate()
  d->mItems.clear();
  d->mWaypoints->clear();
  d->mProduction->clear();
+ d->mUnitsInRange->clear();
  if (!d->mBoson) {
 	return;
  }
@@ -264,6 +292,75 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
 		item->setText(2, i18n("Ready")); // currently always ready
 	}
  
+ }
+}
+
+void KGameUnitDebug::updateUnitsInRange(QListViewItem* item)
+{
+ d->mUnitsInRange->clear();
+ if (!item) {
+	return;
+ }
+ int id = item->text(0).toInt();
+ Unit* unit = d->mUnits[id];
+ if (!unit) {
+	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	return;
+ }
+ BoItemList inRange = unit->unitsInRange();
+ BoItemList enemyInRange = unit->enemyUnitsInRange();
+ if (inRange.count() == 0) {
+	QListViewItem* item = new QListViewItem(d->mUnitsInRange);
+	item->setText(0, i18n("No units in range for unit %1").arg(unit->id()));
+ }
+ BoItemList::Iterator it = inRange.begin();
+ for (; it != inRange.end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		BosonSprite* i = (BosonSprite*)*it;
+		QListViewItem* item = new QListViewItem(d->mUnitsInRange);
+		QString text = i18n("Item is not a unit rtti=%1 ; x=%2 ; y=%3 ; z=%4").arg(i->rtti()).arg(i->x()).arg(i->y()).arg(i->z());
+		item->setText(0, text);
+	}
+	Unit* u = (Unit*)*it;
+	QListViewItem* item = new QListViewItem(d->mUnitsInRange);
+	item->setText(0, QString::number(u->id()));
+	if (enemyInRange.contains(*it)) {
+		item->setText(1, i18n("Yes"));
+	} else {
+		item->setText(1, i18n("No"));
+	}
+ }
+}
+
+void KGameUnitDebug::updateUnitCollisions(QListViewItem* item)
+{
+ d->mUnitCollisions->clear();
+ if (!item) {
+	return;
+ }
+ int id = item->text(0).toInt();
+ Unit* unit = d->mUnits[id];
+ if (!unit) {
+	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	return;
+ }
+ QValueList<Unit*> collisionsFalse = unit->unitCollisions(false);
+ QValueList<Unit*> collisionsTrue = unit->unitCollisions(false);
+ if (collisionsFalse.count() == 0) {
+	QListViewItem* item = new QListViewItem(d->mUnitCollisions);
+	item->setText(0, i18n("No unit collisions for %1").arg(unit->id()));
+ }
+
+ QValueList<Unit*>::Iterator it = collisionsFalse.begin();
+ for (; it != collisionsFalse.end(); ++it) {
+	Unit* u = (Unit*)*it;
+	QListViewItem* item = new QListViewItem(d->mUnitCollisions);
+	item->setText(0, QString::number(u->id()));
+	if (collisionsTrue.contains(*it)) {
+		item->setText(1, i18n("True"));
+	} else {
+		item->setText(1, i18n("False"));
+	}
  }
 }
 
