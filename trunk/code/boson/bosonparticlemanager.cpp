@@ -362,17 +362,16 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
 
 QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme)
 {
+  return loadParticleSystemProperties(BosonConfig::readUnsignedLongNumList(cfg, key), theme);
+}
+
+QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme)
+{
   QPtrList<BosonParticleSystemProperties> props;
-  if(!cfg->hasKey(key))
-  {
-    return props;
-  }
-  QValueList<unsigned long int> list = BosonConfig::readUnsignedLongNumList(cfg, key);
   QValueList<unsigned long int>::Iterator it;
-  for(it = list.begin(); it != list.end(); it++)
+  for(it = ids.begin(); it != ids.end(); it++)
   {
     props.append(theme->particleSystemProperties(*it));
   }
   return props;
 }
-

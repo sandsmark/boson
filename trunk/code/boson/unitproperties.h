@@ -79,7 +79,7 @@ public:
 	/**
 	 * @param fileName The filename of the config file for this unit type
 	 **/
-	UnitProperties(SpeciesTheme*, const QString& fileName, bool fullload = true);
+	UnitProperties(SpeciesTheme*, const QString& fileName, bool fullmode = true);
 	~UnitProperties();
 
 
@@ -90,7 +90,7 @@ public:
 	 * The file should contain units/your_unit_dir/index.unit at the end
 	 * and should be an absolute path.
 	 **/
-	void loadUnitType(const QString& fileName, bool full = true);
+	void loadUnitType(const QString& fileName, bool fullmode = true);
 
 	/**
 	 * Save UnitProperties to the file. This sets all values of UnitProperties. All values are
@@ -361,6 +361,9 @@ protected:
 	void clearPlugins();
 	void createMobileProperties();
 	void createFacilityProperties();
+	void addPlugin(PluginProperties* prop);
+
+	TerrainType terrainType() const  { return mTerrain; };
 
 	friend class BoUnitEditor;
 
@@ -381,6 +384,7 @@ private:
 private:
 	UnitPropertiesPrivate* d;
 	SpeciesTheme* mTheme;
+	bool mFullMode;
 
 	unsigned long int mTypeId; // note: 0 is invalid!
 	unsigned int mUnitWidth;

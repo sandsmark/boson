@@ -73,6 +73,7 @@ class BosonWeaponProperties : public PluginProperties
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
     unsigned long int speed() const  { return mSpeed; };
+    QString modelFileName() const  { return mModelFileName; };
 
     float maxHeight() const  { return mMaxHeight; };
 
@@ -84,9 +85,14 @@ class BosonWeaponProperties : public PluginProperties
     QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
     QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
+    
+    QValueList<unsigned long int> shootParticleSystemIds() const;
+    QValueList<unsigned long int> flyParticleSystemIds() const;
+    QValueList<unsigned long int> hitParticleSystemIds() const;
 
     virtual QString name() const;
-    virtual void loadPlugin(KSimpleConfig* config);
+    virtual void loadPlugin(KSimpleConfig* config)  { loadPlugin(config, true); };
+    virtual void loadPlugin(KSimpleConfig* config, bool full = true);
     virtual void savePlugin(KSimpleConfig* config);
     virtual int pluginType() const  { return Weapon; };
 
@@ -101,9 +107,14 @@ class BosonWeaponProperties : public PluginProperties
     unsigned long int mSpeed;
     float mMaxHeight;
     BosonModel* mModel;
+    QString mModelFileName;
     QPtrList<BosonParticleSystemProperties> mShootParticleSystems;
     QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
     QPtrList<BosonParticleSystemProperties> mHitParticleSystems;
+    // FIXME: these are only needed in editor mode. In normal mode, they only waste memory
+    QValueList<unsigned long int> mShootParticleSystemIds;
+    QValueList<unsigned long int> mFlyParticleSystemIds;
+    QValueList<unsigned long int> mHitParticleSystemIds;
 };
 
 
