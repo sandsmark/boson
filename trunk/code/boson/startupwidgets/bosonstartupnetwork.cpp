@@ -146,21 +146,7 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor)
 	boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
 	return false;
  }
-#if 0
- if (!field->isLoaded()) {
-	if (!field->loadPlayField(QString::null)) {
-		boError() << k_funcinfo << "unable to load playfield " << field->identifier() << endl;
-		return false;
-	}
- }
-#endif
- QByteArray data;/*
- QDataStream stream(data, IO_WriteOnly);
- if (!field->saveAdminPlayField(stream)) {
-	boError() << k_funcinfo << "could not save the playfield to a stream" << endl;
-	return false;
- }
- */
+ QByteArray data;
  data = field->loadFromDiskToStream();
  if (editor) {
 	mGame->sendMessage(data, BosonMessage::IdNewEditor);
