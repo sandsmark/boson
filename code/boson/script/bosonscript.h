@@ -99,6 +99,12 @@ class BosonScript
      * Should be called immeditely after the game is started
      **/
     virtual void init() = 0;
+    /**
+     * Calls "setPlayerId" function in the script.
+     * New player id of the player that owns this script is given to the
+     *  function as a parameter.
+     **/
+    virtual void setPlayerId(int id) = 0;
 
     /**
      * Loads script and variables from stream.

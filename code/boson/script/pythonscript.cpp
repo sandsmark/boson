@@ -383,6 +383,13 @@ void PythonScript::init()
   callFunction("init", args);
 }
 
+void PythonScript::setPlayerId(int id)
+{
+  PyObject* args = PyTuple_New(1);
+  PyTuple_SetItem(args, 0, PyInt_FromLong(id));
+  callFunction("setPlayerId", args);
+}
+
 bool PythonScript::save(QDataStream& stream) const
 {
   boDebug() << k_funcinfo << endl;
