@@ -21,8 +21,8 @@
 
 #include "bodebugdcopiface.h"
 #include "boversion.h"
+#include "boapplication.h"
 
-#include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
- KApplication app;
+ BoApplication app;
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  BoUnitEditor* dlg = new BoUnitEditor(0);

@@ -41,9 +41,7 @@ public:
 	BoItemListHandler();
 	~BoItemListHandler();
 
-	static BoItemListHandler* itemListHandler() { return mItemListHandler; }
-	static void initStatic();
-	static void deleteStatic();
+	static BoItemListHandler* itemListHandler();
 
 	void registerList(BoItemList* list);
 	void unregisterList(BoItemList* list);
@@ -57,7 +55,6 @@ public slots:
 	void slotDeleteLists();
 
 private:
-	static BoItemListHandler* mItemListHandler;
 	BoItemListHandlerPrivate* d;
 };
 

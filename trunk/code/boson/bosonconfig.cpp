@@ -18,17 +18,47 @@
 */
 #include "bosonconfig.h"
 #include "defines.h"
+#include "boglobal.h"
 //#include "bodebug.h"
 
 #include <kconfig.h>
 #include <kapplication.h>
-#include <kstaticdeleter.h>
 #include <klocale.h>
 
 #include <GL/gl.h>
 
-static KStaticDeleter<BosonConfig> sd;
-BosonConfig* BosonConfig::mBosonConfig = 0;
+class BoGlobalConfigObject : public BoGlobalObject<BosonConfig>
+{
+public:
+	BoGlobalConfigObject()
+		: BoGlobalObject<BosonConfig>(BoGlobalObjectBase::BoGlobalConfig, true)
+	{
+		mPostInitFunction = 0;
+	}
+	virtual ~BoGlobalConfigObject()
+	{
+	}
+
+	virtual bool loadObject()
+	{
+		bool ret = BoGlobalObject<BosonConfig>::loadObject();
+		if (ret && pointer() && mPostInitFunction) {
+			mPostInitFunction();
+		}
+		return ret;
+	}
+
+	void setPostInitFunction(void (*func)())
+	{
+		mPostInitFunction = func;
+	}
+
+private:
+	void (*mPostInitFunction)();
+};
+
+static BoGlobalConfigObject globalConfig;
+
 
 BoConfigEntry::BoConfigEntry(BosonConfig* parent, const QString& key)
 {
@@ -234,12 +264,17 @@ BosonConfig::~BosonConfig()
  delete d;
 }
 
-void BosonConfig::initBosonConfig()
+BosonConfig* BosonConfig::bosonConfig()
 {
- if (mBosonConfig) {
+ return BoGlobal::boGlobal()->bosonConfig();
+}
+
+void BosonConfig::setPostInitFunction(void (*func)())
+{
+ if (!func) {
 	return;
  }
- sd.setObject(mBosonConfig, new BosonConfig);
+ globalConfig.setPostInitFunction(func);
 }
 
 void BosonConfig::addConfigEntry(BoConfigEntry* c)

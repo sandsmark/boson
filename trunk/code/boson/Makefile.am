@@ -7,6 +7,8 @@ bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
 
 BOSON_SRC = \
+	boapplication.cpp \
+	boglobal.cpp \
 	top.cpp  \
 	cell.cpp \
 	unitproperties.cpp \
@@ -77,6 +79,8 @@ BOSON_SRC = \
 
 
 BOPROFILING_SRC= \
+	boapplication.cpp \
+	boglobal.cpp \
 	bosonprofilingdialog.cpp \
 	bosonprofiling.cpp \
 	boprofilingmain.cpp
@@ -135,7 +139,8 @@ bocursor_LDADD = \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		-lkio $(LIB_KDEUI) $(GLLIB)
 bocursor_SOURCES = \
-		$(COMMON_SRC) \
+		boapplication.cpp \
+		boglobal.cpp \
 		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
 		bosontexturearray.cpp bosonconfig.cpp \
 		bosonglwidget.cpp
@@ -165,6 +170,8 @@ boinfo_LDADD = \
 		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 boinfo_SOURCES = \
+		boapplication.cpp \
+		boglobal.cpp \
 		bosonglwidget.cpp \
 		boinfomain.cpp
 

@@ -40,11 +40,13 @@ class BosonMusic : public QObject
 {
 	Q_OBJECT
 public:
-	BosonMusic(QObject* parent);
+	BosonMusic(QObject* parent = 0);
 	~BosonMusic();
 
-	static BosonMusic* bosonMusic() { return mBosonMusic; }
-	static void initBosonMusic();
+	/**
+	 * @return BoGlobal::boGlobal()->bosonMusic();
+	 **/
+	static BosonMusic* bosonMusic();
 
 	/**
 	 * Play a previously loaded file. See @ref load
@@ -100,8 +102,6 @@ protected slots:
 private:
 	class BosonMusicPrivate;
 	BosonMusicPrivate* d;
-
-	static BosonMusic* mBosonMusic;
 };
 
 #endif

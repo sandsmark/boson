@@ -169,15 +169,6 @@ public:
 	};
 
 	/**
-	 * Initialize the global BoInfo object (see @ref boInfo) if it is not
-	 * yet there. Otherwise don't do anything.
-	 *
-	 * Note that you must call @ref update on a newly created object before
-	 * you can use it!
-	 **/
-	static void initBoInfo();
-
-	/**
 	 * @return The global BoInfo object. Will return NULL if @ref initBoInfo
 	 * was not yet called.
 	 **/
@@ -633,7 +624,6 @@ private:
 
 private:
 	BoInfoPrivate* d;
-	static BoInfo* mBoInfo;
 };
 
 #endif

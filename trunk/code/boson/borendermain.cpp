@@ -28,10 +28,9 @@
 #include "kgamemodeldebug.h"
 #include "kgamespeciesdebug.h"
 #include "bodebug.h"
-#include "sound/bosonmusic.h"
 #include "boversion.h"
+#include "boapplication.h"
 
-#include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
@@ -87,6 +86,8 @@ static KCmdLineOptions options[] =
     { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
     { 0, 0, 0 }
 };
+
+void postBosonConfigInit();
 
 
 ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
@@ -709,22 +710,20 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 2002 The Boson team",
+		"(C) 2002-2003 The Boson team",
 		0,
 		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
+
+ // we need to do extra stuff after BosonConfig's initialization
+ BosonConfig::setPostInitFunction(&postBosonConfigInit);
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 
- KApplication app;
+ BoApplication app;
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
-
- BosonConfig::initBosonConfig();
- BosonProfiling::initProfiling();
- boConfig->setDisableSound(true);
- BosonMusic::initBosonMusic(); // TODO: completely disable music in BosonConfig
 
  RenderMain* main = new RenderMain();
  kapp->setMainWidget(main);
@@ -863,3 +862,7 @@ int main(int argc, char **argv)
 }
 
 
+void postBosonConfigInit()
+{
+ boConfig->setDisableSound(true);
+}

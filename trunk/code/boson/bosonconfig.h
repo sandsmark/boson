@@ -29,7 +29,6 @@ template<class T> class QValueList;
 
 #define boConfig BosonConfig::bosonConfig()
 
-
 class BoConfigEntry
 {
 public:
@@ -173,9 +172,18 @@ public:
 		DebugSelection = 1
 	};
 
-	static BosonConfig* bosonConfig() { return mBosonConfig; }
-	
-	static void initBosonConfig();
+	static BosonConfig* bosonConfig();
+
+	/**
+	 * Set a function that will be called immediately after @ref
+	 * BoGlobalObjectBase::loadObject() has returned successfully.
+	 *
+	 * You can use this to do some initialization for other global objects,
+	 * that will get constructed after the BosonConfig object, such as
+	 * applying the --nosound parameter (will get used by @ref BosonMusic
+	 * constructor)
+	 **/
+	static void setPostInitFunction(void (*func)());
 
 	static QString readLocalPlayerName(KConfig* conf = 0);
 	static void saveLocalPlayerName(const QString& name, KConfig* conf = 0);
@@ -325,8 +333,6 @@ protected:
 	void saveCommandButtonsPerRow(KConfig* conf);
 
 private:
-	static BosonConfig* mBosonConfig;
-	
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
 

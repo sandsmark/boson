@@ -19,6 +19,7 @@
 
 #include "bosondata.h"
 
+#include "boglobal.h"
 #include "bodebug.h"
 
 #include <kstaticdeleter.h>
@@ -26,6 +27,8 @@
 #include <kstandarddirs.h>
 
 #include <qdict.h>
+
+static BoGlobalObject<BosonData> globalDataObject(BoGlobalObjectBase::BoGlobalData);
 
 BosonData* BosonData::mBosonData = 0;
 static KStaticDeleter<BosonData> sd;
@@ -41,15 +44,6 @@ public:
 	QDict<BosonDataObject> mPlayFields;
 };
 
-void BosonData::initBosonData()
-{
- if (mBosonData) {
-	return;
- }
- boDebug() << k_funcinfo << endl;
- sd.setObject(mBosonData, new BosonData());
-}
-
 BosonData::BosonData()
 {
  d = new BosonDataPrivate;
@@ -62,6 +56,11 @@ BosonData::~BosonData()
  d->mPlayFields.clear();
  d->mGroundThemes.clear();
  delete d;
+}
+
+BosonData* BosonData::bosonData()
+{
+ return BoGlobal::boGlobal()->bosonData();
 }
 
 QStringList BosonData::availableFiles(const QString& searchPattern)

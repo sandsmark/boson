@@ -101,9 +101,10 @@ public:
 	// note that we don't have a public c'tor
 	~BosonData();
 
-	static void initBosonData();
-
-	static BosonData* bosonData() { return mBosonData; }
+	/**
+	 * @return BoGlobal::boGlobal->bosonData();
+	 **/
+	static BosonData* bosonData();
 
 	bool insertGroundTheme(BosonDataObject* object);
 	bool loadGroundTheme(const QString& id);
@@ -125,7 +126,7 @@ public:
 	 **/
 	static QStringList availableFiles(const QString& searchPattern);
 
-protected:
+//protected:
 	// protected, so that noone can make an object except for ourselves.
 	BosonData();
 

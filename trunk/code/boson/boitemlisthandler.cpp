@@ -20,6 +20,7 @@
 #include "boitemlisthandler.h"
 #include "boitemlisthandler.moc"
 #include "boitemlist.h"
+#include "boglobal.h"
 #include "bodebug.h"
 
 #include <qptrlist.h>
@@ -28,7 +29,11 @@
 // currently we delete the lists as soon as we return to the event loop
 #define DELETION_DELAY 0
 
-BoItemListHandler* BoItemListHandler::mItemListHandler = 0;
+// AB: we use initFirst, because the item list hanlder must be deleted last (as
+// BosonPlayField's cells depend on it).
+// note tha this mean neither c'tor nor d'tor may use BosonConfig! same the
+// other way round! (we can't say which of them gets constructed first)
+static BoGlobalObject<BoItemListHandler> globalHandler(BoGlobalObjectBase::BoGlobalItemListHandler, true);
 
 class BoItemListHandlerPrivate
 {
@@ -51,26 +56,9 @@ BoItemListHandler::~BoItemListHandler()
  delete d;
 }
 
-void BoItemListHandler::initStatic()
+BoItemListHandler* BoItemListHandler::itemListHandler()
 {
- if (!mItemListHandler) {
-	// AB: at the moment we do not store in BoItemList whether we registered
-	// to a handler. but as we store BosonPlayField objects statically and
-	// delete them using a static deleter we have to ensure that the
-	// item list handler still exists when they are deleted.
-	// unfortunately KStaticDeleter is registered to a list using append() and
-	// is removed using take(0). so we can't ensure this. therefore we
-	// can't use a static deleter here, but have to use our own deletion
-	// function.
-	mItemListHandler = new BoItemListHandler();
-	qAddPostRoutine(BoItemListHandler::deleteStatic);
- }
-}
-
-void BoItemListHandler::deleteStatic()
-{
- delete mItemListHandler;
- mItemListHandler = 0;
+ return BoGlobal::boGlobal()->boItemListHandler();
 }
 
 void BoItemListHandler::registerList(BoItemList* list)
