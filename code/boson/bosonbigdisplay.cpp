@@ -323,11 +323,6 @@ void BosonBigDisplay::updateCursor()
 	return;
  }
 
-#warning REMOVE
- // just for debugging
- return;
-
- 
  QPoint widgetPos = mapFromGlobal(QCursor::pos());
 #ifndef NO_OPENGL
  QPoint canvasPos;
