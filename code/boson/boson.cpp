@@ -34,7 +34,7 @@
 
 FILE *logfile = (FILE *) 0L;
 
-BosonApp::BosonApp(char *servername)
+BosonApp::BosonApp()
 {
 
   logfile = fopen(BOSON_LOGFILE_CLIENT, "a+b");
@@ -57,7 +57,7 @@ BosonApp::BosonApp(char *servername)
 
   ///////////////////////////////////////////////////////////////////
   // call init() to invoke all other construction parts
-  init(servername);
+  init();
 }
 
 BosonApp::~BosonApp()
@@ -71,7 +71,6 @@ void BosonApp::enableCommand(int id_)
   ///////////////////////////////////////////////////////////////////
   // enable menu and toolbar functions by their ID's
   menu_bar->setItemEnabled(id_,true);
-  tool_bar_0->setItemEnabled(id_,true);
 }
 
 void BosonApp::disableCommand(int id_)
@@ -79,20 +78,16 @@ void BosonApp::disableCommand(int id_)
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar functions by their ID's
   menu_bar->setItemEnabled(id_,false);
-  tool_bar_0->setItemEnabled(id_,false);
 }
 
 
-void BosonApp::init(char *servername )
+void BosonApp::init()
 { 
 
   ///////////////////////////////////////////////////////////////////
   // set up the base application features
   initMenuBar();
-  initToolBars();
   initStatusBar();
-  initView();
-  initSocket(servername);
 
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar items at startup
@@ -166,6 +161,7 @@ void BosonApp::initMenuBar()
   ///////////////////////////////////////////////////////////////////
   // menuBar entry file_menu
   QPopupMenu *file_menu = new QPopupMenu();
+  file_menu->insertItem(Icon("mini/socket.xpm"), i18n("Connect to server"), ID_FILE_CONNECT );
   file_menu->insertItem(Icon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
 /*  file_menu->insertSeparator();
   file_menu->insertItem(Icon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
@@ -255,36 +251,7 @@ void BosonApp::initMenuBar()
 
 
 }
-void BosonApp::initToolBars()
-{
 
-  ///////////////////////////////////////////////////////////////////
-  // TOOLBAR
-  // set tool_bar_0 the current toolBar and the position due to config file
-  tool_bar_0 = toolBar(0);
-  tool_bar_0->insertButton(Icon("configure.xpm"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
-  tool_bar_0->insertButton(Icon("flag.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
-  tool_bar_0->insertButton(Icon("stop.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
-  tool_bar_0->insertButton(Icon("filedel.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
-  tool_bar_0->insertButton(Icon("home.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
-  tool_bar_0->insertButton(Icon("idea.xpm"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
-  tool_bar_0->insertSeparator();
-  tool_bar_0->insertButton(Icon("exit.xpm"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
-  tool_bar_0->insertButton(Icon("help.xpm"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
-
-  ///////////////////////////////////////////////////////////////////
-  // INSERT YOUR APPLICATION SPECIFIC TOOLBARS HERE -e.g. tool_bar_1:
-  // add functionality for new created toolbars in:
-  // enableCommand, disableCommand, in the menu_bar and an additional function slotViewToolbar_1
-  // for that also create a bViewToolbar_1 and a KConfig entry (see Constructor).
-  // Also update ressource values and commands 
-
-
-  ///////////////////////////////////////////////////////////////////
-  // CONNECT THE TOOLBAR SLOTS WITH SIGNALS - add new created toolbars
-  CONNECT_TOOLBAR(tool_bar_0);
-
-}
 
 void BosonApp::initStatusBar()
 {
@@ -296,18 +263,19 @@ void BosonApp::initStatusBar()
 
 }
 
-void BosonApp::initView()
+void BosonApp::initView(int w, int h)
 { 
 
 /* the field is created when a game is created */
-	field = new bosonField(200,200);
+	field = new bosonField(w,h);
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
-	resize(780, 580);
 	setView(mainview);
+	mainview->show();
+	resize(780, 580);
 }
 
 
@@ -471,7 +439,8 @@ void BosonApp::slotStatusHelpMsg(const char *text)
 
 BEGIN_CMD(BosonApp)
 
-  ON_CMD(ID_APP_EXIT,                 slotAppExit(),            i18n(""))
+  ON_CMD(ID_FILE_CONNECT,	initSocket(),		i18n(""))
+  ON_CMD(ID_APP_EXIT,		slotAppExit(),		i18n(""))
 
 
 //  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
@@ -484,7 +453,8 @@ END_CMD()
 
 
 BEGIN_STATUS_MSG(BosonApp)
-  ON_STATUS_MSG(ID_FILE_NEW_WINDOW,  i18n("Opens a new view window"))
+  ON_STATUS_MSG(ID_FILE_CONNECT,	i18n("Connect to the boson server"))
+  ON_STATUS_MSG(ID_FILE_NEW_WINDOW,	i18n("Opens a new view window"))
 
 /*  ON_STATUS_MSG(ID_FILE_NEW,         i18n("Creates a new document"))
   ON_STATUS_MSG(ID_FILE_OPEN,        i18n("Opens an existing document"))

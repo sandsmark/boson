@@ -55,7 +55,7 @@ class BosonApp : public KTMainWindow
 {    Q_OBJECT 
 public: 
   /** construtor */
-  BosonApp(char *servername=0l); 
+  BosonApp(void); 
   /** destructor */
   ~BosonApp();
 
@@ -78,19 +78,16 @@ protected:
     * by calling readOptions() and calls the initXX functions to set up
     * the main view items
     */
-  void init(char *servername=0l);  
-  /** initSocket try to connect to the BosonServer */
-  void initSocket(char *servername=0l);
+  void init(void);  
   /** initMenuBar creates the menu_bar and inserts the menuitems */
   void initMenuBar(); 
   /** this creates the toolbars. Change the toobar look and add more in this
     * function 
     */ 
-  void initToolBars();
   /** setup the statusbar */
   void initStatusBar(); 
   /** setup the mainview*/
-  void initView();
+  void initView(int, int);
   /** resizeEvent for the main view */
   virtual void resizeEvent(QResizeEvent *evt);
   /** add filename to the recentList */
@@ -113,8 +110,6 @@ protected:
   protected slots:      
     /** exits the application */
     void slotAppExit();
-    /** toggle the toolbar*/
-//    void slotViewToolBar_0(); 
     /** toggle the statusbar*/
 //    void slotViewStatusBar(); 
     /** change the status message to text */
@@ -122,12 +117,12 @@ protected:
     /** change the status message of the whole statusbar temporary */
     void slotStatusHelpMsg(const char *text);
 
+	/** initSocket try to connect to the BosonServer */
+	void initSocket(char *servername=0l);
+
 private: 
     /** menu_bar is the applications main menubar */
     KMenuBar *menu_bar;
-    /** tool_bar_0 is the first toolbar. If more toolbars are needed, please
-      * increase _0 to _1 etc. */
-    KToolBar *tool_bar_0;
     /** status_bar is the default statusbar of the application */
     KStatusBar *status_bar;
     QPopupMenu *file_menu_recent;
@@ -140,7 +135,6 @@ private:
       * view-menu entry view toolbar. bViewStatusbar does the same for the
       * statusbar. 
       */
-    bool bViewToolbar_0;
     bool bViewStatusbar;
     /** flag if view is there or not (view is deleted on "File"->"Close") */
     bool bViewEnabled;
@@ -149,7 +143,6 @@ private:
       * positions as well and implement them in saveOptions() and readOptions().
       */    
     KMenuBar::menuPosition menu_bar_pos;
-    KToolBar::BarPosition tool_bar_0_pos; 
 
 
 };   

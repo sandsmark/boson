@@ -37,13 +37,16 @@
 
 ///////////////////////////////////////////////////////////////////
 // File-menu entries
-#define ID_FILE_NEW_WINDOW          10010
-#define ID_FILE_NEW                 10020
+#define ID_FILE_CONNECT			10010
+#define ID_FILE_NEW_WINDOW		10020
+/*
+#define ID_FILE_NEW                 10021
 #define ID_FILE_OPEN                10030
 #define ID_FILE_RECENT              10040
 
 #define ID_FILE_SAVE                10050
 #define ID_FILE_SAVE_AS             10060
+*/
 #define ID_FILE_CLOSE               10070
 
 #define ID_FILE_PRINT               10080
