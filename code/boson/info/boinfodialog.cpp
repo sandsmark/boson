@@ -22,9 +22,6 @@
 #include "boinfo.h"
 #include "bodebug.h"
 
-// we need this to initialize the BoInfo object.
-#include "../bosonglwidget.h"
-
 #include <kfiledialog.h>
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -180,14 +177,15 @@ BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal)
 {
  d = new BoInfoDialogPrivate;
  if (!BoInfo::boInfo()) {
+	boWarning() << k_funcinfo << "the BoInfo object was not yet initialized - doing it now (data may be insufficient!)" << endl;
 	BoInfo::initBoInfo();
-	// GLX and OpenGL demand that we initialize the context first.
-	// same about X, which we need Display and Screen for.
-	BosonGLWidget* tmp = new BosonGLWidget(this);
-	tmp->makeCurrent();
-	tmp->hide();
-	BoInfo::boInfo()->update(tmp);
-	delete tmp;
+
+	// we do not provide a QWidget pointer here, since that would be
+	// unreliable. we have to provide the same screen and display as the GLX
+	// context uses (the window may have been moved to another screen for
+	// example). this won't be a problem, since this update is only a
+	// fallback anyway.
+	BoInfo::boInfo()->update(0);
  }
 
  initBosonPage();

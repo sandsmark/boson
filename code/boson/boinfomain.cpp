@@ -24,6 +24,9 @@
 #include "bodebug.h"
 #include "boversion.h"
 
+// we need this to initialize the GLX context.
+#include "bosonglwidget.h"
+
 #include <kapplication.h>
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -62,6 +65,12 @@ int main(int argc, char **argv)
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 
+ BosonGLWidget* glWidget = new BosonGLWidget(0);
+ glWidget->hide();
+ glWidget->makeCurrent();
+ BoInfo::initBoInfo();
+ BoInfo::boInfo()->update(glWidget);
+
 // if (args->count() == 0) {
 	BoInfoDialog* dlg = new BoInfoDialog(0);
 	QObject::connect(dlg, SIGNAL(finished()), dlg, SLOT(close()));
@@ -83,6 +92,7 @@ int main(int argc, char **argv)
  args->clear();
  int r = app.exec();
  delete iface;
+ delete glWidget;
  return r;
 }
 
