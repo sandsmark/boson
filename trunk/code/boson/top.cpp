@@ -233,7 +233,8 @@ void TopWidget::initBoson()
  // sends an IdStartGame over network. Once this is received signalStartNewGame()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
- connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
+ connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)),
+		this, SLOT(slotPlayFieldChanged(const QString&)));
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
  // this signal gets emitted when starting a game (new games as well as loading
