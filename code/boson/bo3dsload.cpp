@@ -28,6 +28,7 @@
 
 #include <qptrlist.h>
 #include <qstringlist.h>
+#include <qvaluevector.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -507,13 +508,15 @@ void Bo3DSLoad::loadVertices(BoMesh* boMesh, Lib3dsMesh* mesh)
  lib3ds_matrix_inv(invMeshMatrix);
  BoMatrix matrix(&invMeshMatrix[0][0]);
 
+ QValueVector<BoVector3> vertices(mesh->points);
  BoVector3 vector;
  BoVector3 v;
  for (unsigned int i = 0; i < mesh->points; i++) {
 	vector.set(mesh->pointL[i].pos);
 	matrix.transform(&v, &vector);
-	boMesh->setVertex(i, v);
+	vertices[i] = v;
  }
+ boMesh->setVertices(vertices);
 }
 
 void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* material)
@@ -589,13 +592,15 @@ void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* mat
 
  // now we have the final texture matrix in texMatrix.
  // all texel coordinates have to be transformed using this matrix.
+ QValueVector<BoVector3> texels(mesh->points);
  BoVector3 a;
  BoVector3 b;
  for (unsigned int i = 0; i < mesh->points; i++) {
 	a.set(mesh->texelL[i][0], mesh->texelL[i][1], 0.0);
 	texMatrix.transform(&b, &a);
-	boMesh->setTexel(i, b);
+	texels[i] = b;
  }
+ boMesh->setTexels(texels);
 }
 
 void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)

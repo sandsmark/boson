@@ -123,17 +123,6 @@ public:
 		// but that would be harder to code...
 		float v[3];
 
-		// TODO use first frame matrix.
-		// AB: UPDATE: why should we use a non-identity matrix here?
-		// for rendering this makes nearly no sense, as we will multiply
-		// the modelview matrix by the frame matrix anyway. i believe
-		// the situation will be similar for occlusion culling (which
-		// needs to take the current frame matrix into account anyway).
-		// so the above TODO is probably totally obsolete
-		BoMatrix matrix;
-
-		mesh->calculateMaxMin(&matrix); // probably redundant! we need to ensure that these values are final!
-
 		v[0] = mesh->maxX();
 		v[1] = mesh->maxY();
 		v[2] = mesh->maxZ();
@@ -1213,6 +1202,12 @@ public:
 	BoundingObject* mBoundingObject;
 
 	QString mName;
+
+	// these two make sure that we won't call setVertices()/setTexels()
+	// twice, as that might cause trouble (e.g. with calculateMaxMin() and
+	// methods that already used the old max/min values)
+	bool mVerticesApplied;
+	bool mTexelsApplied;
 };
 
 BoMesh::BoMesh(unsigned int faces, const QString& name)
@@ -1220,6 +1215,8 @@ BoMesh::BoMesh(unsigned int faces, const QString& name)
  init();
 
  d->mName = name;
+ d->mVerticesApplied = false;
+ d->mTexelsApplied = false;
 
  BoMeshLOD* lod = levelOfDetail(0);
  BO_CHECK_NULL_RET(lod);
@@ -1344,9 +1341,31 @@ void BoMesh::allocatePoints(unsigned int points)
  d->mMeshPoints.allocatePoints(points);
 }
 
-void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
+void BoMesh::setVertices(const QValueVector<BoVector3>& vertices)
 {
- d->mMeshPoints.setVertex(index, vertex);
+ if (d->mVerticesApplied) {
+	// calling this twice might cause trouble with e.g. calculateMaxMin()
+	// and especially with classes/methods that already used the previous
+	// max/min values. so this is not allowed.
+	//
+	// note that we might one day allow to _add_ vertices (BoLODBuilder
+	// might need that). But they should not change the default LOD (and
+	// are therefore irrelevant for max/min and similar things)
+	boError() << k_funcinfo << "called twice. this is not allowed" << endl;
+	return;
+ }
+ if (d->mMeshPoints.points() != vertices.count()) {
+	boError() << k_funcinfo << "vertices count (" << vertices.count()
+			<< ") does not match allocated points (" << d->mMeshPoints.points()
+			<< ")" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < vertices.count(); i++) {
+	d->mMeshPoints.setVertex(i, vertices[i]);
+ }
+ d->mVerticesApplied = true;
+
+ calculateMaxMin();
 }
 
 BoVector3 BoMesh::vertex(unsigned int p) const
@@ -1377,9 +1396,25 @@ BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) c
  return vertex(f->pointIndex()[i] - d->mMeshPoints.pointsMovedBy());
 }
 
-void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
+void BoMesh::setTexels(const QValueVector<BoVector3>& texels)
 {
- d->mMeshPoints.setTexel(index, texel);
+ if (d->mTexelsApplied) {
+	boError() << k_funcinfo << "called twice. this is not allowed" << endl;
+	return;
+ }
+ if (texels.count() == 0) {
+	return;
+ }
+ if (d->mMeshPoints.points() != texels.count()) {
+	boError() << k_funcinfo << "texel count (" << texels.count()
+			<< ") does not match allocated points (" << d->mMeshPoints.points()
+			<< ")" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < texels.count(); i++) {
+	d->mMeshPoints.setTexel(i, texels[i]);
+ }
+ d->mTexelsApplied = true;
 }
 
 void BoMesh::calculateNormals()
@@ -1521,24 +1556,17 @@ void BoMesh::createPointCache()
  }
 }
 
-void BoMesh::calculateMaxMin(const BoMatrix* matrix)
+void BoMesh::calculateMaxMin()
 {
  // NOT time critical! (called on startup only)
- if (!matrix) {
-	BoMatrix m;
-	calculateMaxMin(&m);
-	return;
- }
- BoVector3 v1 = vertex(0);
- BoVector3 v;
- matrix->transform(&v, &v1);
+ BoVector3 v = vertex(0);
  d->mMinZ = v.z();
  d->mMaxZ = v.z();
  d->mMinX = v.x();
  d->mMaxX = v.x();
  d->mMinY = v.y();
  d->mMaxY = v.y();
- for (unsigned int i = 0; i < points(); i++) {
+ for (unsigned int i = 1; i < points(); i++) {
 	v = vertex(i);
 	if (v.x() < d->mMinX) {
 		d->mMinX = v.x();
@@ -1743,5 +1771,60 @@ void BoMesh::setMeshRendererMeshData(BoMeshRendererMeshData* data)
 {
  delete mMeshRendererMeshData;
  mMeshRendererMeshData = data;
+}
+
+void BoMesh::getBoundingBox(float* _minX, float* _maxX, float* _minY, float* _maxY, float* _minZ, float* _maxZ)
+{
+ *_minX = minX();
+ *_minY = minY();
+ *_minZ = minZ();
+ *_maxX = maxX();
+ *_maxY = maxY();
+ *_maxZ = maxZ();
+}
+
+void BoMesh::getBoundingBox(BoVector3* vertices)
+{
+ float minX, minY, minZ;
+ float maxX, maxY, maxZ;
+ getBoundingBox(&minX, &maxX, &minY, &maxY, &minZ, &maxZ);
+ vertices[0].set(minX, minY, minZ);
+ vertices[1].set(minX, minY, maxZ);
+ vertices[2].set(minX, maxY, minZ);
+ vertices[3].set(minX, maxY, maxZ);
+ vertices[4].set(maxX, minY, minZ);
+ vertices[5].set(maxX, minY, maxZ);
+ vertices[6].set(maxX, maxY, minZ);
+ vertices[7].set(maxX, maxY, maxZ);
+}
+
+void BoMesh::getBoundingBox(const BoMatrix& matrix, float* minX, float* maxX, float* minY, float* maxY, float* minZ, float* maxZ)
+{
+ BoVector3 _vertices[8];
+ BoVector3 vertices[8];
+ getBoundingBox(_vertices);
+ for (int i = 0 ; i < 8; i++) {
+	matrix.transform(&vertices[i], &_vertices[i]);
+ }
+ *minX = *maxX = vertices[0].x();
+ *minY = *maxY = vertices[0].y();
+ *minZ = *maxZ = vertices[0].z();
+ for (int i = 1; i < 7; i++) {
+	if (vertices[i].x() < *minX) {
+		*minX = vertices[i].x();
+	} else if (vertices[i].x() > *maxX) {
+		*maxX = vertices[i].x();
+	}
+	if (vertices[i].y() < *minY) {
+		*minY = vertices[i].y();
+	} else if (vertices[i].y() > *maxY) {
+		*maxY = vertices[i].y();
+	}
+	if (vertices[i].z() < *minZ) {
+		*minZ = vertices[i].z();
+	} else if (vertices[i].z() > *maxZ) {
+		*maxZ = vertices[i].z();
+	}
+ }
 }
 
