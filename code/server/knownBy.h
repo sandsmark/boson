@@ -28,23 +28,25 @@ typedef unsigned long ulong;
 #endif
 
 
-#define getPlayerMask(a)  (1l<<(a))
+#define getPlayerMask(a)	(1l<<(a))
 
 class knownBy
 {
 
- public:
-	knownBy() { known = 0l; } 
+public:
+	knownBy() { exist = known = 0l; } 
 
+	bool existAt(ulong mask) { return (exist & mask); }
 	bool isKnownBy(ulong mask) { return (known & mask); }
-	void setKnown(ulong mask) { known |= mask; }
+	void setKnown(ulong mask) { known |= mask; exist |=mask ;}
 	void unSetKnown(ulong mask) { known &= ~mask; }
 
 // protected:
 	/* implemented in serverUnit.cpp */
 	void sendToKnown(bosonMsgTag tag, int blen, void *data);
 // private :
- 	ulong  known;
+ 	ulong	known;
+	ulong	exist;
 
 };
 
