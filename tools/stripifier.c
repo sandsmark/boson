@@ -38,6 +38,8 @@ void parseMesh(Lib3dsMesh* mesh);
 int hasPoint(Lib3dsFace* face, int point);
 int isPointEqual(Lib3dsMesh* mesh, int p1, int p2); // compares point (vertex), texel, flag
 void optimizeMesh(Lib3dsMesh* mesh);
+void optimizePoints(Lib3dsMesh* mesh);
+void optimizeFaces(Lib3dsMesh* mesh);
 void dumpFace(Lib3dsFace* face, int newline);
 void dumpMesh(Lib3dsMesh* mesh);
 
@@ -118,9 +120,7 @@ void free_list_item(struct List* list)
 	return;
  }
  free_list_item(list->next);
-// printf("2\n");
  free(list);
-// printf("3\n");
 }
 void debug_list(struct List* list)
 {
@@ -323,7 +323,7 @@ void parseMesh(Lib3dsMesh* mesh)
 		}
 		if (match == 3) {
 			printf("WARNING: 3 points matched! face might be redundant! face=%d, face2=%d mesh=%s\n", face, face2, mesh->name);
-			printf("%d,%d,%d   %d,%d,%d\n", l3ds_f->points[0], l3ds_f->points[1], l3ds_f->points[2], l3ds_f2->points[0], l3ds_f2->points[1], l3ds_f2->points[2]);
+			printf("face points: %d,%d,%d   %d,%d,%d\n", l3ds_f->points[0], l3ds_f->points[1], l3ds_f->points[2], l3ds_f2->points[0], l3ds_f2->points[1], l3ds_f2->points[2]);
 			continue;
 		} else if (match != 2) {
 			continue;
@@ -344,6 +344,7 @@ void parseMesh(Lib3dsMesh* mesh)
 		}
 	}
 
+#if 0
 	j = 0;
 	i = 0;
 	l = f->f1;
@@ -379,6 +380,7 @@ void parseMesh(Lib3dsMesh* mesh)
 		printf("face %d: f3 count: %d - mesh: %s\n", face, i, mesh->name);
 		debug_list(f->f3);
 	}
+#endif
  }
 
  if (debug >= 3) {
@@ -463,6 +465,12 @@ void dumpFaceList(Lib3dsMesh* mesh, struct List* first)
 }
 
 void optimizeMesh(Lib3dsMesh* mesh)
+{
+ optimizePoints(mesh);
+ optimizeFaces(mesh);
+}
+
+void optimizePoints(Lib3dsMesh* mesh)
 {
  int i = 0;
  int j = 0;
@@ -579,6 +587,56 @@ void optimizeMesh(Lib3dsMesh* mesh)
  free(duplicates);
  free(replacementPoints);
  free_list_item(duplicatedPoints);
+}
+
+void optimizeFaces(Lib3dsMesh* mesh)
+{
+ if (!mesh) {
+	printf("ERROR: NULL mesh\n");
+	return;
+ }
+ int i = 0;
+ int* redundant = (int*)malloc(sizeof(int) * mesh->faces);
+ int redundantCount = 0;
+ for (i = 0; i < mesh->faces; i++) {
+	Lib3dsWord* p = mesh->faceL[i].points;
+	if (p[0] == p[1] || p[0] == p[2] || p[1] == p[2]) {
+		if (debug) {
+			printf("face %d uses at least 2 equal points: %d %d %d - removing\n", i, p[0], p[1], p[2]);
+		}
+		redundant[redundantCount] = i;
+		redundantCount++;
+	}
+ }
+
+ if (redundantCount != 0) {
+	Lib3dsFace* faces = (Lib3dsFace*)malloc(sizeof(Lib3dsFace) * mesh->faces - redundantCount);
+	int facesCount = 0;
+	int j = 0;
+	for (i = 0; i < mesh->faces; i++) {
+		if (i == redundant[j]) {
+			j++;
+			continue;
+		}
+		Lib3dsFace* f = &mesh->faceL[i];
+		faces[facesCount].user = f->user;
+		faces[facesCount].points[0] = f->points[0];
+		faces[facesCount].points[1] = f->points[1];
+		faces[facesCount].points[2] = f->points[2];
+		faces[facesCount].flags = f->flags;
+		faces[facesCount].smoothing = f->smoothing;
+		faces[facesCount].normal[0] = f->normal[0];
+		faces[facesCount].normal[1] = f->normal[1];
+		faces[facesCount].normal[2] = f->normal[2];
+		strncpy(faces[facesCount].material, f->material, 64);
+		facesCount++;
+	}
+	printf("removed %d redundant faces from mesh %s. faces left: %d\n", redundantCount, mesh->name, facesCount);
+	lib3ds_mesh_free_face_list(mesh);
+	mesh->faceL = faces;
+	mesh->faces = facesCount;
+ }
+ free(redundant);
 }
 
 int isPointEqual(Lib3dsMesh* mesh, int p1, int p2)
