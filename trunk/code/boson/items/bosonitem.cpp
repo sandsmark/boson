@@ -33,12 +33,13 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mCanvas = canvas;
  mModel = model;
  mCurrentAnimation = 0;
- mX = mY = mZ = 0.0;
+ mX = mY = mZ = 0.0f;
  mWidth = mHeight = 0;
  mCellsDirty = true;
- mRotation = 0;
- mXRotation = 0;
- mGLDepthMultiplier = 1.0;
+ mRotation = 0.0f;
+ mXRotation = 0.0f;
+ mYRotation = 0.0f;
+ mGLDepthMultiplier = 1.0f;
  mDisplayList = 0;
  mFrame = 0;
  mGLConstructionStep = 0;
@@ -50,7 +51,7 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 
  mCurrentAnimation = 0;
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
- mBoundingSphereRadius = 1.732; // TODO: can we extract this from the model? this probably needs to change with different frames!
+ mBoundingSphereRadius = 1.732f; // TODO: can we extract this from the model? this probably needs to change with different frames!
 
  mIsAnimated = false;
  mSelectBox = 0;
