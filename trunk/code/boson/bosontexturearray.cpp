@@ -51,6 +51,27 @@ BosonTextureArray::BosonTextureArray()
  init();
 }
 
+BosonTextureArray::BosonTextureArray(const QStringList& files, bool useMipmaps, bool useAlpha)
+{
+ init();
+ QValueList<QImage> images;
+ QStringList::ConstIterator it;
+ for (it = files.begin(); it != files.end(); ++it) {
+	QImage image(*it);
+	if (image.isNull()) {
+		boWarning(110) << k_funcinfo << "could not load " << *it << endl;
+
+		// load dummy image
+		image = QImage(64, 64, 32);
+		image.fill(Qt::green.rgb());
+	}
+	images.append(image);
+ }
+ if (!createTextures(images, useMipmaps, useAlpha)) {
+	boWarning(110) << k_funcinfo << "Could not create textures" << endl;
+ }
+}
+
 BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps, bool useAlpha)
 {
  init();

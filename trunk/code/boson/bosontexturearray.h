@@ -23,9 +23,11 @@
 #include <GL/gl.h>
 
 class BoTextureInfo;
+class BoContext;
 
 class QImage;
 template<class T> class QValueList;
+class QStringList;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -33,6 +35,7 @@ template<class T> class QValueList;
 class BosonTextureArray
 {
 public:
+	BosonTextureArray(const QStringList& files, bool useMipmaps, bool useAlpha);
 	BosonTextureArray(QValueList<QImage> images, bool useMipmaps = true, bool useAlpha = false);
 	BosonTextureArray();
 
@@ -85,7 +88,6 @@ public:
 	 **/
 	static void resetAllTexParameter();
 
-
 private:
 	/**
 	 * Inspired by source code of Mesa-4.0.1 see teximage.c for the original
@@ -98,7 +100,7 @@ private:
 	void init();
 
 private:
-	static QIntDict<BoTextureInfo> mAllTextures; // contains *all* textures. useful for the opntions dialog, where we can change texture parameters on runtime.
+	static QIntDict<BoTextureInfo> mAllTextures; // contains *all* textures. useful for the options dialog, where we can change texture parameters on runtime.
 	unsigned int mCount;
 	GLuint* mTextures;
 };
