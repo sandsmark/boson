@@ -444,6 +444,15 @@ void Unit::shootAt(Unit* target)
 //	kdDebug() << "gotta reload first" << endl;
 	return;
  }
+ if (target->isFlying()) {
+	if (!unitProperties()->canShootAtAirUnits()) {
+		return;
+	}
+ } else {
+	if (!unitProperties()->canShootAtLandUnits()) {
+		return;
+	}
+ }
  kdDebug() << "shoot at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
  d->mReloadState = reload();
