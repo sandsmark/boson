@@ -870,11 +870,11 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  BO_CHECK_NULL_RET(map);
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
  BO_CHECK_NULL_RET(map->textures());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
- float* heightMap = map->heightMap();
  BosonTextureArray* textures = map->textures();
 
  // AB: we can increase performance even more here. lets replace d->mRenderCells
@@ -883,28 +883,25 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
 
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
- // we draw the cells in different stages. the depth test must get enabled
- // before the last stage, so that the new information (i.e. the z pos of the
- // cells) get into the depth buffer.
- // we can safely disable the test completely for all other stages, as cells are
- // the first objects we render.
- glDisable(GL_DEPTH_TEST);
+ // we draw the cells in different stages. depth test is now enabled in all
+ //  stages to prevent drawing errors. Depth func GL_LEQUAL makes sure all
+ //  layers get rendered (they have same z values)
+ // Maybe it should be set back to GL_LESS later?
+ glDepthFunc(GL_LEQUAL);
 
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	GLuint tex = textures->texture(i);
 	if (i == 1) {
 		glEnable(GL_BLEND);
-	} else if (i == groundTheme->textureCount() - 1) {
-		glEnable(GL_DEPTH_TEST);
 	}
 	glBindTexture(GL_TEXTURE_2D, tex);
-	renderCellsNow(renderCells, cellsCount, map->width() + 1, heightMap, map->texMap(i));
+	renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
  }
 
  glDisable(GL_BLEND);
 }
 
-void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
+void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, BoVector3* normalMap, unsigned char* texMapStart)
 {
  // Texture offsets
  const int offsetCount = 5;
@@ -912,6 +909,21 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
  const float texOffsets[] = { 0.0f, 0.2f, 0.4f, 0.6f, 0.8f };  // texOffsets[x] = offset * x
 
  glBegin(GL_QUADS);
+
+ // This macro sets alpha value to alpha for material diffuse and ambient
+ //  colors. It's better than using glColorMaterial() because we can now use
+ //  correct color components for diffuse color and correct alpha for ambient color
+#define SETALPHA(alpha)  ambient.setW(alpha / 255.0); \
+		diffuse.setW(alpha / 255.0); \
+		glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data()); \
+		glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data());
+
+ BoVector4 ambient(0.2f, 0.2f, 0.2f, 1.0f);
+ BoVector4 diffuse(0.8f, 0.8f, 0.8f, 1.0f);
+ glMaterialfv(GL_FRONT, GL_AMBIENT, ambient.data());
+ glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse.data());
+ glMaterialf(GL_FRONT, GL_SHININESS, 0.0f);
+
  for (int i = 0; i < count; i++) {
 	Cell* c = cells[i];
 	int x = c->x();
@@ -935,24 +947,30 @@ void BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int corner
 	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
 
 	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
-	y = offsetCount - (y % offsetCount) - 1;
+	// FIXME: texy might be a bit confusing since we don't have texx
+	int texy = offsetCount - (y % offsetCount) - 1;
 
-	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
+	SETALPHA(upperLeftAlpha);
+	glNormal3fv(normalMap[y * cornersWidth + x].data());
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
-	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
+	SETALPHA(lowerLeftAlpha);
+	glNormal3fv(normalMap[(y + 1) * cornersWidth + x].data());
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
-	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
+	SETALPHA(lowerRightAlpha);
+	glNormal3fv(normalMap[(y + 1) * cornersWidth + (x + 1)].data());
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
-	glColor4ub(255, 255, 255, upperRightAlpha);
-	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
+	SETALPHA(upperRightAlpha);
+	glNormal3fv(normalMap[y * cornersWidth + (x + 1)].data());
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
  }
+#undef SETALPHA
  glEnd();
 }
 

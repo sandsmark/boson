@@ -21,6 +21,8 @@
 
 #include <qobject.h>
 
+#include "bo3dtools.h"
+
 class Cell;
 class UnitBase;
 class Boson;
@@ -309,6 +311,64 @@ private:
 };
 
 /**
+ * Data structure for holding OpenGL normals of map.
+ * One normal is stored for each corner of the cell and normals are shared
+ * between cells.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoNormalMap: public BoMapCornerArray
+{
+public:
+	BoNormalMap(unsigned int width, unsigned int height)
+			: BoMapCornerArray(width, height)
+	{
+		mNormalMap = new BoVector3[arrayPos(width - 1, height - 1) + 1];
+	}
+
+	virtual ~BoNormalMap()
+	{
+		delete[] mNormalMap;
+	}
+
+	// Normal maps won't be saved/loaded (they're auto-generated)
+	virtual bool save(QDataStream&) { return true; };
+	virtual bool load(QDataStream&) { return true; };
+
+	inline BoVector3* normalMap() const { return mNormalMap; }
+
+	/**
+	 * @return The height at @p x, @þ y. This function is safe, i.e. if @þ x
+	 * or @p y are invalid we won't crash.
+	 **/
+	BoVector3 normalAt(int x, int y) const
+	{
+		if (x < 0 || y < 0) {
+			return BoVector3(0.0f, 0.0f, 1.0f);
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return BoVector3(0.0f, 0.0f, 1.0f);
+		}
+		return mNormalMap[arrayPos(x, y)];
+	}
+
+	void setNormalAt(int x, int y, BoVector3 n)
+	{
+		if (x < 0 || y < 0) {
+			return;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return;
+		}
+		mNormalMap[arrayPos(x, y)] = n;
+	}
+
+private:
+	BoVector3* mNormalMap;
+};
+
+
+/**
  * This class represents a boson map. It is part of a @ref BosonPlayField (a
  * .bpf file) and gets stored on disk as binary.
  *
@@ -477,6 +537,20 @@ public:
 	}
 
 	inline float* heightMap() const { return mHeightMap->heightMap(); }
+
+	inline BoVector3* normalMap() const { return mNormalMap->normalMap(); }
+
+	/**
+	 * Recalculates whole normal map.
+	 * Use this whenever heightmap changes.
+	 * It automatically creates new normalmap.
+	 **/
+	void recalculateNormalMap();
+	/**
+	 * Recalculates all normals within given rect
+	 * Normal map must already exist and rect must be valid
+	 **/
+	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
 
 	/**
 	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
@@ -711,6 +785,7 @@ private:
 	BosonMapPrivate* d;
 	Cell* mCells;
 	BoHeightMap* mHeightMap;
+	BoNormalMap* mNormalMap;
 	BoTexMap* mTexMap;
 	bool mModified;
 

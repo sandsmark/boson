@@ -25,6 +25,7 @@ class QString;
 
 class BosonMap;
 class BoMatrix;
+class BoVector3;
 
 class QRect;
 
@@ -145,7 +146,7 @@ private:
 	 *
 	 * One could optimize this by using multitexturing for example!
 	 **/
-	void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart);
+	void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, BoVector3* normalMap, unsigned char* texMapStart);
 };
 
 class BoFastGroundRenderer : public BoGroundRenderer

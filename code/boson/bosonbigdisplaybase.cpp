@@ -628,6 +628,9 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderCells(true);
  glEnable(GL_DEPTH_TEST);
  glEnable(GL_TEXTURE_2D);
+ if (boConfig->useLight()) {
+	glEnable(GL_LIGHTING);
+ }
  renderCells();
  boProfiling->renderCells(false);
 
