@@ -82,13 +82,19 @@ bool editorCanvas::Load(QString filename)
 		boFile::load(mob);
 		if (!isOk()) return false;
 		createMobUnit(mob);
+		nbMobiles--; // nbMobiles has been increased in createMobUnit...
 	}
+
+	emit mobileNbUpdated(nbMobiles);
 
 	for (ii=0; ii<nbFacilities; ii++) {
 		boFile::load(fix);
 		if (!isOk()) return false;
 		createFixUnit(fix);
+		nbFacilities--; // nbFacilities has been increased in createFixUnit...
 	}
+
+	emit facilityNbUpdated(nbFacilities); 
 
 	// ok, it's all right
 	Close();
@@ -187,6 +193,7 @@ void editorCanvas::createMobUnit(mobileMsg_t &msg)
 	m = new visualMobUnit(&msg);
 	mobiles.insert(msg.key, m);
 
+	emit mobileNbUpdated(++nbMobiles);
 	modified = true;
 //	emit updateMobile(m);
 }
@@ -202,6 +209,7 @@ void editorCanvas::createFixUnit(facilityMsg_t &msg)
 	f = new visualFacility(&msg);
 	facilities.insert(msg.key, f);
 
+	emit facilityNbUpdated(++nbFacilities);
 	modified = true;
 //	emit updateFix(f);
 }
