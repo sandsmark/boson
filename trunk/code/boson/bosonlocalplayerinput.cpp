@@ -49,25 +49,27 @@ BosonLocalPlayerInput::BosonLocalPlayerInput() : KGameIO()
 BosonLocalPlayerInput::~BosonLocalPlayerInput()
 {
   boDebug() << k_funcinfo << endl;
- delete mEventListener;
+  delete mEventListener;
 }
 
 void BosonLocalPlayerInput::initIO(KPlayer* p)
 {
- KGameIO::initIO(p);
- delete mEventListener;
- mEventListener = 0;
- if (!p) {
-	return;
- }
- boDebug() << k_funcinfo << endl;
- if (game()) {
-	// note: a NULL game() _is_ possible on program startup.
-	// that player IO will be deleted later though, it is never really used
-	PlayerIO* io = ((Player*)p)->playerIO();
-	BoEventManager* manager = ((Boson*)game())->eventManager();
-	mEventListener = new BoLocalPlayerEventListener(io, manager, this);
- }
+  KGameIO::initIO(p);
+  delete mEventListener;
+  mEventListener = 0;
+  if (!p)
+  {
+     return;
+  }
+  boDebug() << k_funcinfo << endl;
+  if (game())
+  {
+    // note: a NULL game() _is_ possible on program startup.
+    // that player IO will be deleted later though, it is never really used
+    PlayerIO* io = ((Player*)p)->playerIO();
+    BoEventManager* manager = ((Boson*)game())->eventManager();
+    mEventListener = new BoLocalPlayerEventListener(io, manager, this);
+  }
 }
 
 void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameBase* cmdframe)
@@ -86,12 +88,14 @@ void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameBase* cmdframe)
 void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
 {
   boDebug() << k_funcinfo << "Action type: " << action.type() << endl;
-  if (action.isProduceAction()) {
+  if (action.isProduceAction())
+  {
     produceAction(action);
     return;
   }
 
-  switch (action.type()) {
+  switch (action.type())
+  {
     case ActionStop:
       stopUnits(mCmdFrame->selection()->allUnits());
       break;
@@ -227,8 +231,10 @@ void BosonLocalPlayerInput::moveWithoutAttack(QPtrList<Unit> units, int x, int y
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
-  while (it.current()) {
-    if (!unit) {
+  while (it.current())
+  {
+    if (!unit)
+    {
       unit = it.current();
     }
     // tell them which unit to move:
@@ -258,8 +264,10 @@ void BosonLocalPlayerInput::moveWithAttack(QPtrList<Unit> units, int x, int y)
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
-  while (it.current()) {
-    if (!unit) {
+  while (it.current())
+  {
+    if (!unit)
+    {
       unit = it.current();
     }
     // tell them which unit to move:
@@ -301,7 +309,8 @@ void BosonLocalPlayerInput::attack(QPtrList<Unit> units, Unit* target)
   stream << (Q_ULONG)target->id();
   // tell them how many units attack:
   stream << (Q_UINT32)units.count();
-  while (it.current()) {
+  while (it.current())
+  {
     // tell them which unit is going to attack:
     stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
     ++it;
@@ -347,7 +356,8 @@ void BosonLocalPlayerInput::repair(QPtrList<Unit> units, Unit* repairyard)
   stream << (Q_ULONG)repairyard->id();
   // tell them how many units to be repaired:
   stream << (Q_UINT32)units.count();
-  while (it.current()) {
+  while (it.current())
+  {
     // tell them which unit is going be repaired:
     stream << (Q_ULONG)it.current()->id();
     ++it;
@@ -372,7 +382,8 @@ void BosonLocalPlayerInput::refine(QPtrList<Unit> units, Unit* refinery)
   stream << (Q_ULONG)refinery->id();
   // how many units go to the refinery
   stream << (Q_UINT32)units.count();
-  while (it.current()) {
+  while (it.current())
+  {
     // tell them which unit goes there
     stream << (Q_ULONG)it.current()->id();
     ++it;
@@ -395,7 +406,8 @@ void BosonLocalPlayerInput::follow(QPtrList<Unit> units, Unit* target)
   stream << (Q_ULONG)target->id();
   // tell them how many units follow:
   stream << (Q_UINT32)units.count();
-  while (it.current()) {
+  while (it.current())
+  {
     // tell them which unit is going to follow:
     stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
     ++it;
