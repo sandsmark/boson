@@ -23,10 +23,14 @@
 #include "bosonprofilingprivate.h"
 
 #include <klocale.h>
+#include <klistview.h>
+#include <kfiledialog.h>
+#include <kmessagebox.h>
 #include <kdebug.h>
 
+#include <qlabel.h>
 #include <qvbox.h>
-#include <klistview.h>
+#include <qpushbutton.h>
 
 class BosonProfilingDialog::BosonProfilingDialogPrivate
 {
@@ -36,11 +40,20 @@ public:
 		mUnits = 0;
 		mRender = 0;
 		mEvents = 0;
+		mCurrentFile = 0;
+
+		mData = 0;
 	}
+
+	BosonProfiling* data() const { return mData ? mData : boProfiling; }
 
 	KListView* mUnits;
 	KListView* mRender;
 	KListView* mEvents;
+	QLabel* mCurrentFile;
+	QString mCurrentFileName;
+
+	BosonProfiling* mData;
 };
 
 BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
@@ -48,15 +61,20 @@ BosonProfilingDialog::BosonProfilingDialog(QWidget* parent, bool modal)
 		Ok, parent, "bosonprofilingdialog", modal, true)
 {
  d = new BosonProfilingDialogPrivate;
- 
+
  initLoadUnitPage();
  initRenderPage();
  initEventsPage();
+ initFilesPage();
+ reset();
 }
 
 BosonProfilingDialog::~BosonProfilingDialog()
 {
  d->mUnits->clear();
+ d->mRender->clear();
+ d->mEvents->clear();
+ delete d->mData;
  delete d;
 }
 
@@ -70,29 +88,6 @@ void BosonProfilingDialog::initLoadUnitPage()
  d->mUnits->addColumn(i18n("Time"));
  d->mUnits->addColumn(i18n("Time (ms)"));
  d->mUnits->addColumn(i18n("Time (s)"));
- BosonProfiling::BosonProfilingPrivate* pd = boProfiling->d;
- QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
- for (; it != pd->mUnitTimes.end(); ++it) {
-	QListViewItem* unit = new QListViewItem(d->mUnits);
-	QString unitType;
-	unitType.sprintf("%05d", it.key());
-	unit->setText(0, unitType);
-	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
-	long int time = 0;
-	int i = 0;
-	for (; timesIt != (*it).end(); ++timesIt, i++) {
-		QListViewItem* item = new QListViewItem(unit);
-		QString num;
-		num.sprintf("%03d", i);
-		item->setText(0, num);
-		item->setText(1, QString::number(*timesIt));
-		item->setText(2, QString::number((double)*timesIt / 1000));
-		item->setText(3, QString::number((double)*timesIt / 1000000));
-		time += *timesIt;
-	}
-	unit->setText(1, QString::number(time)); // all summed up
-	unit->setOpen(true);
- }
 }
 
 void BosonProfilingDialog::initRenderPage()
@@ -107,31 +102,6 @@ void BosonProfilingDialog::initRenderPage()
  d->mRender->addColumn(i18n("Time"));
  d->mRender->addColumn(i18n("Time (ms)"));
  d->mRender->addColumn(i18n("Time (s)"));
-
- BosonProfiling::BosonProfilingPrivate* pd = boProfiling->d;
- QValueList<RenderGLTimes>::Iterator it = pd->mRenderTimes.begin();
- int i = 0;
- for (; it != pd->mRenderTimes.end(); ++it, i++) {
-	QListViewItem* item = new QListViewItem(d->mRender);
-	QString num;
-	num.sprintf("%03d", i);
-	item->setText(0, num);
-	createRenderItem(item, i18n("Clearing"), (*it).mClear);
-	createRenderItem(item, i18n("Cells"), (*it).mCells);
-	createRenderItem(item, i18n("Units"), (*it).mUnits);
-	createRenderItem(item, i18n("Text"), (*it).mText);
-	createRenderItem(item, i18n("Function"), (*it).mFunction);
-	item->setOpen(true);
- }
-}
-
-void BosonProfilingDialog::createRenderItem(QListViewItem* parent, const QString& type, long int time)
-{
- QListViewItem* item = new QListViewItem(parent);
- item->setText(1, type);
- item->setText(2, QString::number(time));
- item->setText(3, QString::number((double)time / 1000));
- item->setText(4, QString::number((double)time / 1000000));
 }
 
 void BosonProfilingDialog::initEventsPage()
@@ -143,26 +113,6 @@ void BosonProfilingDialog::initEventsPage()
  d->mEvents->addColumn(i18n("Time"));
  d->mEvents->addColumn(i18n("Time (ms)"));
  d->mEvents->addColumn(i18n("Time (s)"));
- BosonProfiling::BosonProfilingPrivate* pd = boProfiling->d;
- QMap<BosonProfiling::ProfilingEvent, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
- for (; it != pd->mTimes.end(); ++it) {
-	QListViewItem* event = new QListViewItem(d->mEvents);
-	event->setText(0, profilingName(it.key()));
-	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
-	int i = 0;
-	for (; timesIt != (*it).end(); ++timesIt, i++) {
-		QListViewItem* item = new QListViewItem(event);
-		item->setText(0, QString::number(i));
-		QString num;
-		num.sprintf("%03d", i);
-		item->setText(0, num);
-		item->setText(1, QString::number(*timesIt));
-		item->setText(2, QString::number((double)*timesIt / 1000));
-		item->setText(3, QString::number((double)*timesIt / 1000000));
-	}
-	// probably it doesn't make sense to sum all values up
-	event->setOpen(true);
- }
 }
 
 QString BosonProfilingDialog::profilingName(int profilingEvent) const
@@ -201,5 +151,158 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 		break;
  }
  return name;
+}
+
+void BosonProfilingDialog::initFilesPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("&Files"));
+ d->mCurrentFile = new QLabel(vbox);
+ QHBox* hbox = new QHBox(vbox);
+ QPushButton* open = new QPushButton(hbox);
+ open->setText(i18n("&Load From File"));
+ connect(open, SIGNAL(clicked()), this, SLOT(slotLoadFromFile()));
+
+ QPushButton* save = new QPushButton(hbox);
+ save->setText(i18n("&Save To File"));
+ connect(save, SIGNAL(clicked()), this, SLOT(slotSaveToFile()));
+
+ QPushButton* reset = new QPushButton(vbox);
+ reset->setText(i18n("Update profiling data (inaccurate because the profiling dialog is on top of the GL screen!"));
+ connect(reset, SIGNAL(clicked()), this, SLOT(slotUpdate()));
+}
+
+void BosonProfilingDialog::reset()
+{
+ resetLoadUnitPage();
+ resetRenderPage();
+ resetEventsPage();
+ resetFilesPage();
+}
+
+void BosonProfilingDialog::resetLoadUnitPage()
+{
+ d->mUnits->clear();
+ BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
+ QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
+ for (; it != pd->mUnitTimes.end(); ++it) {
+	QListViewItem* unit = new QListViewItem(d->mUnits);
+	QString unitType;
+	unitType.sprintf("%05d", it.key());
+	unit->setText(0, unitType);
+	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
+	long int time = 0;
+	int i = 0;
+	for (; timesIt != (*it).end(); ++timesIt, i++) {
+		QListViewItem* item = new QListViewItem(unit);
+		QString num;
+		num.sprintf("%03d", i);
+		item->setText(0, num);
+		item->setText(1, QString::number(*timesIt));
+		item->setText(2, QString::number((double)*timesIt / 1000));
+		item->setText(3, QString::number((double)*timesIt / 1000000));
+		time += *timesIt;
+	}
+	unit->setText(1, QString::number(time)); // all summed up
+	unit->setOpen(true);
+ }
+}
+
+void BosonProfilingDialog::resetRenderPage()
+{
+ d->mRender->clear();
+ BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
+ QValueList<RenderGLTimes>::Iterator it = pd->mRenderTimes.begin();
+ int i = 0;
+ for (; it != pd->mRenderTimes.end(); ++it, i++) {
+	QListViewItem* item = new QListViewItem(d->mRender);
+	QString num;
+	num.sprintf("%03d", i);
+	item->setText(0, num);
+	createRenderItem(item, i18n("Clearing"), (*it).mClear);
+	createRenderItem(item, i18n("Cells"), (*it).mCells);
+	createRenderItem(item, i18n("Units"), (*it).mUnits);
+	createRenderItem(item, i18n("Text"), (*it).mText);
+	createRenderItem(item, i18n("Function"), (*it).mFunction);
+	item->setOpen(true);
+ }
+}
+
+void BosonProfilingDialog::resetFilesPage()
+{
+ if (d->mData) {
+	d->mCurrentFile->setText(i18n("Using file: %1").arg(d->mCurrentFileName));
+ } else {
+	d->mCurrentFile->setText(i18n("Using current data"));
+ }
+}
+
+void BosonProfilingDialog::createRenderItem(QListViewItem* parent, const QString& type, long int time)
+{
+ QListViewItem* item = new QListViewItem(parent);
+ item->setText(1, type);
+ item->setText(2, QString::number(time));
+ item->setText(3, QString::number((double)time / 1000));
+ item->setText(4, QString::number((double)time / 1000000));
+}
+
+void BosonProfilingDialog::resetEventsPage()
+{
+ d->mEvents->clear();
+ BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
+ QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
+ for (; it != pd->mTimes.end(); ++it) {
+	QListViewItem* event = new QListViewItem(d->mEvents);
+	event->setText(0, profilingName(it.key()));
+	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
+	int i = 0;
+	for (; timesIt != (*it).end(); ++timesIt, i++) {
+		QListViewItem* item = new QListViewItem(event);
+		item->setText(0, QString::number(i));
+		QString num;
+		num.sprintf("%03d", i);
+		item->setText(0, num);
+		item->setText(1, QString::number(*timesIt));
+		item->setText(2, QString::number((double)*timesIt / 1000));
+		item->setText(3, QString::number((double)*timesIt / 1000000));
+	}
+	// probably it doesn't make sense to sum all values up
+	event->setOpen(true);
+ }
+}
+
+void BosonProfilingDialog::slotUpdate()
+{
+ d->mData = 0;
+ reset();
+}
+
+void BosonProfilingDialog::slotSaveToFile()
+{
+ QString file;
+ file = KFileDialog::getSaveFileName();
+ if (file == QString::null) {
+	return;
+ }
+ if (!d->data()->saveToFile(file)) {
+	KMessageBox::sorry(this, i18n("Unable to save to file %1").arg(file));
+ }
+}
+
+void BosonProfilingDialog::slotLoadFromFile()
+{
+ QString file;
+ file = KFileDialog::getOpenFileName();
+ if (file == QString::null) {
+	return;
+ }
+ delete d->mData;
+ d->mData = new BosonProfiling;
+ if (!d->mData->loadFromFile(file)) {
+	KMessageBox::sorry(this, i18n("Unable to load from file %1").arg(file));
+	delete d->mData;
+	return;
+ }
+ d->mCurrentFileName = file;
+ reset();
 }
 
