@@ -1319,6 +1319,7 @@ class Bo3dTools
      * cleared with 0.0
      **/
     static void enableReadDepthBufferWorkaround(float _1_0_depthValue);
+    static void disableReadDepthBufferWorkaround();
 };
 
 

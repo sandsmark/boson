@@ -97,6 +97,11 @@ int main(int argc, char **argv)
 
  top->show();
 
+ if (boConfig->boolValue("EnableATIDepthWorkaround", false)) {
+	double depth = boConfig->doubleValue("ATIDepthWorkaroundValu", 0.00390625);
+	Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
+ }
+
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  if (args->isSet("ati-depth-workaround") || args->isSet("ati-depth-workaround-depth")) {
 	// this is the value that a call to

@@ -32,6 +32,7 @@ class KIntNumInput;
 class KDoubleNumInput;
 class QComboBox;
 class QCheckBox;
+class QLineEdit;
 
 /**
  * @short Base widget for pages of the @ref OptionsDialog
@@ -229,6 +230,8 @@ protected:
 
 protected slots:
 	void slotRenderingSpeedChanged(int);
+	void slotEnableATIDepthWorkaround(bool);
+	void slotATIDepthWorkaroundDefaultValue();
 	void slotShowDetails(bool);
 
 signals:
@@ -236,6 +239,9 @@ signals:
 
 private:
 	QComboBox* mRenderingSpeed;
+	QCheckBox* mAlignSelectBoxes;
+	QCheckBox* mEnableATIDepthWorkaround;
+	QLineEdit* mATIDepthWorkaroundValue;
 	QVBox* mAdvanced;
 
 	KIntNumInput* mUpdateInterval;
@@ -243,7 +249,6 @@ private:
 	QComboBox* mMagnificationFilter;
 	QComboBox* mMinificationFilter;
 	QComboBox* mMipmapMinificationFilter;
-	QCheckBox* mAlignSelectBoxes;
 	QCheckBox* mUseLight;
 	QCheckBox* mUseMaterials;
 	QComboBox* mGroundRenderer;
