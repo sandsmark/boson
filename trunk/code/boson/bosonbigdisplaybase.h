@@ -148,8 +148,10 @@ class BosonBigDisplayBase : public BosonGLWidget
 {
 	Q_OBJECT
 public:
-	BosonBigDisplayBase(BosonCanvas* canvas, QWidget* parent);
+	BosonBigDisplayBase(QWidget* parent);
 	virtual ~BosonBigDisplayBase();
+
+	void setCanvas(BosonCanvas* canvas);
 
 	void setDisplayInput(BosonBigDisplayInputBase* input);
 
@@ -177,7 +179,11 @@ public:
 	BoSelection* selection() const { return mSelection; }
 
 	/**
-	 * Final cleanups. Mainly clear the selection.
+	 * Final cleanups. This should remove basically all game relevant data
+	 * from this class, especially pointers to cells or to units.
+	 *
+	 * I am not yet sure whether the localPlayer should get reset here, too
+	 * - probably it should.
 	 **/
 	void quitGame();
 
@@ -243,6 +249,8 @@ public:
 	void setToolTipCreator(int type);
 	void setToolTipUpdatePeriod(int ms);
 
+	void setParticlesDirty(bool dirty);
+
 	const QPoint& cursorCanvasPos() const; // obsolete!
 	const BoVector3& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;
@@ -284,26 +292,14 @@ protected slots:
 	void slotCursorEdgeTimeout();
 
 	/**
-	 * Called by @ref Boson::signalAdvance.
-	 *
-	 * Note that it is <em>not</em> ensured, that @ref
-	 * BosonCanvas::slotAdvance is called first. It might be possible that
-	 * this slot gets called before @ref BosonCanvas::slotAdvance but the
-	 * other way round might be possible as well.
-	 *
-	 * Also note that this should <em>not</em> be used for game logic parts
-	 * that the network might depend on. Use it for OpenGL or similar
-	 * operations (input/output on the local client) only.
-	 **/
-	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
-
-	/**
 	 * Called when @ref BosonCanvas::signalRemovedItem is emitted. Note that
 	 * this usally happens from the @ref BosonItem destructor! So be careful
 	 * with calling function of @p item, they might crash the game (as they
 	 * dont exist anymore / their data doesnt exist anymore)
 	 **/
 	void slotRemovedItemFromCanvas(BosonItem* item);
+
+	void slotMouseIODestroyed();
 
 protected:
 	/**

@@ -76,6 +76,16 @@ public:
 	 **/
 	virtual ~BosonWidgetBase();
 
+	/**
+	 * Set the displaymanager. The displaymanager will be reparened to this
+	 * widget, but ownership is <em>NOT</em> taken.
+	 *
+	 * I repeat: ownership is <em>NOT</em> taken! This means you MUST delete
+	 * the displaymanager manually, Qt will NOT delete this, as we took
+	 * ownership but don't delete here!
+	 **/
+	void setDisplayManager(BoDisplayManager* displayManager);
+
 	void setLocalPlayer(Player* p, bool init);
 
 	TopWidget* top() const { return mTop; }

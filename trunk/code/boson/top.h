@@ -237,6 +237,7 @@ protected slots:
 	void slotEditorNewMap(const QByteArray&);
 
 private:
+	void initDisplayManager();
 	void initBoson();
 	void initCanvas();
 	void initPlayer();

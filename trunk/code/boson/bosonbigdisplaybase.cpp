@@ -523,9 +523,11 @@ public:
 	}
 
 	Player* mLocalPlayer;
+	KGameMouseIO* mMouseIO;
+	BosonBigDisplayInputBase* mInput;
+
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
-	KGameMouseIO* mMouseIO;
 
 	BosonGLChat* mChat;
 
@@ -535,7 +537,6 @@ public:
 	BoMatrix mProjectionMatrix;
 	BoMatrix mModelviewMatrix;
 	GLdouble mFrustumMatrix[6][4];
-
 
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
@@ -560,8 +561,6 @@ public:
 	QTimer mUpdateTimer;
 	int mUpdateInterval;
 
-	bool mIsQuit;
-
 	QPoint mCanvasPos; // obsolete
 	BoVector3 mCanvasVector;
 
@@ -571,8 +570,6 @@ public:
 	bool mParticlesDirty;
 
 	PlacementPreview mPlacementPreview;
-
-	BosonBigDisplayInputBase* mInput;
 	BoGLToolTip* mToolTips;
 
 	bool mDebugMapCoordinates;
@@ -589,12 +586,12 @@ public:
 	unsigned int mRenderedCells;  // same, but for cells
 };
 
-BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
+BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
 		: BosonGLWidget(parent)
 {
  boDebug() << k_funcinfo << endl;
- mCanvas = c;
  init();
+ initGL();
 }
 
 BosonBigDisplayBase::~BosonBigDisplayBase()
@@ -613,10 +610,10 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 void BosonBigDisplayBase::init()
 {
  d = new BosonBigDisplayBasePrivate;
+ mCanvas = 0;
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
- d->mIsQuit = false;
  d->mParticlesDirty = true;
  d->mDebugMapCoordinates = false;
  d->mDebugShowCellGrid = false;
@@ -644,7 +641,6 @@ void BosonBigDisplayBase::init()
  }
 
  setUpdatesEnabled(false);
- slotResetViewProperties();
 
  if (!isValid()) {
 	boError() << k_funcinfo << "No OpenGL support present on this system??" << endl;
@@ -656,14 +652,23 @@ void BosonBigDisplayBase::init()
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
 		this, SLOT(slotCursorEdgeTimeout()));
 
- connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
-		this, SLOT(slotAdvance(unsigned int, bool)));
- connect(canvas(), SIGNAL(signalRemovedItem(BosonItem*)),
-		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
-
  setUpdateInterval(boConfig->updateInterval());
 }
 
+void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
+{
+ if (mCanvas) {
+	disconnect(mCanvas, 0, this, 0);
+ }
+ mCanvas = canvas;
+ if (!mCanvas) {
+	return;
+ }
+ connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
+
+ slotResetViewProperties();
+}
 
 void BosonBigDisplayBase::initializeGL()
 {
@@ -780,8 +785,10 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  glClear(GL_DEPTH_BUFFER_BIT);
 
 
- // update the minimap
- cameraChanged();
+ if (canvas()) {
+	// update the minimap
+	cameraChanged();
+ }
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -792,10 +799,6 @@ void BosonBigDisplayBase::paintGL()
 {
  if (!isInitialized()) {
 	initGL();
-	return;
- }
- if (d->mIsQuit) {
-	// we will get deleted soon
 	return;
  }
  if (boGame->gameStatus() == KGame::Init) {
@@ -2024,10 +2027,7 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoAc
 void BosonBigDisplayBase::addMouseIO(Player* p)
 {
  boDebug() << k_funcinfo << endl;
- if (!p) {
-	boError() << k_funcinfo << "NULL player" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(p);
  if (d->mMouseIO) {
 	boError() << k_funcinfo << "mouse IO already present for this display!" << endl;
 	return;
@@ -2040,6 +2040,8 @@ void BosonBigDisplayBase::addMouseIO(Player* p)
  d->mMouseIO = new KGameMouseIO(this, true);
  connect(d->mMouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
+ connect(d->mMouseIO, SIGNAL(destroyed()),
+		this, SLOT(slotMouseIODestroyed()));
  p->addGameIO(d->mMouseIO);
 }
 
@@ -2060,7 +2062,7 @@ void BosonBigDisplayBase::setActive(bool a)
  selection()->activate(a);
 }
 
-void BosonBigDisplayBase::setLocalPlayer(Player* p) 
+void BosonBigDisplayBase::setLocalPlayer(Player* p)
 {
  boDebug() << k_funcinfo << endl;
  if (d->mLocalPlayer == p) {
@@ -2074,7 +2076,7 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
 	d->mLocalPlayer = 0;
  }
  d->mLocalPlayer = p;
- if (!p) {
+ if (!d->mLocalPlayer) {
 	return;
  }
  addMouseIO(p);
@@ -2280,15 +2282,39 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 
 void BosonBigDisplayBase::quitGame()
 {
- selection()->clear();
+ boDebug() << k_funcinfo << endl;
+ // these are the important things - they *must* be cleared in order to avoid
+ // crashes
  d->mToolTips->hideTip();
- d->mIsQuit = true; // don't call paintGL() anymore
-
  delete[] d->mRenderCells;
+ d->mRenderCells = 0;
  d->mRenderCellsSize = 0;
  d->mRenderCellsCount = 0;
  setCursor(0);
+ selection()->clear();
  d->mPlacementPreview.clear();
+ d->mParticleList.clear();
+ delete d->mMouseIO;
+ d->mMouseIO = 0;
+ delete d->mInput,
+ d->mInput = 0;
+ setLocalPlayer(0);
+ setKGameChat(0);
+ setCanvas(0);
+
+ // these are rather cosmetic. we won't crash if we don't clear
+ d->mCursorEdgeTimer.stop();
+ d->mCursorEdgeCounter = 0;
+ d->mFps = 0;
+ d->mFrameCount = 0;
+ d->mSelectionRect.setVisible(false);
+ d->mSelectionRect.setEndWidgetPos(d->mSelectionRect.startPos());
+ d->mMouseMoveDiff.stop();
+ d->mMouseMoveDiff.moveToPos(0, 0);
+ d->mRenderedItems = 0;
+ d->mRenderedCells = 0;
+// setCamera(Camera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
+ d->mCamera = Camera();
 }
 
 bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
@@ -3067,9 +3093,9 @@ const BoVector3& BosonBigDisplayBase::cursorCanvasVector() const
  return d->mCanvasVector;
 }
 
-void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)
+void BosonBigDisplayBase::setParticlesDirty(bool dirty)
 {
- d->mParticlesDirty = true;
+ d->mParticlesDirty = dirty;
 }
 
 void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bool canPlace)
@@ -3130,7 +3156,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPl
 void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
 {
  if (d->mInput) {
-	boWarning() << k_funcinfo << "input non-NULL" << endl;
+	boWarning() << k_funcinfo << "existing input non-NULL" << endl;
 	delete d->mInput;
  }
  d->mInput = input;
@@ -3266,6 +3292,14 @@ void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)
  // destructor, its functions might be destroyed already!
  BO_CHECK_NULL_RET(item);
  d->mToolTips->unsetItem(item);
+}
+
+void BosonBigDisplayBase::slotMouseIODestroyed()
+{
+ // the mouse IO sometimes gets destroyed outside this widget (when the player
+ // is removed). we need to set the pointer to NULL then...
+ boDebug() << k_funcinfo << endl;
+ d->mMouseIO = 0;
 }
 
 void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
