@@ -15,6 +15,8 @@ editor).
 They share most classes and currently only Editor, Top and OptionsDialog are
 specific for one. Editor and Top are the toplevel widgets (i.e. derived from
 KMainWindow) and contain mostly the menu/toolbar stuff. 
+UPDATE: this was recently redesigned. Because of this editor is now broken and
+currently not compiled. We also use KDockWindow now.
 
 2. KGame
 Boson is completely KGame based. This means that there is on class (Boson)
@@ -58,7 +60,7 @@ allows just any units (this will be the usual case).
 UnitProperties contains information about a special unit type. So e.g. an
 aircraft has currently an initial health of 100, so UnitProperties::health()
 would return 100 for this. These are just the initial values - they usually
-differ in the actual units. 
+differ in the actual units, but the value will stay the same in UnitProperties.
 UnitProperties also describes whether a unit can do certain things, e.g.
 UnitProperties::canGoOnWater() or UnitProperties::canProduce().
 You will find mostly all proprties of UnitBase in UnitProperties, too, except a
@@ -66,9 +68,9 @@ for a few properties that defaults don't change (e.g. work() - the default is
 *always* WorkNone, even if the unit changes the value immediately on startup).
 
 Boson uses KGameProperty<type> all over the code. Note that we use PolicyLocal
-everywhere, so the main intention of KGameProperty (sending a property to the
-network whenever it changes on a client) is useless. We do so to save network
-traffic (see below). 
+nearly everywhere, so the main intention of KGameProperty (sending a property 
+to the network whenever it changes on a client) is useless. We do so to save
+network traffic (see below).
 But using KGameProperty has another *very* big advantage: you have already
 written most parts of the load/save code. KGamePropertyHandler (which contains
 the KGameProperties) can load and save them into a stream and/or file and
@@ -102,7 +104,7 @@ This has a lot of advantages, but also some disadvantages:
   point against upgrading. But games with development version are difficult...
 
 
-3. Widgets (might get outdated soon)
+3. Widgets (might get outdated soon UPDATE: *is* completely outdated)
 The first widget is the toplevel widget, derived from KMainWindow. It is either
 Top or Editor, depending on whether you play the game or create a map. It
 constits mainly of menu/toolbar and BosonWidget. Top and Editor derive from
