@@ -102,13 +102,15 @@ QPointArray BosonItem::cells(int left, int right, int top, int bottom)
 {
  left = QMAX(left, 0);
  top = QMAX(top, 0);
- QPointArray c;
- int n = 0;
+ right = QMAX(left, right);
+ bottom = QMAX(top, bottom);
+
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
-	return c;
+	return QPointArray();
  }
- c.resize(size);
+ int n = 0;
+ QPointArray c(size);
  for (int i = left; i <= right; i++) {
 	for (int j = top; j <= bottom; j++) {
 		c[n++] = QPoint(i, j);
