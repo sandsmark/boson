@@ -1,8 +1,6 @@
 ## Makefile.am for boson
 
-# this has all of the subdirectories that make will recurse into.  if
-# there are none, comment this out
-SUBDIRS = data items commandframe sound startupwidgets bodebug info
+SUBDIRS = data bosonwidgets items commandframe sound startupwidgets bodebug info
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
@@ -96,6 +94,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
@@ -111,6 +110,7 @@ bounit_LDADD = \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		$(GLLIB) -l3ds \
 		-lkio $(LIB_KDEUI)
@@ -144,6 +144,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
