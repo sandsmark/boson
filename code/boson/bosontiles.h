@@ -74,11 +74,6 @@ public:
 	 **/
 	bool loadTiles(QString dir, bool debug = false);
 
-	/**
-	 * Save a pixmap created using @ref loadTiles.
-	 **/
-	bool save(const QString& fileName);
-
 	QPixmap pixmap() const;
 
 	/**
