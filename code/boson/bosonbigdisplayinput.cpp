@@ -280,7 +280,7 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3Fixed& canvasV
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->moveWithoutAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
+ localPlayerInput()->moveWithoutAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderMove);
  }
@@ -303,7 +303,7 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3Fixed& canvasVect
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->moveWithAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
+ localPlayerInput()->moveWithAttack(selection()->allUnits(), canvasVector.x(), canvasVector.y());
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderMove);
  }
@@ -351,7 +351,7 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3Fixed& canvasVector)
 
  // create the new unit
  localPlayerInput()->build(production->completedProductionType(), factory,
-		(int)(canvasVector.x()), (int)(canvasVector.y()));
+		canvasVector.x(), canvasVector.y());
  return true;
 }
 
@@ -398,7 +398,7 @@ bool BosonBigDisplayInput::actionDropBomb(const BoVector3Fixed& canvasVector)
  }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
- localPlayerInput()->dropBomb(selection()->leader(), weaponId, (int)canvasVector.x(), (int)canvasVector.y());
+ localPlayerInput()->dropBomb(selection()->leader(), weaponId, canvasVector.x(), canvasVector.y());
  weaponId = -1;
  if (localPlayerIO()->ownsUnit(selection()->leader())) {
 	selection()->leader()->playSound(SoundOrderAttack);
