@@ -106,12 +106,12 @@ unsigned long int ProductionPlugin::completedProductionId() const
  }
  if (completedProductionType() == ProduceUnit) {
 	if (mProductionState < speciesTheme()->unitProperties(id)->productionTime()) {
-		boDebug() << k_funcinfo << "not yet completed: " << id << endl;
+//		boDebug() << k_funcinfo << "not yet completed: " << id << endl;
 		return 0;
 	}
  } else {
 	if (mProductionState < speciesTheme()->technology(id)->productionTime()) {
-		boDebug() << k_funcinfo << "not yet completed: " << id << endl;
+//		boDebug() << k_funcinfo << "not yet completed: " << id << endl;
 		return 0;
 	}
  }
