@@ -2560,7 +2560,7 @@ bool Boson::addNeutralPlayer()
 {
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
-	if (((Player*)it.current())->isNeutral()) {
+	if (((Player*)it.current())->isNeutralPlayer()) {
 		boWarning() << k_funcinfo << "already have a neutral player. removing." << endl;
 
 		// note: this will _send_ a request to remove only. will get
