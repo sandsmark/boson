@@ -25,5 +25,5 @@
                 <tr><td>Boson Handbook</td><td><a href="mailto:felix.seeger@gmx.de">Felix Seeger</a></td></tr>
 
         </table>
-#include "nav.wml" before_url="faq.html" before_text="FAQ" up_url="index.html"
+#include "nav.wml" before_url="faq.html" before_text="FAQ" after_text="&nbsp;" up_url="index.html"
 #include "footer.wml"
