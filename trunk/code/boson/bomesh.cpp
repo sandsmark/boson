@@ -24,12 +24,6 @@
 #include <qptrlist.h>
 #include <qcolor.h>
 
-#include <lib3ds/mesh.h>
-#include <lib3ds/material.h>
-#include <lib3ds/file.h>
-#include <lib3ds/matrix.h>
-#include <lib3ds/vector.h>
-
 #include <GL/gl.h>
 
 class BoAdjacentDataBase
@@ -100,8 +94,6 @@ private:
 };
 
 
-void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* connected, Lib3dsFace* face, Lib3dsMesh* mesh);
-
 BoNode::BoNode(BoNode* previous)
 {
  init();
@@ -117,16 +109,15 @@ BoNode::~BoNode()
 {
 }
 
-void BoNode::setFace(Lib3dsFace* face)
+void BoNode::setFace(const int* points)
 {
- mFace = face;
  // we store the index of the point in the mesh only. that is necessary for
  // TRIANGLE_STRIPs
  // --> equal vertices don't have to use the same texture coordinates, so we
  // can't connect them.
- mPointIndex[0] = face->points[0];
- mPointIndex[1] = face->points[1];
- mPointIndex[2] = face->points[2];
+ mPointIndex[0] = points[0];
+ mPointIndex[1] = points[1];
+ mPointIndex[2] = points[2];
 }
 
 void BoNode::setPrevious(BoNode* previous)
@@ -172,7 +163,6 @@ void BoNode::init()
 {
  mNext = 0;
  mPrevious = 0;
- mFace = 0;
  mRelevantPoint = -1;
  mPointIndex[0] = -1;
  mPointIndex[1] = -1;
@@ -220,8 +210,6 @@ public:
 	BoMeshPrivate()
 	{
 		mFaces = 0;
-		mMesh = 0;
-		mMaterial = 0;
 
 		mTeamColor = 0;
 
@@ -230,10 +218,9 @@ public:
 	}
 	int mType;
 	BoNode* mFaces;
-	bool mTextured;
+	bool mIsTextured;
+	bool mIsTeamColor;
 
-	Lib3dsMesh* mMesh;
-	Lib3dsMaterial* mMaterial;
 	GLuint mTexture;
 	GLuint mDisplayList;
 	QColor* mTeamColor;
@@ -247,11 +234,10 @@ public:
 	float* mVertices;
 };
 
-BoMesh::BoMesh(Lib3dsMesh* mesh)
+BoMesh::BoMesh(unsigned int faces)
 {
  init();
- d->mMesh = mesh;
- createNodes();
+ createNodes(faces);
 }
 
 BoMesh::~BoMesh()
@@ -270,30 +256,35 @@ void BoMesh::init()
  d = new BoMeshPrivate;
  d->mAllNodes.setAutoDelete(true);
  d->mType = GL_TRIANGLES;
- d->mTextured = false;
+ d->mIsTextured = false;
+ d->mIsTeamColor = false;
  d->mTexture = 0;
  d->mDisplayList = 0;
  d->mPoints = 0;
 }
 
-void BoMesh::createNodes()
+void BoMesh::createNodes(unsigned int faces)
 {
- BO_CHECK_NULL_RET(d->mMesh);
  if (d->mAllNodes.count() > 0) {
 	boDebug() << "nodes already created. nothing to do." << endl;
 	return;
  }
- if (d->mMesh->faces < 1) {
-	boWarning() << k_funcinfo << "no faces in " << d->mMesh->name << endl;
+ if (faces < 1) {
+	boWarning() << k_funcinfo << "no faces in mesh" << endl;
 	return;
  }
 
- for (unsigned int face = 0; face < d->mMesh->faces; face++) {
-	Lib3dsFace* f = &d->mMesh->faceL[face];
+ for (unsigned int face = 0; face < faces; face++) {
 	BoNode* node = new BoNode();
-	node->setFace(f);
 	d->mAllNodes.append(node);
  }
+}
+
+void BoMesh::setFace(int index, const int* points)
+{
+ BoNode* n = d->mAllNodes.at(index);
+ BO_CHECK_NULL_RET(n);
+ n->setFace(points);
 }
 
 void BoMesh::disconnectFaces()
@@ -308,12 +299,11 @@ void BoMesh::disconnectFaces()
 
 void BoMesh::addFaces()
 {
- BO_CHECK_NULL_RET(d->mMesh);
  if (d->mFaces) {
 	disconnectFaces();
  }
  if (d->mAllNodes.isEmpty()) {
-	boError() << k_funcinfo << "no nodes for " << d->mMesh->name << endl;
+	boError() << k_funcinfo << "no nodes for mesh" << endl;
 	return;
  }
  BoNode* previous = 0;
@@ -511,15 +501,14 @@ bool BoMesh::connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoN
 
 void BoMesh::connectFaces()
 {
- BO_CHECK_NULL_RET(d->mMesh);
  if (d->mFaces) {
 	disconnectFaces();
  }
  if (d->mAllNodes.isEmpty()) {
-	boError() << k_funcinfo << "no nodes for " << d->mMesh->name << endl;
+	boError() << k_funcinfo << "no nodes for mesh" << endl;
 	return;
  }
- boDebug() << "trying to connect faces for " << d->mMesh->name << endl;
+ boDebug() << "trying to connect faces" << endl;
 
  QPtrList<BoNode> allFaces = d->mAllNodes;
 
@@ -576,7 +565,7 @@ void BoMesh::connectFaces()
  d->mFaces = first;
  d->mType = GL_TRIANGLE_STRIP;
 }
-
+/*
 void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* connected, Lib3dsFace* face, Lib3dsMesh* mesh)
 {
  BO_CHECK_NULL_RET(face)
@@ -618,6 +607,7 @@ void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* co
 	}
  }
 }
+*/
 
 int BoMesh::type() const
 {
@@ -655,76 +645,9 @@ void BoMesh::deleteNodes(BoNode* node)
  }
 }
 
-Lib3dsMesh* BoMesh::mesh() const
-{
- return d->mMesh;
-}
-
-QString BoMesh::textureName(Lib3dsMesh* mesh, Lib3dsFile* file)
-{
- if (!mesh || mesh->faces == 0) {
-	return QString::null;
- }
- if (mesh->texels == 0) {
-	return QString::null;
- }
- Lib3dsMaterial* mat = BoMesh::material(mesh, file);
- if (!mat) {
-	return QString::null;
- }
- if (BoMesh::isTeamColor(mesh)) {
-	// teamcolor objects are not textured.
-	return QString::null;
- }
-
- // this is the texture map of the object.
- // t->name is the (file-)name and in
- // mesh->texelL you can find the texture
- // coordinates for glTexCoord*()
- // note that mesh->texels can be 0 - then the
- // mesh doesn't have any texture. otherwise it
- // must be equal to mesh->points
- Lib3dsTextureMap* t = &mat->texture1_map;
-
- // AB: note that we use BosonModel::cleanTextureName() for the final name. here
- // we return the name from the 3ds file only.
- return QString(t->name);
-}
-
-Lib3dsMaterial* BoMesh::material(Lib3dsMesh* mesh, Lib3dsFile* file)
-{
-if (!mesh || mesh->faces == 0) {
-	return 0;
- }
- // AB: all faces in this mesh must use the same material!
- Lib3dsFace* f = &mesh->faceL[0];
- Lib3dsMaterial* mat = 0;
- if (f->material[0]) {
-	mat = lib3ds_file_material_by_name(file, f->material);
- }
- return mat;
-}
-
-bool BoMesh::isTeamColor(const Lib3dsMesh* mesh)
-{
- if (!mesh) {
-	BO_NULL_ERROR(mesh);
-	return false;
- }
- if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
-	return true;
- }
- return false;
-}
-
-void BoMesh::setMaterial(Lib3dsMaterial* mat)
-{
- d->mMaterial = mat;
-}
-
 void BoMesh::setTextured(bool tex)
 {
- d->mTextured = tex;
+ d->mIsTextured = tex;
 }
 
 void BoMesh::setTextureObject(GLuint tex)
@@ -734,7 +657,7 @@ void BoMesh::setTextureObject(GLuint tex)
 
 bool BoMesh::textured() const
 {
- return d->mTextured;
+ return d->mIsTextured;
 }
 
 GLuint BoMesh::textureObject() const
@@ -742,148 +665,60 @@ GLuint BoMesh::textureObject() const
  return d->mTexture;
 }
 
-void BoMesh::loadPoints()
+void BoMesh::allocatePoints(unsigned int points, bool texels)
 {
- BO_CHECK_NULL_RET(mesh());
- if (mesh()->faces == 0) {
-	return;
- }
- if (mesh()->points == 0) {
-	return;
- }
- d->mPoints = mesh()->points;
- loadVertices();
- loadTexels();
-}
-
-void BoMesh::loadVertices()
-{
- if (points() == 0) {
-	return;
- }
  if (d->mVertices) {
-	boWarning() << k_funcinfo << "vertices already loaded" << endl;
+	boError() << k_funcinfo << "vertices already allocated!" << endl;
 	delete[] d->mVertices;
  }
- d->mVertices = new float[points() * 3];
- Lib3dsMatrix invMeshMatrix;
- lib3ds_matrix_copy(invMeshMatrix, mesh()->matrix);
- lib3ds_matrix_inv(invMeshMatrix);
- BoMatrix matrix(&invMeshMatrix[0][0]);
-
- BoVector3 vector;
- BoVector3 v;
- for (unsigned int i = 0; i < points(); i++) {
-	vector.set(mesh()->pointL[i].pos);
-	matrix.transform(&v, &vector);
-	d->mVertices[i * 3] = v[0];
-	d->mVertices[i * 3 + 1] = v[1];
-	d->mVertices[i * 3 + 2] = v[2];
+ if (d->mTexels) {
+	boError() << k_funcinfo << "texels already allocated!" << endl;
+	delete[] d->mTexels;
+ }
+ d->mPoints = points;
+ // AB: we should merge them into a single array.
+ d->mVertices = new float[d->mPoints * 3];
+ if (texels) {
+	d->mTexels = new float[d->mPoints * 2];
  }
 }
 
-void BoMesh::loadTexels()
+void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
 {
- BO_CHECK_NULL_RET(mesh());
- if (d->mTexels) {
-	boWarning() << k_funcinfo << "texels already loaded" << endl;
-	delete[] d->mTexels;
+ BO_CHECK_NULL_RET(d->mVertices);
+ if (index >= points()) {
+	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- if (mesh()->texels == 0) {
-	return;
- }
- if (!d->mMaterial) {
-	return;
- }
- if (!textured()) {
-	return;
- }
- if (points() != mesh()->texels) {
-	boError() << k_funcinfo << "points != texels" << endl;
-	return;
- }
- d->mTexels = new float[points() * 2];
+ d->mVertices[index * 3] = vertex[0];
+ d->mVertices[index * 3 + 1] = vertex[1];
+ d->mVertices[index * 3 + 2] = vertex[2];
+}
 
-
- BoMatrix texMatrix;
- // *ggg* this is a nice workaround.
- // it's hard to do this with a Lib3dsMatrix by several
- // reasons - so we do these calculations in OpenGL
- // (*NOT* in a display list - immediate mode) and then
- // get the texture matrix.
- // With this matrix we can easily calculate the actual
- // texture coordinates.
- // btw: this means that all calculations are done only
- // once (on startup) and therefore we'll have some
- // speedup
-
- // AB: this part isn't time critical anymore. you can
- // call even OpenGL commands without runtime slowdowns.
- // We calculate the actual texture map coordinates only
- // once and then use the final calculations in the
- // display list.
- glMatrixMode(GL_TEXTURE);
- glLoadIdentity(); // should already be there
- Lib3dsTextureMap* t = &d->mMaterial->texture1_map;
- if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
-	// 3ds does these things pretty unhandy. it doesn't
-	// scale as opengl does, but rather emulates scaling the
-	// texture itself (i.e. when the texture is centered on
-	// an object it will still be centered after scaling).
-	// so we need to translate them before scaling.
-	glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
-	glScalef(t->scale[0], t->scale[1], 1.0);
+void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
+{
+ BO_CHECK_NULL_RET(d->mTexels);
+ if (index >= points()) {
+	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- if (t->rotation != 0.0) {
-	glRotatef(-t->rotation, 0.0, 0.0, 1.0);
- }
- glTranslatef(-t->offset[0], -t->offset[1], 0.0);
- glTranslatef(mesh()->map_data.pos[0], mesh()->map_data.pos[1], mesh()->map_data.pos[2]);
- float scale = mesh()->map_data.scale;
- if (scale != 0.0 && scale != 1.0) {
-	// doesn't seem to be used in our models
-	glScalef(scale, scale, 1.0);
- }
- texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
- if (texMatrix.isNull()) {
-	boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
-	texMatrix.loadIdentity();
- }
- // AB: we don't use glPushMatrix() / glPopMatrix() here to make sure that the
- // texture matrix is *always* the identity! we don't use the texture matrix
- glLoadIdentity(); // reset to identity
- glMatrixMode(GL_MODELVIEW);
-
-
- // now we have the final texture matrix in texMatrix.
- // all texel coordinates have to be transformed using this matrix.
- BoVector3 a;
- BoVector3 b;
- for (unsigned int i = 0; i < mesh()->texels; i++) {
-	a.set(mesh()->texelL[i][0], mesh()->texelL[i][1], 0.0);
-	texMatrix.transform(&b, &a);
-	d->mTexels[i * 2] = b[0];
-	d->mTexels[i * 2 + 1] = b[1];
- }
+ d->mTexels[index * 2] = texel[0];
+ d->mTexels[index * 2 + 1] = texel[1];
 }
 
 void BoMesh::renderMesh()
 {
- // TODO: count number of nodes in this mesh and compare to mesh->faces
- BO_CHECK_NULL_RET(mesh());
  BO_CHECK_NULL_RET(d->mVertices);
  BoNode* node = faces();
  if (!node) {
 	boError() << k_funcinfo << "NULL node" << endl;
 	return;
  }
- if (mesh()->faces < 1) {
+ if (points() < 1) {
 	return;
  }
  if (type() == GL_TRIANGLE_STRIP && false) {
 	boDebug() << "painting _STRIP" << endl;
 	if (!node->next()) {
-		boError() << k_funcinfo << "less than 2 faces in mesh " << mesh()->name << "! this is not supported" << endl;
+		boError() << k_funcinfo << "less than 2 faces in mesh! this is not supported" << endl;
 		return;
 	}
 	int firstPoint;
@@ -891,9 +726,9 @@ void BoMesh::renderMesh()
 	int thirdPoint;
 	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
 
-	renderPoint(node->face()->points[firstPoint]);
-	renderPoint(node->face()->points[secondPoint]);
-	renderPoint(node->face()->points[thirdPoint]);
+	renderPoint(node->pointIndex()[firstPoint]);
+	renderPoint(node->pointIndex()[secondPoint]);
+	renderPoint(node->pointIndex()[thirdPoint]);
 
 	// we skip the entire first face. all points have been rendered above.
 	node = node->next();
@@ -903,12 +738,12 @@ void BoMesh::renderMesh()
 			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
 			continue;
 		}
-		renderPoint(node->face()->points[point]);
+		renderPoint(node->pointIndex()[point]);
 	}
  } else {
 	for (; node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
-			renderPoint(node->face()->points[i]);
+			renderPoint(node->pointIndex()[i]);
 		}
 	}
  }
@@ -998,6 +833,17 @@ BoVector3 BoMesh::point(unsigned int p) const
 	return BoVector3();
  }
  return BoVector3(&d->mVertices[p * 3]);
+}
+
+bool BoMesh::isTeamColor() const
+{
+ return d->mIsTeamColor;
+}
+
+void BoMesh::setIsTeamColor(bool c)
+{
+ d->mIsTeamColor = c;
+ // AB: this implies setTextured(false) ! -> should be called for this, too!
 }
 
 GLuint BoMesh::displayList() const

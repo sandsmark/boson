@@ -4,7 +4,7 @@
 # there are none, comment this out
 SUBDIRS = data items commandframe sound startupwidgets bodebug
 
-bin_PROGRAMS = botriangles_test boson bounit boprofiling bocursor borender
+bin_PROGRAMS = boson bounit boprofiling bocursor borender
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
 
