@@ -130,7 +130,20 @@ public:
 	 **/
 	void quitGame();
 
-	virtual void unitAction(int ) {}
+	/**
+	 * See @ref BosonBigDisplay::unitAction
+	 **/
+	virtual void unitAction(int) {}
+
+	/**
+	 * See @ref EditorBigDisplay::placeUnit
+	 **/
+	virtual void placeUnit(unsigned long int, Player*) {}
+
+	/**
+	 * See @ref EditorBigDisplay::placeCell
+	 **/
+	virtual void placeCell(int) {}
 
 	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);

@@ -57,12 +57,10 @@ void EditorCommandFrame::init()
  orderWidget()->initEditor();
 
 // the order buttons
-/*
  connect(orderWidget(), SIGNAL(signalProduceUnit(unsigned long int)),
-		this, SLOT(slotProduceUnit(unsigned long int)));
- connect(orderWidget(), SIGNAL(signalStopProduction(unsigned long int)),
-		this, SLOT(slotStopProduction(unsigned long int)));
-*/
+		this, SLOT(slotPlaceUnit(unsigned long int)));
+ connect(orderWidget(), SIGNAL(signalPlaceCell(int)),
+		this, SIGNAL(signalPlaceCell(int)));
 }
 
 EditorCommandFrame::~EditorCommandFrame()
@@ -178,7 +176,8 @@ void EditorCommandFrame::placeCells(CellType type)
 	kdError() << k_funcinfo << "NULL orderwidget" << endl;
 	return;
  }
- orderWidget()->hideOrderButtons();
+ hideActions();
+// orderWidget()->hideOrderButtons();
  orderWidget()->setCellType(type);
  orderWidget()->slotRedrawTiles();
  orderWidget()->show();
@@ -189,4 +188,35 @@ void EditorCommandFrame::setTileSet(BosonTiles* t)
  orderWidget()->setTileSet(t);
 }
 
+void EditorCommandFrame::placeMobiles(Player* owner)
+{
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ SpeciesTheme* theme = owner->speciesTheme();
+ if (!theme) {
+	kdError() << k_funcinfo << "NULL speciestheme" << endl;
+	return;
+ }
+ hideActions();
+ orderWidget()->setOrderButtons(theme->allMobiles(), owner);
+ orderWidget()->show();
+}
+
+void EditorCommandFrame::placeFacilities(Player* owner)
+{
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ SpeciesTheme* theme = owner->speciesTheme();
+ if (!theme) {
+	kdError() << k_funcinfo << "NULL speciestheme" << endl;
+	return;
+ }
+ hideActions();
+ orderWidget()->setOrderButtons(theme->allFacilities(), owner);
+ orderWidget()->show();
+}
 

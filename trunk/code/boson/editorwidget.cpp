@@ -95,6 +95,15 @@ EditorWidget::~EditorWidget()
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
+void EditorWidget::initDisplayManager()
+{
+ BosonWidgetBase::initDisplayManager();
+ connect(cmdFrame(), SIGNAL(signalPlaceUnit(unsigned long int, Player*)),
+		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
+ connect(cmdFrame(), SIGNAL(signalPlaceCell(int)),
+		displayManager(), SLOT(slotPlaceCell(int)));
+}
+
 void EditorWidget::initConnections()
 {
  BosonWidgetBase::initConnections();
@@ -121,7 +130,13 @@ void EditorWidget::initMap()
 void EditorWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
- localPlayer()->addGameIO(d->mCmdInput);// AB: for editor mode, too? maybe place into base widget
+ /*
+ if (!d->mCmdInput) {
+	kdError() << k_funcinfo << "NULL command input" << endl;
+ } else {
+	localPlayer()->addGameIO(d->mCmdInput);
+ }
+ */
 
  minimap()->slotShowMap(true);
 }
@@ -132,9 +147,8 @@ BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 // connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
 //		frame, SLOT(slotUpdateProduction(Unit*)));
 
- //AB: can we use the same input for the editor?
- d->mCmdInput = new CommandInput;
- d->mCmdInput->setCommandFrame(frame);
+// d->mCmdInput = new EditorCommandInput;
+// d->mCmdInput->setCommandFrame(frame);
  return frame;
 }
 
@@ -231,10 +245,12 @@ void EditorWidget::slotChangeLocalPlayer(int)
 
 void EditorWidget::slotPlaceFacilities()
 {
+ editorCmdFrame()->placeFacilities(localPlayer());
 }
 
 void EditorWidget::slotPlaceMobiles()
 {
+ editorCmdFrame()->placeMobiles(localPlayer());
 }
 
 void EditorWidget::slotPlaceCellSmall()

@@ -183,3 +183,22 @@ void EditorBigDisplay::addMouseIO(Player* p)
  localPlayer()->addGameIO(d->mMouseIO);
 }
 */
+
+void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
+{
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (owner != localPlayer()) {
+	kdError() << k_funcinfo << "owner != localplayer" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << "now placing unit: " << unitType << " for " << owner->id() << "==" << owner->name() << endl;
+}
+
+void EditorBigDisplay::placeCell(int tile)
+{
+ kdDebug() << k_funcinfo << "now placing cell: " << tile << endl;
+}
+

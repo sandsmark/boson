@@ -488,3 +488,13 @@ void BoDisplayManager::slotUnitAction(int action)
  activeDisplay()->unitAction(action);
 }
 
+void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
+{
+ activeDisplay()->placeUnit(unitType, owner);
+}
+
+void BoDisplayManager::slotPlaceCell(int tile)
+{
+ activeDisplay()->placeCell(tile);
+}
+

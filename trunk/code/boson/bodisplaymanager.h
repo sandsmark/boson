@@ -167,7 +167,24 @@ public slots:
 	 **/
 	void slotClearGroup(int number);
 
+	/**
+	 * Game mode only: specifies the action (move, attack, mine, ...) that
+	 * will be used for the current selection when the player clicks on the
+	 * map the next time.
+	 **/
 	void slotUnitAction(int action);
+
+	/**
+	 * Editor mode only: specifies the unitType that will be placed on the
+	 * map when the user clicks the next time
+	 **/
+	void slotPlaceUnit(unsigned long int unitType, Player* owner);
+
+	/**
+	 * Editor mode only: specifies the tile/cell that will be placed on the
+	 * map when the user clicks the next time
+	 **/
+	void slotPlaceCell(int tile);
 
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();

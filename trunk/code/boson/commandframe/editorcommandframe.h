@@ -52,6 +52,9 @@ public:
 	 **/
 	void placeCells(CellType type);
 
+	void placeMobiles(Player* owner);
+	void placeFacilities(Player* owner);
+
 public slots:
 	virtual void slotSetButtonsPerRow(int b);
 
@@ -69,14 +72,6 @@ protected:
 	virtual bool checkUpdateTimer() const;
 
 protected slots:
-	/**
-	 * If the selected unit is a facility that has not been constructed
-	 * completely (see @ref Unit::isConstructionComplete) show how far the
-	 * construction is currently.
-	 **/
-//	void slotShowConstructionProgress(Facility* fac);
-
-
 	void slotUpdate();
 
 private:

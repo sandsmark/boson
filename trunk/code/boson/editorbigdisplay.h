@@ -65,15 +65,21 @@ public:
 	virtual ~EditorBigDisplay();
 
 	virtual void setLocalPlayer(Player* p);
-	
-public slots:
+
+	//AB: this should generate an error when owner != localPlayer()
+	/**
+	 * The specified unitType is marked to be placed whenever the user
+	 * clicks on the map.
+	 **/
+	virtual void placeUnit(unsigned long int unitType, Player* owner);
 
 	/**
-	 * Mark the unitType for construction. Inform boson about this and place
-	 * the unit on the screen if in editor mode - otherwise delay.
+	 * The specified cell is marked to be placed whenever the user
+	 * clicks on the map.
 	 **/
-//	void slotWillConstructUnit(int unitType, UnitBase* facility, KPlayer* owner);
-//	void slotWillPlaceCell(int groundType);
+	virtual void placeCell(int);
+
+public slots:
 
 signals:
 	void signalAddCell(int x, int y, int groundType, unsigned char version);

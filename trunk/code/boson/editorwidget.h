@@ -102,6 +102,7 @@ protected:
 	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent);
 
 	virtual void initKActions();
+	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
 

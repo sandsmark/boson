@@ -230,6 +230,7 @@ protected:
 	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent) = 0;
 
 	virtual void initKActions();
+	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void initMap();
 	virtual void setBosonXMLFile();
@@ -238,7 +239,6 @@ private:
 	void initChat();
 
 	void initMiniMap();
-	void initDisplayManager();
 	void initCommandFrame();
 	void initLayout();
 
