@@ -466,7 +466,9 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
  if (!ufo::UToolkit::getToolkit()) {
 	ufo::UXToolkit* tk = new ufo::UXToolkit();
 	QString data_dir;
-	data_dir = KGlobal::dirs()->findResourceDir("data", "boson/pics/boson-startup-logo.png");
+	if (KGlobal::_instance) { // NULL in boufodesigner
+		data_dir = KGlobal::dirs()->findResourceDir("data", "boson/pics/boson-startup-logo.png");
+	}
 	if (data_dir.isEmpty()) {
 		boWarning() << k_funcinfo << "cannot determine data_dir" << endl;
 	} else {
