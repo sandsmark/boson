@@ -973,47 +973,30 @@ void BosonBigDisplayBase::renderItems()
 	if (RTTI::isUnit(item->rtti())) {
 		u = (Unit*)item;
 	}
-	if (u && u ->waypointList().count() > 0) {
+	
+	if (u && u->waypointList().count() > 0) {
+		// render a line from the current position of the unit to the
+		// point it is moving to.
+		// TODO: render one vertex per cell or so. this would fix
+		// problem with heightmaps, when a line goes through mountains.
+		// speed is hardly relevant at s point (rendering a few small
+		// lines is fast).
+		glColor3ub(0, 255, 0);
+		QValueList<QPoint> list = u->waypointList();
+		list.prepend(QPoint((int)(u->x() + u->width() / 2), (int)(u->y() + u->width() / 2)));
+		renderPathLines(list, u->isFlying(), u->z());
+	}
+	if (u && u->pathPointList().count() > 0) {
 		// render a line from the current position of the unit to the
 		// point it is moving to.
 		// TODO: render one vertex per cell or so. this would fix
 		// problem with heightmaps, when a line goes through mountains.
 		// speed is hardly relevant at this point (rendering a few small
 		// lines is fast).
-		glColor3ub(0, 255, 0);
-		glDisable(GL_TEXTURE_2D);
-		glBegin(GL_LINE_STRIP);
-		glVertex3f(x, y, z);
-		QValueList<QPoint> list = u->waypointList();
-		QValueList<QPoint>::Iterator it;
-		bool done = false;
-		for (it = list.begin(); it != list.end(); ++it) {
-			if ((*it).x() < 0 || (*it).y() < 0) {
-				done = true;
-				break;
-			}
-			float x = ((float)(*it).x()) / BO_TILE_SIZE;
-			float y = -((float)(*it).y()) / BO_TILE_SIZE;
-			float z = 0.05f;
-			if (u->isFlying()) {
-				z += item->z();
-			} else {
-				z += canvas()->heightAtPoint(x, y);
-			}
-			glVertex3f(x, y, z);
-		}
-		if (!done) {
-			float x = ((float)(u->destinationX())) / BO_TILE_SIZE;
-			float y = -((float)(u->destinationY())) / BO_TILE_SIZE;
-			float z = 0.05f;
-			if (u->isFlying()) {
-				z += item->z();
-			} else {
-				z += canvas()->heightAtPoint(x, y);
-			}
-			glVertex3f(x, y, z);
-		}
-		glEnd();
+		QValueList<QPoint> list = u->pathPointList();
+		list.prepend(QPoint((int)(u->x() + u->width() / 2), (int)(u->y() + u->width() / 2)));
+		glColor3ub(255, 0, 0);
+		renderPathLines(list, u->isFlying(), u->z());
 	}
 	glColor3ub(255, 255, 255);
 
@@ -1024,6 +1007,37 @@ void BosonBigDisplayBase::renderItems()
  glPopAttrib();
  d->mRenderedItems += d->mRenderItemList->count();
  d->mRenderItemList->clear();
+}
+
+void BosonBigDisplayBase::renderPathLines(QValueList<QPoint>& path, bool isFlying, float _z)
+{
+ // render a line from the current position of the unit to the
+ // point it is moving to.
+ // TODO: render one vertex per cell or so. this would fix
+ // problem with heightmaps, when a line goes through mountains.
+ // speed is hardly relevant at this point (rendering a few small
+ // lines is fast).
+ glDisable(GL_TEXTURE_2D);
+ glBegin(GL_LINE_STRIP);
+ QValueList<QPoint>::Iterator it;
+ bool done = false;
+ for (it = path.begin(); it != path.end(); ++it) {
+	if ((*it).x() < 0 || (*it).y() < 0) {
+		done = true;
+		break;
+	}
+	float x = ((float)(*it).x()) / BO_TILE_SIZE;
+	float y = -((float)(*it).y()) / BO_TILE_SIZE;
+	float z = 0.05f;
+	if (isFlying) {
+		z += _z;
+	} else {
+		z += canvas()->heightAtPoint(x, y);
+	}
+	glVertex3f(x, y, z);
+ }
+ glEnd();
+
 }
 
 void BosonBigDisplayBase::renderPlacementPreview()
