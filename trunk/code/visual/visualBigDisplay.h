@@ -49,9 +49,6 @@ public:
   visualBigDisplay(/*orderWin *,*/ visualTopLevel *, QWidget *parent=0, const char *name=0L, WFlags f=0);
   ~visualBigDisplay();
 
-
-	/* from display classes */
-	virtual void actionClicked(QPoint, int state)=0;	// selecting, moving...
 	virtual QSize sizeHint() const { return QSize(100,100); } // minimum size
 
 signals:
@@ -59,6 +56,13 @@ signals:
 	void	reSizeView (QSize s);
 
 protected:
+	/*
+	 * put object 
+	 */
+	virtual void object_put(QPoint)=0;
+	virtual void actionClicked(QPoint, int state)=0;	// selecting, moving...
+
+
 	// display
 	void drawRectSelect(QPoint p1, QPoint p2, QPainter &qp)	// XXX QRect somewhere ?
 		{ qp.drawRect(p1.x(), p1.y(), p2.x()-p1.x(), p2.y()-p1.y()); }

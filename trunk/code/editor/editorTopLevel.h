@@ -84,7 +84,6 @@ protected:
 	/*
 	 * put object 
 	 */
-	virtual void object_put(QPoint){}; // not useful for the editor yet
 	virtual	void updateViews(void);
 
 private slots:

@@ -38,6 +38,7 @@ public:
 	editorBigDisplay(editorTopLevel *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
 	virtual void actionClicked(QPoint p, int state);	// selecting, moving...
+	virtual void object_put(QPoint p);
 
 private slots:
 	void setSelectedObject	(object_type, int);

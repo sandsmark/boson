@@ -296,6 +296,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_FACILITY;
 			setSelected( species[who]->getBigOverview( (facilityType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
+			setSelectionMode( editorTopLevel::SELECT_PUT);
 			break;
 
 		case W_UNITS:
@@ -303,6 +304,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_UNIT;
 			setSelected( species[who]->getBigOverview( (mobType)but ));
 			emit setSelectedObject (otype, but);		// need to be after the setSelected
+			setSelectionMode( editorTopLevel::SELECT_PUT);
 			break;
 
 		case W_BIG_GROUND_1:
@@ -330,6 +332,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_GROUND;
 			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
+			if (g<GROUND_GRASS_MINERAL) setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
 
 		case W_SMALL_PLAIN:
@@ -338,6 +341,7 @@ void editorTopLevel::handleButton(int but)
 			otype = OT_GROUND;
 			setSelected( & QPixmap ( * tiles[but]->pixmap()) );
 			emit setSelectedObject (otype, g);		// need to be after the setSelected
+			if (g<GROUND_GRASS_MINERAL) setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
 
 	} // switch(which)

@@ -27,9 +27,15 @@
 #include "game.h"
 
 
-bosonBigDisplay::bosonBigDisplay(bosonTopLevel *btl, QWidget *parent, const char *name, WFlags f)
+bosonBigDisplay::bosonBigDisplay(bosonTopLevel *_btl, QWidget *parent, const char *name, WFlags f)
 	:visualBigDisplay(btl,parent,name,f)
 {
+	btl = _btl;
+}
+
+void bosonBigDisplay::object_put(QPoint p)
+{
+	btl->_object_put(p);
 }
 
 

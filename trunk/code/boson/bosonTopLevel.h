@@ -42,15 +42,13 @@ public:
 	enum orderType_t { OT_NONE =-1 , OT_FACILITY=10, OT_MOBILE=11};
 
 	/*
-	 * put object 
-	 */
-	virtual void	object_put(QPoint p);
-
-	/*
          * selection handling
          */
 	virtual void	setSelected(QPixmap *);
 	virtual void	setOrders(int what , int who=-1);
+
+	// XXX dirty HACK, clean this object_put
+	void	_object_put(QPoint p);
 
 protected:
 	virtual	void	updateViews(void);
