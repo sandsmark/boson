@@ -156,7 +156,7 @@ void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
  boDebug() << k_funcinfo << endl;
  BosonBigDisplayBase* old = d->mActiveDisplay;
  d->mActiveDisplay = display;
- 
+
  if (old) {
 	markActive(old, false);
  }
@@ -171,6 +171,7 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 	return;
  }
  display->setActive(active);
+
  // obsolete for OpenGL?
  /*
  if (active) {
@@ -297,6 +298,8 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  //TODO: what about editor widgets??
  BosonBigDisplayBase* b = 0;
  b = new BosonBigDisplayBase(d->mCanvas, parent);
+ connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
+		this, SIGNAL(signalSelectionChanged(BoSelection*)));
  if (mGameMode) {
 	b->setDisplayInput(new BosonBigDisplayInput(b));
  } else {
@@ -304,7 +307,7 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  }
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)), this, SIGNAL(signalLockAction(bool)));
  d->mDisplayList.append(b);
- connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)), 
+ connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)),
 		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
  b->show();
  return b;
@@ -673,5 +676,14 @@ void BoDisplayManager::saveAsXML(QDomElement& root)
 	unitgroups.appendChild(group);
  }
  root.appendChild(unitgroups);
+}
+
+double BoDisplayManager::fps() const
+{
+ if (!activeDisplay()) {
+	BO_NULL_ERROR(activeDisplay());
+	return 0.0;
+ }
+ return activeDisplay()->fps();
 }
 

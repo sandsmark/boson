@@ -20,7 +20,6 @@
 #define BODISPLAYMANAGER_H
 
 #include <qwidget.h>
-#include <qptrlist.h>
 
 class BoBox;
 class BosonBigDisplayBase;
@@ -29,6 +28,7 @@ class BosonCursor;
 class Player;
 class Unit;
 class BosonCanvas;
+class BoSelection;
 
 class KPlayer;
 class QDomElement;
@@ -111,6 +111,11 @@ public:
 	void saveAsXML(QDomElement& root);
 	void loadFromXML(const QDomElement& root);
 
+	/**
+	 * @return BosonBigDisplayBase::fps for the @ref activeDisplay
+	 **/
+	double fps() const;
+
 public slots:
 	/**
 	 * Scroll the active display
@@ -191,6 +196,15 @@ signals:
 	 * See @ref BosonBigDisplayInputBase::signalLockAction
 	 **/
 	void signalLockAction(bool);
+
+	/**
+	 * This signal is emitted when the selection of a display changes, see
+	 * @ref BosonBigDisplayBase::signalSelectionChanged. One day this might
+	 * be changed so that this is emitted when the selection of the @ref
+	 * activeDisplay changes only (in case we support several displays again
+	 * one day).
+	 **/
+	void signalSelectionChanged(BoSelection*);
 
 protected:
 	BosonBigDisplayBase* addDisplay(QWidget* parent);

@@ -240,6 +240,9 @@ void BosonWidgetBase::initDisplayManager()
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  connect(cmdFrame(), SIGNAL(signalAction(int)),
 		displayManager(), SLOT(slotUnitAction(int)));
+ connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
+		d->mCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
+
 
  displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
 }
@@ -298,13 +301,9 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 	boError() << k_funcinfo << "NULL display" << endl;
 	return;
  }
- b->setLocalPlayer(localPlayer());
- //FIXME: initBigDisplay should be done in sublcasses?
+ b->setLocalPlayer(localPlayer()); // AB: this will also add the mouseIO!
  b->setCursor(mCursor);
  b->setKGameChat(d->mChat);
-
- connect(b->selection(), SIGNAL(signalSelectionChanged(BoSelection*)),
-		d->mCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
 
  b->makeActive();
 }
@@ -577,7 +576,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 			const QPoint&, const QPoint&, const QPoint&)));
 	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 			old, SLOT(slotReCenterDisplay(const QPoint&)));
-	connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)), 
+	connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
 			old->selection(), SLOT(slotSelectSingleUnit(Unit*)));
  }
  connect(active, SIGNAL(signalChangeViewport(const QPoint&,const QPoint&,
@@ -586,7 +585,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 		const QPoint&, const QPoint&)));
  connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
 		active, SLOT(slotReCenterDisplay(const QPoint&)));
- connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)), 
+ connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
 		active->selection(), SLOT(slotSelectSingleUnit(Unit*)));
 
 

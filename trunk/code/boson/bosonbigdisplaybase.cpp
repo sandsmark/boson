@@ -545,6 +545,8 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesZ = 0.0f;
 
  mSelection = new BoSelection(this);
+ connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
+		this, SIGNAL(signalSelectionChanged(BoSelection*)));
  d->mChat = new BosonGLChat(this);
  d->mToolTips = new BoGLToolTip(this);
 
