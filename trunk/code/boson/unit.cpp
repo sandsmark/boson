@@ -42,7 +42,6 @@
 #include <kgame/kgame.h>
 #include <krandomsequence.h>
 
-#include <qpointarray.h>
 #include <qptrlist.h>
 #include <qdom.h>
 

@@ -29,7 +29,6 @@
 #include "../bosoneffectproperties.h"
 #include "../boson.h"
 #include "../speciestheme.h"
-#include "../unitproperties.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>

@@ -25,7 +25,6 @@
 #include "player.h"
 #include "bosoncommandframeinterface.h"
 #include "boselection.h"
-#include "player.h"
 #include "bosonmessage.h"
 #include "bodebug.h"
 #include "bosonweapon.h"

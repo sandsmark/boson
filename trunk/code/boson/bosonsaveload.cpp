@@ -32,9 +32,6 @@
 #include "bosonfileconverter.h"
 #include "boeventmanager.h"
 
-// FIXME do not include
-#include <startupwidgets/bosonloadingwidget.h>
-
 #include <kgame/kgamemessage.h>
 #include <kgame/kgamepropertyhandler.h>
 #include <klocale.h>

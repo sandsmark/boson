@@ -21,7 +21,6 @@
 #include <qstring.h>
 
 #include <assert.h> // FIXME: remove! no abort() calls on errors!
-#include <qstring.h>
 
 #include "bodebug.h"
 
