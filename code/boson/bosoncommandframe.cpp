@@ -208,6 +208,9 @@ void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
  if (!unit) {
 	// display nothing
 	d->mUnitView->setUnit(0);
+	for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+		d->mOrderButton[i]->setUnit(0);
+	}
 	return;
  }
  if (unit->isDestroyed()) {
@@ -274,7 +277,7 @@ void BosonCommandFrame::hideOrderButtons()
  d->mFactory = 0;
  QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
  while (it.current()) {
-	it.current()->hide();
+	it.current()->setUnit(0);
 	++it;
  }
 }
@@ -391,5 +394,26 @@ void BosonCommandFrame::setLocalPlayer(Player* p)
 void BosonCommandFrame::slotProduceUnit(int unitType)
 {
  emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
+}
+
+void BosonCommandFrame::slotShowUnit(Unit* unit)
+{
+ kdDebug() << k_funcinfo << endl;
+ for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+	if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandUnitSelected) {
+		if (d->mOrderButton[i]->unit() == unit) {
+			kdDebug() << "unit already displayed - update..." << endl;
+			d->mOrderButton[i]->slotUnitChanged(unit);
+			return;
+		}
+	} else if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandNothing) {
+		kdDebug() << "show unit at " << i << endl;
+		d->mOrderButton[i]->setUnit(unit);
+		return;
+	}
+ }
+ initOrderButtons(d->mOrderButton.count() + 1);
+ kdDebug() << "display unit" << endl;
+ d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
 }
 

@@ -201,6 +201,10 @@ void BosonWidget::init()
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
  connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
+ connect(this, SIGNAL(signalMineralsUpdated(int)),
+		d->mBigDisplay, SLOT(slotUpdateMinerals(int)));
+ connect(this, SIGNAL(signalOilUpdated(int)),
+		d->mBigDisplay, SLOT(slotUpdateOil(int)));
 		
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
@@ -566,6 +570,12 @@ void BosonWidget::addEditorCommandFrame()
 		d->mBigDisplay, SLOT(slotWillPlaceCell(int)));
  connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
 		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
+
+ // AB???
+ connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
+
+
  insertCommandFrame(d->mCommandFrame);
 }
 
@@ -579,6 +589,8 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
+ connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
  insertCommandFrame(d->mCommandFrame);
 }
 
