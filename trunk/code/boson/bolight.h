@@ -67,18 +67,18 @@ class BoLight
     BoLight();
     ~BoLight();
 
-    bool isEnabled() const { return mEnabled; }
+    bool isEnabled() const  { return mEnabled; }
     void setEnabled(bool e);
 
-    const BoVector4& ambient() const { return mAmbient; }
-    const BoVector4& diffuse() const { return mDiffuse; }
-    const BoVector4& specular() const { return mSpecular; }
+    const BoVector4& ambient() const  { return mAmbient; }
+    const BoVector4& diffuse() const  { return mDiffuse; }
+    const BoVector4& specular() const  { return mSpecular; }
 
     void setAmbient(const BoVector4& a);
     void setDiffuse(const BoVector4& d);
     void setSpecular(const BoVector4& s);
 
-    const BoVector4& position() const { return mPos; }
+    const BoVector4& position() const  { return mPos; }
 
     /**
      * Set the position of the light. The w component of @p pos must bei either
@@ -96,46 +96,46 @@ class BoLight
     /**
      * @return The (x,y,z) vector of the position
      **/
-    BoVector3 position3() const { return BoVector3(mPos.x(), mPos.y(), mPos.z()); }
+    BoVector3 position3() const  { return BoVector3(mPos.x(), mPos.y(), mPos.z()); }
 
     /**
      * Change the position (or for a directional light the direction) of the
      * light. The w component (whether the light is directional or positional)
      * is not changed.
      **/
-    void setPosition3(const BoVector3& pos)  { setPosition(BoVector4(pos.x(), pos.y(), pos.z(), mPos.w())); };
+    void setPosition3(const BoVector3& pos)  { setPosition(BoVector4(pos.x(), pos.y(), pos.z(), mPos.w())); }
 
     /**
      * Make the light a directional light of @p directional is TRUE, otherwise
      * make it a positional light.
      **/
-    void setDirectional(bool directional)  { setPosition(BoVector4(mPos.x(), mPos.y(), mPos.z(), directional ? 0.0f : 1.0f)); };
+    void setDirectional(bool directional)  { setPosition(BoVector4(mPos.x(), mPos.y(), mPos.z(), directional ? 0.0f : 1.0f)); }
 
     /**
      * @return Whether the light is directional. A directional light is
      * infinitely away, the @ref position3 specifies actually the direction of
      * the light.
      **/
-    bool isDirectional() const { return mPos.w() == 0.0f; }
+    bool isDirectional() const  { return mPos.w() == 0.0f; }
 
     /**
      * @return The opposite of @ref isDirectional. The light waves of a
      * positional light go in all directions (unless for spotlights) and @ref
      * position3 specifies the actual position of the light.
      **/
-    bool isPositional() const { return mPos.w() != 0.0f; }
+    bool isPositional() const  { return mPos.w() != 0.0f; }
 
     void setConstantAttenuation(float a);
     void setLinearAttenuation(float a);
     void setQuadraticAttenuation(float a);
     void setAttenuation(const BoVector3& a);
 
-    float constantAttenuation() const { return mAttenuation.x(); }
-    float linearAttenuation() const { return mAttenuation.y(); }
-    float quadraticAttenuation() const { return mAttenuation.z(); }
-    BoVector3 attenuation() const { return mAttenuation; }
+    float constantAttenuation() const  { return mAttenuation.x(); }
+    float linearAttenuation() const  { return mAttenuation.y(); }
+    float quadraticAttenuation() const  { return mAttenuation.z(); }
+    BoVector3 attenuation() const  { return mAttenuation; }
 
-    int id() const { return mId; }
+    int id() const  { return mId; }
 
     void refreshPosition();
 
