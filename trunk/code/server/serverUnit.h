@@ -34,8 +34,9 @@
 
 class boBuffer;
 
-class serverUnit {
- public:
+class serverUnit : public knownBy
+{
+public:
 	serverUnit(int k, boBuffer *b, int x, int y)
 		{ key = k; buffer = b; __x=x; __y=y; state = 0; power = MAX_POWER; contain = 0; counter = -1; }
 	
@@ -56,7 +57,7 @@ class serverUnit {
  *  MOBILE
  */
 
-class serverMobUnit : public mobUnit, public serverUnit, public knownBy
+class serverMobUnit : public mobUnit, public serverUnit
 {
  Q_OBJECT
 
@@ -101,7 +102,7 @@ private:
 /*
  *  FACILITY
  */
-class serverFacility : public Facility, public serverUnit, public knownBy
+class serverFacility : public Facility, public serverUnit
 {
  Q_OBJECT
 
