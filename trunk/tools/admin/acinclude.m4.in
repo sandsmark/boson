@@ -408,6 +408,7 @@ AC_DEFUN(KDE_SET_PATHS,
 	kde_servicesdir=\"$kde_servicesdir\" \
 	kde_servicetypesdir=\"$kde_servicetypesdir\" \
 	kde_moduledir=\"$kde_moduledir\" \
+	boson_plugindir=\"$boson_plugindir\" \
    kde_styledir=\"$kde_styledir\" \
 	kde_widgetdir=\"$kde_widgetdir\" \
 	kde_result=$1"
@@ -475,6 +476,9 @@ if test "$1" = "default"; then
   if test -z "$kde_widgetdir"; then
     kde_widgetdir='\${libdir}/kde3/plugins/designer'
   fi
+  if test -z "$boson_plugindir"; then
+    boson_plugindir='\${libdir}/kde3/plugins/boson'
+  fi
 
   KDE_SET_PATHS(defaults)
 
@@ -499,7 +503,8 @@ AC_DEFUN(KDE_CHECK_PATHS_FOR_COMPLETENESS,
    test -z "$kde_wallpaperdir" || test -z "$kde_templatesdir" ||
    test -z "$kde_bindir" || test -z "$kde_servicesdir" ||
    test -z "$kde_servicetypesdir" || test -z "$kde_moduledir" ||
-   test -z "$kde_styledir" || test -z "kde_widgetdir" 
+   test -z "$kde_styledir" || test -z "kde_widgetdir" ||
+   test -z "$boson_plugindir" 
    test "x$kde_have_all_paths" != "xyes"; then
      kde_have_all_paths=no
   fi
@@ -598,6 +603,7 @@ if test "$kde_have_all_paths" = "no" && test "$kde_cached_paths" = "yes"; then
   kde_datadir= kde_locale=  kde_cgidir=  kde_confdir=
   kde_mimedir= kde_toolbardir= kde_wallpaperdir= kde_templatesdir=
   kde_bindir= kde_servicesdir= kde_servicetypesdir= kde_moduledir=
+  boson_plugindir=
   kde_have_all_paths=
   kde_styledir=
   kde_widgetdir=
@@ -643,6 +649,7 @@ AC_SUBST(kde_servicetypesdir)
 AC_SUBST(kde_moduledir)
 AC_SUBST(kde_styledir)
 AC_SUBST(kde_widgetdir)
+AC_SUBST(boson_plugindir)
 if test "$kde_qtver" = 1; then
   kde_minidir="$kde_icondir/mini"
 else
@@ -1808,6 +1815,7 @@ int main() {
     printf("kde_moduledir=\\"/tmp/dummy\\"\n");
     printf("kde_styledir=\\"/tmp/dummy\\"\n");
     printf("kde_widgetdir=\\"/tmp/dummy\\"\n");
+    printf("boson_plugindir=\\"/tmp/dummy\\"\n");
     return 0;
     }
 EOF

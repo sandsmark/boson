@@ -414,6 +414,18 @@ sub processMakefile ($)
       $target_dels{"install-data-am"} .= "install-kde_moduleLTLIBRARIES ";
       $target_adds{"install-data-am"} .= " ";
     }
+    if ($MakefileData =~ m/\nboson_module_LTLIBRARIES\s*=/) {
+#      $target_adds{"install-exec-am"} .= "install-boson_moduleLTLIBRARIES ";
+#      don't use $target_adds here because we need to append the dependency, not
+#      prepend it. Fixes #44342 , when a module depends on a lib in the same dir
+#      and libtool needs it during relinking upon install (Simon)
+      my $lookup = "install-exec-am:([^\n]*)";
+      if($MakefileData =~ /\n$lookup\n/) {
+        substituteLine("$lookup", "install-exec-am: $1 install-boson_moduleLTLIBRARIES");
+      }
+      $target_dels{"install-data-am"} .= "install-boson_moduleLTLIBRARIES ";
+      $target_adds{"install-data-am"} .= " ";
+    }
 
     my $lines = "";
 
