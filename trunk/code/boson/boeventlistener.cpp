@@ -215,12 +215,7 @@ void BoCanvasEventListener::processEvent(const BoEvent* event)
 	//     will change when we support winning conditions
 	boGame->killPlayer(p);
  } else if (event->name() == "CustomStringEvent") {
-	if (event->rtti() != BoEvent::RTTIString) {
-		boError(360) << k_funcinfo << "invalid event rtti" << endl;
-		return;
-	}
-	const BoGenericStringEvent* s = (const BoGenericStringEvent*)event;
-	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter: %1").arg(s->data1()));
+	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter1: %1").arg(event->data1()));
  }
 }
 
@@ -245,12 +240,12 @@ void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
 	}
  }
  if (event->name() == "UnitWithTypeProduced") {
-	if (event->rtti() != BoEvent::RTTIULong) {
-		boError(360) << k_funcinfo << "invalid event rtti for UnitWithTypeProduced" << endl;
+	bool ok;
+	unsigned long int unitType = event->data1().toULong(&ok);
+	if (!ok) {
+		boError(360) << k_funcinfo << "data1 parameter for UnitWithTypeProduced event is not a valid number: " << event->data1() << endl;
 		return;
 	}
-	const BoGenericULongEvent* e = (const BoGenericULongEvent*)event;
-	unsigned long int unitType = e->data1();
 	const UnitProperties* prop = playerIO()->unitProperties(unitType);
 	if (!prop) {
 		boError(360) << k_funcinfo << "cannot find unittype " << unitType << " specified in UnitWithTypeProduced" << endl;

@@ -36,33 +36,29 @@ template <class T1, class T2> class QMap;
 class BoEvent
 {
 public:
-	enum RTTIs {
-		RTTIEvent = 1,
-		RTTIULong = 2,
-		RTTIString = 3
-	};
-public:
 	/**
 	 * Construct a new event.
 	 *
 	 * Note that this event is invalid until you call @ref
 	 * BoEventManager::queueEvent.
+	 * @param _name The name of this event. See @ref name
+	 * @param _data1 Am (optional) parameter to this event. You can use
+	 * QString only, but you can encode nearly every value into a @ref
+	 * QString easily (e.g. @ref QString::number for ints). Note that the
+	 * type of the parameters should depend on the @p _name only. See also
+	 * @ref data1
+	 * @param _data2 Just like @p _data1.
 	 **/
-	BoEvent(const QCString& name);
+	BoEvent(const QCString& _name, const QString& _data1 = QString::null, const QString& _data2 = QString::null);
 
 	/**
 	 * @overload
-	 * Used for loading only
+	 * Used for loading only. You cannot use this before @ref load was
+	 * called, as a name is missing.
 	 **/
 	BoEvent();
 
 	virtual ~BoEvent();
-
-	/**
-	 * @return A @ref BoEvent object for @p rtti. The object has no name, so
-	 * it can be used for loading events only!
-	 **/
-	static BoEvent* createEvent(int rtti);
 
 	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
 	virtual bool load(const QDomElement& root);
@@ -73,14 +69,6 @@ public:
 	 * comparing the events.
 	 **/
 	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
-
-	/**
-	 * @return The RTTI of the event class.
-	 **/
-	virtual int rtti() const
-	{
-		return RTTIEvent;
-	}
 
 	void setPlayerId(unsigned long int playerId)
 	{
@@ -167,9 +155,39 @@ public:
 		return mId;
 	}
 
+	/**
+	 * @return The name of the event, as specified in the constructor. The
+	 * name of an event uniquely identifies the type of the event, including
+	 * the types of the expected parameters (see especially @ref data1, @ref
+	 * data2).
+	 *
+	 * We use QCString for the name, because it can efficiently be compared
+	 * to const char* string, e.g.
+	 * <pre>
+	 * if (event.name() == "foobar")
+	 * </pre>
+	 * is perfectly fine.
+	 **/
 	QCString name() const
 	{
 		return mName;
+	}
+
+	/**
+	 * @return Optional parameter 1. The value of this depends completely on
+	 * the event. Default is @ref QString::null
+	 **/
+	const QString& data1() const
+	{
+		return mData1;
+	}
+	/**
+	 * @return Optional parameter 2. The value of this depends completely on
+	 * the event. Default is @ref QString::null
+	 **/
+	const QString& data2() const
+	{
+		return mData2;
 	}
 
 
@@ -185,88 +203,9 @@ private:
 	unsigned long int mUnitId;
 	bool mHasPlayerId;
 	unsigned long int mPlayerId;
-};
 
-/**
- * Generic event that stores up to 4 ULong values.
- **/
-class BoGenericULongEvent : public BoEvent
-{
-public:
-	BoGenericULongEvent(const QCString& name, unsigned long int data1 = 0, unsigned long int data2 = 0);
-
-	/**
-	 * @overload
-	 * Used for loading only
-	 **/
-	BoGenericULongEvent();
-
-	~BoGenericULongEvent();
-
-	virtual int rtti() const
-	{
-		return RTTIULong;
-	}
-
-	unsigned long int data1() const
-	{
-		return mData1;
-	}
-	unsigned long int data2() const
-	{
-		return mData2;
-	}
-
-	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
-	virtual bool load(const QDomElement& root);
-	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
-
-private:
-	unsigned long int mData1;
-	unsigned long int mData2;
-};
-
-/**
- * This event may be in particular useful for script-only use: scripts might use
- * a generic name , e.g. "ScriptEvent", and emit this event, for delivery to
- * scripts only. Then a (maybe different) script processes the event, according
- * to the string data.
- **/
-class BoGenericStringEvent : public BoEvent
-{
-public:
-	BoGenericStringEvent(const QCString& name, const QString& data1 = QString::null, const QString& data2 = QString::null);
-
-	/**
-	 * @overload
-	 * Used for loading only
-	 **/
-	BoGenericStringEvent();
-
-	~BoGenericStringEvent();
-
-	virtual int rtti() const
-	{
-		return RTTIString;
-	}
-
-	const QString& data1() const
-	{
-		return mData1;
-	}
-	const QString& data2() const
-	{
-		return mData2;
-	}
-
-	virtual bool save(QDomElement& root, const QMap<int,int>* playerId2Index) const;
-	virtual bool load(const QDomElement& root);
-	virtual bool matches(const BoEventMatching* m, const BoEvent* e) const;
-
-private:
 	QString mData1;
 	QString mData2;
-
 };
 
 #endif

@@ -282,7 +282,7 @@ void BoCondition::fireAction()
  // TODO: use an action class instead, probably BoConditionalAction.
  // -> this could be an even (including parameters), a chat message, a script
  // function, ...
- BoGenericStringEvent* e = new BoGenericStringEvent("CustomStringEvent", eventCaused());
+ BoEvent* e = new BoEvent("CustomStringEvent", eventCaused());
  boGame->queueEvent(e);
 }
 

@@ -154,25 +154,7 @@ bool BoEventManager::loadFromXML(const QDomElement& root)
 		boError(360) << k_funcinfo << "not an element" << endl;
 		return false;
 	}
-	if (!e.hasAttribute("RTTI")) {
-		boError(360) << k_funcinfo << "no RTTI in event" << endl;
-		return false;
-	}
-	bool ok;
-	int rtti = e.attribute("RTTI").toInt(&ok);
-	if (!ok) {
-		boError(360) << k_funcinfo << "RTTI not a valid number" << endl;
-		return false;
-	}
-	BoEvent* event = BoEvent::createEvent(rtti);
-	if (!event) {
-		BO_NULL_ERROR(event);
-		return false;
-	}
-	if (!event) {
-		BO_NULL_ERROR(event);
-		return false;
-	}
+	BoEvent* event = new BoEvent();
 	if (!event->load(e)) {
 		boError(360) << k_funcinfo << "could not load event" << endl;
 		delete event;
