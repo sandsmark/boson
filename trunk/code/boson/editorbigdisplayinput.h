@@ -64,8 +64,10 @@ public:
 
 	/**
 	 * In editor mode this does just nothing.
+	 * UPDATE: it calls @ref BosonCursor::setWidgetCursor() on the @ref
+	 * bigDisplay.
 	 **/
-	virtual void updateCursor() { }
+	virtual void updateCursor();
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
 

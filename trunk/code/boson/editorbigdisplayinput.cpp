@@ -474,3 +474,19 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
  actionClicked(event);
 }
 
+void EditorBigDisplayInput::updateCursor()
+{
+ BO_CHECK_NULL_RET(bigDisplay());
+ BosonCursor* c = bigDisplay()->cursor();
+ BO_CHECK_NULL_RET(c);
+
+ // AB: in editor mode we always use the default KDE cursor, so calling this
+ // method does basically nothing at all.
+ // but under certain rare circumstances it might happen that there is no cursor
+ // set for a widget (i.e. a blank cursor). then we must revert to the default -
+ // that is what we do here. for simplicity we simply revert to default whenever
+ // this is called.
+
+ c->setWidgetCursor(bigDisplay());
+}
+
