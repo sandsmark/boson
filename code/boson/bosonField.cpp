@@ -55,12 +55,38 @@ void bosonField::setCell(int i, int j, groundType g)
 }
 */
 
+void bosonField::hideMob(destroyedMsg_t &m)
+{
+	playerMobUnit *u;
+
+	u = mobile.find(m.key);
+	if (u) u->hide();
+	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
+
+	// XXX emit something for the minimap
+}
+
+
+
+void bosonField::unHideMob(mobileMsg_t &m)
+{
+	playerMobUnit *u;
+
+	assert(m.who < nb_player);
+	u = mobile.find(m.key);
+	if (u) u->show();
+	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
+
+	// XXX emit something for the minimap
+}
+
+
 
 void bosonField::createMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
-	assert(m.who < BOSON_MAX_PLAYERS);
+	assert(m.who < nb_player);
 
 	switch (m.type) {
 		default:
@@ -94,6 +120,31 @@ void bosonField::destroyMob(destroyedMsg_t &m)
 
 	boAssert( mobile.remove(m.key) == true );
 }
+
+
+void bosonField::hideFix(destroyedMsg_t &m)
+{
+	playerFacility *f;
+
+	f = facility.find(m.key);
+	if (f) f->hide();
+	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
+
+	// XXX emit something for the minimap
+}
+
+void bosonField::unHideFix(facilityMsg_t &m)
+{
+	playerFacility *f;
+
+	assert(m.who < nb_player);
+	f = facility.find(m.key);
+	if (f) f->show();
+	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
+
+	// XXX emit something for the minimap
+}
+
 
 void bosonField::createFix(facilityMsg_t &m)
 {
