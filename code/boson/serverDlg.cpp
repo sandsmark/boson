@@ -26,10 +26,12 @@
 #include <qlabel.h>
 #include <qpixmap.h>
 #include <qtimer.h>
+#include <qlayout.h>
 
 #include <ksock.h>
 #include <kprocess.h>
 #include <kmessagebox.h>
+#include <klocale.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"
@@ -40,56 +42,46 @@
 #include "game.h"
 
 serverDlg::serverDlg(const char *name)
-	:QDialog( 0l, name,true) // parentless
+	:KDialogBase( Plain, i18n("Server Parameters"), Ok|Cancel, Ok, 
+	0l, name,true, true, i18n("Start Server")) // parentless
 {
-        QPushButton	*button;
 	QLabel		*label;
 	char		host[2000];
+	proc = 0l;
 
 	/* layout */
-	resize( 390, 340 );
-	setCaption( "Server Parameters" );     
+	QVBoxLayout* topLayout = new QVBoxLayout(plainPage(), spacingHint());
+	QGridLayout* grid = new QGridLayout(topLayout, 2, 4, 20);
+	grid->addColSpacing(0, 10);
+	grid->addColSpacing(3, 10);
 	
-	/* buttons */
-	b_ok = new QPushButton( "Launch", this );
-	b_ok->setGeometry( 10,300, 100,30 );
-	connect( b_ok, SIGNAL(clicked()), SLOT(doIt()) );
-
-	button = new QPushButton( "Cancel", this );
-	button->setGeometry( 280,300, 100,30 );
-	connect( button, SIGNAL(clicked()), SLOT(reject()) );
-
 	/* params */
-	label = new QLabel("Boson Server :", this);
-	label->setGeometry( 10,200, 140,30 );
-	label->setAlignment(AlignVCenter | AlignRight);
+	label = new QLabel("Boson Server :", plainPage());
+	grid->addWidget(label, 0, 1);
 	
 	if (gethostname(host, 1999)) {
 		logf(LOG_ERROR, "can't get hostname, aborting");
 		return;
 	}
-	l_host = new QLabel(host, this);
-	l_host->setGeometry( 160,200, 220,30 );
+	l_host = new QLabel(host, plainPage());
+	grid->addWidget(l_host, 0, 2);
 
-	label = new QLabel("Connecting Port :", this);
-	label->setGeometry( 10,250, 140,30 );
-	label->setAlignment(AlignVCenter | AlignRight);
-	e_port = new QLineEdit(this);
+	label = new QLabel("Connecting Port :", plainPage());
+	grid->addWidget(label, 1, 1);
+	e_port = new QLineEdit(plainPage());
 	e_port->setText( BOSON_DEFAULT_PORT_CHAR );
-	e_port->setGeometry( 160,250, 60,30 );
 	e_port->setMaxLength(6);
+	grid->addWidget(e_port, 1, 2);
 
 	/* beautification */
-	label = new QLabel(this);
-	label->move( (390-352)/2, 10);		// biglogo is 352x160
-	label->setAutoResize(true);
+	label = new QLabel(plainPage());
 	label->setPixmap ( *dataPath + "pics/biglogo.bmp"); 
 	//label->setPixmap( QPixmap( *dataPath + "pics/biglogo.bmp" ));
 	boAssert(!label->pixmap()->isNull());
-
+	topLayout->insertWidget(0, label);
 }
 
-void serverDlg::doIt(void)
+void serverDlg::slotOk(void)
 {
 	int port = atoi(e_port->text());
 
@@ -102,14 +94,15 @@ void serverDlg::doIt(void)
 	emit configure(l_host->text(), (const char *)e_port->text()); // so that connectDlg knows where to connect
 
 	proc = new KProcess();
-	*proc << "boserver";
-	*proc << e_port->text();
+	*proc << "boserver"; // FIXME: won't work if server isn't installed in $PATH
+	*proc << "-port"<< e_port->text();
 	
 	connect( proc, SIGNAL(processExited(KProcess *)),		SLOT(serverDied(KProcess *)) );
 	connect( proc, SIGNAL(receivedStdout(KProcess *, char *, int)), SLOT(receivedStdout(KProcess *, char *, int)) );
 	proc->start(KProcess::NotifyOnExit, KProcess::Stdout);
+	// perhaps start with DontCare otherwise the server will exit when this client exits
 
-	b_ok->setEnabled(false);
+	enableButtonOK(false);
 	
 	QTimer *timer = new QTimer( this );
 	connect( timer, SIGNAL(timeout()), this, SLOT(timeOut()) );
@@ -136,21 +129,22 @@ void serverDlg::receivedStdout(KProcess *p, char *buffer, int buflen)
 
 void serverDlg::timeOut(void)
 {
+	enableButtonOK(true);
+	if (!proc) // server can crash before timeout
+		return;
 	delete proc;
-	b_ok->setEnabled(true);
   	KMessageBox::error(this,
 			"The server hasn't been quick enough to connect",
 			"server timed out");
-	return;
 }
 
 
 void serverDlg::serverDied(KProcess *p)
 {
 	boAssert(proc==p);
-
 	delete proc;
-	b_ok->setEnabled(true);
+	proc = 0l;
+	enableButtonOK(true);
   	KMessageBox::error(this,
 			"The server died for an unknown reason, please report\n"
 			"a bug to the author <orzel@yalbi.com>...",
