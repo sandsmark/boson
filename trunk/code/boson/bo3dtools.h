@@ -406,6 +406,7 @@ class BoVector4
 
     BoVector4()  { reset(); };
     BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
+    BoVector4(GLfloat* data) { set(data[0], data[1], data[2], data[3]); }
     ~BoVector4() {};
 
     /**
