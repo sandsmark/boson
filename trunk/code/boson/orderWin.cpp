@@ -89,6 +89,7 @@ playerFacility *f = fixSelected;
 
 if (!f) return f; // already done
 fixSelected	= (playerFacility *) 0l;
+f->unSelect();
 
 view_one->setPixmap(*view_none);
 /**/
@@ -125,7 +126,7 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 
 void orderWin::selectFix(playerFacility *f)
 {
-fixSelected = f;
+fixSelected = f; fixSelected->select();
 view_one->setPixmap(*gpp.species[f->who]->getBigOverview(f));
 logf(LOG_GAME_LOW, "select facility");
 
