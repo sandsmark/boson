@@ -22,8 +22,8 @@
 
 #include "selectPart.h"
 
-#define SP_THICK	4
-#define SP_CORNER_LEN	15
+#define SP_THICK	2
+#define SP_CORNER_LEN	25
 #define SP_CORNER_POS	8
 #define SP_W		(PART_NB*2)
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
@@ -70,7 +70,7 @@ void drawSelectBox(QPainter &painter, bool bw, int power)
 	if (bw) {
 	// mask
 		// "scrollbar"
-		painter.fillRect(0  ,0, SP_W       ,SP_THICK, Qt::white);
+		painter.fillRect(0  ,0, SP_W       ,2*SP_THICK, Qt::white);
 		// selection corner
 		painter.fillRect(
 			SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
@@ -81,15 +81,15 @@ void drawSelectBox(QPainter &painter, bool bw, int power)
 	} else {
 	// read rendering 
 		/* "scrollbar" */
-		painter.fillRect(0  ,0, SP_W       ,SP_THICK, Qt::red);
-		painter.fillRect(len,0, SP_W - len ,SP_THICK, Qt::green);
+		painter.fillRect(0  ,0, SP_W       ,2*SP_THICK, Qt::red);
+		painter.fillRect(len,0, SP_W - len ,2*SP_THICK, Qt::green);
 		/* selection corner */
 		painter.fillRect(
 			SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
-			SP_CORNER_LEN		, SP_THICK, Qt::magenta);
+			SP_CORNER_LEN		, SP_THICK, Qt::white);
 		painter.fillRect(
 			SP_W - SP_THICK		, SP_CORNER_POS,
-			SP_THICK		, SP_CORNER_LEN, Qt::magenta);
+			SP_THICK		, SP_CORNER_LEN, Qt::white);
 	}
 
 }
