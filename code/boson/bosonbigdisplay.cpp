@@ -40,7 +40,6 @@
 #include <qpoint.h>
 #include <qpainter.h>
 #include <qbitmap.h>
-#include <qtimer.h>
 #include <qlabel.h>
 
 #include "bosonbigdisplay.moc"
