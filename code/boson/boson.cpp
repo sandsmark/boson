@@ -40,6 +40,7 @@
 #include "boeventmanager.h"
 #include "bomessage.h"
 #include "bosonplayerinput.h"
+#include "bosonnetworksynchronizer.h"
 
 #include <klocale.h>
 #include <kdeversion.h>
@@ -312,6 +313,7 @@ public:
 		mEventManager = 0;
 
 		mPlayerInputHandler = 0;
+		mNetworkSynchronizer = 0;
 	}
 	BosonStarting* mStartingObject;
 
@@ -335,6 +337,7 @@ public:
 	BoEventManager* mEventManager;
 
 	BosonPlayerInput* mPlayerInputHandler;
+	BosonNetworkSynchronizer* mNetworkSynchronizer;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -344,8 +347,12 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mPlayerInputHandler = new BosonPlayerInput(this);
  d->mAdvance = new BoAdvance(this);
  d->mMessageDelayer = new BoMessageDelayer(this);
+ d->mNetworkSynchronizer = new BosonNetworkSynchronizer();
 
  d->mGameTimer = new QTimer(this);
+
+ d->mNetworkSynchronizer->setGame(this);
+ d->mNetworkSynchronizer->setMessageLogger(&d->mMessageLogger);
 
 
  mGameMode = true;
@@ -384,6 +391,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 Boson::~Boson()
 {
  KCrash::setEmergencySaveFunction(NULL);
+ delete d->mNetworkSynchronizer;
  delete d->mPlayerInputHandler;
  delete d->mMessageDelayer;
  delete d->mAdvance;
@@ -485,6 +493,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
  switch (msgid) {
 	case BosonMessage::AdvanceN:
 	{
+		d->mNetworkSynchronizer->receiveAdvanceMessage(d->mCanvas);
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
 		if (delayedMessageCount() > 20) {
 			boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
@@ -672,6 +681,19 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			break;
 		}
 		d->mStartingObject->startingCompletedReceived(buffer, sender);
+		break;
+	}
+	case BosonMessage::IdNetworkSync:
+	{
+		d->mNetworkSynchronizer->receiveNetworkSyncMessage(stream);
+		break;
+	}
+	case BosonMessage::IdNetworkSyncACK:
+	{
+		if (!isAdmin()) {
+			break;
+		}
+		d->mNetworkSynchronizer->receiveNetworkSyncAck(stream, sender);
 		break;
 	}
 	default:

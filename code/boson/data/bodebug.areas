@@ -20,6 +20,7 @@
 310    Collisions
 350    BosonShot
 360    Event
+370    NetworkSync
 
 # Use 400-449 for Unit::advance*()
 401    AdvanceMove
