@@ -486,8 +486,6 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 
 void BosonMiniMap::createGround()
 {
-  struct timeval time1, time2;
-  gettimeofday(&time1, 0);
  if(mGround) {
 	delete mGround;
  }
@@ -497,6 +495,5 @@ void BosonMiniMap::createGround()
  p.scale(zoom() * scale(), zoom() * scale());
  p.drawPixmap(0, 0, *mUnZoomedGround);
  p.end();
- gettimeofday(&time2, 0);
- cerr << "<createGround: " << time2.tv_usec - time1.tv_usec << ">" << endl;
 }
+
