@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -563,10 +563,12 @@ void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* f = &mesh->faceL[i];
 	int points[3];
+	BoFace face;
 	points[0] = f->points[0];
 	points[1] = f->points[1];
 	points[2] = f->points[2];
-	boMesh->setFace(i, points);
+	face.setPointIndex(points);
+	boMesh->setFace(i, face);
  }
 }
 

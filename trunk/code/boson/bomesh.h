@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,21 +28,49 @@ class BoMesh;
 class BoAdjacentDataBase;
 class QColor;
 
+class BoFace
+{
+public:
+	BoFace();
+	BoFace(const BoFace& face)
+	{
+		*this = face;
+	}
+
+	BoFace& operator=(const BoFace& face);
+
+	void setPointIndex(const int* points)
+	{
+		mPointIndex[0] = points[0];
+		mPointIndex[1] = points[1];
+		mPointIndex[2] = points[2];
+	}
+	const int* pointIndex() const
+	{
+		return mPointIndex;
+	}
+
+private:
+	int mPointIndex[3];
+};
+
+/**
+ * This class stores the way faces are connected. At the moment faces will
+ * always be connected in a linear way (i.e. face1,face2,face3,...). But we
+ * could also connect them so that we use triangle strips.
+ **/
 class BoNode
 {
 public:
-	BoNode(BoNode* previous);
-	BoNode();
+	/**
+	 * Construct a node. Note that a node is 100% unusable without a valid
+	 * @p BoFace object.
+	 **/
+	BoNode(const BoFace* face);
 	~BoNode();
 
 	void setPrevious(BoNode* previous);
 	void setNext(BoNode* next);
-
-	/**
-	 * @param points An array of three with inidces to the vertices and
-	 * texels (in case the mesh is textured) of this face in @ref BoMesh.
-	 **/
-	void setFace(const int* points);
 
 	BoNode* next() const
 	{
@@ -96,7 +124,7 @@ public:
 	 **/
 	int findPointIndex(int index) const;
 
-	const int* pointIndex() const { return &mPointIndex[0]; }
+	const int* pointIndex() const { return mFace->pointIndex(); }
 
 	void delNode();
 
@@ -110,7 +138,7 @@ private:
 	BoNode* mNext;
 	BoNode* mPrevious;
 	int mRelevantPoint;
-	int mPointIndex[3];
+	const BoFace* mFace;
 };
 
 
@@ -136,6 +164,7 @@ public:
 	 * this mesh! See especially @ref setVertex
 	 **/
 	void setFace(int index, const int* points);
+	void setFace(int index, const BoFace& face);
 
 	/**
 	 * Prepare to load the points, i.e. allocate memory for them. You can
@@ -168,30 +197,32 @@ public:
 	/**
 	 * Try to connect all faces in @ref mesh, so that we can use
 	 * GL_TRIANGLE_STRIP. If that doesn't work this function will add all
-	 * faces completely instead. See @ref addFaces
+	 * faces completely instead. See @ref addNodes.
+	 *
+	 * Note that this is not yet working!
 	 **/
-	void connectFaces();
+	void connectNodes();
 
 	/**
-	 * Add all faces from @ref mesh, so that we can use GL_TRIANGLES. You
-	 * should prefer @ref connectFaces usually.
+	 * Add all nodes from @ref mesh, so that we can use GL_TRIANGLES. You
+	 * should prefer @ref connectNodes usually (in case it was working).
 	 **/
-	void addFaces();
+	void addNodes();
 
 	/**
 	 * Generate a point list (as it can be used by glDrawElements()) from
-	 * the node list (see @ref faces).
+	 * the node list (see @ref nodes).
 	 *
-	 * This cache will be invalid once @ref connectFaces or @ref addFaces
+	 * This cache will be invalid once @ref connectNodes or @ref addNodes
 	 * gets called (i.e. the order of points get changed in any way).
 	 **/
 	void createPointCache();
 
 	/**
-	 * Delete all faces. See @ref faces
+	 * Delete all nodes. See @ref nodes
 	 * @obsolete
 	 **/
-	void deleteFaces();
+	void deleteNodes();
 
 	/**
 	 * Delete all nodes starting at @p node. If it has a previous face,
@@ -201,14 +232,14 @@ public:
 	void deleteNodes(BoNode* node);
 
 	/**
-	 * Disconnect all faces to prepare another @ref connectFaces or @ref
-	 * addFaces call. No node/face is deleted.
+	 * Disconnect all nodes to prepare another @ref connectNodes or @ref
+	 * addNodes call. No node is deleted.
 	 **/
-	void disconnectFaces();
+	void disconnectNodes();
 
 	int type() const;
 
-	BoNode* faces() const;
+	BoNode* nodes() const;
 
 	/**
 	 * Set whether this mesh is a teamcolor object or not.
@@ -280,9 +311,14 @@ public:
 	 **/
 	float minZ() const;
 
+	/**
+	 * Compute a bounding object (usually a box) for the mesh.
+	 **/
+	void computeBoundingObject();
+
 protected:
-	void createNodes(unsigned int faces);
-	bool connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const;
+	void createFaces(unsigned int faces);
+	bool connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoNode>& nodes, QPtrList<BoNode>* found, BoNode* node) const;
 
 
 	// this is meant to check whether the something on the screen will
