@@ -21,6 +21,14 @@
 
 #include <kdebug.h>
 
+#include <math.h>
+
+
+void BoVector3::normalize()
+{
+ scale(1.0 / sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]));
+}
+
 void BoMatrix::loadMatrix(const GLfloat* m)
 {
  for (int i = 0; i < 16; i++) {
