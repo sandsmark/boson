@@ -239,6 +239,7 @@ void BosonCommandWidget::setUnit(Unit* unit)
  connect(d->mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
 		 SLOT(slotUnitChanged(Unit*)));
  slotUnitChanged(d->mUnit);
+ setToolTip(i18n("%1\nId: %2").arg(unit->unitProperties()->name()).arg(unit->id()));
 
  d->mHealth->show();
  d->mReload->show(); // TODO don't show if unit cannot shoot
@@ -438,6 +439,7 @@ void BosonCommandWidget::unset()
  d->mUnit = 0;
  d->mCommandType = CommandNothing;
  d->mOwner = 0;
+ QToolTip::remove(this);
 }
 
 void BosonCommandWidget::advanceProduction(double percentage)
