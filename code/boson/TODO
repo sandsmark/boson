@@ -24,4 +24,5 @@ General TODOs
   bottom 3 buttons are: left is a down (aka next page) , middle is free, right
   is a up (aka previous page) button. SO we can add any number of pixmaps with
   this limited number of orderbuttons.
+- player should select team color in new game dialog
 

@@ -617,3 +617,9 @@ QString SpeciesTheme::speciesDirectory(const QString& identifier)
  return QString::null;
 }
 
+QString SpeciesTheme::identifier() const
+{
+ KSimpleConfig cfg(themePath() + QString::fromLatin1("index.desktop"));
+ cfg.setGroup("Boson Species");
+ return cfg.readEntry("Identifier");
+}
