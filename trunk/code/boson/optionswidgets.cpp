@@ -449,6 +449,9 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
  mAlignSelectBoxes = new QCheckBox(this);
  mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
+
+ mUseLight = new QCheckBox(this);
+ mUseLight->setText(i18n("Enable light"));
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -500,17 +503,19 @@ void OpenGLOptions::apply()
  }
 
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
+ boConfig->setUseLight(mUseLight->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void OpenGLOptions::setDefaults()
 {
  setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
- mModelTexturesMipmaps->setChecked(true);
+ mModelTexturesMipmaps->setChecked(DEFAULT_USE_MIPMAPS_FOR_MODELS);
  setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
  setMinificationFilter(DEFAULT_MINIFICATION_FILTER);
  setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
  setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
+ mUseLight->setChecked(DEFAULT_USE_LIGHT);
 }
 
 void OpenGLOptions::load()
@@ -521,6 +526,7 @@ void OpenGLOptions::load()
  setMinificationFilter(boConfig->minificationFilter());
  setMipmapMinificationFilter(boConfig->mipmapMinificationFilter());
  setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
+ mUseLight->setChecked(boConfig->useLight());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

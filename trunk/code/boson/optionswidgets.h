@@ -204,6 +204,7 @@ private:
 	QComboBox* mMinificationFilter;
 	QComboBox* mMipmapMinificationFilter;
 	QCheckBox* mAlignSelectBoxes;
+	QCheckBox* mUseLight;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

@@ -202,7 +202,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
  mChatScreenRemoveTime = new BoConfigUIntEntry(this, "ChatScreenRemoveTime", DEFAULT_CHAT_SCREEN_REMOVE_TIME);
  mChatScreenMaxItems = new BoConfigIntEntry(this, "ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
- mModelTexturesMipmaps = new BoConfigBoolEntry(this, "ModelTexturesMipmaps", true);
+ mModelTexturesMipmaps = new BoConfigBoolEntry(this, "ModelTexturesMipmaps", DEFAULT_USE_MIPMAPS_FOR_MODELS);
  mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
  mMagnificationFilter = new BoConfigIntEntry(this, "MagnificationFilter", DEFAULT_MAGNIFICATION_FILTER);
  mMinificationFilter = new BoConfigIntEntry(this, "MinificationFilter", DEFAULT_MINIFICATION_FILTER);
@@ -212,6 +212,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMouseWheelAction = new BoConfigIntEntry(this, "MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
  mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
  mDeactivateWeaponSounds = new BoConfigBoolEntry(this, "DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
+ mUseLight = new BoConfigBoolEntry(this, "UseLight", DEFAULT_USE_LIGHT);
 
  mDebugMode = DebugNormal;
 
@@ -435,16 +436,6 @@ void BosonConfig::save(bool /*editor*/, KConfig* conf)
  }
 
  conf->setGroup(oldGroup);
-}
-
-void BosonConfig::setDebugMode(DebugMode m)
-{
- mDebugMode = m;
-}
-
-BosonConfig::DebugMode BosonConfig::debugMode() const
-{
- return mDebugMode;
 }
 
 void BosonConfig::setUnitSoundActivated(UnitSoundEvent e, bool activated)
