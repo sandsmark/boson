@@ -623,6 +623,11 @@ void BoGameCamera::setLookAt(const BoVector3Float& pos)
   //  then we validate it (this may change lookAt) and finally we calculate
   //  ground height (z) at validated lookAt point.
   BoCamera::setLookAt(pos);
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
   // Validate lookat point (this may change lookat)
   checkLookAtPosition();
 
@@ -660,6 +665,11 @@ void BoGameCamera::setLookAt(const BoVector3Float& pos)
   setRadius(mRadius * zfactor);
 #else
   BoCamera::setLookAt(pos);
+  if(mFree || !mLimits)
+  {
+    // No restrictions
+    return;
+  }
 
   // Validate lookat point and camera's position
   checkLookAtPosition();
