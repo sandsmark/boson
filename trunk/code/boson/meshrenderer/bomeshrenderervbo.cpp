@@ -205,6 +205,9 @@ void BoMeshRendererVBO::setModel(BosonModel* model)
 	glNormalPointer(GL_FLOAT, stride, normalPtr);
 	glTexCoordPointer(2, GL_FLOAT, stride, texelPtr);
 
+	// Disable VBO
+	bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
 #warning FIXME
 	// atm we keep the data->mPoints around, because of useVBO() which can
 	// be changed on the fly.
