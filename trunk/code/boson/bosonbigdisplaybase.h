@@ -186,8 +186,9 @@ public:
 	 * - probably it should.
 	 **/
 	void quitGame();
-  bool isInputInitialized();
-  void setInputInitialized(bool initialized);
+
+	bool isInputInitialized();
+	void setInputInitialized(bool initialized);
 
 	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);
