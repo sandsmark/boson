@@ -1065,28 +1065,44 @@ bool Bo3dTools::boxInFrustum(const float* viewFrustum, const BoVector3& min, con
   {
     if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * min.y() +
         viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * min.y() +
         viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * max.y() +
         viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * max.y() +
         viewFrustum[p*4 + 2] * min.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * min.y() +
         viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * min.y() +
         viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * min.x() + viewFrustum[p*4 + 1] * max.y() +
         viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     if(viewFrustum[p*4 + 0] * max.x() + viewFrustum[p*4 + 1] * max.y() +
         viewFrustum[p*4 + 2] * max.z() + viewFrustum[p*4 + 3] > 0)
+    {
       continue;
+    }
     return false;
   }
   return true;
