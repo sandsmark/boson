@@ -236,6 +236,17 @@ void TopBase::initKAction()
  items.append(QString::number(150));
  d->mZoomAction->setItems(items);
 
+ // note: the icons for these action need to have konqueror installed!
+ (void)new KAction(i18n( "Split View &Left/Right"), "view_left_right",
+		   CTRL+SHIFT+Key_L, mBosonWidget, SLOT(slotSplitViewHorizontal()),
+		   actionCollection(), "splitviewh");
+ (void)new KAction(i18n("Split View &Top/Bottom"), "view_top_bottom",
+		   CTRL+SHIFT+Key_T, mBosonWidget, SLOT(slotSplitViewVertical()),
+		   actionCollection(), "splitviewv");
+// (void)new KAction(i18n("&Remove Active View"), "view_remove", 
+//		  CTRL+SHIFT+Key_R, mBosonWidget, SLOT(slotRemoveView()),
+//		  actionCollection(), "removeview");
+     
  // no createGUI() - will be done in derived classes
 }
 

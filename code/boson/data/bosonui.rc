@@ -15,5 +15,10 @@
     <Action name="debug_unfog" />
     <Action name="debug_mode" />
   </Menu>
+  <Menu name="window" append="settings_merge"><text>&amp;Window</text>
+    <Action name="splitviewh" />
+    <Action name="splitviewv" />
+    <Action name="removeview" />
+  </Menu>
 </MenuBar>
 </kpartgui>

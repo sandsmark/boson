@@ -24,12 +24,14 @@
 
 class KPlayer;
 class KGameIO;
+class KGameMouseIO;
 class QKeyEvent;
 class KGamePropertyBase;
 class KToolBar;
 
 class BosonCanvas;
 class BosonCommandFrame;
+class BosonBigDisplay;
 class Unit;
 class Player;
 
@@ -138,6 +140,10 @@ public slots:
 	 **/
 	void slotUnfogAll(Player* player = 0);
 
+	void slotSplitViewHorizontal();
+	void slotSplitViewVertical();
+	void slotRemoveActiveView(); // TODO
+
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
@@ -186,6 +192,8 @@ protected slots:
 	void slotNotEnoughMinerals(Player*);
 	void slotNotEnoughOil(Player*);
 
+	void slotChangeCursor(int mode);
+
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
@@ -210,6 +218,8 @@ protected:
 
 	void addBigDisplay();
 	void addMiniMap();
+
+	void addMouseIO(BosonBigDisplay*);
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);

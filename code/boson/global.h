@@ -71,5 +71,10 @@ enum OrderType {
 	OrderLast // should always be the last item - used by loops
 };
 
+enum Cursor {
+	CursorAttack = 0,
+	CursorMove = 1,
+	CursorDefault = 2
+};
 
 #endif

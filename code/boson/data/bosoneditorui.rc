@@ -32,9 +32,17 @@
     <Action name="debug_unfog" />
     <Action name="debug_mode" />
   </Menu>
+  <Menu name="window" append="settings_merge"><text>&amp;Window</text>
+    <Action name="splitviewh" />
+    <Action name="splitviewv" />
+    <Action name="removeview" />
+  </Menu>
 </MenuBar>
 <ToolBar>
   <Action name="editor_build" />
   <Action name="editor_player" />
+  <Action name="splitviewh" />
+  <Action name="splitviewv" />
+  <Action name="removeview" />
 </ToolBar>
 </kpartgui>
