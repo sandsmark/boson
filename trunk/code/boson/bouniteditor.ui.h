@@ -515,7 +515,7 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
     w->setSpeed(mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
-    w->setMaxHeight(mWeaponMaxHeight->value());
+    w->setHeight(mWeaponMaxHeight->value());
     BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
     offset.scale(BO_TILE_SIZE);
     w->setOffset(offset);
@@ -581,7 +581,7 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponCanShootAtLandUnits->setChecked(w->canShootAtLandUnits());
     mWeaponSpeed->setValue(w->speed());
     mWeaponModel->setText(w->modelFileName());
-    mWeaponMaxHeight->setValue(w->maxHeight());
+    mWeaponMaxHeight->setValue(w->height());
     BoVector3 o = w->offset();
     mWeaponOffsetX->setValue(o[0] / BO_TILE_SIZE);
     mWeaponOffsetY->setValue(o[1] / BO_TILE_SIZE);
