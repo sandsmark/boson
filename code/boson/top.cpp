@@ -151,7 +151,15 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  BosonMusic::initBosonMusic();
  BoItemListHandler::initStatic();
 
- BosonGroundTheme::createGroundThemeList();
+ if (!BosonGroundTheme::createGroundThemeList()) {
+	// TODO: message box
+	boError() << k_funcinfo << "Unable to create groundTheme list" << endl;
+	kapp->exit(1);
+ }
+ if (!BosonPlayField::preLoadAllPlayFields()) {
+	boError() << k_funcinfo << "Unable to preload playFields" << endl;
+	kapp->exit(1);
+ }
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
 

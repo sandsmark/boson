@@ -99,8 +99,6 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
  mPreLoaded = false;
  mLoaded = false;
  mDescription = new BPFDescription();
-
- initStatic();
 }
 
 BosonPlayField::~BosonPlayField()
@@ -112,17 +110,6 @@ BosonPlayField::~BosonPlayField()
  delete mDescription;
  delete mFile;
  boDebug() << k_funcinfo << "done" << endl;
-}
-
-void BosonPlayField::initStatic()
-{
- static bool initialized = false;
- if (initialized) {
-	return;
- }
- initialized = true;
- boDebug() << k_funcinfo << endl;
- preLoadAllPlayFields();
 }
 
 bool BosonPlayField::preLoadAllPlayFields()
@@ -149,7 +136,11 @@ bool BosonPlayField::preLoadAllPlayFields()
 		continue;
 	}
 	if (!BosonData::bosonData()->insertPlayField(data)) {
+		boDebug() << k_funcinfo << "could not insert playField "
+				<< data->idString()
+				<< " (maybe already inserted)" << endl;
 		delete data;
+		continue;
 	}
  }
  if (BosonData::bosonData()->availablePlayFields().count() == 0) {
