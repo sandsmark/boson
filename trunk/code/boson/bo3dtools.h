@@ -1253,7 +1253,7 @@ class Bo3dTools
      * is completely in the frustum.
      *
      * @return 0 if the sphere is not in the frustum at all, 1 if it is
-     * partially in the frsutum and 2 if the complete sphere is in the frustum.
+     * partially in the frustum and 2 if the complete sphere is in the frustum.
      **/
     static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3&, float radius);
 
