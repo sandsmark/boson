@@ -280,6 +280,10 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
 #if KDE_VERSION < 301
  return;
 #endif
+ if (file.isEmpty()) {
+	boWarning(200) << k_funcinfo << "cannot add empty filename for event " << name << endl;
+	return;
+ }
  QPtrList<BoPlayObject> list = d->mUnitSounds[name];
  QPtrListIterator<BoPlayObject> it(list);
  for (; it.current(); ++it) {
@@ -293,7 +297,7 @@ void BosonSound::addEventSound(const QString& name, const QString& file)
 	d->mUnitSounds[name].append(playObject);
 	d->mUnitSounds[name].setAutoDelete(true);
  } else {
-	boWarning(200) << k_funcinfo << "NULL sound " << file << endl;
+	boWarning(200) << k_funcinfo << "NULL sound " << file << " for " << name << endl;
 	delete playObject;
  }
 }
@@ -306,12 +310,16 @@ void BosonSound::addEventSound(int id, const QString& file)
  if (d->mSounds.find(id)) {
 	return;
  }
+ if (file.isEmpty()) {
+	boWarning(200) << k_funcinfo << "cannot add empty filename for event " << id << endl;
+	return;
+ }
  boDebug(200) << k_funcinfo << "loading " << file << endl;
  BoPlayObject* playObject = new BoPlayObject(this, file);
  if (!playObject->isNull()) {
 	d->mSounds.insert(id, playObject);
  } else {
-	boWarning(200) << k_funcinfo << "NULL sound " << file << endl;
+	boWarning(200) << k_funcinfo << "NULL sound " << file << " for " << id << endl;
 	delete playObject;
  }
 }

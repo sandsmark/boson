@@ -139,17 +139,18 @@ void BoAudioProcessController::sendCommand(BoAudioCommand* command)
  buffer += QString::number(command->dataInt());
  buffer += ' ';
  if (command->dataString1().isEmpty()) {
-	// use a dummy string
-	buffer += ' ';
+	// send nothing
  } else {
 	buffer += command->dataString1();
  }
  buffer += ' ';
  if (command->dataString2().isEmpty()) {
-	// use a dummy string
-	buffer += ' ';
+	// send nothing
  } else {
 	buffer += command->dataString2();
+ }
+ if (command->type() == 52) {
+	 boError() << "will send: " << buffer << endl;
  }
 
 // boDebug(200) << k_funcinfo << "sending: " << buffer << endl;
@@ -158,7 +159,7 @@ void BoAudioProcessController::sendCommand(BoAudioCommand* command)
  memcpy(d->mBuffer, buffer.latin1(), buffer.length());
  bool ok = d->mProcess->writeStdin(d->mBuffer, buffer.length());
  if (!ok) {
-	boWarning(200) << k_funcinfo << "Unable to send the command to the process!" << endl;
+	boWarning(200) << k_funcinfo << "Unable to send the command to the process! (will retry later)" << endl;
 	d->mCommandQueue.enqueue(command);
  } else {
 	delete command;

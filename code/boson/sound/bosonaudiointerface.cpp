@@ -362,12 +362,20 @@ void BosonSoundInterface::addUnitSounds(const QString& speciesPath, const QStrin
 
 void BosonSoundInterface::addEventSound(const QString& name, const QString& file)
 {
+ if (file.isEmpty()) {
+	boWarning(200) << k_funcinfo << "cannot add empty filename for " << name << endl;
+	return;
+ }
  BoAudioCommand* c = new BoAudioCommand(BoAudioCommand::AddUnitSound, mSpecies, -1, name, file);
  audioInterface()->sendCommand(c);
 }
 
 void BosonSoundInterface::addEventSound(int id, const QString& file)
 {
+ if (file.isEmpty()) {
+	boWarning(200) << k_funcinfo << "cannot add empty filename for " << id << endl;
+	return;
+ }
  BoAudioCommand* c = new BoAudioCommand(BoAudioCommand::AddGeneralSound, mSpecies, id, QString::null, file);
  audioInterface()->sendCommand(c);
 }
