@@ -45,28 +45,25 @@
 /*****  BosonShot  *****/
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
-    BosonItem(prop ? prop->model() : 0, canvas)
+    BosonItem(owner, prop ? prop->model() : 0, canvas)
 {
-  mOwner = owner;
   init();
 
   mProp = prop;
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model) :
-    BosonItem(model, canvas)
+    BosonItem(owner, model, canvas)
 {
-  mOwner = owner;
   init();
 
   mProp = 0;
 }
 
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
-    BosonItem(0, canvas)
+    BosonItem(owner, 0, canvas)
 {
   boDebug() << k_funcinfo << endl;
-  mOwner = owner;
   init();
 
   mProp = 0;

@@ -34,11 +34,10 @@
 #include <qmap.h>
 
 UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
-	: BosonItem(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
+	: BosonItem(owner, owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
- mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
  mIsMoving = false;
 
@@ -120,11 +119,6 @@ void UnitBase::setShields(unsigned long int s)
 unsigned long int UnitBase::type() const
 {
  return unitProperties()->typeId();
-}
-
-void UnitBase::setOwner(Player* owner)
-{
- mOwner = owner;
 }
 
 bool UnitBase::saveAsXML(QDomElement& root)

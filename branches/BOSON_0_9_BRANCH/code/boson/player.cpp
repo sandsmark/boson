@@ -208,7 +208,6 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
 void Player::addUnit(Unit* unit, int dataHandlerId)
 {
  d->mUnits.append(unit);
- unit->setOwner(this); // already done in c'tor of Unit
  if (dataHandlerId == -1) {
 	dataHandlerId = BosonMessage::UnitPropertyHandler + d->mUnitPropID;
 	d->mUnitPropID++;// used for ID of KGamePropertyHandler

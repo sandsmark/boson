@@ -36,7 +36,7 @@
 #include <kstaticdeleter.h>
 
 QMap<int, QString>* BosonItemProperties::mPropertyMap = 0;
-KStaticDeleter< QMap<int, QString> > sd;
+static KStaticDeleter< QMap<int, QString> > sd;
 
 BosonItemProperties::BosonItemProperties()
 {
@@ -111,9 +111,10 @@ QString BosonItemProperties::propertyName(int id)
 }
 
 
-BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
+BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
 	: BosonItemProperties()
 {
+ mOwner = owner;
  mCanvas = canvas;
  mModel = model;
 
