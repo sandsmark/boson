@@ -1368,7 +1368,10 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  }
 
  if (mSearchPath) {
-	if (attackEnemyUnitsInRange()) {
+	// If we're moving with attacking, first check for any enemies in the range
+	//  This prevents units from moving on when you order them to move somewhere
+	//  but there are still enemies in the range.
+	if (moveAttacking() && attackEnemyUnitsInRange()) {
 		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
 		setMoving(false);
@@ -1463,7 +1466,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
 
-	if (attackEnemyUnitsInRange()) {
+	if (moveAttacking() && attackEnemyUnitsInRange()) {
 		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
 		setMoving(false);
