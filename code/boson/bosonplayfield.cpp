@@ -309,7 +309,7 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  QFileInfo fileInfo(fileName);
 
  if (mName.isEmpty()) {
-	mName = fileInfo.fileName();
+	mName = fileInfo.baseName();
  }
  QString description = saveDescriptionXML();
  if (description.isEmpty()) {
