@@ -53,6 +53,7 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(QWidget* parent)
 
   mHeader = new QLabel( this, "header" );
   QFont header_font(  mHeader->font() );
+  header_font.setFamily( "verdana" );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
   mHeader->setFont( header_font ); 
