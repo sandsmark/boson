@@ -33,7 +33,6 @@ BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 {
  boDebug() << k_funcinfo << endl;
  setReactionPeriod(40);
- setAdvancePeriod(50);
  mUnit = -1;
  mTarget = 0l;
 }
