@@ -44,8 +44,7 @@ class editorField : public visualField, public boFile
 	Q_OBJECT
 
 public:
- // editorField(QObject *parent=0, const char *name=0L);
-  editorField(uint l, uint h, QObject *parent=0, const char *name=0L);
+  editorField(QObject *parent=0, const char *name=0L);
 
   void createMobUnit(mobileMsg_t &);
   void destroyMobUnit(destroyedMsg_t &);
