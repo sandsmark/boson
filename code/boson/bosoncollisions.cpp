@@ -54,27 +54,42 @@ Unit* BosonCollisions::findUnitAtCell(int x, int y, float z)
 
 BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
 {
-#warning TODO: z
  BoItemList* list = collisionsAtCell(x, y);
  BoItemList::Iterator it;
 
+ // AB: about unitOnly: we could improve performance slightly by using a 
+ // separate function instead of this additional check. BUT:
+ // a) we won't gain much (probably a few ns only)
+ // b) we shouldn't do a bad design for that little speedups.
+ //    good design is more important than optimizing, cause good
+ //    design leads usually to faster code
+
+ BosonItem* ret = 0;
+ float zDist = 100.0f; // use a very high value - will be thrown away anyway.
  for (it = list->begin(); it != list->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
-		if (!u->isDestroyed()) {
-			return *it;
+		// only living units are rlevant
+		if (u->isDestroyed()) {
+			continue;
 		}
-	} else if (!unitOnly) {
-		// AB: we could improve performance slightly by using a separate
-		// function instead of this additional check. BUT:
-		// a) we won't gain much (probably a few ns only)
-		// b) we shouldn't do a bad design for that little speedups.
-		//    good design is more important than optimizing, cause good
-		//    design leads usually to faster code
-		return *it;
+	} else if (unitOnly) {
+		// ignore all normal other items
+		continue;
+	}
+
+	// distance of item's z to desired z
+	float dist = (*it)->z() - z;
+	if (dist < 0) {
+		dist = -dist;
+	}
+	if (!ret || dist < zDist) {
+		// new distance is lower than previous.
+		ret = *it;
+		zDist = dist;
 	}
  }
- return 0;
+ return ret;
 }
 
 BosonItem* BosonCollisions::findItemAt(const BoVector3& pos)
