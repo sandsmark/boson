@@ -5,4 +5,5 @@ Makefile.in
 *.moc
 *.lo
 bosonwidgets.la
+bosonwidgets.la.closure
 bosonwidgets_la_meta_unload.*

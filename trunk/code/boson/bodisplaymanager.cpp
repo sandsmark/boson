@@ -34,6 +34,7 @@
 #include <qlayout.h>
 #include <qvbox.h>
 #include <qintdict.h>
+#include <qdom.h>
 
 class BoBox : public QWidget
 {
@@ -589,5 +590,85 @@ void BoDisplayManager::setToolTipCreator(int type)
 	it.current()->setToolTipCreator(type);
 	++it;
  }
+}
+
+void BoDisplayManager::loadFromXML(const QDomElement& root)
+{
+ // Load displays (camera)
+ QDomElement displays = root.namedItem(QString::fromLatin1("Displays")).toElement();
+ if (displays.isNull()) {
+	boError(260) << k_funcinfo << "no displays" << endl;
+	return;
+ }
+ QDomElement display = displays.namedItem(QString::fromLatin1("Display")).toElement();
+ if (display.isNull()) {
+	boError(260) << k_funcinfo << "no display" << endl;
+	return;
+ }
+
+ if (d->mDisplayList.at(0)) {
+	d->mDisplayList.at(0)->loadFromXML(display);
+ } else {
+	boError(260) << k_funcinfo << "No displays ?!" << endl;
+ }
+
+ // Load unitgroups
+ QDomElement unitgroups = root.namedItem(QString::fromLatin1("UnitGroups")).toElement();
+ if (unitgroups.isNull()) {
+	boError(260) << k_funcinfo << "no unitgroups " << endl;
+	return;
+ }
+ QDomNodeList list = unitgroups.elementsByTagName(QString::fromLatin1("Group"));
+ if (list.count() == 0) {
+	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return;
+	}
+	if (!e.hasAttribute("Id")) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Group " << i << endl;
+		continue;
+	}
+	int id;
+	bool ok;
+	id = e.attribute("Id").toInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id for Group " << i << endl;
+		continue;
+	}
+	d->mSelectionGroups[id]->loadFromXML(e);
+ }
+}
+
+void BoDisplayManager::saveAsXML(QDomElement& root)
+{
+ QDomDocument doc = root.ownerDocument();
+ // Save displays
+ // FIXME: only first display is saved here as we currently don't support more.
+ //  if we will ever support multiple displays again, their layout etc. must be
+ //  saved here as well.
+ QDomElement displays = doc.createElement(QString::fromLatin1("Displays"));
+ QDomElement display = doc.createElement(QString::fromLatin1("Display"));
+ if (d->mDisplayList.at(0)) {
+	d->mDisplayList.at(0)->saveAsXML(display);
+ } else {
+	boError(260) << k_funcinfo << "No displays ?!" << endl;
+ }
+ displays.appendChild(display);
+ root.appendChild(displays);
+
+ // Save unitgroups
+ QDomElement unitgroups = doc.createElement(QString::fromLatin1("UnitGroups"));
+ for(int i = 0; i < 10; i++) {
+	QDomElement group = doc.createElement(QString::fromLatin1("Group"));
+	group.setAttribute("Id", i);
+	d->mSelectionGroups[i]->saveAsXML(group);
+	unitgroups.appendChild(group);
+ }
+ root.appendChild(unitgroups);
 }
 

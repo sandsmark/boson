@@ -24,6 +24,9 @@
 #include "unitproperties.h"
 #include "pluginproperties.h"
 #include "bodebug.h"
+#include "boson.h"
+
+#include <qdom.h>
 
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
@@ -222,6 +225,75 @@ void BoSelection::activate(bool on)
 		it.current()->unselect();
 		++it;
 	}
+	emit signalSelectionChanged(this);
+ }
+}
+
+void BoSelection::saveAsXML(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc = root.ownerDocument();
+ QDomElement units = doc.createElement(QString::fromLatin1("Units"));
+
+ QString value;
+ QTextStream s(&value, IO_WriteOnly);
+ s << QString::number(mSelection.count());
+ QPtrListIterator<Unit> it(mSelection);
+ while (it.current()) {
+	s << ' ';
+	s << QString::number(it.current()->id());
+	++it;
+ }
+
+ units.appendChild(doc.createTextNode(value));
+ root.appendChild(units);
+}
+
+void BoSelection::loadFromXML(const QDomElement& root, bool activate)
+{
+ boDebug() << k_funcinfo << "activate: " << activate << endl;
+ QDomElement units = root.namedItem(QString::fromLatin1("Units")).toElement();
+ if (units.isNull()) {
+	boError(260) << k_funcinfo << "no units" << endl;
+	return;
+ }
+ QString value = units.text();
+ if (value.isEmpty()) {
+	boError() << k_funcinfo << "empty value for units list" << endl;
+	return;
+ }
+ boDebug(260) << k_funcinfo << "Units value: " << value << endl;
+
+ unsigned int count = 0;
+ int id;
+ char c;
+ Unit* u;
+ QTextStream s(&value, IO_ReadOnly);
+ s >> count;
+ for (unsigned int i = 0; i < count; i++) {
+	//s >> c;
+	s >> id;
+	boDebug(260) << "Should append unit " << id << endl;
+	u = boGame->findUnit((unsigned long int)id, 0);
+	if (!u) {
+		boError(260) << "Unit " << id << " doesn't exist" << endl;
+		continue;
+	}
+	// We can't use add() here because it would bring problems, so we duplicate some code
+	if (u->isDestroyed()) {
+		boDebug(260) << k_funcinfo << "unit destroyed" << endl;
+		continue;
+	}
+	if (mSelection.containsRef(u)) {
+		continue;
+	}
+	mSelection.append(u);
+	if(activate) {
+		u->select();
+	}
+ }
+ if(activate) {
+	boDebug() << k_funcinfo << "emitting signal" << endl;
 	emit signalSelectionChanged(this);
  }
 }
