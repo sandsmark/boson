@@ -342,6 +342,29 @@ void BosonConfig::saveLocalPlayerMap(const QString& id, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
+QString BosonConfig::readEditorMap(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Editor");
+ QString name = conf->readEntry("EditorMap", QString::null);
+ conf->setGroup(oldGroup);
+ return name;
+}
+
+void BosonConfig::saveEditorMap(const QString& id, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Editor");
+ conf->writeEntry("EditorMap", id);
+ conf->setGroup(oldGroup);
+}
+
 void BosonConfig::saveGameSpeed(int speed, KConfig* conf)
 {
  if (!conf) {
