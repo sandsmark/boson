@@ -180,6 +180,9 @@ private:
 
 	void raiseWidget(int id);
 
+	// Game data preloading methods
+	void loadUnitDatas(Player* p, int progress);
+
 private:
 	QWidgetStack* mWs;
 	Boson* mBoson;

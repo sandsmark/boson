@@ -16,6 +16,11 @@ class QHBoxLayout;
 class QLabel;
 class QProgressBar;
 
+// Loading units datas for one player takes so many loading steps
+#define UNITDATAS_LOADINGFACTOR 1600
+// Loading map tiles takes so many loading steps
+#define MAPTILES_LOADINGFACTOR 2200
+
 class BosonLoadingWidget : public QWidget
 { 
   Q_OBJECT
