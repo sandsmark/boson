@@ -377,13 +377,13 @@ void Editor::slotChangeEdit(int e)
  d->mActionCellPlain->setEnabled(e == 0);
  d->mActionCellBig1->setEnabled(e == 0);
  d->mActionCellBig2->setEnabled(e == 0);
+ d->mMapMode = (e == 0);
  if (e == 0) {
 	d->mActionCellSmall->activate();
  } else {
 	d->mActionFacilities->activate();
  }
  bosonWidget()->displayAllItems(e == 1);
- d->mMapMode = (e == 0);
 }
 
 void Editor::slotPlaceFacilities()
