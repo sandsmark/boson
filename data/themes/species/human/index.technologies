@@ -1,13 +1,3 @@
-[X-120]
-Id=12
-Name=X-120 cannons for Panther
-MineralCost=500
-OilCost=200
-Producer=0
-ProductionTime=30
-Pixmap=testtech.png
-RequireUnits=10001
-
 [Armor+2]
 Id=48
 Name=Basic facility armor (for all facilities)
@@ -20,15 +10,40 @@ RequireUnits=12,5,3
 ApplyToFacilities=true
 Armor=2
 
-[Leopard upgrade]
-Id=1234
-Name=Upgrade Leopard tanks
-MineralCost=2500
-OilCost=700
+[SamSite missile upgrade]
+Id=10001
+Name=Upgrade SamSite missiles
+MineralCost=750
+OilCost=150
 Producer=0
-ProductionTime=100
-Pixmap=testtech.png
-ApplyToTypes=10008
-RequireUnits=12,10008
-Health=320
-Armor=+20
+ProductionTime=300
+Pixmap=samsitemissiles.png
+ApplyToTypes=6
+RequireUnits=14,12,3
+Weapon_0:Damage=+5
+Weapon_0:Speed=+5
+
+[Turrets upgrade]
+Id=10002
+Name=Upgrade turrets
+MineralCost=600
+OilCost=150
+Producer=0
+ProductionTime=400
+Pixmap=turretupgrade.png
+ApplyToTypes=10
+RequireUnits=12
+Weapon_0:Damage=+5
+
+[Grizzly missile upgrade]
+Id=10003
+Name=Upgrade Grizzly missiles
+MineralCost=750
+OilCost=150
+Producer=0
+ProductionTime=300
+Pixmap=grizzlymissiles.png
+ApplyToTypes=10006
+RequireUnits=14,12,3
+Weapon_0:Damage=+5
+Weapon_0:Speed=+4
