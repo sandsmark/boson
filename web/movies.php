@@ -83,6 +83,10 @@ draw_bigbox_text("This is the first movie<br>
       <li><a href=\"download.php?dl=movie1-medium.avi\">Download medium-quality version</a> (26179 KB)</li>
       <li><a href=\"download.php?dl=movie1-low.avi\">Download low-quality version</a> (6578 KB)</li>
     </ul>
+    Screenshots (click on thumbnails for full versions):<br>
+    &nbsp;&nbsp;
+    <a href=\"shots/movie1-1.jpg\"><img border=\"0\" src=\"shots/movie1-1-thumb.jpg\" alt=\"Screenshot 1\"></a>
+    <a href=\"shots/movie1-2.jpg\"><img border=\"0\" src=\"shots/movie1-2-thumb.jpg\" alt=\"Screenshot 2\"></a><br>
     <br>");
 draw_bigbox_subheader("Movie 2");
 draw_bigbox_text("This is the second movie<br>
@@ -95,7 +99,12 @@ draw_bigbox_text("This is the second movie<br>
       <li><a href=\"download.php?dl=movie2-high.avi\">Download high-quality version</a> (82613 KB)</li>
       <li><a href=\"download.php?dl=movie2-medium.avi\">Download medium-quality version</a> (52893 KB)</li>
       <li><a href=\"download.php?dl=movie2-low.avi\">Download low-quality version</a> (13283 KB)</li>
-    </ul>");
+    </ul>
+    Screenshots (click on thumbnails for full versions):<br>
+    &nbsp;&nbsp;
+    <a href=\"shots/movie2-1.jpg\"><img border=\"0\" src=\"shots/movie2-1-thumb.jpg\" alt=\"Screenshot 1\"></a>
+    <a href=\"shots/movie2-2.jpg\"><img border=\"0\" src=\"shots/movie2-2-thumb.jpg\" alt=\"Screenshot 2\"></a><br>
+    ");
 draw_bigbox_end();
 
 main_area_end();
