@@ -232,19 +232,12 @@ void serverHarvester::emptying(void)
 {
 	if (!atHome()) {
 		logf(LOG_ERROR, "serverHarvesting::emptying while not at home, refused");
-//		printf("base is %d,%d, we are at %d,%d\n", base_x, base_y, _x(), _y());
 		return;
 	}
 	/* destroy (hide) the client harvester */
 	reportHidden();
 	counter = EMPTYING_DURATION;
 
-}
-
-bool serverHarvester::atHome(void)
-{
-	QRect r = rect();
-	return ( r.x() == base_x && r.y() == base_y );
 }
 
 
