@@ -65,7 +65,6 @@ libboson_la_SOURCES = \
 	player.cpp \
 	playerio.cpp \
 	bomatrixwidget.cpp \
-	bosonglminimap.cpp \
 	bosonglwidget.cpp \
 	bosonufoglwidget.cpp \
 	bocamera.cpp \
@@ -153,6 +152,8 @@ boson_SOURCES = \
 		bosonbigdisplayinput.cpp \
 		editorbigdisplayinput.cpp \
 		bogltooltip.cpp \
+		bosonglminimap.cpp \
+		bosonufominimap.cpp \
 		optionsdialog.cpp \
 		optionswidgets.cpp \
 		bogroundrenderer.cpp \

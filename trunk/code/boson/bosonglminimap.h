@@ -59,6 +59,7 @@ public:
 
 	unsigned int miniMapWidth() const;
 	unsigned int miniMapHeight() const;
+	bool showMiniMap() const;
 
 	BosonMap* map() const { return mMap; }
 	PlayerIO* localPlayerIO() const { return mLocalPlayerIO; }
@@ -84,6 +85,8 @@ public:
 	 **/
 	bool mouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool* send);
 
+	void emitSignalReCenterView(const QPoint& pos);
+	void emitSignalMoveSelection(const QPoint& pos);
 
 
 public slots:
