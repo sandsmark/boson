@@ -26,6 +26,7 @@
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
+#include <kstaticdeleter.h>
 
 #include <qimage.h>
 #include <qgl.h>
@@ -42,6 +43,7 @@
 #include <lib3ds/material.h>
 
 BosonModelTextures* BosonModel::mModelTextures = 0;
+static KStaticDeleter<BosonModelTextures> sd;
 
 BoFrame::BoFrame()
 {
@@ -195,8 +197,9 @@ void BosonModel::init()
  d->mFrames.setAutoDelete(true);
  d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
- if (!mModelTextures) { // TODO static deleter!
+ if (!mModelTextures) {
 	mModelTextures = new BosonModelTextures();
+	sd.setObject(mModelTextures);
  }
 
  // add the default mode 0
