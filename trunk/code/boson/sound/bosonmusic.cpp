@@ -81,6 +81,11 @@ BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
  d->mBosonSound.setAutoDelete(true);
+ if (boConfig->disableSound()) {
+	d->mPlayMusic = false;
+	d->mPlaySound = false;
+	return;
+ }
  if (d->mServer.server().isNull()) {
 	boWarning(200) << "Cannot access KArtsServer - sound disabled" << endl;
 	// TODO: message box
