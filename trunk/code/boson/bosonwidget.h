@@ -57,6 +57,15 @@ signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor
 
+	/**
+	 * Emitted when a new tileset shall be loaded. This is usually emitted
+	 * only once (at program startup), at least currently.
+	 *
+	 * The editor should load the new tileset and probably also update all
+	 * cells on the screen. Currently tileSet is always "earth.png"
+	 **/
+	void signalEditorLoadTiles(const QString& tileSet);
+
 protected slots:
 	void slotStartScenario();
 	void slotChangeSpecies(const QString& speciesDirectory);
