@@ -261,6 +261,14 @@ public:
 
 	void changeGroundRenderer(int renderer);
 
+	/**
+	 * Grab a frame for a movie. The returned @ref QByteArray contains
+	 * everything that is necessary to display one frame. At the moment that
+	 * is the whole screenshot, later we may use the positions of the units
+	 * only or something similar.
+	 **/
+	QByteArray grabMovieFrame();
+
 public slots:
 	void slotCenterHomeBase();
 	void slotResetViewProperties();

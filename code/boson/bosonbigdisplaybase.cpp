@@ -60,6 +60,7 @@
 #include <qtimer.h>
 #include <qcursor.h>
 #include <qpointarray.h>
+#include <qbuffer.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -2839,6 +2840,25 @@ bool BosonBigDisplayBase::isInputInitialized()
 void BosonBigDisplayBase::setInputInitialized(bool initialized)
 {
  d->mInputInitialized = initialized;
+}
+
+QByteArray BosonBigDisplayBase::grabMovie()
+{
+ boDebug() << k_funcinfo << "Grabbing movie frame..." << endl;
+
+ // Repaint
+ slotUpdateGL();
+
+ // WARNING this is NOT dependable! e.g. if boson has the focus, but another
+ // window is in front of it, then the other window will be grabbed as well!
+ // better render to a pixmap instead.
+ QPixmap shot = QPixmap::grabWindow(winId());
+
+ QByteArray ba;
+ QBuffer b(ba);
+ b.open(IO_WriteOnly);
+ shot.save(&b, "JPEG", 90);
+ return ba;
 }
 
 void BosonBigDisplayBase::advanceCamera()

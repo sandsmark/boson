@@ -664,6 +664,11 @@ void BosonWidgetBase::initKActions()
 		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
  (void)new KAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
 		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
+ KToggleAction* movie = new KToggleAction(i18n("Grab &Movie"),
+		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection(), "game_grab_movie");
+ movie->setChecked(false);
+ connect(movie, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetGrabMovie(bool)));
 
  // Debug
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,

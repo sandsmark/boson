@@ -214,6 +214,8 @@ public slots:
 
 	void slotChangeGroundRenderer(int);
 
+	void slotSetGrabMovie(bool grab);
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.
@@ -248,6 +250,8 @@ protected:
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplayBase*) const;
 	void recreateLayout();
+
+	void grabMovieFrame();
 
 protected slots:
 	void slotMakeActiveDisplay(BosonBigDisplayBase*);
