@@ -9,21 +9,28 @@ TODO:
 
 
 click-zone for selection is still badly centered
+
 how to handle selection drawing ?
-good (with _no_ layout)  positionning of widget.
-boAssert( celldiscovered has j<max) seems to have problems
 menu clean-up :-)
+
 when clicking (no box) on two mobiles, both are selected, but shouldn't
 	then -> client units : shouldn't move over each other
+
 checkvisibility -> units
-	server : add a 'known' state to serverUnits
+#	server : add a 'known' state to serverUnits
 	broadcast 'moving' to all people knowing me, and then update 'known'
+
 integration of Ben mobiles (with different colors)
 use different pixmap according to 'direction'
 server : check that each unit does max 1 move each jiffie
 version check whithin the ask_connect msg
-check that loading of pixmap has been done well
 map : inheritate Cell, and put serverCell back in server dir
+
+check that loading of pixmap has been done well
+	OK for species, check ground
+
+#good (with _no_ layout)  positionning of widget.
+#boAssert( celldiscovered has j<max) seems to have problems
 
 check Makefile.am for installation "make install"
 
