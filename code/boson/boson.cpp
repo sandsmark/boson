@@ -885,7 +885,7 @@ void Boson::quitGame()
  boDebug() << k_funcinfo << endl;
 // reset everything
  if (d->mCanvas) {
-	d->mCanvas->deleteDestroyed();
+	d->mCanvas->quitGame();
  }
  d->mGameTimer->stop();
  setGameStatus(KGame::End);
