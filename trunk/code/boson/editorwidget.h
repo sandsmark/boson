@@ -93,6 +93,7 @@ protected slots:
 	void slotSavePlayField();
 	void slotChangeLocalPlayer(int);
 	void slotPlace(int index);
+	void slotEditMapDescription();
 
 	void slotGameStarted();
 

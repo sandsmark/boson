@@ -46,7 +46,7 @@ public:
 	/**
 	 * Load a description.xml file
 	 **/
-	BPFDescription(const QByteArray& data);
+	BPFDescription(const QString& data);
 
 	~BPFDescription();
 

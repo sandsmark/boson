@@ -47,6 +47,7 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
  mFile = 0;
  mPreLoaded = false;
  mLoaded = false;
+ mDescription = new BPFDescription();
 
  initStatic();
 }
@@ -56,6 +57,7 @@ BosonPlayField::~BosonPlayField()
  emit signalNewMap(0);
  delete mMap;
  delete mScenario;
+ delete mDescription;
  delete mFile;
 }
 
@@ -215,12 +217,11 @@ bool BosonPlayField::loadDescriptionXML(const QByteArray& xml)
 {
  if (xml.size() == 0) {
 	boError() << k_funcinfo << "Oops - NULL description file" << endl;
-	return i18n("Invalid");
+	return false;
  }
- BPFDescription description(xml);
- mName = description.name();
- mComment = description.comment();
- return description.toString();
+ delete mDescription;
+ mDescription = new BPFDescription(QString(xml));
+ return true;
 }
 
 bool BosonPlayField::loadMapXML(const QByteArray& xml, const QByteArray& heightMapImage)
@@ -308,8 +309,12 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  }
  QFileInfo fileInfo(fileName);
 
- if (mName.isEmpty()) {
-	mName = fileInfo.baseName();
+ if (!mDescription) {
+	BO_NULL_ERROR(mDescription);
+	return false;
+ }
+ if (mDescription->name().isEmpty()) {
+	mDescription->setName(fileInfo.baseName());
  }
  QString description = saveDescriptionXML();
  if (description.isEmpty()) {
@@ -360,10 +365,11 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 
 QString BosonPlayField::saveDescriptionXML()
 {
- BPFDescription description;
- description.setName(mName);
- description.setComment(mComment);
- return description.toString();
+ if (!mDescription) {
+	BO_NULL_ERROR(mDescription);
+	return QString::null;
+}
+ return mDescription->toString();
 }
 
 QString BosonPlayField::saveMapXML()
@@ -422,6 +428,26 @@ void BosonPlayField::saveMap(QDataStream& stream)
  }
 }
 
+void BosonPlayField::saveDescription(QDataStream& stream)
+{
+ BO_CHECK_NULL_RET(mDescription);
+ QString xml = mDescription->toString();
+ if (xml.isEmpty()) {
+	boError() << k_funcinfo << "empty description string!!" << endl;
+	// don't return! this is *not* fatal!
+ }
+ stream << xml;
+}
+
+bool BosonPlayField::loadDescription(QDataStream& stream)
+{
+ delete mDescription;
+ QString xml;
+ stream >> xml;
+ mDescription = new BPFDescription(xml);
+ return true;
+}
+
 void BosonPlayField::quit()
 {
  emit signalNewMap(0);
@@ -474,3 +500,20 @@ void BosonPlayField::finalizeLoading()
  mLoaded = true;
 }
 
+QString BosonPlayField::playFieldName() const
+{
+ if (!mDescription) {
+	BO_NULL_ERROR(mDescription);
+	return QString::null;
+ }
+ return mDescription->name();
+}
+
+QString BosonPlayField::playFieldComment() const
+{
+ if (!mDescription) {
+	BO_NULL_ERROR(mDescription);
+	return QString::null;
+ }
+ return mDescription->comment();
+}

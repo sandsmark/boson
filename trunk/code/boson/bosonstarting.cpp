@@ -107,6 +107,12 @@ void BosonStarting::startNewGame()
 	loadField->loadPlayField(mPlayFieldId);
 	loadField->saveMap(stream);
 
+	// I'm not too happy about tranmsmitting the complete description
+	// (including translations...) but i'm afraid we need them. in case of
+	// conflicting maps the network version will be used, then we should be
+	// able to provide the correct description, too
+	loadField->saveDescription(stream);
+
 	// in case we are starting a new map
 	delete mNewPlayField;
 	mNewPlayField = 0;
@@ -202,6 +208,10 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
  QDataStream stream(buffer, IO_ReadOnly);
  if (!mPlayField->loadMap(stream)) {
 	boError() << k_funcinfo << "Broken map file at this point?!" << endl;
+	return;
+ }
+ if (!mPlayField->loadDescription(stream)) {
+	boError() << k_funcinfo << "broken description" << endl;
 	return;
  }
  boGame->setPlayField(mPlayField);

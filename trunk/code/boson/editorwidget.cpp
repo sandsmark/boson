@@ -30,6 +30,7 @@
 #include "global.h"
 #include "commandinput.h"
 #include "bodebug.h"
+#include "bpfdescriptiondialog.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -176,6 +177,10 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("Delete selected unit"), KShortcut(s), displayManager(),
 		  SLOT(slotDeleteSelectedUnits()), actionCollection(),
 		  "editor_delete_selected_unit");
+
+ (void)new KAction(i18n("Map &description"), KShortcut(), this, 
+		  SLOT(slotEditMapDescription()), actionCollection(),
+		  "editor_map_description");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -357,3 +362,20 @@ void EditorWidget::startScenario(const QString& playFieldId)
  slotChangeLocalPlayer(0);
  d->mPlayerAction->setCurrentItem(0);
 }
+
+void EditorWidget::slotEditMapDescription()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->description());
+
+
+// TODO: non-modal might be fine. one could use that for translations (one
+// dialog the original language, one the translated language)
+ BPFDescriptionDialog* dialog = new BPFDescriptionDialog(this, true);
+ dialog->setDescription(boGame->playField()->description());
+ dialog->exec();
+
+ delete dialog;
+}
+

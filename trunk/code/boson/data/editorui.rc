@@ -13,6 +13,7 @@
     <Action name="editor_create_unit" />
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
+    <Action name="editor_map_description" />
   </Menu>
 </MenuBar>
 <ToolBar>
