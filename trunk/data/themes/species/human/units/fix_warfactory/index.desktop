@@ -3,8 +3,8 @@ IsFacility=true
 TerrainType=0
 Name=War Factory
 Id=3
-Health=100
-MineralCost=100
+Health=250
+MineralCost=400
 Producer=10
 
 [Boson Facility]

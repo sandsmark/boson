@@ -3,8 +3,8 @@ IsFacility=false
 TerrainType=0
 Name=Oil Harvester
 Id=10002
-Health=100
-MineralCost=100
+Health=150
+MineralCost=300
 Producer=0
 
 [Boson Mobile Unit]

@@ -3,6 +3,10 @@ IsFacility=true
 TerrainType=0
 Name=Barracks
 Id=4
-Health=100
-MineralCost=100
+Health=250
+MineralCost=300
 Producer=10
+
+[Boson Facility]
+CanProduce=true
+ProducerList=0

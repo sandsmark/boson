@@ -4,10 +4,10 @@ TerrainType=0
 Name=Batzen
 Id=10006
 Health=100
-MineralCost=100
-Range=100
+MineralCost=150
+Range=4
 Damage=10
-Reload=30
+Reload=10
 Producer=0
 
 [Boson Mobile Unit]
