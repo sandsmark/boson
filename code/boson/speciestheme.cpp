@@ -149,13 +149,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  mThemePath = speciesDir;
  kdDebug() << "theme path: " << themePath() << endl;
 
- if (!boMusic) {
-	// we loads sounds sounds and therefore need to access the global 
-	// BosonMusic instance. so if its not here create it
-	BosonMusic::initBosonMusic();
-	boMusic->setSound(boConfig->sound());
-	boMusic->setMusic(boConfig->music());
- }
  mSound = boMusic->addSounds(themePath());
 
  // the initial values for the units - config files :-)
