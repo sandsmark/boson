@@ -903,7 +903,7 @@ void ModelPreview::hideMesh(unsigned int mesh, bool hide)
 	}
 	f->setHidden(mesh, hide);
  }
- if (mesh == mSelectedMesh) {
+ if ((int)mesh == mSelectedMesh) {
 	selectMesh(-1);
  }
 }
