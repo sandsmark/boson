@@ -40,9 +40,9 @@ boserver_LDADD   = ../common/libboson.a  -lkdeui -lkdecore -lqt -lXext -lX11 $(L
 #(un)install
 install-data-local:
 	$(mkinstalldirs) $(kde_appsdir)/
-	$(INSTALL_DATA) bosserver.kdelnk $(kde_appsdir)/bosserver.kdelnk
+	$(INSTALL_DATA) boserver.kdelnk $(kde_appsdir)/Games/boserver.kdelnk
 	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) bosserver.xpm $(kde_icondir)/boserver.xpm
+	$(INSTALL_DATA) boserver.xpm $(kde_icondir)/boserver.xpm
 	$(mkinstalldirs) $(kde_minidir)/
 	$(INSTALL_DATA) mini-boserver.xpm $(kde_minidir)/mini-boserver.xpm
 
