@@ -28,6 +28,7 @@
 #include <qvaluelist.h>
 #include <qdom.h>
 #include <qimage.h>
+#include <qstringlist.h>
 
 // version number as used by boson 0.8.128 (aka 0x00,0x08,0x80 - development
 // version. got never released)
@@ -582,6 +583,19 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
 	boError() << k_funcinfo << "itemsList.count() != playerList.count()" << endl;
 	return false;
  }
+ {
+	QStringList ids;
+	ids.append(QString::number(275)); // IdMoveDestX
+	ids.append(QString::number(276)); // IdMoveDestY
+	ids.append(QString::number(277)); // IdMoveRange
+	ids.append(QString::number(279)); // IdMoveAttacking
+	ids.append(QString::number(280)); // IdSearchPath
+	ids.append(QString::number(281)); // IdSlowDownAtDestination
+	ids.append(QString::number(323)); // IdMovingFailed
+	ids.append(QString::number(324)); // IdPathRecalculated
+	ids.append(QString::number(325)); // IdPathAge
+	removePropertyIds_0_9_1(itemsList, ids);
+ }
 
  QDomElement neutralPlayer = playersDoc.createElement(QString::fromLatin1("Player"));
  neutralPlayer.setAttribute("Id", playerList.count());
@@ -611,6 +625,25 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  return true;
 }
 
+void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
+{
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement items = itemsList.item(i).toElement();
+	QDomNodeList dataHandler = items.elementsByTagName(QString::fromLatin1("DataHandler"));
+	for (unsigned int j = 0; j < dataHandler.count(); j++) {
+		QDomElement handler = dataHandler.item(j).toElement();
+		QDomNodeList properties = handler.elementsByTagName(QString::fromLatin1("KGameProperty"));
+		for (int k = 0; k < (int)properties.count(); k++) {
+			QDomElement e = properties.item(k).toElement();
+			QString id = e.attribute("Id");
+			if (ids.contains(id)) {
+				handler.removeChild(e);
+				k--;
+			}
+		}
+	}
+ }
+}
 
 
 bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, QByteArray* texMap)
