@@ -74,12 +74,13 @@ public:
 	void		getWantedAction();
  
 	void		shooted(int _power);
+	void		destroyed(void) { setFrame(PIXMAP_MOBILE_DESTROYED); }
 /* Server orders */
 	void		s_moveTo(state_t nstate);
 
 protected:
-	int		getLeft(int a=1) {return (direction+12-a)%12; }
-	int		getRight(int a=1) {return (direction+a)%12; }
+	int		getLeft(int a=1) {return (direction+DIRECTION_STEPS-a)%DIRECTION_STEPS; }
+	int		getRight(int a=1) {return (direction+a)%DIRECTION_STEPS; }
 	void		turnTo(int newdir);
 	bool		checkMove(state_t nstate);
    	bool		near(int distance);
@@ -151,6 +152,7 @@ public:
 /* Server orders */
 	void	s_setState(int );
 	void	shooted(int _power);
+	void	destroyed(void) { setFrame(PIXMAP_FIX_DESTROYED); }
 
 
 };
