@@ -67,7 +67,7 @@ draw_bigbox_text("There are three mailing lists.<br><br>
 
 draw_bigbox_subheader("IRC");
 draw_bigbox_text("We also have an IRC channel. If you have questions/problems/compile errors,
-    you can just go to #boson on openprojects (e.g. irc.openprojects.net).<br><br>");
+    you can just go to #boson on openprojects (e.g. irc.kde.org).<br><br>");
 
 draw_bigbox_subheader("<a name=\"bugs\"></a>Reporting bugs");
 draw_bigbox_text("You can report bugs using <a href=\"http://bugs.kde.org/\">KDE's bug tracking system</a>
