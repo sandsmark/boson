@@ -70,16 +70,17 @@ void bosonUnit::targetDying(bosonUnit *t)
 
 void bosonUnit::u_attack(bosonUnit *u)
 {
+
+	if (u == this) {
+		/* attacking myself */
+		logf(LOG_WARNING, "(bosonUnit::u_attack()) %p attacking itself, aborting", this);
+		return;
+	}
+
 	if (target) {
 		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
 	}
 
-	if (u == this) {
-		/* attacking myself */
-		logf(LOG_WARNING, "%p attacking itself, aborting", this);
-		target = 0;
-		return;
-	}
 	target		= u;
 	shoot_timer	= -1;
 
@@ -448,6 +449,14 @@ void playerMobUnit::u_attack(bosonUnit *u)
 {
 	QPoint	p;
 
+	if (mobileProp[type].range<=0) return;		// Unit can't shoot
+
+	bosonUnit *that = this;
+	if (u == that) { /* attacking myself */
+		logf(LOG_WARNING, "(playerMobUnit::u_attack()) %p attacking itself, aborting", this);
+		return;
+	}
+
 	bosonUnit::u_attack(u);
 
 	connect( u, SIGNAL(sig_moveTo(QPoint)), this, SLOT(targetMoveTo(QPoint)) );
@@ -478,13 +487,6 @@ void playerMobUnit::shooted(int _power)
 	if (sp_up) sp_up->setFrame(_power);
 }
   
-
-bool playerMobUnit::near(int )
-{
-	// XXX near should dissappear with the new scheme
-	return boGridDist( gridRect().topLeft() - dest ) < 1; 
-}
-
 void playerMobUnit::destroy(void)
 {
 	setFrame(PIXMAP_MOBILE_DESTROYED);
@@ -556,14 +558,14 @@ bool harvesterUnit::getWantedMove(QPoint &wstate)
 			return false;
 			break;
 		case comingBack:
-			if ( gridRect().topLeft() == base ) {
+			if ( atHome() ) {
 				/* we are back : empty the harvester */ 
 //				puts("harvester : arrived home");
 				harvestEndMsg_t    he;
 				he.key = key;
 				sendMsg(buffer, MSG_UNIT_HARVEST_END, MSG(he) );
 				hstate = goingTo;
-				playerMobUnit::u_goto(harvest); // go to base station
+				playerMobUnit::u_goto(harvest*BO_TILE_SIZE); // go to harvest point
 				contain = 0 ;		// emptying
 
 			}
@@ -571,11 +573,11 @@ bool harvesterUnit::getWantedMove(QPoint &wstate)
 			break;
 		case goingTo:
 			ret = playerMobUnit::getWantedMove(wstate);
-			if (near (100) && underlyingGround() == GROUND_GRASS_OIL ) {
+			if ( dest == gridRect().topLeft() && underlyingGround() == GROUND_GRASS_OIL ) {
 				hstate = harvesting;
 //				puts("harvester : change to \"harvesting\" state");
 			} else // nothing to harvest
-			if ( near (5) ) { 
+			if ( dest == gridRect().topLeft() ) { 
 				// orzel : look around for another cell to harvest
 				hstate = standBy;
 //				printf("harvester : change to \"standby\" state, underlying is %d, not %d\n", underlyingGround(), GROUND_GRASS_OIL);
@@ -591,7 +593,7 @@ bool harvesterUnit::getWantedMove(QPoint &wstate)
 			} else {
 				hstate = comingBack;
 //				puts("harvester : change to \"comingBack\" state");
-				playerMobUnit::u_goto(base); // go to base station
+				playerMobUnit::u_goto(home*BO_TILE_SIZE); // go to home station
 			}
 			// send a message "i'm harvesting there"
 			// check "contain" ...

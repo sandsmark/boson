@@ -112,7 +112,6 @@ protected:
 	int		getLeft(int a=1) {return (direction+DIRECTION_STEPS-a)%DIRECTION_STEPS; }
 	int		getRight(int a=1) {return (direction+a)%DIRECTION_STEPS; }
 	void		turnTo(int newdir);
-   	bool		near(int distance);
 
 	virtual bool	getWantedMove(QPoint &);
 	virtual bool	getWantedShoot(bosonMsgData *);
@@ -128,6 +127,9 @@ public slots:
 	/** this slots receives message when the attacked unit moves */
   	void		targetMoveTo(QPoint);
 
+protected:
+	/* moving */
+	QPoint		dest;
 private :
 	/** actually do the job of moving the unit, from server order */
 	void		do_moveTo(QPoint nstate);
@@ -136,8 +138,7 @@ private :
 	int		direction;	// [0-11] is the angle ...
 	mobUnitState	state;
 
-/* moving */
-	QPoint		dest;
+	/* moving */
 	QPoint		asked;
 	mobUnitState	asked_state;
 	uint		failed_move;
@@ -152,7 +153,7 @@ class harvesterUnit : public playerMobUnit
 Q_OBJECT
 		
 public:
-	harvesterUnit(mobileMsg_t *m) : playerMobUnit(m) , base(m->x,m->y)
+	harvesterUnit(mobileMsg_t *m) : playerMobUnit(m) , home(m->x,m->y)
 		{ hstate = standBy;}
 
 	virtual bool	getWantedMove(QPoint &);
@@ -162,8 +163,10 @@ public:
 	enum		harvestState { standBy, goingTo, comingBack, harvesting };
 	
 private:
+	bool		atHome(void) { return home == gridRect().topLeft(); }
+
 	harvestState	hstate;
-	QPoint		base;
+	QPoint		home;
 	QPoint		harvest;
 };
 
