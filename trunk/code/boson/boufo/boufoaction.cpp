@@ -475,9 +475,7 @@ void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const
  d->mDefaultShortcut = cut;
  d->mText = text;
 
- if (!mParentCollection) {
-	BO_NULL_ERROR(mParentCollection);
- } else {
+ if (mParentCollection) {
 	mParentCollection->insert(this);
  }
 
@@ -512,7 +510,7 @@ void BoUfoAction::removeWidget(ufo::UWidget* w)
  d->mWidgets.removeRef(w);
 }
 
-QPtrList<ufo::UWidget> BoUfoAction::widgets() const
+const QPtrList<ufo::UWidget>& BoUfoAction::widgets() const
 {
  return d->mWidgets;
 }
@@ -526,9 +524,14 @@ void BoUfoAction::uslotHighlighted(ufo::UActionEvent*)
 {
 }
 
+#warning FIXME: this is called too often by some weird reason
+// by some weirs reason this is called e.g. when a menu is closed.
+// but the pointers remain valid.
+// maybe they are just reparented?
+// -> the we really need a sigWidgetDeleted() !
 void BoUfoAction::uslotWidgetRemoved(ufo::UWidget* w)
 {
- removeWidget(w);
+// removeWidget(w);
 }
 
 
@@ -592,7 +595,6 @@ void BoUfoToggleAction::slotActivated()
  if (recursive) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  recursive = true;
 
  setChecked(!mChecked);
@@ -615,7 +617,11 @@ void BoUfoToggleAction::setChecked(bool c)
  while (it.current()) {
 	ufo::UCheckBoxMenuItem* checkBox = dynamic_cast<ufo::UCheckBoxMenuItem*>(it.current());
 	if (checkBox) {
-		checkBox->setSelected(checked());
+		if (checkBox->isSelected() != checked()) {
+			checkBox->setSelected(checked());
+		}
+	} else {
+		boError() << k_funcinfo << "widget is not a checkbox" << endl;
 	}
 	++it;
  }
@@ -679,6 +685,16 @@ void BoUfoActionMenu::remove(BoUfoAction* a)
  redoMenus();
 }
 
+void BoUfoActionMenu::clear()
+{
+ QPtrList<BoUfoAction> list = d->mActions;
+ QPtrListIterator<BoUfoAction> it(list);
+ while (it.current()) {
+	remove(it.current());
+	++it;
+ }
+}
+
 void BoUfoActionMenu::redoMenus()
 {
  QPtrList<ufo::UWidget> list = widgets();
@@ -701,6 +717,97 @@ void BoUfoActionMenu::redoMenus()
  }
 }
 
+const QPtrList<BoUfoAction>& BoUfoActionMenu::actions() const
+{
+ return d->mActions;
+}
+
+class BoUfoSelectActionPrivate
+{
+public:
+	BoUfoSelectActionPrivate()
+	{
+	}
+};
+
+BoUfoSelectAction::BoUfoSelectAction(const QString& text, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
+	: BoUfoActionMenu(text, parent, name)
+{
+ d = new BoUfoSelectActionPrivate;
+
+ if (receiver && slot) {
+	connect(this, SIGNAL(signalActivated(int)), receiver, slot);
+ }
+}
+
+BoUfoSelectAction::~BoUfoSelectAction()
+{
+ delete d;
+}
+
+void BoUfoSelectAction::clear()
+{
+ QPtrList<BoUfoAction> list = actions();
+ BoUfoActionMenu::clear();
+ QPtrListIterator<BoUfoAction> it(list);
+ while (it.current()) {
+	delete it.current();
+ }
+}
+
+void BoUfoSelectAction::setItems(const QStringList& list)
+{
+ clear();
+ QStringList::ConstIterator it = list.begin();
+ for (; it != list.end(); ++it) {
+	BoUfoToggleAction* a = new BoUfoToggleAction(*it, KShortcut(), this, SLOT(slotItemActivated()), 0, 0);
+	insert(a);
+ }
+}
+
+void BoUfoSelectAction::slotItemActivated()
+{
+ BO_CHECK_NULL_RET(sender());
+ if (!sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() is not a BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* a = (BoUfoAction*)sender();
+ QPtrListIterator<BoUfoAction> it(actions());
+ int i = 0;
+ while (it.current()) {
+	if (it.current() == a) {
+		setCurrentItem(i);
+		emit signalActivated(i);
+		return;
+	}
+	i++;
+	++it;
+ }
+ boError() << k_funcinfo << "could not find item" << endl;
+}
+
+void BoUfoSelectAction::setCurrentItem(int index)
+{
+ QPtrList<BoUfoAction> list = actions();
+ QPtrListIterator<BoUfoAction> it(list);
+ for (int i = 0; it.current(); ++it, i++) {
+	if (!it.current()->inherits("BoUfoToggleAction")) {
+		boWarning() << k_funcinfo << "oops - not a BoUfoToggleAction" << endl;
+		continue;
+	}
+	BoUfoToggleAction* t = (BoUfoToggleAction*)it.current();
+	if (i == index) {
+		if (!t->checked()) {
+			t->setChecked(true);
+		}
+	} else {
+		if (t->checked()) {
+			t->setChecked(false);
+		}
+	}
+ }
+}
 
 
 class BoUfoActionCollectionPrivate
@@ -916,7 +1023,7 @@ unsigned int BoUfoMenuBarMenu::itemCount() const
  return d->mItems.count();
 }
 
-QValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
+const QValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
 {
  return d->mItems;
 }

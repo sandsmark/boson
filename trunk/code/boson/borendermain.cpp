@@ -123,8 +123,9 @@ static KCmdLineOptions options[] =
 void postBosonConfigInit();
 
 
-ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
+ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* parent) : BosonGLWidget(parent)
 {
+ mSpecies = species;
  mUpdateTimer = new QTimer(this);
  connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
  qApp->setGlobalMouseTracking(true);
@@ -344,7 +345,39 @@ void ModelPreview::initUfoGUI()
  BoUfoActionCollection* actionCollection = mUfoManager->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
 
-#warning TODO: KActionMenu
+ BoUfoActionMenu* modelMenu = new BoUfoActionMenu(i18n("&Model"),
+		 actionCollection, "model");
+ QPtrListIterator<SpeciesTheme> it(mSpecies);
+ for (; it.current(); ++it) {
+	SpeciesTheme* s = it.current();
+	BoUfoActionMenu* menu = new BoUfoActionMenu(s->identifier(), actionCollection,
+			QString("model_species_%1").arg(s->identifier()));
+	modelMenu->insert(menu);
+
+	BoUfoSelectAction* selectUnit = new BoUfoSelectAction(i18n("&Units"), this, SLOT(slotUnitChanged(int)), 0, 0);
+	BoUfoSelectAction* selectObject = new BoUfoSelectAction(i18n("&Objects"), this, SLOT(slotUnitChanged(int)), 0, 0);
+	menu->insert(selectUnit);
+	menu->insert(selectObject);
+
+	mAction2Species.insert(selectUnit, s);
+	mAction2Species.insert(selectObject, s);
+
+
+	connect(selectUnit, SIGNAL(signalActivated(int)),
+			this, SLOT(slotUnitChanged(int)));
+	connect(selectObject, SIGNAL(signalActivated(int)),
+			this, SLOT(slotObjectChanged(int)));
+
+	QValueList<const UnitProperties*> units = s->allUnits();
+	QStringList list;
+	for (unsigned int j = 0; j < units.count(); j++) {
+		list.append(units[j]->name());
+	}
+	selectUnit->setItems(list);
+	selectObject->setItems(s->allObjects());
+ }
+
+
  BoUfoToggleAction* vertexPoints = new BoUfoToggleAction(i18n("Show vertex points"),
 		KShortcut(), 0, 0,
 		actionCollection, "options_show_vertex_points");
@@ -862,6 +895,49 @@ void ModelPreview::slotConstructionChanged(bool on)
  emit signalMaxFramesChanged((float)max);
 }
 
+void ModelPreview::uncheckAllBut(BoUfoAction* action)
+{
+ if (!action || !action->isA("BoUfoSelectAction")) {
+	boError() << k_funcinfo << "not a valid BoUfoSelectAction" << endl;
+	return;
+ }
+ QPtrDictIterator<SpeciesTheme> it(mAction2Species);
+ for (; it.current(); ++it) {
+	BoUfoAction* a = (BoUfoAction*)it.currentKey();
+	if (a == action) {
+		continue;
+	}
+	if (!a->isA("BoUfoSelectAction")) {
+		continue;
+	}
+	((BoUfoSelectAction*)a)->setCurrentItem(-1);
+ }
+}
+
+void ModelPreview::slotUnitChanged(int index)
+{
+ if (!sender() || !sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* p = (BoUfoAction*)sender();
+ uncheckAllBut(p);
+ SpeciesTheme* s = mAction2Species[p];
+ emit signalUnitChanged(s, index);
+}
+
+void ModelPreview::slotObjectChanged(int index)
+{
+ if (!sender() || !sender()->inherits("BoUfoAction")) {
+	boError() << k_funcinfo << "sender() must inherit BoUfoAction" << endl;
+	return;
+ }
+ BoUfoAction* p = (BoUfoAction*)sender();
+ uncheckAllBut(p);
+ SpeciesTheme* s = mAction2Species[p];
+ emit signalObjectChanged(s, index);
+}
+
 void ModelPreview::resetModel()
 {
  mModel = 0;
@@ -1290,7 +1366,11 @@ RenderMain::RenderMain() : KMainWindow()
  QWidget* w = new QWidget(this);
  QHBoxLayout* layout = new QHBoxLayout(w);
 
- mPreview = new ModelPreview(w);
+ // AB: note that this is not a "preview" anymore. it contains a lot of the
+ // important control code, too.
+ // this is mostly due to the libufo conversion. once we have completed that
+ // conversion, we should change the general design of this program.
+ mPreview = new ModelPreview(mSpecies, w);
  layout->addWidget(mPreview, 1);
  mPreview->show();
 
@@ -1326,6 +1406,10 @@ RenderMain::RenderMain() : KMainWindow()
 		this, SLOT(slotReloadModelTextures()));
  connect(mPreview, SIGNAL(signalReloadMeshRenderer()),
 		this, SLOT(slotReloadMeshRenderer()));
+ connect(mPreview, SIGNAL(signalUnitChanged(SpeciesTheme*, int)),
+		this, SLOT(slotUnitChanged(SpeciesTheme*, int)));
+ connect(mPreview, SIGNAL(signalObjectChanged(SpeciesTheme*, int)),
+		this, SLOT(slotObjectChanged(SpeciesTheme*, int)));
 
 
  mPreview->slotResetView();
@@ -1443,6 +1527,12 @@ void RenderMain::slotUnitChanged(int index)
  KAction* p = (KAction*)sender();
  uncheckAllBut(p);
  SpeciesTheme* s = mAction2Species[p];
+ slotUnitChanged(s, index);
+}
+
+void RenderMain::slotUnitChanged(SpeciesTheme* s, int index)
+{
+ BO_CHECK_NULL_RET(s);
  boDebug() << k_funcinfo << index << endl;
  QValueList<const UnitProperties*> props = s->allUnits();
  if (index >= (int)props.count()) {
@@ -1469,7 +1559,13 @@ void RenderMain::slotObjectChanged(int index)
 	return;
  }
  KAction* a = (KAction*)sender();
+ uncheckAllBut(a);
  SpeciesTheme* s = mAction2Species[a];
+ slotObjectChanged(s, index);
+}
+
+void RenderMain::slotObjectChanged(SpeciesTheme* s, int index)
+{
  BO_CHECK_NULL_RET(s);
  boDebug() << k_funcinfo << index << endl;
  QString object = s->allObjects()[index];
@@ -1781,7 +1877,9 @@ void RenderMain::uncheckAllBut(KAction* action)
 	if (!a->isA("KSelectAction")) {
 		continue;
 	}
+	a->blockSignals(true);
 	((KSelectAction*)a)->setCurrentItem(-1);
+	a->blockSignals(false);
  }
 }
 
