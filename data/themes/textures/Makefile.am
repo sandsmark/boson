@@ -1,18 +1,18 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
-        black.jpg \
-        broken1.jpg \
-        broken2.jpg \
-        camo1.jpg \
-        camo2.jpg \
-        camo3.jpg \
-        camo4.jpg \
-        camo5.jpg \
-        camo6.jpg \
-        camo7.jpg \
-        camo8.jpg \
-        camo9.jpg \
-        camo10.jpg \
+	black.jpg \
+	broken1.jpg \
+	broken2.jpg \
+	camo1.jpg \
+	camo2.jpg \
+	camo3.jpg \
+	camo4.jpg \
+	camo5.jpg \
+	camo6.jpg \
+	camo7.jpg \
+	camo8.jpg \
+	camo9.jpg \
+	camo10.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
@@ -23,8 +23,8 @@ texture_DATA = \
 	doors4.jpg \
 	doors5.jpg \
 	doors6.jpg \
-        grid1.jpg \
-        grid2.jpg \
+	grid1.jpg \
+	grid2.jpg \
 	metal1.jpg \
 	metal2.jpg \
 	metal3.jpg \
@@ -40,9 +40,9 @@ texture_DATA = \
 	metal13.jpg \
 	metal14.jpg \
 	metal15.jpg \
-        metal16.jpg \
-        metal17.jpg \
-        metal18.jpg \
+	metal16.jpg \
+	metal17.jpg \
+	metal18.jpg \
 	minerals.jpg \
 	missile1.jpg \
 	mslback1.jpg \
@@ -50,10 +50,10 @@ texture_DATA = \
 	pipe2.jpg \
 	roof1.jpg \
 	roof2.jpg \
-        shockwav.jpg \
+	shockwav.jpg \
 	stairs1.jpg \
-        steel3.jpg \
-        steel4.jpg \
+	steel3.jpg \
+	steel4.jpg \
 	swtchbrd.jpg \
 	tnkhull1.jpg \
 	tracks.jpg \
@@ -64,7 +64,7 @@ texture_DATA = \
 	wheel.jpg \
 	wheel1.jpg \
 	window1.jpg \
-	window2.jpg \
+	window2.jpg
 
 # no further editing need here
 
