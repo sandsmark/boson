@@ -118,6 +118,8 @@ protected slots:
 	void slotDisplayMesh(QListViewItem*);
 	void slotDisplayNode(QListViewItem*);
 	void slotConnectToFace(QListViewItem*);
+	void slotUseLib3dsCoordinates(bool);
+	void slotHideConnectableWidgets(bool);
 
 protected:
 	void updateMaterialPage();

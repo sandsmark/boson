@@ -55,6 +55,7 @@
 #include <lib3ds/mesh.h>
 #include <lib3ds/material.h>
 #include <lib3ds/vector.h>
+#include <lib3ds/matrix.h>
 #include <lib3ds/quat.h>
 
 #include <math.h>
@@ -297,6 +298,7 @@ public:
 	{
 		QFontMetrics metrics(font());
 		setShowToolTips(true);
+		addColumn(i18n("Face"));
 		addColumn(i18n("Point1"));
 		addColumn(i18n("Point2"));
 		addColumn(i18n("Point3"));
@@ -317,19 +319,45 @@ public:
 	{
 	}
 
-	QListViewItem* addFace(Lib3dsFace* face, Lib3dsMesh* mesh)
+	QListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh, bool lib3dsCoordinates = true)
 	{
 		QListViewItem* item = new QListViewItem(this);
-		for (int j = 0; j < 3; j++) {
-			Lib3dsVector v;
-			lib3ds_vector_copy(v, mesh->pointL[ face->points[j] ].pos);
-			item->setText(j, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
+		QString no;
+		if (mesh->faces >= 1000) {
+			no.sprintf("%04d", index);
+		} else if (mesh->faces >= 100) {
+			no.sprintf("%03d", index);
+		} else {
+			no.sprintf("%02d", index);
 		}
-		item->setText(3, face->material);
+		item->setText(0, no);
+
+		// note: calculating the inverse of the mesh matrix is slow but
+		// we do it for every face. causes less work for the API - the
+		// class is easier to use then.
+
+		BoMatrix matrix;
+		if (!lib3dsCoordinates) {
+			Lib3dsMatrix invMeshMatrix;
+			lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+			lib3ds_matrix_inv(invMeshMatrix);
+			matrix.loadMatrix(&invMeshMatrix[0][0]);
+		}
+
+		BoVector3 v;
+		for (int j = 0; j < 3; j++) {
+			v.set(mesh->pointL[ face->points[j] ].pos);
+			if (!lib3dsCoordinates) {
+				BoVector3 v2 = v;
+				matrix.transform(&v, &v2);
+			}
+			item->setText(j + 1, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
+		}
+		item->setText(4, face->material);
 		QString flags = QString::number(face->flags);
-		item->setText(4, flags);
-		item->setText(5, QString::number(face->smoothing));
-		item->setText(6, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+		item->setText(5, flags);
+		item->setText(6, QString::number(face->smoothing));
+		item->setText(7, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
 		return item;
 	}
 };
@@ -706,7 +734,10 @@ public:
 		mFaceList = 0;
 		mConnectedFacesList = 0;
 		mUnconnectedFacesList = 0;
+		mUseLib3dsCoordinates = 0;
+		mHideConnectableWidgets = 0;
 		mMeshMatrix = 0;
+		mInvMeshMatrix = 0;
 
 		mNodeView = 0;
 		mCurrentFrame = 0;
@@ -739,7 +770,10 @@ public:
 	BoFaceView* mFaceList;
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
+	QCheckBox* mUseLib3dsCoordinates;
+	QCheckBox* mHideConnectableWidgets;
 	BoMatrixWidget* mMeshMatrix;
+	BoMatrixWidget* mInvMeshMatrix;
 
 	KListView* mNodeView;
 	QPtrDict<Lib3dsNode> mListItem2Node;
@@ -857,9 +891,24 @@ void KGameModelDebug::initMeshPage()
  d->mConnectedFacesList = new BoFaceView(faceView);
  (void)new QLabel(i18n("Unconnectable to selected face:"), faceView);
  d->mUnconnectedFacesList = new BoFaceView(faceView);
+ d->mUseLib3dsCoordinates = new QCheckBox(i18n("Display lib3ds coordinates of points"), faceView);
+ d->mUseLib3dsCoordinates->setChecked(true);
+ connect(d->mUseLib3dsCoordinates, SIGNAL(toggled(bool)), this, SLOT(slotUseLib3dsCoordinates(bool)));
+ QToolTip::add(d->mUseLib3dsCoordinates, i18n("Display the coordinates of the points of a face as they appear in a .3ds file. If unchecked display them as they get rendered (i.e. in mesh coordinates)."));
+ d->mHideConnectableWidgets = new QCheckBox(i18n("Hide \"connectable\" widgets"), faceView);
+ d->mHideConnectableWidgets->setChecked(true);
+ connect(d->mHideConnectableWidgets, SIGNAL(toggled(bool)), this, SLOT(slotHideConnectableWidgets(bool)));
+ slotHideConnectableWidgets(d->mHideConnectableWidgets->isChecked());
+ QToolTip::add(d->mHideConnectableWidgets, i18n("The \"connectable\" widgets show which faces of a mesh are connectable to a certain face. This is important to make GL_TRIANGLE_STRIPs, but the code used here is obsolete."));
 
- QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Matrix"), splitter);
+
+ QVBox* matrixBox = new QVBox(splitter);
+ QVGroupBox* meshMatrixBox = new QVGroupBox(i18n("Mesh Matrix"), matrixBox);
  d->mMeshMatrix = new BoMatrixWidget(meshMatrixBox);
+ QToolTip::add(d->mMeshMatrix, i18n("This is the mesh matrix (i.e. mesh->matrix in a lib3ds mesh)."));
+ QVGroupBox* invMeshMatrixBox = new QVGroupBox(i18n("Inv Mesh Matrix"), matrixBox);
+ d->mInvMeshMatrix = new BoMatrixWidget(invMeshMatrixBox);
+ QToolTip::add(d->mInvMeshMatrix, i18n("This is the inverse of the mesh matrix."));
 
  d->mTabWidget->addTab(d->mMeshPage, i18n("&Meshes"));
 }
@@ -1019,6 +1068,7 @@ void KGameModelDebug::updateMeshPage()
  d->mListItem2Mesh.clear();
  d->mListItem2Face.clear();
  d->mMeshMatrix->setIdentity();
+ d->mInvMeshMatrix->setIdentity();
 
  if (!d->m3ds) {
 	return;
@@ -1118,6 +1168,11 @@ void KGameModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
  }
 }
 
+void KGameModelDebug::slotUseLib3dsCoordinates(bool)
+{
+ slotDisplayMesh(d->mMeshView->currentItem());
+}
+
 void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 {
  d->mFaceList->clear();
@@ -1132,12 +1187,16 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
  // faces
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* face = &mesh->faceL[i];
-	QListViewItem* item = d->mFaceList->addFace(face, mesh);
+	QListViewItem* item = d->mFaceList->addFace(i, face, mesh, d->mUseLib3dsCoordinates->isChecked());
 	d->mListItem2Face.insert(item, face);
  }
 
  // mesh->matrix
  d->mMeshMatrix->setMatrix(mesh->matrix);
+ Lib3dsMatrix invMeshMatrix;
+ lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+ lib3ds_matrix_inv(invMeshMatrix);
+ d->mInvMeshMatrix->setMatrix(invMeshMatrix);
 
  // TODO: mesh->box_map
  // TODO: mesh->map_data
@@ -1255,10 +1314,20 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* f = &mesh->faceL[i];
 	if (connected.contains(f)) {
-		d->mConnectedFacesList->addFace(f, mesh);
+		d->mConnectedFacesList->addFace(i, f, mesh, d->mUseLib3dsCoordinates->isChecked());
 	} else {
-		d->mUnconnectedFacesList->addFace(f, mesh);
+		d->mUnconnectedFacesList->addFace(i, f, mesh, d->mUseLib3dsCoordinates->isChecked());
 	}
  }
 }
 
+void KGameModelDebug::slotHideConnectableWidgets(bool h)
+{
+ if (h) {
+	d->mConnectedFacesList->hide();
+	d->mUnconnectedFacesList->hide();
+ } else {
+	d->mConnectedFacesList->show();
+	d->mUnconnectedFacesList->show();
+ }
+}
