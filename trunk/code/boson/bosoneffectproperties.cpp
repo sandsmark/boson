@@ -118,7 +118,6 @@ BosonEffectProperties* BosonEffectPropertiesFactory::newParticleEffectProperties
 
 BosonEffectProperties::BosonEffectProperties()
 {
-  boDebug() << k_funcinfo << "" << endl;
   mId = 0;
 }
 
