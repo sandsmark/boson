@@ -20,7 +20,7 @@
 #include "bofile.h"
 
 #include "bodebug.h"
-#include "../defines.h"
+#include "defines.h"
 
 //#include <qdom.h>
 #include <qfileinfo.h>
