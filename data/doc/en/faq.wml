@@ -27,7 +27,7 @@
     - Increase the update interval in the Boson settings<br>
     - Change the color depth of your XServer to 16bit<br>
     - Check the speed of other OpenGL games like tuxkart and tuxracer, maybe they also run slow<br>
-    - If you are using a Nvidia card you can use a script <!-- <a href="http://boson.sourceforge.net/download.html">--> called nvcheck.sh</a>
+    - If you are using a Nvidia card you can use a script called<a href="http://boson.sourceforge.net/download/nvcheck.sh"> nvcheck.sh</a>
     to check your driver installation.<br>
     - Make sure you are using hardware accellerated OpenGL:<br>
         <blockquote>You will need the program glxinfo, it is part of your X Server. Enter this into your console:
