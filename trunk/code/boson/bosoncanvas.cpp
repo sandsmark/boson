@@ -1303,7 +1303,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 		BosonItem* i = createItemFromXML(item, owner);
 		if (!i) {
 			boError(260) << k_funcinfo << "failed creating item " << j << endl;
-			continue;
+			return false;
 		}
 		allItemElements.append(item);
 		allItems.append(i);
@@ -1826,13 +1826,13 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
 	addAnimation(item);
-	if (!boGame->gameMode()) {
-		item->setRendererToEditorMode();
-	}
 	if (!item->initItemRenderer()) {
 		boError() << k_funcinfo << "initModel() failed. cannot create item." << endl;
 		deleteItem(item);
 		item = 0;
+	}
+	if (!boGame->gameMode()) {
+		item->setRendererToEditorMode();
 	}
 	if (item && !item->init()) {
 		boError() << k_funcinfo << "item initialization failed. cannot create item." << endl;
