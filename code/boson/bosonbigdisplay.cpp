@@ -260,7 +260,7 @@ void BosonBigDisplay::addUnitSelection(Unit* unit)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
- if (unit->owner() != d->mLocalPlayer) {
+ if (selectionMode() != SelectSingle && unit->owner() != d->mLocalPlayer) {
 	kdDebug() << k_funcinfo << ": not owner" << endl;
 	return;
  }

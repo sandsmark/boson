@@ -253,7 +253,6 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
 
  // don't display construction items of units of other players. 
  if (owner != d->mOwner) {
-	kdDebug() << k_funcinfo << ": we are not the owner" << endl;
 	return;
  }
 
