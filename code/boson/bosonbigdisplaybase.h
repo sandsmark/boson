@@ -66,14 +66,19 @@ public:
 	{
 		return mWidgetPos;
 	}
-	void setCanvasPos(const QPoint& pos)
+	void setCanvasVector(const BoVector3& pos)
 	{
-		mCanvasPos = pos;
+		mCanvasVector = pos;
+		mCanvasPos = QPoint((int)pos.x(), (int)pos.y());
 	}
 
 	const QPoint& canvasPos() const
 	{
 		return mCanvasPos;
+	}
+	const BoVector3& canvasVector() const
+	{
+		return mCanvasVector;
 	}
 
 	void setWorldPos(GLfloat x, GLfloat y, GLfloat z)
@@ -124,6 +129,7 @@ public:
 private:
 	QPoint mWidgetPos;
 	QPoint mCanvasPos;
+	BoVector3 mCanvasVector;
 	GLfloat mX;
 	GLfloat mY;
 	GLfloat mZ;
@@ -212,6 +218,7 @@ public:
 	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
+	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const;
 	void canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const;
 
 	double fps() const;
@@ -234,7 +241,8 @@ public:
 	 **/
 	void setPlacementCellPreviewData(int groundType, bool canPlace);
 
-	const QPoint& cursorCanvasPos() const;
+	const QPoint& cursorCanvasPos() const; // obsolete!
+	const BoVector3& cursorCanvasVector() const;
 	BosonBigDisplayInputBase* displayInput() const;
 
 public slots:

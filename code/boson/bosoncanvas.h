@@ -238,22 +238,22 @@ public:
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAt
 	 **/
-	Unit* findUnitAt(const QPoint& pos) { return collisions()->findUnitAt(pos); }
+	Unit* findUnitAt(const BoVector3& pos) { return collisions()->findUnitAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAt
 	 **/
-	BosonItem* findItemAt(const QPoint& pos) { return collisions()->findItemAt(pos); }
+	BosonItem* findItemAt(const BoVector3& pos) { return collisions()->findItemAt(pos); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAtCell
 	 **/
-	Unit* findUnitAtCell(int x, int y) { return collisions()->findUnitAtCell(x, y); }
+	Unit* findUnitAtCell(int x, int y, float z) { return collisions()->findUnitAtCell(x, y, z); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAtCell
 	 **/
-	BosonItem* findItemAtCell(int x, int y, bool unitOnly) { return collisions()->findItemAtCell(x, y, unitOnly); }
+	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) { return collisions()->findItemAtCell(x, y, z, unitOnly); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::cellOccupied
@@ -310,6 +310,7 @@ public:
 	{
 		return onCanvas(pos.x(), pos.y());
 	}
+	bool onCanvas(const BoVector3& canvasPos) const;
 	bool onCanvas(int x, int y) const
 	{
 		return x >= 0 && y >= 0 && (unsigned int)x < mapWidth() * BO_TILE_SIZE && (unsigned int)y < mapHeight() * BO_TILE_SIZE;

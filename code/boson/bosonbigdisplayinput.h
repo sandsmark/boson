@@ -23,6 +23,7 @@
 
 class BosonBigDisplayBase;
 class BoSelection;
+class BoVector3;
 
 class BosonBigDisplayInput : public BosonBigDisplayInputBase
 {
@@ -43,14 +44,14 @@ public slots:
 
 protected:
 	//AB: use BoAction as 2nd parameter
-	bool actionMine(QDataStream& stream, const QPoint& pos);
-	bool actionMove(QDataStream& stream, const QPoint& pos);
-	bool actionBuild(QDataStream& stream, const QPoint& pos);
-	bool actionAttack(QDataStream& stream, const QPoint& pos);
-	bool actionAttackPos(QDataStream& stream, const QPoint& pos);
-	bool actionRepair(QDataStream& stream, const QPoint& pos);
-	bool actionRefine(QDataStream& stream, const QPoint& pos);
-	bool actionFollow(QDataStream& stream, const QPoint& pos);
+	bool actionMine(QDataStream& stream, const BoVector3& pos);
+	bool actionMove(QDataStream& stream, const BoVector3& pos);
+	bool actionBuild(QDataStream& stream, const BoVector3& pos);
+	bool actionAttack(QDataStream& stream, const BoVector3& pos);
+	bool actionAttackPos(QDataStream& stream, const BoVector3& pos);
+	bool actionRepair(QDataStream& stream, const BoVector3& pos);
+	bool actionRefine(QDataStream& stream, const BoVector3& pos);
+	bool actionFollow(QDataStream& stream, const BoVector3& pos);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 

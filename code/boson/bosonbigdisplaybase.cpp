@@ -433,7 +433,8 @@ public:
 
 	bool mIsQuit;
 
-	QPoint mCanvasPos;
+	QPoint mCanvasPos; // obsolete
+	BoVector3 mCanvasVector;
 
 	BoVector3 mCameraPos;
 
@@ -1622,11 +1623,11 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	return;
  }
 // boDebug() << posZ << endl;
- QPoint canvasPos;
- worldToCanvas(posX, posY, posZ, &canvasPos);
+ BoVector3 canvasVector;
+ worldToCanvas(posX, posY, posZ, &canvasVector);
 
  BoAction action;
- action.setCanvasPos(canvasPos);
+ action.setCanvasVector(canvasVector);
  action.setWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
 	action.setWidgetPos(e->pos());
@@ -1842,6 +1843,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
  d->mDebugMapCoordinatesY = y;
  d->mDebugMapCoordinatesZ = z;
  worldToCanvas(x, y, z, &(d->mCanvasPos));
+ worldToCanvas(x, y, z, &(d->mCanvasVector)); // AB: are these already real z coordinates?
  displayInput()->updatePlacementPreviewData();
 
  // AB: we might want to use a timer here instead - then we would also be able
@@ -1913,7 +1915,7 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoAc
 		// currently!
 		bool replace = !action.controlButton();
 		bool onScreenOnly = !action.shiftButton();
-		Unit* unit = canvas()->findUnitAt(action.canvasPos());
+		Unit* unit = canvas()->findUnitAt(action.canvasVector());
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << "TODO: select only those that are currently on the screen!" << endl;
@@ -2054,6 +2056,14 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
  pos->setX((int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE));
  pos->setY((int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE));
  // AB: z remains as-is
+}
+
+void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const
+{
+ // we want the rounding errors here (at least for now).
+ int intx = (int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE);
+ int inty = (int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE);
+ pos->set((float)intx, (float)inty, z);
 }
 
 void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
@@ -2243,21 +2253,21 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		boError() << k_funcinfo << "Cannot map coordinates" << endl;
 		return;
 	}
-	QPoint canvasPos;
-	worldToCanvas(x, y, z, &canvasPos);
+	BoVector3 canvasVector;
+	worldToCanvas(x, y, z, &canvasVector);
 	Unit* unit = 0l;
-	if (!canvas()->onCanvas(canvasPos)) {
-		boError() << k_funcinfo << canvasPos.x() << "," << canvasPos.y() << " is not on the canvas!" << endl;
+	if (!canvas()->onCanvas(canvasVector)) {
+		boError() << k_funcinfo << canvasVector.x() << "," << canvasVector.y() << " is not on the canvas!" << endl;
 		return;
 	}
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
 	// maybe in selectSingle() or so.
-	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE)) {
-		unit = canvas()->findUnitAt(canvasPos);
+	if (!localPlayer()->isFogged(canvasVector.x() / BO_TILE_SIZE, canvasVector.y() / BO_TILE_SIZE)) {
+		unit = canvas()->collisions()->findUnitAt(canvasVector);
 	}
 	if (unit) {
-		boDebug() << k_funcinfo << "select unit at " << canvasPos.x() << "," << canvasPos.y() << " (canvas)" << endl;
+		boDebug() << k_funcinfo << "select unit at " << canvasVector.x() << "," << canvasVector.y() << " (canvas)" << endl;
 		displayInput()->selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
@@ -2934,6 +2944,11 @@ void BosonBigDisplayBase::mapChanged()
 const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
 {
  return d->mCanvasPos;
+}
+
+const BoVector3& BosonBigDisplayBase::cursorCanvasVector() const
+{
+ return d->mCanvasVector;
 }
 
 void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)

@@ -70,6 +70,11 @@ const QPoint& BosonBigDisplayInputBase::cursorCanvasPos() const
  return bigDisplay()->cursorCanvasPos();
 }
 
+const BoVector3& BosonBigDisplayInputBase::cursorCanvasVector() const
+{
+ return bigDisplay()->cursorCanvasVector();
+}
+
 void BosonBigDisplayInputBase::selectSingle(Unit* unit, bool replace)
 {
  boDebug() << k_funcinfo << endl;

@@ -181,7 +181,7 @@ void BoGLToolTip::slotTimeOut()
  mShowTip = true;
 
  BosonCanvas* c = mView->canvas();
- BosonItem* item = c->findItemAt(mView->cursorCanvasPos());
+ BosonItem* item = c->findItemAt(mView->cursorCanvasVector());
  if (!item) {
 	hideTip();
 	return;

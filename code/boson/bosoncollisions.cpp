@@ -47,14 +47,15 @@ Cell* BosonCollisions::cell(int x, int y) const
  return map()->cell(x, y);
 }
 
-Unit* BosonCollisions::findUnitAtCell(int x, int y)
+Unit* BosonCollisions::findUnitAtCell(int x, int y, float z)
 {
- return (Unit*)findItemAtCell(x, y, true);
+ return (Unit*)findItemAtCell(x, y, z, true);
 }
 
-BosonItem* BosonCollisions::findItemAtCell(int x, int y, bool unitOnly)
+BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
 {
- BoItemList* list = collisionsAtCell(QPoint(x, y));
+#warning TODO: z
+ BoItemList* list = collisionsAtCell(x, y);
  BoItemList::Iterator it;
 
  for (it = list->begin(); it != list->end(); ++it) {
@@ -76,14 +77,14 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, bool unitOnly)
  return 0;
 }
 
-BosonItem* BosonCollisions::findItemAt(const QPoint& pos)
+BosonItem* BosonCollisions::findItemAt(const BoVector3& pos)
 {
- return findItemAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE, false);
+ return findItemAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z(), false);
 }
 
-Unit* BosonCollisions::findUnitAt(const QPoint& pos)
+Unit* BosonCollisions::findUnitAt(const BoVector3 & pos)
 {
- return findUnitAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
+ return findUnitAtCell((int)(pos.x() / BO_TILE_SIZE), (int)(pos.y() / BO_TILE_SIZE), pos.z());
 }
 
 QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const QPoint& pos, int radius) const
@@ -274,12 +275,12 @@ BoItemList* BosonCollisions::collisionsAtCells(const QRect& rect, const BosonIte
  return collisionsAtCells(&cells, item, exact);
 }
 
-BoItemList* BosonCollisions::collisionsAtCell(const QPoint& pos) const
+BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
 {
  QPtrVector<Cell> cells(1);
- Cell* c = cell(pos.x(), pos.y());
+ Cell* c = cell(x, y);
  if (!c) {
-	boWarning(310) << k_funcinfo << "NULL cell: " << pos.x() << "," << pos.y() << endl;
+	boWarning(310) << k_funcinfo << "NULL cell: " << x << "," << y << endl;
 	return new BoItemList();
  }
  cells.insert(0, c);
@@ -289,7 +290,7 @@ BoItemList* BosonCollisions::collisionsAtCell(const QPoint& pos) const
 
 BoItemList* BosonCollisions::collisions(const QPoint& pos) const
 {
- return collisionsAtCell(pos / BO_TILE_SIZE);
+ return collisionsAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
 }
 
 

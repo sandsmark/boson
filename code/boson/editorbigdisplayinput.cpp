@@ -149,25 +149,25 @@ EditorBigDisplayInput::~EditorBigDisplayInput()
 void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
  boDebug() << k_funcinfo << endl;
- if (!canvas()->onCanvas(action.canvasPos())) {
+ if (!canvas()->onCanvas(action.canvasVector())) {
 	return;
  }
  if (actionLocked()) {
 	if (actionType() == ActionBuild) {
-		if (actionPlace(stream, action.canvasPos())) {
+		if (actionPlace(stream, action.canvasVector())) {
 			*send = true;
 		}
 		return;
 	} else if (actionType() == ActionChangeHeight) {
 		bool up = !action.controlButton();
-		if (actionChangeHeight(stream, action.canvasPos(), up)) {
+		if (actionChangeHeight(stream, action.canvasVector(), up)) {
 			*send = true;
 		}
 	}
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canvasPos)
+bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& canvasVector)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -179,8 +179,8 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
 	return false;
  }
  bool ret = false;
- int x = canvasPos.x() / BO_TILE_SIZE;
- int y = canvasPos.y() / BO_TILE_SIZE;
+ int x = (int)(canvasVector.x()) / BO_TILE_SIZE;
+ int y = (int)(canvasVector.y()) / BO_TILE_SIZE;
  if (!canvas()->cell(x, y)) {
 	return false;
  }
@@ -239,31 +239,31 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
  return ret;
 }
 
-bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const QPoint& canvasPos, bool up)
+bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const BoVector3& canvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
 	return false;
  }
- if (!canvas()->onCanvas(canvasPos)) {
+ if (!canvas()->onCanvas(canvasVector)) {
 	return false;
  }
- int cellX = canvasPos.x() / BO_TILE_SIZE;
- int cellY = canvasPos.y() / BO_TILE_SIZE;
+ int cellX = (int)(canvasVector.x()) / BO_TILE_SIZE;
+ int cellY = (int)(canvasVector.y()) / BO_TILE_SIZE;
  if (!canvas()->cell(cellX, cellY)) {
 	return false;
  }
  int cornerX = 0;
  int cornerY = 0;
  // we need the corner that was clicked, not the cell!
- if (canvasPos.x() % BO_TILE_SIZE >= BO_TILE_SIZE) {
+ if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE) {
 	// a right corner
 	cornerX = cellX + 1;
  } else {
 	cornerX = cellX;
  }
- if (canvasPos.x() % BO_TILE_SIZE >= BO_TILE_SIZE) {
+ if (((int)canvasVector.x()) % BO_TILE_SIZE >= BO_TILE_SIZE) {
 	cornerY = cellY + 1;
  } else {
 	cornerY = cellY;
@@ -410,7 +410,9 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
  QDataStream stream(buffer, IO_WriteOnly);
  bool send = false;
  BoAction action;
- action.setCanvasPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
+ action.setCanvasVector(BoVector3((float)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2),
+		(float)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2),
+		0.0f));
  actionClicked(action, stream, &send);
  if (send) {
 	QDataStream msg(buffer, IO_ReadOnly);
