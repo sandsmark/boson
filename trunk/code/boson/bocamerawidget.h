@@ -291,13 +291,20 @@ class BoLightCameraWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoLightCameraWidget(QWidget* parent);
+	/**
+	 * @param showGlobalValues If TRUE this will allow you to edit the
+	 * global light values, i.e. the light model (see man glLightModel). You
+	 * should ensure that only one widget is allowed to modify the global
+	 * values, to avoid unsynchronized valus.
+	 **/
+	BoLightCameraWidget(QWidget* parent = 0, bool showGlobalValues = false);
 	~BoLightCameraWidget();
 
 	void setLight(BoLight* light, BoContext* context);
 
 private slots:
 	void slotLightChanged();
+	void slotLightModelChanged();
 
 private:
 	BoLightCamera* mCamera;
@@ -305,6 +312,7 @@ private:
 	BoLight* mLight;
 	BoContext* mContext;
 	bool mBlockLightChanges;
+	bool mShowGlobalValues;
 
 	QCheckBox* mDirectional;
 	BoFloatNumInput* mConstantAttenuation;
@@ -322,6 +330,11 @@ private:
 	BoFloatNumInput* mSpecularG;
 	BoFloatNumInput* mSpecularB;
 	BoFloatNumInput* mSpecularA;
+
+	BoFloatNumInput* mGlobalAmbientR;
+	BoFloatNumInput* mGlobalAmbientG;
+	BoFloatNumInput* mGlobalAmbientB;
+	BoFloatNumInput* mGlobalAmbientA;
 
 };
 

@@ -976,7 +976,7 @@ void BoOrbiterCameraWidget::setCamera(BoCamera* camera)
 
 
 
-BoLightCameraWidget::BoLightCameraWidget(QWidget* parent) : QWidget(parent)
+BoLightCameraWidget::BoLightCameraWidget(QWidget* parent, bool showGlobalValues) : QWidget(parent)
 {
  mCamera = 0;
 
@@ -1056,6 +1056,29 @@ BoLightCameraWidget::BoLightCameraWidget(QWidget* parent) : QWidget(parent)
  connect(mSpecularB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
  connect(mSpecularA, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightChanged()));
 
+ mShowGlobalValues = showGlobalValues;
+ mGlobalAmbientR = 0;
+ mGlobalAmbientG = 0;
+ mGlobalAmbientB = 0;
+ mGlobalAmbientA = 0;
+ if (showGlobalValues) {
+	hbox = new QHBox(this);
+	layout->addWidget(hbox);
+	(void)new QLabel(i18n("Global Ambient:"), hbox);
+	mGlobalAmbientR = new BoFloatNumInput(hbox);
+	mGlobalAmbientG = new BoFloatNumInput(hbox);
+	mGlobalAmbientB = new BoFloatNumInput(hbox);
+	mGlobalAmbientA = new BoFloatNumInput(hbox);
+	mGlobalAmbientR->setRange(0.0f, 1.0f, 0.1f, false);
+	mGlobalAmbientG->setRange(0.0f, 1.0f, 0.1f, false);
+	mGlobalAmbientB->setRange(0.0f, 1.0f, 0.1f, false);
+	mGlobalAmbientA->setRange(0.0f, 1.0f, 0.1f, false);
+	connect(mGlobalAmbientR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
+	connect(mGlobalAmbientG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
+	connect(mGlobalAmbientB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
+	connect(mGlobalAmbientA, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
+ }
+
  mBlockLightChanges = false;
 }
 
@@ -1100,6 +1123,16 @@ void BoLightCameraWidget::setLight(BoLight* light, BoContext* context)
  mConstantAttenuation->setEnabled(!mDirectional->isChecked());
  mLinearAttenuation->setEnabled(!mDirectional->isChecked());
  mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
+
+ if (mShowGlobalValues) {
+	GLfloat amb[4];
+	glGetFloatv(GL_LIGHT_MODEL_AMBIENT, amb);
+	mGlobalAmbientR->setValue(amb[0]);
+	mGlobalAmbientG->setValue(amb[1]);
+	mGlobalAmbientB->setValue(amb[2]);
+	mGlobalAmbientA->setValue(amb[3]);
+ }
+
  mBlockLightChanges = false;
 }
 
@@ -1134,5 +1167,36 @@ void BoLightCameraWidget::slotLightChanged()
  mConstantAttenuation->setEnabled(!mDirectional->isChecked());
  mLinearAttenuation->setEnabled(!mDirectional->isChecked());
  mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
+}
+
+void BoLightCameraWidget::slotLightModelChanged()
+{
+ if (!mLight) {
+	return;
+ }
+ if (!mContext) {
+	return;
+ }
+ if (mBlockLightChanges) {
+	return;
+ }
+ if (!mShowGlobalValues) {
+	return;
+ }
+
+ boDebug() << k_funcinfo << endl;
+ BoContext* old = BoContext::currentContext();
+ mContext->makeCurrent();
+
+ GLfloat amb[4];
+ amb[0] = mGlobalAmbientR->value();
+ amb[1] = mGlobalAmbientG->value();
+ amb[2] = mGlobalAmbientB->value();
+ amb[3] = mGlobalAmbientA->value();
+ glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
+
+ if (old) {
+	old->makeCurrent();
+ }
 }
 

@@ -846,7 +846,7 @@ void BoDisplayManager::slotShowLight0Widget()
 	return;
  }
  delete d->mLightWidget;
- d->mLightWidget = new BoLightCameraWidget(0);
+ d->mLightWidget = new BoLightCameraWidget(0, true);
  d->mLightWidget->show();
  d->mLightWidget->setLight(d->mActiveDisplay->light(0), d->mActiveDisplay->context());
 }
