@@ -336,7 +336,7 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
- if (selectedUnit() == f) {
+ if (selectedUnit() == f && selectionWidget()->orderType() == OrderProduce) {
 	boDebug() << k_funcinfo << endl;
 	setProduction(f);
  }
@@ -344,7 +344,7 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 
 void BosonCommandFrameBase::slotUpdateProductionOptions()
 {
- if (selectedUnit()) {
+ if (selectedUnit() && selectionWidget()->orderType() == OrderProduce) {
 	boDebug() << k_funcinfo << endl;
 	setProduction(selectedUnit());
  }

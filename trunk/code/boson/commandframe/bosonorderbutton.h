@@ -40,14 +40,6 @@ public:
 	BosonOrderButton(QWidget* parent);
 	~BosonOrderButton();
 
-	enum CommandType {
-		CommandNothing = 0,
-		CommandCell = 1,
-		CommandProduce = 2,
-		CommandUnitSelected = 3,
-		CommandAction = 4
-	};
-
 	/**
 	 * Shows small overview pixmap of unit, it's health and maybe some other
 	 * information
@@ -75,7 +67,7 @@ public:
 	 **/
 	Unit* unit() const
 	{
-		return (commandType() == CommandUnitSelected) ? mUnit : 0;
+		return (orderType() == OrderUnitSelected) ? mUnit : 0;
 	}
 
 	/**
@@ -84,12 +76,12 @@ public:
 	 **/
 	unsigned long int productionId() const
 	{
-		return (commandType() == CommandProduce) ? mProductionId : 0;
+		return (orderType() == OrderProduce) ? mProductionId : 0;
 	}
 
 	ProductionType productionType() const
 	{
-		return (commandType() == CommandProduce) ? mProductionType : ProduceNothing;
+		return (orderType() == OrderProduce) ? mProductionType : ProduceNothing;
 	}
 
 	/**
@@ -97,7 +89,7 @@ public:
 	 **/
 	int action() const
 	{
-		return (commandType() == CommandAction) ? mAction : -1;
+		return (orderType() == OrderAction) ? mAction : -1;
 	}
 
 	/**
@@ -109,7 +101,7 @@ public:
 	 **/
 	Player* productionOwner() const
 	{ 
-		return (commandType() == CommandProduce) ? mProductionOwner : 0;
+		return (orderType() == OrderProduce) ? mProductionOwner : 0;
 	}
 
 	/**
@@ -118,16 +110,16 @@ public:
 	 **/
 	int tile() const
 	{ 
-		return (commandType() == CommandCell) ? mTileNumber : -1;
+		return (orderType() == OrderCell) ? mTileNumber : -1;
 	}
 
-	CommandType commandType() const { return mCommandType; }
+	OrderType orderType() const { return mOrderType; }
 
 	void unset();
 
 	/**
-	 * A call of this function does only make sense when @ref commandType is
-	 * @ref CommandUnit.
+	 * A call of this function does only make sense when @ref orderType is
+	 * @ref OrderUnit.
 	 *
 	 * This displays the progress of the production.
 	 **/
@@ -196,12 +188,12 @@ private:
 	BosonOrderButtonPrivate* d;
 
 	Unit* mUnit;
-	// FIXME: use only one int for all command modes
+	// FIXME: use only one int for all order modes
 	unsigned long int mProductionId;
 	ProductionType mProductionType;
 	int mTileNumber;
 	int mAction;
-	CommandType mCommandType;
+	OrderType mOrderType;
 
 	Player* mProductionOwner;
 
@@ -238,7 +230,7 @@ protected:
 private:
 	bool mGrayOut;
 	int mProductionCount;
-	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* command button!!!
+	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* order button!!!
 };
 
 #endif

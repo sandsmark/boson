@@ -61,7 +61,7 @@ protected:
 		//TODO: do not re-display if already displayed and text didn't
 		//change
 		QString text;
-		QWidget* w = (commandWidget()->commandType() == BosonOrderButton::CommandUnitSelected) ? commandWidget()->childAt(pos) : 0;
+		QWidget* w = (commandWidget()->orderType() == OrderUnitSelected) ? commandWidget()->childAt(pos) : 0;
 		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
 			Unit* u = commandWidget()->unit();
 			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
@@ -83,15 +83,15 @@ protected:
 	QString mainTip() const
 	{
 		QString text;
-		switch (commandWidget()->commandType()) {
-			case BosonOrderButton::CommandNothing:
+		switch (commandWidget()->orderType()) {
+			case OrderNothing:
 				// do not display anything
 				return QString::null;
-			case BosonOrderButton::CommandCell:
+			case OrderCell:
 				//TODO: place something useful here
 				text = i18n("Tilenumber: %1").arg(commandWidget()->tile());
 				break;
-			case BosonOrderButton::CommandProduce:
+			case OrderProduce:
 			{
 				if(commandWidget()->productionType() == ProduceUnit) {
 					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
@@ -105,14 +105,14 @@ protected:
 				}
 				break;
 			}
-			case BosonOrderButton::CommandUnitSelected:
+			case OrderUnitSelected:
 				if (!commandWidget()->unit()) {
-					boWarning() << k_funcinfo << "CommandUnitSelected, but NULL unit" << endl;
+					boWarning() << k_funcinfo << "OrderUnitSelected, but NULL unit" << endl;
 					return QString::null;
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
 				break;
-			case BosonOrderButton::CommandAction:
+			case OrderAction:
 				if(commandWidget()->action() == ActionMove) {
 					text = i18n("Move");
 				}
@@ -267,7 +267,7 @@ BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
  mProductionType = ProduceNothing;
  mTileNumber = 0;
  mAction = -1;
- mCommandType = CommandNothing;
+ mOrderType = OrderNothing;
 
  QHBoxLayout* topLayout = new QHBoxLayout(this);
  topLayout->setAutoAdd(true);
@@ -309,7 +309,7 @@ void BosonOrderButton::setUnit(Unit* unit)
 	return;
  }
  mUnit = unit;
- mCommandType = CommandUnitSelected;
+ mOrderType = OrderUnitSelected;
  displayUnitPixmap(unit);
  connect(mUnit->owner(), SIGNAL(signalUnitChanged(Unit*)), this,
 		 SLOT(slotUnitChanged(Unit*)));
@@ -335,7 +335,7 @@ void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, 
  mProductionType = type;
  mProductionId = id;
  mProductionOwner = owner;
- mCommandType = CommandProduce;
+ mOrderType = OrderProduce;
 
  if(type == ProduceUnit) {
 	displayUnitPixmap(id, owner);
@@ -352,7 +352,7 @@ void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, 
 
 void BosonOrderButton::setAction(UnitAction action, Player* owner)
 {
- mCommandType = CommandAction;
+ mOrderType = OrderAction;
  mAction = (int)action;
 
  if (!owner->speciesTheme()->actionPixmap(action)) {
@@ -378,7 +378,7 @@ void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
  mUnit = 0;
 
  mTileNumber = tileNo;
- mCommandType = CommandCell;
+ mOrderType = OrderCell;
  setPixmap(tileSet->tile(mTileNumber));
 
  mHealth->hide();
@@ -434,17 +434,17 @@ void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 
 void BosonOrderButton::slotClicked()
 {
- switch (commandType()) {
-	case CommandNothing:
-		boWarning() << "Invalud Command Type \"Nothing\"" << endl;
+ switch (orderType()) {
+	case OrderNothing:
+		boWarning() << "Invalud order Type \"Nothing\"" << endl;
 		break;
-	case CommandCell:
+	case OrderCell:
 		emit signalPlaceCell(tile());
 		break;
-	case CommandProduce:
+	case OrderProduce:
 		emit signalProduce(productionType(), productionId());
 		break;
-	case CommandUnitSelected:
+	case OrderUnitSelected:
 		if (!unit()) {
 			boError() << k_lineinfo << "NULL unit" << endl;
 		} else {
@@ -452,19 +452,19 @@ void BosonOrderButton::slotClicked()
 			emit signalSelectUnit(unit());
 		}
 		break;
-	case CommandAction:
+	case OrderAction:
 		emit signalAction(mAction);
 		break;
 	default:
-		boError() << "Unknown Command Type " << commandType() << endl;
+		boError() << "Unknown order Type " << orderType() << endl;
 		break;
  }
 }
 
 void BosonOrderButton::slotRightClicked()
 {
- switch (commandType()) {
-	case CommandProduce:
+ switch (orderType()) {
+	case OrderProduce:
 		emit signalStopProduction(productionType(), productionId());
 		break;
 	default:
@@ -503,7 +503,7 @@ void BosonOrderButton::unset()
  mProductionType = ProduceNothing;
  mTileNumber = 0;
  mAction = -1;
- mCommandType = CommandNothing;
+ mOrderType = OrderNothing;
  mProductionOwner = 0;
 }
 

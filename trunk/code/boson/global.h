@@ -92,4 +92,31 @@ enum ProductionType {
 	ProduceTech = 2
 };
 
+/**
+ * These are the valid types of the @ref BosonOrderButton. A @ref
+ * BosonOrderWidget (which contains several @ref BosonOrderButton objects) also
+ * uses this, to inform other classes about the currently displayed type.
+ *
+ * Usually the buttons and the widget is in OrderNothing (i.e. nothing
+ * displayed).
+ *
+ * OrderCell is for editor only
+ *
+ * OrderProduce for editor (unit placements) and for units with a
+ * @ref ProductionPlugin.
+ *
+ * OrderUnitSelected is used when the button displays the image of a
+ * currently selected unit.
+ *
+ * OrderAction are the action buttons (move, attack, mine, ...)
+ **/
+enum OrderType {
+	OrderNothing = 0,
+	OrderCell = 1,
+	OrderProduce = 2,
+	OrderUnitSelected = 3,
+	OrderAction = 4
+};
+
+
 #endif

@@ -46,27 +46,70 @@ public:
 	BosonOrderWidget(QWidget* parent);
 	~BosonOrderWidget();
 
+	/**
+	 * Initialize this widget for editor mode. In editor mode the widget
+	 * also displays widgets for modifying cells.
+	 **/
+	void initEditor();
+
+	/**
+	 * Ensure that at least @p number buttons are available.
+	 **/
 	void ensureButtons(unsigned int number);
 
 	/**
 	 * Hide all buttons
 	 **/
 	void hideOrderButtons();
-	void setButtonsPerRow(int);
 
-	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
+	/**
+	 * Display @p number buttons per row
+	 **/
+	void setButtonsPerRow(int number);
+
+	/**
+	 * This function is used to display production options (e.g. when the
+	 * unit has a @ref ProductionPlugin or in editor mode units should get
+	 * placed). The list contains pairs, where the first element of the @ref
+	 * QPair specifies whether the id is a unit or a technology. See @ref
+	 * ProductionType. The second element of the pair specifies the id that
+	 * fits the @ref ProductionType.
+	 * @param produceList A list of production options (or placement options
+	 * in editor mode) which all have a @ref ProductionType assigned which
+	 * specifies which kind of production option the id is.
+	 *
+	 * See also @ref hideOrderButtons, @ref showUnits and @ref
+	 * slotRedrawTiles
+	 **/
 	void setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory = 0);
 
+	/**
+	 * @overloaded
+	 *
+	 * This creates a list of @ref QPair where all elements of @p idList
+	 * share the type @p type. See @ref setOrderButtons above.
+	 **/
+	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
+
+	/**
+	 * Display the @p units. This is used for multiple selections, i.e. when
+	 * the player selected more than one unit.
+	 *
+	 * Use @ref setOrderButtons or @ref hideOrderButtons if the player
+	 * selected one unit only.
+	 **/
 	void showUnits(QPtrList<Unit> units);
-	void showUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit
 
 	void productionAdvanced(Unit* factory, double percentage);
 
-	void initEditor();
-	void hideCellConfigWidgets();
-	void showCellConfigWidgets();
 	void setCellType(CellType type);
 	void setTileSet(BosonTiles* tileSet);
+
+	/**
+	 * @return TRUE if the widget display production options (.e. order
+	 * buttons), otherwise FALSE
+	 **/
+	OrderType orderType() const;
 
 	/**
 	 * Resets button by setting it's production count to 0 and making it
@@ -75,10 +118,30 @@ public:
 	void resetButton(BosonOrderButton* button);
 
 public slots:
+	/**
+	 * Display the cells that can be placed on the map according to @ref
+	 * setCellType and the config widgets.
+	 *
+	 * Note that you need to call @ref setTileSet at least once before you
+	 * can use this slot.
+	 **/
 	void slotRedrawTiles();
 
 protected:
 	void resetLayout();
+
+	/**
+	 * In editor mode hide the widget to configure cells. Should be called
+	 * when no cells are displayed.
+	 **/
+	void hideCellConfigWidgets();
+
+	/**
+	 * Call this once the user wants to place cells. This will show the
+	 * cell configuration widgets. Note that you need to call @ref
+	 * initEditor once before this has an effect.
+	 **/
+	void showCellConfigWidgets();
 
 signals:
 	void signalProduce(ProductionType type, unsigned long int id);
