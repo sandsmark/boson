@@ -1147,6 +1147,11 @@ void Bo3dTools::enableReadDepthBufferWorkaround(float _1_0_depthValue)
   workaround_depth_value_enabled = true;
 }
 
+void Bo3dTools::disableReadDepthBufferWorkaround()
+{
+  workaround_depth_value_enabled = false;
+}
+
 /*
  * vim:et sw=2
  */
