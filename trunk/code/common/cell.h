@@ -21,6 +21,7 @@
 #ifndef CELL_H 
 #define CELL_H 
 
+#include <qrect.h>
 
 #include "common/unitType.h"
 
@@ -63,7 +64,36 @@ public:
 
 private:
 	bool canGoOnGround( groundType g, uint goFlag);
-} ;
+};
+
+
+class CellMap {
+
+public:
+	CellMap(int w, int h);
+
+	// access functions
+
+	/** return the cell at (i,j) */
+	virtual Cell	&ccell(int i, int j)=0;
+	/** convenient function */
+	Cell	&ccell(QPoint p ) { return ccell(p.x(), p.y()); }
+	/** tells if (x,y) is a valid point in this map */
+	bool	isValid(int x, int y);
+	/** check if a unit can go in r with a given goFlag */
+	bool		checkMove(QRect r, uint goFlag );
+
+
+	// manipulation function
+	void setCellFlag(QRect r, Cell::cell_flags flag);
+	void unsetCellFlag(QRect r, Cell::cell_flags flag);
+
+protected:
+	virtual enum groundType	groundAt(QPoint p)=0;
+
+
+	int	_width, _height;
+};
 
 
 #endif // CELL_H

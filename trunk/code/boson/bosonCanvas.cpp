@@ -33,8 +33,6 @@
 #include "game.h" 	// who_am_i
   
 
-#undef DEBUG_REQUEST_F
-
 Arts::SimpleSoundServer		*soundserver;
 
 /*
@@ -42,6 +40,7 @@ Arts::SimpleSoundServer		*soundserver;
  */
 bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	: visualCanvas(p,w,h)
+	, CellMap (w, h)
 {
 
 	// units containers
@@ -76,49 +75,6 @@ bosonCanvas::~bosonCanvas()
 	delete [] cells;
 }
 
-void bosonCanvas::setCellFlag(QRect r, Cell::cell_flags flag)
-{
-	int i,j;
-	for(i=r.left(); i<=r.right(); i++)
-		for(j=r.top(); j<=r.bottom(); j++) {
-			cell(i,j).setFlag( flag);
-#ifdef DEBUG_REQUEST_F
-			// does _not_ affect cells[]
-			//  -> so it's only 'visual'
-			//  -> algorithms not modified by this
-			if (flag==Cell::request_f || flag==Cell::request_flying_f)
-				setTile( i, j, makeCell(GROUND_WATER_OIL) );
-#endif // DEBUG_REQUEST_F
-		}
-}
-
-void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
-{
-	int i,j;
-	for(i=r.left(); i<=r.right(); i++)
-		for(j=r.top(); j<=r.bottom(); j++) {
-			cell(i,j).unsetFlag( flag);
-#ifdef DEBUG_REQUEST_F
-			if (flag==Cell::request_f || flag==Cell::request_flying_f)
-				setTile( i, j, makeCell(GROUND_GRASS) ); 
-#endif // DEBUG_REQUEST_F
-			 }
-}
-
-
-bool bosonCanvas::checkMove(QRect r, uint goFlag )
-	
-{
-	int	i,j;
-
-	if ( r.left()<0 || r.top()<0) return false;
-	if ( r.right()>=maxX || r.right()>=maxY ) return false;
-
-	for(i=r.left(); i<=r.right(); i++)
-		for(j=r.top(); j<=r.bottom(); j++)
-			if (!cell(i, j).canGo( goFlag, ground( tile(i,j)))) return false;
-	return true;
-}
 
 void bosonCanvas::hideMob(destroyedMsg_t &m)
 {

@@ -42,7 +42,7 @@ class Unit;
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class bosonCanvas : public visualCanvas
+class bosonCanvas : public visualCanvas, public CellMap
 {
 	Q_OBJECT
 
@@ -70,19 +70,18 @@ public:
 	/** third (and last) communication layer : game */
 	void handleGameMessage(bosonMsgTag, int, bosonMsgData *);
 
-	/** configure the cell at the given point (i,j) */
-  	void	setCell(int i, int j, cell_t c);	// not virtual !
-	/** return the cell at (x,y) */
-	Cell	&cell(int x, int y)
-			{return cells[ x + y * maxX ]; }
-	/** convenient function */
-	Cell	&cell(QPoint p ) { return cell(p.x(), p.y()); }
-	void 	setCellFlag(QRect r, Cell::cell_flags flag);
-	void 	unsetCellFlag(QRect r, Cell::cell_flags flag);
+	/** configure the cell at the given point (i,j)
+	 * reimplement(and uses) visualCanvas::setCell()
+	 * */
+	void	setCell(int i, int j, cell_t c);        // not virtual !  
+
+	// CellMap functions
+	virtual enum groundType	groundAt(QPoint p) { return ::ground( (cell_t)tile(p.x(), p.y()) ); }
+	/** return the cell at (i,j) */
+	virtual Cell	&ccell(int i, int j) { return cells[i+j*_width]; }
 
 	/* concerning contents */
 	playerFacility *getFacility(long key) { return facility.find(key); }
-	bool		checkMove(QRect r, uint goFlag );
 
 	// sound stuff
 	void	play(char *);
