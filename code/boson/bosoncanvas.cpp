@@ -744,10 +744,20 @@ void BosonCanvas::destroyUnit(Unit* unit)
 
 	// the following events are not emitted for the neutral player
 	if (owner != boGame->playerList()->at(boGame->playerCount() - 1)) {
+		if (owner->mobilesCount() == 0) {
+			BoEvent* event = new BoEvent("AllMobileUnitsDestroyed");
+			event->setPlayerId(unit->owner()->id());
+			boGame->queueEvent(event);
+		}
+		if (owner->facilitiesCount() == 0) {
+			BoEvent* allFacilitiesDestroyed = new BoEvent("AllFacilitiesDestroyed");
+			allFacilitiesDestroyed->setPlayerId(id());
+			boGame->queueEvent(allFacilitiesDestroyed);
+		}
 		if (owner->allUnits()->count() == 0) {
-			BoEvent* noUnitsLeft = new BoEvent("AllUnitsDestroyed");
-			noUnitsLeft->setPlayerId(unit->owner()->id());
-			boGame->queueEvent(noUnitsLeft);
+			BoEvent* event = new BoEvent("AllUnitsDestroyed");
+			event->setPlayerId(unit->owner()->id());
+			boGame->queueEvent(event);
 		}
 	}
  }
