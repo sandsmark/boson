@@ -41,6 +41,7 @@ class BoVector3
     inline void setX(GLfloat x) { mData[0] = x; }
     inline void setY(GLfloat y) { mData[1] = y; }
     inline void setZ(GLfloat z) { mData[2] = z; }
+    inline void set(const float* v) { set(v[0], v[1], v[2]); }
 
     inline void addScaled(BoVector3 v, GLfloat s)  { mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s; };
     inline void setScaledSum(BoVector3 a, BoVector3 b,  GLfloat s)
@@ -59,6 +60,36 @@ class BoVector3
      * Loads BoVector3 from KConfig
      **/
     static BoVector3 load(KConfig* cfg, QString key);
+
+    /**
+     * @return TRUE when @p v is at the same position (x,y,z are all equal).
+     * Otherwise FALSE.
+     **/
+    bool isEqual(BoVector3 v) const { return v.mData[0] == mData[0] && v.mData[1] == mData[1] && v.mData[2] == mData[2]; }
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes an array of 3 floats, such as e.g.
+     * Lib3dsVector.
+     **/
+    bool isEqual(float* v) const { return mData[0] == v[0] && mData[1] == v[1] && mData[2] == v[2]; }
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes 3 separate floats as arguments.
+     **/
+    bool isEqual(float x, float y, float z) const { return mData[0] == x && mData[1] == y && mData[2] == z; }
+
+    /**
+     * @overload
+     *
+     * Same as above, except that it takes 2 separate float arrays. You can use
+     * this static method without a BoVector3 instance - useful for comparing
+     * Lib3dsVectors.
+     **/
+   static bool isEqual(float* v1, float* v2) { return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] && v2[2]; }
 
   private:
     friend class BoMatrix;
