@@ -28,11 +28,13 @@
 #include <klocale.h>
 #include <kstandarddirs.h>
 #include <kprocio.h>
+#include <kstaticdeleter.h>
 
 #include <qstringlist.h>
 #include <qwidget.h>
 #include <qmap.h>
 #include <qvariant.h>
+#include <qdom.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -42,7 +44,7 @@
 #include <sys/types.h>
 
 
-#define BOINFO_VERSION 0x01
+#define BOINFO_VERSION 0x02
 #define BOINFO_TAG "BoInfo"
 
 // fix KDE. (this macro didn't exist before 3.1.x)
@@ -65,6 +67,7 @@
 #define NVIDIAXDRIVER "/usr/X11R6/lib/modules/drivers/nvidia_drv.o" // proprietary
 
 
+static KStaticDeleter<BoInfo> sd;
 BoInfo* BoInfo::mBoInfo = 0;
 
 class BoInfoPrivate
@@ -97,8 +100,7 @@ void BoInfo::init()
 void BoInfo::initBoInfo()
 {
  if (!mBoInfo) {
-#warning TODO static deleter!
-	mBoInfo = new BoInfo();
+	sd.setObject(mBoInfo, new BoInfo);
  }
 }
 
@@ -135,17 +137,76 @@ bool BoInfo::load(QDataStream& stream)
  return true;
 }
 
+bool BoInfo::save(QDomElement& root) const
+{
+ // AB: warning: *all* entries in d->mInfos must be able to cast to a string.
+ // See QVariant::toString() about this!
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc = root.ownerDocument();
+ root.setAttribute(QString::fromLatin1("Version"), QString::number((Q_UINT32)BOINFO_VERSION));
+ QMap<int, QVariant>::Iterator it;
+ for (it = d->mInfos.begin(); it != d->mInfos.end(); ++it) {
+	if (!it.data().canCast(QVariant::String)) {
+		boError() << k_funcinfo << "Invalid variant type " << it.data().type() << endl;
+	}
+	QDomElement e = doc.createElement(QString::fromLatin1("BoInfo"));
+	e.setAttribute(QString::fromLatin1("Key"), it.key());
+	e.appendChild(doc.createTextNode(it.data().toString()));
+	root.appendChild(e);
+ }
+ return true;
+}
+
+bool BoInfo::load(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ QDomDocument doc = root.ownerDocument();
+ unsigned int version = root.attribute(QString::fromLatin1("Version")).toUInt();
+ if (version < 0x02) {
+	boError() << k_funcinfo << "File format version < 0x02 not supported anymore" << endl;
+	return false;
+ }
+ reset();
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("BoInfo"));
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "Could not convert to QDomElement" << endl;
+		continue;
+	}
+	bool ok = true;
+	int key = -1;
+	key = e.attribute(QString::fromLatin1("Key")).toInt(&ok);
+	if (!ok || key < 0) {
+		boError() << k_funcinfo << "Invalid key entry" << endl;
+		continue;
+	}
+	QString value = e.text();
+	if (value == QString::null) {
+		boWarning() << k_funcinfo << "no value for key " << key << endl;
+		continue;
+	}
+
+	// AB: is this working properly for ALL values? we are using toInt() and
+	// so in our get*() methods, so this *should* work...
+	insert(key, value);
+ }
+ return true;
+}
+
 bool BoInfo::saveToFile(const QString& fileName) const
 {
- // AB: an XML file would be *way* better!
- // but I am too lazy currently.
  QFile file(fileName);
  if (!file.open(IO_WriteOnly)) {
 	boError() << k_funcinfo << "Could not open " << fileName << " for writing" << endl;
 	return false;
  }
- QDataStream stream(&file);
- bool ret = save(stream);
+ QDomDocument doc(QString::fromLatin1("BoInfo"));
+ QDomElement root = doc.createElement(QString::fromLatin1("BoInfo"));
+ doc.appendChild(root);
+ bool ret = save(root);
+ QString string = doc.toString();
+ file.writeBlock(string.ascii(), string.length());
  file.close();
  return ret;
 }
@@ -157,8 +218,17 @@ bool BoInfo::loadFromFile(const QString& fileName)
 	boError() << k_funcinfo << "Could not open " << fileName << endl;
 	return false;
  }
- QDataStream stream(&file);
- bool ret = load(stream);
+ QDomDocument doc(QString::fromLatin1("BoInfo"));
+ QString errorMsg;
+ int lineNo, columnNo;
+ if (!doc.setContent(file.readAll(), &errorMsg, &lineNo, &columnNo)) {
+	boError() << k_funcinfo << "Parse error in line " << lineNo
+			<< ",column " << columnNo
+			<< " error message: " << errorMsg << endl;
+		return false;
+ }
+ QDomElement root = doc.documentElement();
+ bool ret = load(root);
  file.close();
  return ret;
 }
@@ -291,7 +361,9 @@ void BoInfo::insert(int key, const char* value)
 
 void BoInfo::insert(int key, bool value)
 {
- d->mInfos.insert(key, QVariant((bool)value));
+ // we store a boolean as an integer, since it makes loading/saving using
+ // QVariant casts easier.
+ insert(key, (int)(value ? 1 : 0));
 }
 
 bool BoInfo::contains(int key) const
@@ -325,10 +397,7 @@ unsigned int BoInfo::getUInt(int key) const
 
 bool BoInfo::getBool(int key) const
 {
- if (!d->mInfos.contains(key)) {
-	return false;
- }
- return d->mInfos[key].toBool();
+ return getInt(key);
 }
 
 QStringList BoInfo::openGLExtensions() const

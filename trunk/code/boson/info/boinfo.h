@@ -21,11 +21,13 @@
 
 #include <qstring.h>
 
-class QStringList;
 class BosonGLWidget;
+
+class QStringList;
 class QWidget;
 class QVariant;
 template<class T1, class T2> class QMap;
+class QDomElement;
 
 class BoInfoPrivate;
 /**
@@ -187,6 +189,8 @@ public:
 
 	bool loadFromFile(const QString& file);
 	bool saveToFile(const QString& file) const;
+	bool load(QDomElement& root);
+	bool save(QDomElement& root) const;
 	bool load(QDataStream& stream);
 	bool save(QDataStream& stream) const;
 	void copyFrom(const BoInfo&);
