@@ -44,7 +44,7 @@ class PythonScript : public BosonScript
     virtual void setPlayerId(int id);
 
     virtual bool load(QDataStream& stream);
-    virtual bool save(QDataStream& stream) const;
+    virtual bool save(QDataStream& stream);
 
     virtual void callFunction(const QString& function);
     void callFunction(const QString& function, PyObject* args);
@@ -174,7 +174,11 @@ class PythonScript : public BosonScript
     void getPythonLock();
     void freePythonLock();
 
+    PyObject* saveModule(PyObject* module) const;
+    void loadModule(PyObject* module, PyObject* data);
+
   private:
+    PyObject* mMainModule;
     PyObject* mDict;
     PyThreadState* mInterpreter;
     QString mLoadedScripts;

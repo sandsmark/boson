@@ -114,7 +114,7 @@ class BosonScript
     /**
      * Saves script and variables to specified stream.
      **/
-    virtual bool save(QDataStream& stream) const = 0;
+    virtual bool save(QDataStream& stream) = 0;
 
     /**
      * Calls function with given name in the script
