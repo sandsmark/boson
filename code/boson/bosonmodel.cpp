@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -670,6 +670,7 @@ void BosonModel::loadModel()
  sortByDepth();
 
  applyMasterScale();
+ computeBoundingObjects();
 
  boProfiling->start(BosonProfiling::LoadModelTextures);
  loadTextures(d->mLoader->textures());
@@ -694,9 +695,9 @@ void BosonModel::loadModel()
 	mesh->setTextured(myTex != 0);
 
 #if USE_STRIP
-	mesh->connectFaces();
+	mesh->connectNodes();
 #else
-	mesh->addFaces();
+	mesh->addNodes();
 #endif
 	mesh->createPointCache();
  }
@@ -993,6 +994,29 @@ void BosonModel::applyMasterScale()
 		matrix->loadMatrix(m);
 	}
 	f->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
+ }
+}
+
+void BosonModel::computeBoundingObjects()
+{
+ // we use bounding boxes everywhere at the moment.
+ // most (culling-)algorithms can be implemented easier with boxes, but
+ // sometimes (e.g. for the hp culling extension) the object must be as small as
+ // possible - such as spheres for certain meshes. one day we may support that
+ // (the hp extension is too slow for us, but maybe we have other uses one day).
+
+ // compute a bounding box for all meshes first.
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	m->computeBoundingObject();
+ }
+
+ // here we should compute a bounding object for the complete frame, which take
+ // care of frame matrices.
+ // we will need this object (box) for borender, for a grid.
+ for (unsigned int i = 0; i < frames(); i++) {
+	BoFrame* f = frame(i);
+
  }
 }
 

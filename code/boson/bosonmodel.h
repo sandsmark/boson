@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -320,6 +320,12 @@ protected:
 	void applyMasterScale();
 
 	void computeBoundings(BoFrame* frame, BoHelper* helper) const;
+
+	/**
+	 * Compute bounding objects for all meshes and all frames. Usually these
+	 * objects will be boxes.
+	 **/
+	void computeBoundingObjects();
 
 	/**
 	 * Convert a 3ds texture name to a clean name. That means call
