@@ -28,6 +28,7 @@
 #define	S_SHOT		(S_FACILITY+	100)
 #define	S_END		(S_SHOT+	100)
 
+#define Z_FOW			(+1000)
 #define Z_MOBILE		(+400)
 #define Z_FACILITY		(+300)
 #define Z_DESTROYED_MOBILE	(+200)
