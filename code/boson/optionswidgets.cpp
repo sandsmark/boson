@@ -81,8 +81,9 @@ GeneralOptions::~GeneralOptions()
 
 void GeneralOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  if (!game()) {
-	boError() << k_funcinfo << "NULL game" << endl;
+	boError(210) << k_funcinfo << "NULL game" << endl;
 	return;
  }
  if (mGameSpeed->value() != game()->gameSpeed()) {
@@ -94,12 +95,13 @@ void GeneralOptions::apply()
 	file = mCmdBackgrounds[mCmdBackground->currentItem() - 1];
  }
  emit signalCmdBackgroundChanged(file);
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void GeneralOptions::load()
 {
  if (!game()) {
-	boError() << k_funcinfo << "NULL game" << endl;
+	boError(210) << k_funcinfo << "NULL game" << endl;
 	return;
  }
  setGameSpeed(game()->gameSpeed());
@@ -154,7 +156,7 @@ CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  for (int i = 0; i < (int)list.count(); i++) {
 	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.cursor"));
 	if (!cfg.hasGroup("Boson Cursor")) {
-		boWarning() << "invalid cursor " << list[i] << endl;
+		boWarning(210) << "invalid cursor " << list[i] << endl;
 	} else {
 		cfg.setGroup("Boson Cursor");
 		QString name = cfg.readEntry("Name", i18n("Unknown"));
@@ -170,9 +172,10 @@ CursorOptions::~CursorOptions()
 
 void CursorOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  int mode = mCursor->currentItem();
  if (mode < 0) {
-	boWarning() << k_funcinfo << "Invalid cursor mode " << mode << endl;
+	boWarning(210) << k_funcinfo << "Invalid cursor mode " << mode << endl;
 	return;
  }
  QString theme;
@@ -182,6 +185,7 @@ void CursorOptions::apply()
 	theme = BosonCursor::defaultTheme();
  }
  emit signalCursorChanged(mode, theme);
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void CursorOptions::setDefaults()
@@ -233,6 +237,7 @@ ScrollingOptions::~ScrollingOptions()
 
 void ScrollingOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  boConfig->setRMBMove(mRMBScrolling->isChecked());
  boConfig->setMMBMove(mMMBScrolling->isChecked());
  if (mCursorEdgeSensity->value() < 0) {
@@ -243,6 +248,7 @@ void ScrollingOptions::apply()
 	mArrowSpeed->setValue(0);
  }
  boConfig->setArrowKeyStep(mArrowSpeed->value());
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void ScrollingOptions::setDefaults()
@@ -312,10 +318,12 @@ SoundOptions::~SoundOptions()
 
 void SoundOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  QMap<QCheckBox*, UnitSoundEvent>::Iterator it = mCheckBox2UnitSoundEvent.begin();
  for (; it != mCheckBox2UnitSoundEvent.end(); ++it) {
 	boConfig->setUnitSoundActivated(it.data(), !it.key()->isChecked());
  }
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void SoundOptions::setDefaults()
@@ -396,6 +404,7 @@ OpenGLOptions::~OpenGLOptions()
 
 void OpenGLOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  bool reloadModelTextures = false;
  bool resetTexParameter = false;
  emit signalUpdateIntervalChanged((unsigned int)mUpdateInterval->value());
@@ -423,6 +432,7 @@ void OpenGLOptions::apply()
 	int r = KMessageBox::questionYesNo(this, i18n("You need to reload the model textures to see your changes. Do you want to reload now (takes some time)?"));
 	reloadModelTextures = (r == KMessageBox::Yes);
 	if (reloadModelTextures) {
+		boDebug(210) << k_funcinfo << "reloading all textures" << endl;
 		BosonModel::reloadAllTextures();
 	}
  }
@@ -431,11 +441,13 @@ void OpenGLOptions::apply()
 	// parameters. currently we just reset them - leave it at this as long
 	// as no problems appear
 	if (resetTexParameter) {
+		boDebug(210) << k_funcinfo << "resetting all textures parameters" << endl;
 		BosonTextureArray::resetAllTexParameter();
 	}
  }
- 
+
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void OpenGLOptions::setDefaults()
@@ -460,7 +472,7 @@ void OpenGLOptions::load()
 
 void OpenGLOptions::setUpdateInterval(int ms)
 {
- boDebug() << k_funcinfo << ms << endl;
+ boDebug(210) << k_funcinfo << ms << endl;
  mUpdateInterval->setValue(ms);
 }
 
@@ -588,8 +600,10 @@ ChatOptions::~ChatOptions()
 
 void ChatOptions::apply()
 {
+ boDebug(210) << k_funcinfo << endl;
  boConfig->setChatScreenRemoveTime(mScreenRemoveTime->value());
  boConfig->setChatScreenMaxItems(mScreenMaxItems->value());
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void ChatOptions::setDefaults()

@@ -162,9 +162,11 @@ void OptionsDialog::slotOk()
 
 void OptionsDialog::slotApply()
 {
+ boDebug(210) << k_funcinfo << endl;
  QPtrListIterator<OptionsWidget> it(d->mOptionsWidgets);
  for (; it.current(); ++it) {
 	it.current()->apply();
  }
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
