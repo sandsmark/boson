@@ -32,8 +32,6 @@ Game TODOs
   on the map. Currently the player has to click on the cmd bunker only (not on
   the order button) to start placement
 - Make shield reloading speed configurable
-- fix minimap-zooming. there are a few bugs when the viewport is not at top left
-  of the map and we therefore have to call QPainter::translate().
 - samsite should be more vulnerable when the doors are open. decrease armor
   then. we need to provide some config entries for indes.unit for this,
   specifying the frame number when armor changes. note that the frame number for
@@ -41,7 +39,8 @@ Game TODOs
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
 - Add screenshots support to saving/loading widget
-- make mineralrefinery-chimney smoke configurable!! less effects==faster
+- call updateCursor() every advance call, so that the cursor changes also if a
+  unit moved below it.
 
 Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
