@@ -319,14 +319,12 @@ void SpeciesTheme::loadNewUnit(Unit* unit)
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
  unit->setShields(prop->shields());
-// unit->setWeaponRange(prop->weaponRange()); // seems to cause a KGame error sometimes
-// unit->setWeaponDamage(prop->weaponDamage());
  unit->setSightRange(prop->sightRange());
 
  if (prop->isMobile()) {
 	unit->setMaxSpeed(prop->speed());
-	unit->setAccelerationSpeed(0.4);
-	unit->setDecelerationSpeed(0.8);
+	unit->setAccelerationSpeed(prop->accelerationSpeed());
+	unit->setDecelerationSpeed(prop->decelerationSpeed());
  } else if (prop->isFacility()) {
 
  }

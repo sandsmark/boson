@@ -62,6 +62,8 @@ public:
 	}
 
 	float mSpeed;
+	float mAccelerationSpeed;
+	float mDecelerationSpeed;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
 };
@@ -219,6 +221,8 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  conf->setGroup("Boson Mobile Unit");
  createMobileProperties();
  mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0);
+ mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.5);
+ mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 1.0);
  if (mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
@@ -326,6 +330,8 @@ void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
+ conf->writeEntry("AccelerationSpeed", (double)mMobileProperties->mAccelerationSpeed);
+ conf->writeEntry("DecelerationSpeed", (double)mMobileProperties->mDecelerationSpeed);
  conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
 }
@@ -439,6 +445,22 @@ float UnitProperties::speed() const
 	return 0;
  }
  return mMobileProperties->mSpeed;
+}
+
+float UnitProperties::accelerationSpeed() const
+{
+ if (!mMobileProperties) {
+	return 0;
+ }
+ return mMobileProperties->mAccelerationSpeed;
+}
+
+float UnitProperties::decelerationSpeed() const
+{
+ if (!mMobileProperties) {
+	return 0;
+ }
+ return mMobileProperties->mDecelerationSpeed;
 }
 
 bool UnitProperties::canGoOnLand() const
@@ -645,6 +667,8 @@ void UnitProperties::reset()
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
+ mMobileProperties->mAccelerationSpeed = 0.5;
+ mMobileProperties->mDecelerationSpeed = 1.0;
  mMobileProperties->mCanGoOnLand = true;
  mMobileProperties->mCanGoOnWater = false;
  // Sounds

@@ -52,7 +52,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mName = cfg->readEntry("Name", "");
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
-  mSpeed = cfg->readLongNumEntry("Speed", 0);
+  mSpeed = (float)(cfg->readDoubleNumEntry("Speed", 0));
+  mAccelerationSpeed = (float)(cfg->readDoubleNumEntry("AccelerationSpeed", 0.2));
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mFullDamageRange = (float)(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange));

@@ -89,7 +89,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   mTotalDist = mVelo.length();
 
   // Speeds
-  setAccelerationSpeed(0.2);
+  setAccelerationSpeed(prop->accelerationSpeed());
   setMaxSpeed(prop->speed());
 
   // Maximum height missile can have
@@ -192,18 +192,19 @@ bool BosonShot::saveAsXML(QDomElement& root)
   root.setAttribute("Owner", (unsigned int)mOwner->id());
 
   // Too many attributes?
-//  root.setAttribute("Step", mStep);
-//  root.setAttribute("TotalSteps", mTotalSteps);
-  root.setAttribute("mZ", mZ);
   root.setAttribute("x", x());
   root.setAttribute("y", y());
   root.setAttribute("z", z());
   root.setAttribute("xVelo", mVelo.x());
   root.setAttribute("yVelo", mVelo.y());
   root.setAttribute("zVelo", mVelo.z());
-  root.setAttribute("ParticleVelo", mParticleVelo);
+  root.setAttribute("Targetx", mTarget.x());
+  root.setAttribute("Targety", mTarget.y());
+  root.setAttribute("Targetz", mTarget.z());
+  root.setAttribute("TotalDist", mTotalDist);
+  root.setAttribute("PassedDist", mPassedDist);
+  root.setAttribute("mZ", mZ);
   root.setAttribute("MaxHeight", mMaxHeight);
-  root.setAttribute("Rotation", rotation());
   return true;
 }
 
@@ -214,7 +215,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   float y;
   float z;
   float xvelo, yvelo, zvelo;
-  float rotation;
+  float targetx, targety, targetz;
   x = root.attribute("x").toFloat(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for x tag" << endl;
@@ -230,6 +231,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Invalid value for z tag" << endl;
     return false;
   }
+
   xvelo = root.attribute("xVelo").toFloat(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for xVelo tag" << endl;
@@ -245,30 +247,35 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     boError() << k_funcinfo << "Invalid value for zVelo tag" << endl;
     return false;
   }
-  rotation = root.attribute("Rotation").toFloat(&ok);
+  targetx = root.attribute("Targetx").toFloat(&ok);
   if (!ok) {
-    boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
-    rotation = 0;
-    // don't stop (will be broken, but unit won't get deleted)
-  }
-/*  mStep = root.attribute("Step").toUInt(&ok);
-  if (!ok) {
-    boError() << k_funcinfo << "Invalid value for Step tag" << endl;
+    boError() << k_funcinfo << "Invalid value for Targetx tag" << endl;
     return false;
   }
-  mTotalSteps = root.attribute("TotalSteps").toUInt(&ok);
+  targety = root.attribute("Targety").toFloat(&ok);
   if (!ok) {
-    boError() << k_funcinfo << "Invalid value for TotalSteps tag" << endl;
+    boError() << k_funcinfo << "Invalid value for Targety tag" << endl;
     return false;
-  }*/
+  }
+  targetz = root.attribute("Targetz").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for Targetz tag" << endl;
+    return false;
+  }
+
+  mTotalDist = root.attribute("TotalDist").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for TotalDist tag" << endl;
+    return false;
+  }
+  mPassedDist = root.attribute("PassedDist").toFloat(&ok);
+  if (!ok) {
+    boError() << k_funcinfo << "Invalid value for PassedDist tag" << endl;
+    return false;
+  }
   mZ = root.attribute("mZ").toFloat(&ok);
   if (!ok) {
     boError() << k_funcinfo << "Invalid value for mZ tag" << endl;
-    return false;
-  }
-  mParticleVelo = root.attribute("ParticleVelo").toFloat(&ok);
-  if (!ok) {
-    boError() << k_funcinfo << "Invalid value for ParticleVelo tag" << endl;
     return false;
   }
   mMaxHeight = root.attribute("MaxHeight").toFloat(&ok);
@@ -278,10 +285,11 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   }
 
   mVelo.set(xvelo, yvelo, zvelo);
+  mTarget.set(targetx, targety, targetz);
+  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   mActive = true; // Inactive shots won't be saved
   move(x, y, z);
-  boDebug() << k_funcinfo << "Moving to (" << x << "; " << y << "; " << z << ")" << endl;
-  setRotation(rotation);
+  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   setAnimated(true);
   canvas()->newShot(this);
   return true;
@@ -293,33 +301,31 @@ void BosonShot::save(QDataStream& stream)
   stream << (float)y();
   stream << (float)z();
   stream << mVelo;
-//  stream << (Q_UINT32)mStep;
-//  stream << (Q_UINT32)mTotalSteps;
+  stream << mTarget;
   stream << (float)mTotalDist;
+  stream << (float)mPassedDist;
   stream << (float)mZ;
-  stream << (float)mParticleVelo;
-  stream << (float)rotation();
+  stream << (float)mMaxHeight;
 }
 
 void BosonShot::load(QDataStream& stream)
 {
-//  Q_UINT32 step, totalsteps;
   float x, y, z;
   float rot;
 
   stream >> x >> y >> z;
   stream >> mVelo;
-//  stream >> step >> totalsteps;
-  stream >> mTotalDist >> mZ >> mParticleVelo;
-  stream >> rot;
+  stream >> mTarget;
+  stream >> mTotalDist >> mPassedDist;
+  stream >> mZ >> mMaxHeight;
 
-//  mStep = step;
-//  mTotalSteps = totalsteps;
-//  mActive = (mStep < mTotalSteps);
+  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+  mActive = true; // Inactive shots won't be saved
   move(x, y, z);
-  boDebug() << k_funcinfo << "Moving to (" << x << "; " << y << "; " << z << ")" << endl;
+  setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   setRotation(rot);
   setAnimated(true);
+  canvas()->newShot(this);
 }
 
 void BosonShot::explode()
