@@ -536,13 +536,19 @@ void TopWidget::slotLoadGame(const QString& fileName)
  }
 
  // load the file into memory
- if (!d->mStarting->loadGame(fileName)) {
+ QByteArray data = d->mStarting->loadGame(fileName);
+ if (data.size() == 0) {
 	boError() << k_funcinfo << "failed loading from file" << endl;
 	return;
  }
 
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_INT8)1; // game mode
+ stream << data;
+
  // actually start the game
- QTimer::singleShot(0, this, SLOT(slotStartNewGame()));
+ boGame->sendMessage(buffer, BosonMessage::IdNewGame);
 }
 
 void TopWidget::slotSaveGame(const QString& fileName, const QString& description)
@@ -1025,13 +1031,35 @@ void TopWidget::slotGameStarted()
 				return;
 			}
 			localPlayer = p;
+
+			// when starting the game, a player must not have a
+			// BosonLocalPlayerInput!
+			KGameIO* io = p->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+			p->removeGameIO(io);
 		}
 	}
  }
 
- if (!localPlayer && !boGame->gameMode()) {
-	// pick one player for editor mode
-	localPlayer = (Player*)boGame->playerList()->at(0);
+ if (!localPlayer) {
+	// this can happen in two cases
+	// 1. editor mode
+	// 2. loading a game
+	
+	if (!boGame->gameMode()) {
+		// pick one player for editor mode
+		// (it doesnt matter which)
+		boDebug() << k_funcinfo << "picking a local player for editor mode" << endl;
+		localPlayer = (Player*)boGame->playerList()->at(0);
+	} else {
+		// we are loading a game
+		// we are chosing the first player here - this is
+		// valid as long as we don't support loading network games.
+		// later we may allow selecting a player in the startup widgets
+		//
+		// if we ever do that, we should remove these line here!
+		boDebug() << k_funcinfo << "picking a local player for loading games" << endl;
+		localPlayer = (Player*)boGame->playerList()->at(0);
+	}
  }
  if (!localPlayer) {
 	boError(270) << k_funcinfo << "NULL local player" << endl;

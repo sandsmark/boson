@@ -52,7 +52,14 @@ public:
 
 	void startNewGame();
 
-	bool loadGame(const QString& fileName);
+	/**
+	 * Prepare for loading a game. This loads the playfield from @ref
+	 * fileName and adds the players necessary for loading the game.
+	 * @return An empty @ref QByteArray if an error occurred or the data
+	 * necessary for @ref setNewGameData (such as the playField) if it
+	 * succeeded.
+	 **/
+	QByteArray loadGame(const QString& fileName);
 
 	/**
 	 * Called by @ref Boson once a message indicating that a client

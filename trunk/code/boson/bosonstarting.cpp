@@ -210,40 +210,42 @@ bool BosonStarting::start()
  return true;
 }
 
-bool BosonStarting::loadGame(const QString& loadingFileName)
+QByteArray BosonStarting::loadGame(const QString& loadingFileName)
 {
  if (loadingFileName.isNull()) {
 	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	//TODO: set Boson::loadingStatus()
-	return false;
+	return QByteArray();
  }
  BosonPlayField loadField;
  if (!loadField.preLoadPlayField(loadingFileName)) {
 	boError(260) << k_funcinfo << "could not preload " << loadingFileName << endl;
-	return false;
+	return QByteArray();
  }
 
  QMap<QString, QByteArray> files;
  if (!loadField.loadFromDiskToFiles(files)) {
 	boError(260) << k_funcinfo << "could not load " << loadingFileName << endl;
-	return false;
+	return QByteArray();
  }
- mNewGameData = BosonPlayField::streamFiles(files);
- if (mNewGameData.size() == 0) {
+ QByteArray playField = BosonPlayField::streamFiles(files);
+ if (playField.size() == 0) {
 	boError(260) << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
-	return false;
+	return QByteArray();
  }
 
  if (!files.contains("players.xml")) {
 	boError(260) << k_funcinfo << "did not find players.xml" << endl;
-	return false;
-}
+	return QByteArray();
+ }
  if (!addLoadGamePlayers(files["players.xml"])) {
 	boError(260) << k_funcinfo << "adding players failed" << endl;
-	return false;
+	return QByteArray();
  }
 
- return true;
+ boDebug() << k_funcinfo << "done" << endl;
+
+ return playField;
 }
 
 void BosonStarting::checkEvents()
@@ -518,13 +520,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 	return false;
  }
  boDebug(260) << k_funcinfo << "adding " << list.count() << " players" << endl;
- BosonSaveLoad load(boGame);
  for (unsigned int i = 0; i < list.count(); i++) {
-	// AB: TODO: store "PlayerNumber" in the xml file only (use the same
-	// number for the canvas.xml as ownerid / ownernumber).
-	// We should assign new IDs.
-	// -­> makes the code easier to be used in newgames, too and we will
-	// support network then.
 	QDomElement p = list.item(i).toElement();
 	bool ok = false;
 	unsigned int id = p.attribute("Id").toUInt(&ok);
@@ -549,14 +545,10 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 		boError(260) << k_funcinfo << "id " << id << " already in the game" << endl;
 		return false;
 	}
-	Player* player = (Player*)boGame->createPlayer(0, 0, false);
-	player->setId(id);
+	Player* player = new Player();
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
 
-	// AB: we _must_ add the players _before_ we load the game, in order to
-	// keep network working.
-//
-	load.systemAddPlayer(player);
+	boGame->bosonAddPlayer(player);
  }
 
  return true;
