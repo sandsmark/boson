@@ -93,8 +93,7 @@ public:
 		WorkConstructed = 5,
 		WorkMoveInGroup = 6,
 		WorkDestroyed = 7,
-		WorkRefine = 8,
-		WorkRepair = 9
+		WorkRefine = 8
 	};
 	
 	UnitBase(const UnitProperties* prop);

@@ -109,8 +109,11 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100); 
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
- mDamage = conf.readLongNumEntry("Damage", 0); 
- mRange = conf.readUnsignedLongNumEntry("Range", 0); 
+ mWeaponDamage = conf.readLongNumEntry("WeaponDamage", 0); 
+ mWeaponRange = conf.readUnsignedLongNumEntry("WeaponRange", 0); 
+ if (mWeaponDamage <= 0) {
+	mWeaponRange = 1;
+ }
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
  mReload = conf.readUnsignedNumEntry("Reload", 0); 
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);

@@ -102,7 +102,7 @@ public:
 	 * @return The weapon range of this unit. It's a number of cells, so multiply
 	 * with BO_TILE_SIZE to use it on the canvas.
 	 **/
-	unsigned long int range() const { return mRange; }
+	unsigned long int weaponRange() const { return mWeaponRange; }
 
 	/**
 	 * @return The number of advance calls until the weapon is reloaded
@@ -119,7 +119,7 @@ public:
 	 * The damage this unit makes to other units. Negative values means
 	 * repairing
 	 **/
-	long int damage() const { return mDamage; }
+	long int weaponDamage() const { return mWeaponDamage; }
 	
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
@@ -284,9 +284,9 @@ private:
 	QString mUnitPath; // the path to the unit files
 	int mTypeId; // note: -1 is invalid!
 	unsigned long int mHealth;
-	unsigned long int mRange;
+	unsigned long int mWeaponRange;
 	unsigned int mSightRange;
-	long int mDamage;
+	long int mWeaponDamage;
 	unsigned int mReload;
 	unsigned int mProducer;
 	unsigned int mProductionTime;

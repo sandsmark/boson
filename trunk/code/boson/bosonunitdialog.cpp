@@ -473,9 +473,9 @@ void BosonUnitDialog::loadProperties()
  d->mShield->setValue(d->mUnit->shields());
  d->mMineralCosts->setValue(d->mUnit->mineralCost());
  d->mOilCosts->setValue(d->mUnit->oilCost());
- d->mWeaponRange->setValue(d->mUnit->range());
+ d->mWeaponRange->setValue(d->mUnit->weaponRange());
  d->mSightRange->setValue(d->mUnit->sightRange());
- d->mWeaponDamage->setValue(d->mUnit->damage());
+ d->mWeaponDamage->setValue(d->mUnit->weaponDamage());
  d->mWeaponReload->setValue(d->mUnit->reload());
  d->mTerrainType->setCurrentItem(d->mUnit->isLand() ? 0 : d->mUnit->isShip() ?
 		1 : d->mUnit->isAircraft() ? 2 : 0);
@@ -585,9 +585,9 @@ void BosonUnitDialog::saveProperties(KSimpleConfig* cfg)
  cfg->writeEntry("Shield", (unsigned long int)d->mShield->value());
  cfg->writeEntry("MineralCost", (unsigned long int)d->mMineralCosts->value());
  cfg->writeEntry("OilCost", (unsigned long int)d->mOilCosts->value());
- cfg->writeEntry("Range", (unsigned long int)d->mWeaponRange->value());
+ cfg->writeEntry("WeaponRange", (unsigned long int)d->mWeaponRange->value());
  cfg->writeEntry("SightRange", (unsigned long int)d->mSightRange->value());
- cfg->writeEntry("Damage", (long int)d->mWeaponDamage->value());
+ cfg->writeEntry("WeaponDamage", (long int)d->mWeaponDamage->value());
  cfg->writeEntry("Reload", (unsigned int)d->mWeaponReload->value());
  cfg->writeEntry("TerrainType", (int)d->mTerrainType->currentItem());
  cfg->writeEntry("ProductionTime", (unsigned int)d->mProductionTime->value());

@@ -61,7 +61,8 @@ public:
 	enum PluginPropertyIds {
 		IdPlugin_Productions = IdUnitPropertyLast + 1,
 		IdPlugin_ProductionState = IdUnitPropertyLast + 2,
-		IdPlugin_RepairList = IdUnitPropertyLast + 3,
+		IdPlugin_RepairList = IdUnitPropertyLast + 10,
+//		IdPlugin_RepairAdvanceCounter = IdUnitPropertyLast + 11,
 
 		IdPluginProperyLast
 	};

@@ -149,7 +149,6 @@ public:
 	QPtrList<Unit> mWorkRefine;
 	QPtrList<Unit> mWorkAttack;
 	QPtrList<Unit> mWorkConstructed;
-	QPtrList<Unit> mWorkRepair;
 
 	QValueList<UnitGroup> mGroups;
 
@@ -205,7 +204,6 @@ void BosonCanvas::quitGame()
  d->mWorkRefine.clear();
  d->mWorkAttack.clear();
  d->mWorkConstructed.clear();
- d->mWorkRepair.clear();
  d->mGroups.clear();
 }
 
@@ -393,17 +391,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
 			it.current()->advanceConstruction();
-		}
-		++it;
-	}
- }
- if (d->mWorkRepair.count() > 0 && (advanceCount % 40) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkRepair);
-	while (it.current()) {
-		if (!it.current()->repairPlugin()) {
-			it.current()->setWork(Unit::WorkNone);
-		} else {
-			it.current()->repairPlugin()->advance();
 		}
 		++it;
 	}
@@ -883,7 +870,6 @@ void BosonCanvas::changeWork()
 	d->mWorkRefine.removeRef(u);
 	d->mWorkAttack.removeRef(u);
 	d->mWorkConstructed.removeRef(u);
-	d->mWorkRepair.removeRef(u);
 
 	if (d->mDestroyedUnits.contains(u)) {
 		continue;
@@ -913,9 +899,6 @@ void BosonCanvas::changeWork()
 			break;
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
-			break;
-		case UnitBase::WorkRepair:
-			d->mWorkRepair.append(u);
 			break;
 		case UnitBase::WorkMoveInGroup:
 			// already in d->mGroups

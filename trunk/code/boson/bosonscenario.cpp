@@ -429,11 +429,11 @@ bool BosonScenario::saveUnit(QDomElement& node, Unit* unit)
  // but currently they are not. they will never appear in the xml
  // file, as they don't differ from the default (howver if that
  // ever gets implemented it can be used immediately)
- if (unit->weaponDamage() != prop->damage()) {
-	node.setAttribute("Damage", (int)unit->weaponDamage());
+ if (unit->weaponDamage() != prop->weaponDamage()) {
+	node.setAttribute("WeaponDamage", (int)unit->weaponDamage());
  }
- if (unit->weaponRange() != prop->range()) {
-	node.setAttribute("Range", (unsigned int)unit->weaponRange());
+ if (unit->weaponRange() != prop->weaponRange()) {
+	node.setAttribute("WeaponRange", (unsigned int)unit->weaponRange());
  }
  if (unit->sightRange() != prop->sightRange()) {
 	node.setAttribute("SightRange", (unsigned int)unit->sightRange());
@@ -513,20 +513,20 @@ bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
 	}
  }
 
- if (node.hasAttribute("Damage")) {
-	int v = node.attribute("Damage").toInt(&ok);
+ if (node.hasAttribute("WeaponDamage")) {
+	int v = node.attribute("WeaponDamage").toInt(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "Invalid value for Damage" << endl;
+		kdError() << k_funcinfo << "Invalid value for WeaponDamage" << endl;
 		ret = false;
 	} else if (unit) {
 		unit->setWeaponDamage(v);
 	}
  }
 
- if (node.hasAttribute("Range")) {
-	unsigned int v = node.attribute("Range").toUInt(&ok);
+ if (node.hasAttribute("WeaponRange")) {
+	unsigned int v = node.attribute("WeaponRange").toUInt(&ok);
 	if (!ok) {
-		kdError() << k_funcinfo << "Invalid value for Range" << endl;
+		kdError() << k_funcinfo << "Invalid value for WeaponRange" << endl;
 		ret = false;
 	} else if (unit) {
 		unit->setWeaponRange(v);

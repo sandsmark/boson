@@ -224,20 +224,53 @@ RepairPlugin::RepairPlugin(Unit* unit)
 {
  mUnit = unit;
 
+ /*
  KGamePropertyHandler* dataHandler = mUnit->dataHandler();
  mRepairList.registerData(Unit::IdPlugin_RepairList, dataHandler, 
 		KGamePropertyBase::PolicyLocal, "RepairList");
  mRepairList.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
+ */
 
 }
 
-void RepairPlugin::repair(Unit* unit)
+void RepairPlugin::repair(Unit* u)
 {
+ kdDebug() << k_funcinfo << endl;
+ if (unit()->isFacility()) {
+	if (!u->moveTo(unit()->x(), unit()->y())) {
+		kdDebug() << u->id() << " cannot find a way to repairyard" << endl;
+		u->setWork(Unit::WorkNone);
+	}
+ } else {
+	if (!unit()->moveTo(u->x(), u->y())) {
+		kdDebug() << "Cannot find way to " << u->id() << endl;
+		unit()->setWork(Unit::WorkNone);
+	} else {
+		unit()->setAdvanceWork(Unit::WorkMove);
+	}
+ }
 }
 
-void RepairPlugin::advance()
+void RepairPlugin::repairInRange()
 {
- 
+// kdDebug() << k_funcinfo << endl;
+ //TODO: support for friendly non-player (i.e. allied) units
+
+ // TODO: once we started repairing a unit also repair it in the next call,
+ // until it isn't in range anymore or is repaired
+ QCanvasItemList list = unit()->unitsInRange();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	Unit* u = (Unit*)list[i];
+	if (u->health() >= u->unitProperties()->health()) {
+		
+		continue;
+	}
+	if (!unit()->owner()->isEnemy(u->owner())) {
+		kdDebug() << "repair" << u->id() << endl;
+		u->setHealth(u->unitProperties()->health());
+		return; // only one unit at once
+	}
+ }
 }
 
 
