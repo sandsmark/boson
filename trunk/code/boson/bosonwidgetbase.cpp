@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,6 +99,8 @@ public:
 		mActionCmdFrame = 0;
 
 		mScript = 0;
+
+		mCanvas = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
@@ -114,6 +116,8 @@ public:
 	bool mInitialized;
 
 	BosonScript* mScript;
+
+	BosonCanvas* mCanvas;
 };
 
 BosonWidgetBase::BosonWidgetBase(QWidget* parent)
@@ -169,7 +173,7 @@ void BosonWidgetBase::setDisplayManager(BoDisplayManager* displayManager)
 
 BosonCanvas* BosonWidgetBase::canvas() const
 {
- return boGame->canvasNonConst();
+ return d->mCanvas;
 }
 
 BosonLocalPlayerInput* BosonWidgetBase::localPlayerInput() const
@@ -208,7 +212,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 
  initPlayersMenu();
 
- BosonScript::setCanvas(canvas());
  BosonScript::setGame(boGame);
 }
 
@@ -245,12 +248,6 @@ void BosonWidgetBase::initMap()
 
 void BosonWidgetBase::initConnections()
 {
- connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
-		this, SLOT(slotUnitRemoved(Unit*)));
-
- connect(canvas(), SIGNAL(signalItemAdded(BosonItem*)),
-		this, SLOT(slotItemAdded(BosonItem*)));
-
  connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
 		this, SLOT(slotLoadExternalStuff(QDataStream&)));
  connect(boGame, SIGNAL(signalSaveExternalStuff(QDataStream&)),
@@ -756,6 +753,7 @@ void BosonWidgetBase::quitGame()
 // this needs to be done first, before the players are removed
  boDebug() << k_funcinfo << endl;
  boGame->quitGame();
+ d->mCanvas = 0;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -1260,5 +1258,16 @@ void BosonWidgetBase::slotShowGLStates()
 void BosonWidgetBase::changeToConfigCursor()
 {
  slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
+}
+
+void BosonWidgetBase::setCanvas(BosonCanvas* canvas)
+{
+ d->mCanvas = canvas;
+ connect(d->mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
+		this, SLOT(slotUnitRemoved(Unit*)));
+ connect(d->mCanvas, SIGNAL(signalItemAdded(BosonItem*)),
+		this, SLOT(slotItemAdded(BosonItem*)));
+
+ BosonScript::setCanvas(d->mCanvas);
 }
 
