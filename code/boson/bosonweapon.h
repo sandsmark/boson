@@ -175,6 +175,8 @@ class BosonWeaponProperties : public PluginProperties
      **/
     bool autoUse() const  { return mAutoUse; }
 
+    bool takeTargetVeloIntoAccount() const  { return mTakeTargetVeloIntoAccount; }
+
     /**
      * Creates new shot
      * @param attacker Unit that fired this shot
@@ -214,6 +216,7 @@ class BosonWeaponProperties : public PluginProperties
     void setHeight(bofixed height)  { mHeight = height; }
     void setSound(int event, QString filename);
     void setAutoUse(bool use)  { mAutoUse = use; }
+    void setTakeTargetVeloIntoAccount(bool take)  { mTakeTargetVeloIntoAccount = take; }
 
     void reset();
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
@@ -258,6 +261,7 @@ class BosonWeaponProperties : public PluginProperties
     QMap<int, QString> mSounds;
     QIntDict<BoAction> mActions;
     bool mAutoUse;
+    bool mTakeTargetVeloIntoAccount;
 
 
 #undef DECLAREUPGRADEABLE

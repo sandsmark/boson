@@ -105,6 +105,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
+  mTakeTargetVeloIntoAccount = cfg->readBoolEntry("TakeTargetVeloIntoAccount", false);
   mShootEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootEffects");
   mFlyEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyEffects");
   mHitEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "HitEffects");
@@ -406,7 +407,24 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
-  shoot(BoVector3Fixed(u->centerX(), u->centerY(), u->z()) + u->unitProperties()->hitPoint());
+  BoVector3Fixed targetpos(u->centerX(), u->centerY(), u->z());
+  targetpos += u->unitProperties()->hitPoint();
+  BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
+  if(mProp->takeTargetVeloIntoAccount() && mProp->shotType() == BosonShot::Missile)
+  {
+    // Calculate how much time it should take to reach target
+    // Note that this is just _approximation_! It doesn't take many things,
+    //  e.g. acceleration into account.
+    float dist = (targetpos - mypos).length();
+    float time = dist / mProp->speed();
+    targetpos += BoVector3Fixed(u->xVelocity(), u->yVelocity(), u->zVelocity()) * time;
+  }
+  if (!unit())
+  {
+    boError() << k_funcinfo << "NULL unit" << endl;
+    return;
+  }
+  shoot(mypos, targetpos);
 }
 
 void BosonWeapon::shoot(const BoVector3Fixed& target)
