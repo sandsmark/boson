@@ -80,6 +80,7 @@ public:
 	Cell* cell(int x, int y) const;
 
 	bool loadMap(QDomElement& node);
+	bool loadHeightMapImage(const QByteArray&);
 
 	/**
 	 * Read the map geo from stream. This only reads map size, playercount
@@ -98,6 +99,8 @@ public:
 	 **/
 	bool loadCells(QDataStream& stream);
 
+	bool loadHeightMap(QDataStream& stream);
+
 	/**
 	 * Save the map geo into stream. This creates a stream in the format
 	 * used by @ref loadMapGeo. You can use this to send the map geo to
@@ -110,8 +113,10 @@ public:
 	 **/
 	bool saveMapGeo(QDataStream& stream);
 	bool saveCells(QDataStream& stream);
+	bool saveHeightMap(QDataStream& stream);
 
 	bool saveMap(QDomElement& node);
+	QByteArray saveHeightMapImage();
 
 	/**
 	 * @return TRUE if the current map is valid i.e. can be transmitted
@@ -160,6 +165,8 @@ public:
 	 **/
 	void fill(int ground);
 
+	inline float* heightMap() const { return mHeightMap; }
+
 public slots:
 	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 
@@ -189,6 +196,9 @@ protected:
 	bool loadCells(QDomElement&);
 	bool loadCell(QDomElement&, int& x, int& y, int& groundType, unsigned char& b);
 
+	static float pixelToHeight(int p);
+	static int heightToPixel(float height);
+
 
 protected slots:
 	/**
@@ -204,6 +214,7 @@ private:
 	class BosonMapPrivate;
 	BosonMapPrivate* d;
 	Cell* mCells;
+	float* mHeightMap;
 	bool mModified;
 
 	unsigned int mMapWidth;

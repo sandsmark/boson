@@ -53,6 +53,11 @@ public:
 		return fileData(QString::fromLatin1("map.xml"));
 	}
 
+	QByteArray heightMapData() const
+	{
+		return fileData(QString::fromLatin1("heightmap.png"));
+	}
+
 	/**
 	 * @return The content of the scenario.xml file
 	 **/

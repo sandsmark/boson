@@ -200,7 +200,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
  }
 
  // this takes most loading time
- if (!loadMapXML(mFile->mapData())) {
+ if (!loadMapXML(mFile->mapData(), mFile->heightMapData())) {
 	boError() << k_funcinfo << "Error loading map from " << file << endl;
 	return false;
  }
@@ -222,10 +222,14 @@ bool BosonPlayField::loadDescriptionXML(const QByteArray& xml)
  return description.toString();
 }
 
-bool BosonPlayField::loadMapXML(const QByteArray& xml)
+bool BosonPlayField::loadMapXML(const QByteArray& xml, const QByteArray& heightMapImage)
 {
  if (xml.size() == 0) {
-	boError() << k_funcinfo << "empty byte array" << endl;
+	boError() << k_funcinfo << "empty byte array for map.xml" << endl;
+	return false;
+ }
+ if (heightMapImage.size() == 0) {
+	boError() << k_funcinfo << "empty height map array" << endl;
 	return false;
  }
  QDomDocument doc("BosonMap");
@@ -247,6 +251,12 @@ bool BosonPlayField::loadMapXML(const QByteArray& xml)
  bool ret = mMap->loadMap(root);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map" << endl;
+	return false;
+ }
+ boWarning() << k_funcinfo << "should load height map now" << endl;
+ ret = mMap->loadHeightMapImage(heightMapImage);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
 	return false;
  }
  emit signalNewMap(mMap);
@@ -315,6 +325,11 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "Unable to save scenario" << endl;
 	return false;
  }
+ QByteArray heightMap = mMap->saveHeightMapImage();
+ if (heightMap.size() == 0) {
+	boError() << k_funcinfo << "Unable to save height map" << endl;
+	return false;
+ }
 
  QString topDir = fileInfo.fileName();
  if (topDir.right(7) == QString::fromLatin1(".tar.gz")) {
@@ -332,6 +347,7 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  QString group = "foobar";
  f->writeFile(QString::fromLatin1("%1/map.xml").arg(topDir), user, group, map.length(), map.data());
  f->writeFile(QString::fromLatin1("%1/scenario.xml").arg(topDir), user, group, scenario.length(), scenario.data());
+ f->writeFile(QString::fromLatin1("%1/heightmap.png").arg(topDir), user, group, heightMap.size(), heightMap.data());
  f->writeFile(QString::fromLatin1("%1/%2/description.xml").arg(topDir).arg(QString::fromLatin1("C")), user, group, description.length(), description.data());
 
  mMap->setModified(false);
@@ -391,6 +407,9 @@ bool BosonPlayField::loadMap(QDataStream& stream)
  if (!mMap->loadCells(stream)) {
 	return false;
  }
+ if (!mMap->loadHeightMap(stream)) {
+	return false;
+ }
  emit signalNewMap(mMap);
  return true;
 }
@@ -403,6 +422,7 @@ void BosonPlayField::saveMap(QDataStream& stream)
  }
  mMap->saveMapGeo(stream);
  mMap->saveCells(stream);
+ mMap->saveHeightMap(stream);
 }
 
 void BosonPlayField::quit()

@@ -974,10 +974,25 @@ void BosonBigDisplayBase::renderCells()
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
+ BosonMap* map = mCanvas->map();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
+ float* heightMap = map->heightMap();
+ if (!heightMap) {
+	boError() << k_funcinfo << "NULL height map" << endl;
+ }
 
+
+ // AB: we can increase performance even more here. lets replace d->mRenderCells
+ // by two array defining the coordinates of cells and the heightmap values.
+ // we could use that as vertex array for example.
  QPtrListIterator<Cell> cellIt(d->mRenderCells);
  GLuint texture = 0;
  int tile = -1;
+ int heightMapWidth = map->width() + 1;
+// int heightMapHeight = map->height() + 1;
  for (; cellIt.current(); ++cellIt) {
 	Cell* c = cellIt.current();
 	int x = c->x();
@@ -987,8 +1002,8 @@ void BosonBigDisplayBase::renderCells()
 		// because of the glClear() call.
 		continue;
 	}
-	GLfloat cellXPos = (float)c->x() * BO_GL_CELL_SIZE;
-	GLfloat cellYPos = -(float)c->y() * BO_GL_CELL_SIZE;
+	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
+	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 	if (c->tile() != tile) {
 		texture = textures->texture(c->tile());
 		tile = c->tile();
@@ -996,11 +1011,19 @@ void BosonBigDisplayBase::renderCells()
 
 	}
 	// FIXME: performance: only a single glBegin(GL_QUADS)!
+//	boDebug() << heightMap[y * heightMapWidth + x] << endl;
 	glBegin(GL_QUADS);
-		glTexCoord2fv(textureUpperLeft); glVertex3f(cellXPos, cellYPos, 0.0);
-		glTexCoord2fv(textureLowerLeft); glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, 0.0);
-		glTexCoord2fv(textureLowerRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, 0.0);
-		glTexCoord2fv(textureUpperRight); glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, 0.0);
+		glTexCoord2fv(textureUpperLeft);
+		glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x]);
+
+		glTexCoord2fv(textureLowerLeft);
+		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x]);
+
+		glTexCoord2fv(textureLowerRight);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)]);
+
+		glTexCoord2fv(textureUpperRight);
+		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)]);
 	glEnd();
  }
 }
