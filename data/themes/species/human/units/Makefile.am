@@ -1,4 +1,5 @@
 MOBILE_UNITS = \
+	mob_ferry \
 	mob_grizzly \
 	mob_leopard \
 	mob_mineralharvester \
@@ -9,18 +10,18 @@ MOBILE_UNITS = \
 	mob_tiger \
 	mob_tornado
 FACILITIES = \
-	fix_comsat \
 	fix_commandbunker \
+	fix_comsat \
 	fix_helipad \
+	fix_mineralrefinery \
+	fix_oilrefinery \
 	fix_oiltower \
 	fix_powerplant \
-	fix_oilrefinery \
 	fix_repairpad \
 	fix_samsite \
 	fix_techcenter \
 	fix_turret \
-	fix_warfactory \
-	fix_mineralrefinery
+	fix_weaponsfactory
 
 unitsdir = $(kde_datadir)/boson/themes/species/human/units
 
