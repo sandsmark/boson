@@ -63,6 +63,7 @@ public:
 		IdWantedRotation = UnitBase::IdLast + 6,
 		IdMoveAttacking = UnitBase::IdLast + 7,
 		IdSearchPath = UnitBase::IdLast + 8,
+		IdSlowDownAtDestination = UnitBase::IdLast + 9,
 
 		// properties in MobileUnit
 		IdMovingFailed = UnitBase::IdLast + 51,
@@ -285,9 +286,10 @@ public:
 	 * occupied and you should use e.g. @ref weaponRange if the unit should
 	 * attack. -1 keeps the previously set range.
 	 * @param attack Whether to stop and attack any enemy units in range while moving
+	 * @param slowDownAtDetination Whether to slow down before reaching detination point
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(float x, float y, int range = 0, bool attack = false);
+	bool moveTo(float x, float y, int range = 0, bool attack = false, bool slowDownAtDetination = true);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -410,6 +412,8 @@ protected:
 	 * @return Whether unit should attack any enemy units in range while moving
 	 **/
 	int moveAttacking() const;
+
+	int slowDownAtDestination() const;
 
 	/**
 	 * @return Whether new path should be searched

@@ -31,6 +31,7 @@
 #include "cell.h"
 #include "upgradeproperties.h"
 #include "bodebug.h"
+#include "bosonweapon.h"
 
 #include <klocale.h>
 
@@ -620,4 +621,117 @@ unsigned int HarvesterPlugin::unloadingSpeed() const
 	return 0;
  }
  return prop->unloadingSpeed();
+}
+
+
+BombingPlugin::BombingPlugin(Unit* owner) : UnitPlugin(owner)
+{
+ mWeapon = 0;
+ mPosX = 0;
+ mPosY = 0;
+}
+
+BombingPlugin::~BombingPlugin()
+{
+}
+
+void BombingPlugin::bomb(int weaponId, float x, float y)
+{
+ boDebug() << k_funcinfo << "wep: " << weaponId << "; pos: (" << x << "; " << y << ")" << endl;
+ BosonWeapon* w = unit()->weapon(weaponId);
+ if (!w) {
+	boError() << k_funcinfo << "No weapon with id " << weaponId << endl;
+	return;
+ }
+ if (w->properties()->shotType() != BosonShot::Bomb) {
+	boError() << k_funcinfo << "Weapon with id " << weaponId << " is not a bomb" << endl;
+	return;
+ }
+
+ unit()->stopMoving();
+
+ int cellX = (int)(x / BO_TILE_SIZE);
+ int cellY = (int)(y / BO_TILE_SIZE);
+ if (!canvas()->cell(cellX, cellY)) {
+	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
+	return;
+ }
+
+ // This is where unit has to be when making the drop
+ // FIXME: REWRITE MOVING CODE OF Unit!!!
+ // This is probably one of the worst examples of hacks used to work around
+ //  problems with moving code. I want to be able to just write
+ //  unit()->move(x, y) and unit would go exactly to (x, y) without any trouble.
+ //  But ATM this isn't possible.
+ mPosX = (int)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2 - unit()->width() / 2/* + w->offset().x()*/);
+ mPosY = (int)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2 - unit()->height() / 2/* + w->offset().y()*/);
+ boDebug() << k_funcinfo << "Drop-point: (" << mPosX << "; " << mPosY << ")" << endl;
+ mWeapon = w;
+
+ unit()->setPluginWork(UnitPlugin::Bomb);
+}
+
+void BombingPlugin::advance(unsigned int)
+{
+ boDebug() << k_funcinfo << endl;
+
+ // Check if we're at the drop point
+ float dist = QMAX(QABS(unit()->x() - mPosX), QABS(unit()->y() - mPosY));
+ boDebug() << k_funcinfo << "dist: " << dist << endl;
+ boDebug() << k_funcinfo << "my pos is: (" << unit()->x() << "; " << unit()->y() << ");  drop-point is: (" << mPosX << "; " << mPosX << ")" << endl; // ";  movedest is: (" << d->mMoveDestX << "; " << d->mMoveDestY << ")" << endl;
+// int x = (int)(BosonItem::x() + width() / 2);
+// int y = (int)(BosonItem::y() + height() / 2);
+ if ((unit()->x() != mPosX) || (unit()->y() != mPosY)) {
+// if ((x() != d->mMoveDestX) || (y() != d->mMoveDestY)) {
+// if (dist > 2) {
+	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
+	if (!unit()->moveTo(mPosX, mPosY, 0, false, false)) {
+		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
+		unit()->setWork(Unit::WorkNone);
+	} else {
+		//d->mSlowDownAtDestination = 0;
+		unit()->setAdvanceWork(Unit::WorkMove);
+	}
+	return;
+ }
+
+ // We're at drop point. Drop the bomb
+ boDebug() << k_funcinfo << "At drop-point!" << endl;
+ if (mWeapon->reloaded()) {
+	boDebug() << k_funcinfo << "Bomb ready. Dropping..." << endl;
+	mWeapon->dropBomb();
+	// And get the hell out of there
+	// Go away from bomb's explosion radius
+	float dist = mWeapon->properties()->damageRange() * BO_TILE_SIZE + unit()->width() / 2;
+  boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
+	float newx = unit()->x();
+	float newy = unit()->y();
+	// TODO: quite messy code, maybe it can be cleaned up somehow
+	int rot = (int)unit()->rotation() % 360;
+	if (rot >= 45 && rot <= 135) {
+		newx += dist;
+	} else if (rot >= 225 && rot <= 315) {
+		newx -= dist;
+	}
+	if (rot <= 45 || rot >= 315) {
+		newy -= dist;
+	} else if (rot >= 135 && rot <= 225) {
+		newy += dist;
+	}
+
+	// Make sure coords are valid
+	newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE));
+	newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE));
+
+  boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
+	if (!unit()->moveTo(newx, newy)) {
+		boWarning() << k_funcinfo << "Aargh! Can't move away from drop-point!" << endl;
+		unit()->setWork(Unit::WorkNone);
+	} else {
+		unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
+	}
+	mWeapon = 0;
+	boDebug() << k_funcinfo << "returning" << endl;
+	return;
+ }
 }

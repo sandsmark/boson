@@ -32,6 +32,7 @@ class Cell;
 class Player;
 class PluginProperties;
 class Boson;
+class BosonWeapon;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -45,6 +46,8 @@ public:
 		Repair = 2,
 		Harvester = 3,
 		Weapon = 4, // note: this won't end up in Unit::plugin()! weapons are stored separately. also note that rtti==Weapon is *not* unique! they have their own class and rttis - see BosonWeapon
+		Bomb = 5,
+		Mine = 6,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -290,5 +293,27 @@ private:
 	Unit* mRefinery; // TODO we need to store this when Unit::save() is called!
 };
 
+/**
+ * @short Helper plugin for bombing (dropping bomb)
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BombingPlugin : public UnitPlugin
+{
+public:
+	BombingPlugin(Unit* owner);
+	~BombingPlugin();
+
+	virtual int pluginType() const { return Bomb; }
+
+	void bomb(int weaponId, float x, float y);
+
+	virtual void advance(unsigned int);
+
+private:
+	BosonWeapon* mWeapon;
+	int mPosX;
+	int mPosY;
+};
 
 #endif

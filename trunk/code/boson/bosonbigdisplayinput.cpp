@@ -36,11 +36,13 @@
 #include "bodebug.h"
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
+#include "bosonweapon.h"
 
 #include <klocale.h>
 
 BosonBigDisplayInput::BosonBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
 {
+ weaponId = -1;
 }
 
 BosonBigDisplayInput::~BosonBigDisplayInput()
@@ -80,6 +82,11 @@ void BosonBigDisplayInput::actionClicked(const BoMouseEvent& event)
 			} else {
 				unlock = actionMoveWithAttack(event.canvasVector());
 			}
+			break;
+		}
+		case ActionDropBomb:
+		{
+			unlock = actionDropBomb(event.canvasVector());
 			break;
 		}
 		case ActionFollow:
@@ -321,6 +328,26 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
  return true;
 }
 
+bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
+{
+ if (!localPlayer()) {
+	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!selection()) {
+	BO_NULL_ERROR(selection());
+	return false;
+ }
+ // AB: note that only x and y are relevant from canvasVector !
+ // z is ignored
+ localPlayerInput()->dropBomb(selection()->leader(), weaponId, (int)canvasVector.x(), (int)canvasVector.y());
+ weaponId = -1;
+ if (selection()->leader()->owner() == localPlayer()) {
+	selection()->leader()->playSound(SoundOrderAttack);
+ }
+ return true;
+}
+
 bool BosonBigDisplayInput::actionRepair(const BoVector3& canvasVector)
 {
  if (!selection()) {
@@ -462,6 +489,10 @@ void BosonBigDisplayInput::action(const BoSpecificAction& action)
 	case ActionPlacementPreview:
 		break;
 	case ActionAttack:
+		setCursorType(CursorAttack);
+		break;
+	case ActionDropBomb:
+		weaponId = action.weapon()->id();
 		setCursorType(CursorAttack);
 		break;
 	default:
