@@ -45,9 +45,6 @@ class BoDisplayManager : public QWidget
 	Q_OBJECT
 public:
 	/**
-	 * @param gameMode controls whether to create @ref BosonBigDisplay or
-	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
-	 * BosonBigDisplay widgets are the default (TRUE)
 	 **/
 	BoDisplayManager(QWidget* parent);
 	~BoDisplayManager();
@@ -151,12 +148,6 @@ public slots:
 	void slotMoveActiveSelection(int x, int y);
 
 	/**
-	 * Move the viewport of the @ref activeDisplay so that it displays @p
-	 * center in the center of the screen.
-	 **/
-	void slotReCenterActiveDisplay(const QPoint& center);
-
-	/**
 	 * Select the a single unit in the @ref activeDisplay. See also @ref
 	 * BoSelection::slotSelectSingleUnit
 	 **/
@@ -172,15 +163,6 @@ public slots:
 
 signals:
 	/**
-	 * Emitted when the currently active display changes.
-	 * @param active The currently (newly) active display. See @ref
-	 * activeDisplay
-	 * @param old The previously active display (if any) or NULL if
-	 * there was no.
-	 **/
-	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
-
-	/**
 	 * See @ref BosonBigDisplayInputBase::signalLockAction
 	 **/
 	void signalLockAction(bool);
@@ -194,23 +176,8 @@ signals:
 	 **/
 	void signalSelectionChanged(BoSelection*);
 
-	/**
-	 * Emitted when the viewport of the @ref activeDisplay is changed. The
-	 * params specify the new viewport (in cell coordinates).
-	 **/
-	void signalChangeActiveViewport(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
-
 protected:
-	BosonBigDisplayBase* addDisplay(QWidget* parent);
-
 	void grabMovieFrame();
-
-protected slots:
-	void slotMakeActiveDisplay(BosonBigDisplayBase*);
-	void slotChangeViewport(BosonBigDisplayBase* display, const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
-
-private:
-	void markActive(BosonBigDisplayBase* display, bool active);
 
 private:
 	class BoDisplayManagerPrivate;

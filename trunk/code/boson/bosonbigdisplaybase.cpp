@@ -356,6 +356,9 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  // we go back to the original (non-fullscreen) mode here
  BoFullScreen::enterOriginalMode();
 
+ qApp->setGlobalMouseTracking(false);
+ qApp->removeEventFilter(this);
+
  quitGame();
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
@@ -383,6 +386,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
  d->mFovY = 60.0f;
+
  BosonScript::setDisplay(this); // AB: EVIL! this is part of BosonScript init
 // process, but initializing is partially done in BosonWidgetBase, partially
 // here. this is *bad*
@@ -434,6 +438,9 @@ void BosonBigDisplayBase::init()
 		SLOT(slotAddLineVisualization(const QValueList<BoVector3>&, const BoVector4&, float, int, float)));
 
  setUpdateInterval(boConfig->updateInterval());
+
+ qApp->setGlobalMouseTracking(true);
+ qApp->installEventFilter(this);
 }
 
 void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
@@ -462,15 +469,6 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, float, float)));
 	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
 		d->mGLMiniMap, SLOT(slotUnitDestroyed(Unit*)));
- // AB: from bosonwidgetbase.cpp:
- /*
- connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
-		minimap(), SLOT(slotMoveRect(
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
- // I guess we can do this by simply forwarding the view frustum to the minimap
- // when rendering?
- */
 
 	connect(d->mGLMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			this, SLOT(slotReCenterDisplay(const QPoint&)));
@@ -1904,7 +1902,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 	}
 	case QEvent::MouseButtonDblClick:
 	{
-		makeActive();
 		isDoubleClick = e->button();
 		// actual actions will happen on ButtonRelease!
 		e->accept();
@@ -1912,7 +1909,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* io, QDataStream& stream, QMous
 	}
 	case QEvent::MouseButtonPress:
 	{
-		makeActive();
 		// no action should happen here!
 		isDoubleClick = NoButton;
 		if (e->button() == LEFT_BUTTON) {
@@ -2189,23 +2185,6 @@ void BosonBigDisplayBase::addMouseIO(PlayerIO* io)
  connect(d->mMouseIO, SIGNAL(destroyed()),
 		this, SLOT(slotMouseIODestroyed()));
  io->addGameIO(d->mMouseIO);
-}
-
-void BosonBigDisplayBase::makeActive()
-{
- emit signalMakeActive(this);
-}
-
-void BosonBigDisplayBase::setActive(bool a)
-{
- if (a) {
-	qApp->setGlobalMouseTracking(true);
-	qApp->installEventFilter(this);
- } else {
-	qApp->setGlobalMouseTracking(false);
-	qApp->removeEventFilter(this);
- }
- selection()->activate(a);
 }
 
 void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)

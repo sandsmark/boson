@@ -338,7 +338,6 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  b->setKGameChat(d->mChat->chatWidget());
 
  b->show();
- b->makeActive();
 
  b->setInputInitialized(true);
 }

@@ -174,21 +174,6 @@ public:
 
 	const BosonCanvas* canvas() const { return mCanvas; }
 
-	/**
-	 * Emit @ref signalMakeActive to inform @ref BosonWidget and @ref
-	 * BoDisplayManager that this display should become the active display.
-	 *
-	 * Use this if you want to change the active status of the display!
-	 **/
-	void makeActive();
-
-	/**
-	 * Called by @ref BoDisplayManager (once it can handle GL displays)
-	 *
-	 * Do NOT call directly!
-	 **/
-	void setActive(bool a);
-
 	void addLineVisualization(BoLineVisualization v);
 	void advanceLineVisualization();
 

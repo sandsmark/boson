@@ -70,6 +70,7 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
 	BoSelection* s = new BoSelection(this);
 	d->mSelectionGroups.insert(i, s);
  }
+ d->mLayout = new QVBoxLayout(this);
 }
 
 BoDisplayManager::~BoDisplayManager()
@@ -80,31 +81,6 @@ BoDisplayManager::~BoDisplayManager()
  delete d->mActiveDisplay;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
-}
-
-void BoDisplayManager::slotMakeActiveDisplay(BosonBigDisplayBase* display)
-{
- if (display == d->mActiveDisplay) {
-	return;
- }
- boDebug() << k_funcinfo << endl;
- BosonBigDisplayBase* old = d->mActiveDisplay;
- d->mActiveDisplay = display;
-
- if (old) {
-	markActive(old, false);
- }
- markActive(d->mActiveDisplay, true);
- emit signalActiveDisplay(d->mActiveDisplay, old);
-}
-
-void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
-{
- if (!display) {
-	boWarning() << k_funcinfo << "NULL display" << endl;
-	return;
- }
- display->setActive(active);
 }
 
 BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
@@ -118,38 +94,15 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 	boDebug() << k_funcinfo << "already have displays - returning first..." << endl;
 	return d->mActiveDisplay;
  }
- BosonBigDisplayBase* b = addDisplay(this);
+ boDebug() << k_funcinfo << endl;
+ BosonBigDisplayBase* b = new BosonBigDisplayBase(this);
+ d->mActiveDisplay = b;
+ connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
+		this, SIGNAL(signalSelectionChanged(BoSelection*)));
 
- delete d->mLayout;
- d->mLayout = new QVBoxLayout(this);
  d->mLayout->addWidget(b);
  d->mLayout->activate();
 
- slotMakeActiveDisplay(b);
- return b;
-}
-
-BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
-{
- if (!parent) {
-	boError() << k_funcinfo << "parent must not be 0" << endl;
-	return 0;
- }
- if (d->mActiveDisplay) {
-	boError() << k_funcinfo << "multiple displays not supported anymore" << endl;
-	return 0;
- }
- boDebug() << k_funcinfo << endl;
- BosonBigDisplayBase* b = new BosonBigDisplayBase(parent);
- connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
-		this, SIGNAL(signalSelectionChanged(BoSelection*)));
- connect(b, SIGNAL(signalChangeViewport(BosonBigDisplayBase*,
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
-		this, SLOT(slotChangeViewport(BosonBigDisplayBase*,
-		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
-
- connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)),
-		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
  return b;
 }
 
@@ -260,13 +213,6 @@ void BoDisplayManager::slotMoveActiveSelection(int x, int y)
  BO_CHECK_NULL_RET(activeDisplay()->displayInput());
 
  activeDisplay()->displayInput()->slotMoveSelection(x, y); // FIXME: not a slot anymore
-}
-
-void BoDisplayManager::slotReCenterActiveDisplay(const QPoint& center)
-{
- BO_CHECK_NULL_RET(activeDisplay());
-
- activeDisplay()->slotReCenterDisplay(center); // FIXME: not a slot anymore
 }
 
 void BoDisplayManager::slotActiveSelectSingleUnit(Unit* unit)
@@ -398,14 +344,6 @@ double BoDisplayManager::fps() const
 	return 0.0;
  }
  return activeDisplay()->fps();
-}
-
-void BoDisplayManager::slotChangeViewport(BosonBigDisplayBase* display, const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
-{
- if (display != activeDisplay()) {
-	return;
- }
- emit signalChangeActiveViewport(topLeft, topRight, bottomLeft, bottomRight);
 }
 
 void BoDisplayManager::slotAction(const BoSpecificAction& action)
