@@ -105,6 +105,11 @@ QPtrVector<Cell>* BosonItem::cells()
  return &mCells;
 }
 
+QPtrVector<Cell>* BosonItem::cellsConst() const
+{
+ return &mCells;
+}
+
 void BosonItem::makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom)
 {
  left = QMAX(left, 0);
