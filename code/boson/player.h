@@ -129,6 +129,17 @@ public:
 	int mobilesCount();
 	int facilitiesCount();
 
+	/**
+	 * @return TRUE if this player can build units with type unitType, FALSE
+	 * otherwise
+	 **/
+	bool canBuild(int unitType);
+
+	/**
+	 * @return TRUE if player has unit with type type, FALSE otherwise
+	 **/
+	bool hasUnitWithType(int type);
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
