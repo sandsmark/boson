@@ -133,6 +133,8 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
  }
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
+ //TODO: instead of transmitting the filename of the map we should transmit
+ //the map itself!
  stream << d->mMapIndex2Identifier[index];
  game()->sendMessage(buffer, BosonMessage::ChangeMap);
 }
@@ -175,6 +177,9 @@ void KGameDialogBosonConfig::slotScenarioChanged(int index)
  }
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
+
+ //TODO: instead of transmitting the filename of the scenario we should transmit
+ //the scenario itself!
  stream << d->mScenarioIndex2Identifier[index];
  game()->sendMessage(buffer, BosonMessage::ChangeScenario);
 }
