@@ -262,10 +262,35 @@ class BoMatrix
       return true;
     }
 
+    /**
+     * Translate (i.e. move) the matrix by x,y,z.
+     **/
     void translate(GLfloat x, GLfloat y, GLfloat z);
     inline void translate(BoVector3 v)
     {
       translate(v.x(), v.y(), v.z());
+    }
+
+    /**
+     * Scale the matrix by x,y,z.
+     *
+     * Note that if one of x,y,z is 0.0 the result will probably an invalid
+     * matrix. Don't do that unless you really know what you're doing.
+     **/
+    void scale(GLfloat x, GLfloat y, GLfloat z);
+
+    /**
+     * Multiply the matrix by @p mat.
+     * @param mat An array as returned by @ref data and as used by OpenGL.
+     **/
+    void multiply(const GLfloat* mat);
+
+    /**
+     * @overloaded
+     **/
+    inline void multiply(const BoMatrix* mat)
+    {
+      multiply(mat->data());
     }
 
     /**
