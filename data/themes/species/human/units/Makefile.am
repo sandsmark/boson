@@ -26,6 +26,7 @@ FACILITIES = \
 	fix_samsite \
 	fix_techcenter \
 	fix_turret \
+	fix_airturret \
 	fix_weaponsfactory
 
 unitsdir = $(kde_datadir)/boson/themes/species/human/units
