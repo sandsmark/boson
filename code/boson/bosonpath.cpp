@@ -382,9 +382,12 @@ float BosonPath::cost(int x, int y)
   }
 
   // Check if there are units on that tile (slow method?)
-// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
-// qcanvas::collisions() treats width==height==10 as width==height==11
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE, BO_TILE_SIZE);
+#else
   QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE - 1, BO_TILE_SIZE - 1);// QT uses QCanvasRectangle::boudingRect() for collision detection - but this @_,+p*@ function adds +1 to width and height !!! (QCanvasRectangle::rect() is ok)
+#endif
   // collisions() consists in this case of a simple
   // QRect r1=rect,r2=mUnit->boundingRectAdvanced(); return r1.intersects(r2);
   QCanvasItemList list = mUnit->canvas()->collisions(rect);

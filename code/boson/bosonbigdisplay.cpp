@@ -258,7 +258,7 @@ void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 	drawSelectionRect();
 	// would be great here but is a huge performance
 	// problem (therefore in releasebutton):
-	// selectArea(QRect(selectionStart(), pos));
+	// selectArea();
  }
 }
 
