@@ -32,6 +32,7 @@ template<class T> class QValueList;
 
 namespace ufo {
 	class UMenuBar;
+	class UMenuItem;
 	class UWidget;
 	class UActionEvent;
 };
@@ -54,7 +55,7 @@ public slots:
 	/**
 	 * Just emit @ref signalActivated
 	 **/
-	void slotActivated();
+	virtual void slotActivated();
 
 signals:
 	void signalActivated();
@@ -65,6 +66,35 @@ private:
 private:
 	BoUfoActionPrivate* d;
 	BoUfoActionCollection* mParentCollection;
+};
+
+class BoUfoToggleAction : public BoUfoAction
+{
+	Q_OBJECT
+public:
+	BoUfoToggleAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name);
+	~BoUfoToggleAction();
+
+	void setChecked(bool);
+	bool checked() const
+	{
+		return mChecked;
+	}
+
+public slots:
+	virtual void slotActivated();
+
+signals:
+	void signalToggled(bool);
+
+	/**
+	 * Emitter internally by @ref setChecked. You should use @ref
+	 * signalToggled.
+	 **/
+	void signalInternalToggle(bool);
+
+private:
+	bool mChecked;
 };
 
 class BoUfoActionCollectionPrivate;
@@ -116,7 +146,7 @@ class BoUfoMenuBarItem : public QObject
 {
 	Q_OBJECT
 public:
-	BoUfoMenuBarItem(const QString& text, QObject* parent, const char* name = 0);
+	BoUfoMenuBarItem(BoUfoAction* a, const QString& text, QObject* parent, const char* name = 0);
 	~BoUfoMenuBarItem();
 
 	const QString& text() const
@@ -124,20 +154,31 @@ public:
 		return mText;
 	}
 
-	/**
-	 * Called by the plib callback
-	 **/
-	void activate();
+	BoUfoAction* action() const
+	{
+		return mAction;
+	}
+	void setUfoItem(ufo::UMenuItem* i);
+	ufo::UMenuItem* ufoItem() const
+	{
+		return mUfoItem;
+	}
 
 protected:
 	void uslotActivated(ufo::UActionEvent*);
 	void uslotHighlighted(ufo::UActionEvent*);
+	void uslotWidgetRemoved(ufo::UWidget*);
+
+private slots:
+	void slotInternalToggle(bool);
 
 signals:
 	void signalActivated();
 
 private:
 	QString mText;
+	BoUfoAction* mAction;
+	ufo::UMenuItem* mUfoItem;
 };
 
 
@@ -160,7 +201,7 @@ public:
 	BoUfoMenuBarMenu(const QString& text, QObject* parent, const char* name = 0);
 	~BoUfoMenuBarMenu();
 
-	void addMenuItem(const QString& text, const QObject* receiver, const char* slot);
+	void addMenuItem(const QString& text, BoUfoAction* receiver, const char* slot);
 	void addSeparator();
 	void addSubMenu(BoUfoMenuBarMenu* menu);
 
