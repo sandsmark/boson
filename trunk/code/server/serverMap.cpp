@@ -143,42 +143,44 @@ void BosonServer::placeMob(serverMobUnit *u)
 
 void BosonServer::createFixUnit(facilityMsg_t &data)
 {
-serverFacility	*f;
-int		i,j, i2, j2;
-ulong		k;
+	serverFacility	*f;
 
-logf(LOG_GAME_HIGH, "BosonServer::createFixUnit called");
+	logf(LOG_GAME_HIGH, "BosonServer::createFixUnit called");
 
-data.key	= key;
-data.state	= 0;
-assert(data.who< BOSON_MAX_CONNECTION);
-assert(player[data.who].socketState==SSS_CONNECT_OK);
+	data.key	= key;
+	data.state	= 0;
+	assert(data.who< BOSON_MAX_CONNECTION);
+	assert(player[data.who].socketState==SSS_CONNECT_OK);
 
-f = new serverFacility(player[data.who].buffer, &data);
+	f = new serverFacility(player[data.who].buffer, &data);
 
-/* who is interested in knowing u's arrival */
-i2 = facilityProp[data.type].width / BO_TILE_SIZE;
-j2 = facilityProp[data.type].height / BO_TILE_SIZE;
+	placeFix(f);
 
-k = getPlayerMask(data.who);
-for (i=0; i<i2; i++)
-	for (j=0; j<j2; j++)
-		k |= cells[data.x+i][data.y+j].known;
-f->setKnown(k);
-
-/* telling them */
-f->sendToKnown(MSG_FACILITY_CREATED, sizeof(data), (bosonMsgData *)&data);
-
-facility.insert ( key++, f);
-checkUnitVisibility(f);
+	facility.insert ( key++, f);
+	checkUnitVisibility(f);
 }
 
-/*
- * should be done the same way as placeMob()
- */
-void BosonServer::placeFix(serverFacility *)
+
+void BosonServer::placeFix(serverFacility * f)
 {
-	logf(LOG_ERROR, "Arghhhhhhhhhh... unimplemented placeFix called");
+	ulong		k;
+	int		i,j, i2, j2;
+	int		xx, yy;
+
+	/* who is interested in knowing f's arrival */
+	xx = f->_x() / BO_TILE_SIZE;
+	yy = f->_y() / BO_TILE_SIZE;
+	i2 = (f->getWidth() + BO_TILE_SIZE -1 ) / BO_TILE_SIZE;
+	j2 = (f->getHeight() + BO_TILE_SIZE -1 )/ BO_TILE_SIZE;    
+
+	k = getPlayerMask(f->who);
+	for (i=0; i<i2; i++)
+		for (j=0; j<j2; j++)
+			k |= cells[xx+i][yy+j].known;
+	f->setKnown(k);
+
+	/* telling them */
+	f->reportCreated();
 }
 
 
