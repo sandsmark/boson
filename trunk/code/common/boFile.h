@@ -45,8 +45,8 @@ class boFile
 
 public:
 	boFile();
-virtual	~boFile();
 
+	uint nb_player() { return nbPlayer; }
 protected :
 
 	bool	openRead(const char *);
