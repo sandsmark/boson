@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#include "global.h"
+
 #define BO_TILE_SIZE 48
 #define BO_GL_CELL_SIZE 1.0
 
@@ -71,6 +73,7 @@
 #define DEFAULT_MINIFICATION_FILTER GL_LINEAR
 #define DEFAULT_MIPMAP_MINIFICATION_FILTER GL_NEAREST_MIPMAP_NEAREST
 #define DEFAULT_ALIGN_SELECTION_BOXES true
+#define DEFAULT_RMB_ACTION ActionMove
 
 #endif
 

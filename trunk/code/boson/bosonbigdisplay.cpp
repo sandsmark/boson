@@ -162,9 +162,14 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			}
 		}
 
-		// TODO: let player choose whether to move or attack at RMB
-		if (!actionMove(stream, action.canvasPos())) {
-			return;
+		if(boConfig->RMBAction() == ActionAttack) {
+			if (!actionAttackPos(stream, action.canvasPos())) {
+				return;
+			}
+		} else {
+			if (!actionMove(stream, action.canvasPos())) {
+				return;
+			}
 		}
 		*send = true;
 	} else { // place constructions
@@ -248,7 +253,7 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
  // tell the clients we want to move units:
  stream << (Q_UINT32)BosonMessage::MoveMove;
  // We want to move without attacking
- stream << (Q_UINT8)false;
+ stream << (Q_UINT8)0;
  // tell them where to move to:
  stream << canvasPos;
  // tell them how many units:
@@ -325,7 +330,7 @@ bool BosonBigDisplay::actionAttackPos(QDataStream& stream, const QPoint& canvasP
  // tell the clients we want to move units:
  stream << (Q_UINT32)BosonMessage::MoveMove;
  // We want to move with attacking
- stream << (Q_UINT8)true;
+ stream << (Q_UINT8)1;
  // tell them where to move to:
  stream << canvasPos;
  // tell them how many units:

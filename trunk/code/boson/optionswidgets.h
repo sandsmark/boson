@@ -78,6 +78,7 @@ public:
 	void setGameSpeed(int ms);
 	void setMiniMapScale(double s);
 	void setCmdBackground(const QString& file);
+	void setRMBAction(UnitAction action);
 
 signals:
 	void signalMiniMapScaleChanged(double);
@@ -88,6 +89,7 @@ private:
 	KDoubleNumInput* mMiniMapScale;
 	QComboBox* mCmdBackground;
 	QStringList mCmdBackgrounds;
+	QComboBox* mRMBAction;
 };
 
 class CursorOptions : public QVBox, public OptionsWidget
