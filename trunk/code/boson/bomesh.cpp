@@ -1646,16 +1646,17 @@ void BoMesh::generateLOD()
 		<< " generating: " << LODCount - oldCount
 		<< endl;
 
+ for (unsigned int i = oldCount; i < LODCount; i++) {
+	lod[i] = new BoMeshLOD();
+ }
+
  delete[] d->mLODs;
  d->mLODs = lod;
  d->mLODCount = LODCount;
 
  BoLODBuilder builder(this, lod[0]);
  for (unsigned int i = oldCount; i < LODCount; i++) {
-	lod[i] = new BoMeshLOD();
 	QValueList<BoFace> faces = builder.generateLOD(i);
-	boDebug() << k_funcinfo << "Created lod " << i << " which has " << faces.count() << " of " <<
-			facesCount(0) << " faces" << endl;
 	lod[i]->createFaces(faces.count());
 	for (unsigned int j = 0; j < faces.count(); j++) {
 		lod[i]->setFace(j, faces[j]);
@@ -1670,7 +1671,7 @@ BoMeshLOD* BoMesh::levelOfDetail(unsigned int lod) const
 	boError(100) << k_funcinfo << "NULL LOD pointer" << endl;
 	return 0;
  }
- if (lodCount() < lod) {
+ if (lod >= lodCount()) {
 	boError(100) << k_funcinfo << "invalid lod: " << lod << " have only " << lodCount() << endl;
 	return 0;
  }
