@@ -114,6 +114,11 @@ PlayerIO* Player::playerIO() const
  return d->mPlayerIO;
 }
 
+BosonMap* Player::map() const
+{
+ return d->mMap;
+}
+
 void Player::quitGame(bool destruct)
 {
  boDebug() << k_funcinfo << endl;
