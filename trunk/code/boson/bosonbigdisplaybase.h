@@ -393,13 +393,12 @@ public:
 
 public slots:
 	void slotAction(const BoSpecificAction&);
-	void slotCenterHomeBase();
-	void slotResetViewProperties();
 
 	/**
 	 * @param pos the <em>cell</em>-coordinates of the centered position
 	 **/
 	void slotReCenterDisplay(const QPoint& pos);
+	void slotCenterHomeBase();
 
 	/**
 	 * In case the unit has been destroyed make sure that it's removed from
@@ -412,11 +411,6 @@ public slots:
 
 	void slotFog(int x, int y);
 	void slotUnfog(int x, int y);
-
-	void slotRotateLeft(float factor = 5);
-	void slotRotateRight(float factor = 5);
-	void slotZoomIn(float factor = 5);
-	void slotZoomOut(float factor = 5);
 
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
@@ -452,38 +446,12 @@ protected slots:
 	void slotInitMiniMapFogOfWar();
 
 	void slotAdvance(unsigned int, bool);
-	void slotSetGrabMovie(bool);
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
-	void slotToggleCheating(bool);
-	void slotShowLight0Widget();
-	void slotDebugMemory();
-	void slotDebugKillPlayer(Q_UINT32 playerId);
-	void slotDebugModifyMinerals(Q_UINT32 playerId, int amount);
-	void slotDebugModifyOil(Q_UINT32 playerId, int amount);
-	void slotChangeMaxProfilingEventEntries();
-	void slotChangeMaxProfilingAdvanceEntries();
-	void slotChangeMaxProfilingRenderingEntries();
-	void slotPreferences();
 	void slotPreferencesApply();
-	void slotDebugKGame();
 	void slotUpdateOpenGLSettings();
 	void slotChangeCursor(int, const QString&);
-	void slotUnfogAll(Player* pl = 0);
-	void slotEditorSavePlayFieldAs();
-	void slotEditorDeleteSelectedUnits();
-	void slotEditorEditMapDescription();
-	void slotEditorShowPlaceFacilities();
-	void slotEditorShowPlaceMobiles();
-	void slotEditorShowPlaceGround();
-	void slotEditorImportHeightMap();
-	void slotEditorImportTexMap();
-	void slotEditorExportHeightMap();
-	void slotEditorExportTexMap();
-	void slotEditorEditHeight(bool);
-	void slotEditorEditPlayerMinerals();
-	void slotEditorEditPlayerOil();
 
 protected:
 	/**
@@ -544,37 +512,15 @@ protected:
 	void mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& action, QDataStream& stream, bool* send);
 
 protected slots:
-	void slotToggleSound();
-	void slotToggleMusic();
-	void slotToggleFullScreen(bool);
-	void slotProfiling();
-	void slotBoDebugLogDialog();
-	void slotSleep1s();
-	void slotGrabProfiling();
-	void slotGrabScreenshot();
-	void slotSetShowResources(bool show);
-	void slotSetEnableColorMap(bool enable);
-	void slotShowGLStates();
-	void slotReloadMeshRenderer();
-	void slotReloadGroundRenderer();
-	void slotCrashBoson();
-	void slotSetDebugMode(int);
-	void slotSetDebugMapCoordinates(bool);
-	void slotSetDebugPFData(bool);
-	void slotSetDebugShowCellGrid(bool);
-	void slotSetDebugMatrices(bool);
-	void slotSetDebugItemWorks(bool);
-	void slotSetDebugCamera(bool);
-	void slotSetDebugRenderCounts(bool);
-	void slotSetDebugBoundingBoxes(bool);
-	void slotSetDebugFPS(bool);
-	void slotSetDebugAdvanceCalls(bool);
-	void slotSetDebugTextureMemory(bool);
-	void slotSetDebugWireFrames(bool);
-	void slotDumpGameLog();
-	void slotSyncNetwork();
-	void slotEditConditions();
 	void slotScroll(int);
+
+	void slotResetViewProperties();
+	void slotShowLight0Widget();
+	void slotEditorDeleteSelectedUnits();
+	void slotEditorEditHeight(bool);
+	void slotEditorShowPlaceFacilities();
+	void slotEditorShowPlaceMobiles();
+	void slotEditorShowPlaceGround();
 
 protected:
 	virtual void initializeGL();
