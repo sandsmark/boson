@@ -239,6 +239,12 @@ public:
 	 **/
 	unsigned int productionTime() const;
 
+	/**
+	 * @return TRUE if this unittype gives you the ability to show a
+	 * minimap, otherwise FALSE.
+	 **/
+	bool supportMiniMap() const { return mSupportMiniMap; }
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -262,6 +268,12 @@ private:
 	TerrainType mTerrain;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
+	bool mSupportMiniMap;
+
+	class MobileProperties;
+	class FacilityProperties;
+	MobileProperties* mMobileProperties;
+	FacilityProperties* mFacilityProperties;
 };
 
 #endif

@@ -959,6 +959,7 @@ void Facility::advanceConstruction()
 	}
  } else {
 	setWork(WorkNone);
+	owner()->facilityCompleted(this);
  }
 }
 
@@ -1206,5 +1207,6 @@ void Facility::setConstructionStep(unsigned int step)
  d->mConstructionState = step * constructionDelay();
  if (step == constructionSteps() - 1) {
 	setWork(WorkNone);
+	owner()->facilityCompleted(this);
  }
 }

@@ -345,3 +345,12 @@ int BosonMiniMap::pointSize() const
 {
  return d->mPointSize;
 }
+
+void BosonMiniMap::slotShowMap(bool s)
+{
+ if (s) {
+	show();
+ } else {
+	hide();
+ }
+}

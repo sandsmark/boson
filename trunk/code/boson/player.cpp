@@ -21,6 +21,7 @@
 
 #include "speciestheme.h"
 #include "unit.h"
+#include "unitproperties.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
 
@@ -171,6 +172,9 @@ void Player::unitDestroyed(Unit* unit)
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
+ if (!hasMiniMap()) {
+	emit signalShowMiniMap(false);
+ }
 }
 
 void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
@@ -394,4 +398,29 @@ const QColor& Player::teamColor() const
 {
  return speciesTheme()->teamColor();
 }
+
+bool Player::hasMiniMap() const
+{
+ QPtrListIterator<Unit> it(d->mUnits);
+ while (it.current()) {
+	if (it.current()->unitProperties()->supportMiniMap()) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
+void Player::facilityCompleted(Facility* fac)
+{
+ if (!fac) {
+	kdError() << k_funcinfo << "NULL facility" << endl;
+	return;
+ }
+ if (fac->unitProperties()->supportMiniMap()) {
+	emit signalShowMiniMap(true);
+ }
+}
+
+
 
