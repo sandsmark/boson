@@ -23,6 +23,7 @@
 #include <qstring.h>
 #include <qptrlist.h>
 #include <qdatastream.h>
+#include <qdom.h>
 
 #include <math.h>
 #include <GL/glu.h>
@@ -100,6 +101,47 @@ void BoVector3::debugVector(const BoVector3& v, int prec)
   boDebug() << "vector: " << debugString(v, prec) << endl;
 }
 
+bool BoVector3::saveAsXML(QDomElement& root, const QString& name) const
+{
+  root.setAttribute(name + ".x", mData[0]);
+  root.setAttribute(name + ".y", mData[1]);
+  root.setAttribute(name + ".z", mData[2]);
+  return true;
+}
+
+bool BoVector3::loadFromXML(const QDomElement& root, const QString& name)
+{
+  BoVector3 backup = *this;
+  bool ok;
+  bool ret = true;
+
+  mData[0] = root.attribute(name + ".x").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    mData[0] = backup.x();
+  }
+  mData[1] = root.attribute(name + ".y").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    mData[1] = backup.y();
+  }
+  mData[2] = root.attribute(name + ".z").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
+        root.attribute(name + ".z") << "')" << endl;
+    ret = false;
+    mData[2] = backup.z();
+  }
+  return ret;
+}
+
 QDataStream& operator<<(QDataStream& s, const BoVector3& v)
 {
   return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2];
@@ -128,6 +170,56 @@ void BoVector4::debugVector(const BoVector4& v, int prec)
 QString BoVector4::debugString(int prec) const
 {
   return BoVector4::debugString(*this, prec);
+}
+
+bool BoVector4::saveAsXML(QDomElement& root, const QString& name) const
+{
+  root.setAttribute(name + ".x", mData[0]);
+  root.setAttribute(name + ".y", mData[1]);
+  root.setAttribute(name + ".z", mData[2]);
+  root.setAttribute(name + ".w", mData[3]);
+  return true;
+}
+
+bool BoVector4::loadFromXML(const QDomElement& root, const QString& name)
+{
+  BoVector4 backup = *this;
+  bool ok;
+  bool ret = true;
+
+  mData[0] = root.attribute(name + ".x").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".x' attribute ('" <<
+        root.attribute(name + ".x") << "')" << endl;
+    ret = false;
+    mData[0] = backup.x();
+  }
+  mData[1] = root.attribute(name + ".y").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".y' attribute ('" <<
+        root.attribute(name + ".y") << "')" << endl;
+    ret = false;
+    mData[1] = backup.y();
+  }
+  mData[2] = root.attribute(name + ".z").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".z' attribute ('" <<
+        root.attribute(name + ".z") << "')" << endl;
+    ret = false;
+    mData[2] = backup.z();
+  }
+  mData[3] = root.attribute(name + ".w").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Error loading '" << name << ".w' attribute ('" <<
+        root.attribute(name + ".w") << "')" << endl;
+    ret = false;
+    mData[3] = backup.w();
+  }
+  return ret;
 }
 
 
