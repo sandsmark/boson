@@ -97,7 +97,7 @@ function copy_music()
  done
 # echo "SUBDIRS=music" > $DEST_MUSIC/data/Makefile.am
  cp $BOSON_DATA/music/Makefile.am $DEST_MUSIC/music/
- cp -r $BOSON_CODE/admin $DEST_MUSIC/
+ cp -r $BOSON_TOOLS/admin $DEST_MUSIC/
  cp $BOSON_CODE/Makefile.cvs $DEST_MUSIC/
  cp $BOSON_CODE/Makefile.am $DEST_MUSIC/
  #TODO: use a modified version of this! we really don't need to check for this stuff
