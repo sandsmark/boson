@@ -31,7 +31,7 @@ public:
 	BoContext(QPaintDevice*);
 	~BoContext();
 
-	bool create();
+	bool create(bool wantDirect);
 	void makeCurrent();
 
 	bool isValid() const
@@ -50,7 +50,7 @@ public:
 	void swapBuffers();
 
 protected:
-	bool chooseContext();
+	bool chooseContext(bool wantDirect);
 	void* chooseVisual();
 	void* tryVisual(const QGLFormat& fmt);
 	
@@ -78,14 +78,20 @@ class BosonGLWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonGLWidget(QWidget* parent);
+	/**
+	 * @param direct Use TRUE to enable direct rendering. Use FALSE for
+	 * debugging/optimizing software rendering only. @ref directRendering
+	 * will tell you whether your request for a direct/non-direct context
+	 * succeeded.
+	 **/
+	BosonGLWidget(QWidget* parent, bool direct = true);
 	~BosonGLWidget();
 
 	virtual void paintGL() {}
 	bool isValid() const;
 
 	BoContext* context() const;
-	bool directRendering() const; //AB: steal code from QGLFormat! - maybe make const and get the value only when relevant? i.e. on construction?
+	bool directRendering() const;
 
 	void makeCurrent();
 	void swapBuffers();
