@@ -62,7 +62,7 @@ void editorBigDisplay::actionClicked(int mx, int my)
 
 		case OT_FACILITY:
 			facilityMsg_t	fix;
-			fix.who 	= 0;
+			fix.who 	= who;
 			fix.x		= x;
 			fix.y		= y;
 			fix.state	= CONSTRUCTION_STEP-1;
@@ -73,7 +73,7 @@ void editorBigDisplay::actionClicked(int mx, int my)
 
 		case OT_UNIT:
 			mobileMsg_t	mob;
-			mob.who		= 0;
+			mob.who		= who;
 			mob.x		= mx;
 			mob.y		= my;
 			mob.type	= m;

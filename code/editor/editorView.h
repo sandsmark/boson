@@ -59,9 +59,11 @@ public:
 
 signals:
 	void setSelectedObject(object_type , int);
+	void setWho(int);
 
 private slots:
 	void setTransRef(int);
+	void _setWho(int);
 	void setInverted(bool);
 	void setWhich(int what) { setOrders(what); }
 /* orzel : very ugly, but what the hell should I have used here ? */
@@ -92,7 +94,7 @@ private:
 	QPixmap		*view_none;
 
 /* tiles selection */
-	QComboBox	*qcb_transRef, *qcb_which;
+	QComboBox	*qcb_transRef, *qcb_which, *qcb_who;
 	QPushButton	*tiles[TILES_NB];
 	QPushButton	*bigTiles[BIG_TILES_NB];
 	bool		inverted;
@@ -105,6 +107,7 @@ private:
 		W_UNITS
 	} which;
 	object_type	otype;
+	int		who;
 };
 
 
