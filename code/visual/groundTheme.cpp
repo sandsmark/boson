@@ -18,35 +18,38 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <assert.h>
-
-#include <qpixmap.h>
 #include <qbitarray.h>
 
 #include <QwSpriteField.h>
 
-#include <kapp.h>
+#include <kapp.h>		// kde_datadir()
 
 #include "../common/log.h"
-#include "../common/map.h"
-
 #include "groundTheme.h"
 
 
 groundTheme::groundTheme(char *themeName)
 {
 	int i ; 
+	QString transS;
 
-	assert (GROUND_LAST == groundPropNb);
-	assert (TRANS_LAST  == groundTransPropNb);
+	boAssert (GROUND_LAST == groundPropNb);
+	boAssert (TRANS_LAST  == groundTransPropNb);
 
 	groundPix	= new (QwSpritePixmapSequence *)[NB_GROUND_TILES];
 	themePath	= new QString(kapp->kde_datadir() + "/boson/themes/grounds/" + themeName + "/" );
-	transitions	= new QBitArray(TRANS_LAST);
+	pixLoaded	= new QBitArray(NB_GROUND_TILES);
 
-	boAssert ( transitions->fill(false) );
+	for (i=0; i< TRANS_LAST; i++) { // pre-load transitions name
+		transS	 = groundProp[groundTransProp[i].from].name;
+		transS	+= "_";
+		transS	+= groundProp[groundTransProp[i].to].name;
+		transName[i] = *themePath +  transS + "/" + transS;
+	}
 
-	for (i=0; i< groundPropNb; i++)
+	boAssert ( pixLoaded->fill(false) );
+
+	for (i=0; i< groundPropNb; i++) // load non-transitions
 		loadGround(i, *themePath + groundProp[i].name);
 
 }
@@ -55,31 +58,33 @@ groundTheme::~groundTheme()
 {
 	unsigned int i,n;
 	
-	for (i=0, n=transitions->size(); i<n; i++)
-		if (transitions[i])
+	for (i=0, n=NB_GROUND_TILES; i<n; i++)
+		if (pixLoaded[i])
 			delete groundPix[i];
+
 	delete groundPix;
 	delete themePath;
-	delete transitions;
+	delete pixLoaded;
+
 }
 
-bool groundTheme::loadGround(int i, const QString &path)
+void groundTheme::loadGround(int i, const QString &path)
 {
   	groundPix[i] = new QwSpritePixmapSequence(path+".%.2d.bmp",0l, 4);
 /*	boAssert(BO_TILE_SIZE == pixmap[i]->width());
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
-///orzel : do some boAssert with QwSpritePixmapSequence sizes... 
+/// XXX orzel : do some boAssert with QwSpritePixmapSequence sizes... 
 	if (groundPix[i]->image(0)->isNull()) {
-		fprintf(stderr, "groundTheme : Can't load %s.XX.bmp ...\n", (const char *)path);
-		return false;
+		logf(LOG_ERROR, "groundTheme : Can't load %s.XX.bmp ...", (const char *)path);
 	}
-	return true;
+	pixLoaded->setBit(i);
 }
 
-bool groundTheme::loadTransition(int ref)
+void groundTheme::loadTransition(groundType gt)
 {
-	int i, j;
-	bool ret = true;
+	int ref = GET_TRANS_REF(gt);
+	int tile = GET_TRANS_TILE(gt);
+
 	static const char *trans_ext[TILES_PER_TRANSITION] = {
 		".01", ".03", ".07", ".05",	// 48x48 transitions
 		".02", ".06", ".08", ".04",
@@ -89,36 +94,17 @@ bool groundTheme::loadTransition(int ref)
 		".21", ".22", ".23", ".24",
 		".25", ".26", ".27", ".28",
 		};
-	QString transS;
-	QString	path(*themePath);
 
-	i = GROUND_LAST + ref * TILES_PER_TRANSITION;
-
-	transS	 = groundProp[groundTransProp[ref].from].name;
-	transS	+= "_";
-	transS	+= groundProp[groundTransProp[ref].to].name;
-
-	path = *themePath + transS + "/" + transS;
-
-	for (j=0; j<TILES_PER_TRANSITION; j++)
-		if (!loadGround(i+j, path + trans_ext[j] ))
-			ret = false;
-
-	if (ret) transitions->setBit(ref);
-	return ret;
+	boAssert(IS_TRANS(gt));
+	loadGround(gt, transName[ref] + trans_ext[tile]);
 }
 
 
 QwSpritePixmapSequence *groundTheme::getPixmap(groundType gt)
 {
 
-	if (IS_TRANS(gt)) {
-		int ref = GET_TRANS_REF(gt);
-		if (!transitions->testBit(ref))
-			loadTransition(ref);
-	
-		boAssert(transitions->testBit(ref));
-	}
+	if (!pixLoaded->testBit(gt))
+			loadTransition(gt);
 
 	return groundPix[gt];
 }
