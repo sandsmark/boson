@@ -155,11 +155,10 @@ CanGoOnWater=boolean - Whether this unit can go over water.
 
 -------------------------------------------------------------------------------
 [Boson Facility]
-CanProduce=Boolean  - True if something can be produced here.
-                      Default is false. (OBSOLETE)
-ConstructionSteps=Number  - Number of frames for the construction (when the
-                            facility is built) animation.
-                            Default is 0
+ConstructionSteps=Number  - Time the facility takes to be built. This is more or
+                            less the number of frames displayed in the 
+                            construction animation.
+                            Default is 20
 -------------------------------------------------------------------------------
 
 

@@ -12,3 +12,5 @@ UnitHeight=2.0
 
 [Boson Facility]
 CanRefineOil=true
+ConstructionSteps=20
+

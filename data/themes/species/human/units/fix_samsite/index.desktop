@@ -13,3 +13,6 @@ CanShootAtLandUnits=false
 Producer=10
 Requirements=5,0,2
 
+[Boson Facility]
+ConstructionSteps=20
+

@@ -12,3 +12,5 @@ UnitHeight=2.0
 
 [Boson Facility]
 CanRefineMinerals=true
+ConstructionSteps=20
+
