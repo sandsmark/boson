@@ -32,6 +32,8 @@
 #define FOGGED_COST 2.5
 #define SEARCH_STEPS 10  // How many steps of path to find
 
+#define MOVE_IN_LINE
+
 class BosonPath::Marking
 {
   public:
@@ -630,25 +632,28 @@ float BosonPath::cost(int x, int y)
     return ERROR_COST;
   }
 
+#ifndef MOVE_IN_LINE
   // If we are close to our starting point or to our goal, then consider cell
   //  to be occupied even if only moving units are on it (we assume they can't
   //  move away fast enough)
-  bool includeMoving = false;
-  if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) < 3) // Change 3 to 2???
+ bool includeMoving = false;
+  if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) <= 2) // Change 2 to 1???
   {
     includeMoving = true;
   }
-  else if(mRange == 0 && QMAX(QABS(x - mGoalx), QABS(y - mGoaly)) < 3)
+/*  else if(mRange == 0 && QMAX(QABS(x - mGoalx), QABS(y - mGoaly)) < 3)
   {
       includeMoving = true;
-  }
+  }*/
   if(c->isOccupied(mUnit, includeMoving))
+#else
+  if(c->isOccupied(mUnit, false))
+#endif
   {
     return ERROR_COST;
   }
-  float cost = c->moveCost();
 
-  return cost + mMinCost;
+  return c->moveCost() + mMinCost;
 }
 
 #ifdef USE_STL

@@ -680,11 +680,11 @@ void TopWidget::loadGameData3() // FIXME rename!
 	while (it.current()) {
 		loadUnitDatas(((Player*)it.current()), progress);
 		((Player*)it.current())->speciesTheme()->loadTechnologies();
-		((Player*)it.current())->speciesTheme()->loadParticles();
 		++it;
 		progress += UNITDATAS_LOADINGFACTOR;
 	}
  }
+ mPlayer->speciesTheme()->loadParticles();
  // these are sounds like minimap activated.
  // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
  // too?
