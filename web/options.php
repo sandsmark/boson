@@ -59,16 +59,15 @@ main_area_begin();
 draw_box("Options");
 echo "
     Here you can change style, or color scheme, of this homepage.<br>
-    Currently, there are 2 different styles: blue, which is default and looks
-    like style of KDE homepages and green which has green and black colors and
-    looks like <a href=\"http://politbuero.dyndns.org/websites/boson/\">homepage
-    that Ben once created</a>.<br>
+    Currently, there are 2 different styles: blue, which looks
+    like style of KDE homepages and green (default) which has green and black colors and
+    looks cooler.<br>
     Note that your browser must have cookies enabled for this site for this to
     work.<br>
     Your style: <form class=\"style\" action=\"$filename\" method=\"get\">
     <select size=\"1\" name=\"style\">";
-draw_option("blue", "Default blue style");
-draw_option("green", "Green/black style");
+draw_option("green", "Green/black style (default)");
+draw_option("blue", "Blue style");
 echo "
     </select>
     &nbsp;&nbsp;

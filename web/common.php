@@ -29,10 +29,11 @@ function print_header()
 {
 $image;
 global $style;
-if($style == "green")
-  $image="pictures/header.jpg";
-else
+if($style == "blue") {
   $image="pictures/boson.png";
+} else {
+  $image="pictures/header.jpg";
+}
 echo "
 <h1 align=\"center\"><img src=\"$image\" alt=\"Boson logo\"></h1><br>";
 }
@@ -64,10 +65,11 @@ header ("Pragma: no-cache");                          // HTTP/1.0
 // Select stylesheet
 global $style;
 $stylesheet;
-if($style == "green")
-  $stylesheet="style-green.css";
-else
+if($style == "blue") {
   $stylesheet="style-blue.css";
+} else {
+  $stylesheet="style-green.css";
+}
 
 // HTML header
 echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
