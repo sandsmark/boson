@@ -343,13 +343,10 @@ void BosonCommandFrame::slotHandleOrder(int index)
 {
  switch (d->mOrderType) {
 	case PlainTiles:
-		emit signalCellSelected(0, '0');
-		break;
 	case Small:
-		break;
 	case Big1:
-		break;
 	case Big2:
+		emit signalCellSelected(d->mOrder2Type[index], '0');
 		break;
 	case Facilities:
 	case Mobiles:
@@ -428,7 +425,9 @@ void BosonCommandFrame::slotRedrawTiles()
 		hideOrderButtons();
 		initOrderButtons(9);
 		for (int i = 0; i < 9; i++) {
-			setOrderPixmap(i, d->mTiles->small(i, trans, inverted));
+			int tile = d->mTiles->smallTileNumber(i, trans, inverted);
+			setOrderPixmap(i, d->mTiles->tile(tile));
+			d->mOrder2Type.insert(i, tile);
 		}
 		break;
 	case Big1:
@@ -437,6 +436,10 @@ void BosonCommandFrame::slotRedrawTiles()
 		for (int i = 0; i < 4; i++) {
 			QPixmap p = d->mTiles->big1(i, trans, inverted);
 			setOrderPixmap(i, p);
+			d->mOrder2Type.insert(i, d->mTiles->getBigTransNumber(
+					trans, (inverted ? 4 : 0) + i));
+			// FIXME: big tiles are currently placed as small ones
+			// only
 		}
 		break;
 	case Big2:
@@ -445,6 +448,10 @@ void BosonCommandFrame::slotRedrawTiles()
 		for (int i = 0; i < 4; i++) {
 			QPixmap p = d->mTiles->big2(i, trans, inverted);
 			setOrderPixmap(i, p);
+			d->mOrder2Type.insert(i, d->mTiles->getBigTransNumber(
+					trans, (inverted ? 12 : 8) + i));
+			// FIXME: big tiles are currently placed as small ones
+			// only
 		}
 		break;
 	case Facilities:

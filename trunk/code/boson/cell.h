@@ -52,9 +52,9 @@ public:
 	/**
 	 * @return The number of the tile in the tile file (earth.png)
 	 **/
-	int tile() const
+	static int tile(int groundType, unsigned char version)
 	{
-		return (groundType() << 2 | (version() & 0x3) );
+		return (groundType << 2 | (version & 0x3) );
 	}
 
 	/**

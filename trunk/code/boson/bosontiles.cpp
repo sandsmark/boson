@@ -31,7 +31,7 @@ QPixmap BosonTiles::big2(int bigNo, TransType trans, bool inverted) // bigNo = 0
  return tile(getBigTransNumber(trans, (inverted ? 12 : 8) + bigNo));
 }
 
-QPixmap BosonTiles::small(int smallNo, TransType trans, bool inverted)
+int BosonTiles::smallTileNumber(int smallNo, TransType trans, bool inverted)
 {
  int tileNo;
  switch (smallNo) {
@@ -39,42 +39,56 @@ QPixmap BosonTiles::small(int smallNo, TransType trans, bool inverted)
 		tileNo = getTransNumber(trans,
 				inverted ? TransUpLeftInverted
 				: TransUpLeft);
+		break;
 	case 1:
 		tileNo = getTransNumber(trans, inverted ? 
 				TransDown : TransUp);
+		break;
 	case 2:
 		tileNo = getTransNumber(trans,
 				inverted ? TransUpRightInverted
 				: TransUpRight);
+		break;
 	case 3:
 		tileNo = getTransNumber(trans,
 				inverted ? TransRight
 				: TransLeft);
+		break;
 	case 4:
 		tileNo = getTransNumber(trans,
 				inverted ? to(trans)
 				: from(trans));
+		break;
 	case 5:
 		tileNo = getTransNumber(trans,
 				inverted ? TransLeft
 				: TransRight);
+		break;
 	case 6:
 		tileNo = getTransNumber(trans,
 				inverted ? TransDownLeftInverted
 				: TransDownLeft);
+		break;
 	case 7:
 		tileNo = getTransNumber(trans,
 				inverted ? TransUp
 				: TransDown);
+		break;
 	case 8:
 		tileNo = getTransNumber(trans,
 				inverted ? TransDownRightInverted
 				: TransDownRight);
+		break;
 	default:
 		kdError() << "Unknwon small tile " << smallNo << endl;
-		return QPixmap();
+		return 0;
  }
- return tile(tileNo);
+ return tileNo;
+}
+
+QPixmap BosonTiles::small(int smallNo, TransType trans, bool inverted)
+{
+ return tile(smallTileNumber(smallNo, trans, inverted));
 }
 	
 // call this like the original fillGroundPixmap() in editorTopLevel.cpp
@@ -178,7 +192,7 @@ bool BosonTiles::isBigTrans(int g)
  return (isTrans(g) && getTransTile(g) >= smallTilesPerTransition());
 }
 
-Cell::GroundType BosonTiles::from(TransType trans) const
+Cell::GroundType BosonTiles::from(TransType trans)
 {
  switch (trans) {
 	case TransGrassWater:
@@ -195,7 +209,7 @@ Cell::GroundType BosonTiles::from(TransType trans) const
  }
 }
 
-Cell::GroundType BosonTiles::to(TransType trans) const
+Cell::GroundType BosonTiles::to(TransType trans)
 {
  switch (trans) {
 	case TransGrassWater:

@@ -438,7 +438,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  stream >> groundType; // not groundType - first TAG_CELL
 
  if (groundType != TAG_CELL) {
-	kdError() << "BosonMap::load(): broken map file!" << endl;
+	kdError() << "BosonMap::loadCell(): broken map file!" << endl;
 	kdError() << "missing TAG_CELL!" << endl;
 	return false;
  }
@@ -449,7 +449,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  
  stream >> b; // what is this?
  if (b > 4) {
-	kdError() << "BosonMap::load(): broken map file!" << endl;
+	kdError() << "BosonMap::loadCell(): broken map file!" << endl;
 	kdError() << "invalid cell!" << endl;
  }
 

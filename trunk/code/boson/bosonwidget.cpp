@@ -99,6 +99,7 @@ BosonWidget::BosonWidget(QWidget* parent, bool editor)
  connect(d->mBigDisplay, SIGNAL(signalConstructUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotConstructUnit(int, int, int, Player*)));
 
+
 }
 
 void BosonWidget::init()
@@ -151,6 +152,10 @@ void BosonWidget::init()
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
  connect(d->mBigDisplay, SIGNAL(signalEditorAddUnit(int, int, int, int)), 
 		d->mBoson, SLOT(slotAddUnit(int, int, int, int)));
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 		
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)), 
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));

@@ -59,7 +59,8 @@ signals:
 
 	void signalEditorAddUnit(int type, int x, int y, int owner);
 //	void signalEditorConstruction(int unitType, Player* owner);
-
+	void signalAddCell(int x, int y, int groundType, unsigned char version);
+	
 	void signalConstructUnit(int type, VisualUnit* facility, Player* owner);
 	void signalConstructUnit(int type, int x, int y, Player* owner); // editor mode only
 

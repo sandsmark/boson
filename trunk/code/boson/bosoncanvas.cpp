@@ -238,14 +238,22 @@ void BosonCanvas::initMap(const QString& tileFile)
 			kdError() << "BosonCanvas::initMap NULL cell" << endl;
 			continue;
 		}
-		int tile = c->tile();
-		if (tile < 0 || tile >= d->mMap->width() * d->mMap->height()) {
-			kdWarning() << "Invalid tile " << tile << endl;
-		}
-		setTile(i, j, tile);
+		slotAddCell(i, j, c->groundType(), c->version());
 	}
  }
  update();
+}
+
+void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
+{
+ int tile = Cell::tile(groundType, version);
+ if (tile < 0 || tile >= d->mMap->width() * d->mMap->height()) {
+	kdWarning() << "Invalid tile " << tile << endl;
+ }
+// kdDebug() << "g=" << c->groundType() << ",v=" << c->version() <<
+//		"==>tile=" << tile << endl;
+ setTile(x, y, tile);
+
 }
 
 void BosonCanvas::addAnimation(QCanvasItem* item)
