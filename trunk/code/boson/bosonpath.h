@@ -31,7 +31,7 @@
 // (and easier to use).
 #include <config.h>
 #if defined(HAVE_HP_STL) || defined(HAVE_SGI_STL)
- #define USE_STL 1
+ #define USE_STL 0
 #endif
 
 #if USE_STL
@@ -94,8 +94,6 @@ class BosonPath
     float pathCost() const { return mPathCost; };
 
   protected:
-    class PathNode;
-
     /**
      * In this list are waypoints of path
      */
