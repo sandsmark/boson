@@ -57,7 +57,10 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Options");
-draw_bigbox_text("Here you can change the color scheme of this homepage. Currently, there are two different styles: blue, which looks like the KDE homepages and green (default) which has green and black colors and looks cooler.<br><br>Note that your browser must have cookies enabled for this site for this to work.<br><br>");
+draw_bigbox_text("Here you can change the color scheme of this homepage.
+	Currently, there are two different styles: blue, which looks like the KDE homepages and green (default)
+	which has green and black colors and looks cooler.<br><br>
+	Note that your browser must have cookies enabled if you want a different style for the homepage.<br><br>");
 
 draw_bigbox_text("Your style:");
 
