@@ -11,6 +11,7 @@ Reload=10
 Producer=0
 Requisities=3
 Armor=1
+Shield=50
 
 [Boson Mobile Unit]
 Speed=4
