@@ -22,7 +22,10 @@
 #include <kdockwidget.h>
 #include <kdeversion.h>
 
+//#include <qstring.h>
+
 class QWidgetStack;
+class QString;
 class Boson;
 class Player;
 class BosonPlayField;
@@ -63,7 +66,9 @@ public slots:
 	void slotNewGame();
 
 	void slotStartEditor();
-	
+
+	void slotLoadGame();
+
 	/**
 	 * Starts loading new game. Called when user clicks "Start game" button in
 	 * BosonStartGameWidget
@@ -107,6 +112,7 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 	void slotGameOver();
+	void slotSaveGame();
 
 #if KDE_VERSION < 310
 	virtual void setGeometry(const QRect&);
@@ -192,7 +198,7 @@ private:
 	void initStartEditorWidget();
 	void showNewGameWidget();
 	void showStartEditorWidget();
-	void initBosonWidget();
+	void initBosonWidget(bool loading = false);
 	void showBosonWidget();
 	void initNetworkOptions();
 	void showNetworkOptions();
@@ -212,6 +218,8 @@ private:
 	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
 	bool mGame;
+	bool mLoading;
+	QString mLoadingFileName;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;

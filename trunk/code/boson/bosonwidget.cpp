@@ -74,6 +74,7 @@ public:
 	BosonWidgetPrivate()
 	{
 		mCommandFrame = 0;
+		mCmdInput = 0;
 		mCommandFrameDock = 0;
 
 		mChat = 0;
@@ -83,6 +84,7 @@ public:
 	}
 
 	BosonCommandFrame* mCommandFrame;
+	CommandInput* mCmdInput;
 	KDockWidget* mCommandFrameDock;
 
 	KGameChat* mChat;
@@ -91,19 +93,17 @@ public:
 	GameOverDialog* mGameOverDialog;
 };
 
-BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
+BosonWidget::BosonWidget(TopWidget* top, QWidget* parent, bool loading)
     : QWidget( parent, "BosonWidget" ), KXMLGUIClient(/*FIXME: clientParent!*/top)
 {
  d = new BosonWidgetPrivate;
  mTop = top;
+ mLoading = loading;
 
  mCursor = 0;
  mMiniMap = 0;
  mDisplayManager = 0;
 
- mMobilesCount = 0;
- mFacilitiesCount = 0;
-		
 // XMLClient stuff - not all of this is necessary! most cut'n'pasted from
 // elsewhere
  actionCollection()->setWidget(this);
@@ -162,7 +162,9 @@ void BosonWidget::init()
  initGameCommandFrame();
  initDisplayManager();
  initMap();
- initPlayer();
+ if(!mLoading) {
+	initPlayer();
+ }
 
  initConnections();
  initKeys();
@@ -181,14 +183,9 @@ void BosonWidget::initMap()
  kdDebug() << k_funcinfo << endl;
 
  canvas()->setMap(map()->map());
- for (unsigned int i = 0; i < game()->playerCount(); i++) {
-	Player* p = (Player*)game()->playerList()->at(i);
-	if (p) {
-		p->initMap(map()->map());
-	}
- }
  minimap()->setMap(map()->map());
  minimap()->initMap();
+ game()->setMap(map());
 }
 
 void BosonWidget::initMiniMap()
@@ -197,7 +194,6 @@ void BosonWidget::initMiniMap()
  minimap()->hide();
  minimap()->setCanvas(canvas());
  minimap()->setBackgroundOrigin(WindowOrigin);
- minimap()->setLocalPlayer(player());
 
  connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
 		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
@@ -241,7 +237,7 @@ void BosonWidget::initDisplayManager()
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  canvas()->setDisplayManager(displaymanager());
- displaymanager()->setLocalPlayer(player());
+
  initBigDisplay(displaymanager()->addInitialDisplay());
 }
 
@@ -251,7 +247,6 @@ void BosonWidget::initChat()
  d->mChat = new KGameChat(game(), BosonMessage::IdChat, d->mChatDock);
  d->mChatDock->setWidget(d->mChat);
  d->mChatDock->hide();
- d->mChat->setFromPlayer(player());
 
  connect(d->mChatDock, SIGNAL(iMBeingClosed()), this, SIGNAL(signalChatDockHidden()));
  connect(d->mChatDock, SIGNAL(hasUndocked()), this, SIGNAL(signalChatDockHidden()));
@@ -259,6 +254,22 @@ void BosonWidget::initChat()
 
 void BosonWidget::initPlayer()
 {
+ if(!mLoading) {
+	for (unsigned int i = 0; i < game()->playerCount(); i++) {
+		Player* p = (Player*)game()->playerList()->at(i);
+		if (p) {
+			p->initMap(map()->map());
+		}
+	}
+ }
+
+ minimap()->setLocalPlayer(player());
+ displaymanager()->setLocalPlayer(player());
+ game()->setLocalPlayer(player());
+ d->mCommandFrame->setLocalPlayer(player());
+ d->mChat->setFromPlayer(player());
+ player()->addGameIO(d->mCmdInput);
+
  connect(player(), SIGNAL(signalUnfog(int, int)),
 		this, SLOT(slotUnfog(int, int)));
  connect(player(), SIGNAL(signalFog(int, int)),
@@ -267,6 +278,13 @@ void BosonWidget::initPlayer()
 		minimap(), SLOT(slotShowMap(bool)));
  connect(player(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
+
+ // Needed for loading game
+ emit signalMineralsUpdated(player()->minerals());
+ emit signalOilUpdated(player()->oil());
+ emit signalMobilesCount(player()->mobilesCount());
+ emit signalFacilitiesCount(player()->facilitiesCount());
+ minimap()->slotShowMap(player()->hasMiniMap());
 }
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
@@ -347,7 +365,10 @@ void BosonWidget::slotChangeGroupMove(int mode)
 void BosonWidget::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
- slotStartScenario();
+ if(!mLoading) {
+	slotStartScenario();
+ }
+ mLoading = false;
 }
 
 void BosonWidget::initBigDisplay(BosonBigDisplayBase* b)
@@ -379,16 +400,14 @@ void BosonWidget::initGameCommandFrame()
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrameDock->hide();
  d->mCommandFrame->reparentMiniMap(minimap());
- d->mCommandFrame->setLocalPlayer(player());
 
  connect(game(), SIGNAL(signalUpdateProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotUpdateProduction(Facility*)));
  connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SIGNAL(signalCmdFrameDockHidden()));
  connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SIGNAL(signalCmdFrameDockHidden()));
 
- CommandInput* cmdInput = new CommandInput;
- cmdInput->setCommandFrame(d->mCommandFrame);
- player()->addGameIO(cmdInput);
+ d->mCmdInput = new CommandInput;
+ d->mCmdInput->setCommandFrame(d->mCommandFrame);
 }
 
 void BosonWidget::initLayout()
@@ -504,13 +523,9 @@ void BosonWidget::slotAddUnit(Unit* unit, int, int)
  if (p != player()) {
 	return;
  }
- if (unit->unitProperties()->isMobile()) {
-	mMobilesCount++;
- } else {
-	mFacilitiesCount++;
- }
- emit signalMobilesCount(mMobilesCount);
- emit signalFacilitiesCount(mFacilitiesCount);
+
+ emit signalMobilesCount(p->mobilesCount());
+ emit signalFacilitiesCount(p->facilitiesCount());
 }
 
 void BosonWidget::slotRemoveUnit(Unit* unit)
@@ -518,13 +533,9 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
  if (unit->owner() != player()) {
 	return;
  }
- if (unit->unitProperties()->isMobile()) {
-	mMobilesCount--;
- } else {
-	mFacilitiesCount--;
- }
- emit signalMobilesCount(mMobilesCount);
- emit signalFacilitiesCount(mFacilitiesCount);
+
+ emit signalMobilesCount(unit->owner()->mobilesCount());
+ emit signalFacilitiesCount(unit->owner()->facilitiesCount());
 }
 
 void BosonWidget::zoom(const QWMatrix& m)

@@ -37,6 +37,7 @@ class BosonWelcomeWidget : public QWidget
 
   signals:
     void signalNewGame();
+    void signalLoadGame();
     void signalStartEditor();
     void signalQuit();
 
@@ -46,6 +47,7 @@ class BosonWelcomeWidget : public QWidget
 
   private:
     QPushButton* mNewGameButton;
+    QPushButton* mLoadGameButton;
     QPushButton* mEditorButton;
     QPushButton* mQuitButton;
 

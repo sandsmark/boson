@@ -74,7 +74,7 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(TopWidget* top, QWidget* parent);
+	BosonWidget(TopWidget* top, QWidget* parent, bool loading = false);
 
 	/**
 	 * Default Destructor
@@ -109,6 +109,7 @@ public:
 	void debugKillPlayer(KPlayer* p);
 
 	void initKeys();
+	void initPlayer();
 
 	bool isCmdFrameVisible() const;
 	bool isChatVisible() const;
@@ -138,6 +139,8 @@ public slots:
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
+
+	void slotInitFogOfWar();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)
@@ -178,8 +181,6 @@ protected slots:
 
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
-	void slotInitFogOfWar();
-
 	void slotNotEnoughMinerals(Player*);
 	void slotNotEnoughOil(Player*);
 
@@ -216,7 +217,6 @@ private:
 	void initMiniMap();
 	void initConnections();
 	void initDisplayManager();
-	void initPlayer();
 	void initGameCommandFrame();
 	void initLayout();
 
@@ -232,9 +232,7 @@ private:
 	BosonMiniMap* mMiniMap;
 	BoDisplayManager* mDisplayManager;
 
-	// for performance:
-	int mMobilesCount;
-	int mFacilitiesCount;
+	bool mLoading;
 };
 
 #endif

@@ -53,6 +53,7 @@ public:
 	{
 		mSelectBox = 0;
 		mLeader = false;
+		mTarget = 0;
 	}
 	KGamePropertyInt mDirection;
 
@@ -737,6 +738,7 @@ public:
 	MobileUnitPrivate()
 	{
 		mHarvesterProperties = 0;
+		mTargetCellMarked = false;
 	}
 
 	KGameProperty<double> mSpeed;
@@ -776,7 +778,6 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 	d->mHarvesterProperties->mResourcesY.setLocal(0);
  }
  setWork(WorkNone);
- d->mTargetCellMarked = false;
 }
 
 MobileUnit::~MobileUnit()
@@ -1230,6 +1231,26 @@ void MobileUnit::waypointDone()
 {
  Unit::waypointDone();
  d->mTargetCellMarked = false;
+}
+
+bool MobileUnit::load(QDataStream& stream)
+{
+ if(!Unit::load(stream)) {
+	kdError() << "Unit not loaded properly" << endl;
+	return false;
+ }
+
+ return true;
+}
+
+bool MobileUnit::save(QDataStream& stream)
+{
+ if(!Unit::save(stream)) {
+	kdError() << "Unit not loaded properly" << endl;
+	return false;
+ }
+
+ return true;
 }
 
 /////////////////////////////////////////////////
