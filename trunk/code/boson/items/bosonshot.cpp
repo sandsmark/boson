@@ -37,29 +37,29 @@
 BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, BoVector3 pos, BoVector3 target) :
     BosonItem(prop ? prop->model() : 0, canvas)
 {
-  boDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
+  boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mOwner = owner;
   mProp = prop;
   if (!mProp)
   {
-    boError() << k_funcinfo << "NULL weapon properties!" << endl;
+    boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
     return;
   }
   if (!mOwner)
   {
-    boError() << k_funcinfo << "NULL owner!" << endl;
+    boError(350) << k_funcinfo << "NULL owner!" << endl;
     return;
   }
   if (!canvas)
   {
-    boError() << k_funcinfo << "NULL canvas" << endl;
+    boError(350) << k_funcinfo << "NULL canvas" << endl;
     return;
   }
   if(prop->speed() == 0)
   {
     // This shot is bullet, not missile - it has infinite speed and it reaches
     //  it's target immideately. No need to calculate anything.
-    boDebug() << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
+    boDebug(350) << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
     move(target[0], target[1], target[2]);
     mActive = false;
     return;
@@ -67,15 +67,15 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   // First set the velocity to length of whole trip (for calculations)
   mVelo = target - pos;
   mLength = mVelo.length();
-  //boDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
+  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
   // Calculate number of steps
   mTotalSteps = (int)ceilf(mLength / prop->speed());
   // Current step
   mStep = 0;
-  //boDebug() << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
+  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
   // Set velocity
   mVelo.scale(prop->speed() / mLength);
-  //boDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
+  //boDebug(350) << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   // Initialization
   mActive = true;
   move(pos[0], pos[1], pos[2]);

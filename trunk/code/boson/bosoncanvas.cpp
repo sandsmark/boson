@@ -347,7 +347,7 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 
 void BosonCanvas::newShot(BosonShot* shot)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(350) << k_funcinfo << endl;
 
  if (!shot->isActive()) {
 	shotHit(shot);
@@ -590,7 +590,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
 //	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (w * w + h * h <= radius * radius) {
-//		boDebug() << "adding " << u->id() << endl;
+//		boDebug(310) << "adding " << u->id() << endl;
 		list.append(u);
 	}
  }
@@ -600,7 +600,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
 QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int radius) const
 {
  // FIXME: code duplicated from unitCollisionsInRange
-boDebug() << k_funcinfo << endl;
+ boDebug(310) << k_funcinfo << endl;
  BoItemList l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
