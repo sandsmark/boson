@@ -276,7 +276,7 @@ void BoMeshRendererVertexArray::fillModelPointsArray(BosonModel* model, float* a
 	for (unsigned int j = 0; j < lodCount(mesh); j++) {
 		BoMeshLOD* lod = levelOfDetail(mesh, j);
 		BO_CHECK_NULL_RET(lod);
-		offsets[i * maxLODCount + j] = totalAddedPoints;
+		offsets[i * maxLODCount + j] = totalAddedPoints + meshAddedPoints;
 		pointCounts[i * maxLODCount + j] = lod->facesCount() * 3;
 		for (unsigned int f = 0; f < lod->facesCount(); f++) {
 			const BoFace* face = lod->face(f);
