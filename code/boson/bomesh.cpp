@@ -1435,6 +1435,17 @@ void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
  }
 }
 
+void BoMesh::renderBoundingObject()
+{
+ if (!d->mBoundingObject) {
+	computeBoundingObject();
+	if (!d->mBoundingObject) {
+		return;
+	}
+ }
+ d->mBoundingObject->render();
+}
+
 // there MUST be a valid context set already!!
 void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 {
@@ -1597,7 +1608,7 @@ bool BoMesh::checkVisible()
 #endif
  glEnable(GL_OCCLUSION_TEST_HP);
 
- d->mBoundingObject->render();
+ renderBoundingObject();
 
  glGetBooleanv(GL_OCCLUSION_TEST_RESULT_HP, &result);
 

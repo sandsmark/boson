@@ -446,9 +446,14 @@ public:
 	/**
 	 * @return name of the mesh (loaded from file)
 	 **/
-	const QString& name() const; 
+	const QString& name() const;
 
 	void renderMesh(const QColor* color, unsigned int lod = 0);
+
+	/**
+	 * Render the bounding object (usually a mesh) of this mesh
+	 **/
+	void renderBoundingObject();
 
 	void loadDisplayList(const QColor* teamColor, bool reload = false);
 	GLuint displayList(unsigned int lod) const;
