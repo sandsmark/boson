@@ -31,9 +31,6 @@
 CommandInput::CommandInput() : KGameIO()
 {
 }
-CommandInput::CommandInput(KPlayer* player) : KGameIO(player)
-{
-}
 
 CommandInput::~CommandInput()
 {
@@ -41,12 +38,14 @@ CommandInput::~CommandInput()
 
 void CommandInput::setCommandFrame(BosonCommandFrameBase* f)
 {
+ if (!f) {
+	kdError() << k_funcinfo << "NULL command frame" << endl;
+	return;
+ }
  connect(f, SIGNAL(signalProduceUnit(unsigned long int, UnitBase*, KPlayer*)),
 		this, SLOT(slotProduceUnit(unsigned long int, UnitBase*, KPlayer*)));
  connect(f, SIGNAL(signalStopProduction(unsigned long int, UnitBase*, KPlayer*)),
 		this, SLOT(slotStopProduction(unsigned long int, UnitBase*, KPlayer*)));
-// connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)),
-//		this, SLOT(slotPlaceCell(int)));
 }
 
 void CommandInput::slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner)
@@ -107,6 +106,5 @@ void CommandInput::slotStopProduction(unsigned long int unitType, UnitBase* fact
 
  QDataStream msg(b, IO_ReadOnly);
  sendInput(msg);
-
 }
 

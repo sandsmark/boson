@@ -27,11 +27,10 @@ class BosonCommandFrameBase;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class CommandInput : public KGameIO 
+class CommandInput : public KGameIO
 {
 	Q_OBJECT
 public:
-	CommandInput(KPlayer* player);
 	CommandInput();
 	virtual ~CommandInput();
 
@@ -40,9 +39,20 @@ public:
 	virtual int rtti() const { return 125; } // just any unique number
 
 protected slots:
-//	void slotPlaceCell(int tile); // we don't use CommandInput for the editor
+//	virtual void slotPlaceCell(int tile);
+//
+	/**
+	 * Called when the player starts to produce a unit in the cmdframe. This
+	 * just sends the event as a message through the network.
+	 **/
 	void slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+
+	/**
+	 * Called when the player aborts a production in the cmdframe. This
+	 * just sends the event as a message through the network.
+	 **/
 	void slotStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
 };
 
 #endif
+
