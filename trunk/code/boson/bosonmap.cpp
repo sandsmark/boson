@@ -1395,6 +1395,9 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
 		}
 		n.scale(1.0f / count);
 		n.normalize();
+		// Cells will be drawn with y-coordinate reversed, so to make lighting look
+		//  correct, we need to reverse normal's y-component here as well.
+		n.setY(-n.y());
 		mNormalMap->setNormalAt(x, y, n);
 	}
  }
