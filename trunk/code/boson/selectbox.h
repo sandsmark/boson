@@ -56,6 +56,8 @@ public:
 	 **/
 	void update(double factor);
 
+	virtual bool collidesWith(const QCanvasItem* item) const;
+
 protected:
 	QCanvasPixmapArray* initPixmapArray();
 

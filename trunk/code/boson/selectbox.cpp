@@ -197,3 +197,11 @@ int SelectBox::cornerLength() const
  }
  */
 }
+
+bool SelectBox::collidesWith(const QCanvasItem*) const
+{
+ // the selection rect never collides with anything
+ return false;
+}
+
+	
