@@ -1651,12 +1651,6 @@ void Boson::slotSendAdvance()
  d->mAdvance->sendAdvance();
 }
 
-Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
-{
- BO_CHECK_NULL_RET0(d->mCanvas);
- return (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, unitType, owner);
-}
-
 Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
@@ -1897,6 +1891,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 
 Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
+ BO_CHECK_NULL_RET0(d->mCanvas);
  if (x < 0 || (unsigned int)x >= d->mCanvas->mapWidth()) {
 	boError() << k_funcinfo << "Invalid x-coordinate " << x << endl;
 	return 0;
@@ -1909,7 +1904,7 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return 0;
  }
- Unit* unit = createUnit(unitType, (Player*)p);
+ Unit* unit = (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, unitType, p);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
@@ -1930,6 +1925,7 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 
 Unit* Boson::addUnit(QDomElement& node, Player* p)
 {
+ BO_CHECK_NULL_RET0(d->mCanvas);
  unsigned long int unitType = 0;
  unsigned int x = 0;
  unsigned int y = 0;
@@ -1937,7 +1933,7 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	boError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
 	return 0;
  }
- Unit* unit = createUnit(unitType, (Player*)p);
+ Unit* unit = (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, unitType, p);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
