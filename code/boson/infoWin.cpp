@@ -120,7 +120,6 @@ void infoWin::setOrderType( int what, int who)
 {
 	int i;
 
-
 	switch(what) {
 		case OT_NONE:
 			orderType = OT_NONE;

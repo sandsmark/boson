@@ -128,8 +128,8 @@ switch(State) {
 				data->accepted.sizeY);
 			who_am_i	= data->accepted.who_you_are;
 			vpp.nb_player	= data->accepted.total_player;
-			myspecy	= vpp.species[data->accepted.who_you_are];
 			initView(200,200);
+			myspecy	= vpp.species[data->accepted.who_you_are];
 			break;
 		case MSG_DLG_REFUSED :
 			State = PS_NO_CONNECT;
