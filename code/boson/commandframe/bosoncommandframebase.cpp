@@ -274,11 +274,16 @@ void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
 	return;
  }
 
- if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
-	// hmm.. is this correct? maybe display for plugins anyway? dont know...
+ // For enemy units, we show nothing.
+ // For friendly units, we show plugins.
+ // For our own units, we show everything
+ if (!localPlayerIO() || localPlayerIO()->isEnemyUnit(unit)) {
 	hidePluginWidgets();
 	selectionWidget()->hideOrderButtons();
 	return;
+ }
+ if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
+	selectionWidget()->hideOrderButtons();
  }
  mSelectedUnit = unit;
 }
