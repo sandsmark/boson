@@ -6,6 +6,7 @@ TODO:
 Generic :
 =========
 
+read/save Options has been removed (was using an olg buggy kdevelop code)
 bug : mobile on very-bottom-right can't be selected [still exact?]
 smoother moves (using float instead of int for VirtualSprite?)
 black background ??

@@ -100,9 +100,9 @@ protected:
   /** overloaded for Message box on last window exit */
   bool queryExit();
   /** save the app-specific options on slotAppExit or by an Options dialog */
-  void saveOptions();
+  //void saveOptions();
   /** read the app-specific options on init() or by an Options dialog */
-  void readOptions();
+  //void readOptions();
 
   /** receive Server message */
   void handleDialogMessage(bosonMsgTag, int, bosonMsgData *);
@@ -135,7 +135,7 @@ private:
 //    QStrList *recentList; 
     /** rMainGeom keeps the acutal size of your application and is used to
       * restore your last used application size. */
-    QRect rMainGeom;
+    //QRect rMainGeom;
     /** flag if toolbar is visible or not. Used for kconfig and checking the
       * view-menu entry view toolbar. bViewStatusbar does the same for the
       * statusbar. 

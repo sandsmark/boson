@@ -64,7 +64,7 @@ BoEditorApp::BoEditorApp(char *filename)
 
   ///////////////////////////////////////////////////////////////////
   // read the config file options
-  readOptions();
+  //readOptions();
 
   ///////////////////////////////////////////////////////////////////
   // call init() to invoke all other construction parts
@@ -110,18 +110,6 @@ void BoEditorApp::init(char *filename )
   initToolBars();
   initStatusBar();
   initView();
-
-  ///////////////////////////////////////////////////////////////////
-  // enable bars dependend on config file setups
-  if (!bViewToolbar_0)
-    enableToolBar(KToolBar::Hide,0);
-  if (!bViewStatusbar)
-    enableStatusBar(KStatusBar::Hide);
-
-//orzel : should be re-tested, was removed because menuBar wasn't appearing
-//	probably because of a corrupted config file
-//  menu_bar->setMenuBarPos(menu_bar_pos);
-  tool_bar_0->setBarPos(tool_bar_0_pos);
 
   ///////////////////////////////////////////////////////////////////
   // disable menu and toolbar items at startup
@@ -296,6 +284,7 @@ void BoEditorApp::initView()
    this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
+	resize(800,600);
 	setView(mainview);
 }
 
@@ -305,7 +294,6 @@ void BoEditorApp::resizeEvent(QResizeEvent *evt)
 {
     KTMainWindow::resizeEvent(evt);
 
-    rMainGeom= this->geometry();
     updateRects();
 }
 
@@ -357,6 +345,7 @@ bool BoEditorApp::queryExit()
     return false;
 }
 
+/*
 void BoEditorApp::saveOptions()
 {
 	KConfig *config = kapp->getConfig();
@@ -394,6 +383,7 @@ void BoEditorApp::readOptions()
 
 
 }
+*/
 
 
 /////////////////////////////////////////////////////////////////////
@@ -407,7 +397,7 @@ void BoEditorApp::slotAppExit()
   // exits the Application
   if(this->queryExit())
     {
-      saveOptions();
+      //saveOptions();
       KTMainWindow::deleteAll();
       kapp->quit();
     }
