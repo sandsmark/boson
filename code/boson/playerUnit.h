@@ -49,7 +49,7 @@ public slots:
 //  	void	targetMoveTo(int, int);
   	void	targetDying(bosonUnit *);
 signals:
-	void	sig_moveTo(int newx, int newy); // never emitted for a facility !
+	void	sig_moveTo(QPoint npos); // never emitted for a facility !
 	void	dying(bosonUnit *);
 protected:
 	/* attack */
@@ -64,51 +64,46 @@ class playerMobUnit : public bosonUnit, public visualMobUnit
 Q_OBJECT
 
 public:
-	struct	state_t {
-		int x;
-		int y;
-	};
-
 			playerMobUnit(mobileMsg_t *);
 
 	void		getWantedAction();
 	void		shooted(int _power);
 	void		destroy(void);
 /* Server orders */
-	void		s_moveTo(state_t nstate);
+	void		s_moveTo(QPoint nstate);
 
 protected:
 	int		getLeft(int a=1) {return (direction+DIRECTION_STEPS-a)%DIRECTION_STEPS; }
 	int		getRight(int a=1) {return (direction+a)%DIRECTION_STEPS; }
 	void		turnTo(int newdir);
-	bool		checkMove(state_t nstate);
+	bool		checkMove(QPoint pos);
    	bool		near(int distance);
 
-	virtual bool	getWantedMove(state_t &);
+	virtual bool	getWantedMove(QPoint &);
 	virtual bool	getWantedShoot(bosonMsgData *);
 
 public slots:
 	/** user asked for a given destination */
-	virtual void	u_goto(int, int); // not the same as QCanvasSprite::moveTo
+	virtual void	u_goto(QPoint); // not the same as QCanvasSprite::moveTo
 	/** user asked to stop */
 	void		u_stop(void);	
 	/** user asked to attack the given unit */
 	virtual void	u_attack(bosonUnit *); // reimplemented from bosonUnit
 
 	/** this slots receives message when the attacked unit moves */
-  	void		targetMoveTo(int, int);
+  	void		targetMoveTo(QPoint);
 
 private :
 	/** actually do the job of moving the unit, from server order */
-	void		do_moveTo(state_t nstate);
+	void		do_moveTo(QPoint nstate);
 	/** actually do the job of configuring the unit with given destination */
-	void		do_goto(int, int);
+	void		do_goto(QPoint);
 	int		direction;	// [0-11] is the angle ...
 	mobUnitState	state;
 
 /* moving */
-	int 		dest_x, dest_y;
-	state_t		asked;
+	QPoint		dest;
+	QPoint		asked;
 	mobUnitState	asked_state;
 
 };
@@ -119,19 +114,19 @@ class harvesterUnit : public playerMobUnit
 Q_OBJECT
 		
 public:
-	harvesterUnit(mobileMsg_t *m) : playerMobUnit(m) 
-		{ hstate = standBy; base_x = m->x; base_y = m->y; }
+	harvesterUnit(mobileMsg_t *m) : playerMobUnit(m) , base(m->x,m->y)
+		{ hstate = standBy;}
 
-	virtual bool	getWantedMove(state_t &);
+	virtual bool	getWantedMove(QPoint &);
 	virtual bool	getWantedShoot(bosonMsgData *);
-	virtual void	u_goto(int, int);
+	virtual void	u_goto(QPoint);
 	
 	enum		harvestState { standBy, goingTo, comingBack, harvesting };
 	
 private:
 	harvestState	hstate;
-	int		base_x, base_y;
-	int		harvest_x, harvest_y;
+	QPoint		base;
+	QPoint		harvest;
 };
 
 
