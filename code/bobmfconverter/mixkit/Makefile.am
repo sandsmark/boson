@@ -33,7 +33,6 @@ libmixkit_la_SOURCES = MxAsp.cxx \
 	MxQSlim.cxx \
 	MxQVis3.cxx \
 	MxSMF.cxx \
-	MxStdGUI.cxx \
 	MxStdModel.cxx \
 	MxStdRender.cxx \
 	MxStdSlim.cxx \
