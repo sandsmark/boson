@@ -502,7 +502,7 @@ void BosonBigDisplay::slotUnitAction(int actionType)
  d->mLockCursor = true;
 }
 
-bool BosonBigDisplay::actionLocked()
+bool BosonBigDisplay::actionLocked() const
 {
  return d->mLockCursor;
 }
