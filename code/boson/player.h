@@ -93,9 +93,7 @@ public:
 	bool loadFromXML(const QDomElement& element);
 
 	virtual bool load(QDataStream& stream);
-	bool loadUnits(QDataStream& stream); // must be done after the map was initialized
 	virtual bool save(QDataStream& stream);
-	bool saveUnits(QDataStream& stream);
 
 	/**
 	 * @return <em>All</em> units of this player. Please don't use this as

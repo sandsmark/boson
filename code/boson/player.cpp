@@ -335,27 +335,6 @@ bool Player::save(QDataStream& stream)
  return true;
 }
 
-bool Player::saveUnits(QDataStream& stream)
-{
- // Save units
- Q_UINT32 unitCount = d->mUnits.count();
- stream << unitCount;
- for (unsigned int i = 0; i < unitCount; i++) {
-	Unit* unit = d->mUnits.at(i);
-	// we need the type first!
-	stream << (unsigned long int)unit->type();
-	stream << (unsigned long int)unit->id();
-
-	stream << (int)unit->dataHandler()->id();
-
-	if (!unit->save(stream)) {
-		boError() << k_funcinfo << "Error while saving unit with id=" << unit->id() << endl;
-		return false;
-	}
- }
- return true;
-}
-
 bool Player::load(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
@@ -393,41 +372,6 @@ bool Player::load(QDataStream& stream)
  d->mStatistics->load(stream);
  */
 
- return true;
-}
-
-bool Player::loadUnits(QDataStream& stream)
-{
- // Load units
- Q_UINT32 unitCount;
- stream >> unitCount;
- for (unsigned int i = 0; i < unitCount; i++) {
-	unsigned long int type;
-	unsigned long int id;
-	int dataHandlerID;
-	stream >> type;
-	stream >> id;
-	stream >> dataHandlerID;
-
-	// Create unit with Boson
-	Unit* unit = ((Boson*)game())->loadUnit(type, this);
-
-	if (!unit) {
-		boError() << k_funcinfo << "NULL unit loaded" << endl;
-		// we cannot load properly anymore.
-		return false;
-	}
-
-	// Set additional properties
-	addUnit(unit, dataHandlerID);
-	unit->setId(id);
-
-	// Call unit's loading methods
-	if (!unit->load(stream)) {
-		boError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
-		return false;
-	}
- }
  return true;
 }
 
