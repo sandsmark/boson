@@ -366,7 +366,6 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 	// these will emit the signals using a QTimer::singleShot(), i.e. return
 	// immediately
 	boGame->initFogOfWar(this);
-	boGame->startScenario(this); // AB: signalStartScenario() seems not to be connected to any slot!
  } else if (mLoading) {
 	// If we're loading saved game, init fog of war for local player
 #warning LOADING code: FIXME

@@ -369,14 +369,6 @@ signals:
 	 * Now all clients should start loading tiles etc.
 	 **/
 	void signalStartNewGame();
-	
-	/**
-	 * Start a scenario. This should be done after loading map and scenario
-	 * (a scenario is loaded first, <em>then</em> started). It is
-	 * implemented using @ref KGame::sendMessage as the map must be loaded
-	 * this way as well.
-	 **/
-	void signalStartScenario();
 
 	/**
 	 * @param unit The unit to be added
