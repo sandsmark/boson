@@ -113,11 +113,11 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if (!canvas()->onCanvas((*it)->x(), (*it)->y())) {
+	if (!canvas()->onCanvas((int)(*it)->x(), (int)(*it)->y())) {
 		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}
-	if (localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {
+	if (localPlayer()->isFogged((int)(*it)->x() / BO_TILE_SIZE, (int)(*it)->y() / BO_TILE_SIZE)) {
 		continue;
 	}
 	Unit* unit = (Unit*)*it;

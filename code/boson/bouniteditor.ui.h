@@ -339,9 +339,9 @@ void BoUnitEditor::slotUpdateUnitProperties()
     // General page
     mUnit->setName(mUnitName->text());
     mUnit->setId(mUnitId->value());
-    mUnit->setUnitWidth(mUnitWidth->value() * BO_TILE_SIZE);
-    mUnit->setUnitHeight(mUnitHeight->value() * BO_TILE_SIZE);
-    mUnit->setUnitDepth(mUnitDepth->value() * BO_TILE_SIZE);
+    mUnit->setUnitWidth((unsigned int)mUnitWidth->value() * BO_TILE_SIZE);
+    mUnit->setUnitHeight((unsigned int)mUnitHeight->value() * BO_TILE_SIZE);
+    mUnit->setUnitDepth((unsigned int)mUnitDepth->value() * BO_TILE_SIZE);
     
     // Mobile/facility properties
     if(mUnitTypeFacility->isChecked()) {
@@ -513,7 +513,7 @@ void BoUnitEditor::slotUpdateWeaponProps()
     w->setRange(mWeaponRange->value());
     w->setCanShootAtAirUnits(mWeaponCanShootAtAirUnits->isChecked());
     w->setCanShootAtLandUnits(mWeaponCanShootAtLandUnits->isChecked());
-    w->setSpeed(mWeaponSpeed->value());
+    w->setSpeed((long unsigned int)mWeaponSpeed->value());
     w->setModelFileName(mWeaponModel->text());
     w->setHeight(mWeaponMaxHeight->value());
     BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());

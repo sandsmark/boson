@@ -1003,7 +1003,7 @@ BoItemList Unit::unitsInRange(unsigned long int r) const
 	if (u->isDestroyed()) {
 		continue;
 	}
-	if (owner()->isFogged(u->x() / BO_TILE_SIZE, u->y() / BO_TILE_SIZE)) {
+	if (owner()->isFogged((int)u->x() / BO_TILE_SIZE, (int)u->y() / BO_TILE_SIZE)) {
 		continue;
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:

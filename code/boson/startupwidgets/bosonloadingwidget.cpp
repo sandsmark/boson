@@ -181,7 +181,7 @@ void BosonLoadingWidget::update()
     }
     case LoadTiles:
     {
-      setProgress(500 + (mCurrentTile / 1244.0 * 2500));
+      setProgress((int)(500 + (mCurrentTile / 1244.0 * 2500)));
       text = i18n("Loading map tiles...");
       break;
     }
@@ -199,7 +199,7 @@ void BosonLoadingWidget::update()
     }
     case LoadUnits:
     {
-      setProgress(3000 + (mCurrentPlayer * 2000) + 150 + (mCurrentUnit / (float)mTotalUnits * 1750));
+      setProgress((int)(3000 + (mCurrentPlayer * 2000) + 150 + (mCurrentUnit / (float)mTotalUnits * 1750)));
       text = i18n("Loading datas for player %1 of %2 (unit model %3 of %4)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers).arg(mCurrentUnit + 1).arg(mTotalUnits);
       break;
     }

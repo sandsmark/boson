@@ -57,7 +57,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
     boError(350) << k_funcinfo << "NULL canvas" << endl;
     return;
   }
-  if(!canvas->onCanvas(pos[0], pos[1]))
+  if(!canvas->onCanvas((int)pos[0], (int)pos[1]))
   {
     boError(350) << k_funcinfo << "invalid start position" << endl;
     mActive = false;

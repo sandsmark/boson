@@ -155,8 +155,8 @@ void BosonMiniMap::createMap()
 // AB: the minimap size is meant to display a MINIMAP_WIDTHxMINIMAP_HEIGHT map
 // completely (at default zooming/scaling factor), for all bigger maps we
 // display a part of the map only (and scroll it)
- d->mPixmap->setFixedWidth(MINIMAP_WIDTH * DEFAULT_MINIMAP_SCALE);
- d->mPixmap->setFixedHeight(MINIMAP_HEIGHT * DEFAULT_MINIMAP_SCALE);
+ d->mPixmap->setFixedWidth((int)MINIMAP_WIDTH * DEFAULT_MINIMAP_SCALE);
+ d->mPixmap->setFixedHeight((int)MINIMAP_HEIGHT * DEFAULT_MINIMAP_SCALE);
  updateGeometry();
 }
 
