@@ -64,6 +64,9 @@ private slots:
 	void bc7(void) { handleButton(7); } // button clicked
 	void bc8(void) { handleButton(8); } // button clicked
 
+protected:
+	virtual void object_put(int, int){}; // not useful for the editor yet
+
 private:
 	void	redrawTiles(void);
 	void	handleButton(int);

@@ -286,3 +286,4 @@ void editorView::handleButton(int but)
 	emit setSelectedTile (g);		// need to be after the setSelected
 }
 
+

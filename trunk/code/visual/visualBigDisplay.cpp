@@ -104,54 +104,63 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 {
 	QPainter p;
 	QPen pen(green, 2);
+	
+	switch( view->getSelectionMode()) {
+		default:
+			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode");
+		case SELECT_NONE:
+			break;
+		case SELECT_RECT:
+			p.begin(this);
+			p.setPen(pen);
+			p.setRasterOp(XorROP);
+			/* erase previous rect */
+			if (oldX != selectX && oldY != selectY)	
+				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			/* draw present rect */
+			oldX = e->x();
+			oldY = e->y();
+			if (oldX != selectX && oldY != selectY)	
+				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			p.end();
+			break;
 
-	if (SELECT_RECT != view->getSelectionMode()) return;
-
-	p.begin(this);
-	p.setPen(pen);
-	p.setRasterOp(XorROP);
-	/* erase previous rect */
-	if (oldX != selectX && oldY != selectY)	
-		drawRectSelect(selectX, selectY, oldX, oldY, p);
-	/* draw present rect */
-	oldX = e->x();
-	oldY = e->y();
-	if (oldX != selectX && oldY != selectY)	
-		drawRectSelect(selectX, selectY, oldX, oldY, p);
-	p.end();
+		case SELECT_PUT:
+			return;
+	}
 }
 
 void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 {
 	QPainter p;
 	QPen pen(green, 2);
-/*
-	QIntDictIterator<visualMobUnit> mobIt mobIt(view->field->mobileList());
-	QIntDictIterator<visualFacility> fixIt(view->field->facilityList());
-*/
 
-//	visualMobUnit	*m;
-//	int		t;
+	switch( view->getSelectionMode()) {
+		default:
+			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode");
+		case SELECT_NONE:
+			break;
+		case SELECT_RECT:
+			p.begin(this);
+			p.setPen(pen);
+			p.setRasterOp(XorROP);
+			/* erase rect */
+			if (oldX != selectX && oldY != selectY)	
+				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			p.end();
+		
+			/* generate multiple selection */
+			selectX	+= BO_TILE_SIZE * view->X();
+			selectY	+= BO_TILE_SIZE * view->Y();
+			oldX	+= BO_TILE_SIZE * view->X();
+			oldY	+= BO_TILE_SIZE * view->Y();
+			
+			view->selectArea(selectX, selectY, oldX, oldY);
+			view->field->update();
 
-	if (SELECT_RECT != view->getSelectionMode()) return;
-
-	p.begin(this);
-	p.setPen(pen);
-	p.setRasterOp(XorROP);
-	/* erase rect */
-	if (oldX != selectX && oldY != selectY)	
-		drawRectSelect(selectX, selectY, oldX, oldY, p);
-	p.end();
+			break;
+	}
 	view->setSelectionMode( SELECT_NONE);
-
-	/* generate multiple selection */
-	selectX	+= BO_TILE_SIZE * view->X();
-	selectY	+= BO_TILE_SIZE * view->Y();
-	oldX	+= BO_TILE_SIZE * view->X();
-	oldY	+= BO_TILE_SIZE * view->Y();
-	
-	view->selectArea(selectX, selectY, oldX, oldY);
-	view->field->update();
 }
 
 void visualBigDisplay::resizeEvent(QResizeEvent *e)
@@ -161,10 +170,21 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 }
 
 
+/*
+void visualBigDisplay::putSomething(void)
+{
+	view->setSelectionMode( SELECT_PUT);
+	oldX = selectX = 0;
+	oldY = selectY = 0;
+	view->unSelectFix();
+	return;
+}
+*/
+
+
 void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 {
 	int x, y;
-	
 	
 	x = e->x();
 	y = e->y();
@@ -178,6 +198,12 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	x += view->X()*BO_TILE_SIZE; y += view->Y()*BO_TILE_SIZE;
 	
 	if (e->button() & LeftButton) {	
+
+		if (view->getSelectionMode() == SELECT_PUT) {
+			view->object_put(e->x(), e->y());
+			return;
+		}
+
 		/* Control -> multiselection, else... */
 		if (! (e->state()&ControlButton)) {
 			view->unSelectAll();
