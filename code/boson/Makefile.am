@@ -74,7 +74,8 @@ COMMON_SRC = \
 	bosontexturearray.cpp \
 	bosonmodel.cpp \
 	bosonglfont.cpp \
-	bosonprofiling.cpp
+	bosonprofiling.cpp \
+	bosonprofilingdialog.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

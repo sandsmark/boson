@@ -36,6 +36,7 @@
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
 #include "kgamecelldebug.h"
+#include "bosonprofilingdialog.h"
 #include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "commandinput.h"
@@ -451,6 +452,13 @@ void BosonWidget::slotDebug()
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
  dlg->show();
+}
+
+void BosonWidget::slotProfiling()
+{
+ BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
+ dlg->exec();
 }
 
 void BosonWidget::slotArrowScrollChanged(int speed)

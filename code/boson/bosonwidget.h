@@ -130,6 +130,7 @@ public:
 
 public slots:
 	void slotDebug();
+	void slotProfiling();
 	void slotGamePreferences();
 	void slotEndGame();
 

@@ -659,7 +659,6 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->render(false);
- boProfiling->debugRender();
 }
 
 void BosonBigDisplayBase::renderText()

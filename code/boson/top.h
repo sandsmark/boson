@@ -178,6 +178,7 @@ private slots:
 	void slotDebugMode(int index);
 	void slotZoom(int index);
 	void slotDebug();
+	void slotProfiling();
 	void slotUnfogAll();
 
 private:

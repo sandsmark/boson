@@ -80,8 +80,6 @@ public:
 	 **/
 	bool loadUnit(int unitType);
 
-	bool loadUnitGraphics(const UnitProperties* prop);
-
 	/**
 	 * Load pixmaps of available actions (attack, move ...). This must be
 	 * done before @ref actionPixmap can return anything useful
@@ -230,6 +228,8 @@ public:
 	static QValueList<QColor> defaultColors();
 
 protected:
+	bool loadUnitGraphics(const UnitProperties* prop);
+
 	/**
 	 * Load a pixmap from path with mash (or not). This is used for all unit
 	 * pixmaps: small/big overview and sprites. It is <em>not</em> yet used

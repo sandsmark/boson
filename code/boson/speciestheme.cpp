@@ -24,6 +24,7 @@
 #include "unitproperties.h"
 #include "bosonmusic.h"
 #include "bosonsound.h"
+#include "bosonprofiling.h"
 
 #ifndef NO_OPENGL
 #include "bosontexturearray.h"
@@ -263,18 +264,22 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 
 bool SpeciesTheme::loadUnit(int type)
 {
+ boProfiling->loadUnit();
  const UnitProperties* prop = unitProperties(type);
  if (!prop) {
 	kdError() << "Could not load unit type " << type << endl;
+	boProfiling->loadUnitDone(type);
 	return false;
  }
  bool ret = loadUnitGraphics(prop);
 
  if (!ret) {
+	boProfiling->loadUnitDone(type);
 	return false;
  }
  BosonSound* sound = boMusic->bosonSound(themePath());
  sound->addUnitSounds(prop);
+ boProfiling->loadUnitDone(type);
  return true;
 }
 

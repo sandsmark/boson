@@ -227,6 +227,8 @@ void TopWidget::initActions()
  // Debug - no i18n!
  (void)new KAction("Debug", KShortcut(), this,
 		SLOT(slotDebug()), d->mGameActions, "debug_kgame");
+ (void)new KAction("Profiling", KShortcut(), this,
+		SLOT(slotProfiling()), d->mGameActions, "debug_profiling");
  (void)new KAction("Unfog", KShortcut(), this,
 		SLOT(slotUnfogAll()), d->mGameActions, "debug_unfog");
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), d->mGameActions, "debug_mode");
@@ -592,6 +594,7 @@ void TopWidget::loadGameData1() // FIXME rename!
  // If game is loaded, we disable progressbar in loading widget, but still set
  //  steps and progress to make code less messy (it's better than having
  //  if(!mLoading) { ... }  everywhere)
+ boProfiling->start(BosonProfiling::LoadGameData1);
  d->mLoading->setSteps(3400 + mBoson->playerCount() * UNITDATAS_LOADINGFACTOR);
  d->mLoading->setProgress(0);
  checkEvents();
@@ -663,9 +666,9 @@ void TopWidget::loadGameData1() // FIXME rename!
 
 		// Then return to welcome screen
 		showWelcomeWidget();
-		return;
 	}
  }
+ boProfiling->stop(BosonProfiling::LoadGameData1);
 }
 
 void TopWidget::loadGameData2() //FIXME rename!
@@ -676,6 +679,7 @@ void TopWidget::loadGameData2() //FIXME rename!
  //  has already returned, if we're loading saved game, then it hasn't, because
  //  map is initialized immediately when it's loaded from file
 
+ boProfiling->start(BosonProfiling::LoadGameData2);
  // Init canvas
  d->mLoading->setLoading(BosonLoadingWidget::InitClasses);
  checkEvents();
@@ -700,10 +704,12 @@ void TopWidget::loadGameData2() //FIXME rename!
 
  // also loads the cursor and the map display list!
  d->mBosonWidget->addInitialDisplay();
+ boProfiling->stop(BosonProfiling::LoadGameData2);
 }
 
 void TopWidget::loadGameData3() // FIXME rename!
 {
+ boProfiling->start(BosonProfiling::LoadGameData3);
  // If we're loading saved game, local player isn't set and inited, because it
  //  was not known (not loaded) when BosonWidget was constructed. Set and init
  //  it now
@@ -789,6 +795,7 @@ void TopWidget::loadGameData3() // FIXME rename!
  // mGame indicates that game is running (and BosonWidget shown and game game
  //  actions enabled etc.)
  mGame = true;
+ boProfiling->stop(BosonProfiling::LoadGameData3);
 }
 
 void TopWidget::slotCanvasTilesLoading(int progress)
@@ -984,26 +991,49 @@ void TopWidget::slotGamePreferences()
 
 void TopWidget::slotDebug()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotDebug();
+}
+
+void TopWidget::slotProfiling()
+{
+ if (!d->mBosonWidget) {
+	return;
+ }
+ d->mBosonWidget->slotProfiling();
 }
 
 void TopWidget::slotUnfogAll()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotUnfogAll();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotSplitDisplayHorizontal();
 }
 
 void TopWidget::slotSplitDisplayVertical()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotSplitDisplayVertical();
 }
 
 void TopWidget::slotRemoveActiveDisplay()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotRemoveActiveDisplay();
 }
 
