@@ -63,11 +63,11 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
 							if (y+j>=0 && y+j<_canvas->maxY) {
-								setTile(c, random()%4 );
+								setVersion(c, random()%4 );
 								_canvas->changeCell( x+i, y+j, c); // some kind of randomness in 'c' here
 							}
 			} else {
-				setTile(c, random()%4 );
+				setVersion(c, random()%4 );
 				_canvas->changeCell( x, y, c); // some kind of randomness in 'c' here
 			}
 
