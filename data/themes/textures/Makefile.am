@@ -63,6 +63,7 @@ texture_DATA = \
 	metal30.jpg \
 	minerals.jpg \
 	missile1.jpg \
+	mine1.jpg \
 	mslback1.jpg \
 	mslfrnt1.jpg \
 	pipe2.jpg \
