@@ -67,6 +67,7 @@ void BosonGLChat::setChat(KGameChat* chat)
 {
  mChat = chat;
  if (!mChat) {
+	setKGame(0);
 	return;
  }
  if (!mChat->game()) {
