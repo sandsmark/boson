@@ -25,6 +25,8 @@
 #include <kdebug.h>
 
 #include <qlayout.h>
+#include <qlabel.h>
+#include <qcombobox.h>
 
 #include "optionsdialog.moc"
 
@@ -35,10 +37,12 @@ public:
 	{
 		mArrowSpeed = 0;
 		mGameSpeed = 0;
+		mCommandFrame = 0;
 	}
 
 	KIntNumInput* mArrowSpeed;
 	KIntNumInput* mGameSpeed;
+	QComboBox* mCommandFrame;
 };
 
 OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
@@ -50,15 +54,30 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  
  d->mArrowSpeed = new KIntNumInput(ARROW_KEY_STEP, plainPage());
  d->mArrowSpeed->setRange(1, 200);
+ d->mArrowSpeed->setLabel(i18n("Arrow Key Steps"));
  connect(d->mArrowSpeed, SIGNAL(valueChanged(int)), 
 		this, SIGNAL(signalArrowScrollChanged(int)));
  topLayout->addWidget(d->mArrowSpeed);
 
  d->mGameSpeed = new KIntNumInput(10, plainPage());
  d->mGameSpeed->setRange(MAX_GAME_SPEED, MIN_GAME_SPEED);
+ d->mGameSpeed->setLabel(i18n("Game Speed"));
  connect(d->mGameSpeed, SIGNAL(valueChanged(int)), 
 		this, SLOT(slotSpeedChanged(int)));
  topLayout->addWidget(d->mGameSpeed);
+
+ QHBoxLayout* l = new QHBoxLayout(topLayout);
+ QLabel* commandLabel = new QLabel(i18n("Position of Command Frame"), plainPage());
+ l->addWidget(commandLabel);
+ d->mCommandFrame = new QComboBox(plainPage());
+ d->mCommandFrame->insertItem(i18n("Left"), Left);
+ d->mCommandFrame->insertItem(i18n("Right"), Right);
+ connect(d->mCommandFrame, SIGNAL(activated(int)), 
+		this, SIGNAL(signalCommandFramePositionChanged(int)));
+ l->addWidget(d->mCommandFrame);
+
+
+ setCommandFramePosition(Left);
 }
 
 
@@ -92,3 +111,9 @@ void OptionsDialog::setArrowScrollSpeed(int value)
 {
  d->mArrowSpeed->setValue(value);
 }
+
+void OptionsDialog::setCommandFramePosition(CommandFramePosition position)
+{
+ d->mCommandFrame->setCurrentItem(position);
+}
+

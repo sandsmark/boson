@@ -31,6 +31,11 @@ public:
 	OptionsDialog(QWidget* parent, bool modal = false);
 	~OptionsDialog();
 
+	enum CommandFramePosition {
+		Left = 0,
+		Right = 1
+	};
+
 	/**
 	 * Set the shown value for the game speed. Note that this value is the
 	 * time between 2 @ref QCanvas::advance calls in ms while the dialog
@@ -41,6 +46,8 @@ public:
 
 	void setArrowScrollSpeed(int);
 
+	void setCommandFramePosition(CommandFramePosition position);
+
 protected slots:
 	/**
 	 * @param ms The new game speed in ms
@@ -50,6 +57,11 @@ protected slots:
 signals:
 	void signalArrowScrollChanged(int);
 	void signalSpeedChanged(int);
+
+	/**
+	 * @param index see @ref CommandFramePosition
+	 **/
+	void signalCommandFramePositionChanged(int index); 
 
 private:
 	class OptionsDialogPrivate;
