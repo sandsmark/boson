@@ -589,7 +589,6 @@ void BosonGLWidget::initGL()
  boDebug() << k_funcinfo << "done" << endl;
  context()->setIsInitialized(true);
 
- // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
  resizeGL(width(), height());
 }
 
@@ -728,6 +727,17 @@ void BosonGLWidget::setContext(BoContext* context)
 
 void BosonGLWidget::paintEvent(QPaintEvent*)
 {
+ static bool resized = false;
+ if (!resized) {
+	// some drivers have initialization problems. they require a resize as
+	// soon as the widget is visible, in order to work correctly.
+	// otherwise e.g. glDrawPixels() won't work correctly (e.g. for my
+	// tdfx driver) - dunno why.
+	int w = width();
+	int h = height();
+	resizeGL(w - 1, h - 1);
+	resizeGL(w, h);
+ }
  slotUpdateGL();
 }
 
