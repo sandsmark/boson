@@ -1,4 +1,17 @@
 [article]
+id=031224
+date=December 24th 2003 12:18
+title=Merry christmas and a happy new year!
+text=The Boson Team wishes you a merry christmas and a happy new year.<br>
+    0.9.1 binary packages are now available for Gentoo, Debian and Redhat, you
+    can get them from the <a href="download.php">download page</a>.<br>
+    CVS contains some <a href="status.php">new features</a>, most interesting of
+    which is probably support for neutral units. Neutral units will include
+    stuff such as civilian building and nature (e.g trees).<br>
+    We also have two new <a href="screenshots.php">screenshots</a> showing some
+    neutral units such as trees.<br><br>
+
+[article]
 id=031116
 date=November 16th 2003 18:46
 title=Boson 0.9.1 released
