@@ -624,7 +624,22 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		myTex = 0;
 	}
 
+#define NO_OPTIMIZE 1
+
+#if NO_OPTIMIZE
+	// now start the actual display list for this node.
+	glNewList(node->user.d, GL_COMPILE);
+#else
+	// AB: the next few lines try to optimize. but there might be a bug.
+	// imagine the texture map gets rotated - we can emulate this by
+	// rotating the texture coordinates as well - but how are the other
+	// coordinates calculated? those that are between the specified texture
+	// coordinates (which are assigned to the vertices)? is the texture
+	// matrix used for them as well? If yes this optimize approach can't
+	// work.
+
 	BoMatrix texMatrix;
+#endif
 	if (mat && myTex) {
 		// *ggg* this is a nice workaround.
 		// it's hard to do this with a Lib3dsMatrix by several
@@ -659,6 +674,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 			// doesn't seem to be used in our models
 			glScalef(scale, scale, 1.0);
 		}
+#if !NO_OPTIMIZE
 		texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
 		if (texMatrix.isNull()) {
 			boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
@@ -666,14 +682,17 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		}
 
 		glPopMatrix();
+#endif
 		glMatrixMode(GL_MODELVIEW);
 	} else {
 		// we use the default identity matrix - this is just "in case".
 		// we must not use this matrix at all!
 	}
 
+#if !NO_OPTIMIZE
 	// now start the actual display list for this node.
 	glNewList(node->user.d, GL_COMPILE);
+#endif
 	d->mNodeDisplayLists.append(node->user.d);
 	glBindTexture(GL_TEXTURE_2D, myTex);
 
@@ -706,7 +725,12 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				BoVector3 a;
 				BoVector3 b;
 				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
+#if NO_OPTIMIZE
+				b.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
+#else
+				a.set(mesh->texelL[f->points[i]][0], mesh->texelL[f->points[i]][1], 0.0);
 				texMatrix.transform(&b, &a);
+#endif
 				tex[i][0] = b[0];
 				tex[i][1] = b[1];
 			}
@@ -723,6 +747,13 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		
 	}
 	glEnd();
+#if NO_OPTIMIZE
+	if (mat && myTex) {
+		glMatrixMode(GL_TEXTURE);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	}
+#endif
 
 	if (resetColor) {
 		// we need to reset the color (mainly for the placement preview)
