@@ -61,6 +61,7 @@ BoGroundRenderer::BoGroundRenderer()
  mFogTextureData = 0;
  mLastMapWidth = 0;
  mLastMapHeight = 0;
+ mFogTextureDirty = false;
 }
 
 BoGroundRenderer::~BoGroundRenderer()
@@ -146,13 +147,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 	// Enable fog texture (TU 1)
 	initFogTexture(map);
 	boTextureManager->activateTextureUnit(1);
-#ifndef USE_TEXSUBIMAGE
-	// Update fog texture
-	if (!mFogTexture) {
-		mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
-				BoTexture::FilterLinear | BoTexture::FormatRGBA);
-	}
-#endif
+	updateFogTexture();
 	boTextureManager->bindTexture(mFogTexture);
 	// Use automatic texcoord generation to map fog texture to cells
 	const float texPlaneS[] = { 1.0f / mFogTextureDataW, 0.0, 0.0, 0.0 };
@@ -354,31 +349,14 @@ void BoGroundRenderer::cellChanged(int x, int y)
  mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
  mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
 
-#ifdef USE_TEXSUBIMAGE
- mFogTexture->bind();
- // Because of (possible) texture compression, we can't update a single pixel
- //  of the texture. Instead, we have to update the whole 4x4 block that the
- //  pixel is in.
- int blockx = ((x + 1) / 4) * 4;
- int blocky = ((y + 1) / 4) * 4;
- // Create temporary array for the 4x4 block
- unsigned char blockdata[4 * 4 * 4];
- // Copy data from mFogTextureData to blockdata
- for(int i = 0; i < 4; i++) {
-	for(int j = 0; j < 4; j++) {
-		blockdata[((j * 4) + i) * 4 + 0] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 0];
-		blockdata[((j * 4) + i) * 4 + 1] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 1];
-		blockdata[((j * 4) + i) * 4 + 2] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 2];
-		blockdata[((j * 4) + i) * 4 + 3] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 3];
-	}
- }
- // Update texture
- glTexSubImage2D(GL_TEXTURE_2D, 0, blockx, blocky, 4, 4, GL_RGBA, GL_UNSIGNED_BYTE, blockdata);
+ // Fog texture is now dirty
+ mFogTextureDirty = true;
 
-#else
- delete mFogTexture;
- mFogTexture = 0;
-#endif
+ // Update dirty area
+ mFogTextureDirtyAreaX1 = QMIN(mFogTextureDirtyAreaX1, x);
+ mFogTextureDirtyAreaY1 = QMIN(mFogTextureDirtyAreaY1, y);
+ mFogTextureDirtyAreaX2 = QMAX(mFogTextureDirtyAreaX2, x);
+ mFogTextureDirtyAreaY2 = QMAX(mFogTextureDirtyAreaY2, y);
 }
 
 void BoGroundRenderer::initFogTexture(const BosonMap* map)
@@ -421,11 +399,72 @@ void BoGroundRenderer::initFogTexture(const BosonMap* map)
 			mFogTextureData[(y * w + x) * 4 + 3] = 255;
 		}
 	}
-#ifdef USE_TEXSUBIMAGE
 	mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
 			BoTexture::FilterLinear | BoTexture::FormatRGBA);
-#endif
+
+	mFogTextureDirty = false;
+
+	// Update dirty area
+	mFogTextureDirtyAreaX1 = 1000000;
+	mFogTextureDirtyAreaY1 = 1000000;
+	mFogTextureDirtyAreaX2 = -1;
+	mFogTextureDirtyAreaY2 = -1;
  }
+}
+
+void BoGroundRenderer::updateFogTexture()
+{
+ if (!mFogTextureDirty) {
+	// No need to update
+	return;
+ }
+
+#ifdef USE_TEXSUBIMAGE
+ mFogTexture->bind();
+ // Because of (possible) texture compression, we can't update a single pixel
+ //  of the texture. Instead, we have to update the whole 4x4 block that the
+ //  pixel is in.
+ int blockx1 = (mFogTextureDirtyAreaX1 + 1) / 4;
+ int blocky1 = (mFogTextureDirtyAreaY1 + 1) / 4;
+ int blockx2 = (mFogTextureDirtyAreaX2 + 1) / 4;
+ int blocky2 = (mFogTextureDirtyAreaY2 + 1) / 4;
+ int x = blockx1 * 4;
+ int y = blocky1 * 4;
+ int w = (blockx2 - blockx1 + 1) * 4;
+ int h = (blocky2 - blocky1 + 1) * 4;
+ // Create temporary array for the 4x4 block
+ unsigned char blockdata[w * h * 4];
+ // Copy data from mFogTextureData to blockdata
+ for(int i = 0; i < w; i++) {
+	for(int j = 0; j < h; j++) {
+		// Use black if the point is not on the map
+		if (((x + i) >= mLastMapWidth) || ((y + j) >= mLastMapHeight)) {
+			blockdata[((j * w) + i) * 4 + 0] = blockdata[((j * w) + i) * 4 + 1] =
+					blockdata[((j * w) + i) * 4 + 2] = blockdata[((j * w) + i) * 4 + 3] = 0;
+		}
+		blockdata[((j * w) + i) * 4 + 0] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 0];
+		blockdata[((j * w) + i) * 4 + 1] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 1];
+		blockdata[((j * w) + i) * 4 + 2] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 2];
+		blockdata[((j * w) + i) * 4 + 3] = mFogTextureData[((y + j) * mFogTextureDataW + (x + i)) * 4 + 3];
+	}
+ }
+ // Update texture
+ glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, blockdata);
+
+#else
+ delete mFogTexture;
+ // Create new fog texture
+ mFogTexture = new BoTexture(mFogTextureData, mFogTextureDataW, mFogTextureDataH,
+		BoTexture::FilterLinear | BoTexture::FormatRGBA);
+#endif
+
+ mFogTextureDirty = false;
+
+ // Update dirty area
+ mFogTextureDirtyAreaX1 = 1000000;
+ mFogTextureDirtyAreaY1 = 1000000;
+ mFogTextureDirtyAreaX2 = -1;
+ mFogTextureDirtyAreaY2 = -1;
 }
 
 

@@ -249,6 +249,11 @@ protected:
 
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map) = 0;
 
+	/**
+	 * Updates fog texture if it's dirty
+	 **/
+	void updateFogTexture();
+
 
 private:
 	const BoMatrix* mModelviewMatrix;
@@ -272,6 +277,11 @@ private:
 	int mFogTextureDataH;
 	unsigned int mLastMapWidth;
 	unsigned int mLastMapHeight;
+	bool mFogTextureDirty;
+	int mFogTextureDirtyAreaX1;
+	int mFogTextureDirtyAreaY1;
+	int mFogTextureDirtyAreaX2;
+	int mFogTextureDirtyAreaY2;
 };
 
 #endif
