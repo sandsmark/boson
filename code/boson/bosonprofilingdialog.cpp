@@ -36,15 +36,8 @@
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 #include <qdatetime.h>
-
-#warning workaround only!
-// FIXME: these should not be in this file at all (not even in the class). maybe
-// as parameters to addItemAdvance() or so... but not global in any way
-unsigned long int itemFunctionSum;
-unsigned long int itemAdvanceSum;
-unsigned long int itemAdvanceFunctionSum;
-unsigned long int itemMoveSum;
-unsigned int itemAllItems;
+#include <qintdict.h>
+#include <qmemarray.h>
 
 class QListViewItemNumber : public QListViewItem
 {
@@ -232,8 +225,10 @@ public:
 		mRender = 0;
 		mRenderSummary = 0;
 		mSlotAdvance = 0;
+		mSlotAdvanceSummaryOnly = 0;
+		mSlotAdvanceSummaryForCount = 0;
 		mItemAdvance = 0;
-		mCreateItemAdvanceSummaryOnly = 0;
+		mItemAdvanceSummaryOnly = 0;
 		mEvents = 0;
 		mCurrentFile = 0;
 
@@ -246,8 +241,10 @@ public:
 	KListView* mRender;
 	RenderSummary* mRenderSummary;
 	KListView* mSlotAdvance;
+	QCheckBox* mSlotAdvanceSummaryOnly;
+	QCheckBox* mSlotAdvanceSummaryForCount;
 	KListView* mItemAdvance;
-	QCheckBox* mCreateItemAdvanceSummaryOnly;
+	QCheckBox* mItemAdvanceSummaryOnly;
 	KListView* mEvents;
 	QLabel* mCurrentFile;
 	QString mCurrentFileName;
@@ -326,8 +323,15 @@ void BosonProfilingDialog::initSlotAdvancePage()
  d->mSlotAdvance->addColumn(i18n("Time (ms)"));
  d->mSlotAdvance->addColumn(i18n("Time (s)"));
  d->mSlotAdvance->addColumn(i18n("%"));
+ QHBox* slotAdvanceControlBox = new QHBox(page);
+ d->mSlotAdvanceSummaryOnly = new QCheckBox(i18n("Summary only"), slotAdvanceControlBox);
+ d->mSlotAdvanceSummaryOnly->setChecked(true);
+ d->mSlotAdvanceSummaryForCount = new QCheckBox(i18n("Summary for AdvanceCount"), slotAdvanceControlBox);
+ d->mSlotAdvanceSummaryForCount->setChecked(true);
+
  layout->addWidget(slotAdvanceLabel);
  layout->addWidget(d->mSlotAdvance);
+ layout->addWidget(slotAdvanceControlBox);
  layout->addSpacing(10);
 
  QLabel* itemAdvanceLabel = new QLabel(i18n("Values per item:"), page);
@@ -347,11 +351,13 @@ void BosonProfilingDialog::initSlotAdvancePage()
  layout->addWidget(d->mItemAdvance);
 
  QHBox* controlBox = new QHBox(page);
- d->mCreateItemAdvanceSummaryOnly = new QCheckBox(i18n("Item Advance Summary Only"), controlBox);
- d->mCreateItemAdvanceSummaryOnly->setChecked(true);
- QPushButton* reset = new QPushButton(i18n("Reset Values"), controlBox);
- connect(reset, SIGNAL(clicked()), this, SLOT(slotResetSlotAdvancePage()));
+ d->mItemAdvanceSummaryOnly = new QCheckBox(i18n("Item Advance Summary Only"), controlBox);
+ d->mItemAdvanceSummaryOnly->setChecked(true);
  layout->addWidget(controlBox);
+
+ QPushButton* reset = new QPushButton(i18n("Reset Values"), page);
+ connect(reset, SIGNAL(clicked()), this, SLOT(slotResetSlotAdvancePage()));
+ layout->addWidget(reset);
 }
 
 void BosonProfilingDialog::initEventsPage()
@@ -528,7 +534,7 @@ void BosonProfilingDialog::resetRenderPage()
 
 void BosonProfilingDialog::slotResetSlotAdvancePage()
 {
- if (!d->mCreateItemAdvanceSummaryOnly->isChecked()) {
+ if (!d->mItemAdvanceSummaryOnly->isChecked()) {
 	int r = KMessageBox::questionYesNo(this, i18n("You selected to display advance information for ALL items - this will take a very long time.\nDo you really want to do this?"));
 	if (r != KMessageBox::Yes) {
 		return;
@@ -536,55 +542,104 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
  }
  d->mSlotAdvance->clear();
  d->mItemAdvance->clear();
- itemFunctionSum = itemAdvanceSum = itemAdvanceFunctionSum = itemMoveSum = 0;
- itemAllItems = 0;
  BosonProfilingPrivate* pd = d->data()->d;
- QPtrListIterator<ProfileSlotAdvance> it(pd->mSlotAdvanceTimes);
- int i = 0;
- unsigned long int functionSum = 0;
- unsigned long int advanceFunctionSum = 0;
- unsigned long int deleteUnusedShotsSum = 0;
- unsigned long int particlesSum = 0;
- unsigned long int maximalAdvanceCountSum = 0;
-
- for (; it.current(); ++it, i++) {
-	unsigned long int func = it.current()->dFunction();
-	unsigned int call = it.current()->mAdvanceCount;
-	QListViewItemNumber* item = new QListViewItemNumber(d->mSlotAdvance);
-	item->setText(0, QString::number(i));
-	initSlotAdvanceItem(item, call,i18n("Function"), it.current()->dFunction(), func);
-	functionSum += it.current()->dFunction();
-
-	initSlotAdvanceItem(new QListViewItemNumber(item), call, i18n("AdvanceFunctions"), it.current()->dAdvanceFunction(), func);
-	advanceFunctionSum += it.current()->dAdvanceFunction();
-	initSlotAdvanceItem(new QListViewItemNumber(item), call, i18n("DeleteUnusedShots"), it.current()->dDeleteUnusedShots(), func);
-	deleteUnusedShotsSum += it.current()->dDeleteUnusedShots();
-	initSlotAdvanceItem(new QListViewItemNumber(item), call, i18n("Particles"), it.current()->dParticles(), func);
-	particlesSum += it.current()->dParticles();
-	initSlotAdvanceItem(new QListViewItemNumber(item), call, i18n("MaximalAdvancCount"), it.current()->dMaximalAdvanceCount(), func);
-	maximalAdvanceCountSum += it.current()->dMaximalAdvanceCount();
-
-	item->setOpen(true);
-
-	// add values for the units, missiles, ...
-	addItemAdvance(it.current());
+ if (pd->mSlotAdvanceTimes.isEmpty()) {
+	return;
  }
+
+ QValueList<QString> slotAdvanceValueNames = ProfileSlotAdvance::names();
+ QMemArray<unsigned long int> slotAdvanceSums(slotAdvanceValueNames.count());
+ for (unsigned int i = 0; i < slotAdvanceSums.count(); i++) {
+	slotAdvanceSums[i] = 0;
+ }
+
+ QPtrListIterator<ProfileSlotAdvance> it(pd->mSlotAdvanceTimes);
+ int slotAdvanceCount = 0;
+ for (; it.current(); ++it, slotAdvanceCount++) {
+	QValueList<unsigned long int> values = it.current()->values();
+	for (unsigned int i = 0; i < values.count(); i++) {
+		slotAdvanceSums[i] += values[i];
+	}
+	if (!d->mSlotAdvanceSummaryOnly->isChecked()) {
+		unsigned long int func = values[0];
+		unsigned int call = it.current()->mAdvanceCount;
+		QListViewItemNumber* item = new QListViewItemNumber(d->mSlotAdvance);
+		initSlotAdvanceItem(item, call, slotAdvanceValueNames[0], values[0], func);
+		item->setText(0, QString::number(slotAdvanceCount));
+		for (unsigned int i = 1; i < values.count(); i++) { // skip function entry
+			initSlotAdvanceItem(new QListViewItemNumber(item), call, slotAdvanceValueNames[i], values[i], func);
+		}
+		item->setOpen(true);
+	}
+
+ }
+
+ if (d->mSlotAdvanceSummaryForCount->isChecked()) {
+	it.toFirst();
+	QIntDict< QPtrList<ProfileSlotAdvance> > advanceCounts;
+	advanceCounts.setAutoDelete(true);
+	for (; it.current(); ++it) {
+		QPtrList<ProfileSlotAdvance>* prof = advanceCounts.find(it.current()->mAdvanceCount);
+		if (!prof) {
+			prof = new QPtrList<ProfileSlotAdvance>();
+			advanceCounts.insert(it.current()->mAdvanceCount, prof);
+		}
+		prof->append(it.current());
+	}
+ }
+
+ QMemArray<unsigned long int> itemAdvanceSums(4); // FIXME hardcoded
+ int itemAdvanceCount = 0;
+ for (unsigned int i = 0; i < itemAdvanceSums.count(); i++) {
+	itemAdvanceSums[i] = 0;
+ }
+
+ it.toFirst();
+ for (; it.current(); ++it) {
+	// values per item for the units, missiles, ...
+	addItemAdvance(it.current());
+	QPtrListIterator<ProfileItemAdvance> itemsIt(it.current()->mItems);
+	// warning: this loop is very speed sensitive! there are a lot of items
+	// here...
+	for (; itemsIt.current(); ++itemsIt) {
+		QValueList<unsigned long int> values = itemsIt.current()->values();
+		for (int i = 0; i < values.count(); i++) {
+			itemAdvanceSums[i] += values[i];
+		}
+		itemAdvanceCount++;
+	}
+ }
+
+
 
  unsigned int count = pd->mSlotAdvanceTimes.count();
  if (!count) {
+	// hmm we already checked above?!
+	boError() << k_funcinfo << "internal error - count == 0" << endl;
 	return;
  }
- addItemAdvanceSummary();
 
- unsigned long int func = functionSum / count;
+ // slot advance summary
+ unsigned long int func = slotAdvanceSums[0] / count;
  QListViewItemNumber* average = new QListViewItemNumber(d->mSlotAdvance);
  average->setText(0, i18n("Average - use with care"));
- initSlotAdvanceItem(average, 0, i18n("Function"), functionSum / count, func);
- initSlotAdvanceItem(new QListViewItemNumber(average), 0, i18n("AdvanceFunctions"), advanceFunctionSum / count, func);
- initSlotAdvanceItem(new QListViewItemNumber(average), 0, i18n("DeleteUnusedShots"), deleteUnusedShotsSum / count, func);
- initSlotAdvanceItem(new QListViewItemNumber(average), 0, i18n("Particles"), particlesSum / count, func);
- initSlotAdvanceItem(new QListViewItemNumber(average), 0, i18n("MaximalAdvanceCount"), maximalAdvanceCountSum/ count, func);
+ initSlotAdvanceItem(average, -1, slotAdvanceValueNames[0], slotAdvanceSums[0] / count, func);
+ for (unsigned int i = 1; i < slotAdvanceSums.count(); i++) { // we skip the function entry!
+	initSlotAdvanceItem(new QListViewItemNumber(average), -1, slotAdvanceValueNames[i], slotAdvanceSums[i] / count, func);
+ }
  average->setOpen(true);
+ // slot advance summary (end)
+
+ // item advance summary
+ if (!itemAdvanceCount) {
+	return;
+ }
+ QValueList<QString> itemAdvanceNames = ProfileItemAdvance::names();
+ for (unsigned int i = 1; i < itemAdvanceSums.count(); i++) {
+	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i], itemAdvanceSums[0]);
+	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i] / itemAdvanceCount, itemAdvanceSums[0] / itemAdvanceCount);
+ }
+ // item advance summary (end)
 }
 
 void BosonProfilingDialog::addItemAdvance(ProfileSlotAdvance* slotAdvance)
@@ -594,46 +649,24 @@ void BosonProfilingDialog::addItemAdvance(ProfileSlotAdvance* slotAdvance)
 	return;
  }
  QPtrListIterator<ProfileItemAdvance> it(slotAdvance->mItems);
- if (!d->mCreateItemAdvanceSummaryOnly->isChecked()) {
-	for (; it.current(); ++it, itemAllItems++) {
-		unsigned long int function = it.current()->mFunction.diff();
-//		initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-//				it.current(), slotAdvance->mAdvanceCount, 
-//				i18n("Function"), it.current()->mFunction.diff(), function);
-		initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-				it.current(), slotAdvance->mAdvanceCount,
-				i18n("Advance"), it.current()->mAdvance.diff(), function);
-		initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-				it.current(), slotAdvance->mAdvanceCount,
-				i18n("AdvanceFunction"), it.current()->mAdvanceFunction.diff(), function);
-		initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-				it.current(), slotAdvance->mAdvanceCount,
-				i18n("Move"), it.current()->mMove.diff(), function);
-	}
- }
- it.toFirst();
- for (; it.current(); ++it, itemAllItems++) {
-	unsigned long int function = it.current()->mFunction.diff();
-	itemFunctionSum += it.current()->mFunction.diff();
-	itemAdvanceSum += it.current()->mAdvance.diff();
-	itemAdvanceFunctionSum += it.current()->mAdvanceFunction.diff();
-	itemMoveSum += it.current()->mMove.diff();
- }
-}
-
-void BosonProfilingDialog::addItemAdvanceSummary()
-{
- if (!itemAllItems) {
-	boDebug() << k_funcinfo << "no items here yet" << endl;
+ if (d->mItemAdvanceSummaryOnly->isChecked()) {
 	return;
  }
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAllItems), i18n("Advance"), itemAdvanceSum, itemFunctionSum);
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAllItems), i18n("AdvanceFunction"), itemAdvanceFunctionSum, itemFunctionSum);
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAllItems), i18n("Move"), itemMoveSum, itemFunctionSum);
-
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAllItems), i18n("Advance"), itemAdvanceSum  / itemAllItems, itemFunctionSum / itemAllItems);
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAllItems), i18n("AdvanceFunction"), itemAdvanceFunctionSum  / itemAllItems, itemFunctionSum / itemAllItems);
- initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAllItems), i18n("Move"), itemMoveSum  / itemAllItems, itemFunctionSum  / itemAllItems);
+ for (; it.current(); ++it) {
+	unsigned long int function = it.current()->mFunction.diff();
+//	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
+//			it.current(), slotAdvance->mAdvanceCount, 
+//			i18n("Function"), it.current()->mFunction.diff(), function);
+	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
+			it.current(), slotAdvance->mAdvanceCount,
+			i18n("Advance"), it.current()->mAdvance.diff(), function);
+	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
+			it.current(), slotAdvance->mAdvanceCount,
+			i18n("AdvanceFunction"), it.current()->mAdvanceFunction.diff(), function);
+	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
+			it.current(), slotAdvance->mAdvanceCount,
+			i18n("Move"), it.current()->mMove.diff(), function);
+ }
 }
 
 void BosonProfilingDialog::initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCount, const QString& type, unsigned long int time, unsigned long int function)
@@ -690,13 +723,17 @@ void BosonProfilingDialog::initRenderItem(QListViewItemNumber* item, const QStri
  item->setTime(2, time, function);
 }
 
-void BosonProfilingDialog::initSlotAdvanceItem(QListViewItemNumber* item, unsigned int advanceCall, const QString& type, long int time, long int function)
+void BosonProfilingDialog::initSlotAdvanceItem(QListViewItemNumber* item, int advanceCall, const QString& type, long int time, long int function)
 {
  if (!function) {
 	boError() << k_funcinfo << "function == 0" << endl;
 	return;
  }
- item->setText(1, QString::number(advanceCall));
+ if (advanceCall == -1) {
+	item->setText(1, QString::fromLatin1("-"));
+ } else {
+	item->setText(1, QString::number(advanceCall));
+ }
  item->setText(2, type);
  item->setTime(3, time, function);
 }

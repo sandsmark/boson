@@ -23,6 +23,8 @@
 #include "bosonprofiling.h"
 #include "defines.h"
 
+#include <klocale.h>
+
 #include <qmap.h>
 #include <qvaluelist.h>
 #include <qptrlist.h>
@@ -99,6 +101,26 @@ public:
 		mId = id;
 		mWork = work;
 	}
+	QValueList<unsigned long int> values() const
+	{
+		QValueList<unsigned long int> values;
+		values.append(mFunction.diff()); // MUST be the first entry!
+		values.append(mAdvance.diff());
+		values.append(mAdvanceFunction.diff());
+		values.append(mMove.diff());
+		return values;
+	}
+	static QValueList<QString> names()
+	{
+		// note that count AND order must match count and order of
+		// values() exactly!
+		QValueList<QString> names;
+		names.append(i18n("Function"));
+		names.append(i18n("Advance"));
+		names.append(i18n("AdvanceFunction"));
+		names.append(i18n("Move"));
+		return names;
+	}
 
 	ProfilingEntry mFunction;
 	ProfilingEntry mAdvance;
@@ -122,6 +144,30 @@ public:
 	unsigned long int dDeleteUnusedShots() const { return mDeleteUnusedShots.diff(); }
 	unsigned long int dParticles() const { return mParticles.diff(); }
 	unsigned long int dMaximalAdvanceCount() const { return mMaximalAdvanceCount.diff(); }
+
+
+	QValueList<unsigned long int> values() const
+	{
+		QValueList<unsigned long int> values;
+		values.append(dFunction()); // MUST be the first entry!
+		values.append(dAdvanceFunction());
+		values.append(dDeleteUnusedShots());
+		values.append(dParticles());
+		values.append(dMaximalAdvanceCount());
+		return values;
+	}
+	static QValueList<QString> names()
+	{
+		// note that count AND order must match count and order of
+		// values() exactly!
+		QValueList<QString> names;
+		names.append(i18n("Function"));
+		names.append(i18n("Advance Function"));
+		names.append(i18n("Delete Unused Shots"));
+		names.append(i18n("Particles"));
+		names.append(i18n("MaximalAdvanceCount"));
+		return names;
+	}
 
 
 	// remember to update operator>>() and operator<<() in the .cpp file if
