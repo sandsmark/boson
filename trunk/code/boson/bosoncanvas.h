@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #ifndef BOSONCANVAS_H
 #define BOSONCANVAS_H
 
+#include "bosoncollisions.h"
 #include "defines.h"
 
 #include <qobject.h>
@@ -71,34 +72,7 @@ public:
 	 **/
 	void initCell(int x, int y);
 
-	/**
-	 * @param pos The position to check for presence of a unit. In
-	 * <em>canvas</em>-coordinates. See also @ref findUnitAtCell
-	 * @return The unit on this coordinates of the canvas. Won't return a
-	 * destroyed unit (wreckage)
-	 **/
-	Unit* findUnitAt(const QPoint& pos);
-
-	BosonItem* findItemAt(const QPoint& pos);
-
-	/**
-	 * See @ref findItemAtCell.
-	 * @param x The x-coordinate of the cell
-	 * @param y The y-coordinate of the cell
-	 * @return The unit on this cell. Won't return a
-	 * destroyed unit (wreckage)
-	 **/
-	Unit* findUnitAtCell(int x, int y);
-
-	/*
-	 * @param x The x-coordinate of the cell
-	 * @param y The y-coordinate of the cell
-	 * @param unitOnly If TRUE this returns units only (see @ref
-	 * findUnitAtCell), otherwise any item.
-	 * @return The first item that is found on that cell. If that item is a
-	 * unit then it'll be returned only if it is not destroyed.
-	 **/
-	BosonItem* findItemAtCell(int x, int y, bool unitOnly);
+	inline BosonCollisions* collisions() const { return mCollisions; }
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -170,19 +144,6 @@ public:
 	unsigned int allItemsCount() const;
 
 
-	BoItemList collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const;
-	BoItemList collisions(const QRect& rect, const BosonItem* item = 0, bool exact = true) const; // note: exact == true has n effec for item != 0 ONLY!
-
-	/**
-	 * @param pos Position in <em>canvas</em> coordinates, i.e. not cell
-	 * values
-	 **/
-	BoItemList collisions(const QPoint& pos) const;
-
-	/**
-	 * @param pos Position in <em>cell</em>-coordinates.
-	 **/
-	BoItemList collisionsAtCell(const QPoint& pos) const;
 
 	/**
 	 * Called by @ref Unit. This informs the canvas about a moved
@@ -259,44 +220,34 @@ public:
 	void deleteUnusedShots();
 
 	/**
-	 * Usually you don't need a @ref QCanvasItemList of all units in a
-	 * certain rect but rather a list of all units in a certain circle. This
-	 * function does exactly that. Note that it's speed can be improved as
-	 * it first uses @ref bosonCollisions for a rect and then checks for
-	 * units inside the rect which are also in the circle. Maybe we could
-	 * check for the circle directly.
+	 * Convenience method. See @ref BosonCollisions::findUnitAt
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius) const;
+	Unit* findUnitAt(const QPoint& pos) { return collisions()->findUnitAt(pos); }
 
 	/**
-	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
-	 * operates in 3d space
+	 * Convenience method. See @ref BosonCollisions::findItemAt
 	 **/
-	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, int radius) const;
-
-	QValueList<Unit*> unitsAtCell(int x, int y) const;
+	BosonItem* findItemAt(const QPoint& pos) { return collisions()->findItemAt(pos); }
 
 	/**
-	 * Returns whether cell is occupied (there is non-destroyed mobile or
-	 * facility on it) or not
-	 * Note that if there is aircraft on this tile, it returns false
+	 * Convenience method. See @ref BosonCollisions::findUnitAtCell
 	 **/
-	bool cellOccupied(int x, int y) const;
+	Unit* findUnitAtCell(int x, int y) { return collisions()->findUnitAtCell(x, y); }
 
 	/**
-	 * Like previous one, but unit u can be on cell
-	 * Can be used from inside Unit class
-	 * If excludemoving is true moving units can be on cell
-	 */
-	bool cellOccupied(int x, int y, Unit* u, bool excludemoving = false) const;
+	 * Convenience method. See @ref BosonCollisions::findItemAtCell
+	 **/
+	BosonItem* findItemAtCell(int x, int y, bool unitOnly) { return collisions()->findItemAtCell(x, y, unitOnly); }
 
 	/**
-	 * Check if any cell in rect is occupied. Note that rect consists of
-	 * <em>canvas coordinates</em>, not of cell-coordinates.
-	 * @param rect Check all cells on this rect
-	 * @return TRUE if any cell in rect is occupied, otherwise FALSE.
+	 * Convenience method. See @ref BosonCollisions::cellOccupied
 	 **/
-	bool cellsOccupied(const QRect& rect) const;
+	bool cellOccupied(int x, int y) const { return collisions()->cellOccupied(x, y); }
+
+	/**
+	 * Convenience method. See @ref BosonCollisions::cellOccupied
+	 **/
+	bool cellOccupied(int x, int y, Unit* u, bool excludeMoving = false) const { return collisions()->cellOccupied(x, y, u, excludeMoving); }
 
 	/**
 	 * @param pos The location where the unit should get placed.
@@ -359,7 +310,6 @@ public:
 	void load(QDataStream& stream);
 	void save(QDataStream& stream);
 
-
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -392,6 +342,7 @@ private:
 private:
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
+	BosonCollisions* mCollisions;
 
 	bool mAdvanceFunctionLocked;
 };

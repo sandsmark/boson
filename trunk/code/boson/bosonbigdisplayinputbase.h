@@ -26,6 +26,7 @@
 class BosonBigDisplayBase;
 class BoSelection;
 class BosonCanvas;
+class BosonCollisions;
 class BoAction;
 class Player;
 class Unit;
@@ -43,6 +44,7 @@ public:
 	BosonBigDisplayBase* bigDisplay() const { return mBigDisplay; }
 	BoSelection* selection() const;
 	BosonCanvas* canvas() const;
+	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
 	const QPoint& cursorCanvasPos() const;
 

@@ -26,6 +26,7 @@
 #include <qptrvector.h>
 
 class BosonCanvas;
+class BosonCollisions;
 class SelectBox;
 class BosonModel;
 class BosonAnimation;
@@ -59,6 +60,7 @@ public:
 
 	inline BosonCanvas* canvas() const { return mCanvas; }
 	inline BosonModel* model() const { return mModel; }
+	BosonCollisions* collisions() const;
 
 	/**
 	 * @return Unique identifier of this object type. E.g. RTTI::Unit for

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,12 +78,14 @@ void BosonCanvas::init()
  d->mDestroyedUnits.setAutoDelete(false);
  d->mParticles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
+ mCollisions = new BosonCollisions();
 }
 
 BosonCanvas::~BosonCanvas()
 {
 boDebug()<< k_funcinfo << endl;
  quitGame();
+ delete mCollisions;
  delete d;
 boDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -120,45 +122,6 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 
  unit->move(x, y, unit->z());
 // unit->show();
-}
-
-Unit* BosonCanvas::findUnitAtCell(int x, int y)
-{
- return (Unit*)findItemAtCell(x, y, true);
-}
-
-BosonItem* BosonCanvas::findItemAtCell(int x, int y, bool unitOnly)
-{
- BoItemList list = collisionsAtCell(QPoint(x, y));
- BoItemList::Iterator it;
-
- for (it = list.begin(); it != list.end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
-		Unit* u = (Unit*)*it;
-		if (!u->isDestroyed()) {
-			return *it;
-		}
-	} else if (!unitOnly) {
-		// AB: we could improve performance slightly by using a separate
-		// function instead of this additional check. BUT:
-		// a) we won't gain much (probably a few ns only)
-		// b) we shouldn't do a bad design for that little speedups.
-		//    good design is more important than optimizing, cause good
-		//    design leads usually to faster code
-		return *it;
-	}
- }
- return 0;
-}
-
-BosonItem* BosonCanvas::findItemAt(const QPoint& pos)
-{
- return findItemAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE, false);
-}
-
-Unit* BosonCanvas::findUnitAt(const QPoint& pos)
-{
- return findUnitAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
 }
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
@@ -316,6 +279,7 @@ bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 void BosonCanvas::setMap(BosonMap* map)
 {
  d->mMap = map;
+ collisions()->setMap(map);
 }
 
 void BosonCanvas::addAnimation(BosonItem* item)
@@ -426,7 +390,7 @@ void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, 
  float fr = QMAX(0, fullrange * BO_TILE_SIZE - 1);
  long int d;
  float dist;
- QValueList<Unit*> l = unitCollisionsInSphere(pos, (int)r);
+ QValueList<Unit*> l = collisions()->unitCollisionsInSphere(pos, (int)r);
  for (unsigned int i = 0; i < l.count(); i++) {
 	dist = l[i]->distance(pos);
 	if (dist <= fr * fr || r == fr) {
@@ -628,116 +592,6 @@ float* BosonCanvas::heightMap() const
  return map() ? map()->heightMap() : 0;
 }
 
-QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
-{
- BoItemList l = collisions(QRect(
-		(pos.x() - radius > 0) ? pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? pos.y() - radius : 0,
-		pos.x() + radius,
-		pos.y() + radius));
-			
- QValueList<Unit*> list;
- for (unsigned int i = 0; i < l.count(); i++) {
-	if (!RTTI::isUnit(l[i]->rtti())) {
-		// this item is not important for us here
-		continue;
-	}
-	Unit* u = (Unit*)l[i];
-	if (u->isDestroyed()) {
-		// this item is not important for us here
-		continue;
-	}
-//	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
-	int w = pos.x() - (int)(u->x() + u->width() / 2);
-	int h = pos.y() - (int)(u->y() + u->height() / 2);
-//	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
-
-	if (w * w + h * h <= radius * radius) {
-//		boDebug(310) << "adding " << u->id() << endl;
-		list.append(u);
-	}
- }
- return list;
-}
-
-QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int radius) const
-{
- radius -= 10;  // hack, but prevents nearby units from getting damaged in some conditions
- // FIXME: code duplicated from unitCollisionsInRange
- boDebug(310) << k_funcinfo << endl;
- BoItemList l = collisions(QRect(
-		(pos.x() - radius > 0) ? (int)pos.x() - radius : 0,
-		(pos.y() - radius > 0) ? (int)pos.y() - radius : 0,
-		(int)pos.x() + radius,
-		(int)pos.y() + radius));
-			
- QValueList<Unit*> list;
- for (unsigned int i = 0; i < l.count(); i++) {
-	if (!RTTI::isUnit(l[i]->rtti())) {
-		// this item is not important for us here
-		continue;
-	}
-	Unit* u = (Unit*)l[i];
-	if (u->isDestroyed()) {
-		// this item is not important for us here
-		continue;
-	}
-//	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
-
-	if (u->distance(pos) <= radius * radius) {
-//		boDebug() << k_funcinfo << "adding " << u->id() << endl;
-		list.append(u);
-	}
- }
- return list;
-}
-
-QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y) const
-{
- if (!cell(x, y)) {
-	return QValueList<Unit*>();
- }
- return cell(x, y)->items()->units(false);
-}
-
-bool BosonCanvas::cellOccupied(int x, int y) const
-{
- if (!cell(x, y)) {
-	return true;
- }
- return cell(x, y)->isOccupied();
-}
-
-bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) const
-{
- if (!unit) {
-	return cellOccupied(x, y);
- }
- if (!cell(x, y)) {
-	boError() << k_funcinfo << "NULL cell" << endl;
-	return true;
- }
- bool includeMoving = !excludeMoving; // FIXME: replace exclude by include in parameter
- return cell(x, y)->isOccupied(unit, includeMoving);
-}
-
-bool BosonCanvas::cellsOccupied(const QRect& rect) const
-{
- const int left = rect.left() / BO_TILE_SIZE;
- const int top = rect.top() / BO_TILE_SIZE;
- const int right = rect.right() / BO_TILE_SIZE + ((rect.right() % BO_TILE_SIZE == 0) ? 0 : 1);
- const int bottom = rect.bottom() / BO_TILE_SIZE + ((rect.bottom() % BO_TILE_SIZE == 0) ? 0 : 1);
-
- for (int x = left; x < right; x++) {
-	for (int y = top; y < bottom; y++) {
-		if (cellOccupied(x, y)) {
-			return true;
-		}
-	}
- }
- return false;
-}
-
 void BosonCanvas::killPlayer(Player* player)
 {
  while (player->allUnits()->count() > 0) {
@@ -794,7 +648,7 @@ bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& p
  if (!canGo(prop, r)) {
 	return false;
  }
- if (cellsOccupied(r)) {
+ if (collisions()->cellsOccupied(r)) {
 	return false;
  }
  if (!factory) {
@@ -817,7 +671,7 @@ bool BosonCanvas::canPlaceUnitAtCell(const UnitProperties* prop, const QPoint& p
 	}
  } else {
 	// must be in BUILD_RANGE of any facility of the player
-	QValueList<Unit*> list = unitCollisionsInRange(r.center(), BUILD_RANGE);
+	QValueList<Unit*> list = collisions()->unitCollisionsInRange(r.center(), BUILD_RANGE);
 	for (unsigned int i = 0; i < list.count(); i++) {
 		if (list[i]->isFacility() && list[i]->owner() == factory->player()) {
 			return true;
@@ -874,92 +728,6 @@ void BosonCanvas::updateItemCount()
 	}
 	d->mItemCount[rtti] += 1;
  }
-}
-
-// this is an extremely time-critical function!
-BoItemList BosonCanvas::collisionsAtCells(const QPtrVector<Cell>* cells, const BosonItem* item, bool exact) const
-{
- // FIXME: if exact is true we assume that cells == item->cells() !!
-// AB: item can be NULL, too!
- BoItemList collisions;
- const BoItemList* cellItems;
- BoItemList::ConstIterator it;
- BosonItem* s;
- if (cells->count() == 0) {
-	return collisions;
- }
- if (!map()) {
-	BO_NULL_ERROR(map());
-	return collisions;
- }
- for (unsigned int i = 0; i < cells->count(); i++) {
-	Cell* c = cells->at(i);
-	if (!c) {
-		boError() << "invalid cell at " << i << endl;
-		continue;
-	}
-	cellItems = c->items();
-	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
-		s = *it;
-		if (s != item) {
-			if (collisions.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
-				collisions.append(s);
-			}
-		}
-	}
- }
- return collisions;
-}
-
-BoItemList BosonCanvas::collisionsAtCell(const QPoint& pos) const
-{
- QPtrVector<Cell> cells(1);
- Cell* c = cell(pos.x(), pos.y());
- if (!c) {
-	boWarning() << k_funcinfo << "NULL cell: " << pos.x() << "," << pos.y() << endl;
-	return BoItemList();
- }
- cells.insert(0, c);
- boDebug(310) << k_funcinfo << c->x() << " " << c->y() << endl;
- return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
-}
-
-BoItemList BosonCanvas::collisions(const QRect& r, const BosonItem* item, bool exact) const
-{
- // r is canvas coordinates!
- int left, right, top, bottom;
- left = QMAX(r.left() / BO_TILE_SIZE, 0);
- right = QMIN(r.right() / BO_TILE_SIZE, QMAX((int)mapWidth() - 1, 0));
- top = QMAX(r.top() / BO_TILE_SIZE, 0);
- bottom = QMIN(r.bottom() / BO_TILE_SIZE, QMAX((int)mapHeight() - 1, 0));
- int size = (right - left + 1) * (bottom - top + 1);
- if (size <= 0) {
-	return BoItemList();
- }
- QPtrVector<Cell> cells(size);
- int n = 0;
- Cell* allCells = map()->cells();
- for (int i = left; i <= right; i++) {
-	for (int j = top; j <= bottom; j++) {
-		if (!map()->isValidCell(i, j)) {
-			boError() << k_funcinfo << "not a valid cell: " << i << "," << j << endl;
-			continue;
-		}
-		Cell* c = &allCells[map()->cellArrayPos(i, j)];
-		if (!c) {
-			boError() << k_funcinfo << "NULL cell (although the coordinates should be valid: " << i << "," << j << ")" << endl;
-			continue;
-		}
-		cells.insert(n, c);
-		n++;
-	}
- }
- return collisionsAtCells(&cells, item, exact);
-}
-
-BoItemList BosonCanvas::collisions(const QPoint& pos) const
-{
- return collisionsAtCell(pos / BO_TILE_SIZE);
 }
 
 int BosonCanvas::particleSystemsCount() const
@@ -1040,12 +808,12 @@ void BosonCanvas::save(QDataStream& stream)
 	}
  }
  stream << shotscount;
- boDebug() << "    " << k_funcinfo << "Saving " << shotscount << " shots" << endl;
+ boDebug() << k_funcinfo << "Saving " << shotscount << " shots" << endl;
 
  BosonShot* s;
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
 	if (RTTI::isShot(i->rtti())) {
-		boDebug() << "        " << k_funcinfo << "Saving shot" << endl;
+		boDebug() << k_funcinfo << "Saving shot" << endl;
 		s = (BosonShot*)i;
 		stream << (Q_UINT32)s->owner()->id();
 		stream << (Q_UINT32)s->properties()->unitProperties()->typeId();
@@ -1060,13 +828,13 @@ void BosonCanvas::load(QDataStream& stream)
  boDebug() << k_funcinfo << endl;
  Q_UINT32 shotscount;
  stream >> shotscount;
- boDebug() << "    " << k_funcinfo << "Loading " << shotscount << " shots" << endl;
+ boDebug() << k_funcinfo << "Loading " << shotscount << " shots" << endl;
 
  BosonShot* s;
  Player* p;
  Q_UINT32 playerid, unitpropid, propid;
  for (unsigned int i = 0; i < shotscount; i++) {
-	boDebug() << "        " << k_funcinfo << "Loading shot" << endl;
+	boDebug() << k_funcinfo << "Loading shot" << endl;
 	stream >> playerid >> unitpropid >> propid;
 	p = (Player*)boGame->findPlayer(playerid);
 	s = new BosonShot(p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid),

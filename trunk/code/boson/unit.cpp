@@ -975,7 +975,7 @@ BoItemList Unit::unitsInRange(unsigned long int range) const
  // collisions() does this anyway.
  QRect rect;
  rect.setCoords(left - range, top - range, right + range, bottom + range);
- BoItemList items = canvas()->collisions(rect, (BosonItem*)this, false);
+ BoItemList items = collisions()->collisions(rect, (BosonItem*)this, false);
  items.remove((BosonItem*)this);
 
  BoItemList inRange;
@@ -1018,7 +1018,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact)
 {
  QValueList<Unit*> units;
  boDebug(310) << k_funcinfo << endl;
- BoItemList collisionList = canvas()->collisionsAtCells(cells(), (BosonItem*)this, exact);
+ BoItemList collisionList = collisions()->collisionsAtCells(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
