@@ -116,6 +116,7 @@ protected:
 	virtual CanSelectUnit canSelect(Unit* unit) const { Q_UNUSED(unit); return CanSelectMultipleOk; }
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
+	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const;
 
 //	void addMouseIO(Player* p);
 

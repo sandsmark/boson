@@ -100,6 +100,7 @@ protected:
 	virtual bool actionLocked() const;
 	virtual CanSelectUnit canSelect(Unit* unit) const;
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
+	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const;
 
 //	void addMouseIO(Player* p);
 

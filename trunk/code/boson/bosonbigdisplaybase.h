@@ -226,6 +226,15 @@ protected:
 		CanSelectDestroyed = 2, // can't be selected - is destroyed
 		CanSelectError = 3 // can't be selected - unknown reason
 	};
+  
+	// This is used for placement-preview
+	class PlacementPreview
+	{
+		public:
+			bool draw;  // Whether to draw preview
+			float x, y, w, h;  // Size of placement rect in cell coordinates
+			bool canPlace;  // If unit can be placed to current position. Used to select color (white/red)
+	};
 
 protected:
 	virtual void initializeGL();
@@ -249,7 +258,7 @@ protected:
 	virtual void updateCursor() = 0;
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
 
-	QPoint cursorCanvasPos();
+	QPoint cursorCanvasPos() const;
 
 	void generateCellList();
 
@@ -347,6 +356,7 @@ protected:
 
 	virtual bool actionLocked() const = 0;
 	virtual CanSelectUnit canSelect(Unit* unit) const = 0;
+	virtual BosonBigDisplayBase::PlacementPreview placementPreview() const = 0;
 
 private:
 	void init();

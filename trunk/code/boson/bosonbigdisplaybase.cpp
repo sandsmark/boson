@@ -752,39 +752,28 @@ void BosonBigDisplayBase::paintGL()
  }
 
  // Facility-placing preview code
- Unit* factory = selection()->leader();
- if (factory) {
-	ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
-	if (production && production->completedProductionId() > 0 && production->completedProductionType() == ProduceUnit) {
-		// We have completed production
-		const UnitProperties* u = localPlayer()->unitProperties(production->currentProductionId());
-		if(u->isFacility()) {
-			// Mobiles are auto-placed, no preview is needed for them
-			float w = u->unitWidth() / (float)BO_TILE_SIZE;
-			float h = u->unitHeight() / (float)BO_TILE_SIZE;
-			QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
-			if ((canvas())->canPlaceUnitAt(u, pos, production)) {
-				glColor4f(1.0, 1.0, 1.0, 0.5);
-			} else {
-				glColor4f(1.0, 0.0, 0.0, 0.5);
-			}
-			glDisable(GL_TEXTURE_2D);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glBegin(GL_QUADS);
-				glVertex3f(pos.x(), -(pos.y()), 0.01);
-				glVertex3f(pos.x() + w, -(pos.y()), 0.01);
-				glVertex3f(pos.x()+ w, -(pos.y() + h), 0.01);
-				glVertex3f(pos.x(), -(pos.y() + h), 0.01);
-			glEnd();
-			glColor3f(1.0, 1.0, 1.0);  // reset color
-			glDisable(GL_BLEND);
-			glEnable(GL_TEXTURE_2D);
-		}
+ PlacementPreview p = placementPreview();
+ if(p.draw) {
+	if(p.canPlace) {
+		glColor4f(1.0, 1.0, 1.0, 0.5);
+	} else {
+		glColor4f(1.0, 0.0, 0.0, 0.5);
 	}
+	glDisable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBegin(GL_QUADS);
+		glVertex3f(p.x, -(p.y), 0.01);
+		glVertex3f(p.x + p.w, -(p.y), 0.01);
+		glVertex3f(p.x + p.w, -(p.y + p.h), 0.01);
+		glVertex3f(p.x, -(p.y + p.h), 0.01);
+	glEnd();
+	glColor3f(1.0, 1.0, 1.0);  // reset color
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
  }
-
-
+ 
+ 
  if (checkError()) {
 	boError() << k_funcinfo << "preview rendered" << endl;
  }
@@ -2036,7 +2025,7 @@ void BosonBigDisplayBase::mapChanged()
 }
 
 
-QPoint BosonBigDisplayBase::cursorCanvasPos()
+QPoint BosonBigDisplayBase::cursorCanvasPos() const
 {
  return d->mCanvasPos;
 }

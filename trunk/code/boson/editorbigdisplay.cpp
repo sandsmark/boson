@@ -295,3 +295,32 @@ bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
+BosonBigDisplayBase::PlacementPreview EditorBigDisplay::placementPreview() const
+{
+ PlacementPreview p;
+ p.draw = false;
+ if (d->mPlacement.isUnit()) {
+	if (!d->mPlacement.owner()) {
+		boError() << k_funcinfo << "NO OWNER" << endl;
+		return p;
+	}
+	const UnitProperties* u = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
+	p.w = u->unitWidth() / (float)BO_TILE_SIZE;
+	p.h = u->unitHeight() / (float)BO_TILE_SIZE;
+	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+	p.x = pos.x();
+	p.y = pos.y();
+
+
+	// Check if unit can be placed to cursor position.
+	// FIXME: this code is taken from BosonCanvas::canPlaceUnitAt()
+	QRect r(p.x * BO_TILE_SIZE, p.y * BO_TILE_SIZE, p.w * BO_TILE_SIZE, p.h * BO_TILE_SIZE);
+	if (!canvas()->canGo(u, r) || canvas()->cellsOccupied(r)) {
+		p.canPlace = false;
+	} else {
+		p.canPlace = true;
+	}
+	p.draw = true;
+ }
+ return p;
+}
