@@ -415,6 +415,19 @@ class BoMatrix
 
     inline GLfloat operator[](int i) const { return mData[i]; }
 
+    /**
+     * @return The element at @p row, @p column in the matrix.
+     **/
+    inline GLfloat at(int row, int column) const { return mData[indexAt(row, column)]; }
+
+    /**
+     * @return The index of the element @p row, @p column of the matrix in the
+     * internal array. The array can be organized in two different ways, which
+     * both are used out there in the world. We are preferring the organization
+     * that is used by OpenGL/mesa
+     **/
+    static inline int indexAt(int row, int column) { return (column << 2) + row; }
+
   private:
     GLfloat mData[16];
 };
