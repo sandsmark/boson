@@ -781,8 +781,8 @@ void BosonBigDisplayBase::paintGL()
 
  // Facility-placing preview code
  PlacementPreview p = placementPreview();
- if(p.draw) {
-	if(p.canPlace) {
+ if (p.draw) {
+	if (p.canPlace) {
 		glColor4f(1.0, 1.0, 1.0, 0.5);
 	} else {
 		glColor4f(1.0, 0.0, 0.0, 0.5);
@@ -835,7 +835,7 @@ void BosonBigDisplayBase::paintGL()
 			}
 		}
 	}
-	if(visible.count() > 0) {
+	if (visible.count() > 0) {
 		glEnable(GL_DEPTH_TEST);
 		glDepthMask(GL_FALSE);
 		glEnable(GL_TEXTURE_2D);
@@ -1765,7 +1765,7 @@ void BosonBigDisplayBase::cameraChanged()
 
  float diffX, diffY;
  float radius = camera()->radius();
- if(radius <= 0.02) {
+ if (radius <= 0.02) {
 	// If radius is 0, up vector will be wrong so we change it
 	radius = 0.02;
  }
