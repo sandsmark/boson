@@ -1051,7 +1051,7 @@ void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 			menuItem = new ufo::UMenuItem(item->text().latin1());
 			parentWidget->add(menuItem);
 		} else {
-			boDebug() << k_funcinfo << "plugging action " << action->name() << endl;
+//			boDebug() << k_funcinfo << "plugging action " << action->name() << endl;
 			action->plug(parentWidget);
 		}
 	}
