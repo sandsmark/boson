@@ -30,7 +30,7 @@ enum mobType {
 	MOB_SHIP = 0,
 	MOB_QUAD,
 	MOB_AIRCRAFT,
-	MOB_
+	MOB_LAST
 	};
 
 
@@ -48,7 +48,7 @@ enum facilityType {
 	FACILITY_REFINERY,
 	FACILITY_REPAIRPAD,
 	FACILITY_TURRET,
-	FACILITY_,
+	FACILITY_LAST,
 	};
 
 

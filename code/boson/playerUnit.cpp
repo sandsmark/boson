@@ -172,7 +172,7 @@ bool playerMobUnit::checkMove(int dx, int dy)
 				return false;
 				//printf("%s, ", mobileProp[ty-S_MOBILE].name);
 				}
-			if (ty < S_FACILITY+FACILITY_) { // S_FACILITY
+			if (ty < S_FACILITY+FACILITY_LAST) { // S_FACILITY
 				return false;
 				//printf("%s, ", facilityProp[ty-S_FACILITY].name);
 				continue;// unreachable ?

@@ -97,7 +97,7 @@ public:
 	void		selectArea(int x1, int y1, int x2, int y2);
 signals:
 	void		setSelected(QPixmap *); //null -> nothing is selected
-	void		setOrders(unsigned long);  //orzel : should be something like 'actionSet'
+	void		setOrders(int what , int who=-1);
 
 	/*
 public slots:
