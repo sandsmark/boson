@@ -91,7 +91,7 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 #include "playerio.h"
 #endif
 
-#define TEST_LOD
+//#define TEST_LOD
 
 float textureUpperLeft[2] = { 0.0f, 1.0f };
 float textureLowerLeft[2] = { 0.0f, 0.0f };
@@ -813,7 +813,7 @@ void BosonBigDisplayBase::renderItems()
  // better.
  createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
 
- //unsigned int lod = boConfig->uintValue("UseLOD", 0);
+ unsigned int defaultLOD = boConfig->uintValue("UseLOD", 0);
 
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
@@ -834,7 +834,8 @@ void BosonBigDisplayBase::renderItems()
 	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
 	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
 
-	unsigned int lod = 0;
+	unsigned int lod = defaultLOD;
+	// TODO: change lod according to distance from the camera
 
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
