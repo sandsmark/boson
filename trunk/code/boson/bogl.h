@@ -26,7 +26,7 @@
 #define QT_CLEAN_NAMESPACE
 
 #ifdef __gl_h_
-#warning You should include "bogl.h" before <GL/gl.h>
+#error You should include "bogl.h" before <GL/gl.h>
 #endif
 
 // Some gl headers define GLsizeiptrARB type while others do not and there
