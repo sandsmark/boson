@@ -89,44 +89,44 @@ bool BoAudioThread::audioStarted() const
 
 void BoAudioThread::processCommand()
 {
-	if (d->mCommandQueue.isEmpty()) {
-		return;
-	}
-	BoAudioCommand* command = dequeueCommand();
-	if (!command) {
-		BO_NULL_ERROR(command);
-		return;
-	}
-	BosonSound* sound = 0;
-	BosonMusic* music = 0;
-	if (command->species().isEmpty()) {
-		// most probably this is a music command
-		if (command->type() != BoAudioCommand::CreateMusicObject) {
-			music = audio()->bosonMusic();
-			if (!music) {
-				// happens e.g. for --nosound
-				delete command;
-				command = 0;
-			}
-		}
-	} else {
-		// this must be a sound command for a species.
-		if (command->type() != BoAudioCommand::CreateSoundObject) {
-			sound = audio()->bosonSound(command->species());
-			if (!sound) {
-				// happens e.g. for --nosound
-				delete command;
-				command = 0;
-			}
+ if (d->mCommandQueue.isEmpty()) {
+	return;
+ }
+ BoAudioCommand* command = dequeueCommand();
+ if (!command) {
+	BO_NULL_ERROR(command);
+	return;
+ }
+ BosonSound* sound = 0;
+ BosonMusic* music = 0;
+ if (command->species().isEmpty()) {
+	// most probably this is a music command
+	if (command->type() != BoAudioCommand::CreateMusicObject) {
+		music = audio()->bosonMusic();
+		if (!music) {
+			// happens e.g. for --nosound
+			delete command;
+			command = 0;
 		}
 	}
+ } else {
+	// this must be a sound command for a species.
+	if (command->type() != BoAudioCommand::CreateSoundObject) {
+		sound = audio()->bosonSound(command->species());
+		if (!sound) {
+			// happens e.g. for --nosound
+			delete command;
+			command = 0;
+		}
+	}
+ }
 
-	if (!command) {
-		// we don't want to continue with this command by any reason
-		return;
-	}
-	executeCommand(command, audio(), music, sound);
-	delete command;
+ if (!command) {
+	// we don't want to continue with this command by any reason
+	return;
+ }
+ executeCommand(command, audio(), music, sound);
+ delete command;
 }
 
 void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, BosonMusic* music, BosonSound* sound)
