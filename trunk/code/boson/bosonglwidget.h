@@ -65,6 +65,17 @@ public:
 		mIsInitialized = i;
 	}
 
+	/**
+	 * Warning: you should not access this unless you know what you are
+	 * doing!
+	 *
+	 * This is used for plib's puGetWindow() only.
+	 **/
+	QPaintDevice* paintDevice() const
+	{
+		return mPaintDevice;
+	}
+
 protected:
 	bool chooseContext(bool wantDirect, bool wantDoubleBuffer);
 	void* chooseVisual(bool wantDoubleBuffer);
