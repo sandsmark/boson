@@ -224,6 +224,7 @@ void Unit::setTarget(Unit* target)
 	 d->mTarget = 0;
  }
  // Find weapon
+ // FIXME: currently we only use 1 weapon. If unit has multiple weapons, why not use them all?
  if (d->mTarget) {
 	boDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
 	QPtrListIterator<BosonWeapon> it(d->mWeapons);
@@ -327,14 +328,16 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->unitMoved(this, oldX, oldY);
- if (smokeParticleSystem()) {
+ /*if (smokeParticleSystem()) {
 	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
- }
+ }*/
 }
 
 void Unit::advance(unsigned int advanceCount)
 { // time critical function !!!
  if (isDestroyed()) {
+	// FIXME: won't this make problems with wreckage animations? We should call
+	//  BosonItem::advance() in any way (even if we're destroyed)
 	return;
  }
  // Reload weapons
@@ -355,7 +358,7 @@ void Unit::advanceNone(unsigned int advanceCount)
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
 
- if (advanceCount % 10 != 0) {
+ if (advanceCount % 20 != 0) {
 	return;
  }
  
@@ -370,12 +373,15 @@ bool Unit::attackEnemyUnitsInRange()
 	BosonWeapon* w;
 	if(list.count() > 0) {
 		QPtrListIterator<BosonWeapon> wit(d->mWeapons);
+		Unit* bestunit = 0;
+		Unit* bestnonshooting = 0;
+		BoItemList::Iterator it = list.begin();
+		Unit* u = 0;
 		while (( w = wit.current()) != 0) {
 			++wit;
-			Unit* bestunit = 0;
-			Unit* bestnonshooting = 0;
-			BoItemList::Iterator it = list.begin();
-			Unit* u = 0;
+			bestunit = 0;
+			bestnonshooting = 0;
+			it = list.begin();
 			for (; it != list.end(); ++it) {
 				u = ((Unit*)*it);
 				// Quick check if we can shoot at u
@@ -396,7 +402,7 @@ bool Unit::attackEnemyUnitsInRange()
 					}
 				} else {
 					// FIXME: duplicated code!
-					if (w->canShootAt((Unit*)*it) && inRange(w->properties()->range(), u)) {
+					if (w->canShootAt(u) && inRange(w->properties()->range(), u)) {
 						bestnonshooting = u;
 						break;
 					}
@@ -784,9 +790,6 @@ bool Unit::load(QDataStream& stream)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- // maybe we should use an own algorithm here - can be faster than this generic
- // one
- //return unitsInRange(w->properties()->range()).contains(target);
  return (QMAX(QABS(target->x() - x()), QABS(target->y() - y())) <= r * BO_TILE_SIZE);
 }
 
@@ -839,11 +842,12 @@ BoItemList Unit::unitsInRange(unsigned long int r) const
  items.remove((BosonItem*)this);
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
+ Unit* u;
  for (; it != items.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	Unit* u = (Unit*)(*it);
+	u = (Unit*)(*it);
 	if (u->isDestroyed()) {
 		continue;
 	}
@@ -1129,14 +1133,6 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	return;
  }
 
- // FIXME: as path is now recalculated every time waypoint is reached, this
- //  should never be called
- if ((wp.x() == -2) &&(wp.y() == -2)) {
-	clearWaypoints();
-	newPath();
-	return;
- }
-
  int x = (int)(BosonItem::x() + width() / 2);
  int y = (int)(BosonItem::y() + height() / 2);
 
@@ -1172,21 +1168,6 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	newPath();
 
 	wp = currentWaypoint();
- }
-
- // Check if we can actually go to waypoint (maybe it was fogged)
- // FIXME: currentWaypoint should have been unfogged when path was calculated
- //  because we now recalc path after every waypoint (see ~5 lines above)
- if (!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
-		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	boWarning(401) << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
-	setVelocity(0.0, 0.0);
-	// We have to clear waypoints first to make sure that they aren't used next
-	//  advance() call (when new waypoints haven't arrived yet)
-	// FIXME: no need to clear them anymore
-	clearWaypoints();
-	newPath();
-	return;
  }
 
  // Try to go to same x and y coordinates as waypoint's coordinates
