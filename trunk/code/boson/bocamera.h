@@ -27,6 +27,8 @@
 class QDomElement;
 class BoAutoCamera;
 class BoAutoGameCamera;
+class BoLight;
+class BoContext;
 
 /**
  * Camera class for Boson
@@ -39,7 +41,8 @@ class BoCamera
     enum CameraType
     {
       Camera = 0,
-      GameCamera = 1
+      GameCamera = 1,
+      LightCamera = 2
     };
     BoCamera();
     BoCamera(const BoCamera& c)
@@ -82,7 +85,7 @@ class BoCamera
      * Set the gluLookAt() paremeters directly. Note that when you use
      * this @ref radius and @ref rotation will remain undefined.
      **/
-    void setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+    virtual void setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
 
     /**
      * @return The eye vector (camera position), as it can get used by
@@ -272,6 +275,32 @@ class BoGameCamera : public BoCamera
     GLfloat mRadius;
 
     GLfloat mMinX, mMaxX, mMinY, mMaxY;
+};
+
+
+/**
+ * This is not an actual camera, but rather a wrapper around the light position.
+ * This class allows you to configure the light position using existing camera
+ * configuration widgets.
+ *
+ * @ref setGluLookAt does the main work. The @ref lookAt vector is used for the
+ * position of the light (due to the way OpenGL maths works, the correct vector
+ * is NOT the cameraPos vector!)
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoLightCamera : public BoCamera
+{
+  public:
+    BoLightCamera(BoLight* light, BoContext* context);
+    ~BoLightCamera();
+    virtual int cameraType() const { return LightCamera; }
+
+    void setLightPos(const BoVector3& pos);
+    virtual void setGluLookAt(const BoVector3& c, const BoVector3& l, const BoVector3& u);
+
+  private:
+    BoContext* mContext;
+    BoLight* mLight;
 };
 
 #endif

@@ -35,6 +35,7 @@
 #include "boapplication.h"
 #include "bocamera.h"
 #include "bocamerawidget.h"
+#include "bolight.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -59,6 +60,9 @@
 #define FAR 100.0
 
 #define GL_UPDATE_TIMER 40
+
+#define BORENDER_DEFAULT_LIGHT_ENABLED true
+#define BORENDER_DEFAULT_MATERIALS_ENABLED true
 
 static const char *description =
     I18N_NOOP("Rendering tester for Boson");
@@ -127,6 +131,8 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mDefaultFont = 0;
 
  mCamera = new BoCamera;
+ mLight = 0;
+
 
  connect(this, SIGNAL(signalFovYChanged(float)), this, SLOT(slotFovYChanged(float)));
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
@@ -146,20 +152,51 @@ ModelPreview::~ModelPreview()
  resetModel();
  delete mUpdateTimer;
  delete mMouseMoveDiff;
+ delete mLight;
+ delete mCamera;
 }
 
 void ModelPreview::initializeGL()
 {
+ if (isInitialized()) {
+	return;
+ }
+ static bool recursive = false;
+ if (recursive) {
+	return;
+ }
+ recursive = true;
  makeCurrent();
+ delete mDefaultFont;
  mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+ delete mLight;
+ mLight = new BoLight;
+ if (mLight->id() < 0) {
+	boError() << k_funcinfo << "light NOT created" << endl;
+	delete mLight;
+	mLight = 0;
+ } else {
+	BoVector4 lightDif(1.0f, 1.0f, 1.0f, 1.0f);
+	BoVector4 lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
+	BoVector3 lightPos(-6000.0, 3000.0, 10000.0);
+	mLight->setAmbient(lightAmb);
+	mLight->setDiffuse(lightDif);
+	mLight->setSpecular(lightDif);
+	mLight->setDirectional(true);
+	mLight->setEnabled(true);
+ }
+
  setUpdatesEnabled(false);
  mUpdateTimer->start(GL_UPDATE_TIMER);
+
+
+ recursive = false;
 }
 
 void ModelPreview::resizeGL(int w, int h)
@@ -193,17 +230,22 @@ void ModelPreview::paintGL()
 	renderAxii();
  }
 
+ if (boConfig->useLight()) {
+	glEnable(GL_LIGHTING);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+	glEnable(GL_NORMALIZE);
+ }
+
  renderModel();
  renderMeshSelection();
+
+ glDisable(GL_LIGHTING);
+ glDisable(GL_NORMALIZE);
 
  glDisable(GL_DEPTH_TEST);
 
  renderText();
-
- GLenum e = glGetError();
- if (e != GL_NO_ERROR) {
-	boError() << k_funcinfo << "OpenGL error: " << (int)e << endl;
- }
 }
 
 void ModelPreview::renderAxii()
@@ -289,7 +331,7 @@ void ModelPreview::renderModel(int mode)
 	if (f) {
 		if (mPlacementPreview) {
 			glEnable(GL_BLEND);
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); // default anyway - redundant call
 			GLubyte r, g, b, a;
 			a = PLACEMENTPREVIEW_ALPHA;
 			r = 255;
@@ -314,7 +356,6 @@ void ModelPreview::renderModel(int mode)
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 			glColor4ub(255, 255, 255, 255);
 		}
 	} else {
@@ -953,6 +994,11 @@ RenderMain::RenderMain()
  connect(mPreview, SIGNAL(signalCameraChanged()), mConfig, SLOT(slotCameraChanged()));
  mConfig->setCamera(mPreview->camera());
 
+ mPreview->initGL();
+ mLightWidget = new BoLightCameraWidget(0);
+ mLightWidget->hide();
+ mLightWidget->setLight(mPreview->light(), mPreview->context());
+
 
  connectBoth(mConfig, mPreview, SIGNAL(signalFovYChanged(float)), SLOT(slotFovYChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
@@ -1351,6 +1397,8 @@ void RenderMain::initKAction()
  (void)new KAction(i18n("Background color..."), 0, this,
 		SLOT(slotBackgroundColor()),
 		actionCollection(), "options_background_color");
+ (void)new KAction(i18n("Light..."), 0, this, SLOT(slotShowLightWidget()),
+		actionCollection(), "options_light"); // AB: actually this is NOT a setting
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
@@ -1377,6 +1425,11 @@ void RenderMain::uncheckAllBut(KAction* action)
 	}
 	((KSelectAction*)a)->setCurrentItem(-1);
  }
+}
+
+void RenderMain::slotShowLightWidget()
+{
+ mLightWidget->show();
 }
 
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
@@ -1442,6 +1495,18 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  connect(mRenderGrid, SIGNAL(toggled(bool)), this, SIGNAL(signalRenderGridChanged(bool)));
  topLayout->addWidget(mRenderGrid);
 
+ mEnableLight = new QCheckBox(i18n("Enable Light"), this);
+ connect(mEnableLight, SIGNAL(toggled(bool)), this, SLOT(slotEnableLightChanged(bool)));
+ topLayout->addWidget(mEnableLight);
+ mEnableLight->setChecked(BORENDER_DEFAULT_LIGHT_ENABLED);
+ slotEnableLightChanged(mEnableLight->isChecked());
+
+ mEnableMaterials = new QCheckBox(i18n("Enable Materials"), this);
+ connect(mEnableMaterials, SIGNAL(toggled(bool)), this, SLOT(slotEnableMaterialsChanged(bool)));
+ topLayout->addWidget(mEnableMaterials);
+ mEnableMaterials->setChecked(BORENDER_DEFAULT_MATERIALS_ENABLED);
+ slotEnableMaterialsChanged(mEnableMaterials->isChecked());
+
  mCameraWidget = new BoCameraWidget(this, "bocamerawidget");
  topLayout->addWidget(mCameraWidget);
  mCameraWidget->show();
@@ -1476,6 +1541,16 @@ void PreviewConfig::slotMeshSelected(int mesh)
 	mHideMesh->setEnabled(true);
 	mHideOthers->setEnabled(true);
  }
+}
+
+void PreviewConfig::slotEnableLightChanged(bool e)
+{
+ boConfig->setUseLight(e);
+}
+
+void PreviewConfig::slotEnableMaterialsChanged(bool e)
+{
+ boConfig->setUseMaterials(e);
 }
 
 int main(int argc, char **argv)

@@ -46,6 +46,8 @@ class BoMatrix;
 class BoQuaternion;
 class BoVector3;
 class BoFrame;
+class BoLight;
+class BoLightCameraWidget;
 class KCmdLineArgs;
 class QCheckBox;
 
@@ -104,6 +106,7 @@ public:
 	void resetModel();
 
 	BoCamera* camera() const { return mCamera; }
+	BoLight* light() const { return mLight; }
 
 signals:
 	void signalFovYChanged(float);
@@ -230,6 +233,7 @@ private:
 	BoMouseMoveDiff* mMouseMoveDiff;
 
 	BoCamera* mCamera;
+	BoLight* mLight;
 };
 
 class PreviewConfig : public QWidget
@@ -267,6 +271,8 @@ protected slots:
 
 	void slotMaxFramesChanged(int max) { mFrame->setRange(0, max); }
 	void slotMaxLODChanged(int max) { mLOD->setRange(0, max); }
+	void slotEnableLightChanged(bool);
+	void slotEnableMaterialsChanged(bool);
 
 private:
 	KMyFloatNumInput* mFovY;
@@ -282,6 +288,8 @@ private:
 	BoCameraWidget* mCameraWidget;
 	QCheckBox* mRenderAxis;
 	QCheckBox* mRenderGrid;
+	QCheckBox* mEnableLight;
+	QCheckBox* mEnableMaterials;
 };
 
 /**
@@ -334,6 +342,7 @@ protected slots:
 	void slotGridUnitSize();
 	void slotShowVertexPoints(bool);
 	void slotBackgroundColor();
+	void slotShowLightWidget();
 
 private:
 	PreviewConfig* mConfig;
@@ -341,6 +350,8 @@ private:
 	QPtrList<SpeciesTheme> mSpecies;
 	QPtrDict<SpeciesTheme> mAction2Species;
 	BoDebugDCOPIface* mIface;
+
+	BoLightCameraWidget* mLightWidget;
 };
 
 #endif
