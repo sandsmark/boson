@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <stdio.h>
+#include <unistd.h>
 #include <boson.h>
 #include <qframe.h>
 #include "ressource.h"
@@ -111,7 +112,14 @@ void BosonApp::init()
 
 void BosonApp::initSocket()
 {
-socket = new KSocket("eagle",  BOSON_DEFAULT_PORT);
+char charbuf[1024];
+
+if (gethostname(charbuf, 1023)) {
+	printf("can't get hostname, aborting\n");
+	}
+
+/* let's say the server is on the local machine, hum..  */
+socket = new KSocket(charbuf,  BOSON_DEFAULT_PORT);
 
 if (-1 == socket->socket())  {
 	logf(LOG_FATAL, "BosonApp : beuh, unable to connect socket\n");
