@@ -661,41 +661,35 @@ void Unit::advancePlugin(unsigned int advanceCount)
 
 void Unit::advanceTurn(unsigned int)
 {
- int dir = (int)rotation(); // wanted heading
- bool turnright; // direction of turning
- // Find out direction of turning
- // TODO: maybe we can cache it somewhere so we'd only have to calculate it
- //  when we want to turn. OTOH, it shouldn't be very expensive calculation
- if (dir >= 180) {
-	if ((d->mWantedRotation < dir) && (d->mWantedRotation >= dir - 180)) {
-		turnright = false;
-	} else {
-		turnright = true;
-	}
- } else {
-	if ((d->mWantedRotation > dir) && (d->mWantedRotation <= dir + 180)) {
-		turnright = true;
-	} else {
-		turnright = false;
-	}
+ int dir = (int)rotation();
+ int a = dir - d->mWantedRotation;  // How many degrees to turn
+ bool turncw = false;  // Direction of turning, CW or CCW
+
+ // First find out direction of turning and huw much is left to turn
+ if (a < 0) {
+	a = QABS(a);
+	turncw = true;
+ }
+ if (a > 180) {
+	a = 180 - (a - 180);
+	turncw = !turncw;
  }
 
- // FIXME: This algorithm _sucks_. Replace it with something better
- for (int i = 0; i < (int)(2 * speed())/*TURN_STEP*/; i++) {
-	if (dir == d->mWantedRotation) {
-		break;
-	}
-	if (turnright) {
-		dir += 1;
+ // TODO: rotating speed should be configurable
+ if (a <= (int)(2 * speed())) {
+	dir = d->mWantedRotation;
+ } else {
+	if (turncw) {
+		dir += (int)(2 * speed());
 	} else {
-		dir -= 1;
+		dir -= (int)(2 * speed());
 	}
-	// Check for overflows
-	if (dir < 0) {
-		dir += 360;
-	} else if (dir > 360) {
-		dir -= 360;
-	}
+ }
+ // Check for overflows
+ if (dir < 0) {
+	dir += 360;
+ } else if (dir > 360) {
+	dir -= 360;
  }
 
  setRotation((float)dir);

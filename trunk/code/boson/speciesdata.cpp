@@ -438,8 +438,7 @@ void SpeciesData::loadParticleSystemProperties()
  QStringList::Iterator it;
  for (it = particles.begin(); it != particles.end(); ++it) {
 	boDebug(150) << k_funcinfo << "Loading particle system from group " << *it << endl;
-	cfg.setGroup(*it);
-	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg);
+	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg, *it);
 	if (!d->mParticleProperties.find(particleprop->id())) {
 		d->mParticleProperties.insert(particleprop->id(), particleprop);
 	} else {
