@@ -416,13 +416,14 @@ void Unit::advanceNone(unsigned int advanceCount)
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
 
- if (advanceCount % 10 != 0) {
+ if (!target()) {
+	if (advanceCount != 10) {
+		return;
+	}
+ } else if (advanceCount % 10 != 0) {
 	return;
  }
 
- if (!target() && (advanceCount % 20 != 0)) {
-	return;
- }
  attackEnemyUnitsInRange();
 }
 
