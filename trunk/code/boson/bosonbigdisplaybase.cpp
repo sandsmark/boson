@@ -298,8 +298,10 @@ public:
 
 	Camera mCamera;
 
-	int mW; // width ... we should use glGetIntegerv(GL_VIEWPORT, view); and then view[foo] instead.
-	int mH; // height ... see above
+	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
+	GLdouble mProjectionMatrix[16];
+	GLdouble mModelviewMatrix[16];
+
 
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
@@ -357,8 +359,13 @@ void BosonBigDisplayBase::init()
  d->mChat = new BosonChat(this);
 
  slotResetViewProperties();
- d->mW = 0;
- d->mH = 0;
+ for (int i = 0; i < 4; i++) {
+	d->mViewport[i] = 0;
+ }
+ for (int i = 0; i < 16; i++) {
+	d->mProjectionMatrix[i] = 0.0;
+	d->mModelviewMatrix[i] = 0.0;
+ }
 
  d->mMapDisplayList = 0;
 
@@ -405,13 +412,13 @@ void BosonBigDisplayBase::initializeGL()
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
 
- glEnableClientState(GL_VERTEX_ARRAY);
- glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
+
+ // the actual GL initializing should be done now.
+ d->mInitialized = true;
+ 
  struct timeval time;
  gettimeofday(&time, 0);
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
@@ -428,11 +435,8 @@ void BosonBigDisplayBase::initializeGL()
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
 {
- d->mW = w;
- d->mH = h;
-
  kdDebug() << k_funcinfo << w << " " << h << endl;
- glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+ setViewport(0, 0, (GLsizei)w, (GLsizei)h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
 
@@ -442,6 +446,9 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  d->mAspect = (float)w / (float)h;
  gluPerspective(fovY, d->mAspect, NEAR, FAR);
 
+ // cache the composed projection matrix. we'll need it very often in
+ // mapCoordinates()
+ glGetDoublev(GL_PROJECTION_MATRIX, d->mProjectionMatrix);
  glMatrixMode(GL_MODELVIEW);
 
 
@@ -516,6 +523,7 @@ void BosonBigDisplayBase::paintGL()
  }
  d->mEvenFlag = !d->mEvenFlag;
  calcFPS();
+ /*
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
 
@@ -537,6 +545,16 @@ void BosonBigDisplayBase::paintGL()
  if (checkError()) {
 	kdError() << k_funcinfo << "after gluLookAt()" << endl;
  }
+ */
+
+ glPushMatrix();
+
+ // the gluLookAt() above is the most important call for the modelview matrix.
+ // everything else will be discarded by glPushMatrix/glPopMatrix anyway. So we
+ // cache the matrix here, for mapCoordinates()
+ // FIXME: call this only when the modelview matrix changed, i.e. when the
+ // camera changed!
+ glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
@@ -634,7 +652,7 @@ void BosonBigDisplayBase::paintGL()
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
  glLoadIdentity();
- gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
+ gluOrtho2D(0.0, (GLfloat)d->mViewport[2], 0.0, (GLfloat)d->mViewport[3]); // the same as the viewport
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
  glLoadIdentity();
@@ -651,7 +669,7 @@ void BosonBigDisplayBase::paintGL()
 		GLfloat x;
 		GLfloat y;
 		x = (GLfloat)pos.x() - c->hotspotX();
-		y = (GLfloat)d->mH - (GLfloat)pos.y() - c->hotspotY();
+		y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y() - c->hotspotY();
 		const GLfloat w = BO_TILE_SIZE;
 		const GLfloat h = BO_TILE_SIZE;
 		glBindTexture(GL_TEXTURE_2D, tex);
@@ -714,6 +732,8 @@ void BosonBigDisplayBase::paintGL()
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
 
+ glPopMatrix();
+
  boProfiling->render(false);
 }
 
@@ -730,8 +750,8 @@ void BosonBigDisplayBase::renderText()
  QString minerals = i18n("Minerals: %1").arg(localPlayer()->minerals());
  QString oil = i18n("Oil:      %1").arg(localPlayer()->oil());
  int w = QMAX(d->mDefaultFont->metrics()->width(minerals), d->mDefaultFont->metrics()->width(oil));
- int x = d->mW - w - border;
- int y = d->mH - d->mDefaultFont->height() - border;
+ int x = d->mViewport[2] - w - border;
+ int y = d->mViewport[3] - d->mDefaultFont->height() - border;
  glRasterPos2i(x, y);
  glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
  y -= d->mDefaultFont->height();
@@ -795,12 +815,12 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		break;
 	}
 	case QEvent::MouseMove:
+	{
 		d->mMouseMoveDiff.moveToPos(e->pos());
 		if (e->state() & AltButton) {
 			// zooming
-			d->mCamera.setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
 			kdDebug() << "zoom factor: " << d->mCamera.zoomFactor()<< endl;
-			resizeGL(d->mW, d->mH);
+			setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
 		} else if (e->state() & LeftButton) {
 			if (e->state() & ControlButton) {
 				d->mCamera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
@@ -817,7 +837,18 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			}
 		} else if (e->state() & RightButton) {
 			if (boConfig->rmbMove()) {
-				//FIXME: doesn't work, since QCursor::setPos() also generates a MouseMove event
+				// problem is that QCursor::setPos() also causes
+				// a mouse move event. we can use this hack in
+				// order to check whether it is a real mouse
+				// move event or we caused it here.
+				// TODO: use d->mMouseMoveDiff.x()/y() in
+				// paintGL() for the cursor, not QCursor::pos()
+//				static bool a = false;
+//				if (a) {
+//					a = false;
+//					break;
+//				}
+//				a = true;
 //				QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
 //				QCursor::setPos(pos);
 				d->mMouseMoveDiff.startRMBMove();
@@ -833,6 +864,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		updateCursor();
 		e->accept();
 		break;
+	}
 	case QEvent::MouseButtonDblClick:
 		makeActive();
 		if (e->button() == LeftButton) {
@@ -986,8 +1018,8 @@ void BosonBigDisplayBase::slotResetViewProperties()
 
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCameraPos(d->mCamera.posX(), d->mCamera.posY(), d->mCamera.posZ());
- resizeGL(d->mW, d->mH);
+ setCamera(d->mCamera);
+ resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
@@ -1004,18 +1036,7 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
 
 bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const
 {
- GLint view[4];
- GLdouble proj[16];
- GLdouble model[16];
- GLint realy;
- glGetIntegerv(GL_VIEWPORT, view);
- glGetDoublev(GL_MODELVIEW_MATRIX, model);
- glGetDoublev(GL_PROJECTION_MATRIX, proj);
-
- realy = view[3] - (GLint)pos.y() - 1;
-
- GLdouble winX = (GLdouble)pos.x();
- GLdouble winY = (GLdouble)realy;
+ GLint realy = d->mViewport[3] - (GLint)pos.y() - 1;
 
  // we basically calculate a line here .. nearX/Y/Z is the starting point,
  // farX/Y/Z is the end point. From these points we can calculate a direction.
@@ -1023,13 +1044,13 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
  // and then find the point that is on z=0.0
  GLdouble nearX, nearY, nearZ;
  GLdouble farX, farY, farZ;
- if (!gluUnProject(winX, winY, 0.0,
-		model, proj, view,
+ if (!gluUnProject((GLdouble)pos.x(), (GLdouble)realy, 0.0,
+		d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		&nearX, &nearY, &nearZ)) {
 	return false;
  }
- if (!gluUnProject(winX, winY, 1.0,
-		model, proj, view,
+ if (!gluUnProject((GLdouble)pos.x(), (GLdouble)realy, 1.0,
+		d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport,
 		&farX, &farY, &farZ)) {
 	return false;
  }
@@ -1343,7 +1364,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-			setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
+		setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
 	}
  }
 }
@@ -1442,11 +1463,48 @@ void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
  h = y2-y1;
 #endif
 
+ Camera camera = d->mCamera;
+
  // FIXME: these tests are not really good anymore. especially when map is
  // rotated.
- d->mCamera.setPosX(QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x)));
- d->mCamera.setPosY(QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y)));
- d->mCamera.setPosZ(QMAX(NEAR+0.5, QMIN(FAR-0.5, z)));
+ camera.setPosX(QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x)));
+ camera.setPosY(QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y)));
+ camera.setPosZ(QMAX(NEAR+0.5, QMIN(FAR-0.5, z)));
+
+ setCamera(camera);
+}
+
+void BosonBigDisplayBase::setCamera(const Camera& camera)
+{
+ if (!d->mInitialized) {
+	glInit();
+ }
+ makeCurrent();
+ d->mCamera = camera;
+
+ glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
+ glLoadIdentity();
+
+ float upX, upY, upZ;
+ upX = 0.0;
+ upY = 1.0;
+ upZ = 0.0;
+ float centerX, centerY, centerZ;
+ centerX = d->mCamera.centerX();
+ centerY = d->mCamera.centerY();
+ centerZ = -100.0;
+// centerZ = d->mPosZ;
+ // TODO: performance: isn't it possible to skip this by using pushMatrix() and
+ // popMatrix() a clever way? - afaics OpenGL needs to calculate the inverse at
+ // this point...
+ gluLookAt(cameraX(), cameraY(), cameraZ(), 
+		centerX, centerY, centerZ, 
+		upX, upY, upZ);
+ if (checkError()) {
+	kdError() << k_funcinfo << "after gluLookAt()" << endl;
+ }
+
+
 
 #if 0
  // hmm.. TODO !
@@ -1543,6 +1601,21 @@ void BosonBigDisplayBase::setZoomFactor(float f)
 {
  kdDebug() << k_funcinfo << f << endl;
  d->mCamera.setZoomFactor(f);
- resizeGL(d->mW, d->mH);
+ resizeGL(d->mViewport[2], d->mViewport[3]);
+}
+
+void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
+{
+ if (!d->mInitialized) {
+	glInit();
+ }
+ makeCurrent();
+ glViewport(x, y, w, h);
+ // AB: we could use glGetIntegerv(GL_VIEWPORT, d->mViewport); here. But our own
+ // version should be the same
+ d->mViewport[0] = x;
+ d->mViewport[1] = y;
+ d->mViewport[2] = w;
+ d->mViewport[3] = h;
 }
 
