@@ -120,6 +120,12 @@ public:
 
 	BosonStatistics* statistics() const;
 
+	/**
+	 * @return TRUE if player is an enemy or FALSE if it is e.g. allied with
+	 * us.
+	 **/
+	bool isEnemy(Player* player) const;
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
