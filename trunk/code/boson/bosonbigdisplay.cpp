@@ -273,8 +273,10 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
  }
 
  setSelectionMode(SelectSingle);
- boMusic->playSound(unit, Unit::SoundOrderSelect);
  addUnitSelection(unit);
+ if (d->mLocalPlayer == unit->owner()) {
+	boMusic->playSound(unit, Unit::SoundOrderSelect);
+ }
  //canvas->update(); // TODO?
 }
 
@@ -496,7 +498,9 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
 			++it;
 		}
-		boMusic->playSound(unit, Unit::SoundOrderMove);
+		if (unit->owner() == d->mLocalPlayer) {
+			boMusic->playSound(unit, Unit::SoundOrderMove);
+		}
 		send = true;
 	} else { // place constructions
 		// FIXME: another option: add the waypoint to the facility and
@@ -529,7 +533,9 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	}
 	send = true;
 	Unit* u = selection().first();
-	boMusic->playSound(u, Unit::SoundOrderAttack);
+	if (unit->owner() == d->mLocalPlayer) {
+		boMusic->playSound(u, Unit::SoundOrderAttack);
+	}
  }
 }
 
