@@ -171,9 +171,7 @@ protected slots:
 	void slotCmdFrameDockHidden();
 	void slotChatDockHidden();
 	void slotDebugPlayer(int);
-#ifndef NO_OPENGL
 	void slotUpdateFPS();
-#endif
 
 private slots:
 	void loadGameData3();

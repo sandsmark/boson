@@ -206,7 +206,6 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
  loadUnitTextures(prop->typeId(), imageList);
  loadUnitModel(prop);
 #else
- kdDebug() << k_funcinfo << endl;
  QValueList<QPixmap> pixmapList;
  for (unsigned int i = 0; i < imageList.count(); i++) {
 	QPixmap p(imageList[i]);
@@ -219,7 +218,6 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 	return false;
  }
  d->mSprite.insert(prop->typeId(), pixmapArray);
- kdDebug() << k_funcinfo << "1" << endl;
 #endif
 
 // big overview 

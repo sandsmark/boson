@@ -447,6 +447,7 @@ void TopWidget::initBosonWidget(bool loading)
 	return;
  }
  d->mBosonWidget = new BosonWidget(this, mWs, loading);
+ d->mBosonWidget->hide();
  mWs->addWidget(d->mBosonWidget, ID_WIDGETSTACK_BOSONWIDGET);
 
  connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)), this, SIGNAL(signalSetMobilesCount(int)));
@@ -686,10 +687,11 @@ void TopWidget::loadGameData2() //FIXME rename!
  // Load map tiles. This takes most time
  d->mLoading->setProgress(600);
  d->mLoading->setLoading(BosonLoadingWidget::LoadTiles);
- checkEvents();
  connect(mCanvas, SIGNAL(signalTilesLoading(int)), this, SLOT(slotCanvasTilesLoading(int)));
  connect(mCanvas, SIGNAL(signalTilesLoaded()), this, SLOT(slotCanvasTilesLoaded()));
+ kdDebug()<< k_funcinfo << endl;
  checkEvents();
+ kdDebug()<< k_funcinfo << endl;
  // Note that next call doesn't return before tiles are fully loaded (because
  //  second argument is false; if it would be true, then it would return
  //  immediately). This is needed for loading saved game. GUI is
@@ -1189,10 +1191,10 @@ void TopWidget::slotSaveGame()
  f.close();
 }
 
-#ifndef NO_OPENGL
 void TopWidget::slotUpdateFPS()
 {
+#ifndef NO_OPENGL
  emit signalFPSUpdated(d->mBosonWidget->displaymanager()->activeDisplay()->fps());
-}
 #endif
+}
 
