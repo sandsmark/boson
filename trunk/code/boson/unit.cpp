@@ -233,12 +233,7 @@ bool Unit::load(QDataStream& stream)
 
 const UnitProperties* Unit::unitProperties() const
 {
- Player* o = owner();
- if (!o) {
-	kdError() << "Unit::unitProperties(): NULL owner" << endl;
-	return 0;
- }
- SpeciesTheme* theme = o->speciesTheme();
+ SpeciesTheme* theme = speciesTheme();
  if (!theme) {
 	kdError() << "Unit::unitProperties(): NULL theme" << endl;
 	return 0;
