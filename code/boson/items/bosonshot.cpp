@@ -196,6 +196,7 @@ void BosonShot::explode()
  setVelocity(0, 0, 0);
  setVisible(false);
  canvas()->shotHit(this);
+ setActive(false);
 }
 
 long int BosonShot::damage() const
@@ -211,6 +212,17 @@ bofixed BosonShot::damageRange() const
 bofixed BosonShot::fullDamageRange() const
 {
   return properties() ? properties()->fullDamageRange() : bofixed(0);
+}
+
+void BosonShot::setActive(bool a)
+{
+  mActive = a;
+  if(!mActive)
+  {
+    // This sets effect owner ids to 0 (so that they won't be owned by this
+    //  shot anymore). It doesn't delete the effects.
+    clearEffects();
+  }
 }
 
 

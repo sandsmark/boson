@@ -159,7 +159,7 @@ class BosonShot : public BosonItem
   protected:
     virtual const QColor* teamColor() const;
 
-    inline void setActive(bool a)  { mActive = a; }
+    void setActive(bool a);
     inline void setProperties(const BosonWeaponProperties* p)  { mProp = p; }
 
     virtual void advanceMoveInternal() {}
