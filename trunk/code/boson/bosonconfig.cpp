@@ -55,7 +55,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mRMBMove = true;
  mMMBMove = true;
  mCursorEdgeSensity = 20;
- mUpdateInterval = 50;
+ mUpdateInterval = 25;
 
  mDisableSound = false;
 
