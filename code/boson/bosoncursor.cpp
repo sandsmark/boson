@@ -48,9 +48,6 @@ BosonCursor::~BosonCursor()
 
 void BosonCursor::setCursor(int mode)
 {
- if (mMode == mode) {
-	return;
- }
 // kdDebug() << k_funcinfo << mode << endl;
  mMode = (int)mode;
 }
@@ -218,6 +215,14 @@ bool BosonKDECursor::insertMode(int , QString , QString )
 /////////////////////////////////////////
 /////// BosonSpriteCursor ///////////////
 /////////////////////////////////////////
+
+class BoCursorSprite : public QCanvasSprite
+{
+public:
+	BoCursorSprite(QCanvasPixmapArray* a,QCanvas* c) : QCanvasSprite(a,c) { }
+	virtual bool collidesWith(const QCanvasItem*) const { return false; }
+};
+
 class BosonSpriteCursor::BosonSpriteCursorPrivate
 {
 public:
@@ -236,7 +241,7 @@ public:
 	QCanvasPixmapArray* mCurrentFrames;
 	int mCurrentFrame;
 
-	QCanvasSprite* mCursor;
+	BoCursorSprite* mCursor;
 };
 
 BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
@@ -277,6 +282,7 @@ void BosonSpriteCursor::setCursor(int mode)
 		}
 	} else {
 		kdWarning() << k_funcinfo << "NULL pixmap array for " << mode << endl;
+		d->mCursor->hide();
 	}
  } else {
 	d->mCursor->hide();
@@ -293,7 +299,7 @@ void BosonSpriteCursor::setCanvas(QCanvas* canvas, int mode, int z)
  if (d->mCursor) {
 	d->mCursor->setCanvas(canvas);
  } else {
-	d->mCursor = new QCanvasSprite(0, d->mCanvas);
+	d->mCursor = new BoCursorSprite(0, d->mCanvas);
 	d->mCursor->setZ(z);
  }
  setCursor(mode);
