@@ -223,7 +223,7 @@ private:
 	QLabel* mUpdateIntervalLabel;
 };
 
-class BosonProfilingDialog::BosonProfilingDialogPrivate
+class BosonProfilingDialogPrivate
 {
 public:
 	BosonProfilingDialogPrivate()
@@ -425,12 +425,12 @@ void BosonProfilingDialog::reset()
 void BosonProfilingDialog::resetLoadUnitPage()
 {
  d->mUnits->clear();
- BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
- QMap<unsigned long int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
+ BosonProfilingPrivate* pd = d->data()->d;
+ QMap<unsigned long int, BosonProfilingPrivate::TimesList>::Iterator it = pd->mUnitTimes.begin();
  for (; it != pd->mUnitTimes.end(); ++it) {
 	QListViewItemNumber* unit = new QListViewItemNumber(d->mUnits);
 	unit->setText(0, QString::number(it.key()));
-	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
+	BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin(); // wow what a line ;)
 	unsigned long int time = 0;
 	int i = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {
@@ -448,7 +448,7 @@ void BosonProfilingDialog::resetRenderPage()
 {
  d->mRender->clear();
  d->mRenderSummary->clear();
- BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
+ BosonProfilingPrivate* pd = d->data()->d;
  QPtrListIterator<RenderGLTimes> it(pd->mRenderTimes);
  int i = 0;
  // average values:
@@ -529,7 +529,7 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
  d->mItemAdvance->clear();
  itemFunctionSum = itemAdvanceSum = itemAdvanceFunctionSum = itemMoveSum = 0;
  itemAllItems = 0;
- BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
+ BosonProfilingPrivate* pd = d->data()->d;
  QPtrListIterator<ProfileSlotAdvance> it(pd->mSlotAdvanceTimes);
  int i = 0;
  unsigned long int functionSum = 0;
@@ -695,12 +695,12 @@ void BosonProfilingDialog::initSlotAdvanceItem(QListViewItemNumber* item, unsign
 void BosonProfilingDialog::resetEventsPage()
 {
  d->mEvents->clear();
- BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
- QMap<int, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
+ BosonProfilingPrivate* pd = d->data()->d;
+ QMap<int, BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
  for (; it != pd->mTimes.end(); ++it) {
 	QListViewItemNumber* event = new QListViewItemNumber(d->mEvents);
 	event->setText(0, profilingName(it.key()));
-	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
+	BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
 	int i = 0;
 	long int sum = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {

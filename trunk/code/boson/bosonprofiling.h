@@ -29,6 +29,7 @@ class RenderGLTimes;
 class ProfileSlotAdvance;
 struct timeval;
 
+class BosonProfilingPrivate;
 // note that there are several workarounds in this class to reduce the number of
 // #includes as far as possible. i want to be able to place this header to about
 // every other class without increasing compile-time.
@@ -161,7 +162,6 @@ private:
 	void init();
 
 private:
-	class BosonProfilingPrivate;
 	BosonProfilingPrivate* d;
 	friend class BosonProfilingDialog;
 
