@@ -60,6 +60,7 @@
 #include "script/bosonscript.h"
 #include "bosonpath.h"
 #include "bofullscreen.h"
+#include "speciesdata.h"
 
 #include <kgame/kgameio.h>
 
@@ -366,6 +367,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete d->mDefaultFont;
  delete d->mToolTips;
  delete d->mGLMiniMap;
+ SpeciesData::clearSpeciesData();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -792,7 +794,7 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_TEXTURE_2D);
 
 
- boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect
+ boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect and minimap
 
  // cursor and text are drawn in a 2D-matrix, so that we can use window
  // coordinates
@@ -866,8 +868,8 @@ void BosonBigDisplayBase::renderItems()
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	glTranslatef(x, y, z);
 	glPushMatrix();
+	glTranslatef(x, y, z);
 	glRotatef(-(item->rotation()), 0.0, 0.0, 1.0);
 	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
 	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
@@ -899,8 +901,6 @@ void BosonBigDisplayBase::renderItems()
 	if (item->isSelected()) {
 		selectedItems->append(item);
 	}
-
-	glTranslatef(-x, -y, -z);
 
 	if (boConfig->debugBoundingBoxes()) {
 		// Corners of bb of item

@@ -69,6 +69,11 @@ public:
 	static SpeciesData* speciesData(const QString& speciesPath);
 
 	/**
+	 * Remove all SpeciesData objects that were added by @ref speciesData
+	 **/
+	static void clearSpeciesData();
+
+	/**
 	 * Add the specified @p color to the SpeciesData instance. You need to
 	 * call this before using one of the color-dependant functions.
 	 **/

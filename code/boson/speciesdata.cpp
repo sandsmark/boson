@@ -200,6 +200,14 @@ SpeciesData* SpeciesData::speciesData(const QString& speciesDir)
  return species;
 }
 
+void SpeciesData::clearSpeciesData()
+{
+ if (!mSpeciesData) {
+	return;
+ }
+ mSpeciesData->clear();
+}
+
 QString SpeciesData::themePath() const
 {
  return d->mThemePath;
