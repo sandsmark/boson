@@ -105,7 +105,7 @@ void BosonEffectPropertiesManager::loadEffectProperties()
     else
     {
       boError(150) << k_funcinfo << "effect with id " << effectprop->id() << " already there!" << endl;
-      delete effectProp;
+      delete effectprop;
     }
   }
   // BosonEffectProperties (more specifically, collection properties) need
