@@ -243,6 +243,7 @@ protected:
 #ifndef NO_OPENGL
 	void loadUnitTextures(int type, QValueList<QImage> list);
 	void loadUnitModel(const UnitProperties* prop);
+	GLuint createDisplayList(int typeId);
 #endif
 
 private:
