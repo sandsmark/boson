@@ -5,7 +5,7 @@
 SUBDIRS = data 
 #boson editor
 
-bin_PROGRAMS = boson boeditor
+bin_PROGRAMS = boson boeditor bounit
 
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
@@ -53,7 +53,12 @@ COMMON_SRC = \
 	kgamecanvaschat.cpp \
 	bosoncursor.cpp \
 	bosonsound.cpp \
-	unitgroup.cpp
+	unitgroup.cpp 
+
+BOUNIT_SRC = \
+	unitproperties.cpp \
+	bosonunitdialog.cpp \
+	bounitmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
@@ -62,5 +67,9 @@ boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
 boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
+
+bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+bounit_LDADD = -lkio $(LIB_KDEUI) 
+bounit_SOURCES = $(BOUNIT_SRC) 
 
 METASOURCES = AUTO
