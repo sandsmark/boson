@@ -1830,10 +1830,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 /**
  * AB:
  * @li BosonCanvas::createNewItem()
- * @li UnitBase::setId
  * @li Boson::signalAddUnit
- * @li Unit::setGLConstructionStep
- * @li Unit::setAnimationMode
  ***/
 Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
@@ -1855,28 +1852,15 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
  }
-// unit->setId(nextUnitId());
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
- if (!gameMode()) {
-	// editor won't display the construction, but always completed
-	// facilities. otherwise it's hard to recognize where they were actually
-	// placed
-	if (unit->glConstructionSteps() > 0) {
-		unit->setGLConstructionStep(unit->glConstructionSteps());
-	}
-	unit->setAnimationMode(UnitAnimationIdle);
- }
  return unit;
 }
 
 /**
  * AB:
  * @li BosonCanvas::createNewItem()
- * @li UnitBase::setId
  * @li BosonScenario::loadUnit  <--
  * @li Boson::signalAddUnit
- * @li Unit::setGLConstructionStep
- * @li Unit::setAnimationMode
  **/
 Unit* Boson::addUnit(QDomElement& node, Player* p)
 {
@@ -1893,7 +1877,6 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
  }
-// unit->setId(nextUnitId());
  if (!BosonScenario::loadUnit(node, unit)) {
 	boWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
 	// don't return - the error should be on every client so with some luck
@@ -1902,15 +1885,6 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
  }
 
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
- if (!gameMode()) {
-	// editor won't display the construction, but always completed
-	// facilities. otherwise it's hard to recognize where they were actually
-	// placed
-	if (unit->glConstructionSteps() > 0) {
-		unit->setGLConstructionStep(unit->glConstructionSteps());
-	}
-	unit->setAnimationMode(UnitAnimationIdle);
- }
  return unit;
 }
 

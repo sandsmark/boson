@@ -76,9 +76,47 @@ public:
 		mGroup = group;
 		mGroupType = groupType;
 	}
+	ItemType(const ItemType& t)
+	{
+		*this = t;
+	}
+	ItemType operator=(const ItemType& t)
+	{
+		mType = t.mType;
+		mGroup = t.mGroup;
+		mGroupType = t.mGroupType;
+		return *this;
+	}
+
+	// AB: this class is meant as a "short" way of grouping all 3 parameters
+	// to a single parameter for createItem(). no need to make members
+	// private.
 	unsigned long int mType;
 	unsigned long int mGroup;
 	unsigned long int mGroupType;
+
+public:
+	/**
+	 * Convenience method for creating a ItemType object for a unit with @p
+	 * unitType.
+	 **/
+	static ItemType typeForUnit(unsigned long int unitType);
+	/**
+	 * Convenience method for creating a ItemType object for a @ref
+	 * BosonShotExplosion object
+	 **/
+	static ItemType typeForExplosion();
+	/**
+	 * Convenience method for creating a ItemType object for a @ref
+	 * BosonShotFragment object
+	 **/
+	static ItemType typeForFragment();
+
+	/**
+	 * Convenience method for creating a ItemType object for a generic @ref
+	 * BosonShot object
+	 **/
+	static ItemType typeForShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
 };
 
 /**
