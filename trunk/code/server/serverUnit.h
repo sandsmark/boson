@@ -29,6 +29,8 @@
 #define EMPTYING_DURATION	(40)
 #define SEND_TO_KNOWN		(-1)
 
+#define OIL_HARVESTER_CONTENT		50
+#define MINERAL_HARVESTER_CONTENT	50
 
 class boBuffer;
 
