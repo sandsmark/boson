@@ -878,26 +878,19 @@ void Unit::newPath()
  // Update our start position
  pathInfo()->start.setX((int)(BosonItem::x() + width() / 2));
  pathInfo()->start.setY((int)(BosonItem::y() + height() / 2));
- 
+
  // Find path
 #ifdef PATHFINDER_TNG
  canvas()->pathfinder()->findPath(pathInfo());
- 
+#else
+ BosonPath::findPath(pathInfo());
+#endif
+
  // Copy low-level path to pathpoints' list
  clearPathPoints();
  for (int unsigned i = 0; i < pathInfo()->llpath.count(); i++) {
 	addPathPoint(pathInfo()->llpath[i]);
  }
-#else
- QValueList<QPoint> path = BosonPath::findPath(pathInfo());
- 
- // Copy path to pathpoints' list
- clearPathPoints();
- for (int unsigned i = 0; i < path.count(); i++) {
-	addPathPoint(path[i]);
- }
-#endif
-
 
  if (pathPointCount() == 0) {
 	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached

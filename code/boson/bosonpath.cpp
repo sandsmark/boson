@@ -167,6 +167,14 @@ QValueList<QPoint> BosonPath::findPath(BosonPathInfo* pathInfo)
   boDebug() << k_funcinfo << "Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls <<
       ";  handled in (R/F/S): " << pathRange << "/" << pathFast << "/" << pathSlow << endl;
   points = path.path; // faster than manually coping all points
+
+  pathInfo->llpath.clear();
+  pathInfo->llpath.reserve(points.count());
+  QValueList<QPoint>::Iterator it;
+  int i = 0;
+  for (it = points.begin(); it != points.end(); ++it, i++) {
+    pathInfo->llpath.append(*it);
+  }
   return points;
 }
 
