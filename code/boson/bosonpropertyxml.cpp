@@ -191,7 +191,7 @@ QTextStream& operator<<(QTextStream& s, const QPoint& p)
 QTextStream& operator>>(QTextStream& s, QPoint& p)
 {
  int x, y;
- char c;
+ QChar c;
  s >> x;
  s >> c; // single space
  s >> y;
@@ -252,7 +252,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
 		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
 		unsigned int count = 0;
-		char c;
+		QChar c;
 		QPoint point;
 		QTextStream s((QString*)&value, IO_ReadOnly);
 		s >> count;
