@@ -47,6 +47,7 @@ class SpeciesTheme;
 class UnitProperties;
 class BosonModel;
 class QCheckBox;
+
 class KMyFloatNumInput : public KDoubleNumInput
 {
 	Q_OBJECT
@@ -178,6 +179,14 @@ protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual void mouseReleaseEvent(QMouseEvent*);
+
+	bool haveModel() const
+	{
+		if (mModel && mCurrentFrame >= 0) {
+			return true;
+		}
+		return false;
+	}
 
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
