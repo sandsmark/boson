@@ -34,22 +34,32 @@ class Cell {
 public:
 	Cell(void) { ground = g_unknown; flags=0u; }
 
-	bool isKnown(void) { return flags&0x1; }	// 0x1 : known / unknown
+	bool isKnown(void) { return flags&known_f; }	// known_f : known / unknown
 	void setGround(groundType);
 	/** tel if a given mobile can "go" on this cell */
 	bool canGo(mobType type);
 
-	bool building(void) { return flags & 0x2; }	// 0x2 : building
-	void put_building(void) { flags |= 0x2; }
-	void del_building(void) { flags &= (~0x2); }
+	enum {
+		known_f	= 0x01,
+		building_f = 0x02,
+		field_unit_f = 0x03,
+		flying_unit_f = 0x04
+	} cell_flags;
 
-	bool field_unit(void) { return flags & 0x3; }	// 0x3 : field unit
-	void put_field_unit(void) { flags |= 0x3; }
-	void del_field_unit(void) { flags &= (~0x3); }
+	void	setFlag(uint f) { flags |= f;}
+	void	unsetFlag(uint f) { flags &= ~f; }
 
-	bool flying_unit(void) { return flags & 0x4; }	// 0x4 : flying unit
-	void put_flying_unit(void) { flags |= 0x4; }
-	void del_flying_unit(void) { flags &= (~0x4); }
+	bool building(void) { return flags & building_f; }	// building_f : building
+	void put_building(void) { setFlag(building_f); }
+	void del_building(void) { unsetFlag(building_f); }
+
+	bool field_unit(void) { return flags & field_unit_f; }	// field_unit_f : field unit
+	void put_field_unit(void) { setFlag(field_unit_f); }
+	void del_field_unit(void) { unsetFlag(field_unit_f); }
+
+	bool flying_unit(void) { return flags & flying_unit_f; }	// flying_unit_f : flying unit
+	void put_flying_unit(void) { setFlag(flying_unit_f); }
+	void del_flying_unit(void) { unsetFlag(flying_unit_f); }
 
 
 private:
