@@ -1,0 +1,41 @@
+We have two different kinds of sounds:
+- sound effects
+- speech
+
+Sound effects are currently all in .wav but .ogg would probably ok, too.
+Speech should be in .ogg.
+Please don't use .mp3 - if you can't create .ogg files you can send me .mp3, too
+but please use .ogg if possible.
+
+Boson searches two different locations for sound files - this directory
+(species/species_name/sounds/) and the unit subdir:
+species/species_name/units/unit_name/sounds/
+
+The first subdif (e.g. species/human/sounds/) is the default dir. When a unit
+has no specific sound file the sounds here are used.
+If a unit should not use the default sounds place them into the unit directory,
+e.g. for the ship:
+species/humen/units/mob_ship/sounds/
+
+Sound Effects
+-------------
+Sound effects are not yet standardized and therefore will change. Currently
+there are:
+shoot.wav - played when a unit shoots at another unit.
+
+That's all. The other files are not yet supported by code.
+
+Speech
+------
+Speech files do not necessarily contain speech - but they usually do. The "_0"
+in the filename stands for the number of the sound. Currently only 0 is
+supported - will change soon. Once we support it a unit chooses one file
+randomly of the same type.
+
+order_attack_0.ogg - Played when the unit is ordered to attack something.
+order_move_0.ogg   - Played when a unit is ordered to move to another location
+order_select_0.ogg - Played when the unit is being selected
+report_produced_0.ogg - Played when the unit has been produced. Note this is
+                        *not* played when the unit (factory) starts to produce!
+report_underattack_0.ogg - Played when the unit is being attacked. Not yet used.
+report_destroyed_0.ogg - Guess what? Yes! Played when the unit is destroyed.
