@@ -39,6 +39,8 @@ public:
 	
 	void	unSelect();
 	void	updateContain(uint c) { contain = c;}
+	void	doHide();
+	void	doShow();
 
 protected:
 	int		power;

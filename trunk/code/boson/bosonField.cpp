@@ -60,7 +60,7 @@ void bosonField::hideMob(destroyedMsg_t &m)
 	playerMobUnit *u;
 
 	u = mobile.find(m.key);
-	if (u) u->hide();
+	if (u) u->doHide();
 	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
 
 	// XXX emit something for the minimap
@@ -74,7 +74,7 @@ void bosonField::unHideMob(mobileMsg_t &m)
 
 	assert(m.who < nb_player);
 	u = mobile.find(m.key);
-	if (u) u->show();
+	if (u) u->doShow();
 	else logf(LOG_ERROR, "bosonField::unHideMob : can't find m.key");
 
 	// XXX emit something for the minimap
@@ -129,7 +129,7 @@ void bosonField::hideFix(destroyedMsg_t &m)
 	playerFacility *f;
 
 	f = facility.find(m.key);
-	if (f) f->hide();
+	if (f) f->doHide();
 	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
 
 	// XXX emit something for the minimap
@@ -141,7 +141,7 @@ void bosonField::unHideFix(facilityMsg_t &m)
 
 	assert(m.who < nb_player);
 	f = facility.find(m.key);
-	if (f) f->show();
+	if (f) f->doShow();
 	else logf(LOG_ERROR, "bosonField::unHideFix : can't find m.key");
 
 	// XXX emit something for the minimap
