@@ -24,10 +24,71 @@ class BoMesh;
 class BoMeshLOD;
 class BoVector3;
 class BoFace;
+class BoLODVertex;
+class BoLODFace;
+class BoLODHeap;
 
 template<class T> class QValueList;
 
+#include <qptrvector.h>
+#include <qvaluevector.h>
+
+
 /**
+ * Improved QPtrVector
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+template<class type> class BoLODVector : public QPtrVector<type>
+{
+public:
+	BoLODVector() : QPtrVector<type>() {};
+	BoLODVector(unsigned int size) : QPtrVector<type>(size) {};
+
+	/**
+	 * Appends item d to the vector.
+	 * If vector is too small, it will be resized
+	 **/
+	inline void appendItem(const type* d)
+	{
+		if (count() == size()) {
+			resize(size() ? (size() * 2) : 8);
+		}
+		insert(count(), d);
+	}
+
+	/**
+	 * Removes item d from the vector and moves last item to the slot previously
+	 * occupied by d, so that there won't be any "holes" in vector.
+	 **/
+	inline void removeItem(const type* d)
+	{
+		removeItem(findRef(d));
+	}
+
+	inline void removeItem(unsigned int i)
+	{
+		remove(i);
+		if (i < count()) {
+			insert(i, take(count()));
+		}
+	}
+
+	/**
+	 * Deletes all items in the vector and sets autoDelete to false
+	 **/
+	inline void deleteAllItems()
+	{
+		setAutoDelete(true);
+		clear();
+		setAutoDelete(false);
+	}
+};
+
+
+/**
+ * Builds LOD (Level Of Detail) mesh from full-detail mesh.
+ *
  * @author Andreas Beckermann <b_mann@gmx.de>, Rivo Laks <rivolaks@hot.ee>
  **/
 class BoLODBuilder
@@ -69,10 +130,23 @@ protected:
 	 **/
 	const BoFace* face(unsigned int _face) const;
 
+	void computeEdgeCostAtVertex(BoLODVertex* v);
+	float computeEdgeCollapseCost(BoLODVertex* u, BoLODVertex* v);
+	void collapse(BoLODVertex* u, BoLODVertex* v, bool recompute = true);
+
+	void buildLOD();
+	QValueList<BoFace> getLOD(float factor);
+
 private:
 	const BoMesh* mMesh;
 	const BoMeshLOD* mFullDetail;
 
+	BoLODHeap* mHeap;
+	BoLODVector<BoLODFace> mFaces;
+	BoLODVector<BoLODVertex> mVertices;
+	QValueVector<int> mMap;
+	QValueVector<int> mOrder;
+	QValueVector<float> mCost;
 };
 
 #endif

@@ -1078,11 +1078,15 @@ public:
 	float mMaxZ;
 
 	BoundingObject* mBoundingObject;
+
+	QString mName;
 };
 
-BoMesh::BoMesh(unsigned int faces)
+BoMesh::BoMesh(unsigned int faces, const QString& name)
 {
  init();
+
+ d->mName = name;
 
  BoMeshLOD* lod = levelOfDetail(0);
  BO_CHECK_NULL_RET(lod);
@@ -1625,7 +1629,7 @@ void BoMesh::generateLOD()
  // these numbers can be used by renderMesh() (or indirectly by renderFrame())
  // to choose which LOD should be rendered at. 0 is always the default, i.e.
  // render all points and faces.
- unsigned int LODCount = 2; // must be at least 1, as we have at leas the full-detailed version
+ unsigned int LODCount = 5; // must be at least 1, as we have at leas the full-detailed version
 
  unsigned int oldCount = d->mLODCount;
  if (LODCount < oldCount) {
@@ -1647,6 +1651,7 @@ void BoMesh::generateLOD()
  boDebug(100) << k_funcinfo << "lods=" << LODCount
 		<< " exisiting: " << oldCount
 		<< " generating: " << LODCount - oldCount
+		<< " name: " << name()
 		<< endl;
 
  for (unsigned int i = oldCount; i < LODCount; i++) {
@@ -1663,6 +1668,7 @@ void BoMesh::generateLOD()
 	if (faces.count() > 0) {
 		lod[i]->createFaces(faces.count());
 	}
+	boDebug() << k_funcinfo << "generated LOD " << i << " which has " << faces.count() << " faces" << endl;
 	for (unsigned int j = 0; j < faces.count(); j++) {
 		lod[i]->setFace(j, faces[j]);
 	}
@@ -1698,3 +1704,7 @@ unsigned int BoMesh::facesCount(unsigned int lod) const
  return l->facesCount();
 }
 
+const QString& BoMesh::name() const
+{
+ return d->mName;
+}

@@ -312,7 +312,7 @@ public:
 	 * @param faces The number of faces (triangles) in this mesh to be
 	 * created. You must use @ref setFace to initialize them.
 	 **/
-	BoMesh(unsigned int faces);
+	BoMesh(unsigned int faces, const QString& name);
 	~BoMesh();
 
 	/**
@@ -442,6 +442,11 @@ public:
 	 * otherwise 0.
 	 **/
 	GLuint textureObject() const;
+
+	/**
+	 * @return name of the mesh (loaded from file)
+	 **/
+	const QString& name() const; 
 
 	void renderMesh(const QColor* color, unsigned int lod = 0);
 

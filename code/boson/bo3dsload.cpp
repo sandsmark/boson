@@ -180,7 +180,7 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  QString textureName = Bo3DSLoad::textureName(mesh, m3ds);
 
- BoMesh* boMesh = new BoMesh(mesh->faces);
+ BoMesh* boMesh = new BoMesh(mesh->faces, node->name);
  mMesh2Mesh.insert(mesh, boMesh);
  mData->addMesh(boMesh);
 
