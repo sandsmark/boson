@@ -155,6 +155,7 @@ public slots:
 
 	void slotDumpGameLog();
 	void slotReloadModelTextures();
+	void slotReloadMeshRenderer();
 
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();

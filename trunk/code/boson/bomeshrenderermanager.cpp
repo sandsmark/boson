@@ -278,8 +278,11 @@ bool BoMeshRendererManager::loadLibrary()
  return ret;
 }
 
-void BoMeshRendererManager::unloadLibrary()
+bool BoMeshRendererManager::unloadLibrary()
 {
+ boDebug() << k_funcinfo << "unsetting old renderer" << endl;
+ unsetCurrentRenderer();
+ boDebug() << k_funcinfo << "deleting factory" << endl;
  delete d->mLibraryFactory;
  d->mLibraryFactory = 0;
  if (d->mLibrary) {
@@ -349,4 +352,25 @@ bool BoMeshRendererManager::checkCurrentRenderer()
  return true;
 }
 
+bool BoMeshRendererManager::reloadPlugin(bool* unusable)
+{
+ if (!unloadLibrary()) {
+	boError() << k_funcinfo << "unloading failed" << endl;
+	if (unusable) {
+		*unusable = true;
+	}
+	return false;
+ }
+ if (!loadLibrary()) {
+	boError() << k_funcinfo << "library loading failed" << endl;
+	if (unusable) {
+		*unusable = true;
+	}
+	return false;
+ }
+ if (unusable) {
+	*unusable = false;
+ }
+ return true;
+}
 
