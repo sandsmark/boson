@@ -172,6 +172,11 @@ class BoVector3
 
     /**
      * @return The dot product of this vector with itself, i.e. (v * v).
+     *
+     * The dot product is also equivalent to the square of the @ref length. This
+     * can be important sometimes, as it might be sufficient to use the square
+     * of the length (which is calculated very fast) instead of the actual
+     * length (which needs a call to sqrt()).
      **/
     inline float dotProduct() const
     {
