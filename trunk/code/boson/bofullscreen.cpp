@@ -46,18 +46,29 @@
 // resolution
 #undef HAVE_XFREE86_VIDMODE
 
+/**
+ * This function makes sure that we enter the original screen mode/resolution
+ * again when boson is quit. It is a function, not a method, so that it can
+ * easily be called from certain points (such as atexit()).
+ *
+ * It forwards the request to enter the original mode to the particular
+ * implementation (probably xrandr). Note that there may be some requirements on
+ * when this may be called (e.g. existence of a main window).
+ **/
+static void bo_enter_orig_mode();
+
 #ifdef HAVE_XFREE86_VIDMODE
 #include <qapplication.h>
 #include <qwidget.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86vmode.h>
 
-static bool bo_enter_mode(XF86VidModeModeInfo* mode);
-static void bo_enter_orig_mode();
+static void bo_vidmode_enter_orig_mode();
+static bool bo_vidmode_enter_mode(XF86VidModeModeInfo* mode);
 
 static bool gUseVidMode = true;
-static XF86VidModeModeInfo gOriginalMode;
-static bool gOriginalModeValid = false;
+static XF86VidModeModeInfo gVidOriginalMode;
+static bool gVidOriginalModeValid = false;
 #endif
 
 #ifdef HAVE_XFREE86_XRANDR
@@ -69,9 +80,14 @@ static bool gOriginalModeValid = false;
 #include <X11/extensions/Xrandr.h>
 
 static bool gUseXrandr = true;
-static bool gOriginalModeValid = false;
+static bool gXRROriginalModeValid = false;
+static SizeID gXRROriginalMode;
+static Rotation gXRROriginalRotation;
+XRRScreenConfiguration* gXRRScreenConfig = 0;
 
-static bool bo_init_xrandr(Display* dpy);
+static bool bo_init_xrandr(Display* dpy, Window root);
+static void bo_deinit_xrandr();
+static void bo_xrr_enter_orig_mode();
 static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc);
 #endif // HAVE_XFREE86_XRANDR
 
@@ -83,9 +99,6 @@ class BoFullScreenPrivate
 public:
 	BoFullScreenPrivate()
 	{
-#ifdef HAVE_XFREE86_XRANDR
-		mScreenConfig = 0;
-#endif // HAVE_XFREE86_XRANDR
 #ifdef HAVE_XFREE86_VIDMODE
 		mModes = 0;
 		mModeCount = 0;
@@ -95,9 +108,6 @@ public:
 	XF86VidModeModeInfo** mModes;
 	int mModeCount;
 #endif // HAVE_XFREE86_VIDMODE
-#ifdef HAVE_XFREE86_XRANDR
-	XRRScreenConfiguration* mScreenConfig;
-#endif // HAVE_XFREE86_XRANDR
 
 	bool mInitialized;
 };
@@ -107,29 +117,23 @@ BoFullScreen::BoFullScreen()
  d = new BoFullScreenPrivate;
  d->mInitialized = false;
 
-#ifdef HAVE_XFREE86_VIDMODE
  // AB: won't work. at this point everything is closed already!
  // -> no qApp pointer, no display, ...
  atexit(bo_enter_orig_mode);
-#endif
 }
 
 BoFullScreen::~BoFullScreen()
 {
+ // reset to the original resolution asap.
+ // will probably called twice, due to atexit()
+ // AB: won't work. at this point everything is closed already!
+ // -> no qApp pointer, no display, ...
+ enterOriginalMode();
+
 #ifdef HAVE_XFREE86_XRANDR
- if (d->mScreenConfig) {
-	XRRFreeScreenConfigInfo(d->mScreenConfig);
- }
+ bo_deinit_xrandr();
 #endif // HAVE_XFREE86_XRANDR
 #ifdef HAVE_XFREE86_VIDMODE
-	if (d->mModes) {
-		// in case the resolution got ever changed, we need to change
-		// back again
-		// will probably called twice, due to atexit()
-		// AB: won't work. at this point everything is closed already!
-		// -> no qApp pointer, no display, ...
-		bo_enter_orig_mode();
-	}
 	XFree(d->mModes);
 	d->mModes = 0;
 	d->mModeCount  = 0;
@@ -162,19 +166,10 @@ void BoFullScreen::initModes()
  int screen = w->x11Screen();
  Window root = RootWindow(dpy, screen);
 
- gUseXrandr = bo_init_xrandr(dpy);
+ gUseXrandr = bo_init_xrandr(dpy, root);
  if (!gUseXrandr) {
 	return;
  }
- if (!d->mScreenConfig) {
-	d->mScreenConfig = XRRGetScreenInfo(dpy, root);
- }
- if (!d->mScreenConfig) {
-	boWarning() << k_funcinfo << "NULL screen config. Xrandr disabled" << endl;
-	gUseXrandr = false;
-	return;
- }
- // TODO: store current mode
 #endif // HAVE_XFREE86_XRANDR
 #ifdef HAVE_XFREE86_VIDMODE
  if (d->mModes) {
@@ -213,15 +208,15 @@ void BoFullScreen::initModes()
  // AB: this nice hack was shamelessy stolen from SDL, so that we don't have to
  // copy the modeline manually to the modeinfo
  int dotclock;
- XF86VidModeModeLine* l = (XF86VidModeModeLine*)((char*)(&gOriginalMode) + sizeof gOriginalMode.dotclock);
+ XF86VidModeModeLine* l = (XF86VidModeModeLine*)((char*)(&gVidOriginalMode) + sizeof gVidOriginalMode.dotclock);
  bool ret = XF86VidModeGetModeLine(dpy, scr, &dotclock, l);
- gOriginalMode.dotclock = dotclock;
+ gVidOriginalMode.dotclock = dotclock;
 
  if (!ret) {
 	boError() << k_funcinfo << "Could not retrieve current modeline" << endl;
-	gOriginalModeValid = false;
+	gVidOriginalModeValid = false;
  } else {
-	gOriginalModeValid = true;
+	gVidOriginalModeValid = true;
  }
 #endif // HAVE_XFREE86_VIDMODE
 }
@@ -253,12 +248,12 @@ QStringList BoFullScreen::availableModeList()
  if (!gUseXrandr) {
 	return list;
  }
- if (!d->mScreenConfig) {
-	boDebug() << k_funcinfo << "NULL screen config" << endl;
+ if (!gXRRScreenConfig) {
+	boError() << k_funcinfo << "NULL screen config" << endl;
 	return list;
  }
  int count = 0;
- XRRScreenSize* sizes = XRRConfigSizes(d->mScreenConfig, &count);
+ XRRScreenSize* sizes = XRRConfigSizes(gXRRScreenConfig, &count);
  if (count <= 0 || !sizes) {
 	boWarning() << k_funcinfo << "oops - no sizes available" << endl;
 	return list;
@@ -292,16 +287,17 @@ bool BoFullScreen::enterModeInList(int index)
  if (!gUseXrandr) {
 	return false;
  }
- if (!d->mScreenConfig) {
+ if (!gXRRScreenConfig) {
+	BO_NULL_ERROR(gXRRScreenConfig);
 	return false;
  }
  int count = 0;
- XRRScreenSize* sizes = XRRConfigSizes(d->mScreenConfig, &count);
+ XRRScreenSize* sizes = XRRConfigSizes(gXRRScreenConfig, &count);
  if (count <= 0 || !sizes || index >= count) {
 	boError() << k_funcinfo << "unable to switch to mode " << index << " count=" << count << endl;
 	return false;
  }
- return bo_xrr_enter_mode(index, d->mScreenConfig);
+ return bo_xrr_enter_mode(index, gXRRScreenConfig);
 #endif // HAVE_XFREE86_VIDMODE
 #ifdef HAVE_XFREE86_VIDMODE
  if (!gUseVidMode) {
@@ -326,14 +322,25 @@ bool BoFullScreen::enterModeInList(int index)
 
 bool BoFullScreen::enterOriginalMode()
 {
-#ifdef HAVE_XFREE86_VIDMODE
  bo_enter_orig_mode();
-#endif
  return true;
 }
 
+static void bo_enter_orig_mode()
+{
+#ifdef HAVE_XFREE86_XRANDR
+ bo_xrr_enter_orig_mode();
+ return;
+#endif // HAVE_XFREE86_XRANDR
 #ifdef HAVE_XFREE86_VIDMODE
-static bool bo_enter_mode(XF86VidModeModeInfo* mode)
+ bo_vidmode_enter_orig_mode();
+ return;
+#endif // HAVE_XFREE86_VIDMODE
+
+}
+
+#ifdef HAVE_XFREE86_VIDMODE
+static bool bo_vidmode_enter_mode(XF86VidModeModeInfo* mode)
 {
  if (!gUseVidMode) {
 	return false;
@@ -353,39 +360,88 @@ static bool bo_enter_mode(XF86VidModeModeInfo* mode)
  return XF86VidModeSwitchToMode(dpy, scr, mode);
 }
 
-static void bo_enter_orig_mode()
+static void bo_videmode_enter_orig_mode()
 {
- if (gOriginalModeValid) {
-	bo_enter_mode(&gOriginalMode);
+ if (gVidOriginalModeValid) {
+	bo_enter_mode(&gVidOriginalMode);
  }
 }
 #endif // HAVE_XFREE86_VIDMODE
 
 #ifdef HAVE_XFREE86_XRANDR
-static bool bo_init_xrandr(Display* dpy)
+static bool bo_init_xrandr(Display* dpy, Window root)
 {
+ boDebug() << k_funcinfo << endl;
  int event_base, error_base;
  if (!XRRQueryExtension(dpy, &event_base, &error_base)) {
 	boWarning() << k_funcinfo << "Xrandr extension not available. you cannot change the resolution!" << endl;
 	return false;
- } else {
+ }
+ if (gXRRScreenConfig) {
+	boWarning() << k_funcinfo << "xrandr already initialized!" << endl;
 	return true;
  }
- return false;
+ gXRRScreenConfig = XRRGetScreenInfo(dpy, root);
+ if (!gXRRScreenConfig) {
+	boWarning() << k_funcinfo << "NULL screen config. Xrandr disabled" << endl;
+	return false;
+ }
+ gXRROriginalMode = XRRConfigCurrentConfiguration(gXRRScreenConfig, &gXRROriginalRotation);
+ gXRROriginalModeValid = true;
+ return true;
+}
+
+static void bo_deinit_xrandr()
+{
+ boDebug() << k_funcinfo << endl;
+ if (gXRRScreenConfig) {
+	XRRFreeScreenConfigInfo(gXRRScreenConfig);
+ }
+ gXRRScreenConfig = 0;
+ gXRROriginalModeValid = false;
+}
+
+static void bo_xrr_enter_orig_mode()
+{
+ if (gXRROriginalModeValid) {
+	boDebug() << k_funcinfo << "entering mode " << gXRROriginalMode << endl;
+//	bo_xrr_enter_mode(gXRROriginalMode, gXRRScreenConfig);
+	bo_xrr_enter_mode(gXRROriginalMode, 0);
+ }
 }
 
 static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
 {
+ boDebug() << k_funcinfo << "entering mode " << mode << endl;
  if (!gUseXrandr) {
 	return false;
  }
  if (mode < 0) {
 	return false;
  }
+ if (!qApp) {
+	BO_NULL_ERROR(qApp);
+	return false;
+ }
+ Display* dpy = 0;
+ Window root;
  QWidget* w = qApp->mainWidget();
- Display* dpy = w->x11Display();
- int screen = w->x11Screen();
- Window root = RootWindow(dpy, screen);
+ if (!w) {
+	// AB: I don't know whether the x11Display() of the main widget can
+	// differ from the x11AppDisplay(), so we try the x11Display() if the
+	// widget if possible, but also use the appdisplay if necessary
+	// (fallback)
+	dpy = QPaintDevice::x11AppDisplay();
+	root = QPaintDevice::x11AppRootWindow();
+ } else {
+	dpy = w->x11Display();
+	int screen = w->x11Screen();
+	root = RootWindow(dpy, screen);
+ }
+ if (!dpy) {
+	boError() << k_funcinfo << "cannot get a usable display" << endl;
+	return false;
+ }
 
  XRRScreenConfiguration* delete_sc = 0;
  if (!sc) { // 0 is allowed for failsafe switch on destruction
@@ -396,10 +452,8 @@ static bool bo_xrr_enter_mode(int mode, XRRScreenConfiguration* sc)
 	boError() << k_funcinfo << "NULL screen config" << endl;
 	return false;
  }
- Rotation currentRotation;
- XRRConfigRotations(sc, &currentRotation);
  Status stat = XRRSetScreenConfig(dpy, sc, root, mode,
-		currentRotation, CurrentTime);
+		gXRROriginalRotation, CurrentTime);
  if (delete_sc) {
 	XRRFreeScreenConfigInfo(delete_sc);
  }
