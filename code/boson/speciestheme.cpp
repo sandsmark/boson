@@ -620,7 +620,7 @@ void SpeciesTheme::loadGeneralSounds()
  sound()->addSounds(themePath(), sounds);
 }
 
-QIntDict<UpgradeProperties> SpeciesTheme::technologyList() const
+const QIntDict<UpgradeProperties>& SpeciesTheme::technologyList() const
 {
  return d->mTechnologies;
 }

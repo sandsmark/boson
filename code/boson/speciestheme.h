@@ -277,7 +277,7 @@ public:
 	 * Do not use this method! It's only meant to be used by
 	 * Player::hasTechnology() and might be made private later
 	 **/
-	QIntDict<UpgradeProperties> technologyList() const;
+	const QIntDict<UpgradeProperties>& technologyList() const;
 
 	void loadUnitModel(const UnitProperties* prop);
 
