@@ -50,30 +50,85 @@ draw_bigbox_text("Most recent version, 0.9.1, was released on 16th November 2003
 
 draw_bigbox_text("What has been changed since 0.9.1:
 <ul>
- <li>Support for textured fonts. They are faster and more powerful, but most
- important: not even proprietary NVidia drivers crash when they are invalid.
- Thanks a lot to <a href=\"http://plib.sf.net\">plib</a> where this code has
- been shamelessy stolen</li>
- <li>Neutral player and species has been added. You cannot play this, it is
- meant for civilian units or things like trees and so on.</li>
- <li>Texture compression is used, if available which can reduce texture size an
- therefore improve speed.</li>
- <li>OpenGL minimap</li>
- <li>The path a unit is using is displayed when it is selected</li>
- <li>The menu is properly removed when a game is ended, fixing menu duplication
- (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
- <li>The game starts only once all clients have loaded their game data</li>
- <li>Units are correctly rotated, depending on the slope of the terrain that
- they're on</li>
- <li>New pathfinding code</li>
- <li>Resolution changing using Xrandr supported</li>
- <li>Use vertex arrays and vertex buffer objects by default if possible. This
- increases speed by a few FPS.</li>
- <li>Sound is played using OpenAL now. Dependancy on arts and kdemultimedia
- removed.</li>
- <li>Sound is enabled by default again</li>
- <li>Support for oil harvesting. Mineral harvesting is not yet supported due to
- the lack of a mineral mine model.</li>
+ <h3>General</h3>
+ <ul>
+    <li>Resolution changing using Xrandr is supported (XFree 4.3 required)</li>
+    <li>Dependency changes:</li>
+    <ul>
+    <li>Added: <a href=\"http://www.openal.org/\">OpenAL</a></li>
+    <li>Removed: arts, kdemultimedia and kdegames</li>
+    </ul>
+ </ul>
+
+ <h3>Sound</h3>
+ <ul>
+     <li>Sound is played using OpenAL now</li>
+     <li>Dependency on arts and kdemultimedia removed</li>
+     <li>Sound is enabled by default again</li>
+</ul>
+
+ <h3>Rendering</h3>
+ <ul>
+    <li>Use vertex arrays and vertex buffer objects by default if possible,
+    increases speed by a few FPS</li>
+    <li>First steps for transparent textures (transparent surfaces support)</li>
+    <li>New effects system which replaces particle systems. At the moment is an
+    internal change only</li>
+    <li>Units are correctly rotated, depending on the slope of the terrain that
+    they're on</li>
+    <li>Performance improvements</li>
+ </ul>
+
+ <h3>Game</h3>
+ <ul>
+    <li>OpenGL minimap</li>
+    <li>New pathfinding code</li>
+    <li>Special pathfinding code for flying units</li>
+    <li>The game starts only once all clients have loaded their game data</li>
+    <li>Neutral player and species has been added. You cannot play this, it is
+    meant for civilian units or things like trees and so on</li>
+    <li>Support for oil harvesting. Mineral harvesting is not yet supported due to
+    the lack of a mineral mine model</li>
+    <li>Oil tower is a neutral unit now</li>
+    <li>Day/night support, the default AI script now triggers day/night changes</li>
+    <li>Flying units can't fly on unpassable cells (slope > 45 degrees)</li>
+    <li>Take unit's size into account when calculating unit's distance from explosions</li>
+ </ul>
+
+ <h3>Scripts / AI</h3>
+ <ul>
+    <li>AI now produces units, thanks to Carlo (aka alea)</li>
+    <li>New ai script functions</li>
+    <li>Free mode and no-limits mode for camera (to get used by scripts)</li>
+</ul>
+
+ <h3>Data</h3>
+ <ul>
+     <li>Some neutral objects added (trees, stone, house...)</li>
+     <li>New explosions</li>
+     <li>Two textured fonts added</li>
+     <li>Scaled down a texture</li>
+     <li>General map changes</li>
+     <li>New map: Canyon</li>
+     <li>New map: We are under attack</li>
+ </ul>
+
+ <h3>Internal</h3>
+ <ul>
+    <li>Very basic support for ac3d models</li>
+    <li>Support for textured fonts. They are faster, more powerful and stable.
+    Thanks a lot to <a href=\"http://plib.sf.net\">plib</a> where this code has
+    been shamelessy stolen</li>
+    <li>Texture compression is used, if available which can reduce texture size an
+    therefore improve speed</li>
+    <li>The path a unit is using is displayed when it is selected</li>
+    <li>The menu is properly removed when a game is ended, fixing menu duplication
+    (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
+    <li>Boson now provides it's own copy of kgame</li>
+ </ul>
+
+
+
 </ul>");
 
 draw_bigbox_text("This is a list of features that we consider as
@@ -84,6 +139,7 @@ draw_bigbox_text("This is a list of features that we consider as
     conversion on startup</li>
     <li>Find out whether save/load is still working</li>
     <li>Find out whether playfield saving is still working</li>
+    <li>Look for more textures which can be scaled down</li>
   </ul>");
 draw_bigbox_end();
 main_area_end();
