@@ -2691,7 +2691,7 @@ void BosonPath2::initSectors()
       //  we must use this a bit hackish solution
 //      boDebug(510) << k_funcinfo << "Initing sector " << sector(x, y) << " at ("<< x << "; " << y << ")" << endl;
       sector(x, y)->setPathfinder(this);
-      sector(x, y)->setGeometry(x * mSectorWidth, y * mSectorWidth,
+      sector(x, y)->setGeometry(x * mSectorWidth, y * mSectorHeight,
           QMIN(mSectorWidth, mMap->width() - x * mSectorWidth), QMIN(mSectorHeight, mMap->height() - y * mSectorWidth));
     }
   }
