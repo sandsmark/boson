@@ -4,11 +4,14 @@ all: Makefile
 	make all
 	cd map && ./boeditor
 
-Makefile: Makefile.in configure
+Makefile: configure
 	./configure
 
+configure: Makefile.in
+	autoconf
+
 Makefile.in: Makefile.am
+	aclocal
+	autoheader
 	automake
 	perl automoc
-configure:
-	autoconf
