@@ -50,7 +50,7 @@ public:
 
 		mMinerType = new QLabel(this);
 		layout->addWidget(mMinerType);
-		
+
 		layout->addStretch(1);
 
 		mProgress = new KGameProgress(this);
@@ -64,7 +64,7 @@ public:
 protected:
 	virtual bool display(Unit* unit)
 	{
-		
+
 		HarvesterPlugin* miner = (HarvesterPlugin*)unit->plugin(UnitPlugin::Harvester);
 		if (miner) {
 			setMiner(miner);
@@ -209,10 +209,7 @@ protected:
 		if (!u) {
 			return false;
 		}
-		if (u->currentPluginType() == UnitPlugin::ResourceMine) {
-			return true;
-		}
-		return false;
+		return true;
 	}
 
 private:
@@ -229,11 +226,13 @@ public:
 		mConstructionProgress = 0;
 		mMinerWidget = 0;
 		mUnitActions = 0;
+		mResourceMineWidget = 0;
 	}
 
 	BoConstructionProgress* mConstructionProgress;
 	BoHarvesterWidget* mMinerWidget;
 	BoActionsWidget* mUnitActions;
+	BoResourceMineWidget* mResourceMineWidget;
 };
 
 BosonCommandFrame::BosonCommandFrame(QWidget* parent) : BosonCommandFrameBase(parent)
@@ -271,12 +270,18 @@ void BosonCommandFrame::initPlugins()
 
 // the miner display (minerals/oil)
  d->mMinerWidget = new BoHarvesterWidget(this, unitDisplayBox());
+
+ // Resource mine display (how much minerals/oil is left in a mine)
+ d->mResourceMineWidget = new BoResourceMineWidget(this, unitDisplayBox());
 }
 
 void BosonCommandFrame::setSelectedUnit(Unit* unit)
 {
  boDebug(220) << k_funcinfo << endl;
  BosonCommandFrameBase::setSelectedUnit(unit);
+ // BosonCommandFrameBase sets selectedUnit() to 0 if local player doesn't own
+ //  it. But we want to show mineral mine info even for non-owned units.
+ d->mResourceMineWidget->showUnit(unit);
  if (!selectedUnit()) {
 	// all plugin widgets have been hidden already. same about unit actions.
 	return;
@@ -403,6 +408,7 @@ void BosonCommandFrame::slotUpdate()
 	selectionWidget()->productionAdvanced(selectedUnit(), production->productionProgress());
  }
  d->mMinerWidget->showUnit(selectedUnit());
+ d->mResourceMineWidget->showUnit(selectedUnit());
 }
 
 bool BosonCommandFrame::checkUpdateTimer() const
