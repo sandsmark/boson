@@ -64,10 +64,11 @@ public:
 	virtual ~BosonBigDisplay();
 
 	virtual void setLocalPlayer(Player* p);
-	
+
+	virtual void unitAction(int actionType);
+
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
-	void slotUnitAction(int actionType);
 
 signals:
 

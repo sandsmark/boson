@@ -163,6 +163,8 @@ public slots:
 	 **/
 	void slotClearGroup(int number);
 
+	void slotUnitAction(int action);
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.
