@@ -20,5 +20,5 @@
     </dl>
     
 
-#include "nav.wml" before_url="../units/aircraft.html" before_text="Aircraft" after_url="overview.html" after_text="Overview" up_url="../index.html"
+#include "nav.wml" before_url="../units/tornado.html" before_text="Tornado" after_url="overview.html" after_text="Overview" up_url="../index.html"
 #include "footer.wml"
