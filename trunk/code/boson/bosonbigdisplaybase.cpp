@@ -368,7 +368,6 @@ public:
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
-		mParticleManager = 0;
 	}
 
 	Player* mLocalPlayer;
@@ -412,7 +411,6 @@ public:
 
 	QPoint mCanvasPos;
 
-	BoParticleManager* mParticleManager;
 	BoVector3 mCameraPos;
 };
 
@@ -532,8 +530,6 @@ void BosonBigDisplayBase::initializeGL()
 
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
-
- d->mParticleManager = new BoParticleManager;
 
  // the actual GL initializing should be done now.
  d->mInitialized = true;
@@ -840,7 +836,7 @@ void BosonBigDisplayBase::paintGL()
 		glDepthMask(GL_FALSE);
 		glEnable(GL_TEXTURE_2D);
 		glEnable(GL_BLEND);
-		d->mParticleManager->draw(&visible, d->mCameraPos);
+		canvas()->particleManager()->draw(&visible, d->mCameraPos);
 		glDepthMask(GL_TRUE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glDisable(GL_BLEND);
@@ -1798,6 +1794,8 @@ void BosonBigDisplayBase::cameraChanged()
  glGetDoublev(GL_MODELVIEW_MATRIX, d->mModelviewMatrix);
  extractFrustum(); // modelview matrix changed
  generateCellList();
+
+ canvas()->particleManager()->viewportChanged();
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell

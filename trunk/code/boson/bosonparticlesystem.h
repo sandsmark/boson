@@ -38,15 +38,17 @@
 class BoParticleManager : public QPtrList<BosonParticle>
 {
   public:
-    BoParticleManager() {};
+    BoParticleManager();
     ~BoParticleManager() {};
     void draw(QPtrList<BosonParticleSystem>* systems, const BoVector3& camera);
     virtual int compareItems(QPtrCollection::Item item1, QPtrCollection::Item item2);
-    void viewportChanged()  { mViewportDirty = true; };
+    void viewportChanged()  { mViewportDirty = true; particlesMoved(); };
+    void particlesMoved()  { mParticlesDirty = true; };
 
   private:
     BoVector3 mCameraPos;
     bool mViewportDirty;
+    bool mParticlesDirty;
 };
 
 /**
