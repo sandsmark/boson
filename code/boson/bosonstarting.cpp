@@ -35,21 +35,32 @@
 #include "bosonsaveload.h"
 
 #include <klocale.h>
+#include <kgame/kmessageserver.h>
 
 #include <qtimer.h>
 #include <qdom.h>
 #include <qmap.h>
 
+class BosonStartingPrivate
+{
+public:
+	BosonStartingPrivate()
+	{
+	}
+	QValueList<Q_UINT32> mStartingCompleted; // clients that completed starting
+};
+
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
+ d = new BosonStartingPrivate;
  mDestPlayField = 0;
  mNewPlayField = 0; // in case we are starting a new map
- mLoading = false;
 }
 
 BosonStarting::~BosonStarting()
 {
  delete mNewPlayField;
+ delete d;
 }
 
 void BosonStarting::setNewGameData(const QByteArray& data)
@@ -64,7 +75,6 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
 void BosonStarting::startNewGame()
 {
  boDebug() << k_funcinfo << endl;
- mLoading = false; // we are starting a new game
 
  emit signalLoadingShowProgressBar(true);
  emit signalLoadingSetLoading(false);
@@ -91,6 +101,8 @@ void BosonStarting::slotStart()
 
 bool BosonStarting::start()
 {
+ d->mStartingCompleted.clear();
+
  // Reset progressbar
  emit signalLoadingReset();
  emit signalLoadingSetAdmin(boGame->isAdmin());
@@ -157,20 +169,13 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
- if (!startGame()) {
-	boError() << k_funcinfo << "starting game failed" << endl;
-	boGame->unlock();
-	return false;
- }
+ sendStartingCompleted(true);
  boGame->unlock();
  return true;
 }
 
 bool BosonStarting::loadGame(const QString& loadingFileName)
 {
- // If mLoading true, then we're loading saved game; if it's false, we're
- //  starting new game
- mLoading = true;
  if (loadingFileName.isNull()) {
 	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	//TODO: set Boson::loadingStatus()
@@ -259,15 +264,8 @@ bool BosonStarting::loadGameData3() // FIXME rename!
 
  checkEvents();
 
- if (!mLoading) {
-	// emits a signal using a QTimer only - it returns immediately.
-	boGame->initFogOfWar(this);
- } else if (mLoading) {
-	// If we're loading saved game, init fog of war for local player
-#warning LOADING code: FIXME
-	// why is this called directly and not using sendMessage() ??
-//	d->mBosonWidget->slotInitFogOfWar(); // FIXME
- }
+ // emits a signal using a QTimer only - it returns immediately.
+ boGame->initFogOfWar(this);
 
  boProfiling->stop(BosonProfiling::LoadGameData3);
  boDebug() << k_funcinfo << "done" << endl;
@@ -278,18 +276,14 @@ bool BosonStarting::loadPlayerData()
 {
  boDebug() << k_funcinfo << endl;
 
- // Load unit datas (pixmaps and sounds), but only if we're starting new game,
- //  because if we're loading saved game, then units are already constructed
- //  and unit datas loaded
- if (!mLoading) {
-	QPtrListIterator<KPlayer> it(*(boGame->playerList()));
-	int currentplayer = 0;
-	while (it.current()) {
-		emit signalLoadingPlayer(currentplayer);
-		slotLoadPlayerData((Player*)it.current());
-		currentplayer++;
-		++it;
-	}
+ // Load unit datas (pixmaps and sounds)
+ QPtrListIterator<KPlayer> it(*(boGame->playerList()));
+ int currentplayer = 0;
+ while (it.current()) {
+	emit signalLoadingPlayer(currentplayer);
+	slotLoadPlayerData((Player*)it.current());
+	currentplayer++;
+	++it;
  }
 
  if (!mPlayer) {
@@ -351,10 +345,6 @@ bool BosonStarting::startScenario()
 {
  if (!mPlayer) {
 	BO_NULL_ERROR(mPlayer);
-	return false;
- }
- if (mLoading) {
-	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
 	return false;
  }
  if (!boGame) {
@@ -508,24 +498,6 @@ bool BosonStarting::startScenario()
  return true;
 }
 
-bool BosonStarting::startGame()
-{
- boDebug() << k_funcinfo << endl;
- // we do some final initializations here (mostly status changed) and then send
- // out IdGameIsStarted.
- // At that point all units should be on the map and it should be ready to
- // start.
- // Once the message is received the clients need to do visual initializations
- // (i.e. hide the loading progressbar, show the big display, ...)
- boGame->startGame();
- if (!boGame->isAdmin()) {
-	return true;
- }
- boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
- return true;
-}
-
-
 // note: this method is _incompatible_ with network!!
 // if we want loading games to be network compatible, we need to add the players
 // _before_ loading the game.
@@ -599,4 +571,45 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
  return true;
 }
 
+void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32 sender)
+{
+ if (!d->mStartingCompleted.contains(sender)) {
+	d->mStartingCompleted.append(sender);
+ }
+
+ if (!boGame->isMaster()) {
+	return;
+ }
+ if (!boGame->isAdmin()) {
+	boError() << k_funcinfo << "MASTER, but not ADMIN! not supported" << endl;
+	return;
+ }
+ QValueList<Q_UINT32> clients = boGame->messageServer()->clientIDs();
+ if (clients.count() > d->mStartingCompleted.count()) {
+	return;
+ }
+ QValueList<Q_UINT32>::Iterator it;
+ for (it = clients.begin(); it != clients.end(); ++it) {
+	if (!d->mStartingCompleted.contains(*it)) {
+		return;
+	}
+ }
+
+ boDebug() << k_funcinfo << "received IdGameStartingCompleted from all clients. starting the game." << endl;
+ // AB: _first_ set the new game status.
+ // note: Boson is in PolicyClean, so the game status does *not* change
+ // immediately. but it will change before IdGameIsStarted is received.
+ boGame->setGameStatus(KGame::Run);
+ boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+}
+
+void BosonStarting::sendStartingCompleted(bool success)
+{
+ if (!success) {
+	// TODO: we should stream the success parameter and handle it on all
+	// clients
+	return;
+ }
+ boGame->sendMessage(0, BosonMessage::IdGameStartingCompleted);
+}
 

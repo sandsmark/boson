@@ -119,7 +119,6 @@ public:
 	void initSaveLoad(BosonSaveLoad*);
 
 	void quitGame();
-	void startGame();
 
 	int gameSpeed() const;
 	bool gamePaused() const;
