@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 		0,
 		"http://boson.eu.org");
  about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"),
-		"orzel@kde.org", "http://orzel.freehackers.org");
+		"orzel@freehackers.org", "http://orzel.freehackers.org");
  about.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), 
 		"benadler@bigfoot.de");
  about.addAuthor("Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de");
