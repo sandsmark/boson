@@ -112,7 +112,7 @@ public:
 
 	virtual void plug(ufo::UWidget*);
 
-	void setChecked(bool);
+	virtual void setChecked(bool);
 	bool isChecked() const
 	{
 		return mChecked;
