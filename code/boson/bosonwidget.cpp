@@ -469,7 +469,7 @@ void BosonWidget::slotAddUnit(Unit* unit, int, int)
 	kdError() << k_funcinfo << ": NULL owner" << endl;
 	return;
  }
- d->mUnitTips->add(unit->type(), player->speciesTheme()->unitProperties(unit)->name());
+ d->mUnitTips->add(unit->rtti(), player->speciesTheme()->unitProperties(unit)->name());
  if (unit->owner() != d->mLocalPlayer) {
 	return;
  }

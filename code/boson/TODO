@@ -7,7 +7,6 @@ Game TODOs
 - selectpart: static memory should be deleted
 - BosonPath doesn't honor fog of war
 - MiniMap does not know about units when removing fog of war
-- Game crashes on quit if a unit was destroyed
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
