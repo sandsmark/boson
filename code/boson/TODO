@@ -28,8 +28,6 @@ Game TODOs
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
 - pause
-- Improve pathfinding for groups - if unit can't go to goal, it should go to
-  some other tile near goal
 
 
 Editor (map, unit, scenario) TODOs
