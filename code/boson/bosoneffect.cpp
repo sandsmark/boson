@@ -93,6 +93,19 @@ void BosonEffect::doDelayedUpdates()
   }
 }
 
+void BosonEffect::markUpdate(float elapsed)
+{
+  if(supportsDelayedUpdates())
+  {
+    // TODO: make sure elapsed it 0.05f
+    mUpdateCounter++;
+  }
+  else
+  {
+    update(elapsed);
+  }
+}
+
 void BosonEffect::update(float elapsed)
 {
   // If effect is delayed, decrease delay

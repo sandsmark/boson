@@ -471,7 +471,7 @@ void BoCanvasAdvance::updateEffects(QPtrList<BosonEffect>& effects, float elapse
 	if (!e->hasStarted()) {
 		e->update(elapsed);
 	} else {
-		e->markUpdate();
+		e->markUpdate(elapsed);
 	}
 	if (!e->isActive()) {
 		effects.removeRef(e);

@@ -425,6 +425,7 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      * and if age is more than 0.
      **/
     virtual void update(float elapsed);
+    virtual bool supportsDelayedUpdates() const  { return false; }
 
 
     virtual BosonParticle* particle(unsigned int i)  { return &mParticles[i]; }
@@ -571,6 +572,7 @@ class BosonEffectParticleEnvironmental : public BosonEffectParticle
      * and if age is more than 0.
      **/
     virtual void update(float elapsed);
+    virtual bool supportsDelayedUpdates() const  { return false; }
 
 
     virtual BosonParticle* particle(unsigned int i)  { return &mParticles[i]; }
