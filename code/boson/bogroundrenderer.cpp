@@ -40,7 +40,7 @@
 
 
 // Whether to use glTexSubImage2D() to update texture. It seems to be buggy.
-//#define USE_TEXSUBIMAGE
+#define USE_TEXSUBIMAGE
 
 
 BoGroundRenderer::BoGroundRenderer()
@@ -349,18 +349,37 @@ void BoGroundRenderer::cellChanged(int x, int y)
  if (!localPlayerIO()->isFogged(x, y)) {
 	value = 255;
  }
+
  // 'x + 1' and 'y + 1' because we use 1-texel border
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 0] = value;
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
+ mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
+
 #ifdef USE_TEXSUBIMAGE
- unsigned char color[] = { value, value, value, 255 };
  mFogTexture->bind();
- glTexSubImage2D(GL_TEXTURE_2D, 0, x + 1, y + 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, color);
+ // Because of (possible) texture compression, we can't update a single pixel
+ //  of the texture. Instead, we have to update the whole 4x4 block that the
+ //  pixel is in.
+ int blockx = ((x + 1) / 4) * 4;
+ int blocky = ((y + 1) / 4) * 4;
+ // Create temporary array for the 4x4 block
+ unsigned char blockdata[4 * 4 * 4];
+ // Copy data from mFogTextureData to blockdata
+ for(int i = 0; i < 4; i++) {
+	for(int j = 0; j < 4; j++) {
+		blockdata[((j * 4) + i) * 4 + 0] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 0];
+		blockdata[((j * 4) + i) * 4 + 1] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 1];
+		blockdata[((j * 4) + i) * 4 + 2] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 2];
+		blockdata[((j * 4) + i) * 4 + 3] = mFogTextureData[((blocky + j) * mFogTextureDataW + (blockx + i)) * 4 + 3];
+	}
+ }
+ // Update texture
+ glTexSubImage2D(GL_TEXTURE_2D, 0, blockx, blocky, 4, 4, GL_RGBA, GL_UNSIGNED_BYTE, blockdata);
+
 #else
  delete mFogTexture;
  mFogTexture = 0;
 #endif
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 0] = value;
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 1] = value;
- mFogTextureData[((y + 1) * mFogTextureDataW + (x + 1)) * 4 + 2] = value;
 }
 
 void BoGroundRenderer::initFogTexture(const BosonMap* map)
