@@ -39,6 +39,20 @@ class RenderGLTimes
 public:
 	RenderGLTimes()
 	{
+		// i dont want to unroll this loop (even though it adds some
+		// overhead), because it makes adding new variables more
+		// difficult
+		for (int i = 0; i < 2; i++) {
+			timerclear(&mFunction[i]);
+			timerclear(&mClear[i]);
+			timerclear(&mCells[i]);
+			timerclear(&mUnits[i]);
+			timerclear(&mMissiles[i]);
+			timerclear(&mParticles[i]);
+			timerclear(&mFOW[i]);
+			timerclear(&mText[i]);
+		}
+		mUnitCount = 0;
 	}
 	unsigned long int dFunction() const { return compareTimes(mFunction[0], mFunction[1]); }
 	unsigned long int dClear() const { return compareTimes(mClear[0], mClear[1]); }
