@@ -25,7 +25,6 @@
 #include "bodebug.h"
 #include "../bosonconfig.h"
 #include "../boglobal.h"
-#include "../bosonprofiling.h"
 
 #include <qstringlist.h>
 #include <qdict.h>
@@ -321,10 +320,8 @@ void BosonSoundInterface::playSound(const QString& file)
  if (!sound()) {
 	return;
  }
- boProfiling->start(1111);
  BoAudioCommand* c = new BoAudioCommand(BoAudioCommand::PlaySound, mSpecies, -1, file);
  audioInterface()->sendCommand(c);
- boProfiling->stop(1111);
 }
 
 void BosonSoundInterface::playSound(int id)
