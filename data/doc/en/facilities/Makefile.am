@@ -1,8 +1,23 @@
-# list all files that should be installed here. space separated.
-EXTRA_DIST=index.html barracks.html bunker.html command_bunker.png comsat.html comsat.png helipad.html map.html mineralrefinery.html oiltower.html powerplant.html prison.html refinery.html repairpad.html samsite.html samsite.png techcenter.html tree.png turret.html turret.png warfactory.html warfactory.png
-
 # the language this directory contains
 KDE_LANG=en
 
-# just the appname. no need to change.
-KDE_DOCS=boson/facilities
+# all subdirs that should get processed, too
+SUBDIRS =
+
+# please specify the subdirectry here, e.g. "units" or "facilities". leave empty
+# for toplevel directory.
+BO_DOC_DIR = facilities
+
+# list all wml files here
+BO_DOCS = index.wml barracks.wml bunker.wml comsat.wml helipad.wml map.wml \
+	mineralrefinery.wml oiltower.wml powerplant.wml prison.wml \
+	refinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
+	warfactory.wml
+
+# list additional data here - these files will get installed
+doc_DATA=command_bunker.png comsat.png samsite.png tree.png turret.png warfactory.png
+
+# Condiguration ends here!
+
+docdir=$(kde_htmldir)/$(KDE_LANG)/boson/$(BO_DOC_DIR)
+
