@@ -1133,7 +1133,7 @@ OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
  dlg->setPlayer(localPlayer());
  dlg->slotLoad();
 
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater())); // seems not to be called if you quit with "cancel"!
 
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
