@@ -38,6 +38,7 @@
 #include "bopointeriterator.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include "items/bosonitemrenderer.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -115,11 +116,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mPathPoints, IdPathPoints);
  registerData(&d->mWantedRotation, IdWantedRotation);
  d->mWantedRotation.setLocal(0);
-
- if (!model()) {
-	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
-	return;
- }
 
 // create the plugins
 // note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
@@ -250,7 +246,7 @@ void Unit::setHealth(unsigned long int h)
  updateSelectBox();
  if (isDestroyed()) {
 	unselect();
-	setAnimationMode(UnitAnimationWreckage);
+	itemRenderer()->setAnimationMode(UnitAnimationWreckage);
  }
 }
 
@@ -2321,20 +2317,13 @@ void Facility::setConstructionStep(unsigned int step)
  }
  // warning: constructionSteps() and BosonModel::constructionSteps() are
  // *totally* different values!!
- unsigned int modelStep = 0;
- if (step == constructionSteps()) {
-	modelStep = model()->constructionSteps(); // completed construction
- } else {
-	modelStep = model()->constructionSteps() * step / constructionSteps();
-//	boDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
- }
- setGLConstructionStep(modelStep); // the displayed construction step. note that currentConstructionStep() is a *different* value!
+ itemRenderer()->setGLConstructionStep(step, constructionSteps()); // the displayed construction step. note that currentConstructionStep() is a *different* value!
  d->mConstructionStep = step;
  if (step == constructionSteps()) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
-	setAnimationMode(UnitAnimationIdle);
+	itemRenderer()->setAnimationMode(UnitAnimationIdle);
 	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  }
 }
@@ -2354,13 +2343,7 @@ bool Facility::loadFromXML(const QDomElement& root)
  if (d->mConstructionStep > constructionSteps()) {
 	d->mConstructionStep = constructionSteps();
  }
- unsigned int modelStep = 0;
- if (d->mConstructionStep == constructionSteps()) {
-	modelStep = model()->constructionSteps(); // completed construction
- } else {
-	modelStep = model()->constructionSteps() * d->mConstructionStep / constructionSteps();
- }
- setGLConstructionStep(modelStep);
+ itemRenderer()->setGLConstructionStep(d->mConstructionStep, constructionSteps());
 
  // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
  // effects in loadFromXML() - then these lines are obsolete.

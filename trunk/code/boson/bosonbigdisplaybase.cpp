@@ -43,6 +43,7 @@
 #include "boson.h"
 #include "bodebug.h"
 #include "items/bosonshot.h"
+#include "items/bosonitemrenderer.h"
 #include "unitplugins.h"
 #include "bosonmodel.h"
 #include "bo3dtools.h"
@@ -901,6 +902,7 @@ void BosonBigDisplayBase::renderItems()
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
 	BosonItem* item = *it;
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
@@ -935,7 +937,7 @@ void BosonBigDisplayBase::renderItems()
 	if (useLOD) {
 		// TODO: we could compare squared distances here and get rid of sqrt()
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
-		lod = item->preferredLod(dist);
+		lod = itemRenderer->preferredLod(dist);
 	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
@@ -979,6 +981,7 @@ void BosonBigDisplayBase::renderItems()
  BoMaterial::deactivate();
  while (it != selectedItems->end()) {
 	BosonItem* item = *it;
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
 	if (!item->isSelected()) {
 		boError() << k_funcinfo << "not selected" << endl;
 		++it;
@@ -996,7 +999,7 @@ void BosonBigDisplayBase::renderItems()
 
 	GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat depth = item->glDepthMultiplier();
+	GLfloat depth = itemRenderer->glDepthMultiplier();
 	glPushMatrix();
 	glTranslatef(x, y, z);
 	if (w != 1.0 || h != 1.0 || depth != 1.0) {
@@ -2647,6 +2650,7 @@ void BosonBigDisplayBase::createRenderItemList()
  BoItemList::Iterator it = allItems->begin();
  for (; it != allItems->end(); ++it) {
 	BosonItem* item = *it;
+	BosonItemRenderer* itemRenderer = item->itemRenderer();
 
 	if (!item->isVisible()) {
 		continue;
@@ -2671,7 +2675,7 @@ void BosonBigDisplayBase::createRenderItemList()
 	// UPDATE: we could instead use the "sectors" that we are planning to
 	// use for collision detection and pathfinding also for the frustum
 	// tests (they wouldn't do floating point calculations)
-	if (!sphereInFrustum(x, y, z, item->boundingSphereRadius())) {
+	if (!sphereInFrustum(x, y, z, itemRenderer->boundingSphereRadius())) {
 		// the unit is not visible, currently. no need to draw anything.
 		continue;
 	}
