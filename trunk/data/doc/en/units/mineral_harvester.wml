@@ -2,11 +2,12 @@
     <h1>
       Units - Mineral harvester
     </h1>
+    <p>&nbsp;</p>
     <table border="0">
 	<tr>
 		<td><img src="mineral_harvester.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		The Mineral Harvester transports minerals to the <a href="../facilities/mineralrefinery.html">Mineral Refinery</a>.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>

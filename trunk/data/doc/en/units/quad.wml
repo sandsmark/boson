@@ -2,11 +2,14 @@
     <h1>
       Units - Quad
     </h1>
+    <p>&nbsp;</p>
     <table border="0">
 	<tr>
 		<td><img src="quad.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		A Quad is a lightweight and small vehicle. It doesn't has the fire power or the armor of a tank, 
+		but it is cheap, fast and has a good reload value.<br>
+		Don't underestimate the Quad, you can overrun the enemy if have enough from them.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>

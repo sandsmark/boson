@@ -2,11 +2,14 @@
     <h1>
       Units - Tank
     </h1>
+    <p>&nbsp;</p>
     <table border="0">
 	<tr>
 		<td><img src="tank.png" border="0">&nbsp;</td>
 		<td valign="top"><img src="../none.png" border="0" height="30"><br>
-		Nothing yet.
+		A tank is a heavily armored combat vehicle which moves on
+		caterpillar treads, rather than wheels.<br>
+		You need many tanks because a tank needs very long for the reload of the weapons.
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>

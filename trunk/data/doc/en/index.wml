@@ -79,10 +79,15 @@
               <dt>4.7 <a href="units/aircraft.html">Aircraft</a></dt>
             </dl>
           </dd>
-          
-          
-	  
-	  
+          <!--
+	  <dd>&nbsp;</dd>
+          <dt>5 <a href="editor/index.html">The Boson editor</a></dt>
+          <dd>
+            <dl>
+              <dt>5.1 <a href="editor/overview.html">Overview</a></dt>
+            </dl>
+          </dd>
+	  -->
 	  <dd>&nbsp;</dd>
           <dt>5 <a href="faq.html">FAQ</a></dt>
           
