@@ -157,6 +157,7 @@ public slots:
 	void slotUnfogAll(Player* player = 0);
 
 	void slotDumpGameLog();
+	void slotShowLight0Widget();
 	void slotReloadModelTextures();
 	void slotReloadMeshRenderer();
 	void slotReloadGroundRenderer();
