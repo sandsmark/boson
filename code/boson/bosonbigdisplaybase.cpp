@@ -464,6 +464,9 @@ public:
 	BoGLToolTip* mToolTips;
 
 	bool mDebugMapCoordinates;
+	float mDebugMapCoordinatesX;
+	float mDebugMapCoordinatesY;
+	float mDebugMapCoordinatesZ;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -498,6 +501,9 @@ void BosonBigDisplayBase::init()
  d->mParticlesDirty = true;
  d->mCellPlacementTexture = 0;
  d->mDebugMapCoordinates = false;
+ d->mDebugMapCoordinatesX = 0.0f;
+ d->mDebugMapCoordinatesY = 0.0f;
+ d->mDebugMapCoordinatesZ = 0.0f;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
@@ -1073,23 +1079,6 @@ void BosonBigDisplayBase::paintGL()
  if ( showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
 	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
  }
-
- if (d->mDebugMapCoordinates) {
-	GLfloat x, y, z;
-	canvasToWorld(d->mCanvasPos.x(), d->mCanvasPos.y(), 0.0, &x, &y, &z);
-	glColor3ub(255, 0, 0);
-	glBegin(GL_LINES);
-		glVertex3f(x - 0.25, y, z);
-		glVertex3f(x + 0.25, y, z);
-
-		glVertex3f(x, y - 0.25, z);
-		glVertex3f(x, y + 0.25, z);
-
-		glVertex3f(x, y, z - 0.25);
-		glVertex3f(x, y, z + 0.25);
-	glEnd();
-	glColor3ub(255, 255, 255);
- }
 }
 
 void BosonBigDisplayBase::renderText()
@@ -1120,6 +1109,21 @@ void BosonBigDisplayBase::renderText()
  y -= d->mDefaultFont->height();
  glRasterPos2i(x, y);
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
+ if (d->mDebugMapCoordinates) {
+	canvasToWorld(d->mCanvasPos.x(), d->mCanvasPos.y(), 0.0,
+			&d->mDebugMapCoordinatesX,
+			&d->mDebugMapCoordinatesY,
+			&d->mDebugMapCoordinatesZ);
+	QString s = QString::fromLatin1("World: (%1,%2,%2) Canvas: (%4,%5)").
+			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
+			arg((double)d->mDebugMapCoordinatesY, 6, 'f', 3).
+			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3).
+			arg(d->mCanvasPos.x(), 4, 10).
+			arg(d->mCanvasPos.y(), 4, 10);
+	y -= d->mDefaultFont->height();
+	glRasterPos2i(d->mViewport[2] - border - d->mDefaultFont->width(s), y);
+	glCallLists(s.length(), GL_UNSIGNED_BYTE, (GLubyte*)s.latin1());
+ }
 
 // now the chat messages
  d->mChat->renderMessages(border, border, d->mViewport[2] - 2 * border, d->mViewport[3] - 2 * border, d->mDefaultFont);
