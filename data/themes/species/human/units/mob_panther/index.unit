@@ -33,6 +33,12 @@ ReportProduced=report_produced
 ReportUnderAttack=report_underattack
 Shoot=shoot
 
+[Upgrade_1]
+RequireTechnologies=12
+WeaponRange=5
+WeaponDamage=15
+Health=60
+
 [Weapon_0]
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
