@@ -70,7 +70,8 @@ texture_DATA = \
 	wheel.jpg \
 	wheel1.jpg \
 	window1.jpg \
-	window2.jpg
+	window2.jpg \
+	water1.jpg
 
 # no further editing need here
 
