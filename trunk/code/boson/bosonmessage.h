@@ -39,7 +39,7 @@ public:
 	// Player Moves:
 		MoveMove = 100, // Unit(s) is/are moved
 		MoveAttack = 101, // a unit is being attacked
-		MoveConstruct = 102, // construct a unit
+		MoveBuild = 102, // build a unit
 
 
 		// the last message ID:

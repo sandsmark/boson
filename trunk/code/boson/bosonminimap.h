@@ -69,6 +69,9 @@ public slots:
 	void slotMoveUnit(Unit* unit, double oldX, double oldY);
 	void slotUnitDestroyed(Unit* unit);
 
+	void slotUnfog(int x, int y);
+	void slotFog(int x, int y);
+
 protected:
 	void setPoint(int x, int y, const QColor& color);
 	virtual void paintEvent(QPaintEvent*);

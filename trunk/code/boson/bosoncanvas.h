@@ -91,6 +91,8 @@ public:
 	 **/
 	void unitMoved(Unit* unit, double oldX, double oldY);
 
+	void updateSight(Unit*, double oldX, double oldY);
+
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
 	 **/
@@ -114,6 +116,8 @@ public slots:
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
+	void signalUnfog(int x, int y);
+	void signalFog(int x, int y);
 
 protected:
 	void loadTiles(const QString&);

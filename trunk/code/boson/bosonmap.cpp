@@ -277,8 +277,8 @@ bool BosonMap::loadCells(QDataStream& stream)
 	return false;
  }
 // load all cells:
- for (int i = 0; i < width(); i++) {
-	for (int j = 0; j < height(); j++) {
+ for (unsigned int i = 0; i < width(); i++) {
+	for (unsigned int j = 0; j < height(); j++) {
 		int groundType = 0;
 		unsigned char version = 0;
 		if (!loadCell(stream, groundType, version)) {
@@ -407,11 +407,11 @@ bool BosonMap::loadMapGeo(QDomElement& node)
 bool BosonMap::loadCells(QDomElement& node)
 {
  QDomNodeList list = node.elementsByTagName("Cell");
- if ((int)list.count() < width() * height()) {
+ if (list.count() < width() * height()) {
 	kdError() << "XML error: not enough cells" << endl;
 	return false;
  }
- if ((int)list.count() != width() * height()) {
+ if (list.count() != width() * height()) {
 	kdWarning() << "Cell count doesn't match width * height" 
 			<< endl;
  }
@@ -437,8 +437,8 @@ bool BosonMap::loadCells(QDomElement& node)
 		version[x + y * width()] = v;
 	}
  }
- for (int i = 0; i < width(); i++) {
-	for (int j = 0; j < height(); j++) {
+ for (unsigned int i = 0; i < width(); i++) {
+	for (unsigned int j = 0; j < height(); j++) {
 		saveCell(stream, groundType[i + j * width()], 
 				version[i + j * width()]);
 	}
@@ -474,11 +474,11 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
  groundType = node.attribute("GroundType").toInt();
  version = (unsigned char)node.attribute("Version").toInt(); // not nice...
 
- if (x >= width()) {
+ if (x >= (int)width()) {
 	kdError() << k_lineinfo << ": x >= width" << endl;
 	return false;
  }
- if (y >= height()) {
+ if (y >= (int)height()) {
 	kdError() << k_lineinfo << ": y >= height" << endl;
 	return false;
  }
@@ -492,8 +492,8 @@ bool BosonMap::saveCells(QDomElement& node)
 	return false;
  }
  QDomDocument doc = node.ownerDocument();
- for (int i = 0; i < width(); i++) {
-	for (int j = 0; j < height(); j++) {
+ for (unsigned int i = 0; i < width(); i++) {
+	for (unsigned int j = 0; j < height(); j++) {
 		QDomElement c = doc.createElement("Cell");
 		node.appendChild(c);
 		saveCell(c, i, j, cell(i, j));
@@ -532,8 +532,8 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
 
 bool BosonMap::saveCells(QDataStream& stream)
 {
- for (int i = 0; i < width(); i++) {
-	for (int j = 0; j < height(); j++) {
+ for (unsigned int i = 0; i < width(); i++) {
+	for (unsigned int j = 0; j < height(); j++) {
 		Cell* c = cell(i, j);
 		if (!c) {
 			kdError() << k_funcinfo << ": NULL Cell" << endl;
@@ -623,11 +623,11 @@ Cell* BosonMap::cell(int x, int y) const
 	kdError() << "Cells not yet created" << endl;
 	return 0;
  }
- if (x < 0 || x >= width()) {
+ if (x < 0 || x >= (int)width()) {
 	kdWarning() << "Invalid Cell! x=" << x << endl;
 	return 0;
  }
- if (y < 0 || y >= height()) {
+ if (y < 0 || y >= (int)height()) {
 	kdWarning() << "Invalid Cell! y=" << y << endl;
 	return 0;
  }

@@ -23,6 +23,7 @@
 #include "player.h"
 
 #include <klistview.h>
+#include <klistbox.h>
 #include <klocale.h>
 #include <kdebug.h>
 
@@ -39,11 +40,14 @@ public:
 	{
 		mBoson = 0;
 		mUnitList = 0;
+		mWaypoints = 0;
 	}
 
 	Boson* mBoson;
 
 	KListView* mUnitList;
+	KListBox* mWaypoints;
+	KListView* mProduction;
 
 	QIntDict<Unit> mUnits;
 };
@@ -68,6 +72,19 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
 // connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
  layout->addWidget(d->mUnitList);
+
+ QVBoxLayout* l = new QVBoxLayout(layout);
+ d->mWaypoints = new KListBox(this);
+ connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateWaypoints(QListViewItem*)));
+ l->addWidget(d->mWaypoints);
+
+ d->mProduction = new KListView(this);
+ d->mProduction->addColumn(i18n("Number"));
+ d->mProduction->addColumn(i18n("TypeId"));
+ d->mProduction->addColumn(i18n("ETA"));
+ connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateProduction(QListViewItem*)));
+ l->addWidget(d->mProduction);
+ 
 
 /*
  d->mUnitView = new KListView(this);
@@ -96,6 +113,8 @@ void KGameUnitDebug::slotUpdate()
  d->mUnitList->clear();
 // d->mUnitView->clear();
  d->mUnits.clear();
+ d->mWaypoints->clear();
+ d->mProduction->clear();
  if (!d->mBoson) {
 	return;
  }
@@ -135,5 +154,48 @@ void KGameUnitDebug::addUnit(Unit* unit)
  item->setText(7, QString::number(unit->health()));
  item->setText(8, QString::number(unit->cost()));
  item->setText(9, QString::number(unit->speed()));
-
 }
+
+void KGameUnitDebug::updateWaypoints(QListViewItem* item)
+{
+ d->mWaypoints->clear();
+ if (!item) {
+	return;
+ }
+ int id = item->text(0).toInt();
+ Unit* unit = d->mUnits[id];
+ if (!unit) {
+	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	return;
+ }
+ QValueList<QPoint> points = unit->waypointList();
+ for (unsigned int i = 0; i < points.count(); i++) {
+	(void)new QListBoxText(d->mWaypoints, i18n("x=%1 y=%2").arg(points[i].x()).arg(points[i].y()));
+ }
+}
+
+void KGameUnitDebug::updateProduction(QListViewItem* item)
+{
+ d->mProduction->clear();
+ if (!item) {
+	return;
+ }
+ int id = item->text(0).toInt();
+ Unit* unit = d->mUnits[id];
+ if (!unit) {
+	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	return;
+ }
+ if (!unit->isFacility()) {
+	return;
+ }
+ QValueList<int> constructions = ((Facility*)unit)->productionList();
+ for (unsigned int i = 0; i < constructions.count(); i++) {
+	QListViewItem* item = new QListViewItem(d->mProduction);
+	item->setText(0, QString::number(i+1));
+	item->setText(1, QString::number(constructions[i]));
+	item->setText(2, i18n("Ready")); // currently always ready
+ }
+ 
+}
+

@@ -222,8 +222,8 @@ void BosonMiniMap::initMap()
 	return;
  }
  slotCreateMap(d->mMap->width(), d->mMap->height());
- for (int i = 0; i < d->mMap->width(); i++) {
-	for (int j = 0; j < d->mMap->height(); j++) {
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (c) {
 			slotAddCell(i, j, c->groundType(), c->version());
@@ -269,5 +269,13 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 	return;
  }
  slotAddCell(x, y, c->groundType(), c->version());
+}
+
+void BosonMiniMap::slotUnfog(int x, int y)
+{
+}
+
+void BosonMiniMap::slotFog(int x, int y)
+{
 }
 

@@ -21,6 +21,7 @@
 
 #include <qwidget.h>
 
+class QListViewItem;
 class Boson;
 class Unit;
 
@@ -41,6 +42,8 @@ protected:
 
 protected slots:
 	void slotUpdate();
+	void updateWaypoints(QListViewItem*);
+	void updateProduction(QListViewItem*);
 
 private:
 	class KGameUnitDebugPrivate;

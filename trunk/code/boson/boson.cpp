@@ -189,9 +189,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
-	case BosonMessage::MoveConstruct:
+	case BosonMessage::MoveBuild:
 	{
-		kdDebug() << "moveConstruct" << endl;
+		kdDebug() << "moveBuild" << endl;
 		Q_UINT32 factoryId;
 		Q_UINT32 owner;
 		Q_INT32 x;
@@ -203,17 +203,17 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
-			kdError() << "Cannot construct without owner" << endl;
+			kdError() << "Cannot build without owner" << endl;
 			break;
 		}
 		Facility* factory = (Facility*)findUnit(factoryId, p);
 		if (!factory) {
-			kdError() << "Cannot construct without factory" << endl;
+			kdError() << "Cannot build without factory" << endl;
 			break;
 		}
-		unsigned int unitType = factory->completedConstruction();
-		if (constructUnit(factory, unitType, x, y)) {
-			factory->removeConstruction();
+		unsigned int unitType = factory->completedProduction();
+		if (buildUnit(factory, unitType, x, y)) {
+			factory->removeProduction();
 		}
 		break;
 	}
@@ -461,7 +461,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // kdDebug() << k_funcinfo << endl;
 }
 
-bool Boson::constructUnit(Facility* factory, int unitType, int x, int y)
+bool Boson::buildUnit(Facility* factory, int unitType, int x, int y)
 {
  if (!factory) {
 	kdError() << k_funcinfo << ": NULL factory cannot produce" << endl;
@@ -482,7 +482,7 @@ bool Boson::constructUnit(Facility* factory, int unitType, int x, int y)
 		a->image(0)->width(), // -1?
 		a->image(0)->height())); // -1?
  if (!((BosonCanvas*)d->mCanvas)->canGo(p->unitProperties(unitType), rect)) {
-	kdWarning() << "Unit can not be constructed here" << endl;
+	kdWarning() << "Unit can not be produced here" << endl;
 	return false;
  }
  QCanvasItemList list = d->mCanvas->collisions(QRect(x * BO_TILE_SIZE,

@@ -24,20 +24,21 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
+#include "unitproperties.h"
 #include "unit.h"
 #include "speciestheme.h"
-#include "unitproperties.h"
 #include "kspritetooltip.h"
 #include "bosoncommandframe.h"
 #include "editorinput.h"
 #include "bosonmessage.h"
-#include "kgamedialogbosonconfig.h"
 #include "bosonmap.h"
 #include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
-#include "kgamedialogcomputerconfig.h"
 #include "newgamedialog.h"
+#include "kgamedialogbosonconfig.h"
+#include "kgamedialogcomputerconfig.h"
+#include "kgameunitdebug.h"
 
 #include "defines.h"
 
@@ -116,7 +117,7 @@ BosonWidget::BosonWidget(QWidget* parent)
 
 
 // new code
- connect(d->mBigDisplay, SIGNAL(signalConstructUnit(int,int, int, Player*)),
+ connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 
 }
@@ -194,6 +195,10 @@ void BosonWidget::init()
 
  connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
 		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
+ connect(d->mCanvas, SIGNAL(signalUnfog(int, int)),
+		d->mMiniMap, SLOT(slotUnfog(int, int)));
+ connect(d->mCanvas, SIGNAL(signalFog(int, int)),
+		d->mMiniMap, SLOT(slotFog(int, int)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		this, SLOT(slotRemoveUnit(Unit*)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
@@ -291,6 +296,9 @@ void BosonWidget::keyReleaseEvent(QKeyEvent* e)
 void BosonWidget::slotDebug()
 {
  KGameDebugDialog* dlg = new KGameDebugDialog(d->mBoson, this);
+ QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KGameUnitDebug* units = new KGameUnitDebug(b);
+ units->setBoson(d->mBoson);
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  dlg->show();
 }

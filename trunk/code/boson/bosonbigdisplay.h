@@ -100,8 +100,8 @@ signals:
 //	void signalEditorConstruction(int unitType, Player* owner);
 	void signalAddCell(int x, int y, int groundType, unsigned char version);
 	
-	void signalConstructUnit(int type, Unit* facility, Player* owner);
-	void signalConstructUnit(int type, int x, int y, Player* owner); // editor mode only
+	void signalBuildUnit(int type, Unit* facility, Player* owner);
+	void signalBuildUnit(int type, int x, int y, Player* owner); // editor mode only
 
 protected:
 	/**

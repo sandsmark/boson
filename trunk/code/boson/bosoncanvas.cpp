@@ -229,8 +229,8 @@ void BosonCanvas::initMap(const QString& tileFile)
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
  loadTiles(tileFile);
- for (int i = 0; i < d->mMap->width(); i++) {
-	for (int j = 0; j < d->mMap->height(); j++) {
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
 			kdError() << k_funcinfo << ": NULL cell" << endl;
@@ -245,7 +245,7 @@ void BosonCanvas::initMap(const QString& tileFile)
 void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
 {
  int tile = Cell::tile(groundType, version);
- if (tile < 0 || tile >= d->mMap->width() * d->mMap->height()) {
+ if (tile < 0 || tile >= (int)d->mMap->width() * (int)d->mMap->height()) {
 	kdWarning() << "Invalid tile " << tile << endl;
 	return;
  }
@@ -265,11 +265,59 @@ void BosonCanvas::removeAnimation(QCanvasItem* item)
 
 void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
 {
+ updateSight(unit, oldX, oldY);
+	
 // test if any unit has this unit as target. If sou then adjust the destination. 
 //TODO 
 
 // used to adjust the mini map
  emit signalUnitMoved(unit, oldX, oldY);
+}
+
+void BosonCanvas::updateSight(Unit* unit, double, double)
+{
+// TODO: use the double parameters - check whether the player can still see
+// these coordinates and if not out fog on them again. Remember to check for -1
+// (new unit placed)!
+
+// if (unit->owner != d->mLocalPlayer) {
+//	return;
+// }
+ unsigned int sight = unit->sightRange(); // *cell* number! not pixel number!
+ unsigned int x = unit->boundingRect().center().x() / BO_TILE_SIZE;
+ unsigned int y = unit->boundingRect().center().y() / BO_TILE_SIZE;
+
+ unsigned int left = (x > sight) ? (x - sight) : 0;
+ unsigned int top = (y > sight) ? (y - sight) : 0;
+ unsigned int right = (x + sight > d->mMap->width() - 1) ?  d->mMap->width() - 1 :
+		x + sight;
+ unsigned int bottom = (y + sight > d->mMap->height() - 1) ?  d->mMap->height() - 1 :
+		y + sight;
+ 
+ sight *= sight;
+
+ for (unsigned int i = left; i < right; i++) {
+	for (unsigned int j = bottom; j < top; j++) {
+		Cell* c = cell(i, j);
+		if (i*i + j*j < sight) {
+			if (!c) {
+				kdError() << k_lineinfo << "invalid cell " 
+						<< x << "," << y << endl;
+				continue;
+			}
+			c->unfog();
+			emit signalUnfog(i, j); // minimap
+		} else {
+			//TODO
+			// cell(i, j) is not in sight anymore. Check if any
+			// other unit can see it!
+			// if (we_cannot_see_this) {
+			// 	c->fog(this, i, j);
+			// 	emit signalFog(i, j); // minimap
+			// }
+		}
+	}
+ }
 }
 
 void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
