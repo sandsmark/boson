@@ -128,9 +128,7 @@ void BosonMusic::stop()
 bool BosonMusic::load(const QString& file)
 {
  kdDebug() << k_funcinfo << file << endl;
- if (d->mPlayObject) {
-	delete d->mPlayObject;
- }
+ delete d->mPlayObject;
  KPlayObjectFactory factory(server().server());
  d->mPlayObject = factory.createPlayObject(file, true);
  if (d->mPlayObject->isNull()) {

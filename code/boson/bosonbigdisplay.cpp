@@ -299,10 +299,8 @@ void BosonBigDisplay::removeSelectionRect()
 	selectArea();
 
 	// remove the rect:
-	if (d->mSelectionRect) {
-		delete d->mSelectionRect;
-		d->mSelectionRect = 0;
-	}
+	delete d->mSelectionRect;
+	d->mSelectionRect = 0;
 	if (selection().isEmpty()) {
 		setSelectionMode(SelectNone);
 	} else {

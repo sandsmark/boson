@@ -36,9 +36,7 @@ BosonTiles::BosonTiles()
 
 BosonTiles::~BosonTiles()
 {
- if (mTilesImage) {
-	delete mTilesImage;
- }
+ delete mTilesImage;
 }
 
 QPixmap BosonTiles::plainTile(Cell::GroundType type)

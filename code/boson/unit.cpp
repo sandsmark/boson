@@ -106,10 +106,8 @@ void Unit::select()
 
 void Unit::unselect()
 {
- if (d->mSelectBox) {
-	delete d->mSelectBox;
-	d->mSelectBox = 0;
- }
+ delete d->mSelectBox;
+ d->mSelectBox = 0;
 }
 
 Unit* Unit::target() const

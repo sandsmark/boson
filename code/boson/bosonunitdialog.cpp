@@ -153,9 +153,7 @@ BosonUnitDialog::BosonUnitDialog(QWidget* parent)
 
 BosonUnitDialog::~BosonUnitDialog()
 {
- if (d->mUnit) {
-	delete d->mUnit;
- }
+ delete d->mUnit;
  delete d;
 }
 
@@ -274,9 +272,7 @@ void BosonUnitDialog::slotChangeUnitDir()
  if (!QFile::exists(file)) {
 	return;
  }
- if (d->mUnit) {
-	delete d->mUnit;
- }
+ delete d->mUnit;
  d->mUnit = new UnitProperties;
  d->mUnit->loadUnitType(file);
 

@@ -94,9 +94,7 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  if (w == mapWidth() && h == mapHeight()) {
 	return;
  }
- if (mGround) {
-	delete mGround;
- }
+ delete mGround;
  d->mMapWidth = w;
  d->mMapHeight = h;
  mGround = new QPixmap(mapWidth() * pointSize(), mapHeight() * pointSize());

@@ -73,12 +73,8 @@ Player::~Player()
 {
  kdDebug() << k_funcinfo << endl;
  d->mUnits.clear();
-// kdDebug() << "clear handler" << endl;
  dataHandler()->clear();
-// kdDebug() << "delete theme" << endl;
- if (mSpecies) {
-	delete mSpecies;
- }
+ delete mSpecies;
  delete d;
 // kdDebug() << "~Player done" << endl;
 }
@@ -141,9 +137,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
 void Player::loadTheme(const QString& species, const QColor& teamColor)
 {
- if (mSpecies) {
-	delete mSpecies;
- }
+ delete mSpecies;
  mSpecies = new SpeciesTheme(species, teamColor);
 }
 
