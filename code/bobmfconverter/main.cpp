@@ -69,6 +69,7 @@ unsigned int tex_size = 512;
 QString tex_name;
 QString tex_path;
 bool tex_converttolowercase = false;
+bool tex_optimize = false;
 bool model_center = false;
 
 
@@ -194,6 +195,7 @@ bool processCommandLine(int argc, char** argv)
       usage += "  -keepframes        Don't remove duplicate frames\n";
       usage += "  -baseframe <num>   Make frame <num> the base frame (all calculations will be based on it)\n";
       usage += "  -size <num>        Make model's width/height (whichever is bigger) <num> units long (default: 1)\n";
+      usage += "  -texoptimize       Combine all textures into one big texture\n";
       usage += "  -texsize <num>     Combined texture will be <num>x<num> pixels big\n";
       usage += "  -texname <file>    Combined texture will be written to <file> (this should be without path)\n";
       usage += "  -texpath <dir>     Combined texture file will be put to <dir>\n";
@@ -295,6 +297,10 @@ bool processCommandLine(int argc, char** argv)
     {
       NEXTARG(arg);
       Texture::addTexturePath(arg);
+    }
+    else if(larg == "-texoptimize")
+    {
+      tex_optimize = true;
     }
     else if(larg == "-texname")
     {
@@ -414,6 +420,12 @@ bool loadConfigFile(Model* m)
   // Load model size
   cfg.setGroup("Boson Unit");
   modelsize = (float)cfg.readDoubleNumEntry("UnitWidth", modelsize);
+
+  // Load entries from "Model" config group.
+  // Note that size entry here takes preference over the one in "Boson Unit"
+  //  group.
+  cfg.setGroup("Model");
+  modelsize = (float)cfg.readDoubleNumEntry("Size", modelsize);
 
   return true;
 }
@@ -598,12 +610,15 @@ void doModelProcessing(Model* m)
   transformer.setCenterModel(model_center);
   transformer.process();
 
-  boDebug() << "Optimizing textures..." << endl;
-  /*TextureOptimizer textureoptimizer(m, m->baseLOD());
-  textureoptimizer.setCombinedTexSize(tex_size);
-  textureoptimizer.setCombinedTexFilename(tex_name);
-  textureoptimizer.setCombinedTexPath(tex_path);
-  textureoptimizer.process();*/
+  if(tex_optimize)
+  {
+    boDebug() << "Optimizing textures..." << endl;
+    TextureOptimizer textureoptimizer(m, m->baseLOD());
+    textureoptimizer.setCombinedTexSize(tex_size);
+    textureoptimizer.setCombinedTexFilename(tex_name);
+    textureoptimizer.setCombinedTexPath(tex_path);
+    textureoptimizer.process();
+  }
 
   boDebug() << "Optimizing materials..." << endl;
   MaterialOptimizer materialoptimizer(m, m->baseLOD());
@@ -632,7 +647,7 @@ void doModelProcessing(Model* m)
   //saveLod(m, 0);
 
   //boDebug() << "Quicksaving base frame in base LOD..." << endl;
-  saveLodFrameAC(m, 0, frame_base);
+  //saveLodFrameAC(m, 0, frame_base);
 //  saveLodFrameAC(m, 0, 10);
 
   float targetfactor = 1.0f;
@@ -651,7 +666,7 @@ void doModelProcessing(Model* m)
     lodcreator.process();
     boDebug() << "LOD " << i << " has now " << m->lod(i)->shortStats() << endl;
     //saveLod(m, i);
-    saveLodFrameAC(m, i, frame_base);
+    //saveLodFrameAC(m, i, frame_base);
     //boDebug() << "LOD quicksaved" << endl;
 
     loderror *= lod_errormod;
