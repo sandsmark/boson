@@ -148,6 +148,7 @@ public:
 		playersStream << (Q_UINT32)mGame->playerList()->count();
 		while (playerIt.current()) {
 			Player* p = (Player*)playerIt.current();
+			playersStream << (Q_UINT32)p->foggedCells();
 			playersStream << (Q_UINT32)p->minerals();
 			playersStream << (Q_UINT32)p->oil();
 			++playerIt;
@@ -179,13 +180,17 @@ protected:
 			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
 		}
 		for (unsigned int i = 0; i < count; i++) {
+			Q_UINT32 fogged, fogged2;
 			Q_UINT32 minerals, minerals2;
 			Q_UINT32 oil, oil2;
+			s1 >> fogged;
+			s2 >> fogged2;
 			s1 >> minerals;
 			s2 >> minerals2;
 			s1 >> oil;
 			s2 >> oil2;
 #define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
+			CHECK(fogged, fogged2);
 			CHECK(minerals, minerals2);
 			CHECK(oil, oil2);
 #undef CHECK
