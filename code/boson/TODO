@@ -26,6 +26,8 @@ Game TODOs
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
+- BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
+  hurts performance. But it is necessary for slow game speed :(
 
 
 Editor (map, unit, scenario) TODOs

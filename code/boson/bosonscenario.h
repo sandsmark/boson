@@ -83,6 +83,10 @@ public:
 	static bool savePlayer(QDomElement& node, Player* p);
 	static bool loadPlayer(QDomElement& node, Player* p);
 
+
+	bool modified() const { return mModified; }
+	void setModified(bool m) { mModified = m; }
+
 protected:
 	bool saveScenarioSettings(QDomElement&);
 	bool loadScenarioSettings(QDomElement&);
@@ -98,6 +102,8 @@ private:
 private:
 	class BosonScenarioPrivate;
 	BosonScenarioPrivate* d;
+
+	bool mModified;
 };
 
 #endif

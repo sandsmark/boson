@@ -73,6 +73,8 @@ public:
 
 	static QString playFieldFileName(const QString& identifier);
 
+	bool modified() const;
+
 signals:
 	/**
 	 * Emitted when the map changes. Note that this can even be 0!

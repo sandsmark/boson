@@ -114,6 +114,9 @@ public:
 
 	Cell* cell(int x, int y) const;
 
+	void setModified(bool m) { mModified = m; }
+	bool modified() const { return mModified; }
+
 public slots:
 	void changeCell(int x, int y, int groundType, unsigned char b);
 
@@ -153,6 +156,7 @@ private:
 private:
 	class BosonMapPrivate;
 	BosonMapPrivate* d;
+	bool mModified;
 
 	unsigned int mMapWidth;
 	unsigned int mMapHeight;

@@ -166,6 +166,8 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  dev->writeBlock(xml.data(), xml.length());
  dev->close();
  delete dev;
+ mMap->setModified(false);
+ mScenario->setModified(false);
  return true;
 }
 
@@ -254,4 +256,15 @@ void BosonPlayField::applyScenario(Boson* boson)
  delete mScenario;
  mScenario = new BosonScenario();
  mScenario->applyScenario(boson);
+}
+
+bool BosonPlayField::modified() const
+{
+ if (mMap && mMap->modified()) {
+	return true;
+ }
+ if (mScenario && mScenario->modified()) {
+	return true;
+ }
+ return false;
 }

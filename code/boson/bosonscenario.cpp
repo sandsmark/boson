@@ -60,6 +60,7 @@ BosonScenario::~BosonScenario()
 void BosonScenario::init()
 {
  d = new BosonScenarioPrivate;
+ setModified(false);
 }
 
 bool BosonScenario::loadScenario(QDomElement& root)

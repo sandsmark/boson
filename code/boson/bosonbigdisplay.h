@@ -71,26 +71,15 @@ public:
 	void setLocalPlayer(Player* p);
 
 	/**
-	 * This makes only sense when in editor mode: change the @ref
-	 * isModified status.
-	 **/
-	void setModified(bool m);
-
-	bool isModified() const;
-
-	/**
 	 * Set the @ref KGameChat object to the @ref KGameCanvasChat.
 	 **/
 	void setKGameChat(KGameChat* c);
 	
 	void addChatMessage(const QString&);
 
-	void setHPos(unsigned int);
-	void setVPos(unsigned int);
-	unsigned int hPos() const;
-	unsigned int vPos() const;
-
 	void setCursor(BosonCursor* cursor);
+
+	void setActive();
 
 public slots:
 	/**
@@ -139,6 +128,11 @@ signals:
 	
 	void signalBuildUnit(int type, Unit* facility, Player* owner);
 	void signalBuildUnit(int type, int x, int y, Player* owner); // editor mode only
+
+	/**
+	 * Make this display the currently active view
+	 **/
+	void signalMakeActive(BosonBigDisplay*);
 
 protected:
 	/**

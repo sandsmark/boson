@@ -64,6 +64,7 @@ BosonMap::~BosonMap()
 void BosonMap::init()
 {
  d = new BosonMapPrivate;
+ setModified(false);
 }
 
 bool BosonMap::loadMap(const QByteArray& buffer, bool binary)

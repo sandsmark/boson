@@ -387,5 +387,4 @@ void Editor::slotPlaceCellBig2()
 
 void Editor::slotGameStarted()
 {
- bosonWidget()->setModified(false);
 }
