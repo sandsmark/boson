@@ -430,6 +430,9 @@ void BosonBigDisplayBase::initializeGL()
  // depth buffer...
  // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
  resizeGL(width(), height());
+
+ glEnable(GL_CULL_FACE);
+ glCullFace(GL_BACK);
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
