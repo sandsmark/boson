@@ -24,8 +24,6 @@
 #define __KGAME_H_
 
 #include <qstring.h>
-#include <qptrlist.h>
-#include <qvaluelist.h>
 
 #include "kgamenetwork.h"
 
@@ -35,6 +33,8 @@ class KPlayer;
 class KGamePropertyBase;
 class KGamePropertyHandler;
 class KGameSequence;
+template<class T> class QValueList;
+template<class T> class QPtrList;
 
 class KGamePrivate;
 

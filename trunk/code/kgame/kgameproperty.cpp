@@ -27,6 +27,8 @@
 #include "kplayer.h"
 #include "kgame.h"
 
+#include <kdebug.h>
+
 #define KPLAYERHANDLER_LOAD_COOKIE 6239
 
 KGamePropertyBase::KGamePropertyBase(int id, KGame* parent)

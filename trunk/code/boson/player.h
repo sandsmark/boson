@@ -19,7 +19,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <kgame/kplayer.h>
+#include <kplayer.h>
+#include <kgameproperty.h>
 
 class QColor;
 class QDomElement;

@@ -29,6 +29,7 @@
 #include <qptrqueue.h>
 
 #include <klocale.h>
+#include <kdebug.h>
 #include <typeinfo>
 
 #define KPLAYERHANDLER_LOAD_COOKIE 6239

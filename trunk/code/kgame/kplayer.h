@@ -23,14 +23,12 @@
 
 #include <qstring.h>
 #include <qobject.h>
-#include <qptrlist.h>
-
-#include "kgameproperty.h"
 
 class KGame;
 class KGameIO;
 class KGamePropertyBase;
 class KGamePropertyHandler;
+template <class T> class QPtrList;
 
 class KPlayerPrivate;
 
@@ -107,7 +105,7 @@ public:
        *
        * @return list of devices
        */
-      KGameIOList *ioList() {return &mInputList;}
+      KGameIOList *ioList();
 
       /**
        * sets the game the player belongs to. This
@@ -132,7 +130,7 @@ public:
        *
        * @param a async=true turn based=false
        */
-      void setAsyncInput(bool a) {mAsyncInput = a;}
+      void setAsyncInput(bool a);
 
       /**
        * Query whether this player does asynchronous 
@@ -140,7 +138,7 @@ public:
        *
        * @return true/false
        */
-      bool asyncInput() const {return mAsyncInput.value();}
+      bool asyncInput() const;
 
       /**
        * Is this player a virtual player, ie is it 
@@ -203,13 +201,13 @@ public:
        *
        * @return the user defined player id
        */
-      int userId() const {return mUserId.value();} 
+      int userId() const;
 
       /* Set the user defined players id.
        *
        * @param i the user defined player id
        */
-      void setUserId(int i) {mUserId = i;}
+      void setUserId(int i);
 
       /**
        * Returns whether this player can be replaced by a network
@@ -345,7 +343,7 @@ public:
        *
        * @return true/false
        */
-      bool myTurn() const {return mMyTurn.value();}
+      bool myTurn() const;
 
       /**
        * Sets whether this player is the next to turn.
@@ -456,13 +454,6 @@ private:
 private:
       KGame *mGame;
       bool mActive;      // active player
-      KGameIOList mInputList;
-
-      // GameProperty // AB: I think we can't move them to KPlayerPrivate - inline
-      // makes sense here
-      KGamePropertyBool mAsyncInput;  // async input allowed
-      KGamePropertyBool mMyTurn;      // Is it my turn to play (only useful if not async)?
-      KGamePropertyInt  mUserId;      // a user defined id
 
       KPlayerPrivate* d;
 };
