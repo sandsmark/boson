@@ -1,11 +1,11 @@
 [article]
 date=November 15th 2002 12:45
 title=IMPORTANT: Problem found in 0.7, fix available
-text=Many users who downloaded 0.7 have reported problems when using 24bpp depth
-    or when playing fullscreen. We have found out that reason for this were too
+text=Many users who downloaded 0.7 reported problems when using 24bpp depth
+    or when playing in fullscreen mode. We have found out that the reason for this were too
     big textures which didn't fit into the memory of the videocard and caused
-    big slowdowns. Package containing fix (scaled-down textures) is available
-    from <a href="download.php#0.7-fix">download page</a>.<br>
+    big slowdowns. A Package containing the fix (scaled-down textures) is available
+    from the <a href="download.php#0.7-fix">download page</a>.<br>
     We're sorry for any inconvenience.
     <br><br>
 
