@@ -28,7 +28,7 @@
 
 #define ERROR_COST 100000
 //#define MAX_PATH_COST 5000 // AB: too low!!
-#define MAX_PATH_COST 50000000
+#define MAX_PATH_COST 500000
 
 class Marking
 {
