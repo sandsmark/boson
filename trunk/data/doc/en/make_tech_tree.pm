@@ -1,7 +1,7 @@
 package make_tech_tree;
 use strict;
 
-# usage: command path_to_facilities [mob]
+# usage: command path_to_facilities [fixed]
 #
 # If you add "fixed" mobile units will be ignored
 
@@ -13,6 +13,7 @@ sub draw_map() {
 if (eval {require Image::Magick})   {
     }
 else    {
+    # we need exit code 0, this way wml will not print an error during make and the user will get a nice note on the html page
     print "You need to install the perl \"image magick\" module to get this image generated !";
     exit(0);    
 }
