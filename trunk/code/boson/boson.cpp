@@ -68,7 +68,7 @@
 Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
-#define COLLECT_UNIT_LOGS
+//#define COLLECT_UNIT_LOGS
 
 /**
  * Function that checks whether the ComputerIO list is still valid (i.e. players
@@ -829,6 +829,18 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 
 void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 {
+ boDebug() << k_funcinfo << endl;
+ if (gameStatus() == KGame::Init) {
+	boDebug() << k_funcinfo << "game in Init state - remove player" << endl;
+	// game has not yet started - we can safely remove the player now
+	*remove = true;
+	return;
+ }
+ boDebug() << k_funcinfo << "game not in Init state - keep player" << endl;
+
+ // the game is still running, so don't remove the player.
+ // -> one day we should add a new KGameIO object here, so that the computer
+ //    plays instead of the network player now
  *remove = false;
  if (!player) {
 	boError() << k_funcinfo << "NULL player" << endl;
@@ -838,6 +850,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	boError() << k_funcinfo << "only ADMIN can do this" << endl;
 	return;
  }
+ slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.").arg(player->name()).arg(player->id()));
 // boDebug() << k_funcinfo << endl;
 }
 
