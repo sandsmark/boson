@@ -79,31 +79,12 @@ public:
 	inline BosonCollisions* collisions() const { return mCollisions; }
 
 	/**
-	 * @param rtti The RTTI of the item that is to be created. See @ref RTTI
-	 * and @ref BosonItem::rtti. The RTTI groups the items in certain
-	 * classes, such as units and shots.
-	 * @param owner The player that will own the item. NULL might be allowed
-	 * for certain items (atm we dont have such items)
+	 * See @ref createItem.
 	 *
-	 * @param type The precise type of the item. The type depends on the @p
-	 * rtti, i.e. a "1" for a unit means something totally different than
-	 * for a shot. The class that will be created (new'ed) should usually
-	 * be described perfectly by the type. See e.g. @ref UnitBase::type and
-	 * @ref BosonShot::type
-	 *
-	 * @param group Many items need additional parameters for their
-	 * constructors, mainly to define the model. This defines a group of
-	 * available items, depending on the other parameters (e.g. a group for
-	 * a @ref BosonShotMissile is the unittype where the weapon is defined).
-	 * The group can be unused for some items.
-	 *
-	 * @param groupType This defines the unique item inside the @p group.
-	 * For example a @ref BosonShotMissile of the group "Unit XYZ" (with 3
-	 * weapons) can have the groupTypes 1,2 or 3 (each of the available
-	 * weapons in the group).
-	 * The groupType can be unused for some items.
+	 * This will also do the necessary steps for newly added items, such as
+	 * loading unit defaults and adding the unit to the @p owner.
 	 **/
-	BosonItem* createItem(int rtti, Player* owner, unsigned long int type, unsigned long int group = 0, unsigned long int groupType = 0);
+	BosonItem* createNewItem(int rtti, Player* owner, unsigned long int type, unsigned long int group = 0, unsigned long int groupType = 0);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
@@ -396,15 +377,46 @@ signals:
 	void signalRemovedItem(BosonItem* item);
 
 protected:
+	/**
+	 * This is a minimalistic method for creating @ref BosonItem objects.
+	 * Only the actual creation happens here, no additional configuration
+	 * (beside the constructor) is made. Such configuration (such as adding
+	 * the item to the @p owner) should be made in the calling method, e.g.
+	 * @ref createNewItem for new items or @ref loadItemFromXML for loading items.
+	 *
+	 * @param rtti The RTTI of the item that is to be created. See @ref RTTI
+	 * and @ref BosonItem::rtti. The RTTI groups the items in certain
+	 * classes, such as units and shots.
+	 * @param owner The player that will own the item. NULL might be allowed
+	 * for certain items (atm we dont have such items)
+	 *
+	 * @param type The precise type of the item. The type depends on the @p
+	 * rtti, i.e. a "1" for a unit means something totally different than
+	 * for a shot. The class that will be created (new'ed) should usually
+	 * be described perfectly by the type. See e.g. @ref UnitBase::type and
+	 * @ref BosonShot::type
+	 *
+	 * @param group Many items need additional parameters for their
+	 * constructors, mainly to define the model. This defines a group of
+	 * available items, depending on the other parameters (e.g. a group for
+	 * a @ref BosonShotMissile is the unittype where the weapon is defined).
+	 * The group can be unused for some items.
+	 *
+	 * @param groupType This defines the unique item inside the @p group.
+	 * For example a @ref BosonShotMissile of the group "Unit XYZ" (with 3
+	 * weapons) can have the groupTypes 1,2 or 3 (each of the available
+	 * weapons in the group).
+	 * The groupType can be unused for some items.
+	 **/
+	BosonItem* createItem(int rtti, Player* owner, unsigned long int type, unsigned long int group = 0, unsigned long int groupType = 0);
+
+	Unit* createUnit(Player* owner, unsigned long int unitType);
+	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
+
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
 
 	void removeFromAdvanceLists(BosonItem* item);
-
-
-
-	Unit* createUnit(Player* owner, unsigned long int unitType);
-	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
 
 private:
 	void init();
