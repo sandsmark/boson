@@ -97,6 +97,7 @@ void BoLake::init(BoWaterManager* _manager, float _level)
   level = _level;
   minx = 0; miny = 0;
   maxx = 0; maxy = 0;
+  loadedminx = 0; loadedminy = 0; loadedmaxx = 0; loadedmaxy = 0;
   originx = -1; originy = -1;
   cornercount = 0;
   corners = 0;
@@ -134,6 +135,11 @@ void BoLake::findWater(int x, int y, const QRect& searcharea)
 
   originx = x;
   originy = y;
+  loadedminx = searcharea.left();
+  loadedminy = searcharea.top();
+  loadedmaxx = searcharea.right();
+  loadedmaxy = searcharea.bottom();
+
   minx = 10000; miny = 10000;
   maxx = -1; maxy = -1;
   cornercount = 0;
@@ -490,10 +496,10 @@ bool BoWaterManager::saveToXML(QDomElement& root)
     QDomElement l = doc.createElement("Lake");
     root.appendChild(l);
 
-    l.setAttribute("MinX", lake->minx);
-    l.setAttribute("MinY", lake->miny);
-    l.setAttribute("MaxX", lake->maxx);
-    l.setAttribute("MaxY", lake->maxy);
+    l.setAttribute("MinX", lake->loadedminx);
+    l.setAttribute("MinY", lake->loadedminy);
+    l.setAttribute("MaxX", lake->loadedmaxx);
+    l.setAttribute("MaxY", lake->loadedmaxy);
     l.setAttribute("OriginX", lake->originx);
     l.setAttribute("OriginY", lake->originy);
     l.setAttribute("Level", lake->level);

@@ -93,6 +93,10 @@ class BoLake
     //  (maxx, maxy) is in the lake.
     int minx, miny;
     int maxx, maxy;
+    // Those are same as previous ones, except for that they aren't
+    //  automatically changed when lake is loaded.
+    // This is necessary to make saved xml look exactly like loaded one.
+    int loadedminx, loadedminy, loadedmaxx, loadedmaxy;
     // Center point of the lake, for in-frustum checks
     BoVector3 center;
     // 2d radius of the lake, for in-frustum checks
