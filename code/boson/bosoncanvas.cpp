@@ -169,7 +169,7 @@ void BosonCanvas::advance()
 		unit->owner()->unitDestroyed(unit); // remove from player without deleting
 		++destroyedIt;
 	}
-	d->mDestroyedUnits.clear();
+//	d->mDestroyedUnits.clear(); // we don't clear but display the wreckage
  }
  update();
 }
@@ -193,11 +193,12 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 	y++;
  } while(y * BO_TILE_SIZE <= rect.bottom());
 
+/*
 // kdDebug() << "This unit can go there!" << endl;
  // unit con go on the ground of the new cell. Now check if there is a unit
  // already there...
  if (unit->unitProperties()->isAircraft()) {
-	return true;
+	return true; // aircraft dont collide with other units. //TODO: they collide with other aircrafts!
  }
  QCanvasItemList items = collisions(rect);
  QCanvasItemList::iterator it;
@@ -206,14 +207,14 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 		if ((*it)->rtti() >= RTTI::UnitStart) { // AKA isUnit
 			VisualUnit* u = (VisualUnit*)*it;
 			if (!u->isDestroyed() && !u->unitProperties()->isAircraft()) {
-//				kdDebug() << "unit " << unit->id() << " would collide with " 
-//						<< ((VisualUnit*)(*it))->id() << endl;
+				kdDebug() << "unit " << unit->id() << " would collide with " 
+						<< ((VisualUnit*)(*it))->id() << endl;
 				return false;
 			}
 		}
 	}
  }
-
+*/
  return true;
 }
 

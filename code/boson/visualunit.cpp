@@ -177,7 +177,6 @@ void VisualUnit::advance(int phase)
 	// perhaps test if there is a enemy unit in weapon range (x() - range()
 	// -> x() + width() + range() and so on)
 	// but we would need a setAnimated(true) for all units then :-(
- } else {
 	if (work() == WorkMove) {
 		advanceMove(); // move one step
 	} else if (work() == WorkAttack) {
@@ -196,8 +195,10 @@ void VisualUnit::advance(int phase)
 	if (d->mReloadState > 0) {
 		d->mReloadState = d->mReloadState - 1;
 	}
+	QCanvasSprite::advance(phase); // does nothing for phase == 0
+ } else { // phase == 1
+	QCanvasSprite::advance(phase); // move
  }
- QCanvasSprite::advance(phase);
 }
 
 void VisualUnit::turnTo(int direction)
@@ -420,26 +421,32 @@ void VisualMobileUnit::advanceMove()
 
  if (speed() == 0) {
 	stopMoving();
-	kdDebug() << "speed = 0" << endl;
+	kdDebug() << "speed == 0" << endl;
 	return;
  }
 
  QRect position = boundingRect(); // where we currently are.
  QPoint waypoint = currentWaypoint(); // where we go to
-
- setXVelocity(0); // so that boundinRectAdvanced() is working
- setYVelocity(0); // so that boundinRectAdvanced() is working
  double x = position.center().x();
  double y = position.center().y();
+
+ setXVelocity(0); // so that boundingRectAdvanced() is working
+ setYVelocity(0); // so that boundingRectAdvanced() is working
+ 
+ //  first check whether we have arrived - if not set the speed.
  if (waypoint.x() != x) {
 	if (waypoint.x() > x) {
 		setXVelocity(speed());
-		if (waypoint.x() <= boundingRectAdvanced().center().x()) {
+		if (waypoint.x() < boundingRectAdvanced().center().x()) {
+			// we are not exactly there but close enough.
+//			kdDebug() << "x is close enough(1)" << endl;
 			setXVelocity(0);
 		}
 	} else {
-		setXVelocity(speed() * -1);
-		if (waypoint.x() >= boundingRectAdvanced().center().x()) {
+		setXVelocity(-speed());
+		if (waypoint.x() > boundingRectAdvanced().center().x()) {
+			// we are not exactly there but close enough.
+//			kdDebug() << "x is close enough(2)" << endl;
 			setXVelocity(0);
 		}
 	}
@@ -448,17 +455,22 @@ void VisualMobileUnit::advanceMove()
 		setXVelocity(0);
 	}
  } else {
+//	kdDebug() << "arrived x" << endl;
 	setXVelocity(0);
  }
  if (waypoint.y() != y) {
 	if (waypoint.y() > y) {
 		setYVelocity(speed());
 		if (waypoint.y() <= boundingRectAdvanced().center().y()) {
+			// we are not exactly there but close enough.
+//			kdDebug() << "y is close enough(1)" << endl;
 			setYVelocity(0);
 		}
 	} else {
-		setYVelocity(speed() * -1);
+		setYVelocity(-speed());
 		if (waypoint.y() >= boundingRectAdvanced().center().y()) {
+			// we are not exactly there but close enough.
+//			kdDebug() << "y is close enough(2)" << endl;
 			setYVelocity(0);
 		}
 	}
@@ -467,10 +479,35 @@ void VisualMobileUnit::advanceMove()
 		setYVelocity(0);
 	}
  } else {
+//	kdDebug() << "arrived y" << endl;
 	setYVelocity(0);
  }
+ bool arrived = (xVelocity() == 0 && yVelocity() == 0); // note: this is also false if boCanvas()->canGo() is false!
+ if (arrived) {
+	kdDebug() << "unit " << id() << " has arrived" << endl; // or cannot go on that ground
+	stopMoving();
+	return;
+ }
+ QCanvasItemList collisionList = collisions(false);
+ if (collisionList.isEmpty()) {
+	return;
+ }
+ QCanvasItemList::Iterator it;
+ for (it = collisionList.begin(); it != collisionList.end(); ++it) {
+	if (collidesWith(*it)) {
+		if ((*it)->rtti() >= RTTI::UnitStart) {
+			VisualUnit* unit = ((VisualUnit*)*it);
+			if (!unit->isDestroyed()) {
+				setXVelocity(0);
+				setYVelocity(0);
+				kdDebug() << id() << " collidesWith " << unit->id() << endl;
+			}
+		}
+	}
+ }
+
  if (xVelocity() == 0 && yVelocity() == 0) {
-	kdDebug() << "could not complete move ?!" << endl;
+	kdDebug() << id() << " has not arrived but cannot move further" << endl;
 	stopMoving();
  }
 }
