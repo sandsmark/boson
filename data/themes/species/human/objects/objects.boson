@@ -3,6 +3,11 @@ File=missile.3ds
 Width=0.4
 Height=0.4
 
+[mine]
+File=mine.3ds
+Width=0.3
+Height=0.3
+
 [daisycutter]
 File=daisycutter.3ds
 Width=0.5
