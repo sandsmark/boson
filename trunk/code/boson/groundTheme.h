@@ -39,11 +39,10 @@ class groundTheme
 {
   public:
   groundTheme(char *themeName);
-  ~groundTheme();
 
 	QwSpritePixmapSequence
 		*getPixmap(groundType gt) { return groundPix[gt]; }
-	bool		isOk(void){ return allLoaded; }
+	bool	isOk(void){ return allLoaded; }
 
   private:
 	bool loadGround(int i, const QString &path, QProgressDialog &progress);
