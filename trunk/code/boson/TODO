@@ -34,6 +34,10 @@ Game TODOs
   QPainter to paint it to pixmap)
 - Do not start game before all players has loaded their data
 - BosonTiles::mTilesImage is unused in game mode. free memory
+- UnitGroups (i.e. selection groups)
+- maybe provide UnitGroups without keyboard, too. select units, click on a
+  (empty) button to store that group. another click on that button restores the
+  group. rmb on that button deletes it
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
@@ -93,6 +97,7 @@ General TODOs
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
+- Click+Move in minimap should move the rectangle (aka the screen position)
 
 Data TODOs
 - sound for minimap activated/deactivated
