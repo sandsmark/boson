@@ -625,7 +625,7 @@ public:
 		}
 		return true;
 	}
-	bool saveMessageLog(QIODevice* logDevice)
+	bool saveMessageLog(QIODevice* logDevice, unsigned int maxCount = 0)
 	{
 		if (!logDevice) {
 			BO_NULL_ERROR(logDevice);
@@ -638,6 +638,10 @@ public:
 		QDataStream stream(logDevice);
 		stream << (Q_UINT32)mLoggedMessages.count();
 		QPtrListIterator<BoMessage> it(mLoggedMessages);
+		if (maxCount > 0 && mLoggedMessages.count() > maxCount) {
+			unsigned int diff = mLoggedMessages.count() - maxCount;
+			it += diff;
+		}
 		while (it.current()) {
 			const BoMessage* m = it.current();
 			stream << (Q_UINT32)m->advanceCallsCount;
