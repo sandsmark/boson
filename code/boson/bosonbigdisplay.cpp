@@ -1,12 +1,13 @@
 
 #include "bosonbigdisplay.h"
+
 #include "visualunit.h"
 #include "bosoncanvas.h"
 #include "player.h"
 #include "unitproperties.h"
-
-#include "defines.h"
+#include "cell.h"
 #include "bosonmessage.h"
+#include "defines.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -403,6 +404,14 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 	int version = 0; // FIXME: random()%4;
 	// int version = d->mConstruction.version; // one of these lines - random here or in command frame?
 	emit signalAddCell(x, y, d->mConstruction.groundType, version);
+	if (Cell::isBigTrans(d->mConstruction.groundType)) {
+		emit signalAddCell(x + 1, y, 
+				d->mConstruction.groundType + 1, version);
+		emit signalAddCell(x, y + 1, 
+				d->mConstruction.groundType + 2, version);
+		emit signalAddCell(x + 1, y + 1, 
+				d->mConstruction.groundType + 3, version);
+	}
  }
 }
 

@@ -89,11 +89,11 @@ void BosonMiniMap::slotCreateMap(int w, int h)
 void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 {
  if (x < 0 || x >= mapWidth()) {
-	kdError() << k_funcinfo << ": invalid cell! x=" << x << endl;
+//	kdError() << k_funcinfo << ": invalid cell! x=" << x << endl;
 	return;
  }
  if (y < 0 || y >= mapHeight()) {
-	kdError() << k_funcinfo << ": invalid cell! y=" << y << endl;
+//	kdError() << k_funcinfo << ": invalid cell! y=" << y << endl;
 	return;
  }
  if (!ground()) {

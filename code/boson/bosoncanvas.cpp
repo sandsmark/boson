@@ -230,6 +230,7 @@ void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char versio
  int tile = Cell::tile(groundType, version);
  if (tile < 0 || tile >= d->mMap->width() * d->mMap->height()) {
 	kdWarning() << "Invalid tile " << tile << endl;
+	return;
  }
 // kdDebug() << "g=" << c->groundType() << ",v=" << c->version() <<
 //		"==>tile=" << tile << endl;

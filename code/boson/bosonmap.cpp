@@ -357,7 +357,7 @@ bool BosonMap::saveMapGeo(QDomElement& node)
 {
 // TODO: maybe check for validity
  node.setAttribute("Width", width());
- node.setAttribute("Height", width());
+ node.setAttribute("Height", height());
  return true;
 }
 
@@ -454,12 +454,12 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
  groundType = node.attribute("GroundType").toInt();
  version = (unsigned char)node.attribute("Version").toInt(); // not nice...
 
- if (x > width()) {
-	kdError() << "XML: x > width" << endl;
+ if (x >= width()) {
+	kdError() << k_lineinfo << ": x >= width" << endl;
 	return false;
  }
- if (y > height()) {
-	kdError() << "XML: y > height" << endl;
+ if (y >= height()) {
+	kdError() << k_lineinfo << ": y >= height" << endl;
 	return false;
  }
  return true;
@@ -613,12 +613,12 @@ Cell* BosonMap::cell(int x, int y) const
 	kdError() << "Cells not yet created" << endl;
 	return 0;
  }
- if (x < 0 || x > width()) {
-	kdError() << "Invalid Cell! x=" << x << endl;
+ if (x < 0 || x >= width()) {
+	kdWarning() << "Invalid Cell! x=" << x << endl;
 	return 0;
  }
- if (y < 0 || x > height()) {
-	kdError() << "Invalid Cell! y=" << y << endl;
+ if (y < 0 || y >= height()) {
+	kdWarning() << "Invalid Cell! y=" << y << endl;
 	return 0;
  }
  return &d->mCells[ x + y * width() ];
@@ -645,6 +645,8 @@ QStringList BosonMap::availableMaps()
 
 void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
 {
+//kdDebug() << x << " -> " << y << endl;
+//kdDebug() << width() << " " << height() << endl;
  Cell* c = cell(x, y);
  if (!c) {
 	kdError() << "Invalid cell x=" << x << ",y=" << y << endl;
@@ -655,3 +657,4 @@ void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
 	c->makeCell(groundType, b);
  }
 }
+
