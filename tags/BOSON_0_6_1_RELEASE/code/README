@@ -1,0 +1,14 @@
+
+Please check the website for more info : 
+
+		http://boson.eu.org/
+
+------
+
+June 1st 1999 on : Linux gauss 2.2.2 #2 Fri Mar 5 15:43:26 CET 1999 i686 unknown
+
+  PID USER     PRI  NI  SIZE  RSS SHARE STAT  LIB %CPU %MEM   TIME COMMAND
+17855 orzel      0   0  7752 7752  3408 S       0  0.0 12.1   0:01 boson
+17856 orzel      0   0  7716 7716  3364 S       0  0.0 12.1   0:01 boson
+17854 orzel      0   0  4224 4224  2720 S       0  0.0  6.6   0:00 boserver  
+
