@@ -29,6 +29,7 @@
 #include "unitproperties.h"
 #include "bosonprofiling.h"
 #include "bosonmap.h"
+#include "unitplugins.h"
 
 #include <qptrqueue.h>
 
@@ -257,18 +258,46 @@ QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n,
       // If it's not fogged, maybe it's what we're looking for
       if(type == Minerals)
       {
-        if(canvas->cell(n2.x, n2.y)->hasMinerals())
+        const BoItemList* items = canvas->cell(n2.x, n2.y)->items();
+        for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
         {
-          locations.append(QPoint(n2.x, n2.y));
-          found++;
+          if(!RTTI::isUnit((*it)->rtti()))
+          {
+            continue;
+          }
+          Unit* u = (Unit*)*it;
+          if(u->isDestroyed())
+          {
+            continue;
+          }
+          ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+          if(res && res->canProvideMinerals() && (res->minerals() != 0))
+          {
+            locations.append(QPoint(n2.x, n2.y));
+            found++;
+          }
         }
       }
       else if(type == Oil)
       {
-        if(canvas->cell(n2.x, n2.y)->hasOil())
+        const BoItemList* items = canvas->cell(n2.x, n2.y)->items();
+        for(BoItemList::ConstIterator it = items->begin(); it != items->end(); ++it)
         {
-          locations.append(QPoint(n2.x, n2.y));
-          found++;
+          if(!RTTI::isUnit((*it)->rtti()))
+          {
+            continue;
+          }
+          Unit* u = (Unit*)*it;
+          if(u->isDestroyed())
+          {
+            continue;
+          }
+          ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+          if(res && res->canProvideOil() && (res->oil() != 0))
+          {
+            locations.append(QPoint(n2.x, n2.y));
+            found++;
+          }
         }
       }
       else if(type == EnemyBuilding)
@@ -280,7 +309,7 @@ QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n,
         // TODO!
       }
 
-      if(found >= n)
+      if(n > 0 && found >= n)
       {
         delete[] visited;
         return locations;

@@ -1292,7 +1292,11 @@ unsigned int ResourceMinePlugin::mineMinerals(const HarvesterPlugin* harvester)
 	return 0;
  }
 
- return mineStep(harvester, minerals());
+ int amount = mineStep(harvester, minerals());
+ if (minerals() >= 0) {
+	setMinerals(minerals() - amount);
+ }
+ return amount;
 }
 
 unsigned int ResourceMinePlugin::mineOil(const HarvesterPlugin* harvester)
@@ -1310,7 +1314,11 @@ unsigned int ResourceMinePlugin::mineOil(const HarvesterPlugin* harvester)
 	return 0;
  }
 
- return mineStep(harvester, oil());
+ int amount = mineStep(harvester, oil());
+ if (oil() >= 0) {
+	setOil(oil() - amount);
+ }
+ return amount;
 }
 
 unsigned int ResourceMinePlugin::mineStep(const HarvesterPlugin* harvester, int resourcesAvailable) const
@@ -1338,7 +1346,7 @@ unsigned int ResourceMinePlugin::mineStep(const HarvesterPlugin* harvester, int 
 void ResourceMinePlugin::setMinerals(int m)
 {
  if (!canProvideMinerals()) {
-	mMinerals = m;
+	mMinerals = 0;
 	return;
  }
  mMinerals = m;

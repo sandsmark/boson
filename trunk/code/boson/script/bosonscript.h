@@ -131,14 +131,16 @@ class BosonScript
     static void addOil(int playerId, int amount);
     /**
      * Finds n nearest mineral locations to point (x, y), that are visible to
-     * player with id playerId
-     * At most radius tiles are searched
+     * player with id playerId.
+     * At most radius tiles are searched.
+     * If n is 0, all visible mineral mines in given are returned.
      **/
     static QValueList<QPoint> nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
     /**
      * Finds n nearest oil locations to point (x, y), that are visible to
-     * player with id playerId
-     * At most radius tiles are searched
+     * player with id playerId.
+     * At most radius tiles are searched.
+     * If n is 0, all visible oil mines in given are returned.
      **/
     static QValueList<QPoint> nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
 
@@ -234,6 +236,14 @@ class BosonScript
      * @return Whether unit with id id can produce (other units or upgrades)
      **/
     static bool canUnitProduce(int id);
+    /**
+     * @return Can unit with id id mine minerals
+     **/
+    static bool canUnitMineMinerals(int id);
+    /**
+     * @return Can unit with id id mine oil
+     **/
+    static bool canUnitMineOil(int id);
 
     /**
      * @return List of unit types unit with id id can produce
