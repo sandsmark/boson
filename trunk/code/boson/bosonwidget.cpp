@@ -48,10 +48,12 @@
 
 #include "defines.h"
 
+#include <kapplication.h>
 #include <klocale.h>
 #include <kaction.h>
 #include <kdebug.h>
 #include <kmessagebox.h>
+#include <kconfig.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -1308,6 +1310,8 @@ void BosonWidget::initKeys(bool editor)
  if (editor) {
  } else {
  }
+ 
+ d->mActionCollection->readShortcutSettings(QString::null, kapp->config());
 }
 
 KActionCollection* BosonWidget::actionCollection() const
