@@ -386,16 +386,18 @@ void Unit::advanceNone(unsigned int advanceCount)
 				}
 			}
 			if(u) {
-				float rot = rotationToPoint(u->x() - x(), u->y() - y());
-				if(rot < rotation() - 5 || rot > rotation() + 5) {
-					// Rotate to face target
-					if(QABS(rotation() - rot) > (2 * speed())) {
-						turnTo((int)rot);
-						setAdvanceWork(WorkTurn);
-						return;
-					} else {
-						// If we can get wanted rotation with only little turning, then we don't call turnTo()
-						setRotation(rot);
+				if(isMobile()) {
+					float rot = rotationToPoint(u->x() - x(), u->y() - y());
+					if(rot < rotation() - 5 || rot > rotation() + 5) {
+						// Rotate to face target
+						if(QABS(rotation() - rot) > (2 * speed())) {
+							turnTo((int)rot);
+							setAdvanceWork(WorkTurn);
+							return;
+						} else {
+							// If we can get wanted rotation with only little turning, then we don't call turnTo()
+							setRotation(rot);
+						}
 					}
 				}
 				shootAt(w, u);
