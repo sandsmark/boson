@@ -90,15 +90,13 @@ for(j=0; j<12; j++) {
 mobSprite[index] = new QwSpritePixmapSequence(pix_l, point_l);
 
 /* big overview */
-mobBigOverview[index] = new QPixmap(path + "/overview.big.bmp");
-if (mobBigOverview[index]->isNull()) {
+if (!loadPixmap(path + "/overview.big.bmp", &mobBigOverview[index], false)) {
 	logf(LOG_ERROR, "SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.bmp"));
 	return false;
 	}
 
 /* small overview */
-mobSmallOverview[index] = new QPixmap(path + "/overview.small.bmp");
-if (mobSmallOverview[index]->isNull()) {
+if (!loadPixmap(path + "/overview.small.bmp", &mobSmallOverview[index], false)) {
 	logf(LOG_ERROR, "SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.small.bmp"));
 	return false;
 	}
@@ -109,17 +107,15 @@ return true;
 
 
 
-bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix)
+bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix, bool withMask)
 {
 	QImage	image(path), *mask;
 	QBitmap	*m;
 	int	x, y, w, h;
     	uchar	*yp;
 	QRgb	*p;
-	QRgb	background  = qRgb(255,  0, 255) & RGB_MASK ;
-	QRgb	background2 = qRgb(248, 40, 240) & RGB_MASK ;
-	QRgb	team_mask   = qRgb(255, 16,  16) & RGB_MASK;
-	QRgb	team_mask2  = qRgb(248,  0,   0) & RGB_MASK;
+	static const QRgb background  = qRgb(255,  0, 255) & RGB_MASK ;
+	static const QRgb background2 = qRgb(248, 40, 240) & RGB_MASK ;
 
 
 	
@@ -133,47 +129,52 @@ bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix)
 	if (image.isNull() || w < 32 || h < 32) 
 		return false;
 	
-	mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
-	boAssert ( ! mask->isNull() );
-	mask->setColor( 0, 0xffffff );
-	mask->setColor( 1, 0 );
-	mask->fill(0xff); 
+	
+	if (withMask) {
+		mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
+		boAssert ( ! mask->isNull() );
+		mask->setColor( 0, 0xffffff );
+		mask->setColor( 1, 0 );
+		mask->fill(0xff); 
+	}
 	
 	
 
-	for ( y = 0; y < h; y++ ) {
-		yp = mask->scanLine(y);	// mask
-		p  = (QRgb *)image.scanLine(y);	// image
-		for ( x = 0; x < w; x++, p++ ) {
-			if ( (*p & 0x00fff0ff) == background ) {// set transparent 
-				*(yp + (x >> 3)) &= ~(1 << (x & 7));
-				continue;
+	if (withMask)
+		for ( y = 0; y < h; y++ ) {
+			yp = mask->scanLine(y);	// mask
+			p  = (QRgb *)image.scanLine(y);	// image
+			for ( x = 0; x < w; x++, p++ ) {
+				if ( (*p & 0x00fff0ff) == background ) {// set transparent 
+					*(yp + (x >> 3)) &= ~(1 << (x & 7));
+					continue;
+				}
+				if ( (*p & 0x00f8f8f8) == background2) {// set transparent 
+					*(yp + (x >> 3)) &= ~(1 << (x & 7));
+					continue;
+				}
+				if ( (qRed(*p) > 0x80) && (qGreen(*p) < 0x70) && (qBlue(*p) < 0x70))
+					*p = team_color;
 			}
-			if ( (*p & 0x00f8f8f8) == background2) {// set transparent 
-				*(yp + (x >> 3)) &= ~(1 << (x & 7));
-				continue;
-			}
-			if ( (*p & 0x00fff8f8) == team_mask ) {// set team color
-				*p = team_color;
-				puts("bof");
-				continue;
-			}
-			if ( (*p & 0x00f8f8f8) == team_mask2) {// set team color
-				*p = team_color;
-				continue;
-			}
-			if ( (qRed(*p) > 0x80) && (qGreen(*p) < 0x70) && (qBlue(*p) < 0x70))
-				*p = team_color;
 		}
-	}
+	else
+		for ( y = 0; y < h; y++ ) {
+			p  = (QRgb *)image.scanLine(y);	// image
+			for ( x = 0; x < w; x++, p++ )
+				if ( (qRed(*p) > 0x90) && (qGreen(*p) < 0x60) && (qBlue(*p) < 0x60))
+					*p = team_color;
+		}
 
 	*pix = new QPixmap;
 	m = new QBitmap;
 	(*pix)->convertFromImage(image);
-	m->convertFromImage(*mask);
-	(*pix)->setMask( *m );
+	
+	if (withMask) {
+		m->convertFromImage(*mask);
+		(*pix)->setMask( *m );
+		delete mask;
+	}
 
-	delete mask;
 
 	return true;
 }
@@ -206,14 +207,12 @@ for(j=0; j< CONSTRUCTION_STEP ; j++) {
 fixSprite[i] = new QwSpritePixmapSequence(pix_l, point_l);
 
 /* big overview */
-fixBigOverview[i] = new QPixmap(path + "/overview.big.bmp");
-if (fixBigOverview[i]->isNull()) {
+if (!loadPixmap(path + "/overview.big.bmp", &fixBigOverview[i], false)) {
 	logf(LOG_ERROR, "SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.bmp"));
 	return false;
 	}
 /* small overview */
-fixSmallOverview[i] = new QPixmap(path + "/overview.small.bmp");
-if (fixSmallOverview[i]->isNull()) {
+if (!loadPixmap(path + "/overview.small.bmp", &fixSmallOverview[i], false)) {
 	logf(LOG_ERROR, "SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.small.bmp"));
 	return false;
 	}
