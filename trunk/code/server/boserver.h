@@ -99,6 +99,9 @@ class BosonServer : public KTMainWindow, public boFile
   QIntDict<serverFacility>	facility;
 
   long		key;
+  
+  /* gui  */
+  	QLabel		*l_state, *l_connected;
 };
 
 #endif // BOSERVER_H
