@@ -550,7 +550,7 @@ void BosonBigDisplayBase::paintGL()
 	glDepthRange(1.0, 0.5);
  }
  d->mEvenFlag = !d->mEvenFlag;
- float elapsed = calcFPS();
+ calcFPS();
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
@@ -674,7 +674,6 @@ void BosonBigDisplayBase::paintGL()
 
  // Render particle systems
  boProfiling->renderParticles(true);
- canvas()->updateParticleSystems(elapsed); // this sucks. we should use advance calls, i.e. the number of advance calls elapsed.
  int count = canvas()->particleSystemsCount();
  if (count > 0) {
 	glEnable(GL_BLEND);
