@@ -165,7 +165,6 @@ bool BosonFileConverter::convertMapFile_From_0_8_128_To_0_9(const QByteArray& ma
 	*mapHeight = height;
  }
  *mapXML = doc.toCString();
-// *mapXML = doc.toString().local8Bit(); // by any reason toCString() and therefore toUtf8() causes problems with unexpected characters
  return true;
 }
 
