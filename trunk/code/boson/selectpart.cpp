@@ -88,30 +88,17 @@ int SelectPart::frames()
 /*
  *  Drawing functions
  */
-void SelectPart::drawSelectBox(QPainter &painter, bool mask, int frame)
+void SelectPart::drawSelectBox(QPainter &painter, bool mask)
 {
 // int len = 2 * ( PART_NB - 1 - power );
 
  if (mask) {
-	// "scrollbar" - or rather "health bar"
-	painter.fillRect(0, 0, barWidth(frame), barHeight(), Qt::color1);
-
 	// selection corner
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
 			SP_CORNER_LEN, SP_THICK, Qt::color1);
 	painter.fillRect(SP_W - SP_THICK, SP_CORNER_POS,
 			SP_THICK, SP_CORNER_LEN, Qt::color1);
  } else {
-	// read rendering 
-	// "scrollbar" - or rather "health bar"
-	int a = barWidth(0); // why is this hack necessary????
-	KPixmap pix(QPixmap(a, barHeight())); 
-//	KPixmap pix(QPixmap(barWidth(0), barHeight())); // not working by any reason
-	pix.fill(Qt::green);
-	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
-			KPixmapEffect::HorizontalGradient);
-	painter.drawPixmap(0, 0, pix);
-
 	// selection corner 
 	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
 			SP_CORNER_LEN, SP_THICK, Qt::white);
@@ -119,6 +106,23 @@ void SelectPart::drawSelectBox(QPainter &painter, bool mask, int frame)
 			SP_THICK, SP_CORNER_LEN, Qt::white);
  }
 }
+
+void SelectPart::drawHealthBox(QPainter &painter, bool mask, int frame)
+{
+ if (mask) {
+	// "scrollbar" - or rather "health bar"
+	painter.fillRect(0, 0, barWidth(frame), barHeight(), Qt::color1);
+ } else {
+	// "scrollbar" - or rather "health bar"
+//	KPixmap pix(QPixmap(barWidth(3), barHeight())); // not working by any reason
+	KPixmap pix(QPixmap((int)barWidth(frames() - 1), barHeight()));
+	pix.fill(Qt::green);
+	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
+			KPixmapEffect::HorizontalGradient);
+	painter.drawPixmap(0, 0, pix);
+ }
+}
+
 
 
 QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
@@ -132,22 +136,28 @@ QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
 	// generate the mask first
 	QBitmap mask (SP_W, SP_H);
 	painter.begin(&mask);
-	if (SelectPart::PartDown == type) {
+	if (type == PartDown) {
 		painter.rotate(180);
 		painter.translate(-SP_W + 1, -SP_H + 1);
 	}
 	mask.fill(Qt::color0);
-	drawSelectBox(painter, true, i);
+	drawSelectBox(painter, true);
+	if (type == PartUp) {
+		drawHealthBox(painter, true, i);
+	}
 	painter.end();
 
 	// now draw the pixmap
 	painter.begin(&pix);
-	if (SelectPart::PartDown == type) {
+	if (type == PartDown) {
 		painter.rotate(180);
 		painter.translate(-SP_W + 1, -SP_H + 1);
 	}
 	pix.fill(Qt::white);
-	drawSelectBox(painter, false, i);
+	drawSelectBox(painter, false);
+	if (type == PartUp) {
+		drawHealthBox(painter, false, i);
+	}
 	painter.end();
 
 	// merge results 
@@ -180,3 +190,4 @@ int SelectPart::barWidth(int frame)
 {
  return SP_W - 2 * (PART_NB - 1 - frame);
 }
+
