@@ -2,7 +2,7 @@
 IsFacility=false
 TerrainType=0
 Name=Tank
-Id=10001
+Id=10005
 Health=100
 MineralCost=100
 Range=100
