@@ -27,7 +27,7 @@
 	GROUND_GRASS,
 	GROUND_DESERT,
 
-	GROUND_WATER_OIL,
+	GROUND_GRASS_MINERAL,
 	GROUND_GRASS_OIL,
 */
 
@@ -37,7 +37,7 @@ const groundProperties_t groundProp[] = {
 	{"water", },
 	{"grass", },
 	{"desert", },
-	{"water_oil", },
+	{"grass_mineral", },
 	{"grass_oil", },
 	};		// XXX this one could be moved to  map/createGround.cpp
 

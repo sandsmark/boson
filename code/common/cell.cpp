@@ -67,11 +67,12 @@ bool Cell::canGoOnGround( groundType g, uint goFlag)
 		//	printf("deep water\n");
 			return goFlag & BO_GO_DEEP_WATER;
 		case GROUND_WATER:
-		case GROUND_WATER_OIL:
+//		case GROUND_WATER_OIL:
 		//	printf("water\n");
 			return goFlag & BO_GO_WATER;
 		case GROUND_GRASS:
 		case GROUND_GRASS_OIL:
+		case GROUND_GRASS_MINERAL:
 		//	printf("grass\n");
 			return goFlag & BO_GO_GRASS;
 		case GROUND_DESERT:
