@@ -137,7 +137,7 @@ bool BosonPropertyXML::saveAsXML(QDomElement& root, const KGamePropertyHandler* 
 	element.appendChild(doc.createTextNode(value));
 	root.appendChild(element);
  }
- return doc.toString();
+ return true;
 }
 
 bool BosonPropertyXML::loadFromXML(const QDomElement& root, KGamePropertyHandler* dataHandler)
