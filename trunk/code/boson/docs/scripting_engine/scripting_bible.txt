@@ -66,7 +66,7 @@ triggers and events will be written and a usable ai can be developed.
 1a) Contact information
 
 The website for the Boson project is:
-http://boson.sf.net
+http://boson.sourceforge.net
 
 This documented is located in the CVS repository under code/boson/docs/scripting_engine
 
