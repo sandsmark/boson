@@ -32,6 +32,7 @@
 #include "global.h"
 #include "upgradeproperties.h"
 #include "bosonprofiling.h"
+#include "bofile.h"
 #include "bodebug.h"
 #include "bosonpropertyxml.h"
 #include "startupwidgets/bosonloadingwidget.h"
@@ -1728,6 +1729,7 @@ bool Boson::saveToFile(const QString& file)
 	return false;
  }
 
+
  // we store the map as binary. XML would take a lot of space and time to save
  // and load.
  QByteArray map;
@@ -1735,16 +1737,20 @@ bool Boson::saveToFile(const QString& file)
  d->mPlayField->saveMap(stream);
  d->mPlayField->saveDescription(stream);
 
- // TODO: write a class similar to our .bpf files (i.e. a .tar.gz file).
- // for testing we just stream the data
- QFile f(file);
- f.open(IO_WriteOnly);
- QDataStream s(&f);
- s << kgameXML;
- s << playersXML;
- s << map;
-// bool ok = save(s, true);
- f.close();
+ BSGFile f(file, false);
+ if (!f.writeFile(QString::fromLatin1("kgame.xml"), kgameXML)) {
+	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("players.xml"), playersXML)) {
+	boError() << k_funcinfo << "Could not write players.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("map"), map)) {
+	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+
  return true;
 }
 
@@ -1806,18 +1812,19 @@ QString Boson::savePlayersAsXML()
 bool Boson::loadFromFile(const QString& file)
 {
  boDebug(260) << k_funcinfo << endl;
- // FIXME: for testing we are just streaming the values. we should use a .tar.gz file.
+ BSGFile f(file, true);
+ if (!f.checkTar()) {
+	boError(260) << k_funcinfo << "Could not load from " << file << endl;
+	return false;
+ }
  QString kgameXML;
  QString playersXML;
  QByteArray map;
 
- QFile f(file);
- f.open(IO_ReadOnly);
- QDataStream s(&f);
- s >> kgameXML;
- s >> playersXML;
- s >> map;
- f.close();
+ kgameXML = QString(f.kgameData());
+ playersXML = QString(f.playersData());
+ map = f.mapData();
+
  if (kgameXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
 	return false;

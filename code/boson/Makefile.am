@@ -63,8 +63,8 @@ BOSON_SRC = \
 	bosonparticlesystem.cpp \
 	bosonparticlesystemproperties.cpp \
 	bosonstarting.cpp \
+	bofile.cpp \
 	bpfdescription.cpp \
-	bpffile.cpp \
 	bosonweapon.cpp \
 	bpfdescriptiondialog.cpp \
 	bosonbigdisplayinputbase.cpp \

@@ -22,8 +22,8 @@
 #include "../bosonmap.h"
 #include "../bosonscenario.h"
 #include "bodebug.h"
+#include "bofile.h"
 #include "bpfdescription.h"
-#include "bpffile.h"
 #include "../defines.h"
 
 #include <qdom.h>
@@ -224,7 +224,6 @@ bool BosonPlayField::loadPlayField(const QString& file)
 	boError() << k_funcinfo << "Error loading map from " << file << endl;
 	return false;
  }
- mFile->close();
  delete mFile;
  mFile = 0;
  mLoaded = true;
@@ -373,27 +372,14 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  }
  boDebug() << k_funcinfo << "Save height map done" << endl;
 
- QString topDir = fileInfo.fileName();
- if (topDir.right(7) == QString::fromLatin1(".tar.gz")) {
-	// might be the case for debugging
-	topDir = topDir.left(topDir.length() - 7);
- }
- if (topDir.findRev('.') > 0) {
-	topDir.truncate(topDir.findRev('.'));
- }
-
- BPFFile* f = new BPFFile(fileName, false);
- QString user = f->directory()->user();
- QString group = f->directory()->group();
- f->writeFile(QString::fromLatin1("%1/map").arg(topDir), user, group, map.size(), map);
- f->writeFile(QString::fromLatin1("%1/scenario.xml").arg(topDir), user, group, scenario.length(), scenario.data());
- f->writeFile(QString::fromLatin1("%1/heightmap.png").arg(topDir), user, group, heightMap.size(), heightMap.data());
- f->writeFile(QString::fromLatin1("%1/%2/description.xml").arg(topDir).arg(QString::fromLatin1("C")), user, group, description.length(), description.data());
+ BPFFile f(fileName, false);
+ f.writeFile(QString::fromLatin1("map"), map);
+ f.writeFile(QString::fromLatin1("scenario.xml"), scenario);
+ f.writeFile(QString::fromLatin1("heightmap.png"), heightMap);
+ f.writeFile(QString::fromLatin1("description.xml"), description, QString::fromLatin1("C"));
 
  mMap->setModified(false);
  mScenario->setModified(false);
- f->close();
- delete f;
  return true;
 }
 
