@@ -1871,7 +1871,7 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return 0;
  }
- Unit* unit = (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, p, unitType);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, unitType);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;
@@ -1900,7 +1900,7 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	boError() << k_funcinfo << "Received invalid XML file from server!!!! (very bad)" << endl;
 	return 0;
  }
- Unit* unit = (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, p, unitType);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, unitType);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
 	return 0;

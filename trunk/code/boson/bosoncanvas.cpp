@@ -740,7 +740,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
-		BosonShotExplosion* e = (BosonShotExplosion*)createItem(RTTI::Shot, unit->owner(), BosonShot::Explosion, 0, 0);
+		BosonShotExplosion* e = (BosonShotExplosion*)createNewItem(RTTI::Shot, unit->owner(), BosonShot::Explosion, 0, 0);
 		// Do we want ability to set fullDamageRange here?
 		if (e) {
 			e->activate(pos, prop->explodingDamage(), prop->explodingDamageRange(), 0.0f, 10);
@@ -748,7 +748,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	}
 	// Add explosion fragments
 	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
-		BosonShotFragment* f = (BosonShotFragment*)createItem(RTTI::Shot, unit->owner(), BosonShot::Fragment, 0, 0);
+		BosonShotFragment* f = (BosonShotFragment*)createNewItem(RTTI::Shot, unit->owner(), BosonShot::Fragment, 0, 0);
 		if (f) {
 			f->activate(pos, unit->unitProperties());
 		}
@@ -1153,7 +1153,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 	}
 
 	// Create unit with Boson
-	Unit* u = boGame->loadUnit(type, owner);
+	Unit* u = boGame->loadUnit1(type, owner);
 
 	// Set additional properties
 	owner->addUnit(u, dataHandlerId);
@@ -1168,7 +1168,7 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 
 	return true;
  } else if (RTTI::isShot(rtti)) {
-	BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, type, group, groupType);
+	BosonShot* s = (BosonShot*)createNewItem(RTTI::Shot, owner, type, group, groupType);
 	if (!s) {
 		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
 		return false;
@@ -1299,6 +1299,36 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
+BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, unsigned long int type, unsigned long int group, unsigned long int groupType)
+{
+ BosonItem* item = createItem(rtti, owner, type, group, groupType);
+ if (!item) {
+	return 0;
+ }
+ if (RTTI::isUnit(item->rtti())) {
+	Unit* unit = (Unit*)item;
+	if (unit->owner() != owner) {
+		boError() << k_funcinfo << "unexpected owner for new unit" << endl;
+		return item;
+	}
+	owner->addUnit(unit);
+	SpeciesTheme* theme = owner->speciesTheme();
+	if (!theme) {
+		boError() << k_funcinfo << "NULL speciesTheme" << endl;
+		return item;
+	}
+	theme->loadNewUnit(unit);
+	unit->setAnimationMode(UnitAnimationIdle);
+	if (unit->isFlying()) {
+//		unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
+		unit->moveBy(0.0f, 0.0f, 2.0);
+	}
+ }
+
+
+ return item;
+}
+
 BosonItem* BosonCanvas::createItem(int rtti, Player* owner, unsigned long int type, unsigned long int group, unsigned long int groupType)
 {
  if (RTTI::isUnit(rtti)) {
@@ -1332,14 +1362,6 @@ Unit* BosonCanvas::createUnit(Player* owner, unsigned long int unitType)
 	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
- owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
- theme->loadNewUnit(unit);
- unit->setAnimationMode(UnitAnimationIdle);
- if (unit->isFlying()) {
-//	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
-	unit->moveBy(0.0f, 0.0f, 2.0);
- }
-
  return unit;
 }
 
