@@ -23,11 +23,12 @@
 #include "bodebug.h"
 
 Cell::Cell()
-	: mItems(BoItemList(2, false))
+	: mType(GroundUnknown),
+	mVersion(0),
+	mX(0),
+	mY(0),
+	mItems(BoItemList(2, false))
 {
- setGroundType(GroundUnknown);
- mX = 0;
- mY = 0;
 }
 
 Cell::~Cell()
