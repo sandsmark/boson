@@ -61,6 +61,7 @@ public:
 	{
 		mSelectionMode = BosonBigDisplay::SelectNone;
 		mIsSelecting = false;
+		mIsRMBMove = false;
 
 		mLocalPlayer = 0;
 	}
@@ -70,6 +71,8 @@ public:
 	QPoint mSelectionStart;
 	QPoint mSelectionEnd;
 	bool mIsSelecting;
+	bool mIsRMBMove;
+	QPoint mRMBMove; // position where RMB move started
 
 	Player* mLocalPlayer;
 
@@ -119,6 +122,20 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
 			removeSelectionRect();
+		} else if (e->button() == RightButton) {
+			if (d->mIsRMBMove) {
+				d->mIsRMBMove = false;
+			} else {
+			 	// AB: is *eatevent the correct parameter? KGame should
+				// *not* send the stream if this is false!
+				bool send = false;
+				// pos must be viewportToContents'ed and mapped using
+				// the inverse matrix!
+			 	actionClicked(pos, stream, send);
+				if (send) {
+					*eatevent = true;
+				}
+			}
 		}
 		e->accept();
 		break;
@@ -126,6 +143,10 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 	{
 		if (e->state() & LeftButton) {
 			moveSelectionRect(pos);
+		} else if (e->state() & RightButton) {
+			d->mIsRMBMove = true;
+			scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
+			d->mRMBMove = pos;
 		} else if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
 			if (selection().count() == 0) {
 				kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
@@ -153,20 +174,12 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 	case QEvent::MouseButtonPress:
 		if (e->button() == LeftButton) {
 			startSelection(pos);
-		} else if (e->button() == RightButton) {
-		 	// AB: is *eatevent the correct parameter? KGame should
-			// *not* send the stream if this is false!
-			bool send = false;
-			// pos must be viewportToContents'ed and mapped using
-			// the inverse matrix!
-		 	actionClicked(pos, stream, send);
-			if (send) {
-				*eatevent = true;
-			}
 		} else if (e->button() == MidButton) {
 			center(pos.x(), pos.y());
+		} else if (e->button() == RightButton) {
+			d->mRMBMove = pos;
 		}
-//		e->accept();
+		e->accept();
 		break;
 	default:
 		kdWarning() << "unexpected mouse event " << e->type() << endl;
@@ -429,28 +442,39 @@ void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
 			removeSelectionRect();
+		} else if (e->button() == RightButton) {
+			if (d->mIsRMBMove) {
+				d->mIsRMBMove = false;
+			} else {
+				editorActionClicked(pos);
+			}
 		}
 		break;
 	case QEvent::MouseMove:
 	{
 		if (e->state() & LeftButton) {
 			moveSelectionRect(pos);
+		} else if (e->state() & RightButton) {
+			d->mIsRMBMove = true;
+			scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
+			d->mRMBMove = pos;
 		}
 		break;
 	}
 	case QEvent::MouseButtonPress:
 		if (e->button() == LeftButton) {
 			startSelection(pos);
-		} else if (e->button() == RightButton) {
-			editorActionClicked(pos);
 		} else if (e->button() == MidButton) {
 			center(pos.x(), pos.y());
+		} else if (e->button() == RightButton) {
+			d->mRMBMove = pos;
 		}
 		break;
 	default:
 		kdWarning() << "unexpected mouse event " << e->type() << endl;
 		break;
  }
+ e->accept();
 }
 
 void BosonBigDisplay::editorActionClicked(const QPoint& pos)
