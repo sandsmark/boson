@@ -41,6 +41,8 @@
 #include <qdom.h>
 #include <qstringlist.h>
 
+#include <math.h>
+
 UnitPlugin::UnitPlugin(Unit* unit)
 {
  mUnit = unit;
@@ -450,8 +452,8 @@ HarvesterPlugin::HarvesterPlugin(Unit* unit)
  unit->registerData(&mResourcesY, Unit::IdResourcesY);
  unit->registerData(&mHarvestingType, Unit::IdHarvestingType);
  mResourcesMined.setLocal(0);
- mResourcesX.setLocal(0);
- mResourcesY.setLocal(0);
+ mResourcesX.setLocal(0); // obsolete
+ mResourcesY.setLocal(0); // obsolete
  mHarvestingType.setLocal(0);
 
  mRefinery = 0;
@@ -525,14 +527,14 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool HarvesterPlugin::canMine(Unit* unit) const
+bool HarvesterPlugin::canMine(const Unit* unit) const
 {
  if (!unit) {
 	return false;
  }
  return canMine((ResourceMinePlugin*)unit->plugin(UnitPlugin::ResourceMine));
 }
-bool HarvesterPlugin::canMine(ResourceMinePlugin* p) const
+bool HarvesterPlugin::canMine(const ResourceMinePlugin* p) const
 {
  if (!p) {
 	return false;
@@ -551,14 +553,59 @@ bool HarvesterPlugin::canMine(ResourceMinePlugin* p) const
  return false;
 }
 
-bool HarvesterPlugin::canMine(Cell* cell) const
+bool HarvesterPlugin::isAtResourceMine() const
 {
+ if (!mResourceMine) {
+	return false;
+ }
+ if (!mResourceMine->unit()) {
+	BO_NULL_ERROR(mResourceMine->unit());
+	return false;
+ }
+ return isNextTo(mResourceMine->unit());
+}
+
+bool HarvesterPlugin::isAtRefinery() const
+{
+ if (!mRefinery) {
+	return false;
+ }
+ return isNextTo(mRefinery);
+}
+
+bool HarvesterPlugin::isNextTo(const Unit* u) const
+{
+ // warning: we measure center of _this_ unit to center of the other unit only.
+ // this will cause problems for units that occupy multiple cells (e.g.
+ // refineries)
+ if (!u) {
+	return false;
+ }
+ if (!unit()) {
+	BO_NULL_ERROR(unit());
+	return false;
+ }
+ float distx;
+ float disty;
+ if (u->x() < (unit()->x() + unit()->width()) && (u->x() + u->width()) > unit()->x()) {
+	distx = 0.0f;
+ } else {
+	distx = fminf(fabsf(u->x() - (unit()->x() + unit()->width())), fabsf((u->x() + u->width()) - unit()->x()));
+ }
+ if (u->y() < (unit()->y() + unit()->height()) && (u->y() + u->height()) > unit()->y()) {
+	disty = 0.0f;
+ } else {
+	disty = fminf(fabsf(u->y() - (unit()->y() + unit()->height())), fabsf((u->y() + u->height()) - unit()->y()));
+ }
+ if (distx * distx + disty * disty < BO_TILE_SIZE * BO_TILE_SIZE) {
+	return true;
+ }
  return false;
 }
 
-
 void HarvesterPlugin::advanceMine()
 {
+ boDebug() << k_funcinfo << endl;
  const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
 	boError() << k_funcinfo << "NULL harvester properties" << endl;
@@ -567,41 +614,50 @@ void HarvesterPlugin::advanceMine()
  }
  if (!canMine(mResourceMine)) {
 	// TODO: search a new resource mine
-	boDebug() << k_funcinfo << "cannot mine there" << endl;
+	QString mineId = "no id";
+	if (mResourceMine && mResourceMine->unit()) {
+		mineId = QString::number(mResourceMine->unit()->id());
+	}
+	boDebug() << k_funcinfo << "cannot mine at " << mResourceMine << " (" << mineId << ")" << endl;
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
 
+ BO_CHECK_NULL_RET(mResourceMine);
+ BO_CHECK_NULL_RET(mResourceMine->unit());
+
  // Check if unit is at mining location. If not, go there
- if ((mResourcesX / BO_TILE_SIZE != unit()->x() / BO_TILE_SIZE) || (mResourcesY / BO_TILE_SIZE != unit()->y() / BO_TILE_SIZE)) {
-	unit()->moveTo(mResourcesX, mResourcesY);
+ if (!isAtResourceMine()) {
+	Unit* u = mResourceMine->unit();
+	unit()->moveTo(u->x(), u->y(), 1);
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
- // Check if we should harvest more
- if (resourcesMined() < prop->maxResources()) {
-	if (canMine(canvas()->cellAt(unit()))) {
-		// How much more to harvest
-		const int step = (resourcesMined() + miningSpeed() <= prop->maxResources()) ? miningSpeed() : prop->maxResources() - resourcesMined();
-		mResourcesMined = resourcesMined() + step;
-		if (prop->canMineMinerals()) {
-			player()->statistics()->increaseMinedMinerals(step);
-		} else if (prop->canMineOil()) {
-			player()->statistics()->increaseMinedOil(step);
-		}
-		boDebug() << k_funcinfo << "resources mined: " << resourcesMined() << endl;
-	} else {
-		// This unit cannot mine at this cell
-		boDebug() << k_funcinfo << "cannot mine here" << endl;
-		unit()->setWork(Unit::WorkNone);
-		unit()->setAdvanceWork(Unit::WorkNone);
-		return;
-	}
- } else {
+ if (resourcesMined() >= prop->maxResources()) {
 	// Back to refinery
 	boDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
 	mHarvestingType = 2; // refining
+	return;
  }
+ unsigned int mined = 0;
+ if (canMineMinerals() && mResourceMine->canProvideMinerals()) {
+	mined = mResourceMine->mineMinerals(this);
+	player()->statistics()->increaseMinedMinerals(mined);
+ } else if (canMineOil() && mResourceMine->canProvideOil()) {
+	mined = mResourceMine->mineOil(this);
+	player()->statistics()->increaseMinedOil(mined);
+ } else {
+	boError() << k_funcinfo << "oops - cannot mine here?!" << endl;
+	mined = 0;
+ }
+ if (resourcesMined() + mined > prop->maxResources()) {
+	// any additional resources are lost now, not even another harvester can
+	// get them (intended).
+	// cannot happen anyway.
+	mined = prop->maxResources() - resourcesMined();
+ }
+ mResourcesMined = resourcesMined() + mined;
+ boDebug() << k_funcinfo << "resources mined: " << resourcesMined() << endl;
 }
 
 void HarvesterPlugin::advanceRefine()
@@ -690,16 +746,19 @@ void HarvesterPlugin::advanceRefine()
  }
 }
 
-void HarvesterPlugin::mineAt(const ResourceMinePlugin* resource)
+void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
 {
  //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
  boDebug() << k_funcinfo << endl;
- QPoint pos((int)resource->unit()->x(), (int)resource->unit()->y());
- unit()->moveTo(pos);
+ BO_CHECK_NULL_RET(resource);
+ BO_CHECK_NULL_RET(resource->unit());
+ BO_CHECK_NULL_RET(unit());
+ unit()->moveTo(resource->unit()->x(), resource->unit()->y(), 1);
  unit()->setPluginWork(UnitPlugin::Harvester);
  unit()->setAdvanceWork(Unit::WorkMove);
- mResourcesX = pos.x();
- mResourcesY = pos.y();
+ mResourceMine = resource;
+// mResourcesX = pos.x();
+// mResourcesY = pos.y();
 
  mHarvestingType = 1;
  mRefinery = 0;  // we'll search the closest refinery after mining
@@ -748,6 +807,7 @@ bool HarvesterPlugin::canMineMinerals() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
+	BO_NULL_ERROR(prop);
 	return false;
  }
  return prop->canMineMinerals();
@@ -757,6 +817,7 @@ bool HarvesterPlugin::canMineOil() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
+	BO_NULL_ERROR(prop);
 	return false;
  }
  return prop->canMineOil();
@@ -766,6 +827,7 @@ unsigned int HarvesterPlugin::maxResources() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
+	BO_NULL_ERROR(prop);
 	return 0;
  }
  return prop->maxResources();
@@ -775,6 +837,7 @@ unsigned int HarvesterPlugin::miningSpeed() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
+	BO_NULL_ERROR(prop);
 	return 0;
  }
  return prop->miningSpeed();
@@ -784,6 +847,7 @@ unsigned int HarvesterPlugin::unloadingSpeed() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
  if (!prop) {
+	BO_NULL_ERROR(prop);
 	return 0;
  }
  return prop->unloadingSpeed();
@@ -1134,6 +1198,56 @@ bool ResourceMinePlugin::canProvideOil() const
 	return false;
  }
  return prop->canProvideOil();
+}
+
+unsigned int ResourceMinePlugin::mineMinerals(const HarvesterPlugin* harvester)
+{
+ if (!harvester) {
+	BO_NULL_ERROR(harvester);
+	return 0;
+ }
+ if (!canProvideMinerals()) {
+	boDebug() << k_funcinfo << "no minerals available. sorry." << endl;
+	return 0;
+ }
+
+ return mineStep(harvester, minerals());
+}
+
+unsigned int ResourceMinePlugin::mineOil(const HarvesterPlugin* harvester)
+{
+ if (!harvester) {
+	BO_NULL_ERROR(harvester);
+	return 0;
+ }
+ if (!canProvideOil()) {
+	boDebug() << k_funcinfo << "no oil available. sorry." << endl;
+	return 0;
+ }
+
+ return mineStep(harvester, oil());
+}
+
+unsigned int ResourceMinePlugin::mineStep(const HarvesterPlugin* harvester, int resourcesAvailable) const
+{
+ if (!harvester) {
+	BO_NULL_ERROR(harvester);
+	return 0;
+ }
+ int maxCapacity = QMAX((int)harvester->maxResources() - (int)harvester->resourcesMined(), 0);
+ int maxAvailable = resourcesAvailable;
+ if (resourcesAvailable < 0) {
+	// infinite resources
+	maxAvailable = maxCapacity;
+ }
+ int step = harvester->miningSpeed();
+ if (step > maxAvailable) {
+	step = maxAvailable;
+ }
+ if (step > maxCapacity) {
+	step = maxCapacity;
+ }
+ return step;
 }
 
 void ResourceMinePlugin::setMinerals(int m)
