@@ -2523,6 +2523,7 @@ void MobileUnit::newPath()
  // FIXME: remove this, Unit::newPath() seems to be enough
  Unit::newPath();
 #else
+ Unit::newPath();
  d->mPathAge = 0;
  setSearchPath(0);
 #endif
