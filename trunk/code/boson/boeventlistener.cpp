@@ -74,19 +74,25 @@ bool BoEventListener::addCondition(BoCondition* c)
 
 bool BoEventListener::save(QDomElement& root) const
 {
- return saveConditions(root);
+ QDomDocument doc = root.ownerDocument();
+ QDomElement conditions = doc.createElement("Conditions");
+ root.appendChild(conditions);
+ return saveConditions(conditions);
 }
 
 bool BoEventListener::load(const QDomElement& root)
 {
- return loadConditions(root);
+ QDomElement conditions = root.namedItem("Conditions").toElement();
+ if (conditions.isNull()) {
+	boError(360) << k_funcinfo << "No Conditions tag" << endl;
+	return false;
+ }
+ return loadConditions(conditions);
 }
 
 bool BoEventListener::saveConditions(QDomElement& root) const
 {
  QDomDocument doc = root.ownerDocument();
- QDomElement conditions = doc.createElement("Conditions");
- root.appendChild(conditions);
 
  QMap<int, int> playerId2Index;
  QPtrListIterator<KPlayer> playerIt(*boGame->playerList());
@@ -102,7 +108,7 @@ bool BoEventListener::saveConditions(QDomElement& root) const
 		boError(360) << k_funcinfo << "unable to save condition" << endl;
 		return false;
 	}
-	conditions.appendChild(e);
+	root.appendChild(e);
 	++it;
  }
  return true;
@@ -112,12 +118,7 @@ bool BoEventListener::loadConditions(const QDomElement& root)
 {
  boDebug(360) << k_funcinfo << endl;
  d->mConditions.clear();
- QDomElement conditions = root.namedItem("Conditions").toElement();
- if (conditions.isNull()) {
-	boError(360) << k_funcinfo << "No Conditions tag" << endl;
-	return false;
- }
- QDomNodeList list = conditions.elementsByTagName("Condition");
+ QDomNodeList list = root.elementsByTagName("Condition");
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	if (e.isNull()) {
