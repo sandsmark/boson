@@ -59,19 +59,16 @@ public:
 	 * go the save way).
 	 **/
 	enum PropertyIds {
-		// properties in UnitBase
-		IdHealth = KGamePropertyBase::IdUser + 0,
-		IdArmor = KGamePropertyBase::IdUser + 1,
-		IdShields = KGamePropertyBase::IdUser + 2,
-		IdShieldReloadCounter = KGamePropertyBase::IdUser + 3,
-		IdSightRange = KGamePropertyBase::IdUser + 5,
-		IdWork = KGamePropertyBase::IdUser + 10,
-		IdAdvanceWork = KGamePropertyBase::IdUser + 11,
-		IdMovingStatus = KGamePropertyBase::IdUser + 12,
-		IdDeletionTimer = KGamePropertyBase::IdUser + 15,
-
-		// last entry.
-		IdLast
+		// UnitBase uses IDs from 512 to 1023.
+		IdHealth = 512 + 0,
+		IdArmor = 512 + 1,
+		IdShields = 512 + 2,
+		IdShieldReloadCounter = 512 + 3,
+		IdSightRange = 512 + 5,
+		IdWork = 512 + 10,
+		IdAdvanceWork = 512 + 11,
+		IdMovingStatus = 512 + 12,
+		IdDeletionTimer = 512 + 15,
 	};
 
 	/**
