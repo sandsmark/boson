@@ -739,7 +739,7 @@ void BosonBigDisplayBase::paintGL()
 		if (w != 1.0 || h != 1.0 || depth != 1.0) {
 			glScalef(w, h, depth);
 		}
-		if(boConfig->alignSelectionBoxes()) {
+		if (boConfig->alignSelectionBoxes()) {
 			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 		}
 		glCallList(item->selectBox()->displayList());
