@@ -20,13 +20,15 @@
 #define __BOSONSCENARIO_H__
 
 #include <qstring.h>
-#include <qdatastream.h>
+#include <qptrlist.h>
 
 class UnitBase;
 class Boson;
 class Player;
-class QDomElement;
+
 class QStringList;
+class QIODevice;
+class QDomElement;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -54,7 +56,7 @@ public:
 	 **/
 	bool loadScenario(const QString& fileName);
 
-	bool saveScenario(const QString& fileName, bool binary = false);
+	bool saveScenario(const QString& fileName);
 	
 	/**
 	 * @return The (hardcoded) default map
@@ -83,33 +85,10 @@ protected:
 	void initPlayer(Boson* boson, int playerNumber);
 
 	/**
-	 * Save the scenario to the stream.
-	 **/
-	bool saveScenario(QDataStream& stream);
-
-	/**
 	 * Save the scenario as XML to dev
 	 **/
 	bool saveXMLScenario(QIODevice* dev);
 	
-	/**
-	 * Add unit to the game. See also @ref Boson::slotSendAddUnit
-	 **/
-	void addUnit(Boson* boson, Player* owner, int unitType, int x, int y);
-
-	/**
-	 * Read the magic string from stream.
-	 * @return TRUE if the magic string matches the expected value.
-	 * Otherwise FALSE (not a boson map file)
-	 **/
-	bool verifyScenario(QDataStream& stream); // TODO
-	bool loadScenarioSettings(QDataStream& stream);
-	bool loadPlayers(QDataStream& stream);
-
-	bool saveValidityHeader(QDataStream& stream);
-	bool saveScenarioSettings(QDataStream& stream);
-	bool savePlayers(QDataStream& stream);
-
 	bool saveScenarioSettings(QDomElement&);
 	bool savePlayers(QDomElement&);
 

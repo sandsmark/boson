@@ -154,12 +154,8 @@ BosonWidget::~BosonWidget()
 // QCanvas (->crash)
  delete d->mBoson;
  delete d->mCanvas;
- if (d->mMap) {
-	delete d->mMap;
- }
- if (d->mScenario) {
-	delete d->mScenario;
- }
+ delete d->mMap;
+ delete d->mScenario;
  
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
@@ -743,9 +739,7 @@ void BosonWidget::slotLoadScenario(const QString& scenario)
 	kdWarning() << k_funcinfo << ": not ADMIN" << endl;
 	return;
  }
- if (d->mScenario) {
-	delete d->mScenario;
- }
+ delete d->mScenario;
  d->mScenario = new BosonScenario;
  d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
  d->mBoson->setMinPlayers(d->mScenario->minPlayers());
@@ -820,7 +814,7 @@ void BosonWidget::slotEditorSaveScenario(const QString& fileName)
  }
  // TODO: let the user choose - binary or XML? XML is far better here. binary is
  // probably useless (scenario files are not that big).
- d->mScenario->saveScenario(fileName, false);
+ d->mScenario->saveScenario(fileName);
  setModified(false);
 }
 

@@ -22,9 +22,10 @@
 #include <kgame/kgame.h>
 
 class Player;
-class QCanvas;
 class Unit;
 class Facility;
+class QCanvas;
+class QDomElement;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -68,6 +69,11 @@ public:
 	 **/
 	bool buildProducedUnit(Facility* factory, int unitType, int x, int y);
 
+	/**
+	 * Behaves slightly similar to @ref slotSendAddUnit but this function
+	 * takes an xml document and you can add several units at once.
+	 **/
+	void sendAddUnits(const QString& xmlDocument, Player* owner);
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -178,6 +184,15 @@ protected:
 	 * is created immediately.
 	 **/
 	Unit* addUnit(int unitType, Player* owner, int x, int y);
+
+	/**
+	 * Create a unit from node. This behaves similar to the above function,
+	 * but you can specify <em>every</em> property in the node, not just
+	 * type and position. 
+	 *
+	 * This is used by @ref BosonScenario.
+	 **/
+	Unit* addUnit(QDomElement& node, Player* owner);
 
 protected slots:
 	/**
