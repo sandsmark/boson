@@ -171,6 +171,8 @@ void BosonCommandFrame::init()
 {
  d = new BosonCommandFramePrivate;
 
+ addUnitView();
+
  d->mUnitActions = new BoActionsWidget(unitActionsBox());
  unitActionsBox()->show();
 

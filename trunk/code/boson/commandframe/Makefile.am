@@ -7,7 +7,8 @@ COMMON_SRC = bosoncommandframebase.cpp \
 		bosonorderwidget.cpp \
 		bosonorderbutton.cpp \
 		bosonunitview.cpp
-EDITOR_SRC = editorcommandframe.cpp
+EDITOR_SRC = editorcommandframe.cpp \
+		editorunitconfigwidget.cpp
 GAME_SRC = bosoncommandframe.cpp \
 		boactionswidget.cpp
 
