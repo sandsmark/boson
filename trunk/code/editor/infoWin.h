@@ -26,6 +26,8 @@
 //#include <qintdict.h>
 //#include <playerUnit.h>
 
+#include "../common/groundType.h"
+
 class QPushButton;
 class QPixmap;
 class playerFacility;
@@ -34,6 +36,7 @@ class QWidgetStack;
 class QScrollView;
 //class visualBigDisplay;
 class QVBoxLayout;
+class QComboBox;
 
 #define ORDER_BUTTONS_NB  (8)
 
@@ -48,18 +51,41 @@ public:
 public slots:
 	void setSelected(QPixmap*);
 
+signals:
+	void setSelectedTile(groundType);
+
+private slots:
+	void setTransRef(int);
+	void setInverted(bool);
+	void setWhich(int);
+/* orzel : very ugly, but what the hell should I have used here ? */
+	void bc0(void) { handleButton(0); } // button clicked
+	void bc1(void) { handleButton(1); } // button clicked
+	void bc2(void) { handleButton(2); } // button clicked
+	void bc3(void) { handleButton(3); } // button clicked
+	void bc4(void) { handleButton(4); } // button clicked
+	void bc5(void) { handleButton(5); } // button clicked
+	void bc6(void) { handleButton(6); } // button clicked
+	void bc7(void) { handleButton(7); } // button clicked
+	void bc8(void) { handleButton(8); } // button clicked
+
 private:
+	void	redrawTiles(void);
+	void	handleButton(int);
+
 /* state view (for selected items) */
 	QWidgetStack	*stack;
 	QLabel		*view_one;
 	QScrollView	*view_many;
 	QPixmap		*view_none;
 
-private:
-//	visualBigDisplay	*field;
-
-/* GUI */
-	QPushButton	*orderButton[ORDER_BUTTONS_NB];
+/* tiles selection */
+	QComboBox	*qcb_transRef, *qcb_which;
+	QPushButton	*tiles[9];
+	QPushButton	*bigTiles[4];
+	bool		inverted;
+	int		trans;
+	int		which;
 };
 
 

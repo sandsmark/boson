@@ -63,8 +63,15 @@ bool editorField::load(QString filename)
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
 			boFile::load( c);
-			cells[i][j].set(c.getGroundType(), i, j);
-			cells[i][j].setFrame(c.getItem());
+			if (c.getGroundType() != GROUND_UNKNOWN) {
+				cells[i][j].set(c.getGroundType(), i, j);
+				cells[i][j].setFrame(c.getItem());
+			} else {
+				// orzel : ugly, should be handled a _lot_ more nicely
+				cells[i][j].set( GROUND_WATER, i, j);
+				cells[i][j].z( Z_INVISIBLE);
+				cells[i][j].set( GROUND_UNKNOWN);
+			}
 		}
 	
 	/* checking */
@@ -211,6 +218,59 @@ void editorField::destroyFixUnit(destroyedMsg_t &msg)
 */
 
 
+void editorField::deleteCell(int x, int y)
+{
+	groundType	oldg =  cells[x][y].getGroundType();
+	
+
+	/* deal with improper value */
+	if ( x<0 || y<0) return;
+
+// debugging recursive behaviour :-)
+//	static int i = 20;
+//	if (i--<0) exit(-1);
 
 
+//	printf ("deleting %d,%d\n", x, y);
+
+
+	/* actually delete the cell */
+	cells[x][y].set(GROUND_UNKNOWN);
+	cells[x][y].z( Z_INVISIBLE);
+
+	/* deal with big tiles */
+	if ( IS_BIG_TRANS( oldg )) {
+		/* sanity check */
+		if ( x+1>=maxX || y+1>=maxY) {
+			logf(LOG_ERROR, "deleteCell : out of bound big tile...");
+			return;
+		}
+		/* delte children */
+		deleteCell(x,y+1);
+		deleteCell(x+1,y);
+		deleteCell(x+1,y+1);
+	}
+	
+	/* deal with alread UNKNOWN tiles */
+	if ( GROUND_UNKNOWN == oldg ) {
+		if ( IS_BIG_TRANS (cells[x-1][y].getGroundType()) )
+			deleteCell(x-1,y);
+		else if ( IS_BIG_TRANS (cells[x][y-1].getGroundType()) )
+			deleteCell(x,y-1);
+		else if ( IS_BIG_TRANS (cells[x-1][y-1].getGroundType()) )
+			deleteCell(x-1,y-1);
+		return;
+	}
+}
+
+void editorField::setCell(int x, int y, groundType g )
+{
+//	printf ("setting %d,%d at %d\n", x, y, g);
+	if ( IS_BIG_TRANS(g) || IS_BIG_TRANS( cells[x][y].getGroundType() ) ) {
+		deleteCell(x,y+1);
+		deleteCell(x+1,y);
+		deleteCell(x+1,y+1);
+	}
+	cells[x][y].set(g);
+}
 

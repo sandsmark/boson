@@ -42,7 +42,7 @@ mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 
 		view = new visualView(field); // the view associated with this window
 		mini = new visualMiniDisplay(view, this);
-		mini->setFixedSize(200,200);
+		mini->setFixedSize(250,200);
 		leftLayout->addWidget(mini);
 
 		info = new infoWin(this, "infowin");
@@ -53,13 +53,15 @@ mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
 	big = new editorBigDisplay(view, this);
 	topLayout->addWidget(big,10);
 
+	connect (info, SIGNAL(setSelectedTile(groundType)), big, SLOT(setSelectedTile(groundType)));
+
 /* finish the stuff */
 //	leftLayout->addStretch(10);
 	topLayout->activate();
 }
 
 
-#define ARROW_KEY_STEP	2
+#define ARROW_KEY_STEP	1
 
 void mainView::keyReleaseEvent ( QKeyEvent * e )
 {
