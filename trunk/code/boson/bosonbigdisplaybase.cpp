@@ -1015,6 +1015,9 @@ void BosonBigDisplayBase::renderItems()
 
 void BosonBigDisplayBase::renderPlacementPreview()
 {
+ BO_CHECK_NULL_RET(displayInput());
+ BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(canvas()->map());
  if (!displayInput()->actionLocked()) {
 	return;
  }
@@ -1037,10 +1040,8 @@ void BosonBigDisplayBase::renderPlacementPreview()
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
 
-#warning FIXME: z value!
  bool modelPreview = d->mPlacementPreview.isModelPreview();
  bool groundPreview = d->mPlacementPreview.isGroundPreview();
- const float z = 0.1;
  QPoint pos(d->mPlacementPreview.canvasPos());
  int w = 0;
  int h = 0;
@@ -1062,6 +1063,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  }
  x /= BO_TILE_SIZE;
  y /= BO_TILE_SIZE;
+ const float z = canvas()->map()->cellAverageHeight((int)x, (int)y) + 0.1f;
  glTranslatef(x, -y, z);
  if (modelPreview) {
 	BoFrame* f = d->mPlacementPreview.model()->frame(0);
