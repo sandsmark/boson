@@ -130,6 +130,9 @@ public:
 	void loadUnitDone(unsigned long int typeId);
 
 	void render(bool start); // always call this first, before any other render*()
+	// note that you must NOT use nested calls of render*()! e.g.
+	// renderCells(true); renderUnits(true); renderUnits(false); renderCells(false);
+	// would *NOT* work!
 	void renderClear(bool start);
 	void renderCells(bool start);
 	void renderUnits(bool start, unsigned int number = 0);
