@@ -66,15 +66,74 @@ void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 		printf(", offset : %d,%d", xoffset, yoffset);
 #endif
 
-	if (_debug) { // draw a rectangle on top of that
+#define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )
+#define SETPIXEL2(x,y) \
+	SETPIXEL(2*(x), 2*(y));		\
+	SETPIXEL(2*(x)+1, 2*(y));	\
+	SETPIXEL(2*(x), 2*(y)+1);	\
+	SETPIXEL(2*(x)+1, 2*(y)+1)
+	if (_debug) {
+		// draw a rectangle on top of that
 		int i;
 		for(i=0; i< BO_TILE_SIZE; i++) {
-			p.setPixel( xoffset+ 0,			yoffset + i, 0x00ff0000 );
-			p.setPixel( xoffset+ BO_TILE_SIZE-1,	yoffset + i, 0x00ff0000 );
-			p.setPixel( xoffset+ i,			yoffset + 0, 0x00ff0000 );
-			p.setPixel( xoffset+ i,			yoffset + BO_TILE_SIZE-1, 0x00ff0000 );
+			SETPIXEL(0,i);
+			SETPIXEL(BO_TILE_SIZE-1,i);
+			SETPIXEL(i,0);
+			SETPIXEL(i,BO_TILE_SIZE-1);
+		}
+		// print the # version
+		switch(z%4) {
+			case 0:
+				SETPIXEL2(3,4);
+				SETPIXEL2(4,3);
+				SETPIXEL2(5,3);
+				SETPIXEL2(5,4);
+				SETPIXEL2(5,5);
+				SETPIXEL2(5,6);
+				SETPIXEL2(5,7);
+				break;
+			case 1:
+				SETPIXEL2(4,4);
+				SETPIXEL2(5,3);
+				SETPIXEL2(6,3);
+				SETPIXEL2(7,4);
+				SETPIXEL2(6,5);
+				SETPIXEL2(5,6);
+				SETPIXEL2(4,7);
+				SETPIXEL2(5,7);
+				SETPIXEL2(6,7);
+				SETPIXEL2(7,7);
+				break;
+			case 2:
+				SETPIXEL2(4,3);
+				SETPIXEL2(5,3);
+
+				SETPIXEL2(4,5);
+				SETPIXEL2(5,5);
+
+				SETPIXEL2(4,7);
+				SETPIXEL2(5,7);
+
+				SETPIXEL2(6,4);
+				SETPIXEL2(6,5);
+				SETPIXEL2(6,6);
+				break;
+			case 3:
+				SETPIXEL2(6,3);
+				SETPIXEL2(5,4);
+				SETPIXEL2(4,5);
+				SETPIXEL2(4,6);
+				SETPIXEL2(5,6);
+				SETPIXEL2(6,6);
+				SETPIXEL2(7,6);
+
+				SETPIXEL2(7,5);
+				SETPIXEL2(7,7);
+				break;
 		}
 	}
+#undef SETPIXEL
+#undef SETPIXEL2
 
 	bitBlt(&theBig, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
 }
@@ -148,7 +207,8 @@ int main (int argc, char **argv)
 
 
 	if (argc>2) {
-		puts("usage: createGround [-d]\n-d is for a debugging earth.png");
+		logf(LOG_ERROR, "usage: createGround [-d]");
+		logf(LOG_ERROR, "\t-d is for a debugging earth.png");
 		exit(1);
 	}
 	if (argc>1)
@@ -156,7 +216,9 @@ int main (int argc, char **argv)
 			logf(LOG_INFO, "DEBUG MODE ON");
 			_debug = true;
 		} else {
-			puts("\nunrecognised optoin\n\nusage: createGround [-d]\n-d is for a debugging earth.png");
+			logf(LOG_ERROR, "unrecognised optoin");
+			logf(LOG_ERROR, "\tusage: createGround [-d]");
+			logf(LOG_ERROR, "\t-d is for a debugging earth.png");
 			exit(1);
 		}
 	begin("earth");
@@ -172,7 +234,5 @@ int main (int argc, char **argv)
 	}
 
 	end();
-
-	printf("\n");
 	return 0;
 }
