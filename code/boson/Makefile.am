@@ -123,7 +123,6 @@ libboson_la_SOURCES = \
 	boeventmatching.cpp \
 	boeventlistener.cpp \
 	boeventmanager.cpp \
-	bostatuscondition.cpp \
 	bocondition.cpp
 
 
