@@ -39,6 +39,8 @@
 #include "../bolight.h"
 #include "../speciestheme.h"
 #include "../bosonparticlesystemproperties.h"
+#include "../playerio.h"
+#include "../pluginproperties.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -649,23 +651,24 @@ QValueList<int> BosonScript::productionTypes(int id)
     return list;
   }
 
-  ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
+  ProductionProperties* production = (ProductionProperties*)u->properties(PluginProperties::Production);
   if(!production)
   {
     boError() << k_funcinfo << "Unit with id " << id << " cannot produce" << endl;
     return list;
   }
 
-  QValueList<QPair<ProductionType, unsigned long int> > l = production->productionList();
-  QValueList<QPair<ProductionType, unsigned long int> >::iterator it;
-  for(it = l.begin(); it != l.end(); ++it)
-  {
-    if((*it).first == ProduceUnit)
-    {
-      list.append((*it).second);
+  // Add units to production list
+  QValueList<unsigned long int> unitsList = u->speciesTheme()->productions(production->producerList());
+  // Filter out things that player can't actually build (requirements aren't met yet)
+  QValueList<unsigned long int>::Iterator it;
+  it = unitsList.begin();
+  for (; it != unitsList.end(); ++it) {
+    if (u->ownerIO()->canBuild(*it)) {
+      list.append(*it);
     }
   }
-
+  
   return list;
 }
 
