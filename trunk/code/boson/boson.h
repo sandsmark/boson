@@ -91,7 +91,6 @@ public:
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
 	void removeAllPlayers();
 
-	Unit* createUnit(unsigned long int unitType, Player* owner); // public for Player::load
 	Unit* loadUnit(unsigned long int unitType, Player* owner);
 
 	QValueList<QColor> availableTeamColors() const;
@@ -310,6 +309,7 @@ signals:
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
+	Unit* createUnit(unsigned long int unitType, Player* owner);
 
 	unsigned long int nextUnitId();
 
