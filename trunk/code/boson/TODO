@@ -19,7 +19,6 @@ Game TODOs
 - pause
 - display "filling" status of harvesters instead of firepower. use different
   colors!
-- TopWidget::slotNewGame() is broken
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
 - Do not start game before all players have loaded their data
@@ -31,8 +30,6 @@ Game TODOs
   group. rmb on that button deletes it
 - Use different config file fields for repairing and weapon damage. Then unit
   that can repair can also shoot at enemies.
-- Support more than 1 weapon per unit. Think of a unit that has one weapon for
-  air units and other one for land units.
 - make clear that "building mode" is enabled. maybe replace the cursor by the
   facility that should get built.
 - display on the map where a facility can be placed. maybe change the cursor to
@@ -64,15 +61,11 @@ Game TODOs
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
-- unit editor: check if images are in the directory, provide possibility to copy
-  them
 - unit editor: add an additional page for the description of the unit (longer
   text - should go into the handbook). Should be able to contain images and so
   on. Maybe use plain docbook or so
 - use another options dialog. we MUST NOT provide the possibility to change the
   game speed!!
-- write EditorWidget for editor which should replace BosonWidget that doesn't
-  support editor anymore
 
 General TODOs
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
@@ -86,14 +79,10 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.unit especially).
-- splitViews: we could use one view for players that are allied with the local
-  player. we need to transmit the position of the view over network... would be
-  a nice idea!
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
   somehow if it isn't
 - make sure that libogg and so on is installed! even if kdemultimedia is
   installed it may still be that ogg support is missing
-- use KDock for the dispalys
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin  update: it's not wrong, it's disabled-color
 - pixmaps on startup widgets should be centered horizontally
@@ -101,8 +90,6 @@ General TODOs
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
-- remove zooming support. maybe replace it by simple cameraZ position changes.
-  especially remove BosonBigDisplayBase::setZoomFactor() and the menu entry.
 - unit editor does not support plugins
 - Don't load UnitProperties and technologies and other stuff in SpeciesTheme
   constructor
