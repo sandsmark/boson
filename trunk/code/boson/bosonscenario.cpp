@@ -591,7 +591,7 @@ bool BosonScenario::loadFacility(QDomElement& node, Facility* fac)
  bool ok = false; // for QString::toInt() like functions
  if (node.hasAttribute("ConstructionCompleted")) { // its value does not matter
 	if (fac) {
-		fac->setConstructionStep(fac->constructionSteps() - 1);
+		fac->setConstructionStep(fac->constructionSteps());
 	}
  } else if (node.hasAttribute("ConstructionStep")) {
 	unsigned int step = node.attribute("ConstructionStep").toUInt(&ok);

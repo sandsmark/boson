@@ -809,7 +809,7 @@ MobileUnit::~MobileUnit()
 void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
-	kdWarning() << "speed == 0" << endl;
+	kdWarning() << k_funcinfo << "speed == 0" << endl;
 	stopMoving();
 	return;
  }
@@ -897,7 +897,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  //  because we now recalc path after every waypoint (see ~5 lines above)
  if(!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	kdWarning() << "cannot go to waypoint, finding new path" << endl;
+	kdWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
 	setXVelocity(0);
 	setYVelocity(0);
 	// We have to clear waypoints first to make sure that they aren't used next
@@ -1079,7 +1079,7 @@ QRect MobileUnit::boundingRect() const
 // > BO_TILE_SIZE
 // we simply return a boundingrect which has size BO_TILE_SIZE
  if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
-	kdWarning() << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
+	kdWarning() << k_funcinfo << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
 	return BosonSprite::boundingRect();
  }
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
@@ -1167,13 +1167,7 @@ void Facility::advanceConstruction(unsigned int advanceCount)
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if (d->mConstructionState < constructionSteps() - 1) {
-	d->mConstructionState = d->mConstructionState + 1;
-	setFrame(d->mConstructionState);
- } else {
-	setWork(WorkNone);
-	owner()->facilityCompleted(this);
- }
+ setConstructionStep(d->mConstructionState + 1);
 }
 
 UnitPlugin* Facility::plugin(int pluginType) const
@@ -1197,7 +1191,7 @@ bool Facility::isConstructionComplete() const
  if (work() == WorkConstructed) {
 	return false;
  }
- if (d->mConstructionState < constructionSteps() - 1) {
+ if (d->mConstructionState < constructionSteps()) {
 	return false;
  }
  return true;
@@ -1205,7 +1199,7 @@ bool Facility::isConstructionComplete() const
 
 double Facility::constructionProgress() const
 {
- unsigned int constructionTime = constructionSteps() - 1;
+ unsigned int constructionTime = constructionSteps();
  double percentage = (double)(d->mConstructionState * 100) / (double)constructionTime;
  return percentage;
 }
@@ -1213,7 +1207,7 @@ double Facility::constructionProgress() const
 void Facility::setTarget(Unit* u)
 {
  if (u && !isConstructionComplete()) {
-	kdWarning() << "not yet constructed completely" << endl;
+	kdWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  Unit::setTarget(u);
@@ -1222,7 +1216,7 @@ void Facility::setTarget(Unit* u)
 void Facility::moveTo(float x, float y, int range)
 {
  if (!isConstructionComplete()) {
-	kdWarning() << "not yet constructed completely" << endl;
+	kdWarning() << k_funcinfo << "not yet constructed completely" << endl;
 	return;
  }
  Unit::moveTo(x, y, range);
@@ -1234,14 +1228,24 @@ void Facility::setConstructionStep(unsigned int step)
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if (step >= constructionSteps()) {
-	step = PIXMAP_FIX_DESTROYED - 1;
+ if (step > constructionSteps()) {
+	step = constructionSteps();
  }
- setFrame(step);
+ // warning: constructionSteps() and BosonModel::constructionSteps() are
+ // *totally* different values!!
+ unsigned int modelStep; // TODO
+ if (step == constructionSteps()) {
+	modelStep = model()->constructionSteps(); // completed construction
+ } else {
+	modelStep = model()->constructionSteps() * step / constructionSteps();
+	kdDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
+ }
+ model()->setConstructionStep(modelStep);
  d->mConstructionState = step;
- if (step == constructionSteps() - 1) {
+ if (step == constructionSteps()) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
+	setFrame(0);
  }
 }
 
