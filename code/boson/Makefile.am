@@ -125,9 +125,10 @@ boson_LDADD = \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
-		-lkdegames \
+		$(LIB_KGAME) \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI) \
+		$(LIB_KIO) \
 		$(LIB_XRANDR)
 boson_SOURCES = \
 		$(BOSON_COMMON_SRC)\
@@ -144,9 +145,10 @@ bounit_LDADD = \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
-		-lkdegames \
+		$(LIB_KGAME) \
 		$(GLLIB) -l3ds \
-		-lkio $(LIB_KDEUI) \
+		$(LIB_KDEUI) \
+		$(LIB_KIO) \
 		$(LIB_XRANDR)
 bounit_SOURCES = \
 		$(BOSON_COMMON_SRC) \
@@ -156,7 +158,8 @@ bounit_SOURCES = \
 boprofiling_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boprofiling_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
-		-lkio $(LIB_KDEUI)
+		$(LIB_KDEUI) \
+		$(LIB_KIO)
 boprofiling_SOURCES = \
 		$(BOPROFILING_SRC)
 
@@ -164,7 +167,9 @@ bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
-		-lkio $(LIB_KDEUI) $(GLLIB)
+		$(LIB_KDEUI) \
+		$(LIB_KIO) \
+		$(GLLIB)
 bocursor_SOURCES = \
 		boapplication.cpp \
 		boglobal.cpp \
@@ -182,9 +187,10 @@ borender_LDADD = \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
-		-lkdegames \
+		$(LIB_KGAME) \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI) \
+		$(LIB_KIO) \
 		$(LIB_XRANDR)
 borender_SOURCES = \
 		$(BOSON_COMMON_SRC) \
