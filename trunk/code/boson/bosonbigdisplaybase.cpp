@@ -463,9 +463,9 @@ void BosonBigDisplayBase::init()
 		this, SLOT(slotCursorEdgeTimeout()));
 
  connect(BosonPathVisualization::pathVisualization(),
-		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3>&, const BoVector4&, float, int, float)),
+		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3>&, const BoVector4&, bofixed, int, bofixed)),
 		this,
-		SLOT(slotAddLineVisualization(const QValueList<BoVector3>&, const BoVector4&, float, int, float)));
+		SLOT(slotAddLineVisualization(const QValueList<BoVector3>&, const BoVector4&, bofixed, int, bofixed)));
 
  setUpdateInterval(boConfig->updateInterval());
 
@@ -502,8 +502,8 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 	}
 	disconnect(d->mGLMiniMap, 0, this, 0);
 	disconnect(d->mGLMiniMap, 0, displayInput(), 0);
-	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, float, float)),
-		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, float, float)));
+	connect(mCanvas, SIGNAL(signalUnitMoved(Unit*, bofixed, bofixed)),
+		d->mGLMiniMap, SLOT(slotUnitMoved(Unit*, bofixed, bofixed)));
 	connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
 		d->mGLMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
@@ -1356,9 +1356,9 @@ int BosonBigDisplayBase::renderTextPFData(int x, int y, int w, int border)
  w = QMAX(w, d->mDefaultFont->width(celloccupied));
  QString regid = QString::fromLatin1("Region  : %1").arg((r == 0) ? -1 : r->id);
  w = QMAX(w, d->mDefaultFont->width(regid));
- QString regcost = QString::fromLatin1("    cost: %1").arg((r == 0) ? -1.0f : r->cost, 5, 'g', 3);
+ QString regcost = QString::fromLatin1("    cost: %1").arg((r == 0) ? bofixed(-1) : r->cost, 5, 'g', 3);
  w = QMAX(w, d->mDefaultFont->width(regcost));
- QString regcenter = QString::fromLatin1("  center: (%1; %2)").arg((r == 0) ? -1.0f : r->centerx).arg((r == 0) ? -1.0f : r->centery);
+ QString regcenter = QString::fromLatin1("  center: (%1; %2)").arg((r == 0) ? bofixed(-1) : r->centerx).arg((r == 0) ? bofixed(-1) : r->centery);
  w = QMAX(w, d->mDefaultFont->width(regcenter));
  QString regcells = QString::fromLatin1("   cells: %1").arg((r == 0) ? -1 : r->cellsCount);
  w = QMAX(w, d->mDefaultFont->width(regcells));
@@ -3552,7 +3552,7 @@ void BosonBigDisplayBase::addLineVisualization(BoLineVisualization v)
 
 // FIXME: someone who know what these are supposed to be for, could probably
 // group most parameters into a single "type" integer
-void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset)
+void BosonBigDisplayBase::slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
  if (!canvas()) {
 	return;
