@@ -55,16 +55,16 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
-  mSpeed = (float)(cfg->readDoubleNumEntry("Speed", 0)) / 48.0f;
+  mSpeed = (cfg->readDoubleNumEntry("Speed", 0)) / 48.0f;
   if(mSpeed == 0 && mShotType == BosonShot::Missile)
   {
     boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
-  mAccelerationSpeed = (float)(cfg->readDoubleNumEntry("AccelerationSpeed", 0.2)) / 48.0f;
+  mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 0.2)) / 48.0f;
   mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
-  mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
-  mFullDamageRange = (float)(cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange));
+  mDamageRange = cfg->readDoubleNumEntry("DamageRange", 1);
+  mFullDamageRange = cfg->readDoubleNumEntry("FullDamageRange", 0.25 * mDamageRange);
   if(mFullDamageRange > mDamageRange)
   {
     boWarning() << k_funcinfo << "FullDamageRange must not be bigger than DamageRange!" << endl;
@@ -72,7 +72,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   }
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
-  mHeight = (float)(cfg->readDoubleNumEntry("Height", 0.25));
+  mHeight = cfg->readDoubleNumEntry("Height", 0.25);
   mOffset = BosonConfig::readBoVector3Entry(cfg, "Offset");
   mAutoUse = cfg->readBoolEntry("AutoUse", true);
   if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
@@ -210,12 +210,12 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   return s;
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3 pos, float rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3 pos, bofixed rotation) const
 {
   return BosonEffectProperties::newEffects(&mShootEffects, pos, BoVector3(0, 0, rotation));
 }
 
-QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3 pos, float rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3 pos, bofixed rotation) const
 {
   return BosonEffectProperties::newEffects(&mFlyEffects, pos, BoVector3(0, 0, rotation));
 }

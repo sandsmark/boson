@@ -96,13 +96,13 @@ class BosonShot : public BosonItem
      * If you supply weapon properties in ctor, this equals to properties()->damageRange().
      * Otherwise, you should re-implement it in derived classes
      **/
-    virtual float damageRange() const;
+    virtual bofixed damageRange() const;
     /**
      * @return Full damage range of this shot.
      * If you supply weapon properties in ctor, this equals to properties()->fullDamageRange().
      * Otherwise, you should re-implement it in derived classes
      **/
-    virtual float fullDamageRange() const;
+    virtual bofixed fullDamageRange() const;
 
     /**
      * @return If this shot is active.
@@ -225,11 +225,11 @@ class BosonShotMissile : public BosonShot
   private:
     BoVector3 mVelo;
     BoVector3 mTarget;
-    float mTotalDist;
-    float mPassedDist;
-    float mZ;
-    float mEffectVelo;
-    float mMaxHeight;
+    bofixed mTotalDist;
+    bofixed mPassedDist;
+    bofixed mZ;
+    bofixed mEffectVelo;
+    bofixed mMaxHeight;
 };
 
 
@@ -247,7 +247,7 @@ class BosonShotExplosion : public BosonShot
   public:
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
-    void activate(const BoVector3& pos, long int damange, float damageRange, float fulldamagerange, int delay);
+    void activate(const BoVector3& pos, long int damange, bofixed damageRange, bofixed fulldamagerange, int delay);
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
@@ -255,16 +255,16 @@ class BosonShotExplosion : public BosonShot
     inline virtual int type() const { return BosonShot::Explosion; }
 
     virtual long int damage() const  { return mDamage; }
-    virtual float damageRange() const  { return mDamageRange; }
-    virtual float fullDamageRange() const  { return mFullDamageRange; }
+    virtual bofixed damageRange() const  { return mDamageRange; }
+    virtual bofixed fullDamageRange() const  { return mFullDamageRange; }
 
   protected:
     virtual void advanceMoveInternal();
 
   private:
     long int mDamage;
-    float mDamageRange;
-    float mFullDamageRange;
+    bofixed mDamageRange;
+    bofixed mFullDamageRange;
     int mDelay;
 };
 
@@ -346,8 +346,8 @@ class BosonShotFragment : public BosonShot
     virtual bool loadFromXML(const QDomElement& root);
 
     virtual long int damage() const;
-    virtual float damageRange() const;
-    virtual float fullDamageRange() const;
+    virtual bofixed damageRange() const;
+    virtual bofixed fullDamageRange() const;
 
     inline virtual int type() const { return BosonShot::Fragment; }
 

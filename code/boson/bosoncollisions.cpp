@@ -51,12 +51,12 @@ Cell* BosonCollisions::cell(int x, int y) const
  return map()->cell(x, y);
 }
 
-Unit* BosonCollisions::findUnitAtCell(int x, int y, float z) const
+Unit* BosonCollisions::findUnitAtCell(int x, int y, bofixed z) const
 {
  return (Unit*)findItemAtCell(x, y, z, true);
 }
 
-BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly) const
+BosonItem* BosonCollisions::findItemAtCell(int x, int y, bofixed z, bool unitOnly) const
 {
  BoItemList* list = collisionsAtCell(x, y);
  BoItemList::Iterator it;
@@ -69,7 +69,7 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
  //    design leads usually to faster code
 
  BosonItem* ret = 0;
- float zDist = 100.0f; // use a very high value - will be thrown away anyway.
+ bofixed zDist = 100; // use a very high value - will be thrown away anyway.
  for (it = list->begin(); it != list->end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
@@ -83,7 +83,7 @@ BosonItem* BosonCollisions::findItemAtCell(int x, int y, float z, bool unitOnly)
 	}
 
 	// distance of item's z to desired z
-	float dist = (*it)->z() - z;
+	bofixed dist = (*it)->z() - z;
 	if (dist < 0) {
 		dist = -dist;
 	}
@@ -106,9 +106,9 @@ Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, float radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, bofixed radius) const
 {
- BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
+ BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.x() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -133,11 +133,11 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, f
  return list;
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, float radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, bofixed radius) const
 {
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, 0), QMAX(pos.x() - radius, 0),
+ BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.x() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -175,7 +175,7 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
 	return cellOccupied(x, y);
  }
  if (!cell(x, y)) {
-	boError(310) << k_funcinfo << "NULL cell" << endl;
+	boError(310) << k_funcinfo << "NULL cell at " << x << "," << y << endl;
 	return true;
  }
  bool includeMoving = !excludeMoving; // FIXME: replace exclude by include in parameter

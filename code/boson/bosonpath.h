@@ -19,6 +19,7 @@
 #ifndef BOSONPATH_H
 #define BOSONPATH_H
 
+#include "bomath.h"
 #include <qobject.h>
 
 /***  COMMON STUFF  ***/
@@ -110,7 +111,7 @@ class BosonPath
     /**
      * Returns cost of path
      */
-    float pathCost() const { return mPathCost; };
+    bofixed pathCost() const { return mPathCost; };
 
   protected:
     /**
@@ -120,8 +121,8 @@ class BosonPath
 
   private:
     class Marking;
-    float dist(int ax, int ay, int bx, int by);
-    float cost(int x, int y);
+    bofixed dist(int ax, int ay, int bx, int by);
+    bofixed cost(int x, int y);
     static void getFirst(QValueList<PathNode>& list, PathNode& n);
     static void addNode(QValueList<PathNode>& list, const PathNode& n);
     static void neighbor(int& x, int& y, Direction d);
@@ -144,7 +145,7 @@ class BosonPath
 
     int mNodesRemoved;
     int mPathLength;
-    float mPathCost;
+    bofixed mPathCost;
     int mRange;
 
     class Marking
@@ -152,9 +153,9 @@ class BosonPath
       public:
         Marking() { dir = DirNone; f = -1; g = -1; c = -1; level = -1; }
         Direction dir;
-        float f;
-        float g;
-        float c; // Cost of cell
+        bofixed f;
+        bofixed g;
+        bofixed c; // Cost of cell
         short int level;
     };
     Marking mMark[SEARCH_STEPS * 2 + 1][SEARCH_STEPS * 2 + 1];
@@ -306,11 +307,11 @@ class BosonPath2
     void searchHighLevelPath(BosonPathInfo* info);
     void findHighLevelGoal(BosonPathInfo* info);
 
-    float highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info);
-    float highLevelCost(BosonPathRegion* r, BosonPathInfo* info);
-    float lowLevelDistToGoal(int x, int y, BosonPathInfo* info);
-    float lowLevelCost(int x, int y, BosonPathInfo* info);
-    float lowLevelCostAir(int x, int y, BosonPathInfo* info);
+    bofixed highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info);
+    bofixed highLevelCost(BosonPathRegion* r, BosonPathInfo* info);
+    bofixed lowLevelDistToGoal(int x, int y, BosonPathInfo* info);
+    bofixed lowLevelCost(int x, int y, BosonPathInfo* info);
+    bofixed lowLevelCostAir(int x, int y, BosonPathInfo* info);
 
     static void neighbor(int& x, int& y, Direction d);
 
@@ -340,7 +341,7 @@ class BosonPath2
     /**
      * @return cost of given cell
      **/
-    float cellCost(int x, int y);
+    bofixed cellCost(int x, int y);
     /**
      * @return Cell at given pos
      **/
@@ -416,7 +417,7 @@ class BosonPathRegion
         Neighbor()  {region = 0; cost = 0.0f; bordercells = 0; }
 
         BosonPathRegion* region;
-        float cost;
+        bofixed cost;
         int bordercells;
     };
 
@@ -442,9 +443,9 @@ class BosonPathRegion
     // How many cells this region has
     int cellsCount;
     // Center of this region (average of centers of all cells)
-    float centerx, centery;
+    bofixed centerx, centery;
     // Cost of passing this region
-    float cost;
+    bofixed cost;
     // Unique id of this region
     int id;
     // Group that this region belongs to
@@ -481,8 +482,8 @@ class BosonPathNode
     int x;
     int y;
 
-    float g;
-    float h;
+    bofixed g;
+    bofixed h;
 };
 
 class BosonPathFlyingNode : public BosonPathNode
@@ -663,8 +664,8 @@ class BosonPathHighLevelNode
     inline bool operator==(const BosonPathHighLevelNode& x)  { return (region == x.region); }
 
     BosonPathRegion* region;
-    float g;
-    float h;
+    bofixed g;
+    bofixed h;
 };
 
 /**
@@ -692,16 +693,16 @@ class BosonPathVisualization : public QObject
      * @param points The points of the line visualization. Note that the z
      * coordinates are overwritten later, you do not have to specify them!
      **/
-    void addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize = 1.0f, int timeout = 60, float zOffset = 0.5f);
+    void addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
     /**
      * @overload
      * Just like above, but with a default color
      **/
-    void addLineVisualization(const QValueList<BoVector3>& points, float pointSize = 1.0f, int timeout = 60, float zOffset = 0.5f);
+    void addLineVisualization(const QValueList<BoVector3>& points, bofixed pointSize = 1.0f, int timeout = 60, bofixed zOffset = 0.5f);
 
   signals:
-    void signalAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset);
+    void signalAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset);
 
   private:
     BosonPathVisualization(QObject* parent);

@@ -20,8 +20,9 @@
 #define UNITPLUGINS_H
 
 #include "global.h"
+#include "bomath.h"
 
-#include <kgame/kgameproperty.h>
+#include "bogameproperty.h"
 
 #include <qvaluelist.h>
 #include <qpair.h>
@@ -379,8 +380,8 @@ public:
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
-	KGameProperty<float> mPosX;
-	KGameProperty<float> mPosY;
+	KGameProperty<bofixed> mPosX;
+	KGameProperty<bofixed> mPosY;
 };
 
 /**

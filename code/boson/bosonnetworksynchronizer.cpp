@@ -313,9 +313,9 @@ protected:
 		stream << (Q_INT32)r->id;
 		stream << (Q_INT32)r->passabilityType;
 		stream << (Q_INT32)r->cellsCount;
-		stream << (float)r->centerx;
-		stream << (float)r->centery;
-		stream << (float)r->cost;
+		stream << (bofixed)r->centerx;
+		stream << (bofixed)r->centery;
+		stream << (bofixed)r->cost;
 		stream << (Q_UINT32)r->neighbors.count();
 		for (unsigned int i = 0; i < r->neighbors.count(); i++) {
 			if (!r->neighbors[i].region) {
@@ -323,7 +323,7 @@ protected:
 				return false;
 			}
 			stream << (Q_INT32)r->neighbors[i].region->id;
-			stream << (float)r->neighbors[i].cost;
+			stream << (bofixed)r->neighbors[i].cost;
 			stream << (Q_INT32)r->neighbors[i].bordercells;
 		}
 		if (r->group) {
@@ -335,8 +335,8 @@ protected:
 		return true;
 	}
 
-	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, float& centerx, float& centery, float& cost,
-			Q_UINT32& nCount, QValueVector<Q_INT32>& nIds, QValueVector<float>& nCost, QValueVector<Q_INT32>& nBorderCells)
+	static bool unstreamRegion(QDataStream& stream, Q_INT32& id, Q_INT32& passabilityType, Q_INT32& cellsCount, bofixed& centerx, bofixed& centery, bofixed& cost,
+			Q_UINT32& nCount, QValueVector<Q_INT32>& nIds, QValueVector<bofixed>& nCost, QValueVector<Q_INT32>& nBorderCells)
 	{
 		stream >> id;
 		stream >> passabilityType;
@@ -350,7 +350,7 @@ protected:
 		nBorderCells.resize(nCount);
 		for (unsigned int i = 0; i < nCount; i++) {
 			Q_UINT32 id;
-			float cost;
+			bofixed cost;
 			Q_UINT32 borderCells;
 			stream >> id;
 			stream >> cost;
@@ -437,12 +437,12 @@ QString BoPathSyncMessage::findLogError(const QByteArray& b1, const QByteArray& 
 		DECLARE(Q_INT32, id);
 		DECLARE(Q_INT32, passabilityType);
 		DECLARE(Q_INT32, cellsCount);
-		DECLARE(float, centerx);
-		DECLARE(float, centery);
-		DECLARE(float, cost);
+		DECLARE(bofixed, centerx);
+		DECLARE(bofixed, centery);
+		DECLARE(bofixed, cost);
 		DECLARE(Q_UINT32, nCount);
 		DECLARE(QValueVector<Q_INT32>, nIds);
-		DECLARE(QValueVector<float>, nCost);
+		DECLARE(QValueVector<bofixed>, nCost);
 		DECLARE(QValueVector<Q_INT32>, nBorderCells);
 		unstreamRegion(s1, id, passabilityType, cellsCount, centerx, centery, cost, nCount, nIds, nCost, nBorderCells);
 		unstreamRegion(s2, id2, passabilityType2, cellsCount2, centerx2, centery2, cost2, nCount2, nIds2, nCost2, nBorderCells2);
@@ -565,7 +565,7 @@ protected:
 		stream << i->xRotation();
 		stream << i->yRotation();
 	}
-	static void unstreamItem(QDataStream& stream, Q_UINT32& id, float& x, float& y, float& z, float& rotation, float& xrotation, float& yrotation)
+	static void unstreamItem(QDataStream& stream, Q_UINT32& id, bofixed& x, bofixed& y, bofixed& z, bofixed& rotation, bofixed& xrotation, bofixed& yrotation)
 	{
 		stream >> id;
 		stream >> x;
@@ -580,12 +580,12 @@ protected:
 		QString error;
 
 		DECLARE(Q_UINT32, id);
-		DECLARE(float, x);
-		DECLARE(float, y);
-		DECLARE(float, z);
-		DECLARE(float, rotation);
-		DECLARE(float, xrotation);
-		DECLARE(float, yrotation);
+		DECLARE(bofixed, x);
+		DECLARE(bofixed, y);
+		DECLARE(bofixed, z);
+		DECLARE(bofixed, rotation);
+		DECLARE(bofixed, xrotation);
+		DECLARE(bofixed, yrotation);
 
 		unstreamItem(s1, id, x, y, z, rotation, xrotation, yrotation);
 		unstreamItem(s2, id2, x2, y2, z2, rotation2, xrotation2, yrotation2);

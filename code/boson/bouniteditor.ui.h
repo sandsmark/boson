@@ -380,7 +380,7 @@ void BoUnitEditor::slotUpdateUnitProperties()
 	mUnit->setConstructionSteps(mUnitConstructionSteps->value());
     } else {
 	mUnit->createMobileProperties();
-	mUnit->setSpeed(mUnitSpeed->value());
+	mUnit->setSpeed(bofixed(mUnitSpeed->value()));
 	mUnit->setCanGoOnLand(mUnitCanGoOnLand->isChecked());
 	mUnit->setCanGoOnWater(mUnitCanGoOnWater->isChecked());
     }

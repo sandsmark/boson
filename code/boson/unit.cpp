@@ -249,12 +249,12 @@ void Unit::select(bool markAsLeader)
  updateSelectBox();
 }
 
-float Unit::destinationX() const
+bofixed Unit::destinationX() const
 {
  return pathInfo()->dest.x();
 }
 
-float Unit::destinationY() const
+bofixed Unit::destinationY() const
 {
  return pathInfo()->dest.y();
 }
@@ -347,7 +347,7 @@ void Unit::updateSelectBox()
  }
 }
 
-void Unit::moveBy(float moveX, float moveY, float moveZ)
+void Unit::moveBy(bofixed moveX, bofixed moveY, bofixed moveZ)
 {
 // time critical function
  if (!moveX && !moveY && !moveZ) {
@@ -369,11 +369,11 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  // this will most probably cause trouble in the future, but it is necessary for
  // things like addToCells().
 
- float oldX = x();
- float oldY = y();
+ bofixed oldX = x();
+ bofixed oldY = y();
 
- float rotateX = 0.0f;
- float rotateY = 0.0f;
+ bofixed rotateX = 0.0f;
+ bofixed rotateY = 0.0f;
  updateZ(moveX, moveY, &moveZ, &rotateX, &rotateY);
  setXRotation(rotateX);
  setYRotation(rotateY);
@@ -382,26 +382,26 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  canvas()->unitMoved(this, oldX, oldY);
 }
 
-void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX, float* rotateY)
+void Unit::updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveByZ, bofixed* rotateX, bofixed* rotateY)
 {
  // Center point of the unit.
- float centerx = x() + moveByX + width() / 2;
- float centery = y() + moveByY + height() / 2;
+ bofixed centerx = x() + moveByX + width() / 2;
+ bofixed centery = y() + moveByY + height() / 2;
 
  // Calculate unit's rotation (depends on ground height).
  // These are offsets (from center point) to front and right side of the unit.
- float frontx = 0.0f, fronty = 0.0f, sidex = 0.0f, sidey = 0.0f;
+ bofixed frontx = 0.0f, fronty = 0.0f, sidex = 0.0f, sidey = 0.0f;
  // Calculate front offset
  Bo3dTools::pointByRotation(&frontx, &fronty, rotation(), height() / 2);
  // Calculate right side offset
- float myrot = rotation() + 90;
+ bofixed myrot = rotation() + 90;
  if (myrot > 360) {
 	myrot -= 360;
  }
  Bo3dTools::pointByRotation(&sidex, &sidey, myrot, width() / 2);
 
  // Find necessary height values.
- float rearz, frontz, rightz, leftz, newZ;
+ bofixed rearz, frontz, rightz, leftz, newZ;
  // For flying units and ships, we take water level into surface; for land
  //  units, we don't.
  if (unitProperties()->isAircraft() || unitProperties()->canGoOnWater()) {
@@ -427,12 +427,12 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
 
  // Calculate rotations
  // Calculate angle from frontz to rearz
- float xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) / height()));
+ bofixed xrot = Bo3dTools::rad2deg(atan(QABS(frontz - rearz) / height()));
  *rotateX = (frontz >= rearz) ? xrot : -xrot;
 
  // Calculate y rotation
  // Calculate angle from leftz to rightz
- float yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) / width()));
+ bofixed yrot = Bo3dTools::rad2deg(atan(QABS(rightz - leftz) / width()));
  *rotateY = (leftz >= rightz) ? yrot : -yrot;
 
 
@@ -519,7 +519,7 @@ bool Unit::attackEnemyUnitsInRange()
 
 	// If unit is mobile, rotate to face the target if it isn't facing it yet
 	if (isMobile()) {
-		float rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
+		bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 		if (rot < rotation() - 5 || rot > rotation() + 5) {
 			// Rotate to face target
 			if (QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
@@ -566,7 +566,7 @@ Unit* Unit::bestEnemyUnitInRange()
  Unit* best = 0l;
  BoItemList::Iterator it = list->begin();
  Unit* u = 0l;
- float dist = 0;
+ bofixed dist = 0;
  // Candidates to best unit, see below
  Unit* c1 = 0l;
  Unit* c2 = 0l;
@@ -675,7 +675,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
  }
 
  if (isMobile()) {
-	float rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
+	bofixed rot = Bo3dTools::rotationToPoint(target()->x() - x(), target()->y() - y());
 	if(rot < rotation() - 5 || rot > rotation() + 5) {
 		if(QABS(rotation() - rot) > unitProperties()->rotationSpeed()) {
 			turnTo((int)rot);
@@ -765,7 +765,7 @@ void Unit::advanceTurn(unsigned int)
 	dir -= 360;
  }
 
- setRotation((float)dir);
+ setRotation(bofixed(dir));
  updateRotation();
 
  if (d->mWantedRotation == dir) {
@@ -839,8 +839,8 @@ void Unit::moveTo(const BoVector2& pos, bool attack)
  d->mTarget = 0;
 
  // We want unit's center point to be in the middle of the cell after moving.
- float x = pos.x() + (1.0f/ 2);
- float y = pos.y() + (1.0f/ 2);
+ bofixed x = pos.x() + (1.0f/ 2);
+ bofixed y = pos.y() + (1.0f/ 2);
 
  if (moveTo(x, y, 0)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
@@ -855,7 +855,7 @@ void Unit::moveTo(const BoVector2& pos, bool attack)
  }
 }
 
-bool Unit::moveTo(float x, float y, int range)
+bool Unit::moveTo(bofixed x, bofixed y, int range)
 {
  // Range -1 means to use previously set range
  if (range == -1) {
@@ -1106,7 +1106,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	return false;
  }
  bool ok = false;
- float rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
+ bofixed rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Invalid value for Rotation tag" << endl;
 	rotation = 0.0f;
@@ -1187,7 +1187,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((target->x() - x())), QABS((target->y() - y()))) <= (float)r);
+ return (QMAX(QABS((target->x() - x())), QABS((target->y() - y()))) <= bofixed(r));
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -1485,9 +1485,9 @@ BosonWeapon* Unit::weapon(unsigned long int id) const
 
 void Unit::updateRotation()
 {
- float rotateX = 0.0f;
- float rotateY = 0.0f;
- float moveZ = 0.0f;
+ bofixed rotateX = 0.0f;
+ bofixed rotateY = 0.0f;
+ bofixed moveZ = 0.0f;
  updateZ(0.0f, 0.0f, &moveZ, &rotateX, &rotateY);
  setXRotation(rotateX);
  setYRotation(rotateY);
@@ -1539,8 +1539,8 @@ public:
 
 
 	// Should this be made KGameProperty?
-	float lastXVelocity;
-	float lastYVelocity;
+	bofixed lastXVelocity;
+	bofixed lastYVelocity;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1573,7 +1573,7 @@ bool MobileUnit::init()
  // FIXME: loading!
  setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
 
- setRotation((float)(owner()->game()->random()->getLong(359)));
+ setRotation(bofixed(owner()->game()->random()->getLong(359)));
  updateRotation();
  return true;
 }
@@ -1672,13 +1672,13 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  }
 
  // x and y are center of the unit here
- float x = BosonItem::x() + width() / 2;
- float y = BosonItem::y() + height() / 2;
+ bofixed x = BosonItem::x() + width() / 2;
+ bofixed y = BosonItem::y() + height() / 2;
  //boDebug(401) << k_funcinfo << "unit " << id() << ": pos: (" << x << "; "<< y << ")" << endl;
  // If we're close to destination, decelerate, otherwise  accelerate
  // TODO: we should also slow down when turning at pathpoint.
  // TODO: support range != 0
- if (pathInfo()->slowDownAtDest && QMAX(QABS(x - (float)pathInfo()->dest.x()), QABS(y - (float)pathInfo()->dest.y())) <= decelerationDistance()) {
+ if (pathInfo()->slowDownAtDest && QMAX(QABS(x - bofixed(pathInfo()->dest.x())), QABS(y - bofixed(pathInfo()->dest.y()))) <= decelerationDistance()) {
 	decelerate();
  } else {
 	accelerate();
@@ -1686,9 +1686,9 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 
  // Go speed() distance towards the next pathpoint. If distance to it is less
  //  than speed(), we go towards the one after this as well
- float xspeed = 0;
- float yspeed = 0;
- float dist = speed();
+ bofixed xspeed = 0;
+ bofixed yspeed = 0;
+ bofixed dist = speed();
  BoVector2 pp;
 
  // We move through the pathpoints, until we've passed dist distance
@@ -1762,14 +1762,14 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  turnTo();
 }
 
-float MobileUnit::moveTowardsPoint(const BoVector2& p, float x, float y, float maxdist, float &xspeed, float &yspeed)
+bofixed MobileUnit::moveTowardsPoint(const BoVector2& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed)
 {
  //boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
 		//");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
  // Passed distance
- float dist = 0.0f;
+ bofixed dist = 0.0f;
  // Calculate difference between point and our current position
- float xdiff, ydiff;
+ bofixed xdiff, ydiff;
  xdiff = p.x() - x;
  ydiff = p.y() - y;
 
@@ -1997,7 +1997,7 @@ void MobileUnit::advanceMoveCheck()
 	// Unit will collide with smth in 10 adv. calls. Decelerate
 	decelerate();
 	decelerate();  // Yes, we decelerate _two_ times
-	float s = speed();
+	bofixed s = speed();
 	if (s > 0.0f) {
 		d->lastXVelocity = QMIN(d->lastXVelocity, s);
 		d->lastYVelocity = QMIN(d->lastYVelocity, s);
@@ -2027,7 +2027,7 @@ void MobileUnit::turnTo(int dir)
  }
  if ((int)rotation() != dir) {
 	// Find out how much we have to turn
-	float delta = rotation() - dir;
+	bofixed delta = rotation() - dir;
 	if (delta < 0) {
 		delta = QABS(delta);
 	}
@@ -2044,7 +2044,7 @@ void MobileUnit::turnTo(int dir)
 	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
 	// If we're moving, we want to take one more step with current velocity, but
 	//  setAdvanceWork() resets it to 0, so we have this workaround here
-	float _xVelocity = 0, _yVelocity = 0;
+	bofixed _xVelocity = 0, _yVelocity = 0;
 	if (advanceWork() == WorkMove) {
 		_xVelocity = xVelocity();
 		_yVelocity = yVelocity();
@@ -2057,8 +2057,8 @@ void MobileUnit::turnTo(int dir)
 
 void MobileUnit::turnTo()
 {
- float xspeed = xVelocity();
- float yspeed = yVelocity();
+ bofixed xspeed = xVelocity();
+ bofixed yspeed = yVelocity();
  // Set correct rotation
  // Try to find rotation fast first
  if ((xspeed == 0) && (yspeed < 0)) { // North
@@ -2145,7 +2145,7 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
  }
 
  bool ok = false;
- float speed = 0.0f;
+ bofixed speed = 0.0f;
  if (root.hasAttribute("Speed")) {
 	speed = root.attribute("Speed").toFloat(&ok);
 	if (!ok) {
@@ -2367,7 +2367,7 @@ void Facility::setTarget(Unit* u)
  Unit::setTarget(u);
 }
 
-void Facility::moveTo(float x, float y, int range)
+void Facility::moveTo(bofixed x, bofixed y, int range)
 {
  if (!isConstructionComplete()) {
 	boWarning() << k_funcinfo << "not yet constructed completely" << endl;

@@ -20,6 +20,7 @@
 #define UNITPROPERTIES_H
 
 #include "global.h"
+#include "bomath.h"
 
 class SpeciesTheme;
 class PluginProperties;
@@ -119,24 +120,22 @@ public:
 	 **/
 	const QCString& md5() const;
 
-#warning fixme: use bofixed
 	/**
 	 * @return The unrotated width of the unit. The value is number of cells
 	 * this unit occupies
 	 **/
-	float unitWidth() const { return mUnitWidth; }
+	const bofixed& unitWidth() const { return mUnitWidth; }
 
-#warning fixme: use bofixed
 	/**
 	 * @return The unrotated height of the unit. The value is number of cells
 	 * this unit occupies
 	 **/
-	float unitHeight() const { return mUnitHeight; }
+	const bofixed& unitHeight() const { return mUnitHeight; }
 
 	/**
 	 * @return The unrotated height in z-direction of the unit.
 	 **/
-	float unitDepth() const { return mUnitDepth; }
+	const bofixed& unitDepth() const { return mUnitDepth; }
 
 	/**
 	 * @return Default health aka power aka hitpoints of this unit.
@@ -197,19 +196,19 @@ public:
 	 * @return Maximal speed of the mobile unit. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	float speed() const;
+	bofixed speed() const;
 
 	/**
 	 * @return How fast this mobile unit accelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	float accelerationSpeed() const;
+	bofixed accelerationSpeed() const;
 
 	/**
 	 * @return How fast this mobile unit decelerates. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	float decelerationSpeed() const;
+	bofixed decelerationSpeed() const;
 
 	/**
 	 * @return Turning speed of this mobile unit (degrees per advance call). 0 if
@@ -343,7 +342,7 @@ public:
 	/**
 	 * @return Radius of explosion when this unit is destroyed
 	 **/
-	float explodingDamageRange() const { return mExplodingDamageRange; };
+	const bofixed& explodingDamageRange() const { return mExplodingDamageRange; };
 
 	/**
 	 * @return So called hitpoint of this unit
@@ -366,7 +365,7 @@ public:
 
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; };
 	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; };
-	float explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
+	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
 	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3 pos) const;
 	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3 pos) const;
 
@@ -401,9 +400,9 @@ protected:
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
 	void setTypeId(unsigned long int id)  { mTypeId = id; };
-	void setUnitWidth(float unitWidth)  { mUnitWidth = unitWidth; };
-	void setUnitHeight(float unitHeight)  { mUnitHeight = unitHeight; };
-	void setUnitDepth(float unitDepth)  { mUnitDepth = unitDepth; };
+	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; };
+	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; };
+	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; };
 	void setHealth(unsigned long int health)  { mHealth = health; };
 	void setSightRange(unsigned int sightRange)  { mSightRange = sightRange; };
 	void setProducer(unsigned int producer)  { mProducer = producer; };
@@ -417,16 +416,16 @@ protected:
 	void setShields(unsigned long int shields)  { mShields = shields; };
 	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
 	void setConstructedEffectIds(QValueList<unsigned long int> ids);
-	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
+	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
 	void setHitPoint(const BoVector3& hitpoint);
 	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
 
 	// These only have effect if there is mobile or facility properties
 	void setConstructionSteps(unsigned int steps);
-	void setSpeed(float speed);
-	void setAccelerationSpeed(float speed);
-	void setDecelerationSpeed(float speed);
+	void setSpeed(bofixed speed);
+	void setAccelerationSpeed(bofixed speed);
+	void setDecelerationSpeed(bofixed speed);
 	void setRotationSpeed(int speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
@@ -461,9 +460,9 @@ private:
 	bool mFullMode;
 
 	unsigned long int mTypeId; // note: 0 is invalid!
-	float mUnitWidth;
-	float mUnitHeight;
-	float mUnitDepth;
+	bofixed mUnitWidth;
+	bofixed mUnitHeight;
+	bofixed mUnitDepth;
 	unsigned long int mHealth;
 	unsigned int mSightRange;
 	unsigned int mProducer;
@@ -480,11 +479,11 @@ private:
 	unsigned long int mMaxLandWeaponRange;
 	unsigned long int mMaxAirWeaponRange;
 	long int mExplodingDamage;
-	float mExplodingDamageRange;
+	bofixed mExplodingDamageRange;
 	BoAction* mProduceAction;
 	unsigned int mExplodingFragmentCount;
 	long int mExplodingFragmentDamage;
-	float mExplodingFragmentDamageRange;
+	bofixed mExplodingFragmentDamageRange;
 	bool mRemoveWreckageImmediately;
 
 	MobileProperties* mMobileProperties;

@@ -722,7 +722,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 	{
 		Q_UINT32 unitId;
 		Q_UINT32 owner;
-		float rot;
+		bofixed rot;
 
 		stream >> owner;
 		stream >> unitId;
@@ -769,8 +769,8 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		//  because everything else should be checked before placing anything. But
 		//  occupied status of cell might have changed already.
 		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
-		float width = prop->unitWidth();
-		float height = prop->unitHeight();
+		bofixed width = prop->unitWidth();
+		bofixed height = prop->unitHeight();
 		BoRect r(pos, pos + BoVector2(width, height));
 		if (!canvas()->canGo(prop, r)) {
 			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << pos.x() << "; " << pos.y() << ")" << endl;
@@ -832,7 +832,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		Q_UINT32 count;
 		Q_INT32 cornerX;
 		Q_INT32 cornerY;
-		float height;
+		bofixed height;
 		stream >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			stream >> cornerX;

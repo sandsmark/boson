@@ -214,7 +214,7 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, float x, float y)
+void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -245,7 +245,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, float
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, float x, float y)
+void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
   // FIXME: maybe moveWithAttack() and moveWithoutAttack() should be merged to
@@ -278,7 +278,7 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, float x,
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, float x, float y)
+void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -318,7 +318,7 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, float x, float y)
+void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -414,7 +414,7 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, float x, float y)
+void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -430,7 +430,7 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::changeHeight(int x, int y, float height)
+void BosonLocalPlayerInput::changeHeight(int x, int y, bofixed height)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;

@@ -23,6 +23,7 @@
 #include <GL/gl.h>
 
 #include "defines.h"
+#include "bomath.h"
 
 class QString;
 class KConfig;
@@ -1455,7 +1456,7 @@ class Bo3dTools
      * normalized vector)
      * @author Rivo Laks <rivolaks@hot.ee>
      **/
-    static float rotationToPoint(float x, float y);
+    static bofixed rotationToPoint(bofixed x, bofixed y);
 
     /**
      * This is the inverse operation to @ref rotationToPoint.
@@ -1463,18 +1464,19 @@ class Bo3dTools
      * and line which is rotated by @p angle around z-axis.
      * @author Rivo Laks <rivolaks@hot.ee>
      **/
+    static void pointByRotation(bofixed* x, bofixed* y, const bofixed& angle, const bofixed& radius);
     static void pointByRotation(float* x, float* y, const float angle, const float radius);
 
     /**
      * Convert @p deg, given in degree, into radians.
      * @return @p deg as radians.
      **/
-    static float deg2rad(float deg);
+    static bofixed deg2rad(bofixed deg);
     /**
      * Convert @p rad, given in radians, into degree.
      * @return @p rad as degree.
      **/
-    static float rad2deg(float rad);
+    static bofixed rad2deg(bofixed rad);
 
     /**
      * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.

@@ -106,18 +106,18 @@ bool BosonShot::init()
 //optimized for performance in the second place!
 void BosonShot::advanceMoveCheck()
 {
-  float velocityX = xVelocity();
-  float velocityY = yVelocity();
+  bofixed velocityX = xVelocity();
+  bofixed velocityY = yVelocity();
   if(!velocityX && !velocityY)
   {
     return;
   }
-  float xPos = x() + xVelocity();
-  float yPos = y() + yVelocity();
+  bofixed xPos = x() + xVelocity();
+  bofixed yPos = y() + yVelocity();
   // ensure that the next position will be valid
   if(xPos < 0 || xPos >= canvas()->mapWidth())
   {
-    velocityX = 0.0f;
+    velocityX = 0;
     xPos = x();
     if(xPos < 0 || xPos >= canvas()->mapWidth())
     {
@@ -126,7 +126,7 @@ void BosonShot::advanceMoveCheck()
   }
   if(yPos < 0 || yPos >= canvas()->mapHeight())
   {
-    velocityY = 0.0f;
+    velocityY = 0;
     yPos = y();
     if(yPos < 0 || yPos >= canvas()->mapHeight())
     {
@@ -177,9 +177,9 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     return false;
   }
   bool ok;
-  float x;
-  float y;
-  float z;
+  bofixed x;
+  bofixed y;
+  bofixed z;
   x = root.attribute("x").toFloat(&ok);
   if(!ok)
   {
@@ -219,14 +219,14 @@ long int BosonShot::damage() const
   return properties() ? properties()->damage() : 0;
 }
 
-float BosonShot::damageRange() const
+bofixed BosonShot::damageRange() const
 {
-  return properties() ? properties()->damageRange() : 0;
+  return properties() ? properties()->damageRange() : bofixed(0);
 }
 
-float BosonShot::fullDamageRange() const
+bofixed BosonShot::fullDamageRange() const
 {
-  return properties() ? properties()->fullDamageRange() : 0;
+  return properties() ? properties()->fullDamageRange() : bofixed(0);
 }
 
 
@@ -269,7 +269,7 @@ void BosonShotBullet::explode()
   // We need to create fly effects here, because atm, our position is shooter's
   //  (weapon's) position and BosonShot::explode() moves us to target position,
   //  so fly effects will then get correctly moved as well.
-  setEffects(properties()->newFlyEffects(BoVector3(x(), y(), z()), 0.0));
+  setEffects(properties()->newFlyEffects(BoVector3(x(), y(), z()), 0));
 
   BosonShot::explode();
 
@@ -307,7 +307,7 @@ void BosonShotMissile::init(const BoVector3& pos, const BoVector3& target)
 
   // First set the velocity to length of whole trip (for calculations)
   mVelo = target - pos;
-  mVelo.setZ(0.0);
+  mVelo.setZ(0.0f);
 
   mTotalDist = mVelo.length();
 
@@ -344,11 +344,11 @@ void BosonShotMissile::advanceMoveInternal()
   // Increase distance that missile has flied
   mPassedDist += speed();
   // Calculate parable height at current step
-  float factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
+  bofixed factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
   // How much will be added to current z position
-  float addZ = (mMaxHeight * factor);
-  float zvelo = mVelo[2] * speed() + (addZ - mZ);
+  bofixed addZ = (mMaxHeight * factor);
+  bofixed zvelo = mVelo[2] * speed() + (addZ - mZ);
   mZ = addZ;
   setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
   setXRotation(Bo3dTools::rotationToPoint(mEffectVelo * speed(), zvelo) - 90 );
@@ -393,9 +393,9 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   }
 
   bool ok;
-  float xvelo, yvelo, zvelo;
-  float targetx, targety, targetz;
-  float speed;
+  bofixed xvelo, yvelo, zvelo;
+  bofixed targetx, targety, targetz;
+  bofixed speed;
 
   xvelo = root.attribute("xVelocity").toFloat(&ok);
   if(!ok)
@@ -500,12 +500,12 @@ BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
     BosonShot(owner, canvas)
 {
   mDamage = 0;
-  mDamageRange = 0.0f;
-  mFullDamageRange = 0.0f;
+  mDamageRange = 0;
+  mFullDamageRange = 0;
   mDelay = 0;
 }
 
-void BosonShotExplosion::activate(const BoVector3& pos, long int damage, float damagerange, float fulldamagerange, int delay)
+void BosonShotExplosion::activate(const BoVector3& pos, long int damage, bofixed damagerange, bofixed fulldamagerange, int delay)
 {
   mDamage = damage;
   mDamageRange = damagerange;
@@ -700,7 +700,7 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
   }
 
   bool ok;
-  float speed;
+  bofixed speed;
 
   speed = root.attribute("Speed").toFloat(&ok);
   if(!ok)
@@ -841,7 +841,7 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   }
 
   bool ok;
-  float velox, veloy, veloz;
+  bofixed velox, veloy, veloz;
   unsigned int props;
 
   velox = root.attribute("Velocityx").toFloat(&ok);
@@ -924,12 +924,12 @@ long int BosonShotFragment::damage() const
   return mUnitProperties->explodingFragmentDamage();
 }
 
-float BosonShotFragment::damageRange() const
+bofixed BosonShotFragment::damageRange() const
 {
   return mUnitProperties->explodingFragmentDamageRange();
 }
 
-float BosonShotFragment::fullDamageRange() const
+bofixed BosonShotFragment::fullDamageRange() const
 {
   return 0.25 * damageRange();
 }

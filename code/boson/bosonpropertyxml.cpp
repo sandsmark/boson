@@ -21,6 +21,7 @@
 #include "bosonpropertyxml.moc"
 
 #include "bodebug.h"
+#include "bomath.h"
 
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertylist.h>
@@ -52,6 +53,8 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
 	value = QString::number(((KGameProperty<unsigned long int>*)prop)->value());
  } else if (*t == typeid(float)) {
 	value = QString::number(((KGameProperty<float>*)prop)->value());
+ } else if (*t == typeid(bofixed)) {
+	value = QString::number(((KGameProperty<bofixed>*)prop)->value());
  } else if (*t == typeid(char)) {
 	value = ((KGameProperty<char>*)prop)->value();
  } else if (*t == typeid(QString)) {
@@ -92,6 +95,8 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 	((KGameProperty<unsigned long int>*)prop)->setValue(value.toULong(&ok));
  } else if (*t == typeid(float)) {
 	((KGameProperty<float>*)prop)->setValue(value.toULong(&ok));
+ } else if (*t == typeid(bofixed)) {
+	((KGameProperty<bofixed>*)prop)->setValue(value.toULong(&ok));
  } else if (*t == typeid(char)) {
 	if (value.length() >= 1) {
 		((KGameProperty<char>*)prop)->setValue(value[0]);

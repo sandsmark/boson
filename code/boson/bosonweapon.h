@@ -82,20 +82,20 @@ class BosonWeaponProperties : public PluginProperties
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    inline float damageRange() const  { return mDamageRange; }
+    inline bofixed damageRange() const  { return mDamageRange; }
     /**
      * @return Full damage range of missile of this unit, e.g. range in what
      *  units will be damaged by damage value (farther they'll be damaged less)
      **/
-    inline float fullDamageRange() const  { return mFullDamageRange; }
+    inline bofixed fullDamageRange() const  { return mFullDamageRange; }
     /**
      * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    inline float speed() const  { return mSpeed; }
+    inline bofixed speed() const  { return mSpeed; }
     /**
      * @return Acceleration speed of missile of this unit
      **/
-    inline float accelerationSpeed() const  { return mAccelerationSpeed; }
+    inline bofixed accelerationSpeed() const  { return mAccelerationSpeed; }
     /**
      * @return Filename of 3d model of shot of this weapon.
      * Only used in unit editor
@@ -118,7 +118,7 @@ class BosonWeaponProperties : public PluginProperties
      * Note that this is height per cell, it should be multiplied by distance of
      * shot to get final height.
      **/
-    inline float height() const  { return mHeight; }
+    inline bofixed height() const  { return mHeight; }
 
     inline BosonModel* model() const  { return mModel; }
 
@@ -152,8 +152,8 @@ class BosonWeaponProperties : public PluginProperties
      **/
     BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
-    QPtrList<BosonEffect> newShootEffects(BoVector3 pos, float rotation) const;
-    QPtrList<BosonEffect> newFlyEffects(BoVector3 pos, float rotation) const;
+    QPtrList<BosonEffect> newShootEffects(BoVector3 pos, bofixed rotation) const;
+    QPtrList<BosonEffect> newFlyEffects(BoVector3 pos, bofixed rotation) const;
     QPtrList<BosonEffect> newHitEffects(BoVector3 pos) const;
 
     QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; }
@@ -171,20 +171,20 @@ class BosonWeaponProperties : public PluginProperties
   protected:
     void setWeaponName(QString str)  { mName = str; }
     void setDamage(long int damage)  { mDamage = damage; }
-    void setDamageRange(float range)  { mDamageRange = range; }
-    void setFullDamageRange(float range)  { mFullDamageRange = range; }
+    void setDamageRange(bofixed range)  { mDamageRange = range; }
+    void setFullDamageRange(bofixed range)  { mFullDamageRange = range; }
     void setReloadingTime(unsigned int reload)  { mReload = reload; }
     void setRange(unsigned long int range)  { mRange = range; }
     void setCanShootAtAirUnits(bool can)  { mCanShootAtAirUnits = can; }
     void setCanShootAtLandUnits(bool can)  { mCanShootAtLandUnits = can; }
-    void setSpeed(float speed)  { mSpeed = speed; }
-    void setAccelerationSpeed(float speed)  { mAccelerationSpeed = speed; }
+    void setSpeed(bofixed speed)  { mSpeed = speed; }
+    void setAccelerationSpeed(bofixed speed)  { mAccelerationSpeed = speed; }
     void setModelFileName(QString file)  { mModelFileName = file; }
     void setShootEffectIds(QValueList<unsigned long int> ids)  { mShootEffectIds = ids; }
     void setFlyEffectIds(QValueList<unsigned long int> ids)  { mFlyEffectIds = ids; }
     void setHitEffectIds(QValueList<unsigned long int> ids)  { mHitEffectIds = ids; }
     void setOffset(BoVector3 o)  { mOffset = o; }
-    void setHeight(float height)  { mHeight = height; }
+    void setHeight(bofixed height)  { mHeight = height; }
     void setSound(int event, QString filename);
     void setAutoUse(bool use)  { mAutoUse = use; }
 
@@ -198,14 +198,14 @@ class BosonWeaponProperties : public PluginProperties
     unsigned long int mId;
     unsigned long int mRange;
     long int mDamage;
-    float mDamageRange;
-    float mFullDamageRange;
+    bofixed mDamageRange;
+    bofixed mFullDamageRange;
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     unsigned int mReload;
-    float mSpeed;
-    float mAccelerationSpeed;
-    float mHeight;
+    bofixed mSpeed;
+    bofixed mAccelerationSpeed;
+    bofixed mHeight;
     BosonShot::Type mShotType;
     BosonModel* mModel;
     QString mModelFileName;

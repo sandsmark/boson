@@ -121,19 +121,19 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mCanvas = canvas;
 
  mId = 0;
- mX = mY = mZ = 0.0f;
- mWidth = mHeight = 0.0f;
- mDepth = 0.0;
+ mX = mY = mZ = 0;
+ mWidth = mHeight = 0;
+ mDepth = 0;
  mCellsDirty = true;
- mRotation = 0.0f;
- mXRotation = 0.0f;
- mYRotation = 0.0f;
+ mRotation = 0;
+ mXRotation = 0;
+ mYRotation = 0;
  mIsVisible = true;
  mEffects = 0;
 
- mXVelocity = 0.0f;
- mYVelocity = 0.0f;
- mZVelocity = 0.0f;
+ mXVelocity = 0;
+ mYVelocity = 0;
+ mZVelocity = 0;
 
  mCurrentSpeed = 0;
  mMaxSpeed = 0;
@@ -228,24 +228,26 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
 //		"); size: (" << width() << "; " << height() << "; " << depth() << ")" << endl;
 
  // Check z-coord first
- if (QMAX(z() + zVelocity(), v1.z()) >= QMIN(z() + zVelocity() + depth(), v2.z())) {
+ bofixed v1_z = v1.z();
+ bofixed v2_z = v2.z();
+ if (QMAX(z() + zVelocity(), v1_z) >= QMIN(z() + zVelocity() + depth(), v2_z)) {
 	// z-coordinates don't intersect
 	return false;
  }
 
  // Half the width and height of the other box
- float halfw = (v2.x() - v1.x()) / 2;
- float halfh = (v2.y() - v1.y()) / 2;
+ bofixed halfw = (v2.x() - v1.x()) / 2;
+ bofixed halfh = (v2.y() - v1.y()) / 2;
 
- float centerx = v1.x() + halfw;
- float centery = v1.y() + halfh;
+ bofixed centerx = v1.x() + halfw;
+ bofixed centery = v1.y() + halfh;
 
  // BB 1
- float minx1, miny1, maxx1, maxy1;
+ bofixed minx1, miny1, maxx1, maxy1;
  minx1 = x() + xVelocity() - halfw;
- miny1 = y() + xVelocity() - halfh + 1.0f;
+ miny1 = y() + xVelocity() - halfh + 1;
  maxx1 = x() + yVelocity() + width() + halfw;
- maxy1 = y() + yVelocity() + height() + halfw - 1.0f;
+ maxy1 = y() + yVelocity() + height() + halfw - 1;
  if ((centerx > minx1) && (centerx < maxx1) && (centery > miny1) && (centery < maxy1)) {
 	// Box's center is in BB 1
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE (1)!!!" << endl;
@@ -253,10 +255,10 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
  }
 
  // BB 2
- float minx2, miny2, maxx2, maxy2;
- minx2 = x() + xVelocity() - halfw + 1.0f;
+ bofixed minx2, miny2, maxx2, maxy2;
+ minx2 = x() + xVelocity() - halfw + 1;
  miny2 = y() + xVelocity() - halfh;
- maxx2 = x() + yVelocity() + width() + halfw - 1.0f;
+ maxx2 = x() + yVelocity() + width() + halfw - 1;
  maxy2 = y() + yVelocity() + height() + halfw;
  if ((centerx > minx2) && (centerx < maxx2) && (centery > miny2) && (centery < maxy2)) {
 	// Box's center is in BB 2
@@ -265,9 +267,9 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
  }
 
  // Check manhattan dist between centers
- float mycenterx = x() + xVelocity() + width() / 2;
- float mycentery = y() + yVelocity() + height() / 2;
- if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1.0f)) {
+ bofixed mycenterx = x() + xVelocity() + width() / 2;
+ bofixed mycentery = y() + yVelocity() + height() / 2;
+ if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - 1)) {
 	// Box's center still collides with us
 //	boDebug() << "        " << k_funcinfo << "Items COLLIDE! (3)!!" << endl;
 	return true;
@@ -304,8 +306,8 @@ BoRect BosonItem::boundingRect() const
 
 BoRect BosonItem::boundingRectAdvanced() const
 {
- float left = leftEdge() + xVelocity();
- float top = topEdge() + yVelocity();
+ bofixed left = leftEdge() + xVelocity();
+ bofixed top = topEdge() + yVelocity();
  return BoRect(left, top, left + width(), top + height());
 }
 
@@ -327,7 +329,7 @@ void BosonItem::removeFromCells()
  canvas()->removeFromCells(this);
 }
 
-void BosonItem::setSize(float width, float height, float depth)
+void BosonItem::setSize(bofixed width, bofixed height, bofixed depth)
 {
  removeFromCells();
  mWidth = width;
@@ -349,7 +351,7 @@ BosonCollisions* BosonItem::collisions() const
  return canvas()->collisions();
 }
 
-void BosonItem::setEffectsPosition(float x, float y, float z)
+void BosonItem::setEffectsPosition(bofixed x, bofixed y, bofixed z)
 {
  if (effects() && effects()->count() > 0) {
 	BoVector3 pos(x + width() / 2, y + height() / 2, z);
@@ -361,7 +363,7 @@ void BosonItem::setEffectsPosition(float x, float y, float z)
  }
 }
 
-void BosonItem::setEffectsRotation(float xrot, float yrot, float zrot)
+void BosonItem::setEffectsRotation(bofixed xrot, bofixed yrot, bofixed zrot)
 {
  BoVector3 rot(xrot, yrot, zrot);
  if (effects() && effects()->count() > 0) {

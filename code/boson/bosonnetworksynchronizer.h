@@ -27,6 +27,7 @@ class Unit;
 class BosonCanvas;
 class BoMessageLogger;
 
+#include "bomath.h"
 #include <qstring.h>
 
 class BosonNetworkSynchronizerPrivate;

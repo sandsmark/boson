@@ -237,7 +237,7 @@ void BoItemList::recalculateAirOccupiedStatus()
 #endif // PATHFINDER_TNG
 }
 
-float BoItemList::passageCostLand() const
+bofixed BoItemList::passageCostLand() const
 {
  // FIXME: this rather belongs to pathfinder, but it's here because pathfinder
  //  doesn't have direct access to list of items on a cell and so it is faster
@@ -247,7 +247,7 @@ float BoItemList::passageCostLand() const
  //  unit occupies 25% of the cell, we should use  WAITING_COST * 0.25  instead
  //  of just  WAITING_COST.
  //  Maybe use maximum of costs of all units on this cell, not sum of them?
- float cost = 0.0f;
+ bofixed cost = 0;
 #ifdef PATHFINDER_TNG
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -277,7 +277,7 @@ float BoItemList::passageCostLand() const
  return cost;
 }
 
-float BoItemList::passageCostAir() const
+bofixed BoItemList::passageCostAir() const
 {
  // FIXME: this rather belongs to pathfinder, but it's here because pathfinder
  //  doesn't have direct access to list of items on a cell and so it is faster
@@ -287,7 +287,7 @@ float BoItemList::passageCostAir() const
  //  unit occupies 25% of the cell, we should use  WAITING_COST * 0.25  instead
  //  of just  WAITING_COST.
  //  Maybe use maximum of costs of all units on this cell, not sum of them?
- float cost = 0.0f;
+ bofixed cost = 0;
 #ifdef PATHFINDER_TNG
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {

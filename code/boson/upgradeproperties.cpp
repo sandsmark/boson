@@ -290,7 +290,7 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
   boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " properites. weaponid: " << weaponid << endl;
   QValueList<unsigned long int>::Iterator it;
   unsigned long int oldvalueuint = 0;
-  float oldvaluef = 0.0f;
+  bofixed oldvaluef = 0.0f;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
@@ -304,21 +304,21 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
         {
           oldvalueuint = prop->health();
           prop->setHealth(applyValue(data, oldvalueuint));
-          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          applyPropertyToUnits((bofixed)oldvalueuint, *it, player, type);
           break;
         }
         case Armor:
         {
           oldvalueuint = prop->armor();
           prop->setArmor(applyValue(data, oldvalueuint));
-          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          applyPropertyToUnits((bofixed)oldvalueuint, *it, player, type);
           break;
         }
         case Shields:
         {
           oldvalueuint = prop->shields();
           prop->setShields(applyValue(data, oldvalueuint));
-          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          applyPropertyToUnits((bofixed)oldvalueuint, *it, player, type);
           break;
         }
         case MineralCost:
@@ -337,7 +337,7 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
         {
           oldvalueuint = prop->sightRange();
           prop->setSightRange(applyValue(data, oldvalueuint));
-          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          applyPropertyToUnits((bofixed)oldvalueuint, *it, player, type);
           break;
         }
         case ProductionTime:
@@ -452,12 +452,12 @@ unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned lo
   return applyValueInternal(type, oldvalue, value);
 }
 
-float UpgradeProperties::applyValue(const QString& data, float oldvalue) const
+bofixed UpgradeProperties::applyValue(const QString& data, bofixed oldvalue) const
 {
   ValueType type;
   QString valuestr;
   parseEntry(data, type, valuestr);
-  float value = valuestr.toFloat();
+  bofixed value = valuestr.toFloat();
   return applyValueInternal(type, oldvalue, value);
 }
 
@@ -480,7 +480,7 @@ void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QStrin
   }
 }
 
-void UpgradeProperties::applyPropertyToUnits(float oldvalue,
+void UpgradeProperties::applyPropertyToUnits(bofixed oldvalue,
     unsigned long int typeId, Player* player, UpgradeType type) const
 {
   boDebug(600) << "          " << "[UpgradeProperties::applyPropertyToUnits(...)]" <<

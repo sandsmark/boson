@@ -19,6 +19,7 @@
 #ifndef BOITEMLIST_H
 #define BOITEMLIST_H
 
+#include "bomath.h"
 #include <qvaluelist.h>
 
 class BosonItem;
@@ -176,8 +177,8 @@ public:
 	void recalculateLandOccupiedStatus();
 	void recalculateAirOccupiedStatus();
 
-	float passageCostLand() const;
-	float passageCostAir() const;
+	bofixed passageCostLand() const;
+	bofixed passageCostAir() const;
 
 protected:
 	void registerList();

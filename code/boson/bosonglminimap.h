@@ -21,6 +21,8 @@
 
 #include <qobject.h>
 
+#include "bomath.h"
+
 class Player;
 class PlayerIO;
 class Unit;
@@ -88,7 +90,7 @@ public slots:
 	 **/
 	void slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
-	void slotUnitMoved(Unit* unit, float oldX, float oldY);
+	void slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void slotUnitDestroyed(Unit* unit);
 
 	void slotUnfog(int x, int y);
@@ -116,7 +118,7 @@ signals:
 
 protected:
 	void setPoint(int x, int y, const QColor& color);
-	void makeCellList(QPtrVector<Cell>* cells, const Unit* unit, float x, float y);
+	void makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y);
 	/**
 	 * Move a unit. if oldCells is NULL they are ignored.
 	 * (added a unit)

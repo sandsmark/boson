@@ -96,8 +96,8 @@ class PathNode
     int x; // x-coordinate of cell
     int y; // y-coordinate of cell
 
-    float g; // real cost - cost of all nodes up to this one (If this node is at goal, it's cost of full path)
-    float h; // heuristic cost - distance between this node and goal
+    bofixed g; // real cost - cost of all nodes up to this one (If this node is at goal, it's cost of full path)
+    bofixed h; // heuristic cost - distance between this node and goal
     short int level; // node is level steps away from start. It's needed to search only 10 steps of path at once
 };
 
@@ -610,7 +610,7 @@ bool BosonPath::findSlowPath()
       }
 
       // Calculate costs of node
-      float nodecost = cost(n2.x, n2.y);
+      bofixed nodecost = cost(n2.x, n2.y);
       // If cost is ERROR_COST, then we can't go there
       if(nodecost >= ERROR_COST)
       {
@@ -746,9 +746,9 @@ bool BosonPath::findSlowPath()
       points.append(BoVector3((*it).x(), -(*it).y(), 0.0f));
     }
     BoVector4 color(0.5f, 0.5f, 0.5f, 1.0f);
-    float pointSize = 2.0f;
+    bofixed pointSize = 2.0f;
     int timeout = 100;
-    float zOffset = 0.5f;
+    bofixed zOffset = 0.5f;
     BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
   }
 #endif
@@ -869,7 +869,7 @@ bool BosonPath::rangeCheck()
   return true;
 }
 
-float BosonPath::dist(int ax, int ay, int bx, int by)
+bofixed BosonPath::dist(int ax, int ay, int bx, int by)
 {
   // Cost is bigger when point a is not near straight line between start and
   //  goal
@@ -883,7 +883,7 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
     cross = -cross;
   }
 
-  float dist = float(cross / CROSSDIVIDER);
+  bofixed dist = bofixed(cross / CROSSDIVIDER);
   dist += DIST_MODIFIER * QMAX(QABS(ax - bx), QABS(ay - by));
   return dist;
 }
@@ -908,7 +908,7 @@ void BosonPath::neighbor(int& x, int& y, Direction d)
   }
 }
 
-float BosonPath::cost(int x, int y)
+bofixed BosonPath::cost(int x, int y)
 {
   // Use cached value if possible
   if(marking(x, y).c != -1)
@@ -916,7 +916,7 @@ float BosonPath::cost(int x, int y)
     return marking(x, y).c;
   }
 
-  float co;
+  bofixed co;
   // Check at the very beginning if tile is fogged - if it is, we return one value and save time
   if(mUnit->owner()->isFogged(x, y))
   {
@@ -1430,8 +1430,8 @@ void BosonPathRegion::calculateCosts(unsigned int index)
   // Calculate 'neighbor cost' for neighbor.
   // It's cost of going from this region to neighbor region. The more border
   // cells this region has with us, the less the cost will be.
-  //neighbors[index].cost = (float)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
-  neighbors[index].cost = (float)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
+  //neighbors[index].cost = (bofixed)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
+  neighbors[index].cost = (bofixed)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
 //  boDebug(510) << k_funcinfo << "Passage cost from " << id << " to " << neighbors[index].region->id <<
 //      " is " << neighbors[index].cost << " (" << neighbors[index].bordercells << " border cells)" << endl;
 /*  for(unsigned int i = 0; i < neighbors.count(); i++)
@@ -1465,8 +1465,8 @@ void BosonPathRegion::addNeighbor(BosonPathRegion* r)
 
   Neighbor n;
   n.region = r;
-  float dx = QABS(r->centerx - centerx);
-  float dy = QABS(r->centery - centery);
+  bofixed dx = QABS(r->centerx - centerx);
+  bofixed dy = QABS(r->centery - centery);
   n.cost = sqrt(dx * dx + dy * dy);
   n.bordercells = 1;
   neighbors.append(n);
@@ -1997,14 +1997,14 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        float x = info->llpath[point].x();
-        float y = info->llpath[point].y();
+        bofixed x = info->llpath[point].x();
+        bofixed y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
         points.append(BoVector3(x, -y, 0.0f));
       }
-      float pointSize = 3.0f;
+      bofixed pointSize = 3.0f;
       int timeout = 100;
-      float zOffset = 0.5f;
+      bofixed zOffset = 0.5f;
       BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
@@ -2342,14 +2342,14 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
       QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        float x = info->llpath[point].x();
-        float y = info->llpath[point].y();
+        bofixed x = info->llpath[point].x();
+        bofixed y = info->llpath[point].y();
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
         points.append(BoVector3(x, -y, 0.0f));
       }
-      float pointSize = 3.0f;
+      bofixed pointSize = 3.0f;
       int timeout = 100;
-      float zOffset = 0.5f;
+      bofixed zOffset = 0.5f;
       BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
@@ -2729,21 +2729,21 @@ void BosonPath2::initCellPassability()
 {
 #define RAD2DEG (180.0/M_PI)
 //  boDebug(510) << k_funcinfo << endl;
-  const float maxPassableSlope = 45.0f; // If slope <= this, then it's passable, otherwise not
-  float minh, maxh, slope;
+  const bofixed maxPassableSlope = 45; // If slope <= this, then it's passable, otherwise not
+  bofixed minh, maxh, slope;
   for(unsigned int y = 0; y < mMap->height(); y++)
   {
     for(unsigned int x = 0; x < mMap->width(); x++)
     {
       // Find min and max heights for that cell
-      minh = 1000.0f;
-      maxh = -1000.0f;
+      minh = 1000;
+      maxh = -1000;
       for(unsigned int i = x; i <= x + 1; i++)
       {
         for(unsigned int j = y; j <= y + 1; j++)
         {
-          minh = QMIN(minh, mMap->heightAtCorner(i, j));
-          maxh = QMAX(maxh, mMap->heightAtCorner(i, j));
+          minh = QMIN(minh, bofixed(mMap->heightAtCorner(i, j)));
+          maxh = QMAX(maxh, bofixed(mMap->heightAtCorner(i, j)));
         }
       }
       // Calculate slope between min and max height.
@@ -3323,13 +3323,13 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
       QValueList<BoVector3> points;
       for(unsigned int point = 0; point < path->path.count(); point++)
       {
-        float x = path->path[point]->centerx;
-        float y = path->path[point]->centery;
+        bofixed x = path->path[point]->centerx;
+        bofixed y = path->path[point]->centery;
         points.append(BoVector3(x, -y, 0.0f));
       }
-      float pointSize = 5.0f;
+      bofixed pointSize = 5.0f;
       int timeout = 200;
-      float zOffset = 0.5f;
+      bofixed zOffset = 0.5f;
       BosonPathVisualization::pathVisualization()->addLineVisualization(points, pointSize, timeout, zOffset);
     }
 #endif
@@ -3436,7 +3436,7 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   boDebug(510) << k_funcinfo << "Found " << info->possibleDestRegions.count() << " possible dest regions" << endl;
 }
 
-float BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
+bofixed BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
 {
   // We use start and destination _points_, not _regions_, because points are
   //  more accurate, than region centers (we may start/end at the edge of the
@@ -3453,16 +3453,16 @@ float BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
   }*/
   // Cost is bigger when point a is not near straight line between start and
   //  goal
-  float dx1 = r->centerx - info->dest.x();
-  float dy1 = r->centery - info->dest.y();
-  float dx2 = info->start.x() - r->centerx;
-  float dy2 = info->start.y() - r->centery;
-  float cross = dx1 * dy2 - dx2 * dy1;
+  bofixed dx1 = r->centerx - info->dest.x();
+  bofixed dy1 = r->centery - info->dest.y();
+  bofixed dx2 = info->start.x() - r->centerx;
+  bofixed dy2 = info->start.y() - r->centery;
+  bofixed cross = dx1 * dy2 - dx2 * dy1;
   /*double dx1 = ax - bx;
   double dy1 = ay - by;
   double dx2 = mStartx - bx;
   double dy2 = mStarty - by;
-  float cross = (r->center.x - info->destRegion->center.x) * (info->startRegion->center.y - r->center.y) - dx2 * dy1;*/
+  bofixed cross = (r->center.x - info->destRegion->center.x) * (info->startRegion->center.y - r->center.y) - dx2 * dy1;*/
   if(cross < 0)
   {
     cross = -cross;
@@ -3471,18 +3471,18 @@ float BosonPath2::highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info)
   return (cross / HIGH_CROSS_DIVIDER) + TNG_HIGH_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
 }
 
-float BosonPath2::highLevelCost(BosonPathRegion* r, BosonPathInfo*)
+bofixed BosonPath2::highLevelCost(BosonPathRegion* r, BosonPathInfo*)
 {
   return r->cost;
 }
 
-float BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
+bofixed BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
 {
-  /*float dx1 = x - info->dest.x();
-  float dy1 = y - info->dest.y();
-  float dx2 = info->start.x() - x;
-  float dy2 = info->start.y() - y;
-  float cross = dx1 * dy2 - dx2 * dy1;*/
+  /*bofixed dx1 = x - info->dest.x();
+  bofixed dy1 = y - info->dest.y();
+  bofixed dx2 = info->start.x() - x;
+  bofixed dy2 = info->start.y() - y;
+  bofixed cross = dx1 * dy2 - dx2 * dy1;*/
   int dx1 = x - (int)info->dest.x();
   int dy1 = y - (int)info->dest.y();
   int dx2 = (int)info->start.x() - x;
@@ -3493,15 +3493,15 @@ float BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
     cross = -cross;
   }
 
-  return (cross / (float)LOW_CROSS_DIVIDER) + TNG_LOW_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
+  return (cross / bofixed(LOW_CROSS_DIVIDER)) + TNG_LOW_DIST_MULTIPLIER * QMAX(QABS(dx1), QABS(dy1));
 }
 
-float BosonPath2::lowLevelCost(int x, int y, BosonPathInfo* info)
+bofixed BosonPath2::lowLevelCost(int x, int y, BosonPathInfo* info)
 {
   return TNG_LOW_BASE_COST + cell(x, y)->passageCostLand();
 }
 
-float BosonPath2::lowLevelCostAir(int x, int y, BosonPathInfo* info)
+bofixed BosonPath2::lowLevelCostAir(int x, int y, BosonPathInfo* info)
 {
   return TNG_LOW_BASE_COST + cell(x, y)->passageCostAir();
 }
@@ -3558,7 +3558,7 @@ bool BosonPath2::cellOccupied(int x, int y)
   return cell(x, y)->isLandOccupied();
 }
 
-float BosonPath2::cellCost(int x, int y)
+bofixed BosonPath2::cellCost(int x, int y)
 {
   return cell(x, y)->passageCostLand();
 }
@@ -3639,12 +3639,12 @@ BosonPathVisualization* BosonPathVisualization::pathVisualization()
   return mPathVisualization;
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset)
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset)
 {
   emit signalAddLineVisualization(points, color, pointSize, timeout, zOffset);
 }
 
-void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, float pointSize, int timeout, float zOffset)
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, bofixed pointSize, int timeout, bofixed zOffset)
 {
   addLineVisualization(points, BoVector4(1.0f, 1.0f, 1.0f, 1.0f), pointSize, timeout, zOffset);
 }
