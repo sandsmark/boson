@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -714,6 +714,7 @@ QStringList BosonPlayField::findPlayFieldsOfCampaign(const QString& campaign)
 // load from harddisk to virtual files in the QMap.
 bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 {
+ boDebug() << k_funcinfo << endl;
  if (!destFiles.isEmpty()) {
 	boError() << k_funcinfo << "destFiles must be empty" << endl;
 	return false;
@@ -1015,6 +1016,7 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
  switch (version) {
 	case BOSON_SAVEGAME_FORMAT_VERSION_0_9:
 	{
+		boDebug() << k_funcinfo << "converting from 0.9 to 0.9.1 format" << endl;
 		BosonFileConverter converter;
 		if (!converter.convertPlayField_From_0_9_To_0_9_1(destFiles)) {
 			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
@@ -1026,6 +1028,7 @@ bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& dest
 	}
 	case BOSON_SAVEGAME_FORMAT_VERSION_0_9_1:
 	{
+		boDebug() << k_funcinfo << "converting from 0.9.1 to 0.10 format" << endl;
 		BosonFileConverter converter;
 		if (!converter.convertPlayField_From_0_9_1_To_0_10(destFiles)) {
 			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
