@@ -163,7 +163,7 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
 	return false;
  } else {
 	// file format is >= boson 0.9
-	boDebug() << k_funcinfo << "file format is current" << endl;
+//	boDebug() << k_funcinfo << "file format is current" << endl;
 	mapXML = file->mapXMLData();
 	playersXML = file->playersData();
  }
