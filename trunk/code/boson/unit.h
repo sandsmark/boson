@@ -285,7 +285,7 @@ public:
 	/**
 	 * @return A list of all waypoints for debugging
 	 **/
-	QValueList<QPoint> waypointList() const;
+	const QValueList<QPoint>& waypointList() const;
 
 	/**
 	 * Move this unit to a specified point. Also make sure that previous
