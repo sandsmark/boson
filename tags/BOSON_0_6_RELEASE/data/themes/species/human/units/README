@@ -1,0 +1,147 @@
+Ok this is work in progress so a lot of things might and probably will change
+(or have already changed when you read this).
+Nevertheless here the description of the themes/species/*/units directory (where
+"*" is currently "human" only).
+
+All units in boson are derived from the "Unit" class and therefore they all
+share one common directory - facilities as well as mobile units.
+All files which belong to a unit of this species belong to its directory in
+themes/species/*/units/unit_dir - unit_dir is the unique directory of the unit.
+It doesn't matter how you name this directory - however a prefix like mob_ and
+fix_ might be useful when working on the units. But this depends on you.
+
+Currently a unit must have at least 2 overview bitmaps (overview-big.bmp and
+overview-small.bmp) which are shown when the unit is selected (big) and as a
+button in the construction facility (small). 
+The big overview must have s size of 180*110 (AB: ??? probably smaller)
+The small overview must have a size of ??
+A facility has 5 sprites, a mobile unit 9.  
+The sprites of the facilities show the 4 construction steps 
+(from initial to completely built) while a mobile unit has 8 different directions. 
+The last one is the "destroyed" pix. 
+The files of the sprites are named field-000N.bmp where N is the number of the
+sprite (0..8 or 0..4).
+
+Additionally all units have index.desktop file in their directories. This file
+describes the unit. It has first a common group shared by all units: 
+"[Boson Unit]" (without the quotation marks). This group can contain the 
+following entries:
+
+-------------------------------------------------------------------------------
+[Boson Unit]
+IsFacility=boolean  - True if this is a facility, false if this is a mobile
+                      unit. 
+                      Default is false.
+* Name=Text         - The Name of the unit. Should be short, no more than 2 or 3
+                      words. One if possible.
+                      Default is "Unknown".
+* Id=Number         - A unique (!) ID for this unit. Must be > 0.
+                      No default!
+Health=Number       - Health, power, whatever. Make this greater and the unit will
+                      live longer. Must be > 0. 
+                      Defaul is 100.
+Shield=Number       - Not yet supported. 
+                      Default is 0.
+Armor=Number        - Not yet supported. 
+                      Default is 0.
+MineralCost=Number  - How much mineral do you have to pay if you build this? 
+                      Default is 100.
+OilCost=Number      - How much oil do you have to pay if you build this? 
+                      Default is 0.
+SightRange=Number   - The sight range (>= 0) of this unit. 
+                      the sight range is how far (in cells!) this unit can see.
+                      Default is 5 (currently).
+WeaponDamage=Number - The damage this unit makes to other units when firing. Can
+                      also be negative - the unit repairs then. 
+                      Default is 0.
+WeaponRange=Number  - The weapon range (>= 0) of this unit. 
+                      Note: when WeaponDamage <= 0 this has no effect!
+                      Default is 0.
+Reload=Number       - The time (>= 0) to reload the weapon. "Time" means number of
+                      advance calls (ca 1 per 50ms). 
+                      Default is 0.
+TerrainType=Number  - The default terrain type of the unit. One of 0 (Land), 
+                      1 (Water) or 2 (Air).
+                      You must decide for one - even if the unit is some kind
+                      of mixture. If so you will probably use Land (0). 
+                      The default is 0 (=Land Unit)
+ProductionTime=Number - The number of advance calls needed to produce this unit
+                        Default is (currenlty) 100.
+CanShootAtAirUnits=bool  - Can this unit shoot at aircrafts?
+                           Default true for TeeeainType=2, otherwise false.
+CanShootAtLandUnits=bool - Can this unit shoot at ground units? True or False.
+                           Default is true for TerrainType=0 or TerrainType=1, 
+                           otherwise false.
+Producer=Number     - Specifies which kind of factory is able to produce this 
+                      unit. Possible values are: 0=war factory (heavy land 
+                      units, all types of vehicles), 1=shipyard (all ships), 
+                      2=airport (all aircrafts), 3=barracks (soldiers,
+                      human units), 10=command bunker (all facilities).
+                      Please note that there is currently only a single factory
+                      for every Producer type, but we might add more one day
+                      (e.g. a mobile factory). The possible productions of those
+                      factories will also depend on the Producer type.
+                      The default is the value of "TerrainType" for mobile units
+                      and 10 (= command bunker) for facilities.
+SupportMiniMap=bool - If true then this player has a minimap when he has a unit
+                      of this type. The minimap disappears when all units of the
+                      player which have SupportMiniMap=true are gone.
+                      Default is false.
+-------------------------------------------------------------------------------
+
+The entries marked with * are mandatory.
+
+The number of mandatory entries can increase in the future. This is still work
+in progress.
+You should provide as many entries as possible although you don't have to.
+
+Also note that all entries support (as of KConfig) the possibility to create
+localized versions. You can e.g. use "Name[de]=German Name" or so. Use this
+feature where it is useful. I doubt this is useful for something like Id ;-)
+
+
+Beside this general group there are (currently) two additional groups: 
+"[Boson Mobile Unit]" and "[Boson Facility]". 
+These groups contain all mobile unit/facility specific stuff (like the
+speed for a unit).
+
+-------------------------------------------------------------------------------
+[Boson Mobile Unit]
+Speed=Number         - Value of the speed of the unit. A unit will move that many
+                       pixels per advance call. This is a double number so values
+                       like "0.452463" are possible as well.
+		       Default is 0
+CanGoOnLand=boolean  - Whether this unit can go over land. 
+                       This is true by default for TerrainType = Land or
+		       Aircraft.
+CanGoOnWater=boolean - Whether this unit can go over water. 
+                       This is true by default for TerrainType = Water or 
+		       Aircraft.
+CanMineMinerals=boolean - Whether this unit can mine minerals.
+                          Default is false.
+CanMineOil=boolean   - Whether this unit can mine oil.
+                       Default is false .
+MaxResources=number  - The maximal amount of resourced that can be mined until
+                       the unit needs to return to a refinery. Always 0 if
+                       CanMineMinerals and CanMineOil are false.
+                       Default is 100 if either CanMineMinerals or CanMineOil 
+                       is true.
+
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+[Boson Facility]
+CanProduce=Boolean  - True if something can be produced here. 
+                      Default is false.
+ProducerList=List   - CanProduce must be true for this.
+                      The List is a comma separated list of Producer IDs.
+                      The facility will be able to produce all units with the
+                      "Producer" entry that is listed here.
+                      Default is an empty List.
+CanRefineOil=Boolean - True if this is an oilrefinery.
+                      Default is false
+CanRefineMinerals=Boolean - True if this is a mineralrefinery.
+                            Default is false
+-------------------------------------------------------------------------------
+
+

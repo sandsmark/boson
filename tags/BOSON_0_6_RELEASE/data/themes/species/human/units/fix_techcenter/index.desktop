@@ -1,0 +1,8 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Techcenter
+Id=12
+Health=300
+MineralCost=400
+Producer=10

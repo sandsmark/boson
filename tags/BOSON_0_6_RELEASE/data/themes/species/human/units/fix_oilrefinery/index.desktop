@@ -1,0 +1,11 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Oil Refinery
+Id=8
+Health=250
+MineralCost=400
+Producer=10
+
+[Boson Facility]
+CanRefineOil=true
