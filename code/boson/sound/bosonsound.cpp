@@ -19,7 +19,6 @@
 
 #include "bosonsound.h"
 
-#include "../defines.h"
 #include "bodebug.h"
 #include "bosonaudio.h"
 

@@ -23,7 +23,7 @@ bosonaudioprocess_LDFLAGS = $(all_libraries)
 bosonaudioprocess_LDADD = \
 		-lqtmcop -lsoundserver_idl \
 		$(top_builddir)/boson/sound/libbosonsound.la \
-		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(LIB_QT) \
 		-lartskde $(LIBKDECORE)
 
