@@ -117,8 +117,11 @@ class BosonShot : public BosonItem
 
   protected:
     BoVector3 mVelo;
-    unsigned int mSteps;
+    unsigned int mStep;
+    unsigned int mTotalSteps;
     bool mActive;
+    float mLength;
+    float mZ;
     Player* mOwner;
     const BosonShotProperties* mProp;
     QPtrList<BosonParticleSystem> mFlyParticleSystems;
