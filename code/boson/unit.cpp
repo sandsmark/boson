@@ -309,7 +309,6 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 
  if (isDestroyed()) {
 	// Just move the unit and return. No need to update z or minimap
-	boDebug() << k_funcinfo << "moving destroyed unit, moveZ: " << moveZ << endl;
 	BosonItem::moveBy(moveX, moveY, moveZ);
 	return;
  }
