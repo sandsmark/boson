@@ -4,22 +4,19 @@ dnl the argument is a source file out of your sources. But
 dnl acinclude.m4 makes the job for all programs ;-)
 AC_INIT(acinclude.m4)
 
+KDE_SET_PREFIX
+
 dnl without this order in this file, automake will be confused!
 dnl the argument 
 AM_CONFIG_HEADER(config.h)
 
-dnl   I've put it here, cause, for an unknown reason, KDE_CHECK_EXTRA_LIBS was made
-dnl   after call to KDE_DO_IT_ALL, but before the first line of KDE_DO_IT_ALL
 AC_CHECK_COMPILERS
+AC_ENABLE_SHARED(yes)
+AC_ENABLE_STATIC(no)
 
 dnl insert here your program name and version number
 KDE_DO_IT_ALL(boson, 0.4)
 
-dnl in this space add everything you want to check for
-dnl examples are specific headers, libraries, etc.
-dnl everything to compile and run a KDE program is already checked
-
-dnl add here all your Makefiles. This are created by configure
 AC_OUTPUT(Makefile \
 	common/Makefile \
 	server/Makefile \
@@ -30,3 +27,5 @@ AC_OUTPUT(Makefile \
 	editor/Makefile \
 	map/Makefile \
 )
+
+
