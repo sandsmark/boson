@@ -213,15 +213,16 @@ void BosonItem::unselect()
 
 QRect BosonItem::boundingRect() const
 {
- return QRect((int)leftEdge(), (int)topEdge(), width() - 1, height() - 1);
+ return QRect(QPoint((int)leftEdge(), (int)topEdge()),
+		QPoint((int)leftEdge() + width() - 1, (int)topEdge() + height() - 1));
 }
 
 QRect BosonItem::boundingRectAdvanced() const
 {
- return QRect((int)(leftEdge() + xVelocity()),
-		(int)(topEdge() + yVelocity()),
-		width() + (int)xVelocity() - 1,
-		height() + (int)yVelocity() - 1);
+ int left = (int)(leftEdge() + xVelocity());
+ int top = (int)(topEdge() + yVelocity());
+ return QRect(QPoint(left, top),
+		QPoint(left + width() - 1, top + height() - 1));
 }
 
 void BosonItem::setGLDepthMultiplier(float d)
