@@ -72,6 +72,7 @@ public:
 	const BoVector4& diffuse() const { return mDiffuse; }
 	const BoVector4& specular() const { return mSpecular; }
 	float shininess() const { return mShininess; }
+	bool twoSided() const { return mTwoSided; }
 
 	/**
 	 * Set the (file-)name of the primary texture map. In boson we use this
