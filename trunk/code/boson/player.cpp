@@ -209,6 +209,8 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 //	case UnitBase::IdReload:
 	case Unit::IdDirection:
 	case Unit::IdWaypoints:
+	case Unit::IdMoveDestX:
+	case Unit::IdMoveDestY:
 	case Unit::IdFix_ConstructionState:
 	case Unit::IdFix_Productions:
 	case Unit::IdFix_ProductionState:
