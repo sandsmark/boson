@@ -77,7 +77,7 @@ boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
-		-lGLU -l3ds \
+		-lGLU -lGL -l3ds \
 		$(LIB_KDEUI)
 boson_SOURCES = \
 		$(BOSON_SRC)\
@@ -91,7 +91,7 @@ bounit_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
-		-lGLU -l3ds \
+		-lGLU -lGL -l3ds \
 		-lkio $(LIB_KDEUI)
 bounit_SOURCES = \
 		$(BOSON_SRC) \
@@ -107,7 +107,7 @@ boprofiling_SOURCES = \
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
-		-lkio $(LIB_KDEUI) -lGLU
+		-lkio $(LIB_KDEUI) -lGLU -lGL
 bocursor_SOURCES = \
 		$(COMMON_SRC) \
 		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
@@ -121,7 +121,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
-		-lGLU -l3ds \
+		-lGLU -lGL -l3ds \
 		$(LIB_KDEUI)
 borender_SOURCES = \
 		$(BOSON_SRC) \
