@@ -558,6 +558,21 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 	case BosonProfiling::SaveGameToXMLWriteFile:
 		name = i18n("SaveGameToXMLWriteFile");
 		break;
+	case BosonProfiling::SaveCanvasToXML:
+		name = i18n("SaveCanvasToXML");
+		break;
+	case BosonProfiling::SaveExternalToXML:
+		name = i18n("SaveExternalToXML");
+		break;
+	case BosonProfiling::PreLoadPlayFields:
+		name = i18n("PreLoadPlayFields");
+		break;
+	case BosonProfiling::LoadPlayField:
+		name = i18n("LoadPlayField");
+		break;
+	case BosonProfiling::FindPath:
+		name = i18n("FindPath");
+		break;
 	default:
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;

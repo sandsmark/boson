@@ -25,9 +25,10 @@
 #include "player.h"
 #include "bodebug.h"
 #include "unitproperties.h"
+#include "bosonprofiling.h"
 
 #include <qpoint.h>
-#include <sys/time.h> // only for debug
+//#include <sys/time.h> // only for debug
 
 
 // this should be highest of all costs. If cell's cost is at least ERROR_COST,
@@ -166,12 +167,11 @@ bool BosonPath::findPath()
   // Slow method is the one used before. It should always find some path and it
   //  can find path around other units. It's at least about 10 times slower
   //  though (with a simple path)
-  struct timeval time1, time2;
-  gettimeofday(&time1, 0);
+  BosonProfiler profiler(BosonProfiling::FindPath);
   if(findFastPath())
   {
-    gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << time2.tv_usec - time1.tv_usec << " microsec." << endl;
+    long int elapsed = profiler.stop();
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << elapsed << " microsec." << endl;
     pathFast++;
     return true;
   }
@@ -179,16 +179,16 @@ bool BosonPath::findPath()
   {
     if(rangeCheck())
     {
-      gettimeofday(&time2, 0);
-      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << time2.tv_usec - time1.tv_usec << " microsec." << endl;
+      long int elapsed = profiler.stop();
+      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << elapsed << " microsec." << endl;
       pathRange++;
       return false;
     }
-    bool a = findSlowPath();
-    gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << " microsec. nodes removed: " << mNodesRemoved << endl;
+    bool ret = findSlowPath();
+    long int elapsed = profiler.stop();
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << elapsed << " microsec. nodes removed: " << mNodesRemoved << endl;
     pathSlow++;
-    return a;
+    return ret;
   }
 }
 
