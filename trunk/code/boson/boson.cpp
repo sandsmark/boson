@@ -83,6 +83,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyLocal, "AdvanceCount");
  d->mNextUnitId.setLocal(0);
  d->mAdvanceCount.setLocal(0);
+ d->mGameSpeed.setLocal(0);
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 }
 
@@ -592,7 +593,7 @@ void Boson::slotSetGameSpeed(int speed)
  d->mGameSpeed = speed;
  if (d->mGameTimer->isActive()) {
 	d->mGameTimer->stop();
-	if (speed != 0) {
+	if (d->mGameSpeed != 0) {
 		d->mGameTimer->start(gameSpeed());
 	}
  }
