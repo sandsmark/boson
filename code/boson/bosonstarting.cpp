@@ -44,6 +44,7 @@
 #include <qtimer.h>
 #include <qdom.h>
 #include <qmap.h>
+#include <qregexp.h>
 
 class BosonStartingPrivate
 {
@@ -606,6 +607,8 @@ bool BosonStarting::fixPlayerIds(QMap<QString, QByteArray>& files) const
  ret = ret & fixPlayerIds(actualIds, playersList.count(), playersRoot); // e.g. players
  ret = ret & fixPlayerIds(actualIds, playersList.count(), canvasRoot); // e.g. items
  ret = ret & fixPlayerIds(actualIds, playersList.count(), kgameRoot); // e.g. events
+ ret = ret & fixPlayerIdsInFileNames(actualIds, playersList.count(), files);
+
  delete[] actualIds;
  actualIds = 0;
 
@@ -661,6 +664,44 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 	}
 	root.setAttribute("PlayerId", QString::number(actualIds[id]));
 
+ }
+ return true;
+}
+
+bool BosonStarting::fixPlayerIdsInFileNames(int* actualIds, unsigned int players, QMap<QString, QByteArray>& files) const
+{
+ QMap<QString, QByteArray> addFiles;
+ QStringList removeFiles;
+ QRegExp hasPlayerId("-player_([0-9]+)");
+ for (QMap<QString, QByteArray>::iterator it = files.begin(); it != files.end(); ++it) {
+	int pos = hasPlayerId.search(it.key());
+	if (pos < 0) {
+		continue;
+	}
+	QString number = hasPlayerId.cap(1);
+	boDebug() << k_funcinfo << "cap(1)=" << number << endl;
+	bool ok;
+	unsigned int n = number.toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "not a valid number in " << it.key() << endl;
+		return false;
+	}
+	if (n >= players) {
+		boError() << k_funcinfo << "found file for player " << n << " but only " << players << " players available" << endl;
+		return false;
+	}
+
+	QString file = it.key();
+	QByteArray b = it.data();
+	file.replace(hasPlayerId, QString("-player_%1").arg(actualIds[n]));
+	addFiles.insert(file, b);
+	removeFiles.append(it.key());
+ }
+ for (QStringList::iterator it = removeFiles.begin(); it != removeFiles.end(); ++it) {
+	files.remove(*it);
+ }
+ for (QMap<QString, QByteArray>::iterator it = addFiles.begin(); it != addFiles.end(); ++it) {
+	files.insert(it.key(), it.data());
  }
  return true;
 }
