@@ -21,7 +21,7 @@
 #include "bosonglchat.moc"
 
 #include "bosonconfig.h"
-#include "bosonglfont.h"
+#include "bosonfont/bosonglfont.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -204,10 +204,7 @@ void BosonGLChat::renderMessages(int x, int y, int maxW, int maxH, BosonGLFont* 
  if (d->mMessages.count() == 0) {
 	return;
  }
- // AB: this is a redundant call, since we use the same in BosonBigDisplayBase::paintGL().
- // but we might support different fonts one day and so we need it anyway.
- // and a single call doesn't hurt anyway :)
- glListBase(font->displayList());
+ font->begin();
 
  QStringList::Iterator it = d->mMessages.end();
  --it;

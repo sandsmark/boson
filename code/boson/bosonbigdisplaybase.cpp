@@ -79,7 +79,7 @@
 
 
 #include "bosontexturearray.h"
-#include "bosonglfont.h"
+#include "bosonfont/bosonglfont.h"
 
 #include <GL/glu.h>
 
@@ -512,6 +512,7 @@ void BosonBigDisplayBase::initializeGL()
 
  // this needs to be done in initializeGL():
  delete d->mDefaultFont;
+ makeCurrent();
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
 
  if (!context()->deviceIsPixmap()) {
@@ -559,7 +560,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  // AB: this does not work dependable :(
  float depth = 1.0f;
  glReadPixels(0, 0, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
- if (fabsf(depth) > 0.001 && fabsf(depth - 1.0f) > 0.001) {
+ if (fabsf(depth) > 0.001f && fabsf(depth - 1.0f) > 0.001f && isVisible()) {
 	// i really cannot  imagine why this happens - but it does for me.
 	// Radeon 9200 with ATI proprietary drivers, version 3.2.8
 	boWarning() << k_funcinfo << "clearing depth buffer with 1.0 did caused depth buffer values of " << depth << ", but not 1.0! enabling workaround" << endl;
@@ -721,7 +722,7 @@ void BosonBigDisplayBase::paintGL()
  glPushMatrix();
  glLoadIdentity();
 
- // alpha blending is used for both, cursor and text
+ // alpha blending is used for cursor/text/...
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  renderCursor();
@@ -1004,8 +1005,9 @@ void BosonBigDisplayBase::renderSelectionRect()
 
 void BosonBigDisplayBase::renderText()
 {
+ BO_CHECK_NULL_RET(d->mDefaultFont);
  BO_CHECK_NULL_RET(localPlayerIO());
- glListBase(d->mDefaultFont->displayList());
+ d->mDefaultFont->begin();
  const int border = 5;
 
  // first the resource display
@@ -1361,8 +1363,11 @@ void BosonBigDisplayBase::renderParticles()
 
 int BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text)
 {
+ if (!d->mDefaultFont) {
+	return 0;
+ }
+ d->mDefaultFont->begin();
  y -= d->mDefaultFont->height(); // y is now at the bottom of the first line
- glListBase(d->mDefaultFont->displayList());
 
  QString lines[4];
  int w = 0;
@@ -1772,17 +1777,18 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
 	boDebug() << k_funcinfo << "player already set. nothing to do." << endl;
 	return;
  }
- if (d->mLocalPlayer) {
+ if (localPlayer()) {
 	boDebug() << k_funcinfo << "already a local player present! unset..." << endl;
-	delete d->mMouseIO;
-	d->mMouseIO = 0;
-	d->mLocalPlayer = 0;
  }
  d->mLocalPlayer = p;
  if (d->mGroundRenderer) {
 	d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
  }
- if (!d->mLocalPlayer) {
+
+ delete d->mMouseIO;
+ d->mMouseIO = 0;
+
+ if (!localPlayer()) {
 	return;
  }
  addMouseIO(p);

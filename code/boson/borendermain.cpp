@@ -25,7 +25,7 @@
 #include "bosonmodel.h"
 #include "bomesh.h"
 #include "bomaterial.h"
-#include "bosonglfont.h"
+#include "bosonfont/bosonglfont.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
@@ -474,7 +474,7 @@ void ModelPreview::renderText()
  glPushMatrix();
  glLoadIdentity();
 
- glListBase(mDefaultFont->displayList());
+ mDefaultFont->begin();
  const int border = 5;
  int y = height() - border;
 

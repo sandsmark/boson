@@ -1,6 +1,6 @@
 ## Makefile.am for boson
 
-SUBDIRS = data bosonwidgets items commandframe startupwidgets sound info script
+SUBDIRS = data bosonwidgets items commandframe startupwidgets sound info script bosonfont
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
@@ -64,7 +64,6 @@ BOSON_COMMON_SRC = \
 	bosonmodel.cpp \
 	bosonmodelloader.cpp \
 	bo3dsload.cpp \
-	bosonglfont.cpp \
 	bosonglchat.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
@@ -119,6 +118,7 @@ boson_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
+		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
@@ -136,6 +136,7 @@ bounit_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
+		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		-lkio $(LIB_KDEUI)
@@ -171,6 +172,7 @@ borender_LDADD = \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
+		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
