@@ -1351,6 +1351,9 @@ public:
 	//  it every time we search a new path. Then we could do it directly in
 	//  newPath()
 	KGameProperty<unsigned int> mPathAge;
+
+	// Should this be made KGameProperty?
+	bool mWayPointReached;  // FIXME: bad hack
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1366,6 +1369,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  d->mMovingFailed.setLocal(0);
  d->mPathRecalculated.setLocal(0);
  d->mPathAge.setLocal(0);
+ d->mWayPointReached = false;
 
  d->mMovingFailed.setEmittingSignal(false);
  d->mPathRecalculated.setEmittingSignal(false);
@@ -1490,28 +1494,29 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  if ((x == wp.x()) && (y == wp.y())) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
+	d->mWayPointReached = true;
+ }
 
+ // This is a bad hack to fix #55926
+ if (d->mWayPointReached) {
+	// Check for enemy units in range every time waypoint is reached
 	if (moveAttacking() && attackEnemyUnitsInRange()) {
 		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
 		setMoving(false);
 		return;
 	}
-	if (waypointCount() == 0) {
-		//boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
+
+	// Path is recalculated every MAX_PATH_AGE waypoints
+	d->mPathAge = d->mPathAge + 1;
+	if (d->mPathAge >= MAX_PATH_AGE || waypointCount() == 0) {
+		boDebug(401) << k_funcinfo << "Searching new path (update)" << endl;
 		newPath();
 		d->mPathAge = 0;
-	} else {
-		// Path is recalculated every MAX_PATH_AGE waypoints
-		d->mPathAge = d->mPathAge + 1;
-		if (d->mPathAge >= MAX_PATH_AGE) {
-			boDebug(401) << k_funcinfo << "Searching new path (update)" << endl;
-			newPath();
-			d->mPathAge = 0;
-		}
 	}
 
 	wp = currentWaypoint();
+	d->mWayPointReached = false;
  }
 
  // Try to go to same x and y coordinates as waypoint's coordinates
@@ -1791,6 +1796,7 @@ void MobileUnit::stopMoving()
  // Reset moveCheck variables
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
+ d->mWayPointReached = false;
 }
 
 
