@@ -132,7 +132,7 @@ protected slots:
 	void slotPlaceGround(unsigned int texture);
 
 signals:
-	void signalAction(BoSpecificAction action);
+	void signalAction(const BoSpecificAction& action);
 
 	/**
 	 * @param textureCount See @ref BosonGroundTheme::textureCount

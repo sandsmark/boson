@@ -424,7 +424,7 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
  }
 }
 
-void EditorBigDisplayInput::action(BoSpecificAction action)
+void EditorBigDisplayInput::action(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << action.type() << endl;
  switch (action.type()) {

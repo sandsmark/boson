@@ -50,7 +50,9 @@ public:
 	BosonCanvas* canvas() const;
 	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
+
 	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
+
 	const QPoint& cursorCanvasPos() const;
 	const BoVector3& cursorCanvasVector() const;
 
@@ -88,7 +90,7 @@ public:
 	 **/
 	virtual void actionClicked(const BoMouseEvent& event) = 0;
 
-	virtual void action(BoSpecificAction action) = 0;
+	virtual void action(const BoSpecificAction& action) = 0;
 
 	/**
 	 * Called when the placement preview should get updated. Note that you

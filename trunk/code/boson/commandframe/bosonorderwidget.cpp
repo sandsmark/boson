@@ -90,8 +90,8 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceGround(unsigned int)),
 				this, SLOT(slotPlaceGround(unsigned int)));
-		connect(b, SIGNAL(signalAction(BoSpecificAction)),
-				this, SIGNAL(signalAction(BoSpecificAction)));
+		connect(b, SIGNAL(signalAction(const BoSpecificAction&)),
+				this, SIGNAL(signalAction(const BoSpecificAction&)));
 		connect(b, SIGNAL(signalSelectUnit(Unit*)),
 				this, SIGNAL(signalSelectUnit(Unit*)));
 	}

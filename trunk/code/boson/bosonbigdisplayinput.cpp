@@ -446,7 +446,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
 
 }
 
-void BosonBigDisplayInput::action(BoSpecificAction action)
+void BosonBigDisplayInput::action(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(localPlayer());

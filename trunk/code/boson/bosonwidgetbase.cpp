@@ -277,8 +277,8 @@ void BosonWidgetBase::initDisplayManager()
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
 
- connect(localPlayerInput(), SIGNAL(signalAction(BoSpecificAction)),
-		mDisplayManager, SLOT(slotAction(BoSpecificAction)));
+ connect(localPlayerInput(), SIGNAL(signalAction(const BoSpecificAction&)),
+		mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
  displayManager()->setLocalPlayerInput(localPlayerInput());
 }
 

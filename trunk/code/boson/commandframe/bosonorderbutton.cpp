@@ -304,7 +304,7 @@ void BosonOrderButton::setUnit(Unit* unit)
  setGrayOut(false);
 }
 
-void BosonOrderButton::setAction(BoSpecificAction action)
+void BosonOrderButton::setAction(const BoSpecificAction& action)
 {
  boDebug() << k_funcinfo << "Setting action" << endl;
  mType = ShowAction;

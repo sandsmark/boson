@@ -302,7 +302,7 @@ Player* BosonCommandFrameBase::localPlayer() const
  return d->mOwner;
 }
 
-void BosonCommandFrameBase::slotPlaceUnit(BoSpecificAction action)
+void BosonCommandFrameBase::slotPlaceUnit(const BoSpecificAction& action)
 {
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
@@ -322,9 +322,10 @@ void BosonCommandFrameBase::slotPlaceGround(unsigned int textureCount, unsigned 
  emit signalAction(a);
 }
 
-void BosonCommandFrameBase::slotProduce(BoSpecificAction action)
+void BosonCommandFrameBase::slotProduce(const BoSpecificAction& _action)
 {
  boDebug() << k_funcinfo << endl;
+ BoSpecificAction action = _action;
  if (selectedUnit()) {
 	if (localPlayer() != selectedUnit()->owner()) {
 		boError() << k_funcinfo << "local owner != selected unit owner" << endl;

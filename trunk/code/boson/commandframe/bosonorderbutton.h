@@ -58,7 +58,7 @@ public:
 	 **/
 	virtual void setUnit(Unit* unit);
 
-	void setAction(BoSpecificAction action);
+	void setAction(const BoSpecificAction& action);
 
 	void setGround(unsigned int texture, BosonGroundTheme* theme);
 
@@ -82,7 +82,7 @@ public:
 	/**
 	 * @return The displayed action
 	 **/
-	BoSpecificAction action() const { return mAction; }
+	const BoSpecificAction& action() const { return mAction; }
 
 	/**
 	 * Only valid if @ref unitType is > 0! If @ref unitType is 0 then this
@@ -137,7 +137,7 @@ signals:
 	/**
 	 * Emitted when the player clicks on the action
 	 **/
-	void signalAction(BoSpecificAction action);
+	void signalAction(const BoSpecificAction& action);
 
 	/**
 	 * Emitted when there are several units selected and the player clicks

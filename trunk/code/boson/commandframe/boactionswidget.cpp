@@ -74,8 +74,8 @@ void BoActionsWidget::ensureButtons(unsigned int number)
 		b->hide();
 		b->setBackgroundOrigin(WindowOrigin);
 		d->mOrderButton.insert(i, b);
-		connect(b, SIGNAL(signalAction(BoSpecificAction)),
-				this, SIGNAL(signalAction(BoSpecificAction)));
+		connect(b, SIGNAL(signalAction(const BoSpecificAction&)),
+				this, SIGNAL(signalAction(const BoSpecificAction&)));
 	}
  }
  resetLayout();
