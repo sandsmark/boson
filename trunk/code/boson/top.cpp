@@ -294,12 +294,14 @@ void TopWidget::initPlayer()
 
 void TopWidget::initPlayField()
 {
+ delete mPlayField;
  mPlayField = new BosonPlayField(this);
 }
 
 void TopWidget::initCanvas()
 {
  BO_CHECK_NULL_RET(boGame);
+ delete mCanvas;
  mCanvas = new BosonCanvas(this);
  boGame->setCanvas(mCanvas);
 }
