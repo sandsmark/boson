@@ -29,7 +29,6 @@
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "global.h"
-#include "gameoverdialog.h"
 #include "bodebug.h"
 #include "sound/bosonaudiointerface.h"
 
@@ -48,10 +47,7 @@ class BosonWidget::BosonWidgetPrivate
 public:
 	BosonWidgetPrivate()
 	{
-		mGameOverDialog = 0;
 	}
-
-	GameOverDialog* mGameOverDialog;
 };
 
 BosonWidget::BosonWidget(QWidget* parent)
@@ -65,13 +61,6 @@ BosonWidget::~BosonWidget()
  boDebug() << k_funcinfo << endl;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
-}
-
-void BosonWidget::initConnections()
-{
- BosonWidgetBase::initConnections();
- connect(boGame, SIGNAL(signalPlayerKilled(Player*)),
-		this, SLOT(slotPlayerKilled(Player*)));
 }
 
 void BosonWidget::initDisplayManager()
@@ -167,32 +156,6 @@ void BosonWidget::slotGamePreferences()
  dlg->show();
 }
 
-void BosonWidget::slotPlayerKilled(Player* p)
-{
- // TODO write BosonGameOverWidget, add it to widgetstack in TopWidget and then
- //  use it instead
- int inGame = 0;
- Player* winner = 0;
- for (unsigned int i = 0; i < boGame->playerList()->count() - 1; i++) { // AB: playerList()->count()-1 is the neutral player, it is never the winner
-	if (!((Player*)boGame->playerList()->at(i))->isOutOfGame()) {
-		winner = (Player*)boGame->playerList()->at(i);
-		inGame++;
-	}
- }
- if (inGame <= 1 && winner) {
-	boDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
-	delete d->mGameOverDialog;
-	d->mGameOverDialog = new GameOverDialog(this);
-	d->mGameOverDialog->createStatistics(boGame, winner, localPlayer());
-	d->mGameOverDialog->show();
-	connect(d->mGameOverDialog, SIGNAL(finished()), this, SLOT(slotGameOverDialogFinished()));
-	boGame->setGameStatus(KGame::End);
- } else if (!winner) {
-	boError() << k_funcinfo << "no player left ?!" << endl;
-	return;
- }
-}
-
 void BosonWidget::saveConfig()
 {
   // note: the game is *not* saved here! just general settings like game speed,
@@ -214,12 +177,4 @@ void BosonWidget::saveConfig()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonWidget::slotGameOverDialogFinished()
-{
- d->mGameOverDialog->deleteLater();
-
- // we must not emit directly, as it'd delete the BosonWidget and therefore the
- // GameOverDialog, but that is later deleted through the event loop
- QTimer::singleShot(0, this, SIGNAL(signalGameOver()));
-}
 
