@@ -151,7 +151,6 @@ public:
 	inline virtual void advanceFunction(unsigned int advanceCount)
 	{
 		(this->*mAdvanceFunction)(advanceCount);
-		mAdvanceFunction = mAdvanceFunction2;
 	}
 
 	/**
@@ -166,6 +165,28 @@ public:
 	inline virtual void advanceFunction2(unsigned int advanceCount)
 	{
 		(this->*mAdvanceFunction2)(advanceCount);
+	}
+
+	
+	/**
+	 * Synchronize the advance function variable. This needs to be called
+	 * after @ref advanceFunction has been called for <em>all</em> units.
+	 *
+	 * Use @ref syncAdvanceFunction2 when @ref advanceFunction2 was called
+	 * on all units.
+	 *
+	 * DO NOT CALL THIS unless you REALLY know what youre doing! Call it
+	 * from @ref BosonCanvas::slotAdvance ONLY!
+	 **/
+	inline virtual void syncAdvanceFunction()
+	{
+		mAdvanceFunction = mAdvanceFunction2;
+	}
+	/**
+	 * See @ref syncAdvanceFunction
+	 **/
+	inline virtual void syncAdvanceFunction2()
+	{
 		mAdvanceFunction2 = mAdvanceFunction;
 	}
 

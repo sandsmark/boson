@@ -288,6 +288,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	}
  }
 
+ // now we need to make sure that the correct advance function will be called in
+ // the next advance call.
+ animIt.toFirst();
+ if (advanceFlag) {
+	for (; animIt.current(); ++animIt) {
+		BosonItem* i = animIt.current();
+		i->syncAdvanceFunction();
+	}
+ } else {
+	for (; animIt.current(); ++animIt) {
+		BosonItem* i = animIt.current();
+		i->syncAdvanceFunction2();
+	}
+ }
+
  // we completed iterating through the advance lists. now we might have to
  // change the list for some items.
  QPtrListIterator<BosonItem> changeIt(d->mChangeAdvanceList);
