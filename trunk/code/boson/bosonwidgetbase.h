@@ -40,6 +40,7 @@ class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
 class BosonPlayField;
+class OptionsDialog;
 
 /**
  * This is the actual main widget of boson for the game
@@ -265,6 +266,8 @@ protected:
 	QString findSaveFileName(const QString& prefix, const QString& suffix);
 
 	void setActionEnabled(const char* name, bool enabled);
+
+	OptionsDialog* gamePreferences(bool editor);
 
 private:
 	void initChat();

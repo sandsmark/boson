@@ -192,34 +192,11 @@ void BosonWidget::startScenarioAndGame()
 
 void BosonWidget::slotGamePreferences()
 {
- CursorMode mode;
- if (cursor()) {
-	if (cursor()->isA("BosonOpenGLCursor")) {
-		mode = CursorOpenGL;
-	} else {
-		mode = CursorKDE;
-	}
- } else {
-	mode = CursorKDE;
+ OptionsDialog* dlg = gamePreferences(false);
+ if (!dlg) {
+	boError() << k_funcinfo << "NULL options dialog" << endl;
+	return;
  }
-
- OptionsDialog* dlg = new OptionsDialog(this);
- dlg->setGame(boGame);
- dlg->setPlayer(localPlayer());
- dlg->slotLoad();
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
- dlg->setCursor(mode);
-
- connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
-		this, SLOT(slotChangeCursor(int, const QString&)));
- connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
-		this, SLOT(slotCmdBackgroundChanged(const QString&)));
- connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)),
-		this, SLOT(slotMiniMapScaleChanged(double)));
- connect(dlg, SIGNAL(signalUpdateIntervalChanged(unsigned int)),
-		displayManager(), SLOT(slotUpdateIntervalChanged(unsigned int)));
-
  dlg->show();
 }
 

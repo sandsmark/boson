@@ -97,6 +97,8 @@ protected slots:
 
 	void slotGameStarted();
 
+	void slotEditorPreferences();
+
 protected:
 	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent);
 
