@@ -95,7 +95,7 @@ public:
 	 *
 	 * The returned matrix should be applied to the modelview before
 	 * rendering the mesh that is at @p index.
-	 * @return A pointer to the matrix at index @p index. No validity check happens here!
+	 * @return A pointer to the matrix at index @p index (0 .. @ref meshCount). No validity check happens here!
 	 **/
 	BoMatrix* matrix(int index) const;
 
@@ -281,7 +281,7 @@ protected:
 	 * The model is scaled to the values width and height that were
 	 * specified to the constructor.
 	 **/
-	float generateMasterScale() const;
+	void applyMasterScale();
 
 	void computeBoundings(BoFrame* frame, BoHelper* helper) const;
 
