@@ -6,9 +6,11 @@ MOBILE_UNITS = \
 	mob_oilharvester \
 	mob_panther \
 	mob_piranha \
+	mob_puma \
 	mob_ship \
 	mob_tiger \
-	mob_tornado
+	mob_tornado \
+	mob_transall
 FACILITIES = \
 	fix_commandbunker \
 	fix_comsat \
