@@ -27,9 +27,8 @@ We do this to be able to share the textures between all units/models. If you use
 textures that are already used by other units boson will use less memory (on
 runtime!) and might run faster (texture memory is limited).
 
-Since we've just moved to OpenGL there is currently *no* decision on how shots
-and explosions are handled. When I implement this I'll probably forget to note
-that here - so you need to look at the exisiting files.
+Shots and explosions are implemented using particles now.
+See ../particles/REAMDE for a description.
 
 Additionally all units have index.unit file in their directories. This file
 describes the unit - if you are familar with KConfig syntax you'll know how to
