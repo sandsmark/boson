@@ -810,7 +810,7 @@ unsigned int BosonCanvas::mapHeight() const
  return map() ? map()->height() : 0;
 }
 
-float* BosonCanvas::heightMap() const
+const float* BosonCanvas::heightMap() const
 {
  return map() ? map()->heightMap() : 0;
 }

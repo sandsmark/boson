@@ -1306,6 +1306,10 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
 
  int w = x2 - x1;  // Width and height of the rect
  int h = y2 - y1;
+ if (w * h <= 0) {
+	boWarning() << k_funcinfo << "w*h <= 0 is not valid" << endl;
+	return;
+ }
  // First calculate plane normals for all cells in rect
  BoVector3 a, b, c, n;
  BoVector3* normals = new BoVector3[w * h];

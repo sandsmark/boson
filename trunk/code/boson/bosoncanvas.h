@@ -109,7 +109,7 @@ public:
 	/**
 	 * @return @ref BosonMap::heightMap
 	 **/
-	float* heightMap() const;
+	const float* heightMap() const;
 
 	/**
 	 * See @ref BosonMap::setHeightAtCorner

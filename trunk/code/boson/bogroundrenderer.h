@@ -80,7 +80,7 @@ public:
 	 * It does render the grid only if @ref BosonConfig::debugShowCellGrid
 	 * returns true.
 	 **/
-	void renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth);
+	void renderCellGrid(Cell** cells, int cellsCount, const float* heightMap, int heightMapWidth);
 
 	void setLocalPlayerIO(PlayerIO* p);
 	PlayerIO* localPlayerIO() const;
@@ -146,7 +146,7 @@ private:
 	 *
 	 * One could optimize this by using multitexturing for example!
 	 **/
-	void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, BoVector3* normalMap, unsigned char* texMapStart);
+	void renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
 };
 
 class BoFastGroundRenderer : public BoGroundRenderer
