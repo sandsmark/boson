@@ -40,7 +40,6 @@ class KLoadSaveGameWidget::KLoadSaveGameWidgetPrivate
 public:
 	KLoadSaveGameWidgetPrivate()
 	{
-		mHeadline = 0;
 		mLoadSaveButton = 0;
 		mDeleteButton = 0;
 
@@ -53,7 +52,6 @@ public:
 	bool mSave;
 	QString mSuffix;
 
-	QLabel* mHeadline;
 	QPushButton* mLoadSaveButton;
 	QPushButton* mDeleteButton;
 
@@ -89,13 +87,9 @@ void KLoadSaveGameWidget::init()
  d->mDir.setFilter(QDir::Files | QDir::Readable);
 
  QVBoxLayout* topLayout = new QVBoxLayout(this, 5, 5);
- d->mHeadline = new QLabel(this);
  QFont font;
  font.setPointSize(font.pointSize() + 4);
  font.setBold(true);
- d->mHeadline->setFont(font);
- d->mHeadline->setAlignment(AlignHCenter);
- topLayout->addWidget(d->mHeadline);
 
  QScrollView* scroll = new QScrollView(this, "scrollwidget");
  scroll->setResizePolicy(QScrollView::AutoOneFit);
@@ -332,10 +326,8 @@ void KLoadSaveGameWidget::setSaveMode(bool save)
 {
  d->mSave = save;
  if (save) {
-	d->mHeadline->setText(i18n("Save Game"));
 	d->mLoadSaveButton->setText(i18n("&Save Game"));
  } else {
-	d->mHeadline->setText(i18n("Load Game"));
 	d->mLoadSaveButton->setText(i18n("&Load Game"));
  }
  d->mLoadSaveButton->setEnabled(save);
