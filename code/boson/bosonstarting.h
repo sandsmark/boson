@@ -110,20 +110,8 @@ signals:
 	void signalLoadingUnit(int current);
 
 protected slots:
-	void slotReceiveMap(const QByteArray&);
-	/**
-	 * Tile loading is most time consuming action on startup.
-	 *
-	 * Note that this function doesn't return before all tiles are loaded,
-	 * but still is non-blocking, as @ref QApplication::processEvents is
-	 * called while loading
-	 *
-	 * This slot is called from @ref slotReceiveMap only. Once the map has
-	 * been received we load its tiles.
-	 **/
-	void slotLoadTiles();
+	void slotStartGame();
 
-	void slotLoadGameData3();
 
 	void slotLoadPlayerData(Player* p);
 
@@ -134,10 +122,13 @@ protected:
 	 **/
 	BosonPlayField* playField() const { return mDestPlayField; }
 
-	void loadPlayerData();
+	bool loadPlayerData();
 	void loadUnitDatas(Player* p);
-	void startScenario();
-	void startGame();
+	bool startScenario();
+	bool start();
+	bool startGame();
+	bool loadTiles();
+	bool loadGameData3();
 
 private:
 	QByteArray mNewGameData;
