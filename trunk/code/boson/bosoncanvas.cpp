@@ -698,7 +698,11 @@ void BosonCanvas::removeFromCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		QString error = QString("NULL cell - x=%1,y=%2 for item rtti=%3").arg(cells[i].x()).arg(cells[i].y()).arg(item->rtti());
+		if (RTTI::isUnit(item->rtti())) {
+			error += QString(" unit id=%1").arg(((Unit*)item)->id());
+		}
+		boError() << k_funcinfo << error << endl;
 		continue;
 	}
 	c->removeItem(item);
@@ -711,7 +715,11 @@ void BosonCanvas::addToCells(BosonItem* item)
  for (unsigned int i = 0; i < cells.count(); i++) {
 	Cell* c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		boError() << k_funcinfo << "NULL cell - x=" << cells[i].x() << ",y=" << cells[i].y() << endl;
+		QString error = QString("NULL cell - x=%1,y=%2 for item rtti=%3").arg(cells[i].x()).arg(cells[i].y()).arg(item->rtti());
+		if (RTTI::isUnit(item->rtti())) {
+			error += QString(" unit id=%1").arg(((Unit*)item)->id());
+		}
+		boError() << k_funcinfo << error << endl;
 		continue;
 	}
 	c->addItem(item);
