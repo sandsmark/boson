@@ -175,11 +175,11 @@ public:
 };
 
 
-class BosonSpriteCursorData
+class BosonOpenGLCursorData
 {
 public:
-	BosonSpriteCursorData();
-	~BosonSpriteCursorData();
+	BosonOpenGLCursorData();
+	~BosonOpenGLCursorData();
 
 	BosonTextureArray* mArray;
 	unsigned int mHotspotX;
@@ -189,12 +189,12 @@ public:
 	int mRotateDegree;
 };
 
-class BosonSpriteCursor : public BosonCursor
+class BosonOpenGLCursor : public BosonCursor
 {
 	Q_OBJECT
 public:
-	BosonSpriteCursor();
-	virtual ~BosonSpriteCursor();
+	BosonOpenGLCursor();
+	virtual ~BosonOpenGLCursor();
 	
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
@@ -214,9 +214,9 @@ public:
 		return mCurrentData ? mCurrentTexture : 0;
 	}
 
-	bool insertMode(int mode, BosonSpriteCursorData* data);
+	bool insertMode(int mode, BosonOpenGLCursorData* data);
 	void setCurrentTextureArray(BosonTextureArray* array);
-	void setCurrentData(BosonSpriteCursorData* data);
+	void setCurrentData(BosonOpenGLCursorData* data);
 
 	virtual void renderCursor(GLfloat x, GLfloat y);
 
@@ -224,13 +224,13 @@ protected slots:
 	void slotAdvance();
 
 protected:
-	BosonSpriteCursorData* loadSpriteCursor(QString baseDir, QString cursor);
+	BosonOpenGLCursorData* loadSpriteCursor(QString baseDir, QString cursor);
 
 private:
-	class BosonSpriteCursorPrivate;
-	BosonSpriteCursorPrivate* d;
+	class BosonOpenGLCursorPrivate;
+	BosonOpenGLCursorPrivate* d;
 
-	BosonSpriteCursorData* mCurrentData;
+	BosonOpenGLCursorData* mCurrentData;
 	GLuint mCurrentTexture;
 };
 

@@ -42,6 +42,8 @@
 #include <qcheckbox.h>
 #include <qdir.h>
 
+
+// FIXME: rename -> OpenGLConfig or so
 SpriteConfig::SpriteConfig(QWidget* w) : QVGroupBox(i18n("OpenGL Cursor"), w)
 {
  QHBox* hbox = new QHBox(this);
@@ -159,7 +161,7 @@ void BosonCursorEditor::init()
  hbox = new QHBox(this);
  (void)new QLabel(i18n("Cursor Mode"), hbox);
  mCursorMode = new QComboBox(hbox);
- mCursorMode->insertItem(i18n("Sprite Cursor"), CursorSprite);
+ mCursorMode->insertItem(i18n("OpenGL Cursor"), CursorOpenGL);
  mCursorMode->insertItem(i18n("B/W Cursor"), CursorNormal);
  mCursorMode->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
  connect(mCursorMode, SIGNAL(activated(int)), this, SLOT(slotCursorModeChanged(int)));
@@ -250,7 +252,7 @@ void BosonCursorEditor::slotCursorModeChanged(int index)
 	theme = BosonCursor::defaultTheme();
  }
  emit signalCursorChanged(index, theme);
- mSpriteConfig->setEnabled(index == CursorSprite);
+ mSpriteConfig->setEnabled(index == CursorOpenGl);
  slotCursorTypeChanged(mCursorType->currentItem());
 }
 
@@ -279,7 +281,7 @@ void BosonCursorEditor::slotCursorTypeChanged(int index)
 	return;
  }
  QString name = mCursorTypes[index];
- if (mCursorMode->currentItem() == CursorSprite) {
+ if (mCursorMode->currentItem() == CursorOpenGL) {
 	loadSpriteConfig(name);
  }
 

@@ -107,9 +107,9 @@ void CursorPreview::slotChangeCursor(int mode, const QString& cursorDir_)
 {
  BosonCursor* b;
  switch (mode) {
-	case CursorSprite:
+	case CursorOpenGL:
 		makeCurrent();
-		b = new BosonSpriteCursor;
+		b = new BosonOpenGLCursor;
 		break;
 	case CursorKDE:
 		b = new BosonKDECursor;

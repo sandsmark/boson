@@ -38,10 +38,6 @@ public:
 	~RTTI() { }
 
 	enum Rtti {
-		SelectPart = 0,
-		BoShot = 1,
-		FogOfWar = 2,
-		SpriteCursor = 3,
 
 
 		UnitStart = 200 // the IDs of the units start at this value.

@@ -179,12 +179,12 @@ public:
 
 	static int getTransTile(int g);
 
-	inline void addItem(BosonSprite* u) { mItems.appendItem(u); }
+	inline void addItem(BosonItem* u) { mItems.appendItem(u); }
 
 	/**
 	 * Remove a previously added item from the cell
 	 **/
-	inline void removeItem(BosonSprite* u) { mItems.removeItem(u); }
+	inline void removeItem(BosonItem* u) { mItems.removeItem(u); }
 
 
 	/**

@@ -20,7 +20,7 @@
 #define UNIT_H
 
 #include "unitbase.h"
-#include "visual/bosonsprite.h"
+#include "items/bosonitem.h"
 #include "global.h"
 
 #include <qvaluelist.h>
@@ -48,7 +48,7 @@ class KGameUnitDebug;
  * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class Unit : public UnitBase, public BosonSprite
+class Unit : public UnitBase, public BosonItem
 {
 public:
 	enum PropertyIds {

@@ -24,9 +24,9 @@
 
 #include <kdebug.h>
 
-QValueList<BosonSprite*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
+QValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
 {
- QValueList<BosonSprite*> list;
+ QValueList<BosonItem*> list;
  QValueList<Unit*> unitList = units(collidingOnly, includeMoving, forUnit, &list);
 
  //TODO: once we have non-unit items we need to test if they are actually
@@ -34,12 +34,12 @@ QValueList<BosonSprite*> BoItemList::items(bool collidingOnly, bool includeMovin
 
  QValueList<Unit*>::Iterator it = unitList.begin();
  for (; it != unitList.end(); ++it) {
-	list.append((BosonSprite*)*it);
+	list.append((BosonItem*)*it);
  }
  return list;
 }
 
-QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, QValueList<BosonSprite*>* nonUnits) const 
+QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit* forUnit, QValueList<BosonItem*>* nonUnits) const 
 {
  QValueList<Unit*> list;
  ConstIterator it = begin();
@@ -108,6 +108,6 @@ void BoItemList::willBeOccupiedBy(Unit* unit)
 {
  // FIXME: ab: ahem... this might cause some trouble in the future
  // the unit is not yet there actually!
- appendItem((BosonSprite*)unit);
+ appendItem((BosonItem*)unit);
 }
 

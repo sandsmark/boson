@@ -36,7 +36,7 @@
 #include "boselection.h"
 #include "bosonconfig.h"
 #include "selectbox.h"
-#include "visual/bosonchat.h"
+#include "bosonglchat.h"
 #include "bosonprofiling.h"
 #include "bosonparticlesystem.h"
 
@@ -292,7 +292,7 @@ public:
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
 
-	BosonChat* mChat;
+	BosonGLChat* mChat;
 
 	Camera mCamera;
 
@@ -355,7 +355,7 @@ void BosonBigDisplayBase::init()
  d->mInitialized = false;
 
  mSelection = new BoSelection(this);
- d->mChat = new BosonChat(this);
+ d->mChat = new BosonGLChat(this);
 
  slotResetViewProperties();
  for (int i = 0; i < 4; i++) {
@@ -567,7 +567,7 @@ void BosonBigDisplayBase::paintGL()
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
 
-	BosonSprite* item = *it;
+	BosonItem* item = *it;
 
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
@@ -801,19 +801,7 @@ void BosonBigDisplayBase::renderText()
  glCallLists(fpsstr.length(), GL_UNSIGNED_BYTE, (GLubyte*)fpsstr.latin1());
 
 // now the chat messages
-// TODO: line break?
- x = border;
- y = border;
- QStringList list = d->mChat->messages();
- QStringList::Iterator it = list.end();
- --it;
- for (; it != list.begin(); --it) {
-	glRasterPos2i(x, y);
-	glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1());
-	y += d->mDefaultFont->height();
- }
- glRasterPos2i(x, y);
- glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1()); // list.begin()
+ d->mChat->renderMessages(border, border, d->mDefaultFont);
 
  glColor3f(1.0, 1.0, 1.0);
  glDisable(GL_BLEND);
