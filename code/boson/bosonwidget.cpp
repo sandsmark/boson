@@ -671,6 +671,7 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
 
 void BosonWidget::startEditor()
 {
+ slotChangeCursor(CursorNormal);
  connect(d->mBigDisplay, SIGNAL(signalBuildUnit(int,int, int, Player*)),
 		d->mBoson, SLOT(slotSendAddUnit(int, int, int, Player*)));
 	
