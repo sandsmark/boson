@@ -30,8 +30,8 @@ class KSocket;
 class boBuffer;
 
 
-#define BO_INITIAL_OIL		0
-#define BO_INITIAL_MINERAL	0
+#define BO_INITIAL_OIL		1000
+#define BO_INITIAL_MINERAL	2000
 
 
 /**
