@@ -50,6 +50,8 @@ public:
 
 	QSize mSize;
 	QPoint mPos;
+
+	int mPointSize;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -60,8 +62,9 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  mLocalPlayer = 0;
  mCanvas = 0;
  mUseFog = false;
- 
+
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+ setPointSize(2);
 }
 
 BosonMiniMap::~BosonMiniMap()
@@ -94,11 +97,11 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  }
  d->mMapWidth = w;
  d->mMapHeight = h;
- mGround = new QPixmap(mapWidth(), mapHeight());
+ mGround = new QPixmap(mapWidth() * pointSize(), mapHeight() * pointSize());
  mGround->fill(COLOR_UNKNOWN);
 
- setMinimumWidth(mapWidth() + 5);
- setMinimumHeight(mapHeight() + 5);
+ setMinimumWidth(mGround->width() + 5);
+ setMinimumHeight(mGround->height() + 5);
  updateGeometry();
 }
 
@@ -144,8 +147,7 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
  }
  QPainter p;
  p.begin(ground());
- p.setPen(color);
- p.drawPoint(x, y);
+ p.fillRect(x*pointSize(), y*pointSize(), pointSize(), pointSize(), QBrush(color));
  p.end();
 }
 
@@ -158,10 +160,13 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
  p.begin(this);
  p.drawPixmap(0, 0, *ground());
  
- // the little rectangle 
+ // the little rectangle
+ // there seems to be a small bug - if you scroll to the lower right corner
+ // there are at both sides (right + bottom) a few pixels left. the rect should
+ // be at the border (frame?).
  p.setPen(white);
  p.setRasterOp(XorROP);
- p.drawRect( QRect( d->mPos, d->mSize) ); 
+ p.drawRect( QRect( d->mPos * pointSize(), d->mSize * pointSize()) );
 
  p.end();
 }
@@ -329,3 +334,17 @@ void BosonMiniMap::initFogOfWar(Player* p)
  }
 }
 
+void BosonMiniMap::setPointSize(int p)
+{
+ if (d->mPointSize == p) {
+	return;
+ }
+ d->mPointSize = p;
+ //TODO: regenerate the current map!!
+ 
+}
+
+int BosonMiniMap::pointSize() const
+{
+ return d->mPointSize;
+}
