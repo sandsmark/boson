@@ -345,7 +345,7 @@ protected slots:
 
 	void slotInitMiniMapFogOfWar();
 
-	void slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset);
+	void slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, bofixed pointSize, int timeout, bofixed zOffset);
 
 protected:
 	/**
