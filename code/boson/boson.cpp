@@ -26,7 +26,6 @@
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
-#include "bosonscenario.h"
 #include "bosonstatistics.h"
 #include "bosonplayfield.h"
 #include "global.h"
