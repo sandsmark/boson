@@ -151,7 +151,11 @@ void ModelPreview::paintGL()
 
  if (mModel && mCurrentFrame >= 0) {
 	BoFrame* f = mModel->frame(mCurrentFrame);
+	if (f) {
 	glCallList(f->displayList());
+	} else {
+		boError() << k_funcinfo << "NULL frame" << endl;
+	}
  }
 
  glDisable(GL_CULL_FACE);
