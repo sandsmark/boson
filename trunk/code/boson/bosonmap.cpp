@@ -28,16 +28,9 @@
 #include "bosondata.h"
 #include "bosontexturearray.h"
 
-#include <qtimer.h>
-#include <qdatetime.h>
 #include <qdatastream.h>
 #include <qimage.h>
-#include <qvaluevector.h>
 #include <qdom.h>
-
-#include <kapplication.h>
-#include <kglobal.h>
-#include <kstandarddirs.h>
 
 #define BOSONMAP_VERSION 0x01 // current version
 
