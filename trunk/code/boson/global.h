@@ -78,4 +78,16 @@ enum UnitAction {
 	ActionStop = 2
 };
 
+	enum UnitSoundEvents {
+		SoundShoot = 0,
+		SoundOrderMove = 1,
+		SoundOrderAttack = 2,
+		SoundOrderSelect = 3,
+		SoundReportProduced = 4,
+		SoundReportDestroyed = 5,
+		SoundReportUnderAttack = 6
+	};
+
+
+
 #endif

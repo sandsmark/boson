@@ -1231,7 +1231,7 @@ void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
  // cannot be placed into mSelection cause we don't have localPlayer
  // there
  if (localPlayer() == unit->owner()) {
-	boMusic->playSound(unit, Unit::SoundOrderSelect);
+	boMusic->playSound(unit, SoundOrderSelect);
  }
  */
 }
@@ -1259,7 +1259,7 @@ void BosonBigDisplayBase::removeSelectionRect()
 		if (u->owner() == localPlayer()) {
 			// TODO: do not play sound here
 			// instead make virtual and play in derived class
-			boMusic->playSound(u, Unit::SoundOrderSelect);
+			boMusic->playSound(u, SoundOrderSelect);
 		}
 	}
  } else {
@@ -1276,7 +1276,7 @@ void BosonBigDisplayBase::removeSelectionRect()
 		// cannot be placed into mSelection cause we don't have localPlayer
 		// there
 		if (localPlayer() == unit->owner()) {
-			boMusic->playSound(unit, Unit::SoundOrderSelect);
+			boMusic->playSound(unit, SoundOrderSelect);
 		}
 	}
  }

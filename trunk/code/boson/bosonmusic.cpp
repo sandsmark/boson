@@ -21,6 +21,7 @@
 
 #include "defines.h"
 #include "unit.h"
+#include "unitproperties.h"
 #include "speciestheme.h"
 #include "bosonsound.h"
 #include "bosonconfig.h"
@@ -56,8 +57,6 @@ public:
 		mPlayObject = 0;
 
 		mTicker = 0;
-
-		mBosonSound = 0;
 	}
 
 	KArtsDispatcher mDispatcher;
@@ -242,7 +241,7 @@ void BosonMusic::playSound(Unit* unit, int event)
  if (boConfig->disableSound()) {
 	return;
  }
- bosonSound(unit->speciesTheme()->themePath())->play(unit, event);
+ bosonSound(unit->speciesTheme()->themePath())->play(unit->unitProperties()->sound(event));
 }
 
 bool BosonMusic::sound() const

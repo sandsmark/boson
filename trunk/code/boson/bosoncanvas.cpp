@@ -114,28 +114,12 @@ private:
 	BosonTiles* mTiles;
 };
 
-#warning FOW is not yet implemented for OpenGL
-class FogOfWar
-{
-public:
-	FogOfWar(BosonCanvas* )
-		// TODO
-	{
-	}
-	virtual int rtti() const { return RTTI::FogOfWar; }
-
-	void setVisible(bool) {}
-	void move(float , float ) { }
-	void setZ(float) { }
-};
-
 class BosonCanvas::BosonCanvasPrivate
 {
 public:
 	BosonCanvasPrivate()
 	{
 		mMap = 0;
-//		mFogPixmap = 0;
 
 		mLoader = 0;
 
@@ -145,8 +129,6 @@ public:
 	QPixmap mPix;
 	QPtrList<Unit> mDestroyedUnits;
 	QPtrList<BoShot> mDeleteShot;
-	QPtrDict<FogOfWar> mFogOfWar;
-//	QCanvasPixmapArray* mFogPixmap;
 	BoDisplayManager* mDisplayManager;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
@@ -174,7 +156,6 @@ BosonCanvas::BosonCanvas(QObject* parent)
 void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
- d->mFogOfWar.setAutoDelete(true);
  d->mDestroyedUnits.setAutoDelete(false);
  d->mDeleteShot.setAutoDelete(true);
 
@@ -189,7 +170,6 @@ BosonCanvas::~BosonCanvas()
 kdDebug()<< k_funcinfo << endl;
  quitGame();
  delete d->mLoader;
-// delete d->mFogPixmap;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -198,7 +178,6 @@ void BosonCanvas::quitGame()
 {
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
- d->mFogOfWar.clear();
  d->mDeleteShot.clear();
 
  d->mWorkNone.clear();
@@ -554,7 +533,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 		// Unit will not be damaged (it has enough shields)
 		target->setShields(target->shields() - damage);
 		// TODO: show some shield animation
-		boMusic->playSound(attackedBy, Unit::SoundShoot);
+		boMusic->playSound(attackedBy, SoundShoot);
 		return;
 	} else {
 		damage -= target->shields();
@@ -590,7 +569,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
 //	(void) new BoShot(target, attackedBy, this);
  }
- boMusic->playSound(attackedBy, Unit::SoundShoot);
+ boMusic->playSound(attackedBy, SoundShoot);
 }
 
 void BosonCanvas::destroyUnit(Unit* unit)
@@ -610,7 +589,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	unit->setHealth(0); // in case of an accidental change before
 	unit->setWork(UnitBase::WorkDestroyed);
 	owner->unitDestroyed(unit); // remove from player without deleting
-	boMusic->playSound(unit, Unit::SoundReportDestroyed);
+	boMusic->playSound(unit, SoundReportDestroyed);
 	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
 //	(void) new BoShot(unit, 0, this, true);
 	emit signalUnitDestroyed(unit);
@@ -646,89 +625,6 @@ unsigned int BosonCanvas::mapWidth() const
 unsigned int BosonCanvas::mapHeight() const
 {
  return map() ? map()->height() : 0;
-}
-
-void BosonCanvas::fogLocal(int x, int y)
-{
- // AB: I would rather like to place this into BosonBigDisplay as the fog of war
- // logically belongs to there. But I'd need to add a BosonMap pointer there and
- // make some small hacks - so you can find this here now. Note that this is
- // only the *local* fow, i.e. the fog of the local player.
- // Same is valid for unfogLocal.
-
-/*
- if (!d->mFogPixmap) {
-	return;
- }
- Cell* c = cell(x, y);
- if (!c) {
-	kdError() << k_funcinfo << "NULL cell" << endl;
-	return;
- }
- if (d->mFogOfWar[c]) {
-	kdError() << "tried adding fog of war twice!!!!" << endl;
-	return;
- }
- FogOfWar* fog = new FogOfWar(d->mFogPixmap, this);
- fog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
- fog->setZ(Z_FOG_OF_WAR);
- fog->setVisible(true);
- d->mFogOfWar.insert(c, fog);
- */
-}
-
-void BosonCanvas::unfogLocal(int x, int y)
-{
-// it seems like this doesn't work sometimes... dunno why...
- Cell* c = cell(x, y);
- if (!c) {
-	kdError() << k_funcinfo << "NULL cell" << endl;
-	return;
- }
-
- FogOfWar* f = d->mFogOfWar.take(c);
- if (f) {
-	f->setVisible(false);
-	delete f;
- }
-}
-
-void BosonCanvas::initFogOfWar(Player* p)
-{
-/*
- if (!d->mFogPixmap) {
-	QString fogPath = locate("data", "boson/themes/fow.xpm");
-	d->mFogPixmap = new QCanvasPixmapArray(fogPath);
-	if (!d->mFogPixmap->image(0) || 
-			d->mFogPixmap->image(0)->width() != (BO_TILE_SIZE * 2) ||
-			d->mFogPixmap->image(0)->height() != (BO_TILE_SIZE * 2)) {
-		kdError() << k_funcinfo << "Cannot load fow.xpm" << endl;
-		delete d->mFogPixmap;
-		d->mFogPixmap = 0;
-		return;
-	}
-	QBitmap mask(fogPath);
-	if (mask.width() != (BO_TILE_SIZE * 2) || mask.height() != (BO_TILE_SIZE * 2)) {
-		kdError() << k_funcinfo << "Can't create fow mask" << endl;
-		delete d->mFogPixmap;
-		d->mFogPixmap = 0;
-		return;
-	}
-	d->mFogPixmap->image(0)->setMask(mask);
-	d->mFogPixmap->image(0)->setOffset(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2);
- }
-
-// now put the fow wherever necessary to meet the players sight
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
-		if (p->isFogged(i, j)) {
-			fogLocal(i, j);
-		} else {
-			unfogLocal(i, j);
-		}
-	}
- }
- */
 }
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const

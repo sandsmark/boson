@@ -22,12 +22,11 @@
 #include "defines.h"
 #include "bosonmusic.h"
 #include "unitproperties.h"
+#include "speciestheme.h"
 #include "unit.h"
 #include "bosonconfig.h"
 
-#include <kglobal.h>
 #include <kapplication.h>
-#include <kstandarddirs.h>
 #include <kmimetype.h>
 #include <kdebug.h>
 #include <arts/kartsserver.h>
@@ -38,7 +37,9 @@
 
 #include <qstringlist.h>
 #include <qintdict.h>
+#include <qdict.h>
 #include <qdir.h>
+#include <qregexp.h>
 
 class BoPlayObject
 {
@@ -184,8 +185,7 @@ public:
 
 	QIntDict<BoPlayObject> mSounds;
 
-	UnitSounds mUnitSounds; // whoaa... QMap< int, QMap< int, QPtrList< BoPlayObject> > > // <-- probably a design problem!! (probably ??? )
-	SoundEvents mDefaultSounds;
+	QMap<QString, QPtrList<BoPlayObject> > mUnitSounds;
 
 	Arts::StereoEffectStack mEffectStack; // all effects are placed in the stack. we connect a playobject to this and so the playoubject uses all effects.
 	Arts::StereoVolumeControl mVolumeControl; // changes the volume.
@@ -201,7 +201,7 @@ BosonSound::BosonSound()
 {
  d = new BosonSoundPrivate;
  d->mSounds.setAutoDelete(true);
- 
+
 #if KDE_VERSION < 301
  d->mPlaySounds = false;
  return;
@@ -244,30 +244,8 @@ BosonSound::BosonSound()
 BosonSound::~BosonSound()
 {
  kdDebug() << k_funcinfo << endl;
- int sounds = 0;
  d->mSounds.clear();
- UnitSounds::Iterator unitsIt;
- unitsIt = d->mUnitSounds.begin();
- for (; unitsIt != d->mUnitSounds.end(); ++unitsIt) {
-	SoundEvents::Iterator eventsIt;
-	for (eventsIt = (*unitsIt).begin(); eventsIt != (*unitsIt).end(); ++eventsIt) {
-		QPtrListIterator<BoPlayObject> it(*eventsIt);
-		while ((*eventsIt).count() > 0) {
-			BoPlayObject* p = (*eventsIt).take(0);
-			delete p;
-			sounds++;
-		}
-	}
- }
- SoundEvents::Iterator eventsIt;
- for (eventsIt = d->mDefaultSounds.begin(); eventsIt != d->mDefaultSounds.end(); ++eventsIt) {
-	QPtrListIterator<BoPlayObject> it = (*eventsIt);
-	while ((*eventsIt).count() > 0) {
-		BoPlayObject* p = (*eventsIt).take(0);
-		delete p;
-		sounds++;
-	}
- }
+ d->mUnitSounds.clear();
 
  if (d->mId != -1) {
 	d->mEffectStack.remove(d->mId);
@@ -287,51 +265,13 @@ void BosonSound::addUnitSounds(const UnitProperties* prop)
  if (boConfig->disableSound()) {
 	return;
  }
- QDir dir(QString("%1sounds").arg(prop->unitPath()));
- dir.setFilter(QDir::Files);
-
- addEvent(prop->typeId(), Unit::SoundShoot, dir);
- addEvent(prop->typeId(), Unit::SoundOrderMove, dir);
- addEvent(prop->typeId(), Unit::SoundOrderAttack, dir);
- addEvent(prop->typeId(), Unit::SoundOrderSelect, dir);
- addEvent(prop->typeId(), Unit::SoundReportProduced, dir);
- addEvent(prop->typeId(), Unit::SoundReportDestroyed, dir);
- addEvent(prop->typeId(), Unit::SoundReportUnderAttack, dir);
+ QString dir = prop->theme()->themePath() + QString::fromLatin1("sounds/");
+ QMap<int, QString> sounds = prop->sounds();
+ QMap<int, QString>::Iterator it = sounds.begin();
+ for (; it != sounds.end(); ++it) {
+	addEvent(dir, it.data());
+ }
 }
-
-void BosonSound::loadDefaultEvent(int event, const QString& filter)
-{
-#if KDE_VERSION < 301
- return;
-#endif
- if (boConfig->disableSound()) {
-	return;
- }
- if (d->mDefaultSounds.contains(event)) {
-	return;
- }
- if (server().server().isNull()) {
-	return;
- }
-
- // TODO: replace * by correct species path
- QStringList defaultSounds = KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/sounds/*.ogg");
- defaultSounds += KGlobal::dirs()->findAllResources("data", "boson/themes/species/*/sounds/*.wav");
-
- QStringList list = defaultSounds.grep(filter);
- for (unsigned int i = 0; i < list.count(); i++) {
-	kdDebug() << k_funcinfo << "adding " << event << " = " << list[i] << endl;
-	BoPlayObject* playObject = new BoPlayObject(this, list[i]);
-	if (!playObject->isNull()) {
-		d->mDefaultSounds[event].append(playObject);
-	} else {
-		kdWarning() << k_funcinfo << "NULL sound " << list[i] << endl;
-		delete playObject;
-	}
- }
- d->mDefaultSounds[event].setAutoDelete(true);
-}
-
 
 void BosonSound::addSound(int id, const QString& file)
 {
@@ -344,6 +284,7 @@ void BosonSound::addSound(int id, const QString& file)
  if (d->mSounds.find(id)) {
 	return;
  }
+ kdDebug() << k_funcinfo << "loading " << file << endl;
  BoPlayObject* playObject = new BoPlayObject(this, file);
  if (!playObject->isNull()) {
 	d->mSounds.insert(id, playObject);
@@ -353,42 +294,20 @@ void BosonSound::addSound(int id, const QString& file)
  }
 }
 
-void BosonSound::addEvent(unsigned long int unitType, int event, QDir& dir)
+void BosonSound::addEvent(const QString& dir, const QString& name)
 {
- QString filter;
- switch (event) {
-	case Unit::SoundShoot:
-		filter = "shoot";
-		break;
-	case Unit::SoundOrderMove:
-		filter = "order_move";
-		break;
-	case Unit::SoundOrderAttack:
-		filter = "order_attack";
-		break;
-	case Unit::SoundOrderSelect:
-		filter = "order_select";
-		break;
-	case Unit::SoundReportProduced:
-		filter = "report_produced";
-		break;
-	case Unit::SoundReportDestroyed:
-		filter = "report_destroyed";
-		break;
-	case Unit::SoundReportUnderAttack:
-		filter = "report_underattack";
-		break;
- }
- dir.setNameFilter(QString("%1*.ogg;%2*.wav").arg(filter).arg(filter));
- QStringList list = dir.entryList();
- loadDefaultEvent(event, filter);
+ QDir directory(dir);
+ directory.setNameFilter(QString("%1_*.ogg;%2_*.wav").arg(name).arg(name));
+ QStringList list = directory.entryList();
+ // for "oder_select" we'd also get "order_select_cmdbunker_0.wav" which is
+ // wrong. so:
+ list = list.grep(QRegExp(QString("%1_[0-9]{1,2}\\....").arg(name)));
  for (unsigned int i = 0; i < list.count(); i++) {
-	addEventSound(unitType, event, dir.absPath() + QString::fromLatin1("/") + list[i]);
+	addEventSound(name, directory.absPath() + QString::fromLatin1("/") + list[i]);
  }
- (d->mUnitSounds[unitType])[event].setAutoDelete(true);
 }
 
-void BosonSound::addEventSound(unsigned long int unitType, int event, const QString& file)
+void BosonSound::addEventSound(const QString& name, const QString& file)
 {
 #if KDE_VERSION < 301
  return;
@@ -396,11 +315,18 @@ void BosonSound::addEventSound(unsigned long int unitType, int event, const QStr
  if (boConfig->disableSound()) {
 	return;
  }
-// kdDebug() << k_funcinfo << "adding: " << unitType << "->" << event << " = " << file << endl;
+ QPtrList<BoPlayObject> list = d->mUnitSounds[name];
+ QPtrListIterator<BoPlayObject> it(list);
+ for (; it.current(); ++it) {
+	if (it.current()->file() == file) {
+		return;
+	}
+ }
  BoPlayObject* playObject = new BoPlayObject(this, file);
+ kdDebug() << k_funcinfo << "loading " << file << endl;
  if (!playObject->isNull()) {
-	// that's really ugly code:
-	(d->mUnitSounds[unitType])[event].append(playObject);
+	d->mUnitSounds[name].append(playObject);
+	d->mUnitSounds[name].setAutoDelete(true);
  } else {
 	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
 	delete playObject;
@@ -425,28 +351,25 @@ void BosonSound::play(int id)
  }
 }
 
-void BosonSound::play(Unit* unit, int event)
+void BosonSound::play(const QString& name)
 {
  if (boConfig->disableSound()) {
 	return;
  }
- if (!d->mPlaySounds) { 
+ if (!d->mPlaySounds) {
 	return; // something evil happened to our sound server...
  }
  if (!boConfig->sound()) {
 	return;
  }
- kdDebug() << k_funcinfo << "event: " << event << endl;
- // that's really ugly code:
- QPtrList<BoPlayObject>& list =  (d->mUnitSounds[unit->unitProperties()->typeId()])[event];
+ QPtrList<BoPlayObject>& list = d->mUnitSounds[name];
 
  BoPlayObject* p = 0;
  if (list.count() > 0) {
 	int no = kapp->random() % list.count();
 	p = list.at(no);
- } else if (d->mDefaultSounds.contains(event) && d->mDefaultSounds[event].count() > 0) {
-	int no = kapp->random() % d->mDefaultSounds[event].count();
-	p = d->mDefaultSounds[event].at(no);
+ } else {
+	return;
  }
 
  if (!p || p->isNull()) {
@@ -456,8 +379,8 @@ void BosonSound::play(Unit* unit, int event)
  p->playFromBeginning();
 }
 
-Arts::StereoEffectStack BosonSound::effectStack() 
-{ 
- return d->mEffectStack; 
+Arts::StereoEffectStack BosonSound::effectStack()
+{
+ return d->mEffectStack;
 }
 
