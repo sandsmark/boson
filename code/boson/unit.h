@@ -255,7 +255,8 @@ protected:
 	 **/
 	void newPath();
 
-	bool searchpath;
+protected:
+	bool mSearchPath;
 
 private:
 	class UnitPrivate;
