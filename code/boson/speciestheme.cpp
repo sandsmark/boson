@@ -52,7 +52,7 @@ public:
 };
 
 static int defaultColorIndex = 0;
-QRgb default_color[BOSON_MAX_PLAYERS] = {
+QRgb default_color[BOSON_MAX_PLAYERS + 1] = { // AB: + 1 because of neutral player
 	qRgb(0,0,255),
 	qRgb(0,255,0),
 	qRgb(255,0,0),
@@ -63,6 +63,7 @@ QRgb default_color[BOSON_MAX_PLAYERS] = {
 	qRgb(255,0,127),
 	qRgb(0,127,255),
 	qRgb(0,127,127),
+	qRgb(127,0,255),
 };
 
 SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
