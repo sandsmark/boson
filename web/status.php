@@ -52,7 +52,6 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>All units must have their own 3D model</li>
 	  <li>Generate the technology tree dynamically for documentation.</li>
 	  <li>Remove the reloadstate progress bar</li>
-	  <li>Fix problem with particles' textures</li>
 	</ul>
 	<h2>DONE</h2>
 	<ul>
@@ -70,7 +69,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>Experimental support for unit animations (currenlty comsat only)</li>
 	  <li>Support for multiple weapons per unit (experimental)</li>
 	  <li>Rename all index.desktop files to appropriate names</li>
-	  <li>Map/scenario editor is working again. Map are at least modifyable,
+	  <li>Map/scenario editor is working again. Maps are at least modifyable,
 	  you can add/delete a few units.</li>
 	</ul>
 	");
