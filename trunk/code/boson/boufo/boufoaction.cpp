@@ -566,12 +566,7 @@ BoUfoToggleAction::~BoUfoToggleAction()
 
 void BoUfoToggleAction::plug(ufo::UWidget* w)
 {
-#if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2
- // AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
- // implementation.
- BoUfoAction::plug(w);
- return;
-#endif
+#if UFO_VERSION_ATLEAST(0,7,3)
  ufo::UMenuBar* menuBar = dynamic_cast<ufo::UMenuBar*>(w);
  ufo::UMenu* menu = dynamic_cast<ufo::UMenu*>(w);
  if (menuBar || menu) {
@@ -587,6 +582,12 @@ void BoUfoToggleAction::plug(ufo::UWidget* w)
 	w->add(menuItem);
 	addWidget(menuItem);
  }
+#else
+ #warning checkbox menuitems not supported with libufo < 0.7.3
+ // AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
+ // implementation.
+ BoUfoAction::plug(w);
+#endif
 }
 
 void BoUfoToggleAction::slotActivated()
