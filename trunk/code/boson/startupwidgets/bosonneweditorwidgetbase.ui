@@ -236,7 +236,7 @@
         <sender>mChangeMaxHeight</sender>
         <signal>sliderMoved(int)</signal>
         <receiver>BosonNewEditorWidgetBase</receiver>
-        <slot>slotMaxHeigthChanged(int)</slot>
+        <slot>slotMaxHeightChanged(int)</slot>
     </connection>
     <connection>
         <sender>mChangeMaxPlayers</sender>
@@ -268,7 +268,7 @@
     <slot access="protected" specifier="pure virtual">slotTilesetChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxPlayersChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxWidthChanged(int)</slot>
-    <slot access="protected" specifier="pure virtual">slotMaxHeigthChanged(int)</slot>
+    <slot access="protected" specifier="pure virtual">slotMaxHeightChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotNewMapToggled(bool)</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
