@@ -199,19 +199,6 @@ protected slots:
 	void slotUpdateStatusBar();
 
 	/**
-	 * Actually start a game. Note that this is called at the end of the
-	 * loading (game data, map, ...) procedure. This will show the big
-	 * display and also do some final cleanups.
-	 *
-	 * Do not confuse with e.g. @ref slotStartNewGame, @ref
-	 * slotStartEditor or @ref slotLoadGame
-	 * @param playFieldId QString::null if no playfield should be started
-	 * (e.g. you are not ADMIN, you are loading a game, ...) otherwise the
-	 * id of the playfield as in @ref BosonStarting::playField.
-	 **/
-	void slotStartGame(const QString& playFieldId);
-
-	/**
 	 * Assign the map (from starting/loading a game) to the game.
 	 *
 	 * From this point on we can actually use the map.

@@ -392,9 +392,13 @@ void TopWidget::slotStartNewGame()
  initCanvas();
  initBosonWidget();
 
+ changeLocalPlayer(boGame->localPlayer());
+ d->mBosonWidget->initPlayer();
+
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
- // start the game. Once it's done it'll emit signalStartGame().
+ // start the game. Once it's done it'll send IdGameIsStarted (see
+ // Boson::signalGameStarted())
  d->mStarting->startNewGame();
 }
 
@@ -531,49 +535,6 @@ void TopWidget::slotAssignMap()
  d->mBosonWidget->initMap();
 }
 
-void TopWidget::slotStartGame(const QString& playFieldId)
-{
- boDebug() << k_funcinfo << endl;
- BO_CHECK_NULL_RET(boGame);
- if (boGame->gameStatus() != KGame::Init) {
-	boWarning() << k_funcinfo << "not in Init status" << endl;
-	return;
- }
-// AB: first init map (see slotAssginMap()), THEN init player. we need map for
-// player loading (unit positions, ...)
-
- boDebug() << k_funcinfo << "init player" << endl;
- if (!boGame->localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
- changeLocalPlayer(boGame->localPlayer());
- d->mBosonWidget->initPlayer();
-/*
- boDebug() << k_funcinfo << "init map" << endl;
- d->mBosonWidget->initMap();//AB: see slotAssingMap()!! // FIXME REMOVE
- */
-
- // now show the bosonwidget and hide the startup widgets.
- mMainDock->setWidget(d->mBosonWidget);
- d->mBosonWidget->show();
- d->mStartup->hide();
- setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
- setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
-
- int progress = 0; // FIXME: wrong value!
-
- // we don't need these anymore. lets save the memory.
- d->mStartup->resetWidgets();
-
- // Init some stuff
- d->mActionStatusbar->setChecked(true); // we do not yet remember user settings here! TODO
- slotToggleStatusbar();// AB: doesn't really toggle!
- d->mBosonWidget->initGameMode(playFieldId);
- enableGameActions(true);
- d->mStatusBarTimer.start(1000);
-}
-
 void TopWidget::slotToggleSound()
 {
  boMusic->setSound(!boMusic->sound());
@@ -633,7 +594,6 @@ void TopWidget::reinitGame()
 
  delete d->mStarting;
  d->mStarting = new BosonStarting(this); // manages startup of games
- connect(d->mStarting, SIGNAL(signalStartGame(const QString&)), this, SLOT(slotStartGame(const QString&)));
  connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
  connect(d->mStarting, SIGNAL(signalLoadingReset()),
 			d->mStartup, SLOT(slotLoadingReset()));
@@ -944,6 +904,42 @@ void TopWidget::slotAddLocalPlayer()
 
 void TopWidget::slotGameStarted()
 {
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
+ if (boGame->gameStatus() != KGame::Run) {
+	boWarning() << k_funcinfo << "not in Run status" << endl;
+	return;
+ }
+// AB: first init map (see slotAssginMap()), THEN init player. we need map for
+// player loading (unit positions, ...)
+
+ boDebug() << k_funcinfo << "init player" << endl;
+ if (!boGame->localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+ changeLocalPlayer(boGame->localPlayer());
+ d->mBosonWidget->initPlayer();
+
+ // now show the bosonwidget and hide the startup widgets.
+ mMainDock->setWidget(d->mBosonWidget);
+ d->mBosonWidget->show();
+ d->mStartup->hide();
+ setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+ setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+
+ int progress = 0; // FIXME: wrong value!
+
+ // we don't need these anymore. lets save the memory.
+ d->mStartup->resetWidgets();
+
+ // Init some stuff
+ d->mActionStatusbar->setChecked(true); // we do not yet remember user settings here! TODO
+ slotToggleStatusbar();// AB: doesn't really toggle!
+ enableGameActions(true);
+ d->mStatusBarTimer.start(1000);
+ d->mBosonWidget->initGameMode();
+
  showHideMenubar(); // depends on boGame->gameStatus()
 }
 

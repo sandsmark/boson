@@ -173,8 +173,7 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  f.close();
  mLoading = false;
 
- // start the game. we are loading a game, so we must not start a scenario here.
- emit signalStartGame(QString::null); // FIXME - also in loadgamedata3
+ startGame();
  return loaded;
 }
 
@@ -230,7 +229,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 		return;
 	}
 #warning FIXME for LOADING code
-//	slotChangeLocalPlayer(boGame->localPlayer()); //AB: can we place this after signalStartGame?
+//	slotChangeLocalPlayer(boGame->localPlayer());
 	mPlayer = boGame->localPlayer();
  }
 
@@ -341,11 +340,12 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
-	QString playFieldId;
 	if (boGame->isAdmin()) {
-		playFieldId = mPlayFieldId;
+		startScenario();
 	}
-	emit signalStartGame(playFieldId);
+
+	// load games will do that themselves.
+	startGame();
  }
 // boGame->unlock();
 }
@@ -412,5 +412,43 @@ void BosonStarting::loadUnitDatas(Player* p)
 	emit signalLoadingUnit(currentunit);
 	p->speciesTheme()->loadUnit(*it);
  }
+}
+
+void BosonStarting::startScenario()
+{
+ if (!boGame->isAdmin()) {
+	boError() << "not admin" << endl;
+	return;
+ }
+ if (mLoading) {
+	boError() << k_funcinfo << "scenario doesn't need to be started on loading" << endl;
+	return;
+ }
+ BosonPlayField* field = BosonPlayField::playField(mPlayFieldId);
+ // TODO: on error we should abort starting the game, i.e. 
+ // return to the welcome widget (and displaying a msg box) or so
+ if (!field) {
+	boError() << k_funcinfo << "NULL playfield" << endl;
+ } else if (!field->scenario()) {
+	boError() << k_funcinfo << "NULL scenario" << endl;
+ } else {
+	field->scenario()->startScenario(boGame);
+ }
+}
+
+void BosonStarting::startGame()
+{
+ boDebug() << k_funcinfo << endl;
+ // we do some final initializations here (mostly status changed) and then send
+ // out IdGameIsStarted.
+ // At that point all units should be on the map and it should be ready to
+ // start.
+ // Once the message is received the clients need to do visual initializations
+ // (i.e. hide the loading progressbar, show the big display, ...)
+ boGame->startGame();
+ if (!boGame->isAdmin()) {
+	return;
+ }
+ boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
 }
 

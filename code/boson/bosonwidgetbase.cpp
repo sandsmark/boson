@@ -278,12 +278,9 @@ void BosonWidgetBase::initPlayer()
  slotUnitCountChanged(localPlayer());
 }
 
-void BosonWidgetBase::initGameMode(const QString& playFieldId)//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
+void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
- if (!playFieldId.isEmpty()) {
-	startScenario(playFieldId);
- }
  startScenarioAndGame();
 }
 
@@ -830,44 +827,9 @@ void BosonWidgetBase::saveConfig()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void BosonWidgetBase::startScenario(const QString& playFieldId)
-{
- if (boGame->isAdmin()) {
-	boDebug() << k_funcinfo << playFieldId << endl;
-#warning FIXME
-	// this must be called for ADMIN only, but we have a few calls in here
-	// which must be done for ALL players. e.g. Player::setOil() and so.
-
-	// TODO this really has to be fixed! TODO
-
-	// I repeat: this MUST NOT be called for the clients, ONLY for ADMIN.
-	// the reason is that one player might have modified a scenario, so we
-	// need to transmit the entire thing over network. we can do this by
-	// either transmitting the entire XML file or only the commands. since
-	// the latter is faster we do that.
-	BosonPlayField* field = BosonPlayField::playField(playFieldId);
-
-	// we don't return on error, so that we don't have a totally broken
-	// display
-	if (!field) {
-		boError() << k_funcinfo << "NULL playfield" << endl;
-	} else if (!field->scenario()) {
-		boError() << k_funcinfo << "NULL scenario" << endl;
-	} else {
-		field->scenario()->startScenario(boGame);
-	}
- }
-}
-
 void BosonWidgetBase::startScenarioAndGame()
 {
  boDebug() << k_funcinfo << endl;
- boGame->startGame();
- if (boGame->isAdmin()) {
-	// as soon as this message is received the game is actually started
-	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
- }
-
  displayManager()->slotCenterHomeBase();
 
  #warning FIXME
