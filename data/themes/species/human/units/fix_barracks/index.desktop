@@ -5,6 +5,7 @@ Name=Barracks
 Id=4
 Health=250
 MineralCost=200
+OilCost=0
 Producer=10
 Requirements=5
 UnitWidth=2.0

@@ -5,6 +5,7 @@ Name=Helipad
 Id=1
 Health=200
 MineralCost=250
+OilCost=0
 Producer=10
 Requirements=4,5,3
 UnitWidth=2.0

@@ -5,6 +5,7 @@ Name=Batzen
 Id=10006
 Health=100
 MineralCost=150
+OilCost=80
 Producer=0
 Requirements=3
 Armor=1

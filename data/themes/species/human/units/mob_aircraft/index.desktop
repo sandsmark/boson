@@ -5,6 +5,7 @@ Name=Aircraft
 Id=10004
 Health=70
 MineralCost=250
+OilCost=150
 Producer=2
 Requirements=1
 UnitWidth=1.5

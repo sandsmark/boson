@@ -5,6 +5,7 @@ Name=Ship
 Id=10000
 Health=150
 MineralCost=250
+OilCost=100
 Producer=1
 Requirements=3
 UnitWidth=2.0

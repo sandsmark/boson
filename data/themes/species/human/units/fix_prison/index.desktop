@@ -5,6 +5,7 @@ Name=Prison
 Id=11
 Health=200
 MineralCost=250
+OilCost=0
 Producer=10
 Requirements=5,2
 UnitWidth=2.0
