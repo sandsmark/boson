@@ -300,7 +300,7 @@ void ModelPreview::initUfoGUI()
 
 
 
-#define UFO CAMERA_WIDGET 0
+#define UFO_CAMERA_WIDGET 0
 #if UFO_CAMERA_WIDGET
  // AB: atm this causes problems with the camera.
  BoUfoCameraWidget* camera = new BoUfoCameraWidget();
@@ -345,6 +345,12 @@ void ModelPreview::initUfoGUI()
  BO_CHECK_NULL_RET(actionCollection);
 
 #warning TODO: KToggleAction
+#warning TODO: KActionMenu
+ BoUfoToggleAction* vertexPoints = new BoUfoToggleAction(i18n("Show vertex points"),
+		KShortcut(), 0, 0,
+		actionCollection, "options_show_vertex_points");
+ connect(vertexPoints, SIGNAL(signalToggled(bool)), this, SLOT(slotShowVertexPoints(bool)));
+ vertexPoints->setChecked(boConfig->boolValue("ShowVertexPoints"));
 
  // TODO BoUfoStdAction
 #warning FIXME: use KMainWindow::close()
@@ -834,6 +840,11 @@ void ModelPreview::slotResetView()
  updateCamera(cameraPos, lookAt, up);
  emit signalFovYChanged(60.0);
  resizeGL(width(), height());
+}
+
+void ModelPreview::slotShowVertexPoints(bool s)
+{
+ boConfig->setBoolValue("ShowVertexPoints", s);
 }
 
 void ModelPreview::slotConstructionChanged(bool on)

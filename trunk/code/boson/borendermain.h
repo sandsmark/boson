@@ -200,6 +200,7 @@ public slots:
 	void slotUnHideAllMeshes();
 	void slotEnableLight(bool);
 	void slotEnableMaterials(bool);
+	void slotShowVertexPoints(bool);
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
