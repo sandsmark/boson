@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONSOUND_H__
-#define __BOSONSOUND_H__
+#ifndef BOSONSOUND_H
+#define BOSONSOUND_H
 
 #include <qptrlist.h>
 #include <qmap.h>

@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONTILES_H__
-#define __BOSONTILES_H__
+#ifndef BOSONTILES_H
+#define BOSONTILES_H
 
 #include "cell.h"
 

@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONSCENARIO_H__
-#define __BOSONSCENARIO_H__
+#ifndef BOSONSCENARIO_H
+#define BOSONSCENARIO_H
 
 #include <qstring.h>
 #include <qptrlist.h>

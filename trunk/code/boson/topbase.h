@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __TOPBASE_H__
-#define __TOPBASE_H__
+#ifndef TOPBASE_H
+#define TOPBASE_H
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -134,4 +134,4 @@ private:
 	BosonWidget* mBosonWidget;
 };
 
-#endif // __TOPBASE_H__
+#endif

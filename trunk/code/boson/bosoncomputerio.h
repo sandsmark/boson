@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONCOMPUTERIO_H__
-#define __BOSONCOMPUTERIO_H__
+#ifndef BOSONCOMPUTERIO_H
+#define BOSONCOMPUTERIO_H
 
 #include <kgame/kgameio.h>
 

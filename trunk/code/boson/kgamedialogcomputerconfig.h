@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __KGAMEDIALOGCOMPUTERCONFIG_H__
-#define __KGAMEDIALOGCOMPUTERCONFIG_H__
+#ifndef KGAMEDIALOGCOMPUTERCONFIG_H
+#define KGAMEDIALOGCOMPUTERCONFIG_H
 
 #include <kgame/kgamedialogconfig.h>
 

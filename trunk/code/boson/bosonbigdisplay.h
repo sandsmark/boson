@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONBIGDISPLAY_H__
-#define __BOSONBIGDISPLAY_H__
+#ifndef BOSONBIGDISPLAY_H
+#define BOSONBIGDISPLAY_H
 
 #include <qcanvas.h>
 #include <qptrlist.h>

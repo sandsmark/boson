@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONSTATISTICS_H__
-#define __BOSONSTATISTICS_H__
+#ifndef BOSONSTATISTICS_H
+#define BOSONSTATISTICS_H
 
 class UnitBase;
 

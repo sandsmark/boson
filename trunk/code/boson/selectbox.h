@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __SELECTBOX_H__
-#define __SELECTBOX_H__
+#ifndef SELECTBOX_H
+#define SELECTBOX_H
 
 #include <qcanvas.h>
 #include "rtti.h"
@@ -97,5 +97,5 @@ private:
 	bool mLeader;
 };
 
-#endif // __SELECTBOX_H__
+#endif
 

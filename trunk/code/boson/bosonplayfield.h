@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONPLAYFIELD_H__
-#define __BOSONPLAYFIELD_H__
+#ifndef BOSONPLAYFIELD_H
+#define BOSONPLAYFIELD_H
 
 #include <qobject.h>
 

@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __BOSONMUSIC_H__
-#define __BOSONMUSIC_H__
+#ifndef BOSONMUSIC_H
+#define BOSONMUSIC_H
 
 #include <qobject.h>
 
