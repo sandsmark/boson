@@ -46,16 +46,17 @@
       "Configure Boson". Change "Mouse wheel action" under the "Scrolling" tab to "Move camera".<br>
       Now you can scroll with your mouse wheel, hold down the Alt key for horizontal scrolling.
     </p>
-    
+
     <h4>6. Cursor at the Edge of the window</h4>
     <p>
       <i>(Currently at an experimental state!)</i><br>
       You can also scroll by moving the cursor at the edge of the window. Move
       the cursor at the edge of the main window and wait a moment. That's it.<br>
       Please note that you may have some problems with this if you are not
-      playing in fullscreen mode. We recommend to play in fullscreen mode!
+      playing in fullscreen mode. We recommend to play in fullscreen mode!<br>
+      The sensity is configureable under the "scolling" tab in the settings dialog.
     </p>
-    
+
 
 #include "nav.wml" before_url="apps.html" before_text="Programs and tools" after_url="cursor.html" after_text="The cursors" up_url="index.html"
 #include "footer.wml"

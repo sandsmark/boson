@@ -5,9 +5,9 @@
     <p>&nbsp;</p>
     <p>
       You can instruct different buildings to construct units.<br>
-      At the moment the <a href="../facilities/weaponsfactory.html">Weapons Factory</a> and the <a href="../facilities/helipad.html">Helipad</a>
-      are the only buildings that can construct units.
+      At the moment only the <a href="../facilities/weaponsfactory.html">Weapons Factory</a> and the <a href="../facilities/helipad.html">Helipad</a>
+      support that.
     </p>
-    
+
 #include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units" up_url="index.html"
 #include "footer.wml"

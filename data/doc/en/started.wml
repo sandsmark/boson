@@ -13,14 +13,13 @@ performance)
      </ul>
      Minimum software requirements:
      <ul>
-        <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support)</li>
-        <li><a href="http://www.trolltech.com" target="_blank">QT</a> (at least version 3)</li>
-        <li><a href="http://www.kde.org" target="_blank">KDE</a> (at least version 3.0)</li>
-        <li>kdegames/libkdegames - usually shipped with KDE</li>
-        <li>kdemultimedia - also shipped with KDE</li>
-        <li><a href="http://www.vorbis.org" target="_blank">libvorbis</a> (for sound and music)</li>
+        <li><a href="http://www.xfree86.org" target="_blank">XFree 4.x server</a> (with OpenGL support, 4.3 and Xrandr for resolution changing)</li>
+        <li><a href="http://www.xfree86.org" target="_blank">OpenGL <a> the OpenGL library (should be included in your XFree Server or graphics card driver)</li>
+        <li><a href="http://www.trolltech.com" target="_blank">QT 3.1</a> or better</li>
+        <li><a href="http://www.kde.org" target="_blank">kdelibs 3.1</a> or better (3.0 is untested)</li>
         <li><a href="http://lib3ds.sourceforge.net" target="_blank">lib3ds</a> (Units and building rendering)</li>
-        <li><a href="http://www.xfree86.org" target="_blank">OpenGL</a> - The OpenGL library (should be included in your XFree server or graphics card driver)</li>
+        <li><a href="http://www.python.org" target="_blank">Python 2.0</a> or better (2.3 is recommended) </li>
+        <li><a href="http://www.openal.org" target="_blank"> OpenAL (audio library)</li>
         <li><a href="http://www.thewml.org" target="_blank">WML</a> - For the handbook, if you don't use a binary package</li>
         <li>Image::Magick - For the handbook technologie dependency tree image, if you don't use a binary package and want this image.</li>
     </ul>

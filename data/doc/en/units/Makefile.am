@@ -12,7 +12,7 @@ BO_DOC_DIR = units
 BO_DOCS=index.wml tornado.wml mineralharvester.wml \
         oilharvester.wml ship.wml ferry.wml grizzly.wml leopard.wml \
         panther.wml piranha.wml tiger.wml transall.wml puma.wml \
-        map.wml
+	wolf.wml warthog.wml map.wml
 
 # list additional data here - these files will get installed
 doc_DATA=tornado.jpg mineralharvester.jpg oilharvester.jpg \
@@ -21,7 +21,8 @@ doc_DATA=tornado.jpg mineralharvester.jpg oilharvester.jpg \
         tornado_small.jpg mineralharvester_small.jpg \
         oilharvester_small.jpg ship_small.jpg ferry_small.jpg grizzly_small.jpg \
         leopard_small.jpg panther_small.jpg piranha_small.jpg \
-        tiger_small.jpg map_small.jpg puma_small.jpg transall_small.jpg
+        tiger_small.jpg map_small.jpg puma_small.jpg transall_small.jpg \
+	wolf.jpg wolf_small.jpg warthog.jpg warthog_small.jpg
 
 # Condiguration ends here!
 
