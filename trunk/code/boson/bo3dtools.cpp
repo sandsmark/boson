@@ -222,6 +222,22 @@ bool BoVector4::loadFromXML(const QDomElement& root, const QString& name)
   return ret;
 }
 
+QDataStream& operator<<(QDataStream& s, const BoVector4& v)
+{
+  return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2] << (float)v.mData[3];
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector4& v)
+{
+  float x, y, z, w;
+  s >> x >> y >> z >> w;
+  v.mData[0] = x;
+  v.mData[1] = y;
+  v.mData[2] = z;
+  v.mData[3] = w;
+  return s;
+}
+
 
 
 /*****  BoMatrix  *****/

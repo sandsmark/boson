@@ -644,8 +644,13 @@ class BoVector4
 
   private:
     friend class BoMatrix;
+    friend QDataStream& operator<<(QDataStream& s, const BoVector4& v);
+    friend QDataStream& operator>>(QDataStream& s, BoVector4& v);
     GLfloat mData[4];
 };
+
+QDataStream& operator<<(QDataStream& s, const BoVector4& v);
+QDataStream& operator>>(QDataStream& s, BoVector4& v);
 
 /**
  * an OpenGL 4x4 matrix. note that we use (just like mesa) column major order to
