@@ -83,6 +83,7 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	qcb_which = new QComboBox(this, "qcb_which");
 	qcb_which->setGeometry(130,40,80,30);
 
+	qcb_which->insertItem("Plain tiles",	W_SMALL_PLAIN);
 	qcb_which->insertItem("small",		W_SMALL_GROUND);
 	qcb_which->insertItem("big 1",		W_BIG_GROUND_1);
 	qcb_which->insertItem("big 2",		W_BIG_GROUND_2);
@@ -142,10 +143,10 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 
 	inverted	= false;
 	trans		= TRANS_GW;
-	setOrders	(0);
-	otype		= OT_NONE;
+	otype		= OT_GROUND;
 	who		= 0;
-	qcb_who->hide();
+	which		= W_BIG_GROUND_1;
+	setOrders	(W_SMALL_PLAIN);
 }
 
 
@@ -223,6 +224,11 @@ void editorView::redrawTiles(void)
 			seq = ground->getPixmap( inverted?groundTransProp[trans].to:groundTransProp[trans].from);
 			tiles[4]->setPixmap(*seq->image(0));
 			break;
+			
+		case W_SMALL_PLAIN:
+			for (i=0; i<GROUND_LAST; i++)
+				tiles[i]->setPixmap( *ground->getPixmap( (groundType) i)->image(0) );
+			break;
 
 		case W_FACILITIES:
 			for (i=0; i< facilityPropNb; i++)
@@ -260,7 +266,7 @@ void editorView::setOrders(int whatb , int who)
 	what = (which_t) whatb; // casting needed cause setOrders is virtual from visual
 	
 	if (what == which) return;
-	if (what<W_SMALL_GROUND || what>W_UNITS) {
+	if (what<W_SMALL_PLAIN || what>W_UNITS) {
 		logf(LOG_ERROR, "editorView::setOrders : unknown what");
 		return;
 	}
@@ -301,6 +307,12 @@ void editorView::setOrders(int whatb , int who)
 			qcb_transRef->show();
 			invertBox->show();
 			break;
+		case W_SMALL_PLAIN:
+			i = GROUND_LAST;
+			qcb_who->hide();
+			qcb_transRef->hide();
+			invertBox->hide();
+			break;
 		default : 
 			logf(LOG_ERROR, "editorView::setOrders : unhandled which in switch");
 	} // switch(which)
@@ -335,7 +347,6 @@ void editorView::handleButton(int but)
 			break;
 
 		case W_FACILITIES:
-			boAssert(but>=0);
 			boAssert(but<facilityPropNb);
 			otype = OT_FACILITY;
 			setSelected( species[who]->getBigOverview( (facilityType)but ));
@@ -343,7 +354,6 @@ void editorView::handleButton(int but)
 			break;
 
 		case W_UNITS:
-			boAssert(but>=0);
 			boAssert(but<mobilePropNb);
 			otype = OT_UNIT;
 			setSelected( species[who]->getBigOverview( (mobType)but ));
@@ -351,7 +361,6 @@ void editorView::handleButton(int but)
 			break;
 
 		case W_BIG_GROUND_1:
-			boAssert(but>=0);
 			boAssert(but<4);
 			g = GET_TRANS_NUMBER(trans, (inverted?16:12) + but);
 
@@ -361,7 +370,6 @@ void editorView::handleButton(int but)
 			break;
 
 		case W_BIG_GROUND_2:
-			boAssert(but>=0);
 			boAssert(but<4);
 			g = GET_TRANS_NUMBER(trans, (inverted?24:20) + but);
 
@@ -371,12 +379,20 @@ void editorView::handleButton(int but)
 			break;
 
 		case W_SMALL_GROUND:
-			boAssert(but>=0);
+			boAssert(but!=4);
 			boAssert(but<9);
+
 			if (4 == but)
 				g = inverted?groundTransProp[trans].to:groundTransProp[trans].from;
 			else	g = GET_TRANS_NUMBER(trans, m_map[ (inverted?9:0) + but ]);
+			otype = OT_GROUND;
+			setSelected( ground->getPixmap(g)->image(0));
+			emit setSelectedObject (otype, g);		// need to be after the setSelected
+			break;
 
+		case W_SMALL_PLAIN:
+			boAssert(but<6);
+			g = (groundType) but;
 			otype = OT_GROUND;
 			setSelected( ground->getPixmap(g)->image(0));
 			emit setSelectedObject (otype, g);		// need to be after the setSelected

@@ -101,6 +101,7 @@ private:
 	bool		inverted;
 	int		trans;
 	enum which_t {
+		W_SMALL_PLAIN,
 		W_SMALL_GROUND,
 		W_BIG_GROUND_1,
 		W_BIG_GROUND_2,
