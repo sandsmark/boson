@@ -425,6 +425,10 @@ void EditorWidget::slotEditPlayerMinerals()
  val.setBottom(0);
  val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
  value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	// cancel pressed
+	return;
+ }
  boDebug() << k_funcinfo << value << endl;
  unsigned long int v = value.toULong(&ok);
  if (!ok) {
