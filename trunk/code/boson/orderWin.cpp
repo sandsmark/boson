@@ -170,11 +170,13 @@ QIntDictIterator<playerMobUnit> mobIt(mobSelected);
 
 if (SELECT_MOVE != getSelectionMode()) {
 	logf(LOG_ERROR,"orderWin::leftClicked while not in SELECT_MOVE state");
+	orderButton[0]->disconnect(this);
 	return;
 	}
 if (mobSelected.isEmpty()) {
 	logf(LOG_ERROR,"orderWin::leftClicked : unexpected empty mobSelected");
 	setSelectionMode(SELECT_NONE);
+	orderButton[0]->disconnect(this);
 	return;
 	}
 
@@ -183,7 +185,6 @@ for (mobIt.toFirst(); mobIt; ++mobIt) {
 	mobIt.current()->u_goto(mx,my);
 	}
 
-orderButton[0]->disconnect(this);
 setSelectionMode(SELECT_NONE);
 } 
 
