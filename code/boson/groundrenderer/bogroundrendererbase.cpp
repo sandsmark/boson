@@ -880,6 +880,9 @@ bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* parti
 
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
+ if (w * h <= 4) {
+	return true;
+ }
  float hmid = (float)x + ((float)w) / 2.0f;
  float vmid = (float)y + ((float)h) / 2.0f;
 
