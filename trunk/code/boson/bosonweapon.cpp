@@ -85,9 +85,9 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mHitEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "HitEffects");
   if(full)
   {
-    mShootEffects = BosonEffectProperties::loadEffectProperties(mShootEffectIds, speciesTheme());
-    mFlyEffects = BosonEffectProperties::loadEffectProperties(mFlyEffectIds, speciesTheme());
-    mHitEffects = BosonEffectProperties::loadEffectProperties(mHitEffectIds, speciesTheme());
+    mShootEffects = BosonEffectProperties::loadEffectProperties(mShootEffectIds);
+    mFlyEffects = BosonEffectProperties::loadEffectProperties(mFlyEffectIds);
+    mHitEffects = BosonEffectProperties::loadEffectProperties(mHitEffectIds);
   }
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)

@@ -278,7 +278,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      *  particle when it's initialized. This feature is used by e.g. missile
      *  trails.
      **/
-    inline const BoMatrix& matrix() const  { return mMatrix;}
+    inline const BoMatrix& matrix() const  { return mMatrix; }
 
 
     /**
@@ -296,7 +296,7 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      * For effects with infinite lifetime, you will need to use this to end
      *  creation of new particles.
      **/
-    virtual void makeObsolete()  { setAge(0); }
+    virtual void makeObsolete()  { setAge(0); BosonEffect::makeObsolete(); }
 
     /**
      * Return mass of the particles of this particle system.
@@ -378,8 +378,6 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
     float mMass;
     float mMaxParticleSize;
     BoMatrix mMatrix;
-
-    BoVector3 mRotation;  // Euler angles for rotation
 };
 
 
@@ -475,14 +473,14 @@ class BosonEffectParticleTrail : public BosonEffectParticle
      * Rotation matrix is used to calculate initial position and velocity of
      * particle when it's initialized. This feature is used by missile traces.
      **/
-    inline const BoMatrix& matrix() const  { return mMatrix;}
+    inline const BoMatrix& matrix() const  { return mMatrix; }
 
 
     /**
      * Makes the effect obsolete.
      * No more particles will be created after this.
      **/
-    virtual void makeObsolete()  { mObsolete = true; }
+    virtual void makeObsolete()  { mObsolete = true; BosonEffect::makeObsolete(); }
     virtual bool isActive() const  { return ((mNum > 0) || (!mObsolete)); }
 
 
@@ -552,7 +550,6 @@ class BosonEffectParticleTrail : public BosonEffectParticle
 
     BoVector3 mOffset;
 
-    BoVector3 mRotation;  // Euler angles for rotation
     BoVector3 mLastPos;
 };
 

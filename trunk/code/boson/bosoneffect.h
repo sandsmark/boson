@@ -78,14 +78,22 @@ class BosonEffect
     virtual void setPosition(const BoVector3& pos)  { mPosition = pos; }
 
     /**
+     * @return Rotation of this particle effect.
+     * Note that for some effects, rotation isn't used.
+     * Also note that all rotations should be done in order z, x, y, which is
+     *  same as in the rendering code
+     **/
+    const BoVector3& rotation() const  { return mRotation; }
+
+    /**
      * Sets effect's rotation to given values
      * Note that this only changes some effects, such as particle systems, for
      *  others, it does nothing. If your effect supports rotating, you will need
-     *  to reimplement this method. Default implementation does nothing.
-     * Note that all rotations should be done in order z, x, y, which is same as in
-     *  the rendering code
+     *  to reimplement this method.
+     * Note that all rotations should be done in order z, x, y, which is same
+     *  as in the rendering code
      **/
-    virtual void setRotation(const BoVector3& rotation)  {}
+    virtual void setRotation(const BoVector3& rotation)  { mRotation = rotation; }
 
 
     /**
@@ -127,8 +135,8 @@ class BosonEffect
     virtual void start();
 
 
-    virtual bool saveAsXML(QDomElement& root) const = 0;
-    virtual bool loadFromXML(const QDomElement& root) = 0;
+    virtual bool saveAsXML(QDomElement& root) const;
+    virtual bool loadFromXML(const QDomElement& root);
 
 
     /**
@@ -147,6 +155,7 @@ class BosonEffect
 
   protected:
     BoVector3 mPosition;
+    BoVector3 mRotation;
     bool mActive;
     bool mStarted;
     float mDelay;

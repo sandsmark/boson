@@ -24,6 +24,7 @@
 #include <kstaticdeleter.h>
 
 #include <qstring.h>
+#include <qdom.h>
 
 #include "bosoneffectpropertiesparticle.h"
 #include "bodebug.h"
@@ -96,6 +97,36 @@ void BosonEffect::start()
   mStarted = true;
 }
 
+bool BosonEffect::saveAsXML(QDomElement& root) const
+{
+  // Properties id
+  if(mGeneralProperties)
+  {
+    root.setAttribute(QString::fromLatin1("PropId"), mGeneralProperties->id());
+    // TODO: owner id. Maybe make effects global?
+  }
+  // Position
+  root.setAttribute(QString::fromLatin1("Posx"), position().x());
+  root.setAttribute(QString::fromLatin1("Posy"), position().y());
+  root.setAttribute(QString::fromLatin1("Posz"), position().z());
+  // Rotation
+  root.setAttribute(QString::fromLatin1("Rotx"), rotation().x());
+  root.setAttribute(QString::fromLatin1("Roty"), rotation().y());
+  root.setAttribute(QString::fromLatin1("Rotz"), rotation().z());
+
+  // Misc
+  root.setAttribute(QString::fromLatin1("Active"), mActive ? 1 : 0);
+  root.setAttribute(QString::fromLatin1("Started"), mStarted ? 1 : 0);
+  root.setAttribute(QString::fromLatin1("Delay"), mDelay);
+
+  return true;
+}
+
+bool BosonEffect::loadFromXML(const QDomElement& root)
+{
+  return true;
+}
+
 
 
 /*****  BosonEffectFog  *****/
@@ -121,11 +152,21 @@ BosonEffectFog::BosonEffectFog(const BoVector4& color, float start, float end, f
 
 bool BosonEffectFog::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffect::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectFog::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -167,16 +208,26 @@ void BosonEffectFade::makeObsolete()
   {
     return;
   }
-  mActive = false;
+  BosonEffect::makeObsolete();
 }
 
 bool BosonEffectFade::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffect::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectFade::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -276,11 +327,21 @@ void BosonEffectLight::makeObsolete()
 
 bool BosonEffectLight::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffect::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectLight::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
@@ -372,11 +433,21 @@ float BosonEffectBulletTrail::width() const
 
 bool BosonEffectBulletTrail::saveAsXML(QDomElement& root) const
 {
+  if(!BosonEffect::saveAsXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 
 bool BosonEffectBulletTrail::loadFromXML(const QDomElement& root)
 {
+  if(!BosonEffect::loadFromXML(root))
+  {
+    return false;
+  }
+
   return true;
 }
 

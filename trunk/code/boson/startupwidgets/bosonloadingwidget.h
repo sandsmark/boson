@@ -38,7 +38,7 @@ class BosonLoadingWidget : public QWidget
         ReceiveMap,  // Map is being received over the net
         LoadMap,  // Map has been received and is being loaded
         LoadTiles,  // Map tiles (textures) // AB: obsolete!
-        LoadEffects,  // Loading effects for a player
+        LoadEffects,  // Loading effects
         LoadUnitConfigs,  // Loading unit config files for a player
         LoadUnits,  // Loading unit models and textures for a player
         LoadTechnologies,  // Loading technologies for a player

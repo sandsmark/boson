@@ -21,7 +21,6 @@
 
 #include "unitproperties.h"
 #include "bosonmodel.h"
-#include "bosoneffectproperties.h"
 #include "bodebug.h"
 #include "boaction.h"
 
@@ -120,7 +119,6 @@ public:
 	// we should separate our OpenGL context from BosonBigDisplay first
 	QString mThemePath;
 	QIntDict<TeamColorData> mTeamData;
-	QIntDict<BosonEffectProperties> mEffectProperties;
 	QDict<BoAction> mActions;
 	QDict<QPixmap> mPixmaps;
 
@@ -156,7 +154,6 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 	return;
  }
  d = new SpeciesDataPrivate;
- d->mEffectProperties.setAutoDelete(true);
  d->mTeamData.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
@@ -168,7 +165,6 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 SpeciesData::~SpeciesData()
 {
  boDebug() << k_funcinfo << endl;
- d->mEffectProperties.clear();
  d->mTeamData.clear();
  d->mUnitModels.clear();
  d->mObjectModels.clear();
@@ -402,67 +398,6 @@ QPixmap* SpeciesData::smallOverview(unsigned long int unitType, const QColor& te
 	return 0;
  }
  return data->mSmallOverview[unitType];
-}
-
-
-void SpeciesData::loadEffectProperties()
-{
- if (d->mEffectProperties.count() > 0) {
-	// already loaded, probably for another player
-	return;
- }
- BosonEffect::initStatic(themePath() + "/particles");
- QString fileName = themePath() + QString::fromLatin1("effects.boson");
- if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no effects.boson file found" << endl;
-	// We assume that this theme has no effects and don't complain
-	return;
- }
- KSimpleConfig cfg(fileName);
- QStringList effects = cfg.groupList();
- if (effects.isEmpty()) {
-	boWarning() << k_funcinfo << "No effects found in effects "
-			<< "file (" << fileName << ")" << endl;
-	return;
- }
- boDebug(150) << k_funcinfo << "Loading " << effects.count()
-		<< " effects from config file" << endl;
- QStringList::Iterator it;
- for (it = effects.begin(); it != effects.end(); ++it) {
-	boDebug(150) << k_funcinfo << "Loading effect from group " << *it << endl;
-	// TODO: Is it possible to remove 'this' from here (used by
-	//  BosonEffectPropertiesCollection)
-	BosonEffectProperties* effectprop = BosonEffectPropertiesFactory::loadEffectProperties(&cfg, *it);
-	if (!effectprop) {
-		// Error has already been given
-		continue;
-	}
-	if (!d->mEffectProperties.find(effectprop->id())) {
-		d->mEffectProperties.insert(effectprop->id(), effectprop);
-	} else {
-		boError(150) << k_funcinfo << "effect with id " << effectprop->id() << " already there!" << endl;
-	}
- }
- // BosonEffectProperties (more specifically, collection properties) need 2-wave
- //  loading
- QIntDictIterator<BosonEffectProperties> eit(d->mEffectProperties);
- while (eit.current()) {
-	eit.current()->finishLoading(this);
-	++eit;
- }
-}
-
-const BosonEffectProperties* SpeciesData::effectProperties(unsigned long int id) const
-{
- if (id == 0) {
-	// We don't print error here because 0 means "none" in configurations
-	return 0;
- }
- if (!d->mEffectProperties[id]) {
-	boError() << k_funcinfo << "oops - no effect properties for " << id << endl;
-	return 0;
- }
- return d->mEffectProperties[id];
 }
 
 const BoAction* SpeciesData::action(const QString& name) const

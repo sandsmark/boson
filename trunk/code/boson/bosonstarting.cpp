@@ -34,6 +34,7 @@
 #include "bodebug.h"
 #include "bpfdescription.h"
 #include "bosonsaveload.h"
+#include "bosoneffectproperties.h"
 
 #include <klocale.h>
 #include <kgame/kmessageserver.h>
@@ -188,6 +189,8 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
+ emit signalLoadingType(BosonLoadingWidget::LoadEffects);
+ boEffectPropertiesManager->loadEffectProperties();
  if (!loadPlayerData()) {
 	boError(270) << k_funcinfo << "loading player data failed" << endl;
 	boGame->unlock();
@@ -319,8 +322,6 @@ void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
  p->speciesTheme()->loadActions();
  emit signalLoadingType(BosonLoadingWidget::LoadObjects);
  p->speciesTheme()->loadObjects();
- emit signalLoadingType(BosonLoadingWidget::LoadEffects);
- p->speciesTheme()->loadEffects();
  emit signalLoadingType(BosonLoadingWidget::LoadUnitConfigs);
  p->speciesTheme()->readUnitConfigs();
  loadUnitDatas(p);

@@ -626,16 +626,6 @@ const QIntDict<UpgradeProperties>& SpeciesTheme::technologyList() const
  return d->mTechnologies;
 }
 
-void SpeciesTheme::loadEffects()
-{
- mData->loadEffectProperties();
-}
-
-const BosonEffectProperties* SpeciesTheme::effectProperties(unsigned long int id)
-{
- return mData->effectProperties(id);
-}
-
 BosonModel* SpeciesTheme::objectModel(const QString& name) const
 {
  return mData->objectModel(name);

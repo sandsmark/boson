@@ -1225,13 +1225,13 @@ PyObject* PythonScript::py_findPath(PyObject*, PyObject* args)
 
 PyObject* PythonScript::py_addEffect(PyObject*, PyObject* args)
 {
-  int player, id;
+  int id;
   float x, y, z, rot = 0.0f;
-  if(!PyArg_ParseTuple(args, (char*)"ii(fff)|f", &player, &id, &x, &y, &z, &rot))
+  if(!PyArg_ParseTuple(args, (char*)"i(fff)|f", &id, &x, &y, &z, &rot))
   {
     return 0;
   }
-  BosonScript::addEffect(player, id, BoVector3(x, y, z), rot);
+  BosonScript::addEffect(id, BoVector3(x, y, z), rot);
   Py_INCREF(Py_None);
   return Py_None;
 }
