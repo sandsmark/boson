@@ -335,6 +335,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
  }
  boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMap);
+ if (!map.isGrayscale()) {
+	boError() << k_funcinfo << "not a grayscale image" << endl;
+	return loadHeightMapImage(QByteArray());
+ }
  if ((unsigned int)map.height() < height() + 1) {
 	boError() << k_funcinfo << "invalid height of heightmap: " <<
 			map.height() << " must be: " << height() + 1 << endl;
@@ -345,13 +349,26 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 			<< map.width() << " must be: " << width() + 1 << endl;
 	return loadHeightMapImage(QByteArray());
  }
+ int increment = 1;
+ boWarning() << map.bytesPerLine() << " " << map.width() << endl;
+ if (map.bytesPerLine() > map.width() + 1) {
+	// QT doesn't save images as grayscale. it returns bytesPerLine() ==
+	// width() (i.e. 8bits per pixel) for all *actual* grayscale images
+	// and bytesPerLine() == width() * 4 for grayscale images that Qt
+	// has created (i.e. RGB/RGBA images). we only use grayscale here, that
+	// means red=blue=green component. so we can just pick the first and
+	// skip all (including alpha) other values.
+	increment = 4;
+ }
  for (unsigned int y = 0; y < width() + 1; y++) {
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
 	// do we have to care about this? (since we are using 16bpp)
 	// AB: we use 32bpp (qt doesnt support 16bpp on X11)
+	// AB: hmm accordint to "file" we use 6bpp only... ok thats easier
+	// then :)
 	unsigned char* line = map.scanLine(y);
-	for (unsigned int x = 0; x < height() + 1; x++) {
+	for (unsigned int x = 0; x < height() + 1; x += increment) {
 		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[x]);
 	}
  }
@@ -526,6 +543,11 @@ QByteArray BosonMap::saveHeightMapImage()
 			p++;
 		}
 	}
+ }
+
+ if (!image.isGrayscale()) {
+	boError() << k_funcinfo << "not a grayscale image!!" << endl;
+	return QByteArray();
  }
 
  QByteArray array;
