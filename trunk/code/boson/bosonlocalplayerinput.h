@@ -30,6 +30,7 @@ class Unit;
 class Player;
 class HarvesterPlugin;
 class ResourceMinePlugin;
+class BoEventListener;
 
 template<class T> class QPtrList;
 
@@ -50,6 +51,8 @@ class BosonLocalPlayerInput : public KGameIO
   public:
     BosonLocalPlayerInput();
     virtual ~BosonLocalPlayerInput();
+
+    virtual void initIO(KPlayer*);
 
     virtual int rtti() const  { return LocalPlayerInputRTTI; }
 
@@ -82,6 +85,7 @@ class BosonLocalPlayerInput : public KGameIO
 
   private:
     BosonCommandFrameBase* mCmdFrame;
+    BoEventListener* mEventListener;
 };
 
 #endif // BOSONLOCALPLAYERINPUT_H

@@ -30,6 +30,7 @@
 #include "player.h"
 #include "bodebug.h"
 #include "bosonfileconverter.h"
+#include "boeventmanager.h"
 
 // FIXME do not include
 #include <startupwidgets/bosonloadingwidget.h>
@@ -362,8 +363,13 @@ QCString BosonSaveLoad::saveKGameAsXML()
  propertyXML.removeProperty(handler, KGamePropertyBase::IdGameStatus);
  root.appendChild(handler);
 
- // here we could add additional data for the Boson object.
- // but I believe all data should get into the datahandler as far as possible
+
+ QDomElement eventManager = doc.createElement(QString::fromLatin1("EventManager"));
+ root.appendChild(eventManager);
+ if (!d->mBoson->eventManager()->saveAsXML(eventManager)) {
+	boError() << k_funcinfo << "unable to save the event manager" << endl;
+	return false;
+ }
 
  return doc.toCString();
 }
@@ -495,6 +501,16 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
 		return false;
 	}
  }
+
+ QDomElement eventManager = root.namedItem(QString::fromLatin1("EventManager")).toElement();
+ if (eventManager.isNull()) {
+	boError(270) << k_funcinfo << "no EventManager tag" << endl;
+	return false;
+ }
+ if (!d->mBoson->eventManager()->loadFromXML(eventManager)) {
+	boError(270) << k_funcinfo << "unable to load EventManager" << endl;
+	return false;
+ }
  return true;
 }
 
@@ -519,7 +535,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 	for (unsigned int j = 0; j < list.count() && player.isNull(); j++) {
 		QDomElement e = list.item(j).toElement();
 		bool ok = false;
-		unsigned int id = e.attribute(QString::fromLatin1("Id")).toUInt(&ok);
+		unsigned int id = e.attribute(QString::fromLatin1("PlayerId")).toUInt(&ok);
 		if (!ok) {
 			boError(270) << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
 			continue;
@@ -617,7 +633,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	p.removeChild(p.namedItem("Statistics"));
 	p.removeChild(p.namedItem("Fogged"));
 	bool ok = false;
-	unsigned int id = p.attribute("Id").toUInt(&ok);
+	unsigned int id = p.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid value for Id attribute of Player tag" << endl;
 		return false;
@@ -650,7 +666,7 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
  for (unsigned int i = 0; i < itemsList.count(); i++) {
 	QDomElement items = itemsList.item(i).toElement();
 	bool ok = false;
-	unsigned int id = items.attribute("Id").toUInt(&ok);
+	unsigned int id = items.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid value for Id attribute of Items tag" << endl;
 		return false;

@@ -26,6 +26,7 @@ class BosonPlayField;
 class Player;
 class Boson;
 class BosonCanvas;
+class QDomElement;
 
 class BosonStartingPrivate;
 /**
@@ -145,6 +146,16 @@ protected:
 	 * player ID. This is done here.
 	 **/
 	bool fixPlayerIds(QMap<QString, QByteArray>& files) const;
+
+	/**
+	 * Fixes (recursively) all PlayerId tags in @p root and its children.
+	 *
+	 * @param actualIds An array containing the actual ID for every player
+	 * index
+	 * @param players The number of players. This is equal to the number of
+	 * elements in @p actualIds.
+	 **/
+	bool fixPlayerIds(int* actualIds, unsigned int players, QDomElement& root) const;
 
 	/**
 	 * Add the players for a loaded game.

@@ -33,6 +33,8 @@ class QTextStream;
 class BosonSaveLoad;
 class BosonStarting;
 class BoMessage;
+class BoEvent;
+class BoEventManager;
 
 #define boGame Boson::boson()
 
@@ -276,6 +278,8 @@ public:
 	 **/
 	void startScenario(BosonStarting*);
 
+	void queueEvent(BoEvent* event);
+
 public: // small KGame extenstions for boson
 	/**
 	 * Used internally by @ref KGame. Simply create and return a new @ref
@@ -334,6 +338,8 @@ public: // small KGame extenstions for boson
 			systemAddPlayer(player);
 		}
 	}
+
+	BoEventManager* eventManager() const;
 
 public slots:
 	void slotSetGameSpeed(int speed);

@@ -34,6 +34,7 @@
 #include "bodebug.h"
 #include "bosonweapon.h"
 #include "bosonpath.h"
+#include "boevent.h"
 
 #include <klocale.h>
 
@@ -223,7 +224,7 @@ void ProductionPlugin::advance(unsigned int)
 		boDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
 		mProductionState = mProductionState + 1;
 
-		if(currentProductionType() != ProduceUnit) {
+		if (currentProductionType() != ProduceUnit) {
 			// It's technology
 			removeProduction();
 			player()->technologyResearched(this, id);
@@ -240,16 +241,15 @@ void ProductionPlugin::advance(unsigned int)
 			boError() << k_lineinfo << "Unknown id " << id << endl;
 			return;
 		}
-		if (speciesTheme()->unitProperties(id)->isFacility()) {
-			game()->slotAddChatSystemMessage(
-					i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()),
-					player());
+
+		BoGenericULongEvent* unitProduced = new BoGenericULongEvent("UnitProduced", id);
+		unitProduced->setPlayerId(player()->id());
+		game()->queueEvent(unitProduced);
+
+		if (prop->isFacility()) {
 			return;
-		} else {
-			game()->slotAddChatSystemMessage(
-					i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()),
-					player());
 		}
+
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
 		int currentx, currenty; // Position of tile currently tested

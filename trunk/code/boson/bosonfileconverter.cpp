@@ -641,6 +641,131 @@ bool BosonFileConverter::convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByte
  return true;
 }
 
+bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteArray>& files)
+{
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
+ QDomDocument playersDoc(QString::fromLatin1("Players"));
+ if (!loadXMLDoc(&kgameDoc, files["kgame.xml"])) {
+	boError() << k_funcinfo << "could not load kgame.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&canvasDoc, files["canvas.xml"])) {
+	boError() << k_funcinfo << "could not load canvas.xml" << endl;
+	return false;
+ }
+ if (!loadXMLDoc(&playersDoc, files["players.xml"])) {
+	boError() << k_funcinfo << "could not load players.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ QDomElement canvasRoot = canvasDoc.documentElement();
+ QDomElement playersRoot = playersDoc.documentElement();
+
+#if BOSON_VERSION_MICRO < 0x80 || BOSON_VERSION_MINOR >= 0x11
+#error replace the following by BOSON_SAVEGAME_FORMAT_VERSION_0_11
+#endif
+#define BO_VERSION BOSON_MAKE_SAVEGAME_FORMAT_VERSION(0x00, 0x02, 0x04)
+ kgameRoot.setAttribute("Version", BO_VERSION);
+#undef BO_VERSION
+
+ // all occurances of the player ID/index are now stored in an attribute named
+ // "PlayerId"
+ QDomNodeList playersList = playersRoot.elementsByTagName("Player");
+ if (playersList.count() < 2) {
+	boError() << k_funcinfo << "less than 2 Player tags found in file. This is an invalid file." << endl;
+	return false;
+ }
+ for (unsigned int i = 0; i < playersList.count(); i++) {
+	QDomElement e = playersList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Player tag" << endl;
+		return false;
+	}
+	QString id = e.attribute("Id");
+	e.removeAttribute("Id");
+	e.setAttribute("PlayerId", id);
+	if (i == playersList.count() - 1) {
+		if (!e.hasAttribute("IsNeutral")) {
+			boError() << k_funcinfo << "file format error: last player must be neutral player" << endl;
+			return false;
+		}
+		bool ok = false;
+		if (e.attribute("IsNeutral").toUInt(&ok) != 1 || !ok) {
+			boError() << k_funcinfo << "IsNeutral attribute must be 1 if present" << endl;
+			return false;
+		}
+
+	}
+ }
+ QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Items tag" << endl;
+		return false;
+	}
+	QString id = e.attribute("Id");
+	e.removeAttribute("Id");
+	e.setAttribute("PlayerId", id);
+ }
+
+
+ // events/conditions:
+ QDomElement eventManager = kgameDoc.createElement("EventManager");
+ kgameRoot.appendChild(eventManager);
+ QDomElement eventDataHandler = kgameDoc.createElement("DataHandler");
+ eventManager.appendChild(eventDataHandler);
+ QDomElement eventQueue = kgameDoc.createElement("EventQueue");
+ eventManager.appendChild(eventQueue);
+
+ QDomElement canvasEventListener = canvasDoc.createElement("EventListener");
+ canvasRoot.appendChild(canvasEventListener);
+ QDomElement canvasConditions = canvasDoc.createElement("Conditions");
+ canvasEventListener.appendChild(canvasConditions);
+{
+	boWarning() << k_funcinfo << "Adding a dummy condition for testing" << endl;
+	QDomElement cond = canvasDoc.createElement("Condition");
+	canvasConditions.appendChild(cond);
+
+	QDomElement events = canvasDoc.createElement("Events");
+	QDomElement statuses = canvasDoc.createElement("StatusConditions");
+	cond.appendChild(events);
+	cond.appendChild(statuses);
+
+	QDomElement matching = canvasDoc.createElement("EventMatching");
+	QDomElement event = canvasDoc.createElement("Event");
+	matching.setAttribute("IsLeft", QString::number(1));
+	matching.setAttribute("IgnoreUnitId", true);
+	matching.setAttribute("IgnorePlayerId", true);
+	matching.setAttribute("IgnoreData1", true);
+	matching.setAttribute("IgnoreData2", true);
+	event.setAttribute("RTTI", 1);
+	event.setAttribute("Name", "UnitDestroyed");
+	event.setAttribute("Id", 0);
+	event.setAttribute("UnitId", 0);
+	event.setAttribute("DelayedDelivery", 0);
+	event.setAttribute("HasLocation", 0);
+	event.setAttribute("LocationX", 0.0);
+	event.setAttribute("LocationY", 0.0);
+	event.setAttribute("LocationZ", 0.0);
+	matching.appendChild(event);
+	events.appendChild(matching);
+
+	// FIXME: we should use a separate "Action" tag, which can be an event,
+	// a chat message, a script function, ...
+	// -> just a name of an event is insufficient, as we will need at least
+	// a parameter.
+	cond.setAttribute("EventCaused", "Foobar");
+}
+
+
+ files.insert("kgame.xml", kgameDoc.toString().utf8());
+ files.insert("canvas.xml", canvasDoc.toString().utf8());
+ files.insert("players.xml", playersDoc.toString().utf8());
+ return true;
+}
+
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
  for (unsigned int i = 0; i < itemsList.count(); i++) {
