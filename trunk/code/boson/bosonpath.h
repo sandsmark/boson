@@ -45,7 +45,7 @@ class BosonPathInfo;
 // Defines whether next-generation pathfinder will be used or not
 // NOTE: TNG is a bit buggy atm, especially concerning collision-detection, with
 //  big groups
-//#define PATHFINDER_TNG
+#define PATHFINDER_TNG
 
 
 class Unit;

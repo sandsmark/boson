@@ -134,7 +134,7 @@ class BosonParticle
  * burning and smoking, you should use two particle systems, because smoke and
  * flames are very different things. It doesn't matter that both are used for
  * the same unit.
- * 
+ *
  * BosonParticleSystem uses @ref BosonParticleSystemProperties to initialize
  * and update particles. This should provide enough flexibility for normal
  * usage. If you want even more flexibility, then you can write you own
