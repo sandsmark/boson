@@ -1510,8 +1510,8 @@ public:
 
 
 	// Should this be made KGameProperty?
-	float lastxvelo;
-	float lastyvelo;
+	float lastXVelocity;
+	float lastYVelocity;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1521,8 +1521,8 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setMaxSpeed(prop->speed());
  setAccelerationSpeed(prop->accelerationSpeed());
  setDecelerationSpeed(prop->decelerationSpeed());
- d->lastxvelo = 0.0f;
- d->lastyvelo = 0.0f;
+ d->lastXVelocity = 0.0f;
+ d->lastYVelocity = 0.0f;
 }
 
 MobileUnit::~MobileUnit()
@@ -1713,8 +1713,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 
  //boDebug(401) << k_funcinfo << "unit " << id() << ": Setting velo to: (" << xspeed << "; "<< yspeed << ")" << endl;
  setVelocity(xspeed, yspeed, 0.0);
- d->lastxvelo = xspeed;
- d->lastyvelo = yspeed;
+ d->lastXVelocity = xspeed;
+ d->lastYVelocity = yspeed;
  setMovingStatus(Moving);
 
  turnTo();
@@ -1772,13 +1772,13 @@ void MobileUnit::advanceMoveCheck()
 		// I know, this code is _very_ ugly and unreadable, but once we'll have
 		//  polygonal pathfinder, I'll change/cleanup/rewrite this
 		QValueList<Unit*> immediatecollisions;
-		immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo, y() + d->lastyvelo, z()),
-				BoVector3(x() + d->lastxvelo + width(), y() + d->lastyvelo + height(), z() + depth()), this);
+		immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+				BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
 		if(!immediatecollisions.isEmpty()) {
-/*		if(canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo, y() + d->lastyvelo, z()),
-				BoVector3(x() + d->lastxvelo + width(), y() + d->lastyvelo + height(), z() + depth()), this) &&
-				canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo * 5, y() + d->lastyvelo * 5, z()),
-				BoVector3(x() + d->lastxvelo * 5 + width(), y() + d->lastyvelo * 5 + height(), z() + depth()), this)) {*/
+/*		if(canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+				BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this) &&
+				canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
+				BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVelocity * 5 + height(), z() + depth()), this)) {*/
 #else
 		if (canvas()->cellOccupied(currentPathPoint().x() / BO_TILE_SIZE,
 				currentPathPoint().y() / BO_TILE_SIZE, this, false)) {
@@ -1867,10 +1867,10 @@ void MobileUnit::advanceMoveCheck()
 			<< point.x() << ";" << point.y() << ")"
 			<< "  current rightEdge: " << rightEdge()
 			<< " ; current bottomEdge:" << bottomEdge()
-			<< " ; xVelo: " << xVelocity()
-			<< " ; (int)xVelo: " << (int)xVelocity()
-			<< " ; yVelo: " << yVelocity()
-			<< " ; (int)yVelo: " << (int)yVelocity()
+			<< " ; xVelocity: " << xVelocity()
+			<< " ; (int)xVelocity: " << (int)xVelocity()
+			<< " ; yVelocity: " << yVelocity()
+			<< " ; (int)yVelocity: " << (int)yVelocity()
 			<< " problem was: "
 			<< problem << endl;
 	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
@@ -1890,8 +1890,8 @@ void MobileUnit::advanceMoveCheck()
  //  action to prevent this, e.g. slow down)
 #ifdef USE_NEW_COLLISION_DETECTION
  QValueList<Unit*> immediatecollisions;
- immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo, y() + d->lastyvelo, z()),
-		BoVector3(x() + d->lastxvelo + width(), y() + d->lastyvelo + height(), z() + depth()), this);
+ immediatecollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity, y() + d->lastYVelocity, z()),
+		BoVector3(x() + d->lastXVelocity + width(), y() + d->lastYVelocity + height(), z() + depth()), this);
  if (!immediatecollisions.isEmpty()) {
 #else
  if (canvas()->cellOccupied(currentPathPoint().x() / BO_TILE_SIZE,
@@ -1912,8 +1912,8 @@ void MobileUnit::advanceMoveCheck()
  }
 #ifdef USE_NEW_COLLISION_DETECTION
  QValueList<Unit*> fiveadvcollisions;
- fiveadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo * 5, y() + d->lastyvelo * 5, z()),
-		BoVector3(x() + d->lastxvelo * 5 + width(), y() + d->lastyvelo * 5 + height(), z() + depth()), this);
+ fiveadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 5, y() + d->lastYVelocity * 5, z()),
+		BoVector3(x() + d->lastXVelocity * 5 + width(), y() + d->lastYVeloity * 5 + height(), z() + depth()), this);
  if (!fiveadvcollisions.isEmpty()) {
 	// Unit will collide with smth in 5 adv. calls. Stop.
 	// Maybe it would be better to slow down quickly instead...
@@ -1926,17 +1926,17 @@ void MobileUnit::advanceMoveCheck()
 	return;
  }
  QValueList<Unit*> tenadvcollisions;
- tenadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastxvelo * 10, y() + d->lastyvelo * 10, z()),
-		BoVector3(x() + d->lastxvelo * 10 + width(), y() + d->lastyvelo * 10 + height(), z() + depth()), this);
+ tenadvcollisions = canvas()->collisionsInBox(BoVector3(x() + d->lastXVelocity * 10, y() + d->lastYVelocity * 10, z()),
+		BoVector3(x() + d->lastXVelocity * 10 + width(), y() + d->lastYVelocity * 10 + height(), z() + depth()), this);
  if (!tenadvcollisions.isEmpty()) {
 	// Unit will collide with smth in 10 adv. calls. Decelerate
 	decelerate();
 	decelerate();  // Yes, we decelerate _two_ times
 	float s = speed();
 	if (s > 0.0f) {
-		d->lastxvelo = QMIN(d->lastxvelo, s);
-		d->lastyvelo = QMIN(d->lastyvelo, s);
-		setVelocity(d->lastxvelo, d->lastyvelo, 0.0);
+		d->lastXVelocity = QMIN(d->lastXVelocity, s);
+		d->lastYVelocity = QMIN(d->lastYVelocity, s);
+		setVelocity(d->lastXVelocity, d->lastYVelocity, 0.0);
 	} else {
 		// Stop and set moving status to Waiting
 		setVelocity(0.0, 0.0, 0.0);
@@ -1979,14 +1979,14 @@ void MobileUnit::turnTo(int dir)
 	boDebug() << k_funcinfo << id() << ": will slowly rotate from " << rotation() << " to " << dir << endl;
 	// If we're moving, we want to take one more step with current velocity, but
 	//  setAdvanceWork() resets it to 0, so we have this workaround here
-	float xvelo = 0, yvelo = 0;
+	float _xVelocity = 0, _yVelocity = 0;
 	if (advanceWork() == WorkMove) {
-		xvelo = xVelocity();
-		yvelo = yVelocity();
+		_xVelocity = xVelocity();
+		_yVelocity = yVelocity();
 	}
 	Unit::turnTo(dir);
 	setAdvanceWork(WorkTurn);
-	setVelocity(xvelo, yvelo, 0);
+	setVelocity(_xVelocity, _yVelocity, 0);
  }
 }
 
@@ -2111,8 +2111,8 @@ void MobileUnit::stopMoving()
  if (pathInfo()->slowDownAtDest) {
 	setSpeed(0);
  }
- d->lastxvelo = 0.0f;
- d->lastyvelo = 0.0f;
+ d->lastXVelocity = 0.0f;
+ d->lastYVelocity = 0.0f;
 }
 
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
@@ -2124,8 +2124,8 @@ bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
  if (pathInfo()->moveAttacking && attackEnemyUnitsInRange()) {
 	boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 	setVelocity(0.0, 0.0, 0.0);  // To prevent moving
-	d->lastxvelo = 0.0f;
-	d->lastyvelo = 0.0f;
+	d->lastXVelocity = 0.0f;
+	d->lastYVelocity = 0.0f;
 	setSpeed(0);
 	setMovingStatus(Engaging);
 	return true;
