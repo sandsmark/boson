@@ -329,7 +329,7 @@ void BoCamera::updatePosition()
     // If radius is 0, up vector will be wrong so we change it
     radius = 0.02f;
   }
-  pointByRotation(&diffX, &diffY, rotation(), radius);
+  Bo3dTools::pointByRotation(&diffX, &diffY, rotation(), radius);
 
   // Position of camera
   mCameraPos.set(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());

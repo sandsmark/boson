@@ -31,20 +31,32 @@ class KConfig;
 class QDataStream;
 
 /**
- * @return How many degrees you have to rotate around z-axis for y-axis to go
- * through (x, y). (i.e. angle between (0, 1) and (x, y) when (x, y) is a
- * normalized vector)
- * @author Rivo Laks <rivolaks@hot.ee>
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ * @short collection class for misc 3d functions
  **/
-float rotationToPoint(float x, float y);
+class Bo3dTools
+{
+  public:
+    Bo3dTools()
+    {
+    }
 
-/**
- * This is the inverse operation to @ref rotationToPoint.
- * It calculates point (x, y) which is at intersection of circle with @p radius
- * and line which is rotated by @p angle around z-axis.
- * @author Rivo Laks <rivolaks@hot.ee>
- **/
-void pointByRotation(float* x, float* y, const float angle, const float radius);
+    /**
+     * @return How many degrees you have to rotate around z-axis for y-axis to go
+     * through (x, y). (i.e. angle between (0, 1) and (x, y) when (x, y) is a
+     * normalized vector)
+     * @author Rivo Laks <rivolaks@hot.ee>
+     **/
+    static float rotationToPoint(float x, float y);
+
+    /**
+     * This is the inverse operation to @ref rotationToPoint.
+     * It calculates point (x, y) which is at intersection of circle with @p radius
+     * and line which is rotated by @p angle around z-axis.
+     * @author Rivo Laks <rivolaks@hot.ee>
+     **/
+    static void pointByRotation(float* x, float* y, const float angle, const float radius);
+};
 
 
 /**

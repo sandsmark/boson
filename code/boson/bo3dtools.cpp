@@ -40,7 +40,7 @@
 
 /*****  Misc methods  *****/
 
-float rotationToPoint(float x, float y)
+float Bo3dTools::rotationToPoint(float x, float y)
 {
   float add = 0;
   float arg = 0;
@@ -78,7 +78,7 @@ float rotationToPoint(float x, float y)
   return (atan(arg) * RAD2DEG) + add;
 }
 
-void pointByRotation(float* x, float* y, const float angle, const float radius)
+void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const float radius)
 {
   // Some quick tests
   if(angle == 0)
