@@ -63,7 +63,7 @@ class BosonShot : public BosonItem
     enum Type
     {
       Bullet = 0,
-      Missile,
+      Rocket,
       Explosion,
       Mine,
       Bomb,
@@ -221,13 +221,15 @@ class BosonShotBullet : public BosonShot
 
 
 /**
- * @short Shot class for missiles
+ * @short Shot class for rockets
  *
- * Missile is a shot that flies through the air from initial position to target
+ * Rockets is a shot that flies through the air from initial position to target.
+ *
+ * Note that rockets are not guided.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BosonShotMissile : public BosonShot
+class BosonShotRocket : public BosonShot
 {
   public:
     enum PropertyIds
@@ -240,15 +242,15 @@ class BosonShotMissile : public BosonShot
       IdMaxHeight = 4224 + 4
     };
 
-    BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
-    ~BosonShotMissile();
+    BosonShotRocket(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+    ~BosonShotRocket();
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
     void init(const BoVector3Fixed& pos, const BoVector3Fixed& target);
 
-    inline virtual int type() const { return BosonShot::Missile; }
+    inline virtual int type() const { return BosonShot::Rocket; }
 
   protected:
     virtual void advanceMoveInternal();

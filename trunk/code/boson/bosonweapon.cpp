@@ -53,14 +53,14 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
   // Find out type of the weapon
-  QString shottype = cfg->readEntry("Type", "Missile");
+  QString shottype = cfg->readEntry("Type", "Rocket");
   if(shottype == "Bullet")
   {
     mShotType = BosonShot::Bullet;
   }
-  else if(shottype == "Missile")
+  else if(shottype == "Rocket")
   {
-    mShotType = BosonShot::Missile;
+    mShotType = BosonShot::Rocket;
   }
   else if(shottype == "Mine")
   {
@@ -72,8 +72,8 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   }
   else
   {
-    // Default to missile
-    mShotType = BosonShot::Missile;
+    // Default to rocket
+    mShotType = BosonShot::Rocket;
   }
   // Other parameters
   m_range.init(cfg->readUnsignedLongNumEntry("Range", 0));
@@ -82,9 +82,9 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
  // We divide speeds with 20, because speeds in config files are cells/second,
  //  but we want cells/advance call
   m_speed.init(cfg->readDoubleNumEntry("Speed", 0) / 20.0f);
-  if(speed() == 0 && mShotType == BosonShot::Missile)
+  if(speed() == 0 && mShotType == BosonShot::Rocket)
   {
-    boWarning() << k_funcinfo << "Type is missile, but speed is 0, setting type to bullet" << endl;
+    boWarning() << k_funcinfo << "Type is rocket, but speed is 0, setting type to bullet" << endl;
     mShotType = BosonShot::Bullet;
   }
   mAccelerationSpeed = (cfg->readDoubleNumEntry("AccelerationSpeed", 4) / 20.0f);
@@ -146,9 +146,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   {
     shottype == "Bullet";
   }
-  else if(mShotType = BosonShot::Missile)
+  else if(mShotType = BosonShot::Rocket)
   {
-    shottype == "Missile";
+    shottype == "Rocket";
   }
   else if(mShotType = BosonShot::Mine)
   {
@@ -161,8 +161,8 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   else
   {
     boError() << k_funcinfo << "Invalid shot type: " << mShotType << endl;
-    // Default to missile
-    mShotType = BosonShot::Missile;
+    // Default to rocket
+    mShotType = BosonShot::Rocket;
   }
   cfg->writeEntry("Type", shottype);
   // Other parameters
@@ -198,7 +198,7 @@ void BosonWeaponProperties::reset()
   m_damage.init(0);
   m_damageRange.init(1);
   m_fullDamageRange.init(0.25 * m_damageRange);
-  mShotType = BosonShot::Missile;
+  mShotType = BosonShot::Rocket;
   mCanShootAtAirUnits = false;
   mCanShootAtLandUnits = false;
   mHeight = 0.25;
@@ -231,7 +231,7 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Bo
     ((BosonShotBullet*)s)->setTarget(target);
     s->explode();
   }
-  else if(shotType() == BosonShot::Missile)
+  else if(shotType() == BosonShot::Rocket)
   {
     BoVector3Float realPosFloat;
     BoMatrix m;
@@ -240,9 +240,9 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3Fixed pos, Bo
     m.transform(&realPosFloat, &offset);
     BoVector3Fixed realPos = realPosFloat.toFixed();
     realPos += pos;
-    ItemType type(BosonShot::Missile, unitProperties()->typeId(), id());
+    ItemType type(BosonShot::Rocket, unitProperties()->typeId(), id());
     s = (BosonShot*)canvas->createNewItem(RTTI::Shot, attacker->owner(), type, realPos);
-    ((BosonShotMissile*)s)->init(realPos, target);
+    ((BosonShotRocket*)s)->init(realPos, target);
   }
   else if(shotType() == BosonShot::Mine)
   {
@@ -410,7 +410,7 @@ void BosonWeapon::shoot(Unit* u)
   BoVector3Fixed targetpos(u->centerX(), u->centerY(), u->z());
   targetpos += u->unitProperties()->hitPoint();
   BoVector3Fixed mypos(unit()->centerX(), unit()->centerY(), unit()->z());
-  if(mProp->takeTargetVeloIntoAccount() && mProp->shotType() == BosonShot::Missile)
+  if(mProp->takeTargetVeloIntoAccount() && mProp->shotType() == BosonShot::Rocket)
   {
     // Calculate how much time it should take to reach target
     // Note that this is just _approximation_! It doesn't take many things,
