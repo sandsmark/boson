@@ -140,9 +140,9 @@ for(j=0; j<6; j++) {
 fixSprite[i] = new QwSpritePixmapSequence(pix_l, point_l);
 
 /* big overview */
-fixBigOverview[i] = new QPixmap(path + "/overview.big.xpm");
+fixBigOverview[i] = new QPixmap(path + "/overview.big.bmp");
 if (fixBigOverview[i]->isNull()) {
-	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.xpm"));
+	printf("SpeciesTheme : Can't load %s ...\n", (const char *)(path+"/overview.big.bmp"));
 	ret = false;
 	}
 /* small overview */
