@@ -95,7 +95,7 @@ enum transition_t {
 #define IS_SMALL_TRANS(g)	( IS_TRANS((g)) && (GET_TRANS_TILE(g) <  SMALL_TILES_PER_TRANSITION))
 #define IS_BIG_TRANS(g)		( IS_TRANS((g)) && (GET_TRANS_TILE(g) >= SMALL_TILES_PER_TRANSITION))
 #define IS_PLAIN(g)		( (g) >= 0 && (g) < GROUND_LAST)
-#define IS_GROUND(g)		( (g) >= 0 && (g) < NB_GROUND_TILES)
+#define IS_VALID_GROUND(g)	( (g) >= 0 && (g) < NB_GROUND_TILES)
 
 
 /* Transition description */

@@ -195,7 +195,7 @@ void boFile::load(Cell &c)
 	}
 	
 	*stream >> g;
-	boAssert( IS_GROUND(g));
+	boAssert( IS_VALID_GROUND(g));
 	c.setGroundType((groundType)g);
 
 	*stream >> b;
