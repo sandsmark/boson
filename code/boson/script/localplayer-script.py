@@ -3,6 +3,7 @@ print "BoScriptAI: - [INFO] Loading Python script for localplayer..."
 from sys import exit
 from math import *
 from utils import boprint
+import sys
 
 # This is just to be able to test the syntax whith you
 # Python interpreter on the console
@@ -10,6 +11,12 @@ try:
   import BoScript
 except ImportError:
   boprint("error", "Couldn't import BoScript, something bad is going on, watch your back !")
+
+# Python didn't have radians() before 2.3, so in this case we have to add this
+#  function ourselves
+if sys.version_info[1] < 3:
+  def radians(x):
+    return x * (3.14159265359/180)
 
 
 cycle = 0
