@@ -28,6 +28,7 @@ class QListViewItemNumber;
 class ProfileSlotAdvance;
 class ProfileItemAdvance;
 
+class BosonProfilingDialogPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -70,7 +71,6 @@ protected slots:
 	void slotResetSlotAdvancePage();
 
 private:
-	class BosonProfilingDialogPrivate;
 	BosonProfilingDialogPrivate* d;
 };
 

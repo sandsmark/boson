@@ -137,7 +137,7 @@ public:
 };
 
 
-class BosonProfiling::BosonProfilingPrivate
+class BosonProfilingPrivate
 {
 public:
 	BosonProfilingPrivate()
@@ -159,7 +159,7 @@ public:
 	ProfileSlotAdvance* mCurrentSlotAdvanceTimes;
 	ProfileItemAdvance* mCurrentItemAdvanceTimes;
 
-	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
+	QMap<BosonProfiling::ProfilingEvent, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
 
 	unsigned int mGLUpdateInterval;
