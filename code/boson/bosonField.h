@@ -55,7 +55,7 @@ public:
   void destroyFix(destroyedMsg_t &);
 
   void move(moveMsg_t &);
-  void requestAction(boBuffer *);
+  void requestAction(void);
 
 /* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }

@@ -23,7 +23,7 @@
 
 #include "bosonField.h"
 #include "visualMiniDisplay.h"
-#include "visualBigDisplay.h"
+#include "bosonBigDisplay.h"
 #include "bosonView.h"
 
 #include "mainView.h"		// myself
@@ -48,7 +48,7 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 		leftLayout->addWidget(view, 10);
 
 /* This is the main map, the game area */
-	big = new visualBigDisplay(view, this);
+	big = new bosonBigDisplay(view, this);
 	topLayout->addWidget(big,10);
 
 /* finish the stuff */

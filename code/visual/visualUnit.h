@@ -33,7 +33,8 @@ class selectPart_down;
 
 class visualMobUnit : public mobUnit, public QwSprite
 {
- Q_OBJECT
+
+	Q_OBJECT
 
  public:
   
@@ -63,6 +64,8 @@ class visualMobUnit : public mobUnit, public QwSprite
 
 class visualFacility : public Facility, public QwSprite
 {
+
+	Q_OBJECT
 
  public:
   visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);

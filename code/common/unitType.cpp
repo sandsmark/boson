@@ -25,16 +25,17 @@
 	uint	orders;		// which orders it's able to understand
 	int	width;		// pixel-size
 	int	height;		// pixel-size
-
 	int	visibility;	// how far it can see
+	int	range;		// how far it can send weapons
+
 	int 	speed;		// how far it may travel (in pixels) during one jiffie
 	uint	goFlag;		// where can it go ? 
 */
 
 mobileProperties_t mobileProp[] = {
-	{"ship",	0, 96, 96,  2, 3, BO_GO_SEA},	// MOB_SHIP
-	{"quad",	0, 32, 32,  3, 4, BO_GO_EARTH},	// MOB_QUAD
-	{"aircraft",	0, 72, 72,  3, 6, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"ship",	0, 96, 96,  2, 100,	3, BO_GO_SEA},		// MOB_SHIP
+	{"quad",	0, 32, 32,  3, 70,	4, BO_GO_EARTH},	// MOB_QUAD
+	{"aircraft",	0, 72, 72,  3, 100,	6, BO_GO_AIR},		// MOB_AIRCRAFT
 	};
 
 /*
@@ -43,19 +44,20 @@ mobileProperties_t mobileProp[] = {
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
+	int	range;		// how far it can send weapons
 */
 facilityProperties_t facilityProp[] = {
-	{"comsat"	, 0, 2, 2, 7},			// FACILITY_COMSAT
-	{"helipad"	, 0, 2, 2, 6},			// FACILITY_HELIPAD
-	{"powerplant"	, 0, 2, 2, 3},			// FACILITY_POWERPLANT
-	{"warfactory"	, 0, 2, 2, 3}, 			// FACILITY_WAR_FACTORY
-	{"barracks"	, 0, 2, 2, 3}, 			// FACILITY_BARRACKS
-	{"cmdbunker"	, 0, 3, 3, 3}, 			// FACILITY_CMDBUNKER
-	{"samsite"	, 0, 1, 1, 4}, 			// FACILITY_SAMSITE
-	{"oiltower"	, 0, 1, 1, 2}, 			// FACILITY_OILTOWER
-	{"refinery"	, 0, 2, 2, 3},			// FACILITY_REFINERY
-	{"repairpad"	, 0, 3, 3, 4},			// FACILITY_REPAIRPAD
-	{"turret"	, 0, 1, 1, 5},			// FACILITY_TURRET
+	{"comsat"	, 0, 2, 2, 7, 0},			// FACILITY_COMSAT
+	{"helipad"	, 0, 2, 2, 6, 0},			// FACILITY_HELIPAD
+	{"powerplant"	, 0, 2, 2, 3, 0},			// FACILITY_POWERPLANT
+	{"warfactory"	, 0, 2, 2, 3, 0}, 			// FACILITY_WAR_FACTORY
+	{"barracks"	, 0, 2, 2, 3, 0}, 			// FACILITY_BARRACKS
+	{"cmdbunker"	, 0, 3, 3, 3, 0}, 			// FACILITY_CMDBUNKER
+	{"samsite"	, 0, 1, 1, 4, 0}, 			// FACILITY_SAMSITE
+	{"oiltower"	, 0, 1, 1, 2, 0}, 			// FACILITY_OILTOWER
+	{"refinery"	, 0, 2, 2, 3, 0},			// FACILITY_REFINERY
+	{"repairpad"	, 0, 3, 3, 4, 0},			// FACILITY_REPAIRPAD
+	{"turret"	, 0, 1, 1, 5, 90},			// FACILITY_TURRET
 	};
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));

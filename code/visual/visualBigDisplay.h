@@ -60,7 +60,7 @@ public:
 
 
 	/* from display classes */
-	virtual void	actionClicked(int, int);		// selecting, moving...
+	virtual void actionClicked(int, int)=0;		// selecting, moving...
 
 signals:
 	void	relativeReCenterView (int x, int y);

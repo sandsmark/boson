@@ -49,6 +49,8 @@ struct moveMsg_t	{ int key, dx, dy, direction ;};
 struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
 /* MSG_*_CONSTRUCT */
 struct constructMsg_t	{ int x, y; union {mobType mob; facilityType fix;} type;}; // where and what
+/* MSG_UNIT_SHOOT */
+struct shootMsg_t	{ int key, target_key; };
 
 typedef union {
 /* Dialog layer */
@@ -63,6 +65,7 @@ typedef union {
 	moveMsg_t	move;
 	destroyedMsg_t  destroyed;
 	constructMsg_t  construct;
+	shootMsg_t	shoot;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */
@@ -76,40 +79,41 @@ test made on LinuxPPC on february 3rd 1999 :
 */
 
 /* layer 1 transition */
-#define TRANSITION(signal,newState,emit)	\
-	if (signal == tag) {			\
-	socketState = newState;			\
-	if ( BOSON_NO_TAG != emit )		\
-		sendMsg(buffer, emit, BOSON_NO_DATA);  \
+#define TRANSITION(_signal,_newState,_emit)	\
+	if (_signal == tag) {			\
+	socketState = _newState;			\
+	if ( BOSON_NO_TAG != _emit )		\
+		sendMsg(buffer, _emit, BOSON_NO_DATA);  \
 	break;  }
 
 /* layer 2 transition */
 
-#define TRANSITION2(signal,newState,emit)	\
-	if (signal == tag) {			\
-	State = newState;			\
-	if ( BOSON_NO_TAG != emit )		\
-		sendMsg(buffer, emit, BOSON_NO_DATA);  \
+#define TRANSITION2(_signal,_newState,_emit)	\
+	if (_signal == tag) {			\
+	State = _newState;			\
+	if ( BOSON_NO_TAG != _emit )		\
+		sendMsg(buffer, _emit, BOSON_NO_DATA);  \
 	break;  }
 
 /* Misc. */
 
-#define UNKNOWN_TAG(State)	{		\
-	logf(LOG_COMM, "Unknown tag(%d) while in " #State  " %d (file %s, line %d) -> ignored", \
-	tag, State, __FILE__, __LINE__);	\
+#define UNKNOWN_TAG(_State)	{		\
+	logf(LOG_COMM, "Unknown tag(%d) while in " #_State  " %d (file %s, line %d) -> ignored", \
+	tag, _State, __FILE__, __LINE__);	\
 	break;					\
 	}
 
-#define ASSERT_DATA_BLENGHT(wanted_blen)	\
-	if (blen != wanted_blen)		\
+#define ASSERT_DATA_BLENGHT(_wanted_blen)	\
+	if (blen != _wanted_blen)		\
 	logf(LOG_ERROR, "unexpected data blengh : %d, wanted %d, line %d, file %s", \
-	blen, wanted_blen, __LINE__, __FILE__ );
+	blen, _wanted_blen, __LINE__, __FILE__ );
+
 
 enum bosonMsgTag {
 
 	BOSON_NO_TAG = -1,
 
-/** Here are the message tags used for the underlying socket communiation */
+/** Here are the message tags used for the underlying socket communication */
 
 /* General */
 	MSG_NOK=0,
@@ -162,12 +166,15 @@ enum bosonMsgTag {
 	MSG_FACILITY_CHANGED,
 	MSG_FACILITY_,
 
-/* General units management */
+/* mobile units management */
 	MSG_MOBILE_MOVE_R,	// Request
 	MSG_MOBILE_MOVE_C,	// confirm
 	MSG_MOBILE_CONSTRUCT,
 	MSG_MOBILE_CREATED,
 	MSG_MOBILE_DESTROYED,
+
+/* General units management */
+	MSG_UNIT_SHOOT,
 
 /* Player's units management */
 	MSG_UNIT_POWER,

@@ -169,7 +169,7 @@ switch(tag) {
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
 	// let's each object speaks
-		field->requestAction(buffer);
+		field->requestAction();
 	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);

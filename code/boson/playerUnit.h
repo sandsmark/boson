@@ -24,7 +24,6 @@
 #include "visualUnit.h"
 #include "sprites.h"
 
-
 enum mobUnitState {
 	MUS_NONE,
 	MUS_TURNING,
@@ -32,16 +31,18 @@ enum mobUnitState {
 	MUS_,
 	};
 
+
 class playerMobUnit : public visualMobUnit
 {
- Q_OBJECT
+
+	Q_OBJECT
 
  public:
   
   playerMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
+  ~playerMobUnit();
 
-  int	getWantedMove(int &dx, int &dy, int &direction);
-  int	getWantedAction();
+  void	getWantedAction();
 
 /* Server orders */
   void  doMoveBy(int dx, int dy);
@@ -53,20 +54,33 @@ class playerMobUnit : public visualMobUnit
   void	turnTo(int newdir);
   bool	checkMove(int dx, int dy);
 
+	bool	getWantedMove(bosonMsgData *);
+	bool	getWantedShoot(bosonMsgData *);
+	
+signals:
+	void dying(Unit *);
+	void sig_move(int dx, int dy);
+
  public slots:
 /* orders from user */
   void	u_goto(int, int); // not the same as QwSprite::moveTo
   void  u_stop(void);	
+  void  u_attack(Unit *);
+  	void targetDying(Unit *);
+  	void targetMoveBy(int, int);
 
  private :
+  void	do_goto(int, int);
   int		direction;	// [0-11] is the angle ...
   mobUnitState	state;
 
-  /* moving */
-  int 	dest_x, dest_y;
-  int	asked_dx, asked_dy;
+/* moving */
+	int 	dest_x, dest_y;
+	int	asked_dx, asked_dy;
 
-  /* toute la gestion du but, chemin pris, etc... */
+/* attack */
+	Unit 	*target;
+
 };
 
 
@@ -75,13 +89,23 @@ class playerMobUnit : public visualMobUnit
 class playerFacility : public visualFacility
 {
 
+	Q_OBJECT
+
  public:
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
+  ~playerFacility();
+
+  void	getWantedAction();
 
 /* Server orders */
   void		s_setState(int );
 
- private:
+
+public slots:
+  	void targetDying(Unit *);
+  	void targetMoveBy(int, int);
+signals:
+	void dying(Unit *);
 };
 
 #endif // PLAYERUNIT_H
