@@ -183,8 +183,8 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 		}
 		imageList.append(image);
 	}
+	loadUnitTextures(prop->typeId(), imageList);
  }
- loadUnitTextures(prop->typeId(), imageList);
  loadUnitModel(prop);
 
 // big overview
