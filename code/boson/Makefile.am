@@ -63,7 +63,6 @@ COMMON_SRC = \
 	bosonmusic.cpp \
 	selectbox.cpp \
 	commandinput.cpp \
-	kgamecanvaschat.cpp \
 	bosoncursor.cpp \
 	bosonsound.cpp \
 	unitgroup.cpp \
@@ -74,7 +73,8 @@ COMMON_SRC = \
 	bosonstartupbasewidget.cpp \
 	editorbigdisplay.cpp \
 	bosontexturearray.cpp \
-	bosonmodel.cpp
+	bosonmodel.cpp \
+	bosonglfont.cpp 
 
 BOUNIT_SRC = \
 	unitproperties.cpp \

@@ -26,7 +26,6 @@
 #include "unitproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
-#include "kgamecanvaschat.h"
 #include "bosoncursor.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
@@ -53,13 +52,9 @@ public:
 	BosonBigDisplayPrivate()
 	{
 		mMouseIO = 0;
-		
-//		mChat = 0;
 	}
 
 	KGameMouseIO* mMouseIO;
-
-//	KGameCanvasChat* mChat;
 };
 
 BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 

@@ -227,6 +227,11 @@ protected:
 	virtual void initializeGL();
 	virtual void resizeGL(int w, int h);
 	virtual void paintGL();
+
+	/**
+	 * Called by @ref paintGL only to render text on the screen
+	 **/
+	void renderText();
 #endif
 
 	virtual void enterEvent(QEvent*);
@@ -285,6 +290,9 @@ protected:
 	Player* localPlayer() const;
 
 	void addMouseIO(Player* p);
+
+private:
+	void init();
 
 private:
 	class BosonBigDisplayBasePrivate;

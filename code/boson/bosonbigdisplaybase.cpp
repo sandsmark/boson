@@ -37,9 +37,11 @@
 #include "bosonconfig.h"
 #include "bosonmusic.h"
 #include "selectbox.h"
+#include "visual/bosonchat.h"
 
 #include <kgame/kgameio.h>
 
+#include <klocale.h>
 #include <kdebug.h>
 
 #include <qimage.h>
@@ -53,10 +55,11 @@
 #ifdef NO_OPENGL
 #include <qwmatrix.h>
 
-
 #else
 
+#include <GL/glx.h>
 #include "bosontexturearray.h"
+#include "bosonglfont.h"
 
 // both must be > 0.0:
 #define NEAR 1.0 // FIXME: should be > 1.0
@@ -223,12 +226,13 @@ public:
 	BosonBigDisplayBasePrivate()
 	{
 		mLocalPlayer = 0;
-//		mChat = 0;
+		mChat = 0;
 
 #ifndef NO_OPENGL
 		mFramecount = 0;
 		mFps = 0;
 		mFpsTime = 0;
+		mDefaultFont = 0;
 #endif
 	}
 
@@ -236,7 +240,7 @@ public:
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
 
-//	KGameCanvasChat* mChat; //TODO: write some kind of KGameGLChat
+	BosonChat* mChat;
 
 #ifndef NO_OPENGL
 	// maybe we should use GLint here, as glViewport does
@@ -255,6 +259,7 @@ public:
 	GLfloat mAspect; // see gluPerspective
 
 	GLuint mMapDisplayList;
+	BosonGLFont* mDefaultFont;// AB: maybe we should support several fonts
 
 	long long int mFpsTime;
 	double mFps;
@@ -277,13 +282,29 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
 		: MyHack(parent, "bigdisplay")
 {
  kdDebug() << k_funcinfo << endl;
+ mCanvas = c;
+ init();
+}
+
+BosonBigDisplayBase::~BosonBigDisplayBase()
+{
+ quitGame();
+ delete mSelection;
+ delete d->mChat;
+// delete d->mUnitTips;
+ delete d->mDefaultFont;
+ delete d;
+}
+
+void BosonBigDisplayBase::init()
+{
  d = new BosonBigDisplayBasePrivate;
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
- mCanvas = c;
  d->mUpdateInterval = 0;
 
  mSelection = new BoSelection(this);
+ d->mChat = new BosonChat(this);
 
 #ifndef NO_OPENGL
  slotResetViewProperties();
@@ -322,15 +343,6 @@ BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
  setUpdateInterval(boConfig->updateInterval());
 }
 
-BosonBigDisplayBase::~BosonBigDisplayBase()
-{
- quitGame();
- delete mSelection;
-// delete d->mChat;
-// delete d->mUnitTips;
- delete d;
-}
-
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::initializeGL()
 {
@@ -345,9 +357,12 @@ void BosonBigDisplayBase::initializeGL()
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
-  struct timeval time;
-  gettimeofday(&time, 0);
-  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
+ struct timeval time;
+ gettimeofday(&time, 0);
+ d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
+
+ // this needs to be done in initializeGL():
+ d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -383,7 +398,7 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 void BosonBigDisplayBase::paintGL()
 {
  struct timeval time1, time2, funcStart;
- long int clearTime = 0, misc1 = 0, render_cells = 0, render_units = 0, timer_start = 0, creating_iterator = 0, misc2 = 0, function_time = 0;
+ long int clearTime = 0, misc1 = 0, render_cells = 0, render_units = 0, timer_start = 0, creating_iterator = 0, misc2 = 0, render_text = 0, function_time = 0;
  gettimeofday(&funcStart, 0);
  d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
@@ -611,6 +626,10 @@ void BosonBigDisplayBase::paintGL()
 
  gettimeofday(&time2, 0);
  misc2 = COMPARE_TIMES(time1, time2);
+ time1 = time2;
+ renderText();
+ gettimeofday(&time2, 0);
+ render_text = COMPARE_TIMES(time1, time2);
 
  gettimeofday(&time1, 0);
  if (d->mUpdateInterval) {
@@ -626,8 +645,60 @@ void BosonBigDisplayBase::paintGL()
 		<< "renderCells: " << render_cells << endl
 		<< "renderUnits: " << render_units << endl
 		<< "misc2:       " << misc2 << endl
+		<< "text:        " << render_text << endl
 		<< "timerStart:  " << timer_start << endl
 		<< "function:    " << function_time << endl;
+}
+
+void BosonBigDisplayBase::renderText()
+{
+ glMatrixMode(GL_PROJECTION);
+ glPushMatrix();
+ glLoadIdentity();
+ gluOrtho2D(0.0, (GLfloat)d->mW, 0.0, (GLfloat)d->mH); // the same as the viewport
+ glMatrixMode(GL_MODELVIEW);
+ glPushMatrix();
+ glLoadIdentity();
+ glListBase(d->mDefaultFont->displayList()); // AB: this is a redundant call, since we don't change it somewhere in paintGL(). but we might support different fonts one day and so we need it anyway.
+ glColor3f(1.0, 1.0, 1.0);
+ const int border = 5;
+
+// first the resource display
+ // AB: we can avoid these calls to i18n() here! e.g. cache it somewhere and
+ // update every 5 seconds or so (maybe less)
+ // remember that painGL() is very speed sensitive!
+ QString minerals = i18n("Minerals: %1").arg(localPlayer()->minerals());
+ QString oil = i18n("Oil:      %1").arg(localPlayer()->oil());
+ int w = QMAX(d->mDefaultFont->metrics()->width(minerals), d->mDefaultFont->metrics()->width(oil));
+ int x = d->mW - w - border;
+ int y = d->mH - d->mDefaultFont->height() - border;
+ glRasterPos2i(x, y);
+ glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
+ y -= d->mDefaultFont->height();
+ glRasterPos2i(x, y);
+ glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
+
+// now the chat messages
+// TODO: line break?
+ x = border;
+ y = border;
+ QStringList list = d->mChat->messages(); 
+ QStringList::Iterator it = list.end();
+ --it;
+ for (; it != list.begin(); --it) {
+	glRasterPos2i(x, y);
+	glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1());
+	y += d->mDefaultFont->height();
+ }
+ glRasterPos2i(x, y);
+ glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1()); // list.begin()
+
+ glColor3f(1.0, 1.0, 1.0);
+ 
+ glMatrixMode(GL_PROJECTION);
+ glPopMatrix();
+ glMatrixMode(GL_MODELVIEW);
+ glPopMatrix();
 }
 
 #endif // !NO_OPENGL
@@ -1222,12 +1293,12 @@ QRect BosonBigDisplayBase::selectionRectCanvas() const
 
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
 {
-// d->mChat->setChat(chat);
+ d->mChat->setChat(chat);
 }
 
 void BosonBigDisplayBase::addChatMessage(const QString& message)
 {
-// d->mChat->addMessage(message);
+ d->mChat->addMessage(message);
 }
 
 void BosonBigDisplayBase::slotCursorEdgeTimeout()
