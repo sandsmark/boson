@@ -55,6 +55,6 @@
     </p>
     
 
-#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="buildfac.html" after_text="Building facilities"    
+#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="curser.html" after_text="The cursors"    
 #include "footer.wml"
 

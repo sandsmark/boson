@@ -11,5 +11,5 @@
       - If the building is not available, look at the <a href="../facilities/map.html">Facilities dependency tree</a>
       and check if you have all required buildings.
     </p>
-#include "nav.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildunit.html" after_text="Building Units"
+#include "nav.wml" before_url="cursor.html" before_text="The cursors" after_url="buildunit.html" after_text="Building Units"
 #include "footer.wml"

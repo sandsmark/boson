@@ -4,11 +4,11 @@
 
 case "$1" in
  help|-help|--help)
-	echo "$0 -f file.wml - Make only one file"
+	echo "$0 -f file - Make only one file, don't add a .wml to the filename"
 	echo "$0 -d dir - Make only one directory"
 	;;
  -f)	
-	wmk -f $2 --include `pwd`/includes
+	wmk -f $2.wml --include `pwd`/includes
 	;;
  -d)
 	clear

@@ -7,17 +7,17 @@
       Here you will find answers for most of your questions.
     </p>
     <ol>
-      <li><a href="#1">When is Boson finished ?</a></li>
-      <li><a href="#2">Why is Boson so slow ?</a></li>
-      <li><a href="#3">Are there other supported languages than english ?</a></li>
+      <li><a href="#1">- When is Boson finished ?</a></li>
+      <li><a href="#2">- Why is Boson so slow ?</a></li>
+      <li><a href="#3">- Are there other supported languages than english ?</a></li>
     </ol>
     
     <p>&nbsp;</p>
-    <a name="1">When is Boson finished ?</a>
+    <a name="1">- When is Boson finished ?</a>
     <p>When it's done.</p>
     
     <p>&nbsp;</p>
-    <a name="2">Why is boson so slow ?</a>
+    <a name="2">- Why is boson so slow ?</a>
     <p>
     There are many reasons, some things that can help:<br>
     - Check your hardware: <a href="started.html">here</a><br>
@@ -27,8 +27,8 @@
     </p>
 
     <p>&nbsp;</p>
-    <a name="3">Are there other supported languages than english ?</a>
-    <p>Not, Boson is a game in development, text changes very often. It is to hard to maintain diffrent languages yet.
+    <a name="3">- Are there other supported languages than english ?</a>
+    <p>No, Boson is a game in development, text changes very often. It is to hard to maintain diffrent languages yet.
     </p>
 
 
