@@ -48,6 +48,20 @@ news_box_begin();
 **  To add an article, call
 **  news_article(<title>, <date added>, <full text>);
 **/
+news_article("Updates", "September 28th 2002 19:55",
+    "Pretty much has happened during last few weeks.<br>
+    Bmann added <a href=\"status.php#features\">feature list to the status page</a>, you
+    can now check if your favourite feature will be included in next release (but
+    note that we <b>do not</b> make any promises that features listed there will
+    be in the next release. It just shows what has already been done and what
+    will <b>probably</b> be done in the future). If it isn't there, you can tell
+    us about your wishes via <a href=\"contact.php#bugs\">our bug tracking
+    system</a> or <a href=\"contact.php#mail\">write to our mailing list</a>!<br>
+    About new features, we now have configurable texture filters (you can choose
+    good compromise between speed and quality), shots/missiles support (you can
+    see them flying!) and today I added support to configurable particle
+    systems, weapons and shots. Everyone can now edit them in configuration
+    files, just like units!<br><br>");
 news_article("More eyecandy", "September 10th 2002 20:00",
     "Boson now has particle effects! This means that shots and explosions work
     again! Also, we have smoke clouds for destroyed units and flames for

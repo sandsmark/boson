@@ -34,19 +34,23 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Contact us");
-draw_bigbox_subheader("Mailing lists");
+draw_bigbox_subheader("<a name=\"mail\"></a>Mailing lists");
 draw_bigbox_text("There are three mailing lists.<br><br>
-<a href=\"mailto:boson-devel@lists.sourceforge.net\">boson-devel@lists.sourceforge.net</a> is meant for users and developers. If you have questions or problems, you can always come there and ask.<br><br>
-
-boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post there.<br><br>
-
-boson-bugs@lists.sourceforge.net is also not meant for posting, bug reports are sent there. See below on how to report bugs.<br><br>");
+    <a href=\"mailto:boson-devel@lists.sourceforge.net\">boson-devel@lists.sourceforge.net</a>
+    is meant for users and developers. If you have questions or problems, you can always come there and ask.<br>
+    <br>
+    boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post there.<br>
+    <br>
+    boson-bugs@lists.sourceforge.net is also not meant for posting, bug reports are sent there.
+    See below on how to report bugs.<br><br>");
 
 draw_bigbox_subheader("IRC");
-draw_bigbox_text("We also have an IRC channel. If you have questions/problems/compile errors, you can just go to #boson on openprojects (e.g. irc.openprojects.net).<br><br>");
+draw_bigbox_text("We also have an IRC channel. If you have questions/problems/compile errors,
+    you can just go to #boson on openprojects (e.g. irc.openprojects.net).<br><br>");
 
-draw_bigbox_subheader("Reporting bugs");
-draw_bigbox_text("You can report bugs using <a href=\"http://bugs.kde.org/\">KDE's bug tracking system</a> or the 'report bug' feature in boson's help menu.");
+draw_bigbox_subheader("<a name=\"bugs\"></a>Reporting bugs");
+draw_bigbox_text("You can report bugs using <a href=\"http://bugs.kde.org/\">KDE's bug tracking system</a>
+    or the 'report bug' feature in boson's help menu.");
 
 draw_bigbox_end();
 
