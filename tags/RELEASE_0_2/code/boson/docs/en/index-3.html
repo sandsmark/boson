@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>The Boson Handbook: Usage </TITLE>
+<META HTTP-EQUIV="content-type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="keywords" CONTENT="boson boserver settings RTS game configuration KDE">
+<META NAME="description" CONTENT="Boson and Boserver documentation">
+</HEAD>
+<BODY BGCOLOR="#ffffff" LINK="#aa0000" TEXT="#000000" > 
+<FONT FACE="Helvetica">
+<A HREF="http://www.kde.org/"><IMG SRC="logotp3.gif" BORDER="0" ALT="The K Desktop Environment"></A>
+<HR WIDTH="100%" SIZE=2 ALIGN="CENTER" NOSHADE>
+
+ 
+<P ALIGN="RIGHT">
+
+<A HREF="index-4.html">Next</A>
+ <A HREF="index-2.html">Previous</A>
+ <A HREF="index.html#toc3">Table of Contents</A>
+</P>
+<H3><A NAME="s3">3. Usage </A></H3>
+
+<P>
+<P>In this section, we will explain you the basis to actually be able to play Boson.
+The first thing to know is that, because of the lack of any IA player (artificial intelligence),
+you won't be able to play alone. You need to have at least another player to play against.
+<P>
+<H3><A NAME="ss3.1">3.1 Launching the server </A>
+</H3>
+
+<P>
+<P>The <CODE>server</CODE> is the central piece of the game, the place where everything is coordinated, and the
+link between the different players. It must be launched on one and only one computer. Let's say for
+the example that this computer is called 'eagle'
+<P>If you have successfully installed boson, you should have a program called <CODE>boserver</CODE>. 
+This is the first program to launch so that every single player may connect to it.
+<P>You should run it in <CODE>background</CODE>, typing
+<BLOCKQUOTE><CODE>
+<PRE>
+[eagle]% boserver&amp;
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>You can also click on <CODE>boserver</CODE>, in the <CODE>K-Menu</CODE>, under the group <CODE>Games</CODE>.
+<P>Don't worry about the still naked interface of it, just hide it if you don't like it, there's nothing
+in the window, but it _does_ do a lot of things behing.
+<P>
+<H3><A NAME="ss3.2">3.2 Launching Boson</A>
+</H3>
+
+<P>
+<P>Every single player should perform this step on his computer. There is no problem if
+one of them is on the same computer as the server.
+<P>
+<BLOCKQUOTE><CODE>
+<PRE>
+[gauss]% boson eagle&amp;
+</PRE>
+</CODE></BLOCKQUOTE>
+<P>By giving the <CODE>eagle</CODE> argument to boson, you tell him on which computer he can find the server
+in order to connect to it.
+<P>You can also click on <CODE>boson</CODE>, in the <CODE>K-Menu</CODE>, under the group <CODE>Games</CODE>, but doing this way
+you won't be able to give any argument, so that boson will try to connect to the same computer. You can do this
+only if the boserver has been launched on _your_ computer.
+<P>There will soon be <CODE>icons</CODE>-to-click-on-to-get-things-simplier, but until then, you need
+to performs all of those steps.
+<P>
+<P>
+<H3><A NAME="ss3.3">3.3 User input </A>
+</H3>
+
+<P>
+<P>On the keyboard, you may use the arrow keys to move across the map.
+<P>The left button of the mouse let you select objects
+Left-click on a facility or a mobile unit to select it.
+If you left-click on the ground and drag the mouse (while still having the button down), it will draw
+a selection rectangle that will select everything in it when you release the button.
+<P>The right-button let you do <CODE>actions</CODE> : on the ground it will make a mobile unit to move there,
+on a <CODE>friend</CODE> mobile unit, it will follow it, on a <CODE>ennemy</CODE>, it will attack it.
+Note that so far, only <CODE>move</CODE> is implemented :-)
+<P>
+<P>The middle-button is used to move across the map. By middle-clicking on any place, the point you've clicked on
+will become the new center of the map. If you click on the center, if will do nothing. If you click on the border, you'll make
+a big jump.
+<P>
+<P>
+<P ALIGN="RIGHT">
+
+<A HREF="index-4.html">Next</A>
+ <A HREF="index-2.html">Previous</A>
+ <A HREF="index.html#toc3">Table of Contents</A>
+</P>
+<CENTER>
+<HR WIDTH="100%" SIZE=3 ALIGN=CENTER NOSHADE>
+</CENTER>    
+</FONT>
+
+ 
+</BODY>
+</HTML>
