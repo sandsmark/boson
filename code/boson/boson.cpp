@@ -759,7 +759,7 @@ public:
 
 	QTimer* mGameTimer;
 
-	BosonCanvas* mCanvas; // this pointer is anti-OO IMHO
+	BosonCanvas* mCanvas;
 	BosonPlayField* mPlayField;
 	Player* mPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
@@ -814,6 +814,7 @@ Boson::~Boson()
 {
  delete d->mAdvance;
  delete d->mGameTimer;
+ delete d->mCanvas;
  delete d;
 }
 
