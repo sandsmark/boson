@@ -44,7 +44,7 @@ public:
 	~BoColorChooser();
 
 	/**
-	 * Mark a color as "taken" and display the @ref takenColor at this
+	 * Mark a color as "taken" and display a cross at this
 	 * point. A color that is taken is not available for selection anymore.
 	 **/
 	void setTaken(const QColor& color, bool taken = true);
@@ -82,13 +82,9 @@ signals:
 protected:
 	void applyColors();
 
-	/**
-	 * @return The color that is display if a certain color is already
-	 * taken.
-	 **/
-	QColor takenColor() const;
-
 	virtual bool eventFilter(QObject* o, QEvent* e);
+
+	void markTaken(QLabel*);
 
 private:
 	void init();
