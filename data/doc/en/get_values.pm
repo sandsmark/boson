@@ -226,7 +226,8 @@ sub getIndexVals() {
         my $line;
         my $found_value;
         my $value;
-
+        my $health_lock = 0;
+        
         foreach $line (@CONTENT) {
                 foreach $found_value (@searchValues) {
                         # remove all spaces and \n
@@ -236,10 +237,16 @@ sub getIndexVals() {
                         #print "trying: $line <--> $line2\n";
                         if ($line =~ /^$found_value=\s*(.*)/ ) {
                                 $value = $1;
-                                print "<tr><td>$found_value</td><td>$value</td></tr>\n";
+                                # Workaround for technology upgrades. Only show the first Health in the file.
+                                if ($found_value eq "Health") {
+                                    $health_lock = $health_lock + 1;
+                                }
+                                if ($health_lock < 2) {
+                                    print "<tr><td>$found_value</td><td>$value</td></tr>\n";
                                 }
                         }
                 }
+        }
         print "</table>\n";
         }
 }
