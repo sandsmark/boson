@@ -839,7 +839,7 @@ void BoMesh::renderMesh()
 	return;
  }
  if (type() == GL_TRIANGLE_STRIP && false) {
-	 boDebug() << "painting _STRIP" << endl;
+	boDebug() << "painting _STRIP" << endl;
 	if (!node->next()) {
 		boError() << k_funcinfo << "less than 2 faces in mesh " << mesh()->name << "! this is not supported" << endl;
 		return;
