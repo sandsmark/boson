@@ -791,15 +791,6 @@ void BosonBigDisplayBase::renderText()
  glRasterPos2i(x, y);
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
 
- // fps
- QString fpsstr = i18n("FPS: %1").arg(fps());
- glColor4f(0.0, 0.0, 0.0, 0.5);
- glRecti(border - alphaborder, d->mViewport[3] - border + alphaborder,
-		d->mDefaultFont->metrics()->width(fpsstr) + border + alphaborder, d->mViewport[3] - border - d->mDefaultFont->height() - alphaborder);
- glColor3f(1.0, 1.0, 1.0);
- glRasterPos2i(border, d->mViewport[3] - d->mDefaultFont->height() - border);
- glCallLists(fpsstr.length(), GL_UNSIGNED_BYTE, (GLubyte*)fpsstr.latin1());
-
 // now the chat messages
  d->mChat->renderMessages(border, border, d->mDefaultFont);
 
