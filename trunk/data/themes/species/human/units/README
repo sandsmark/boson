@@ -96,18 +96,6 @@ SightRange=Number
         The sight range of this unit.
         the sight range is how far (in cells!) this unit can see.
         Must be >= 0. Default is 5 (currently).
-WeaponDamage=Number
-        The damage this unit makes to other units when firing. Can
-        also be negative - the unit repairs then.
-        Default is 0.
-WeaponRange=Number
-        The weapon range of this unit.
-        Note: when WeaponDamage <= 0 this has no effect!
-        Must be >= 0. Default is 0.
-Reload=Number
-        The time to reload the weapon. "Time" means number of
-        advance calls (default is 1 per 50ms = 20 calls/sec).
-        Must be >= 0. Default is 0.
 TerrainType=Number
         The default terrain type of the unit. One of 0 (Land),
         1 (Water) or 2 (Air).
@@ -117,13 +105,6 @@ TerrainType=Number
 ProductionTime=Number
         The number of advance calls needed to produce this unit
         Must be >= 0. Default is (currently) 100.
-CanShootAtAirUnits=bool
-        Can this unit shoot at aircrafts?
-        Default true for TerrainType=2, otherwise false.
-CanShootAtLandUnits=bool
-        Can this unit shoot at ground units? True or False.
-        Default is true for TerrainType=0 or TerrainType=1,
-        otherwise false.
 Producer=Number
         Specifies which kind of factory is able to produce this
         unit. Possible values are: 0=war factory (heavy land
@@ -292,6 +273,10 @@ DamageRange=Number
         E.g. if it's 2, all units two or less cells away from the
         explosion will get damaged.
         Must be >= 0. Default is 0.
+MaxHeight=Number
+        What's the maximum height of missile of this weapon when it flies. If
+        you increase this, your missiles will fly with bigger arc.
+        Default is 1.
 Model=filename
         Model of this weapon. If weapon's speed is 0, model
         will never be visible, so you won't need it.
