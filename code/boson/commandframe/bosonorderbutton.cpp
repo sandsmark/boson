@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,121 +41,18 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 
+#include <ufo/events/umouseevent.hpp>
+
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
-class BoToolTip : public QToolTip
-{
-public:
-	BoToolTip(BosonOrderButton* parent) : QToolTip(parent)
-	{
-	}
 
-	inline BosonOrderButton* commandWidget() const
-	{
-		return (BosonOrderButton*)parentWidget();
-	}
-
-protected:
-	virtual void maybeTip(const QPoint& pos)
-	{
-		//TODO: do not re-display if already displayed and text didn't
-		//change
-		QString text;
-		QWidget* w = (commandWidget()->type() == BosonOrderButton::ShowUnit) ? commandWidget()->childAt(pos) : 0;
-		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
-			Unit* u = commandWidget()->unit();
-			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
-		} else {
-			text = mainTip();
-		}
-
-		if (text.isNull()) {
-			return;
-		}
-		tip(QRect(commandWidget()->rect()), text);
-	}
-
-	/**
-	 * Tip for the widget if there is no other tip available. Some parts of
-	 * the widget (e.g. the progress bars) can provide another tip that
-	 * overrides this one.
-	 **/
-	QString mainTip() const
-	{
-		QString text;
-		switch (commandWidget()->type()) {
-			case BosonOrderButton::ShowNothing:
-				// do not display anything
-				return QString::null;
-			case BosonOrderButton::ShowCell:
-				//TODO: place something useful here
-				text = i18n("Texturenumber: %1").arg(commandWidget()->texture());
-				break;
-			case BosonOrderButton::ShowUnit:
-				if (!commandWidget()->unit()) {
-					boWarning(220) << k_funcinfo << "type is ShowUnit, but NULL unit" << endl;
-					return QString::null;
-				}
-				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
-				break;
-			case BosonOrderButton::ShowAction:
-				if (commandWidget()->action().isProduceAction()) {
-					if(commandWidget()->action().productionType() == ProduceUnit) {
-						const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
-						text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
-					} else if(commandWidget()->action().productionType() == ProduceTech) {
-						const UpgradeProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
-						text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
-					} else {
-						boWarning(220) << k_funcinfo << "Invalid productiontype when producing!" << endl;
-						return QString::null;
-					}
-				} else if (commandWidget()->action().type() == ActionPlacementPreview) {
-					// Used by editor when placing units
-					const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->productionId());
-					text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
-				} else {
-					text = commandWidget()->action().text();
-				}
-				break;
-		}
-		return text;
-	}
-};
-
-class BoProgress : public KGameProgress
-{
-	public:
-		BoProgress(QWidget* p) : KGameProgress(p) { }
-
-		virtual void setGeometry(int x, int y, int w, int h)
-		{
-			KPixmap pix(QPixmap(w, h));
-			pix.fill(green);
-			KPixmapEffect::gradient(pix, green, red, KPixmapEffect::VerticalGradient);
-			setBarPixmap(pix);
-			KGameProgress::setGeometry(x, y, w, h);
-		}
-};
-
-
-QSize BoButton::sizeHint() const
-{
- // there is a *lot* of code in the QPushButton implementation
- // -> hope this is enough for our needs...
- if (!pixmap()) {
-	return QSize(0, 0);
- }
- return QSize(pixmap()->width(), pixmap()->height());
-}
-
-void BoButton::setGrayOut(bool g)
+void BoOrderButtonButton::setGrayOut(bool g)
 {
  mGrayOut = g;
  setPixmap(mPixmap);
 }
 
-void BoButton::setPixmap(const QPixmap& pix)
+void BoOrderButtonButton::setPixmap(const QPixmap& pix)
 {
  mPixmap = pix;
  if (mGrayOut) {
@@ -164,51 +61,34 @@ void BoButton::setPixmap(const QPixmap& pix)
 	if (mProductionCount != 0) {
 		addProductionCount(&p);
 	}
-	QPushButton::setPixmap(p);
+	BoUfoPushButton::setIcon(p);
  } else {
 	QPixmap p(pix);
 	if (mProductionCount != 0) {
 		addProductionCount(&p);
 	}
-	QPushButton::setPixmap(p);
+	BoUfoPushButton::setIcon(p);
  }
 }
 
-void BoButton::setProductionCount(int c)
+void BoOrderButtonButton::setProductionCount(int c)
 {
  mProductionCount = c;
  QPixmap p(mPixmap);
  if (mProductionCount != 0) {
 	addProductionCount(&p);
  }
- QPushButton::setPixmap(p);
+ BoUfoPushButton::setIcon(p);
 }
 
-void BoButton::drawButton(QPainter* p)
+void BoOrderButtonButton::slotMouseReleaseEvent(ufo::UMouseEvent* e)
 {
- // we want to have a *visible* pixmap - not just a gray pixmap!
- bool e = isEnabled();
- clearWState(WState_Disabled);
- drawButtonLabel(p);
- if (!e) {
-	setWState(WState_Disabled);
+ if (e->getButton() == ufo::UMod::RightButton) {
+	emit rightClicked();
  }
 }
 
-void BoButton::mouseReleaseEvent(QMouseEvent* e)
-{
- QPushButton::mouseReleaseEvent(e);
- if (e->isAccepted()) {
-	return;
- }
- if (e->button() == RightButton) {
-	if (hitButton(e->pos())) {
-		emit rightClicked();
-	}
- }
-}
-
-void BoButton::addProductionCount(QPixmap* pix)
+void BoOrderButtonButton::addProductionCount(QPixmap* pix)
 {
  QColor color(green);
  QFont f;
@@ -216,7 +96,7 @@ void BoButton::addProductionCount(QPixmap* pix)
  QPainter painter(pix);
  painter.setPen(color);
  painter.setFont(f);
- 
+
  if (mProductionCount > 0) {
 	painter.drawText(5, 5 + painter.fontMetrics().height(),
 			QString::number(mProductionCount));
@@ -229,56 +109,52 @@ void BoButton::addProductionCount(QPixmap* pix)
 }
 
 
-class BosonOrderButton::BosonOrderButtonPrivate
+class BosonOrderButtonPrivate
 {
 public:
 	BosonOrderButtonPrivate()
 	{
 		mPixmap = 0;
-
-		mTip = 0;
 	}
 
-	BoButton * mPixmap;
-
-	BoToolTip* mTip;
+	BoOrderButtonButton * mPixmap;
 };
 
-BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
+BosonOrderButton::BosonOrderButton() : BoUfoWidget()
 {
  d = new BosonOrderButtonPrivate;
  mUnit = 0;
  mTextureNumber = 0;
  mType = ShowNothing;
 
- QHBoxLayout* topLayout = new QHBoxLayout(this);
- topLayout->setAutoAdd(true);
+ setLayoutClass(UHBoxLayout);
+ setOpaque(false);
 
- QWidget* display = new QWidget(this);
- QHBoxLayout* displayLayout = new QHBoxLayout(display);
- mPixmap = new BoButton(display);
- connect(mPixmap, SIGNAL(clicked()), this, SLOT(slotClicked()));
+ BoUfoWidget* display = new BoUfoWidget();
+ addWidget(display);
+ display->setLayoutClass(UHBoxLayout);
+
+ mPixmap = new BoOrderButtonButton();
+ mPixmap->setOpaque(false);
+ display->addWidget(mPixmap);
+ connect(mPixmap, SIGNAL(signalClicked()), this, SLOT(slotClicked()));
  connect(mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
- displayLayout->addWidget(mPixmap);
+// mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
- mHealth = new BoProgress(display);
+ mHealth = new BoUfoProgress();
+ display->addWidget(mHealth);
  mHealth->setOrientation(Vertical);
+#if 0
  mHealth->setTextEnabled(false);
  mHealth->setFixedWidth(BAR_WIDTH);
- displayLayout->addWidget(mHealth);
-
- d->mTip = new BoToolTip(this);
+#endif
 
  mHealth->setValue(0);
- 
- mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
- setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
- setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
+
 }
 
 BosonOrderButton::~BosonOrderButton()
 {
- delete d->mTip;
  delete mPixmap;
  delete d;
 }
@@ -298,6 +174,7 @@ void BosonOrderButton::setUnit(Unit* unit)
  slotUnitChanged(mUnit);
 
  show();
+
  mHealth->show();
 
  setProductionCount(0);
@@ -429,7 +306,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
  if (unit->health() > unit->unitProperties()->health()) {
 	boWarning(220) << k_lineinfo << "health > possible health" << endl;
  }
- mHealth->setValue((int)h);
+ mHealth->setValue(h);
 }
 
 

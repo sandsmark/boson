@@ -47,7 +47,6 @@
 #include "bosongroundtheme.h"
 #include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
-#include "commandframe/bosoncommandframebase.h"
 #include "bodebuglogdialog.h"
 //#include "kgamecelldebug.h"
 
@@ -98,7 +97,6 @@ public:
 		mIface = 0;
 
 		mChatDock = 0;
-		mCommandFrameDock = 0;
 	}
 
 	BosonStartupWidget* mStartup;
@@ -121,7 +119,6 @@ public:
 	BoDebugDCOPIface* mIface;
 
 	KDockWidget* mChatDock;
-	KDockWidget* mCommandFrameDock;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -130,8 +127,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = false;
 #endif
-
- BosonCommandFrameInterface::setFactory(new BosonCommandFrameFactory());
 
  mMainDock = createDockWidget("mainDock", 0, this, i18n("Map"));
  mMainDock->setDockSite(KDockWidget::DockCorner);
@@ -219,26 +214,18 @@ void TopWidget::initGameDockWidgets(bool display)
  if (!d->mChatDock) {
 	d->mChatDock = createDockWidget("chat_dock", 0, 0, i18n("Chat"));
  }
- if (!d->mCommandFrameDock) {
-	d->mCommandFrameDock = createDockWidget("cmdframe_dock", 0, 0, i18n("Command Frame"));
- }
 
  d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
  d->mChatDock->setDockSite(KDockWidget::DockNone);
 
- d->mCommandFrameDock->setEnableDocking(KDockWidget::DockLeft | KDockWidget::DockRight);
- d->mCommandFrameDock->setDockSite(KDockWidget::DockNone);
-
  // we are initializing, so we should do the initial docking positions as well.
  // will be overridden once a dock layout is loaded.
  d->mChatDock->manualDock(getMainDockWidget(), KDockWidget::DockBottom, 80);
- d->mCommandFrameDock->manualDock(getMainDockWidget(), KDockWidget::DockLeft, 30);
 
  if (!display) {
 	hideGameDockWidgets();
  } else {
 	makeDockVisible(d->mChatDock);
-	makeDockVisible(d->mCommandFrameDock);
  }
 }
 
@@ -249,7 +236,6 @@ void TopWidget::slotLoadBosonGameDock()
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
 	makeDockInvisible(d->mChatDock);
-	makeDockVisible(d->mCommandFrameDock);
 	if (d->mDisplayManager) {
 		d->mDisplayManager->updateGeometry();  // Hack? Bug in BoDisplayManager?
 	}
@@ -264,30 +250,21 @@ void TopWidget::slotCheckGameDockStatus()
 {
  if (d->mBosonWidget) {
 	d->mBosonWidget->setActionChat(d->mChatDock->isVisible());
-	d->mBosonWidget->setActionCmdFrame(d->mCommandFrameDock->isVisible());
  }
 }
 
 void TopWidget::hideGameDockWidgets(bool deinit)
 {
  makeDockInvisible(d->mChatDock);
- makeDockInvisible(d->mCommandFrameDock);
 
  if (deinit) {
 	d->mChatDock->setWidget(0);
-	d->mCommandFrameDock->setWidget(00);
  }
 }
 
 void TopWidget::slotToggleChatDockVisible()
 {
  d->mChatDock->changeHideShowState();
- slotCheckGameDockStatus();
-}
-
-void TopWidget::slotToggleCmdFrameDockVisible()
-{
- d->mCommandFrameDock->changeHideShowState();
  slotCheckGameDockStatus();
 }
 
@@ -452,8 +429,6 @@ void TopWidget::initBosonWidget()
 		this, SLOT(slotLoadBosonGameDock()));
  connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()),
 		this, SLOT(slotToggleChatDockVisible()));
- connect(d->mBosonWidget, SIGNAL(signalToggleCmdFrameVisible()),
-		this, SLOT(slotToggleCmdFrameDockVisible()));
  connect(d->mBosonWidget, SIGNAL(signalCheckDockStatus()),
 		this, SLOT(slotCheckGameDockStatus()));
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
@@ -473,7 +448,7 @@ void TopWidget::initBosonWidget()
 
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
- d->mBosonWidget->init(d->mChatDock, d->mCommandFrameDock); // this depends on several virtual methods and therefore can't be called in the c'tor
+ d->mBosonWidget->init(d->mChatDock); // this depends on several virtual methods and therefore can't be called in the c'tor
 
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);

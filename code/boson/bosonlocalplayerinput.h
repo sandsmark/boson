@@ -25,7 +25,6 @@
 #include "global.h"
 #include "bomath.h"
 
-class BosonCommandFrameInterface;
 class BoSpecificAction;
 class Unit;
 class Player;
@@ -74,9 +73,6 @@ class BosonLocalPlayerInput : public KGameIO
 
     void placeUnit(Player* owner, unsigned long int unitType, bofixed x, bofixed y);
     void changeHeight(int x, int y, bofixed height);
-
-    virtual void setCommandFrame(BosonCommandFrameInterface* cmdframe);
-
 
   protected slots:
     virtual void slotAction(const BoSpecificAction& action);

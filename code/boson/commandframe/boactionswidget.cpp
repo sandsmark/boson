@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,27 +33,25 @@
 
 #include <klocale.h>
 
-#include <qlayout.h>
 #include <qintdict.h>
 
 
-class BoActionsWidget::BoActionsWidgetPrivate
+class BoActionsWidgetPrivate
 {
 public:
 	BoActionsWidgetPrivate()
 	{
-		mTopLayout = 0;
-		mOrderLayout = 0;
 	}
 
 	QIntDict<BosonOrderButton> mOrderButton;
-	QVBoxLayout* mTopLayout;
-	QGridLayout* mOrderLayout;
 };
 
-BoActionsWidget::BoActionsWidget(QWidget* parent) : QWidget(parent)
+BoActionsWidget::BoActionsWidget()
+	: BoUfoWidget()
 {
  d = new BoActionsWidgetPrivate;
+
+ setLayoutClass(UFlowLayout);
 }
 
 BoActionsWidget::~BoActionsWidget()
@@ -68,32 +66,14 @@ void BoActionsWidget::ensureButtons(unsigned int number)
  }
  for (unsigned int i = 0; i < number; i++) {
 	if (!d->mOrderButton[i]) {
-		BosonOrderButton* b = new BosonOrderButton(this);
+		BosonOrderButton* b = new BosonOrderButton();
 		b->hide();
-		b->setBackgroundOrigin(WindowOrigin);
+		addWidget(b);
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalAction(const BoSpecificAction&)),
 				this, SIGNAL(signalAction(const BoSpecificAction&)));
 	}
  }
- resetLayout();
-}
-
-void BoActionsWidget::resetLayout()
-{
- delete d->mOrderLayout;
- delete d->mTopLayout;
- d->mTopLayout = new QVBoxLayout(this);
- int buttons = DEFAULT_CMD_BUTTONS_PER_ROW;
- d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
- d->mTopLayout->addStretch(1);
- for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	BosonOrderButton* b = d->mOrderButton[i];
-	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
- }
- int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
- d->mOrderLayout->setRowStretch(row, 1);
-d->mOrderLayout->activate();
 }
 
 void BoActionsWidget::hideButtons()
@@ -153,13 +133,13 @@ void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits
  }
 
  ensureButtons(actions.count());
- for (unsigned int button = 0; button < actions.count(); button++) {
+ int button = 0;
+ for (QValueList<BoSpecificAction>::iterator it = actions.begin(); it != actions.end(); ++it) {
 	boDebug(220) << k_funcinfo << "Setting action for button " << button << endl;
 	resetButton(d->mOrderButton[button]);
-	d->mOrderButton[button]->setAction(actions[button]);
+	d->mOrderButton[button]->setAction(*it);
+	button++;
  }
- boDebug(220) << k_funcinfo << "Activating topLayout" << endl;
- d->mTopLayout->activate();
 }
 
 void BoActionsWidget::resetButton(BosonOrderButton* button)

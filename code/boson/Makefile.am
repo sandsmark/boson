@@ -160,7 +160,6 @@ boson_SOURCES = \
 		bogroundrenderer.cpp \
 		bogroundrenderermanager.cpp \
 		top.cpp  \
-		bosoncommandframeinterface.cpp \
 		bosonlocalplayerinput.cpp \
 		kgameunitdebug.cpp \
 		kgameadvancemessagesdebug.cpp \

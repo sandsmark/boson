@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 class Unit;
 
+class BosonUnitViewPrivate;
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -30,7 +31,7 @@ class BosonUnitView : public BosonOrderButton
 {
 	Q_OBJECT
 public:
-	BosonUnitView(QWidget* parent);
+	BosonUnitView();
 	~BosonUnitView();
 
 	/**
@@ -55,7 +56,6 @@ protected:
 	virtual void displayUnitPixmap(unsigned long int unitType, const Player* owner);
 
 private:
-	class BosonUnitViewPrivate;
 	BosonUnitViewPrivate* d;
 };
 

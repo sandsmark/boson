@@ -27,7 +27,6 @@ class KActionCollection;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrameInterface;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -39,19 +38,8 @@ class BosonPlayField;
 class BosonGroundTheme;
 
 /**
- * This is the actual main widget of boson for the game
- *
  * [obsolete docs got removed]
  *
- * The @ref BosonCommandFrame is currently a quite tricky part as the frame
- * differs heavily between game and editor mode. Maybe it will become two
- * classes one day, but the basic structure will stay.
- *
- * All game specific stuff should be done in other classes - e.g. visual stuff
- * (click on a unit) in @ref BosonBigDisplay, constructing in @ref
- * BosonCommandFrame and so on. These classes should emit signals which get
- * connected by EditorWidget to the necessary slots - probably mainly to @ref
- * Boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class EditorWidget : public BosonWidgetBase
@@ -82,9 +70,6 @@ protected slots:
 	virtual void slotPlayerJoinedGame(KPlayer*);
 	virtual void slotPlayerLeftGame(KPlayer*);
 
-
-	void slotGroundThemeChanged(BosonGroundTheme*);
-
 	void slotSavePlayFieldAs();
 	void slotSavePlayField();
 	void slotChangeLocalPlayer(int);
@@ -105,8 +90,6 @@ protected slots:
 	void slotEditorPreferences();
 
 protected:
-	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent);
-
 	virtual void initKActions();
 	virtual void initDisplayManager();
 	virtual void initConnections();

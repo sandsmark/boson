@@ -23,7 +23,6 @@
 #include "boaction.h"
 #include "unit.h"
 #include "player.h"
-#include "bosoncommandframeinterface.h"
 #include "boselection.h"
 #include "bosonmessage.h"
 #include "bodebug.h"
@@ -69,14 +68,6 @@ void BosonLocalPlayerInput::initIO(KPlayer* p)
     mEventListener = new BoLocalPlayerEventListener(io, manager, this);
     mEventListener->initScript();
   }
-}
-
-void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameInterface* cmdframe)
-{
-  boDebug() << k_funcinfo << endl;
-  disconnect(cmdframe, 0, this, 0);
-  connect(cmdframe, SIGNAL(signalAction(const BoSpecificAction&)),
-      this, SLOT(slotAction(const BoSpecificAction&)));
 }
 
 void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)

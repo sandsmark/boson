@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,11 +27,6 @@
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <knuminput.h>
-
-#include <qhbox.h>
-#include <qlayout.h>
-#include <qlabel.h>
 
 class EditorUnitConfigWidgetPrivate
 {
@@ -52,75 +47,80 @@ public:
 	}
 
 	unsigned long int mUnitId; // used to check whether we actually have values for the selected unit in updateUnit()
-	QLabel* mName;
-	QLabel* mId;
-	KIntNumInput* mHealth;
-	KIntNumInput* mShields;
-	KIntNumInput* mConstructionStep;
+	BoUfoLabel* mName;
+	BoUfoLabel* mId;
+	BoUfoNumInput* mHealth;
+	BoUfoNumInput* mShields;
+	BoUfoNumInput* mConstructionStep;
 
-	QLabel* mProductionList;
+	BoUfoLabel* mProductionList;
 
-//	KIntNumInput* mHarvesterMinerals; // TODO once the plugin is ready
-//	KIntNumInput* mHarvesterOil; // TODO once the plugin is ready
-	KIntNumInput* mResourceMineMinerals;
-	KIntNumInput* mResourceMineOil;
+//	BoUfoNumInput* mHarvesterMinerals; // TODO
+//	BoUfoNumInput* mHarvesterOil; // TODO
+	BoUfoNumInput* mResourceMineMinerals;
+	BoUfoNumInput* mResourceMineOil;
 
-	KIntNumInput* mRotation;
+	BoUfoNumInput* mRotation;
 };
 
-EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWidget* parent)
-	: BoUnitDisplayBase(frame, parent)
+EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrame* frame)
+	: BoUnitDisplayBase(frame)
 {
  d = new EditorUnitConfigWidgetPrivate;
  d->mUnitId = 0;
- QVBoxLayout* layout = new QVBoxLayout(this);
+ setLayoutClass(UVBoxLayout);
 
- QHBox* hbox = new QHBox(this);
- (void)new QLabel(i18n("Name: "), hbox);
- d->mName = new QLabel(hbox);
- layout->addWidget(hbox);
+ BoUfoHBox* hbox = new BoUfoHBox();
+ addWidget(hbox);
+ BoUfoLabel* label = new BoUfoLabel(i18n("Name: "));
+ d->mName = new BoUfoLabel();
+ hbox->addWidget(label);
+ hbox->addWidget(d->mName);
 
- hbox = new QHBox(this);
- (void)new QLabel(i18n("Id: "), hbox);
- d->mId = new QLabel(hbox);
- layout->addWidget(hbox);
+ hbox = new BoUfoHBox();
+ addWidget(hbox);
+ label = new BoUfoLabel(i18n("Id: "));
+ d->mId = new BoUfoLabel();
+ hbox->addWidget(label);
+ hbox->addWidget(d->mId);
 
- d->mHealth = new KIntNumInput(this);
+ d->mHealth = new BoUfoNumInput(); // AB: should be an int input
  d->mHealth->setLabel(i18n("Health: "), AlignVCenter);
- connect(d->mHealth, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- layout->addWidget(d->mHealth);
+ connect(d->mHealth, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
+ addWidget(d->mHealth);
 
- d->mShields = new KIntNumInput(this);
+ d->mShields = new BoUfoNumInput(); // AB: should be an int input
  d->mShields->setLabel(i18n("Shields: "), AlignVCenter);
- connect(d->mShields, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- layout->addWidget(d->mShields);
+ connect(d->mShields, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
+ addWidget(d->mShields);
 
- d->mConstructionStep = new KIntNumInput(this);
+ d->mConstructionStep = new BoUfoNumInput(); // AB: should be an int input
  d->mConstructionStep->setLabel(i18n("Construction step: "), AlignVCenter);
- connect(d->mConstructionStep, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- layout->addWidget(d->mConstructionStep);
+ connect(d->mConstructionStep, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
+ addWidget(d->mConstructionStep);
 
- d->mProductionList = new QLabel(i18n("Here would be the production list, if it was implemented"), this);
- layout->addWidget(d->mProductionList);
+ d->mProductionList = new BoUfoLabel(i18n("Here would be the production list, if it was implemented"));
+ addWidget(d->mProductionList);
 
- d->mResourceMineMinerals = new KIntNumInput(this);
+ d->mResourceMineMinerals = new BoUfoNumInput(); // AB: should be an int input
  d->mResourceMineMinerals->setLabel(i18n("Minerals: "), AlignVCenter);
  d->mResourceMineMinerals->setRange(-1, 200000);
- connect(d->mResourceMineMinerals, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- layout->addWidget(d->mResourceMineMinerals);
+ connect(d->mResourceMineMinerals, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
+ addWidget(d->mResourceMineMinerals);
 
- d->mResourceMineOil = new KIntNumInput(this);
+ d->mResourceMineOil = new BoUfoNumInput(); // AB: should be an int input
  d->mResourceMineOil->setLabel(i18n("Oil: "), AlignVCenter);
- connect(d->mResourceMineOil, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
+ connect(d->mResourceMineOil, SIGNAL(signalValueChanged(float)), this, SIGNAL(signalUpdateUnit()));
  d->mResourceMineOil->setRange(-1, 200000);
- layout->addWidget(d->mResourceMineOil);
+ addWidget(d->mResourceMineOil);
 
 
- d->mRotation = new KIntNumInput(this);
+ d->mRotation = new BoUfoNumInput();
  d->mRotation->setLabel(i18n("Rotation: "), AlignVCenter);
  d->mRotation->setRange(0, 359);
- connect(d->mRotation, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- layout->addWidget(d->mRotation);
+ connect(d->mRotation, SIGNAL(signalValueChanged(float)),
+		this, SIGNAL(signalUpdateUnit()));
+ addWidget(d->mRotation);
 
  // AB: some interesting things: configure plugins (e.g. production lists),
  // configure waypoints, configure work (use combobox with real names!)
@@ -201,6 +201,7 @@ void EditorUnitConfigWidget::displayHarvesterPlugin(Unit* unit)
 
  // TODO the HarvesterPlugin will be modified soon, so I dont implement this now
  // (03/12/14)
+ // (AB: this comment is obsolete)
 
  if (!p) {
 	// hide all widgets related to harvesting
@@ -214,18 +215,15 @@ void EditorUnitConfigWidget::displayResourceMinePlugin(Unit* unit)
  BO_CHECK_NULL_RET(unit);
  ResourceMinePlugin* p = (ResourceMinePlugin*)unit->plugin(UnitPlugin::ResourceMine);
  if (!p) {
-	boDebug() << "no resource mine plugin" << endl;
 	// hide all widgets related to ResourceMine
 	d->mResourceMineMinerals->hide();
 	d->mResourceMineOil->hide();
 	return;
  }
  if (p->canProvideMinerals()) {
-	boDebug() << "ok" << endl;
 	d->mResourceMineMinerals->show();
 	d->mResourceMineMinerals->setValue(p->minerals());
  } else {
-	boDebug() << "cant provide minerals" << endl;
 	d->mResourceMineMinerals->hide();
 	d->mResourceMineMinerals->setValue(0);
  }
@@ -246,12 +244,12 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 	boError(220) << k_funcinfo << "Data are for not for the correct unit! data id=" << d->mUnitId << " selected unit: " << unit->id() << endl;
 	return;
  }
- unit->setHealth(d->mHealth->value());
- unit->setShields(d->mShields->value());
+ unit->setHealth((unsigned long int)d->mHealth->value());
+ unit->setShields((unsigned long int)d->mShields->value());
  if (unit->isFacility()) {
 	Facility* fac = (Facility*)unit;
 	if (fac->constructionSteps() != 0) {
-		fac->setConstructionStep(d->mConstructionStep->value());
+		fac->setConstructionStep((unsigned int)d->mConstructionStep->value());
 		// If the facility isn't fully constructed yet, we need to set it's work
 		//  back to WorkConstructed, so that it's construction will be completed in
 		//  the game
@@ -286,6 +284,7 @@ void EditorUnitConfigWidget::updateHarvesterPlugin(Unit* unit)
 
  // TODO the HarvesterPlugin will be modified soon, so I dont implement this now
  // (03/12/14)
+ // (AB: this comment is obsolete)
 
  if (!p) {
 	return;
@@ -300,10 +299,10 @@ void EditorUnitConfigWidget::updateResourceMinePlugin(Unit* unit)
 	return;
  }
  if (p->canProvideMinerals()) {
-	p->setMinerals(d->mResourceMineMinerals->value());
+	p->setMinerals((unsigned int)d->mResourceMineMinerals->value());
  }
  if (p->canProvideOil()) {
-	p->setOil(d->mResourceMineOil->value());
+	p->setOil((unsigned int)d->mResourceMineOil->value());
  }
 }
 
