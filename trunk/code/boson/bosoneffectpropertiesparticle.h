@@ -31,7 +31,7 @@
 
 class KSimpleConfig;
 class QString;
-class BosonTextureArray;
+class BoTextureArray;
 class BosonEffectParticle;
 class BosonParticle;
 
@@ -59,9 +59,9 @@ class BosonEffectPropertiesParticle : public BosonEffectProperties
 
 
   protected:
-    static const BosonTextureArray* getTextures(const QString& name);
+    static const BoTextureArray* getTextures(const QString& name);
 
-    static QDict<BosonTextureArray> mTextureArrays;
+    static QDict<BoTextureArray> mTextureArrays;
     static QString mTexturePath;
 };
 
@@ -122,7 +122,7 @@ class BosonEffectPropertiesParticleGeneric : public BosonEffectPropertiesParticl
     bool mMoveParticlesWithSystem;
     QString mTextureName;
     QString mGLBlendFuncStr, mGLSrcBlendFuncStr;
-    const BosonTextureArray* mTextures;
+    const BoTextureArray* mTextures;
 };
 
 
@@ -177,7 +177,7 @@ class BosonEffectPropertiesParticleTrail : public BosonEffectPropertiesParticle
     QString mTextureName;
     QString mGLBlendFuncStr, mGLSrcBlendFuncStr;
     int mGLBlendFunc, mGLSrcBlendFunc;
-    const BosonTextureArray* mTextures;
+    const BoTextureArray* mTextures;
 };
 
 

@@ -49,6 +49,7 @@
 #include "bolight.h"
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
+#include "botexture.h"
 #include "bopui/bopui.h"
 #include "bopui/bopuiaction.h"
 #include "info/boinfo.h"
@@ -2003,7 +2004,8 @@ void RenderMain::slotReloadMeshRenderer()
 void RenderMain::slotReloadModelTextures()
 {
  BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
- BosonModelTextures::modelTextures()->reloadTextures();
+#warning TODO! (reloading textures)
+ //BosonModelTextures::modelTextures()->reloadTextures();
 }
 
 void RenderMain::slotChangeFont()
@@ -2136,6 +2138,8 @@ int main(int argc, char **argv)
  // this call. otherwise we get an undefined reference on plugin loading.
  // I have _no_ idea why this is required, as it's basically a noop.
  (void)BoInfo::boInfo();
+ // Init BoTexture stuff
+ boTextureManager->initOpenGL();
  return app.exec();
 }
 

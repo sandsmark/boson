@@ -20,7 +20,7 @@
 #include "selectbox.h"
 
 #include "defines.h"
-#include "bosontexturearray.h"
+#include "botexture.h"
 #include "bosonglwidget.h"
 #include "bodebug.h"
 
@@ -32,14 +32,14 @@
 
 SelectBoxData::SelectBoxData()
 {
- mTextures = 0;
+ mTexture = 0;
  mDisplayListCount = 0;
  mDisplayListBase = 0;
 }
 
 SelectBoxData::~SelectBoxData()
 {
- delete mTextures;
+ delete mTexture;
  if (mDisplayListCount > 0 && mDisplayListBase) {
 	glDeleteLists(mDisplayListBase, mDisplayListCount);
 	mDisplayListBase = 0;
@@ -81,25 +81,19 @@ void SelectBoxData::loadBoxes()
  // TODO: we might want to use mipmaps here - interesting for big units, as well as for zooming
  mDisplayListCount = POWER_LEVELS;
  mDisplayListBase = glGenLists(mDisplayListCount);
- if (mTextures) {
+ if (mTexture) {
 	boWarning() << k_funcinfo << "textures loaded before" << endl;
-	delete mTextures;
-	mTextures = 0;
+	delete mTexture;
+	mTexture = 0;
  }
- QValueList<QImage> textureImages;
-
 // AB: the size is hardcoded. mipmaps might be VERY useful here!
 // FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
 // QImage image = KImageEffect::gradient(QSize(48, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
 // QImage image = KImageEffect::gradient(QSize(48, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
- QImage image = KImageEffect::gradient(QSize(48, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
+ QImage image = KImageEffect::gradient(QSize(64, 1), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
  image = BosonGLWidget::convertToGLFormat(image);
- textureImages.append(image);
 
- mTextures = new BosonTextureArray(textureImages);
- if (!mTextures->texture(0)) {
-	boWarning() << k_funcinfo << "textures got loaded improperly" << endl;
- }
+ mTexture = new BoTexture(image.bits(), image.width(), image.height(), BoTexture::UI);
 
  for (int i = 0; i < mDisplayListCount; i++) {
 	glNewList(mDisplayListBase + i, GL_COMPILE);
@@ -109,7 +103,8 @@ void SelectBoxData::loadBoxes()
 		// note: we render in the ceter of x/y but from bottom to top!
 		glTranslatef(-0.5, -0.5, 0.0);
 		drawCube();
-		glBindTexture(GL_TEXTURE_2D, mTextures->texture(0));
+		// We can't use BoTexture::bind(), because it's display list
+		glBindTexture(GL_TEXTURE_2D, mTexture->id());
 		drawHealthBar(i, mDisplayListCount);
 	glEndList();
  }
@@ -120,7 +115,7 @@ void SelectBoxData::drawCube()
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_BLEND);
  glLineWidth(2.0);
-		
+
  const float s = 0.3; // size (width or height depending on direction) of a line
  glBegin(GL_LINES);
 	// bottom quad
@@ -226,7 +221,7 @@ void SelectBoxData::drawHealthBar(int frame, int displayListCount)
 	glVertex3f(0.0, hy, 0.0);
  glEnd();
 
- // top 
+ // top
  glBegin(GL_LINE_STRIP);
 	glVertex3f(0.0, 0.0, hz);
 	glVertex3f(1.0, 0.0, hz);

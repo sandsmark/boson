@@ -22,8 +22,12 @@
 
 #include <GL/gl.h>
 
+#include <qptrlist.h>
+#include <qvaluevector.h>
+
 
 class QString;
+class QStringList;
 
 
 /**
@@ -49,9 +53,9 @@ class BoTexture
     {
       // Values are from GL/gl.h. We don't use OpenGL constants because they
       //  may not be available (if user has obsolete gl.h).
-      Texture2D = 0x0DE1,
-      Texture3D = 0x806F,
-      TextureCube = 0x8513
+      Texture2D = 0x0DE1,  // GL_TEXTURE_2D
+      Texture3D = 0x806F,  // GL_TEXTURE_3D
+      TextureCube = 0x8513  //GL_TEXTURE_CUBE_MAP
     };
     /**
      * Texture class.
@@ -61,13 +65,17 @@ class BoTexture
      * @li Terrain terrain textures
      * @li Particle particle (and other effect) textures
      * @li UI user interface textures (e.g. cursor, minimap)
+     * @li NormalMap normal maps (bumpmaps), those won't be compressed
+     * @li Custom options specified by user
      **/
     enum Class
     {
       Model = 1,
       Terrain,
       Particle,
-      UI
+      UI,
+      NormalMap,
+      Custom = 1000
     };
     /**
      * Misc options for texture.
@@ -76,6 +84,8 @@ class BoTexture
      *  on format of texture image.
      * @li DontGenMipmaps doesn't generate mipmaps for the texture (when using
      *  mipmap filter)
+     * @li DontCompress doesn't compress the texture (when texture compression
+     *  is available)
      **/
     enum Options
     {
@@ -91,7 +101,8 @@ class BoTexture
       FormatRGB = 128,
       FormatRGBA = 256,
       // Misc
-      DontGenMipmaps = 1024
+      DontGenMipmaps = 1024,
+      DontCompress = 2048
     };
 
 
@@ -122,7 +133,7 @@ class BoTexture
      * Create new texture with specified class and size and initialize it with
      *  given data.
      **/
-    BoTexture(const unsigned char* data, int width, int height, Class texclass);
+    BoTexture(unsigned char* data, int width, int height, Class texclass);
     /**
      * Create new texture with specified options, type and size and initialize it with
      *  given data.
@@ -130,7 +141,7 @@ class BoTexture
      * If Type is TextureCube, name must contain %1 which will be replaced with
      *  "[np][xyz]" for corresponding cube sides.
      **/
-    BoTexture(const unsigned char* data, int width, int height, int options = FilterLinearMipmapLinear | FormatRGB, Type type = Texture2D);
+    BoTexture(unsigned char* data, int width, int height, int options = FilterLinearMipmapLinear | FormatRGB, Type type = Texture2D);
 
 
     /**
@@ -156,23 +167,13 @@ class BoTexture
      **/
 //     *  If side is -1, data for all 6 sides of the cube must be in data, in
 //     *  order px, nx, py, ny, pz, nz.
-    void load(const unsigned char* data, int width, int height, int side = 0);
+    void load(unsigned char* data, int width, int height, int side = 0);
 
     /**
      * Bind this texture.
      * Note that this does not enable the texture.
      **/
     void bind();
-    /**
-     * Enable this texture type.
-     * Note that this doesn't bind the texture, so you have to call @ref bind
-     *  before using it.
-     **/
-    void enable();
-    /**
-     * Disables this texture type.
-     **/
-    void disable();
 
     // TODO: do we need set(Width|Height|Depth)() methods?
     /**
@@ -202,20 +203,67 @@ class BoTexture
      **/
     GLuint id() const  { return mId; }
 
+    /**
+     * @return Whether texture has been correctly loaded.
+     **/
+    bool loaded() const  { return mLoaded; }
+
+    /**
+     * @return _Approximate_ amount of memory used by this texture, in bytes.
+     **/
+    int memoryUsed() const;
+
+    static int nextPower2(int n);
+    void applyOptions();
+
+
   protected:
     void setOptions(Class c);
-    void applyOptions();
     void init();
 
+    unsigned char* ensureCorrectSize(unsigned char* data, int &width, int &height);
+    int buildColoredMipmaps(unsigned char* data, int width, int height,
+        GLenum format, GLenum internalformat, GLenum type);
+
+
+    // Dimensions of the texture, in pixels
     int mWidth;
     int mHeight;
     int mDepth;
+    // Type of the texture (2d/3d/cube)
     GLenum mType;
-    int mOptions;
+    // OpenGL id of texture
     GLuint mId;
+
+    // Whether texture has been correctly loaded
+    bool mLoaded;
+
+    // Texture class
+    Class mClass;
+    // Additional options, such as filtering
+    int mOptions;
 };
 
 
+
+class BoTextureArray
+{
+  public:
+    BoTextureArray(const QStringList& files, BoTexture::Class texclass);
+    BoTextureArray(const QStringList& files, int options = BoTexture::FilterLinearMipmapLinear | BoTexture::FormatAuto, BoTexture::Type type = BoTexture::Texture2D);
+    ~BoTextureArray();
+
+    BoTexture* texture(int i) const  { return mTextures[i]; }
+    BoTexture* operator[](int i) const  { return mTextures[i]; }
+    unsigned int count() const  { return mTextures.count(); }
+
+  private:
+    QValueVector<BoTexture*> mTextures;
+};
+
+
+
+#define boTextureManager BoTextureManager::textureManager()
 
 class BoTextureManager
 {
@@ -223,10 +271,108 @@ class BoTextureManager
     BoTextureManager();
     ~BoTextureManager();
 
-    static BoTextureManager* boTextureManager();
+    static BoTextureManager* textureManager();
+
+
+    // Init methods
+    void initOpenGL();
+
+
+    // Texture API methods.
+    /**
+     * Binds given texture object to active texture unit.
+     * It also enables texturing with this texture (e.g.
+     *  glEnable(GL_TEXTURE_2D)) and disables texturing with previously binded
+     *  texture (e.g. glDisable(GL_TEXTURE_1D)).
+     **/
+    void bindTexture(BoTexture* texture);
+    /**
+     * Same as above, but uses given texture unit instead of the active one.
+     **/
+    void bindTexture(BoTexture* texture, int textureUnit);
+    /**
+     * Binds 0 (default) texture to active texture unit.
+     **/
+    void unbindTexture();
+    /**
+     * Same as above, but uses given texture unit instead of the active one.
+     **/
+    void unbindTexture(int textureUnit);
+    /**
+     * Disable texturing for active texture unit.
+     **/
+    void disableTexturing();
+    /**
+     * Makes given texture unit active.
+     * Note that textureUnit should be an integer (e.g. 1), not OpenGL constant
+     *  (e.g. GL_TEXTURE1).
+     * If textureUnit is invalid (less than zero or equal to or greater than
+     *  @ref textureUnits, then it does nothing).
+     **/
+    void activateTextureUnit(int textureUnit);
+    /**
+     * Invalidates cache of active textures/texture units.
+     * Call this after executing non-BoTexture code which may change active
+     *  texture and/or texture unit.
+     **/
+    void invalidateCache();
+
+
+    void clearStatistics();
+    int textureBinds() const  { return mTextureBinds; }
+
+
+    // Config methods.
+    bool supportsTexture3D() const  { return mSupportsTexture3D; }
+    bool supportsTextureCube() const  { return mSupportsTextureCube; }
+    bool supportsGenerateMipmap() const  { return mSupportsGenerateMipmap; }
+    bool supportsTextureCompression() const  { return mSupportsTextureCompressionS3TC; }
+
+    int maxTextureSize() const  { return mMaxTextureSize; }
+    int max3DTextureSize() const  { return mMax3DTextureSize; }
+    int maxCubeTextureSize() const  { return mMaxCubeTextureSize; }
+    int textureUnits() const  { return mTextureUnits; }
+
+    bool useColoredMipmaps() const  { return mUseColoredMipmaps; }
+    bool useTextureCompression() const  { return mUseCompressedTextures; }
+    int textureFilter() const  { return mTextureFilter; }
+
+
+    // Those are meant to be used by only BoTexture.
+    void registerTexture(BoTexture* tex);
+    void unregisterTexture(BoTexture* tex);
+    void textureLoaded(BoTexture* tex, bool firsttime);
+
+    void textureFilterChanged();
+
 
   private:
     static BoTextureManager* mManager;
+
+    QPtrList<BoTexture> mTextures;
+    BoTexture** mActiveTexture;
+    int* mActiveTextureType;
+    int mActiveTextureUnit;
+
+    bool mOpenGLInited;
+
+
+    int mUsedTextureMemory;
+    int mTextureBinds;
+
+
+    bool mSupportsTexture3D;
+    bool mSupportsTextureCube;
+    bool mSupportsGenerateMipmap;
+    bool mSupportsTextureCompressionS3TC;
+    int mMaxTextureSize;
+    int mMax3DTextureSize;
+    int mMaxCubeTextureSize;
+    int mTextureUnits;
+
+    bool mUseColoredMipmaps;
+    bool mUseCompressedTextures;
+    int mTextureFilter;
 };
 
 #endif // BOTEXTURE_H

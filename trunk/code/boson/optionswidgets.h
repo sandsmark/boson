@@ -184,29 +184,14 @@ public:
 	void setUpdateInterval(int ms);
 
 protected:
-	/**
-	 * @return GL_NEAREST or GL_LINEAR for all textures.
-	 **/
-	int magnificationFilter() const;
-	void setMagnificationFilter(int f);
-
-	/**
-	 * @return GL_NEAREST or GL_LINEAR for normal textures.
-	 **/
-	int minificationFilter() const;
-	void setMinificationFilter(int f);
+	int textureFilter() const;
+	void setTextureFilter(int f);
 
 	void setUseLOD(bool l);
 	bool useLOD() const;
 
 	void setDefaultLOD(unsigned int l);
 	unsigned int defaultLOD() const;
-
-	/**
-	 * @return GL_NEAREST, GL_LINEAR, GL_*_MIPMAP_* for mipmapped textures
-	 **/
-	int mipmapMinificationFilter() const;
-	void setMipmapMinificationFilter(int f);
 
 	void setAlignSelectionBoxes(bool align);
 
@@ -253,10 +238,9 @@ private:
 	QVBox* mAdvanced;
 
 	KIntNumInput* mUpdateInterval;
-	QCheckBox* mModelTexturesMipmaps;
-	QComboBox* mMagnificationFilter;
-	QComboBox* mMinificationFilter;
-	QComboBox* mMipmapMinificationFilter;
+	QComboBox* mTextureFilter;
+	QCheckBox* mUseCompressedTextures;
+	QCheckBox* mUseColoredMipmaps;
 	QCheckBox* mUseLight;
 	QCheckBox* mUseMaterials;
 	QComboBox* mGroundRenderer;

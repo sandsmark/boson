@@ -1339,7 +1339,7 @@ void BoMesh::connectNodes()
  }
 }
 
-GLuint BoMesh::textureObject() const
+BoTexture* BoMesh::textureObject() const
 {
  if (material()) {
 	return material()->textureObject();

@@ -338,11 +338,11 @@ class BoWaterManager
     void calculateIndices(RenderInfo* info);
 
     // Sets up env map texture (for reflection) for given texture unit.
-    void setupEnvMapTexture(GLenum unit);
+    void setupEnvMapTexture(int unit);
     // Sets up bumpmap texture for given texture unit.
-    void setupBumpMapTexture(GLenum unit);
+    void setupBumpMapTexture(int unit);
     // Sets up diffuse (i.e. usual) texture for given texture unit.
-    void setupDiffuseTexture(GLenum unit);
+    void setupDiffuseTexture(int unit);
 
     // Inits OpenGL rendering environment (e.g. textures).
     void initRenderEnvironment();
@@ -374,15 +374,12 @@ class BoWaterManager
     PlayerIO* mLocalPlayerIO;
     bool mRenderEnvironmentSetUp;
 
-    bool mSupports_cubemap;
     bool mSupports_texlod;
     bool mSupports_env_combine;
     bool mSupports_env_dot3;
-    bool mSupports_multitexture;
     bool mSupports_vbo;
     bool mSupports_blendcolor;
     bool mSupports_blendcolor_ext;
-    bool mSupports_texture3d;
     bool mSupports_nv_register_combiners;
     bool mSupports_ati_fragment_shader;
 

@@ -23,6 +23,8 @@
 #include "bo3dtools.h"
 #include <qstring.h>
 
+class BoTexture;
+
 /**
  * Note: .3ds seem to support different materials for every face. But in boson
  * we allow only a single material per mesh (performance reasons).
@@ -110,8 +112,8 @@ public:
 	 **/
 	const QString& textureName() const { return mTextureName; }
 
-	void setTextureObject(unsigned int t) { mTextureObject = t; }
-	unsigned int textureObject() const { return mTextureObject; }
+	void setTextureObject(BoTexture* t) { mTextureObject = t; }
+	BoTexture* textureObject() const { return mTextureObject; }
 
 	/**
 	 * Set the alpha value of the default material (See @ref activate with
@@ -125,7 +127,6 @@ private:
 
 private:
 	static BoMaterial* mCurrentMaterial;
-	static unsigned int mCurrentTexture;
 	static BoMaterial mDefaultMaterial;
 
 private:
@@ -160,7 +161,7 @@ private:
 	// lib3ds/material.h). the others are unused by us and I (AB) have no
 	// idea (yet) what they are for. maybe they will get added one day.
 	QString mTextureName;
-	unsigned int mTextureObject;
+	BoTexture* mTextureObject;
 };
 
 #endif

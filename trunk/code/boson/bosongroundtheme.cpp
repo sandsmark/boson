@@ -18,13 +18,13 @@
 */
 #include "bosongroundtheme.h"
 
-#include "bosontexturearray.h"
 #include "bosonmap.h"
 #include "bodebug.h"
 #include "defines.h"
 #include "bosondata.h"
 #include "bo3dtools.h"
 #include "bosonconfig.h"
+#include "botexture.h"
 
 #include <ksimpleconfig.h>
 
@@ -298,7 +298,7 @@ void BosonGroundTheme::loadTextureImages(const QString& dir, unsigned int textur
 	boError() << k_funcinfo << "No files found from " << dir << " for texture " << texture << " (" << name << ")" << endl;
 	return;
  }
- BosonTextureArray* t = new BosonTextureArray(absFiles);
+ BoTextureArray* t = new BoTextureArray(absFiles, BoTexture::Terrain);
  mTextures.insert(texture, t);
 
  // Load pixmap (for editor)
@@ -334,7 +334,7 @@ QPixmap BosonGroundTheme::pixmap(unsigned int texture)
  return *mPixmaps[texture];
 }
 
-BosonTextureArray* BosonGroundTheme::textures(int i) const
+BoTextureArray* BosonGroundTheme::textures(int i) const
 {
  return mTextures[i];
 }

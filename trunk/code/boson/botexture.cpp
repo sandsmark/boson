@@ -29,7 +29,41 @@
 
 #include "info/boinfo.h"
 #include "bodebug.h"
+#include "bosonconfig.h"
 
+
+/*****  Some OpenGL constants, in case they haven't been defined yet  *****/
+#ifndef GL_TEXTURE_CUBE_MAP_POSITIVE_X
+#define GL_TEXTURE_CUBE_MAP_POSITIVE_X 0x8515
+#endif
+
+#ifndef GL_MAX_CUBE_MAP_TEXTURE_SIZE
+#define GL_MAX_CUBE_MAP_TEXTURE_SIZE 0x851C
+#endif
+
+#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
+#endif
+
+#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
+#endif
+
+#ifndef GL_GENERATE_MIPMAP
+#define GL_GENERATE_MIPMAP 0x8191
+#endif
+
+#ifndef GL_MAX_TEXTURE_UNITS
+#define GL_MAX_TEXTURE_UNITS 0x84E2
+#endif
+
+#ifndef GL_TEXTURE_CUBE_MAP
+#define GL_TEXTURE_CUBE_MAP 0x8513
+#endif
+
+
+
+/*****  BoTexture  *****/
 
 BoTexture::BoTexture(Class texclass)
 {
@@ -41,6 +75,7 @@ BoTexture::BoTexture(int options, Type type)
 {
   mType = type;
   mOptions = options;
+  mClass = Custom;
   init();
 }
 
@@ -55,21 +90,23 @@ BoTexture::BoTexture(const QString& name, int options, Type type)
 {
   mType = type;
   mOptions = options;
+  mClass = Custom;
   init();
   load(name);
 }
 
-BoTexture::BoTexture(const unsigned char* data, int width, int height, Class texclass)
+BoTexture::BoTexture(unsigned char* data, int width, int height, Class texclass)
 {
   setOptions(texclass);
   init();
   load(data, width, height);
 }
 
-BoTexture::BoTexture(const unsigned char* data, int width, int height, int options, Type type)
+BoTexture::BoTexture(unsigned char* data, int width, int height, int options, Type type)
 {
   mType = type;
   mOptions = options;
+  mClass = Custom;
   init();
   load(data, width, height);
 }
@@ -77,31 +114,29 @@ BoTexture::BoTexture(const unsigned char* data, int width, int height, int optio
 BoTexture::~BoTexture()
 {
   glDeleteTextures(1, &mId);
+  // Unregister texture in texture manager
+  boTextureManager->unregisterTexture(this);
 }
 
 void BoTexture::init()
 {
   glGenTextures(1, &mId);
   applyOptions();
+  // Reset dimensions
+  mWidth = mHeight = mDepth = 0;
+  mLoaded = false;
+  // Register texture in texture manager
+  boTextureManager->registerTexture(this);
 }
 
 void BoTexture::bind()
 {
-  glBindTexture(mType, mId);
-}
-
-void BoTexture::enable()
-{
-  glEnable(mType);
-}
-
-void BoTexture::disable()
-{
-  glDisable(mType);
+  boTextureManager->bindTexture(this);
 }
 
 void BoTexture::setOptions(Class c)
 {
+  mClass = c;
   if(c == Model)
   {
     mType = Texture2D;
@@ -122,6 +157,12 @@ void BoTexture::setOptions(Class c)
     mType = Texture2D;
     mOptions = FilterLinear | FormatAuto;
   }
+  else if(c == NormalMap)
+  {
+    mType = Texture2D;
+    // Normal maps look bad with compression
+    mOptions = FilterLinearMipmapLinear | FormatAuto | DontCompress;
+  }
 }
 
 void BoTexture::applyOptions()
@@ -129,42 +170,68 @@ void BoTexture::applyOptions()
   // Bind
   bind();
 
+  // This is the highest filter that can be used
+  int maxfilter = boTextureManager->textureFilter();
+
+  // These are the selected filters
+  int filtermag = GL_LINEAR;
+  int filtermin = GL_LINEAR;
   if(mOptions & FilterNearest)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    filtermag = GL_NEAREST;
+    filtermin = GL_NEAREST;
   }
   else if(mOptions & FilterLinear)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    filtermag = GL_LINEAR;
+    filtermin = GL_LINEAR;
   }
   else if(mOptions & FilterNearestMipmapNearest)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  // is this ok?
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    filtermag = GL_NEAREST;  // is this ok?
+    filtermin = GL_NEAREST_MIPMAP_NEAREST;
   }
   else if(mOptions & FilterNearestMipmapLinear)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);  // is this ok?
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+    filtermag = GL_NEAREST;  // is this ok?
+    filtermin = GL_NEAREST_MIPMAP_LINEAR;
   }
   else if(mOptions & FilterLinearMipmapNearest)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    filtermag = GL_LINEAR;
+    filtermin = GL_LINEAR_MIPMAP_NEAREST;
   }
   else if(mOptions & FilterLinearMipmapLinear)
   {
-    glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    filtermag = GL_LINEAR;
+    filtermin = GL_LINEAR_MIPMAP_LINEAR;
   }
+
+  // Make sure filter is allowed by config settings
+  if(filtermag > maxfilter)
+  {
+    filtermag = maxfilter;
+  }
+  if(filtermin > maxfilter)
+  {
+    filtermin = maxfilter;
+  }
+
+  // Set correct filter
+  glTexParameteri(mType, GL_TEXTURE_MAG_FILTER, filtermag);
+  glTexParameteri(mType, GL_TEXTURE_MIN_FILTER, filtermin);
 }
 
 void BoTexture::load(const QString& name)
 {
   if(mType == TextureCube)
   {
+    if(!boTextureManager->supportsTextureCube())
+    {
+      boError() << k_funcinfo << "Cubemap textures are not supported (trying to load from file '" <<
+          name << "')!" << endl;
+      return;
+    }
     const char* sides[6] = { "px", "nx", "py", "ny", "pz", "nz" };
     // QImage always uses RGBA
     mOptions |= FormatRGBA;
@@ -178,10 +245,11 @@ void BoTexture::load(const QString& name)
       {
         boError() << k_funcinfo << "Couldn't load image for side " << i << " from file '" <<
             sidename << "'" << endl;
+        mLoaded = false;
         return;
       }
-      QImage tex = QGLWidget::convertToGLFormat(img);
-      load(tex.bits(), tex.width(), tex.height(), i);
+      img = QGLWidget::convertToGLFormat(img);
+      load(img.bits(), img.width(), img.height(), i);
     }
   }
   else
@@ -193,15 +261,15 @@ void BoTexture::load(const QString& name)
       boError() << k_funcinfo << "Couldn't load image from file '" << name << "'" << endl;
       return;
     }
-    QImage tex = QGLWidget::convertToGLFormat(img);
+    img = QGLWidget::convertToGLFormat(img);
     // QImage always uses RGBA
     mOptions |= FormatRGBA;
     mOptions &= (~FormatAuto);
-    load(tex.bits(), tex.width(), tex.height());
+    load(img.bits(), img.width(), img.height());
   }
 }
 
-void BoTexture::load(const unsigned char* data, int width, int height, int side)
+void BoTexture::load(unsigned char* data, int width, int height, int side)
 {
   // Bind the texture
   bind();
@@ -215,17 +283,6 @@ void BoTexture::load(const unsigned char* data, int width, int height, int side)
       boError() << k_funcinfo << "Invalid side " << side << endl;
       side = 0;
     }
-    // Special boson logic: swap y and z sides
-    /*if(side == 2 || side == 3)  // *y side
-    {
-      // Turn *y side into *z side
-      side += 2;
-    }
-    else if(side == 4 || side == 5)
-    {
-      // Turn *z side into *y side
-      side -= 2;
-    }*/
     type = GL_TEXTURE_CUBE_MAP_POSITIVE_X + side;
   }
 
@@ -235,38 +292,20 @@ void BoTexture::load(const unsigned char* data, int width, int height, int side)
   // Find out internal format
   GLenum internalFormat;
   // Check if we can use texture compression
-#ifdef GL_EXT_TEXTURE_COMPRESSION_S3TC
-  if(BoInfo::boInfo()->openGLExtensions().contains("GL_EXT_texture_compression_s3tc"))
+  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression() && !(mOptions & DontCompress))
   {
-    // Texture compression is in core since 1.3 and was earlier available via
-    //  GL_ARB_texture_compression extension.
-    bool compressionAvailable = false;
-#ifdef GL_VERSION_1_3
-    if(BoInfo::boInfo()->hasOpenGLVersion(1,3,0))
-    {
-      compressionAvailable = true;
-    }
-    else
-#endif
-#ifdef GL_EXT_TEXTURE_COMPRESSION_S3TC
-    if(BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_texture_compression"))
-    {
-      compressionAvailable = true;
-    }
-#endif
-    if(compressionAvailable)
-    {
-      internalFormat = (mOptions & FormatRGB) ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
-    }
-    else
-    {
-      internalFormat = format;
-    }
+    internalFormat = (mOptions & FormatRGB) ? GL_COMPRESSED_RGB_S3TC_DXT1_EXT : GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
   }
   else
-#endif // GL_EXT_TEXTURE_COMPRESSION_S3TC
   {
     internalFormat = format;
+  }
+
+  // Ensure that texture has correct size
+  unsigned char* newdata = ensureCorrectSize(data, width, height);
+  if(!newdata)
+  {
+    return;
   }
 
   // Check if we need to generate mipmaps
@@ -275,39 +314,640 @@ void BoTexture::load(const unsigned char* data, int width, int height, int side)
   if((mOptions & useMipmaps) && !(mOptions & DontGenMipmaps))
   {
     // Generate mipmaps
-#ifdef GL_VERSION_1_4
-    // Since version 1.4, OpenGL has automatic mipmap generation in core.
-    if(BoInfo::boInfo()->hasOpenGLVersion(1,4,0))
+    if(boTextureManager->useColoredMipmaps())
     {
-      glTexParameteri(mType, GL_GENERATE_MIPMAP, GL_TRUE);
+      // Use colored mipmaps.
+      int error = buildColoredMipmaps(newdata, width, height, format, internalFormat, type);
+      if(error)
+      {
+        boWarning() << k_funcinfo << "buildColoredMipmaps() returned error: " << error << endl;
+      }
     }
     else
-#endif
-#ifdef GL_SGIS_GENERATE_MIPMAP
-    // If we don't have OGL 1.4, we may still have GL_SGIS_generate_mipmap
-    //  extension.
-    if(BoInfo::boInfo()->openGLExtensions().contains("GL_SGIS_generate_mipmap"))
     {
-      glTexParameteri(mType, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
-    }
-    else
-#endif
-    {
-      // Can't generate mipmaps on hardware. Use software fallback.
-      int error = gluBuild2DMipmaps(type, internalFormat, width, height,
-          format, GL_UNSIGNED_BYTE, data);
-      if (error) {
-        boWarning() << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
+      // Use automatic mipmap generation if it's supported
+      if(boTextureManager->supportsGenerateMipmap())
+      {
+        glTexParameteri(mType, GL_GENERATE_MIPMAP, GL_TRUE);
+        // Just specify base level - mipmaps will be automatically created.
+        glTexImage2D(type, 0, internalFormat, width, height, 0, format,
+            GL_UNSIGNED_BYTE, newdata);
+      }
+      else
+      {
+        // Can't generate mipmaps on hardware. Use software fallback.
+        int error = gluBuild2DMipmaps(type, internalFormat, width, height,
+            format, GL_UNSIGNED_BYTE, newdata);
+        if(error)
+        {
+          boWarning() << k_funcinfo << "gluBuild2DMipmaps() returned error: " << error << endl;
+        }
       }
     }
   }
+  else
+  {
+    // No mipmaps
+    // Load base texture
+    glTexImage2D(type, 0, internalFormat, width, height, 0, format,
+        GL_UNSIGNED_BYTE, newdata);
+  }
 
-  // Load base texture
-  glTexImage2D(type, 0, internalFormat, width, height, 0, format,
-      GL_UNSIGNED_BYTE, data);
 
   mWidth = width;
   mHeight = height;
   mDepth = 0;
+
+  bool wasloaded = mLoaded;
+  mLoaded = true;
+
+  if(newdata != data)
+  {
+    delete[] newdata;
+  }
+
+  boTextureManager->textureLoaded(this, !wasloaded);
+}
+
+unsigned char* BoTexture::ensureCorrectSize(unsigned char* data, int &width, int &height)
+{
+  // Find out max size of the texture
+  int maxSize;
+  if(mType == Texture2D)
+  {
+    maxSize = boTextureManager->maxTextureSize();
+  }
+  else if(mType == Texture3D)
+  {
+    maxSize = boTextureManager->max3DTextureSize();
+  }
+  else if(mType == TextureCube)
+  {
+    maxSize = boTextureManager->maxCubeTextureSize();
+  }
+
+  // Ensure correct width
+  int newW = nextPower2(width);
+  if(newW > maxSize)
+  {
+    newW = maxSize;
+  }
+  // Ensure correct height
+  int newH = nextPower2(height);
+  if(newH > maxSize)
+  {
+    newH = maxSize;
+  }
+
+  if((newW != width) || (newH != height))
+  {
+    // Resize texture
+    // TODO: this might be quite slow, I suppose. Perhaps we could provide our
+    //  own specific scaling function?
+    GLenum format = (mOptions & FormatRGB) ? GL_RGB : GL_RGBA;
+    int bpp = (format == GL_RGB) ? 3 : 4;
+    unsigned char* scaledImage = new unsigned char[newW * newH * bpp];
+    boDebug() << k_funcinfo << "Scaling texture from " << width << "x" << height <<
+        " to " << newW << "x" << newH << endl;
+    int error = gluScaleImage(format, width, height, GL_UNSIGNED_BYTE, data,
+        newW, newH, GL_UNSIGNED_BYTE, scaledImage);
+    if(error)
+    {
+      boError() << k_funcinfo << "Error while scaling texture: " << error << endl;
+      delete[] scaledImage;
+      return 0;
+    }
+    // Update dimensions
+    width = newW;
+    height = newH;
+    // Return scaled image data
+    return scaledImage;
+  }
+  else
+  {
+    // No resizing is necessary, return original data.
+    return data;
+  }
+}
+
+int BoTexture::nextPower2(int n)
+{
+  if(n <= 0)
+  {
+    return 1;
+  }
+  int i = 1;
+  while(n > i)
+  {
+    i *= 2;
+  }
+  return i;
+}
+
+int BoTexture::memoryUsed() const
+{
+  if(!mLoaded)
+  {
+    return 0;
+  }
+
+  // Find out number of pixels in this texture.
+  int pixels = mWidth * mHeight;
+  if(mType == TextureCube)
+  {
+    pixels *= 6;
+  }
+  else if(mType == Texture3D)
+  {
+    pixels *= mDepth;
+  }
+
+  // Find out bytes-per-pixel
+  // FIXME: at least most NVidia's cards (dunno about others) internally still
+  //  use 4 bpp, even if format is RGB.
+  int bpp = (mOptions & FormatRGB) ? 3 : 4;
+
+  int bytes = pixels * bpp;
+
+  // A bit more tricky stuff
+  // Mipmaps
+  int useMipmaps = FilterNearestMipmapNearest | FilterNearestMipmapLinear |
+      FilterLinearMipmapNearest | FilterLinearMipmapLinear;
+  if((mOptions & useMipmaps) && !(mOptions & DontGenMipmaps))
+  {
+    // Mipmaps are used, which makes the texture about 1/3 bigger.
+    bytes = (int)(bytes * 1.333);
+  }
+  // Compression
+  if(boTextureManager->supportsTextureCompression() && boTextureManager->useTextureCompression())
+  {
+    if(mOptions & FormatRGB)
+    {
+      // GL_COMPRESSED_RGB_S3TC_DXT1_EXT format uses 64 bits (8 bytes) of image
+      //  data for every 4x4 block
+      // No compression uses 4*4*3 = 48 bytes for such block, so the difference
+      //  is 6 times.
+      bytes /= 6;
+    }
+    else
+    {
+      // GL_COMPRESSED_RGBA_S3TC_DXT5_EXT format uses 128 bits (16 bytes) of
+      //  image data for every 4x4 block
+      // No compression uses 4*4*4 = 64 bytes for such block, so the difference
+      //  is 4 times.
+      bytes /= 4;
+    }
+  }
+
+  return bytes;
+}
+
+int BoTexture::buildColoredMipmaps(unsigned char* data, int width, int height,
+         GLenum format, GLenum internalformat, GLenum target)
+{
+  // This is more tricky as we have to specify each mipmap separately to be
+  //  able to color it.
+  // This code is based on gluBuild2DMipmaps() function from glu/mipmap.c in Mesa 6.0.
+
+  unsigned char* image;
+  unsigned char* newimage;
+  GLint unpackrowlength, unpackalignment, unpackskiprows, unpackskippixels;
+  GLint packrowlength, packalignment, packskiprows, packskippixels;
+  GLint w, h;
+  GLint neww, newh, level, bpp;
+  int error;
+  bool done;
+  GLint retval = 0;
+
+  bpp = (format == GL_RGB) ? 3 : 4;
+  w = width;
+  h = height;
+
+  /* Get current glPixelStore values */
+  glGetIntegerv(GL_UNPACK_ROW_LENGTH, &unpackrowlength);
+  glGetIntegerv(GL_UNPACK_ALIGNMENT, &unpackalignment);
+  glGetIntegerv(GL_UNPACK_SKIP_ROWS, &unpackskiprows);
+  glGetIntegerv(GL_UNPACK_SKIP_PIXELS, &unpackskippixels);
+  glGetIntegerv(GL_PACK_ROW_LENGTH, &packrowlength);
+  glGetIntegerv(GL_PACK_ALIGNMENT, &packalignment);
+  glGetIntegerv(GL_PACK_SKIP_ROWS, &packskiprows);
+  glGetIntegerv(GL_PACK_SKIP_PIXELS, &packskippixels);
+
+  /* set pixel packing */
+  glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+  glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  glPixelStorei(GL_PACK_SKIP_ROWS, 0);
+  glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
+
+  // Push attributes for glPixelTransfer()
+  glPushAttrib(GL_PIXEL_MODE_BIT);
+
+  // Mipmap coloring:
+  // We first scale colors by 0.5 and then add mipmap color (which is also
+  //  scaled by 0.5) to them. This makes the resulting color be 50-50 blend
+  //  between original color and mipmap color.
+  glPixelTransferf(GL_RED_SCALE, 0.5);
+  glPixelTransferf(GL_GREEN_SCALE, 0.5);
+  glPixelTransferf(GL_BLUE_SCALE, 0.5);
+  // Mipmap colors:
+  int mipmapColorsCount = 10;  // 512x512 texture has base level and 9 mipmaps
+  const float mipmapColorsR[] = { 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0 };
+  const float mipmapColorsG[] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.5, 0.5, 0.5 };
+  const float mipmapColorsB[] = { 0.0, 0.0, 1.0, 1.0, 0.5, 1.0, 0.5, 0.5, 0.0, 0.0 };
+
+
+  done = false;
+  image = data;
+
+  level = 0;
+  while (!done)
+  {
+    if (image != data)
+    {
+      /* set pixel unpacking */
+      glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+      glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+    }
+
+    // Set mipmap color
+    int colorindex = level;
+    if(colorindex >= mipmapColorsCount)
+    {
+      colorindex = mipmapColorsCount - 1;
+    }
+    glPixelTransferf(GL_RED_BIAS,   0.5 * mipmapColorsR[colorindex]);
+    glPixelTransferf(GL_GREEN_BIAS, 0.5 * mipmapColorsG[colorindex]);
+    glPixelTransferf(GL_BLUE_BIAS,  0.5 * mipmapColorsB[colorindex]);
+
+    glTexImage2D(target, level, internalformat, w, h, 0, format, GL_UNSIGNED_BYTE, image);
+
+    if (w == 1 && h == 1)
+    {
+      break;
+    }
+
+    neww = (w < 2) ? 1 : w / 2;
+    newh = (h < 2) ? 1 : h / 2;
+    newimage = new unsigned char[(neww + 4) * newh * bpp];
+    if (!newimage)
+    {
+      glPopAttrib();
+      return GLU_OUT_OF_MEMORY;
+    }
+
+    error = gluScaleImage(format, w, h, GL_UNSIGNED_BYTE, image,
+        neww, newh, GL_UNSIGNED_BYTE, newimage);
+    if (error)
+    {
+      retval = error;
+      done = true;
+    }
+
+    if (image != data)
+    {
+      delete[] image;
+    }
+    image = newimage;
+
+    w = neww;
+    h = newh;
+    level++;
+  }
+
+  if (image != data)
+  {
+    delete[] image;
+  }
+
+  // Restore glPixelTransfer() attributes
+  glPopAttrib();
+
+  /* Restore original glPixelStore state */
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, unpackrowlength);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, unpackalignment);
+  glPixelStorei(GL_UNPACK_SKIP_ROWS, unpackskiprows);
+  glPixelStorei(GL_UNPACK_SKIP_PIXELS, unpackskippixels);
+  glPixelStorei(GL_PACK_ROW_LENGTH, packrowlength);
+  glPixelStorei(GL_PACK_ALIGNMENT, packalignment);
+  glPixelStorei(GL_PACK_SKIP_ROWS, packskiprows);
+  glPixelStorei(GL_PACK_SKIP_PIXELS, packskippixels);
+
+  return retval;
+}
+
+
+
+/*****  BoTextureArray  *****/
+
+BoTextureArray::BoTextureArray(const QStringList& files, BoTexture::Class texclass)
+{
+  mTextures.reserve(files.count());
+  QStringList::ConstIterator it;
+  for (it = files.begin(); it != files.end(); ++it)
+  {
+    BoTexture* tex = new BoTexture(*it, texclass);
+    mTextures.append(tex);
+  }
+}
+
+BoTextureArray::BoTextureArray(const QStringList& files, int options, BoTexture::Type type)
+{
+  mTextures.reserve(files.count());
+  QStringList::ConstIterator it;
+  for (it = files.begin(); it != files.end(); ++it)
+  {
+    BoTexture* tex = new BoTexture(*it, options, type);
+    mTextures.append(tex);
+  }
+}
+
+BoTextureArray::~BoTextureArray()
+{
+  // Delete all textures
+  for(unsigned int i = 0; i < mTextures.count(); i++)
+  {
+    delete mTextures[i];
+  }
+}
+
+
+
+
+/*****  BoTextureManager  *****/
+
+BoTextureManager* BoTextureManager::mManager = 0;
+
+BoTextureManager* BoTextureManager::textureManager()
+{
+  if(!mManager)
+  {
+    mManager = new BoTextureManager();
+  }
+  return mManager;
+}
+
+BoTextureManager::BoTextureManager()
+{
+  mOpenGLInited = false;
+
+  mUsedTextureMemory = 0;
+  mTextureBinds = 0;
+}
+
+BoTextureManager::~BoTextureManager()
+{
+  boDebug() << k_funcinfo << "Deleting remaining " << mTextures.count() << " textures" << endl;
+  mTextures.setAutoDelete(true);
+  mTextures.clear();
+}
+
+void BoTextureManager::initOpenGL()
+{
+  if(mOpenGLInited)
+  {
+    boDebug() << k_funcinfo << "OpenGL already inited, returning" << endl;
+    return;
+  }
+
+  // Get list of supported opengl extensions
+  boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
+  QStringList extensions = BoInfo::boInfo()->openGLExtensions();
+  // Get OpenGL (runtime) version
+  unsigned int openglversion = BoInfo::boInfo()->openGLVersion();
+
+
+  // Find out maximal 2d texture size
+  glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
+
+  // Find out number of texture units that the card has
+  mTextureUnits = 0;
+  if(openglversion >= MAKE_VERSION(1,3,0) || extensions.contains("GL_ARB_multitexture"))
+  {
+    glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mTextureUnits);
+    boDebug() << k_funcinfo << mTextureUnits << " texture units are available." << endl;
+  }
+  else
+  {
+    boDebug() << k_funcinfo << "Multitexturing is not supported!" << endl;
+    mTextureUnits = 1;
+  }
+
+  // Check if cube map textures are supported.
+  // Cube maps are part of the core since OpenGL 1.3
+  mSupportsTextureCube = false;
+  if(openglversion >= MAKE_VERSION(1,3,0) || extensions.contains("GL_ARB_texture_cube_map"))
+  {
+    mSupportsTextureCube = true;
+  }
+  if(!mSupportsTextureCube)
+  {
+    boDebug() << k_funcinfo << "Cube map textures are not supported!" << endl;
+    mMaxCubeTextureSize = 0;
+  }
+  else
+  {
+    // Find out maximal cube map texture size
+    glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &mMaxCubeTextureSize);
+  }
+
+  // Check if 3D textures are supported
+  mSupportsTexture3D = false;
+  if(/*openglversion >= MAKE_VERSION(1,2,0) || */extensions.contains("GL_EXT_texture3D"))
+  {
+    mSupportsTexture3D = true;
+  }
+  if(!mSupportsTexture3D)
+  {
+    boDebug() << k_funcinfo << "3D textures are not supported!" << endl;
+    mMax3DTextureSize = 0;
+  }
+  else
+  {
+    // Find out maximal 3d texture size
+    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &mMax3DTextureSize);
+  }
+
+  // Check if automatic mipmap generation is supported
+  mSupportsGenerateMipmap = false;
+  if(openglversion >= MAKE_VERSION(1,4,0) || extensions.contains("GL_SGIS_generate_mipmap"))
+  {
+    mSupportsGenerateMipmap = true;
+  }
+  if(!mSupportsGenerateMipmap)
+  {
+    boDebug() << k_funcinfo << "Automatic mipmap generation is not supported!" << endl;
+  }
+
+  // Check if texture compression is supported
+  mSupportsTextureCompressionS3TC = false;
+  if(extensions.contains("GL_EXT_texture_compression_s3tc") &&
+      (openglversion >= MAKE_VERSION(1,3,0) || extensions.contains("GL_ARB_texture_compression")))
+  {
+    mSupportsTextureCompressionS3TC = true;
+  }
+  if(!mSupportsTextureCompressionS3TC)
+  {
+    boDebug() << k_funcinfo << "S3TC texture compression is not supported!" << endl;
+  }
+
+
+  // Init active texture cache
+  mActiveTexture = new BoTexture*[mTextureUnits];
+  mActiveTextureType = new int[mTextureUnits];
+  invalidateCache();
+
+
+  mUseColoredMipmaps = boConfig->textureColorMipmaps();
+  mUseCompressedTextures = boConfig->textureCompression();
+  mTextureFilter = boConfig->textureFilter();
+
+  boDebug() << k_funcinfo << "OpenGL initialized" << endl;
+  mOpenGLInited = true;
+}
+
+void BoTextureManager::bindTexture(BoTexture* texture, int textureUnit)
+{
+  activateTextureUnit(textureUnit);
+  bindTexture(texture);
+}
+
+void BoTextureManager::bindTexture(BoTexture* texture)
+{
+  if(mActiveTextureType[mActiveTextureUnit] != texture->type())
+  {
+    // Disable current texture type and enable new one.
+    if(mActiveTextureType[mActiveTextureUnit])
+    {
+      glDisable(mActiveTextureType[mActiveTextureUnit]);
+    }
+    glEnable(texture->type());
+    mActiveTextureType[mActiveTextureUnit] = texture->type();
+  }
+  if(mActiveTexture[mActiveTextureUnit] != texture)
+  {
+    // Bind new texture and update cache.
+    glBindTexture(texture->type(), texture->id());
+    mActiveTexture[mActiveTextureUnit] = texture;
+    mTextureBinds++;
+  }
+}
+
+void BoTextureManager::unbindTexture(int textureUnit)
+{
+  activateTextureUnit(textureUnit);
+  unbindTexture();
+}
+
+void BoTextureManager::unbindTexture()
+{
+  if(mActiveTexture[mActiveTextureUnit] != 0)
+  {
+    glBindTexture(mActiveTextureType[mActiveTextureUnit], 0);
+    mActiveTexture[mActiveTextureUnit] = 0;
+    mTextureBinds++;
+  }
+}
+
+void BoTextureManager::disableTexturing()
+{
+  if(mActiveTextureType[mActiveTextureUnit] != 0)
+  {
+    glDisable(mActiveTextureType[mActiveTextureUnit]);
+    mActiveTextureType[mActiveTextureUnit] = 0;
+  }
+}
+
+void BoTextureManager::activateTextureUnit(int textureUnit)
+{
+  if(textureUnit < 0 || textureUnit >= mTextureUnits)
+  {
+    boError() << k_funcinfo << "Invalid texture unit " << textureUnit <<
+        " (" << mTextureUnits << " texture units are supported" << endl;
+    return;
+  }
+  if(mActiveTextureUnit != textureUnit)
+  {
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    mActiveTextureUnit = textureUnit;
+  }
+}
+
+void BoTextureManager::invalidateCache()
+{
+  for(int i = 0; i < mTextureUnits; i++)
+  {
+    // Disable all texturing
+    if(mTextureUnits > 1)
+    {
+      glActiveTexture(GL_TEXTURE0 + i);
+    }
+    glDisable(GL_TEXTURE_1D);
+    glDisable(GL_TEXTURE_2D);
+    if(supportsTexture3D())
+    {
+      glDisable(GL_TEXTURE_3D);
+    }
+    if(supportsTextureCube())
+    {
+      glDisable(GL_TEXTURE_CUBE_MAP);
+    }
+    // TODO: do we need to bind any (0) texture here?
+    // Reset cache variables
+    mActiveTexture[i] = 0;
+    mActiveTextureType[i] = 0;  // 0 means none
+  }
+  if(mTextureUnits > 1)
+  {
+    glActiveTexture(GL_TEXTURE0);
+  }
+  mActiveTextureUnit = 0;
+}
+
+void BoTextureManager::registerTexture(BoTexture* tex)
+{
+  mTextures.append(tex);
+}
+
+void BoTextureManager::unregisterTexture(BoTexture* tex)
+{
+  if(tex->loaded())
+  {
+    mUsedTextureMemory = QMAX(0, mUsedTextureMemory - tex->memoryUsed());
+    boDebug() << k_funcinfo << "About " << mUsedTextureMemory / 1024.0 <<
+        " kb of memory is now used by " << mTextures.count() - 1 << " textures" << endl;
+  }
+
+  mTextures.remove(tex);
+}
+
+void BoTextureManager::textureLoaded(BoTexture* tex, bool firsttime)
+{
+  if(firsttime)
+  {
+    // Increase amount of used texture memory
+    mUsedTextureMemory += tex->memoryUsed();
+    boDebug() << k_funcinfo << "About " << mUsedTextureMemory / 1024.0 <<
+        " kb of memory is now used by " << mTextures.count() << " textures" << endl;
+  }
+}
+
+void BoTextureManager::clearStatistics()
+{
+  mTextureBinds = 0;
+}
+
+void BoTextureManager::textureFilterChanged()
+{
+  mTextureFilter = boConfig->textureFilter();
+
+  // Go through all the textures and change their filters.
+  QPtrListIterator<BoTexture> it(mTextures);
+  while(it.current())
+  {
+    it.current()->applyOptions();
+    ++it;
+  }
 }
 

@@ -26,8 +26,8 @@
 #include "boson.h" // for an ugly boGame->gameMode() hack!
 #include "bodebug.h"
 #include "bosondata.h"
-#include "bosontexturearray.h"
 #include "bowater.h"
+#include "botexture.h"
 
 #include <qdatastream.h>
 #include <qimage.h>
@@ -983,10 +983,10 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(width, height);
 }
 
-int BosonMap::currentTexture(int texture, int advanceCallsCount) const
+BoTexture* BosonMap::currentTexture(int texture, int advanceCallsCount) const
 {
  BO_CHECK_NULL_RET0(groundTheme());
- BosonTextureArray* t = groundTheme()->textures(texture);
+ BoTextureArray* t = groundTheme()->textures(texture);
  BO_CHECK_NULL_RET0(t);
  return t->texture((advanceCallsCount / groundTheme()->textureAnimationDelay(texture)) % t->count());
 }

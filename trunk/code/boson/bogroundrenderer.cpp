@@ -26,7 +26,6 @@
 #include "defines.h"
 #include "cell.h"
 #include "bosongroundtheme.h"
-#include "bosontexturearray.h"
 #include "bo3dtools.h"
 #include "bomaterial.h"
 #include "bowater.h"
@@ -163,7 +162,7 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_DEPTH_TEST);
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glColor3ub(255, 255, 255);
+	glColor3ub(127, 127, 127);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_QUADS);
 	for (int i = 0; i < cellsCount; i++) {

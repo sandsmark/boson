@@ -27,7 +27,7 @@ class QImage;
 class QPixmap;
 
 class BosonMap;
-class BosonTextureArray;
+class BoTextureArray;
 
 class BosonGroundThemePrivate;
 /**
@@ -70,7 +70,7 @@ public:
 	// least if a different theme is used for the next map)
 	bool loadGroundTheme(QString dir);
 
-	BosonTextureArray* textures(int texture) const;
+	BoTextureArray* textures(int texture) const;
 
 	/**
 	 * Create a list of BosonGroundTheme objects by searching for
@@ -114,7 +114,7 @@ protected:
 
 private:
 	BosonGroundThemePrivate* d;
-	QIntDict<BosonTextureArray> mTextures;
+	QIntDict<BoTextureArray> mTextures;
 	QIntDict<QPixmap> mPixmaps;
 };
 

@@ -24,6 +24,7 @@
 class QImage;
 class QString;
 class BosonModel;
+class BoTexture;
 
 /**
  * This class stores <em>all</em> textures for <em>all</em> models. Simply call
@@ -50,7 +51,7 @@ public:
 	 * @param model The @ref BosonModel object that asks for the texture
 	 * @param textureName the filename of the texture
 	 **/
-	GLuint insert(BosonModel* model, const QString& textureName);
+	BoTexture* insert(BosonModel* model, const QString& textureName);
 
 	/**
 	 * Call this in the destructor of @ref BosonModel. The model gets
@@ -62,18 +63,12 @@ public:
 	/**
 	 * @return The texture object assigned to the name textureName
 	 **/
-	GLuint texture(const QString& textureName) const;
+	BoTexture* texture(const QString& textureName) const;
 
 	/**
 	 * @return The absolute path to all textures
 	 **/
 	const QString& texturePath() const;
-
-	/**
-	 * Reload all textures. The current mipmap settings for models are
-	 * honored, since @ref loadTexture is used.
-	 **/
-	void reloadTextures();
 
 protected:
 	/**
@@ -83,8 +78,7 @@ protected:
 	 **/
 	static void createStatic();
 
-	void removeTexture(GLuint tex);
-	void loadTexture(const QString& textureName, GLuint tex);
+	void removeTexture(BoTexture* tex);
 
 private:
 	BosonModelTextures();

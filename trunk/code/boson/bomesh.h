@@ -30,6 +30,7 @@ class BoMeshRendererMeshData;
 class BoMeshRendererMeshLODData;
 class BosonModel;
 class QColor;
+class BoTexture;
 
 template<class T> class QValueVector;
 
@@ -444,7 +445,7 @@ public:
 	 * @return material()->textureObject() if @ref material is non-null,
 	 * otherwise 0.
 	 **/
-	GLuint textureObject() const;
+	BoTexture* textureObject() const;
 
 	/**
 	 * @return name of the mesh (loaded from file)

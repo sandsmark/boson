@@ -77,8 +77,6 @@ libboson_la_SOURCES = \
 	selectbox.cpp \
 	bosoncursor.cpp \
 	bosonstatistics.cpp \
-	bosontexturearray.cpp \
-	\
 	bosonmodel.cpp \
 	bosonmodelloader.cpp \
 	bo3dsload.cpp \
@@ -195,7 +193,7 @@ libbocursor_la_SOURCES = \
 		boapplication.cpp \
 		boglobal.cpp \
 		bosoncursor.cpp \
-		bosontexturearray.cpp \
+		botexture.cpp \
 		bosonconfig.cpp \
 		bosonglwidget.cpp
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)

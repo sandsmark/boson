@@ -271,11 +271,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
  mChatScreenRemoveTime = new BoConfigUIntEntry(this, "ChatScreenRemoveTime", DEFAULT_CHAT_SCREEN_REMOVE_TIME);
  mChatScreenMaxItems = new BoConfigIntEntry(this, "ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
- mModelTexturesMipmaps = new BoConfigBoolEntry(this, "ModelTexturesMipmaps", DEFAULT_USE_MIPMAPS_FOR_MODELS);
  mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
- mMagnificationFilter = new BoConfigIntEntry(this, "MagnificationFilter", DEFAULT_MAGNIFICATION_FILTER);
- mMinificationFilter = new BoConfigIntEntry(this, "MinificationFilter", DEFAULT_MINIFICATION_FILTER);
- mMipmapMinificationFilter = new BoConfigIntEntry(this, "MipmapMinificationFilter", DEFAULT_MIPMAP_MINIFICATION_FILTER);
  mAlignSelectionBoxes = new BoConfigBoolEntry(this, "AlignSelectionBoxes", DEFAULT_ALIGN_SELECTION_BOXES);
  mRMBMovesWithAttack = new BoConfigBoolEntry(this, "RMBMovesWithAttack", DEFAULT_RMB_MOVES_WITH_ATTACK);
  mMouseWheelAction = new BoConfigIntEntry(this, "MouseWheelAction", DEFAULT_MOUSE_WHEEL_ACTION);
@@ -295,6 +291,9 @@ BosonConfig::BosonConfig(KConfig* conf)
  mWaterTranslucency = new BoConfigBoolEntry(this, "WaterTranslucency", DEFAULT_WATER_TRANSLUCENCY);
  mWaterBumpmapping = new BoConfigBoolEntry(this, "WaterBumpmapping", DEFAULT_WATER_BUMPMAPPING);
  mWaterAnimatedBumpmaps = new BoConfigBoolEntry(this, "WaterAnimatedBumpmaps", DEFAULT_WATER_ANIMATED_BUMPMAPS);
+ mTextureFilter = new BoConfigIntEntry(this, "TextureFilter", DEFAULT_TEXTURE_FILTER);
+ mTextureCompression = new BoConfigBoolEntry(this, "TextureCompression", DEFAULT_TEXTURE_COMPRESSION);
+ mTextureColorMipmaps = new BoConfigBoolEntry(this, "TextureColorMipmaps", false);
 
  mDebugMode = DebugNormal;
 

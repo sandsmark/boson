@@ -32,8 +32,9 @@
 #include "playerio.h"
 #include "bodebug.h"
 #include "bosonprofiling.h"
-#include "bosontexturearray.h"
+#include "botexture.h"
 #include "bosonglwidget.h"
+#include "bowater.h"
 
 #include <klocale.h>
 #include <kstandarddirs.h>
@@ -322,17 +323,25 @@ void BosonGLMiniMap::calculateGround(int x, int y)
 	int cornerRed = 0;
 	int cornerGreen = 0;
 	int cornerBlue = 0;
-	for (unsigned int i = 0; i < map()->groundTheme()->textureCount(); i++) {
-		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
-		alphaSum += alpha;
+	if (boWaterManager->underwater(cornerX[j], cornerY[j])) {
+		// Water is dark-blue, a bit greenish
+		cornerRed += 0;
+		cornerGreen += 64;
+		cornerBlue += 192;
+		alphaSum += 255;
+	} else {
+		for (unsigned int i = 0; i < map()->groundTheme()->textureCount(); i++) {
+			int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
+			alphaSum += alpha;
 
-		QRgb rgb = map()->miniMapColor(i);
-		int red = qRed(rgb);
-		int green = qGreen(rgb);
-		int blue = qBlue(rgb);
-		cornerRed += red * alpha / 255;
-		cornerGreen += green * alpha / 255;
-		cornerBlue += blue * alpha / 255;
+			QRgb rgb = map()->miniMapColor(i);
+			int red = qRed(rgb);
+			int green = qGreen(rgb);
+			int blue = qBlue(rgb);
+			cornerRed += red * alpha / 255;
+			cornerGreen += green * alpha / 255;
+			cornerBlue += blue * alpha / 255;
+		}
 	}
 	if (alphaSum == 0) {
 		// nothing to do for this corner.
@@ -675,8 +684,8 @@ void BosonGLMiniMapRenderer::createMap(unsigned int w, unsigned int h, BosonGrou
  mMapWidth = w;
  mMapHeight = h;
 
- unsigned int w2 = BosonTextureArray::nextPower2(mMapWidth);
- unsigned int h2 = BosonTextureArray::nextPower2(mMapHeight);
+ unsigned int w2 = BoTexture::nextPower2(mMapWidth);
+ unsigned int h2 = BoTexture::nextPower2(mMapHeight);
  mTextureMaxWidth = (float)w / (float)w2;
  mTextureMaxHeight = (float)h / (float)h2;
 
@@ -738,10 +747,11 @@ void BosonGLMiniMapRenderer::renderLogo()
 	return;
  }
  glPushAttrib(GL_ENABLE_BIT);
- glDisable(GL_TEXTURE_2D);
+ boTextureManager->disableTexturing();
  glRasterPos2i(mPosX, mPosY);
  glDrawPixels(d->mLogo.width(), d->mLogo.height(), GL_RGBA, GL_UNSIGNED_BYTE, d->mLogo.bits());
  glPopAttrib();
+ boTextureManager->invalidateCache();
 }
 
 void BosonGLMiniMapRenderer::renderMiniMap()
@@ -755,21 +765,15 @@ void BosonGLMiniMapRenderer::renderMiniMap()
  d->mModelviewMatrix.scale(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 // glScalef(mZoom, mZoom, 1.0f); // AB: maybe do this on the texture matrix stack
 
- GLuint tex;
- glGenTextures(1, &tex);
+ BoTexture tex(d->mMapTexture, d->mMapTextureWidth, d->mMapTextureHeight,
+     BoTexture::FilterLinear | BoTexture::FormatRGBA);
+ tex.bind();
 
- glBindTexture(GL_TEXTURE_2D, tex);
- glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
- glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
- glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, d->mMapTextureWidth, d->mMapTextureHeight,
-		0, GL_RGBA, GL_UNSIGNED_BYTE, d->mMapTexture);
  renderQuad();
 
  glPopMatrix();
 
  renderCamera();
-
- glDeleteTextures(1, &tex);
 }
 
 void BosonGLMiniMapRenderer::renderQuad()
