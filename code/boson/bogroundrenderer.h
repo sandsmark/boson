@@ -20,7 +20,6 @@
 #define BOGROUNDRENDERER_H
 
 class Cell;
-class Player;
 class PlayerIO;
 class QString;
 
@@ -82,20 +81,11 @@ public:
 	 **/
 	void renderCellGrid(Cell** cells, int cellsCount, float* heightMap, int heightMapWidth);
 
-	// AB: replace by localPlayerIO()
-	void setLocalPlayer(Player* p);
-	Player* localPlayer() const;
-
-#if 0
-	void setLocalPlayerIO(PlayerIO* io);
-	PlayerIO* localPlayerIO() const
-	{
-		return 0;
-	}
-#endif
+	void setLocalPlayerIO(PlayerIO* p);
+	PlayerIO* localPlayerIO() const;
 
 	/**
-	 * This generates an array of visible cells for the @p player. It works
+	 * This generates an array of visible cells for the @p playerIO. It works
 	 * on the list previously created by @ref generateCellList.
 	 *
 	 * This mainly checks for whether the cells are fogged.
@@ -103,7 +93,7 @@ public:
 	 * Note that you _MUST_ delete[] the array when you are done using it!
 	 * @param cellCount The number of cells in the array is returned here.
 	 **/
-	Cell** createVisibleCellList(int* cellCount, Player* player); // TODO: replace by a PlayerIO
+	Cell** createVisibleCellList(int* cellCount, PlayerIO* playerIO);
 
 	/**
 	 * Generate a list of cells that are (or may) be visible at the moment.

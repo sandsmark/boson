@@ -32,6 +32,7 @@
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "player.h"
+#include "playerio.h"
 #include "bosoncursor.h"
 #include "boselection.h"
 #include "bosonconfig.h"
@@ -63,6 +64,7 @@
 #include <qpointarray.h>
 #include <qbuffer.h>
 #include <qimage.h>
+#include <qdir.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -82,17 +84,6 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 
 #include <GL/glu.h>
 
-
-// this will get removed once I add my PlayerIO class. atm i need it so that I
-// don't have to remove all changes for PlayerIO when I commit a different patch
-// for this file.
-#define PLAYERIO 0
-
-#if !PLAYERIO
-#define localPlayerIO localPlayer
-#else
-#include "playerio.h"
-#endif
 
 //#define TEST_LOD
 
@@ -1269,21 +1260,9 @@ void BosonBigDisplayBase::renderParticles()
 	s = allIt.current();
 	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-#if !PLAYERIO
-		if (canvas()->cell(s->x(), s->y())) {
-			if (!localPlayerIO()->isFogged(s->x(), s->y())) {
-				visible.append(s);
-			}
-		} else {
-			// AB: we don't complain here, as particle systems are
-			// visual appearance only. note that invalid positions
-			// are BAAAAAAD !!
+		if (localPlayerIO()->canSee(s->x(), s->y())) {
+			visible.append(s);
 		}
-#else
-		if (localPlayerIO()->canSee(s)) {
-				visible.append(s);
-		}
-#endif
 	}
  }
 
@@ -1755,11 +1734,11 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoMo
 		// currently!
 		bool replace = !event.controlButton();
 		bool onScreenOnly = !event.shiftButton();
-#if PLAYERIO
+#warning TODO
+#if 0
 		Unit* unit = localPlayerIO()->findUnitAt(event.canvasVector());
-#else
-		Unit* unit = canvas()->findUnitAt(event.canvasVector());
 #endif
+		Unit* unit = canvas()->findUnitAt(event.canvasVector());
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << "TODO: select only those that are currently on the screen!" << endl;
@@ -1836,11 +1815,7 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  }
  d->mLocalPlayer = p;
  if (d->mGroundRenderer) {
-#if PLAYERIO
 	d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
-#else
-	d->mGroundRenderer->setLocalPlayer(localPlayer());
-#endif
  }
  if (!d->mLocalPlayer) {
 	return;
@@ -1853,7 +1828,6 @@ Player* BosonBigDisplayBase::localPlayer() const
  return d->mLocalPlayer;
 }
 
-#if PLAYERIO
 PlayerIO* BosonBigDisplayBase::localPlayerIO() const
 {
  if (!d->mLocalPlayer) {
@@ -1861,44 +1835,12 @@ PlayerIO* BosonBigDisplayBase::localPlayerIO() const
  }
  return d->mLocalPlayer->playerIO();
 }
-#endif
 
 void BosonBigDisplayBase::slotCenterHomeBase()
 {
  boDebug() << k_funcinfo << endl;
-#if !PLAYERIO
- BO_CHECK_NULL_RET(localPlayer());
- //TODO
- // find the command center of the local player
- QPoint pos(0, 0); // note: we use *cell* coordinates!
- Player* p = localPlayer();
- QPtrList<Unit> units = *(p->allUnits());
- QPtrListIterator<Unit> it(units);
- Unit* commandCenter = 0;
- for (; it.current() && !commandCenter; ++it) {
-	// now we have a problem. what do we need to check for?
-	// checking for Unit::type() isn't nice. maybe we need a
-	// UnitProperties::isCommandCenter() or so?
-	//
-	// so for now we get around this problem by picking the first unit and
-	// then exiting the loop.
-	commandCenter = it.current();
- }
- if (!commandCenter) {
-	commandCenter = units.getFirst();
- }
- if (!commandCenter) {
-	boWarning() << k_funcinfo << "cannot find a unit for localplayer" << endl;
-	// no units for player
-	return;
- }
- pos = QPoint((int)commandCenter->x() / BO_TILE_SIZE, (int)commandCenter->y() / BO_TILE_SIZE);
-
- slotReCenterDisplay(pos);
-#else
  BO_CHECK_NULL_RET(localPlayerIO());
  slotReCenterDisplay(localPlayerIO()->homeBase());
-#endif
 }
 
 void BosonBigDisplayBase::slotResetViewProperties()
@@ -2067,10 +2009,8 @@ void BosonBigDisplayBase::moveSelectionRect(const QPoint& widgetPos)
 void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
  BO_CHECK_NULL_RET(displayInput());
-#if PLAYERIO
  BO_CHECK_NULL_RET(localPlayerIO());
 #warning FIXME: move to PlayerIO
-#endif
  // only PlayerIO should be allowed to select units! there we should always
  // check whether a unit is fogged or not before selecting it!
  if (d->mSelectionRect.isVisible()) {
@@ -2082,11 +2022,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	d->mSelectionRect.setVisible(false);
 	if (!selection()->isEmpty()) {
 		Unit* u = selection()->leader();
-#if PLAYERIO
 		if (localPlayerIO()->ownsUnit(u)) {
-#else
-		if (u->owner() == localPlayer()) {
-#endif
 			// TODO: do not play sound here
 			// instead make virtual and play in derived class
 			u->playSound(SoundOrderSelect);
@@ -2117,11 +2053,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		displayInput()->selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
-#if PLAYERIO
 		if (localPlayerIO()->ownsUnit(unit)) {
-#else
-		if (unit->owner() == localPlayer()) {
-#endif
 			unit->playSound(SoundOrderSelect);
 		}
 	} else {
@@ -2259,11 +2191,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 	i++;
  }
 
-#if PLAYERIO
  return localPlayerIO()->unitsAtCells(&cellVector);
-#else
- return canvas()->collisions()->collisionsAtCells(&cellVector, 0, true);
-#endif
 }
 
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
@@ -2361,25 +2289,7 @@ void BosonBigDisplayBase::createRenderItemList()
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
 
-	bool visible = false;
-#if !PLAYERIO
-	const QPtrVector<Cell>* cells = item->cells();
-	for (unsigned int i = 0; i < cells->count(); i++) {
-		Cell* c = cells->at(i);
-		if (!c) {
-			boError() << k_funcinfo << i << " is no valid cell!" << endl;
-			continue;
-		}
-		if (!localPlayerIO()->isFogged(c->x(), c->y())) {
-			visible = true;
-			// ugly but faster than placing this into the loop
-			// condition
-			break;
-		}
-	}
-#else
-	visible = localPlayerIO()->canSee(item);
-#endif
+	bool visible = localPlayerIO()->canSee(item);
 	if (visible) {
 		d->mRenderItemList->append(*it);
 	}
@@ -2911,10 +2821,6 @@ void BosonBigDisplayBase::changeGroundRenderer(int renderer)
  }
  d->mGroundRenderer->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
  d->mGroundRenderer->setViewFrustum(d->mViewFrustum);
-#if PLAYERIO
  d->mGroundRenderer->setLocalPlayerIO(localPlayerIO());
-#else
- d->mGroundRenderer->setLocalPlayer(localPlayer());
-#endif
 }
 
