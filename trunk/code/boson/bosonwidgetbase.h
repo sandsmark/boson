@@ -156,6 +156,8 @@ public slots:
 	 **/
 	void slotUnfogAll(Player* player = 0);
 
+	void slotDumpGameLog();
+
 	void slotSplitDisplayHorizontal();
 	void slotSplitDisplayVertical();
 	void slotRemoveActiveDisplay();
