@@ -355,3 +355,9 @@ QPtrList<KGameIO>* PlayerIO::ioList()
  return player()->ioList();
 }
 
+bool PlayerIO::removeGameIO(KGameIO* io, bool deleteit)
+{
+ return player()->removeGameIO(io, deleteit);
+}
+
+

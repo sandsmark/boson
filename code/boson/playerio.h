@@ -79,10 +79,9 @@ public:
 	 * @return Player::hasRtti
 	 **/
 	bool hasRtti(int rtti) const;
-
 	KGameIO* findRttiIO(int rtti) const;
-
 	QPtrList<KGameIO>* ioList();
+	bool removeGameIO(KGameIO* io = 0, bool deleteit = true);
 
 	/**
 	 * @return Player::addGameIO
