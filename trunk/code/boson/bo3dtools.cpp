@@ -470,7 +470,7 @@ void BoMatrix::multiply(const GLfloat* mat)
  GLint i;
  for (i = 0; i < 4; i++)
  {
-   const GLfloat ai0=at(i,0),  ai1=at(i,1),  ai2=at(i,2),  ai3=at(i,3);
+   const GLfloat ai0=element(i,0),  ai1=element(i,1),  ai2=element(i,2),  ai3=element(i,3);
    mData[indexAt(i, 0)] = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
    mData[indexAt(i, 1)] = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
    mData[indexAt(i, 2)] = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);

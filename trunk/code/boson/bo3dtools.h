@@ -175,7 +175,7 @@ class BoVector3
      * Lib3dsVectors.
      **/
    static bool isEqual(float* v1, float* v2) { return v1[0] == v2[0] && v1[1] == v2[1] && v1[2] && v2[2]; }
-   
+
   private:
     friend class BoMatrix;
     friend QDataStream& operator<<(QDataStream& s, const BoVector3& v);
@@ -193,6 +193,7 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v);
 class BoVector4
 {
   public:
+
     BoVector4()  { reset(); };
     BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
     ~BoVector4() {};
@@ -245,7 +246,7 @@ class BoVector4
 /**
  * an OpenGL 4x4 matrix. note that we use (just like mesa) column major order to
  * store the matrix elements!
- * 
+ *
  * This means that a matrix
  * <pre>
  * A11 A12 A13 A14
@@ -258,30 +259,42 @@ class BoVector4
  * A11 A21 A31 A41 A12 A22 A32 A42 A13 A23 A33 A43 A41 A42 A43 A44
  * </pre>
  *
- * Note that this class is not optimized for speed.
+ * @short A 4x4 matrix as used by boson and OpenGL
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-// AB: note that this is a dummy implementation. we need BoMatrix::debugMatrix()
-// only right now. one day we might add rotate() translate() and all that stuff
-// here, too.
 class BoMatrix
 {
   public:
+    /**
+     * Construct an (identitiy) matrix. See @ref loadIdentity.
+     **/
     BoMatrix()
     {
       loadIdentity();
     }
-    BoMatrix(const GLfloat* m)
-    {
-      loadMatrix(m);
-    }
-    BoMatrix(GLenum matrix)
+
+    /**
+     * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
+     **/
+    BoMatrix(const GLfloat* matrix)
     {
       loadMatrix(matrix);
     }
-    BoMatrix(const BoMatrix& m)
+
+    /**
+     * Construct a matrix that is a copy of @p matrix. See @ref loadMatrix
+     **/
+    BoMatrix(const BoMatrix& matrix)
     {
-      loadMatrix(m);
+      loadMatrix(matrix);
+    }
+
+    /**
+     * Load @p matrix from OpenGL. See @ref loadMatrix.
+     **/
+    BoMatrix(GLenum matrix)
+    {
+      loadMatrix(matrix);
     }
 
     /**
@@ -303,15 +316,28 @@ class BoMatrix
      * identity matrix and generate an error
      **/
     void loadMatrix(GLenum matrix);
+
+    /**
+     * @overload
+     **/
     void loadMatrix(const GLfloat* m);
+
+    /**
+     * @overload
+     **/
     void loadMatrix(const BoMatrix& m) { loadMatrix(m.data()); }
 
+    /**
+     * Change the element at @p row, @p column to @p value. See also @ref
+     * element and @ref indexAt
+     **/
     void setElement(int row, int column, float value)
     {
-      mData[row + column * 4] = value;
+      mData[indexAt(row, column)] = value;
     }
 
     /**
+     * See also @ref indexAt
      * @param row 0..3 -> specifies the row (aka line) of the matrix
      * @param column 0..3 -> specifies the column of the matrix (what a
      * surprise)
@@ -319,14 +345,15 @@ class BoMatrix
      **/
     inline float element(int row, int column) const
     {
-      return mData[row + column * 4];
+      return mData[indexAt(row, column)];
     }
 
+    /**
+     * @return A pointer to the internal array. See also @ref element, @ref indexAt,
+     * @ref setElement
+     **/
     const GLfloat* data() const { return mData; }
-    void debugMatrix()
-    {
-      debugMatrix(data());
-    }
+
 
     /**
      * @return TRUE if <em>all</em> elements of this matrix are 0. Otherwise
@@ -360,6 +387,10 @@ class BoMatrix
      * Translate (i.e. move) the matrix by x,y,z.
      **/
     void translate(GLfloat x, GLfloat y, GLfloat z);
+
+    /**
+     * @overload
+     **/
     inline void translate(BoVector3 v)
     {
       translate(v.x(), v.y(), v.z());
@@ -380,7 +411,7 @@ class BoMatrix
     void multiply(const GLfloat* mat);
 
     /**
-     * @overloaded
+     * @overload
      **/
     inline void multiply(const BoMatrix* mat)
     {
@@ -402,23 +433,28 @@ class BoMatrix
      * This calculates simply does v = M * input, where M is this matrix.
      **/
     void transform(BoVector3* v, const BoVector3* input) const;
+
+    /**
+     * @overload
+     **/
     void transform(BoVector4* v, const BoVector4* input) const;
 
     /**
-     * Invert this matrix and place the result into @p inverse
+     * Invert this matrix and place the result into @p inverse.
+     * @return TRUE on success or FALSE if this is a not invertible matrix.
      **/
     bool invert(BoMatrix* inverse) const;
 
+    /**
+     * @return TRUE when.. well, when this matrix is equal to @p matrix
+     **/
     bool isEqual(const BoMatrix& matrix) const;
 
-    static void debugMatrix(const GLfloat* matrix);
-
-    inline GLfloat operator[](int i) const { return mData[i]; }
-
     /**
-     * @return The element at @p row, @p column in the matrix.
+     * @return @return The element at index @p i in the internal array. See @ref
+     * indexAt.
      **/
-    inline GLfloat at(int row, int column) const { return mData[indexAt(row, column)]; }
+    inline GLfloat operator[](int i) const { return mData[i]; }
 
     /**
      * @return The index of the element @p row, @p column of the matrix in the
@@ -427,6 +463,19 @@ class BoMatrix
      * that is used by OpenGL/mesa
      **/
     static inline int indexAt(int row, int column) { return (column << 2) + row; }
+
+    /**
+     * Dump this matrix to the console as debug output.
+     **/
+    void debugMatrix()
+    {
+      debugMatrix(data());
+    }
+
+    /**
+     * Dump @p matrix onto the console as debug output.
+     **/
+    static void debugMatrix(const GLfloat* matrix);
 
   private:
     GLfloat mData[16];
