@@ -8,26 +8,11 @@ sub getval() {
         my $self = shift;
         my $type = shift or die("Please define a facility type");	
         my $name = shift or die("Please define a facility name");
-        my $level = shift or die("Please define your filesystem level");
-
-        my $data_level_addon;
-        my $doc_level_addon;
+        # this must be removed, but every facility file has to be changed too
 
         # debug output
         #print "Facillity Type: $type\n";
         #print "Facility Name: $name\n";
-        #print "Filesystem Level: $level\n";
-
-        # I know that this is not the best way, but it is enough for now
-        if ($level == 1) {
-                $data_level_addon = "../../";
-        }
-        elsif ($level == 2) {
-                $data_level_addon = "../../../";
-        }
-        elsif ($level == 3) {
-                $data_level_addon = "../../../../";
-        }
 
         my $path1;
         my $path2;
