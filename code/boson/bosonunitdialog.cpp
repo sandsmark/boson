@@ -300,7 +300,7 @@ void BosonUnitDialog::slotChangeUnitDir()
  d->mSpeed->setValue(d->mUnit->speed());
  kdDebug() << d->mUnit->speed() << endl;
 
- QString fileName = d->mUnit->unitPath() + QString("field.%1.bmp");
+ QString fileName = d->mUnit->unitPath() + QString("field-%1.png");
  unsigned int pixmaps = d->mUnit->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
  for (unsigned int i = 0; i < pixmaps; i++) {
 	QString number;
