@@ -376,6 +376,6 @@ bool BoMeshRendererManager::reloadPlugin(bool* unusable)
  if (unusable) {
 	*unusable = false;
  }
- return true;
+ return checkCurrentRenderer();
 }
 
