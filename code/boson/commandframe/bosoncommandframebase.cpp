@@ -242,13 +242,34 @@ void BosonCommandFrameBase::setLocalPlayer(Player* p)
  d->mOwner = p;
 }
 
+void BosonCommandFrameBase::slotPlaceUnit(unsigned long int unitType)
+{
+ if (!d->mOwner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ emit signalPlaceUnit(unitType, d->mOwner);
+}
+
 void BosonCommandFrameBase::slotProduceUnit(unsigned long int unitType)
 {
+ if (selectedUnit()) {
+	if (d->mOwner != selectedUnit()->owner()) {
+		kdError() << k_funcinfo << "local owner != selected unit owner" << endl;
+		return;
+	}
+ }
  emit signalProduceUnit(unitType, (UnitBase*)selectedUnit(), d->mOwner);
 }
 
 void BosonCommandFrameBase::slotStopProduction(unsigned long int unitType)
 {
+ if (selectedUnit()) {
+	if (d->mOwner != selectedUnit()->owner()) {
+		kdError() << k_funcinfo << "local owner != selected unit owner" << endl;
+		return;
+	}
+ }
  emit signalStopProduction(unitType, (UnitBase*)selectedUnit(), d->mOwner);
 }
 

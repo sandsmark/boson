@@ -75,6 +75,13 @@ BosonWidget::~BosonWidget()
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
+void BosonWidget::initDisplayManager()
+{
+ BosonWidgetBase::initDisplayManager();
+ connect(cmdFrame(), SIGNAL(signalAction(int)),
+		displayManager(), SLOT(slotUnitAction(int)));
+}
+
 void BosonWidget::initConnections()
 {
  BosonWidgetBase::initConnections();
@@ -96,7 +103,11 @@ void BosonWidget::initConnections()
 void BosonWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
- localPlayer()->addGameIO(d->mCmdInput);
+ if (!d->mCmdInput) {
+	kdError() << k_funcinfo << "NULL command input" << endl;
+ } else {
+	localPlayer()->addGameIO(d->mCmdInput);
+ }
 
  connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
 		this, SLOT(slotUnfog(int, int)));

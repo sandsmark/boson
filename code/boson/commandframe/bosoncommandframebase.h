@@ -127,15 +127,21 @@ protected:
 signals:
 	/**
 	 * Emitted when a unit should be produced.
+	 * @param factory The factory producing the unit. Usually equal to the
+	 * selected unit. Is NULL in editor mode
+	 * @param owner The local player. See @ref setLocalPlayer. Note that
+	 * this is (in game mode) the same as factory->owner()
 	 **/
 	void signalProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
 	void signalStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+
+	void signalPlaceUnit(unsigned long int unitType, Player* owner);
 
 	/**
 	 * @param groundType The tile number. See @ref BosonTiles::tile to get
 	 * the actual pixmap.
 	 **/
-	void signalCellSelected(int groundType);
+	void signalPlaceCell(int groundType);
 
 	/**
 	 * Emitted when user clicks on action button (e.g move)
@@ -151,8 +157,20 @@ protected slots:
 //	void slotShowConstructionProgress(Facility* fac);
 
 
+	/**
+	 * Game mode only. Emit @ref signalProduceUnit.
+	 **/
 	void slotProduceUnit(unsigned long int unitType);
+
+	/**
+	 * Game mode only. Emit @ref signalStopProduction.
+	 **/
 	void slotStopProduction(unsigned long int unitType);
+
+	/**
+	 * Editor mode only. Emit @ref signalPlaceUnit.
+	 **/
+	void slotPlaceUnit(unsigned long int unitType);
 
 	virtual void slotUpdate();
 
