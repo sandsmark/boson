@@ -6,7 +6,9 @@ TODO:
 0.1 release : (june, 15th?)
 =============
 
+does units::rect need to be virtual anymore ?
 
+bug : mobile on very-bottom-right can't be selected
 
 click-zone for selection is still badly centered
 
@@ -20,17 +22,17 @@ checkvisibility -> units
 #	server : add a 'known' state to serverUnits
 	broadcast 'moving' to all people knowing me, and then update 'known'
 
-integration of Ben mobiles (with different colors)
 use different pixmap according to 'direction'
 server : check that each unit does max 1 move each jiffie
 version check whithin the ask_connect msg
 map : inheritate Cell, and put serverCell back in server dir
 
 check that loading of pixmap has been done well
-	OK for species, check ground
+	OK for species, ground still needs checking
 
 #good (with _no_ layout)  positionning of widget.
 #boAssert( celldiscovered has j<max) seems to have problems
+#integration of Ben mobiles (with different colors)
 
 check Makefile.am for installation "make install"
 
