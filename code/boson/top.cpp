@@ -115,8 +115,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
 
  d->mStartup = new BosonStartupWidget(mMainDock);
- connect(d->mStartup, SIGNAL(signalSetLocalPlayer(Player*)),
-		this, SLOT(slotChangeLocalPlayer(Player*)));
  connect(d->mStartup, SIGNAL(signalAddLocalPlayer()),
 		this, SLOT(slotAddLocalPlayer()));
  connect(d->mStartup, SIGNAL(signalResetGame()),
