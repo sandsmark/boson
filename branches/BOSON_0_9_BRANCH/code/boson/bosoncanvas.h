@@ -446,7 +446,7 @@ protected:
 	 * Only the actual creation happens here, no additional configuration
 	 * (beside the constructor) is made. Such configuration (such as adding
 	 * the item to the @p owner) should be made in the calling method, e.g.
-	 * @ref createNewItem for new items or @ref loadItemFromXML for loading items.
+	 * @ref createNewItem for new items or @ref createItemFromXML for loading items.
 	 *
 	 * @param rtti The RTTI of the item that is to be created. See @ref RTTI
 	 * and @ref BosonItem::rtti. The RTTI groups the items in certain
@@ -463,7 +463,22 @@ protected:
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);
 
-	bool loadItemFromXML(const QDomElement& unit, Player* owner);
+	/**
+	 * Load <em>all</em> items from @p root - this means for all players!
+	 *
+	 * Used by @ref loadFromXML.
+	 **/
+	bool loadItemsFromXML(const QDomElement& root);
+	bool loadParticlesFromXML(const QDomElement& root);
+
+	/**
+	 * Parses @p item and will create a @ref BosonItem correspoding to the
+	 * attributes and elements found there.
+	 * @return A new @ref BosonItem object accorind to @p item
+	 **/
+	BosonItem* createItemFromXML(const QDomElement& item, Player* owner);
+
+	bool loadItemFromXML(const QDomElement& element, BosonItem* item);
 
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
