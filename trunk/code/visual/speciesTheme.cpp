@@ -24,13 +24,11 @@
 #include <qimage.h>
 #include <qcanvas.h>
 
-#include <kstddirs.h>
-#include <kinstance.h>
-
 #include "common/log.h"
 #include "common/unit.h"
 
 #include "speciesTheme.h"
+#include "visual.h" 		// dataPath
 
 
 speciesTheme::speciesTheme(char *themeName, QRgb color)
@@ -53,8 +51,7 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 	boAssert ( mobiles->fill(false) );
 	boAssert ( facilities->fill(false) );
 
-	themePath	= KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/species/";
+	themePath	= *dataPath + "themes/species/";
 	themePath	+= themeName;
 	themePath	+= "/";
 

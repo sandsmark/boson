@@ -28,7 +28,6 @@
 #include <qpixmap.h>
 #include <qtimer.h>
 
-#include <kstddirs.h>
 #include <ksock.h>
 #include <kmessagebox.h>
 
@@ -93,7 +92,8 @@ connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
 	label = new QLabel(this);
 	label->move( (390-352)/2, 10);		// biglogo is 352x160
 	label->setAutoResize(true);
-	label->setPixmap( QPixmap( locate ( "data", "boson/pics/biglogo.bmp")) );
+	label->setPixmap ( *dataPath + "pics/biglogo.bmp"); 
+	//label->setPixmap( QPixmap( *dataPath + "pics/biglogo.bmp" ));
 	boAssert(!label->pixmap()->isNull());
 
 }

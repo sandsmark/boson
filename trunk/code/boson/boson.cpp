@@ -28,6 +28,7 @@
 #include <kmenubar.h>
 #include <khelpmenu.h>
 #include <kstddirs.h>
+#include <kinstance.h>   
 
 #include "common/boconfig.h"
 #include "common/log.h"
@@ -54,6 +55,10 @@ BosonApp::BosonApp()
 		logf(LOG_ERROR, "Can't open logfile, using stderr");
 	}
 	logf(LOG_INFO, "========= New Log File ==============");
+
+	/* find the boson data dir */
+	dataPath = new QString(KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") + "boson/"); 
+	logf(LOG_INFO, "dataPath initialised at %s", dataPath->latin1());
 
 	/* application initialisation */
 	init();
@@ -96,8 +101,7 @@ void BosonApp::initSocket(char *servername)
 void BosonApp::initCanvas(int w, int h)
 {
 	/* the field is created when a game is created */
-	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/grounds/earth.png";
+	QString themePath = *dataPath + "themes/grounds/earth.png";
 
 	printf("initView : loading groundTheme : %s\n", themePath.latin1() );
 
