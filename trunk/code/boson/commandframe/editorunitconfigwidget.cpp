@@ -101,14 +101,14 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWi
 
  d->mResourceMineMinerals = new KIntNumInput(this);
  d->mResourceMineMinerals->setLabel(i18n("Minerals: "), AlignVCenter);
- d->mResourceMineMinerals->setRange(-1, 1000000);
+ d->mResourceMineMinerals->setRange(-1, 200000);
  connect(d->mResourceMineMinerals, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
  layout->addWidget(d->mResourceMineMinerals);
 
  d->mResourceMineOil = new KIntNumInput(this);
  d->mResourceMineOil->setLabel(i18n("Oil: "), AlignVCenter);
  connect(d->mResourceMineOil, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
- d->mResourceMineOil->setRange(-1, 1000000);
+ d->mResourceMineOil->setRange(-1, 200000);
  layout->addWidget(d->mResourceMineOil);
 
 
@@ -194,7 +194,7 @@ void EditorUnitConfigWidget::displayHarvesterPlugin(Unit* unit)
 	// hide all widgets related to harvesting
 	return;
  }
- 
+
 }
 
 void EditorUnitConfigWidget::displayResourceMinePlugin(Unit* unit)
@@ -240,6 +240,12 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 	Facility* fac = (Facility*)unit;
 	if (fac->constructionSteps() != 0) {
 		fac->setConstructionStep(d->mConstructionStep->value());
+		// If the facility isn't fully constructed yet, we need to set it's work
+		//  back to WorkConstructed, so that it's construction will be completed in
+		//  the game
+		if (fac->currentConstructionStep() < fac->constructionSteps()) {
+			fac->setWork(UnitBase::WorkConstructed);
+		}
 	}
  }
 
