@@ -92,7 +92,10 @@ public slots:
 	void slotConfigureKeys();
 	/** Toggles if Boson is shown fullscreen or normally */
 	void slotToggleFullScreen();
-	/** Ends current game */
+	/** 
+	 * Ends current game and reinits all game data, so that a new game can
+	 * be started.
+	 * */
 	void slotEndGame();
 	/** Shows game preferences dialog */
 	void slotGamePreferences();
@@ -132,7 +135,25 @@ protected:
 	virtual bool queryClose();
 	virtual bool queryExit();
 
+	/**
+	 * End the game. All relevant classes are deleted. You
+	 * may want to call @ref reinitGame after @ref endGame so that you can
+	 * start a new game now.
+	 **/
 	void endGame();
+
+	/**
+	 * Initialize all classes and member vars so that a new game can be
+	 * started. Also show the welcome widget.
+	 *
+	 * Note that you <em>must</em> call @ref endGame before - otherwise
+	 * you'll experience a <em>big</em> memory hole (and probably a lot of
+	 * instability).
+	 *
+	 * You may want to call @ref slotGameOver instead, which calls both @ref
+	 * endGame and @ref reinitGame
+	 **/
+	void reinitGame();
 
 protected slots:
 	void slotCanvasTilesLoading(int);
@@ -189,7 +210,6 @@ private:
 	Player* mPlayer;
 	BosonPlayField* mMap;
 	BosonCanvas* mCanvas;
-	bool mMapReceived;
 	KDockWidget* mMainDock;
 	bool mGame;
 
