@@ -277,6 +277,8 @@ QDomElement BoOneConditionWidget::element()
  
  QDomElement action = root.ownerDocument().createElement("Action");
  root.appendChild(action);
+
+ action.setAttribute("Type", "Event");
  QDomElement actionEvent = mAction->event();
  action.appendChild(actionEvent);
  return root;
