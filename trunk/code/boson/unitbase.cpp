@@ -21,7 +21,6 @@
 #include "unitbase.h"
 
 #include "unitproperties.h"
-#include "pluginproperties.h"
 #include "player.h"
 #include "speciestheme.h"
 #include "bodebug.h"

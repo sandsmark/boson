@@ -33,7 +33,6 @@
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
-#include <kmainwindow.h>
 #include <kaction.h>
 #include <kpopupmenu.h>
 #include <kstandarddirs.h>

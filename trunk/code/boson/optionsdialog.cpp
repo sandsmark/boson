@@ -25,13 +25,7 @@
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <knuminput.h>
-#include <ksimpleconfig.h>
-#include <kstandarddirs.h>
 
-#include <qlabel.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
 #include <qvbox.h>
 #include <qptrlist.h>
 

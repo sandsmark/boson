@@ -40,10 +40,6 @@
 
 #include <qptrlist.h>
 #include <qpoint.h>
-#include <qpainter.h>
-#include <qbitmap.h>
-#include <qlabel.h>
-#include <qtimer.h>
 #include <qcursor.h>
 
 class BosonBigDisplay::BosonBigDisplayPrivate

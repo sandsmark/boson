@@ -25,7 +25,6 @@
 #include "bosonbigdisplay.h"
 #include "editorbigdisplay.h"
 #include "bosonconfig.h"
-#include "bosoncursor.h"
 #include "player.h"
 #include "boselection.h"
 #include "bodebug.h"
@@ -35,7 +34,6 @@
 #include <qstyle.h>
 #include <qlayout.h>
 #include <qvbox.h>
-#include <qpainter.h>
 #include <qintdict.h>
 
 class BoBox : public QWidget

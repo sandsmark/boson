@@ -28,10 +28,8 @@
 #include <klocale.h>
 #include <klistview.h>
 
-#include <qvgroupbox.h>
 #include <qptrdict.h>
 #include <qlayout.h>
-#include <qlabel.h>
 #include <qpushbutton.h>
 
 class KGameCellDebug::KGameCellDebugPrivate

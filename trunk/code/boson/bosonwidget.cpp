@@ -24,14 +24,11 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
-#include "bosonmessage.h"
-#include "bosonplayfield.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "global.h"
-#include "bosonbigdisplay.h"
 #include "commandinput.h"
 #include "gameoverdialog.h"
 #include "bodebug.h"
@@ -43,7 +40,6 @@
 #include <kaction.h>
 #include <kdeversion.h>
 
-#include <qregexp.h>
 #include <qsignalmapper.h>
 
 #include "bosonwidget.moc"
