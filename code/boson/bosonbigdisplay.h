@@ -91,6 +91,7 @@ protected:
 	bool actionMove(QDataStream& stream, const QPoint& pos);
 	bool actionBuild(QDataStream& stream, const QPoint& pos);
 	bool actionAttack(QDataStream& stream, const QPoint& pos);
+	bool actionAttackPos(QDataStream& stream, const QPoint& pos);
 	bool actionRepair(QDataStream& stream, const QPoint& pos);
 	bool actionRefine(QDataStream& stream, const QPoint& pos);
 	bool actionFollow(QDataStream& stream, const QPoint& pos);

@@ -314,8 +314,10 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  switch (msgid) {
 	case BosonMessage::MoveMove:
 	{
+		bool attack;
 		QPoint pos;
 		Q_UINT32 unitCount;
+		stream >> (Q_UINT8)attack;
 		stream >> pos;
 		stream >> unitCount;
 		QPtrList<Unit> unitsToMove;
@@ -351,11 +353,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			++it;
 		}
 		if (unitsToMove.count() == 1) {
-			unitsToMove.first()->moveTo(pos);
+			unitsToMove.first()->moveTo(pos, attack);
 		} else {
 			it.toFirst();
 			while (it.current()) {
-				it.current()->moveTo(pos);
+				it.current()->moveTo(pos, attack);
 				++it;
 			}
 		}
