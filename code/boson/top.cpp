@@ -41,6 +41,7 @@
 #include "startupwidgets/bosonstarteditorwidget.h"
 #include "startupwidgets/bosonnetworkoptionswidget.h"
 #include "startupwidgets/bosonstartupbasewidget.h"
+#include "startupwidgets/kloadsavegamewidget.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>
@@ -73,6 +74,7 @@ public:
 		mNetworkOptions = 0;
 		mLoadingWidget = 0;
 		mBosonWidget = 0;
+		mLoadSaveWidget = 0;
 
 		mActionStatusbar = 0;
 		mActionMenubar = 0;
@@ -89,6 +91,7 @@ public:
 	BosonNetworkOptionsWidget* mNetworkOptions;
 	BosonLoadingWidget* mLoadingWidget;
 	BosonWidgetBase* mBosonWidget;
+	KLoadSaveGameWidget* mLoadSaveWidget;
 
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionMenubar;
@@ -349,6 +352,20 @@ void TopWidget::initStartupWidget(StartupWidgetIds id)
 		d->mLoadingWidget->setProgress(0);
 		break;
 	}
+	case IdLoadSaveGame:
+	{
+		d->mLoadSaveWidget = new KLoadSaveGameWidget(startup->plainWidget());
+		d->mLoadSaveWidget->setSuffix(QString::fromLatin1("bsg"));
+		w = d->mLoadSaveWidget;
+
+		connect(d->mLoadSaveWidget, SIGNAL(signalLoadGame(const QString&)),
+				this, SLOT(slotLoadGame(const QString&)));
+		connect(d->mLoadSaveWidget, SIGNAL(signalSaveGame(const QString&, const QString&)),
+				this, SLOT(slotSaveGame(const QString&, const QString&)));
+		connect(d->mLoadSaveWidget, SIGNAL(signalCancel()),
+				this, SLOT(slotCancelLoadSave()));
+		break;
+	}
 	case IdBosonWidget: // gets loaded elsewhere
 	default:
 	{
@@ -363,6 +380,7 @@ void TopWidget::initStartupWidget(StartupWidgetIds id)
 	return;
  }
  w->installEventFilter(this);
+ w->show();
  startup->initBackgroundOrigin();
 }
 
@@ -378,6 +396,8 @@ void TopWidget::showStartupWidget(StartupWidgetIds id)
 	case IdNetwork:
 	case IdLoading:
 		showHideMenubar();
+		break;
+	case IdLoadSaveGame:
 		break;
 	default:
 		boWarning() << k_funcinfo << "Invalid id " << id << endl;
@@ -483,41 +503,26 @@ void TopWidget::slotStartNewGame()
 
 void TopWidget::slotSaveGame()
 {
- QString file = KFileDialog::getSaveFileName(QString::null, "*.bsg|Boson SaveGame", this);
- if (file == QString::null) {
-	return;
- }
- if (file.findRev('.') == -1) {
-	file += ".bsg";
- }
- if (QFile::exists(file)) {
-	int r = KMessageBox::questionYesNo(this, i18n("File already exists. Overwrite?"));
-	if (r != KMessageBox::Yes) {
-		return;
-	}
- }
+ // TODO: pause the game!
 
- QFile f(file);
- f.open(IO_WriteOnly);
- QDataStream s(&f);
- boGame->save(s, true);
- f.close();
+ showStartupWidget(IdLoadSaveGame);
+ d->mLoadSaveWidget->setSaveMode(true);
+ d->mLoadSaveWidget->updateGames();
 }
 
 void TopWidget::slotLoadGame()
 {
- boDebug() << k_funcinfo << endl;
+ showStartupWidget(IdLoadSaveGame);
+ d->mLoadSaveWidget->setSaveMode(false);
+ d->mLoadSaveWidget->updateGames();
+}
 
- // Get filename
- QString loadingFileName = KFileDialog::getOpenFileName(QString::null, "*.bsg|Boson SaveGame", this);
- if (loadingFileName == QString::null) {
+void TopWidget::slotLoadGame(const QString& fileName)
+{
+ boDebug() << k_funcinfo << endl;
+ if (fileName.isEmpty()) {
 	return;
  }
-
- // AB: the stuff below should be a separate slot and should be called from
- // network, just as slotStartNewGame() gets called. This way we could 
- // support loading network games.
-
  showStartupWidget(IdLoading);
 
  initCanvas();
@@ -540,7 +545,7 @@ void TopWidget::slotLoadGame()
 
 
  // Start loading
- if (!d->mStarting->loadGame(loadingFileName)) {
+ if (!d->mStarting->loadGame(fileName)) {
 	// There was a loading error
 	// Find out what went wrong...
 	Boson::LoadingStatus status = boGame->loadingStatus();
@@ -558,6 +563,10 @@ void TopWidget::slotLoadGame()
 				"Probably the game wasn't saved properly");
 	} else {
 		// This should never be reached
+		// AB: but it will be! I can't provide valid error codes for all
+		// cases at this point of development. feel free to fix all
+		// "return false" at all points in loading code...
+		text = i18n("Error loading saved game!");
 		boError() << k_funcinfo << "Invalid error type or no error (while loading saved game)!!!" << endl;
 	}
 
@@ -572,6 +581,53 @@ void TopWidget::slotLoadGame()
  }
 
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void TopWidget::slotSaveGame(const QString& fileName, const QString& description)
+{
+ boDebug() << k_funcinfo << endl;
+ QString file = fileName;
+ if (file == QString::null) {
+	return;
+ }
+ if (file[0] != '/') {
+	boError() << k_funcinfo << "filename must be absolute" << endl;
+	return;
+ }
+ if (file.findRev('.') == -1) {
+	file += ".bsg";
+ }
+ if (QFile::exists(file)) {
+	int r = KMessageBox::questionYesNo(this, i18n("File %1 already exists. Overwrite?").arg(file));
+	if (r != KMessageBox::Yes) {
+		return;
+	}
+ }
+
+ boDebug() << k_funcinfo << file << endl;
+ QFile f(file);
+ f.open(IO_WriteOnly);
+ QDataStream s(&f);
+ bool ok = boGame->save(s, true);
+ f.close();
+
+ if (ok) {
+	slotCancelLoadSave();
+ } else {
+	KMessageBox::sorry(this, i18n("Error while saving!"));
+ }
+}
+
+void TopWidget::slotCancelLoadSave()
+{
+ boDebug() << k_funcinfo << endl;
+ if (boGame && boGame->gameStatus() != KGame::Init) {
+	// called from a running game - but the player doesn't want to load/save a
+	// game anymore
+	showStartupWidget(IdBosonWidget);
+ } else {
+	showStartupWidget(IdWelcome);
+ }
 }
 
 void TopWidget::slotShowMainMenu()
@@ -926,6 +982,10 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
 		showHideMenubar();
 		break;
+	case IdLoadSaveGame:
+		// do NOT change the size here!
+		// we call it as startup and from game!
+		break;
 	case IdBosonWidget:
 		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
 		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
@@ -1014,6 +1074,10 @@ void TopWidget::showHideMenubar()
 		} else {
 			hideMenubar();
 		}
+		break;
+	case IdLoadSaveGame:
+		// don't touch settings here. can be both, startup and game
+		// widget.
 		break;
 	default:
 		boWarning() << k_funcinfo << "unknown id " << id << endl;
