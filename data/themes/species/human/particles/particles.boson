@@ -15,7 +15,7 @@ Rate=150
 Size=1.0
 SystemLife=0.3
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 [FireBallExplosion]
 Id=1002
@@ -37,7 +37,7 @@ Rate=150
 Size=1.0
 SystemLife=0.3
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 [BigExplosion]
 Id=1010
@@ -56,7 +56,7 @@ Rate=400
 Size=1.0
 SystemLife=0.7
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 [BigBallExplosion]
 Id=1011
@@ -75,7 +75,7 @@ Rate=400
 Size=1.0
 SystemLife=0.7
 Align=true
-Texture=explosion.png
+Texture=explosion
 Normalize=true
 MinScale=0.5
 MaxScale=3.0
@@ -99,7 +99,7 @@ Rate=0
 Size=0.5
 SystemLife=0
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 [GeneralBulletHit]
 Id=2002
@@ -118,7 +118,7 @@ Rate=0
 Size=0.3
 SystemLife=0
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 
 
@@ -139,7 +139,7 @@ Rate=35
 Size=1.0
 SystemLife=20
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [DarkSmoke]
 Id=3002
@@ -158,7 +158,7 @@ Rate=35
 Size=1.0
 SystemLife=10
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [LightSmoke]
 Id=3003
@@ -177,7 +177,7 @@ Rate=35
 Size=1.0
 SystemLife=20
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [BigSmoke]
 Id=3010
@@ -196,7 +196,7 @@ Rate=50
 Size=1.0
 SystemLife=10
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [BigDarkSmoke]
 Id=3011
@@ -215,7 +215,7 @@ Rate=50
 Size=1.0
 SystemLife=10
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [GeneralShockWave]
 Id=4001
@@ -235,7 +235,7 @@ InitNum=350
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Size=1.0
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [BigShockWave]
 Id=4002
@@ -255,7 +255,7 @@ InitNum=350
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Size=1.0
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 
 [GeneralSmokeTrace]
@@ -275,7 +275,7 @@ Rate=100
 Size=0.5
 SystemLife=3600
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [MissileFireTrace]
 Id=5002
@@ -294,7 +294,7 @@ Rate=80
 Size=0.45
 SystemLife=3600
 Align=true
-Texture=explosion.png
+Texture=explosion
 
 
 
@@ -315,7 +315,7 @@ Rate=20
 Size=0.9
 SystemLife=0.5
 Align=true
-Texture=smoke.png
+Texture=smoke
 
 [BigExplosionSmoke]
 Id=6002
@@ -334,7 +334,7 @@ Rate=30
 Size=0.9
 SystemLife=0.6
 Align=true
-Texture=smoke.png
+Texture=smoke
 Normalize=true
 MinScale=0.3
 MaxScale=2.6
