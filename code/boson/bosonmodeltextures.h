@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@
 #ifndef BOSONMODELTEXTURES_H
 #define BOSONMODELTEXTURES_H
 
-#include <qstring.h>
 #include <GL/gl.h>
 
 class QImage;
+class QString;
 class BosonModel;
 
 /**
@@ -38,7 +38,6 @@ class BosonModelTextures
 public:
 	~BosonModelTextures();
 
-	static void createStatic();
 	static BosonModelTextures* modelTextures();
 
 	/**
@@ -51,7 +50,7 @@ public:
 	 * @param model The @ref BosonModel object that asks for the texture
 	 * @param textureName the filename of the texture
 	 **/
-	void insert(BosonModel* model, const QString& textureName);
+	GLuint insert(BosonModel* model, const QString& textureName);
 
 	/**
 	 * Call this in the destructor of @ref BosonModel. The model gets
@@ -70,9 +69,20 @@ public:
 	 **/
 	const QString& texturePath() const;
 
+	/**
+	 * Reload all textures. The current mipmap settings for models are
+	 * honored, since @ref loadTexture is used.
+	 **/
 	void reloadTextures();
 
 protected:
+	/**
+	 * Create the static object of this class (see @ref modelTextures). This
+	 * is called in @ref modelTextures - no need for you to call it
+	 * manually.
+	 **/
+	static void createStatic();
+
 	void removeTexture(GLuint tex);
 	void loadTexture(const QString& textureName, GLuint tex);
 
