@@ -32,7 +32,7 @@ class playerFacility;
 class QLabel;
 class QWidgetStack;
 class QScrollView;
-class fieldMap;
+//class fieldMap;
 class QVBoxLayout;
 
 #define ORDER_BUTTONS_NB  (8)
@@ -54,7 +54,7 @@ class orderWin : public QFrame
   Q_OBJECT
 
 public:
-	orderWin(fieldMap *, QWidget *parent=0, const char *name=0);
+	orderWin(QWidget *parent=0, const char *name=0);
 
 	selectionMode_t	getSelectionMode(void) {return selectionMode;}
 	void setSelectionMode(selectionMode_t t) {selectionMode=t;}
@@ -86,7 +86,7 @@ public: ///orzel : bof...
 	playerFacility		*fixSelected;
 	QIntDict<playerMobUnit>	mobSelected;
 private:
-	fieldMap	*field;
+//	fieldMap	*field;
 
 /* GUI */
 	QPushButton	*orderButton[ORDER_BUTTONS_NB];
