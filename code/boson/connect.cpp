@@ -263,7 +263,7 @@ switch(tag) {
 		/* center all TopLevels on CMDBUNKER creation */
 		if ( FACILITY_CMDBUNKER == data->facility.type && data->facility.who == who_am_i)
 			for ( bosonTopLevel *btl=topLevels.first(); btl != 0; btl=topLevels.next() )
-				btl->reCenterView(data->facility.x, data->facility.y);
+				btl->reCenterView( QPoint(data->facility.x, data->facility.y) );
 
 		break;
 

@@ -483,7 +483,7 @@ void editorTopLevel::slot_close(void)
 
 void editorTopLevel::updateViews(void)
 {
-	mw.big->setContentsPos( X() * BO_TILE_SIZE, Y() * BO_TILE_SIZE );
+	mw.big->setContentsPos( viewPos.x() * BO_TILE_SIZE, viewPos.y() * BO_TILE_SIZE );
 	mw.big->update();
 	mw.mini->repaint(FALSE);
 }

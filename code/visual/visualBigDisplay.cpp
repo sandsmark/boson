@@ -45,8 +45,8 @@ setResizePolicy(QScrollView::AutoOne);
 setVScrollBarMode( AlwaysOff);
 setHScrollBarMode( AlwaysOff);
 
-connect(this, SIGNAL(relativeReCenterView(int, int)), vtl, SLOT(relativeReCenterView(int, int)));
-connect(this, SIGNAL(reSizeView(int, int)), vtl, SLOT(reSizeView(int, int)));
+connect(this, SIGNAL(relativeReCenterView(QPoint)), vtl, SLOT(relativeReCenterView(QPoint)));
+connect(this, SIGNAL(reSizeView(QSize)), vtl, SLOT(reSizeView(QSize)));
 
 }
 
@@ -70,23 +70,21 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
 			/* erase previous rect */
-			if (oldX != selectX && oldY != selectY)	
-				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			if (oldPos!=selectPos)
+				drawRectSelect(selectPos, oldPos, p);
 			/* draw present rect */
-			oldX = e->x();
-			oldY = e->y();
-			if (oldX != selectX && oldY != selectY)	
-				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			oldPos = QPoint (e->x(), e->y());
+			if (oldPos!=selectPos)
+				drawRectSelect(selectPos, oldPos, p);
 			p.end();
 			break;
 
 		case visualTopLevel::SELECT_FILL:
-			selectX =  e->x() + vtl->X()*BO_TILE_SIZE;
-			selectY =  e->y() + vtl->Y()*BO_TILE_SIZE;
-			if (oldX==selectX && oldY==selectY)
+			selectPos = QPoint (e->x(), e->y()) + vtl->_pos() * BO_TILE_SIZE;
+			if (oldPos == selectPos)
 				return;
-			oldX = selectX; oldY = selectY;
-			actionClicked( oldX, oldY, e->state());
+			oldPos = selectPos;
+			actionClicked( oldPos, e->state());
 			break;
 
 		case visualTopLevel::SELECT_PUT:
@@ -110,23 +108,19 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
 			/* erase rect */
-			if (oldX != selectX && oldY != selectY)	
-				drawRectSelect(selectX, selectY, oldX, oldY, p);
+			if (oldPos!=selectPos)
+				drawRectSelect(selectPos, oldPos, p);
 			p.end();
 		
 			/* generate multiple selection */
-			selectX	+= BO_TILE_SIZE * vtl->X();
-			selectY	+= BO_TILE_SIZE * vtl->Y();
-			oldX	+= BO_TILE_SIZE * vtl->X();
-			oldY	+= BO_TILE_SIZE * vtl->Y();
-			
-			vtl->selectArea(selectX, selectY, oldX, oldY);
+			vtl->selectArea( QRect(selectPos, oldPos));
 			vcanvas->update();
-
 			break;
+
 		case visualTopLevel::SELECT_PUT:
 			break;
 			return;
+
 	}
 	vtl->setSelectionMode( visualTopLevel::SELECT_NONE);
 }
@@ -135,8 +129,8 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 {
 	QCanvasView::resizeEvent(e);
 
-	emit reSizeView (	(width()+BO_TILE_SIZE-1)/BO_TILE_SIZE,
-				(height()+BO_TILE_SIZE-1)/BO_TILE_SIZE  );
+	emit reSizeView (	QSize((width()+BO_TILE_SIZE-1)/BO_TILE_SIZE,
+				(height()+BO_TILE_SIZE-1)/BO_TILE_SIZE ) );
 }
 
 
@@ -144,8 +138,7 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 void visualBigDisplay::putSomething(void)
 {
 	vtl->setSelectionMode( visualTopLevel::SELECT_PUT);
-	oldX = selectX = 0;
-	oldY = selectY = 0;
+	oldPos = selectPos = QPoint(0,0);
 	vtl->unSelectFix();
 	return;
 }
@@ -154,23 +147,20 @@ void visualBigDisplay::putSomething(void)
 
 void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 {
-	int x, y;
-	
-	x = e->x();
-	y = e->y();
+	QPoint pos(e->x(), e->y());
 	
 	if (e->button() & MidButton) {
-		emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
+		emit relativeReCenterView( pos/BO_TILE_SIZE );
 		return;
 		}
 
 	/* Now we transpose coo into the map referential */
-	x += vtl->X()*BO_TILE_SIZE; y += vtl->Y()*BO_TILE_SIZE;
+	pos += vtl->_pos()*BO_TILE_SIZE;
 	
 	if (e->button() & LeftButton) {	
 
 		if (vtl->getSelectionMode() == visualTopLevel::SELECT_PUT) {
-			vtl->object_put(e->x(), e->y());
+			vtl->object_put( QPoint(e->x(), e->y()) );
 			return;
 		}
 
@@ -179,14 +169,13 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 			vtl->unSelectAll();
 			}
 	
-		QCanvasItem *sfg = vcanvas->findUnitAt( x, y);
+		QCanvasItem *sfg = vcanvas->findUnitAt(pos);
 
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
 			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
-			oldX = selectX = e->x();
-			oldY = selectY = e->y();
+			selectPos = oldPos = QPoint (e->x(), e->y());
 			vtl->unSelectFix();
 			return;
 		}
@@ -220,8 +209,8 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	} // LeftButton 
 
 	if (e->button() & RightButton) {
-		actionClicked( x, y, e->state());
-		oldX = x; oldY = y;
+		actionClicked( pos, e->state());
+		oldPos = pos;
 		return;
 		}
 	

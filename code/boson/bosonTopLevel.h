@@ -44,7 +44,7 @@ public:
 	/*
 	 * put object 
 	 */
-	virtual void	object_put(int, int);
+	virtual void	object_put(QPoint p);
 
 	/*
          * selection handling

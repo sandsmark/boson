@@ -42,11 +42,8 @@ public:
 	/*
 	 * size / position handling
  	 */
-	int X(void) { return viewX; }
-	int Y(void) { return viewY; }
-
-	int L(void) { return viewL; }
-	int H(void) { return viewH; }
+	QPoint	_pos() { return viewPos; } // XXX check if pos() and size() exist in KMainWindo
+	QSize	_size() { return viewSize; }
 
 	int maxX(void) { return (vcanvas)?vcanvas->maxX:0; }
 	int maxY(void) { return (vcanvas)?vcanvas->maxY:0; }
@@ -58,38 +55,29 @@ public:
 		SELECT_FILL,		/* something is being filled (editor) */
 		SELECT_ 
 		};
-	
-protected:
-//	void		putSomething(void);
 
 public slots:
-	void reCenterView(int x, int y);
-	void relativeReCenterView(int x, int y) {reCenterView(x+viewX, y+viewY);}
-	void reSizeView(int l, int h);
+	void reCenterView(QPoint p);
+	void relativeReCenterView(QPoint p) {reCenterView(p+viewPos);}
+	void reSizeView(QSize s);
 //	void mobileDestroyed(int);
 //	void fixDestroyed(int);
 
 public:
-	void relativeMoveView(int dx, int dy);
+	void relativeMoveView(QPoint );
 	/*
 	 * put object 
 	 */
-	virtual void object_put(int, int)=0;
+	virtual void object_put(QPoint)=0;
 
 
 private:
 	void checkMove();
 
-	int	viewL, viewH;	// size of the viewing window
-	int	viewX, viewY;	// relative position of the upper-left corner
-
-
-
+public:
 	/*
          * selection handling
          */
-
-public:
 	selectionMode_t	getSelectionMode(void) {return selectionMode;}
 	void		setSelectionMode(selectionMode_t t) {selectionMode=t;}
 	void		selectFix(visualFacility *);
@@ -97,8 +85,9 @@ public:
 	visualFacility	*unSelectFix(void);
 	visualMobUnit	*unSelectMob(long key);
 	void		unSelectAll(void);
-	/** add to selection all units in this area */
-	void		selectArea(int x1, int y1, int x2, int y2);
+	/** add to selection all units in this area
+	 *  the rect is given in pixel coo relative coo (to this _pos()) */
+	void		selectArea(QRect r);
 
 	virtual void	setSelected(QPixmap *)=0; //null -> nothing is selected
 	virtual void	setOrders(int what , int who=-1)=0;
@@ -108,9 +97,11 @@ public: ///orzel : bof...
 	QIntDict<visualMobUnit>	mobSelected;
 	int			selectionWho; // -1 is nobody
 protected:
+//	void		putSomething(void);
+	QPoint			viewPos;
+	QSize			viewSize;
 	selectionMode_t		selectionMode;
-
-	virtual void	updateViews(void)=0;
+	virtual void		updateViews(void)=0;
 
 };
 

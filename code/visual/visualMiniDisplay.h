@@ -46,8 +46,8 @@ public:
 	virtual QSize sizeHint() const { return QSize(_w+5, _h+5); }
 
 signals:
-  void	reCenterView(int x, int y);
-//  void  reSizeView(int l, int h);
+  void	reCenterView(QPoint p);
+//  void  reSizeView(QSize s);
 
 public slots:
   void newCell(int,int, groundType);

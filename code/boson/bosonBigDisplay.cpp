@@ -33,7 +33,7 @@ bosonBigDisplay::bosonBigDisplay(bosonTopLevel *btl, QWidget *parent, const char
 }
 
 
-void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
+void bosonBigDisplay::actionClicked(QPoint mp, int /*state*/)
 {
 	QCanvasItem *sfg;
 
@@ -44,13 +44,13 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 	QIntDictIterator<visualMobUnit> mobIt(vtl->mobSelected);
 
 
-	sfg = bocanvas->findUnitAt( mx, my);
+	sfg = bocanvas->findUnitAt( mp);
 	if (!sfg) {
 		// nothing has been found : it's a ground-click
 		// order all mobiles to go there
 		for (mobIt.toFirst(); mobIt; ++mobIt) {
 			boAssert(mobIt.current()->who == who_am_i);
-			((playerMobUnit *)mobIt.current())->u_goto(QPoint(mx,my));
+			((playerMobUnit *)mobIt.current())->u_goto( mp );
 		}
 		if (!mobIt.isEmpty())bocanvas->play("mobile_going.wav");
 		return;

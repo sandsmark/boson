@@ -20,17 +20,17 @@
 
 #include "visualTopLevel.h"
 #include "common/log.h"
+#include "common/bomap.h" 	// BO_TILE_SIZE
 #include "speciesTheme.h"
 
 
 visualTopLevel::visualTopLevel( const char *name, WFlags f)
 	: KMainWindow(0l, name,f)
 	,fixSelected( 0L )
+	,viewPos(0,0)
+	,viewSize(6,6) ///orzel : senseless, will be set by mainMap later
 	,selectionMode(SELECT_NONE)
 {
-	/* map geometry */
-	viewL = viewH = 5; ///orzel : senseless, will be set by mainMap later
-	viewX = viewY = 0;
 
 //	connect(vcanvas, SIGNAL(mobileDestroyed(int)), this, SLOT(mobileDestroyed(int)));
 //	connect(vcanvas, SIGNAL(fixDestroyed(int)), this, SLOT(fixDestroyed(int)));
@@ -38,53 +38,49 @@ visualTopLevel::visualTopLevel( const char *name, WFlags f)
 }
 
 
-void visualTopLevel::reCenterView(int x, int y)
+void visualTopLevel::reCenterView(QPoint p)
 {
-	int oldX = viewX, oldY = viewY;
+	QPoint old = viewPos;
 
-	viewX  = x - viewL/2;
-	viewY  = y - viewH/2;
+	viewPos = p - QPoint(viewSize.width(), viewSize.height())/2;
 
 	checkMove();
 
-	if (viewX != oldX || viewY != oldY) {
+	if (old != viewPos)
 		emit updateViews();
-		}
 }
 
 
-void visualTopLevel::reSizeView(int l, int h)
+void visualTopLevel::reSizeView(QSize s)
 {
-	int	Xcenter = viewX + viewL/2,
-		Ycenter = viewY + viewH/2;
+	QPoint center = viewPos + QPoint(viewSize.width(), viewSize.height())/2;
+	viewSize = s;
 
-	viewL = l;
-	viewH = h;
-
-	reCenterView(Xcenter, Ycenter);
+	reCenterView(center);
 }
 
-void visualTopLevel::relativeMoveView(int dx, int dy)
+void visualTopLevel::relativeMoveView(QPoint dpos)
 {
-	int oldX = viewX, oldY = viewY;
+	QPoint old = viewPos;
 
-	viewX += dx;
-	viewY += dy;
+	viewPos += dpos;
 
 	checkMove();
 
-	if (viewX != oldX || viewY != oldY) {
-		updateViews();
-		}
+	if (old != viewPos)
+		emit updateViews();
 }
 
 void visualTopLevel::checkMove()
 {
-	viewX = QMIN(viewX, vcanvas->maxX - viewL);
-	viewY = QMIN(viewY, vcanvas->maxY - viewH);
+	int minx = vcanvas->maxX - viewSize.width();
+	int miny = vcanvas->maxY - viewSize.height();
 
-	viewX = QMAX(viewX, 0);
-	viewY = QMAX(viewY, 0);
+	if (viewPos.x() > minx) viewPos.setX(minx);
+	if (viewPos.y() > miny) viewPos.setY(miny);
+
+	if (viewPos.x() < 0) viewPos.setX(0);
+	if (viewPos.y() < 0) viewPos.setY(0);
 }
 
 /*
@@ -195,19 +191,17 @@ void visualTopLevel::selectMob(long key, visualMobUnit *m)
 
 
 
-void visualTopLevel::selectArea(int x1, int y1, int x2, int y2)
+void visualTopLevel::selectArea(QRect r)
 {
 	QCanvasItemList list;
 	QCanvasItemList::Iterator it;
 	visualMobUnit *u;
  
-	/* ensure that (x1<=x2 && y1<=y2) */
-	int t;
-	if (x2<x1) { t  = x1; x1 = x2; x2 = t ; }
-	if (y2<y1) { t  = y1; y1 = y2; y2 = t ; }
-
 	/* selection */
-	list = vcanvas->collisions( QRect(x1,y1,x2-x1,y2-y1) );
+	QPoint _do = viewPos*BO_TILE_SIZE;
+	r.moveBy( _do.x(), _do.y() );
+
+	list = vcanvas->collisions( r.normalize() );
 
 	for( it = list.begin(); it != list.end(); ++it )
 		if ( IS_MOBILE( (*it)->rtti() ) ) {
