@@ -21,15 +21,17 @@
 
 #include <qobject.h>
 #include <qstring.h>
-#include <qdatastream.h>
 
 class Cell;
 class UnitBase;
 class Boson;
 class QDomElement;
 class QStringList;
+class QDataStream;
 
 /**
+ * DOC is OBSOLETE
+ * 
  * This class represents a Boson map file (*.bpf). Use @ref loadMap to load the
  * file and you get the min/max players of the map (currently both have the same
  * value) as well as all of the units/facilities.
@@ -55,7 +57,6 @@ class BosonMap : public QObject
 	Q_OBJECT
 public:
 	BosonMap(QObject* parent = 0);
-	BosonMap(const QString& fileName, QObject* parent = 0);
 	~BosonMap();
 
 	/**
@@ -71,16 +72,7 @@ public:
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
 
-	/**
-	 * @return All valid map files. The list contains the .desktop files.
-	 **/
-	static QStringList availableMaps();
-
-	/**
-	 * Load the specified map from a file
-	 * @param fileName the absolute filename of the map file.
-	 **/
-	bool loadMap(const QString& fileName);
+	bool loadMap(QDomElement& node);
 	
 	/**
 	 * Read the map geo from stream. This only reads map size, playercount
@@ -92,6 +84,7 @@ public:
 	 * which will be added.
 	 **/
 	bool loadMapGeo(QDataStream& stream);
+
 	/**
 	 * Load the cells from the stream.
 	 * @param stream The stream to read from
@@ -111,25 +104,7 @@ public:
 	bool saveMapGeo(QDataStream& stream);
 	bool saveCells(QDataStream& stream);
 
-	/**
-	 * Save the map to a file. By default this creates an XML file. But you
-	 * can also create a binary file. While an XML file is human readable a
-	 * binary file is smaller and faster parsed by boson. 
-	 *
-	 * Please note that the map file is only read <em>once</em> from file
-	 * per game, so speed does not matter much (icon loading takes far more
-	 * time).
-	 * @param fileName The filename of the new map. Must be absolute.
-	 * @param binary If false this creates an XML file (much better
-	 * readable). If true a binary file is created.
-	 **/
-	bool saveMap(const QString& fileName, bool binary = false);
-
-
-	/**
-	 * @return The (hardcoded) default map
-	 **/
-	static QString defaultMap();
+	bool saveMap(QDomElement& node);
 
 	/**
 	 * @return TRUE if the current map is valid i.e. can be transmitted
@@ -138,8 +113,6 @@ public:
 	bool isValid() const;
 
 	Cell* cell(int x, int y) const;
-
-	static QString mapFileName(const QString& mapIdentifier);
 
 public slots:
 	void changeCell(int x, int y, int groundType, unsigned char b);

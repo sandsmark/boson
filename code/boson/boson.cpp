@@ -123,18 +123,15 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  Player* player = (Player*)p;
  Q_UINT32 msgid;
  stream >> msgid;
-// kdDebug() << k_funcinfo << ": " << msgid << endl;
  switch (msgid) {
 	case BosonMessage::MoveMove:
 	{
-//		kdDebug() << "MoveMove" << endl;
 		QPoint pos;
 		Q_UINT32 unitCount;
 		Q_UINT32 mode;
 		stream >> mode;
 		stream >> pos;
 		stream >> unitCount;
-//		kdDebug() << "unitCount: " << unitCount << endl;
 		QPtrList<Unit> unitsToMove;
 		for (unsigned int i = 0; i < unitCount; i++) {
 			Q_ULONG unitId;
@@ -235,11 +232,34 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveMine:
+	{
+		kdDebug() << "MoveMine" << endl;
+		Q_ULONG unitId;
+		QPoint pos;
+		stream >> unitId;
+		stream >> pos;
+		MobileUnit* u = (MobileUnit*)findUnit(unitId, player);
+		if (!((Unit*)u)->isMobile()) {
+			kdError() << k_lineinfo << "only mobile units can mine" << endl;
+			break;
+		}
+		if (u->owner() != player) {
+			kdDebug() << "unit " << unitId << "only owner can move units!" << endl;
+			break;
+		}
+		if (u->isDestroyed()) {
+			kdDebug() << "cannot mine with destroyed units" << endl;
+			break;
+		}
+		u->moveTo(pos);
+		u->setWork(Unit::WorkMine);
+		break;
+	}
 	case BosonMessage::MoveProduce:
 	{
-		kdDebug() << "MoveProduce" << endl;
 		Q_UINT32 owner;
-		Q_UINT32 factoryId;
+		Q_ULONG factoryId;
 		Q_INT32 unitType;
 		stream >> owner;
 		stream >> factoryId;
@@ -298,7 +318,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	{
 		kdDebug() << "MoveProduceStop" << endl;
 		Q_UINT32 owner;
-		Q_UINT32 factoryId;
+		Q_ULONG factoryId;
 		Q_INT32 unitType;
 		stream >> owner;
 		stream >> factoryId;
@@ -353,7 +373,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveBuild:
 	{
 		kdDebug() << "MoveBuild" << endl;
-		Q_UINT32 factoryId;
+		Q_ULONG factoryId;
 		Q_UINT32 owner;
 		Q_INT32 x;
 		Q_INT32 y;
@@ -404,15 +424,15 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
  switch (msgid) {
 	case BosonMessage::AddUnit:
 	{
+		Q_INT32 owner;
 		Q_INT32 unitType;
 		Q_INT32 x;
 		Q_INT32 y;
-		Q_INT32 owner;
 
+		stream >> owner;
 		stream >> unitType;
 		stream >> x;
 		stream >> y;
-		stream >> owner;
 		
 		KPlayer* p = 0;
 		if (owner >= 1024) { // a KPlayer ID
@@ -524,18 +544,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
-	case BosonMessage::ChangeMap:
+	case BosonMessage::ChangePlayField:
 	{
-		QString map;
-		stream >> map;
-		emit signalMapChanged(map);
-		break;
-	}
-	case BosonMessage::ChangeScenario:
-	{
-		QString scenario;
-		stream >> scenario;
-		emit signalScenarioChanged(scenario);
+		QString field;
+		stream >> field;
+		emit signalPlayFieldChanged(field);
 		break;
 	}
 	case BosonMessage::IdChat:

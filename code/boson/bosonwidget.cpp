@@ -31,6 +31,7 @@
 #include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "bosonmap.h"
+#include "bosonplayfield.h"
 #include "bosonscenario.h"
 #include "bosonconfig.h"
 #include "optionsdialog.h"
@@ -75,8 +76,7 @@ public:
 
 		mBoson = 0;
 		mLocalPlayer = 0;
-		mMap = 0;
-		mScenario = 0;
+		mPlayField = 0;
 
 		mUnitTips = 0;
 
@@ -97,8 +97,7 @@ public:
 	
 	Boson* mBoson;
 	Player* mLocalPlayer;
-	BosonMap* mMap;
-	BosonScenario* mScenario;
+	BosonPlayField* mPlayField;
 
 	KSpriteToolTip* mUnitTips;
 
@@ -154,8 +153,7 @@ BosonWidget::~BosonWidget()
 // QCanvas (->crash)
  delete d->mBoson;
  delete d->mCanvas;
- delete d->mMap;
- delete d->mScenario;
+ delete d->mPlayField;
  
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
@@ -170,6 +168,10 @@ void BosonWidget::init()
  d->mIOList.setAutoDelete(true);
 
  BosonMusic::initBosonMusic(); 
+
+ d->mPlayField = new BosonPlayField(this);
+ connect(d->mPlayField, SIGNAL(signalNewMap(BosonMap*)),
+		this, SLOT(slotNewMap(BosonMap*)));
 
  d->mCanvas = new BosonCanvas(this);
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
@@ -195,10 +197,8 @@ void BosonWidget::init()
 		this, SLOT(slotInitFogOfWar()));
  connect(d->mBoson, SIGNAL(signalStartScenario()),
 		this, SLOT(slotStartScenario()));
- connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
-		this, SLOT(slotLoadMap(const QString&)));
- connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
-		this, SLOT(slotLoadScenario(const QString&)));
+ connect(d->mBoson, SIGNAL(signalPlayFieldChanged(const QString&)),
+		this, SLOT(slotLoadPlayField(const QString&)));
  connect(d->mBoson, SIGNAL(signalGameStarted()),
 		this, SIGNAL(signalGameStarted()));
  connect(d->mBoson, SIGNAL(signalNotEnoughMinerals(Player*)),
@@ -310,8 +310,8 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 		d->mBigDisplay, SLOT(slotUnitChanged(Unit*)));
  connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
- if (d->mMap) {
-	p->initMap(d->mMap);
+ if (d->mPlayField->map()) {
+	p->initMap(d->mPlayField->map());
  }
  if (player == d->mLocalPlayer) {
 	changeLocalPlayer(d->mLocalPlayer); // now with a KGame object
@@ -393,10 +393,8 @@ void BosonWidget::slotNewGame()
  // add our costum game config widget
  KGameDialogBosonConfig* bosonConfig = new KGameDialogBosonConfig(0);
  connect(bosonConfig, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
- connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
-		bosonConfig, SLOT(slotMapChanged(const QString&)));
- connect(d->mBoson, SIGNAL(signalScenarioChanged(const QString&)),
-		bosonConfig, SLOT(slotScenarioChanged(const QString&)));
+ connect(d->mBoson, SIGNAL(signalPlayFieldChanged(const QString&)),
+		bosonConfig, SLOT(slotPlayFieldChanged(const QString&)));
  connect(d->mBoson, SIGNAL(signalSpeciesChanged(Player*)),
 		bosonConfig, SLOT(slotSpeciesChanged(Player*)));
  connect(d->mBoson, SIGNAL(signalTeamColorChanged(Player*)),
@@ -440,7 +438,7 @@ void BosonWidget::slotNewGame()
 
  // show the dialog
  dialog->show();
- bosonConfig->slotMapChanged(0);
+ bosonConfig->slotPlayFieldChanged(0);
 }
 
 void BosonWidget::slotStartGame()
@@ -477,11 +475,11 @@ void BosonWidget::slotStartGame()
 void BosonWidget::slotStartScenario()
 {
 // kdDebug() << k_funcinfo << endl;
- if (!d->mScenario) {
+ if (!d->mPlayField->scenario()) {
 	kdError() << k_funcinfo << ": NULL scenario" << endl;
 	return;
  }
- d->mScenario->startScenario(d->mBoson);
+ d->mPlayField->scenario()->startScenario(d->mBoson);
  boMusic->startLoop();
 
  // TODO as soon as it is implemented the map file should also contain the
@@ -585,8 +583,7 @@ void BosonWidget::quitGame()
  
  d->mLocalPlayer = 0;
 
- delete d->mMap;
- d->mMap = 0;
+ d->mPlayField->quit();
 
  // now re-add the local player
  addLocalPlayer();
@@ -609,14 +606,17 @@ void BosonWidget::slotEditorConstructionChanged(int index)
  d->mCommandFrame->slotEditorProduction(index, d->mLocalPlayer);
 }
 
-void BosonWidget::recreateMap()
+void BosonWidget::slotNewMap(BosonMap* map)
 {
- delete d->mMap;
- d->mMap = new BosonMap;
- d->mCanvas->setMap(d->mMap);
- d->mMiniMap->setMap(d->mMap);
+ kdDebug() << k_funcinfo << endl;
+ if (!map) {
+	//TODO: disconnect all receivers!
+	return;
+ }
+ d->mCanvas->setMap(map);
+ d->mMiniMap->setMap(map);
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mMap, SLOT(changeCell(int, int, int, unsigned char)));
+		map, SLOT(changeCell(int, int, int, unsigned char)));
 }
 
 void BosonWidget::addEditorCommandFrame(QWidget* parent)
@@ -687,11 +687,9 @@ void BosonWidget::startEditor()
  addDummyComputerPlayer(i18n("Computer 1"));
  addDummyComputerPlayer(i18n("Computer 2"));
 
- // load default map
+ // load default playfield 
  // FIXME: should be loaded by a dialog!
- slotLoadMap(BosonMap::defaultMap());
- slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
-
+ slotLoadPlayField(BosonPlayField::defaultPlayField());
 
 // start the chosen scenario
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
@@ -700,55 +698,42 @@ void BosonWidget::startEditor()
  d->mCanvas->setUpdatePeriod(500); // AB: too high?
 }
 
-void BosonWidget::slotLoadMap(const QString& map)
+void BosonWidget::slotLoadPlayField(const QString& identifier)
 {
 // the map is first loaded locally from the file. Then the data is sent over
 // network. It is initialized (i.e. the cells are shown in the canvas) when the
 // data is received from network, in slotReceiveMap()
+//
+// Then, when this is done the scenario is initialized (the scenario is also
+// loaded in the playfield, together with the map).
  if (!d->mBoson->isAdmin()) {
 	kdWarning() << k_funcinfo << ": not ADMIN" << endl;
 	return;
  }
- recreateMap();
- // load the map into d->mMap
- kdDebug() << "load map " << map << endl;
- if (!d->mMap->loadMap(BosonMap::mapFileName(map))) {
+ if (!d->mPlayField->loadPlayField(BosonPlayField::playFieldFileName(identifier))) {
+	kdDebug() << k_funcinfo << "Error loading playfield " << identifier << endl;
 	return;
  }
-
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
- d->mMap->saveMapGeo(stream);
- d->mMap->saveCells(stream);
+ d->mPlayField->saveMap(stream);
 
  // send the loaded map via network. It will be initialized in slotReceiveMap
  d->mBoson->sendMessage(stream, BosonMessage::InitMap);
 
- delete d->mMap; // we create it again when InitMap is received again.
- d->mMap = 0;
-}
+// also load scenario settings:
+ d->mBoson->setMinPlayers(d->mPlayField->scenario()->minPlayers());
+ d->mBoson->setMaxPlayers(d->mPlayField->scenario()->maxPlayers());
 
-void BosonWidget::slotLoadScenario(const QString& scenario)
-{
- if (!d->mBoson->isAdmin()) {
-	kdWarning() << k_funcinfo << ": not ADMIN" << endl;
-	return;
- }
- delete d->mScenario;
- d->mScenario = new BosonScenario;
- d->mScenario->loadScenario(BosonScenario::scenarioFileName(scenario));
- d->mBoson->setMinPlayers(d->mScenario->minPlayers());
- d->mBoson->setMaxPlayers(d->mScenario->maxPlayers());
 }
 
 void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 {
  kdDebug() << k_funcinfo << endl;
  QDataStream stream(buffer, IO_ReadOnly);
- recreateMap();
+ d->mPlayField->loadMap(stream);
+
  QString tiles = "earth.png"; // TODO: should be selectable
- d->mMap->loadMapGeo(stream);
- d->mMap->loadCells(stream);
 
  // load tiles if in editor mode - otherwise this does nothing
  emit signalEditorLoadTiles(tiles);
@@ -756,7 +741,7 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  for (unsigned int i = 0; i < d->mBoson->playerCount(); i++) {
 	Player* p = (Player*)d->mBoson->playerList()->at(i);
 	if (p) {
-		p->initMap(d->mMap);
+		p->initMap(d->mPlayField->map());
 	}
  }
 // kdDebug() << "init minimap" << endl;
@@ -790,27 +775,11 @@ void BosonWidget::slotAddComputerPlayer(Player* computer)
  d->mBoson->addPlayer(computer);
 }
 
-void BosonWidget::slotEditorSaveMap(const QString& fileName)
+void BosonWidget::editorSavePlayField(const QString& fileName)
 {
- if (!d->mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
-	return;
+ if (d->mPlayField->savePlayField(fileName)) {
+	setModified(false);
  }
- // TODO: let the user choose - binary or XML.
- d->mMap->saveMap(fileName, false);
- setModified(false);
-}
-
-void BosonWidget::slotEditorSaveScenario(const QString& fileName)
-{
- if (!d->mScenario) {
-	kdError() << k_funcinfo << ": NULL scenario" << endl;
-	return;
- }
- // TODO: let the user choose - binary or XML? XML is far better here. binary is
- // probably useless (scenario files are not that big).
- d->mScenario->saveScenario(fileName);
- setModified(false);
 }
 
 void BosonWidget::saveConfig(bool editor)
@@ -1051,7 +1020,7 @@ void BosonWidget::slotSetCommandButtonsPerRow(int b)
 
 void BosonWidget::slotUnfogAll(Player* player)
 {
- if (!d->mMap) {
+ if (!d->mPlayField->map()) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
@@ -1063,8 +1032,8 @@ void BosonWidget::slotUnfogAll(Player* player)
  }
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
-	for (unsigned int x = 0; x < d->mMap->width(); x++) {
-		for (unsigned int y = 0; y < d->mMap->height(); y++) {
+	for (unsigned int x = 0; x < d->mPlayField->map()->width(); x++) {
+		for (unsigned int y = 0; y < d->mPlayField->map()->height(); y++) {
 			p->unfog(x, y);
 		}
 	}

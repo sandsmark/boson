@@ -21,14 +21,10 @@
 
 #include "cell.h"
 
-#include <qfile.h>
 #include <qdatastream.h>
 #include <qdom.h>
 
 #include <kdebug.h>
-#include <kstandarddirs.h>
-#include <kfilterdev.h>
-#include <ksimpleconfig.h>
 
 #include "defines.h"
 
@@ -46,7 +42,6 @@ public:
 		mCells = 0;
 	}
 	
-	QString mFileName;
 
 	Cell* mCells;
 
@@ -56,12 +51,6 @@ public:
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
 {
  init();
-}
-
-BosonMap::BosonMap(const QString& fileName, QObject* parent) : QObject(parent)
-{
- init();
- loadMap(fileName);
 }
 
 BosonMap::~BosonMap()
@@ -75,50 +64,6 @@ BosonMap::~BosonMap()
 void BosonMap::init()
 {
  d = new BosonMapPrivate;
-}
-
-QString BosonMap::defaultMap()
-{
-//TODO create a list of all maps (search for .desktop files in boson/map/) and
-//look if list contains "basic" - then check whether basic.bpf exists and return. 
-// Otherwise look for the first .desktop file which has a .bpf file exisiting.
-// Return that then.
-// UPDATE (01/12/22): only the identifier should be returned.
-
- return QString::fromLatin1("Basic");
-}
-
-bool BosonMap::loadMap(const QString& fileName)
-{
-// kdDebug() << k_funcinfo << endl;
- d->mFileName = fileName; // probably obsolete?
- 
- // open stream 
- QIODevice* dev = KFilterDev::deviceForFile(fileName);
- if (!dev) {
-	kdError() << k_funcinfo << ": No file " << fileName << endl;
-	return false;
- }
- if (!dev->open(IO_ReadOnly)){
-	kdError() << k_funcinfo << ": Can't open file " << fileName << endl;
-	delete dev;
-	return false;
- }
- QByteArray buffer = dev->readAll();
- delete dev;
- QDataStream stream(buffer, IO_ReadOnly);
- 
- bool binary = false;
- if (verifyMap(stream)) { // check if this is binary
-	binary = true;
- } else {
-	binary = false;
- }
- bool ret = loadMap(buffer, binary);
- if (!ret) {
-	kdError() << "Could not load file " << fileName << endl;
- }
- return ret;
 }
 
 bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
@@ -150,8 +95,13 @@ bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
 			<< " error message: " << errorMsg << endl;
 	return false;
  }
- QDomNodeList list;
  QDomElement root = doc.documentElement();
+ return loadMap(root);
+}
+
+bool BosonMap::loadMap(QDomElement& root)
+{
+ QDomNodeList list;
  list = root.elementsByTagName("MapGeo");
  if (list.count() != 1) {
 	kdError() << "XML error: cannot have tag MapGeo " 
@@ -297,77 +247,29 @@ bool BosonMap::loadCells(QDataStream& stream)
 }
 
 
-bool BosonMap::saveMap(const QString& fileName, bool binary)
+bool BosonMap::saveMap(QDomElement& root)
 {
-// TODO: check if file exists already
-// kdDebug() << k_funcinfo << endl;
- if (!isValid()) {
-	kdError() << "Cannot save invalid file" << endl;
-	return false;
- }
-// QFile file(fileName);
- if (binary) { // write a binary file
-	QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
-	if (!dev) {
-		kdError() << "No file " << fileName << endl;
-		return false;
-	}
-	if (!dev->open(IO_WriteOnly)){
-		kdError() << k_funcinfo << ": Can't open file " << fileName 
-				<< endl;
-		delete dev;
-		return false;
-	}
-	QDataStream stream(dev);
- 
-	saveValidityHeader(stream);
-	bool ret = saveMapGeo(stream);
-	if (ret) {
-		ret = saveCells(stream);
-	}
-//	file.close();
-	dev->close();
-	kdDebug() << k_funcinfo << " done" << endl;
-	delete dev;
-	return ret;
- }
-
- QDomDocument doc("BosonMap");
- QDomElement root = doc.createElement("BosonMap");
- doc.appendChild(root);
+ QDomDocument doc = root.ownerDocument();
+ QDomElement node = doc.createElement("BosonMap");
+ root.appendChild(node);
 
  QDomElement geo = doc.createElement("MapGeo");
- root.appendChild(geo);
+ node.appendChild(geo);
 
  if (!saveMapGeo(geo)) {
-	kdError() << "Could not save map geo to " << fileName << endl;
+	kdError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
  }
 
  QDomElement cells = doc.createElement("MapCells");
- root.appendChild(cells);
+ node.appendChild(cells);
 
  if (!saveCells(cells)) {
-	kdError() << "Could not save cells into " << fileName << endl;
+	kdError() << k_funcinfo << "Could not save cells" << endl;
 	return false;
  }
 
-// now save the file
- QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
- if (!dev) {
-	kdError() << "No file " << fileName << endl;
-	return false;
- }
- if (!dev->open(IO_WriteOnly)){
-	kdError() << k_funcinfo << ": Can't open file " << fileName << endl;
-	delete dev;
-	return false;
- }
- QString xml = doc.toString();
- dev->writeBlock(xml.data(), xml.length()); // is this ok? is there a better way??
- dev->close();
- delete dev;
- return true;
+return true;
 }
 
 bool BosonMap::saveMapGeo(QDomElement& node)
@@ -631,25 +533,6 @@ Cell* BosonMap::cell(int x, int y) const
  return &d->mCells[ x + y * width() ];
 }
 
-QStringList BosonMap::availableMaps()
-{
- QStringList list = KGlobal::dirs()->findAllResources("data", 
-		"boson/map/*.desktop");
- if (list.isEmpty()) {
-	kdError() << "Cannot find any map?!" << endl;
-	return list;
- }
- QStringList validList;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
-	fileName += QString::fromLatin1(".bpf");
-	if (QFile::exists(fileName)) {
-		validList.append(list[i]);
-	}
- }
- return validList;
-}
-
 void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
 {
 //kdDebug() << x << " -> " << y << endl;
@@ -665,22 +548,3 @@ void BosonMap::changeCell(int x, int y, int groundType, unsigned char b)
  }
 }
 
-QString BosonMap::mapFileName(const QString& identifier)
-{
- QStringList l = availableMaps();
- for (unsigned int i = 0; i < l.count(); i++) {
-	KSimpleConfig cfg(l[i]);
-	cfg.setGroup("Boson Map");
-	if (cfg.readEntry("Identifier") == identifier) {
-		QString m = l[i].left(l[i].length() - strlen(".desktop"));
-		m += QString::fromLatin1(".bpf");
-		if (QFile::exists(m)) {
-			return m;
-		} else {
-			kdError() << "Cannot find " << m << " for valid .desktop file" << endl;
-		}
-	}
- }
- kdWarning() << "no map file found for " << identifier << endl;
- return QString::null;
-}

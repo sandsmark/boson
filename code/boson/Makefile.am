@@ -24,6 +24,7 @@ COMMON_SRC = \
 	kspritetooltip.cpp \
 	bosonmap.cpp \
 	bosonscenario.cpp \
+	bosonplayfield.cpp \
 	bosoncanvas.cpp \
 	boson.cpp \
 	speciestheme.cpp player.cpp \

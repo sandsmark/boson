@@ -105,6 +105,16 @@ void Unit::unselect()
  d->mSelectBox = 0;
 }
 
+int Unit::destinationX() const
+{
+ return d->mMoveDestX;
+}
+
+int Unit::destinationY() const
+{
+ return d->mMoveDestY;
+}
+
 Unit* Unit::target() const
 {
  return d->mTarget;
@@ -207,25 +217,6 @@ void Unit::advance(int phase)
  }
 }
 
-void Unit::advanceMine()
-{
- if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassMineral) {
-	if (!unitProperties()->canMineMinerals()) {
-		kdWarning() << k_funcinfo << "cannot mine minerals" << endl;
-		return;
-	}
-	kdDebug() << "mining... minerals" << endl;
- } else if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassOil) {
-	if (!unitProperties()->canMineOil()) {
-		kdWarning() << k_funcinfo << "cannot mine oil" << endl;
-		return;
-	}
-	kdDebug() << "mining... oil" << endl;
- } else {
-	setWork(WorkNone);
- }
-}
-
 void Unit::advanceNone()
 {
 // this is called when the unit has nothing specific to do. Usually we just want
@@ -256,9 +247,6 @@ void Unit::waypointDone()
  d->mWaypoints.setPolicy(KGamePropertyBase::PolicyLocal);
  d->mWaypoints.remove(d->mWaypoints.at(0));
  d->mWaypoints.setPolicy(KGamePropertyBase::PolicyClean);
- if (waypointCount() == 0) {
-	setWork(WorkNone);
- }
 }
 
 QValueList<QPoint> Unit::waypointList() const
@@ -276,8 +264,7 @@ void Unit::moveTo(const QPoint& pos)
  d->mTarget = 0;
  if(moveTo(pos.x(), pos.y())) {
 	setWork(WorkMove);
- }
- else {
+ } else {
 	setWork(WorkNone);
  }
 }
@@ -308,6 +295,7 @@ bool Unit::moveTo(int x, int y)
 
 bool Unit::newPath()
 {
+ kdDebug() << k_funcinfo << endl;
  if (owner()->isVirtual()) {
 	// only the owner of the unit calculates the path and then transmits it
 	// over network. a "virtual" player is one which is duplicated on
@@ -449,6 +437,7 @@ void Unit::attackUnit(Unit* target)
 	}
 	kdDebug() << "unit not in range - moving..." << endl;
 	advanceMove();
+	advanceMoveCheck();
 	return;
  }
  if (waypointCount() > 0) {
@@ -638,6 +627,8 @@ public:
 
 	KGameProperty<unsigned int> mMovingFailed;
 
+	KGameProperty<unsigned int> mResourcesMined;
+
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
@@ -645,10 +636,14 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
  d = new MobileUnitPrivate;
  d->mSpeed.registerData(IdSpeed, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Speed");
- d->mMovingFailed.registerData(IdMovingFailed, dataHandler(), 
+ d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MovingFailed");
+ d->mResourcesMined.registerData(IdMob_ResourcesMined, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "ResourcesMined");
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
+ d->mResourcesMined.setLocal(0);
+
  d->mMovingFailed.setEmittingSignal(false);
 }
 
@@ -659,16 +654,17 @@ MobileUnit::~MobileUnit()
 
 void MobileUnit::advanceMove()
 {
+ kdDebug() << k_funcinfo << endl;
  if (speed() == 0) {
 	kdWarning() << "speed == 0" << endl;
 	stopMoving();
 	return;
  }
 
- if(searchpath)
- {
-	if(! newPath())
+ if(searchpath) {
+	if(!newPath()) {
 		stopMoving();
+	}
 	searchpath = false;
  }
 
@@ -693,8 +689,9 @@ void MobileUnit::advanceMove()
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
 	clearWaypoints();
-	if(! newPath())
+	if(! newPath()) {
 		stopMoving();
+	}
 	return;
  }
 
@@ -903,6 +900,55 @@ void MobileUnit::leaderMoved(double x, double y)
  }
 }
 
+void MobileUnit::advanceMine()
+{
+ kdDebug() << k_funcinfo << endl;
+
+ int x = (int)(QCanvasSprite::x() + width() / 2);
+ int y = (int)(QCanvasSprite::y() + height() / 2);
+ if (destinationX() / BO_TILE_SIZE != x / BO_TILE_SIZE ||
+		destinationY() / BO_TILE_SIZE != y / BO_TILE_SIZE) {
+
+// if (!canMine(boCanvas()->cellAt((Unit*)this))) { // FIXME: the player ordered to go to a certain place, not to *any* cell we can mine at...
+	kdDebug() << "moving to mining..." << endl;
+	kdDebug() << destinationX() / BO_TILE_SIZE << "    " << x / BO_TILE_SIZE << endl;
+	kdDebug() << destinationY() / BO_TILE_SIZE << "    " << y / BO_TILE_SIZE << endl;
+	advanceMove();
+	advanceMoveCheck();
+	return;
+ }
+ 
+ //FIXME: this should not be necessary!!!
+ setXVelocity(0);
+ setYVelocity(0);
+
+ if (canMine(boCanvas()->cellAt(this))) {
+	d->mResourcesMined = d->mResourcesMined + 1;
+	kdDebug() << "resources mined: " << d->mResourcesMined << endl;
+ } else {
+	kdDebug() << k_funcinfo << "cannot mine here" << endl;
+	setWork(WorkNone);
+	return;
+ }
+ if (d->mResourcesMined >= unitProperties()->maxResources()) {
+	setWork(WorkNone);
+	kdDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
+	kdDebug() << "TODO: return to refinery" << endl;
+ }
+}
+
+bool MobileUnit::canMine(Cell* cell) const
+{
+ if (unitProperties()->canMineMinerals() &&
+		cell->groundType() == Cell::GroundGrassMineral) {
+	return true;
+ }
+ if (unitProperties()->canMineOil() && 
+		cell->groundType() == Cell::GroundGrassOil) {
+	return true;
+ }
+ return false;
+}
 
 /////////////////////////////////////////////////
 // Facility

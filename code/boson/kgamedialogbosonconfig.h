@@ -43,39 +43,27 @@ public:
 
 signals:
 	void signalStartGame();
-	void signalMapChanged(const QString& fileName);
-	void signalScenarioChanged(const QString& fileName);
+
+	void signalPlayFieldChanged(const QString& fileName);
+	
 	void signalSpeciesChanged(const QString& species);
 	void signalTeamColorChanged(const QColor& color);
 
 public slots:
-	/**
-	 * Called when the user changes the map in the combo box. Just sends a
-	 * message using @ref KGame::sendMessage. See also @ref
-	 * Boson::signalMapChanged
-	 **/
-	void slotMapChanged(int index);
+	void slotPlayFieldChanged(int index);
 
-	/**
-	 * In contrary to the previous @ref slotMapChanged this is <em>not</em>
-	 * called when the user changed the map in the combo box but as soon as
-	 * @ref Boson::signalMapChanged is received.
-	 *
-	 * The reason for this is that in a 2-player game there are 2 players
-	 * who can change the map. Both must be able to see the change, so we
-	 * must transmit the change over network (the previous slotMapChanged)
-	 * and then (when we receive it from network) actually change the map
-	 * (this slot).
-	 **/
-	void slotMapChanged(const QString& mapIdentifier);
-	
-	void slotScenarioChanged(const QString& scenarioIdentifier);
 	void slotSpeciesChanged(Player*);
 	void slotTeamColorChanged(Player*);
 
+	/**
+	 * When this slot is called a remote player has selected another
+	 * playField. We should display it now.
+	 * @param playField name/identifier of the newly selected playField.
+	 **/
+	void slotPlayFieldChanged(const QString& playField);
+
 protected slots:
 	void slotStartGame();
-	void slotScenarioChanged(int index);
 	void slotSpeciesChanged(int index);
 	void slotTeamColorChanged(int index);
 

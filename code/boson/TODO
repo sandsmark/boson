@@ -26,9 +26,6 @@ Game TODOs
 - _much_ better moving for multiple units in group
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
-- production lists need some work. there are already plans for this... i just
-  don't have the time at the moment. will do so soon
-- show the minimap only when the player has a radar station
 
 
 Editor (map, unit, scenario) TODOs
@@ -57,7 +54,6 @@ General TODOs
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
-- Use BosonCanvas::unitCollisionsInRange() wherever useful
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).

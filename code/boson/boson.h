@@ -118,9 +118,9 @@ signals:
 	void signalInitMap(const QByteArray&);
 
 	/**
-	 * Emitted when a new map in the new game dialog is selected
+	 * Emitted when a new playfield in the new game dialog is selected
 	 **/
-	void signalMapChanged(const QString& mapIdentifier);
+	void signalPlayFieldChanged(const QString& playfield);
 
 	/**
 	 * This is only interesting for the new game dialog. Emitted when
@@ -133,11 +133,6 @@ signals:
 	 * another species has been chosen.
 	 **/
 	void signalTeamColorChanged(Player* player);
-
-	/**
-	 * Emitted when a new scenario in the new game dialog is selected
-	 **/
-	void signalScenarioChanged(const QString& scenarioIdentifier);
 
 	void signalInitFogOfWar();
 
