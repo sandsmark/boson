@@ -247,5 +247,11 @@ QString BosonPlayField::playFieldFileName(const QString& identifier)
  }
  kdWarning() << "no map file found for " << identifier << endl;
  return QString::null;
+}
 
+void BosonPlayField::applyScenario(Boson* boson)
+{
+ delete mScenario;
+ mScenario = new BosonScenario();
+ mScenario->applyScenario(boson);
 }

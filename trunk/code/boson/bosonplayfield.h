@@ -40,7 +40,15 @@ public:
 	~BosonPlayField();
 
 	bool loadPlayField(const QString& fileName);
+
+	/**
+	 * Remember to call @ref applyScenario first! The @ref
+	 * BosonMap is updated automatically whenever a cell is added, but the
+	 * unit list is not.
+	 **/
 	bool savePlayField(const QString& fileName);
+
+	void applyScenario(Boson* boson);
 
 	static QString defaultPlayField();
 	static QStringList availablePlayFields();

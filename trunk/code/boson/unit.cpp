@@ -125,8 +125,8 @@ void Unit::setTarget(Unit* target)
  if (!target) {
 	return;
  }
- if (damage() == 0) {
-	kdWarning() << "Cannot attack: damage() == 0" << endl;
+ if (weaponDamage() == 0) {
+	kdWarning() << "Cannot attack: waponDamage() == 0" << endl;
 	return;
  }
  if (!target->isDestroyed()) {
@@ -464,7 +464,7 @@ void Unit::shootAt(Unit* target)
 	}
  }
  kdDebug() << "shoot at unit " << target->id() << endl;
- ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
+ ((BosonCanvas*)canvas())->shootAtUnit(target, this, weaponDamage());
  reloadWeapon();
 }
 
@@ -474,16 +474,16 @@ QCanvasItemList Unit::unitsInRange() const
  // ever heard about pythagoras ;-) ?
  
  QRect r = boundingRect();
- r.setTop((r.top() > (int)range()) ? r.top() - range() : 0);
+ r.setTop((r.top() > (int)weaponRange()) ? r.top() - weaponRange() : 0);
 // qt bug (confirmed). will be fixed in 3.1
 #if QT_VERSION >= 310
- r.setBottom(r.bottom() + range());
- r.setRight(r.right() + range());
+ r.setBottom(r.bottom() + weaponRange());
+ r.setRight(r.right() + weaponRange());
 #else
- r.setBottom(r.bottom() + range() - 1);
- r.setRight(r.right() + range() - 1);
+ r.setBottom(r.bottom() + weaponRange() - 1);
+ r.setRight(r.right() + weaponRange() - 1);
 #endif
- r.setLeft((r.left() > (int)range()) ? r.left() - range() : 0);
+ r.setLeft((r.left() > (int)weaponRange()) ? r.left() - weaponRange() : 0);
 
  QCanvasItemList items = canvas()->collisions(r);
  items.remove((QCanvasItem*)this);
