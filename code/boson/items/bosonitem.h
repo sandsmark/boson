@@ -468,13 +468,15 @@ public:
 	inline void setVisible(bool v) { mIsVisible = v; }
 	inline bool isVisible() const { return mIsVisible; }
 
+	void animate(unsigned int advanceCallsCount);
+
 	/**
 	 * See @ref Unit::advance
 	 *
-	 * This advance implementation manages the animation of the item. Call
-	 * it in your implementation, if you want to provide animations!
+	 * This implementation does nothing. No need to call this when you
+	 * implement it.
 	 **/
-	virtual void advance(unsigned int );
+	virtual void advance(unsigned int ) { }
 
 	/**
 	 * See @ref Unit::advanceFunction

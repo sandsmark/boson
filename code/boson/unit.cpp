@@ -451,12 +451,17 @@ void Unit::updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveByZ, bofixed* 
 
 void Unit::advance(unsigned int advanceCallsCount)
 { // time critical function !!!
-// Mostly animation:
- BosonItem::advance(advanceCallsCount);
-
  if (isDestroyed()) {
 	return;
  }
+
+#warning FIXME
+ // FIXME: this reloads _all_ weapons of _all_ units in _all_ advance calls.
+ // however only very few weapons per advance call need to be reloaded. even in
+ // big battles many weapons don't need to be reloaded (turrets of the player
+ // who is not under attack for example).
+ // we should add weapons that need to be reloaded to a list and iterate that
+ // list only (and remove wepons from the list once they got reloaded)
  // Reload weapons
  if (d->mWeapons[0]) {
 	BosonWeapon** w = &d->mWeapons[0];

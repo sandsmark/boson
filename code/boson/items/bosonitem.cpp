@@ -472,7 +472,7 @@ bool BosonItem::loadFromXML(const QDomElement& root)
  return true;
 }
 
-void BosonItem::advance(unsigned int)
+void BosonItem::animate(unsigned int)
 {
  if (itemRenderer()) {
 	itemRenderer()->animate();
