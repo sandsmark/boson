@@ -1,6 +1,13 @@
-boson-data (021020-1) unstable; urgency=low
+boson-data (0.9-1) unstable; urgency=low
+
+  * New upstream release
+  * Bumped Standards-Version to 3.6.1 (no changes)
+
+ -- Mickael Marchand <marchand@kde.org>  Mon,  3 Nov 2003 10:13:51 +0000
+
+boson-data (0.8-1) unstable; urgency=low
 
   * Initial Release.
 
- -- Felix Seeger <felix.seeger@gmx.de>  Sun, 20 Oct 2002 12:19:12 +0200
+ -- Mickael Marchand <marchand@kde.org>  Tue, 13 May 2003 16:51:31 +0200
 
