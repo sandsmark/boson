@@ -39,6 +39,7 @@
 #include <qdom.h>
 #include <qdatastream.h>
 #include <qptrqueue.h>
+#include <qvaluelist.h>
 
 // Saving format version
 #define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
@@ -411,9 +412,35 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  boDebug(260) << k_funcinfo << endl;
  d->mLoadingStatus = LoadingInProgress;
  BSGFile f(file, true);
+
  if (!f.checkTar()) {
-	boError(260) << k_funcinfo << "Could not load from " << file << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("tar archive invalid"));
+	d->mLoadingStatus = BSGFileError;
+	return false;
+ }
+
+ QValueList<QByteArray> list;
+ list.append(f.kgameData());
+ list.append(f.playersData());
+ list.append(f.canvasData());
+ list.append(f.externalData());
+ list.append(f.mapData());
+
+ bool ret = loadFromFile(list);
+ if (!ret) {
+	boError(260) << k_funcinfo << "Could not load from " << file << endl;
+ }
+ return ret;
+}
+
+bool BosonSaveLoad::loadFromFile(const QValueList<QByteArray>& fileList)
+{
+ boDebug(260) << k_funcinfo << endl;
+ d->mLoadingStatus = LoadingInProgress;
+
+ if (fileList.count() < 1) {
+	boError(260) << k_funcinfo << "empty filelist" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("No files in archive found"));
 	d->mLoadingStatus = BSGFileError;
 	return false;
  }
@@ -421,8 +448,7 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  // kgame.xml is mandatory in all boson savegame versions. We can get the
  // savegame format version from there (which is also mandatory) so we load this
  // first.
- QString kgameXML;
- kgameXML = QString(f.kgameData());
+ QString kgameXML = fileList[0];
  if (kgameXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty kgame.xml"));
@@ -431,20 +457,31 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  }
  unsigned int version = savegameFormatVersion(kgameXML);
  if (version > latestSavegameVersion()) {
-	boError(260) << "version " << version << " is too recent. Can read up to " << latestSavegameVersion() << " only." << endl;
+	boError(260) << k_funcinfo << "version " << version << " is too recent. Can read up to " << latestSavegameVersion() << " only." << endl;
 	d->mLoadingStatus = InvalidVersion;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("savegame version (%1) is too recent. Can read up to %2 only.").arg(version).arg(latestSavegameVersion()));
 	return false;
  }
  if (version < BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
-	boError(260) << "version " << version << " is too old. Must be at least from boson 0.8" << endl;
+	boError(260) << k_funcinfo << "version " << version << " is too old. Must be at least from boson 0.8" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("savegame version (%1) is too old. Must be at least %2.").arg(version).arg(BOSON_SAVEGAME_FORMAT_VERSION_0_8));
 	d->mLoadingStatus = InvalidVersion;
 	return false;
  }
- if (version != latestSavegameVersion()) {
-	boDebug(260) << "version " << version << " must be converted first. trying to convert now" << endl;
 
+ if (version == BOSON_SAVEGAME_FORMAT_VERSION_0_8) {
+	boDebug(260) << "trying to load a savegame from boson 0.8" << endl;
+	return false;
+ }
+ if (version != latestSavegameVersion()) {
+	boError(260) << k_funcinfo << "version " << version << " could not be converted to current savegame format." << endl;
+	addLoadError(SaveLoadError::LoadInvalidVersion, i18n("File format version (%1) could not be converted to current file format. Unable to load this file.").arg(version));
+	return false;
+ }
+
+ if (fileList.count() != 5) {
+	boError(260) << k_funcinfo << "invalid file count: " << fileList.count() << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("Trying to load invalid number of files: %1 - must be 5.").arg(fileList.count()));
 	return false;
  }
 
@@ -453,10 +490,10 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  QString externalXML;
  QByteArray map;
 
- playersXML = QString(f.playersData());
- canvasXML = QString(f.canvasData());
- externalXML = QString(f.externalData());
- map = f.mapData();
+ playersXML = QString(fileList[1]);
+ canvasXML = QString(fileList[2]);
+ externalXML = QString(fileList[3]);
+ map = fileList[4];
 
  if (playersXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty playersXML" << endl;
@@ -649,7 +686,7 @@ bool BosonSaveLoad::loadKGameFromXML(const QString& xml)
 bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 {
  // now load the players (not the units!)
- QDomDocument doc(QString::fromLatin1("Boson"));
+ QDomDocument doc(QString::fromLatin1("Players"));
  if (!loadXMLDoc(&doc, playersXML)) {
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in players.xml"));
 	d->mLoadingStatus = InvalidXML;
