@@ -219,6 +219,7 @@ public slots:
 	void slotSetDebugItemWorks(bool);
 	void slotSetDebugCamera(bool);
 	void slotSetDebugRenderCounts(bool);
+	void slotSetDebugBoundingBoxes(bool);
 
 signals:
 	/**

@@ -582,6 +582,7 @@ public:
 	bool mDebugItemWorks;
 	bool mDebugCamera;
 	bool mDebugRenderCounts;
+	bool mDebugBoundingBoxes;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -626,6 +627,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMatrices = false;
  d->mDebugItemWorks = false;
  d->mDebugRenderCounts = false;
+ d->mDebugBoundingBoxes = false;
  d->mDebugCamera = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
@@ -1040,9 +1042,37 @@ void BosonBigDisplayBase::renderItems()
 		}
 		glCallList(item->selectBox()->displayList());
 		glPopMatrix();
+		glColor3ub(255, 255, 255);
 	}
 
 	glTranslatef(-x, -y, -z);
+
+	if (d->mDebugBoundingBoxes) {
+		// Corners of bb of item
+		BoVector3 c1(item->x(), item->y(), item->z());
+		c1.canvasToWorld();
+		BoVector3 c2(item->x() + item->width(), item->y() + item->height(), item->z() + item->depth());
+		c2.canvasToWorld();
+		glDisable(GL_TEXTURE_2D);
+		glLineWidth(1.0);
+		glBegin(GL_LINES);
+			glVertex3f(c1.x(), c1.y(), c1.z());  glVertex3f(c2.x(), c1.y(), c1.z());
+			glVertex3f(c2.x(), c1.y(), c1.z());  glVertex3f(c2.x(), c2.y(), c1.z());
+			glVertex3f(c2.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c2.y(), c1.z());
+			glVertex3f(c1.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c1.y(), c1.z());
+
+			glVertex3f(c1.x(), c1.y(), c2.z());  glVertex3f(c2.x(), c1.y(), c2.z());
+			glVertex3f(c2.x(), c1.y(), c2.z());  glVertex3f(c2.x(), c2.y(), c2.z());
+			glVertex3f(c2.x(), c2.y(), c2.z());  glVertex3f(c1.x(), c2.y(), c2.z());
+			glVertex3f(c1.x(), c2.y(), c2.z());  glVertex3f(c1.x(), c1.y(), c2.z());
+
+			glVertex3f(c1.x(), c1.y(), c1.z());  glVertex3f(c1.x(), c1.y(), c2.z());
+			glVertex3f(c2.x(), c1.y(), c1.z());  glVertex3f(c2.x(), c1.y(), c2.z());
+			glVertex3f(c2.x(), c2.y(), c1.z());  glVertex3f(c2.x(), c2.y(), c2.z());
+			glVertex3f(c1.x(), c2.y(), c1.z());  glVertex3f(c1.x(), c2.y(), c2.z());
+		glEnd();
+		glEnable(GL_TEXTURE_2D);
+	}
  }
  d->mRenderedItems += d->mRenderItemList->count();
  d->mRenderItemList->clear();
@@ -3128,6 +3158,11 @@ void BosonBigDisplayBase::setDebugCamera(bool debug)
 void BosonBigDisplayBase::setDebugRenderCounts(bool debug)
 {
  d->mDebugRenderCounts = debug;
+}
+
+void BosonBigDisplayBase::setDebugBoundingBoxes(bool debug)
+{
+ d->mDebugBoundingBoxes = debug;
 }
 
 void BosonBigDisplayBase::setToolTipCreator(int type)

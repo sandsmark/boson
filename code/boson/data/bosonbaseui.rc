@@ -13,6 +13,7 @@
     <Action name="debug_unfog" />
     <Action name="debug_players" />
     <Action name="debug_wireframes" />
+    <Action name="debug_boundingboxes" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge" />
