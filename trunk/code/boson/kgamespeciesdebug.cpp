@@ -213,12 +213,12 @@ protected:
 		QPtrListIterator<BoMesh> it(meshes);
 		for (; it.current(); ++it) {
 			BoMesh* mesh = it.current();
-			*all += mesh->facesCount();
-			if (mesh->facesCount() > *max) {
-				*max = mesh->facesCount();
+			*all += mesh->facesCount(0);
+			if (mesh->facesCount(0) > *max) {
+				*max = mesh->facesCount(0);
 			}
-			if (mesh->facesCount() < *min || mesh == meshes.getFirst()) {
-				*min = mesh->facesCount();
+			if (mesh->facesCount(0) < *min || mesh == meshes.getFirst()) {
+				*min = mesh->facesCount(0);
 			}
 		}
 	}

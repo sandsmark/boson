@@ -27,6 +27,7 @@
 class BoMesh;
 class BoMaterial;
 class BoAdjacentDataBase;
+class BoMeshLOD;
 class QColor;
 
 // AB: there are two different ways for normals: store one normal per face
@@ -236,26 +237,6 @@ public:
 	void allocatePoints(unsigned int points);
 
 	/**
-	 * Use material @p mat when rendering this mesh.
-	 **/
-	void setMaterial(BoMaterial* mat);
-
-	BoMaterial* material() const;
-
-	/**
-	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
-	 * the constructor to create the correct number.
-	 **/
-	unsigned int facesCount() const;
-
-	/**
-	 * @param See @ref BoFaceNode::setFace. Remember to add the actual points to
-	 * this mesh! See especially @ref setVertex
-	 **/
-	void setFace(int index, const int* points);
-	void setFace(int index, const BoFace& face);
-
-	/**
 	 * Move the points from the local array to the specified array. This
 	 * will copy all points (vertices and texture coordinates). The points
 	 * are inserted starting at @p index - all local indices are changed
@@ -271,28 +252,46 @@ public:
 	unsigned int movePoints(float* array, int index);
 
 	/**
+	 * Use material @p mat when rendering this mesh.
+	 **/
+	void setMaterial(BoMaterial* mat);
+
+	BoMaterial* material() const;
+
+	/**
+	 * This adds the @p face to the default LOD (i.e. the full-detailed
+	 * version) of this mesh. The face will be at @p index.
+	 *
+	 * Note that once @ref generateLOD was called you should not call
+	 * setFace() anymore, as it will apply to the full-detailed version of
+	 * the mesh only. As long as LODs aren't generated you don't have to
+	 * care about LOD (@ref generateLOD will do everything).
+	 **/
+	void setFace(int index, const BoFace& face);
+
+	/**
 	 * You must call @ref allocatePoints before calling this!
 	 * @param index The index of the vertex in the vertex pool (relative to
 	 * this mesh). It must be < @ref points.
+	 *
+	 * Note that this changes the vertex at @p index for all LODs that
+	 * reference that index!
 	 **/
 	void setVertex(unsigned int index, const BoVector3&);
-
-	/**
-	 * @param vertex The vertex in the face this normal applies to. This
-	 * must be 0..2 or -1 for all vertices.
-	 **/
-	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
 
 	void calculateNormals();
 
 	/**
 	 * The third coordinate is discarded.
 	 * @param index See @ref setVertex.
+	 *
+	 * Note that this changes the texel at @p index for all LODs that
+	 * reference that index!
 	 **/
 	void setTexel(unsigned int index, const BoVector3&);
 
 	/**
-	 * Try to connect all faces in @ref mesh, so that we can use
+	 * Try to connect all faces in the mesh, so that we can use
 	 * GL_TRIANGLE_STRIP. If that doesn't work this function will add all
 	 * faces completely instead. See @ref addNodes.
 	 *
@@ -324,25 +323,10 @@ public:
 	void createPointCache();
 
 	/**
-	 * Delete all nodes. See @ref nodes
-	 * @obsolete
-	 **/
-	void deleteNodes();
-
-	/**
-	 * Delete all nodes starting at @p node. If it has a previous face,
-	 * @ref BoFaceNode::previous is set to 0 before deleting the node.
-	 * @obsolete
-	 **/
-	void deleteNodes(BoFaceNode* node);
-
-	/**
 	 * Disconnect all nodes to prepare another @ref connectNodes or @ref
 	 * addNodes call. No node is deleted.
 	 **/
 	void disconnectNodes();
-
-	int type() const;
 
 	/**
 	 * Set whether this mesh is a teamcolor object or not.
@@ -364,30 +348,17 @@ public:
 	void renderMesh(const QColor* color);
 
 	void loadDisplayList(const QColor* teamColor, bool reload = false);
-	GLuint displayList() const;
+	GLuint displayList(unsigned int lod) const;
 
 
 	/**
 	 * Create a BoVector3 at index @p p from the vertex pool.
 	 *
-	 * @param p The index of the vertex in the vertex pool. Must be 
-	 * < @ref points.
+	 * @param p The index of the vertex in the vertex pool. Must
+	 * be < @ref points.
 	 **/
 	BoVector3 vertex(unsigned int p) const;
 
-	/**
-	 * @overload
-	 *
-	 * This will create a @ref BoVector3 for the vertex @p i in @p face.
-	 **/
-	BoVector3 vertex(unsigned int face, unsigned int i) const;
-
-
-	BoVector3 normal(unsigned int face, unsigned int vertex) const;
-	/**
-	 * @overload
-	 **/
-	BoVector3 normal(unsigned int p) const;
 
 	/**
 	 * @return The number of points in this mesh. See also @ref facesCount
@@ -441,14 +412,37 @@ public:
 	 **/
 	void computeBoundingObject();
 
-protected:
-	void createFaces(unsigned int faces);
+	/**
+	 * Called by @ref BosonModel to generate LODs for the mesh.
+	 **/
+	void generateLOD();
 
+	unsigned int facesCount(unsigned int lod) const;
+
+protected:
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
 	bool checkVisible();
 
-	BoFaceNode* nodes() const;
+	BoMeshLOD* levelOfDetail(unsigned int lod) const;
+	unsigned int lodCount() const;
+
+	/**
+	 * @overload
+	 *
+	 * This will create a @ref BoVector3 for the vertex @p i in @p face.
+	 *
+	 * Note: this is protected, because I don't want to make the @p _lod
+	 * public. If possible people who write e.g. fileloaders should not cope
+	 * with lod at all.
+	 * @param lod See @ref levelOfDetail
+	 **/
+	BoVector3 vertex(unsigned int face, unsigned int i, unsigned int lod) const;
+
+	void calculateNormals(unsigned int lod);
+
+	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
+	void loadDisplayList(BoMeshLOD* lod, const QColor* teamColor, bool reload = false);
 
 private:
 	void init();

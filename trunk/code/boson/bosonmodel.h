@@ -356,6 +356,8 @@ protected:
 	 **/
 	const QString& baseDirectory() const;
 
+	void generateLOD();
+
 	/**
 	 * @ref BoMesh allocates its own array(s) for vertices and texture
 	 * coordinates. It is more efficient to maintain a single array that

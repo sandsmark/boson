@@ -833,38 +833,314 @@ private:
 	unsigned int mPointCount;
 };
 
-class BoMeshPrivate
+/**
+ * This class is a collection of all data that depend on the current level of
+ * detail (LOD).
+ *
+ * Note that some values/arrays (such as the point cache) are automatically
+ * generated <em>after</em> the LOD has been generated. This happens for all
+ * meshes and all LODs, so you don't have to worry about this for LOD. But it
+ * also depends on the current LOD, so it is in this class.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshLOD
 {
 public:
-	BoMeshPrivate()
+	BoMeshLOD()
 	{
 		mNodes = 0;
-
-		mMaterial = 0;
-
 		mPointsCache = 0;
 		mPointsCacheCount = 0;
+		mAllNodes.setAutoDelete(true);
+		mDisplayList = 0;
 
-		mBoundingObject = 0;
+		mType = GL_TRIANGLES;
 	}
-	int mType;
-	BoFaceNode* mNodes;
-	bool mIsTeamColor;
+	~BoMeshLOD()
+	{
+		mAllNodes.clear();
+		delete[] mPointsCache;
+		if (mDisplayList) {
+			glDeleteLists(mDisplayList, 1);
+		}
+	}
 
-	BoMaterial* mMaterial;
+	void createFaces(unsigned int faces)
+	{
+		if (faces < 1) {
+			boWarning(100) << k_funcinfo << "no faces in mesh" << endl;
+			return;
+		}
+		if (mAllFaces.count() != 0) {
+			boWarning(100) << "faces already created. resizing" << endl;
+		}
+		mAllFaces.resize(faces);
 
-	GLuint mDisplayList;
+		// there are exactly as many nodes as faces in a mesh.
+		// Every node represents exactly one face. Nodes represent the "connections" of
+		// faces.
+		if (mAllNodes.count() > 0) {
+			boDebug(100) << "nodes already created. deleting." << endl;
+			mAllNodes.clear();
+		}
+		for (unsigned int face = 0; face < faces; face++) {
+			BoFaceNode* node = new BoFaceNode(&mAllFaces[face]);
+			mAllNodes.append(node);
+		}
+	}
 
+
+	/**
+	 * @param data The full-detailed mesh data, i.e. LOD 0.
+	 * @param lod The to-be-generated level of detail.
+	 **/
+	void generateLOD(BoMeshLOD* data, unsigned int lod)
+	{
+		BO_CHECK_NULL_RET(data);
+		boDebug(100) << k_funcinfo << "generate lod=" << lod << endl;
+		boDebug(100) << k_funcinfo << "TODO: implement" << endl;
+	}
+
+	inline BoFaceNode* nodes() const
+	{
+		return mNodes;
+	}
+	inline int type() const
+	{
+		return mType;
+	}
+	inline unsigned int* pointsCache() const
+	{
+		return mPointsCache;
+	}
+	inline unsigned int pointsCacheCount() const
+	{
+		return mPointsCacheCount;
+	}
+	/**
+	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
+	 * the constructor to create the correct number.
+	 **/
+	unsigned int facesCount() const
+	{
+		return mAllFaces.count();
+	}
+
+	void setFace(int index, const BoFace& face)
+	{
+		mAllFaces[index] = face;
+	}
+	const BoFace* face(unsigned int f) const
+	{
+		if (f >= facesCount()) {
+			return 0;
+		}
+		return &mAllFaces[f];
+	}
+
+	void setDisplayList(GLuint list)
+	{
+		mDisplayList = list;
+	}
+	inline GLuint displayList() const
+	{
+		return mDisplayList;
+	}
+
+	/**
+	 * @param vertex The vertex in the face this normal applies to. This
+	 * must be 0..2 or -1 for all vertices.
+	 **/
+	void setNormal(unsigned int face, int vertex, const BoVector3& normal)
+	{
+		if (face >= facesCount()) {
+			boError() << k_funcinfo << "invalid face " << face
+					<< " max=" << facesCount() << endl;
+			return;
+		}
+		if (vertex >= 3) {
+			boError() << k_funcinfo << "vertex must be 0..2  or -1 not " << vertex << endl;
+			vertex = vertex % 3;
+		}
+
+		if (vertex < 0) {
+			mAllFaces[face].setAllNormals(normal);
+		} else {
+			mAllFaces[face].setNormal(vertex, normal);
+		}
+	}
+
+	/**
+	 * Called by @ref movePoints. This adds @p moveBy to every @ref
+	 * BoFace::pointIndex.
+	 **/
+	void movePointIndices(int moveBy)
+	{
+		for (unsigned int i = 0; i < facesCount(); i++) {
+			BoFace* face = &mAllFaces[i];
+			const int* orig = face->pointIndex();
+			int p[3];
+			p[0] = moveBy + orig[0];
+			p[1] = moveBy + orig[1];
+			p[2] = moveBy + orig[2];
+			face->setPointIndex(p);
+		}
+		if (mPointsCache) {
+			// we need to regenerate the cache
+			createPointCache();
+		}
+	}
+
+	void createPointCache();
+
+	/**
+	 * Ensure that all values in the point cache are valid. After this
+	 * function is done, all entries in the point cache are greate or equal
+	 * @p min and less or equal @p max.
+	 *
+	 * Note the "or equal" for @p max!
+	 **/
+	void ensurePointCacheValid(unsigned int min, unsigned int max)
+	{
+		if (!mPointsCache) {
+			return;
+		}
+		for (unsigned int i = 0; i < mPointsCacheCount; i++) {
+			if (mPointsCache[i] < min) {
+				boWarning(100) << k_funcinfo << "point cache at "
+						<< i << " is less than " << min
+						<< ": " << mPointsCache[i]
+						<< ". Fixing." << endl;
+				mPointsCache[i] = min;
+			} else if (mPointsCache[i] > max) {
+				boWarning(100) << k_funcinfo << "point cache at "
+						<< i << " is greater than " << max
+						<< ": " << mPointsCache[i]
+						<< ". Fixing." << endl;
+				mPointsCache[i] = max;
+			}
+		}
+	}
+
+	void disconnectNodes()
+	{
+		mType = BoFaceConnector::connectNodes(mAllNodes, mNodes);
+	}
+	void connectNodes()
+	{
+		mType = BoFaceConnector::connectNodes(mAllNodes, mNodes);
+	}
+	void addNodes()
+	{
+		mType = BoFaceConnector::addNodes(mAllNodes, mNodes);
+	}
+
+private:
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoFaceNode> mAllNodes;
-
-	BoMeshPoints mMeshPoints;
+	BoFaceNode* mNodes;
+	int mType;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
 	// some modes the BoFaceNode::relevantPoint() will have to be used though)
 	unsigned int* mPointsCache;
 	unsigned int mPointsCacheCount;
+
+	GLuint mDisplayList;
+};
+
+void BoMeshLOD::createPointCache()
+{
+ // the point cache is an array of all vertex indices of the faces. so if face1
+ // references vertices 2,3,1 and face 2 references vertices 5,4,7 then the
+ // point cache will be 2,3,1,5,4,7 (assuming we don't use GL_TRIANGLES)
+ boMem->freeUIntArray(mPointsCache);
+ mPointsCacheCount = 0;
+ BoFaceNode* node = nodes();
+ if (!node) {
+	boError(100) << k_funcinfo << "NULL node" << endl;
+	return;
+ }
+ if (mAllFaces.count() < 1) {
+	return;
+ }
+ int nodesCount = 0;
+ // count the number of nodes in our list.
+ // note that we mustn't assume that all nodes are in that list!
+ for (node = nodes(); node; node = node->next()) {
+	nodesCount++;
+ }
+ node = nodes();
+ if (type() == GL_TRIANGLE_STRIP) {
+	boDebug(100) << "creating _STRIP" << endl;
+	if (!node->next()) {
+		boError() << k_funcinfo << "less than 2 nodes in mesh! this is not supported" << endl;
+		return;
+	}
+	int firstPoint;
+	int secondPoint;
+	int thirdPoint;
+	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
+
+	// 3 basic points + one point per remaining face
+	mPointsCacheCount = 3 + (nodesCount - 3) * 1;
+	mPointsCache = boMem->allocateUIntArray(mPointsCacheCount);
+
+	mPointsCache[0] = (unsigned int)node->pointIndex()[firstPoint];
+	mPointsCache[1] = (unsigned int)node->pointIndex()[secondPoint];
+	mPointsCache[2] = (unsigned int)node->pointIndex()[thirdPoint];
+
+	int element = 3;
+	// we skip the entire first face. all points have been rendered above.
+	node = node->next();
+	for (; node; node = node->next()) {
+		int point = node->relevantPoint();
+		if (point < 0 || point > 2) {
+			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
+			continue;
+		}
+		mPointsCache[element] = (unsigned int)node->pointIndex()[point];
+		element++;
+	}
+ } else if (type() == GL_TRIANGLES) {
+	// 3 points per face
+	mPointsCacheCount = nodesCount * 3;
+	mPointsCache = boMem->allocateUIntArray(mPointsCacheCount);
+	int element = 0;
+	for (node = nodes(); node; node = node->next()) {
+		for (int i = 0; i < 3; i++) {
+			mPointsCache[element] = (unsigned int)node->pointIndex()[i];
+			element++;
+		}
+	}
+ } else {
+	boError(100) << k_funcinfo << "Invalid type: " << type() << endl;
+ }
+}
+
+
+
+class BoMeshPrivate
+{
+public:
+	BoMeshPrivate()
+	{
+		mMaterial = 0;
+
+		mBoundingObject = 0;
+
+		mLODs = 0;
+	}
+	bool mIsTeamColor;
+
+	BoMaterial* mMaterial;
+
+	BoMeshPoints mMeshPoints;
+
+
+	BoMeshLOD** mLODs;
+	unsigned int mLODCount;
 
 	float mMinX;
 	float mMaxX;
@@ -879,15 +1155,18 @@ public:
 BoMesh::BoMesh(unsigned int faces)
 {
  init();
- createFaces(faces);
+
+ BoMeshLOD* lod = levelOfDetail(0);
+ BO_CHECK_NULL_RET(lod);
+ lod->createFaces(faces);
 }
 
 BoMesh::~BoMesh()
 {
- if (d->mDisplayList) {
-	glDeleteLists(d->mDisplayList, 1);
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	delete d->mLODs[i];
  }
- d->mAllNodes.clear();
+ delete[] d->mLODs;
  delete d->mBoundingObject;
  delete d;
 }
@@ -895,10 +1174,8 @@ BoMesh::~BoMesh()
 void BoMesh::init()
 {
  d = new BoMeshPrivate;
- d->mAllNodes.setAutoDelete(true);
- d->mType = GL_TRIANGLES;
  d->mIsTeamColor = false;
- d->mDisplayList = 0;
+ d->mLODCount = 0;
 
  d->mMinX = 0.0f;
  d->mMaxX = 0.0f;
@@ -906,6 +1183,12 @@ void BoMesh::init()
  d->mMaxY = 0.0f;
  d->mMinZ = 0.0f;
  d->mMaxZ = 0.0f;
+
+ // a mesh *never* has less than 1 LOD. LOD 0 is always the full-detailed
+ // version.
+ d->mLODs = new BoMeshLOD*[1];
+ d->mLODs[0] = new BoMeshLOD;
+ d->mLODCount = 1;
 }
 
 int BoMesh::pointSize()
@@ -933,53 +1216,48 @@ BoMaterial* BoMesh::material() const
  return d->mMaterial;
 }
 
-unsigned int BoMesh::facesCount() const
-{
- return d->mAllFaces.count();
-}
-
-void BoMesh::createFaces(unsigned int faces)
-{
- if (faces < 1) {
-	boWarning() << k_funcinfo << "no faces in mesh" << endl;
-	return;
- }
- if (d->mAllFaces.count() != 0) {
-	boWarning() << "faces already created. resizing" << endl;
- }
- d->mAllFaces.resize(faces);
-
- // there are exactly as many nodes as faces in a mesh.
- // Every node represents exactly one face. Nodes represent the "connections" of
- // faces.
- if (d->mAllNodes.count() > 0) {
-	boDebug(100) << "nodes already created. deleting." << endl;
-	d->mAllNodes.clear();
- }
- for (unsigned int face = 0; face < faces; face++) {
-	BoFaceNode* node = new BoFaceNode(&d->mAllFaces[face]);
-	d->mAllNodes.append(node);
- }
-}
-
+// this is used for mesh-loading and therefore operates on LOD 0 only.
 void BoMesh::setFace(int index, const BoFace& face)
 {
- d->mAllFaces[index] = face;
+ BoMeshLOD* lod = levelOfDetail(0);
+ if (!lod) {
+	boError(100) << k_funcinfo << "NULL default LOD" << endl;
+	return;
+ }
+ lod->setFace(index, face);
 }
 
 void BoMesh::disconnectNodes()
 {
- BoFaceConnector::disconnectNodes(d->mAllNodes, d->mNodes);
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	if (!d->mLODs[i]) {
+		boError(100) << k_funcinfo << "NULL LOD at " << i << endl;
+		continue;
+	}
+	d->mLODs[i]->disconnectNodes();
+ }
 }
 
 void BoMesh::addNodes()
 {
- d->mType = BoFaceConnector::addNodes(d->mAllNodes, d->mNodes);
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	if (!d->mLODs[i]) {
+		boError(100) << k_funcinfo << "NULL LOD at " << i << endl;
+		continue;
+	}
+	d->mLODs[i]->addNodes();
+ }
 }
 
 void BoMesh::connectNodes()
 {
- d->mType = BoFaceConnector::connectNodes(d->mAllNodes, d->mNodes);
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	if (!d->mLODs[i]) {
+		boError(100) << k_funcinfo << "NULL LOD at " << i << endl;
+		continue;
+	}
+	d->mLODs[i]->connectNodes();
+ }
 }
 
 /*
@@ -1026,42 +1304,6 @@ void findConnectable(const QPtrList<Lib3dsFace>& nodes, QPtrList<Lib3dsFace>* co
 }
 */
 
-int BoMesh::type() const
-{
- return d->mType;
-}
-
-BoFaceNode* BoMesh::nodes() const
-{
- return d->mNodes;
-}
-
-void BoMesh::deleteNodes()
-{
- if (d->mNodes) {
-	BoFaceNode* first = d->mNodes;
-	while (first->previous()) {
-		// WARNING: we mustn't have any node appear two times in the
-		// list, otherwise we have an infinite loop here
-		first = first->previous();
-	}
- }
-}
-
-void BoMesh::deleteNodes(BoFaceNode* node)
-{
- // node is the *first* node!
- if (node) {
-	node->setPrevious(0);
-	BoFaceNode* next = node;
-	do {
-		BoFaceNode* current = next;
-		next = current->next();
-		delete current;
-	} while (next);
- }
-}
-
 GLuint BoMesh::textureObject() const
 {
  if (material()) {
@@ -1085,17 +1327,27 @@ BoVector3 BoMesh::vertex(unsigned int p) const
  return d->mMeshPoints.vertex(p);
 }
 
-BoVector3 BoMesh::vertex(unsigned int face, unsigned int i) const
+BoVector3 BoMesh::vertex(unsigned int face, unsigned int i, unsigned int _lod) const
 {
- if (face >= facesCount()) {
-	boError() << k_funcinfo << "invalid face " << face << " have only " << facesCount() << endl;
+ BoMeshLOD* lod = levelOfDetail(_lod);
+ if (!lod) {
+	boError() << k_funcinfo << "NULL LOD " << _lod << endl;
+	return BoVector3();
+ }
+ if (face >= lod->facesCount()) {
+	boError() << k_funcinfo << "invalid face " << face << " have only " << lod->facesCount() << endl;
 	return BoVector3();
  }
  if (i >= 3) {
 	boError() << k_funcinfo << " vertex index must be 0..2, not " << i << endl;
 	i = i % 3;
  }
- return vertex(d->mAllFaces[face].pointIndex()[i] - d->mMeshPoints.pointsMovedBy());
+ const BoFace* f = lod->face(face);
+ if (!f) {
+	boError(100) << k_funcinfo << "NULL face " << face << endl;
+	return BoVector3();
+ }
+ return vertex(f->pointIndex()[i]);
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
@@ -1103,58 +1355,26 @@ void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
  d->mMeshPoints.setTexel(index, texel);
 }
 
-void BoMesh::setNormal(unsigned int face, int vertex, const BoVector3& normal)
-{
- if (face >= facesCount()) {
-	boError() << k_funcinfo << "invalid face " << face << " max=" << facesCount() << endl;
-	return;
- }
- if (vertex >= 3) {
-	boError() << k_funcinfo << "vertex must be 0..2  or -1 not " << vertex << endl;
-	vertex = vertex % 3;
- }
-
- if (vertex < 0) {
-	d->mAllFaces[face].setAllNormals(normal);
- } else {
-	d->mAllFaces[face].setNormal(vertex, normal);
- }
-}
-
-BoVector3 BoMesh::normal(unsigned int face, unsigned int vertex) const
-{
- if (face >= facesCount()) {
-	boError() << k_funcinfo << "invalid face " << face << " max= " << facesCount() << endl;
-	return BoVector3();
- }
- if (vertex >= 3) {
-	boError() << k_funcinfo << "invalid vertex " << vertex << " must be 0..2" << endl;
-	vertex = vertex % 3;
- }
- return d->mAllFaces[face].normal(vertex);
-}
-
-BoVector3 BoMesh::normal(unsigned int p) const
-{
- if (p >= points()) {
-	boError() << k_funcinfo << "invalid point " << p << " max=" << points() - 1 << endl;
-	return BoVector3();
- }
- int face = p / 3;
- int vertex = p % 3;
- return normal(face, vertex);
-}
-
 void BoMesh::calculateNormals()
+{
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	calculateNormals(i);
+ }
+}
+
+void BoMesh::calculateNormals(unsigned int _lod)
 {
  // we don't use lib3ds' normals so that we can easily support file formats that
  // dont store the normals. furthermore we depend on less external data :)
  //
  // note that we calculate 1 normal per face only at the moment!
- for (unsigned int face = 0; face < facesCount(); face++) {
-	BoVector3 a(vertex(face, 0));
-	BoVector3 b(vertex(face, 1));
-	BoVector3 c(vertex(face, 2));
+
+ BoMeshLOD* lod = levelOfDetail(_lod);
+ BO_CHECK_NULL_RET(lod);
+ for (unsigned int face = 0; face < lod->facesCount(); face++) {
+	BoVector3 a(vertex(face, 0, _lod));
+	BoVector3 b(vertex(face, 1, _lod));
+	BoVector3 c(vertex(face, 2, _lod));
 #if AB_DEBUG_1
 	boDebug() << k_funcinfo << face << ": a=" << a.debugString() << endl;
 	boDebug() << k_funcinfo << face << ": b=" << b.debugString() << endl;
@@ -1179,14 +1399,26 @@ void BoMesh::calculateNormals()
 	boDebug() << k_funcinfo << face << ": normal2=" << normal.debugString() << endl;
 #endif
 
-	setNormal(face, -1, normal);
+	lod->setNormal(face, -1, normal);
  }
 }
 
 void BoMesh::renderMesh(const QColor* teamColor)
 {
- // AB: it would be better to do most of this in BosonModel instead. we could
- // group several meshes into a single glBegin()/glEnd() pair
+ // use a parameter for this
+ unsigned int _lod = 0;
+
+
+ BoMeshLOD* lod = levelOfDetail(_lod);
+ if (!lod) {
+	BO_NULL_ERROR(lod);
+	return;
+ }
+ unsigned int* pointsCache = lod->pointsCache();
+ unsigned int pointsCacheCount = lod->pointsCacheCount();
+ int type = lod->type();
+ BoFaceNode* nodes = lod->nodes();
+
 
  bool resetColor = false; // needs to be true after we changed the current color
 
@@ -1214,12 +1446,12 @@ void BoMesh::renderMesh(const QColor* teamColor)
 #endif
  {
 //	boDebug() << k_funcinfo << "not culled" << endl;
-	if (!d->mPointsCache || d->mPointsCacheCount == 0) {
+	if (!pointsCache || pointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
-		glBegin(type());
+		glBegin(type);
 
-		BoFaceNode* node = nodes();
+		BoFaceNode* node = nodes;
 		while (node) {
 			const BoFace* face = node->face();
 			const int* points = face->pointIndex();
@@ -1270,11 +1502,18 @@ void BoMesh::renderMesh(const QColor* teamColor)
 // there MUST be a valid context set already!!
 void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 {
- // AB: it would be better to do most of this in BosonModel instead. we could
- // group several meshes into a single glBegin()/glEnd() pair
- if (!d->mDisplayList) {
-	d->mDisplayList = glGenLists(1);
-	if (d->mDisplayList == 0) {
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	loadDisplayList(d->mLODs[i], teamColor, reload);
+ }
+}
+
+void BoMesh::loadDisplayList(BoMeshLOD* lod, const QColor* teamColor, bool reload)
+{
+ BO_CHECK_NULL_RET(lod);
+
+ if (!lod->displayList()) {
+	lod->setDisplayList(glGenLists(1));
+	if (lod->displayList() == 0) {
 		boError() << k_funcinfo << "NULL display list generated" << endl;
 		return;
 	}
@@ -1283,7 +1522,7 @@ void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 		// it is important that the list is deleted, but the
 		// newly generated list must have the *same* number as
 		// it had before!
-		glDeleteLists(d->mDisplayList, 1);
+		glDeleteLists(lod->displayList(), 1);
 	} else {
 		boWarning() << k_funcinfo << "mesh was already loaded!" << endl;
 		return;
@@ -1291,7 +1530,7 @@ void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
  }
  boDebug(100) << k_funcinfo << endl;
 
- glNewList(d->mDisplayList, GL_COMPILE);
+ glNewList(lod->displayList(), GL_COMPILE);
  renderMesh(teamColor);
  glEndList();
 }
@@ -1311,9 +1550,14 @@ void BoMesh::setIsTeamColor(bool c)
  d->mIsTeamColor = c;
 }
 
-GLuint BoMesh::displayList() const
+GLuint BoMesh::displayList(unsigned int lod) const
 {
- return d->mDisplayList;
+ BoMeshLOD* l = levelOfDetail(lod);
+ if (!l) {
+	boError(100) << k_funcinfo << "NULL lod " << lod << endl;
+	return 0;
+ }
+ return l->displayList();
 }
 
 unsigned int BoMesh::movePoints(float* array, int index)
@@ -1321,102 +1565,24 @@ unsigned int BoMesh::movePoints(float* array, int index)
  // move all points to the new array
  unsigned int pointsMoved = d->mMeshPoints.movePoints(array, index);
 
- // now we fix the (point-)indices of all faces.
- for (unsigned int i = 0; i < facesCount(); i++) {
-	BoFace* face = &d->mAllFaces[i];
-	const int* orig = face->pointIndex();
-	int p[3];
-	p[0] = index + orig[0];
-	p[1] = index + orig[1];
-	p[2] = index + orig[2];
-	face->setPointIndex(p);
+ // now we fix the (point-)indices of all faces in all LODs.
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	if (!d->mLODs[i]) {
+		boError(100) << k_funcinfo << "NULL LOD " << i << endl;
+		continue;
+	}
+	d->mLODs[i]->movePointIndices(index);
  }
 
- if (d->mPointsCache) {
-	// we need to regenerate the cache
-	createPointCache();
- }
  return pointsMoved;
 }
 
 void BoMesh::createPointCache()
 {
- // the point cache is an array of all vertex indices of the faces. so if face1
- // references vertices 2,3,1 and face 2 references vertices 5,4,7 then the
- // point cache will be 2,3,1,5,4,7 (assuming we don't use GL_TRIANGLES)
- boMem->freeUIntArray(d->mPointsCache);
- d->mPointsCacheCount = 0;
- BoFaceNode* node = nodes();
- if (!node) {
-	boError() << k_funcinfo << "NULL node" << endl;
-	return;
- }
- if (points() < 1) {
-	return;
- }
- int nodesCount = 0;
- // count the number of nodes in our list.
- // note that we mustn't assume that all nodes are in that list!
- for (node = nodes(); node; node = node->next()) {
-	nodesCount++;
- }
- node = nodes();
- if (type() == GL_TRIANGLE_STRIP) {
-	boDebug(100) << "creating _STRIP" << endl;
-	if (!node->next()) {
-		boError() << k_funcinfo << "less than 2 nodes in mesh! this is not supported" << endl;
-		return;
-	}
-	int firstPoint;
-	int secondPoint;
-	int thirdPoint;
-	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
-	if (firstPoint < 0 || (unsigned int)firstPoint >= points()) {
-		boError() << k_funcinfo << "invalid first point " << firstPoint << endl;
-		return;
-	}
-	if (secondPoint < 0 || (unsigned int)secondPoint >= points()) {
-		boError() << k_funcinfo << "invalid second point" << secondPoint << endl;
-		return;
-	}
-	if (thirdPoint < 0 || (unsigned int)thirdPoint >= points()) {
-		boError() << k_funcinfo << "invalid third point" << thirdPoint << endl;
-		return;
-	}
-
-	// 3 basic points + one point per remaining face
-	d->mPointsCacheCount = 3 + (nodesCount - 3) * 1;
-	d->mPointsCache = boMem->allocateUIntArray(d->mPointsCacheCount);
-
-	d->mPointsCache[0] = (unsigned int)node->pointIndex()[firstPoint];
-	d->mPointsCache[1] = (unsigned int)node->pointIndex()[secondPoint];
-	d->mPointsCache[2] = (unsigned int)node->pointIndex()[thirdPoint];
-
-	int element = 3;
-	// we skip the entire first face. all points have been rendered above.
-	node = node->next();
-	for (; node; node = node->next()) {
-		int point = node->relevantPoint();
-		if (point < 0 || point > 2) {
-			boError( )<< k_funcinfo "oops - invalid point " << point << endl;
-			continue;
-		}
-		d->mPointsCache[element] = (unsigned int)node->pointIndex()[point];
-		element++;
-	}
- } else if (type() == GL_TRIANGLES) {
-	// 3 points per face
-	d->mPointsCacheCount = nodesCount * 3;
-	d->mPointsCache = boMem->allocateUIntArray(d->mPointsCacheCount);
-	int element = 0;
-	for (node = nodes(); node; node = node->next()) {
-		for (int i = 0; i < 3; i++) {
-			d->mPointsCache[element] = (unsigned int)node->pointIndex()[i];
-			element++;
-		}
-	}
- } else {
-	boError(100) << k_funcinfo << "Invalid type: " << type() << endl;
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	d->mLODs[i]->createPointCache();
+	d->mLODs[i]->ensurePointCacheValid(d->mMeshPoints.pointsMovedBy(),
+			d->mMeshPoints.pointsMovedBy() + points());
  }
 }
 
@@ -1519,5 +1685,68 @@ void BoMesh::computeBoundingObject()
 
  BoundingObjectBuilder builder;
  d->mBoundingObject = builder.generateBoundingObject(this);
+}
+
+void BoMesh::generateLOD()
+{
+ // how many LODs should be generated. maybe use a parameter for this?
+ // these numbers can be used by renderMesh() (or indirectly by renderFrame())
+ // to choose which LOD should be rendered at. 0 is always the default, i.e.
+ // render all points and faces.
+ unsigned int LODCount = 1; // must be at least 1, as we have at leas the full-detailed version
+
+ unsigned int oldCount = d->mLODCount;
+ if (LODCount < oldCount) {
+	boError(100) << k_funcinfo << "must at least preserve existing LODs (" << oldCount << ")!" << endl;
+	LODCount = oldCount;
+ }
+ if (LODCount == 0) {
+	// default rendering is LOD 0 !
+	LODCount = 1;
+	boWarning(100) << k_funcinfo << "must create at least one LOD" << endl;
+ }
+ BoMeshLOD** lod = new BoMeshLOD*[LODCount];
+ for (unsigned int i = 0; i < oldCount; i++) {
+	lod[i] = d->mLODs[i];
+ }
+ if (oldCount == 0) {
+	lod[0] = 0;
+ }
+ boDebug(100) << k_funcinfo << "lods=" << LODCount
+		<< " exisiting: " << oldCount
+		<< " generating: " << LODCount - oldCount
+		<< endl;
+ for (unsigned int i = oldCount; i < LODCount; i++) {
+	lod[i] = new BoMeshLOD();
+	lod[i]->generateLOD(lod[0], i);
+ }
+}
+
+BoMeshLOD* BoMesh::levelOfDetail(unsigned int lod) const
+{
+ if (!d->mLODs) {
+	boError(100) << k_funcinfo << "NULL LOD pointer" << endl;
+	return 0;
+ }
+ if (lodCount() < lod) {
+	boError(100) << k_funcinfo << "invalid lod: " << lod << " have only " << lodCount() << endl;
+	return 0;
+ }
+ return d->mLODs[lod];
+}
+
+unsigned int BoMesh::lodCount() const
+{
+ return d->mLODCount;
+}
+
+unsigned int BoMesh::facesCount(unsigned int lod) const
+{
+ BoMeshLOD* l = levelOfDetail(lod);
+ if (!l) {
+	boError(100) << k_funcinfo << "NULL LOD " << lod << endl;
+	return 0;
+ }
+ return l->facesCount();
 }
 

@@ -706,6 +706,10 @@ void BosonModel::loadModel()
 	meshIt.current()->calculateNormals();
  }
 
+ boDebug(100) << k_funcinfo << "generating LODs for meshes" << endl;
+ generateLOD();
+ boDebug(100) << k_funcinfo << "generating LODs for meshes done" << endl;
+
  boDebug(100) << k_funcinfo << "merge arrays" << endl;
  mergeArrays();
  mergeMeshesInFrames();
@@ -1054,6 +1058,14 @@ void BosonModel::computeBoundingObjects()
  for (unsigned int i = 0; i < frames(); i++) {
 	BoFrame* f = frame(i);
 
+ }
+}
+
+void BosonModel::generateLOD()
+{
+ QIntDictIterator<BoMesh> it(d->mMeshes);
+ for (; it.current(); ++it) {
+	it.current()->generateLOD();
  }
 }
 
