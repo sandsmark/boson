@@ -1,10 +1,37 @@
 [article]
+date=December 26th 2002 10:19
+title=New year's update
+text=Here comes another status update.<br>
+    Our last release, 0.7, has been downloaded about 3000 times now. When it was
+    released, our homepage received as many hits during following week,
+    as it had had since September when new homepage was opened :-)<br>
+    Now about CVS. There are already many improvements in CVS code and we're
+    moving towards 0.8. Biggest changes are:
+    <ul><li>Map information is preloaded on startup (no slowdown when changing
+    map)</li>
+    <li>Particles drawing has been improved much</li>
+    <li>Big optimizations</li>
+    <li>Smaller map format</li>
+    <li>Of course, usual bugfixes</li></ul>
+    For more, take a look at the <a href="status.php#done">done section of our
+    status page</a>. There are many additions!<br>
+    Also, two new <a href="screenshots.php">screenshots</a>, taken from CVS
+    version, are available.<br>
+    And last, but not least, code of this homepage is now licenced under GPL
+    which means that you can use it to create your own pages, provided that you
+    also give note about the original author
+    (<a href="mailto:boson-devel@lists.sourceforge.net">The Boson Team</a>) and
+    a link to this page. And we'd be happy if you'd also mail us, so we know if
+    somebody is using it ;-)
+    <br><br>
+
+[article]
 date=January 3rd 2003 04:30
 title=Boson 0.7 RPMs for Mandrake available
 text=
     <a href="mailto:bstoke@bstoke.co.uk">Steve</a> provided us with RPM packages
-    for Mandrake 9.0 (on i386). You can download them at <a
-    href="http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263">SourceForge</a>.
+    for Mandrake 9.0 (on i386). You can download them at
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263">SourceForge</a>.
     Thanks a lot Steve!<br>
     These packages already contain the smaller-textures fix announced two months
     ago.

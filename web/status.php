@@ -1,4 +1,22 @@
 <?php
+/*
+    This file is part of the Boson game
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 
 
 /*****  Variables  *****/
@@ -47,7 +65,7 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Support for height maps in editor</li>
     <li>3d-terrains in map files</li>
   </ul>
-  <h2>DONE</h2>
+  <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
   <h4>Internal</h4>
   <ul>
@@ -56,11 +74,13 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Preload map information on startup</li>
     <li>Decrease size of textures (fixes problems for 24bpp and 32bpp)</li>
     <li>Don't draw invisible particles</li>
+    <li>Particles are drawn depth-sorted</li>
     <li>Big performance improvements</li>
+    <li>Binary map format (decreases size of map files a lot, especially for big maps)</li>
   </ul>
   <h4>Game</h4>
   <ul>
-    <li>Technology upgrades are working now</li>
+    <li>Technology upgrades are working now and were improved</li>
     <li>Added minimap image for disabled minimap</li>
     <li>Weapon specific sound support</li>
     <li>Smoke support for powerplant, oilrefinery, mineralrefinery etc.</li>
