@@ -425,14 +425,20 @@ QCString BosonSaveLoad::saveExternalAsXML()
 }
 
 
-//bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML)
 bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 {
  boDebug(270) << k_funcinfo << endl;
 
  QByteArray playersXML = files["players.xml"];
  QByteArray canvasXML = files["canvas.xml"];
+ QByteArray kgameXML = files["kgame.xml"];
+ QByteArray externalXML = files["external.xml"];
 
+  if (kgameXML.isEmpty()) {
+	boError(270) << k_funcinfo << "Empty kgameXML" << endl;
+	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: kgame.xml"));
+	return false;
+  }
   if (playersXML.isEmpty()) {
 	boError(270) << k_funcinfo << "Empty playersXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
@@ -444,6 +450,9 @@ bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 	return false;
  }
 
+ if (!loadKGameFromXML(kgameXML)) {
+	return false;
+ }
  if (!loadPlayersFromXML(playersXML)) {
 	return false;
  }
@@ -456,7 +465,36 @@ bool BosonSaveLoad::startFromFiles(const QMap<QString, QByteArray>& files)
 	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
 	return false;
  }
+ if (externalXML.size() != 0) {
+	// external.xml is optional only, it's valid that it's missing
+	if (!loadExternalFromXML(externalXML)) {
+		addLoadError(SaveLoadError::General, i18n("error while loading external data"));
+		return false;
+	}
+ }
 
+ return true;
+}
+
+bool BosonSaveLoad::loadKGameFromXML(const QString& kgameXML)
+{
+ QDomDocument doc(QString::fromLatin1("Boson"));
+ if (!loadXMLDoc(&doc, kgameXML)) {
+	addLoadError(SaveLoadError::LoadInvalidXML, i18n("Parsing error in kgame.xml"));
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+
+ BosonCustomPropertyXML propertyXML;
+ QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
+ if (!handler.isNull()) {
+	// note: a missing DataHandler is valid.
+	 BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdGameStatus);
+	if (!propertyXML.loadFromXML(handler, d->mBoson->dataHandler())) {
+		boError(270) << k_funcinfo << "unable to load KGame DataHandler" << endl;
+		return false;
+	}
+ }
  return true;
 }
 
