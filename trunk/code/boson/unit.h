@@ -103,7 +103,7 @@ public:
 	inline UnitPlugin* currentPlugin() const { return mCurrentPlugin; }
 
 	/**
-	 * @return The @refUnitPlugin::pluginType of the @ref currentPlugin or
+	 * @return The @ref UnitPlugin::pluginType of the @ref currentPlugin or
 	 * 0 if there is no plugin.
 	 **/
 	int currentPluginType() const;
