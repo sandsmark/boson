@@ -1061,13 +1061,13 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveMine:
 	{
 		boDebug() << "MoveMine" << endl;
-		Q_ULONG unitId;
-		QPoint pos;
-		stream >> unitId;
-		stream >> pos;
-		Unit* u = findUnit(unitId, player);
+		Q_ULONG harvesterId;
+		Q_ULONG resourceMineId;
+		stream >> harvesterId;
+		stream >> resourceMineId;
+		Unit* u = findUnit(harvesterId, player);
 		if (!u) {
-			boError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
+			boError() << k_lineinfo << "cannot find harvester unit " << harvesterId << " for player " << player << endl;
 			break;
 		}
 		if (!u->isMobile()) {
@@ -1080,14 +1080,25 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 		if (u->owner() != player) {
-			boDebug() << k_funcinfo << "unit " << unitId << "only owner can move units!" << endl;
+			boDebug() << k_funcinfo << "unit " << harvesterId << "only owner can move units!" << endl;
 			break;
 		}
 		if (u->isDestroyed()) {
 			boDebug() << "cannot mine with destroyed units" << endl;
 			break;
 		}
-		h->mineAt(pos);
+
+		u = findUnit(resourceMineId, 0);
+		if (!u) {
+			boError() << k_lineinfo << "cannot find resourcemine unit " << resourceMineId << " for player " << player << endl;
+			break;
+		}
+		ResourceMinePlugin* r = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+		if (!r) {
+			boError() << k_lineinfo << "can mine at resource mine only" << endl;
+			break;
+		}
+		h->mineAt(r);
 		break;
 	}
 	case BosonMessage::MoveRefine:

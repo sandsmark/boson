@@ -28,6 +28,8 @@ class BosonCommandFrameBase;
 class BoSpecificAction;
 class Unit;
 class Player;
+class HarvesterPlugin;
+class ResourceMinePlugin;
 
 template<class T> class QPtrList;
 
@@ -56,7 +58,7 @@ class BosonLocalPlayerInput : public KGameIO
 
     void stopUnits(QPtrList<Unit> units);
     void layMine(const BoSpecificAction& action);
-    void harvest(Unit* u, int x, int y);
+    void harvest(const HarvesterPlugin* harvester, const ResourceMinePlugin* mine);
     void moveWithoutAttack(QPtrList<Unit> units, int x, int y);
     void moveWithAttack(QPtrList<Unit> units, int x, int y);
     void build(ProductionType type, Unit* factory, int x, int y);
