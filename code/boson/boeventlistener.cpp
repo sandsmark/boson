@@ -400,7 +400,7 @@ BoCanvasEventListener::~BoCanvasEventListener()
 
 BosonScript* BoCanvasEventListener::createScriptParser() const
 {
- return BosonScript::newScriptParser(BosonScript::Python, 0);
+ return BosonScript::newScriptParser(BosonScript::Python, -1);
 }
 
 void BoCanvasEventListener::processEvent(const BoEvent* event)
@@ -437,15 +437,15 @@ BoLocalPlayerEventListener::~BoLocalPlayerEventListener()
 
 BosonScript* BoLocalPlayerEventListener::createScriptParser() const
 {
- Player* p = 0;
+ int playerId = -1;
  if (!playerIO()) {
 	BO_NULL_ERROR(playerIO());
 	// really bad error.
 	// fortunately it should be impossible anyway :)
  } else {
-	p = playerIO()->player();
+	playerId = playerIO()->playerId();
  }
- return BosonScript::newScriptParser(BosonScript::Python, p);
+ return BosonScript::newScriptParser(BosonScript::Python, playerId);
 }
 
 void BoLocalPlayerEventListener::processEvent(const BoEvent* event)
@@ -510,16 +510,16 @@ BoComputerPlayerEventListener::~BoComputerPlayerEventListener()
 
 BosonScript* BoComputerPlayerEventListener::createScriptParser() const
 {
- Player* p = 0;
+ int playerId = -1;
  if (!playerIO()) {
 	BO_NULL_ERROR(playerIO());
 	// really bad error.
 	// fortunately it should be impossible anyway :)
  } else {
-	p = playerIO()->player();
+	playerId = playerIO()->playerId();
  }
 
- return BosonScript::newScriptParser(BosonScript::Python, p);
+ return BosonScript::newScriptParser(BosonScript::Python, playerId);
 }
 
 void BoComputerPlayerEventListener::processEvent(const BoEvent* event)

@@ -59,7 +59,7 @@ class BosonScript
   public:
     enum Language { Python = 1 };
 
-    static BosonScript* newScriptParser(Language lang, Player* p);
+    static BosonScript* newScriptParser(Language lang, int playerId = -1);
 
     virtual ~BosonScript();
 
@@ -129,7 +129,6 @@ class BosonScript
 
     virtual void callEventHandler(const BoEvent* e, const QString& function, const QString& args) = 0;
 
-    Player* player() const  { return mPlayer; }
     int playerId() const;
 
 
@@ -450,7 +449,7 @@ class BosonScript
 
 
   protected:
-    BosonScript(Player* p);
+    BosonScript(int playerId = -1);
 
     static void sendInput(int player, QDataStream& stream);
 
@@ -472,7 +471,7 @@ class BosonScript
     static BosonScript* mCurrentScript;
     BosonScriptInterface* mInterface;
 
-    Player* mPlayer;
+    int mPlayerId;
 
     static BosonCanvas* mCanvas;
     static Boson* mGame;

@@ -146,7 +146,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
 
 /*****  Basic stuff  *****/
 
-PythonScript::PythonScript(Player* p) : BosonScript(p)
+PythonScript::PythonScript(int playerId) : BosonScript(playerId)
 {
   boDebug() << k_funcinfo << endl;
 
