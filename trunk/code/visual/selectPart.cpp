@@ -25,10 +25,10 @@
 
 
 #define SP_THICK	4
-#define SP_COIN_LEN	15
-#define SP_COIN_POS	8
+#define SP_CORNER_LEN	15
+#define SP_CORNER_POS	8
 #define SP_W		35
-#define SP_H		(SP_COIN_LEN+SP_COIN_POS)
+#define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
 static void drawSelectBox(QPainter &painter, QColor c1, QColor c2);
 
@@ -43,11 +43,11 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2)
 	painter.setPen(pen);
 	painter.fillRect(0,0,SP_W,SP_THICK,c1);
 	painter.fillRect(
-		SP_W - SP_COIN_LEN	, SP_COIN_POS,
-		SP_COIN_LEN		, SP_THICK, c2);
+		SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
+		SP_CORNER_LEN		, SP_THICK, c2);
 	painter.fillRect(
-		SP_W - SP_THICK		, SP_COIN_POS,
-		SP_THICK		, SP_COIN_LEN, c2);
+		SP_W - SP_THICK		, SP_CORNER_POS,
+		SP_THICK		, SP_CORNER_LEN, c2);
 }
 
 
@@ -95,7 +95,7 @@ void selectPart_up::initStatic()
 	for(i=0; i<PART_NB; i++) {
 		pix = new QPixmap(*pix);
 		pixmaps.append (pix);
-		point = new QPoint(SP_W-2, SP_COIN_POS);
+		point = new QPoint(SP_W-2, SP_CORNER_POS);
 		points.append (point);
 		}
 
@@ -154,7 +154,7 @@ void selectPart_down::initStatic()
 	for(i=0; i<PART_NB; i++) {
 		pix = new QPixmap(*pix);
 		pixmaps.append (pix);
-		point = new QPoint(1, SP_H-2 - SP_COIN_POS);
+		point = new QPoint(1, SP_H-2 - SP_CORNER_POS);
 		points.append (point);
 		}
 
