@@ -40,7 +40,8 @@ BoMessage::BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UIN
 		receiver(_receiver),
 		sender(_sender),
 		clientId(_clientId),
-		advanceCallsCount(_advanceCallsCount)
+		receivedOnAdvanceCallsCount(_advanceCallsCount),
+		deliveredOnAdvanceCallsCount(0)
 {
  mArrivalTime = QTime::currentTime();
 }
@@ -51,7 +52,8 @@ BoMessage::BoMessage(QDataStream& stream, int _msgid, Q_UINT32 _receiver, Q_UINT
 		receiver(_receiver),
 		sender(_sender),
 		clientId(_clientId),
-		advanceCallsCount(_advanceCallsCount)
+		receivedOnAdvanceCallsCount(_advanceCallsCount),
+		deliveredOnAdvanceCallsCount(0)
 {
  mArrivalTime = QTime::currentTime();
 }
@@ -268,7 +270,7 @@ bool BoMessageLogger::saveHumanReadableMessageLog(QIODevice* logDevice)
  QPtrListIterator<BoMessage> it(*mLoggedMessages);
  while (it.current()) {
 	const BoMessage* m = it.current();
-	log << "Msg: " << m->advanceCallsCount << "  "
+	log << "Msg: " << m->deliveredOnAdvanceCallsCount << "  "
 			<< m->msgid << "  "
 			<< m->sender << " "
 			<< m->receiver << " "
@@ -299,7 +301,7 @@ bool BoMessageLogger::saveMessageLog(QIODevice* logDevice, unsigned int maxCount
  }
  while (it.current()) {
 	const BoMessage* m = it.current();
-	stream << (Q_UINT32)m->advanceCallsCount;
+	stream << (Q_UINT32)m->deliveredOnAdvanceCallsCount;
 	stream << (Q_INT32)m->msgid;
 	stream << (Q_UINT32)m->sender;
 	stream << (Q_UINT32)m->receiver;
@@ -334,7 +336,10 @@ bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* 
  Q_UINT32 count;
  stream >> count;
  for (unsigned int i = 0; i < count; i++) {
-	Q_UINT32 advanceCallsCount;
+	// AB: we log when the message was delivered _only_
+	// -> receiving of the message is not interesting and makes comparing
+	// network logs very hard (diffs are useless then)
+	Q_UINT32 deliveredOnAdvanceCallsCount;
 	Q_INT32 msgid;
 	Q_UINT32 sender;
 	Q_UINT32 receiver;
@@ -342,7 +347,7 @@ bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* 
 	QTime arrivalTime;
 	QTime deliveryTime;
 	QByteArray byteArray;
-	stream >> advanceCallsCount;
+	stream >> deliveredOnAdvanceCallsCount;
 	stream >> msgid;
 	stream >> sender;
 	stream >> receiver;
@@ -351,7 +356,7 @@ bool BoMessageLogger::loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* 
 	stream >> deliveryTime;
 	stream >> byteArray;
 
-	BoMessage* m = new BoMessage(byteArray, msgid, receiver, sender, clientId, advanceCallsCount);
+	BoMessage* m = new BoMessage(byteArray, msgid, receiver, sender, clientId, deliveredOnAdvanceCallsCount);
 	m->mArrivalTime = arrivalTime;
 	m->mDeliveryTime = deliveryTime;
 	messages->append(m);

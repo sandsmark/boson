@@ -41,7 +41,8 @@ public:
 	Q_UINT32 receiver;
 	Q_UINT32 sender;
 	Q_UINT32 clientId;
-	unsigned int advanceCallsCount;
+	unsigned int receivedOnAdvanceCallsCount;
+	unsigned int deliveredOnAdvanceCallsCount;
 	QTime mArrivalTime;
 	QTime mDeliveryTime;
 
