@@ -28,6 +28,7 @@
 #include "bomesh.h"
 #include "bomaterial.h"
 #include "bosonfont/bosonglfont.h"
+#include "bosonfont/bosonglfontchooser.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
@@ -180,7 +181,10 @@ void ModelPreview::initializeGL()
  recursive = true;
  makeCurrent();
  delete mDefaultFont;
- mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
+ boDebug() << boConfig->stringValue("GLFont", QString::null) << endl;
+ BoFontInfo defaultFontInfo;
+ defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
+ mDefaultFont = new BosonGLFont(defaultFontInfo);
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
@@ -209,6 +213,18 @@ void ModelPreview::initializeGL()
 
 
  recursive = false;
+}
+
+void ModelPreview::setFont(const BoFontInfo& font)
+{
+ makeCurrent();
+ delete mDefaultFont;
+ mDefaultFont = new BosonGLFont(font);
+}
+
+const BoFontInfo& ModelPreview::fontInfo() const
+{
+ return mDefaultFont->fontInfo();
 }
 
 void ModelPreview::resizeGL(int w, int h)
@@ -1447,6 +1463,8 @@ void RenderMain::initKAction()
 		actionCollection(), "options_light"); // AB: actually this is NOT a setting
  (void)new KAction(i18n("Materials..."), 0, this, SLOT(slotShowMaterialsWidget()),
 		actionCollection(), "options_materials"); // AB: actually this is NOT a setting
+ (void)new KAction(i18n("Font..."), 0, this, SLOT(slotChangeFont()),
+		actionCollection(), "options_font"); // AB: actually this is NOT a setting
 
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
@@ -1533,6 +1551,18 @@ void RenderMain::slotReloadModelTextures()
 {
  BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
  BosonModelTextures::modelTextures()->reloadTextures();
+}
+
+void RenderMain::slotChangeFont()
+{
+ mPreview->initializeGL();
+ BoFontInfo f;
+ f = mPreview->fontInfo();
+ int result = BosonGLFontChooser::getFont(f, this);
+ if (result == QDialog::Accepted) {
+	mPreview->setFont(f);
+	boConfig->setStringValue("GLFont", mPreview->fontInfo().toString());
+ }
 }
 
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)

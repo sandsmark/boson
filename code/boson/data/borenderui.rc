@@ -19,6 +19,7 @@
     <Action name="options_background_color" />
     <Action name="options_light" />
     <Action name="options_materials" />
+    <Action name="options_font" />
   </Menu>
 </MenuBar>
 </kpartgui>
