@@ -140,8 +140,6 @@ public:
 	 **/
 	virtual void advanceProduction() { }
 
-	void attackUnit(Unit* target);
-	
 	inline Unit* target() const;
 	virtual void setTarget(Unit* target);
 	bool inRange(Unit* unit) const;

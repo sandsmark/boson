@@ -230,7 +230,33 @@ void Unit::advanceNone()
 
 void Unit::advanceAttack()
 {
- attackUnit(target());
+ kdDebug() << k_funcinfo << endl;
+ if (!target()) {
+	kdWarning() << k_funcinfo << "cannot attack NULL target" << endl;
+	stopAttacking();
+	return;
+ }
+ if (target()->isDestroyed()) {
+	kdDebug() << "Target is destroyed!" << endl;
+	stopAttacking();
+	return;
+ }
+ if (!inRange(target())) {
+	if (!canvas()->allItems().contains(target())) {
+		kdDebug() << "Target seems to be destroyed!" << endl;
+		stopAttacking();
+		return;
+	}
+	kdDebug() << "unit not in range - moving..." << endl;
+	moveTo(target()->x(), target()->y());
+	setAdvanceWork(WorkMove);
+	return;
+ }
+ shootAt(target());
+ if (target()->isDestroyed()) {
+	stopAttacking();
+ }
+
 }
 
 void Unit::addWaypoint(const QPoint& pos)
@@ -360,7 +386,7 @@ void Unit::stopMoving()
 
 void Unit::stopAttacking()
 {
- stopMoving(); // FIXME not really intuitive... nevertheless its currenlty useful.
+ stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
  setTarget(0);
  setWork(WorkNone);
 }
@@ -410,45 +436,6 @@ bool Unit::inRange(Unit* target) const
  // maybe we should use an own algorithm here - can be faster than this generic
  // one
  return unitsInRange().contains(target);
-}
-
-void Unit::attackUnit(Unit* target)
-{
- if (!target) {
-	kdError() << k_funcinfo << ": cannot attack NULL target" << endl;
-	return;
- }
- if (target->isDestroyed()) {
-	kdDebug() << "Target is destroyed!" << endl;
-	stopAttacking();
-	return;
- }
- if (!inRange(target)) {
-	if (!canvas()->allItems().contains(target)) {
-		kdDebug() << "Target seems to be destroyed!" << endl;
-		stopAttacking();
-		return;
-	}
-	// TODO: make sure that the attakced unit has not moved!!
-	// if it has moved the waypoints should be regenerated (perhaps if the
-	// unit moved across one or more cells?)
-	if (waypointCount() == 0) { //FIXME perhaps it could happen that the new waypoints have not yet arrived but are underway! moveTo() would clear them...
-		moveTo(target->x(), target->y());
-	}
-	kdDebug() << "unit not in range - moving..." << endl;
-	advanceMove();
-	advanceMoveCheck();
-	return;
- }
- if (waypointCount() > 0) {
-	clearWaypoints();
- }
- setXVelocity(0);
- setYVelocity(0);
- shootAt(target);
- if (target->isDestroyed()) {
-	stopAttacking();
- }
 }
 
 void Unit::shootAt(Unit* target)
@@ -687,6 +674,20 @@ void MobileUnit::advanceMove()
 	setXVelocity(0);
 	setYVelocity(0);
 	return;
+ }
+
+ if (advanceWork() != work()) {
+	if (work() == WorkAttack) {
+		// no need to move to the position of the unit...
+		// just check if unit is in range now.
+		if (inRange(target())) {
+			kdDebug() << k_funcinfo << "target is in range now" << endl;
+			stopMoving();
+			return;
+		}
+		// TODO: make sure that target() hasn't moved!
+		// if it has moved also adjust waypoints
+	}
  }
 
  QPoint wp = currentWaypoint(); // where we go to
