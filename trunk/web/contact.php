@@ -42,7 +42,10 @@ draw_bigbox_text("There are three mailing lists.<br><br>
     boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post there.<br>
     <br>
     boson-bugs@lists.sourceforge.net is also not meant for posting, bug reports are sent there.
-    See below on how to report bugs.<br><br>");
+    See below on how to report bugs.
+    <br><br>
+    You can subscribe and unsubscribe them
+    <a href=\"http://sourceforge.net/mail/?group_id=15087\" target=\"_blank\"> here.</a><br><br>");
 
 draw_bigbox_subheader("IRC");
 draw_bigbox_text("We also have an IRC channel. If you have questions/problems/compile errors,
