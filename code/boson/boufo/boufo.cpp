@@ -525,7 +525,7 @@ void BoUfoWidget::init(ufo::UWidget* w)
 
 void BoUfoWidget::invalidate()
 {
- boDebug() << k_funcinfo << endl;
+// boDebug() << k_funcinfo << endl;
  widget()->invalidateTree();
 }
 
@@ -657,11 +657,13 @@ void BoUfoWidget::setPreferredSize(const ufo::UDimension& s)
 void BoUfoWidget::show()
 {
  widget()->setVisible(true);
+ invalidate(); // AB: libufo fails to do so
 }
 
 void BoUfoWidget::hide()
 {
  widget()->setVisible(false);
+ invalidate(); // AB: libufo fails to do so
 }
 
 void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
@@ -1262,6 +1264,11 @@ void BoUfoLabel::setText(const QString& text)
 	mLabel->setText("");
  } else {
 	mLabel->setText(text.latin1());
+
+	// AB: the text is not completely displayed if it the widget was smaller previously.
+	// FIXME: buttons (e.g.) probably have the same problem
+//	invalidate();
+	mLabel->invalidate();
  }
 }
 
