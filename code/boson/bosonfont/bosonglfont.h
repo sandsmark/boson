@@ -199,6 +199,11 @@ public:
 	int width(const QString& text);
 
 	/**
+	 * @return The width of @p string, which must not contain any newlines.
+	 **/
+	int lineWidth(const GLubyte* string, int len) const;
+
+	/**
 	 * @return The width of the widest char in this font
 	 **/
 	int widestChar() const;

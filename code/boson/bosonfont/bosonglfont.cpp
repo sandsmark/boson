@@ -502,6 +502,11 @@ int BosonGLFont::width(const QString& text)
  return wmax;
 }
 
+int BosonGLFont::lineWidth(const GLubyte* text, int len) const
+{
+ return mFont->width(text, len);
+}
+
 int BosonGLFont::wrapAtPos(const GLubyte* string, int length) const
 {
  for (int i = length - 1; i > 0; i--) {
