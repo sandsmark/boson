@@ -138,7 +138,7 @@ void BosonShot::advanceMoveCheck()
   {
     velocityX = 0.0f;
     xPos = x();
-    if(yPos < 0 || yPos >= canvas()->mapHeight() * BO_TILE_SIZE)
+    if(xPos < 0 || xPos >= canvas()->mapWidth() * BO_TILE_SIZE)
     {
       boError() << k_funcinfo << "Internal error! xPos is still invalid: " << xPos << endl;
     }
