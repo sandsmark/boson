@@ -72,6 +72,12 @@ void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 	SETPIXEL(2*(x)+1, 2*(y));	\
 	SETPIXEL(2*(x), 2*(y)+1);	\
 	SETPIXEL(2*(x)+1, 2*(y)+1)
+#define SETPIXEL3(x,y) \
+	SETPIXEL2(2*(x), 2*(y));	\
+	SETPIXEL2(2*(x)+1, 2*(y));	\
+	SETPIXEL2(2*(x), 2*(y)+1);	\
+	SETPIXEL2(2*(x)+1, 2*(y)+1)
+
 	if (_debug) {
 		// draw a rectangle on top of that
 		int i;
@@ -84,56 +90,57 @@ void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 		// print the # version
 		switch(z%4) {
 			case 0:
-				SETPIXEL2(3,4);
-				SETPIXEL2(4,3);
-				SETPIXEL2(5,3);
-				SETPIXEL2(5,4);
-				SETPIXEL2(5,5);
-				SETPIXEL2(5,6);
-				SETPIXEL2(5,7);
+				SETPIXEL3(3,4);
+				SETPIXEL3(4,3);
+				SETPIXEL3(5,3);
+				SETPIXEL3(5,4);
+				SETPIXEL3(5,5);
+				SETPIXEL3(5,6);
+				SETPIXEL3(5,7);
 				break;
 			case 1:
-				SETPIXEL2(4,4);
-				SETPIXEL2(5,3);
-				SETPIXEL2(6,3);
-				SETPIXEL2(7,4);
-				SETPIXEL2(6,5);
-				SETPIXEL2(5,6);
-				SETPIXEL2(4,7);
-				SETPIXEL2(5,7);
-				SETPIXEL2(6,7);
-				SETPIXEL2(7,7);
+				SETPIXEL3(4,4);
+				SETPIXEL3(5,3);
+				SETPIXEL3(6,3);
+				SETPIXEL3(7,4);
+				SETPIXEL3(6,5);
+				SETPIXEL3(5,6);
+				SETPIXEL3(4,7);
+				SETPIXEL3(5,7);
+				SETPIXEL3(6,7);
+				SETPIXEL3(7,7);
 				break;
 			case 2:
-				SETPIXEL2(4,3);
-				SETPIXEL2(5,3);
+				SETPIXEL3(4,3);
+				SETPIXEL3(5,3);
 
-				SETPIXEL2(4,5);
-				SETPIXEL2(5,5);
+				SETPIXEL3(4,5);
+				SETPIXEL3(5,5);
 
-				SETPIXEL2(4,7);
-				SETPIXEL2(5,7);
+				SETPIXEL3(4,7);
+				SETPIXEL3(5,7);
 
-				SETPIXEL2(6,4);
-				SETPIXEL2(6,5);
-				SETPIXEL2(6,6);
+				SETPIXEL3(6,4);
+				SETPIXEL3(6,5);
+				SETPIXEL3(6,6);
 				break;
 			case 3:
-				SETPIXEL2(6,3);
-				SETPIXEL2(5,4);
-				SETPIXEL2(4,5);
-				SETPIXEL2(4,6);
-				SETPIXEL2(5,6);
-				SETPIXEL2(6,6);
-				SETPIXEL2(7,6);
+				SETPIXEL3(6,3);
+				SETPIXEL3(5,4);
+				SETPIXEL3(4,5);
+				SETPIXEL3(4,6);
+				SETPIXEL3(5,6);
+				SETPIXEL3(6,6);
+				SETPIXEL3(7,6);
 
-				SETPIXEL2(7,5);
-				SETPIXEL2(7,7);
+				SETPIXEL3(7,5);
+				SETPIXEL3(7,7);
 				break;
 		}
 	}
-#undef SETPIXEL
+#undef SETPIXEL3
 #undef SETPIXEL2
+#undef SETPIXEL
 
 	bitBlt(&theBig, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
 }
