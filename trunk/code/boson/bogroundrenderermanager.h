@@ -19,7 +19,7 @@
 #ifndef BOGROUNDRENDERERMANAGER_H
 #define BOGROUNDRENDERERMANAGER_H
 
-#include <qobject.h>
+#include "bopluginmanager.h"
 
 class BoGroundRenderer;
 class PlayerIO;
@@ -31,19 +31,12 @@ class BoGroundRendererManagerPrivate;
  * @short Managing of @ref BoGroundRenderer classes
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoGroundRendererManager
+class BoGroundRendererManager : public BoPluginManager
 {
 public:
 	~BoGroundRendererManager();
 
 	static void initStatic();
-
-	/**
-	 * @param unusable If non-null this is set to TRUE, when reloading
-	 * failed and the library is unusable now, or to FALSE if it still can
-	 * be used. If reloading succeeded, this is always set to FALSE.
-	 **/
-	bool reloadPlugin(bool* unusable);
 
 	/**
 	 * @return The BoGroundRendererManager object.
@@ -64,7 +57,10 @@ public:
 	 * @param className The name of the renderer, or @ref QString::null for
 	 * the first renderer found
 	 **/
-	bool makeRendererCurrent(const QString& className);
+	bool makeRendererCurrent(const QString& className)
+	{
+		return makePluginCurrent(className);
+	}
 	bool makeRendererIdCurrent(int id); // obsolete
 
 	/**
@@ -73,34 +69,49 @@ public:
 	 * @return TRUE when we have a current renderer, FALSE if no current
 	 * renderer is set and no default renderer could get loaded.
 	 **/
-	static bool checkCurrentRenderer();
+	static bool checkCurrentRenderer()
+	{
+		if (!manager()) {
+			return false;
+		}
+		return manager()->checkCurrentPlugin();
+	}
 
 	/**
 	 * @return The @ref QObject::className of the @ref currentRenderer or
 	 * @ref QString::null if none is set. This name can be used in @ref
 	 * makeRendererCurrent.
 	 **/
-	QString currentRendererName() const;
+	inline QString currentRendererName() const
+	{
+		return currentPluginName();
+	}
 
 	/**
 	 * @return The currently used renderer. See @ref makeRendererCurrent
 	 **/
 	BoGroundRenderer* currentRenderer() const
 	{
-		return mCurrentRenderer;
+		return (BoGroundRenderer*)currentPlugin();
 	}
 
 	void setLocalPlayerIO(PlayerIO*);
 	void setViewFrustum(const float*);
 	void setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport);
 
-	void unsetCurrentRenderer();
+	void unsetCurrentRenderer()
+	{
+		unsetCurrentPlugin();
+	}
 
 protected:
-	bool loadLibrary();
-	bool unloadLibrary();
 	BoGroundRenderer* createRenderer(const QString& name);
-	bool makeRendererCurrent(BoGroundRenderer* renderer);
+
+	virtual QString configKey() const;
+	virtual QString libname() const;
+
+	virtual void initializePlugin();
+	virtual void deinitializePlugin();
 
 private:
 	BoGroundRendererManager();
@@ -108,8 +119,6 @@ private:
 private:
 	BoGroundRendererManagerPrivate* d;
 	static BoGroundRendererManager* mManager;
-
-	BoGroundRenderer* mCurrentRenderer;
 };
 
 #endif
