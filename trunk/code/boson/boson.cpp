@@ -33,6 +33,7 @@
 
 #include <qtimer.h>
 #include <qptrlist.h>
+#include <qdom.h>
 
 #include "boson.moc"
 
@@ -420,10 +421,39 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			p = playerList()->at(owner);
 		}
 		if (!p) {
-			kdError() << "Cannot find player " << owner << endl;
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
 		addUnit(unitType, (Player*)p, x, y);
+		break;
+	}
+	case BosonMessage::AddUnitsXML:
+	{
+		Q_INT32 owner;
+		stream >> owner;
+
+		QString xmlDocument;
+		stream >> xmlDocument;
+
+		KPlayer* p = 0;
+		if (owner >= 1024) { // a KPlayer ID
+			p = findPlayer(owner);
+		} else {
+			p = playerList()->at(owner);
+		}
+		if (!p) {
+			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+
+		QDomDocument doc;
+		doc.setContent(xmlDocument);
+		QDomElement root = doc.documentElement();
+		QDomNodeList list = root.elementsByTagName("Unit");
+		for (unsigned int i = 0; i < list.count(); i++) {
+			QDomElement e = list.item(i).toElement();
+			addUnit(e, (Player*)p);
+		}
 		break;
 	}
 	case BosonMessage::Advance:
@@ -663,11 +693,31 @@ void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
 
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_INT32)owner->id();
  stream << (Q_INT32)unitType;
  stream << (Q_INT32)x;
  stream << (Q_INT32)y;
- stream << (Q_INT32)owner->id();
  sendMessage(buffer, BosonMessage::AddUnit);
+}
+
+void Boson::sendAddUnits(const QString& xmlDocument, Player* owner)
+{
+ if (!isServer()) {
+	return;
+ }
+ if (!owner) {
+	kdWarning() << k_funcinfo << ": NULL owner! using first player" << endl;
+	owner = (Player*)playerList()->at(0);
+ }
+ if (!owner) { // no player here
+	kdError() << k_funcinfo << ": NULL owner" << endl;
+	return;
+ }
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_INT32)owner->id();
+ stream << xmlDocument;
+ sendMessage(buffer, BosonMessage::AddUnitsXML);
 }
 
 void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
@@ -748,6 +798,28 @@ Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
 {
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
+ emit signalAddUnit(unit, x, y);
+ return unit;
+}
+
+Unit* Boson::addUnit(QDomElement& node, Player* p)
+{
+ int unitType = node.attribute("UnitType").toInt();
+ int x = node.attribute("x").toInt();
+ int y = node.attribute("y").toInt();
+ Unit* unit = createUnit(unitType, (Player*)p);
+ unit->setId(nextUnitId());
+ if (node.hasAttribute("Health")) {
+	unit->setHealth(node.attribute("Health").toUInt());
+ }
+ if (node.hasAttribute("Armor")) {
+	unit->setArmor(node.attribute("Armor").toUInt());
+ }
+ if (node.hasAttribute("Shields")) {
+	unit->setShields(node.attribute("Shields").toUInt());
+ }
+ 
+ 
  emit signalAddUnit(unit, x, y);
  return unit;
 }

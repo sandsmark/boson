@@ -36,38 +36,72 @@
 #define TAG_FIELD "bosonscenario_magic_0_6"
 #define TAG_UNIT (0xba)
 
-struct ScenarioUnit
-{
-	int unitType;
-	int x;
-	int y;
-};
-
-class ScenarioPlayer
+class ScenarioUnit
 {
 public:
+	ScenarioUnit()
+	{
+	}
+
+	bool save(QDomElement& node)
+	{
+		if (!mNode.hasAttribute("UnitType")) {
+			kdError() << k_funcinfo << "missing UnitType" << endl;
+			return false;
+		}
+		if (!mNode.hasAttribute("x")) {
+			kdError() << k_funcinfo << "missing x" << endl;
+			return false;
+		}
+		if (!mNode.hasAttribute("y")) {
+			kdError() << k_funcinfo << "missing y" << endl;
+			return false;
+		}
+
+		node = mNode.cloneNode(true).toElement();
+		return true;
+	}
+	
+	bool load(QDomElement& node)
+	{
+		if (!node.hasAttribute("UnitType")) {
+			kdError() << "Missing UnitType" << endl;
+			return false;
+		}
+		if (!node.hasAttribute("x")) {
+			kdError() << "Missing x" << endl;
+			return false;
+		}
+		if (!node.hasAttribute("y")) {
+			kdError() << "Missing y" << endl;
+			return false;
+		}
+
+		mNode = node.cloneNode(true).toElement(); 
+		return true;
+	}
+
+private:
+	QDomElement mNode;
+};
+
+
+class ScenarioPlayer 
+{
+public:
+
 	ScenarioPlayer()
 	{
 		mMinerals = 0;
 		mOil = 0;
-	}
-	
-	bool savePlayer(QDataStream& stream)
-	{
-		stream << (Q_LONG)minerals();
-		stream << (Q_LONG)oil();
-		stream << (Q_UINT32)unitCount();
-		QValueList<ScenarioUnit>::Iterator it;
-		for (it = mUnits.begin(); it != mUnits.end(); ++it) {
-			ScenarioUnit s = (*it);
-			stream << (Q_INT32)TAG_UNIT;
-			stream << (Q_INT32)s.unitType;
-			stream << (Q_INT32)s.x;
-			stream << (Q_INT32)s.y;
-		}
-		return true;
+
+		mUnits.setAutoDelete(true);
 	}
 
+	~ScenarioPlayer()
+	{
+		mUnits.clear();
+	}
 	bool savePlayer(QDomDocument& doc, QDomElement& node)
 	{
 		QDomText m = doc.createTextNode("Minerals");
@@ -78,121 +112,45 @@ public:
 		node.appendChild(o);
 		o.setData(QString::number(oil()));
 
-		QValueList<ScenarioUnit>::Iterator it;
-		for (it = mUnits.begin(); it != mUnits.end(); ++it) {
-			ScenarioUnit s = (*it);
+		QPtrListIterator<ScenarioUnit> it(mUnits);
+		while (it.current()) {
 			QDomElement unit = doc.createElement("Unit");
 			node.appendChild(unit);
-			unit.setAttribute("UnitType", s.unitType);
-			unit.setAttribute("x", s.x);
-			unit.setAttribute("y", s.y);
+			it.current()->save(unit);
+			++it;
 		}
 		return true;
 	}
 
-	bool loadPlayer(QDataStream& stream)
-	{
-		Q_ULONG minerals;
-		Q_ULONG oil;
-		Q_UINT32 unitCount;
-		stream >> minerals;
-		stream >> oil;
-		stream >> unitCount;
-
-		setMinerals(minerals);
-		setOil(oil);
-
-		for (unsigned int i = 0; i < unitCount; i++) {
-			Q_INT32 tag_unit;
-			Q_INT32 unitType;
-			Q_INT32 x;
-			Q_INT32 y;
-	
-			stream >> tag_unit;
-			stream >> unitType;
-			stream >> x;
-			stream >> y;
-	
-			if (tag_unit != TAG_UNIT) {
-				kdError() << "Missing TAG_UNIT" << endl;
-				return false;
-			}
-			
-			ScenarioUnit s;
-			s.unitType = unitType;
-			s.x = x;
-			s.y = y;
-			mUnits.append(s);
-		}
-		return true;
-	}
-	
 	bool loadPlayer(QDomElement& node)
 	{
-
-		bool ok = false; // toInt() parameter
-		QByteArray buffer;
-		QDataStream stream(buffer, IO_WriteOnly);
-
+		bool ret = true;
 		unsigned long int minerals = 0;
 		unsigned long int oil = 0;
 
 		if (!readMinerals(node, minerals)) {
-			return false;
+			ret = false;
 		}
 		if (!readOil(node, oil)) {
-			return false;
+			ret = false;
 		}
-		stream << (Q_ULONG)minerals;
-		stream << (Q_ULONG)oil;
+		setMinerals(minerals);
+		setOil(oil);
  
 		QDomNodeList list = node.elementsByTagName("Unit");
-		stream << (Q_UINT32)list.count();
 		for (unsigned int i = 0; i < list.count(); i++) {
 			QDomElement unit = list.item(i).toElement();
 			if (unit.isNull()) {
 				kdError() << "Unit is not a QDomElement" << endl;
 				return false;
 			}
-			if (!unit.hasAttribute("UnitType")) {
-				kdError() << "Missing UnitType" << endl;
-				return false;
+			ScenarioUnit* s = new ScenarioUnit();
+			if (!s->load(unit)) {
+				ret = false;
 			}
-			if (!unit.hasAttribute("x")) {
-				kdError() << "Missing x" << endl;
-				return false;
-			}
-			if (!unit.hasAttribute("y")) {
-				kdError() << "Missing y" << endl;
-				return false;
-			}
-			Q_INT32 unitType;
-			Q_INT32 x;
-			Q_INT32 y;
-		
-			unitType = unit.attribute("UnitType").toInt(&ok);
-			if (!ok) {
-				kdError() << k_funcinfo << "UnitType was no number" << endl;
-				return false;
-			}
-			x = unit.attribute("x").toInt(&ok);
-			if (!ok) {
-				kdError() << k_funcinfo << "x was no number" << endl;
-				return false;
-			}
-			y = unit.attribute("y").toInt(&ok);
-			if (!ok) {
-				kdError() << k_funcinfo << "y was no number" << endl;
-				return false;
-			}
-	
-			stream << (Q_INT32)TAG_UNIT;
-			stream << unitType;
-			stream << x;
-			stream << y;
+		 	mUnits.append(s);
 		}
-		QDataStream readStream(buffer, IO_ReadOnly);
-		return loadPlayer(readStream);
+		return ret;
 	}
 
 	unsigned int unitCount() const
@@ -200,9 +158,9 @@ public:
 		return mUnits.count();
 	}
 	
-	ScenarioUnit unit(unsigned int i)
+	ScenarioUnit* unit(unsigned int i)
 	{
-		return mUnits[i];
+		return mUnits.at(i);
 	}
 
 	void setMinerals(unsigned long int m) { mMinerals = m; }
@@ -210,6 +168,28 @@ public:
 
 	void setOil(unsigned long int o) { mOil = o; }
 	unsigned long int oil() const { return mOil; }
+
+	void addToGame(Boson* boson, Player* p)
+	{
+		p->setMinerals(minerals());
+		p->setOil(oil());
+
+		// now add the units
+		QDomDocument doc;
+		QDomElement root = doc.createElement("BosonUnits");
+		doc.appendChild(root);
+
+		for (unsigned int i = 0; i < unitCount(); i++) {
+			QDomElement e = doc.createElement("Unit");
+			if (unit(i)->save(e)) {
+				root.appendChild(e);
+			} else {
+				kdWarning() << k_funcinfo << "failed saving unit " << i << endl;
+			}
+		 }
+
+		boson->sendAddUnits(doc.toString(), p);
+	}
 
 protected:
 	bool readMinerals(QDomElement& node, unsigned long int& minerals)
@@ -219,9 +199,9 @@ protected:
 			kdWarning() << "Must have exactly one \"Minerals\" per player" << endl;
 			return false;
 		}
-		 bool ok = false;
-		 QDomElement e = list.item(0).toElement();
-		 minerals = e.text().toULong(&ok);
+		bool ok = false;
+		QDomElement e = list.item(0).toElement();
+		minerals = e.text().toULong(&ok);
 		if (!ok) {
 			kdError() << "Invalid minerals" << endl;
 			return false;
@@ -245,12 +225,12 @@ protected:
 		}
 		return true;
 	}
-
-
+	
 private:
-	QValueList<ScenarioUnit> mUnits;
 	unsigned long int mMinerals;
 	unsigned long int mOil;
+
+	QPtrList<ScenarioUnit> mUnits;
 };
 
 
@@ -284,6 +264,7 @@ BosonScenario::BosonScenario(const QString& fileName)
 
 BosonScenario::~BosonScenario()
 {
+ kdDebug() << k_funcinfo << endl;
  delete d;
 }
 
@@ -300,7 +281,6 @@ QString BosonScenario::defaultScenario()
 
 bool BosonScenario::loadScenario(const QString& fileName)
 {
- // open stream
  QIODevice* dev = KFilterDev::deviceForFile(fileName);
  if (!dev) {
 	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
@@ -316,20 +296,7 @@ bool BosonScenario::loadScenario(const QString& fileName)
  delete dev;
  d->mFileName = fileName;
 
- QDataStream stream(buffer, IO_ReadOnly);
- if (verifyScenario(stream)) { // binary file
-	if (!loadScenarioSettings(stream)) {
-		kdError() << "Could not load scenario settings" << endl;
-		return false;
-	}
-	if (!loadPlayers(stream)) {
-		kdError() << "Could not load scenario players" << endl;
-		return false;
-	}
-	kdDebug() << "loading done - save now..." << endl;
-	return true;
- }
- // XML file
+
  QDomDocument doc("BosonScenario");
  QString errorMsg;
  int lineNo;
@@ -376,27 +343,8 @@ bool BosonScenario::loadScenario(const QString& fileName)
  return false;
 }
 
-bool BosonScenario::saveScenario(const QString& fileName, bool binary)
+bool BosonScenario::saveScenario(const QString& fileName)
 {
- if (binary) {
-	QIODevice* dev = KFilterDev::deviceForFile(fileName);
-	if (!dev) {
-		kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
-		return false;
-	}
-	if (!dev->open(IO_WriteOnly)) {
-		kdError() << k_funcinfo << ": Could not open " << fileName << endl;
-		delete dev;
-		return false;
-	}
-	QDataStream stream(dev);
-	bool ret = saveScenario(stream);
-	dev->close();
-	delete dev;
-	return ret;
- }
-
- // now save the file
  QIODevice* dev = KFilterDev::deviceForFile(fileName, "application/x-gzip");
  if (!dev) {
 	kdError() << k_funcinfo << ": NULL device for " << fileName << endl;
@@ -410,23 +358,6 @@ bool BosonScenario::saveScenario(const QString& fileName, bool binary)
  saveXMLScenario(dev);
  dev->close();
  delete dev;
- return true;
-}
-
-bool BosonScenario::saveScenario(QDataStream& stream)
-{
- if (!saveValidityHeader(stream)) {
-	kdError() << "Could not write header" << endl;
-	return false;
- }
- if (!saveScenarioSettings(stream)) {
-	kdError() << "Could not write settings" << endl;
-	return false;
- }
- if (!savePlayers(stream)) {
-	kdError() << "Could not write players" << endl;
-	return false;
- }
  return true;
 }
 
@@ -470,91 +401,51 @@ bool BosonScenario::saveScenarioSettings(QDomElement& node)
 
 bool BosonScenario::loadScenarioSettings(QDomElement& node)
 {
- if (!node.hasAttribute("MinPlayers")) {
-	kdError() << "Missing MinPlayers" << endl;
-	return false;
+ if (d->mPlayers.count() != 0) {
+	kdError() << k_funcinfo << "called before!!" << endl;
+	d->mPlayers.clear();
  }
+
  if (!node.hasAttribute("MaxPlayers")) {
 	kdError() << "Missing MaxPlayers" << endl;
 	return false;
  }
 
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
-
  bool ok;
- Q_UINT32 min = node.attribute("MinPlayers").toUInt(&ok);
- if (!ok) {
-	kdWarning() << "invalid MinPlayers" << endl;
-	min = 0;
+ unsigned int min = 1;
+ if (node.hasAttribute("MinPlayers")) {
+	min = node.attribute("MinPlayers").toUInt(&ok);
+	if (!ok) {
+		kdWarning() << "invalid MinPlayers" << endl;
+		min = 1;
+	}
  }
- Q_INT32 max = node.attribute("MaxPlayers").toInt(&ok);
+ if (min < 1) {
+	kdError() << k_funcinfo << "broken scenario file!" << endl;
+	kdError() << "min < 1" << endl;
+	return false;
+ }
+ int max = node.attribute("MaxPlayers").toInt(&ok);
  if (!ok) {
 	kdWarning() << "invalid MaxPlayers" << endl;
 	max = 0;
  }
- 
- stream << min;
- stream << max;
- 
- QDataStream readStream(buffer, IO_ReadOnly);
- loadScenarioSettings(readStream);
- return true;
-}
+ if (max > BOSON_MAX_PLAYERS) {
+	kdError() << k_funcinfo << "broken scenario file!" << endl;
+	kdError() << "max > " << BOSON_MAX_PLAYERS << endl;
+	return false;
+ }
+ if ((int)min > max) {
+	kdError() << k_funcinfo << "broken scenario file!" << endl;
+	kdError() << "min > max" << endl;
+	return false;
+ }
 
-bool BosonScenario::loadScenarioSettings(QDataStream& stream)
-{
- if (d->mPlayers.count() != 0) {
-	kdError() << k_funcinfo << "called before!!" << endl;
-	d->mPlayers.clear();
- }
- Q_UINT32 minPlayers;
- Q_INT32 maxPlayers;
- stream >> minPlayers;
- stream >> maxPlayers;
+ d->mMinPlayers = min;
+ d->mMaxPlayers = max;
  
- if (minPlayers < 1) {
-	kdError() << k_funcinfo << ": broken scenario file!" << endl;
-	kdError() << "minPlayers < 1" << endl;
-	return false;
- }
- if (maxPlayers > BOSON_MAX_PLAYERS) {
-	kdError() << k_funcinfo << ": broken scenario file!" << endl;
-	kdError() << "maxPlayers > " << BOSON_MAX_PLAYERS << endl;
-	return false;
- }
- if ((int)minPlayers > maxPlayers) {
-	kdError() << k_funcinfo << ": broken scenario file!" << endl;
-	kdError() << "minPlayers > maxPlayers" << endl;
-	return false;
- }
- d->mMinPlayers = minPlayers;
- d->mMaxPlayers = maxPlayers;
  for (int i = 0; i < d->mMaxPlayers; i++) {
 	d->mPlayers.append(ScenarioPlayer());
- }
- return true;
-}
-
-
-bool BosonScenario::saveScenarioSettings(QDataStream& stream)
-{
- stream << (Q_UINT32)minPlayers();
- stream << (Q_UINT32)maxPlayers();
- return true;
-}
-
-bool BosonScenario::loadPlayers(QDataStream& stream)
-{
- if (maxPlayers() != (int)d->mPlayers.count()) {
-	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
-	return false;
- }
- for (int i = 0; i < d->mMaxPlayers; i++) {
-	if (!d->mPlayers[i].loadPlayer(stream)) {
-		kdError() << "Could not load player " << i << endl;
-		return false;
-	}
  }
  return true;
 }
@@ -611,7 +502,7 @@ bool BosonScenario::loadPlayer(QDomElement& node)
 	return false;
  }
 
- d->mPlayers[playerNumber].loadPlayer(node);
+ return d->mPlayers[playerNumber].loadPlayer(node);
 }
 
 bool BosonScenario::savePlayers(QDomElement& node)
@@ -630,66 +521,6 @@ bool BosonScenario::savePlayers(QDomElement& node)
 		return false;
 	}
  }
- return true;
-}
-
-bool BosonScenario::savePlayers(QDataStream& stream)
-{
- if (maxPlayers() != (int)d->mPlayers.count()) {
-	kdError() << k_funcinfo << "maxPlayers() != d->mPlayers.count()" << endl;
-	return false;
- }
- for (int i = 0; i < maxPlayers(); i++) {
-	if (d->mPlayers[i].savePlayer(stream)) {
-		kdError() << "Error saving units of player " << i << endl;
-		return false;
-	}
- }
- return true;
-}
-
-bool BosonScenario::saveValidityHeader(QDataStream& stream)
-{
- // magic
- // Qt marshalling for a string is 4-byte-len + data
-
- int length = QString(TAG_FIELD).length();
- stream << (Q_INT32)(length - 1);
-
- for (int i = 0; i <= length; i++) {
-	stream << (Q_INT8)TAG_FIELD[i];
- }
- return true;
-}
-
-bool BosonScenario::verifyScenario(QDataStream& stream)
-{
- int length = QString(TAG_FIELD).length();
- // FIXME: use QString/QCString or so instead
- char* magic = new char[ length + 4 ];  // paranoic spaces
- int i;
-
- // magic 
- // Qt marshalling for a string is 4-byte-len + data
- stream >> i;
- if (length + 1 != i) {
-//	kdError() << k_funcinfo << ": Magic doesn't match(len), check file name" << endl;
-	delete[] magic;
-	return false;
- }
-
- for (i = 0; i < length + 1; i++) {
-	Q_INT8  b;
-	stream >> b;
-	magic[i] = b;
- }
-
- if (!QString::compare(magic, TAG_FIELD)) {
-//	kdError() << k_funcinfo << ": Magic doesn't match(string), check file name" << endl;
-	delete[] magic;
-	return false;
- }
- delete[] magic;
  return true;
 }
 
@@ -743,28 +574,7 @@ void BosonScenario::initPlayer(Boson* boson, int playerNumber)
 			<< endl;
 	return;
  }
- p->setMinerals(d->mPlayers[playerNumber].minerals());
- p->setOil(d->mPlayers[playerNumber].oil());
-
- // now add the units
- unsigned int unitCount = d->mPlayers[playerNumber].unitCount();
- for (unsigned int i = 0; i < unitCount; i++) {
-	ScenarioUnit s = d->mPlayers[playerNumber].unit(i);
-	addUnit(boson, p, s.unitType, s.x, s.y);
- }
-}
-
-void BosonScenario::addUnit(Boson* boson, Player* owner, int unitType, int x, int y)
-{
- if (!boson) {
-	kdError() << k_funcinfo << ": NULL game" << endl;
-			return;
- }
- if (!owner) {
-	kdError() << k_funcinfo << ": NULL player" << endl;
-	return;
- }
- boson->slotSendAddUnit(unitType, x, y, owner);
+ d->mPlayers[playerNumber].addToGame(boson, p);
 }
 
 void BosonScenario::startScenario(Boson* boson)
