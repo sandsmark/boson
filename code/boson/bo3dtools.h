@@ -26,7 +26,7 @@ class QString;
 class KConfig;
 
 float rotationToPoint(float x, float y);
-void pointByRotation(float &x, float &y, const float angle, const float radius);
+void pointByRotation(float* x, float* y, const float angle, const float radius);
 
 
 /**
