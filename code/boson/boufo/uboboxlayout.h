@@ -30,6 +30,7 @@ namespace ufo {
 class UBoBoxLayout : public ULayoutManager {
 public:
 	UBoBoxLayout(bool horizontal);
+	UBoBoxLayout(bool horizontal, int hgap, int vgap);
 
 	virtual UDimension getPreferredLayoutSize(const UWidget* parent) const;
 	virtual UDimension getMinimumLayoutSize(const UWidget* parent) const;
