@@ -37,7 +37,7 @@ void visualMiniDisplay::drawMobile(visualMobUnit *unit)
 {
 	QPainter p;
 	p.begin(ground);
-	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==gpp.who_am_i)?magenta:darkMagenta, &p);
+	setPoint(unit->_x()/BO_TILE_SIZE, unit->_y()/BO_TILE_SIZE, (unit->who==who_am_i)?magenta:darkMagenta, &p);
 	p.end();
 	repaint(FALSE);
 }
@@ -47,7 +47,7 @@ void visualMiniDisplay::drawFix(visualFacility *fix)
 {
 	QPainter p;
 	p.begin(ground);
-	setPoint(fix->_x(), fix->_y(), (fix->who==gpp.who_am_i)?magenta:darkMagenta, &p);
+	setPoint(fix->_x(), fix->_y(), (fix->who==who_am_i)?magenta:darkMagenta, &p);
 	p.end();
 	repaint(FALSE);
 }

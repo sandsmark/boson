@@ -24,11 +24,13 @@
 
 #include <qframe.h>
 
-#include "ressource.h"
-
 #include "../common/boconfig.h"
 #include "../common/bobuffer.h"
 #include "../common/log.h"
+
+#include "ressource.h"
+#include "game.h"
+
 
 FILE *logfile = (FILE *) 0L;
 
@@ -84,7 +86,6 @@ void BosonApp::disableCommand(int id_)
 void BosonApp::init(char *servername )
 { 
 
-  jiffies = 0;
   ///////////////////////////////////////////////////////////////////
   // set up the base application features
   initMenuBar();
@@ -123,26 +124,26 @@ if (!servername)
 	} else servername = charbuf;
 
 /* let's say the server is on the local machine, hum..  */
-socket = new KSocket(servername,  BOSON_DEFAULT_PORT);
+Socket = new KSocket(servername,  BOSON_DEFAULT_PORT);
 
-if (-1 == socket->socket())  {
+if (-1 == Socket->socket())  {
 	logf(LOG_FATAL, "BosonApp : beuh, unable to connect socket to \"%s\" server\n", servername);
 	socketState = PSS_CONNECT_DOWN;
 	return;
 }
 
-buffer = new boBuffer(socket->socket(), BOSON_BUFFER_SIZE );
+buffer = new boBuffer(Socket->socket(), BOSON_BUFFER_SIZE );
 
 logf(LOG_COMM, "KSocket connect ok");
 logf(LOG_COMM, "\tsocket = %d, addr = %lu",
-			socket->socket(), socket->getAddr());
+			Socket->socket(), Socket->getAddr());
 
 socketState = PSS_INIT;
 
 connect (
-	socket, SIGNAL(readEvent(KSocket *)), 
+	Socket, SIGNAL(readEvent(KSocket *)), 
 	this, SLOT(handleSocketMessage(KSocket*) ) );
-socket->enableRead(TRUE);
+Socket->enableRead(TRUE);
 
 /*
 bosonMsgData	data;
