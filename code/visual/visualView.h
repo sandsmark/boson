@@ -32,6 +32,7 @@ enum selectionMode_t {
 	SELECT_MOBILE, */
 	SELECT_RECT,		/* is drawing a selection rect */
 	SELECT_PUT,		/* something is being put on the field */
+	SELECT_FILL,		/* something is being filled (editor) */
 //	SELECT_ACTION,		// something is selected
 /*	SELECT_, 
 	SELECT_, 

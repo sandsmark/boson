@@ -126,6 +126,15 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 			p.end();
 			break;
 
+		case SELECT_FILL:
+			selectX =  e->x() + view->X()*BO_TILE_SIZE;
+			selectY =  e->y() + view->Y()*BO_TILE_SIZE;
+			if (oldX==selectX && oldY==selectY)
+				return;
+			oldX = selectX; oldY = selectY;
+			actionClicked( oldX, oldY);
+			return;
+
 		case SELECT_PUT:
 			return;
 	}
@@ -140,6 +149,7 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 		default:
 			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2)");
 		case SELECT_NONE:
+		case SELECT_FILL:
 			break;
 		case SELECT_RECT:
 			p.begin(this);
@@ -251,7 +261,9 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	} // LeftButton 
 
 	if (e->button() & RightButton) {
+		view->setSelectionMode( SELECT_FILL) ;
 		actionClicked( x, y);
+		oldX = x; oldY = y;
 		return;
 		}
 	
