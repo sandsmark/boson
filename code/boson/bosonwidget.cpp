@@ -464,7 +464,8 @@ void BosonWidget::addEditorCommandFrame()
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mCommandFrame, SIGNAL(signalCellSelected(int,unsigned char)), 
 		d->mBigDisplay, SLOT(slotWillPlaceCell(int, unsigned char))); // in addEditorCommandFrame()
-
+ connect(this, SIGNAL(signalEditorLoadTiles(const QString&)), 
+		d->mCommandFrame, SLOT(slotEditorLoadTiles(const QString&)));
 
 }
 void BosonWidget::addGameCommandFrame()
@@ -554,9 +555,8 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
  d->mMap->loadMapGeo(stream);
  d->mMap->loadCells(stream);
 
- // load tiles if in editor mode
- kdDebug() << "Editor mode: load tiles" << endl;
- d->mCommandFrame->slotEditorLoadTiles(tiles); // FIXME: do not load if not in editor mode
+ // load tiles if in editor mode - otherwise this does nothing
+ emit signalEditorLoadTiles(tiles);
 
  kdDebug() << "init map" << endl;
  d->mMiniMap->initMap();
