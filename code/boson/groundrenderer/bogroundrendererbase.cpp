@@ -482,7 +482,7 @@ void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
  } else {
 #if FIX_EDGES_1
 	const float* h = map->heightMap();
-	for (int x = mMinX; x <= mMaxX; x++) { // +1 because we need _corners_ not cells
+	for (int x = mMinX; x <= mMaxX; x++) { // <= because we need _corners_ not cells
 		for (int y = mMinY; y <= mMaxY; y++) {
 			const int index = map->cornerArrayPos(x, y);
 			heightMap[index] = h[index];
