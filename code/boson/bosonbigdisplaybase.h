@@ -398,8 +398,6 @@ protected:
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
 
-	void generateCellList();
-
 	/**
 	 * Set a viewport. Basically the same as glViewport, but you should use
 	 * this instead the standard OpenGL function. The viewport values are
