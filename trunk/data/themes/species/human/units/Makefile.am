@@ -34,7 +34,8 @@ install-data-local:
 		fi ;\
 		echo "installing $$i" ;\
 		mkdir -p $(DESTDIR)$(unitsdir)/$$i ;\
-		files=`cd $(srcdir)/$$i && ls -1d *` ;\
+		mkdir -p $(DESTDIR)$(unitsdir)/$$i/sounds ;\
+		files=`cd $(srcdir)/$$i && find . -type f -not -regex ".*CVS.*"` ;\
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
 				$(INSTALL_DATA) $(srcdir)/$$i/$$f $(DESTDIR)$(unitsdir)/$$i/$$f ;\
