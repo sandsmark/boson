@@ -300,6 +300,10 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  b = new BosonBigDisplayBase(d->mCanvas, parent);
  connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
+ connect(b, SIGNAL(signalChangeViewport(BosonBigDisplayBase*,
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
+		this, SLOT(slotChangeViewport(BosonBigDisplayBase*,
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
  if (mGameMode) {
 	b->setDisplayInput(new BosonBigDisplayInput(b));
  } else {
@@ -491,6 +495,21 @@ void BoDisplayManager::slotMoveActiveSelection(int x, int y)
  activeDisplay()->displayInput()->slotMoveSelection(x, y); // FIXME: not a slot anymore
 }
 
+void BoDisplayManager::slotReCenterActiveDisplay(const QPoint& center)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ activeDisplay()->slotReCenterDisplay(center); // FIXME: not a slot anymore
+}
+
+void BoDisplayManager::slotActiveSelectSingleUnit(Unit* unit)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->selection());
+
+ activeDisplay()->selection()->slotSelectSingleUnit(unit);
+}
+
 void BoDisplayManager::slotDeleteSelectedUnits()
 {
  if (!activeDisplay()) {
@@ -521,6 +540,18 @@ void BoDisplayManager::mapChanged()
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->mapChanged();
+	++it;
+ }
+}
+
+void BoDisplayManager::slotUnitChanged(Unit* unit)
+{
+ // this slot is meant for the case that unit has been destroyed but is
+ // selected. we don't check for unit->isDestroyed() here (which would be
+ // faster) but forward the pointer to the displays, to avoid including unit.h
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->slotUnitChanged(unit);
 	++it;
  }
 }
@@ -694,4 +725,13 @@ double BoDisplayManager::fps() const
  }
  return activeDisplay()->fps();
 }
+
+void BoDisplayManager::slotChangeViewport(BosonBigDisplayBase* display, const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
+{
+ if (display != activeDisplay()) {
+	return;
+ }
+ emit signalChangeActiveViewport(topLeft, topRight, bottomLeft, bottomRight);
+}
+
 
