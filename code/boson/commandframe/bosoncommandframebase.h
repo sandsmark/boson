@@ -207,6 +207,11 @@ protected slots:
 	 **/
 	void slotPlaceUnit(ProductionType, unsigned long int unitType);
 
+	/**
+	 * Editor mode only. Emit @ref signalPlaceCell.
+	 **/
+	void slotPlaceCell(int groundType);
+
 	virtual void slotUpdate();
 
 protected:

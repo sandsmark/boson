@@ -394,6 +394,12 @@ protected:
 	 **/
 	void setPlacementPreviewData(const UnitProperties* prop, bool canPlace);
 
+	/**
+	 * Same as above - but this will make a cell placement preview, instead
+	 * of a unit placement preview.
+	 **/
+	void setPlacementCellPreviewData(int groundType, bool canPlace);
+
 private:
 	void init();
 

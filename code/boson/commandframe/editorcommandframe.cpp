@@ -67,7 +67,7 @@ void EditorCommandFrame::init()
  connect(d->mPlacementWidget, SIGNAL(signalProduce(ProductionType, unsigned long int)),
 		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
  connect(d->mPlacementWidget, SIGNAL(signalPlaceCell(int)),
-		this, SIGNAL(signalPlaceCell(int)));
+		this, SLOT(slotPlaceCell(int)));
 }
 
 EditorCommandFrame::~EditorCommandFrame()

@@ -69,7 +69,7 @@ enum UnitAction {
 	ActionFollow = 3,
 	ActionMine = 4,
 	ActionRepair = 5,
-	ActionBuild = 6 // placement of a facility (usually - mobile is possible, too)
+	ActionBuild = 6 // placement of a facility (usually - mobile is possible, too). also used for cell placements in editor
 };
 
 enum UnitSoundEvent {

@@ -426,6 +426,7 @@ public:
 	GLuint mPlacementPreviewDisplayList;
 	bool mPlacementPreviewCanPlace;
 	QPoint mPlacementCanvasPos;
+	GLuint mCellPlacementTexture;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -456,6 +457,7 @@ void BosonBigDisplayBase::init()
  d->mUpdateInterval = 0;
  d->mIsQuit = false;
  d->mParticlesDirty = true;
+ d->mCellPlacementTexture = 0;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
@@ -833,15 +835,9 @@ void BosonBigDisplayBase::paintGL()
  }
 
  // Facility-placing preview code
- if (actionLocked() && actionType() == ActionBuild && d->mPlacementPreviewDisplayList != 0 && d->mPlacementPreviewProperties) {
-#warning FIXME: z value!
-	const float z = 0.1;
-	QPoint pos(d->mPlacementCanvasPos / BO_TILE_SIZE);
-	int w = d->mPlacementPreviewProperties->unitWidth() / BO_TILE_SIZE;
-	int h = d->mPlacementPreviewProperties->unitHeight() / BO_TILE_SIZE;
-	float x = ((float)(pos.x() + w / 2)) * BO_GL_CELL_SIZE;
-	float y = ((float)(pos.y() + h / 2)) * BO_GL_CELL_SIZE;
-	glTranslatef(x, -y, z);
+ if (actionLocked() && actionType() == ActionBuild &&
+		((d->mPlacementPreviewDisplayList != 0 && d->mPlacementPreviewProperties) ||
+		d->mCellPlacementTexture != 0)) {
 	// AB: GL_MODULATE is currently default. if we every change it to
 	// GL_REPLACE we should change it here:
 //	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -853,13 +849,41 @@ void BosonBigDisplayBase::paintGL()
 	}
 	glEnable(GL_BLEND);
 	glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
-	glCallList(d->mPlacementPreviewDisplayList);
+
+#warning FIXME: z value!
+	const float z = 0.1;
+	QPoint pos(d->mPlacementCanvasPos / BO_TILE_SIZE);
+	if (d->mPlacementPreviewDisplayList) {
+		int w = d->mPlacementPreviewProperties->unitWidth() / BO_TILE_SIZE;
+		int h = d->mPlacementPreviewProperties->unitHeight() / BO_TILE_SIZE;
+		float x = ((float)(pos.x() + w / 2)) * BO_GL_CELL_SIZE;
+		float y = ((float)(pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+		glTranslatef(x, -y, z);
+		glCallList(d->mPlacementPreviewDisplayList);
+		glTranslatef(-x, y, -z);
+	} else if (d->mCellPlacementTexture) {
+		float x = ((float)pos.x()) * BO_GL_CELL_SIZE;
+		float y = ((float)pos.y()) * BO_GL_CELL_SIZE;
+		glBindTexture(GL_TEXTURE_2D, d->mCellPlacementTexture);
+		glBegin(GL_QUADS);
+			glTexCoord2fv(textureUpperLeft);
+			glVertex3f(x, -y, z);
+
+			glTexCoord2fv(textureLowerLeft);
+			glVertex3f(x, -y - BO_GL_CELL_SIZE, z);
+
+			glTexCoord2fv(textureLowerRight);
+			glVertex3f(x + BO_GL_CELL_SIZE, -y - BO_GL_CELL_SIZE, z);
+
+			glTexCoord2fv(textureUpperRight);
+			glVertex3f(x + BO_GL_CELL_SIZE, -y, z);
+		glEnd();
+	}
 	glColor4ub(255, 255, 255, 255);
 	glDisable(GL_BLEND);
 	// AB: see above. if GL_REPLACES ever becomes default we have to set it
 	// here again.
 //	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-	glTranslatef(-x, y, -z);
  }
 
 
@@ -1011,7 +1035,7 @@ void BosonBigDisplayBase::renderCells()
 	boError() << k_funcinfo << "NULL tiles" << endl;
 	return;
  }
- BosonTextureArray* textures = mCanvas->tileSet()->textures();
+ BosonTextureArray* textures = tiles->textures();
  if (!textures) {
 	makeCurrent();
 	tiles->generateTextures();
@@ -2363,6 +2387,7 @@ void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)
 
 void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bool canPlace)
 {
+ d->mCellPlacementTexture = 0;
  if (!prop) {
 	d->mPlacementPreviewProperties = 0;
 	d->mPlacementPreviewDisplayList = 0;
@@ -2396,5 +2421,30 @@ void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bo
  }
  d->mPlacementPreviewCanPlace = canPlace;
  d->mPlacementCanvasPos = cursorCanvasPos();
+}
+
+void BosonBigDisplayBase::setPlacementCellPreviewData(int groundType, bool canPlace)
+{
+ if (!Cell::isValidGround(groundType)) {
+	boWarning() << k_funcinfo << "no valid ground " << groundType << endl;
+	setPlacementPreviewData(0, false);
+	return;
+ }
+ BosonTiles* tiles = mCanvas->tileSet();
+ if (!tiles) {
+	boError() << k_funcinfo << "NULL tiles" << endl;
+	setPlacementPreviewData(0, false);
+	return;
+ }
+ BosonTextureArray* textures = tiles->textures();
+ if (!textures) {
+	boError() << k_funcinfo << "no cell textures available" << endl;
+	setPlacementPreviewData(0, false);
+	return;
+ }
+ d->mCellPlacementTexture = textures->texture(Cell::tile(groundType, 0));
+ d->mPlacementPreviewCanPlace = canPlace;
+ d->mPlacementCanvasPos = cursorCanvasPos();
+ d->mPlacementPreviewDisplayList = 0;
 }
 
