@@ -23,7 +23,8 @@
 #include "bopuiaction.moc"
 
 #include <bodebug.h>
-#include "bosonglwidget.h"
+#include "bopumenubar.h"
+#include "../bosonglwidget.h"
 
 #include <kshortcut.h>
 #include <kstandarddirs.h>
@@ -602,7 +603,7 @@ public:
 
 	BoPUIActionCollection* mActionCollection;
 
-	puMenuBar* mBar;
+	bopuMenuBar* mBar;
 };
 
 BoPUIMenuBar::BoPUIMenuBar(BoPUIActionCollection* c, QObject* parent, const char* name)
@@ -618,7 +619,7 @@ BoPUIMenuBar::~BoPUIMenuBar()
  delete d;
 }
 
-puMenuBar* BoPUIMenuBar::puiMenuBar() const
+bopuMenuBar* BoPUIMenuBar::puiMenuBar() const
 {
  return d->mBar;
 }
@@ -641,7 +642,7 @@ void BoPUIMenuBar::createMenu()
  BosonGLWidget* w = (BosonGLWidget*)parent();
  puSetWindow(w->winId());
  clearPUI();
- d->mBar = new puMenuBar(-1);
+ d->mBar = new bopuMenuBar();
 
  QValueList<BoPUIMenuBarItem*>::Iterator it;
  int i = 0;
@@ -674,15 +675,8 @@ class BoPUIMenuBarMenuPrivate
 public:
 	BoPUIMenuBarMenuPrivate()
 	{
-		mPUICallbacks = 0;
-		mPUIItems = 0;
-		mPUIUser = 0;
 	}
 	QValueList<BoPUIMenuBarItem*> mItems;
-
-	puCallback* mPUICallbacks;
-	char** mPUIItems;
-	void** mPUIUser;
 };
 
 BoPUIMenuBarMenu::BoPUIMenuBarMenu(const QString& text, QObject* parent, const char* name)
@@ -704,12 +698,7 @@ BoPUIMenuBarMenu::~BoPUIMenuBarMenu()
 
 void BoPUIMenuBarMenu::clearPUI()
 {
- delete[] d->mPUICallbacks;
- d->mPUICallbacks = 0;
- delete[] d->mPUIItems;
- d->mPUIItems = 0;
- delete[] d->mPUIUser;
- d->mPUIUser = 0;
+ // obsolete :-)
 }
 
 void BoPUIMenuBarMenu::addSeparator()
@@ -748,29 +737,53 @@ void BoPUIMenuBarMenu::createPUISubMenu()
 	boError() << k_funcinfo << "parent() is not a BoPUIMenuBarMenu" << endl;
 	return;
  }
- if (!parent()->inherits("BoPUIMenuBar")) {
-	boWarning() << k_funcinfo << "plib does not support nested menus. won't add " << text() << endl;
+ puPopupMenu* currentPopupMenu = 0;
+ BoPUIMenuBar* bar = 0;
+ if (parent()->inherits("BoPUIMenuBar")) {
+	bar = (BoPUIMenuBar*)parent();
+ } else if (parent()->inherits("BoPUIMenuBarMenu")) {
+	QObject* p = parent()->parent();
+	while (!bar && p) {
+		if (p->inherits("BoPUIMenuBar")) {
+			bar = (BoPUIMenuBar*)p;
+		} else if (p->inherits("BoPUIMenuBarMenu")) {
+			p = p->parent();
+		} else {
+			boError() << k_funcinfo << "unexpected parent class" << endl;
+			return;
+		}
+	}
+	if (!bar) {
+		boError() << k_funcinfo << "could not find the BoPUIMenuBar parent" << endl;
+		return;
+	}
+	puGroup* g = puGetCurrGroup();
+	BO_CHECK_NULL_RET(g);
+	if (g->getType() & PUCLASS_POPUPMENU) {
+		currentPopupMenu = (puPopupMenu*)g;
+	}
+ } else {
+	boError() << k_funcinfo << "unexpected parent() class" << endl;
 	return;
  }
 
- BoPUIMenuBar* bar = (BoPUIMenuBar*)parent();
  BO_CHECK_NULL_RET(bar->puiMenuBar());
  clearPUI();
- d->mPUICallbacks = new puCallback[itemCount() + 1];
- d->mPUIItems = new char*[itemCount() + 1];
- d->mPUIUser = new void*[itemCount() + 1];
- for (unsigned int i = 0; i < itemCount() + 1; i++) {
-	d->mPUICallbacks[i] = 0;
-	d->mPUIItems[i] = 0;
-	d->mPUIUser[i] = 0;
- }
+
+ puPopupMenu* p = bar->puiMenuBar()->addSubMenu(currentPopupMenu, puiText());
  for (unsigned int i = 0; i < itemCount(); i++) {
 	int index = itemCount() - 1 - i;
-	d->mPUIUser[index] = (void*)items()[i];
-	d->mPUICallbacks[index] = bo_pui_menu_item_callback;
-	d->mPUIItems[index] = (char*)items()[i]->puiText();// conversion from const char* to char* is valid here, as plib actually treats the pointer as a const char*
+	if (items()[index]->isA("BoPUIMenuBarMenu")) {
+		BoPUIMenuBarMenu* m = (BoPUIMenuBarMenu*)items()[index];
+		m->createPUISubMenu();
+	} else {
+		bar->puiMenuBar()->addMenuItem(p,
+				items()[index]->puiText(),
+				bo_pui_menu_item_callback,
+				(void*)items()[index]);
+	}
  }
- bar->puiMenuBar()->add_submenu(puiText(), d->mPUIItems, d->mPUICallbacks, d->mPUIUser);
+ bar->puiMenuBar()->closeSubMenu(p);
 }
 
 

@@ -26,7 +26,7 @@
 class BoPUIActionCollection;
 class BosonGLWidget;
 class KShortcut;
-class puMenuBar;
+class bopuMenuBar;
 
 template<class T> class QValueList;
 
@@ -157,7 +157,7 @@ public:
 
 	static void initMenuBar(BosonGLWidget* w);
 
-	puMenuBar* puiMenuBar() const;
+	bopuMenuBar* puiMenuBar() const;
 
 protected:
 	void clearPUI();
