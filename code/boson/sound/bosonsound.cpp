@@ -107,7 +107,7 @@ public:
 			return;
 		}
 		result = mParent->server().server().createPlayObjectForURL(
-				std::string(file()), std::string(mimeType->name()),
+				std::string(file().latin1()), std::string(mimeType->name().latin1()),
 				false); // false as we connect it to the soundcard ourselfes
 		if (result.isNull()) {
 			boError(200) << k_funcinfo << "NULL playobject - file="

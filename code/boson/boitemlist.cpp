@@ -73,21 +73,13 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
  // Note that some code here is taken from units() (code duplication), but it
  //  makes this method much faster
 
- // Flying units never collide - different altitudes
- if(forUnit && forUnit->isFlying()) {
-	return false;
- }
-
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
 		if (forUnit == u) {
 			continue;
 		}
-		if (u->isDestroyed()) {
-			continue;
-		}
-		if (u->isFlying()) {
+		if (u->isFlying() != forUnit->isFlying()) {
 			continue;
 		}
 		if (u->isMoving()) {
