@@ -1093,7 +1093,6 @@ class BoQuaternion
       BoQuaternion q = conjugate();
       float l = length();
       q.mW /= l;
-      q.mV.scale(1.0f / l);
       return q;
     }
 
@@ -1119,9 +1118,19 @@ class BoQuaternion
       mV.scale(1.0f / l);
     }
 
-    bool isEqual(const BoQuaternion& quat) const
+    bool isEqual(const BoQuaternion& quat, float diff = 0.001) const
     {
-      return ((mW == quat.mW) && (mV.isEqual(quat.mV)));
+      // avoid fabsf() as we don't include math.h
+      float d = mW - quat.mW;
+      if (d < 0)
+      {
+        d = -d;
+      }
+      if (d > diff)
+      {
+        return false;
+      }
+      return mV.isEqual(quat.mV, diff);
     }
 
     bool operator==(const BoQuaternion& quat) const
