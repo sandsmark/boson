@@ -28,7 +28,6 @@ class Facility;
 class Player;
 class BosonOrderButton;
 class BoSelection;
-class BoUnitDisplayBase;
 class BosonTiles;
 
 class KPlayer;
@@ -60,15 +59,37 @@ public slots:
 
 protected:
 	/**
-	 * Sets e.g. the order buttons of possible production items, if this is
-	 * a factory.
+	 * Set the plugins. See @ref BosonCommandFrameBase::setSelectedUnit
+	 *
+	 * We might use plugins for unit-configurations, e.g. to change the
+	 * initial health of a unit.
+	 *
+	 * Currently not used.
 	 * @param unit The selected unit
 	 **/
-	virtual void setAction(Unit* unit); // FIXME: set"Action" conflicts with showUnitActions. this is totally different!
+	virtual void setSelectedUnit(Unit* unit);
 
-	virtual void showUnitActions(Unit* unit);
+	/**
+	 * See @ref BosonCommandFrameBase::showUnitActions
+	 *
+	 * We might use this for configuration widget, but i'd prefer plugins -
+	 * see @ref setSelectedUnit.
+	 **/
+	virtual void showUnitActions(Unit*);
+
+	/**
+	 * See @ref BosonCommandFrameBase::setProduction
+	 *
+	 * We might use this for configuration widget, but i'd prefer plugins -
+	 * see @ref setSelectedUnit.
+	 **/
+	virtual void setProduction(Unit* unit);
 
 
+	/**
+	 * See @ref BosonCommandFrameBase::checkUpdateTimer. Additionally all
+	 * plugins are checked, whether they want to be updated.
+	 **/
 	virtual bool checkUpdateTimer() const;
 
 protected slots:

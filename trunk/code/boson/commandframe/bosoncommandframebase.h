@@ -34,6 +34,7 @@ class BosonOrderWidget;
 
 class KPlayer;
 class QVBox;
+class QScrollView;
 
 
 /**
@@ -52,6 +53,7 @@ public:
 	 * @param p The player whose units can be produced here.
 	 **/
 	void setLocalPlayer(Player* p);
+	Player* localPlayer() const;
 
 	/**
 	 * Ok, I know this function is a hack. Since we use QToolBar as parent
@@ -72,11 +74,24 @@ public:
 	void addUnitDisplayWidget(BoUnitDisplayBase*);
 
 	/**
+	 * @return The parent widget for the unit actions (move, attack,
+	 * stop...). You need to show this explicitly, as it is hidden by
+	 * default (as its not used by the editor).
+	 **/
+	QVBox* unitActionsBox() const;
+
+	/**
+	 * The "plugin widget".
 	 * @return The parent box for the @ref BoUnitDisplayBase widgets. You
 	 * can use another parent but this should be used, if possible
 	 **/
 	QVBox* unitDisplayBox() const;
 
+	/**
+	 * @return The leader of the current selection (see @ref
+	 * BosonBigDisplayBase::selection). All unit specific items will be
+	 * displayed for this unit.
+	 **/
 	Unit* selectedUnit() const { return mSelectedUnit; }
 
 public slots:
@@ -105,11 +120,20 @@ protected:
 	virtual void clearSelection();
 
 	/**
-	 * Sets e.g. the order buttons of possible production items, if this has
-	 * a production pluign.
-	 * @param unit The selected unit
+	 * Set the @ref selectedUnit and display the unit in the unit view (the
+	 * image on the top).
+	 *
+	 * Derived classes should reimplement (and call) this. Here e.g. all
+	 * plugin widgets (construction progress, harvester filling, ...) should
+	 * be shown and updated.
 	 **/
-	virtual void setAction(Unit* unit);
+	virtual void setSelectedUnit(Unit* unit);
+
+	/**
+	 * In game mode this should display the order buttons if @p unit has a
+	 * production plugin.
+	 **/
+	virtual void setProduction(Unit* unit) = 0;
 
 	/**
 	 * Display the unit actions. Mostly used by game mode - there we display
@@ -122,8 +146,18 @@ protected:
 	 **/
 	virtual void showUnitActions(Unit* unit) = 0;
 
+	/**
+	 * @return The widget where the selected units are displayed, as well as
+	 * the order buttons (in case a single unit is selected and has a
+	 * production plugin)
+	 **/
+	BosonOrderWidget* selectionWidget() const;
 
-	BosonOrderWidget* orderWidget() const;
+	/**
+	 * Construct and return a @ref QScrollView that should be used as parent
+	 * for the placement items (i.e. cell placement, unit placement)
+	 **/
+	QScrollView* addPlacementView();
 
 signals:
 	/**
@@ -176,7 +210,11 @@ protected slots:
 protected:
 	virtual void resizeEvent(QResizeEvent*);
 
-	void hideActions();
+	/**
+	 * Hide all plugin widgets (harvester filling, construction progress,
+	 * ...), i.e. all @ref BoUnitDisplayBase widgets.
+	 **/
+	void hidePluginWidgets();
 
 	void startStopUpdateTimer();
 	/**
@@ -186,14 +224,16 @@ protected:
 	virtual bool checkUpdateTimer() const;
 
 private:
-	void init();
-
-private:
 	class BosonCommandFrameBasePrivate;
 	BosonCommandFrameBasePrivate* d;
 	Unit* mSelectedUnit;
 };
 
+/**
+ * @short Base class for plugin widgets (e.g. construction progress, harvester
+ * filling, ...
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoUnitDisplayBase : public QWidget
 {
 public:
