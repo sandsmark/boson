@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -515,6 +515,7 @@ void BosonProfilingDialog::initEventsPage()
 QString BosonProfilingDialog::profilingName(int profilingEvent) const
 {
  QString name;
+ bool found = true;
  switch ((BosonProfiling::ProfilingEvent)profilingEvent) {
 	case BosonProfiling::LoadGameData1:
 		name = i18n("LoadGameData1 (currently unused)");
@@ -539,6 +540,9 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 		break;
 	case BosonProfiling::AddUnitsXML:
 		name = i18n("AddUnitsXML");
+		break;
+	case BosonProfiling::BosonStartingStart:
+		name = i18n("BosonStartingStart");
 		break;
 	case BosonProfiling::SaveGameToXML:
 		name = i18n("SaveGameToXML");
@@ -589,8 +593,15 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 		name = i18n("BuildLOD");
 		break;
 	default:
+		found = false;
 		name = i18n("Unknown %1").arg(profilingEvent);
 		break;
+ }
+ if (!found && profilingEvent >= BosonProfiling::LastFixedEventId) {
+	QString n = boProfiling->eventName(profilingEvent);
+	if (!n.isEmpty()) {
+		name = n;
+	}
  }
  return name;
 }
