@@ -23,6 +23,7 @@
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
+#include "bo3dsload.h"
 #include "bosonglwidget.h"
 #include "bodebug.h"
 #include "bomesh.h"
@@ -57,15 +58,36 @@ static KStaticDeleter<BosonModelTextures> sd;
 
 BoFrame::BoFrame()
 {
- mDisplayList = 0;
- mRadius = 0.0;
+ init();
 }
 
-BoFrame::BoFrame(const BoFrame& f)
+BoFrame::BoFrame(const BoFrame& f, int meshCount)
 {
+ init();
  mDisplayList = f.mDisplayList;
  mDepthMultiplier = f.mDepthMultiplier;
  mRadius = f.mRadius;
+
+ if (meshCount == 0) {
+	return;
+ }
+ if (f.mMeshCount == 0 || !f.mMeshes || !f.mMatrices) {
+ }
+ allocMeshes(meshCount);
+ for (int i = 0; i < meshCount; i++) {
+	mMeshes[i] = f.mMeshes[i]; // copy the pointer only
+	mMatrices[i].loadMatrix(f.mMatrices[i]);
+ }
+}
+
+void BoFrame::init()
+{
+ mDisplayList = 0;
+ mDepthMultiplier = 0.0f;
+ mRadius = 0.0;
+ mMatrices = 0;
+ mMeshes = 0;
+ mMeshCount = 0;
 }
 
 BoFrame::~BoFrame()
@@ -73,6 +95,47 @@ BoFrame::~BoFrame()
  if (mDisplayList != 0) {
 	glDeleteLists(mDisplayList, 1);
  }
+ delete[] mMeshes;
+ delete[] mMatrices;
+}
+
+void BoFrame::allocMeshes(int meshes)
+{
+ if (mMeshCount != 0) {
+	boError() << k_funcinfo << "meshes already loaded" << endl;
+	return;
+ }
+ if (mMatrices) {
+	boError() << k_funcinfo << "matrices already allocated??" << endl;
+	delete[] mMatrices;
+ }
+ if (mMeshes) {
+	boError() << k_funcinfo << "meshes already allocated??" << endl;
+	delete[] mMeshes;
+ }
+ mMeshes = new BoMesh*[meshes];
+ mMatrices = new BoMatrix[meshes];
+ mMeshCount = meshes; // unused?
+ for (int i = 0; i < meshes; i++) {
+	mMeshes[i] = 0;
+ }
+}
+
+void BoFrame::setMesh(int index, BoMesh* mesh)
+{
+ if (index < 0 || index >= mMeshCount) {
+	boError() << k_funcinfo << "invalid mesh " << mesh << " , count=" << mMeshCount << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(mesh);
+ BO_CHECK_NULL_RET(mMeshes);
+ // we store the *pointer* only!
+ mMeshes[index] = mesh;
+}
+
+BoMatrix* BoFrame::matrix(int index) const
+{
+ return &mMatrices[index];
 }
 
 class BosonModel::BoHelper
@@ -88,6 +151,10 @@ public:
 		mMinZ = 0.0;
 	}
 	
+	void addPoint(const BoVector3& v)
+	{
+		addPoint(v[0], v[1], v[2]);
+	}
 	void addPoint(float x, float y, float z)
 	{
 		if (x > mMaxX) {
@@ -141,51 +208,27 @@ public:
 	float mMinZ;
 };
 
-// store the current values (e.g. current texture, color) to avoid redundant
-// OpenGL calls
-class BoRenderData
-{
-public:
-	BoRenderData()
-	{
-		mColor[0] = mColor[1] = mColor[2] = 255;
-	}
-
-	bool colorChanged(GLubyte* c)
-	{
-		bool changed = c[0] != mColor[0] || c[1] != mColor[1] || c[2] != mColor[2];
-		if (changed) {
-			mColor[0] = c[0];
-			mColor[1] = c[1];
-			mColor[2] = c[2];
-		}
-		return changed;
-	}
-
-	bool colorToDefault()
-	{
-		GLubyte c[3];
-		c[0] = c[1] = c[2] = 255;
-		return colorChanged(c);
-	}
-
-	GLubyte mColor[3];
-};
 
 class BosonModel::Private
 {
 public:
 	Private()
 	{
+		mLoader = 0;
 	}
 
-	QValueList<GLuint> mNodeDisplayLists;
+	QIntDict<BoMesh> mMeshes;
 	QIntDict<BoFrame> mFrames;
+	QMap<BoMesh*, QString> mTextures;
+
+	QValueList<GLuint> mNodeDisplayLists;
 	QIntDict<BoFrame> mConstructionSteps;
 	QIntDict<BosonAnimation> mAnimations;
 	QMap<QString, QString> mTextureNames;
 	QString mDirectory;
 	QString mFile;
+
+	Bo3DSLoad* mLoader;
 };
 
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
@@ -204,6 +247,7 @@ void BosonModel::init()
  mTeamColor = 0;
  mWidth = 0;
  mHeight = 0;
+ d->mMeshes.setAutoDelete(true);
  d->mFrames.setAutoDelete(true);
  d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
@@ -231,42 +275,10 @@ BosonModel::~BosonModel()
 	glDeleteLists((*it), 1);
  }
  d->mAnimations.clear();
+ boDebug(100) << k_funcinfo << "delete meshes" << endl;
+ d->mMeshes.clear();
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
-}
-
-void BosonModel::loadModel()
-{
- if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
-	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
-	return;
- }
- boProfiling->start(BosonProfiling::LoadModel);
- QString fullFile = file();
- m3ds = lib3ds_file_load(fullFile);
- if (!m3ds) {
-	boError(100) << k_funcinfo << "Can't load " << fullFile << endl;
-	boProfiling->stop(BosonProfiling::LoadModel);
-	return;
- }
-
- Lib3dsNode* node = m3ds->nodes;
- if (!node) {
-	boError(100) << k_funcinfo << "Could not load file " << fullFile << " correctly" << endl;
-	boProfiling->stop(BosonProfiling::LoadModel);
-	return;
- }
- boProfiling->start(BosonProfiling::LoadModelTextures);
- loadTextures();
- boProfiling->stop(BosonProfiling::LoadModelTextures);
- boProfiling->start(BosonProfiling::LoadModelDisplayLists);
- loadNodes();
- createDisplayLists();
- boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
-
- boDebug(100) << k_funcinfo << "loaded from " << fullFile << endl;
-
- boProfiling->stop(BosonProfiling::LoadModel);
 }
 
 const QString& BosonModel::baseDirectory() const
@@ -315,131 +327,162 @@ QStringList BosonModel::textures(Lib3dsFile* file)
  return list;
 }
 
-void BosonModel::loadTextures()
+void BosonModel::loadTextures(const QStringList& list)
 {
- if (!m3ds) {
-	boError(100) << k_funcinfo << "File was not yet loaded" << endl;
-	return;
- }
- QStringList list = textures(m3ds);
- QStringList::Iterator it = list.begin();
+ QStringList::ConstIterator it = list.begin();
  for (; it != list.end(); ++it) {
 	mModelTextures->insert(this, cleanTextureName(*it));
  }
 }
 
-void BosonModel::createDisplayLists()
+void BosonModel::loadModel()
 {
+ if (d->mFile.isEmpty() || d->mDirectory.isEmpty()) {
+	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
+	return;
+ }
+ boProfiling->start(BosonProfiling::LoadModel);
+ d->mLoader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
+
+ // TODO: add a profiling entry for this
+ d->mLoader->loadModel();
+
+ boProfiling->start(BosonProfiling::LoadModelTextures);
+ loadTextures(d->mLoader->textures());
+ boProfiling->stop(BosonProfiling::LoadModelTextures);
+
  if (!BoContext::currentContext()) {
 	boError(100) << k_funcinfo << "NULL current context" << endl;
 	return;
  }
- boDebug(100) << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
- GLuint listBase = glGenLists(m3ds->frames);
+ boProfiling->start(BosonProfiling::LoadModelDisplayLists);
+ QMap<BoMesh*, QString>::Iterator it = d->mTextures.begin();
+ for (; it != d->mTextures.end(); ++it) {
+	BoMesh* mesh = it.key();
+	QString tex = cleanTextureName(it.data());
+	GLuint myTex;
+	if (tex.isEmpty()) {
+		myTex = 0;
+	} else {
+		myTex = mModelTextures->texture(tex);
+	}
+	mesh->setTextureObject(myTex);
+	mesh->setTextured(myTex != 0);
+
+	// AB: about profiling: this doesn't really fit to loading display
+	// lists...
+#if USE_STRIP
+	mesh->connectFaces();
+#else
+	mesh->addFaces();
+#endif
+
+	mesh->loadDisplayList();
+ }
+
+
+ createDisplayLists();
+ boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
+
+ delete d->mLoader;
+ d->mLoader = 0;
+ boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
+
+ boProfiling->stop(BosonProfiling::LoadModel);
+}
+
+void BosonModel::createDisplayLists()
+{
+ if (d->mFrames.isEmpty()) {
+	boWarning() << k_funcinfo << "no frames" << endl;
+	return;
+ }
+ boDebug(100) << k_funcinfo << "creating " << d->mFrames.count() << " lists" << endl;
+ GLuint listBase = glGenLists(d->mFrames.count());
  if (listBase == 0) {
 	boError(100) << k_funcinfo << "NULL display lists created" << endl;
 	return;
  }
- float scale = 1.0; // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
 
- // ok so lets start now. A .3ds file can contain several frames. A different
- // frame of the same file looks slightly differnt - e.g. useful for animation
- // (mainly even).
- // You can read a frame with lib3ds by calling lib3ds_file_eval() first for
- // every frame.
- for (int i = 0; i < m3ds->frames; i++) {
-	Lib3dsNode* p;
-	m3ds->current_frame = i;
+ // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
+ float scale = generateMasterScale();
+ boDebug(100) << "master scale: " << scale << endl;
 
-	// prepare the file for rendering the next frame.
-	// Note: as far as I understand the lib3ds code this does *not* change
-	// the object itself, but rather node->data.object.*
-	// this means for us that we can continue to use the display lists in
-	// node->user.d ; but we *have* to ensure that the new values from
-	// node->data are used, i.e. they are not stored in that display list.
-	// they should reside in the final list.
-	// UPDATE: this is achieved by calling loadNode() before renderNode().
-	// loadNode() generates the user.d display lists, renderNode() renders
-	// the nodes with the recent positions for the frame from node->data
-	lib3ds_file_eval(m3ds, m3ds->current_frame);
+ for (unsigned int i = 0; i < frames(); i++) {
+	BoFrame* f = frame(i);
 
-	// ok, this way (iterating all nodes again) is not really efficient. but
-	// it is done only once, so it does not really matter. and it is worth
-	// it :)
 	BoHelper helper;
-	for (p = m3ds->nodes; p; p = p->next) {
-		computeBoundings(p, &helper);
-	}
+	// AB: not efficient - very slow and the *results* (not all the data!)
+	// in the helper should get stored somewhere - we may use it for
+	// construction lists. anyway, it is startup work only.
+	computeBoundings(f, &helper);
 
-	GLuint list = listBase + m3ds->current_frame;
+	GLuint list = listBase + i;
 	glNewList(list, GL_COMPILE);
+
+	for (int j = 0; j < f->meshCount(); j++) {
 		glPushMatrix();
 
-
-		// TODO: use BosonHelper::diff*() ! they can be used as
-		// glTranslate here! (the center of the gl coordinate system
-		// should actually be the *center* of the model)
-		
-		// note: we use BO_GL_CELL_SIZE as default size in *all*
-		// directions. one day we should use UnitProperties::unitWidth()
-		// and so on here - but for now we use this and re-scale it
-		// later (in Unit or so).
-		if (i == 0) {
-			// we compute scaling for the first frame only.
-			scale = helper.scale(mWidth, mHeight);
-			boDebug(100) << "master scale: " << scale << endl;
+		BoMatrix* m = f->matrix(j);
+		BoMesh* mesh = f->mesh(j);
+		if (!m) {
+			boError() << k_funcinfo << "NULL matrix at " << j << endl;
+			continue;
 		}
-
-		// FIXME: can we do our own calculations here, instead of OpenGL
-		// scaling? i.e. try to use lib3ds scaling!
-		glScalef(scale, scale, scale);
-
+		if (!mesh) {
+			boError() << k_funcinfo << "NULL mesh at " << j << endl;
+			continue;
+		}
+		BoMatrix matrix;
+		matrix.scale(scale, scale, scale);
+			
 		// we render from bottom to top - but for x and y in the center!
 		// FIXME: this doesn't work 100% correctly - the quad e.g. is
 		// still partially (parts of the wheels) in the grass.
-		glTranslatef(0.0, 0.0, -helper.mMinZ * scale);
+		matrix.translate(0.0, 0.0, -helper.mMinZ * scale);
 
+		matrix.multiply(m);
 
-		// a .3ds file consists of nodes. I don't *know* it, but I'm
-		// pretty sure that a 3ds node is simply an object of the whole
-		// object file. One object (node) for example may be a "wheel".
-		// A node can have child-nodes, too.
-		// Here we parse all top-level nodes. child nodes get parsed in
-		// renderNode().
-		for (p = m3ds->nodes; p; p = p->next) {
-			renderNode(p);
+		glMultMatrixf(matrix.data());
+
+		// AB: try to merge the meshes into the frame display list. -->
+		// bigger lists, but might be faster.
+#define USE_MANY_LISTS 1
+#if USE_MANY_LISTS
+		glCallList(mesh->displayList());
+#else
+
+		if (mesh->textured()) {
+			glBindTexture(GL_TEXTURE_2D, mesh->textureObject());
 		}
+		glBegin(mesh->type());
+		mesh->renderMesh();
+		glEnd();
+#endif
+
+		// AB: performance: we could try to use glLoadMatrix
+		// instead of glMultMatrixf and then get rid of the
+		// glPushMatrix()/glPopMatrix. try which version is
+		// faster!
 		glPopMatrix();
+	}
+
 	glEndList();
 
-	BoFrame* frame = new BoFrame;
-	frame->setDisplayList(list);
-	frame->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
-//	frame->setDepthMultiplier(helper.lengthZ() / BO_GL_CELL_SIZE);
-	d->mFrames.insert(m3ds->current_frame, frame);
+	f->setDisplayList(list);
+	f->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
  }
 }
 
 void BosonModel::generateConstructionLists()
 {
- if (!m3ds) {
-	boError(100) << k_funcinfo << "NULL file" << endl;
-	return;
- }
  // construction lists are always generated from the 1st frame!
- m3ds->current_frame = 0;
- lib3ds_file_eval(m3ds, m3ds->current_frame);
-
- BoFrame* frame0 = d->mFrames[0];
+ BoFrame* frame0 = frame(0);
  if (!frame0) {
 	boError(100) << k_funcinfo << "No frame was loaded yet!" << endl;
 	return;
  }
- unsigned int nodes = 0;
- Lib3dsNode* node;
- for (node = m3ds->nodes; node; node = node->next) {
-	nodes++;
- }
+ unsigned int nodes = frame0->meshCount();
  boDebug(100) << k_funcinfo << "Generating " << nodes << " construction lists" << endl;
 
  // again this iterating... it is exactly the same as it was for the first frame
@@ -447,9 +490,7 @@ void BosonModel::generateConstructionLists()
  // not for *all* frames - would take quite same memory. after startup we don't
  // need this helper anymore!
  BoHelper helper;
- for (node = m3ds->nodes; node; node = node->next) {
-	computeBoundings(node, &helper);
- }
+ computeBoundings(frame0, &helper);
 
  float scale = helper.scale(mWidth, mHeight);
  GLuint base = glGenLists(nodes);
@@ -459,235 +500,42 @@ void BosonModel::generateConstructionLists()
  }
  for (unsigned int i = 0; i < nodes; i++) {
 	GLuint list = base + i;
-	BoFrame* step = new BoFrame(*frame0);
+	BoFrame* step = new BoFrame(*frame0, i); // copy the first i meshes from frame0
 
-	unsigned int j = 0;
 	// AB: FIXME: this code is pretty much redundant. we use the same code as
 	// in createDisplayLists(), but for a limted number of nodes only. we
 	// could merge both in a new function!
 	glNewList(list, GL_COMPILE);
+
+	for (unsigned int j = 0; j < i; j++) {
 		glPushMatrix();
-		glScalef(scale, scale, scale);
-		glTranslatef(0.0, 0.0, -helper.mMinZ * scale);
-		for (node = m3ds->nodes; node && j <= i; node = node->next) {
-			renderNode(node);
-			j++;
+
+		BoMatrix* m = step->matrix(j);
+		BoMesh* mesh = step->mesh(j);
+		if (!m) {
+			boError() << k_funcinfo << "NULL matrix at " << j << endl;
+			continue;
 		}
+		if (!mesh) {
+			boError() << k_funcinfo << "NULL mesh at " << j << endl;
+			continue;
+		}
+
+		BoMatrix matrix;
+		matrix.scale(scale, scale, scale);
+		matrix.translate(0.0, 0.0, -helper.mMinZ * scale);
+		matrix.multiply(m);
+		glMultMatrixf(matrix.data());
+
+		glCallList(mesh->displayList());
+
 		glPopMatrix();
+	}
 	glEndList();
 	step->setDisplayList(list);
 	d->mConstructionSteps.insert(i, step);
  }
 }
-
-void BosonModel::computeBoundings(Lib3dsNode* node, BosonModel::BoHelper* helper)
-{
- {
-	Lib3dsNode* p;
-	for (p = node->childs; p; p = p->next) {
-		computeBoundings(p, helper);
-	}
- }
-
- if (node->type != LIB3DS_OBJECT_NODE) {
-	return;
- }
- if (strcmp(node->name, "$$$DUMMY") == 0) {
-	return;
- }
- Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
- if (!mesh) {
-	return;
- }
- unsigned int p;
- Lib3dsMatrix invMeshMatrix;
- lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
- lib3ds_matrix_inv(invMeshMatrix);
-
- for (p = 0; p < mesh->faces; ++p) {
-	Lib3dsFace* f = &mesh->faceL[p];
-
-	Lib3dsVector v[3];
-	for (int i = 0; i < 3; i++) {
-		lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f->points[i]].pos);
-		Lib3dsObjectData* d = &node->data.object;
-		Lib3dsVector tmp, actualPoint;
-		lib3ds_vector_copy(actualPoint, v[i]);
-		lib3ds_vector_sub(actualPoint, actualPoint, d->pivot);
-		lib3ds_vector_copy(tmp, actualPoint);
-		lib3ds_vector_transform(actualPoint, node->matrix, tmp);
-		helper->addPoint(actualPoint[0], actualPoint[1], actualPoint[2]);
-	}
- }
-}
-
-void BosonModel::loadNodes(bool reload)
-{
- if (!BoContext::currentContext()) {
-	boError(100) << k_funcinfo << "NULL current context" << endl;
-	return;
- }
- if (reload) {
-	boDebug(100) << k_funcinfo << "reloading all nodes" << endl;
- } else {
-	boDebug(100) << k_funcinfo << "loading all nodes" << endl;
- }
- Lib3dsNode* p;
- for (p = m3ds->nodes; p; p = p->next) {
-	loadNode(p, reload);
- }
-}
-
-
-void debugTex(Lib3dsMaterial* mat, Lib3dsMesh* mesh)
-{
- Lib3dsTextureMap* t = &mat->texture1_map;
- boDebug() << mat->name << " -- " << t->name << endl;
- boDebug() << "rot: " << t->rotation
-		<< " offset: " << t->offset[0] << "," << t->offset[1]
-		<< " scale: " << t->scale[0] << "," << t->scale[1]
-		<< " flags: " << t->flags
-		<< endl;
- boDebug() << "map_data scale: " << mesh->map_data.scale
-		<< " pos: " << mesh->map_data.pos[0]
-			<< "," << mesh->map_data.pos[1]
-			<< "," << mesh->map_data.pos[2]
-		<< " type: " << mesh->map_data.maptype
-		<< " tile: " << mesh->map_data.tile[0] << "," << mesh->map_data.tile[1]
-		<< endl;
-}
-
-void BosonModel::loadNode(Lib3dsNode* node, bool reload)
-{
- {
-	Lib3dsNode* p;
-	for (p = node->childs; p; p = p->next) {
-		loadNode(p, reload);
-	}
- }
- if (node->type != LIB3DS_OBJECT_NODE) {
-	return;
- }
- if (strcmp(node->name, "$$$DUMMY") == 0) {
-	return;
- }
- // we create a display list for *every single* node.
- // This might look like a lot of overhead (both memory and speed - we
- // need to use glCallList() every time which means more function calls)
- // but it is actually less - e.g. in animations we don't have separate
- // display lists for node that didn't change at all (less memory!)
-
- Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
- if (!mesh) {
-	return;
- }
- if (mesh->faces < 1) {
-	boWarning() << k_funcinfo << "no faces in " << mesh->name << " of " << file() << endl;
-	return;
- }
- if (!node->user.d) {
-	node->user.d = glGenLists(1);
-	if (node->user.d == 0) {
-		boError(100) << k_funcinfo << "NULL display list created" << endl;
-		return;
-	}
- } else {
-	if (reload) {
-		// it is important that the list is deleted, but the
-		// newly generated list must have the *same* number as
-		// it had before!
-		glDeleteLists(node->user.d, 1);
-	} else {
-		boWarning(100) << k_funcinfo << "node was already loaded before" << endl;
-		return;
-	}
- }
- if (mesh->texels != mesh->points) {
-	if (mesh->texels != 0) {
-		boError(100) << k_funcinfo << "hmm.. points: " << mesh->points
-				<< " , texels: " << mesh->texels << endl;
-		return;
-	}
- }
-
- GLuint myTex = 0;
- bool resetColor = false; // needs to be true after we changed the current color
-
- // AB: we have *lots* of faces! in numbers the maximum i found
- // so far (only a short look) was about 25 toplevel nodes and
- // rarely child nodes. sometimes 2 child nodes or so - maybe 10
- // per model (if at all).
- // but we have up to (short look only) 116 faces *per node*
- // usually it's about 10-20 faces (minimum) per node!
- //
- // so optimization should happen here - if possible at all...
-
-
- QString textureName = BoMesh::textureName(mesh, m3ds);
- if (textureName == QString::null) {
-	myTex = 0;
- } else {
-	QString tex;
-	tex = cleanTextureName(textureName);
-	if (tex.isEmpty()) {
-		myTex = 0;
-	} else {
-		myTex = mModelTextures->texture(tex);
-		if (!myTex) {
-			boWarning(100) << k_funcinfo << "Texture " << tex << " was not loaded" << endl;
-		}
-	}
- }
-
-#warning memory leak
- //AB: memory leak!
- //AB: we need to do this once per modelnode only (for every player)
- BoMesh* boMesh = new BoMesh(mesh);
-
- boMesh->setMaterial(BoMesh::material(mesh, m3ds));
- boMesh->setTextured(myTex != 0);
- boMesh->setTextureObject(myTex);
- boMesh->loadVertices();
- boMesh->loadTexels();
-
-
-
-#if USE_STRIP
-	boMesh->connectFaces();
-#else
-	boMesh->addFaces();
-#endif
- // TODO: count number of nodes in this mesh and compare to mesh->faces
-
-
- // now start the actual display list for this node.
- glNewList(node->user.d, GL_COMPILE);
- d->mNodeDisplayLists.append(node->user.d);
-
- if (BoMesh::isTeamColor(mesh)) {
-	myTex = 0; // teamcolor objects are *not* textured
-	if (mTeamColor) {
-		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
-		resetColor = true;
-	}
- }
-
- glBindTexture(GL_TEXTURE_2D, myTex);
-
- // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
- glBegin(boMesh->type());
- boMesh->renderMesh();
- glEnd();
-
- if (resetColor) {
-	// we need to reset the color (mainly for the placement preview)
-	glPopAttrib();
-	resetColor = false;
- }
- glEndList();
-}
-
 
 void BosonModel::renderNode(Lib3dsNode* node)
 {
@@ -709,21 +557,18 @@ void BosonModel::renderNode(Lib3dsNode* node)
 
 	// I assume thats e.g. the rotation of the node. maybe
 	// even scaling.
-	glMultMatrixf(&node->matrix[0][0]);
+	BoMatrix m(&node->matrix[0][0]);
 
 	// the pivot point is the center of the object, I guess.
-	glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+	m.translate(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+
+	glMultMatrixf(m.data());
 
 	// finally call the list, which was created in loadNode()
 	glCallList(node->user.d);
 
 	glPopMatrix();
  }
-}
-
-BoFrame* BosonModel::frame(unsigned int frame) const
-{
- return d->mFrames[frame];
 }
 
 unsigned int BosonModel::frames() const
@@ -748,12 +593,17 @@ void BosonModel::setTeamColor(const QColor& c)
 {
  delete mTeamColor;
  mTeamColor = new QColor(c);
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	mesh(i)->setTeamColor(*mTeamColor);
+ }
 }
 
 void BosonModel::finishLoading()
 {
  delete mTeamColor;
  mTeamColor = 0;
+ delete d->mLoader;
+ d->mLoader = 0;
  if (m3ds) {
 	lib3ds_file_free(m3ds);
 	m3ds = 0;
@@ -761,20 +611,6 @@ void BosonModel::finishLoading()
  delete mTeamColor;
  mTeamColor = 0;
  d->mTextureNames.clear();
-}
-
-void BosonModel::dumpVector(Lib3dsVector v)
-{
- boDebug(100) << "Vector: " << v[0] << "," << v[1] << "," << v[2] << endl;
-}
-
-void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
-{
- BoVector3 vector[3];
- for (int i = 0; i < 3; i++) {
-	vector[i].set(v[i]);
- }
- dumpTriangle(vector, texture, tex);
 }
 
 void BosonModel::dumpTriangle(BoVector3* v, GLuint texture, Lib3dsTexel* tex)
@@ -903,5 +739,86 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 
 }
 
+void BosonModel::addMesh(BoMesh* mesh)
+{
+ d->mMeshes.insert(d->mMeshes.count(), mesh);
+ if (mTeamColor) {
+	mesh->setTeamColor(*mTeamColor);
+ }
+}
+
+BoMesh* BosonModel::mesh(int index) const
+{
+ return d->mMeshes[index];
+}
+
+QIntDict<BoMesh> BosonModel::allMeshes() const
+{
+ return d->mMeshes;
+}
+
+unsigned int BosonModel::meshCount() const
+{
+ return d->mMeshes.count();
+}
+
+void BosonModel::setTexture(BoMesh* mesh, const QString& texture)
+{
+ d->mTextures.insert(mesh, texture);
+}
+
+int BosonModel::addFrames(int count)
+{
+ int offset = d->mFrames.count();
+ for (int i = 0; i < count; i++) {
+	BoFrame* f = new BoFrame;
+	d->mFrames.insert(offset + i, f);
+ }
+ return offset;
+}
+
+BoFrame* BosonModel::frame(unsigned int index) const
+{
+ return d->mFrames[index];
+}
+
+void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
+{
+ BO_CHECK_NULL_RET(frame);
+ BO_CHECK_NULL_RET(helper);
+
+ BoVector3 v;
+ for (int i = 0; i < frame->meshCount(); i++) {
+	BoMesh* mesh = frame->mesh(i);
+	BoMatrix* m = frame->matrix(i);
+	if (!mesh) {
+		boError() << k_funcinfo << "NULL mesh at " << i << endl;
+		continue;
+	}
+	if (!m) {
+		boError() << k_funcinfo << "NULL matrix at " << i << endl;
+		continue;
+	}
+	for (unsigned int j = 0; j < mesh->points(); j++) {
+		BoVector3 vector(mesh->point(j));
+		m->transform(&v, &vector);
+		helper->addPoint(v);
+	}
+	
+ }
+}
+
+float BosonModel::generateMasterScale() const
+{
+ BoHelper helper;
+ BoFrame* f = frame(0);
+ if (!f) {
+	boError() << k_funcinfo << "NULL frame 0" << endl;
+	return 1.0; // don't scale
+ }
+ computeBoundings(f, &helper);
+ float scale = helper.scale(mWidth, mHeight);
+ return scale;
+}
 
 

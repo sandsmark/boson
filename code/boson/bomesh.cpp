@@ -22,6 +22,7 @@
 #include "bo3dtools.h"
 
 #include <qptrlist.h>
+#include <qcolor.h>
 
 #include <lib3ds/mesh.h>
 #include <lib3ds/material.h>
@@ -222,6 +223,8 @@ public:
 		mMesh = 0;
 		mMaterial = 0;
 
+		mTeamColor = 0;
+
 		mTexels = 0;
 		mVertices = 0;
 	}
@@ -232,11 +235,14 @@ public:
 	Lib3dsMesh* mMesh;
 	Lib3dsMaterial* mMaterial;
 	GLuint mTexture;
+	GLuint mDisplayList;
+	QColor* mTeamColor;
 
 	QPtrList<BoNode> mAllNodes;
 
 	//  TODO: combine with vertex data into a single array! we can optimize
 	//  vertex arrays this way!
+	unsigned int mPoints;
 	float* mTexels;
 	float* mVertices;
 };
@@ -250,6 +256,9 @@ BoMesh::BoMesh(Lib3dsMesh* mesh)
 
 BoMesh::~BoMesh()
 {
+ if (d->mDisplayList) {
+	glDeleteLists(d->mDisplayList, 1);
+ }
  d->mAllNodes.clear();
  delete[] d->mTexels;
  delete[] d->mVertices;
@@ -263,6 +272,8 @@ void BoMesh::init()
  d->mType = GL_TRIANGLES;
  d->mTextured = false;
  d->mTexture = 0;
+ d->mDisplayList = 0;
+ d->mPoints = 0;
 }
 
 void BoMesh::createNodes()
@@ -721,17 +732,40 @@ void BoMesh::setTextureObject(GLuint tex)
  d->mTexture = tex;
 }
 
-void BoMesh::loadVertices()
+bool BoMesh::textured() const
+{
+ return d->mTextured;
+}
+
+GLuint BoMesh::textureObject() const
+{
+ return d->mTexture;
+}
+
+void BoMesh::loadPoints()
 {
  BO_CHECK_NULL_RET(mesh());
  if (mesh()->faces == 0) {
+	return;
+ }
+ if (mesh()->points == 0) {
+	return;
+ }
+ d->mPoints = mesh()->points;
+ loadVertices();
+ loadTexels();
+}
+
+void BoMesh::loadVertices()
+{
+ if (points() == 0) {
 	return;
  }
  if (d->mVertices) {
 	boWarning() << k_funcinfo << "vertices already loaded" << endl;
 	delete[] d->mVertices;
  }
- d->mVertices = new float[mesh()->points * 3];
+ d->mVertices = new float[points() * 3];
  Lib3dsMatrix invMeshMatrix;
  lib3ds_matrix_copy(invMeshMatrix, mesh()->matrix);
  lib3ds_matrix_inv(invMeshMatrix);
@@ -739,7 +773,7 @@ void BoMesh::loadVertices()
 
  BoVector3 vector;
  BoVector3 v;
- for (unsigned int i = 0; i < mesh()->points; i++) {
+ for (unsigned int i = 0; i < points(); i++) {
 	vector.set(mesh()->pointL[i].pos);
 	matrix.transform(&v, &vector);
 	d->mVertices[i * 3] = v[0];
@@ -761,10 +795,14 @@ void BoMesh::loadTexels()
  if (!d->mMaterial) {
 	return;
  }
- if (!d->mTextured) {
+ if (!textured()) {
 	return;
  }
- d->mTexels = new float[mesh()->texels * 2];
+ if (points() != mesh()->texels) {
+	boError() << k_funcinfo << "points != texels" << endl;
+	return;
+ }
+ d->mTexels = new float[points() * 2];
 
 
  BoMatrix texMatrix;
@@ -785,7 +823,6 @@ void BoMesh::loadTexels()
  // once and then use the final calculations in the
  // display list.
  glMatrixMode(GL_TEXTURE);
- glPushMatrix();
  glLoadIdentity(); // should already be there
  Lib3dsTextureMap* t = &d->mMaterial->texture1_map;
  if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
@@ -812,7 +849,9 @@ void BoMesh::loadTexels()
 	boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
 	texMatrix.loadIdentity();
  }
- glPopMatrix();
+ // AB: we don't use glPushMatrix() / glPopMatrix() here to make sure that the
+ // texture matrix is *always* the identity! we don't use the texture matrix
+ glLoadIdentity(); // reset to identity
  glMatrixMode(GL_MODELVIEW);
 
 
@@ -836,6 +875,9 @@ void BoMesh::renderMesh()
  BoNode* node = faces();
  if (!node) {
 	boError() << k_funcinfo << "NULL node" << endl;
+	return;
+ }
+ if (mesh()->faces < 1) {
 	return;
  }
  if (type() == GL_TRIANGLE_STRIP && false) {
@@ -874,7 +916,7 @@ void BoMesh::renderMesh()
 
 void BoMesh::renderPoint(int point)
 {
- if (point < 0 || (unsigned int)point >= mesh()->points) {
+ if (point < 0 || (unsigned int)point >= points()) {
 	boError() << k_funcinfo << "invalid point " << point << endl;
 	return;
  }
@@ -887,4 +929,85 @@ void BoMesh::renderPoint(int point)
  glVertex3fv(d->mVertices + 3 * point);
 }
 
+// there MUST be a valid context set already!!
+void BoMesh::loadDisplayList(bool reload)
+{
+ // AB: it would be better to do most of this in BosonModel instead. we could
+ // group several meshes into a single glBegin()/glEnd() pair
+ if (!d->mDisplayList) {
+	d->mDisplayList = glGenLists(1);
+	if (d->mDisplayList == 0) {
+		boError() << k_funcinfo << "NULL display list generated" << endl;
+		return;
+	}
+ } else {
+	if (reload) {
+		// it is important that the list is deleted, but the
+		// newly generated list must have the *same* number as
+		// it had before!
+		glDeleteLists(d->mDisplayList, 1);
+	} else {
+		boWarning() << k_funcinfo << "mesh was already loaded!" << endl;
+		return;
+	}
+ }
+ glNewList(d->mDisplayList, GL_COMPILE);
+
+ bool resetColor = false; // needs to be true after we changed the current color
+ // AB: we have *lots* of faces! in numbers the maximum i found
+ // so far (only a short look) was about 25 toplevel nodes and
+ // rarely child nodes. sometimes 2 child nodes or so - maybe 10
+ // per model (if at all).
+ // but we have up to (short look only) 116 faces *per node*
+ // usually it's about 10-20 faces (minimum) per node!
+ //
+ // so optimization should happen here - if possible at all...
+
+ if (!textured()) {
+	if (d->mTeamColor) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3ub(d->mTeamColor->red(), d->mTeamColor->green(), d->mTeamColor->blue());
+		resetColor = true;
+	}
+ } else {
+	glBindTexture(GL_TEXTURE_2D, textureObject());
+ }
+
+ glBegin(type());
+ renderMesh();
+ glEnd();
+
+ if (resetColor) {
+	// we need to reset the color (mainly for the placement preview)
+	glPopAttrib();
+	resetColor = false;
+ }
+
+ glEndList();
+}
+
+unsigned int BoMesh::points() const
+{
+ return d->mPoints;
+}
+
+BoVector3 BoMesh::point(unsigned int p) const
+{
+ if (p >= points()) {
+	boError() << k_funcinfo << "invalid point " << p << endl;
+	return BoVector3();
+ }
+ return BoVector3(&d->mVertices[p * 3]);
+}
+
+GLuint BoMesh::displayList() const
+{
+ return d->mDisplayList;
+}
+
+void BoMesh::setTeamColor(const QColor& c)
+{
+ delete d->mTeamColor;
+ d->mTeamColor = new QColor(c);
+}
 

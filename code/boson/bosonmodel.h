@@ -21,7 +21,7 @@
 
 #include <GL/gl.h>
 
-#include <lib3ds/types.h>
+#include <lib3ds/types.h> // TODO: remove
 
 class BosonModelTextures;
 class KSimpleConfig;
@@ -33,6 +33,7 @@ class BoMatrix;
 class BoMesh;
 template<class T> class QPtrList; //hmm is this working for all compilers? can templates be forwarded safely?
 template<class T, class T2> class QMap;
+template<class T> class QIntDict;
 
 /**
  * This class represents the Frame* entries in the index.unit files. Here you
@@ -65,8 +66,40 @@ class BoFrame
 {
 public:
 	BoFrame();
-	BoFrame(const BoFrame& f);
+
+	/**
+	 * Construct a copy of the first @p meshCount meshes from @p frame
+	 *
+	 * This can be used for the construction animations. Remember to set the
+	 * correct display lists!
+	 **/
+	BoFrame(const BoFrame& frame, int meshCount);
 	~BoFrame();
+
+	/**
+	 * Allocate matrices for all meshes in the model. These matrices modify
+	 * the positions of the meshes for this frame.
+	 **/
+	void allocMeshes(int meshes);
+
+	void setMesh(int index, BoMesh* mesh);
+
+	/**
+	 * To initialize the mesh you should call @ref setMesh before calling
+	 * this!
+	 * @return The mesh at index @p index. No validity check happens here!
+	 **/
+	inline BoMesh* mesh(int index) const { return mMeshes[index]; }
+
+	/**
+	 * You can use this function to change the matrix after calling @ref
+	 * allocMeshes!
+	 *
+	 * The returned matrix should be applied to the modelview before
+	 * rendering the mesh that is at @p index.
+	 * @return A pointer to the matrix at index @p index. No validity check happens here!
+	 **/
+	BoMatrix* matrix(int index) const;
 
 	void setDisplayList(GLuint l) { mDisplayList = l; }
 	GLuint displayList() const { return mDisplayList; }
@@ -74,12 +107,24 @@ public:
 	void setDepthMultiplier(float d) { mDepthMultiplier = d; }
 	void setRadius(float r) { mRadius = r; }
 
+	//AB: this is the number of nodes (from 3ds files), NOT the number if
+	//*different* meshes! we can have several pointers two the same mesh,
+	//but they will have different matrices. e.g. we can have 4 wheels (-->
+	//the same mesh, but 4 different positions)
+	int meshCount() const { return mMeshCount; }
+
+private:
+	void init();
+
 private:
 	GLuint mDisplayList;
 	float mDepthMultiplier;
 	float mRadius; // TODO
-};
 
+	int mMeshCount;
+	BoMatrix* mMatrices;
+	BoMesh** mMeshes; // AB: WARNING! double pointer! probably bad code!
+};
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -97,10 +142,36 @@ public:
 	~BosonModel();
 
 	/**
+	 * Add a mesh. This class takes ownership of that mesh, i.e. will delete
+	 * it when this class gets deleted.
+	 **/
+	void addMesh(BoMesh* mesh);
+
+	/**
+	 * Set the texture for @p mesh. The filename will be changed by @ref
+	 * BosonModel::cleanTextureName before it will get loaded.
+	 **/
+	void setTexture(BoMesh* mesh, const QString& texture);
+
+	/**
+	 * Add @þ count frames. You need to give them useful data using @ref
+	 * frame
+	 * @return The offset after which the frames where added. E.g. you can
+	 * retrive the first newly added frame using frame(offset + 0)
+	 **/
+	int addFrames(int count);
+
+	BoMesh* mesh(int index) const;
+	unsigned int meshCount() const;
+	QIntDict<BoMesh> allMeshes() const;
+
+	/**
 	 * Will use c as color for all meshes of the model with the name
 	 * "teamcolor". Note that this <em>must</em> be called before @ref
 	 * loadModel
 	 **/
+	// AB: WARNING: this is the reason why we have to load every model for
+	// every player, even if they use the same species!
 	void setTeamColor(const QColor& c);
 
 	void loadModel();
@@ -198,7 +269,8 @@ protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 
 protected:
-	void loadTextures();
+	void loadTextures(const QStringList& textures);
+
 	/**
 	 * Call @ref loadNode for all nodes in this model - also the child
 	 * nodes.
@@ -214,6 +286,22 @@ protected:
 	 * doesn't use all nodes.
 	 **/
 	void createDisplayLists();
+
+	/**
+	 * Most 3ds files use dimensions like 40.0 width or more. We use 1.0 for
+	 * a normal one-cell unit.
+	 *
+	 * So we need to compute the scaling factor. Only the first frame is
+	 * taken into account currently! Note that we MUST use the SAME value
+	 * for ALL frames - otherwise the model might get smaller and bigger
+	 * when changing frames.
+	 *
+	 * The model is scaled to the values width and height that were
+	 * specified to the constructor.
+	 **/
+	float generateMasterScale() const;
+
+	void computeBoundings(BoFrame* frame, BoHelper* helper) const;
 
 	/**
 	 * Generate the display list for this node, including all child nodes.
@@ -268,18 +356,12 @@ public:
 	static void findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search = 0);
 
 	/**
-	 * @param v A single vector
-	 **/
-	void dumpVector(Lib3dsVector v);
-
-	/**
 	 * @param v An array of 3 BoVector3
 	 * @param texture none if 0, otherwise the textue object
 	 * @param tex if texture is non-null this must be the texture
 	 * coordinates (array of 3) as provided for glTexCoord*()
 	 **/
 	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
-	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
 private:
 	void init();
