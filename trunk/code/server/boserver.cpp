@@ -122,7 +122,6 @@ int i;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++) {
 	player[i].socketState = SSS_NO_CONNECT;
-	player[i].server = this;
 	player[i].id = i;
 	}
 
