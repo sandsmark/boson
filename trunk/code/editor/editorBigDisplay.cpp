@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "../common/log.h"
+#include "../common/map.h"
 
 #include "editorBigDisplay.h"
 #include "visualView.h"
