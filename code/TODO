@@ -50,4 +50,10 @@ Generic :
 #77 f: releasiing some predefined 'templates' for the editor
 #78 b: use checkMove() in boeditor as well
 #79 f: latest facilities from ben aren't used
+#80 f: health bar should be graduated
+#81 f: plain rectangular selection boxes (QCanvas has something to do that)
+#82 f: new team-coloration stuff
+#83 f: destroyed things should dissapear after some times..
+#84 b: launching server from client failed
+#85 b: keeping on cliking on ennemy make them die quickly.. 
 
