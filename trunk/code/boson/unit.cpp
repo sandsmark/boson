@@ -303,7 +303,14 @@ void Unit::updateSelectBox()
 void Unit::moveBy(float moveX, float moveY, float moveZ)
 {
 // time critical function
- if (!moveX && !moveY && !moveZ || isDestroyed()) {
+ if (!moveX && !moveY && !moveZ) {
+	return;
+ }
+
+ if (isDestroyed()) {
+	// Just move the unit and return. No need to update z or minimap
+	boDebug() << k_funcinfo << "moving destroyed unit, moveZ: " << moveZ << endl;
+	BosonItem::moveBy(moveX, moveY, moveZ);
 	return;
  }
 
@@ -649,8 +656,12 @@ void Unit::advanceAttack(unsigned int advanceCount)
 void Unit::advanceDestroyed(unsigned int advanceCount)
 {
  // note: the unit/wreckage will get deleted pretty soon
- if (advanceCount % 20 != 0) {
+ if (advanceCount % 10 != 0) {
 	return;
+ }
+ if (isVisible()) {
+	// Make unit slowly sink into ground
+	setVelocity(0, 0, -(depth() / (REMOVE_WRECKAGES_TIME * MAXIMAL_ADVANCE_COUNT)) * 1.2);
  }
 }
 
@@ -766,8 +777,8 @@ bool Unit::moveTo(float x, float y, int range, bool attack, bool slowDownAtDest)
 	if (!ownerIO()->canGo(this, cell)) {
 		// No pathfinding if goal not reachable or occupied and we can see it
 		boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
+		return false;
 	}
-	return false;
  }
 
  // Center of the destination cell
