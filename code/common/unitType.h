@@ -75,7 +75,7 @@ struct mobileProperties_t {
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
-	uint 	speed;		// how far it may travel (in pixels) during one jiffie
+	int 	speed;		// how far it may travel (in pixels) during one jiffie
 
 /*
 // still unused ///orzel
