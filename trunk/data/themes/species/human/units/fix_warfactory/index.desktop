@@ -7,6 +7,8 @@ Health=250
 MineralCost=400
 Producer=10
 Requirements=4,5,2
+UnitWidth=2.0
+UnitHeight=2.0
 
 [Boson Facility]
 
@@ -15,3 +17,11 @@ ProducerList=0
 
 [Sounds]
 OrderSelect=order_select_warfactory
+
+[Textures]
+Textures=concrt1.jpg,concrt3.jpg,metal3.jpg,tnkhull1.jpg
+concrt1.jpg=rome_streets1.jpg
+concrt3.jpg=5sqtunnelroad.jpg
+metal3.jpg=hhroofgray.jpg
+tnkhull1.jpg=etopcrome.jpg
+

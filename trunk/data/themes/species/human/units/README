@@ -52,6 +52,16 @@ IsFacility=boolean  - True if this is a facility, false if this is a mobile
                       Default is "Unknown".
 * Id=Number         - A unique (!) ID for this unit. Must be > 0.
                       No default!
+UnitWidth=Number    - The width of the unit in cells. You can use floating point
+                      numbers - e.g. 1.5 will make the unit occupy 1.5 cells.
+                      Please don't use values like 1.3333 (might cause rounding
+                      trouble) or 1.23876381687 (nonsense value).
+                      Default is 1.0
+UnitHeight=Number   - The height of the unit in cells. You can use floating point
+                      numbers - e.g. 1.5 will make the unit occupy 1.5 cells.
+                      Please don't use values like 1.3333 (might cause rounding
+                      trouble) or 1.23876381687 (nonsense value).
+                      Default is 1.0
 Health=Number       - Health, power, whatever. Make this greater and the unit will
                       live longer. 
                       Must be > 0. Default is 100.
