@@ -1,0 +1,18 @@
+[Boson Facility]
+ConstructionSteps=0
+
+[Boson Unit]
+Name=House
+Health=50
+Id=45
+IsFacility=true
+MineralCost=200
+OilCost=100
+#Producer=10
+#ProductionTime=20
+SupportMiniMap=false
+TerrainType=0
+UnitDepth=1.4
+UnitHeight=2
+UnitWidth=2
+

@@ -1,9 +1,19 @@
 MOBILE_UNITS =
 FACILITIES = \
 	barn1 \
+	barrel-big \
+	barrel-small \
 	broken_tree \
+	crate-cross \
+	crate-cross-double \
+	crate-plain \
+	crate-plain-double \
+	crate-wooden-1 \
+	crate-wooden-1-double \
 	haystack1 \
+	house-1 \
 	rock1 \
+	toilet \
 	tree1 \
 	tree2 \
 	tree3 \
