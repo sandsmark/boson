@@ -835,7 +835,8 @@ void Facility::advanceConstruction()
 		setFrame(d->mConstructionState / unitProperties()->constructionDelay());
 	}
  } else {
-	setAnimated(false);
+//	setAnimated(false);
+	setWork(WorkNone);
  }
 }
 
@@ -948,7 +949,8 @@ void Facility::advanceProduction()
 {
  int type = currentProduction();
  if (type < 0) { // no production
-	setAnimated(false);
+//	setAnimated(false);
+	setWork(WorkNone);
 	d->mProductionState = 0;
 	return;
  }
