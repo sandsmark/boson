@@ -18,11 +18,12 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>  // random
+
 #include "common/log.h"
+#include "common/map.h"
 
 #include "editorCanvas.h"
-
-#include "common/map.h"
 
 editorCanvas::editorCanvas(QPixmap p)
 	: visualCanvas(p, 50, 50) // XXXX hardcoded until QCanvas allow on-the-fly creation
@@ -149,7 +150,7 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++)
-			setCell( i, j, cell ( fill_ground, (3*i+5*j)%4 ));
+			setCell( i, j, cell ( fill_ground, random()%4 ));
 
 	modified = true;
 	return true;
