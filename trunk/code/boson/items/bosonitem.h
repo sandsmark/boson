@@ -252,6 +252,9 @@ public:
 
 	void setRotation(float r) { mRotation = r; }
 
+	inline float xRotation() const { return mXRotation; }
+
+	void setXRotation(float r) { mXRotation = r; }
 
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
@@ -309,6 +312,7 @@ private:
 // OpenGL values. should not be used for pathfinding and so on. Most stoff
 // shouldn't be stored in save() either
 	float mRotation;
+	float mXRotation;
 	float mGLDepthMultiplier;
 	GLuint mDisplayList;
 	unsigned int mGLConstructionStep;
