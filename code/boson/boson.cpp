@@ -28,7 +28,8 @@
 #include <kmenubar.h>
 #include <khelpmenu.h>
 #include <kstddirs.h>
-#include <kinstance.h>   
+#include <kinstance.h>
+#include <kdebug.h>
 
 #include "common/boconfig.h"
 #include "common/log.h"
@@ -89,7 +90,6 @@ void BosonApp::initSocket(char *servername)
 	dlg = new connectDlg(this, servername, "connect_0");
 	ret = dlg->exec();
 	delete dlg;
-
 	if ( ret != QDialog::Accepted ) {
 		logf(LOG_ERROR, "initSocket : connectDlg rejected with value %d", ret);
 		return;
@@ -106,7 +106,7 @@ void BosonApp::initCanvas(uint w, uint h, uint nb)
 	QPixmap *p = new QPixmap(themePath);
 	if (p->isNull() ) {
 		logf(LOG_ERROR, "can't load earth.png");
-		printf("can't load earth.png\n");
+		kdError() << "can't load earth.png" << endl;
 		exit(1);
 	}
 
