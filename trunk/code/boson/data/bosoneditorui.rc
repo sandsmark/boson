@@ -43,5 +43,6 @@
   <Action name="splitviewh" />
   <Action name="splitviewv" />
   <Action name="removeview" />
+  <Action name="window_fullscreen" />
 </ToolBar>
 </kpartgui>

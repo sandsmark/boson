@@ -257,6 +257,8 @@ void TopBase::initKAction()
  (void)new KAction(i18n("&Remove Active Display"), "view_remove", 
 		  CTRL+SHIFT+Key_R, mBosonWidget, SLOT(slotRemoveActiveDisplay()),
 		  actionCollection(), "removeview");
+ KToggleAction* full = new KToggleAction(i18n("Fullscreen Mode"), CTRL+SHIFT+Key_F, this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
+ full->setChecked(false);
      
  // no createGUI() - will be done in derived classes
 }
@@ -469,4 +471,13 @@ void TopBase::slotConfigureKeys()
  dlg.insert(actionCollection());
  dlg.insert(bosonWidget()->actionCollection());
  dlg.configure(true);
+}
+
+void TopBase::slotToggleFullScreen()
+{
+ if (((KToggleAction*)actionCollection()->action("window_fullscreen"))->isChecked()) {
+	showNormal();
+ } else {
+	showFullScreen();
+ }
 }

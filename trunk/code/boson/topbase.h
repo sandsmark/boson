@@ -117,6 +117,7 @@ private slots:
 	void slotConfigureToolbars();
 	void slotMoveCommandFrame(int pos);
 	void slotDebugMode(int);
+	void slotToggleFullScreen();
 
 	void slotDebugPlayer(int);
 

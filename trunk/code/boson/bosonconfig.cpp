@@ -52,6 +52,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mArrowKeyStep = 10;
  mMiniMapScale = 2.0;
  mMiniMapZoom = 1.0;
+ mRMBMove = true;
 
  mDisableSound = false;
 
@@ -309,6 +310,19 @@ void BosonConfig::saveCommandButtonsPerRow(KConfig* conf)
 {
  conf->setGroup("Boson");
  conf->writeEntry("CommandButtonsPerRow", commandButtonsPerRow());
+}
+
+bool BosonConfig::readRMBMove(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ bool m = conf->readBoolEntry("RMBMove", true);
+ return m;
+}
+
+void BosonConfig::saveRMBMove(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("RMBMove", rmbMove());
 }
 
 void BosonConfig::setCommandButtonsPerRow(int b)
