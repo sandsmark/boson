@@ -13,4 +13,7 @@ rc_DATA = topui.rc bosonbaseui.rc bosonui.rc editorui.rc borenderui.rc
 bodebugdir = $(kde_confdir)
 bodebug_DATA = bodebugrc bodebug.areas
 
+bosoniconsdir = $(kde_datadir)/boson/icons
+bosonicons_ICON = AUTO
+
 EXTRA_DIST = $(apps_DATA) $(bodebug_DATA)
