@@ -65,9 +65,11 @@ public:
 	{
 		mCanvas = c;
 		mTile = 0;
+		mTiles = new BosonTiles;
 	}
 	virtual ~TileLoader()
 	{
+		delete mTiles;
 	}
 
 	void setDir(const QString& d)
@@ -86,9 +88,8 @@ protected:
 		kdDebug() << k_funcinfo << endl;
 		QTime time;
 		time.start();
-		BosonTiles tiles;
-		tiles.loadTiles(mDir);
-		mTile = new QPixmap(tiles.pixmap());
+		mTiles->loadTiles(mDir);
+		mTile = new QPixmap(mTiles->pixmap());
 		kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
 		if (mTile->isNull()) {
 			kdError() << k_funcinfo << "NULL pixmap" << endl;
@@ -103,6 +104,8 @@ private:
 	QString mDir;
 	QPixmap* mTile;
 	BosonCanvas* mCanvas;
+	BosonTiles* mTiles;
+	friend class BosonCanvas;  // Then BosonCanvas can access mTiles
 };
 
 class FogOfWar : public QCanvasSprite
@@ -177,7 +180,7 @@ void BosonCanvas::init()
  d->mDeleteShot.setAutoDelete(true);
 
  d->mLoader = new TileLoader(this);
- 
+ connect(d->mLoader->mTiles, SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
 }
 
 BosonCanvas::~BosonCanvas()
@@ -243,6 +246,7 @@ void BosonCanvas::setTileSet(QPixmap* p)
 	}
  }
  update();
+ emit signalTilesLoaded();
 }
 
 Cell* BosonCanvas::cell(int x, int y) const

@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "bosontiles.h"
+#include "bosontiles.moc"
 
 #include "defines.h"
 
@@ -26,7 +27,7 @@
 #include <qapplication.h>
 #include <qpixmap.h>
 
-BosonTiles::BosonTiles()
+BosonTiles::BosonTiles() : QObject()
 {
  mTilesImage = new QImage(big_w() * BO_TILE_SIZE, big_h() * BO_TILE_SIZE, 32);
 }
@@ -118,6 +119,9 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 	dir += QString::fromLatin1("/");
  }
  mDebug = debug;
+ // Variables for progress information
+ mLoaded = 0;
+ mSignalCounter = 0;
  mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
 
  for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
@@ -138,6 +142,7 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 		}
 	}
  }
+ emit signalTilesLoaded();
  return true;
 }
 
@@ -163,11 +168,19 @@ bool BosonTiles::loadGround(int j, const QString& path)
 		return false;
 	}
 	putOne(4 * j + i, p);
+	mLoaded++;
 	if (Cell::isBigTrans(j)) {
 		putOne(4 * (j + 1) + i, p, BO_TILE_SIZE, 0);
 		putOne(4 * (j + 2) + i, p, 0, BO_TILE_SIZE);
 		putOne(4 * (j + 3) + i, p, BO_TILE_SIZE, BO_TILE_SIZE);
+		mLoaded += 3;
 	}
+ }
+ mSignalCounter++;
+ if((mSignalCounter % 10) == 0)
+ {
+	mSignalCounter = 0;
+	emit signalTilesLoading(mLoaded);
  }
  return true;
 }
@@ -261,7 +274,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
-//	kdDebug() << "process events" << endl;
+	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
 	qApp->processEvents(10);
  }
 }
