@@ -169,22 +169,6 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
  QValueList<QImage> imageList;
  QString path = prop->unitPath();
 
-// sprites first
- QString fileName = path + "field-%1.png";
- int images = prop->isFacility() ? PIXMAP_PER_FIX : PIXMAP_PER_MOBILE;
- if (!QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
-	for(int i = 0; i < images; i++) {
-		QImage image;
-		QString number;
-		number.sprintf("%04d", i);
-		if (!loadUnitImage(fileName.arg(number), image, true, (images - 1 != i))) { // latest(destroyed) isn't team-colored
-			kdError() << "Cannot load " << fileName.arg(number) << endl;
-			return false;
-		}
-		imageList.append(image);
-	}
-	loadUnitTextures(prop->typeId(), imageList);
- }
  loadUnitModel(prop);
 
 // big overview
@@ -248,69 +232,30 @@ bool SpeciesTheme::loadActionGraphics()
  kdDebug() << k_funcinfo << "action Path: " << actionPath << endl;
 
  QPixmap* attack = new QPixmap(actionPath + "attack.png");
- d->mActionPixmaps.insert((int)ActionAttack, attack);
- if (!attack) {
+ if (attack->isNull()) {
 	kdError() << k_funcinfo << "NULL attack pixmap!" << endl;
+	delete attack;
 	return false;
  }
+ d->mActionPixmaps.insert((int)ActionAttack, attack);
 
  QPixmap* move = new QPixmap(actionPath + "move.png");
- d->mActionPixmaps.insert((int)ActionMove, move);
- if (!move) {
+ if (move->isNull()) {
 	kdError() << k_funcinfo << "NULL move pixmap!" << endl;
+	delete move;
 	return false;
  }
+ d->mActionPixmaps.insert((int)ActionMove, move);
 
  QPixmap* stop = new QPixmap(actionPath + "stop.png");
- d->mActionPixmaps.insert((int)ActionStop, stop);
- if (!stop) {
+ if (stop->isNull()) {
 	kdError() << k_funcinfo << "NULL stop pixmap!" << endl;
+	delete stop;
 	return false;
  }
+ d->mActionPixmaps.insert((int)ActionStop, stop);
+
  return true;
-}
-
-int SpeciesTheme::unitWidth(unsigned long int unitType)
-{
- BosonTextureArray* array = d->mSpriteTextures[unitType];
- if (!array) {
-	loadUnit(unitType);
-	d->mSpriteTextures[unitType];
-	if (!array) {
-		kdError() << "Cannot load data files for " << unitType << endl;
-		return 0;
-	}
- }
- return array->width(0);
-}
-
-int SpeciesTheme::unitHeight(unsigned long int unitType)
-{
- BosonTextureArray* array = d->mSpriteTextures[unitType];
- if (!array) {
-	loadUnit(unitType);
-	array = d->mSpriteTextures[unitType];
-	if (!array) {
-		kdError() << "Cannot load data files for " << unitType << endl;
-		return 0;
-	}
- }
- return array->height(0);
-}
-
-BosonTextureArray* SpeciesTheme::textureArray(unsigned long int unitType)
-{
- BosonTextureArray* array = d->mSpriteTextures[unitType];
- if (!array) {
-	loadUnit(unitType);
-	array = d->mSpriteTextures[unitType];
- }
- if (!array) {
-	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
-			<< endl;
-	return 0;
- }
- return array;
 }
 
 BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
@@ -326,43 +271,6 @@ BosonModel* SpeciesTheme::unitModel(unsigned long int unitType)
 	return 0;
  }
  return model;
-}
-
-GLuint SpeciesTheme::textureNumber(unsigned long int unitType, int dir)
-{
- BosonTextureArray* array = d->mSpriteTextures[unitType];
- if (!array) {
-	loadUnit(unitType);
-	array = d->mSpriteTextures[unitType];
-	if (!array) {
-		kdError() << k_funcinfo << "Cannot find texture for " << unitType << endl;
-		return 0;
-	}
- }
- if (!array->isValid()) {
-	kdError() << k_funcinfo << "Oops - textures not allocated for " << unitType << endl;
-	return 0;
- }
- if ((int)array->count() <= dir) {
-	kdError() << k_funcinfo << "Texture " << dir << " not allocated for " << unitType << endl;
-	return 0;
- }
- return array->texture(dir);
-}
-
-GLuint SpeciesTheme::displayList(unsigned long int unitType)
-{
- BosonModel* model = d->mUnitModels[unitType];
- if (!model) {
-	loadUnit(unitType);
-	model = d->mUnitModels[unitType];
- }
- if (!model) {
-	kdError() << k_funcinfo << "Cannot load display list for " << unitType 
-			<< endl;
-	return 0;
- }
- return model->displayList();
 }
 
 QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
@@ -404,7 +312,7 @@ QPixmap* SpeciesTheme::actionPixmap(UnitAction action)
 bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool withMask, bool with_team_color)
 {
  d->mCanChangeTeamColor = false;
- 
+
  QImage image(fileName);
  image.setAlphaBuffer(false);
  QImage *mask = 0;
@@ -414,7 +322,7 @@ bool SpeciesTheme::loadUnitImage(const QString &fileName, QImage &_image, bool w
  static const QRgb background = qRgb(255,  0, 255) & RGB_MASK ;
  static const QRgb background2 = qRgb(248, 40, 240) & RGB_MASK ;
 
- w = image.width(); 
+ w = image.width();
  h = image.height();
 
  if (image.depth() != 32) {
@@ -616,7 +524,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
- const UnitProperties* prop = unitProperties(unit);
+ const UnitProperties* prop = unit->unitProperties(); //unitProperties(unit);
  if (!prop) {
 	kdError() << k_funcinfo << "NULL properties for " << unit->type() << endl;
 	return;
@@ -625,9 +533,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
  unit->setShields(prop->shields());
-// kdDebug() << k_funcinfo << "1"<<endl;
  unit->setWeaponRange(prop->weaponRange()); // seems to cause a KGame error sometimes
-// kdDebug() << k_funcinfo << "2"<<endl;
  unit->setWeaponDamage(prop->weaponDamage());
  unit->setSightRange(prop->sightRange());
 
@@ -640,7 +546,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  if (prop->isMobile()) {
 	unit->setSpeed(prop->speed());
  } else if (prop->isFacility()) {
- 
+
  }
 }
 
@@ -680,15 +586,6 @@ void SpeciesTheme::readUnitConfigs()
 				<< endl;
 	}
  }
-}
-
-const UnitProperties* SpeciesTheme::unitProperties(UnitBase* unit) const
-{
- if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
-	return 0;
- }
- return unitProperties(unit->type());
 }
 
 const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const
@@ -811,63 +708,21 @@ QValueList<QColor> SpeciesTheme::defaultColors()
  return colors;
 }
 
-void SpeciesTheme::loadUnitTextures(unsigned long int unitType, QValueList<QImage> list)
-{
- if (list.isEmpty()) {
-	kdError() << k_funcinfo << "empty list" << endl;
-	return;
- }
- BosonTextureArray* tex = new BosonTextureArray;
- tex->createTextures(list);
- d->mSpriteTextures.insert(unitType, tex);
-}
-
 void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 {
- BosonModel* m = 0;
- if (QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
-	m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"));
-	m->setLongNames(prop->longTextureNames());
-	m->loadModel();
- } else {
-	// this should get removed!
-	BosonTextureArray* array = textureArray(prop->typeId());
-	GLuint list = createDisplayList(prop->typeId());
-	m = new BosonModel(list, array->width(0), array->height(0));
+ if (d->mUnitModels[prop->typeId()]) {
+	kdWarning() << k_funcinfo << "Model already loaded" << endl;
+	return;
  }
+ if (!QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
+	kdError() << k_funcinfo << "Cannot find unit.3ds file for " << prop->typeId() << endl;
+	return;
+ }
+ BosonModel* m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"),
+		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
+		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+ m->setLongNames(prop->longTextureNames());
+ m->loadModel();
  d->mUnitModels.insert(prop->typeId(), m);
 }
-
-GLuint SpeciesTheme::createDisplayList(unsigned long int typeId)
-{
- BosonTextureArray* texArray = textureArray(typeId);
- if (!texArray) {
-	kdError() << k_funcinfo << "NULL textures" << endl;
-	return 0;
- }
- float width = ((float)texArray->width(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
- float height = ((float)texArray->height(0)) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
- #warning FIXME - directions are not supported
- GLuint tex = texArray->texture(0); // this doesn't support directions!!
- if (tex == 0) {
-	kdWarning() << k_funcinfo << "invalid texture" << endl;
-	return 0;
- }
-
- GLuint list = glGenLists(1);
- glNewList(list, GL_COMPILE);
-	glBindTexture(GL_TEXTURE_2D, tex); // which texture to load
-
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0,0.0); glVertex3f(0.0, 0.0, 0.0);
-		glTexCoord2f(1.0,0.0); glVertex3f(width, 0.0, 0.0);
-		glTexCoord2f(1.0,1.0); glVertex3f(width, height, 0.0);
-		glTexCoord2f(0.0,1.0); glVertex3f(0.0, height, 0.0);
-
-	glEnd();
- glEndList();
-
- return list;
-}
-
 

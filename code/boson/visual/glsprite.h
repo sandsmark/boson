@@ -36,35 +36,52 @@ public:
 	virtual void setCanvas(BosonCanvas*);
 
 	BosonCanvas* canvas() const { return mCanvas; }
+
+	/**
+	 * @return Exactly the same as @ref leftEdge. Note that it has
+	 * <em>nothing</em> to do with the OpenGL coordinates. these are the
+	 * internal canvas coordinates.
+	 **/
 	inline float x() const { return mX; }
 	inline float y() const { return mY; }
 	inline float z() const { return mZ; }
-	inline void setX(float x)
-	{
-		mX = x;
-	}
-	inline void setY(float y)
-	{
-		mY = y;
-	}
-	inline void setZ(float z)
-	{
-		mZ = z;
-	}
+
+	inline void setX(float x) { mX = x; }
+	inline void setY(float y) { mY = y; }
+	inline void setZ(float z) { mZ = z; }
 
 	inline BosonModel* model() const { return mModel; }
 
-	// note: for GLunit all frames must have the same width/height
-	inline int width() const { return model() ? model()->width(frame()) : 0; }
-	inline int height() const { return model() ? model()->height(frame()) : 0; }
+	// note: for GLunit all frames must have the same width/height!
+	// different depth is ok!
+	inline int width() const { return mWidth; }
+	inline int height() const { return mHeight; }
 
-	// AB: we don't support a hotspot here!
+	/**
+	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
+	 * achieve the depth (height in z-direction) of the unit. Note that this
+	 * value <em>must not</em> be used in pathfinding or so, but only in
+	 * OpenGL!
+	 **/
+	inline float glDepthMultiplier() const { return mGLDepthMultiplier; }
+
+	void setWidth(int w); // width in cells * BO_TILE_SIZE // FIXME: should be changed to cell value (float!!)
+	void setHeight(int w); // height in cells * BO_TILE_SIZE // FIXME: should be changed to cell value (float!!)
+	/**
+	 * See @ref glDepthMultiplier. Note that the depth of the unit
+	 * (i.e. the height in z-direction) is allowed to change for
+	 * different frames!
+	 **/
+	void setGLDepthMultiplier(float d);
+
+
 	float leftEdge() const { return x(); }
 	float topEdge() const { return y(); } // note: in OpenGL the top is y-coordinate + height!!
 	float rightEdge() const { return (leftEdge() + width() - 1); }
 	float bottomEdge() const { return (topEdge() + height() - 1); }
-	QRect boundingRect() const; 
-	QRect boundingRectAdvanced() const; 
+	QRect boundingRect() const;
+	QRect boundingRectAdvanced() const;
+
 
 	void show() { setVisible(true); }
 	void hide() { setVisible(true); }
@@ -91,12 +108,14 @@ public:
 			move(x, y, z);
 			if (_frame != frame()) {
 				model()->setFrame(_frame);
+				setGLDepthMultiplier(model()->depthMultiplier());
 			}
 			setVisible(true);
 		} else {
 			move(x, y, z);
 			if (_frame != frame()) {
 				model()->setFrame(_frame);
+				setGLDepthMultiplier(model()->depthMultiplier());
 			}
 		}
 	}
@@ -137,6 +156,10 @@ private:
 	float mX;
 	float mY;
 	float mZ;
+	int mWidth;
+	int mHeight;
+	float mGLDepthMultiplier;
+
 	bool mIsVisible;
 	float mXVelocity;
 	float mYVelocity;

@@ -66,8 +66,8 @@ public:
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
 };
 
-Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
-		: UnitBase(prop), 
+Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
+		: UnitBase(prop),
 		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
  d = new UnitPrivate;
@@ -75,6 +75,11 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mAdvanceFunction = &Unit::advanceNone;
  mAdvanceFunction2 = &Unit:: advanceNone;
  setOwner(owner);
+
+ // note: these width and height can be used for e.g. pathfinding. It does not
+ // depend in any way on the .3ds file or another OpenGL thing.
+ setWidth(prop->unitWidth());
+ setHeight(prop->unitWidth());
 
  d->mDirection.registerData(IdDirection, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Direction");
@@ -197,9 +202,6 @@ void Unit::setWork(WorkType w)
 {
  if (currentPlugin() && w != WorkPlugin) {
 	mCurrentPlugin = 0;
- }
- if (w == WorkNone) {
-	kdDebug() << "none - 0. ; " << id() << endl;
  }
  UnitBase::setWork(w);
 }
@@ -693,7 +695,6 @@ void Unit::setAdvanceWork(WorkType w)
  // we even do this if nothing changed - just in case...
  switch (w) {
 	case WorkNone:
-		kdDebug() << k_funcinfo << "none" << endl;
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
@@ -857,7 +858,6 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	return;
  }
 
-#warning FIXME!!
  int x = (int)(BosonSprite::x() + width() / 2);
  int y = (int)(BosonSprite::y() + height() / 2);
 

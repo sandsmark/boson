@@ -94,14 +94,6 @@ public:
 	 **/
 	QPixmap* actionPixmap(UnitAction action);
 
-	int unitWidth(unsigned long int unitType);
-	int unitHeight(unsigned long int unitType);
-
-	BosonTextureArray* textureArray(unsigned long int unitType);
-	GLuint textureNumber(unsigned long int unitType, int direction);
-	// TODO an OpenGL implementation for shot()
-
-	GLuint displayList(unsigned long int unitType);
 	BosonModel* unitModel(unsigned long int unitType);
 
 	/**
@@ -151,7 +143,6 @@ public:
 	 **/
 	void loadNewUnit(UnitBase* unit);
 
-	const UnitProperties* unitProperties(UnitBase* unit) const;
 	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
 	/**
@@ -186,6 +177,7 @@ public:
 	/**
 	 * Load the shot "animation"
 	 **/
+	//TODO: OpenGL implementations!
 	bool loadShot();
 	bool loadBigShot(bool isFacility, unsigned int version);
 
@@ -223,7 +215,6 @@ protected:
 	 * @param pix The pixmap that is loaded. 
 	 **/
 	bool loadUnitImage(const QString& fileName, QImage &image, bool withMask = true, bool withTeamColor = true);
-//	bool loadUnitPixmap(const QString& fileName, QPixmap &pix, bool withMask = true, bool withTeamColor = true);
 
 	/**
 	 * Used for the shot sprites by @ref loadShot.

@@ -82,6 +82,11 @@ void SelectBoxData::loadBoxes()
 
  for (unsigned int i = 0; i < POWER_LEVELS; i++) {
 	glNewList(list + i, GL_COMPILE);
+		// ok, this is the quick and dirty way. correct would be to
+		// adjust all vertices - but it doesn't really matter.
+		// this ensures, that we render around the *center*
+		// note: we render in the ceter of x/y but from bottom to top!
+		glTranslatef(-0.5, -0.5, 0.0);
 		drawCube();
 		glBindTexture(GL_TEXTURE_2D, mTextures->texture(0));
 		drawHealthBar(i);

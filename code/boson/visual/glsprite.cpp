@@ -26,6 +26,8 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
 {
  mCanvas = canvas;
  mX = mY = mZ = 0.0;
+ mWidth = mHeight = 0;
+ mGLDepthMultiplier = 1.0;
 
  mIsVisible = false;
 
@@ -72,4 +74,18 @@ void GLSprite::setCanvas(BosonCanvas* c)
  mCanvas = c;
 }
 
+void GLSprite::setWidth(int w)
+{
+ mWidth = w;
+}
+
+void GLSprite::setHeight(int h)
+{
+ mHeight = h;
+}
+
+void GLSprite::setGLDepthMultiplier(float d)
+{
+ mGLDepthMultiplier = d;
+}
 

@@ -560,8 +560,8 @@ void BosonBigDisplayBase::paintGL()
 
 	BosonSprite* item = *it;
 
-	GLfloat x = item->x() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat y = -(item->y() * BO_GL_CELL_SIZE / BO_TILE_SIZE + ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	GLfloat z = item->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 
 	// TODO: performance: we can improve this greatly:
@@ -584,6 +584,9 @@ void BosonBigDisplayBase::paintGL()
 		continue;
 	}
 
+	// AB: note units are rendered in the *center* point of their
+	// width/height.
+	// but concerning z-position they are rendered from bottom to top!
 	glTranslatef(x, y, z);
 
 	if (item->displayList() == 0) {
@@ -598,9 +601,10 @@ void BosonBigDisplayBase::paintGL()
 		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
 		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+		GLfloat depth = item->glDepthMultiplier();
 		glPushMatrix();
-		if (w != 1.0 || h != 1.0) {
-			glScalef(w, h, 1.0);
+		if (w != 1.0 || h != 1.0 || depth != 1.0) {
+			glScalef(w, h, depth);
 		}
 		glCallList(item->selectBox()->displayList());
 		glPopMatrix();
@@ -1128,7 +1132,7 @@ void BosonBigDisplayBase::enterEvent(QEvent*)
 	// editor mode
 	return;
  }
- cursor()->showCursor();
+// cursor()->showCursor();
 }
 
 void BosonBigDisplayBase::leaveEvent(QEvent*)
@@ -1138,7 +1142,7 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 	// editor mode
 	return;
  }
- cursor()->hideCursor();
+// cursor()->hideCursor();
 }
 
 void BosonBigDisplayBase::quitGame()

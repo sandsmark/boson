@@ -20,11 +20,14 @@
 #define BOSONMODEL_H
 
 #include <qmap.h>
+#include <qintdict.h>
 #include <GL/gl.h>
 
 #include <lib3ds/types.h>
 
 class BosonModelTextures;
+class BoFrame;
+
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -35,8 +38,15 @@ public:
 	/**
 	 * Construct a model using an already created display list
 	 **/
-	BosonModel(GLuint list, int width, int height);
-	BosonModel(const QString& dir, const QString& file);
+	BosonModel(GLuint list, float width, float height);
+
+	/**
+	 * @param width The final width of the unit. The model will be scaled to
+	 * fit this value, if possible. Distortion will be avoided.
+	 * @param height The final height width of the unit. The model will be scaled to
+	 * fit this value, if possible. Distortion will be avoided.
+	 **/
+	BosonModel(const QString& dir, const QString& file, float width, float height);
 	~BosonModel();
 
 	void loadModel();
@@ -51,12 +61,13 @@ public:
 	{
 		return mDisplayList;
 	}
+	
+	/**
+	 * @return The factor BO_GL_CELL_SIZE needs to be multiplied with to get
+	 * the actual depth (height in z-direction) of the unit
+	 **/
+	float depthMultiplier() const { return mDepthMultiplier; }
 
-	//FIXME!!
-	//FIXME: do we need frame at all? we already demand all frames to be at
-	//the same size
-	inline int width(int /*frame*/) const { return mWidth; }
-	inline int height(int /*frame*/) const { return mHeight; }
 	inline unsigned int frames() const { return mFrames.count(); }
 
 	/**
@@ -66,9 +77,13 @@ public:
 	void setLongNames(QMap<QString, QString> names) { mTextureNames = names; }
 
 protected:
+	class BoHelper; // for computing width,height,.. of the model. this is a hack!
+
+protected:
 	void loadTextures();
 	void createDisplayLists();
 	void renderNode(Lib3dsNode* node);
+	void computeBoundings(Lib3dsNode* node, BoHelper* helper);
 
 	/**
 	 * Convert a 3ds texture name to a clean name. That means call
@@ -92,16 +107,14 @@ private:
 	static BosonModelTextures* mModelTextures;
 	QMap<QString, QString> mTextureNames;
 	GLuint mDisplayList;
-	QMap<int, GLuint> mFrames;
+	QIntDict<BoFrame> mFrames;
 	QString mDirectory;
 	QString mFile;
 	unsigned int mFrame;
 
-	// warning! width and height are still in canvas sizes!
-	int mWidth;
-	int mHeight;
-
-	int mPoints; // for debugging
+	float mWidth;
+	float mHeight;
+	float mDepthMultiplier;
 };
 #endif
 

@@ -19,15 +19,14 @@
 
 #include "bosoncursor.h"
 
-#include "rtti.h" // if we ever make this class public we should remove dependancy on this class
-#include "bosoncanvas.h" // see above .. but since we don't depend on QCanvas anymore thats just an illusion ;)
+#include "rtti.h"
+#include "bosoncanvas.h"
 
 #include <ksimpleconfig.h>
 #include <kstandarddirs.h>
 #include <kcursor.h>
 #include <kdebug.h>
 
-#include <qpainter.h>
 #include <qwidget.h>
 #include <qbitmap.h>
 #include <qtimer.h>
@@ -57,15 +56,6 @@ void BosonCursor::setCursor(int mode)
 QCursor BosonCursor::cursor() const
 {
  return QCursor(QCursor::ArrowCursor);
-}
-
-QRect BosonCursor::oldCursor() const
-{
- return QRect(0,0,1,1);
-}
-
-void BosonCursor::move(double, double)
-{
 }
 
 QPoint BosonCursor::pos() const
@@ -271,7 +261,6 @@ void BosonSpriteCursor::setCursor(int mode)
  if (cursorMode() >= 0) {
 	BosonSpriteCursorData* data;
 	data = d->mCursors[cursorMode()];
-	hideCursor();
 	if (data) {
 //		kdDebug() << k_funcinfo << mode << endl;
 		if (!data->mArray || !data->mArray->isValid()) {
@@ -281,10 +270,7 @@ void BosonSpriteCursor::setCursor(int mode)
 		setCurrentData(data);
 	} else {
 		kdWarning() << k_funcinfo << "NULL array for " << mode << endl;
-		hideCursor();
 	}
- } else {
-	hideCursor();
  }
 }
 
@@ -324,16 +310,6 @@ void BosonSpriteCursor::slotAdvance()
 	d->mCurrentFrame = 0;
  }
  mCurrentTexture = mCurrentData->mArray->texture(d->mCurrentFrame);
-}
-
-void BosonSpriteCursor::hideCursor()
-{
-//TODO
-}
-
-void BosonSpriteCursor::showCursor()
-{
-//TODO
 }
 
 bool BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
@@ -390,7 +366,6 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  }
  if (!data) {
 	kdWarning() << k_funcinfo << "NULL data" << endl;
-	hideCursor();
 	mCurrentData = 0;
 	return;
  }
@@ -406,6 +381,5 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  if (mCurrentData->mArray->count() > 1) {
 	d->mAnimateTimer.start(100);
  }
- showCursor();
 }
 
