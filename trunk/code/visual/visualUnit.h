@@ -71,7 +71,6 @@ public:
 	virtual int rtti() const { return S_MOBILE+type; }
 	/* attachement */
 	void  select();
-	void  destroy(void) { setFrame(PIXMAP_MOBILE_DESTROYED); unSelect(); _destroyed = true;}
 
 };
 
@@ -91,7 +90,6 @@ public:
 	virtual int	rtti() const { return S_FACILITY+type; }
 	/* attachement */
 	void  select();
-	void  destroy(void) { setFrame(PIXMAP_FIX_DESTROYED); unSelect(); _destroyed = true; }
 
 };
 
