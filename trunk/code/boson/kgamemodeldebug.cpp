@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #include "kgamemodeldebug.h"
 #include "kgamemodeldebug.moc"
 
-#include "bosonmodel.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bo3dtools.h"
@@ -41,13 +40,15 @@
 #include <qsplitter.h>
 #include <qvbox.h>
 #include <qstringlist.h>
-#include <ksimpleconfig.h>
+#include <qtooltip.h>
 
+#include <ksimpleconfig.h>
 #include <klistbox.h>
 #include <klistview.h>
 #include <klocale.h>
 #include <kpopupmenu.h>
 #include <kstandarddirs.h>
+#include <knuminput.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -111,6 +112,11 @@ public:
 			}
 		}
 		setMatrix(&matrix);
+	}
+	void setIdentity()
+	{
+		BoMatrix m;
+		setMatrix(&m);
 	}
 
 	void clear()
@@ -325,6 +331,104 @@ public:
 	}
 };
 
+class BoNodeObjectDataWidget : public QWidget
+{
+public:
+	BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
+	{
+		mLayout = new QVBoxLayout(this);
+
+		mPivot = (QLabel*)addWidget(i18n("Pivot"), new QLabel(this));
+		QToolTip::add(mPivot, i18n("The pivot point of the node"));
+
+		mInstance = (QLabel*)addWidget(i18n("Instance"), new QLabel(this));
+		QToolTip::add(mInstance, i18n("dunno what this is"));
+
+		mBBoxMin = (QLabel*)addWidget(i18n("bbox_min"), new QLabel(this));
+		QToolTip::add(mBBoxMin, i18n("Most probably this is the min point of the bounding box"));
+		mBBoxMax = (QLabel*)addWidget(i18n("bbox_max"), new QLabel(this));
+		QToolTip::add(mBBoxMax, i18n("Most probably this is the max point of the bounding box"));
+
+		mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
+		QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
+		mRot = (QLabel*)addWidget(i18n("Rotation"), new QLabel(this));
+		QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value."));
+		mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
+		QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
+
+		mMorphSmooth = (QLabel*)addWidget(i18n("morph_smooth"), new QLabel(this));
+		mMorph = (QLabel*)addWidget(i18n("morph"), new QLabel(this));
+
+		mHide = (QCheckBox*)addWidget(i18n("morph"), new QCheckBox(this));
+	}
+
+	void setNodeObjectData(Lib3dsObjectData* d)
+	{
+		QString pivot;
+		QString instance;
+		QString bboxMin;
+		QString bboxMax;
+		QString pos;
+		QString rot;
+		QString scl;
+		QString morphSmooth;
+		QString morph;
+		bool hide = false;
+
+		if (d) {
+			pivot = QString("(%1,%2,%3)").arg(d->pivot[0]).arg(d->pivot[1]).arg(d->pivot[2]);
+			instance = QString(d->instance);
+			bboxMin = QString("(%1,%2,%3)").arg(d->bbox_min[0]).arg(d->bbox_min[1]).arg(d->bbox_min[2]);
+			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0]).arg(d->bbox_max[1]).arg(d->bbox_max[2]);
+			pos = QString("(%1,%2,%3)").arg(d->pos[0]).arg(d->pos[1]).arg(d->pos[2]);
+			rot = QString("(%1,%2,%3)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]);
+			scl = QString("(%1,%2,%3)").arg(d->scl[0]).arg(d->scl[1]).arg(d->scl[2]);
+			morphSmooth = QString::number(d->morph_smooth);
+			morphSmooth = QString(d->morph_smooth);
+			hide = d->hide;
+		}
+
+		mPivot->setText(pivot);
+		mInstance->setText(instance);
+		mBBoxMin->setText(bboxMin);
+		mBBoxMax->setText(bboxMax);
+		mPos->setText(pos);
+		mRot->setText(rot);
+		mScl->setText(scl);
+		mMorphSmooth->setText(morphSmooth);
+		mMorph->setText(morph);
+		mHide->setChecked(hide);
+	}
+
+protected:
+	QWidget* addWidget(const QString& label, QWidget* w)
+	{
+		QWidget* box = new QWidget(this, "widgetbox");
+		w->reparent(box, QPoint(0,0)); // ugly, but useful
+		QHBoxLayout* l = new QHBoxLayout(box);
+		l->addWidget(new QLabel(label, box, "label"));
+		l->addWidget(w);
+		mLayout->addWidget(box);
+
+		return w;
+	}
+
+private:
+	QVBoxLayout* mLayout;
+
+	QLabel* mPivot;
+	QLabel* mInstance;
+	QLabel* mBBoxMin;
+	QLabel* mBBoxMax;
+	QLabel* mPos;
+	QLabel* mRot;
+	QLabel* mScl;
+	QLabel* mMorphSmooth;
+	QLabel* mMorph;
+	QCheckBox* mHide;
+};
+
+
 BoListView::BoListView(QWidget* parent) : KListView(parent)
 {
  mPopup = 0;
@@ -400,6 +504,7 @@ public:
 		mTabWidget = 0;
 		mMaterialPage = 0;
 		mMeshPage = 0;
+		mNodePage = 0;
 
 		mMaterialBox = 0;
 		mMaterialData = 0;
@@ -409,6 +514,11 @@ public:
 		mConnectedFacesList = 0;
 		mUnconnectedFacesList = 0;
 		mMeshMatrix = 0;
+
+		mNodeView = 0;
+		mCurrentFrame = 0;
+		mNodeMatrix = 0;
+		mNodeObjectData = 0;
 
 		mFacesCountLabel = 0;
 		mVertexCountLabel = 0;
@@ -423,6 +533,7 @@ public:
 	QTabWidget* mTabWidget;
 	QWidget* mMaterialPage;
 	QWidget* mMeshPage;
+	QWidget* mNodePage;
 
 	KListBox* mMaterialBox;
 	BoMaterialWidget* mMaterialData;
@@ -436,6 +547,12 @@ public:
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
 	BoMatrixWidget* mMeshMatrix;
+
+	KListView* mNodeView;
+	QPtrDict<Lib3dsNode> mListItem2Node;
+	KIntNumInput* mCurrentFrame;
+	BoMatrixWidget* mNodeMatrix;
+	BoNodeObjectDataWidget* mNodeObjectData;
 
 	QLabel* mFacesCountLabel;
 	QLabel* mVertexCountLabel;
@@ -474,6 +591,7 @@ void KGameModelDebug::init()
 
  initMeshPage();
  initMaterialPage();
+ initNodePage();
 
  slotUpdate();
 }
@@ -512,6 +630,9 @@ void KGameModelDebug::initMaterialPage()
 
 void KGameModelDebug::initMeshPage()
 {
+ // AB: a "mesh" from a lib3ds point of view is the object itself. it does not
+ // contain any information on it's position - it is always at (0,0,0).
+ // a "node" is an instance of a mesh
  d->mMeshPage = new QWidget(d->mTabWidget);
  QHBoxLayout* l = new QHBoxLayout(d->mMeshPage, 10, 10);
  QSplitter* splitter = new QSplitter(d->mMeshPage);
@@ -548,6 +669,48 @@ void KGameModelDebug::initMeshPage()
  d->mMeshMatrix = new BoMatrixWidget(meshMatrixBox);
 
  d->mTabWidget->addTab(d->mMeshPage, i18n("&Meshes"));
+}
+
+void KGameModelDebug::initNodePage()
+{
+ // a node is an "instance" of a mesh from a lib3ds point of view. the mesh is
+ // the "class" and the node is the "object".
+ d->mNodePage = new QWidget(d->mTabWidget);
+ QVBoxLayout* l = new QVBoxLayout(d->mNodePage, 10, 10);
+ QSplitter* splitter = new QSplitter(d->mNodePage);
+ l->addWidget(splitter, 1);
+ QFontMetrics metrics(font());
+
+ QVBox* nodeView = new QVBox(splitter);
+ d->mNodeView = new KListView(nodeView);
+ d->mNodeView->setRootIsDecorated(true);
+ d->mNodeView->addColumn(i18n("Name"));
+ d->mNodeView->addColumn(i18n("ID"));
+ d->mNodeView->addColumn(i18n("flags1"));
+ d->mNodeView->addColumn(i18n("flags2"));
+ connect(d->mNodeView, SIGNAL(executed(QListViewItem*)),
+		this, SLOT(slotDisplayNode(QListViewItem*)));
+
+ d->mNodeObjectData = new BoNodeObjectDataWidget(splitter);
+
+
+ // display all data from Lib3dsObjectData !
+ // note that this data depends on the current frame!
+ // data includes: pivot, bbox, pos, rot (rotation?), scl (scale?), morph_smooth
+ // (?), morph (?), hide (?)
+ //
+ // and node->matrix
+
+ QVGroupBox* nodeMatrixBox = new QVGroupBox(i18n("Matrix"), splitter);
+ d->mNodeMatrix = new BoMatrixWidget(nodeMatrixBox);
+
+
+ d->mCurrentFrame = new KIntNumInput(d->mNodePage);
+ connect(d->mCurrentFrame, SIGNAL(valueChanged(int)),
+		this, SLOT(slotFrameChanged(int)));
+ l->addWidget(d->mCurrentFrame);
+
+ d->mTabWidget->addTab(d->mNodePage, i18n("&Nodes"));
 }
 
 void KGameModelDebug::addModel(const QString& file, const QString& _name)
@@ -621,6 +784,7 @@ void KGameModelDebug::slotUpdate()
 
  updateMaterialPage();
  updateMeshPage();
+ updateNodePage();
 
  if (!d->m3ds) {
 	return;
@@ -660,11 +824,29 @@ void KGameModelDebug::updateMeshPage()
  d->mFaceList->clear();
  d->mListItem2Mesh.clear();
  d->mListItem2Face.clear();
+ d->mMeshMatrix->setIdentity();
 
  if (!d->m3ds) {
 	return;
  }
  slotConstructMeshList();
+}
+
+void KGameModelDebug::updateNodePage()
+{
+ d->mNodeView->clear();
+ d->mListItem2Node.clear();
+ d->mNodeMatrix->setIdentity();
+ d->mNodeObjectData->setNodeObjectData(0);
+
+ d->mCurrentFrame->setValue(0);
+
+ if (!d->m3ds) {
+	return;
+ }
+ slotConstructNodeList();
+ d->mCurrentFrame->setRange(0, d->m3ds->frames);
+ slotFrameChanged(0);
 }
 
 void KGameModelDebug::slotConstructMeshList()
@@ -694,6 +876,51 @@ void KGameModelDebug::slotConstructMeshList()
 	}
 	item->setText(6, QString::number(indices));
 	d->mListItem2Mesh.insert(item, mesh);
+ }
+}
+
+void KGameModelDebug::slotConstructNodeList()
+{
+ boDebug() << k_funcinfo << endl;
+ d->mNodeView->clear();
+ d->mListItem2Node.clear();
+ if (!d->m3ds) {
+	return;
+ }
+ Lib3dsNode* node = d->m3ds->nodes;
+ for (; node; node = node->next) {
+	addNodeToList(0, node);
+ }
+
+}
+
+void KGameModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
+{
+ BO_CHECK_NULL_RET(node);
+ if (node->type != LIB3DS_OBJECT_NODE) {
+	return;
+ }
+ if (strcmp(node->name, "$$$DUMMY") == 0) {
+	return;
+ }
+ QListViewItem* item = 0;
+ if (parent) {
+	item = new QListViewItem(parent);
+ } else {
+	item = new QListViewItem(d->mNodeView);
+ }
+ item->setText(0, node->name);
+ item->setText(1, QString::number(node->node_id));
+ item->setText(2, QString::number(node->flags1));
+ item->setText(3, QString::number(node->flags2));
+ d->mListItem2Node.insert(item, node);
+ item->setOpen(true);
+
+ {
+	Lib3dsNode* p;
+	for (p = node->childs; p; p = p->next) {
+		addNodeToList(item, p);
+	}
  }
 }
 
@@ -753,6 +980,31 @@ void KGameModelDebug::slotDisplayMaterial(QListBoxItem* item)
  addTextureMap(i18n("Self Illum Mask"), &mat->self_illum_mask);
  addTextureMap(i18n("Reflection Map"), &mat->reflection_map);
  addTextureMap(i18n("Reflection Mask"), &mat->reflection_mask);
+}
+
+void KGameModelDebug::slotDisplayNode(QListViewItem* item)
+{
+ Lib3dsNode* node = d->mListItem2Node[item];
+
+ if (!node) {
+	boWarning() << k_funcinfo << "NULL node" << endl;
+	return;
+ }
+
+ d->mNodeMatrix->setMatrix(node->matrix);
+ d->mNodeObjectData->setNodeObjectData(&node->data.object);
+}
+
+void KGameModelDebug::slotFrameChanged(int frame)
+{
+ if (!d->m3ds) {
+	return;
+ }
+ boDebug() << k_funcinfo << endl;
+ lib3ds_file_eval(d->m3ds, frame);
+ d->m3ds->current_frame = frame;
+
+ slotDisplayNode(d->mNodeView->currentItem());
 }
 
 QString KGameModelDebug::rgbaText(Lib3dsRgba r)
