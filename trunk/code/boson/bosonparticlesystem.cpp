@@ -214,16 +214,23 @@ void BosonParticleSystem::draw()
   BoVector3 nw, ne, sw, se;  // Coordinates of particle vertexes
   float size = mSize / 2.0;
   
+  // Matrix transformations first
+  glPushMatrix();
+  glTranslatef(mPos[0], mPos[1], mPos[2]);
+  glRotatef(mRot[0], 1.0, 0.0, 0.0);
+  glRotatef(mRot[1], 0.0, 1.0, 0.0);
+  glRotatef(mRot[2], 0.0, 0.0, 1.0);
+
   // Align if needed
   if(mAlign)
   {
     float mat[4][4];
     glGetFloatv(GL_MODELVIEW_MATRIX, (float*)mat);
     BoVector3 x, y;
-    
+
     x.set(mat[0][0] * size, mat[1][0] * size, mat[2][0] * size);
     y.set(mat[0][1] * size, mat[1][1] * size, mat[2][1] * size);
-    
+
     nw.set(-x[0] - y[0], -x[1] - y[1], -x[2] - y[2]);
     ne.set(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
     se.set(x[0] + y[0], x[1] + y[1], x[2] + y[2]);
@@ -240,7 +247,6 @@ void BosonParticleSystem::draw()
   // Update particles
 //  int num = 0;
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos[0] << ", " << mPos[1] << ", " << mPos[2] << ")" << endl;
-  glTranslatef(mPos[0], mPos[1], mPos[2]);
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
 
@@ -272,7 +278,7 @@ void BosonParticleSystem::draw()
   glEnd();
 
   glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
-  glTranslatef(-mPos[0], -mPos[1], -mPos[2]);
+  glPopMatrix();
 //  boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawn " << num << " particles" << endl;
 }
 
@@ -296,8 +302,6 @@ void BosonParticleSystem::updateParticle(BosonParticle* particle)
 
 void BosonParticleSystem::moveParticles(BoVector3 v)
 {
-  // Move particle system's position
-  mPos.add(v);
   // Move particles by inverse of v (to have effect of them staying in same place)
   BoVector3 inv(-v[0], -v[1], -v[2]);
   for(int i = 0; i < mMaxNum; i++)

@@ -299,6 +299,8 @@ void BosonCanvas::newShot(BosonShot* shot)
 
  if (!shot->isActive()) {
 	shotHit(shot);
+	d->mAnimList.removeRef(shot);
+	d->mAllItems.removeItem(shot);
 	delete shot;
  }
 }
@@ -795,6 +797,7 @@ void BosonCanvas::deleteUnusedShots()
 			shotHit((BosonShot*)i);
 			d->mAnimList.remove();
 			d->mAllItems.removeItem(i);
+			delete i;
 		}
 	}
  }

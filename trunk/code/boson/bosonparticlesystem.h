@@ -152,7 +152,9 @@ class BosonParticleSystem
     /**
      * @return Current position of this system
      **/
-//    const BoVector3& position() { return mPos; };
+    const BoVector3 position() { return mPos; };
+
+    void setRotation(BoVector3 r) { mRot = r; };
 
     /**
      * Sets current velocity of particles in this system.
@@ -262,6 +264,7 @@ class BosonParticleSystem
     int mTexture;  // Texture of particles
     BoVector3 mPos;
     BoVector3 mVelo;
+    BoVector3 mRot;
     float mAge;
     int mBlendFunc[2];
 
