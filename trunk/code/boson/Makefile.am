@@ -36,7 +36,6 @@ BOSON_SRC = \
 	editorwidget.cpp \
 	bosonglwidget.cpp \
 	bosonbigdisplaybase.cpp \
-	bosonbigdisplay.cpp \
 	bosontiles.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
@@ -50,7 +49,6 @@ BOSON_SRC = \
 	bosonstatistics.cpp \
 	gameoverdialog.cpp \
 	unitplugins.cpp \
-	editorbigdisplay.cpp \
 	bosontexturearray.cpp \
 	bosonmodel.cpp \
 	bosonglfont.cpp \
@@ -65,7 +63,10 @@ BOSON_SRC = \
 	bpfdescription.cpp \
 	bpffile.cpp \
 	bosonweapon.cpp \
-	bpfdescriptiondialog.cpp
+	bpfdescriptiondialog.cpp \
+	bosonbigdisplayinputbase.cpp \
+	bosonbigdisplayinput.cpp \
+	editorbigdisplayinput.cpp
 
 
 BOPROFILING_SRC= \

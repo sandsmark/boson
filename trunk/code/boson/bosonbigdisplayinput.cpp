@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,69 +16,36 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "bosonbigdisplay.h"
-#include "bosonbigdisplay.moc"
 
-#include "boson.h"
-#include "unit.h"
-#include "unitplugins.h"
+#include "bosonbigdisplayinput.h"
+#include "bosonbigdisplayinput.moc"
+
+#include "bosonbigdisplaybase.h"
+
+#include "boselection.h"
 #include "bosoncanvas.h"
+#include "bosonconfig.h"
+#include "bosonmessage.h"
+#include "boson.h"
+#include "bosoncursor.h"
 #include "player.h"
 #include "unitproperties.h"
 #include "pluginproperties.h"
-#include "cell.h"
-#include "bosonmessage.h"
-#include "bosoncursor.h"
-#include "bosonconfig.h"
-#include "global.h"
-#include "kspritetooltip.h"
-#include "boselection.h"
+#include "unit.h"
+#include "unitplugins.h"
 #include "bodebug.h"
-#include "defines.h"
 
-#include <kgame/kgameio.h>
 #include <klocale.h>
 
-#include <qptrlist.h>
-#include <qpoint.h>
-#include <qcursor.h>
-
-class BosonBigDisplay::BosonBigDisplayPrivate
+BosonBigDisplayInput::BosonBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
 {
-public:
-	BosonBigDisplayPrivate()
-	{
-		mMouseIO = 0;
-		mLockAction = false;
-		mCursorType = CursorDefault;
-	}
-
-	KGameMouseIO* mMouseIO;
-	bool mLockAction;
-	CursorType mCursorType;
-	UnitAction mActionType;
-};
-
-BosonBigDisplay::BosonBigDisplay(BosonCanvas* c, QWidget* parent) 
-		: BosonBigDisplayBase(c, parent)
-{
- init();
 }
 
-void BosonBigDisplay::init()
+BosonBigDisplayInput::~BosonBigDisplayInput()
 {
- d = new BosonBigDisplayPrivate;
-
-// setSizePolicy(QSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding ));
-// setResizePolicy(QScrollView::AutoOne);
 }
 
-BosonBigDisplay::~BosonBigDisplay()
-{
- delete d;
-}
-
-void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
+void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
 // this method should not perform any tasks but rather send the input through
 // the KGameIO. this way it is very easy (it should be at least) to write a
@@ -96,7 +63,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
  }
 
  if (actionLocked()) {
-	switch (d->mActionType) {
+	switch (actionType()) {
 		case ActionMove:
 		{
 			if (actionMove(stream, action.canvasPos())) {
@@ -150,7 +117,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 			break;
 		}
 		default:
-			boError() << k_funcinfo << "Unknown actiontype for locked action: " << d->mActionType << endl;
+			boError() << k_funcinfo << "Unknown actiontype for locked action: " << actionType() << endl;
 			break;
 	}
 	if (*send) {
@@ -241,16 +208,18 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 		}
 	}
  }
+
 }
 
-bool BosonBigDisplay::actionMine(QDataStream& stream, const QPoint& canvasPos)
+
+bool BosonBigDisplayInput::actionMine(QDataStream& stream, const QPoint& canvasPos)
 {
  MobileUnit* u = (MobileUnit*)selection()->leader();
  HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
  if (!h) {
 	return false;
  }
- if (h->canMine(((BosonCanvas*)canvas())->cellAt(canvasPos.x(), canvasPos.y()))) {
+ if (h->canMine((canvas())->cellAt(canvasPos.x(), canvasPos.y()))) {
 	stream << (Q_UINT32)BosonMessage::MoveMine;
 	stream << (Q_ULONG)u->id();
 	stream << canvasPos;
@@ -259,7 +228,7 @@ bool BosonBigDisplay::actionMine(QDataStream& stream, const QPoint& canvasPos)
  return false;
 }
 
-bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionMove(QDataStream& stream, const QPoint& canvasPos)
 {
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
@@ -286,7 +255,7 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* factory = selection()->leader();
  if (!factory) {
@@ -319,7 +288,7 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionAttack(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
  QPtrList<Unit> list = selection()->allUnits();
@@ -342,7 +311,7 @@ bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-bool BosonBigDisplay::actionAttackPos(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionAttackPos(QDataStream& stream, const QPoint& canvasPos)
 {
  QPtrList<Unit> list = selection()->allUnits();
  QPtrListIterator<Unit> it(list);
@@ -369,7 +338,7 @@ bool BosonBigDisplay::actionAttackPos(QDataStream& stream, const QPoint& canvasP
  return true;
 }
 
-bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionRepair(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
  QPtrList<Unit> allUnits = selection()->allUnits();
@@ -403,7 +372,7 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
 // if (!unit->properites(PluginProperties::Refine)) {
@@ -450,7 +419,7 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-bool BosonBigDisplay::actionFollow(QDataStream& stream, const QPoint& canvasPos)
+bool BosonBigDisplayInput::actionFollow(QDataStream& stream, const QPoint& canvasPos)
 {
  Unit* unit = canvas()->findUnitAt(canvasPos);
  QPtrList<Unit> list = selection()->allUnits();
@@ -473,151 +442,51 @@ bool BosonBigDisplay::actionFollow(QDataStream& stream, const QPoint& canvasPos)
  return true;
 }
 
-/*
-void BosonBigDisplay::setLocalPlayer(Player* p)
+void BosonBigDisplayInput::updatePlacementPreviewData()
 {
- if (localPlayer() == p) {
+ bigDisplay()->setPlacementPreviewData(0, false);
+ if (!actionLocked() || actionType() != ActionBuild) {
 	return;
  }
-
- if (localPlayer()) {
-	//AB: in theory the IO gets removed from the players' IO list. if we
-	//ever use this, then test it!
-	delete d->mMouseIO;
-	d->mMouseIO = 0;
- }
-
- BosonBigDisplayBase::setLocalPlayer(p);
-
- if (p) {
-	addMouseIO(localPlayer());
-//	d->mChat->setFromPlayer(localPlayer());
- }
-}
- */
-
-void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
-{
- if (!localPlayer()) {
-	boError() << "NULL local player" << endl;
-	return;
- }
- if (!selection()) {
-	boError() << k_funcinfo << "NULL selection" << endl;
-	return;
- }
- if (selection()->isEmpty()) {
-	return;
- }
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- bool send = false;
- BoAction action;
- action.setCanvasPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
- actionClicked(action, stream, &send);
- if (send) {
-	QDataStream msg(buffer, IO_ReadOnly);
-	localPlayer()->forwardInput(msg, true);
- }
-}
-
-void BosonBigDisplay::updateCursor()
-{
- BosonCursor* c = cursor();
- if (!c) {
-	boError() << k_funcinfo << "NULL cursor!!" << endl;
+ if (!selection() || selection()->isEmpty() || !selection()->leader()) {
 	return;
  }
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
-
- if (!canvas()->onCanvas(cursorCanvasPos())) {
-	if (actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
-	} else {
-		d->mCursorType = CursorDefault;
-		c->setCursor(d->mCursorType);
-		c->setWidgetCursor(this);
-		return;
-	}
- }
- if (actionLocked()) {
-	c->setCursor(d->mCursorType);
-	c->setWidgetCursor(this);
+ Unit* leader = selection()->leader();
+ if (leader->owner() != localPlayer()) {
 	return;
  }
-
- if (!selection()->isEmpty() && selection()->leader()->owner() == localPlayer()) {
-	Unit* leader = selection()->leader();
-	if (localPlayer()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE)) {
-		if (leader->isMobile()) {
-			d->mCursorType = CursorMove;
-		} else {
-			d->mCursorType = CursorDefault;
-		}
-	} else {
-		Unit* unit = canvas()->findUnitAt(cursorCanvasPos());
-		if (unit) {
-			if (unit->owner() == localPlayer()) {
-				d->mCursorType = CursorDefault;
-				// we might add something like 
-				// if (leader->isDamaged() && unit->canRepair())
-				// here
-			} else if (leader->unitProperties()->canShoot()) {
-				if ((unit->isFlying() && leader->unitProperties()->canShootAtAirUnits()) ||
-						(!unit->isFlying() && leader->unitProperties()->canShootAtLandUnits())) {
-					d->mCursorType = CursorAttack;
-				}
-			}
-		} else if (leader->isMobile()) {
-			d->mCursorType = CursorMove;
-		} else {
-			d->mCursorType = CursorDefault;
-		}
-	}
- } else {
-	d->mCursorType = CursorDefault;
+ ProductionPlugin* pp = (ProductionPlugin*)leader->plugin(UnitPlugin::Production);
+ if (!pp || pp->completedProductionId() == 0 || pp->completedProductionType() != ProduceUnit) {
+	return;
  }
+ const UnitProperties* prop = localPlayer()->unitProperties(pp->completedProductionId());
+ if (!prop) {
+	return;
+ }
+ // note: this applies to mobiles as well as for facilities!
+ // (mobiles are usually auto placed, but manual placement might get used if
+ // auto-placement failed)
+ bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos() / BO_TILE_SIZE, pp));
 
- c->setCursor(d->mCursorType);
- c->setWidgetCursor(this);
 }
 
-/*
-void BosonBigDisplay::addMouseIO(Player* p)
-{
-//AB: make sure that both editor and game mode can share the same IO !
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL player" << endl;
-	return;
- }
- if (d->mMouseIO) {
-	boError() << "This view already has a mouse io!!" << endl;
-	return;
- }
- d->mMouseIO = new KGameMouseIO(viewport(), true);
- connect(d->mMouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, 
-		QMouseEvent*, bool*)),
-		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*,
-		bool*)));
- localPlayer()->addGameIO(d->mMouseIO);
-}
-*/
-
-void BosonBigDisplay::unitAction(int actionType)
+void BosonBigDisplayInput::unitAction(int actionType)
 {
  switch ((UnitAction)actionType) {
 	case ActionFollow:
 	case ActionMine:
 	case ActionRepair:
 	case ActionMove:
-		d->mCursorType = CursorMove;
+		setCursorType(CursorMove);
 		break;
 	case ActionBuild:
 		break;
 	case ActionAttack:
-		d->mCursorType = CursorAttack;
+		setCursorType(CursorAttack);
 		break;
 	case ActionStop:
 	{
@@ -652,26 +521,74 @@ void BosonBigDisplay::unitAction(int actionType)
 		boError() << k_funcinfo << "Unknown actionType: " << actionType << endl;
 		return;
  }
- d->mActionType = (UnitAction)actionType;
- d->mLockAction = true;
+ setActionType((UnitAction)actionType);
+ lockAction();
 }
 
-bool BosonBigDisplay::actionLocked() const
+void BosonBigDisplayInput::updateCursor()
 {
- return d->mLockAction;
+ BosonCursor* c = bigDisplay()->cursor();
+ if (!c) {
+	boError() << k_funcinfo << "NULL cursor!!" << endl;
+	return;
+ }
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
+ if (!canvas()->onCanvas(cursorCanvasPos())) {
+	if (actionLocked()) {  // TODO: show "can't do that" cursor if action is locked
+	} else {
+		setCursorType(CursorDefault);
+		c->setCursor(cursorType());
+		c->setWidgetCursor(bigDisplay());
+		return;
+	}
+ }
+ if (actionLocked()) {
+	c->setCursor(cursorType());
+	c->setWidgetCursor(bigDisplay());
+	return;
+ }
+
+ if (!selection()->isEmpty() && selection()->leader()->owner() == localPlayer()) {
+	Unit* leader = selection()->leader();
+	if (localPlayer()->isFogged(cursorCanvasPos().x() / BO_TILE_SIZE, cursorCanvasPos().y() / BO_TILE_SIZE)) {
+		if (leader->isMobile()) {
+			setCursorType(CursorMove);
+		} else {
+			setCursorType(CursorDefault);
+		}
+	} else {
+		Unit* unit = canvas()->findUnitAt(cursorCanvasPos());
+		if (unit) {
+			if (unit->owner() == localPlayer()) {
+				setCursorType(CursorDefault);
+				// we might add something like 
+				// if (leader->isDamaged() && unit->canRepair())
+				// here
+			} else if (leader->unitProperties()->canShoot()) {
+				if ((unit->isFlying() && leader->unitProperties()->canShootAtAirUnits()) ||
+						(!unit->isFlying() && leader->unitProperties()->canShootAtLandUnits())) {
+					setCursorType(CursorAttack);
+				}
+			}
+		} else if (leader->isMobile()) {
+			setCursorType(CursorMove);
+		} else {
+			setCursorType(CursorDefault);
+		}
+	}
+ } else {
+	setCursorType(CursorDefault);
+ }
+
+ c->setCursor(cursorType());
+ c->setWidgetCursor(bigDisplay());
 }
 
-void BosonBigDisplay::unlockAction()
-{
- d->mLockAction = false;
-}
-
-UnitAction BosonBigDisplay::actionType() const
-{
- return d->mActionType;
-}
-
-BosonBigDisplayBase::CanSelectUnit BosonBigDisplay::canSelect(Unit* unit) const
+BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* unit) const
 {
  if (!unit) {
 	return CanSelectError;
@@ -689,7 +606,7 @@ BosonBigDisplayBase::CanSelectUnit BosonBigDisplay::canSelect(Unit* unit) const
  return CanSelectMultipleOk;
 }
 
-bool BosonBigDisplay::selectAll(const UnitProperties* prop, bool replace)
+bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 {
  if (!localPlayer()) {
 	boError() << k_funcinfo << "NULL localplayer" << endl;
@@ -718,35 +635,28 @@ bool BosonBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-void BosonBigDisplay::updatePlacementPreviewData()
+void BosonBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- setPlacementPreviewData(0, false);
- if (!actionLocked() || actionType() != ActionBuild) {
-	return;
- }
- if (!selection() || selection()->isEmpty() || !selection()->leader()) {
-	return;
- }
  if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
+	boError() << "NULL local player" << endl;
 	return;
  }
- Unit* leader = selection()->leader();
- if (leader->owner() != localPlayer()) {
+ if (!selection()) {
+	boError() << k_funcinfo << "NULL selection" << endl;
 	return;
  }
- ProductionPlugin* pp = (ProductionPlugin*)leader->plugin(UnitPlugin::Production);
- if (!pp || pp->completedProductionId() == 0 || pp->completedProductionType() != ProduceUnit) {
+ if (selection()->isEmpty()) {
 	return;
  }
- const UnitProperties* prop = localPlayer()->unitProperties(pp->completedProductionId());
- if (!prop) {
-	return;
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ bool send = false;
+ BoAction action;
+ action.setCanvasPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
+ actionClicked(action, stream, &send);
+ if (send) {
+	QDataStream msg(buffer, IO_ReadOnly);
+	localPlayer()->forwardInput(msg, true);
  }
- // note: this applies to mobiles as well as for facilities!
- // (mobiles are usually auto placed, but manual placement might get used if
- // auto-placement failed)
- setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, cursorCanvasPos() / BO_TILE_SIZE, pp));
 }
-
 

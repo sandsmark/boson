@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,25 +16,29 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include "editorbigdisplay.h"
-#include "editorbigdisplay.moc"
 
-#include "unit.h"
-#include "unitproperties.h"
-#include "bosoncanvas.h"
-#include "player.h"
-#include "boson.h"
-#include "cell.h"
-#include "bosonmessage.h"
-#include "global.h"
+#include "editorbigdisplayinput.h"
+#include "editorbigdisplayinput.moc"
+
+#include "bosonbigdisplaybase.h"
+
 #include "boselection.h"
-#include "defines.h"
+#include "bosoncanvas.h"
+#include "bosonconfig.h"
+#include "bosonmessage.h"
+#include "boson.h"
+#include "bosoncursor.h"
+#include "player.h"
+#include "unitproperties.h"
+#include "pluginproperties.h"
+#include "unit.h"
+#include "unitplugins.h"
+#include "cell.h"
 #include "bodebug.h"
-//#include "kspritetooltip.h"//TODO
 
-#include <kapplication.h>
-#include <kgame/kgameio.h>
 #include <klocale.h>
+#include <kapplication.h>
+
 
 // this just stores a *selection* for placement. This means e.g. if you click
 // on a unit (in the command frame!) the unit type is placed here as well as the
@@ -122,60 +126,29 @@ private:
 	int mGroundType;
 };
 
-class EditorBigDisplay::EditorBigDisplayPrivate
+class EditorBigDisplayInputPrivate
 {
 public:
-	EditorBigDisplayPrivate()
+	EditorBigDisplayInputPrivate()
 	{
-		mMouseIO = 0;
 	}
-
-	KGameMouseIO* mMouseIO;
-
 	Placement mPlacement;
-
-	bool mActionLocked;
-	UnitAction mActionType;
 };
 
-EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent) 
-		: BosonBigDisplayBase(c, parent)
+EditorBigDisplayInput::EditorBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
 {
- init();
+ d = new EditorBigDisplayInputPrivate;
+ setActionType(ActionBuild); // dummy initialization
 }
 
-void EditorBigDisplay::init()
-{
- d = new EditorBigDisplayPrivate;
- d->mActionLocked = false;
- d->mActionType = ActionBuild; // unused at this point. just a dummy initialization
-}
-
-EditorBigDisplay::~EditorBigDisplay()
+EditorBigDisplayInput::~EditorBigDisplayInput()
 {
  delete d;
 }
 
-void EditorBigDisplay::setLocalPlayer(Player* p)
+void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
 {
- if (localPlayer() == p) {
-	return;
- }
- if (localPlayer()) {
-	//AB: in theory the IO gets removed from the players' IO list. if we
-	//ever use this, then test it!
-	delete d->mMouseIO;
-	d->mMouseIO = 0;
- }
- BosonBigDisplayBase::setLocalPlayer(p);
- if (localPlayer()) {
-	addMouseIO(localPlayer());
- }
-}
-
-void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
-{
-// boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (actionLocked()) {
 	if (actionType() == ActionBuild) {
 		if (actionPlace(stream, action.canvasPos())) {
@@ -186,8 +159,9 @@ void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& stream
  }
 }
 
-bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
+bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canvasPos)
 {
+ boDebug() << k_funcinfo << endl;
  if (!canvas()) {
 	BO_NULL_ERROR(canvas())
 	return false;
@@ -253,30 +227,9 @@ bool EditorBigDisplay::actionPlace(QDataStream& stream, const QPoint& canvasPos)
  return ret;
 }
 
-/*
-void EditorBigDisplay::addMouseIO(Player* p)
-{
-//AB: make sure that both editor and game mode can share the same IO !
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL player" << endl;
-	return;
- }
- if (d->mMouseIO) {
-	boError() << "This view already has a mouse io!!" << endl;
-	return;
- }
- d->mMouseIO = new KGameMouseIO(viewport(), true);
- connect(d->mMouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, 
-		QMouseEvent*, bool*)),
-		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*,
-		bool*)));
- localPlayer()->addGameIO(d->mMouseIO);
-}
-*/
-
 // the place*() methods get called when an item in (e.g.) the commandframe is
 // selected.
-void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
+void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	boError() << k_funcinfo << "NULL owner" << endl;
@@ -290,7 +243,7 @@ void EditorBigDisplay::placeUnit(unsigned long int unitType, Player* owner)
  d->mPlacement.placeUnit(unitType, owner);
 }
 
-void EditorBigDisplay::placeCell(int tile)
+void EditorBigDisplayInput::placeCell(int tile)
 {
  boDebug() << k_funcinfo << "now placing cell: " << tile << endl;
  if (tile < 0) {
@@ -300,7 +253,7 @@ void EditorBigDisplay::placeCell(int tile)
  d->mPlacement.placeCell(tile);
 }
 
-void EditorBigDisplay::deleteSelectedUnits()
+void EditorBigDisplayInput::deleteSelectedUnits()
 {
  if (!selection()) {
 	boError() << k_funcinfo << "NULL selection" << endl;
@@ -320,7 +273,45 @@ void EditorBigDisplay::deleteSelectedUnits()
  units.clear();
 }
 
-bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
+void EditorBigDisplayInput::updatePlacementPreviewData()
+{
+ if (!d->mPlacement.isUnit() && !d->mPlacement.isCell()) {
+	bigDisplay()->setPlacementPreviewData(0, false);
+	return;
+ }
+ if (d->mPlacement.isUnit()) {
+	if (!d->mPlacement.owner()) {
+		boError() << k_funcinfo << "NULL owner" << endl;
+		bigDisplay()->setPlacementPreviewData(0, false);
+		return;
+	}
+	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
+	bigDisplay()->setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
+ } else if (d->mPlacement.isCell()) {
+	if (d->mPlacement.cell() < 0) {
+		boError() << k_funcinfo << "invalid cell" << endl;
+		return;
+	}
+	bigDisplay()->setPlacementCellPreviewData(d->mPlacement.cell(), true); // we could use false if there is a unit or so?
+ }
+}
+
+void EditorBigDisplayInput::unitAction(int actionType)
+{
+ boDebug() << k_funcinfo << actionType << endl;
+ switch (actionType) {
+	case ActionBuild:
+		setActionType(ActionBuild);
+		lockAction();
+		break;
+	default:
+		unlockAction();
+		break;
+ }
+}
+
+bool EditorBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 {
  QPtrList<Unit> list;
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
@@ -342,57 +333,28 @@ bool EditorBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
-void EditorBigDisplay::updatePlacementPreviewData()
+void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
 {
- if (!d->mPlacement.isUnit() && !d->mPlacement.isCell()) {
-	setPlacementPreviewData(0, false);
+ if (!localPlayer()) {
+	boError() << "NULL local player" << endl;
 	return;
  }
- if (d->mPlacement.isUnit()) {
-	if (!d->mPlacement.owner()) {
-		boError() << k_funcinfo << "NULL owner" << endl;
-		setPlacementPreviewData(0, false);
-		return;
-	}
-	QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
-	const UnitProperties* prop = d->mPlacement.owner()->unitProperties(d->mPlacement.unitType());
-	setPlacementPreviewData(prop, canvas()->canPlaceUnitAt(prop, pos, 0));
- } else if (d->mPlacement.isCell()) {
-	if (d->mPlacement.cell() < 0) {
-		boError() << k_funcinfo << "invalid cell" << endl;
-		return;
-	}
-	setPlacementCellPreviewData(d->mPlacement.cell(), true); // we could use false if there is a unit or so?
+ if (!selection()) {
+	boError() << k_funcinfo << "NULL selection" << endl;
+	return;
  }
-}
-
-
-void EditorBigDisplay::unitAction(int actionType)
-{
- boDebug() << k_funcinfo << actionType << endl;
- switch (actionType) {
-	case ActionBuild:
-		d->mActionType = ActionBuild;
-		d->mActionLocked = true;
-		break;
-	default:
-		unlockAction();
-		break;
+ if (selection()->isEmpty()) {
+	return;
  }
-}
-
-bool EditorBigDisplay::actionLocked() const
-{
- return d->mActionLocked;
-}
-
-void EditorBigDisplay::unlockAction()
-{
- d->mActionLocked = false;
-}
-
-UnitAction EditorBigDisplay::actionType() const
-{
- return d->mActionType;
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ bool send = false;
+ BoAction action;
+ action.setCanvasPos(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2, cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2));
+ actionClicked(action, stream, &send);
+ if (send) {
+	QDataStream msg(buffer, IO_ReadOnly);
+	localPlayer()->forwardInput(msg, true);
+ }
 }
 
