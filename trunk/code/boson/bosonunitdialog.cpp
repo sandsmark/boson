@@ -39,7 +39,6 @@
 #include <qlineedit.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
-#include <qlineedit.h>
 #include <qvaluelist.h>
 #include <qscrollview.h>
 #include <qwhatsthis.h>
