@@ -120,6 +120,9 @@ SupportMiniMap=bool - If true then this player has a minimap when he has a unit
                       of this type. The minimap disappears when all units of the
                       player which have SupportMiniMap=true are gone.
                       Default is false.
+Requirements=List   - List is comma separated list of unit IDs. Player must have
+                      built all those units before he can build this unit.
+                      Default is an empty list.
 -------------------------------------------------------------------------------
 
 The entries marked with * are mandatory.
