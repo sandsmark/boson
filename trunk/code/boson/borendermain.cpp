@@ -346,14 +346,14 @@ void ModelPreview::renderModel(int mode)
 			glColor4ub(r, g, b, a);
 		}
 
-		// FIXME: this isn't good here...
-		mModel->prepareRendering();
-
 		if (mode == GL_SELECT) {
 			glDisable(GL_BLEND);
 			glDisable(GL_TEXTURE_2D);
 		}
+		BosonModel::startModelRendering();
+		mModel->prepareRendering();
 		f->renderFrame(0, mCurrentLOD, mode);
+		BosonModel::stopModelRendering();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.

@@ -23,6 +23,8 @@
 #include "bomaterial.h"
 #include "bomemorytrace.h"
 #include "bolodbuilder.h"
+#include "bomeshrenderermanager.h"
+#include "bomeshrenderer.h"
 
 #include <qptrlist.h>
 #include <qcolor.h>
@@ -802,14 +804,14 @@ public:
 	}
 
 	/**
-	 * @return The vertex of the poiint at @p p.
+	 * @return The vertex of the point at @p p.
 	 *
 	 * This method is safe - it won't crash on invalid @p index values.
 	 *
 	 * Note that this method is somewhat slow for using it in mesh
 	 * rendering. It creates a @ref BoVector3 object that is returned then.
 	 **/
-	inline BoVector3 vertex(unsigned int p) const
+	BoVector3 vertex(unsigned int p) const
 	{
 		if (!mPoints) {
 			boError() << k_funcinfo << "no points allocated" << endl;
@@ -823,7 +825,7 @@ public:
 		return BoVector3(&mPoints[p * pointSize() + vertexPos()]);
 	}
 
-	inline BoVector3 texel(unsigned int p) const
+	BoVector3 texel(unsigned int p) const
 	{
 		if (!mPoints) {
 			boError() << k_funcinfo << "no points allocated" << endl;
@@ -832,7 +834,7 @@ public:
 		if (p >= points()) {
 			boError() << k_funcinfo << "invalid point " << p
 					<< " max=" << points() - 1 << endl;
-		return BoVector3();
+			return BoVector3();
 		}
 		BoVector3 tex;
 		tex.setX(mPoints[p * pointSize() + texelPos() + 0]);
@@ -958,12 +960,9 @@ class BoMeshLODPrivate
 public:
 	BoMeshLODPrivate()
 	{
-		mArrayIndex = 0;
 	}
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoFaceNode> mAllNodes;
-
-	unsigned int mArrayIndex;
 };
 
 BoMeshLOD::BoMeshLOD()
@@ -973,12 +972,17 @@ BoMeshLOD::BoMeshLOD()
  mPointsCache = 0;
  mPointsCacheCount = 0;
  d->mAllNodes.setAutoDelete(true);
+ mMeshRendererMeshLODData = 0;
 
  mType = GL_TRIANGLES;
 }
 
 BoMeshLOD::~BoMeshLOD()
 {
+ if (mMeshRendererMeshLODData) {
+	boWarning(100) << "meshrenderer forgot to delete meshLOD data" << endl;
+ }
+ delete mMeshRendererMeshLODData;
  d->mAllNodes.clear();
  delete[] mPointsCache;
  delete d;
@@ -1024,16 +1028,6 @@ const BoFace* BoMeshLOD::face(unsigned int f) const
 	return 0;
  }
  return &d->mAllFaces[f];
-}
-
-void BoMeshLOD::setArrayIndex(unsigned int index)
-{
- d->mArrayIndex = index;
-}
-
-unsigned int BoMeshLOD::arrayIndex() const
-{
- return d->mArrayIndex;
 }
 
 void BoMeshLOD::setNormal(unsigned int face, int vertex, const BoVector3& normal)
@@ -1176,6 +1170,13 @@ void BoMeshLOD::createPointCache()
  }
 }
 
+void BoMeshLOD::setMeshRendererMeshLODData(BoMeshRendererMeshLODData* data)
+{
+ delete mMeshRendererMeshLODData;
+ mMeshRendererMeshLODData = data;
+}
+
+
 
 
 class BoMeshPrivate
@@ -1224,6 +1225,10 @@ BoMesh::BoMesh(unsigned int faces, const QString& name)
 
 BoMesh::~BoMesh()
 {
+ if (mMeshRendererMeshData) {
+	boWarning(100) << "meshrenderer forgot to delete mesh data" << endl;
+ }
+ delete mMeshRendererMeshData;
  for (unsigned int i = 0; i < d->mLODCount; i++) {
 	delete d->mLODs[i];
  }
@@ -1250,6 +1255,8 @@ void BoMesh::init()
  d->mLODs = new BoMeshLOD*[1];
  d->mLODs[0] = new BoMeshLOD;
  d->mLODCount = 1;
+
+ mMeshRendererMeshData = 0;
 }
 
 int BoMesh::pointSize()
@@ -1442,75 +1449,12 @@ void BoMesh::calculateNormals(unsigned int _lod)
 
 void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 {
- if (_lod >= lodCount()) {
-	_lod = lodCount() - 1;
- }
- BoMeshLOD* lod = levelOfDetail(_lod);
- if (!lod) {
-	BO_NULL_ERROR(lod);
+ BoMeshRenderer* renderer = BoMeshRendererManager::manager()->currentRenderer();
+ if (!renderer) {
+	BO_NULL_ERROR(renderer);
 	return;
  }
- int type = lod->type();
-
- bool resetColor = false; // needs to be true after we changed the current color
-
- // AB: we have *lots* of faces! in numbers the maximum i found
- // so far (only a short look) was about 25 toplevel nodes and
- // rarely child nodes. sometimes 2 child nodes or so - maybe 10
- // per model (if at all).
- // but we have up to (short look only) 116 faces *per node*
- // usually it's about 10-20 faces (minimum) per node!
- //
- // so optimization should happen here - if possible at all...
-
- BoMaterial::activate(material());
- if (!material()) {
-	if (isTeamColor()) {
-		if (teamColor) {
-			glPushAttrib(GL_CURRENT_BIT);
-			glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
-			resetColor = true;
-		}
-	}
- } else if (material()->textureName().isEmpty()){
-	glPushAttrib(GL_CURRENT_BIT);
-	glColor3fv(material()->diffuse().data());
-	resetColor = true;
- }
-
-#if USE_OCCLUSION_CULLING
- if (checkVisible())
-#endif
- {
-//	boDebug() << k_funcinfo << "not culled" << endl;
-//	boDebug() << k_funcinfo << "Drawing " << lod->facesCount() * 3 << " elements, starting from " << lod->arrayIndex() << endl;
-	// FIXME: only type == GL_TRIANGLES is supported atm. OTOH, that's also the only one we use atm.
-	glDrawArrays(type, lod->arrayIndex(), lod->facesCount() * 3);
-//	boDebug() << k_funcinfo << "Drawing completed" << endl;
-
-	glstat_item_vertices += lod->facesCount() * 3;
-	glstat_item_faces += lod->facesCount();
-
-	// reset the normal...
-	// (better solution: don't enable light when rendering
-	// selection rect!)
-	const float n[] = { 0.0f, 0.0f, 1.0f };
-	glNormal3fv(n);
- }
-
-
- if (resetColor) {
-	// we need to reset the color (mainly for the placement preview)
-	glPopAttrib();
-	resetColor = false;
- }
-
- // we need this currently, because of the selection rects. we should avoid
- // this.
- // maybe place BoMaterial::deactivate() into SelectBox ?
- if (material()) {
-	material()->deactivate();
- }
+ renderer->renderMesh(teamColor, this, _lod);
 }
 
 void BoMesh::renderBoundingObject()
@@ -1559,15 +1503,6 @@ unsigned int BoMesh::points() const
  return d->mMeshPoints.points();
 }
 
-unsigned int BoMesh::elements() const
-{
- unsigned int e = 0;
- for (unsigned int i = 0; i < d->mLODCount; i++) {
-	e += d->mLODs[i]->facesCount() * 3;
- }
- return e;
-}
-
 bool BoMesh::isTeamColor() const
 {
  return d->mIsTeamColor;
@@ -1576,63 +1511,6 @@ bool BoMesh::isTeamColor() const
 void BoMesh::setIsTeamColor(bool c)
 {
  d->mIsTeamColor = c;
-}
-
-unsigned int BoMesh::movePoints(float* vertexarray, float* normalarray, float* texelarray, int index)
-{
-// boDebug() << k_funcinfo << endl;
- unsigned int i = 0;  // How many points have been added
-
- // Create vertex list for each lod
- for (unsigned int j = 0; j < d->mLODCount; j++) {
-	boDebug() << k_funcinfo << "trying to create array for lod " << j << endl;
-	if (!d->mLODs[j]) {
-		boError(100) << k_funcinfo << "NULL LOD " << j << endl;
-		continue;
-	}
-
-	BoMeshLOD* lod = levelOfDetail(j);
-	if (!lod) {
-		BO_NULL_ERROR(lod);
-		return i;
-	}
-
-	lod->setArrayIndex(index + i);
-
-	int lodi = 0;  // n'th vertex in this lod
-	BoVector3 vertex, normal, texel;
-
-	// Add all faces for this lod
-	for (unsigned int facei = 0; facei < lod->facesCount(); facei++) {
-		const BoFace* face = lod->face(facei);
-		const int* points = face->pointIndex();
-
-		// Add all 3 vertices for this face
-		for (int v = 0; v <= 2; v++) {
-			// Store them in temporary variables for easier access
-			vertex = d->mMeshPoints.vertex(points[v]);
-			normal = face->normal(v);
-			texel = d->mMeshPoints.texel(points[v]);
-
-			// And copy them to corresponding arrays
-			vertexarray[(index + i) * 3 + 0] = vertex[0];
-			vertexarray[(index + i) * 3 + 1] = vertex[1];
-			vertexarray[(index + i) * 3 + 2] = vertex[2];
-			normalarray[(index + i) * 3 + 0] = normal[0];
-			normalarray[(index + i) * 3 + 1] = normal[1];
-			normalarray[(index + i) * 3 + 2] = normal[2];
-			texelarray[(index + i) * 2 + 0] = texel[0];
-			texelarray[(index + i) * 2 + 1] = texel[1];
-
-			lodi++;
-			i++;
-		}
-	}
-	boDebug() << k_funcinfo << "Got " << lodi << " vertices for lod " << j << " at " << lod << "; indices at: " << lod->arrayIndex() << endl;
- }
-
-// boDebug() << k_funcinfo << "Total points used: " << i << endl;
- return i;
 }
 
 void BoMesh::createPointCache()
@@ -1843,5 +1721,28 @@ unsigned int BoMesh::facesCount(unsigned int lod) const
 const QString& BoMesh::name() const
 {
  return d->mName;
+}
+
+unsigned int BoMesh::movePoints(float* array, int index)
+{
+ // move all points to the new array
+ unsigned int pointsMoved = d->mMeshPoints.movePoints(array, index);
+
+ // now we fix the (point-)indices of all faces in all LODs.
+ for (unsigned int i = 0; i < d->mLODCount; i++) {
+	if (!d->mLODs[i]) {
+		boError(100) << k_funcinfo << "NULL LOD " << i << endl;
+		continue;
+	}
+	d->mLODs[i]->movePointIndices(index);
+ }
+
+ return pointsMoved;
+}
+
+void BoMesh::setMeshRendererMeshData(BoMeshRendererMeshData* data)
+{
+ delete mMeshRendererMeshData;
+ mMeshRendererMeshData = data;
 }
 

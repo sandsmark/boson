@@ -26,6 +26,8 @@ class BoMesh;
 class BoMaterial;
 class BoAdjacentDataBase;
 class BoMeshLOD;
+class BoMeshRendererMeshData;
+class BoMeshRendererMeshLODData;
 class QColor;
 
 // AB: there are two different ways for normals: store one normal per face
@@ -268,9 +270,6 @@ public:
 	void setFace(int index, const BoFace& face);
 	const BoFace* face(unsigned int f) const;
 
-	void setArrayIndex(unsigned int index);
-	unsigned int arrayIndex() const;
-
 	/**
 	 * @param vertex The vertex in the face this normal applies to. This
 	 * must be 0..2 or -1 for all vertices.
@@ -298,12 +297,21 @@ public:
 	void connectNodes();
 	void addNodes();
 
+	inline BoMeshRendererMeshLODData* meshRendererMeshLODData() const
+	{
+		return mMeshRendererMeshLODData;
+	}
+
+	void setMeshRendererMeshLODData(BoMeshRendererMeshLODData* data);
+
 private:
 	BoMeshLODPrivate* d;
 
 private:
 	BoFaceNode* mNodes;
 	int mType;
+
+	BoMeshRendererMeshLODData* mMeshRendererMeshLODData;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
@@ -356,7 +364,7 @@ public:
 	 * @return The number of points (!) that have been used. Note: a single
 	 * point consists of @ref pointSize floats!
 	 **/
-	unsigned int movePoints(float* vertexarray, float* normalarray, float* texelarray, int index);
+	unsigned int movePoints(float* array, int index);
 
 	/**
 	 * Use material @p mat when rendering this mesh.
@@ -476,6 +484,10 @@ public:
 	 *
 	 * @param p The index of the vertex in the vertex pool. Must
 	 * be < @ref points.
+	 *
+	 * See also @ref BosonModel::vertex, which uses indices that are
+	 * <em>global</em> to the model (as in @ref BoFace::pointIndex), while
+	 * this method uses indices that are local to this mesh.
 	 **/
 	BoVector3 vertex(unsigned int p) const;
 
@@ -484,11 +496,6 @@ public:
 	 * @return The number of points in this mesh. See also @ref facesCount
 	 **/
 	unsigned int points() const;
-
-	/**
-	 * @return The total number of elements (point indices) in all lods of this mesh
-	 **/
-	unsigned int elements() const;
 
 	/**
 	 * Calculate values for @ref maxZPoint and similar functions. This needs
@@ -550,6 +557,13 @@ public:
 
 	unsigned int facesCount(unsigned int lod) const;
 
+	inline BoMeshRendererMeshData* meshRendererMeshData() const
+	{
+		return mMeshRendererMeshData;
+	}
+
+	void setMeshRendererMeshData(BoMeshRendererMeshData* data);
+
 protected:
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
@@ -576,9 +590,60 @@ protected:
 
 private:
 	void init();
+	friend class BoMeshRenderer;
 
 private:
 	BoMeshPrivate* d;
+	BoMeshRendererMeshData* mMeshRendererMeshData;
+};
+
+
+/**
+ * Same as @ref BoMeshRendererModelData, but this stores data for the @ref
+ * BoMesh.
+ *
+ * See also @ref BoMesh::meshRendererMeshData and @ref
+ * BoMeshRenderer::initMeshData.
+ *
+ * If you are not sure whether your data belongs to BoMeshRendererMeshData or to
+ * @ref BoMeshRendererMeshLODData, try @ref BoMeshRendererMeshLODData first.
+ * There you will have less trouble retrieving certain data (such as normals).
+ * @short Simple storage class for @ref BoMesh and @ref BoMeshRenderer
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshRendererMeshData
+{
+public:
+	BoMeshRendererMeshData()
+	{
+	}
+	virtual ~BoMeshRendererMeshData()
+	{
+	}
+};
+
+/**
+ * Same as @ref BoMeshRendererModelData, but this stores data for the @ref
+ * BoMeshLOD.
+ *
+ * See also @ref BoMesh::meshRendererMeshData and @ref
+ * BoMeshRenderer::initMeshLODData.
+ *
+ * You will most probably want to store your mesh relevant data in this class
+ * (e.g. vertex buffer objects), if you are not sure whether you need @ref
+ * BoMeshRendererMeshData or BoMeshRendererLODData, try this one first.
+ * @short Simple storage class for @ref BoMeshLOD and @ref BoMeshRenderer
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshRendererMeshLODData
+{
+public:
+	BoMeshRendererMeshLODData()
+	{
+	}
+	virtual ~BoMeshRendererMeshLODData()
+	{
+	}
 };
 
 #endif

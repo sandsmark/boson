@@ -592,24 +592,6 @@ void BosonBigDisplayBase::initializeGL()
 	BoInfo::boInfo()->update(this);
  }
 
- if (boConfig->useVBO()) {
-#ifdef GL_ARB_vertex_buffer_object
-	if (!BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
-		boWarning() << k_funcinfo << "VBOs not supported!" << endl;
-		BosonModel::setUseVBO(false);
-	} else {
-		boDebug() << k_funcinfo << "Using VBOs" << endl;
-		BosonModel::setUseVBO(true);
-	}
-#else
-	boDebug() << k_funcinfo << "VBOs weren't supported when compiling!" << endl;
-	BosonModel::setUseVBO(false);
-#endif
- } else {
-	boDebug() << k_funcinfo << "not using VBOs (configured so)!" << endl;
-	BosonModel::setUseVBO(false);
- }
-
  recursive = false;
 }
 
@@ -755,20 +737,10 @@ void BosonBigDisplayBase::paintGL()
 	glEnable(GL_NORMALIZE);
  }
 
- // AB: these are problematic for triangle strips! they need to be in a special
- // format to make culling work!
- glEnable(GL_CULL_FACE);
- glCullFace(GL_BACK);
- glEnableClientState(GL_VERTEX_ARRAY);
- glEnableClientState(GL_NORMAL_ARRAY);
- glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
+ BosonModel::startModelRendering();
  renderItems();
+ BosonModel::stopModelRendering();
 
- glDisableClientState(GL_VERTEX_ARRAY);
- glDisableClientState(GL_NORMAL_ARRAY);
- glDisableClientState(GL_TEXTURE_COORD_ARRAY);
- glDisable(GL_CULL_FACE);
  if (boConfig->wireFrames()) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  }
@@ -1091,12 +1063,10 @@ void BosonBigDisplayBase::renderPlacementPreview()
  glTranslatef(x, -y, z);
  if (modelPreview) {
 	BoFrame* f = d->mPlacementPreview.model()->frame(0);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	BosonModel::startModelRendering();
 	d->mPlacementPreview.model()->prepareRendering();
 	f->renderFrame(&localPlayerIO()->teamColor());
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	BosonModel::stopModelRendering();
  } else if (groundPreview) {
 #warning TODO: cell placement preview
 #if 0

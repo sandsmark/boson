@@ -1,6 +1,8 @@
 ## Makefile.am for boson
 
-SUBDIRS = data bosonwidgets items commandframe startupwidgets sound info script bosonfont
+SUBDIRS = data \
+	bosonwidgets items commandframe startupwidgets sound info script \
+	bosonfont meshrenderer
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo bo3dsdebug
 
@@ -80,6 +82,8 @@ BOSON_COMMON_SRC = \
 	bosonbigdisplayinput.cpp \
 	editorbigdisplayinput.cpp \
 	bomesh.cpp \
+	bomeshrenderer.cpp \
+	bomeshrenderermanager.cpp \
 	bolodbuilder.cpp \
 	bomaterial.cpp \
 	bomaterialwidget.cpp \
@@ -93,6 +97,7 @@ BOSON_COMMON_SRC = \
 	bobincoder.cpp \
 	bolight.cpp \
 	bofullscreen.cpp
+
 
 
 BOPROFILING_SRC= \
@@ -113,12 +118,12 @@ BOPROFILING_SRC= \
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
-		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
@@ -133,11 +138,11 @@ boson_SOURCES = \
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
+		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
-		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
@@ -169,7 +174,7 @@ bocursor_SOURCES = \
 		bosontexturearray.cpp bosonconfig.cpp \
 		bosonglwidget.cpp
 
-borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+borender_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 borender_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
