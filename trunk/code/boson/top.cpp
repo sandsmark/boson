@@ -237,7 +237,7 @@ void TopWidget::initKActions()
  KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
 		SLOT(slotToggleSound()), actionCollection(), "options_sound");
  sound->setChecked(boConfig->sound());
- KToggleAction* music = new KToggleAction(i18n("&Music"), 0, this,
+ KToggleAction* music = new KToggleAction(i18n("M&usic"), 0, this,
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
  music->setChecked(boConfig->music());
 
