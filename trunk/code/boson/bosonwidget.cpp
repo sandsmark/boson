@@ -640,3 +640,7 @@ void BosonWidget::slotChangeSpecies(const QString& directory)
  d->mLocalPlayer->loadTheme(directory, SpeciesTheme::defaultColor());
 }
 
+void BosonWidget::zoom(const QWMatrix& m)
+{
+ d->mBigDisplay->setWorldMatrix(m);
+}

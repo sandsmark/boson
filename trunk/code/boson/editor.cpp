@@ -25,6 +25,7 @@
 #include <kmessagebox.h>
 
 #include <qintdict.h>
+#include <qwmatrix.h>
 
 #include "editor.moc"
 
@@ -383,3 +384,9 @@ void Editor::slotCreateTiles()
  newTiles.save(fileName);
 }
 
+void Editor::slotZoom(int index)
+{
+ QWMatrix m;
+ m.scale(index, index);
+ d->mBosonWidget->zoom(m);
+}

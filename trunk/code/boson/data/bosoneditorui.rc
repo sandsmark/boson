@@ -12,6 +12,9 @@
     <Action name="editor_create_unit" />
     <Action name="editor_create_tiles" />
   </Menu>
+  <Menu name="settings"><text>&amp;Settings</text>
+    <Action name="options_zoom" />
+  </Menu>
 </MenuBar>
 <ToolBar>
   <Action name="editor_build" />

@@ -87,7 +87,9 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 {
 // *eatevent = true;//FIXME: it seems that this makes KGameIO *SEND* the input?
 // e->accept() is not called for this?!
+ QWMatrix wm = inverseWorldMatrix(); // for zooming
  QPoint pos = viewportToContents(e->pos());
+ wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
 	case QEvent::Wheel:
@@ -113,7 +115,9 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		 	// AB: is *eatevent the correct parameter? KGame should
 			// *not* send the stream if this is false!
 			bool send = false;
-		 	actionClicked(viewportToContents(e->pos()), stream, send);
+			// pos must be viewportToContents'ed and mapped using
+			// the inverse matrix!
+		 	actionClicked(pos, stream, send);
 			if (send) {
 				*eatevent = true;
 			}
@@ -264,6 +268,9 @@ void BosonBigDisplay::drawSelectionRect()
 // might cause problems when viewport is moved:
  QPoint pos1 = contentsToViewport(selectionStart());
  QPoint pos2 = contentsToViewport(selectionEnd());
+ QWMatrix wm = worldMatrix(); // for zooming
+ wm.map(pos1.x(), pos1.y(), &pos1.rx(), &pos1.ry());
+ wm.map(pos2.x(), pos2.y(), &pos2.rx(), &pos2.ry());
  QRect r(pos1, pos2);
  r.normalize();
  if (d->mIsSelecting) {
@@ -349,13 +356,17 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
 void BosonBigDisplay::resizeEvent(QResizeEvent* e)
 {
  QCanvasView::resizeEvent(e);
+ // FIXME: is width()/height() correct? rather the ones from viewport()!
+ // use the same line as im resizeContents()!
  emit signalSizeChanged(width(), height());
 }
 
 void BosonBigDisplay::slotEditorMouseEvent(QMouseEvent* e, bool* eatevent)
 {
  *eatevent = true;
+ QWMatrix wm = inverseWorldMatrix(); // for zooming
  QPoint pos = viewportToContents(e->pos());
+ wm.map(pos.x(), pos.y(), &pos.rx(), &pos.ry());
  switch(e->type()) {
 	case QEvent::MouseButtonDblClick:
 	case QEvent::Wheel:
@@ -460,5 +471,13 @@ void BosonBigDisplay::slotUnitChanged(VisualUnit* unit)
 		emit signalSingleUnitSelected(unit); // update
 	}
  }
+}
+
+void BosonBigDisplay::resizeContents(int w, int h)
+{
+ QCanvasView::resizeContents(w, h);
+ QWMatrix wm = inverseWorldMatrix();
+ QRect br = wm.mapRect(QRect(0,0,width(),height()));
+ emit signalSizeChanged(br.width(), br.height());
 }
 

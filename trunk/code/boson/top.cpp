@@ -19,6 +19,8 @@
 #include <kstdgameaction.h>
 #include <kdebug.h>
 
+#include <qwmatrix.h>
+
 #include "top.moc"
 
 class TopPrivate
@@ -29,11 +31,13 @@ public:
 		mBosonWidget = 0;
 		mToolbarAction = 0;
 		mStatusbarAction = 0;
+		mZoomAction = 0;
 	}
 
 	BosonWidget* mBosonWidget;
 	KToggleAction* mToolbarAction;
 	KToggleAction* mStatusbarAction;
+	KSelectAction* mZoomAction;
 };
 
 Top::Top()
@@ -81,6 +85,15 @@ void Top::setupActions()
  KStdAction::keyBindings(this, SLOT(optionsConfigureKeys()), actionCollection());
  KStdAction::configureToolbars(this, SLOT(optionsConfigureToolbars()), actionCollection());
  KStdAction::preferences(d->mBosonWidget, SLOT(slotGamePreferences()), actionCollection()); // FIXME: for game only - not editor!
+
+ d->mZoomAction = new KSelectAction(i18n("&Zoom"), QKeySequence(), actionCollection(), "options_zoom");
+ connect(d->mZoomAction, SIGNAL(activated(int)), 
+		this, SLOT(slotZoom(int)));
+ QStringList items;
+ items.append(QString::number(50));
+ items.append(QString::number(100));
+ items.append(QString::number(150));
+ d->mZoomAction->setItems(items);
 
  createGUI();
 }
@@ -156,5 +169,15 @@ void Top::optionsConfigureToolbars()
 	// recreate our GUI
 	createGUI();
  } 
+}
+
+void Top::slotZoom(int index)
+{
+kdDebug() << "zoom index=" << index << endl;
+ double percent = d->mZoomAction->items()[index].toDouble();
+ double factor = (double)percent / 100;
+ QWMatrix m;
+ m.scale(factor, factor);
+ d->mBosonWidget->zoom(m);
 }
 

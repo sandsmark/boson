@@ -538,33 +538,26 @@ void VisualMobileUnit::advanceMove()
 	stopMoving();
 	return;
  }
+
  QCanvasItemList collisionList = collisions(false);
  if (collisionList.isEmpty()) {
 	return;
  }
 
- bool isAircraft = unitProperties()->isAircraft();
- QCanvasItemList::Iterator it;
- for (it = collisionList.begin(); it != collisionList.end(); ++it) {
+ QValueList<VisualUnit*> collisions = unitCollisions();
+ if (collisions.isEmpty()) {
+	return;
+ }
+
+// here starts the tricky part. There are most probably units in our way. We
+// should test them now with QCanvasItem::collidesWith() and either get around
+// them somehow or just stop. 
+ QValueList<VisualUnit*>::Iterator it;
+ for (it = collisions.begin(); it != collisions.end(); ++it) {
 	if (collidesWith(*it)) {
-		if (RTTI::isUnit((*it)->rtti())) {
-			VisualUnit* unit = ((VisualUnit*)*it);
-			if (!unit->isDestroyed()) {
-				if (isAircraft) {
-					if (unit->unitProperties()->isAircraft()) {
-						setXVelocity(0);
-						setYVelocity(0);
-						kdDebug() << id() << " collidesWith " << unit->id() << endl;
-					}
-				} else {
-					if (!unit->unitProperties()->isAircraft()) {
-						setXVelocity(0);
-						setYVelocity(0);
-						kdDebug() << id() << " collidesWith " << unit->id() << endl;
-					}
-				}
-			}
-		}
+		setXVelocity(0);
+		setYVelocity(0);
+		return;
 	}
  }
 
@@ -576,6 +569,31 @@ void VisualMobileUnit::advanceMove()
  }
 }
 
+
+QValueList<VisualUnit*> VisualUnit::unitCollisions(bool exact) const
+{
+ QValueList<VisualUnit*> units;
+ QCanvasItemList collisionList = collisions(exact);
+ if (collisionList.isEmpty()) {
+	return units;
+ }
+ 
+ bool isAircraft = unitProperties()->isAircraft();
+ QCanvasItemList::Iterator it;
+ for (it = collisionList.begin(); it != collisionList.end(); ++it) {
+	if (!RTTI::isUnit((*it)->rtti())) {
+		continue;
+	}
+	VisualUnit* unit = ((VisualUnit*)*it);
+	if (unit->isDestroyed()) {
+		continue;
+	}
+	if (isAircraft == unit->unitProperties()->isAircraft()) {
+		units.append(unit);
+	}
+ }
+ return units;
+}
 
 
 class VisualFacilityPrivate

@@ -42,6 +42,7 @@ protected:
 
 private slots:
 	void slotGameNew();
+	void slotZoom(int index);
 	void fileSave();
 	void fileSaveAs();
 

@@ -59,6 +59,8 @@ private slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotPlayerLeftGame(KPlayer* p);
 
+	void slotZoom(int index);
+
 private:
 	void setupAccel();
 	void setupActions();
