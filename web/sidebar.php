@@ -122,9 +122,9 @@ counter2($filename);
 
 echo "
 <br>
-<a href=\"http://www.sourceforge.net/projects/boson\" target=\"_blank\">
-  <img style=\"border:0;width:114px;height:34px\"
-       src=\"${basedir}pictures/sflogo.png\"
+<a href=\"http://sourceforge.net/projects/boson\" target=\"_blank\">
+  <img style=\"border:0;width:125px;height:37px\"
+       src=\"http://sourceforge.net/sflogo.php?group_id=15087&amp;type=3\"
        alt=\"SF Project Home\"></a><br><br>";
 
 /*echo "
