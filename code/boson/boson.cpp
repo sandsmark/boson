@@ -192,6 +192,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mIsLocked = false;
  d->mDelayedWaiting = false;
  d->mAdvanceMessageWaiting = 0;
+ d->mDelayedMessages.setAutoDelete(true);
 
  mGameMode = true;
 
@@ -230,6 +231,7 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 
 Boson::~Boson()
 {
+ d->mDelayedMessages.clear();
  delete d->mGameTimer;
  delete d;
 }

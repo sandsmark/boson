@@ -76,6 +76,8 @@ UnitBase::~UnitBase()
 	// (will create a datahandler)
 	weaponDataHandler()->clear();
  }
+ delete mWeaponProperties;
+ delete mProperties;
 // boDebug() << k_funcinfo << " done" << endl;
 }
 

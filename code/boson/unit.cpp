@@ -92,6 +92,8 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mAdvanceFunction = &Unit::advanceNone;
  mAdvanceFunction2 = &Unit:: advanceNone;
  setOwner(owner);
+ d->mPlugins.setAutoDelete(true);
+ d->mWeapons.setAutoDelete(true);
  d->mPlugins.clear();
  d->mWeapons.clear();
 

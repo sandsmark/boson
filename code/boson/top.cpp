@@ -158,6 +158,7 @@ TopWidget::~TopWidget()
  boDebug() << "endGame()" << endl;
  endGame();
  boDebug() << "endGame() done" << endl;
+ delete d->mIface;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
