@@ -443,13 +443,10 @@ void BoFrame::renderFrame(const QColor* teamColor, unsigned int lod, int mode)
 		boError() << k_funcinfo << "NULL mesh at " << i << endl;
 		continue;
 	}
-	glPushMatrix();
-	glMultMatrixf(m->data());
 	if (mode == GL_SELECT) {
 		glLoadName(i);
 	}
-	mesh->renderMesh(teamColor, lod);
-	glPopMatrix();
+	mesh->renderMesh(m, teamColor, lod);
  }
 }
 
@@ -762,7 +759,17 @@ void BosonModel::loadModel()
 	m->calculateNormals();
  }
 
+ // scale the model to mWidth * mHeight. vertices are not touched, the scaling
+ // factor is integrated into the mesh matrices.
+ applyMasterScale();
+ computeBoundingObjects();
+
  boDebug(100) << k_funcinfo << "generating LODs for meshes" << endl;
+ // AB: first apply the master scale, then the LOD: in order to find out how
+ // much surface / volume the model can take at most, we need the final
+ // matrices.
+ // computing the master scaling factor first, we can easily use width() and
+ // height().
  generateLOD();
  boDebug(100) << k_funcinfo << "generating LODs for meshes done" << endl;
 
@@ -770,11 +777,6 @@ void BosonModel::loadModel()
  mergeArrays();
  mergeMeshesInFrames();
  sortByDepth();
-
- // scale the model to mWidth * mHeight. vertices are not touched, the scaling
- // factor is integrated into the mesh matrices.
- applyMasterScale();
- computeBoundingObjects();
 
  QStringList modelTextures;
  for (unsigned int i = 0; i < materialCount(); i++) {
@@ -1142,7 +1144,7 @@ void BosonModel::generateLOD()
 		BO_NULL_ERROR(m);
 		continue;
 	}
-	m->generateLOD(lodCount);
+	m->generateLOD(lodCount, this);
  }
 }
 

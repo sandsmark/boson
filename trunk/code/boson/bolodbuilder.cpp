@@ -42,6 +42,12 @@ BoLODBuilder::BoLODBuilder(const BoMesh* mesh, const BoMeshLOD* fullDetail)
 {
  mMesh = mesh;
  mFullDetail = fullDetail;
+ mThisVolume = 0.0f;
+ mThisMaxSurface = 0.0f;
+ mModelVolume = 0.0f;
+ mModelMaxSurface = 0.0f;
+ mLargestMeshVolume = 0.0f;
+ mLargestMeshSurface = 0.0f;
 
  boDebug(120) << k_funcinfo << "mesh has " << pointCount() << " vertices in " << facesCount() <<
 		" faces" << endl;
@@ -123,7 +129,34 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 	return faceList;
  }
 
- faceList = getLOD(percents[lod], maxcosts[lod]);
+ bool reject = false;
+ if (lod >= 2) {
+	if (mThisMaxSurface * 5 < mModelMaxSurface) {
+		// less than 20% of the entire surface taken by this mesh.
+		if (mThisMaxSurface * 2 < mLargestMeshSurface) {
+			// this mesh surface is at most 50% of the largest mesh
+			// in the model
+			// lets reject it
+			reject = true;
+		}
+	}
+ }
+
+ if (lod >= 3 && !reject) {
+	if (mThisMaxSurface * 2.5 < mModelMaxSurface) {
+		// less than 40% of the entire surface taken by this mesh.
+		if (mThisMaxSurface * 1.5 < mLargestMeshSurface) {
+			// this mesh surface is at most 66% of the largest mesh
+			// in the model
+			// lets reject it
+			reject = true;
+		}
+	}
+ }
+
+ if (!reject) {
+	faceList = getLOD(percents[lod], maxcosts[lod]);
+ }
 
  long int elapsed = profiler.stop();
  boDebug(120) << k_funcinfo << "lod: " << lod << "; took " << elapsed << "us" << endl;
@@ -728,5 +761,15 @@ void BoLODBuilder::collapse(BoLODVertex* u, BoLODVertex* v, bool recompute)
 		mHeap->sortDown(tmp[i]->heapspot);
 	}
  }
+}
+
+void BoLODBuilder::setModelData(float thisVolume, float thisMaxSurface, float modelVolume, float modelMaxSurface, float largestMeshVolume, float largestMeshSurface)
+{
+ mThisVolume = thisVolume;
+ mThisMaxSurface = thisMaxSurface;
+ mModelVolume = modelVolume;
+ mModelMaxSurface = modelMaxSurface;
+ mLargestMeshVolume = largestMeshVolume;
+ mLargestMeshSurface = largestMeshSurface;
 }
 
