@@ -410,8 +410,13 @@ signals:
 	void signalEndGame();
 	void signalQuit();
 	void signalGamePreferences();
+	void signalEditorPreferences();
 	void signalSelectGroup(int);
 	void signalCreateGroup(int);
+	void signalEditorChangeLocalPlayer(Player*);
+	void signalEditorEditPlayerMinerals();
+	void signalEditorEditPlayerOil();
+	void signalEditorEditHeight(bool);
 
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
@@ -439,6 +444,15 @@ protected slots:
 	void slotChangeMaxProfilingRenderingEntries();
 	void slotToggleStatusbar();
 	void slotDebugKGame();
+	void slotEditorSavePlayFieldAs();
+	void slotEditorChangeLocalPlayer(int);
+	void slotEditorDeleteSelectedUnits();
+	void slotEditorEditMapDescription();
+	void slotEditorPlace(int);
+	void slotEditorImportHeightMap();
+	void slotEditorImportTexMap();
+	void slotEditorExportHeightMap();
+	void slotEditorExportTexMap();
 
 protected:
 	/**
@@ -643,6 +657,7 @@ protected:
 	void setGameMode(bool);
 
 	void createDebugPlayersMenu();
+	void createEditorPlayerMenu();
 
 private:
 	void init();

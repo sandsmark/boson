@@ -25,7 +25,6 @@
 
 class KPlayer;
 class KGamePropertyBase;
-class KActionCollection;
 class KDockWidget;
 class QDataStream;
 class QDomElement;
@@ -202,7 +201,6 @@ protected:
 
 	virtual void initDisplayManager();
 	virtual void initConnections();
-	virtual void setBosonXMLFile();
 
 	/**
 	 * Called by @ref slotStartScenario and the equivalent for loading games

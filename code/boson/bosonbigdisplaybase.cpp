@@ -85,6 +85,8 @@
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
 #include "kgameadvancemessagesdebug.h"
+#include "bpfdescriptiondialog.h"
+#include "botexmapimportdialog.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -97,6 +99,7 @@
 #include <kmessagebox.h>
 #include <kapplication.h>
 #include <kshortcut.h>
+#include <kfiledialog.h>
 #include "boeventloop.h"
 
 #include <qtimer.h>
@@ -112,6 +115,11 @@
 #include <qptrdict.h>
 #include <qinputdialog.h>
 #include <qvbox.h>
+#include <qlayout.h>
+#include <qlabel.h>
+#include <qdialog.h>
+#include <qcombobox.h>
+#include <qpushbutton.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -1153,6 +1161,8 @@ public:
 		mActionDebugPlayers = 0;
 		mActionChat = 0;
 		mActionFullScreen = 0;
+		mActionEditorPlayer = 0;
+		mActionEditorPlace = 0;
 
 		mSelectMapper = 0;
 		mCreateMapper = 0;
@@ -1250,6 +1260,10 @@ public:
 	QGuardedPtr<BoUfoActionMenu> mActionDebugPlayers;
 	QGuardedPtr<BoUfoToggleAction> mActionChat;
 	QGuardedPtr<BoUfoToggleAction> mActionFullScreen;
+	QGuardedPtr<BoUfoSelectAction> mActionEditorPlayer;
+	QGuardedPtr<BoUfoSelectAction> mActionEditorPlace;
+	QGuardedPtr<BoUfoToggleAction> mActionEditorChangeHeight;
+	QPtrList<KPlayer> mEditorPlayers;
 	QPtrDict<KPlayer> mActionDebugPlayer2Player;
 	QSignalMapper* mSelectMapper;
 	QSignalMapper* mCreateMapper;
@@ -1703,7 +1717,6 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  //
  //
 
- // TODO: EditorWidget::initKActions();
  // TODO: help menu
 
 
@@ -1984,6 +1997,97 @@ void BosonBigDisplayBase::initUfoEditorActions()
  BoUfoActionCollection* actionCollection = ufoManager()->actionCollection();
  BO_CHECK_NULL_RET(actionCollection);
 
+
+ BoUfoStdAction::fileSaveAs(this, SLOT(slotEditorSavePlayFieldAs()), actionCollection, "file_save_playfield_as");
+ BoUfoAction* close = BoUfoStdAction::fileClose(this, SIGNAL(signalEndGame()), actionCollection);
+
+ // TODO
+// close->setText(i18n("&End Editor"));
+ BoUfoStdAction::fileQuit(this, SIGNAL(signalQuit()), actionCollection);
+ (void)BoUfoStdAction::preferences(this, SIGNAL(signalEditorPreferences()), actionCollection);
+
+ d->mActionEditorPlayer = new BoUfoSelectAction(i18n("&Player"), 0, 0, actionCollection, "editor_player");
+ connect(d->mActionEditorPlayer, SIGNAL(signalActivated(int)),
+		this, SLOT(slotEditorChangeLocalPlayer(int)));
+
+ QStringList list;
+ list.append(i18n("&Facilities"));
+ list.append(i18n("&Mobiles"));
+ list.append(i18n("&Ground"));
+ d->mActionEditorPlace = new BoUfoSelectAction(i18n("Place"), 0, 0, actionCollection, "editor_place");
+ connect(d->mActionEditorPlace, SIGNAL(signalActivated(int)),
+		this, SLOT(slotEditorPlace(int)));
+ d->mActionEditorPlace->setItems(list);
+
+ KShortcut s;
+ s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
+ s.append(KKeySequence(QKeySequence(Qt::Key_D)));
+ (void)new BoUfoAction(i18n("Delete selected unit"), KShortcut(s), this,
+		SLOT(slotEditorDeleteSelectedUnits()), actionCollection,
+		"editor_delete_selected_unit");
+
+ (void)new BoUfoAction(i18n("Map &description"), KShortcut(), this,
+		SLOT(slotEditorEditMapDescription()), actionCollection,
+		"editor_map_description");
+ (void)new BoUfoAction(i18n("Edit &Minerals"), KShortcut(), this,
+		SIGNAL(signalEditorEditPlayerMinerals()), actionCollection,
+		"editor_player_minerals");
+ (void)new BoUfoAction(i18n("Edit &Oil"), KShortcut(), this,
+		SIGNAL(signalEditorEditPlayerOil()), actionCollection,
+		"editor_player_oil");
+ d->mActionEditorChangeHeight = new BoUfoToggleAction(i18n("Edit &Height"),
+		KShortcut(), this, 0, actionCollection, "editor_height");
+ connect(d->mActionEditorChangeHeight, SIGNAL(signalToggled(bool)),
+		this, SIGNAL(signalEditorEditHeight(bool)));
+ (void)new BoUfoAction(i18n("&Import height map"), KShortcut(), this,
+		SLOT(slotEditorImportHeightMap()), actionCollection,
+		"editor_import_heightmap");
+ (void)new BoUfoAction(i18n("&Export height map"), KShortcut(), this,
+		SLOT(slotEditorExportHeightMap()), actionCollection,
+		"editor_export_heightmap");
+ (void)new BoUfoAction(i18n("I&mport texmap"), KShortcut(), this,
+		SLOT(slotEditorImportTexMap()), actionCollection,
+		"editor_import_texmap");
+ (void)new BoUfoAction(i18n("E&xport texmap"), KShortcut(), this,
+		SLOT(slotEditorExportTexMap()), actionCollection,
+		"editor_export_texmap");
+ (void)new BoUfoAction(i18n("Edit global conditions"), KShortcut(), this,
+		SLOT(slotEditConditions()), actionCollection,
+		"editor_edit_conditions");
+
+// KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection); // FIXME: slotEditorPreferences()
+
+ createEditorPlayerMenu();
+ d->mActionEditorPlace->setCurrentItem(0);
+ slotEditorPlace(0);
+}
+
+void BosonBigDisplayBase::createEditorPlayerMenu()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(d->mActionEditorPlayer);
+ QPtrList<KPlayer> players = *boGame->playerList();
+ QPtrListIterator<KPlayer> it(players);
+ QStringList items;
+ int current = -1;
+ while (it.current()) {
+	d->mEditorPlayers.append(it.current());
+	items.append(it.current()->name());
+	if (localPlayerIO()) {
+		if (it.current() == (KPlayer*)localPlayerIO()->player()) {
+			current = items.count() - 1;
+		}
+	}
+	++it;
+ }
+ d->mActionEditorPlayer->setItems(items);
+
+ if (current >= 0) {
+	d->mActionEditorPlayer->setCurrentItem(current);
+
+	// AB: this causes a recursion
+//	slotEditorChangeLocalPlayer(current);
+ }
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -5333,6 +5437,213 @@ void BosonBigDisplayBase::slotDebugKGame()
 
  connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
  dlg->show();
+}
+
+void BosonBigDisplayBase::slotEditorSavePlayFieldAs()
+{
+ boDebug() << k_funcinfo << endl;
+ QString startIn; // shall we provide this??
+ QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ QFileInfo info(fileName);
+ if (info.extension().isEmpty()) {
+	fileName += ".bpf";
+ }
+ if (info.exists()) {
+	int r = KMessageBox::warningYesNoCancel(this, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
+	if (r != KMessageBox::Yes) {
+		return;
+	}
+ }
+ bool ret = boGame->savePlayFieldToFile(fileName);
+ if (!ret) {
+	KMessageBox::sorry(this, i18n("An error occurred while saving the playfield. Unable to save."));
+ }
+}
+
+void BosonBigDisplayBase::slotEditorChangeLocalPlayer(int index)
+{
+ Player* p = 0;
+ p = (Player*)d->mEditorPlayers.at(index);
+ if (p) {
+	emit signalEditorChangeLocalPlayer((Player*)p);
+	if (d->mActionEditorPlace->currentItem() >= 0) {
+		slotEditorPlace(d->mActionEditorPlace->currentItem());
+	}
+ } else {
+	boWarning() << k_funcinfo << "NULL player for index " << index << endl;
+ }
+}
+
+void BosonBigDisplayBase::slotEditorDeleteSelectedUnits()
+{
+ displayInput()->deleteSelectedUnits();
+}
+
+void BosonBigDisplayBase::slotEditorEditMapDescription()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->description());
+
+
+// TODO: non-modal might be fine. one could use that for translations (one
+// dialog the original language, one the translated language)
+ BPFDescriptionDialog* dialog = new BPFDescriptionDialog(this, true);
+ dialog->setDescription(boGame->playField()->description());
+ dialog->exec();
+
+ delete dialog;
+}
+
+void BosonBigDisplayBase::slotEditorPlace(int index)
+{
+ boDebug() << k_funcinfo << "index: " << index << endl;
+ switch (index) {
+	case 0:
+		slotShowPlaceFacilities(localPlayerIO()->player());
+		break;
+	case 1:
+		slotShowPlaceMobiles(localPlayerIO()->player());
+		break;
+	case 2:
+		slotShowPlaceGround();
+		break;
+	default:
+		boError() << k_funcinfo << "Invalid index " << index << endl;
+		return;
+ }
+}
+
+void BosonBigDisplayBase::slotEditorImportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getOpenFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ // first load the file as an image. We need it to be in greyscale png in boson,
+ // and we can easily convert that image.
+ QImage image(fileName);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "unbable to load file " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to load %1\nSeems not to be a valid image.").arg(fileName));
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if ((unsigned int)image.width() != map->width() + 1 ||
+		(unsigned int)image.height() != map->height() + 1) {
+	KMessageBox::sorry(this, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image selected %5 was %6x%7").
+			arg(map->width()).arg(map->height()).
+			arg(map->width() + 1).arg(map->height() + 1).
+			arg(fileName).
+			arg(image.width()).arg(image.height()));
+	return;
+ }
+ if (!image.isGrayscale()) {
+	KMessageBox::sorry(this, i18n("%1 is not a greyscale image").arg(fileName));
+	return;
+ }
+ boGame->playField()->importHeightMapImage(image);
+ // TODO: update unit positions!
+}
+
+void BosonBigDisplayBase::slotEditorExportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportHeightMap();
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export heightMap" << endl;
+	KMessageBox::sorry(this, i18n("Unable to export heightMap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(this, i18n("An invalid heightmop image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
+}
+
+void BosonBigDisplayBase::slotEditorImportTexMap()
+{
+ boDebug() << k_funcinfo << endl;
+ BoTexMapImportDialog* dialog = new BoTexMapImportDialog(this);
+ connect(dialog, SIGNAL(finished()),
+		dialog, SLOT(deleteLater()));
+
+ BosonMap* map = boGame->playField()->map();
+ dialog->setMap(map);
+
+ dialog->show();
+ dialog->slotSelectTexMapImage();
+}
+
+void BosonBigDisplayBase::slotEditorExportTexMap()
+{
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ BO_CHECK_NULL_RET(boGame->playField()->map()->groundTheme());
+
+ BosonMap* map = boGame->playField()->map();
+ QStringList textures;
+ for (unsigned int i = 0; i < map->groundTheme()->textureCount(); i++) {
+	textures.append(map->groundTheme()->textureFileName(i));
+ }
+
+ QDialog* d = new QDialog(0, 0, true);
+ QVBoxLayout* layout = new QVBoxLayout(d);
+ QLabel* label = new QLabel(i18n("Select texture to export:"), d);
+ QComboBox* combo = new QComboBox(d);
+ QPushButton* button = new QPushButton(i18n("Ok"), d);
+ connect(button, SIGNAL(clicked()), d, SLOT(accept()));
+ combo->insertStringList(textures);
+ layout->addWidget(label);
+ layout->addWidget(combo);
+ layout->addWidget(button);
+ d->exec();
+ unsigned int tex = (unsigned int)combo->currentItem();
+ boDebug() << k_funcinfo << "tex: " << tex << endl;
+ delete d;
+
+ QString fileName = KFileDialog::getSaveFileName(QString::null, "*.png", this);
+ if (fileName.isNull()) {
+	return;
+ }
+ QByteArray buffer = boGame->playField()->exportTexMap(tex);
+ if (buffer.size() == 0) {
+	boError() << k_funcinfo << "Could not export texmap" << endl;
+	KMessageBox::sorry(this, i18n("Unable to export texmap"));
+	return;
+ }
+ QImage image(buffer);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "an invalid image has been generated" << endl;
+	KMessageBox::sorry(this, i18n("An invalid texmap image has been generated."));
+ }
+ if (!image.save(fileName, "PNG")) {
+	boError() << k_funcinfo << "unable to save image to " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to save image to %1.").arg(fileName));
+	return;
+ }
 }
 
 
