@@ -47,12 +47,20 @@ public:
 	BoGroundRendererManagerPrivate()
 	{
 		mLocalPlayerIO = 0;
+		mViewFrustum = 0;
+		mModelviewMatrix = 0;
+		mProjectionMatrix = 0;
+		mViewport = 0;
 
 		mLibrary = 0;
 		mLibraryFactory = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
+	const float* mViewFrustum;
+	const BoMatrix* mModelviewMatrix;
+	const BoMatrix* mProjectionMatrix;
+	const int* mViewport;
 
 	QLibrary* mLibrary;
 	KLibFactory* mLibraryFactory;
@@ -81,13 +89,20 @@ void BoGroundRendererManager::initStatic()
 
 bool BoGroundRendererManager::makeRendererCurrent(int id)
 {
+ bool ret = false;
  switch (id) {
 	case BoGroundRenderer::Fast:
-		return makeRendererCurrent("BoFastGroundRenderer");
+		ret = makeRendererCurrent("BoFastGroundRenderer");
+		break;
 	case BoGroundRenderer::Default:
-		return makeRendererCurrent("BoDefaultGroundRenderer");
+		ret = makeRendererCurrent("BoDefaultGroundRenderer");
+		break;
 	default:
 		break;
+ }
+ if (ret && mCurrentRenderer) {
+	QString renderer = mCurrentRenderer->className();
+	boConfig->setStringValue("GroundRendererClass", renderer);
  }
  boWarning() << k_funcinfo << "unknown id " << id << "using default renderer" << endl;
  return makeRendererCurrent(QString::null);
@@ -300,8 +315,8 @@ bool BoGroundRendererManager::makeRendererCurrent(BoGroundRenderer* renderer)
  mCurrentRenderer = renderer;
 
  mCurrentRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
- mCurrentRenderer->setViewFrustum(0); // TODO
- mCurrentRenderer->setMatrices(0, 0, 0); // TODO
+ mCurrentRenderer->setViewFrustum(d->mViewFrustum);
+ mCurrentRenderer->setMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewport);
 
  return true;
 }
@@ -355,7 +370,7 @@ bool BoGroundRendererManager::reloadPlugin(bool* unusable)
  if (unusable) {
 	*unusable = false;
  }
- return true;
+ return checkCurrentRenderer();
 }
 
 void BoGroundRendererManager::setLocalPlayerIO(PlayerIO* io)
@@ -363,6 +378,24 @@ void BoGroundRendererManager::setLocalPlayerIO(PlayerIO* io)
  d->mLocalPlayerIO = io;
  if (mCurrentRenderer) {
 	mCurrentRenderer->setLocalPlayerIO(d->mLocalPlayerIO);
+ }
+}
+
+void BoGroundRendererManager::setViewFrustum(const float* f)
+{
+ d->mViewFrustum = f;
+ if (mCurrentRenderer) {
+	mCurrentRenderer->setViewFrustum(f);
+ }
+}
+
+void BoGroundRendererManager::setMatrices(const BoMatrix* m, const BoMatrix* p, const int* v)
+{
+ d->mModelviewMatrix = m;
+ d->mProjectionMatrix = p;
+ d->mViewport = v;
+ if (mCurrentRenderer) {
+	mCurrentRenderer->setMatrices(m, p, v);
  }
 }
 

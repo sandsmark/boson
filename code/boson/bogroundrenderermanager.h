@@ -91,6 +91,9 @@ public:
 	}
 
 	void setLocalPlayerIO(PlayerIO*);
+	void setViewFrustum(const float*);
+	void setMatrices(const BoMatrix* modelviewMatrix, const BoMatrix* projectionMatrix, const int* viewport);
+
 	void unsetCurrentRenderer();
 
 protected:

@@ -50,6 +50,7 @@
 #include "bosonwidgets/bogamechat.h"
 #include "bosonpath.h"
 #include "bomeshrenderermanager.h"
+#include "bogroundrenderermanager.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -747,9 +748,12 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("Light0..."), KShortcut(), displayManager(),
 		SLOT(slotShowLight0Widget()), actionCollection(),
 		"debug_light0");
- (void)new KAction(i18n("Reload meshrenderer plugin"), KShortcut(), this,
+ (void)new KAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
 		SLOT(slotReloadMeshRenderer()), actionCollection(),
 		"debug_lazy_reload_meshrenderer");
+ (void)new KAction(i18n("Reload &groundrenderer plugin"), KShortcut(), this,
+		SLOT(slotReloadGroundRenderer()), actionCollection(),
+		"debug_lazy_reload_groundrenderer");
 
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
@@ -1236,6 +1240,22 @@ void BosonWidgetBase::slotReloadMeshRenderer()
 	exit(1);
  } else {
 	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
+}
+
+void BosonWidgetBase::slotReloadGroundRenderer()
+{
+ bool unusable = false;
+ bool r = BoGroundRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "groundrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed but library should still be usable"));
  }
 }
 
