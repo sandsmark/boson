@@ -158,6 +158,7 @@ void BoAudioProcessController::sendCommand(BoAudioCommand* command)
 
 // boDebug(200) << k_funcinfo << "sending: " << buffer << endl;
  buffer += '\n';
+ delete[] d->mBuffer;
  d->mBuffer = new char[buffer.length()];
  memcpy(d->mBuffer, buffer.latin1(), buffer.length());
  bool ok = d->mProcess->writeStdin(d->mBuffer, buffer.length());
