@@ -226,7 +226,7 @@ public:
 	GLuint textureObject() const;
 	bool textured() const;
 
-	void renderMesh(const QColor* color);
+	unsigned int renderMesh(const QColor* color);
 	void renderPoint(int index);
 
 	void loadDisplayList(const QColor* teamColor, bool reload = false);

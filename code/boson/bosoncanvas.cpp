@@ -398,10 +398,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
- boProfiling->advanceDeleteUnusedShots(true);
- deleteUnusedShots(); //AB: do we *have* to do this in every advance call???
- boProfiling->advanceDeleteUnusedShots(false);
-
  boProfiling->advanceParticles(true);
  updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
  boProfiling->advanceParticles(false);
@@ -428,6 +424,10 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	}
 
 	deleteUnits(&deleteList);
+
+	boProfiling->advanceDeleteUnusedShots(true);
+	deleteUnusedShots();
+	boProfiling->advanceDeleteUnusedShots(false);
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
@@ -546,17 +546,6 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 void BosonCanvas::newShot(BosonShot* shot)
 {
  boDebug(350) << k_funcinfo << endl;
-
- if (!shot->isActive()) {
-	shotHit(shot);
-
-	// AB: is this a good idea? maybe prefer deleteUnusedShots() instead!
-	// (note that deleteUnusedShots() depends on the item still being in 
-	// the animation list!!)
-	// it won't hurt too much here, cause setAnimated(true) got never called
-	// for a new shot that is inactive. but its ugly anyway.
-	delete shot;
- }
 }
 
 void BosonCanvas::shotHit(BosonShot* s)
@@ -982,7 +971,6 @@ void BosonCanvas::deleteUnusedShots()
 	if (RTTI::isShot(i->rtti())) {
 		BosonShot* shot = (BosonShot*)i;
 		if (!shot->isActive()) {
-			shotHit(shot);
 			delete i;
 		}
 	}

@@ -66,6 +66,7 @@ class BosonShot : public BosonItem
      **/
     inline virtual void advanceFunction(unsigned int)
     {
+      if(!isActive()) { return; }
       advanceMoveInternal();
       advanceMoveCheck();
     }
@@ -74,6 +75,7 @@ class BosonShot : public BosonItem
      **/
     inline virtual void advanceFunction2(unsigned int)
     {
+      if(!isActive()) { return; }
       advanceMoveInternal();
       advanceMoveCheck();
     }
@@ -88,15 +90,17 @@ class BosonShot : public BosonItem
 
     virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
 
+    virtual void explode();
+
   protected:
     virtual const QColor* teamColor() const;
 
   private:
     BoVector3 mVelo;
-    unsigned int mStep;
-    unsigned int mTotalSteps;
+    BoVector3 mTarget;
     bool mActive;
-    float mLength;
+    float mTotalDist;
+    float mPassedDist;
     float mZ;
     float mParticleVelo;
     float mMaxHeight;

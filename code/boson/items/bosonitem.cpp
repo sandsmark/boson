@@ -46,10 +46,16 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mGLConstructionStep = 0;
  mAnimationCounter = 0;
  mCurrentFrame = 0;
+ mIsVisible = true;
 
  mXVelocity = 0.0f;
  mYVelocity = 0.0f;
  mZVelocity = 0.0f;
+
+ mCurrentSpeed = 0;
+ mMaxSpeed = 0;
+ mAccelerationSpeed = 0;
+ mDecelerationSpeed = 0;
 
  mCurrentAnimation = 0;
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
@@ -369,7 +375,7 @@ void BosonItem::setSize(int width, int height)
  addToCells();
 }
 
-void BosonItem::renderItem()
+unsigned int  BosonItem::renderItem()
 {
  mModel->enablePointer();
  if (displayList() != 0) {
@@ -378,8 +384,9 @@ void BosonItem::renderItem()
 	// teamcolor->displaylist!
 	// not here, but in setDisplayList() or friends
 	glCallList(displayList());
+	return 0;
  } else {
-	mCurrentFrame->renderFrame(teamColor());
+	return mCurrentFrame->renderFrame(teamColor());
  }
 }
 

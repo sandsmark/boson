@@ -255,6 +255,9 @@ public:
 	unsigned long int armor() const;
 	void setArmor(unsigned long int armor);
 
+	virtual int rotationSpeed() const { return 0; }
+	virtual void setRotationSpeed(int) {}
+
 	/**
 	 * The type of the unit as described in the index.unit file of this
 	 * unit. See also @ref UnitProperties::typeId
@@ -272,13 +275,6 @@ public:
 	 **/
 	inline unsigned int sightRange() const { return mSightRange; }
 	void setSightRange(unsigned int r) { mSightRange = r; }
-
-	/**
-	 * @return The speed of the unit. Must be replaced in derived classes to
-	 * be of use as this just return 0.
-	 **/
-	inline virtual float speed() const { return 0.0; }
-	virtual void setSpeed(float ) { }
 
 	virtual bool saveAsXML(QDomElement& root);
 	virtual bool loadFromXML(const QDomElement& root);

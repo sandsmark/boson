@@ -737,7 +737,7 @@ void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
  d->mPoints[index * 5 + 4] = texel[1];
 }
 
-void BoMesh::renderMesh(const QColor* teamColor)
+unsigned int BoMesh::renderMesh(const QColor* teamColor)
 {
  // AB: it would be better to do most of this in BosonModel instead. we could
  // group several meshes into a single glBegin()/glEnd() pair
@@ -777,6 +777,7 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	glPopAttrib();
 	resetColor = false;
  }
+ return d->mPointsCacheCount;
 }
 
 void BoMesh::renderPoint(int point)

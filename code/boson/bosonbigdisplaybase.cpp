@@ -584,6 +584,10 @@ public:
 
 	unsigned int mRenderedItems;  // units rendered when paintGL was last called
 	unsigned int mRenderedCells;  // same, but for cells
+	unsigned int mRenderedModelVertices;
+	unsigned int mRenderedCellVertices;
+	unsigned int mRenderedParticleVertices;
+	unsigned int mRenderedOtherVertices;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -866,6 +870,10 @@ void BosonBigDisplayBase::paintGL()
  BoItemList* allItems = canvas()->allItems();
  BoItemList::Iterator it = allItems->begin();
  d->mRenderedItems = 0;
+ d->mRenderedModelVertices = 0;
+ d->mRenderedCellVertices = 0;
+ d->mRenderedParticleVertices = 0;
+ d->mRenderedOtherVertices = 0;
 
  // AB: these are problematic for triangle strips! they need to be in a special
  // format to make culling work!
@@ -876,6 +884,10 @@ void BosonBigDisplayBase::paintGL()
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
  for (; it != allItems->end(); ++it) {
 	BosonItem* item = *it;
+
+	if (!item->isVisible()) {
+		continue;
+	}
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
@@ -947,7 +959,7 @@ void BosonBigDisplayBase::paintGL()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
-	item->renderItem();
+	d->mRenderedModelVertices += item->renderItem();
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
@@ -965,6 +977,7 @@ void BosonBigDisplayBase::paintGL()
 			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
 		}
 		glCallList(item->selectBox()->displayList());
+		d->mRenderedOtherVertices += item->selectBox()->verticesCount();
 		glPopMatrix();
 	}
 
@@ -1035,7 +1048,7 @@ void BosonBigDisplayBase::paintGL()
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		d->mPlacementPreview.model()->enablePointer();
-		f->renderFrame(&localPlayer()->teamColor());
+		d->mRenderedOtherVertices += f->renderFrame(&localPlayer()->teamColor());
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	} else if (cellPreview) {
@@ -1053,6 +1066,7 @@ void BosonBigDisplayBase::paintGL()
 			glTexCoord2fv(textureUpperRight);
 			glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
 		glEnd();
+		d->mRenderedOtherVertices += 4;
 	}
 	glTranslatef(-x, y, -z);
 	glColor4ub(255, 255, 255, 255);
@@ -1107,13 +1121,12 @@ void BosonBigDisplayBase::paintGL()
  if (checkError()) {
 	boError() << k_funcinfo << "GL error when cursor rendered" << endl;
  }
- renderText();
 
  if (d->mSelectionRect.isVisible()) {
 	glPushMatrix();
 
 	glColor3ub(255, 0, 0); // FIXME hardcoded
-	
+
 	QRect rect;
 	d->mSelectionRect.widgetRect(&rect);
 
@@ -1128,10 +1141,13 @@ void BosonBigDisplayBase::paintGL()
 		glVertex3f(x + w, y - h, 0.0f);
 		glVertex3f(x, y - h, 0.0f);
 	glEnd();
+	d->mRenderedOtherVertices += 4;
 
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
  }
+
+ renderText();
 
  // now restore the old 3D-matrix
  glMatrixMode(GL_PROJECTION);
@@ -1333,6 +1349,19 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	renderString(x, y, i18n("Cells rendered: %1").arg(d->mRenderedCells));
 	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Vertices:  total: %1").arg(d->mRenderedModelVertices + d->mRenderedCellVertices +
+			d->mRenderedParticleVertices + d->mRenderedOtherVertices));
+	y -= d->mDefaultFont->height();
+	x += 25;
+	renderString(x, y, i18n("Models: %1").arg(d->mRenderedModelVertices));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Cells: %1").arg(d->mRenderedCellVertices));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Particles: %1").arg(d->mRenderedParticleVertices));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Other: %1").arg(d->mRenderedOtherVertices));
+	y -= d->mDefaultFont->height();
+	x -= 25;
  }
 
 // now the chat messages
@@ -1428,6 +1457,7 @@ void BosonBigDisplayBase::renderCells()
 		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)]);
 	glEnd();
 	d->mRenderedCells++;
+	d->mRenderedCellVertices += 4;
  }
  if (d->mDebugShowCellGrid) {
 	glDisable(GL_LIGHTING);
@@ -1448,6 +1478,7 @@ void BosonBigDisplayBase::renderCells()
 			glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + x] + dist);
 			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, heightMap[(y+1) * heightMapWidth + (x+1)] + dist);
 			glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, heightMap[y * heightMapWidth + (x+1)] + dist);
+		d->mRenderedCellVertices += 4;
 	}
 	glEnd();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1607,6 +1638,7 @@ void BosonBigDisplayBase::renderParticles()
 	glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
 	glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
 	glTexCoord2f(0.0, 0.0);  glVertex3fv(e.data());
+	d->mRenderedParticleVertices += 4;
  }
  glEnd();
 
