@@ -36,6 +36,8 @@ enum refusedType {
 	REFUSED_
 	};
 
+// If not STATED, all coordinates are grid-related (ie, not in pixel)
+
 /* MSG_DLG_ASK */ ///orzel still unused
 struct askMsg_t		{ int major, minor, patch; };
 /* MSG_DLG_ACCEPTED */ /// orzel still unused
@@ -53,7 +55,7 @@ struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
 struct mobileMsg_t	{ int who, key, x, y; mobType type; };
 /* MSG_MOBILE_MOVE_*  */
-struct moveMsg_t	{ int key, newx, newy, direction ;};
+struct moveMsg_t	{ int key, newx, newy;};
 /* MSG_*_DESTROYED */
 struct destroyedMsg_t	{ int key, x, y; }; // x and y are for checking 
 /* MSG_*_CONSTRUCT */

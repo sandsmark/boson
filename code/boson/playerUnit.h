@@ -67,7 +67,6 @@ public:
 	struct	state_t {
 		int x;
 		int y;
-		int dir;
 	};
 
 			playerMobUnit(mobileMsg_t *);
