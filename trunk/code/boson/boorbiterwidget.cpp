@@ -249,6 +249,10 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
 
 	q2.multiply(q);
 
+	// sometimes the quat is (due to rounding errors) not normalized. fix
+	// that.
+	q2.normalize();
+
 	BoQuaternion inv = q2.conjugate(); // equal to inverse(), but faster
 	inv.transform(&cameraPos, &cameraPos);
 	updateOrbiterPosition(cameraPos, q2);
@@ -261,6 +265,10 @@ void BoOrbiterWidget::mouseMoveEvent(QMouseEvent* e)
 	q2.setRotation(0.0f, (float)dx, 0.0f);
 
 	q2.multiply(q);
+
+	// sometimes the quat is (due to rounding errors) not normalized. fix
+	// that.
+	q2.normalize();
 
 	BoQuaternion inv = q2.conjugate(); // equal to inverse(), but faster
 	inv.transform(&cameraPos, &cameraPos);

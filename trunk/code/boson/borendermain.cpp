@@ -741,6 +741,12 @@ void ModelPreview::mouseMoveEvent(QMouseEvent* e)
 	// multiply.
 	q2.multiply(q);
 
+	// AB: usually q2 should be normalized already, but sometimes we have
+	// pretty big rounding errors (2nd and 3rd digit after the decimal point
+	// are pretty usual already).
+	// so we re-normalize here, to avoid trouble
+	q2.normalize();
+
 	BoQuaternion inv = q2.conjugate(); // equal to inverse() (as q2 is normalized) but faster
 	inv.transform(&cameraPos, &cameraPos);
 
