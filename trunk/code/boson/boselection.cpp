@@ -235,17 +235,14 @@ void BoSelection::saveAsXML(QDomElement& root)
  QDomDocument doc = root.ownerDocument();
  QDomElement units = doc.createElement(QString::fromLatin1("Units"));
 
- QString value;
- QTextStream s(&value, IO_WriteOnly);
- s << QString::number(mSelection.count());
  QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
-	s << ' ';
-	s << QString::number(it.current()->id());
+	QDomElement unit = doc.createElement("Unit");
+	unit.setAttribute("Id", (unsigned int)it.current()->id());
+	units.appendChild(unit);
 	++it;
  }
 
- units.appendChild(doc.createTextNode(value));
  root.appendChild(units);
 }
 
@@ -257,24 +254,32 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 	boError(260) << k_funcinfo << "no units" << endl;
 	return;
  }
- QString value = units.text();
- if (value.isEmpty()) {
-	boError() << k_funcinfo << "empty value for units list" << endl;
+
+ QDomNodeList list = units.elementsByTagName(QString::fromLatin1("Unit"));
+ if (list.count() == 0) {
+	// It's ok to have no units in selection
 	return;
  }
- boDebug(260) << k_funcinfo << "Units value: " << value << endl;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("Id"))) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Unit " << i << endl;
+		continue;
+	}
 
- unsigned int count = 0;
- int id;
- char c;
- Unit* u;
- QTextStream s(&value, IO_ReadOnly);
- s >> count;
- for (unsigned int i = 0; i < count; i++) {
-	//s >> c;
-	s >> id;
-	boDebug(260) << "Should append unit " << id << endl;
-	u = boGame->findUnit((unsigned long int)id, 0);
+	bool ok = false;
+	unsigned long int id;
+	id = e.attribute(QString::fromLatin1("Id")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id number for Unit " << i << endl;
+		continue;
+	}
+
+	Unit* u = boGame->findUnit(id, 0);
 	if (!u) {
 		boError(260) << "Unit " << id << " doesn't exist" << endl;
 		continue;
@@ -292,6 +297,7 @@ void BoSelection::loadFromXML(const QDomElement& root, bool activate)
 		u->select();
 	}
  }
+
  if(activate) {
 	boDebug() << k_funcinfo << "emitting signal" << endl;
 	emit signalSelectionChanged(this);
