@@ -22,7 +22,7 @@
 #include "bosonwidget.h"
 #include "bosonwelcomewidget.h"
 #include "bosonnewgamewidget.h"
-#include "bosonserveroptionswidget.h"
+#include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
 #include "bosonloadingwidget.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
@@ -61,16 +61,16 @@ class TopWidget::TopWidgetPrivate
 {
 public:
 	TopWidgetPrivate() {
-		mWelcome = 0l;
-		mNewGame = 0l;
-		mServeroptions = 0l;
-		mLoading = 0l;
-		mBosonWidget = 0l;
+		mWelcome = 0;
+		mNewGame = 0;
+		mNetworkOptions = 0;
+		mLoading = 0;
+		mBosonWidget = 0;
 	};
 
 	BosonWelcomeWidget* mWelcome;
 	BosonNewGameWidget* mNewGame;
-	BosonServerOptionsWidget* mServeroptions;
+	BosonNetworkOptionsWidget* mNetworkOptions;
 	BosonLoadingWidget* mLoading;
 	BosonWidget* mBosonWidget;
 
@@ -349,7 +349,7 @@ void TopWidget::initNewGameWidget()
  }
  d->mNewGame = new BosonNewGameWidget(this, mWs);
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
- connect(d->mNewGame, SIGNAL(signalShowServerOptions()), this, SLOT(slotShowServerOptions()));
+ connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()), this, SLOT(slotShowNetworkOptions()));
  mWs->addWidget(d->mNewGame, ID_WIDGETSTACK_NEWGAME);
 }
 
@@ -378,20 +378,20 @@ void TopWidget::showBosonWidget()
  mWs->raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
 }
 
-void TopWidget::initServerOptions()
+void TopWidget::initNetworkOptions()
 {
- if(d->mServeroptions) {
+ if(d->mNetworkOptions) {
 	return;
  }
- d->mServeroptions = new BosonServerOptionsWidget(this, mWs);
- connect(d->mServeroptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideServerOptions()));
- mWs->addWidget(d->mServeroptions, ID_WIDGETSTACK_NETWORK);
+ d->mNetworkOptions = new BosonNetworkOptionsWidget(this, mWs);
+ connect(d->mNetworkOptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideNetworkOptions()));
+ mWs->addWidget(d->mNetworkOptions, ID_WIDGETSTACK_NETWORK);
 }
 
-void TopWidget::showServerOptions()
+void TopWidget::showNetworkOptions()
 {
- if(!d->mServeroptions) {
-	initServerOptions();
+ if(!d->mNetworkOptions) {
+	initNetworkOptions();
  }
  mWs->raiseWidget(ID_WIDGETSTACK_NETWORK);
 }
@@ -435,16 +435,16 @@ void TopWidget::slotShowMainMenu()
  showWelcomeWidget();
 }
 
-void TopWidget::slotShowServerOptions()
+void TopWidget::slotShowNetworkOptions()
 {
- showServerOptions();
+ showNetworkOptions();
 }
 
-void TopWidget::slotHideServerOptions()
+void TopWidget::slotHideNetworkOptions()
 {
- disconnect(d->mServeroptions);
- delete d->mServeroptions;
- d->mServeroptions = 0;
+ disconnect(d->mNetworkOptions);
+ delete d->mNetworkOptions;
+ d->mNetworkOptions = 0;
  d->mNewGame->slotSetAdmin(mBoson->isAdmin());
  showNewGameWidget();
 }

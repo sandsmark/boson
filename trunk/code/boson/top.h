@@ -73,10 +73,10 @@ public slots:
 	 * From there, user can start new game or quit
 	 **/
 	void slotShowMainMenu();
-	/** Shows game server options */
-	void slotShowServerOptions();
-	/** Hides game server options and shows BosonStartGameWidget */
-	void slotHideServerOptions();
+	/** Shows game network options */
+	void slotShowNetworkOptions();
+	/** Hides game network options and shows BosonStartGameWidget */
+	void slotHideNetworkOptions();
 	/** Toggles if chat dock is shown or hidden */
 	void slotToggleChat();
 	/** Toggles if  is shown or hidden */
@@ -165,8 +165,8 @@ private:
 	void showNewGameWidget();
 	void initBosonWidget();
 	void showBosonWidget();
-	void initServerOptions();
-	void showServerOptions();
+	void initNetworkOptions();
+	void showNetworkOptions();
 	void initLoadingWidget();
 	void showLoadingWidget();
 

@@ -85,7 +85,7 @@ class BosonNewGameWidget : public QWidget
     KGameChat* chatwidget;
     QFrame* line2;
     QPushButton* cancelbutton;
-    QPushButton* serverbutton;
+    QPushButton* networkButton;
     QPushButton* startgamebutton;
 
 
@@ -106,10 +106,10 @@ class BosonNewGameWidget : public QWidget
       * Currently it removes mHighlightedPlayer from game
       */
     void slotRemovePlayer();
-    /** Called when user clicks "Server options" button
-      * Hides this widget and shows server options widget
+    /** Called when user clicks "Network Options" button
+      * Hides this widget and shows Network Options widget
       */
-    void slotServerOptions();
+    void slotNetworkOptions();
     /** Called when local player's name is changed */
     void slotMyNameChanged();
     /** Called when local player's name is changed */
@@ -156,7 +156,7 @@ class BosonNewGameWidget : public QWidget
   signals:
     void signalStartGame();
     void signalCancelled();
-    void signalShowServerOptions();
+    void signalShowNetworkOptions();
 
   protected slots:
     void slotSendNewGame();

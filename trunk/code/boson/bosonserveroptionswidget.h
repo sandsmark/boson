@@ -17,8 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONSERVEROPTIONSWIDGET_H
-#define BOSONSERVEROPTIONSWIDGET_H
+#ifndef BOSONNETWORKOPTIONSWIDGET_H
+#define BOSONNETWORKOPTIONSWIDGET_H
 
 #include <qwidget.h>
 
@@ -36,12 +36,12 @@ class QRadioButton;
 class TopWidget;
 class Boson;
 
-class BosonServerOptionsWidget : public QWidget
+class BosonNetworkOptionsWidget : public QWidget
 { 
   Q_OBJECT
   public:
-    BosonServerOptionsWidget(TopWidget* top, QWidget* parent);
-    ~BosonServerOptionsWidget();
+    BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent);
+    ~BosonNetworkOptionsWidget();
 
     QLabel* header;
     QLabel* netstatustext;
@@ -69,7 +69,7 @@ class BosonServerOptionsWidget : public QWidget
     void signalOkClicked();
 
   protected:
-    QVBoxLayout* BosonServerOptionsWidgetLayout;
+    QVBoxLayout* BosonNetworkOptionsWidgetLayout;
     QHBoxLayout* Layout10;
     QVBoxLayout* Layout8;
     QHBoxLayout* Layout1;
@@ -87,4 +87,4 @@ class BosonServerOptionsWidget : public QWidget
     TopWidget* mTop;
 };
 
-#endif // BOSONSERVEROPTIONSWIDGET_H
+#endif // BOSONNETWORKOPTIONSWIDGET_H
