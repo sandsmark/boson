@@ -337,6 +337,10 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 			return;
 		}
 	}
+	if (fabsf(d->mViewFrustum[i * 4 + 3]) <= EPSILON) {
+		boError() << k_funcinfo << "plane distance is 0" << endl;
+		return;
+	}
  }
 
 
@@ -361,6 +365,88 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 			mPrevious->mNext = 0;
 		}
 	}
+
+#if 0
+	bool checkSegment(int maxLines) const
+	{
+		const LineSegment* start = this;
+		if (!start->mNext || !start->mPrevious) {
+			boError() << k_funcinfo << "oops - start has invalid next/prev pointer" << endl;
+			return false;
+		}
+		const LineSegment* prev = start;
+		const LineSegment* l = prev->mNext;
+		int lines = 0;
+		while (l && l != start) {
+			if (!checkPointers(l)) {
+				return false;
+			}
+			l = l->mNext;
+			if (lines > maxLines) {
+				boError() << k_funcinfo << "too many lines: " << lines << endl;
+				dumpLinkedList(maxLines);
+				return false;
+			}
+		}
+		return true;
+	}
+	static bool checkPointers(const LineSegment* l)
+	{
+		if (!l) {
+			BO_NULL_ERROR(l);
+			if (!l->mNext) {
+				boError() << k_funcinfo << l->id << " has invalid next pointer" << endl;
+				return false;
+			}
+			if (!l->mPrevious) {
+				boError() << k_funcinfo << l->id << " has invalid previous pointer" << endl;
+				return false;
+			}
+			if (l == l->mNext) {
+				if (l != l->mPrevious) {
+					boError() << k_funcinfo << l->id << ": next points to this, but previous does not" << endl;
+					return false;
+				}
+			} else {
+				if (l == l->mPrevious) {
+					boError() << k_funcinfo << l->id << ": previous points to this, but next does not" << endl;
+					return false;
+				}
+			}
+			if (l->mNext->mPrevious != l) {
+				boError() << k_funcinfo << "previous of next doesnt point to this" << endl;
+				return false;
+			}
+			if (l->mPrevious->mNext != l) {
+				boError() << k_funcinfo << "next of previous doesnt point to this" << endl;
+				return false;
+			}
+		}
+		return true;
+	}
+	void dumpLinkedList(int maxLines = 5000) const
+	{
+		const LineSegment* first = this;
+		const LineSegment* l = first;
+		QString list = QString::number(first->id);
+		int lines = 1;
+		do {
+			l = l->mNext;
+			if (l) {
+				list += QString(" -> %1").arg(l->id);
+			} else {
+				list += QString(" -> (null)");
+			}
+		} while (l && l != first && lines < maxLines);
+		if (l == first) {
+			list += QString(" -> %1").arg(l->id);
+		}
+		boDebug() << "list: " << list << endl;
+		if (lines >= maxLines) {
+			boDebug() << "(maxLines=" << maxLines << " reached)" << endl;
+		}
+	}
+#endif
 
 	BoVector3 mStart;
 	BoVector3 mEnd;
@@ -429,6 +515,24 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 		if (!first) {
 			first = l;
 		}
+#if 0
+		// for debugging. this will catch most pointer errors in the
+		// list, except of one. imagine:
+		//  1->2->3->2
+		// => "1" is "first" pointer, all pointers are valid, but we
+		// will never terminate.
+		// of course, such an error must not occur anyway! (not even
+		// those that will be catched by this code should ever be
+		// reached)
+		if (!l->checkPointers(l)) {
+			boError() << k_funcinfo << "pass1: argh! at line segment " << l->id << endl;
+			return;
+		}
+		if (!l->checkSegment(MAX_LINES)) {
+			boError() << k_funcinfo << "pass1: argh2! at line segment " << l->id << endl;
+			return;
+		}
+#endif
 		bool intersects = false;
 		BoVector3 intersection; // point where the line intersects
 		intersects = lineSegmentIntersects(plane, l->mStart, l->mEnd, &intersection);
@@ -443,6 +547,14 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 			} else {
 				// the entire line is behind the plane
 				// it is removed now.
+				if (l->mNext == l) {
+					if (l->mPrevious != l) {
+						boError() << k_funcinfo << "next line points to line, but previous line does not!" << endl;
+						return;
+					}
+					boWarning() << k_funcinfo << "removing last line. nothing visible?!" << endl;
+					return;
+				}
 				l->mPrevious->mNext = l->mNext;
 				l->mNext->mPrevious = l->mPrevious;
 //				boDebug() << "removing line " << l->id << " start=" << l->mStart.debugString() << " end=" << l->mEnd.debugString() << endl;
@@ -615,6 +727,10 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 //	boDebug() << l->id << ": " << l->mStart.debugString() << " " << l->mEnd.debugString() << endl;
 	l = l->mNext;
 	lineCount++;
+	if (lineCount >= MAX_LINES) {
+		boError() << k_funcinfo << "internal error. lineCount >= MAX_LINES. must never happen!" << endl;
+		return;
+	}
  } while (l && l != first);
 
 // boDebug() << "relevant lines: " << lineCount << endl;
