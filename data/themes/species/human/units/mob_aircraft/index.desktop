@@ -7,7 +7,7 @@ Health=70
 MineralCost=250
 WeaponRange=4
 WeaponDamage=15
-Reload=15
+Reload=10
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
 Producer=2
@@ -15,6 +15,7 @@ Requirements=1
 UnitWidth=1.5
 UnitHeight=1.5
 ProductionTime=100
+SightRange=7
 
 [Boson Mobile Unit]
 Speed=6
