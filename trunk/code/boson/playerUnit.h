@@ -106,6 +106,7 @@ public:
 	void		destroy(void);
 /* Server orders */
 	void		s_moveTo(QPoint nstate);
+	virtual	int	rtti() const { return _destroyed?0:visualMobUnit::rtti(); }
 
 protected:
 	int		getLeft(int a=1) {return (direction+DIRECTION_STEPS-a)%DIRECTION_STEPS; }
@@ -180,6 +181,7 @@ public:
 	~playerFacility();
 
 	void	getWantedAction();
+	virtual	int rtti() const { return _destroyed?0:visualFacility::rtti(); }
 
 /* Server orders */
 	void	s_setState(int );
