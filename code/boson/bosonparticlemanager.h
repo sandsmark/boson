@@ -37,6 +37,7 @@ class KConfig;
 class SpeciesTheme;
 template<class T, class T2> class QMap;
 template<class T> class QPtrList;
+template<class T> class QValueList;
 
 /*class BosonParticleManager
 {
@@ -97,6 +98,7 @@ class BosonParticleSystemProperties
     unsigned long int id()  { return mId; };
     
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(KSimpleConfig* cfg, QString key, SpeciesTheme* theme);
+    static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
 
   protected:
     static void addTexture(QString name);

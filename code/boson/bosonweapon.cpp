@@ -26,6 +26,7 @@
 #include "global.h"
 #include "bosoncanvas.h"
 #include "bodebug.h"
+#include "bosonconfig.h"
 
 #include <ksimpleconfig.h>
 
@@ -44,7 +45,7 @@ QString BosonWeaponProperties::name() const
   return "Weapon";
 }
 
-void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
+void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 {
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
   mReload = cfg->readUnsignedNumEntry("Reload", 0);
@@ -54,12 +55,19 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
   mMaxHeight = (float)(cfg->readDoubleNumEntry("MaxHeight", 1));
-  mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", speciesTheme());
-  mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", speciesTheme());
-  mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", speciesTheme());
+  mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
+  mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
+  mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");
+  if(full)
+  {
+    mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mShootParticleSystemIds, speciesTheme());
+    mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mFlyParticleSystemIds, speciesTheme());
+    mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mHitParticleSystemIds, speciesTheme());
+  }
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
-  mModel = speciesTheme()->objectModel(cfg->readEntry("Model", "missile.3ds"));
+  mModelFileName = cfg->readEntry("Model", "missile.3ds");
+  mModel = speciesTheme()->objectModel(mModelFileName);
 }
 
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)

@@ -112,8 +112,9 @@ UnitProperties::~UnitProperties()
  delete d;
 }
 
-void UnitProperties::loadUnitType(const QString& fileName, bool full)
+void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 {
+ mFullMode = fullmode;
  bool isFacility;
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
@@ -145,7 +146,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
 
- if (full) {
+ if (mFullMode) {
 	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
  }
 
@@ -161,9 +162,7 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadUpgrades(&conf);
- if (full) {
 	loadWeapons(&conf);
- }
 }
 
 void UnitProperties::saveUnitType(const QString& fileName)
@@ -292,7 +291,7 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
  for (int i = 0; i < num; i++) {
 	conf->setGroup(QString("Weapon_%1").arg(i));
 	BosonWeaponProperties* p = new BosonWeaponProperties(this);
-	p->loadPlugin(conf);
+	p->loadPlugin(conf, mFullMode);
 	d->mPlugins.append(p);
 	if(p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
@@ -535,6 +534,11 @@ void UnitProperties::createMobileProperties()
 void UnitProperties::createFacilityProperties()
 {
  mFacilityProperties = new FacilityProperties;
+}
+
+void UnitProperties::addPlugin(PluginProperties* prop)
+{
+ d->mPlugins.append(prop);
 }
 
 void UnitProperties::setCanRefineMinerals(bool r)
