@@ -61,6 +61,8 @@ function copy_code()
  echo "Copying code"
  cp -a $BOSON_CODE/* $DEST_ALL/
  cp -a $BOSON_CODE/* $DEST_CODE/
+ rm -rf $DEST_ALL/admin
+ rm -rf $DEST_CODE/admin
  cp -a $BOSON_TOOLS/admin $DEST_CODE/
  cp -a $BOSON_TOOLS/admin $DEST_ALL/
 }
@@ -84,6 +86,7 @@ function copy_data()
  cp -rd $BOSON_DATA/* $DEST_DATA/
 
 
+ rm -rf $DEST_DATA/admin
  cp -a $BOSON_TOOLS/admin $DEST_DATA/
 # cp $BOSON_CODE/Makefile.cvs $DEST_DATA/
 }
@@ -136,7 +139,6 @@ function prepare_makefiles()
 }
 
 
-
 # first test if all param/paths are correct and update from cvs
 if [ "$1" = "" ]; then
 	echo "Usage: $0 version"
@@ -150,6 +152,7 @@ fi
 
 if [ ! -d "$BOSON_CODE" ]; then
 	echo "$BOSON_CODE doesn't exist"
+	echo "You need to have code, data and tools in the directory $BOSON_BASE !"
 	exit 1
 fi
 if [ ! -d "$BOSON_DATA" ]; then
@@ -196,6 +199,12 @@ copy_data
 
 # and the music
 copy_music
+
+# remove developer cvs files and replace by anonymous files
+echo "Anonymize CVS/Root files"
+for i in `find $DEST_BASE -type d -name CVS`; do
+	echo ":pserver:anonymous@cvs.sourceforge.net:/cvsroot/boson" > "$i/Root"
+done
 
 # remove all CVS dirs and .cvsignore files since we mixed several modules and so they are useless
 # ONLY in $DEST_ALL - the others contain anonymous cvs files
