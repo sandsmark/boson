@@ -1,0 +1,23 @@
+#include "top.wml"
+#use wml::std::grid
+    
+    <h1>
+      Programs and tools
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      Boson also includes some tools usefull for developers and users. This is an overview.
+    </p>
+
+    <grid layout=2x6 width="400">
+    <cell>boson</cell><cell>The game itself</cell>
+    <cell>bocursor</cell><cell>Test the settings for the curser</cell>
+    <cell>bodebugdialog</cell><cell>Enable/Disable debug output</cell>
+    <cell>boprofiling</cell><cell>View saved profiling data</cell>
+    <cell>borender</cell><cell>For viewing models</cell>
+    <cell>bounit</cell><cell>Settings editor for facilities</cell>
+    </grid>    
+
+#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="cursor.html" after_text="The cursors" up_url="index.html"
+#include "footer.wml"
+
