@@ -29,7 +29,7 @@ float BoInfo::cpuSpeed() const
  return -1.0f;
 }
 
-bool BoInfo::hasMtrr() const
+bool BoInfo::haveMtrr() const
 {
  return false;
 }
