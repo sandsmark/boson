@@ -28,6 +28,7 @@
 #include "../boson.h"
 #include "../top.h"
 #include "../bosonplayfield.h"
+#include "../bosonscenario.h"
 #include "../speciestheme.h"
 
 #include <klocale.h>
@@ -53,7 +54,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
 
  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
- mStartGameLayout = new QHBoxLayout( 0, 0, 6, "startgamelayout"); 
+ mStartGameLayout = new QHBoxLayout( 0, 0, 6, "startgamelayout");
 
  mCancelButton = new QPushButton( this, "cancelbutton" );
  mCancelButton->setText( i18n( "&Cancel" ) );
@@ -66,7 +67,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  mStartGameLayout->addWidget( mStartGameButton );
  mMainLayout->addLayout( mStartGameLayout );
  mBosonStartEditorWidgetLayout->addLayout( mMainLayout );
-  
+
  // signals and slots connections
  connect(mCancelButton, SIGNAL(clicked()), this, SLOT(slotCancel()));
  connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStart()));
@@ -91,7 +92,7 @@ void BosonStartEditorWidget::initPlayer()
 {
  kdDebug() << k_funcinfo << "playerCount(): " << game()->playerCount() << endl;
  player()->setName(boConfig->readLocalPlayerName());
- if(player()->speciesTheme()) {
+ if (player()->speciesTheme()) {
 	kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
  mPlayercolor = boConfig->readLocalPlayerColor();
@@ -102,8 +103,13 @@ void BosonStartEditorWidget::initPlayer()
 void BosonStartEditorWidget::slotStart()
 {
  playField()->loadPlayField(BosonPlayField::playFieldFileName(BosonPlayField::defaultPlayField()));
+ BosonScenario* scenario = playField()->scenario();
+ if (!scenario) {
+	kdError() << k_funcinfo << "NULL scenario" << endl;
+	return;
+ }
 
- for (uint i = 1; i < game()->playerCount(); i++) {
+ for (int i = 1; i < scenario->maxPlayers(); i++) {
 	// add dummy computer player
 	Player* p = new Player;
 	p->setName(i18n("Computer"));
@@ -134,7 +140,7 @@ BosonPlayField* BosonStartEditorWidget::playField() const
  return mTop->playField();
 }
 
-void BosonStartEditorWidget::sendNewGame() 
+void BosonStartEditorWidget::sendNewGame()
 {
  game()->sendMessage(0, BosonMessage::IdNewEditor);
 }
