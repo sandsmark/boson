@@ -143,7 +143,6 @@ boson_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
-		bodisplaymanager.cpp \
 		bosonbigdisplaybase.cpp \
 		bosonbigdisplayinputbase.cpp \
 		bosonbigdisplayinput.cpp \
