@@ -252,7 +252,7 @@ void BosonCursorEditor::slotCursorModeChanged(int index)
 	theme = BosonCursor::defaultTheme();
  }
  emit signalCursorChanged(index, theme);
- mSpriteConfig->setEnabled(index == CursorOpenGl);
+ mSpriteConfig->setEnabled(index == CursorOpenGL);
  slotCursorTypeChanged(mCursorType->currentItem());
 }
 
