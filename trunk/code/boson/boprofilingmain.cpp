@@ -44,8 +44,7 @@ int main(int argc, char **argv)
 		KAboutData::License_GPL,
 		"(C) 2002 The Boson team",
 		0,
-		"http://boson.eu.org",
-		"b_mann@gmx.de");
+		"http://boson.eu.org");
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
 
  KCmdLineArgs::init(argc, argv, &about);
