@@ -730,7 +730,7 @@ void BoDisplayManager::grabMovieFrame()
  if (!d->mGrabMovie) {
 	return;
  }
- QByteArray shot = d->mActiveDisplay->grabMovie();
+ QByteArray shot = d->mActiveDisplay->grabMovieFrame();
 
  if (shot.size() == 0) {
 	return;
