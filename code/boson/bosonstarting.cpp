@@ -52,6 +52,7 @@ public:
 	{
 	}
 	QValueList<Q_UINT32> mStartingCompleted; // clients that completed starting
+	QMap<unsigned int, QByteArray> mStartingCompletedMessage;
 
 	QString mLoadFromLogFile;
 };
@@ -446,6 +447,7 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 {
  if (!d->mStartingCompleted.contains(sender)) {
 	d->mStartingCompleted.append(sender);
+	d->mStartingCompletedMessage.insert(sender, buffer);
  }
 
  if (!boGame->isMaster()) {
@@ -466,7 +468,17 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 	}
  }
 
- boDebug() << k_funcinfo << "received IdGameStartingCompleted from all clients. starting the game." << endl;
+ boDebug() << k_funcinfo << "received IdGameStartingCompleted from all clients." << endl;
+ if (!checkStartingCompletedMessages()) {
+	// TODO: abort game starting.
+	// AB: we cannot use return, as then boson would be in a unusable state
+	// (cannot leave loading widget)
+	boError() << k_funcinfo << "starting messages broken." << endl;
+	boError() << k_funcinfo << "TODO: abort game starting" << endl;
+ } else {
+	boDebug() << k_funcinfo << "all IdGameStartingCompleted valid. starting the game." << endl;
+ }
+
  // AB: _first_ set the new game status.
  // note: Boson is in PolicyClean, so the game status does *not* change
  // immediately. but it will change before IdGameIsStarted is received.
@@ -481,12 +493,27 @@ void BosonStarting::startingCompletedReceived(const QByteArray& buffer, Q_UINT32
 
 void BosonStarting::sendStartingCompleted(bool success)
 {
- if (!success) {
-	// TODO: we should stream the success parameter and handle it on all
-	// clients
-	return;
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_INT8)success;
+ QCString themeMD5;
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	Player* p = (Player*)boGame->playerList()->at(i);
+	SpeciesTheme* theme = p->speciesTheme();
+	if (!theme) {
+		// make an invalid string.
+		themeMD5 = QCString();
+		break;
+	}
+	QCString num;
+	num.setNum(p->id());
+	themeMD5 += QCString("Player ") + num + ":\n";
+	themeMD5 += "UnitProperties:\n" + theme->unitPropertiesMD5();
+	themeMD5 += "\n";
  }
- boGame->sendMessage(0, BosonMessage::IdGameStartingCompleted);
+ stream << themeMD5;
+
+ boGame->sendMessage(b, BosonMessage::IdGameStartingCompleted);
 }
 
 bool BosonStarting::fixPlayerIds(QMap<QString, QByteArray>& files) const
@@ -641,6 +668,56 @@ bool BosonStarting::fixPlayerIds(int* actualIds, unsigned int players, QDomEleme
 	}
 	root.setAttribute("PlayerId", QString::number(actualIds[id]));
 
+ }
+ return true;
+}
+
+bool BosonStarting::checkStartingCompletedMessages() const
+{
+ if (!boGame->isAdmin()) {
+	boError() << k_funcinfo << "only ADMIN can do this" << endl;
+	return false;
+ }
+ QByteArray admin = d->mStartingCompletedMessage[boGame->gameId()];
+ if (admin.size() == 0) {
+	boError() << k_funcinfo << "have not StartingCompleted message from ADMIN" << endl;
+	return false;
+ }
+ QDataStream adminStream(admin, IO_ReadOnly);
+ Q_INT8 adminSuccess;
+ adminStream >> adminSuccess;
+ if (!adminSuccess) {
+	boError() << k_funcinfo << "ADMIN failed in game starting" << endl;
+	return false;
+ }
+ QCString adminThemeMD5;
+ adminStream >> adminThemeMD5;
+ if (adminThemeMD5.isNull()) {
+	boError() << k_funcinfo << "no MD5 string for themes by ADMIN" << endl;
+	return false;
+ }
+ QMap<unsigned int, QByteArray>::Iterator it = d->mStartingCompletedMessage.begin();
+ for (; it != d->mStartingCompletedMessage.end(); ++it) {
+	if (it.key() == boGame->gameId()) {
+		continue;
+	}
+	QDataStream stream(it.data(), IO_ReadOnly);
+	Q_INT8 success;
+	stream >> success;
+	if (!success) {
+		boError() << k_funcinfo << "client " << it.key() << " failed on game starting" << endl;
+		return false;
+	}
+	QCString themeMD5;
+	stream >> themeMD5;
+	if (themeMD5 != adminThemeMD5) {
+		boError() << k_funcinfo << "theme MD5 sums of client "
+				<< it.key()
+				<< " and ADMIN differ." << endl
+				<< "ADMIN has: " << adminThemeMD5 << endl
+				<< "client " << it.key() << " has: " << themeMD5 << endl;
+		return false;
+	}
  }
  return true;
 }

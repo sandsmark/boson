@@ -164,6 +164,8 @@ protected:
 
 	void sendStartingCompleted(bool success);
 
+	bool checkStartingCompletedMessages() const;
+
 private:
 	BosonStartingPrivate* d;
 
