@@ -282,7 +282,7 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
     Player* player, const QString& data, UpgradeType type, int weaponid)
 {
   // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
-  boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " props. weaponid: " << weaponid << endl;
+  boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " properites. weaponid: " << weaponid << endl;
   QValueList<unsigned long int>::Iterator it;
   unsigned long int oldvalueuint = 0;
   float oldvaluef = 0.0f;
