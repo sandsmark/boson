@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Transall" \
+        description="" \
+        name2="transall" type2="mob" \
+        before_url="tornado.html" before_text="Tornado" after_url="puma.html" after_text="Puma" up_url="index.html"

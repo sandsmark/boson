@@ -1,0 +1,112 @@
+BODY {
+	color: Black;
+	background-color: White;
+	font-family: Verdana, sans-serif;
+	font-size: 12px;
+}
+
+DL {
+	margin: .8em 0;
+	line-height: 1.2;
+}
+
+TD {
+	font-family: Verdana, sans-serif;
+	font-size: 12px;
+}
+
+H1 {
+	font-size: 21px;
+	font-weight : bold;
+}
+
+H2 {
+	font-size: 12px;
+	font-style: italic;
+	font-weight: normal;
+}
+
+H3 {
+	font-size: 18px;
+}
+
+A {
+	color: #0000CC;
+	background-color: #FFFFFF;
+	text-decoration: none;
+}
+
+A:HOVER {
+	color: #0000CC;
+	background-color: #EFEFEF;
+	text-decoration: none;
+}
+
+
+/** Boxes **/
+.boxtitle {
+  font-weight: bold;
+}
+
+.boxtext {
+}
+
+table.box {
+  background-color: #004000;
+  color: #00ff00;
+}
+
+td.boxcell {
+  background-color: #202020;
+  color: #00ff00;
+}
+
+.bigboxtitle {
+  font-weight: bold;
+}
+
+.bigboxsubheader {
+  font-weight: bold;
+}
+
+.bigboxtext {
+  margin-left: 5px;
+}
+
+table.bigbox {
+  background-color: #004000;
+  color: #00ff00;
+}
+
+td.bigboxtitlecell {
+  background-color: #202020;
+  color: #00ff00;
+}
+
+td.bigboxcell {
+  background-color: #081808;
+  color: #00ff00;
+}
+
+table.bigboxarea {
+  background-color: #081808;
+  color: #00ff00;
+}
+
+td.bigboxsubheadercell {
+  background-color: #303030;
+  color: #00ff00;
+}
+
+
+/** Main area **/
+table.main {
+  background-color: #000000;
+  color: #00ff00;
+}
+
+td.mainarea {
+  background-color: #000000;
+  color: #00ff00;
+}
+

@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Ferry" \
+        description="A Ferry" \
+        name2="ferry" type2="mob" \
+        before_url="ship.html" before_text="Ship" after_url="tornado.html" after_text="Tornado" up_url="index.html"

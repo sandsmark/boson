@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Facilities" name="Tech Center" \
+        description="You need a Tech Center to build a <a href='repairpad.html'>Repair Pad</a> or a <a href='comsat.html'>Comsat</a>." \
+        name2="techcenter" type2="fix" \
+        before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair Pad" up_url="index.html"

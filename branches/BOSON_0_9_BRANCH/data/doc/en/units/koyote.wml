@@ -1,0 +1,4 @@
+#include "facilities.wml" type="Units" name="Koyote" \
+        description="" \
+        name2="koyote" type2="mob" \
+        before_url="puma.html" before_text="Puma" after_url="../editor/index.html" after_text="The Boson editor" up_url="index.html"

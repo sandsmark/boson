@@ -1,0 +1,190 @@
+Boson pathfinder - the next generation
+ 
+ 
+Design draft 
+ 
+Last modified: 05/04/2003 
+ 
+ 
+Table of Contents 
+1.Next-generation pathfinder goals	2 
+1.1.Primary goals	2 
+1.2.Secondary goals	2 
+2.Specific actions	2 
+3.Code design & ideas	2 
+3.1.Moving status	2 
+3.2.canMove() check	3 
+3.3.Unit's collision handling	3 
+3.4.Pathfinder object handling	3 
+3.5.Formations	3 
+3.6.Other ideas	4 
+4.Pathfinding methods	4 
+4.1.Fast method	5 
+4.2.Slow method	5 
+5.Hierarchical pathfinder	5 
+5.1.How it works	5 
+5.2.Sectors	6 
+5.3.Advantages & disadvantages	6 
+6.Secondary goals	6 
+6.1.Support for units bigger than one cell	6 
+6.2.Support for flying units	7 
+ 
+1. Next-generation pathfinder goals 
+ 
+1.1. Primary goals 
+  Reduce time spent in pathfinder, especially when there are lots of units moving. 
+  Better support for pathfinding for big groups (aka «big army support»). 
+  More intelligent pathfinder (leading to more intelligent unit movement). 
+ 
+1.2. Secondary goals 
+  Support for units bigger than one cell. 
+  Support for flying units. 
+ 
+ 
+ 
+2. Specific actions 
+ 
+Here are specific bits that pathfinder and unit moving code should follow, e.g. what unit should do in certain circumstanses. They are in random order. 
+ 
+  Wait if unit is surrounded by other moving whose moving status is not Standing. For this, we need some kind of canMove() check, maybe another check in pathfinder. Section 3.2 for more info. 
+  If unit is surrounded by standing units, it should stop. Section 3.2 for more info. 
+  If path is blocked, unit should stop, it's moving status should be set to Waiting and it should periodically check whether it's path has freed. After some time has passed, it should search another path and so on in loop. Section 3.3 for more info. 
+  If unit is ordered to move by player and it is surrounded by Waiting units (cannot start moving), it should not try to find new path periodically as described in section 3.3, but rather wait until it can move (checking it periodically, e.g. every 5 advance calls). 
+ 
+ 
+ 
+3. Code design & ideas 
+ 
+In this section should be only code- and implementation-specific things. Other stuff should go to other sections. 
+ 
+3.1. Moving status 
+ 
+Every unit has moving status describing whether it is currently moving, standing still, waiting for path to be freed etc. This will replace current isMoving()/setMoving() methods in Unit. 
+ 
+Moving status can be one of: 
+  Moving - unit is moving ATM, it's velocity is not zero. 
+  Standing - unit is not moving and is not intending to do so. It won't move until player commands it to do so. 
+  Waiting - unit should be moving, but it's way is blocked and it is currently waiting for it's way to be freed again. Maybe there will be multiple Waiting statuses, depending on how long unit has waited. 
+  Engaging - unit was moving, but then it spotted enemy and is currently attacking it. When enemy is destroyed, it will continue moving. 
+ 
+ 
+3.2. canMove() check 
+ 
+canMove() check would be another pathfinder helper method, something like rangeCheck() is ATM. It would check all cells surrounding unit and see if they are occupied. If they are occupied, then if at least one cell is occupied by unit whose moving status is not Standing, unit should wait until it can move again and not try to find a path immediately. If all cells are occupied by standing units, there's no way for unit to move anywhere and it should stop (possibly telling player about it). 
+ 
+ 
+3.3. Unit's collision handling 
+ 
+Unit's collision handling will be done in two loops: 
+If unit collides with something, it should periodically wait some time (e.g. 5 advance calls) and then retry to move. Velocity should be stored for that. While waiting, unit should not calculate anything, e.g. advanceMoveInternal() should not be called (or at least most stuff should not be calculated there). Bool flag may be necessary to do that. 
+When unit has failed to move within e.g. 20 advance calls, it should search new path and start trying again. If it still doesn't help, unit should search new path again, but after longer period, e.g. 40 advance calls and so on. If path has been searched for certain number of times (e.g. 5), unit should stop moving and set it's moving status to Standing. Delays between new path searching should increase all the time (e.g. 20 for first time, 40 for second, 80 for third etc). 
+ 
+ 
+3.4. Pathfinder object handling 
+ 
+One instance of pathfinder will be held in the memory at all times. 
+It is stored in BosonCanvas and will be used by all units as needed. 
+BosonPath object will be created and initialized when map is initialized. Initialization includes allocating memory for all needed variables. Most of variables from fast and slow pathfinder methods will be moved to be private members of the class to save allocation time. 
+When new path will be searched for, marking matrix (where cell costs are stored) and maybe some other variables will be reset to default values. 
+If any additional per-unit data will be needed to e.g. keep pathfinding information around, an extra class will be used for that. Copy of this class would then be allocated for each unit. 
+ 
+ 
+3.5. Formations 
+ 
+Note that it is unclear if there will be formations support or not. 
+ 
+Formations may improve pathfinding for big groups since all units wouldn't try to get to exactly one point, so there would be less alternative point searching. 
+Main problem is obstacles. It's easy to change moving code so that instead of moving all units to one point, all units would be moved by certain amount, e.g. 3 cells up and 7 cells right. This way, all units would move to unique place and they wouldn't try to reach single common place and clutter around it. The problem is when one of target cells is occupied. Then we should find alternate point for unit whose goal is occupied, but which point? One, probably easiest, solution would be to move all such units to a point where you clicked, but there would still be some cluttering and they'll most probably distract other units as well. 
+ 
+ 
+3.6. Other ideas 
+ 
+All other code-specific ideas should go here. 
+ 
+  Cell cost should be calculated in the cell's item list. For this, add BoItemList::cost(). It's better to do this in the list because it has more direct access to it's items and thus it's faster. Also, we can have dirty flags and cost caching there. 
+  It may be necessary to keep pathing information for each unit to e.g. detect if unit is in a pathfinding loop (can't get out of obstacle). 
+  Thanks to improved collision handling, path can be updated more seldom. E.g. every 10 waypoints. If everything works fine, we can think about disabling path updating completely and only searching new path is old can't be followed for some reason. 
+  Current cell occupying and unit collision check sucks. It only checks if cell where unit wants to go is occupied or not. Actually, we should use BosonItem::bosonCollidesWith() to test if unit actually collide. This would also improve moving for big groups (no big spaces between units). BosonItem::bosonCollidesWith()'s speed should be improved for that (e.g. first check if bounding rects intersect, etc). 
+  Different Waiting statuses might be necessary to reflect time the unit has been waiting so that pathfinder could easily access and use this info. 
+  Maybe we should calculate average cost-per-node and use this as fast pathfinder limit instead of current current-cell-cost. 
+  Occupied costs may depend on the distance between current node and start point. This way, we'd care more about nearby occupied cells and less about distant ones (if they're moving). OTOH, if we don't periodically update the path, it's quite nonsense. 
+  If goal is unreachable, we should search less steps and maybe also increase the range so we'd end up close to goal without huge speed penalties. 
+  Maybe we could later have units moving away from other units' way, like in C&C. 
+ 
+ 
+ 
+4. Pathfinding methods 
+ 
+There will still be two main pathfinder methods (slow and fast) and also two tests (rangeCheck() and new canMove()). 
+First the tests will be used to check if moving away from current position or getting closer to the goal is possible. If tests show that unit should move, actual pathfinding will be done. 
+Fast method will be used first. If it will fail, slow method will be used instead. 
+ 
+4.1. Fast method 
+ 
+Fast method will be used first. It will try to search the path until unit's sight range. 
+Fast pathfinder uses dumb but quick algorithm and searches in straight line only. If there is something on the way, fast pathfinder won't be able to find a way around it and slow pathfinder will be used instead. 
+Fast method is actually not «real» pathfinder. I'd rather call it a checker method which decides whether actual pathfinding is needed. 
+Performance goal is fast method to take ~10us on average path and never more than 25us. 
+ 
+Fast method code will probably mostly stay as-is, huge optimizations are not possible there (because it's already quite optimized). 
+ 
+ 
+4.2. Slow method 
+ 
+Slow method is using A* algorithm to find the path. It will always find the path, if it's possible, but it's also much slower than fast method. 
+Performance goal is slow method to take: 
+  ~50 us for very simple single-unit paths (one unit to go around). 
+  ~100 us for normal single-unit paths (multiple units to go around). 
+  ~300 us for normal multiple-unit paths. 
+  never more than 2000 us, even for most complex paths. 
+ 
+Slow method can be improved by e.g. having one object in memory (section 3.4) and tweaking heuristics. 
+ 
+ 
+ 
+5. Hierarchical pathfinder 
+ 
+Note that it is unclear if we'll use hierarchical pathfinder. 
+ 
+5.1. How it works 
+ 
+Hierarchical pathfinder would break pathfinding to two levels: 
+  Sector level. For this, map must be divided into sectors, preferably every sector consists of (mostly) one type of cells only and they shouldn't be too big. Section 5.2 for more info. 
+  Cell level. This is mostly what current pathfinder is doing, except that we would only find way from one sector to next. That allows us to use much less cells and thus it will be faster. 
+ 
+First, the path between start and goal sectors would be found (sector-level path), then exact cell path between every two sectors (cell-level path). 
+ 
+ 
+5.2. Sectors 
+ 
+Sector should be a collection of cells which are of (mostly) one type. Also, unit must always be able to move from any point inside a sector to any other point inside the same sector without going out of that sector. If it becomes impossible, then sector should be divided to two. Later, those sectors can be re-joined if needed. Also, sectors shouldn't be too small or big. 
+ 
+FreeCraft uses hierarchical pathfinder and they have areas and regions. Map is divided into areas, area is a square area, all areas are with the same size, cells inside one area don't need to be of a same type. Regions are same what I call sectors, they area non-rectangular and they are always passable. Also, single region always lies inside a single area i.e. a region cannot lie in multiple areas, but there may be several regions inside an area. 
+ 
+Biggest problem with sectors is that they must be always kept up to date. Whenever unit is created (produced), destroyed or it's moving status changes, sectors must be updated. I'm mostly fearing that this may take too much time. We must check if it's still possible to move freely inside a sector and to which of it's neighbor sectors you can go from this sector. OTOH, we could use isDirty flags and such to make these things calculated only if needed. Most likely we have to experiment with it to find the best solution. 
+ 
+ 
+5.3. Advantages & disadvantages 
+ 
+Advantages: 
+  Pathfinding would probably become faster since we wouldn't need to search all the cells, just the cells in specific sectors. 
+  Sector-level paths could be re-used if there are multiple moving units with same start and goal sector. This can be quite big speed-up when moving big groups. 
+Disadvantages: 
+  Sectors must be kept updated. We must know all the time to what sectors we can get from any given sector and it might be slow to update that information, so basically we may lost speed gained from faster pathfinding here. 
+ 
+ 
+ 
+6. Secondary goals 
+ 
+Note that it is unclear if secondary goals will be implemented or not. 
+ 
+6.1. Support for units bigger than one cell 
+ 
+Any ideas on how to do this? 
+It can be done by checking multiple tiles instead of one, but this would mean big performance hits. 
+ 
+ 
+6.2. Support for flying units 
+ 
+If flying units will be supported, they will use their own pathfinder, not the main one, because they need curves and maybe velocity support for realism, but main pathfinder will probably never support these things for performance reasons. 
+Any ideas are welcome. 

@@ -1,0 +1,7 @@
+SUBDIRS=objects
+
+# this is not (yet?) a real species, so we don't have additional data here.
+species_DATA =
+speciesdir = $(kde_datadir)/boson/themes/species/neutral
+
+EXTRA_DIST = $(species_DATA)
