@@ -49,7 +49,7 @@ BoToolTipCreatorFactory::BoToolTipCreatorFactory()
  d = new BoToolTipCreatorFactoryPrivate;
  registerTipCreator(BoToolTipCreator::Basic, i18n("Basic Tooltips"));
  registerTipCreator(BoToolTipCreator::Extended, i18n("Extended Tooltips"));
-// registerTipCreator(BoToolTipCreator::Debug, i18n("Tooltips for debugging"));
+ registerTipCreator(BoToolTipCreator::Debug, i18n("Tooltips for debugging"));
 }
 
 BoToolTipCreatorFactory::~BoToolTipCreatorFactory()
@@ -76,10 +76,13 @@ BoToolTipCreator* BoToolTipCreatorFactory::tipCreator(int type) const
 		break;
 	default:
 		boWarning() << k_funcinfo << "Unknown tooltip creator type " << type << endl;
+		// no break - Extended is default
 	case BoToolTipCreator::Extended:
 		tipCreator = new BoToolTipCreatorExtended();
 		break;
-//	case BoToolTipCreator::Debug:
+	case BoToolTipCreator::Debug:
+		tipCreator = new BoToolTipCreatorDebug();
+		break;
  }
  return tipCreator;
 }
