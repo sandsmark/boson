@@ -29,10 +29,8 @@
 
 #include "editorField.h"
   
-//editorField::editorField(QObject *parent, const char *name=0L)
-//	: visualField(parent,name)
-editorField::editorField(uint w, uint h, QObject *parent, const char *name=0L)
-	: visualField(w,h,parent,name)
+editorField::editorField(QObject *parent, const char *name=0L)
+	: visualField(parent,name)
 {
 	mobiles.resize(149);
 	facilities.resize(149);
@@ -56,7 +54,7 @@ bool editorField::Load(QString filename)
 	if (!openRead(filename.data())) return false;
 	
 	
-	//resize(map_width, map_height);
+	resize(map_width, map_height);
 
 	/* creation of the ground map */
 	cells = new (visualCell *)[map_width];

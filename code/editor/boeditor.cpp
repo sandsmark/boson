@@ -283,7 +283,7 @@ void BoEditorApp::initView()
 { 
 
 /* the physical map is created when a game is created */
-	vfield = field = new editorField(200,200);
+	vfield = field = new editorField();
 	assert (true == field->Load(*currentFile));
 
 /* a mainView is each window containing : field, mini, order...
