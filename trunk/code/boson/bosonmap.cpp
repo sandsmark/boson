@@ -1312,16 +1312,7 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  boDebug() << k_funcinfo << "Rect: (" << x1 << "; " << y1 << ")-(" << x2 << "; " << y2 << ")" << endl;
  // FIXME: simplify this method? Is it possible?
 
- int w = x2 - x1;  // Width and height of the rect
- int h = y2 - y1;
- if (w * h <= 0) {
-	boWarning() << k_funcinfo << "w*h <= 0 is not valid" << endl;
-	return;
- }
  // First calculate plane normals for all cells in rect
- BoVector3 a, b, c, n;
- BoVector3* normals = new BoVector3[w * h];
-#define NORM(x, y) normals[(y - y1) * h + (x - x1)]
  // We need to have additional 1-cell border to correctly calculate normals at
  //  the border of given rect.
  // Here we calculate rect for cells, taking this border and map size into
@@ -1330,6 +1321,16 @@ void BosonMap::recalculateNormalsInRect(int x1, int y1, int x2, int y2)
  int cy1 = QMAX(0, y1 - 1);
  int cx2 = QMIN((int)width() - 1, x2 + 1);
  int cy2 = QMIN((int)height() - 1, y2 + 1);
+
+ int w = cx2 - cx1 + 1;  // Width and height of the rect
+ int h = cy2 - cy1 + 1;
+ if (w * h <= 0) {
+	boWarning() << k_funcinfo << "w*h <= 0 is not valid" << endl;
+	return;
+ }
+ BoVector3 a, b, c, n;
+ BoVector3* normals = new BoVector3[w * h];
+#define NORM(x, y) normals[(y - cy1) * h + (x - cx1)]
  // FIXME: this is not entirely correct: our cells consist of a single quad atm,
  //  however, they can be "folded" so that it seems to consist of two triangles.
  //  In this case, the cell actually has two planes - one for each half.
