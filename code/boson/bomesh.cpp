@@ -179,7 +179,7 @@ public:
 class BoAdjacentDataBase
 {
 public:
-	BoAdjacentDataBase(const QPtrList<BoNode>& allNodes)
+	BoAdjacentDataBase(const QPtrList<BoFaceNode>& allNodes)
 	{
 		addNodes(allNodes);
 	}
@@ -188,12 +188,12 @@ public:
 	 * Add all nodes to the databse. construct the lists of adjacent
 	 * nodes/faces.
 	 **/
-	void addNodes(const QPtrList<BoNode>& allNodes)
+	void addNodes(const QPtrList<BoFaceNode>& allNodes)
 	{
 		mAllNodes = allNodes;
-		QPtrListIterator<BoNode> it(allNodes);
+		QPtrListIterator<BoFaceNode> it(allNodes);
 		for (; it.current(); ++it) {
-			QPtrListIterator<BoNode> it2(allNodes);
+			QPtrListIterator<BoFaceNode> it2(allNodes);
 			it2 = it;
 			++it2; // we don't care about it==it2, so skip it
 			for (; it2.current(); ++it2) {
@@ -206,7 +206,7 @@ public:
 				// mDataBase[it2.current()].containsRef(it.current())
 				// doesn't need to be checked, as we always add
 				// adjacent nodes/faces to both lists
-				if (BoNode::isAdjacent(it.current(), it2.current())) {
+				if (BoFaceNode::isAdjacent(it.current(), it2.current())) {
 					mDataBase[it.current()].append(it2.current());
 					mDataBase[it2.current()].append(it.current());
 				}
@@ -215,11 +215,11 @@ public:
 	}
 	void debug()
 	{
-		QPtrListIterator<BoNode> it(mAllNodes);
+		QPtrListIterator<BoFaceNode> it(mAllNodes);
 		for (; it.current(); ++it) {
 			boDebug(100) << "adjacent to " << it.current()->debugString() << " (Face " << mAllNodes.find(it.current()) + 1 << "):" << endl;
-			QPtrList<BoNode> a = adjacent(it.current());
-			QPtrListIterator<BoNode> it2(a);
+			QPtrList<BoFaceNode> a = adjacent(it.current());
+			QPtrListIterator<BoFaceNode> it2(a);
 			for (; it2.current(); ++it2) {
 				boDebug(100) << it2.current()->debugString() << " (Face " << mAllNodes.find(it2.current()) + 1 << ")" << endl;
 			}
@@ -230,7 +230,7 @@ public:
 	/**
 	 * @return a list of faces that are adjacent to @p node
 	 **/
-	QPtrList<BoNode> adjacent(BoNode* node) const
+	QPtrList<BoFaceNode> adjacent(BoFaceNode* node) const
 	{
 		if (!node) {
 			return mAllNodes;
@@ -239,8 +239,8 @@ public:
 	}
 
 private:
-	QMap<BoNode*, QPtrList<BoNode> > mDataBase;
-	QPtrList<BoNode> mAllNodes;
+	QMap<BoFaceNode*, QPtrList<BoFaceNode> > mDataBase;
+	QPtrList<BoFaceNode> mAllNodes;
 };
 
 
@@ -267,18 +267,18 @@ BoFace& BoFace::operator=(const BoFace& face)
 
 
 #define BO_NODE_BYTE_SIZE ((1 + 1 + 1 + 3) * 4) // 2 pointer, one int, one 3-int array, each 4 bytes
-BoNode::BoNode(const BoFace* face)
+BoFaceNode::BoFaceNode(const BoFace* face)
 {
  init();
  mFace = face;
 }
 
-BoNode::~BoNode()
+BoFaceNode::~BoFaceNode()
 {
  boMem->subBytes(BO_NODE_BYTE_SIZE);
 }
 
-void BoNode::setPrevious(BoNode* previous)
+void BoFaceNode::setPrevious(BoFaceNode* previous)
 {
  mPrevious = previous;
  if (!mPrevious) {
@@ -290,7 +290,7 @@ void BoNode::setPrevious(BoNode* previous)
  mPrevious->mNext = this;
 }
 
-void BoNode::setNext(BoNode* next)
+void BoFaceNode::setNext(BoFaceNode* next)
 {
  mNext = next;
  if (!mNext) {
@@ -302,7 +302,7 @@ void BoNode::setNext(BoNode* next)
  mNext->mPrevious = this;
 }
 
-void BoNode::delNode()
+void BoFaceNode::delNode()
 {
  if (previous() && next()) {
 	previous()->mNext = next();
@@ -317,7 +317,7 @@ void BoNode::delNode()
  }
 }
 
-void BoNode::init()
+void BoFaceNode::init()
 {
  mNext = 0;
  mPrevious = 0;
@@ -326,7 +326,7 @@ void BoNode::init()
  boMem->addBytes(BO_NODE_BYTE_SIZE);
 }
 
-bool BoNode::isAdjacent(BoNode* f1, BoNode* f2)
+bool BoFaceNode::isAdjacent(BoFaceNode* f1, BoFaceNode* f2)
 {
  const int* v1 = f1->pointIndex();
  const int* v2 = f2->pointIndex();
@@ -339,14 +339,14 @@ bool BoNode::isAdjacent(BoNode* f1, BoNode* f2)
  return equal >= 2;
 }
 
-QString BoNode::debugString() const
+QString BoFaceNode::debugString() const
 {
  QString s;
  s = QString("%1  %2  %3").arg(pointIndex()[0]).arg(pointIndex()[1]).arg(pointIndex()[2]);
  return s;
 }
 
-int BoNode::findPointIndex(int index) const
+int BoFaceNode::findPointIndex(int index) const
 {
  if (pointIndex()[0] == index) {
 	return 0;
@@ -361,22 +361,6 @@ int BoNode::findPointIndex(int index) const
 }
 
 
-#if 0
-{
-	// does NOT change for LOD:
-	BoMaterial* mMaterial;
-	BoundingObject* mBoundingObject;
-	BoMeshPoints mMeshPoints; // (not yet)
-}
-{
-	BoNode* mNodes;
-	QValueVector<BoFace> mAllFaces;
-	QPtrList<BoNode> mAllNodes;
-
-	unsigned int* mPointsCache;
-	unsigned int mPointsCacheCount;
-}
-#endif
 
 /**
  * This class is a collection of points for @ref BoMesh. You start by calling
@@ -567,7 +551,7 @@ public:
 		mBoundingObject = 0;
 	}
 	int mType;
-	BoNode* mNodes;
+	BoFaceNode* mNodes;
 	bool mIsTeamColor;
 
 	BoMaterial* mMaterial;
@@ -575,13 +559,13 @@ public:
 	GLuint mDisplayList;
 
 	QValueVector<BoFace> mAllFaces;
-	QPtrList<BoNode> mAllNodes;
+	QPtrList<BoFaceNode> mAllNodes;
 
 	BoMeshPoints mMeshPoints;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
-	// some modes the BoNode::relevantPoint() will have to be used though)
+	// some modes the BoFaceNode::relevantPoint() will have to be used though)
 	unsigned int* mPointsCache;
 	unsigned int mPointsCacheCount;
 
@@ -676,7 +660,7 @@ void BoMesh::createFaces(unsigned int faces)
 	d->mAllNodes.clear();
  }
  for (unsigned int face = 0; face < faces; face++) {
-	BoNode* node = new BoNode(&d->mAllFaces[face]);
+	BoFaceNode* node = new BoFaceNode(&d->mAllFaces[face]);
 	d->mAllNodes.append(node);
  }
 }
@@ -688,7 +672,7 @@ void BoMesh::setFace(int index, const BoFace& face)
 
 void BoMesh::disconnectNodes()
 {
- QPtrListIterator<BoNode> it(d->mAllNodes);
+ QPtrListIterator<BoFaceNode> it(d->mAllNodes);
  for (; it.current(); ++it) {
 	it.current()->setNext(0);
 	it.current()->setPrevious(0);
@@ -705,8 +689,8 @@ void BoMesh::addNodes()
 	boError() << k_funcinfo << "no nodes for mesh" << endl;
 	return;
  }
- BoNode* previous = 0;
- QPtrListIterator<BoNode> it(d->mAllNodes);
+ BoFaceNode* previous = 0;
+ QPtrListIterator<BoFaceNode> it(d->mAllNodes);
  d->mNodes = it.current(); // d->mNodes is the first node
  previous = d->mNodes;
  ++it;
@@ -720,7 +704,7 @@ void BoMesh::addNodes()
 
 
 
-bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoNode>& nodes, QPtrList<BoNode>* found, BoNode* node) const
+bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoFaceNode>& nodes, QPtrList<BoFaceNode>* found, BoFaceNode* node) const
 {
  static int call = 0;
  static int max = 0;
@@ -743,15 +727,15 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 	boError() << k_funcinfo << "list shouldn't contain that node" << endl;
 	return false;
  }
- QPtrList<BoNode> adjacent = database->adjacent(node);
- QPtrList<BoNode> remainingNodes = nodes;
- QPtrListIterator<BoNode> it(adjacent);
+ QPtrList<BoFaceNode> adjacent = database->adjacent(node);
+ QPtrList<BoFaceNode> remainingNodes = nodes;
+ QPtrListIterator<BoFaceNode> it(adjacent);
  int x = 0;
  for (; it.current(); ++it) {
 	if (!remainingNodes.containsRef(it.current())) {
 		continue;
 	}
-	BoNode* next = it.current();
+	BoFaceNode* next = it.current();
 
 	if (node) {
 		if (node->relevantPoint() < 0) {
@@ -764,7 +748,7 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 			// face. not the next face.
 			continue;
 		}
-		BoNode* previous = node->previous();
+		BoFaceNode* previous = node->previous();
 		if (previous) {
 			if (previous->relevantPoint() < 0) {
 				boError() << k_funcinfo << "negative relevant (previous) point" << endl;
@@ -828,12 +812,12 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 		for (int i = 0; i < 3 && !ok; i++) {
 			next->setRelevantPoint(i);
 			remainingNodes.removeRef(next);
-			QPtrList<BoNode> newFound;
+			QPtrList<BoFaceNode> newFound;
 			ok = connectNodes(database, remainingNodes, &newFound, next);
 			remainingNodes.append(next);
 			if (ok) {
 				found->append(next);
-				QPtrListIterator<BoNode> it2(newFound);
+				QPtrListIterator<BoFaceNode> it2(newFound);
 				for (; it2.current(); ++it2) {
 					found->append(it2.current());
 				}
@@ -863,7 +847,7 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 		next->setPrevious(0);
 	}
 	remainingNodes.removeRef(next);
-	QPtrList<BoNode> newFound;
+	QPtrList<BoFaceNode> newFound;
 	bool ok = connectNodes(database, remainingNodes, &newFound, next);
 	if (!ok) {
 		// reset next and remove next from node
@@ -880,7 +864,7 @@ bool BoMesh::connectNodes(const BoAdjacentDataBase* database, const QPtrList<BoN
 		// that is good - n actually was the next node. now we happend
 		// all nodes to found and return.
 		found->append(next);
-		QPtrListIterator<BoNode> it2(newFound);
+		QPtrListIterator<BoFaceNode> it2(newFound);
 		for (; it2.current(); ++it2) {
 			found->append(it2.current());
 		}
@@ -909,15 +893,15 @@ void BoMesh::connectNodes()
  }
  boDebug(100) << k_funcinfo << "trying to connect nodes" << endl;
 
- QPtrList<BoNode> allNodes = d->mAllNodes;
+ QPtrList<BoFaceNode> allNodes = d->mAllNodes;
 
  // this constructs lists of all adjacent faces for all faces.
  BoAdjacentDataBase database(allNodes);
 
  // now we need to connect them if possible.
-// BoNode* node = allNodes.first();
+// BoFaceNode* node = allNodes.first();
 // allNodes.removeFirst();
- QPtrList<BoNode> connected;
+ QPtrList<BoFaceNode> connected;
  bool ok = connectNodes(&database, allNodes, &connected, 0);
 
  if (!ok) {
@@ -941,7 +925,7 @@ void BoMesh::connectNodes()
  }
  */
 
- BoNode* first = connected.first();
+ BoFaceNode* first = connected.first();
  while (first->previous()) {
 	first = first->previous();
  }
@@ -1013,7 +997,7 @@ int BoMesh::type() const
  return d->mType;
 }
 
-BoNode* BoMesh::nodes() const
+BoFaceNode* BoMesh::nodes() const
 {
  return d->mNodes;
 }
@@ -1021,7 +1005,7 @@ BoNode* BoMesh::nodes() const
 void BoMesh::deleteNodes()
 {
  if (d->mNodes) {
-	BoNode* first = d->mNodes;
+	BoFaceNode* first = d->mNodes;
 	while (first->previous()) {
 		// WARNING: we mustn't have any node appear two times in the
 		// list, otherwise we have an infinite loop here
@@ -1030,14 +1014,14 @@ void BoMesh::deleteNodes()
  }
 }
 
-void BoMesh::deleteNodes(BoNode* node)
+void BoMesh::deleteNodes(BoFaceNode* node)
 {
  // node is the *first* node!
  if (node) {
 	node->setPrevious(0);
-	BoNode* next = node;
+	BoFaceNode* next = node;
 	do {
-		BoNode* current = next;
+		BoFaceNode* current = next;
 		next = current->next();
 		delete current;
 	} while (next);
@@ -1201,7 +1185,7 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	} else {
 		glBegin(type());
 
-		BoNode* node = nodes();
+		BoFaceNode* node = nodes();
 		while (node) {
 			const BoFace* face = node->face();
 			const int* points = face->pointIndex();
@@ -1328,7 +1312,7 @@ void BoMesh::createPointCache()
  // point cache will be 2,3,1,5,4,7 (assuming we don't use GL_TRIANGLES)
  boMem->freeUIntArray(d->mPointsCache);
  d->mPointsCacheCount = 0;
- BoNode* node = nodes();
+ BoFaceNode* node = nodes();
  if (!node) {
 	boError() << k_funcinfo << "NULL node" << endl;
 	return;
