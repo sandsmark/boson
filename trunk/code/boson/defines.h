@@ -65,7 +65,7 @@
 
 // default values
 // used for both BosonConfig and OptionsDialog
-#define DEFAULT_SOUND true
+#define DEFAULT_SOUND false
 #define DEFAULT_MUSIC true
 #define DEFAULT_USE_RMB_MOVE true
 #define DEFAULT_USE_MMB_MOVE true
