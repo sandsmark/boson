@@ -27,7 +27,6 @@
 #include "cell.h"
 #include "bosonmessage.h"
 #include "bosoncursor.h"
-#include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "global.h"
 #include "kspritetooltip.h"

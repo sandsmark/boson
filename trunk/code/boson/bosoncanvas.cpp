@@ -25,7 +25,6 @@
 #include "bosonmap.h"
 #include "unitproperties.h"
 #include "boshot.h"
-#include "bosonmusic.h"
 #include "bosontiles.h"
 #include "bodisplaymanager.h"
 #include "speciestheme.h"
@@ -452,7 +451,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 		// Unit will not be damaged (it has enough shields)
 		target->setShields(target->shields() - damage);
 		// TODO: show some shield animation
-		boMusic->playSound(attackedBy, SoundShoot);
+		attackedBy->playSound(SoundShoot);
 		return;
 	} else {
 		damage -= target->shields();
@@ -488,7 +487,7 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
 //	(void) new BoShot(target, attackedBy, this);
  }
- boMusic->playSound(attackedBy, SoundShoot);
+ attackedBy->playSound(SoundShoot);
 }
 
 void BosonCanvas::destroyUnit(Unit* unit)
@@ -508,7 +507,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	unit->setHealth(0); // in case of an accidental change before
 	unit->setWork(UnitBase::WorkDestroyed);
 	owner->unitDestroyed(unit); // remove from player without deleting
-	boMusic->playSound(unit, SoundReportDestroyed);
+	unit->playSound(SoundReportDestroyed);
 	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
 //	(void) new BoShot(unit, 0, this, true);
 	emit signalUnitDestroyed(unit);

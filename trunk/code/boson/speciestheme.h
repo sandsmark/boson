@@ -29,6 +29,7 @@
 
 class BosonTextureArray;
 class BosonModel;
+class BosonSound;
 class UnitProperties;
 class UnitBase;
 
@@ -37,8 +38,8 @@ class QStringList;
 class QColor;
 
 /**
- * Stores player's species - this includes units' textures and models, sounds, 
- * properties and overviews as well as action pixmaps (attack, move and stop) 
+ * Stores player's species - this includes units' textures and models, sounds,
+ * properties and overviews as well as action pixmaps (attack, move and stop)
  * and player's teamcolor.
  *
  * This class provides methods for loading and teamcoloring pixmaps and for
@@ -182,6 +183,16 @@ public:
 	bool loadBigShot(bool isFacility, unsigned int version);
 
 	/**
+	 * @return The @ref BosonSound object for this species.
+	 **/
+	BosonSound* sound() const { return mSound; }
+
+	/**
+	 * Play the specified event for the specified unit.
+	 **/
+	void playSound(UnitBase* unit, UnitSoundEvent event);
+
+	/**
 	 * @return A list of all possible species. Note that the list contains
 	 * the index.dektop files - so remove index.desktop from every entry to
 	 * get the actual species directory.
@@ -238,6 +249,7 @@ private:
 
 	QString mThemePath;
 	QColor mTeamColor;
+	BosonSound* mSound;
 };
 
 #endif

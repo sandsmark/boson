@@ -28,7 +28,6 @@
 #include "cell.h"
 #include "bosonmessage.h"
 #include "bosoncursor.h"
-#include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "global.h"
 #include "kspritetooltip.h"
@@ -233,7 +232,7 @@ bool BosonBigDisplay::actionMove(QDataStream& stream, const QPoint& canvasPos)
 	++it;
  }
  if (unit->owner() == localPlayer()) {
-	boMusic->playSound(unit, SoundOrderMove);
+	unit->playSound(SoundOrderMove);
  }
  return true;
 }
@@ -278,7 +277,7 @@ bool BosonBigDisplay::actionAttack(QDataStream& stream, const QPoint& canvasPos)
  }
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
-	boMusic->playSound(u, SoundOrderAttack);
+	u->playSound(SoundOrderAttack);
  }
  return true;
 }
@@ -313,7 +312,7 @@ bool BosonBigDisplay::actionRepair(QDataStream& stream, const QPoint& canvasPos)
  }
 // TODO:
 // Unit* u = selection()->leader();
-// boMusic->playSound(u, SoundOrderRepair);
+// u->playSound(SoundOrderRepair);
  return true;
 }
 
@@ -360,7 +359,7 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
  }
 // TODO:
 // Unit* u = selection()->leader();
-// boMusic->playSound(u, SoundOrderRefine);
+// u->playSound(SoundOrderRefine);
  return true;
 }
 
@@ -382,7 +381,7 @@ bool BosonBigDisplay::actionFollow(QDataStream& stream, const QPoint& canvasPos)
  }
  Unit* u = selection()->leader();
  if (u->owner() == localPlayer()) {
-	boMusic->playSound(u, SoundOrderMove);
+	u->playSound(SoundOrderMove);
  }
  return true;
 }

@@ -754,6 +754,14 @@ bool Unit::isNextTo(Unit* target) const
  return false;
 }
 
+void Unit::playSound(UnitSoundEvent event)
+{
+ if (!speciesTheme()) {
+	return;
+ }
+ speciesTheme()->playSound(this, event);
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit

@@ -35,7 +35,6 @@
 #include "bosoncursor.h"
 #include "boselection.h"
 #include "bosonconfig.h"
-#include "bosonmusic.h"
 #include "selectbox.h"
 #include "visual/bosonchat.h"
 #include "bosonprofiling.h"
@@ -1236,7 +1235,7 @@ void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
  // cannot be placed into mSelection cause we don't have localPlayer
  // there
  if (localPlayer() == unit->owner()) {
-	boMusic->playSound(unit, SoundOrderSelect);
+	unit->playSound(SoundOrderSelect);
  }
  */
 }
@@ -1264,7 +1263,7 @@ void BosonBigDisplayBase::removeSelectionRect()
 		if (u->owner() == localPlayer()) {
 			// TODO: do not play sound here
 			// instead make virtual and play in derived class
-			boMusic->playSound(u, SoundOrderSelect);
+			u->playSound(SoundOrderSelect);
 		}
 	}
  } else {
@@ -1281,7 +1280,7 @@ void BosonBigDisplayBase::removeSelectionRect()
 		// cannot be placed into mSelection cause we don't have localPlayer
 		// there
 		if (localPlayer() == unit->owner()) {
-			boMusic->playSound(unit, SoundOrderSelect);
+			unit->playSound(SoundOrderSelect);
 		}
 	}
  }

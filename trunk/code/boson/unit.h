@@ -326,6 +326,8 @@ public:
 	 **/
 	bool isNextTo(Unit* unit) const;
 
+	void playSound(UnitSoundEvent event);
+
 protected:
 	void shootAt(Unit* target);
 
