@@ -20,6 +20,7 @@
 #ifndef BOSONSTARTEDITORWIDGET_H
 #define BOSONSTARTEDITORWIDGET_H
 
+#include "bosonstartwidgetbase.h"
 #include <qwidget.h>
 #include <qmap.h>
 
@@ -39,7 +40,7 @@ class KGamePropertyBase;
 class TopWidget;
 class BosonPlayField;
 
-class BosonStartEditorWidget : public QWidget
+class BosonStartEditorWidget : public BosonStartWidgetBase
 {
 	Q_OBJECT
 public:
@@ -48,21 +49,15 @@ public:
 
 public slots:
 	void slotStart();
-	/**
-	 * Called when user clicks on "Cancel" button
-	 * Cancels game starting and closes (hides) this widget 
-	 **/
-	void slotCancel();
 
 signals:
 	void signalStartGame();
-	void signalCancelled();
 
 protected slots:
-	void slotMapChanged(const QString& mapIdentifier);
-	void slotMyMapChanged(int index);
+	virtual void slotSendPlayFieldChanged(int index);
 
 protected:
+	virtual void setCurrentPlayField(BosonPlayField* field);
 	void sendNewGame();
 
 	void initNewMap();
@@ -70,11 +65,9 @@ protected:
 private:
 	void initKGame();
 	void initPlayer();
-	void initMaps();
+	void initPlayFields();
 	void initTileSets();
 	void initSpecies();
-	Player* player() const; // FIXME: do NOT use here! we should add dummy AI players for *all* players (even local)
-	BosonPlayField* playField() const;
 
 private:
 	QVBoxLayout* mTopLayout;
@@ -88,8 +81,6 @@ private:
 
 	QPushButton* mCancelButton;
 	QPushButton* mStartGameButton;
-
-	QMap<int, QString> mMapIndex2Identifier;
 
 	TopWidget* mTop;
 };

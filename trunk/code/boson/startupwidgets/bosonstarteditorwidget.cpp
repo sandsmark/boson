@@ -48,10 +48,9 @@
 // not meant for public use yet
 
 BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
-    : QWidget(parent)
+    : BosonStartWidgetBase(top, parent)
 {
  mTop = top;
-
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game" << endl;
 	return;
@@ -67,7 +66,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  QLabel* mapComboLabel = new QLabel(i18n("Map: "), this);
  mapComboLayout->addWidget(mapComboLabel);
  mMapCombo = new QComboBox(this);
- connect(mMapCombo, SIGNAL(activated(int)), this, SLOT(slotMyMapChanged(int)));
+ connect(mMapCombo, SIGNAL(activated(int)), this, SLOT(slotSendPlayFieldChanged(int)));
  mapComboLayout->addWidget(mMapCombo);
 
  // information about the selected map.
@@ -123,7 +122,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  QHBoxLayout* startGameLayout = new QHBoxLayout(mTopLayout);
  mCancelButton = new QPushButton(this, "cancelbutton");
  mCancelButton->setText(i18n("&Cancel") );
- connect(mCancelButton, SIGNAL(clicked()), this, SLOT(slotCancel()));
+ connect(mCancelButton, SIGNAL(clicked()), this, SIGNAL(signalCancelled()));
  startGameLayout->addWidget(mCancelButton);
  startGameLayout->addStretch(1);
 
@@ -132,7 +131,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  startGameLayout->addWidget( mStartGameButton );
  connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStart()));
 
- initMaps();
+ initPlayFields();
  initTileSets();
  initSpecies();
 
@@ -153,7 +152,7 @@ void BosonStartEditorWidget::initKGame()
  boDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
  boDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 
- connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotMapChanged(const QString&)));
+ connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
 }
 
 void BosonStartEditorWidget::initPlayer()
@@ -170,8 +169,10 @@ void BosonStartEditorWidget::initPlayer()
 
 void BosonStartEditorWidget::slotStart()
 {
+ BosonPlayField* field = 0;
  if (mMapCombo->currentItem() == 0) {
-	BosonMap* map = new BosonMap(playField());
+	field = mTop->playField();
+	BosonMap* map = new BosonMap(field);
 	BosonScenario* s = new BosonScenario();
 
 	// TODO: fill widget (i.e. fill with grass, water, ... by default)
@@ -180,10 +181,19 @@ void BosonStartEditorWidget::slotStart()
 	s->setPlayers(mMaxPlayers->value(), mMaxPlayers->value());
 	s->initializeScenario();
 
-	playField()->changeMap(map);
-	playField()->changeScenario(s);
+	field->changeMap(map);
+	field->changeScenario(s);
+
+	// ensure that we won't try to load this anymore.
+	field->finalizeLoading();
+ } else {
+	field = BosonPlayField::playField(playFieldIdentifier());
  }
- BosonScenario* scenario = playField()->scenario();
+ if (!field) {
+	boError() << k_funcinfo << "NULL playfield" << endl;
+	return;
+ }
+ BosonScenario* scenario = field->scenario();
  if (!scenario) {
 	boError() << k_funcinfo << "NULL scenario" << endl;
 	return;
@@ -200,46 +210,20 @@ void BosonStartEditorWidget::slotStart()
  sendNewGame();
 }
 
-void BosonStartEditorWidget::slotCancel()
-{
- emit signalCancelled();
-}
-
-Player* BosonStartEditorWidget::player() const
-{
- return mTop->player();
-}
-
-BosonPlayField* BosonStartEditorWidget::playField() const
-{
- return mTop->playField();
-}
-
 void BosonStartEditorWidget::sendNewGame()
 {
  boGame->sendMessage(0, BosonMessage::IdNewEditor);
 }
 
-void BosonStartEditorWidget::initMaps()
+void BosonStartEditorWidget::initPlayFields()
 {
- QStringList list;
- list.append(i18n("New Map"));
- // TODO: add existing maps
- mMapCombo->insertStringList(list);
+ mMapCombo->insertItem(i18n("New Map"));
 
- QStringList list2 = BosonPlayField::availablePlayFields();
- for (unsigned int i = 0; i < list2.count(); i++) {
-	KSimpleConfig cfg(list2[i]);
-	cfg.setGroup("Boson PlayField");
-	QString identifier = cfg.readEntry("Identifier", QString::null);
-	if (identifier.isNull()) {
-		boWarning() << k_funcinfo << list2[i] << " has no identifier" << endl;
-		continue;
-	}
-	int index = mMapCombo->count();
-	mMapCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), index);
-	mMapIndex2Identifier.insert(index, identifier);
+ QStringList list = BosonPlayField::availablePlayFields();
+ for (unsigned int i = 0; i < list.count(); i++) {
+	mMapCombo->insertItem(BosonPlayField::playFieldName(list[i]));
  }
+ slotSendPlayFieldChanged(0); // by default we create a new map
 }
 
 void BosonStartEditorWidget::initTileSets()
@@ -264,57 +248,47 @@ void BosonStartEditorWidget::initNewMap()
  mMapBox->setEnabled(true);
 }
 
-void BosonStartEditorWidget::slotMyMapChanged(int index)
+void BosonStartEditorWidget::setCurrentPlayField(BosonPlayField* field)
 {
- if (index < 0 || index >= mMapCombo->count()) {
-	boError() << k_funcinfo << "invalid index " << index << endl;
-	return;
- }
- // AB: we send the new map identifier through network. this isn't necessary for
- // editor mode, but it is consistent to the normal game mode.
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- if (!index) {
-	stream << QString::null;
- } else {
-	stream << mMapIndex2Identifier[index];
- }
- boGame->sendMessage(buffer, BosonMessage::ChangePlayField);
-}
-
-void BosonStartEditorWidget::slotMapChanged(const QString& identifier)
-{
- if (identifier.isEmpty()) {
+ boDebug() << k_funcinfo << endl;
+ if (!field) {
+	// create a new map
 	initNewMap();
 	return;
  }
  mMapBox->setEnabled(false);
- QMap<int, QString>::Iterator it = mMapIndex2Identifier.begin();
- for (; it != mMapIndex2Identifier.end(); ++it) {
-	if (it.data() == identifier) {
-		int index = it.key();
-		mMapCombo->setCurrentItem(index);
-		boDebug() << k_funcinfo << "loading map: " << identifier << endl;
-#warning FIXME
-		boFatal() << k_funcinfo << "needs to be fixed!" << endl;
-//		playField()->loadPlayField(BosonPlayField::playFieldFileName(identifier));
-		BosonMap* map = playField()->map();
-		BosonScenario* scenario = playField()->scenario();
-		if (!map) {
-			boError() << k_funcinfo << "NULL map for " << identifier << endl;
-			return;
-		}
-		if (!scenario) {
-			boError() << k_funcinfo << "NULL scenario for " << identifier << endl;
-			return;
-		}
-		mMapWidth->setValue(map->width());
-		mMapHeight->setValue(map->height());
-		mTileSetCombo->setCurrentItem(0); // TODO - we don't support multiple tilesets yet
-		mMaxPlayers->setValue(scenario->maxPlayers());
-		return;
-	}
+ QStringList list = BosonPlayField::availablePlayFields();
+ int index = list.findIndex(field->identifier());
+ if (index < 0) {
+	boError() << k_funcinfo << "invalid index" << endl;
+	setCurrentPlayField(0);
+	return;
  }
- boError() << k_funcinfo << "No such map: " << identifier << endl;
+ index++; // index 0 is new map
+ mMapCombo->setCurrentItem(index);
+
+ boDebug() << k_funcinfo << "loading map: " << field->identifier() << endl;
+ // am afraid we need the entire data here :-(
+ field->loadPlayField(QString::null); // QString::null is allowed, as we already opened the file using preLoadPlayField()
+ BosonMap* map = field->map();
+ BosonScenario* scenario = field->scenario();
+ if (!map) {
+	boError() << k_funcinfo << "NULL map for " << field->identifier() << endl;
+	return;
+ }
+ if (!scenario) {
+	boError() << k_funcinfo << "NULL scenario for " << field->identifier() << endl;
+	return;
+ }
+ mMapWidth->setValue(map->width());
+ mMapHeight->setValue(map->height());
+ mTileSetCombo->setCurrentItem(0); // TODO - we don't support multiple tilesets yet
+ mMaxPlayers->setValue(scenario->maxPlayers());
+}
+
+void BosonStartEditorWidget::slotSendPlayFieldChanged(int index)
+{
+ // index 0 is new map
+ BosonStartWidgetBase::slotSendPlayFieldChanged(index - 1);
 }
 

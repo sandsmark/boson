@@ -20,6 +20,8 @@
 #ifndef BOSONNEWGAMEWIDGET_H
 #define BOSONNEWGAMEWIDGET_H
 
+#include "bosonstartwidgetbase.h"
+
 #include <qwidget.h>
 #include <qptrdict.h>
 #include <qcolor.h>
@@ -47,146 +49,149 @@ class KGamePropertyBase;
 class TopWidget;
 class BosonPlayField;
 
-class BosonNewGameWidget : public QWidget
+class BosonNewGameWidget : public BosonStartWidgetBase
 {
-  Q_OBJECT
-  public:
-    /** Constructs BosonNewGameWidget
-      * @param top TopWidget class of Boson
-      * @param parent arent of this widget
-      */
-    BosonNewGameWidget(TopWidget* top, QWidget* parent);
-    /** Destructs BosonNewGameWidget */
-    ~BosonNewGameWidget();
-    /** Resets all configuration */
+	Q_OBJECT
+public:
+	BosonNewGameWidget(TopWidget* top, QWidget* parent);
+	~BosonNewGameWidget();
 
-    QString playFieldIdentifier() const;
-
-  private:
-    QComboBox* mColorCombo;
-    QLineEdit* mNameEdit;
-    QComboBox* mSpeciesCombo;
-    QComboBox* mMapCombo;
-    QLabel* mMapName;
-    QLabel* mSpeciesLabel;
-    QGroupBox* mAddAIGroup;
-    QLabel* mAddAINameLabel;
-    QLineEdit* mAddAIName;
-    QPushButton* mAddAIButton;
-    QListBox* mPlayersList;
-    QPushButton* mRemovePlayerButton;
-    QFrame* mLine1;
-    KGameChat* mChatWidget;
-    QFrame* mLine2;
-    QPushButton* mCancelButton;
-    QPushButton* mNetworkButton;
-    QPushButton* mStartGameButton;
+private:
+	QComboBox* mColorCombo;
+	QLineEdit* mNameEdit;
+	QComboBox* mSpeciesCombo;
+	QComboBox* mMapCombo;
+	QLabel* mMapName;
+	QLabel* mSpeciesLabel;
+	QGroupBox* mAddAIGroup;
+	QLabel* mAddAINameLabel;
+	QLineEdit* mAddAIName;
+	QPushButton* mAddAIButton;
+	QListBox* mPlayersList;
+	QPushButton* mRemovePlayerButton;
+	QFrame* mLine1;
+	KGameChat* mChatWidget;
+	QFrame* mLine2;
+	QPushButton* mCancelButton;
+	QPushButton* mNetworkButton;
+	QPushButton* mStartGameButton;
 
 
-  public slots:
-    /** Called when user clicks on "Start game" button
-      * This widget should then be hided and game should be started
-      */
-    void slotStart();
-    /** Adds AI (computer-controlled) player to game
-      * At the moment it uses default species theme and first available color,
-      * in the future, they will be selectable
-      */
-    void slotAddAIPlayer();
-    /** Called when user clicks on "Cancel" button
-      * Cancels game starting and closes (hides) this widget */
-    void slotCancel();
-    /** Called when user clicks "Remove player" button
-      * Currently it removes mHighlightedPlayer from game
-      */
-    void slotRemovePlayer();
-    /** Called when user clicks "Network Options" button
-      * Hides this widget and shows Network Options widget
-      */
-    void slotNetworkOptions();
-    /** Called when local player's name is changed */
-    void slotMyNameChanged();
-    /** Called when local player's name is changed */
-    void slotMyColorChanged(int);
-    /** Called when local player's name is changed */
-    void slotMySpeciesChanged(int);
-    /** Called when local player's name is changed */
-    void slotMyMapChanged(int);
-    /** Called when some player joins the game
-      * This adds player's name to players' listbox
-      */
-    void slotPlayerJoinedGame(KPlayer*);
-    /** Called when some player leaves the game
-      * This removes player's name from players' listbox
-      */
-    void slotPlayerLeftGame(KPlayer*);
-    /** Called when some property of some player has changed
-      * Currently it is only used to get notifyed when some player changes his
-      * name. Player's name in players' listbox is then updated
-      */
-    void slotPropertyChanged(KGamePropertyBase*, KPlayer*);
-    /** Called when user selects some player in players' listbox
-      * "Remove player" button is then disabled or enabled accordingly to if
-      * user can delete that player
-      */
-    void slotPlayerSelected(QListBoxItem*);
-    /** Called when admin changes game's map
-      * This updates map name label if user is not admin
-      */
-    void slotMapChanged(const QString&);
-    /** Called when some player changes his species
-      * This does nothing at the moment
-      */
-    void slotSpeciesChanged(Player*);
-    /** Called when some player changes his color
-      * this calls @ref initColors()
-      */
-    void slotColorChanged(Player*);
-    /** This is used to enable or disable some widgets when user's admin status
-      * changes
-      */
-    void slotSetAdmin(bool);
+public slots:
+	/**
+	 * :Called when user clicks on "Start game" button
+	 * This widget should then be hided and game should be started
+	 **/
+	virtual void slotStart();
 
-  signals:
-    void signalStartGame();
-    void signalCancelled();
-    void signalShowNetworkOptions();
+	/** Adds AI (computer-controlled) player to game
+	 * At the moment it uses default species theme and first available color,
+	 * in the future, they will be selectable
+	 **/
+	void slotAddAIPlayer();
 
-  protected:
-    void sendNewGame();
+	/**
+	 * Called when user clicks "Remove player" button
+	 * Currently it removes mHighlightedPlayer from game
+	 **/
+	void slotRemovePlayer();
 
-  protected:
-    QVBoxLayout* mBosonNewGameWidgetLayout;
-    QVBoxLayout* mMainLayout;
-    QHBoxLayout* mUpperLayout;
-    QVBoxLayout* mLeftLayout;
-    QGridLayout* mYourOptionsLayout;
-    QHBoxLayout* mAddAIGroupLayout;
-    QVBoxLayout* mPlayersLayout;
-    QHBoxLayout* mStartGameLayout;
+	/** Called when user clicks "Network Options" button
+	 * Hides this widget and shows Network Options widget
+	 **/
+	void slotNetworkOptions();
 
-  private:
-    void initKGame();
-    void initPlayer();
-    void initMaps();
-    void initSpecies();
-    void initColors();
-    Player* player() const;
+	/**
+	 * Called when local player's name is changed 
+	 **/
+	void slotMyNameChanged();
 
-  private:
-    QPtrDict<KPlayer> mItem2Player;
-    KPlayer* mHighlightedPlayer;
-    TopWidget* mTop;
-    QColor mPlayercolor;
-    QValueList<QColor> mAvailableColors;
-    bool mAdmin;
-    int mMap;
-    int mMinPlayers;
-    int mMaxPlayers;
-    QString mMapId;
+	/**
+	 * Called when local player's name is changed 
+	 **/
+	void slotMyColorChanged(int);
 
-    QMap<int, QString> mMapIndex2Identifier; // index -> playfield identifier
-    QMap<int, QString> mSpeciesIndex2Identifier; // index -> species identifier
+	/**
+	 * Called when local player's name is changed 
+	 **/
+	void slotMySpeciesChanged(int);
+
+	/**
+	 * Called when some player joins the game
+	 * This adds player's name to players' listbox
+	 **/
+	void slotPlayerJoinedGame(KPlayer*);
+
+	/**
+	 * Called when some player leaves the game
+	 * This removes player's name from players' listbox
+	 **/
+	void slotPlayerLeftGame(KPlayer*);
+
+	/**
+	 * Called when some property of some player has changed
+	 * Currently it is only used to get notifyed when some player changes 
+	 * his name. Player's name in players' listbox is then updated
+	 **/
+	void slotPropertyChanged(KGamePropertyBase*, KPlayer*);
+
+	/**
+	 * Called when user selects some player in players' listbox
+	 * "Remove player" button is then disabled or enabled accordingly to if
+	 * user can delete that player
+	 **/
+	void slotPlayerSelected(QListBoxItem*);
+
+	/**
+	 * Called when some player changes his species
+	 * This does nothing at the moment
+	 **/
+	void slotSpeciesChanged(Player*);
+
+	/**
+	 * Called when some player changes his color
+	 * this calls @ref initColors()
+	 **/
+	void slotColorChanged(Player*);
+
+	/**
+	 * This is used to enable or disable some widgets when user's admin 
+	 * status changes
+	 **/
+	void slotSetAdmin(bool);
+
+signals:
+	void signalStartGame();
+	void signalCancelled();
+	void signalShowNetworkOptions();
+
+protected:
+	void sendNewGame();
+	virtual void setCurrentPlayField(BosonPlayField* field);
+
+private:
+	QVBoxLayout* mBosonNewGameWidgetLayout;
+	QGridLayout* mYourOptionsLayout;
+
+private:
+	void initKGame();
+	void initPlayer();
+	void initPlayFields();
+	void initSpecies();
+	void initColors();
+
+private:
+	QPtrDict<KPlayer> mItem2Player;
+	KPlayer* mHighlightedPlayer;
+	QColor mPlayercolor;
+	QValueList<QColor> mAvailableColors;
+	bool mAdmin;
+	int mMap;
+	int mMinPlayers;
+	int mMaxPlayers;
+
+	QMap<int, QString> mSpeciesIndex2Identifier; // index -> species identifier
 };
 
-#endif // BOSONNEWGAMEWIDGET_H
+#endif
+
