@@ -26,6 +26,9 @@ class BosonLoadingWidget;
 class BosonPlayField;
 class Player;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonStarting : public QObject
 {
 	Q_OBJECT

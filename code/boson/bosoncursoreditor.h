@@ -32,6 +32,9 @@ class QCheckBox;
 class QVBox;
 class KIntNumInput;
 
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class SpriteConfig : public QVGroupBox
 {
 	Q_OBJECT
@@ -57,6 +60,9 @@ private:
 	KIntNumInput* mAnimationSpeed;
 };
 
+/**
+ * Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonCursorEditor : public QWidget
 {
 	Q_OBJECT

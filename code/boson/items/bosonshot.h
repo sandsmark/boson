@@ -39,6 +39,7 @@ class BosonShot;
  * @short Property class for shots
  * It contains properties for specific shot type
  * Properties include damage, speed and damaging range of shot
+ * @author Rivo Laks <rivolaks@hot.ee>
  **/
 class BosonShotProperties
 {
@@ -55,22 +56,22 @@ class BosonShotProperties
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    inline unsigned long int damageRange() { return mDamageRange; };
+    unsigned long int damageRange() { return mDamageRange; }
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
     **/
-    inline long int damage() { return mDamage; };
+    long int damage() { return mDamage; }
     /**
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
-    inline unsigned long int speed()  { return mSpeed; };
+    unsigned long int speed()  { return mSpeed; }
 
-    inline SpeciesTheme* theme()  { return mTheme; };
+    inline SpeciesTheme* theme()  { return mTheme; }
 
-    inline long unsigned int id()  { return mId; };
-    
-    inline BosonModel* model()  { return mModel; };
+    inline long unsigned int id()  { return mId; }
+
+    inline BosonModel* model()  { return mModel; }
 
     BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
 
@@ -91,23 +92,26 @@ class BosonShotProperties
 };
 
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BosonShot : public BosonItem
 {
   public:
     BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
 
-    virtual void advance(unsigned int phase);
+    virtual void advance(unsigned int phase)
 
-//    inline BoVector3 pos()  { return mPos; };
+//    inline BoVector3 pos()  { return mPos; }
 
-    inline Player* owner()  { return mOwner; };
-    inline BosonShotProperties* properties()  { return mProp; };
-    
-    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
+    inline Player* owner()  { return mOwner; }
+    inline BosonShotProperties* properties()  { return mProp; }
 
-    inline bool isActive() { return mActive; };
+    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; }
 
-    inline virtual int rtti() const  { return RTTI::Shot; };
+    inline bool isActive() { return mActive; }
+
+    inline virtual int rtti() const  { return RTTI::Shot; }
 
   protected:
     BoVector3 mVelo;
