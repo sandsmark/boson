@@ -480,3 +480,23 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
  return list;
 }
 
+QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
+{
+ QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+			BO_TILE_SIZE, BO_TILE_SIZE));
+ QValueList<Unit*> list;
+ for (unsigned int i = 0; i < l.count(); i++) {
+	if (!RTTI::isUnit(l[i]->rtti())) {
+		// this item is not important for us here
+		continue;
+	}
+	Unit* u = (Unit*)l[i];
+	if (u->isDestroyed()) {
+		// this item is not important for us here
+		continue;
+	}
+	list.append(u);
+ }
+ return list;
+}
+

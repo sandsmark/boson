@@ -24,6 +24,7 @@
 class Player;
 class Unit;
 class BosonMap;
+class BosonCanvas;
 
 class QPixmap;
 class QPainter;
@@ -46,6 +47,7 @@ public:
 	int mapHeight() const;
 
 	void setMap(BosonMap* map);
+	void setCanvas(BosonCanvas*);
 	void initMap();
 
 	void setLocalPlayer(Player*);

@@ -124,6 +124,8 @@ public:
 	 **/
 	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius);
 
+	QValueList<Unit*> unitsAtCell(int x, int y);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do

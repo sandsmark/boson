@@ -3,7 +3,6 @@ Game TODOs
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - BosonPath doesn't honor fog of war
-- MiniMap does not know about units when removing fog of war
 - remove wreckages after a certain timeout
 - left dbl-click should select ALL units of that type
 - auto-attacking when unit is in range
