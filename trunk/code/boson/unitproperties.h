@@ -162,6 +162,16 @@ public:
 	 * @return Whether this is a land unit.
 	 **/
 	bool isLand() const { return mTerrain == Land; }
+
+	/**
+	 * @return Whether this unit can shoot at aircrafts.
+	 **/
+	bool canShootAtAirUnits() const { return mCanShootAtAirUnits; }
+
+	/**
+	 * @return Whether this unit can shoot at land units
+	 **/
+	bool canShootAtLandUnits() const { return mCanShootAtLandUnits; }
 	
 	/**
 	 * @return Whether this facility (if it is one) can produce anything.
@@ -221,6 +231,8 @@ private:
 	unsigned long int mMineralCost;
 	unsigned long int mOilCost;
 	TerrainType mTerrain;
+	bool mCanShootAtAirUnits;
+	bool mCanShootAtLandUnits;
 };
 
 #endif

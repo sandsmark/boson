@@ -88,10 +88,18 @@ void UnitProperties::loadUnitType(const QString& fileName)
  bool isFacility;
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
+
  mUnitPath = fileName.left(fileName.length() - QString("index.desktop").length());
- isFacility = conf.readBoolEntry("IsFacility", false);
- mName = conf.readEntry("Name", i18n("Unknown"));
  mTypeId = conf.readNumEntry("Id", -1); // -1 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
+ if (typeId() < 0) {
+	kdError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
+	// we continue - but we'll crash soon
+ }
+ mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
+ if (mTerrain < 0 || mTerrain > 2) {
+	mTerrain = (TerrainType)0;
+ }
+ mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 0); 
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0); 
@@ -99,17 +107,12 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mRange = conf.readUnsignedLongNumEntry("Range", 0); 
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
  mReload = conf.readUnsignedNumEntry("Reload", 0); 
- mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
  d->mShields = conf.readUnsignedLongNumEntry("Shield", 0); 
- d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0); 
- if (mTerrain < 0 || mTerrain > 2) {
-	mTerrain = (TerrainType)0;
- }
- if (typeId() < 0) {
-	kdError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
-	// we continue - but we'll crash soon
- }
+ d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
+ mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft());
+ mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()));
+ isFacility = conf.readBoolEntry("IsFacility", false);
 
  if (isFacility) {
 	loadFacilityProperties(&conf);
