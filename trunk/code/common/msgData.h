@@ -41,7 +41,7 @@ enum refusedType {
 /* MSG_DLG_ASK */ ///orzel still unused
 struct askMsg_t		{ int major, minor, patch; };
 /* MSG_DLG_ACCEPTED */ /// orzel still unused
-struct acceptedMsg_t	{ int who_you_are, missing_player, total_player, sizeX, sizeY; };
+struct acceptedMsg_t	{ uint who_you_are; int missing_player, total_player, sizeX, sizeY; };
 /* MSG_DLG_REFUSED */ /// orzel still unused
 struct refusedMsg_t	{ refusedType why_not; };
 /* MSG_DLG_END */
@@ -53,7 +53,7 @@ struct facilityMsg_t	{ uint who; int key, x, y, state; facilityType type; };
 /* MSG_FACILITY_CHANGED */
 struct fixChangedMsg_t	{ int key, state; };
 /* MSG_MOBILE_CREATED */
-struct mobileMsg_t	{ int who, key, x, y; mobType type; };
+struct mobileMsg_t	{ uint who; int key, x, y; mobType type; };
 /* MSG_MOBILE_MOVE_*  */
 struct moveMsg_t	{ int key, newx, newy;};
 /* MSG_*_DESTROYED */

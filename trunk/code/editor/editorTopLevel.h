@@ -127,7 +127,7 @@ private:
 		W_UNITS
 	} which;
 	object_type	otype;
-	int		who;
+	uint		who;
 
 	/*
 	 * GUI
