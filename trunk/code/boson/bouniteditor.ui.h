@@ -366,7 +366,7 @@ void BoUnitEditor::slotCanProduceChanged()
 
 void BoUnitEditor::slotUpdateUnitProperties()
 {
-    mUnit->clearPlugins(false);
+    mUnit->clearPlugins(true);
     // General page
     mUnit->setName(mUnitName->text());
     mUnit->setTypeId(mUnitId->value());
