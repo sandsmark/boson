@@ -77,11 +77,9 @@ void BosonComputerIO::reaction()
  if (boConfig->aiDelay() == 0.0) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
  BosonProfiler p(900);
 
  if (mScript) {
 	mScript->advance();
  }
- boDebug() << k_funcinfo << "Took " << p.stop() << " us" << endl;
 }
