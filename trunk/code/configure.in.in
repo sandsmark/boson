@@ -19,3 +19,17 @@ AC_SUBST(all_includes)
 AC_SUBST(LIB_KGAME)
 AC_DEFINE_UNQUOTED(HAVE_KGAME_VERSION_H, 1, [ ])
 AC_DEFINE_UNQUOTED(HAVE_KGAME_SAVEGAME, 1, [ ])
+
+
+AC_DEFUN([AC_BOSON_STATIC],
+[
+  if test "x$enable_static" = "xyes"; then
+      AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 1, [ ])
+  else
+    AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 0, [ ])
+  fi
+ AM_CONDITIONAL(link_static, test x$enable_static = xyes)
+])
+AC_BOSON_STATIC
+
+

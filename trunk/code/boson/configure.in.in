@@ -118,16 +118,6 @@ AC_DEFUN([AC_BOSON_PREFIX],
 ])
 AC_BOSON_PREFIX
 
-AC_DEFUN([AC_BOSON_STATIC],
-[
-  if test "x$enable_static" = "xyes"; then
-      AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 1, [ ])
-  else
-    AC_DEFINE_UNQUOTED(BOSON_LINK_STATIC, 0, [ ])
-  fi
-])
-AC_BOSON_STATIC
-
 
 AC_DEFUN([AC_BOSON_CHECK_VIDMODE],
 [
