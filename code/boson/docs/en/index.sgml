@@ -1,9 +1,8 @@
-
 <!doctype linuxdoc system>
 <article>
 <title>The Boson Handbook
 <author>Thomas Capricelli <tt>capricel@enst.fr</tt>
-<date>Version 0.1 , Sat Jan  9 19:35:36 CET 1999
+<date>Version 0.1 , Sun Sep 12 13:28:38 CEST 1999
 
 <abstract>
 This Handbook describes Boson Version 0.1
@@ -11,18 +10,72 @@ This Handbook describes Boson Version 0.1
 
 <toc>
 
+
 <sect>Introduction
+<p>
+
+A <tt/RTS/ (real-time strategy game) was missing under linux, and we felt like
+we could do it.  KDE/Qt appeared to be the best environment under which such a
+game could be done.
+
+We would like to thanx Warwick Allison (<htmlurl url="warwick@troll.no" name="warwick@troll.no">)
+for his wonderful <tt/QwSpriteField/ library, which is used by Boson.  
+We hope you will enjoy this game as much as we did while doing it and 
+we would appreciate any suggestions and comments.
+
+Please contact : <tt/Thomas Capricelli/
+<htmlurl url="mailto:capricel@enst.fr" name="capricel@enst.fr">.
+<p>
+
 <p>
 <sect1>Changes
 <p>
+
+Boson 0.1 is the first release, it's meant to be a developper-only release and
+isn't yet intended for playing.
+
+This release features :
+<itemize>
+	<item> Network layer and synchronisation.
+	<item> Map file structure.
+	<item> Selection and mutliple selection (control+click)
+	<item> Units/Mobiles displaying.
+	<item> One can <tt/move/ units
+	<item> Units can move only on 'allowed' ground and don't overlap.
+</itemize>
+
+<p>
+<sect1>Contributing
+<p>
+
+If you ever want to contribute to the project, please contact 
+<htmlurl url="mailto:capricel@enst.fr" name="capricel@enst.fr">.
+
+Every kind of help is welcome : 
+<itemize>
+	<item> Graphist (ground, species)
+	<item> Web page maintainer
+	<item> Documentation writer
+	<item> Alpha-tester ( wanna see segfaults ?)
+	<item> Beta-tester ( we want _your_ feedback)
+</itemize>
 
 <sect>Installation
 <p>
 <sect1>How to obtain Boson 
 <p>
 
+<bf/Boson/ can be found on <htmlurl
+url="http://aquila.rezel.enst.fr/boson/" name="the boson homepage" >.
+
+Until the first public release (should be 0.5), this is the only place you can find it. Then, it
+will probably also be available on the main kde ftp site, and perhaps on some other places.
+
 <sect1>Requirements
 <p>
+In order to successfully compile boson, you need kdelibs-1.0 and kdesupport-1.0, or the latest versions
+of <tt> libkdecore</tt>, <tt> libkdeui</tt>, <tt> libkfile</tt>, <tt> libkfm</tt> and <tt> libQwSpriteField</tt>.
+All required libraries can be found on <url url="ftp://ftp.kde.org/pub/kde/">.
 
 <sect1>Compilation and installation
 <p>
@@ -36,25 +89,73 @@ the base directory of the Boson distribution:
 % make install
 </verb></tscreen>
 
+You will probably need to be root for the install stage.
+
 <p>
-Since Boson uses <verb>autoconf</verb> you should have not trouble
+Since Boson uses <tt/autoconf/ you should have not trouble
 compiling it.
 Should you run into problems please report them to the the author at 
 <htmlurl url="mailto:capricel@enst.fr" name = "Thomas Capricelli">
 
 
 <p>
+
 <sect> Usage <p>
-<sect1> General Usage
-<p>
-<sect> Another Section
-<p>
+
+In this section, we will explain you the basis to actually be able to play Boson.
+The first thing to know is that, because of the lack of any IA player (artificial intelligence),
+you won't be able to play alone. You need to have at least another player to play against.
+
+<sect1> Launching the server <p>
+
+The <tt/server/ is the central piece of the game, the place where everything is coordinated, and the
+link between the different players. It must be launched on one and only one computer. Let's say for
+the example that this computer is called 'eagle'
+
+If you have successfully installed boson, you should have a program called <tt/boserver/. 
+This is the first program to launch so that every single player may connect to it.
+
+You should run it in <tt/background/, typing
+<tscreen><verb>
+[eagle]% boserver&
+</verb></tscreen>
+
+You can also click on <tt/boserver/, in the <tt/K-Menu/, under the group <tt/Games/.
+
+Don't worry about the still naked interface of it, just hide it if you don't like it, there's nothing
+in the window, but it _does_ do a lot of things behing.
+
+<sect1> Launching Boson<p>
+
+	Every single player should perform this step on his computer. There is no problem if
+one of them is on the same computer as the server.
+
+<tscreen><verb>
+[gauss]% boson eagle&
+</verb></tscreen>
+
+By giving the <tt/eagle/ argument to boson, you tell him on which computer he can find the server
+in order to connect to it.
+
+You can also click on <tt/boson/, in the <tt/K-Menu/, under the group <tt/Games/, but doing this way
+you won't be able to give any argument, so that boson will try to connect to the same computer. You can do this
+only if the boserver has been launched on _your_ computer.
+
+There will soon be <tt/icons/-to-click-on-to-get-things-simplier, but until then, you need
+to performs all of those steps.
+
 
 <sect>Questions and Answers<p>
 
+Please contact :
+<htmlurl url="mailto:capricel@enst.fr" name="Thomas Capricelli"> if
+you have any questions, we will be happy to add it here if it's a frequently 
+asked one.
+
 <sect>Copyright<p>
 
-Boson Copyright 1998 Thomas Capricelli , capricel@enst.fr
+Boson Copyright 1999 Thomas Capricelli , capricel@enst.fr<p>
+Boson-pics Copyright 1999 Benjamin Adler , benAdler@gmx.net
 
 
 This program is free software; you can redistribute it and/or modify
