@@ -3,7 +3,8 @@ MOBILE_UNITS = \
 	mob_mineralharvester \
 	mob_oilharvester \
 	mob_quad \
-	mob_ship 
+	mob_ship \
+	mob_tank
 FACILITIES = \
 	fix_barracks \
 	fix_comsat \
