@@ -248,13 +248,13 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 	QPoint point;
 	s >> point;
 	p->setValue(point);
- } else if (*t == typeid(KGamePropertyBase)) {
+ } else if (*t == typeid(KGamePropertyBase*)) {
 	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
 		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
 		unsigned int count = 0;
 		char c;
 		QPoint point;
-		QTextStream s((QString*)&value, IO_WriteOnly);
+		QTextStream s((QString*)&value, IO_ReadOnly);
 		s >> count;
 		for (unsigned int i = 0; i < count; i++) {
 			s >> c;
