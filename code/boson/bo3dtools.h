@@ -30,45 +30,6 @@ class QString;
 class KConfig;
 class QDataStream;
 
-/**
- * @author Andreas Beckermann <b_mann@gmx.de>
- * @short collection class for misc 3d functions
- **/
-class Bo3dTools
-{
-  public:
-    Bo3dTools()
-    {
-    }
-
-    /**
-     * @return How many degrees you have to rotate around z-axis for y-axis to go
-     * through (x, y). (i.e. angle between (0, 1) and (x, y) when (x, y) is a
-     * normalized vector)
-     * @author Rivo Laks <rivolaks@hot.ee>
-     **/
-    static float rotationToPoint(float x, float y);
-
-    /**
-     * This is the inverse operation to @ref rotationToPoint.
-     * It calculates point (x, y) which is at intersection of circle with @p radius
-     * and line which is rotated by @p angle around z-axis.
-     * @author Rivo Laks <rivolaks@hot.ee>
-     **/
-    static void pointByRotation(float* x, float* y, const float angle, const float radius);
-
-    /**
-     * Convert @p deg, given in degree, into radians.
-     * @return @p deg as radians.
-     **/
-    static float deg2rad(float deg);
-    /**
-     * Convert @p rad, given in radians, into degree.
-     * @return @p rad as degree.
-     **/
-    static float rad2deg(float rad);
-};
-
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>
@@ -837,6 +798,47 @@ class BoMatrix
   private:
     GLfloat mData[16];
 };
+
+/**
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ * @short collection class for misc 3d functions
+ **/
+class Bo3dTools
+{
+  public:
+    Bo3dTools()
+    {
+    }
+
+    /**
+     * @return How many degrees you have to rotate around z-axis for y-axis to go
+     * through (x, y). (i.e. angle between (0, 1) and (x, y) when (x, y) is a
+     * normalized vector)
+     * @author Rivo Laks <rivolaks@hot.ee>
+     **/
+    static float rotationToPoint(float x, float y);
+
+    /**
+     * This is the inverse operation to @ref rotationToPoint.
+     * It calculates point (x, y) which is at intersection of circle with @p radius
+     * and line which is rotated by @p angle around z-axis.
+     * @author Rivo Laks <rivolaks@hot.ee>
+     **/
+    static void pointByRotation(float* x, float* y, const float angle, const float radius);
+
+    /**
+     * Convert @p deg, given in degree, into radians.
+     * @return @p deg as radians.
+     **/
+    static float deg2rad(float deg);
+    /**
+     * Convert @p rad, given in radians, into degree.
+     * @return @p rad as degree.
+     **/
+    static float rad2deg(float rad);
+};
+
+
 
 #endif // BO3DTOOLS_H
 /*
