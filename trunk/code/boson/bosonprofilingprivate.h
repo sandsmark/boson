@@ -205,7 +205,7 @@ public:
 	ProfileSlotAdvance* mCurrentSlotAdvanceTimes;
 	ProfileItemAdvance* mCurrentItemAdvanceTimes;
 
-	QMap<BosonProfiling::ProfilingEvent, struct timeval> mProfilingTimes;
+	QMap<int, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
 
 	unsigned int mGLUpdateInterval;
