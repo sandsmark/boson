@@ -760,6 +760,8 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	cond.setAttribute("EventCaused", "Foobar");
 }
 
+ QDomElement effects = canvasDoc.createElement("Effects");
+ canvasRoot.appendChild(effects);
 
  files.insert("kgame.xml", kgameDoc.toString().utf8());
  files.insert("canvas.xml", canvasDoc.toString().utf8());
