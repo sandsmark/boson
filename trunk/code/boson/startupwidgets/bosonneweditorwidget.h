@@ -59,7 +59,7 @@ protected:
 private:
 	void initPlayFields();
 	void initSpecies();
-	void initTilesets();
+	void initGroundThemes();
 
 private:
 	BosonNewEditorWidgetPrivate* d;

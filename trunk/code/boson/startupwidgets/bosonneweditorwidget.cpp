@@ -77,7 +77,7 @@ BosonNewEditorWidget::BosonNewEditorWidget(BosonStartupNetwork* interface, QWidg
 
  initSpecies();
  initPlayFields();
- initTilesets();
+ initGroundThemes();
 
  connect(networkInterface(), SIGNAL(signalStartGameClicked()),
 		this, SLOT(slotNetStart()));
@@ -136,12 +136,13 @@ void BosonNewEditorWidget::initSpecies()
 // important to allow that here.
 }
 
-void BosonNewEditorWidget::initTilesets()
+void BosonNewEditorWidget::initGroundThemes()
 {
  // AB: atm we use identifiers for the combobox only. one day we may want to add
  // names for them, too
  QStringList list = BosonData::bosonData()->availableGroundThemes();
- mChangeTileset->insertStringList(list);
+ mChangeGroundTheme->insertStringList(list);
+ slotGroundThemeChanged(mChangeGroundTheme->currentItem());
 }
 
 void BosonNewEditorWidget::slotNetStart()
@@ -170,13 +171,13 @@ void BosonNewEditorWidget::slotNetStart()
 		return;
 	}
 	QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
-	int themeIndex = mChangeTileset->currentItem();
+	int themeIndex = mChangeGroundTheme->currentItem();
 	if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
 		boError() << k_funcinfo << "invalid theme index " << themeIndex << endl;
 		if (themeIndex < 0) {
-			KMessageBox::sorry(this, i18n("Please select a ground theme / tileset first"));
+			KMessageBox::sorry(this, i18n("Please select a ground theme first"));
 		} else {
-			KMessageBox::sorry(this, i18n("The selected groundTheme / tileset at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
+			KMessageBox::sorry(this, i18n("The selected groundTheme at index %1 could not be found. %2 themes are available").arg(themeIndex).arg(groundThemes.count()));
 		}
 		return;
 	}
@@ -195,7 +196,7 @@ void BosonNewEditorWidget::slotNetStart()
 		return;
 	}
 
-	unsigned int texture = 0; // TODO: add a "fill with" combobox containing all available textures to the start new editor widget
+	unsigned int texture = mChangeFilling->currentItem();
 	if (texture >= theme->textureCount()) {
 		boError() << k_funcinfo << "invalid texture " << texture << endl;
 		KMessageBox::sorry(this, i18n("Could not fill the map with texture %1 - only %2 textures in groundTheme %3").arg(texture).arg(theme->textureCount()).arg(themeId));
@@ -311,7 +312,7 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  mChangeMaxWidthNumInput->setValue(map->width());
  mChangeMaxHeight->setValue(map->height());
  mChangeMaxHeightNumInput->setValue(map->height());
- mChangeTileset->setCurrentItem(0); // TODO - we do not yet support more than one :(
+ mChangeGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
  mChangeMaxPlayers->setValue(scenario->maxPlayers());
  mChangeMaxPlayersNumInput->setValue(scenario->maxPlayers());
 }
@@ -329,19 +330,41 @@ void BosonNewEditorWidget::slotPlayFieldChanged(QListViewItem* item)
 
 void BosonNewEditorWidget::slotGroundThemeChanged(int)
 {
- boDebug() << k_funcinfo << "only one groundTheme supported currently :(" << endl;
+ // we don't transmit over network.
+
+ mChangeFilling->clear();
+ QStringList groundThemes = BosonData::bosonData()->availableGroundThemes();
+ int themeIndex = mChangeGroundTheme->currentItem();
+ if (themeIndex < 0 || (unsigned int)themeIndex >= groundThemes.count()) {
+	KMessageBox::sorry(this, i18n("Invalid groundTheme index %1").arg(themeIndex));
+	return;
+ }
+ QString themeId = groundThemes[themeIndex];
+ BosonGroundTheme* theme = boData->groundTheme(themeId);
+ if (!theme) {
+	BO_NULL_ERROR(theme);
+	KMessageBox::sorry(this, i18n("An error occured while loading the selected groundtheme"));
+	return;
+ }
+
+ for (unsigned int i = 0; i < theme->textureCount(); i++) {
+	mChangeFilling->insertItem(theme->textureFileName(i));
+ }
 }
 
 void BosonNewEditorWidget::slotMaxPlayersChanged(int)
 {
+ // we don't transmit over network.
 }
 
 void BosonNewEditorWidget::slotMaxWidthChanged(int)
 {
+ // we don't transmit over network.
 }
 
 void BosonNewEditorWidget::slotMaxHeightChanged(int)
 {
+ // we don't transmit over network.
 }
 
 void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
@@ -353,7 +376,7 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	mChangeMaxWidthNumInput->setValue(50);
 	mChangeMaxPlayers->setValue(2);
 	mChangeMaxPlayersNumInput->setValue(2);
-	mChangeTileset->setCurrentItem(0);
+	mChangeGroundTheme->setCurrentItem(0);
 	mMapPropertiesTextBrowser->setText(i18n("Create a new (empty) map"));
 
 	// FIXME
