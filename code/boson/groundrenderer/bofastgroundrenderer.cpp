@@ -46,11 +46,11 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);
  BO_CHECK_NULL_RET(map->texMap());
- BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(mHeightMap2);
  BO_CHECK_NULL_RET(map->groundTheme());
 
  BosonGroundTheme* groundTheme = map->groundTheme();
- const float* heightMap = map->heightMap();
+ const float* heightMap = mHeightMap2;
 
  unsigned int* cellTextures = new unsigned int[cellsCount];
  for (unsigned int i = 0; i < cellsCount; i++) {

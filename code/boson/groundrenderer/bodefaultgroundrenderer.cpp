@@ -47,7 +47,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  BO_CHECK_NULL_RET(renderCells);
  BO_CHECK_NULL_RET(map);
  BO_CHECK_NULL_RET(map->texMap());
- BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(mHeightMap2);
  BO_CHECK_NULL_RET(map->normalMap());
  BO_CHECK_NULL_RET(map->groundTheme());
 
@@ -72,7 +72,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 		glEnable(GL_BLEND);
 	}
 	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i, boGame->advanceCallsCount()));
-	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, map->heightMap(), map->normalMap(), map->texMap(i));
+	unsigned int quads = renderCellsNow(renderCells, cellsCount, map->width() + 1, mHeightMap2, map->normalMap(), map->texMap(i));
 	if (quads != 0) {
 		usedTextures++;
 	}
@@ -85,7 +85,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
-	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), map->heightMap());
+	renderCellColors(renderCells, cellsCount, map->width(), map->colorMap()->colorMap(), mHeightMap2);
 	glPopAttrib();
 
  }
