@@ -53,7 +53,9 @@
 #include <qcstring.h>
 #include <qfile.h>
 
-#ifndef KGAME_HAVE_KGAME_PORT
+#ifndef KGAME_HAVE_KGAME_HOSTNAME
+// AB: !KGAME_HAVE_KGAME_PORT implies !KGAME_HAVE_KGAME_HOSTNAME
+// (KGame::hostName() was added after KGame::port())
 #include <qsocket.h>
 #include <qserversocket.h>
 #include <qobjectlist.h>
@@ -2405,6 +2407,29 @@ Q_UINT16 Boson::bosonPort()
 	boWarning() << k_funcinfo << "could not find QSocket!" << endl;
  }
  return 0;
+#endif
+}
+
+QString Boson::bosonHostName()
+{
+#ifdef KGAME_HAVE_KGAME_HOSTNAME
+ return KGame::hostName();
+#else
+ if (!isNetwork() || isOfferingConnections()) {
+	return QString::fromLatin1("localhost");
+ }
+ boDebug() << k_funcinfo << endl;
+ // ugly hack... luckily we *can* do such hacks :)
+ const QObjectList* list = QObject::objectTrees();
+ QObjectListIt it(*list);
+ for (; it.current(); ++it) {
+	if (qstrcmp((*it)->className(), "QSocket") == 0) {
+		QSocket* socket = (QSocket*)*it;
+		return socket->peerName();
+	}
+ }
+ boWarning() << k_funcinfo << "could not find QSocket!" << endl;
+ return QString::fromLatin1("localhost");
 #endif
 }
 

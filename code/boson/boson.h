@@ -270,6 +270,13 @@ public: // small KGame extenstions for boson
 	bool isServer() const;
 
 	/**
+	 * @return @ref KGameNetwork::hotName, if present (was added in KDE
+	 * 3.2). If it is not present, we use an evil hack that should have the
+	 * same result.
+	 **/
+	QString bosonHostName();
+
+	/**
 	 * Dummy systemAddPlayer function. This is meant to grant access to
 	 * systemAddPlayer to @ref BosonSaveLoad, without making the class a
 	 * friend of Boson (i.e. granting access to whole Boson).
