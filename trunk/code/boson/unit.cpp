@@ -124,6 +124,10 @@ void Unit::setTarget(Unit* target)
  if (!target) {
 	return;
  }
+ if (damage() == 0) {
+	kdWarning() << "Cannot attack: damage() == 0" << endl;
+	return;
+ }
  if (!target->isDestroyed()) {
 	setWork(WorkAttack);
 	setAnimated(true);
