@@ -454,6 +454,7 @@ void BosonUnitDialog::slotChangeUnitDir()
  loadProperties();
  loadMobileProperties();
  loadFacilityProperties();
+ loadPixmaps();
 }
 
 void BosonUnitDialog::loadProperties()
