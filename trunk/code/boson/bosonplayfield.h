@@ -107,20 +107,8 @@ public:
 	bool preLoadPlayField(const QString& identifier);
 
 	/**
-	 * Load all data from the playField. Needs to be done only once - when
-	 * the map gets started. You may want to use @ref preLoadPlayField
-	 * instead, which loads the important data only.
-	 *
-	 * @ref preLoadPlayField is sufficient for displaying description and
-	 * winning conditions and so on of a game. You need to load it
-	 * completely for starting a playField only.
-	 *
-	 * @param file The fileName of the playField. Can be QString::null if
-	 * @ref preLoadPlayField has been called already, i.e. @ref isPreLoaded
-	 * is true.
+	 * Load the playfield from @p files to this object.
 	 **/
-	bool loadPlayField(const QString& file);
-
 	bool loadPlayField(const QMap<QString, QByteArray>& files);
 
 	bool importHeightMapImage(const QImage& image);
@@ -235,7 +223,6 @@ signals:
 
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
-	bool loadMapFromFile_0_8(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
 
 	QString saveDescriptionToFile();
