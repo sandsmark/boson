@@ -30,50 +30,63 @@
 
 #define POWER_LEVELS 15
 
-#warning this is never freed
-SelectBoxData* SelectBox::mBoxData = 0;
-
 SelectBoxData::SelectBoxData()
 {
  mTextures = 0;
+ mDisplayListCount = 0;
+ mDisplayListBase = 0;
 }
 
 SelectBoxData::~SelectBoxData()
 {
- // TODO: free the display lists?
  delete mTextures;
+ if (mDisplayListCount > 0 && mDisplayListBase) {
+	glDeleteLists(mDisplayListBase, mDisplayListCount);
+	mDisplayListBase = 0;
+	mDisplayListCount = 0;
+ }
 }
 
-GLuint SelectBoxData::list(double factor)
+GLuint SelectBoxData::list(float factor)
 {
  if (factor > 1.0) {
 	factor = 1.0;
  } else if (factor < 0.0) {
 	factor = 0.0;
  }
- int list = (int)((POWER_LEVELS - 1) * factor);
- if (!mDisplayLists.contains(list)) {
+ if (mDisplayListBase == 0) {
 	loadBoxes();
-	if (!mDisplayLists.contains(list)) {
-		boError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
-		return 0;
-	}
-	return mDisplayLists[list];
  }
- return mDisplayLists[list];
+ if (mDisplayListBase == 0) {
+	boError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
+	return 0;
+ }
+ if (mDisplayListCount == 0) {
+	boError() << k_funcinfo << "no display lists loaded" << endl;
+	return 0;
+ }
+ int list = (int)((mDisplayListCount - 1) * factor);
+ if (list < 0) {
+	boError() << k_funcinfo << "list < 0: " << list << endl;
+	list = 0;
+ } else if (list >= mDisplayListCount) {
+	boError() << k_funcinfo << "list >= display list count: " << mDisplayListCount << " >= " << mDisplayListCount << endl;
+	list = mDisplayListCount - 1;
+ }
+ return mDisplayListBase + list;
 }
 
 void SelectBoxData::loadBoxes()
 {
  // TODO: we might want to use mipmaps here - interesting for big units, as well as for zooming
- GLuint list = glGenLists(POWER_LEVELS);
+ mDisplayListCount = POWER_LEVELS;
+ mDisplayListBase = glGenLists(mDisplayListCount);
  if (mTextures) {
 	boWarning() << k_funcinfo << "textures loaded before" << endl;
 	delete mTextures;
 	mTextures = 0;
  }
  QValueList<QImage> textureImages;
- glEnable(GL_TEXTURE_2D); // should already be enabled, cause we need it for units. just to be sure...
 
 // AB: the size is hardcoded. mipmaps might be VERY useful here!
 // FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
@@ -88,8 +101,8 @@ void SelectBoxData::loadBoxes()
 	boWarning() << k_funcinfo << "textures got loaded improperly" << endl;
  }
 
- for (unsigned int i = 0; i < POWER_LEVELS; i++) {
-	glNewList(list + i, GL_COMPILE);
+ for (int i = 0; i < mDisplayListCount; i++) {
+	glNewList(mDisplayListBase + i, GL_COMPILE);
 		// ok, this is the quick and dirty way. correct would be to
 		// adjust all vertices - but it doesn't really matter.
 		// this ensures, that we render around the *center*
@@ -97,9 +110,8 @@ void SelectBoxData::loadBoxes()
 		glTranslatef(-0.5, -0.5, 0.0);
 		drawCube();
 		glBindTexture(GL_TEXTURE_2D, mTextures->texture(0));
-		drawHealthBar(i);
+		drawHealthBar(i, mDisplayListCount);
 	glEndList();
-	mDisplayLists.insert(i, list+i);
  }
 }
 
@@ -152,9 +164,9 @@ void SelectBoxData::drawCube()
  glEnable(GL_TEXTURE_2D);
 }
 
-void SelectBoxData::drawHealthBar(int frame)
+void SelectBoxData::drawHealthBar(int frame, int displayListCount)
 {
- GLfloat texLength = ((float)frame) / (float)(POWER_LEVELS - 1);
+ GLfloat texLength = ((float)frame) / (float)(displayListCount - 1);
  GLfloat length = 1.0 * texLength; // y-direction
  GLfloat hy = 0.15; // height in y-direction
  GLfloat hz = 0.15; // height in z-direction
@@ -169,7 +181,7 @@ void SelectBoxData::drawHealthBar(int frame)
 	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, 0.0);
 	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, 0.0);
 	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, 0.0);
- 
+
 	// top
 	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, hz);
 	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, hz);
@@ -261,18 +273,10 @@ void SelectBoxData::drawHealthBar(int frame)
 
 SelectBox::SelectBox(BosonItem*, BosonCanvas*, bool groupLeader)
 {
- mDisplayList = 0;
- if (!mBoxData) {
-	mBoxData = new SelectBoxData;
- }
+ mFactor = 1.0f;
 }
 
 SelectBox::~SelectBox()
 {
-}
-
-void SelectBox::update(double div)
-{
- mDisplayList = mBoxData->list(div);
 }
 

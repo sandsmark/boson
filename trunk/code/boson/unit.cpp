@@ -350,7 +350,7 @@ int Unit::currentPluginType() const
 void Unit::updateSelectBox()
 {
  if (selectBox()) {
-	selectBox()->update((float)health() / unitProperties()->health());
+	selectBox()->setFactor((float)health() / unitProperties()->health());
  }
 }
 
