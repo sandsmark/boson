@@ -142,7 +142,7 @@ QCursor BosonNormalCursor::cursor() const
  return QCursor(QCursor::ArrowCursor);
 }
 
-void BosonNormalCursor::insertMode(int mode, QCursor* cursor)
+bool BosonNormalCursor::insertMode(int mode, QCursor* cursor)
 {
  if (d->mQCursors[mode]) {
 	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
@@ -150,12 +150,14 @@ void BosonNormalCursor::insertMode(int mode, QCursor* cursor)
  }
  if (cursor) {
 	d->mQCursors.insert(mode, cursor);
+	return true;
  }
+ return false;
 }
 
-void BosonNormalCursor::insertMode(int mode, QString baseDir, QString cursor)
+bool BosonNormalCursor::insertMode(int mode, QString baseDir, QString cursor)
 {
- insertMode(mode, loadQCursor(baseDir, cursor));
+ return insertMode(mode, loadQCursor(baseDir, cursor));
 }
 
 QCursor* BosonNormalCursor::loadQCursor(QString baseDir, QString cursor)
@@ -170,8 +172,6 @@ QCursor* BosonNormalCursor::loadQCursor(QString baseDir, QString cursor)
  if (p.load(file)) {
 	p.setMask(p.createHeuristicMask());
 	qcursor = new QCursor(p);
- } else {
-	qcursor = new QCursor(Qt::arrowCursor);
  }
  return qcursor;
 }
@@ -209,8 +209,10 @@ QCursor BosonKDECursor::cursor() const
  return KCursor::arrowCursor();
 }
 
-void BosonKDECursor::insertMode(int , QString , QString )
+bool BosonKDECursor::insertMode(int , QString , QString )
 {
+ // always successful :-)
+ return true;
 }
 
 /////////////////////////////////////////
@@ -301,7 +303,7 @@ void BosonSpriteCursor::setWidgetCursor(QWidget* w)
  }
 }
 
-void BosonSpriteCursor::insertMode(int mode, QCanvasPixmapArray* array)
+bool BosonSpriteCursor::insertMode(int mode, QCanvasPixmapArray* array)
 {
  if (d->mCursorPixmaps[mode]) {
 	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
@@ -309,7 +311,9 @@ void BosonSpriteCursor::insertMode(int mode, QCanvasPixmapArray* array)
  }
  if (array) {
 	d->mCursorPixmaps.insert(mode, array);
+	return true;
  }
+ return false;
 }
 
 QCanvasSprite* BosonSpriteCursor::cursorSprite() const
@@ -343,9 +347,9 @@ void BosonSpriteCursor::showCursor()
  }
 }
 
-void BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
+bool BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
 {
- insertMode(mode, loadSpriteCursor(baseDir, cursor));
+ return insertMode(mode, loadSpriteCursor(baseDir, cursor));
 }
 
 QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString cursor)
@@ -387,14 +391,6 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
 	} else {
 		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
 	}
- }
- if (!array) {
-	QValueList<QPixmap> p;
-	QPointArray points(1);
-	points.setPoint(0, 0, 0);
-	p.append(*KCursor::arrowCursor().bitmap());
-	kdWarning() << "loading fallback cursor..." << endl;
-	array = new QCanvasPixmapArray();
  }
  return array;
 }
@@ -548,7 +544,7 @@ void BosonExperimentalCursor::move(double x, double y)
  paintCursor(0, QPoint(x, y));
 }
 
-void BosonExperimentalCursor::insertMode(int mode, QCanvasPixmapArray* array)
+bool BosonExperimentalCursor::insertMode(int mode, QCanvasPixmapArray* array)
 {
  if (d->mCursorPixmaps[mode]) {
 	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
@@ -556,7 +552,9 @@ void BosonExperimentalCursor::insertMode(int mode, QCanvasPixmapArray* array)
  }
  if (array) {
 	d->mCursorPixmaps.insert(mode, array);
+	return true;
  }
+ return false;
 }
 
 void BosonExperimentalCursor::hideCursor()
@@ -583,9 +581,9 @@ QRect BosonExperimentalCursor::oldCursor() const
  return d->mRect;
 }
 
-void BosonExperimentalCursor::insertMode(int mode, QString baseDir, QString cursor)
+bool BosonExperimentalCursor::insertMode(int mode, QString baseDir, QString cursor)
 {
- insertMode(mode, loadCursor(baseDir, cursor));
+ return insertMode(mode, loadCursor(baseDir, cursor));
 }
 
 void BosonExperimentalCursor::paintCursor(QPainter* /**obsolete**/, const QPoint& pos)
@@ -621,7 +619,7 @@ QCanvasPixmapArray* BosonExperimentalCursor::loadCursor(QString baseDir, QString
  QCanvasPixmapArray* array = 0;
  KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
  if (!c.hasGroup("Boson Cursor")) {
-	kdWarning() << k_funcinfo << "index.desktop is missing default group - sprite cursor disabled" << endl;
+	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
  } else {
 	c.setGroup("Boson Cursor");
 	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
@@ -651,14 +649,6 @@ QCanvasPixmapArray* BosonExperimentalCursor::loadCursor(QString baseDir, QString
 	} else {
 		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
 	}
- }
- if (!array) {
-	QValueList<QPixmap> p;
-	QPointArray points(1);
-	points.setPoint(0, 0, 0);
-	p.append(*KCursor::arrowCursor().bitmap());
-	kdWarning() << "loading fallback cursor..." << endl;
-	array = new QCanvasPixmapArray();
  }
  return array;
 }
