@@ -129,13 +129,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  mMainDock->setEnableDocking(KDockWidget::DockNone);
  initGameDockWidgets(false);
 
- // this is for broken installations. people tend to install to /usr/local or
- // similar (which is 100% correct), but don't set $KDEDIRS (note that S)
- // correct. This is (I guess) a distribution bug in most (all?) distributions
- // out there.
- // we tell KDE here which our prefix is and add it this way to $KDEDIRS
- KGlobal::dirs()->addPrefix(BOSON_PREFIX);
-
  if (!BosonGroundTheme::createGroundThemeList()) {
 	boError() << k_funcinfo << "Unable to create groundTheme list" << endl;
 	KMessageBox::sorry(this, i18n("Unable to load groundThemes. Check your installation!"));
