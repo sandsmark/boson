@@ -36,6 +36,7 @@ visualCanvas::visualCanvas( QPixmap p, uint w, uint h)
 {
 	/* map geometry */
 	maxX = w; maxY = h;
+	_pm = p;
 
 	initTheme();
 }
@@ -80,6 +81,8 @@ void visualCanvas::resize (int w, int h)
 	/* map geometry */
 	maxX = w; maxY = h;
 	QCanvas::resize(w * BO_TILE_SIZE ,h * BO_TILE_SIZE);
+	QCanvas::setTiles( _pm, w, h, BO_TILE_SIZE, BO_TILE_SIZE);
+	logf(LOG_INFO, "visualCanvas::resize to %d, %d", w, h);
 }
 
 
@@ -94,6 +97,7 @@ void visualCanvas::setCell(int i, int j, cell_t c)
 
 	setTile( i, j, c);
 
+	///orzel : XXX this is the bottleneck in editor::New
 	emit newCell(i,j, ground(c));
 }
 
