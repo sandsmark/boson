@@ -196,6 +196,13 @@ TopWidget::~TopWidget()
 void TopWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(0);
+
+ // add an initial display. this should happen asap, as we need the OpenGL
+ // context for every texture that is to be loaded.
+ // the display will not be deleted before the program is quit, so that we don't
+ // have to load the textures several times.
+ d->mDisplayManager->addInitialDisplay();
+
  d->mDisplayManager->hide();
 }
 
@@ -476,8 +483,7 @@ void TopWidget::initBosonWidget()
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
 
- // finally add the initial display
- // note that this call also loads the cursor
+ // FIXME: rename. only the cursor is loaded here, the display was added before!
  d->mBosonWidget->addInitialDisplay();
 }
 
