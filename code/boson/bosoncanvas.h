@@ -29,7 +29,6 @@ class Cell;
 class Player;
 class Unit;
 class UnitProperties;
-class BoShot;
 class BosonTiles;
 class BoItemList;
 class BosonSprite;
@@ -108,8 +107,6 @@ public:
 	 * The unit will be deleted after a certain time.
 	 **/
 	void destroyUnit(Unit* unit);
-
-	void deleteShot(BoShot*);
 
 	void updateSight(Unit*, float oldX, float oldY);
 

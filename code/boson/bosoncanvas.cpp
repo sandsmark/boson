@@ -24,7 +24,6 @@
 #include "unitplugins.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
-#include "boshot.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
 #include "bosonparticlesystem.h"
@@ -49,7 +48,6 @@ public:
 	}
 	
 	QPtrList<Unit> mDestroyedUnits;
-	QPtrList<BoShot> mDeleteShot;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -70,7 +68,6 @@ void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
- d->mDeleteShot.setAutoDelete(true);
  d->mParticles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
 }
@@ -87,7 +84,6 @@ void BosonCanvas::quitGame()
 {
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
- d->mDeleteShot.clear();
  d->mParticles.clear();
 }
 
@@ -195,7 +191,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		d->mDestroyedUnits.removeRef(u);
 		delete u;
 	}
-	d->mDeleteShot.clear();
  }
 }
 
@@ -490,11 +485,6 @@ bool BosonCanvas::cellsOccupied(const QRect& rect, Unit* unit, bool excludeMovin
  return false;
 }
 
-void BosonCanvas::deleteShot(BoShot* s)
-{
- d->mDeleteShot.append(s);
-}
-
 void BosonCanvas::killPlayer(Player* player)
 {
  while (player->allUnits().count() > 0) {
@@ -700,3 +690,4 @@ void BosonCanvas::renderParticleSystems()
 	s->draw();
  }
 }
+
