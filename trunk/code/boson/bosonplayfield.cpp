@@ -343,11 +343,6 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  }
 
  BPFFile* f = new BPFFile(fileName, false);
- if (!f->directory()) {
-	boError() << k_funcinfo << "lkfsjsfklj" << endl;
-	return false;
- }
-
  QString user = f->directory()->user();
  QString group = f->directory()->group();
  f->writeFile(QString::fromLatin1("%1/map.xml").arg(topDir), user, group, map.length(), map.data());
