@@ -86,8 +86,8 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  mLoading = true;
  if (loadingFileName == QString::null) {
 	kdError() << k_funcinfo << "Cannot load game with NULL filename" << endl;
-	// do not return - we'll return to the welcome widget below
-	// anyway
+	//TODO: set Boson::loadingStatus()
+	return false;
  }
 
  // Open file and QDataStream on it
