@@ -736,6 +736,16 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			// use that game anymore anyway.
 			break;
 		}
+		if (!isAdmin()) {
+			// the ADMIN has already a chat message containing the
+			// success/failure of the sync
+			// FIXME: we should tell the clients whether we
+			// succeeded or failed at syncing
+			// AB: maybe we can tell the player whether this client
+			// is in sync (only ADMIN can know about the other
+			// clients)
+			slotAddChatSystemMessage(i18n("Network Sync completed. Success/failure unknown (only ADMIN knows). Unpause to continue the game"));
+		}
 		break;
 	}
 	case BosonMessage::IdNetworkSyncUnlockGame:
