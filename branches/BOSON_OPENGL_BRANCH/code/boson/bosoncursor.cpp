@@ -527,6 +527,8 @@ BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
  d = new BosonSpriteCursorPrivate;
  d->mCursorPixmaps.setAutoDelete(true);
  connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
+ mHotspotX = 0;
+ mHotspotY = 0;
 }
 
 BosonSpriteCursor::~BosonSpriteCursor()
@@ -720,62 +722,58 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
  if (!c.hasGroup("Boson Cursor")) {
 	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
 	return 0;
- } else {
-	c.setGroup("Boson Cursor");
-	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
-	unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
-	unsigned int hotspotX = 0;
-	unsigned int hotspotY = 0;
+ }
+ c.setGroup("Boson Cursor");
+ QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
+ unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
 #ifndef NO_OPENGL
-	QValueList<QImage> images;
+ QValueList<QImage> images;
 #else
-	QValueList<QPixmap> pixmaps;
+ QValueList<QPixmap> pixmaps;
+ QPointArray points(frames);
 #endif
-	QPointArray points(frames);
-	for (unsigned int j = 0; j < frames; j++) {
-		hotspotX = c.readUnsignedNumEntry(QString("HotspotX_%1").arg(j), hotspotX);
-		hotspotY = c.readUnsignedNumEntry(QString("HotspotY_%1").arg(j), hotspotY);
-		points.setPoint(j, hotspotX, hotspotY);
-		QString number;
-		number.sprintf("%04d", j);
-		QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
+
+ // AB: we support one hotspot only! it is used for all frames
+ mHotspotX = c.readUnsignedNumEntry(QString("HotspotX_0"), 0);
+ mHotspotY = c.readUnsignedNumEntry(QString("HotspotY_0"), 0);
+ for (unsigned int j = 0; j < frames; j++) {
+	// FIXME: supporting different hotspots for different frames is
+	// nonse. will never be used. too complex.
+	QString number;
+	number.sprintf("%04d", j);
+	QString file = QString::fromLatin1("%1%2/%3%4.png").arg(baseDir).arg(cursor).arg(filePrefix).arg(number);
 #ifndef NO_OPENGL
-		QImage image;
-		if (!image.load(file)) {
-			kdError() << k_funcinfo << "Could not load " << file << endl;
-			// TODO: load dummy image
-		}
-		images.append(image);
-#else
-		QPixmap p;
-		if (p.load(file)) {
-			QBitmap mask(file);
-			p.setMask(mask);
-		} else {
-			kdError() << k_funcinfo << "Could not load " << file << endl;
-		}
-		pixmaps.append(p);
-#endif // !NO_OPENGL
+	QImage image;
+	if (!image.load(file)) {
+		kdError() << k_funcinfo << "Could not load " << file << endl;
+		// TODO: load dummy image
 	}
-#ifndef NO_OPENGL
-	if (images.count() > 0) {
-		if (images.count() != points.count()) {
-			kdError() << k_funcinfo << "oops - points and images have different counts!" << endl;
-		} else {
-			kdDebug() << "create cursor texture array" << endl;
-			BosonTextureArray* array = new BosonTextureArray(images);
-			kdDebug() << "created texture array" << endl;
-			array->setHotspots(points);
-			return array;
-		}
+	images.append(image);
 #else
-	if (pixmaps.count() > 0) {
-		array = new QCanvasPixmapArray(pixmaps, points);
-		return array;
-#endif
+	points.setPoint(j, mHotspotX, mHotspotY);
+	QPixmap p;
+	if (p.load(file)) {
+		QBitmap mask(file);
+		p.setMask(mask);
 	} else {
-		kdError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
+		kdError() << k_funcinfo << "Could not load " << file << endl;
 	}
+	pixmaps.append(p);
+#endif // !NO_OPENGL
+ }
+#ifndef NO_OPENGL
+ if (images.count() > 0) {
+	kdDebug() << "create cursor texture array" << endl;
+	BosonTextureArray* array = new BosonTextureArray(images);
+	kdDebug() << "created texture array" << endl;
+	return array;
+#else
+ if (pixmaps.count() > 0) {
+	array = new QCanvasPixmapArray(pixmaps, points);
+	return array;
+#endif
+ } else {
+	kdError() << k_funcinfo << "Could not load from " << baseDir + cursor << endl;
  }
  return 0;
 }

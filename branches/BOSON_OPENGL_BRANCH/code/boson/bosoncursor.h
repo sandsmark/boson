@@ -322,6 +322,9 @@ public:
 
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
+	inline unsigned int hotspotX() const { return mHotspotX; }
+	inline unsigned int hotspotY() const { return mHotspotY; }
+
 #ifndef NO_OPENGL
 	bool insertMode(int mode, BosonTextureArray* pixmaps);
 	GLuint currentTexture() const;
@@ -349,6 +352,9 @@ protected:
 private:
 	class BosonSpriteCursorPrivate;
 	BosonSpriteCursorPrivate* d;
+
+	unsigned int mHotspotX;
+	unsigned int mHotspotY;
 };
 
 
