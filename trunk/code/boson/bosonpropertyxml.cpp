@@ -287,7 +287,7 @@ bool BosonPropertyXML::removeProperty(QDomElement& root, unsigned long int id)
  QDomNodeList list = root.elementsByTagName(QString::fromLatin1("KGameProperty"));
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement element = list.item(i).toElement();
-	if (!element.isNull()) {
+	if (element.isNull()) {
 		boError() << k_funcinfo << "item " << i << " is not an element" << endl;
 		continue;
 	}
