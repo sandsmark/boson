@@ -31,7 +31,6 @@
 
 #include <stdlib.h>
 
-//#include <klocale.h>
 BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name)
 		: QWidget(parent, name)
 {
