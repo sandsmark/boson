@@ -20,12 +20,7 @@
 
 #include "cell.h"
 
-/*
-Cell::Cell(groundType g, QObject*parent, const char *name=0L)
-	: QObject(parent, name)
-*/
 Cell::Cell(groundType g)
-//Cell::Cell(int pix)
 {
 ground = g;
 destroyed = DESTROYED_NONE ;
@@ -34,9 +29,3 @@ destroyed = DESTROYED_NONE ;
 Cell::~Cell()
 {
 }
-
-/*
-void Cell::setGroundType(groundType g)
-{
-ground = g;
-} */

@@ -58,8 +58,7 @@ class Unit : public QObject
   virtual	int	getWidth(void)=0;
   virtual	int	getHeight(void)=0;
 
-  //int 		pos_x,pos_y;		// cartesian Position
-  uint		who;		// who is the owner ?
+  int		who;		// who is the owner ?
   protected:
   int		key;
   uint		power;		// Power : 0 => death
@@ -78,10 +77,7 @@ class mobUnit : public Unit
  public:
   mobUnit(mobileMsg_t *msg, QObject* parent=0L, const char *name=0L);
 
-//  void	setPos(uint xx, uint yy) {pos_x = xx; pos_y = yy; }
-  void	getPos(uint &xx, uint &yy) {xx = _x(); yy = _y(); }
-//  void  move( int dx, int dy) { pos_x+=dx; pos_y+=dy; }
-
+  void		getPos(uint &xx, uint &yy) {xx = _x(); yy = _y(); }
   mobType	getType(void) {return type;}
 
   virtual	int	getWidth(void) { return mobileProp[type].width;}
@@ -102,9 +98,11 @@ class Facility : public Unit
 
  public:
   		Facility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
+
   facilityType	getType(void) {return type;}
-  virtual int	getWidth(void) { return facilityProp[type].width * BO_TILE_SIZE;}
-  virtual int	getHeight(void) { return facilityProp[type].height * BO_TILE_SIZE;}
+
+  virtual	int	getWidth(void) { return facilityProp[type].width * BO_TILE_SIZE;}
+  virtual	int	getHeight(void) { return facilityProp[type].height * BO_TILE_SIZE;}
   virtual	uint	getVisibility(void) {return facilityProp[type].visibility; }
   virtual	QRect	rect(void);
 
