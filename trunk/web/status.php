@@ -64,7 +64,6 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Support for height maps in editor</li>
     <li>3d-terrains in map files</li>
     <li>The new startup widgets need some work</li>
-    <li>New save game format</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
@@ -79,6 +78,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Big performance improvements</li>
     <li>Binary map format (decreases size of map files a lot, especially for big maps)</li>
     <li>Some new startup widgets</li>
+    <li>New save game format</li>
   </ul>
   <h4>Game</h4>
   <ul>
