@@ -77,6 +77,7 @@ bool boFile::openRead(const char *filename)
 	*stream >> map_height;
 	*stream >> nbMobiles;
 	*stream >> nbFacilities;
+	*stream >> worldName;
 
 	/*check 'realityness' */
 	boAssert (nbPlayer	> 1 );
@@ -117,6 +118,7 @@ bool boFile::openWrite(const char *filename)
 	*stream << map_height;
 	*stream << nbMobiles;
 	*stream << nbFacilities;
+	*stream << worldName;
 
 	BFstate = Write;
 	error = false;
