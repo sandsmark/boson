@@ -91,6 +91,8 @@ void BosonStartupWidget::init()
  topLayout->addWidget(logo, 0, AlignHCenter);
  topLayout->addSpacing(10); // FIXME hardcoded
  topLayout->addWidget(d->mWidgetStack, 1);
+
+ installEventFilter(this); // for the popup menu
 }
 
 BosonStartupWidget::~BosonStartupWidget()
