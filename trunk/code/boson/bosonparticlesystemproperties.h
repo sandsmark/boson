@@ -47,6 +47,10 @@ template<class T> class QValueList;
 class BosonParticleTextureArray
 {
   public:
+    ~BosonParticleTextureArray()
+    {
+      delete[] mTextureIds;
+    }
     int mTextureCount;
     GLuint* mTextureIds;
 };
