@@ -46,7 +46,8 @@ class FogTexture;
  *  automatic texture coordinate generation is used.
  *
  * The renderer uses geomipmapping for LOD.
- * ATM, LOD is only distance-based, but this might change in the future.
+ * LOD choosing algorithm takes chunk's roughness into account, so flat areas
+ *  will be optimized more than rough areas.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -70,6 +71,11 @@ class BoQuickGroundRenderer : public BoGroundRenderer
     class TerrainChunk
     {
       public:
+        ~TerrainChunk()
+        {
+          delete[] hastexture;
+        }
+
         // Min/max coordinates of the chunk. Note that max coordinate is not
         //  inclusive, so  width = maxX - minX.
         unsigned int minX;
@@ -106,6 +112,10 @@ class BoQuickGroundRenderer : public BoGroundRenderer
         float maxZ;
         BoVector3Float center;
         float radius;
+
+        // 'Roughness' of the chunk, used for lod level calculations
+        float roughness;
+        float textureRoughnessTotal;
     };
 
 
