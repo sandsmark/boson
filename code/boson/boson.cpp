@@ -22,6 +22,7 @@
 #include "player.h"
 #include "defines.h"
 #include "unit.h"
+#include "unitplugins.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "bosoncanvas.h"
@@ -282,13 +283,24 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveRefine:
 	{
 		kdDebug() << "MoveRefine" << endl;
-		Q_UINT32 refineryId;
+		Q_UINT32 refineryOwnerId;
+		Q_ULONG refineryId;
 		Q_UINT32 unitCount;
+		stream >> refineryOwnerId;
 		stream >> refineryId;
 		stream >> unitCount;
-		Unit* refinery = findUnit(refineryId, player);
+		Player* refineryOwner = (Player*)findPlayer(refineryOwnerId);
+		if (!refineryOwner) {
+			kdError() << k_lineinfo << "Cannot find player " << refineryOwnerId << endl;
+			break;
+		}
+		if (player->isEnemy(refineryOwner)) {
+			kdError() << k_lineinfo << "Cannot go to enemy refinery" << endl;
+			break;
+		}
+		Unit* refinery = findUnit(refineryId, refineryOwner);
 		if (!refinery) {
-			kdError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << player << endl;
+			kdError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
 			break;
 		}
 		if (!refinery->isFacility()) {
@@ -300,21 +312,68 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			stream >> unitId;
 			Unit* u = findUnit(unitId, player);
 			if (!u) {
-				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
+				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
 				continue;
 			}
 			if (!u->isMobile()) {
 				kdError() << k_lineinfo << "must be a mobile unit" << endl;
 				continue;
 			}
-			if (u->owner() != player) {
-				kdDebug() << k_lineinfo << "unit " << unitId << " is not of " << player << endl;
-				continue;
-			}
 			((MobileUnit*)u)->refineAt((Facility*)refinery);
 		}
 		break;
 		
+	}
+	case BosonMessage::MoveRepair:
+	{
+		// move mobile units to repairyard
+		//
+		// TODO there are several ways of repairing:
+		// 1. move mobile units to repairyard
+		// 2. move a mobile repairunit to damaged units
+		// 3. repair facilities
+		// can we use MoveRepair for all of them?
+		// this is currently about 1. only
+		Q_UINT32 repairOwnerId;
+		Q_ULONG repairId;
+		Q_UINT32 unitCount;
+		stream >> repairOwnerId;
+		stream >> repairId;
+		stream >> unitCount;
+		Player* repairOwner= (Player*)findPlayer(repairOwnerId);
+		if (!repairOwner) {
+			kdError() << k_lineinfo << "Cannot find player " << repairOwnerId << endl;
+			break;
+		}
+		if (player->isEnemy(repairOwner)) {
+			kdError() << k_lineinfo << "Cannot move to enemy repairyard" << endl;
+			break;
+		}
+		Unit* repairYard = findUnit(repairId, repairOwner);
+		if (!repairYard) {
+			kdError() << k_lineinfo << "Cannot find " << repairId << " for player " << repairOwnerId << endl;
+			break;
+		}
+		RepairPlugin* repair = repairYard->repairPlugin();
+		if (!repair) {
+			kdError() << k_lineinfo << "repairyard cannot repair?!" << endl;
+			break;
+		}
+		for (unsigned int i = 0; i < unitCount; i++) {
+			Q_ULONG unitId;
+			stream >> unitId;
+			Unit* u = findUnit(unitId, player);
+			if (!u) {
+				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id()  << endl;
+				continue;
+			}
+			if (!u->isMobile()) {
+				kdError() << k_lineinfo << "must be a mobile unit" << endl;
+				continue;
+			}
+			repair->repair(u);
+		}
+		break;
 	}
 	case BosonMessage::MoveProduce:
 	{
@@ -348,12 +407,14 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
 		}
-		if (!factory->isConstructionComplete()) {
-			kdWarning() << "Factory " << factoryId << " not yet constructed" << endl;
+		ProductionPlugin* production = factory->productionPlugin();
+		if (!production) {
+			// maybe not yet fully constructed
+			kdWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
 			break;
 		}
 		if (factory->work() != Unit::WorkProduce) {
-			if (factory->currentProduction() == unitType) {
+			if (production->currentProduction() == unitType) {
 				// production was stopped - continue it now
 				factory->setWork(Unit::WorkProduce);
 				emit signalUpdateProduction(factory);
@@ -370,7 +431,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		p->setMinerals(p->minerals() - prop->mineralCost());
 		p->setOil(p->oil() - prop->oilCost());
-		factory->addProduction(unitType);
+		production->addProduction(unitType);
 		emit signalUpdateProduction(factory);
 		break;
 	}
@@ -407,8 +468,14 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
 		}
+		ProductionPlugin* production = factory->productionPlugin();
+		if (!production) {
+			// should not happen here!
+			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
+			break;
+		}
 
-		if (factory->currentProduction() == unitType) {
+		if (production->currentProduction() == unitType) {
 			if (factory->work() == Unit::WorkProduce) {
 				// do not abort but just pause
 				factory->setWork(Unit::WorkNone);
@@ -416,7 +483,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			} else {
 				p->setMinerals(p->minerals() + prop->mineralCost());
 				p->setOil(p->oil() + prop->oilCost());
-				factory->removeProduction();
+				production->removeProduction();
 				emit signalUpdateProduction(factory);
 			}
 		} else {
@@ -425,7 +492,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			//item is added to the queue)
 			p->setMinerals(p->minerals() + prop->mineralCost());
 			p->setOil(p->oil() + prop->oilCost());
-			factory->removeProduction(unitType);
+			production->removeProduction(unitType);
 			emit signalUpdateProduction(factory);
 		}
 		break;
@@ -456,7 +523,13 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
-		int unitType = factory->completedProduction();
+		ProductionPlugin* production = factory->productionPlugin();
+		if (!production) {
+			// should not happen here!
+			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
+			break;
+		}
+		int unitType = production->completedProduction();
 		kdDebug() << k_lineinfo 
 				<< "factory=" 
 				<< factory->id() 
@@ -806,7 +879,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	return;
  }
  if (!isAdmin()) {
-	kdError() << k_funcinfo << ": only ADMIN can do this" << endl; 
+	kdError() << k_funcinfo << "only ADMIN can do this" << endl; 
 	return;
  }
 // kdDebug() << k_funcinfo << endl;
@@ -815,54 +888,22 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
 {
  if (!factory) {
-	kdError() << k_funcinfo << ": NULL factory cannot produce" << endl;
+	kdError() << k_funcinfo << "NULL factory cannot produce" << endl;
+	return false;
+ }
+ if (!factory->productionPlugin()) {
+	kdError() << k_funcinfo << "factory " << factory->id() << " cannot produce" << endl;
 	return false;
  }
  Player* p = factory->owner();
  if (!p) {
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
- QCanvasPixmapArray* a = p->speciesTheme()->pixmapArray(unitType);
- if (!a) {
-	kdError() << k_funcinfo << ": NULL pximap array for " << unitType 
-			<< endl;
+ if (!((BosonCanvas*)d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), 
+			QPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE), 0)) {
+	kdDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
- }
-
- QRect rect = (QRect(
-		x * BO_TILE_SIZE,
-		y * BO_TILE_SIZE,
-		a->image(0)->width(),
-		a->image(0)->height()));
- if (!((BosonCanvas*)d->mCanvas)->canGo(p->unitProperties(unitType), rect)) {
-	kdWarning() << "Unit can not be produced here" << endl;
-	return false;
- }
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
- QCanvasItemList list = d->mCanvas->collisions(QRect(
-		x * BO_TILE_SIZE,
-		y * BO_TILE_SIZE, 
-		a->image(0)->width(),
-		a->image(0)->height()));
-#else
- QCanvasItemList list = d->mCanvas->collisions(QRect(
-		x * BO_TILE_SIZE,
-		y * BO_TILE_SIZE, 
-		a->image(0)->width() - 1,
-		a->image(0)->height() - 1));
-#endif
- QCanvasItemList::Iterator it;
- for (it = list.begin(); it != list.end(); ++it) {
-	if (!RTTI::isUnit((*it)->rtti())) {
-		continue; // this item is not interesting here
-	}
-	Unit* unit = (Unit*)*it;
-	if (!unit->isDestroyed() && !unit->isFlying()) {
-		kdDebug() << "Cannot create unit here" << endl;
-		return false;
-	}
  }
  Unit* unit = addUnit(unitType, p, x, y);
  if (unit->isFacility()) {
@@ -872,7 +913,7 @@ bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
  }
  
  // the current production is done.
- factory->removeProduction();
+ factory->productionPlugin()->removeProduction();
  emit signalUpdateProduction(factory);
  return true;
 }

@@ -19,6 +19,7 @@
 #include "bosonbigdisplay.h"
 
 #include "unit.h"
+#include "unitplugins.h"
 #include "bosoncanvas.h"
 #include "player.h"
 #include "unitproperties.h"
@@ -243,8 +244,6 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			if (boConfig->mmbMove()) {
 				//TODO can we move the cursor-replacing code
 				//directly into center() ?
-				int oldX = contentsX();
-				int oldY = contentsY();
 				center(pos.x(), pos.y());
 				updateCursor();
 				canvas()->update();
@@ -485,9 +484,17 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		// apply it to any unit that gets constructed by that facility.
 		// For this we'd probably have to use LMB for unit placing
 		Facility* fac = (Facility*)d->mSelection->leader();
-		if (!fac->hasProduction() || !fac->canPlaceProductionAt(action->pos())) {
+		ProductionPlugin* production = fac->productionPlugin();
+		if (!production || !production->hasProduction() || production->completedProduction() < 0) {
 			return;
 		}
+		
+//		if (!fac->canPlaceProductionAt(action->pos())) { // obsolete
+		if (!((BosonCanvas*)canvas())->canPlaceUnitAt(d->mLocalPlayer->unitProperties(production->currentProduction()), action->pos(), fac)) {
+			kdDebug() << k_funcinfo << "Cannot place production here" << endl;
+			return;
+		}
+
 		// create the new unit
 		stream << (Q_UINT32)BosonMessage::MoveBuild;
 		stream << (Q_ULONG)fac->id();
@@ -515,7 +522,7 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		}
 		send = true;
 		Unit* u = d->mSelection->leader();
-		if (unit->owner() == d->mLocalPlayer) {
+		if (u->owner() == d->mLocalPlayer) {
 			boMusic->playSound(u, Unit::SoundOrderAttack);
 		}
 
@@ -524,17 +531,27 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 		// we probably won't do anything here
 	} else {
 		// click on a friendly unit
-		if (unit->weaponDamage() < 0 && unit->isFacility()) {
-			kdDebug() << "TODO: goto repairyard" << endl;
+		if (unit->weaponDamage() < 0 && unit->isFacility() && unit->repairPlugin()) {
 			// some kind of repairyard - repair all units
-			// (not yet implemented)
+			// (not yet implemented) //FIXME
 			// note that currently the unit can go to every friendly
 			// player, even non-local players
-			/*
-			QPtrList<Unit> list = d->mSelection->allUnits();
-			QPtrListIterator<Unit> it(list);
+			QPtrList<Unit> allUnits = d->mSelection->allUnits();
+			QPtrList<Unit> list;
+			QPtrListIterator<Unit> it(allUnits);
+			while (it.current()) {
+				if (it.current()->health() < it.current()->unitProperties()->health()) {
+					kdDebug() << "repair " << it.current()->id() << endl;
+					list.append(it.current());
+				}
+				++it;
+			}
+			it = QPtrListIterator<Unit>(list);
 			// tell the clients we want to repair:
 			stream << (Q_UINT32)BosonMessage::MoveRepair;
+			// the owner of the repairyard (can also be an allied
+			// player - not localplayer only)
+			stream << (Q_UINT32)unit->owner()->id();
 			// tell them where to repair the units:
 			stream << (Q_ULONG)unit->id();
 			// tell them how many units to be repaired:
@@ -545,11 +562,9 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				++it;
 			}
 			send = true;
-			Unit* u = d->mSelection->leader();
-			if (unit->owner() == d->mLocalPlayer) {
-				boMusic->playSound(u, Unit::SoundOrderRepair);
-			}
-			*/
+			// TODO:
+//			Unit* u = d->mSelection->leader();
+//			boMusic->playSound(u, Unit::SoundOrderRepair);
 		} else if ((unit->unitProperties()->canRefineMinerals() &&
 				d->mSelection->hasMineralHarvester()) ||
 				(unit->unitProperties()->canRefineOil() &&
@@ -573,6 +588,9 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 			}
 			QPtrListIterator<Unit> it(list);
 			stream << (Q_UINT32)BosonMessage::MoveRefine;
+			// the owner of the refinery (can also be an allied
+			// player - not localplayer only)
+			stream << (Q_UINT32)unit->owner()->id();
 			// destination:
 			stream << (Q_ULONG)unit->id();
 			// how many units go to the refinery
@@ -583,11 +601,9 @@ void BosonBigDisplay::actionClicked(const BoAction* action, QDataStream& stream,
 				++it;
 			}
 			send = true;
-			Unit* u = d->mSelection->leader();
-			if (unit->owner() == d->mLocalPlayer) {
-				//TODO
-//				boMusic->playSound(u, Unit::SoundOrderRefine);
-			}
+			// TODO:
+//			Unit* u = d->mSelection->leader();
+//			boMusic->playSound(u, Unit::SoundOrderRefine);
 		} else {
 			// selection and clicked unit both are friendly
 			// no repairyard and no refinery
@@ -725,8 +741,10 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, UnitBase* factory, KPl
  if (factory) { // usual production
 //	kdDebug() << "there is a factory " << endl;
 	return;
+	kdError() << "obsolete??" << endl;
 	// this MUST be sent over network - therefore use CommandInput!
-	((Facility*)factory)->addProduction(unitType);
+//	((Facility*)factory)->addProduction(unitType); //AB: seems to be
+//	obsolete.. //TODO: test if it is used in any way!
  } else { // we are in editor mode!
 	//FIXME
 	// should be sent over network

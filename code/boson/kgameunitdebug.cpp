@@ -20,6 +20,7 @@
 
 #include "boson.h"
 #include "unit.h"
+#include "unitplugins.h"
 #include "player.h"
 
 #include <klistview.h>
@@ -253,13 +254,16 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
  if (!unit->isFacility()) {
 	return;
  }
- QValueList<int> constructions = ((Facility*)unit)->productionList();
- for (unsigned int i = 0; i < constructions.count(); i++) {
-	QListViewItem* item = new QListViewItem(d->mProduction);
-	item->setText(0, QString::number(i+1));
-	item->setText(1, QString::number(constructions[i]));
-	item->setText(2, i18n("Ready")); // currently always ready
- }
+ ProductionPlugin* production = ((Facility*)unit)->productionPlugin();
+ if (production) {
+	QValueList<int> productions = production->productionList();
+	for (unsigned int i = 0; i < productions.count(); i++) {
+		QListViewItem* item = new QListViewItem(d->mProduction);
+		item->setText(0, QString::number(i+1));
+		item->setText(1, QString::number(productions[i]));
+		item->setText(2, i18n("Ready")); // currently always ready
+	}
  
+ }
 }
 

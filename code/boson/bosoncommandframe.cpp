@@ -20,6 +20,7 @@
 #include "bosoncommandframe.h"
 
 #include "unit.h"
+#include "unitplugins.h"
 #include "player.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
@@ -216,21 +217,25 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
  ensureButtons(produceList.count());
  hideOrderButtons();
  int unitType = -1;
+ ProductionPlugin* production = 0;
  if (factory) {
-	if (factory->hasProduction()) {
-		unitType = factory->currentProduction();
+	production = factory->productionPlugin();
+	if (!production) {
+		kdDebug() << k_funcinfo << "factory cannot produce" << endl;
+	} else if (production->hasProduction()) {
+		unitType = production->currentProduction();
 	}
  }
  for (unsigned int i = 0; i < produceList.count(); i++) {
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
 	d->mTopLayout->activate();
-	if (unitType >= 0) {
-		int count = factory->productionList().contains(produceList[i]);
+	if (unitType >= 0 && production) {
+		int count = production->productionList().contains(produceList[i]);
 		if (produceList[i] != unitType) {
 			d->mOrderButton[i]->setProductionCount(count);
 			d->mOrderButton[i]->setGrayOut(true);
 		} else {
-			d->mOrderButton[i]->advanceProduction(factory->productionProgress());
+			d->mOrderButton[i]->advanceProduction(production->productionProgress());
 			if (factory->work() != Unit::WorkProduce) {
 				d->mOrderButton[i]->setProductionCount(-1);
 			} else {
@@ -349,14 +354,19 @@ void BoOrderWidget::productionAdvanced(Unit* factory, double percentage)
 	kdError() << k_lineinfo << "NOT factory" << endl;
 	return;
  }
- if (!((Facility*)factory)->hasProduction()) {
+ ProductionPlugin* production = ((Facility*)factory)->productionPlugin();
+ if (!production) {
+	kdError() << k_funcinfo << factory->id() << " cannot produce" << endl;
+	return;
+ }
+ if (!production->hasProduction()) {
 	kdDebug() << k_funcinfo << "no production" << endl;
 	return;
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonCommandWidget* c = d->mOrderButton[i];
 	if (c->commandType() == BosonCommandWidget::CommandUnit) {
-		if (c->unitType() == ((Facility*)factory)->currentProduction()) {
+		if (c->unitType() == production->currentProduction()) {
 			c->advanceProduction(percentage);
 		}
 	}
@@ -538,10 +548,11 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 		slotShowConstructionProgress(fac);
 		return;
 	}
-	if (prop->canProduce()) {
+	ProductionPlugin* production = fac->productionPlugin();
+	if (production) {
 		QValueList<int> produceList = fac->speciesTheme()->productions(prop->producerList());
 		d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
-		if (fac->hasProduction()) {
+		if (production->hasProduction()) {
 			d->mUpdateTimer.start(UPDATE_TIMEOUT);
 		}
 		d->mOrderWidget->show();
@@ -678,11 +689,12 @@ void BosonCommandFrame::slotUpdate()
 	}
  }
  if (!d->mOrderWidget->isHidden()) {
-	if (!((Facility*)d->mSelectedUnit)->hasProduction()) {
+	ProductionPlugin* production = ((Facility*)d->mSelectedUnit)->productionPlugin();
+	if (!production || !production->hasProduction()) {
 		slotUpdateProduction((Facility*)d->mSelectedUnit);
 	} else {
 		d->mOrderWidget->productionAdvanced(d->mSelectedUnit, 
-				((Facility*)d->mSelectedUnit)->productionProgress());
+				production->productionProgress());
 		used = true;
 	}
  }

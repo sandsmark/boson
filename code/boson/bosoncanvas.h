@@ -26,6 +26,7 @@ class BosonMap;
 class Cell;
 class Player;
 class Unit;
+class Facility;
 class UnitProperties;
 class BoShot;
 class BoDisplayManager;
@@ -143,23 +144,41 @@ public:
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius);
+	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius) const;
 
-	QValueList<Unit*> unitsAtCell(int x, int y);
+	QValueList<Unit*> unitsAtCell(int x, int y) const;
 
 	/**
 	 * Returns whether cell is occupied (there is non-destroyed mobile or
 	 * facility on it) or not
 	 * Note that if there is aircraft on this tile, it returns false
 	 **/
-	bool cellOccupied(int x, int y);
+	bool cellOccupied(int x, int y) const;
 
 	/**
 	 * Like previous one, but unit u can be on cell
 	 * Can be used from inside Unit class
 	 * If excludemoving is true moving units can be on cell
 	 */
-	bool cellOccupied(int x, int y, Unit* u, bool excludemoving = false);
+	bool cellOccupied(int x, int y, Unit* u, bool excludemoving = false) const;
+
+	/**
+	 * Check if any cell in rect is occupied. Note that rect consists of
+	 * <em>canvas coordinates</em>, not of cell-coordinates.
+	 * @return TRUE if any cell in rect is occupied, otherwise FALSE.
+	 **/
+	bool cellsOccupied(const QRect& rect) const;
+
+	/**
+	 * @param owner If non-NULL and unit is a facilty we also check whether
+	 * a player unit is in BUILD_RANGE. Otherwise only @ref cellOccupied is
+	 * checked.
+	 * @param factory If NULL BUILD_RANGE is ignored. Otherwise facilities
+	 * must be in range of BUILD_RANGE of any player unit and mobile units
+	 * in BUILD_RANGE of the facility.
+	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
+	 **/
+	bool canPlaceUnitAt(const UnitProperties* unit, const QPoint& pos, Facility* factory) const;
 
 	void quitGame();
 

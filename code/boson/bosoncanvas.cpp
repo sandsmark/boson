@@ -21,6 +21,7 @@
 #include "player.h"
 #include "cell.h"
 #include "unit.h"
+#include "unitplugins.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
 #include "boshot.h"
@@ -28,6 +29,7 @@
 #include "unitgroup.h"
 #include "bosontiles.h"
 #include "bodisplaymanager.h"
+#include "speciestheme.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -47,7 +49,7 @@
 
 /**
  * Pixmap loader for the tileset. We use a different thread to provide
- * non-blocking UI.
+ * non-blocking UI. UPDATE: not correct anymore!
  *
  * It is important that you <em>DON'T</em> access the canvas (especially
  * update()) before this is completed! The canvas does <em>not</em> have tiles
@@ -147,6 +149,7 @@ public:
 	QPtrList<Unit> mWorkRefine;
 	QPtrList<Unit> mWorkAttack;
 	QPtrList<Unit> mWorkConstructed;
+	QPtrList<Unit> mWorkRepair;
 
 	QValueList<UnitGroup> mGroups;
 
@@ -202,6 +205,7 @@ void BosonCanvas::quitGame()
  d->mWorkRefine.clear();
  d->mWorkAttack.clear();
  d->mWorkConstructed.clear();
+ d->mWorkRepair.clear();
  d->mGroups.clear();
 }
 
@@ -333,8 +337,11 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
  if (d->mWorkProduce.count() > 0 && (advanceCount % 1) == 0) {// always true. should be be bigger, like % 10 or so. we need to change something in the production logic for this.
 	QPtrListIterator<Unit> it(d->mWorkProduce);
 	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceProduction();
+		if (!it.current()->productionPlugin()) {
+			kdWarning() << k_lineinfo << "unit cannot produce" << endl;
+			it.current()->setWork(Unit::WorkNone);
+		} else {
+			it.current()->productionPlugin()->advance();
 		}
 		++it;
 	}
@@ -386,6 +393,17 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
 			it.current()->advanceConstruction();
+		}
+		++it;
+	}
+ }
+ if (d->mWorkRepair.count() > 0 && (advanceCount % 40) == 0) {
+	QPtrListIterator<Unit> it(d->mWorkRepair);
+	while (it.current()) {
+		if (!it.current()->repairPlugin()) {
+			it.current()->setWork(Unit::WorkNone);
+		} else {
+			it.current()->repairPlugin()->advance();
 		}
 		++it;
 	}
@@ -752,7 +770,7 @@ void BosonCanvas::initFogOfWar(Player* p)
  }
 }
 
-QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius)
+QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
 // qt bug (confirmed). will be fixed in 3.1
 #if QT_VERSION >= 310
@@ -794,7 +812,7 @@ QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radi
  return list;
 }
 
-QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
+QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y) const
 {
  if (!cell(x, y)) {
 	return QValueList<Unit*>();
@@ -802,7 +820,7 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
  return cell(x, y)->items()->units(false);
 }
 
-bool BosonCanvas::cellOccupied(int x, int y)
+bool BosonCanvas::cellOccupied(int x, int y) const
 {
  if (!cell(x, y)) {
 	return true;
@@ -810,12 +828,11 @@ bool BosonCanvas::cellOccupied(int x, int y)
  return cell(x, y)->isOccupied();
 }
 
-bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
+bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) const
 {
  if (unit->isFlying()) {
 	return false; // even if there are other flying units - different altitudes!
  }
-// qt bug (confirmed). will be fixed in 3.1
  if (!cell(x, y)) {
 	kdError() << k_funcinfo << "NULL cell" << endl;
 	return true;
@@ -824,6 +841,22 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
+bool BosonCanvas::cellsOccupied(const QRect& rect) const
+{
+ const int left = rect.left() / BO_TILE_SIZE;
+ const int top = rect.top() / BO_TILE_SIZE;
+ const int right = rect.right() / BO_TILE_SIZE + ((rect.right() % BO_TILE_SIZE == 0) ? 0 : 1);
+ const int bottom = rect.bottom() / BO_TILE_SIZE + ((rect.bottom() % BO_TILE_SIZE == 0) ? 0 : 1);
+
+ for (int x = left; x < right; x++) {
+	for (int y = top; y < bottom; y++) {
+		if (cellOccupied(x, y)) {
+			return true;
+		}
+	}
+ }
+ return false;
+}
 
 void BosonCanvas::setWorkChanged(Unit* u)
 {
@@ -850,6 +883,7 @@ void BosonCanvas::changeWork()
 	d->mWorkRefine.removeRef(u);
 	d->mWorkAttack.removeRef(u);
 	d->mWorkConstructed.removeRef(u);
+	d->mWorkRepair.removeRef(u);
 
 	if (d->mDestroyedUnits.contains(u)) {
 		continue;
@@ -879,6 +913,9 @@ void BosonCanvas::changeWork()
 			break;
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
+			break;
+		case UnitBase::WorkRepair:
+			d->mWorkRepair.append(u);
 			break;
 		case UnitBase::WorkMoveInGroup:
 			// already in d->mGroups
@@ -963,5 +1000,50 @@ void BosonCanvas::addToCells(Unit* u)
 void BosonCanvas::setDisplayManager(BoDisplayManager* m)
 {
  d->mDisplayManager = m;
+}
+
+bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const QPoint& pos, Facility* factory) const
+{
+ QCanvasPixmapArray* a = prop->theme()->pixmapArray(prop->typeId());
+ if (!a) {
+	kdError() << k_funcinfo << "Cannot fine pixmap array for " << prop->typeId() << endl;
+	return false;
+ }
+ if (!a->image(0)) {
+	kdError() << k_funcinfo << "Cannot find first pixmap for " << prop->typeId() << endl;
+	return false;
+ }
+ int width = a->image(0)->width();
+ int height = a->image(0)->height();
+ QRect r(pos.x(), pos.y(), width, height);
+ if (!canGo(prop, r)) {
+	return false;
+ }
+ if (cellsOccupied(r)) {
+	return false;
+ }
+ if (!factory) {
+	return true;
+ }
+ if (prop->isMobile()) {
+	// must be in BUILD_RANGE of factory
+	// not perfect - there is alays a distance from center() to the edge of
+	// both units which should also added to this. but this is not a maths
+	// contest, so its ok this way
+	int dx = QABS(r.center().x() - factory->boundingRect().center().x());
+	int dy = QABS(r.center().y() - factory->boundingRect().center().y());
+	if (dx * dx + dy * dy <= BUILD_RANGE * BUILD_RANGE) {
+		return true;
+	}
+ } else {
+	// must be in BUILD_RANGE of any facility of the player
+	QValueList<Unit*> list = unitCollisionsInRange(r.center(), BUILD_RANGE);
+	for (unsigned int i = 0; i < list.count(); i++) {
+		if (list[i]->isFacility() && list[i]->owner() == factory->owner()) {
+			return true;
+		}
+	}
+ }
+ return false;
 }
 
