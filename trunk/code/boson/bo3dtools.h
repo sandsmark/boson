@@ -41,6 +41,10 @@ class BoVector3
 
     inline void reset()  { mData[0] = mData[1] = mData[2] = 0; };
 
+    inline GLfloat x() const { return mData[0]; };
+    inline GLfloat y() const { return mData[1]; };
+    inline GLfloat z() const { return mData[2]; };
+
     inline void set(GLfloat x, GLfloat y, GLfloat z)  { mData[0] = x;  mData[1] = y;  mData[2] = z; };
     inline void setX(GLfloat x) { mData[0] = x; }
     inline void setY(GLfloat y) { mData[1] = y; }

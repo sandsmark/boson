@@ -20,6 +20,7 @@
 #define BOSONBIGDISPLAYBASE_H
 
 #include "defines.h"
+#include "bo3dtools.h"
 
 #include <qgl.h>
 
@@ -292,18 +293,19 @@ protected:
 	 * otherwise the distance from the near plane. We might use this for the
 	 * level of detail.
 	 **/
-	float sphereInFrustum(const float* pos, float radius) const;
+	float sphereInFrustum(const BoVector3& pos, float radius) const;
 	inline float sphereInFrustum(float x, float y, float z, float radius) const
 	{
-		float pos[3] = {x,y,z};
+		BoVector3 pos(x,y,z);
 		return sphereInFrustum(pos, radius);
 	}
 
 	void setCamera(const Camera& c);
 	Camera* camera() const;
-	GLfloat centerX() const;
-	GLfloat centerY() const;
-	GLfloat cameraZ() const;
+	/**
+	 * @return Point that the camera is looking at
+	 **/
+	const BoVector3& cameraLookAtPos() const;
 	void cameraChanged();
 
 	bool checkError() const;

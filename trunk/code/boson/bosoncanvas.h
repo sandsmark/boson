@@ -34,6 +34,7 @@ class BosonItem;
 class ProductionPlugin;
 class BosonParticleSystem;
 class BosonShot;
+class BoVector3;
 
 class KPlayer;
 template<class T> class QPtrList;
@@ -42,6 +43,11 @@ template<class T> class QValueList;
 
 
 /**
+ * @short Class that takes care of game management
+ *
+ * BosonCanvas is one of the most important classes in Boson.
+ * It holds lists with all items and calls advance() methods for them
+ *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonCanvas : public QObject
@@ -107,17 +113,26 @@ public:
 	void newShot(BosonShot* shot);
 
 	/**
-	 * Called when missile explodes. This iterates through all unit in damage
-	 * range of the missile and calls @ref unitHit for them.
+	 * Called when missile explodes. This just calls @ref explosion with correct
+	 * values
 	 **/
 	void shotHit(BosonShot* m);
+
+	/**
+	 * Called when something explodes. Usually it's unit or missile.
+	 * @param pos Position of the center of the explosion
+	 * @param damage How much unit will be damaged if it's in explosion area
+	 * @param range Radius of explosion. All units range or less cells away will be damaged
+	 * @param owner Player who caused the explosion. Used for statistics. May be null
+	 **/
+	void explosion(const BoVector3& pos, long int damage, float range, Player* owner);
 
 	/**
 	 * Called when unit is damaged (usually by missile).
 	 * It calculates new health for the unit, creates particle systems if needed
 	 * and marks unit as destoyed if it doesn't have any hitpoints left anymore.
 	 **/
-	void unitHit(Unit* unit, long int damage);
+	void unitDamaged(Unit* unit, long int damage);
 
 	/**
 	 * Mark the unit as destroyed and play the destroyed sound.
@@ -156,6 +171,12 @@ public:
 	 * check for the circle directly.
 	 **/
 	QValueList<Unit*> unitCollisionsInRange(const QPoint& pos, int radius) const;
+
+	/**
+	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
+	 * operates in 3d space
+	 **/
+	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, int radius) const;
 
 	QValueList<Unit*> unitsAtCell(int x, int y) const;
 

@@ -151,6 +151,8 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
+ mExplodingDamage = conf.readLongNumEntry("ExplodingDamage", 0);
+ mExplodingDamageRange = (float)(conf.readDoubleNumEntry("ExplodingDamageRange", 0));
 
  d->mDestroyedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedParticles");
  if (mFullMode) {
@@ -194,6 +196,8 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("SupportMiniMap", mSupportMiniMap);
  conf.writeEntry("IsFacility", isFacility());
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
+ conf.writeEntry("ExplodingDamage", mExplodingDamage);
+ conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);

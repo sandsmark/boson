@@ -319,6 +319,10 @@ public:
 	 **/
 	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };  
 
+
+	long int explodingDamage() const { return mExplodingDamage; }; 
+	float explodingDamageRange() const { return mExplodingDamageRange; }; 
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -356,6 +360,8 @@ protected:
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
 	void setDestroyedParticleSystemIds(QValueList<unsigned long int> ids);
+	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
+	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
 
 	// These only have effect if there is mobile or facility properties
 	void setCanRefineMinerals(bool r);
@@ -415,7 +421,9 @@ private:
 	unsigned long int mShields;
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
-  unsigned long int mMaxWeaponRange;
+	unsigned long int mMaxWeaponRange;
+	long int mExplodingDamage;
+	float mExplodingDamageRange;
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;

@@ -357,7 +357,7 @@ void BosonCanvas::shotHit(BosonShot* s)
 	boError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
- // Set age of flying particle systems (e.g. smoke traces) to 0 so they wont create any new particles
+ // Set age of flying particle systems (e.g. smoke traces) to 0 so they won't create any new particles
  QPtrListIterator<BosonParticleSystem> it(*(s->flyParticleSystems()));
  while (it.current()) {
 	it.current()->setAge(0);
@@ -365,22 +365,28 @@ void BosonCanvas::shotHit(BosonShot* s)
  }
  // Add hit particle systems
  addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
- // Decrease health of all units within damaging range of missile
- QValueList<Unit*> l = unitCollisionsInRange(QPoint(s->x(), s->y()),
-		s->properties()->damageRange() * BO_TILE_SIZE - 10);  // - 2 is needed to prevent units on next cells from also being damaged
+ 
+ explosion(BoVector3(s->x(), s->y(), s->z()), s->properties()->damage(), s->properties()->damageRange(), s->owner());
+}
+
+void BosonCanvas::explosion(const BoVector3& pos, long int damage, float range, Player* owner)
+{
+ // Decrease health of all units within damaging range of explosion
+ float r = QMAX(0, range * BO_TILE_SIZE - 1);  // - 1 is needed to prevent units on next cells from also being damaged
+ QValueList<Unit*> l = unitCollisionsInSphere(pos, r);
  for (unsigned int i = 0; i < l.count(); i++) {
-	unitHit(l[i], s->properties()->damage());
-	if (l[i]->isDestroyed()) {
+	unitDamaged(l[i], damage);
+	if (l[i]->isDestroyed() && owner) {
 		if (l[i]->isFacility()) {
-			s->owner()->statistics()->addDestroyedFacility(l[i], s->owner());
+			owner->statistics()->addDestroyedFacility(l[i], owner);
 		} else {
-			s->owner()->statistics()->addDestroyedMobileUnit(l[i], s->owner());
+			owner->statistics()->addDestroyedMobileUnit(l[i], owner);
 		}
 	}
  }
 }
 
-void BosonCanvas::unitHit(Unit* unit, long int damage)
+void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 {
  // Shield
  if (unit->shields() > 0) {
@@ -492,8 +498,11 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	removeUnit(unit);
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
-	BoVector3 pos(unit->x() + unit->width() / 2,unit->y() + unit->height() / 2, unit->z());
+	BoVector3 pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
+	if(unit->unitProperties()->explodingDamage() > 0) {
+		explosion(pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), unit->owner());
+	}
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
 	}
@@ -572,6 +581,41 @@ boDebug() << k_funcinfo << endl;
 //	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (w * w + h * h <= radius * radius) {
+//		boDebug() << "adding " << u->id() << endl;
+		list.append(u);
+	}
+ }
+ return list;
+}
+
+QValueList<Unit*> BosonCanvas::unitCollisionsInSphere(const BoVector3& pos, int radius) const
+{
+ // FIXME: code duplicated from unitCollisionsInRange
+boDebug() << k_funcinfo << endl;
+ BoItemList l = bosonCollisions(QRect(
+		(pos.x() - radius > 0) ? pos.x() - radius : 0,
+		(pos.y() - radius > 0) ? pos.y() - radius : 0,
+		pos.x() + radius,
+		pos.y() + radius));
+			
+ QValueList<Unit*> list;
+ for (unsigned int i = 0; i < l.count(); i++) {
+	if (!RTTI::isUnit(l[i]->rtti())) {
+		// this item is not important for us here
+		continue;
+	}
+	Unit* u = (Unit*)l[i];
+	if (u->isDestroyed()) {
+		// this item is not important for us here
+		continue;
+	}
+//	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
+	int x = (int)(pos.x() - (u->x() + u->width() / 2));
+	int y = (int)(pos.y() - (u->y() + u->height() / 2));
+	int z = (int)(pos.z() - (u->z()));
+//	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
+
+	if (x * x + y * y + z * z <= radius * radius) {
 //		boDebug() << "adding " << u->id() << endl;
 		list.append(u);
 	}
