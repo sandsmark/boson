@@ -246,6 +246,7 @@ private:
 	QComboBox* mRenderingSpeed;
 	QCheckBox* mAlignSelectBoxes;
 	QCheckBox* mEnableATIDepthWorkaround;
+	QComboBox* mResolution;
 	QLineEdit* mATIDepthWorkaroundValue;
 	QVBox* mAdvanced;
 

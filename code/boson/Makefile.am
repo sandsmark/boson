@@ -91,7 +91,8 @@ BOSON_COMMON_SRC = \
 	bosonlocalplayerinput.cpp \
 	botexmapimportdialog.cpp \
 	bobincoder.cpp \
-	bolight.cpp
+	bolight.cpp \
+	bofullscreen.cpp
 
 
 BOPROFILING_SRC= \
@@ -123,7 +124,8 @@ boson_LDADD = \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
-		$(LIB_KDEUI)
+		$(LIB_KDEUI) \
+		$(LIB_XRANDR)
 boson_SOURCES = \
 		$(BOSON_COMMON_SRC)\
 		top.cpp  \
@@ -141,7 +143,8 @@ bounit_LDADD = \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
-		-lkio $(LIB_KDEUI)
+		-lkio $(LIB_KDEUI) \
+		$(LIB_XRANDR)
 bounit_SOURCES = \
 		$(BOSON_COMMON_SRC) \
 		bounitmain.cpp bosonsearchpathswidget.ui \
@@ -178,7 +181,8 @@ borender_LDADD = \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		-lkdegames \
 		$(GLLIB) -l3ds \
-		$(LIB_KDEUI)
+		$(LIB_KDEUI) \
+		$(LIB_XRANDR)
 borender_SOURCES = \
 		$(BOSON_COMMON_SRC) \
 		kgamemodeldebug.cpp \

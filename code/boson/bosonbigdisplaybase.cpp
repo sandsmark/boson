@@ -57,6 +57,7 @@
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
 #include "bosonpath.h"
+#include "bofullscreen.h"
 
 #include <kgame/kgameio.h>
 
@@ -348,6 +349,11 @@ BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
 BosonBigDisplayBase::~BosonBigDisplayBase()
 {
  boDebug() << k_funcinfo << endl;
+
+ // the bigdisplay destructor is the place where many systems tend to crash - so
+ // we go back to the original (non-fullscreen) mode here
+ BoFullScreen::enterOriginalMode();
+
  quitGame();
  delete d->mGroundRenderer;
  delete d->mRenderItemList;
