@@ -202,6 +202,7 @@ void Editor::initKAction()
  KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
  KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 
+ bosonWidget()->initKeys(true);
  createGUI("boson/bosoneditorui.rc");
 }
 
@@ -246,7 +247,10 @@ void Editor::slotSavePlayFieldAs()
 
 void Editor::slotConfigureKeys()
 {
- KKeyDialog::configureKeys(actionCollection(), "bosoneditorui.rc");
+ KKeyDialog::configure(actionCollection());
+ KKeyDialog dlg(this);
+ dlg.insert(actionCollection());
+ dlg.insert(bosonWidget()->actionCollection());
 }
 
 void Editor::slotFileNew()

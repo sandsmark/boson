@@ -27,6 +27,7 @@ class KGameMouseIO;
 class QKeyEvent;
 class KGamePropertyBase;
 class KToolBar;
+class KActionCollection;
 
 class BosonCanvas;
 class BosonCommandFrame;
@@ -104,6 +105,9 @@ public:
 
 	void debugKillPlayer(KPlayer* p);
 
+	void initKeys(bool editorMode = false);
+	KActionCollection* actionCollection() const;
+
 
 public slots:
 	void slotDebug();
@@ -171,6 +175,15 @@ protected slots:
 	void slotCommandFramePosition(int);
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
+
+	void slotScrollUp() { slotScroll(ScrollUp); }
+	void slotScrollRight() { slotScroll(ScrollRight); }
+	void slotScrollDown() { slotScroll(ScrollDown); }
+	void slotScrollLeft() { slotScroll(ScrollLeft); }
+	/**
+	 * @param direction See @ref ScrollDirection
+	 **/
+	void slotScroll(int direction);
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
@@ -213,6 +226,13 @@ protected slots:
 	void slotOutOfGame(Player* p);
 
 protected:
+	enum ScrollDirection {
+		ScrollUp = 0,
+		ScrollRight = 1,
+		ScrollDown = 2,
+		ScrollLeft = 3
+	};
+
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
 	void sendChangeTeamColor(Player* player, const QColor& color);
@@ -222,7 +242,6 @@ protected:
 	void addDummyComputerPlayer(const QString& name); // used by editor only
 
 	virtual void changeLocalPlayer(Player* p);
-	virtual void keyReleaseEvent(QKeyEvent* e);
 
 	void quitGame();
 

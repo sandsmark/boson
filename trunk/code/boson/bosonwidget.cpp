@@ -49,6 +49,7 @@
 #include "defines.h"
 
 #include <klocale.h>
+#include <kaction.h>
 #include <kdebug.h>
 #include <kmessagebox.h>
 #include <kgame/kgameio.h>
@@ -62,11 +63,16 @@
 
 #include "bosonwidget.moc"
 
+// the kaction patch (will) make it possible to make it emit integer values. but
+// currently it doesn't - so use 4 slots instead of one
+#define OLD_KACTION 1
+
 class BosonWidget::BosonWidgetPrivate
 {
 public:
 	BosonWidgetPrivate()
 	{
+		mActionCollection = 0;
 		mMiniMap = 0;
 		mCommandFrame = 0;
 		mDisplayManager = 0;
@@ -86,7 +92,8 @@ public:
 
 		mCursor = 0;
 	}
-	
+
+	KActionCollection* mActionCollection;
 	BosonMiniMap* mMiniMap;
 	BosonCommandFrame* mCommandFrame;
 	BoDisplayManager* mDisplayManager;
@@ -214,6 +221,7 @@ void BosonWidget::init()
  connect(d->mBoson, SIGNAL(signalNewGroup(Unit*, QPtrList<Unit>)),
 		d->mCanvas, SLOT(slotNewGroup(Unit*, QPtrList<Unit>)));
 
+
  slotChangeCursor(boConfig->readCursorMode(), boConfig->readCursorDir());
  slotChangeGroupMove(boConfig->readGroupMoveMode());
 
@@ -327,30 +335,6 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 		}
 	}
 	++it;
- }
-}
-
-void BosonWidget::keyReleaseEvent(QKeyEvent* e)
-{
- BosonBigDisplay* active = d->mDisplayManager->activeDisplay();
- if (!active) {
-	return;
- }
- switch (e->key()) {
-	case Key_Left:
-		active->scrollBy(-boConfig->arrowKeyStep(), 0);
-		break;
-	case Key_Right:
-		active->scrollBy(boConfig->arrowKeyStep(), 0);
-		break;
-	case Key_Up:
-		active->scrollBy(0, -boConfig->arrowKeyStep());
-		break;
-	case Key_Down:
-		active->scrollBy(0, boConfig->arrowKeyStep());
-		break;
-	default:
-		break;
  }
 }
 
@@ -1285,5 +1269,73 @@ void BosonWidget::slotCmdBackgroundChanged(const QString& file)
 	return;
  }
  d->mCommandFrame->setPaletteBackgroundPixmap(p);
+}
+
+void BosonWidget::initKeys(bool editor)
+{
+// TODO KKeyDialog::configure() doesn't save this automatically :-(
+// so we need to do ourselfes. maybe just provide an xml file in c'tor or
+// something like this?
+ d->mActionCollection = new KActionCollection(this);
+#ifdef OLD_KACTION
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, this, 
+		SLOT(slotScrollUp()), d->mActionCollection, 
+		"scroll_up");
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, this,
+		SLOT(slotScrollDown()), d->mActionCollection,
+		"scroll_down");
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, this,
+		SLOT(slotScrollLeft()), d->mActionCollection,
+		"scroll_left");
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, this,
+		SLOT(slotScrollRight()), d->mActionCollection,
+		"scroll_right");
+#else
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, this, 
+		SLOT(slotScroll(int)), d->mActionCollection, 
+		QString("scroll_up {%1}").arg(ScrollUp));
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, this,
+		SLOT(slotScroll(int)), d->mActionCollection,
+		QString("scroll_down {%1}").arg(ScrollDown));
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, this,
+		SLOT(slotScroll(int)), d->mActionCollection,
+		QString("scroll_left {%1}").arg(ScrollLeft));
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, this,
+		SLOT(slotScroll(int)), d->mActionCollection,
+		QString("scroll_right {%1}").arg(ScrollRight));
+#endif
+
+ if (editor) {
+ } else {
+ }
+}
+
+KActionCollection* BosonWidget::actionCollection() const
+{
+ return d->mActionCollection;
+}
+
+void BosonWidget::slotScroll(int dir)
+{
+ BosonBigDisplay* active = d->mDisplayManager->activeDisplay();
+ if (!active) {
+	return;
+ }
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		active->scrollBy(0, -boConfig->arrowKeyStep());
+		break;
+	case ScrollRight:
+		active->scrollBy(boConfig->arrowKeyStep(), 0);
+		break;
+	case ScrollDown:
+		active->scrollBy(0, boConfig->arrowKeyStep());
+		break;
+	case ScrollLeft:
+		active->scrollBy(-boConfig->arrowKeyStep(), 0);
+		break;
+	default:
+		return;
+ }
 }
 
