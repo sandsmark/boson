@@ -314,13 +314,14 @@ void BosonWidgetBase::initCommandFrame()
 
 void BosonWidgetBase::initLayout()
 {
+ boDebug() << k_funcinfo << endl;
  d->mCommandFrameDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
  d->mChatDock->manualDock(mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
 
- if(!kapp->config()->hasGroup("BosonGameDock")) {
+ if (!kapp->config()->hasGroup("BosonGameDock")) {
 	// Dock config isn't saved (probably first start). Hide chat dock (we only
 	//  show commandframe by default)
 	d->mChatDock->changeHideShowState();
@@ -627,7 +628,7 @@ void BosonWidgetBase::initKActions()
 
  // Screenshot
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
-		this, SLOT(slotGrabScreenshot()), actionCollection(), "grab_screenshot");
+		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
 
  // Debug - no i18n!
  (void)new KAction("Profiling", KShortcut(), this,
@@ -947,19 +948,19 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 
 void BosonWidgetBase::slotGrabScreenshot()
 {
- kdDebug() << k_funcinfo << "Taking screenshot!" << endl;
+ boDebug() << k_funcinfo << "Taking screenshot!" << endl;
  QPixmap ss = QPixmap::grabWindow(mTop->winId());
  QString file;
  for(int i = 0; i < 1000; i++) {
 	file.sprintf("boson-%03d.png", i);
-	kdDebug() << "Checking if file " << file << " exists" << endl;
-	if(!QFile::exists(file)) {
-		kdDebug() << "    File doesn't exist, breaking" << endl;
+	boDebug() << "Checking if file " << file << " exists" << endl;
+	if (!QFile::exists(file)) {
+		boDebug() << "    File doesn't exist, breaking" << endl;
 		break;
 	} else {
-		kdDebug() << "    File exists, continuing" << endl;
+		boDebug() << "    File exists, continuing" << endl;
 	}
  }
- kdDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
+ boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
  ss.save(file, "PNG");
 }
