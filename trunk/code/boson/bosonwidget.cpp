@@ -138,8 +138,8 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  }
  BosonCursor* b;
  switch (mode) {
-	case CursorSprite:
-		b = new BosonSpriteCursor;
+	case CursorOpenGL:
+		b = new BosonOpenGLCursor;
 		break;
 	case CursorKDE:
 		b = new BosonKDECursor;
@@ -191,8 +191,8 @@ void BosonWidget::slotGamePreferences()
 {
  CursorMode mode;
  if (cursor()) {
-	if (cursor()->isA("BosonSpriteCursor")) {
-		mode = CursorSprite;
+	if (cursor()->isA("BosonOpenGLCursor")) {
+		mode = CursorOpenGL;
 	} else if (cursor()->isA("BosonKDECursor")) {
 		mode = CursorKDE;
 	} else {
@@ -314,8 +314,8 @@ void BosonWidget::saveConfig()
  BosonConfig::saveLocalPlayerName(localPlayer()->name());
  BosonConfig::saveGameSpeed(game()->gameSpeed());
  if (cursor()) {
-	if (cursor()->isA("BosonSpriteCursor")) {
-		boConfig->saveCursorMode(CursorSprite);
+	if (cursor()->isA("BosonOpenGLCursor")) {
+		boConfig->saveCursorMode(CursorOpenGL);
 	} else if (cursor()->isA("BosonKDECursor")) {
 		boConfig->saveCursorMode(CursorKDE);
 	} else {

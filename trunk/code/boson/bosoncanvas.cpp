@@ -51,7 +51,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
+	QPtrList<BosonItem> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
 
@@ -132,7 +132,7 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
- QPtrListIterator<BosonSprite> animIt(d->mAnimList);
+ QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  if (advanceFlag) {
 	// note: the advance methods must not change the advanceFunction()s
@@ -159,7 +159,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	// have been done above - especially in advanceMoveCheck() methods.
 	// AB: do NOT add something here - if you add something for units then
 	// check for isDestroyed() !!
-	BosonSprite* s = animIt.current();
+	BosonItem* s = animIt.current();
 	if (s->xVelocity() || s->yVelocity()) {
 		s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
 	}
@@ -225,12 +225,12 @@ void BosonCanvas::setMap(BosonMap* map)
  d->mMap = map;
 }
 
-void BosonCanvas::addAnimation(BosonSprite* item)
+void BosonCanvas::addAnimation(BosonItem* item)
 {
  d->mAnimList.append(item);
 }
 
-void BosonCanvas::removeAnimation(BosonSprite* item)
+void BosonCanvas::removeAnimation(BosonItem* item)
 {
  d->mAnimList.removeRef(item);
 }
@@ -544,7 +544,7 @@ void BosonCanvas::killPlayer(Player* player)
  emit signalOutOfGame(player);
 }
 
-void BosonCanvas::removeFromCells(BosonSprite* item)
+void BosonCanvas::removeFromCells(BosonItem* item)
 {
  QPointArray cells = item->cells();
  for (unsigned int i = 0; i < cells.count(); i++) {
@@ -557,7 +557,7 @@ void BosonCanvas::removeFromCells(BosonSprite* item)
  }
 }
 
-void BosonCanvas::addToCells(BosonSprite* item)
+void BosonCanvas::addToCells(BosonItem* item)
 {
  QPointArray cells = item->cells();
  for (unsigned int i = 0; i < cells.count(); i++) {
@@ -632,19 +632,19 @@ BoItemList BosonCanvas::allBosonItems() const
  return d->mAllItems;
 }
 
-void BosonCanvas::addItem(BosonSprite* item)
+void BosonCanvas::addItem(BosonItem* item)
 {
  d->mAllItems.append(item);
 }
 
-void BosonCanvas::removeItem(BosonSprite* item)
+void BosonCanvas::removeItem(BosonItem* item)
 {
  d->mAllItems.remove(item);
 }
 
 
 // this is an extremely time-critical function!
-BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSprite* item, bool exact) const
+BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonItem* item, bool exact) const
 {
  // FIXME: if exact is true we assume that cells == item->cells() !!
 // AB: item can be NULL, too!
@@ -661,7 +661,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonSpr
 	cellItems = c->items();
 	BoItemList::ConstIterator it;
 	for (it = cellItems->begin(); it != cellItems->end(); ++it) {
-		BosonSprite* s = *it;
+		BosonItem* s = *it;
 		if (s != item) {
 			if (seen.findIndex(s) < 0 && (!item || !exact || item->bosonCollidesWith(s))) {
 				seen.append(s);

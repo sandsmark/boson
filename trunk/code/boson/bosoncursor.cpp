@@ -198,10 +198,10 @@ bool BosonKDECursor::insertMode(int , QString , QString )
 
 
 /////////////////////////////////////////
-/////// BosonSpriteCursor ///////////////
+/////// BosonOpenGLCursor ///////////////
 /////////////////////////////////////////
 
-BosonSpriteCursorData::BosonSpriteCursorData()
+BosonOpenGLCursorData::BosonOpenGLCursorData()
 {
  mArray = 0;
  mHotspotX = 0;
@@ -211,15 +211,15 @@ BosonSpriteCursorData::BosonSpriteCursorData()
  mRotateDegree = 0;
 }
 
-BosonSpriteCursorData::~BosonSpriteCursorData()
+BosonOpenGLCursorData::~BosonOpenGLCursorData()
 {
  delete mArray;
 }
 
-class BosonSpriteCursor::BosonSpriteCursorPrivate
+class BosonOpenGLCursor::BosonOpenGLCursorPrivate
 {
 public:
-	BosonSpriteCursorPrivate()
+	BosonOpenGLCursorPrivate()
 	{
 		mCurrentFrame = 0;
 		mCurrentRotate = 0;
@@ -229,24 +229,24 @@ public:
 	int mCurrentFrame;
 	int mCurrentRotate;
 
-	QIntDict<BosonSpriteCursorData> mCursors;
+	QIntDict<BosonOpenGLCursorData> mCursors;
 };
 
-BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
+BosonOpenGLCursor::BosonOpenGLCursor() : BosonCursor()
 {
- d = new BosonSpriteCursorPrivate;
+ d = new BosonOpenGLCursorPrivate;
  d->mCursors.setAutoDelete(true);
  connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
  mCurrentData = 0;
 }
 
-BosonSpriteCursor::~BosonSpriteCursor()
+BosonOpenGLCursor::~BosonOpenGLCursor()
 {
  d->mCursors.clear();
  delete d;
 }
 
-void BosonSpriteCursor::setCursor(int mode)
+void BosonOpenGLCursor::setCursor(int mode)
 {
  if (mode == cursorMode()) {
 	return;
@@ -255,7 +255,7 @@ void BosonSpriteCursor::setCursor(int mode)
  d->mAnimateTimer.stop();
 // kdDebug() << k_funcinfo << endl;
  if (cursorMode() >= 0) {
-	BosonSpriteCursorData* data;
+	BosonOpenGLCursorData* data;
 	data = d->mCursors[cursorMode()];
 	if (data) {
 //		kdDebug() << k_funcinfo << mode << endl;
@@ -270,7 +270,7 @@ void BosonSpriteCursor::setCursor(int mode)
  }
 }
 
-void BosonSpriteCursor::setWidgetCursor(QWidget* w)
+void BosonOpenGLCursor::setWidgetCursor(QWidget* w)
 {
  // TODO: check if the cursor data (i.e. textures are valid - otherwise display
  // a default cursor!)
@@ -280,7 +280,7 @@ void BosonSpriteCursor::setWidgetCursor(QWidget* w)
  }
 }
 
-bool BosonSpriteCursor::insertMode(int mode, BosonSpriteCursorData* data)
+bool BosonOpenGLCursor::insertMode(int mode, BosonOpenGLCursorData* data)
 {
  if (d->mCursors[mode]) {
 	kdWarning() << k_funcinfo << "Mode already inserted - removing first" << endl;
@@ -296,7 +296,7 @@ bool BosonSpriteCursor::insertMode(int mode, BosonSpriteCursorData* data)
  return false;
 }
 
-void BosonSpriteCursor::slotAdvance()
+void BosonOpenGLCursor::slotAdvance()
 {
  if (!mCurrentData || !mCurrentData->mArray) {
 	return;
@@ -315,12 +315,12 @@ void BosonSpriteCursor::slotAdvance()
  mCurrentTexture = mCurrentData->mArray->texture(d->mCurrentFrame);
 }
 
-bool BosonSpriteCursor::insertMode(int mode, QString baseDir, QString cursor)
+bool BosonOpenGLCursor::insertMode(int mode, QString baseDir, QString cursor)
 {
  return insertMode(mode, loadSpriteCursor(baseDir, cursor));
 }
 
-BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString cursor)
+BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QString cursor)
 {
  if (baseDir.right(1) != QString::fromLatin1("/")) {
 	baseDir += QString::fromLatin1("/");
@@ -364,7 +364,7 @@ BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QStr
  }
 
  if (images.count() > 0) {
-	BosonSpriteCursorData* data = new BosonSpriteCursorData;
+	BosonOpenGLCursorData* data = new BosonOpenGLCursorData;
 	data->mArray = new BosonTextureArray(images, false);
 	data->mHotspotX = hotspotX;
 	data->mHotspotY = hotspotY;
@@ -378,7 +378,7 @@ BosonSpriteCursorData* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QStr
  return 0;
 }
 
-void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
+void BosonOpenGLCursor::setCurrentData(BosonOpenGLCursorData* data)
 {
  if (data == mCurrentData) {
 	return;
@@ -404,7 +404,7 @@ void BosonSpriteCursor::setCurrentData(BosonSpriteCursorData* data)
  }
 }
 
-void BosonSpriteCursor::renderCursor(GLfloat x, GLfloat y)
+void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 {
  GLuint tex = currentTexture();
  if (tex != 0) {

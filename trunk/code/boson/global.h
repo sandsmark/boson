@@ -30,7 +30,7 @@
  **/
 
 enum CursorMode {
-	CursorSprite = 0,
+	CursorOpenGL = 0,
 	CursorNormal = 1,
 	CursorKDE = 2
 };

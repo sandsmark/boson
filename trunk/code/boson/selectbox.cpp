@@ -254,7 +254,7 @@ void SelectBoxData::drawHealthBar(int frame)
  glEnable(GL_TEXTURE_2D);
 }
 
-SelectBox::SelectBox(BosonSprite*, BosonCanvas*, bool groupLeader)
+SelectBox::SelectBox(BosonItem*, BosonCanvas*, bool groupLeader)
 {
  mDisplayList = 0;
  if (!mBoxData) {

@@ -32,7 +32,7 @@ class Unit;
 class UnitProperties;
 class BosonTiles;
 class BoItemList;
-class BosonSprite;
+class BosonItem;
 class ProductionPlugin;
 class BosonParticleSystem;
 
@@ -80,13 +80,13 @@ public:
 	unsigned int mapHeight() const;
 	unsigned int mapWidth() const;
 
-	virtual void addAnimation(BosonSprite* item);
-	virtual void removeAnimation(BosonSprite* item);
+	virtual void addAnimation(BosonItem* item);
+	virtual void removeAnimation(BosonItem* item);
 
-	void addItem(BosonSprite* item);
-	void removeItem(BosonSprite* item);
+	void addItem(BosonItem* item);
+	void removeItem(BosonItem* item);
 
-	BoItemList bosonCollisions(const QPointArray& cells, const BosonSprite* item, bool exact) const;
+	BoItemList bosonCollisions(const QPointArray& cells, const BosonItem* item, bool exact) const;
 	BoItemList bosonCollisions(const QRect& rect) const;
 	BoItemList bosonCollisions(const QPoint& pos) const;
 
@@ -172,8 +172,8 @@ public:
 	 **/
 	void killPlayer(Player* player);
 
-	void addToCells(BosonSprite* u);
-	void removeFromCells(BosonSprite* u);
+	void addToCells(BosonItem* u);
+	void removeFromCells(BosonItem* u);
 
 	/**
 	 * This is meant to be used instead of QCanvas::allItems, since it also

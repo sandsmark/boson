@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data visual commandframe sound startupwidgets
+SUBDIRS = data items commandframe sound startupwidgets
 
 bin_PROGRAMS = boson bounit boprofiling bocursor
 
@@ -55,6 +55,7 @@ BOSON_SRC = \
 	bosontexturearray.cpp \
 	bosonmodel.cpp \
 	bosonglfont.cpp \
+	bosonglchat.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp \
@@ -68,7 +69,8 @@ BOPROFILING_SRC= \
 	boprofilingmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la \
+boson_LDADD = \
+		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsound.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \

@@ -74,7 +74,7 @@ public:
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 		: UnitBase(prop),
-		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
+		BosonItem(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
  d = new UnitPrivate;
  mCurrentPlugin = 0;
@@ -151,7 +151,7 @@ void Unit::select(bool markAsLeader)
  if (isDestroyed()) {
 	return; // shall we really return?
  }
- BosonSprite::select(markAsLeader);
+ BosonItem::select(markAsLeader);
  updateSelectBox();
 }
 
@@ -278,10 +278,10 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  float oldX = x();
  float oldY = y();
 
- //TODO: these calls should be in BosonSprite, since they are valid for all
+ //TODO: these calls should be in BosonItem, since they are valid for all
  //items, not just for units!
  canvas()->removeFromCells(this);
- BosonSprite::moveBy(moveX, moveY, moveZ);
+ BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->addToCells(this);
  canvas()->unitMoved(this, oldX, oldY);
 }
@@ -293,8 +293,8 @@ void Unit::advance(unsigned int advanceCount)
  }
  reloadWeapon();
 // Reload shields
- if(d->shieldReloadCounter >= 10) {
-	if(shields() < unitProperties()->shields()) {
+ if (d->shieldReloadCounter >= 10) {
+	if (shields() < unitProperties()->shields()) {
 		setShields(shields() + 1);  // Maybe increase by more than 1. Or make configurable (ShieldsReload=xxx)
 	}
 	d->shieldReloadCounter = 0;
@@ -679,8 +679,8 @@ BoItemList Unit::unitsInRange() const
 	}
  }
 
- BoItemList items = canvas()->bosonCollisions(cells, (BosonSprite*)this, false);
- items.remove((BosonSprite*)this);
+ BoItemList items = canvas()->bosonCollisions(cells, (BosonItem*)this, false);
+ items.remove((BosonItem*)this);
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
@@ -718,7 +718,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 	return units;
  }
  kdDebug() << k_funcinfo << endl;
- BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonSprite*)this, exact);
+ BoItemList collisionList = canvas()->bosonCollisions(cells(), (BosonItem*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
@@ -934,8 +934,8 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	return;
  }
 
- int x = (int)(BosonSprite::x() + width() / 2);
- int y = (int)(BosonSprite::y() + height() / 2);
+ int x = (int)(BosonItem::x() + width() / 2);
+ int y = (int)(BosonItem::y() + height() / 2);
 
  float xspeed = 0;
  float yspeed = 0;
@@ -1161,7 +1161,7 @@ QRect MobileUnit::boundingRect() const
 // we simply return a boundingrect which has size BO_TILE_SIZE
  if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
 	kdWarning() << k_funcinfo << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
-	return BosonSprite::boundingRect();
+	return BosonItem::boundingRect();
  }
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }

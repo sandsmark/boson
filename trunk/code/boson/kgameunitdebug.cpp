@@ -336,7 +336,7 @@ void KGameUnitDebug::updateUnitsInRange(QListViewItem* item)
  BoItemList::Iterator it = inRange.begin();
  for (; it != inRange.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
-		BosonSprite* i = (BosonSprite*)*it;
+		BosonItem* i = (BosonItem*)*it;
 		QListViewItem* item = new QListViewItem(d->mUnitsInRange);
 		QString text = i18n("Item is not a unit rtti=%1 ; x=%2 ; y=%3 ; z=%4").arg(i->rtti()).arg(i->x()).arg(i->y()).arg(i->z());
 		item->setText(0, text);

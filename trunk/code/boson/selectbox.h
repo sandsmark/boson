@@ -20,7 +20,7 @@
 #ifndef SELECTBOX_H
 #define SELECTBOX_H
 
-class BosonSprite;
+class BosonItem;
 class BosonCanvas;
 
 #include <GL/gl.h>
@@ -52,7 +52,7 @@ private:
 class SelectBox
 {
 public :
-	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false);
+	SelectBox(BosonItem*, BosonCanvas* canvas, bool groupLeader = false);
 	~SelectBox();
 
 	void update(double);

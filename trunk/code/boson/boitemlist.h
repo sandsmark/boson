@@ -20,7 +20,7 @@
 #define BOITEMLIST_H
 
 #include <qvaluelist.h>
-class BosonSprite;
+class BosonItem;
 class Unit;
 
 /**
@@ -34,20 +34,20 @@ class Unit;
  * Note that since nothing of the above except units is implemented in boson so
  * all items in the list are units, currently. 
  *
- * UPDATE: the list now consists of BosonSprite and therefore <em>items</em>,
+ * UPDATE: the list now consists of BosonItem and therefore <em>items</em>,
  * not just units. we may add some additional code to separate units (in favor
  * of performance) in the future
- * @short A list of @ref BosonSprite
+ * @short A list of @ref BosonItem
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BoItemList : public QValueList<BosonSprite*>
+class BoItemList : public QValueList<BosonItem*>
 {
 public:
-	// FIXME: this *should* be Unit* instead of BosonSprite but since we
-	// must not include unit.h here we use BosonSprite . pointer conversion
+	// FIXME: this *should* be Unit* instead of BosonItem but since we
+	// must not include unit.h here we use BosonItem . pointer conversion
 	// without unit.h included would cause problems here :-(
-	iterator appendItem(BosonSprite* item) { return QValueList<BosonSprite*>::append(item); }
-	uint removeItem(BosonSprite* item) { return QValueList<BosonSprite*>::remove(item); }
+	iterator appendItem(BosonItem* item) { return QValueList<BosonItem*>::append(item); }
+	uint removeItem(BosonItem* item) { return QValueList<BosonItem*>::remove(item); }
 
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -63,7 +63,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The units on this cell
 	 **/
-	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<BosonSprite*>* nonUnit = 0) const;
+	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<BosonItem*>* nonUnit = 0) const;
 	
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
@@ -76,7 +76,7 @@ public:
 	 * if TRUE, otherwise not
 	 * @return The items on this cell
 	 **/
-	QValueList<BosonSprite*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
+	QValueList<BosonItem*> items(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0) const;
 
 	/**
 	 * Please note that this function might get performance improvements!
@@ -96,14 +96,14 @@ protected:
 	/**
 	 * You are meant to use e.g. @ref appendUnit but not append. We change the
 	 * access permissions to protected here to avoid adding of a
-	 * BosonSprite directly.
+	 * BosonItem directly.
 	 **/
-	QValueList<BosonSprite*>::append;
+	QValueList<BosonItem*>::append;
 
 	/**
 	 * See above. You are meant to use e.g. @ref removeUnit
 	 **/
-	QValueList<BosonSprite*>::remove;
+	QValueList<BosonItem*>::remove;
 };
 
 #endif
