@@ -556,7 +556,9 @@ bool Player::hasUnitWithType(unsigned long int type) const
  QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->type() == type) {
-		return true;
+		if (it.current()->isMobile() || ((Facility*)it.current())->isConstructionComplete()) {
+			return true;
+		}
 	}
 	++it;
  }
