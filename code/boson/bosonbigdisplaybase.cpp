@@ -1109,10 +1109,14 @@ void BosonBigDisplayBase::renderParticles()
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
-		if (canvas()->onCanvas(s->x(), s->y())) {
+		if (canvas()->cell(s->x(), s->y())) {
 			if (!localPlayer()->isFogged(s->x(), s->y())) {
 				visible.append(s);
 			}
+		} else {
+			// AB: we don't complain here, as particle systems are
+			// visual appearance only. note that invalid positions
+			// are BAAAAAAD !!
 		}
 	}
  }
