@@ -225,20 +225,30 @@ void Unit::advanceNone()
 {
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
-// kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
- QCanvasItemList list = enemyUnitsInRange();
- if (list.count() > 0) {
-	QCanvasItemList::Iterator it = list.begin();
-	for (; it != list.end(); ++it) {
-		if (((Unit*)*it)->unitProperties()->canShoot()) {
+
+ if (weaponDamage() > 0) {
+	QCanvasItemList list = enemyUnitsInRange();
+	if (list.count() > 0) {
+		QCanvasItemList::Iterator it = list.begin();
+		for (; it != list.end(); ++it) {
+			if (((Unit*)*it)->unitProperties()->canShoot()) {
+				shootAt((Unit*)*it);
+				break;
+			}
+		}
+		if (it != list.end()) {
+			// no military unit (i.e. unit that can shoot) found
 			shootAt((Unit*)*it);
-			break;
 		}
 	}
-	if (it != list.end()) {
-		// no military unit (i.e. unit that can shoot) found
-		shootAt((Unit*)*it);
+ } else if (weaponDamage() < 0) {
+	if (!repairPlugin()) {
+		kdWarning() << k_funcinfo << "weaponDamage < 0 but no repair plugin??" << endl;
+		return;
 	}
+	repairPlugin()->repairInRange();
+ } else {
+	// weaponDamage() == 0 - what can be done here?
  }
 }
 
@@ -368,7 +378,7 @@ void Unit::newPath()
  // Only go until enemy is in range if we are attacking
  if(work() == WorkAttack) {
 	range = weaponRange();
- } else if (work() == WorkRefine) {//|| work() == WorkRepair
+ } else if (work() == WorkRefine) {
 	range = 1;
  }
  QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, range);
@@ -530,10 +540,12 @@ QCanvasItemList Unit::unitsInRange() const
  QCanvasItemList inRange;
  QCanvasItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
-	if (! RTTI::isUnit((*it)->rtti()))
+	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
-	if(((Unit*)(*it))->isDestroyed())
+	}
+	if(((Unit*)(*it))->isDestroyed()) {
 		continue;
+	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
 	// pythagoras)
 	inRange.append(*it);
@@ -1178,7 +1190,7 @@ public:
 
 	KGamePropertyInt mConstructionState; // state of *this* unit
 	ProductionPlugin* mProductionPlugin;
-
+	RepairPlugin* mRepairPlugin;
 };
 
 Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1191,7 +1203,9 @@ Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) :
  if (prop->canProduce()) {
 	d->mProductionPlugin = new ProductionPlugin(this);
  }
-
+ if (unitProperties()->weaponDamage() < 0) {
+	d->mRepairPlugin = new RepairPlugin(this);
+ }
  setWork(WorkConstructed);
 }
 
@@ -1235,8 +1249,7 @@ RepairPlugin* Facility::repairPlugin() const
  if (!isConstructionComplete()) {
 	return 0;
  }
- //TODO
- return 0;
+ return d->mRepairPlugin;
 }
 
 bool Facility::isConstructionComplete() const

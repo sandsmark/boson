@@ -93,17 +93,43 @@ private:
 	KGameProperty<unsigned int> mProductionState;
 };
 
+/**
+ * Experimental plugin. At the current state id doesn't make any sense, since I
+ * don't use any member variables anymore...
+ *
+ * Nevertheless I don't entegrate the functionality into Unit since it should
+ * get some more testing
+ **/
 class RepairPlugin
 {
 public:
 	RepairPlugin(Unit* owner);
 
-	void repair(Unit*);
-	void advance();
+	Unit* unit() const { return mUnit; }
+
+	/**
+	 * Order to repair unit. For a repairyard this means the unit will move
+	 * to the repairyard and once it is in range it'll be repaired. 
+	 *
+	 * For mobile repair-units this means that the <em>repairing</em> (i.e.
+	 * the one that has this plugin) moves to unit and repairs it.
+	 **/
+	void repair(Unit* unit);
+
+	/**
+	 * Called from @ref Unit::advanceNone. Repair the next unit that is in
+	 * range. An alternative name might be "advance", just like in @ref
+	 * ProducePlugin but since we don't have a WorkRepair in @ref Unit there
+	 * is no advance call for it from @ref BosonCanvas::slotAdvance either.
+	 *
+	 * @ref Unit::advanceNone is used for it instead.
+	 **/
+	void repairInRange();
 
 private:
 	Unit* mUnit;
-	KGamePropertyList<unsigned long int> mRepairList;
+//	KGameProperty<unsigned int> mAdvanceCount;
+//	KGamePropertyList<unsigned long int> mRepairList;
 };
 
 #endif
