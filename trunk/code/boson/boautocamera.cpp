@@ -153,8 +153,7 @@ bool BoAutoCamera::advance2()
     // How much lookAt point will move
     BoVector3 lookAtChange(mLookAtDiff * factor);
     // Change lookAt point and difference
-    camera()->mLookAt.add(lookAtChange);
-    camera()->checkPosition();
+    camera()->setLookAt(camera()->mLookAt + lookAtChange);
     changed = true;
   }
 

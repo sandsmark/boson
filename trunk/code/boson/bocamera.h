@@ -99,7 +99,7 @@ class BoCamera
      * Set lookAt point of camera
      * Changes are not commited
      **/
-    void setLookAt(const BoVector3& pos);
+    virtual void setLookAt(const BoVector3& pos);
 
     /**
      * @return The point we are looking at. This is the lookAt vector, as it
@@ -112,12 +112,6 @@ class BoCamera
 
 
   protected:
-    /**
-     * Checks if camera is inside rectangle set by setMoveRect method.
-     * If it's not inside this rectangle, it will be moved into it.
-     **/
-    virtual void checkPosition() = 0;
-
     /**
      * Update the parameters for gluLookAt() (@ref cameraPos
      * and @ref up) according to the new values from @ref radius,
@@ -186,6 +180,8 @@ class BoGameCamera : public BoCamera
     void changeRadius(GLfloat diff);
     void changeRotation(GLfloat diff);
 
+    virtual void setLookAt(const BoVector3& pos);
+
     // these will change the up and cameraPos vectors!
     /**
      * Set camera's rotation (in degrees). Rotation is measured from y-axis, if
@@ -236,7 +232,7 @@ class BoGameCamera : public BoCamera
      * Checks if camera is inside rectangle set by setMoveRect method.
      * If it's not inside this rectangle, it will be moved into it.
      **/
-    virtual void checkPosition();
+    void checkPosition();
 
     /**
      * Update the parameters for gluLookAt() (@ref cameraPos

@@ -81,7 +81,6 @@ void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos,
   mLookAt = lookAt;
   mCameraPos = cameraPos;
   mUp = up;
-  // checkPosition();
 }
 
 void BoCamera::changeLookAt(const BoVector3& diff)
@@ -158,7 +157,6 @@ const BoVector3& BoCamera::up()
 void BoCamera::setLookAt(const BoVector3& pos)
 {
   mLookAt = pos;
-  checkPosition();
   setPositionDirty();
 }
 
@@ -415,6 +413,12 @@ bool BoGameCamera::loadFromXML(const QDomElement& root)
   mRadius = radius;
   setPositionDirty();
   return ret;
+}
+
+void BoGameCamera::setLookAt(const BoVector3& pos)
+{
+  BoCamera::setLookAt(pos);
+  checkPosition();
 }
 
 void BoGameCamera::setRadius(GLfloat r)
