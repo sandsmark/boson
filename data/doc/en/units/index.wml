@@ -31,6 +31,8 @@
         name2="transall" type2="mob"
 #include "simple_facilities.wml" type="Units" name="Puma" \
         name2="puma" type2="mob"
+#include "simple_facilities.wml" type="Units" name="Koyote" \
+        name2="koyote" type2="mob"
 </grid>
 
 #include "nav.wml" before_url="../facilities/samsite.html" before_text="Sam-Site" after_url="map.html" after_text="Unit dependency tree"  up_url="../index.html"
