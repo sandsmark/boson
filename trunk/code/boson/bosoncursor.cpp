@@ -120,7 +120,9 @@ bool BosonKDECursor::insertMode(int , QString , QString )
 
 BosonOpenGLCursorData::BosonOpenGLCursorData()
 {
- mArray = 0;
+ mTextureArray = 0;
+ mDisplayLists = 0;
+ mDisplayListCount = 0;
  mHotspotX = 0;
  mHotspotY = 0;
  mAnimated = false;
@@ -130,7 +132,39 @@ BosonOpenGLCursorData::BosonOpenGLCursorData()
 
 BosonOpenGLCursorData::~BosonOpenGLCursorData()
 {
- delete mArray;
+ delete mTextureArray;
+ delete[] mDisplayLists;
+}
+
+bool BosonOpenGLCursorData::computeDisplayLists(QValueList<QImage> images)
+{
+ mTextureArray = new BosonTextureArray(images, false);
+ if (!mTextureArray->isValid() || mTextureArray->count() == 0) {
+	return false;
+ }
+ mDisplayListCount = mTextureArray->count();
+ mDisplayLists = new GLuint[mDisplayListCount];
+ mDisplayLists[0] = glGenLists(mDisplayListCount);
+ for (unsigned int i = 0; i < mDisplayListCount; i++) {
+	mDisplayLists[i] = mDisplayLists[0] + i;
+	glNewList(mDisplayLists[i], GL_COMPILE);
+		GLfloat x, y;
+		x = -(GLfloat)mHotspotX;
+		y = -(GLfloat)mHotspotY;
+		// FIXME: we currently depend on image width/height == BO_TILE_SIZE
+		// we should use the actual width/height here instead!
+		const GLfloat w = BO_TILE_SIZE;
+		const GLfloat h = BO_TILE_SIZE;
+		glBindTexture(GL_TEXTURE_2D, mTextureArray->texture(i));
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
+			glTexCoord2f(0.0, 1.0); glVertex3f(x, y + h, 0.0);
+			glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
+			glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
+		glEnd();
+	glEndList();
+ }
+ return true;
 }
 
 class BosonOpenGLCursor::BosonOpenGLCursorPrivate
@@ -176,8 +210,8 @@ void BosonOpenGLCursor::setCursor(int mode)
 	data = d->mCursors[cursorMode()];
 	if (data) {
 //		boDebug() << k_funcinfo << mode << endl;
-		if (!data->mArray || !data->mArray->isValid()) {
-			boError() << k_funcinfo << "array not valid for mode=" << mode << endl;
+		if (!data->mDisplayLists || data->mDisplayListCount == 0) {
+			boError() << k_funcinfo << "display lists not valid for mode=" << mode << endl;
 			return;
 		}
 		setCurrentData(data);
@@ -215,21 +249,21 @@ bool BosonOpenGLCursor::insertMode(int mode, BosonOpenGLCursorData* data)
 
 void BosonOpenGLCursor::slotAdvance()
 {
- if (!mCurrentData || !mCurrentData->mArray) {
+ if (!mCurrentData || !mCurrentData->mDisplayLists || mCurrentData->mDisplayListCount == 0) {
 	return;
  }
  if (!mCurrentData->mAnimated || !mCurrentData->mAnimationSpeed) {
 	return;
  }
  d->mCurrentFrame++;
- if (d->mCurrentFrame >= (int)mCurrentData->mArray->count()) {
+ if (d->mCurrentFrame >= (int)mCurrentData->mDisplayListCount) {
 	d->mCurrentFrame = 0;
 	d->mCurrentRotate += mCurrentData->mRotateDegree;
 	if (QABS(d->mCurrentRotate) >= 360) {
 		d->mCurrentRotate = 0;
 	}
  }
- mCurrentTexture = mCurrentData->mArray->texture(d->mCurrentFrame);
+ mCurrentDisplayList = mCurrentData->mDisplayLists[d->mCurrentFrame];
 }
 
 bool BosonOpenGLCursor::insertMode(int mode, QString baseDir, QString cursor)
@@ -282,9 +316,12 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
 
  if (images.count() > 0) {
 	BosonOpenGLCursorData* data = new BosonOpenGLCursorData;
-	data->mArray = new BosonTextureArray(images, false);
-	data->mHotspotX = hotspotX;
-	data->mHotspotY = hotspotY;
+	data->setHotspot(hotspotX, hotspotY);
+	if (!data->computeDisplayLists(images)) {
+		boError() << k_funcinfo << "Unable to generate textured display lists for cursor " << baseDir << "," << cursor << endl;
+		delete data;
+		return 0;
+	}
 	data->mAnimated = animated;
 	data->mAnimationSpeed = animationSpeed;
 	data->mRotateDegree = rotateDegree;
@@ -305,13 +342,13 @@ void BosonOpenGLCursor::setCurrentData(BosonOpenGLCursorData* data)
 	mCurrentData = 0;
 	return;
  }
- if (!data->mArray || !data->mArray->isValid()) {
-	boError() << k_funcinfo << "invalid texture array" << endl;
+ if (!data->mDisplayLists || data->mDisplayListCount == 0) {
+	boError() << k_funcinfo << "invalid display lists" << endl;
 	return;
  }
  mCurrentData = data;
- mCurrentTexture = data->mArray->texture(0);
- if (d->mCurrentFrame >= (int)mCurrentData->mArray->count()) {
+ mCurrentDisplayList = mCurrentData->mDisplayLists[0];
+ if (d->mCurrentFrame >= (int)mCurrentData->mDisplayListCount) {
 	d->mCurrentFrame = 0;
  }
  d->mCurrentRotate = 0;
@@ -323,26 +360,14 @@ void BosonOpenGLCursor::setCurrentData(BosonOpenGLCursorData* data)
 
 void BosonOpenGLCursor::renderCursor(GLfloat x, GLfloat y)
 {
- GLuint tex = currentTexture();
- if (tex != 0) {
+ if (mCurrentData && mCurrentDisplayList != 0) {
+	// AB: probably we can place glEnable/Disable(GL_BLEND) into the display
+	// list!
 	glEnable(GL_BLEND);
 	glPushMatrix();
 	glTranslatef(x, y, 0.0);
 	glRotatef(d->mCurrentRotate, 0.0, 0.0, 1.0);
-	x = -(GLfloat)hotspotX();
-	y = -(GLfloat)hotspotY();
-
-	// FIXME: we currently depend on image width/height == BO_TILE_SIZE
-	// we should use the actual width/height here instead!
-	const GLfloat w = BO_TILE_SIZE;
-	const GLfloat h = BO_TILE_SIZE;
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 0.0); glVertex3f(x, y, 0.0);
-		glTexCoord2f(0.0, 1.0); glVertex3f(x, y + h, 0.0);
-		glTexCoord2f(1.0, 1.0); glVertex3f(x + w, y + h, 0.0);
-		glTexCoord2f(1.0, 0.0); glVertex3f(x + w, y, 0.0);
-	glEnd();
+	glCallList(mCurrentDisplayList);
 	glPopMatrix();
 	glDisable(GL_BLEND);
  }
