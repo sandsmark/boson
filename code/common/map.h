@@ -25,13 +25,16 @@
 #include "common/groundType.h"
 
 #define BO_TILE_SIZE 48
-
-#define		BIG_W	32
-#define		BIG_H	( (NB_GROUND_TILES*4 + BIG_W-1) / BIG_W )
-
 /*
  * BIG_W		should be 4*n, cause this way it's easier to watch the generated file
  * NB_GROUND_TILES*4	is 1244 (on may, 14th 200), so BIG_H should be 39
  */
+#define	BIG_W	32
+#define	BIG_H	( (NB_GROUND_TILES*4 + BIG_W-1) / BIG_W )
+
+#define GET_BIG_X(g) (( (g) % BIG_W) * BO_TILE_SIZE)
+#define GET_BIG_Y(g) (( (g) / BIG_W) * BO_TILE_SIZE)
+
+
 
 #endif /* MAP_H */

@@ -56,8 +56,7 @@ void end(void)
 
 void putOne(int z, QImage &p, int xoffset=0, int yoffset=0)
 {
-	int x = (z % BIG_W) * BO_TILE_SIZE;
-	int y = (z / BIG_W) * BO_TILE_SIZE;
+	int x = GET_BIG_X(z), y = GET_BIG_Y(z);
 	int i,j;
 
 	printf("\nputOne(%d), on %d,%d (%d,%d)", z, x, y, x/BO_TILE_SIZE, y/BO_TILE_SIZE);
