@@ -20,6 +20,7 @@
 #define TOP_H
 
 #include <kdockwidget.h>
+#include <kdeversion.h>
 
 class QWidgetStack;
 class Boson;
@@ -103,6 +104,10 @@ public slots:
 	void slotSplitDisplayVertical();
 	/** Removes active display */
 	void slotRemoveActiveDisplay();
+
+#if KDE_VERSION < 310
+	virtual void setGeometry(const QRect&);
+#endif
 
 signals:
 	void signalSetMobilesCount(int);

@@ -134,27 +134,9 @@ BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
 BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
-
- // TODO: this doesn't work
- if(d->mLayoutCreated) {
-	kdDebug() << "writing dock config" << endl;
-//	d->mTop->writeDockConfig(kapp->config(), QString("BosonDockConfig"));
-////	d->mTop->writeDockConfig();
- }
-
  delete d->mCommandFrameDock;
  delete d->mChatDock;
 
- if (d->mCursor->isA("BosonSpriteCursor")) {
-	boConfig->saveCursorMode(CursorSprite);
- } else if (d->mCursor->isA("BosonExperimentalCursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
- } else if (d->mCursor->isA("BosonKDECursor")) {
-	boConfig->saveCursorMode(CursorKDE);
- } else {
-	boConfig->saveCursorMode(CursorNormal);
- }
- boConfig->saveCursorDir(d->mCursorTheme);
  d->mIOList.clear();
  delete d->mCursor;
  delete d->mDisplayManager;
@@ -975,3 +957,38 @@ void BosonWidget::toggleChatVisible()
 {
  d->mChatDock->changeHideShowState();
 }
+
+void BosonWidget::saveConfig(bool editor)
+{
+  // note: the game is *not* saved here! just general settings like game speed,
+  // player name, ...
+ kdDebug() << k_funcinfo << endl;
+ if (!game()) {
+	kdError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ if (!player()) {
+	kdError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
+
+ if (!editor) {
+	BosonConfig::saveLocalPlayerName(player()->name());
+	BosonConfig::saveGameSpeed(game()->gameSpeed());
+ } else {
+	 
+ }
+ if (d->mCursor->isA("BosonSpriteCursor")) {
+	boConfig->saveCursorMode(CursorSprite);
+ } else if (d->mCursor->isA("BosonExperimentalCursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
+ } else if (d->mCursor->isA("BosonKDECursor")) {
+	boConfig->saveCursorMode(CursorKDE);
+ } else {
+	boConfig->saveCursorMode(CursorNormal);
+ }
+ boConfig->saveCursorDir(d->mCursorTheme);
+ boConfig->save(editor);
+ kdDebug() << k_funcinfo << "done" << endl;
+}
+
