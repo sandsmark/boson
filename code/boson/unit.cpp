@@ -166,7 +166,7 @@ void Unit::initStatic()
  addPropertyId(IdPathRecalculated, QString::fromLatin1("PathRecalculated"));
 
  // Facility
- addPropertyId(IdConstructionState, QString::fromLatin1("ConstructionState"));
+ addPropertyId(IdConstructionStep, QString::fromLatin1("ConstructionStep"));
 
  // UnitPlugin and derived classes
  addPropertyId(IdProductionState, QString::fromLatin1("ProductionState"));
@@ -1350,7 +1350,7 @@ public:
 		mFlamesParticleSystem = 0;
 	}
 
-	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
+	KGameProperty<unsigned int> mConstructionStep;
 	RepairPlugin* mRepairPlugin;
 
 	BosonParticleSystem* mFlamesParticleSystem;
@@ -1360,9 +1360,9 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 {
  d = new FacilityPrivate;
 
- registerData(&d->mConstructionState, IdConstructionState);
+ registerData(&d->mConstructionStep, IdConstructionStep);
 
- d->mConstructionState.setLocal(0);
+ d->mConstructionStep.setLocal(0);
 
 /* if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
 	d->mRepairPlugin = new RepairPlugin(this);
@@ -1391,7 +1391,7 @@ void Facility::advanceConstruction(unsigned int advanceCount)
 	boError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- setConstructionStep(d->mConstructionState + 1);
+ setConstructionStep(currentConstructionStep() + 1);
 }
 
 UnitPlugin* Facility::plugin(int pluginType) const
@@ -1415,7 +1415,7 @@ bool Facility::isConstructionComplete() const
  if (work() == WorkConstructed) {
 	return false;
  }
- if (d->mConstructionState < constructionSteps()) {
+ if (currentConstructionStep() < constructionSteps()) {
 	return false;
  }
  return true;
@@ -1424,7 +1424,7 @@ bool Facility::isConstructionComplete() const
 double Facility::constructionProgress() const
 {
  unsigned int constructionTime = constructionSteps();
- double percentage = (double)(d->mConstructionState * 100) / (double)constructionTime;
+ double percentage = (double)(currentConstructionStep() * 100) / (double)constructionTime;
  return percentage;
 }
 
@@ -1465,7 +1465,7 @@ void Facility::setConstructionStep(unsigned int step)
 //	boDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
  }
  setGLConstructionStep(modelStep); // the displayed construction step. note that currentConstructionStep() is a *different* value!
- d->mConstructionState = step;
+ d->mConstructionStep = step;
  if (step == constructionSteps()) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
@@ -1476,7 +1476,7 @@ void Facility::setConstructionStep(unsigned int step)
 
 unsigned int Facility::currentConstructionStep() const
 {
- return d->mConstructionState;
+ return d->mConstructionStep;
 }
 
 BosonParticleSystem* Facility::flamesParticleSystem() const
