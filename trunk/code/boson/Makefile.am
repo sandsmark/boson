@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data bosonwidgets items commandframe sound startupwidgets bodebug info
+SUBDIRS = data items commandframe sound startupwidgets bodebug info
 
 bin_PROGRAMS = boson bounit boprofiling bocursor borender boinfo
 
