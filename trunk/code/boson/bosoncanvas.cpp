@@ -1089,29 +1089,29 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		continue;
 	}
 
-	// FIXME: the target must be loaded after _all_ units are loaded
-	QDomNodeList unitList = items.elementsByTagName(QString::fromLatin1("Unit"));
-	for (unsigned int j = 0; j < unitList.count(); j++) {
-		QDomElement unit = unitList.item(j).toElement();
-		if (unit.isNull()) {
+	// FIXME: the unit target must be loaded after _all_ units are loaded
+	QDomNodeList itemList = items.elementsByTagName(QString::fromLatin1("Item"));
+	for (unsigned int j = 0; j < itemList.count(); j++) {
+		QDomElement item = itemList.item(j).toElement();
+		if (item.isNull()) {
 			continue;
 		}
-		bool ok = loadUnitFromXML(unit, owner);
+		bool ok = false;
+		unsigned int rtti = item.attribute(QString::fromLatin1("Rtti")).toUInt(&ok);
 		if (!ok) {
-			boError(260) << k_funcinfo << "Unit " << j << " was not loaded correctly" << endl;
+			boError(260) << k_funcinfo << "Rtti attribute of Item " << j << " is not a valid number" << endl;
 			continue;
 		}
-	}
-
-	QDomNodeList shotList = items.elementsByTagName(QString::fromLatin1("Shot"));
-	for (unsigned int j = 0; j < shotList.count(); j++) {
-		QDomElement shot = shotList.item(j).toElement();
-		if (shot.isNull()) {
-			continue;
+		ok = false;
+		if (RTTI::isUnit(rtti)) {
+			ok = loadUnitFromXML(item, owner);
+		} else if (RTTI::isShot(rtti)) {
+			ok = loadShotFromXML(item, owner);
+		} else {
+			boError(260) << k_funcinfo << "unknown Rtti " << rtti << endl;
 		}
-		bool ok = loadShotFromXML(shot, owner);
 		if (!ok) {
-			boError(260) << k_funcinfo << "Shot " << j << " was not loaded correctly" << endl;
+			boError(260) << k_funcinfo << "Item " << j << " was not loaded correctly" << endl;
 			continue;
 		}
 	}
@@ -1296,25 +1296,18 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 		boError() << k_funcinfo << "no Items element found" << endl;
 		continue;
 	}
+	QDomElement item = doc.createElement(QString::fromLatin1("Item"));
+	item.setAttribute(QString::fromLatin1("Rtti"), i->rtti());
 	if (RTTI::isShot(i->rtti())) {
 		if (!((BosonShot*)i)->isActive()) {
 			continue;
 		}
-		QDomElement shot = doc.createElement(QString::fromLatin1("Shot"));
-		if (!i->saveAsXML(shot)) {
-			boError() << k_funcinfo << "Could not save shot " << i << endl;
-			continue;
-		}
-		items.appendChild(shot);
-	} else if (RTTI::isUnit(i->rtti())) {
-		Unit* u = (Unit*)i;
-		QDomElement unit = doc.createElement(QString::fromLatin1("Unit"));
-		if (!i->saveAsXML(unit)) {
-			boError() << k_funcinfo << "Could not save unit " << u->id() << endl;
-			continue;
-		}
-		items.appendChild(unit);
 	}
+	if (!i->saveAsXML(item)) {
+		boError() << k_funcinfo << "Could not save item " << i << endl;
+		continue;
+	}
+	items.appendChild(item);
  }
  return true;
 }
