@@ -1,5 +1,5 @@
 #include "facilities.wml" type="Facilities" name="Weapons Factory" \
-        description="The Weapons Factory provides the technology to build other buildings and units, \
-        see the <a href='map.html'>Facilities dependency tree.</a><br> You can also build land units here." \
+        description="Nearly your complete army will be trained in the Weapons Factory.<br> \
+        Also it provides the technology to build other facilities and units." \
         name2="weaponsfactory" type2="fix" \
         before_url="powerplant.html" before_text="Power Plant" after_url="comsat.html" after_text="Comsat" up_url="index.html"
