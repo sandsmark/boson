@@ -107,14 +107,19 @@ BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* 
 
 BosonNewGameWidget::~BosonNewGameWidget()
 {
-/*
  // Save stuff like player name, color etc.
- boConfig->saveLocalPlayerName(mNameEdit->text());
+ boConfig->saveLocalPlayerName(mLocalPlayerName->text());
  boConfig->saveLocalPlayerColor(mPlayerColor);
- boConfig->saveLocalPlayerMap(playFieldIdentifier());
-
- boConfig->saveComputerPlayerName(mAddAIName->text());
- */
+ QString playFieldIdentifier;
+ if (mChooseBosonMap->currentItem()) {
+	if (d->mItem2Map.contains(mChooseBosonMap->currentItem())) {
+		playFieldIdentifier = d->mItem2Map[mChooseBosonMap->currentItem()];
+	}
+ }
+ if (!playFieldIdentifier.isEmpty()) {
+	boConfig->saveLocalPlayerMap(playFieldIdentifier);
+ }
+// TODO: save species. not yet useful as we support one species only.
  delete d;
 }
 
@@ -145,6 +150,7 @@ void BosonNewGameWidget::initPlayFields()
 	d->mItem2Map.insert(item, list[i]);
  }
  if (boGame->isAdmin()) {
+	// load the map that was selected in a previous game
 	QString mapId = boConfig->readLocalPlayerMap();
 	if (mapId.isNull()) {
 		mapId = BosonPlayField::defaultPlayField();
@@ -321,7 +327,7 @@ void BosonNewGameWidget::slotNetPlayerNameChanged(Player* p)
 		QListBoxText* old = (QListBoxText*)it.currentKey();
 		int index = mConnectPlayers->index(old);
 		if (index < 0 || (unsigned int)index >= mConnectPlayers->count()) {
-			boError() << k_funcinfo << "invalid index" << endl;
+			boError() << k_funcinfo << "invalid index " << index << endl;
 			return;
 		}
 		QListBoxItem* t = new QListBoxText(p->name());
