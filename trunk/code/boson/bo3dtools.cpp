@@ -585,7 +585,7 @@ float Bo3dTools::rad2deg(float rad)
   return rad * RAD2DEG;
 }
 
-float Bo3dTools::sphereInFrustum(double* viewFrustum, const BoVector3& pos, float radius)
+float Bo3dTools::sphereInFrustum(const double* viewFrustum, const BoVector3& pos, float radius)
 {
   // FIXME: performance: we might unroll the loop and then make this function
   // inline. We call it pretty often!
@@ -600,6 +600,186 @@ float Bo3dTools::sphereInFrustum(double* viewFrustum, const BoVector3& pos, floa
     }
   }
   return distance + radius;
+}
+
+bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
+{
+  // AB: once again - most credits go to mesa :)
+  BoVector4 v;
+  v.setX(x);
+  v.setY(y);
+  v.setZ(z);
+  v.setW(1.0f);
+
+  BoVector4 v2;
+  modelviewMatrix.transform(&v2, &v);
+  projectionMatrix.transform(&v, &v2);
+
+  if(v[3] == 0.0f)
+  {
+    boError() << k_funcinfo << "Can't divide by zero" << endl;
+    return false;
+  }
+  v2.setX(v[0] / v[3]);
+  v2.setY(v[1] / v[3]);
+  v2.setZ(v[2] / v[3]);
+
+  pos->setX((int)(viewport[0] + (1 + v2[0]) * viewport[2] / 2));
+  pos->setY((int)(viewport[1] + (1 + v2[1]) * viewport[3] / 2));
+
+  // return the actual window y
+  pos->setY(viewport[3] - pos->y());
+  return true;
+}
+
+bool Bo3dTools::boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3* ret, float z)
+{
+  // AB: most code is from mesa's gluUnProject().
+  BoMatrix A(projectionMatrix);
+  BoMatrix B;
+
+  // A = A x Modelview (== Projection x Modelview)
+  A.multiply(&modelviewMatrix);
+
+  // B = A^(-1)
+  if(!A.invert(&B))
+  {
+    boError() << k_funcinfo << "Could not invert (Projection x Modelview)" << endl;
+    return false;
+  }
+
+  // AB: we could calculate the inverse whenever camera changes!
+  // --> less inverses to be calculated.
+
+  GLfloat depth = 0.0f;
+  GLint realy = viewport[3] - (GLint)pos.y() - 1;
+  if (z == -1.0f)
+  {
+    glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+  }
+  else
+  {
+    depth = z;
+  }
+
+
+  BoVector4 v;
+  BoVector4 result;
+  v.setX( ((GLfloat)((pos.x() - viewport[0]) * 2)) / viewport[2] - 1.0f);
+  v.setY( ((GLfloat)((realy - viewport[1]) * 2)) / viewport[3] - 1.0f);
+#if 0
+  // mesa uses this
+  v.setX( (pos.x() - viewport[0]) * 2 / viewport[2] - 1.0f);
+  v.setY( (realy - viewport[1]) * 2 / viewport[3] - 1.0f);
+#endif
+  v.setZ(2 * depth - 1.0f);
+  v.setW(1.0f);
+  B.transform(&result, &v);
+
+  if(result[3] == 0.0f)
+  {
+    boError() << k_funcinfo << "Can't divide by zero" << endl;
+    return false;
+  }
+
+  ret->set(result[0] / result[3], result[1] / result[3], result[2] / result[3]);
+
+  return true;
+}
+
+bool Bo3dTools::mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth)
+{
+  GLint realy = viewport[3] - (GLint)pos.y() - 1;
+  // we basically calculate a line here .. nearX/Y/Z is the starting point,
+  // farX/Y/Z is the end point. From these points we can calculate a direction.
+  // using this direction and the points nearX(Y)/farX(Y) you can build triangles
+  // and then find the point that is on z=0.0
+  GLdouble nearX, nearY, nearZ;
+  GLdouble farX, farY, farZ;
+  BoVector3 near, far;
+  if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &near, 0.0f))
+  {
+    return false;
+  }
+  if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &far, 1.0f))
+  {
+    return false;
+  }
+  nearX = near[0];
+  nearY = near[1];
+  nearZ = near[2];
+  farX = far[0];
+  farY = far[1];
+  farZ = far[2];
+
+  GLdouble zAtPoint = 0.0f;
+
+  // we need to find out which z position is at the point pos. this is important
+  // for mapping 2d values (screen coordinates) to 3d (world coordinates)
+  GLfloat depth = 0.0;
+  glReadPixels(pos.x(), realy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+  // AB: 0.0f is reached when we have a point that is outside the actual window!
+  if(useRealDepth && depth != 1.0f && depth != 0.0f) {
+    // retrieve z
+    BoVector3 v;
+    if(!boUnProject(modelviewMatrix, projectionMatrix, viewport, pos, &v))
+    {
+      return false;
+    }
+    zAtPoint = v[2];
+  }
+  else
+  {
+    // assume we're using z = 0.0f
+    zAtPoint = 0.0f;
+  }
+
+  // simple maths .. however it took me pretty much time to do this.. I haven't
+  // done this for way too long time!
+  GLdouble dist = (nearZ - zAtPoint); // distance from nearZ to our actual z. for z=0.0 this is equal to nearZ.
+  GLdouble tanAlphaX = (nearX - farX) / (nearZ - farZ);
+  *posX = (GLfloat)(nearX - tanAlphaX * dist);
+
+  GLdouble tanAlphaY = (nearY - farY) / (nearZ - farZ);
+  *posY = (GLfloat)(nearY - tanAlphaY * dist);
+
+  *posZ = zAtPoint;
+  return true;
+}
+
+bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy)
+{
+  GLfloat moveZ; // unused
+  GLfloat moveX1, moveY1;
+  GLfloat moveX2, moveY2;
+  if(windx >= viewport[1]) // viewport[1] == width
+  {
+    boError() << k_funcinfo << "windx (" << windx <<") must be < " << viewport[1] << endl;
+    return false;
+  }
+  if(windy >= viewport[3]) // viewport[3] == width
+  {
+    boError() << k_funcinfo << "windy (" << windy <<") must be < " << viewport[3] << endl;
+    return false;
+  }
+  if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
+              QPoint(viewport[1] / 2 - windx / 2, viewport[3] / 2 - windy / 2),
+              &moveX1, &moveY1, &moveZ, false))
+  {
+    boError() << k_funcinfo << "Cannot map coordinates" << endl;
+    return false;
+  }
+  if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
+              QPoint(viewport[1] / 2 + windx / 2, viewport[3] / 2 + windy / 2),
+              &moveX2, &moveY2, &moveZ, false))
+  {
+    boError() << k_funcinfo << "Cannot map coordinates" << endl;
+    return false;
+  }
+  *dx = moveX2 - moveX1;
+  *dy = moveY2 - moveY1;
+  return true;
 }
 
 

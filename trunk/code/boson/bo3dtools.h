@@ -29,6 +29,7 @@
 class QString;
 class KConfig;
 class QDataStream;
+class QPoint;
 
 
 /**
@@ -848,16 +849,61 @@ class Bo3dTools
      * BosonBigDisplayBase. The view frustum is a 6x4 matrix
      **/
     // FIXME: we should use float* instead of double*
-    static float sphereInFrustum(double* viewFrustum, const BoVector3&, float radius);
+    static float sphereInFrustum(const double* viewFrustum, const BoVector3&, float radius);
 
     /**
      * @overload
      **/
-    inline static float sphereInFrustum(double* viewFrustum, float x, float y, float z, float radius)
+    inline static float sphereInFrustum(const double* viewFrustum, float x, float y, float z, float radius)
     {
       BoVector3 pos(x,y,z);
       return sphereInFrustum(viewFrustum, pos, radius);
     }
+
+    /**
+     * @param modelviewMatrix A reference to the modelview matrix. You can use
+     * @ref BoMatrix::loadMatrix with GL_MODELVIEW_MATRIX for this.
+     * @param projectionMatrix A reference to the projection matrix. You can use
+     * @ref BoMatrix::loadMatrix with GL_PROJECTION_MATRIX for this.
+     * @ref viewport The viewport. Use glGetIntegerv(GL_VIEWPORT, viewport) for
+     * this.
+     * @param x The x-coordinate (world-, aka OpenGL- coordinates) of the point
+     * that is to be projected.
+     * @param y The y-coordinate (world-, aka OpenGL- coordinates) of the point
+     * that is to be projected.
+     * @param z The z-coordinate (world-, aka OpenGL- coordinates) of the point
+     * that is to be projected.
+     * @param pos Here the result will get returned. It will be in
+     * window-coordinates (relative to the OpenGL widget of course).
+     **/
+    static bool boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos);
+
+    static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3* v, float z = -1.0);
+
+    /**
+     * This is a frontend to @ref boUnProject. It calculates the world-(aka
+     * OpenGL-) coordinates (@p posX, @p posY, @p posZ) of given window
+     * coordinates @p pos.
+     *
+     * This function takes the correct z value at @p pos into account (usually
+     * the z/depth at the mouse cursor).
+     * @param useRealDepth If TRUE this function will calculate the real
+     * coordinates at @p pos, if FALSE it will calculate the coordinate at
+     * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
+     * different z values could deliver wrong values.
+     **/
+    static bool mapCoordinates(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true);
+
+    /**
+     * Map distances from window to world coordinates.
+     *
+     * Sometimes you need to know how much a certain amount of pixels (from a
+     * widget) is in world-coordinates. This is e.g. the case for mouse
+     * scrolling - the player moved the mouse by a certain distance and you need
+     * to scroll the scene by a certain distance.
+     **/
+    static bool mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy);
+
 };
 
 
