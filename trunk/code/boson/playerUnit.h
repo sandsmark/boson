@@ -27,6 +27,9 @@
 #include "sprites.h"
 
 
+class selectPart_up;
+class selectPart_down;
+
 enum mobUnitState {
 	MUS_NONE,
 	MUS_TURNING,
@@ -41,6 +44,7 @@ class playerMobUnit : public mobUnit, public QwSprite
  public:
   
   playerMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
+  ~playerMobUnit();
 
   virtual	int _x(void) {return x();}
   virtual	int _y(void) {return y();}
@@ -48,7 +52,12 @@ class playerMobUnit : public mobUnit, public QwSprite
   int	getWantedMove(int &dx, int &dy, int &direction);
   int	getWantedAction();
 
+/* attachement */
+  void  select();
+  void  unSelect();
+
 /* Server orders */
+  void  doMoveBy(int dx, int dy);
   void  s_moveBy(int dx, int dy, int direction);
 
 /* Qw stuff */
@@ -67,6 +76,10 @@ class playerMobUnit : public mobUnit, public QwSprite
  private :
   int		direction;	// [0-11] is the angle ...
   mobUnitState	state;
+
+/* attachement */
+  selectPart_up *sp_up;
+  selectPart_down *sp_down;
 
   /* moving */
   int 	dest_x, dest_y;

@@ -1,9 +1,9 @@
 /***************************************************************************
-                         sprites.h  -  description                              
+                         selectPart.h  -  description                              
                              -------------------                                         
 
     version              :                                   
-    begin                : Sat Apr 24 20:42:00 CET 1999
+    begin                : Sat Jun 26 16:23:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,20 +18,46 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SPRITES_H 
-#define SPRITES_H 
-
-#define	S_BASE		1234
-#define	S_GROUND	(S_BASE+1)
-#define	S_MOBILE	(S_BASE+2)
-#define	S_FACILITY	(S_BASE+3)
+#ifndef SELECTPART_H 
+#define SELECTPART_H 
 
 
-#define Z_SELECT	(+20)
-#define Z_FLYING	(+10)
-#define Z_MOBILE	(+5)
-#define Z_SAILING	(+2)
-#define Z_FACILITY	(+0)
-#define Z_GROUND	(-1)
+#include <QwSpriteField.h>
 
-#endif // SPRITES_H
+
+#define PART_NB		10
+
+class selectPart : public QwSprite
+{
+public:
+		selectPart();
+  static void	drawSelectBox(QPainter &painter, QColor, QColor);
+};
+
+
+
+class selectPart_up : public selectPart
+{
+public:
+		selectPart_up(int a);
+  static void	initStatic();
+
+private:
+  static QwSpritePixmapSequence  *qsps;
+	
+};
+
+
+
+class selectPart_down : public selectPart
+{
+public:
+		selectPart_down(int);
+  static void	initStatic();
+
+private:
+  static QwSpritePixmapSequence  *qsps;
+	
+};
+
+#endif // SELECTPART_H 

@@ -32,7 +32,6 @@
 #include "../common/groundType.h"
 #include "../common/unitType.h"
 #include "../common/unit.h"	// Facility
-#include "playerUnit.h"		// playerMobUnit
 #include "speciesTheme.h"
 #include "orderWin.h"
 #include "game.h"
@@ -77,8 +76,6 @@ class fieldMap : public QWidget, public QwAbsSpriteFieldView
 
 /* display */
   void drawCell(int i, int j, QPainter *p=0L);
-  void drawSelected(void);
-  void drawSelected(QPainter *p);
   void drawRelative(int x, int y, QPixmap *p, QPainter *p=0L);
   void drawRectSelect(int x1, int y1, int x2, int y2, QPainter &qp) {qp.drawRect(x1, y1, x2-x1, y2-y1);}
 

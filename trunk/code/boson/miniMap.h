@@ -21,15 +21,17 @@
 #ifndef MINI_MAP_H 
 #define MINI_MAP_H 
 
+#include "../common/groundType.h"
 
 #include <qframe.h> ///orzel qwidget.h
-#include "playerUnit.h"		// playerMobUnit
 
 class Cell;
 class Unit;
 class QPixmap;
 class playerCell;
 class viewMap;
+class playerMobUnit;
+class playerFacility;
 
 /** 
   * This is the little map, which "zoom" the battle field
