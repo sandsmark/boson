@@ -22,14 +22,16 @@
 #include "unit.h"
 #include "bosoncanvas.h"
 #include "defines.h"
+#include "player.h"
 
 #include <qcanvas.h>
 #include <qpoint.h>
 
 #define ERROR_COST 100000
 #define MAX_PATH_COST 5000
+#define FOGGED_COST 5
 
-class Marking
+class BosonPath::Marking
 {
   public:
     Marking() { dir = BosonPath::DirNone; f = -1; g = -1; }
@@ -38,7 +40,7 @@ class Marking
     float g;
 };
 
-class PathNode
+class BosonPath::PathNode
 {
   public:
     PathNode() { x = 0; y = 0; g = 0; h = 0; };
@@ -51,7 +53,7 @@ class PathNode
     float h; // distance of all cells the unit has crossed up to here
 };
 
-bool operator < (const PathNode& a, const PathNode& b)
+bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
 }
@@ -64,9 +66,10 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly)
   mStarty = starty;
   mGoalx = goalx;
   mGoaly = goaly;
-  mModifier = 5;
-  mCrossDivider = 1000;
-  mMinCost = 5;
+  /// TODO: those variables needs tuning and *lots* of testing!
+  mModifier = 3;
+  mCrossDivider = 10;
+  mMinCost = 3;
   mAbortPath = 2000;
 
   kdDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << endl;
@@ -182,7 +185,7 @@ bool BosonPath::findPath()
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
       {
-        kdWarning() << k_lineinfo << ": not on canvas" << endl;
+        //kdWarning() << k_lineinfo << ": not on canvas" << endl;
         continue;
       }
 
@@ -200,7 +203,7 @@ bool BosonPath::findPath()
           kdDebug() << "new goal x=" << mGoalx << ",y=" << mGoaly << endl;
           continue;
         }
-        kdDebug() << k_lineinfo << "ERROR_COST" << endl;
+        //kdDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
       }
       else // we can go on this cell
@@ -373,20 +376,31 @@ inline void BosonPath::neighbor(int& x, int& y, Direction d)
 
 float BosonPath::cost(int x, int y)
 {
+  // Check at the very beginning if tile is fogged - if it is, we return one value and save time
+  if(mUnit->owner()->isFogged(x, y))
+  {
+    //kdDebug() << "Tile at (" << x << ", " << y << ") is fogged, returning FOGGED_COST" << endl;
+    return FOGGED_COST + mMinCost;
+  }
+
   Cell* c = mUnit->boCanvas()->cell(x, y);
-  // Check if we can go to that tile, if we can't, return -1
+
+  // Check if we can go to that tile, if we can't, return ERROR_COST
   if(! c->canGo(mUnit->unitProperties()))
   {
-    kdDebug() << k_lineinfo << ": cannot go on " << x << "," << y << endl;
+    //kdDebug() << k_lineinfo << ": cannot go on " << x << "," << y << endl;
     return ERROR_COST;
   }
+
+  float cost;
 
   // Check if there are units on that tile (slow method?)
 // qt bug (confirmed). will be fixed in 3.1
 #if QT_VERSION >= 310
   QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE, BO_TILE_SIZE);
 #else
-  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE - 1, BO_TILE_SIZE - 1);// QT uses QCanvasRectangle::boudingRect() for collision detection - but this @_,+p*@ function adds +1 to width and height !!! (QCanvasRectangle::rect() is ok)
+  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE - 1, BO_TILE_SIZE - 1);
+  // QT uses QCanvasRectangle::boudingRect() for collision detection - but this @_,+p*@ function adds +1 to width and height !!! (QCanvasRectangle::rect() is ok)
 #endif
   // collisions() consists in this case of a simple
   // QRect r1=rect,r2=mUnit->boundingRectAdvanced(); return r1.intersects(r2);
@@ -399,16 +413,16 @@ float BosonPath::cost(int x, int y)
       if(RTTI::isUnit((*it)->rtti()))
       {
         Unit* unit = (Unit*)*it;
-        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed())
+        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed() && unit->work() != UnitBase::WorkMove)
         {
-          kdDebug() << k_lineinfo << ": unit on cell " << x << "," << y << ": " << unit->id() << endl;
+          //kdDebug() << k_lineinfo << ": unit on cell " << x << "," << y << ": " << unit->id() << endl;
           return ERROR_COST;
         }
       }
     }
   }
+  cost = c->moveCost();
 
-  float cost = c->moveCost();
   return cost + mMinCost;
 }
 
