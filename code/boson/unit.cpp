@@ -702,7 +702,20 @@ void MobileUnit::advanceMove()
  // If both waypoint's coordinates are -1, then it means that path to
  //  destination can't be found and we should stop
  if((wp.x() == -1) &&(wp.y() == -1))
+ {
 	stopMoving();
+	return;
+ }
+
+ // If both waypoint's coordinates are -2, then it means that path was partial
+ //  and we have to search new one
+ if((wp.x() == -2) &&(wp.y() == -2))
+ {
+	clearWaypoints();
+	newPath();
+	return;
+ }
+
 
  // Check if we can actually go to waypoint (maybe it was fogged)
  if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
