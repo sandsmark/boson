@@ -25,6 +25,21 @@
 
 #include <kdebug.h>
 
+// warning: mAllTextures is *not* setAutoDelete(true) !
+QIntDict<BoTextureInfo> BosonTextureArray::mAllTextures = QIntDict<BoTextureInfo>();
+
+class BoTextureInfo
+{
+public:
+	BoTextureInfo()
+	{
+		mTexture = 0;
+		mMipmap = false;
+	}
+	GLuint mTexture;
+	bool mMipmap;
+};
+
 BosonTextureArray::BosonTextureArray()
 {
  init();
@@ -50,6 +65,10 @@ BosonTextureArray::~BosonTextureArray()
 {
 // kdDebug() << k_funcinfo << endl;
  if (mTextures && mCount) {
+	for (unsigned int i = 0; i < mCount; i++) {
+		BoTextureInfo* t = mAllTextures.take(mTextures[i]);
+		delete t;
+	}
 	glDeleteTextures(mCount, &mTextures[0]);
 	delete[] mTextures;
 	delete[] mWidths;
@@ -104,9 +123,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // (usually!!) - so don't change it :)
 
  if (useMipmaps) {
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
-	// note: GL_*_MIPMAP_* is slower! GL_NEAREST would be fastest
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->mipmapMinificationFilter());
+	resetMipmapTexParameter();
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
 			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
@@ -118,8 +135,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// are not so much quality relevant
 	// TODO: performance: combine several textures into a single one and
 	// adjust the coordinates in glTexCoord
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->minificationFilter());
+	resetTexParameter();
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(),
 			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
@@ -132,6 +148,36 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	return false;
  }
  return true;
+}
+
+void BosonTextureArray::resetAllTexParameter()
+{
+ kdDebug() << k_funcinfo << "reset " << mAllTextures.count() << " textures" << endl;
+ QIntDictIterator<BoTextureInfo> it(mAllTextures);
+ for (; it.current(); ++it) {
+	GLuint tex = it.currentKey();
+	glBindTexture(GL_TEXTURE_2D, tex);
+	if (it.current()->mMipmap) {
+		resetMipmapTexParameter();
+	} else {
+		resetTexParameter();
+	}
+ }
+}
+
+void BosonTextureArray::resetTexParameter()
+{
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->minificationFilter());
+
+}
+
+void BosonTextureArray::resetMipmapTexParameter()
+{
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (GLenum)boConfig->magnificationFilter());
+ // note: GL_*_MIPMAP_* is slower! GL_NEAREST would be fastest
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)boConfig->mipmapMinificationFilter());
+
 }
 
 bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmaps)
@@ -156,6 +202,12 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmap
  mWidths = new int[mCount];
  mHeights = new int[mCount];
  glGenTextures(mCount, &mTextures[0]);
+ for (unsigned int i = 0; i < mCount; i++) {
+	BoTextureInfo* t = new BoTextureInfo;
+	t->mTexture = mTextures[i];
+	t->mMipmap = useMipmaps;
+	mAllTextures.insert(mTextures[i], t);
+ }
 
 // kdDebug() << k_funcinfo << "count=" << mCount << endl;
 
