@@ -3,7 +3,6 @@ Game TODOs
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - AI
-- follow-mode for units
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
 - mine/harvest minerals/oil is only at an experimantal state ; same about

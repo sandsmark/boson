@@ -1014,6 +1014,38 @@ void MobileUnit::advanceRefine()
  }
 }
 
+void MobileUnit::advanceFollow()
+{
+ if (!target()) {
+	kdWarning() << k_funcinfo << "cannot follow NULL unit" << endl;
+	stopAttacking();  // stopAttacking should maybe be renamed to stopEverything
+			//  or just stop because it's used in several places to stop unit from
+			//  doing whatever it does.
+	return;
+ }
+ if (target()->isDestroyed()) {
+	kdDebug() << k_funcinfo << "Unit is destroyed!" << endl;
+	stopAttacking();
+	return;
+ }
+// if (!isNextTo(target())) {  // This doesn't work for some reason :-(  Dunno why.
+ if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
+	// We're not next to unit
+	if (!canvas()->allBosonItems().contains(target())) {
+		kdDebug() << k_funcinfo << "Unit seems to be destroyed!" << endl;
+		stopAttacking();
+		return;
+	}
+	kdDebug() << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	if (!moveTo(target()->x(), target()->y(), 1)) {
+		setWork(WorkNone);
+	} else {
+		setAdvanceWork(WorkMove);
+	}
+ }
+ // Do nothing (unit is in range)
+}
+
 unsigned int MobileUnit::resourcesMined() const
 {
  return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesMined : 0;

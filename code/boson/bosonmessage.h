@@ -59,6 +59,7 @@ public:
 		MoveRepair = 106,
 		MoveRefine = 107,
 		MoveStop = 108,  // Stop unit(s) from moving or attacking
+		MoveFollow = 109,  // Follow another unit
 
 
 	// the last message ID:

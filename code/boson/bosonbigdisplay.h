@@ -93,6 +93,7 @@ protected:
 	bool actionAttack(QDataStream& stream, const QPoint& pos);
 	bool actionRepair(QDataStream& stream, const QPoint& pos);
 	bool actionRefine(QDataStream& stream, const QPoint& pos);
+	bool actionFollow(QDataStream& stream, const QPoint& pos);
 
 	virtual void updateCursor();
 

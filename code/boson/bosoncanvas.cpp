@@ -164,6 +164,7 @@ public:
 	QPtrList<Unit> mWorkMine;
 	QPtrList<Unit> mWorkRefine;
 	QPtrList<Unit> mWorkAttack;
+	QPtrList<Unit> mWorkFollow;
 	QPtrList<Unit> mWorkConstructed;
 
 	BoItemList mAllItems;
@@ -211,6 +212,7 @@ void BosonCanvas::quitGame()
  d->mWorkMine.clear();
  d->mWorkRefine.clear();
  d->mWorkAttack.clear();
+ d->mWorkFollow.clear();
  d->mWorkConstructed.clear();
 }
 
@@ -381,6 +383,16 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
 			it.current()->advanceAttack();
+		}
+		++it;
+	}
+ }
+
+ if (d->mWorkFollow.count() > 0 && (advanceCount % 5) == 0) {
+	QPtrListIterator<Unit> it(d->mWorkFollow);
+	while (it.current()) {
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceFollow();
 		}
 		++it;
 	}
@@ -853,6 +865,7 @@ void BosonCanvas::changeWork()
 	d->mWorkMine.removeRef(u);
 	d->mWorkRefine.removeRef(u);
 	d->mWorkAttack.removeRef(u);
+	d->mWorkFollow.removeRef(u);
 	d->mWorkConstructed.removeRef(u);
 
 	if (d->mDestroyedUnits.contains(u)) {
@@ -880,6 +893,9 @@ void BosonCanvas::changeWork()
 			break;
 		case UnitBase::WorkAttack:
 			d->mWorkAttack.append(u);
+			break;
+		case UnitBase::WorkFollow:
+			d->mWorkFollow.append(u);
 			break;
 		case UnitBase::WorkConstructed:
 			d->mWorkConstructed.append(u);
