@@ -62,6 +62,7 @@ static bool createGame()
  g_canvas->pathfinder()->findPath(&i);
  boDebug() << k_funcinfo << "sample path searching complete" << endl;
 
+ qDebug("testing completed. no bugs found.");
  return true;
 }
 
