@@ -20,6 +20,10 @@
 
 #include <stdio.h>
 
+#include <qgroupbox.h>
+
+#include <kapp.h>
+
 #include "../common/bobuffer.h"
 #include "../common/map.h"	 ///orzel: temp, pour la creation...
 
@@ -31,19 +35,54 @@ FILE *logfile = (FILE *) 0L;
 BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	: KTMainWindow(name)
 {
+	QLabel		*label;
+	QGroupBox	*box;
+	QString		buf;
 
-//gpp.nbPlayer = 2;
-gpp.nbConnected = 0;
+	/* GUI */
+	resize( 120+180+10, 160);		// boserver-gui is 100x100
 
-initLog();
-logf(LOG_INFO, "Entering BosonServer constructor");
+		/* box */
+	box	= new QGroupBox(this);
+	box->setGeometry( this->rect());
+	
+		/* pix */
+	label = new QLabel(box);
+	label->move( 10, 10);		// biglogo is 352x160
+	label->setAutoResize(true);
+	label->setPixmap( QPixmap(kapp->kde_datadir() + "/boson/pics/boserver-gui.bmp") );
 
-initSocket(port);
-logf(LOG_INFO, "Socket is initialized");
+		/* port */
+	buf.sprintf("listening on port %d", port);
+	label	= new QLabel(buf, box);
+	//label->setAlignment(AlignCenter);
+	label->setGeometry( 120, 20, 180, 30);
 
-initMap(mapfile);
-logf(LOG_INFO, "Map is initialized");
+  	l_state = new QLabel("Waiting for first connection", box);
+	l_state->setGeometry( 120, 50, 180, 30);
 
+  	l_connected = new QLabel("Nobody is connected", box);
+	l_connected->setGeometry( 120, 80, 180, 30);
+
+	/* initialisation */
+
+	gpp.nbConnected = 0;
+
+	initLog();
+	logf(LOG_INFO, "Entering BosonServer constructor");
+
+	initSocket(port);
+	logf(LOG_INFO, "Socket is initialized");
+
+	initMap(mapfile);
+	logf(LOG_INFO, "Map is initialized");
+	
+	
+	/* GUI again */
+	buf.sprintf("Scenario : \"%s\" for %d players", gpp.worldName->data(), nbPlayer);
+	label	= new QLabel(buf, box);
+	//label->setAlignment(AlignVCenter | AlignLeft);
+	label->setGeometry( 10, 120, 250, 30);
 }
 
 
@@ -161,6 +200,8 @@ switch(state) {
 	case SS_INIT :
 		if (MSG_DLG_ASK == tag) {
 			state = SS_WAITING;
+			l_state->setText("waiting for other players");
+			l_connected->setText("One player connected");
 			gpp.nbConnected = 1;
 
 			data->accepted.who_you_are = playerId;
@@ -175,7 +216,9 @@ switch(state) {
 
 	case SS_WAITING :
 		if (MSG_DLG_ASK == tag ) {
-			gpp.nbConnected++;
+			QString buf;
+			buf.sprintf("%d players connected", ++gpp.nbConnected);
+			l_connected->setText(buf);
 			data->accepted.who_you_are = playerId;
 			data->accepted.missing_player = gpp.nbPlayer-gpp.nbConnected;
 			data->accepted.total_player = gpp.nbPlayer;
@@ -190,6 +233,7 @@ switch(state) {
 
 				/* then initialize the game */
 				state		= SS_PLAYING;
+				l_state->setText("Game is begin played");
 				loadUnits();
 				logf(LOG_INFO, "Game is beginning");
 

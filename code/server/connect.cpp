@@ -93,6 +93,7 @@ if (oldState != socketState)
 void BosonServer::clientClose(KSocket *s)
 {
 int i;
+QString buf;
 
 for(i=0; i<BOSON_MAX_CONNECTION; i++)
    if (gpp.player[i].socket == s) {
@@ -101,8 +102,13 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 	delete gpp.player[i].buffer;
 	delete s;
 	assert(gpp.nbConnected>0);
-	gpp.nbConnected--;
-	if (gpp.nbConnected<1) state = SS_INIT ;
+
+	buf.sprintf("%d players connected", --gpp.nbConnected);
+	l_connected->setText(buf);
+	if (gpp.nbConnected<1) {
+		state = SS_INIT ;
+  		l_state->setText("Waiting for first connection");
+	}
 	logf( LOG_INFO, "Connection[%d] has closed", i);
 	return;
 

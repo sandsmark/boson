@@ -41,6 +41,7 @@ key = 127; // why not ?
 	assert (openRead(mapfile));
 	///orzel, was ugly.. should handle openRead()==false correctly 
 	gpp.nbPlayer= nbPlayer;
+	gpp.worldName = new QString(worldName);
 	assert (loadGround());
 }
 
