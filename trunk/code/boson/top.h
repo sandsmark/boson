@@ -98,28 +98,12 @@ public slots:
 	void slotStartNewGame();
 
 	/**
-	 * Toggles if togglebar is shown or hidden
-	 **/
-	void slotToggleStatusbar(bool show);
-
-	/**
 	 * Ends current game and reinits all game data, so that a new game can
 	 * be started.
 	 * */
 	void slotEndGame();
 
 	void slotGameOver();
-
-signals:
-	void signalSetMobilesCount(int);// mobiles of the local player
-	void signalSetFacilitiesCount(int);// facilities of the local player
-	void signalMineralsUpdated(int);
-	void signalOilUpdated(int);
-	void signalEffectsCountUpdated(int);
-	void signalCanvasItemsCountUpdated(int);
-	void signalCanvasAnimationsCountUpdated(int);
-	void signalUnitsUpdated(int);// number of units on the canvas
-	void signalShotsUpdated(int);// number of shots on the canvas
 
 protected:
 	/**
@@ -163,7 +147,6 @@ protected:
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p);
-	void slotUpdateStatusBar();
 
 	/**
 	 * Cancenl the load/save widget and return to the game (if running), or
@@ -191,10 +174,6 @@ protected slots:
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
-	void slotUnitCountChanged(Player*);
-	void slotItemAdded(BosonItem*);
-	void slotUnitRemoved(Unit*);
-	void slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p);
 	void slotSaveExternalStuffAsXML(QDomElement& root);
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
@@ -202,13 +181,88 @@ protected slots:
 private:
 	void initDisplayManager();
 	void initBoson();
-	void initStatusBar();
 
 private:
 	KDockWidget* mMainDock;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;
+};
+
+class BoStatusBarHandler : public QObject
+{
+	Q_OBJECT
+public:
+	BoStatusBarHandler(KDockMainWindow*, QObject* parent);
+	~BoStatusBarHandler() { }
+
+	void setLocalPlayer(Player*);
+	void setCanvas(const BosonCanvas*);
+
+public slots:
+	/**
+	 * Toggles if togglebar is shown or hidden
+	 **/
+	void slotToggleStatusbar(bool show);
+
+signals:
+	/**
+	 * @internal
+	 **/
+	void signalSetMobilesCount(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalSetFacilitiesCount(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalMineralsUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalOilUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalEffectsCountUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalCanvasItemsCountUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalCanvasAnimationsCountUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalUnitsUpdated(int);
+
+	/**
+	 * @internal
+	 **/
+	void signalShotsUpdated(int);
+
+protected slots:
+	void slotUpdateStatusBar();
+	void slotUnitCountChanged(Player*);
+	void slotItemAdded(BosonItem*);
+	void slotUnitRemoved(Unit*);
+	void slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p);
+
+private:
+	void initStatusBar();
+
+	KDockMainWindow* mMainWindow;
+	Player* mLocalPlayer;
 };
 
 #endif

@@ -77,6 +77,8 @@ public:
 		mIface = 0;
 
 		mLocalPlayer = 0;
+
+		mStatusBarHandler = 0;
 	}
 
 	BosonStartupWidget* mStartup;
@@ -90,6 +92,8 @@ public:
 	BoDebugDCOPIface* mIface;
 
 	QGuardedPtr<Player> mLocalPlayer;
+
+	BoStatusBarHandler* mStatusBarHandler;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -116,14 +120,15 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  connect(d->mStartup, SIGNAL(signalCancelLoadSave()),
 		this, SLOT(slotCancelLoadSave()));
 
- connect(&d->mStatusBarTimer, SIGNAL(timeout()), this, SLOT(slotUpdateStatusBar()));
+ d->mStatusBarHandler = new BoStatusBarHandler(this, this);
+
+ connect(&d->mStatusBarTimer, SIGNAL(timeout()),
+		d->mStatusBarHandler, SLOT(slotUpdateStatusBar()));
 
  mMainDock->setWidget(d->mStartup);
 
  setView(mMainDock);
  setMainDockWidget(mMainDock);
-
- initStatusBar();
 
  d->mIface = new BoDebugDCOPIface();
 
@@ -166,7 +171,7 @@ void TopWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(0);
  connect(d->mDisplayManager, SIGNAL(signalToggleStatusbar(bool)),
-		this, SLOT(slotToggleStatusbar(bool)));
+		d->mStatusBarHandler, SLOT(slotToggleStatusbar(bool)));
 
  // add an initial display. this should happen asap, as we need the OpenGL
  // context for every texture that is to be loaded.
@@ -240,48 +245,6 @@ void TopWidget::initBoson()
  // for editor (new maps)
  connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
 		this, SLOT(slotEditorNewMap(const QByteArray&)));
-}
-
-void TopWidget::initStatusBar()
-{
- KStatusBar* bar = statusBar();
- QHBox* box = new QHBox(bar);
- (void)new QLabel(i18n("Mobiles: "), box);
- QLabel* mobilesLabel = new QLabel(QString::number(0), box);
- connect(this, SIGNAL(signalSetMobilesCount(int)), mobilesLabel, SLOT(setNum(int)));
- (void)new QLabel(i18n("Facilities: "), box);
- QLabel* facilitiesLabel = new QLabel(QString::number(0), box);
- connect(this, SIGNAL(signalSetFacilitiesCount(int)), facilitiesLabel, SLOT(setNum(int)));
- bar->addWidget(box);
-
- QHBox* resources = new QHBox(bar);
- (void)new QLabel(i18n("Minerals: "), resources);
- QLabel* mineralLabel = new QLabel(QString::number(0), resources);
- connect(this, SIGNAL(signalMineralsUpdated(int)), mineralLabel, SLOT(setNum(int)));
- (void)new QLabel(i18n("Oil: "), resources);
- QLabel* oilLabel = new QLabel(QString::number(0), resources);
- connect(this, SIGNAL(signalOilUpdated(int)), oilLabel, SLOT(setNum(int)));
- bar->addWidget(resources);
-
- QHBox* debug = new QHBox(bar);
- (void)new QLabel(i18n("Effects: "), debug);
- QLabel* effectsLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalEffectsCountUpdated(int)), effectsLabel, SLOT(setNum(int)));
- (void)new QLabel(i18n("Canvas items: "), debug);
- QLabel* itemsLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalCanvasItemsCountUpdated(int)), itemsLabel, SLOT(setNum(int)));
- (void)new QLabel(i18n("Animated items: "), debug);
- QLabel* animatedLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalCanvasAnimationsCountUpdated(int)), animatedLabel, SLOT(setNum(int)));
- bar->addWidget(debug);
- (void)new QLabel(i18n("Units: "), debug);
- QLabel* unitsLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalUnitsUpdated(int)), unitsLabel, SLOT(setNum(int)));
- (void)new QLabel(i18n("Shots: "), debug);
- QLabel* shotsLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalShotsUpdated(int)), shotsLabel, SLOT(setNum(int)));
-
- bar->hide();
 }
 
 void TopWidget::slotStartNewGame()
@@ -460,15 +423,6 @@ void TopWidget::slotGameOver()
  mMainDock->setWidget(d->mStartup);
 }
 
-void TopWidget::slotToggleStatusbar(bool show)
-{
- if (show) {
-	statusBar()->show();
- } else {
-	statusBar()->hide();
- }
-}
-
 bool TopWidget::queryClose()
 {
  boDebug() << k_funcinfo << endl;
@@ -512,28 +466,6 @@ bool TopWidget::queryExit()
 
  return true;
 }
-
-void TopWidget::slotUpdateStatusBar()
-{
- const BosonCanvas* canvas = boGame->canvas();
- BO_CHECK_NULL_RET(canvas);
- BosonCanvasStatistics* stat = canvas->canvasStatistics();
- BO_CHECK_NULL_RET(stat);
- // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
- // but whenever their value actually changes.
- emit signalEffectsCountUpdated(stat->effectsCount());
- emit signalCanvasItemsCountUpdated(stat->allItemsCount());
- emit signalCanvasAnimationsCountUpdated(stat->animationsCount());
-
- // AB: this *might* be an expensive calculation. this can be a pretty big loop
- // (> 1000 entries), but there are simple calculations only. maybe we should
- // add a slotUpdateStatusBarExpensive() or so which gets called every 5 seconds
- // only
- stat->updateItemCount();
- emit signalUnitsUpdated(stat->itemCount(RTTI::UnitStart));
- emit signalShotsUpdated(stat->itemCount(RTTI::Shot));
-}
-
 
 void TopWidget::changeLocalPlayer(Player* p)
 {
@@ -621,7 +553,7 @@ void TopWidget::slotGameStarted()
 	disconnect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
 			this, 0);
 	connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
-			this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
+			d->mStatusBarHandler, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
  }
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
 	Player* p = (Player*)boGame->playerList()->at(i);
@@ -674,15 +606,10 @@ void TopWidget::slotGameStarted()
 	return;
  }
  slotChangeLocalPlayer(localPlayer);
- emit signalMineralsUpdated(localPlayer->minerals());
- emit signalOilUpdated(localPlayer->oil());
- slotUnitCountChanged(localPlayer);
 
- connect(boGame->canvas(), SIGNAL(signalUnitRemoved(Unit*)),
-		this, SLOT(slotUnitRemoved(Unit*)));
- connect(boGame->canvas(), SIGNAL(signalItemAdded(BosonItem*)),
-		this, SLOT(slotItemAdded(BosonItem*)));
+ d->mStatusBarHandler->setLocalPlayer(localPlayer);
 
+ d->mStatusBarHandler->setCanvas(boGame->canvas());
  d->mDisplayManager->setCanvas(boGame->canvasNonConst());
 
  mMainDock->setWidget(d->mDisplayManager);
@@ -707,8 +634,6 @@ void TopWidget::slotGameStarted()
 	} else {
 		display->setDisplayInput(new EditorBigDisplayInput(display));
 	}
-	connect(display->displayInput(), SIGNAL(signalLockAction(bool)),
-			d->mDisplayManager, SIGNAL(signalLockAction(bool)));
 	display->setInputInitialized(true);
  }
  display->setLocalPlayerIO(d->mLocalPlayer->playerIO());
@@ -879,62 +804,6 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
  changeLocalPlayer(p);
 }
 
-void TopWidget::slotUnitCountChanged(Player* p)
-{
- emit signalSetMobilesCount(p->mobilesCount());
- emit signalSetFacilitiesCount(p->facilitiesCount());
-}
-
-void TopWidget::slotItemAdded(BosonItem* item)
-{
- if (!item) {
-	boError() << k_funcinfo << "NULL item" << endl;
-	return;
- }
- if (!RTTI::isUnit(item->rtti())) {
-	return;
- }
- Unit* unit = (Unit*)item;
- Player* p = unit->owner();
- if (!p) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return;
- }
- if (p != d->mLocalPlayer) {
-	return;
- }
-
- slotUnitCountChanged(p);
-}
-
-void TopWidget::slotUnitRemoved(Unit* unit)
-{
- if (unit->owner() != d->mLocalPlayer) {
-	return;
- }
-
- slotUnitCountChanged(unit->owner());
-}
-
-void TopWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
-{
- if (p != d->mLocalPlayer) {
-	// not yet used
-	return;
- }
- switch (prop->id()) {
-	case Player::IdMinerals:
-		emit signalMineralsUpdated(d->mLocalPlayer->minerals());
-		break;
-	case Player::IdOil:
-		emit signalOilUpdated(d->mLocalPlayer->oil());
-		break;
-	default:
-		break;
- }
-
-}
-
 void TopWidget::slotLoadExternalStuffFromXML(const QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
@@ -971,6 +840,160 @@ void TopWidget::saveConfig()
 	BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
 	BosonConfig::saveGameSpeed(boGame->gameSpeed());
  } else {
+ }
+}
+
+
+
+BoStatusBarHandler::BoStatusBarHandler(KDockMainWindow* w, QObject* parent)
+	: QObject(parent)
+{
+ mMainWindow = w;
+ mLocalPlayer = 0;
+ KStatusBar* bar = w->statusBar();
+ QHBox* box = new QHBox(bar);
+ (void)new QLabel(i18n("Mobiles: "), box);
+ QLabel* mobilesLabel = new QLabel(QString::number(0), box);
+ connect(this, SIGNAL(signalSetMobilesCount(int)), mobilesLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Facilities: "), box);
+ QLabel* facilitiesLabel = new QLabel(QString::number(0), box);
+ connect(this, SIGNAL(signalSetFacilitiesCount(int)), facilitiesLabel, SLOT(setNum(int)));
+ bar->addWidget(box);
+
+ QHBox* resources = new QHBox(bar);
+ (void)new QLabel(i18n("Minerals: "), resources);
+ QLabel* mineralLabel = new QLabel(QString::number(0), resources);
+ connect(this, SIGNAL(signalMineralsUpdated(int)), mineralLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Oil: "), resources);
+ QLabel* oilLabel = new QLabel(QString::number(0), resources);
+ connect(this, SIGNAL(signalOilUpdated(int)), oilLabel, SLOT(setNum(int)));
+ bar->addWidget(resources);
+
+ QHBox* debug = new QHBox(bar);
+ (void)new QLabel(i18n("Effects: "), debug);
+ QLabel* effectsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalEffectsCountUpdated(int)), effectsLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Canvas items: "), debug);
+ QLabel* itemsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalCanvasItemsCountUpdated(int)), itemsLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Animated items: "), debug);
+ QLabel* animatedLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalCanvasAnimationsCountUpdated(int)), animatedLabel, SLOT(setNum(int)));
+ bar->addWidget(debug);
+ (void)new QLabel(i18n("Units: "), debug);
+ QLabel* unitsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalUnitsUpdated(int)), unitsLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Shots: "), debug);
+ QLabel* shotsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalShotsUpdated(int)), shotsLabel, SLOT(setNum(int)));
+
+ bar->hide();
+}
+
+void BoStatusBarHandler::setLocalPlayer(Player* p)
+{
+ BO_CHECK_NULL_RET(p);
+ mLocalPlayer = p;
+ emit signalMineralsUpdated(p->minerals());
+ emit signalOilUpdated(p->oil());
+ slotUnitCountChanged(p);
+}
+
+void BoStatusBarHandler::setCanvas(const BosonCanvas* canvas)
+{
+ // TODO: disconnect signals from a previous canvas (if any).
+ // this is a very low priority todo, as the old canvas has been deleted anyway
+ // already
+ connect(canvas, SIGNAL(signalUnitRemoved(Unit*)),
+		this, SLOT(slotUnitRemoved(Unit*)));
+ connect(canvas, SIGNAL(signalItemAdded(BosonItem*)),
+		this, SLOT(slotItemAdded(BosonItem*)));
+
+}
+
+void BoStatusBarHandler::slotUnitCountChanged(Player* p)
+{
+ emit signalSetMobilesCount(p->mobilesCount());
+ emit signalSetFacilitiesCount(p->facilitiesCount());
+}
+
+void BoStatusBarHandler::slotItemAdded(BosonItem* item)
+{
+ if (!item) {
+	boError() << k_funcinfo << "NULL item" << endl;
+	return;
+ }
+ if (!RTTI::isUnit(item->rtti())) {
+	return;
+ }
+ Unit* unit = (Unit*)item;
+ Player* p = unit->owner();
+ if (!p) {
+	boError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (p != mLocalPlayer) {
+	return;
+ }
+
+ slotUnitCountChanged(p);
+}
+
+void BoStatusBarHandler::slotUnitRemoved(Unit* unit)
+{
+ if (unit->owner() != mLocalPlayer) {
+	return;
+ }
+
+ slotUnitCountChanged(unit->owner());
+}
+
+void BoStatusBarHandler::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
+{
+ if (p != mLocalPlayer) {
+	// not yet used
+	return;
+ }
+ switch (prop->id()) {
+	case Player::IdMinerals:
+		emit signalMineralsUpdated(mLocalPlayer->minerals());
+		break;
+	case Player::IdOil:
+		emit signalOilUpdated(mLocalPlayer->oil());
+		break;
+	default:
+		break;
+ }
+
+}
+
+void BoStatusBarHandler::slotUpdateStatusBar()
+{
+ const BosonCanvas* canvas = boGame->canvas();
+ BO_CHECK_NULL_RET(canvas);
+ BosonCanvasStatistics* stat = canvas->canvasStatistics();
+ BO_CHECK_NULL_RET(stat);
+ // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
+ // but whenever their value actually changes.
+ emit signalEffectsCountUpdated(stat->effectsCount());
+ emit signalCanvasItemsCountUpdated(stat->allItemsCount());
+ emit signalCanvasAnimationsCountUpdated(stat->animationsCount());
+
+ // AB: this *might* be an expensive calculation. this can be a pretty big loop
+ // (> 1000 entries), but there are simple calculations only. maybe we should
+ // add a slotUpdateStatusBarExpensive() or so which gets called every 5 seconds
+ // only
+ stat->updateItemCount();
+ emit signalUnitsUpdated(stat->itemCount(RTTI::UnitStart));
+ emit signalShotsUpdated(stat->itemCount(RTTI::Shot));
+}
+
+void BoStatusBarHandler::slotToggleStatusbar(bool show)
+{
+ if (show) {
+	mMainWindow->statusBar()->show();
+ } else {
+	mMainWindow->statusBar()->hide();
  }
 }
 
