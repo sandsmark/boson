@@ -47,12 +47,12 @@ FlyParticles=5001
 [Weapon_2]
 Name=God killer
 Model=missile.3ds
-Range=7
-Reload=600
+Range=6
+Reload=900
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
-Damage=50
+Damage=100
 Speed=1
-DamageRange=9
+DamageRange=14
 HitParticles=4001
-FlyParticles=1002
+FlyParticles=5001

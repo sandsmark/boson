@@ -201,6 +201,25 @@ Size=1.0
 Align=true
 Texture=smoke.png
 
+[BigShockWave]
+Id=4001
+MinVelocity=-5,-5,0  
+MaxVelocity=5,5,0.05
+MinPos=-0.1,-0.1,0.0
+MaxPos=0.1,0.1,0.05
+Normalize=true
+MinScale=4.5
+MaxScale=5
+StartColor=1.0,1.0,0.8,0.4
+EndColor=1.0,1.0,0.9,0.3
+MinLife=0.4
+MaxLife=3.0
+MaxNum=350   
+InitNum=350
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Size=1.0
+Align=true
+Texture=smoke.png
 
 
 [GeneralSmokeTrace]
