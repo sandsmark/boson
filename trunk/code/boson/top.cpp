@@ -447,6 +447,8 @@ void TopWidget::initBosonWidget()
 	return;
  }
  BO_CHECK_NULL_RET(d->mDisplayManager);
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->canvas());
  if (boGame->gameMode()) {
 	BosonWidget* w = new BosonWidget(mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
