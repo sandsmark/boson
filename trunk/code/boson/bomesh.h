@@ -264,8 +264,11 @@ public:
 	 * Note that the points are moved only, not changed. I.e. as long as you
 	 * use the correct (maybe modified) index @ref point will return the
 	 * same point.
+	 *
+	 * @return The number of points (!) that have been used. Note: a single
+	 * point consists of @ref pointSize floats!
 	 **/
-	void movePoints(float* array, int index);
+	unsigned int movePoints(float* array, int index);
 
 	/**
 	 * You must call @ref allocatePoints before calling this!
