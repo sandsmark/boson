@@ -283,6 +283,7 @@ protected slots:
 	void slotCheckGameDockStatus();
 
 	void slotBoDebugLogDialog();
+	void slotSleep1s();
 
 private:
 	void initDisplayManager();
