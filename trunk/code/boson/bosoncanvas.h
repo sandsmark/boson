@@ -133,6 +133,8 @@ public:
 	 **/
 	bool cellOccupied(int x, int y);
 
+	void quitGame();
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
