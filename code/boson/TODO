@@ -59,7 +59,6 @@ General TODOs
   released version. also remember to add a configure check for the fixed version
 - make cursors themeable again (quite easy cause we use BosonCursor for all of
   this)
-- remove QFile from unit.cpp
 - decrease game speed ; increase unit speed. Saves cpu power
 - add check for STL to configure script
 
