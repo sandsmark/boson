@@ -279,9 +279,6 @@ void BosonCommandFrame::setSelectedUnit(Unit* unit)
 {
  boDebug(220) << k_funcinfo << endl;
  BosonCommandFrameBase::setSelectedUnit(unit);
- // BosonCommandFrameBase sets selectedUnit() to 0 if local player doesn't own
- //  it. But we want to show mineral mine info even for non-owned units.
- d->mResourceMineWidget->showUnit(unit);
  if (!selectedUnit()) {
 	// all plugin widgets have been hidden already. same about unit actions.
 	return;
@@ -301,9 +298,13 @@ void BosonCommandFrame::setSelectedUnit(Unit* unit)
 
  // Show unit's actions (move, attack, stop...
  // TODO: these can be displayed (at least most of them) for groups, too!
- showUnitActions(unit);
+ // Actions will be shown only for our own units
+ if (!localPlayerIO() || !localPlayerIO()->ownsUnit(unit)) {
+	showUnitActions(unit);
+ }
 
  d->mMinerWidget->showUnit(selectedUnit());
+ d->mResourceMineWidget->showUnit(unit);
  startStopUpdateTimer();
 }
 
