@@ -1,0 +1,94 @@
+
+
+TODO:
+
+
+Generic :
+=========
+
+positionning rect in editor/boson
+move boson.h into bosonapp.h (socket handling / generic stuff)
+	      and boWindow.h (KTMainWindow ...)
+read/save Options has been removed (was using an olg buggy kdevelop code)
+bug : mobile on very-bottom-right can't be selected [still exact?]
+smoother moves (using float instead of int for VirtualSprite?)
+black background ??
+change miniDisplay to be gpp-indep, then move it to visual
+move logfile initialisation into common/
+Initial dialog:
+	give 'world' name
+	give 'species' names
+	version check whithin the ask_connect msg
+Unit drawing into minimap : moving, etc...
+how to handle non 1x1 tiles ? 
+does units::rect need to be virtual anymore ?
+server : check that each unit does max 1 move each jiffie
+different subclass for my_units and other_units in client
+
+graphism 
+	>now, we have: The picture, the health bar, the status, the progress bar,
+	>Damage (number, not a bar), Amor (number, not a bar), Speed (number, not
+	>a bar). I that fills it up, cool. If its too much, I don't care, we can
+	>cut speed...
+	>
+
+mouse handling :
+	When you select a unit and rightclick somewhere on the radarmap, it will go there.
+	When you left click-and-hold and drag on the radarmap, you see that part
+	on the right window.
+
+
+0.3 release:
+============
+source documentation
+client and server should be peer-killed proof
+attack feature
+handling of 2x2 tiles
+construction feature
+
+
+0.4 release:
+============
+fog of war ?
+
+
+0.5 release: (first public release)
+============
+
+list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
+
+	mailing-list
+	web-site
+	kde-announce
+	upload to upload.kde.org/
+	slashdot	www.slahdot.net
+	freshmeat	www.freshmeat.org
+	linuxGames
+
+register the website to :
+	yahoo
+	... ? 
+	
+
+
+1.0 release :
+=============
+theme editor
+map editor
+server can handle multiple game
+
+===================================
+
+Even more :
+	Torus Map, where everybody's point of view is in the center of the miniMap in the beginning.
+	Chatting
+	Computer player (AI)
+	Speed optimisation
+	'forgotten' fog of war
+	Game recording for post-analyse
+	kind of acceleration to make starting moves smoother ? (ben)
+	what about drag and dropping units ? :-)
+	theme is configured in a file (explaining, for example, how many
+		different implementation there are for a given pixmap)
+
+
