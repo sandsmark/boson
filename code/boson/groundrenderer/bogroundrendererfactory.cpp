@@ -54,10 +54,6 @@ QObject* BoGroundRendererFactory::createObject(QObject* parent, const char* name
 	o = new BoDefaultGroundRenderer();
  } else if (qstrcmp(className, "BoFastGroundRenderer") == 0) {
 	o = new BoFastGroundRenderer();
- } else if (qstrcmp(className, "BoDefaultGroundRendererNoTree") == 0) {
-	o = new BoDefaultGroundRendererNoTree();
- } else if (qstrcmp(className, "BoFastGroundRendererNoTree") == 0) {
-	o = new BoFastGroundRendererNoTree();
  } else {
 	boError() << k_funcinfo << "no such class available: " << className << endl;
 	return 0;

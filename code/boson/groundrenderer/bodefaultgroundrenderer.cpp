@@ -34,8 +34,8 @@
 #include <math.h>
 
 
-BoDefaultGroundRenderer::BoDefaultGroundRenderer(bool useCellTree)
-	: BoGroundRendererBase(useCellTree)
+BoDefaultGroundRenderer::BoDefaultGroundRenderer()
+	: BoGroundRendererBase()
 {
 }
 

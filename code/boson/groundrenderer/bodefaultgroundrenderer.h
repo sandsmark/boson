@@ -33,7 +33,7 @@ class BoDefaultGroundRenderer : public BoGroundRendererBase
 {
 	Q_OBJECT
 public:
-	BoDefaultGroundRenderer(bool useCellTree = true);
+	BoDefaultGroundRenderer();
 	virtual ~BoDefaultGroundRenderer();
 
 	virtual int rtti() const { return Default; }
@@ -55,13 +55,5 @@ private:
 	void renderCellColors(int* cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
 };
 
-class BoDefaultGroundRendererNoTree : public BoDefaultGroundRenderer
-{
-	Q_OBJECT
-public:
-	BoDefaultGroundRendererNoTree() : BoDefaultGroundRenderer(false)
-	{
-	}
-};
 #endif
 
