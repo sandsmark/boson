@@ -693,7 +693,7 @@ function counter2_get_browser($ua)
   {
     return "Lynx";
   }
-  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.5)|(MSIE 6.0)", $ua))
+  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.2)|(MSIE 5.5)|(MSIE 6.0)", $ua))
   {
     return "Internet Explorer";
   }
@@ -792,6 +792,10 @@ function counter2_get_os($ua)
   else if(eregi("OS/2", $ua))
   {
     return "OS/2";
+  }
+  else if(eregi("Amiga", $ua))
+  {
+    return "Amiga";
   }
   else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)", $ua))
   {
