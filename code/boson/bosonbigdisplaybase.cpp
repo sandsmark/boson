@@ -3183,7 +3183,6 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	worldToCanvas(x, y, z, &canvasVector);
 	Unit* unit = 0;
 	if (!canvas()->onCanvas(canvasVector)) {
-		boError() << k_funcinfo << canvasVector.x() << "," << canvasVector.y() << " is not on the canvas!" << endl;
 		return;
 	}
 	// this is not good: isFogged() should get checked *everywhere* where a
