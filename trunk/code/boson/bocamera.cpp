@@ -212,3 +212,34 @@ void BoCamera::checkPosition()
  }
 }
 
+void BoCamera::applyCameraToScene()
+{
+ glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
+ glLoadIdentity();
+
+ float diffX, diffY;
+ float radius = this->radius();
+ if (radius <= 0.02) {
+	// If radius is 0, up vector will be wrong so we change it
+	radius = 0.02;
+ }
+ pointByRotation(&diffX, &diffY, this->rotation(), radius);
+ float lookatX, lookatY, lookatZ;  // Point that we look at
+ lookatX = lookAt().x();
+ lookatY = lookAt().y();
+ lookatZ = 0.0f;
+ float eyeX, eyeY, eyeZ;  // Position of camera
+ eyeX = lookatX + diffX;
+ eyeY = lookatY + diffY;
+ eyeZ = lookatZ + z();
+ mCameraPos.set(eyeX, eyeY, eyeZ);
+ float upX, upY, upZ;  // up vector (points straight up in viewport)
+ upX = -diffX;
+ upY = -diffY;
+ upZ = 0.0;
+
+ gluLookAt(eyeX, eyeY, eyeZ,
+		lookatX, lookatY, lookatZ,
+		upX, upY, upZ);
+}
+
