@@ -81,7 +81,7 @@
                                 </color>
                             </property>
                             <property name="text">
-                                <string>Species</string>
+                                <string>Species:</string>
                             </property>
                         </widget>
                         <widget class="QLabel" row="1" column="0">
@@ -96,7 +96,7 @@
                                 </color>
                             </property>
                             <property name="text">
-                                <string>Your Name</string>
+                                <string>Your Name:</string>
                             </property>
                         </widget>
                         <widget class="QLabel" row="2" column="0">
@@ -111,12 +111,15 @@
                                 </color>
                             </property>
                             <property name="text">
-                                <string>Your Color</string>
+                                <string>Your Color:</string>
                             </property>
                         </widget>
                         <widget class="QPushButton" row="4" column="0" rowspan="1" colspan="2">
                             <property name="name">
                                 <cstring>mAddComputerPlayer</cstring>
+                            </property>
+                            <property name="backgroundOrigin">
+                                <enum>WidgetOrigin</enum>
                             </property>
                             <property name="text">
                                 <string>&amp;Add Computer Player</string>
@@ -125,6 +128,9 @@
                         <widget class="QPushButton" row="4" column="2">
                             <property name="name">
                                 <cstring>mRemovePlayer</cstring>
+                            </property>
+                            <property name="backgroundOrigin">
+                                <enum>WidgetOrigin</enum>
                             </property>
                             <property name="text">
                                 <string>Remove Player</string>
