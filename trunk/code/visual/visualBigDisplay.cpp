@@ -109,9 +109,9 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 	switch( view->getSelectionMode()) {
 		default:
 			logf(LOG_WARNING, "visualBigDisplay::mouseMoveEvent : unknown selectionMode(1), mode is %d", view->getSelectionMode());
-		case SELECT_NONE:
+		case visualView::SELECT_NONE:
 			break;
-		case SELECT_RECT:
+		case visualView::SELECT_RECT:
 			p.begin(this);
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
@@ -126,7 +126,7 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 			p.end();
 			break;
 
-		case SELECT_FILL:
+		case visualView::SELECT_FILL:
 			selectX =  e->x() + view->X()*BO_TILE_SIZE;
 			selectY =  e->y() + view->Y()*BO_TILE_SIZE;
 			if (oldX==selectX && oldY==selectY)
@@ -135,7 +135,7 @@ void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 			actionClicked( oldX, oldY, e->state());
 			break;
 
-		case SELECT_PUT:
+		case visualView::SELECT_PUT:
 			break;
 	}
 }
@@ -148,10 +148,10 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 	switch( view->getSelectionMode()) {
 		default:
 			logf(LOG_WARNING, "visualBigDisplay::mouseReleaseEvent : unknown selectionMode(2), mode is %d", view->getSelectionMode());
-		case SELECT_NONE:
-		case SELECT_FILL:
+		case visualView::SELECT_NONE:
+		case visualView::SELECT_FILL:
 			break;
-		case SELECT_RECT:
+		case visualView::SELECT_RECT:
 			p.begin(this);
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
@@ -170,11 +170,11 @@ void visualBigDisplay::mouseReleaseEvent(QMouseEvent *e)
 			view->field->update();
 
 			break;
-		case SELECT_PUT:
+		case visualView::SELECT_PUT:
 			break;
 			return;
 	}
-	view->setSelectionMode( SELECT_NONE);
+	view->setSelectionMode( visualView::SELECT_NONE);
 }
 
 void visualBigDisplay::resizeEvent(QResizeEvent *e)
@@ -187,7 +187,7 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 /*
 void visualBigDisplay::putSomething(void)
 {
-	view->setSelectionMode( SELECT_PUT);
+	view->setSelectionMode( visualView::SELECT_PUT);
 	oldX = selectX = 0;
 	oldY = selectY = 0;
 	view->unSelectFix();
@@ -213,7 +213,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 	
 	if (e->button() & LeftButton) {	
 
-		if (view->getSelectionMode() == SELECT_PUT) {
+		if (view->getSelectionMode() == visualView::SELECT_PUT) {
 			view->object_put(e->x(), e->y());
 			return;
 		}
@@ -228,7 +228,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
-			view->setSelectionMode( SELECT_RECT);
+			view->setSelectionMode( visualView::SELECT_RECT);
 			oldX = selectX = e->x();
 			oldY = selectY = e->y();
 			view->unSelectFix();

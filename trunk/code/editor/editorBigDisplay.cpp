@@ -67,7 +67,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			} else
 				field->changeCell( x, y, g);
 
-			view->setSelectionMode( SELECT_FILL);
+			view->setSelectionMode( visualView::SELECT_FILL);
 			break;
 
 		case OT_FACILITY:
@@ -78,7 +78,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			fix.state	= CONSTRUCTION_STEP-1;
 			fix.type	= f; 
 			field->createFixUnit(fix);
-			view->setSelectionMode( SELECT_PUT);
+			view->setSelectionMode( visualView::SELECT_PUT);
 			break;
 
 		case OT_UNIT:
@@ -88,7 +88,7 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			mob.y		= my;
 			mob.type	= m;
 			field->createMobUnit(mob);
-			view->setSelectionMode( SELECT_PUT);
+			view->setSelectionMode( visualView::SELECT_PUT);
 			break;
 	}
 
