@@ -140,9 +140,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	d->mPlugins.append(new HarvesterPlugin(this));
  }
  if (prop->properties(PluginProperties::Refinery)) {
-	boDebug() << k_funcinfo << "Unit has refinery properties!!!" << endl;
-	boWarning() << k_funcinfo << "TODO: refinery plugin" << endl;
-//	d->mPlugins.append(new RefinePlugin(this));
+	d->mPlugins.append(new RefineryPlugin(this));
  }
  if (prop->properties(PluginProperties::ResourceMine)) {
 	d->mPlugins.append(new ResourceMinePlugin(this));

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ public:
 		Bombing = 5,
 		Mining = 6, // placing mine (the exploding ones)
 		ResourceMine = 7,
+		Refinery = 8,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -280,10 +281,11 @@ public:
 private:
 };
 
-/*
+class ResourceMinePlugin;
+class RefineryPlugin;
+/**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class ResourceMinePlugin;
 class HarvesterPlugin : public UnitPlugin
 {
 public:
@@ -301,14 +303,11 @@ public:
 	unsigned int resourcesMined() const { return mResourcesMined; }
 
 	void mineAt(ResourceMinePlugin* resource);
-	void refineAt(Unit* refinery);
+	void refineAt(RefineryPlugin* refinery);
 
-	void setRefinery(Unit* refinery);
 
 	bool canMine(const Unit*) const;
 	bool canMine(const ResourceMinePlugin*) const;
-
-	inline Unit* refinery() const { return mRefinery; }
 
 	/**
 	 * @return PluginProperties::canMineMinerals
@@ -341,9 +340,13 @@ public:
 	virtual void itemRemoved(BosonItem*);
 
 protected:
+	void setRefinery(RefineryPlugin* refinery);
+
 	bool isAtResourceMine() const;
 	bool isAtRefinery() const;
 	bool isNextTo(const Unit* unit) const;
+
+	RefineryPlugin* findClosestRefinery() const;
 
 private:
 	KGameProperty<int> mResourcesX;
@@ -352,7 +355,7 @@ private:
 
 	KGameProperty<int> mHarvestingType; // either mining or refining
 
-	Unit* mRefinery;
+	RefineryPlugin* mRefinery;
 	ResourceMinePlugin* mResourceMine;
 };
 
@@ -477,6 +480,40 @@ protected:
 private:
 	KGameProperty<int> mOil;
 	KGameProperty<int> mMinerals;
+};
+
+class RefineryPlugin : public UnitPlugin
+{
+public:
+	RefineryPlugin(Unit* owner);
+	~RefineryPlugin();
+
+	virtual int pluginType() const { return Refinery; }
+
+	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual void advance(unsigned int advanceCount);
+
+	bool isUsableTo(const HarvesterPlugin* harvester) const;
+
+	bool canRefineMinerals() const;
+	bool canRefineOil() const;
+
+	/**
+	 * Try to refine @p minerals.
+	 * @return The minerals that got actually refined. The harvester should
+	 * reduce it's resources by exactly that amount only
+	 **/
+	unsigned int refineMinerals(unsigned int minerals);
+
+	/**
+	 * Try to refine @p oil.
+	 * @return The oil that got actually refined. The harvester should
+	 * reduce it's resources by exactly that amount only
+	 **/
+	unsigned int refineOil(unsigned int oil);
+
+	virtual void itemRemoved(BosonItem*);
 };
 
 #endif
