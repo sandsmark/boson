@@ -168,9 +168,9 @@ void BosonParticleManager::initFireParticle(BosonParticleSystem*, BosonParticle*
 
 void BosonParticleManager::updateFireParticle(BosonParticleSystem*, BosonParticle* particle)
 {
-  particle->color.data[1] = 0.3 * (particle->life / particle->maxage);  // Green - makes fire more yellow
-  particle->color.data[2] = 0.15 * (particle->life / particle->maxage);  // Blue - makes fire more white
-  particle->color.data[3] = 0.3 * (particle->life / particle->maxage);  // Alpha
+  particle->color.mData[1] = 0.3 * (particle->life / particle->maxage);  // Green - makes fire more yellow
+  particle->color.mData[2] = 0.15 * (particle->life / particle->maxage);  // Blue - makes fire more white
+  particle->color.mData[3] = 0.3 * (particle->life / particle->maxage);  // Alpha
 }
 
 void BosonParticleManager::updateFadeOutParticle(BosonParticleSystem*, BosonParticle* particle)
@@ -178,6 +178,6 @@ void BosonParticleManager::updateFadeOutParticle(BosonParticleSystem*, BosonPart
   // Alpha will start decreasing when half of particle's life is over and will be 0 when it dies
   if((particle->life * 2) < particle->maxage)
   {
-    particle->color.data[3] = 0.25 * (particle->life * 2 / particle->maxage);
+    particle->color.mData[3] = 0.25 * (particle->life * 2 / particle->maxage);
   }
 }

@@ -242,8 +242,8 @@ void BosonParticleSystem::draw()
   // Update particles
 //  int num = 0;
   glPushMatrix();
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos.data[0] << ", " << mPos.data[1] << ", " << mPos.data[2] << ")" << endl;
-  glTranslatef(mPos.data[0], mPos.data[1], mPos.data[2]);
+//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "translating by (" << mPos.mData[0] << ", " << mPos.mData[1] << ", " << mPos.mData[2] << ")" << endl;
+  glTranslatef(mPos.mData[0], mPos.mData[1], mPos.mData[2]);
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
   glBegin(GL_QUADS);
@@ -261,18 +261,18 @@ void BosonParticleSystem::draw()
     c.setScaledSum(mParticles[i].pos, se, mParticles[i].size);
     d.setScaledSum(mParticles[i].pos, sw, mParticles[i].size);
 
-    glColor4fv(mParticles[i].color.data);
+    glColor4fv(mParticles[i].color.mData);
     if(i == 20)
 /*    kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing 20. particle; vertex coordinates: "
-    << "(" << a.data[0] << "; " << a.data[1] << "; " << a.data[2] << ");  "
-    << "(" << b.data[0] << "; " << b.data[1] << "; " << b.data[2] << ");  "
-    << "(" << c.data[0] << "; " << c.data[1] << "; " << c.data[2] << ");  "
-    << "(" << d.data[0] << "; " << d.data[1] << "; " << d.data[2] << ");  "
-    << "  alpha: " << mParticles[i].color.data[3] << endl;*/
-    glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data);
-    glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data);
-    glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data);
-    glTexCoord2f(0.0, 0.0);  glVertex3fv(d.data);
+    << "(" << a.mData[0] << "; " << a.mData[1] << "; " << a.mData[2] << ");  "
+    << "(" << b.mData[0] << "; " << b.mData[1] << "; " << b.mData[2] << ");  "
+    << "(" << c.mData[0] << "; " << c.mData[1] << "; " << c.mData[2] << ");  "
+    << "(" << d.mData[0] << "; " << d.mData[1] << "; " << d.mData[2] << ");  "
+    << "  alpha: " << mParticles[i].color.mData[3] << endl;*/
+    glTexCoord2f(0.0, 1.0);  glVertex3fv(a.mData);
+    glTexCoord2f(1.0, 1.0);  glVertex3fv(b.mData);
+    glTexCoord2f(1.0, 0.0);  glVertex3fv(c.mData);
+    glTexCoord2f(0.0, 0.0);  glVertex3fv(d.mData);
 //    num++;
   }
   glColor4f(1.0, 1.0, 1.0, 1.0); // Reset color
