@@ -86,7 +86,7 @@ bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, Q
 	return false;
  }
  if (mapHeight < 10 || mapHeight > 500) {
-	boError() << k_funcinfo << "broken map file - invalid height: " << mapWidth << endl;
+	boError() << k_funcinfo << "broken map file - invalid height: " << mapHeight << endl;
 	return false;
  }
 
@@ -764,7 +764,7 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
 
  delete[] scenarioPlayers;
  *playersXML = playersDoc.toCString();
- *canvasXML= canvasDoc.toCString();
+ *canvasXML = canvasDoc.toCString();
 
  return true;
 }
