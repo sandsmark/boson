@@ -30,8 +30,10 @@
 #include <kmessagebox.h>
 #include <klocale.h>
 
+#include <stdlib.h>
+
 //#include <klocale.h>
-BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name) 
+BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name)
 		: QWidget(parent, name)
 {
  QVBoxLayout* topLayout = new QVBoxLayout(this);
@@ -41,7 +43,7 @@ BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name
  if (backgroundPix.isNull()) {
 	KMessageBox::error(this, i18n("You do not have Boson data files installed!\n"
 			"Please install data package of Boson and restart Boson."), i18n("Data files not found!"));
-//	kdError() << "Could not find background pixmap. Please install the data package first!" << endl;
+	exit(1);  // Evil, but if we'd call qApp->exit(1); then we would return to event loop
 	return;
  }
  setPaletteBackgroundPixmap(backgroundPix);
