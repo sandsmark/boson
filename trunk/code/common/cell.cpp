@@ -60,7 +60,7 @@ bool Cell::canGo(uint goFlag)
 	}
 
 	// ... in the air
-	if (goFlag & BO_GO_AIR) { 
+	if ( BO_GO_AIR == goFlag) { 
 		printf("flying\n");
 		return flying_unit();
 	}
