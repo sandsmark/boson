@@ -63,7 +63,7 @@ public:
 	 * @param viewFrustum A pointer to the view frustum which must be a 6*4
 	 * array. Do <em>not</em> use this class after freeing the pointer
 	 **/
-	void setViewFrustum(const double* viewFrustum);
+	void setViewFrustum(const float* viewFrustum);
 
 
 	/**
@@ -105,7 +105,7 @@ public:
 protected:
 	void calculateWorldRect(const QRect& rect, int mapWidth, int mapHeight, float* minX, float* minY, float* maxX, float* maxY);
 
-	const double* viewFrustum() const;
+	const float* viewFrustum() const;
 
 	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map) = 0;
 

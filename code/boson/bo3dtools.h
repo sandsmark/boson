@@ -829,6 +829,25 @@ class BoMatrix
     void toRotation(float* angleX, float* angleY, float* angleZ);
 
     /**
+     * Convert a matrix to @p lookAt and @p up, as it can get used by gluLookAt.
+     *
+     * Keep in mind that infinite different combinations of these vectors will
+     * lead to exactly the same matrix, so you will not receive the same vectors
+     * as you have initially specified. But they construct the same matrix.
+     *
+     * You can do this with any valid matrix (i.e. any matrix that was created
+     * by using @ref rotate, @ref transform, @ref scale). You are not limited to
+     * rotation matrices. But you will have to provide the cameraPos vector - it
+     * may be possible without (haven't tried), but this function was developed
+     * to convert euler angles to gluLookAt() and then you'll have it anyway.
+     *
+     * This function is pretty complex and not very optimized, as I have had to
+     * develop the algorithm on my own. A good mathematician may develop a
+     * faster way but that doesn't matter for us.
+     **/
+    void toGluLookAt(BoVector3* lookAt, BoVector3* up, const BoVector3& cameraPos) const;
+
+    /**
      * @return The index of the element @p row, @p column of the matrix in the
      * internal array. The array can be organized in two different ways, which
      * both are used out there in the world. We are preferring the organization
@@ -848,6 +867,13 @@ class BoMatrix
      * Dump @p matrix onto the console as debug output.
      **/
     static void debugMatrix(const GLfloat* matrix);
+
+  private:
+    /**
+     * Used by @ref toGluLookAt. Extract the up vector from the two row vectors
+     * @p x and @p z.
+     **/
+    void extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z) const;
 
   private:
     GLfloat mData[16];
@@ -1116,8 +1142,7 @@ class Bo3dTools
      * @param viewFrustum This is the viewFrustum, as it is used by @ref
      * BosonBigDisplayBase. The view frustum is a 6x4 matrix
      **/
-    // FIXME: we should use float* instead of double*
-    static float sphereInFrustum(const double* viewFrustum, const BoVector3&, float radius);
+    static float sphereInFrustum(const float* viewFrustum, const BoVector3&, float radius);
 
     /**
      * This is similar to @ref sphereInFrustum, but will test whether the sphere
@@ -1126,12 +1151,12 @@ class Bo3dTools
      * @return 0 if the sphere is not in the frustum at all, 1 if it is
      * partially in the frsutum and 2 if the complete sphere is in the frustum.
      **/
-    static int sphereCompleteInFrustum(const double* viewFrustum, const BoVector3&, float radius);
+    static int sphereCompleteInFrustum(const float* viewFrustum, const BoVector3&, float radius);
 
     /**
      * @overload
      **/
-    inline static float sphereInFrustum(const double* viewFrustum, float x, float y, float z, float radius)
+    inline static float sphereInFrustum(const float* viewFrustum, float x, float y, float z, float radius)
     {
       BoVector3 pos(x,y,z);
       return sphereInFrustum(viewFrustum, pos, radius);

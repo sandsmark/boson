@@ -82,7 +82,7 @@ class BoCamera
      * Set the gluLookAt() paremeters directly. Note that when you use
      * this @ref radius and @ref rotation will remain undefined.
      **/
-    void setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up);
+    void setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
 
     /**
      * @return The eye vector (camera position), as it can get used by
@@ -116,6 +116,20 @@ class BoCamera
 
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
+
+
+    // FIXME: make it const!! (->make cameraPos() const)
+    /**
+     * The rotation matrix defines, together with the @ref cameraPos, the
+     * complete camera.
+     * @return The rotation matrix that is used for the current camera rotation.
+     **/
+    BoMatrix rotationMatrix();
+
+    /**
+     * Same as @ref rotationMatrix.
+     **/
+    BoQuaternion quaternion();
 
 
   protected:

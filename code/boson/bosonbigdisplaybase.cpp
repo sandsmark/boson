@@ -91,7 +91,7 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
  * vector in the first 3 numbers and the distance from the origin in the 4th
  * number.
  **/
-static QString planeDebugString(const double* plane)
+static QString planeDebugString(const float* plane)
 {
  return QString("((%1,%2,%3),%4)").arg(plane[0]).arg(plane[1]).arg(plane[2]).arg(plane[3]);
 }
@@ -287,7 +287,7 @@ public:
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
 	BoMatrix mProjectionMatrix;
 	BoMatrix mModelviewMatrix;
-	GLdouble mViewFrustum[6 * 4];
+	GLfloat mViewFrustum[6 * 4];
 
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective

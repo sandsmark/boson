@@ -225,7 +225,7 @@ void BoAutoGameCamera::updatePosition()
 
   BoVector3 cameraPos(gameCamera()->lookAt().x() + diffX, gameCamera()->lookAt().y() + diffY, gameCamera()->lookAt().z() + gameCamera()->z());
   BoVector3 up(-diffX, -diffY, 0.0f);
-  gameCamera()->setGluLookAt(gameCamera()->lookAt(), cameraPos, up);
+  gameCamera()->setGluLookAt(cameraPos, gameCamera()->lookAt(), up);
 
   setPositionDirty(false);
 }
