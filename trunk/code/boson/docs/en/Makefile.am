@@ -12,12 +12,16 @@ EXTRA_DIST =
 HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html index.html
 
 # help files
-data_DATA = $(HTML_DOCS)
-datadir = $(DESTDIR)$(kde_htmldir)/en/boson
+data_DATA = $(HTML_DOCS) logotp3.gif
+datadir = $(kde_htmldir)/en/boson
 
 $(HTML_DOCS) : index.sgml
 	ksgml2html index.sgml en
 
-CLEANFILES = $(HTML_DOCS)
+EXTRA_DIST = $(data_DATA)
 
+myclean:
+	-rm -f $(HTML_DOCS)
+
+doit: $(HTML_DOCS)
 
