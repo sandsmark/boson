@@ -540,7 +540,7 @@ BosonEffectParticleTrail::BosonEffectParticleTrail(const BosonEffectPropertiesPa
     int maxnum, const BoTextureArray* textures, const BoVector3Fixed& pos) :
     BosonEffectParticle(prop)
 {
-  mParticles = new BosonTrailParticle[maxnum];
+  mParticles = new BosonGenericParticle[maxnum];
   mParticleCount = maxnum;
   mTextures = textures;
 
@@ -672,7 +672,7 @@ void BosonEffectParticleTrail::setPosition(const BoVector3Fixed& pos)
   BosonEffect::setPosition(pos);
 }
 
-void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const BoVector3Fixed& pos)
+void BosonEffectParticleTrail::initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos)
 {
   // Note that most stuff isn't initialized here, it's done in
   //  BosonParticleSystemProperties
@@ -693,7 +693,7 @@ void BosonEffectParticleTrail::initParticle(BosonTrailParticle* particle, const 
   mBoundingSphereRadius = QMAX(mBoundingSphereRadius, (float)(particle->pos.toFixed() - mPosition).dotProduct());
 }
 
-void BosonEffectParticleTrail::updateParticle(BosonTrailParticle* particle, float elapsed)
+void BosonEffectParticleTrail::updateParticle(BosonGenericParticle* particle, float elapsed)
 {
   particle->life -= elapsed;
   particle->pos.addScaled(particle->velo, elapsed);

@@ -368,7 +368,7 @@ BosonEffect* BosonEffectPropertiesParticleTrail::newEffect(const BoVector3Fixed&
 
 void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effect, BosonParticle* p) const
 {
-  BosonTrailParticle* particle = (BosonTrailParticle*)p;
+  BosonGenericParticle* particle = (BosonGenericParticle*)p;
   particle->life = BosonEffect::getFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
   particle->color = mStartColor;
@@ -400,7 +400,7 @@ void BosonEffectPropertiesParticleTrail::initParticle(BosonEffectParticle* effec
 
 void BosonEffectPropertiesParticleTrail::updateParticle(BosonEffectParticle* effect, BosonParticle* p) const
 {
-  BosonTrailParticle* particle = (BosonTrailParticle*)p;
+  BosonGenericParticle* particle = (BosonGenericParticle*)p;
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
   particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
   particle->size = mStartSize * factor + mEndSize * (1.0 - factor);

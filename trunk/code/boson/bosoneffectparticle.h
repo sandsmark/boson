@@ -383,31 +383,6 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
 
 
 
-// FIXME: this is same as BosonGenericParticle? maybe use this one instead?
-/**
- * @short Particle class for trail particle effect.
- **/
-class BosonTrailParticle : public BosonParticle
-{
-  public:
-    virtual void reset()
-    {
-      BosonParticle::reset();
-      velo.reset();
-      maxage = 0.0f;
-    }
-
-    /**
-     * Current velocity i.e. how much particle moves per second
-     **/
-    BoVector3Fixed velo;
-    /**
-     * Maximum lifetime of this particle
-     * @see life
-     **/
-    float maxage;
-};
-
 /**
  * @short Trail particle effect.
  *
@@ -530,15 +505,15 @@ class BosonEffectParticleTrail : public BosonEffectParticle
     /**
      * Called when new particle is made active and needs to be initialized
      **/
-    virtual void initParticle(BosonTrailParticle* particle, const BoVector3Fixed& pos);
+    virtual void initParticle(BosonGenericParticle* particle, const BoVector3Fixed& pos);
     /**
      * Called when particle has to be updated. Called from @ref update
      **/
-    virtual void updateParticle(BosonTrailParticle* particle, float elapsed);
+    virtual void updateParticle(BosonGenericParticle* particle, float elapsed);
 
 
   protected:
-    BosonTrailParticle* mParticles;  // Array of particles
+    BosonGenericParticle* mParticles;  // Array of particles
     int mNum;  // Current number of particles (aka number of active particles)
     float mCreateCache;  // Number of particles to create during next update
     const BoTextureArray* mTextures;  // Textures of particles
