@@ -403,7 +403,7 @@ bool BoConditionAction::loadAction(const QDomElement& root)
 
  if (type == "Event") {
 	QDomElement actionEvent = root.namedItem("Event").toElement();
-	if (actionEvent.isNull()) {
+	if (!actionEvent.isNull()) {
 		mEventCaused = new BoEvent();
 		if (!mEventCaused->load(actionEvent)) {
 			boError() << k_funcinfo << "cannot load event that is caused by condition" << endl;
