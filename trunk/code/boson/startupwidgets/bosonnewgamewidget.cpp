@@ -450,12 +450,12 @@ void BosonNewGameWidget::slotLocalPlayerNameChanged()
 
 void BosonNewGameWidget::slotLocalPlayerColorChanged(int index)
 {
- if (index < 0 || (unsigned int)index >= mAvailableColors.count()) {
+ if (index < 0 || (unsigned int)index >= SpeciesTheme::defaultColors().count()) {
 	boWarning() << k_funcinfo << "Invalid index: " << index << endl;
 	return;
  }
  BO_CHECK_NULL_RET(localPlayer());
- mPlayerColor = mAvailableColors[index];
+ mPlayerColor = SpeciesTheme::defaultColors()[index];
 
  networkInterface()->sendChangeTeamColor(localPlayer(), mPlayerColor);
 }
