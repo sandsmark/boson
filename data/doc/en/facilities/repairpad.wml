@@ -1,4 +1,5 @@
 #include "facilities.wml" type="Facilities" name="Repair Pad" \
-        description="You can repair your units here, take a unit and click with the right mouse button in the Repair Pad." \
+        description="You can repair your units here. Take a unit and click with the right mouse button in the Repair Pad.<br>\
+        At the moment this feature is broken." \
         name2="repairpad" type2="fix" \
         before_url="techcenter.html" before_text="Tech Center" after_url="helipad.html" after_text="Helipad" up_url="index.html"
