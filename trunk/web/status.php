@@ -55,7 +55,6 @@ draw_bigbox_text("This is a list of features that we consider as
   <h2>TODO</h2>
   <ul>
     <li>Fixing all critical bugs</li>
-    <li>Better support for mines</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
 
