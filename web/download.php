@@ -68,9 +68,8 @@ draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("A boson ebuild is available in the standard gentoo portage and is tested
     against gcc-2.95.3 (gentoo 1.2 and previous) and gcc-3.2 (gentoo 1.4 and following).
     Please just issue a 
-    <pre> emerge boson <pre>
-    as root on your gentoo box to get boson downloaded, compiled and installed
-    ");
+    <pre> emerge boson </pre>
+    as root on your gentoo box to get boson downloaded, compiled and installed");
 
 draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by Boson team and are
