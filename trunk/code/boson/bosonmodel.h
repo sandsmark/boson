@@ -154,6 +154,20 @@ public:
 	~BosonModel();
 
 	/**
+	 * @return The width of the model in the OpenGL coordinate system. This
+	 * is the value provided in the constructor - most units will use 1.0 or
+	 * 1.5 or 2.0 probably.
+	 **/
+	float width() const { return mWidth; }
+
+	/**
+	 * @return The height of the model in the OpenGL coordinate system. This
+	 * is the value provided in the constructor - most units will use 1.0 or
+	 * 1.5 or 2.0 probably.
+	 **/
+	float height() const { return mHeight; }
+
+	/**
 	 * Add a mesh. This class takes ownership of that mesh, i.e. will delete
 	 * it when this class gets deleted.
 	 **/
