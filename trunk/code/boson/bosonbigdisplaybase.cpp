@@ -503,6 +503,10 @@ void BosonBigDisplayBase::initializeGL()
 	// already called initializeGL()
 	return;
  }
+ if (!context()) {
+	boError() << k_funcinfo << "NULL context" << endl;
+	return;
+ }
  // AB: we need at least GLU 1.3 for gluCheckExtension() !
  // TODO: find out if we might be able to run boson with older versions - if yes
  // use the code from http://www.mesa3d.org/brianp/sig97/exten.htm#Compile to
@@ -556,6 +560,12 @@ void BosonBigDisplayBase::initializeGL()
  struct timeval time;
  gettimeofday(&time, 0);
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
+
+ if (!format().directRendering()) {
+	// i guess this should be normal for nvidia cards? can someone with a
+	// nvidia card confirm this?
+	boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
+ }
 
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
