@@ -191,11 +191,7 @@ void bosonCanvas::move(moveMsg_t &msg)
 		return;
 	}
 
-	playerMobUnit::state_t	ns;
-
-	ns.x = msg.newx;
-	ns.y = msg.newy;
-	m->s_moveTo(ns);
+	m->s_moveTo(QPoint(msg.newx, msg.newy));
 }
 
 void bosonCanvas::requestAction(void)

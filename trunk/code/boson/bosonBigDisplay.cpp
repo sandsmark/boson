@@ -50,7 +50,7 @@ void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 		// order all mobiles to go there
 		for (mobIt.toFirst(); mobIt; ++mobIt) {
 			boAssert(mobIt.current()->who == who_am_i);
-			((playerMobUnit *)mobIt.current())->u_goto(mx,my);
+			((playerMobUnit *)mobIt.current())->u_goto(QPoint(mx,my));
 		}
 		return;
 	}

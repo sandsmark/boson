@@ -66,11 +66,6 @@ void bosonUnit::u_attack(bosonUnit *u)
  * playerMobUnit
  */
 
-static const int pos_x[DIRECTION_STEPS] = 
-	{  34,  77,  98,  94,  64,  17, -34, -77, -98, -94, -64, -17};
-static const int pos_y[DIRECTION_STEPS] = 
-	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
-
 playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	: visualMobUnit(msg)
 	, state(MUS_NONE)
@@ -82,21 +77,25 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 #define VECT_PRODUCT(dir)	(pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
 #define SQ(x)			( (x) * (x) )
 
-bool playerMobUnit::getWantedMove(state_t &wstate)
+
+bool playerMobUnit::checkMove(QPoint pos)
+{
+	return bocanvas->cell(pos).canGo(type);
+}
+
+
+bool playerMobUnit::getWantedMove(QPoint &wstate)
 {
 	int ldx, ldy;
 	int vp1, vp2, vp3;
 	int range = mobileProp[type].range;
 
 
-	asked.x = gridRect().x();
-	asked.y = gridRect().y();
+	asked = gridRect().topLeft();	// destinaton asked, let's begin where we already are
+	QPoint dv = dest - asked;	// delta do the destination
+	QPoint local = asked;		// temporory variable
 
-
-	int dx = dest_x - gridRect().x();
-	int dy = dest_y - gridRect().y();
-
-	if (!dx && !dy) state = MUS_NONE;
+	if ( dv == QPoint(0,0) ) state = MUS_NONE;
 
 	switch(state){
 		default:
@@ -108,23 +107,51 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 		case MUS_TURNING:
 		case MUS_MOVING:
-			if (target && boGridDist(dx,dy)<=range) {// near enough the target to shot it
+//			printf("position : %d, %d", asked.x(), asked.y());
+//			printf(", dv : %d, %d", dv.x(), dv.y());
+			if (target && boGridDist(dv)<=range) {// near enough the target to shot it
 				state = MUS_NONE;
 				return false;
 			}
-			if (dx*dx>dy*dy) {
-				asked.x += (dx>0)?1:-1;
+			/* old code 
+			if ( abs(dv.x()) > abs(dv.y()) )
+				if (dv.x()>0)
+					asked += QPoint(1,0);
+				else
+					asked += QPoint(-1,0);
+			else
+				if (dv.y()>0)
+					asked += QPoint(0,1);
+				else
+					asked += QPoint(0,-1);
+			*/
+			if ( abs(dv.x()) > abs(dv.y()) ) {
+				// x is greater
+				local = asked + QPoint( (dv.x()>0)?1:-1, 0); // try first along the x axis
+				if (!checkMove(asked))  {
+					local = asked + QPoint( 0, (dv.y()>0)?1:-1); // the along the y axis
+					if (!checkMove(asked))
+						return false;
+				}
+
 			} else {
-				asked.y += (dy>0)?1:-1;
+				// y is greater
+				local = asked + QPoint( 0, (dv.y()>0)?1:-1); // try first along the y axis
+				if (!checkMove(asked)) {
+					local = asked + QPoint( (dv.x()>0)?1:-1, 0); // then along the x axis
+					if (!checkMove(asked))
+						return false;
+				}
 			}
+			wstate = asked = local;
 			wstate = asked;
 			asked_state = MUS_MOVING;
+//			printf(", asking for : %d, %d\n", asked.x(), asked.y());
 			return true;
 	}
 
 	// should not be reached :
 	return false;
-
 
 /*
 			assert(direction>=0); assert(direction<DIRECTION_STEPS);
@@ -215,84 +242,13 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 	*/
 }
 
-
-bool playerMobUnit::checkMove(state_t nstate)
-{
-	int ty;
-	int g;
-
-	/* XXXX  
-	Pix p = neighbourhood( nstate.x, nstate.y, nstate.dir);
-	
-	if (goFlag() == BO_GO_AIR) { // we are a flyer
-		for(; p; next(p) ) {
-			ty = at(p)->rtti();
-			if ( (ty < S_FACILITY) && !(ty < S_MOBILE) && (BO_GO_AIR == mobileProp[ty-S_MOBILE].goFlag) && exact(p))
-				return false; // another flyer is around
-		}
-		return true; // nothing else in the aire here
-	}
-
-//	printf("%p would hit :", this);
-	for(; p; next(p) )
-		if (exact(p)) {     // ugly, should be find-tuned
-			// p is what would be hit if ....
-			ty = at(p)->rtti();
-			if (ty < S_GROUND) continue;	// S_PART
-			if (ty >=  S_SHOT) continue;	// S_PART
-			if (ty < S_MOBILE) {		// S_GROUND
-				g = ty - S_GROUND;
-//printf("\ng = %d\n", g); fflush(stdout);
-				if (IS_PLAIN(g))
-					if ( !(GET_BIT(g) & goFlag()) ) {
-						end(p);
-						return false;
-						}
-					else continue;
-//puts("e"); fflush(stdout);
-//printf("\ntrans = %d\n", GET_TRANS_REF(g)); fflush(stdout);
-//printf("\ngetbit 1 = %d\n", GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].from ) );
-//printf("\ngetbit 2 = %d\n", GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].to ) );
-//printf("\ngoFlag = %d\n", goFlag() );
-				// is TRANS
-					if ( !(GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].from ) & goFlag()) ||
-					     !(GET_BIT( groundTransProp[ GET_TRANS_REF(g) ].to ) & goFlag()) )  {
-						end(p);
-						return false;
-						}
-					else continue;
-			//	printf("%s, ", (IS_PLAIN(g))?
-			//		groundProp[g].name:
-			//		groundTransProp[ GET_TRANS_REF(g) ].name); 
-				continue;// unreachable ?
-				}
-			if (ty < S_FACILITY) {		// S_MOBILE
-				if (BO_GO_AIR == mobileProp[ty-S_MOBILE].goFlag)// smthg that can fly
-					continue;
-				end(p);					// anything else
-				return false;
-				//printf("%s, ", mobileProp[ty-S_MOBILE].name);
-				}
-			if (ty < S_FACILITY+FACILITY_LAST) { // S_FACILITY
-				return false;
-				//printf("%s, ", facilityProp[ty-S_FACILITY].name);
-				continue;// unreachable ?
-				}
-			logf(LOG_ERROR, "playerMobUnit::checkMove : type is %d, ", ty);
-			}
-	//end(p); 
-	// not needed because we have reached the end of the list
-	*/	
-
-	return true;
-}
-
 void playerMobUnit::turnTo(int newdir)
 {
 //printf("turning from %d to %d\n", direction, newdir);
 	assert(newdir>=0); assert(newdir<DIRECTION_STEPS);
 	//if (direction==newdir) return;
 	direction = newdir;
+	/*
 	setXVelocity( pos_x[direction]);
 	setYVelocity( pos_y[direction]);
 	double factor = (double) mobileProp[type].speed / 100.;
@@ -301,6 +257,7 @@ void playerMobUnit::turnTo(int newdir)
 		setYVelocity((double)yVelocity()*factor);
 		}
 	else logf(LOG_ERROR, "turnTo : unexpected mobileProp.speed..."); ///orzel : test should be removed
+	*/
 
 	setFrame(direction);
 }
@@ -309,15 +266,15 @@ void playerMobUnit::turnTo(int newdir)
 void playerMobUnit::getWantedAction()
 {
 	bosonMsgData	data;
-	state_t		ns;
+	QPoint		ns;
 
 	if (who != who_am_i) return;
 	if ( !visible() ) return;
 
 	/* move ?*/
 	if (getWantedMove(ns)) {
-		data.move.newx		= ns.x;
-		data.move.newy		= ns.y;
+		data.move.newx		= ns.x();
+		data.move.newy		= ns.y();
 		data.move.key		= key;
 		sendMsg(buffer, MSG_MOBILE_MOVE_R, MSG(data.move) );
 	}
@@ -332,7 +289,6 @@ void playerMobUnit::getWantedAction()
 bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 {
 	int	range = mobileProp[type].range;
-	QRect	r;
 
 	if (!target) return false;		// no target
 	if (range<=0) return false;		// Unit can't shoot
@@ -349,7 +305,7 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 	}
 
 	QPoint p = _target->center() - QPoint( x(), y());
-	if ( boDist( p.x(), p.y() ) > range) return false; // too far
+	if ( boDist(p) > range) return false; // too far
 
 	shoot_timer--;
 	if (shoot_timer<=0) shoot_timer = 30;
@@ -364,48 +320,46 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 /***** server orders *********/
 
 /* actually do the job, used by different functions */
-void playerMobUnit::do_moveTo(state_t ns)
+void playerMobUnit::do_moveTo(QPoint npos)
 {
-	// XXX  simplify this stuff
-	QRect r = gridRect();
-	int dx = (ns.x - r.x()) * BO_TILE_SIZE;
-	int dy = (ns.y - r.y()) * BO_TILE_SIZE;
+	QPoint	dv = npos - gridRect().topLeft();
+	dv *= BO_TILE_SIZE;	// pixelwise
 
 	boAssert(int(x())%BO_TILE_SIZE==0);
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
-	move(BO_TILE_SIZE*ns.x, BO_TILE_SIZE*ns.y);
-	emit sig_moveTo(ns.x, ns.y);
+	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
 
+	emit sig_moveTo(npos);
 
-	if (sp_up) sp_up->moveBy(dx,dy);
-	if (sp_down) sp_down->moveBy(dx,dy);
+	if (sp_up) sp_up->moveBy(dv.x() ,dv.y() );
+	if (sp_down) sp_down->moveBy(dv.x() ,dv.y() );
 }
 
 
 /* server order */
-void playerMobUnit::s_moveTo(state_t ns)
+void playerMobUnit::s_moveTo(QPoint nz)
 {
 
 	//orzel : use some kind of fuel
 	if ( who!=who_am_i) { /* this not my unit */
-		do_moveTo(ns);
+		do_moveTo(nz);
 		return;
 		}
 
 	/* else */
 
-	if ( MUS_MOVING != asked_state && (ns.x!=x() || ns.y!=y()) ) {
+	if ( MUS_MOVING != asked_state && (nz != asked )) {
 		logf(LOG_ERROR, "playerMobUnit::s_moveTo while not moving, ignored");
 		return;
 		}
 
-	if (ns.x!=asked.x || ns.y!=asked.y)
+	if (nz != asked)
 		logf(LOG_ERROR, "playerMobUnit::s_moveTo : unexpected dx,dy");
 
-	do_moveTo(ns);
+	do_moveTo(nz);
 
-	if (x()==dest_x && y()==dest_y) {
+	if (nz == dest) {
 		//puts("going to MUS_NONE");
 		state = MUS_NONE;
 		setXVelocity(0.); setYVelocity(0.);
@@ -420,22 +374,21 @@ void playerMobUnit::s_moveTo(state_t ns)
 
 /***** users orders *********/
 
-void playerMobUnit::u_goto(int mx, int my) // not the same as QCanvasSprite::moveTo
+void playerMobUnit::u_goto(QPoint mpos) // not the same as QCanvasSprite::moveTo
 {
 	if (target) {
 		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
 		target = 0l;
 		//puts("u_goto disconnecting target");
 	}
-	do_goto(mx/BO_TILE_SIZE, my/BO_TILE_SIZE);
+	do_goto(mpos/BO_TILE_SIZE);
 }
 	
 	
-void playerMobUnit::do_goto(int mx, int my)
+void playerMobUnit::do_goto(QPoint _dest)
 {
-
-	dest_x = mx; dest_y = my;
-	if (x()==dest_x && y()==dest_y)
+	dest = _dest;
+	if ( gridRect().topLeft() == dest )
 		state = MUS_NONE;
 	else	state = MUS_TURNING;
 	//puts("going to MUS_TURNING");
@@ -456,7 +409,7 @@ void playerMobUnit::u_attack(bosonUnit *u)
 
 	bosonUnit::u_attack(u);
 
-	connect( u, SIGNAL(sig_moveTo(int,int)), this, SLOT(targetMoveTo(int,int)) );
+	connect( u, SIGNAL(sig_moveTo(QPoint)), this, SLOT(targetMoveTo(QPoint)) );
 
 	if (u->inherits("playerMobUnit"))
 		p = ((playerMobUnit*)u)->center();
@@ -467,13 +420,13 @@ void playerMobUnit::u_attack(bosonUnit *u)
 		return;
 	}
 
-	do_goto(p.x()/BO_TILE_SIZE, p.y()/BO_TILE_SIZE);
+	do_goto(p/BO_TILE_SIZE);
 }
 
 
-void playerMobUnit::targetMoveTo(int newx, int newy)
+void playerMobUnit::targetMoveTo(QPoint npos)
 {
-	do_goto(newx, newy);
+	do_goto(npos);
 }
 
 
@@ -483,12 +436,10 @@ void playerMobUnit::shooted(int _power)
 }
   
 
-bool playerMobUnit::near(int d)
+bool playerMobUnit::near(int )
 {
-	int a = x() - dest_x;
-	int b = y() - dest_y;
-	
-	return (a*a + b*b) < (d*d);
+	// XXX near should dissappear with the new scheme
+	return boGridDist( gridRect().topLeft() - dest ) < 1; 
 }
 
 void playerMobUnit::destroy(void)
@@ -546,7 +497,7 @@ void playerFacility::destroy(void)
 /*
  * harvester 
  */
-bool harvesterUnit::getWantedMove(state_t &wstate)
+bool harvesterUnit::getWantedMove(QPoint &wstate)
 {
 	bool ret = false;
 
@@ -555,14 +506,14 @@ bool harvesterUnit::getWantedMove(state_t &wstate)
 			return false;
 			break;
 		case comingBack:
-			if ( x() == base_x && y() == base_y) {
+			if ( gridRect().topLeft() == base ) {
 				/* we are back : empty the harvester */ 
 //				puts("harvester : arrived home");
 				harvestEndMsg_t    he;
 				he.key = key;
 				sendMsg(buffer, MSG_UNIT_HARVEST_END, MSG(he) );
 				hstate = goingTo;
-				playerMobUnit::u_goto(harvest_x, harvest_y); // go to base station
+				playerMobUnit::u_goto(harvest); // go to base station
 				contain = 0 ;		// emptying
 
 			}
@@ -590,7 +541,7 @@ bool harvesterUnit::getWantedMove(state_t &wstate)
 			} else {
 				hstate = comingBack;
 //				puts("harvester : change to \"comingBack\" state");
-				playerMobUnit::u_goto(base_x, base_y); // go to base station
+				playerMobUnit::u_goto(base); // go to base station
 			}
 			// send a message "i'm harvesting there"
 			// check "contain" ...
@@ -604,11 +555,11 @@ bool harvesterUnit::getWantedShoot(bosonMsgData *)
 	return false;
 }
 
-void harvesterUnit::u_goto(int mx, int my)
+void harvesterUnit::u_goto(QPoint npos)
 {
-	harvest_x = mx; harvest_y = my;
 	hstate = goingTo;
+	harvest = npos/BO_TILE_SIZE;
 //	puts("harvester : change to \"goingTo\" state");
-	playerMobUnit::u_goto(mx, my);
+	playerMobUnit::u_goto(npos);
 }
 
