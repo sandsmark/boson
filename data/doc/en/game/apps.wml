@@ -18,6 +18,6 @@
     <cell>bounit</cell><cell>Settings editor for facilities</cell>
     </grid>    
 
-#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="cursor.html" after_text="The cursors" up_url="index.html"
+#include "nav.wml" before_url="index.html" before_text="In the game" after_url="scrolling.html" after_text="Scrolling" up_url="index.html"
 #include "footer.wml"
 
