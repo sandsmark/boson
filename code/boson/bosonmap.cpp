@@ -39,6 +39,7 @@
 
 #define BOSONMAP_VERSION 0x01 // current version
 
+
 float BoHeightMap::pixelToHeight(int p)
 {
  // we have 255 different values available. we use 0.1 steps, i.e. if
@@ -94,6 +95,121 @@ bool BoHeightMap::load(QDataStream& stream)
 		setHeightAt(x, y, h);
 	}
  }
+ return true;
+}
+
+
+bool BoTexMap::save(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ if (!mTexMap) {
+	BO_NULL_ERROR(mTexMap);
+	return false;
+ }
+ if (width() == 0) {
+	boError() << k_funcinfo << "width()==0" << endl;
+	return false;
+ }
+ if (height() == 0) {
+	boError() << k_funcinfo << "height()==0" << endl;
+	return false;
+ }
+ if (mTextureCount > 100) {
+	// this *cant* be true (would be > 100*500*500 bytes on a 500x500 map)
+	boError() << k_funcinfo << "texture count > 100: " << mTextureCount << " - won't save anything." << endl;
+	return false;
+ }
+ if (mTextureCount < 1) {
+	boError() << k_funcinfo << "need at least one texture!" << endl;
+	return false;
+ }
+ stream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
+ stream << (Q_UINT32)BOSONMAP_VERSION;
+
+ // there is a groundTheme identifier in the "map" file, but an invalid texture
+ // count would suck greatly (->crash). so we stream it.
+ stream << (Q_UINT32)mTextureCount;
+
+ // now the actual texmap for this texture
+ for (unsigned int i = 0; i < mTextureCount; i++) {
+	for (unsigned int x = 0; x < width(); x++) {
+		for (unsigned int y = 0; y < height(); y++) {
+			stream << (Q_UINT8)texMapAlpha(i, x, y);
+		}
+	}
+ }
+ return true;
+}
+
+bool BoTexMap::load(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ if (stream.atEnd()) {
+	boError() << k_funcinfo << "empty stream" << endl;
+	return false;
+ }
+ if (!mTexMap) {
+	BO_NULL_ERROR(mTexMap);
+	return false;
+ }
+ if (width() * height() == 0) {
+	boError() << k_funcinfo << "width=" << width() << " height=" << height() << endl;
+	return false;
+ }
+ if (mTextureCount == 0) {
+	boError() << k_funcinfo << "0 textures in array??" << endl;
+	return false;
+ }
+ QString cookie;
+ Q_UINT32 version;
+ stream >> cookie;
+ if (cookie != BOSONMAP_TEXMAP_MAGIC_COOKIE) {
+	boError() << k_funcinfo << "invalid cookie" << endl;
+	return false;
+ }
+ stream >> version;
+ if (version != BOSONMAP_VERSION) {
+	boError() << k_funcinfo << "version " << version << " not supported" << endl;
+	return false;
+ }
+ Q_UINT32 textures;
+ stream >> textures;
+ if (textures == 0) {
+	boError() << k_funcinfo << "0 textures is not possible" << endl;
+	return false;
+ }
+ if (textures > mTextureCount) {
+	boError() << k_funcinfo << "textureCount from map stream must not be greater than texture count from BoTexMap!"
+			<< " textureCount=" << textures
+			<< " BoTexMap textureCount=" << mTextureCount
+			<< endl;
+	return false;
+ }
+ if (stream.atEnd()) {
+	boError() << k_funcinfo << "stream at end" << endl;
+	return false;
+ }
+ if (textures != mTextureCount) {
+	boWarning() << k_funcinfo << "only " << textures << " textures in stream - expected " << mTextureCount << endl;
+	// still possible - the rest will be 0.
+ }
+
+ // now load all textures that are actually used here.
+ for (unsigned int i = 0; i < textures; i++) {
+	for (unsigned int x = 0; x < width(); x++) {
+		for (unsigned int y = 0; y < height(); y++) {
+			Q_UINT8 c;
+			stream >> c;
+			setTexMapAlpha(i, x, y, c);
+		}
+	}
+ }
+
+ // reset all textures that are not in the stream to 0
+ for (unsigned int i = textures; i < mTextureCount; i++) {
+	initialize(i, 0);
+ }
+ boDebug() << "done" << endl;
  return true;
 }
 
@@ -434,71 +550,18 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
 bool BosonMap::loadTexMap(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
- if (stream.atEnd()) {
-	boError() << k_funcinfo << "empty stream" << endl;
-	return false;
- }
+
+ // we allocate memory for all possible textures, even if this map doesn't use
+ // them all. we also have to initialize all textures.
+ // one day we may want to change this to save a few kb of memory on some maps
+ // (none yet)
  if (mTexMap) {
 	boWarning() << k_funcinfo << "already a texmap present - deleting..." << endl;
 	delete mTexMap;
 	mTexMap = 0;
  }
- if (width() * height() <= 0) {
-	boError() << k_funcinfo << "width=" << width() << " height=" << height() << endl;
-	return false;
- }
- if (!groundTheme()) {
-	BO_NULL_ERROR(groundTheme());
-	return false;
- }
- boDebug() << k_funcinfo << "loading texmap from stream" << endl;
- QString cookie;
- Q_UINT32 version;
- stream >> cookie;
- if (cookie != BOSONMAP_TEXMAP_MAGIC_COOKIE) {
-	boError() << k_funcinfo << "invalid cookie" << endl;
-	return false;
- }
- stream >> version;
- if (version != BOSONMAP_VERSION) {
-	boError() << k_funcinfo << "version " << version << " not supported" << endl;
-	return false;
- }
- Q_UINT32 textures;
- stream >> textures;
- if (textures == 0) {
-	boError() << k_funcinfo << "0 textures is not possible" << endl;
-	return false;
- }
- if (textures > groundTheme()->textureCount()) {
-	boError() << k_funcinfo << "textureCount from map stream must not be greater than texture count from groundTheme!"
-			<< " textureCount=" << textures
-			<< " theme textureCount=" << groundTheme()->textureCount()
-			<< endl;
-	return false;
- }
- if (stream.atEnd()) {
-	boError() << k_funcinfo << "stream at end" << endl;
-	return false;
- }
- // we allocate memory for all possible textures, even if this map doesn't use
- // them all. we also have to initialize all textures.
- // one day we may want to change this to save a few kb of memory on some maps
- // (none yet)
  mTexMap = new BoTexMap(groundTheme()->textureCount(), width() + 1, height() + 1);
-
- // now load all textures that are actually used here.
- for (unsigned int i = 0; i < textures; i++) {
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			Q_UINT8 c;
-			stream >> c;
-			setTexMapAlpha(i, x, y, c);
-		}
-	}
- }
- boDebug() << "done" << endl;
- return true;
+ return mTexMap->load(stream);
 }
 
 bool BosonMap::saveTexMap(QDataStream& stream)
@@ -512,31 +575,11 @@ bool BosonMap::saveTexMap(QDataStream& stream)
 	BO_NULL_ERROR(groundTheme());
 	return false;
  }
- if (groundTheme()->textureCount() > 100) {
-	// this *cant* be true (would be > 100*500*500 bytes on a 500x500 map)
-	boError() << k_funcinfo << "texture count > 100: " << groundTheme()->textureCount() << " - won't save anything." << endl;
+ if (groundTheme()->textureCount() != mTexMap->textureCount()) {
+	boError() << k_funcinfo << "groundTheme()->texturCount() differs from texMap->textureCount() !" << endl;
 	return false;
  }
- if (groundTheme()->textureCount() < 1) {
-	boError() << k_funcinfo << "need at least one texture!" << endl;
-	return false;
- }
- stream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
- stream << (Q_UINT32)BOSONMAP_VERSION;
-
- // there is a groundTheme identifier in the "map" file, but an invalid texture
- // count would suck greatly (->crash). so we stream it.
- stream << (Q_UINT32)groundTheme()->textureCount();
-
- // now the actual texmap for this texture
- for (unsigned int i = 0; i < groundTheme()->textureCount(); i++) {
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			stream << (Q_UINT8)texMapAlpha(i, x, y);
-		}
-	}
- }
- return true;
+ return mTexMap->save(stream);
 }
 
 bool BosonMap::saveMapToFile(QDataStream& stream)
