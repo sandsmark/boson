@@ -249,6 +249,8 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 {
  // first we save a complete game.
+ static int profilingId = boProfiling->requestEventId("savePlayFieldToFiles()");
+ BosonProfiler prof(profilingId);
  bool ret = saveToFiles(files);
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
@@ -611,6 +613,8 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 
 bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 {
+ static int profilingId = boProfiling->requestEventId("convertSaveGameToPlayField()");
+ BosonProfiler prof(profilingId);
  // now we remove / change what does not belong there
  QDomDocument kgameDoc("Boson");
  if (!loadXMLDoc(&kgameDoc, QString(files["kgame.xml"]))) {
@@ -669,26 +673,37 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	return false;
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
- QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
-	QDomElement items = itemsList.item(i).toElement();
+
+ int itemsIndex = -1;
+ QDomNode itemsNode;
+ for (QDomNode itemsNode = canvasRoot.firstChild(); !itemsNode.isNull(); itemsNode = itemsNode.nextSibling()) {
+	QDomElement items = itemsNode.toElement();
+	if (items.isNull()) {
+		continue;
+	}
+	if (items.tagName() != "Items") {
+		continue;
+	}
+	itemsIndex++;
 	bool ok = false;
 	unsigned int id = items.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
 		boError() << k_funcinfo << "invalid value for PlayerId attribute of Items tag" << endl;
 		return false;
 	}
-	if (id >= itemsList.count()) {
-		boError() << k_funcinfo << "invalid PlayerId for Items tag: " << id << endl;
+	if (id != (unsigned int)itemsIndex) {
+		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Items tag - expected " << itemsIndex << endl;
 		return false;
 	}
-	if (id != i) {
-		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Items tag - expected " << i << endl;
-		return false;
-	}
-	QDomNodeList itemList = items.elementsByTagName("Item");
-	for (unsigned int j = 0; j < itemList.count(); j++) {
-		QDomElement item = itemList.item(j).toElement();
+
+	for (QDomNode node = items.firstChild(); !node.isNull(); node = node.nextSibling()) {
+		QDomElement item = node.toElement();
+		if (item.isNull()) {
+			continue;
+		}
+		if (item.tagName() != "Item") {
+			continue;
+		}
 		item.setAttribute("Id", 0);
 	}
 	QDomElement handler = items.namedItem("DataHandler").toElement();
