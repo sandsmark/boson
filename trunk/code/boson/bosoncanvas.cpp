@@ -654,9 +654,6 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) con
  if (!unit) {
 	return cellOccupied(x, y);
  }
- if (unit->isFlying()) {
-	return false; // even if there are other flying units - different altitudes!
- }
  if (!cell(x, y)) {
 	boError() << k_funcinfo << "NULL cell" << endl;
 	return true;
