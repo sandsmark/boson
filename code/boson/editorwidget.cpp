@@ -110,11 +110,11 @@ void EditorWidget::initConnections()
 // connect(canvas(), SIGNAL(signalOutOfGame(Player*)),
 //		this, SLOT(slotOutOfGame(Player*)));
 
- connect(game(), SIGNAL(signalPlayerJoinedGame(KPlayer*)),
+ connect(boGame, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
- connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)),
+ connect(boGame, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
- connect(game(), SIGNAL(signalChangeCell(int,int,int,unsigned char)),
+ connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
 		playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
 
@@ -146,7 +146,7 @@ void EditorWidget::initPlayer()
 BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 {
  EditorCommandFrame* frame = new EditorCommandFrame(parent);
-// connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
+// connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 //		frame, SLOT(slotUpdateProduction(Unit*)));
 
 // d->mCmdInput = new EditorCommandInput;
@@ -211,7 +211,7 @@ void EditorWidget::saveConfig()
   // note: the game is *not* saved here! just general settings like game speed,
   // player name, ...
  kdDebug() << k_funcinfo << endl;
- if (!game()) {
+ if (!boGame) {
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }

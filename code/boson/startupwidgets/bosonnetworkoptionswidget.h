@@ -82,7 +82,6 @@ class BosonNetworkOptionsWidget : public QWidget
 
   private:
     void setConnected(bool connected, bool master);
-    Boson* game();
 
     TopWidget* mTop;
 };

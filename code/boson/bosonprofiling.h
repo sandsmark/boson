@@ -91,8 +91,8 @@ public:
 		// note that all entries here need to be in order, so that we
 		// can iterate them easily in a Profiling dialog.
 		ProfilingStart = 0, // must remain the first entry!
-		LoadGameData1,
-		LoadGameData2,
+		LoadGameData1, // currently unused
+		LoadTiles,
 		LoadGameData3,
 		LoadModel,
 		LoadModelTextures,

@@ -176,7 +176,6 @@ class BosonNewGameWidget : public QWidget
     void initMaps();
     void initSpecies();
     void initColors();
-    Boson* game() const;
     Player* player() const;
     BosonPlayField* playField() const;
 

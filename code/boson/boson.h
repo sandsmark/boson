@@ -28,6 +28,8 @@ class BosonCanvas;
 class QDomElement;
 class BosonPlayField;
 
+#define boGame Boson::boson()
+
 /**
  * This is probably the most important class in Boson.
  * It is derived from KGame, so it is responsible for handling players' input
@@ -141,6 +143,10 @@ public:
 	void toggleAdvanceFlag();
 
 	virtual bool save(QDataStream& stream, bool savePlayers = true);
+
+	static Boson* boson() { return mBoson; }
+	static void initBoson();
+	static void deleteBoson();
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -319,6 +325,7 @@ private:
 	BosonPrivate* d;
 
 	bool mGameMode;
+	static Boson* mBoson;
 };
 
 #endif

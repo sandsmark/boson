@@ -39,6 +39,7 @@
 #include "bosonglchat.h"
 #include "bosonprofiling.h"
 #include "bosonparticlesystem.h"
+#include "boson.h"
 
 #include <kgame/kgameio.h>
 
@@ -413,7 +414,7 @@ void BosonBigDisplayBase::initializeGL()
  */
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
- glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
+ glDisable(GL_DITHER); // we don't need this (and its enabled by default)
 
  // for anti-aliased lines (currently unused):
  glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
@@ -486,6 +487,9 @@ void BosonBigDisplayBase::paintGL()
 {
  if (!d->mInitialized) {
 	glInit();
+	return;
+ }
+ if (boGame->gameStatus() == KGame::Init) {
 	return;
  }
  boProfiling->render(true);
@@ -810,12 +814,22 @@ void BosonBigDisplayBase::renderCells()
 	kdError() << k_funcinfo << "NULL tiles" << endl;
 	return;
  }
- if (!mCanvas->tileSet()->textures()) {
-	mCanvas->tileSet()->generateTextures();
-	if (!mCanvas->tileSet()->textures()) {
+ BosonTextureArray* textures = mCanvas->tileSet()->textures();
+ if (!textures) {
+	makeCurrent();
+	tiles->generateTextures();
+	textures = tiles->textures();
+	if (!textures) {
 		kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
 		return;
 	}
+ }
+
+ if (d->mRenderCells.count() == 0) {
+	// this happens either when we have to generate the list first or if no
+	// cell is visible at all. The latter case isn't speed relevant, so we
+	// can simply re-generate then.
+	generateCellList();
  }
 
  QPtrListIterator<Cell> cellIt(d->mRenderCells);
@@ -831,7 +845,7 @@ void BosonBigDisplayBase::renderCells()
 	GLfloat cellXPos = (float)c->x() * BO_GL_CELL_SIZE;
 	GLfloat cellYPos = -(float)c->y() * BO_GL_CELL_SIZE;
 	if (c->tile() != tile) {
-		texture = tiles->textures()->texture(c->tile());
+		texture = textures->texture(c->tile());
 		tile = c->tile();
 		glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -1517,22 +1531,14 @@ void BosonBigDisplayBase::generateCellList()
 	glInit();
 	return;
  }
+ if (boGame->gameStatus() == KGame::Init) {
+	// we construct the display before the map is received
+	return;
+ }
  BosonMap* map = mCanvas->map();
  if (!map) {
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
- }
- BosonTiles* tiles = map->tileSet();
- if (!tiles) {
-	kdError() << k_funcinfo << "NULL tiles" << endl;
-	return;
- }
- if (!mCanvas->tileSet()->textures()) {
-	mCanvas->tileSet()->generateTextures();
-	if (!mCanvas->tileSet()->textures()) {
-		kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
-		return;
-	}
  }
 
  // re-generate the list of to-be-rendered cells:

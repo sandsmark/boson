@@ -46,6 +46,8 @@
 
 #include "boson.moc"
 
+Boson* Boson::mBoson = 0;
+
 #define ADVANCE_INTERVAL 250 // ms
 
 // the advance message <-> advance call thing is pretty new. i want to have
@@ -155,6 +157,17 @@ Boson::~Boson()
 {
  delete d->mGameTimer;
  delete d;
+}
+
+void Boson::initBoson()
+{
+ mBoson = new Boson(0);
+}
+
+void Boson::deleteBoson()
+{
+ delete mBoson;
+ mBoson = 0;
 }
 
 void Boson::setCanvas(BosonCanvas* c)

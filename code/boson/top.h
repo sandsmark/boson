@@ -48,7 +48,6 @@ public:
 	 **/
 	~TopWidget();
 
-	Boson* game() const { return mBoson; };
 	Player* player() const { return mPlayer; };
 	BosonPlayField* playField() const { return mPlayField; };
 	BosonCanvas* canvas() const { return mCanvas; };
@@ -70,10 +69,10 @@ public slots:
 	void slotLoadGame();
 
 	/**
-	 * Starts loading new game. Called when user clicks "Start game" button in
+	 * Starts a new game. Called when user clicks "Start game" button in
 	 * BosonStartGameWidget
 	 **/
-	void slotStartGame();
+	void slotStartNewGame();
 	
 	/**
 	 * Shows BosonWelcomeWidget
@@ -199,56 +198,63 @@ protected:
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
-	void slotCanvasTilesLoading(int);
-	void slotCanvasTilesLoaded();
+	void slotTilesLoading(int);
 	void slotReceiveMap(const QByteArray& buffer);
 	void slotUpdateFPS();
 
 private slots:
+	/**
+	 * Tile loading is most time consuming action on startup.
+	 *
+	 * Note that this function doesn't return before all tiles are loaded,
+	 * but still is non-blocking, as @ref QApplication::processEvents is
+	 * called while loading
+	 *
+	 * This slot is called from @ref slotReceiveMap only. Once the map has
+	 * been received we load its tiles.
+	 **/
+	void slotLoadTiles();
+
 	void loadGameData3();
 
+	/**
+	 * Called by the @ref KLoadSaveGameWidget . This will do the actual game loading
+	 * from the file into a stream and then will start the usual data
+	 * loading procedure.
+	 **/
+	void slotLoadGame(const QString& loadingFileName);
+
 private:
-	void initMusic();
 	void initBoson();
+	void initCanvas();
 	void initPlayer();
 	void initPlayField();
 	void initKActions();
 	void initStatusBar();
 	void enableGameActions(bool enable);
 
-	void loadGameData1();
-	void loadGameData2();
 	void slotWaitForMap();
 	void checkEvents();
 
-	void initWelcomeWidget();
-	void showWelcomeWidget();
-	void initNewGameWidget();
-	void initStartEditorWidget();
-	void showNewGameWidget();
-	void showStartEditorWidget();
-	void initBosonWidget(bool loading = false);
-	void showBosonWidget();
-	void initNetworkOptions();
-	void showNetworkOptions();
-	void initLoadingWidget();
-	void showLoadingWidget();
+	void initStartupWidget(int id);
+	void showStartupWidget(int id);
+	void initBosonWidget(bool loading = false); // a special case for initStartupWidget - this must get called from outside a show*Widget().
 
 	void raiseWidget(int id);
 
-	// Game data preloading methods
+
+private:
+	void loadPlayerData(); // sound, models, textures, ...
 	void loadUnitDatas(Player* p, int progress);
 
 private:
 	QWidgetStack* mWs;
-	Boson* mBoson;
 	Player* mPlayer;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
 	bool mGame;
 	bool mLoading;
-	QString mLoadingFileName;
 
 	class TopWidgetPrivate;
 	TopWidgetPrivate* d;

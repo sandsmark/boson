@@ -135,11 +135,6 @@ BosonPlayField* BosonWidgetBase::playField() const
  return mTop->playField();
 }
 
-Boson* BosonWidgetBase::game() const
-{
- return mTop->game();
-}
-
 #include <kstandarddirs.h> //locate()
 void BosonWidgetBase::init()
 {
@@ -181,7 +176,7 @@ void BosonWidgetBase::initMap()
  canvas()->setMap(playField()->map());
  minimap()->setMap(playField()->map());
  minimap()->initMap();
- game()->setPlayField(playField());
+ boGame->setPlayField(playField());
 }
 
 void BosonWidgetBase::initMiniMap()
@@ -191,7 +186,7 @@ void BosonWidgetBase::initMiniMap()
  minimap()->setCanvas(canvas());
  minimap()->setBackgroundOrigin(WindowOrigin);
 
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
+ connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
  connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
 		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
@@ -204,21 +199,21 @@ void BosonWidgetBase::initConnections()
  connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
 		this, SLOT(slotRemoveUnit(Unit*)));
 
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
+ connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		canvas(), SLOT(slotAddUnit(Unit*, int, int))); 
- connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
+ connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
 
- connect(game(), SIGNAL(signalGameStarted()),
+ connect(boGame, SIGNAL(signalGameStarted()),
 		this, SIGNAL(signalGameStarted()));
 
- connect(game(), SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
+ connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&,const QString&)));
 }
 
 void BosonWidgetBase::initDisplayManager()
 {
- mDisplayManager = new BoDisplayManager(canvas(), this, game()->gameMode());
+ mDisplayManager = new BoDisplayManager(canvas(), this, boGame->gameMode());
  connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
 		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
 
@@ -240,7 +235,7 @@ void BosonWidgetBase::initChat()
  // messages!
  d->mChatDock = mTop->createDockWidget("chat_dock", 0, 0, i18n("Chat"));
  d->mChatDock->setEnableDocking(KDockWidget::DockTop | KDockWidget::DockBottom);
- d->mChat = new KGameChat(game(), BosonMessage::IdChat, d->mChatDock);
+ d->mChat = new KGameChat(boGame, BosonMessage::IdChat, d->mChatDock);
  d->mChatDock->setWidget(d->mChat);
  d->mChatDock->hide();
 
@@ -255,17 +250,17 @@ void BosonWidgetBase::initPlayer()
 	return;
  }
  if (!mLoading) {
-	for (unsigned int i = 0; i < game()->playerCount(); i++) {
-		Player* p = (Player*)game()->playerList()->at(i);
+	for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+		Player* p = (Player*)boGame->playerList()->at(i);
 		if (p) {
-			p->initMap(playField()->map(), game()->gameMode());
+			p->initMap(playField()->map(), boGame->gameMode());
 		}
 	}
  }
 
  minimap()->setLocalPlayer(localPlayer());
  displayManager()->setLocalPlayer(localPlayer());
- game()->setLocalPlayer(localPlayer());
+ boGame->setLocalPlayer(localPlayer());
  d->mCommandFrame->setLocalPlayer(localPlayer());
  d->mChat->setFromPlayer(localPlayer());
 
@@ -353,15 +348,15 @@ void BosonWidgetBase::changeCursor(BosonCursor* cursor)
 
 void BosonWidgetBase::slotDebug()
 {
- KGameDebugDialog* dlg = new KGameDebugDialog(game(), this);
+ KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this);
  
  QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
  KGameUnitDebug* units = new KGameUnitDebug(b);
- units->setBoson(game());
+ units->setBoson(boGame);
 
  b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
- player->setBoson(game());
+ player->setBoson(boGame);
 
  b = dlg->addVBoxPage(i18n("Debug &Cells"));
  KGameCellDebug* cells = new KGameCellDebug(b);
@@ -512,7 +507,7 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
  }
  QPtrList<KPlayer> list;
  if (!pl) {
-	list = *game()->playerList();
+	list = *boGame->playerList();
  } else {
 	list.append(pl);
  }
@@ -523,7 +518,7 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 			p->unfog(x, y);
 		}
 	}
-	game()->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
+	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
 }
 
@@ -596,7 +591,7 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 void BosonWidgetBase::debugKillPlayer(KPlayer* p)
 {
  canvas()->killPlayer((Player*)p);
- game()->slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
+ boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
 }
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
@@ -759,7 +754,7 @@ void BosonWidgetBase::quitGame()
 // this needs to be done first, before the players are removed
  displayManager()->quitGame();
  canvas()->deleteDestroyed();
- game()->quitGame();
+ boGame->quitGame();
 }
 
 bool BosonWidgetBase::isCmdFrameVisible() const
@@ -814,7 +809,7 @@ void BosonWidgetBase::saveConfig()
  // note: the game is *not* saved here! just general settings like game speed,
  // player name, ...
  kdDebug() << k_funcinfo << endl;
- if (!game()) {
+ if (!boGame) {
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
@@ -829,17 +824,17 @@ void BosonWidgetBase::saveConfig()
 
 void BosonWidgetBase::slotStartScenario()
 {
- playField()->scenario()->startScenario(game());
+ playField()->scenario()->startScenario(boGame);
  boMusic->startLoop();
 
  // This DOES NOT work correctly
- game()->startGame(); // correct here? should be so.
+ boGame->startGame(); // correct here? should be so.
 
  // as soon as this message is received the game is actually started
- if (game()->isAdmin()) {
-	game()->sendMessage(0, BosonMessage::IdGameIsStarted);
-	if (game()->gameMode()) {
-		game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
+ if (boGame->isAdmin()) {
+	boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+	if (boGame->gameMode()) {
+		boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
 	}
  }
 
@@ -864,7 +859,7 @@ kdDebug() << "zoom index=" << index << endl;
 
 void BosonWidgetBase::initPlayersMenu()
 {
- QPtrListIterator<KPlayer> it(*(game()->playerList()));
+ QPtrListIterator<KPlayer> it(*(boGame->playerList()));
  while (it.current()) {
 	slotPlayerJoinedGame(it.current());
 	++it;

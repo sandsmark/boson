@@ -83,21 +83,21 @@ void BosonStartEditorWidget::initKGame()
  // We must manually set maximum players number to some bigger value, because
  //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
  //  players (it's a bug actually)
- game()->setMaxPlayers(BOSON_MAX_PLAYERS);
- kdDebug() << k_funcinfo << " minPlayers(): " << game()->minPlayers() << endl;
- kdDebug() << k_funcinfo << " maxPlayers(): " << game()->maxPlayers() << endl;
+ boGame->setMaxPlayers(BOSON_MAX_PLAYERS);
+ kdDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
+ kdDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 }
 
 void BosonStartEditorWidget::initPlayer()
 {
- kdDebug() << k_funcinfo << "playerCount(): " << game()->playerCount() << endl;
+ kdDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
  player()->setName(boConfig->readLocalPlayerName());
  if (player()->speciesTheme()) {
 	kdDebug() << k_funcinfo << "Player has speciesTheme already loaded, reloading" << endl;
  }
  mPlayercolor = boConfig->readLocalPlayerColor();
  player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
- game()->addPlayer(player());
+ boGame->addPlayer(player());
 }
 
 void BosonStartEditorWidget::slotStart()
@@ -113,9 +113,9 @@ void BosonStartEditorWidget::slotStart()
 	// add dummy computer player
 	Player* p = new Player;
 	p->setName(i18n("Computer"));
-	QColor color = game()->availableTeamColors().first();
+	QColor color = boGame->availableTeamColors().first();
 	p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
-	game()->addPlayer(p);
+	boGame->addPlayer(p);
  }
  sendNewGame();
 }
@@ -123,11 +123,6 @@ void BosonStartEditorWidget::slotStart()
 void BosonStartEditorWidget::slotCancel()
 {
  emit signalCancelled();
-}
-
-Boson* BosonStartEditorWidget::game() const
-{
- return mTop->game();
 }
 
 Player* BosonStartEditorWidget::player() const
@@ -142,6 +137,6 @@ BosonPlayField* BosonStartEditorWidget::playField() const
 
 void BosonStartEditorWidget::sendNewGame()
 {
- game()->sendMessage(0, BosonMessage::IdNewEditor);
+ boGame->sendMessage(0, BosonMessage::IdNewEditor);
 }
 
