@@ -29,7 +29,6 @@
 #include "../boson.h"
 #include "../bosonplayfield.h"
 #include "../bpfdescription.h"
-#include "../bosonscenario.h"
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
 #include "../bosondata.h"
@@ -238,6 +237,7 @@ void BosonNewEditorWidget::slotNetStart()
 		return;
 	}
 
+#warning broken due to file format change (not binary anymore)
 	// WARNING: this is a hack! the message should contain the *map* only,
 	// not the scenario. I do not yet know how the scenario will be handled
 	// and if the maxplayers input will remain in this widget (we could
@@ -273,12 +273,7 @@ void BosonNewEditorWidget::slotNetStart()
 		boError() << k_funcinfo << "NULL playfield" << endl;
 		return;
 	}
-	BosonScenario* scenario = field->scenario();
-	if (!scenario) {
-		boError() << k_funcinfo << "NULL scenario" << endl;
-		return;
-	}
-	maxPlayers = scenario->maxPlayers();
+	maxPlayers = field->information()->maxPlayers();
  }
 
  QValueList<QColor> availableTeamColors = boGame->availableTeamColors();
@@ -326,7 +321,6 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
 
- BO_CHECK_NULL_RET(field->scenario());
  BO_CHECK_NULL_RET(field->description());
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  QStringList list = boData->availablePlayFields();
@@ -336,7 +330,7 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  BO_CHECK_NULL_RET(field->map());
 
  BosonMap* map = field->map();
- BosonScenario* scenario = field->scenario();
+ const BosonPlayFieldInformation* information = field->information();
  BPFDescription* description = field->description();
 
  // AB: I am not fully sure if a text browser is the right choice for this
@@ -353,8 +347,8 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  mHeight->setValue(map->height());
  mHeightNum->setValue(map->height());
  mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
- mMaxPlayers->setValue(scenario->maxPlayers());
- mMaxPlayersNum->setValue(scenario->maxPlayers());
+ mMaxPlayers->setValue(information->maxPlayers());
+ mMaxPlayersNum->setValue(information->maxPlayers());
 
  d->mSelectedMap = field;
 }
@@ -427,7 +421,7 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	mMapDescription->setText(i18n("Enter description here"));
  } else if (d->mSelectedMap) {
 	BosonMap* map = d->mSelectedMap->map();
-	BosonScenario* scenario = d->mSelectedMap->scenario();
+	const BosonPlayFieldInformation* information = d->mSelectedMap->information();
 	BPFDescription* description = d->mSelectedMap->description();
 
 	if (description->comment().isEmpty()) {
@@ -440,8 +434,8 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	mHeight->setValue(map->height());
 	mHeightNum->setValue(map->height());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
-	mMaxPlayers->setValue(scenario->maxPlayers());
-	mMaxPlayersNum->setValue(scenario->maxPlayers());
+	mMaxPlayers->setValue(information->maxPlayers());
+	mMaxPlayersNum->setValue(information->maxPlayers());
  }
 
  mHeight->setEnabled(isNewMap);
