@@ -48,6 +48,18 @@ public:
 	 **/
 	void setLocalPlayer(Player* p);
 
+	/**
+	 * Ok, I know this function is a hack. Since we use QToolBar as parent
+	 * of BosonCommandFrame we need to do some ugly things - like
+	 * reparenting the minimap. It is done only once, immediately after
+	 * constructing the command frame.
+	 *
+	 * Seriously it does not even belong here. It belongs <em>next</em> to
+	 * BosonCommandFrame onto the QToolBar. But hey - it doesn't hurt here
+	 * and it's an easy solution for the background pixmap :-)
+	 **/
+	void reparentMiniMap(QWidget* map);
+	
 public slots:
 	/**
 	 * Show the selected unit in the @ref BosonUnitView
@@ -145,7 +157,7 @@ protected:
 	void hideOrderButtons();
 
 	void resetLayout();
-	
+
 private:
 	void init();
 	void initEditor();
