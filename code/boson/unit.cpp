@@ -52,6 +52,7 @@ public:
 	{
 		mTarget = 0;
 		shieldReloadCounter = 0;
+		mSmokeParticleSystem = 0;
 	}
 	KGamePropertyInt mDirection;
 
@@ -70,6 +71,8 @@ public:
 	int wantedDirection;
 
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
+  
+	BosonParticleSystem* mSmokeParticleSystem;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -284,6 +287,9 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->addToCells(this);
  canvas()->unitMoved(this, oldX, oldY);
+ if(smokeParticleSystem()) {
+	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
+ }
 }
 
 void Unit::advance(unsigned int advanceCount)
@@ -826,6 +832,16 @@ void Unit::turnTo(int deg)
  d->wantedDirection = deg;
 }
 
+BosonParticleSystem* Unit::smokeParticleSystem() const
+{
+ return d->mSmokeParticleSystem;
+}
+
+void Unit::setSmokeParticleSystem(BosonParticleSystem* s)
+{
+ d->mSmokeParticleSystem = s;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
@@ -1210,14 +1226,12 @@ public:
 		mRepairPlugin = 0;
 
 		mFlamesParticleSystem = 0;
-		mSmokeParticleSystem = 0;
 	}
 
 	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
 	RepairPlugin* mRepairPlugin;
 
 	BosonParticleSystem* mFlamesParticleSystem;
-	BosonParticleSystem* mSmokeParticleSystem;
 };
 
 Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
@@ -1352,22 +1366,12 @@ void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
  d->mFlamesParticleSystem = s;
 }
 
-BosonParticleSystem* Facility::smokeParticleSystem() const
-{
- return d->mSmokeParticleSystem;
-}
-
-void Facility::setSmokeParticleSystem(BosonParticleSystem* s)
-{
- d->mSmokeParticleSystem = s;
-}
-
 void Facility::deleteParticleSystems()
 {
- if(d->mFlamesParticleSystem) {
+/* if(d->mFlamesParticleSystem) {
 	delete d->mFlamesParticleSystem;
  }
  if(d->mSmokeParticleSystem) {
 	delete d->mSmokeParticleSystem;
- }
+ }*/
 }
