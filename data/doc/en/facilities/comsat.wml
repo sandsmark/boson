@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Facilities - Comsat
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_comsat/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		A comsat is needed for the mini map.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_comsat/overview-big.png">&nbsp;
+		<img src="comsat.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>150</td></tr>
+	<tr><td>Mineral cost</td><td>200</td></tr>
+	<tr><td>provides</td><td>Mini map</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="warfactory.html" before_text="War factory" after_url="techcenter.html" after_text="Tech center"        

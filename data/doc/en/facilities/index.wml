@@ -1,0 +1,36 @@
+#include "top.wml"
+    <h1>
+      Facilities
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+	Here you can learn all important things about the buildings.
+    </p>
+    <h3>
+      Contents:
+    </h3>
+    <dl>
+      <dd>
+        <dl>
+		<dt>3.1 <a href="map.html">Facilities dependency tree</a></dt>
+		<dt>3.2 <a href="bunker.html">Command bunker</a></dt>
+		<dt>3.3 <a href="mineralrefinery.html">Mineral refinery</a></dt>
+		<dt>3.4 <a href="refinery.html">Oil refinery</a></dt>
+		<dt>3.5 <a href="oiltower.html">Oil tower</a></dt>
+		<dt>3.6 <a href="powerplant.html">Powerplant</a></dt>
+		<dt>3.7 <a href="barracks.html">Barracks</a></dt>
+		<dt>3.8 <a href="warfactory.html">War factory</a></dt>
+		<dt>3.9 <a href="comsat.html">Comsat</a></dt>
+		<dt>3.10 <a href="techcenter.html">Tech center</a></dt>
+		<dt>3.11 <a href="repairpad.html">Repair pad</a></dt>
+		<dt>3.12 <a href="prison.html">Prison</a></dt>
+		<dt>3.13 <a href="helipad.html">Helipad</a></dt>
+		<dt>3.14 <a href="turret.html">Turret</a></dt>
+		<dt>3.15 <a href="samsite.html">Sam-Site</a></dt>
+
+        </dl>
+      </dd>
+    </dl>
+    
+
+#include "footer.wml" before_url="../game/buildunit.html" before_text="Building units" after_url="map.html" after_text="Facilities dependency tree"        

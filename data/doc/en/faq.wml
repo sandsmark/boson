@@ -1,0 +1,29 @@
+#include "top.wml"
+    <h1>
+      Frequently asked questions
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      Here you will find answers for most of your questions.
+    </p>
+    <ol>
+      <li><a href="#1">When is Boson finished?</a></li>
+      <li><a href="#2">When is Boson finished?</a></li>
+      <li><a href="#3">When is Boson finished?</a></li>
+      <li><a href="#4">When is Boson finished?</a></li>
+      <li><a href="#5">When is Boson finished?</a></li>
+    </ol>
+    
+    <p>&nbsp;</p>
+    <a name="1">When is Boson finished?</a>
+    <p>When it's done.</p>
+    <a name="2">When is Boson finished?</a>
+    <p>When it's done.</p>
+    <a name="3">When is Boson finished?</a>
+    <p>When it's done.</p>
+    <a name="4">When is Boson finished?</a>
+    <p>When it's done.</p>
+    <a name="5">When is Boson finished?</a>
+    <p>When it's done.</p>
+
+#include "footer.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" 

@@ -1,0 +1,25 @@
+#include "top.wml"
+    <h1>
+      Units - Mineral harvester
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/mob_mineralharvester/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		Nothing yet.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>400</td></tr>
+	<tr><td>Mineral cost</td><td>300</td></tr>
+	<tr><td>Speed</td><td>3</td></tr>
+	<tr><td>Resources</td><td>100</td></tr>
+    </table>
+    
+#include "footer.wml" before_url="../index.html" before_text="Units" after_url="oil_harvester.html" after_text="Oil Harvester"    

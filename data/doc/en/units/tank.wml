@@ -1,0 +1,30 @@
+#include "top.wml"
+    <h1>
+      Units - Tank
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="tank.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		Nothing yet.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_mineralrefinery/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+        
+    <table border="1">
+	<tr><td>Health</td><td>200</td></tr>
+	<tr><td>Mineral cost</td><td>250</td></tr>
+	<tr><td>Speed</td><td>3</td></tr>
+	<tr><td>Amor</td><td>3</td></tr>
+	<tr><td>Weapon range</td><td>3</td></tr>
+	<tr><td>Weapon damage</td><td>35</td></tr>
+	<tr><td>Reload</td><td>30</td></tr>
+	<tr><td>Shoot at land units</td><td>Yes</td></tr>
+	<tr><td>Shoot at air units</td><td>No</td></tr>
+    </table>
+
+#include "footer.wml" before_url="batzen.html" before_text="Batzen" after_url="ship.html" after_text="Ship"    

@@ -1,0 +1,24 @@
+#include "top.wml"
+    <h1>
+      Facilities - Tech center
+    </h1>
+    <table border="0">
+	<tr>
+		<td><img src="../../../themes/species/human/units/fix_techcenter/overview-big.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		Nothing yet.
+	</tr>
+	<tr><td>
+		<img src="../../../themes/species/human/units/fix_techcenter/overview-big.png">&nbsp;
+		<img src="../../../themes/species/human/units/fix_techcenter/overview-small.png">&nbsp;
+	</td></tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+    
+    <table border="1">
+	<tr><td>Health</td><td>300</td></tr>
+	<tr><td>Mineral cost</td><td>400</td></tr>
+    </table>
+    
+
+#include "footer.wml" before_url="comsat.html" before_text="Comsat" after_url="repairpad.html" after_text="Repair pad"        
