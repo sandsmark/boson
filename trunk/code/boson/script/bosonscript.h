@@ -302,9 +302,17 @@ class BosonScript
      **/
     static bool isUnitMobile(int id);
     /**
+     * @return Whether unit with given type is mobile unit
+     **/
+    static bool isUnitTypeMobile(int playerid, int type);
+    /**
      * @return Whether unit with id id is an aircraft
      **/
     static bool isUnitAircraft(int id);
+    /**
+     * @return Whether unit with given type is aircraft
+     **/
+    static bool isUnitTypeAircraft(int playerid, int type);
     /**
      * @return Whether unit with id id can shoot
      **/

@@ -630,6 +630,32 @@ bool BosonScript::isUnitMobile(int id)
   return u->isMobile();
 }
 
+bool BosonScript::isUnitTypeMobile(int playerid, int type)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return false;
+  }
+
+  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    return false;
+  }
+
+  return prop->isMobile();
+}
+
 bool BosonScript::isUnitAircraft(int id)
 {
   if(!game())
@@ -646,6 +672,32 @@ bool BosonScript::isUnitAircraft(int id)
   }
 
   return u->unitProperties()->isAircraft();
+}
+
+bool BosonScript::isUnitTypeAircraft(int playerid, int type)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return false;
+  }
+
+  const UnitProperties* prop = p->speciesTheme()->unitProperties(type);
+  if(!prop)
+  {
+    boError() << k_funcinfo << "No unit properties with typeid " << type << " for player with id " << playerid << endl;
+    return false;
+  }
+
+  return prop->isAircraft();
 }
 
 bool BosonScript::canUnitShoot(int id)
