@@ -229,6 +229,8 @@ public:
 	void setMinificationFilter(int f) { mMinificationFilter->setValue(f); }
 	int mipmapMinificationFilter() const { return mMipmapMinificationFilter->value(); }
 	void setMipmapMinificationFilter(int f) { mMipmapMinificationFilter->setValue(f); }
+	void setAlignSelectionBoxes(bool enable) { mAlignSelectionBoxes->setValue(enable); }
+	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -310,6 +312,7 @@ private:
 	BoConfigIntEntry* mMagnificationFilter;
 	BoConfigIntEntry* mMinificationFilter;
 	BoConfigIntEntry* mMipmapMinificationFilter;
+	BoConfigBoolEntry* mAlignSelectionBoxes;
 
 	// NOT stored to config file!
 	bool mDisableSound;

@@ -354,7 +354,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  // button. then add some default options (i.e. best speed, average speed, best
  // quality)
  mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, this);
- mUpdateInterval->setRange(2, 400);
+ mUpdateInterval->setRange(1, 100);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
  QToolTip::add(mUpdateInterval, i18n("The update interval specifies after how many milli seconds the scene gets re-rendered and therefore directly influence the frames per seconds. But low values prevent boson from doing other important tasks and therefore you might end up in a game that takes several seconds until your units react to your commands! 20ms are usually a good value."));
  mModelTexturesMipmaps = new QCheckBox(this);
@@ -386,7 +386,8 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mMipmapMinificationFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_LINEAR (best quality)"));
  QToolTip::add(mMipmapMinificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a smaller size than they are stored at. This applies to mipmapped textures (i.e. model textures) only.\nNote: The speed GL_*_MIPMAP_* will probably be noticebly slower, but it's quality is way better!"));
 
-
+ mAlignSelectBoxes = new QCheckBox(this);
+ mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -433,6 +434,8 @@ void OpenGLOptions::apply()
 		BosonTextureArray::resetAllTexParameter();
 	}
  }
+ 
+ boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
 }
 
 void OpenGLOptions::setDefaults()
@@ -442,6 +445,7 @@ void OpenGLOptions::setDefaults()
  setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
  setMinificationFilter(DEFAULT_MINIFICATION_FILTER);
  setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
+ setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
 }
 
 void OpenGLOptions::load()
@@ -451,6 +455,7 @@ void OpenGLOptions::load()
  setMagnificationFilter(boConfig->magnificationFilter());
  setMinificationFilter(boConfig->minificationFilter());
  setMipmapMinificationFilter(boConfig->mipmapMinificationFilter());
+ setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -553,6 +558,11 @@ void OpenGLOptions::setMipmapMinificationFilter(int f)
 		mMipmapMinificationFilter->setCurrentItem(5);
 		break;
  }
+}
+
+void OpenGLOptions::setAlignSelectionBoxes(bool align)
+{
+ mAlignSelectBoxes->setChecked(align);
 }
 
 //////////////////////////////////////////////////////////////////////

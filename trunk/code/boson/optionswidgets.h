@@ -188,12 +188,15 @@ protected:
 	int mipmapMinificationFilter() const;
 	void setMipmapMinificationFilter(int f);
 
+	void setAlignSelectionBoxes(bool align);
+
 private:
 	KIntNumInput* mUpdateInterval;
 	QCheckBox* mModelTexturesMipmaps;
 	QComboBox* mMagnificationFilter;
 	QComboBox* mMinificationFilter;
 	QComboBox* mMipmapMinificationFilter;
+	QCheckBox* mAlignSelectBoxes;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget
