@@ -10,21 +10,12 @@ CursorPrefix=text    -  The prefix of the filename. Default: "cursor-". Then
 FrameCount=number    -  The number of files you provide. This must be at least
                         1! Note that file naming starts with zero!
                         Default is 1.
-HotspotX_n=number    -  The horizontal hotspot of the cursor - file n. Example:
-                        HotspotX_0=0
+HotspotX=number      -  The horizontal hotspot of the cursor. Example:
+                        HotspotX=20
                         This means that the file cursor-0000.png has the
-                        horizontal hotspot at 0.
-                        HotspotX_32=68
-                        Means that the file cursor-0032.png has the
-                        horizontal hotspot at 68.
-
-                        If you don't specify all of the hotspots, the alway the
-                        last read is used. E.g. You have
-                        HotspotX_0=3
-                        HotspotX_32=22
-                        Then all frames cursor-0000.png up to cursor-0031.png
-                        have HotspotX=3. All following files have HotspotX=22
-HotspotY_n=number    -  See above.
+                        horizontal hotspot at 20, i.e. at x=20 will be the
+                        center of the cursor
+HotspotY=number      -  See above.
 
 
 X-Cursors (The animated ones are actually sprites) have a very easy filename
