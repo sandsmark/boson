@@ -1299,9 +1299,6 @@ bool Boson::gamePaused() const
 void Boson::slotSetGameSpeed(int speed)
 {
  boDebug() << k_funcinfo << " speed = " << speed << endl;
- if (d->mGameSpeed == speed) {
-	return; // do not restart timer
- }
  if (speed < 0) {
 	boError() << "Invalid speed value " << speed << endl;
 	return;
