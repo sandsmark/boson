@@ -156,6 +156,8 @@ public:
 	 **/
 	void quitGame();
 
+	virtual void unitAction(int actionType) {}
+
 	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);
 

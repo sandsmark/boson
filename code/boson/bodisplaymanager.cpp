@@ -562,3 +562,8 @@ void BoDisplayManager::slotClearGroup(int number)
  d->mSelectionGroups[number]->clear();
 }
 
+void BoDisplayManager::slotUnitAction(int action)
+{
+ activeDisplay()->unitAction(action);
+}
+
