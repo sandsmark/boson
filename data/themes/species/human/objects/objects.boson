@@ -2,3 +2,8 @@
 File=missile.3ds
 Width=0.4
 Height=0.4
+
+[daisycutter]
+File=daisycutter.3ds
+Width=0.5
+Height=0.5
