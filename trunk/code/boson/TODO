@@ -58,6 +58,9 @@ Game TODOs
   map, players, ...
 - maintaining two different files for one map sucks. we should be able to place
   all map_name.boson data into the .bpf file, too. xml supports i18n, too!
+- particles: there are only very few different textures used by particles
+  (specified in particles.boson). we would gain a lot of speed by grouping all
+  particles with one texture on the screen into a single glBegin()/glEnd() pair
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
