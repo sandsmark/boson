@@ -929,6 +929,7 @@ BoOrbiterCameraWidget::BoOrbiterCameraWidget(QWidget* parent, const char* name)
 
  QVBoxLayout* layout = new QVBoxLayout(this);
  d->mOrbiter = new BoOrbiterWidget(this);
+ connect(d->mOrbiter, SIGNAL(signalChanged(BoCamera*)), this, SLOT(slotCameraChanged()));
  layout->addWidget(d->mOrbiter, 1);
 }
 
@@ -970,3 +971,4 @@ void BoOrbiterCameraWidget::setCamera(BoCamera* camera)
  BoCameraConfigWidgetBase::setCamera(camera);
  d->mOrbiter->setCamera(camera);
 }
+
