@@ -162,7 +162,7 @@ int BosonConfig::readGameSpeed(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int speed = conf->readNumEntry("Speed", 130);
+ int speed = conf->readNumEntry("Speed", 800);
  conf->setGroup(oldGroup);
  return speed;
 }
