@@ -47,6 +47,23 @@
 
 #include "bosoncanvas.moc"
 
+ItemType ItemType::typeForUnit(unsigned long int unitType)
+{
+ return ItemType(unitType);
+}
+ItemType ItemType::typeForExplosion()
+{
+ return ItemType(BosonShot::Explosion, 0, 0);
+}
+ItemType ItemType::typeForFragment()
+{
+ return ItemType(BosonShot::Fragment, 0, 0);
+}
+ItemType ItemType::typeForShot(unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId)
+{
+ return ItemType(shotType, unitType, weaponPropertyId);
+}
+
 
 class BosonCanvas::BosonCanvasPrivate
 {
@@ -1332,6 +1349,17 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 	if (unit->isFlying()) {
 //		unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
 		unit->moveBy(0.0f, 0.0f, 2.0);
+	}
+
+
+	if (!boGame->gameMode()) {
+		// editor won't display the construction but always completed
+		// facilities. otherwise it's hard to recognize where they were actually
+		// placed
+		if (unit->glConstructionSteps() > 0) {
+			unit->setGLConstructionStep(unit->glConstructionSteps());
+		}
+		unit->setAnimationMode(UnitAnimationIdle);
 	}
  }
 
