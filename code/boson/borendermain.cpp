@@ -36,6 +36,7 @@
 #include <kdebug.h>
 #include <kpopupmenu.h>
 #include <klocale.h>
+#include <kstandarddirs.h>
 
 #include <qtimer.h>
 #include <qhbox.h>
@@ -396,7 +397,7 @@ void RenderMain::initKAction()
 	}
  }
 
- createGUI("borenderui.rc");
+ createGUI(locate("data", "boson/borenderui.rc"));
 }
 
 QValueList<unsigned long int> RenderMain::allUnits(SpeciesTheme* s) const
