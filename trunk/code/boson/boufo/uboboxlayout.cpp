@@ -27,6 +27,14 @@ using namespace ufo;
 
 #define DO_DEBUG 0
 
+static bool childIsFlowLayout(const UWidget* child)
+{
+ if (dynamic_cast<UFlowLayout*>(child->getLayout())) {
+	return true;
+ }
+ return false;
+}
+
 UBoBoxLayout::UBoBoxLayout(bool horizontal)
 	: ULayoutManager()
 {
@@ -285,12 +293,62 @@ void UBoBoxLayout::layoutContainer(const UWidget* parent)
 	totalHeight = bounds.h;
  }
 
+ totalWidth = 0;
+ totalHeight = 0;
+ int lastWidgetIndex = -1;
+ for (unsigned int i = 0; i < parent->getWidgetCount(); i++) {
+	UWidget* w = parent->getWidget(i);
+	if (!w->isVisible()) {
+		continue;
+	}
+	lastWidgetIndex = i;
+	if (mHorizontal) {
+		totalWidth += widths[i];
+		totalWidth += mHGap;
+	} else {
+		totalHeight += heights[i];
+		totalHeight += mVGap;
+	}
+ }
+ if (lastWidgetIndex >= 0) {
+	// the last widget of the layout will get all remaining space
+	// TODO: it'd be better to give that space to the last container widget,
+	// so that it can actually use it
+	if (mHorizontal) {
+		totalWidth -= mHGap; // counted one too much
+		if (totalWidth < bounds.w) {
+			widths[lastWidgetIndex] += bounds.w - totalWidth;
+		}
+	} else {
+		totalHeight -= mVGap; // counted one too much
+		if (totalHeight < bounds.h) {
+			heights[lastWidgetIndex] += bounds.h - totalHeight;
+		}
+	}
+ }
+
  int x = bounds.x;
  int y = bounds.y;
  for (unsigned int i = 0; i < parent->getWidgetCount(); i++) {
 	UWidget* w = parent->getWidget(i);
 	if (!w->isVisible()) {
 		continue;
+	}
+	if (childIsFlowLayout(w) && 0) {
+		UDimension ps = w->getPreferredSize();
+		UDimension ms = w->getMinimumSize();
+		printf("%d is a flow layout widget\n", i);
+		printf("preferred size=%d, %d\n", ps.w, ps.h);
+		printf("minimum size=%d, %d\n", ms.w, ms.h);
+		printf("get size=%d, %d\n", widths[i], heights[i]);
+		printf("get pos=%d, %d\n", x, y);
+		printf("parent bounds=(%d,%d,%d,%d)\n", rootBounds.x, rootBounds.y, rootBounds.w, rootBounds.h);
+		printf("parent innerBounds=(%d,%d,%d,%d)\n", bounds.x, bounds.y, bounds.w, bounds.h);
+		printf("parent childCount=%d\n", parent->getWidgetCount());
+		printf("parent horizontal=%d\n", (int)mHorizontal);
+		printf("layout preferredSize=%d,%d\n", getPreferredLayoutSize(parent).w, getPreferredLayoutSize(parent).h);
+		printf("useMin=%d\n", (int)useMin);
+		printf("mHGap,mVGap=%d,%d\n", mHGap, mVGap);
 	}
 #if DO_DEBUG
 	printf(" placing widget %d at ", i);
