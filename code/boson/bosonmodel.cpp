@@ -177,7 +177,7 @@ void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
 	}
 
 	// do some necessary calculations
-	mesh.mesh->calculateMaxMin();
+	mesh.mesh->calculateMaxMin(mesh.matrix);
 
 	float v = volume(mesh.mesh);
 	bool found = false;
@@ -210,41 +210,53 @@ void BoMeshSorter::sortByZ(QValueList<BoMeshSorter::Mesh>* meshes, bool byMaxZ)
  if (meshes->count() == 1) {
 	return;
  }
- QValueList<BoMeshSorter::Mesh> list;
+ QMap<float, QValueList<BoMeshSorter::Mesh>* > map;
 
  QValueList<BoMeshSorter::Mesh>::Iterator it;
  for (it = meshes->begin(); it != meshes->end(); ++it) {
 	BoMeshSorter::Mesh mesh = *it;
 
 	// do some necessary calculations
-	mesh.mesh->calculateMaxMin();
+	mesh.mesh->calculateMaxMin(mesh.matrix);
 
-	float z = mesh.mesh->maxZ();
-	bool found = false;
-	QValueList<BoMeshSorter::Mesh>::Iterator it2;
-	for (it2 = list.begin(); it2 != list.end() && !found; ++it2) {
-		if (byMaxZ) {
-			if (z >= (*it2).mesh->maxZ()) {
-				list.insert(it2, mesh);
-				found = true;
-			}
-		} else {
-			if (z <= (*it2).mesh->maxZ()) {
-				list.insert(it2, mesh);
-				found = true;
-			}
+	float z = 0.0f;
+	if (byMaxZ) {
+		z = mesh.mesh->maxZ();
+	} else {
+		z = mesh.mesh->minZ();
+	}
+	QValueList<BoMeshSorter::Mesh>* list = 0;
+	if (!map.contains(z)) {
+		list = new QValueList<BoMeshSorter::Mesh>();
+		map.insert(z, list);
+	} else {
+		list = map[z];
+	}
+	map[z]->append(mesh);
+ }
+
+ unsigned int meshesCount = meshes->count();
+ meshes->clear();
+ QMap<float, QValueList<BoMeshSorter::Mesh>* >::Iterator mapIt;
+ for (mapIt = map.begin(); mapIt != map.end(); ++mapIt) {
+	QValueList<BoMeshSorter::Mesh>* list = mapIt.data();
+	if (byMaxZ) {
+		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
+		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
+			meshes->append(*listIt);
+		}
+	} else {
+		QValueList<BoMeshSorter::Mesh>::Iterator listIt;
+		for (listIt = list->begin(); listIt != list->end(); ++listIt) {
+			meshes->prepend(*listIt);
 		}
 	}
-	if (!found) {
-		list.append(mesh);
-	}
+	map.remove(mapIt.key());
+	delete list;
  }
-
- if (list.count() != meshes->count()) {
-	boError() << k_funcinfo << "invalid result! count=" << list.count() << " should be: " << meshes->count() << endl;
-	return;
+ if (meshesCount != meshes->count()) {
+	boWarning() << k_funcinfo << "oops - something weird happened: meshesCount=" << meshesCount << " meshes->count()=" << meshes->count() << endl;
  }
- *meshes = list;
 }
 
 

@@ -506,8 +506,12 @@ public:
 	/**
 	 * Calculate values for @ref maxZPoint and similar functions. This needs
 	 * to get called whenever the values might change!
+	 *
+	 * @param matrix The matrix of the first frame. Note that the max/min
+	 * values can change when the frames changes, but we will always use the
+	 * values from the _first_ frame only.
 	 **/
-	void calculateMaxMin();
+	void calculateMaxMin(const BoMatrix* matrix);
 
 	/**
 	 * @return The maximal x value in this mesh. Call @ref calculateMaxMin
