@@ -695,6 +695,11 @@ void BosonWidgetBase::initKActions()
  boundingboxes->setChecked(false);
  connect(boundingboxes, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetDebugBoundingBoxes(bool)));
+ KToggleAction* fps = new KToggleAction(i18n("Debug FPS"),
+		KShortcut(), 0, 0, actionCollection(), "debug_fps");
+ fps->setChecked(false);
+ connect(fps, SIGNAL(toggled(bool)),
+		this, SLOT(slotSetDebugFPS(bool)));
 
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
@@ -1152,5 +1157,10 @@ void BosonWidgetBase::slotSetDebugRenderCounts(bool debug)
 void BosonWidgetBase::slotSetDebugBoundingBoxes(bool debug)
 {
  boConfig->setDebugBoundingBoxes(debug);
+}
+
+void BosonWidgetBase::slotSetDebugFPS(bool debug)
+{
+ boConfig->setDebugFPS(debug);
 }
 

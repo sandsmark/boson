@@ -261,6 +261,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugOpenGLCamera = false;
  mDebugRenderCounts = false;
  mDebugBoundingBoxes = false;
+ mDebugFPS = false;
 
  // load from config
  reset(conf);

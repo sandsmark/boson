@@ -137,7 +137,6 @@ signals:
 	void signalSetFacilitiesCount(int);// facilities of the local player
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
-	void signalFPSUpdated(double);
 	void signalParticlesCountUpdated(int);
 	void signalCanvasItemsCountUpdated(int);
 	void signalCanvasAnimationsCountUpdated(int);

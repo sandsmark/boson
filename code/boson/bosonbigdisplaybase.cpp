@@ -1222,6 +1222,11 @@ void BosonBigDisplayBase::renderText()
  int y = d->mViewport[3] - border;
  y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
+ if (boConfig->debugFPS()) {
+	y -= 5;
+	y -= d->mDefaultFont->renderText(x, y, i18n("FPS: %1").arg(fps()), width() - x);
+ }
+
  if (boConfig->debugMapCoordinates()) {
 	QString world = QString::fromLatin1("World:  (%1,%2,%2)").
 			arg((double)d->mDebugMapCoordinatesX, 6, 'f', 3).
