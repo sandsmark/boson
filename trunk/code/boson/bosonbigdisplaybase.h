@@ -186,6 +186,7 @@ public:
 	void setDebugMapCoordinates(bool debug);
 	void setDebugShowCellGrid(bool debug);
 	void setDebugMatrices(bool debug);
+	void setDebugItemWorks(bool debug);
 
 	/**
 	 * Scroll by a certain distance.
@@ -364,6 +365,8 @@ protected:
 	void renderParticles();
 
 	void renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
+
+	void renderString(int x, int y, const QString& text);
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);

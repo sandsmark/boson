@@ -452,6 +452,7 @@ public:
 	bool mDebugMapCoordinates;
 	bool mDebugShowCellGrid;
 	bool mDebugMatrices;
+	bool mDebugItemWorks;
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -491,6 +492,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinates = false;
  d->mDebugShowCellGrid = false;
  d->mDebugMatrices = false;
+ d->mDebugItemWorks = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -1178,6 +1180,34 @@ void BosonBigDisplayBase::renderText()
 	glRasterPos2i(x, y);
 	glCallLists(realCoords.length(), GL_UNSIGNED_BYTE, (GLubyte*)realCoords.latin1());
  }
+ if (d->mDebugItemWorks) {
+	QMap<int, int> workCounts = *canvas()->workCounts();
+	int x = border;
+	int y = d->mViewport[3] - border;
+	renderString(x, y, i18n("Item work statistics:"));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("Total items: %1").arg(canvas()->allItemsCount()));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("-1 (items): %1").arg(workCounts[-1]));
+	y -= d->mDefaultFont->height();
+	int worknone = workCounts[(int)UnitBase::WorkNone];
+	boDebug() << k_funcinfo << "WorkNone: " << worknone << endl;
+	renderString(x, y, i18n("WorkNone: %1").arg(worknone));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkMove: %1").arg(workCounts[(int)UnitBase::WorkMove]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkAttack: %1").arg(workCounts[(int)UnitBase::WorkAttack]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkConstructed: %1").arg(workCounts[(int)UnitBase::WorkConstructed]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkDestroyed: %1").arg(workCounts[(int)UnitBase::WorkDestroyed]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkFollow: %1").arg(workCounts[(int)UnitBase::WorkFollow]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkPlugin: %1").arg(workCounts[(int)UnitBase::WorkPlugin]));
+	y -= d->mDefaultFont->height();
+	renderString(x, y, i18n("WorkTurn: %1").arg(workCounts[(int)UnitBase::WorkTurn]));
+ }
 
 // now the chat messages
  d->mChat->renderMessages(border, border, d->mViewport[2] - 2 * border, d->mViewport[3] - 2 * border, d->mDefaultFont);
@@ -1556,6 +1586,20 @@ void BosonBigDisplayBase::renderMatrix(int x, int y, const BoMatrix* matrix, con
 	glCallLists(lines[i].length(), GL_UNSIGNED_BYTE, (GLubyte*)lines[i].latin1());
 	y -= d->mDefaultFont->height();
  }
+ glDisable(GL_BLEND);
+}
+
+void BosonBigDisplayBase::renderString(int x, int y, const QString& text)
+{
+ y -= d->mDefaultFont->height(); // y is now at the bottom of the first line
+ glEnable(GL_BLEND);
+ glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+ glRecti(x, y + d->mDefaultFont->height(),
+		x + d->mDefaultFont->width(text),
+		y);
+ glColor3ub(255, 255, 255);
+ glRasterPos2i(x, y);
+ glCallLists(text.length(), GL_UNSIGNED_BYTE, (GLubyte*)text.latin1());
  glDisable(GL_BLEND);
 }
 
@@ -3000,6 +3044,11 @@ void BosonBigDisplayBase::setDebugShowCellGrid(bool debug)
 void BosonBigDisplayBase::setDebugMatrices(bool debug)
 {
  d->mDebugMatrices = debug;
+}
+
+void BosonBigDisplayBase::setDebugItemWorks(bool debug)
+{
+ d->mDebugItemWorks = debug;
 }
 
 bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const

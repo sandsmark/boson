@@ -538,6 +538,15 @@ void BoDisplayManager::slotSetDebugMatrices(bool debug)
  }
 }
 
+void BoDisplayManager::slotSetDebugItemWorks(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugItemWorks(debug);
+	++it;
+ }
+}
+
 void BoDisplayManager::unlockAction()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);

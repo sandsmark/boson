@@ -42,6 +42,7 @@ class QDataStream;
 template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QPtrVector;
+template<class T1, class T2> class QMap;
 
 
 
@@ -321,6 +322,9 @@ public:
 	QPtrList<BosonParticleSystem>* particleSystems();
 	void addParticleSystem(BosonParticleSystem* s);
 	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
+
+	QMap<int, int>* workCounts();
+	void resetWorkCounts();
 
 	void load(QDataStream& stream);
 	void save(QDataStream& stream);

@@ -167,6 +167,7 @@ public slots:
 	void slotSetDebugMapCoordinates(bool);
 	void slotSetDebugShowCellGrid(bool);
 	void slotSetDebugMatrices(bool);
+	void slotSetDebugItemWorks(bool);
 
 signals:
 	/**
