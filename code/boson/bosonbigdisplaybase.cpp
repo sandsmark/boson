@@ -1191,9 +1191,7 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	renderString(x, y, i18n("-1 (items): %1").arg(workCounts[-1]));
 	y -= d->mDefaultFont->height();
-	int worknone = workCounts[(int)UnitBase::WorkNone];
-	boDebug() << k_funcinfo << "WorkNone: " << worknone << endl;
-	renderString(x, y, i18n("WorkNone: %1").arg(worknone));
+	renderString(x, y, i18n("WorkNone: %1").arg(workCounts[(int)UnitBase::WorkNone]));
 	y -= d->mDefaultFont->height();
 	renderString(x, y, i18n("WorkMove: %1").arg(workCounts[(int)UnitBase::WorkMove]));
 	y -= d->mDefaultFont->height();
@@ -1384,7 +1382,7 @@ void BosonBigDisplayBase::renderParticles()
  //  we don't resort the list if there hasn't been any advance() calls and
  //  camera hasn't changed either
  BosonParticle* p;
- bool wassorted = d->mParticlesDirty;
+ //bool wassorted = d->mParticlesDirty;  // only for debug, commented because of compiler warning
  if (d->mParticlesDirty) {
 	BosonParticleSystem* s;
 	float x, y, z;
@@ -2210,7 +2208,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
 	// maybe in selectSingle() or so.
-	if (!localPlayer()->isFogged(canvasVector.x() / BO_TILE_SIZE, canvasVector.y() / BO_TILE_SIZE)) {
+	if (!localPlayer()->isFogged((int)(canvasVector.x() / BO_TILE_SIZE), (int)(canvasVector.y() / BO_TILE_SIZE))) {
 		unit = canvas()->collisions()->findUnitAt(canvasVector);
 	}
 	if (unit) {
@@ -2267,7 +2265,7 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
  // someone with some maths knowledge and/or some time can surely speed this up
  // by using some proper formulas!
 
- QRect cellRect = QRect(QPoint(minX, minY), QPoint(maxX, maxY)).normalize();
+ QRect cellRect = QRect(QPoint((int)minX, (int)minY), QPoint((int)maxX, (int)maxY)).normalize();
  QPoint win;
  QValueList<Cell*> cells;
  if (debugMe) {
@@ -3044,8 +3042,8 @@ bool BosonBigDisplayBase::boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos
  v2.setY(v[1] / v[3]);
  v2.setZ(v[2] / v[3]);
 
- pos->setX(d->mViewport[0] + (1 + v2[0]) * d->mViewport[2] / 2);
- pos->setY(d->mViewport[1] + (1 + v2[1]) * d->mViewport[3] / 2);
+ pos->setX((int)(d->mViewport[0] + (1 + v2[0]) * d->mViewport[2] / 2));
+ pos->setY((int)(d->mViewport[1] + (1 + v2[1]) * d->mViewport[3] / 2));
 
  // return the actual window y
  pos->setY(d->mViewport[3] - pos->y());

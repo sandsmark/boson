@@ -128,7 +128,7 @@ void BosonBigDisplayInput::actionClicked(const BoAction& action, QDataStream& st
  }
 
  Unit* unit = 0l;
- if (!localPlayer()->isFogged(action.canvasVector().x() / BO_TILE_SIZE, action.canvasVector().y() / BO_TILE_SIZE)) {
+ if (!localPlayer()->isFogged((int)(action.canvasVector().x() / BO_TILE_SIZE), (int)(action.canvasVector().y() / BO_TILE_SIZE))) {
 	unit = canvas()->findUnitAt(action.canvasVector());
  }
  if (!unit) {
