@@ -228,7 +228,8 @@ void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& color)
 	boWarning() << k_funcinfo << "Model already loaded" << endl;
 	return;
  }
- if (!QFile::exists(prop->unitPath() + unitModelFile())) {
+ QString fileName = prop->unitPath() + unitModelFile();
+ if (!KStandardDirs::exists(fileName)) {
 	boError() << k_funcinfo << "Cannot find " << unitModelFile() << " file for " << prop->typeId() << endl;
 	return;
  }
@@ -420,17 +421,17 @@ void SpeciesData::loadParticleSystemProperties()
 	return;
  }
  BosonParticleSystemProperties::initStatic(themePath() + "/particles");
- QFile f(themePath() + "particles/particles.boson");
- if (!f.exists()) {
+ QString fileName = themePath() + QString::fromLatin1("particles/particles.boson");
+ if (!KStandardDirs::exists(fileName)) {
 	boDebug() << k_funcinfo << "no particles.boson file found" << endl;
 	// We assume that this theme has no particles and don't complain
 	return;
  }
- KSimpleConfig cfg(f.name());
+ KSimpleConfig cfg(fileName);
  QStringList particles = cfg.groupList();
  if (particles.isEmpty()) {
 	boWarning() << k_funcinfo << "No particle systems found in particles "
-			<< "file (" << f.name() << ")" << endl;
+			<< "file (" << fileName << ")" << endl;
 	return;
  }
  boDebug(150) << k_funcinfo << "Loading " << particles.count()
