@@ -77,8 +77,6 @@ public:
 	 **/
 	static QString checkInstallation();
 
-	BosonPlayField* playField() const { return mPlayField; }
-
 	void loadGameDockConfig();
 	void loadInitialDockConfig();
 	void saveGameDockConfig();
