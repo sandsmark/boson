@@ -32,15 +32,12 @@
 class Cell {
 
 public:
-	Cell(void) { ground = g_unknown; flags=(cell_flags)0u; }
+	Cell(void) { flags=(cell_flags)0u; }
 
-	bool isKnown(void) { return flags&known_f; }	// known_f : known / unknown
-	void setGround(groundType);
 	/** tel if a given mobile can "go" on this cell */
-	bool canGo(uint goFlag);
+	bool canGo(uint goFlag, groundType g);
 
 	enum cell_flags { // one bit/flag
-		known_f	=	0x01,
 		building_f = 	0x02,
 		field_unit_f =	0x04,
 		flying_unit_f =	0x08,
@@ -64,13 +61,7 @@ public:
 
 
 private:
-	enum {
-		g_unknown,
-		g_dwater,
-		g_water,
-		g_grass,
-		g_desert
-	} ground;
+	bool canGoOnGround( groundType g, uint goFlag);
 } ;
 
 
