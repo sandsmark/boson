@@ -78,7 +78,7 @@ function poll_show($id = -1)
     while($i <= 10 && $row['answer'.$i] != "")
     {
       echo "
-      <input type=\"radio\" name=\"answer\" value=\"$i\"><font class=\"pollanswer\">".$row['answer'.$i]."</font><br>";
+      <input type=\"radio\" name=\"answer\" value=\"$i\"><font class=\"pollanswer\">".stripslashes($row['answer'.$i])."</font><br>";
       $i++;
     }
     echo "
@@ -196,7 +196,7 @@ function poll_results($id = -1)
       }
       echo "
       <tr>
-        <td width=\"200\"><font class=\"pollanswer\">".$row['answer'.$i]."</font></td>
+        <td width=\"200\"><font class=\"pollanswer\">".stripslashes($row['answer'.$i])."</font></td>
         <td width=\"100\">".$row['count'.$i]."  ($prct %)</td>
         <td width=\"100\"><img class=\"statsbar\" src=\"stats-bar-$style.png\" width=\"$width\" height=\"10\" alt=\"\"></td>
       </tr>
@@ -282,7 +282,7 @@ function poll_results_small($id = -1)
         $prct = ceil($row['count'.$i] * 100 / $total);
       }
       // Make some things smaller
-      $small_answer = $row['answer'.$i];
+      $small_answer = stripslashes($row['answer'.$i]);
       if (strlen($small_answer) >= 30)
       {
         $small_answer = substr($small_answer, 0, 30)."...";
