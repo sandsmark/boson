@@ -31,7 +31,7 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 #define MAX_ENTRIES 300
-#define PROFILING_VERSION 0x05 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x06 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
 {
@@ -58,20 +58,30 @@ QDataStream& operator>>(QDataStream& s, struct timeval& t)
  s >> t.tv_usec;
  return s;
 }
+QDataStream& operator<<(QDataStream& s, const ProfilingEntry& e)
+{
+ s << e.mData[0];
+ s << e.mData[1];
+ return s;
+}
+QDataStream& operator>>(QDataStream& s, ProfilingEntry& e)
+{
+ s >> e.mData[0];
+ s >> e.mData[1];
+ return s;
+}
 
 QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
 {
  s << (Q_UINT32)t.mUnitCount;
- for (int i = 0; i < 2; i++) {
-	s << t.mClear[i];
-	s << t.mCells[i];
-	s << t.mUnits[i];
-	s << t.mMissiles[i];
-	s << t.mParticles[i];
-	s << t.mFOW[i];
-	s << t.mText[i];
-	s << t.mFunction[i];
- }
+ s << t.mClear;
+ s << t.mCells;
+ s << t.mUnits;
+ s << t.mMissiles;
+ s << t.mParticles;
+ s << t.mFOW;
+ s << t.mText;
+ s << t.mFunction;
  return s;
 }
 
@@ -80,28 +90,60 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  Q_UINT32 unitCount;
  s >> unitCount;
  t.mUnitCount = unitCount;
- for (int i = 0; i < 2; i++) {
-	s >> t.mClear[i];
-	s >> t.mCells[i];
-	s >> t.mUnits[i];
-	s >> t.mMissiles[i];
-	s >> t.mParticles[i];
-	s >> t.mFOW[i];
-	s >> t.mText[i];
-	s >> t.mFunction[i];
-  }
+ s >> t.mClear;
+ s >> t.mCells;
+ s >> t.mUnits;
+ s >> t.mMissiles;
+ s >> t.mParticles;
+ s >> t.mFOW;
+ s >> t.mText;
+ s >> t.mFunction;
+ return s;
+}
+
+QDataStream& operator<<(QDataStream& s, const ProfileItemAdvance& t)
+{
+ s << t.mFunction;
+ s << t.mAdvance;
+ s << t.mAdvanceFunction;
+ s << t.mMove;
+ s << (Q_INT32)t.mRtti;
+ s << (Q_UINT32)t.mId;
+ s << (Q_INT32)t.mWork;
+ return s;
+}
+QDataStream& operator>>(QDataStream& s, ProfileItemAdvance& t)
+{
+ Q_INT32 rtti;
+ Q_UINT32 id;
+ Q_INT32 work;
+ s >> t.mFunction;
+ s >> t.mAdvance;
+ s >> t.mAdvanceFunction;
+ s >> t.mMove;
+ s >> rtti;
+ s >> id;
+ s >> work;
+ t.mRtti = rtti;
+ t.mId = id;
+ t.mWork = work;
  return s;
 }
 
 QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t)
 {
  s << (Q_UINT32)t.mAdvanceCount;
- for (int i = 0; i < 2; i++) {
-	s << t.mFunction[i];
-	s << t.mAdvanceFunction[i];
-	s << t.mDeleteUnusedShots[i];
-	s << t.mParticles[i];
-	s << t.mMaximalAdvanceCount[i];
+ s << t.mFunction;
+ s << t.mAdvanceFunction;
+ s << t.mDeleteUnusedShots;
+ s << t.mParticles;
+ s << t.mMaximalAdvanceCount;
+
+ // now the items (mostly units):
+ s << (Q_UINT32)t.mItems.count();
+ QPtrListIterator<ProfileItemAdvance> it(t.mItems);
+ for (; it.current(); ++it) {
+	s << *it.current();
  }
  return s;
 }
@@ -111,12 +153,19 @@ QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t)
  Q_UINT32 advanceCount;
  s >> advanceCount;
  t.mAdvanceCount = advanceCount;
- for (int i = 0; i < 2; i++) {
-	s >> t.mFunction[i];
-	s >> t.mAdvanceFunction[i];
-	s >> t.mDeleteUnusedShots[i];
-	s >> t.mParticles[i];
-	s >> t.mMaximalAdvanceCount[i];
+ s >> t.mFunction;
+ s >> t.mAdvanceFunction;
+ s >> t.mDeleteUnusedShots;
+ s >> t.mParticles;
+ s >> t.mMaximalAdvanceCount;
+
+ // now the items (mostly units):
+ Q_UINT32 items;
+ s >> items;
+ for (unsigned int i = 0; i < items; i++) {
+	ProfileItemAdvance* item = new ProfileItemAdvance();
+	s >> *item;
+	t.mItems.append(item);
  }
  return s;
 }
@@ -124,9 +173,7 @@ QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t)
 
 BosonProfiling::BosonProfiling()
 {
- d = new BosonProfilingPrivate;
- d->mRenderTimes.setAutoDelete(true);
- d->mSlotAdvanceTimes.setAutoDelete(true);
+ init();
 }
 
 BosonProfiling::BosonProfiling(const BosonProfiling& p)
@@ -135,9 +182,16 @@ BosonProfiling::BosonProfiling(const BosonProfiling& p)
  QDataStream writeStream(buffer, IO_WriteOnly);
  p.save(writeStream);
 
- d = new BosonProfilingPrivate;
+ init();
  QDataStream readStream(buffer, IO_ReadOnly);
  load(readStream);
+}
+
+void BosonProfiling::init()
+{
+ d = new BosonProfilingPrivate;
+ d->mRenderTimes.setAutoDelete(true);
+ d->mSlotAdvanceTimes.setAutoDelete(true);
 }
 
 BosonProfiling::~BosonProfiling()
@@ -175,9 +229,9 @@ void BosonProfiling::render(bool start)
 		delete d->mCurrentRenderTimes;
 	}
 	d->mCurrentRenderTimes = new RenderGLTimes();
-	gettimeofday(&d->mCurrentRenderTimes->mFunction[0], 0);
+	d->mCurrentRenderTimes->mFunction.start();
  } else {
-	gettimeofday(&d->mCurrentRenderTimes->mFunction[1], 0);
+	d->mCurrentRenderTimes->mFunction.stop();
 	d->mRenderTimes.append(d->mCurrentRenderTimes);
 	if (d->mRenderTimes.count() > MAX_ENTRIES) {
 		d->mRenderTimes.removeFirst();
@@ -188,42 +242,42 @@ void BosonProfiling::render(bool start)
 
 void BosonProfiling::renderClear(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mClear[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mClear.getTime(start);
 }
 
 void BosonProfiling::renderCells(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mCells[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mCells.getTime(start);
 }
 
 void BosonProfiling::renderUnits(bool start, unsigned int units)
 {
  if (start) {
-	gettimeofday(&d->mCurrentRenderTimes->mUnits[0], 0);
+	d->mCurrentRenderTimes->mUnits.start();
  } else {
-	gettimeofday(&d->mCurrentRenderTimes->mUnits[1], 0);
+	d->mCurrentRenderTimes->mUnits.stop();
 	d->mCurrentRenderTimes->mUnitCount = units;
  }
 }
 
 void BosonProfiling::renderMissiles(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mMissiles[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mMissiles.getTime(start);
 }
 
 void BosonProfiling::renderParticles(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mParticles[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mParticles.getTime(start);
 }
 
 void BosonProfiling::renderFOW(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mFOW[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mFOW.getTime(start);
 }
 
 void BosonProfiling::renderText(bool start)
 {
- gettimeofday(&d->mCurrentRenderTimes->mText[start ? 0 : 1], 0);
+ d->mCurrentRenderTimes->mText.getTime(start);
 }
 
 void BosonProfiling::advance(bool start, unsigned int advanceCount)
@@ -234,9 +288,9 @@ void BosonProfiling::advance(bool start, unsigned int advanceCount)
 		delete d->mCurrentSlotAdvanceTimes;
 	}
 	d->mCurrentSlotAdvanceTimes = new ProfileSlotAdvance(advanceCount);
-	gettimeofday(&d->mCurrentSlotAdvanceTimes->mFunction[0], 0);
+	d->mCurrentSlotAdvanceTimes->mFunction.start();
  } else {
-	gettimeofday(&d->mCurrentSlotAdvanceTimes->mFunction[1], 0);
+	d->mCurrentSlotAdvanceTimes->mFunction.stop();
 	d->mSlotAdvanceTimes.append(d->mCurrentSlotAdvanceTimes);
 	if (d->mSlotAdvanceTimes.count() > MAX_ENTRIES) {
 		d->mSlotAdvanceTimes.removeFirst();
@@ -252,22 +306,51 @@ void BosonProfiling::advance(bool start, unsigned int advanceCount)
 
 void BosonProfiling::advanceFunction(bool start)
 {
- gettimeofday(&d->mCurrentSlotAdvanceTimes->mAdvanceFunction[start ? 0 : 1], 0);
+ d->mCurrentSlotAdvanceTimes->mAdvanceFunction.getTime(start);
 }
 
 void BosonProfiling::advanceDeleteUnusedShots(bool start)
 {
- gettimeofday(&d->mCurrentSlotAdvanceTimes->mDeleteUnusedShots[start ? 0 : 1], 0);
+ d->mCurrentSlotAdvanceTimes->mDeleteUnusedShots.getTime(start);
 }
 
 void BosonProfiling::advanceParticles(bool start)
 {
- gettimeofday(&d->mCurrentSlotAdvanceTimes->mParticles[start ? 0 : 1], 0);
+ d->mCurrentSlotAdvanceTimes->mParticles.getTime(start);
 }
 
 void BosonProfiling::advanceMaximalAdvanceCount(bool start)
 {
- gettimeofday(&d->mCurrentSlotAdvanceTimes->mMaximalAdvanceCount[start ? 0 : 1], 0);
+ d->mCurrentSlotAdvanceTimes->mMaximalAdvanceCount.getTime(start);
+}
+
+void BosonProfiling::advanceItemStart(int rtti, unsigned int unitId, int work)
+{
+ d->mCurrentItemAdvanceTimes = new ProfileItemAdvance(rtti, unitId, work);
+ d->mCurrentItemAdvanceTimes->mFunction.start();
+}
+
+void BosonProfiling::advanceItem(bool start)
+{
+ d->mCurrentItemAdvanceTimes->mAdvance.getTime(start);
+}
+
+void BosonProfiling::advanceItemFunction(bool start)
+{
+ d->mCurrentItemAdvanceTimes->mAdvanceFunction.getTime(start);
+}
+
+void BosonProfiling::advanceItemMove(bool start)
+{
+ d->mCurrentItemAdvanceTimes->mAdvance.getTime(start);
+}
+
+void BosonProfiling::advanceItemStop()
+{
+ d->mCurrentItemAdvanceTimes->mFunction.stop();
+ d->mCurrentSlotAdvanceTimes->mItems.append(d->mCurrentItemAdvanceTimes);
+ // AB: there is NO limit on unit number here!
+ d->mCurrentItemAdvanceTimes = 0;
 }
 
 void BosonProfiling::start(ProfilingEvent event)
@@ -380,6 +463,6 @@ bool BosonProfiling::load(QDataStream& stream)
 	stream >> *t;
 	d->mSlotAdvanceTimes.append(t);
  }
-return true;
+ return true;
 }
 

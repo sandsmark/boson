@@ -29,6 +29,26 @@
 
 #include <sys/time.h>
 
+class ProfilingEntry
+{
+public:
+	ProfilingEntry()
+	{
+		clear();
+	}
+	void clear()
+	{
+		timerclear(&mData[0]);
+		timerclear(&mData[1]);
+	}
+	unsigned long int diff() const { return compareTimes2(mData); }
+	inline void getTime(bool start) { gettimeofday(&mData[start ? 0 : 1], 0); }
+	inline void start() { gettimeofday(&mData[0], 0); }
+	inline void stop() { gettimeofday(&mData[1], 0); }
+
+	struct timeval mData[2];
+};
+
 /**
  * Information about the rendering times. Helper class for @ref BosonProfiling.
  *
@@ -40,44 +60,53 @@ class RenderGLTimes
 public:
 	RenderGLTimes()
 	{
-		// i dont want to unroll this loop (even though it adds some
-		// overhead), because it makes adding new variables more
-		// difficult
-		for (int i = 0; i < 2; i++) {
-			timerclear(&mFunction[i]);
-			timerclear(&mClear[i]);
-			timerclear(&mCells[i]);
-			timerclear(&mUnits[i]);
-			timerclear(&mMissiles[i]);
-			timerclear(&mParticles[i]);
-			timerclear(&mFOW[i]);
-			timerclear(&mText[i]);
-		}
 		mUnitCount = 0;
 	}
-	unsigned long int dFunction() const { return compareTimes2(mFunction); }
-	unsigned long int dClear() const { return compareTimes2(mClear); }
-	unsigned long int dCells() const { return compareTimes2(mCells); }
-	unsigned long int dUnits() const { return compareTimes2(mUnits); }
-	unsigned long int dMissiles() const { return compareTimes2(mMissiles); }
-	unsigned long int dParticles() const { return compareTimes2(mParticles); }
-	unsigned long int dFOW() const { return compareTimes2(mFOW); }
-	unsigned long int dText() const { return compareTimes2(mText); }
+	unsigned long int dFunction() const { return mFunction.diff(); }
+	unsigned long int dClear() const { return mClear.diff(); }
+	unsigned long int dCells() const { return mCells.diff(); }
+	unsigned long int dUnits() const { return mUnits.diff(); }
+	unsigned long int dMissiles() const { return mMissiles.diff(); }
+	unsigned long int dParticles() const { return mParticles.diff(); }
+	unsigned long int dFOW() const { return mFOW.diff(); }
+	unsigned long int dText() const { return mText.diff(); }
 
 	// we use array of size 2 - the first is the start time, the second the
 	// stop time. the difference of both is the consumed time then.
 
 	// remember to update operator>>() and operator<<() in the .cpp file if
 	// you change something here!
-	struct timeval mFunction[2];
-	struct timeval mClear[2];
-	struct timeval mCells[2];
-	struct timeval mUnits[2];
-	struct timeval mMissiles[2];
-	struct timeval mParticles[2];
-	struct timeval mFOW[2];
-	struct timeval mText[2];
+	ProfilingEntry mFunction;
+	ProfilingEntry mClear;
+	ProfilingEntry mCells;
+	ProfilingEntry mUnits;
+	ProfilingEntry mMissiles;
+	ProfilingEntry mParticles;
+	ProfilingEntry mFOW;
+	ProfilingEntry mText;
 	unsigned int mUnitCount;
+};
+
+class ProfileItemAdvance
+{
+public:
+	ProfileItemAdvance()
+	{
+	}
+	ProfileItemAdvance(int rtti, unsigned int id, int work)
+	{
+		mRtti = rtti;
+		mId = id;
+		mWork = work;
+	}
+
+	ProfilingEntry mFunction;
+	ProfilingEntry mAdvance;
+	ProfilingEntry mAdvanceFunction;
+	ProfilingEntry mMove;
+	int mRtti;
+	unsigned int mId;
+	int mWork;
 };
 
 class ProfileSlotAdvance
@@ -85,30 +114,26 @@ class ProfileSlotAdvance
 public:
 	ProfileSlotAdvance(unsigned int advanceCount)
 	{
-		for (int i = 0; i < 2; i++) {
-			timerclear(&mFunction[i]);
-			timerclear(&mAdvanceFunction[i]);
-			timerclear(&mDeleteUnusedShots[i]);
-			timerclear(&mParticles[i]);
-			timerclear(&mMaximalAdvanceCount[i]);
-		}
 		mAdvanceCount = advanceCount;
+		mItems.setAutoDelete(true);
 	}
-	unsigned long int dFunction() const { return compareTimes2(mFunction); }
-	unsigned long int dAdvanceFunction() const { return compareTimes2(mAdvanceFunction); }
-	unsigned long int dDeleteUnusedShots() const { return compareTimes2(mDeleteUnusedShots); }
-	unsigned long int dParticles() const { return compareTimes2(mParticles); }
-	unsigned long int dMaximalAdvanceCount() const { return compareTimes2(mMaximalAdvanceCount); }
+	unsigned long int dFunction() const { return mFunction.diff(); }
+	unsigned long int dAdvanceFunction() const { return mAdvanceFunction.diff(); }
+	unsigned long int dDeleteUnusedShots() const { return mDeleteUnusedShots.diff(); }
+	unsigned long int dParticles() const { return mParticles.diff(); }
+	unsigned long int dMaximalAdvanceCount() const { return mMaximalAdvanceCount.diff(); }
 
 
 	// remember to update operator>>() and operator<<() in the .cpp file if
 	// you change something here!
-	struct timeval mFunction[2]; // the entire slotAdvance() function
-	struct timeval mAdvanceFunction[2]; // the advanceFunction()/advanceFunction2() stuff
-	struct timeval mDeleteUnusedShots[2];
-	struct timeval mParticles[2];
-	struct timeval mMaximalAdvanceCount[2];
+	ProfilingEntry mFunction; // the entire slotAdvance() function
+	ProfilingEntry mAdvanceFunction; // the advanceFunction()/advanceFunction2() stuff
+	ProfilingEntry mDeleteUnusedShots;
+	ProfilingEntry mParticles;
+	ProfilingEntry mMaximalAdvanceCount;
 	unsigned int mAdvanceCount;
+
+	QPtrList<ProfileItemAdvance> mItems;
 };
 
 
@@ -119,6 +144,7 @@ public:
 	{
 		mCurrentRenderTimes = 0;
 		mCurrentSlotAdvanceTimes = 0;
+		mCurrentItemAdvanceTimes = 0;
 	}
 	typedef QValueList<long int> TimesList;
 
@@ -131,6 +157,7 @@ public:
 
 	QPtrList<ProfileSlotAdvance> mSlotAdvanceTimes;
 	ProfileSlotAdvance* mCurrentSlotAdvanceTimes;
+	ProfileItemAdvance* mCurrentItemAdvanceTimes;
 
 	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
