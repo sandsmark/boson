@@ -34,7 +34,7 @@ public:
 		IdStartScenario = 11,
 		AddUnit = 50, // whenever a unit is added
 		AddUnitsXML = 49, // whenever a unit is added (for BosonScenario)
-		Advance = 51, // call BosonCanvas::advance()
+		Advance10 = 51, // call BosonCanvas::advance() 10 times
 		IdChat = 52, // a chat message
 		IdGameIsStarted = 55, // the game is started as soon as this is received
 

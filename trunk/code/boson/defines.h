@@ -44,8 +44,8 @@
 #define MAX_MAP_HEIGHT 500
 #define MAX_MAP_WIDTH 500
 
-#define MAX_GAME_SPEED 10 // the advance period - lower means faster
-#define MIN_GAME_SPEED 800 // the advance period - higher means slower
+#define MAX_GAME_SPEED 200 // the advance period - lower means faster
+#define MIN_GAME_SPEED 1500 // the advance period - higher means slower
 #define DEFAULT_GAME_SPEED 70
 
 #define REMOVE_WRECKAGES_TIME 20 // remove wreckages after a certain time
