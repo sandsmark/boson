@@ -38,6 +38,7 @@
 #include "bodebugdcopiface.h"
 #include "startupwidgets/bosonstartupwidget.h"
 #include "sound/bosonmusic.h"
+#include "info/boinfo.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -135,6 +136,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  setView(mMainDock);
  setMainDockWidget(mMainDock);
 
+ BoInfo::initBoInfo();
  BosonConfig::initBosonConfig();
  BosonProfiling::initProfiling();
  BosonMusic::initBosonMusic();

@@ -46,6 +46,7 @@
 #include "bosonmodel.h"
 #include "bo3dtools.h"
 #include "bosonbigdisplayinputbase.h"
+#include "info/boinfo.h"
 
 #include <kgame/kgameio.h>
 
@@ -529,6 +530,7 @@ void BosonBigDisplayBase::init()
  setUpdateInterval(boConfig->updateInterval());
 }
 
+
 void BosonBigDisplayBase::initializeGL()
 {
  if (isInitialized()) {
@@ -609,6 +611,10 @@ void BosonBigDisplayBase::initializeGL()
  boDebug() << k_funcinfo << "starting timer" << endl;
  // start rendering (will also start the timer if necessary)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
+
+ // update system information (we initializeGL() must have been called before
+ // this makes sense)
+ BoInfo::boInfo()->update(this);
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
