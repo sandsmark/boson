@@ -1345,13 +1345,10 @@ class Facility::FacilityPrivate
 public:
 	FacilityPrivate()
 	{
-		mRepairPlugin = 0;
-
 		mFlamesParticleSystem = 0;
 	}
 
 	KGameProperty<unsigned int> mConstructionStep;
-	RepairPlugin* mRepairPlugin;
 
 	BosonParticleSystem* mFlamesParticleSystem;
 };
@@ -1364,16 +1361,12 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 
  d->mConstructionStep.setLocal(0);
 
-/* if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
-	d->mRepairPlugin = new RepairPlugin(this);
- }*/
  setWork(WorkConstructed);
 }
 
 Facility::~Facility()
 {
  // TODO: write a plugin framework and manage plugins in a list.
- delete d->mRepairPlugin;
  delete d;
 }
 
@@ -1400,14 +1393,6 @@ UnitPlugin* Facility::plugin(int pluginType) const
 	return 0;
  }
  return Unit::plugin(pluginType);
-}
-
-RepairPlugin* Facility::repairPlugin() const
-{
- if (!isConstructionComplete()) {
-	return 0;
- }
- return d->mRepairPlugin;
 }
 
 bool Facility::isConstructionComplete() const
