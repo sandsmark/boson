@@ -1,24 +1,31 @@
-# Add all maps here
-maps_DATA = \
-	a10-test.bpf \
-	basic.bpf \
-	basic2.bpf \
-	basic3.bpf \
-	bigarmy-test.bpf \
-	bigarmy-test-2.bpf \
-	experimental.bpf \
-	experimental2.bpf \
-	experimental3.bpf \
-	experimental4.bpf \
-	experimental5.bpf \
-	just_for_fun.bpf \
-	lod-test.bpf \
-	oneunit.bpf \
-	the_pass.bpf \
-	units-test.bpf \
-	wartest1.bpf
 
-# This is where it will all be installed
+# This is where the maps will all be installed
 mapsdir = $(kde_datadir)/boson/maps
+
+uninstall-local:
+	rm -rf $(mapsdir)
+
+install-data-local:
+	@if test -d $(DESTDIR)$(mapsdir); then \
+		echo "Removing old maps directory" ;\
+		rm -rf $(DESTDIR)$(mapsdir) ;\
+	fi
+	@$(mkinstalldirs) $(DESTDIR)$(mapsdir)
+	@echo "Creating campaign dirs" ;\
+	dirs=`cd $(srcdir) && find . -type d -maxdepth 1 | grep -v CVS` ;\
+	for d in $$dirs; do \
+		if test -d $(srcdir)/$$d; then \
+			$(mkinstalldirs) $(DESTDIR)$(mapsdir)/$$d ;\
+		fi \
+	done
+
+	@echo "Installing maps"
+	@mkdir -p $(DESTDIR)$(mapsdir)
+	@files=`cd $(srcdir) && find . -type f -maxdepth 2 -name "*.bpf"`;\
+	for f in $$files; do \
+		if test -f $(srcdir)/$$f; then \
+			$(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(mapsdir)/$$f ;\
+		fi \
+	done
 
 EXTRA_DIST = $(maps_DATA)
