@@ -180,7 +180,7 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  QString textureName = Bo3DSLoad::textureName(mesh, m3ds);
 
- BoMesh* boMesh = new BoMesh(mesh->faces); // allocates mesh->faces * 3 points!
+ BoMesh* boMesh = new BoMesh(mesh->faces);
  mMesh2Mesh.insert(mesh, boMesh);
  mData->addMesh(boMesh);
 
@@ -208,7 +208,6 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  loadVertices(boMesh, mesh);
  loadTexels(boMesh, mesh, Bo3DSLoad::material(mesh, m3ds));
- boMesh->calculateNormals(); // TODO: move to BosonModel. no need to do this in the fileloading class.
 
  loadFaces(boMesh, mesh);
 }
