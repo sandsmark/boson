@@ -35,9 +35,6 @@
 #include <ksimpleconfig.h>
 #include <klocale.h>
 
-#include <qpixmap.h>
-#include <qimage.h>
-#include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
 
