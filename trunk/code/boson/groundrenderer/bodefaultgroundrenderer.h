@@ -57,5 +57,13 @@ private:
 	void renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
 };
 
+class BoDefaultGroundRendererNoTree : public BoDefaultGroundRenderer
+{
+	Q_OBJECT
+public:
+	BoDefaultGroundRendererNoTree() : BoDefaultGroundRenderer(false)
+	{
+	}
+};
 #endif
 
