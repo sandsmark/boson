@@ -206,9 +206,11 @@ public:
 
 	/**
 	 * @return The names of all objects of this theme, as they could
-	 * be provided to @ref objectModel
+	 * be provided to @ref objectModel.
+	 * @param fileList if non-null here are the filenames returned, that
+	 * belong the the names.
 	 **/
-	QStringList allObjects() const;
+	QStringList allObjects(QStringList* files = 0) const;
 
 	/**
 	 * @return A list of all units that have a @ref UnitProperties::producer
