@@ -55,6 +55,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>Commandframe (un)-docking must be fixed. See #48058</li>
 	  <li>All units must have their own 3D model</li>
 	  <li>Generate the technology tree dynamically.</li>
+	  <li>Remove the reloadstate progress bar</li>
 	</ul>
 	<h2>DONE</h2>
 	<ul>
