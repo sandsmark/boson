@@ -436,6 +436,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
  } else if (*t == typeid(KGamePropertyBase*)) {
 	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
 		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
+		list->clear();
 		unsigned int count = 0;
 		QChar c;
 		QPoint point;
@@ -448,6 +449,7 @@ void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const 
 		}
 	} else if (typeid(*prop) == typeid(KGamePropertyList<BoVector2Fixed>)) {
 		KGamePropertyList<BoVector2Fixed>* list = (KGamePropertyList<BoVector2Fixed>*)prop;
+		list->clear();
 		unsigned int count = 0;
 		QChar c;
 		BoVector2Fixed point;
