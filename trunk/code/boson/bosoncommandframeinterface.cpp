@@ -20,6 +20,7 @@
 #include "bosoncommandframeinterface.h"
 #include "bosoncommandframeinterface.moc"
 
+#warning this is never freed!
 BosonCommandFrameFactoryBase* BosonCommandFrameInterface::mFactory = 0;
 
 BosonCommandFrameInterface::BosonCommandFrameInterface(QWidget* parent, const char* name)

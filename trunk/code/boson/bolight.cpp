@@ -86,6 +86,7 @@ BoLight* BoLightManager::light(int id)
 
 BoLight* BoLightManager::createLight()
 {
+#warning this is never deleted
   BoLight* light = new BoLight;
   if(light->id() == -1)
   {

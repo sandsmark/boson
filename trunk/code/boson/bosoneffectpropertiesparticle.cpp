@@ -33,6 +33,7 @@
 
 /*****  BosonEffectPropertiesParticle  *****/
 
+#warning this is never freed!
 QDict<BosonTextureArray> BosonEffectPropertiesParticle::mTextureArrays;
 QString BosonEffectPropertiesParticle::mTexturePath;
 
