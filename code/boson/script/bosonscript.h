@@ -262,6 +262,12 @@ class BosonScript
      * Teleports (immediately moves) unit with id id, owned by player to (x, y)
      **/
     static void teleportUnit(int player, int id, float x, float y);
+    /**
+     * Places completed production (i.e. unit) of given factory to (x, y)
+     * If unit with id factoryid is not factory, if it doesn't have a
+     *  production or if the production isn't completed, it does nothing.
+     **/
+    static void placeProduction(int player, int factoryid, float x, float y);
 
     /**
      * @return List of units on cell (x, y)
@@ -381,9 +387,13 @@ class BosonScript
     void setCameraRadius(float r);
     void setCameraZ(float z);
     void setCameraMoveMode(int mode);
+    void setCameraInterpolationMode(int mode);
     void setCameraLookAt(const BoVector3Float& pos);
     void setCameraPos(const BoVector3Float& pos);
     void setCameraUp(const BoVector3Float& up);
+    void addCameraLookAtPoint(const BoVector3Float& pos, float time);
+    void addCameraPosPoint(const BoVector3Float& pos, float time);
+    void addCameraUpPoint(const BoVector3Float& up, float time);
     void setCameraLimits(bool on);
     void setCameraFreeMode(bool on);
     void commitCameraChanges(int ticks);

@@ -207,6 +207,11 @@ void BosonScriptInterface::setCameraMoveMode(int v)
   emit signalSetCameraMoveMode(v);
 }
 
+void BosonScriptInterface::setCameraInterpolationMode(int mode)
+{
+  emit signalSetCameraInterpolationMode(mode);
+}
+
 void BosonScriptInterface::setCameraPos(const BoVector3Float& v)
 {
   emit signalSetCameraPos(v);
@@ -220,6 +225,21 @@ void BosonScriptInterface::setCameraLookAt(const BoVector3Float& v)
 void BosonScriptInterface::setCameraUp(const BoVector3Float& v)
 {
   emit signalSetCameraUp(v);
+}
+
+void BosonScriptInterface::addCameraLookAtPoint(const BoVector3Float& pos, float time)
+{
+  emit signalAddCameraLookAtPoint(pos, time);
+}
+
+void BosonScriptInterface::addCameraPosPoint(const BoVector3Float& pos, float time)
+{
+  emit signalAddCameraPosPoint(pos, time);
+}
+
+void BosonScriptInterface::addCameraUpPoint(const BoVector3Float& up, float time)
+{
+  emit signalAddCameraUpPoint(up, time);
 }
 
 void BosonScriptInterface::commitCameraChanges(int ticks)

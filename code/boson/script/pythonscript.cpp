@@ -63,6 +63,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"produceUnit", py_produceUnit, METH_VARARGS, 0 },
   { (char*)"spawnUnit", py_spawnUnit, METH_VARARGS, 0 },
   { (char*)"teleportUnit", py_teleportUnit, METH_VARARGS, 0 },
+  { (char*)"placeProduction", py_placeProduction, METH_VARARGS, 0 },
   { (char*)"unitsOnCell", py_unitsOnCell, METH_VARARGS, 0 },
   { (char*)"unitsInRect", py_unitsInRect, METH_VARARGS, 0 },
   { (char*)"cellOccupied", py_cellOccupied, METH_VARARGS, 0 },
@@ -92,11 +93,15 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"setCameraRadius", py_setCameraRadius, METH_VARARGS, 0 },
   { (char*)"setCameraZ", py_setCameraZ, METH_VARARGS, 0 },
   { (char*)"setCameraMoveMode", py_setCameraMoveMode, METH_VARARGS, 0 },
+  { (char*)"setCameraInterpolationMode", py_setCameraInterpolationMode, METH_VARARGS, 0 },
   { (char*)"setCameraLookAt", py_setCameraLookAt, METH_VARARGS, 0 },
   { (char*)"setCameraPos", py_setCameraPos, METH_VARARGS, 0 },
   { (char*)"setCameraUp", py_setCameraUp, METH_VARARGS, 0 },
   { (char*)"setCameraLimits", py_setCameraLimits, METH_VARARGS, 0 },
   { (char*)"setCameraFreeMode", py_setCameraFreeMode, METH_VARARGS, 0 },
+  { (char*)"addCameraLookAtPoint", py_addCameraLookAtPoint, METH_VARARGS, 0 },
+  { (char*)"addCameraUpPoint", py_addCameraUpPoint, METH_VARARGS, 0 },
+  { (char*)"addCameraPosPoint", py_addCameraPosPoint, METH_VARARGS, 0 },
   { (char*)"commitCameraChanges", py_commitCameraChanges, METH_VARARGS, 0 },
   { (char*)"cameraLookAt", py_cameraLookAt, METH_VARARGS, 0 },
   { (char*)"cameraPos", py_cameraPos, METH_VARARGS, 0 },
@@ -1048,6 +1053,21 @@ PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_placeProduction(PyObject*, PyObject* args)
+{
+  int player, factoryid;
+  float x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiff", &player, &factoryid, &x, &y))
+  {
+    return 0;
+  }
+
+  BosonScript::placeProduction(player, factoryid, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_unitsOnCell(PyObject*, PyObject* args)
 {
   int x, y;
@@ -1386,6 +1406,19 @@ PyObject* PythonScript::py_setCameraMoveMode(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_setCameraInterpolationMode(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int m;
+  if(!PyArg_ParseTuple(args, (char*)"i", &m))
+  {
+    return 0;
+  }
+  currentScript()->setCameraInterpolationMode(m);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_setCameraLookAt(PyObject*, PyObject* args)
 {
   BO_CHECK_NULL_RET0(currentScript());
@@ -1447,6 +1480,45 @@ PyObject* PythonScript::py_setCameraFreeMode(PyObject*, PyObject* args)
     return 0;
   }
   currentScript()->setCameraFreeMode((bool)on);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_addCameraLookAtPoint(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  float x, y, z, time;
+  if(!PyArg_ParseTuple(args, (char*)"ffff", &x, &y, &z, &time))
+  {
+    return 0;
+  }
+  currentScript()->addCameraLookAtPoint(BoVector3Float(x, y, z), time);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_addCameraUpPoint(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  float x, y, z, time;
+  if(!PyArg_ParseTuple(args, (char*)"ffff", &x, &y, &z, &time))
+  {
+    return 0;
+  }
+  currentScript()->addCameraUpPoint(BoVector3Float(x, y, z), time);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_addCameraPosPoint(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  float x, y, z, time;
+  if(!PyArg_ParseTuple(args, (char*)"ffff", &x, &y, &z, &time))
+  {
+    return 0;
+  }
+  currentScript()->addCameraPosPoint(BoVector3Float(x, y, z), time);
   Py_INCREF(Py_None);
   return Py_None;
 }

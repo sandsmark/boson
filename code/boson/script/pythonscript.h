@@ -86,6 +86,7 @@ class PythonScript : public BosonScript
     static PyObject* py_produceUnit(PyObject* self, PyObject* args);
     static PyObject* py_spawnUnit(PyObject* self, PyObject* args);
     static PyObject* py_teleportUnit(PyObject* self, PyObject* args);
+    static PyObject* py_placeProduction(PyObject* self, PyObject* args);
 
     static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);
     static PyObject* py_unitsInRect(PyObject* self, PyObject* args);
@@ -121,11 +122,15 @@ class PythonScript : public BosonScript
     static PyObject* py_setCameraRadius(PyObject* self, PyObject* args);
     static PyObject* py_setCameraZ(PyObject* self, PyObject* args);
     static PyObject* py_setCameraMoveMode(PyObject* self, PyObject* args);
+    static PyObject* py_setCameraInterpolationMode(PyObject* self, PyObject* args);
     static PyObject* py_setCameraLookAt(PyObject* self, PyObject* args);
     static PyObject* py_setCameraPos(PyObject* self, PyObject* args);
     static PyObject* py_setCameraUp(PyObject* self, PyObject* args);
     static PyObject* py_setCameraLimits(PyObject* self, PyObject* args);
     static PyObject* py_setCameraFreeMode(PyObject* self, PyObject* args);
+    static PyObject* py_addCameraLookAtPoint(PyObject* self, PyObject* args);
+    static PyObject* py_addCameraUpPoint(PyObject* self, PyObject* args);
+    static PyObject* py_addCameraPosPoint(PyObject* self, PyObject* args);
 
     static PyObject* py_commitCameraChanges(PyObject* self, PyObject* args);
 

@@ -493,6 +493,61 @@ void BosonScript::teleportUnit(int player, int id, float x, float y)
   sendInput(player, msg);
 }
 
+void BosonScript::placeProduction(int player, int factoryid, float x, float y)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(player));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << player << endl;
+    return;
+  }
+
+  Unit* u = game()->findUnit(factoryid, p);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << factoryid << endl;
+    return;
+  }
+
+  ProductionPlugin* prod = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
+  if(!prod)
+  {
+    boError() << k_funcinfo << "Unit " << factoryid << " doesn't have production plugin!" << endl;
+    return;
+  }
+  if(prod->completedProductionType() != ProduceUnit)
+  {
+    boError() << k_lineinfo << "not producing unit!" << endl;
+    break;
+  }
+  int unitType = prod->completedProductionId();
+  if (unitType <= 0) {
+    // hope this is working...
+    boWarning() << k_lineinfo << "not yet completed" << endl;
+    break;
+  }
+  //game()->buildProducedUnit(prod, unitType, BoVector2Fixed(x, y));
+
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveBuild;
+  stream << (Q_UINT32)ProduceUnit;
+  stream << (Q_ULONG)u->id();
+  stream << (Q_UINT32)p->id();
+  stream << BoVector2Fixed(x, y);
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
+}
+
 QValueList<int> BosonScript::unitsOnCell(int x, int y)
 {
   QValueList<int> list;
@@ -1072,8 +1127,12 @@ void BosonScript::setCameraZ(float z)
 
 void BosonScript::setCameraMoveMode(int mode)
 {
-  boDebug() << k_funcinfo << "mode: " << mode << endl;
   interface()->setCameraMoveMode(mode);
+}
+
+void BosonScript::setCameraInterpolationMode(int mode)
+{
+  interface()->setCameraInterpolationMode(mode);
 }
 
 void BosonScript::setCameraPos(const BoVector3Float& pos)
@@ -1089,6 +1148,21 @@ void BosonScript::setCameraLookAt(const BoVector3Float& pos)
 void BosonScript::setCameraUp(const BoVector3Float& up)
 {
   interface()->setCameraUp(up);
+}
+
+void BosonScript::addCameraLookAtPoint(const BoVector3Float& pos, float time)
+{
+  interface()->addCameraLookAtPoint(pos, time);
+}
+
+void BosonScript::addCameraPosPoint(const BoVector3Float& pos, float time)
+{
+  interface()->addCameraPosPoint(pos, time);
+}
+
+void BosonScript::addCameraUpPoint(const BoVector3Float& up, float time)
+{
+  interface()->addCameraUpPoint(up, time);
 }
 
 void BosonScript::setCameraLimits(bool on)

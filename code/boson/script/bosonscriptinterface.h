@@ -97,9 +97,13 @@ class BosonScriptInterface : public QObject
     void setCameraRadius(float);
     void setCameraZ(float);
     void setCameraMoveMode(int mode);
+    void setCameraInterpolationMode(int mode);
     void setCameraPos(const BoVector3Float&);
     void setCameraLookAt(const BoVector3Float&);
     void setCameraUp(const BoVector3Float&);
+    void addCameraLookAtPoint(const BoVector3Float& pos, float time);
+    void addCameraPosPoint(const BoVector3Float& pos, float time);
+    void addCameraUpPoint(const BoVector3Float& up, float time);
     void commitCameraChanges(int ticks);
     void setAcceptUserInput(bool accept);
 
@@ -139,10 +143,14 @@ class BosonScriptInterface : public QObject
     void signalSetCameraPos(const BoVector3Float&);
     void signalSetCameraLookAt(const BoVector3Float&);
     void signalSetCameraUp(const BoVector3Float&);
+    void signalAddCameraLookAtPoint(const BoVector3Float&, float);
+    void signalAddCameraPosPoint(const BoVector3Float&, float);
+    void signalAddCameraUpPoint(const BoVector3Float&, float);
     void signalSetCameraRotation(float);
     void signalSetCameraRadius(float);
     void signalSetCameraZ(float);
     void signalSetCameraMoveMode(int);
+    void signalSetCameraInterpolationMode(int);
     void signalCommitCameraChanges(int);
     void signalSetAcceptUserInput(bool);
 };
