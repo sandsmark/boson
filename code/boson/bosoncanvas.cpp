@@ -191,7 +191,6 @@ Cell* BosonCanvas::cells() const
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
-#define USE_ADVANCE_LISTS 1
 #define DO_ITEM_PROFILING 0
  boProfiling->advance(true, advanceCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
@@ -199,7 +198,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  boProfiling->advanceFunction(true);
  d->mStatistics->resetWorkCounts();
 
-#if USE_ADVANCE_LISTS
  // first we need to call *all* BosonItem::advance() functions.
  // AB: profiling information will be inaccurate because of this... we are
  // collecting for every item advance() here, and below for some items
@@ -356,101 +354,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  d->mChangeAdvanceList.clear();
 
-#else // USE_ADVANCE_LISTS
- if (advanceFlag) {
-	// note: the advance methods must not change the advanceFunction()s
-	// here!
-	// AB: do NOT add something here - if you add something for units then
-	// check for isDestroyed() !!
-	while (animIt.current()) {
-		unsigned int id;
-		int work;
-		BosonItem* s = animIt.current();
-		if (RTTI::isUnit(s->rtti())) {
-			id = ((Unit*)s)->id();
-			work = (int)((Unit*)s)->advanceWork();
-		} else {
-			id = 0;
-			work = -1;
-		}
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemStart(s->rtti(), id, work);
-		boProfiling->advanceItem(true);
-#endif
-
-		// TODO: group some stuff.
-		// e.g. we reload weapons and shields here whenever we call
-		// this. instead we could reaload every 5th or 10th call only,
-		// but then by 5 or 10 instead of 1. the units would reload with
-		// the same speed (except for up to 4 or 9 advance calls - but
-		// that doesnt matter anyway) and this function would execute
-		// faster.
-		s->advance(advanceCount);
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItem(false);
-		boProfiling->advanceItemFunction(true);
-#endif
-		s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemFunction(false);
-#endif
-
-		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemMove(true);
-#endif
-		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
-			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
-		}
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemMove(false);
-		boProfiling->advanceItemStop();
-#endif
-		++animIt;
-	}
- } else {
-	// note: the advance methods must not change the advanceFunction2()s
-	// here!
-	while (animIt.current()) {
-		unsigned int id;
-		int work;
-		BosonItem* s = animIt.current();
-		if (RTTI::isUnit(s->rtti())) {
-			id = ((Unit*)s)->id();
-			work = (int)((Unit*)s)->work();
-		} else {
-			id = 0;
-			work = 0;
-		}
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemStart(s->rtti(), id, work);
-		boProfiling->advanceItem(true);
-#endif
-		s->advance(advanceCount);
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItem(false);
-		boProfiling->advanceItemFunction(true);
-#endif
-		s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemFunction(false);
-#endif
-
-		// AB: warning: this might cause trouble at this point! see Unit::moveBy()
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemMove(true);
-#endif
-		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
-			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
-		}
-#if DO_ITEM_PROFILING
-		boProfiling->advanceItemMove(false);
-		boProfiling->advanceItemStop();
-#endif
-		++animIt;
-	}
- }
-#endif
  boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
