@@ -70,7 +70,8 @@ BOSON_SRC = \
 	bosonbigdisplayinput.cpp \
 	editorbigdisplayinput.cpp \
 	bomesh.cpp \
-	bosonpropertyxml.cpp
+	bosonpropertyxml.cpp \
+	bomemorytrace.cpp
 
 
 BOPROFILING_SRC= \
