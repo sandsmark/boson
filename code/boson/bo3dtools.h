@@ -53,12 +53,14 @@ class BoVector3
     inline void add(BoVector3 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; };
     inline void normalize()  { scale(1 / length()); };
     inline void scale(float s)  {mData[0] = mData[0] * s;  mData[1] = mData[1] * s;  mData[2] = mData[2] * s; };
-    float length();
 
-    inline GLfloat* data() { return mData; }
+    //AB: this calls sqrt() and therefore is slow!
+    float length() const;
+
+    inline const GLfloat* data() const { return mData; }
     inline void operator=(BoVector3 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
-    inline GLfloat operator[](int i)  { return mData[i]; };
+    inline GLfloat operator[](int i) const  { return mData[i]; };
 
     /**
      * Loads BoVector3 from KConfig
@@ -127,10 +129,10 @@ class BoVector4
         mData[2] = a.mData[2] * af + b.mData[2] * bf;   mData[3] = a.mData[3] * af + b.mData[3] * af; };
     inline void add(BoVector4 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; mData[3] += v.mData[3]; };
 
-    inline GLfloat* data() { return mData; }
+    inline const GLfloat* data() const { return mData; }
     inline void operator=(BoVector4 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2];  mData[3] = v.mData[3]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2];  mData[3] = v[3]; };
-    inline GLfloat operator[](int i)  { return mData[i]; };
+    inline GLfloat operator[](int i) const { return mData[i]; };
 
     /**
      * Loads BoVector4 from KConfig
