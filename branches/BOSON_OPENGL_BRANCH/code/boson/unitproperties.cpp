@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "unitproperties.h"
+#include "defines.h"
 
 #include <qcanvas.h>
 #include "speciestheme.h"
@@ -51,6 +52,7 @@ public:
 	QValueList<int> mProducerList;
 	bool mCanRefineMinerals;
 	bool mCanRefineOil;
+	unsigned int mConstructionFrames;
 };
 
 class UnitProperties::UnitPropertiesPrivate
@@ -164,6 +166,7 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
  mFacilityProperties->mCanRefineMinerals = conf->readBoolEntry("CanRefineMinerals",
 		false);
  mFacilityProperties->mCanRefineOil= conf->readBoolEntry("CanRefineOil", false);
+ mFacilityProperties->mConstructionFrames= conf->readUnsignedNumEntry("ConstructionSteps", FACILITY_CONSTRUCTION_STEPS);
 }
 
 bool UnitProperties::isMobile() const
@@ -279,5 +282,13 @@ bool UnitProperties::canRefineOil() const
 	return false;
  }
  return mFacilityProperties->mCanRefineOil;
+}
+
+unsigned int UnitProperties::constructionSteps() const
+{
+ if (!mFacilityProperties) {
+	return 0;
+ }
+ return mFacilityProperties->mConstructionFrames;
 }
 
