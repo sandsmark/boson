@@ -110,6 +110,7 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  // too
  QString tip = i18n("Rtti: %1").arg(item->rtti());
  tip += i18n("\nPosition: (%1,%2,%3)").arg(item->x()).arg(item->y()).arg(item->z());
+ tip += i18n("\nRotation: (%1,%2,%3)").arg(item->xRotation()).arg(item->yRotation()).arg(item->rotation());
  tip += i18n("\nSize: (%1,%2)").arg(item->width()).arg(item->height());
 
  QPtrVector<Cell>* cells = item->cellsConst();
