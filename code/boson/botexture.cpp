@@ -278,6 +278,8 @@ void BoTexture::load(const QString& name)
     mOptions &= (~FormatAuto);
     load(img.bits(), img.width(), img.height());
   }
+
+  mFilePath = name;
 }
 
 void BoTexture::load(unsigned char* data, int width, int height, int side)
@@ -327,6 +329,10 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
     // Generate mipmaps
     if(boTextureManager->useColoredMipmaps())
     {
+      if(boTextureManager->supportsGenerateMipmap())
+      {
+        glTexParameteri(mType, GL_GENERATE_MIPMAP, GL_FALSE);
+      }
       // Use colored mipmaps.
       int error = buildColoredMipmaps(newdata, width, height, format, internalFormat, type);
       if(error)
@@ -371,6 +377,9 @@ void BoTexture::load(unsigned char* data, int width, int height, int side)
 
   bool wasloaded = mLoaded;
   mLoaded = true;
+  // Reset filepath. If we're loading from a file, it will be set to correct
+  //  path later (in another load() method).
+  mFilePath = QString();
 
   if(newdata != data)
   {
@@ -651,6 +660,30 @@ int BoTexture::buildColoredMipmaps(unsigned char* data, int width, int height,
   return retval;
 }
 
+void BoTexture::reload()
+{
+  if(mFilePath.isNull())
+  {
+    return;
+  }
+
+  boDebug() << k_funcinfo << "Reloading texture from " << mFilePath << endl;
+
+  // Delete old texture
+  glDeleteTextures(1, &mId);
+
+  // Create new texture
+  glGenTextures(1, &mId);
+  applyOptions();
+  // Reset dimensions
+  mWidth = mHeight = mDepth = 0;
+
+  // Load the texture
+  QString oldpath = mFilePath;
+  load(mFilePath);
+  mFilePath = oldpath;
+}
+
 
 
 /*****  BoTextureArray  *****/
@@ -824,11 +857,6 @@ void BoTextureManager::initOpenGL()
   mActiveTextureType = new int[mTextureUnits];
   invalidateCache();
 
-
-  mUseColoredMipmaps = boConfig->textureColorMipmaps();
-  mUseCompressedTextures = boConfig->textureCompression();
-  mTextureFilter = boConfig->textureFilter();
-
   boDebug() << k_funcinfo << "OpenGL initialized" << endl;
   mOpenGLInited = true;
 }
@@ -967,8 +995,6 @@ void BoTextureManager::clearStatistics()
 
 void BoTextureManager::textureFilterChanged()
 {
-  mTextureFilter = boConfig->textureFilter();
-
   // Go through all the textures and change their filters.
   QPtrListIterator<BoTexture> it(mTextures);
   while(it.current())
@@ -977,6 +1003,42 @@ void BoTextureManager::textureFilterChanged()
     ++it;
   }
 }
+
+void BoTextureManager::reloadTextures()
+{
+  // Go through all the textures and change their filters.
+  QPtrListIterator<BoTexture> it(mTextures);
+  int total = 0;
+  int reloaded = 0;
+  while(it.current())
+  {
+    if(!it.current()->filePath().isNull())
+    {
+      // Texture has been loaded from image file. Reload it.
+      it.current()->reload();
+      reloaded++;
+    }
+    total++;
+    ++it;
+  }
+  boDebug() << k_funcinfo << reloaded << " of " << total << " textures reloaded" << endl;
+}
+
+bool BoTextureManager::useColoredMipmaps() const
+{
+  return boConfig->textureColorMipmaps();
+}
+
+bool BoTextureManager::useTextureCompression() const
+{
+  return boConfig->textureCompression();
+}
+
+int BoTextureManager::textureFilter() const
+{
+  return boConfig->textureFilter();
+}
+
 
 /*
  * vim: et sw=2
