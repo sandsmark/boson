@@ -24,6 +24,7 @@
 #include <GL/gl.h>
 
 BoMaterial* BoMaterial::mCurrentMaterial = 0;
+unsigned int BoMaterial::mCurrentTexture = 0;
 
 BoMaterial::BoMaterial()
 {
@@ -76,7 +77,10 @@ void BoMaterial::activate(BoMaterial* mat)
 	return;
  }
 
- glBindTexture(GL_TEXTURE_2D, mat->textureObject());
+ if (mat->textureObject() != mCurrentTexture) {
+	glBindTexture(GL_TEXTURE_2D, mat->textureObject());
+	mCurrentTexture = mat->textureObject();
+ }
 
  if (boConfig->useLight() && boConfig->useMaterials()) { // useMaterials() is about OpenGL materials, not about the rest of BoMaterial (e.g. textures)
 	// AB: my OpenGL sample code uses GL_FRONT, so I do as well. I think as back
