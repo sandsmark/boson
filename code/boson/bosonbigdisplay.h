@@ -217,6 +217,9 @@ protected:
 	 * rect is currently drawn.
 	 **/
 	void removeSelectionRect();
+
+	void enterEvent(QEvent*);
+	void leaveEvent(QEvent*);
 	
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);
