@@ -6,7 +6,6 @@
 
     file              : include/ufo/ux/uxdisplay
     begin             : Wed Jul 28 2004
-    $Id$
  ***************************************************************************/
 
 /***************************************************************************
@@ -178,10 +177,68 @@ public: // general event push methods
 		UKeyCode_t keyCode, wchar_t keyChar) {
 		pushKeyUp(context, keyCode, keyChar);
 	}
+public: // general event dispatch methods
+	/** Like @ref pushMouseButtonDown, but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchMouseButtonDown(UContext * context,
+		int x, int y, UMod_t button);
+	/** Like @ref pushMouseButtonUp, but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchMouseButtonUp(UContext * context,
+		int x, int y, UMod_t button);
+	/** Like @ref pushMouseWheelDown, but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchMouseWheelDown(UContext * context,
+		int x, int y, int delta = -120, int mouseWheelNum = 0);
+	/** Like @ref pushMouseWheelUp, but the event is dispatched
+	  * immediately
+	  */
+	virtual bool dispatchMouseWheelUp(UContext * context,
+		int x, int y, int delta = 120, int mouseWheelNum = 0);
+	/** Like @ref pushMouseMove , but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchMouseMove(UContext * context,
+		int x, int y);
+	/** Like @ref pushKeyDown, but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchKeyDown(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar);
+	/** Like @ref pushKeyUp, but the event is dispatched
+	  * immediately
+	  * @return TRUE, if the event got consumed, otherwise FALSE
+	  */
+	virtual bool dispatchKeyUp(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar);
+
 protected: // Protected methods
 	/** registers a new UXContext. */
 	void registerContext(UXContext * context);
 	void unregisterContext(UXContext * context);
+
+	virtual bool mouseButtonDown(UContext * context,
+		int x, int y, UMod_t button, bool push = true);
+	virtual bool mouseButtonUp(UContext * context,
+		int x, int y, UMod_t button, bool pus = true);
+	virtual bool mouseWheelDown(UContext * context,
+		int x, int y, int delta = -120, int mouseWheelNum = 0, bool push = true);
+	virtual bool mouseWheelUp(UContext * context,
+		int x, int y, int delta = 120, int mouseWheelNum = 0, bool push = true);
+	virtual bool mouseMove(UContext * context,
+		int x, int y, bool push = true);
+	virtual bool keyDown(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar, bool push = true);
+	virtual bool keyUp(UContext * context,
+		UKeyCode_t keyCode, wchar_t keyChar, bool push = true);
 
 private: // Private attributes
 	UVideoDriver * m_videoDriver;
