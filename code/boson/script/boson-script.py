@@ -69,7 +69,10 @@ def explore():
             expl = -1
   pos = BoScript.unitPosition(expl)
   boprint("debug", "explore, expl %s, pos %s" % (expl,pos))
-  BoScript.moveUnit(player, expl,randint(pos[0]-50,pos[0]+50) ,randint(pos[1]-50,pos[1]+50))
+  # randint's arguments must be integers, so convert pos to integer
+  x = int(pos[0])
+  y = int(pos[1])
+  BoScript.moveUnit(player, expl,randint(x-50, x+50), randint(y-50,y+50))
   if not BoScript.isUnitAlive(expl):
     expl = -1
 
@@ -171,18 +174,18 @@ def mine():
     if BoScript.canUnitMineOil(u) and BoScript.unitWork(u)==0:
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestOilLocations(player,pos[0],pos[1],0,150)
+      oil=BoScript.nearestOilLocations(player,pos[0],pos[1],1,150)
       boprint("debug", "Mine oil  %s" % oil)
-      if oil:
+      if len(oil) > 0:
         BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
         BoScript.mineUnit(player, u, oil[0][0], oil[0][1])
         boprint("debug", "Mine oil done")
     elif BoScript.canUnitMineMinerals(u) and BoScript.unitWork(u)==0 :
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestMineralLocations(player,pos[0],pos[1],0,150)
+      oil=BoScript.nearestMineralLocations(player,pos[0],pos[1],1,150)
       boprint("debug", "Mine mineral %s" % oil)
-      if oil:
+      if len(oil) > 0:
         BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
         BoScript.mineUnit(player, u, oil[0][0], oil[0][1])
         boprint("debug", "Mine  minerals done")
