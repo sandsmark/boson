@@ -60,19 +60,29 @@ draw_bigbox_text("These requirements apply to the latest stable release
     <br>
     <b>Minimum software requirements:</b><br>
     * XFree 4.x server (with OpenGL support) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
+    * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
     * Qt 3.1 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>
     * KDE 3.1 or better (3.0 is untested) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
     * Python 2.0 or better (2.3 is recommended) - see <a href=\"http://www.python.org/\" target=\"_blank\">http://www.python.org/</a><br>
     * kdegames/libkdegames - usually shipped with KDE<br>
     * libvorbis (for sound and music) - see <a href=\"http://www.vorbis.com/\" target=\"_blank\">http://www.vorbis.com/</a><br>
     * lib3ds (Units and building rendering) - see <a href=\"http://lib3ds.sf.net/\" target=\"_blank\">http://lib3ds.sf.net/</a><br>
+    * WML and Perl  - For the handbook - see <a href=\"http://www.thewml.org\" target=\"_blank\">http://www.thewml.org</a><br><br>
+    <br>
+    <b>Minimum software requirements (CVS version):</b><br>
+    * XFree 4.x server (with OpenGL support, 4.3 and Xrandr for resolution changing) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
     * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
+    * Qt 3.1 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>
+    * kdelibs 3.1 or better (3.0 is untested) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
+    * Python 2.0 or better (2.3 is recommended) - see <a href=\"http://www.python.org/\" target=\"_blank\">http://www.python.org/</a><br>
+    * libvorbis (for sound and music) - see <a href=\"http://www.vorbis.com/\" target=\"_blank\">http://www.vorbis.com/</a><br>
+    * lib3ds (Units and building rendering) - see <a href=\"http://lib3ds.sf.net/\" target=\"_blank\">http://lib3ds.sf.net/</a><br>
     * OpenAL (audio library) - see <a href=\"http://www.openal.org/\"target=\"_blank\">http://www.openal.org/</a><br>
     * WML and Perl  - For the handbook - see <a href=\"http://www.thewml.org\" target=\"_blank\">http://www.thewml.org</a><br><br>");
 
 draw_bigbox_subheader("<a name=\"compiler\"></a>Compiler requirements");
 draw_bigbox_text("To compile Boson (you don't need a compiler if you're downloading a binary version),
-    you need <a href=\"http://gcc.gnu.org/\" target=\"_blank\">Gcc</a> version 2.95.3 or 3.1.x or 3.2.
+    you need <a href=\"http://gcc.gnu.org/\" target=\"_blank\">Gcc</a> version 2.95.3 or 3.1.x, 3.2 or 3.3.
     <b>Gcc 3.0.x</b> is untested and <b>may not work</b>. <b>Gcc 2.96 won't work</b> either.");
 
 draw_bigbox_end();
