@@ -60,9 +60,9 @@ draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"download.php?dl=boson-all-0.9.1.tar.bz2\">here</a>
-(23 860 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=197716\">here</a>.<br><br>");
+<a href=\"http://boson.eu.org/download/boson-all-0.9.1.tar.bz2\">here</a>.<br><br>");
+/*(23 860 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=197716\">here</a>.<br><br>");*/
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
