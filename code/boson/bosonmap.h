@@ -307,8 +307,13 @@ public slots:
 	 * recalculateCell).
 	 *
 	 * This slot is meant for editor use only.
+	 *
+	 * @param textureCount The numbe of textures in @p textures and @p
+	 * alpha.
+	 * @param textures Indices of the textures used in @p alpha, as they
+	 * will get used in @ref BosonGroundTheme
 	 **/
-	void slotChangeTexMap(int x, int y, unsigned int texture, unsigned char alpha);
+	void slotChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
 signals:
 	void signalGroundThemeChanged(BosonGroundTheme*);

@@ -43,7 +43,7 @@ class BosonOrderWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BosonOrderWidget(QWidget* parent);
+	BosonOrderWidget(QWidget* parent, const char* name = 0);
 	~BosonOrderWidget();
 
 	/**
@@ -79,7 +79,7 @@ public:
 	 * specifies which kind of production option the id is.
 	 *
 	 * See also @ref hideOrderButtons, @ref showUnits and @ref
-	 * slotRedrawTiles
+	 * setOrderButtonsGround
 	 **/
 	void setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory = 0);
 
@@ -90,6 +90,12 @@ public:
 	 * share the type @p type. See @ref setOrderButtons above.
 	 **/
 	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
+
+	/**
+	 * Use the @ref BosonGroundTheme, for the order buttons, i.e. allow
+	 * ground placing. See also @ref setGroundTheme.
+	 **/
+	void setOrderButtonsGround();
 
 	/**
 	 * Display the @p units. This is used for multiple selections, i.e. when
@@ -117,16 +123,6 @@ public:
 	 **/
 	void resetButton(BosonOrderButton* button);
 
-public slots:
-	/**
-	 * Display the cells that can be placed on the map according to @ref
-	 * setCellType and the config widgets.
-	 *
-	 * Note that you need to call @ref setTileSet at least once before you
-	 * can use this slot.
-	 **/
-	void slotRedrawTiles();
-
 protected:
 	void resetLayout();
 
@@ -143,10 +139,20 @@ protected:
 	 **/
 	void showCellConfigWidgets();
 
+protected slots:
+	void slotPlaceGround(unsigned int texture);
+
 signals:
 	void signalProduce(ProductionType type, unsigned long int id);
 	void signalStopProduction(ProductionType type, unsigned long int id);
-	void signalPlaceCell(int groundType);
+
+	/**
+	 * @param textureCount See @ref BosonGroundTheme::textureCount
+	 * @param alpha The desired alpha values, i.e. how much of every texture
+	 * should be display (255=maximum, 0=nothing). This is an array of size
+	 * @p textureCount.
+	 **/
+	void signalPlaceGround(unsigned int textureCount, unsigned char* alpha);
 	
 	/**
 	 * This unit should become the only selected unit. See @ref

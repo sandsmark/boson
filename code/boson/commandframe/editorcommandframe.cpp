@@ -62,7 +62,7 @@ void EditorCommandFrame::init()
  d = new EditorCommandFramePrivate;
 
  QScrollView* scrollView = addPlacementView();
- d->mPlacementWidget = new BosonOrderWidget(scrollView->viewport());
+ d->mPlacementWidget = new BosonOrderWidget(scrollView->viewport(), "placementwidget");
  d->mPlacementWidget->setBackgroundOrigin(WindowOrigin);
  d->mPlacementWidget->initEditor();
  scrollView->addChild(d->mPlacementWidget);
@@ -72,8 +72,8 @@ void EditorCommandFrame::init()
 // the order buttons
  connect(d->mPlacementWidget, SIGNAL(signalProduce(ProductionType, unsigned long int)),
 		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
- connect(d->mPlacementWidget, SIGNAL(signalPlaceCell(int)),
-		this, SLOT(slotPlaceCell(int)));
+ connect(d->mPlacementWidget, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
+		this, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
 }
 
 EditorCommandFrame::~EditorCommandFrame()
@@ -155,21 +155,12 @@ void EditorCommandFrame::slotSetButtonsPerRow(int b)
 
 void EditorCommandFrame::setGroundTheme(BosonGroundTheme* theme)
 {
-#warning FIXME
-#if 0
- d->mPlacementWidget->setTileSet(theme);
-#endif
-}
-
-void EditorCommandFrame::placeCells(CellType type)
-{
- d->mPlacementWidget->setCellType(type);
- d->mPlacementWidget->slotRedrawTiles();
+ d->mPlacementWidget->setGroundTheme(theme);
 }
 
 void EditorCommandFrame::placeGround()
 {
-#warning TODO
+ d->mPlacementWidget->setOrderButtonsGround();
 }
 
 void EditorCommandFrame::placeMobiles(Player* owner)

@@ -181,10 +181,11 @@ signals:
 	void signalPlaceUnit(unsigned long int unitType, Player* owner);
 
 	/**
-	 * @param groundType The tile number. See @ref BosonTiles::tile to get
-	 * the actual pixmap.
+	 * @param textureCount See @ref BosonGroundTheme::textureCount
+	 * @param alpha An array (of size @þ textureCount) defining how much of
+	 * every texture should get displayed. 255 is maximum, 0 is nothing.
 	 **/
-	void signalPlaceCell(int groundType);
+	void signalPlaceGround(unsigned int textureCount, unsigned char* alpha);
 
 	/**
 	 * Emitted when user clicks on action button (e.g move). Also used for
@@ -216,10 +217,9 @@ protected slots:
 	void slotPlaceUnit(ProductionType, unsigned long int unitType);
 
 	/**
-	 * Editor mode only. Emit @ref signalPlaceCell.
+	 * Editor mode only. Emit @ref signalPlaceGround.
 	 **/
-	void slotPlaceCell(int groundType); // obsolete
-	void slotPlaceGround();
+	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha);
 
 	virtual void slotUpdate();
 

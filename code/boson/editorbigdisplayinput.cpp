@@ -50,8 +50,7 @@ public:
 	enum PlacementType {
 		PlaceNothing = 0,
 		PlaceUnit = 1,
-		PlaceCell = 2, // obsolete!
-		PlaceCellCorners = 3
+		PlaceGround = 2
 	};
 
 	Placement()
@@ -66,8 +65,8 @@ public:
 	{
 		mType = PlaceNothing;
 		mUnitType = 0;
-		mGroundType = -1;
 		mOwner = 0;
+		mTextureCount = 0;
 		delete mTextureAlpha;
 		mTextureAlpha = 0;
 	}
@@ -80,16 +79,11 @@ public:
 		mOwner = owner;
 	}
 
-	void placeCell(int t)
+	void placeGround(unsigned int texCount, unsigned char* alpha)
 	{
 		reset();
-		mType = PlaceCell;
-		mGroundType = t;
-	}
-	void placeCellCorner(unsigned int texCount, unsigned char* alpha)
-	{
-		reset();
-		mType = PlaceCellCorners;
+		mType = PlaceGround;
+		mTextureCount = texCount;
 		mTextureAlpha = new unsigned char[texCount];
 		for (unsigned int i = 0; i < texCount; i++) {
 			mTextureAlpha[i] = alpha[i];
@@ -120,27 +114,35 @@ public:
 		return 0;
 	}
 
-	/**
-	 * @return The tile number of the to-be-placed cell, or -1 if none is to
-	 * be placed.
-	 **/
-	int cell() const
+	unsigned int textureCount() const
 	{
-		if (isCell()) {
-			return mGroundType;
+		return mTextureCount;
+	}
+	unsigned char textureAlpha(unsigned int texture) const
+	{
+		if (texture >= textureCount()) {
+			return 0;
 		}
-		return -1;
+		if (!mTextureAlpha) {
+			BO_NULL_ERROR(mTextureAlpha);
+			return 0;
+		}
+		return mTextureAlpha[texture];
+	}
+	unsigned char* textureAlpha() const
+	{
+		return mTextureAlpha;
 	}
 
 	PlacementType type() const { return mType; }
 	bool isUnit() const { return type() == PlaceUnit; }
-	bool isCell() const { return type() == PlaceCell; }
+	bool isGround() const { return type() == PlaceGround; }
 
 private:
 	PlacementType mType;
 	unsigned long int mUnitType;
 	Player* mOwner;
-	int mGroundType; // obsolete
+	unsigned int mTextureCount;
 	unsigned char* mTextureAlpha;
 };
 
@@ -218,7 +220,6 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there!").arg(prop->name()));
 		ret = false;
 	} else {
-	
 		boDebug() << "place unit " << d->mPlacement.unitType() << endl;
 
 		stream << (Q_UINT32)BosonMessage::MoveEditor;
@@ -229,7 +230,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		stream << (Q_INT32)y;
 		ret = true;
 	}
- } else if (d->mPlacement.isCell()) {
+ } else if (d->mPlacement.isGround()) {
 #if 0
 	if (canvas()->cellOccupied(x, y)) {
 		// AB: this is not very user friendly.
@@ -263,6 +264,12 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		BO_NULL_ERROR(map);
 		return false;
 	}
+	if (map->textureCount() != d->mPlacement.textureCount()) {
+		boError() << k_funcinfo << "textureCount=" << map->textureCount()
+				<< " , placement textureCount="
+				<< d->mPlacement.textureCount() << endl;
+		return false;
+	}
 
 	stream << (Q_UINT32)BosonMessage::MoveEditor;
 	stream << (Q_UINT32)BosonMessage::MoveChangeTexMap;
@@ -276,17 +283,14 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		stream << (Q_UINT32)cornersX[i];
 		stream << (Q_UINT32)cornersY[i];
 		stream << (Q_UINT32)map->textureCount();
-		for (unsigned int j = 0; j < map->textureCount(); j++) {
+		for (unsigned int j = 0; j < d->mPlacement.textureCount(); j++) {
 			unsigned char alpha = 0;
-#warning TODO
-#if 0
-			alpha = d->mPlacement.alpha(j);
-#endif
+			alpha = d->mPlacement.textureAlpha(j);
 			stream << (Q_UINT32)j;
 			stream << (Q_UINT8)alpha;
 		}
 	}
-
+	ret = true;
  }
  if (ret) {
 	// TODO: in BosonPlayField (call it when the message is received?
@@ -356,14 +360,14 @@ void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
  d->mPlacement.placeUnit(unitType, owner);
 }
 
-void EditorBigDisplayInput::placeCell(int tile)
+void EditorBigDisplayInput::placeGround(unsigned int textureCount, unsigned char* alpha)
 {
- boDebug() << k_funcinfo << "now placing cell: " << tile << endl;
- if (tile < 0) {
-	boError() << k_funcinfo << "invalid tile " << tile << endl;
-	return;
+ QString s;
+ for (unsigned int i = 0; i < textureCount; i++) {
+	s += QString::number(alpha[i]) + QString(" ");
  }
- d->mPlacement.placeCell(tile);
+ boDebug() << k_funcinfo << "now placing ground: " << s << endl;
+ d->mPlacement.placeGround(textureCount, alpha);
 }
 
 void EditorBigDisplayInput::deleteSelectedUnits()
@@ -386,7 +390,7 @@ void EditorBigDisplayInput::deleteSelectedUnits()
 void EditorBigDisplayInput::updatePlacementPreviewData()
 {
  BO_CHECK_NULL_RET(canvas());
- if (!d->mPlacement.isUnit() && !d->mPlacement.isCell()) {
+ if (!d->mPlacement.isUnit() && !d->mPlacement.isGround()) {
 	bigDisplay()->setPlacementPreviewData(0, false);
 	return;
  }
@@ -400,14 +404,18 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
 
 	bool canPlace = canvas()->canPlaceUnitAt(prop, cursorCanvasPos(), 0);
 	bigDisplay()->setPlacementPreviewData(prop, canPlace);
-
-	QPoint p = cursorCanvasPos() / BO_TILE_SIZE;
- } else if (d->mPlacement.isCell()) {
-	if (d->mPlacement.cell() < 0) {
-		boError() << k_funcinfo << "invalid cell" << endl;
+ } else if (d->mPlacement.isGround()) {
+	if (d->mPlacement.textureCount() == 0) {
+		boError() << k_funcinfo << "no textures" << endl;
 		return;
 	}
-	bigDisplay()->setPlacementCellPreviewData(d->mPlacement.cell(), true); // we could use false if there is a unit or so?
+	if (!d->mPlacement.textureAlpha()) {
+		boError() << k_funcinfo << "NULL textureAlpha" << endl;
+		return;
+	}
+	bool canPlace = true; // we could use false if there is a unit or so?
+	bigDisplay()->setPlacementCellPreviewData(d->mPlacement.textureCount(),
+			d->mPlacement.textureAlpha(), canPlace);
  }
 }
 

@@ -164,10 +164,10 @@ public slots:
 	void slotPlaceUnit(unsigned long int unitType, Player* owner);
 
 	/**
-	 * Editor mode only: specifies the tile/cell that will be placed on the
+	 * Editor mode only: specifies the texture values that will be placed on the
 	 * map when the user clicks the next time
 	 **/
-	void slotPlaceCell(int tile);
+	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha);
 
 	/**
 	 * Editor mode only: delete all currently selected units.

@@ -139,9 +139,13 @@ public:
 	virtual void placeUnit(unsigned long int unitType, Player* owner) { Q_UNUSED(unitType); Q_UNUSED(owner); }
 
 	/**
-	 * See @ref EditorBigDisplayInput::placeCell
+	 * See @ref EditorBigDisplayInput::placeGround
 	 **/
-	virtual void placeCell(int tile) { Q_UNUSED(tile); }
+	virtual void placeGround(unsigned int textureCount, unsigned char* alpha)
+	{
+		Q_UNUSED(textureCount);
+		Q_UNUSED(alpha);
+	}
 
 	/**
 	 * See @ref EditorBigDisplayInput::deleteSelectedUnits

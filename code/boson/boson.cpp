@@ -918,7 +918,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				stream >> textures[j];
 				stream >> alpha[j];
 			}
-			emit signalChangeTexMap(x, y, texCount, textures, alpha);
+			emit signalChangeTexMap((int)x, (int)y, texCount, textures, alpha);
 			delete[] textures;
 			delete[] alpha;
 		}

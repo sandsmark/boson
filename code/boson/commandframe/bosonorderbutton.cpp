@@ -89,7 +89,7 @@ protected:
 				return QString::null;
 			case OrderCell:
 				//TODO: place something useful here
-				text = i18n("Tilenumber: %1").arg(commandWidget()->tile());
+				text = i18n("Texturenumber: %1").arg(commandWidget()->texture());
 				break;
 			case OrderProduce:
 			{
@@ -248,7 +248,7 @@ BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
  mProductionOwner = 0;
  mProductionId = 0;
  mProductionType = ProduceNothing;
- mTileNumber = 0;
+ mTextureNumber = 0;
  mAction = -1;
  mOrderType = OrderNothing;
 
@@ -349,23 +349,19 @@ void BosonOrderButton::setAction(UnitAction action, Player* owner)
  show();
 }
 
-void BosonOrderButton::setCell(int tileNo, BosonGroundTheme* theme)
+void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
 {
  if (mUnit) {
 	unset();
  }
- if (!theme) {
-	boError() << k_funcinfo << "NULL ground theme" << endl;
-	return;
- }
  mUnit = 0;
+ BO_CHECK_NULL_RET(theme);
 
- mTileNumber = tileNo;
+ // we don't store pointer to theme, so that we don't have to worry about
+ // deletion of it.
+ mTextureNumber = texture;
  mOrderType = OrderCell;
-#warning TODO
-#if 0
- setPixmap(tileSet->tile(mTileNumber));
-#endif
+ setPixmap(theme->pixmap(mTextureNumber));
 
  mHealth->hide();
 
@@ -422,10 +418,10 @@ void BosonOrderButton::slotClicked()
 {
  switch (orderType()) {
 	case OrderNothing:
-		boWarning() << "Invalud order Type \"Nothing\"" << endl;
+		boWarning() << "Invalid order Type \"Nothing\"" << endl;
 		break;
 	case OrderCell:
-		emit signalPlaceCell(tile());
+		emit signalPlaceGround((unsigned int)texture());
 		break;
 	case OrderProduce:
 		emit signalProduce(productionType(), productionId());
@@ -487,7 +483,7 @@ void BosonOrderButton::unset()
  mUnit = 0;
  mProductionId = 0;
  mProductionType = ProduceNothing;
- mTileNumber = 0;
+ mTextureNumber = 0;
  mAction = -1;
  mOrderType = OrderNothing;
  mProductionOwner = 0;
