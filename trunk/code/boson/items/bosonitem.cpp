@@ -164,6 +164,7 @@ BosonItem::~BosonItem()
  }
  delete mCells;
  delete mEffects;
+ delete mRenderer;
 }
 
 
