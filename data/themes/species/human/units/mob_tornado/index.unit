@@ -14,6 +14,7 @@ Name=Tornado
 OilCost=150
 ProductionTime=300
 Requirements=1,14
+Producer=2
 Shield=0
 SightRange=6
 SupportMiniMap=false
