@@ -829,6 +829,7 @@ bool TopWidget::queryExit()
 	// note that even a startup widget might be on top here (e.g. when
 	// saving a game)!
 	d->mBosonWidget->saveConfig();
+	d->mDisplayManager->quitGame();
 	d->mBosonWidget->quitGame();
 	if (boGame->gameMode()) {
 		saveGameDockConfig();
