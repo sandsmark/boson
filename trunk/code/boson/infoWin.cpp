@@ -1,5 +1,5 @@
 /***************************************************************************
-                          orderWin.cpp  -  description                              
+                          infoWin.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -30,7 +30,7 @@
 
 #include "../common/log.h"
 
-#include "orderWin.h"
+#include "infoWin.h"
 #include "viewMap.h"
 //#include "fieldMap.h"
 //#include "speciesTheme.h"
@@ -39,7 +39,7 @@
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-orderWin::orderWin(QWidget *parent, const char *name)
+infoWin::infoWin(QWidget *parent, const char *name)
 	:QFrame(parent, name)
 {
 QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
@@ -57,7 +57,7 @@ stack->setGeometry(10,10,180,110);
 /* stack/one */
 view_none = new QPixmap(path);
 if (view_none->isNull())
-	printf("orderWin::orderWin : Can't load overview_none \n");
+	printf("infoWin::infoWin : Can't load overview_none \n");
 
 view_one = new QLabel(stack,"preview");
 view_one->setPixmap(*view_none);

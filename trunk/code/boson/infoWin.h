@@ -1,5 +1,5 @@
 /***************************************************************************
-                         orderWin.h  -  description                              
+                         infoWin.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef ORDER_WIN_H
-#define ORDER_WIN_H
+#ifndef INFO_WIN_H
+#define INFO_WIN_H
 
 
 #include <qframe.h>
@@ -38,12 +38,12 @@ class QVBoxLayout;
 #define ORDER_BUTTONS_NB  (8)
 
 
-class orderWin : public QFrame
+class infoWin : public QFrame
 {
   Q_OBJECT
 
 public:
-	orderWin(QWidget *parent=0, const char *name=0);
+	infoWin(QWidget *parent=0, const char *name=0);
 
 private:
 /* state view (for selected items) */
@@ -60,5 +60,5 @@ private:
 };
 
 
-#endif // ORDER_WIN_H
+#endif // INFO_WIN_H
 
