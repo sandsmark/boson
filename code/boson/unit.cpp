@@ -584,13 +584,12 @@ bool Unit::collidesWith(const QCanvasItem* item) const
  // use default QCanvasSprite's collision check, then uncomment next line
  //return QCanvasSprite::collidesWith(item);
 
- if(! RTTI::isUnit(item->rtti()))
- {
+ if(! RTTI::isUnit(item->rtti())) {
 	return QCanvasSprite::collidesWith(item);
  }
 
  double itemw, itemh;
- QRect r = item->boundingRect();
+ QRect r = item->boundingRectAdvanced();
  itemw = r.width();
  itemh = r.height();
 
@@ -601,20 +600,16 @@ bool Unit::collidesWith(const QCanvasItem* item) const
  itemx = item->x() + BO_TILE_SIZE / 2.0;
  itemy = item->y() + BO_TILE_SIZE / 2.0;
 
- if(itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE)
- {
+ if(itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE) {
 	double dist = QABS(itemx - myx) + QABS(itemy - myy);
 	return (dist < BO_TILE_SIZE);
- }
- else
- {
-	for(int i = 0; i < itemw; i += BO_TILE_SIZE)
-	{
-		for(int j = 0; j < itemh; j += BO_TILE_SIZE)
-		{
+ } else {
+	for(int i = 0; i < itemw; i += BO_TILE_SIZE) {
+		for(int j = 0; j < itemh; j += BO_TILE_SIZE) {
 			double dist = QABS((itemx + i) - myx) + QABS((itemy + j) - myy);
-			if(dist < BO_TILE_SIZE)
+			if(dist < BO_TILE_SIZE) {
 				return true;
+			}
 		}
 	}
 	return false;

@@ -54,7 +54,6 @@ protected:
 
 private slots:
 	void slotGameNew();
-	void slotConfigureKeys();
 
 private:
 	void initKAction();

@@ -30,6 +30,7 @@
 #include <ktoolbar.h>
 #include <kpopupmenu.h>
 #include <kshortcut.h>
+#include <kkeydialog.h>
 
 #include <kgame/kplayer.h>
 
@@ -460,4 +461,12 @@ void TopBase::slotDebugPlayer(int index)
 		kdError() << k_funcinfo << "unknown index " << index << endl;
 		break;
  }
+}
+
+void TopBase::slotConfigureKeys()
+{
+ KKeyDialog dlg(true, this);
+ dlg.insert(actionCollection());
+ dlg.insert(bosonWidget()->actionCollection());
+ dlg.configure(true);
 }

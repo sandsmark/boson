@@ -68,8 +68,6 @@ private slots:
 	void slotCreateTiles();
 	void slotCreateDebugTiles();
 
-	void slotConfigureKeys();
-
 	void slotGameStarted();
 
 	void slotPlaceFacilities();
