@@ -66,16 +66,16 @@ void bosonUnit::u_attack(bosonUnit *u)
  * playerMobUnit
  */
 
-static const int pos_x[12] = 
+static const int pos_x[DIRECTION_STEPS] = 
 	{  34,  77,  98,  94,  64,  17, -34, -77, -98, -94, -64, -17};
-static const int pos_y[12] = 
+static const int pos_y[DIRECTION_STEPS] = 
 	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	: visualMobUnit(msg)
 	, state(MUS_NONE)
 {
-	turnTo(random()%12);
+	turnTo(random()%DIRECTION_STEPS);
 }
 
 
@@ -123,7 +123,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 
 
 /*
-			assert(direction>=0); assert(direction<12);
+			assert(direction>=0); assert(direction<DIRECTION_STEPS);
 			ldx = dest_x - x(); ldy = dest_y - y();
 			vp1 = VECT_PRODUCT(direction);
 			// turning 
@@ -286,7 +286,7 @@ bool playerMobUnit::checkMove(state_t nstate)
 void playerMobUnit::turnTo(int newdir)
 {
 //printf("turning from %d to %d\n", direction, newdir);
-	assert(newdir>=0); assert(newdir<12);
+	assert(newdir>=0); assert(newdir<DIRECTION_STEPS);
 	//if (direction==newdir) return;
 	direction = newdir;
 	setXVelocity( pos_x[direction]);
