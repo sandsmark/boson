@@ -48,6 +48,31 @@ news_box_begin();
 **  To add an article, call
 **  news_article(<title>, <date added>, <full text>);
 **/
+news_article("Another update", "October 14th 2002 17:54",
+    "Again, much has changed during last weeks. I wanted to take some
+    screenshots and update our screenshots page, but things just kept changing
+    (and they still do :-)) and I didn't want outdated screenies, so they'll
+    come later ;-)<br>
+    So here is list of updated stuff:
+    <ul>
+    <li>Mining works</li>
+    <li>Missiles are properly rotated</li>
+    <li>New map: Basic 2 which is modified version of Basic map</li>
+    <li>Added menu entry and shortcut to grab screenshots. Just press Ctrl+G</li>
+    <li>DCOP support. At the moment it's only used for debugging, but in the
+      future we may do other stuff with it as well</li>
+    <li>.desktop files were renamed. They now have better suffixes like .boson
+      and .unit</li>
+    <li>Map editor is now mostly working. Go create your own map!</li>
+    <li>New camera system.</li>
+    <li>New loading/saving widget</li>
+    <li>Updated units README and added README about particle systems</li>
+    <li>Some new units and some updated unit models</li>
+    <li>and, of course, bugfixes and many smaller things</li>
+    </ul>
+    And finally, some statistics: since 1st September or so, our homepage has
+    been visited almost 9500 times, more than 200 times a day on average :-)
+    <br><br>");
 news_article("Updates", "September 28th 2002 19:55",
     "Pretty much has happened during last few weeks.<br>
     Andi added <a href=\"status.php#features\">TODO list to the status page</a>, you
