@@ -17,7 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <ufo/ufo.hpp>
 #include "bosonufominimap.h"
 #include "bosonufominimap.moc"
 
@@ -26,8 +25,6 @@
 #include "bosonmap.h"
 
 #include <bodebug.h>
-
-#include <ufo/events/umouseevent.hpp>
 
 class UfoMiniMap : public BoUfoDrawable
 {
@@ -96,20 +93,16 @@ BosonUfoMiniMap::BosonUfoMiniMap() : BoUfoWidget()
  d->mUfoMiniMap = new UfoMiniMap();
  setBackground(d->mUfoMiniMap);
 
- connect(this, SIGNAL(signalMouseEntered(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMouseExited(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMouseMoved(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMouseDragged(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMousePressed(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMouseReleased(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
- connect(this, SIGNAL(signalMouseClicked(ufo::UMouseEvent*)),
-		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
+ connect(this, SIGNAL(signalMouseMoved(QMouseEvent*)),
+		this, SLOT(slotMouseEvent(QMouseEvent*)));
+// connect(this, SIGNAL(signalMouseDragged(ufo::UMouseEvent*)),
+//		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
+ connect(this, SIGNAL(signalMousePressed(QMouseEvent*)),
+		this, SLOT(slotMouseEvent(QMouseEvent*)));
+ connect(this, SIGNAL(signalMouseReleased(QMouseEvent*)),
+		this, SLOT(slotMouseEvent(QMouseEvent*)));
+// connect(this, SIGNAL(signalMouseClicked(ufo::UMouseEvent*)),
+//		this, SLOT(slotMouseEvent(ufo::UMouseEvent*)));
 }
 
 BosonUfoMiniMap::~BosonUfoMiniMap()
@@ -135,13 +128,13 @@ void BosonUfoMiniMap::setMiniMap(BosonGLMiniMap* m)
 // setMinimumHeight(d->mGLMiniMap->miniMapHeight());
 
  // the above seem to be noops. this is the important call.
- widget()->setSize(150, 150);
+ setSize(150, 150);
 // setSize(d->mGLMiniMap->miniMapWidth(), d->mGLMiniMap->miniMapHeight());
 }
 
-void BosonUfoMiniMap::slotMouseEvent(ufo::UMouseEvent* e)
+void BosonUfoMiniMap::slotMouseEvent(QMouseEvent* e)
 {
- QPoint pos(e->getX(), e->getY());
+ QPoint pos = e->pos();
  QPoint cell = widgetToCell(pos);
 
  // FIXME: maybe we can do this using this->setEnabled(false/true) ?
@@ -149,28 +142,24 @@ void BosonUfoMiniMap::slotMouseEvent(ufo::UMouseEvent* e)
 	return;
  }
 
- switch (e->getType()) {
-	case ufo::UMouseEvent::MousePressed:
+ switch (e->type()) {
+	case QMouseEvent::MouseButtonPress:
 	{
-		if (e->getButton() == ufo::UMod::LeftButton) {
+		if (e->button() == Qt::LeftButton) {
 			d->mGLMiniMap->emitSignalReCenterView(cell);
-		} else if (e->getButton() == ufo::UMod::RightButton) {
+		} else if (e->button() == Qt::RightButton) {
 			d->mGLMiniMap->emitSignalMoveSelection(cell);
 		}
 		break;
 	}
-	case ufo::UMouseEvent::MouseReleased:
+	case QMouseEvent::MouseButtonRelease:
 		break;
-	case ufo::UMouseEvent::MouseMoved:
+	case QMouseEvent::MouseMove:
 		break;
-	case ufo::UMouseEvent::MouseClicked:
-		break;
-	case ufo::UMouseEvent::MouseEntered:
-		break;
-	case ufo::UMouseEvent::MouseExited:
-		break;
-	case ufo::UMouseEvent::MouseDragged:
-		break;
+//	case QMouseEvent::MouseClicked:
+//		break;
+//	case QMouseEvent::MouseDragged:
+//		break;
 	default:
 		break;
  }

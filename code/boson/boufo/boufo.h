@@ -460,15 +460,15 @@ public:
 	virtual void setSize(int w, int h);
 
 
-signals:
+signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
 	void signalMouseEntered(ufo::UMouseEvent* e);
 	void signalMouseExited(ufo::UMouseEvent* e);
-	void signalMouseMoved(ufo::UMouseEvent* e);
+	void signalMouseMoved(QMouseEvent* e);
 	void signalMouseDragged(ufo::UMouseEvent* e);
-	void signalMousePressed(ufo::UMouseEvent* e);
-	void signalMouseReleased(ufo::UMouseEvent* e);
+	void signalMousePressed(QMouseEvent* e);
+	void signalMouseReleased(QMouseEvent* e);
 	void signalMouseClicked(ufo::UMouseEvent* e);
-	void signalMouseWheel(ufo::UMouseWheelEvent* e);
+	void signalMouseWheel(QWheelEvent* e);
 	void signalKeyPressed(ufo::UKeyEvent* e);
 	void signalKeyReleased(ufo::UKeyEvent* e);
 	void signalKeyTyped(ufo::UKeyEvent* e);
