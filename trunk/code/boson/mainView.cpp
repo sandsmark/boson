@@ -31,14 +31,16 @@
 mainView::mainView(QWidget *parent, const char *name)
 	:QWidget(parent, name)
 { 
+
+	/* this code doesn't work, either me or Qt layout sucks,
+	 * i've lost too many time trying to use those layout in qt1 and qt2
+	 *
+	// layout management
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
-	QVBoxLayout	*leftLayout = new QVBoxLayout();
+	QVBoxLayout	*leftLayout = new QVBoxLayout(topLayout);
 
-	setFocusPolicy (StrongFocus);		// accept key event
-	setFocus();
 
-	topLayout->addLayout(leftLayout,0);
-
+	// leftLayout
 		view = new bosonView(this, "bosonView");
 		
 		mini = new visualMiniDisplay(view, this);
@@ -48,15 +50,44 @@ mainView::mainView(QWidget *parent, const char *name)
 		leftLayout->addWidget(view, 10);
 
 		
-	connect(parent, SIGNAL(ressourcesUpdated(void)), view, SLOT(ressourcesUpdated(void)));
-/* This is the main map, the game area */
+	// This is the main map, the game area 
 	big = new bosonBigDisplay(view, this);
-	topLayout->addWidget(big,10);
+	big->resize(300,300);
+	topLayout->addWidget(big, 10);
 
-/* finish the stuff */
-//	leftLayout->addStretch(10);
+
+	printf("size : %d,%d\n", big->width(), big->height() );
+
+	leftLayout->activate();
 	topLayout->activate();
-//	setMinimumSize(800, 624);
+
+	printf("size : %d,%d\n", big->width(), big->height() );
+	big->resize(300,300);
+	printf("size : %d,%d\n", big->width(), big->height() );
+
+	*/
+
+	view = new bosonView(this, "bosonView");
+	mini = new visualMiniDisplay(view, this);
+	big = new bosonBigDisplay(view, this);
+
+	mini->setGeometry (   0,   0, 200,200);
+	view->setGeometry (   0, 200, 200, height() - 200);
+	big->setGeometry  ( 200,   0, width() - 200, height() );
+
+
+	connect(parent, SIGNAL(ressourcesUpdated(void)), view, SLOT(ressourcesUpdated(void)));
+
+	/* focus handling */
+	setFocusPolicy (StrongFocus);		// accept key event
+	setFocus();
+
+}
+
+void mainView::resizeEvent ( QResizeEvent * )
+{
+	big->setGeometry(200,0, width() - 200, height() );
+	view->setGeometry(0,200,200, height() - 200);
 }
 
 #define ARROW_KEY_STEP	2

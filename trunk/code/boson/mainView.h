@@ -24,7 +24,7 @@
 #include <qwidget.h>
 
 class	visualMiniDisplay;
-class	visualBigDisplay;
+class	bosonBigDisplay;
 class	bosonView;
 class	bosonField;
 
@@ -36,11 +36,12 @@ public:
 
 protected:
 	virtual void keyReleaseEvent (QKeyEvent * e );
+	virtual void resizeEvent ( QResizeEvent *e );
 
 private:
 	/* the map object we are playing in */
 	visualMiniDisplay	*mini;
-	visualBigDisplay	*big;
+	bosonBigDisplay		*big;
 	bosonView		*view;
 };
 
