@@ -1644,6 +1644,19 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveDeleteItems:
+	{
+		Q_UINT32 count;
+		stream >> count;
+		QValueList<unsigned long int> items;
+		for (unsigned int i = 0; i < count; i++) {
+			Q_ULONG id;
+			stream >> id;
+			items.append(id);
+		}
+		d->mCanvas->deleteItems(items);
+		break;
+	}
 	default:
 		boWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;
