@@ -28,6 +28,10 @@
 
 #include <kglobal.h>
 #include <kstandarddirs.h>
+#include <kstaticdeleter.h>
+
+BosonModelTextures* BosonModelTextures::mModelTextures = 0;
+static KStaticDeleter<BosonModelTextures> sd;
 
 class BosonModelTextures::BosonModelTexturesPrivate
 {
@@ -44,6 +48,23 @@ public:
 BosonModelTextures::BosonModelTextures()
 {
  init();
+}
+
+void BosonModelTextures::createStatic()
+{
+ if (mModelTextures) {
+	return;
+ }
+ mModelTextures = new BosonModelTextures();
+ sd.setObject(mModelTextures);
+}
+
+BosonModelTextures* BosonModelTextures::modelTextures()
+{
+ if (!mModelTextures) {
+	createStatic();
+ }
+ return mModelTextures;
 }
 
 void BosonModelTextures::init()

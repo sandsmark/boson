@@ -36,9 +36,10 @@ class BosonModel;
 class BosonModelTextures
 {
 public:
-	BosonModelTextures();
-
 	~BosonModelTextures();
+
+	static void createStatic();
+	static BosonModelTextures* modelTextures();
 
 	/**
 	 * Load a texture. A texture gets loaded only once, no matter how many
@@ -76,11 +77,13 @@ protected:
 	void loadTexture(const QString& textureName, GLuint tex);
 
 private:
+	BosonModelTextures();
 	void init();
 
 private:
 	class BosonModelTexturesPrivate;
 	BosonModelTexturesPrivate* d;
+	static BosonModelTextures* mModelTextures;
 };
 
 #endif

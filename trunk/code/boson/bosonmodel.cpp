@@ -31,7 +31,6 @@
 #include "bomemorytrace.h"
 
 #include <ksimpleconfig.h>
-#include <kstaticdeleter.h>
 
 #include <qimage.h>
 #include <qptrlist.h>
@@ -55,9 +54,6 @@
 
 // some testings for me. this is here for my own use only currently.
 // #define AB_TEST 1
-
-BosonModelTextures* BosonModel::mModelTextures = 0;
-static KStaticDeleter<BosonModelTextures> sd;
 
 class BoMeshSorter
 {
@@ -586,10 +582,6 @@ void BosonModel::init()
  d->mFrames.setAutoDelete(true);
  d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
- if (!mModelTextures) {
-	mModelTextures = new BosonModelTextures();
-	sd.setObject(mModelTextures);
- }
 
  // add the default mode 0
  insertAnimationMode(0, 0, 1, 1);
@@ -599,7 +591,7 @@ BosonModel::~BosonModel()
 {
  boDebug(100) << k_funcinfo << endl;
  finishLoading();
- mModelTextures->removeModel(this);
+ BosonModelTextures::modelTextures()->removeModel(this);
  boDebug(100) << k_funcinfo << "delete " << d->mFrames.count() << " frames" << endl;
  d->mFrames.clear();
  boDebug(100) << k_funcinfo << "delete " << d->mConstructionSteps.count() << " construction frames" << endl;
@@ -667,7 +659,7 @@ void BosonModel::loadTextures(const QStringList& list)
 {
  QStringList::ConstIterator it = list.begin();
  for (; it != list.end(); ++it) {
-	mModelTextures->insert(this, cleanTextureName(*it));
+	BosonModelTextures::modelTextures()->insert(this, cleanTextureName(*it));
  }
 }
 
@@ -740,7 +732,7 @@ void BosonModel::loadModel()
 	QString tex = cleanTextureName(mat->textureName());
 	GLuint myTex = 0;
 	if (!tex.isEmpty()) {
-		myTex = mModelTextures->texture(tex);
+		myTex = BosonModelTextures::modelTextures()->texture(tex);
 	}
 	mat->setTextureObject(myTex);
  }
@@ -883,16 +875,6 @@ unsigned int BosonModel::constructionSteps() const
 void BosonModel::finishLoading()
 {
  d->mTextureNames.clear();
-}
-
-void BosonModel::reloadAllTextures()
-{
- boDebug(100) << k_funcinfo << endl;
- if (!mModelTextures) {
-	boError(100) << k_funcinfo << "NULL model textures ?!?!" << endl;
-	return;
- }
- mModelTextures->reloadTextures();
 }
 
 void BosonModel::insertAnimationMode(int mode, int start, unsigned int range, unsigned int speed)

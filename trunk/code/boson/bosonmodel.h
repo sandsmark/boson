@@ -21,7 +21,6 @@
 
 #include <GL/gl.h>
 
-class BosonModelTextures;
 class KSimpleConfig;
 class QColor;
 class QString;
@@ -260,8 +259,6 @@ public:
 	 **/
 	void setLongNames(QMap<QString, QString> names);
 
-	static void reloadAllTextures();
-
 	/**
 	 * Add an animation mode with the identitfier @p mode, starting at frame
 	 * number @p start with the number of frames @p range. The frame should
@@ -389,8 +386,6 @@ private:
 	friend class KGameModelDebug;
 
 private:
-	static BosonModelTextures* mModelTextures;
-
 	BosonModelPrivate* d;
 
 	float mWidth;

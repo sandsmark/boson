@@ -20,7 +20,7 @@
 #include "bosonconfig.h"
 
 #include "bosoncursor.h"
-#include "bosonmodel.h"
+#include "bosonmodeltextures.h"
 #include "bosontexturearray.h"
 #include "boson.h"
 #include "defines.h"
@@ -635,7 +635,7 @@ void OpenGLOptions::apply()
 	reloadModelTextures = (r == KMessageBox::Yes);
 	if (reloadModelTextures) {
 		boDebug(210) << k_funcinfo << "reloading all textures" << endl;
-		BosonModel::reloadAllTextures();
+		BosonModelTextures::modelTextures()->reloadTextures();
 	}
  }
  if (resetTexParameter) {
