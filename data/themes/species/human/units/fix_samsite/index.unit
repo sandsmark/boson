@@ -57,4 +57,4 @@ SoundHit=hit
 SoundShoot=shoot
 Speed=7
 TakeTargetVeloIntoAccount=true
-Type=Missile
+Type=Rocket
