@@ -27,6 +27,7 @@
 visualCanvas		*vcanvas=0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 uint			nb_player;
+QString			*dataPath;
 
 /*
  * boson/game.h

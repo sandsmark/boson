@@ -19,8 +19,6 @@
  ***************************************************************************/
 
 #include <stdlib.h>		// random.
-#include <kstddirs.h>
-#include <kinstance.h>
 
 #include <qimage.h>
 
@@ -59,9 +57,8 @@ boShot::boShot(int _x, int _y, int _z, shot_style style)
 			/* small shot (unit hitten) */
 			if (!shotSequ) { // static imagepool initialization
 	//			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/explosion00.pbm") + "explosion%02d" );
-				QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/" _SHOTS ".pbm");
+				QString path = *dataPath + "themes/species/human/explosions/" SHOTS ;
 	//			printf("path is %s\n", (const char*)path);
-				path += "boson/themes/species/human/explosions/" SHOTS ;
 	//			printf("path is %s\n", (const char*)path);
 				shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
 				//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
@@ -139,10 +136,9 @@ bool boShot::loadBig(shot_style style, int version)
 	QList<QPoint>	point_l;
 	QPixmap		*p;
 	QPoint		*pp;
-	QString		path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/" _SHOTS ".pbm");
+	QString		path  = *dataPath + "themes/species/human/explosions/";
 	int		frame_nb;
 
-	path += "boson/themes/species/human/explosions/";
 
 	switch(style) {
 		default:
