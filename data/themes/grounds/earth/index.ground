@@ -5,36 +5,36 @@ Textures=7
 [Texture_0]
 File=grass.jpg
 AmountOfLand=255
-MiniMapColor=4278222848
+MiniMapColor=50,130,50
 
 [Texture_1]
 File=desert.jpg
 AmountOfLand=255
-MiniMapColor=4278222848
+MiniMapColor=230,210,140
 
 [Texture_2]
 File=water.jpg
 AmountOfWater=255
-MiniMapColor=4278190335
+MiniMapColor=80,80,220
 
 [Texture_3]
 File=mud.jpg
 AmountOfWater=100
 AmountOfLand=155
-MiniMapColor=4286611456
+MiniMapColor=205,51,51
 
 [Texture_4]
 File=snow.jpg
 AmountOfWater=125
 AmountOfLand=130
-MiniMapColor=4286611456
+MiniMapColor=238,233,233
 
 [Texture_5]
 File=grass2.jpg
 AmountOfLand=255
-MiniMapColor=4278222848
+MiniMapColor=40,150,40
 
 [Texture_6]
 File=rocks.jpg
 AmountOfLand=255
-MiniMapColor=4278222848
+MiniMapColor=200,200,200
