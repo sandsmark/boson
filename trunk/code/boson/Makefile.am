@@ -127,7 +127,6 @@ libboson_la_LIBADD = \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
-		$(top_builddir)/boson/bosonfont/libbosonfont.la \
 		$(top_builddir)/boson/boufo/libboufo.la \
 		$(LIB_KGAME) \
 		$(LIB_KDEUI) \
