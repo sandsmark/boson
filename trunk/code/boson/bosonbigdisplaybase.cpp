@@ -42,6 +42,7 @@
 #include "boson.h"
 #include "bodebug.h"
 #include "items/bosonshot.h"
+#include "unitplugins.h"
 
 #include <kgame/kgameio.h>
 
@@ -395,6 +396,7 @@ public:
 
 	bool mIsQuit;
 
+	QPoint mCanvasPos;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -749,6 +751,44 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "cells rendered" << endl;
  }
 
+ // Facility-placing preview code
+ Unit* factory = selection()->leader();
+ if (factory) {
+	ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
+	if (production && production->completedProductionId() > 0) {
+		// We have completed production
+		const UnitProperties* u = localPlayer()->unitProperties(production->currentProductionId());
+		if(u->isFacility()) {
+			// Mobiles are auto-placed, no preview is needed for them
+			float w = u->unitWidth() / (float)BO_TILE_SIZE;
+			float h = u->unitHeight() / (float)BO_TILE_SIZE;
+			QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+			if ((canvas())->canPlaceUnitAt(u, pos, production)) {
+				glColor4f(1.0, 1.0, 1.0, 0.5);
+			} else {
+				glColor4f(1.0, 0.0, 0.0, 0.5);
+			}
+			glDisable(GL_TEXTURE_2D);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glBegin(GL_QUADS);
+				glVertex3f(pos.x(), -(pos.y()), 0.01);
+				glVertex3f(pos.x() + w, -(pos.y()), 0.01);
+				glVertex3f(pos.x()+ w, -(pos.y() + h), 0.01);
+				glVertex3f(pos.x(), -(pos.y() + h), 0.01);
+			glEnd();
+			glColor3f(1.0, 1.0, 1.0);  // reset color
+			glDisable(GL_BLEND);
+			glEnable(GL_TEXTURE_2D);
+		}
+	}
+ }
+
+
+ if (checkError()) {
+	boError() << k_funcinfo << "preview rendered" << endl;
+ }
+ 
  // Render particle systems
  boProfiling->renderParticles(true);
  int count = canvas()->particleSystemsCount();
@@ -1041,6 +1081,10 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				d->mMouseMoveDiff.stop();
 			}
 		}
+		QPoint widgetPos = mapFromGlobal(QCursor::pos());
+		GLdouble x, y, z;
+		mapCoordinates(widgetPos, &x, &y, &z);
+		worldToCanvas(x, y, z, &(d->mCanvasPos));
 		updateCursor();
 		e->accept();
 		break;
@@ -1991,4 +2035,10 @@ void BosonBigDisplayBase::selectSingle(Unit* unit, bool replace)
 void BosonBigDisplayBase::mapChanged()
 {
  camera()->setMapSize(mCanvas->mapWidth(), mCanvas->mapHeight());
+}
+
+
+QPoint BosonBigDisplayBase::cursorCanvasPos()
+{
+ return d->mCanvasPos;
 }
