@@ -259,6 +259,8 @@ void EditorWidget::slotSavePlayFieldAs()
 
 void EditorWidget::savePlayField(const QString& fileName)
 {
+boError() << k_funcinfo << "saving a playfield is currently broken" << endl;
+#if 0
  boGame->playField()->applyScenario(boGame); // this must be called before we are able to save the playfield! otherwise the old units will be used
  bool ok = boGame->playField()->savePlayField(fileName);
  if (!ok) {
@@ -270,6 +272,7 @@ void EditorWidget::savePlayField(const QString& fileName)
  } else {
 	boDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
  }
+#endif
 }
 
 void EditorWidget::slotSavePlayField()
