@@ -95,6 +95,8 @@ public:
 	unsigned int arrowKeyStep() const { return mArrowKeyStep; }
 	void setMiniMapScale(double s) { mMiniMapScale = s; }
 	double miniMapScale() const { return mMiniMapScale; }
+	void setMiniMapZoom(double z) { mMiniMapZoom= z; }
+	double miniMapZoom() const { return mMiniMapZoom; }
 	void setCommandButtonsPerRow(int b);
 	int commandButtonsPerRow() const;
 
@@ -136,6 +138,9 @@ protected:
 	void saveMiniMapScale(KConfig* conf);
 	double readMiniMapScale(KConfig* conf);
 
+	void saveMiniMapZoom(KConfig* conf);
+	double readMiniMapZoom(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -146,6 +151,7 @@ private:
 	bool mMusic;
 	bool mDisableSound;
 	double mMiniMapScale;
+	double mMiniMapZoom;
 	unsigned int mArrowKeyStep;
 };
 
