@@ -26,18 +26,6 @@
 #include <visualUnit.h>
 #include "visualField.h"
 
-enum selectionMode_t {
-	SELECT_NONE, 		/* is doing nothing */
-/*	SELECT_FACILITY, 
-	SELECT_MOBILE, */
-	SELECT_RECT,		/* is drawing a selection rect */
-	SELECT_PUT,		/* something is being put on the field */
-	SELECT_FILL,		/* something is being filled (editor) */
-//	SELECT_ACTION,		// something is selected
-/*	SELECT_, 
-	SELECT_, 
-	SELECT_,  */
-	};
 
 /** 
   * This class is the global object concerning a view : where, how large..
@@ -67,6 +55,16 @@ public:
 
 	///orzel : should be moved private ?
 	visualField	*field;
+
+	enum selectionMode_t {
+		SELECT_NONE, 		/* is doing nothing */
+		SELECT_RECT,		/* is drawing a selection rect */
+		SELECT_PUT,		/* something is being put on the field */
+		SELECT_FILL,		/* something is being filled (editor) */
+		SELECT_, 
+		};
+
+
 
 signals:
 	void repaint(bool);
