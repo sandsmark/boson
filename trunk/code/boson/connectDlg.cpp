@@ -22,14 +22,16 @@
 #include <netdb.h>	// gethostbyname()
 #include <unistd.h>	// gethostname()
 
-#include <qpushbutton.h>
+//#include <qpushbutton.h>
 #include <qlineedit.h>
 #include <qlabel.h>
 #include <qpixmap.h>
 #include <qtimer.h>
+#include <qlayout.h>
 
 #include <ksock.h>
 #include <kmessagebox.h>
+#include <klocale.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"
@@ -42,29 +44,18 @@
 #include "game.h"
 
 connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
-	:QDialog(0l, name,true) // parentless : application-wide dialog
+	:KDialogBase(Plain, i18n("Choose game mode"), Ok|Cancel|User1,
+	Ok, 0l, name, true, true, 
+	i18n("Launch Server")) // parentless : application-wide dialog
 	,_parent(p)
 {
-        QPushButton	*button;
 	QLabel		*label;
 	char		host[2000];
 
-	/* layout */
-	resize( 390, 340 );
-	setCaption( "Choose game mode" );     
-	
-	/* buttons */
-	b_ok = new QPushButton( "Ok", this );
-	b_ok->setGeometry( 10,300, 100,30 );
-	connect( b_ok, SIGNAL(clicked()), SLOT(tryServer()) );
-
-	button = new QPushButton( "Launch Server", this );
-	button->setGeometry( 120,300, 150,30 );
-	connect( button, SIGNAL(clicked()), SLOT(launchServer()) );
-
-	button = new QPushButton( "Cancel", this );
-	button->setGeometry( 280,300, 100,30 );
-	connect( button, SIGNAL(clicked()), SLOT(reject()) );
+	QVBoxLayout* topLayout = new QVBoxLayout(plainPage(), spacingHint());
+	QGridLayout* grid = new QGridLayout(topLayout, 2, 4, 20);
+	grid->addColSpacing(0, 10);
+	grid->addColSpacing(3, 10);
 
 	/* server params */
 	if (gethostname(host, 1999)) {
@@ -72,34 +63,30 @@ connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
 		strcpy(host, "boson.eu.org");
 	}
 
-	label = new QLabel("Boson Server :", this);
-	label->setGeometry( 10,200, 140,30 );
-	label->setAlignment(AlignVCenter | AlignRight);
-	e_server = new QLineEdit(this);
+	label = new QLabel("Boson Server :", plainPage());
+	grid->addWidget(label, 0, 1);
+	e_server = new QLineEdit(plainPage());
 	e_server->setText(servername?servername:host);
-	e_server->setGeometry( 160,200, 220,30 );
 	e_server->setMaxLength(50);
+	grid->addWidget(e_server, 0, 2);
 
-	label = new QLabel("Connecting Port :", this);
-	label->setGeometry( 10,250, 140,30 );
-	label->setAlignment(AlignVCenter | AlignRight);
-	e_port = new QLineEdit(this);
+	label = new QLabel("Connecting Port :", plainPage());
+	grid->addWidget(label, 1, 1);
+	e_port = new QLineEdit(plainPage());
 	e_port->setText( BOSON_DEFAULT_PORT_CHAR );
-	e_port->setGeometry( 160,250, 60,30 );
 	e_port->setMaxLength(6);
+	grid->addWidget(e_port, 1, 2);
 
 	/* beautification */
-	label = new QLabel(this);
-	label->move( (390-352)/2, 10);		// biglogo is 352x160
-	label->setAutoResize(true);
+	label = new QLabel(plainPage());
 	label->setPixmap ( *dataPath + "pics/biglogo.bmp"); 
 	//label->setPixmap( QPixmap( *dataPath + "pics/biglogo.bmp" ));
 	boAssert(!label->pixmap()->isNull());
-
+	topLayout->insertWidget(0, label);
 }
 
 
-void connectDlg::tryServer(void)
+void connectDlg::slotOk(void)
 {
 	int	sock;
 	int	port;
@@ -109,7 +96,7 @@ void connectDlg::tryServer(void)
 	/* create the socket */
 	sock = socket(PF_INET, SOCK_STREAM, 0);
 	if ( sock<0 ) {
-		logf(LOG_FATAL, "tryServer : unable to create socket.");
+		logf(LOG_FATAL, "slotOk : unable to create socket.");
   		KMessageBox::error(this, "Unable to create a socket", "connection error");
 		return;
 	}
@@ -117,7 +104,7 @@ void connectDlg::tryServer(void)
 	/* connect the socket to server */
 	hostinfo = gethostbyname( e_server->text() );
 	if ( !hostinfo ) {
-		logf(LOG_FATAL,"tryServer : unknown host %s.", (const char*)e_server->text());
+		logf(LOG_FATAL,"slotOk : unknown host %s.", (const char*)e_server->text());
   		KMessageBox::error(this, "Can't find the boson server on the net", "Unknown host");
 		return;
 	}
@@ -125,7 +112,7 @@ void connectDlg::tryServer(void)
 	port = atoi(e_port->text());
 
 	if ( ! (port>1000) ) {
-		logf(LOG_FATAL,"tryServer : unexpeted port %s.", (const char*) e_port->text());
+		logf(LOG_FATAL,"slotOk : unexpeted port %s.", (const char*) e_port->text());
   		KMessageBox::error(this, "The port must be an integer bigger than 1000", "unexpected port");
 		return;
 	}
@@ -134,7 +121,7 @@ void connectDlg::tryServer(void)
 	sin.sin_port = htons(port);
 	
 	if ( ::connect(sock, (struct sockaddr *)&sin, sizeof(sin))<0 ) {
-		logf(LOG_FATAL, "tryServer : unable to connect socket to \"%s\" server", (const char*) e_server->text() );
+		logf(LOG_FATAL, "slotOk : unable to connect socket to \"%s\" server", (const char*) e_server->text() );
   		KMessageBox::error(this, "Unable to connect to the server", "Unreachable server");
 		return ;
 	}
@@ -144,7 +131,7 @@ void connectDlg::tryServer(void)
 	Socket = new KSocket(sock);
 
 	if ( Socket->socket() <= 0 )  {
-		logf(LOG_FATAL, "tryServer : unable to create KSocket()");
+		logf(LOG_FATAL, "slotOk : unable to create KSocket()");
 		socketState = PSS_CONNECT_DOWN;
 		delete Socket;
   		KMessageBox::error(this, "Internal error : KSocket() creation error", "Internal error");
@@ -188,7 +175,7 @@ void connectDlg::tryServer(void)
 
 
 
-void connectDlg::launchServer(void)
+void connectDlg::slotUser1(void)
 {
 	serverDlg *dlg = new serverDlg( "serverDlg_0");
 
@@ -196,7 +183,7 @@ void connectDlg::launchServer(void)
 	hide();
 	if ( dlg->exec() == QDialog::Accepted ) {
 		delete dlg;
-		tryServer();
+		slotOk();
 		return;
 	}
 	delete dlg;
@@ -233,3 +220,9 @@ void connectDlg::configure(const char *servername, const char *port)
 	e_server->setText(servername);
 	e_port->setText( port );
 }
+
+void connectDlg::slotCancel()
+{
+	reject();
+}
+

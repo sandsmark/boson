@@ -21,15 +21,14 @@
 #ifndef CONNECT_DLG_H 
 #define CONNECT_DLG_H 
 
-#include <qdialog.h>
-
+#include <kdialogbase.h>
 
 class QLineEdit;
 class QPushButton;
 class BosonApp;
 
 
-class connectDlg : public QDialog 
+class connectDlg : public KDialogBase 
 {
 	Q_OBJECT
 
@@ -37,11 +36,14 @@ public:
 	connectDlg(BosonApp *parent, char *servername=0l, const char *name=0l);
 
 public slots:
-	void	tryServer(void);
 	void	configure(const char *server, const char *port);
 
+protected slots:
+	virtual void	slotCancel();
+	virtual void	slotOk();
+	virtual void	slotUser1();
+	
 private slots:
-	void	launchServer(void);
 //	void	timeOut(void);
 
 private:
