@@ -26,15 +26,9 @@
 BosonItemRenderer::BosonItemRenderer(BosonItem* item)
 {
  mItem = item;
- mModel = 0;
 
- mCurrentAnimation = 0;
  mGLDepthMultiplier = 1.0f;
- mFrame = 0;
  mShowGLConstructionSteps = true;
- mGLConstructionStep = 0;
- mAnimationCounter = 0;
- mCurrentFrame = 0;
 
  // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
  mBoundingSphereRadius = 1.732f; // TODO: can we extract this from the model? this probably needs to change with different frames!
@@ -45,7 +39,55 @@ BosonItemRenderer::~BosonItemRenderer()
 {
 }
 
-bool BosonItemRenderer::setModel(BosonModel* model)
+const QColor* BosonItemRenderer::teamColor() const
+{
+ return mItem->teamColor();
+}
+
+void BosonItemRenderer::setGLDepthMultiplier(float d)
+{
+ mGLDepthMultiplier = d;
+}
+
+void BosonItemRenderer::renderItem(unsigned int lod)
+{
+}
+
+bool BosonItemRenderer::itemInFrustum(const float* frustum) const
+{
+ if (!frustum) {
+	return false;
+ }
+ if (!mItem) {
+	BO_NULL_ERROR(mItem);
+	return false;
+ }
+ // FIXME: can't we use BoVector3 and it's conversion methods here?
+ GLfloat x = (mItem->x() + mItem->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+ GLfloat y = -((mItem->y() + mItem->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+ GLfloat z = mItem->z(); // this is already in the correct format!
+ BoVector3 pos(x, y, z);
+ return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());
+}
+
+
+BosonItemModelRenderer::BosonItemModelRenderer(BosonItem* item)
+	: BosonItemRenderer(item)
+{
+ mModel = 0;
+
+ mCurrentFrame = 0;
+ mCurrentAnimation = 0;
+ mFrame = 0;
+ mGLConstructionStep = 0;
+ mAnimationCounter = 0;
+}
+
+BosonItemModelRenderer::~BosonItemModelRenderer()
+{
+}
+
+bool BosonItemModelRenderer::setModel(BosonModel* model)
 {
  mModel = model;
  if (!mModel) {
@@ -64,17 +106,7 @@ bool BosonItemRenderer::setModel(BosonModel* model)
  return true;
 }
 
-const QColor* BosonItemRenderer::teamColor() const
-{
- return mItem->teamColor();
-}
-
-void BosonItemRenderer::setGLDepthMultiplier(float d)
-{
- mGLDepthMultiplier = d;
-}
-
-void BosonItemRenderer::setGLConstructionStep(unsigned int s)
+void BosonItemModelRenderer::setGLConstructionStep(unsigned int s)
 {
  BO_CHECK_NULL_RET(model());
  // note: in case of s >= model()->constructionSteps() we use the last
@@ -90,13 +122,13 @@ void BosonItemRenderer::setGLConstructionStep(unsigned int s)
  }
 }
 
-unsigned int BosonItemRenderer::glConstructionSteps() const
+unsigned int BosonItemModelRenderer::glConstructionSteps() const
 {
  BO_CHECK_NULL_RET0(model());
  return model()->constructionSteps();
 }
 
-void BosonItemRenderer::setFrame(int _frame)
+void BosonItemModelRenderer::setFrame(int _frame)
 {
  BO_CHECK_NULL_RET(model());
  if (mGLConstructionStep < glConstructionSteps() && showGLConstructionSteps()) {
@@ -123,12 +155,12 @@ void BosonItemRenderer::setFrame(int _frame)
 	}
 }
 
-unsigned int BosonItemRenderer::frameCount() const
+unsigned int BosonItemModelRenderer::frameCount() const
 {
  return model() ? model()->frames() : 0;
 }
 
-void BosonItemRenderer::setCurrentFrame(BoFrame* frame)
+void BosonItemModelRenderer::setCurrentFrame(BoFrame* frame)
 {
  if (!frame) {
 	boError() << k_funcinfo << "NULL frame" << endl;
@@ -143,7 +175,7 @@ void BosonItemRenderer::setCurrentFrame(BoFrame* frame)
  setGLDepthMultiplier(frame->depthMultiplier());
 }
 
-void BosonItemRenderer::setAnimationMode(int mode)
+void BosonItemModelRenderer::setAnimationMode(int mode)
 {
  BO_CHECK_NULL_RET(model());
  if (mGLConstructionStep < glConstructionSteps()) {
@@ -164,7 +196,7 @@ void BosonItemRenderer::setAnimationMode(int mode)
  setFrame(mCurrentAnimation->start());
 }
 
-void BosonItemRenderer::animate()
+void BosonItemModelRenderer::animate()
 {
  if (!mCurrentAnimation || !mCurrentAnimation->speed()) {
 	return;
@@ -180,7 +212,7 @@ void BosonItemRenderer::animate()
  }
 }
 
-void BosonItemRenderer::renderItem(unsigned int lod)
+void BosonItemModelRenderer::renderItem(unsigned int lod)
 {
  BO_CHECK_NULL_RET(mModel);
  BO_CHECK_NULL_RET(mCurrentFrame);
@@ -188,7 +220,7 @@ void BosonItemRenderer::renderItem(unsigned int lod)
  mCurrentFrame->renderFrame(teamColor(), lod);
 }
 
-unsigned int BosonItemRenderer::lodCount() const
+unsigned int BosonItemModelRenderer::lodCount() const
 {
  if (!mModel) {
 	return 1;
@@ -196,7 +228,7 @@ unsigned int BosonItemRenderer::lodCount() const
  return mModel->lodCount();
 }
 
-unsigned int BosonItemRenderer::preferredLod(float dist) const
+unsigned int BosonItemModelRenderer::preferredLod(float dist) const
 {
  if (!mModel) {
 	return 0;
@@ -204,31 +236,14 @@ unsigned int BosonItemRenderer::preferredLod(float dist) const
  return mModel->preferredLod(dist);
 }
 
-void BosonItemRenderer::setShowGLConstructionSteps(bool s)
+void BosonItemModelRenderer::setShowGLConstructionSteps(bool s)
 {
  BO_CHECK_NULL_RET(model());
- mShowGLConstructionSteps = s;
- if (mShowGLConstructionSteps) {
+ BosonItemRenderer::setShowGLConstructionSteps(s);
+ if (showGLConstructionSteps()) {
 	setGLConstructionStep(mGLConstructionStep);
  } else {
 	setCurrentFrame(mModel->frame(frame()));
  }
-}
-
-bool BosonItemRenderer::itemInFrustum(const float* frustum) const
-{
- if (!frustum) {
-	return false;
- }
- if (!mItem) {
-	BO_NULL_ERROR(mItem);
-	return false;
- }
- // FIXME: can't we use BoVector3 and it's conversion methods here?
- GLfloat x = (mItem->x() + mItem->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
- GLfloat y = -((mItem->y() + mItem->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
- GLfloat z = mItem->z(); // this is already in the correct format!
- BoVector3 pos(x, y, z);
- return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());
 }
 
