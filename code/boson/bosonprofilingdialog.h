@@ -45,12 +45,16 @@ protected:
 	void initLoadUnitPage();
 	void initRenderPage();
 	void initSlotAdvancePage();
+	void initSlotAdvanceWidget(QWidget* slotAdvanceWidget);
+	void initItemAdvanceWidget(QWidget* itemAdvanceWidget);
 	void initEventsPage();
 	void initFilesPage();
 
 	void reset();
 	void resetLoadUnitPage();
 	void resetRenderPage();
+	void resetSlotAdvanceWidget();
+	void resetItemAdvanceWidget();
 	void addItemAdvance(ProfileSlotAdvance*);
 	void resetEventsPage();
 	void resetFilesPage();
