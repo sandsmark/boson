@@ -63,7 +63,8 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
 #ifndef NO_EDITOR
   mEditorButton = new QPushButton( this, "editorbutton" );
-  mEditorButton->setText( i18n( "Start Editor" ) ); // TODO: accel
+  mEditorButton->setText( i18n( "Start &Editor" ) );
+  mEditorButton->setMinimumWidth(150);
   buttonsLayout->addWidget( mEditorButton );
   connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
 #else
@@ -72,6 +73,7 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mQuitButton = new QPushButton( this, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );
+  mQuitButton->setMinimumWidth(150);
   buttonsLayout->addWidget( mQuitButton );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonsLayout->addItem( spacer_4 );
