@@ -23,6 +23,7 @@
 
 #include <qobject.h>
 #include <qvaluelist.h>
+#include <qptrlist.h>
 
 class BosonMap;
 class Cell;
@@ -33,6 +34,7 @@ class BosonTiles;
 class BoItemList;
 class BosonSprite;
 class ProductionPlugin;
+class BosonParticleSystem;
 
 class KPlayer;
 
@@ -196,6 +198,7 @@ public:
 	int particleSystemsCount();
 	void updateParticleSystems(float elapsed);
 	void renderParticleSystems();
+	QPtrList<BosonParticleSystem>* particleSystems();
 
 public slots:
 	/**

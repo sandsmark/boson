@@ -662,6 +662,11 @@ int BosonCanvas::particleSystemsCount()
  return d->mParticles.count();
 }
 
+QPtrList<BosonParticleSystem>* BosonCanvas::particleSystems()
+{
+ return &(d->mParticles);
+}
+
 void BosonCanvas::updateParticleSystems(float elapsed)
 {
  int count = d->mParticles.count();
