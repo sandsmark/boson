@@ -27,6 +27,9 @@ class QPoint;
 class QTextStream;
 class KGamePropertyBase;
 class KGamePropertyHandler;
+class bofixed;
+template<class T> class BoVector2;
+typedef BoVector2<bofixed> BoVector2Fixed;
 
 /**
  * Helper class for @ref KGamePropertyHandler. You can use it to store a
@@ -120,5 +123,7 @@ protected:
 
 QTextStream& operator>>(QTextStream& s, QPoint& p);
 QTextStream& operator<<(QTextStream& s, const QPoint& p);
+QTextStream& operator>>(QTextStream& s, BoVector2Fixed& p);
+QTextStream& operator<<(QTextStream& s, const BoVector2Fixed& p);
 
 #endif
