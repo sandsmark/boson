@@ -1,0 +1,30 @@
+This is a copy of libufo cvs with a couple of patches applied.
+
+Patches applied currently (this list may not be complete):
+- getHeightForWidth(), see http://sourceforge.net/mailarchive/forum.php?thread_id=5943335&forum_id=6384
+- compiler warnings, see http://sourceforge.net/mailarchive/forum.php?thread_id=5956139&forum_id=6384
+
+Use
+ make_ufo_dir.sh ufo_dir code/ufo
+from the tools module (boson cvs) to update this directory (all changes will be lost!).
+
+This copy of libufo is required because of several reasons:
+- libufo can not (because of it's current development state) preserve binary
+  compatibility and not even source compatibility among releases. Therefore
+  boson must compile _exactly_ against a certain version of libufo (a more recent
+  version may not work anymore)
+  -> this is a lot of work for users (and developers)
+- Some patches against latest libufo are required for boson. Without them boson
+  cannot make actual use of libufo. It is a hell of work to developers (and
+  eventually users) to track all required patches (or install modified libufo
+  versions).
+  E.g. as of today version 0.7.3 is the most current official libufo version,
+  but that does not support multiline labels (not even cvs does as of today).
+  Multiline labels are an absolutely required feature.
+- Because of the lack of binary compatibility it only makes sense to link
+  statically against libufo. However that requires yet another custom
+  configure switch - it's a pain to the developers to make the users actually
+  understand and do that, but it's even worse to the users who have to remember
+  and follow 10 million different ways of compiling a hundred different libs,
+  only to install boson.
+
