@@ -251,12 +251,12 @@ void PythonScript::loadScript(QString file)
   freePythonLock();
 }
 
-void PythonScript::callFunction(QString function)
+void PythonScript::callFunction(const QString& function)
 {
   callFunction(function, 0);
 }
 
-void PythonScript::callFunction(QString function, PyObject* args)
+void PythonScript::callFunction(const QString& function, PyObject* args)
 {
   boDebug(700) << k_funcinfo << "function: " << function << endl;
 
@@ -1253,3 +1253,54 @@ PyObject* PythonScript::QValueListToPyList(QValueList<int>* list)
   return pylist;
 }
 
+int PythonScript::callFunctionWithReturn(const QString& function)
+{
+  return callFunctionWithReturn(function, 0);
+}
+
+int PythonScript::callFunctionWithReturn(const QString& function, PyObject* args)
+{
+  // AB: this is duplicated code from callFunction().
+  // probably we need a callFunctionInteral which returns the returned PyObject.
+  // callFunction() would then simply Py_DECREF() it, and here we would also
+  // parse it.
+  boDebug(700) << k_funcinfo << "function: " << function << endl;
+
+  if(!mDict)
+  {
+    boError() << k_funcinfo << "No file loaded!" << endl;
+    return -1;
+  }
+
+  getPythonLock();
+
+  PyObject* func = PyDict_GetItemString(mDict, (char*)function.ascii());
+  if(!func)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "No such function: " << function << endl;
+    freePythonLock();
+    return -1;
+  }
+
+  int ret = -1;
+  PyObject* pValue = PyObject_CallObject(func, args);
+  if(!pValue)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "Error while calling function " << function << endl;
+    ret = -1;
+  }
+  else
+  {
+    PyArg_Parse(pValue, "i", &ret);
+    Py_DECREF(pValue);
+  }
+
+  freePythonLock();
+  return ret;
+}
+
+/*
+ * vim: et sw=2
+ */

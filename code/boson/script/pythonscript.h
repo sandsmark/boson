@@ -26,6 +26,7 @@ typedef struct _object PyObject;
 struct PyMethodDef;
 typedef struct _ts PyThreadState;
 class QString;
+class BoVector3;
 
 class PythonScript : public BosonScript
 {
@@ -38,8 +39,10 @@ class PythonScript : public BosonScript
     virtual void advance();
     virtual void init();
 
-    virtual void callFunction(QString function);
-    virtual void callFunction(QString function, PyObject* args);
+    virtual void callFunction(const QString& function);
+    void callFunction(const QString& function, PyObject* args);
+    virtual int callFunctionWithReturn(const QString& function);
+    int callFunctionWithReturn(const QString& function, PyObject* args);
 
     virtual void execLine(const QString& line);
 
