@@ -44,7 +44,7 @@
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent, "bosonstarting")
 {
- mPlayField = 0;
+ mDestPlayField = 0;
  mNewPlayField = 0; // in case we are starting a new map
  mLoading = false;
 }
@@ -158,13 +158,13 @@ void BosonStarting::startNewGame()
  }
 #endif
  boDebug() << k_funcinfo << endl;
- if (!mPlayField) {
+ if (!mDestPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
 	emit signalStartingFailed();
 	return;
  }
- // mPlayField should be empty - ensure this by deleting the map
- mPlayField->deleteMap();
+ // mDestPlayField should be empty - ensure this by deleting the map
+ mDestPlayField->deleteMap();
 
 
  // before actually starting the game we need to wait for the map (which is sent
@@ -172,7 +172,7 @@ void BosonStarting::startNewGame()
  emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
 
  QDataStream stream(mNewGameData, IO_ReadOnly);
- if (!mPlayField->loadPlayFieldFromAdmin(stream)) {
+ if (!mDestPlayField->loadPlayFieldFromAdmin(stream)) {
 	boError() << k_funcinfo << "loading playfield from network stream failed" << endl;
 	emit signalStartingFailed();
 	return;
@@ -242,7 +242,7 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 	emit signalStartingFailed();
 	return;
  }
- if (!mPlayField) {
+ if (!mDestPlayField) {
 	boError() << k_funcinfo << "NULL playfield" << endl;
 	emit signalStartingFailed();
 	return;
@@ -251,13 +251,13 @@ void BosonStarting::slotReceiveMap(const QByteArray& buffer)
 #if 0
  emit signalLoadingType(BosonLoadingWidget::LoadMap);
  QDataStream stream(buffer, IO_ReadOnly);
- if (!mPlayField->loadPlayFieldFromRemote(stream)) {
+ if (!mDestPlayField->loadPlayFieldFromRemote(stream)) {
 	boError() << k_funcinfo << "Remote has sent a broken playfield stream" << endl;
 	emit signalStartingFailed();
 	return;
  }
 #endif
- boGame->setPlayField(mPlayField);
+ boGame->setPlayField(mDestPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
 
  // If we're loading saved game, local player isn't set and inited, because it
@@ -472,9 +472,9 @@ void BosonStarting::startScenario()
 	return;
  }
  BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(mPlayField);
- BO_CHECK_NULL_RET(mPlayField->scenario());
- QCString s = mPlayField->scenario()->saveScenarioToDocument().utf8();
+ BO_CHECK_NULL_RET(mDestPlayField);
+ BO_CHECK_NULL_RET(mDestPlayField->scenario());
+ QCString s = mDestPlayField->scenario()->saveScenarioToDocument().utf8();
  QByteArray playersXML;
  QByteArray canvasXML;
  BosonFileConverter converter;
