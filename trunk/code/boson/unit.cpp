@@ -398,6 +398,7 @@ void Unit::stopMoving()
  setYVelocity(0);
  if(d->mLeader) {
 	boCanvas()->leaderStopped(this);
+	d->mLeader = false;
  }
 }
 
@@ -599,17 +600,19 @@ bool Unit::collidesWith(const QCanvasItem* item) const
 	return QCanvasSprite::collidesWith(item);
  }
 
- double itemw, itemh;
- QRect r = item->boundingRectAdvanced();
- itemw = r.width();
- itemh = r.height();
 
  // I use centers of units as positions here
  double myx, myy, itemx, itemy;
- myx = x() + width() / 2.0;
- myy = y() + height() / 2.0;
- itemx = item->x() + BO_TILE_SIZE / 2.0;
- itemy = item->y() + BO_TILE_SIZE / 2.0;
+ QRect r = boundingRectAdvanced();
+ QRect r2 = item->boundingRectAdvanced();
+ myx = r.center().x();
+ myy = r.center().y();
+ itemx = r2.center().x();
+ itemy = r2.center().y();
+
+ double itemw, itemh;
+ itemw = r2.width();
+ itemh = r2.height();
 
  if(itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE) {
 	double dist = QABS(itemx - myx) + QABS(itemy - myy);
@@ -859,9 +862,7 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
- QCanvasItem::moveBy(xVelocity(), yVelocity());
  QValueList<Unit*> l = unitCollisions(true);
- QCanvasItem::moveBy(-xVelocity(), -yVelocity());
  if (!l.isEmpty()) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
