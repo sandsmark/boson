@@ -339,6 +339,10 @@ class BoGameCamera : public BoCamera
     GLfloat mRotation;
     GLfloat mRadius;
 
+    // Absolute z coordinate of cameraPos that we'll try to get. This should
+    //  always be equal to  lookAt().z() + z()
+    float mWantedAbsoluteZ;
+
     const BosonCanvas* mCanvas;
 
     bool mFree, mLimits;
