@@ -275,19 +275,6 @@ void TopWidget::slotToggleCmdFrameDockVisible()
  slotCheckGameDockStatus();
 }
 
-void TopWidget::slotRemoveFromGUIFactory(QObject* obj)
-{
- if (!obj) {
-	return;
- }
- if (obj->inherits("BosonWidgetBase")) {
-	BosonWidgetBase* w = (BosonWidgetBase*)obj;
-	if (factory()) {
-		factory()->removeClient(w);
-	}
- }
-}
-
 void TopWidget::saveProperties(KConfig *config)
 {
  // the 'config' object points to the session managed
@@ -460,7 +447,6 @@ void TopWidget::initBosonWidget()
 	d->mBosonWidget = w;
  }
 
- connect(d->mBosonWidget, SIGNAL(destroyed(QObject*)), this, SLOT(slotRemoveFromGUIFactory(QObject*)));
  connect(d->mBosonWidget, SIGNAL(signalLoadBosonGameDock()), this, SLOT(slotLoadBosonGameDock()));
  connect(d->mBosonWidget, SIGNAL(signalToggleChatVisible()), this, SLOT(slotToggleChatDockVisible()));
  connect(d->mBosonWidget, SIGNAL(signalToggleCmdFrameVisible()), this, SLOT(slotToggleCmdFrameDockVisible()));
@@ -670,7 +656,6 @@ void TopWidget::endGame()
  }
  if (d->mBosonWidget) {
 	d->mBosonWidget->quitGame();
-//	disconnect(d->mBosonWidget, 0, 0, 0); // we must not do this, so that slotRemoveFromGUIFactory() is called. do we need this disconnect at all?
 	d->mStatusBarTimer.stop();
 	// This prevent wrong dock config from getting saved when loading fails
 	if (boGame->gameStatus() != KGame::Init) {
