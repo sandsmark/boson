@@ -93,7 +93,7 @@ protected:
 				break;
 			case BosonOrderButton::ShowUnit:
 				if (!commandWidget()->unit()) {
-					boWarning() << k_funcinfo << "type is ShowUnit, but NULL unit" << endl;
+					boWarning(220) << k_funcinfo << "type is ShowUnit, but NULL unit" << endl;
 					return QString::null;
 				}
 				text = i18n("%1\nId: %2").arg(commandWidget()->unit()->unitProperties()->name()).arg(commandWidget()->unit()->id());
@@ -107,7 +107,7 @@ protected:
 						const UpgradeProperties* prop = commandWidget()->productionOwner()->speciesTheme()->technology(commandWidget()->productionId());
 						text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->upgradeName()).arg(prop->mineralCost()).arg(prop->oilCost());
 					} else {
-						boWarning() << k_funcinfo << "Invalid productiontype when producing!" << endl;
+						boWarning(220) << k_funcinfo << "Invalid productiontype when producing!" << endl;
 						return QString::null;
 					}
 				} else if (commandWidget()->action().type() == ActionPlacementPreview) {
@@ -306,12 +306,12 @@ void BosonOrderButton::setUnit(Unit* unit)
 
 void BosonOrderButton::setAction(const BoSpecificAction& action)
 {
- boDebug() << k_funcinfo << "Setting action" << endl;
+ boDebug(220) << k_funcinfo << "Setting action" << endl;
  mType = ShowAction;
  mAction = action;
 
  if (!action.pixmap()) {
-	boError() << k_funcinfo << "NULL pixmap for action " << action.id() << endl;
+	boError(220) << k_funcinfo << "NULL pixmap for action " << action.id() << endl;
 	return;
  }
  setPixmap(*action.pixmap());
@@ -343,7 +343,7 @@ void BosonOrderButton::setGround(unsigned int texture, BosonGroundTheme* theme)
 void BosonOrderButton::displayUnitPixmap(Unit* unit)
 {
  if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
+	boError(220) << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  displayUnitPixmap(unit->type(), unit->owner());
@@ -352,12 +352,12 @@ void BosonOrderButton::displayUnitPixmap(Unit* unit)
 void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QPixmap* small = owner->speciesTheme()->smallOverview(unitType);
  if (!small) {
-	boError() << k_funcinfo << "Cannot find small overview for "
+	boError(220) << k_funcinfo << "Cannot find small overview for "
 			<< unitType << endl;
 	return;
  }
@@ -374,14 +374,14 @@ void BosonOrderButton::slotClicked()
 {
  switch (type()) {
 	case ShowNothing:
-		boWarning() << "Invalid type \"ShowNothing\"" << endl;
+		boWarning(220) << "Invalid type \"ShowNothing\"" << endl;
 		break;
 	case ShowCell:
 		emit signalPlaceGround((unsigned int)texture());
 		break;
 	case ShowUnit:
 		if (!unit()) {
-			boError() << k_lineinfo << "NULL unit" << endl;
+			boError(220) << k_lineinfo << "NULL unit" << endl;
 		} else {
 			// select this unit only, i.e. unselect all others
 			emit signalSelectUnit(unit());
@@ -391,7 +391,7 @@ void BosonOrderButton::slotClicked()
 		emit signalAction(mAction);
 		break;
 	default:
-		boError() << "Unknown type " << type() << endl;
+		boError(220) << "Unknown type " << type() << endl;
 		break;
  }
 }
@@ -405,7 +405,7 @@ void BosonOrderButton::slotRightClicked()
 	} else if (mAction.type() == ActionProduceTech) {
 		a.setType(ActionStopProduceTech);
 	} else {
-		boError() << k_funcinfo << "Produce action, but invalid actionType: " << mAction.type() << endl;
+		boError(220) << k_funcinfo << "Produce action, but invalid actionType: " << mAction.type() << endl;
 		return;
 	}
 	emit signalAction(a);
@@ -418,7 +418,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
 	return;
  }
  if (!unit) {
-	boError() << k_funcinfo << "NULL unit" << endl;
+	boError(220) << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (unit->isDestroyed()) {
@@ -427,7 +427,7 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
  }
  double h = (double)unit->health() * 100 / (double)unit->unitProperties()->health();
  if (unit->health() > unit->unitProperties()->health()) {
-	boWarning() << k_lineinfo << "health > possible health" << endl;
+	boWarning(220) << k_lineinfo << "health > possible health" << endl;
  }
  mHealth->setValue((int)h);
 }
@@ -447,20 +447,20 @@ void BosonOrderButton::unset()
 void BosonOrderButton::advanceProduction(double percentage)
 {
  if (!mAction.ok()) {
-	boError() << k_funcinfo << "No action set" << endl;
+	boError(220) << k_funcinfo << "No action set" << endl;
 	return;
  }
  if (!mAction.unit()->owner()) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (mAction.productionId() <= 0) {
-	boError() << k_funcinfo << "invalid production id: " << mAction.productionId() << endl;
+	boError(220) << k_funcinfo << "invalid production id: " << mAction.productionId() << endl;
 	return;
  }
  QPixmap* pix = mAction.pixmap();
  if (!pix) {
-	boError() << k_funcinfo << "NULL pixmap for action " << mAction.id() << endl;
+	boError(220) << k_funcinfo << "NULL pixmap for action " << mAction.id() << endl;
 	return;
  }
  QPixmap small(*pix);

@@ -115,9 +115,9 @@ void BoActionsWidget::hideButtons()
 
 void BoActionsWidget::showUnitActions(Unit* unit)
 {
- boDebug() << k_funcinfo << "unit: " << unit << endl;
+ boDebug(220) << k_funcinfo << "unit: " << unit << endl;
  if (!unit) {
-	boDebug() << k_funcinfo << "NULL unit, returning" << endl;
+	boDebug(220) << k_funcinfo << "NULL unit, returning" << endl;
 	return;
  }
 
@@ -128,7 +128,7 @@ void BoActionsWidget::showUnitActions(Unit* unit)
  // Add all unit actions
  QIntDictIterator<BoAction> it(*unit->unitProperties()->allActions());
  for (; it.current(); ++it) {
-	boDebug() << k_funcinfo << "Adding action: type: " << it.currentKey() << "; id: " <<
+	boDebug(220) << k_funcinfo << "Adding action: type: " << it.currentKey() << "; id: " <<
 			it.current()->id() << "; text: " << it.current()->text() << endl;
 	BoSpecificAction a(it.current());
 	a.setUnit(unit);
@@ -153,7 +153,7 @@ void BoActionsWidget::showUnitActions(Unit* unit)
 	}
  }
 
- boDebug() << k_funcinfo << "actions count: " << actions.count() << endl;
+ boDebug(220) << k_funcinfo << "actions count: " << actions.count() << endl;
 
  if (!actions.count()) {
 	return;
@@ -161,11 +161,11 @@ void BoActionsWidget::showUnitActions(Unit* unit)
 
  ensureButtons(actions.count());
  for (unsigned int button = 0; button < actions.count(); button++) {
-	boDebug() << k_funcinfo << "Setting action for button " << button << endl;
+	boDebug(220) << k_funcinfo << "Setting action for button " << button << endl;
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(actions[button]);
  }
- boDebug() << k_funcinfo << "Activating topLayout" << endl;
+ boDebug(220) << k_funcinfo << "Activating topLayout" << endl;
  d->mTopLayout->activate();
 }
 

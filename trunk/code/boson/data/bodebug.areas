@@ -7,6 +7,7 @@
 150	Boson Particles
 200	Boson Sound
 210	OptionsDialog
+220	CommandFrame
 250	BosonScenario
 
 # LoadGame, as in SaveGame (not as in "loading data on startup")

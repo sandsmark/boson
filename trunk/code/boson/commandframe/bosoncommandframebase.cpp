@@ -69,7 +69,7 @@ BoUnitDisplayBase::BoUnitDisplayBase(BosonCommandFrameBase* frame, QWidget* pare
  mCommandFrame = frame;
  mUpdateTimer = false;
  if (!frame) {
-	boError() << k_funcinfo << "NULL cmdFrame" << endl;
+	boError(220) << k_funcinfo << "NULL cmdFrame" << endl;
 	return;
  }
  cmdFrame()->addUnitDisplayWidget(this);
@@ -212,7 +212,7 @@ void BosonCommandFrameBase::addUnitDisplayWidget(BoUnitDisplayBase* w)
 
 void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  Unit* leader = 0;
  d->mSelection = selection;
  if (!selection || selection->count() == 0) {
@@ -220,15 +220,15 @@ void BosonCommandFrameBase::slotSelectionChanged(BoSelection* selection)
  } else {
 	leader = selection->leader();
 	if (!leader) {
-		boError() << k_funcinfo << "non-empty selection, but NULL leader" << endl;
+		boError(220) << k_funcinfo << "non-empty selection, but NULL leader" << endl;
 		leader = 0;
 		clearSelection();
 	} else if (!leader->owner()) {
-		boError() << k_funcinfo << "group leader has NULL owner" << endl;
+		boError(220) << k_funcinfo << "group leader has NULL owner" << endl;
 		leader = 0;
 		clearSelection();
 	} else if (leader->isDestroyed()) {
-		boWarning() << k_funcinfo << "group leader is destroyed" << endl;
+		boWarning(220) << k_funcinfo << "group leader is destroyed" << endl;
 		leader = 0;
 	}
  }
@@ -270,11 +270,11 @@ void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
  }
  Player* owner = unit->owner();
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (!unit->speciesTheme()) {
-	boError() << k_funcinfo << "NULL speciestheme" << endl;
+	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
@@ -318,7 +318,7 @@ Player* BosonCommandFrameBase::localPlayer() const
 void BosonCommandFrameBase::slotPlaceUnit(const BoSpecificAction& action)
 {
  if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
+	boError(220) << k_funcinfo << "NULL local player" << endl;
 	return;
  }
  emit signalPlaceUnit(action.productionId(), localPlayer());
@@ -337,18 +337,18 @@ void BosonCommandFrameBase::slotPlaceGround(unsigned int textureCount, unsigned 
 
 void BosonCommandFrameBase::slotProduce(const BoSpecificAction& _action)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BoSpecificAction action = _action;
  if (selectedUnit()) {
 	if (localPlayer() != selectedUnit()->owner()) {
-		boError() << k_funcinfo << "local owner != selected unit owner" << endl;
+		boError(220) << k_funcinfo << "local owner != selected unit owner" << endl;
 		return;
 	}
 	// FIXME: is there any way not to hardcode this
 	if (action.type() != ActionStopProduceUnit && action.type() != ActionStopProduceTech) {
 		ProductionPlugin* pp = (ProductionPlugin*)selectedUnit()->plugin(UnitPlugin::Production);
 		if (!pp) {
-			boWarning() << k_funcinfo << "NULL production plugin?!" << endl;
+			boWarning(220) << k_funcinfo << "NULL production plugin?!" << endl;
 			return;
 		}
 		if (pp->completedProductionType() == action.productionType() &&
@@ -361,7 +361,7 @@ void BosonCommandFrameBase::slotProduce(const BoSpecificAction& _action)
 		}
 	}
  }
- boDebug() << k_funcinfo << "Emitting signalAction(action)  (for producing; type: " << action.type() << ")" << endl;
+ boDebug(220) << k_funcinfo << "Emitting signalAction(action)  (for producing; type: " << action.type() << ")" << endl;
  action.setUnit(selectedUnit());
  emit signalAction(action);
 }
@@ -369,11 +369,11 @@ void BosonCommandFrameBase::slotProduce(const BoSpecificAction& _action)
 void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 {
  if (!f) {
-	boError() << k_funcinfo << "NULL unit" << endl;
+	boError(220) << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  if (selectedUnit() == f && selectionWidget()->isProduceAction()) {
-	boDebug() << k_funcinfo << endl;
+	boDebug(220) << k_funcinfo << endl;
 	setProduction(f);
  }
 }
@@ -381,14 +381,14 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
 void BosonCommandFrameBase::slotUpdateProductionOptions()
 {
  if (selectedUnit() && selectionWidget()->isProduceAction()) {
-	boDebug() << k_funcinfo << endl;
+	boDebug(220) << k_funcinfo << endl;
 	setProduction(selectedUnit());
  }
 }
 
 void BosonCommandFrameBase::slotUpdate()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  if (!selectedUnit()) {
 	d->mUpdateTimer.stop();
 	return;
@@ -431,7 +431,7 @@ void BosonCommandFrameBase::slotSetButtonsPerRow(int b)
 void BosonCommandFrameBase::reparentMiniMap(QWidget* map)
 {
  if (!map) {
-	boError() << k_funcinfo << "NULL map" << endl;
+	boError(220) << k_funcinfo << "NULL map" << endl;
 	return;
  }
  map->reparent(this, QPoint(0,0));
