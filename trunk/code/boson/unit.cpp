@@ -162,8 +162,7 @@ void Unit::setHealth(unsigned long int h)
 		setZ(Z_DESTROYED_FACILITY);
 	}
 	setAnimated(false);
-	if(d->mLeader)
-	{
+	if(d->mLeader) {
 		boCanvas()->leaderDestroyed(this);
 		d->mLeader = false;
 	}
@@ -435,7 +434,11 @@ bool Unit::load(QDataStream& stream)
  setY(y);
  setZ(z);
  setVisible(visible);
- setFrame(frame);
+ if (isDestroyed()) {
+	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+ } else {
+	setFrame(frame);
+ }
  return true;
 }
 
@@ -890,6 +893,10 @@ double MobileUnit::speed() const
 
 void MobileUnit::turnTo(Direction direction)
 {
+ if (isDestroyed()) {
+	kdError() << k_funcinfo << "unit is already destroyed!" << endl;
+	return;
+ }
  setFrame((int)direction);
 }
 
@@ -1030,6 +1037,10 @@ int Facility::constructionSteps()
 
 void Facility::advanceConstruction()
 {
+ if (isDestroyed()) {
+	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+	return;
+ }
  if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
 	d->mConstructionState = d->mConstructionState + 1;
 	if (d->mConstructionState % constructionDelay() == 0) {
@@ -1278,6 +1289,10 @@ int Facility::constructionDelay()
 
 void Facility::setConstructionStep(unsigned int step)
 {
+ if (isDestroyed()) {
+	kdError() << k_funcinfo << "unit is already destroyed" << endl;
+	return;
+ }
  if ((int)step >= constructionSteps()) {
 	step = PIXMAP_FIX_DESTROYED - 1;
  }

@@ -136,7 +136,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  switch (msgid) {
 	// nothing done here currently
 	default:
-		kdWarning() << "Unknown message " << msgid << endl;
+		kdWarning() << k_funcinfo << "Unknown message " << msgid << endl;
 		break;
  }
 }

@@ -83,8 +83,11 @@ void UnitGroup::advanceGroupMove()
   QPtrListIterator<Unit> it(mMembers);
   while(it.current())
   {
-    it.current()->advanceGroupMove(mLeader);
-    it.current()->advanceMoveCheck();
+    if (!it.current()->isDestroyed()) 
+    {
+      it.current()->advanceGroupMove(mLeader);
+      it.current()->advanceMoveCheck();
+    }
     ++it;
   }
 }

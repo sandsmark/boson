@@ -344,15 +344,19 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
  if (d->mWorkProduce.count() > 0 && (advanceCount % 1) == 0) {// always true. should be be bigger, like % 10 or so. we need to change something in the production logic for this.
 	QPtrListIterator<Unit> it(d->mWorkProduce);
 	while (it.current()) {
-		it.current()->advanceProduction();
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceProduction();
+		}
 		++it;
 	}
  }
  if ((d->mWorkMove.count() > 0 || d->mGroups.count() > 0) && (advanceCount % 1) == 0) { // always true
 	QPtrListIterator<Unit> it(d->mWorkMove);
 	while (it.current()) {
-		it.current()->advanceMove(); // move
-		it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceMove(); // move
+			it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
+		}
 		++it;
 	}
 	QValueList<UnitGroup>::Iterator groupIt;
@@ -363,14 +367,18 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
  if (d->mWorkMine.count() > 0 && (advanceCount % 40) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkMine);
 	while (it.current()) {
-		it.current()->advanceMine();
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceMine();
+		}
 		++it;
 	}
  }
  if (d->mWorkAttack.count() > 0 && (advanceCount % 40) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkAttack);
 	while (it.current()) {
-		it.current()->advanceAttack();
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceAttack();
+		}
 		++it;
 	}
  }
@@ -378,7 +386,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
  if (d->mWorkConstructed.count() > 0 && (advanceCount % 30) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkConstructed);
 	while (it.current()) {
-		it.current()->advanceConstruction();
+		if (!it.current()->isDestroyed()) {
+			it.current()->advanceConstruction();
+		}
 		++it;
 	}
  }
@@ -626,17 +636,16 @@ void BosonCanvas::destroyUnit(Unit* unit)
  if (!unit) {
 	return;
  }
- // the unit is added to a list - now displayed as a wreckage only.
  if (!d->mDestroyedUnits.contains(unit)) {
+	kdDebug() << "destroy unit " << unit->id() << endl;
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
-	unit->setWork(UnitBase::WorkDestroyed);
+
+	// the unit is added to a list - now displayed as a wreckage only.
 	unit->setAnimated(false);
-	if (unit->health() != 0) {
-		unit->setHealth(0);
-	}
+	unit->setHealth(0); // in case of an accidental change before
+	unit->setWork(UnitBase::WorkDestroyed);
 	owner->unitDestroyed(unit); // remove from player without deleting
-	kdDebug() << "destroy unit " << unit->id() << endl;
 	boMusic->playSound(unit, Unit::SoundReportDestroyed);
 	(void) new BoShot(unit, 0, this, true);
 	emit signalUnitDestroyed(unit);
