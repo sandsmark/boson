@@ -517,7 +517,10 @@ void BosonBigDisplayBase::initializeGL()
 
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
- glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // we don't use modulate (the default)
+ // AB: GL_MODULATE is the default and the models don't use it. unortunately the
+ // light code seems to have problems with GL_REPLACE. GL_REPLACE would be
+ // faster
+// glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
  float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
@@ -671,10 +674,6 @@ void BosonBigDisplayBase::paintGL()
  // is called only whenever cameraChanged() is called.
  glPushMatrix();
 
- // FIXME: put these next to gluLookAt()
-// glRotatef(a1, 0.0, 0.0, 1.0);
-// glRotatef(a2, 0.0, 1.0, 0.0);
-
  if (checkError()) {
 	boError() << k_funcinfo << "before unit rendering" << endl;
  }
@@ -809,12 +808,12 @@ void BosonBigDisplayBase::paintGL()
 	glDisable(GL_BLEND);
 	glEnable(GL_TEXTURE_2D);
  }
- 
- 
+
+
  if (checkError()) {
 	boError() << k_funcinfo << "preview rendered" << endl;
  }
- 
+
  // Render particle systems
  boProfiling->renderParticles(true);
  renderParticles();
