@@ -21,7 +21,7 @@
 
 class BosonSound;
 class BosonMusic;
-class BoAudioThread;
+class BoAudioCommand;
 
 #include <qstring.h>
 
@@ -30,52 +30,6 @@ class QStringList;
 
 #define boAudio BosonAudioInterface::bosonAudioInterface()
 #define boMusic BosonAudioInterface::bosonAudioInterface()->musicInterface()
-
-/**
- * Represents a command for the audio thread. You will probably use @ref
- * BosonAudioInterface (and @ref BosonMusicInterface / @ref BosonSoundInterface
- * that live inside it) to create these commands.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoAudioCommand
-{
-public:
-	enum Command {
-		CreateMusicObject = 0,
-		CreateSoundObject = 1,
-		EnableMusic = 2,
-		EnableSound = 3,
-
-		PlayMusic = 10,
-		StopMusic = 11,
-		ClearMusicList = 12,
-		AddToMusicList = 13,
-		StartMusicLoop = 14,
-
-		PlaySound = 50,
-		AddUnitSound = 51,
-		AddGeneralSound = 52
-	};
-	BoAudioCommand(int command, int dataInt = -1, const QString& dataString1 = QString::null, const QString& dataString2 = QString::null);
-
-	/**
-	 * Create a command for sounds. This takes an additional species
-	 * parameter.
-	 **/
-	BoAudioCommand(int command, const QString& species, int dataInt = -1, const QString& dataString = QString::null, const QString& dataString2 = QString::null);
-
-	int type() const { return mCommand; }
-	int dataInt() const { return mDataInt; }
-	const QString& dataString1() const { return mDataString1; }
-	const QString& dataString2() const { return mDataString2; }
-	const QString& species() const { return mSpecies; }
-private:
-	int mCommand;
-	int mDataInt;
-	QString mDataString1;
-	QString mDataString2;
-	QString mSpecies;
-};
 
 /**
  * Abstract class that defines an interface for music playing.
@@ -185,9 +139,6 @@ class BosonAudioInterfacePrivate;
  * interface to the sound/music classes only.
  *
  * It can be called at any time without thinking about threads.
- *
- * Note that when you add a function here that touches the audio thread (most
- * functions do) you must call @ref BoAudioThread::lock first!
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonAudioInterface
@@ -209,9 +160,6 @@ public:
 
 	BosonMusicInterface* musicInterface() const;
 	BosonSoundInterface* soundInterface(const QString& species) const;
-
-protected:
-	BoAudioThread* audioThread() const;
 
 private:
 	BosonAudioInterfacePrivate* d;

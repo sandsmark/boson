@@ -18,7 +18,9 @@
 */
 
 #include "bosonaudiointerface.h"
-#include "boaudiothread.h"
+
+#include "boaudiocommand.h"
+#include "boaudioprocesscontroller.h"
 
 #include "bodebug.h"
 #include "../bosonconfig.h"
@@ -37,23 +39,6 @@
 
 static BoGlobalObject<BosonAudioInterface> globalAudio(BoGlobalObjectBase::BoGlobalAudio);
 
-BoAudioCommand::BoAudioCommand(int command, int dataInt, const QString& dataString1, const QString& dataString2)
-{
- mCommand = command;
- mDataInt = dataInt;
- mDataString1 = QDeepCopy<QString>(dataString1);
- mDataString2 = QDeepCopy<QString>(dataString2);
-}
-
-BoAudioCommand::BoAudioCommand(int command, const QString& species, int dataInt, const QString& dataString1, const QString& dataString2)
-{
- mCommand = command;
- mDataInt = dataInt;
- mDataString1 = QDeepCopy<QString>(dataString1);
- mDataString2 = QDeepCopy<QString>(dataString2);
- mSpecies = QDeepCopy<QString>(species);
-}
-
 class BosonAudioInterfacePrivate
 {
 public:
@@ -61,13 +46,13 @@ public:
 	{
 		mMusicInterface = 0;
 
-		mAudioThread = 0;
+		mProcess = 0;
 	}
 
 	BosonMusicInterface* mMusicInterface;
 	QDict<BosonSoundInterface> mBosonSoundInterfaces;
 
-	BoAudioThread* mAudioThread;
+	BoAudioProcessController* mProcess;
 
 	bool mPlayMusic;
 	bool mPlaySound;
@@ -75,6 +60,7 @@ public:
 
 BosonAudioInterface::BosonAudioInterface()
 {
+ boDebug(200) << k_funcinfo << endl;
  d = new BosonAudioInterfacePrivate;
  d->mPlayMusic = true;
  d->mPlaySound = true;
@@ -95,20 +81,24 @@ BosonAudioInterface::BosonAudioInterface()
  return;
 #endif
 
- d->mAudioThread = new BoAudioThread;
-
- if (!d->mAudioThread->audioStarted()) {
-	boWarning(200) << k_funcinfo << "Unable to start audio thread" << endl;
+ d->mProcess = new BoAudioProcessController();
+ bool ok = d->mProcess->start();
+ if (ok) {
+	// this shouldn't change anything, but we do it anyway
+	ok = d->mProcess->isRunning();
+	if (!ok) {
+		boError(200) << k_funcinfo << "start() returned true, but process isn't running!" << endl;
+	}
+ }
+ if (!ok) {
+	boWarning(200) << k_funcinfo << "Unable to start audio process" << endl;
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
 	boConfig->setDisableSound(true);
-	delete d->mAudioThread;
-	d->mAudioThread = 0;
+	delete d->mProcess;
+	d->mProcess = 0;
 	return;
  }
-
- boDebug(200) << k_funcinfo << "starting audio thread" << endl;
- d->mAudioThread->start();
 
  sendCommand(new BoAudioCommand(BoAudioCommand::CreateMusicObject));
 }
@@ -118,16 +108,9 @@ BosonAudioInterface::~BosonAudioInterface()
  d->mBosonSoundInterfaces.clear();
  delete d->mMusicInterface;
 
-#warning TODO
-// d->mAudioThread->stop();
- delete d->mAudioThread;
+ delete d->mProcess;
 
  delete d;
-}
-
-BoAudioThread* BosonAudioInterface::audioThread() const
-{
- return d->mAudioThread;
 }
 
 BosonAudioInterface* BosonAudioInterface::bosonAudioInterface()
@@ -137,14 +120,8 @@ BosonAudioInterface* BosonAudioInterface::bosonAudioInterface()
 
 void BosonAudioInterface::sendCommand(BoAudioCommand* command)
 {
- if (boProfiling) {
-	boProfiling->start(1112);
- }
- if (audioThread()) {
-	audioThread()->enqueueCommand(command);
- }
- if(boProfiling) {
-	boProfiling->stop(1112);
+ if (d->mProcess) {
+	d->mProcess->sendCommand(command);
  }
 }
 

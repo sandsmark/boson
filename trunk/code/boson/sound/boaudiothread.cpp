@@ -19,6 +19,7 @@
 
 #include "boaudiothread.h"
 
+#include "boaudiocommand.h"
 #include "bosonaudio.h"
 #include "bosonmusic.h"
 #include "bosonsound.h"
@@ -26,6 +27,7 @@
 #include "bodebug.h"
 
 #include <qptrqueue.h>
+
 
 /**
  * Shamelessy stolen from Rik Hemsley: http://rikkus.info/kde_mt.html
@@ -74,7 +76,6 @@ private:
 	QMutex mMutex;
 };
 
-
 class BoAudioThreadPrivate
 {
 public:
@@ -88,10 +89,9 @@ public:
 	BosonAudio* mAudio;
 
 	MTQueue<BoAudioCommand> mCommandQueue;
-
 };
 
-BoAudioThread::BoAudioThread()
+BoAudioThread::BoAudioThread() : QThread()
 {
  d = new BoAudioThreadPrivate;
 
@@ -135,7 +135,6 @@ bool BoAudioThread::audioStarted() const
 void BoAudioThread::run()
 {
  boDebug(200) << k_funcinfo << endl;
- static int myhandle = (int)currentThread();
  while (true) {
 	while (d->mCommandQueue.isEmpty()) {
 		msleep(100); // TODO: increase?
@@ -176,18 +175,12 @@ void BoAudioThread::run()
 		// we don't want to continue with this command by any reason
 		continue;
 	}
-	if (myhandle != (int)currentThread()) {
-		boError() << k_funcinfo << "oops: " << myhandle <<"!=" << (int)currentThread() << endl;
-		delete command;
-		
-	} else {
-	executeCommand(command, music, sound);
+	executeCommand(command, audio(), music, sound);
 	delete command;
-	}
  }
 }
 
-void BoAudioThread::executeCommand(BoAudioCommand* command, BosonMusic* music, BosonSound* sound)
+void BoAudioThread::executeCommand(BoAudioCommand* command, BosonAudio* audio, BosonMusic* music, BosonSound* sound)
 {
  if (!command) {
 	return;
@@ -199,19 +192,19 @@ void BoAudioThread::executeCommand(BoAudioCommand* command, BosonMusic* music, B
 	case BoAudioCommand::CreateSoundObject:
 		if (!command->species().isEmpty()) {
 			boDebug(200) << k_funcinfo << "create sound object for " << command->species() << endl;
-			audio()->addSounds(command->species());
+			audio->addSounds(command->species());
 		} else {
-			boError() << k_funcinfo << "Cannot add a BosonSound object for an empty species string" << endl;
+			boError(200) << k_funcinfo << "Cannot add a BosonSound object for an empty species string" << endl;
 		}
 		break;
 	case BoAudioCommand::EnableSound:
-		if (audio()) {
-			audio()->setSound((bool)command->dataInt());
+		if (audio) {
+			audio->setSound((bool)command->dataInt());
 		}
 		break;
 	case BoAudioCommand::EnableMusic:
-		if (audio()) {
-			audio()->setMusic((bool)command->dataInt());
+		if (audio) {
+			audio->setMusic((bool)command->dataInt());
 		}
 		break;
 	case BoAudioCommand::PlayMusic:
