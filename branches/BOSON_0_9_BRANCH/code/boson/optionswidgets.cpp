@@ -27,6 +27,7 @@
 #include "bodebug.h"
 #include "bogltooltip.h"
 #include "bogroundrenderer.h"
+#include "bo3dtools.h"
 
 #include <klocale.h>
 #include <knuminput.h>
@@ -40,6 +41,7 @@
 #include <qvbox.h>
 #include <qtooltip.h>
 #include <qpushbutton.h>
+#include <qlineedit.h>
 
 #include "optionswidgets.moc"
 
@@ -441,6 +443,20 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mAlignSelectBoxes = new QCheckBox(this);
  mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
 
+ QVBox* atiWorkaround = new QVBox(this);
+ mEnableATIDepthWorkaround = new QCheckBox(atiWorkaround);
+ mEnableATIDepthWorkaround->setText(i18n("Enable ATI depth workaround"));
+ connect(mEnableATIDepthWorkaround, SIGNAL(toggled(bool)), this, SLOT(slotEnableATIDepthWorkaround(bool)));
+ QToolTip::add(mEnableATIDepthWorkaround, i18n("Use this if you own a ATI card and you have <em>extreme</em> problems at selecting units"));
+ QHBox* atiValue = new QHBox(atiWorkaround);
+ (void)new QLabel(i18n("Value: "), atiValue);
+ mATIDepthWorkaroundValue = new QLineEdit(atiValue);
+ QPushButton* atiDefaultValue = new QPushButton(i18n("Default"), atiValue);
+ connect(atiDefaultValue, SIGNAL(clicked()), this, SLOT(slotATIDepthWorkaroundDefaultValue()));
+ slotATIDepthWorkaroundDefaultValue();
+ mEnableATIDepthWorkaround->setChecked(false);
+ slotEnableATIDepthWorkaround(false);
+
  QPushButton* showDetails = new QPushButton(i18n("Show &Details"), this);
  showDetails->setToggleButton(true);
  connect(showDetails, SIGNAL(toggled(bool)), this, SLOT(slotShowDetails(bool)));
@@ -661,6 +677,18 @@ void OpenGLOptions::apply()
  boConfig->setUseMaterials(mUseMaterials->isChecked());
  boConfig->setUseLOD(useLOD());
  boConfig->setUIntValue("DefaultLOD", defaultLOD());
+ boConfig->setBoolValue("EnableATIDepthWorkaround", mEnableATIDepthWorkaround->isChecked());
+ if (mEnableATIDepthWorkaround->isChecked()) {
+	bool ok = false;
+	double d = mATIDepthWorkaroundValue->text().toDouble(&ok);
+	if (!ok) {
+		d = 0.00390625;
+	}
+	boConfig->setDoubleValue("ATIDepthWorkaroundValue", d);
+	Bo3dTools::enableReadDepthBufferWorkaround((float)d);
+ } else {
+	Bo3dTools::disableReadDepthBufferWorkaround();
+ }
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -839,6 +867,16 @@ void OpenGLOptions::setDefaultLOD(unsigned int l)
 		mDefaultLOD->setCurrentItem(1);
 		break;
  }
+}
+
+void OpenGLOptions::slotEnableATIDepthWorkaround(bool e)
+{
+ mATIDepthWorkaroundValue->setEnabled(e);
+}
+
+void OpenGLOptions::slotATIDepthWorkaroundDefaultValue()
+{
+ mATIDepthWorkaroundValue->setText(QString::number(0.00390625));
 }
 
 //////////////////////////////////////////////////////////////////////
