@@ -2479,8 +2479,8 @@ void Boson::bosonAddPlayer(KPlayer* player)
  blockSignals(blocks);
 #else
  // we can safely call KGame::addPlayer() directly
- KGame::addPlayer(player);
 #endif
+ KGame::addPlayer(player);
 }
 
 void Boson::killPlayer(Player* player)
