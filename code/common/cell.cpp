@@ -57,7 +57,7 @@ bool Cell::canGo(uint goFlag)
 
 	if (flags&request_f) {
 		printf("requested cell\n");
-		return true;
+		return false;
 	}
 
 	if (!isKnown()) {
