@@ -821,6 +821,50 @@ QByteArray BosonMap::saveHeightMapImage()
  return array;
 }
 
+QByteArray BosonMap::saveTexMapImage(unsigned int texture)
+{
+ // this function is sloooow !
+ if (!width() || !height()) {
+	boError() << k_funcinfo << "Cannot save empty map" << endl;
+	return QByteArray();
+ }
+ QImage image;
+ if (!image.create(width() + 1, height() + 1, 32, 0)) { // AB: 16bpp isnt available for X11 (only for qt embedded)
+	boError() << k_funcinfo << "Unable to create texmap!" << endl;
+	return QByteArray();
+ }
+ boDebug() << k_funcinfo << "texmap: " << image.width() << "x" << image.height() << endl;
+ if (!mHeightMap) {
+	boDebug() << k_funcinfo << "dummy texmap..." << endl;
+	image.fill(0);
+ } else {
+	boDebug() << k_funcinfo << "real texmap" << endl;
+	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
+	for (int y = 0; y < image.height(); y++) {
+		uint* p = (uint*)image.scanLine(y);
+		for (int x = 0; x < image.width(); x++) {
+			int v = (int)texMapAlpha(texture, x, y);
+			*p = qRgb(v, v, v);
+			p++;
+		}
+	}
+ }
+
+ if (!image.isGrayscale()) {
+	boError() << k_funcinfo << "not a grayscale image!!" << endl;
+	return QByteArray();
+ }
+
+ QByteArray array;
+ QDataStream stream(array, IO_WriteOnly);
+ QImageIO io;
+ io.setIODevice(stream.device());
+ io.setFormat("PNG");
+ io.setImage(image);
+ io.write();
+ return array;
+}
+
 void BosonMap::createCells()
 {
  if (mCells) {
