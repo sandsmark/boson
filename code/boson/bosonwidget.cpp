@@ -169,7 +169,6 @@ void BosonWidget::init()
  d->mDisplayList.setAutoDelete(true);
  d->mIOList.setAutoDelete(true);
 
- BosonConfig::initBosonConfig(); // initialize global config
  BosonMusic::initBosonMusic(); 
 
  d->mCanvas = new BosonCanvas(this);
@@ -255,7 +254,7 @@ void BosonWidget::addMiniMap()
 void BosonWidget::reparentMiniMap(QWidget* parent)
 {
  d->mMiniMap->reparent(parent, QPoint(0, 0));
- d->mMiniMap->show();
+ d->mMiniMap->hide();
 }
 
 void BosonWidget::initChat()
@@ -275,6 +274,8 @@ void BosonWidget::addLocalPlayer()
 		this, SLOT(slotUnfog(int, int)));
  connect(p, SIGNAL(signalFog(int, int)),
 		this, SLOT(slotFog(int, int)));
+ connect(p, SIGNAL(signalShowMiniMap(bool)),
+		d->mMiniMap, SLOT(slotShowMap(bool)));
  d->mBoson->addPlayer(p);
 
  CommandInput* cmdInput = new CommandInput;

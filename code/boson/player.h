@@ -24,6 +24,7 @@
 class QCanvasPixmapArray;
 class QColor;
 class Unit;
+class Facility;
 class SpeciesTheme;
 class UnitProperties;
 class BosonMap;
@@ -87,6 +88,19 @@ public:
 
 	void initMap(BosonMap* map);
 
+	/**
+	 * Called by @ref Facility when the construction has been completed.
+	 * When this facility has some special functions they should be
+	 * activated now (e.g. the mini map for the radar station)
+	 **/
+	void facilityCompleted(Facility* fac);
+
+	/**
+	 * @return TRUE if the player can display a minimap (i.e. he has a radar
+	 * station), otherwise FALSE.
+	 **/
+	bool hasMiniMap() const;
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
@@ -96,6 +110,8 @@ signals:
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
+
+	void signalShowMiniMap(bool show);
 
 public slots:
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);

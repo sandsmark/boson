@@ -22,7 +22,7 @@
 #include <klocale.h>
 #include <kdebug.h>
 
-class MobileProperties
+class UnitProperties::MobileProperties
 {
 public:
 	MobileProperties()
@@ -36,7 +36,7 @@ public:
 	bool mCanMineOil;
 };
 
-class FacilityProperties
+class UnitProperties::FacilityProperties
 {
 public:
 	FacilityProperties()
@@ -52,32 +52,32 @@ class UnitProperties::UnitPropertiesPrivate
 public:
 	UnitPropertiesPrivate()
 	{
-		mMobileProperties = 0;
-		mFacilityProperties = 0;
 	}
 
 	unsigned long int mArmor;
 	unsigned long int mShields;
-
-	MobileProperties* mMobileProperties;
-	FacilityProperties* mFacilityProperties;
 };
 
 UnitProperties::UnitProperties()
 {
  d = new UnitPropertiesPrivate;
+ mMobileProperties = 0;
+ mFacilityProperties = 0;
 }
 
 UnitProperties::UnitProperties(const QString& fileName)
 {
  d = new UnitPropertiesPrivate;
+ mMobileProperties = 0;
+ mFacilityProperties = 0;
+
  loadUnitType(fileName);
 }
 
 UnitProperties::~UnitProperties()
 {
- delete d->mMobileProperties;
- delete d->mFacilityProperties;
+ delete mMobileProperties;
+ delete mFacilityProperties;
  delete d;
 }
 
@@ -110,6 +110,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft());
  mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()));
+ mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
 
  if (isFacility) {
@@ -124,30 +125,30 @@ void UnitProperties::loadUnitType(const QString& fileName)
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- d->mMobileProperties = new MobileProperties;
- d->mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
- d->mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
- d->mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
- d->mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", false);
- d->mMobileProperties->mCanMineOil= conf->readBoolEntry("CanMineOil", false);
+ mMobileProperties = new MobileProperties;
+ mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
+ mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
+ mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
+ mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", false);
+ mMobileProperties->mCanMineOil= conf->readBoolEntry("CanMineOil", false);
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
- d->mFacilityProperties = new FacilityProperties;
- d->mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
- d->mFacilityProperties->mProducerList = conf->readIntListEntry("ProducerList");
+ mFacilityProperties = new FacilityProperties;
+ mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
+ mFacilityProperties->mProducerList = conf->readIntListEntry("ProducerList");
 }
 
 bool UnitProperties::isMobile() const
 {
- return (d->mMobileProperties != 0);
+ return (mMobileProperties != 0);
 }
 
 bool UnitProperties::isFacility() const
 {
- return (d->mFacilityProperties != 0);
+ return (mFacilityProperties != 0);
 }
 
 unsigned long int UnitProperties::armor() const
@@ -172,42 +173,42 @@ unsigned long int UnitProperties::oilCost() const
 
 double UnitProperties::speed() const
 {
- if (!d->mMobileProperties) {
+ if (!mMobileProperties) {
 	return 0;
  }
- return d->mMobileProperties->mSpeed;
+ return mMobileProperties->mSpeed;
 }
 
 bool UnitProperties::canGoOnLand() const
 {
- if (!d->mMobileProperties) {
+ if (!mMobileProperties) {
 	return true; // even facilities can go there.
  }
- return d->mMobileProperties->mCanGoOnLand;
+ return mMobileProperties->mCanGoOnLand;
 }
 
 bool UnitProperties::canGoOnWater() const
 {
- if (!d->mMobileProperties) {
+ if (!mMobileProperties) {
 	return false;
  }
- return d->mMobileProperties->mCanGoOnWater;
+ return mMobileProperties->mCanGoOnWater;
 }
 
 bool UnitProperties::canProduce() const
 {
- if (!d->mFacilityProperties) {
+ if (!mFacilityProperties) {
 	return false;
  }
- return d->mFacilityProperties->mCanProduce;
+ return mFacilityProperties->mCanProduce;
 }
 
 QValueList<int> UnitProperties::producerList() const
 {
- if (!d->mFacilityProperties) {
+ if (!mFacilityProperties) {
 	return QValueList<int>();
  }
- return d->mFacilityProperties->mProducerList;
+ return mFacilityProperties->mProducerList;
 }
 
 unsigned int UnitProperties::productionTime() const
@@ -217,17 +218,17 @@ unsigned int UnitProperties::productionTime() const
 
 bool UnitProperties::canMineMinerals() const
 {
- if (!d->mMobileProperties) {
+ if (!mMobileProperties) {
 	return false;
  }
- return d->mMobileProperties->mCanMineMinerals;
+ return mMobileProperties->mCanMineMinerals;
 }
 
 bool UnitProperties::canMineOil() const
 {
- if (!d->mMobileProperties) {
+ if (!mMobileProperties) {
 	return false;
  }
- return d->mMobileProperties->mCanMineOil;
+ return mMobileProperties->mCanMineOil;
 }
 

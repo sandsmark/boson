@@ -84,6 +84,12 @@ public slots:
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
 
+	/**
+	 * Show or hide the minimap, depending on show. This slot is called when
+	 * the radar station is constructed or destroyed.
+	 **/
+	void slotShowMap(bool show);
+
 protected:
 	void setPoint(int x, int y, const QColor& color);
 	virtual void paintEvent(QPaintEvent*);
