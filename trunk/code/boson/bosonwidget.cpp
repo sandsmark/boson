@@ -174,6 +174,8 @@ void BosonWidget::init()
 		this, SIGNAL(signalPlayerLeftGame(KPlayer*)));
  connect(d->mBoson, SIGNAL(signalInitMap(const QByteArray&)),
 		this, SLOT(slotReceiveMap(const QByteArray&)));
+ connect(d->mBoson, SIGNAL(signalInitFogOfWar()),
+		this, SLOT(slotInitFogOfWar()));
  connect(d->mBoson, SIGNAL(signalStartScenario()),
 		this, SLOT(slotStartScenario()));
  connect(d->mBoson, SIGNAL(signalMapChanged(const QString&)),
@@ -401,8 +403,11 @@ void BosonWidget::slotStartGame()
 	return;
  }
 
- d->mCanvas->initFogOfWar(d->mLocalPlayer); //could be used for editor as well - to see what a player can see
- d->mMiniMap->initFogOfWar(d->mLocalPlayer);
+// put fog of war on the map. We don't do this before so that the player can
+// look at the map and choose whether they want to playe there.
+ d->mBoson->sendMessage(0, BosonMessage::IdInitFogOfWar);
+
+// start the chosen scenario.
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
 }
 
@@ -578,7 +583,7 @@ void BosonWidget::startEditor()
  slotLoadMap(BosonMap::defaultMap());
  slotLoadScenario(BosonScenario::defaultScenario()); // perhaps this should load the map as well - as it depends on the map...
 
-
+// start the chosen scenario
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
 }
 
@@ -766,3 +771,10 @@ void BosonWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
 		break;
  }
 }
+
+void BosonWidget::slotInitFogOfWar()
+{
+ d->mCanvas->initFogOfWar(d->mLocalPlayer); //could be used for editor as well - to see what a player can see
+ d->mMiniMap->initFogOfWar(d->mLocalPlayer);
+}
+
