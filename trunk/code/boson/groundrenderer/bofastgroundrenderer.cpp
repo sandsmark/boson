@@ -104,10 +104,6 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		int w;
 		int h;
 		BoGroundRenderer::getCell(renderCells, j, &x, &y, &w, &h);
-		if (w != 1 || h != 1 || x < 0 || y < 0) {
-			boError() << k_funcinfo << x << " " << y << " " << w << " " << h << endl;
-			continue;
-		}
 		count++;
 
 		int celloffset = y * cornersWidth + x;
