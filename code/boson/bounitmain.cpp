@@ -22,10 +22,15 @@
 #include "bodebugdcopiface.h"
 #include "boversion.h"
 #include "boapplication.h"
+#include "bosonconfig.h"
+#include "boglobal.h"
+#include "bodebug.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
 #include <klocale.h>
+
+static void postBosonConfigInit();
 
 static const char *description =
     I18N_NOOP("Unit Editor for Boson");
@@ -52,6 +57,8 @@ int main(int argc, char **argv)
  about.addAuthor( "Andreas Beckermann", I18N_NOOP("Coding & Current Maintainer"), "b_mann@gmx.de" );
  about.addAuthor( "Rivo Laks", I18N_NOOP("Design & Coding"), "rivolaks@hot.ee" );
 
+ BosonConfig::setPostInitFunction(&postBosonConfigInit);
+
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  BoApplication app;
@@ -69,4 +76,14 @@ int main(int argc, char **argv)
  return r;
 }
 
+
+static void postBosonConfigInit()
+{
+ BosonConfig* conf = BoGlobal::boGlobal()->bosonConfig();
+ if (!conf) {
+	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
+	return;
+ }
+ conf->setDisableSound(true);
+}
 
