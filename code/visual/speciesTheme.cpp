@@ -23,8 +23,7 @@
 #include <qwmatrix.h>
 #include <qbitarray.h>
 #include <qimage.h>
-
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include <kstddirs.h>
 #include <kinstance.h>
@@ -46,8 +45,8 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 	fixSmallOverview	= new (QPixmap*)[facilityPropNb];
 
 
-	mobSprite		= new (QwSpritePixmapSequence*)[mobilePropNb];
-	fixSprite		= new (QwSpritePixmapSequence*)[facilityPropNb];
+	mobSprite		= new (QCanvasPixmapArray*)[mobilePropNb];
+	fixSprite		= new (QCanvasPixmapArray*)[facilityPropNb];
 
 
 	mobiles			= new QBitArray(mobilePropNb);
@@ -112,7 +111,7 @@ QString		path(*themePath + "/units/" + mobileProp[index].name);
 for(j=0; j<12; j++) {
 	sprintf(buffer, "/field.%02d.bmp", j);
 	if ( ! loadPixmap(path + buffer, &p)) {
-		logf(LOG_ERROR, "SpeciesTheme : Can't load(mob) %s/Field.%02d.bmp ...\n", (const char *)path, j);
+		logf(LOG_ERROR, "SpeciesTheme : Can't load(mob) %s/field.%02d.bmp ...\n", (const char *)path, j);
 		return false;
 		}
 	pix_l.append(p);
@@ -120,7 +119,7 @@ for(j=0; j<12; j++) {
 	point_l.append(pp);
 }
 
-mobSprite[index] = new QwSpritePixmapSequence(pix_l, point_l);
+mobSprite[index] = new QCanvasPixmapArray(pix_l, point_l);
 
 /* big overview */
 if (!loadPixmap(path + "/overview.big.bmp", &mobBigOverview[index], false)) {
@@ -150,8 +149,6 @@ bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix, bool withMask)
 	static const QRgb background  = qRgb(255,  0, 255) & RGB_MASK ;
 	static const QRgb background2 = qRgb(248, 40, 240) & RGB_MASK ;
 
-
-	
 	w = image.width(); h = image.height();
 
 	boAssert(image.depth()==32);
@@ -200,6 +197,12 @@ bool speciesTheme::loadPixmap(const QString &path, QPixmap **pix, bool withMask)
 
 	*pix = new QPixmap;
 	m = new QBitmap;
+
+	if (image.isNull() || w < 32 || h < 32)  {
+		logf(LOG_ERROR, "speciesTheme : image is null");
+		return false;
+	}
+
 	(*pix)->convertFromImage(image);
 	
 	if (withMask) {
@@ -229,7 +232,7 @@ QString		path(*themePath + "/facilities/" + facilityProp[i].name);
 for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	sprintf(buffer, "/field.%03d.bmp", j);
 	if (!loadPixmap(path + buffer, &p)) {
-		logf(LOG_ERROR, "SpeciesTheme : Can't load(fix) %s/Field.%03d.bmp ...\n", (const char *)path, j);
+		logf(LOG_ERROR, "SpeciesTheme : Can't load(fix) %s/field.%03d.bmp ...\n", (const char *)path, j);
 		return false;
 	}
 	pix_l.append(p);
@@ -237,7 +240,7 @@ for(j=0; j< CONSTRUCTION_STEP ; j++) {
 	point_l.append(pp);
 	}
 
-fixSprite[i] = new QwSpritePixmapSequence(pix_l, point_l);
+fixSprite[i] = new QCanvasPixmapArray(pix_l, point_l);
 
 /* big overview */
 if (!loadPixmap(path + "/overview.big.bmp", &fixBigOverview[i], false)) {
@@ -304,7 +307,7 @@ QPixmap	* speciesTheme::getSmallOverview(facilityType unit)
 /*
  *   Main Pixmaps
  */
-QwSpritePixmapSequence *speciesTheme::getPixmap(mobType unit)
+QCanvasPixmapArray *speciesTheme::getPixmap(mobType unit)
 {
 	if (!mobiles->testBit(unit))
 		loadMob(unit);
@@ -314,7 +317,7 @@ QwSpritePixmapSequence *speciesTheme::getPixmap(mobType unit)
 }
 
 
-QwSpritePixmapSequence *speciesTheme::getPixmap(facilityType unit)
+QCanvasPixmapArray *speciesTheme::getPixmap(facilityType unit)
 {
 	if (!facilities->testBit(unit))
 		loadFix(unit);

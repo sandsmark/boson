@@ -86,7 +86,7 @@ void mainView::keyReleaseEvent ( QKeyEvent * e )
 void mainView::slotEditDestroy(void)
 {
 	int mkey;
-	editorField  *field = (editorField*)vfield;
+	editorField  *field = (editorField*)bocanvas;
 
 	if (view->fixSelected) {
 		/* destroy fix */

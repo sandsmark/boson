@@ -174,7 +174,7 @@ switch(tag) {
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
-		field->update();		// QwSpriteField periodical rendering
+		field->update();		// QCanvas periodical rendering
 		break;
 
 	case MSG_MAP_DISCOVERED :
@@ -249,7 +249,6 @@ switch(tag) {
 
 	case MSG_MOBILE_CREATED :
 		ASSERT_DATA_BLENGHT(sizeof(data->mobile));
-		//printf("mobile_created : who = %d\n", data->mobile.who);
 		fflush(stdout);
 		logf(LOG_GAME_HIGH, "mobile(%d) created at %d,%d", 
 			(int)data->mobile.type,

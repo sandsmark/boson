@@ -32,8 +32,7 @@
   
 
 visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*parent, const char *name, WFlags f)
-	: QWidget(parent, name, f)
-	, QwAbsSpriteFieldView(v->field)
+	: QCanvasView(bocanvas,parent,name,f)
 {
 
 //setBackgroundColor(black);
@@ -45,6 +44,10 @@ visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*paren
 /* the visualView */
 view = v;
 
+// QScrollView stuff 
+setVScrollBarMode( AlwaysOff);
+setHScrollBarMode( AlwaysOff);
+
 // connect(, SIGNAL(), this, SLOT());
 connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
 connect(this, SIGNAL(relativeReCenterView(int, int)), view, SLOT(relativeReCenterView(int, int)));
@@ -54,7 +57,6 @@ connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
 
 visualBigDisplay::~visualBigDisplay()
 {
-	QwAbsSpriteFieldView::view(0);
 }
 
 
@@ -86,20 +88,24 @@ boAssert(p.backgroundColor() == black);
 }
 
 
-void visualBigDisplay::paintEvent(QPaintEvent *evt)
+/*
+void visualBigDisplay::drawContents( QPainter *p, int cx, int cy, int cw, int ch )
 {
-	if (viewing) {
-		QRect r = evt->rect();
+	QRect r(cx,cy,cw,ch);
+	if (canvas()) {
+
 ///orzel : should be removed :
-		r = rect();
+//		r = rect();
 //printf("r = %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
 		r.moveBy(view->X() * BO_TILE_SIZE, view->Y() * BO_TILE_SIZE);
 //printf("visualBigDisplay::paintEvents, moved : %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
-		viewing->updateInView(this, r);
-	}
+		canvas()->drawArea(r,p,!repaint_from_moving);
+		repaint_from_moving = FALSE;
 
-}
-
+	} else {
+		p->eraseRect(r);
+} 
+*/
 
 void visualBigDisplay::mouseMoveEvent(QMouseEvent *e)
 {
@@ -223,7 +229,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			view->unSelectAll();
 			}
 	
-		QwSpriteFieldGraphic *sfg = view->field->findUnitAt( x, y);
+		QCanvasItem *sfg = view->field->findUnitAt( x, y);
 
 		if (!sfg) {
 			// nothing has been found : it's a ground-click

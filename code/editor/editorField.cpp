@@ -22,8 +22,8 @@
 
 #include "editorField.h"
   
-editorField::editorField(QObject *parent, const char *name)
-	: visualField(parent,name)
+editorField::editorField()
+	: visualField()
 {
 	mobiles.resize(149);
 	facilities.resize(149);
@@ -46,8 +46,11 @@ bool editorField::Load(QString filename)
 
 	if (!openRead(filename.data())) return false;
 	
+
+	puts("hop1");
 	
 	resize(map_width, map_height);
+	puts("hop2");
 
 	/* creation of the ground map */
 	cells = new (visualCell *)[map_width];
@@ -56,17 +59,21 @@ bool editorField::Load(QString filename)
 	cells_allocated = true;
 
 	
+	puts("hop3");
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
+//			printf("loading cell %d,%d\n", i, j );
 			boFile::load( c);
+			// bypassing it until qcanvas-port-related bug is done
+			continue;
 			if (c.getGroundType() != GROUND_UNKNOWN) {
 				cells[i][j].set(c.getGroundType(), i, j);
-				cells[i][j].setFrame(c.getItem());
+				cells[i][j]._setFrame(c.getItem());
 			} else {
 				// orzel : ugly, should be handled a _lot_ more nicely
 				cells[i][j].set( GROUND_WATER, i, j);
-				cells[i][j].z( Z_INVISIBLE);
+				cells[i][j].setZ( Z_INVISIBLE);
 				cells[i][j].set( GROUND_UNKNOWN);
 				boAssert (
 					(i>0 && IS_BIG_TRANS(cells[i-1][j].getGroundType())) ||
@@ -74,18 +81,21 @@ bool editorField::Load(QString filename)
 					(i>0 && j>0 && IS_BIG_TRANS(cells[i-1][j-1].getGroundType())) );
 			}
 		}
+	puts("hop4");
 	
 	/* checking */
 	for (int i=0; i< 3; i++)
 		for (int j=0; j< 3; j++)
 			boAssert(0 <= cells[i][j].getGroundType());
 
+	puts("hop5");
 
 	for (i=0; i<nbMobiles; i++) {
 		boFile::load(mob);
 		if (!isOk()) return false;
 		createMobUnit(mob);
 	}
+	puts("hop6");
 
 	for (i=0; i<nbFacilities; i++) {
 		boFile::load(fix);
@@ -93,6 +103,7 @@ bool editorField::Load(QString filename)
 		createFixUnit(fix);
 	}
 
+	puts("hop7");
 	// ok, it's all right
 	Close();
 	modified = false;
@@ -143,7 +154,7 @@ bool editorField::New(groundType fill_ground, uint w, uint h, const QString &nam
 
 	freeRessources();
 
-	/* QwSpriteField configuratoin */
+	/* QCanvas configuratoin */
 	resize(w,h);
 	
 	/* boFile configuration */
@@ -162,7 +173,7 @@ bool editorField::New(groundType fill_ground, uint w, uint h, const QString &nam
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
 			cells[i][j].set( fill_ground, i, j);
-			cells[i][j].setFrame((3*i+5*j)%4);
+			cells[i][j]._setFrame((3*i+5*j)%4);
 		}
 
 	modified = true;
@@ -279,7 +290,7 @@ void editorField::deleteCell(int x, int y)
 	/* actually delete the cell */
 	modified = true;
 	cells[x][y].set(GROUND_UNKNOWN);
-	cells[x][y].z( Z_INVISIBLE);
+	cells[x][y].setZ( Z_INVISIBLE);
 
 	/* deal with big tiles */
 	if ( IS_BIG_TRANS( oldg )) {

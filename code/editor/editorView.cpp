@@ -28,7 +28,7 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include <kapp.h>
 
@@ -170,7 +170,7 @@ void editorView::setTransRef(int r)
 
 void editorView::redrawTiles(void)
 {
-	QwSpritePixmapSequence *seq;
+	QCanvasPixmapArray *seq;
 	int 	i;
 
 	

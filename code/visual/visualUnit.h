@@ -21,19 +21,20 @@
 #ifndef VISUALUNIT_H 
 #define VISUALUNIT_H 
 
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include "common/unit.h"
 #include "sprites.h"
+#include "visual.h"
 
 
 class selectPart;
 
 
-class visualUnit : public QwSprite
+class visualUnit : public QCanvasSprite
 {
 public:
-	visualUnit(int k, QwSpritePixmapSequence* s) : QwSprite(s), key(k)
+	visualUnit(int k, QCanvasPixmapArray* s) : QCanvasSprite(s, bocanvas), key(k)
 		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; }
 	
 	void	unSelect();
@@ -62,14 +63,14 @@ class visualMobUnit : public mobUnit, public visualUnit
   visualMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
   ~visualMobUnit();
 
-	/** make the connection with <i>non-virtual</i> QwSpriteField functions */
+	/** make the connection with <i>non-virtual</i> QCanvas* functions */
 	virtual	int	_x(void) {return x();}
 	virtual	int	_y(void) {return y();}
 
 /* attachement */
   void  select();
 
-/* Qw stuff */
+/* QCanvas stuff */
   virtual int rtti() const { return S_MOBILE+type; }
 
 };
@@ -86,14 +87,14 @@ class visualFacility : public Facility, public visualUnit
   visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
   ~visualFacility();
 
-	/** make the connection with <i>non-virtual</i> QwSpriteField functions */
+	/** make the connection with <i>non-virtual</i> QCanvas* functions */
 	virtual	int	_x(void) {return x();}
 	virtual	int	_y(void) {return y();}
 
 /* attachement */
   void  select();
 
-/* Qw stuff */
+/* QCanvas stuff */
   virtual int	rtti() const { return S_FACILITY+type; }
 
 };

@@ -172,6 +172,7 @@ bool playerMobUnit::checkMove(int newx, int newy)
 	int ty;
 	int g;
 
+	/* XXXX  
 	Pix p = neighbourhood( newx, newy);
 	
 	if (goFlag() == BO_GO_AIR) { // we are a flyer
@@ -211,9 +212,9 @@ bool playerMobUnit::checkMove(int newx, int newy)
 						return false;
 						}
 					else continue;
-				/*printf("%s, ", (IS_PLAIN(g))?
-					groundProp[g].name:
-					groundTransProp[ GET_TRANS_REF(g) ].name); */
+			//	printf("%s, ", (IS_PLAIN(g))?
+			//		groundProp[g].name:
+			//		groundTransProp[ GET_TRANS_REF(g) ].name); 
 				continue;// unreachable ?
 				}
 			if (ty < S_FACILITY) {		// S_MOBILE
@@ -232,6 +233,7 @@ bool playerMobUnit::checkMove(int newx, int newy)
 			}
 	//end(p); 
 	// not needed because we have reached the end of the list
+	*/	
 
 	return true;
 }
@@ -251,7 +253,7 @@ void playerMobUnit::turnTo(int newdir)
 		}
 	else logf(LOG_ERROR, "turnTo : unexpected mobileProp.speed..."); ///orzel : test should be removed
 
-	frame(direction);
+	setFrame(direction);
 }
 
 
@@ -305,7 +307,7 @@ void playerMobUnit::doMoveTo(int newx, int newy)
 	int dx = newx - x();
 	int dy = newy - y();
 
-	moveTo(newx,newy);
+	move(newx,newy);
 	emit sig_moveTo(newx, newy);
 
 	if (sp_up) sp_up->moveBy(dx,dy);
@@ -319,7 +321,7 @@ if ( who!=who_am_i) {
 	/* this not my unit */
 	doMoveTo(newx, newy);
 	direction = dir;
-	frame(dir);
+	setFrame(dir);
 	return;
 	}
 
@@ -351,7 +353,7 @@ if (x()==dest_x && y()==dest_y) {
 
 /***** users orders *********/
 
-void playerMobUnit::u_goto(int mx, int my) // not the same as QwSprite::moveTo
+void playerMobUnit::u_goto(int mx, int my) // not the same as QCanvasSprite::moveTo
 {
 	if (target) {
 		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
@@ -421,7 +423,7 @@ void playerMobUnit::targetMoveTo(int newx, int newy)
 
 void playerMobUnit::shooted(int _power)
 {
-	if (sp_up) sp_up->frame(_power);
+	if (sp_up) sp_up->setFrame(_power);
 }
   
 
@@ -452,7 +454,7 @@ playerFacility::~playerFacility()
 void playerFacility::s_setState(int s)
 {
 	boAssert(frame()==s-1);
-	frame(s);
+	setFrame(s);
 }
 
 
@@ -483,7 +485,7 @@ void playerFacility::targetMoveTo(int newx, int newy)
 
 void playerFacility::shooted(int _power)
 {
-	if (sp_up) sp_up->frame(_power);
+	if (sp_up) sp_up->setFrame(_power);
 }
   
 

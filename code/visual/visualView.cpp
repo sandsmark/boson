@@ -173,7 +173,7 @@ void visualView::selectMob(long key, visualMobUnit *m)
 
 void visualView::selectArea(int x1, int y1, int x2, int y2)
 {
-	Pix p;
+	QCanvasItemList qcitl;
 	visualMobUnit *u;
 	int t;
  
@@ -191,6 +191,9 @@ void visualView::selectArea(int x1, int y1, int x2, int y2)
         }
 
 	/* selection */
+	qcitl = field->collisions( QRect(x1,y1,x2-x1,y2-y1) );
+
+	/* XXXX  
 	for( p = field->lookIn(x1,y1,x2-x1,y2-y1); p; field->next(p))
 		if (IS_MOBILE(field->at(p)->rtti()) )  { //found one
 //		if (IS_MOBILE(field->at(p)->rtti()) && field->exact(p))  { //found one
@@ -199,5 +202,6 @@ void visualView::selectArea(int x1, int y1, int x2, int y2)
 			if (!mobSelected.find(u->key))			// already selected ?
 				selectMob(u->key, u); //, puts("bof");
 		}
+		*/
 }
 

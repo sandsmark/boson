@@ -29,7 +29,7 @@
 class QString;
 class QBitArray;
 class QPixmap;
-class QwSpritePixmapSequence;
+class QCanvasPixmapArray;
 
 /** 
   * This class handles the drawing of the different units for a given specy(ie?)
@@ -40,8 +40,8 @@ public:
 	speciesTheme(char *themeName, QRgb c);
 	~speciesTheme();
 
-	QwSpritePixmapSequence *getPixmap(mobType unit);
-	QwSpritePixmapSequence *getPixmap(facilityType unit);
+	QCanvasPixmapArray *getPixmap(mobType unit);
+	QCanvasPixmapArray *getPixmap(facilityType unit);
 
 	QPixmap		*getBigOverview(mobType unit);
 	QPixmap		*getBigOverview(facilityType unit);
@@ -72,7 +72,7 @@ private:
 	QPixmap		**mobSmallOverview;	// pixmaps for the control panel
 	QPixmap		**fixSmallOverview;	// pixmaps for the control panel
 
-	QwSpritePixmapSequence
+	QCanvasPixmapArray
 			**mobSprite,		// all sprites for a given mobile
 			**fixSprite;		// all sprites for a giver facility
 

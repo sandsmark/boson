@@ -2894,16 +2894,6 @@ AC_DEFUN(KDE_CHECK_HEADER,
    AC_LANG_RESTORE
 ])
 
-AC_DEFUN(KDE_CHECK_QWSPRITEFIELD,
-[
-  KDE_CHECK_HEADER(QwSpriteField.h, ,
-  [
-    AC_MSG_WARN([you don't have QwSpriteField.h somewhere. Please install
-       QwSpriteField out of kdesupport.])
-      $1
-  ])
-])
-
 AC_DEFUN(KDE_FAST_CONFIGURE,
 [
   dnl makes configure fast (needs perl)

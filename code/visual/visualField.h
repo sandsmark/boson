@@ -24,8 +24,7 @@
 
 #include <qobject.h>
 #include <qintdict.h>
-
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include "common/groundType.h"
 
@@ -45,13 +44,13 @@ class visualMobUnit;
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class visualField : public QObject, public QwSpriteField
+class visualField : public QCanvas
 {
 
 	Q_OBJECT
 
 public:
-	visualField(uint l, uint h, QObject *parent=0, const char *name=0L);
+	visualField( uint , uint );
 
 /* geometry ? , still public */
 	int		maxX, maxY;	// size of the map
@@ -59,13 +58,13 @@ public:
 
 	void setCell(int i, int j, groundType g);
 	/** find the unit at this position */
-	QwSpriteFieldGraphic	*findUnitAt(int x, int y);
+	QCanvasItem		*findUnitAt(int x, int y);
 	groundType		findGroundAt(int x, int y);
 	
 	
 	virtual void resize (int, int);
 protected:
-	visualField(QObject *parent=0, const char *name=0L); // to be used by editorField
+	visualField();		// to be used by editorField
 	void init(void);
 
 signals:

@@ -67,8 +67,8 @@ visualMobUnit::visualMobUnit(mobileMsg_t *msg, QObject* parent, const char *name
 	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
 {
 
-	z(Z_MOBILE + 3 * type);
-	moveTo(msg->x, msg->y);
+	setZ	(Z_MOBILE + 3 * type);
+	move	(msg->x, msg->y);
 }
 
 visualMobUnit::~visualMobUnit()
@@ -86,9 +86,9 @@ void visualMobUnit::select()
 	boAssert(!sp_down);
 
 	sp_up = new selectPart(power, z(), selectPart::PART_UP);
-	sp_up->moveTo(r.right(), r.top());
+	sp_up->move(r.right(), r.top());
 	sp_down = new selectPart(9, z(), selectPart::PART_DOWN);
-	sp_down->moveTo(r.left(), r.bottom());
+	sp_down->move(r.left(), r.bottom());
 }
 
 
@@ -99,10 +99,10 @@ visualFacility::visualFacility(facilityMsg_t *msg, QObject* parent, const char *
 	: Facility(msg,parent,name)
 	, visualUnit(msg->key, species[msg->who]->getPixmap(msg->type))
 {
-	z(Z_FACILITY);
-	moveTo(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
+	setZ	(Z_FACILITY);
+	move	(BO_TILE_SIZE * msg->x , BO_TILE_SIZE * msg->y);
 
-	frame(msg->state);
+	setFrame(msg->state);
 }
 
 
@@ -122,9 +122,9 @@ void visualFacility::select()
 	boAssert(!sp_down);
 
 	sp_up = new selectPart(power, z(), selectPart::PART_UP);
-	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
+	sp_up->move(r.right() - PF_DELTA, r.top() + PF_DELTA);
 	sp_down = new selectPart(9, z(), selectPart::PART_DOWN);
-	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
+	sp_down->move(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
 }
 
 

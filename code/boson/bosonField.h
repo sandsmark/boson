@@ -44,7 +44,7 @@ class bosonField : public visualField
 	Q_OBJECT
 
 public:
-  bosonField(uint l, uint h, QObject *parent=0, const char *name=0L);
+  bosonField(uint l, uint h);
 
   void createMob(mobileMsg_t &);
   void unHideMob(mobileMsg_t &);

@@ -21,7 +21,7 @@
 #ifndef VISUALCELL_H 
 #define VISUALCELL_H 
 
-#include <QwSpriteField.h>
+#include <qcanvas.h>
 
 #include "common/cell.h"
 
@@ -31,7 +31,7 @@
   * This class represents one cell of the main game board
   */
 
-class visualCell : public Cell, public QwSprite
+class visualCell : public Cell, public QCanvasSprite
 {
 
 
@@ -41,9 +41,9 @@ public:
 
 	void	set	(groundType g, int i, int j);
 	void	set	(groundType g);
-	void	setFrame(byte it) { setItem(it); frame(it); }
+	void	_setFrame(byte it) { setItem(it); setFrame(it); }
   
-/* Qw stuff */
+/* QCanvas stuff */
 	virtual int rtti() const { return S_GROUND + ground; }
 
 };

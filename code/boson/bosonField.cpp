@@ -30,8 +30,8 @@
 #include "boshot.h"
 #include "game.h" 	// who_am_i
   
-bosonField::bosonField(uint w, uint h, QObject *parent, const char *name)
-	: visualField(w,h,parent,name)
+bosonField::bosonField(uint w, uint h)
+	: visualField(w,h)
 {
 	mobile.resize(149);
 	facility.resize(149);

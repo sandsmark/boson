@@ -28,14 +28,13 @@
 bosonBigDisplay::bosonBigDisplay(bosonView *v, QWidget *parent, const char *name, WFlags f)
 	:visualBigDisplay(v,parent,name,f)
 {
-
 	bview = v;
 }
 
 
 void bosonBigDisplay::actionClicked(int mx, int my, int /*state*/)
 {
-	QwSpriteFieldGraphic *sfg;
+	QCanvasItem *sfg;
 
 	/* is there any mobiles of my own selected ? */
 	if (view->mobSelected.isEmpty()) return;	// nothing to do

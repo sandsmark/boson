@@ -39,7 +39,9 @@ int main(int argc, char* argv[])
 	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
 	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
 		                                                              
-	KCmdLineArgs::init( argc, argv, &aboutData );
+	static char *fake_arg= "boeditor";
+	KCmdLineArgs::init( 1, &fake_arg, &aboutData );
+	//KCmdLineArgs::init( argc, argv, &aboutData );
 
 	KApplication app;  
  

@@ -66,7 +66,7 @@ signals:
 
 public slots:
 	/* orders from user */
-	virtual void	u_goto(int, int); // not the same as QwSprite::moveTo
+	virtual void	u_goto(int, int); // not the same as QCanvasSprite::moveTo
   void  u_stop(void);	
   void  u_attack(Unit *);
   	void targetDying(Unit *);

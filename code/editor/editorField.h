@@ -42,7 +42,7 @@ class editorField : public visualField, public boFile
 	Q_OBJECT
 
 public:
-  editorField(QObject *parent=0, const char *name=0L);
+  editorField();
   ~editorField() { freeRessources(); }
 
   void createMobUnit(mobileMsg_t &);

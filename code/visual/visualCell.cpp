@@ -27,14 +27,14 @@
 
 visualCell::visualCell(groundType g)
 	: Cell(g)
-	, QwSprite()
+	, QCanvasSprite(0, bocanvas)
 {
 	// don't do anything until set() has been called, no even a z() !
 }
 
 visualCell::visualCell(groundType g, int i, int j)
 	: Cell(g)
-	, QwSprite()
+	, QCanvasSprite(0, bocanvas)
 {
 
 	set(g,i,j);	// To be done first !
@@ -43,9 +43,11 @@ visualCell::visualCell(groundType g, int i, int j)
 void visualCell::set(groundType g, int i, int j)
 {
 	// first of all, call setSequence, else you'll get a segfault
+//	printf("visualCell::est(g=%d,i=%d,j=%d)...", g, i, j);
 	set(g);
-	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
-	z(Z_GROUND);
+	move(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
+	setZ (Z_GROUND);
+//	printf("ok\n");
 }
 
 
