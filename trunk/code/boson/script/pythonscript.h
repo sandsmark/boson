@@ -54,6 +54,8 @@ class PythonScript : public BosonScript
     static PyObject* py_addMinerals(PyObject* self, PyObject* args);
     static PyObject* py_oil(PyObject* self, PyObject* args);
     static PyObject* py_addOil(PyObject* self, PyObject* args);
+    static PyObject* py_nearestMineralLocations(PyObject* self, PyObject* args);
+    static PyObject* py_nearestOilLocations(PyObject* self, PyObject* args);
 
 
     // Units

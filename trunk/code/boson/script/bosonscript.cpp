@@ -35,6 +35,7 @@
 #include "../unitproperties.h"
 #include "../unitplugins.h"
 #include "../bosonprofiling.h"
+#include "../bosonpath.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -246,6 +247,45 @@ void BosonScript::addOil(int playerId, int amount)
   stream << (Q_INT32)amount;
   game()->sendMessage(b, BosonMessage::IdModifyOil);
 }
+
+QValueList<QPoint> BosonScript::nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return QValueList<QPoint>();
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return QValueList<QPoint>();
+  }
+
+  return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Minerals);
+}
+
+QValueList<QPoint> BosonScript::nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return QValueList<QPoint>();
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return QValueList<QPoint>();
+  }
+
+  return BosonPath::findLocations(p, x, y, n, radius, BosonPath::Oil);
+}
+
 
 /*****  Unit methods  *****/
 void BosonScript::moveUnit(int player, int id, int x, int y)

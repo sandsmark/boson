@@ -126,6 +126,18 @@ class BosonScript
      * Add given amount of oil for player with id playerId
      **/
     static void addOil(int playerId, int amount);
+    /**
+     * Finds n nearest mineral locations to point (x, y), that are visible to
+     * player with id playerId
+     * At most radius tiles are searched
+     **/
+    static QValueList<QPoint> nearestMineralLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
+    /**
+     * Finds n nearest oil locations to point (x, y), that are visible to
+     * player with id playerId
+     * At most radius tiles are searched
+     **/
+    static QValueList<QPoint> nearestOilLocations(int playerId, int x, int y, unsigned int n, unsigned int radius);
 
 
     // Units

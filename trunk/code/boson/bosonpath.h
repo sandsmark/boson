@@ -28,7 +28,10 @@
 
 
 class Unit;
+class Player;
+
 class PathNode;
+
 class QPoint;
 template<class T> class QValueList;
 
@@ -67,6 +70,9 @@ class BosonPath
      **/
     static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly, int range = 0);
 
+    enum ResourceType { Minerals, Oil, EnemyBuilding, EnemyUnit };
+    static QValueList<QPoint> findLocations(Player* player, int x, int y, int n, int radius, ResourceType type);
+
     /**
      * Returns lenght of path (in tiles)
      */
@@ -87,9 +93,9 @@ class BosonPath
     class Marking;
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
-    void getFirst(QValueList<PathNode>& list, PathNode& n);
-    void addNode(QValueList<PathNode>& list, const PathNode& n);
-    void neighbor(int& x, int& y, Direction d);
+    static void getFirst(QValueList<PathNode>& list, PathNode& n);
+    static void addNode(QValueList<PathNode>& list, const PathNode& n);
+    static void neighbor(int& x, int& y, Direction d);
     Direction reverseDir(Direction d);
     bool inRange(int x, int y);
 
