@@ -200,7 +200,11 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 bool BosonBigDisplay::actionMine(QDataStream& stream, const QPoint& canvasPos)
 {
  MobileUnit* u = (MobileUnit*)selection()->leader();
- if (u->canMine(((BosonCanvas*)canvas())->cellAt(canvasPos.x(), canvasPos.y()))) {
+ HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+ if (!h) {
+	return false;
+ }
+ if (h->canMine(((BosonCanvas*)canvas())->cellAt(canvasPos.x(), canvasPos.y()))) {
 	stream << (Q_UINT32)BosonMessage::MoveMine;
 	stream << (Q_ULONG)u->id();
 	stream << canvasPos;

@@ -239,6 +239,16 @@ public:
 		return x >= 0 && y >= 0 && x < width() && y < height();
 	}
 
+	/**
+	 * A @ref Unit must not change its @ref Unit::currentPlugin while the
+	 * plugins are locked. This is the case at the beginning of @ref
+	 * slotAdvance.
+	 *
+	 * In other words: @ref UnitPlugin::advance must not change any current
+	 * plugin of any unit.
+	 **/
+	bool unitPluginsLocked() const { return mUnitPluginsLocked; }
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -251,12 +261,6 @@ public slots:
 	 **/
 	void slotAdvance(unsigned int advanceCount);
 	
-	/**
-	 * Reimplemented for internal reasons. Don't use it. It is obsolete. Use
-	 * @ref slotAdvance instead.
-	 **/
-	virtual void advance();
-
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
 
 signals:
@@ -275,6 +279,10 @@ protected:
 	 **/
 	void changeWork();
 
+	void lockUnitPlugins() { mUnitPluginsLocked = true; }
+	void unlockUnitPlugins() { mUnitPluginsLocked = false; }
+
+
 protected slots:
 	/**
 	 * ad the tileset that has been specified using @ref loadTiles. We use
@@ -289,6 +297,8 @@ private:
 private:
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
+
+	bool mUnitPluginsLocked;
 
 	int mWidth;
 	int mHeight;

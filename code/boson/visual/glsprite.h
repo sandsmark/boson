@@ -101,12 +101,12 @@ public:
 		}
 	}
 
-	int frame() const { return model()->frame(); }
+	inline int frame() const { return model()->frame(); }
 	void setFrame(int frame) { move(x(), y(), z(), frame); }
 	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
 
-	float xVelocity() const { return mXVelocity; }
-	float yVelocity() const { return mYVelocity; }
+	inline float xVelocity() const { return mXVelocity; }
+	inline float yVelocity() const { return mYVelocity; }
 	void setXVelocity(float vx) { mXVelocity = vx; }
 	void setYVelocity(float vy) { mYVelocity = vy; }
 	void setVelocity(float vx, float vy) 

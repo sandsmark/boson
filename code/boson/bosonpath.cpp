@@ -24,7 +24,6 @@
 #include "defines.h"
 #include "player.h"
 
-#include <qcanvas.h>
 #include <qpoint.h>
 #include <sys/time.h> // only for debug
 

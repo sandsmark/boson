@@ -45,6 +45,14 @@ Game TODOs
 - Make shield reloading speed configurable
 - fix minimap-zooming. there are a few bugs when the viewport is not at top left
   of the map and we therefore have to call QPainter::translate().
+- samsite should be more vulnerable when the doors are open. decrease armor
+  then. we need to provide some config entries for indes.desktop for this,
+  specifying the frame number when armor changes. note that the frame number for
+  this must NOT depend on the .3ds file!
+- does load() and save() also work with plugins? they use the same dataHandler()
+  as units do - but at least the current plugin must be stored/loaded
+- many methods depend on a factory to be a facility. remove this dependance. a
+  production plugin can be part of a mobile unit, too
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently

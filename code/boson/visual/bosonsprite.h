@@ -67,9 +67,7 @@ public:
 	inline bool isAnimated() const { return mIsAnimated; }
 
 	/**
-	 * We reimplement this in Unit anyway. See @ref QCanvasSprite::advance
-	 * for comments on how to use advance methods. (note the QCanvas docs on
-	 * this are still valid, even though we don't use QCanvas anymore!)
+	 * See @ref Unit::advance
 	 **/
 	virtual void advance(int ) {}
 

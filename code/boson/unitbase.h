@@ -78,25 +78,22 @@ public:
 	 *
 	 * Possible value are
 	 * @li WorkNone - The unit does nothing
-	 * @li WorkProduce - a facility is producing something
+	 * WorkPlugin
 	 * @li WorkMove A unit is currently moving
-	 * @li WorkMine - a mining unit is working...
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
 	 * @li WorkDestroyed - Is destroyed
-	 * @li WorkRefine - Is refining oil or minerals
 	 * @li WorkFollow - Is following another unit
+	 * @li WorkPlugin - a @ref UnitPlugin is currently used
 	 **/
 	enum WorkType {
 		WorkNone = 0,
-		WorkProduce = 1,
 		WorkMove = 2,
-		WorkMine = 3,
 		WorkAttack = 4,
 		WorkConstructed = 5,
 		WorkDestroyed = 6,
-		WorkRefine = 7,
-		WorkFollow = 8
+		WorkFollow = 8,
+		WorkPlugin = 9
 	};
 	
 	UnitBase(const UnitProperties* prop);
@@ -105,10 +102,10 @@ public:
 	/**
 	 * Change what this unit is currently doing.
 	 **/
-	void setWork(WorkType w) 
+	virtual void setWork(WorkType w)
 	{ 
 		mWork = w;
-		setAdvanceWork(w); 
+		setAdvanceWork(w);
 	}
 
 	/**
@@ -119,7 +116,7 @@ public:
 	 * to do (concerning the Unit::advanceXYZ() methods) depending on @ref
 	 * advanceWork. This is usually the same as @ref work, but think e.g. of
 	 * a unit that should mine minerals but first needs to move to the
-	 * minerals field. It needs to have @ref WorkMine but to make moving
+	 * minerals field. It needs to have @ref WorkPlugin but to make moving
 	 * work it needs to have @ref advanceWork == @ref WorkMove.
 	 *
 	 * You need to change this only very seldom.
@@ -337,6 +334,7 @@ public:
 	 **/
 	void resetReload();
 
+
 private:
 	class UnitBasePrivate;
 	UnitBasePrivate* d;
@@ -351,6 +349,8 @@ private:
 	KGamePropertyInt mAdvanceWork;
 
 	const UnitProperties* mUnitProperties;
+
 };
 
 #endif
+

@@ -343,13 +343,18 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		QPoint pos;
 		stream >> unitId;
 		stream >> pos;
-		MobileUnit* u = (MobileUnit*)findUnit(unitId, player);
+		Unit* u = findUnit(unitId, player);
 		if (!u) {
 			kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player << endl;
 			break;
 		}
-		if (!((Unit*)u)->isMobile()) {
+		if (!u->isMobile()) {
 			kdError() << k_lineinfo << "only mobile units can mine" << endl;
+			break;
+		}
+		HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+		if (!h) {
+			kdError() << k_lineinfo << "only harvester can mine" << endl;
 			break;
 		}
 		if (u->owner() != player) {
@@ -360,7 +365,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdDebug() << "cannot mine with destroyed units" << endl;
 			break;
 		}
-		u->mineAt(pos);
+		h->mineAt(pos);
 		break;
 	}
 	case BosonMessage::MoveRefine:
@@ -386,6 +391,8 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "cannot find refinery " << refineryId << " for player " << refineryOwnerId << endl;
 			break;
 		}
+#warning TODO
+//		if (!refinery->plugin(UnitPlugin::Refinery)) {
 		if (!refinery->isFacility()) {
 			kdWarning() << k_lineinfo << "refinery must be a facility" << endl;
 			break;
@@ -398,11 +405,18 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				kdError() << k_lineinfo << "cannot find unit " << unitId << " for player " << player->id() << endl;
 				continue;
 			}
-			if (!u->isMobile()) {
-				kdError() << k_lineinfo << "must be a mobile unit" << endl;
+			if (u->isDestroyed()) {
 				continue;
 			}
-			((MobileUnit*)u)->refineAt((Facility*)refinery);
+			if (u->owner() != player) {
+				continue;
+			}
+			HarvesterPlugin* h = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+			if (!h) {
+				kdError() << k_lineinfo << "must be a harvester" << endl;
+				continue;
+			}
+			h->refineAt((Facility*)refinery);
 		}
 		break;
 		
@@ -490,16 +504,16 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
 		}
-		ProductionPlugin* production = factory->productionPlugin();
+		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// maybe not yet fully constructed
 			kdWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
 			break;
 		}
-		if (factory->work() != Unit::WorkProduce) {
+		if (factory->currentPluginType() != UnitPlugin::Production) {
 			if (production->currentProduction() == unitType) {
 				// production was stopped - continue it now
-				factory->setWork(Unit::WorkProduce);
+				factory->setPluginWork(UnitPlugin::Production);
 				emit signalUpdateProduction(factory);
 				break;
 			}
@@ -533,13 +547,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
-		Facility* factory = (Facility*)findUnit(factoryId, p);
+		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
 			kdError() << "Cannot find unit " << factoryId << endl;
-			break;
-		}
-		if (!((Unit*)factory)->isFacility()) {
-			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
 		if (unitType <= 0) {
@@ -551,7 +561,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
 			break;
 		}
-		ProductionPlugin* production = factory->productionPlugin();
+		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// should not happen here!
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
@@ -562,7 +572,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			return true;
 		}
 		if (production->currentProduction() == unitType) {
-			if (factory->work() == Unit::WorkProduce) {
+			if (factory->currentPluginType() == UnitPlugin::Production) {
 				// do not abort but just pause
 				factory->setWork(Unit::WorkNone);
 				emit signalUpdateProduction(factory);
@@ -611,7 +621,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
-		ProductionPlugin* production = factory->productionPlugin();
+		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// should not happen here!
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
@@ -1078,7 +1088,8 @@ bool Boson::buildProducedUnit(Facility* factory, unsigned long int unitType, int
 	kdError() << k_funcinfo << "NULL factory cannot produce" << endl;
 	return false;
  }
- if (!factory->productionPlugin()) {
+ ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
+ if (!production) {
 	kdError() << k_funcinfo << "factory " << factory->id() << " cannot produce" << endl;
 	return false;
  }
@@ -1098,9 +1109,9 @@ bool Boson::buildProducedUnit(Facility* factory, unsigned long int unitType, int
  } else {
 	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
  }
- 
+
  // the current production is done.
- factory->productionPlugin()->removeProduction();
+ production->removeProduction();
  emit signalUpdateProduction(factory);
  return true;
 }

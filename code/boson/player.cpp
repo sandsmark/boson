@@ -31,7 +31,6 @@
 #include <kgame/kgame.h>
 #include <kgame/kgamemessage.h>
 
-#include <qcanvas.h>
 #include <qbitarray.h>
 
 #include "player.moc"

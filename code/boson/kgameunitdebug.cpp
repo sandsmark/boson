@@ -37,6 +37,7 @@
 #include <qvgroupbox.h>
 #include <qvbox.h>
 #include <qpointarray.h>
+#include <qptrdict.h>
 
 #include "kgameunitdebug.moc"
 

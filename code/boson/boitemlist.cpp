@@ -22,7 +22,6 @@
 #include "rtti.h"
 #include "unit.h"
 
-#include <qcanvas.h>
 #include <kdebug.h>
 
 QValueList<BosonSprite*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 

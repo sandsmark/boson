@@ -209,11 +209,11 @@ signals:
 	 * This signal is emitted whenever the production list of factory
 	 * changes. This means whenever you add a unit to the queue (see @ref
 	 * Factory::productionList), pause a production (using @ref
-	 * Unit::setWork(Unit::WorkNone)) or continue a production (using @ref
-	 * Unit::setWork(Unit::WorkProduce)). This is also emitted once a
-	 * production has been completed.
+	 * Unit::setWork(Unit::WorkNone)) or continue a production
+	 *
+	 * This is also emitted once a production has been completed.
 	 **/
-	void signalUpdateProduction(Facility* factory);
+	void signalUpdateProduction(Unit* factory);
 
 	void signalNotEnoughMinerals(Player* p);
 	void signalNotEnoughOil(Player* p);

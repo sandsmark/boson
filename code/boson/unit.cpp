@@ -37,6 +37,8 @@
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
 
+#include <qpointarray.h>
+
 #include "defines.h"
 
 class Unit::UnitPrivate
@@ -60,7 +62,9 @@ public:
 	// network game.
 	Unit* mTarget;
 
-	int shieldReloadCounter;
+	int shieldReloadCounter; // FIXME: should be a KGameProperty! And in UnitBase...
+
+	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
@@ -68,6 +72,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
  d = new UnitPrivate;
+ mCurrentPlugin = 0;
  setOwner(owner);
 
  d->mDirection.registerData(IdDirection, dataHandler(), 
@@ -94,6 +99,21 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	return;
  }
  model()->setFrame(0);
+
+// create the plugins
+ if (prop->properties(PluginProperties::Production)) {
+	d->mPlugins.append(new ProductionPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Repair)) {
+	d->mPlugins.append(new RepairPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Harvester)) {
+	d->mPlugins.append(new HarvesterPlugin(this));
+ }
+ if (prop->properties(PluginProperties::Refine)) {
+//	d->mPlugins.append(new RefinePlugin(this));
+ }
+
 }
 
 Unit::~Unit()
@@ -169,6 +189,49 @@ void Unit::setHealth(unsigned long int h)
  }
 }
 
+void Unit::setWork(WorkType w)
+{
+ if (currentPlugin() && w != WorkPlugin) {
+	mCurrentPlugin = 0;
+ }
+ UnitBase::setWork(w);
+}
+
+void Unit::setPluginWork(int pluginType)
+{
+ if (canvas()->unitPluginsLocked()) {
+	kdWarning() << k_funcinfo << "Plugins locked!" << endl;
+	return;
+ }
+ UnitPlugin* p = plugin(pluginType);
+ if (!p) {
+	kdError() << k_funcinfo << id() << " does not have plugin " << pluginType << endl;
+	return;
+ }
+ setWork(WorkPlugin);
+ mCurrentPlugin = p;
+}
+
+UnitPlugin* Unit::plugin(int pluginType) const
+{
+ QPtrListIterator<UnitPlugin> it(d->mPlugins);
+ for (; it.current(); ++it) {
+	if (it.current()->pluginType() == pluginType) {
+		return it.current();
+	}
+ }
+ return 0;
+}
+
+int Unit::currentPluginType() const
+{
+ if (!currentPlugin()) {
+	return 0;
+ }
+ return currentPlugin()->pluginType();
+}
+
+
 void Unit::updateSelectBox()
 {
  if (selectBox()) {
@@ -183,7 +246,7 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 {
 // time critical function
 
- if (!moveX && !moveY && !moveZ) {
+ if (!moveX && !moveY && !moveZ || isDestroyed()) {
 	return;
  }
 
@@ -197,7 +260,9 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  // is ok, too, as item A won't be in the way in the next phase.
  // This means that be will be moved, too, but it mustn't be moved - we have a
  // collision.
- // UDPATE: we don't use QCanvas anymore - but this is still valid!
+ // UDPATE: we don't use QCanvas anymore - but this is still valid! We don't
+ // support the advance phases anymore - we actually move directly in
+ // BosonCanvas::slotAdvance()
  float oldX = x();
  float oldY = y();
  canvas()->removeFromCells(this);
@@ -206,28 +271,27 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  canvas()->unitMoved(this, oldX, oldY);
 }
 
-void Unit::advance(int phase)
+void Unit::advance(int advanceCount)
 { // time critical function !!!
-// kdDebug() << k_funcinfo << " id=" << id() << endl;
  if (isDestroyed()) {
 	return;
  }
- if (phase == 0) {
-	reloadWeapon();
-	// Reload shields
-	if(d->shieldReloadCounter >= 10) {
-		if(shields() < unitProperties()->shields()) {
-			setShields(shields() + 1);  // Maybe increase by more than 1. Or make configurable (ShieldsReload=xxx)
-		}
-		d->shieldReloadCounter = 0;
-	} else {
-		d->shieldReloadCounter++;
+ reloadWeapon();
+// Reload shields
+ if(d->shieldReloadCounter >= 10) {
+	if(shields() < unitProperties()->shields()) {
+		setShields(shields() + 1);  // Maybe increase by more than 1. Or make configurable (ShieldsReload=xxx)
 	}
- } else { // phase == 1
-	// in phase 1 the unit just gets moved *without* collision detection.
-	// That should be done on phase 0 (see e.g. advanceMoveCheck())
-	if (xVelocity() || yVelocity()) {
-		moveBy(xVelocity(), yVelocity(), 0.0);
+	d->shieldReloadCounter = 0;
+ } else {
+	d->shieldReloadCounter++;
+ }
+ if (work() == WorkPlugin) {
+	if (!currentPlugin()) {
+		kdWarning() << k_funcinfo << "NULL plugin but WorkPlugin!" << endl;
+		setWork(WorkNone);
+	} else {
+		currentPlugin()->advance(advanceCount);
 	}
  }
 }
@@ -428,6 +492,9 @@ void Unit::stopAttacking()
 
 bool Unit::save(QDataStream& stream)
 {
+ //TODO: d->mTarget
+ //we should probably add pure virtual methods save() and load() to the plugins,
+ //in order to store non-KGameProperty data there, too
  if (!UnitBase::save(stream)) {
 	kdError() << "Unit not saved properly" << endl;
 	return false;
@@ -633,20 +700,11 @@ bool Unit::isNextTo(Unit* target) const
 // MobileUnit
 /////////////////////////////////////////////////
 
-class HarvesterPlugin // FIXME: actually make a plugin!! --> UnitPlugin
-{
-public:
-	KGameProperty<int> mResourcesX;
-	KGameProperty<int> mResourcesY;
-	KGameProperty<unsigned int> mResourcesMined;
-};
-
 class MobileUnit::MobileUnitPrivate
 {
 public:
 	MobileUnitPrivate()
 	{
-		mHarvesterProperties = 0;
 		mTargetCellMarked = false;
 	}
 
@@ -654,7 +712,6 @@ public:
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
 
-	HarvesterPlugin* mHarvesterProperties; // FIXME: make a plugin!! properties is not correct anymore
 	bool mTargetCellMarked;
 };
 
@@ -674,24 +731,11 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  d->mMovingFailed.setEmittingSignal(false);
  d->mPathRecalculated.setEmittingSignal(false);
 
- if (unitProperties()->properties(PluginProperties::Harvester)) {
-	d->mHarvesterProperties = new HarvesterPlugin;
-	d->mHarvesterProperties->mResourcesMined.registerData(IdMob_ResourcesMined, dataHandler(), 
-			KGamePropertyBase::PolicyLocal, "ResourcesMined");
-	d->mHarvesterProperties->mResourcesMined.setLocal(0);
-	d->mHarvesterProperties->mResourcesX.registerData(IdMob_ResourcesX, dataHandler(), 
-			KGamePropertyBase::PolicyLocal, "ResourcesX");
-	d->mHarvesterProperties->mResourcesX.setLocal(0);
-	d->mHarvesterProperties->mResourcesY.registerData(IdMob_ResourcesY, dataHandler(), 
-			KGamePropertyBase::PolicyLocal, "ResourcesY");
-	d->mHarvesterProperties->mResourcesY.setLocal(0);
- }
  setWork(WorkNone);
 }
 
 MobileUnit::~MobileUnit()
 {
- delete d->mHarvesterProperties;
  delete d;
 }
 
@@ -731,8 +775,9 @@ void MobileUnit::advanceMove()
 		}
 		// TODO: make sure that target() hasn't moved!
 		// if it has moved also adjust waypoints
-	} else if (work() == WorkRefine) {
-		if (isNextTo(refinery())) {
+	} else if (currentPluginType() == UnitPlugin::Harvester) {
+		HarvesterPlugin* h = (HarvesterPlugin*)currentPlugin();
+		if (isNextTo(h->refinery())) {
 			kdDebug() << k_funcinfo << "refinery in range now" << endl;
 			stopMoving();
 			return;
@@ -928,110 +973,6 @@ void MobileUnit::turnTo()
  }
 }
 
-void MobileUnit::advanceMine()
-{
-//AB: this should get moved to a UnitPlugin. maybe
-//HarvesterPlugin::advanceMine()
- kdDebug() << k_funcinfo << endl;
- if (!d->mHarvesterProperties) {
-	setWork(WorkNone);
-	return;
- }
- const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
- if (resourcesMined() < prop->maxResources()) {
-	if (canMine(canvas()->cellAt(this))) {
-		const int step = (resourcesMined() + 10 <= prop->maxResources()) ? 10 : prop->maxResources() - resourcesMined();
-		d->mHarvesterProperties->mResourcesMined = resourcesMined() + step;
-		if (prop->canMineMinerals()) {
-			owner()->statistics()->increaseMinedMinerals(step);
-		} else if (prop->canMineOil()) {
-			owner()->statistics()->increaseMinedOil(step);
-		}
-		kdDebug() << "resources mined: " << resourcesMined() << endl;
-	} else {
-		kdDebug() << k_funcinfo << "cannot mine here" << endl;
-		setWork(WorkNone);
-		return;
-	}
- } else {
-	kdDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
-	setWork(WorkRefine);
- }
-}
-
-void MobileUnit::advanceRefine()
-{
-//AB: this should get moved to a UnitPlugin. maybe
-//HarvesterPlugin::advanceRefine()
- kdDebug() << k_funcinfo << endl;
- if (!d->mHarvesterProperties) {
-	setWork(WorkNone);
-	return;
- }
- if (resourcesMined() == 0) {
-	kdDebug() << k_funcinfo << "refining done" << endl;
-	if (resourcesX() != -1 && resourcesY() != -1) {
-		setWork(WorkMine);
-		mineAt(QPoint(resourcesX(), resourcesY()));
-	} else {
-		setWork(WorkNone);
-	}
-	return;
- }
- if (!refinery()) {
-	// TODO: pick closest refinery
-	QPtrList<Unit> list = owner()->allUnits();
-	QPtrListIterator<Unit> it(list);
-	const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
-	if (!prop) {
-		kdError() << k_funcinfo << "NULL harvester plugin" << endl;
-		setWork(WorkNone);
-		return;
-	}
-	Facility* ref = 0;
-	while (it.current() && !ref) {
-		const UnitProperties* unitProp = it.current()->unitProperties();
-		if (!it.current()->isFacility()) {
-			++it;
-			continue;
-		}
-		if (prop->canMineMinerals() && unitProp->canRefineMinerals()) {
-			ref = (Facility*)it.current();
-		} else if (prop->canMineOil() && unitProp->canRefineOil()) {
-			ref = (Facility*)it.current();
-		}
-		++it;
-	}
-	if (!ref) {
-		kdDebug() << k_funcinfo << "no suitable refinery found" << endl;
-		setWork(WorkNone);
-	} else {
-		kdDebug() << k_funcinfo << "refinery: " << ref->id() << endl;
-		refineAt(ref);
-	}
-	return;
- } else {
-	if (isNextTo(refinery())) {
-		const int step = (resourcesMined() >= 10) ? 10 : resourcesMined();
-		d->mHarvesterProperties->mResourcesMined = resourcesMined() - step;
-		const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
-		if (!prop) {
-			kdError() << k_funcinfo << "NULL harvester plugin" << endl;
-			setWork(WorkNone);
-			return;
-		}
-		if (prop->canMineMinerals()) {
-			owner()->setMinerals(owner()->minerals() + step);
-			owner()->statistics()->increaseRefinedMinerals(step);
-		} else if (prop->canMineOil()) {
-			owner()->setOil(owner()->oil() + step);
-			owner()->statistics()->increaseRefinedOil(step);
-		}
-	} else {
-	}
- }
-}
-
 void MobileUnit::advanceFollow()
 {
  if (!target()) {
@@ -1062,108 +1003,6 @@ void MobileUnit::advanceFollow()
 	}
  }
  // Do nothing (unit is in range)
-}
-
-unsigned int MobileUnit::resourcesMined() const
-{
- return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesMined : 0;
-}
-
-int MobileUnit::resourcesX() const
-{
- return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesX : 0;
-}
-
-int MobileUnit::resourcesY() const
-{
- return d->mHarvesterProperties ? d->mHarvesterProperties->mResourcesY : 0;
-}
-
-bool MobileUnit::canMine(Cell* cell) const
-{
- const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
- if (!prop) {
-	return false;
- }
- if (prop->canMineMinerals() &&
-		cell->groundType() == Cell::GroundGrassMineral) {
-	return true;
- }
- if (prop->canMineOil() && 
-		cell->groundType() == Cell::GroundGrassOil) {
-	return true;
- }
- return false;
-}
-
-void MobileUnit::mineAt(const QPoint& pos)
-{
- //TODO: don't move if unit cannot mine more minerals/oil or no minerals/oil at all
- kdDebug() << k_funcinfo << endl;
- moveTo(pos);
- setWork(WorkMine);
- setAdvanceWork(WorkMove);
- d->mHarvesterProperties->mResourcesX = pos.x();
- d->mHarvesterProperties->mResourcesY = pos.y();
-}
-
-void MobileUnit::refineAt(Facility* refinery)
-{
- if (!refinery) {
-	kdError() << k_funcinfo << "NULL refinery" << endl;
-	return;
- }
- if (!refinery->unitProperties()->canRefineMinerals() &&
-		!refinery->unitProperties()->canRefineOil()) {
-	kdError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
- }
- kdDebug() << k_funcinfo << endl;
- setRefinery(refinery);
- setWork(WorkRefine);
- // move...
- kdDebug() << k_funcinfo << "move to refinery " << refinery->id() << endl;
- if (!moveTo(refinery->x(), refinery->y(), 1)) {
-	kdDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
-	setWork(WorkNone);
- } else {
-	setAdvanceWork(WorkMove);
- }
-}
-
-Facility* MobileUnit::refinery() const
-{
- if (!target() || !target()->isFacility()) {
-	return 0;
- }
- const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
- if (!prop) {
-	return 0;
- }
- Facility* fac = (Facility*)target();
- const UnitProperties* facProp = fac->unitProperties();
- if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
-	return fac;
- } else if (prop->canMineOil() && facProp->canRefineOil()) {
-	return fac;
- }
- return 0;
-}
-
-void MobileUnit::setRefinery(Facility* refinery)
-{
- if (!refinery) {
-	return;
- }
- const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
- if (!prop) {
-	return;
- }
- const UnitProperties* facProp = refinery->unitProperties();
- if (prop->canMineMinerals() && facProp->canRefineMinerals()) {
-	setTarget(refinery);
- } else if (prop->canMineOil() && facProp->canRefineOil()) {
-	setTarget(refinery);
- }
 }
 
 QRect MobileUnit::boundingRect() const
@@ -1272,12 +1111,12 @@ void Facility::advanceConstruction()
  }
 }
 
-ProductionPlugin* Facility::productionPlugin() const
+UnitPlugin* Facility::plugin(int pluginType) const
 {
  if (!isConstructionComplete()) {
 	return 0;
  }
- return d->mProductionPlugin;
+ return Unit::plugin(pluginType);
 }
 
 RepairPlugin* Facility::repairPlugin() const
