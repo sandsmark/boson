@@ -39,6 +39,7 @@
 #include <kmessagebox.h>
 #include <klistview.h>
 #include <klistbox.h>
+#include <knuminput.h>
 #include <ktextbrowser.h>
 
 #include <qcombobox.h>
@@ -241,9 +242,12 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  }
 
  mChangeMaxWidth->setValue(map->width());
+  mChangeMaxWidthNumInput->setValue(map->width());
  mChangeMaxHeight->setValue(map->height());
+ mChangeMaxHeightNumInput->setValue(map->height());
  mChangeTileset->setCurrentItem(0); // TODO - we do not yet support more than one :(
  mChangeMaxPlayers->setValue(scenario->maxPlayers());
+ mChangeMaxPlayersNumInput->setValue(scenario->maxPlayers());
 }
 
 void BosonNewEditorWidget::slotPlayFieldChanged(QListViewItem* item)
@@ -278,8 +282,11 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 {
  if (isNewMap) {
 	mChangeMaxHeight->setValue(50);
+    mChangeMaxHeightNumInput->setValue(50);
 	mChangeMaxWidth->setValue(50);
+    mChangeMaxWidthNumInput->setValue(50);
 	mChangeMaxPlayers->setValue(2);
+    mChangeMaxPlayersNumInput->setValue(2);
 	mChangeTileset->setCurrentItem(0);
 	mMapPropertiesTextBrowser->setText(i18n("Create a new (empty) map"));
 
