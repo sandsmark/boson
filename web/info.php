@@ -68,9 +68,7 @@ draw_bigbox_text("These requirements apply to the latest stable release
     * lib3ds (Units and building rendering) - see <a href=\"http://lib3ds.sf.net/\" target=\"_blank\">http://lib3ds.sf.net/</a><br>
     * OpenAL (audio library) - see <a href=\"http://www.openal.org/\"target=\"_blank\">http://www.openal.org/</a><br>
     * WML and Perl  - For the handbook - see <a href=\"http://www.thewml.org\" target=\"_blank\">http://www.thewml.org</a><br>
-    <br>
-    <b>Differences to cvs HEAD:</b><br>
-    + plib >= 1.8.2<br><br>");
+    <br>");
 
 draw_bigbox_subheader("<a name=\"compiler\"></a>Compiler requirements");
 draw_bigbox_text("To compile Boson (you don't need a compiler if you're downloading a binary version),
