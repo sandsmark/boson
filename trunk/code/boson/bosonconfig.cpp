@@ -319,7 +319,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
- addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVBO"));
+ addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVertexArray"));
  addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", DEFAULT_GROUND_RENDERER));
 
  // load from config
