@@ -1,3 +1,4 @@
+$Id$
 Boson Scripting Bible
 
 This bible is for the scripting engine for the Boson RTS Game
@@ -6,9 +7,9 @@ Submitted by: Kal Kolberg
 Written: November 8th, 2002
 Copyright: Kal Kolberg (c) 2002 kolberg@cyberdawgs.com
 License: GPL 2.0  http://www.gnu.org/copyleft/gpl.html
-Modified:
+Last Modified: $Date$
 Revisions:
-Version: 1.00
+Version: $Revision$
 
    This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
