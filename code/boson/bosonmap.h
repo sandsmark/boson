@@ -83,10 +83,12 @@ public:
 	 * @overload
 	 *
 	 * This is a static version of the function above.
+	 * @param _width The number of corners. This is usually @ref
+	 * BosonMap::width + 1. See also @ref width.
 	 **/
-	inline static int arrayPos(int x, int y, int width)
+	inline static int arrayPos(int x, int y, int _width)
 	{
-		return x + y * width;
+		return x + y * _width;
 	}
 
 private:
@@ -393,6 +395,40 @@ public:
 	bool createNewMap(unsigned int width, unsigned int height, BosonGroundTheme* theme);
 
 	/**
+	 * Fill the @ref texMap with 100% of @p texture.
+	 **/
+	void fill(unsigned int texture);
+
+	void resetTexMap(unsigned int texture, unsigned char alpha)
+	{
+		if (!mTexMap) {
+			return;
+		}
+		mTexMap->initialize(texture, alpha);
+	}
+
+	/**
+	 * Recalculates whole normal map.
+	 * Use this whenever heightmap changes.
+	 * It automatically creates new normalmap.
+	 **/
+	void recalculateNormalMap();
+
+	/**
+	 * Recalculates all normals within given rect
+	 * Normal map must already exist and rect must be valid
+	 **/
+	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
+	bool generateCellsFromTexMap();
+
+	/**
+	 * Resize the map. Currently this works only if the cells have
+	 * <em>not</em> yet been created.
+	 **/
+	void resize(unsigned int width, unsigned int height);
+
+
+	/**
 	 * @return vertical cell count
 	 **/
 	inline unsigned int height() const { return mMapHeight; }
@@ -415,6 +451,13 @@ public:
 	 * coordinates have been invalid.
 	 **/
 	Cell* cell(int x, int y) const;
+
+	/**
+	 * You should rather use @ref cell ! If you use this, you need to ensure
+	 * yourself, that all cells you want ta access are actually valid.
+	 * @return The internal cell array
+	 **/
+	inline Cell* cells() const { return mCells; }
 
 	/**
 	 * If you <em>really</em> need some speedup and can't use @ref cell you
@@ -447,122 +490,10 @@ public:
 		return true;
 	}
 
-	/**
-	 * Load an image from @p buffer and convert it to the internal
-	 * heightmap format of @ref BosonMap.
-	 *
-	 * This function can be used to import a height map in the editor or
-	 * (more important) to load the heightmap from a .bpf file (where it is
-	 * stored as a png image).
-	 **/
-	bool loadHeightMapImage(const QByteArray& buffer);
-
-	bool importHeightMapImage(const QImage& image);
-
-	bool saveMapToFile(QDataStream& stream);
-
-	/**
-	 * Save the complete map into the stream, even the parts that are
-	 * usually stored in different files, such as the height map.
-	 *
-	 * Use this to send the map over network, but remember that there will
-	 * be a lot of data! (probably more a few MB for 500x500 maps!)
-	 **/
-	bool saveCompleteMap(QDataStream& stream);
-
-	/**
-	 * Load the "main" map, i.e. the map geo (it's size) and it's cells from
-	 * the file on disk. This will not load things such as height map, which
-	 * are in a different file.
-	 **/
-	bool loadMapFromFile(const QByteArray& map);
-
-	/**
-	 * Load the complete map, even those data that are stored in different
-	 * files in the .bpf file. This is e.g. the height map.
-	 *
-	 * The stream must have been creates using @ref saveCompleteMap,
-	 * <em>not</em> @ref saveMapToFile!
-	 **/
-	bool loadCompleteMap(QDataStream& stream);
-
-	QByteArray saveHeightMapImage();
-
-	QByteArray saveTexMapImage(unsigned int texture);
-
-
-	/**
-	 * @return TRUE if the current map geo is valid.
-	 **/
-	static bool isValidMapGeo(unsigned int width, unsigned int height);
-
-	/**
-	 * You should rather use @ref cell ! If you use this, you need to ensure
-	 * yourself, that all cells you want ta access are actually valid.
-	 * @return The internal cell array
-	 **/
-	inline Cell* cells() const { return mCells; }
-
-	void setModified(bool m) { mModified = m; }
-	bool modified() const { return mModified; }
-
-	/**
-	 * Load a @ref groundTheme - see @ref BosonGroundTheme. The groundTheme
-	 * contains the actual textures used by the @ref texMap.
-	 *
-	 * @param theme The groundTheme to be loaded, such as "earth"
-	 **/
-	void loadGroundTheme(const QString& theme);
-	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
-
 	int currentTexture(int texture) const;
-
-	/**
-	 * Resize the map. Currently this works only if the cells have
-	 * <em>not</em> yet been created.
-	 **/
-	void resize(unsigned int width, unsigned int height);
-
-	/**
-	 * Fill the @ref texMap with 100% of @p texture.
-	 **/
-	void fill(unsigned int texture);
-
-	void resetTexMap(unsigned int texture, unsigned char alpha)
-	{
-		if (!mTexMap) {
-			return;
-		}
-		mTexMap->initialize(texture, alpha);
-	}
-
 	inline float* heightMap() const { return mHeightMap->heightMap(); }
-
 	inline BoVector3* normalMap() const { return mNormalMap->normalMap(); }
-
-	/**
-	 * Recalculates whole normal map.
-	 * Use this whenever heightmap changes.
-	 * It automatically creates new normalmap.
-	 **/
-	void recalculateNormalMap();
-	/**
-	 * Recalculates all normals within given rect
-	 * Normal map must already exist and rect must be valid
-	 **/
-	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
-
-	/**
-	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
-	 * See also @ref cornerArrayPos for detailed description of possible
-	 * values.
-	 * @return The height of the upper left corner of the cell at @p x, @p
-	 * y or 1.0 if invalid coordinates were specified.
-	 **/
-	float heightAtCorner(int x, int y) const;
-	void setHeightAtCorner(int x, int y, float height);
-
-	float cellAverageHeight(int x, int y);
+	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
 	/**
 	 * @return The internal texmap array, which defines how much percent
@@ -615,11 +546,22 @@ public:
 		return false;
 	}
 
-
 	/**
 	 * @return @ref BosonGroundTheme::miniMapColor
 	 **/
 	QRgb miniMapColor(unsigned int texture) const;
+
+	/**
+	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
+	 * See also @ref cornerArrayPos for detailed description of possible
+	 * values.
+	 * @return The height of the upper left corner of the cell at @p x, @p
+	 * y or 1.0 if invalid coordinates were specified.
+	 **/
+	float heightAtCorner(int x, int y) const;
+	void setHeightAtCorner(int x, int y, float height);
+
+	float cellAverageHeight(int x, int y);
 
 	/**
 	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
@@ -644,8 +586,54 @@ public:
 	 **/
 	inline int cornerArrayPos(int x, int y) const
 	{
-		return x + y * (width() + 1);
+		return BoMapCornerArray::arrayPos(x, y, width() + 1);
 	}
+
+
+
+
+	/**
+	 * Load an image from @p buffer and convert it to the internal
+	 * heightmap format of @ref BosonMap.
+	 *
+	 * This function can be used to import a height map in the editor or
+	 * (more important) to load the heightmap from a .bpf file (where it is
+	 * stored as a png image).
+	 **/
+	bool loadHeightMapImage(const QByteArray& buffer);
+
+	bool importHeightMapImage(const QImage& image);
+
+	bool saveMapToFile(QDataStream& stream);
+
+	/**
+	 * Save the complete map into the stream, even the parts that are
+	 * usually stored in different files, such as the height map.
+	 *
+	 * Use this to send the map over network, but remember that there will
+	 * be a lot of data! (probably more a few MB for 500x500 maps!)
+	 **/
+	bool saveCompleteMap(QDataStream& stream);
+
+	/**
+	 * Load the "main" map, i.e. the map geo (it's size) and it's cells from
+	 * the file on disk. This will not load things such as height map, which
+	 * are in a different file.
+	 **/
+	bool loadMapFromFile(const QByteArray& map);
+
+	/**
+	 * Load the complete map, even those data that are stored in different
+	 * files in the .bpf file. This is e.g. the height map.
+	 *
+	 * The stream must have been creates using @ref saveCompleteMap,
+	 * <em>not</em> @ref saveMapToFile!
+	 **/
+	bool loadCompleteMap(QDataStream& stream);
+
+	QByteArray saveHeightMapImage();
+
+	QByteArray saveTexMapImage(unsigned int texture);
 
 	/**
 	 * Load the @ref texMap from @p stream.
@@ -657,13 +645,29 @@ public:
 	bool loadTexMap(QDataStream& stream);
 	bool saveTexMap(QDataStream& stream);
 
-	bool generateCellsFromTexMap();
+	/**
+	 * Load a @ref groundTheme - see @ref BosonGroundTheme. The groundTheme
+	 * contains the actual textures used by the @ref texMap.
+	 *
+	 * @param theme The groundTheme to be loaded, such as "earth"
+	 **/
+	void loadGroundTheme(const QString& theme);
+
+	void setModified(bool m) { mModified = m; }
+	bool modified() const { return mModified; }
+
+public:
+	/**
+	 * @return TRUE if the current map geo is valid.
+	 **/
+	static bool isValidMapGeo(unsigned int width, unsigned int height);
 
 	/**
 	 * @return The file format version of the map, that is used when
 	 * saving a map file (see @ref saveMapToFile).
 	 **/
 	static int mapFileFormatVersion();
+
 
 public slots:
 	void slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater);
