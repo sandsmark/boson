@@ -143,12 +143,10 @@ void SelectBoxData::drawCube()
 void SelectBoxData::drawHealthBar(int frame)
 {
  GLfloat texLength = ((float)frame) / (float)(POWER_LEVELS - 1);
-// double factor = (double)frame / (frames() - 1);
-// return (int)(boxWidth() * factor - 2); // -2: the white frame around the box
  GLfloat length = 1.0 * texLength; // y-direction
  GLfloat hy = 0.15; // height in y-direction
  GLfloat hz = 0.15; // height in z-direction
- GLfloat depth = 0.15;
+
  glDisable(GL_BLEND);
 // FIXME: a lot of redundant vertices here!
  glTranslatef(0.0, 1.0 - hy, 1.0 - hz);

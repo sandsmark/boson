@@ -238,7 +238,6 @@ void Unit::updateSelectBox()
 	unsigned long int maxHealth = unitProperties()->health();
 	double div = (double)health() / maxHealth;
 	selectBox()->update(div);
-	selectBox()->setVisible(true);
  }
 }
 

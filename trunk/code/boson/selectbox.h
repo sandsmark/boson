@@ -56,10 +56,8 @@ class SelectBox
 public :
 	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false);
 	~SelectBox();
-	void update(double);
-	void setVisible(bool) {}
-	void moveBy(float dx, float dy, float dz) {}
 
+	void update(double);
 	inline GLuint displayList() const { return mDisplayList; }
 
 private:
