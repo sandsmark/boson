@@ -56,5 +56,92 @@ int BosonGLFont::width(const QString& text)
  if (!mFontMetrics) {
 	return 0;
  }
- return metrics()->width(text);
+ // AB: we use the widest chat of the font only. may be .. bad. but at least it
+ // is fast and easy to use.
+ return text.length() * metrics()->maxWidth();
 }
+
+int BosonGLFont::wrapAtPos(const GLubyte* string, int length) const
+{
+ return length - 1;
+}
+
+int BosonGLFont::makeLine(const GLubyte* string, int len, int width) const
+{
+ if (!metrics()) {
+	// returning 0 could result in infinite loops...
+	// 30 is a random value. 1 would suck (only 1 char per line) and result
+	// in long loops.
+	return 30;
+ }
+ if (len * metrics()->maxWidth() < width) {
+	return len;
+ }
+ // TODO: search a white space in the text where we can wrap
+ return width / metrics()->maxWidth();
+}
+
+int BosonGLFont::height(const QString& text, int maxWidth)
+{
+ int w = width(text);
+ if (w < maxWidth) {
+	return height();
+ }
+ GLubyte* string = (GLubyte*)text.latin1();
+ const int len = text.length();
+ int pos = 0;
+ int lines = 0;
+ while (pos < len) {
+	// we can always render at least maxPos chars per line.
+	int maxPos = maxWidth / metrics()->maxWidth();
+	int wrapPos;
+	if (maxPos > len - pos) {
+		maxPos = len - pos;
+		wrapPos = maxPos;
+	} else {
+		wrapPos = wrapAtPos(string + pos, maxPos);
+	}
+	pos += wrapPos;
+	lines++;
+ }
+ return lines * height();
+}
+
+int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth)
+{
+ int w = width(text);
+ const int len = text.length();
+ GLubyte* string = (GLubyte*)text.latin1();
+ // we must never ever use more height than height(..) claims we do
+ int maxHeight = height(text, maxWidth);
+ if (w < maxWidth) {
+	glRasterPos2i(x, y - maxHeight);
+	glCallLists(len, GL_UNSIGNED_BYTE, string);
+ } else {
+	int h = 0;
+	int pos = 0;
+	int line = 0;
+	while (pos < len) {
+		int l;
+		l = BosonGLFont::makeLine(string + pos, len - pos, maxWidth);
+		if (l <= 0) {
+			// oops!
+			// must never happen!
+			l = len - pos;
+		}
+		h = (line + 1) * height();
+		if (h > maxHeight) {
+			boError() << k_funcinfo
+					<< "oops - invalid height! h= " << h
+					<< " maxHeight=" << maxHeight << endl;
+			h = maxHeight;
+		}
+		glRasterPos2i(x, y - h);
+		glCallLists(l, GL_UNSIGNED_BYTE, string + pos);
+		pos += l;
+		line++;
+	}
+ }
+ return maxHeight;
+}
+

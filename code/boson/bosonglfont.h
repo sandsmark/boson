@@ -61,9 +61,42 @@ public:
 	int width(const QString& text);
 
 	/**
+	 * @return The height of the text as it will be rendered by @ref
+	 * renderText (including line wraps)
+	 **/
+	int height(const QString& text, int maxWidth);
+
+	/**
 	 * @return The base of the OpenGL display lists.
 	 **/
 	inline GLuint displayList() const { return mFontDisplayList; }
+
+	/**
+	 * Warning: this function will change the glRasterPos()! (not
+	 * necessarily to (x,y) !)
+	 * @param x The left position of the text
+	 * @param y The position directly <em>above</em> the text. This function
+	 * won't render text above y, but below only.
+	 * @return The height that was needed to render the text. See also @ref
+	 * height
+	 **/
+	int renderText(int x, int y, const QString& text, int maxWidth);
+
+protected:
+	/**
+	 * Make a line that is no longer than @width (opengl coordinates, not
+	 * characters) for @p font from @p string.
+	 * @param len The length of the @p string.
+	 * @return The number of characters that can be rendered without
+	 * exceeding @p width.
+	 **/
+	int makeLine(const GLubyte* string, int len, int width) const;
+
+	/**
+	 * @return The position in @p string where to wrap. Currently this
+	 * implementation will wrap at length-1, i.e. the last char.
+	 **/
+	int wrapAtPos(const GLubyte* string, int length) const;
 
 private:
 	QFont mFont;

@@ -1064,7 +1064,6 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->render(false);
  if ( showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
 	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
-	boGame->slotAddChatSystemMessage(i18n("TODO: newlines for chat messages"));
  }
 
  if (d->mDebugMapCoordinates) {
@@ -1115,7 +1114,7 @@ void BosonBigDisplayBase::renderText()
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
 
 // now the chat messages
- d->mChat->renderMessages(border, border, d->mDefaultFont);
+ d->mChat->renderMessages(border, border, d->mViewport[2] - 2 * border, d->mViewport[3] - 2 * border, d->mDefaultFont);
 
 // display a paused label if game is paused
  if (boGame->gamePaused()) {
@@ -1128,7 +1127,6 @@ void BosonBigDisplayBase::renderText()
  glColor3f(1.0, 1.0, 1.0);
  glDisable(GL_BLEND);
 }
-
 
 void BosonBigDisplayBase::renderCells()
 {
