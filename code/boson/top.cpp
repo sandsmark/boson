@@ -167,7 +167,8 @@ void TopWidget::initActions()
  // Main actions: Game start/end and quit
  d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
 
- (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
+ //FIXME: slotNewGame() is broken - endGame() is enough for now.
+// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
  (void)KStdGameAction::end(this, SLOT(slotEndGame()), d->mGameActions);
 // (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
  (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
@@ -231,7 +232,15 @@ void TopWidget::initActions()
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
 
+#if KDE_VERSION >= 310
  actionCollection()->addDocCollection(d->mGameActions);
+#else
+ KActionPtrList list = d->mGameActions->actions();
+ KActionPtrList::Iterator it = list.begin();
+ for (; it != list.end(); ++it) {
+	actionCollection()->insert(*it);
+ }
+#endif
  createGUI();
 }
 
