@@ -63,13 +63,13 @@ and music. You do not need to download any package below if you download this
 one. You can get it from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-all-0.8.tar.bz2?download\">here</a>
 (31 515 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-code-0.8.tar.bz2?download\">here</a>
 (808 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.
 Note that you also need to download  the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
@@ -77,7 +77,7 @@ draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-data-0.8.tar.bz2?download\">here</a>
 (15 149 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
@@ -99,13 +99,13 @@ we'll be happy to put a link here and/or add them to our site.<br><br>You can
 get a RPM package of Boson from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-0.7-1.i386.rpm?download\">here</a>
 (38 140 KB) or from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">SF.net</a>.
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263\">SF.net</a>.
 This package is compiled for Red Hat 7.3 on i386.<br><br>
 We also have a RPM source package which is like all-in-one package, just that
 it's packaged with RPM. You can get it from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-0.7-1.src.rpm?download\">here</a>
 (36 293 KB) or from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">SF.net</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263\">SF.net</a>
 again. These package were provided by
 <a href=\"mailto:krzyko@users.sourceforge.net\">Krzysztof Kosz</a><br><br>");*/
 
@@ -113,13 +113,13 @@ draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
 Available versions are
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">Boson 0.7</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263\">Boson 0.7</a>
 (released on 10th November 2002),
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=98577\">Boson 0.6.1</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=98577\">Boson 0.6.1</a>
 (released on 9th July 2002),
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=93970\">Boson 0.6</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=93970\">Boson 0.6</a>
 (released on 10th June 2002) and
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=17261\">Boson 0.5</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=17261\">Boson 0.5</a>
 (released on 30th October 2000).<br><br>");
 
 draw_bigbox_subheader("<a name=\"cvs\"></a>CVS - Bleeding edge development version");

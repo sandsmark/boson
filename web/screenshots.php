@@ -251,7 +251,7 @@ if($show_ss == -1)
         echo "</tr>";
         $index=$index+2;
     }
-    echo "</table></tr></td>";
+    echo "</table></td></tr>";
 
     echo "
       <tr><td width=\"100%\" align=\"right\"><br>Page:";

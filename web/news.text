@@ -14,7 +14,7 @@ text=It's been quite long since the last update.<br>
 Good new is that we're moving towards 0.8 which will probably be released in
     late March. Of course there are many
     <a href="status.php#done">changes</a> in the current CVS version. To name a
-    few bigger:
+    few bigger:</p>
     <ul>
     <li>Better support for upgrades, including weapon upgrades</li>
     <li>Support for heightmaps. Map is not flat anymore!</li>
@@ -22,7 +22,7 @@ Good new is that we're moving towards 0.8 which will probably be released in
     <li>New XML-based saving format. Saving/loading is still experimental, but
     should work</li>
     <li>Tooltips for units</li>
-    </ul>
+    </ul><p class="newstext">
     Also, our <a href="screenshots.php">screenshots page</a> is updated. No new
     screens yet, but the page itself is improved. Individual screenshots are now
     also shown inside HTML-page, you can see the comment and date. And
@@ -37,13 +37,13 @@ text=Here comes another status update.<br>
     released, our homepage received as many hits during the following week
     as it had since September when the new homepage was opened :-)<br>
     Now about CVS. There are already many improvements in our CVS code and we're
-    moving forward to 0.8. Biggest changes are:
+    moving forward to 0.8. Biggest changes are:</p>
     <ul><li>Map information is preloaded on startup (no slowdown when changing
     map)</li>
     <li>Particles drawing has been improved</li>
     <li>Big optimizations</li>
     <li>Smaller map format</li>
-    <li>Of course, usual bugfixes</li></ul>
+    <li>Of course, usual bugfixes</li></ul><p class="newstext">
     For more, take a look at the <a href="status.php#done">done section of our
     status page</a>. There are many additions!<br>
     Also, two new <a href="screenshots.php">screenshots</a>, taken from the CVS
@@ -62,7 +62,7 @@ title=Boson 0.7 RPMs for Mandrake available
 text=
     <a href="mailto:bstoke@bstoke.co.uk">Steve</a> provided us with RPM packages
     for Mandrake 9.0 (on i386). You can download them at
-    <a href="http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263">SourceForge</a>.
+    <a href="http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263">SourceForge</a>.
     Thanks a lot Steve!<br>
     These packages already contain the smaller-textures fix announced two months
     ago.
