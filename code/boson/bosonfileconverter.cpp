@@ -177,6 +177,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QValueList<QByteArray>&
 			boError() << k_funcinfo << "UnitType attribute is not a valid number for Item " << j << endl;
 			continue;
 		}
+		unit.setAttribute(QString::fromLatin1("Type"), QString::number(unitType));
 
 		// 200 is RTTI::UnitStart. Hardcoded in case this value is
 		// changed one day (it was 200 in 0.8)
