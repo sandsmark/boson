@@ -280,6 +280,12 @@ signals:
 
 	void signalChangeViewport(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
+	/**
+	 * Emitted when the selection for this big display has changed. See also
+	 * @ref BoSelection::signalSelectionChanged
+	 **/
+	void signalSelectionChanged(BoSelection* selection);
+
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
 	void slotCursorEdgeTimeout();

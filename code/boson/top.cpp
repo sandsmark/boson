@@ -32,7 +32,6 @@
 #include "speciestheme.h"
 #include "bosonprofiling.h"
 #include "bodisplaymanager.h"
-#include "bosonbigdisplaybase.h"
 #include "bosonstarting.h"
 #include "rtti.h"
 #include "bodebug.h"
@@ -819,12 +818,12 @@ bool TopWidget::queryExit()
 
 void TopWidget::slotUpdateStatusBar()
 {
- BosonBigDisplayBase* display = d->mBosonWidget->displayManager()->activeDisplay();// damn this call sucks!
- BO_CHECK_NULL_RET(display)
- BO_CHECK_NULL_RET(mCanvas)
+ BO_CHECK_NULL_RET(d->mBosonWidget);
+ BO_CHECK_NULL_RET(d->mBosonWidget->displayManager());
+ BO_CHECK_NULL_RET(mCanvas);
  // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
  // but whenever their value actually changes.
- emit signalFPSUpdated(display->fps());
+ emit signalFPSUpdated(d->mBosonWidget->displayManager()->fps());
  emit signalParticlesCountUpdated(mCanvas->particleSystemsCount());
  emit signalCanvasItemsCountUpdated(mCanvas->allItemsCount());
  emit signalCanvasAnimationsCountUpdated(mCanvas->animationsCount());
