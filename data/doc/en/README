@@ -9,6 +9,8 @@ top.wml
 	This file includes the html header, css, some meta tags, the title and <body>
 	You can change the default title:
 	 #include top.wml title="new title"
+	 And you can add some params to the body:
+	 #include top.wml title="new title" body_args="style=background-image:url($(basedir)bg.png);background-attachment:fixed;background-repeat:no-repeat;background-position:center;"
 
 nav.wml
 	This is the navigation used at the bottom of the page.

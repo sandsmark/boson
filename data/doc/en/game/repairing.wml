@@ -8,5 +8,5 @@
       Just select a unit and click with the right mouse button on the Repair Pad.
     </p>
     
-#include "nav.wml" before_url="repairing.html" before_text="Repairing" after_url="../facilities/index.html" after_text="Facilities"    
+#include "nav.wml" before_url="attacking.html" before_text="Attacking" after_url="../facilities/index.html" after_text="Facilities"    
 #include "footer.wml"
