@@ -146,7 +146,7 @@ protected:
 	/**
 	 * Selects units in the specified rect. See also @ref addUnitSelection
 	 **/
-	void selectArea(const QRect& rect);
+	void selectArea();
 
 	/**
 	 * @return The start point of the selection rect
