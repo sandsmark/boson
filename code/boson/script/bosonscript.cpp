@@ -21,6 +21,7 @@
 
 #include "../bo3dtools.h"
 #include "../bocamera.h"
+#include "../boautocamera.h"
 #include "../bosonbigdisplaybase.h"
 #include "../player.h"
 #include "../boson.h"
@@ -102,6 +103,17 @@ BoGameCamera* BosonScript::camera()
   }
 
   return display()->camera();
+}
+
+BoAutoGameCamera* BosonScript::autoCamera()
+{
+  if(!display())
+  {
+    boError() << k_funcinfo << "NULL display" << endl;
+    return 0;
+  }
+
+  return display()->autoCamera();
 }
 
 int BosonScript::playerId() const
@@ -648,38 +660,38 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
 
 void BosonScript::moveCamera(BoVector3 pos)
 {
-  camera()->setLookAt(pos);
+  autoCamera()->setLookAt(pos);
 }
 
 void BosonScript::moveCameraBy(BoVector3 pos)
 {
-  camera()->changeLookAt(pos);
+  autoCamera()->changeLookAt(pos);
 }
 
 void BosonScript::setCameraRotation(float r)
 {
-  camera()->setRotation(r);
+  autoCamera()->setRotation(r);
 }
 
 void BosonScript::setCameraRadius(float r)
 {
-  camera()->setRadius(r);
+  autoCamera()->setRadius(r);
 }
 
 void BosonScript::setCameraZ(float z)
 {
-  camera()->setZ(z);
+  autoCamera()->setZ(z);
 }
 
 void BosonScript::setCameraMoveMode(int mode)
 {
   boDebug() << k_funcinfo << "mode: " << mode << endl;
-  camera()->setMoveMode((BoGameCamera::MoveMode)mode);
+  autoCamera()->setMoveMode((BoAutoCamera::MoveMode)mode);
 }
 
 void BosonScript::commitCameraChanges(int ticks)
 {
-  camera()->commitChanges(ticks);
+  autoCamera()->commitChanges(ticks);
 }
 
 BoVector3 BosonScript::cameraPos()
