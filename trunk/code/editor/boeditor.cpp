@@ -63,12 +63,12 @@ BoEditorApp::BoEditorApp(char *servername)
   recentList->setAutoDelete(true);
 
   ///////////////////////////////////////////////////////////////////
-  // call init() to invoke all other construction parts
-  init(servername);
-
-  ///////////////////////////////////////////////////////////////////
   // read the config file options
   readOptions();
+
+  ///////////////////////////////////////////////////////////////////
+  // call init() to invoke all other construction parts
+  init(servername);
 }
 
 BoEditorApp::~BoEditorApp()
