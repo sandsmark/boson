@@ -22,6 +22,7 @@
 #include <kgame/kgameio.h>
 
 class Player;
+class Unit;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -42,8 +43,11 @@ public:
 protected:
 	virtual void reaction();
 	Player* boPlayer() const { return (Player*)player(); }
+	Unit* findTarget();
 
 private:
+	int mUnit;
+	Unit* mTarget;
 };
 
 #endif

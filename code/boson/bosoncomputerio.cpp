@@ -20,15 +20,27 @@
 
 #include "player.h"
 #include "bodebug.h"
+#include "unit.h"
+#include "unitproperties.h"
+
+#include <kgame/kgame.h>
+
+#include <qpoint.h>
 
 #include "bosoncomputerio.moc"
 
 BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 {
+ boDebug() << k_funcinfo << endl;
+ setReactionPeriod(40);
+ setAdvancePeriod(50);
+ mUnit = -1;
+ mTarget = 0l;
 }
 
 BosonComputerIO::BosonComputerIO(KPlayer* p) : KGameComputerIO(p)
 {
+ boDebug() << k_funcinfo << endl;
 }
 
 BosonComputerIO::~BosonComputerIO()
@@ -37,7 +49,56 @@ BosonComputerIO::~BosonComputerIO()
 
 void BosonComputerIO::reaction()
 {
-// boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
 
+ if(!mTarget || mTarget->isDestroyed()) {
+	mTarget = findTarget();
+	if(!mTarget) {
+		boDebug() << k_funcinfo << "No enemies left" << endl;
+		return;
+	}
+ }
+
+ QPtrList<Unit>* units = boPlayer()->allUnits();
+ Unit* attacker = 0l;
+ Unit* u;
+
+ while(!attacker) {
+	mUnit++;
+
+	if(mUnit >= units->count()) {
+		mUnit = -1;
+		return;
+	}
+
+	u = units->at(mUnit);
+	if(u->isMobile() && u->unitProperties()->canShoot()) {
+		attacker = u;
+	}
+ }
+
+ boDebug() << k_funcinfo << "Sending " << mUnit << ". unit with id " << u->id() << " to attack" << endl;
+ attacker->moveTo(QPoint((int)mTarget->x(), (int)mTarget->y()), true);
+}
+
+Unit* BosonComputerIO::findTarget()
+{
+ QPtrListIterator<KPlayer> it(*(boPlayer()->game()->playerList()));
+ for (; it.current(); ++it) {
+	Player* p = (Player*)it.current();
+	if (boPlayer()->isEnemy(p)) {
+		QPtrListIterator<Unit> it(*(p->allUnits()));
+		// First try to find enemy's command center
+		for (; it.current(); ++it) {
+			// FIXME: command center id is hardcoded
+			if(it.current()->unitProperties()->typeId() == 5) {
+				return it.current();
+			}
+		}
+		// if there's no command center, find any other unit
+		return it.toFirst();
+	}
+ }
+ return 0l;
 }
 
