@@ -18,12 +18,12 @@ Weapons=2
 [Boson Mobile Unit]
 Speed=15
 CanGoOnLand=true
-CanGoOnWater=false
+CanGoOnWater=true
 
 [Weapon_0]
 Range=5
 Reload=10
-CanShootAtAirUnits=false
+CanShootAtAirUnits=true
 CanShootAtLandUnits=true
 Damage=8
 Speed=0
