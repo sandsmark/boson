@@ -561,8 +561,7 @@ void Unit::stopMoving()
  } else if (advanceWork() != work()) {
 	setAdvanceWork(work());
  }
- setXVelocity(0);
- setYVelocity(0);
+ setVelocity(0.0, 0.0);
 }
 
 void Unit::stopAttacking()
@@ -745,8 +744,7 @@ void Unit::setAdvanceWork(WorkType w)
 {
  // velicities should be 0 anyway - this is the final fallback in case it was 
  // missing by any reason
- setXVelocity(0);
- setYVelocity(0);
+ setVelocity(0.0, 0.0);
 
  UnitBase::setAdvanceWork(w);
 
@@ -977,8 +975,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  if(!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
-	setXVelocity(0);
-	setYVelocity(0);
+	setVelocity(0.0, 0.0);
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
 	// FIXME: no need to clear them anymore
@@ -1040,8 +1037,7 @@ void MobileUnit::advanceMoveCheck()
 	// advanceMove() call
 
 	d->mMovingFailed = d->mMovingFailed + 1;
-	setXVelocity(0);
-	setYVelocity(0);
+	setVelocity(0.0, 0.0);
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
 	if(d->mPathRecalculated >= 2) {
