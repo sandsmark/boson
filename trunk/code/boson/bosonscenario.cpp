@@ -136,7 +136,7 @@ bool BosonScenario::saveScenario(QDomElement& root)
  boDebug(250) << k_funcinfo << endl;
 
  QDomNodeList list = d->mInternalDoc.documentElement().childNodes();
- for (int i = 0; i < list.count(); i++) {
+ for (unsigned int i = 0; i < list.count(); i++) {
 	root.appendChild(list.item(i).cloneNode(true));
  }
  return true;
