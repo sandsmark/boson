@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,38 @@
 #include <qdom.h>
 
 #include "defines.h"
+
+/**
+ * Class that is used to emphasize in the code where game-logic relevant actions
+ * are executed in @ref BosonScenario code. Whenever @ref Boson or similar is
+ * touched (in a non-readonly way) this class is used.
+ *
+ * This mainly means that this builder is used to start a scenario.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonScenarioBuilder
+{
+public:
+	BosonScenarioBuilder(BosonScenario* s)
+	{
+		mScenario = s;
+	}
+
+	bool startScenario(Boson* boson);
+
+	static bool loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y);
+	static bool loadUnit(const QDomElement& node, Unit* unit);
+
+protected:
+	static bool loadMobile(const QDomElement& node, MobileUnit* mob);
+	static bool loadFacility(const QDomElement& node, Facility* fac);
+
+	bool loadPlayer(const QDomElement& node, Player* p);
+
+private:
+	const BosonScenario* mScenario;
+};
+
 
 class BosonScenario::BosonScenarioPrivate
 {
@@ -91,7 +123,7 @@ bool BosonScenario::loadScenarioFromDocument(const QString& xml)
  return loadScenario(root);
 }
 
-bool BosonScenario::loadScenario(QDomElement& root)
+bool BosonScenario::loadScenario(const QDomElement& root)
 {
  // TODO: check for syntax errors
  d->mInternalDoc.appendChild(root.cloneNode(true));
@@ -114,8 +146,8 @@ bool BosonScenario::loadScenario(QDomElement& root)
  }
 
  return true;
- 
- 
+
+
  /*
  QDomNodeList list;
  list = root.elementsByTagName("ScenarioSettings");
@@ -178,7 +210,7 @@ bool BosonScenario::saveScenario(QDomElement& root) const
  return true;
 }
 
-bool BosonScenario::saveScenarioSettings(QDomElement& node)
+bool BosonScenario::saveScenarioSettings(QDomElement& node) const
 {
  boDebug(250) << k_funcinfo << "MinPlayers=" << minPlayers() << " MaxPlayers=" << maxPlayers() << endl;
  if (maxPlayers() > 0) {
@@ -204,7 +236,7 @@ bool BosonScenario::saveScenarioSettings(QDomElement& node)
  return true;
 }
 
-bool BosonScenario::loadScenarioSettings(QDomElement& node)
+bool BosonScenario::loadScenarioSettings(const QDomElement& node)
 {
  if (!node.hasAttribute("MaxPlayers")) {
 	boError(250) << k_funcinfo << "Missing MaxPlayers" << endl;
@@ -272,79 +304,8 @@ int BosonScenario::maxPlayers() const
 
 void BosonScenario::startScenario(Boson* boson)
 {
- if (!isValid()) {
-	return;
- }
- if (!boson) {
-	boError(250) << k_funcinfo << "NULL game" << endl;
-	return;
- }
- boDebug(250) << k_funcinfo << endl;
-
- // no error must happen here anymore!! everything should have been checked in
- // loadScenario()
- // UPDATE: we also have to support *new* scenario, i.e. where loadScenario()
- // wasn't used. but errors arent so important then, as it is used by editor
- // only and not in network.
-
- QDomNodeList l = d->mInternalDoc.documentElement().elementsByTagName("ScenarioPlayers");
- if (l.count() < 1) {
-	boError(250) << k_funcinfo << "oops - broken file? no players!" << endl;
-	return;
- }
- QDomNodeList list = l.item(0).toElement().elementsByTagName("Player");
- if (boson->playerList()->count() > list.count()) {
-	boError(250) << k_funcinfo << "too many players for this scenario" << endl;
-	return;
- }
- QValueList<int> playerOrder;
- for (int unsigned i = 0; i < list.count(); i++) {
-	QDomElement player = list.item(i).toElement();
-	if (!player.hasAttribute("PlayerNumber")) {
-		boError(250) << k_funcinfo << "Missing PlayerNumber" << endl;
-		return;
-	}
-	bool ok = true;
-	unsigned int playerNumber = player.attribute("PlayerNumber").toUInt(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "PlayerNumber was no number" << endl;
-		playerNumber = 0;
-	}
-	if ((int)playerNumber >= maxPlayers()) {
-		boError(250) << k_funcinfo << "don't know player " << playerNumber 
-				<< endl;
-		return;
-	}
-	playerOrder.append(playerNumber);
- }
-
-
- boDebug(250) << k_funcinfo << "players done" << endl;
- for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
-	bool ok = false;
-	QDomElement node = list.item(i).toElement();
-	Player* p = (Player*)boson->playerList()->at(playerOrder[i]);
-
-	p->setOil(node.attribute("Oil").toULong());
-	QDomElement m = node.elementsByTagName("Minerals").item(0).toElement();
-	unsigned long int minerals = m.text().toULong(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid minerals" << endl;
-		minerals = 0;
-	}
-	p->setMinerals(minerals);
-
-	QDomElement o = node.elementsByTagName("Oil").item(0).toElement();
-	unsigned long int oil = o.text().toULong(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid oil" << endl;
-		oil= 0;
-	}
-	p->setOil(oil);
-
-	loadPlayer(node, p);
- }
- boDebug(250) << k_funcinfo << "done" << endl;
+ BosonScenarioBuilder builder(this);
+ builder.startScenario(boson);
 }
 
 bool BosonScenario::initializeScenario()
@@ -454,7 +415,7 @@ void BosonScenario::initPlayerNode(QDomElement& player, unsigned int playerNumbe
  player.appendChild(o);
 }
 
-bool BosonScenario::savePlayer(QDomElement& node, Player* p)
+bool BosonScenario::savePlayer(QDomElement& node, const Player* p)
 {
  boDebug(250) << k_funcinfo << endl;
  QDomDocument doc = node.ownerDocument();
@@ -490,22 +451,6 @@ bool BosonScenario::savePlayer(QDomElement& node, Player* p)
  return true;
 }
 
-bool BosonScenario::loadPlayer(QDomElement& node, Player* p)
-{
- QDomNodeList list = node.elementsByTagName("Unit");
-
- QDomDocument doc;
- QDomElement root = doc.createElement("BosonUnits");
- doc.appendChild(root);
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement unit = list.item(i).toElement();
-	root.appendChild(unit.cloneNode(true));
- }
-
- ((Boson*)p->game())->sendAddUnits(doc.toString(), p);
- return true;
-}
-
 
 bool BosonScenario::saveBasicUnit(QDomElement& node, unsigned long int unitType, unsigned int x, unsigned int y)
 {
@@ -515,44 +460,13 @@ bool BosonScenario::saveBasicUnit(QDomElement& node, unsigned long int unitType,
  return true;
 }
 
-bool BosonScenario::loadBasicUnit(QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y)
+bool BosonScenario::loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y)
 {
- if (!node.hasAttribute("Type") && !node.hasAttribute("UnitType")) {
-	boError(250) << k_funcinfo << "missing Type" << endl;
-	return false;
- }
- if (!node.hasAttribute("x")) {
-	boError(250) << k_funcinfo << "missing x" << endl;
-	return false;
- }
- if (!node.hasAttribute("y")) {
-	boError(250) << k_funcinfo << "missing y" << endl;
-	return false;
- }
- bool ok = false;
- unitType = node.attribute("Type").toInt(&ok);
- if (!ok) {
-	unitType = node.attribute("UnitType").toInt(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "UnitType is no number" << endl;
-		return false;
-	}
- }
- x = node.attribute("x").toUInt(&ok);
- if (!ok) {
-	boError(250) << k_funcinfo << "x is no number" << endl;
-	return false;
- }
- y = node.attribute("y").toUInt(&ok);
- if (!ok) {
-	boError(250) << k_funcinfo << "y is no number" << endl;
-	return false;
- }
- return true;
+ return BosonScenarioBuilder::loadBasicUnit(node, unitType, x, y);
 }
 
 
-bool BosonScenario::saveUnit(QDomElement& node, Unit* unit)
+bool BosonScenario::saveUnit(QDomElement& node, const Unit* unit)
 {
  if (!unit) {
 	boError(250) << k_funcinfo << "NULL unit" << endl;
@@ -607,7 +521,172 @@ bool BosonScenario::saveUnit(QDomElement& node, Unit* unit)
 }
 
 // called mainly by Boson::addUnit()
-bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
+bool BosonScenario::loadUnit(const QDomElement& node, Unit* unit)
+{
+ return BosonScenarioBuilder::loadUnit(node, unit);
+}
+
+bool BosonScenario::saveFacility(QDomElement& node, const Facility* fac)
+{
+ if (fac->isConstructionComplete()) {
+	node.setAttribute("ConstructionCompleted", 1);
+ } else if (fac->currentConstructionStep() != 0) {
+	node.setAttribute("ConstructionStep", fac->currentConstructionStep());
+ }
+ return true;
+}
+
+bool BosonScenario::saveMobile(QDomElement& node, const MobileUnit* mob)
+{
+ bool ret = true;
+ const UnitProperties* prop = mob->unitProperties();
+
+// meant to change during the game one day - but it is unused currenlty.
+ if (mob->maxSpeed() != prop->speed()) {
+	node.setAttribute("MaxSpeed", (double)mob->maxSpeed());
+ }
+ return ret;
+}
+
+
+bool BosonScenarioBuilder::startScenario(Boson* boson)
+{
+ if (!mScenario) {
+	BO_NULL_ERROR(mScenario);
+	return false;
+ }
+ if (!boson) {
+	BO_NULL_ERROR(boson);
+	return false;
+ }
+ if (!mScenario->isValid()) {
+	return false;
+ }
+
+ // no error must happen here anymore!! everything should have been checked in
+ // loadScenario()
+ // UPDATE: we also have to support *new* scenario, i.e. where loadScenario()
+ // wasn't used. but errors arent so important then, as it is used by editor
+ // only and not in network.
+
+ QDomNodeList l = mScenario->d->mInternalDoc.documentElement().elementsByTagName("ScenarioPlayers");
+ if (l.count() < 1) {
+	boError(250) << k_funcinfo << "oops - broken file? no players!" << endl;
+	return false;
+ }
+ QDomNodeList list = l.item(0).toElement().elementsByTagName("Player");
+ if (boson->playerList()->count() > list.count()) {
+	boError(250) << k_funcinfo << "too many players for this scenario" << endl;
+	return false;
+ }
+ QValueList<int> playerOrder;
+ for (int unsigned i = 0; i < list.count(); i++) {
+	QDomElement player = list.item(i).toElement();
+	if (!player.hasAttribute("PlayerNumber")) {
+		boError(250) << k_funcinfo << "Missing PlayerNumber" << endl;
+		return false;
+	}
+	bool ok = true;
+	unsigned int playerNumber = player.attribute("PlayerNumber").toUInt(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "PlayerNumber was no number" << endl;
+		playerNumber = 0;
+	}
+	if ((int)playerNumber >= mScenario->maxPlayers()) {
+		boError(250) << k_funcinfo << "don't know player " << playerNumber 
+				<< endl;
+		return false;
+	}
+	playerOrder.append(playerNumber);
+ }
+
+
+ boDebug(250) << k_funcinfo << "players done" << endl;
+ for (unsigned int i = 0; i < boson->playerList()->count(); i++) {
+	bool ok = false;
+	QDomElement node = list.item(i).toElement();
+	Player* p = (Player*)boson->playerList()->at(playerOrder[i]);
+
+	p->setOil(node.attribute("Oil").toULong());
+	QDomElement m = node.elementsByTagName("Minerals").item(0).toElement();
+	unsigned long int minerals = m.text().toULong(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "Invalid minerals" << endl;
+		minerals = 0;
+	}
+	p->setMinerals(minerals);
+
+	QDomElement o = node.elementsByTagName("Oil").item(0).toElement();
+	unsigned long int oil = o.text().toULong(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "Invalid oil" << endl;
+		oil= 0;
+	}
+	p->setOil(oil);
+
+	bool ret = loadPlayer(node, p);
+	if (!ret) {
+		boError(250) << k_funcinfo << "error loading player " << i << endl;
+		return ret;
+	}
+ }
+ boDebug(250) << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool BosonScenarioBuilder::loadPlayer(const QDomElement& node, Player* p)
+{
+ QDomNodeList list = node.elementsByTagName("Unit");
+
+ QDomDocument doc;
+ QDomElement root = doc.createElement("BosonUnits");
+ doc.appendChild(root);
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement unit = list.item(i).toElement();
+	root.appendChild(unit.cloneNode(true));
+ }
+
+ ((Boson*)p->game())->sendAddUnits(doc.toString(), p);
+ return true;
+}
+
+bool BosonScenarioBuilder::loadBasicUnit(const QDomElement& node, unsigned long int& unitType, unsigned int& x, unsigned int& y)
+{
+ if (!node.hasAttribute("Type") && !node.hasAttribute("UnitType")) {
+	boError(250) << k_funcinfo << "missing Type" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("x")) {
+	boError(250) << k_funcinfo << "missing x" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("y")) {
+	boError(250) << k_funcinfo << "missing y" << endl;
+	return false;
+ }
+ bool ok = false;
+ unitType = node.attribute("Type").toInt(&ok);
+ if (!ok) {
+	unitType = node.attribute("UnitType").toInt(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "UnitType is no number" << endl;
+		return false;
+	}
+ }
+ x = node.attribute("x").toUInt(&ok);
+ if (!ok) {
+	boError(250) << k_funcinfo << "x is no number" << endl;
+	return false;
+ }
+ y = node.attribute("y").toUInt(&ok);
+ if (!ok) {
+	boError(250) << k_funcinfo << "y is no number" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonScenarioBuilder::loadUnit(const QDomElement& node, Unit* unit)
 {
  // note that unit can be 0 !!!
  // this will be the case when the xml file is parsed initially. We simply load
@@ -678,21 +757,29 @@ bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
 		}
 	}
  }
-
  return ret;
 }
 
-bool BosonScenario::saveFacility(QDomElement& node, Facility* fac)
+bool BosonScenarioBuilder::loadMobile(const QDomElement& node, MobileUnit* mob)
 {
- if (fac->isConstructionComplete()) {
-	node.setAttribute("ConstructionCompleted", 1);
- } else if (fac->currentConstructionStep() != 0) {
-	node.setAttribute("ConstructionStep", fac->currentConstructionStep());
+ // note that mob can be 0 !!!
+ // this will be the case when the xml file is parsed initially. We simply load
+ // all values but apply nowhere.
+ // Check if mob is 0 before actually using it!
+ bool ret = true;
+ bool ok = false; // for QString::toInt() like functions
+ if (node.hasAttribute("MaxSpeed")) {
+	double speed = node.attribute("MaxSpeed").toDouble(&ok);
+	if (!ok) {
+		boError(250) << k_funcinfo << "Invalid value for MaxSpeed!" << endl;
+	} else if (mob) {
+		mob->setMaxSpeed(speed);
+	}
  }
- return true;
+ return ret;
 }
 
-bool BosonScenario::loadFacility(QDomElement& node, Facility* fac)
+bool BosonScenarioBuilder::loadFacility(const QDomElement& node, Facility* fac)
 {
  // note that fac can be 0 !!!
  // this will be the case when the xml file is parsed initially. We simply load
@@ -716,34 +803,4 @@ bool BosonScenario::loadFacility(QDomElement& node, Facility* fac)
  return ret;
 }
 
-bool BosonScenario::saveMobile(QDomElement& node, MobileUnit* mob)
-{
- bool ret = true;
- const UnitProperties* prop = mob->unitProperties();
-
-// meant to change during the game one day - but it is unused currenlty.
- if (mob->maxSpeed() != prop->speed()) {
-	node.setAttribute("MaxSpeed", (double)mob->maxSpeed());
- }
- return ret;
-}
-
-bool BosonScenario::loadMobile(QDomElement& node, MobileUnit* mob)
-{
- // note that mob can be 0 !!!
- // this will be the case when the xml file is parsed initially. We simply load
- // all values but apply nowhere.
- // Check if mob is 0 before actually using it!
- bool ret = true;
- bool ok = false; // for QString::toInt() like functions
- if (node.hasAttribute("MaxSpeed")) {
-	double speed = node.attribute("MaxSpeed").toDouble(&ok);
-	if (!ok) {
-		boError(250) << k_funcinfo << "Invalid value for MaxSpeed!" << endl;
-	} else if (mob) {
-		mob->setMaxSpeed(speed);
-	}
- }
- return ret;
-}
 
