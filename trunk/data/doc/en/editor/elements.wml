@@ -27,5 +27,5 @@
     Don't forget to change the player while building units and buildings.<br>
     If you create or change the map the player doesn't matter.    
     </p>
-#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="map.html" after_text="Working with the map"
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="map.html" after_text="Working with the map" up_url="index.html"
 #include "footer.wml"

@@ -46,7 +46,7 @@ sub getval() {
         @CONTENT2 = <FILE2>;
         close(FILE2);
 
-        print "<table border=\"0\" cellpadding=\"15\"><tr valign=\"top\"><td><table border=\"0\">\n";
+        print "<table border=\"1\" style=\"border-width:0;\" cellpadding=\"15\"><tr valign=\"top\"><td><table border=\"0\">\n";
 
         my $line;
         my $line2;

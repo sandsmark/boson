@@ -20,5 +20,5 @@ get_values->getval("fix", "powerplant", 2);
 :>
     
 
-#include "nav.wml" before_url="oiltower.html" before_text="Oil Tower" after_url="barracks.html" after_text="Barracks"        
+#include "nav.wml" before_url="oiltower.html" before_text="Oil Tower" after_url="barracks.html" after_text="Barracks" up_url="index.html"
 #include "footer.wml"

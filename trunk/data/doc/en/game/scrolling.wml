@@ -55,6 +55,6 @@
     </p>
     
 
-#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="cursor.html" after_text="The cursors"    
+#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="cursor.html" after_text="The cursors" up_url="index.html"
 #include "footer.wml"
 

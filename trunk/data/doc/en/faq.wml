@@ -32,5 +32,5 @@
     </p>
 
 
-#include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" 
+#include "nav.wml" before_url="units/aircraft.html" before_text="Aircraft" after_url="credits.html" after_text="Credits" up_url="index.html"
 #include "footer.wml"

@@ -14,5 +14,5 @@
     <tr><td>X-120 cannons for Quad</td><td>Add a nice X-120 cannon to your Quads</td></tr>
     </table>
 
-#include "nav.wml" before_url="repairing.html" before_text="Repairing" after_url="../facilities/index.html" after_text="Facilities"    
+#include "nav.wml" before_url="repairing.html" before_text="Repairing" after_url="../facilities/index.html" after_text="Facilities" up_url="index.html"
 #include "footer.wml"

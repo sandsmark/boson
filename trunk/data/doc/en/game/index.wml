@@ -23,5 +23,5 @@
       </dd>
     </dl>
     
-#include "nav.wml" before_url="../installation.html" before_text="Installation" after_url="configure.html" after_text="Configure Boson"        
+#include "nav.wml" before_url="../installation.html" before_text="Installation" after_url="configure.html" after_text="Configure Boson" up_url="../index.html"
 #include "footer.wml"

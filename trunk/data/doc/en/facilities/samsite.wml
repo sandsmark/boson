@@ -20,5 +20,5 @@ get_values->getval("fix", "samsite", 2);
 :>
     
 
-#include "nav.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units"        
+#include "nav.wml" before_url="turret.html" before_text="Turret" after_url="../units/index.html" after_text="Units" up_url="index.html"
 #include "footer.wml"

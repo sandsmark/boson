@@ -11,5 +11,5 @@
       <!-- - <a href="../facilities/hangar.html">Hangar</a><br> -->
     </p>
     
-#include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units"    
+#include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units" up_url="index.html"
 #include "footer.wml"

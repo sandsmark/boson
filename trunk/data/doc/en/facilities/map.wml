@@ -88,5 +88,5 @@ Depends on:
 	</p>	
 	
 
-#include "nav.wml" before_url="index.html" before_text="Facilities" after_url="bunker.html" after_text="Command bunker"        
+#include "nav.wml" before_url="index.html" before_text="Facilities" after_url="bunker.html" after_text="Command bunker" up_url="index.html"
 #include "footer.wml"

@@ -19,5 +19,5 @@ use get_values;
 get_values->getval("mob", "batzen", 2);
 :>
 
-#include "nav.wml" before_url="quad.html" before_text="Quad" after_url="tank.html" after_text="Tank"    
+#include "nav.wml" before_url="quad.html" before_text="Quad" after_url="tank.html" after_text="Tank" up_url="index.html"
 #include "footer.wml"
