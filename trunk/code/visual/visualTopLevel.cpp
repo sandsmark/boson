@@ -24,7 +24,7 @@
 
 
 visualTopLevel::visualTopLevel( const char *name, WFlags f)
-	: KTMainWindow(name,f)
+	: KMainWindow(0l, name,f)
 	,fixSelected( 0L )
 	,selectionMode(SELECT_NONE)
 {

@@ -30,9 +30,9 @@
   * This class is the global object concerning a view : where, how large..
   * It's also the place where selections are handled
   * 
-  * it inherits from KTMainWindow only because it will _also_ be part of the GUI in boson or boeditor
+  * it inherits from KMainWindow only because it will _also_ be part of the GUI in boson or boeditor
   */
-class visualTopLevel : public KTMainWindow
+class visualTopLevel : public KMainWindow
 {
 	Q_OBJECT
 
