@@ -449,7 +449,7 @@ void BosonWidget::initLayout()
 {
  d->mLayoutCreated = true;
  d->mCommandFrameDock->manualDock(d->mTop->getMainDockWidget(), KDockWidget::DockLeft, 30);
- d->mChatDock->manualDock(d->mTop->getMainDockWidget(), KDockWidget::DockBottom, 20);
+ d->mChatDock->manualDock(d->mTop->getMainDockWidget(), KDockWidget::DockBottom, 80);
  d->mCommandFrameDock->show();  // We show only commandframe by dafault, not chat
  // Following DOES NOT WORK and I have no idea why...
 // d->mTop->readDockConfig(kapp->config(), QString("BosonDockConfig"));
