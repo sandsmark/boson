@@ -34,15 +34,16 @@
 	uint	goFlag;		// where can it go ? 
 */
 
+#define EX(s) ((s)*BO_TILE_SIZE)
 mobileProperties_t mobileProp[] = {
-	{"ship",		96, 96,  2, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
-	{"quad",		48, 48,  3, 2,	200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
-	{"oilharvester",	48, 48,  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
-	{"mineralharvester",	48, 48,  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
-	{"aircraft",		96, 96,  3, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"ship",		EX(2), EX(2),  2, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
+	{"quad",		EX(1), EX(1),  3, 2,	200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
+	{"oilharvester",	EX(1), EX(1),  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
+	{"mineralharvester",	EX(1), EX(1),  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"aircraft",		EX(2), EX(2),  3, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
-//	                        width    visibility     mineral   speed
-//	                            height  range            oil     goFlag
+//	                        width          visibility    oil  speed
+//	                               height     range mineral      goFlag
 
 /*
 	char 	*name;		// Guess it, geek..
@@ -54,7 +55,6 @@ mobileProperties_t mobileProp[] = {
 	uint	cost_oil;	// how much oil does it cost ?
 */
 	
-#define EX(s) ((s)*BO_TILE_SIZE)
 facilityProperties_t facilityProp[] = {
 	{"comsat"	, EX(2), EX(2), 7,  0,	300, 100},	// FACILITY_COMSAT
 	{"helipad"	, EX(2), EX(2), 6,  0,	300, 100},	// FACILITY_HELIPAD
