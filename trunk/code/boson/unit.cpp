@@ -1048,7 +1048,7 @@ bool Unit::load(QDataStream& stream)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS((int)(target->x() - x()) / BO_TILE_SIZE), QABS((int)(target->y() - y()) / BO_TILE_SIZE)) <= (int)r);
+ return (QMAX(QABS((target->x() - x()) / BO_TILE_SIZE), QABS((target->y() - y()) / BO_TILE_SIZE)) <= (float)r);
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
