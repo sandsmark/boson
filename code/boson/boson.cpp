@@ -190,7 +190,7 @@ void BoMyKMessageSocket::slotProcessNewData()
 }
 
 #else
-void BoMyKMessageSocket::setSocket(KMessageSocket*)
+void BoMyKMessageSocket::setSocket(KMessageSocket* s, QSocket* sock)
 {
 }
 void BoMyKMessageSocket::slotProcessNewData()
