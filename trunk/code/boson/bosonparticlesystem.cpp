@@ -20,7 +20,7 @@
 #include "bosonparticlesystem.h"
 
 #include "bo3dtools.h"
-#include "bosonparticlemanager.h"
+#include "bosonparticlesystemproperties.h"
 #include "bodebug.h"
 #include "boson.h"
 #include "player.h"

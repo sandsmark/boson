@@ -21,7 +21,7 @@
 
 #include "speciestheme.h"
 #include "bosonparticlesystem.h"
-#include "bosonparticlemanager.h"
+#include "bosonparticlesystemproperties.h"
 #include "unit.h"
 #include "global.h"
 #include "bosoncanvas.h"
