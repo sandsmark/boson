@@ -45,6 +45,8 @@ public:
 		MoveProduce = 103, // start to produce a unit. Sent when a cmd widget is clicked
 		MoveProduceStop = 104, // stop a production. Either pause it or abort it completely
 		MoveMine = 105,
+		MoveRepair = 106,
+		MoveRefine = 107,
 
 
 		// the last message ID:

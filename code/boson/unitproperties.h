@@ -213,6 +213,9 @@ public:
 	 **/
 	bool canMineOil() const;
 
+	bool canRefineMinerals() const;
+	bool canRefineOil() const;
+
 	/**
 	 * @return The maximal amount of resources (oil or minerals) that can be
 	 * mined until the unit must return to a refinery. The type of resources

@@ -70,3 +70,6 @@ Data TODOs
 - make use of biglogo.png
 - shipyard
 - airport 
+- rewrite installation code:
+  -> when a dir is renamed currently the old remains on disk and therefore is
+     read by the game
