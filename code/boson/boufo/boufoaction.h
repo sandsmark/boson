@@ -26,6 +26,7 @@
 class BoUfoActionCollection;
 class BosonGLWidget;
 class KShortcut;
+class KAccel;
 class BoUfoManager;
 
 template<class T> class QValueList;
@@ -55,6 +56,12 @@ public:
 
 	const QString& text() const;
 
+	void setEnabled(bool e);
+	bool isEnabled() const
+	{
+		return mIsEnabled;
+	}
+
 	virtual void plug(ufo::UWidget*);
 
 	/**
@@ -64,6 +71,7 @@ public:
 	{
 		mParentCollection = parent;
 	}
+	void insertToKAccel(KAccel* accel);
 
 public slots:
 	/**
@@ -78,9 +86,11 @@ protected:
 
 signals:
 	void signalActivated();
+	void signalEnabled(bool);
 
 private:
 	void init(BoUfoActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot);
+	void initShortcut();
 
 public: // g++ 3.4 complains if we make this protected
 	void uslotActivated(ufo::UActionEvent*);
@@ -90,6 +100,7 @@ public: // g++ 3.4 complains if we make this protected
 private:
 	BoUfoActionPrivate* d;
 	BoUfoActionCollection* mParentCollection;
+	bool mIsEnabled;
 };
 
 class BoUfoToggleAction : public BoUfoAction
@@ -199,6 +210,9 @@ public:
 
 	bool createGUI(const QString& file);
 	bool createGUI(const QStringList& fileList);
+
+	void setAccelWidget(QWidget* widget);
+	KAccel* kaccel() const;
 
 	static void initActionCollection(BoUfoManager* m);
 
