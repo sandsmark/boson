@@ -311,6 +311,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  // isn't 100% clear which class will reference it first).
  addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", DEFAULT_GROUND_RENDERER));
  addDynamicEntry(new BoConfigUIntEntry(this, "DefaultLOD", 0));
+ addDynamicEntry(new BoConfigBoolEntry(this, "EnableATIDepthWorkaround", false));
+ addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
 
  // load from config
  reset(conf);
