@@ -102,6 +102,10 @@ public:
 	bool mmbMove() const { return mMMBMove; }
 	void setUpdateInterval(unsigned int i) { mUpdateInterval = i; }
 	unsigned int updateInterval() const { return mUpdateInterval; }
+	void setShowMenubarInGame(bool s) { mShowMenubarInGame = s; }
+	bool showMenubarInGame() const { return mShowMenubarInGame; }
+	void setShowMenubarOnStartup(bool s) { mShowMenubarOnStartup = s; }
+	bool showMenubarOnStartup() const { return mShowMenubarOnStartup; }
 
 	/**
 	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
@@ -163,6 +167,12 @@ protected:
 	unsigned int readUpdateInterval(KConfig* conf);
 	void saveUpdateInterval(KConfig* conf);
 
+	void saveShowMenubarInGame(KConfig* conf);
+	bool readShowMenubarInGame(KConfig* conf);
+
+	void saveShowMenubarOnStartup(KConfig* conf);
+	bool readShowMenubarOnStartup(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -179,6 +189,8 @@ private:
 	bool mMMBMove;
 	unsigned int mCursorEdgeSensity;
 	unsigned int mUpdateInterval;
+	bool mShowMenubarInGame;
+	bool mShowMenubarOnStartup;
 };
 
 #endif

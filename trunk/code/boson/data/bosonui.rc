@@ -27,4 +27,7 @@
     <Action name="window_fullscreen" />
   </Menu>
 </MenuBar>
+<Menu name="welcomepopup">
+    <Action name="options_show_menubar" />
+</Menu>
 </kpartgui>

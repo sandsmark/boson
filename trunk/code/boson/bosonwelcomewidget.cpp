@@ -24,6 +24,7 @@
 
 #include <klocale.h>
 #include <kstandarddirs.h>
+#include <kbugreport.h>
 #include <kdebug.h>
 
 #include <qlabel.h>
@@ -36,66 +37,68 @@
  */
 BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 {
-  mBosonWelcomeWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
+  QVBoxLayout* widgetLayout = new QVBoxLayout( this, 11, 6, "BosonWelcomeWidgetLayout");
 
-  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
+  QVBoxLayout* mainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-//  mMainLayout->addSpacing(10);//FIXME hardcoded
+//  mainLayout->addSpacing(10);//FIXME hardcoded
   QPixmap bannerPix(locate("data", "boson/pics/boson-startup-banner.png"));
-  mBanner = new QLabel(this);
-  mBanner->setPixmap(bannerPix);
-  mMainLayout->addWidget(mBanner, 0, AlignHCenter);
+  QLabel* banner = new QLabel(this);
+  banner->setPixmap(bannerPix);
+  mainLayout->addWidget(banner, 0, AlignHCenter);
 
-  mMainLayout->addSpacing(10);
+  mainLayout->addSpacing(10);
 
   QWidget* textFrame = new QWidget(this);
-  mMainLayout->addWidget(textFrame, 0, AlignHCenter);
+  mainLayout->addWidget(textFrame, 0, AlignHCenter);
   QVBoxLayout* textFrameLayout = new QVBoxLayout(textFrame, 0, AlignHCenter);
   QPixmap textPixmap(locate("data", "boson/pics/boson-startup-textframe.png"));
   QLabel* textPix = new QLabel(textFrame);
   textPix->setPixmap(textPixmap);
   textFrameLayout->addWidget(textPix, 0, AlignHCenter);
-  
+
   // we fix this to the size of the pixmap!
   textPix->setFixedSize(textPixmap.size());
   textFrame->setFixedWidth(textPixmap.width());
 
-  
+
   QWidget* buttonWidget = new QWidget(textFrame);
   textFrameLayout->addWidget(buttonWidget, 0, AlignHCenter);
   QHBoxLayout* buttonsLayout = new QHBoxLayout( buttonWidget, 0, 6, "buttonslayout");
   buttonsLayout->addStretch(1);
 
-  mNewGameButton = new QPushButton( buttonWidget, "newgamebutton" );
-  mNewGameButton->setText( i18n( "S&tart new game" ) );
-  mNewGameButton->setMinimumWidth(120);
-  buttonsLayout->addWidget( mNewGameButton );
+  QPushButton* newGameButton = new QPushButton( buttonWidget, "newgamebutton" );
+  newGameButton->setText( i18n( "S&tart new game" ) );
+  newGameButton->setMinimumWidth(120);
+  buttonsLayout->addWidget( newGameButton );
   buttonsLayout->addStretch(1);
 
-  mLoadGameButton = new QPushButton( buttonWidget, "loadgamebutton" );
-  mLoadGameButton->setText( i18n( "&Load saved game" ) );
-  mLoadGameButton->setMinimumWidth(120);
-  buttonsLayout->addWidget( mLoadGameButton );
+  QPushButton* loadGameButton = new QPushButton( buttonWidget, "loadgamebutton" );
+  loadGameButton->setText( i18n( "&Load saved game" ) );
+  loadGameButton->setMinimumWidth(120);
+  buttonsLayout->addWidget( loadGameButton );
   buttonsLayout->addStretch(1);
 
-  mEditorButton = new QPushButton( buttonWidget, "editorbutton" );
-  mEditorButton->setText( i18n( "Start &Editor" ) );
-  mEditorButton->setMinimumWidth(120);
-  buttonsLayout->addWidget( mEditorButton );
-  connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+  QPushButton* editorButton = new QPushButton( buttonWidget, "editorbutton" );
+  editorButton->setText( i18n( "Start &Editor" ) );
+  editorButton->setMinimumWidth(120);
+  buttonsLayout->addWidget( editorButton );
   buttonsLayout->addStretch(1);
 
-  mQuitButton = new QPushButton( buttonWidget, "quitbutton" );
-  mQuitButton->setText( i18n( "&Quit Boson" ) );
-  mQuitButton->setMinimumWidth(120);
-  buttonsLayout->addWidget( mQuitButton );
+  QPushButton* quitButton = new QPushButton( buttonWidget, "quitbutton" );
+  quitButton->setText( i18n( "&Quit Boson" ) );
+  quitButton->setMinimumWidth(120);
+  buttonsLayout->addWidget( quitButton );
   buttonsLayout->addStretch(1);
 
-  mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
+  widgetLayout->addLayout( mainLayout );
 
-  connect(mNewGameButton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
-  connect(mLoadGameButton, SIGNAL(clicked()), this, SIGNAL(signalLoadGame()));
-  connect(mQuitButton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
+  connect(newGameButton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
+  connect(loadGameButton, SIGNAL(clicked()), this, SIGNAL(signalLoadGame()));
+  connect(editorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
+  connect(quitButton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
+
+  mBugReport = 0;
 }
 
 /*  
@@ -103,6 +106,14 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
  */
 BosonWelcomeWidget::~BosonWelcomeWidget()
 {
-  // no need to delete child widgets, Qt does it all for us
+  delete mBugReport;
+}
+
+void BosonWelcomeWidget::slotReportBug()
+{
+  if (!mBugReport) {
+      mBugReport = new KBugReport(this, false);
+      connect(mBugReport, SIGNAL(finished()), this, SLOT(slotBugDialogFinished()));
+  }
 }
 

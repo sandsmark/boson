@@ -27,6 +27,7 @@ class QHBoxLayout;
 class QGridLayout;
 class QLabel;
 class QPushButton;
+class KBugReport;
 
 class BosonWelcomeWidget : public QWidget
 {
@@ -41,17 +42,11 @@ class BosonWelcomeWidget : public QWidget
     void signalStartEditor();
     void signalQuit();
 
-  protected:
-    QVBoxLayout* mBosonWelcomeWidgetLayout;
-    QVBoxLayout* mMainLayout;
+  protected slots:
+    void slotReportBug();
 
   private:
-    QPushButton* mNewGameButton;
-    QPushButton* mLoadGameButton;
-    QPushButton* mEditorButton;
-    QPushButton* mQuitButton;
-
-    QLabel* mBanner;
+    KBugReport* mBugReport;
 
 };
 

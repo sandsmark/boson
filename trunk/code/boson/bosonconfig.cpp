@@ -56,6 +56,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMMBMove = true;
  mCursorEdgeSensity = 20;
  mUpdateInterval = 25;
+ mShowMenubarInGame = true;
+ mShowMenubarOnStartup = false;
 
  mDisableSound = false;
 
@@ -318,6 +320,32 @@ void BosonConfig::saveMMBMove(KConfig* conf)
  conf->writeEntry("MMBMove", mmbMove());
 }
 
+bool BosonConfig::readShowMenubarInGame(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ bool m = conf->readBoolEntry("ShowMenubarInGame", true);
+ return m;
+}
+
+void BosonConfig::saveShowMenubarInGame(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("ShowMenubarInGame", showMenubarInGame());
+}
+
+bool BosonConfig::readShowMenubarOnStartup(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ bool m = conf->readBoolEntry("ShowMenubarOnStartup", false);
+ return m;
+}
+
+void BosonConfig::saveShowMenubarOnStartup(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("ShowMenubarOnStartup", showMenubarOnStartup());
+}
+
 unsigned int BosonConfig::readCursorEdgeSensity(KConfig* conf)
 {
  conf->setGroup("Boson");
@@ -372,6 +400,8 @@ void BosonConfig::reset(KConfig* conf)
  setMMBMove(readMMBMove(conf));
  setCursorEdgeSensity(readCursorEdgeSensity(conf));
  setUpdateInterval(readUpdateInterval(conf));
+ setShowMenubarInGame(readShowMenubarInGame(conf));
+ setShowMenubarOnStartup(readShowMenubarOnStartup(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -394,6 +424,8 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveMMBMove(conf);
  saveCursorEdgeSensity(conf);
  saveUpdateInterval(conf);
+ saveShowMenubarInGame(conf);
+ saveShowMenubarOnStartup(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }
