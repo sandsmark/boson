@@ -1051,9 +1051,8 @@ void KGameModelDebug::updateNodePage()
 	if (node->type != LIB3DS_OBJECT_NODE) {
 		continue;
 	}
-	if (strcmp(node->name, "$$$DUMMY") == 0) {
-		continue;
-	}
+	// AB: $$$DUMMY nodes can contain child nodes as well.
+	// for debugging purposes we display them as well
 	Lib3dsNode* p;
 	for (p = node->childs; p; p = p->next) {
 		allNodes.append(p);
@@ -1116,9 +1115,6 @@ void KGameModelDebug::addNodeToList(QListViewItem* parent, Lib3dsNode* node)
 {
  BO_CHECK_NULL_RET(node);
  if (node->type != LIB3DS_OBJECT_NODE) {
-	return;
- }
- if (strcmp(node->name, "$$$DUMMY") == 0) {
 	return;
  }
  QListViewItem* item = 0;
