@@ -1060,10 +1060,6 @@ bool Unit::saveAsXML(QDomElement& root)
 	return false;
  }
 
- // AB: we use too many attributes ... maybe we should add a few more elements :)
- root.setAttribute(QString::fromLatin1("x"), x());
- root.setAttribute(QString::fromLatin1("y"), y());
- root.setAttribute(QString::fromLatin1("z"), z());
  root.setAttribute(QString::fromLatin1("Rotation"), rotation());
  // No need to store x and y rotations
 

@@ -430,6 +430,10 @@ bool BosonItem::saveAsXML(QDomElement& root)
  root.setAttribute(QString::fromLatin1("GroupType"), (int)0);
 
 
+ root.setAttribute(QString::fromLatin1("x"), x());
+ root.setAttribute(QString::fromLatin1("y"), y());
+ root.setAttribute(QString::fromLatin1("z"), z());
+ root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
 
  // the data handler

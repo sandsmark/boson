@@ -137,7 +137,6 @@ bool UnitBase::saveAsXML(QDomElement& root)
 	return false;
  }
  QDomDocument doc = root.ownerDocument();
- root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Type"), (unsigned int)type());
  root.setAttribute(QString::fromLatin1("Group"), 0);
  root.setAttribute(QString::fromLatin1("GroupType"), 0);
