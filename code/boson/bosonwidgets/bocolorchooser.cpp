@@ -28,6 +28,7 @@
 #include <qbitmap.h>
 #include <qpixmap.h>
 #include <qpainter.h>
+#include <qpen.h>
 
 #include <kdebug.h>
 
@@ -155,7 +156,7 @@ void BoColorChooser::markTaken(QLabel* label)
  QBitmap mask(label->width(), label->height(), true);
  QPixmap pix(label->width(), label->height());
  QPainter p(&mask);
- p.setPen(Qt::color1);
+ p.setPen(QPen(Qt::color1, 2));
  p.drawLine(0, 0, mask.width()-1, mask.height()-1);
  p.drawLine(mask.width()-1, 0, 0, mask.height()-1);
  pix.fill(Qt::black);
