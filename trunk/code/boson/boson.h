@@ -53,6 +53,7 @@ public:
 	bool isServer() const;
 
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
+	void removeAllPlayers();
 
 	Unit* createUnit(int unitType, Player* owner); // public for Player::load
 
