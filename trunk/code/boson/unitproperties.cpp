@@ -203,6 +203,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);
+ BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedParticles", d->mConstructedParticleSystemIds);
 
  if (isFacility()) {
 	saveFacilityProperties(&conf);
@@ -662,7 +663,11 @@ void UnitProperties::reset()
  mSupportMiniMap = false;
  d->mRequirements.clear();
  d->mDestroyedParticleSystemIds.clear();
+ d->mConstructedParticleSystemIds.clear();
+ d->mHitPoint.reset();
  mProducer = 0;
+ mExplodingDamage = 0;
+ mExplodingDamageRange = 0;
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
  mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
