@@ -12,7 +12,6 @@ IsFacility=false
 MineralCost=350
 Name=Tornado
 OilCost=150
-Producer=2
 ProductionTime=300
 Requirements=1,14
 Shield=0
