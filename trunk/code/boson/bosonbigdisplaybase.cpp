@@ -663,8 +663,8 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderParticles(true);
  canvas()->updateParticleSystems(elapsed);
  int count = canvas()->particleSystemsCount();
- if(count > 0) {
-	kdDebug() << k_funcinfo << "rendering " << count << " particle systems (elapsed: " << elapsed << ")" << endl;
+ if (count > 0) {
+//	kdDebug() << k_funcinfo << "rendering " << count << " particle systems (elapsed: " << elapsed << ")" << endl;
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	canvas()->renderParticleSystems();
