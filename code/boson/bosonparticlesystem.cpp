@@ -22,8 +22,6 @@
 #include "bo3dtools.h"
 #include "bosonparticlesystemproperties.h"
 #include "bodebug.h"
-#include "boson.h"
-#include "player.h"
 
 #include <GL/gl.h>
 
@@ -252,8 +250,6 @@ void BosonParticleSystem::draw()
   glBindTexture(GL_TEXTURE_2D, mTexture);
   glBlendFunc(mBlendFunc[0], mBlendFunc[1]);
   
-  Player* p = boGame->localPlayer();
-
   // FIXME: between glBegin() and glEnd() there should be as little code as
   // possible, i.e. try to get around the loop and so.
   // FIXME: can't we use a display list here?
@@ -263,11 +259,6 @@ void BosonParticleSystem::draw()
   {
     // Don't draw dead particles
     if(mParticles[i].life <= 0.0)
-    {
-      continue;
-    }
-    // FIXME: this is extremely bad here but we must not draw particles on fogged areas
-    if(p->isFogged(mParticles[i].pos[0] + mPos[0], -(mParticles[i].pos[1] + mPos[1])))
     {
       continue;
     }
