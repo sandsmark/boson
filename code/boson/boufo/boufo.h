@@ -33,6 +33,7 @@ class BoUfoActionCollection;
 class BoUfoMenuBar;
 class BoUfoWidget;
 class BoUfoInternalFrame;
+class BoUfoLayeredPane;
 
 namespace ufo {
 	class UXToolkit;
@@ -58,6 +59,7 @@ namespace ufo {
 	class UComboBox;
 	class UInternalFrame;
 	class UBoProgress;
+	class ULayeredPane;
 
 
 	class UActionEvent;
@@ -155,6 +157,16 @@ public:
 		return mContentWidget;
 	}
 
+	/**
+	 * @return The layered pane of the @ref ufo::URootPane. This is the
+	 * desktop pane, containing the @ref contentWidget as well as the
+	 * menubar
+	 **/
+	BoUfoLayeredPane* layeredPaneWidget() const
+	{
+		return mLayeredPaneWidget;
+	}
+
 	void addFrame(BoUfoInternalFrame*);
 	void removeFrame(BoUfoInternalFrame*);
 
@@ -214,6 +226,7 @@ private:
 	ufo::URootPane* mRootPane;
 	ufo::UWidget* mContentPane;
 	BoUfoWidget* mContentWidget;
+	BoUfoLayeredPane* mLayeredPaneWidget;
 
 	BoUfoActionCollection* mActionCollection;
 	BoUfoMenuBar* mMenuBar;
@@ -452,6 +465,17 @@ public:
 	void hide() { setVisible(false); }
 	bool isVisible() const;
 
+	/**
+	 * Call @ref ufo::UWidget::paint for this widget.
+	 *
+	 * You normally don't need this, as the paint of the parent widget
+	 * should call this automatically.
+	 *
+	 * Calling this makes sense for widgets that have not been added to
+	 * other widgets only.
+	 **/
+	void render(BoUfoManager*);
+
 
 	void loadPropertiesFromXML(const QDomNamedNodeMap&);
 	void loadProperties(const QMap<QString, QString>&);
@@ -459,6 +483,9 @@ public:
 	virtual void setMinimumSize(const ufo::UDimension& size);
 	virtual void setPreferredSize(const ufo::UDimension& size);
 	virtual void setSize(int w, int h);
+	virtual void setPos(int x, int y);
+	int width() const;
+	int height() const;
 
 
 signals: // TODO: remove ufo::* parameters. use Qt or custom parameters only
@@ -992,6 +1019,18 @@ private:
 	BoUfoTabWidgetPrivate* d;
 };
 
+
+class BoUfoLayeredPane : public BoUfoWidget
+{
+	Q_OBJECT
+public:
+	BoUfoLayeredPane();
+	BoUfoLayeredPane(ufo::ULayeredPane*);
+	~BoUfoLayeredPane();
+
+	void addLayer(BoUfoWidget* w, int layer = 0, int position = -1);
+	void setLayer(BoUfoWidget* w, int layer, int position = -1);
+};
 
 /**
  * Note: in libufo @ref ufo::UInternalFrame objects have to be added using @ref

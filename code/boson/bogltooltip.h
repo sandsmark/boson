@@ -26,6 +26,8 @@ class BosonItem;
 class QString;
 class BosonGLFont;
 class BoToolTipCreator;
+class BoUfoLabel;
+class PlayerIO;
 
 class BoToolTipCreatorFactoryPrivate;
 /**
@@ -88,23 +90,15 @@ public:
 	BoGLToolTip(BosonBigDisplayBase*);
 	virtual ~BoGLToolTip();
 
+	void setPlayerIO(PlayerIO* io);
+	void setLabel(BoUfoLabel* label);
+
 	/**
 	 * Set which kind of tooltips will be created. See @ref
 	 * BoToolTipCreatorFactory and @ref BoToolTipCreator for more
 	 * information.
 	 **/
 	void setToolTipCreator(int type);
-
-	/**
-	 * Render the tooltip at the cursor position @p cursorX and @p cursor Y.
-	 * An offset is added to that cursor position and the "best" direction
-	 * (left to the cursor / right to the cursor, ...) is chosen.
-	 * @param viewportMatrix The current viewport matrix as it is used by
-	 * the @ref BosonBigDisplayBase widget that was specified in the
-	 * construcotr.
-	 * @param font The desired font for the tooltip
-	 **/
-	void renderToolTip(int cursorX, int cursorY, const int* viewportMatrix, BosonGLFont* font);
 
 	/**
 	 * @return TRUE when the @ref currentTip should get displayed in this
@@ -149,7 +143,7 @@ protected slots:
 	 * had been called the last time).
 	 *
 	 * If a tooltip is meant to be displayed @ref showTip will be set to
-	 * TRUE. Use @ref renderToolTip to render the tip.
+	 * TRUE.
 	 *
 	 * Also see @ref slotUpdate, which takes care that the displayed data
 	 * remains current.
@@ -168,12 +162,18 @@ protected slots:
 	 **/
 	void slotUpdate();
 
+protected:
+	void updateLabel();
+	void setCursorPos(const QPoint& pos);
+
 private:
 	BoGLToolTipPrivate* d;
 	BosonBigDisplayBase* mView;
 	BoToolTipCreator* mCreator;
 	bool mShowTip;
 	int mUpdatePeriod;
+	BoUfoLabel* mLabel;
+	PlayerIO* mPlayerIO;
 };
 
 #endif
