@@ -1758,7 +1758,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
 	BoItemList list;
 	QRect r = selectionRectCanvas();
-	list = canvas()->bosonCollisions(r);
+	list = canvas()->collisions(r);
 	BoItemList::Iterator it;
 	boDebug() << "Selection count: " << list.count() << endl;
 	for (it = list.begin(); it != list.end(); ++it) {
@@ -1779,7 +1779,7 @@ void BosonBigDisplayBase::selectArea(bool replace)
  QPtrList<Unit> unitList;
  Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
  BoItemList::Iterator it;
- list = canvas()->bosonCollisions(r);
+ list = canvas()->collisions(r);
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
