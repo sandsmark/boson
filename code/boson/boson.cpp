@@ -1691,23 +1691,19 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			boError() << k_funcinfo << "received IdNewGame, but starting a game is not allowed!" << endl;
 			return;
 		}
-		setGameMode(true);
-		d->mStartingObject->setNewGameData(buffer);
-		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
-		break;
-	}
-	case BosonMessage::IdNewEditor:
-	{
-		if (isRunning()) {
-			boError() << k_funcinfo << "received IdNewEditor, but game is already running" << endl;
+		Q_INT8 gameMode; // game/editor mode
+		stream >> gameMode;
+		if (gameMode == 1) {
+			setGameMode(true);
+		} else if (gameMode == 0) {
+			setGameMode(false);
+		} else {
+			boError() << k_funcinfo << "invalid gameMode value " << gameMode << endl;
 			return;
 		}
-		if (!d->mStartingObject) {
-			boError() << k_funcinfo << "received IdNewEditor, but starting a editor/game is not allowed!" << endl;
-			return;
-		}
-		setGameMode(false);
-		d->mStartingObject->setNewGameData(buffer);
+		QByteArray data;
+		stream >> data;
+		d->mStartingObject->setNewGameData(data);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	}

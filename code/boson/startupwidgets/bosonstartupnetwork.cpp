@@ -154,12 +154,17 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 	boError() << k_funcinfo << "unable to add neutral player. cannot send newgame message." << endl;
 	return false;
  }
- boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
+
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
  if (editor) {
-	mGame->sendMessage(data, BosonMessage::IdNewEditor);
+	stream << (Q_INT8)0;
  } else {
-	mGame->sendMessage(data, BosonMessage::IdNewGame);
+	stream << (Q_INT8)1;
  }
+ stream << data;
+ boDebug() << k_funcinfo << "neutral player will get added from network soon. sending newgame message." << endl;
+ mGame->sendMessage(buffer, BosonMessage::IdNewGame);
  return true;
 }
 
