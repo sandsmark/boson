@@ -208,6 +208,35 @@ private:
 	QValueList<int> mValue;
 };
 
+BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue)
+		: BoConfigEntry(parent, key)
+{
+ mRGBValue = defaultValue.rgb();
+}
+
+void BoConfigColorEntry::save(KConfig* conf)
+{
+ activate(conf);
+ conf->writeEntry(key(), value());
+}
+
+void BoConfigColorEntry::load(KConfig* conf)
+{
+ activate(conf);
+ QColor def = value();
+ mRGBValue = conf->readColorEntry(key(), &def).rgb();
+}
+
+void BoConfigColorEntry::setValue(const QColor& v)
+{
+ setValue(v.rgb());
+}
+
+QColor BoConfigColorEntry::value() const
+{
+ return QColor(mRGBValue);
+}
+
 
 
 class BosonConfig::BosonConfigPrivate
@@ -620,7 +649,7 @@ void BosonConfig::writeFloatNumList(QValueList<float> list, KConfig* cfg, const 
  cfg->writeEntry(key, strlist);
 }
 
-void BosonConfig::addDynamicEntry(BoConfigEntry* entry)
+void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
 {
  BO_CHECK_NULL_RET(entry);
  if (entry->key().isEmpty()) {
@@ -634,6 +663,10 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry)
 	return;
  }
  d->mDynamicEntries.insert(entry->key(), entry);
+ if (!conf) {
+	conf = kapp->config();
+ }
+ entry->load(conf);
 }
 
 bool BosonConfig::hasKey(const QString& key) const
@@ -699,6 +732,17 @@ void BosonConfig::setDoubleValue(const QString& key, double v)
 	return;
  }
  ((BoConfigDoubleEntry*)entry)->setValue(v);
+}
+
+void BosonConfig::setColorValue(const QString& key, const QColor& v)
+{
+ BoConfigEntry* entry = value(key);
+ BO_CHECK_NULL_RET(entry);
+ if (entry->type() != BoConfigEntry::Color) {
+	boError() << k_funcinfo << key << "is not a color entry. type=" << entry->type() << endl;
+	return;
+ }
+ ((BoConfigColorEntry*)entry)->setValue(v);
 }
 
 bool BosonConfig::boolValue(const QString& key, bool _default) const
@@ -769,5 +813,24 @@ double BosonConfig::doubleValue(const QString& key, double _default) const
 	return _default;
  }
  return ((BoConfigDoubleEntry*)entry)->value();
+}
+
+QColor BosonConfig::colorValue(const QString& key) const
+{
+ return colorValue(key, Qt::black);
+}
+
+QColor BosonConfig::colorValue(const QString& key, const QColor& _default) const
+{
+ BoConfigEntry* entry = value(key);
+ if (!entry) {
+	boError() << k_funcinfo << "no key " << key << endl;
+	return _default;
+ }
+ if (entry->type() != BoConfigEntry::Color) {
+	boError() << k_funcinfo << key << "is not a color entry. type=" << entry->type() << endl;
+	return _default;
+ }
+ return ((BoConfigColorEntry*)entry)->value();
 }
 

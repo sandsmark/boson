@@ -40,7 +40,8 @@ public:
 		UInt = 2,
 		Double = 3,
 		String = 4,
-		IntList = 5
+		IntList = 5,
+		Color = 6
 	};
 public:
 	BoConfigEntry(BosonConfig* parent, const QString& key);
@@ -156,6 +157,25 @@ public:
 
 private:
 	QString mValue;
+};
+
+class BoConfigColorEntry : public BoConfigEntry
+{
+public:
+	BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue);
+	virtual ~BoConfigColorEntry() {}
+
+	QColor value() const;
+	void setValue(unsigned int rgb ) { mRGBValue = rgb; }
+	void setValue(const QColor& v);
+
+	virtual void save(KConfig* conf);
+	virtual void load(KConfig* conf);
+
+	virtual int type() const { return Color; }
+
+private:
+	unsigned int mRGBValue;
 };
 
 class BoConfigIntListEntry; // forwarding, since i dont want to #include <qvaluelist.h>
@@ -347,8 +367,10 @@ public:
 	 * For all non-time critical config entries this can be very handy, as
 	 * you don't need to modify bosonconfig.h (and therefore don't have to
 	 * recompile everything).
+	 * @param conf The @ref KConfig object that is looked into for whether
+	 * the key already has a value.
 	 **/
-	void addDynamicEntry(BoConfigEntry* entry);
+	void addDynamicEntry(BoConfigEntry* entry, KConfig* conf = 0);
 
 	/**
 	 * @return TRUE if a dynamic entry with @p key was added with @ref
@@ -389,6 +411,11 @@ public:
 	void setStringValue(const QString& key, const QString& value);
 
 	/**
+	 * Same as  @ref setBoolValue, but for @ref BoConfigColorEntry objects.
+	 **/
+	void setColorValue(const QString& key, const QColor& value);
+
+	/**
 	 * @return The (dynamic) entry for @p key, or NULL if no such key was
 	 * ever added using @ref addDynamicEntry.
 	 **/
@@ -423,6 +450,18 @@ public:
 	 * correct type exists.
 	 **/
 	double doubleValue(const QString& key, double _default = 0.0) const;
+
+	/**
+	 * @return The value of the entry @p key, or @ref Qt::black if no entry
+	 * of the correct type exists.
+	 **/
+	QColor colorValue(const QString& key) const;
+
+	/**
+	 * @return The value of the entry @p key, or @p _default if no entry of
+	 * the correct type exists.
+	 **/
+	QColor colorValue(const QString& key, const QColor& _default) const;
 
 
 // below we have config values that are *not* stored when quitting boson
