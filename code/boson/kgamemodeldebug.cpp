@@ -1119,8 +1119,24 @@ void KGameModelDebug::updateNodePage()
  slotFrameChanged(0);
 
  int faces = 0;
+ QValueList<Lib3dsNode*> allNodes;
  Lib3dsNode* node = d->m3ds->nodes;
  for (; node; node = node->next) {
+	allNodes.append(node);
+ }
+ QValueList<Lib3dsNode*>::Iterator it;
+ for (it = allNodes.begin(); it != allNodes.end(); ++it) {
+	Lib3dsNode* node = *it;
+	if (node->type != LIB3DS_OBJECT_NODE) {
+		continue;
+	}
+	if (strcmp(node->name, "$$$DUMMY") == 0) {
+		continue;
+	}
+	Lib3dsNode* p;
+	for (p = node->childs; p; p = p->next) {
+		allNodes.append(p);
+	}
 	Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(d->m3ds, node->name);
 	if (mesh) {
 		faces += mesh->faces;
