@@ -62,8 +62,11 @@ class playField //: public  QDataStream
 {
 
  public:
+	playField();
 	playField(const QString name);
 	~playField();
+
+	void setFile(const QString name);
 
 	bool	load	(void);
 	bool	write	(void);
