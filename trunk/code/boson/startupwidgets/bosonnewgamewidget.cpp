@@ -56,6 +56,7 @@
 #include <qlayout.h>
 #include <qpainter.h>
 #include <qguardedptr.h>
+#include <qtimer.h>
 
 
 /**
@@ -524,6 +525,10 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 	return;
  }
 
+ if (mInited) {
+	boGame->slotAddChatSystemMessage("Boson", i18n("%1 left the game").arg(p->name()));
+ }
+
  if (p == (KPlayer*)localPlayer() && boGame->isNetwork()) {
 	// Localplayer was removed and w have a net game.
 	// Either player was kicked by ADMIN or we're connecting to net game
@@ -531,41 +536,13 @@ void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 	if (!boGame->inactivePlayerList()->containsRef(p)) {
 		boDebug() << k_funcinfo << "We were kicked out!" << endl;
 		boGame->slotAddChatSystemMessage("Boson", i18n("You were kicked from the game by ADMIN"));
-		boDebug() << k_funcinfo << "disconnect" << endl;
-		boGame->disconnect();
-		boDebug() << k_funcinfo << "disconnect DONE" << endl;
-		return;
+
+		// disconnect from the network game
+		QTimer::singleShot(0, this, SIGNAL(signalKickedOut()));
 	}
- }
- if (mInited) {
-	boGame->slotAddChatSystemMessage("Boson", i18n("%1 left the game").arg(p->name()));
  }
 
- this->disconnect(p);
- QPtrDictIterator<KPlayer> it(d->mItem2Player);
- while (it.current()) {
-	if (it.current() == p) {
-		QListBoxItem* i = (QListBoxItem*)it.currentKey();
-		int index = mPlayers->index(i);
-		if (mPlayers->selectedItem() == i) {
-			// Selected item will be removed. Select another item
-			if (index == (int)mPlayers->count() - 1) {
-				// Last item in list
-				mPlayers->setSelected(index - 1, true);
-			} else {
-				mPlayers->setSelected(index + 1, true);
-			}
-		}
-		mPlayers->removeItem(index);
-		d->mItem2Player.remove(i);
-		// Update player info
-		playerCountChanged();
-		slotPlayerSelected(mPlayers->selectedItem());
-		return;
-	}
-	++it;
- }
- boError() << k_funcinfo << "Player not found" << endl;
+ removePlayer((Player*)p);
 }
 
 void BosonNewGameWidget::slotNetSpeciesChanged(Player* p)
@@ -995,5 +972,34 @@ void BosonNewGameWidget::slotAddChatSystemMessage(const QString& fromName, const
 	return;
  }
  mChat->chatWidget()->addSystemMessage(fromName, text);
+}
+
+void BosonNewGameWidget::removePlayer(KPlayer* p)
+{
+ this->disconnect(p);
+ QPtrDictIterator<KPlayer> it(d->mItem2Player);
+ while (it.current()) {
+	if (it.current() == p) {
+		QListBoxItem* i = (QListBoxItem*)it.currentKey();
+		int index = mPlayers->index(i);
+		if (mPlayers->selectedItem() == i) {
+			// Selected item will be removed. Select another item
+			if (index == (int)mPlayers->count() - 1) {
+				// Last item in list
+				mPlayers->setSelected(index - 1, true);
+			} else {
+				mPlayers->setSelected(index + 1, true);
+			}
+		}
+		mPlayers->removeItem(index);
+		d->mItem2Player.remove(i);
+		// Update player info
+		playerCountChanged();
+		slotPlayerSelected(mPlayers->selectedItem());
+		return;
+	}
+	++it;
+ }
+ boError() << k_funcinfo << "Player not found" << endl;
 }
 

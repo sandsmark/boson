@@ -280,6 +280,8 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(startGame, SIGNAL(signalShowNetworkOptions()),
 				this, SLOT(slotShowNetworkOptions()));
+		connect(startGame, SIGNAL(signalKickedOut()),
+				this, SLOT(slotKickedOut()));
 
 		// AB: this does nothing, as d->mLocalPlayer is NULL. but maybe
 		// that will change.
@@ -544,5 +546,15 @@ void BosonStartupWidget::slotConnectedToServer()
 	return;
  }
  ((BosonNewGameWidget*)w)->slotConnectedToServer();
+}
+
+
+void BosonStartupWidget::slotKickedOut()
+{
+ boDebug() << k_funcinfo << "disconnect" << endl;
+ boGame->disconnect();
+ boDebug() << k_funcinfo << "disconnect DONE" << endl;
+ boDebug() << k_funcinfo << "re-adding local player" << endl;
+ emit signalAddLocalPlayer();
 }
 

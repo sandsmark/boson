@@ -152,6 +152,11 @@ signals:
 	 **/
 	void signalCancelled();
 
+	/**
+	 * Emitted when the local player has been kicked out of a network game.
+	 **/
+	void signalKickedOut();
+
 protected:
 	// AB: do NOT move to public!
 	Player* localPlayer() const;
@@ -166,6 +171,7 @@ private:
 
 	void playersChanged();
 	void playerCountChanged();
+	void removePlayer(KPlayer* p);
 
 private:
 	BosonNewGameWidgetPrivate* d;

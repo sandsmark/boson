@@ -147,6 +147,14 @@ protected slots:
 	void slotConnectingToServer();
 	void slotConnectedToServer();
 
+	/**
+	 * Called when the local player is kicked out of a game (in newgame
+	 * widget only).
+	 *
+	 * This calls @ref Boson::disconnect and re-adds the local player
+	 **/
+	void slotKickedOut();
+
 private:
 	void init();
 	void initBackgroundOrigin(QWidget* w);
