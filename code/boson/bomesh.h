@@ -268,15 +268,6 @@ public:
 	void setFace(int index, const BoFace& face);
 	const BoFace* face(unsigned int f) const;
 
-	void setDisplayList(GLuint list)
-	{
-		mDisplayList = list;
-	}
-	inline GLuint displayList() const
-	{
-		return mDisplayList;
-	}
-
 	/**
 	 * @param vertex The vertex in the face this normal applies to. This
 	 * must be 0..2 or -1 for all vertices.
@@ -316,8 +307,6 @@ private:
 	// some modes the BoFaceNode::relevantPoint() will have to be used though)
 	unsigned int* mPointsCache;
 	unsigned int mPointsCacheCount;
-
-	GLuint mDisplayList;
 };
 
 
@@ -479,10 +468,6 @@ public:
 	 **/
 	void renderVertexPoints(unsigned int lod = 0);
 
-	void loadDisplayList(const QColor* teamColor, bool reload = false);
-	GLuint displayList(unsigned int lod) const;
-
-
 	/**
 	 * Create a BoVector3 at index @p p from the vertex pool.
 	 *
@@ -580,7 +565,6 @@ protected:
 	void calculateNormals(unsigned int lod);
 
 	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
-	void loadDisplayList(BoMeshLOD* lod, const QColor* teamColor, bool reload = false);
 
 private:
 	void init();
