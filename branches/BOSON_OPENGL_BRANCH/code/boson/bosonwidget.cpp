@@ -35,6 +35,7 @@
 #include "optionsdialog.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
+#include "kgamecelldebug.h"
 #include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "commandinput.h"
@@ -440,6 +441,10 @@ void BosonWidget::slotDebug()
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
  player->setBoson(game());
 // player->setLocalPlayer(d->mLocalPlayer); // FIXME
+
+ b = dlg->addVBoxPage(i18n("Debug &Cells"));
+ KGameCellDebug* cells = new KGameCellDebug(b);
+ cells->setMap(playField()->map());
  
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct()));
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
