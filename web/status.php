@@ -64,46 +64,63 @@ draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-    <li>Basic scripting support</li>
+    <li>Fixing all critical bugs</li>
+    <li>Campaign support for the map chooser</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
+
+  <h4>Internal</h4>
   <ul>
     <li>Units can be rendered as wireframes</li>
-    <li>Acceleration/deceleration support for units</li>
-    <li>Units accelerate/decelerate realistically</li>
     <li>Rotation speed of units can be configured</li>
+    <li>Bounding boxes of items can be rendered</li>
     <li>Shots split to subclasses</li>
-    <li>Support for mines</li>
-    <li>Support for bombs (basically a falling mine)</li>
-    <li>Bounding boxes of items can be rendered<li>
+    <li>Pathfinder is much faster now</li>
+    <li>Separate process is used for audio</li>
+    <li>OpenGL setting profiles (default/fastest/best quality)</li>
+  </ul>
+
+  <h4>Rendering</h4>
+  <ul>
     <li>New terrain rendering code. Terrain is now drawn using several layers
         which are blended together. This creates nice effect for transitions and
         looks really nice</li>
+    <li>Added supports for light and halos using particles</li>
+    <li>Added support for explosion fragments when unit is destroyed</li>
+    <li>Materials are supported for models</li>
+    <li>Models have normals now, meaning that everything should be lit correctly</li>
+    <li>Better support for wind for particle systems</li>
+    <li>New kind of smoke for wreckages</li>
+  </ul>
+
+
+  <h4>Game</h4>
+  <ul>
+    <li>Acceleration/deceleration support for units</li>
+    <li>Support for mines</li>
+    <li>Support for bombs (basically a falling mine)</li>
+    <li>New actions patch</li>
+    <li>Basic scripting support</li>
+  </ul>
+
+  <h4>Data</h4>
+  <ul>
     <li>Fixed Puma model</li>
-    <li>New unit: Koyote (a nice helicopter with a cannon)</li>
     <li>New Leopard model</li>
+    <li>New unit: Koyote (a nice helicopter with a cannon)</li>
     <li>New unit: Warthog (A-10 plane with heavy anti-tank missiles)</li>
     <li>New unit: Wolf (a truck which may carry other units in the future)</li>
-    <li>New actions patch</li>
+  </ul>
+
+  <h4>Editor</h4>
+  <ul>
     <li>You can now add multiple units and draw multiple tiles in editor using
         click+drag</li>
     <li>Height maps can be exported</li>
-    <li>Added supports for light and halos using particles</li>
-    <li>Ground textures are drawn over multiple cells, making tiling effect less
-        visible</li>
-    <li>Added support for explosion fragments when unit is destroyed</li>
     <li>Texture maps can be exported/imported in editor</li>
-    <li>Materials are supported for models</li>
-    <li>Pathfinder is much faster now</li>
-    <li>New kind of smoke for wreckages</li>
-    <li>Models have normals now, meaning that everything should be lit correctly</li>
-    <li>Separate process is used for audio</li>
-    <li>Better support for wind for particle systems</li>
-    <li>Basic scripting support</li>
-    <li>OpenGL setting profiles (default/fastest/best quality)</li>
-    <li></li>
   </ul>
+
   </blockquote>");
 draw_bigbox_end();
 main_area_end();
