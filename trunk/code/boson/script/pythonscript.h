@@ -33,7 +33,7 @@ typedef struct _ts PyThreadState;
 class PythonScript : public BosonScript
 {
   public:
-    PythonScript(Player* p);
+    PythonScript(int playerId = -1);
     virtual ~PythonScript();
 
     virtual bool loadScript(QString file);

@@ -58,13 +58,13 @@ BosonScript* BosonScript::mCurrentScript = 0;
 BosonCanvas* BosonScript::mCanvas = 0;
 Boson* BosonScript::mGame = 0;
 
-BosonScript* BosonScript::newScriptParser(Language lang, Player* p)
+BosonScript* BosonScript::newScriptParser(Language lang, int playerId)
 {
   boDebug() << k_funcinfo << endl;
   BosonScript* s = 0;
   if(lang == Python)
   {
-    s = new PythonScript(p);
+    s = new PythonScript(playerId);
   }
   else
   {
@@ -74,11 +74,11 @@ BosonScript* BosonScript::newScriptParser(Language lang, Player* p)
   return s;
 }
 
-BosonScript::BosonScript(Player* p)
+BosonScript::BosonScript(int playerId)
 {
   boDebug() << k_funcinfo << endl;
   mInterface = new BosonScriptInterface(0);
-  mPlayer = p;
+  mPlayerId = playerId;
 }
 
 BosonScript::~BosonScript()
@@ -115,13 +115,7 @@ void BosonScript::makeScriptCurrent(BosonScript* s)
 
 int BosonScript::playerId() const
 {
-  if(!player())
-  {
-    boError() << k_funcinfo << "NULL player" << endl;
-    return -1;
-  }
-
-  return player()->id();
+  return mPlayerId;
 }
 
 QString BosonScript::scriptsPath()
