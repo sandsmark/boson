@@ -28,6 +28,7 @@ editorFieldMap::editorFieldMap(viewMap *v, QWidget *p, const char *n, WFlags f)
 {
 
 	QPopupMenu *qpm;
+	selectedCell = (Cell*) 0l;
 
 	// global menu
 	popup = new QPopupMenu();

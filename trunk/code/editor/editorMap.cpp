@@ -24,6 +24,7 @@
 //#include <kmsgbox.h>
 
 #include "../common/log.h"
+#include "../common/playField.h"
 #include "../common/boconfig.h" // MAX_PLAYERS
 #include "../map/map.h"
 
@@ -32,6 +33,31 @@
 editorMap::editorMap(uint w, uint h, QObject *parent, const char *name=0L)
 	: physMap(w,h,parent,name)
 {
+int	i, j;
+playField field("/opt/kde/share/apps/boson/map/basic.bpf");
+
+assert(true == field.load() );
+///orzel, was ugly.. should handle load()==false correctly 
+
+map.width = field.map.width;
+map.height = field.map.height;
+
+/* creation of the ground map */
+map.cells = new (Cell *)[map.width];
+for (i=0; i< map.width; i++)
+	map.cells[i] = new (Cell)[map.height];
+
+/* initialisation */
+for (i=0; i< map.width; i++)
+	for (j=0; j< map.height; j++)
+		map.cells[i][j].setGroundType( field.map.cells[i][j]);
+
+
+/* freeing of field.map.cells */
+for (i=0; i< map.width; i++)
+	delete [] field.map.cells[i];
+delete [] field.map.cells;
+
 }
 
 
