@@ -881,7 +881,7 @@ void SpeciesTheme::loadObjectModels()
  m->setTeamColor(teamColor());
  m->loadModel();
  kdDebug() << k_funcinfo << "DONE" << endl;
- d->mObjectModels.insert(ObjectMissile, m);
+ d->mObjectModels.insert(ObjectShot, m);
 }
 
 BosonModel* SpeciesTheme::objectModel(ObjectType type)

@@ -94,7 +94,7 @@ enum ProductionType {
 };
 
 enum ObjectType {
-	ObjectMissile = 0
+	ObjectShot = 0
 };
 
 

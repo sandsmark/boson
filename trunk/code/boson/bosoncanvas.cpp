@@ -29,7 +29,7 @@
 #include "bosonparticlesystem.h"
 #include "bosonparticlemanager.h"
 #include "defines.h"
-#include "bosonmissile.h"
+#include "items/bosonshot.h"
 #include "bosonstatistics.h"
 
 #include <kdebug.h>
@@ -58,7 +58,6 @@ public:
 	BoItemList mAllItems;
 
 	QPtrList<BosonParticleSystem> mParticles;
-	QPtrList<BosonMissile> mMissiles;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -72,7 +71,6 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  d->mParticles.setAutoDelete(true);
- d->mMissiles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
 }
 
@@ -89,7 +87,6 @@ void BosonCanvas::quitGame()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mParticles.clear();
- d->mMissiles.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -171,7 +168,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	++animIt;
  }
 
- updateMissiles();
+ deleteUnusedShots();
 
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
 	kdDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
@@ -307,31 +304,29 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy)
 
  attackedBy->playSound(SoundShoot);
 
- BosonMissile* m = new BosonMissile(attackedBy, target);
+ BosonShot* m = new BosonShot(attackedBy, target);
  if (!m->isActive()) {
-	missileHit(m);
+	shotHit(m);
 	delete m;
- } else {
-	d->mMissiles.append(m);
  }
 }
 
-void BosonCanvas::missileHit(BosonMissile* m)
+void BosonCanvas::shotHit(BosonShot* s)
 {
- if (!m) {
-	kdError() << k_funcinfo << "NULL missile" << endl;
+ if (!s) {
+	kdError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
- d->mParticles.append(BosonParticleManager::newShot(m->pos()));
- QValueList<Unit*> l = unitCollisionsInRange(QPoint(m->pos()[0] * BO_TILE_SIZE, -(m->pos()[1] * BO_TILE_SIZE)),
-		m->damageRange() * BO_TILE_SIZE - 2);  // - 2 is needed to prevent units on next cells from also being damaged
+ d->mParticles.append(BosonParticleManager::newShot(BoVector3(s->x() / BO_TILE_SIZE, -(s->y() / BO_TILE_SIZE), s->z() / BO_TILE_SIZE)));
+ QValueList<Unit*> l = unitCollisionsInRange(QPoint(s->x(), s->y()),
+		s->damageRange() * BO_TILE_SIZE - (BO_TILE_SIZE / 2));  // - 2 is needed to prevent units on next cells from also being damaged
  for (unsigned int i = 0; i < l.count(); i++) {
-	unitHit(l[i], m->damage());
+	unitHit(l[i], s->damage());
 	if (l[i]->isDestroyed()) {
 		if (l[i]->isFacility()) {
-			m->owner()->statistics()->addDestroyedFacility(l[i], m->owner());
+			s->owner()->statistics()->addDestroyedFacility(l[i], s->owner());
 		} else {
-			m->owner()->statistics()->addDestroyedMobileUnit(l[i], m->owner());
+			s->owner()->statistics()->addDestroyedMobileUnit(l[i], s->owner());
 		}
 	}
  }
@@ -786,29 +781,15 @@ void BosonCanvas::updateParticleSystems(float elapsed)
  }
 }
 
-void BosonCanvas::updateMissiles()
+void BosonCanvas::deleteUnusedShots()
 {
-/* QPtrListIterator<BosonMissile> it(d->mMissiles);
- BosonMissile* m;
- while ((m = it.current()) != 0) {
-	m->update();
-	if (!m->isActive()) {
-		missileHit(m);
-		d->mMissiles.remove();
-	} else {
-		++it;
-	}
- }*/
- for (BosonMissile* m = d->mMissiles.first(); m; m = d->mMissiles.next()) {
-	m->update();
-	if (!m->isActive()) {
-		missileHit(m);
-		d->mMissiles.remove();
+ for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	if (RTTI::isShot(i->rtti())) {
+		if (!((BosonShot*)i)->isActive()) {
+			shotHit((BosonShot*)i);
+			d->mAnimList.remove();
+			d->mAllItems.removeItem(i);
+		}
 	}
  }
-}
-
-QPtrList<BosonMissile>* BosonCanvas::missiles()
-{
- return &(d->mMissiles);
 }

@@ -35,7 +35,7 @@ class BoItemList;
 class BosonItem;
 class ProductionPlugin;
 class BosonParticleSystem;
-class BosonMissile;
+class BosonShot;
 
 class KPlayer;
 
@@ -110,7 +110,7 @@ public:
 	 * Called when missile explodes. This iterates through all unit in damage
 	 * range of the missile and calls @ref unitHit for them.
 	 **/
-	void missileHit(BosonMissile* m);
+	void shotHit(BosonShot* m);
 
 	/**
 	 * Called when unit is damaged (usually by missile).
@@ -132,6 +132,7 @@ public:
 	Cell* cell(int x, int y) const;
 
 	void deleteDestroyed();
+	void deleteUnusedShots();
 
 	/**
 	 * Usually you don't need a @ref QCanvasItemList of all units in a
@@ -213,9 +214,6 @@ public:
 	int particleSystemsCount();
 	void updateParticleSystems(float elapsed);
 	QPtrList<BosonParticleSystem>* particleSystems();
-
-	void updateMissiles();
-	QPtrList<BosonMissile>* missiles();
 
 public slots:
 	/**

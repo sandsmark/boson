@@ -39,6 +39,7 @@ public:
 
 	enum Rtti {
 
+		Shot = 150,
 
 		UnitStart = 200 // the IDs of the units start at this value.
 		                // Do not insert RTTIs after this!
@@ -47,6 +48,11 @@ public:
 	static bool isUnit(int rtti)
 	{
 		return (rtti >= UnitStart);
+	}
+
+	static bool isShot(int rtti)
+	{
+		return (rtti == Shot);
 	}
 };
 

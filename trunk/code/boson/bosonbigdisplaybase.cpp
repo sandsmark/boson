@@ -39,7 +39,6 @@
 #include "bosonglchat.h"
 #include "bosonprofiling.h"
 #include "bosonparticlesystem.h"
-#include "bosonmissile.h"
 
 #include <kgame/kgameio.h>
 
@@ -664,22 +663,6 @@ void BosonBigDisplayBase::paintGL()
 
  if (checkError()) {
 	kdError() << k_funcinfo << "cells rendered" << endl;
- }
-
- // Render missiles
- boProfiling->renderMissiles(true);
- if (canvas()->missiles()->count() > 0) {
-	QPtrListIterator<BosonMissile> it(*(canvas()->missiles()));
-	BosonMissile* s;
-	while ((s = it.current()) != 0) {
-		++it;
-		s->draw();
-	}
- }
- boProfiling->renderMissiles(false);
-
- if (checkError()) {
-	kdError() << k_funcinfo << "when missiles rendered" << endl;
  }
 
  // Render particle systems
