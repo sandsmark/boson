@@ -75,6 +75,11 @@ void BosonModelTextures::insert(BosonModel* model, const QString& textureName)
  if (!d->mName2Texture.contains(textureName)) {
 	glGenTextures(1, &tex);
 	QImage image(texturePath() + textureName);
+	if (image.isNull()) {
+		kdError() << k_funcinfo << "Could not load " << textureName << " from " << texturePath() << endl;
+		image = QImage(64, 64, 32);
+		image.fill(Qt::red.rgb());
+	}
 	BosonTextureArray::createTexture(image, tex);
 	d->mName2Texture.insert(textureName, tex);
  } else {
