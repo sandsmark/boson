@@ -1173,6 +1173,7 @@ public:
 	PlayerIO* mLocalPlayerIO;
 	KGameMouseIO* mMouseIO;
 	BosonBigDisplayInputBase* mInput;
+	QIntDict<BoSelection> mSelectionGroups;
 
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
@@ -1289,6 +1290,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  qApp->removeEventFilter(this);
 
  quitGame();
+ d->mSelectionGroups.clear();
  delete d->mLightWidget;
  delete d->mScriptConnector;
  BoMeshRendererManager::manager()->unsetCurrentRenderer();
@@ -1320,6 +1322,11 @@ void BosonBigDisplayBase::init()
 
  d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
 
+ d->mSelectionGroups.setAutoDelete(true);
+ for (int i = 0; i < 10; i++) {
+	BoSelection* s = new BoSelection(this);
+	d->mSelectionGroups.insert(i, s);
+ }
  mSelection = new BoSelection(this);
  connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
@@ -1394,6 +1401,14 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
  if (!mCanvas) {
 	return;
  }
+
+ QIntDictIterator<BoSelection> selectIt(d->mSelectionGroups);
+ for (; selectIt.current(); ++selectIt) {
+	connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
+			selectIt.current(), SLOT(slotRemoveItem(BosonItem*)));
+ }
+ connect(mCanvas, SIGNAL(signalUnitRemoved(Unit*)),
+		this, SLOT(slotUnitRemoved(Unit*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
@@ -1979,9 +1994,9 @@ void BosonBigDisplayBase::initUfoGameActions()
  delete d->mCreateMapper;
  d->mCreateMapper = new QSignalMapper(this);
  connect(d->mSelectMapper, SIGNAL(mapped(int)),
-		this, SIGNAL(signalSelectGroup(int)));
+		this, SLOT(slotSelectSelectionGroup(int)));
  connect(d->mCreateMapper, SIGNAL(mapped(int)),
-		this, SIGNAL(signalCreateGroup(int)));
+		this, SLOT(slotCreateSelectionGroup(int)));
 
  for (int i = 0; i < 10; i++) {
 	BoUfoAction* a = new BoUfoAction(i18n("Select Group %1").arg(i == 0 ? 10 : i),
@@ -3319,6 +3334,9 @@ void BosonBigDisplayBase::leaveEvent(QEvent*)
 void BosonBigDisplayBase::quitGame()
 {
  boDebug() << k_funcinfo << endl;
+ for (int i = 0; i < 10; i++) {
+	slotClearSelectionGroup(i);
+ }
  setLocalPlayerIO(0);
  setCanvas(0);
 
@@ -4078,6 +4096,15 @@ void BosonBigDisplayBase::slotRemovedItemFromCanvas(BosonItem* item)
  d->mToolTips->unsetItem(item);
 }
 
+void BosonBigDisplayBase::slotUnitRemoved(Unit* unit)
+{
+ // AB: this slot is already called when the unit is destroyed, not only when it
+ // is completely removed from the canvas
+ for(int i = 0; i < 10; i++) {
+	d->mSelectionGroups[i]->removeUnit(unit);
+ }
+}
+
 void BosonBigDisplayBase::slotMouseIODestroyed()
 {
  // the mouse IO sometimes gets destroyed outside this widget (when the player
@@ -4089,15 +4116,63 @@ void BosonBigDisplayBase::slotMouseIODestroyed()
 void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
+
+ // Load selection groups
+ QDomElement unitGroups = root.namedItem(QString::fromLatin1("UnitGroups")).toElement();
+ if (unitGroups.isNull()) {
+	boError(260) << k_funcinfo << "no UnitGroups tag" << endl;
+	return;
+ }
+ QDomNodeList list = unitGroups.elementsByTagName(QString::fromLatin1("Group"));
+ if (list.count() == 0) {
+	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return;
+	}
+	if (!e.hasAttribute("Id")) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Group " << i << endl;
+		continue;
+	}
+	int id;
+	bool ok;
+	id = e.attribute("Id").toInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id for Group " << i << endl;
+		continue;
+	}
+	if (!d->mSelectionGroups[id]) {
+		boError(260) <<k_funcinfo << "no unitgroup with id=" << id << endl;
+		continue;
+	}
+	d->mSelectionGroups[id]->loadFromXML(e);
+ }
+
+
+ QDomElement displays = root.namedItem(QString::fromLatin1("Displays")).toElement();
+ if (displays.isNull()) {
+	boError(260) << k_funcinfo << "no displays" << endl;
+	return;
+ }
+ QDomElement display = displays.namedItem(QString::fromLatin1("Display")).toElement();
+ if (display.isNull()) {
+	boError(260) << k_funcinfo << "no display" << endl;
+	return;
+ }
+
  // Load camera
- QDomElement cam = root.namedItem(QString::fromLatin1("Camera")).toElement();
+ QDomElement cam = display.namedItem(QString::fromLatin1("Camera")).toElement();
  if (!cam.isNull()) {
 	camera()->loadFromXML(cam);
  } else {
 	boError(260) << k_funcinfo << "no camera" << endl;
  }
  // Load selection
- QDomElement sel = root.namedItem(QString::fromLatin1("Selection")).toElement();
+ QDomElement sel = display.namedItem(QString::fromLatin1("Selection")).toElement();
  if (!sel.isNull()) {
 	selection()->loadFromXML(sel, true);
  } else {
@@ -4110,14 +4185,33 @@ void BosonBigDisplayBase::saveAsXML(QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
  QDomDocument doc = root.ownerDocument();
+
+ // Save selection groups
+ QDomElement unitGroups = doc.createElement(QString::fromLatin1("UnitGroups"));
+ for(int i = 0; i < 10; i++) {
+	QDomElement group = doc.createElement(QString::fromLatin1("Group"));
+	group.setAttribute("Id", i);
+	d->mSelectionGroups[i]->saveAsXML(group);
+	unitGroups.appendChild(group);
+ }
+ root.appendChild(unitGroups);
+
+
+ // we use a Displays and a Display tag for historic reasons. we have only one
+ // Display these days.
+ QDomElement displays = doc.createElement(QString::fromLatin1("Displays"));
+ QDomElement display = doc.createElement(QString::fromLatin1("Display"));
+ displays.appendChild(display);
+ root.appendChild(displays);
+
  // Save camera
  QDomElement cam = doc.createElement(QString::fromLatin1("Camera"));
  camera()->saveAsXML(cam);
- root.appendChild(cam);
+ display.appendChild(cam);
  // Save current selection
  QDomElement sel = doc.createElement(QString::fromLatin1("Selection"));
  selection()->saveAsXML(sel);
- root.appendChild(sel);
+ display.appendChild(sel);
 }
 
 void BosonBigDisplayBase::showEvent(QShowEvent* e)
@@ -5940,4 +6034,44 @@ void BosonBigDisplayBase::slotDebugRequestIdName(int msgid, bool , QString& name
  }
 // boDebug() << name << endl;
 }
+
+void BosonBigDisplayBase::slotSelectSelectionGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ selection()->copy(d->mSelectionGroups[number]);
+}
+
+void BosonBigDisplayBase::slotCreateSelectionGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ d->mSelectionGroups[number]->copy(selection());
+}
+
+void BosonBigDisplayBase::slotClearSelectionGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	boError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	boError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ d->mSelectionGroups[number]->clear();
+}
+
 
