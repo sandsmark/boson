@@ -284,9 +284,9 @@ void BosonShotBullet::explode()
 }
 
 
-/*****  BosonShotMissile  *****/
+/*****  BosonShotRocket  *****/
 
-BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
+BosonShotRocket::BosonShotRocket(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonShot(owner, canvas, prop)
 {
   initStatic();
@@ -296,11 +296,11 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   registerData(&mMaxHeight, IdMaxHeight);
 }
 
-BosonShotMissile::~BosonShotMissile()
+BosonShotRocket::~BosonShotRocket()
 {
 }
 
-void BosonShotMissile::initStatic()
+void BosonShotRocket::initStatic()
 {
   static bool initialized = false;
   if (initialized)
@@ -314,7 +314,7 @@ void BosonShotMissile::initStatic()
   addPropertyId(IdMaxHeight, "MaxHeight");
 }
 
-void BosonShotMissile::init(const BoVector3Fixed& pos, const BoVector3Fixed& target)
+void BosonShotRocket::init(const BoVector3Fixed& pos, const BoVector3Fixed& target)
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mTarget = target;
@@ -362,7 +362,7 @@ void BosonShotMissile::init(const BoVector3Fixed& pos, const BoVector3Fixed& tar
 
 // move the shot by one step
 // (actually only set the velocity - it is moved by BosonCanvas::slotAdvance())
-void BosonShotMissile::advanceMoveInternal()
+void BosonShotRocket::advanceMoveInternal()
 {
   setVisible(true);
   // Always accelerate
@@ -396,7 +396,7 @@ void BosonShotMissile::advanceMoveInternal()
   }
 }
 
-bool BosonShotMissile::saveAsXML(QDomElement& root)
+bool BosonShotRocket::saveAsXML(QDomElement& root)
 {
   if(!BosonShot::saveAsXML(root))
   {
@@ -415,7 +415,7 @@ bool BosonShotMissile::saveAsXML(QDomElement& root)
   return true;
 }
 
-bool BosonShotMissile::loadFromXML(const QDomElement& root)
+bool BosonShotRocket::loadFromXML(const QDomElement& root)
 {
   if(!BosonShot::loadFromXML(root))
   {
@@ -495,7 +495,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotMissile::moveToTarget()
+void BosonShotRocket::moveToTarget()
 {
   move(mTarget.x(), mTarget.y(), mTarget.z());
 }
