@@ -51,7 +51,7 @@ void boBuffer::flush(void)
 		}
 
 	i = write(socket, data, pos*sizeof(int));
-	assert(i == ((int)sizeof(int)*(pos)));
+	assert(i == (int)(sizeof(int)*(pos)));
 
 	logf(LOG_LAYER1, "[socket %2d ] Flushing %d out of %d (%f %%)", socket, pos, posMax, (float)(100.*pos/posMax));
 

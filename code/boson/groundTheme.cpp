@@ -80,7 +80,7 @@ bool groundTheme::loadGround(int i, const QString &path, QProgressDialog &progre
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
 ///orzel : do some boAssert with QwSpritePixmapSequence sizes... 
 	progress.setProgress(i);
-	if (groundPix[i]->image(0).isNull()) return false;
+	if (groundPix[i]->image(0)->isNull()) return false;
 	return true;
 }
 

@@ -42,9 +42,6 @@ order = o;
 /* the viewMap */
 view = v;
 
-/* make the connection */
-physMap *phys = v->phys; ///orzel : should be moved
-
 // connect(, SIGNAL(), this, SLOT());
 connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
 connect(this, SIGNAL(relativeReCenterView(int, int)), view, SLOT(relativeReCenterView(int, int)));

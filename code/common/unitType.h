@@ -46,7 +46,7 @@ enum facilityType {
 
 
 #ifndef uint
-#define uint unsigned int
+typedef unsigned int uint;
 #endif
 
 /*
