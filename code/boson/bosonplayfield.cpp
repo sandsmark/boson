@@ -122,7 +122,7 @@ bool BosonPlayField::preLoadAllPlayFields()
 	boWarning() << k_funcinfo << "playFields already loaded" << endl;
 	return true;
  }
- QStringList list = BosonData::availableFiles(QString::fromLatin1("maps/*.bpf"));
+ QStringList list = findAvailablePlayFields();
  if (list.isEmpty()) {
 	boWarning() << k_funcinfo << "Cannot find any playFields" << endl;
 	return false;
@@ -656,5 +656,14 @@ QByteArray BosonPlayField::exportTexMap(unsigned int texture) const
 	return QByteArray();
  }
  return mMap->saveTexMapImage(texture);
+}
+
+
+QStringList BosonPlayField::findAvailablePlayFields()
+{
+ QStringList list = BosonData::availableFiles(QString::fromLatin1("maps/*.bpf"));
+ QStringList campaignMaps = BosonData::availableFiles(QString::fromLatin1("maps/*/*.bpf"));
+ list += campaignMaps;
+ return list;
 }
 
