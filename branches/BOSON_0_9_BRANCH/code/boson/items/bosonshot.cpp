@@ -307,8 +307,7 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   mVelo.scale(1 / mTotalDist);
 
   // Particle systems
-  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(properties()->newFlyParticleSystems(pos, 0.0));
-  canvas->addParticleSystems(*mFlyParticleSystems);
+  setParticleSystems(properties()->newFlyParticleSystems(pos, 0.0));
   // FIXME: name: it has nothing to do with particles anymore
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 
@@ -333,7 +332,14 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
 
 BosonShotMissile::~BosonShotMissile()
 {
+ delete mFlyParticleSystems;
+}
+
+void BosonShotMissile::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
+{
   delete mFlyParticleSystems;
+  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(list);
+  canvas()->addParticleSystems(*mFlyParticleSystems);
 }
 
 // move the shot by one step
@@ -811,7 +817,14 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 
 BosonShotFragment::~BosonShotFragment()
 {
+ delete mParticleSystems;
+}
+
+void BosonShotFragment::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
+{
   delete mParticleSystems;
+  mParticleSystems = new QPtrList<BosonParticleSystem>(list);
+  canvas()->addParticleSystems(*mParticleSystems);
 }
 
 void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
@@ -825,8 +838,7 @@ void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* uni
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
   boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
-  mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
-  canvas()->addParticleSystems(*mParticleSystems);
+  setParticleSystems(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
 
   move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));

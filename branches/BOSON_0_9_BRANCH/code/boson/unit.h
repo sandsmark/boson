@@ -365,8 +365,14 @@ public:
 	 * @return List of active particle systems this unit has.
 	 * This may include e.g. smoke for factories.
 	 **/
-	virtual QPtrList<BosonParticleSystem>* particleSystems() const;
-	void setParticleSystems(QPtrList<BosonParticleSystem> list);
+	virtual const QPtrList<BosonParticleSystem>* particleSystems() const;
+
+	/**
+	 * Clear the particle systems list. Note that the particles are
+	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
+	 * anyway. Just the @ref particleSystems list is meant to be cleared.
+	 **/
+	virtual void clearParticleSystems();
 
 	void loadWeapons();
 
@@ -399,6 +405,8 @@ public:
 
 
 protected:
+	void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
+
 	void shootAt(BosonWeapon* w, Unit* target);
 
 	/**

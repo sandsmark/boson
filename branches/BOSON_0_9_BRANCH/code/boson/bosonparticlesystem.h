@@ -26,6 +26,8 @@
 
 #include "bosonparticlesystemproperties.h"
 
+class QDomElement;
+
 
 /**
  * @short List of particles
@@ -286,6 +288,9 @@ class BosonParticleSystem
      **/
     void createParticles(int count);
 
+    virtual bool saveAsXML(QDomElement& root) const;
+    virtual bool loadFromXML(const QDomElement& root);
+
   protected:
     /**
      * Initializes particle system (resets variables) and creates some new
@@ -303,6 +308,8 @@ class BosonParticleSystem
      * Called when particle has to be updated. Called from @ref update
      **/
     virtual void updateParticle(BosonParticle* particle);
+
+    const BosonParticleSystemProperties* properties() const;
 
   protected:
     BosonParticle* mParticles;  // Array of particles

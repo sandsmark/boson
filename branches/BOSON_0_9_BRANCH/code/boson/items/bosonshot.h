@@ -217,11 +217,12 @@ class BosonShotMissile : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
+    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
 
     inline virtual int type() const { return BosonShot::Missile; }
 
   protected:
+    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
     virtual void advanceMoveInternal();
 
     virtual void moveToTarget();
@@ -355,11 +356,12 @@ class BosonShotFragment : public BosonShot
 
     inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
+    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
 
     virtual void explode();
 
   protected:
+    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
     virtual void advanceMoveInternal();
 
   private:

@@ -513,7 +513,16 @@ public:
 	void moveParticleSystems(float x, float y, float z);
 	void rotateParticleSystems(float angle, float x, float y, float z);
 
-	virtual QPtrList<BosonParticleSystem>* particleSystems() const;
+	virtual const QPtrList<BosonParticleSystem>* particleSystems() const;
+
+	/**
+	 * Clear the particle systems list. Note that the particles are
+	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
+	 * anyway. Just the @ref particleSystems list is meant to be cleared.
+	 *
+	 * The default implementation simply does nothing.
+	 **/
+	virtual void clearParticleSystems();
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
 // objects (like missiles) just can't be selected usually.
