@@ -94,7 +94,7 @@ int main(int argc, char **argv)
  QCString argv0(argv[0]);
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
-#ifdef BOSON_LINK_STATIC
+#if BOSON_LINK_STATIC
  KApplication::disableAutoDcopRegistration();
 #endif
 
