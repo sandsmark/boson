@@ -19,12 +19,12 @@
 
 #include "bosonplayfield.h"
 
-#include "../bosonmap.h"
-#include "../bosonscenario.h"
+#include "bosonmap.h"
+#include "bosonscenario.h"
 #include "bodebug.h"
 #include "bofile.h"
 #include "bpfdescription.h"
-#include "../defines.h"
+#include "defines.h"
 
 #include <qdom.h>
 #include <qdatastream.h>
@@ -184,6 +184,21 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
  }
 
  mPreLoaded = true;
+
+ // we have a problem.
+ // the minimap for the startupwidgets requires the cells to be loaded which
+ // basically means that we have to load *all* data (except heightmaps) for the
+ // startup widgets.
+ // so "preLoadPlayField()" now loads the *complete* playfield. this is *really*
+ // bad, as it takes too much memory!
+ // we could solve this by
+ // - load on demand only
+ //   --> long loading times (about 0.2-1 seconds) when the player selects a map
+ //   in the startup widgets
+ // - clear the preloaded maps once a game is started
+ //   --> we'd have to preload again when another game is started. anyway I
+ //   think this is the best solution. TODO
+ loadPlayField(QString::null); // we don't need to provide the filename again.
  return true;
 }
 
@@ -203,26 +218,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
 	return false;
  }
 
- QByteArray map = mFile->mapData();
- if (map.size() == 0) {
-	// xml is obsolete. will be removed!
-	QByteArray buffer = mFile->mapXMLData();
-	if (buffer.size() == 0) {
-		boError() << k_funcinfo << "Error loading map from " << file << endl;
-		return false;
-	}
-	boWarning() << k_funcinfo << "no map found in " << file << " - using map.xml instead. note that this is obsolete!" << endl;
-
-	BosonMap tmpMap;
-	bool ret = loadMapFromXML(buffer, &tmpMap);
-	if (!ret) {
-		boError() << k_funcinfo << "Error loading map from " << file << endl;
-		return false;
-	}
-	QDataStream stream(map, IO_WriteOnly);
-	tmpMap.saveMapToFile(stream);
- }
- if (!loadMapFromFile(map, mFile->heightMapData())) {
+ if (!loadMapFromFile(mFile->mapData(), mFile->heightMapData())) {
 	boError() << k_funcinfo << "Error loading map from " << file << endl;
 	return false;
  }
@@ -262,7 +258,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& he
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
  }
- boWarning() << k_funcinfo << "should load height map now" << endl;
  ret = mMap->loadHeightMapImage(heightMapImage);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
