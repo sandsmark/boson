@@ -97,11 +97,6 @@ private slots:
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-// AB: this is not a "preview" anymore. it contains a lot of the actual control
-// code (such as the menubar).
-// this is mostly due to the current libufo conversion.
-// once that is completed we should change the general class design of this
-// program, to reflect the new facts.
 class ModelPreview : public BosonUfoGLWidget
 {
 	Q_OBJECT
@@ -123,6 +118,13 @@ public:
 	BoCamera* camera() const { return mCamera; }
 	BoLight* light() const { return mLight; }
 	BosonModel* model() const { return mModel; }
+
+	void changeUnit(const QString& speciesIdentifier, const QString& unit);
+	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
+	void changeObject(const QString& speciesIdentifier, const QString& file);
+
+	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
+	void changeObject(SpeciesTheme* s, const QString& file);
 
 signals:
 	void signalFovYChanged(float);
@@ -218,6 +220,17 @@ public slots:
 	void slotSetVertexPointSize(int);
 	void slotSetGridUnitSize(float);
 
+	void slotChangeBackgroundColor();
+	void slotShowLightWidget();
+	void slotDebugModels();
+	void slotDebugMemory();
+	void slotDebugSpecies();
+	void slotShowMaterialsWidget();
+	void slotShowGLStates();
+	void slotReloadModelTextures();
+	void slotReloadMeshRenderer();
+	void slotShowChangeFont();
+
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
 	virtual void mouseMoveEvent(QMouseEvent*);
@@ -268,8 +281,11 @@ protected:
 
 	void uncheckAllBut(BoUfoAction*); // BAH!
 
+	SpeciesTheme* findTheme(const QString& theme) const;
+
 private:
 	void initUfoGUI();
+	void initUfoAction();
 
 private:
 	friend class RenderMain; // we need to emit signals from outside, in order to save lots of forwarding code
@@ -300,9 +316,15 @@ private:
 
 	QPtrList<SpeciesTheme> mSpecies;
 	QPtrDict<SpeciesTheme> mAction2Species;
+
+	// TODO: use a BoUfo widget. don't use a separate window.
+	BoLightCameraWidget1* mLightWidget;
+	BoMaterialWidget* mMaterialWidget;
 };
 
 /**
+ * This widget is here mainly for historic reasons. It just contains a @ref
+ * Modelpreview widget. Most interesting things are done there.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 class RenderMain : public KMainWindow
@@ -323,53 +345,12 @@ public:
 	void emitSignalLOD(int l) { emit mPreview->signalLODChanged(l); }
 
 protected:
-	void initKAction();
-
-protected:
-	/**
-	 * Connect both objects to the signal. Both objects need to provide the
-	 * signal and the slot (i.e. it must have the same name/params)
-	 **/
-	void connectBoth(QObject* o1, QObject* o2, const char* signal, const char* slot);
-
-	/**
-	 * Display another unit. This will load the unit from the @ref
-	 * ModelPreview. See @ref ModelPreview::load
-	 **/
-	void changeUnit(SpeciesTheme* s, const UnitProperties* prop);
-
-	void changeObject(SpeciesTheme* s, const QString& file);
-
-	SpeciesTheme* findTheme(const QString& theme) const;
-	void uncheckAllBut(KAction*); // BAH!
-
-protected slots:
-	void slotUnitChanged(int);
-	void slotUnitChanged(SpeciesTheme*, int);
-	void slotObjectChanged(int);
-	void slotObjectChanged(SpeciesTheme*, int);
-	void slotDebugModels();
-	void slotDebugMemory();
-	void slotDebugSpecies();
-	void slotVertexPointSize();
-	void slotGridUnitSize();
-	void slotShowVertexPoints(bool);
-	void slotBackgroundColor();
-	void slotShowLightWidget();
-	void slotShowMaterialsWidget();
-	void slotShowGLStates();
-	void slotReloadModelTextures();
-	void slotReloadMeshRenderer();
-	void slotChangeFont();
+//	SpeciesTheme* findTheme(const QString& theme) const;
 
 private:
 	ModelPreview* mPreview;
 	QPtrList<SpeciesTheme> mSpecies;
-	QPtrDict<SpeciesTheme> mAction2Species;
 	BoDebugDCOPIface* mIface;
-
-	BoLightCameraWidget1* mLightWidget;
-	BoMaterialWidget* mMaterialWidget;
 };
 
 
