@@ -11,4 +11,5 @@
   is a up (aka previous page) button. SO we can add any number of pixmaps with
   this limited number of orderbuttons.
 - map editor: big tiles are currently placed as small ones only
-
+- unit editor: check if images are in the directory, provide possibility to copy
+  them
