@@ -659,6 +659,7 @@ void TopWidget::slotEndGame()
  }
 
  d->mBosonWidget->slotEndGame();
+ saveGameDockConfig();
  disconnect(d->mBosonWidget, 0, 0, 0);
  // Delete all objects
  delete d->mBosonWidget;
