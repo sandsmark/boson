@@ -539,7 +539,7 @@ BoItemList Unit::unitsInRange() const
 	}
  }
 
- BoItemList items = boCanvas()->bosonCollisions(cells, (BosonSprite*)this, true);
+ BoItemList items = boCanvas()->bosonCollisions(cells, (BosonSprite*)this, false);
  items.remove((BosonSprite*)this);
  BoItemList inRange;
  BoItemList::Iterator it = items.begin();
