@@ -518,7 +518,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  }
  boDebug(300) << "    " << k_funcinfo << "checking if unit's in range" << endl;
  if (!inRange(d->mActiveWeapon->properties()->range(), target())) {
-	if (!canvas()->allBosonItems().contains(target())) {
+	if (!canvas()->allItems().contains(target())) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
@@ -1407,7 +1407,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
 // if (!isNextTo(target())) {  // This doesn't work for some reason :-(  Dunno why.
  if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
 	// We're not next to unit
-	if (!canvas()->allBosonItems().contains(target())) {
+	if (!canvas()->allItems().contains(target())) {
 		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		stopAttacking();
 		return;

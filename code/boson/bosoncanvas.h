@@ -99,6 +99,7 @@ public:
 
 	virtual void addAnimation(BosonItem* item);
 	virtual void removeAnimation(BosonItem* item);
+	unsigned int animationsCount() const;
 
 	void addItem(BosonItem* item);
 	void removeItem(BosonItem* item);
@@ -258,11 +259,10 @@ public:
 	void removeFromCells(BosonItem* u);
 
 	/**
-	 * This is meant to be used instead of QCanvas::allItems, since it also
-	 * works for OpenGL
 	 * @return A complete list of <em>all</em> items on the canvas.
 	 **/
-	BoItemList allBosonItems() const;
+	BoItemList allItems() const;
+	unsigned int allItemsCount() const;
 
 	BosonTiles* tileSet() const;
 

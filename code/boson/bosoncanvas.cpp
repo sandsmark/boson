@@ -781,9 +781,14 @@ BosonTiles* BosonCanvas::tileSet() const
  return d->mMap->tileSet();
 }
 
-BoItemList BosonCanvas::allBosonItems() const
+BoItemList BosonCanvas::allItems() const
 {
  return d->mAllItems;
+}
+
+unsigned int BosonCanvas::allItemsCount() const
+{
+ return d->mAllItems.count();
 }
 
 void BosonCanvas::addItem(BosonItem* item)
@@ -936,5 +941,10 @@ void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems
  for (; it.current(); ++it) {
 	addParticleSystem(it.current());
  }
+}
+
+unsigned int BosonCanvas::animationsCount() const
+{
+ return d->mAnimList.count();
 }
 

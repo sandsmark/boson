@@ -137,6 +137,9 @@ signals:
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
 	void signalFPSUpdated(double);
+	void signalParticlesCountUpdated(int);
+	void signalCanvasItemsCountUpdated(int);
+	void signalCanvasAnimationsCountUpdated(int);
 
 protected:
 	/**
@@ -190,7 +193,7 @@ protected:
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
-	void slotUpdateFPS();
+	void slotUpdateStatusBar();
 
 	/**
 	 * Actually start a game. Note that this is called at the end of the

@@ -711,7 +711,7 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_DEPTH_TEST);
 
  boProfiling->renderUnits(true);
- BoItemList allItems = mCanvas->allBosonItems();
+ BoItemList allItems = mCanvas->allItems();
  BoItemList::Iterator it = allItems.begin();
  unsigned int renderedUnits = 0;
  glEnable(GL_CULL_FACE);
