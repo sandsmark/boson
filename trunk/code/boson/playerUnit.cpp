@@ -493,6 +493,8 @@ bool playerMobUnit::near(int )
 void playerMobUnit::destroy(void)
 {
 	setFrame(PIXMAP_MOBILE_DESTROYED);
+	setZ( Z_DESTROYED_MOBILE );
+	bocanvas->unsetCellFlag ( gridRect() , (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 	_destroyed = true;
 	unSelect();
 	emit dying(this);
@@ -537,6 +539,8 @@ void playerFacility::shooted(int _power)
 void playerFacility::destroy(void)
 {
 	setFrame(PIXMAP_FIX_DESTROYED);
+	setZ( Z_DESTROYED_FACILITY );
+	bocanvas->unsetCellFlag ( gridRect(), Cell::building_f );
 	_destroyed = true;
 	unSelect();
 	emit dying(this);
