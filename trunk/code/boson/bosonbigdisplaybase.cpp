@@ -1353,6 +1353,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	w = d->mPlacementPreview.unitProperties()->unitWidth();
 	h = d->mPlacementPreview.unitProperties()->unitHeight();
  }
+ // This is _center_ pos of the unit
  bofixed x;
  bofixed y;
  if (d->mControlPressed && !boGame->gameMode()) {
@@ -1362,7 +1363,21 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	x = ((rintf(pos.x()) + w / 2));
 	y = ((rintf(pos.y()) + h / 2));
  }
- const float z = canvas()->map()->cellAverageHeight((int)x, (int)y) + 0.1f;
+ // Calculate z. This code is taken from Unit::updateZ()
+ float z;
+ if (d->mPlacementPreview.unitProperties()->isAircraft() ||
+		d->mPlacementPreview.unitProperties()->canGoOnWater()) {
+	z = canvas()->heightAtPoint(x, y);
+	if (!d->mPlacementPreview.unitProperties()->isAircraft()) {
+		z -= 0.05;
+	}
+ } else
+ {
+	z = canvas()->terrainHeightAtPoint(x, y);
+ }
+ if (d->mPlacementPreview.unitProperties()->isAircraft()) {
+	z += 2.0f;  // Flying units are always 2 units above the ground
+ }
  glTranslatef(x, -y, z);
  if (modelPreview) {
 	BoFrame* f = d->mPlacementPreview.model()->frame(0);
