@@ -38,7 +38,7 @@ class editorBigDisplay : public visualBigDisplay
 public:
 	editorBigDisplay(visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
-	virtual void actionClicked(int, int);		// selecting, moving...
+	virtual void actionClicked(int, int, int state);	// selecting, moving...
 
 private slots:
 	void setSelectedObject	(object_type, int);

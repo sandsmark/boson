@@ -59,11 +59,9 @@ public:
 
   bool isModified() {return modified; }
 
-/* concerning contents */
-  visualFacility *getFacility(long key) { return facilities.find(key); }
-  
-  void	deleteCell(int, int);
-  void	setCell(int, int, groundType );
+	/* concerning contents */
+	visualFacility	*getFacility(long key) { return facilities.find(key); }
+	void		changeCell(int x, int y, groundType g) { deleteCell(x,y); setCell(x,y,g); }
 
 public:
 //private:
@@ -71,6 +69,9 @@ public:
 	QIntDict<visualFacility>	facilities;
 
 private:
+	void		deleteCell(int, int);
+	void		setCell(int, int, groundType );
+
 	long		key;
 	void		freeRessources();
 	bool		modified;

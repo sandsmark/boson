@@ -31,7 +31,7 @@ class bosonBigDisplay : public visualBigDisplay
 public:
 	bosonBigDisplay(bosonView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 	/* from display classes */
-	virtual void actionClicked(int, int);		// selecting, moving...
+	virtual void actionClicked(int, int, int state);	// selecting, moving...
 
 protected:
 	bosonView	*bview;
