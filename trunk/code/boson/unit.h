@@ -91,8 +91,31 @@ public:
 	unsigned int waypointCount() const;
 	void clearWaypoints();
 	void waypointDone();
+
+	/**
+	 * Move this unit to a specified point. Also make sure that previous
+	 * @ref work is cleared. After the path is found the unit starts to get
+	 * animated and to move to the destination.
+	 * @param pos The point on the canvas to move to.
+	 **/
 	void moveTo(const QPoint& pos);
-	void stopMoving(bool send = true);
+	
+	/**
+	 * Nearly similar to the above version (actually this is called by the
+	 * above) but any previous @ref work is <em>not</em> cleared. This way
+	 * you can call this while e.g. a unit is being attacked and actually
+	 * start to attack as soon as the unit is in range. We also assume that
+	 * the @ref setAnimated was already called.
+	 * @param x The destination x-coordinate on the canvas
+	 * @param y The destination y-coordinate on the canvas
+	 **/
+	void moveTo(int x, int y);
+
+	/**
+	 * Just stop moving. Don't call this if you don't want to stop attacking
+	 * as well! This sets @ref work to @ref WorkNone
+	 **/
+	void stopMoving();
 	void stopAttacking();
 
 	virtual bool save(QDataStream& stream);

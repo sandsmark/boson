@@ -123,6 +123,8 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  switch (msgid) {
 	case BosonMessage::IdStopMoving:
 	{
+		kdWarning() << "IdStopMoving is obsolete" << endl;
+		/*
 		unsigned long int id;
 		double x;
 		double y;
@@ -145,6 +147,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 		unit->setX(x);
 		unit->setY(y);
 		unit->setZ(z);
+		*/
 		break;
 	}
 	default:
@@ -341,6 +344,8 @@ void Player::sendStopMoving(Unit* unit)
  if (!game()) {
 	return;
  }
+ kdWarning() << "sendStopMoving is obsolete" << endl;
+ /*
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (unsigned long int)unit->id();
@@ -348,6 +353,7 @@ void Player::sendStopMoving(Unit* unit)
  stream << (double)unit->y();
  stream << (double)unit->z();
  game()->sendMessage(buffer, BosonMessage::IdStopMoving, id());
+ */
 }
 
 const UnitProperties* Player::unitProperties(int unitType) const
