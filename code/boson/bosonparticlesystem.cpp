@@ -260,13 +260,6 @@ void BosonParticleSystem::draw()
     d.setScaledSum(mParticles[i].pos, sw, mParticles[i].size);
 
     glColor4fv(mParticles[i].color.data());
-//    if(i == 20) // AB: I guess that's wrong here.
-/*    boDebug() << "PARTICLE:" << "        " << k_funcinfo << "drawing 20. particle; vertex coordinates: "
-    << "(" << a[0] << "; " << a[1] << "; " << a[2] << ");  "
-    << "(" << b[0] << "; " << b[1] << "; " << b[2] << ");  "
-    << "(" << c[0] << "; " << c[1] << "; " << c[2] << ");  "
-    << "(" << d[0] << "; " << d[1] << "; " << d[2] << ");  "
-    << "  alpha: " << mParticles[i].color[3] << endl;*/
     glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());
     glTexCoord2f(1.0, 1.0);  glVertex3fv(b.data());
     glTexCoord2f(1.0, 0.0);  glVertex3fv(c.data());
