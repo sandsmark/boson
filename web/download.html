@@ -134,6 +134,7 @@ To compile boson use something like
 <tr> <td><font size="3" color="#505050">
 
 	cd code <br />
+	make -f Makefile.cvs<br />
 	./configure --prefix=/opt/kde3  <br />
 	make  <br />
 
@@ -194,7 +195,8 @@ Now install the graphics following exactly the same rules as for the code :
 <center><table border=1>
 <tr> <td>
 <font size="3" color="#505050">
- ./configure --prefix=/opt/kde3 
+	make -f Makefile.cvs<br />
+        ./configure --prefix=/opt/kde3 <br />
 	make <br />
 	su <br />
 	make install <br />
