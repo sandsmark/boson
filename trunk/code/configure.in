@@ -24,4 +24,5 @@ AC_OUTPUT(Makefile \
 	boson/docs/Makefile \
 	boson/docs/en/Makefile \
 	map/Makefile \
+	editor/Makefile \
 )
