@@ -184,8 +184,8 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
 
 bool BosonCollisions::cellsOccupied(const BoRectFixed& rect) const
 {
- int right = lround(rect.right());
- int bottom = lround(rect.bottom());
+ int right = (int)ceil(rect.right());
+ int bottom = (int)ceil(rect.bottom());
  for (int x = (int)rect.left(); x < right; x++) {
 	for (int y = (int)rect.top(); y < bottom; y++) {
 		if (cellOccupied(x, y)) {
@@ -244,9 +244,9 @@ BoItemList* BosonCollisions::collisionsAtCells(const BoRectFixed& rect, const Bo
  }
  int left, right, top, bottom;
  left = QMAX((int)rect.left(), 0);
- right = QMIN(lround(rect.right()), (int)map()->width());
+ right = QMIN((int)ceil(rect.right()), (int)map()->width());
  top = QMAX((int)rect.top(), 0);
- bottom = QMIN(lround(rect.bottom()), (int)map()->height());
+ bottom = QMIN((int)ceil(rect.bottom()), (int)map()->height());
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return new BoItemList();
@@ -303,9 +303,9 @@ QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3Fixed& v1, con
  // Calculate rect in cell coordinates
  int left, right, top, bottom;
  left = QMAX((int)v1.x(), 0);
- right = QMIN(lround(v2.x()), (int)map()->width());
+ right = QMIN((int)ceil(v2.x()), (int)map()->width());
  top = QMAX((int)v1.y(), 0);
- bottom = QMIN(lround(v2.y()), (int)map()->height());
+ bottom = QMIN((int)ceil(v2.y()), (int)map()->height());
  boDebug() << k_funcinfo << "Cell rect: (" << left << ";" << top << ")-(" << right << ";" << bottom <<
 		")" << endl;
 
