@@ -74,6 +74,8 @@ public:
 	 **/
 	bool makeRendererCurrent(const QString& className);
 
+	void unsetCurrentRenderer();
+
 	/**
 	 * Check for @ref currentRenderer being NULL and try to load a default
 	 * renderer when it is NULL.
@@ -117,7 +119,6 @@ protected:
 	bool unloadLibrary();
 	BoMeshRenderer* createRenderer(const QString& name);
 	bool makeRendererCurrent(BoMeshRenderer* renderer);
-	void unsetCurrentRenderer();
 
 private:
 	BoMeshRendererManager();
