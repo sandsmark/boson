@@ -275,6 +275,12 @@ public:
 	virtual void addWidget(BoUfoWidget* w);
 	virtual void addSpacing(int spacing);
 
+	/**
+	 * Set the foreground color of the @ref widget and all of it's children
+	 * (!!) to @p c
+	 **/
+	virtual void setForegroundColor(const QColor& c);
+
 	virtual void setLayoutClass(LayoutClass);
 	LayoutClass layoutClass() const
 	{

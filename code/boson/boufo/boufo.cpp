@@ -680,6 +680,17 @@ void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
  loadProperties(properties);
 }
 
+void BoUfoWidget::setForegroundColor(const QColor& c)
+{
+ ufo::UColor color(c.red(), c.green(), c.blue());
+ widget()->setForegroundColor(&color);
+ std::vector<ufo::UWidget*> widgets = widget()->getWidgets();
+ std::vector<ufo::UWidget*>::iterator it;
+ for (it = widgets.begin(); it != widgets.end(); ++it) {
+	(*it)->setForegroundColor(&color);
+ }
+}
+
 void BoUfoWidget::loadProperties(const QMap<QString, QString>& properties)
 {
  QStrList propertyNames = metaObject()->propertyNames(true);
@@ -1247,6 +1258,7 @@ void BoUfoLabel::init()
  mLabel = new ufo::ULabel();
  widget()->add(mLabel);
  mLabel->setOpaque(false);
+ setForegroundColor(QColor(255, 255, 255));
 }
 
 void BoUfoLabel::setMinimumSize(const ufo::UDimension& s)
