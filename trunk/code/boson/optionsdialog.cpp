@@ -163,8 +163,11 @@ void OptionsDialog::slotDefault()
 
 void OptionsDialog::slotOk()
 {
+ boDebug(210) << k_funcinfo << endl;
  slotApply();
+ boDebug(210) << k_funcinfo << "calling accept()" << endl;
  accept();
+ boDebug(210) << k_funcinfo << "done" << endl;
 }
 
 void OptionsDialog::slotApply()
