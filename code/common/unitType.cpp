@@ -30,17 +30,23 @@
 	uint	cost_mineral;	// how much mineral does it cost ?
 	uint	cost_oil;	// how much oil does it cost ?
 
-	int 	speed;		// how far it may travel (in pixels) during one jiffie
+	int 	speed;		// how many tiles can it move during one jiffie
 	uint	goFlag;		// where can it go ? 
 */
 
+// speed = 1          up, left, right, down
+// speed = 2 idem 1 + upper-left, uppert-right corner...
+// speed = 3 idem 2 + two-tile up, two-tile left..
+
 mobileProperties_t mobileProp[] = {
 	{"ship",		96, 96,  2, 100,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
-	{"quad",		32, 32,  3, 70,		200, 100, 4, BO_GO_EARTH},	// MOB_QUAD
-	{"aircraft",		72, 72,  3, 100,	200, 100, 6, BO_GO_AIR},	// MOB_AIRCRAFT
-	{"oilharvester",	64, 64,  4, 0,		200, 100, 4, BO_GO_EARTH},	// MOB_OIL_HARVESTER
-	{"mineralharvester",	64, 64,  4, 0,		200, 100, 4, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"quad",		32, 32,  3, 70,		200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
+	{"aircraft",		72, 72,  3, 100,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"oilharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
+	{"mineralharvester",	64, 64,  4, 0,		200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
 	};
+//	                        width    visibility     mineral   speed
+//	                            height  range            oil     goFlag
 
 /*
 	char 	*name;		// Guess it, geek..
