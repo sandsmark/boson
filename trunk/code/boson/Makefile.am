@@ -22,10 +22,6 @@
 INCLUDES= -I../visual $(all_includes)
 boson_appsdir = $(kde_appsdir)/Games/Boson
 
-# compilation
-CXXFLAGS = -pipe -Wall -g # -O2
-#	MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
-#	CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
 
 
@@ -37,7 +33,7 @@ SUBDIRS = docs
 boson_METASOURCES = USE_AUTOMOC
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp bosonField.cpp playerUnit.cpp bosonView.cpp connectDlg.cpp serverDlg.cpp boshot.cpp
-boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkfm -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 $(LIBSOCKET)
+boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 $(LIBSOCKET)
 
 
 #(un)install stuff
@@ -60,11 +56,4 @@ uninstall-local:
 CLEANFILES = $(boson_METASOURCES) boson-*.log
 
 EXTRA_DIST = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainView.cpp miniDisplay.cpp bosonField.cpp playerUnit.cpp boson.h connect.h game.h mainView.h orderType.h bosonField.h playerUnit.h ressource.h bosonView.cpp bosonView.h connectDlg.cpp connectDlg.h serverDlg.cpp serverDlg.h boshot.cpp boshot.h
-
-
-# make messages.po. Move this one to ../po/ and "make merge" in po
-# the -x is for skipping messages already translated in kdelibs
-messages:
-	$(XGETTEXT) -C -ki18n -x ../../../kdelibs/po/kde.pot $(boson_SOURCES) && mv messages.po ../po/boson.pot
-
 

@@ -35,7 +35,6 @@
 #include <ktmainwindow.h> 
 #include <kaccel.h>
 #include <kiconloader.h>
-#include <ksock.h>
 
 // application specific includes
 #include "common/msgData.h"
@@ -46,6 +45,8 @@
 
 
 class KProcess;
+class KSocket;
+
 /**
   * This Class is the base class for your application. It sets up the main
   * window and reads the config file as well as providing a menubar, toolbar
@@ -149,7 +150,6 @@ private:
       * tool_bar_0_pos. If more menubars or toolbars are created, you should add
       * positions as well and implement them in saveOptions() and readOptions().
       */    
-    KMenuBar::menuPosition menu_bar_pos;
 };   
  
 #endif // BOSON_H

@@ -21,7 +21,7 @@
 #include <assert.h>
 
 #include <kapp.h>
-#include <kmsgbox.h>
+//#include <kmessagebox.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"

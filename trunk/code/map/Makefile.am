@@ -21,10 +21,6 @@
 # include files
 INCLUDES= $(all_includes)
 
-# compilation
-CXXFLAGS = -pipe -Wall -g # -O2
-#MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
-#CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
 
 noinst_PROGRAMS = boeditor
@@ -48,7 +44,3 @@ basic.bpf : boeditor
 EXTRA_DIST =  map.h boeditor.cpp boeditor.h
 CLEANFILES = basic.bpf
 
-# make messages.po. Move this one to ../po/ and "make merge" in po
-# the -x is for skipping messages already translated in kdelibs
-#messages:
-#	$(XGETTEXT) -C -ki18n -x ../../../kdelibs/po/kde.pot $(libboson_la_SOURCES) && mv messages.po ../po/bocommon.pot

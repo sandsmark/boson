@@ -19,7 +19,8 @@
  ***************************************************************************/
 
 #include <kapp.h>
-#include <kmsgbox.h>
+#include <kstddirs.h>
+#include <kmessagebox.h>
 
 #include "boserver.h" 
 #include "game.h" 
@@ -35,7 +36,7 @@ void usage(void)
 		"\tPort is the TCP/IP port the server is listening to (default to %d)\n"
 		"\tThe port number should be > 1000\n"
 		"\t\n", BOSON_DEFAULT_PORT);
- 	KMsgBox::message(0l, "boserver usage",  buffer);
+ 	KMessageBox::information(0l, buffer, "boserver usage");
 	exit(1);
 }
  
@@ -44,7 +45,7 @@ int main(int argc, char* argv[])
 
 	KApplication	app(argc,argv,"BoServer");  
 	int		port;
-	QString		mapname(kapp->kde_datadir() + "/boson/map/basic.bpf");
+	QString		mapname( locate ("data", "boson/map/basic.bpf") );
 
 	port = (argc>1)?atoi(argv[1]): BOSON_DEFAULT_PORT;
 	if (! (port>1000) ) usage ();

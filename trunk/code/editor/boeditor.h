@@ -35,7 +35,6 @@
 #include <ktmainwindow.h> 
 #include <kaccel.h>
 #include <kiconloader.h>
-#include <kmsgbox.h>
 
 // application specific includes
 #include "common/msgData.h"
@@ -165,14 +164,6 @@ private:
     bool bViewStatusbar;
     /** flag if view is there or not (view is deleted on "File"->"Close") */
     bool bViewEnabled;
-    /** used for KConfig to store and restore menubar position. Same with
-      * tool_bar_0_pos. If more menubars or toolbars are created, you should add
-      * positions as well and implement them in saveOptions() and readOptions().
-      */    
-    KMenuBar::menuPosition menu_bar_pos;
-    KToolBar::BarPosition tool_bar_0_pos; 
-
-
 
     void doLoad(QString newname);
 /* The map which handle grouds and units*/

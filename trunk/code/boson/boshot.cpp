@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <kapp.h>
+#include <kstddirs.h>
 
 #include <qimage.h>
 
@@ -58,7 +59,7 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 
 		/* small shot (unit hitten) */
 		if (!shotSequ) { // static imagepool initialization
-			QString path(kapp->kde_datadir() + "/boson/themes/species/human/explosions/shot/explosion%02d");
+			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/") + "explosion%02d" );
 			shotSequ = new QwSpritePixmapSequence(path+".ppm", path+".pbm", SHOT_FRAMES);
 		}
 
@@ -94,7 +95,7 @@ QwSpritePixmapSequence *loadBig(void) // XXX should be factorized with speciesTh
 	QList<QPoint>	point_l;
 	QPixmap		*p;
 	QPoint		*pp;
-	QString		path(kapp->kde_datadir() + "/boson/themes/species/human/explosions/big");
+	QString		path( locate ( "data", "boson/themes/species/human/explosions/big") );
 
 	// XXX will use  speciesTheme::loadPixmap() (made non-speciesTheme dep and public)
 	// and QCanvasPixmap(const QPixmap&, QPoint hotspot);

@@ -23,7 +23,7 @@
 #include <QwSpriteField.h>
 
 
-#include <kapp.h>		// kde_datadir()
+#include <kstddirs.h>
 
 #include "common/log.h"
 #include "groundTheme.h"
@@ -38,7 +38,7 @@ groundTheme::groundTheme(char *themeName)
 	boAssert (TRANS_LAST  == groundTransPropNb);
 
 	groundPix	= new (QwSpritePixmapSequence *)[NB_GROUND_TILES];
-	themePath	= new QString(kapp->kde_datadir() + "/boson/themes/grounds/" + themeName + "/" );
+	themePath	= new QString(locate ( "data", "boson/themes/grounds/") + themeName + "/" );
 	pixLoaded	= new QBitArray(NB_GROUND_TILES);
 
 	for (i=0; i< TRANS_LAST; i++) { // pre-load transitions name

@@ -27,10 +27,10 @@
 #include <qpixmap.h>
 #include <qtimer.h>
 
-#include <kapp.h>
+#include <kstddirs.h>
 #include <ksock.h>
 #include <kprocess.h>
-#include <kmsgbox.h>
+#include <kmessagebox.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"
@@ -84,7 +84,7 @@ serverDlg::serverDlg(QWidget *parent, const char *name)
 	label = new QLabel(this);
 	label->move( (390-352)/2, 10);		// biglogo is 352x160
 	label->setAutoResize(true);
-	label->setPixmap( QPixmap(kapp->kde_datadir() + "/boson/pics/biglogo.bmp") );
+	label->setPixmap( QPixmap( locate ( "data", "boson/pics/biglogo.bmp")) );
 	boAssert(!label->pixmap()->isNull());
 
 }
@@ -94,12 +94,12 @@ void serverDlg::doIt(void)
 	int port = atoi(e_port->text());
 
 	if ( ! (port>1000) ) {
-		logf(LOG_FATAL,"launchServer : unexpected port %s.",e_port->text());
-  		KMsgBox::message(this, "unexpected port", "The port must be an integer bigger than 1000");
+		logf(LOG_FATAL,"launchServer : unexpected port %s.", (const char *)e_port->text());
+  		KMessageBox::error(this, "The port must be an integer bigger than 1000", "unexpected port");
 		return;
 	}
 
-	emit configure(l_host->text(), e_port->text()); // so that connectDlg knows where to connect
+	emit configure(l_host->text(), (const char *)e_port->text()); // so that connectDlg knows where to connect
 
 	proc = new KProcess();
 	*proc << "boserver";
@@ -138,8 +138,9 @@ void serverDlg::timeOut(void)
 {
 	delete proc;
 	b_ok->setEnabled(true);
-  	KMsgBox::message(this, "server timed out",
-			"The server hasn't been quick enough to connect");
+  	KMessageBox::error(this,
+			"The server hasn't been quick enough to connect",
+			"server timed out");
 	return;
 }
 
@@ -150,9 +151,10 @@ void serverDlg::serverDied(KProcess *p)
 
 	delete proc;
 	b_ok->setEnabled(true);
-  	KMsgBox::message(this, "server died",
+  	KMessageBox::error(this,
 			"The server died for an unknown reason, please report\n"
-			"a bug to the author <orzel@yalbi.com>...");
+			"a bug to the author <orzel@yalbi.com>...",
+			"server died");
 	return;
 }
 

@@ -28,9 +28,9 @@
 #include <qpixmap.h>
 #include <qtimer.h>
 
-#include <kapp.h>
+#include <kstddirs.h>
 #include <ksock.h>
-#include <kmsgbox.h>
+#include <kmessagebox.h>
 
 #include "common/log.h"
 #include "common/boconfig.h"
@@ -91,7 +91,7 @@ connectDlg::connectDlg(char *servername ,QWidget *parent, const char *name)
 	label = new QLabel(this);
 	label->move( (390-352)/2, 10);		// biglogo is 352x160
 	label->setAutoResize(true);
-	label->setPixmap( QPixmap(kapp->kde_datadir() + "/boson/pics/biglogo.bmp") );
+	label->setPixmap( QPixmap( locate ( "data", "boson/pics/biglogo.bmp")) );
 	boAssert(!label->pixmap()->isNull());
 
 }
@@ -108,23 +108,23 @@ void connectDlg::tryServer(void)
 	sock = socket(PF_INET, SOCK_STREAM, 0);
 	if ( sock<0 ) {
 		logf(LOG_FATAL, "tryServer : unable to create socket.");
-  		KMsgBox::message(this, "connection error", "Unable to create a socket");
+  		KMessageBox::error(this, "Unable to create a socket", "connection error");
 		return;
 	}
 	
 	/* connect the socket to server */
 	hostinfo = gethostbyname( e_server->text() );
 	if ( !hostinfo ) {
-		logf(LOG_FATAL,"tryServer : unknown host %s.",e_server->text());
-  		KMsgBox::message(this, "Unknown host", "Can't find the boson server on the net");
+		logf(LOG_FATAL,"tryServer : unknown host %s.", (const char*)e_server->text());
+  		KMessageBox::error(this, "Can't find the boson server on the net", "Unknown host");
 		return;
 	}
 
 	port = atoi(e_port->text());
 
 	if ( ! (port>1000) ) {
-		logf(LOG_FATAL,"tryServer : unexpeted port %s.",e_port->text());
-  		KMsgBox::message(this, "unexpected port", "The port must be an integer bigger than 1000");
+		logf(LOG_FATAL,"tryServer : unexpeted port %s.", (const char*) e_port->text());
+  		KMessageBox::error(this, "The port must be an integer bigger than 1000", "unexpected port");
 		return;
 	}
 	sin.sin_addr = *(struct in_addr*) hostinfo->h_addr;
@@ -132,8 +132,8 @@ void connectDlg::tryServer(void)
 	sin.sin_port = htons(port);
 	
 	if ( ::connect(sock, (struct sockaddr *)&sin, sizeof(sin))<0 ) {
-		logf(LOG_FATAL, "tryServer : unable to connect socket to \"%s\" server", e_server->text() );
-  		KMsgBox::message(this, "Unreachable server", "Unable to connect to the server");
+		logf(LOG_FATAL, "tryServer : unable to connect socket to \"%s\" server", (const char*) e_server->text() );
+  		KMessageBox::error(this, "Unable to connect to the server", "Unreachable server");
 		return ;
 	}
 	
@@ -145,13 +145,13 @@ void connectDlg::tryServer(void)
 		logf(LOG_FATAL, "tryServer : unable to create KSocket()");
 		socketState = PSS_CONNECT_DOWN;
 		delete Socket;
-  		KMsgBox::message(this, "Internal error", "Internal error : KSocket() creation error");
+  		KMessageBox::error(this, "Internal error : KSocket() creation error", "Internal error");
 		return;
 	}
 
 	logf(LOG_COMM, "KSocket connect ok");
 	logf(LOG_COMM, "\tsocket = %d, addr = %lu",
-			Socket->socket(), Socket->getAddr());
+			Socket->socket(), Socket->ipv4_addr());
 
 
 	/* buffer creation */
@@ -218,7 +218,7 @@ void connectDlg::timeOut(void)
 	delete Socket;
 	socketState	= PSS_INIT;
 	State		= PS_INIT;
-  	KMsgBox::message(this, "Server not fast enough", "The server hasn't answered fast enough.");
+  	KMessageBox::message(this, "Server not fast enough", "The server hasn't answered fast enough.");
 	b_ok->setEnabled(true);
 	
 	show();
