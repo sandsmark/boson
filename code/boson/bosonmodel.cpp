@@ -289,7 +289,7 @@ void BoFrame::init()
 {
  mDisplayList = 0;
  mDepthMultiplier = 0.0f;
- mRadius = 0.0;
+ mRadius = 0.0f;
  mMatrices = 0;
  mMeshes = 0;
  mMeshCount = 0;
@@ -648,11 +648,22 @@ void BosonModel::loadModel()
 	return;
  }
  boMem->startCatching();
- boProfiling->start(BosonProfiling::LoadModel);
+ BosonProfiler profiler(BosonProfiling::LoadModel);
  d->mLoader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
 
  // TODO: add a profiling entry for this
  d->mLoader->loadModel();
+
+ if (frames() == 0) {
+	boError() << k_funcinfo << "0 frames loaded for model " << d->mFile << endl;
+	boMem->stopCatching("BosonModel::loadModel()");
+	return;
+ }
+ if (meshCount() == 0) {
+	boError() << k_funcinfo << "0 meshes loaded for model " << d->mFile << endl;
+	boMem->stopCatching("BosonModel::loadModel()");
+	return;
+ }
 
  mergeArrays();
  mergeMeshesInFrames();
@@ -682,8 +693,6 @@ void BosonModel::loadModel()
 	mesh->setTextureObject(myTex);
 	mesh->setTextured(myTex != 0);
 
-	// AB: about profiling: this doesn't really fit to loading display
-	// lists...
 #if USE_STRIP
 	mesh->connectFaces();
 #else
@@ -697,7 +706,6 @@ void BosonModel::loadModel()
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
 
  boMem->stopCatching("BosonModel::loadModel()");
- boProfiling->stop(BosonProfiling::LoadModel);
 }
 
 void BosonModel::createDisplayLists(const QColor* teamColor)
@@ -932,8 +940,8 @@ void BosonModel::computeBoundings(BoFrame* frame, BoHelper* helper) const
 
  BoVector3 v;
  for (unsigned int i = 0; i < frame->meshCount(); i++) {
-	BoMesh* mesh = frame->mesh(i);
-	BoMatrix* m = frame->matrix(i);
+	const BoMesh* mesh = frame->mesh(i);
+	const BoMatrix* m = frame->matrix(i);
 	if (!mesh) {
 		boError() << k_funcinfo << "NULL mesh at " << i << endl;
 		continue;
