@@ -48,6 +48,7 @@ BOSON_COMMON_SRC = \
 	bocamera.cpp \
 	boautocamera.cpp \
 	bocamerawidget.cpp \
+	boorbiterwidget.cpp \
 	bosongroundtheme.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
