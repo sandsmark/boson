@@ -650,3 +650,27 @@ void BosonScenario::startScenario(Boson* boson)
  }
 }
 
+QStringList BosonScenario::availableScenarios()
+{
+ QStringList list = KGlobal::dirs()->findAllResources("data", 
+		"boson/scenario/*.desktop");
+ if (list.isEmpty()) {
+	kdError() << "Cannot find any scenario?!" << endl;
+	return list;
+ }
+ QStringList validList;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
+	fileName += QString::fromLatin1(".bsc");
+	if (QFile::exists(fileName)) {
+		validList.append(list[i]);
+	}
+ }
+ return validList;
+}
+
+QStringList BosonScenario::availableScenarios(const QString& mapIdentifier)
+{
+ QStringList list = availableScenarios();
+ return list; // FIXME
+}

@@ -8,6 +8,7 @@ class Unit;
 class Boson;
 class Player;
 class QDomElement;
+class QStringList;
 
 class BosonScenarioPrivate;
 
@@ -25,6 +26,9 @@ public:
 	BosonScenario();
 	BosonScenario(const QString& fileName);
 	~BosonScenario();
+
+	static QStringList availableScenarios();
+	static QStringList availableScenarios(const QString& map);
 
 	int maxPlayers() const;
 	unsigned int minPlayers() const;
