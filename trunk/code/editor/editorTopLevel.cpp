@@ -487,22 +487,8 @@ void editorTopLevel::updateViews(void)
 
 bool editorTopLevel::queryExit()
 {
-	logf(LOG_INFO, "queryExit called");
+//	logf(LOG_INFO, "queryExit called");
 	BoEditorApp *app = (BoEditorApp *) kapp;
 	return app->slot_close();
 }
-
-
-bool editorTopLevel::queryClose()
-{
-	logf(LOG_INFO, "queryClose called");
-/*	
-	BoEditorApp *app = (BoEditorApp *) kapp;
-	return app->slot_close(this);
-*/
-	return true;
-}
-
-
-
 

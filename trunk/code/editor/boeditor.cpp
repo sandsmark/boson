@@ -238,5 +238,7 @@ bool BoEditorApp::slot_saveAs()
 
 void BoEditorApp::slot_quit()
 {
+//	logf(LOG_INFO, "slot_quit called");
+	if (slot_close()) quit() ;
 }
 
