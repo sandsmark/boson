@@ -31,6 +31,8 @@
 #ifndef BEFORE_BETA2
 #include <arts/kartsserver.h>
 #include <arts/kartsdispatcher.h>
+#else
+#include <arts/kmedia2.h>
 #endif
 
 #include <qtimer.h>

@@ -164,8 +164,6 @@ protected:
 	 **/
 	void recreateMap();
 
-	void insertCommandFrame(BosonCommandFrame*);
-
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
