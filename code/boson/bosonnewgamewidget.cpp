@@ -508,7 +508,7 @@ void BosonNewGameWidget::slotStart()
   }
   else
   {
-    slotSendNewGame();
+    sendNewGame();
   }
 }
 
@@ -606,7 +606,7 @@ inline BosonPlayField* BosonNewGameWidget::map()
   return mTop->map();
 }
 
-void BosonNewGameWidget::slotSendNewGame() // FIXME: no slot
+void BosonNewGameWidget::sendNewGame() 
 {
   game()->sendMessage(0, BosonMessage::IdNewGame);
 }

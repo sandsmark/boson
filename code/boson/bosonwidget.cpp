@@ -294,6 +294,9 @@ void BosonWidget::init()
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
  kdDebug() << k_funcinfo << endl;
+ if (!game()->gameMode()) {
+	mode = CursorKDE;
+ }
  BosonCursor* b;
  switch (mode) {
 	case CursorSprite:
@@ -364,7 +367,7 @@ void BosonWidget::slotChangeGroupMove(int mode)
  boConfig->saveGroupMoveMode((GroupMoveMode)mode);
 }
 
-void BosonWidget::initGameMode()
+void BosonWidget::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
  slotStartScenario();
@@ -475,7 +478,9 @@ void BosonWidget::slotStartScenario()
  // as soon as this message is received the game is actually started
  if (game()->isAdmin()) {
 	game()->sendMessage(0, BosonMessage::IdGameIsStarted);
-	game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
+	if (game()->gameMode()) {
+		game()->slotSetGameSpeed(BosonConfig::readGameSpeed());
+	}
  }
 }
 

@@ -104,6 +104,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mAdvanceMessageWaiting = 0;
 #endif
 
+ mGameMode = true;
+
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, Q_UINT32)));
  connect(this, SIGNAL(signalSave(QDataStream&)),
@@ -167,6 +169,10 @@ void Boson::removeAllPlayers()
 
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 {
+ if (!gameMode()) {
+	kdWarning() << k_funcinfo << "Not in game mode!" << endl;
+	return true;
+ }
  Player* player = (Player*)p;
  if (player->isOutOfGame()) {
 	kdWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
@@ -684,6 +690,11 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalStartScenario();
 		break;
 	case BosonMessage::IdNewGame:
+		setGameMode(true);
+		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
+		break;
+	case BosonMessage::IdNewEditor:
+		setGameMode(false);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
 	case BosonMessage::IdGameIsStarted:

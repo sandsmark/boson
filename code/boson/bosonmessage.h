@@ -33,6 +33,7 @@ public:
 		ChangePlayField = 2,
 		ChangeTeamColor = 4,
 		IdNewGame = 5,
+		IdNewEditor = 6,
 
 	// once a newgame is started:
 		IdInitFogOfWar = 10,

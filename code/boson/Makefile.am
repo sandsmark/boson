@@ -68,7 +68,8 @@ COMMON_SRC = \
 	unitgroup.cpp \
 	bosonstatistics.cpp \
 	gameoverdialog.cpp \
-	unitplugins.cpp
+	unitplugins.cpp \
+	bosonstarteditorwidget.cpp
 
 BOUNIT_SRC = \
 	unitproperties.cpp \
