@@ -71,6 +71,7 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kapplication.h>
+#include "boeventloop.h"
 
 #include <qtimer.h>
 #include <qcursor.h>
@@ -644,6 +645,8 @@ void BosonBigDisplayBase::initializeGL()
 
  boWaterManager->initOpenGL();
 
+ connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
+
  recursive = false;
 }
 
@@ -922,8 +925,8 @@ void BosonBigDisplayBase::renderItems()
 	BosonItem* item = *it;
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
-	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat x = (item->x() + item->width() / 2) / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) / BO_TILE_SIZE);
 	GLfloat z = item->z(); // this is already in the correct format!
 
 	// AB: note units are rendered in the *center* point of their
@@ -1009,12 +1012,12 @@ void BosonBigDisplayBase::renderItems()
 		continue;
 	}
 
-	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat x = (item->x() + item->width() / 2) / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) / BO_TILE_SIZE);
 	GLfloat z = item->z();
 
-	GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat w = ((float)item->width()) / BO_TILE_SIZE;
+	GLfloat h = ((float)item->height()) / BO_TILE_SIZE;
 	GLfloat depth = item->glDepthMultiplier();
 	glPushMatrix();
 	glTranslatef(x, y, z);
@@ -1137,8 +1140,8 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	w = d->mPlacementPreview.unitProperties()->unitWidth();
 	h = d->mPlacementPreview.unitProperties()->unitHeight();
  }
- float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
- float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+ float x = ((pos.x() + w / 2));
+ float y = ((pos.y() + h / 2));
  if (pos.x() >= 0) {
 	x = x - pos.x() % BO_TILE_SIZE;
  } else {
@@ -1168,13 +1171,13 @@ void BosonBigDisplayBase::renderPlacementPreview()
 		glVertex3f(0.0f, 0.0f, 0.0f);
 
 		glTexCoord2fv(textureLowerLeft);
-		glVertex3f(0.0f, - BO_GL_CELL_SIZE, 0.0f);
+		glVertex3f(0.0f, - 1.0f, 0.0f);
 
 		glTexCoord2fv(textureLowerRight);
-		glVertex3f(BO_GL_CELL_SIZE, -BO_GL_CELL_SIZE, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
 
 		glTexCoord2fv(textureUpperRight);
-		glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
+		glVertex3f(1.0f, 0.0f, 0.0f);
 	glEnd();
 #endif
  }
@@ -2122,8 +2125,8 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button, const BoMouseEve
 			float posX, posY, posZ;
 			event.worldPos(&posX, &posY, &posZ);
 			int cellX, cellY;
-			cellX = (int)(posX / BO_GL_CELL_SIZE);
-			cellY = (int)(-posY / BO_GL_CELL_SIZE);
+			cellX = (int)(posX);
+			cellY = (int)(-posY);
 			slotReCenterDisplay(QPoint(cellX, cellY));
 			displayInput()->updateCursor();
 		}
@@ -2275,28 +2278,28 @@ void BosonBigDisplayBase::slotResetViewProperties()
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
 //TODO don't center the corners - e.g. 0;0 should be top left, never center
- camera()->setLookAt(BoVector3(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, 0));
+ camera()->setLookAt(BoVector3(((float)pos.x()), -((float)pos.y()), 0));
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
 {
- pos->setX((int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE));
- pos->setY((int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE));
+ pos->setX((int)(x * BO_TILE_SIZE));
+ pos->setY((int)(-y * BO_TILE_SIZE));
  // AB: z remains as-is
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat z, BoVector3* pos) const
 {
  // we want the rounding errors here (at least for now).
- int intx = (int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE);
- int inty = (int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE);
+ int intx = (int)(x * BO_TILE_SIZE);
+ int inty = (int)(-y * BO_TILE_SIZE);
  pos->set((float)intx, (float)inty, z);
 }
 
 void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
 {
- *glx = (((GLfloat)x) * BO_GL_CELL_SIZE) / BO_TILE_SIZE;
- *gly = (((GLfloat)-y) * BO_GL_CELL_SIZE) / BO_TILE_SIZE;
+ *glx = (((GLfloat)x)) / BO_TILE_SIZE;
+ *gly = (((GLfloat)-y)) / BO_TILE_SIZE;
  *glz = z;
 }
 
@@ -2323,8 +2326,8 @@ bool BosonBigDisplayBase::mapCoordinatesToCell(const QPoint& pos, QPoint* cell)
 	return false;
  }
  y *= -1;
- int cellX = (int)(x / BO_GL_CELL_SIZE);
- int cellY = (int)(y / BO_GL_CELL_SIZE);
+ int cellX = (int)(x);
+ int cellY = (int)(y);
  cellX = QMAX(0, QMIN((int)canvas()->mapWidth(), cellX));
  cellY = QMAX(0, QMIN((int)canvas()->mapHeight(), cellY));
  cell->setX(cellX);
@@ -2503,10 +2506,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
  GLfloat maxX, maxY;
  GLfloat minX, minY;
  calculateWorldRect(widgetRect, &minX, &minY, &maxX, &maxY);
- maxX /= BO_GL_CELL_SIZE;
- minX /= BO_GL_CELL_SIZE;
- maxY /= -BO_GL_CELL_SIZE;
- minY /= -BO_GL_CELL_SIZE;
+ maxY /= -1.0f;
+ minY /= -1.0f;
 
  if (debugMe) {
 	boDebug() << k_funcinfo << "maxX: " << maxX << " maxY: " << maxY
@@ -2552,8 +2553,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 		// (read: I don't know which kind of trouble it will cause)
 		GLfloat glx, gly, glz;
 		// top left corner of cell
-		glx = x * BO_GL_CELL_SIZE;
-		gly = -y * BO_GL_CELL_SIZE;
+		glx = x;
+		gly = -y;
 		glz = canvas()->map()->heightAtCorner(x, y);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
@@ -2564,8 +2565,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 			continue;
 		}
 		// top right corner of cell
-		glx = (x + 1) * BO_GL_CELL_SIZE;
-		gly = -y * BO_GL_CELL_SIZE;
+		glx = (x + 1);
+		gly = -y;
 		glz = canvas()->map()->heightAtCorner(x + 1, y);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
@@ -2576,8 +2577,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 			continue;
 		}
 		// bottom left corner of cell
-		glx = x * BO_GL_CELL_SIZE;
-		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		glx = x;
+		gly = -(y + 1);
 		glz = canvas()->map()->heightAtCorner(x, y + 1);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
@@ -2588,8 +2589,8 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 			continue;
 		}
 		// bottom right corner of cell
-		glx = (x + 1) * BO_GL_CELL_SIZE;
-		gly = -(y + 1) * BO_GL_CELL_SIZE;
+		glx = (x + 1);
+		gly = -(y + 1);
 		glz = canvas()->map()->heightAtCorner(x + 1, y + 1);
 		boProject(glx, gly, glz, &win);
 		if (widgetRect.contains(win)) {
@@ -2802,10 +2803,10 @@ void BosonBigDisplayBase::calculateWorldRect(const QRect& rect, float* minX, flo
  *maxY = QMAX(0, *maxY);
  *minX = QMAX(0, *minX);
  *minY = QMAX(0, *minY);
- *maxX = QMIN((map->width() - 1) * BO_GL_CELL_SIZE, *maxX);
- *minX = QMIN((map->width() - 1) * BO_GL_CELL_SIZE, *minX);
- *maxY = QMIN((map->height() - 1) * BO_GL_CELL_SIZE, *maxY);
- *minY = QMIN((map->height() - 1) * BO_GL_CELL_SIZE, *minY);
+ *maxX = QMIN((map->width() - 1), *maxX);
+ *minX = QMIN((map->width() - 1), *minX);
+ *maxY = QMIN((map->height() - 1), *maxY);
+ *minY = QMIN((map->height() - 1), *minY);
  *minY *= -1;
  *maxY *= -1;
 }
