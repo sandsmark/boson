@@ -13,6 +13,9 @@ FACILITIES = \
 	haystack1 \
 	house-1 \
 	rock1 \
+	rubbishpile-1 \
+	rubbishpile-1-big \
+	rubbishpile-1-small \
 	toilet \
 	tree1 \
 	tree2 \
