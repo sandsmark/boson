@@ -355,6 +355,8 @@ void BoDisplayManager::setCanvas(BosonCanvas* c)
 	connect(c, SIGNAL(signalRemovedItem(BosonItem*)),
 			selectIt.current(), SLOT(slotRemoveItem(BosonItem*)));
  }
+ connect(c, SIGNAL(signalUnitRemoved(Unit*)),
+		this, SLOT(slotUnitRemoved(Unit*)));
 }
 
 void BoDisplayManager::quitGame()
