@@ -70,7 +70,7 @@ void bosonTopLevel::setOrders( int what, int who)
 			for (i=0; i<11; i++) orderButton[i]->hide();
 			break;
 		case OT_FACILITY:
-			if ( who!=who_am_i) return;
+			if ( (uint) who!=who_am_i) return;
 			orderType = OT_FACILITY;
 			for (i=0; i<FACILITY_LAST; i++) {
 				orderButton[i]->setPixmap( *myspecy->getSmallOverview((facilityType)i) );
@@ -79,7 +79,7 @@ void bosonTopLevel::setOrders( int what, int who)
 			for (i=FACILITY_LAST; i<11; i++) orderButton[i]->hide();
 			break;
 		case OT_MOBILE:
-			if ( who!=who_am_i) return;
+			if ( (uint) who!=who_am_i) return;
 			orderType = OT_MOBILE;
 			for (i=0; i<MOB_LAST; i++) {
 				orderButton[i]->setPixmap( *myspecy->getSmallOverview( (mobType)i) );
