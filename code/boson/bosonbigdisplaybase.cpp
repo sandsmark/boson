@@ -3206,19 +3206,20 @@ void BosonBigDisplayBase::loadFromXML(const QDomElement& root)
  boDebug() << k_funcinfo << endl;
  // Load camera
  QDomElement cam = root.namedItem(QString::fromLatin1("Camera")).toElement();
- if (cam.isNull()) {
-	boError(260) << k_funcinfo << "no camera" << endl;
-	return;
+ if (!cam.isNull()) {
+	camera()->loadFromXML(cam);
+	cameraChanged();
+ } else {
+	boWarning(260) << k_funcinfo << "no camera" << endl;
  }
- camera()->loadFromXML(cam);
- cameraChanged();
  // Load selection
  QDomElement sel = root.namedItem(QString::fromLatin1("Selection")).toElement();
- if (sel.isNull()) {
-	boError(260) << k_funcinfo << "no selection" << endl;
-	return;
+ if (!sel.isNull()) {
+	selection()->loadFromXML(sel, true);
+ } else {
+	boWarning(260) << k_funcinfo << "no selection" << endl;
+	selection()->clear(); // just in case...
  }
- selection()->loadFromXML(sel, true);
 }
 
 void BosonBigDisplayBase::saveAsXML(QDomElement& root)
