@@ -63,12 +63,17 @@ class physMap : public QObject, public QwSpriteField
 
 /* modify contents */
   void setCell(int i, int j, groundType g);
+
   void createMob(mobileMsg_t &);
+  void destroyMob(destroyedMsg_t &);
+
   void createFix(facilityMsg_t &);
+  void destroyFix(destroyedMsg_t &);
+
   void move(moveMsg_t &);
   void requestAction(boBuffer *);
 
-/* get content */
+/* concerning contents */
   playerFacility *getFacility(long key) { return facility.find(key); }
 
   signals:

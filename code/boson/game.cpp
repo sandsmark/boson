@@ -1,5 +1,5 @@
 /***************************************************************************
-                         game.h  -  description                              
+                         game.cpp  -  description                              
                              -------------------                                         
 
     version              :                                   
@@ -21,7 +21,7 @@
 
 #include "game.h"
 
-gameProperties_t gameProperties = {
+gameProperties_t gpp = {
 	0l,
 	{0l, 0l},
 	0l,
