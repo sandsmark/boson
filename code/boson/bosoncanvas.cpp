@@ -197,6 +197,9 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 // kdDebug() << "This unit can go there!" << endl;
  // unit con go on the ground of the new cell. Now check if there is a unit
  // already there...
+ if (unit->unitProperties()->isAircraft()) {
+	return true;
+ }
  QCanvasItemList items = collisions(rect);
  QCanvasItemList::iterator it;
  for (it = items.begin(); it != items.end(); ++it) {
