@@ -985,7 +985,7 @@ MobileUnit::~MobileUnit()
 void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
-	boWarning() << k_funcinfo << "speed == 0" << endl;
+	boWarning(401) << k_funcinfo << "speed == 0" << endl;
 	stopMoving();
 	return;
  }
@@ -1000,7 +1000,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	// Waypoints were PolicyClean previously but are now PolicyLocal so they
 	//  should arrive immediately. If there are no waypoints but advanceMove is
 	//  called, then probably there's an error somewhere
-	boError() << k_funcinfo << "No waypoints" << endl;
+	boError(401) << k_funcinfo << "No waypoints" << endl;
 	stopMoving();
 	return;
  }
@@ -1011,7 +1011,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
 		if (inRange(activeWeapon(), target())) {
-			boDebug() << k_funcinfo << "target is in range now" << endl;
+			boDebug(401) << k_funcinfo << "target is in range now" << endl;
 			stopMoving();
 			return;
 		}
@@ -1044,11 +1044,11 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
-	boDebug() << k_funcinfo << "unit is at waypoint" << endl;
+	boDebug(401) << k_funcinfo << "unit is at waypoint" << endl;
 	waypointDone();
 
 	if (waypointCount() == 0) {
-		boDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
+		boDebug(401) << k_funcinfo << "no more waypoints. Stopping moving" << endl;
 		stopMoving();
 		if (work() == WorkNone) {
 			// Turn a bit
@@ -1078,7 +1078,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  //  because we now recalc path after every waypoint (see ~5 lines above)
  if (!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
 		!canvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-	boWarning() << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
+	boWarning(401) << k_funcinfo << "cannot go to waypoint, finding new path" << endl;
 	setVelocity(0.0, 0.0);
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
@@ -1119,13 +1119,13 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	boDebug() << k_funcinfo << "not on canvas" << endl;
+	boDebug(401) << k_funcinfo << "not on canvas" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	boDebug() << k_funcinfo << "not on canvas" << endl;
+	boDebug(401) << k_funcinfo << "not on canvas" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
@@ -1145,12 +1145,12 @@ void MobileUnit::advanceMoveCheck()
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
 	if (d->mPathRecalculated >= 2) {
-		boDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
+		boDebug(401) << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
 		stopMoving();
 		return;
 	}
 	if (d->mMovingFailed >= recalculate) {
-		boDebug() << "recalculating path" << endl;
+		boDebug(401) << "recalculating path" << endl;
 		// you must not do anything that changes local variables directly here!
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.

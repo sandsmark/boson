@@ -6,3 +6,6 @@
 110	Boson Textures
 200	Boson Sound
 300	Boson Advance
+
+# Use 400-449 for Unit::advance*()
+401	AdvanceMove
