@@ -374,3 +374,11 @@ KGamePropertyHandler* UnitBase::weaponDataHandler()
  return (KGamePropertyHandler*)mWeaponProperties;
 }
 
+PlayerIO* UnitBase::ownerIO() const
+{
+ if (!owner()) {
+	return 0;
+ }
+ return owner()->playerIO();
+}
+
