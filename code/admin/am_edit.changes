@@ -1,3 +1,5 @@
 # changes to am_edit (for boson):
 - added sub tag_BOSONDOCFILES() which gets called after tag_DOCFILES().
   we need this to support .wml files for docs.
+- added 'BO_DOCS' to the @marks array in tag_DIST(). This is necessary to ensure
+  that the .wml files are *not* distributed.
