@@ -350,6 +350,21 @@ public:
 	inline virtual void advanceFunction2(unsigned int /*advanceCount*/) { }
 
 	/**
+	 * Used to synchronize the advance function for the next advance call.
+	 * See @ref Unit::syncAdvanceFunction.
+	 *
+	 * DO NOT CALL THIS unless you REALLY know what youre doing! Call it
+	 * from @ref BosonCanvas::slotAdvance ONLY!
+	 **/
+	inline virtual void syncAdvanceFunction() { }
+
+	/**
+	 * Used to synchronize the advance function for the next advance call.
+	 * See @ref Unit::syncAdvanceFunction.
+	 **/
+	inline virtual void syncAdvanceFunction2() { }
+
+	/**
 	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
 	 * achieve the depth (height in z-direction) of the unit. Note that this
 	 * value <em>must not</em> be used in pathfinding or so, but only in
