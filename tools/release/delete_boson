@@ -42,6 +42,7 @@ delete_files "$KDEDIR/share/applnk/Games/TacticStrategy/bounit.desktop"
 delete_dir "$KDEDIR/share/doc/HTML/en/boson"
 delete_dir "$KDEDIR/share/apps/boson"
 delete_dir "$KDEDIR/share/apps/borender"
+delete_dir "$KDEDIR/share/applnk/Games/TacticStrategy/boson"
 
 # now from $KDEHOME
 if [ "x$KDEHOME" = "x" ]; then
