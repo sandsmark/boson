@@ -41,7 +41,8 @@ enum ChatFramePosition {
 enum CursorMode {
 	CursorSprite = 0,
 	CursorNormal = 1,
-	CursorExperimental = 2
+	CursorKDE = 2,
+	CursorExperimental = 3
 };
 
 enum Direction {

@@ -97,6 +97,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, bool modal)
  d->mCursor = new QComboBox(plainPage());
  d->mCursor->insertItem(i18n("Sprite Cursor"), CursorSprite);
  d->mCursor->insertItem(i18n("Normal (X) Cursor"), CursorNormal);
+ d->mCursor->insertItem(i18n("KDE Cursor"), CursorKDE);
  d->mCursor->insertItem(i18n("Experimental Cursor (*Very* Unstable)"), CursorExperimental);
  l->addWidget(d->mCursor);
  connect(d->mCursor, SIGNAL(activated(int)), 

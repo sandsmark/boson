@@ -240,6 +240,8 @@ BosonWidget::~BosonWidget()
 	boConfig->saveCursorMode(CursorSprite);
  } else if (d->mCursor->isA("BosonExperimentalCursor")) {
 	boConfig->saveCursorMode(CursorExperimental);
+ } else if (d->mCursor->isA("BosonKDECursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
  } else {
 	boConfig->saveCursorMode(CursorNormal);
  }
@@ -1175,6 +1177,9 @@ void BosonWidget::slotChangeCursor(int mode)
 		break;
 	case CursorExperimental:
 		b = new BosonExperimentalCursor;
+		break;
+	case CursorKDE:
+		b = new BosonKDECursor;
 		break;
 	case CursorNormal:
 	default:
