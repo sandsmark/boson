@@ -63,6 +63,7 @@
 #include "bosonpath.h"
 #include "bofullscreen.h"
 #include "speciesdata.h"
+#include "bowater.h"
 
 #include <kgame/kgameio.h>
 
@@ -408,6 +409,8 @@ void BosonBigDisplayBase::init()
  BoGroundRendererManager::manager()->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
  BoGroundRendererManager::manager()->setViewFrustum(d->mViewFrustum);
 
+ boWaterManager->setViewFrustum(d->mViewFrustum);
+
  BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
  BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
 
@@ -571,6 +574,8 @@ void BosonBigDisplayBase::initializeGL()
  l->setPosition3(lightPos);
 
  l->setEnabled(true);
+
+ boWaterManager->setSun(l);
 
  if (checkError()) {
 	boError() << k_funcinfo << endl;
@@ -776,6 +781,11 @@ void BosonBigDisplayBase::paintGL()
  if (checkError()) {
 	boError() << k_funcinfo << "preview rendered" << endl;
  }
+
+ // Render water
+ boProfiling->renderWater(true);
+ boWaterManager->render();
+ boProfiling->renderWater(false);
 
  // Render particle systems
  boProfiling->renderParticles(true);
@@ -1494,6 +1504,10 @@ int BosonBigDisplayBase::renderTextRenderCounts(int x, int y)
 
  text = i18n("Mesh renderer statistics:\n");
  text += BoMeshRendererManager::manager()->currentStatisticsData();
+ y -= d->mDefaultFont->renderText(x, y, text, width() - x);
+
+ text = i18n("Water renderer statistics:\n");
+ text += boWaterManager->currentRenderStatisticsData();
  y -= d->mDefaultFont->renderText(x, y, text, width() - x);
 
  return y;
@@ -2840,6 +2854,9 @@ void BosonBigDisplayBase::cameraChanged()
 	  lights->at(i)->refreshPosition();
 	}
  }
+
+ boWaterManager->modelviewMatrixChanged(d->mModelviewMatrix);
+ boWaterManager->setCameraPos(camera()->cameraPos());
 
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell

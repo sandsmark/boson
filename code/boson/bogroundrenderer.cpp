@@ -29,6 +29,7 @@
 #include "bosontexturearray.h"
 #include "bo3dtools.h"
 #include "bomaterial.h"
+#include "bowater.h"
 
 #include "playerio.h"
 
@@ -206,6 +207,10 @@ Cell** BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
 		continue;
 	}
 
+	if (!boWaterManager->cellVisible(c->x(), c->y())) {
+		// don't draw anything at all. the cell won't be visible
+		continue;
+	}
 	// AB: better solution: check *before* the cells get assigned to this
 	// class. localPlayerIO() is *very* ugly in this class
 	if (playerIO->isFogged(c->x(), c->y())) {

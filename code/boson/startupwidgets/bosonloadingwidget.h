@@ -48,6 +48,7 @@ class BosonLoadingWidget : public QWidget
         LoadSavedGameHeader,  // Loading header of saved game file
         LoadSavedGame,  // Loading saved game data (map and KGame stuff)
         LoadSavedUnits,  // Loading units from saved game file for a player
+        LoadWater,  // Loading water (textures)
         InitGame,  // Game is being initialized (InitFogOfWar and StartScenario messages)
         StartingGame,  // Last phase, BosonWidget is about to being shown
         LoadingDone  // All done

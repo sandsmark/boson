@@ -201,6 +201,7 @@ public:
 	void renderUnits(bool start, unsigned int number = 0);
 	void renderMissiles(bool start);
 	void renderParticles(bool start);
+	void renderWater(bool start);
 	void renderFOW(bool start);
 	void renderText(bool start);
 
@@ -215,6 +216,7 @@ public:
 	void advanceFunction(bool start);
 	void advanceDeleteUnusedShots(bool start);
 	void advanceEffects(bool start);
+	void advanceWater(bool start);
 	void advanceMaximalAdvanceCount(bool start); // in MAXIMAL_ADVANCE_COUNT we do some interesting stuff (especially deleting unused stuff - e.g. wreckages
 	// these are tricky now - they get called multiple times in every
 	// advance call (note that this is a pretty big overhead!)

@@ -189,6 +189,12 @@ void BosonLoadingWidget::update()
       text = i18n("Loading general data...");
       break;
     }
+    case LoadWater:
+    {
+      setProgress(700 + (mTotalPlayers * 2000) + 100);
+      text = i18n("Loading water...");
+      break;
+    }
     case LoadSavedGameHeader:
     {
     }

@@ -57,6 +57,7 @@ OptionsDialog::OptionsDialog(bool editor, QWidget* parent, bool modal)
 	initSoundsPage();
  }
  initOpenGLPage();
+ initWaterPage();
  initChatPage(); // in editor for chat messages
  initToolTipPage();
 }
@@ -108,6 +109,13 @@ void OptionsDialog::initOpenGLPage()
 		this, SIGNAL(signalOpenGLSettingsUpdated()));
  connect(o, SIGNAL(signalFontChanged(const BoFontInfo&)),
 		this, SIGNAL(signalFontChanged(const BoFontInfo&)));
+ addOptions(o);
+}
+
+void OptionsDialog::initWaterPage()
+{
+ QVBox* vbox = addVBoxPage(i18n("&Water"));
+ WaterOptions* o = new WaterOptions(vbox);
  addOptions(o);
 }
 

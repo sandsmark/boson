@@ -168,6 +168,18 @@ public:
 	}
 
 	/**
+	 * @return The content of the map/water.xml file. Note that this will
+	 * always be in the map/ subdir, if present at all.
+	 **/
+	QByteArray waterXMLData() const
+	{
+		if (!hasMapDirectory()) {
+			return QByteArray();
+		}
+		return fileData(QString::fromLatin1("water.xml"), QString::fromLatin1("map"));
+	}
+
+	/**
 	 * @return The heightmap, if present. This may either be in the toplevel
 	 * directory (boson < 0.9) or in the map directory, depending on @ref
 	 * hasMapDirectory.

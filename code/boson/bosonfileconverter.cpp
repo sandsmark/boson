@@ -770,6 +770,15 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
  return true;
 }
 
+bool BosonFileConverter::addDummyWaterXML(QByteArray& waterXML)
+{
+ QDomDocument doc(QString::fromLatin1("Water"));
+ QDomElement root = doc.createElement(QString::fromLatin1("Water"));
+ doc.appendChild(root);
+ waterXML = doc.toCString();
+ return true;
+}
+
 void BosonFileConverter::removePropertyIds_0_9_1(const QDomNodeList& itemsList, const QStringList& ids)
 {
  for (unsigned int i = 0; i < itemsList.count(); i++) {

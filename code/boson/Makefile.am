@@ -129,7 +129,9 @@ libboson_la_SOURCES = \
 	boeventlistener.cpp \
 	boeventmanager.cpp \
 	bocondition.cpp \
-	boconditionwidget.cpp
+	boconditionwidget.cpp \
+	bowater.cpp \
+	botexture.cpp
 
 
 libboson_la_LIBADD = \

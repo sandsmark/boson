@@ -73,6 +73,7 @@ public:
 		values.append(mCells.diff());
 		values.append(mMissiles.diff());
 		values.append(mParticles.diff());
+		values.append(mWater.diff());
 		values.append(mFOW.diff());
 		values.append(mText.diff());
 		return values;
@@ -88,6 +89,7 @@ public:
 		names.append(i18n("Cells"));
 		names.append(i18n("Missiles"));
 		names.append(i18n("Particles"));
+		names.append(i18n("Water"));
 		names.append(i18n("FOW"));
 		names.append(i18n("Text"));
 		return names;
@@ -99,6 +101,7 @@ public:
 	unsigned long int dUnits() const { return mUnits.diff(); }
 	unsigned long int dMissiles() const { return mMissiles.diff(); }
 	unsigned long int dParticles() const { return mParticles.diff(); }
+	unsigned long int dWater() const { return mWater.diff(); }
 	unsigned long int dFOW() const { return mFOW.diff(); }
 	unsigned long int dText() const { return mText.diff(); }
 
@@ -113,6 +116,7 @@ public:
 	ProfilingEntry mUnits;
 	ProfilingEntry mMissiles;
 	ProfilingEntry mParticles;
+	ProfilingEntry mWater;
 	ProfilingEntry mFOW;
 	ProfilingEntry mText;
 	unsigned int mUnitCount;
@@ -177,6 +181,7 @@ public:
 	unsigned long int dAdvanceFunction() const { return mAdvanceFunction.diff(); }
 	unsigned long int dDeleteUnusedShots() const { return mDeleteUnusedShots.diff(); }
 	unsigned long int dEffects() const { return mEffects.diff(); }
+	unsigned long int dWater() const { return mWater.diff(); }
 	unsigned long int dMaximalAdvanceCount() const { return mMaximalAdvanceCount.diff(); }
 
 
@@ -187,6 +192,7 @@ public:
 		values.append(dAdvanceFunction());
 		values.append(dDeleteUnusedShots());
 		values.append(dEffects());
+		values.append(dWater());
 		values.append(dMaximalAdvanceCount());
 		return values;
 	}
@@ -199,6 +205,7 @@ public:
 		names.append(i18n("Advance Function"));
 		names.append(i18n("Delete Unused Shots"));
 		names.append(i18n("Effects"));
+		names.append(i18n("Water"));
 		names.append(i18n("MaximalAdvanceCount"));
 		return names;
 	}
@@ -210,6 +217,7 @@ public:
 	ProfilingEntry mAdvanceFunction; // the advanceFunction()/advanceFunction2() stuff
 	ProfilingEntry mDeleteUnusedShots;
 	ProfilingEntry mEffects;
+	ProfilingEntry mWater;
 	ProfilingEntry mMaximalAdvanceCount;
 	unsigned int mAdvanceCallsCount;
 

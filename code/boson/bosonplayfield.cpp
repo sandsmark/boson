@@ -397,6 +397,10 @@ bool BosonPlayField::loadPlayField(const QMap<QString, QByteArray>& files)
 	boError() << k_funcinfo << "no texmap found" << endl;
 	return false;
  }
+ if (!files.contains("map/water.xml")) {
+	boError() << k_funcinfo << "no water.xml found" << endl;
+	return false;
+ }
 
  // AB: C/description.xml is mandatory. all other languages are optional.
  if (!files.contains("C/description.xml")) {
@@ -404,7 +408,7 @@ bool BosonPlayField::loadPlayField(const QMap<QString, QByteArray>& files)
 	return false;
  }
 
- if (!loadMapFromFile(files["map/map.xml"], files["map/heightmap.png"], files["map/texmap"])) {
+ if (!loadMapFromFile(files["map/map.xml"], files["map/heightmap.png"], files["map/texmap"], files["map/water.xml"])) {
 	boError() << k_funcinfo << "error loading the map" << endl;
 	return false;
  }
@@ -433,7 +437,7 @@ bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
  return true;
 }
 
-bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray& heightMapImage, const QByteArray& texMap)
+bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML)
 {
  boDebug() << k_funcinfo << endl;
  if (mapXML.size() == 0) {
@@ -446,6 +450,10 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  }
  if (texMap.size() == 0) {
 	boError() << k_funcinfo << "empty texmap array" << endl;
+	return false;
+ }
+ if (waterXML.size() == 0) {
+	boError() << k_funcinfo << "empty byte array for waterXML" << endl;
 	return false;
  }
  delete mMap;
@@ -476,6 +484,11 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
 	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
 	return false;
  }
+ ret = mMap->loadWaterFromFile(waterXML);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load water" << endl;
+	return false;
+ }
 
  // Create color map
  mMap->createColorMap();
@@ -499,6 +512,15 @@ QByteArray BosonPlayField::saveMapToFile()
 	return QByteArray();
  }
  return mMap->saveMapToFile();
+}
+
+QByteArray BosonPlayField::saveWaterToFile()
+{
+ if (!mMap) {
+	boError() << k_funcinfo << "NULL map" << endl;
+	return QByteArray();
+ }
+ return mMap->saveWaterToFile();
 }
 
 QByteArray BosonPlayField::saveTexMapToFile()
@@ -661,6 +683,7 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  QByteArray heightMap = mFile->heightMapData();
  QByteArray texMap = mFile->texMapData();
  QByteArray mapXML = mFile->mapXMLData();
+ QByteArray waterXML = mFile->waterXMLData();
  QByteArray playersXML = mFile->playersData();
  QByteArray canvasXML = mFile->canvasData();
  QByteArray kgameXML = mFile->kgameData();
@@ -685,6 +708,16 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	QByteArray scenario = mFile->scenarioData();
 	converter.convertScenario_From_0_8_To_0_9(scenario, &playersXML, &canvasXML, &kgameXML);
 	boDebug() << k_funcinfo << "conversion completed" << endl;
+ }
+ if (waterXML.size() == 0) {
+	boDebug() << k_funcinfo << "Adding dummy water.xml file" << endl;
+	// Old file format - add dummy water.xml file
+	BosonFileConverter converter;
+	if(!converter.addDummyWaterXML(waterXML))
+	{
+		boError() << k_funcinfo << "Couldn't add dummy water.xml file" << endl;
+		return false;
+	}
  }
 
  if (texMap.size() == 0) {
@@ -714,6 +747,7 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  destFiles.insert("map/texmap", texMap);
  destFiles.insert("map/heightmap.png", heightMap);
  destFiles.insert("map/map.xml", mapXML);
+ destFiles.insert("map/water.xml", waterXML);
  destFiles.insert("players.xml", playersXML);
  destFiles.insert("canvas.xml", canvasXML);
  destFiles.insert("kgame.xml", kgameXML);
@@ -812,9 +846,15 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  QByteArray mapXML;
  QByteArray heightMap;
  QByteArray texMap;
+ QByteArray waterXML;
  mapXML = saveMapToFile();
  if (mapXML.size() == 0) {
 	boError() << k_funcinfo << "failed saving the map" << endl;
+	return false;
+ }
+ waterXML = saveWaterToFile();
+ if (waterXML.size() == 0) {
+	boError() << k_funcinfo << "failed saving water" << endl;
 	return false;
  }
  heightMap = mMap->saveHeightMapImage();
@@ -837,6 +877,7 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  }
 
  files.insert("map/map.xml", mapXML);
+ files.insert("map/water.xml", waterXML);
  files.insert("map/heightmap.png", heightMap);
  files.insert("map/texmap", texMap);
  files.insert("C/description.xml", descriptionXML);

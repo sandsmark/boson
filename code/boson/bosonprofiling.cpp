@@ -30,7 +30,7 @@ static BoGlobalObject<BosonProfiling> globalProfiling(BoGlobalObjectBase::BoGlob
 
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
-#define PROFILING_VERSION 0x09 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x10 // increase if you change the file format of saved files!
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2)
 {
@@ -78,6 +78,7 @@ QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
  s << t.mUnits;
  s << t.mMissiles;
  s << t.mParticles;
+ s << t.mWater;
  s << t.mFOW;
  s << t.mText;
  s << t.mFunction;
@@ -94,6 +95,7 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  s >> t.mUnits;
  s >> t.mMissiles;
  s >> t.mParticles;
+ s >> t.mWater;
  s >> t.mFOW;
  s >> t.mText;
  s >> t.mFunction;
@@ -136,6 +138,7 @@ QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t)
  s << t.mAdvanceFunction;
  s << t.mDeleteUnusedShots;
  s << t.mEffects;
+ s << t.mWater;
  s << t.mMaximalAdvanceCount;
 
  // now the items (mostly units):
@@ -156,6 +159,7 @@ QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t)
  s >> t.mAdvanceFunction;
  s >> t.mDeleteUnusedShots;
  s >> t.mEffects;
+ s >> t.mWater;
  s >> t.mMaximalAdvanceCount;
 
  // now the items (mostly units):
@@ -273,6 +277,11 @@ void BosonProfiling::renderParticles(bool start)
  d->mCurrentRenderTimes->mParticles.getTime(start);
 }
 
+void BosonProfiling::renderWater(bool start)
+{
+ d->mCurrentRenderTimes->mWater.getTime(start);
+}
+
 void BosonProfiling::renderFOW(bool start)
 {
  d->mCurrentRenderTimes->mFOW.getTime(start);
@@ -328,6 +337,11 @@ void BosonProfiling::advanceDeleteUnusedShots(bool start)
 void BosonProfiling::advanceEffects(bool start)
 {
  d->mCurrentSlotAdvanceTimes->mEffects.getTime(start);
+}
+
+void BosonProfiling::advanceWater(bool start)
+{
+ d->mCurrentSlotAdvanceTimes->mWater.getTime(start);
 }
 
 void BosonProfiling::advanceMaximalAdvanceCount(bool start)
@@ -485,7 +499,7 @@ bool BosonProfiling::load(QDataStream& stream)
  }
  Q_INT32 version;
  stream >> version;
- if (version != PROFILING_VERSION && version < 0x06) {
+ if (version != PROFILING_VERSION && version < 0x10) {
 	boError() << k_funcinfo << "Invalid profiling format version " << version << endl;
 	return false;
  }
@@ -588,42 +602,44 @@ void BosonProfiling::endBenchmark(const QString& name)
  boDebug() << "ADVANCE RESULTS:" << endl;
  boDebug() << d->mBenchmark->mAdvanceProfiles.count() << " advance calls were profiled" << endl;
  QValueList<ProfileSlotAdvance>::iterator advit;
- unsigned long int advfunction = 0, advancefunction = 0, deleteshots = 0, effects = 0, maximaladvancecount = 0;
- unsigned long int maxadvfunction = 0, maxadvancefunction = 0, maxdeleteshots = 0, maxeffects = 0, maxmaximaladvancecount = 0;
+ unsigned long int advfunction = 0, advancefunction = 0, deleteshots = 0, effects = 0, water = 0, maximaladvancecount = 0;
+ unsigned long int maxadvfunction = 0, maxadvancefunction = 0, maxdeleteshots = 0, maxeffects = 0, maxwater = 0, maxmaximaladvancecount = 0;
  unsigned long int count = 0;
  for (advit = d->mBenchmark->mAdvanceProfiles.begin(); advit != d->mBenchmark->mAdvanceProfiles.end(); ++advit) {
 	advfunction += (*advit).dFunction();
 	advancefunction += (*advit).dAdvanceFunction();
 	deleteshots += (*advit).dDeleteUnusedShots();
 	effects += (*advit).dEffects();
+	water += (*advit).dWater();
 	maximaladvancecount += (*advit).dMaximalAdvanceCount();
 
 	maxadvfunction = QMAX(maxadvfunction, (*advit).dFunction());
 	maxadvancefunction = QMAX(maxadvancefunction, (*advit).dAdvanceFunction());
 	maxdeleteshots = QMAX(maxdeleteshots, (*advit).dDeleteUnusedShots());
 	maxeffects = QMAX(maxeffects, (*advit).dEffects());
+	maxwater = QMAX(maxwater, (*advit).dWater());
 	maxmaximaladvancecount = QMAX(maxmaximaladvancecount, (*advit).dMaximalAdvanceCount());
 
 	count++;
  }
- (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s",
-		"", "function", "advancefunc", "deleteshots", "effects", "maxadvcount") << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s |%15s",
+		"", "function", "advancefunc", "deleteshots", "effects", "water", "maxadvcount") << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"TOTAL", advfunction / 1000.0, advancefunction / 1000.0, deleteshots / 1000.0,
-		effects / 1000.0, maximaladvancecount / 1000.0) << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		effects / 1000.0, water / 1000.0, maximaladvancecount / 1000.0) << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"average", advfunction / 1000.0 / count, advancefunction / 1000.0 / count, deleteshots / 1000.0 / count,
-		effects / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		effects / 1000.0 / count, water / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"max", maxadvfunction / 1000.0, maxadvancefunction / 1000.0, maxdeleteshots / 1000.0,
-		maxeffects / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
+		maxeffects / 1000.0, maxwater / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
 
  // Render stuff
  boDebug() << "RENDER RESULTS:" << endl;
  boDebug() << d->mBenchmark->mRenderProfiles.count() << " rendered frames were profiled" << endl;
  QValueList<RenderGLTimes>::iterator glit;
- unsigned long int glfunction = 0, clear = 0, cells = 0, units = 0, glparticles = 0, text = 0;
- unsigned long int maxglfunction = 0, maxclear = 0, maxcells = 0, maxunits = 0, maxglparticles = 0, maxtext = 0;
+ unsigned long int glfunction = 0, clear = 0, cells = 0, units = 0, glparticles = 0, glwater = 0, text = 0;
+ unsigned long int maxglfunction = 0, maxclear = 0, maxcells = 0, maxunits = 0, maxglparticles = 0, maxglwater = 0, maxtext = 0;
  count = 0;
  for (glit = d->mBenchmark->mRenderProfiles.begin(); glit != d->mBenchmark->mRenderProfiles.end(); ++glit) {
 	glfunction += (*glit).dFunction();
@@ -631,6 +647,7 @@ void BosonProfiling::endBenchmark(const QString& name)
 	cells += (*glit).dCells();
 	units += (*glit).dUnits();
 	glparticles += (*glit).dParticles();
+	glwater += (*glit).dWater();
 	text += (*glit).dText();
 
 	maxglfunction = QMAX(maxglfunction, (*glit).dFunction());
@@ -638,21 +655,22 @@ void BosonProfiling::endBenchmark(const QString& name)
 	maxcells = QMAX(maxcells, (*glit).dCells());
 	maxunits = QMAX(maxunits, (*glit).dUnits());
 	maxglparticles = QMAX(maxglparticles, (*glit).dParticles());
+	maxglwater = QMAX(maxtext, (*glit).dWater());
 	maxtext = QMAX(maxtext, (*glit).dText());
 
 	count++;
  }
- (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s |%15s",
-		"", "function", "clear", "cells", "items", "particles", "text") << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+ (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s |%15s |%15s",
+		"", "function", "clear", "cells", "items", "particles", "water", "text") << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"TOTAL", glfunction / 1000.0, clear / 1000.0, cells / 1000.0,
-		units / 1000.0, glparticles / 1000.0, text / 1000.0) << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		units / 1000.0, glparticles / 1000.0, glwater / 1000.0, text / 1000.0) << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"average", glfunction / 1000.0 / count, clear / 1000.0 / count, cells / 1000.0 / count,
-		units / 1000.0 / count, glparticles / 1000.0 / count, text / 1000.0 / count) << endl;
- (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
+		units / 1000.0 / count, glparticles / 1000.0 / count, glwater / 1000.0 / count, text / 1000.0 / count) << endl;
+ (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"max", maxglfunction / 1000.0, maxclear / 1000.0, maxcells / 1000.0,
-		maxunits / 1000.0, maxglparticles / 1000.0, maxtext / 1000.0) << endl;
+		maxunits / 1000.0, maxglparticles / 1000.0, maxglwater / 1000.0, maxtext / 1000.0) << endl;
  (boDebug()).form("%d frames were rendered in %.3f sec - average FPS was %.2f",
 		count, d->mBenchmark->mInterval.diff() / 1000000.0, count / (d->mBenchmark->mInterval.diff() / 1000000.0)) << endl;
 

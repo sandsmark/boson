@@ -68,6 +68,8 @@ public:
 	bool convertPlayField_From_0_9_1_To_0_10(QMap<QString, QByteArray>& files);
 	bool convertPlayField_From_0_10_To_0_11(QMap<QString, QByteArray>& files);
 
+	bool addDummyWaterXML(QByteArray& waterXML);
+
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
 
