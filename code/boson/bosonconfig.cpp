@@ -243,6 +243,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMouseWheelShiftAction = new BoConfigIntEntry(this, "MouseWheelShiftAction", DEFAULT_MOUSE_WHEEL_SHIFT_ACTION);
  mDeactivateWeaponSounds = new BoConfigBoolEntry(this, "DeactivateWeaponSounds", DEFAULT_DEACTIVATE_WEAPON_SOUNDS);
  mUseLight = new BoConfigBoolEntry(this, "UseLight", DEFAULT_USE_LIGHT);
+ mUseMaterials = new BoConfigBoolEntry(this, "UseMaterials", DEFAULT_USE_MATERIALS);
  mCursorMode = new BoConfigIntEntry(this, "CursorMode", (int)DEFAULT_CURSOR);
  mCursorDir = new BoConfigStringEntry(this, "CursorDir", DEFAULT_CURSOR_DIR);
  mToolTipUpdatePeriod = new BoConfigIntEntry(this, "ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);

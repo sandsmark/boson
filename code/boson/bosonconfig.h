@@ -264,6 +264,9 @@ public:
 	bool useLight() const { return mUseLight->value(); }
 	void setUseLight(bool l) const { return mUseLight->setValue(l); }
 
+	bool useMaterials() const { return mUseMaterials->value(); }
+	void setUseMaterials(bool l) const { return mUseMaterials->setValue(l); }
+
 	void setCursorMode(int mode) { mCursorMode->setValue(mode); }
 	int cursorMode() const { return mCursorMode->value(); }
 
@@ -387,6 +390,7 @@ private:
 	BoConfigIntEntry* mMouseWheelShiftAction;
 	BoConfigBoolEntry* mDeactivateWeaponSounds;
 	BoConfigBoolEntry* mUseLight;
+	BoConfigBoolEntry* mUseMaterials;
 	BoConfigStringEntry* mCursorDir;
 	BoConfigIntEntry* mCursorMode;
 	BoConfigIntEntry* mToolTipUpdatePeriod;

@@ -99,6 +99,7 @@
 #define DEFAULT_MOUSE_WHEEL_SHIFT_ACTION CameraRotate
 #define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
 #define DEFAULT_USE_LIGHT false // not really supported yet
+#define DEFAULT_USE_MATERIALS false
 #define DEFAULT_USE_MIPMAPS_FOR_MODELS true
 #define DEFAULT_TOOLTIP_UPDATE_PERIOD 300
 #define DEFAULT_TOOLTIP_CREATOR 1 // FIXME: should be BoToolTipCreator::Extended, but I don't want to include the file here

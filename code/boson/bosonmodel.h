@@ -29,6 +29,7 @@ class QStringList;
 class BoVector3;
 class BoMatrix;
 class BoMesh;
+class BoMaterial;
 template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
@@ -168,16 +169,29 @@ public:
 	float height() const { return mHeight; }
 
 	/**
+	 * Allocate @p count material objects. You must call this before you can
+	 * use @ref setMaterial and @ref material.
+	 *
+	 * The material objects will be initialized as "default" materials.
+	 **/
+	void allocateMaterials(unsigned int count);
+
+	/**
+	 * Set the material object at @p index (see @ref allocateMaterials) to
+	 * @p mat
+	 **/
+	void setMaterial(unsigned int index, const BoMaterial& mat);
+
+	/**
+	 * @return The materian object at @p index (see @ref allocateMaterials)
+	 **/
+	BoMaterial* material(unsigned int index) const;
+
+	/**
 	 * Add a mesh. This class takes ownership of that mesh, i.e. will delete
 	 * it when this class gets deleted.
 	 **/
 	void addMesh(BoMesh* mesh);
-
-	/**
-	 * Set the texture for @p mesh. The filename will be changed by @ref
-	 * BosonModel::cleanTextureName before it will get loaded.
-	 **/
-	void setTexture(BoMesh* mesh, const QString& texture);
 
 	/**
 	 * Add @þ count frames. You need to give them useful data using @ref
