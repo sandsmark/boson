@@ -33,12 +33,9 @@ UnitWidth=1
 Weapons=1
 
 [OpenGL]
-FrameRangeIdle=149
-FrameRangeWreckage=49
+FrameRangeIdle=49
 FrameSpeedIdle=1
-FrameSpeedWreckage=1
 FrameStartIdle=0
-FrameStartWreckage=150
 
 [Sounds]
 OrderAttack=order_attack
