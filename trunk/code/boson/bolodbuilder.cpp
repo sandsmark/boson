@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -129,30 +129,42 @@ QValueList<BoFace> BoLODBuilder::generateLOD(unsigned int lod)
 	return faceList;
  }
 
+ // These define when mesh will be completely rejected from a lod, i.e. not
+ //  drawn at all. Note that mesh will be rejected only if _all_ of test below
+ //  are succesful for a mesh.
+ // Mesh will be considered for rejection, if for lod x, it's volume is less
+ //  than minvolumeofmodel[x]  of model's volume
+ const float minvolumeofmodel[] = { 0.0, 0.0, 0.05, 0.15, 0.3 };
+ // Mesh will be considered for rejection, if for lod x, it's volume is less
+ //  than minvolumeoflargestmesh[x]  of largest mesh's volume
+ const float minvolumeoflargestmesh[] = { 0.0, 0.0, 0.2, 0.35, 0.5 };
+ // Mesh will be considered for rejection, if for lod x, it's surface area is
+ //  less than minsurfaceofmodel[x]  of model's surface area
+ const float minsurfaceofmodel[] = { 0.0, 0.0, 0.1, 0.25, 0.4 };
+ // Mesh will be considered for rejection, if for lod x, it's surface area is
+ //  less than minsurfaceoflargestmesh[x]  of largest mesh's surface area
+ const float minsurfaceoflargestmesh[] = { 0.0, 0.0, 0.25, 0.5, 0.65 };
+
  bool reject = false;
- if (lod >= 2) {
-	if (mThisMaxSurface * 5 < mModelMaxSurface) {
-		// less than 20% of the entire surface taken by this mesh.
-		if (mThisMaxSurface * 2 < mLargestMeshSurface) {
-			// this mesh surface is at most 50% of the largest mesh
-			// in the model
-			// lets reject it
-			reject = true;
+ // Volume of the mesh is the most important criteria when checking if mesh
+ //  should be rejected.
+ if (mThisVolume < mModelVolume * minvolumeofmodel[lod]) {
+	if (mThisVolume < mLargestMeshVolume * minvolumeoflargestmesh[lod]) {
+		// Volume of mesh is small enough for the mesh to be rejected.
+		// But we must also check for mesh's surface area - this makes sure meshes
+		//  with small volume but big surface area (e.g. big rectangles, used for
+		//  ground in some models), which are very visible because of their surface,
+		//  won't be rejected.
+		if (mThisMaxSurface < mModelMaxSurface * minsurfaceofmodel[lod]) {
+			if (mThisMaxSurface < mLargestMeshSurface * minsurfaceoflargestmesh[lod]) {
+				// This mesh has too small volume and surface area for this lod. Reject
+				//  it.
+				reject = true;
+			}
 		}
 	}
  }
 
- if (lod >= 3 && !reject) {
-	if (mThisMaxSurface * 2.5 < mModelMaxSurface) {
-		// less than 40% of the entire surface taken by this mesh.
-		if (mThisMaxSurface * 1.5 < mLargestMeshSurface) {
-			// this mesh surface is at most 66% of the largest mesh
-			// in the model
-			// lets reject it
-			reject = true;
-		}
-	}
- }
 
  if (!reject) {
 	faceList = getLOD(percents[lod], maxcosts[lod]);
