@@ -12,6 +12,7 @@
     <Action name="options_grid_unit_size" />
     <Action name="options_background_color" />
     <Action name="options_light" />
+    <Action name="options_materials" />
   </Menu>
 </MenuBar>
 </kpartgui>

@@ -83,10 +83,10 @@ void BoMaterial::activate(BoMaterial* mat)
  if (boConfig->useLight() && boConfig->useMaterials()) { // useMaterials() is about OpenGL materials, not about the rest of BoMaterial (e.g. textures)
 	// AB: my OpenGL sample code uses GL_FRONT, so I do as well. I think as back
 	// faces are culled anyway we don't need GL_FRONT_AND_BACK.
-	glMaterialfv(GL_FRONT, GL_AMBIENT, mat->mAmbient.data());
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->mDiffuse.data());
-	glMaterialfv(GL_FRONT, GL_SPECULAR, mat->mSpecular.data());
-	glMaterialf(GL_FRONT, GL_SHININESS, mat->mShininess);
+	glMaterialfv(GL_FRONT, GL_AMBIENT, mat->ambient().data());
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat->diffuse().data());
+	glMaterialfv(GL_FRONT, GL_SPECULAR, mat->specular().data());
+	glMaterialf(GL_FRONT, GL_SHININESS, mat->shininess());
  }
 
  mCurrentMaterial = mat;

@@ -35,6 +35,7 @@
 #include "boapplication.h"
 #include "bocamera.h"
 #include "bocamerawidget.h"
+#include "bomaterialwidget.h"
 #include "bolight.h"
 
 #include <kcmdlineargs.h>
@@ -999,6 +1000,9 @@ RenderMain::RenderMain()
  mLightWidget->hide();
  mLightWidget->setLight(mPreview->light(), mPreview->context());
 
+ mMaterialWidget = new BoMaterialWidget(0);
+ mMaterialWidget->hide();
+
 
  connectBoth(mConfig, mPreview, SIGNAL(signalFovYChanged(float)), SLOT(slotFovYChanged(float)));
  connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
@@ -1340,12 +1344,16 @@ void RenderMain::changeUnit(SpeciesTheme* s, const UnitProperties* prop)
  BO_CHECK_NULL_RET(prop);
  // TODO: check/uncheck the menu items!
 
+ mMaterialWidget->clearMaterials();
+ mMaterialWidget->hide();
  mPreview->load(s, prop);
 }
 
 void RenderMain::changeObject(SpeciesTheme* s, const QString& objectModel)
 {
  BO_CHECK_NULL_RET(s);
+ mMaterialWidget->clearMaterials();
+ mMaterialWidget->hide();
  mPreview->loadObjectModel(s, objectModel);
 }
 
@@ -1399,6 +1407,9 @@ void RenderMain::initKAction()
 		actionCollection(), "options_background_color");
  (void)new KAction(i18n("Light..."), 0, this, SLOT(slotShowLightWidget()),
 		actionCollection(), "options_light"); // AB: actually this is NOT a setting
+ (void)new KAction(i18n("Materials..."), 0, this, SLOT(slotShowMaterialsWidget()),
+		actionCollection(), "options_materials"); // AB: actually this is NOT a setting
+
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
@@ -1430,6 +1441,19 @@ void RenderMain::uncheckAllBut(KAction* action)
 void RenderMain::slotShowLightWidget()
 {
  mLightWidget->show();
+}
+
+void RenderMain::slotShowMaterialsWidget()
+{
+ mMaterialWidget->clearMaterials();
+ if (!mPreview || !mPreview->model()) {
+	return;
+ }
+ BosonModel* model = mPreview->model();
+ for (unsigned int i = 0; i < model->materialCount(); i++) {
+	mMaterialWidget->addMaterial(model->material(i));
+ }
+ mMaterialWidget->show();
 }
 
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)

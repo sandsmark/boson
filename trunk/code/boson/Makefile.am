@@ -82,6 +82,8 @@ BOSON_COMMON_SRC = \
 	bomesh.cpp \
 	bolodbuilder.cpp \
 	bomaterial.cpp \
+	bomaterialwidget.cpp \
+	bovectorinput.cpp \
 	bosonpropertyxml.cpp \
 	bomemorytrace.cpp \
 	boaction.cpp \
