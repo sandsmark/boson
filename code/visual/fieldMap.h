@@ -88,11 +88,9 @@ protected:
   void	unSelectFix(void);
   void	unSelectAll(void);
 
-private:
 
   viewMap	*view;
-public: ///orzel : what about that ?
-//  orderWin	*order;
+
 };
 
 #endif // FIELD_MAP_H
