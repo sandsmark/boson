@@ -95,7 +95,7 @@ class UpgradePropertiesBase
     /**
      * @return Name of this upgrade
      **/
-    QString upgradeName() const { return mName; };
+    const QString& upgradeName() const { return mName; };
     /**
      * @return Mineral cost of this upgrade
      **/
@@ -115,7 +115,7 @@ class UpgradePropertiesBase
     /**
      * @return Filename of pixmap of this upgrade
      **/
-    QString pixmapName() const { return mPixmapName; };
+    const QString& pixmapName() const { return mPixmapName; };
     /**
      * @return List of units required by this upgrade
      **/
