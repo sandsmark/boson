@@ -136,7 +136,6 @@ BosonCanvas::~BosonCanvas()
 {
  boDebug()<< k_funcinfo << endl;
  quitGame();
- delete d->mPathfinder;
  delete d->mStatistics;
  delete mCollisions;
  delete d;
@@ -150,6 +149,10 @@ BosonCanvasStatistics* BosonCanvas::canvasStatistics() const
 
 void BosonCanvas::quitGame()
 {
+ // Delete pathfinder first. Otherwise lot of time would be spent recalculating
+ //  regions (when units are removed), which is totally unnecessary
+ delete d->mPathfinder;
+ d->mPathfinder = 0;
  deleteDestroyed();
  d->mAnimList.clear();
  d->mEffects.clear();
@@ -1651,7 +1654,9 @@ void BosonCanvas::unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus)
 		x2 = QMAX(x2, c->x());
 		y2 = QMAX(y2, c->y());
 	}
-	pathfinder()->cellsOccupiedStatusChanged(x1, y1, x2, y2);
+	if (pathfinder()) {
+		pathfinder()->cellsOccupiedStatusChanged(x1, y1, x2, y2);
+	}
  }
 #endif
 }

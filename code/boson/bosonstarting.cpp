@@ -158,10 +158,6 @@ bool BosonStarting::start()
  }
  canvas->setMap(mDestPlayField->map());
 
- boDebug(270) << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
- canvas->initPathfinder();
- boDebug(270) << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
-
  // AB: note that this meets the name "initMap" only slightly. We can't do this
  // when players are initialized, as the map must be known to them once we start
  // loading the units (for *loading* games)
@@ -191,6 +187,11 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
+
+ boDebug(270) << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
+ canvas->initPathfinder();
+ boDebug(270) << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
+
  sendStartingCompleted(true);
  boGame->unlock();
  return true;
