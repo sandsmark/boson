@@ -42,6 +42,7 @@
 #include <qpushbutton.h>
 #include <qbuttongroup.h>
 #include <qdir.h>
+#include <qptrqueue.h>
 
 #include <ksimpleconfig.h>
 #include <klistbox.h>
@@ -1599,6 +1600,7 @@ void KGameModelDebug::initMeshPage()
  d->mMeshView->addColumn(i18n("Faces count"), metrics.width(QString::number(111)));
  d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
  d->mMeshView->addColumn(i18n("Max point index"), metrics.width(QString::number(11)));
+ d->mMeshView->addColumn(i18n("# of instances"), metrics.width(QString::number(11)));
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
  QVBox* modelInfo = new QVBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
  QHBox* faces = new QHBox(modelInfo);
@@ -1908,6 +1910,21 @@ void KGameModelDebug::slotConstructMeshList()
 		indices = QMAX(indices, f->points[2]);
 	}
 	item->setText(6, QString::number(indices));
+	unsigned int instances = 0;
+	QPtrQueue<Lib3dsNode> allNodes;
+	for (Lib3dsNode* n = d->m3ds->nodes; n; n = n->next) {
+		allNodes.enqueue(n);
+	}
+	while (!allNodes.isEmpty()) {
+		Lib3dsNode* currentNode = allNodes.dequeue();
+		for (Lib3dsNode* n = currentNode->childs; n; n = n->next) {
+			allNodes.enqueue(n);
+		}
+		if ((currentNode->type == LIB3DS_OBJECT_NODE) && (strcmp(currentNode->name, mesh->name)) == 0) {
+			instances++;
+		}
+	}
+	item->setText(7, QString::number(instances));
 	d->mListItem2Mesh.insert(item, mesh);
  }
 }
