@@ -196,6 +196,11 @@ switch(tag) {
 			);
 		field->createFix(data->facility);
 		break;
+		
+	case MSG_UNIT_POWER:
+		ASSERT_DATA_BLENGHT(sizeof(data->power));
+		field->shooted(data->power);
+		break;
 
 	case MSG_FACILITY_CHANGED :
 		ASSERT_DATA_BLENGHT(sizeof(data->fixChanged));

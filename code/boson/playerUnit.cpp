@@ -386,6 +386,13 @@ void playerMobUnit::targetMoveBy(int dx, int dy)
 }
 
 
+void playerMobUnit::shooted(int _power)
+{
+	if (sp_up) sp_up->frame(_power);
+}
+  
+
+
 /*
  * playerFacility
  */
@@ -433,4 +440,9 @@ void playerFacility::targetMoveBy(int dx, int dy)
 {
 }
 
+void playerFacility::shooted(int _power)
+{
+	if (sp_up) sp_up->frame(_power);
+}
+  
 

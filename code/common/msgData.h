@@ -60,6 +60,8 @@ struct constructMsg_t	{ int x, y; union {mobType mob; facilityType fix;} type;};
 struct shootMsg_t	{ int key, target_key; };
 /* MSG_PERSO_RESSOURCES */
 struct ressMsg_t	{ uint oil, mineral; };
+/* MSG_UNIT_POWER */
+struct powerMsg_t	{ int key, power; };
 
 typedef union {
 /* Dialog layer */
@@ -76,6 +78,7 @@ typedef union {
 	constructMsg_t  construct;
 	shootMsg_t	shoot;
 	ressMsg_t	ressources;
+	powerMsg_t	power;
 /* MSG_TIME */
 	unsigned int	jiffies;
 /* used by  {send,recv}Msg */

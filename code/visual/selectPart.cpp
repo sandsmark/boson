@@ -39,7 +39,7 @@ QwSpritePixmapSequence * selectPart_down::qsps = 0l;
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 {
 	QPen	pen(red);
-	int	len =  2 * ( PART_NB-power);
+	int	len =  3 * ( PART_NB-power);
 
 	painter.setPen(pen);
 	painter.fillRect(len,0, SP_W - len ,SP_THICK,c1);
@@ -62,7 +62,10 @@ selectPart_up::selectPart_up(int _f, int _z)
 		initStatic();
 		}
 	setSequence(qsps);
-	boAssert( _f>=0); boAssert( _f<PART_NB);
+	boAssert( _f>=0);
+	boAssert( _f<PART_NB);
+	if (_f<0 ) _f = 0;
+	if (_f>= PART_NB ) _f = PART_NB-1;
 	frame( _f);
 	z( _z + 1);
 }
@@ -122,7 +125,10 @@ selectPart_down::selectPart_down(int _f, int _z)
 		initStatic();
 		}
 	setSequence(qsps);
-	boAssert(_f>=0); boAssert(_f<PART_NB);
+	boAssert(_f>=0);
+	boAssert(_f<PART_NB);
+	if (_f<0 ) _f = 0;
+	if (_f>= PART_NB ) _f = PART_NB-1;
 	frame(_f);
 	z( _z + 1);
 }

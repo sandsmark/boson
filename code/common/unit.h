@@ -28,6 +28,8 @@
 //#include "../common/map.h"
 
 
+#define  MAX_POWER 9
+
 enum workType {
 	WORK_NONE =0, 
 	WORK_TRAINING, 
@@ -47,7 +49,7 @@ class Unit : public QObject
  Q_OBJECT
 
  public:
-  Unit(QObject* parent=0, const char *name=0L);
+  Unit(int key, int who, QObject* parent=0, const char *name=0L);
 
   virtual	int	_x(void)=0;
   virtual	int	_y(void)=0;
@@ -59,7 +61,6 @@ class Unit : public QObject
   int		who;		// who is the owner ?
   int		key;
   protected:
-  uint		power;		// Power : 0 => death
   uint		contain;	// how much contain (petrol, money);
   uint		countDown;	// work countDown;
   workType	work;		// work being done

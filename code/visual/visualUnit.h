@@ -37,10 +37,6 @@ public:
 	visualUnit(QwSpritePixmapSequence* s) : QwSprite(s)
 		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; }
 	
-	/** make the connection with <i>non-virtual</i> QwSpriteField functions */
-	virtual	int	_x(void) {return x();}
-	virtual	int	_y(void) {return y();}
-
 	void  unSelect();
 
 protected:
@@ -59,6 +55,10 @@ class visualMobUnit : public mobUnit, public visualUnit
   
   visualMobUnit(mobileMsg_t *, QObject* parent=0, const char *name=0L);
   ~visualMobUnit();
+
+	/** make the connection with <i>non-virtual</i> QwSpriteField functions */
+	virtual	int	_x(void) {return x();}
+	virtual	int	_y(void) {return y();}
 
 /* attachement */
   void  select();
@@ -79,6 +79,10 @@ class visualFacility : public Facility, public visualUnit
  public:
   visualFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
   ~visualFacility();
+
+	/** make the connection with <i>non-virtual</i> QwSpriteField functions */
+	virtual	int	_x(void) {return x();}
+	virtual	int	_y(void) {return y();}
 
 /* attachement */
   void  select();
