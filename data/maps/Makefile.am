@@ -5,7 +5,8 @@ maps_DATA = basic.bpf \
 	experimental.bpf \
 	experimental2.bpf \
 	experimental3.bpf \
-    experimental4.bpf
+    experimental4.bpf \
+    experimental5.bpf
 
 # This is where it will all be installed
 mapsdir = $(kde_datadir)/boson/maps
