@@ -79,6 +79,63 @@ float textureCoordPointer[] = { 0.0, 0.0,
 GLubyte unitIndices[] = { 0, 1, 2, 3 };
 #endif // !NO_OPENGL
 
+class Camera
+{
+public:
+	Camera()
+	{
+		mPosX = 0.0;
+		mPosY = 0.0;
+		mPosZ = 10.0;
+		mCenterDiffX = 0.0;
+		mCenterDiffY = 0.0;
+		mZoomFactor = 1.0;
+	}
+	Camera(const Camera& c)
+	{
+		*this = c;
+	}
+	Camera& operator=(const Camera& c)
+	{
+		mPosX = c.mPosX;
+		mPosY = c.mPosY;
+		mPosZ = c.mPosZ;
+		mCenterDiffX = c.mCenterDiffX;
+		mCenterDiffY = c.mCenterDiffY;
+		mZoomFactor= c.mZoomFactor;
+		return *this;
+	}
+	
+	void setPos(GLfloat x, GLfloat y, GLfloat z)
+	{
+		mPosX = x;
+		mPosY = y;
+		mPosZ = z;
+	}
+	void setPosX(GLfloat x) { setPos(x, mPosY, mPosZ); }
+	void setPosY(GLfloat y) { setPos(mPosX, y, mPosZ); }
+	void setPosZ(GLfloat z) { setPos(mPosX, mPosY, z); }
+	GLfloat posX() const { return mPosX; }
+	GLfloat posY() const { return mPosY; }
+	GLfloat posZ() const { return mPosZ; }
+	GLfloat centerX() const { return posX() + mCenterDiffX; }
+	GLfloat centerY() const { return posY() + mCenterDiffY; }
+
+	void setZoomFactor(GLfloat f) { mZoomFactor = f; }
+	GLfloat zoomFactor() const { return mZoomFactor; }
+
+	void increaseCenterDiffXBy(GLfloat d) { mCenterDiffX += d; }
+	void increaseCenterDiffYBy(GLfloat d) { mCenterDiffY += d; }
+private:
+	GLfloat mPosX;
+	GLfloat mPosY;
+	GLfloat mPosZ;
+	GLfloat mZoomFactor; //TODO
+
+	GLfloat mCenterDiffX;
+	GLfloat mCenterDiffY;
+};
+
 class SelectionRect
 {
 public:
@@ -177,7 +234,7 @@ public:
 	{
 		return mX;
 	}
-	int yy() const
+	int y() const
 	{
 		return mY;
 	}
@@ -243,14 +300,7 @@ public:
 	BosonChat* mChat;
 
 #ifndef NO_OPENGL
-	// maybe we should use GLint here, as glViewport does
-	float mPosX;
-	float mPosY;
-	float mPosZ;
-	float mZoomFactor; //TODO
-
-	float mCenterDiffX;
-	float mCenterDiffY;
+	Camera mCamera;
 
 	int mW; // width ... we should use glGetIntegerv(GL_VIEWPORT, view); and then view[foo] instead.
 	int mH; // height ... see above
@@ -404,7 +454,9 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
 
- GLfloat fovY = d->mFovY * d->mZoomFactor;
+ // IMO we don't need zooming. changing posY should be equally .. and even
+ // better. no distortion
+ GLfloat fovY = d->mFovY; // * d->mCamera.zoomFactor();
  d->mAspect = (float)w / (float)h;
  gluPerspective(fovY, d->mAspect, NEAR, FAR);
 
@@ -490,8 +542,8 @@ void BosonBigDisplayBase::paintGL()
  upY = 1.0;
  upZ = 0.0;
  float centerX, centerY, centerZ;
- centerX = cameraX() + d->mCenterDiffX;
- centerY = cameraY() - d->mCenterDiffY;
+ centerX = d->mCamera.centerX();
+ centerY = d->mCamera.centerY();
  centerZ = -100.0;
 // centerZ = d->mPosZ;
  // TODO: performance: isn't it possible to skip this by using pushMatrix() and
@@ -565,6 +617,31 @@ void BosonBigDisplayBase::paintGL()
 
 
  glDisable(GL_DEPTH_TEST);
+
+
+#if 0
+ glColor3f(0.0, 0.0, 0.0);
+ GLfloat cellYPos = -BO_GL_CELL_SIZE;
+ GLfloat cellXPos = 0.0;
+ BosonMap* map = mCanvas->map();
+ glBegin(GL_QUADS);
+	// bah - for() between glBegin()/glEnd() isn't nice. but we can't use
+	// display lists here as we do for cell drawing :-(
+	for (unsigned int cellY = 0; cellY < map->height(); cellY++, cellYPos -= BO_GL_CELL_SIZE) {
+		cellXPos = 0.0;
+		for (unsigned int cellX = 0; cellX < map->width(); cellX++, cellXPos += BO_GL_CELL_SIZE) {
+			if (localPlayer()->isFogged(cellX, cellY)) { // bah - again something between glBegin()/glEnd() !! FIXME!
+				glVertex3f(cellXPos, cellYPos, 0.0);
+				glVertex3f(cellXPos, cellYPos + BO_GL_CELL_SIZE, 0.0);
+				glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos + BO_GL_CELL_SIZE, 0.0);
+				glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, 0.0);
+			}
+		}
+	}
+ glEnd();
+ glColor3f(1.0, 1.0, 1.0);
+#endif
+
 
  boProfiling->renderText(true); // AB: actually this is text and cursor
 
@@ -752,32 +829,25 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseMove:
 		d->mMouseMoveDiff.moveToPos(e->pos());
 		if (e->state() & AltButton) {
-#ifndef NO_OPENGL
 			// zooming
-			d->mZoomFactor += ((float)d->mMouseMoveDiff.dy()) / 10;
-			kdDebug() << "zoom factor: " << d->mZoomFactor << endl;
+			d->mCamera.setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
+			kdDebug() << "zoom factor: " << d->mCamera.zoomFactor()<< endl;
 			resizeGL(d->mW, d->mH);
-#endif
 		} else if (e->state() & LeftButton) {
-#ifndef NO_OPENGL
 			if (e->state() & ControlButton) {
-				d->mCenterDiffX += d->mMouseMoveDiff.dx();
-				d->mCenterDiffY -= d->mMouseMoveDiff.dy();
-				kdDebug() << d->mCenterDiffX << " " << d->mCenterDiffY << endl;
+				d->mCamera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
+				d->mCamera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
 			} else if (e->state() & ShiftButton) {
 				// move the z-position of the cameraa
 				setCameraPos(cameraX(), cameraY(), cameraZ() + d->mMouseMoveDiff.dy());
-				kdDebug() << "posZ: " << d->mPosZ << endl;
+				kdDebug() << "posZ: " << d->mCamera.posZ() << endl;
 			} else if (e->state() & AltButton) {
 				// we can't use Alt+LMB since KDE already uses it to move the window :(
-			} else 
-#endif
-			{
+			} else {
 				d->mSelectionRect.setVisible(true);
 				moveSelectionRect(posX, posY, posZ);
 			}
 		} else if (e->state() & RightButton) {
-#ifndef NO_OPENGL
 			if (boConfig->rmbMove()) {
 				//FIXME: doesn't work, since QCursor::setPos() also generates a MouseMove event
 //				QPoint pos = mapToGlobal(QPoint(d->mMouseMoveDiff.oldX(), d->mMouseMoveDiff.oldY()));
@@ -787,13 +857,11 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveX = d->mMouseMoveDiff.dx();
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
+				kdDebug() << "moveX=" << moveX << " moveY=" << moveY << " dx=" << dx << ",dy=" << dy << endl;
 				setCameraPos(cameraX() + dx, cameraY() + dy, cameraZ());
 			} else {
 				d->mMouseMoveDiff.stop();
 			}
-#else
-			//TODO - the canvasview version is broken
-#endif
 		}
 		updateCursor();
 		e->accept();
@@ -953,16 +1021,11 @@ void BosonBigDisplayBase::slotCenterHomeBase()
 void BosonBigDisplayBase::slotResetViewProperties()
 {
 #ifndef NO_OPENGL
- d->mPosX = 0.0;
- d->mPosY = 0.0;
- d->mPosZ = 10.0;
- d->mCenterDiffX = 0.0;
- d->mCenterDiffY = 0.0;
- d->mZoomFactor = 1.0;
+ d->mCamera = Camera();
 
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCameraPos(d->mPosX, d->mPosY, d->mPosZ);
+ setCameraPos(d->mCamera.posX(), d->mCamera.posY(), d->mCamera.posZ());
  resizeGL(d->mW, d->mH);
 #endif
 }
@@ -997,29 +1060,61 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
 
  realy = view[3] - (GLint)pos.y() - 1;
 
-// kdDebug() << "mouse pos: " << pos.x() << "," << pos.y() << endl;
-// kdDebug() << "real mouse pos: " << pos.x() << "," << realy << endl;
-
  GLdouble winX = (GLdouble)pos.x();
  GLdouble winY = (GLdouble)realy;
- GLdouble winZ;
 
-// winZ = (1.0 / (FAR - NEAR)) * (d->mPosZ - NEAR);
-// kdDebug() << "winZ: " << winZ << "; mPosZ: " << d->mPosZ << endl;
- GLdouble tmp;
- if (!gluProject(winX, winY, 0.0,
+ // we basically calculate a line here .. nearX/Y/Z is the starting point,
+ // farX/Y/Z is the end point. From these points we can calculate a direction.
+ // using this direction and the points nearX(Y)/farX(Y) you can build triangles
+ // and then find the point that is on z=0.0
+ GLdouble nearX, nearY, nearZ;
+ GLdouble farX, farY, farZ;
+ if (!gluUnProject(winX, winY, 0.0,
 		model, proj, view,
-		&tmp, &tmp, &winZ)) {
+		&nearX, &nearY, &nearZ)) {
 	return false;
  }
+ if (!gluUnProject(winX, winY, 1.0,
+		model, proj, view,
+		&farX, &farY, &farZ)) {
+	return false;
+ }
+
+ // simple maths .. however it took me pretty much time to do this.. I haven't
+ // done this for way too long time!
+ GLdouble tanAlphaX = (nearX - farX) / (nearZ - farZ);
+ *posX = (GLfloat)(nearX - tanAlphaX * nearZ);
+
+ GLdouble tanAlphaY = (nearY - farY) / (nearZ - farZ);
+ *posY = (GLfloat)(nearY - tanAlphaY * nearZ);
+
+ return true;
+
+#if 0
+ if (checkError()) {
+	kdError() << k_funcinfo << "GL error before glReadPixels" << endl;
+ }
+ glReadPixels(pos.x(), view[3] - pos.y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ);
+ if (checkError()) {
+	kdError() << k_funcinfo << "GL error after glReadPixels" << endl;
+ }
+
+ kdDebug() << "winZ = " << winZ << endl;
  if (!gluUnProject(winX, winY, winZ,
 		model, proj, view,
 		posX, posY, posZ)) {
+	kdWarning() << k_funcinfo << "oops" << endl;
 	return false;
+ }
+ kdDebug() << winX << "->" << *posX << "," << winY << "->" << *posY << "," << winZ << "->" << *posZ << endl;
+
+ if (checkError()) {
+	kdError() << k_funcinfo << "GL error" << endl;
  }
 
 // kdDebug() << "click on: " << *posX << "," << *posY << "," <<*posZ << endl;
  return true;
+#endif
 }
 
 bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdouble* dy) const
@@ -1411,6 +1506,7 @@ void BosonBigDisplayBase::generateMapDisplayList()
 		// then we could render them in a single glBegin(GL_QUADS) call
 		// we can't render cells with differnt textures in a single call
 		// :(
+		// FIXME: performance: only a single glBegin(GL_QUADS)!
 		glBegin(GL_QUADS);
 			glTexCoord2fv(textureUpperLeft); glVertex3f(cellXPos, cellYPos, 0.0);
 			glTexCoord2fv(textureLowerLeft); glVertex3f(cellXPos, cellYPos + BO_GL_CELL_SIZE, 0.0);
@@ -1430,11 +1526,12 @@ void BosonBigDisplayBase::generateMapDisplayList()
 
 void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
 {
- // TODO: rotating the screen is not yet supported!
+ GLdouble w = 0;
+ GLdouble h = 0;
+#if 0
  GLdouble x1, x2;
  GLdouble y1, y2;
  GLdouble tmp;
- GLdouble w, h;
  // we cannot simply map 0,0 and compare it with the mapped d->mW,d->mH since
  // the screen might be rotated... but thats not supported anyway
  mapCoordinates(QPoint(0,0), &x1, &y1, &tmp);
@@ -1442,14 +1539,20 @@ void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
  mapCoordinates(QPoint(0,d->mH), &tmp, &y2, &tmp);
  w = x2-x1;
  h = y2-y1;
- 
- d->mPosX = QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x));
- d->mPosY = QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y));
- d->mPosZ = QMAX(NEAR+0.1, QMIN(FAR-0.1, z));
+#endif
 
+ // FIXME: these tests are not really good anymore. especially when map is
+ // rotated.
+ d->mCamera.setPosX(QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x)));
+ d->mCamera.setPosY(QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y)));
+ d->mCamera.setPosZ(QMAX(NEAR+0.5, QMIN(FAR-0.5, z)));
+
+#if 0
+ // hmm.. TODO !
  int cellX = (int)(x1 / BO_GL_CELL_SIZE);
  int cellY = -(int)(y1 / BO_GL_CELL_SIZE);
  emit signalTopLeftCell(cellX, cellY);
+#endif
 
  // TODO: if z changed also the size changes - the player can see more on the
  // screen. we should emit signalSizeChanged(). that signal should be renamed
@@ -1458,17 +1561,17 @@ void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
 
 GLfloat BosonBigDisplayBase::cameraX() const
 {
- return d->mPosX;
+ return d->mCamera.posX();
 }
 
 GLfloat BosonBigDisplayBase::cameraY() const
 {
- return d->mPosY;
+ return d->mCamera.posY();
 }
 
 GLfloat BosonBigDisplayBase::cameraZ() const
 {
- return d->mPosZ;
+ return d->mCamera.posZ();
 }
 
 void BosonBigDisplayBase::updateGLCursor()
@@ -1476,7 +1579,7 @@ void BosonBigDisplayBase::updateGLCursor()
  // FIXME: use updateGL() directly instead. this function is just for testing.
 }
 
-bool BosonBigDisplayBase::checkError()
+bool BosonBigDisplayBase::checkError() const
 {
  bool ret = true;
  GLenum e = glGetError();
@@ -1547,7 +1650,7 @@ void BosonBigDisplayBase::setZoomFactor(float f)
 {
 #ifndef NO_OPENGL
  kdDebug() << k_funcinfo << f << endl;
- d->mZoomFactor = f;
+ d->mCamera.setZoomFactor(f);
  resizeGL(d->mW, d->mH);
 #else
  QWMatrix w;
