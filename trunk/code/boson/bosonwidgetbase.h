@@ -207,6 +207,7 @@ protected slots:
 
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
+	void slotDebugToggleWireFrames(bool);
 	void slotToggleCmdFrameVisible();
 	void slotToggleChatVisible();
 	void slotGrabScreenshot();

@@ -655,6 +655,11 @@ void BosonWidgetBase::initKActions()
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
+ KToggleAction* wireFrames = new KToggleAction(i18n("Render &Wireframes"),
+		KShortcut(), 0, 0, actionCollection(), "debug_wireframes");
+ connect(wireFrames, SIGNAL(toggled(bool)), this, SLOT(slotDebugToggleWireFrames(bool)));
+ wireFrames->setChecked(false);
+ slotDebugToggleWireFrames(false);
 
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
@@ -999,6 +1004,11 @@ void BosonWidgetBase::slotToggleCheating(bool on)
 {
  setActionEnabled("debug_unfog", on);
  setActionEnabled("debug_players", on);
+}
+
+void BosonWidgetBase::slotDebugToggleWireFrames(bool on)
+{
+ boConfig->setWireFrames(on);
 }
 
 void BosonWidgetBase::setActionEnabled(const char* name, bool on)

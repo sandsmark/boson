@@ -12,6 +12,7 @@
     <Action name="debug_enable_cheating" />
     <Action name="debug_unfog" />
     <Action name="debug_players" />
+    <Action name="debug_wireframes" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge" />
