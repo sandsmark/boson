@@ -5,14 +5,13 @@ Name=Quad
 Id=10001
 Health=50
 MineralCost=80
-WeaponRange=4
-WeaponDamage=10
-Reload=5
 Producer=0
 Requirements=3
 Shield=20
 ProductionTime=70
 Upgrades=1
+DestroyedParticles=1001,6001,3002
+Weapons=1001
 
 [Boson Mobile Unit]
 Speed=4
@@ -23,3 +22,4 @@ CanGoOnWater=false
 RequireTechnologies=12
 WeaponRange=5
 WeaponDamage=15
+Health=60

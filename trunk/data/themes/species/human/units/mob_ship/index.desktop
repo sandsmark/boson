@@ -5,14 +5,13 @@ Name=Ship
 Id=10000
 Health=150
 MineralCost=250
-WeaponRange=5
-WeaponDamage=25
-Reload=20
 Producer=1
 Requirements=3
 UnitWidth=2.0
 UnitHeight=2.0
 ProductionTime=100
+DestroyedParticles=1001
+Weapons=1001
 
 [Boson Mobile Unit]
 Speed=3

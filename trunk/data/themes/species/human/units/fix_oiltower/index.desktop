@@ -8,6 +8,7 @@ MineralCost=100
 Producer=10
 Requirements=8
 ProductionTime=50
+DestroyedParticles=1001
 
 [Boson Facility]
 ConstructionSteps=10

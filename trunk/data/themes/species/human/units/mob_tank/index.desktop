@@ -5,13 +5,12 @@ Name=Tank
 Id=10005
 Health=200
 MineralCost=300
-WeaponRange=3
-WeaponDamage=35
-Reload=25
 Producer=0
 Requirements=12,3
 Armor=3
 ProductionTime=90
+DestroyedParticles=1002,3001,4001
+Weapons=1002
 
 [Boson Mobile Unit]
 Speed=3

@@ -5,12 +5,12 @@ Name=Turret
 Id=10
 Health=100
 MineralCost=200
-WeaponRange=4
-WeaponDamage=12
 Reload=13
 Producer=10
 Requirements=5,2,3
 ProductionTime=60
+DestroyedParticles=1001
+Weapons=1001
 
 [Boson Facility]
 ConstructionSteps=12
