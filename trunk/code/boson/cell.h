@@ -22,6 +22,7 @@
 class UnitProperties;
 class QCanvas;
 class QCanvasSprite;
+class QCanvasPixmapArray;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -193,9 +194,13 @@ protected:
 	void setGroundType(GroundType type);
 
 private:
+	void initStatic();
+
+private:
 	GroundType mType;
 	unsigned char mVersion;
 	QCanvasSprite* mFog;
+	static QCanvasPixmapArray* mFogPixmap;
 };
 
 #endif

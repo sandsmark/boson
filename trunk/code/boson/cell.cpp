@@ -19,13 +19,22 @@
 #include "cell.h"
 
 #include "unitproperties.h"
+#include "defines.h"
 
 #include <kdebug.h>
+#include <kstandarddirs.h>
+
+#include <qcanvas.h>
+#include <qbitmap.h>
+
+QCanvasPixmapArray* Cell::mFogPixmap = 0;
+
 
 Cell::Cell()
 {
  mFog = 0;
  setGroundType(GroundUnknown);
+ initStatic();
 }
 
 Cell::~Cell()
@@ -274,11 +283,48 @@ void Cell::fog(QCanvas* canvas, int x, int y)
  if (mFog) {
 	return;
  }
+ if (!mFogPixmap) {
+	return;
+ }
+ mFog = new QCanvasSprite(mFogPixmap, canvas);
+ mFog->move(x * BO_TILE_SIZE, y * BO_TILE_SIZE);
+ mFog->setZ(Z_FOG_OF_WAR);
+ mFog->show();
 }
 
 void Cell::unfog()
 {
-// delete mFog;
+ if (!mFog) {
+	return;
+ }
+ delete mFog;
  mFog = 0;
+}
+
+void Cell::initStatic()
+{
+ if (mFogPixmap) {
+	return;
+ }
+ QString fogPath = locate("data", "boson/themes/fow.xpm");
+ kdDebug() << fogPath << endl;
+ mFogPixmap = new QCanvasPixmapArray(fogPath);
+ if (!mFogPixmap->image(0) || 
+		mFogPixmap->image(0)->width() != (BO_TILE_SIZE * 2) ||
+		mFogPixmap->image(0)->height() != (BO_TILE_SIZE * 2)) {
+	kdError() << k_funcinfo << "Cannot load fow.xpm" << endl;
+	delete mFogPixmap;
+	mFogPixmap = 0;
+	return;
+ }
+ QBitmap mask(fogPath);
+ if (mask.width() != (BO_TILE_SIZE * 2) || mask.height() != (BO_TILE_SIZE * 2)) {
+	kdError() << k_funcinfo << "Can't create fow mask" << endl;
+	delete mFogPixmap;
+	mFogPixmap = 0;
+	return;
+ }
+ mFogPixmap->image(0)->setMask(mask);
+ mFogPixmap->image(0)->setOffset(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2);
 }
 
