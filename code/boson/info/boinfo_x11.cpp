@@ -22,19 +22,17 @@
 #include "boinfo.h"
 #include "bodebug.h"
 
-#include "../bosonglwidget.h" // FIXME: use our own code for directRendering(), then we can replace this widget by QWidget
+#include <qwidget.h>
 
-// FIXME: the order if the includes in important for nvidia users!
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 
-void BoInfo::updateOpenGLInfo(BosonGLWidget* widget)
+void BoInfo::updateOpenGLInfo(QWidget* widget)
 {
  // OpenGL (warning: we don't have compile-time versions here!)
  QString extensions;
- widget->makeCurrent();
  insert(BoInfo::OpenGLVersionString, (const char*)glGetString(GL_VERSION));
  insert(BoInfo::OpenGLVendorString, (const char*)glGetString(GL_VENDOR));
  insert(BoInfo::OpenGLRendererString, (const char*)glGetString(GL_RENDERER));
@@ -46,7 +44,11 @@ void BoInfo::updateOpenGLInfo(BosonGLWidget* widget)
  extensions.replace(' ', '\n');
  insert(BoInfo::GLUExtensionsString, extensions);
 
- if (!widget) {
+ GLXContext context = glXGetCurrentContext();
+ if (!context) {
+	boWarning() << k_funcinfo << "NULL context" << endl;
+ }
+ if (!widget || !context) {
 	// it *may* be possible that GL/GLU infos are valid (don't depend on
 	// this! OpenGL must have been initialized by
 	// BosonGLWidget::initializeGL() or glGetString() returns NULL). But GLX
@@ -69,7 +71,7 @@ void BoInfo::updateOpenGLInfo(BosonGLWidget* widget)
  extensions.replace(' ', '\n');
  extensions = (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_EXTENSIONS);
  insert(GLXServerExtensionsString, extensions);
- insert(BoInfo::IsDirect, (bool)widget->directRendering());
+ insert(BoInfo::IsDirect, (bool)glXIsDirect(widget->x11Display(), context));
 
  insert(BoInfo::HaveOpenGLData, (bool)true);
 }
