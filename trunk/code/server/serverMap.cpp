@@ -102,7 +102,8 @@ void BosonServer::createMobUnit(mobileMsg_t &data)
 		default:
 			u = new serverMobUnit(player[data.who].buffer, &data);
 			break;
-		case MOB_HARVESTER:
+		case MOB_MINERAL_HARVESTER:
+		case MOB_OIL_HARVESTER:
 			u = new serverHarvester(player[data.who].buffer, &data);
 			break;
 	};

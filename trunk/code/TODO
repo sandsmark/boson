@@ -6,6 +6,9 @@ TODO:
 Generic :
 =========
 
+QCanvas : shouldn't segfault when pixmap loading has failed
+
+
 move boson/handleGameMessage into field
 some WARNING / ERROR in logs
 creating things only if ressources permit it (presently, the server already refuse to build)
@@ -27,6 +30,7 @@ how to handle non 1x1 tiles ?
 does units::rect need to be virtual anymore ?
 server : check that each unit does max 1 move each jiffie
 different subclass for my_units and other_units in client
+fog of war
 
 graphism 
 	>now, we have: The picture, the health bar, the status, the progress bar,
@@ -43,11 +47,9 @@ mouse handling :
 
 0.4 release:
 ============
-fog of war ?
-source documentation
 client and server should be peer-killed proof
-harvesting
-money/oil handling
+color-changing while loading -> team
+facility construction in editor
 
 0.5 release: (first public release)
 ============

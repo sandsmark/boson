@@ -302,7 +302,7 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->harvest));
 		mob = mobile.find(data->harvest.key);
 		if (mob) {
-			if (mob->getType() == MOB_HARVESTER) {
+			if (mob->getType() == MOB_MINERAL_HARVESTER) {
 				mob->increaseContain();
 			} else logf(LOG_ERROR, "noharvester unit trying to harvest");
 		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestMsg_t : %d", data->harvest.key);
@@ -312,7 +312,7 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->harvestEnd));
 		mob = mobile.find(data->harvestEnd.key);
 		if (mob) {
-			if (mob->getType() == MOB_HARVESTER) {
+			if (mob->getType() == MOB_MINERAL_HARVESTER) {
 				((serverHarvester*)mob)->emptying();
 			} else logf(LOG_ERROR, "noharvester unit trying to harvestEnd");
 		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestEndMsg_t : %d", data->harvest.key);
@@ -346,7 +346,7 @@ switch(tag) {
 					- mobileProp[_mobile.type].cost_oil,
 					- mobileProp[_mobile.type].cost_mineral))
 			createMobUnit(_mobile);
-		else logf(LOG_ERROR, "client %d have tried to create a %d mobile without enough ressources (%d,%d)",
+		else logf(LOG_ERROR, "client %d has tried to create a %d mobile without enough ressources (%d,%d)",
 				playerId, _mobile.type, player[playerId].oil, player[playerId].mineral);
 		break;
 		
@@ -360,7 +360,7 @@ switch(tag) {
 					- facilityProp[_facility.type].cost_oil,
 					- facilityProp[_facility.type].cost_mineral))
 			createFixUnit(_facility);
-		else logf(LOG_ERROR, "client %d have tried to create a %d facility without enough ressources (%d,%d)",
+		else logf(LOG_ERROR, "client %d has tried to create a %d facility without enough ressources (%d,%d)",
 				playerId, _facility.type, player[playerId].oil, player[playerId].mineral);
 		break;
 
