@@ -6,6 +6,7 @@
     </Menu>
     <Menu name="edit" ><text>&amp;Edit</text>
 	<Action name="edit_destroy" />
+	<Action name="edit_add_player" />
     </Menu>
 </MenuBar>
 </kpartgui>
