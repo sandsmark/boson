@@ -262,7 +262,6 @@ switch(tag) {
 		oil	= data->ressources.oil;
 		mineral = data->ressources.mineral;
 		emit ressourcesUpdated();
-		logf(LOG_ERROR,"ressourcesUpdated emitted");
 		break;
 
 	}
