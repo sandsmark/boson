@@ -430,10 +430,12 @@ void SpeciesData::loadParticleSystemProperties()
  KSimpleConfig cfg(f.name());
  QStringList particles = cfg.groupList();
  if (particles.isEmpty()) {
-	boWarning() << k_funcinfo << "No particle systems found in particles file (" << f.name() << ")" << endl;
+	boWarning() << k_funcinfo << "No particle systems found in particles "
+			<< "file (" << f.name() << ")" << endl;
 	return;
  }
- boDebug(150) << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
+ boDebug(150) << k_funcinfo << "Loading " << particles.count()
+		<< " particle systems from config file" << endl;
  QStringList::Iterator it;
  for (it = particles.begin(); it != particles.end(); ++it) {
 	boDebug(150) << k_funcinfo << "Loading particle system from group " << *it << endl;
