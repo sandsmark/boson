@@ -69,8 +69,8 @@ connectDlg::connectDlg(BosonApp *p, char *servername , const char *name)
 
 	/* server params */
 	if (gethostname(host, 1999)) {
-		logf(LOG_ERROR, "can't get hostname, using \"aquila\"");
-		strcpy(host, "aquila.rezel.enst.fr");
+		logf(LOG_ERROR, "can't get hostname, using \"boson.eu.org\"");
+		strcpy(host, "boson.eu.org");
 	}
 
 	label = new QLabel("Boson Server :", this);
