@@ -1,5 +1,5 @@
 
-Orzel's patch pending : 8, 27, 43, 65, 
+Orzel's patch pending : 8, 43, 65, 41, 44
 
 Code : (Orzel)
 --------------
@@ -7,10 +7,6 @@ Code : (Orzel)
 
 #2 b: when destroyed while selected, facilities are still selected (you can keep on building fe)
 #5 f: server detects end-of-game / winner..
-#8 f: editor handles multiple players (adding players..)
-#11 f: fixed units attacking
-#23 f: serverCell should inherits Cell (bosonCell+=requested, serverCell+=knownby)
-#27 f: use of QPoint/QSize all over canvas/toplevel
 #28 f: remove EX() in common/unitType.cpp -> need lot of checking
 #30 f: new boDist() and use of it all over the place
 #34 b: editor : "close map" not working -> the file is closed, but the user has no feedback
@@ -31,8 +27,7 @@ Code : (Orzel)
 #61 f: selectPart shouldn't be splitted (up/down)
 #62 b: report to QCanvas/author : shouldn't segfault when pixmap loading has failed[still valid ?]
 #63 f: clean up the network code : what handles what ? and in which file..
-#64 f: proposiong/creating things only if ressources permit it in client (presently, the server already refuse to build)
-#65 f: positionning rect in editor/boson (you see where you'll put the facility)
+#64 f: proposing/creating things only if ressources permit it in client (presently, the server already refuse to build)
 #66 f: split boson.h into bosonapp.h (socket handling / generic stuff) and boWindow.h (KTMainWindow ...)
 #67 f: read/save config has been removed (was using an olg buggy kdevelop code)
 #68 b: mobile on very-bottom-right can't be selected [still exact?]
@@ -68,6 +63,9 @@ Code : (Orzel)
 #99 f: non-hardcoded sound theme name "human" in bosonCanvas.cpp (-> speciesTheme/soundTheme ?)
 #106 f: shift-RMB does nothing in editor for oil/mineral ground
 #107 f: oil/mineral info should be in the TIME_ msg, cause anyway, they are sent in every data-burst
+#108 f: add a menu on the leftframe (quit, configure, music on/off, fullscreen)
+#110 b: fix 'attacking' on ground segfaults, how to stop a fix to attack ?
+#111 f: add server option : name of the map to use (default=basic.bpf)
 
 
 Graphics : (ben)
@@ -79,6 +77,7 @@ Graphics : (ben)
 #103 g: Improved boat (96x96 square, not 'long')
 #104 g: 96x96 Plane 
 #105 g: smaller harvester (48x48)
+#109 g: adapt editor/server/client icons to kde standard (# of colors)
 
 Sound : (Nils)
 --------------
@@ -89,6 +88,11 @@ in themes/sound/human/
 	mobile_attacking.wav	// mobile attacking ("yahaaaaaaaaaa")
 	mobile_going.wav	// mobile going to ("going sir")
 	radar_pulse.wav		// small sound for the radar (from time to time)
+any other sound you may think of :
+	base is under attack
+	win
+	lost
+	a 'characteristic' sound for every mobile ("sir, yes sir", "bzzz" for plane, "ok", "ready")
 
 
 
@@ -97,5 +101,10 @@ Done since 0.5 :  (to put in ChangeLog for 0.6 release)
 #46 b: small shots still have black background (need ben' new graphic)
 #84 b: launching server from client failed
 #42 f: sound support (arts)
+#27 f: use of QPoint/QSize all over canvas/toplevel
+#11 f: fixed units attacking
+#23 f: serverCell should inherits Cell
+#65 f: positionning rect in editor/boson (you see where you'll put the facility)
+#8 f: editor handles multiple players (adding players..)
 
 
