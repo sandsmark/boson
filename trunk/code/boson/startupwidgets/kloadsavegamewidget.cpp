@@ -214,7 +214,6 @@ void KLoadSaveGameWidget::updateGames()
 		d->mNoGamesLabel = new QLabel(i18n("No saved games available"), d->mButtonWidget);
 		d->mTopButtonLayout->addWidget(d->mNoGamesLabel, 5, AlignCenter);
 		d->mNoGamesLabel->show();
-		boDebug() << k_funcinfo << endl;
 	}
  }
 
@@ -280,15 +279,18 @@ void KLoadSaveGameWidget::slotDelete()
 	// no game selected
 	return;
  }
- QString description;
+ QString file = w->file();
  int r = KMessageBox::questionYesNoCancel(this, 
-		i18n("Do you really want to delete %1 ?").arg(description),
+		i18n("Do you really want to delete %1 ?").arg(QFileInfo(file).fileName()),
 		QString::null, KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmDeleteGame");
  if (r != KMessageBox::Yes) {
 	return;
  }
- // TODO
- boDebug() << k_funcinfo << "not yet implemented" << endl;
+ slotClicked(w);
+ d->mSelectedGame = 0; // just in case
+ QFile::remove(file);
+ d->mButtons.removeRef(w);
+ updateGames();
 }
 
 void KLoadSaveGameWidget::slotLoadSave()
