@@ -163,14 +163,14 @@ void Editor::initKAction()
  KStdAction::openNew(this, SLOT(slotFileNew()), actionCollection());
  KStdAction::quit(kapp, SLOT(quit()), actionCollection());
 
- (void)new KAction(i18n("Save &Map as..."), QKeySequence(), this,
+ (void)new KAction(i18n("Save &Map as..."), KShortcut(), this,
 		  SLOT(slotSaveMapAs()), actionCollection(),
 		  "file_save_map_as");
- (void)new KAction(i18n("Save &Scenario as..."), QKeySequence(), this,
+ (void)new KAction(i18n("Save &Scenario as..."), KShortcut(), this,
 		  SLOT(slotSaveScenarioAs()), actionCollection(), 
 		  "file_save_scenario_as");
 
- d->mEdit = new KSelectAction(i18n("&Edit"), QKeySequence(), actionCollection(), "editor_edit");
+ d->mEdit = new KSelectAction(i18n("&Edit"), KShortcut(), actionCollection(), "editor_edit");
  connect(d->mEdit, SIGNAL(activated(int)), this, SLOT(slotChangeEdit(int)));
  QStringList list;
  list.append(i18n("&Map"));
@@ -178,10 +178,9 @@ void Editor::initKAction()
  d->mEdit->setItems(list);
  list.clear();
  
- d->mPlayerAction = new KSelectAction(i18n("&Player"), QKeySequence(), actionCollection(), "editor_player");
+ d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)), 
 		bosonWidget(), SLOT(slotChangeLocalPlayer(int)));
-
  d->mActionFacilities = new KRadioAction(i18n("&Facilities"), KShortcut(),
 		this, SLOT(slotPlaceFacilities()), actionCollection(),
 		"editor_place_facilities");
@@ -207,10 +206,10 @@ void Editor::initKAction()
 		"editor_place_cell_big2");
  d->mActionCellBig2->setExclusiveGroup("Place");
 
- (void)new KAction(i18n("&Create Custom Unit"), QKeySequence(), this,
+ (void)new KAction(i18n("&Create Custom Unit"), KShortcut(), this,
 		  SLOT(slotCreateUnit()), actionCollection(),
 		  "editor_create_unit");
- (void)new KAction(i18n("&Generate Custom Tiles Ground"), QKeySequence(), this,
+ (void)new KAction(i18n("&Generate Custom Tiles Ground"), KShortcut(), this,
 		  SLOT(slotCreateTiles()), actionCollection(),
 		  "editor_create_tiles");
 
