@@ -221,7 +221,7 @@ bool BoEditorApp::slot_save()
 bool BoEditorApp::slot_saveAs()
 {
 	QString name;
-	name = KFileDialog::getSaveFileName( filename.isNull()?QString("/tmp"):filename, "*", 0l ); //XXX hardcoded path
+	name = KFileDialog::getSaveFileName( "", "*bpf", 0l );
 	if ( name.isEmpty() ) return false;
 
 	/* already exists */
