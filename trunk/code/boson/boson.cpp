@@ -49,6 +49,12 @@
 #include <qdatastream.h>
 #include <qfile.h>
 
+#ifndef KGAME_HAVE_KGAME_PORT
+#include <qsocket.h>
+#include <qserversocket.h>
+#include <qobjectlist.h>
+#endif
+
 #include "boson.moc"
 
 Boson* Boson::mBoson = 0;
@@ -2389,5 +2395,39 @@ bool Boson::loadXMLDoc(QDomDocument* doc, const QString& xml)
 	return false;
  }
  return true;
+}
+
+Q_UINT16 Boson::bosonPort()
+{
+#ifdef KGAME_HAVE_KGAME_PORT
+ return KGame::port();
+#else
+ if (!isNetwork()) {
+	return 0;
+ }
+ boDebug() << k_funcinfo << endl;
+ // ugly hack... luckily we *can* do such hacks :)
+ const QObjectList* list = QObject::objectTrees();
+ QObjectListIt it(*list);
+ if (isOfferingConnections()) {
+	for (; it.current(); ++it) {
+		if (qstrcmp((*it)->className(), "KMessageServerSocket") == 0) {
+			QServerSocket* server = (QServerSocket*)(*it);
+			return server->port();
+		}
+	}
+	boWarning() << k_funcinfo << "could not find KMessageServerSocket!" << endl;
+ } else {
+	for (; it.current(); ++it) {
+		if (qstrcmp((*it)->className(), "QSocket") == 0) {
+			QSocket* socket = (QSocket*)*it;
+			return socket->peerPort();
+
+		}
+	}
+	boWarning() << k_funcinfo << "could not find QSocket!" << endl;
+ }
+ return 0;
+#endif
 }
 

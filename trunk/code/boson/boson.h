@@ -191,6 +191,13 @@ public:
 	 **/
 	unsigned long int latestSavegameVersion();
 
+	/**
+	 * @return The port that is used for network games. The port we listen
+	 * to when we are server or the peerPort when we are connected to
+	 * another client.
+	 **/
+	Q_UINT16 bosonPort();
+
 public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();
