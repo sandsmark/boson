@@ -79,7 +79,7 @@ class BosonPlayFieldView : public KListView
 {
 	Q_OBJECT
 public:
-	BosonPlayFieldView(QWidget* parent, const char* name);
+	BosonPlayFieldView(QWidget* parent = 0, const char* name = 0);
 	~BosonPlayFieldView();
 
 private:
