@@ -44,6 +44,7 @@
 
 #include <qptrlist.h>
 #include <qvalidator.h>
+#include <qimage.h>
 
 #include "editorwidget.moc"
 
@@ -201,6 +202,9 @@ void EditorWidget::initKActions()
 		this, 0, actionCollection(), "editor_height");
  connect(d->mChangeHeight, SIGNAL(toggled(bool)),
 		this, SLOT(slotEditHeight(bool)));
+ (void)new KAction(i18n("&Import height map"), KShortcut(), this,
+		SLOT(slotImportHeightMap()), actionCollection(),
+		"editor_import_heightmap");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -471,5 +475,49 @@ void EditorWidget::slotLockAction(bool locked)
  if (d->mChangeHeight->isChecked()) {
 	d->mChangeHeight->setChecked(false);
  }
+}
+
+void EditorWidget::slotImportHeightMap()
+{
+ BO_CHECK_NULL_RET(boGame);
+ BO_CHECK_NULL_RET(boGame->playField());
+ BO_CHECK_NULL_RET(boGame->playField()->map());
+ boDebug() << k_funcinfo << endl;
+ QString fileName = KFileDialog::getOpenFileName(QString::null, QString::null, this);
+ if (fileName.isNull()) {
+	return;
+ }
+ // first load the file as an image. We need it to be in greyscale png in boson,
+ // and we can easily convert that image.
+ QImage image(fileName);
+ if (image.isNull()) {
+	boError() << k_funcinfo << "unbable to load file " << fileName << endl;
+	KMessageBox::sorry(this, i18n("Unable to load %1\nSeems not to be a valid image.").arg(fileName));
+	return;
+ }
+ BosonMap* map = boGame->playField()->map();
+ if ((unsigned int)image.width() != map->width() + 1 ||
+		(unsigned int)image.height() != map->height() + 1) {
+	KMessageBox::sorry(this, i18n("This image can't be used as height map for this map. The map is a %1x%2 map, meaning you need a %3x%4 image.\nThe image % 5selected was %6x%7").
+			arg(map->width()).arg(map->height()).
+			arg(map->width() + 1).arg(map->height() + 1).
+			arg(fileName).
+			arg(image.width()).arg(image.height()));
+	return;
+ }
+ if (!image.isGrayscale()) {
+	KMessageBox::sorry(this, i18n("%1 is not a greyscale image").arg(fileName));
+	return;
+ }
+ QByteArray b;
+ QDataStream s(b, IO_WriteOnly);
+ QImageIO io;
+ io.setIODevice(s.device());
+ io.setFormat("PNG");
+ io.setImage(image);
+ io.write();
+ map->loadHeightMapImage(b);
+
+ // TODO: update unit positions!
 }
 
