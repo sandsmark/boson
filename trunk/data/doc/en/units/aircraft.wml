@@ -11,17 +11,45 @@
 	</tr>
 	<tr><td><br>&nbsp</td></tr>
     </table>
-        
-    <table border="1">
-	<tr><td>Health</td><td>70</td></tr>
-	<tr><td>Mineral cost</td><td>100</td></tr>
-	<tr><td>Speed</td><td>6</td></tr>
-	<tr><td>Weapon range</td><td>4</td></tr>
-	<tr><td>Weapon damage</td><td>15</td></tr>
-	<tr><td>Reload</td><td>15</td></tr>
-	<tr><td>Shoot at land units</td><td>Yes</td></tr>
-	<tr><td>Shoot at air units</td><td>Yes</td></tr>
-    </table>
+   
+<:
+open( FILE, '<../../../themes/species/human/units/mob_batzen/index.desktop') || die "Open failed";
+
+@CONTENT = <FILE>;
+close(FILE);
+print "<table border=\"1\">\n";
+
+foreach $line (@CONTENT) {
+	# remove all spaces
+	$line =~ s/\s//g;
+        if ( $line =~ /^Health=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>Health</td><td>$1</td></tr>\n";
+	}
+        elsif ( $line =~ /^MineralCost=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>MineralCost</td><td>$1</td></tr>\n";
+	}
+        elsif ( $line =~ /^OilCost=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>OilCost</td><td>$1</td></tr>\n";
+	}
+        elsif ( $line =~ /^WeaponRange=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>WeaponRange</td><td>$1</td></tr>\n";
+	}
+        elsif ( $line =~ /^WeaponDamage=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>WeaponDamage</td><td>$1</td></tr>\n";
+	}
+        elsif ( $line =~ /^Reload=\s*(\w+)/ ) {
+		$value = $1;
+		print "<tr><td>Reload</td><td>$1</td></tr>\n";
+	}
+	
+}
+print "</table>\n";
+:>
 
 #include "nav.wml" before_url="ship.html" before_text="Ship" after_url="../faq.html" after_text="FAQ"    
 #include "footer.wml"
