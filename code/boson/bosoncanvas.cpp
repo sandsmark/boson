@@ -1305,7 +1305,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 		continue;
 	}
 	QDomElement item = doc.createElement(QString::fromLatin1("Item"));
-	item.setAttribute(QString::fromLatin1("Rtti"), i->rtti());
 	if (RTTI::isShot(i->rtti())) {
 		if (!((BosonShot*)i)->isActive()) {
 			continue;

@@ -184,6 +184,7 @@ void UnitBase::setOwner(Player* owner)
 bool UnitBase::saveAsXML(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
+ root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Type"), (unsigned int)type());
  root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
  root.setAttribute(QString::fromLatin1("Group"), 0);
