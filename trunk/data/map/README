@@ -1,7 +1,7 @@
 The map file is either a gzip compressed XML file, a normal XML file or a binary
 file.
 
-a map file contains information about the map *only*
+A map file contains information about the map *only*
 It contains information about the tiles (cells) and (or only this?)
 it can (? TODO) contain information about maximal and minimal players but no
 more!
@@ -11,22 +11,27 @@ It does *not* contain data about the units of the players. These data are stored
 in the scenario files. See there for further information.
 
 The map filename can be any (you'll probably use the english map name) with a
-suffix of ".bpf" (TODO: what does bpf stand for?).
+suffix of ".bpf" (boson play field - maybe the name is obsolete since map and
+scenarios are now in different files. if you know a better, short extenstion
+just mail to the boson development list at boson-devel@lists.sf.net)
 Additionally there is a file with the same name but a suffix of .desktop.
 So the basic map would have the files
 basic.bpf
 basic.desktop
 
 The .desktop file contains further information about the map. This is mainly the
-localized name and a short description. The structure of this file:
+localized name and a short description. It also contains the "identifier", a
+short, unique (!!) name for the map that is referred to by the scenario files.
+The structure of the .desktop file:
 
-[Boson map file]
+[Boson Map]
 Name=Basic
 Name[de]=German name of Basic
 Comment=Basic is... Basic!
 Comment[de]=German translation of the comment
+Identifier=Basic
 
-The .desktop file consists of a single group "[Boson map file]". It supports the
+The .desktop file consists of a single group "[Boson Map]". It supports the
 following entries:
 Name=Text       - The name of the map. Translated versions can be created with
                   [de] after Name, where de is the language. See KDE/KConfig for
@@ -36,3 +41,7 @@ Name=Text       - The name of the map. Translated versions can be created with
                   sense).
 Comment=Text    - A short text about your map. Can also be translated.
 Identifier=Text - A unique text for this map. Do not translate!
+
+
+You should not need to edit the map file (.bpf) yourself, so I won't explain the
+usage here. look at the code of the class BosonMap for this.
