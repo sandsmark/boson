@@ -24,6 +24,7 @@
 #include "bodebug.h"
 
 #include <GL/glx.h>
+#include <X11/Xlib.h>
 
 #include <qfont.h>
 #include <qstringlist.h>
@@ -38,18 +39,31 @@ BosonGLFont::BosonGLFont(const QString& family)
  }
  mFont = QFont(family);
  mFont.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
- mFontMetrics = new QFontMetrics(mFont);
 
- if ((int)mFont.handle() == 0) {
-	boError() << k_funcinfo << "could not load any bitmap font!" << endl;
-	mFontDisplayList = 0;
+ mFontDisplayList = 0;
+ mFontMetrics = 0;
+
+ int handle = (int)mFont.handle();
+
+ if (handle == 0) {
+	boError() << k_funcinfo << "qt could not load any bitmap font!" << endl;
+	int count;
+	char** names = XListFonts(QPaintDevice::x11AppDisplay(), "*", 0xffff, &count);
+	for (int i = 0; i < count && handle == 0; i++) {
+		mFont.setRawName(names[i]);
+		handle = (int)mFont.handle();
+	}
+	XFreeFontNames(names);
+ }
+ if (handle == 0) {
+	boError() << k_funcinfo << "no bitmap font found. cannot display GL text" << endl;
  } else {
 	// FIXME: i18n() support!
 	mFontDisplayList = glGenLists(256);
-	glXUseXFont((Font)mFont.handle(), 0, 256, mFontDisplayList);
+	glXUseXFont((Font)handle, 0, 256, mFontDisplayList);
 	boDebug() << k_funcinfo << family << " font created. display lists base=" << mFontDisplayList << endl;
  }
-
+ mFontMetrics = new QFontMetrics(mFont);
 }
 
 BosonGLFont::~BosonGLFont()
