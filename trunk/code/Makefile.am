@@ -18,3 +18,7 @@ orzel.clean : maintainer-clean
 #	cd .. && tar cvf /work/save/boson/
 
 AUTOMAKE_OPTIONS = foreign 
+
+tags:
+	ctags `find * -name '*.h' -o -name '*.cpp' | grep -v moc | grep /`
+
