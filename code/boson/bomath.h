@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include <qglobal.h> // Q_INT32, ...
 
@@ -123,8 +124,8 @@ public:
 	bofixed(Q_UINT16 f) : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
 	bofixed(Q_LONG f)   : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
 	bofixed(Q_ULONG f)  : mValue(((Q_INT32)f) << BITS_AFTER_POINT) { }
-	bofixed(float f)    : mValue((Q_INT32)(f * BITS_POW)) { }
-	bofixed(double f)   : mValue((Q_INT32)(f * BITS_POW)) { }
+	bofixed(float f)    : mValue((Q_INT32)(nearbyintf(f * BITS_POW))) { }
+	bofixed(double f)   : mValue((Q_INT32)(nearbyintf(f * BITS_POW))) { }
 
 	inline bool equals(const bofixed& f) const         { return (mValue == f.mValue); }
 	inline bool isGreater(const bofixed& f) const      { return (mValue >  f.mValue); }
@@ -146,6 +147,7 @@ public:
 	 * may be useful for debugging-
 	 **/
 	Q_INT32 rawInt() const { return mValue; }
+	void setFromRawInt(Q_INT32 r) { mValue = r; }
 
 	bofixed& operator=(const bofixed& f) { mValue = f.mValue; return *this; }
 	bofixed& operator=(Q_INT32 f)  { mValue = f << BITS_AFTER_POINT; return *this; }
@@ -156,8 +158,8 @@ public:
 	bofixed& operator=(Q_UINT16 f) { mValue = f << BITS_AFTER_POINT; return *this; }
 	bofixed& operator=(Q_LONG f)   { mValue = f << BITS_AFTER_POINT; return *this; }
 	bofixed& operator=(Q_ULONG f)  { mValue = f << BITS_AFTER_POINT; return *this; }
-	bofixed& operator=(float f)    { mValue = (Q_INT32)(f * BITS_POW); return *this; }
-	bofixed& operator=(double f)   { mValue = (Q_INT32)(f * BITS_POW); return *this; }
+	bofixed& operator=(float f)    { mValue = (Q_INT32)(nearbyintf(f * BITS_POW)); return *this; }
+	bofixed& operator=(double f)   { mValue = (Q_INT32)(nearbyintf(f * BITS_POW)); return *this; }
 
 	inline operator float() const { return toFloat(); }
 
@@ -171,12 +173,6 @@ public:
 	// disadvantage: things like domElement.setAttribute("x", x) work
 	// without changes - we store a float here. I believe it would be nicer
 	// if we'd store bofixed as a rawInt() in xml files.
-	// AB: but this is not required, as the precision of floats is "good
-	// enough". problems come up only with weird values (e.g. 0.1) or with
-	// very lots of digits after the decimal point. both is not an issue
-	// with xml load/save, as we just convert to float and back once.
-//	inline operator Q_INT32() const { return toInt(); }
-//	inline operator double() const { return toDouble(); }
 
 	inline bofixed operator-() const { bofixed f(*this); f.mValue *= -1; return f; }
 

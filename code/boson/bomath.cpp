@@ -61,15 +61,15 @@ void floatToBin(float _f)
 
 QDataStream& operator<<(QDataStream& stream, const bofixed& f)
 {
- stream << (float)f;
+ stream << (Q_INT32)f.rawInt();
  return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, bofixed& f)
 {
- float v;
+ Q_INT32 v;
  stream >> v;
- f = v;
+ f.setFromRawInt(v);
  return stream;
 }
 
