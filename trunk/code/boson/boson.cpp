@@ -33,6 +33,7 @@
 #include "upgradeproperties.h"
 #include "bosonprofiling.h"
 #include "bodebug.h"
+#include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
 #include <kgame/kgameio.h>
@@ -52,7 +53,7 @@ Boson* Boson::mBoson = 0;
 #define ADVANCE_INTERVAL 250 // ms
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 000007
+#define BOSON_SAVEGAME_FORMAT_VERSION 0x000009
 
 class BoMessage
 {
@@ -1656,11 +1657,15 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  // Version information (for future format changes and backwards compatibility)
  stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
 
+ // Players count for loading progressbar
+ stream << (Q_UINT32)playerList()->count();
+
  if (gameStatus() != KGame::Init) {
 	boDebug() << k_funcinfo << "Saveing started game" << endl;
 	stream << (Q_INT8)true;
 	// Save map
 	d->mPlayField->saveMap(stream);
+	d->mPlayField->saveDescription(stream);
 
 	// Save local player (only id)
 	stream << d->mPlayer->id();
@@ -1705,6 +1710,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  boDebug() << k_funcinfo << endl;
 
  d->mLoadingStatus = LoadingInProgress;
+ emit signalLoadingType(BosonLoadingWidget::LoadSavedGameHeader);
 
  // Load magic data
  Q_UINT8 a, b1, b2, b3;
@@ -1732,6 +1738,12 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	return false;
  }
 
+ // Players count for loading progressbar
+ Q_UINT32 playerscount;
+ stream >> playerscount;
+ emit signalLoadingPlayersCount(playerscount);
+
+ emit signalLoadingType(BosonLoadingWidget::LoadSavedGame);
  Q_UINT32 localId = 0;
  Q_INT8 started; // network players usually connect before starting a game
  stream >> started;
@@ -1744,8 +1756,13 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 		boError() << k_funcinfo << "Could not load map" << endl;
 		return false;
 	}
+	if (!f->loadDescription(stream)) {
+		boError() << k_funcinfo << "Could not load map description" << endl;
+		return false;
+	}
 	QDataStream mapstream(mapBuffer, IO_WriteOnly);
 	f->saveMap(mapstream);
+	f->saveDescription(mapstream);
 	delete f;
 
 	// Load local player's id
@@ -1779,17 +1796,17 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if (started) {
 	// AB: needs to be emitted after KGame::loadgame() which adds the
 	// players
+	emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
 	emit signalInitMap(mapBuffer);
  }
 
  // units. they must be loaded *after* the players
  QPtrListIterator<KPlayer> it(*playerList());
- for (; it.current(); ++it) {
-	// Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
-	((Player*)it.current())->speciesTheme()->loadParticleSystems();
-	((Player*)it.current())->speciesTheme()->readUnitConfigs();
-//	loadUnitDatas(((Player*)it.current()), progress);
-	((Player*)it.current())->speciesTheme()->loadTechnologies();
+ int currentplayer = 0;
+ for (; it.current(); ++it, currentplayer++) {
+	emit signalLoadingPlayer(currentplayer);
+	emit signalLoadPlayerData((Player*)it.current());
+	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
 	if (!((Player*)it.current())->loadUnits(stream)) {
 		boError() << k_funcinfo << "Error when loading units" << endl;
 		return false;

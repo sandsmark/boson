@@ -84,46 +84,46 @@ BosonLoadingWidget::~BosonLoadingWidget()
 
 void BosonLoadingWidget::setLoading(LoadingType load)
 {
+  mLoadingType = load;
+  update();
+  /*QString text;
   if(load == SendMap)
   {
-    mLoadingLabel->setText(i18n("Sending map over network..."));
+    text = i18n("Sending map over network...");
   }
   else if(load == ReceiveMap)
   {
-    mLoadingLabel->setText(i18n("Receiving map..."));
+    text = i18n("Receiving map...");
   }
   else if(load == LoadMap)
   {
-    mLoadingLabel->setText(i18n("Loading map..."));
-  }
-  else if(load == InitClasses)
-  {
-    mLoadingLabel->setText(i18n("Initializing data structures"));
+    text = i18n("Loading map...");
   }
   else if(load == LoadTiles)
   {
-    mLoadingLabel->setText(i18n("Loading map tiles..."));
+    text = i18n("Loading map tiles...");
   }
   else if(load == LoadUnits)
   {
-    mLoadingLabel->setText(i18n("Loading units..."));
+    text = i18n("Loading units...");
   }
-  else if(load == LoadGame)
+  else if(load == LoadSavedGame)
   {
-    mLoadingLabel->setText(i18n("Loading saved game..."));
+    text = i18n("Loading saved game...");
   }
   else if(load == InitGame)
   {
-    mLoadingLabel->setText(i18n("Initializing game..."));
+    text = i18n("Initializing game...");
   }
   else if(load == StartingGame)
   {
-    mLoadingLabel->setText(i18n("Starting game..."));
+    text = i18n("Starting game...");
   }
   else if(load == LoadingDone)
   {
-    mLoadingLabel->setText(i18n("Loading completed, starting game..."));
+    text = i18n("Loading completed, starting game...");
   }
+  mLoadingLabel->setText(text);*/
 }
 
 void BosonLoadingWidget::setProgress(int prog)
@@ -136,12 +136,6 @@ void BosonLoadingWidget::setTotalSteps(int steps)
   mProgress->setTotalSteps(steps);
 }
 
-void BosonLoadingWidget::setTotalSteps(int steps, int playerCount)
-{
- steps += playerCount * unitDataLoadingFactor();
- setTotalSteps(steps);
-}
-
 void BosonLoadingWidget::showProgressBar(bool show)
 {
   if(show)
@@ -152,4 +146,151 @@ void BosonLoadingWidget::showProgressBar(bool show)
   {
     mProgress->hide();
   }
+}
+
+void BosonLoadingWidget::update()
+{
+  QString text;
+  switch(mLoadingType)
+  {
+    case AdminLoadMap:
+    {
+      setProgress(0);
+      text = i18n("Sending map over network...");
+      break;
+    }
+    case SendMap:
+    {
+      setProgress(100);
+      text = i18n("Sending map over network...");
+      break;
+    }
+    case ReceiveMap:
+    {
+      setProgress(200);
+      text = i18n("Receiving map...");
+      break;
+    }
+    case LoadMap:
+    {
+      setProgress(300);
+      text = i18n("Loading map...");
+      break;
+    }
+    case LoadTiles:
+    {
+      setProgress(500 + (mCurrentTile / 1244.0 * 2500));
+      text = i18n("Loading map tiles...");
+      break;
+    }
+    case LoadParticleSystems:
+    {
+      setProgress(3000 + (mCurrentPlayer * 2000));
+      text = i18n("Loading datas for player %1 of %2 (particle systems)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      break;
+    }
+    case LoadUnitConfigs:
+    {
+      setProgress(3000 + (mCurrentPlayer * 2000) + 100);
+      text = i18n("Loading datas for player %1 of %2 (unit config files)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      break;
+    }
+    case LoadUnits:
+    {
+      setProgress(3000 + (mCurrentPlayer * 2000) + 150 + (mCurrentUnit / (float)mTotalUnits * 1750));
+      text = i18n("Loading datas for player %1 of %2 (unit model %3 of %4)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers).arg(mCurrentUnit + 1).arg(mTotalUnits);
+      break;
+    }
+    case LoadTechnologies:
+    {
+      setProgress(3000 + (mCurrentPlayer * 2000) + 1950);
+      text = i18n("Loading datas for player %1 of %2 (technologies)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      break;
+    }
+    case LoadGeneralData:
+    {
+      setProgress(3000 + (mTotalPlayers * 2000));
+      text = i18n("Loading general data...");
+      break;
+    }
+    case LoadSavedGameHeader:
+    {
+    }
+    case LoadSavedGame:
+    {
+    }
+    case LoadSavedUnits:
+    {
+      text = i18n("Loading saved game...");
+      break;
+    }
+    case InitGame:
+    {
+      setProgress(3000 + (mTotalPlayers * 2000) + 200);
+      text = i18n("Initializing game...");
+      break;
+    }
+    case StartingGame:
+    {
+      setProgress(3000 + (mTotalPlayers * 2000) + 300);
+      text = i18n("Starting game...");
+      break;
+    }
+    case LoadingDone:
+    {
+      setProgress(3000 + (mTotalPlayers * 2500) + 400);
+      text = i18n("Loading completed.");
+      break;
+    }
+  }
+  mLoadingLabel->setText(text);
+  mLoadingLabel->repaint();
+}
+
+void BosonLoadingWidget::setCurrentTile(int tile)
+{
+  mCurrentTile = tile;
+  update();
+}
+
+void BosonLoadingWidget::setTotalPlayers(int players)
+{
+  mTotalPlayers = players;
+  updateTotalSteps();
+}
+
+void BosonLoadingWidget::setCurrentPlayer(int playerindex)
+{
+  mCurrentPlayer = playerindex;
+  update();
+}
+
+void BosonLoadingWidget::setTotalUnits(int units)
+{
+  mTotalUnits = units;
+}
+
+void BosonLoadingWidget::setCurrentUnit(int unitindex)
+{
+  mCurrentUnit = unitindex;
+  update();
+}
+
+void BosonLoadingWidget::resetProgress()
+{
+  // reset everything
+  mTotalPlayers = 0;
+  mCurrentPlayer = 0;
+  mTotalUnits = 0;
+  mCurrentUnit = 0;
+  mCurrentTile = 0;
+  mAdmin = true;
+  mLoading = false;
+  setTotalSteps(100);  // for progress to be 0
+  setProgress(0);
+}
+
+void BosonLoadingWidget::updateTotalSteps()
+{
+  setTotalSteps(3400 + (mTotalPlayers * 2500));
 }

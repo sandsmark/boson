@@ -22,35 +22,28 @@ class BosonLoadingWidget : public QWidget
   public:
     enum LoadingType
       {
-        SendMap = 0,
-        ReceiveMap,
-        LoadMap,
-        InitClasses,
-        LoadTiles,
-        LoadUnits,
-        LoadGame,
-        InitGame,
-        StartingGame,
-        LoadingDone
+        AdminLoadMap = 0,  // Admin loads map and saves it to stream
+        SendMap,  // Map stream is sent to network (admin only)
+        ReceiveMap,  // Map is being received over the net
+        LoadMap,  // Map has been received and is being loaded
+        LoadTiles,  // Map tiles (textures)
+        LoadParticleSystems,  // Loading particle systems for a player
+        LoadUnitConfigs,  // Loading unit config files for a player
+        LoadUnits,  // Loading unit models and textures for a player
+        LoadTechnologies,  // Loading technologies for a player
+        LoadGeneralData,  // General data loaded only once per game (only general sounds for now)
+        LoadSavedGameHeader,  // Loading header of saved game file
+        LoadSavedGame,  // Loading saved game data (map and KGame stuff)
+        LoadSavedUnits,  // Loading units from saved game file for a player
+        InitGame,  // Game is being initialized (InitFogOfWar and StartScenario messages)
+        StartingGame,  // Last phase, BosonWidget is about to being shown
+        LoadingDone  // All done
       };
 
     BosonLoadingWidget(QWidget* parent);
     ~BosonLoadingWidget();
 
     void setLoading(LoadingType load);
-    /**
-     * See @ref QProgressBase::setProgress
-     **/
-    void setProgress(int prog);
-
-    /**
-     * Set the total steps (i.e. value for @ref setProgress) of the progress
-     * bar.
-     * @param steps The basic total steps. This does <em>not</em> include the
-     * steps for the player datas (such as units, ...)
-     * @param playerCount For how many players data will be loaded.
-     **/
-    void setTotalSteps(int steps, int playerCount);
 
     void showProgressBar(bool show = true);
 
@@ -60,24 +53,18 @@ class BosonLoadingWidget : public QWidget
     // Loading map tiles takes so many loading steps
     static int mapTilesLoadingFactor() { return 2200; }
 
-    /**
-     * Set the progress for unit loading. This gets called whenever another unit
-     * has completed loading for a player.
-     * @param baseProgress Where the progress was before unit loading for this player
-     * started
-     * @param currentUnit The number (1..maxUnit) of the unit that has just
-     * completed loading.
-     * @param totalUnits The total number of units to-be-loaded for this player.
-     **/
-    void setUnitProgress(int baseProgress, int currentUnit, int totalUnits)
-    {
-      setProgress(baseProgress + (int)(((double)currentUnit / totalUnits) * unitDataLoadingFactor()));
-    }
+    void setCurrentTile(int tile);
 
-    void setTileProgress(int baseProgress, int tiles)
-    {
-      setProgress(baseProgress + (int)((double)tiles / 1244.0 * mapTilesLoadingFactor()));
-    }
+    void setTotalPlayers(int players);
+    void setCurrentPlayer(int playerindex);
+
+    void setTotalUnits(int units);
+    void setCurrentUnit(int unitindex);
+
+    void resetProgress();
+
+    void setAdmin(bool isAdmin)  { mAdmin = isAdmin; };
+    void setLoading(bool isLoading)  { mLoading = isLoading; };
 
   protected:
     /**
@@ -85,12 +72,29 @@ class BosonLoadingWidget : public QWidget
      **/
     void setTotalSteps(int steps);
 
+    /**
+     * See @ref QProgressBase::setProgress
+     **/
+    void setProgress(int prog);
+
+    void update();
+
+    void updateTotalSteps();
+
   private:
     QVBoxLayout* mBosonLoadingWidgetLayout;
     QLabel* mHeader;
     QLabel* mPleaseWaitLabel;
     QLabel* mLoadingLabel;
     QProgressBar* mProgress;
+    int mTotalPlayers;
+    int mCurrentPlayer;
+    int mTotalUnits;
+    int mCurrentUnit;
+    int mCurrentTile;
+    bool mAdmin;
+    bool mLoading;
+    LoadingType mLoadingType;
 };
 
 #endif // BOSONLOADINGWIDGET_H
