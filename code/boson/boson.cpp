@@ -907,6 +907,33 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		break;
 	}
+	case BosonMessage::MoveTeleport:
+	{
+		Q_UINT32 unitId;
+		Q_UINT32 owner;
+		Q_INT32 x;
+		Q_INT32 y;
+
+		stream >> owner;
+		stream >> unitId;
+		stream >> x;
+		stream >> y;
+
+		Player* p = (Player*)findPlayer(owner);
+		if (!p) {
+			boError() << k_lineinfo << "Cannot find player " << owner << endl;
+			break;
+		}
+		Unit* u = findUnit(unitId, p);
+		if (!u) {
+			boError() << "Cannot find unit " << unitId << endl;
+			break;
+		}
+
+		u->moveBy(x - u->x(), y - u->y(), 0);
+
+		break;
+	}
 	case BosonMessage::MovePlaceUnit:
 	{
 		Q_UINT32 unitType;

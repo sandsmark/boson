@@ -40,14 +40,18 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"allPlayers", py_allPlayers, METH_VARARGS, 0 },
   // Resources
   { (char*)"minerals", py_minerals, METH_VARARGS, 0 },
+  { (char*)"addMinerals", py_addMinerals, METH_VARARGS, 0 },
   { (char*)"oil", py_oil, METH_VARARGS, 0 },
+  { (char*)"addOil", py_addOil, METH_VARARGS, 0 },
   // Units
   { (char*)"moveUnit", py_moveUnit, METH_VARARGS, 0 },
   { (char*)"moveUnitWithAttacking", py_moveUnitWithAttacking, METH_VARARGS, 0 },
   { (char*)"attack", py_attack, METH_VARARGS, 0 },
   { (char*)"stopUnit", py_stopUnit, METH_VARARGS, 0 },
   { (char*)"mineUnit", py_mineUnit, METH_VARARGS, 0 },
+  { (char*)"produceUnit", py_produceUnit, METH_VARARGS, 0 },
   { (char*)"spawnUnit", py_spawnUnit, METH_VARARGS, 0 },
+  { (char*)"teleportUnit", py_teleportUnit, METH_VARARGS, 0 },
   { (char*)"unitsOnCell", py_unitsOnCell, METH_VARARGS, 0 },
   { (char*)"unitsInRect", py_unitsInRect, METH_VARARGS, 0 },
   { (char*)"cellOccupied", py_cellOccupied, METH_VARARGS, 0 },
@@ -56,6 +60,8 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
+  { (char*)"canUnitProduce", py_canUnitProduce, METH_VARARGS, 0 },
+  { (char*)"productionTypes", py_productionTypes, METH_VARARGS, 0 },
   { (char*)"isUnitAlive", py_isUnitAlive, METH_VARARGS, 0 },
   { (char*)"allPlayerUnits", py_allPlayerUnits, METH_VARARGS, 0 },
   // Camera
@@ -298,6 +304,20 @@ PyObject* PythonScript::py_minerals(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"i", (int)(BosonScript::minerals(id)));
 }
 
+PyObject* PythonScript::py_addMinerals(PyObject*, PyObject* args)
+{
+  int id, amount;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &amount))
+  {
+    return 0;
+  }
+
+  BosonScript::addMinerals(id, amount);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_oil(PyObject*, PyObject* args)
 {
   int id;
@@ -307,6 +327,20 @@ PyObject* PythonScript::py_oil(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", (int)(BosonScript::oil(id)));
+}
+
+PyObject* PythonScript::py_addOil(PyObject*, PyObject* args)
+{
+  int id, amount;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &amount))
+  {
+    return 0;
+  }
+
+  BosonScript::addOil(id, amount);
+
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 
@@ -381,6 +415,20 @@ PyObject* PythonScript::py_mineUnit(PyObject*, PyObject* args)
   return Py_None;
 }
 
+PyObject* PythonScript::py_produceUnit(PyObject*, PyObject* args)
+{
+  int player, factory, production;
+  if(!PyArg_ParseTuple(args, (char*)"iii", &player, &factory, &production))
+  {
+    return 0;
+  }
+
+  BosonScript::produceUnit(player, factory, production);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
 {
   int player, type, x, y;
@@ -390,6 +438,20 @@ PyObject* PythonScript::py_spawnUnit(PyObject*, PyObject* args)
   }
 
   BosonScript::spawnUnit(player, type, x, y);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_teleportUnit(PyObject*, PyObject* args)
+{
+  int player, id, x, y;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &player, &id, &x, &y))
+  {
+    return 0;
+  }
+
+  BosonScript::teleportUnit(player, id, x, y);
 
   Py_INCREF(Py_None);
   return Py_None;
@@ -489,6 +551,30 @@ PyObject* PythonScript::py_canUnitShoot(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", BosonScript::canUnitShoot(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_canUnitProduce(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::canUnitProduce(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_productionTypes(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  QValueList<int> list = BosonScript::productionTypes(id);
+
+  return QValueListToPyList(&list);
 }
 
 PyObject* PythonScript::py_isUnitAlive(PyObject*, PyObject* args)

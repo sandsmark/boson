@@ -112,9 +112,17 @@ class BosonScript
      **/
     static unsigned long int minerals(int playerId);
     /**
+     * Add given amount of minerals for player with id playerId
+     **/
+    static void addMinerals(int playerId, int amount);
+    /**
      * @return Amount of oil local player has
      **/
     static unsigned long int oil(int playerId);
+    /**
+     * Add given amount of oil for player with id playerId
+     **/
+    static void addOil(int playerId, int amount);
 
 
     // Units
@@ -142,9 +150,17 @@ class BosonScript
      **/
     static void mineUnit(int player, int id, int x, int y);
     /**
+     * Produces unit with type production in factory with id factory
+     **/
+    static void produceUnit(int player, int factory, int production);
+    /**
      * Spawns unit owned by player, with type type, at (x, y)
      **/
     static void spawnUnit(int player, int type, int x, int y);
+    /**
+     * Teleports (immediately moves) unit with id id, owned by player to (x, y)
+     **/
+    static void teleportUnit(int player, int id, int x, int y);
 
     /**
      * @return List of units on cell (x, y)
@@ -180,6 +196,15 @@ class BosonScript
      * @return Whether unit with id id can shoot
      **/
     static bool canUnitShoot(int id);
+    /**
+     * @return Whether unit with id id can produce (other units or upgrades)
+     **/
+    static bool canUnitProduce(int id);
+
+    /**
+     * @return List of unit types unit with id id can produce
+     **/
+    static QValueList<int> productionTypes(int id);
 
     /**
      * @return Whether unit with id id exists and is not destroyed
