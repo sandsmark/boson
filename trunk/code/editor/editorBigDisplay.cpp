@@ -61,9 +61,9 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
 							if (y+j>=0 && y+j<_canvas->maxY)
-								_canvas->changeCell( x+i, y+j, c);
+								_canvas->changeCell( x+i, y+j, c); // some kind of randomness in 'c' here
 			} else
-				_canvas->changeCell( x, y, c);
+				_canvas->changeCell( x, y, c); // some kind of randomness in 'c' here
 
 			vtl->setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
@@ -101,7 +101,7 @@ void editorBigDisplay::setSelectedObject(object_type t, int n)
 		case OT_NONE:
 			break;
 		case OT_GROUND:
-			c = cell ( (groundType) n,  /* XXX +random()%4 */(n*(n+1)+7*t ) %4 );
+			c = cell ( (groundType) n, 0 ); // tile will be randomized by the actionClicked
 			break;
 		case OT_FACILITY:
 			f = (facilityType)n;
