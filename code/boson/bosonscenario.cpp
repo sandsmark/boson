@@ -90,7 +90,8 @@ void BosonScenario::init()
 
 QString BosonScenario::defaultScenario()
 {
- return locate("data", "boson/scenario/basic.bsc");
+// TODO: search for locally available scenarios!
+ return QString::fromLatin1("Basic");
 }
 
 bool BosonScenario::loadScenario(const QString& fileName)
