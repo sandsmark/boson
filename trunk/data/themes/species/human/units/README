@@ -64,6 +64,8 @@ TerrainType=Number  - The default terrain type of the unit. One of 0 (Land),
                       You must decide for one - even if the unit is some kind
                       of mixture. If so you will probably use Land (0). 
                       The default is 0 (=Land Unit)
+ProductionTime=Number - The number of advance calls needed to produce this unit
+                        Default is (currenlty) 100.
 -------------------------------------------------------------------------------
 
 The entries marked with * are mandatory.
