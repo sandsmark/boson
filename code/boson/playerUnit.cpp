@@ -101,7 +101,7 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 		case MUS_MOVING_WAIT:
 			if ( 0 == --countDown ) {
 				state = MUS_MOVING;	// and keep on the next case
-				logf(LOG_INFO, "MUS_MOVING_WAIT finished, [%p] try again now", this);
+//				logf(LOG_INFO, "MUS_MOVING_WAIT finished, [%p] try again now", this);
 			}
 			else return false;		// nothing, return
 
@@ -151,7 +151,7 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 
 			/* failed : can't move any more */
 			asked_state = state = MUS_NONE;
-			logf(LOG_INFO, "ckeckMove failed : mobile[%p] will try later", this);
+//			logf(LOG_INFO, "ckeckMove failed : mobile[%p] will try later", this);
 			state = MUS_MOVING_WAIT;
 			countDown = 5;
 			return false; 
