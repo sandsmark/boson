@@ -343,13 +343,6 @@ bool Unit::moveTo(int x, int y, int range)
 	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
 		return false;
 	}
-	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
-		if (range == 0) {
-			return false;
-		}
-		// if work() != WorkMove then we probably actually want to move
-		// to the occupied cell.
-	}
  }
 
  d->mMoveDestX = x;
@@ -375,9 +368,7 @@ void Unit::newPath()
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
-	if(!destCell || (!destCell->canGo(unitProperties())) ||
-			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && 
-			moveRange() == 0)) {
+	if(!destCell || (!destCell->canGo(unitProperties()))) {
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
@@ -708,6 +699,7 @@ public:
 
 	KGameProperty<double> mSpeed;
 	KGameProperty<unsigned int> mMovingFailed;
+	KGameProperty<unsigned int> mPathRecalculated;
 
 	HarvesterProperties* mHarvesterProperties;
 };
@@ -719,10 +711,14 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 		KGamePropertyBase::PolicyLocal, "Speed");
  d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "MovingFailed");
+ d->mPathRecalculated.registerData(IdMob_PathRecalculated, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "PathRecalculated");
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
+ d->mPathRecalculated.setLocal(0);
 
  d->mMovingFailed.setEmittingSignal(false);
+ d->mPathRecalculated.setEmittingSignal(false);
 
  if (unitProperties()->canMineMinerals() || unitProperties()->canMineOil()) {
 	d->mHarvesterProperties = new HarvesterProperties;
@@ -805,14 +801,29 @@ void MobileUnit::advanceMove()
 	return;
  }
 
+ int x = (int)(QCanvasSprite::x() + width() / 2);
+ int y = (int)(QCanvasSprite::y() + height() / 2);
+ double xspeed = 0;
+ double yspeed = 0;
+
+ // First check if we're at waypoint
+ if((x == wp.x()) && (y == wp.y())) {
+	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
+	waypointDone();
+
+	if(waypointCount() == 0) {
+		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
+		stopMoving();
+		return;
+	}
+
+	wp = currentWaypoint();
+ }
 
  // Check if we can actually go to waypoint (maybe it was fogged)
  if(!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) ||
-		(boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-		moveRange() == 0) || 
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
 	kdDebug() << "cannot go to waypoint, finding new path" << endl;
-	kdDebug() << "waypoint is at (" << wp.x() << ", " << wp.y() << "), my pos: (" << x() << ", " << y() << ")" << endl;
 	setXVelocity(0);
 	setYVelocity(0);
 	// We have to clear waypoints first to make sure that they aren't used next
@@ -822,39 +833,6 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- int x = (int)(QCanvasSprite::x() + width() / 2);
- int y = (int)(QCanvasSprite::y() + height() / 2);
- double xspeed = 0;
- double yspeed = 0;
-
- // First check if we're at waypoint
- if((x == wp.x()) && (y == wp.y())) {
-	kdDebug() << k_funcinfo << "unit is at waypoint" << endl;
- 	waypointDone();
-	
-	if(waypointCount() == 0) {
-		kdDebug() << k_funcinfo << "no more waypoints. Stopping moving" << endl;
-		// What to do?
-		stopMoving();
-		return;
-	}
-	
-	wp = currentWaypoint();
-	// Check if we can actually go to waypoint
-	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
-			moveRange() == 0) || 
-			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties())) {
-		setXVelocity(0);
-		setYVelocity(0);
-		kdDebug() << "cannot go to new waypoint, finding new path" << endl;
-		// We have to clear waypoints first to make sure that they aren't used next
-		//  advance() call (when new waypoints haven't arrived yet)
-		clearWaypoints();
-		newPath();
-		return;
-	}
- }
- 
  // Try to go to same x and y coordinates as waypoint's coordinates
  // First x coordinate
  // Slow down if there is less than speed() pixels to go
@@ -918,6 +896,10 @@ void MobileUnit::advanceMoveCheck()
 	setYVelocity(0);
 
 	const int recalculate = 50; // recalculate when 50 advanceMove() failed
+	if(d->mPathRecalculated >= 2) {
+		kdDebug() << k_funcinfo << "Path recalculated 3 times and it didn't help, giving up and stopping" << endl;
+		stopMoving();
+	}
 	if (d->mMovingFailed >= recalculate) {
 		kdDebug() << "recalculating path" << endl;
 		// you must not do anything that changes local variables directly here!
@@ -926,10 +908,12 @@ void MobileUnit::advanceMoveCheck()
 
 		newPath();
 		d->mMovingFailed = 0;
+		d->mPathRecalculated = d->mPathRecalculated + 1;
 	}
 	return;
  }
  d->mMovingFailed = 0;
+ d->mPathRecalculated = 0;
 }
 
 void MobileUnit::setSpeed(double speed)

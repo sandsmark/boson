@@ -55,6 +55,7 @@ public:
 		IdMob_ResourcesMined = UnitBase::IdLast + 21,
 		IdMob_ResourcesX= UnitBase::IdLast + 22,
 		IdMob_ResourcesY= UnitBase::IdLast + 23,
+		IdMob_PathRecalculated = UnitBase::IdLast + 24,
 		IdFix_ConstructionState = UnitBase::IdLast + 30,
 
 		IdUnitPropertyLast

@@ -51,15 +51,28 @@ class BosonPath::PathNode
 {
   public:
     PathNode() { x = 0; y = 0; g = 0; h = 0; level = -1; };
+    inline void operator=(const BosonPath::PathNode& a);
     int x; // x-coordinate of cell
     int y; // y-coordinate of cell
 
-// AB: I don't fully understand these both (I HATE short names) - I hope this
-// description is correct
-    float g; // path cost of this node?? -> "cost" of the cells (ALL cells that the unit has crossed up to here)
-    float h; // distance of all cells the unit has crossed up to here
+    float g; // real cost - cost of all nodes up to this one (If this node is at goal, it's cost of full path)
+    float h; // heuristic cost - distance between this node and goal
     short int level; // node is level steps away from start. It's needed to search only 10 steps of path at once
 };
+
+inline void BosonPath::PathNode::operator=(const BosonPath::PathNode& a)
+{
+  x = a.x;
+  y = a.y;
+  g = a.g;
+  h = a.h;
+  level = a.level;
+}
+
+inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
+{
+  return (a.g + a.h) < (b.g + b.h);
+}
 
 /** Describes found path
   * Possible values are:
@@ -67,18 +80,15 @@ class BosonPath::PathNode
   * FullPath - full path to goal was found
   * PartialPath - SEARCH_STEPS steps of path was found and no further was searched
   * AbortedPath - pathfinding was aborted, but some steps were found
+  * AlternatePath - goal was occupied, but path to nearby tile was found
   */
 enum PathStyle {
   NoPath = 0,
   FullPath = 1,
   PartialPath = 2,
-  AbortedPath = 3
+  AbortedPath = 3,
+  AlternatePath = 4
 };
-
-inline bool operator < (const BosonPath::PathNode& a, const BosonPath::PathNode& b)
-{
-  return (a.g + a.h) < (b.g + b.h);
-}
 
 /*
 * !!! Please do not make big changes to code in this class unless you really now
@@ -97,7 +107,7 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, i
   mModifier = 3;
   mCrossDivider = 10;
   mMinCost = 3;
-  mAbortPath = 2000;
+  mAbortPath = (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1);
 
   kdDebug() << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
 }
@@ -148,6 +158,10 @@ bool BosonPath::findPath()
   node.y = mStarty;
   node.level = 0;
 
+  // Nearest node to goal. This is used when goal is occupied and we want to
+  //  move as near as possible to it
+  PathNode nearest;
+
   // Real cost will be 0 (we haven't moved yet)
   node.g = 0;
   // Calculate heuristic (distance) cost
@@ -163,6 +177,9 @@ bool BosonPath::findPath()
   
   // Create second node
   PathNode n2;
+
+  bool goalUnReachable = false;
+  nearest = node;
 
 
   // Main loop
@@ -187,9 +204,22 @@ bool BosonPath::findPath()
     // Break if SEARCH_STEPS steps of path is found
     if(node.level >= SEARCH_STEPS)
     {
+      if(goalUnReachable)
+      {
+        // If goal is unreachable and we've searched long enough, then we
+        //  should stop searching and go to closest tile to goal
+        /// TODO: currently, "nearest" node can actually be on opposite side of
+        //   goal (nearest is nearest to _goal_). But we would then have to add
+        //   VISITED set to get this working...
+        node = nearest;
+        pathfound = AlternatePath;
+      }
+      else
+      {
+        pathfound = PartialPath;
+      }
       mGoalx = node.x;
       mGoaly = node.y;
-      pathfound = PartialPath;
       break;
     }
     
@@ -243,12 +273,7 @@ bool BosonPath::findPath()
         /// TODO: this may lead to problems when all cells in range have ERROR_COST
         if(n2.x == mGoalx && n2.y == mGoaly && mRange == 0)
         {
-          // change our goal
-          mGoalx = node.x;
-          mGoaly = node.y;
-          kdDebug() << "oops - cannot go on target cell :-(" << endl;
-          kdDebug() << "new goal x=" << mGoalx << ",y=" << mGoaly << endl;
-          continue;
+          goalUnReachable = true;
         }
         //kdDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
@@ -259,7 +284,12 @@ bool BosonPath::findPath()
       }
 
       n2.h = dist(n2.x, n2.y, mGoalx, mGoaly);
-      
+
+      if(n2.h < nearest.h)
+      {
+        nearest = n2;
+      }
+
       // if g == -1 then it isn't visited yet
       if(mark[n2.x][n2.y].g == -1)
       {
@@ -373,6 +403,11 @@ bool BosonPath::findPath()
     }
 
     // Write normal-ordered path to path
+    // We first add waypoint with coordinates of center of tile unit currently
+    //  is on. This helps to get rid of some collisions.
+    wp.setX(mStartx * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    wp.setY(mStarty * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    path.push_back(wp);
     for(int i = temp.size() - 1; i >= 0; --i)
     {
       wp.setX(temp[i].x());
@@ -382,7 +417,7 @@ bool BosonPath::findPath()
 
     // If no full path was found, then we add another point with coordinates
     //  -2; -2 to the path, indicating that this is just partial path.
-    if(pathfound != FullPath)
+    if(pathfound != FullPath && pathfound != AlternatePath)
       path.push_back(QPoint(-2, -2));
   }
   else
@@ -463,7 +498,19 @@ float BosonPath::cost(int x, int y)
     return ERROR_COST;
   }
 
-  if(c->isOccupied(mUnit, false)) 
+  // If we are close to our starting point or to our goal, then consider cell
+  //  to be occupied even if only moving units are on it (we assume they can't
+  //  move away fast enough)
+  bool includeMoving = false;
+  if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) < 3) // Change 3 to 2???
+  {
+    includeMoving = true;
+  }
+  else if(mRange == 0 && QMAX(QABS(x - mGoalx), QABS(y - mGoaly)) < 3)
+  {
+      includeMoving = true;
+  }
+  if(c->isOccupied(mUnit, includeMoving))
   {
     return ERROR_COST;
   }
