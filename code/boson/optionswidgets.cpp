@@ -214,7 +214,19 @@ void CursorOptions::setDefaults()
 
 void CursorOptions::load()
 {
-#warning TODO
+ setCursor((CursorMode)boConfig->cursorMode());
+ int dirIndex = -1;
+ if (boConfig->cursorDir().isNull()) {
+	dirIndex = 0;
+ } else {
+	dirIndex = BosonCursor::availableThemes().findIndex(boConfig->cursorDir());
+ }
+ if (dirIndex < 0) {
+	boWarning() << k_funcinfo << "could not find cusor theme " << boConfig->cursorDir() << endl;
+	dirIndex = 0;
+ }
+ mCursorTheme->setCurrentItem(dirIndex);
+ QString dir = boConfig->cursorDir();
 }
 
 void CursorOptions::setCursor(CursorMode mode)
