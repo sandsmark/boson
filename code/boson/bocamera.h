@@ -54,15 +54,38 @@ public:
 
 	BoCamera& operator=(const BoCamera& c);
 
-	static int minCameraZ();
-	static int maxCameraZ();
-	static int maxCameraRadius();
+	static float minCameraZ();
+	static float maxCameraZ();
+	static float maxCameraRadius();
 
+	/**
+	 * @param pos The point to look at, as used in gluLookAt().
+	 **/
 	void setLookAt(const BoVector3& pos);
 
+	/**
+	 * @return The point we are looking at. This is the lookAt vector, as it
+	 * can get used by gluLookAt().
+	 **/
 	const BoVector3& lookAt() const
 	{
 		return mLookAt;
+	}
+	/**
+	 * @return The eye vector, as it can get used by gluLookAt().
+	 **/
+	const BoVector3& eye() const
+	{
+		return mEye;
+	}
+	/**
+	 * @return The up vector, as it can get used by gluLookAt(). The up
+	 * vector is the vector pointing straight "up" from the position of the
+	 * camera. it can change when the camera is rotated.
+	 **/
+	const BoVector3& up() const
+	{
+		return mUp;
 	}
 
 	void changeZ(GLfloat diff);
@@ -70,6 +93,10 @@ public:
 	void changeRotation(GLfloat diff);
 	void moveLookAtBy(GLfloat x, GLfloat y, GLfloat z);
 
+	/**
+	 * Set limits for the camera. The camera tries not to move beyond the
+	 * map size.
+	 **/
 	void setMapSize(GLfloat w, GLfloat h)
 	{
 		mMapWidth = w;
@@ -83,14 +110,13 @@ public:
 	{
 		mPosZ = z;
 	}
-	void setRotation(GLfloat r)
-	{
-		mRotation = r;
-	}
-	void setRadius(GLfloat r)
-	{
-		mRadius = r;
-	}
+
+	// these will change the up and eye vectors!
+	// TODO: document what they actually do
+	void setRotation(GLfloat r);
+	void setRadius(GLfloat r);
+
+
 	GLfloat z() const
 	{
 		return mPosZ;
@@ -112,12 +138,24 @@ public:
 protected:
 	void checkPosition();
 
+	/**
+	 * Update the parameters for gluLookAt() (@ref lookAt, @ref eye and @ref
+	 * up) according to the new values from @ref radius and @ref rotation.
+	 *
+	 * Note that the @ref lookAt vector isn't changed here, as the kind of
+	 * BoCamera's rotation and radius don't influence it.
+	 **/
+	void updateFromRadiusAndRotation();
+
 private:
 	void init();
 	static void initStatic();
 
 private:
 	BoVector3 mLookAt;
+	BoVector3 mEye;
+	BoVector3 mUp;
+
 	GLfloat mPosZ;
 
 	GLfloat mRotation;
