@@ -155,6 +155,11 @@ public slots:
 
 	void slotAdvanceComputerPlayers(unsigned int advanceCount, bool advanceFlag);
 
+	/**
+	 * Emits @ref signalUpdateProductionOptions
+	 **/
+	void slotUpdateProductionOptions();
+
 signals:
 	/**
 	 * Emitted once the game admin starts the game, i.e. clicks on "start
@@ -225,6 +230,12 @@ signals:
 	 * This is also emitted once a production has been completed.
 	 **/
 	void signalUpdateProduction(Unit* factory);
+
+	/**
+	 * Emitted when unit's construction or when technology research has been
+	 * completed to ensure that new production options become available.
+	 **/
+	void signalUpdateProductionOptions();
 
 	void signalNotEnoughMinerals(Player* p);
 	void signalNotEnoughOil(Player* p);

@@ -284,6 +284,13 @@ void BosonCommandFrameBase::slotUpdateProduction(Unit* f)
  }
 }
 
+void BosonCommandFrameBase::slotUpdateProductionOptions()
+{
+ if(selectedUnit()) {
+	setAction(selectedUnit());
+ }
+}
+
 void BosonCommandFrameBase::slotUpdate()
 {
  if (!selectedUnit()) {

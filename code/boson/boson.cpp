@@ -1491,3 +1491,7 @@ bool Boson::advanceFlag() const
  return d->mAdvanceFlag;
 }
 
+void Boson::slotUpdateProductionOptions()
+{
+ emit signalUpdateProductionOptions();
+}

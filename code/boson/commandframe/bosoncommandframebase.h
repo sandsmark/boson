@@ -94,6 +94,8 @@ public slots:
 
 	void slotSelectionChanged(BoSelection*);
 
+	void slotUpdateProductionOptions();
+
 protected:
 // FIXME: these are NOT slots anymore! we use slotSelectionChanged() instead.
 	/**

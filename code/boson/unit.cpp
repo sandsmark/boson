@@ -32,6 +32,7 @@
 #include "bosonmodel.h"
 #include "pluginproperties.h"
 //#include "kspritetooltip.h" // FIXME
+#include "boson.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -864,6 +865,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  setWork(WorkNone);
 
  setRotation((float)(owner->game()->random()->getLong(359)));
+ ((Boson*)owner->game())->slotUpdateProductionOptions();
 }
 
 MobileUnit::~MobileUnit()
@@ -1326,6 +1328,7 @@ void Facility::setConstructionStep(unsigned int step)
  if (step == constructionSteps()) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
+	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	setFrame(0);
  }
 }

@@ -643,6 +643,7 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 		}
 	}
  }
+ ((Boson*)game())->slotUpdateProductionOptions();
 }
 
 bool Player::advanceFlag() const
