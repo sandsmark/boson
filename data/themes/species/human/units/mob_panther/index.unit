@@ -3,13 +3,14 @@ IsFacility=false
 TerrainType=0
 Name=Panther
 Id=10008
-Health=100
-MineralCost=150
+Health=80
+MineralCost=120
 OilCost=80
 Producer=0
 Requirements=3
-Armor=1
-ProductionTime=80
+Armor=2
+Shield=20
+ProductionTime=100
 Weapons=1
 DestroyedParticles=1002
 
@@ -19,11 +20,11 @@ CanGoOnLand=true
 CanGoOnWater=false
 
 [Weapon_0]
-Range=12
+Range=6
 Reload=5
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=3
+Damage=8
 Speed=0
 DamageRange=1
 HitParticles=2001

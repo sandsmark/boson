@@ -3,13 +3,15 @@ IsFacility=false
 TerrainType=0
 Name=Tiger
 Id=10010
-Health=100
-MineralCost=150
+Health=80
+MineralCost=120
 OilCost=80
 Producer=0
 Requirements=3
-Armor=1
-ProductionTime=80
+Armor=0
+Shield=10
+ProductionTime=90
+SightRange=7
 Weapons=1
 DestroyedParticles=1002
 
@@ -20,7 +22,7 @@ CanGoOnWater=false
 
 [Weapon_0]
 Range=4
-Reload=8
+Reload=5
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=5
