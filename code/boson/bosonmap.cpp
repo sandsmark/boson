@@ -28,7 +28,6 @@
 #include <qtimer.h>
 #include <qdatetime.h>
 #include <qdatastream.h>
-#include <qdom.h>
 #include <qimage.h>
 
 #include <kapplication.h>
@@ -64,44 +63,6 @@ void BosonMap::init()
  mHeightMap = 0;
  mTiles = 0;
  setModified(false);
-}
-
-bool BosonMap::loadMap(QDomElement& root)
-{
- QDomNodeList list;
- list = root.elementsByTagName("MapGeo");
- if (list.count() != 1) {
-	boError() << k_funcinfo << "XML error: cannot have tag MapGeo "
-			<< list.count() << " times" << endl;
-	return false;
- }
- QDomElement geo = list.item(0).toElement();
- if (geo.isNull()) {
-	boError() << k_funcinfo << "XML error: geo is not an QDomElement" << endl;
-	return false;
- }
- if (!loadMapGeo(geo)) {
-	boError() << k_funcinfo << "XML error: failed loading map geo" << endl;
-	return false;
- }
-
- list = root.elementsByTagName("MapCells");
- if (list.count() != 1) {
-	boError() << k_funcinfo << "XML error: cannot have tag Map Geo " 
-			<< list.count() << " times" << endl;
-	return false;
- }
- QDomElement cells = list.item(0).toElement();
- if (geo.isNull()) {
-	boError() << k_funcinfo << "XML error: cells is not an QDomElement" << endl;
-	return false;
- }
- if (!loadCells(cells)) {
-	boError() << k_funcinfo << "XML error: failed loading map geo" << endl;
-	return false;
- }
-
- return true;
 }
 
 bool BosonMap::loadMapFromFile(QDataStream& stream)
@@ -228,77 +189,6 @@ bool BosonMap::loadHeightMap(QDataStream& stream)
  return true;
 }
 
-
-bool BosonMap::loadMapGeo(QDomElement& node)
-{
- if (!node.hasAttribute("Width")) {
-	boError() << k_funcinfo << "Map width is mandatory!" << endl;
-	return false;
- }
- if (!node.hasAttribute("Height")) {
-	boError() << k_funcinfo << "Map height is mandatory!" << endl;
-	return false;
- }
- Q_INT32 width = node.attribute("Width").toInt();
- Q_INT32 height = node.attribute("Height").toInt();
-
-// lets use the same function as for loading the binary file:
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- stream << width;
- stream << height;
-
- QDataStream readStream(buffer, IO_ReadOnly);
- return loadMapGeo(readStream);
-}
-
-bool BosonMap::loadCells(QDomElement& node)
-{
- QDomNodeList list = node.elementsByTagName("Cell");
- if (list.count() < width() * height()) {
-	boError() << k_funcinfo << "XML error: not enough cells" << endl;
-	return false;
- }
- if (list.count() != width() * height()) {
-	boWarning() << k_funcinfo << "Cell count doesn't match width * height"
-			<< endl;
- }
-
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- int* groundType = new int[width() * height()];
- unsigned char* version = new unsigned char[width() * height()];
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement cell = list.item(i).toElement();
-	if (cell.isNull()) {
-		boError() << k_funcinfo << "XML error: cell is not an QDomElement" << endl;
-	} else {
-		int x;
-		int y;
-		int g;
-		unsigned char v;
-		if (!loadCell(cell, x, y, g, v)) {
-			boError() << k_funcinfo << "XML error: could not load cell" << endl;
-			continue;
-		}
-		groundType[cellArrayPos(x, y)] = g;
-		version[cellArrayPos(x, y)] = v;
-	}
- }
- for (unsigned int i = 0; i < width(); i++) {
-	for (unsigned int j = 0; j < height(); j++) {
-		saveCell(stream, groundType[cellArrayPos(i, j)],
-				version[cellArrayPos(i, j)]);
-	}
- }
-
- delete[] groundType;
- delete[] version;
-
- QDataStream readStream(buffer, IO_ReadOnly);
- return loadCells(readStream);
-}
-
 bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 {
 // boDebug() << k_funcinfo << endl;
@@ -359,40 +249,6 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 
  // No need to recalculate cell values here since actual values will be loaded
  //  from network stream later... right?
- return true;
-}
-
-bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsigned char& version)
-{
- if (!node.hasAttribute("x")) {
-	boError() << k_funcinfo << "XML: attribute x is mandatory!" << endl;
-	return false;
- }
- if (!node.hasAttribute("y")) {
-	boError() << k_funcinfo << "XML: attribute y is mandatory!" << endl;
-	return false;
- }
- if (!node.hasAttribute("GroundType")) {
-	boError() << k_funcinfo << "XML: attribute GroundType is mandatory!" << endl;
-	return false;
- }
- if (!node.hasAttribute("Version")) {
-	boError() << k_funcinfo << "XML: attribute Version is mandatory!" << endl;
-	return false;
- }
- x = node.attribute("x").toInt();
- y = node.attribute("y").toInt();
- groundType = node.attribute("GroundType").toInt();
- version = (unsigned char)node.attribute("Version").toInt(); // not nice...
-
- if (x >= (int)width()) {
-	boError() << k_lineinfo << "x >= width" << endl;
-	return false;
- }
- if (y >= (int)height()) {
-	boError() << k_lineinfo << "y >= height" << endl;
-	return false;
- }
  return true;
 }
 

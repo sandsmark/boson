@@ -24,14 +24,13 @@
 class Cell;
 class UnitBase;
 class Boson;
-class QDomElement;
 class QStringList;
 class QDataStream;
 class BosonTiles;
 
 /**
  * This class represents a boson map. It is part of a @ref BosonPlayField (a
- * .bpf file) and gets stored on disk as XML (see @ref QDomDocument).
+ * .bpf file) and gets stored on disk as binary.
  *
  * The map consists of cells (rectangles of fixed width/height). There are @ref
  * width x @ref height cells on a map, you can retrieve a cell using @ref cell.
@@ -40,11 +39,6 @@ class BosonTiles;
  * Another (small) part of the map is the height map. This file (stored as .png
  * on disk) specifies the height of a corner of a cell and is used to represent
  * 3d terrain.
- *
- * Note that the map is loaded and stored on the disk as XML, but we use a
- * binary format internally. Therefore there are usually two different @ref
- * loadMap and @ref saveMap (and all other functions that get called by them),
- * one which takes a @ref QDomElement and one which takes a @ref QDataStream.
  *
  * @short Representation of maps and cells in boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -111,7 +105,6 @@ public:
 		return true;
 	}
 
-	bool loadMap(QDomElement& node);
 	bool loadHeightMapImage(const QByteArray&);
 
 	bool saveMapToFile(QDataStream& stream);
@@ -242,10 +235,6 @@ protected:
 
 	bool loadHeightMap(QDataStream& stream);
 
-
-	bool loadMapGeo(QDomElement&);
-	bool loadCells(QDomElement&);
-	bool loadCell(QDomElement&, int& x, int& y, int& groundType, unsigned char& b);
 
 	static float pixelToHeight(int p);
 	static int heightToPixel(float height);

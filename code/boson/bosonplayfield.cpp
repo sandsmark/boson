@@ -269,34 +269,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& he
  return ret;
 }
 
-bool BosonPlayField::loadMapFromXML(const QByteArray& xml, BosonMap* map)
-{
- if (xml.size() == 0) {
-	boError() << k_funcinfo << "empty byte array for map.xml" << endl;
-	return false;
- }
- QDomDocument doc("BosonMap");
- QString errorMsg;
- int lineNo, columnNo;
- if (!doc.setContent(xml, &errorMsg, &lineNo, &columnNo)) {
-	boError() << k_funcinfo << "Parse error in line " << lineNo << ",column " << columnNo
-			<< " error message: " << errorMsg << endl;
-	return false;
- }
- QDomElement root = doc.documentElement();
-
- if (root.childNodes().count() < 2) { // at least map geo and map cells
-	boError() << k_funcinfo << "No map found in file" << endl;
-	return false;
- }
- bool ret = map->loadMap(root);
- if (!ret) {
-	boError() << k_funcinfo << "Could not load map" << endl;
-	return false;
- }
- return ret;
-}
-
 bool BosonPlayField::loadScenarioFromFile(const QByteArray& xml)
 {
  if (xml.size() == 0) {
