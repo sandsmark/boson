@@ -181,7 +181,6 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
  }
  d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
- d->mHitPoint.cellToCanvas();
 
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
@@ -229,9 +228,7 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("ExplodingDamage", mExplodingDamage);
  conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
- BoVector3 tmpHitPoint(d->mHitPoint);
- tmpHitPoint.canvasToCell();
- BosonConfig::writeEntry(&conf, "HitPoint", tmpHitPoint);
+ BosonConfig::writeEntry(&conf, "HitPoint", mHitPoint);
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
