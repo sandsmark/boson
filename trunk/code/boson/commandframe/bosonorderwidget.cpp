@@ -25,7 +25,6 @@
 #include "../unitplugins.h"
 #include "../player.h"
 #include "../unitproperties.h"
-#include "../cell.h"
 #include "../bosongroundtheme.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
@@ -191,11 +190,6 @@ void BosonOrderWidget::setOrderButtonsGround()
  for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
 	d->mOrderButton[i]->setGround(i, d->mGroundTheme);
  }
-}
-
-void BosonOrderWidget::setCellType(CellType index)
-{
- d->mCellType = index;
 }
 
 void BosonOrderWidget::initEditor()
