@@ -123,8 +123,8 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
- d->mMusic->setSound(BosonConfig::sound());
- d->mMusic->setMusic(BosonConfig::music());
+ d->mMusic->setSound(boConfig->sound());
+ d->mMusic->setMusic(boConfig->music());
 
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
@@ -145,6 +145,8 @@ void BosonWidget::init()
  d->mArrowKeyStep = ARROW_KEY_STEP;
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
+
+ BosonConfig::initBosonConfig(); // initialize global config
 
  d->mCanvas = new BosonCanvas(this);
 
@@ -172,7 +174,7 @@ void BosonWidget::init()
 // AB: but nevertheless this might be necessary - e.g. Boson::signalAddUnit()
 // sends a request to add a unit but Boson should rather create it itself.
  d->mBoson = new Boson(this);
- d->mBoson->slotSetGameSpeed(BosonConfig::gameSpeed());
+ d->mBoson->slotSetGameSpeed(BosonConfig::readGameSpeed());
  connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
@@ -298,7 +300,7 @@ void BosonWidget::addLocalPlayer()
 	delete d->mLocalPlayer;
  }
  Player* p = new Player;
- p->setName(BosonConfig::localPlayerName());
+ p->setName(BosonConfig::readLocalPlayerName());
  KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay->viewport(), true);
  connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
@@ -660,7 +662,7 @@ void BosonWidget::addEditorCommandFrame(QWidget* parent)
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
- slotChatFramePosition(BosonConfig::chatFramePosition());
+ slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
 
 void BosonWidget::addGameCommandFrame(QWidget* parent)
@@ -681,7 +683,7 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
  
- slotChatFramePosition(BosonConfig::chatFramePosition());
+ slotChatFramePosition(BosonConfig::readChatFramePosition());
 }
 
 void BosonWidget::startEditor()
@@ -839,8 +841,7 @@ void BosonWidget::saveConfig()
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
  BosonConfig::saveChatFramePosition(d->mChatPos);
- BosonConfig::saveSound(sound());
- BosonConfig::saveMusic(music());
+ boConfig->save();
  kdDebug() << k_funcinfo << "done" << endl;
 }
 

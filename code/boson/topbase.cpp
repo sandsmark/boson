@@ -80,7 +80,7 @@ TopBase::TopBase()
  setDockEnabled(d->mCommandBar, DockBottom, false);
  connect(mBosonWidget, SIGNAL(signalMoveCommandFrame(int)),
 		this, SLOT(slotMoveCommandFrame(int)));
- slotMoveCommandFrame(BosonConfig::commandFramePosition());
+ slotMoveCommandFrame(BosonConfig::readCommandFramePosition());
  
  showMaximized();
 }
