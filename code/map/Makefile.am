@@ -23,28 +23,22 @@ INCLUDES= $(all_includes)
 
 #LDFLAGS =  -s 
 
-noinst_PROGRAMS = createGround # boeditor
+noinst_PROGRAMS = createGround
 
-
-#boeditor
-#boeditor_METASOURCES = USE_AUTOMOC
-boeditor_SOURCES = boeditor.cpp
-boeditor_LDADD   = ../common/libboson.a -lkdecore -lqt
-boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-
+METASOURCES = AUTO
 
 createGround_SOURCES = createGround.cpp
 createGround_LDADD   = ../common/libboson.a -lqt
 createGround_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 
 #basic.bpf
-data_DATA = basic.bpf
-datadir = $(kde_datadir)/boson/map
-basic.bpf : boeditor
-	./boeditor
+data_DATA = earth.png
+datadir = $(kde_datadir)/boson/themes/ground
 
+earth.png : createGround
+	./createGround
 
 #garbage
-EXTRA_DIST =  map.h boeditor.cpp boeditor.h createGround.cpp
-CLEANFILES = basic.bpf
+EXTRA_DIST =  createGround.cpp
+CLEANFILES = basic.bpf earth.png
 
