@@ -180,10 +180,10 @@ void BosonCommandFrame::init()
 
  initPlugins();
 
- connect(selectionWidget(), SIGNAL(signalAction(BoSpecificAction)),
-		this, SLOT(slotProduce(BoSpecificAction)));
- connect(d->mUnitActions, SIGNAL(signalAction(BoSpecificAction)),
-		this, SIGNAL(signalAction(BoSpecificAction)));
+ connect(selectionWidget(), SIGNAL(signalAction(const BoSpecificAction&)),
+		this, SLOT(slotProduce(const BoSpecificAction&)));
+ connect(d->mUnitActions, SIGNAL(signalAction(const BoSpecificAction&)),
+		this, SIGNAL(signalAction(const BoSpecificAction&)));
 }
 
 BosonCommandFrame::~BosonCommandFrame()

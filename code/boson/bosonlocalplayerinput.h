@@ -68,10 +68,10 @@ class BosonLocalPlayerInput : public KGameIO
 
 
   protected slots:
-    virtual void slotAction(BoSpecificAction action);
+    virtual void slotAction(const BoSpecificAction& action);
 
   signals:
-    void signalAction(BoSpecificAction action);
+    void signalAction(const BoSpecificAction& action);
 
   private:
     BosonCommandFrameBase* mCmdFrame;

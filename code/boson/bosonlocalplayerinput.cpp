@@ -56,11 +56,11 @@ void BosonLocalPlayerInput::setCommandFrame(BosonCommandFrameBase* cmdframe)
     return;
   }
   mCmdFrame = cmdframe;
-  connect(cmdframe, SIGNAL(signalAction(BoSpecificAction)),
-      this, SLOT(slotAction(BoSpecificAction)));
+  connect(cmdframe, SIGNAL(signalAction(const BoSpecificAction&)),
+      this, SLOT(slotAction(const BoSpecificAction&)));
 }
 
-void BosonLocalPlayerInput::slotAction(BoSpecificAction action)
+void BosonLocalPlayerInput::slotAction(const BoSpecificAction& action)
 {
   boDebug() << k_funcinfo << "Action type: " << action.type() << endl;
   if (action.isProduceAction()) {

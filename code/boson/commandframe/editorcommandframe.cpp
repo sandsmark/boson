@@ -72,8 +72,8 @@ void EditorCommandFrame::init()
 
 // the order buttons
 // FIXME: why cannot selectionWidget() be used here instead of d->mPlacementWidget ???
- connect(d->mPlacementWidget, SIGNAL(signalAction(BoSpecificAction)),
-		this, SLOT(slotPlaceUnit(BoSpecificAction)));
+ connect(d->mPlacementWidget, SIGNAL(signalAction(const BoSpecificAction&)),
+		this, SLOT(slotPlaceUnit(const BoSpecificAction&)));
  connect(d->mPlacementWidget, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		this, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
 }
