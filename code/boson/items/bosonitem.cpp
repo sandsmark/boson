@@ -367,6 +367,8 @@ void BosonItem::setSize(int width, int height, float depth)
 
 void BosonItem::renderItem()
 {
+ BO_CHECK_NULL_RET(mModel);
+ BO_CHECK_NULL_RET(mCurrentFrame);
  mModel->enablePointer();
  if (displayList() != 0) {
 #warning FIXME: displaylists and teamcolor!
