@@ -91,6 +91,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned in
  }
 
  glDisable(GL_BLEND);
+ glColor4ub(255, 255, 255, 255);
 }
 
 unsigned int BoDefaultGroundRenderer::renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart)
