@@ -29,9 +29,11 @@ class BosonLoadingWidget : public QWidget
       {
         SendMap = 0,
         ReceiveMap,
+        LoadMap,
         InitClasses,
         LoadTiles,
         LoadUnits,
+        LoadGame,
         InitGame,
         StartingGame,
         LoadingDone
@@ -43,6 +45,8 @@ class BosonLoadingWidget : public QWidget
     void setLoading(LoadingType load);
     void setProgress(int prog);
     void setSteps(int steps);
+    
+    void showProgressBar(bool show = true);
 
   protected:
     QVBoxLayout* mBosonLoadingWidgetLayout;

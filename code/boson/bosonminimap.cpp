@@ -214,6 +214,12 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
+ if(!mLocalPlayer) {
+	return;
+ }
+ // x and y are pixel coordinates
+ x = x / BO_TILE_SIZE;
+ y = y / BO_TILE_SIZE;
  if (mLocalPlayer->isFogged(x, y)) {
 	return;
  }
@@ -275,6 +281,9 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
+ if(!mLocalPlayer) {
+	return;
+ }
  int x = (int)(oldX / BO_TILE_SIZE);
  int y = (int)(oldY / BO_TILE_SIZE);
  if (!mLocalPlayer->isFogged(x, y)) {
@@ -285,8 +294,8 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
 	}
 	slotAddCell(x, y, c->groundType(), c->version());
  }
- x = (int)(unit->x() / BO_TILE_SIZE);
- y = (int)(unit->y() / BO_TILE_SIZE);
+ x = (int)unit->x();
+ y = (int)unit->y();
  slotAddUnit(unit, x, y);
 }
 
@@ -320,7 +329,7 @@ void BosonMiniMap::slotUnfog(int x, int y)
  QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
-	slotAddUnit(u, (int)(u->x() / BO_TILE_SIZE), (int)(u->y() / BO_TILE_SIZE));
+	slotAddUnit(u, (int)u->x(), (int)u->y());
  }
 }
 

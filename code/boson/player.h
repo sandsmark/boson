@@ -126,6 +126,9 @@ public:
 	 **/
 	bool isEnemy(Player* player) const;
 
+	int mobilesCount();
+	int facilitiesCount();
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
@@ -137,6 +140,8 @@ signals:
 	void signalUnfog(int x, int y);
 
 	void signalShowMiniMap(bool show);
+
+	void signalUnitLoaded(Unit* unit, int x, int y);
 
 public slots:
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);

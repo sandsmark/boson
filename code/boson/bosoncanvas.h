@@ -78,8 +78,9 @@ public:
 	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
 	 * use @ref QApplication::processEvents
 	 * @param tileFile currently always "earth.png
+	 * @param withtimer whether to use timer
 	 **/
-	void loadTiles(const QString& tileFile);
+	void loadTiles(const QString& tileFile, bool withtimer = true);
 
 	/**
 	 * Reimlemented from QCanvas::addAnimation because of @ref advance

@@ -29,6 +29,8 @@
 #include "bosonconfig.h"
 #include "bosonscenario.h"
 #include "bosonstatistics.h"
+#include "bosonplayfield.h"
+#include "bosonmap.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -40,6 +42,7 @@
 #include <qptrlist.h>
 #include <qptrqueue.h>
 #include <qdom.h>
+#include <qdatastream.h>
 
 #include "boson.moc"
 
@@ -50,6 +53,9 @@
 // on the other hand i often need to test a few things where i don't need those
 // messages. defining this lets easily disable the debug output.
 //#define NO_ADVANCE_DEBUG
+
+// Saving format version (000005 = 00.00.05)
+#define BOSON_SAVEGAME_FORMAT_VERSION 000005
 
 class BoMessage
 {
@@ -68,8 +74,12 @@ public:
 	{
 		mGameTimer = 0;
 		mCanvas = 0;
+		mMap = 0;
+		mPlayer = 0;
 
 		mAdvanceDividerCount = 0;
+
+		mLoadingStatus = Boson::NotLoaded;
 	}
 
 	QTimer* mGameTimer;
@@ -84,12 +94,15 @@ public:
 	bool mDelayedWaiting; // FIXME bad name!
 
 	QCanvas* mCanvas; // this pointer is anti-OO IMHO
+	BosonPlayField* mMap;
+	Player* mPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
 	
 	KGamePropertyInt mGameSpeed;
 
 	KGameProperty<unsigned long int> mNextUnitId;
 	KGameProperty<unsigned int> mAdvanceCount;
+	Boson::LoadingStatus mLoadingStatus;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -142,6 +155,22 @@ Boson::~Boson()
 void Boson::setCanvas(QCanvas* c)
 {
  d->mCanvas = c;
+}
+
+void Boson::setMap(BosonPlayField* m)
+{
+ kdDebug() << k_funcinfo << endl;
+ d->mMap = m;
+}
+
+Player* Boson::localPlayer()
+{
+ return d->mPlayer;
+}
+
+void Boson::setLocalPlayer(Player* p)
+{
+ d->mPlayer = p;
 }
 
 void Boson::quitGame()
@@ -816,6 +845,36 @@ Unit* Boson::createUnit(int unitType, Player* owner)
  return unit;
 }
 
+Unit* Boson::loadUnit(int unitType, Player* owner)
+{
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return 0;
+ }
+ SpeciesTheme* theme = owner->speciesTheme();
+ if (!theme) {
+	kdError() << k_funcinfo << "No theme for this player" << endl;
+	return 0; // BAAAAD - will crash
+ }
+ const UnitProperties* prop = theme->unitProperties(unitType);
+ if (!prop) {
+	kdError() << "Unknown unitType " << unitType << endl;
+	return 0;
+ }
+
+ Unit* unit = 0;
+ if (prop->isMobile()) {
+	unit = new MobileUnit(prop, owner, d->mCanvas);
+ } else if (prop->isFacility()) {
+	unit = new Facility(prop, owner, d->mCanvas);
+ } else { // should be impossible
+	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	return 0;
+ }
+
+ return unit;
+}
+
 unsigned long int Boson::nextUnitId()
 {
  d->mNextUnitId = d->mNextUnitId + 1;
@@ -844,8 +903,12 @@ KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
  kdDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io 	
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
-// connect(p, SIGNAL(signalLoadUnit(int, unsigned long int, Player*)), 
-//		this, SLOT(slotLoadUnit(int, unsigned long int, Player*)));
+ p->setGame(this);
+ if(d->mMap->map()) {
+	p->initMap(d->mMap->map());
+ }
+ connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
+		this, SIGNAL(signalAddUnit(Unit*, int, int)));
  return p;
 }
 
@@ -1003,7 +1066,7 @@ Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
 {
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
- emit signalAddUnit(unit, x, y);
+ emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  return unit;
 }
 
@@ -1025,7 +1088,7 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	// (non-critical) values were not loaded.
  }
  
- emit signalAddUnit(unit, x, y);
+ emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  return unit;
 }
 
@@ -1179,3 +1242,102 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  delete m;
 }
 
+bool Boson::save(QDataStream& stream, bool saveplayers)
+{
+ kdDebug() << k_funcinfo << endl;
+ // KGame::load() doesn't emit signalLoadPrePlayers in KDE 3.0.x, so we have to
+ //  rewrite some code to be able to load map before players (because players
+ //  need map)
+
+ // First write some magic data
+ // For filetype detection
+ stream << (Q_UINT8)128;
+ stream << (Q_UINT8)'B' << (Q_UINT8)'S' << (Q_UINT8)'G';  // BSG = Boson SaveGame
+ // Magic cookie
+ stream << (Q_UINT32)cookie();
+ // Version information (for future format changes and backwards compatibility)
+ stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
+
+ // Save map
+ d->mMap->saveMap(stream);
+
+ // Save local player (only id)
+ stream << d->mPlayer->id();
+
+ // Save KGame stuff
+ if(!KGame::save(stream, saveplayers)) {
+	kdError() << k_funcinfo << "Can't save KGame!" << endl;
+ }
+
+ kdDebug() << k_funcinfo << " done" << endl;
+ return true;
+}
+
+bool Boson::load(QDataStream& stream, bool reset)
+{
+ kdDebug() << k_funcinfo << endl;
+ d->mLoadingStatus = LoadingInProgress;
+
+ // Load magic data
+ Q_UINT8 a, b1, b2, b3;
+ Q_INT32 c, v;
+ stream >> a >> b1 >> b2 >> b3;
+ if((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
+	// Error - not Boson SaveGame
+	kdError() << k_funcinfo << "This file is not Boson SaveGame" << endl;
+	d->mLoadingStatus = InvalidFileFormat;
+	return false;
+ }
+ stream >> c;
+ if(c != cookie()) {
+	// Error - wrong cookie
+	kdError() << k_funcinfo << "Invalid cookie in header" << endl;
+	d->mLoadingStatus = InvalidCookie;
+	return false;
+ }
+ stream >> v;
+ if(v != BOSON_SAVEGAME_FORMAT_VERSION) {
+	// Error - older version
+	// TODO: It may be possible to load this version
+	kdError() << k_funcinfo << "Unsupported format version" << endl;
+	d->mLoadingStatus = InvalidVersion;
+	return false;
+ }
+
+ // Load map
+ BosonPlayField* f = new BosonPlayField;
+ f->loadMap(stream);
+ QByteArray buffer;
+ QDataStream mapstream(buffer, IO_WriteOnly);
+ f->saveMap(mapstream);
+ delete f;
+
+ emit signalInitMap(buffer);
+
+ // Load local player's id
+ Q_UINT32 localId;
+ stream >> localId;
+
+ // Load KGame stuff
+ if(!KGame::load(stream, reset)) {
+	// KGame loading error
+	kdError() << k_funcinfo << "KGame loading error" << endl;
+	d->mLoadingStatus = KGameError;
+	return false;
+ }
+
+ // Set local player
+ d->mPlayer = (Player*)findPlayer(localId);
+
+ // Set game status to Init. It will be set to Run in TopWidget
+ setGameStatus(Init);
+
+ d->mLoadingStatus = LoadingCompleted;
+ kdDebug() << k_funcinfo << " done" << endl;
+ return true;
+}
+
+Boson::LoadingStatus Boson::loadingStatus()
+{
+ return d->mLoadingStatus;
+}

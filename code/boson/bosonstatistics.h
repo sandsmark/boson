@@ -20,6 +20,7 @@
 #define BOSONSTATISTICS_H
 
 class UnitBase;
+class QDataStream;
 
 /**
  * Whenever a unit shoots its weapon or whenever a new unit is produced we need
@@ -119,6 +120,18 @@ public:
 
 
 	static unsigned int winningPoints();
+
+	/** Load all statistics from QDataStream
+	 * This is used for loading saved games
+	 * @param stream QDataStream from where statistics are read
+	 **/
+	void load(QDataStream& stream);
+
+	/** Save all statistics to QDataStream
+	 * This is used for saving games
+	 * @param stream QDataStream where statistics are written to
+	 **/
+	void save(QDataStream& stream);
 
 protected:
 	static float pointsPerRefinedMinerals();

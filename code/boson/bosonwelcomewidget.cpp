@@ -72,15 +72,22 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mNewGameButton = new QPushButton( mTextFrame, "newgamebutton" );
   mNewGameButton->setText( i18n( "S&tart new game" ) );
-  mNewGameButton->setMinimumWidth(150);
+  mNewGameButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mNewGameButton, 0, 0 );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonsLayout->addItem( spacer_3 );
 
+  mLoadGameButton = new QPushButton( mTextFrame, "loadgamebutton" );
+  mLoadGameButton->setText( i18n( "&Load saved game" ) );
+  mLoadGameButton->setMinimumWidth(120);
+  buttonsLayout->addWidget( mLoadGameButton );
+  QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
+  buttonsLayout->addItem( spacer_6 );
+
 #ifndef NO_EDITOR
   mEditorButton = new QPushButton( mTextFrame, "editorbutton" );
   mEditorButton->setText( i18n( "Start &Editor" ) );
-  mEditorButton->setMinimumWidth(150);
+  mEditorButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mEditorButton );
   connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
 #else
@@ -89,7 +96,7 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mQuitButton = new QPushButton( mTextFrame, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );
-  mQuitButton->setMinimumWidth(150);
+  mQuitButton->setMinimumWidth(120);
   buttonsLayout->addWidget( mQuitButton );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
   buttonsLayout->addItem( spacer_4 );
@@ -104,6 +111,7 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   mBosonWelcomeWidgetLayout->addLayout( mMainLayout );
 
   connect(mNewGameButton, SIGNAL(clicked()), this, SIGNAL(signalNewGame()));
+  connect(mLoadGameButton, SIGNAL(clicked()), this, SIGNAL(signalLoadGame()));
   connect(mQuitButton, SIGNAL(clicked()), this, SIGNAL(signalQuit()));
 }
 
