@@ -566,7 +566,7 @@ BoUfoToggleAction::~BoUfoToggleAction()
 
 void BoUfoToggleAction::plug(ufo::UWidget* w)
 {
-#if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2 && 0
+#if UFO_MAJOR_VERSION == 0 && UFO_MINOR_VERSION <= 7 && UFO_MICRO_VERSION <= 2
  // AB: libufo <= 0.7.2 had a broken UCheckBoxMenuItem
  // implementation.
  BoUfoAction::plug(w);
