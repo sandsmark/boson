@@ -1408,6 +1408,23 @@ void Unit::updateRotation()
  setYRotation(rotateY);
 }
 
+void Unit::itemRemoved(BosonItem* item)
+{
+ UnitBase::itemRemoved(item);
+ if (item == (BosonItem*)this) {
+	return;
+ }
+ if ((BosonItem*)target() == item) {
+	setTarget(0);
+ }
+ QPtrListIterator<UnitPlugin> it(d->mPlugins);
+ while (it.current()) {
+	it.current()->itemRemoved(item);
+	++it;
+ }
+}
+
+
 
 /////////////////////////////////////////////////
 // MobileUnit

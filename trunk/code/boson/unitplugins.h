@@ -34,6 +34,7 @@ class Cell;
 class Player;
 class PluginProperties;
 class Boson;
+class BosonItem;
 class BosonWeapon;
 class QPoint;
 class QDomElement;
@@ -98,6 +99,16 @@ public:
 	Boson* game() const;
 
 	virtual int pluginType() const = 0;
+
+	/**
+	 * Called when @p item is about to be removed from the game. When your
+	 * plugin stores a pointer to an item (e.g. a unit, such as a pointer to
+	 * a refinery), you should set it at least to NULL now.
+	 *
+	 * Note that at this point @p item has not yet been deleted, but it will
+	 * be soon!
+	 **/
+	virtual void itemRemoved(BosonItem* item) = 0;
 
 	/**
 	 * @param advanceCount See @ref BosonCanvas::slotAdvance. You can use
@@ -215,6 +226,8 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void itemRemoved(BosonItem*) {}
+
 private:
 	QValueList<QPair<ProductionType, unsigned long int> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
@@ -262,12 +275,15 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void itemRemoved(BosonItem*);
+
 private:
 };
 
 /*
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
+class RessourceMinePlugin;
 class HarvesterPlugin : public UnitPlugin
 {
 public:
@@ -289,7 +305,9 @@ public:
 
 	void setRefinery(Unit* refinery);
 
-	bool canMine(Cell* cell) const;
+	bool canMine(Cell* cell) const; // obsolete
+	bool canMine(Unit*) const;
+	bool canMine(RessourceMinePlugin*) const;
 
 	inline Unit* refinery() const { return mRefinery; }
 
@@ -321,6 +339,8 @@ public:
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
 
+	virtual void itemRemoved(BosonItem*);
+
 private:
 	KGameProperty<int> mResourcesX;
 	KGameProperty<int> mResourcesY;
@@ -329,6 +349,7 @@ private:
 	KGameProperty<int> mHarvestingType; // either mining or refining
 
 	Unit* mRefinery;
+	RessourceMinePlugin* mRessourceMine;
 };
 
 /**
@@ -350,6 +371,8 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
+
+	virtual void itemRemoved(BosonItem*) {}
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved on Unit::save()
@@ -377,6 +400,8 @@ public:
 
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual bool loadFromXML(const QDomElement& root);
+
+	virtual void itemRemoved(BosonItem*) {}
 
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved in Unit::save()
@@ -421,6 +446,8 @@ public:
 	 * @return See @ref RessourceMinePropeties::canProvideOil
 	 **/
 	bool canProvideOil() const;
+
+	virtual void itemRemoved(BosonItem*);
 
 private:
 	KGameProperty<int> mOil;

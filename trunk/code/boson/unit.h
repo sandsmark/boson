@@ -114,6 +114,15 @@ public:
 	virtual void setWork(WorkType w);
 	void setPluginWork(int pluginType);
 
+	/**
+	 * We are about to remove @p item from the game. Make sure that this
+	 * unit does not use that item in any way (e.g. as a target)
+	 *
+	 * -> after this method was called @p item will become an invalid
+	 *  pointer, so all references to that pointer must be set to NULL
+	 **/
+	virtual void itemRemoved(BosonItem* item);
+
 
 	virtual void select(bool markAsLeader = false);
 

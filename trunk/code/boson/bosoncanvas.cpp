@@ -129,12 +129,12 @@ void BosonCanvas::init()
 
 BosonCanvas::~BosonCanvas()
 {
-boDebug()<< k_funcinfo << endl;
+ boDebug()<< k_funcinfo << endl;
  quitGame();
  delete d->mStatistics;
  delete mCollisions;
  delete d;
-boDebug()<< k_funcinfo <<"done"<< endl;
+ boDebug()<< k_funcinfo <<"done"<< endl;
 }
 
 BosonCanvasStatistics* BosonCanvas::canvasStatistics() const
@@ -144,7 +144,7 @@ BosonCanvasStatistics* BosonCanvas::canvasStatistics() const
 
 void BosonCanvas::quitGame()
 {
- deleteDestroyed(); // already called before
+ deleteDestroyed();
  d->mAnimList.clear();
  d->mParticles.clear();
  QMap<int, QPtrList<BosonItem> >::Iterator it;
@@ -157,9 +157,7 @@ void BosonCanvas::quitGame()
 
 void BosonCanvas::deleteDestroyed()
 {
- d->mDestroyedUnits.setAutoDelete(true);
- d->mDestroyedUnits.clear();
- d->mDestroyedUnits.setAutoDelete(false);
+ deleteUnits(&d->mDestroyedUnits);
 }
 
 Cell* BosonCanvas::cell(int x, int y) const
@@ -976,10 +974,28 @@ void BosonCanvas::addItem(BosonItem* item)
  d->mAllItems.append(item);
 }
 
+void BosonCanvas::deleteItem(BosonItem* item)
+{
+ // remove the item from the canvas BEFORE deleting it. we might need to do some
+ // cleanups and might need rtti() for them (which doesnt exist anymore in the
+ // BosonItem d'tor)
+ removeAnimation(item);
+ removeItem(item);
+
+ // actually delete it
+ delete item;
+}
+
 void BosonCanvas::removeItem(BosonItem* item)
 {
+ removeAnimation(item);
  d->mAllItems.remove(item);
+ BoItemList::Iterator it;
+ for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
+	(*it)->itemRemoved(item);
+ }
  emit signalRemovedItem(item);
+
 }
 
 unsigned int BosonCanvas::particleSystemsCount() const
@@ -1023,7 +1039,7 @@ void BosonCanvas::deleteUnusedShots()
 	if (RTTI::isShot(i->rtti())) {
 		BosonShot* shot = (BosonShot*)i;
 		if (!shot->isActive()) {
-			delete i;
+			deleteItem(i);
 		}
 	}
  }
@@ -1058,6 +1074,12 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
 	return false;
  }
+#if 0
+ if (!loadParticlesFromXML(root)) {
+	boError(260) << k_funcinfo << "unable to load particles from XML" << endl;
+	// AB: do NOT return. this is NOT critical.
+ }
+#endif
 
  QDomElement handler = root.namedItem("DataHandler").toElement();
  if (handler.isNull()) {
@@ -1101,7 +1123,6 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 		continue;
 	}
 
-	// FIXME: the unit target must be loaded after _all_ units are loaded
 	QDomNodeList itemList = items.elementsByTagName(QString::fromLatin1("Item"));
 	for (unsigned int j = 0; j < itemList.count(); j++) {
 		QDomElement item = itemList.item(j).toElement();
@@ -1122,6 +1143,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 	return false;
  }
  boDebug(260) << k_funcinfo << "created " << allItems.count() << " items" << endl;
+
  unsigned int itemCount = 0;
  for (unsigned int i = 0; i < allItems.count(); i++) {
 	QDomElement e = allItemElements[i];
@@ -1133,6 +1155,7 @@ bool BosonCanvas::loadItemsFromXML(const QDomElement& root)
 	itemCount++;
  }
  boDebug(260) << k_funcinfo << "loaded " << itemCount << " items" << endl;
+
  return true;
 }
 
@@ -1302,6 +1325,38 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
  return true;
 }
 
+#if 0
+bool BosonCanvas::loadParticlesFromXML(const QDomElement& root)
+{
+ bool ret = true;
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("ParticleSystem"));
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	bool ok = false;
+	unsigned int ownerId = 0;
+	BosonItem* owner = 0;
+	ownerId = root.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
+	if (!ownerId) {
+		boError() << k_funcinfo << "invalid number for OwnerId" << endl;
+		ret = false;
+		continue;
+	}
+	if (!owner) {
+		boError() << k_funcinfo << "could not find item " << ownerId << endl;
+		ret = false;
+		continue;
+	}
+	SpeciesTheme* theme = 0;
+	if (!theme) {
+		boError() << k_funcinfo << "could not find speciestheme" << endl;
+		ret = false;
+		continue;
+	}
+ }
+ return ret;
+}
+#endif
+
 bool BosonCanvas::saveAsXML(QDomElement& root)
 {
  boDebug() << k_funcinfo << endl;
@@ -1352,6 +1407,15 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	}
 	items.appendChild(item);
  }
+#if 0
+ QPtrListIterator<BosonParticleSystem> particleIt(d->mParticles);
+ while (particleIt.current()) {
+	QDomElement e = doc.createElement(QString::fromLatin1("ParticleSystem"));
+	particleIt.current()->saveAsXML(e);
+	root.appendChild(e);
+	++particleIt;
+ }
+#endif
 
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
@@ -1420,7 +1484,7 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  while (units->count() > 0) {
 	Unit* u = units->first();
 	units->removeRef(u);
-	delete u;
+	deleteItem(u);
  }
 }
 

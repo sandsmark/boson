@@ -296,6 +296,8 @@ class BosonWeapon : public UnitPlugin
      **/
     bool dropBomb();
 
+    virtual void itemRemoved(BosonItem*) {}
+
   protected:
     inline void reload()  { if(mReloadCounter > 0) { mReloadCounter = mReloadCounter - 1; } }
 
