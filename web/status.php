@@ -63,11 +63,13 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Technology upgrades are working now</li>
     <li>Added minimap image for disabled minimap</li>
     <li>Weapon specific sound support</li>
+    <li>Smoke for powerplant and oilrefinery</li>
   </ul>
   <h4>Data</h4>
   <ul>
     <li>New facility: Ferry</li>
-    <li>Unit models improvements<li>
+    <li>Unit models improvements</li>
+    <li>Warfactory is now Weapons Factory</li>
   </ul>
   <h4>Editor</h4>
   <ul>

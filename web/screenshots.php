@@ -64,24 +64,33 @@ echo "
 **  draw_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
 **  Note that filenames do not contain directory and that files are in JPG AND NOT IN PNG because of the size
 **/
+echo "<tr>";
+
+draw_screenshot("Smoking refineries",
+    "NEW: 31. Dec. 2002 (CVS)", "smoke_refineries_thumb.jpg", "smoke_refineries.jpg");
+draw_screenshot("The big war",
+    "NEW: 31. Dec. 2002 (CVS)", "big_war_thumb.jpg", "big_war.jpg");
+echo "
+</tr>
+<tr>";
 draw_screenshot("Blowing up Command center of the enemy",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-1-thumb.jpg", "0.7-1.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-1-thumb.jpg", "0.7-1.jpg");
 draw_screenshot("Smoking wreckages after a failed attack",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-2-thumb.jpg", "0.7-2.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-2-thumb.jpg", "0.7-2.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("Here you can see much smoke from wreckages and missiles and new camera system",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-3-thumb.jpg", "0.7-3.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-3-thumb.jpg", "0.7-3.jpg");
 draw_screenshot("",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-4-thumb.jpg", "0.7-4.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-4-thumb.jpg", "0.7-4.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-5-thumb.jpg", "0.7-5.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-5-thumb.jpg", "0.7-5.jpg");
 draw_screenshot("Outer defenses of an enemy being taken out",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.jpg", "0.7-6.jpg");
+    "10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.jpg", "0.7-6.jpg");
 echo "
 </tr>
 <tr>";
