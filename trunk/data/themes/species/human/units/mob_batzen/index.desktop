@@ -5,14 +5,14 @@ Name=Batzen
 Id=10006
 Health=100
 MineralCost=150
-WeaponRange=4
+WeaponRange=6
 WeaponDamage=12
-Reload=8
+Reload=50
 Producer=0
 Requirements=3
 Armor=1
-Shield=50
 ProductionTime=80
+MissileSpeed=6
 
 [Boson Mobile Unit]
 Speed=4
