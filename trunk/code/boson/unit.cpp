@@ -859,7 +859,9 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
+ QCanvasItem::moveBy(xVelocity(), yVelocity());
  QValueList<Unit*> l = unitCollisions(true);
+ QCanvasItem::moveBy(-xVelocity(), -yVelocity());
  if (!l.isEmpty()) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
 //	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
