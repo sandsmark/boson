@@ -101,7 +101,7 @@ void BosonApp::initCanvas(int w, int h)
 
 	QPixmap *p = new QPixmap(themePath);
 	if (p->isNull() ) {
-		printf("can't load earth.jpeg\n");
+		printf("can't load earth.png\n");
 		exit(1);
 	}
 
