@@ -460,3 +460,4 @@ Arts::StereoEffectStack BosonSound::effectStack()
 { 
  return d->mEffectStack; 
 }
+

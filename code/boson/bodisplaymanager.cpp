@@ -142,6 +142,7 @@ BoDisplayManager::BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool ga
 BoDisplayManager::~BoDisplayManager()
 {
  kdDebug() << k_funcinfo << endl;
+ d->mSelectionGroups.clear();
  d->mDisplayList.clear();
  d->mBoxList.clear();
  delete d;

@@ -34,7 +34,8 @@ Game TODOs
   QPainter to paint it to pixmap)
 - Do not start game before all players has loaded their data
 - BosonTiles::mTilesImage is unused in game mode. free memory
-- UnitGroups (i.e. selection groups)
+- mark selected units, i.e. display the group number in the selectbox (and also
+  in the cmd frame for every unit)
 - maybe provide UnitGroups without keyboard, too. select units, click on a
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
@@ -55,9 +56,6 @@ Editor (map, unit, scenario) TODOs
   support editor anymore
 
 General TODOs
-- zooming (QCanvas::setWorldMatrix()) - mostly done
-- SpeciesTheme loads all pixmaps into memory - share it between different
-  players (if they have the same themes)
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
 - use typeId = 0 as invalid (NOT -1!)
