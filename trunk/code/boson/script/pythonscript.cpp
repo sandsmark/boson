@@ -62,12 +62,16 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitPosition", py_unitPosition, METH_VARARGS, 0 },
   { (char*)"unitOwner", py_unitOwner, METH_VARARGS, 0 },
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
+  { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
   { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
   { (char*)"canUnitProduce", py_canUnitProduce, METH_VARARGS, 0 },
   { (char*)"productionTypes", py_productionTypes, METH_VARARGS, 0 },
   { (char*)"isUnitAlive", py_isUnitAlive, METH_VARARGS, 0 },
   { (char*)"allPlayerUnits", py_allPlayerUnits, METH_VARARGS, 0 },
+  { (char*)"allPlayerUnitsCount", py_allPlayerUnitsCount, METH_VARARGS, 0 },
+  { (char*)"playerUnitsOfType", py_playerUnitsOfType, METH_VARARGS, 0 },
+  { (char*)"playerUnitsOfTypeCount", py_playerUnitsOfTypeCount, METH_VARARGS, 0 },
   // Camera
   { (char*)"moveCamera", py_moveCamera, METH_VARARGS, 0 },
   { (char*)"moveCameraBy", py_moveCameraBy, METH_VARARGS, 0 },
@@ -641,6 +645,17 @@ PyObject* PythonScript::py_unitType(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", BosonScript::unitType(id));
+}
+
+PyObject* PythonScript::py_unitWork(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::unitWork(id));
 }
 
 PyObject* PythonScript::py_isUnitMobile(PyObject*, PyObject* args)

@@ -41,6 +41,7 @@
 #include "../bosonparticlesystemproperties.h"
 #include "../playerio.h"
 #include "../pluginproperties.h"
+#include "../unitbase.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -578,6 +579,24 @@ int BosonScript::unitType(int id)
   }
 
   return u->unitProperties()->typeId();
+}
+
+int BosonScript::unitWork(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return -1;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return -1;
+  }
+
+  return (int)u->work();
 }
 
 bool BosonScript::isUnitMobile(int id)
