@@ -23,7 +23,6 @@
 #include "bosonorderbutton.h"
 #include "../unit.h"
 #include "../unitplugins.h"
-#include "../player.h"
 #include "../unitproperties.h"
 #include "../bosongroundtheme.h"
 #include "../bosonconfig.h"
@@ -60,14 +59,12 @@ public:
 	
 	BosonGroundTheme* mGroundTheme;
 
-	CellType mCellType; // plain tiles, small tiles, ...
 	bool mIsProduceAction;
 };
 
 BosonOrderWidget::BosonOrderWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BosonOrderWidgetPrivate;
- d->mCellType = CellPlain;
  d->mIsProduceAction = false;
 }
 
