@@ -55,20 +55,9 @@ public:
 	unsigned int mConstructionFrames;
 };
 
-class UnitProperties::UnitPropertiesPrivate
-{
-public:
-	UnitPropertiesPrivate()
-	{
-	}
-
-	unsigned long int mArmor;
-	unsigned long int mShields;
-};
 
 UnitProperties::UnitProperties(SpeciesTheme* theme)
 {
- d = new UnitPropertiesPrivate;
  mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
@@ -76,7 +65,6 @@ UnitProperties::UnitProperties(SpeciesTheme* theme)
 
 UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
 {
- d = new UnitPropertiesPrivate;
  mTheme = theme;
  mMobileProperties = 0;
  mFacilityProperties = 0;
@@ -88,7 +76,6 @@ UnitProperties::~UnitProperties()
 {
  delete mMobileProperties;
  delete mFacilityProperties;
- delete d;
 }
 
 void UnitProperties::loadUnitType(const QString& fileName)
@@ -121,8 +108,8 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
  mReload = conf.readUnsignedNumEntry("Reload", 0);
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
- d->mShields = conf.readUnsignedLongNumEntry("Shield", 0);
- d->mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
+ mShields = conf.readUnsignedLongNumEntry("Shield", 0);
+ mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
  mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft() && weaponDamage());
  mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()) && weaponDamage());
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
@@ -185,16 +172,6 @@ bool UnitProperties::isMobile() const
 bool UnitProperties::isFacility() const
 {
  return (mFacilityProperties != 0);
-}
-
-unsigned long int UnitProperties::armor() const
-{
- return d->mArmor;
-}
-
-unsigned long int UnitProperties::shields() const
-{
- return d->mShields;
 }
 
 unsigned long int UnitProperties::mineralCost() const

@@ -82,14 +82,14 @@ public:
 	unsigned long int health() const { return mHealth; }
 
 	/**
-	 * @return The default shields value of this unit. Not yet used.
+	 * @return The default shields value of this unit.
 	 **/
-	unsigned long int shields() const;
+	unsigned long int shields() const { return mShields; }
 
 	/**
-	 * @return The default armor value of this unit. Not yet used.
+	 * @return The default armor value of this unit.
 	 **/
-	unsigned long int armor() const;
+	unsigned long int armor() const { return mArmor; }
 
 	/**
 	 * @return How much this unit costs (of your mineral account)
@@ -290,9 +290,6 @@ protected:
 	void loadFacilityProperties(KSimpleConfig* conf);
 	
 private:
-	class UnitPropertiesPrivate;
-	UnitPropertiesPrivate* d;
-
 	SpeciesTheme* mTheme;
 
 	QString mName;
@@ -312,6 +309,8 @@ private:
 	bool mCanShootAtLandUnits;
 	bool mSupportMiniMap;
 	QValueList<unsigned long int> mRequisities;
+	unsigned long int mArmor;
+	unsigned long int mShields;
 
 	class MobileProperties;
 	class FacilityProperties;
