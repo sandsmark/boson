@@ -55,7 +55,7 @@ class BosonApp : public KTMainWindow
 {    Q_OBJECT 
 public: 
   /** construtor */
-  BosonApp(); 
+  BosonApp(char *servername=0l); 
   /** destructor */
   ~BosonApp();
 
@@ -78,9 +78,9 @@ protected:
     * by calling readOptions() and calls the initXX functions to set up
     * the main view items
     */
-  void init();  
+  void init(char *servername=0l);  
   /** initSocket try to connect to the BosonServer */
-  void initSocket();
+  void initSocket(char *servername=0l);
   /** initMenuBar creates the menu_bar and inserts the menuitems */
   void initMenuBar(); 
   /** this creates the toolbars. Change the toobar look and add more in this

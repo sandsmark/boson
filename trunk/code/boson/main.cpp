@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 /*	if (app.isRestored())
 		RESTORE(BosonApp);
 	else { */
-		BosonApp* boson = new BosonApp;
+		BosonApp* boson = new BosonApp( (argc>1)?argv[1]:0l);
 		app.setMainWidget(boson);
 		app.setTopWidget(boson);
 		boson->show();
