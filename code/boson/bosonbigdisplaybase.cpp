@@ -3012,3 +3012,25 @@ void BosonBigDisplayBase::removeLight(int id)
  BoLight* l = d->mLights.take(id);
  delete l;
 }
+
+QImage BosonBigDisplayBase::screenShot()
+{
+ glFinish();
+ // btw: equal to width() and height()
+ int w = d->mViewport[2];
+ int h = d->mViewport[3];
+ unsigned char* buffer = new unsigned char[w * h * 4];
+ glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+ QImage image(w, h, 32);
+ for (int y = 0; y < h; y++) {
+	QRgb* line = (QRgb*)image.scanLine(y);
+	int opengl_y = h - y;
+	for (int x = 0; x < w; x++) {
+		unsigned char* pixel = &buffer[(opengl_y * w + x) * 4];
+		line[x] = qRgb(pixel[0], pixel[1], pixel[2]);
+	}
+ }
+ delete[] buffer;
+ return image;
+}
+

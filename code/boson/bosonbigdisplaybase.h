@@ -182,6 +182,8 @@ public:
 	void setCursor(BosonCursor* c) { mCursor = c; }
 	BoSelection* selection() const { return mSelection; }
 
+	QImage screenShot();
+
 	/**
 	 * Final cleanups. This should remove basically all game relevant data
 	 * from this class, especially pointers to cells or to units.
