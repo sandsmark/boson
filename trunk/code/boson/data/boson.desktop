@@ -1,7 +1,9 @@
 [Desktop Entry]
 Comment=Real time stragy game
+Comment[de]=Echtzeit Strategiespiel
 Comment[fr]=Jeu de strategie en temps reel
 Name=Boson
+Name[de]=Boson
 Name[fr]=Boson
 Name[it]=Boson
 Exec=boson
