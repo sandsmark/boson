@@ -106,11 +106,15 @@ boprofiling_SOURCES = \
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
-		-lkio $(LIB_KDEUI) -lGLU
+		$(top_builddir)/boson/items/libbosonitems.la \
+		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
+		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lGLU -l3ds 
 bocursor_SOURCES = \
-		$(COMMON_SRC) \
-		bocursormain.cpp bosoncursoreditor.cpp bosoncursor.cpp \
-		bosontexturearray.cpp bosonconfig.cpp
+		$(BOSON_SRC) \
+		bocursormain.cpp bosoncursoreditor.cpp
 
 borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \
