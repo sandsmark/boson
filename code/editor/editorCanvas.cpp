@@ -111,8 +111,11 @@ bool editorCanvas::Save(QString filename)
 		logf(LOG_INFO, "tried to save with %d player only", nbPlayer);
 	}
 
-	nbMobiles = (int)mobiles.count();
-	nbFacilities = (int)facilities.count();
+	boAssert (nbMobiles == mobiles.count());
+	boAssert (nbFacilities == facilities.count());
+	// safety
+	nbMobiles = mobiles.count();
+	nbFacilities = facilities.count();
 
 	if (!openWrite(filename.data())) return false;
 
@@ -201,6 +204,20 @@ void editorCanvas::createFixUnit(facilityMsg_t &msg)
 
 	modified = true;
 //	emit updateFix(f);
+}
+
+
+void editorCanvas::destroyMobUnit(int mkey)
+{
+	mobiles.remove(mkey);
+	emit mobileNbUpdated(--nbMobiles);
+}
+
+
+void editorCanvas::destroyFixUnit(int mkey)
+{
+	facilities.remove(mkey);
+	emit facilityNbUpdated(--nbFacilities);
 }
 
 
