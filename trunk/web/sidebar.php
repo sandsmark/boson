@@ -42,7 +42,14 @@ function draw_link($title, $href, $style = "sidebarboxlink")
 {
 global $basedir;
 echo "
-&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\">$title</a><br>";
+&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\" $params>$title</a><br>";
+}
+
+function draw_extended_link($title, $href, $params, $style = "sidebarboxlink")
+{
+global $basedir;
+echo "
+&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\" $params>$title</a><br>";
 }
 
 function sidebar_links_box()
@@ -55,6 +62,7 @@ draw_link("Screenshots", "screenshots.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
 draw_link("More information", "info.php");
+draw_extended_link("FAQ", "http://www.freehackers.org/boson/handbook/faq.html", "target=\"_blank\"");
 echo "<br>";
 draw_link("Announcements", "announcements.php");
 draw_link("Stories", "stories.php");
