@@ -1,1 +1,1 @@
-SUBDIRS = species
+SUBDIRS = species grounds
