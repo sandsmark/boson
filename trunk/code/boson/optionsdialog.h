@@ -27,6 +27,7 @@ class BosonConfig;
 class OptionsWidget;
 class Player;
 class Boson;
+class BoFontInfo;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -47,6 +48,7 @@ signals:
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalCmdBackgroundChanged(const QString& file);
 	void signalGroundRendererChanged(int);
+	void signalFontChanged(const BoFontInfo&);
 
 	/**
 	 * Emitted when apply or ok is clicked. At this point all options

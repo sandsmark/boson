@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,113 @@
 
 class BoFont;
 
+class BoFontInfo {
+public:
+	BoFontInfo()
+	{
+		mBold = false;
+		mItalic = false;
+		mPointSize = 10;
+		mTextured = false;
+		mFixedPitch = false;
+		mUnderline = false;
+		mStrikeOut = false;
+	}
+	BoFontInfo(const BoFontInfo& f)
+	{
+		*this = f;
+	}
+
+	BoFontInfo& operator=(const BoFontInfo& f)
+	{
+		mName = f.name();
+		mBold = f.bold();
+		mItalic = f.italic();
+		mPointSize = f.pointSize();
+		mTextured = f.textured();
+		mFixedPitch = f.fixed();
+		mUnderline = f.underline();
+		mStrikeOut = f.strikeOut();
+		return *this;
+	}
+
+	bool isEqual(const BoFontInfo& f) const
+	{
+		if (bold() != f.bold()) {
+			return false;
+		}
+		if (italic() != f.italic()) {
+			return false;
+		}
+		if (pointSize() != f.pointSize()) {
+			return false;
+		}
+		if (textured() != f.textured()) {
+			return false;
+		}
+		if (fixed() != f.fixed()) {
+			return false;
+		}
+		if (underline() != f.underline()) {
+			return false;
+		}
+		if (strikeOut() != f.strikeOut()) {
+			return false;
+		}
+		if (name() != f.name()) {
+			return false;
+		}
+		return true;
+	}
+
+	bool operator==(const BoFontInfo& f)
+	{
+		return isEqual(f);
+	}
+
+	QString toString() const;
+	bool fromString(const QString& s);
+
+	void setTextured(bool t) { mTextured = t; }
+	bool textured() const { return mTextured; }
+
+	/**
+	 * @param name The family for GLX fonts, the filename (absolute) for
+	 * textured fonts.
+	 **/
+	void setName(const QString& name) { mName = name; }
+	const QString& name() const { return mName; }
+
+	/**
+	 * @return just like @ref name, but well suited to be displayed in a GUI
+	 * (e.g. QString::null will be "Default")
+	 **/
+	QString guiName() const;
+
+	void setPointSize(int p) { mPointSize = p; }
+	int pointSize() const { return mPointSize; }
+
+	void setBold(bool b) { mBold = b; }
+	bool bold() const { return mBold; }
+
+	void setItalic(bool i) { mItalic = i; }
+	bool italic() const { return mItalic; }
+
+	bool fixed() const { return mFixedPitch; }
+	bool underline() const { return mUnderline; }
+	bool strikeOut() const { return mStrikeOut; }
+
+private:
+	QString mName;
+	bool mBold;
+	bool mItalic;
+	int mPointSize;
+	bool mTextured;
+	bool mFixedPitch;
+	bool mUnderline;
+	bool mStrikeOut;
+};
+
 /**
  * We store a font in this class with a few other values, like width and height.
  * We can use these cached values in order to prevent loading the metrics in
@@ -49,18 +156,45 @@ class BosonGLFont
 {
 public:
 	/**
-	 * Generate a display list containing the specified font.
+	 * Create an NULL font. Do not use this before calling @ref loadFont !
+	 **/
+	BosonGLFont();
+
+	/**
+	 * Generate a display list containing the specified (GLX) font.
 	 *
 	 * Note that non-latin1 characters might be buggy!
 	 *
-	 * Also note that you must call @ref BosonGLWidget::makeCurrent to make
+	 * Also note that you must call @ref BosonGLWidget::makeCurrent
 	 * before constructing a BosonGLFont
+	 *
+	 * This constructor is kinda obsolete and supports GLX fonts only.
+	 * You should prefer the other constructor(s) instead.
 	 **/
 	BosonGLFont(const QString& family);
+
+	/**
+	 * Create a font that is described by @p font.
+	 *
+	 * See also @ref loadFont
+	 **/
+	BosonGLFont(const BoFontInfo& font);
 	~BosonGLFont();
 
-	bool loadGLXFont(const QString& family);
-	bool loadTXFFont(const QString& fileName);
+	/**
+	 * Load a font described by @p font. If the font could not be loaded
+	 * this tries to load a default GLX font (even if you wanted a textured
+	 * font!). See @ref fontInfo to find out which font got actually loaded.
+	 *
+	 * Note that you must call @ref BoContext::makeCurrent or @ref
+	 * BosonGLWidget::makeCurrent <em>before</em> trying to load the font!
+	 *
+	 * @return TRUE If a font was loaded (either the requested font or a
+	 * fallback font), FALSE if no font could get loaded.
+	 **/
+	bool loadFont(const BoFontInfo& font);
+
+	const BoFontInfo& fontInfo() const;
 
 	/**
 	 * Start rendering a font. Call this once before you render the fonts -
@@ -84,11 +218,6 @@ public:
 	int height(const QString& text, int maxWidth);
 
 	/**
-	 * @return The base of the OpenGL display lists.
-	 **/
-//	inline GLuint displayList() const { return mFontDisplayList; }
-
-	/**
 	 * Warning: this function will change the glRasterPos()! (not
 	 * necessarily to (x,y) !)
 	 * @param x The left position of the text
@@ -108,6 +237,9 @@ public:
 	int renderText(int x, int y, const QString& text, int maxWidth, bool background = true);
 
 protected:
+	bool loadGLXFont(const BoFontInfo& font);
+	bool loadTXFFont(const BoFontInfo& font);
+
 	/**
 	 * Make a line that is no longer than @width (opengl coordinates, not
 	 * characters) for @p font from @p string.
@@ -129,6 +261,7 @@ protected:
 
 private:
 	BoFont* mFont;
+	BoFontInfo mFontInfo;
 };
 
 #endif // BOSONGLFONT_H

@@ -1105,6 +1105,8 @@ OptionsDialog* BosonWidgetBase::gamePreferences(bool editor)
 		displayManager(), SLOT(slotChangeGroundRenderer(int)));
  connect(dlg, SIGNAL(signalApply()),
 		this, SLOT(slotApplyOptions()));
+ connect(dlg, SIGNAL(signalFontChanged(const BoFontInfo&)),
+		displayManager(), SLOT(slotChangeFont(const BoFontInfo&)));
 
  return dlg;
 }

@@ -757,6 +757,13 @@ void BoDisplayManager::slotChangeGroundRenderer(int g)
  }
 }
 
+void BoDisplayManager::slotChangeFont(const BoFontInfo& font)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ activeDisplay()->setFont(font);
+}
+
 void BoDisplayManager::slotSetGrabMovie(bool grab)
 {
  BO_CHECK_NULL_RET(activeDisplay());
