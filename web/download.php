@@ -57,44 +57,34 @@ echo "
       currently latest version available.</b><br><br>
     </td></tr>";
 
-draw_bigbox_subheader("<a name=\"0.7-fix\"></a>0.7: Texture-fix");
-draw_bigbox_text("This package fixes slowdown problems with 0.7. It contains
-textures, which were previously too big and didn't fit into the memory of the
-video card and caused slowdowns.<br>
-To apply: <a href=\"download/0.7-textures-fix.tar.bz2\">download this
-package</a> (162 KB) and then either unpack it to the directory where boson's
-textures were installed (might be something like
-/opt/kde/share/apps/boson/themes/textures/) or unpack it to the themes/textures
-directory of the data package and re-execute 'make install' command.<br><br>");
-
 draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-all-0.7.tar.bz2?download\">here</a>
-(36 286 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">here</a>.<br><br>");
+<a href=\"http://prdownloads.sourceforge.net/boson/boson-all-0.8.tar.bz2?download\">here</a>
+(31 515 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-code-0.7.tar.bz2?download\">here</a>
-(674 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">here</a>.
+<a href=\"http://prdownloads.sourceforge.net/boson/boson-code-0.8.tar.bz2?download\">here</a>
+(808 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.
 Note that you also need to download  the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
 draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-data-0.7.tar.bz2?download\">here</a>
-(19 903 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">here</a>.<br><br>");
+<a href=\"http://prdownloads.sourceforge.net/boson/boson-data-0.8.tar.bz2?download\">here</a>
+(15 149 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-music-0.7.tar.bz2?download\">here</a>
+<a href=\"http://prdownloads.sourceforge.net/boson/boson-music-0.8.tar.bz2?download\">here</a>
 (16 544 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">here</a>.<br><br>");
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
 
 /*draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("A boson ebuild is available in the standard gentoo portage and
@@ -102,7 +92,7 @@ is tested against gcc-2.95.3 (gentoo 1.2 and previous) and gcc-3.2 (gentoo 1.4
 and following). To get boson downloaded, compiled and installed, please issue a
 <pre>emerge boson</pre><br>");*/
 
-draw_bigbox_subheader("RPM/binary releases");
+/*draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by the Boson team and
 are inofficial. If you feel like building a RPM for boson (for any platform),
 we'll be happy to put a link here and/or add them to our site.<br><br>You can
@@ -117,12 +107,14 @@ it's packaged with RPM. You can get it from
 (36 293 KB) or from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">SF.net</a>
 again. These package were provided by
-<a href=\"mailto:krzyko@users.sourceforge.net\">Krzysztof Kosz</a><br><br>");
+<a href=\"mailto:krzyko@users.sourceforge.net\">Krzysztof Kosz</a><br><br>");*/
 
 draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
 Available versions are
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">Boson 0.7</a>
+(released on 10th November 2002),
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=98577\">Boson 0.6.1</a>
 (released on 9th July 2002),
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=93970\">Boson 0.6</a>
