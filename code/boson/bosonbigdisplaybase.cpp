@@ -431,8 +431,6 @@ void BosonBigDisplayBase::initializeGL()
  // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
  resizeGL(width(), height());
 
- glEnable(GL_CULL_FACE);
- glCullFace(GL_BACK);
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -552,6 +550,8 @@ void BosonBigDisplayBase::paintGL()
  BoItemList allItems = mCanvas->allBosonItems();
  BoItemList::Iterator it = allItems.begin();
  unsigned int renderedUnits = 0;
+ glEnable(GL_CULL_FACE);
+ glCullFace(GL_BACK);
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
@@ -615,6 +615,7 @@ void BosonBigDisplayBase::paintGL()
 	glTranslatef(-x, -y, -z);
 	renderedUnits++;
  }
+ glDisable(GL_CULL_FACE);
  boProfiling->renderUnits(false, renderedUnits);
 
  if (checkError()) {
