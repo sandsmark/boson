@@ -190,8 +190,7 @@ void BoGLToolTip::slotTimeOut()
  mCurrentTip = tipManager->tip(item);
  if (mCurrentTip.isNull()) {
 	// we should hide it. but for testing...
-	mCurrentTip = "FIXME";
-//	hideTip();
+	hideTip();
 	return;
  }
 }
