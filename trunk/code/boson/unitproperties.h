@@ -209,7 +209,7 @@ public:
 	 * they will all be of the same type (e.g. they are all ships).
 	 * 0 means invalid typeId.
 	 **/
-	unsigned long int typeId() const { return mTypeId; };
+	unsigned long int typeId() const { return mTypeId; }
 
 	/**
 	 * @return The name of this unit type. Examples are "Aircraft", "Quad",
@@ -366,18 +366,18 @@ public:
 	/**
 	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
 	 **/
-	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };
-	unsigned long int maxAirWeaponRange() const  { return mMaxAirWeaponRange; };
-	unsigned long int maxLandWeaponRange() const  { return mMaxLandWeaponRange; };
+	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; }
+	unsigned long int maxAirWeaponRange() const  { return mMaxAirWeaponRange; }
+	unsigned long int maxLandWeaponRange() const  { return mMaxLandWeaponRange; }
 
 	/**
 	 * @return Damage done by explosion when this unit is destroyed
 	 **/
-	long int explodingDamage() const { return mExplodingDamage; };
+	long int explodingDamage() const { return mExplodingDamage; }
 	/**
 	 * @return Radius of explosion when this unit is destroyed
 	 **/
-	const bofixed& explodingDamageRange() const { return mExplodingDamageRange; };
+	const bofixed& explodingDamageRange() const { return mExplodingDamageRange; }
 
 	/**
 	 * @return So called hitpoint of this unit
@@ -398,9 +398,9 @@ public:
 
 	BoAction* produceAction() const { return mProduceAction; };
 
-	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; };
-	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; };
-	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
+	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; }
+	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; }
+	const bofixed& explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; }
 	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3Fixed pos) const;
 	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3Fixed pos) const;
 
@@ -434,19 +434,20 @@ protected:
 	// Methods to set values. They are only meant to be used by unit
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
-	void setTypeId(unsigned long int id)  { mTypeId = id; };
-	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; };
-	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; };
-	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; };
+	void setTypeId(unsigned long int id)  { mTypeId = id; }
+	void setIsFacility(bool f) { mIsFacility = f; }
+	void setUnitWidth(bofixed unitWidth)  { mUnitWidth = unitWidth; }
+	void setUnitHeight(bofixed unitHeight)  { mUnitHeight = unitHeight; }
+	void setUnitDepth(bofixed unitDepth)  { mUnitDepth = unitDepth; }
 
-	void setProducer(unsigned int producer)  { mProducer = producer; };
-	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; };
-	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; };
+	void setProducer(unsigned int producer)  { mProducer = producer; }
+	void setTerrainType(TerrainType terrain)  { mTerrain = terrain; }
+	void setSupportMiniMap(bool supportMiniMap)  { mSupportMiniMap = supportMiniMap; }
 	void setRequirements(QValueList<unsigned long int> requirements);
 	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
 	void setConstructedEffectIds(QValueList<unsigned long int> ids);
-	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; };
-	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
+	void setExplodingDamageRange(bofixed range)  { mExplodingDamageRange = range; }
+	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; }
 	void setHitPoint(const BoVector3Fixed& hitpoint);
 	void setRemoveWreckageImmediately(bool remove)  { mRemoveWreckageImmediately = remove; }
 
@@ -466,7 +467,7 @@ protected:
 	void addTextureMapping(QString shortname, QString longname);
 	void addSound(int event, QString filename);
 
-	TerrainType terrainType() const  { return mTerrain; };
+	TerrainType terrainType() const  { return mTerrain; }
 
 	friend class BoUnitEditor;
 	friend class UpgradeProperties;
