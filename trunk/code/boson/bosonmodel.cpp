@@ -580,6 +580,10 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
  if (!mesh) {
 	return;
  }
+ if (mesh->faces < 1) {
+	boWarning() << k_funcinfo << "no faces in " << mesh->name << " of " << file() << endl;
+	return;
+ }
  if (!node->user.d) {
 	node->user.d = glGenLists(1);
 	if (node->user.d == 0) {
@@ -1124,11 +1128,6 @@ bool BosonModel::isTeamColor(const Lib3dsMesh* mesh)
 // FIXME: same about invMeshmatrix
 void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib3dsMatrix invMeshMatrix, BoMatrix* texMatrix)
 {
- // these two are ugly. i'd prefer pointers, but for this we need to port all of
- // our code from lib3ds to BoVector code.
- BoVector3 last;
- BoVector3 beforeLast;
-
  // TODO: count number of nodes in this mesh and compare to mesh->faces
  BoNode* node = boMesh->faces();
  if (!node) {
@@ -1204,12 +1203,7 @@ void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib
 	renderPoint(mesh, firstFace, firstPoint, textured, invMeshMatrix, texMatrix);
 	renderPoint(mesh, firstFace, secondPoint, textured, invMeshMatrix, texMatrix);
 	renderPoint(mesh, firstFace, thirdPoint, textured, invMeshMatrix, texMatrix);
-	beforeLast = points[firstPoint];
-	last = points[secondPoint];
- }
 
-
- if (boMesh->type() == GL_TRIANGLE_STRIP) {
 	// we skip the entire first face. all points have been rendered above.
 	node = boMesh->faces()->next();
 	for (; node; node = node->next()) {
