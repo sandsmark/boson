@@ -1,7 +1,7 @@
 
 
 appsdir = $(kde_appsdir)/Games/TacticStrategy
-apps_DATA = boson.desktop boeditor.desktop
+apps_DATA = boson.desktop boeditor.desktop bounit.desktop
 KDE_ICON = boson boeditor
 
 # this is where the XML-GUI resource file goes
