@@ -387,14 +387,14 @@ Texture=dirt
 
 [VeryLightFactorySmoke1]
 Id=10001
-MinVelocity=-0.05,-0.05,0.2
-MaxVelocity=0.05,0.05,0.3
-MinPos=0.5,0.7,1.4
-MaxPos=0.5,0.7,1.4
-StartColor=0.8,0.8,0.8,0.6
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.15
+MinPos=0.3,0.7,1.4
+MaxPos=0.3,0.7,1.4
+StartColor=0.5,0.5,0.5,0.3
 EndColor=0.9,0.9,0.9,0.0
 MinLife=2.5
-MaxLife=4.0
+MaxLife=40.0
 MaxNum=16
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
@@ -407,14 +407,14 @@ Texture=smoke
 
 [VeryLightFactorySmoke2]
 Id=10002
-MinVelocity=-0.05,-0.05,0.2
-MaxVelocity=0.05,0.05,0.3
-MinPos=0.7,0.7,1.4
-MaxPos=0.7,0.7,1.4
-StartColor=0.8,0.8,0.8,0.6
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.125
+MinPos=0.5,0.7,1.4
+MaxPos=0.5,0.7,1.4
+StartColor=0.6,0.6,0.6,0.4
 EndColor=0.9,0.9,0.9,0.0
 MinLife=2.5
-MaxLife=4.0
+MaxLife=40.0
 MaxNum=16
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
@@ -427,14 +427,14 @@ Texture=smoke
 
 [VeryLightFactorySmoke3]
 Id=10003
-MinVelocity=-0.05,-0.05,0.2
-MaxVelocity=0.05,0.05,0.3
-MinPos=0.3,0.7,1.4
-MaxPos=0.3,0.7,1.4
-StartColor=0.8,0.8,0.8,0.6
+MinVelocity=0,0,0
+MaxVelocity=0,0,0.1
+MinPos=0.7,0.7,1.4
+MaxPos=0.7,0.7,1.4
+StartColor=0.8,0.8,0.8,0.3
 EndColor=0.9,0.9,0.9,0.0
 MinLife=2.5
-MaxLife=4.0
+MaxLife=40.0
 MaxNum=16
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
@@ -444,3 +444,4 @@ EndSize=0.5
 SystemLife=3600
 Align=true
 Texture=smoke
+
