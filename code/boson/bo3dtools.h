@@ -409,6 +409,8 @@ class BoMatrix
      **/
     bool invert(BoMatrix* inverse) const;
 
+    bool isEqual(const BoMatrix& matrix) const;
+
     static void debugMatrix(const GLfloat* matrix);
 
   private:

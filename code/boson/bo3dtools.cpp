@@ -545,6 +545,16 @@ void BoMatrix::rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 
 }
 
+bool BoMatrix::isEqual(const BoMatrix& matrix) const
+{
+  for (int i = 0; i < 16; i++) {
+    if (mData[i] != matrix.mData[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
  boDebug() << k_funcinfo << endl;
@@ -553,7 +563,6 @@ void BoMatrix::debugMatrix(const GLfloat* m)
  }
  boDebug() << k_funcinfo << "done" << endl;
 }
-
 
 /*
  * vim:et sw=2
