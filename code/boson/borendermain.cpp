@@ -533,11 +533,13 @@ BoFrame* ModelPreview::frame(unsigned int f) const
  if (!haveModel()) {
 	return 0;
  }
+ BoFrame* frame = 0;
  if (mConstruction) {
-	return mModel->constructionStep(f);
+	frame = mModel->constructionStep(f);
  } else {
-	return mModel->frame(f);
+	frame = mModel->frame(f);
  }
+ return frame;
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
