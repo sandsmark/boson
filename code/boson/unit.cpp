@@ -889,7 +889,7 @@ void Unit::newPath()
 	addPathPoint(pathInfo()->llpath[i]);
  }
 #else
- QValueList<QPoint> path = BosonPath::findPath(this, pathInfo()->dest.x(), pathInfo()->dest.y(), pathInfo()->range);
+ QValueList<QPoint> path = BosonPath::findPath(pathInfo());
  
  // Copy path to pathpoints' list
  clearPathPoints();
