@@ -1677,6 +1677,10 @@ void BoMesh::generateLOD(unsigned int LODCount)
 	LODCount = 1;
 	boWarning(100) << k_funcinfo << "must create at least one LOD" << endl;
  }
+ if (oldCount == LODCount) {
+	boDebug(100) << k_funcinfo << "old LOD count == new LOD count. nothing to do." << endl;
+	return;
+ }
  BoMeshLOD** lod = new BoMeshLOD*[LODCount];
  for (unsigned int i = 0; i < oldCount; i++) {
 	lod[i] = d->mLODs[i];
