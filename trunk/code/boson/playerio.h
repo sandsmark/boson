@@ -25,8 +25,10 @@ class Player;
 class Cell;
 class BosonItem;
 class Unit;
+class UnitProperties;
 class BoVector3;
 class BoItemList;
+class BosonStatistics;
 template<class T> class QPtrVector;
 
 class PlayerIOPrivate;
@@ -53,26 +55,85 @@ public:
 
 	Player* player() const { return mPlayer; }
 
+	/**
+	 * @return Whether the coordinates @p cellX, @p cellY are fogged for
+	 * this player.
+	 **/
 	bool isFogged(int cellX, int cellY) const;
-	bool isFogged(Cell* c) const;
+	/**
+	 * @overload
+	 **/
+	bool isFogged(const Cell* c) const;
+
+	/**
+	 * @return Whether the player can see these coordinates. This is equal
+	 * to !isFogged(cellX, cellY).
+	 **/
 	bool canSee(int cellX, int cellY) const
 	{
 		return !isFogged(cellX, cellY);
 	}
-	bool canSee(Cell* c) const { return !isFogged(c); }
-	bool canSee(BosonItem* item) const;
+	/**
+	 * @overload
+	 **/
+	bool canSee(const Cell* c) const { return !isFogged(c); }
+	/**
+	 * @overload
+	 **/
 	bool canSee(const BoVector3& canvasVector) const;
+	/**
+	 * @overload
+	 * This version checks whehter the specified @ref BosonItem can be seen.
+	 * An item can be seen when one of the cells it occupies is visible.
+	 **/
+	bool canSee(BosonItem* item) const;
 
-	bool ownsUnit(Unit* unit) const;
+	/**
+	 * @return Whether this player is the owner of @p unit.
+	 **/
+	bool ownsUnit(const Unit* unit) const;
 
+	bool isEnemy(Player* player) const;
+	bool isEnemyUnit(const Unit* unit) const;
+
+	/**
+	 * @return @ref Player::teamColor
+	 **/
 	const QColor& teamColor() const;
+	/**
+	 * @return @ref Player::minerals
+	 **/
 	unsigned long int minerals() const;
+	/**
+	 * @return @ref Player::oil
+	 **/
 	unsigned long int oil() const;
+	/**
+	 * @return @ref Player::statistics
+	 **/
+	BosonStatistics* statistics() const;
 
+	/**
+	 * @return The position of the home base (cell coordinates).
+	 *
+	 * atmn the position of the homebase is equal to the position of the
+	 * first unit found.
+	 **/
 	QPoint homeBase() const;
 
 	bool canBuild(unsigned long int unitType) const;
 	bool canResearchTech(unsigned long int id) const;
+
+	/**
+	 * @return Whether a unit with @p prop can gto on @p cell. When the
+	 * player can not see this cell, @p _default is returned.
+	 **/
+	bool canGo(const UnitProperties* prop, const Cell* cell, bool _default = false) const;
+
+	/**
+	 * @overload
+	 **/
+	bool canGo(const Unit* unit, const Cell* cell, bool _default = false) const;
 
 	/**
 	 * @return The unit at @p canvasVector, if any. This returns any unit
