@@ -3976,7 +3976,7 @@ else
   version="$1"
 fi
 
-AC_MSG_CHECKING([for Python$version])
+AC_MSG_CHECKING([for Python])
 
 python_incdirs="$ac_python_dir/include /usr/include /usr/local/include/ $kde_extra_includes"
 AC_FIND_FILE(Python.h, $python_incdirs, python_incdir)
@@ -4015,7 +4015,7 @@ fi
 
 PYTHONMODDIR=$python_moddir
 
-AC_MSG_RESULT(header $python_incdir library $python_libdir modules $python_moddir)
+AC_MSG_RESULT([libraries $python_libdir, headers $python_incdir modules $python_moddir])
 
 if test x$python_incdir = xno ||  test x$python_libdir = xno ||  test x$python_moddir = xno; then
    LIBPYTHON=$kde_orig_LIBPYTHON
@@ -5043,3 +5043,5 @@ else
 fi
 AM_CONDITIONAL(include_BZIP2, test -n "$BZIP2DIR")
 ])
+
+
