@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "bogl.h"
+
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
 
@@ -108,10 +110,6 @@
 
 
 #include <GL/glu.h>
-
-#if HAVE_GL_GLEXT_H
-#include <GL/glext.h>
-#endif
 
 
 /**
@@ -1773,6 +1771,8 @@ void BosonBigDisplayBase::initializeGL()
 	// this makes sense)
 	BoInfo::boInfo()->update(this);
  }
+
+ boglInit();
 
  boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();

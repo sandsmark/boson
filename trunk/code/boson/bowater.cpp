@@ -17,11 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define GL_GLEXT_LEGACY
-#define GL_GLEXT_PROTOTYPES
-#define GLX_GLXEXT_PROTOTYPES
-
-#define QT_CLEAN_NAMESPACE
+#include "bogl.h"
 
 #include "bowater.h"
 
@@ -50,38 +46,9 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#ifndef GLAPI
-#define GLAPI
-#endif
-#include <GL/glext.h>
-#include <GL/glx.h>
-
 #define CHUNK_SIZE 10
 
 
-// OpenGL functions stuff
-#ifndef GLsizeiptrARB
-// This type was added for vbo extension.
-typedef int GLsizeiptrARB;
-#endif
-
-typedef void (*_bo_glBlendColor) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-typedef void (*_bo_glBlendColorEXT) (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
-typedef void (*_bo_glDeleteBuffersARB)(GLsizei, const GLuint*);
-typedef void (*_bo_glGenBuffersARB)(GLsizei, GLuint*);
-typedef void (*_bo_glBindBufferARB)(GLenum, GLuint);
-typedef void (*_bo_glBufferDataARB)(GLenum, GLsizeiptrARB, const GLvoid*, GLenum);
-typedef GLvoid* (* _bo_glMapBufferARB) (GLenum target, GLenum access);
-typedef GLboolean (* _bo_glUnmapBufferARB) (GLenum target);
-
-static _bo_glBlendColor bo_glBlendColor = 0;
-static _bo_glBlendColorEXT bo_glBlendColorEXT = 0;
-static _bo_glDeleteBuffersARB bo_glDeleteBuffersARB = 0;
-static _bo_glGenBuffersARB bo_glGenBuffersARB = 0;
-static _bo_glBindBufferARB bo_glBindBufferARB = 0;
-static _bo_glBufferDataARB bo_glBufferDataARB = 0;
-static _bo_glMapBufferARB bo_glMapBufferARB = 0;
-static _bo_glUnmapBufferARB bo_glUnmapBufferARB = 0;
 
 /*****  BoLake  *****/
 
@@ -615,85 +582,38 @@ void BoWaterManager::initOpenGL()
 
   // TODO: some of these are part of the core in later OpenGL versions.
 
-#ifdef GL_EXT_texture_lod_bias
   mSupports_texlod = extensions.contains("GL_EXT_texture_lod_bias");
-#else
-#warning GL_EXT_texture_lod_bias not supported at compile time!
-  mSupports_texlod = false;
-#endif
   if(!mSupports_texlod)
   {
     boDebug() << k_funcinfo << "GL_EXT_texture_lod_bias not supported!" << endl;
   }
 
-#ifdef GL_ARB_texture_env_combine
   mSupports_env_combine = extensions.contains("GL_ARB_texture_env_combine");
-#else
-#warning GL_ARB_texture_env_combine not supported at compile time!
-  mSupports_env_combine = false;
-#endif
   if(!mSupports_env_combine)
   {
     boDebug() << k_funcinfo << "GL_ARB_texture_env_combine not supported!" << endl;
   }
 
-#ifdef GL_ARB_texture_env_dot3
   mSupports_env_dot3 = extensions.contains("GL_ARB_texture_env_dot3");
-#else
-#warning GL_ARB_texture_env_dot3 not supported at compile time!
-  mSupports_env_dot3 = false;
-#endif
   if(!mSupports_env_dot3)
   {
     boDebug() << k_funcinfo << "GL_ARB_texture_env_dot3 not supported!" << endl;
   }
 
-#ifdef GL_ARB_imaging
   mSupports_blendcolor = extensions.contains("GL_ARB_imaging");
-#else
-#warning GL_ARB_imaging not supported at compile time!
-  mSupports_blendcolor = false;
-#endif
   if(!mSupports_blendcolor)
   {
-#ifdef GL_EXT_blend_color
     mSupports_blendcolor_ext = extensions.contains("GL_EXT_blend_color");
-#else
-#warning GL_EXT_blend_color not supported at compile time!
-    mSupports_blendcolor_ext = false;
-#endif
     if(!mSupports_blendcolor_ext)
     {
       boDebug() << k_funcinfo << "GL_ARB_imaging and GL_EXT_blend_color not supported!" << endl;
     }
-    else
-    {
-      bo_glBlendColorEXT = (_bo_glBlendColorEXT)glXGetProcAddressARB((const GLubyte*)"glBlendColorEXT");
-    }
-  }
-  else
-  {
-      bo_glBlendColor = (_bo_glBlendColor)glXGetProcAddressARB((const GLubyte*)"glBlendColorEXT");
   }
 
-#ifdef GL_ARB_vertex_buffer_object
   mSupports_vbo = extensions.contains("GL_ARB_vertex_buffer_object");
-#else
-#warning GL_ARB_vertex_buffer_object not supported at compile time!
-  mSupports_vbo = false;
-#endif
   if(!mSupports_vbo)
   {
     boDebug() << k_funcinfo << "GL_ARB_vertex_buffer_object not supported!" << endl;
-  }
-  else
-  {
-    bo_glDeleteBuffersARB = (_bo_glDeleteBuffersARB)glXGetProcAddressARB((const GLubyte*)"glDeleteBuffersARB");
-    bo_glGenBuffersARB = (_bo_glGenBuffersARB)glXGetProcAddressARB((const GLubyte*)"glGenBuffersARB");
-    bo_glBindBufferARB = (_bo_glBindBufferARB)glXGetProcAddressARB((const GLubyte*)"glBindBufferARB");
-    bo_glBufferDataARB = (_bo_glBufferDataARB)glXGetProcAddressARB((const GLubyte*)"glBufferDataARB");
-    bo_glMapBufferARB = (_bo_glMapBufferARB)glXGetProcAddressARB((const GLubyte*)"glMapBufferARB");
-    bo_glUnmapBufferARB = (_bo_glUnmapBufferARB)glXGetProcAddressARB((const GLubyte*)"glUnmapBufferARB");
   }
 
   boDebug() << k_funcinfo << "Extensions checking done" << endl;
@@ -1087,12 +1007,10 @@ void BoWaterManager::render()
     if(mEnableReflections && !mEnableBumpmapping)
     {
       boTextureManager->activateTextureUnit(1);
-#ifdef GL_EXT_texture_lod_bias
       if(mSupports_texlod)
       {
         glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, 0.0f);
       }
-#endif
       glPopMatrix();
       boTextureManager->activateTextureUnit(0);
     }
@@ -1331,21 +1249,11 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
       diffusecolor.scale(mWaterDiffuseColor);
       diffusecolor.setW(1.0f);
       glEnable(GL_BLEND);
-#ifdef GL_ARB_imaging
       if(mSupports_blendcolor)
       {
-        bo_glBlendColor(diffusecolor.x(), diffusecolor.y(), diffusecolor.z(), diffusecolor.w());
+        boglBlendColor(diffusecolor.x(), diffusecolor.y(), diffusecolor.z(), diffusecolor.w());
         glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
       }
-      else
-#endif
-#ifdef GL_EXT_blend_color
-      if(mSupports_blendcolor_ext)
-      {
-        bo_glBlendColorEXT(diffusecolor.x(), diffusecolor.y(), diffusecolor.z(), diffusecolor.w());
-        glBlendFunc(GL_CONSTANT_COLOR_EXT, GL_ZERO);
-      }
-#endif
     }
   }
   else if(mEnableTranslucency)
@@ -1360,14 +1268,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   glPushClientAttrib(GL_ALL_ATTRIB_BITS);
   // Vertices are always needed
   glEnableClientState(GL_VERTEX_ARRAY);
-#ifdef GL_ARB_vertex_buffer_object
   if(mEnableVBO)
   {
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_vertex);
+    boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_vertex);
     glVertexPointer(3, GL_FLOAT, 0, 0);
   }
   else
-#endif
   {
     glVertexPointer(3, GL_FLOAT, 0, chunk->vertices);
   }
@@ -1379,14 +1285,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     {
       // If we have translucency enabled, water's translucency is sent as
       //  color's alpha
-#ifdef GL_ARB_vertex_buffer_object
       if(mEnableVBO)
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_tangentlight4);
+        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_tangentlight4);
         glColorPointer(4, GL_FLOAT, 0, 0);
       }
       else
-#endif
       {
         glColorPointer(4, GL_FLOAT, 0, chunk->tangentlight4);
       }
@@ -1394,14 +1298,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     else
     {
       // No translucency
-#ifdef GL_ARB_vertex_buffer_object
       if(mEnableVBO)
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_tangentlight);
+        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_tangentlight);
         glColorPointer(3, GL_FLOAT, 0, 0);
       }
       else
-#endif
       {
         glColorPointer(3, GL_FLOAT, 0, chunk->tangentlight);
       }
@@ -1411,14 +1313,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   {
     // For OpenGL lighting (and reflections), we need normals
     glEnableClientState(GL_NORMAL_ARRAY);
-#ifdef GL_ARB_vertex_buffer_object
     if(mEnableVBO)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_normal);
+      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_normal);
       glNormalPointer(GL_FLOAT, 0, 0);
     }
     else
-#endif
     {
       glNormalPointer(GL_FLOAT, 0, chunk->normals);
     }
@@ -1427,14 +1327,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
       // If translucency is enabled but bumpmapping is not, then we need to
       //  supply alpha.
       glEnableClientState(GL_COLOR_ARRAY);
-#ifdef GL_ARB_vertex_buffer_object
       if(mEnableVBO)
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_color);
+        boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_color);
         glColorPointer(4, GL_FLOAT, 0, 0);
       }
       else
-#endif
       {
         glColorPointer(4, GL_FLOAT, 0, chunk->colors);
       }
@@ -1442,14 +1340,12 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
   }
 
   // Do the drawing
-#ifdef GL_ARB_vertex_buffer_object
   if(mEnableVBO)
   {
-    bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, chunk->vbo_index);
+    boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->vbo_index);
     glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, 0);
   }
   else
-#endif
   {
     glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, chunk->indices);
   }
@@ -1525,40 +1421,34 @@ void BoWaterManager::renderChunk(BoLake* lake, BoLake::WaterChunk* chunk, float 
     glPushClientAttrib(GL_ALL_ATTRIB_BITS);
     // Vertices
     glEnableClientState(GL_VERTEX_ARRAY);
-#ifdef GL_ARB_vertex_buffer_object
     if(mEnableVBO)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_vertex);
+      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_vertex);
       glVertexPointer(3, GL_FLOAT, 0, 0);
     }
     else
-#endif
     {
       glVertexPointer(3, GL_FLOAT, 0, chunk->vertices);
     }
     // We need normals for the automatic texgen
     glEnableClientState(GL_NORMAL_ARRAY);
-#ifdef GL_ARB_vertex_buffer_object
     if(mEnableVBO)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, chunk->vbo_normal);
+      boglBindBuffer(GL_ARRAY_BUFFER, chunk->vbo_normal);
       glNormalPointer(GL_FLOAT, 0, 0);
     }
     else
-#endif
     {
       glNormalPointer(GL_FLOAT, 0, chunk->normals);
     }
 
     // Do the drawing
-#ifdef GL_ARB_vertex_buffer_object
     if(mEnableVBO)
     {
-      bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, chunk->vbo_index);
+      boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, chunk->vbo_index);
       glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, 0);
     }
     else
-#endif
     {
       glDrawElements(GL_QUADS, chunk->indices_count, GL_UNSIGNED_INT, chunk->indices);
     }
@@ -1777,7 +1667,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
           // When surface's normal points upwards (is (0; 0; 1)), then
           //  tangent-space is same as world-space.
           tsl = info->lightvector;
-          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, posy, posz);
+          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, -posy, posz);
           viewvector.normalize();
           halfv = viewvector + info->lightvector;
           // halfv will be normalized later
@@ -1851,7 +1741,7 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
 
           // Calculate H (half-angle vector).
           // H is average of light and view vectors (vector which is between them).
-          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, posy, posz);
+          BoVector3Float viewvector = mCameraPos - BoVector3Float(posx, -posy, posz);
           viewvector.normalize();
           BoVector3Float halfvector = viewvector + info->lightvector;
           //halfvector.normalize();
@@ -1962,59 +1852,57 @@ void BoWaterManager::calculatePerCornerStuff(RenderInfo* info)
 void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
 {
   // Corner arrays/vbos first
-#ifdef GL_ARB_vertex_buffer_object
   if(mEnableVBO)
   {
     int corners = info->chunkcornerw * info->chunkcornerh;
     // Generate VBOs if it's not yet done
     if(!info->chunk->vbo_vertex)
     {
-      bo_glGenBuffersARB(1, &info->chunk->vbo_vertex);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_normal);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_tangentlight);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_tangentlight4);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_halfvector);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_color);
-      bo_glGenBuffersARB(1, &info->chunk->vbo_index);
+      boglGenBuffers(1, &info->chunk->vbo_vertex);
+      boglGenBuffers(1, &info->chunk->vbo_normal);
+      boglGenBuffers(1, &info->chunk->vbo_tangentlight);
+      boglGenBuffers(1, &info->chunk->vbo_tangentlight4);
+      boglGenBuffers(1, &info->chunk->vbo_halfvector);
+      boglGenBuffers(1, &info->chunk->vbo_color);
+      boglGenBuffers(1, &info->chunk->vbo_index);
     }
-#define WATER_VBO_MODE GL_DYNAMIC_DRAW_ARB
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_vertex);
-    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-    info->vertices_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_normal);
-    bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-    info->normals_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+#define WATER_VBO_MODE GL_DYNAMIC_DRAW
+    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_vertex);
+    boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+    info->vertices_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
+    boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+    info->normals_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     if(mEnableBumpmapping)
     {
       if(mEnableTranslucency)
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight4);
-        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-        info->tangentlights_p4 = (BoVector4Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
+        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+        info->tangentlights_p4 = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
       }
       else
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight);
-        bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-        info->tangentlights_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
+        boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+        info->tangentlights_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
       }
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_halfvector);
-      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
-      info->halfvectors_p = (BoVector3Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
+      boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector3Float), 0, WATER_VBO_MODE);
+      info->halfvectors_p = (BoVector3Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     }
     else if(mEnableTranslucency)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
-      bo_glBufferDataARB(GL_ARRAY_BUFFER_ARB, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
-      info->colors_p = (BoVector4Float*)bo_glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+      boglBufferData(GL_ARRAY_BUFFER, corners * sizeof(BoVector4Float), 0, WATER_VBO_MODE);
+      info->colors_p = (BoVector4Float*)boglMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
     }
     // Buffer for indices
-    bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, info->chunk->vbo_index);
-    bo_glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, corners * 4 * sizeof(unsigned int), 0, WATER_VBO_MODE);
-    info->indices_p = (unsigned int*)bo_glMapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, GL_WRITE_ONLY_ARB);
+    boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
+    boglBufferData(GL_ELEMENT_ARRAY_BUFFER, corners * 4 * sizeof(unsigned int), 0, WATER_VBO_MODE);
+    info->indices_p = (unsigned int*)boglMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
   }
   else
-#endif // GL_ARB_vertex_buffer_object
   {
     // Use plain arrays. They're stored in water chunks
     if(info->chunk->lastdetail != info->detail)
@@ -2077,17 +1965,16 @@ void BoWaterManager::initDataBuffersForStorage(RenderInfo* info)
 void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
 {
   // If VBOs are used, we need to unmap them
-#ifdef GL_ARB_vertex_buffer_object
   if(mEnableVBO)
   {
     // Unmap vbos
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_vertex);
-    if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_vertex);
+    if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
     {
       boError() << k_funcinfo << "can't unmap vertices' vbo!" << endl;
     }
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_normal);
-    if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+    boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_normal);
+    if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
     {
       boError() << k_funcinfo << "can't unmap normals' vbo!" << endl;
     }
@@ -2095,39 +1982,38 @@ void BoWaterManager::uninitDataBuffersForStorage(RenderInfo* info)
     {
       if(mEnableTranslucency)
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight4);
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight4);
       }
       else
       {
-        bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_tangentlight);
+        boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_tangentlight);
       }
-      if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
       {
         boError() << k_funcinfo << "can't unmap tangentlights' vbo!" << endl;
       }
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_halfvector);
-      if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_halfvector);
+      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
       {
         boError() << k_funcinfo << "can't unmap halfvectors' vbo!" << endl;
       }
     }
     else if(mEnableTranslucency)
     {
-      bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, info->chunk->vbo_color);
-      if(!bo_glUnmapBufferARB(GL_ARRAY_BUFFER_ARB))
+      boglBindBuffer(GL_ARRAY_BUFFER, info->chunk->vbo_color);
+      if(!boglUnmapBuffer(GL_ARRAY_BUFFER))
       {
         boError() << k_funcinfo << "can't unmap colors' vbo!" << endl;
       }
     }
-    bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, info->chunk->vbo_index);
-    if(!bo_glUnmapBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB))
+    boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, info->chunk->vbo_index);
+    if(!boglUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER))
     {
       boError() << k_funcinfo << "can't unmap indices' vbo!" << endl;
     }
-    bo_glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);  // Disable VBO
-    bo_glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);  // Disable index VBO
+    boglBindBuffer(GL_ARRAY_BUFFER, 0);  // Disable VBO
+    boglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);  // Disable index VBO
   }
-#endif // GL_ARB_vertex_buffer_object
 }
 
 void BoWaterManager::calculateIndices(RenderInfo* info)
@@ -2178,7 +2064,6 @@ void BoWaterManager::calculateIndices(RenderInfo* info)
 
 void BoWaterManager::setupEnvMapTexture(int unit)
 {
-#ifdef GL_ARB_texture_cube_map
   // Activate given texture unit
   boTextureManager->activateTextureUnit(unit);
 
@@ -2191,35 +2076,30 @@ void BoWaterManager::setupEnvMapTexture(int unit)
   glLoadMatrixf(mInverseModelview.data());
 
   // Automatically generate texture coords for reflection cubemap
-  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_ARB);
-  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_ARB);
-  glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP_ARB);
+  glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+  glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
+  glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_REFLECTION_MAP);
   glEnable(GL_TEXTURE_GEN_S);
   glEnable(GL_TEXTURE_GEN_T);
   glEnable(GL_TEXTURE_GEN_R);
 
-#ifdef GL_EXT_texture_lod_bias
   // Make texture a bit blurred if it's supported
   if(mSupports_texlod)
   {
     glTexEnvf(GL_TEXTURE_FILTER_CONTROL_EXT, GL_TEXTURE_LOD_BIAS_EXT, mReflectionSharpness);
   }
-#endif
 
-#ifdef GL_ARB_texture_env_combine
   // Interpolate between water texture and envmap
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_INTERPOLATE_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_TEXTURE);
-  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_PREVIOUS_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB_ARB, GL_CONSTANT_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB_ARB, GL_SRC_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+  glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PREVIOUS);
+  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_CONSTANT);
+  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_COLOR);
   float reflectioncolor[] = { mReflectionStrength, mReflectionStrength, mReflectionStrength, 1.0f };
   glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, reflectioncolor);
-#endif // GL_ARB_texture_env_combine
-#endif // GL_ARB_texture_cube_map
 }
 
 void BoWaterManager::setupBumpMapTexture(int unit)
@@ -2253,27 +2133,23 @@ void BoWaterManager::setupBumpMapTexture(int unit)
   glEnable(GL_TEXTURE_GEN_S);
   glEnable(GL_TEXTURE_GEN_T);
 
-#ifdef GL_ARB_texture_env_combine
-#ifdef GL_ARB_texture_env_dot3
   // Tangent space light vector will be encoded in primary color.
   // Do dot3 between primary color (light vector) and normal. (N.L)
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_DOT3_RGB_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PRIMARY_COLOR_ARB);
-  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
-  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_TEXTURE);
-  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+  glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_DOT3_RGB);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PRIMARY_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_TEXTURE);
+  glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
   if(mEnableTranslucency)
   {
     // If we use translucency, then surface's alpha is in alpha component of
     //  primary color. Replace surface's alpha with it.
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_PRIMARY_COLOR_ARB);
-    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_ARB, GL_SRC_ALPHA);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PRIMARY_COLOR);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
   }
-#endif
-#endif
 }
 
 void BoWaterManager::setupDiffuseTexture(int unit)
@@ -2356,25 +2232,23 @@ void BoWaterManager::initRenderEnvironment()
 
     setupDiffuseTexture(1);
 
-#ifdef GL_ARB_texture_env_combine
     // Water surface texture will be modulated with the result of previous
     //  texture operation (N.L).
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_ARB, GL_MODULATE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_ARB, GL_PREVIOUS_ARB);
-    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_ARB, GL_SRC_COLOR);
-    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB_ARB, GL_TEXTURE);
-    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB_ARB, GL_SRC_COLOR);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_PREVIOUS);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_TEXTURE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
     if(mEnableTranslucency)
     {
       // Use alpha from previous texture operation.
       // TODO: maybe replace alpha initially here (not in texture 0)?
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
-      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_ARB, GL_REPLACE);
-      glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_ARB, GL_PREVIOUS_ARB);
-      glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_ARB, GL_SRC_ALPHA);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_REPLACE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA, GL_PREVIOUS);
+      glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
     }
-#endif
     boTextureManager->activateTextureUnit(0);
   }
   else
@@ -2450,3 +2324,4 @@ void BoWaterManager::loadNecessaryTextures()
     }
   }
 }
+

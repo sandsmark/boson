@@ -17,15 +17,10 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#define GLX_GLXEXT_PROTOTYPES
-
-#define QT_CLEAN_NAMESPACE
-
+#include "bogl.h"
 
 #include "botexture.h"
 
-#include <GL/gl.h>
-#include <GL/glext.h>
 #include <GL/glu.h>
 
 #include <qstring.h>
@@ -35,51 +30,6 @@
 #include "info/boinfo.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
-
-#include <GL/glx.h>
-
-
-/*****  Some OpenGL constants, in case they haven't been defined yet  *****/
-#ifndef GL_TEXTURE_CUBE_MAP_POSITIVE_X
-#define GL_TEXTURE_CUBE_MAP_POSITIVE_X 0x8515
-#endif
-
-#ifndef GL_MAX_CUBE_MAP_TEXTURE_SIZE
-#define GL_MAX_CUBE_MAP_TEXTURE_SIZE 0x851C
-#endif
-
-#ifndef GL_COMPRESSED_RGB_S3TC_DXT1_EXT
-#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0x83F0
-#endif
-
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83F3
-#endif
-
-#ifndef GL_GENERATE_MIPMAP
-#define GL_GENERATE_MIPMAP 0x8191
-#endif
-
-#ifndef GL_MAX_TEXTURE_UNITS
-#define GL_MAX_TEXTURE_UNITS 0x84E2
-#endif
-
-#ifndef GL_TEXTURE_CUBE_MAP
-#define GL_TEXTURE_CUBE_MAP 0x8513
-#endif
-
-#ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
-#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#endif
-
-#ifndef GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
-#endif
-
-typedef void (*_bo_glActiveTexture)(GLenum);
-
-static _bo_glActiveTexture bo_glActiveTexture = 0;
-
 
 
 /*****  BoTexture  *****/
@@ -787,12 +737,7 @@ void BoTextureManager::initOpenGL()
   if(openglversion >= MAKE_VERSION(1,3,0) || extensions.contains("GL_ARB_multitexture"))
   {
     glGetIntegerv(GL_MAX_TEXTURE_UNITS, &mTextureUnits);
-    bo_glActiveTexture = (_bo_glActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTexture");
-    if(!bo_glActiveTexture)
-    {
-      bo_glActiveTexture = (_bo_glActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTextureARB");
-    }
-    if(!bo_glActiveTexture)
+    if(!boglActiveTexture)
     {
       boWarning() << k_funcinfo << "GL_ARB_multitexture is supported, but no glActiveTexture function was found!" << endl;
       // Disable multitexturing
@@ -949,7 +894,7 @@ void BoTextureManager::activateTextureUnit(int textureUnit)
   }
   if(mActiveTextureUnit != textureUnit)
   {
-    bo_glActiveTexture(GL_TEXTURE0 + textureUnit);
+    boglActiveTexture(GL_TEXTURE0 + textureUnit);
     mActiveTextureUnit = textureUnit;
   }
 }
@@ -961,7 +906,7 @@ void BoTextureManager::invalidateCache()
     // Disable all texturing
     if(mTextureUnits > 1)
     {
-      bo_glActiveTexture(GL_TEXTURE0 + i);
+      boglActiveTexture(GL_TEXTURE0 + i);
     }
     glDisable(GL_TEXTURE_1D);
     glDisable(GL_TEXTURE_2D);
@@ -980,7 +925,7 @@ void BoTextureManager::invalidateCache()
   }
   if(mTextureUnits > 1)
   {
-    bo_glActiveTexture(GL_TEXTURE0);
+    boglActiveTexture(GL_TEXTURE0);
   }
   mActiveTextureUnit = 0;
 }
