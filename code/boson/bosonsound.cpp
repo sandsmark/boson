@@ -237,16 +237,18 @@ BosonSound::BosonSound()
 BosonSound::~BosonSound()
 {
  kdDebug() << k_funcinfo << endl;
+ int sounds = 0;
  d->mSounds.clear();
  UnitSounds::Iterator unitsIt;
  unitsIt = d->mUnitSounds.begin();
  for (; unitsIt != d->mUnitSounds.end(); ++unitsIt) {
 	SoundEvents::Iterator eventsIt;
 	for (eventsIt = (*unitsIt).begin(); eventsIt != (*unitsIt).end(); ++eventsIt) {
-		QPtrListIterator<BoPlayObject> it = (*eventsIt);
+		QPtrListIterator<BoPlayObject> it(*eventsIt);
 		while ((*eventsIt).count() > 0) {
 			BoPlayObject* p = (*eventsIt).take(0);
 			delete p;
+			sounds++;
 		}
 	}
  }
@@ -256,8 +258,11 @@ BosonSound::~BosonSound()
 	while ((*eventsIt).count() > 0) {
 		BoPlayObject* p = (*eventsIt).take(0);
 		delete p;
+		sounds++;
 	}
  }
+
+ kdDebug() << k_funcinfo << "deleted " << sounds << " playobjects" << endl;
  
  if (d->mId != -1) {
 	d->mEffectStack.remove(d->mId);
