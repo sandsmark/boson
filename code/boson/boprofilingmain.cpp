@@ -26,12 +26,13 @@
 #include <klocale.h>
 
 static const char *description =
-    I18N_NOOP("Unit Editor for Boson");
+    I18N_NOOP("Profiling Data reader for Boson");
 
 static const char *version = "v0.7pre";
 
 static KCmdLineOptions options[] =
 {
+    { "+[FILE]", I18N_NOOP("Profiling file to open."), 0},
     { 0, 0, 0 }
 };
 
@@ -54,12 +55,24 @@ int main(int argc, char **argv)
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
- KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  BosonProfiling::initProfiling();
- BosonProfilingDialog* dlg = new BosonProfilingDialog(0);
- app.setMainWidget(dlg);
- dlg->show();
- 
+ KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
+
+ if (args->count() == 0) {
+	BosonProfilingDialog* dlg = new BosonProfilingDialog(0);
+	QObject::connect(dlg, SIGNAL(finished()), dlg, SLOT(close()));
+	dlg->show();
+ } else {
+	for (int i = 0; i < args->count(); i++) {
+		BosonProfilingDialog* dlg = new BosonProfilingDialog(0);
+		QObject::connect(dlg, SIGNAL(finished()), dlg, SLOT(close()));
+		KURL url = args->url(i);
+		dlg->loadFromFile(url.directory(false) + url.fileName());
+		dlg->show();
+	}
+ }
+
  args->clear();
  return app.exec();
 }
