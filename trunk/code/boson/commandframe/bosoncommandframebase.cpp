@@ -251,7 +251,7 @@ void BosonCommandFrameBase::slotPlaceUnit(unsigned long int unitType)
  emit signalPlaceUnit(unitType, d->mOwner);
 }
 
-void BosonCommandFrameBase::slotProduceUnit(unsigned long int unitType)
+void BosonCommandFrameBase::slotProduce(ProductionType type, unsigned long int id)
 {
  if (selectedUnit()) {
 	if (d->mOwner != selectedUnit()->owner()) {
@@ -259,10 +259,10 @@ void BosonCommandFrameBase::slotProduceUnit(unsigned long int unitType)
 		return;
 	}
  }
- emit signalProduceUnit(unitType, (UnitBase*)selectedUnit(), d->mOwner);
+ emit signalProduce(type, id, (UnitBase*)selectedUnit(), d->mOwner);
 }
 
-void BosonCommandFrameBase::slotStopProduction(unsigned long int unitType)
+void BosonCommandFrameBase::slotStopProduction(ProductionType type, unsigned long int id)
 {
  if (selectedUnit()) {
 	if (d->mOwner != selectedUnit()->owner()) {
@@ -270,7 +270,7 @@ void BosonCommandFrameBase::slotStopProduction(unsigned long int unitType)
 		return;
 	}
  }
- emit signalStopProduction(unitType, (UnitBase*)selectedUnit(), d->mOwner);
+ emit signalStopProduction(type, id, (UnitBase*)selectedUnit(), d->mOwner);
 }
 
 void BosonCommandFrameBase::slotUpdateProduction(Unit* f)

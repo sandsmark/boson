@@ -87,5 +87,11 @@ enum SoundEvent {
 	SoundReportMinimapDeactivated = 1
 };
 
+enum ProductionType {
+	ProduceNothing = 0,
+	ProduceUnit = 1,
+	ProduceTech = 2
+};
+
 
 #endif

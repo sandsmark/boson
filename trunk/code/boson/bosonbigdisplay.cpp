@@ -270,17 +270,18 @@ bool BosonBigDisplay::actionBuild(QDataStream& stream, const QPoint& canvasPos)
 	return false;
  }
  ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
- if (!production || !production->hasProduction() || production->completedProduction() <= 0) {
+ if (!production || !production->hasProduction() || production->completedProductionId() <= 0) {
 	return false;
  }
 
- if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProduction()), canvasPos, production)) {
+ if (!(canvas())->canPlaceUnitAt(localPlayer()->unitProperties(production->currentProductionId()), canvasPos, production)) {
 	kdDebug() << k_funcinfo << "Cannot place production here" << endl;
 	return false;
  }
 
  // create the new unit
  stream << (Q_UINT32)BosonMessage::MoveBuild;
+ stream << (Q_UINT32)production->completedProductionType();
  stream << (Q_ULONG)factory->id();
  stream << (Q_UINT32)factory->owner()->id();
  stream << (Q_INT32)canvasPos.x() / BO_TILE_SIZE;

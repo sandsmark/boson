@@ -21,6 +21,8 @@
 
 #include <qwidget.h>
 #include <qvaluelist.h>
+#include <qpair.h>
+
 #include "../global.h"
 
 class Unit;
@@ -51,7 +53,8 @@ public:
 	void hideOrderButtons();
 	void setButtonsPerRow(int);
 
-	void setOrderButtons(QValueList<unsigned long int> produceList, Player* owner, Facility* factory = 0);
+	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
+	void setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory = 0);
 
 	void showUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit
 
@@ -74,8 +77,8 @@ protected:
 	void resetLayout();
 
 signals:
-	void signalProduceUnit(unsigned long int unitType);
-	void signalStopProduction(unsigned long int unitType);
+	void signalProduce(ProductionType type, unsigned long int id);
+	void signalStopProduction(ProductionType type, unsigned long int id);
 	void signalPlaceCell(int groundType);
 
 private:

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <qstring.h>
 #include <qcolor.h>
 #include <qvaluelist.h>
+#include <qintdict.h>
 
 #include <GL/gl.h>
 
@@ -32,6 +33,8 @@ class BosonModel;
 class BosonSound;
 class UnitProperties;
 class UnitBase;
+class TechnologyProperties;
+class UpgradeProperties;
 
 class QPixmap;
 class QStringList;
@@ -91,9 +94,18 @@ public:
 	bool loadActionGraphics();
 
 	/**
+	 * Load all available technologies. This must be done before starting game
+	 **/
+	bool loadTechnologies();
+
+	/**
 	 * @return Pixmap for the specified action
 	 **/
 	QPixmap* actionPixmap(UnitAction action);
+
+	QPixmap* techPixmap(unsigned long int techType);
+
+	QPixmap* upgradePixmapByName(QString name);
 
 	BosonModel* unitModel(unsigned long int unitType);
 
@@ -146,6 +158,10 @@ public:
 
 	const UnitProperties* unitProperties(unsigned long int unitType) const;
 
+	UnitProperties* nonConstUnitProperties(unsigned long int unitType) const;
+
+	TechnologyProperties* technology(unsigned long int techType) const;
+
 	/**
 	 * @return the path to the species theme (ending with
 	 * boson/themes/species/your_species/)
@@ -169,6 +185,12 @@ public:
 	 * specified in producerList.
 	 **/
 	QValueList<unsigned long int> productions(QValueList<int> producerList) const;
+
+	/**
+	 * @return A list of all technologies that have a producer specified in
+	 * producerList.
+	 **/
+	QValueList<unsigned long int> technologies(QValueList<int> producerList) const;
 
 	/**
 	 * Reset this theme. Delete all pixmaps, unitProperties, ...
@@ -219,6 +241,15 @@ public:
 	QString identifier() const;
 	
 	static QValueList<QColor> defaultColors();
+
+	/**
+	 * @return QIntDict containing all technologies
+	 * Do not use this method! It's only meant to be used by
+	 * Player::hasTechnology() and might be made private later
+	 **/
+	QIntDict<TechnologyProperties> technologyList() const;
+
+	void upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade);
 
 protected:
 	bool loadUnitGraphics(const UnitProperties* prop);

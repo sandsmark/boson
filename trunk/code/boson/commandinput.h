@@ -20,6 +20,7 @@
 #define COMMANDINPUT_H
 
 #include <kgame/kgameio.h>
+#include "global.h"
 
 class UnitBase;
 class BosonCommandFrameBase;
@@ -45,13 +46,13 @@ protected slots:
 	 * Called when the player starts to produce a unit in the cmdframe. This
 	 * just sends the event as a message through the network.
 	 **/
-	void slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+	void slotProduce(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
 
 	/**
 	 * Called when the player aborts a production in the cmdframe. This
 	 * just sends the event as a message through the network.
 	 **/
-	void slotStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+	void slotStopProduction(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
 };
 
 #endif

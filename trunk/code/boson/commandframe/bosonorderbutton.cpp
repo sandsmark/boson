@@ -92,9 +92,10 @@ protected:
 				//TODO: place something useful here
 				text = i18n("Tilenumber: %1").arg(commandWidget()->tile());
 				break;
-			case BosonOrderButton::CommandUnit:
+			case BosonOrderButton::CommandProduce:
 			{
-				if (commandWidget()->unitType() <= 0) {
+				/// TODO!!!
+/*				if (commandWidget()->unitType() <= 0) {
 					kdWarning() << k_funcinfo << "CommandUnit, but no unittype" << endl;
 					return QString::null;
 				}
@@ -103,7 +104,7 @@ protected:
 					return QString::null;
 				}
 				const UnitProperties* prop = commandWidget()->productionOwner()->unitProperties(commandWidget()->unitType());
-				text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());
+				text = i18n("%1\nMinerals: %2\nOil: %3").arg(prop->name()).arg(prop->mineralCost()).arg(prop->oilCost());*/
 				break;
 			}
 			case BosonOrderButton::CommandUnitSelected:
@@ -264,7 +265,8 @@ BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
  d = new BosonOrderButtonPrivate;
  mUnit = 0;
  mProductionOwner = 0;
- mUnitType = 0;
+ mProductionId = 0;
+ mProductionType = ProduceNothing;
  mTileNumber = 0;
  mAction = -1;
  mCommandType = CommandNothing;
@@ -334,7 +336,7 @@ void BosonOrderButton::setUnit(Unit* unit)
  setGrayOut(false);
 }
 
-void BosonOrderButton::setUnit(unsigned long int unitType, Player* owner)
+void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -344,11 +346,16 @@ void BosonOrderButton::setUnit(unsigned long int unitType, Player* owner)
 	unset();
  }
  mUnit = 0;
- mUnitType = unitType;
+ mProductionType = type;
+ mProductionId = id;
  mProductionOwner = owner;
- mCommandType = CommandUnit;
+ mCommandType = CommandProduce;
 
- displayUnitPixmap(unitType, owner);
+ if(type == ProduceUnit) {
+	displayUnitPixmap(id, owner);
+ } else {
+	displayTechPixmap(id, owner);
+ }
 
  mHealth->hide();
  mReload->hide();
@@ -422,6 +429,20 @@ void BosonOrderButton::displayUnitPixmap(unsigned long int unitType, Player* own
  setPixmap(*small);
 }
 
+void BosonOrderButton::displayTechPixmap(unsigned long int id, Player* owner)
+{
+ if (!owner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ QPixmap* small = owner->speciesTheme()->techPixmap(id);
+ if (!small) {
+	kdError() << k_funcinfo << "Cannot find pixmap for  " << id << endl;
+	return;
+ }
+ setPixmap(*small);
+}
+
 void BosonOrderButton::setPixmap(const QPixmap& pixmap)
 {
  mPixmap->setPixmap(pixmap);
@@ -437,8 +458,8 @@ void BosonOrderButton::slotClicked()
 	case CommandCell:
 		emit signalPlaceCell(tile());
 		break;
-	case CommandUnit:
-		emit signalProduceUnit(unitType());
+	case CommandProduce:
+		emit signalProduce(productionType(), productionId());
 		break;
 	case CommandUnitSelected:
 		if (!unit()) {
@@ -462,8 +483,8 @@ void BosonOrderButton::slotClicked()
 void BosonOrderButton::slotRightClicked()
 {
  switch (commandType()) {
-	case CommandUnit:
-		emit signalStopProduction(unitType());
+	case CommandProduce:
+		emit signalStopProduction(productionType(), productionId());
 		break;
 	default:
 		break;
@@ -500,7 +521,8 @@ void BosonOrderButton::unset()
 	disconnect(mUnit->owner(), 0, this, 0);
  }
  mUnit = 0;
- mUnitType = 0;
+ mProductionId = 0;
+ mProductionType = ProduceNothing;
  mTileNumber = 0;
  mAction = -1;
  mCommandType = CommandNothing;
@@ -513,16 +535,21 @@ void BosonOrderButton::advanceProduction(double percentage)
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (mUnitType <= 0) {
-	kdError() << k_funcinfo << "unitType: " << mUnitType << endl;
+ if (mProductionId <= 0) {
+	kdError() << k_funcinfo << "production id: " << mProductionId << endl;
 	return;
  }
- QPixmap* smallOverview = mProductionOwner->speciesTheme()->smallOverview(mUnitType);
- if (!smallOverview) {
-	kdError() << k_funcinfo << "NULL smalloverview for " << mUnitType << endl;
+ QPixmap* pix;
+ if(mProductionType == ProduceUnit) {
+	pix = mProductionOwner->speciesTheme()->smallOverview(mProductionId);
+ } else {
+	pix = mProductionOwner->speciesTheme()->techPixmap(mProductionId);
+ }
+ if (!pix) {
+	kdError() << k_funcinfo << "NULL pixmap for " << mProductionId << endl;
 	return;
  }
- QPixmap small(*smallOverview);
+ QPixmap small(*pix);
  if (percentage == 100) {
 	setPixmap(small);
 	return;

@@ -26,6 +26,8 @@
 #include "bosonmap.h"
 #include "bosonstatistics.h"
 #include "boson.h"
+#include "upgradeproperties.h"
+#include "unitplugins.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
@@ -51,7 +53,7 @@ public:
 
 	BosonMap* mMap; // just a pointer
 	int mUnitPropID; // used for KGamePropertyHandler
-	
+
 	QBitArray mFogged; // TODO: use KGameProperty
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
@@ -304,6 +306,8 @@ bool Player::save(QDataStream& stream)
  // Save statistics
  d->mStatistics->save(stream);
 
+ /// TODO: save researched technologies!!!
+
  return true;
 }
 
@@ -553,6 +557,33 @@ bool Player::canBuild(unsigned long int unitType) const
  return true;
 }
 
+bool Player::canResearchTech(unsigned long int id) const
+{
+ // Check for technologies
+ QValueList<unsigned long int> neededTechs = speciesTheme()->technology(id)->requiredTechnologies();
+ if(!neededTechs.isEmpty()) {
+	QValueList<unsigned long int>::Iterator it;
+	for(it = neededTechs.begin(); it != neededTechs.end(); ++it) {
+		if(!hasTechnology(*it)) {
+			return false;
+		}
+	}
+ }
+
+ // Check for units
+ QValueList<unsigned long int> neededUnits = speciesTheme()->technology(id)->requiredUnits();
+ if(!neededUnits.isEmpty()) {
+	QValueList<unsigned long int>::Iterator it;
+	for(it = neededUnits.begin(); it != neededUnits.end(); ++it) {
+		if(!hasUnitWithType(*it)) {
+			return false;
+		}
+	}
+ }
+
+ return true;
+}
+
 bool Player::hasUnitWithType(unsigned long int type) const
 {
  QPtrListIterator<Unit> it(d->mUnits);
@@ -565,6 +596,53 @@ bool Player::hasUnitWithType(unsigned long int type) const
 	++it;
  }
  return false;
+}
+
+bool Player::hasTechnology(unsigned long int id) const
+{
+ TechnologyProperties* tech = speciesTheme()->technologyList().find(id);
+ if(!tech) {
+	return false;
+ }
+ if(!tech->isResearched()) {
+	return false;
+ }
+ return true;
+}
+
+void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
+{
+ kdDebug() << k_funcinfo << "id: " << id << endl;
+ // Check if it isn't researched already
+ QIntDictIterator<TechnologyProperties> it(speciesTheme()->technologyList());
+ while (it.current()) {
+	if (((unsigned long int)(it.currentKey()) == id) && (it.current()->isResearched())) {
+		kdError() << k_funcinfo << "Technology " << it.current() << " already researched!" << endl;
+		return;
+	}
+	++it;
+ }
+
+ TechnologyProperties* prop = speciesTheme()->technology(id);
+ prop->setResearched(true);
+ prop->apply(this);
+
+ // Iterate through upgrades, applying as needed
+ QValueList<unsigned long int> unitIds = speciesTheme()->allFacilities();  // FIXME: this is dirty
+ unitIds += speciesTheme()->allMobiles();
+ QValueList<unsigned long int>::iterator pit;
+ for(pit = unitIds.begin(); pit != unitIds.end(); pit++) {
+	UpgradeProperties* upgrade;
+	QPtrList<UpgradeProperties> ulist = speciesTheme()->nonConstUnitProperties(*pit)->unresearchedUpgrades();
+	for(upgrade = ulist.first(); upgrade; upgrade = ulist.next()) {
+		if(upgrade->canBeResearched(this)) {
+			kdDebug() << k_funcinfo << "    Applying upgrade for UP " << *pit << " with id " << upgrade->id() << endl;
+			upgrade->setResearched(true);
+			upgrade->apply(this);
+			speciesTheme()->nonConstUnitProperties(*pit)->upgradeResearched( upgrade);
+		}
+	}
+ }
 }
 
 bool Player::advanceFlag() const
