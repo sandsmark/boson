@@ -123,11 +123,13 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
 	// GL_LINEAR
 	// TODO: performance: combine several textures into a single one and
 	// adjust the coordinates in glTexCoord
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+//	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(), 
-			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(),
+			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
 			buffer.bits());
  }
 
