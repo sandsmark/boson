@@ -268,7 +268,7 @@ void BoGLToolTip::slotTimeOut()
 	return;
  }
  BO_CHECK_NULL_RET(mView->canvas()->collisions());
- if (!mView->hasMouse()) {
+ if (!mView->hasMouse() || !mView->canvas()->onCanvas(mView->cursorCanvasVector())) {
 	hideTip();
 	return;
  }
