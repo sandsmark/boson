@@ -88,14 +88,16 @@ public:
 	QCanvasItemList enemyUnitsInRange() const;
 
 protected:
+	/**
+	 * @return a list of interesting collisions, i.e. no non-units, no
+	 * destryed units, ...
+	 **/
+	QValueList<VisualUnit*> unitCollisions(bool exact = false) const;
 
 private:
 	VisualUnitPrivate* d;
 
 };
-
-
-
 
 
 // a d pointer is probably not very good here - far too much memory consumption

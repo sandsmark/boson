@@ -32,6 +32,8 @@ public:
 
 	void saveConfig();
 
+	void zoom(const QWMatrix&);
+
 public slots:
 	void slotDebug();
 	void slotNewGame();

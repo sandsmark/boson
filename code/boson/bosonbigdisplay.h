@@ -43,6 +43,8 @@ public slots:
 
 	void slotUnitChanged(VisualUnit* unit);
 
+	virtual void resizeContents(int w, int h);
+
 signals:
 	/**
 	 * Emitted when a single unit (@ref selectionMode == Select_Single) is
