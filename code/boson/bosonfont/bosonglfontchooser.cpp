@@ -65,7 +65,7 @@ private:
 };
 
 BosonGLFontPreview::BosonGLFontPreview(QWidget* parent)
-    : BosonGLWidget(parent, true)
+    : BosonGLWidget(parent, 0, true)
 {
  mFont = 0;
 }
