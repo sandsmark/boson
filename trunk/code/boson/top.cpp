@@ -26,7 +26,6 @@
 #include "boson.h"
 #include "player.h"
 #include "bosonplayfield.h"
-#include "bosonmap.h"
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
@@ -1022,7 +1021,7 @@ void TopWidget::showHideMenubar()
 		}
 		break;
 	default:
-		boDebug() << k_funcinfo << "unknown id " << id << endl;
+		boWarning() << k_funcinfo << "unknown id " << id << endl;
 		break;
  }
 }
