@@ -170,6 +170,17 @@ QString BoSyncMessageBase::findError(const QByteArray& b1, const QByteArray& b2)
  }
  boWarning(370) << k_funcinfo << "there must be an error in this log (MD5 sums to not match)!!" << endl;
 
+ if (b1.size() == 0) {
+	QString error = i18n("ADMIN stream (b1) is empty");
+	boError(370) << k_funcinfo << error << endl;
+	return error;
+ }
+ if (b2.size() == 0) {
+	QString error = i18n("client stream (b2) is empty");
+	boError(370) << k_funcinfo << error << endl;
+	return error;
+ }
+
  QString error = findLogError(b1, b2);
  if (error.isEmpty()) {
 	boError(370) << k_funcinfo << "findLogError() has not returned a descriptive error string. don't know the error or cannot find it (but it must be here!)" << endl;
