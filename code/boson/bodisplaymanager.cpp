@@ -21,6 +21,7 @@
 #include "bodisplaymanager.moc"
 
 #include "bosonbigdisplay.h"
+#include "bosonconfig.h"
 #include "player.h"
 #include "defines.h"
 
@@ -329,6 +330,30 @@ void BoDisplayManager::recreateLayout()
 	++it;
  }
  d->mLayout->activate();
+}
+
+void BoDisplayManager::slotScroll(int dir)
+{
+ BosonBigDisplay* active = activeDisplay();
+ if (!active) {
+	return;
+ }
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		active->scrollBy(0, -boConfig->arrowKeyStep());
+		break;
+	case ScrollRight:
+		active->scrollBy(boConfig->arrowKeyStep(), 0);
+		break;
+	case ScrollDown:
+		active->scrollBy(0, boConfig->arrowKeyStep());
+		break;
+	case ScrollLeft:
+		active->scrollBy(-boConfig->arrowKeyStep(), 0);
+		break;
+	default:
+		return;
+ }
 }
 
 void BoDisplayManager::paintResources()

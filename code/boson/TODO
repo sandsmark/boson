@@ -19,7 +19,6 @@ Game TODOs
 - mine/harvest minerals/oil is only at an experimantal state
 - oil towers: they should be placed on an oil field. oil tankers go to the
   towers and receive the oil from them, which they take to the refinery
-- dont refine resources if refinery is still constructed
 - pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
   MobileUnit::boundingRect() hack
 - let the player configure how often the different advance methods are called.
@@ -28,9 +27,12 @@ Game TODOs
   every client. A frontend with settings like "best performance" == call
   advance methods seldom and stuff like this would also be nice
 - pause
+- sprite cursor seems to lead to crashes sometimes when moving the mouse (very
+  seldom only)
 
 
 Editor (map, unit, scenario) TODOs
+- totally broken, currently
 - don't place units on invalid tiles (e.g. ship on grass)
 - unit editor: check if images are in the directory, provide possibility to copy
   them
@@ -62,7 +64,6 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
-- decrease game speed ; increase unit speed. Saves cpu power
 - splitViews: we could use one view for players that are allied with the local
   player. we need to transmit the position of the view over network... would be
   a nice idea!
@@ -71,12 +72,14 @@ General TODOs
 - sometimes when splitting displays (maybe only when splitting vertically) it
   happens that no mouse IO is being added (and is therefore unusable and
   unremovable
+- canvas text: we want a static non-moving text in the upper right corner
+  displaying the resources of the player. up to now all implementations flicker
+  in any way...
 
 Data TODOs
 - sound for minimap activated/deactivated
 - sound for destroyed facilities - shouldn't be speech i guess
 - missile sound - e.g. for the samsite
-- make use of biglogo.png
 - shipyard
 - airport 
 - rewrite installation code:

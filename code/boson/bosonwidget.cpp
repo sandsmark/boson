@@ -792,29 +792,29 @@ void BosonWidget::initKeys()
 {
  d->mActionCollection = new KActionCollection(this);
 #ifdef OLD_KACTION
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, this,
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, d->mDisplayManager,
 		SLOT(slotScrollUp()), d->mActionCollection,
 		"scroll_up");
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, this,
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, d->mDisplayManager,
 		SLOT(slotScrollDown()), d->mActionCollection,
 		"scroll_down");
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, this,
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, d->mDisplayManager,
 		SLOT(slotScrollLeft()), d->mActionCollection,
 		"scroll_left");
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, this,
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, d->mDisplayManager,
 		SLOT(slotScrollRight()), d->mActionCollection,
 		"scroll_right");
 #else
- (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, this,
+ (void)new KAction(i18n("Scroll Up"), Qt::Key_Up, d->mDisplayManager,
 		SLOT(slotScroll(int)), d->mActionCollection,
 		QString("scroll_up {%1}").arg(ScrollUp));
- (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, this,
+ (void)new KAction(i18n("Scroll Down"), Qt::Key_Down, d->mDisplayManager,
 		SLOT(slotScroll(int)), d->mActionCollection,
 		QString("scroll_down {%1}").arg(ScrollDown));
- (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, this,
+ (void)new KAction(i18n("Scroll Left"), Qt::Key_Left, d->mDisplayManager,
 		SLOT(slotScroll(int)), d->mActionCollection,
 		QString("scroll_left {%1}").arg(ScrollLeft));
- (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, this,
+ (void)new KAction(i18n("Scroll Right"), Qt::Key_Right, d->mDisplayManager,
 		SLOT(slotScroll(int)), d->mActionCollection,
 		QString("scroll_right {%1}").arg(ScrollRight));
 #endif
@@ -824,30 +824,6 @@ void BosonWidget::initKeys()
 KActionCollection* BosonWidget::actionCollection() const
 {
  return d->mActionCollection;
-}
-
-void BosonWidget::slotScroll(int dir)
-{
- BosonBigDisplay* active = displaymanager()->activeDisplay();
- if (!active) {
-	return;
- }
- switch ((ScrollDirection)dir) {
-	case ScrollUp:
-		active->scrollBy(0, -boConfig->arrowKeyStep());
-		break;
-	case ScrollRight:
-		active->scrollBy(boConfig->arrowKeyStep(), 0);
-		break;
-	case ScrollDown:
-		active->scrollBy(0, boConfig->arrowKeyStep());
-		break;
-	case ScrollLeft:
-		active->scrollBy(-boConfig->arrowKeyStep(), 0);
-		break;
-	default:
-		return;
- }
 }
 
 void BosonWidget::slotDebugRequestIdName(int msgid, bool , QString& name)

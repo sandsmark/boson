@@ -166,15 +166,6 @@ protected slots:
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
 
-	void slotScrollUp() { slotScroll(ScrollUp); }
-	void slotScrollRight() { slotScroll(ScrollRight); }
-	void slotScrollDown() { slotScroll(ScrollDown); }
-	void slotScrollLeft() { slotScroll(ScrollLeft); }
-	/**
-	 * @param direction See @ref ScrollDirection
-	 **/
-	void slotScroll(int direction);
-
 	void slotStartScenario();
 
 	void slotUnfog(int x, int y);
@@ -206,13 +197,6 @@ protected slots:
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
 protected:
-	enum ScrollDirection {
-		ScrollUp = 0,
-		ScrollRight = 1,
-		ScrollDown = 2,
-		ScrollLeft = 3
-	};
-
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
 	void sendChangeTeamColor(Player* player, const QColor& color);
