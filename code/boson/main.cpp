@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 		, KAboutData::License_GPL
 		, "(c) 1999-2000, The boson team"
 		, 0l
-		, "http://aquila.rezel.enst.fr/boson"
+		, "http://boson.eu.org"
 		, "boson-fb@yalbi.com" );
 	   
 	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
