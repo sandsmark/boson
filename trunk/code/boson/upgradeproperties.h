@@ -64,23 +64,12 @@ class UpgradeProperties
     virtual bool canBeResearched(Player* player) const;
 
     /**
-     * @return Whether this upgrade/tech. is already researched
-     **/
-     bool isResearched() const { return mResearched; }
-
-    /**
-     * Set 'researched' status of this upgrade (whether it's already researched)
-     * Use this only in Player class!!!
-     **/
-     void setResearched(bool r) { mResearched = r; }
-
-    /**
      * One of the most important methods in this class
      * It applies upgrade to units and UnitProperties
-     * You must call setResearched(true) before this can have any effect
      * @param player owner of this class (and UnitProperties)
      **/
     virtual void apply(Player* player) const;
+    virtual void applyToUnits(Player* player) const;
 
 
     /**
@@ -130,13 +119,22 @@ class UpgradeProperties
 
     void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
         const QString& data, UpgradeType type, int weaponid = -1) const;
-    void applyPropertyToUnits(bofixed oldvalue, unsigned long int typeId,
-        Player* player, UpgradeType type) const;
+    void applyPropertyToUnits(QValueList<unsigned long int>* typeIds, Player* player,
+        const QString& data, UpgradeType type, int weaponid = -1) const;
+    void applyPropertyToUnits(bofixed oldvalue, bofixed newvalue,
+        unsigned long int typeId, Player* player, UpgradeType type) const;
 
 
     unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
     bofixed applyValue(const QString& data, bofixed oldvalue) const;
+    bool parseEntryType(const QString& typeString, UpgradeType* type, int* weaponid) const;
     void parseEntry(const QString& entry, ValueType& type, QString& value) const;
+
+    /**
+     * @return A list of unit types the upgrade applies to. This can be a fixed
+     * list of units or all mobiles/all facilities.
+     **/
+    QValueList<unsigned long int> appliesToTypes(const Player* player) const;
 
   private:
     /**
@@ -153,7 +151,6 @@ class UpgradeProperties
     template<class T> T applyValueInternal(ValueType type, T oldvalue, T value) const;
 
   private:
-    bool mResearched;
     unsigned long int mId;
     QString mName;
     unsigned long int mMineralCost;

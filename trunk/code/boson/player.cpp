@@ -74,6 +74,8 @@ public:
 	int mFacilitiesCount;
 
 	PlayerIO* mPlayerIO;
+
+	QValueList<unsigned long int> mResearchedUpgrades;
 };
 
 Player::Player(bool isNeutralPlayer) : KPlayer()
@@ -139,6 +141,7 @@ void Player::quitGame(bool destruct)
  d->mFoggedCount = 0;
  mOutOfGame = false;
  d->mMap = 0;
+ d->mResearchedUpgrades.clear();
 
  boDebug() << k_funcinfo << "clearing units" << endl;
  d->mUnits.clear();
@@ -691,27 +694,19 @@ bool Player::hasUnitWithType(unsigned long int type) const
 
 bool Player::hasTechnology(unsigned long int id) const
 {
- UpgradeProperties* tech = speciesTheme()->technologyList().find(id);
- if (!tech) {
-	return false;
+ if (d->mResearchedUpgrades.contains(id)) {
+	return true;
  }
- if (!tech->isResearched()) {
-	return false;
- }
- return true;
+ return false;
 }
 
 void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 {
  boDebug() << k_funcinfo << "id: " << id << endl;
  // Check if it isn't researched already
- QIntDictIterator<UpgradeProperties> it(speciesTheme()->technologyList());
- while (it.current()) {
-	if (((unsigned long int)(it.currentKey()) == id) && (it.current()->isResearched())) {
-		boError() << k_funcinfo << "upgrade " << it.current() << " already researched!" << endl;
-		return;
-	}
-	++it;
+ if (d->mResearchedUpgrades.contains(id)) {
+	boError() << k_funcinfo << "upgrade " << id << " already researched!" << endl;
+	return;
  }
 
  UpgradeProperties* prop = speciesTheme()->technology(id);
@@ -719,7 +714,13 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 	boError() << k_funcinfo << "NULL technology " << id << endl;
 	return;
  }
- prop->setResearched(true);
+ d->mResearchedUpgrades.append(id);
+
+ // AB: important: _first_ apply to units, then apply to the UnitProperties.
+ // otherwise the old values are already discarded (but required for applying to
+ // units)
+ prop->applyToUnits(this);
+
  prop->apply(this);
 
  ((Boson*)game())->slotUpdateProductionOptions();
@@ -770,14 +771,10 @@ bool Player::saveAsXML(QDomElement& root)
 
  QDomElement upgrades = doc.createElement("Upgrades");
  if (speciesTheme()) {
-	QIntDict<UpgradeProperties> list = speciesTheme()->technologyList();
-	QIntDictIterator<UpgradeProperties> it(speciesTheme()->technologyList());
-	for (; it.current(); ++it) {
-		if (!it.current()->isResearched()) {
-			continue;
-		}
+	QValueList<unsigned long int>::Iterator it;
+	for (it = d->mResearchedUpgrades.begin(); it != d->mResearchedUpgrades.end(); ++it) {
 		QDomElement e = doc.createElement("Researched");
-		e.setAttribute("Id", QString::number(it.current()->id()));
+		e.setAttribute("Id", QString::number(*it));
 		upgrades.appendChild(e);
 	}
  }
@@ -827,7 +824,12 @@ bool Player::loadFromXML(const QDomElement& root)
  }
 
  QDomElement upgrades = root.namedItem("Upgrades").toElement();
- if (!upgrades.isNull() && speciesTheme()) {
+ if (upgrades.isNull()) {
+	boError(260) << k_funcinfo << "no Upgrades tag found" << endl;
+	return false;
+ }
+ d->mResearchedUpgrades.clear();
+ if (speciesTheme()) {
 	QDomNodeList researched = upgrades.elementsByTagName("Researched");
 	for (unsigned int i = 0; i < researched.count(); i++) {
 		QDomElement e = researched.item(i).toElement();
@@ -842,11 +844,14 @@ bool Player::loadFromXML(const QDomElement& root)
 			boWarning() << k_funcinfo << "technology " << id << " not found" << endl;
 			continue;
 		}
-		if (u->isResearched()) {
+		if (d->mResearchedUpgrades.contains(id)) {
 			boWarning() << k_funcinfo << "technology " << id << " already researched" << endl;
 			continue;
 		}
-		u->setResearched(true);
+		d->mResearchedUpgrades.append(id);
+
+		// AB: note that this doesn't apply to units. they already have
+		// the correct values.
 		u->apply(this);
 	}
  }
