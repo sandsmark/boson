@@ -50,10 +50,33 @@ public:
 	BoMatrixWidget(QWidget* parent = 0, const char* name = 0);
 	~BoMatrixWidget();
 
-	void setMatrix(BoMatrix* m);
+	void setMatrix(const BoMatrix* m);
+	void setMatrix(const BoMatrix& m);
 	void setMatrix(Lib3dsMatrix m);
 	void setIdentity();
 	void clear();
+
+	const BoMatrix& matrix() const;
+
+	void mark(unsigned int i);
+	void unmark(unsigned int i);
+
+	/**
+	 * Compare the of this widget matrix with @p matrix and @ref mark all
+	 * elements, that don't match.
+	 *
+	 * @param diff The maximal differences that is treated as "equal". A
+	 * perfect match happens rarely with floating point numbers, so using
+	 * 0.0f is usually a bad idea.
+	 **/
+	bool compareMatrices(const BoMatrix& matrix, float diff = 0.001f);
+
+	/**
+	 * @overload
+	 * This will use the matrix of @p widget as 2nd matrix and @ref mark the
+	 * elements in both widgets.
+	 **/
+	bool compareMatrices(BoMatrixWidget* widget, float diff = 0.001f);
 
 private:
 	BoMatrixWidgetPrivate* d;
