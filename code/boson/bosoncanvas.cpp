@@ -141,33 +141,32 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	// note: the advance methods must not change the advanceFunction()s
 	// here!
 	while (animIt.current()) {
-		animIt.current()->advance(advanceCount);
-		animIt.current()->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		BosonItem* s = animIt.current();
+		s->advance(advanceCount);
+		s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		// now move *without* collision detection. collision detection should
+		// have been done above - especially in advanceMoveCheck() methods.
+		// AB: do NOT add something here - if you add something for units then
+		// check for isDestroyed() !!
+		if (s->xVelocity() || s->yVelocity()) {
+			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
+		}
 		++animIt;
 	}
  } else {
 	// note: the advance methods must not change the advanceFunction2()s
 	// here!
 	while (animIt.current()) {
-		animIt.current()->advance(advanceCount);
-		animIt.current()->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+		BosonItem* s = animIt.current();
+		s->advance(advanceCount);
+		s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+		if (s->xVelocity() || s->yVelocity()) {
+			s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
+		}
 		++animIt;
 	}
  }
  unlockAdvanceFunction();
-
- animIt.toFirst();
- while (animIt.current()) {
-	// now move *without* collision detection. collision detection should
-	// have been done above - especially in advanceMoveCheck() methods.
-	// AB: do NOT add something here - if you add something for units then
-	// check for isDestroyed() !!
-	BosonItem* s = animIt.current();
-	if (s->xVelocity() || s->yVelocity()) {
-		s->moveBy(s->xVelocity(), s->yVelocity(), 0.0);
-	}
-	++animIt;
- }
 
  deleteUnusedShots();
  

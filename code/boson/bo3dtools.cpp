@@ -55,10 +55,14 @@ float rotationToPoint(float x, float y)
       add = 180;
       arg = -x / y;
     }
-    else
+    else if(x < 0)
     {
       add = 270;
       arg = -y / -x;
+    }
+    else
+    {
+      return 0;
     }
   }
 

@@ -1085,7 +1085,7 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
  if (!prop) {
-	boError() << "Unknown unitType " << unitType << endl;
+	boError() << k_funcinfo << "Unknown unitType " << unitType << endl;
 	return 0;
  }
 
@@ -1340,6 +1340,10 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 	return 0;
  }
  Unit* unit = createUnit(unitType, (Player*)p);
+ if (!unit) {
+	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
+	return 0;
+ }
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
  return unit;
@@ -1355,6 +1359,10 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
 	return 0;
  }
  Unit* unit = createUnit(unitType, (Player*)p);
+ if (!unit) {
+	boError() << k_funcinfo << "NULL unit when adding new unit with type " << unitType << endl;
+	return 0;
+ }
  unit->setId(nextUnitId());
  if (!BosonScenario::loadUnit(node, unit)) {
 	boWarning() << k_funcinfo << "Received broken XML file from server. It may be that network is broken now!" << endl;
