@@ -25,6 +25,7 @@
 #include "bo3dtools.h"
 #include "bo3dsload.h"
 #include "bodebug.h"
+#include "bomatrixwidget.h"
 
 #include <qcombobox.h>
 #include <qcheckbox.h>
@@ -59,81 +60,6 @@
 #include <lib3ds/quat.h>
 
 #include <math.h>
-
-/**
- * Display a matrix. We use a @ref QGrid here, in order to display it like this:
- * <pre>
- * 1 0  0   0
- * 0 10 0   0
- * 0 0  100 0
- * 0 0  0   1
- * </pre>
- * and not like this
- * <pre>
- * 1 0 0 0
- * 1 10 0 0
- * 1 0 0 100 0
- * 1 0 0 1
- * </pre>
- **/
-class BoMatrixWidget : public QWidget
-{
-public:
-	BoMatrixWidget(QWidget* parent) : QWidget(parent)
-	{
-		mLayout = new QGridLayout(this, 0, 1);
-		for (int i = 0; i < 16; i++) {
-			QLabel* l = new QLabel(this);
-			mLabel.insert(i, l);
-			mLayout->addWidget(l, i % 4, i / 4);
-		}
-	}
-	~BoMatrixWidget()
-	{
-	}
-
-	void setMatrix(BoMatrix* m)
-	{
-		if (!m) {
-			boError() << k_funcinfo << "NULL matrix" << endl;
-			return;
-		}
-		for (int i = 0; i < 4; i++) {
-			const float* d = m->data();
-			mLabel[i + 0]->setText(QString::number(d[i + 0]));
-			mLabel[i + 4]->setText(QString::number(d[i + 4]));
-			mLabel[i + 8]->setText(QString::number(d[i + 8]));
-			mLabel[i + 12]->setText(QString::number(d[i + 12]));
-		}
-	}
-
-	void setMatrix(Lib3dsMatrix m)
-	{
-		BoMatrix matrix;
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				matrix.setElement(i, j, m[j][i]);
-			}
-		}
-		setMatrix(&matrix);
-	}
-	void setIdentity()
-	{
-		BoMatrix m;
-		setMatrix(&m);
-	}
-
-	void clear()
-	{
-		for (int i = 0; i < 16; i++) {
-			mLabel[i]->setText("");
-		}
-	}
-
-private:
-	QGridLayout* mLayout;
-	QIntDict<QLabel> mLabel;
-};
 
 class BoMaterialWidget : public QWidget
 {

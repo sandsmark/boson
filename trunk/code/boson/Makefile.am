@@ -30,6 +30,7 @@ BOSON_SRC = \
 	speciesdata.cpp \
 	player.cpp \
 	bo3dtools.cpp \
+	bomatrixwidget.cpp \
 	bosonminimap.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
