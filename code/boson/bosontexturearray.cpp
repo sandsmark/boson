@@ -29,11 +29,10 @@ BosonTextureArray::BosonTextureArray()
  init();
 }
 
-BosonTextureArray::BosonTextureArray(QValueList<QImage> images, GLenum mode)
+BosonTextureArray::BosonTextureArray(QValueList<QImage> images)
 {
-// FIXME: remove mode parameter. will always be 2d anyway
  init();
- if (!createTextures(images, mode)) {
+ if (!createTextures(images)) {
 	kdWarning() << k_funcinfo << "Could not create textures" << endl;
  }
 }
@@ -60,7 +59,69 @@ BosonTextureArray::~BosonTextureArray()
 // kdDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
+bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
+{
+ if (!QGLContext::currentContext()) {
+	kdError() << k_funcinfo << "NULL current context!!" << endl;
+	return false; // baaaad - we should delay loading or so
+ }
+ GLenum error = glGetError();
+ if (error != GL_NO_ERROR) {
+	kdError() << k_funcinfo << "OpenGL Error before loading texture" << endl;
+ }
+
+ QImage buffer;
+
+ //FIXME: minimum size should be 64x64!!
+ int w = nextPower2(image.width());
+ int h = nextPower2(image.height());
+
+ if (w != image.width() || h != image.height()) {
+	buffer = image.scale(w, h, QImage::ScaleFree);
+ } else {
+	buffer = image;
+ }
+ if (buffer.isNull()) {
+	kdWarning() << k_funcinfo << "using fallback image" << endl;
+	buffer = QImage(w, h, 32);
+	buffer.fill(Qt::red.rgb()); // fallback
+	// should not appear at all...
+ }
+
+ buffer = QGLWidget::convertToGLFormat(buffer);
+ glBindTexture(GL_TEXTURE_2D, texture);
+
+ // note: width and height MUST be a power of 2!! they must be >= 64
+ // and should be <= 256
+ // (we already scaled above - this is rather meant as a reminder)
+
+ // AB: performance: GL_UNSIGNED_BYTE is said to be the fastest format
+ // (usually!!) - so don't change it :)
+ glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(), 
+		buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+		buffer.bits());
+
+ // FIXME: performance: GL_NEAREST is said to be fastest, GL_LINEAR
+ // second fastest
+ // FIXME: performance: do we gain anything by using mipmaps here?
+ // probably...
+ // TODO: performance: combine several textures into a single one and
+ // adjust the coordinates in glTexCoord
+ // TODO: performance: glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
+ // is fast - do we loose anything from it? is this the correct file to
+ // place it in? can it go to initializeGL() ?
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+ glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+ error = glGetError();
+ if (error != GL_NO_ERROR) {
+	kdError() << k_funcinfo << "OpenGL Error when loading texture " << texture << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonTextureArray::createTextures(QValueList<QImage> images)
 {
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
@@ -77,7 +138,6 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
 	return false; // baaaad - we should delay loading or so
  }
  QImage buffer;
- mMode = mode;
  mCount = images.count();
  mTextures = new GLuint[mCount];
  mWidths = new int[mCount];
@@ -89,60 +149,17 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images, GLenum mode)
  for (unsigned int i = 0; i < mCount; i++) {
 	//FIXME: minimum size should be 64x64!!
 
-	int w = nextPower2(images[i].width());
-	int h = nextPower2(images[i].height());
-
-	if (w != images[i].width() || h != images[i].height()) {
-		buffer = images[i].scale(w, h, QImage::ScaleFree);
-	} else {
-		buffer = images[i];
-	}
-	if (buffer.isNull()) {
-		kdWarning() << k_funcinfo << "using fallback image" << endl;
-		buffer = QImage(w, h, 32);
-		buffer.fill(Qt::red.rgb()); // fallback
-		// should not appear at all... - do we need an alpha buffer?
-	}
 
 	// the original size (NOT the texture size)
 	mWidths[i] = images[i].width();
 	mHeights[i] = images[i].height();
 
-	buffer = QGLWidget::convertToGLFormat(buffer);
-	glBindTexture(mMode, mTextures[i]);
-
-        // note: width and height MUST be a power of 2!! they must be >= 64
-	// and should be <= 256
-	// (we already scaled above - this is rather meant as a reminder)
-	// FIXME: all params (e.g. GL_RGBA) are hardcoded
-	// AB: performance: GL_UNSIGNED_BYTE is said to be the fastest format
-	// (usually!!) - so don't change it :)
-	glTexImage2D(mMode, 0, GL_RGBA, buffer.width(), 
-			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
-			buffer.bits());
-
-	// FIXME: this is hardcoded, too...
-	// FIXME: performance: GL_NEAREST is said to be fastest, GL_LINEAR
-	// second fastest
-	// FIXME: performance: do we gain anything by using mipmaps here?
-	// probably...
-	// TODO: performance: combine several textures into a single one and
-	// adjust the coordinates in glTexCoord
-	// TODO: performance: glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
-	// is fast - do we loose anything from it? is this the correct file to
-	// place it in? can it go to initializeGL() ?
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR) {
-		kdError() << k_funcinfo << "OpenGL Error when loading texture " << i << ": " << gluErrorString(error) << endl;
-	}
+	createTexture(images[i], mTextures[i]);
  }
  return true;
 }
 
-int BosonTextureArray::nextPower2(int n) const
+int BosonTextureArray::nextPower2(int n)
 {
  // FIXME: texture must be >= 64x64
  // maybe we should always return a value >= 64

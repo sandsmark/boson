@@ -20,11 +20,9 @@
 #include "bosonmodel.h"
 
 #include "defines.h"
-#include "bosontexturearray.h"
+#include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 
-#include <kglobal.h>
-#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #include <qimage.h>
@@ -36,6 +34,8 @@
 #include <lib3ds/mesh.h>
 #include <lib3ds/vector.h>
 #include <lib3ds/material.h>
+
+BosonModelTextures* BosonModel::mModelTextures = 0;
 
 BosonModel::BosonModel(GLuint list, int width, int height)
 {
@@ -62,20 +62,23 @@ void BosonModel::init()
 {
  m3ds = 0;
  mDisplayList = 0;
- mTextureArray = 0;
  mWidth = 0;
  mHeight = 0;
  mFrame = 0;
+ if (!mModelTextures) { // TODO static deleter!
+	mModelTextures = new BosonModelTextures();
+ }
 }
 
 BosonModel::~BosonModel()
 {
+ kdDebug() << k_funcinfo << endl;
+ mModelTextures->removeModel(this);
  if (m3ds) {
-	lib3ds_file_free(m3ds);
+	lib3ds_file_free(m3ds); // we can probably free already after creating the display lists!
 	m3ds = 0;
  }
- mTextures.clear();
- delete mTextureArray;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonModel::loadModel()
@@ -109,7 +112,7 @@ void BosonModel::loadModel()
  boProfiling->start(BosonProfiling::LoadModelDisplayLists);
  createDisplayLists();
  boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
- 
+
  if (!mDisplayList) {
 	kdError() << k_funcinfo << "Still null display list" << endl;
 	boProfiling->stop(BosonProfiling::LoadModel);
@@ -121,11 +124,6 @@ void BosonModel::loadModel()
  mWidth = BO_TILE_SIZE;
  mHeight = BO_TILE_SIZE;
  boProfiling->stop(BosonProfiling::LoadModel);
-}
-
-QString BosonModel::textureDirectory() const
-{
- return KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/wheel.jpg") + QString::fromLatin1("boson/themes/textures/");
 }
 
 QString BosonModel::cleanTextureName(const char* name)
@@ -142,12 +140,9 @@ void BosonModel::loadTextures()
  if (!m3ds) {
 	kdError() << k_funcinfo << "File was not yet loaded" << endl;
 	return;
-	
  }
  //FIXME: do we need to loop through frames? i guess even in other frames there
  //shouldn't be other textures?!
- QValueList<QImage> images;
- QValueList<QString> names;
  Lib3dsMaterial* mat;
  for (mat = m3ds->materials; mat; mat = mat->next) {
 	Lib3dsTextureMap* t = &mat->texture1_map;
@@ -155,19 +150,7 @@ void BosonModel::loadTextures()
 	if (texName.isEmpty()) {
 		continue;
 	}
-	QImage image(textureDirectory() + texName);
-	if (image.isNull()) {
-		kdError() << k_funcinfo << "NULL image: " << textureDirectory() + texName << endl;
-		image = QImage(64, 64, 32);
-		image.fill(Qt::red.rgb()); // evil dummy image
-	}
-	images.append(image);
-	names.append(t->name);
- }
- mTextureArray = new BosonTextureArray(images);
- for (unsigned int i = 0; i < mTextureArray->count(); i++) {
-	GLuint list = mTextureArray->texture(i);
-	mTextures.insert(names[i], list);
+	mModelTextures->insert(this, texName);
  }
 }
 
@@ -282,13 +265,14 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				// mesh doesn't have any texture. otherwise it
 				// must be equal to mesh->points
 				Lib3dsTextureMap* t = &mat->texture1_map;
-				if (!mTextures.contains(t->name)) {
-					if (!QString(t->name).isEmpty()) {
-						kdWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
-					}
+				QString texName = cleanTextureName(t->name);
+				if (texName.isEmpty()) {
 					myTex = 0;
 				} else {
-					myTex = mTextures[t->name];
+					myTex = mModelTextures->texture(texName);
+					if (!myTex) {
+						kdWarning() << k_funcinfo << "Texture " << t->name << " was not loaded" << endl;
+					}
 				}
 			} else {
 				//...
