@@ -30,6 +30,7 @@ enum mobType {
 	MOB_SHIP = 0,
 	MOB_QUAD,
 	MOB_AIRCRAFT,
+	MOB_HARVESTER,
 	MOB_LAST
 	};
 
