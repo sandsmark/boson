@@ -434,6 +434,204 @@ void BoMatrix::debugMatrix(const GLfloat* m)
  boDebug() << k_funcinfo << "done" << endl;
 }
 
+void BoMatrix::toRotation(float* alpha, float* beta, float* gamma)
+{
+ // see also docs/glrotate.lyx
+ if (!alpha || !beta || !gamma)
+ {
+   return;
+ }
+ // AB: asin() is not unique. See docs/glrotate.lyx on why we can use this
+ // anyway.
+ *beta = asin(mData[8]);
+
+ float cosb = cos(*beta);
+ if (fabsf(cosb) > 0.0001)
+ {
+   float cosa = mData[10] / cosb;
+   float sina = -mData[9] / cosb;
+   *alpha = atan2(sina, cosa);
+
+   float cosc = mData[0] / cosb;
+   float sinc = -mData[4] / cosb;
+   *gamma = atan2(sinc, cosc);
+ }
+ else
+ {
+   *alpha = 0.0f;
+
+   float sinc = mData[1];
+   float cosc = mData[5];
+
+   *gamma = atan2(sinc, cosc);
+ }
+
+ *alpha = Bo3dTools::rad2deg(*alpha);
+ *beta = Bo3dTools::rad2deg(*beta);
+ *gamma = Bo3dTools::rad2deg(*gamma);
+}
+
+
+/*****  BoQuaternion  *****/
+
+BoMatrix BoQuaternion::matrix() const
+{
+ BoMatrix m;
+ const float x = mV[0];
+ const float y = mV[1];
+ const float z = mV[2];
+ const float xx = x * x;
+ const float yy = y * y;
+ const float zz = z * z;
+ const float xy = x * y;
+ const float xz = x * z;
+ const float xw = mW * x;
+ const float yz = y * z;
+ const float yw = mW * y;
+ const float zw = mW * z;
+ m.setElement(0, 0, 1.0f - 2.0f * (yy + zz));
+ m.setElement(1, 0,        2.0f * (xy + zw));
+ m.setElement(2, 0,        2.0f * (xz - yw));
+
+ m.setElement(0, 1,        2.0f * (xy - zw));
+ m.setElement(1, 1, 1.0f - 2.0f * (xx + zz));
+ m.setElement(2, 1,        2.0f * (yz + xw));
+
+ m.setElement(0, 2,        2.0f * (xz + yw));
+ m.setElement(1, 2,        2.0f * (yz - xw));
+ m.setElement(2, 2, 1.0f - 2.0f * (xx + yy));
+
+ return m;
+}
+
+float BoQuaternion::length() const
+{
+ return (float)sqrt(mW * mW + mV[0] * mV[0] + mV[1] * mV[1] + mV[2] * mV[2]);
+}
+
+void BoQuaternion::setRotation(const BoVector3& direction_, const BoVector3& up_)
+{
+ BoVector3 dir(direction_);
+ BoVector3 up(up_);
+ dir.normalize();
+
+ BoVector3 x = BoVector3::crossProduct(up, dir);
+ BoVector3 y = BoVector3::crossProduct(dir, x);
+ x.normalize();
+ y.normalize();
+
+ BoMatrix M;
+ M.setElement(0, 0, x[0]);
+ M.setElement(0, 1, x[1]);
+ M.setElement(0, 2, x[2]);
+
+ M.setElement(1, 0, y[0]);
+ M.setElement(1, 1, y[1]);
+ M.setElement(1, 2, y[2]);
+
+ M.setElement(2, 0, dir[0]);
+ M.setElement(2, 1, dir[1]);
+ M.setElement(2, 2, dir[2]);
+
+ setRotation(M);
+}
+
+void BoQuaternion::setRotation(float angle, const BoVector3& axis)
+{
+ BoVector3 normAxis = axis;
+ normAxis.normalize();
+ float sina = sin(Bo3dTools::deg2rad(angle / 2));
+ mW = cos(Bo3dTools::deg2rad(angle / 2));
+ mV.set(normAxis[0] * sina, normAxis[1] * sina, normAxis[2] * sina);
+ normalize();
+}
+
+void BoQuaternion::setRotation(float angleX, float angleY, float angleZ)
+{
+ BoQuaternion x, y, z;
+ // one quaternion per axis
+ x.set((float)cos(Bo3dTools::deg2rad(angleX/2)), BoVector3((float)sin(Bo3dTools::deg2rad(angleX/2)), 0.0f, 0.0f));
+ y.set((float)cos(Bo3dTools::deg2rad(angleY/2)), BoVector3(0.0f, (float)sin(Bo3dTools::deg2rad(angleY/2)), 0.0f));
+ z.set((float)cos(Bo3dTools::deg2rad(angleZ/2)), BoVector3(0.0f, 0.0f, (float)sin(Bo3dTools::deg2rad(angleZ/2))));
+ x.multiply(y);
+ x.multiply(z);
+ set(x);
+ normalize();
+}
+
+void BoQuaternion::setRotation(const BoMatrix& rotationMatrix)
+{
+ // See Q55 in the quat faq on http://www.j3d.org/matrix_faq/matrfaq_latest.html
+ // WARNING: although they refer to a column order matrix in Q54, they use _row_
+ // order here!
+ float x, y, z, w;
+ const float* m = rotationMatrix.data();
+ float t = 1.0f + m[0] + m[5] + m[10];
+ if (t > 0.0f)
+ {
+   float s = sqrtf(t) * 2.0f;
+   x = (m[6] - m[9]) / s;
+   y = (m[8] - m[2]) / s;
+   z = (m[1] - m[4]) / s;
+   w = 0.25f * s;
+ }
+ else if (m[0] > m[5] && m[0] > m[10])
+ {
+   float s = sqrtf(1.0 + m[0] - m[5] - m[10]) * 2.0f;
+   x = 0.25f * s;
+   y = (m[1] + m[4]) / s;
+   z = (m[8] + m[2]) / s;
+   w = (m[6] - m[9]) / s;
+ }
+ else if (m[5] > m[10])
+ {
+   float s = sqrtf(1.0 + m[5] - m[0] - m[10]) * 2.0f;
+   x = (m[1] + m[4]) / s;
+   y = 0.25f * s;
+   z = (m[6] + m[9]) / s;
+   w = (m[8] - m[2]) / s;
+ }
+ else
+ {
+   float s = sqrtf(1.0 + m[10] - m[0] - m[5]) * 2.0f;
+   x = (m[8] + m[2]) / s;
+   y = (m[6] + m[9]) / s;
+   z = 0.25f * s;
+   w = (m[1] - m[4]) / s;
+ }
+ mW = w;
+ mV.set(x, y, z);
+}
+
+void BoQuaternion::toRotation(float* angle, BoVector3* axis)
+{
+ // see Q 57 in quat faq on http://www.j3d.org/matrix_faq/matrfaq_latest.html
+ if (!angle || !axis)
+ {
+   return;
+ }
+ normalize();
+ const float cosa = mW;
+ *angle = acos(cosa) * 2;
+ *angle = Bo3dTools::rad2deg(*angle);
+ float sina = (float)sqrt(1.0 - cosa * cosa);
+ if (fabsf(sina) < 0.0005)
+ {
+   sina = 1.0f;
+ }
+ axis->set(mV.x() / sina, mV.y() / sina, mV.z() / sina);
+}
+
+void BoQuaternion::toRotation(float* alpha, float* beta, float* gamma)
+{
+ if (!alpha || !beta || !gamma)
+ {
+   return;
+ }
+ BoMatrix m = matrix();
+ m.toRotation(alpha, beta, gamma);
+}
+
 
 /*****  Misc methods  *****/
 

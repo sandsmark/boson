@@ -800,6 +800,23 @@ class BoMatrix
     inline GLfloat operator[](int i) const { return mData[i]; }
 
     /**
+     * Convert the rotation matrix to 3 angles. If you combine these angles in
+     * the following way (the order is important!)
+     * <pre>
+     * glRotatef(*angleX, 1.0, 0.0, 0.0);
+     * glRotatef(*angleY, 0.0, 1.0, 0.0);
+     * glRotatef(*angleZ, 0.0, 0.0, 1.0);
+     * </pre>
+     * You will get this rotation matrix.
+     *
+     * Note that the results of this function are totally undefined if this is
+     * not a rotation matrix (i.e. a mtrix that was rotated only)
+     *
+     * These angles are often referred to as euler angles.
+     **/
+    void toRotation(float* angleX, float* angleY, float* angleZ);
+
+    /**
      * @return The index of the element @p row, @p column of the matrix in the
      * internal array. The array can be organized in two different ways, which
      * both are used out there in the world. We are preferring the organization
@@ -822,6 +839,221 @@ class BoMatrix
 
   private:
     GLfloat mData[16];
+};
+
+// most has been stolen from
+// http://www.gamedev.net/reference/articles/article1095.asp
+// and also from
+// http://www.j3d.org/matrix_faq/matrfaq_latest.html
+// (it seems both articles share some code :))
+// note at least in the matrix/quat faq there are some errors! (version 1.20)
+
+/**
+ * A rotation can be represented in several ways, a quaternion is one of them.
+ *
+ * The by far easiest and most popular way is to store 3 different rotation
+ * values, one for each axis. In OpenGL code this will look like this:
+ * <pre>
+ * glRotatef(angleX, 1.0f, 0.0f, 0.0f);
+ * glRotatef(angleY, 0.0f, 1.0f, 0.0f);
+ * glRotatef(angleZ, 0.0f, 0.0f, 1.0f);
+ * </pre>
+ * These angles are called euler angles.
+ * They suffer from the so-called * "gimbal-lock".
+ *
+ * Use google to find a description on what this "gimbal lock" is  - i am not
+ * qualified enough to give a correct description. It is enough to say that the
+ * rotation will not occur as you want it to.
+ *
+ * Another representation is the angle axis representation. Here you do only one
+ * rotation, by an arbitrary axis. Code:
+ * <pre>
+ * glRotatef(angle, axisX, axisY, axisZ);
+ * </pre>
+ * This does not suffer from gimbal lock but (according to some
+ * tutorials/howtos) it suffers from other things, such as when you interpolate
+ * between two rotations. This problem does not matter for us, as we do not
+ * (yet?) use it. But it is imho hard to use and to calculate.
+ *
+ * The third, and probably most popular among big 3d projects, way of
+ * representing rotations are quaternions.
+ *
+ * I will not try to explain to you what exactly quaternions are - i am not
+ * qualified enough to do this. Use google and e.g.
+ * http://www.gamedev.net/reference/articles/article1095.asp
+ *
+ * A quaternion consists of 4 floating point values - a scalar (w) and a vector
+ * (v).
+ * You can get a rotation matrix (see @ref matrix) from a quaternion and
+ * therefore you can easily use it in glMultMatrix.
+ *
+ * You can convert all major means of rotation into a quaternion,
+ * see @ref setRotation.
+ *
+ * If you @ref multiply a quat by another one you get a similar effect as
+ * if you had multiplied both rotation matrices, i.e. the two rotations are
+ * combined.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoQuaternion
+{
+public:
+	BoQuaternion()
+	: mW(1.0f)
+	{
+	}
+	BoQuaternion(const BoQuaternion& quat)
+	{
+		*this = quat;
+	}
+	BoQuaternion(float w, const BoVector3& v)
+	{
+		set(w, v);
+	}
+	BoQuaternion& operator=(const BoQuaternion& quat)
+	{
+		set(quat);
+		return *this;
+	}
+
+	void loadIdentity()
+	{
+		mW = 1.0f;
+		mV.set(0.0f, 0.0f, 0.0f);
+	}
+
+	/**
+	 * @return The scalar part of this quaternion
+	 **/
+	float w() const
+	{
+		return mW;
+	}
+
+	/**
+	 * @return The vector part of this quaternion
+	 **/
+	const BoVector3& v() const
+	{
+		return mV;
+	}
+
+	/**
+	 * @return The quaternion converted into a rotation matrix
+	 **/
+	BoMatrix matrix() const;
+
+	/**
+	 * Multiply this quaternion by another one. The identity quaternion
+	 * (i.e. a quat doesnt get changed if you multiply it by this one) is
+	 * (1,(0,0,0)), i.e. w is 1 and the vector is (0,0,0).
+	 *
+	 * This way of combining two rotations does not suffer from gimbal lock.
+	 **/
+	void multiply(const BoQuaternion& quat)
+	{
+		float w = mW * quat.mW    - mV[0] * quat.mV[0] - mV[1] * quat.mV[1] - mV[2] * quat.mV[2];
+		float x = mW * quat.mV[0] + mV[0] * quat.mW    + mV[1] * quat.mV[2] - mV[2] * quat.mV[1];
+		float y = mW * quat.mV[1] + mV[1] * quat.mW    + mV[2] * quat.mV[0] - mV[0] * quat.mV[2];
+		float z = mW * quat.mV[2] + mV[2] * quat.mW    + mV[0] * quat.mV[1] - mV[1] * quat.mV[0];
+		mW = w;
+		mV.set(x, y, z);
+	}
+	static BoQuaternion multiply(const BoQuaternion& q1, const BoQuaternion& q2)
+	{
+		BoQuaternion q(q1);
+		q.multiply(q2);
+		return q;
+	}
+	void operator*=(const BoQuaternion& quat)
+	{
+		multiply(quat);
+	}
+	BoQuaternion operator+(const BoQuaternion& q) const
+	{
+		return BoQuaternion(mW + q.mW, mV + q.mV);
+	}
+
+	float length() const;
+	void normalize()
+	{
+		float l = length();
+		mW /= l;
+		mV.scale(1.0f / l);
+	}
+
+	bool isEqual(const BoQuaternion& quat) const
+	{
+		return ((mW == quat.mW) && (mV.isEqual(quat.mV)));
+	}
+	bool operator==(const BoQuaternion& quat) const
+	{
+		return isEqual(quat);
+	}
+
+	void set(float w, const BoVector3& v)
+	{
+		mW = w;
+		mV = v;
+	}
+	inline void set(const BoQuaternion& quat)
+	{
+		set(quat.mW, quat.mV);
+	}
+
+	/**
+	 * @param angle The angle around @p axis, given in degree.
+	 **/
+	void setRotation(float angle, const BoVector3& axis);
+
+	/**
+	 * The so-called "euler rotation". This creates a quaternion for as if
+	 * <pre>
+	 * glRotatef(angleX, 1, 0, 0);
+	 * glRotatef(angleY, 0, 1, 0);
+	 * glRotatef(angleZ, 0, 0, 1);
+	 * </pre>
+	 * was called (in this order).
+	 * @param angleX The (euler-)angle around the x-axis. given in degree.
+	 * @param angleY The (euler-)angle around the y-axis. given in degree.
+	 * @param angleZ The (euler-)angle around the z-axis. given in degree.
+	 **/
+	void setRotation(float angleX, float angleY, float angleZ);
+
+	/**
+	 * Convert a rotation matrix to the quaternion. A rotation matrix is
+	 * simply a matrix that describes a rotation.
+	 **/
+	void setRotation(const BoMatrix& rotationMatrix); // See Q55 in the quat faq
+
+	/**
+	 * Set the rotation according to the @p direction and the @p up vector.
+	 * These are compatible to the parameters used in gluLookAt, but note
+	 * that the @p direction differs from the lookat (aka center) vector.
+	 *
+	 * The direction is the (camera - lookat) vector.
+	 **/
+	void setRotation(const BoVector3& direction, const BoVector3& up);
+	/**
+	 * Convenience method for the version above. This takes exactly the
+	 * arguments that gluLookAt() takes.
+	 **/
+	void setRotation(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
+	{
+		setRotation(cameraPos - lookAt, up);
+	}
+
+	void toRotation(float* angle, BoVector3* axis); // see Q 57 in quat faq
+
+        /**
+         * See @ref BoMatrix::toRotation
+         **/
+	void toRotation(float* angleX, float* angleY, float* angleZ);
+
+private:
+	float mW;
+	BoVector3 mV;
 };
 
 /**
@@ -927,9 +1159,7 @@ class Bo3dTools
      * to scroll the scene by a certain distance.
      **/
     static bool mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, int windx, int windy, GLfloat* dx, GLfloat* dy);
-
 };
-
 
 
 #endif // BO3DTOOLS_H
