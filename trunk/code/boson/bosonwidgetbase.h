@@ -161,8 +161,6 @@ signals:
 
 	void signalMoveCommandFrame(int);
 
-	void signalGameOver();
-
 	/**
 	 * Emitted when the user wants to quit the game and has confirmed the
 	 * "are you sure" messagebox.
