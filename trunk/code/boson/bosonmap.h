@@ -49,6 +49,9 @@ public:
 	{
 	}
 
+	virtual bool save(QDataStream& stream) = 0;
+	virtual bool load(QDataStream& stream) = 0;
+
 	/**
 	 * @return The width of this array, i.e. the number of corners (@ref
 	 * BosonMap::width + 1) of this map.
@@ -189,6 +192,14 @@ public:
 	~BoTexMap()
 	{
 		delete[] mTexMap;
+	}
+
+	virtual bool save(QDataStream& stream);
+	virtual bool load(QDataStream& stream);
+
+	unsigned int textureCount() const
+	{
+		return mTextureCount;
 	}
 
 	/**
