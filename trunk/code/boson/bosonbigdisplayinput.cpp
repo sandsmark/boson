@@ -520,7 +520,7 @@ void BosonBigDisplayInput::updatePlacementPreviewData()
 	return;
  }
  Unit* leader = selection()->leader();
- if (localPlayerIO()->ownsUnit(leader)) {
+ if (!localPlayerIO()->ownsUnit(leader)) {
 	return;
  }
  ProductionPlugin* pp = (ProductionPlugin*)leader->plugin(UnitPlugin::Production);
@@ -638,7 +638,7 @@ BosonBigDisplayInputBase::CanSelectUnit BosonBigDisplayInput::canSelect(Unit* un
  if (unit->isDestroyed()) {
 	return CanSelectDestroyed;
  }
- if (localPlayerIO() && localPlayerIO()->ownsUnit(unit)) {
+ if (localPlayerIO() && !localPlayerIO()->ownsUnit(unit)) {
 	// we can select this unit, but only as a single unit.
 	return CanSelectSingleOk;
  }
