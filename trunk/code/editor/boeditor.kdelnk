@@ -1,0 +1,14 @@
+# KDE Config File  
+[KDE Desktop Entry]
+Type=Application
+Exec=boeditor
+Icon=boeditor.xpm
+MiniIcon=boeditor.xpm
+DocPath=boeditor/index.html
+Comment= Boson Level Editor
+Comment[fr]= Editeur de niveau pour Boson
+Terminal=0
+Name=BoEditor
+Name[de]=BoEditor
+Name[fr]=BoEditor
+Name[it]=BoEditor
