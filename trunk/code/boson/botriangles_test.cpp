@@ -4,6 +4,7 @@
 #include <bodebug.h>
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/mesh.h>
