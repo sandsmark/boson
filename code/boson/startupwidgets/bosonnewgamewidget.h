@@ -58,7 +58,7 @@ protected slots: // implementations for the .ui slots
 	// actual action is performed!
 	virtual void slotLocalPlayerNameChanged();
 	virtual void slotLocalPlayerColorChanged(int);
-	virtual void slotLocalPlayerMapChanged(QListViewItem*);
+	virtual void slotLocalPlayerPlayFieldChanged(QListViewItem*);
 	virtual void slotLocalPlayerSpeciesChanged(int);
 	virtual void slotLocalPlayerAddedComputerPlayer();
 	virtual void slotLocalPlayerRemovedPlayer();

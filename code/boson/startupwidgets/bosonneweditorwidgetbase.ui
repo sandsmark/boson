@@ -260,16 +260,16 @@
         <sender>mChooseBosonMap</sender>
         <signal>clicked(QListViewItem*)</signal>
         <receiver>BosonNewEditorWidgetBase</receiver>
-        <slot>slotMapChanged()</slot>
+        <slot>slotPlayFieldChanged(QListViewItem*)</slot>
     </connection>
 </connections>
 <slots>
-    <slot access="protected" specifier="pure virtual">slotMapChanged()</slot>
+    <slot access="protected" specifier="pure virtual">slotPlayFieldChanged(QListViewItem*)</slot>
     <slot access="protected" specifier="pure virtual">slotTilesetChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxPlayersChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxWidthChanged(int)</slot>
     <slot access="protected" specifier="pure virtual">slotMaxHeigthChanged(int)</slot>
-    <slot access="protected" specifier="pure virtual">slotNewMapToggled()</slot>
+    <slot access="protected" specifier="pure virtual">slotNewMapToggled(bool)</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
