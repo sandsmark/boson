@@ -23,38 +23,99 @@
 #include "../bo3dtools.h"
 #include "../rtti.h"
 #include "bosonitem.h"
+#include <qptrlist.h>
 
 class Unit;
 class Player;
+class SpeciesTheme;
+class KSimpleConfig;
+class BosonParticleSystemProperties;
+class BosonParticleSystem;
+class BosonModel;
+
+class BosonShot;
+
+/**
+ * @short Property class for shots
+ * It contains properties for specific shot type
+ * Properties include damage, speed and damaging range of shot
+ **/
+class BosonShotProperties
+{
+  public:
+    /**
+     * Constructs new BosonShotProperties and loads properties from KConfig.
+     * Group for KConfig must be set before
+     * @param theme speciestheme for this shot
+     * @ cfg KSimpleConfig object which will be used to load values
+     **/
+    BosonShotProperties(SpeciesTheme* theme, KSimpleConfig* cfg);
+    ~BosonShotProperties();
+
+    /**
+     * @return Damage range of missile of this unit, e.g. range in what units will be damaged
+     **/
+    inline unsigned long int damageRange() { return mDamageRange; };
+    /**
+     * The damage this unit makes to other units. Negative values means
+     * repairing
+    **/
+    inline long int damage() { return mDamage; };
+    /**
+     * @return Speed of missile of this unit (per second) or 0 if speed is infinite
+     **/
+    inline unsigned long int speed()  { return mSpeed; };
+
+    inline SpeciesTheme* theme()  { return mTheme; };
+
+    inline long unsigned int id()  { return mId; };
+    
+    inline BosonModel* model()  { return mModel; };
+
+    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
+
+    QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z);
+        //{ if(mFlyParticleSystem) return mFlyParticleSystem->newSystem(x, y, z); };
+    QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z);
+        //{ if(mHitParticleSystem) return mHitParticleSystem->newSystem(x, y, z); };
+
+  private:
+    unsigned long int mDamageRange;
+    long int mDamage;
+    unsigned long int mSpeed;
+    unsigned long int mId;
+    SpeciesTheme* mTheme;
+    QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
+    QPtrList<BosonParticleSystemProperties> mHitParticleSystems;
+    BosonModel* mModel;
+};
+
 
 class BosonShot : public BosonItem
 {
   public:
-    BosonShot(Unit* attacker, float x, float y, float z);
-    BosonShot(Unit* attacker, Unit* target);
+    BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
 
     virtual void advance(unsigned int phase);
-    void draw();
 
-    inline BoVector3 pos() { return mPos; };
+//    inline BoVector3 pos()  { return mPos; };
 
-    inline unsigned long int damageRange() { return mDamageRange; };
-    inline long int damage() { return mDamage; };
-    inline Player* owner() { return mOwner; };
+    inline Player* owner()  { return mOwner; };
+    inline BosonShotProperties* properties()  { return mProp; };
+    
+    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
     inline bool isActive() { return mActive; };
 
-    inline virtual int rtti() const { return RTTI::Shot; };
+    inline virtual int rtti() const  { return RTTI::Shot; };
 
   protected:
-    void init(Unit* attacker, float x, float y, float z);
     BoVector3 mVelo;
-    BoVector3 mPos;
     unsigned int mSteps;
-    unsigned long int mDamageRange;
-    long int mDamage;
     bool mActive;
     Player* mOwner;
+    BosonShotProperties* mProp;
+    QPtrList<BosonParticleSystem> mFlyParticleSystems;
 };
 
 #endif // BOSONSHOT_H

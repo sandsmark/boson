@@ -327,12 +327,12 @@ void KGameUnitDebug::updateUnitsInRange(QListViewItem* item)
 	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
 	return;
  }
- BoItemList inRange = unit->unitsInRange();
+ /*BoItemList inRange = unit->unitsInRange();
  BoItemList enemyInRange = unit->enemyUnitsInRange();
- if (inRange.count() == 0) {
+ if (inRange.count() == 0) */{
 	QListViewItem* item = new QListViewItem(d->mUnitsInRange);
 	item->setText(0, i18n("No units in range for unit %1").arg(unit->id()));
- }
+ }/*
  BoItemList::Iterator it = inRange.begin();
  for (; it != inRange.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
@@ -349,7 +349,7 @@ void KGameUnitDebug::updateUnitsInRange(QListViewItem* item)
 	} else {
 		item->setText(1, i18n("No"));
 	}
- }
+ }*/
 }
 
 void KGameUnitDebug::updateUnitCollisions(QListViewItem* item)

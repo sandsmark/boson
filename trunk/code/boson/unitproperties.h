@@ -28,6 +28,9 @@
 class SpeciesTheme;
 class PluginProperties;
 class UpgradeProperties;
+class BosonWeaponProperties;
+class BosonParticleSystem;
+class BosonParticleSystemProperties;
 
 class KSimpleConfig;
 
@@ -49,17 +52,14 @@ class KSimpleConfig;
  **/
 class UnitProperties
 {
-public:
-	/**
-	 * Only public cause of the private d-pointer! Will become protected as
-	 * soon as the d pointer is removed. Don't use outside this class!
-	 **/
+protected:
 	enum TerrainType {
 		Land = 0,
 		Water = 1,
 		Air = 2
 	};
 
+public:
 	/**
 	 * Which type of factory can produce a unit.
 	 *
@@ -132,37 +132,10 @@ public:
 	unsigned long int oilCost() const { return mOilCost; }
 
 	/**
-	 * @return The weapon range of this unit. It's a number of cells, so multiply
-	 * with BO_TILE_SIZE to use it on the canvas.
-	 **/
-	unsigned long int weaponRange() const { return mWeaponRange; }
-
-	/**
-	 * @return The number of advance calls until the weapon is reloaded
-	 **/
-	unsigned int reload() const { return mReload; }
-
-	/**
 	 * return How far this unit can see. Is a number of cells, so multiply
 	 * with BO_TILE_SIZE to use it on the canvas.
 	 **/
 	unsigned int sightRange() const { return mSightRange; }
-
-	/**
-	 * The damage this unit makes to other units. Negative values means
-	 * repairing
-	 **/
-	long int weaponDamage() const { return mWeaponDamage; }
-
-	/**
-	 * @return Speed of missile of this unit (per second) or 0 if speed is infinite
-	 **/
-	unsigned long int shotSpeed() const { return mShotSpeed; };
-
-	/**
-	 * @return Damage range of missile of this unit, e.g. range in what units will be damaged
-	 **/
-	unsigned long int shotDamageRange() const { return mShotDamageRange; };
 
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
@@ -242,9 +215,9 @@ public:
 
 	/**
 	 * @return Whether the unit can shoot at all. A unit that can shoot is a
-	 * military unit and is meant to be destroyed first. 
+	 * military unit and is meant to be destroyed first.
 	 **/
-	bool canShoot() const { return (canShootAtLandUnits() || canShootAtAirUnits()); }
+	bool canShoot() const { return (!mWeapons.isEmpty()); }
 
 	bool canRefineMinerals() const;
 	bool canRefineOil() const;
@@ -326,6 +299,12 @@ public:
 
 	void upgradeResearched(UpgradeProperties* upgrade) { mNotResearchedUpgrades.removeRef(upgrade); };
 
+	const QPtrList<BosonWeaponProperties>* weaponsList() const  { return &mWeapons; };
+	BosonWeaponProperties* weapon(int index)  { return mWeapons.at(index); };
+
+	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
+
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -349,23 +328,18 @@ private:
 	unsigned int mUnitHeight;
 	unsigned int mUnitDepth;
 	unsigned long int mHealth;
-	unsigned long int mWeaponRange;
 	unsigned int mSightRange;
-	long int mWeaponDamage;
-	unsigned int mReload;
 	unsigned int mProducer;
 	unsigned int mProductionTime;
 	unsigned long int mMineralCost;
 	unsigned long int mOilCost;
 	TerrainType mTerrain;
-	bool mCanShootAtAirUnits;
-	bool mCanShootAtLandUnits;
 	bool mSupportMiniMap;
 	QValueList<unsigned long int> mRequirements;
 	unsigned long int mArmor;
 	unsigned long int mShields;
-	unsigned long int mShotSpeed;
-	unsigned long int mShotDamageRange;
+	bool mCanShootAtAirUnits;
+	bool mCanShootAtLandUnits;
 
 	class MobileProperties;
 	class FacilityProperties;
@@ -378,6 +352,9 @@ private:
 
 	QPtrList<UpgradeProperties> mUpgrades;
 	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
+	QPtrList<BosonWeaponProperties> mWeapons;
+
+	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 };
 
 #endif

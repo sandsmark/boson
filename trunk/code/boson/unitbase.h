@@ -208,28 +208,6 @@ public:
 	inline virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
 
 	/**
-	 * @return How much damage the weapon can make to other units. Note that
-	 * a negative value means that this unit can repair!
-	 **/
-	inline long int weaponDamage() const { return mWeaponDamage; }
-
-	/**
-	 * Change the damage this unit can do to other units
-	 **/
-	void setWeaponDamage(long int d) { mWeaponDamage = d; }
-	
-	/**
-	 * @return The weapon range of this unit. This is a number of cells, so you
-	 * must *= BO_TILE_SIZE to use this on the canvas.
-	 **/
-	inline unsigned long int weaponRange() const { return mWeaponRange; }
-
-	/**
-	 * Change the weapong range of this unit. This is number of cells.
-	 **/
-	void setWeaponRange(unsigned long int r) { mWeaponRange = r; }
-	
-	/**
 	 * @return How far this unit can see. This is a number of cells, so you
 	 * must *= BO_TILE_SIZE to use this on the canvas.
 	 **/
@@ -318,21 +296,7 @@ public:
 		return (work() == WorkMove);
 	}
 
-	/**
-	 * @return THe reload state of the weapon. If this is 0 the unit can
-	 * shoot, otherwise not.
-	 **/
-	unsigned int reloadState() const;
-
-	/**
-	 * Reduces @ref reloadState by 1 until it reaches 0.
-	 **/
-	void reloadWeapon();
-
-	/**
-	 * Set @ref reloadState to @ref UnitProperties::reload
-	 **/
-	void resetReload();
+//	inline QValueList<BosonWeapon>* weapons()  { return &mWeapons; };
 
 
 private:
@@ -342,11 +306,8 @@ private:
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
 	KGameProperty<unsigned int> mDeletionTimer;
-	KGameProperty<unsigned int> mReloadState;
 	KGameProperty<unsigned long int> mHealth;
-	KGameProperty<unsigned long int> mWeaponRange;
 	KGameProperty<unsigned int> mSightRange;
-	KGameProperty<long int> mWeaponDamage; // can also be repair (negative value)
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 

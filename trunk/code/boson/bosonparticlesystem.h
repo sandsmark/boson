@@ -22,6 +22,8 @@
 
 #include "bo3dtools.h"
 
+class BosonParticleSystemProperties;
+
 
 /**
  * @short This class represents a single particle.
@@ -78,7 +80,6 @@ class BosonParticle
 class BosonParticleSystem
 {
   public:
-    typedef void (*ExternalFunction)(BosonParticleSystem* system, BosonParticle* particle);
     /**
      * Constructs new BosonParticleSystem. Use this constructor if you don't
      * want to use update- and init-functions feature.
@@ -100,7 +101,7 @@ class BosonParticleSystem
     BosonParticleSystem(int maxnum, int initialnum, float size,
         float createrate, bool align, float maxradius, int texture,
         BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-        ExternalFunction initFunc = 0, ExternalFunction updateFunc = 0);
+        BosonParticleSystemProperties* prop = 0);
     /**
      * Constructs new BosonParticleSystem. This constructor is often enough if
      * you use functions for initing and updating particles.
@@ -115,8 +116,7 @@ class BosonParticleSystem
      * @param updateFunc This function, if specified, is called every time particle is updated
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, float maxradius, int texture, ExternalFunction initFunc,
-        ExternalFunction updateFunc);
+        bool align, float maxradius, int texture, BosonParticleSystemProperties* prop);
     /**
      * Destructs BosonParticleSystem. This deleted all particles
      **/
@@ -246,8 +246,7 @@ class BosonParticleSystem
     virtual void init(int initialnum);
 
     virtual void initParticle(BosonParticle* particle);
-    inline virtual void updateParticle(BosonParticle* particle) { if(mUpdateFunc) (*mUpdateFunc)(this, particle); };
-    inline virtual void deleteParticle(BosonParticle*) {};
+    virtual void updateParticle(BosonParticle* particle);
 
   protected:
     BosonParticle* mParticles;  // Array of particles
@@ -267,8 +266,7 @@ class BosonParticleSystem
     BoVector4 mColor;  // Color of particle
     float mParticleAge;  // How many seconds particles live
 
-    ExternalFunction mInitFunc;
-    ExternalFunction mUpdateFunc;
+    BosonParticleSystemProperties* mProp;
 };
 
 #endif // BOSONPARTICLESYSTEM_H

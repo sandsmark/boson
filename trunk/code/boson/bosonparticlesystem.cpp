@@ -20,6 +20,7 @@
 #include "bosonparticlesystem.h"
 
 #include "bo3dtools.h"
+#include "bosonparticlemanager.h"
 
 #include <kdebug.h>
 #include <iostream.h>
@@ -68,7 +69,7 @@ void BosonParticle::update(float elapsed)
 BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
     float createrate, bool align, float maxradius, int texture,
     BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-    ExternalFunction initFunc, ExternalFunction updateFunc)
+    BosonParticleSystemProperties* prop)
 {
   // Set some variables first
   mMaxNum = maxnum;
@@ -83,18 +84,17 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
   mTexture = texture;
   mColor = color;
   mPos = pos;
-  mInitFunc = initFunc;
-  mUpdateFunc = updateFunc;
   mParticleAge = particleage;
   mAge = age;
   mVelo = velo;
+  mProp = prop;
 
   init(initialnum);
 }
 
 BosonParticleSystem::BosonParticleSystem(int maxnum,
     float createrate, bool align, float maxradius, int texture,
-    ExternalFunction initFunc, ExternalFunction updateFunc)
+    BosonParticleSystemProperties* prop)
 {
   //cout << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
       //"; createrate: " << createrate << endl;
@@ -104,11 +104,10 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
   mAlign = align;
   mRadius = maxradius;
   mTexture = texture;
-  mInitFunc = initFunc;
-  mUpdateFunc = updateFunc;
   mSize = 0;
   mParticleAge = 0;
   mAge = 3600;
+  mProp = prop;
 
   init(0);
 }
@@ -176,7 +175,7 @@ void BosonParticleSystem::update(float elapsed)
       if(mParticles[i].life <= 0.0)
       {
         // For performance reasons we actually don't create/delete particles. We just mark them dead
-        deleteParticle(&mParticles[i]);
+        //uninitParticle(&mParticles[i]);
       }
       else
       {
@@ -289,28 +288,28 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
   particle->pos.reset();
   particle->size = mSize;
   particle->velo = mVelo;
-  if(mInitFunc)
+  if(mProp)
   {
-    (*mInitFunc)(this, particle);
+    mProp->initParticle(this, particle);
   }
+}
+
+void BosonParticleSystem::updateParticle(BosonParticle* particle)
+{
+  if(mProp) mProp->updateParticle(this, particle);
 }
 
 void BosonParticleSystem::moveParticles(BoVector3 v)
 {
-  //cout << k_funcinfo << "Moving by " << v[0] << "; " << v[1] << "; " << v[2] << endl;
-  //cout << k_funcinfo << "Pos before moving: " << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << endl;
+  // Move particle system's position
   mPos.add(v);
-  //cout << k_funcinfo << "Pos after moving: " << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << endl;
-  // Update particles
+  // Move particles by inverse of v (to have effect of them staying in same place)
   BoVector3 inv(-v[0], -v[1], -v[2]);
-  //cout << k_funcinfo << "Particles will be moved by " << inv[0] << "; " << inv[1] << "; " << inv[2] << endl;
   for(int i = 0; i < mMaxNum; i++)
   {
     if(mParticles[i].life > 0.0)
     {
-      //cout << k_funcinfo << "PARTICLE[" << i << "]: before adding: " << mParticles[i].pos[0] << "; " << mParticles[i].pos[1] << "; " << mParticles[i].pos[2] << endl;
       mParticles[i].pos.add(inv);
-      //cout << k_funcinfo << "PARTICLE[" << i << "]: after adding: " << mParticles[i].pos[0] << "; " << mParticles[i].pos[1] << "; " << mParticles[i].pos[2] << endl;
     }
   }
 }

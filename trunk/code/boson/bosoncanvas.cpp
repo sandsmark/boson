@@ -290,24 +290,13 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
  }
 }
 
-void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy)
+void BosonCanvas::newShot(BosonShot* shot)
 {
  kdDebug() << k_funcinfo << endl;
- if (!target) {
-	kdError() << k_funcinfo << "NULL target" << endl;
-	return;
- }
- if (!attackedBy) {
-	kdError() << k_funcinfo << "NULL attacker" << endl;
-	return;
- }
 
- attackedBy->playSound(SoundShoot);
-
- BosonShot* m = new BosonShot(attackedBy, target);
- if (!m->isActive()) {
-	shotHit(m);
-	delete m;
+ if (!shot->isActive()) {
+	shotHit(shot);
+	delete shot;
  }
 }
 
@@ -317,11 +306,20 @@ void BosonCanvas::shotHit(BosonShot* s)
 	kdError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
- d->mParticles.append(BosonParticleManager::newShot(BoVector3(s->x() / BO_TILE_SIZE, -(s->y() / BO_TILE_SIZE), s->z() / BO_TILE_SIZE)));
+ // Set age of flying particle systems (e.g. smoke traces) to 0 so they wont create any new particles
+ QPtrListIterator<BosonParticleSystem> it(*(s->flyParticleSystems()));
+ while(it.current())
+ {
+	it.current()->setAge(0);
+	++it;
+ }
+ // Add hit particle systems
+ addParticleSystems(s->properties()->newHitParticleSystems(s->x(), s->y(), s->z()));
+ // Decrease health of all units within damaging range of missile
  QValueList<Unit*> l = unitCollisionsInRange(QPoint(s->x(), s->y()),
-		s->damageRange() * BO_TILE_SIZE - (BO_TILE_SIZE / 2));  // - 2 is needed to prevent units on next cells from also being damaged
+		s->properties()->damageRange() * BO_TILE_SIZE - 10);  // - 2 is needed to prevent units on next cells from also being damaged
  for (unsigned int i = 0; i < l.count(); i++) {
-	unitHit(l[i], s->damage());
+	unitHit(l[i], s->properties()->damage());
 	if (l[i]->isDestroyed()) {
 		if (l[i]->isFacility()) {
 			s->owner()->statistics()->addDestroyedFacility(l[i], s->owner());
@@ -372,7 +370,7 @@ void BosonCanvas::unitHit(Unit* unit, long int damage)
  if (unit->isDestroyed()) {
 	destroyUnit(unit); // display the explosion ; not the shoot
  } else {
-	float factor = 2.0 - unit->health() / (unit->unitProperties()->health() / 2.0);
+/*	float factor = 2.0 - unit->health() / (unit->unitProperties()->health() / 2.0);
 //	if (unit->health() <= (unit->unitProperties()->health() / 2.0)) {
 	if (factor >= 1.0) {
 		// If unit has less than 50% hitpoints, it's smoking
@@ -414,7 +412,7 @@ void BosonCanvas::unitHit(Unit* unit, long int damage)
 		if (unit->smokeParticleSystem()) {
 			unit->smokeParticleSystem()->setAge(0);
 		}
-	}
+	}*/
  }
 }
 
@@ -447,16 +445,8 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	owner->unitDestroyed(unit); // remove from player without deleting
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
-	BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE,
-			-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE),
-			unit->z() * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE);
-	d->mParticles.append(BosonParticleManager::newExplosion(pos));
-	d->mParticles.append(BosonParticleManager::newSmoke(pos));
-	// For tank, we want bigger explosion
-	// Note that this is harcoded and extremely bad at the moment
-	if (unit->type() == 10005) {
-		d->mParticles.append(BosonParticleManager::newShockWave(pos));
-	}
+	BoVector3 pos(unit->x() + unit->width() / 2,unit->y() + unit->height() / 2, unit->z());
+	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
 	emit signalUnitDestroyed(unit);
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
@@ -791,5 +781,20 @@ void BosonCanvas::deleteUnusedShots()
 			d->mAllItems.removeItem(i);
 		}
 	}
+ }
+}
+
+void BosonCanvas::addParticleSystem(BosonParticleSystem* s)
+{
+ d->mParticles.append(s);
+}
+
+void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems)
+{
+ QPtrListIterator<BosonParticleSystem> it(systems);
+ BosonParticleSystem* s;
+ while ((s = it.current()) != 0) {
+	++it;
+	addParticleSystem(s);
  }
 }

@@ -391,13 +391,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				kdDebug() << "no sense in attacking destroyed units" << endl;
 				continue;
 			}
-			if (unit->weaponRange() > 0 && unit->weaponDamage() > 0) {
+			if (unit->unitProperties()->canShoot()) {
 				kdDebug() << unitId << " attacks " << attackedUnitId << endl;
-				if (unit->weaponDamage() != 0) {
-					unit->setTarget(attackedUnit);
-					if (unit->target()) {
-						unit->setWork(Unit::WorkAttack);
-					}
+				unit->setTarget(attackedUnit);
+				if (unit->target()) {
+					unit->setWork(Unit::WorkAttack);
 				}
 			}
 		}

@@ -26,91 +26,126 @@
 #include "../player.h"
 #include "../global.h"
 #include "../bosoncanvas.h"
+#include "../bosonparticlesystem.h"
+#include "../bosonparticlemanager.h"
+#include "../bo.h"
+#include "../bosonmodel.h"
 
 #include <kdebug.h>
+#include <ksimpleconfig.h>
 
 #include <GL/gl.h>
 
 #include <math.h>
 
-BosonShot::BosonShot(Unit* attacker, Unit* target) :
-    BosonItem(attacker->owner()->speciesTheme()->objectModel(ObjectShot), attacker->canvas())
+/*****  BosonShotProperties  *****/
+BosonShotProperties::BosonShotProperties(SpeciesTheme* theme, KSimpleConfig* cfg)
 {
-/*  init(attacker, (target->x() + target->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-      -((target->y() + target->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
-      target->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);*/
-  init(attacker, target->x() + target->width() / 2, target->y() + target->height() / 2, target->z());
+  mTheme = theme;
+  mId = cfg->readUnsignedLongNumEntry("Id", 0);
+  if(mId == 0)
+  {
+    kdError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
+  }
+  mDamage = cfg->readUnsignedLongNumEntry("Damage", 0);
+  mSpeed = cfg->readLongNumEntry("Speed", 0);
+  mDamageRange = cfg->readUnsignedLongNumEntry("DamageRange", 1);
+  mFlyParticleSystems = Bo::loadParticleSystemProperties(cfg, "FlyParticles", theme);
+  kdDebug() << "    " << k_funcinfo << "There are " << mFlyParticleSystems.count() << " particle systems in fly list" << endl;
+  mHitParticleSystems = Bo::loadParticleSystemProperties(cfg, "HitParticles", theme);
+  kdDebug() << "    " << k_funcinfo << "There are " << mHitParticleSystems.count() << " particle systems in hit list" << endl;
+  // We need to have some kind of model even for bullet (though it won't be shown),
+  //  because BosonItem will crash otherwise
+  mModel = theme->objectModel(cfg->readEntry("Model", "missile.3ds"));
 }
 
-BosonShot::BosonShot(Unit* attacker, float x, float y, float z) :
-    BosonItem(attacker->owner()->speciesTheme()->objectModel(ObjectShot), attacker->canvas())
+BosonShotProperties::~BosonShotProperties()
 {
-  init(attacker, x, y, z);
 }
 
-void BosonShot::init(Unit* attacker, float x, float y, float z)
+BosonShot* BosonShotProperties::newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz)
+{
+  return new BosonShot(this, attacker, x, y, z, tx, ty, tz);
+}
+
+QPtrList<BosonParticleSystem> BosonShotProperties::newFlyParticleSystems(float x, float y, float z)
+{
+  QPtrList<BosonParticleSystem> list;
+  QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
+  while(it.current())
+  {
+    list.append(it.current()->newSystem(x, y, z));
+    ++it;
+  }
+  return list;
+}
+
+QPtrList<BosonParticleSystem> BosonShotProperties::newHitParticleSystems(float x, float y, float z)
+{
+  kdDebug() << "    " << k_funcinfo << "Start" << endl;
+  QPtrList<BosonParticleSystem> list;
+  kdDebug() << "    " << k_funcinfo << "Start2" << endl;
+  kdDebug() << "    " << k_funcinfo << "There are " << mHitParticleSystems.count() << " particle systems in list" << endl;
+  QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
+  kdDebug() << "    " << k_funcinfo << "Start3" << endl;
+  while(it.current())
+  {
+    kdDebug() << "    " << k_funcinfo << "Creating new system and appending it to list" << endl;
+    list.append(it.current()->newSystem(x, y, z));
+    ++it;
+  }
+  kdDebug() << "    " << k_funcinfo << "Returning list (with " << list.count() << " systems)" << endl;
+  return list;
+}
+
+
+/*****  BosonShot  *****/
+BosonShot::BosonShot(BosonShotProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz) :
+    BosonItem(prop->model(), attacker->canvas())
 {
   kdDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
-  mDamageRange = attacker->unitProperties()->shotDamageRange();
-  mDamage = attacker->unitProperties()->weaponDamage();
   mOwner = attacker->owner();
-  if(attacker->unitProperties()->shotSpeed() == 0)
+  mProp = prop;
+  if(prop->speed() == 0)
   {
+    // This shot is bullet, not missile - it has infinite speed and it reaches
+    //  it's target immideately. No need to calculate anything.
     kdDebug() << "MISSILE: " << k_funcinfo << "    Attacker's shot is bullet (infinite speed). Returning" << endl;
-    mPos.set(x, y, z);
-    move(mPos[0], mPos[1], mPos[2]);
-    //kdDebug() << "MISSILE: " << k_funcinfo << "    Shot's final pos: (" << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << ")" << endl;
+    move(tx, ty, tz);
     mActive = false;
     return;
   }
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Attacker's pos: (" << attacker->x() / BO_TILE_SIZE << "; " << -(attacker->y() / BO_TILE_SIZE) << "; " << attacker->z() / BO_TILE_SIZE << ")" <<
-      //";; target's pos: (" << x << "; " << y << "; " << z << ")" << endl;
-/*  mPos.set((attacker->x() + attacker->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-      -((attacker->y() + attacker->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
-      attacker->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);*/
-  mPos.set(attacker->x() + attacker->width() / 2,  attacker->y() + attacker->height() / 2, attacker->z());
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Shot's initial pos: (" << mPos[0] << "; " << mPos[1] << "; " << mPos[2] << ")" << endl;
-  mVelo.set(x - mPos[0], y - mPos[1], z - mPos[2]);
+  mVelo.set(tx - x, ty - y, tz - z);
   float length = mVelo.length();
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Length of trip: " << length << endl;
-  float a = length / (float)(attacker->unitProperties()->shotSpeed());
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    " << length << " / ( " << attacker->unitProperties()->shotSpeed() << " / " << BO_TILE_SIZE << ") = " << a << endl;
-  mSteps = (int)ceilf(a);
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    (int)ceilf(" << a << ") = " << mSteps << endl;
+  mSteps = (int)ceilf(length / prop->speed());
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Steps: " << mSteps << endl;
-  mVelo.scale(attacker->unitProperties()->shotSpeed() / length);
+  mVelo.scale(prop->speed() / length);
   //kdDebug() << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   mActive = true;
-  move(mPos[0], mPos[1], mPos[2]);
+  move(x, y, z);
   setAnimated(true);
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    All done. Returning." << endl;
+  mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
+  attacker->canvas()->addParticleSystems(mFlyParticleSystems);
 }
 
 void BosonShot::advance(unsigned int phase)
 {
   BosonItem::advance(phase);
-  //kdDebug() << "MISSILE: " << k_funcinfo << "Updating shot" << endl;
-//  mPos.add(mVelo);
   moveBy(mVelo[0], mVelo[1], mVelo[2]);
+  // Move all "fly" particles.
+  BoVector3 move(mVelo);
+  move.scale(1 / (float)BO_TILE_SIZE);
+  move.setY(-(move[1]));
+  QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
+  while(it.current())
+  {
+    it.current()->moveParticles(move);
+    ++it;
+  }
   mSteps--;
-  //kdDebug() << "MISSILE: " << k_funcinfo << "    Steps is now " << mSteps << endl;
   if(mSteps <= 0)
   {
-    //kdDebug() << "MISSILE: " << k_funcinfo << "    Shot is now unactive!" << endl;
     mActive = false;
-    //canvas()->shotHit(this);
   }
 }
-
-/*void BosonShot::draw()
-{
-  //kdDebug() << "MISSILE: " << k_funcinfo << "  Drawing shot" << endl;
-  glPushMatrix();
-  glTranslatef(mPos[0], mPos[1], mPos[2]);
-  //kdDebug() << "MISSILE: " << k_funcinfo << "  Frames of model: " << mAttacker->speciesTheme()->objectModel(ObjectShot)->frames() << endl;
-  //kdDebug() << "MISSILE: " << k_funcinfo << "  Calling display list" << endl;
-  glCallList(mOwner->speciesTheme()->objectModel(ObjectShot)->frame(0)->displayList()); // Long call ;-)
-  //kdDebug() << "MISSILE: " << k_funcinfo << "  DL called" << endl;
-  glPopMatrix();
-  //kdDebug() << "MISSILE: " << k_funcinfo << "  Drawing shot DONE" << endl;
-}*/

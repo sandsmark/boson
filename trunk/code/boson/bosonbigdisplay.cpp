@@ -188,7 +188,7 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 		// IDEA: what about "I cannot shoot that!" sound?
 	} else {
 		// click on a friendly unit
-		if (unit->weaponDamage() < 0 && unit->isFacility() && unit->repairPlugin()) {
+		if (unit->isFacility() && unit->repairPlugin()) {
 			// some kind of repairyard - repair all units
 			// (not yet implemented) //FIXME
 			// note that currently the unit can go to every friendly

@@ -307,14 +307,18 @@ void BosonStarting::loadPlayerData()
 	QPtrListIterator<KPlayer> it(*(boGame->playerList()));
 	progress = 3000;
 	while (it.current()) {
+		// Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
+		((Player*)it.current())->speciesTheme()->loadParticleSystems();
+		((Player*)it.current())->speciesTheme()->loadShots();
+		((Player*)it.current())->speciesTheme()->loadWeapons();
+		((Player*)it.current())->speciesTheme()->readUnitConfigs();
 		loadUnitDatas(((Player*)it.current()), progress);
 		((Player*)it.current())->speciesTheme()->loadTechnologies();
-		((Player*)it.current())->speciesTheme()->loadObjectModels();
+//		((Player*)it.current())->speciesTheme()->loadObjectModels();
 		++it;
 		progress += BosonLoadingWidget::unitDataLoadingFactor();
 	}
  }
- mPlayer->speciesTheme()->loadParticles(); // FIXME: why load only particles for one player??
 
  // these are sounds like minimap activated.
  // FIXME: are there sounds of other player (i.e. non-localplayers) we need,

@@ -22,6 +22,10 @@
 #include "speciestheme.h"
 #include "pluginproperties.h"
 #include "upgradeproperties.h"
+#include "bo.h"
+#include "bosonparticlesystem.h"
+#include "bosonparticlemanager.h"
+#include "bosonweapon.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -99,29 +103,43 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost= conf.readUnsignedLongNumEntry("MineralCost", 100);
  mOilCost = conf.readUnsignedLongNumEntry("OilCost", 0);
- mWeaponDamage = conf.readLongNumEntry("WeaponDamage", 0);
- mShotSpeed = conf.readLongNumEntry("ShotSpeed", 0);
- mShotDamageRange = conf.readLongNumEntry("ShotDamageRange", 1);
- mWeaponRange = conf.readUnsignedLongNumEntry("WeaponRange", 0);
- if (mWeaponDamage == 0) {
-	mWeaponRange = 0;
- }
- mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5); 
- mReload = conf.readUnsignedNumEntry("Reload", 0);
+ mSightRange = conf.readUnsignedLongNumEntry("SightRange", 5);
  mProductionTime = conf.readUnsignedNumEntry("ProductionTime", 100);
  mShields = conf.readUnsignedLongNumEntry("Shield", 0);
  mArmor = conf.readUnsignedLongNumEntry("Armor", 0);
- mCanShootAtAirUnits = conf.readBoolEntry("CanShootAtAirUnits", isAircraft() && weaponDamage());
- mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()) && weaponDamage());
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
  // KConfig doesn't support reading list of _unsigned_ int's so we must cast
  //  them ourselves
- QValueList<int> tmpRequirements = conf.readIntListEntry("Requirements");
+/* QValueList<int> tmpRequirements = conf.readIntListEntry("Requirements");
  QValueList<int>::Iterator it;
  for(it = tmpRequirements.begin(); it != tmpRequirements.end(); it++) {
 	mRequirements.append((unsigned long int)(*it));
+ }*/
+ mRequirements = Bo::readUnsignedLongNumList(&conf, "Requirements");
+
+ QValueList<unsigned long int> weaponIds = Bo::readUnsignedLongNumList(&conf, "Weapons");
+ QValueList<unsigned long int>::Iterator it;
+ for(it = weaponIds.begin(); it != weaponIds.end(); it++) {
+	mWeapons.append(mTheme->weaponProperties(*it));
  }
+ kdDebug() << k_funcinfo << "Loaded " << mWeapons.count() << " weapons" << endl;
+
+ // We cache can-shoot-at values so we don't have to iterate through all the weapons when we need them
+ mCanShootAtAirUnits = false;
+ mCanShootAtLandUnits = false;
+ QPtrListIterator<BosonWeaponProperties> wit(mWeapons);
+ while(wit.current()) {
+	if(wit.current()->canShootAtAirUnits()) {
+		mCanShootAtAirUnits = true;
+	}
+	if(wit.current()->canShootAtLandUnits()) {
+		mCanShootAtLandUnits = true;
+	}
+	++wit;
+ }
+
+ mDestroyedParticleSystems = Bo::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
 
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
@@ -311,3 +329,14 @@ void UnitProperties::setSpeed(float speed)
  mMobileProperties->mSpeed = speed;
 }
 
+QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float x, float y, float z) const
+{
+ QPtrList<BosonParticleSystem> list;
+ QPtrListIterator<BosonParticleSystemProperties> it(mDestroyedParticleSystems);
+ while(it.current())
+ {
+	list.append(it.current()->newSystem(x, y, z));
+	++it;
+ }
+ return list;
+}

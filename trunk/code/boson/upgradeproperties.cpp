@@ -253,22 +253,22 @@ void UpgradePropertiesBase::apply(Player* player)
       }
     }
   }
-  if(mWeaponRangeSpecified)
+/*  if(mWeaponRangeSpecified)
   {
     applyPropertyToUnits(list, player, mWeaponRange, mWeaponRange, mWeaponRange, "mWeaponRange");
-  }
+  }*/
   if(mSightRangeSpecified)
   {
     applyPropertyToUnits(list, player, mSightRange, mSightRange, mSightRange, "mSightRange");
   }
-  if(mWeaponDamageSpecified)
+/*  if(mWeaponDamageSpecified)
   {
     applyPropertyToUnits(list, player, mWeaponDamage, mWeaponDamage, mWeaponDamage, "mWeaponDamage");
   }
   if(mReloadSpecified)
   {
     applyProperty(list, player, mReload, mReload, "mReload");
-  }
+  }*/
   if(mUnitProductionTimeSpecified)
   {
     applyProperty(list, player, mUnitProductionTime, mProductionTime, "mProductionTime");
