@@ -302,9 +302,9 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->harvest));
 		mob = mobile.find(data->harvest.key);
 		if (mob) {
-			if (mob->getType() == MOB_MINERAL_HARVESTER) {
+			if (mob->getType() == MOB_OIL_HARVESTER) {
 				mob->increaseContain();
-			} else logf(LOG_ERROR, "noharvester unit trying to harvest");
+			} else logf(LOG_ERROR, "non oilharvester unit trying to harvest");
 		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestMsg_t : %d", data->harvest.key);
 		break;
 
@@ -312,9 +312,9 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->harvestEnd));
 		mob = mobile.find(data->harvestEnd.key);
 		if (mob) {
-			if (mob->getType() == MOB_MINERAL_HARVESTER) {
+			if (mob->getType() == MOB_OIL_HARVESTER) {
 				((serverHarvester*)mob)->emptying();
-			} else logf(LOG_ERROR, "noharvester unit trying to harvestEnd");
+			} else logf(LOG_ERROR, "non oilharvester unit trying to harvestEnd");
 		} else logf(LOG_ERROR, "handleGameMessage : unexpected key in harvestEndMsg_t : %d", data->harvest.key);
 		break;
 
