@@ -50,11 +50,11 @@ news_box_begin();
 **/
 news_article("Updates", "September 28th 2002 19:55",
     "Pretty much has happened during last few weeks.<br>
-    Bmann added <a href=\"status.php#features\">feature list to the status page</a>, you
-    can now check if your favourite feature will be included in next release (but
-    note that we <b>do not</b> make any promises that features listed there will
-    be in the next release. It just shows what has already been done and what
-    will <b>probably</b> be done in the future). If it isn't there, you can tell
+    Andi added <a href=\"status.php#features\">TODO list to the status page</a>, you
+    can now check if your favourite feature will be included in next release.
+    (But note that this is an incomplete list and merely shows what needs to be done
+    for the next release).
+    If it isn't there, you can tell
     us about your wishes via <a href=\"contact.php#bugs\">our bug tracking
     system</a> or <a href=\"contact.php#mail\">write to our mailing list</a>!<br>
     About new features, we now have configurable texture filters (you can choose
