@@ -1217,6 +1217,9 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 
 Facility::~Facility()
 {
+ // TODO: write a plugin framework and manage plugins in a list.
+ delete d->mProductionPlugin;
+ delete d->mRepairPlugin;
  delete d;
 }
 
