@@ -1696,12 +1696,14 @@ bool BosonCanvas::saveAsXML(QDomElement& root) const
 	return false;
  }
 
- // Save pathfinder
  QDomDocument doc = root.ownerDocument();
- QDomElement pathfinderxml = doc.createElement(QString::fromLatin1("Pathfinder"));
- root.appendChild(pathfinderxml);
- if (d->mPathfinder) {
-	d->mPathfinder->saveAsXML(pathfinderxml);
+ if (boGame->gameMode()) {
+	// Save pathfinder
+	QDomElement pathfinderxml = doc.createElement(QString::fromLatin1("Pathfinder"));
+	root.appendChild(pathfinderxml);
+	if (d->mPathfinder) {
+		d->mPathfinder->saveAsXML(pathfinderxml);
+	}
  }
 
  // Save datahandler
