@@ -543,6 +543,10 @@ public:
 	 **/
 	bool isConstructionComplete() const;
 
+	/**
+	 * @return A percentage that describes how far the construction progress
+	 * of this facility is.
+	 **/
 	double constructionProgress() const;
 
 	/**
