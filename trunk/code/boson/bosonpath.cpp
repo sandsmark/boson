@@ -1646,6 +1646,13 @@ void BosonPath2::findHighLevelPath(BosonPathInfo* info)
   info->hlpath = findCachedHighLevelPath(info);
   if(info->hlpath)
   {
+    QString path;
+    for(unsigned int i = 0; i < info->hlpath->path.count(); i++)
+    {
+      BosonPathRegion* r = info->hlpath->path[i];
+      path += QString("REG(id: %1; cost: %2; center: (%3; %4); cells: %5),   ").arg(r->id).arg(r->cost).arg(r->centerx).arg(r->centery).arg(r->cellsCount);
+    }
+    boDebug(510) << k_funcinfo << "Using cached HL path:  " << path << endl;
     // Cached highlevel path was found. Return.
     info->hlpath->users++;
     info->hlstep = 0;
@@ -1655,6 +1662,16 @@ void BosonPath2::findHighLevelPath(BosonPathInfo* info)
 
   // No cached path was found either - search new one
   searchHighLevelPath(info);
+  if(info->hlpath)
+  {
+    QString path;
+    for(unsigned int i = 0; i < info->hlpath->path.count(); i++)
+    {
+      BosonPathRegion* r = info->hlpath->path[i];
+      path += QString("REG(id: %1; cost: %2; center: (%3; %4); cells: %5),   ").arg(r->id).arg(r->cost).arg(r->centerx).arg(r->centery).arg(r->cellsCount);
+    }
+    boDebug(510) << k_funcinfo << "Found HL path:  " << path << endl;
+  }
 //  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
@@ -1892,9 +1909,12 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     //  coords to canvas ones here
     // FIXME: we can get path length, e.g. by adding level var to nodes
     QValueList<QPoint> temp;
+    // Coordinates of original nodes
+    QValueList<QPoint> orignodes;
     // Coordinate of the last node in the path (destination)
     int x = n.x;
     int y = n.y;
+    orignodes.append(QPoint(x, y));
     QPoint p;
     QPoint canvas; // Point in canvas coords
     p.setX(x);
@@ -1909,6 +1929,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 //      boDebug(510) << k_funcinfo << "parent direction is " << PARENTDIR(p.x(), p.y()) << endl;
       x += xoffsets[(int)PARENTDIR(p.x(), p.y())];
       y += yoffsets[(int)PARENTDIR(p.x(), p.y())];
+      orignodes.append(QPoint(x, y));
       p.setX(x);
       p.setY(y);
       canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
@@ -1918,6 +1939,17 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
       temp.prepend(canvas);
 //      boDebug(510) << k_funcinfo << "Added point (" << canvas.x() << "; " << canvas.y() << ")" << endl;
     }
+
+
+    QValueList<QPoint>::iterator nit;
+    QString nodedebug;
+    for(nit = orignodes.begin(); nit != orignodes.end(); ++nit)
+    {
+      int x = (*nit).x();
+      int y = (*nit).y();
+      nodedebug += QString("N(pos: (%1; %2); g: %3; h: %4),   ").arg(x).arg(y).arg(lowLevelCost(x, y, info)).arg(lowLevelDistToGoal(x, y, info));
+    }
+    boDebug(510) << k_funcinfo << "Found path: " << nodedebug << endl;
 
     // We add special point to the end of the path, telling unit what to do when
     //  it has reached the end of this path
