@@ -110,6 +110,20 @@ signals:
 	 **/
 	void signalGameStarted();
 
+	/**
+	 * Emitted when a factory has started to produce a unit. As a rection
+	 * the cmd panel should grey out the order buttons or maybe completely
+	 * disable them.
+	 **/
+	void signalProduceUnit(Facility* factory);
+
+	/**
+	 * Emitted when a factory has no units left to produce. Especially
+	 * useful to re-enable the disabled orderbuttons. See @ref
+	 * signalProduceUnit
+	 **/
+	void signalCompletedProduction(Facility* factory);
+
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 

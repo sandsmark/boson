@@ -608,6 +608,12 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
+
+ connect(d->mBoson, SIGNAL(signalProduceUnit(Facility*)),
+		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
+ connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
+		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
+ 
  slotCommandFramePosition(BosonConfig::commandFramePosition());
 }
 

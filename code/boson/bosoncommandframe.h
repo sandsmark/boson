@@ -24,6 +24,7 @@
 
 class Unit;
 class UnitBase;
+class Facility;
 class Player;
 class CommandInput;
 
@@ -112,12 +113,27 @@ protected slots:
 
 	void slotProductionAdvanced(Unit* factory, double percentage);
 
+	/**
+	 * Gray out the order buttons that can currently not be used, as another
+	 * units is being produced. (maybe even disable the buttons)
+	 **/
+	void slotFacilityProduces(Facility* factory);
+
+	/**
+	 * Re-Enable the order buttons. See @ref slotFacilityProduces
+	 **/
+	void slotProductionCompleted(Facility* factory);
+
 protected:
 	/**
 	 * Set the orderbuttons to containt a list of producable units.
 	 * @param produceList A list containing UnitTypeIDs.
+	 * @param owner The owner of the producable units
+	 * @param factory if NULL all buttons will be enabled. if non-NULL only
+	 * the producable items are enabled. So if the factory already produces,
+	 * e.g. item #2, then all except #2 are disabled.
 	 **/
-	void setOrderButtons(QValueList<int> produceList, Player* owner);
+	void setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory = 0);
 
 	/**
 	 * Make sure that at least @p count order buttons exist. 

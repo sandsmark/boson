@@ -248,8 +248,12 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
  if (!prop->canProduce()) {
 	return;
  }
+ if (!unit->isFacility()) {
+	kdError() << k_lineinfo << "Only facilities can produce" << endl;
+	return;
+ }
  QValueList<int> produceList = prop->produceList();
- setOrderButtons(produceList, owner);
+ setOrderButtons(produceList, owner, (Facility*)unit);
  d->mFactory = unit;
  connect(d->mFactory->owner(), SIGNAL(signalProductionAdvanced(Unit*, double)),
 		this, SLOT(slotProductionAdvanced(Unit*, double)));
@@ -272,10 +276,30 @@ void BosonCommandFrame::hideOrderButtons()
  }
 }
 
-void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner)
+void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
 {
  initOrderButtons(produceList.count());
  for (unsigned int i = 0; i < produceList.count(); i++) {
+	if (factory) {
+		int unitType = -1;
+		if (factory->hasProduction()) {
+			unitType = factory->currentProduction();
+		}
+		if (unitType > 0) {
+			if (produceList[i] != unitType) {
+				d->mOrderButton[i]->setGrayOut(true);
+			} else {
+				d->mOrderButton[i]->setGrayOut(false);
+			}
+			d->mOrderButton[i]->setEnabled(false);
+		} else {
+			d->mOrderButton[i]->setEnabled(true);
+			d->mOrderButton[i]->setGrayOut(false);
+		}
+	} else {
+		d->mOrderButton[i]->setEnabled(true);
+		d->mOrderButton[i]->setGrayOut(false);
+	}
 	d->mOrderButton[i]->setUnit(produceList[i], owner);
  }
 }
@@ -410,7 +434,6 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
 void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
 {
  if (d->mFactory != factory) {
-	kdError() << "Receive signal from obsolete factory!" << endl;
 	return;
  }
  if (!factory->isFacility()) {
@@ -426,5 +449,24 @@ void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
 	}
  }
 
+}
+
+
+void BosonCommandFrame::slotFacilityProduces(Facility* f)
+{
+ if (!f) {
+	kdError() << k_funcinfo << "NULL facility" << endl;
+	return;
+ }
+ slotSetConstruction(f);
+}
+
+void BosonCommandFrame::slotProductionCompleted(Facility* f)
+{
+ if (!f) {
+	kdError() << k_funcinfo << "NULL facility" << endl;
+	return;
+ }
+ slotSetConstruction(f);
 }
 

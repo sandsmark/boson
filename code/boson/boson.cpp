@@ -219,6 +219,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 		factory->addProduction(unitType);
+		emit signalProduceUnit(factory);
 		break;
 	}
 	case BosonMessage::MoveBuild:
@@ -261,6 +262,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		if (buildUnit(factory, unitType, x, y)) {
 			factory->removeProduction();
+		}
+		if (!factory->hasProduction()) {
+			emit signalCompletedProduction(factory);
 		}
 		break;
 	}

@@ -78,6 +78,9 @@ public:
 	 **/
 	void advanceProduction(double percentage);
 
+
+	void setGrayOut(bool g);
+
 public slots:
 	void slotUnitChanged(Unit*);
 
@@ -99,8 +102,6 @@ signals:
 	void signalProduceUnit(int unitType);
 
 protected:
-	virtual void mousePressEvent(QMouseEvent* e);
-
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(int unitType, Player* owner);
 
