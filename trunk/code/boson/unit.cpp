@@ -91,9 +91,7 @@ public:
 	// OpenGL only:
 	QPtrList<BosonParticleSystem> mParticleSystems;  // No autodelete!!!
 
-#ifdef PATHFINDER_TNG
 	BosonPathInfo mPathInfo;
-#endif
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -1128,22 +1126,15 @@ void Unit::stopMoving()
 }
 #endif
 
+void Unit::stopAttacking()
+{
+ stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
 #ifdef PATHFINDER_TNG
-void Unit::stopAttacking()
-{
- stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
  setMovingStatus(Standing);
- setTarget(0);
- setWork(WorkNone);
-}
-#else
-void Unit::stopAttacking()
-{
- stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
- setTarget(0);
- setWork(WorkNone);
-}
 #endif
+ setTarget(0);
+ setWork(WorkNone);
+}
 
 bool Unit::saveAsXML(QDomElement& root)
 {
@@ -1641,12 +1632,10 @@ void Unit::setMovingStatus(MovingStatus m)
 #endif
 }
 
-#ifdef PATHFINDER_TNG
-BosonPathInfo* Unit::pathInfo()
+BosonPathInfo* Unit::pathInfo() const
 {
  return &d->mPathInfo;
 }
-#endif
 
 void Unit::itemRemoved(BosonItem* item)
 {
@@ -1875,6 +1864,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // FIXME: turnTo() supports only 45*x degree angles
  turnTo();
 }
+#endif // PATHFINDER_TNG
 
 float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed)
 {
@@ -1882,6 +1872,7 @@ float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxd
 		");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
  // Passed distance
  float dist = 0.0f;
+#ifdef PATHFINDER_TNG
  // Calculate difference between point and our current position
  float xdiff, ydiff;
  xdiff = p.x() - x;
@@ -1906,9 +1897,11 @@ float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxd
 
  // Calculate passed distance
  // TODO: use pythagoras
+#endif // PATHFINDER_TNG
  return dist;
 }
 
+#ifdef PATHFINDER_TNG
 #define USE_NEW_COLLISION_DETECTION
 
 void MobileUnit::advanceMoveCheck()
@@ -2483,20 +2476,16 @@ bool MobileUnit::saveAsXML(QDomElement& root)
  return true;
 }
 
-#ifdef PATHFINDER_TNG
 void MobileUnit::stopMoving()
 {
  Unit::stopMoving();
+#ifdef PATHFINDER_TNG
  if (pathInfo()->slowDownAtDest) {
 	setSpeed(0);
  }
  d->lastxvelo = 0.0f;
  d->lastyvelo = 0.0f;
-}
 #else
-void MobileUnit::stopMoving()
-{
- Unit::stopMoving();
  // Reset moveCheck variables
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
@@ -2504,8 +2493,8 @@ void MobileUnit::stopMoving()
  if (slowDownAtDestination()) {
 	setSpeed(0);
  }
-}
 #endif
+}
 
 #ifdef PATHFINDER_TNG
 bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
@@ -2536,20 +2525,16 @@ bool MobileUnit::attackEnemyUnitsInRangeWhileMoving()
 #endif
 
 
-#ifdef PATHFINDER_TNG
 void MobileUnit::newPath()
 {
+#ifdef PATHFINDER_TNG
  // FIXME: remove this, Unit::newPath() seems to be enough
  Unit::newPath();
-}
 #else
-void MobileUnit::newPath()
-{
- Unit::newPath();
  d->mPathAge = 0;
  setSearchPath(0);
-}
 #endif
+}
 
 #ifdef PATHFINDER_TNG
 bool MobileUnit::checkPathPoint(const QPoint& p)
