@@ -32,6 +32,30 @@
 #include "game.h"
 
 
+/*
+ *  boPath
+ */
+bool boPath::addCheckLoop(QPoint p) 
+{
+	int i;
+	bool ret = true;
+
+	// check for previous step
+	for(i=0; i<len; i++)
+		if ( at(i) == p ) { ret=false; break; }
+	// add the latest one
+	at(len) = p;
+	if (len == max) {
+		begin++;
+		begin %= max;
+	} else len++;
+
+	boAssert(len<=max);
+	return ret;
+}
+	
+
+
 
 /*
  *  bosonUnit
@@ -69,6 +93,7 @@ void bosonUnit::u_attack(bosonUnit *u)
 playerMobUnit::playerMobUnit(mobileMsg_t *msg)
 	: visualMobUnit(msg)
 	, state(MUS_NONE)
+	, path(5)
 {
 	turnTo(random()%DIRECTION_STEPS);
 
@@ -143,17 +168,24 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			wstate = asked = local;
 			asked_state = MUS_MOVING;
 			// request those cells so that nobody takes them
-			if (ret) {
-				r.moveTopLeft(asked);
-				bocanvas->setCellFlag ( r, Cell::request_f );
- 				if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
- 			} else {
+//			printf("ret is %s, failed_move = %d\n", ret?"true":"false", failed_move);
+			if (!ret)
+			{
  				failed_move++;
  				if (failed_move>4) state = MUS_NONE; // prevent 'keep on trying when it can obviously not go further'
- 			}
-//			printf("returning %s, failed_move = %d\n", ret?"true":"false", failed_move);
-			return ret;
+				return false;
+			}
+			r.moveTopLeft(asked);
+			bocanvas->setCellFlag ( r, Cell::request_f );
+			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 
+			if (!path.addCheckLoop(asked)) {
+				// loop
+				logf(LOG_WARNING, "loop detected, stopping");
+				state = MUS_NONE;
+				return false;
+			}
+			return true;
 	}
 
 	// dead code : should not be reached :
@@ -396,7 +428,7 @@ void playerMobUnit::u_goto(QPoint mpos) // not the same as QCanvasSprite::moveTo
 		target = 0l;
 		//puts("u_goto disconnecting target");
 	}
-	failed_move = 0;
+	failed_move = 0; path.reset();
 	do_goto(mpos/BO_TILE_SIZE);
 }
 	
@@ -436,7 +468,7 @@ void playerMobUnit::u_attack(bosonUnit *u)
 		return;
 	}
 
-	failed_move = 0;
+	failed_move = 0; path.reset();
 	do_goto(p/BO_TILE_SIZE);
 }
 

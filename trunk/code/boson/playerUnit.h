@@ -35,7 +35,12 @@ enum mobUnitState {
 	};
 
 
-/* boson units needs connect/disconnect.. */
+/**
+ * common part for all fix/mob units used in
+ * the client part.
+ *
+ * boson units needs connect/disconnect..
+ * */
 class bosonUnit : public QObject
 {
 Q_OBJECT
@@ -57,7 +62,37 @@ protected:
 	int		shoot_timer;
 
 };
+
+
+/**
+ *	this class is used to store the latest moves for
+ *	a given mobile
+ */
+
+class boPath //: public QValueList<QPoint>
+{
+public:
+	/** constructor, maxloop is the maximum
+	 * number of QPoint handled by this path */
+	boPath(int maxloop): max(maxloop) { points = new QPoint[maxloop]; reset(); }
+	~boPath(void) {delete points; }
 	
+	/** add a point to the path
+	 * returns false if this move close a loop,
+	 * true else
+	 */
+	bool addCheckLoop(QPoint);
+	void reset(void) {begin=len=0; }
+
+private:
+	QPoint &operator[](int i) { return at(i); }
+	QPoint &at(int i) { return points[ (begin+i)%max];} // suppose that i<len !!!!!!!11
+	QPoint	*points;
+	int	max;
+	int	begin, len;
+
+} ;
+
 	
 class playerMobUnit : public bosonUnit, public visualMobUnit
 {
@@ -106,6 +141,8 @@ private :
 	QPoint		asked;
 	mobUnitState	asked_state;
 	uint		failed_move;
+	boPath		path;
+
 
 };
 
