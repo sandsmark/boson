@@ -85,7 +85,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  Player* player = (Player*)p;
  Q_UINT32 msgid;
  stream >> msgid;
- kdDebug() << "playerInput " << msgid << endl;
+// kdDebug() << "playerInput " << msgid << endl;
  switch (msgid) {
 	case BosonMessage::MoveMove:
 	{
@@ -94,7 +94,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		Q_UINT32 unitCount;
 		stream >> pos;
 		stream >> unitCount;
-		kdDebug() << "unitCount: " << unitCount << endl;
+//		kdDebug() << "unitCount: " << unitCount << endl;
 		for (unsigned int i = 0; i < unitCount; i++) {
 			Q_ULONG unitId;
 			stream >> unitId;

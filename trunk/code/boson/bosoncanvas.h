@@ -37,6 +37,11 @@ public:
 	 **/
 	VisualUnit* findUnitAt(const QPoint& pos);
 
+	/**
+	 * Test whether the unit can go over rect. This method only tests for
+	 * the ground (see @ref Cell) <em>not</em> for collisions with other
+	 * units. See @ref VisualUnit for this.
+	 **/
 	bool canGo(VisualUnit* unit, const QRect& rect) const;
 
 	void setMap(BosonMap* map);
