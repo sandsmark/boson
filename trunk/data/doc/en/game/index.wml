@@ -11,11 +11,12 @@
         <dl>
 		<dt>2.1 <a href="configure.html">Configure Boson</a></dt>
 		<dt>2.2 <a href="scrolling.html">Scrolling</a></dt>
-		<dt>2.3 <a href="buildfac.html">Building facilities</a></dt>
-		<dt>2.4 <a href="buildunit.html">Building units</a></dt>
-		<dt>2.5 <a href="moving.html">Selecting and moving Units</a></dt>
-<!--		<dt>2.6 <a href="game/attack.html">Attacking</a></dt> -->
-<!--		<dt>2.7 <a href="game/repair.html">Repairing</a></dt> -->
+		<dt>2.3 <a href="cursor.html">The cursors</a></dt>
+		<dt>2.4 <a href="buildfac.html">Building facilities</a></dt>
+		<dt>2.5 <a href="buildunit.html">Building units</a></dt>
+		<dt>2.6 <a href="moving.html">Selecting and moving Units</a></dt>
+		<dt>2.7 <a href="game/attack.html">Attacking</a></dt>
+		<dt>2.8 <a href="game/repair.html">Repairing</a></dt>
 
         </dl>
       </dd>

@@ -1,0 +1,12 @@
+#include "top.wml"
+    <h1>
+      Repairing
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+      You can repair your units with the <a href="../units/repairpad.html">Repair Pad</a>.<br>
+      Just select a unit and klick with the right mouse button on the Repair Pad.
+    </p>
+    
+#include "nav.wml" before_url="repairing.html" before_text="Repairing" after_url="../facilities/index.html" after_text="Facilities"    
+#include "footer.wml"

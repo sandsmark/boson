@@ -4,7 +4,7 @@
       The Boson Handbook
     </h1>
     <p>
-      Revision 0.03 - 17th of August, 2002
+      <i>Revision 0.03 - Boson 0.7 - 17th of August, 2002</i>
     </p>
     <h3>
       What is this?
@@ -36,11 +36,12 @@
             <dl>
 	      <dt>2.1 <a href="game/configure.html">Configure Boson</a></dt>
               <dt>2.2 <a href="game/scrolling.html">Scrolling</a></dt>
-              <dt>2.3 <a href="game/buildfac.html">Building facilities</a></dt>
-              <dt>2.4 <a href="game/buildunit.html">Building units</a></dt>
-              <dt>2.5 <a href="game/moving.html">Selecting and moving Units</a></dt>
-<!--              <dt>2.6 <a href="game/attack.html">Attacking</a></dt>
-              <dt>2.7 <a href="game/repair.html">Repairing</a></dt>-->
+	      <dt>2.3 <a href="game/cursors.html">The cursor</a></dt>
+              <dt>2.4 <a href="game/buildfac.html">Building facilities</a></dt>
+              <dt>2.5 <a href="game/buildunit.html">Building units</a></dt>
+              <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
+              <dt>2.7 <a href="game/attack.html">Attacking</a></dt>
+              <dt>2.8 <a href="game/repair.html">Repairing</a></dt>
             </dl>
           </dd>
           

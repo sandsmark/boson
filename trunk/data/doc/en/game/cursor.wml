@@ -1,0 +1,14 @@
+#include "top.wml"
+    <h1>
+      The cursors
+    </h1>
+    <p>&nbsp;</p>
+    <table border="0" cellpadding="20">
+    <tr><td><img src="default.gif"></td><td>Default cusor</td></tr>
+    <tr><td><img src="move.gif"></td><td>Move cursor</td></tr>
+    <tr><td><img src="attack.gif"></td><td>Attack cursor</td></tr>
+    </table>
+
+        
+#include "nav.wml" before_url="scrolling.html" before_text="Scrolling" after_url="buildfac.html" after_text="Building facilities"    
+#include "footer.wml"
