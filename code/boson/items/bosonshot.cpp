@@ -19,14 +19,11 @@
 
 #include "bosonshot.h"
 
-#include "../unit.h"
-#include "../player.h"
 #include "../global.h"
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
 #include "../bosonweapon.h"
 #include "bodebug.h"
-#include "../bo3dtools.h"
 
 #include <ksimpleconfig.h>
 
@@ -37,12 +34,27 @@
 #include <math.h>
 
 
-BosonShot::BosonShot(const BosonWeaponProperties* prop, Unit* attacker, float x, float y, float z, float tx, float ty, float tz) :
-    BosonItem(prop->model(), attacker->canvas())
+BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, float x, float y, float z, float tx, float ty, float tz) :
+    BosonItem(prop ? prop->model() : 0, canvas)
 {
   boDebug() << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
-  mOwner = attacker->owner();
+  mOwner = owner;
   mProp = prop;
+  if (!mProp)
+  {
+    boError() << k_funcinfo << "NULL weapon properties!" << endl;
+    return;
+  }
+  if (!mOwner)
+  {
+    boError() << k_funcinfo << "NULL owner!" << endl;
+    return;
+  }
+  if (!canvas)
+  {
+    boError() << k_funcinfo << "NULL canvas" << endl;
+    return;
+  }
   if(prop->speed() == 0)
   {
     // This shot is bullet, not missile - it has infinite speed and it reaches
@@ -72,7 +84,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Unit* attacker, float x,
   mZ = z;
   // Particle systems
   mFlyParticleSystems = prop->newFlyParticleSystems(x, y, z);
-  attacker->canvas()->addParticleSystems(mFlyParticleSystems);
+  canvas->addParticleSystems(mFlyParticleSystems);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   // Initialize particle systems
   QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
@@ -115,3 +127,7 @@ void BosonShot::advance(unsigned int phase)
     mActive = false;
   }
 }
+
+/*
+ * vim: et sw=2
+ */
