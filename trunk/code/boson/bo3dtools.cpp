@@ -1064,6 +1064,16 @@ QString BoQuaternion::debugString(int prec) const
 
 /*****  Misc methods  *****/
 
+BoGLMatrices::BoGLMatrices(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const GLfloat* viewFrustum, const GLint* viewport, const GLfloat& fovY, const GLfloat& aspect)
+    : mModelviewMatrix(modelviewMatrix),
+      mProjectionMatrix(projectionMatrix),
+      mViewFrustum(viewFrustum),
+      mViewport(viewport),
+      mFovY(fovY),
+      mAspect(aspect)
+{
+}
+
 bofixed Bo3dTools::rotationToPoint(bofixed x, bofixed y)
 {
   bofixed add = 0;
