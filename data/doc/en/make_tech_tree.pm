@@ -217,7 +217,7 @@ while ($count < $maxcount && @done_list < @idlist) {
 	$count++;
 }
 
-my $file = "map.png";
+my $file = "map.jpg";
 print_mesg("Write to $file\n");
 $image->Write($file);
 
