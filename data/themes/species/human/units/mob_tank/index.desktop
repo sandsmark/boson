@@ -10,6 +10,7 @@ WeaponDamage=35
 Reload=30
 Producer=0
 Requisities=12,3
+Armor=3
 
 [Boson Mobile Unit]
 Speed=3
