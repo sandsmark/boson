@@ -9,10 +9,10 @@ SUBDIRS =
 BO_DOC_DIR=editor
 
 # list all wml files here
-BO_DOCS=index.wml overview.wml facilities.wml map.wml
+BO_DOCS=index.wml overview.wml facilities.wml
 
 # list additional data here - these files will get installed
-doc_DATA=up_down.png
+doc_DATA=edit_height.png
 
 # Condiguration ends here!
 
