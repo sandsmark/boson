@@ -220,3 +220,7 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
  return tileNo;
 }
 
+int Cell::moveCost() const
+{
+ return 0;
+}
