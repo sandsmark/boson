@@ -52,6 +52,7 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>All units must have their own 3D model</li>
 	  <li>Generate the technology tree dynamically for documentation.</li>
 	  <li>Remove the reloadstate progress bar</li>
+	  <li>Fix problem with particles' textures</li>
 	</ul>
 	<h2>DONE</h2>
 	<ul>
