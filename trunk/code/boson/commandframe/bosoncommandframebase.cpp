@@ -114,6 +114,10 @@ BosonCommandFrameBase::BosonCommandFrameBase(QWidget* parent) : QFrame(parent, "
  actionLayout->addWidget(d->mOrderWidget);
  d->mOrderWidget->setBackgroundOrigin(WindowOrigin);
 
+ // common to editor and game mode:
+ connect(d->mOrderWidget, SIGNAL(signalSelectUnit(Unit*)),
+		this, SIGNAL(signalSelectUnit(Unit*)));
+
  actionLayout->addStretch(1);
  setBackgroundOrigin(WindowOrigin);
  show();

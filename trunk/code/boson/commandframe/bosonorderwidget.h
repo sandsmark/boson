@@ -80,6 +80,12 @@ signals:
 	void signalProduce(ProductionType type, unsigned long int id);
 	void signalStopProduction(ProductionType type, unsigned long int id);
 	void signalPlaceCell(int groundType);
+	
+	/**
+	 * This unit should become the only selected unit. See @ref
+	 * BosonOrderButton::signalSelectUnit
+	 **/
+	void signalSelectUnit(Unit*);
 
 private:
 	class BosonOrderWidgetPrivate;

@@ -128,6 +128,9 @@ public:
 
 	void activate(bool on);
 
+public slots:
+	void slotSelectSingleUnit(Unit* unit) { selectUnit(unit, true); }
+
 protected:
 	void add(Unit* unit);
 	void remove(Unit* unit);

@@ -171,6 +171,12 @@ signals:
 	 **/
 	void signalAction(int);
 
+	/**
+	 * Emitted when there are several units selected and the player clicks
+	 * on one of them. This unit should become the only selected unit now.
+	 **/
+	void signalSelectUnit(Unit*);
+
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
