@@ -500,6 +500,10 @@ void Player::setMinerals(unsigned long int m)
 
 const QColor& Player::teamColor() const
 {
+ if (!speciesTheme()) {
+	BO_NULL_ERROR(speciesTheme());
+	return Qt::red;
+ }
  return speciesTheme()->teamColor();
 }
 
