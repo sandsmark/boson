@@ -235,6 +235,8 @@ Boson::~Boson()
 void Boson::initBoson()
 {
  mBoson = new Boson(0);
+ connect(BoDebug::self(), SIGNAL(notify(const QString&,const char*,int)),
+		mBoson, SLOT(slotDebugOutput(const QString&,const char*,int)));
 }
 
 void Boson::deleteBoson()
@@ -1741,5 +1743,10 @@ void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& tex
 void Boson::slotAddChatSystemMessage(const QString& text)
 {
  slotAddChatSystemMessage(i18n("Boson"), text);
+}
+
+void Boson::slotDebugOutput(const QString& area, const char* data, int level)
+{
+ slotAddChatSystemMessage(area, data);
 }
 

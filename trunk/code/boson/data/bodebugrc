@@ -19,8 +19,8 @@
 #   2 = shell (stderr)
 #   3 = syslog
 #   4 = off
-#
-# (AB: this will get changed/extended!)
+#   5 = application dependant. if application doesnt support this (the usual
+#       case) this is equal to 4 (off).
 #
 # For file output you can give a filename by *Filename=<file>
 # otherwise bodebug.dbg in the current directory is used.

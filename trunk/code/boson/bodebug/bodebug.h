@@ -427,6 +427,70 @@ bodbgstream boFatal(bool cond, int area = 0);
 void boClearDebugConfig();
 
 
+// AB: TODO document
+// AB: TODO integrate some of the internal .cpp functions here?
+#include <qobject.h>
+class BoDebug : public QObject
+{
+	Q_OBJECT
+public:
+	BoDebug();
+	~BoDebug();
+
+	enum DebugLevels {
+		KDEBUG_INFO = 0,
+		KDEBUG_WARN = 1,
+		KDEBUG_ERROR = 2,
+		KDEBUG_FATAL = 3
+	};
+
+	/**
+	 * Create and return the BoDebug object. You should use this method in
+	 * your program!
+	 * @return The BoDebug instance of your program. The instance will be
+	 * created if not present.
+	 **/
+	static BoDebug* self();
+
+	//AB: workaround. we need this in kDebugBackend. we should make that
+	//function a method of BoDebug instead, so that we can access mDebug
+	//directly. maybe we make kDebugBackend a friend of this class instead
+	/**
+	 * @internal
+	 * Do <em>not</em> use this in your program!
+	 * @return The global BoDebug instance. Does <em>not</em> create the
+	 * instance if not present and will return NULL in that case.
+	 **/
+	static BoDebug* selfNonCreate();
+
+	/**
+	 * Calles internally. Emits @ref notify.
+	 **/
+	void emitSignal(const QString& area, const char* data, int level)
+	{
+		emit notify(area, data, level);
+	}
+
+signals:
+	/**
+	 * @param area The string that belongs to the specified debug area. The
+	 * string is specified in the bodebug.areas file. Usually this is simply
+	 * the instance name of the application, e.g. "boson" for boson if you
+	 * use boDebug() << endl; or boDebug(0) << endl;
+	 * @param data The text of the debug output. Including the prefix, such
+	 * as "ERROR: " or "WARNING: ".
+	 * @param level What kind of debug output this is - see @ref
+	 * DebugLevels. The value depends on the function you called, e.g.
+	 * boWarning() will always generate @ref KDEBUG_WARN.
+	 **/
+	void notify(const QString& area, const char* data, int level);
+
+private:
+	static BoDebug* mDebug;
+	class BoDebugPrivate;
+	BoDebugPrivate* d;
+};
+
 #ifdef NDEBUG
 #define boDebug bondDebug
 #define boBacktrace bondBacktrace
