@@ -26,29 +26,20 @@ boson_appsdir = $(kde_appsdir)/Games/Boson
 bin_PROGRAMS = boserver
 
 #boserver
-boserver_METASOURCES = USE_AUTOMOC
+METASOURCES = AUTO
 boserver_LDFLAGS = $(all_libraries) $(KDE_RPATH)
-
 boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp game.cpp
 boserver_LDADD   = ../common/libboson.a $(LIB_KDEUI)
 
-#(un)install
-install-data-local:
-	$(mkinstalldirs) $(boson_appsdir)/
-	$(INSTALL_DATA) boserver.kdelnk $(boson_appsdir)/boserver.kdelnk
-	$(mkinstalldirs) $(kde_icondir)/
-	$(INSTALL_DATA) boserver.xpm $(kde_icondir)/boserver.xpm
-	$(mkinstalldirs) $(kde_minidir)/
-	$(INSTALL_DATA) mini-boserver.xpm $(kde_minidir)/mini-boserver.xpm
-
-uninstall-local:
-	-rm -f $(boson_appsdir)/boserver.kdelnk
-	-rm -f $(kde_icondir)/boserver.xpm
-	-rm -f $(kde_minidir)/mini-boserver.xpm
-
-
 # garbage
-CLEANFILES = $(boserver_METASOURCES) boson-*.log
+CLEANFILES = boson-*.log
 
 EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h game.h game.cpp
+
+appsdir = $(kde_appsdir)/Games/Boson
+
+apps_DATA = boserver.desktop
+EXTRA_DIST = $(apps_DATA)
+
+KDE_ICON = boserver
 
