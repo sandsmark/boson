@@ -333,6 +333,8 @@ protected:
 	bool saveCells(QDataStream& stream);
 	bool saveHeightMap(QDataStream& stream);
 
+	static bool saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap);
+
 	/**
 	 * Read the map geo from stream. This only reads map size, playercount
 	 * and something like this. Use @ref loadCells to load the cells.
@@ -377,6 +379,11 @@ protected:
 	 * clients will use the same values.
 	 **/
 	void recalculateCell(int x, int y);
+
+	/**
+	 * Create the map array accordint to @ref width and @ref height.
+	 **/
+	void createCells();
 
 private:
 	void init();
