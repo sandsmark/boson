@@ -34,6 +34,7 @@ class BoFrame
 public:
 	BoFrame();
 	BoFrame(const BoFrame& f);
+	~BoFrame();
 
 	void setDisplayList(GLuint l) { mDisplayList = l; }
 	GLuint displayList() const { return mDisplayList; }
@@ -150,6 +151,7 @@ private:
 	QMap<QString, QString> mTextureNames;
 	QIntDict<BoFrame> mFrames;
 	QIntDict<BoFrame> mConstructionSteps;
+	QValueList<GLuint> mNodeDisplayLists;
 	QColor* mTeamColor;
 
 	float mWidth;
