@@ -9,7 +9,7 @@ SUBDIRS =
 BO_DOC_DIR=editor
 
 # list all wml files here
-BO_DOCS=index.wml elements.wml facilities.wml map.wml
+BO_DOCS=index.wml elements.wml facilities.wml map.wml startup.wml
 
 # list additional data here - these files will get installed
 doc_DATA=
