@@ -46,6 +46,10 @@ mouse handling :
 	When you left click-and-hold and drag on the radarmap, you see that part
 	on the right window.
 
+editor:
+	oil-cells aren't shown
+	close -> how to say KTMW that there's no mainWidget anymore ? 
+
 
 0.4 release:
 ============
