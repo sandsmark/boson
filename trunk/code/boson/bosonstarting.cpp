@@ -691,10 +691,12 @@ bool BosonStarting::fixPlayerIdsInFileNames(int* actualIds, unsigned int players
 		return false;
 	}
 
-	QString file = it.key();
-	QByteArray b = it.data();
-	file.replace(hasPlayerId, QString("-player_%1").arg(actualIds[n]));
-	addFiles.insert(file, b);
+	if (actualIds[n] > 0) {
+		QString file = it.key();
+		QByteArray b = it.data();
+		file.replace(hasPlayerId, QString("-player_%1").arg(actualIds[n]));
+		addFiles.insert(file, b);
+	}
 	removeFiles.append(it.key());
  }
  for (QStringList::iterator it = removeFiles.begin(); it != removeFiles.end(); ++it) {
