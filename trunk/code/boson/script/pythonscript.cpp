@@ -259,6 +259,7 @@ bool PythonScript::loadScriptFromString(const QString& string)
   QString code;
   code += "import sys\n";
   code += QString("sys.path.insert(0, '%1')\n").arg(BosonScript::scriptsPath());
+  code += QString("sys.path.insert(0, '%1')\n").arg(BosonScript::scriptsPath() + "pythonlib");
   code += "sys.path.insert(0, '')\n";
   code += string;
 
