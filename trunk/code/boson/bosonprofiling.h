@@ -58,7 +58,8 @@ public:
 		SaveCanvasToXML = 26,
 		SaveExternalToXML = 27,
 		PreLoadPlayFields = 40,
-		LoadPlayField = 41
+		LoadPlayField = 41,
+		FindPath = 100
 	};
 	BosonProfiling();
 	BosonProfiling(const BosonProfiling& profiling);
@@ -113,11 +114,24 @@ public:
 	void start(int event);
 
 	/**
+	 * @return The elapsed time s ince calling @ref start with this event
+	 * number (in usec). Undefined if @ref start has not yet been called
+	 * with this event number.
+	 **/
+	long int elapsed(int event) const;
+
+	/**
 	 * Stop the event timer and append the resulting time to the list. If
 	 * the list contains more than MAX_ENTRIES the first item is removed.
 	 * See also @ref start
+	 *
+	 * @param appendToList If TRUE (default) the resulting time will be
+	 * appended to the list for this event, and can be analyzed using @ref
+	 * BosonProfilingDialog. Otherwise the elapsed time is returned only.
+	 *
+	 * @return See @ref elapsed (note: usec!)
 	 **/
-	void stop(int event);
+	long int stop(int event, bool appendToList = true);
 
 	void loadUnit();
 	void loadUnitDone(unsigned long int typeId);
@@ -244,11 +258,20 @@ public:
 	/**
 	 * This stops profiling the event immediately. The destructor will do
 	 * nothing when you call this.
+	 * @return See @ref BosonProfiling::stop
 	 **/
-	void stop()
+	long int stop()
 	{
-		boProfiling->stop(mEvent);
 		mEventStopped = true;
+		return boProfiling->stop(mEvent);
+	}
+
+	/**
+	 * @return See @ref BosonProfiling::elapsed
+	 **/
+	long int elapsed() const
+	{
+		return boProfiling->elapsed(mEvent);
 	}
 
 private:

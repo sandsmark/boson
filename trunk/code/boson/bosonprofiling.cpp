@@ -362,15 +362,24 @@ void BosonProfiling::start(int event)
  gettimeofday(&d->mProfilingTimes[event], 0);
 }
 
-void BosonProfiling::stop(int event)
+long int BosonProfiling::elapsed(int event) const
 {
  struct timeval time;
  gettimeofday(&time, 0);
+ return COMPARE_TIMES(d->mProfilingTimes[event], time);
+}
 
- d->mTimes[event].append(COMPARE_TIMES(d->mProfilingTimes[event], time));
- if (d->mTimes[event].count() > MAX_PROFILING_ENTRIES) {
-	d->mTimes[event].remove(d->mTimes[event].begin());
+long int BosonProfiling::stop(int event, bool appendToList)
+{
+ long int _elapsed = elapsed(event);
+
+ if (appendToList) {
+	d->mTimes[event].append(_elapsed);
+	if (d->mTimes[event].count() > MAX_PROFILING_ENTRIES) {
+		d->mTimes[event].remove(d->mTimes[event].begin());
+	}
  }
+ return _elapsed;
 }
 
 
