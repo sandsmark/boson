@@ -32,29 +32,6 @@ dnl first search for GL/gl.h and GL/glu.h
  if test "x$bo_have_glu" != "xyes"; then
 	AC_MSG_ERROR([The file GL/glu.h could not be found. Please install the GLU development package (e.g. mesa-glu-devel). Note that this is NOT part of the graphics card drivers! E.g. NVidia does NOT ship GLU!])
  fi
-
-dnl also check for glext.h
-dnl note that this one isn't strictly neccessary, some implementations put
-dnl  everything into gl.h
-dnl AB: we can't use AC_CHECK_HEADERS here, as glext.h may depend on gl.h
-dnl     without including it itself
- bo_have_glext=""
- AC_MSG_CHECKING(for GL/glext.h)
- AC_TRY_COMPILE([
-#include <GL/gl.h>
-#include <GL/glext.h>
-	],
-	[],
-	bo_have_glext="yes",
-	bo_have_glext="no"
- )
- if test "$bo_have_glext" != "yes"; then
-	AC_DEFINE_UNQUOTED(HAVE_GL_GLEXT_H, 0, [Define to 1 if you have the <GL/glext.h> header file.])
-	AC_MSG_RESULT([no])
- else
-	AC_DEFINE_UNQUOTED(HAVE_GL_GLEXT_H, 1, [Define to 1 if you have the <GL/glext.h> header file.])
-	AC_MSG_RESULT([yes])
- fi
 ])
 AC_BOSON_HAVE_GL_HEADERS
 
