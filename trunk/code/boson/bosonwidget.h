@@ -72,11 +72,9 @@ signals:
 protected slots:
 	virtual void slotChangeCursor(int mode, const QString& dir);
 
-	void slotPlayerKilled(Player* p);
 	void slotGameOverDialogFinished();
 
 protected:
-	virtual void initConnections();
 	virtual void initDisplayManager();
 
 	virtual void startScenarioAndGame();
