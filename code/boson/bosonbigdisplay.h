@@ -28,6 +28,8 @@ class Unit;
 class UnitBase;
 class Player;
 class KPlayer;
+class KGame;
+class KGameChat;
 
 /**
  * This is the "view" of the canvas - the part of the canvas that you can
@@ -74,6 +76,13 @@ public:
 	void setModified(bool m);
 
 	bool isModified() const;
+
+	/**
+	 * Set the @ref KGameChat object to the @ref KGameCanvasChat.
+	 **/
+	void setKGameChat(KGameChat* c);
+	
+	void setKGame(KGame* g); // FIXME: remove when kde 3.0 beta2 or final is out!
 
 public slots:
 	/**

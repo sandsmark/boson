@@ -65,6 +65,7 @@ private slots:
 
 	void slotShowToolbar();
 	void slotShowStatusbar();
+	void slotShowChat();
 	void slotConfigureToolbars();
 
 private:

@@ -96,6 +96,8 @@ public:
 	bool isModified() const;
 	void setModified(bool);
 
+	void setShowChat(bool s);
+
 public slots:
 	void slotDebug();
 	void slotNewGame();
