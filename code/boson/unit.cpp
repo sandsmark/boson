@@ -868,7 +868,7 @@ void MobileUnit::advanceMoveCheck()
 	// work() is still workMove() so we'll continue moving in the next
 	// advanceMove() call
 
-	d->mMovingFailed = d->mMovingFailed + 1; // perhaps use PolicyDirty for mMovingFailed. then add a if(isVirtual()) to this
+	d->mMovingFailed = d->mMovingFailed + 1;
 	setXVelocity(0);
 	setYVelocity(0);
 
@@ -927,8 +927,10 @@ void MobileUnit::turnTo()
 	turnTo(West);
  } else if((xspeed < 0) && (yspeed < 0)) { // NW
 	turnTo(NorthWest);
+ } else if (xspeed == 0 && yspeed == 0) {
+	kdDebug() << k_funcinfo << "xspeed == 0 and yspeed == 0" << endl;
  } else {
-	kdDebug() << "xspeed == 0 and yspeed == 0 or error when setting frame" << endl;
+	kdDebug() << k_funcinfo << "error when setting frame" << endl;
  }
 }
 
@@ -937,10 +939,8 @@ void MobileUnit::leaderMoved(double x, double y)
  if(work() == WorkMoveInGroup) {
 	setVelocity(x, y);
 	turnTo();
-	setVelocity(0, 0);
-	moveBy(x, y);
  } else {
-	kdDebug() << "MobileUnit::leaderMoved() called, but work() != WorkMoveInGroup" << endl;
+	kdError() << k_funcinfo << "work() != WorkMoveInGroup" << endl;
  }
 }
 
