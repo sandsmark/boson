@@ -80,7 +80,13 @@ void BosonStartupWidget::init()
 	return;
  }
 
+ setBackgroundMode(FixedPixmap);
  setPaletteBackgroundPixmap(*d->mBackgroundPix);
+ setBackgroundOrigin(WindowOrigin);
+
+ d->mWidgetStack->setBackgroundMode(FixedPixmap);
+ d->mWidgetStack->setPaletteBackgroundPixmap(*d->mBackgroundPix);
+ d->mWidgetStack->setBackgroundOrigin(WindowOrigin);
 
  QLabel* logo = new QLabel(this, "bosonlogo");
  logo->setBackgroundOrigin(WindowOrigin);
@@ -257,11 +263,6 @@ BosonLoadingWidget* BosonStartupWidget::loadingWidget() const
 void BosonStartupWidget::showLoadingWidget()
 {
  showWidget(IdLoading);
-}
-
-void BosonStartupWidget::setLocalPlayer(Player* player)
-{
- mPlayer = player;
 }
 
 void BosonStartupWidget::slotLoadingType(int type)

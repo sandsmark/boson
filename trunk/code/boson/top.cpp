@@ -834,9 +834,6 @@ void TopWidget::changeLocalPlayer(Player* p, bool init)
  boDebug() << k_funcinfo << p << endl;
 
  // AB: note that both, p == 0 AND p == currentplayer are valid and must be executed!
- if (d->mStartup) {
-	d->mStartup->setLocalPlayer(p);
- }
  if (d->mStarting) {
 	d->mStarting->setLocalPlayer(p);
  }

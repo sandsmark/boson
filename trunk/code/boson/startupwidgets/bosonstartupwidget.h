@@ -48,9 +48,6 @@ public:
 	void resetWidgets();
 	void showLoadingWidget();
 
-	void setLocalPlayer(Player* player);
-	Player* localPlayer() const { return mPlayer; }
-
 public slots:
 	void slotLoadingType(int);
 	void slotLoadingShowProgressBar(bool);
@@ -152,8 +149,6 @@ private:
 private:
 	class BosonStartupWidgetPrivate;
 	BosonStartupWidgetPrivate* d;
-
-	Player* mPlayer;
 };
 
 #endif
