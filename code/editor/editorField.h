@@ -67,7 +67,7 @@ public:
 
 private:
 	long		key;
-	void		freeCells();
+	void		freeRessources();
 	bool		modified;
 
 public: //needed by visualBigDisplay
