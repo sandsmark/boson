@@ -48,6 +48,7 @@ public:
 		LoadModelTextures,
 		LoadModelDisplayLists,
 		LoadModelDummy,
+		SlotAdvance,
 
 		ProfilingEnd // must remain the last entry!
 	};

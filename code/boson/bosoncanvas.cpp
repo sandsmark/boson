@@ -32,6 +32,7 @@
 #include "items/bosonshot.h"
 #include "bosonweapon.h"
 #include "bosonstatistics.h"
+#include "bosonprofiling.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -135,6 +136,7 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
+ boProfiling->start(BosonProfiling::SlotAdvance);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  if (advanceFlag) {
@@ -200,6 +202,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		delete u;
 	}
  }
+ boProfiling->stop(BosonProfiling::SlotAdvance);
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
