@@ -319,4 +319,27 @@ private:
 	int mPosY;
 };
 
+/**
+ * @short Helper plugin for mining (mining = placing mines (mine = explosive
+ * device ;-)))
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class MiningPlugin : public UnitPlugin
+{
+public:
+	MiningPlugin(Unit* owner);
+	~MiningPlugin();
+
+	virtual int pluginType() const { return Mine; }
+
+	void mine(int weaponId);
+
+	virtual void advance(unsigned int);
+
+private:
+	BosonWeapon* mWeapon;
+	int mPlacingCounter;
+};
+
 #endif

@@ -1256,14 +1256,12 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				boWarning() << "cannot do anything with destroyed units" << endl;
 				continue;
 			}
-			BosonWeapon* weapon = unit->weapon(weaponId);
-			if (!weapon) {
-				boError() << "weapon " << weaponId << " not found for unit " << unitId << endl;
-				continue;
+			MiningPlugin* m = (MiningPlugin*)unit->plugin(UnitPlugin::Mine);
+			if (!m) {
+				boError() << k_lineinfo << "This unit has no mining plugin" << endl;
+				break;
 			}
-			boDebug() << k_funcinfo << "Calling layMine()" << endl;
-			weapon->layMine();
-			// TODO: move unit away from mine so mine can activate
+			m->mine(weaponId);
 		}
 		boDebug() << k_funcinfo << "done" << endl;
 

@@ -738,3 +738,118 @@ void BombingPlugin::advance(unsigned int)
 	return;
  }
 }
+
+
+MiningPlugin::MiningPlugin(Unit* owner) : UnitPlugin(owner)
+{
+ mWeapon = 0;
+ mPlacingCounter = 0;
+}
+
+MiningPlugin::~MiningPlugin()
+{
+}
+
+// How many game ticks does it take to place mine
+// FIXME: make configurable in BosonWeapon
+#define MINE_PLACE_TIME 10
+
+void MiningPlugin::mine(int weaponId)
+{
+ boDebug() << k_funcinfo << "wep: " << weaponId << endl;
+ BosonWeapon* w = unit()->weapon(weaponId);
+ if (!w) {
+	boError() << k_funcinfo << "No weapon with id " << weaponId << endl;
+	return;
+ }
+ if (w->properties()->shotType() != BosonShot::Mine) {
+	boError() << k_funcinfo << "Weapon with id " << weaponId << " is not a mine" << endl;
+	return;
+ }
+
+ unit()->stopMoving();
+
+ mWeapon = w;
+ mPlacingCounter = MINE_PLACE_TIME;
+
+ // Mine will be layed in advance()
+
+ unit()->setPluginWork(UnitPlugin::Mine);
+}
+
+void MiningPlugin::advance(unsigned int)
+{
+ boDebug() << k_funcinfo << endl;
+
+ // Lay the mine
+ if (mWeapon->reloaded()) {
+	// Don't place the mine immediately
+	if (mPlacingCounter > 0) {
+		boDebug() << k_funcinfo << "mPlacingCounter: " << mPlacingCounter << endl;
+		mPlacingCounter--;
+		return;
+	}
+
+	boDebug() << k_funcinfo << "Mine ready. Placing..." << endl;
+	mWeapon->layMine();
+
+	// Go one cell away from the mine. Maybe go away from explosion radius?
+	// FIXME: code taken from BombingPlugin. This could probably be written better
+	float dist = 1 * BO_TILE_SIZE + unit()->width() / 2;
+	boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
+	float oldx = unit()->x();
+	float oldy = unit()->y();
+	float newx, newy;
+	bool couldmove = false;
+
+	// TODO: quite messy code, maybe it can be cleaned up somehow
+	for (int i = 0; i <= 7; i++) {
+		newx = oldx;
+		newy = oldy;
+
+		// First try to go straight ahead, then try go to 45 degrees right, then
+		//  45 degrees left, then 2 * 45 degrees right, then 2 * 45 degrees left, etc
+		int rotadd = ((i + 1) / 2) * 45;
+		if (i % 2 == 0) {
+			rotadd = -rotadd;
+		}
+		int rot = ((int)unit()->rotation() + rotadd) % 360;
+
+		boDebug() << k_funcinfo << "i: " << i << "; rotadd: " << rotadd << "; rot: " << rot << endl;
+
+		if (rot >= 45 && rot <= 135) {
+			newx += dist;
+		} else if (rot >= 225 && rot <= 315) {
+			newx -= dist;
+		}
+		if (rot <= 45 || rot >= 315) {
+			newy -= dist;
+		} else if (rot >= 135 && rot <= 225) {
+			newy += dist;
+		}
+
+		// Make sure coords are valid
+		newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1) * BO_TILE_SIZE));
+		newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1) * BO_TILE_SIZE));
+
+		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
+		if (unit()->moveTo(newx, newy)) {
+			unit()->setWork(Unit::WorkMove);  // We don't want to return here anymore
+			couldmove = true;
+			break;
+		}
+	}
+
+	if (!couldmove) {
+		boDebug() << k_funcinfo << "Can't move away!" << endl;
+		unit()->setWork(Unit::WorkNone);  // We don't want to return here anymore
+	}
+
+	mWeapon = 0;
+	boDebug() << k_funcinfo << "returning" << endl;
+	return;
+ } else {
+	boDebug() << k_funcinfo << "Weapon not yet reloaded" << endl;
+ }
+}
+
