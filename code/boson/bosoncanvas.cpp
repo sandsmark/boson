@@ -1064,12 +1064,16 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		continue;
 	}
 	bool ok = false;
-	unsigned int ownerId = items.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
+
+	// AB: WARNING: we store the _index_ in the playerList() in saveAsXML(),
+	// but here we expect the _actual ID_ of the player!
+	// -> it should get filled in on startup by BosonStarting or so
+	unsigned int id = items.attribute(QString::fromLatin1("Id")).toUInt(&ok);
 	if (!ok) {
-		boError(260) << k_funcinfo << "OwnerId of Items Tag " << i << " is not a valid number" << endl;
+		boError(260) << k_funcinfo << "Id of Items Tag " << i << " is not a valid number" << endl;
 		continue;
 	}
-	Player* owner = (Player*)boGame->findPlayer(ownerId);
+	Player* owner = (Player*)boGame->findPlayer(id);
 	if (!owner) {
 		// AB: this is totally valid. less players in game, than in the
 		// file.
@@ -1271,7 +1275,9 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
  QMap<unsigned int, QDomElement> owner2Items;
  for (KPlayer* p = boGame->playerList()->first(); p; p = boGame->playerList()->next()) {
 	QDomElement items = doc.createElement(QString::fromLatin1("Items"));
-	items.setAttribute(QString::fromLatin1("OwnerId"), p->id());
+
+	// note: we need to store the index in the list here, not the p->id() !
+	items.setAttribute(QString::fromLatin1("Id"), boGame->playerList()->findRef(p));
 	root.appendChild(items);
 	owner2Items.insert(p->id(), items);
  }
