@@ -6,6 +6,7 @@ Id=3
 Health=250
 MineralCost=400
 Producer=10
+Requisities=4,5,2
 
 [Boson Facility]
 CanProduce=true

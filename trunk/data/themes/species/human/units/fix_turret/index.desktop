@@ -9,3 +9,4 @@ WeaponRange=4
 WeaponDamage=15
 Reload=10
 Producer=10
+Requisities=5,2,3
