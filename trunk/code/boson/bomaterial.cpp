@@ -27,7 +27,7 @@ BoMaterial* BoMaterial::mCurrentMaterial = 0;
 unsigned int BoMaterial::mCurrentTexture = 0;
 BoMaterial BoMaterial::mDefaultMaterial = BoMaterial();
 
-BoMaterial::BoMaterial()
+void BoMaterial::init()
 {
  // defaults from lib3ds:
 // mAmbient = BoVector4(0.588235f, 0.588235f, 0.588235f, 0.0f);
@@ -65,10 +65,6 @@ BoMaterial::BoMaterial()
  mTextureObject = 0;
 }
 
-BoMaterial::~BoMaterial()
-{
-}
-
 void BoMaterial::activate(BoMaterial* mat)
 {
  if (mat == mCurrentMaterial) {
@@ -103,5 +99,36 @@ void BoMaterial::setDefaultAlpha(float alpha)
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mDefaultMaterial.mAmbient.data());
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mDefaultMaterial.mDiffuse.data());
  }
+}
+
+BoMaterial& BoMaterial::operator=(const BoMaterial& mat)
+{
+#define COPY(x) x = mat.x
+ COPY(mName);
+ COPY(mAmbient);
+ COPY(mDiffuse);
+ COPY(mSpecular);
+ COPY(mShininess);
+ COPY(mShinStrength);
+ COPY(mUseBlur);
+ COPY(mBlur);
+ COPY(mTransparency);
+ COPY(mFallOff);
+ COPY(mAdditive);
+ COPY(mUseFallOff);
+ COPY(mSelfIllum);
+ COPY(mShading);
+ COPY(mSoften);
+ COPY(mFaceMap);
+ COPY(mTwoSided);
+ COPY(mMapDecal);
+ COPY(mUseWire);
+ COPY(mUseWireAbs);
+ COPY(mWireSize);
+
+ COPY(mTextureName);
+ COPY(mTextureObject);
+#undef COPY
+ return *this;
 }
 
