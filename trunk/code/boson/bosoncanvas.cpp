@@ -516,7 +516,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
 	BoVector3 pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
-	pos += unit->unitProperties()->hitpoint();
+	pos += unit->unitProperties()->hitPoint();
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
 	if(unit->unitProperties()->explodingDamage() > 0) {
 		explosion(pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), unit->owner());
