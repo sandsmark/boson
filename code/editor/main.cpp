@@ -69,16 +69,16 @@ int main(/*int argc, char* argv[] */)
 
 
 	/* find dataPath */
-	QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") + "boson/";
-	dataPath = &path;	 // local variable to main are 'almost' global
+	dataPath = new QString(KGlobal::instance()->dirs()->findResourceDir("data", "boson/pics/biglogo.bmp") + "boson/"); 
+	logf(LOG_INFO, "dataPath set to %s", dataPath->latin1());
 
 	/* XXX orzel : temp, until GUI is really functionnal */
 	QString themePath = *dataPath +  "themes/grounds/earth.png";
 //	printf("loading groundTheme : %s\n", themePath.latin1() );
 	bigBackground = new QPixmap(themePath);
 	if (bigBackground->isNull() ) {
-		logf(LOG_ERROR, "can't load earth.png");
-		printf("can't load earth.png\n");
+		logf(LOG_ERROR, "can't load %s", themePath.latin1());
+		// XXX some ::sorry() box here..
 		exit(1);
 	}
 

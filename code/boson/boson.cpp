@@ -57,7 +57,7 @@ BosonApp::BosonApp()
 	logf(LOG_INFO, "========= New Log File ==============");
 
 	/* find the boson data dir */
-	dataPath = new QString(KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") + "boson/"); 
+	dataPath = new QString(KGlobal::instance()->dirs()->findResourceDir("data", "boson/pics/biglogo.bmp") + "boson/"); 
 	logf(LOG_INFO, "dataPath initialised at %s", dataPath->latin1());
 
 	/* application initialisation */
