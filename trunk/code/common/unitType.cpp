@@ -36,11 +36,11 @@
 
 #define EX(s) ((s)*BO_TILE_SIZE)
 mobileProperties_t mobileProp[] = {
-	{"ship",		EX(2), EX(2),  2, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
+	{"ship",		EX(2), EX(2),  4, 5,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
 	{"quad",		EX(1), EX(1),  3, 2,	200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
-	{"oilharvester",	EX(1), EX(1),  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
-	{"mineralharvester",	EX(1), EX(1),  4, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
-	{"aircraft",		EX(2), EX(2),  3, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"oilharvester",	EX(1), EX(1),  2, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_OIL_HARVESTER
+	{"mineralharvester",	EX(1), EX(1),  2, 0,	200, 100, 1, BO_GO_EARTH},	// MOB_MINERAL_HARVESTER
+	{"aircraft",		EX(2), EX(2),  4, 4,	200, 100, 3, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 //	                        width          visibility    oil  speed
 //	                               height     range mineral      goFlag
