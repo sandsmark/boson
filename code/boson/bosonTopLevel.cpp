@@ -136,15 +136,13 @@ void bosonTopLevel::object_put(QPoint p)
 {
 	p/= BO_TILE_SIZE;
 	p+= viewPos;
-	construct.x = p.x();
-	construct.y = p.y();
 	switch(orderType) {
 		case OT_FACILITY:
-			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, MSG(construct) );
+			fixConstruct.x = p.x();
+			fixConstruct.y = p.y();
+			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, MSG(fixConstruct) );
 			break;
 		case OT_MOBILE:
-			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, MSG(construct) );
-			break;
 		default:
 			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
 	}
@@ -160,12 +158,14 @@ void bosonTopLevel::handleOrder(int order)
 			return;
 			break;
 		case OT_FACILITY:
-			construct.type.fix = (facilityType) order;
+			fixConstruct.type = (facilityType) order;
 			setSelectionMode( SELECT_PUT);
 			break;
 		case OT_MOBILE:
-			construct.type.mob = (mobType) order;
-			setSelectionMode( SELECT_PUT);
+			mobConstruct.type = (mobType) order;
+			boAssert(fixSelected);
+			mobConstruct.key_constructor = fixSelected->key;
+			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, MSG(mobConstruct) );
 			break;
 	}
 }
