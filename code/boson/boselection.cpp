@@ -78,11 +78,6 @@ void BoSelection::add(Unit* unit)
  if (mSelection.containsRef(unit)) {
 	return;
  }
- if (mSelection.count() > 0) {
-	if (mSelection.first()->owner() != unit->owner()) {
-		return;
-	}
- }
  mSelection.append(unit);
  unit->select();
 }
@@ -111,17 +106,8 @@ void BoSelection::selectUnits(QPtrList<Unit> list, bool replace)
  if (replace) {
 	clear(false);
  }
- Player* p = 0;
  QPtrListIterator<Unit> it(list);
- while (it.current() && it.current()->owner()) {
-	if (it.current()->owner() != p) {
-		if (p == 0) {
-			p = it.current()->owner();
-		} else {
-			continue;
-		}
-	
-	}
+ while (it.current()) {
 	add(it.current());
 	++it;
  }

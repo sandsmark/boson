@@ -145,7 +145,6 @@ CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  (void)new QLabel(i18n("Cursor"), hbox);
  mCursor = new QComboBox(hbox);
  mCursor->insertItem(i18n("OpenGL Cursor"), CursorOpenGL);
- mCursor->insertItem(i18n("B/W Cursor"), CursorNormal); // AB do we still support it?
  mCursor->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
 
  hbox = new QHBox(this);

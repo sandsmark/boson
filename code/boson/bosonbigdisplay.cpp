@@ -589,3 +589,50 @@ bool BosonBigDisplay::actionLocked() const
  return d->mLockAction;
 }
 
+BosonBigDisplayBase::CanSelectUnit BosonBigDisplay::canSelect(Unit* unit) const
+{
+ if (!unit) {
+	return CanSelectError;
+ }
+ if (unit->isDestroyed()) {
+	return CanSelectDestroyed;
+ }
+ if (unit->owner() != localPlayer()) {
+	// we can select this unit, but only as a single unit.
+	return CanSelectSingleOk;
+ }
+ if (unit->isFacility()) {
+	return CanSelectSingleOk;
+ }
+ return CanSelectMultipleOk;
+}
+
+bool BosonBigDisplay::selectAll(const UnitProperties* prop, bool replace)
+{
+ if (!localPlayer()) {
+	boError() << k_funcinfo << "NULL localplayer" << endl;
+	return false;
+ }
+ if (prop->isFacility()) {
+	// we don't select all facilities, but only the one that was
+	// double-clicked. it makes no sense for facilities
+	return false;
+ }
+ QPtrList<Unit> allUnits = localPlayer()->allUnits();
+ QPtrList<Unit> list;
+ QPtrListIterator<Unit> it(allUnits);
+ while (it.current()) {
+	if (it.current()->unitProperties() == prop) {
+		if (canSelect(it.current()) == CanSelectMultipleOk) {
+			list.append(it.current());
+		}
+	}
+	++it;
+ }
+ if (list.count() > 0) {
+	selectUnits(list, replace);
+	return true;
+ }
+ return false;
+}
+

@@ -140,11 +140,8 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 		b = new BosonOpenGLCursor;
 		break;
 	case CursorKDE:
-		b = new BosonKDECursor;
-		break;
-	case CursorNormal:
 	default:
-		b = new BosonNormalCursor;
+		b = new BosonKDECursor;
 		break;
  }
 
@@ -191,13 +188,11 @@ void BosonWidget::slotGamePreferences()
  if (cursor()) {
 	if (cursor()->isA("BosonOpenGLCursor")) {
 		mode = CursorOpenGL;
-	} else if (cursor()->isA("BosonKDECursor")) {
-		mode = CursorKDE;
 	} else {
-		mode = CursorNormal;
+		mode = CursorKDE;
 	}
  } else {
-	mode = CursorNormal;
+	mode = CursorKDE;
  }
 
  OptionsDialog* dlg = new OptionsDialog(this);
@@ -301,13 +296,11 @@ void BosonWidget::saveConfig()
  if (cursor()) {
 	if (cursor()->isA("BosonOpenGLCursor")) {
 		boConfig->saveCursorMode(CursorOpenGL);
-	} else if (cursor()->isA("BosonKDECursor")) {
-		boConfig->saveCursorMode(CursorKDE);
 	} else {
-		boConfig->saveCursorMode(CursorNormal);
+		boConfig->saveCursorMode(CursorKDE);
 	}
  } else {
-	boConfig->saveCursorMode(CursorNormal);
+	boConfig->saveCursorMode(CursorKDE);
  }
  boConfig->saveCursorDir(mCursorTheme);
 // boConfig->save(editor); //FIXME

@@ -47,8 +47,7 @@ class BosonTextureArray;
  *
  * You can call @ref setCursor to change the cursor - e.g. you want to have a
  * different cursor for selecting units than for attacking units. You should also
- * call @ref setWidgetCursor after @ref setCursor. You don't need this though -
- * but you enable your users to use a normal @ref QCursor instead of sprites.
+ * call @ref setWidgetCursor after @ref setCursor.
  *
  * @sect Files
  * You need to provide pixmaps for the sprite-cursor and you can provide pixmaps
@@ -95,16 +94,15 @@ public:
 	virtual void setCursor(int mode);
 	
 	/**
-	 * Change the @ref QCursor cursor of the specified widget. This function
-	 * uses @ref QWidget::setCursor if the feature is compiled in. Note that
-	 * this should do nothing if you don't use @ref BosonNormalCursor
+	 * Change the @ref QCursor cursor of the specified widget. E.g. in case
+	 * an OpenGL cursor is used this will hide the usual cursor for this
+	 * widget (so that not two different cursors are shown)
 	 **/
 	virtual void setWidgetCursor(QWidget* w) = 0;
 
 	/**
-	 * @return The current @ref QCursor according to @ref cursorMode. This
-	 * does only something useful for @ref BosonNormalCursor but if
-	 * everything else fails you might want to use this cursor.
+	 * @return The current @ref QCursor according to @ref cursorMode.
+	 * If everything else fails you might want to use this cursor.
 	 **/
 	virtual QCursor cursor() const;
 
@@ -121,8 +119,7 @@ public:
 	 * @param baseDir specifies the directory where the file are to be
 	 * searched. 
 	 * @param cursor specifies the cursor itself - this is the directoy for
-	 * sprite-cursors or the filename for normal-cursors. See class
-	 * documentation for more information.
+	 * opengl-cursors. See class documentation for more information.
 	 **/
 	virtual bool insertMode(int mode, QString baseDir, QString cursor) = 0;
 
@@ -143,28 +140,6 @@ public:
 
 private:
 	int mMode;
-};
-
-class BosonNormalCursor : public BosonCursor
-{
-	Q_OBJECT
-public:
-	BosonNormalCursor();
-	virtual ~BosonNormalCursor();
-	
-	virtual void setCursor(int mode);
-	virtual void setWidgetCursor(QWidget* w);
-	bool insertMode(int mode, QCursor* cursor);
-	virtual QCursor cursor() const;
-
-	virtual bool insertMode(int mode, QString baseDir, QString cursor);
-
-protected:
-	QCursor* loadQCursor(QString baseDir, QString cursor);
-
-private:
-	class BosonNormalCursorPrivate;
-	BosonNormalCursorPrivate* d;
 };
 
 class BosonKDECursor : public BosonCursor

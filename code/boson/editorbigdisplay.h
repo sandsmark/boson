@@ -108,6 +108,15 @@ protected:
 
 	virtual bool actionLocked() const { return false; }
 
+	/**
+	 * Editor mode can select just everything, even destroyed units
+	 * (otherwise we can't delete them anymore).
+	 * @return CanSelectMultipleOk
+	 **/
+	virtual CanSelectUnit canSelect(Unit* unit) const { Q_UNUSED(unit); return CanSelectMultipleOk; }
+
+	virtual bool selectAll(const UnitProperties* prop, bool replace);
+
 //	void addMouseIO(Player* p);
 
 private:

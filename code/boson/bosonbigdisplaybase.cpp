@@ -1002,7 +1002,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(canvasPos);
 			if (unit) {
 				if (!selectAll(unit->unitProperties(), replace)) {
-					selection()->selectUnit(unit, replace);
+					selectSingle(unit, replace);
 				}
 			}
 		}
@@ -1291,30 +1291,6 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
  return QGLWidget::eventFilter(o, e);
 }
 
-bool BosonBigDisplayBase::selectAll(const UnitProperties* prop, bool replace)
-{
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL localplayer" << endl;
-	return false;
- }
- if (prop->isFacility()) {
-	// we don't select all facilities, but only the one that was
-	// double-clicked. it makes no sense for facilities
-	return false;
- }
- QPtrList<Unit> allUnits = localPlayer()->allUnits();
- QPtrList<Unit> list;
- QPtrListIterator<Unit> it(allUnits);
- while (it.current()) {
-	if (it.current()->unitProperties() == prop) {
-		list.append(it.current());
-	}
-	++it;
- }
- selection()->selectUnits(list, replace);
- return true;
-}
-
 void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
 {
 // FIXME: we might want to place this code into BoSelection directly (cleaner)
@@ -1357,10 +1333,8 @@ void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
  }
 
  boDebug() << k_funcinfo << "unit" << endl;
- selection()->selectUnit(unit);
+ selectSingle(unit);
 
- // cannot be placed into mSelection cause we don't have localPlayer
- // there
  if (localPlayer() == unit->owner()) {
 	unit->playSound(SoundOrderSelect);
  }
@@ -1400,13 +1374,13 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
-	if(!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.x() / BO_TILE_SIZE)) {
+	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.x() / BO_TILE_SIZE)) {
 	unit = canvas()->findUnitAt(canvasPos);
 	}
 	if (unit) {
 		boDebug() << k_funcinfo << "unit" << endl;
-		selection()->selectUnit(unit, replace);
-		// cannot be placed into mSelection cause we don't have localPlayer
+		selectSingle(unit, replace);
+		// cannot be placed into selection() cause we don't have localPlayer
 		// there
 		if (localPlayer() == unit->owner()) {
 			unit->playSound(SoundOrderSelect);
@@ -1454,30 +1428,29 @@ void BosonBigDisplayBase::selectArea(bool replace)
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if(localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {
+	if (localPlayer()->isFogged((*it)->x() / BO_TILE_SIZE, (*it)->y() / BO_TILE_SIZE)) {
 		continue;
 	}
 	Unit* unit = (Unit*)*it;
-	if (unit->isDestroyed()) {
-		continue;
-	}
-	if (unit->unitProperties()->isMobile()) {
-		if (unit->owner() == localPlayer()) {
-			unitList.append(unit);
-		} else {
+	CanSelectUnit s = canSelect(unit);
+	switch (s) {
+		case CanSelectSingleOk:
 			fallBackUnit = unit;
-		}
-	} else {
-		fallBackUnit = unit; 
+			break;
+		case CanSelectMultipleOk:
+			unitList.append(unit);
+			break;
+		case CanSelectDestroyed:
+		case CanSelectError:
+			break;
 	}
-	
  }
 
  if (unitList.count() > 0) {
 	boDebug() << "select " << unitList.count() << " units" << endl;
-	selection()->selectUnits(unitList, replace);
- } else if (fallBackUnit) {
-	selection()->selectUnit(fallBackUnit, replace);
+	selectUnits(unitList, replace);
+ } else if (fallBackUnit && selection()->count() == 0) {
+	selectSingle(fallBackUnit, replace);
  } else {
 	if (replace) {
 		selection()->clear();
@@ -1934,5 +1907,28 @@ float BosonBigDisplayBase::sphereInFrustum(float x, float y, float z, float radi
 	}
  }
  return distance + radius;
+}
+
+void BosonBigDisplayBase::selectUnits(QPtrList<Unit> unitList, bool replace)
+{
+ boDebug() << k_funcinfo << endl;
+ selection()->selectUnits(unitList, replace);
+}
+
+void BosonBigDisplayBase::selectSingle(Unit* unit, bool replace)
+{
+ boDebug() << k_funcinfo << endl;
+ switch (canSelect(unit)) {
+	case CanSelectSingleOk:
+		// this should not happen, as it should have been checked before
+		// already.
+		replace = true;
+		break;
+	case CanSelectMultipleOk:
+		break;
+	default:
+		return;
+ }
+ selection()->selectUnit(unit, replace);
 }
 

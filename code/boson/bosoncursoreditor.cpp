@@ -162,7 +162,6 @@ void BosonCursorEditor::init()
  (void)new QLabel(i18n("Cursor Mode"), hbox);
  mCursorMode = new QComboBox(hbox);
  mCursorMode->insertItem(i18n("OpenGL Cursor"), CursorOpenGL);
- mCursorMode->insertItem(i18n("B/W Cursor"), CursorNormal);
  mCursorMode->insertItem(i18n("KDE Standard Cursor"), CursorKDE);
  connect(mCursorMode, SIGNAL(activated(int)), this, SLOT(slotCursorModeChanged(int)));
 

@@ -115,11 +115,8 @@ void CursorPreview::slotChangeCursor(int mode, const QString& cursorDir_)
 		b = new BosonOpenGLCursor;
 		break;
 	case CursorKDE:
-		b = new BosonKDECursor;
-		break;
-	case CursorNormal:
 	default:
-		b = new BosonNormalCursor;
+		b = new BosonKDECursor;
 		break;
  }
 

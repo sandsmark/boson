@@ -31,8 +31,7 @@
 
 enum CursorMode {
 	CursorOpenGL = 0,
-	CursorNormal = 1,
-	CursorKDE = 2
+	CursorKDE = 1
 };
 
 enum Direction {
