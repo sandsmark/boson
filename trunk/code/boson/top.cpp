@@ -31,7 +31,6 @@
 #include "bosoncanvasstatistics.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
-#include "bosonprofiling.h"
 #include "bodisplaymanager.h"
 #include "bosonstarting.h"
 #include "rtti.h"
@@ -39,32 +38,19 @@
 #include "bodebugdcopiface.h"
 #include "startupwidgets/bosonstartupwidget.h"
 #include "sound/bosonaudiointerface.h"
-#include "kgameunitdebug.h"
-#include "kgameplayerdebug.h"
-#include "kgameadvancemessagesdebug.h"
-#include "bosonprofilingdialog.h"
 #include "bosondata.h"
 #include "bosongroundtheme.h"
 #include "bosonlocalplayerinput.h"
 
-#include <kgamedebugdialog.h>
 #include <kgameio.h>
 
-#include <kapplication.h>
 #include <klocale.h>
 #include <kstatusbar.h>
-#include <kstdaction.h>
-#include <kstdgameaction.h>
-#include <kaction.h>
-#include <kkeydialog.h>
 #include <kmessagebox.h>
 #include <kconfig.h>
 #include <kstandarddirs.h>
-#include <kfiledialog.h>
 #include <kglobal.h>
 
-#include <qcursor.h>
-#include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvbox.h>
@@ -84,8 +70,6 @@ public:
 		mDisplayManager = 0;
 		mBosonWidget = 0;
 
-		mActionStatusbar = 0;
-
 		mStarting = 0;
 
 		mIface = 0;
@@ -95,8 +79,6 @@ public:
 
 	BoDisplayManager* mDisplayManager;
 	BosonWidgetBase* mBosonWidget;
-
-	KToggleAction* mActionStatusbar;
 
 	QTimer mStatusBarTimer;
 
@@ -136,7 +118,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  setView(mMainDock);
  setMainDockWidget(mMainDock);
 
- initKActions();
  initStatusBar();
 
  d->mIface = new BoDebugDCOPIface();
@@ -179,6 +160,8 @@ QString TopWidget::checkInstallation()
 void TopWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(0);
+ connect(d->mDisplayManager, SIGNAL(signalToggleStatusbar(bool)),
+		this, SLOT(slotToggleStatusbar(bool)));
 
  // add an initial display. this should happen asap, as we need the OpenGL
  // context for every texture that is to be loaded.
@@ -208,20 +191,6 @@ void TopWidget::readProperties(KConfig *config)
  if (!config) {
 	return;
  }
-}
-
-void TopWidget::initKActions()
-{
- // note: boGame and similar are *not* yet constructed!
-
- // Settings
- d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
-
- // Debug
- (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
-		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
-
- createGUI("topui.rc", false);
 }
 
 void TopWidget::initBoson()
@@ -337,7 +306,7 @@ void TopWidget::initBosonWidget()
 
  d->mBosonWidget->init(0); // this depends on several virtual methods and therefore can't be called in the c'tor
 
- factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
+// factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
 // createGUI("bosonui.rc", false);
 
 }
@@ -473,18 +442,6 @@ void TopWidget::slotCancelLoadSave()
  }
 }
 
-void TopWidget::slotConfigureKeys()
-{
- KKeyDialog dlg(true, this);
- QPtrList<KXMLGUIClient> clients = guiFactory()->clients();
- QPtrListIterator<KXMLGUIClient> it(clients);
- while (it.current()) {
-	dlg.insert((*it)->actionCollection());
-	++it;
- }
- dlg.configure(true);
-}
-
 void TopWidget::endGame()
 {
  boDebug() << k_funcinfo << endl;
@@ -535,8 +492,6 @@ void TopWidget::reinitGame()
 
  initBoson();
 
- d->mActionStatusbar->setChecked(false);
- slotToggleStatusbar();
  enableGameActions(false);
 }
 
@@ -551,11 +506,9 @@ void TopWidget::slotGameOver()
  mMainDock->setWidget(d->mStartup);
 }
 
-// FIXME: nonsense name. this doesn't toggle anything, but it applies the
-// d->mActionStatusbar status to the actual statusbar
-void TopWidget::slotToggleStatusbar()
+void TopWidget::slotToggleStatusbar(bool show)
 {
- if (d->mActionStatusbar->isChecked()) {
+ if (show) {
 	statusBar()->show();
  } else {
 	statusBar()->hide();
@@ -777,8 +730,6 @@ void TopWidget::slotGameStarted()
  d->mStartup->resetWidgets();
 
  // Init some stuff
- d->mActionStatusbar->setChecked(true); // we do not yet remember user settings here! TODO
- slotToggleStatusbar();// AB: doesn't really toggle!
  enableGameActions(true);
  d->mStatusBarTimer.start(1000);
  d->mBosonWidget->initGameMode();
@@ -876,55 +827,6 @@ void TopWidget::slotStartEditor(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotStartEditor(args);
-}
-
-void TopWidget::slotDebugKGame()
-{
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this, false);
-
- QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
- KGameUnitDebug* units = new KGameUnitDebug(b);
- units->setBoson(boGame);
-
- b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
- KGamePlayerDebug* player = new KGamePlayerDebug(b);
- player->setBoson(boGame);
-
- b = dlg->addVBoxPage(i18n("Debug &Advance messages"));
- KGameAdvanceMessagesDebug* messages = new KGameAdvanceMessagesDebug(b);
- messages->setBoson(boGame);
-
-#if 0
- if (boGame->playField()) {
-	BosonMap* map = boGame->playField()->map();
-	if (!map) {
-		boError() << k_funcinfo << "NULL map" << endl;
-		return;
-	}
-	b = dlg->addVBoxPage(i18n("Debug &Cells"));
-
-	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
-	// time and memory to be initialized on big maps (on list item per cell,
-	// on a 500x500 map thats a lot)
-	KGameCellDebug* cells = new KGameCellDebug(b);
-	cells->setMap(map);
- }
-#endif
-
- connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
-		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
-
- displayNonModalDialog(dlg);
-}
-
-void TopWidget::displayNonModalDialog(KDialogBase* dialog)
-{
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- dialog->show();
 }
 
 void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)

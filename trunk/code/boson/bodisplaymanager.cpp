@@ -99,6 +99,12 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
  d->mActiveDisplay = b;
  connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
+ connect(b, SIGNAL(signalToggleStatusbar(bool)),
+		this, SIGNAL(signalToggleStatusbar(bool)));
+ connect(b, SIGNAL(signalSelectGroup(int)),
+		this, SLOT(slotSelectGroup(int)));
+ connect(b, SIGNAL(signalCreateGroup(int)),
+		this, SLOT(slotCreateGroup(int)));
 
  d->mLayout->addWidget(b);
  d->mLayout->activate();

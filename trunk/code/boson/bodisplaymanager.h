@@ -180,6 +180,8 @@ signals:
 	 **/
 	void signalSelectionChanged(BoSelection*);
 
+	void signalToggleStatusbar(bool);
+
 protected:
 	void grabMovieFrame();
 

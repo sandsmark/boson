@@ -405,6 +405,13 @@ signals:
 	void signalToggleChatVisible();
 	void signalUnfogAll();
 	void signalSetGrabMovie(bool);
+	void signalToggleStatusbar(bool);
+	void signalSaveGame();
+	void signalEndGame();
+	void signalQuit();
+	void signalGamePreferences();
+	void signalSelectGroup(int);
+	void signalCreateGroup(int);
 
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
@@ -430,6 +437,8 @@ protected slots:
 	void slotChangeMaxProfilingEventEntries();
 	void slotChangeMaxProfilingAdvanceEntries();
 	void slotChangeMaxProfilingRenderingEntries();
+	void slotToggleStatusbar();
+	void slotDebugKGame();
 
 protected:
 	/**

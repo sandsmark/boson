@@ -132,8 +132,6 @@ public slots:
 	void slotUnitCountChanged(Player* p);
 
 protected slots:
-	void slotHack1();
-
 	// These are used to save/load camera, unit groups etc.
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
 	void slotSaveExternalStuffAsXML(QDomElement& root);
@@ -174,11 +172,6 @@ signals:
 	void signalQuit();
 	void signalEndGame();
 
-	/**
-	 * Load the dock(-widget) layout for game mode.
-	 **/
-	void signalLoadBosonGameDock();
-
 	void signalChangeLocalPlayer(Player* p);
 
 protected slots:
@@ -199,8 +192,6 @@ protected slots:
 	 **/
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
 
-
-	void slotCenterHomeBase();
 
 protected:
 	void initBigDisplay(BosonBigDisplayBase*);
