@@ -162,6 +162,12 @@ class UpgradeProperties
      **/
     template<class T> T applyValueInternal(ValueType type, T oldvalue, T value) const;
 
+    /**
+     * Converts entries in entry list from seconds to advance calls if
+     *  necessary.
+     **/
+    void convertEntries();
+
   private:
     unsigned long int mId;
     QString mName;
