@@ -171,7 +171,7 @@ int SelectBox::barHeight()
 int SelectBox::barWidth(int frame)
 {
  double factor = (double)frame / (frames() - 1);
- return boxWidth() * factor - 2; // -2: the white frame around the box
+ return (int)(boxWidth() * factor - 2); // -2: the white frame around the box
 }
 
 int SelectBox::boxWidth() const
