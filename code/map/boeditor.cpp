@@ -36,8 +36,19 @@ void createIsland(int x, int y, int trans, playField &field, int width=1, int he
 
 
 
+/* 0 is red, 1 is blue*/
 origFacility facility[] = {
 	{FACILITY_POWERPLANT,	0, 13, 27},
+	{FACILITY_HELIPAD,	0, 15, 27},
+	{FACILITY_COMSAT,	0, 17, 27},
+	{FACILITY_BUNKER,	0, 13, 29},
+	{FACILITY_BARRACKS,	0, 15, 29},
+	{FACILITY_WAR_FACTORY,	0, 17, 29},
+
+	{FACILITY_SAMSITE,	0, 18, 25},
+	{FACILITY_OILTOWER,	0, 19, 25},
+	{FACILITY_OILTOWER,	0, 18, 26},
+	{FACILITY_SAMSITE,	0, 19, 26},
 
 	{FACILITY_COMSAT,	1, 16, 15},
 	{FACILITY_HELIPAD,	1, 12, 17},
@@ -45,18 +56,19 @@ origFacility facility[] = {
 	{FACILITY_WAR_FACTORY,	1, 16, 17}, 
 	};
 
+/* 0 is red, 1 is blue*/
 origMobile mobile[] = {
 	{MOB_AIRCRAFT,	1, BO_TILE_SIZE*22, BO_TILE_SIZE*15},
 	{MOB_QUAD,	1, BO_TILE_SIZE*13, BO_TILE_SIZE*16},
 	{MOB_SHIP,	1, BO_TILE_SIZE*19, BO_TILE_SIZE*13},
-	{MOB_QUAD,	1, BO_TILE_SIZE*16, BO_TILE_SIZE*29},
+	{MOB_QUAD,	1, BO_TILE_SIZE*16, BO_TILE_SIZE*33},
 
 	{MOB_SHIP,	0, BO_TILE_SIZE*10, BO_TILE_SIZE*28},
+	{MOB_QUAD,	0, BO_TILE_SIZE*14, BO_TILE_SIZE*26},
 	{MOB_QUAD,	0, BO_TILE_SIZE*15, BO_TILE_SIZE*26},
 	{MOB_QUAD,	0, BO_TILE_SIZE*16, BO_TILE_SIZE*26},
-	{MOB_QUAD,	0, BO_TILE_SIZE*17, BO_TILE_SIZE*26},
-	{MOB_QUAD,	0, BO_TILE_SIZE*18, BO_TILE_SIZE*26},
-	{MOB_QUAD,	0, BO_TILE_SIZE*19, BO_TILE_SIZE*26},
+	{MOB_QUAD,	0, BO_TILE_SIZE*20, BO_TILE_SIZE*29},
+	{MOB_QUAD,	0, BO_TILE_SIZE*20, BO_TILE_SIZE*20},
 	{MOB_AIRCRAFT,	0, BO_TILE_SIZE*12, BO_TILE_SIZE*25},
 	};
 
@@ -75,9 +87,9 @@ int main(void)
 
 playField *field = new playField(PF_NAME); /// basic BosonPlayField...
 createSeaMap( MAP_WIDTH, MAP_HEIGHT, *field);
-createIsland(12, 15, TRANS_GW, *field, 8, 15);
+createIsland(12, 15, TRANS_GW, *field,15, 20);
 createIsland(15, 23, TRANS_GD, *field, 2, 3, true);
-createIsland(22, 15, TRANS_GW, *field);
+createIsland(30, 15, TRANS_GW, *field);
 
 /* fill misc */
 field->nbPlayer = 2;
