@@ -173,12 +173,12 @@ public:
 	 * Add a unit to this cell. All this function does is to increase the
 	 * value returned by @ref unitCount by one.
 	 **/
-	void addUnit(QCanvasItem* u) { mItems.appendUnit(u); }
+	inline void addUnit(QCanvasItem* u) { mItems.appendUnit(u); }
 
 	/**
 	 * Remove a previously added unit from the cell
 	 **/
-	void removeUnit(QCanvasItem* u) { mItems.removeUnit(u); }
+	inline void removeUnit(QCanvasItem* u) { mItems.removeUnit(u); }
 
 
 	/**
@@ -186,9 +186,9 @@ public:
 	 * not.
 	 * @return @ref BoItemList::isOccupied
 	 **/
-	bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
+	inline bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
 
-	const BoItemList* items() const { return &mItems; }
+	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
 protected:
