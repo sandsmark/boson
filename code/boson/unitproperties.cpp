@@ -99,6 +99,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  d->mPrize = conf.readUnsignedLongNumEntry("Prize", 0); 
  mDamage = conf.readLongNumEntry("Damage", 0); 
  mRange = conf.readUnsignedLongNumEntry("Range", 0); 
+ mSightRange = conf.readUnsignedLongNumEntry("SightRange", 10); 
  mReload = conf.readUnsignedNumEntry("Reload", 0); 
  mTerrain = (TerrainType)conf.readNumEntry("TerrainType", 0);
  if (mTerrain < 0 || mTerrain > 2) {

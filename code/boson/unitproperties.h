@@ -66,6 +66,8 @@ public:
 	 **/
 	unsigned int reload() const { return mReload; }
 
+	unsigned int sightRange() const { return mSightRange; }
+
 	/**
 	 * The damage this unit makes to other units. Negative values means
 	 * repairing
@@ -157,6 +159,7 @@ private:
 	int mTypeId; // note: -1 is invalid!
 	unsigned long int mHealth;
 	unsigned long int mRange;
+	unsigned int mSightRange;
 	long int mDamage;
 	unsigned int mReload;
 	TerrainType mTerrain;

@@ -53,6 +53,7 @@ public:
 		IdDamage = KGamePropertyBase::IdUser + 8,
 		IdRange = KGamePropertyBase::IdUser + 9,
 		IdReload = KGamePropertyBase::IdUser + 10,
+		IdSightRange = KGamePropertyBase::IdUser + 11,
 		//...
 		IdLast
 	};
@@ -165,6 +166,9 @@ public:
 	void setRange(unsigned long int r);
 	unsigned int reload() const; // number of advance() calls until reloaded
 	void setReload(unsigned int r);
+
+	unsigned int sightRange() const;
+	void setSightRange(unsigned int);
 
 	// TODO: ONLY mobile units!
 	// I dont want to have classes UnitBase, MobileUnit, FixUnit, Unit,

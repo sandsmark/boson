@@ -48,6 +48,7 @@ public:
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
 	KGameProperty<unsigned long int> mCost;
 	KGameProperty<unsigned long int> mRange;
+	KGameProperty<unsigned int> mSightRange;
 	KGameProperty<long int> mDamage; // can also repair (negative value)
 	KGameProperty<double> mSpeed;
 	KGameProperty<unsigned int> mReload;
@@ -85,6 +86,8 @@ UnitBase::UnitBase(int type)
 		KGamePropertyBase::PolicyLocal, "Range");
  d->mReload.registerData(IdReload, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ReloadTime");
+ d->mSightRange.registerData(IdSightRange, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "SightRange");
 
 
  d->mWork.setLocal((int)WorkNone);
@@ -97,6 +100,7 @@ UnitBase::UnitBase(int type)
  d->mDamage.setLocal(0);
  d->mRange.setLocal(0);
  d->mReload.setLocal(0);
+ d->mSightRange.setLocal(0);
 }
 
 UnitBase::~UnitBase()
@@ -219,6 +223,16 @@ unsigned long int UnitBase::range() const
 void UnitBase::setRange(unsigned long int range)
 {
  d->mRange= range;
+}
+
+unsigned int UnitBase::sightRange() const
+{
+ return d->mSightRange;
+}
+
+void UnitBase::setSightRange(unsigned int range)
+{
+ d->mSightRange= range;
 }
 
 void UnitBase::setReload(unsigned int reload)
