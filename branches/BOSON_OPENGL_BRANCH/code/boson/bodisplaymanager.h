@@ -52,6 +52,13 @@ class BoDisplayManager : public QWidget
 {
 	Q_OBJECT
 public:
+	enum ScrollDirection {
+		ScrollUp = 0,
+		ScrollRight = 1,
+		ScrollDown = 2,
+		ScrollLeft = 3
+	};
+
 	/**
 	 * @param gameMode controls whether to create @ref BosonBigDisplay or
 	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
@@ -99,15 +106,69 @@ public slots:
 	void slotEditorWillPlaceUnit(int unitType, UnitBase* fac, KPlayer*);
 
 
+	// old KActions suck!
 	void slotScrollUp() { slotScroll(ScrollUp); }
 	void slotScrollRight() { slotScroll(ScrollRight); }
 	void slotScrollDown() { slotScroll(ScrollDown); }
 	void slotScrollLeft() { slotScroll(ScrollLeft); }
+	void slotSelectGroup1() { slotSelectGroup(1); }
+	void slotSelectGroup2() { slotSelectGroup(2); }
+	void slotSelectGroup3() { slotSelectGroup(3); }
+	void slotSelectGroup4() { slotSelectGroup(4); }
+	void slotSelectGroup5() { slotSelectGroup(5); }
+	void slotSelectGroup6() { slotSelectGroup(6); }
+	void slotSelectGroup7() { slotSelectGroup(7); }
+	void slotSelectGroup8() { slotSelectGroup(8); }
+	void slotSelectGroup9() { slotSelectGroup(9); }
+	void slotSelectGroup0() { slotSelectGroup(0); }
+	void slotCreateGroup1() { slotCreateGroup(1); }
+	void slotCreateGroup2() { slotCreateGroup(2); }
+	void slotCreateGroup3() { slotCreateGroup(3); }
+	void slotCreateGroup4() { slotCreateGroup(4); }
+	void slotCreateGroup5() { slotCreateGroup(5); }
+	void slotCreateGroup6() { slotCreateGroup(6); }
+	void slotCreateGroup7() { slotCreateGroup(7); }
+	void slotCreateGroup8() { slotCreateGroup(8); }
+	void slotCreateGroup9() { slotCreateGroup(9); }
+	void slotCreateGroup0() { slotCreateGroup(0); }
+	void slotClearGroup1() { slotClearGroup(1); }
+	void slotClearGroup2() { slotClearGroup(2); }
+	void slotClearGroup3() { slotClearGroup(3); }
+	void slotClearGroup4() { slotClearGroup(4); }
+	void slotClearGroup5() { slotClearGroup(5); }
+	void slotClearGroup6() { slotClearGroup(6); }
+	void slotClearGroup7() { slotClearGroup(7); }
+	void slotClearGroup8() { slotClearGroup(8); }
+	void slotClearGroup9() { slotClearGroup(9); }
+	void slotClearGroup0() { slotClearGroup(0); }
+
 	/**
 	 * Scroll the active display
 	 * @param direction See @ref ScrollDirection
 	 **/
 	void slotScroll(int direction);
+
+	/**
+	 * Select the specified group to the active display.
+	 * @param number The group to be selected. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotSelectGroup(int number);
+
+	/**
+	 * Copy the current selection (of the active display) to the specified
+	 * group.
+	 * @param number The group to be created. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotCreateGroup(int number);
+
+	/**
+	 * Clear the specified group.
+	 * @param number The group to be created. Must be in range 0..9 where 1
+	 * is the first group and 0 the 10th group.
+	 **/
+	void slotClearGroup(int number);
 
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
@@ -127,13 +188,6 @@ signals:
 	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
 
 protected:
-	enum ScrollDirection {
-		ScrollUp = 0,
-		ScrollRight = 1,
-		ScrollDown = 2,
-		ScrollLeft = 3
-	};
-
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplayBase*) const;
 	void recreateLayout();

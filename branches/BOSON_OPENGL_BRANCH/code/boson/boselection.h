@@ -38,6 +38,8 @@ public:
 	BoSelection(QObject* parent);
 	~BoSelection();
 
+	void copy(BoSelection* selection);
+
 	/**
 	 * Clear the selection and unselect all units.
 	 **/
@@ -62,12 +64,12 @@ public:
 	/**
 	 * @return The number of selected items.
 	 **/
-	uint count() const;
+	uint count() const { return mSelection.count(); }
 
 	/**
 	 * @return TRUE if nothing is selected, otherwise FALSE
 	 **/
-	bool isEmpty() const;
+	bool isEmpty() const { return mSelection.isEmpty(); }
 
 	/**
 	 * @return Whether the current selection has at least one mobile unit
@@ -82,12 +84,12 @@ public:
 	/**
 	 * @return TRUE if unit is in this selection, otherwise FALSE
 	 **/
-	bool contains(Unit* unit) const;
+	bool contains(Unit* unit) const { return mSelection.containsRef(unit); }
 
 	/**
 	 * @return All selected units
 	 **/
-	QPtrList<Unit> allUnits() const;
+	QPtrList<Unit> allUnits() const { return mSelection; }
 
 	/**
 	 * @return TRUE if at least one unit in the selection can shoot,
@@ -148,8 +150,8 @@ signals:
 	void signalSelectUnit(Unit* unit);
 
 private:
-	class BoSelectionPrivate;
-	BoSelectionPrivate* d;
+	bool mIsActivated;
+	QPtrList<Unit> mSelection;
 };
 
 #endif

@@ -23,33 +23,39 @@
 #include "unit.h"
 #include "unitproperties.h"
 
-class BoSelection::BoSelectionPrivate
-{
-public:
-	QPtrList<Unit> mSelection;
-	bool mIsActivated;
-};
-
 BoSelection::BoSelection(QObject* parent) : QObject(parent)
 {
- d = new BoSelectionPrivate;
- d->mIsActivated = false;
+ mIsActivated = false;
 }
 
 BoSelection::~BoSelection()
 {
- delete d;
+}
+
+void BoSelection::copy(BoSelection* selection)
+{
+ clear();
+ if (!selection) {
+	return;
+ }
+ QPtrList<Unit> list = selection->allUnits();
+ QPtrListIterator<Unit> it(list);
+ for (; it.current(); ++it) {
+	add(it.current());
+ }
 }
 
 void BoSelection::clear()
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ if (isEmpty()) {
+	return;
+ }
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	remove(it.current());
  }
- d->mSelection.clear();
+ mSelection.clear();
 
- // FIXME: don't emit if selection was already empty
  emit signalSingleUnitSelected(0);
 }
 
@@ -63,15 +69,15 @@ void BoSelection::add(Unit* unit)
 	kdDebug() << k_funcinfo << "unit destroyed" << endl;
 	return;
  }
- if (d->mSelection.containsRef(unit)) {
+ if (mSelection.containsRef(unit)) {
 	return;
  }
- if (d->mSelection.count() > 0) {
-	if (d->mSelection.first()->owner() != unit->owner()) {
+ if (mSelection.count() > 0) {
+	if (mSelection.first()->owner() != unit->owner()) {
 		return;
 	}
  }
- d->mSelection.append(unit);
+ mSelection.append(unit);
  unit->select();
 }
 
@@ -124,23 +130,13 @@ void BoSelection::remove(Unit* unit)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
- d->mSelection.removeRef(unit);
+ mSelection.removeRef(unit);
  unit->unselect();
-}
-
-uint BoSelection::count() const
-{
- return d->mSelection.count();
-}
-
-bool BoSelection::isEmpty() const
-{
- return d->mSelection.isEmpty();
 }
 
 bool BoSelection::hasMobileUnit() const
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->isMobile()) {
 		return true;
@@ -152,7 +148,7 @@ bool BoSelection::hasMobileUnit() const
 
 bool BoSelection::hasMineralHarvester() const
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->unitProperties()->canMineMinerals()) {
 		return true;
@@ -164,7 +160,7 @@ bool BoSelection::hasMineralHarvester() const
 
 bool BoSelection::hasOilHarvester() const
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->unitProperties()->canMineOil()) {
 		return true;
@@ -180,22 +176,12 @@ Unit* BoSelection::leader() const
  if (count() == 0) {
 	return 0;
  }
- return d->mSelection.first();
-}
-
-QPtrList<Unit> BoSelection::allUnits() const
-{
- return d->mSelection;
-}
-
-bool BoSelection::contains(Unit* unit) const
-{
- return d->mSelection.containsRef(unit);
+ return mSelection.getFirst();
 }
 
 bool BoSelection::canShoot() const
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	if (it.current()->unitProperties()->canShoot()) {
 		return true;
@@ -207,7 +193,7 @@ bool BoSelection::canShoot() const
 
 bool BoSelection::canShootAt(Unit* unit) const
 {
- QPtrListIterator<Unit> it(d->mSelection);
+ QPtrListIterator<Unit> it(mSelection);
  while (it.current()) {
 	const UnitProperties* prop = it.current()->unitProperties();
 	if (unit->isFlying() && prop->canShootAtAirUnits()) {
@@ -226,14 +212,14 @@ void BoSelection::activate(bool on)
 // it would also be nice if the selection in one display remains when we switch
 // to another display, i.e. we have only one global selection. the user should
 // be able to choose one behaviour.
- if (d->mIsActivated == on) {
+ if (mIsActivated == on) {
 	return;
  }
- d->mIsActivated = on;
+ mIsActivated = on;
  if (on) {
-	selectUnits(d->mSelection);
+	selectUnits(mSelection);
  } else {
-	QPtrListIterator<Unit> it(d->mSelection);
+	QPtrListIterator<Unit> it(mSelection);
 	while (it.current()) {
 		it.current()->unselect();
 		++it;
