@@ -2443,13 +2443,11 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
     p = invalidpaths.take(0);
     // This path is now invalid
     p->valid = false;
-    // Remove it from cache. Note that it won't be deleted yet, as there are
-    //  still units using it
-    mHLPathCache.removeRef(p);
     if(p->users == 0)
     {
       // Paths with no users shouldn't be in the cache
       boWarning(510) << k_funcinfo << "Path without users found in cache!" << endl;
+      removeHighLevelPath(p);
       delete p;
     }
   }
@@ -2872,7 +2870,7 @@ void BosonPath2::colorizeRegions()
       current++;
       continue;
     }
-    // Check if mRegions[i] is suitable
+    // Check if mRegions[current] is suitable
     if(mRegions[current]->neighbors.count() <= 5)
     {
       // Only up to 5 neighbors - add
@@ -2884,9 +2882,9 @@ void BosonPath2::colorizeRegions()
     {
       // It may be that some regions have already been inserted to queue
       int uninsertedregions = 0;  // FIXME: variable name
-      for(unsigned int i = 0; i < mRegions[i]->neighbors.count(); i++)
+      for(unsigned int i = 0; i < mRegions[current]->neighbors.count(); i++)
       {
-        if(!inserted[mRegions[i]->neighbors[i].region->id])
+        if(!inserted[mRegions[current]->neighbors[i].region->id])
         {
           uninsertedregions++;
         }
@@ -3010,7 +3008,7 @@ BosonPathHighLevelPath* BosonPath2::findCachedHighLevelPath(BosonPathInfo* info)
   QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
   while(it.current())
   {
-    if((it.current()->startRegion == info->startRegion) && (info->possibleDestRegions.contains(it.current()->destRegion)))
+    if(it.current()->valid && (it.current()->startRegion == info->startRegion) && (info->possibleDestRegions.contains(it.current()->destRegion)))
     {
       return it.current();
     }
