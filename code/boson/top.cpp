@@ -144,7 +144,7 @@ TopWidget::~TopWidget()
  }
  boConfig->save(editor);
  endGame();
- d->mDisplayManager->quitGame();
+ d->mDisplayManager->activeDisplay()->quitGame();
  delete d->mDisplayManager;
  delete d->mIface;
  delete d;
@@ -170,14 +170,15 @@ QString TopWidget::checkInstallation()
 void TopWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(0);
- connect(d->mDisplayManager, SIGNAL(signalToggleStatusbar(bool)),
-		d->mStatusBarHandler, SLOT(slotToggleStatusbar(bool)));
 
  // add an initial display. this should happen asap, as we need the OpenGL
  // context for every texture that is to be loaded.
  // the display will not be deleted before the program is quit, so that we don't
  // have to load the textures several times.
  d->mDisplayManager->addInitialDisplay();
+
+ connect(d->mDisplayManager->activeDisplay(), SIGNAL(signalToggleStatusbar(bool)),
+		d->mStatusBarHandler, SLOT(slotToggleStatusbar(bool)));
 
  BosonBigDisplayBase* display = d->mDisplayManager->activeDisplay();
  BO_CHECK_NULL_RET(display);
@@ -369,7 +370,7 @@ void TopWidget::endGame()
  //  calls boGame->quitGame() which in turn deletes all players and units and if
  //  something was selected, we would have crash later when trying to unselect them
  if (d->mDisplayManager) {
-	d->mDisplayManager->quitGame();
+	d->mDisplayManager->activeDisplay()->quitGame();
  }
  if (boGame) {
 	boGame->quitGame();
@@ -610,7 +611,7 @@ void TopWidget::slotGameStarted()
  d->mStatusBarHandler->setLocalPlayer(localPlayer);
 
  d->mStatusBarHandler->setCanvas(boGame->canvas());
- d->mDisplayManager->setCanvas(boGame->canvasNonConst());
+ d->mDisplayManager->activeDisplay()->setCanvas(boGame->canvasNonConst());
 
  mMainDock->setWidget(d->mDisplayManager);
  d->mDisplayManager->show();
@@ -756,18 +757,12 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
 
 void TopWidget::slotLoadExternalStuffFromXML(const QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
- // TODO: load camera
- // TODO: load unitgroups
- d->mDisplayManager->loadFromXML(root);
+ d->mDisplayManager->activeDisplay()->loadFromXML(root);
 }
 
 void TopWidget::slotSaveExternalStuffAsXML(QDomElement& root)
 {
- boDebug() << k_funcinfo << endl;
- // TODO: save camera  (BosonBigDisplayBase?)
- // TODO: save unitgroups  (BoDisplayManager?)
- d->mDisplayManager->saveAsXML(root);
+ d->mDisplayManager->activeDisplay()->saveAsXML(root);
 }
 
 void TopWidget::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)

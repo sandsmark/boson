@@ -24,16 +24,12 @@
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplayinputbase.h"
 #include "bosonconfig.h"
-#include "boselection.h"
-#include "bosoncanvas.h"
 #include "bodebug.h"
 #include "boaction.h"
 
 #include <klocale.h>
 
 #include <qlayout.h>
-#include <qintdict.h>
-#include <qdom.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qpixmap.h>
@@ -55,8 +51,6 @@ public:
 
 	BosonBigDisplayBase* mActiveDisplay;
 
-	QIntDict<BoSelection> mSelectionGroups;
-
 	bool mGrabMovie;
 };
 
@@ -65,22 +59,13 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
  d = new BoDisplayManagerPrivate;
  d->mGrabMovie = false;
 
- d->mSelectionGroups.setAutoDelete(true);
- for (int i = 0; i < 10; i++) {
-	BoSelection* s = new BoSelection(this);
-	d->mSelectionGroups.insert(i, s);
- }
  d->mLayout = new QVBoxLayout(this);
 }
 
 BoDisplayManager::~BoDisplayManager()
 {
- boDebug() << k_funcinfo << endl;
- d->mSelectionGroups.clear();
- boDebug() << k_funcinfo << "deleting display" << endl;
  delete d->mActiveDisplay;
  delete d;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
@@ -97,14 +82,6 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
  boDebug() << k_funcinfo << endl;
  BosonBigDisplayBase* b = new BosonBigDisplayBase(this);
  d->mActiveDisplay = b;
- connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
-		this, SIGNAL(signalSelectionChanged(BoSelection*)));
- connect(b, SIGNAL(signalToggleStatusbar(bool)),
-		this, SIGNAL(signalToggleStatusbar(bool)));
- connect(b, SIGNAL(signalSelectGroup(int)),
-		this, SLOT(slotSelectGroup(int)));
- connect(b, SIGNAL(signalCreateGroup(int)),
-		this, SLOT(slotCreateGroup(int)));
  connect(b, SIGNAL(signalSetGrabMovie(bool)),
 		this, SLOT(slotSetGrabMovie(bool)));
 
@@ -114,31 +91,6 @@ BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
  return b;
 }
 
-void BoDisplayManager::setCanvas(BosonCanvas* c)
-{
- boDebug() << k_funcinfo << endl;
- QIntDictIterator<BoSelection> selectIt(d->mSelectionGroups);
- for (; selectIt.current(); ++selectIt) {
-	connect(c, SIGNAL(signalRemovedItem(BosonItem*)),
-			selectIt.current(), SLOT(slotRemoveItem(BosonItem*)));
- }
- connect(c, SIGNAL(signalUnitRemoved(Unit*)),
-		this, SLOT(slotUnitRemoved(Unit*)));
-
- d->mActiveDisplay->setCanvas(c);
-}
-
-void BoDisplayManager::quitGame()
-{
- boDebug() << k_funcinfo << endl;
- if (d->mActiveDisplay) {
-	d->mActiveDisplay->quitGame();
- }
- for (int i = 0; i < 10; i++) {
-	slotClearGroup(i);
- }
-}
-
 void BoDisplayManager::slotAdvance(unsigned int, bool)
 {
  BO_CHECK_NULL_RET(d->mActiveDisplay);
@@ -146,149 +98,6 @@ void BoDisplayManager::slotAdvance(unsigned int, bool)
  d->mActiveDisplay->advanceCamera();
  d->mActiveDisplay->advanceLineVisualization();
  grabMovieFrame();
-}
-
-void BoDisplayManager::slotSelectGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- if (!activeDisplay()) {
-	boError() << k_funcinfo << "NULL active display" << endl;
-	return;
- }
- activeDisplay()->selection()->copy(d->mSelectionGroups[number]);
-}
-
-void BoDisplayManager::slotCreateGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- if (!activeDisplay()) {
-	boError() << k_funcinfo << "NULL active display" << endl;
-	return;
- }
- d->mSelectionGroups[number]->copy(activeDisplay()->selection());
-}
-
-void BoDisplayManager::slotClearGroup(int number)
-{
- if (number < 0 || number >= 10) {
-	boError() << k_funcinfo << "Invalid group " << number << endl;
-	return;
- }
- if (!d->mSelectionGroups[number]) {
-	boError() << k_funcinfo << "NULL group " << number << endl;
-	return;
- }
- d->mSelectionGroups[number]->clear();
-}
-
-void BoDisplayManager::slotUnitRemoved(Unit* u)
-{
- for(int i = 0; i < 10; i++) {
-	d->mSelectionGroups[i]->removeUnit(u);
- }
-}
-
-void BoDisplayManager::loadFromXML(const QDomElement& root)
-{
- // Load displays (camera)
- QDomElement displays = root.namedItem(QString::fromLatin1("Displays")).toElement();
- if (displays.isNull()) {
-	boError(260) << k_funcinfo << "no displays" << endl;
-	return;
- }
- QDomElement display = displays.namedItem(QString::fromLatin1("Display")).toElement();
- if (display.isNull()) {
-	boError(260) << k_funcinfo << "no display" << endl;
-	return;
- }
-
- if (d->mActiveDisplay) {
-	d->mActiveDisplay->loadFromXML(display);
- } else {
-	boError(260) << k_funcinfo << "No displays ?!" << endl;
- }
-
- // Load unitgroups
- QDomElement unitgroups = root.namedItem(QString::fromLatin1("UnitGroups")).toElement();
- if (unitgroups.isNull()) {
-	boError(260) << k_funcinfo << "no unitgroups " << endl;
-	return;
- }
- QDomNodeList list = unitgroups.elementsByTagName(QString::fromLatin1("Group"));
- if (list.count() == 0) {
-	boWarning(260) << k_funcinfo << "no unitgroups" << endl;
-	return;
- }
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	if (e.isNull()) {
-		boError(260) << k_funcinfo << i << " is not an element" << endl;
-		return;
-	}
-	if (!e.hasAttribute("Id")) {
-		boError(260) << k_funcinfo << "missing attribute: Id for Group " << i << endl;
-		continue;
-	}
-	int id;
-	bool ok;
-	id = e.attribute("Id").toInt(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Id for Group " << i << endl;
-		continue;
-	}
-	d->mSelectionGroups[id]->loadFromXML(e);
- }
-}
-
-void BoDisplayManager::saveAsXML(QDomElement& root)
-{
- QDomDocument doc = root.ownerDocument();
- // Save displays
- // FIXME: only first display is saved here as we currently don't support more.
- //  if we will ever support multiple displays again, their layout etc. must be
- //  saved here as well.
- QDomElement displays = doc.createElement(QString::fromLatin1("Displays"));
- QDomElement display = doc.createElement(QString::fromLatin1("Display"));
- if (d->mActiveDisplay) {
-	d->mActiveDisplay->saveAsXML(display);
- } else {
-	boError(260) << k_funcinfo << "No displays ?!" << endl;
- }
- displays.appendChild(display);
- root.appendChild(displays);
-
- // Save unitgroups
- QDomElement unitgroups = doc.createElement(QString::fromLatin1("UnitGroups"));
- for(int i = 0; i < 10; i++) {
-	QDomElement group = doc.createElement(QString::fromLatin1("Group"));
-	group.setAttribute("Id", i);
-	d->mSelectionGroups[i]->saveAsXML(group);
-	unitgroups.appendChild(group);
- }
- root.appendChild(unitgroups);
-}
-
-double BoDisplayManager::fps() const
-{
- if (!activeDisplay()) {
-	BO_NULL_ERROR(activeDisplay());
-	return 0.0;
- }
- return activeDisplay()->fps();
 }
 
 void BoDisplayManager::slotAction(const BoSpecificAction& action)
@@ -308,9 +117,6 @@ void BoDisplayManager::slotSetGrabMovie(bool grab)
 
 void BoDisplayManager::grabMovieFrame()
 {
- if (!d->mActiveDisplay) {
-	return;
- }
  if (!d->mGrabMovie) {
 	return;
  }

@@ -28,13 +28,11 @@ class BosonCursor;
 class Player;
 class PlayerIO;
 class Unit;
-class BosonCanvas;
 class BoSelection;
 class BoSpecificAction;
 class BoFontInfo;
 
 class KPlayer;
-class QDomElement;
 template<class T> class QPtrList;
 
 /**
@@ -52,42 +50,7 @@ public:
 	BosonBigDisplayBase* addInitialDisplay();
 	BosonBigDisplayBase* activeDisplay() const;
 
-	void setCanvas(BosonCanvas* canvas);
-
-	void quitGame();
-
-	void saveAsXML(QDomElement& root);
-	void loadFromXML(const QDomElement& root);
-
-	/**
-	 * @return BosonBigDisplayBase::fps for the @ref activeDisplay
-	 **/
-	double fps() const;
-
 public slots:
-	/**
-	 * Select the specified group to the active display.
-	 * @param number The group to be selected. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotSelectGroup(int number);
-
-	/**
-	 * Copy the current selection (of the active display) to the specified
-	 * group.
-	 * @param number The group to be created. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotCreateGroup(int number);
-
-	/**
-	 * Clear the specified group.
-	 * @param number The group to be created. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotClearGroup(int number);
-
-	void slotUnitRemoved(Unit* u);
 
 	/**
 	 * Called by @ref Boson::signalAdvance.
@@ -106,18 +69,6 @@ public slots:
 	void slotAction(const BoSpecificAction&);
 
 	void slotSetGrabMovie(bool grab);
-
-signals:
-	/**
-	 * This signal is emitted when the selection of a display changes, see
-	 * @ref BosonBigDisplayBase::signalSelectionChanged. One day this might
-	 * be changed so that this is emitted when the selection of the @ref
-	 * activeDisplay changes only (in case we support several displays again
-	 * one day).
-	 **/
-	void signalSelectionChanged(BoSelection*);
-
-	void signalToggleStatusbar(bool);
 
 protected:
 	void grabMovieFrame();
