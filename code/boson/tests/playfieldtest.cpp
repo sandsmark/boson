@@ -115,6 +115,10 @@ static bool testMap(const QString& map)
 		if (differs) {
 			// we saved something different than we loaded
 			boError() << k_funcinfo << "original data and resulting data differ for file " << name << endl;
+			if (name.right(4) == QString(".xml")) {
+			    boDebug() << k_funcinfo << "Original:" << endl << QString(b) << endl;
+			    boDebug() << k_funcinfo << "Result:" << endl << QString(b2) << endl;
+			}
 			return false;
 		}
 	}
