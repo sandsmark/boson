@@ -86,9 +86,9 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
 
 KGameDialogBosonConfig::~KGameDialogBosonConfig()
 {
- kdDebug() << "~KGameDialogBosonConfig()" << endl;
+// kdDebug() << k_funcinfo << endl;
  delete d;
- kdDebug() << "~KGameDialogBosonConfig() done" << endl;
+// kdDebug() << k_funcinfo << " done" << endl;
 }
 
 void KGameDialogBosonConfig::slotMapChanged(int index)

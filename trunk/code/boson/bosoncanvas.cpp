@@ -69,7 +69,7 @@ void BosonCanvas::init()
 
 BosonCanvas::~BosonCanvas()
 {
- kdDebug() << "~BosonCanvas" << endl;
+// kdDebug() << k_funcinfo << endl;
  d->mDestroyUnits.clear();
  d->mDestroyedUnits.clear();
  d->mAnimList.clear();
@@ -83,7 +83,7 @@ void BosonCanvas::slotLoadTiles(const QString& name)
  QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(name));
  QPixmap p(themePath);
  if (p.isNull()) {
-	kdError() << "Could not load " << name << endl;
+	kdError() << k_funcinfo << ": Could not load " << name << endl;
 	return;
  }
  if (width() == 0 || height() == 0) {
@@ -91,7 +91,7 @@ void BosonCanvas::slotLoadTiles(const QString& name)
 	return;
  }
  if (!d->mMap) {
-	kdError() << "slotLoatTiles(): NULL map" << endl;
+	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  setTiles(p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
@@ -100,7 +100,7 @@ void BosonCanvas::slotLoadTiles(const QString& name)
 Cell* BosonCanvas::cell(int x, int y) const
 {
  if (!d->mMap) {
-	kdError() << "BosonCanvas::cell(): NULL map" << endl;
+	kdError() << k_funcinfo << ": NULL map" << endl;
 	return 0;
  }
  return d->mMap->cell(x, y);
@@ -109,7 +109,7 @@ Cell* BosonCanvas::cell(int x, int y) const
 void BosonCanvas::slotAddUnit(VisualUnit* unit, int x, int y)
 {
  if (!unit) {
-	kdError() << "BosonCanvas::slotAddUnit(): NULL unit!" << endl;
+	kdError() << k_funcinfo << ": NULL unit!" << endl;
 	return;
  }
  
@@ -179,7 +179,7 @@ void BosonCanvas::advance()
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
 {
-//kdDebug() << "BosonCanvas::canGo" << endl;
+// kdDebug() << k_funcinfo << endl;
  int y = rect.y() / BO_TILE_SIZE; // what about modulu? do we care ?
  do {
 	int x = rect.x() / BO_TILE_SIZE;
@@ -207,7 +207,7 @@ void BosonCanvas::setMap(BosonMap* map)
 void BosonCanvas::initMap(const QString& tileFile)
 {
  if (!d->mMap) {
-	kdError() << "BosonCanvas::initMap(): NULL map" << endl;
+	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
@@ -216,7 +216,7 @@ void BosonCanvas::initMap(const QString& tileFile)
 	for (int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
-			kdError() << "BosonCanvas::initMap NULL cell" << endl;
+			kdError() << k_funcinfo << ": NULL cell" << endl;
 			continue;
 		}
 		slotAddCell(i, j, c->groundType(), c->version());
@@ -259,11 +259,11 @@ void BosonCanvas::unitMoved(VisualUnit* unit, double oldX, double oldY)
 void BosonCanvas::shootAtUnit(VisualUnit* target, VisualUnit* attackedBy, long int damage)
 {
  if (!target) {
-	kdError() << "BosonCanvas::shootAtUnit(): NULL target" << endl;
+	kdError() << k_funcinfo << ": NULL target" << endl;
 	return;
  }
  if (!attackedBy) {
-	kdError() << "BosonCanvas::shootAtUnit(): NULL attacker" << endl;
+	kdError() << k_funcinfo << ": NULL attacker" << endl;
 	return;
  }
 

@@ -200,8 +200,8 @@ QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
 	array = d->mSprite[unitType];
  }
  if (!array) {
-	kdError() << "SpeciesTheme::pixmapArray(): Cannot find unit type " 
-			<< unitType << endl;
+	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+			<< endl;
 	return 0;
  }
  return array;
@@ -215,8 +215,8 @@ QPixmap* SpeciesTheme::bigOverview(int unitType)
 	pix = d->mBigOverview[unitType];
  }
  if (!pix) {
-	kdError() << "SpeciesTheme::bigOverview(): Cannot find unit type " 
-			<< unitType << endl;
+	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+			<< endl;
 	return 0;
  }
  return pix;
@@ -230,8 +230,8 @@ QPixmap* SpeciesTheme::smallOverview(int unitType)
 	pix = d->mSmallOverview[unitType];
  }
  if (!pix) {
-	kdError() << "SpeciesTheme::smallOverview(): Cannot find unit type " 
-			<< unitType << endl;
+	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+			<< endl;
 	return 0;
  }
  return pix;
@@ -253,26 +253,26 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  h = image.height();
 
  if (image.depth() != 32) {
-	kdError() << "loadUnitPixmap: depth != 32" << endl;
+	kdError() << k_funcinfo << ": depth != 32" << endl;
  }
  if (w < 32) {
-	kdError() << "loadUnitPixmap: w < 32" << endl;
+	kdError() << k_funcinfo << ": w < 32" << endl;
 	return false;
  }
  if (h < 32) {
-	kdError() << "loadUnitPixmap: h < 32" << endl;
+	kdError() << k_funcinfo << ": h < 32" << endl;
 	return false;
  }
 
  if (image.isNull()) {
-	kdError() << "loadUnitPixmap: NULL image" << endl;
+	kdError() << k_funcinfo << ": NULL image" << endl;
 	return false;
  }
 
  if (withMask) {
 	mask = new QImage ( w, h, 1, 2, QImage::LittleEndian);
 	if (mask->isNull()) {
-		kdError() << "NULL mask" << endl;
+		kdError() << k_funcinfo << ": NULL mask" << endl;
 		return false;
 	}
 	mask->setColor( 0, 0xffffff );
@@ -312,7 +312,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  }
 
  if (image.isNull() || w < 32 || h < 32)  {
-	kdError() << "speciesTheme : image is null" << endl;
+	kdError() << k_funcinfo << ": image is null" << endl;
 	return false;
  }
 
@@ -335,8 +335,7 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
  const QRgb backGround = qRgb(255, 0, 255) & RGB_MASK;
 
  if (image.isNull()) {
-	kdError() << "SpeciesTheme::loadShotPixmap(): Could not load " 
-			<< fileName << endl;
+	kdError() << k_funcinfo << ": Could not load " << fileName << endl;
 	return false;
  }
  if (image.width() < 25) {
@@ -350,7 +349,7 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
 
  QImage mask(image.width(), image.height(), 1, 2, QImage::LittleEndian);
  if (mask.isNull()) {
-	kdError() << "SpeciesTheme::loadShotPixmap(): NULL mask" << endl;
+	kdError() << k_funcinfo << ": NULL mask" << endl;
 	return false;
  }
  mask.setColor(0, 0xffffff);
@@ -378,12 +377,12 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
 void SpeciesTheme::loadNewUnit(Unit* unit)
 {
  if (!unit) {
-	kdError() << "NULL unit" << endl;
+	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
  const UnitProperties* prop = unitProperties(unit);
  if (!prop) {
-	kdError() << "NULL properties for " << unit->type() << endl;
+	kdError() << k_funcinfo << ": NULL properties for " << unit->type() << endl;
 	return;
  }
  unit->setHealth(prop->health());
@@ -453,7 +452,7 @@ void SpeciesTheme::readUnitConfigs()
 const UnitProperties* SpeciesTheme::unitProperties(Unit* unit) const
 {
  if (!unit) {
-	kdError() << "NULL unit" << endl;
+	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return 0;
  }
  return unitProperties(unit->type());
@@ -550,7 +549,7 @@ bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 	QString number;
 	number.sprintf("%04d", i);
 	if (!loadShotPixmap(fileName.arg(number), p)) {
-		kdError() << "SpeciesTheme::loadBigShot(): Could not load" 
+		kdError() << k_funcinfo << ": Could not load"
 				<< fileName.arg(number) << endl;
 		return false; }
 	pixList.append(p);
