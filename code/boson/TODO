@@ -29,6 +29,7 @@ Editor (map, unit, scenario) TODOs
 - unit editor (should be quite easy cause of config files) - mostly done
 - unit editor: check if images are in the directory, provide possibility to copy
   them
+- fix mouse cursor
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done

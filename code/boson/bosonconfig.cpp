@@ -20,9 +20,11 @@
 
 #include <kconfig.h>
 #include <kapplication.h>
+#include <kstaticdeleter.h>
 #include <klocale.h>
 #include <kdebug.h>
 
+static KStaticDeleter<BosonConfig> sd;
 BosonConfig* BosonConfig::mBosonConfig = 0;
 
 class BosonConfig::BosonConfigPrivate
@@ -60,7 +62,7 @@ void BosonConfig::initBosonConfig()
  if (mBosonConfig) {
 	return;
  }
- mBosonConfig = new BosonConfig;
+ sd.setObject(mBosonConfig, new BosonConfig);
 }
 
 QString BosonConfig::readLocalPlayerName(KConfig* conf)
