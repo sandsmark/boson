@@ -172,8 +172,6 @@ protected slots:
 
 	void slotEditorNewMap(const QByteArray&);
 
-	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
-
 	void slotSaveExternalStuffAsXML(QDomElement& root);
 	void slotLoadExternalStuffFromXML(const QDomElement& root);
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);

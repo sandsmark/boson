@@ -427,6 +427,7 @@ protected slots:
 
 	void slotInitMiniMapFogOfWar();
 
+	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 	void slotAddLineVisualization(const QValueList<BoVector3Fixed>& points, const BoVector4Float& color, bofixed pointSize, int timeout, bofixed zOffset);
 	void slotToggleCheating(bool);
 	void slotShowLight0Widget();

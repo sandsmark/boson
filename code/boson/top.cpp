@@ -749,56 +749,6 @@ void TopWidget::slotStartEditor(KCmdLineArgs* args)
  d->mStartup->slotStartEditor(args);
 }
 
-void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
-{
- // we don't use i18n() for debug messages... not worth the work
- switch (msgid) {
-	case BosonMessage::ChangeSpecies:
-		name = "Change Species";
-		break;
-	case BosonMessage::ChangePlayField:
-		name = "Change PlayField";
-		break;
-	case BosonMessage::ChangeTeamColor:
-		name = "Change TeamColor";
-		break;
-	case BosonMessage::AdvanceN:
-		name = "Advance";
-		break;
-	case BosonMessage::IdChat:
-		name = "Chat Message";
-		break;
-	case BosonMessage::IdGameIsStarted:
-		name = "Game is started";
-		break;
-	case BosonMessage::MoveMove:
-		name = "PlayerInput: Move";
-		break;
-	case BosonMessage::MoveAttack:
-		name = "PlayerInput: Attack";
-		break;
-	case BosonMessage::MoveBuild:
-		name = "PlayerInput: Build";
-		break;
-	case BosonMessage::MoveProduce:
-		name = "PlayerInput: Produce";
-		break;
-	case BosonMessage::MoveProduceStop:
-		name = "PlayerInput: Produce Stop";
-		break;
-	case BosonMessage::MoveMine:
-		name = "PlayerInput: Mine";
-		break;
-	case BosonMessage::UnitPropertyHandler:
-	default:
-		// a unit property was changed
-		// all ids > UnitPropertyHandler will be a unit property. we
-		// don't check further...
-		break;
- }
-// boDebug() << name << endl;
-}
-
 void TopWidget::slotChangeLocalPlayer(Player* p)
 {
  changeLocalPlayer(p);
