@@ -140,7 +140,7 @@ counter2($filename);
 // Copyright
 echo "
 <br><br>
-<font class=\"copyright\">(C) 2002-2003  <a class=\"copyright\" href=\"mailto:boson-devel@lists.sourceforge.net\">
+<font class=\"copyright\">(C) 2002-2003  <a class=\"copyright\" href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">
 The Boson Team</a></font><br>";
 
 sidebar_box_end();
