@@ -869,8 +869,8 @@ bool Unit::moveTo(bofixed x, bofixed y, int range)
  }
 
  // Find destination cell
- int cellX = (int)(x);
- int cellY = (int)(y);
+ int cellX = (int)x;
+ int cellY = (int)y;
  Cell* cell = canvas()->cell(cellX, cellY);
  if (!cell) {
 	boError() << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
@@ -1870,13 +1870,6 @@ void MobileUnit::advanceMoveCheck()
 		return;
 	}
  }
- if (!canvas()->cell((int)currentPathPoint().x(), (int)currentPathPoint().y())) {
-	boError(401) << k_funcinfo << "NULL cell " << (int)currentPathPoint().x() << "," << (int)currentPathPoint().y() << endl;
-	setMovingStatus(Standing);
-	stopMoving();
-	setWork(WorkNone);
-	return;
- }
 
  // Check if top-left point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
@@ -1937,6 +1930,24 @@ void MobileUnit::advanceMoveCheck()
 	boError(401) << k_funcinfo << "leaving unit a current bottomright pos: ("
 			<< boundingRect().bottomRight().x() << ";"
 			<< boundingRect().bottomRight().y() << ")" << endl;
+	setMovingStatus(Standing);
+	stopMoving();
+	setWork(WorkNone);
+	return;
+ }
+
+ if (currentPathPoint().x() == PF_END_CODE && currentPathPoint().y() == PF_END_CODE) {
+	// This is allowed and means that unit will stop after this this advance call
+	//  (there are no more actual pathpoints).
+	if (pathPointCount() > 1) {
+		// There shouldn't be more pathpoints
+		boWarning(401) << k_funcinfo << "PF_END_CODE pathpoint reached, but pathpoint count is" <<
+				pathPointCount() << endl;
+	}
+	return;
+ }
+ if (!canvas()->cell((int)currentPathPoint().x(), (int)currentPathPoint().y())) {
+	boError(401) << k_funcinfo << "NULL cell " << (int)currentPathPoint().x() << "," << (int)currentPathPoint().y() << endl;
 	setMovingStatus(Standing);
 	stopMoving();
 	setWork(WorkNone);
