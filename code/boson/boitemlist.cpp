@@ -102,11 +102,3 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 
  return false;
 }
-
-void BoItemList::willBeOccupiedBy(Unit* unit)
-{
- // FIXME: ab: ahem... this might cause some trouble in the future
- // the unit is not yet there actually!
- appendItem((BosonItem*)unit);
-}
-
