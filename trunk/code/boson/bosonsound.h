@@ -22,6 +22,8 @@
 #include <qptrlist.h>
 #include <qmap.h>
 
+#include <arts/kartsserver.h>
+
 class Unit;
 class UnitProperties;
 class QString;
@@ -64,6 +66,8 @@ public:
 	KArtsServer& server() const;
 
 	void loadDefaultEvent(int event, const QString& eventFilter);
+
+	Arts::StereoEffectStack effectStack();
 
 protected:
 	void addEvent(int unitType, int unitSound, const QStringList& sounds);
