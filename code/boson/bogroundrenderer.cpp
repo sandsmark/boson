@@ -344,7 +344,6 @@ void BoGroundRenderer::cellChanged(int x, int y)
  if (!mFogTextureData) {
 	return;
  }
- boDebug() << "FOGTEX: " << k_funcinfo << "x: " << x << "; y: " << y << endl;
  unsigned char value = 0;
  if (!localPlayerIO()->isFogged(x, y)) {
 	value = 255;
