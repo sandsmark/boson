@@ -27,7 +27,7 @@ public:
 	void loadTheme(const QString& species, const QRgb& teamColor);
 
 	void addUnit(VisualUnit* unit);
-	void removeUnit(VisualUnit* unit);
+	void unitDestroyed(VisualUnit* unit);
 	SpeciesTheme* speciesTheme() const;
 
 	VisualUnit* findUnit(unsigned long int unitId) const;

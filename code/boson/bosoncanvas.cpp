@@ -63,6 +63,7 @@ void BosonCanvas::init()
  if (d->mSoundServer->isNull()) {
 	kdWarning() << "Sound could not be initialized - sound disabled" << endl;
  }
+ d->mDestroyedUnits.setAutoDelete(true);
 }
 
 BosonCanvas::~BosonCanvas()
@@ -165,12 +166,10 @@ void BosonCanvas::advance()
 		VisualUnit* unit = destroyedIt.current();
 		kdDebug() << "destroy unit " << unit->id() << endl;
 		emit signalUnitDestroyed(unit); // currently unused
-		unit->owner()->removeUnit(unit);
+		unit->owner()->unitDestroyed(unit); // remove from player without deleting
 		++destroyedIt;
 	}
-	kdDebug() << "delete units" << endl;
 	d->mDestroyedUnits.clear();
-	kdDebug() << "delete units done" << endl;
  }
  update();
 }
@@ -206,7 +205,7 @@ bool BosonCanvas::canGo(VisualUnit* unit, const QRect& rect) const
 	if (*it != unit) {
 		if ((*it)->rtti() >= RTTI::UnitStart) { // AKA isUnit
 			VisualUnit* u = (VisualUnit*)*it;
-			if (!u->unitProperties()->isAircraft()) {
+			if (!u->isDestroyed() && !u->unitProperties()->isAircraft()) {
 //				kdDebug() << "unit " << unit->id() << " would collide with " 
 //						<< ((VisualUnit*)(*it))->id() << endl;
 				return false;
@@ -293,7 +292,7 @@ void BosonCanvas::shootAtUnit(VisualUnit* target, VisualUnit* attackedBy, long i
  }
  
  if (target->isDestroyed()) {
-	// we cannot remove it here!
+	// we cannot delete it here!
 	// called from VisualUnit::advance() so we must delay
 	if (!d->mDestroyedUnits.contains(target)) {
 		// dunno if this is correct - should it be delete immediately?

@@ -172,15 +172,13 @@ void Player::addUnit(VisualUnit* unit)
 
 }
 
-void Player::removeUnit(VisualUnit* unit)
+void Player::unitDestroyed(VisualUnit* unit)
 {
  if (!unit) {
-	kdError() << "Player::removeUnit(): Cannot remove NULL unit" << endl;
+	kdError() << "Player::unitDestroyed(): Cannot remove NULL unit" << endl;
 	return;
  }
- kdDebug() << "Player::removeUnit " << unit->id() << endl;
- d->mUnits.removeRef(unit);
- kdDebug() << "Player::removeUnit done" << endl;
+ d->mUnits.take(d->mUnits.findRef(unit));
 }
 
 SpeciesTheme* Player::speciesTheme() const
