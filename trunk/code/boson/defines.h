@@ -30,7 +30,7 @@
 #define BOSON_COOKIE 992
 #define BOSON_PORT 5454
 
-#define MAXIMAL_ADVANCE_COUNT 20 // maximal value of advanceCount param emitted by Boson::signalAdvance
+#define MAXIMAL_ADVANCE_COUNT 19 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested
 
