@@ -39,7 +39,6 @@ public:
 	BoGroundRendererBase(bool useCellTree);
 	virtual ~BoGroundRendererBase();
 
-
 	/**
 	 * Generate a list of cells that are (or may) be visible at the moment.
 	 * @param map The map that contains the @ref Cell pointers. Use 0 to
@@ -49,8 +48,12 @@ public:
 
 	virtual QString debugStringForPoint(const BoVector3& pos) const;
 
+protected:
+	float* mHeightMap2;
+
 private:
 	CellListBuilder* mCellListBuilder;
+	const BosonMap* mMap;
 };
 
 #endif

@@ -35,6 +35,9 @@
 #include <GL/gl.h>
 #include <math.h>
 
+#define FIX_EDGES 1
+#define FIX_EDGES_1 0
+
 // a couple of helper functions. these should be in Bo3dTools.
 static bool isInFrontOfPlane(const float* plane, const BoVector3& vector);
 static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection);
@@ -168,8 +171,15 @@ public:
 	{
 		mViewFrustum = 0;
 		mViewport = 0;
+
+		mMinX = 0;
+		mMaxX = 0;
+		mMinY = 0;
+		mMaxY = 0;
 	}
 	virtual ~CellListBuilder() {}
+
+	void copyHeightMap(float* heightMap, const BosonMap* map);
 
 	void setViewport(const int* p) { mViewport = p; }
 	const int* viewport() const { return mViewport; }
@@ -187,6 +197,19 @@ public:
 	 * renderCells that are used (starting from 0), i.e. should be rendered.
 	 **/
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
+
+protected:
+	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map)
+	{
+		Q_UNUSED(heightMap);
+		Q_UNUSED(map);
+	}
+
+protected:
+	int mMinX;
+	int mMaxX;
+	int mMinY;
+	int mMaxY;
 
 private:
 	const float* mViewFrustum;
@@ -216,13 +239,16 @@ public:
 
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
+
+	QMemArray< QPtrList<const CellTreeNode>* > mLeafs;
+
 protected:
 	/**
 	 * This is the main method of this class. It checks (recursively)
 	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
 	 * cells to @p cells.
 	 **/
-	void addVisibleCells(int* cells, const CellTreeNode* node);
+	void addVisibleCells(int* cells, const CellTreeNode* node, int depth = 0);
 
 	/**
 	 * @return Whether the cells in the rect of the node are visible.
@@ -236,7 +262,7 @@ protected:
 	/**
 	 * Add all cells in the rect of the node to @p cells
 	 **/
-	void addCells(int* cells, const CellTreeNode* node);
+	void addCells(int* cells, const CellTreeNode* node, int depth);
 
 	void recreateTree(const BosonMap* map);
 
@@ -247,6 +273,8 @@ protected:
 	 * level of detail.
 	 **/
 	bool doLOD(const CellTreeNode* node) const;
+
+	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map);
 
 private:
 	// these variables are valid only while we are in generateCellList() !
@@ -297,6 +325,8 @@ protected:
 BoGroundRendererBase::BoGroundRendererBase(bool useCellTree)
 {
  mCellListBuilder = 0;
+ mMap = 0;
+ mHeightMap2 = 0;
  if (useCellTree) {
 	mCellListBuilder = new CellListBuilderTree();
  } else {
@@ -306,7 +336,11 @@ BoGroundRendererBase::BoGroundRendererBase(bool useCellTree)
 
 BoGroundRendererBase::~BoGroundRendererBase()
 {
+ boDebug() << k_funcinfo << endl;
  delete mCellListBuilder;
+#if FIX_EDGES
+ delete[] mHeightMap2;
+#endif
 }
 
 static bool isInFrontOfPlane(const float* plane, const BoVector3& vector)
@@ -404,6 +438,15 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 	// we construct the display before the map is received
 	return;
  }
+ if (mMap != map) {
+#if FIX_EDGES
+	delete[] mHeightMap2;
+	mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
+#else
+	mHeightMap2 = (float*)map->heightMap();
+#endif
+ }
+ mMap = map;
  int renderCellsSize = 0;
  unsigned int renderCellsCount = 0;
  int* originalList = renderCells();
@@ -414,10 +457,104 @@ void BoGroundRendererBase::generateCellList(const BosonMap* map)
 	setRenderCells(renderCells, renderCellsSize);
  }
  setRenderCellsCount(renderCellsCount);
+#if FIX_EDGES
+ mCellListBuilder->copyHeightMap(mHeightMap2, map);
+#endif
+}
+
+void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
+{
+ static int profiling_id = boProfiling->requestEventId("copyHeightMap");
+ BosonProfiler prof(profiling_id);
+ if (mMinX < 0 || mMinY < 0) {
+	// AB: in the NoTree version this is always the case.
+	// (note the we have basically dropped NoTree already)
+	boError() << k_funcinfo << "minx=" << mMinX << " miny=" << mMinY << endl;
+	mMinX = mMinY = 0;
+	mMaxX = map->width();
+	mMaxY = map->height();
+
+	for (int x = mMinX; x <= mMaxX + 1; x++) { // +1 because we need _corners_ not cells
+		for (int y = mMinY; y <= mMaxY + 1; y++) {
+			heightMap[map->cornerArrayPos(x, y)] = map->heightAtCorner(x, y);
+		}
+	}
+ } else {
+#if FIX_EDGES_1
+	const float* h = map->heightMap();
+	for (int x = mMinX; x <= mMaxX; x++) { // +1 because we need _corners_ not cells
+		for (int y = mMinY; y <= mMaxY; y++) {
+			const int index = map->cornerArrayPos(x, y);
+			heightMap[index] = h[index];
+		}
+	}
+#endif
+ }
+ copyCustomHeightMap(heightMap, map);
+}
+
+void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* map)
+{
+ static int profiling_id = boProfiling->requestEventId("copyCustomHeightMap");
+ BosonProfiler prof(profiling_id);
+ if (mLeafs.size() <= 0) {
+	return;
+ }
+ for (int i = (int)mLeafs.size() - 1; i >= 0; i--) {
+	QPtrList<const CellTreeNode>* list = mLeafs[i];
+	if (!list || list->isEmpty()) {
+		continue;
+	}
+	QPtrListIterator<const CellTreeNode> it(*list);
+	while (it.current()) {
+		const CellTreeNode* node = it.current();
+		++it;
+#if FIX_EDGES_1
+		if (node->mCellsCount == 1) {
+			continue;
+		}
+#endif
+		const int l = node->mLeft;
+		const int r = node->mRight;
+		const int t = node->mTop;
+		const int b = node->mBottom;
+		const float tl = map->heightAtCorner(l, t);
+		const float bl = map->heightAtCorner(l, b + 1);
+		const float tr = map->heightAtCorner(r + 1, t);
+		const float br = map->heightAtCorner(r + 1, b + 1);
+
+		const int w = (r - l) + 1;
+		const int h = (b - t) + 1;
+		const float topStep = (tr - tl) / w;
+		const float bottomStep = (br - bl) / w;
+		const float leftStep = (bl - tl) / h;
+		const float rightStep = (br - tr) / h;
+
+		// top and bottom border
+#if FIX_EDGES_1
+		for (int x = 1; x < w; x++) {
+#else
+		for (int x = 0; x <= w; x++) {
+#endif
+			heightMap[map->cornerArrayPos(l + x, t)] = tl + topStep * x;
+			heightMap[map->cornerArrayPos(l + x, b + 1)] = bl + bottomStep * x;
+		}
+
+		// just like above, but for left/right border
+		// note that y==0 and y==h are not required, as it is covered
+		// above anyqay
+		for (int y = 1; y < h; y++) {
+			heightMap[map->cornerArrayPos(l, t + y)] = tl + leftStep * y;
+			heightMap[map->cornerArrayPos(r + 1, t + y)] = tr + rightStep * y;
+		}
+	}
+ }
 }
 
 int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
+ mMinX = mMinY = -1;
+ mMaxX = mMaxY = 0;
  if (!viewport()) {
 	BO_NULL_ERROR(viewport());
 	return origRenderCells;
@@ -944,6 +1081,8 @@ void CellListBuilderNoTree::calculateWorldRect(const QRect& rect, int mapWidth, 
 
 int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderCells, int* renderCellsSize, unsigned int* renderCellsCount)
 {
+ mMinX = mMinY = -1;
+ mMaxX = mMaxY = 0;
  if (!map) {
 	BO_NULL_ERROR(map);
 	return origRenderCells;
@@ -967,8 +1106,15 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  mMap = map;
  mCount = 0;
 
+ for (int i = 0; i < (int)mLeafs.size(); i++) {
+	QPtrList<const CellTreeNode>* list = mLeafs[i];
+	if (list) {
+		list->clear();
+	}
+ }
+
  g_cellsVisibleCalls = 0;
- addVisibleCells(renderCells, mRoot);
+ addVisibleCells(renderCells, mRoot, 0);
 // boDebug() << k_funcinfo << g_cellsVisibleCalls << " calls - will render cells: " << mCount << endl;
 
  *renderCellsCount = mCount;
@@ -1002,7 +1148,7 @@ bool CellListBuilderTree::doLOD(const CellTreeNode* node) const
  return false;
 }
 
-void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node)
+void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node, int depth)
 {
  if (!node) {
 	return;
@@ -1014,11 +1160,31 @@ void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node)
  if (doLOD(node)) {
 	BoGroundRenderer::setCell(cells, mCount, l, t, r - l + 1, b - t + 1);
 	mCount++;
+	if ((int)mLeafs.size() < depth + 1) {
+		int s = mLeafs.size();
+		mLeafs.resize(depth + 1);
+		for (int i = s; i < (int)mLeafs.size(); i++) {
+			mLeafs[i] = new QPtrList<const CellTreeNode>();
+		}
+	}
+	mLeafs[depth]->append(node);
+	if (l < mMinX || mMinX < 0) {
+		mMinX = l;
+	}
+	if (r > mMaxX || mMaxX < 0) {
+		mMaxX = r;
+	}
+	if (t < mMinY || mMinY < 0) {
+		mMinY = t;
+	}
+	if (b > mMaxY || mMaxY < 0) {
+		mMaxY = b;
+	}
  } else {
-	addCells(cells, node->mTopLeft);
-	addCells(cells, node->mTopRight);
-	addCells(cells, node->mBottomLeft);
-	addCells(cells, node->mBottomRight);
+	addCells(cells, node->mTopLeft, depth + 1);
+	addCells(cells, node->mTopRight, depth + 1);
+	addCells(cells, node->mBottomLeft, depth + 1);
+	addCells(cells, node->mBottomRight, depth + 1);
  }
 }
 
@@ -1080,7 +1246,7 @@ bool CellListBuilderTree::cellsVisible(const CellTreeNode* node, bool* partially
  return true;
 }
 
-void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node)
+void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node, int depth)
 {
  if (!node) {
 	return;
@@ -1089,12 +1255,12 @@ void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node)
  if (cellsVisible(node, &partially)) {
 	if (!partially || doLOD(node)) {
 		// all cells visible
-		addCells(cells, node);
+		addCells(cells, node, depth);
 	} else {
-		addVisibleCells(cells, node->mTopLeft);
-		addVisibleCells(cells, node->mTopRight);
-		addVisibleCells(cells, node->mBottomLeft);
-		addVisibleCells(cells, node->mBottomRight);
+		addVisibleCells(cells, node->mTopLeft, depth + 1);
+		addVisibleCells(cells, node->mTopRight, depth + 1);
+		addVisibleCells(cells, node->mBottomLeft, depth + 1);
+		addVisibleCells(cells, node->mBottomRight, depth + 1);
 	}
  }
 }
@@ -1152,9 +1318,9 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3& pos) const
 	s += "NULL viewFrustum() - cannot do anything";
 	return s;
  }
- const float* bottomPlane = &viewFrustum()[2 * 4];
+// const float* bottomPlane = &viewFrustum()[2 * 4];
  const float* nearPlane = &viewFrustum()[5 * 4];
- const float* farPlane = &viewFrustum()[4 * 4];
+// const float* farPlane = &viewFrustum()[4 * 4];
 
 #if 0
  s += QString("\nPlane: (%1,%2,%3,%4)").
