@@ -87,25 +87,13 @@ public:
 	BosonLoadingWidget* mLoading;
 	BosonWidget* mBosonWidget;
 
-	KAction* mActionNewGame;
-	KAction* mActionEndGame;
-	KAction* mActionQuit;
-	KAction* mActionKeys;
-	KAction* mActionPreferences;
 	KToggleAction* mActionStatusbar;
 	KToggleAction* mActionChat;
 	KToggleAction* mActionCmdFrame;
-	KToggleAction* mActionSound;
-	KToggleAction* mActionMusic;
-	KAction* mActionDebug;
-	KAction* mActionUnfog;
-	KSelectAction* mActionDebugMode;
 	KActionMenu* mActionDebugPlayers;
 	KSelectAction* mActionZoom;
-	KAction* mActionSplitH;
-	KAction* mActionSplitV;
-	KAction* mActionRemoveView;
 	KToggleAction* mActionFullScreen;
+	KActionCollection* mGameActions;
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
@@ -177,47 +165,50 @@ void TopWidget::readProperties(KConfig *config)
 void TopWidget::initActions()
 {
  // Main actions: Game start/end and quit
- d->mActionNewGame = KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection());
- d->mActionEndGame = KStdGameAction::end(this, SLOT(slotEndGame()), actionCollection());
- d->mActionQuit = KStdGameAction::quit(this, SLOT(close()), actionCollection());
+ d->mGameActions = new KActionCollection(this); // actions that are available in game mode only
+
+ (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); //AB: game action?
+ (void)KStdGameAction::end(this, SLOT(slotEndGame()), d->mGameActions);
+// (void)KStdGameAction::pause(mBoson, SLOT(slotTogglePause()), d->mGameActions);
+ (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
- d->mActionKeys = KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
- d->mActionPreferences = KStdAction::preferences(this, SLOT(slotGamePreferences()), actionCollection());
- d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
+ (void)KStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection());
+ (void)KStdAction::preferences(this, SLOT(slotGamePreferences()), d->mGameActions);
+ d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), d->mGameActions);
 
  // Dockwidgets show/hide
  d->mActionChat = new KToggleAction(i18n("Show &Chat"),
 		KShortcut(Qt::CTRL+Qt::Key_C), this, SLOT(slotToggleChat()),
-		actionCollection(), "options_show_chat");
+		d->mGameActions, "options_show_chat");
  d->mActionCmdFrame = new KToggleAction(i18n("Show C&ommandframe"),
 		KShortcut(Qt::CTRL+Qt::Key_F), this, SLOT(slotToggleCmdFrame()),
-		actionCollection(), "options_show_cmdframe");
+		d->mGameActions, "options_show_cmdframe");
 
  // Sound & Music
- d->mActionSound = new KToggleAction(i18n("Soun&d"), 0, this,
+ KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
 		SLOT(slotToggleSound()), actionCollection(), "options_sound");
- d->mActionSound->setChecked(boMusic->sound());
- d->mActionMusic = new KToggleAction(i18n("&Music"), 0, this,
+ sound->setChecked(boMusic->sound());
+ KToggleAction* music = new KToggleAction(i18n("&Music"), 0, this,
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
- d->mActionMusic->setChecked(boMusic->music());
+ music->setChecked(boMusic->music());
 
  // Debug - no i18n!
- d->mActionDebug = new KAction("Debug", KShortcut(), this,
-		SLOT(slotDebug()), actionCollection(), "debug_kgame");
- d->mActionUnfog = new KAction("Unfog", KShortcut(), this,
-		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- d->mActionDebugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
- connect(d->mActionDebugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
+ (void)new KAction("Debug", KShortcut(), this,
+		SLOT(slotDebug()), d->mGameActions, "debug_kgame");
+ (void)new KAction("Unfog", KShortcut(), this,
+		SLOT(slotUnfogAll()), d->mGameActions, "debug_unfog");
+ KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), d->mGameActions, "debug_mode");
+ connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
  QStringList l;
  l.append("Normal");
  l.append("Debug Selection");
- d->mActionDebugMode->setItems(l);
- d->mActionDebugMode->setCurrentItem(0);
- d->mActionDebugPlayers = new KActionMenu("Players", actionCollection(), "debug_players");
+ debugMode->setItems(l);
+ debugMode->setCurrentItem(0);
+ d->mActionDebugPlayers = new KActionMenu("Players", d->mGameActions, "debug_players");
 
  // Zoom
- d->mActionZoom = new KSelectAction(i18n("&Zoom"), KShortcut(), actionCollection(), "options_zoom");
+ d->mActionZoom = new KSelectAction(i18n("&Zoom"), KShortcut(), d->mGameActions, "options_zoom");
  connect(d->mActionZoom, SIGNAL(activated(int)), this, SLOT(slotZoom(int)));
  QStringList items;
  items.append(QString::number(50));
@@ -227,19 +218,20 @@ void TopWidget::initActions()
 
  // Display
  // note: the icons for these action need to have konqueror installed!
- d->mActionSplitH = new KAction(i18n( "Split Display &Left/Right"), "view_left_right",
+ (void)new KAction(i18n( "Split Display &Left/Right"), "view_left_right",
 		   CTRL+SHIFT+Key_L, this, SLOT(slotSplitDisplayHorizontal()),
-		   actionCollection(), "splitviewh");
- d->mActionSplitV = new KAction(i18n("Split Display &Top/Bottom"), "view_top_bottom",
+		   d->mGameActions, "splitviewh");
+ (void)new KAction(i18n("Split Display &Top/Bottom"), "view_top_bottom",
 		   CTRL+SHIFT+Key_T, this, SLOT(slotSplitDisplayVertical()),
-		   actionCollection(), "splitviewv");
- d->mActionRemoveView = new KAction(i18n("&Remove Active Display"), "view_remove",
+		   d->mGameActions, "splitviewv");
+ (void)new KAction(i18n("&Remove Active Display"), "view_remove",
 		  CTRL+SHIFT+Key_R, this, SLOT(slotRemoveActiveDisplay()),
-		  actionCollection(), "removeview");
+		  d->mGameActions, "removeview");
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
 
+ actionCollection()->addDocCollection(d->mGameActions);
  createGUI();
 }
 
@@ -303,19 +295,11 @@ void TopWidget::enableGameActions(bool enable)
  if(enable && ! d->mBosonWidget) {
 	kdWarning() << k_lineinfo << "NULL BosonWidget!" << endl;
  }
- d->mActionEndGame->setEnabled(enable);
- d->mActionPreferences->setEnabled(enable);
- d->mActionStatusbar->setEnabled(enable);
- d->mActionChat->setEnabled(enable);
- d->mActionCmdFrame->setEnabled(enable);
- d->mActionDebug->setEnabled(enable);
- d->mActionUnfog->setEnabled(enable);
- d->mActionDebugMode->setEnabled(enable);
- d->mActionDebugPlayers->setEnabled(enable);
- d->mActionZoom->setEnabled(enable);
- d->mActionSplitH->setEnabled(enable);
- d->mActionSplitV->setEnabled(enable);
- d->mActionRemoveView->setEnabled(enable);
+ KActionPtrList list = d->mGameActions->actions();
+ KActionPtrList::Iterator it;
+ for (it = list.begin(); it != list.end(); ++it) {
+	(*it)->setEnabled(enable);
+ }
 }
 
 void TopWidget::initDebugPlayersMenu()
@@ -693,7 +677,7 @@ void TopWidget::slotDebugMode(int index)
 void TopWidget::slotZoom(int index)
 {
 kdDebug() << "zoom index=" << index << endl;
- double percent = d->mActionZoom->items()[index].toDouble();
+ double percent = d->mActionZoom->items()[index].toDouble(); // bahh!!! 
  double factor = (double)percent / 100;
  QWMatrix m;
  m.scale(factor, factor);
@@ -918,3 +902,4 @@ bool TopWidget::queryExit()
  }
  return true;
 }
+

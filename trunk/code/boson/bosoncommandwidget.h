@@ -26,6 +26,8 @@ class Unit;
 class Player;
 class BosonTiles;
 class BoButton;
+class BoProgress;
+class BoToolTip;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -143,6 +145,9 @@ protected slots:
 	void slotRightClicked();
 	
 private:
+	friend class BoToolTip;
+
+private:
 	class BosonCommandWidgetPrivate;
 	BosonCommandWidgetPrivate* d;
 
@@ -154,6 +159,8 @@ private:
 	Player* mProductionOwner;
 
 	BoButton* mPixmap;
+	BoProgress* mHealth;
+	BoProgress* mReload;
 };
 
 class BoButton : public QPushButton
