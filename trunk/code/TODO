@@ -72,6 +72,9 @@ editor:
 0.5 release:
 ============
 client and server should be peer-killed proof
+check the .bfp format (no binary changes should be allowed after 0.5)
+	-> check for 'version' 'author' and other meta-information especially
+
 
 0.8 release: (first public release)
 ============
