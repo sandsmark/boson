@@ -608,7 +608,6 @@ BoFace& BoFace::operator=(const BoFace& face)
 
 
 
-#define BO_NODE_BYTE_SIZE ((1 + 1 + 1 + 3) * 4) // 2 pointer, one int, one 3-int array, each 4 bytes
 BoFaceNode::BoFaceNode(const BoFace* face)
 {
  init();
@@ -617,7 +616,6 @@ BoFaceNode::BoFaceNode(const BoFace* face)
 
 BoFaceNode::~BoFaceNode()
 {
- boMem->subBytes(BO_NODE_BYTE_SIZE);
 }
 
 void BoFaceNode::setPrevious(BoFaceNode* previous)
@@ -665,7 +663,6 @@ void BoFaceNode::init()
  mPrevious = 0;
  mRelevantPoint = -1;
  mFace = 0;
- boMem->addBytes(BO_NODE_BYTE_SIZE);
 }
 
 bool BoFaceNode::isAdjacent(BoFaceNode* f1, BoFaceNode* f2)
