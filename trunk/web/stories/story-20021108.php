@@ -46,7 +46,7 @@ we don't know how either.
 <p class=\"announcement\">
 The scene:<br />
 The good General is discussing the imminent launch of an assault on a nearby military base. Currently present: Andi,
-Felix, Rivo, shag and Scott.
+Felix, Rivo, Timo and Scott.
 </p>
 <p class=\"announcement\">
 * Andi joins #boson<br />
@@ -59,7 +59,7 @@ Felix, Rivo, shag and Scott.
 fire back.
 </p>
 <p class=\"announcement\">
-A strange 'dying scream' sound comes from shag's mouth. Everybody looks at him. Andi shakes his head.
+A strange 'dying scream' sound comes from Timo's mouth. Everybody looks at him. Andi shakes his head.
 </p>
 <p class=\"announcement\">
 &lt;Andi&gt; Ah yes, I keep meaning to add in support for that.
@@ -77,7 +77,7 @@ Everybody in the room nods knowingly.
 &lt;Felix&gt; Déja vu...
 </p>
 <p class=\"announcement\">
-&lt;shag&gt; AH TTACKING!<br />
+&lt;Timo&gt; AH TTACKING!<br />
 &lt;Felix&gt; Dude, will you shut up!?
 </p>
 ");
