@@ -71,91 +71,6 @@ void fieldMap::paintEvent(QPaintEvent *evt)
 
 }
 
-/*
-void fieldMap::paintEvent(QPaintEvent *evt)
-{
-QPainter p;
-QRect r = evt->rect();
-int i,j;
-int im,iM,jm,jM;
-
-p.begin(this);
-im = r.left()/BO_TILE_SIZE + view->X();
-jm = r.top()/BO_TILE_SIZE + view->Y();
-iM = QMIN (r.right()/BO_TILE_SIZE + view->X() + 1, view->maxX());
-jM = QMIN (r.bottom()/BO_TILE_SIZE + view->Y() + 1, view->maxY());
-for(i=im; i<iM; i++)
-	for(j=jm; j<jM; j++)
-		drawCell(i,j, &p);
-
-// Dessin des unites mobiles et fixes
-QPixmap		*pix;
-QIntDictIterator<playerMobUnit>	mobIt(view->phys->mobile);
-QIntDictIterator<Facility>	fixIt(view->phys->facility);
-
-
-for (mobIt.toFirst(); mobIt; ++mobIt) {
-	pix = getPixmap(mobIt.current());
-	if (pix) drawRelative(mobIt.current()->x, mobIt.current()->y, pix ,&p);
-	}
-
-for (fixIt.toFirst(); fixIt; ++fixIt) {
-	pix = getPixmap(fixIt.current());
-	if (pix) drawRelative(fixIt.current()->x*BO_TILE_SIZE, fixIt.current()->y*BO_TILE_SIZE, pix ,&p);
-	}
-
-drawSelected(&p);
-
-p.end();
-
-} */
-
-/*
-void fieldMap::drawCell(int i, int j, QPainter *p)
-{
-groundType g = view->phys->getGround(i,j);
-assert(i<view->maxX());
-assert(j<view->maxY());
-
-//if ( GROUND_FACILITY == g) return;
-drawRelative( BO_TILE_SIZE*i, BO_TILE_SIZE*j, gameProperties.ground->getPixmap(g), p );
-}
-*/
-
-/*
-void fieldMap::drawMobile(playerMobUnit *unit, QPainter *p) {
-drawRelative(unit->x, unit->y, gameProperties.species[unit->who]->getPixmap(unit), p );
-}
-
-void fieldMap::drawFix(Facility *fix, QPainter *p)
-{
-drawRelative(fix->x * BO_TILE_SIZE , fix->y * BO_TILE_SIZE, gameProperties.species[fix->who]->getPixmap(fix), p );
-}
-*/
-
-
-/*
-
-void fieldMap::drawRelative(int x, int y, QPixmap *pix, QPainter *painter)
-{
-x -= BO_TILE_SIZE * view->X();
-y -= BO_TILE_SIZE * view->Y();
-
-printf("drawrelative : %d, %d\n", x, y);
-
-if (painter)
-	painter->drawPixmap(x,y,*pix);
-else {
-	painter=new QPainter();
-	painter->begin(this);
-	painter->drawPixmap(x,y,*pix);
-	painter->end();
-	}
-	
-}
-*/
-
-
 void fieldMap::drawSelected(void)
 {
 QPainter *painter=new QPainter();
@@ -168,7 +83,6 @@ painter->end();
 void fieldMap::drawSelected(QPainter *painter)
 {
 QIntDictIterator<playerMobUnit> selIt(order->mobSelected);
-//playerMobUnit *m;
 QPen	pen(green, 3, DashDotLine);
 QRect	r;
 
@@ -184,14 +98,8 @@ if(fix) {
 	r.setWidth(r.width()+2*BO_SELECT_MARGIN); 
 	r.setHeight(r.height()+2*BO_SELECT_MARGIN); 
 
-//printf("roundRect : %d.%d %dx%d\n", r.x(), r.y(), r.width(), r.height());
-
 	painter->drawRoundRect(
-		(fix->x()-view->X()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
-		(fix->y()-view->Y()) * BO_TILE_SIZE - BO_SELECT_MARGIN,
-		fix->getWidth()* BO_TILE_SIZE + BO_SELECT_MARGIN + BO_SELECT_MARGIN,
-		fix->getHeight()* BO_TILE_SIZE + BO_SELECT_MARGIN + BO_SELECT_MARGIN, 
-	//	r,
+		r,
 		BO_SELECT_ROUND, BO_SELECT_ROUND
 		);
 	boAssert(order->mobSelected.isEmpty());
@@ -209,19 +117,9 @@ for (selIt.toFirst(); selIt; ++selIt) {
 	r.setWidth(r.width()+2*BO_SELECT_MARGIN); 
 	r.setHeight(r.height()+2*BO_SELECT_MARGIN); 
 
-//printf("roundRect 3: %d.%d %dx%d\n", r.x(), r.y(), r.width(), r.height());
 	painter->drawRoundRect(
 		r,
 		BO_SELECT_ROUND, BO_SELECT_ROUND
 		);
 	}
 }
-
-/*
-void fieldMap::drawRectSelect(int x1, int y1, int x2, int y2, QPainter &movPainter)
-{
-movPainter.drawRect(x1, y1, x2-x1, y2-y1); // inch Allah
-}
-*/
-
-

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 //#include <qdatastream.h>
+#include <stdio.h>
 #include "playField.h"
 #include "map.h"
 
@@ -45,6 +46,7 @@ origMobile mobile[] = {
 	{MOB_AIRCRAFT,	1, BO_TILE_SIZE*22, BO_TILE_SIZE*15},
 	{MOB_QUAD,	1, BO_TILE_SIZE*12, BO_TILE_SIZE*15},
 	{MOB_SHIP,	1, BO_TILE_SIZE*19, BO_TILE_SIZE*18},
+{MOB_QUAD,	1, BO_TILE_SIZE*15, BO_TILE_SIZE*31},
 	{MOB_SHIP,	0, BO_TILE_SIZE*10, BO_TILE_SIZE*28},
 	{MOB_QUAD,	0, BO_TILE_SIZE*15, BO_TILE_SIZE*26},
 	{MOB_AIRCRAFT,	0, BO_TILE_SIZE*12, BO_TILE_SIZE*25},

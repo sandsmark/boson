@@ -23,6 +23,7 @@
 #include "boson.h"
 #include "connect.h"
 #include "../common/log.h"
+#include "../common/bobuffer.h"
 
 #include "game.h"
 
@@ -163,16 +164,12 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->jiffies));
 		jiffies ++;
 		boAssert(jiffies == data->jiffies);
-///orzel : temporaire
-		if (jiffies != data->jiffies)
-			printf("jif : %u, data->jif : %u\n", jiffies, data->jiffies);
 	// let's each object speaks
 		phys->requestAction(buffer);
-	// latest is MSG_TIME_CONFIRM
+	// latest message is MSG_TIME_CONFIRM
 		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
 		logf(LOG_GAME_LOW, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
-	///orzel : here should be a message to the graphics layer : updateScreen
 		phys->update();		// QwSpriteField periodical rendering
 		break;
 

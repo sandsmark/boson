@@ -42,8 +42,8 @@ class groundTheme;
 class speciesTheme;
 
 ///// orzel : TEMPORAIRE que c'en est grave : 
-#define	MAX_PLAYER	2
-#define MAX_UNIT	20
+/*#define	MAX_PLAYER	2
+#define MAX_UNIT	20 */
 
 
 /** 
@@ -69,10 +69,7 @@ class physMap : public QObject, public QwSpriteField
   void requestAction(boBuffer *);
 
 /* get content */
-
   playerFacility *getFacility(long key) { return facility.find(key); }
-//  playerCell * operator[] (int index) {return  cells[index];}
-//  groundType getGround(int x, int y ) {return  cells[coo2index(x,y)]->getGroundType();}
 
   signals:
   void newCell(int,int, groundType g);
@@ -82,22 +79,16 @@ class physMap : public QObject, public QwSpriteField
 
   protected:
 /* Qw stuff */
-//  virtual void drawBackground(QPainter &p, const QRect &area);
-///orzel : ugly 
-  int	coo2index(int x, int y)
+/*  int	coo2index(int x, int y)
 	{ return maxY*x+y;}
   void	index2coo(uint index, int &x, int &y)
-	{ x = index / maxY; y = index % maxY; }
+	{ x = index / maxY; y = index % maxY; } */
 
 //  private:
 public: ///orzel : temp
 
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;
-private:
-/* what's in ? */
-///orzel : ugly, should be moved to something like aaa<bbb> 
-//  playerCell	**cells; 
 
 };
 

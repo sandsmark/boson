@@ -31,30 +31,12 @@
 mainView::mainView(physMap *phys, QWidget *parent=0, const char *name=0)
 :QWidget(parent, name)
 { 
-QHBoxLayout	*topLayout = new QHBoxLayout(this);
-QVBoxLayout	*leftLayout = new QVBoxLayout();
+	QHBoxLayout	*topLayout = new QHBoxLayout(this);
+	QVBoxLayout	*leftLayout = new QVBoxLayout();
 
-QFrame		*group; // shoud be moved ///orzel
+	topLayout->addLayout(leftLayout,0);
 
-topLayout->addLayout(leftLayout,0);
-
-view = new viewMap(phys); // the view associated with this window
-
-
-
-/* this is the mini-map, docked in the left-layout 
-	group = new QFrame(this, "minimap.frame");
-		group->setFrameStyle(QFrame::Box| QFrame::Raised);
-		group->setLineWidth(4);
-		group->setMidLineWidth(4);
-	mini = new miniMap(view, group);
-	mini->setFixedSize(200,200);
-	///orzel: a virer absolument :-(
-	QGridLayout *lll;
-	lll = new QGridLayout(group,1,1,15);
-	lll->addWidget(mini,0,0,0);
-	lll->activate();
-	leftLayout->addWidget(group); */
+	view = new viewMap(phys); // the view associated with this window
 
 	mini = new miniMap(view, this);
 	mini->setFixedSize(200,200);

@@ -10,8 +10,6 @@ does units::rect need to be virtual anymore ?
 
 bug : mobile on very-bottom-right can't be selected
 
-click-zone for selection is still badly centered
-
 how to handle selection drawing ?
 menu clean-up :-)
 
@@ -33,6 +31,7 @@ check that loading of pixmap has been done well
 #good (with _no_ layout)  positionning of widget.
 #boAssert( celldiscovered has j<max) seems to have problems
 #integration of Ben mobiles (with different colors)
+#click-zone for selection is still badly centered
 
 check Makefile.am for installation "make install"
 
@@ -49,7 +48,9 @@ basic map editor
 server GUI
 client and server should be peer-killed proof
 
-smooth  known-unknown transition (maybe later thant .2)
+smooth  known-unknown transition
+see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
+
 
 0.5 release: (first public release)
 ============

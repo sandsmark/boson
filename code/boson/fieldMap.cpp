@@ -18,13 +18,11 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include <qpainter.h>
 #include <kapp.h>
 #include <assert.h>
 #include "../common/log.h"
 #include "fieldMap.h"
 #include "playerCell.h"
-//#include "playerUnit.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "viewMap.h"
@@ -46,10 +44,6 @@ view = v;
 
 /* make the connection */
 physMap *phys = v->phys; ///orzel : should be moved
-
-//connect(phys, SIGNAL(updateCell(int,int)), this, SLOT(drawCell(int,int)));
-//connect(phys, SIGNAL(updateMobile(playerMobUnit *)), this, SLOT(drawMobile(playerMobUnit *)));
-//connect(phys, SIGNAL(updateFix(Facility *)), this, SLOT(drawFix(Facility *)));
 
 // connect(, SIGNAL(), this, SLOT());
 connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));

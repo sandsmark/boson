@@ -18,13 +18,15 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include <qpainter.h>
-#include <kapp.h>
 #include <assert.h>
+
+#include <kapp.h>
+
 #include "../common/log.h"
+#include "../common/boconfig.h"
 #include "../map/map.h"
+
 #include "physMap.h"
-//#include "playerUnit.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
 #include "game.h"
@@ -37,11 +39,6 @@ physMap::physMap(uint w, uint h, QObject *parent, const char *name=0L)
 /* map geometry */
 maxX = w; maxY = h;
 
-/* Cells initialization */
-//uint i;
-//cells = new (playerCell *)[w*h];
-//for (i=0; i < w*h; i++) cells[i] = new playerCell();
-
 /* Dictionaries */
 mobile.resize(149);
 facility.resize(149);
@@ -50,108 +47,72 @@ facility.setAutoDelete(TRUE);
 
 /* Themes selection (should be moved thereafter) */
 gameProperties.ground		= new groundTheme("ben");
-
 gameProperties.species[1]	= new speciesTheme("Blue");
 gameProperties.species[0]	= new speciesTheme("Red");
 
 }
 
+
 physMap::~physMap()
 {
 }
 
-void physMap::setCell(int i, int j, groundType g) //, bool redraw)
+
+void physMap::setCell(int i, int j, groundType g)
 {
-boAssert(i>=0); boAssert(j>=0);
-boAssert(i<width()); boAssert(j<height());
+	boAssert(i>=0); boAssert(j>=0);
+	boAssert(i<width()); boAssert(j<height());
 
-//cells[coo2index(i,j)]->setGroundType(g);
+	(void) new playerCell(g, i, j);
 
-(void) new playerCell(g, i, j);
-
-emit newCell(i,j,g);
-/* if (redraw){
-	emit updateCell(i,j);
-	} */
-//drawCell(i,j);
+	emit newCell(i,j,g);
 }
+
 
 void physMap::createMob(mobileMsg_t &m)
 {
-playerMobUnit *u;
+	playerMobUnit *u;
 
-assert(m.who < MAX_PLAYER);
+	assert(m.who < BOSON_MAX_PLAYERS);
 
-u = new playerMobUnit(&m);
-mobile.insert(m.key, u);
+	u = new playerMobUnit(&m);
+	mobile.insert(m.key, u);
 
-//drawMobile(u);
-emit updateMobile(u);
+	emit updateMobile(u);
 }
+
 
 void physMap::createFix(facilityMsg_t &m)
 {
-playerFacility *f;
+	playerFacility *f;
 
-assert(m.who < MAX_PLAYER);
+	assert(m.who < BOSON_MAX_PLAYERS);
 
-f = new playerFacility(&m);
-facility.insert(m.key, f);
+	f = new playerFacility(&m);
+	facility.insert(m.key, f);
 
-/* map cleaning */
-/*
-int	i,j;
-for(i=0; i< facilityProp[m.type].width; i++)
-	for(j=0; j< facilityProp[m.type].height; j++)
-		cells[coo2index(m.x+i,m.y+j)]->setGroundType(GROUND_FACILITY);
-*/
-
-//drawFix(f);
-emit updateFix(f);
+	emit updateFix(f);
 }
 
 
 void physMap::move(moveMsg_t &m)
 {
-mobile.find(m.key)->s_moveBy(m.dx, m.dy);
+	mobile.find(m.key)->s_moveBy(m.dx, m.dy);
 }
 
 void physMap::requestAction(boBuffer *buffer)
 {
-QIntDictIterator<playerMobUnit> mobIt(mobile);
-//QIntDictIterator<playerFacility> fixIt(facility);
-int		dx, dy;
-bosonMsgData	data;
+	QIntDictIterator<playerMobUnit> mobIt(mobile);
+	//QIntDictIterator<playerFacility> fixIt(facility);
+	int		dx, dy;
+	bosonMsgData	data;
 
-for (mobIt.toFirst(); mobIt; ++mobIt) {
-	if (mobIt.current()->getWantedMove(dx,dy)){
-		data.move.key	= mobIt.currentKey();
-		data.move.dx	= dx;
-		data.move.dy	= dy;
-		sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
+	for (mobIt.toFirst(); mobIt; ++mobIt) {
+		if (mobIt.current()->getWantedMove(dx,dy)){
+			data.move.key	= mobIt.currentKey();
+			data.move.dx	= dx;
+			data.move.dy	= dy;
+			sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
+			}
 		}
-	}
 }
-
-/*!
-Reimplements QwSpriteField::drawBackground to draw the image
-as the background.
-*/
-/*
-void physMap::drawBackground(QPainter& painter, const QRect& area)
-{
-	int x,y;
-
-//	painter.drawRect(area);
-
-printf("drawBackground %d.%d %dx%d\n", area.x(), area.y(), area.width(), area.height());
-//	return;
-	for (x=area.x()/BO_TILE_SIZE;
-		x<(area.x()+area.width()+BO_TILE_SIZE-1)/BO_TILE_SIZE; x++) {
-	for (y=area.y()/BO_TILE_SIZE;
-		y<(area.y()+area.height()+BO_TILE_SIZE-1)/BO_TILE_SIZE; y++) {
-		painter.drawPixmap(x*BO_TILE_SIZE, y*BO_TILE_SIZE, *gameProperties.ground->getPixmap(getGround(x,y)));
-		}
-	}
-}
-*/

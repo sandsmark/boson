@@ -20,12 +20,11 @@
 
 #include <stdio.h>
 #include <boson.h>
-//#include <qlayout.h>
-//#include <qgroupbox.h>
 #include <qframe.h>
 #include "ressource.h"
 #include "connect.h"
 #include "../common/boconfig.h"
+#include "../common/bobuffer.h"
 #include "../common/log.h"
 
 FILE *logfile = (FILE *) 0L;

@@ -22,6 +22,8 @@
 #include "connect.h"
 #include <assert.h>
 
+#include "../common/bobuffer.h"
+
 void Player::handleSocketMessage(KSocket *s)
 {
 serverSocketState oldState = socketState;

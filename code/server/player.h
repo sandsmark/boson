@@ -25,12 +25,7 @@
 #include <qobject.h>
 
 #include "connect.h"
-//#include "../common/boconfig.h"
-//#include "../common/log.h"
 
-//class serverCell;
-//class Unit;
-//class mobUnit;
 class KSocket;
 class BosonServer;
 class boBuffer;
@@ -61,8 +56,6 @@ public :
   uint			mobUnitDestroyed;
   uint			UnitDestroyed;
 
-//signals :
-//  void forwardMessage(int playerId, bosonMsgTag, int, bosonMsgData *);
 };
 
 #endif // PLAYER_H

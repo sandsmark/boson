@@ -19,23 +19,18 @@
  ***************************************************************************/
 
 #include <qpainter.h>
+
 #include "../common/log.h"
+#include "../map/map.h"
+
 #include "viewMap.h"
 #include "miniMap.h"
 
-#include "../map/map.h"
-
-
-//static int oldX, oldY;
 
 void miniMap::mousePressEvent(QMouseEvent *e)
 {
 int x, y;
 
-//bool found = FALSE;
-
-//x = e->x() / 32;
-//y = e->y() / 32;
 x = e->x();
 y = e->y();
 
@@ -44,18 +39,3 @@ if (e->button() & RightButton) {
 	return;
 	}
 }
-
-/*
-void miniMap::mouseMoveEvent(QMouseEvent *e)
-{
-}
-*/
-
-/*
-void miniMap::resizeEvent(QResizeEvent *e)
-{
-//reSizeView(width()/32, height()/32);
-emit reSizeView((width()+32+1)/32, (height()+32+1)/32);
-}
-
-*/

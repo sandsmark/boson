@@ -29,10 +29,12 @@
 
 #include "../common/log.h"
 #include "../common/unit.h"
-#include "speciesTheme.h"
 #include "../map/map.h"
+#include "speciesTheme.h"
+
 
 #define PROGRESS_N	(mobilePropNb+facilityPropNb)
+
 
 speciesTheme::speciesTheme(char *themeName)
 {
@@ -58,9 +60,11 @@ printf("facilityPropNb = %d\n", facilityPropNb);
 
 progress.setProgress(i++);
 
-if (isLoaded) printf("SpeciesTheme : %d mobiles and %d facilities loaded\n", mobilePropNb, facilityPropNb);
-	else printf("SpeciesTheme : problem while loading pixmaps\n");
+if (isLoaded) printf("\nSpeciesTheme : %d mobiles and %d facilities loaded\n", mobilePropNb, facilityPropNb);
+	else printf("\nSpeciesTheme : problem while loading pixmaps\n");
 }
+
+
 
 bool speciesTheme::loadMob(int index, QString const &path)
 {
@@ -99,6 +103,8 @@ if (mobSmallOverview[index]->isNull()) {
 return true;
 }
 
+
+
 bool speciesTheme::loadFix(int i, QString const &path)
 {
 int j;
@@ -130,40 +136,3 @@ if (fixSmallOverview[i]->isNull()) {
 
 return true;
 }
-
-/*
-
-bool speciesTheme::completeMob()
-{
-sprite = new (QPixmap *)[12];
-QWMatrix *matrix = new QWMatrix();
-int i;
-
-matrix->setMatrix(0,-1,-1,0,0,0);
-for (i=0; i<mobilePropNb; i++)
-	mobSprite[i][2] = new QPixmap(mobSprite[i][1]->xForm(*matrix));
-
-matrix->setMatrix(0,1,-1,0,0,0);
-for (i=0; i<mobilePropNb; i++) {
-	mobSprite[i][3] = new QPixmap(mobSprite[i][0]->xForm(*matrix));
-	mobSprite[i][4] = new QPixmap(mobSprite[i][1]->xForm(*matrix));
-	mobSprite[i][5] = new QPixmap(mobSprite[i][2]->xForm(*matrix));
-	}
-
-matrix->setMatrix(-1,0,0,-1,0,0);
-for (i=0; i<mobilePropNb; i++) {
-	mobSprite[i][6] = new QPixmap(mobSprite[i][0]->xForm(*matrix));
-	mobSprite[i][7] = new QPixmap(mobSprite[i][1]->xForm(*matrix));
-	mobSprite[i][8] = new QPixmap(mobSprite[i][2]->xForm(*matrix));
-	}
-
-matrix->setMatrix(0,-1,1,0,0,0);
-for (i=0; i<mobilePropNb; i++) {
-	mobSprite[i][9] = new QPixmap(mobSprite[i][0]->xForm(*matrix));
-	mobSprite[i][10] = new QPixmap(mobSprite[i][1]->xForm(*matrix));
-	mobSprite[i][11] = new QPixmap(mobSprite[i][2]->xForm(*matrix));
-	}
-
-return true;
-}
-*/

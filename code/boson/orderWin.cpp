@@ -25,8 +25,11 @@
 #include <qpixmap.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
+
 #include <kapp.h>
+
 #include "../common/log.h"
+
 #include "playerUnit.h"
 #include "orderWin.h"
 #include "fieldMap.h"
@@ -49,7 +52,6 @@ setLineWidth(5);
 
 /* stack */
 stack = new QWidgetStack(this, "qwidgetstack");
-//stack->setFixedSize(200,200);
 stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
 stack->setLineWidth(5);
 stack->setGeometry(10,10,180,110);
@@ -76,7 +78,6 @@ static char * button_text[ORDER_BUTTONS_NB] = {
 for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 	orderButton[i] = new QPushButton(this);
 	orderButton[i]->setText(button_text[i]);
-	//orderButton[i]->setFixedSize(100,40);
 	orderButton[i]->setGeometry( 10+(i%2)*91, 42*(i/2) + 130, 89, 40);
 	orderButton[i]->hide();
 	}
@@ -104,7 +105,6 @@ mobSelected.remove(key);
 if (mobSelected.isEmpty()) {
 	view_one->setPixmap(*view_none);
 	orderButton[0]->hide();
-printf("disconnect button 0\n");
 	orderButton[0]->disconnect(this);
 	}
 /**/
@@ -126,7 +126,7 @@ for (int i=0; i<ORDER_BUTTONS_NB; i++) {
 void orderWin::selectFix(playerFacility *f)
 {
 fixSelected = f;
-view_one->setPixmap(*gameProperties.myspecies->getBigOverview(f)); ///orzel 0 is not 0, it's my_number_in_the_game
+view_one->setPixmap(*gameProperties.myspecies->getBigOverview(f));
 logf(LOG_GAME_LOW, "select facility");
 
 }
@@ -139,7 +139,6 @@ if (mobSelected.isEmpty()) {
 	orderButton[1]->show(); */
 	selectionWho = m->who;
 	if (selectionWho == gameProperties.who_am_i) {
-printf("connect button 0\n");
 		connect(orderButton[0], SIGNAL(clicked()), this, SLOT(u_goto()));
 		orderButton[0]->show();
 		}
@@ -150,28 +149,24 @@ else {
 		return;
 	}
 
-//setSelectionMode(SELECT_MOVE);
-
 mobSelected.insert(key, m);
-view_one->setPixmap(*gameProperties.myspecies->getBigOverview(m)); ///orzel 0 is not 0, it's my_number_in_the_game
+view_one->setPixmap(*gameProperties.myspecies->getBigOverview(m));
 logf(LOG_GAME_LOW, "select mobile");
 }
 
 
 void orderWin::u_goto(void)
 {
-printf("selection is : %d\n", getSelectionMode());
 boAssert( SELECT_NONE == getSelectionMode() );
 boAssert(selectionWho == gameProperties.who_am_i);
 ///orzel : should change the cursor over fieldMap
 setSelectionMode(SELECT_MOVE);
 }
 
+
 void orderWin::leftClicked(int mx, int my)		// selecting, moving...
 {
 QIntDictIterator<playerMobUnit> mobIt(mobSelected);
-
-//printf(" to %d.%d\n", mx, my);
 
 if (SELECT_MOVE != getSelectionMode()) {
 	logf(LOG_ERROR,"orderWin::leftClicked while not in SELECT_MOVE state");
@@ -188,7 +183,6 @@ for (mobIt.toFirst(); mobIt; ++mobIt) {
 	mobIt.current()->u_goto(mx,my);
 	}
 
-printf("disconnect button 0\n");
 orderButton[0]->disconnect(this);
 setSelectionMode(SELECT_NONE);
 } 

@@ -21,17 +21,15 @@
 #include <assert.h>
 
 #include <qpainter.h>
-#include "boserver.h"
+
 #include "../map/serverCell.h"
-#include "serverUnit.h"
 #include "../map/map.h"
 #include "../map/playField.h"
-//#include "../common/boconnect.h"
+#include "boserver.h"
+#include "serverUnit.h"
 
 void BosonServer::initMap(const char *mapfile)
 {
-//uint i,j,d;
-
 playField field(mapfile);
 
 mobile.resize(149);
@@ -49,32 +47,7 @@ nbPlayer= field.nbPlayer;
 assert(nbPlayer < 11);
 assert(nbPlayer > 1);
 
-
-
-
-
-
-#define CENTER (200/2)
-#define R1 (40*2)
-#define R2 (10*2)
-/*
-
-map.width = w; map.height = h;
-map.cells = new (serverCell *)[w*h];
-
-for (i=0; i < w; i++)
-   for (j=0; j < h; j++) {
-	d = (i-CENTER)*(i-CENTER) + (j-CENTER)*(j-CENTER);
-	if (d>R1*R1) map.cells[coo2index(i,j)] = new serverCell(GROUND_SEA);
-	else if (d>R2*R2) map.cells[coo2index(i,j)] = new serverCell(GROUND_PLAIN);
-	else map.cells[coo2index(i,j)] = new serverCell(GROUND_DESERT);
-	}
-*/
 }
-#undef R2
-#undef R1
-#undef CENTER
-
 
 void  BosonServer::checkUnitVisibility(Unit *u)
 {
@@ -88,14 +61,10 @@ int		x = u->_x(),
 		y = u->_y();
 
 /* mobile don't need to fit the grid-layout */
-//printf("checking ");
 if (u->inherits("mobUnit")) {
-//	printf("mobile ");
 	x /= BO_TILE_SIZE;
 	y /= BO_TILE_SIZE;
 	}
-//else printf("facility ");
-//printf("at %d,%d\n", x, y);
 
 im = QMAX(0, x-dist) - x;
 iM = QMIN(map.width-1,	x+dist ) - x;
@@ -126,11 +95,6 @@ for (i=im ; i<=iM; i++)
 				sizeof(data.coo), &data);
 			}
 		}
-//	else printf("(%d,%d) not discovered\n", i, j);
-
-///orzel : should we ? 
-//player[0].buffer->flush();
-
 }
 
 void BosonServer::createMobUnit(uint who, uint x, uint y, mobType type)
@@ -179,6 +143,7 @@ for ( i=0; k; i++,k>>=1) {
 mobile.insert ( key++, u);
 checkUnitVisibility(u);
 }
+
 
 
 void BosonServer::createFixUnit(uint who, uint x, uint y, facilityType type)

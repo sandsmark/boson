@@ -45,10 +45,6 @@ class viewMap : public QObject
 
   int maxX(void) { return phys->maxX; }
   int maxY(void) { return phys->maxY; }
-/*   int	coo2index(int x, int y)
-	{ return maxY*x+y;}
-  void	index2coo(uint index, int &x, int &y)
-	{ x = index / maxY; y = index % maxY; } */
 
 ///orzel : should be moved private ?
   physMap	*phys;
