@@ -214,7 +214,7 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
   mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
   mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
   mProducer = cfg->readUnsignedNumEntry("Producer", 0);
-  mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
+  mProductionTime = (int)(cfg->readDoubleNumEntry("ProductionTime", 5) * 20.0f);
   mProduceAction = mTheme->action(cfg->readEntry("ProduceAction", ""));
   d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
   d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
@@ -236,6 +236,9 @@ bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
   d->mEntryList.remove("Pixmap");
   d->mEntryList.remove("RequireUnits");
   d->mEntryList.remove("RequireTechnologies");
+
+  convertEntries();
+
   return true;
 }
 
@@ -629,7 +632,7 @@ void UpgradeProperties::applyPropertyToUnits(bofixed oldvalue, bofixed newvalue,
 {
 #define my_funcinfo "[UpgradeProperties::applyPropertyToUnits(...)] "
   boDebug(600) << "          " << my_funcinfo <<
-      "PARAMS: oldvalue: " << oldvalue << "; newvalue: " << newvalue << 
+      "PARAMS: oldvalue: " << oldvalue << "; newvalue: " << newvalue <<
       "; typeId: " << typeId <<
       "; player: " << player << "; type: " << type << endl;
   //boDebug(600) << "      " << k_funcinfo << "Starting to apply" << endl;
@@ -703,6 +706,48 @@ QValueList<unsigned long int> UpgradeProperties::appliesToTypes(const Player* pl
     }
   }
   return list;
+}
+
+void UpgradeProperties::convertEntries()
+{
+  // Iterate through entries map and convert needed ones.
+  QMap<QString, QString>::Iterator it;
+  for(it = d->mEntryList.begin(); it != d->mEntryList.end(); it++)
+  {
+    QString key = it.key();
+    // If it's weapon's key, we have to do some preprocessing:
+    if(key.left(7) == "Weapon_")
+    {
+      int i = key.find(':');
+      if(i < 1)
+      {
+        // Invalid entry
+        continue;
+      }
+      // Extract "weapon key", e.g. Damage, Range etc. from key
+      key = key.right(key.length() - i - 1);  // -1 is ":"
+    }
+
+    // Convert from cells/second to cells/adv.call  (divide by 20)
+    if(key == "Speed")
+    {
+      // Can be both unit's or weapon's key
+      it.data() = QString::number(it.data().toFloat() / 20.0f);
+    }
+    else if(key == "UnitProductionTime")
+    {
+      it.data() = QString::number(it.data().toFloat() * 20.0f);
+    }
+    // Convert from seconds to adv.calls  (multiply by 20)
+    else if(key == "UnitProductionTime")
+    {
+      it.data() = QString::number(it.data().toFloat() * 20.0f);
+    }
+    else if(key == "Reload")
+    {
+      it.data() = QString::number(it.data().toFloat() * 20.0f);
+    }
+  }
 }
 
 
