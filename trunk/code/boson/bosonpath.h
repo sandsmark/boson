@@ -72,7 +72,7 @@ class BosonPath
     float dist(int ax, int ay, int bx, int by);
     float cost(int x, int y);
     inline void getFirst(vector<Node>&, Node& n);
-    inline void neighbor(short int& x, short int& y, Direction d);
+    inline void neighbor(int& x, int& y, Direction d);
     inline Direction reverseDir(Direction d);
 
     void debug() const;
