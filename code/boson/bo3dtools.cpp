@@ -457,8 +457,6 @@ void BoMatrix::scale(GLfloat x, GLfloat y, GLfloat z)
  mData[1] *= x;   mData[5] *= y;   mData[9]  *= z;
  mData[2] *= x;   mData[6] *= y;   mData[10] *= z;
  mData[3] *= x;   mData[7] *= y;   mData[11] *= z;
- // mesa now changes some flags. we don't do so. TODO: check if this might cause
- // trouble
 }
 
 void BoMatrix::multiply(const GLfloat* mat)
