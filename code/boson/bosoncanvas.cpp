@@ -222,9 +222,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			}
 			break;
 		case (int)UnitBase::WorkDestroyed:
-			if (advanceCount % 20 != 0) {
-				skip = true;
-			}
+			skip = false;
 			break;
 		case (int)UnitBase::WorkFollow:
 			if (advanceCount % 5 != 0) {
