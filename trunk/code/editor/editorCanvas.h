@@ -63,7 +63,7 @@ public:
 	void		addPlayer(void);
 
 signals:
-	void	nbPlayerChanged(int);
+	void	nbPlayerChanged(uint);
 
 protected:
 	void	loadSpecyTheme(uint i);

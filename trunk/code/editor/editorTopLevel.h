@@ -77,8 +77,10 @@ signals:
 
 public slots:
 	void slot_editDestroy(void);
-	void slot_addPlayer(void);
+	void slot_addPlayer(void);	// asked by user
 	void slot_close(void);
+
+	void slot_playerAdded(uint);	// sent by canvas
 
 protected:
 	virtual bool queryExit();

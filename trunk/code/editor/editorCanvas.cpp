@@ -54,6 +54,8 @@ bool editorCanvas::Load(QString filename)
 	// QCanvas configuratoin
 	resize(map_width, map_height);
 
+	// "who" combobox update
+	emit nbPlayerChanged(nbPlayer);
 	// Themes
 	for (uint i=0; i<nb_player(); i++)
 		loadSpecyTheme(i);
@@ -141,7 +143,7 @@ bool editorCanvas::New(groundType fill_ground, uint w, uint h, const QString &na
 	freeRessources();
 
 	/* boFile configuration */
-	nbPlayer = 0;	// nobody at beginning
+	emit nbPlayerChanged(nbPlayer = 0); // nobody at beginning
 	map_width = w;
 	map_height = h;
 	_worldName = name;

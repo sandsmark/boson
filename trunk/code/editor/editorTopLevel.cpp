@@ -353,6 +353,18 @@ void editorTopLevel::handleButton(int but)
 	} // switch(which)
 }
 
+
+void editorTopLevel::slot_playerAdded(uint np)
+{
+	QString pl;
+	qcb_who->clear();
+	for (uint i = 0; i<np; i++) {
+		pl = QString("Player %1").arg(i+1);	// let's print [1..n] instead of [0..n-1], users aren't developpers
+		qcb_who->insertItem(pl, i);
+	}
+}
+
+
 void editorTopLevel::makeCommandGui(void)
 {
 	int		i;
@@ -414,18 +426,13 @@ void editorTopLevel::makeCommandGui(void)
 
 	connect(qcb_transRef, SIGNAL(activated(int)), this, SLOT(setTransRef(int)));
 	
+
+/* the who box */
 	qcb_who = new QComboBox(mainFrame, "qcb_who");
 	qcb_who->setGeometry(130,82,90,30);
-
-	//XXXX
-	qcb_who->insertItem("User 0", 0);
-	qcb_who->insertItem("User 1", 1);
-//	qcb_who->insertItem("User 2", 2);
-//	qcb_who->insertItem("User 3", 3);
-
 	connect(qcb_who, SIGNAL(activated(int)), this, SLOT(_setWho(int)));
-	
-	
+	connect (ecanvas, SIGNAL(nbPlayerChanged(uint)), this, SLOT(slot_playerAdded(uint)) );
+
 /* QPushButton */
 	for (i=0; i<TILES_NB; i++){
 		tiles[i] = new QPushButton(mainFrame ,"tiles");
