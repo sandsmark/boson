@@ -1,10 +1,8 @@
-SUBDIRS = facilities game units
-
 # list all files that should be installed here. space separated.
-EXTRA_DIST=main.css index.html about.html faq.html installation.html intr.html started.html credits.html
+EXTRA_DIST=index.html buildfac.html buildunit.html scrolling.html
 
 # the language this directory contains
 KDE_LANG=en
 
 # just the appname. no need to change.
-KDE_DOCS=boson
+KDE_DOCS=boson/game
