@@ -373,7 +373,7 @@ void BosonCanvas::newShot(BosonShot* shot)
 	// the animation list!!)
 	// it won't hurt too much here, cause setAnimated(true) got never called
 	// for a new shot that is inactive. but its ugly anyway.
-	delete shot; 
+	delete shot;
  }
 }
 
