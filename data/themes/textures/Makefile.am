@@ -77,6 +77,8 @@ texture_DATA = \
 	wood2.jpg \
 	wood3.jpg \
 	wood4.jpg \
+	wood5.jpg \
+	treetop1.jpg \
 	hay1.jpg \
 	hay2.jpg \
 	water1.jpg
