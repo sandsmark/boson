@@ -187,7 +187,7 @@ switch(tag) {
 			(int)data->facility.type,
 			data->facility.x,
 			data->facility.y,
-			data->facility.key
+			data->facility.key,
 			data->facility.state
 			);
 		phys->createFix(data->facility);
