@@ -566,3 +566,30 @@ bool BosonCanvas::cellOccupied(int x, int y)
  */
 }
 
+bool BosonCanvas::cellOccupied(int x, int y, Unit* unit)
+{
+// qt bug (confirmed). will be fixed in 3.1
+#if QT_VERSION >= 310
+ QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+		BO_TILE_SIZE, BO_TILE_SIZE));
+#else
+ QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
+		BO_TILE_SIZE-1, BO_TILE_SIZE-1));
+#endif
+ if(list.isEmpty()) {
+	return false;
+ }
+ for (unsigned int i = 0; i < list.count(); i++) {
+	if (!RTTI::isUnit(list[i]->rtti()))
+		continue;
+	Unit* u = (Unit*)list[i];
+	if(u->isDestroyed())
+		continue;
+	if(u->isFlying())
+		continue;
+	if(u->id() == unit->id())
+		continue;
+	return true;
+ }
+ return false;
+}
