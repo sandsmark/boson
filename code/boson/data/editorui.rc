@@ -5,23 +5,17 @@
     <Action name="file_save_playfield_as" append="save_merge"/>
   </Menu>
   <Menu name="editor"><text>&amp;Editor</text>
-    <Menu name="place"><text>&amp;Place</text>
-      <Action name="editor_place_facilities" />
-      <Action name="editor_place_mobiles" />
-      <Action name="editor_place_cell_plain" />
-      <Action name="editor_place_cell_small" />
-      <Action name="editor_place_cell_big1" />
-      <Action name="editor_place_cell_big2" />
-    </Menu>
     <Action name="editor_player" />
+    <Action name="editor_place" />
     <Action name="editor_create_unit" />
     <Action name="editor_create_tiles" />
     <Action name="editor_create_debug_tiles" />
   </Menu>
 </MenuBar>
 <ToolBar>
-  <Action name="editor_build" />
   <Action name="editor_player" />
+  <Separator />
+  <Action name="editor_place" />
   <Action name="splitviewh" />
   <Action name="splitviewv" />
   <Action name="removeview" />
