@@ -1637,8 +1637,10 @@ class Bo3dTools
      * window-coordinates (relative to the OpenGL widget of course).
      **/
     static bool boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos);
+    static bool boProject(const BoGLMatrices& matrices, GLfloat x, GLfloat y, GLfloat z, QPoint* pos);
 
     static bool boUnProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, const QPoint& pos, BoVector3Float* v, float z = -1.0);
+    static bool boUnProject(const BoGLMatrices& matrices, const QPoint& pos, BoVector3Float* v, float z = -1.0);
 
     /**
      * This is a frontend to @ref boUnProject. It calculates the world-(aka
