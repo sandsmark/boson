@@ -28,13 +28,12 @@
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qdatetime.h>
+#include <qlabel.h>
 
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>
 #include <kfiledialog.h>
-
-// TODO: add a "browse" button to allow a normal KFileDialog to be used
 
 class KLoadSaveGameWidget::KLoadSaveGameWidgetPrivate
 {
@@ -46,7 +45,9 @@ public:
 
 		mButtonWidget = 0;
 		mButtonLayout = 0;
+		mTopButtonLayout = 0;
 		mSelectedGame = 0;
+		mNoGamesLabel = 0;
 	}
 
 	QDir mDir;
@@ -57,9 +58,11 @@ public:
 	QPushButton* mDeleteButton;
 
 	QWidget* mButtonWidget;
+	QVBoxLayout* mTopButtonLayout;
 	QVBoxLayout* mButtonLayout;
 	QPtrList<KSaveGameWidget> mButtons;
 	KSaveGameWidget* mSelectedGame;
+	QLabel* mNoGamesLabel;
 };
 
 KLoadSaveGameWidget::KLoadSaveGameWidget(bool save, const QString& suffix, QWidget* parent, const QString& dir)
@@ -100,11 +103,11 @@ void KLoadSaveGameWidget::init()
  scroll->addChild(d->mButtonWidget);
  topLayout->addWidget(scroll, 1);
 
- // this way we canuse d->mButtonLayout->addWidget() and can ignore the stretch
+ // this way we can use d->mButtonLayout->addWidget() and can ignore the stretch
  // area at the end
- QVBoxLayout* buttonLayout = new QVBoxLayout(d->mButtonWidget, 5, 5);
- d->mButtonLayout = new QVBoxLayout(buttonLayout);
- buttonLayout->addStretch(1);
+ d->mTopButtonLayout = new QVBoxLayout(d->mButtonWidget, 5, 5);
+ d->mButtonLayout = new QVBoxLayout(d->mTopButtonLayout);
+ d->mTopButtonLayout->addStretch(1);
 
  QWidget* bottom = new QWidget(this);
  topLayout->addWidget(bottom);
@@ -206,8 +209,13 @@ void KLoadSaveGameWidget::updateGames()
 	QString file = d->mDir.absPath() + QString::fromLatin1("/") + list[i];
 	readFile(file, i);
  }
- if (!d->mSave && list.count() == 0) {
-	// TODO: display "no games" label !
+ if (!d->mSave && d->mButtons.count() == 0) {
+	if (!d->mNoGamesLabel) {
+		d->mNoGamesLabel = new QLabel(i18n("No saved games available"), d->mButtonWidget);
+		d->mTopButtonLayout->addWidget(d->mNoGamesLabel, 5, AlignCenter);
+		d->mNoGamesLabel->show();
+		boDebug() << k_funcinfo << endl;
+	}
  }
 
  if (d->mSave) {
@@ -242,6 +250,7 @@ KSaveGameWidget* KLoadSaveGameWidget::addFile(const QString& file, const QString
 		boError() << k_funcinfo << "Cannot find button at " << position << endl;
 	}
  }
+ delete d->mNoGamesLabel;
 
  if (!w) {
 	// add to the end
