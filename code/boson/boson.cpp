@@ -1653,39 +1653,8 @@ void Boson::slotSendAdvance()
 
 Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
 {
- if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
-	return 0;
- }
- SpeciesTheme* theme = owner->speciesTheme();
- if (!theme) {
-	boError() << k_funcinfo << "No theme for this player" << endl;
-	return 0; // BAAAAD - will crash
- }
- const UnitProperties* prop = theme->unitProperties(unitType);
- if (!prop) {
-	boError() << k_funcinfo << "Unknown unitType " << unitType << endl;
-	return 0;
- }
-
- Unit* unit = 0;
- if (prop->isMobile()) {
-	unit = new MobileUnit(prop, owner, d->mCanvas);
- } else if (prop->isFacility()) {
-	unit = new Facility(prop, owner, d->mCanvas);
- } else { // should be impossible
-	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
-	return 0;
- }
- owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
- theme->loadNewUnit(unit);
- unit->setAnimationMode(UnitAnimationIdle);
- if (unit->isFlying()) {
-//	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
-	unit->moveBy(0.0f, 0.0f, 2.0);
- }
-
- return unit;
+ BO_CHECK_NULL_RET0(d->mCanvas);
+ return (Unit*)d->mCanvas->createItem(RTTI::UnitStart + unitType, unitType, owner);
 }
 
 Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)

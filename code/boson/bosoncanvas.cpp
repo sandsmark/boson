@@ -1390,3 +1390,43 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
  }
 }
 
+BosonItem* BosonCanvas::createItem(unsigned long int rtti, unsigned long int type, Player* owner)
+{
+ if (RTTI::isUnit(rtti)) {
+	return (BosonItem*)createUnit(type, owner);
+ }
+ return 0;
+}
+
+Unit* BosonCanvas::createUnit(unsigned long int unitType, Player* owner)
+{
+ BO_CHECK_NULL_RET0(owner);
+ SpeciesTheme* theme = owner->speciesTheme();
+ BO_CHECK_NULL_RET0(owner); // BAAAAD - will crash
+
+ const UnitProperties* prop = theme->unitProperties(unitType);
+ if (!prop) {
+	boError() << k_funcinfo << "Unknown unitType " << unitType << endl;
+	return 0;
+ }
+
+ Unit* unit = 0;
+ if (prop->isMobile()) {
+	unit = new MobileUnit(prop, owner, this);
+ } else if (prop->isFacility()) {
+	unit = new Facility(prop, owner, this);
+ } else { // should be impossible
+	boError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	return 0;
+ }
+ owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
+ theme->loadNewUnit(unit);
+ unit->setAnimationMode(UnitAnimationIdle);
+ if (unit->isFlying()) {
+//	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
+	unit->moveBy(0.0f, 0.0f, 2.0);
+ }
+
+ return unit;
+}
+
