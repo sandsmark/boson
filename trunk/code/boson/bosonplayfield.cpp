@@ -60,18 +60,12 @@ BosonPlayField::~BosonPlayField()
 
 QString BosonPlayField::defaultPlayField()
 {
-//TODO create a list of all playfield (search for .desktop files in boson/map/)
-// (AB: still boson/map ?? )
-// andlook if list contains "basic" - then check whether basic.bpf exists and return. 
-// Otherwise look for the first .desktop file which has a .bpf file exisiting.
-// Return that then.
-
-// QString bpf = KGlobal::dirs()->findResource("data", "boson/map/basic.bpf") + "boson/map/basic.bpf";// AB: still map?
-// kdDebug() << bpf << endl;
-
-
-
- return QString::fromLatin1("Basic");
+ QStringList list = availablePlayFields();
+ QString defaultField = list.grep(QString::fromLatin1("Basic")).first();
+ if (defaultField == QString::null) {
+	return list.first();
+ }
+ return defaultField;
 }
 
 QStringList BosonPlayField::availablePlayFields()
