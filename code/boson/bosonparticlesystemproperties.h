@@ -105,7 +105,7 @@ class BosonParticleSystemProperties
     float mMinLife, mMaxLife;
     int mMaxNum, mInitNum;
     int mGLBlendFunc;
-    float mRate, mStartSize, mEndSize, mAge, mMass;
+    float mRate, mStartSize, mEndSize, mAge, mMass, mParticleDist;
     bool mAlign;
     bool mMoveParticlesWithSystem;
     QString mTextureName;

@@ -1407,12 +1407,21 @@ void BosonBigDisplayBase::renderParticles()
  if (d->mParticlesDirty) {
 	BosonParticleSystem* s;
 	float x, y, z;
+	BoVector3 dir;
 	d->mParticleList.clear();
 	// Add all particles to the list
 	QPtrListIterator<BosonParticleSystem> visibleIt(visible);
 	s = 0;
 	for (; visibleIt.current(); ++visibleIt) {
 		s = visibleIt.current();
+		// If particleDist is non-zero, calculate vector for moving particles closer
+		//  to camera
+		if (s->particleDist() != 0.0f) {
+			dir = camera()->cameraPos() - s->position();
+			dir.scale(s->particleDist() / dir.length());
+			s->setParticleDistVector(dir);
+		}
+
 		for (int i = 0; i < s->mMaxNum; i++) {
 			if (s->mParticles[i].life > 0.0) {
 				p = &(s->mParticles[i]);
@@ -1484,16 +1493,32 @@ void BosonBigDisplayBase::renderParticles()
 		betweenbeginend = true;
 	}
 
-	if (p->system->mAlign) {
-		a = p->pos + ((-x + y) * p->size);
-		b = p->pos + (( x + y) * p->size);
-		c = p->pos + (( x - y) * p->size);
-		e = p->pos + ((-x - y) * p->size);
+	// Is it worth to duplicate this code just to save few vector additions for
+	//  systems with particleDist() == 0.0 ?
+	if (p->system->particleDist() != 0.0) {
+		if (p->system->mAlign) {
+			a = p->pos + ((-x + y) * p->size) + p->system->particleDistVector();
+			b = p->pos + (( x + y) * p->size) + p->system->particleDistVector();
+			c = p->pos + (( x - y) * p->size + p->system->particleDistVector());
+			e = p->pos + ((-x - y) * p->size) + p->system->particleDistVector();
+		} else {
+			a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
+			b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size) + p->system->particleDistVector();
+			c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
+			e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
+		}
 	} else {
-		a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size);
-		b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size);
-		c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size);
-		e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size);
+		if (p->system->mAlign) {
+			a = p->pos + ((-x + y) * p->size);
+			b = p->pos + (( x + y) * p->size);
+			c = p->pos + (( x - y) * p->size);
+			e = p->pos + ((-x - y) * p->size);
+		} else {
+			a = p->pos + (BoVector3(-0.5, 0.5, 0.0) * p->size);
+			b = p->pos + (BoVector3(0.5, 0.5, 0.0) * p->size);
+			c = p->pos + (BoVector3(0.5, -0.5, 0.0) * p->size);
+			e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size);
+		}
 	}
 
 	glColor4fv(p->color.data());  // Is it worth to cache color as well?
