@@ -42,10 +42,13 @@ class PathNode
 {
   public:
     PathNode() { x = 0; y = 0; g = 0; h = 0; };
-    int x;
-    int y;
-    float g;
-    float h;
+    int x; // x-coordinate of cell
+    int y; // y-coordinate of cell
+
+// AB: I don't fully understand these both (I HATE short names) - I hope this
+// description is correct
+    float g; // path cost of this node?? -> "cost" of the cells (ALL cells that the unit has crossed up to here)
+    float h; // distance of all cells the unit has crossed up to here
 };
 
 bool operator < (const PathNode& a, const PathNode& b)
@@ -195,8 +198,8 @@ bool BosonPath::findPath()
           mGoaly = node.y;
           kdDebug() << "oops - cannot go on target cell :-(" << endl;
           kdDebug() << "new goal x=" << mGoalx << ",y=" << mGoaly << endl;
-	  continue;
-	}
+          continue;
+        }
         kdDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
       }
@@ -240,7 +243,7 @@ bool BosonPath::findPath()
                 break;
               }
             }
-            if (find != open.end()) 
+            if (find == open.end()) 
             {
               kdError() << "find != open.end()" << endl;
               break; // or what?
@@ -285,13 +288,15 @@ bool BosonPath::findPath()
 // We don't add start
     int counter = 0;  // failsave
 //    kdDebug() << k_lineinfo << " before loop: x:" << x << "; y:" << y << endl;
+    // the directions pointing to the cells are in mark[x1][y1] -> x1,y1 starts
+    // at x,y (aka mGoalx,mGoaly) nad go to mStartx,mStarty
     while(((x != mStartx) || (y != mStarty)) && counter < 100)
     {
       counter++;
       // Add waypoint
       temp.push_back(wp);
       mPathLength++;
-      d = mark[x][y].dir;
+      d = mark[x][y].dir; // the direction to the next cell
 //      kdDebug() << k_lineinfo << " loop: x:" << x << "; y:" << y << "; d:" << (int)d << endl;
       neighbor(x, y, d);
       wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
@@ -300,7 +305,7 @@ bool BosonPath::findPath()
     }
     if (counter >= 100) 
     {
-      kdError() << k_lineinfo << "oops - counter >= 100" << endl;
+      kdWarning() << k_lineinfo << "oops - counter >= 100" << endl;
     }
 //    kdDebug() << "loop done" << endl;
 
