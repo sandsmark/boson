@@ -312,7 +312,7 @@ dnl PSL depends on UL, SG and SSG
 dnl In order to grant linking against static plib versions, we need to use
 dnl reverse dependency order, i.e. first link to PUI, then the libs it depends on
 
-nl  LIB_PLIB="-lplibpuaux -lplibpu -lplibfnt -lplibsg -lplibul"
+  LIB_PLIB="-lplibpuaux -lplibpu -lplibfnt -lplibsg -lplibul"
   LDFLAGS="$LDFLAGS $LIB_PLIB -lGL"
   CXXFLAGS="$CFLAGS $X_INCLUDES"
   bo_have_plib=""
