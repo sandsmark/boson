@@ -112,13 +112,13 @@ speed for a unit).
 Speed=Number         - Value of the speed of the unit. A unit will move that many
                        pixels per advance call. This is a double number so values
                        like "0.452463" are possible as well.
-		       Must be >= 0. Default is 0
+                       Must be >= 0. Default is 0
 CanGoOnLand=boolean  - Whether this unit can go over land. 
                        This is true by default for TerrainType = Land or
-		       Aircraft.
+                       Aircraft.
 CanGoOnWater=boolean - Whether this unit can go over water. 
                        This is true by default for TerrainType = Water or 
-		       Aircraft.
+                       Aircraft.
 CanMineMinerals=boolean - Whether this unit can mine minerals.
                           Default is false.
 CanMineOil=boolean   - Whether this unit can mine oil.
@@ -149,4 +149,28 @@ ConstructionSteps=Number  - Number of frames for the construction (when the
                             Default is 0
 -------------------------------------------------------------------------------
 
+
+
+Another group shared by all units (but it is not mandatory) is the textures
+group. Since .3ds files seem to allow filenames of 8+3 length only we are
+mapping those "short names" to "real names" here. If a texture doesn't have an
+entry here it will use the "short name".
+
+-------------------------------------------------------------------------------
+[Textures]
+Textures=List            -  List of textures. Only the "short name" that should
+                           get mapped have to be listed here. All listed files
+                           need to have an entry in this group (if it isn't 
+                           there it is ignored. no error).
+                           Defaul is an empty list
+texture.jpg=LongName.jpg - "texture.jpg" is the "short name" of the texture,
+                           i.e. the name as listed in the model (.3ds) file. It
+                           must be listed in the "Textures=" entry (see above).
+                           It must be lowercase! (even if it is uppercase in the
+                           model file)
+                           "LongName.jpg" is the filename that gets used instead
+                           of the "short name". Case sensitve (but doesn't
+                           matter, since filename in boson should be lowercase
+                           anyway).
+-------------------------------------------------------------------------------
 
