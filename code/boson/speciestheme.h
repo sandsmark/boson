@@ -71,7 +71,7 @@ public:
 	 *
 	 * Note that loadTheme is quite fast as it does <em>not</em> preload the
 	 * pixmaps of the units. These are loaded as soon as a unit is accessed
-	 * first time. 
+	 * first time.
 	 * @param species The theme name to be loaded. Must not be i18n'ed as it
 	 * is used in the directoryname.
 	 * @param teamColor The color of this team or QColor(0,0,0) for a default
@@ -110,6 +110,12 @@ public:
 	 * @return Pixmap for the specified action
 	 **/
 	QPixmap* actionPixmap(UnitAction action);
+
+	/**
+	 * @return The i18n'ed name of the specified unit action. Can be used
+	 * e.g. in tooltips
+	 **/
+	static QString unitActionName(UnitAction action);
 
 	QPixmap* techPixmap(unsigned long int techType);
 

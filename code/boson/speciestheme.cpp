@@ -34,6 +34,7 @@
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
+#include <klocale.h>
 
 #include <qpixmap.h>
 #include <qimage.h>
@@ -276,6 +277,31 @@ QPixmap* SpeciesTheme::actionPixmap(UnitAction action)
 {
  // check for NULL?
  return mData->actionPixmap(action);
+}
+
+QString SpeciesTheme::unitActionName(UnitAction action)
+{
+ switch (action) {
+	case ActionAttack:
+		return i18n("Attack");
+	case ActionMove:
+		return i18n("Move");
+	case ActionStop:
+		return i18n("Stop");
+	case ActionFollow:
+		return i18n("Follow");
+	case ActionMine:
+		return i18n("Mine");
+	case ActionRepair:
+		return i18n("Repair");
+	case ActionBuild:
+		return i18n("Build");
+	case ActionChangeHeight:
+		return i18n("Change Height");
+	default:
+		break;
+ }
+ return QString::null;
 }
 
 void SpeciesTheme::loadNewUnit(UnitBase* unit)
