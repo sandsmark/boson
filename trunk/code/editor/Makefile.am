@@ -33,8 +33,7 @@ bin_PROGRAMS = boeditor
 boeditor_METASOURCES = USE_AUTOMOC
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boeditor_SOURCES = boeditor.cpp editorView.cpp main.cpp mainView.cpp miniDisplay.cpp editorField.cpp editorBigDisplay.cpp newDlg.cpp
-boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lkfile -lkdeui -lkdecore -lQwSpriteField -lqt -lXext -lX11 #$(LIBSOCKET)
-
+boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a -lQwSpriteField $(LIB_KDEUI)
 
 #(un)install stuff
 install-data-local:
