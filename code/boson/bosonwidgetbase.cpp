@@ -200,13 +200,13 @@ void BosonWidgetBase::initMiniMap()
 		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
  connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
 		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
- connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
+ connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
 		minimap(), SLOT(slotUnitDestroyed(Unit*)));
 }
 
 void BosonWidgetBase::initConnections()
 {
- connect(canvas(), SIGNAL(signalUnitDestroyed(Unit*)),
+ connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
 		this, SLOT(slotRemoveUnit(Unit*)));
 
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),

@@ -187,11 +187,11 @@ void EditorWidget::initKActions()
 		this, SLOT(slotPlaceCellSmall()), actionCollection(),
 		"editor_place_cell_small");
  d->mActionCellSmall->setExclusiveGroup("Place");
- d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(), 
+ d->mActionCellPlain = new KRadioAction(i18n("&Plain"), KShortcut(),
 		this, SLOT(slotPlaceCellPlain()), actionCollection(),
 		"editor_place_cell_plain");
  d->mActionCellPlain->setExclusiveGroup("Place");
- d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(), 
+ d->mActionCellBig1 = new KRadioAction(i18n("&Big1"), KShortcut(),
 		this, SLOT(slotPlaceCellBig1()),actionCollection(),
 		"editor_place_cell_big1");
  d->mActionCellBig1->setExclusiveGroup("Place");
@@ -199,6 +199,10 @@ void EditorWidget::initKActions()
 		this, SLOT(slotPlaceCellBig2()),actionCollection(),
 		"editor_place_cell_big2");
  d->mActionCellBig2->setExclusiveGroup("Place");
+
+ (void)new KAction(i18n("Delete selected unit"), KShortcut(Qt::Key_Delete), displayManager(),
+		  SLOT(slotDeleteSelectedUnits()), actionCollection(),
+		  "editor_delete_selected_unit");
 
 // (void)new KAction(i18n("&Create Custom Unit"), KShortcut(), this,
 //		  SLOT(slotCreateUnit()), actionCollection(),

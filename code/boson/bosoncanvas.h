@@ -125,6 +125,19 @@ public:
 	 **/
 	void destroyUnit(Unit* unit);
 
+	/**
+	 * Prepare the unit to be deleted. Remove the unit from the player and
+	 * so on. This doesn't play any sound or so, so it can be used in
+	 * editor, too.
+	 *
+	 * For game mode please use @ref destroyUnit instead, which is a
+	 * frontend for this.
+	 *
+	 * Note that this function doesn't add the unit to any deletion list and
+	 * it doesn't delete the unit either.
+	 **/
+	void removeUnit(Unit* unit);
+
 	void updateSight(Unit*, float oldX, float oldY);
 
 	Cell* cellAt(Unit* unit) const;
@@ -231,7 +244,7 @@ public slots:
 	
 signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
-	void signalUnitDestroyed(Unit* unit);
+	void signalUnitRemoved(Unit* unit);
 	void signalOutOfGame(Player*);
 
 protected:

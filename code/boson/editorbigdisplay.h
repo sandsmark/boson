@@ -79,6 +79,11 @@ public:
 	 **/
 	virtual void placeCell(int);
 
+	/**
+	 * Delete the currently selected units
+	 **/
+	virtual void deleteSelectedUnits();
+
 public slots:
 
 protected:
