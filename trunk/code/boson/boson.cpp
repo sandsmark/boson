@@ -800,12 +800,12 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotAdvanceComputerPlayers(unsigned int, bool)));
  connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
- d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
-		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mGamePaused.registerData(IdGamePaused, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GamePaused");
- d->mGameSpeed.setLocal(0);
+ d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
+		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mGamePaused.setLocal(false);
+ d->mGameSpeed.setLocal(0);
 
  setMinPlayers(1);
 }
