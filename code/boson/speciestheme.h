@@ -102,7 +102,7 @@ public:
 
 	void loadActions();
 
-	const BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
+	const BosonParticleSystemProperties* particleSystemProperties(unsigned long int id);
 
 	/**
 	 * @return The i18n'ed name of the specified unit action. Can be used
