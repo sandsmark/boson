@@ -358,7 +358,16 @@ void BosonShotMissile::advanceMoveInternal()
   // Increase distance that missile has flied
   mPassedDist = mPassedDist + speed();
   // Calculate parable height at current step
-  bofixed factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
+  bofixed factor;
+  if (mTotalDist == 0)
+  {
+    boError() << k_funcinfo << "mTotalDist == 0 is not allowed" << endl;
+    factor = 0;
+  }
+  else
+  {
+    factor = mPassedDist / mTotalDist - 0.5;  // Factor will be in range -0.5 to 0.5
+  }
   factor = -4 * (factor * factor) + 1;  // Factor is now  0 ... 1 ... 0  depending of current step
   // How much will be added to current z position
   bofixed addZ = (mMaxHeight * factor);
