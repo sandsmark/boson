@@ -336,7 +336,7 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return;
  }
- d->mOrderType = index;
+ d->mOrderType = (OrderType)index;
  switch (d->mOrderType) {
 	case OrderPlainTiles:
 	case OrderSmall:
