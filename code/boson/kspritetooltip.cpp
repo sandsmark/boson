@@ -131,7 +131,7 @@ void KSpriteToolTip::maybeTip(const QPoint& p)
  QString text = tipManager->tip(item);
 
  if (text != QString::null) {
-	tip (QRect (p, p), text); // display the tool tip
+	tip (QRect (item->boundingRect()), text); // display the tool tip
  }
 }
 
