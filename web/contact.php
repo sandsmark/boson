@@ -54,14 +54,14 @@ main_area_begin();
 draw_bigbox_begin("Contact us");
 draw_bigbox_subheader("<a name=\"mail\"></a>Mailing lists");
 draw_bigbox_text("There are three mailing lists.<br><br>
-    <a href=\"mailto:boson-devel@lists.sourceforge.net\">boson-devel@lists.sourceforge.net</a>
+    <a href=\"mailto:boson-devel@__NO_SPAM__lists.sourceforge.net\">boson-devel at lists.sourceforge.net</a>
     is meant for users and developers. If you have questions or problems, you can always come there and ask.
     Note that you have to subscribe or you message needs some days to reach the list. Also include a note
     if you aren't on list so the other users can CC you.<br>
     <br>
-    boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post there.<br>
+    boson-cvs at lists.sourceforge.net is only meant for CVS logs, please do not post there.<br>
     <br>
-    boson-bugs@lists.sourceforge.net is also not meant for posting, bug reports are sent there.
+    boson-bugs at lists.sourceforge.net is also not meant for posting, bug reports are sent there.
     See below on how to report bugs.
     <br><br>
     You can subscribe and unsubscribe them
