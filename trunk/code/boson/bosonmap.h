@@ -149,7 +149,14 @@ public slots:
 signals:
 	void signalTileSetChanged(BosonTiles*);
 
-	void signalTilesLoading(int);
+	/**
+	 * See @ref BosonMap::signalTilesLoading
+	 **/
+	void signalTilesLoading(int tiles);
+
+	/**
+	 * See @ref BosonMap::signalTilesLoaded
+	 **/
 	void signalTilesLoaded();
 
 protected:

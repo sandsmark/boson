@@ -119,9 +119,14 @@ void BosonLoadingWidget::setProgress(int prog)
   mProgress->setProgress(prog);
 }
 
-void BosonLoadingWidget::setSteps(int steps)
+void BosonLoadingWidget::setTotalSteps(int steps)
 {
   mProgress->setTotalSteps(steps);
+}
+
+void BosonLoadingWidget::setTotalSteps(int steps, int playerCount)
+{
+ steps += playerCount * unitDataLoadingFactor();
 }
 
 void BosonLoadingWidget::showProgressBar(bool show)

@@ -167,10 +167,10 @@ QString BosonProfilingDialog::profilingName(int profilingEvent) const
 		name = i18n("ProfilingEnd (Invalid here! Please send a Bug report");
 		break;
 	case BosonProfiling::LoadGameData1:
-		name = i18n("LoadGameData1");
+		name = i18n("LoadGameData1 (currently unused)");
 		break;
-	case BosonProfiling::LoadGameData2:
-		name = i18n("LoadGameData2");
+	case BosonProfiling::LoadTiles:
+		name = i18n("LoadTiles");
 		break;
 	case BosonProfiling::LoadGameData3:
 		name = i18n("LoadGameData3");

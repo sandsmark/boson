@@ -27,6 +27,7 @@
 #include <knuminput.h>
 #include <klocale.h>
 #include <kmessagebox.h>
+#include <kdebug.h>
 
 #include <qbuttongroup.h>
 #include <qgroupbox.h>
@@ -44,6 +45,11 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* pa
     : QWidget(parent)
 {
   mTop = top;
+  if (!boGame)
+  {
+    kdError() << k_funcinfo << "NULL Boson object" << endl;
+    return;
+  }
 
   mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout");
 
@@ -167,14 +173,14 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* pa
   connect(mDisconnectButton, SIGNAL(clicked()), this, SLOT(slotDisconnect()));
   connect(mStartNetworkButton, SIGNAL(clicked()), this, SLOT(slotStartNetwork()));
   connect(mConnectionStyleGroup, SIGNAL(clicked(int)), this, SLOT(slotConnectionTypeChanged(int)));
-  connect(game(), SIGNAL(signalConnectionBroken()), this, SLOT(slotConnectionBroken()));
+  connect(boGame, SIGNAL(signalConnectionBroken()), this, SLOT(slotConnectionBroken()));
   connect(mOkButton, SIGNAL(clicked()), this, SIGNAL(signalOkClicked()));
   
   mHostEdit->setText("localhost");
   mPortEdit->setValue(BOSON_PORT);
   mConnectionStyleGroup->setButton(0);
   slotConnectionTypeChanged(0);
-  setConnected(game()->isNetwork(), game()->isMaster());
+  setConnected(boGame->isNetwork(), boGame->isMaster());
 }
 
 /*  
@@ -187,7 +193,7 @@ BosonNetworkOptionsWidget::~BosonNetworkOptionsWidget()
 
 void BosonNetworkOptionsWidget::slotDisconnect()
 {
-  game()->disconnect();
+  boGame->disconnect();
   setConnected(false, false);
 }
 
@@ -200,12 +206,12 @@ void BosonNetworkOptionsWidget::slotStartNetwork()
   if(! mHostEdit->isEnabled())
   {
     master = true;
-    connected = game()->offerConnections(port);
+    connected = boGame->offerConnections(port);
   }
   else
   {
     master = false;
-    connected = game()->connectToServer(host, port);
+    connected = boGame->connectToServer(host, port);
   }
   setConnected(connected, master);
 }
@@ -247,10 +253,5 @@ void BosonNetworkOptionsWidget::slotConnectionBroken()
 {
   setConnected(false, false);
   KMessageBox::error(this, i18n("Cannot Connect to Network!"));
-}
-
-Boson* BosonNetworkOptionsWidget::game()
-{
-  return mTop->game();
 }
 

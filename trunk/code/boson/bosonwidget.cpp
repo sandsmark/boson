@@ -89,10 +89,10 @@ void BosonWidget::initConnections()
 		this, SLOT(slotOutOfGame(Player*)));
 
  // this does the actual game. note that editor must not have this!
- connect(game(), SIGNAL(signalAdvance(unsigned int, bool)),
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		canvas(), SLOT(slotAdvance(unsigned int, bool)));
 
- connect(game(), SIGNAL(signalInitFogOfWar()),
+ connect(boGame, SIGNAL(signalInitFogOfWar()),
 		this, SLOT(slotInitFogOfWar()));
 }
 
@@ -118,9 +118,9 @@ void BosonWidget::initPlayer()
 BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
 {
  BosonCommandFrame* frame = new BosonCommandFrame(parent);
- connect(game(), SIGNAL(signalUpdateProduction(Unit*)),
+ connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 		frame, SLOT(slotUpdateProduction(Unit*)));
- connect(game(), SIGNAL(signalUpdateProductionOptions()),
+ connect(boGame, SIGNAL(signalUpdateProductionOptions()),
 		frame, SLOT(slotUpdateProductionOptions()));
 
  //AB: can we use the same input for the editor?
@@ -132,7 +132,7 @@ BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
 {
  kdDebug() << k_funcinfo << endl;
- if (!game()->gameMode()) {
+ if (!boGame->gameMode()) {
 	// editor mode
 	mode = CursorKDE;
  }
@@ -203,7 +203,7 @@ void BosonWidget::slotGamePreferences()
  }
 
  OptionsDialog* dlg = new OptionsDialog(this);
- dlg->setGame(game());
+ dlg->setGame(boGame);
  dlg->setPlayer(localPlayer());
  dlg->slotLoad();
 
@@ -228,9 +228,9 @@ void BosonWidget::slotOutOfGame(Player* p)
  //  use it instead
  int inGame = 0;
  Player* winner = 0;
- for (unsigned int i = 0; i < game()->playerList()->count(); i++) {
-	if (!((Player*)game()->playerList()->at(i))->isOutOfGame()) {
-		winner = (Player*)game()->playerList()->at(i);
+ for (unsigned int i = 0; i < boGame->playerList()->count(); i++) {
+	if (!((Player*)boGame->playerList()->at(i))->isOutOfGame()) {
+		winner = (Player*)boGame->playerList()->at(i);
 		inGame++;
 	}
  }
@@ -238,10 +238,10 @@ void BosonWidget::slotOutOfGame(Player* p)
 	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
 	delete d->mGameOverDialog;
 	d->mGameOverDialog = new GameOverDialog(this);
-	d->mGameOverDialog->createStatistics(game(), winner, localPlayer());
+	d->mGameOverDialog->createStatistics(boGame, winner, localPlayer());
 	d->mGameOverDialog->show();
 	connect(d->mGameOverDialog, SIGNAL(finished()), this, SLOT(slotGameOverDialogFinished()));
-	game()->setGameStatus(KGame::End);
+	boGame->setGameStatus(KGame::End);
  } else if (!winner) {
 	kdError() << k_funcinfo << "no player left ?!" << endl;
 	return;
@@ -301,7 +301,7 @@ void BosonWidget::saveConfig()
   // note: the game is *not* saved here! just general settings like game speed,
   // player name, ...
  kdDebug() << k_funcinfo << endl;
- if (!game()) {
+ if (!boGame) {
 	kdError() << k_funcinfo << "NULL game" << endl;
 	return;
  }
@@ -312,7 +312,7 @@ void BosonWidget::saveConfig()
  BosonWidgetBase::saveConfig();
 
  BosonConfig::saveLocalPlayerName(localPlayer()->name());
- BosonConfig::saveGameSpeed(game()->gameSpeed());
+ BosonConfig::saveGameSpeed(boGame->gameSpeed());
  if (cursor()) {
 	if (cursor()->isA("BosonOpenGLCursor")) {
 		boConfig->saveCursorMode(CursorOpenGL);

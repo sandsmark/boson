@@ -58,6 +58,12 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 {
   mTop = top;
 
+  if (!boGame)
+  {
+    kdError() << k_funcinfo << "NULL Boson object" << endl;
+    return;
+  }
+
   initKGame();
   initPlayer();
 
@@ -184,7 +190,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   */
 
   mChatWidget = new KGameChat(0, BosonMessage::IdChat, this );
-  mChatWidget->setKGame(game());
+  mChatWidget->setKGame(boGame);
   mChatWidget->setFromPlayer(player());
   mMainLayout->addWidget( mChatWidget );
 
@@ -219,8 +225,8 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   initMaps();
   initSpecies();
   initColors();
-  mAdmin = !game()->isAdmin(); // hack to make slotSetAdmin() think, that admin status changed
-  slotSetAdmin(game()->isAdmin());
+  mAdmin = !boGame->isAdmin(); // hack to make slotSetAdmin() think, that admin status changed
+  slotSetAdmin(boGame->isAdmin());
 
   // signals and slots connections
   connect(mRemovePlayerButton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
@@ -251,18 +257,18 @@ BosonNewGameWidget::~BosonNewGameWidget()
 /*****  Init* methods  *****/
 void BosonNewGameWidget::initKGame()
 {
-  connect(game(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), this, SLOT(slotPlayerJoinedGame(KPlayer*)));
-  connect(game(), SIGNAL(signalPlayerLeftGame(KPlayer*)), this, SLOT(slotPlayerLeftGame(KPlayer*)));
-  connect(game(), SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotMapChanged(const QString&)));
-  connect(game(), SIGNAL(signalSpeciesChanged(Player*)), this, SLOT(slotSpeciesChanged(Player*)));
-  connect(game(), SIGNAL(signalTeamColorChanged(Player*)), this, SLOT(slotColorChanged(Player*)));
+  connect(boGame, SIGNAL(signalPlayerJoinedGame(KPlayer*)), this, SLOT(slotPlayerJoinedGame(KPlayer*)));
+  connect(boGame, SIGNAL(signalPlayerLeftGame(KPlayer*)), this, SLOT(slotPlayerLeftGame(KPlayer*)));
+  connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotMapChanged(const QString&)));
+  connect(boGame, SIGNAL(signalSpeciesChanged(Player*)), this, SLOT(slotSpeciesChanged(Player*)));
+  connect(boGame, SIGNAL(signalTeamColorChanged(Player*)), this, SLOT(slotColorChanged(Player*)));
   
   // We must manually set maximum players number to some bigger value, because
   //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
   //  players (it's a bug actually)
-  game()->setMaxPlayers(BOSON_MAX_PLAYERS);
-  kdDebug() << k_funcinfo << " minPlayers(): " << game()->minPlayers() << endl;
-  kdDebug() << k_funcinfo << " maxPlayers(): " << game()->maxPlayers() << endl;
+  boGame->setMaxPlayers(BOSON_MAX_PLAYERS);
+  kdDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
+  kdDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 }
 
 void BosonNewGameWidget::initPlayer()
@@ -279,9 +285,9 @@ void BosonNewGameWidget::initPlayer()
     mPlayercolor = boConfig->readLocalPlayerColor();
     player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
   }
-  game()->addPlayer(player());*/
+  boGame->addPlayer(player());*/
 
-  kdDebug() << k_funcinfo << "playerCount(): " << game()->playerCount() << endl;
+  kdDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
   player()->setName(boConfig->readLocalPlayerName());
   if(player()->speciesTheme())
   {
@@ -289,7 +295,7 @@ void BosonNewGameWidget::initPlayer()
   }
   mPlayercolor = boConfig->readLocalPlayerColor();
   player()->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), mPlayercolor);
-  game()->addPlayer(player());
+  boGame->addPlayer(player());
 }
 
 void BosonNewGameWidget::initMaps()
@@ -307,7 +313,7 @@ void BosonNewGameWidget::initMaps()
   }
   mMapCombo->setCurrentItem(0);
   mMap = 0;
-  if(game()->isAdmin())
+  if(boGame->isAdmin())
     slotMyMapChanged(0);
 }
 
@@ -334,7 +340,7 @@ void BosonNewGameWidget::initColors()
 {
   mAvailableColors.clear();
   mColorCombo->clear();
-  mAvailableColors = game()->availableTeamColors();
+  mAvailableColors = boGame->availableTeamColors();
   mAvailableColors.prepend(player()->speciesTheme()->teamColor());
   for(unsigned int i = 0; i < mAvailableColors.count(); i++)
   {
@@ -366,12 +372,12 @@ void BosonNewGameWidget::slotMyColorChanged(int index)
   QDataStream stream(buffer, IO_WriteOnly);
   stream << (Q_UINT32)player()->id();
   stream << (Q_UINT32)mPlayercolor.rgb();
-  game()->sendMessage(buffer, BosonMessage::ChangeTeamColor);
+  boGame->sendMessage(buffer, BosonMessage::ChangeTeamColor);
 }
 
 void BosonNewGameWidget::slotMyMapChanged(int index)
 {
-  if (!game()->isAdmin())
+  if (!boGame->isAdmin())
   {
     kdWarning() << "Only admin can change the map" << endl;
     return;
@@ -386,7 +392,7 @@ void BosonNewGameWidget::slotMyMapChanged(int index)
   // transmit the identifier/name so that the remote newgame dialogs will be able
   // to display the newly selected playfield
   stream << mMapIndex2Identifier[index];
-  game()->sendMessage(buffer, BosonMessage::ChangePlayField);
+  boGame->sendMessage(buffer, BosonMessage::ChangePlayField);
 }
 
 void BosonNewGameWidget::slotMySpeciesChanged(int index)
@@ -400,15 +406,15 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
   QDataStream stream(buffer, IO_WriteOnly);
   stream << (Q_UINT32)player()->id();
   stream << mSpeciesIndex2Identifier[index];
-  stream << mPlayercolor; //d->game()->availableTeamColors().first().rgb();
-  game()->sendMessage(buffer, BosonMessage::ChangeSpecies);
+  stream << mPlayercolor; //d->boGame->availableTeamColors().first().rgb();
+  boGame->sendMessage(buffer, BosonMessage::ChangeSpecies);
 }
 
 /*****  slots where some other player has changed something  *****/
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << "there are " << game()->playerList()->count() << " players in game now" << endl;
+  kdDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
   QListBoxText* t = new QListBoxText(p->name());
   mItem2Player.insert(t, p);
   mPlayersList->insertItem(t);
@@ -421,7 +427,7 @@ void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 
 void BosonNewGameWidget::slotPlayerLeftGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << "there are " << game()->playerList()->count() << " players in game now" << endl;
+  kdDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
   this->disconnect(p);
   QPtrDictIterator<KPlayer> it(mItem2Player);
   while(it.current())
@@ -470,7 +476,7 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
       int index = it.key();
       mMap = index;
       mMapName->setText(mMapCombo->text(index));
-      if(game()->isAdmin())
+      if(boGame->isAdmin())
       {
         // Init map to be able to check max/min players count
         kdDebug() << k_funcinfo << " Loading map, index: " << index << ", name: " << playFieldString() << endl;
@@ -497,24 +503,24 @@ void BosonNewGameWidget::slotColorChanged(Player*)
 
 void BosonNewGameWidget::slotStart()
 {
-  if (!game()->isAdmin())
+  if (!boGame->isAdmin())
   {
     // should not happen anyway
     KMessageBox::sorry(this, i18n("Only ADMIN can start a game"));
     return;
   }
-  if((int)game()->playerCount() > mMaxPlayers)
+  if((int)boGame->playerCount() > mMaxPlayers)
   {
     KMessageBox::sorry(this, i18n("There are too many players in game.\n"
         "Current map supports only %1 players, currently, there are %2 players in game.\n"
-        "Please remove some players.").arg(mMaxPlayers).arg(game()->playerCount()),
+        "Please remove some players.").arg(mMaxPlayers).arg(boGame->playerCount()),
         i18n("Too many players"));
   }
-  else if((int)game()->playerCount() < mMinPlayers)
+  else if((int)boGame->playerCount() < mMinPlayers)
   {
     KMessageBox::sorry(this, i18n("There are too few players in game.\n"
         "Current map requires at least %1 players, currently, there are only %2 players in game.\n"
-        "Please add some players.").arg(mMinPlayers).arg(game()->playerCount()),
+        "Please add some players.").arg(mMinPlayers).arg(boGame->playerCount()),
         i18n("Too few players"));
   }
   else
@@ -525,19 +531,19 @@ void BosonNewGameWidget::slotStart()
 
 void BosonNewGameWidget::slotAddAIPlayer()
 {
-  if(!game())
+  if(!boGame)
   {
     return;
   }
   Player* p = new Player();
   p->setName(mAddAIName->text());
-  QColor color = game()->availableTeamColors().first();
+  QColor color = boGame->availableTeamColors().first();
   p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
   BosonComputerIO* io = new BosonComputerIO();
   io->setReactionPeriod(50);
   p->addGameIO(io);
-  game()->addPlayer(p);
+  boGame->addPlayer(p);
 }
 
 void BosonNewGameWidget::slotCancel()
@@ -553,7 +559,7 @@ void BosonNewGameWidget::slotRemovePlayer()
   }
   else
   {
-    game()->removePlayer(mHighlightedPlayer);
+    boGame->removePlayer(mHighlightedPlayer);
   }
 }
 
@@ -570,7 +576,7 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
     mRemovePlayerButton->setEnabled(false);
     return;
   }
-  if(game()->isAdmin() || !mHighlightedPlayer->isVirtual())
+  if(boGame->isAdmin() || !mHighlightedPlayer->isVirtual())
   {
     mRemovePlayerButton->setEnabled(true);
   }
@@ -608,11 +614,6 @@ QString BosonNewGameWidget::playFieldString() const
   return mMapIndex2Identifier[mMap];
 }
 
-Boson* BosonNewGameWidget::game() const
-{
-  return mTop->game();
-}
-
 Player* BosonNewGameWidget::player() const
 {
   return mTop->player();
@@ -626,6 +627,6 @@ BosonPlayField* BosonNewGameWidget::playField() const
 void BosonNewGameWidget::sendNewGame()
 {
   slotMyNameChanged();
-  game()->sendMessage(0, BosonMessage::IdNewGame);
+  boGame->sendMessage(0, BosonMessage::IdNewGame);
 }
 

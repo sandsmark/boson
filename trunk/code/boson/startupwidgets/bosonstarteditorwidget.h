@@ -72,7 +72,6 @@ class BosonStartEditorWidget : public QWidget
   private:
     void initKGame();
     void initPlayer();
-    Boson* game() const;
     Player* player() const;
     BosonPlayField* playField() const;
 
