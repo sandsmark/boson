@@ -288,20 +288,3 @@ QString BPFFile::fileNameToIdentifier(const QString& fileName)
  return fileInfo.fileName();
 }
 
-
-BSGFile::BSGFile(const QString& fileName, bool readOnly) : BoFile(fileName, readOnly)
-{
-}
-
-BSGFile::~BSGFile()
-{
-}
-
-bool BSGFile::checkTar() const
-{
- if (!BoFile::checkTar()) {
-	return false;
- }
- return true;
-}
-

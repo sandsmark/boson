@@ -347,7 +347,7 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	boError() << k_funcinfo << "no descriptionXML found" << endl;
 	return false;
  }
- BSGFile f(file, false);
+ BPFFile f(file, false);
  if (!f.writeFile(QString::fromLatin1("kgame.xml"), QString(kgameXML))) {
 	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
 	return false;
