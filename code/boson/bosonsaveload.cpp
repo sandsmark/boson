@@ -249,7 +249,7 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files)
 bool BosonSaveLoad::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
 {
  // first we save a complete game.
- static int profilingId = boProfiling->requestEventId("savePlayFieldToFiles()");
+ static int profilingId = boProfiling->requestEventId("SavePlayFieldToFiles()");
  BosonProfiler prof(profilingId);
  bool ret = saveToFiles(files);
  if (!ret) {
