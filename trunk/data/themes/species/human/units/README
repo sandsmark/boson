@@ -274,7 +274,11 @@ DamageRange=Number
         In how big range this weapon's shot can damages other units?
         E.g. if it's 2, all units two or less cells away from the
         explosion will get damaged.
-        Must be >= 0. Default is 0.
+        Must be >= 0. Default is 1.
+FullDamageRange=Number
+        Specifys the range where all units will be fully damaged.
+        Must not be bigger than DamageRange. Default is 1.
+        
 MaxHeight=Number
         What's the maximum height of missile of this weapon when it flies. If
         you increase this, your missiles will fly with bigger arc.
