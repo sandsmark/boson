@@ -66,10 +66,10 @@ protected:
 //  virtual void drawContents( QPainter*, int cx, int cy, int cw, int ch );
 
 //  virtual void paintEvent(QPaintEvent *evt);
-  virtual void mousePressEvent(QMouseEvent *e);
-  virtual void mouseMoveEvent(QMouseEvent *e);
-  virtual void mouseReleaseEvent(QMouseEvent *e);
-  virtual void resizeEvent(QResizeEvent *e);
+  virtual void viewportMousePressEvent(QMouseEvent *e);
+  virtual void viewportMouseMoveEvent(QMouseEvent *e);
+  virtual void viewportMouseReleaseEvent(QMouseEvent *e);
+  virtual void resizeEvent(QResizeEvent *e); // do we receive this one ?
 
   visualTopLevel	*vtl;
 
