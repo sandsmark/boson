@@ -23,7 +23,6 @@ checkvisibility -> units
 use different pixmap according to 'direction'
 server : check that each unit does max 1 move each jiffie
 version check whithin the ask_connect msg
-map : inheritate Cell, and put serverCell back in server dir
 
 check that loading of pixmap has been done well
 	OK for species, ground still needs checking
@@ -32,6 +31,7 @@ check that loading of pixmap has been done well
 #boAssert( celldiscovered has j<max) seems to have problems
 #integration of Ben mobiles (with different colors)
 #click-zone for selection is still badly centered
+#map : inheritate Cell, and put serverCell back in server dir
 
 check Makefile.am for installation "make install"
 
