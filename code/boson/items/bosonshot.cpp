@@ -187,14 +187,15 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShot::save(QDataStream& stream)
+bool BosonShot::save(QDataStream& stream)
 {
   stream << (float)x();
   stream << (float)y();
   stream << (float)z();
+  return true;
 }
 
-void BosonShot::load(QDataStream& stream)
+bool BosonShot::load(QDataStream& stream)
 {
   float x, y, z;
   stream >> x >> y >> z;
@@ -204,6 +205,8 @@ void BosonShot::load(QDataStream& stream)
 
   // Is it ok to do these here?
   setAnimated(true);
+
+  return true;
 }
 
 void BosonShot::explode()
@@ -473,9 +476,9 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotMissile::save(QDataStream& stream)
+bool BosonShotMissile::save(QDataStream& stream)
 {
-  BosonShot::save(stream);
+  bool ret = BosonShot::save(stream);
 
   stream << mVelo;
   stream << mTarget;
@@ -484,11 +487,12 @@ void BosonShotMissile::save(QDataStream& stream)
   stream << (float)mZ;
   stream << (float)mMaxHeight;
   stream << speed();
+  return ret;
 }
 
-void BosonShotMissile::load(QDataStream& stream)
+bool BosonShotMissile::load(QDataStream& stream)
 {
-  BosonShot::load(stream);
+  bool ret = BosonShot::load(stream);
 
   float speed;
 
@@ -504,6 +508,7 @@ void BosonShotMissile::load(QDataStream& stream)
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
   setVisible(true);
+  return ret;
 }
 
 void BosonShotMissile::moveToTarget()
@@ -582,22 +587,24 @@ bool BosonShotExplosion::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotExplosion::save(QDataStream& stream)
+bool BosonShotExplosion::save(QDataStream& stream)
 {
   BosonShot::save(stream);
   stream << mDamage;
   stream << mDamageRange;
   stream << mFullDamageRange;
   stream << mDelay;
+  return true;
 }
 
-void BosonShotExplosion::load(QDataStream& stream)
+bool BosonShotExplosion::load(QDataStream& stream)
 {
   BosonShot::load(stream);
   stream >> mDamage;
   stream >> mDamageRange;
   stream >> mFullDamageRange;
   stream >> mDelay;
+  return true;
 }
 
 void BosonShotExplosion::advanceMoveInternal()
@@ -667,17 +674,19 @@ bool BosonShotMine::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotMine::save(QDataStream& stream)
+bool BosonShotMine::save(QDataStream& stream)
 {
-  BosonShot::save(stream);
+  bool ret = BosonShot::save(stream);
   stream << (Q_UINT8)mActivated;
+  return ret;
 }
 
-void BosonShotMine::load(QDataStream& stream)
+bool BosonShotMine::load(QDataStream& stream)
 {
-  BosonShot::load(stream);
+  bool ret = BosonShot::load(stream);
   stream >> (Q_UINT8)mActivated;
   setVisible(true);
+  return ret;
 }
 
 void BosonShotMine::advanceMoveInternal()
@@ -785,16 +794,17 @@ bool BosonShotBomb::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotBomb::save(QDataStream& stream)
+bool BosonShotBomb::save(QDataStream& stream)
 {
-  BosonShot::save(stream);
+  bool ret = BosonShot::save(stream);
   stream << (Q_UINT8)mActivated;
   stream << speed();
+  return ret;
 }
 
-void BosonShotBomb::load(QDataStream& stream)
+bool BosonShotBomb::load(QDataStream& stream)
 {
-  BosonShot::load(stream);
+  bool ret = BosonShot::load(stream);
   float speed;
   stream >> (Q_UINT8)mActivated;
   stream >> speed;
@@ -802,6 +812,7 @@ void BosonShotBomb::load(QDataStream& stream)
   setAccelerationSpeed(properties()->accelerationSpeed());
   setMaxSpeed(properties()->speed());
   setVisible(true);
+  return ret;
 }
 
 void BosonShotBomb::advanceMoveInternal()
@@ -947,19 +958,20 @@ bool BosonShotFragment::loadFromXML(const QDomElement& root)
   return true;
 }
 
-void BosonShotFragment::save(QDataStream& stream)
+bool BosonShotFragment::save(QDataStream& stream)
 {
-  BosonShot::save(stream);
+  bool ret = BosonShot::save(stream);
 
   stream << mVelo.x();
   stream << mVelo.y();
   stream << mVelo.z();
   stream << (Q_UINT32)mUnitProperties->typeId();
+  return ret;
 }
 
-void BosonShotFragment::load(QDataStream& stream)
+bool BosonShotFragment::load(QDataStream& stream)
 {
-  BosonShot::load(stream);
+  bool ret = BosonShot::load(stream);
 
   float velox, veloy, veloz;
   unsigned long int props;
@@ -976,9 +988,10 @@ void BosonShotFragment::load(QDataStream& stream)
   if(!mUnitProperties)
   {
     boError() << k_funcinfo << "NULL properties for " << props << endl;
-    return;
+    return false;
   }
   setVisible(true);
+  return ret;
 }
 
 void BosonShotFragment::advanceMoveInternal()
