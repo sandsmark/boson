@@ -20,7 +20,6 @@
 #include "unitgroup.h"
 
 #include "unit.h"
-#include <qpoint.h>
 
 UnitGroup::UnitGroup(bool moving)
 {

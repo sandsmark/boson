@@ -36,11 +36,9 @@
 
 #include <qlayout.h>
 #include <qintdict.h>
-#include <qpixmap.h>
 #include <qscrollview.h>
 #include <qcombobox.h>
 #include <qcheckbox.h>
-#include <qmap.h>
 #include <qtimer.h>
 #include <qlabel.h>
 

@@ -26,7 +26,6 @@
 
 #include <kdebug.h>
 
-#include <qdatastream.h>
 #include <qdom.h>
 
 #include "defines.h"

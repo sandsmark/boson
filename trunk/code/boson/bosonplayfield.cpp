@@ -25,7 +25,6 @@
 #include <qdom.h>
 #include <qdatastream.h>
 #include <qfile.h>
-#include <qbuffer.h>
 
 #include <kdebug.h>
 #include <kfilterdev.h>

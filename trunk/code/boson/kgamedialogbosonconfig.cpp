@@ -31,7 +31,6 @@
 #include <ksimpleconfig.h>
 
 #include <qpushbutton.h>
-#include <qvgroupbox.h>
 #include <qcombobox.h>
 #include <qmap.h>
 #include <qhbox.h>
