@@ -15,8 +15,9 @@ stamp-h.in
 aclocal.m4
 config.status
 libtool
+config.cache
 stamp-h
 pics
 boson.kdoc
-
 api
+
