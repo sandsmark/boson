@@ -52,6 +52,8 @@ BoAudioProcessController::BoAudioProcessController()
 
 BoAudioProcessController::~BoAudioProcessController()
 {
+ delete d->mProcess;
+ delete[] d->mBuffer;
  delete d;
 }
 
