@@ -28,16 +28,7 @@ class BoFont;
 
 class BoFontInfo {
 public:
-	BoFontInfo()
-	{
-		mBold = false;
-		mItalic = false;
-		mPointSize = 10;
-		mTextured = false;
-		mFixedPitch = false;
-		mUnderline = false;
-		mStrikeOut = false;
-	}
+	BoFontInfo();
 	BoFontInfo(const BoFontInfo& f)
 	{
 		*this = f;
@@ -194,6 +185,7 @@ public:
 	 **/
 	bool loadFont(const BoFontInfo& font);
 
+	void setFont(const BoFontInfo& info);
 	const BoFontInfo& fontInfo() const;
 
 	/**

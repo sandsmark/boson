@@ -25,8 +25,8 @@
 // boson's code instead of plib's.
 
 
-#ifndef _FNT_H_
-#define _FNT_H_
+#ifndef _BO_FNT_H_
+#define _BO_FNT_H_
 
 #include "fakedsg.h"
 
@@ -38,12 +38,12 @@
 #define FNT_FALSE 0
 
 
-class fntFont
+class BofntFont
 {
 public:
-  fntFont();
+  BofntFont();
 
-  virtual ~fntFont();
+  virtual ~BofntFont();
 
   virtual void getBBox( const char *s, float pointsize, float italic,
                                   float *left, float *right,
@@ -76,7 +76,7 @@ public:
 } ;
 
 
-class fntTexFont : public fntFont
+class BofntTexFont : public BofntFont
 {
 private:
   GLuint texture;
@@ -134,7 +134,7 @@ private:
                              GLenum min = GL_LINEAR_MIPMAP_LINEAR );
 public:
 
-  fntTexFont()
+  BofntTexFont()
   {
     bound = FNT_FALSE;
     fixed_pitch = FNT_TRUE;
@@ -146,8 +146,8 @@ public:
     memset( exists, FNT_FALSE, FNTMAX_CHAR * sizeof(int) );
   }
 
-  fntTexFont( const char *fname, GLenum mag = GL_NEAREST, 
-                            GLenum min = GL_LINEAR_MIPMAP_LINEAR ) : fntFont()
+  BofntTexFont( const char *fname, GLenum mag = GL_NEAREST, 
+                            GLenum min = GL_LINEAR_MIPMAP_LINEAR ) : BofntFont()
   {
     bound = FNT_FALSE;
     fixed_pitch = FNT_TRUE;
@@ -159,7 +159,7 @@ public:
     load( fname, mag, min );
   }
 
-  ~fntTexFont()
+  ~BofntTexFont()
   {
     if ( texture != 0 )
     {
@@ -206,7 +206,7 @@ public:
   }
 
   /**
-   * See @ref fntFont::getWidestChar. Only valid once a font is loaded.
+   * See @ref BofntFont::getWidestChar. Only valid once a font is loaded.
    **/
   virtual float getWidestChar() const { return isFixedPitch() ? width : widestChar; }
 
@@ -255,9 +255,9 @@ public:
 };
 
 
-class fntRenderer
+class BofntRenderer
 {
-  fntFont *font;
+  BofntFont *font;
 
   sgVec3 curpos;
 
@@ -265,7 +265,7 @@ class fntRenderer
   float italic;
 
 public:
-  fntRenderer()
+  BofntRenderer()
   {
     start2f ( 0.0f, 0.0f );
     font = NULL;
@@ -285,8 +285,8 @@ public:
     if ( z != NULL ) *z = curpos [ 2 ] ;
   }
 
-  void setFont( fntFont *f ) { font = f; }
-  fntFont *getFont() const { return font; }
+  void setFont( BofntFont *f ) { font = f; }
+  BofntFont *getFont() const { return font; }
 
   void setSlant( float i ) { italic    = i; }
   void setPointSize( float p ) { pointsize = p; }
