@@ -41,6 +41,7 @@
 #include <qcheckbox.h>
 #include <qlineedit.h>
 #include <qvaluelist.h>
+#include <qscrollview.h>
 
 #include "bosonunitdialog.moc"
 
@@ -204,7 +205,11 @@ void BosonUnitDialog::initDirectoriesPage()
 
 void BosonUnitDialog::initPropertiesPage()
 {
- QHBox* propertiesPage = addHBoxPage(i18n("&Properties"));
+ QVBox* topPage = addVBoxPage(i18n("&Properties"));
+ QScrollView* scroll = new QScrollView(topPage);
+ scroll->setResizePolicy(QScrollView::AutoOneFit);
+ QHBox* propertiesPage = new QHBox(scroll->viewport());
+ scroll->addChild(propertiesPage);
  QVBox* page = new QVBox(propertiesPage);
  QVBox* specialProperties = new QVBox(propertiesPage);
 
@@ -265,7 +270,7 @@ void BosonUnitDialog::initPropertiesPage()
  layout->addMultiCellWidget(d->mWeaponReload, 10, 10, 0, 1);
 
  QLabel* terrainTypeLabel = new QLabel(i18n("Terrain"), d->mUnitProperties);
- layout->addWidget(terrainTypeLabel, 7, 0);
+ layout->addWidget(terrainTypeLabel, 11, 0);
  d->mTerrainType = new QComboBox(d->mUnitProperties);
  d->mTerrainType->insertItem(i18n("Land"));
  d->mTerrainType->insertItem(i18n("Water"));
@@ -303,6 +308,10 @@ void BosonUnitDialog::initPropertiesPage()
  
  initMobileProperties(specialProperties);
  initFacilityProperties(specialProperties);
+
+
+ d->mCreateUnit = new QPushButton(i18n("Create Unit"), topPage);
+ connect(d->mCreateUnit, SIGNAL(pressed()), this, SLOT(slotCreateUnit()));
 }
 
 void BosonUnitDialog::initMobileProperties(QWidget* page)
@@ -360,9 +369,6 @@ void BosonUnitDialog::initFacilityProperties(QWidget* page)
  layout->addWidget(producerListLabel, 1, 0);
  d->mProducerList = new QLineEdit(d->mUnitFacilityProperties);
  layout->addWidget(d->mProducerList, 1, 1);
-
- d->mCreateUnit = new QPushButton(i18n("Create Unit"), page);
- connect(d->mCreateUnit, SIGNAL(pressed()), this, SLOT(slotCreateUnit()));
 }
 
 void BosonUnitDialog::initPixmapsPage()
