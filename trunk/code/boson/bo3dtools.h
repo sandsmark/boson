@@ -30,7 +30,20 @@ class QString;
 class KConfig;
 class QDataStream;
 
+/**
+ * @return How many degrees you have to rotate around z-axis for y-axis to go
+ * through (x, y). (i.e. angle between (0, 1) and (x, y) when (x, y) is a
+ * normalized vector)
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 float rotationToPoint(float x, float y);
+
+/**
+ * This is the inverse operation to @ref rotationToPoint.
+ * It calculates point (x, y) which is at intersection of circle with @p radius
+ * and line which is rotated by @p angle around z-axis.
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 void pointByRotation(float* x, float* y, const float angle, const float radius);
 
 
@@ -42,7 +55,7 @@ class BoVector3
   public:
     BoVector3()  { reset(); }
     BoVector3(GLfloat x, GLfloat y, GLfloat z)  { set(x, y, z); }
-    BoVector3(GLfloat* data) { set(data[0], data[1], data[2]); }
+    BoVector3(const GLfloat* data) { set(data[0], data[1], data[2]); }
     ~BoVector3() {}
 
     /**
@@ -417,7 +430,7 @@ class BoVector4
 
     BoVector4()  { reset(); };
     BoVector4(GLfloat x, GLfloat y, GLfloat z, GLfloat w)  { set(x, y, z, w); };
-    BoVector4(GLfloat* data) { set(data[0], data[1], data[2], data[3]); }
+    BoVector4(const GLfloat* data) { set(data[0], data[1], data[2], data[3]); }
     ~BoVector4() {};
 
     /**
@@ -712,7 +725,7 @@ class BoMatrix
     /**
      * @overload
      **/
-    inline void translate(BoVector3 v)
+    inline void translate(const BoVector3& v)
     {
       translate(v.x(), v.y(), v.z());
     }
