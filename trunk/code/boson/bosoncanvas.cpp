@@ -225,16 +225,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << "NULL unit!" << endl;
 	return;
  }
- 
- float z = 0.0;
- if ((unit->unitProperties()->isFacility())) {
-	z = Z_FACILITY;
- } else if (unit->unitProperties()->isAircraft()) {
-	z = Z_MOBILE + 10;
- } else { // ship or land unit
-	z = Z_MOBILE;
- }
- unit->setZ(z);
+
  unit->move(x, y);
  unit->show();
 }

@@ -106,6 +106,12 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  }
  model()->setFrame(0);
 
+ if (isFlying()) {
+	// FIXME i guess we can store z-position as opengl coordinates
+	// instead...
+	setZ(2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE); // FIXME - hardcoded
+ }
+
 // create the plugins
 // note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
 // we ever want to support this, we need to use dynamically assigned (see
@@ -189,11 +195,6 @@ void Unit::setHealth(unsigned long int h)
  if (isDestroyed()) {
 	unselect();
 	setFrame(frameCount() - 1);
-	if (unitProperties()->isMobile()) {
-		setZ(Z_DESTROYED_MOBILE);
-	} else {
-		setZ(Z_DESTROYED_FACILITY);
-	}
 	setAnimated(false);
  }
 }
