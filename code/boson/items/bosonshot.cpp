@@ -56,6 +56,12 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
     boError(350) << k_funcinfo << "NULL canvas" << endl;
     return;
   }
+  if(!canvas->onCanvas(pos[0], pos[1]))
+  {
+    boError(350) << k_funcinfo << "invalid start position" << endl;
+    mActive = false;
+    return;
+  }
   if(prop->speed() == 0)
   {
     // This shot is bullet, not missile - it has infinite speed and it reaches
