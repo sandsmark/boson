@@ -27,7 +27,7 @@
 #include "common/msgData.h"
 
 
-#define  MAX_POWER 9
+#define  POWER_LEVELS 15
 
 enum workType {
 	WORK_NONE =0, 
