@@ -82,6 +82,9 @@ struct unitProperties_t {
 	int	width;
 	int	height;
 	int	visibility;	// how far it can see
+	int	range;		// how far it can send weapons
+	uint	cost_mineral;	// how much mineral does it cost ?
+	uint	cost_oil;	// how much oil does it cost ?
 /* ... to here : shoudn't be changed, as general type assume this is here, in this order */
 	};
 
@@ -99,6 +102,8 @@ struct mobileProperties_t {
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
 	int	range;		// how far it can send weapons
+	uint	cost_mineral;	// how much mineral does it cost ?
+	uint	cost_oil;	// how much oil does it cost ?
 /* ... to here : shoudn't be changed, as general type assume this is here, in this order */
 
 	int 	speed;		// how far it may travel (in pixels) during one jiffie
@@ -133,6 +138,8 @@ struct facilityProperties_t  {
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
 	int	range;		// how far it can send weapons
+	uint	cost_mineral;	// how much mineral does it cost ?
+	uint	cost_oil;	// how much oil does it cost ?
 /* ... to here : shoudn't be changed, as general type assume this is here, in this order */
 
 	};

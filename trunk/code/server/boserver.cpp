@@ -26,6 +26,7 @@
 #include <kmsgbox.h>
 
 #include "../common/bobuffer.h"
+#include "../common/unitType.h"
 #include "../common/map.h"	 ///orzel: temp, pour la creation...
 
 #include "boserver.h"
@@ -264,7 +265,7 @@ switch(state) {
 				boAssert(jiffies == 1); ///orzel : well...
 				for(i=0; i<nbPlayer; i++) {
 				   sendMsg(player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
-				   player[i].buffer->flush();
+				   player[i].buffer->flush();	// buffer is flushed, not the player->flush().
 				   }
 				}
 			break;
@@ -316,7 +317,12 @@ switch(tag) {
 		_mobile.x	= data->construct.x;
 		_mobile.y	= data->construct.y;
 		_mobile.type	= data->construct.type.mob;
-		createMobUnit(_mobile);
+		if (player[playerId].changeRessources(
+					- mobileProp[_mobile.type].cost_oil,
+					- mobileProp[_mobile.type].cost_mineral))
+			createMobUnit(_mobile);
+		else logf(LOG_ERROR, "client %d have tried to create a %d mobile without enough ressources (%d,%d)",
+				playerId, _mobile.type, player[playerId].oil, player[playerId].mineral);
 		break;
 		
 	case MSG_FACILITY_CONSTRUCT :
@@ -325,7 +331,12 @@ switch(tag) {
 		_facility.x	= data->construct.x;
 		_facility.y	= data->construct.y;
 		_facility.type	= data->construct.type.fix;
-		createFixUnit(_facility);
+		if (player[playerId].changeRessources(
+					- facilityProp[_facility.type].cost_oil,
+					- facilityProp[_facility.type].cost_mineral))
+			createFixUnit(_facility);
+		else logf(LOG_ERROR, "client %d have tried to create a %d facility without enough ressources (%d,%d)",
+				playerId, _facility.type, player[playerId].oil, player[playerId].mineral);
 		break;
 
 	case MSG_MOBILE_MOVE_R :

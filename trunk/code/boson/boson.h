@@ -124,6 +124,9 @@ protected:
 	/** initSocket try to connect to the BosonServer */
 	void initSocket(char *servername=0l);
 
+signals:
+	void ressourcesUpdated(void);
+
 private: 
     /** menu_bar is the applications main menubar */
     KMenuBar *menu_bar;

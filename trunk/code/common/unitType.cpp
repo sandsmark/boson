@@ -27,15 +27,17 @@
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
 	int	range;		// how far it can send weapons
+	uint	cost_mineral;	// how much mineral does it cost ?
+	uint	cost_oil;	// how much oil does it cost ?
 
 	int 	speed;		// how far it may travel (in pixels) during one jiffie
 	uint	goFlag;		// where can it go ? 
 */
 
 mobileProperties_t mobileProp[] = {
-	{"ship",	96, 96,  2, 100,	3, BO_GO_SEA},		// MOB_SHIP
-	{"quad",	32, 32,  3, 70,		4, BO_GO_EARTH},	// MOB_QUAD
-	{"aircraft",	72, 72,  3, 100,	6, BO_GO_AIR},		// MOB_AIRCRAFT
+	{"ship",	96, 96,  2, 100,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
+	{"quad",	32, 32,  3, 70,		200, 100, 4, BO_GO_EARTH},	// MOB_QUAD
+	{"aircraft",	72, 72,  3, 100,	200, 100, 6, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 
 /*
@@ -44,21 +46,23 @@ mobileProperties_t mobileProp[] = {
 	int	height;		// tile-size
 	int	visibility;	// how far it can see
 	int	range;		// how far it can send weapons
+	uint	cost_mineral;	// how much mineral does it cost ?
+	uint	cost_oil;	// how much oil does it cost ?
 */
 	
 #define EX(s) (s*BO_TILE_SIZE)
 facilityProperties_t facilityProp[] = {
-	{"comsat"	, EX(2), EX(2), 7, 0},			// FACILITY_COMSAT
-	{"helipad"	, EX(2), EX(2), 6, 0},			// FACILITY_HELIPAD
-	{"powerplant"	, EX(2), EX(2), 3, 0},			// FACILITY_POWERPLANT
-	{"warfactory"	, EX(2), EX(2), 3, 0}, 			// FACILITY_WAR_FACTORY
-	{"barracks"	, EX(2), EX(2), 3, 0}, 			// FACILITY_BARRACKS
-	{"cmdbunker"	, EX(3), EX(3), 3, 0}, 			// FACILITY_CMDBUNKER
-	{"samsite"	, EX(1), EX(1), 4, 0}, 			// FACILITY_SAMSITE
-	{"oiltower"	, EX(1), EX(1), 2, 0}, 			// FACILITY_OILTOWER
-	{"refinery"	, EX(2), EX(2), 3, 0},			// FACILITY_REFINERY
-	{"repairpad"	, EX(2), EX(2), 4, 0},			// FACILITY_REPAIRPAD
-	{"turret"	, EX(1), EX(1), 5, 90},			// FACILITY_TURRET
+	{"comsat"	, EX(2), EX(2), 7,  0,	300, 100},	// FACILITY_COMSAT
+	{"helipad"	, EX(2), EX(2), 6,  0,	300, 100},	// FACILITY_HELIPAD
+	{"powerplant"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_POWERPLANT
+	{"warfactory"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_WAR_FACTORY
+	{"barracks"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_BARRACKS
+	{"cmdbunker"	, EX(3), EX(3), 3,  0,	300, 100},	// FACILITY_CMDBUNKER
+	{"samsite"	, EX(1), EX(1), 4,  0,	300, 100},	// FACILITY_SAMSITE
+	{"oiltower"	, EX(1), EX(1), 2,  0,	300, 100},	// FACILITY_OILTOWER
+	{"refinery"	, EX(2), EX(2), 3,  0,	300, 100},	// FACILITY_REFINERY
+	{"repairpad"	, EX(2), EX(2), 4,  0,	300, 100},	// FACILITY_REPAIRPAD
+	{"turret"	, EX(1), EX(1), 5, 90,	300, 100},	// FACILITY_TURRET
 	};
 #undef EX
 

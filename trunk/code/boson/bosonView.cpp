@@ -54,12 +54,18 @@ bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);
+	
+	/* ressources */
+	oil_text	= new QLabel("Oil : ", this, "oil_text");
+	oil_text->setGeometry(10,8,80,10);
+	mineral_text	= new QLabel("Mineral : ", this, "mineral_text");
+	mineral_text->setGeometry(100,8,80,10);
 
 	/* stack */
 	stack = new QWidgetStack(this, "qwidgetstack");
 	stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
 	stack->setLineWidth(5);
-	stack->setGeometry(10,10,180,110);
+	stack->setGeometry(10,23,180,110);
 
 	/* stack/one */
 	view_none = new QPixmap(path);
@@ -79,7 +85,7 @@ bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
 	/* orders buttons */
 	for (i=0; i< 11; i++) {
 		orderButton[i] = new QPushButton(this, "orderButtons");
-		orderButton[i]->setGeometry( 10+(i%3)*60, 128+(i/3)*60, 55, 55);
+		orderButton[i]->setGeometry( 10+(i%3)*60, 141+(i/3)*60, 55, 55);
 		orderButton[i]->hide();
 		}
 	connect(orderButton[0], SIGNAL(clicked(void)), this, SLOT(bc0(void)));
@@ -173,5 +179,16 @@ void bosonView::object_put(int x, int y)
 			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
 	}
 }
+ 
 
+void bosonView::ressourcesUpdated(void)
+{
+	char buffer[1024];
+	
+	sprintf(buffer, "Oil : %d", oil);
+	oil_text->setText(buffer);
+
+	sprintf(buffer, "Mineral : %d", mineral);
+	mineral_text->setText(buffer);
+}
 
