@@ -25,9 +25,9 @@ class Player;
 class Unit;
 class ProductionPlugin;
 class BosonCanvas;
+class BosonPlayField;
 class QDomElement;
 class QDomDocument;
-class BosonPlayField;
 class QDataStream;
 
 #define boGame Boson::boson()
@@ -59,6 +59,8 @@ public:
 	 * @li NotLoaded - Game is not yet loaded (loading method isn't called yet)
 	 * @li LoadingInProgress - Loading is in progress
 	 * @li LoadingCompleted - Loading is completed (successfully)
+	 * @li BSGFileError - Error in BSGFile. Most likely it wasn't Boson savegame
+	 * @li InvalidXML - Error in one of XML files.
 	 * @li InvalidFileFormat - File format was invalid (error)
 	 * @li InvalidCookie - Cookie in the file header was invalid (error)
 	 * @li InvalidVersion - SaveGame version was invalid. Probably the game was saved with too old version of Boson (error)
@@ -68,6 +70,8 @@ public:
 		NotLoaded = 1,
 		LoadingInProgress,
 		LoadingCompleted,
+		BSGFileError,
+		InvalidXML,
 		InvalidFileFormat,
 		InvalidCookie,
 		InvalidVersion,
@@ -336,6 +340,8 @@ signals:
 
 	void signalLoadExternalStuff(QDataStream& stream);
 	void signalSaveExternalStuff(QDataStream& stream);
+	void signalLoadExternalStuffFromXML(const QDomElement& root);
+	void signalSaveExternalStuffAsXML(QDomElement& root);
 
 protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
@@ -360,7 +366,9 @@ protected:
 
 	QString saveKGameAsXML();
 	QString savePlayersAsXML();
+	QString saveCanvasAsXML();
 	bool loadKGameFromXML(const QString&);
+	bool loadCanvasFromXML(const QString&);
 
 	/**
 	 * Load the XML file in @p xml into @p doc and display an error message

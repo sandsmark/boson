@@ -387,6 +387,10 @@ void TopWidget::slotStartNewGame()
 	return;
  }
  boDebug() << k_funcinfo << endl;
+
+ // Save initial dock config
+ saveInitialDockConfig();
+
  d->mStartup->showLoadingWidget();
 
  d->mStarting->setPlayField(mPlayField);
@@ -439,7 +443,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
 	Boson::LoadingStatus status = boGame->loadingStatus();
 	QString text, caption;
 	if (status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
-		text = i18n("This file is no Boson SaveGame!");
+		text = i18n("This file is not Boson SaveGame!");
 		caption = i18n("Invalid file format!");
 	} else if (status == Boson::InvalidVersion) {
 		text = i18n("This file has unsupported saving format!\n"
@@ -449,6 +453,10 @@ void TopWidget::slotLoadGame(const QString& fileName)
 		text = i18n("Error loading saved game!");
 		caption = i18n("An error occured while loading saved game!\n"
 				"Probably the game wasn't saved properly");
+	} else if (status == Boson::InvalidXML || status == Boson::BSGFileError) {
+		text = i18n("Error loading saved game!");
+		caption = i18n("An error occured while loading saved game!\n"
+				"Probably the game wasn't saved properly or this file is not Boson SaveGame!");
 	} else {
 		// This should never be reached
 		// AB: but it will be! I can't provide valid error codes for all
@@ -633,6 +641,7 @@ void TopWidget::slotGameOver()
  // if you replace this by something else you must call slotResetGame()
  // manually!
  d->mStartup->slotShowWelcomeWidget();
+ loadInitialDockConfig();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
@@ -692,6 +701,7 @@ void TopWidget::slotToggleMenubar()
 
 void TopWidget::loadGameDockConfig()
 {
+ boDebug() << k_funcinfo << endl;
  // readDockConfig() is broken.
  // it uses frameGeometry() to save the geometry which is correct. but then it
  // uses setGeometry() to load it again, and since this doesn't work correctly
@@ -699,35 +709,43 @@ void TopWidget::loadGameDockConfig()
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = true;
 #endif
- readDockConfig(kapp->config(), "BosonGameDock");
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = false;
-#endif
  KConfig* conf = kapp->config();
  conf->setGroup("BosonGameDock");
  bool fs = conf->readBoolEntry("FullScreen", false);
  d->mActionFullScreen->setChecked(fs);
+ readDockConfig(kapp->config(), "BosonGameDock");
  slotToggleFullScreen();
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = false;
+#endif
 }
 
 void TopWidget::loadInitialDockConfig()
 {
+ boDebug() << k_funcinfo << endl;
 #if KDE_VERSION < 310
  d->mLoadingDockConfig = true;
-#endif
- readDockConfig(kapp->config(), "BosonInitialDock");
-#if KDE_VERSION < 310
- d->mLoadingDockConfig = false;
 #endif
  KConfig* conf = kapp->config();
  conf->setGroup("BosonInitialDock");
  bool fs = conf->readBoolEntry("FullScreen", false);
  d->mActionFullScreen->setChecked(fs);
- slotToggleFullScreen();
+ 
+ if (isVisible()) {
+	slotToggleFullScreen();
+	readDockConfig(kapp->config(), "BosonInitialDock");
+ } else {
+	readDockConfig(kapp->config(), "BosonInitialDock");
+	slotToggleFullScreen();
+ }
+#if KDE_VERSION < 310
+ d->mLoadingDockConfig = false;
+#endif
 }
 
 void TopWidget::saveGameDockConfig()
 {
+ boDebug() << k_funcinfo << endl;
  writeDockConfig(kapp->config(), "BosonGameDock");
  KConfig* conf = kapp->config();
  conf->setGroup("BosonGameDock");
@@ -736,6 +754,7 @@ void TopWidget::saveGameDockConfig()
 
 void TopWidget::saveInitialDockConfig()
 {
+ boDebug() << k_funcinfo << endl;
  writeDockConfig(kapp->config(), "BosonInitialDock");
  KConfig* conf = kapp->config();
  conf->setGroup("BosonInitialDock");
@@ -785,6 +804,8 @@ bool TopWidget::queryExit()
  }
  if (mMainDock->getWidget() != d->mStartup) {
 	boWarning() << k_funcinfo << "oops! - game in init mode but no startup widget on top!" << endl;
+	boDebug() << k_funcinfo << "maindock's widget: " << mMainDock->getWidget() << endl;
+	boDebug() << k_funcinfo << "startup widget: " << d->mStartup << endl;
 	return true;
  }
 

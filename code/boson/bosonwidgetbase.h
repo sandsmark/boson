@@ -150,9 +150,11 @@ protected slots:
 
 	void slotToggleCheating(bool on);
 
-	// These 2 are used to save/load camera, shots, particle systems etc.
+	// These 4 are used to save/load camera, unit groups etc.
 	void slotLoadExternalStuff(QDataStream& stream);
 	void slotSaveExternalStuff(QDataStream& stream);
+	void slotLoadExternalStuffFromXML(const QDomElement& root);
+	void slotSaveExternalStuffAsXML(QDomElement& root);
 
 	void slotApplyOptions();
 

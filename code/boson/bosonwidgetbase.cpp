@@ -223,6 +223,10 @@ void BosonWidgetBase::initConnections()
 		this, SLOT(slotLoadExternalStuff(QDataStream&))); 
  connect(boGame, SIGNAL(signalSaveExternalStuff(QDataStream&)),
 		this, SLOT(slotSaveExternalStuff(QDataStream&))); 
+ connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
+		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&))); 
+ connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
+		this, SLOT(slotSaveExternalStuffAsXML(QDomElement&))); 
 
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&,const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&,const QString&)));
@@ -1113,7 +1117,6 @@ void BosonWidgetBase::setActionEnabled(const char* name, bool on)
 void BosonWidgetBase::slotLoadExternalStuff(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
- canvas()->load(stream);
  // TODO: load camera
  // TODO: load unitgroups
 }
@@ -1121,7 +1124,20 @@ void BosonWidgetBase::slotLoadExternalStuff(QDataStream& stream)
 void BosonWidgetBase::slotSaveExternalStuff(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
- canvas()->save(stream);
+ // TODO: save camera  (BosonBigDisplayBase?)
+ // TODO: save unitgroups  (BoDisplayManager?)
+}
+
+void BosonWidgetBase::slotLoadExternalStuffFromXML(const QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ // TODO: load camera
+ // TODO: load unitgroups
+}
+
+void BosonWidgetBase::slotSaveExternalStuffAsXML(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
  // TODO: save camera  (BosonBigDisplayBase?)
  // TODO: save unitgroups  (BoDisplayManager?)
 }

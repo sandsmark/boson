@@ -40,6 +40,7 @@
 
 #include <qpointarray.h>
 #include <qdatastream.h>
+#include <qdom.h>
 
 #include <math.h>
 
@@ -1000,7 +1001,7 @@ unsigned int BosonCanvas::animationsCount() const
  return d->mAnimList.count();
 }
 
-void BosonCanvas::save(QDataStream& stream)
+bool BosonCanvas::save(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
  // Save shots
@@ -1025,9 +1026,10 @@ void BosonCanvas::save(QDataStream& stream)
 		s->save(stream);
 	}
  }
+ return true;
 }
 
-void BosonCanvas::load(QDataStream& stream)
+bool BosonCanvas::load(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
  Q_UINT32 shotscount;
@@ -1042,8 +1044,119 @@ void BosonCanvas::load(QDataStream& stream)
 	stream >> playerid >> unitpropid >> propid;
 	p = (Player*)boGame->findPlayer(playerid);
 	s = new BosonShot(p->speciesTheme()->unitProperties(unitpropid)->weaponProperties(propid),
-			p, this, stream);
+			p, this);
+	s->load(stream);
  }
+ return true;
+}
+
+bool BosonCanvas::loadFromXML(const QDomElement& root)
+{
+ if (root.isNull()) {
+	boError(260) << k_funcinfo << "NULL root node" << endl;
+	return false;
+ }
+
+ // Load shots
+ QDomElement shots = root.namedItem(QString::fromLatin1("Shots")).toElement();
+ if (shots.isNull()) {
+	boWarning(260) << k_funcinfo << "no shots " << endl;
+	return true;
+ }
+ QDomNodeList list = shots.elementsByTagName(QString::fromLatin1("Shot"));
+ if (list.count() == 0) {
+	// It's ok to have no shots
+	return true;
+ }
+
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement e = list.item(i).toElement();
+	if (e.isNull()) {
+		boError(260) << k_funcinfo << i << " is not an element" << endl;
+		return false;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("Owner"))) {
+		boError(260) << k_funcinfo << "missing attribute: Owner for Shot " << i << endl;
+		continue;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("UnitType"))) {
+		boError(260) << k_funcinfo << "missing attribute: UnitType for Shot " << i << endl;
+		continue;
+	}
+	if (!e.hasAttribute(QString::fromLatin1("WeaponType"))) {
+		boError(260) << k_funcinfo << "missing attribute: WeaponType for Shot " << i << endl;
+		continue;
+	}
+	bool ok = false;
+	unsigned long int type, weaponid, ownerid;
+	ownerid = e.attribute(QString::fromLatin1("Owner")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Owner number for Shot " << i << endl;
+		continue;
+	}
+	type = e.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid UnitType number for Shot " << i << endl;
+		continue;
+	}
+	weaponid = e.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid WeaponType number for Shot " << i << endl;
+		continue;
+	}
+
+	Player* owner = (Player*)(boGame->findPlayer(ownerid));
+	if (!owner) {
+		boError() << k_funcinfo << "No player with id " << ownerid << endl;
+	}
+	SpeciesTheme* theme = owner->speciesTheme();
+	if (!theme) {
+		boError() << k_funcinfo << "No theme for player " << ownerid << endl;
+		continue;
+	}
+	const UnitProperties* prop = theme->unitProperties(type);
+	if (!prop) {
+		boError() << "Unknown unitType " << type << endl;
+		return 0;
+	}
+	const BosonWeaponProperties* weapon = prop->weaponProperties(weaponid);
+	if (!weapon) {
+		boError() << "Unknown weaponType " << weaponid << " for unitType " << type << endl;
+		return 0;
+	}
+
+	BosonShot* shot = new BosonShot(weapon, owner, this);
+
+	// Call shot's loading methods
+	if (!shot->loadFromXML(e)) {
+		boWarning(260) << k_funcinfo << "Could not load shot " << i << " correctly" << endl;
+		delete shot;
+		continue;
+	}
+ }
+ return true;
+}
+
+bool BosonCanvas::saveAsXML(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+
+ // Save shots
+ QDomDocument doc = root.ownerDocument();
+ QDomElement shots = doc.createElement(QString::fromLatin1("Shots"));
+ BosonShot* s;
+ for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
+	if (RTTI::isShot(i->rtti())) {
+		s = (BosonShot*)i;
+		QDomElement shot = doc.createElement(QString::fromLatin1("Shot"));
+		if (!s->saveAsXML(shot)) {
+			boError() << k_funcinfo << "Could not save shot " << s << endl;
+			continue;
+		}
+		shots.appendChild(shot);
+	}
+ }
+ root.appendChild(shots);
 }
 
 void BosonCanvas::changeAdvanceList(BosonItem* item)

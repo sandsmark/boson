@@ -213,9 +213,9 @@ signals:
 
 protected slots:
 	void slotFovYChanged(float f) { mFovY->setValue(f); }
-	void slotRotateXChanged(float r) { mRotateX->setValue(r); }
-	void slotRotateYChanged(float r) { mRotateY->setValue(r); }
-	void slotRotateZChanged(float r) { mRotateZ->setValue(r); }
+	void slotRotateXChanged(float r) { mRotateX->setValue((int)r); }
+	void slotRotateYChanged(float r) { mRotateY->setValue((int)r); }
+	void slotRotateZChanged(float r) { mRotateZ->setValue((int)r); }
 	void slotCameraXChanged(float c) { mCameraX->setValue(c); }
 	void slotCameraYChanged(float c) { mCameraY->setValue(c); }
 	void slotCameraZChanged(float c) { mCameraZ->setValue(c); }

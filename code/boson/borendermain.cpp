@@ -611,9 +611,9 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mRotateX->setLabel(i18n("Rotation around X-axis"));
  mRotateY->setLabel(i18n("Rotation around Y-axis"));
  mRotateZ->setLabel(i18n("Rotation around Z-axis"));
- mRotateX->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
- mRotateY->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
- mRotateZ->setRange(MIN_ROTATE, MAX_ROTATE, 1, true);
+ mRotateX->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
+ mRotateY->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
+ mRotateZ->setRange((int)MIN_ROTATE, (int)MAX_ROTATE, 1, true);
  connect(mRotateX, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateXChanged(float)));
  connect(mRotateY, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateYChanged(float)));
  connect(mRotateZ, SIGNAL(valueChanged(float)), this, SIGNAL(signalRotateZChanged(float)));

@@ -208,6 +208,10 @@ public:
 	{
 		return fileData(QString::fromLatin1("players.xml"));
 	}
+	QByteArray canvasData() const
+	{
+		return fileData(QString::fromLatin1("canvas.xml"));
+	}
 };
 
 #endif

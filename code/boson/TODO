@@ -28,9 +28,7 @@ Game TODOs
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
 - cmd bunker should display "completed" for completed facilities in the cmd
-  frame. player should left click this then in order to select it for placement
-  on the map. Currently the player has to click on the cmd bunker only (not on
-  the order button) to start placement
+  frame.
 - Make shield reloading speed configurable
 - samsite should be more vulnerable when the doors are open. decrease armor
   then. we need to provide some config entries for indes.unit for this,
@@ -45,6 +43,9 @@ Game TODOs
   hurting performance. instead we should use a separate timer for this.
 - Add support for playing sound in a loop. E.g. for missile fly sound
 - Add support for miner sounds (mining/unloading)
+- Complete loading/saving. ATM, some things are still not saved:
+  wreckages, particle systems,
+  camera, unit groups
 
 Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
