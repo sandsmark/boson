@@ -32,23 +32,23 @@
 class Marking
 {
   public:
-    Marking() { dir = DirNone; f = -1; g = -1; };
-    Direction dir;
+    Marking() { dir = BosonPath::DirNone; f = -1; g = -1; }
+    BosonPath::Direction dir;
     float f;
     float g;
 };
 
-class Node
+class PathNode
 {
   public:
-    Node() { x = 0; y = 0; g = 0; h = 0; };
+    PathNode() { x = 0; y = 0; g = 0; h = 0; };
     int x;
     int y;
     float g;
     float h;
 };
 
-bool operator < (const Node& a, const Node& b)
+bool operator < (const PathNode& a, const PathNode& b)
 {
   return (a.g + a.h) < (b.g + b.h);
 }
@@ -89,7 +89,7 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly)
     kdWarning() << "no path found" << endl;
     return points;
   }
-  for (vector<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it)
+  for (QValueList<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it)
   {
     points.append(*it);
   }
@@ -103,10 +103,10 @@ bool BosonPath::findPath()
   mPathCost = 0;
   bool pathfound = false;
   Marking mark[mUnit->canvas()->width() / BO_TILE_SIZE][mUnit->canvas()->height() / BO_TILE_SIZE];
-  vector<Node> open;
+  QValueList<PathNode> open;
 
   // Create first (main) node
-  Node node;
+  PathNode node;
 
   // It will be at start
   node.x = mStartx;
@@ -125,8 +125,9 @@ bool BosonPath::findPath()
   mark[node.x][node.y].g = node.g;
   
   // Create second node
-  Node n2;
+  PathNode n2;
 
+  
   // Main loop
   while(! open.empty())
   {
@@ -142,19 +143,16 @@ bool BosonPath::findPath()
     // First check if we're at goal already
     if((node.x == mGoalx) && (node.y == mGoaly))
     {
-      kdDebug() << k_lineinfo << "path found :-)" << endl;
       pathfound = true;
       break;
     }
     
-    kdDebug() << k_lineinfo << "removed nodes: " << mNodesRemoved << endl;
-
     // Check if we've gone too long with searching
     if(mNodesRemoved >= mAbortPath)
     {
       kdDebug() << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
       // Pick best node from OPEN
-      for(vector<Node>::iterator i = open.begin(); i != open.end(); ++i)
+      for(QValueList<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
       {
         if(((*i).g + (*i).h) < (node.g + node.h))
         {
@@ -166,7 +164,6 @@ bool BosonPath::findPath()
       mGoaly = node.y;
       // and abort
       pathfound = false;
-      kdDebug() << k_lineinfo << "path NOT found" << endl;
       break;
     }
 
@@ -176,10 +173,8 @@ bool BosonPath::findPath()
       // First, set new node's position to be old's one
       n2.x = node.x;
       n2.y = node.y;
-//      kdDebug() << k_lineinfo << n2.x << " " << n2.y << endl;
       // then call method to modify position accordingly to direction
       neighbor(n2.x, n2.y, d);
-//      kdDebug() << k_lineinfo << "neighbor: " << n2.x << " " << n2.y << endl;
 
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
@@ -205,7 +200,7 @@ bool BosonPath::findPath()
         kdDebug() << k_lineinfo << "ERROR_COST" << endl;
         continue;
       }
-      else
+      else // we can go on this cell
       {
 //        kdDebug() << k_lineinfo << "can go on cell" << endl;
         n2.g = node.g + nodecost;
@@ -224,11 +219,11 @@ bool BosonPath::findPath()
         mark[n2.x][n2.y].g = n2.g;
         // Push node to OPEN
         open.push_back(n2);
-        push_heap(open.begin(), open.end(), comp);
+//FIXME        push_heap(open.begin(), open.end(), comp);
       }
       else
       {
-        // Node is in OPEN or CLOSED
+        // PathNode is in OPEN or CLOSED
         if(mark[n2.x][n2.y].f != -1)
         {
           // It's in OPEN
@@ -237,7 +232,7 @@ bool BosonPath::findPath()
             // Our current node has lower cost than the one, that was here, so
             //  we modify the path
             // First, find this node in OPEN
-            vector<Node>::iterator find = open.end();
+            QValueList<PathNode>::iterator find = open.end();
             for(find = open.begin(); find != open.end(); ++find)
             {
               if(((*find).x == n2.x) && ((*find).y == n2.y))
@@ -245,7 +240,11 @@ bool BosonPath::findPath()
                 break;
               }
             }
-            assert(find != open.end());
+            if (find != open.end()) 
+            {
+              kdError() << "find != open.end()" << endl;
+              break; // or what?
+            }
             // Mark new direction from this node to previous one
             mark[n2.x][n2.y].dir = reverseDir(d);
             // Then modify costs of spot
@@ -253,12 +252,16 @@ bool BosonPath::findPath()
             mark[n2.x][n2.y].f = n2.g + n2.h;
             // Replace cost of node that was in OPEN
             (*find).g = n2.g;
-            push_heap(open.begin(), find + 1, comp);
+//FIXME            push_heap(open.begin(), find + 1, comp);
           }
         }
       }
     }
   }
+
+
+
+
   // Pathfinding finished, but was the path found
   if((node.x == mGoalx) && (node.y == mGoaly) && (node.g < MAX_PATH_COST))
   {
@@ -266,7 +269,7 @@ bool BosonPath::findPath()
     // Path cost is equal to cost of last node
     mPathCost = node.g;
     // Temporary array - needed because path is first stored from goal to start
-    vector<QPoint> temp;
+    QValueList<QPoint> temp;
     
     // Construct waypoint and set it's pos to goal
     QPoint wp;
@@ -339,7 +342,7 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
   }
   
   float dist = float(cross / mCrossDivider);
-  dist += mModifier * max(abs(ax - bx), abs(ay - by));
+  dist += mModifier * QMAX(QABS(ax - bx), QABS(ay - by));
   return dist;
 }
 
@@ -397,14 +400,13 @@ float BosonPath::cost(int x, int y)
   return cost + mMinCost;
 }
 
-inline void BosonPath::getFirst(vector<Node>& v, Node& n)
+inline void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
 {
   n = v.front();
-  pop_heap(v.begin(), v.end(), comp);
-  v.pop_back();
+  v.pop_front();
 }
 
-inline Direction BosonPath::reverseDir(Direction d)
+inline BosonPath::Direction BosonPath::reverseDir(Direction d)
 {
   return (Direction)(((int)d + 4) % 8);
 }
@@ -421,7 +423,7 @@ void BosonPath::debug() const
  kdDebug() << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
  kdDebug() << "waypoints: " << path.size() << endl;
  int j = 0;
- for(vector<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) { // FIXME should be const
+ for(QValueList<QPoint>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
 	kdDebug() << "waypoint " << j << ":" << endl;
 	kdDebug() << "x,y=" << (*i).x() << "," << (*i).y() << endl;
  }
