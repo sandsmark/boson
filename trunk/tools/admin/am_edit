@@ -1125,7 +1125,7 @@ sub tag_UIFILES ()
     my @psources = split(/[\034\s]+/, $sources{$program});
     my $dep_lines = "";
     my @depFiles = ();
-    
+
     foreach $source (@psources) {
 
         if ($source =~ m/\.ui$/) {
@@ -1161,11 +1161,11 @@ sub tag_UIFILES ()
                 $dep_lines .= "$source.moc: $source.h\n";
                 $dep_lines .= "\t\$(MOC) $source.h -o $source.moc\n";
 
-		$uiFiles{$source} = 1;
+                $uiFiles{$source} = 1;
                 $depedmocs{$program} .= " $source.moc";
                 $globalmocs{$source} = "\035$source.h\035$source.cpp";
             }
-            
+
             if ($program =~ /_la$/) {
                 $realObjs{$program} .= " $source.lo";
             } else {
@@ -1176,7 +1176,55 @@ sub tag_UIFILES ()
             $important{$program} .= "$source.h ";
             $ui_output .= "\\\n\t$source.$cxxsuffix $source.h $source.moc ";
             push(@cleanfiles, "$source.$cxxsuffix");
-            push(@cleanfiles, "source.h");
+            push(@cleanfiles, "$source.h");
+            push(@cleanfiles, "$source.moc");
+            $dep_files .= " \$(DEPDIR)/$source.P" if($dep_files !~/$source.P/ );
+        } elsif ($source =~ m/\.boui$/) {
+
+            print STDERR "adding BOUI file $source\n" if ($verbose);
+
+            my $qs = quotemeta($source);
+            $sources{$program} =~ s/$qs//;
+            $sources_changed{$program} = 1;
+
+            $source =~ s/\.boui$//;
+
+            my $sourcedir = '';
+            if (-f "$makefileDir/$source.boui") {
+                $sourcedir = '$(srcdir)/';
+            }
+
+            my $BOUIC = "\$(top_builddir)/boson/boufo/bouic/bouic";
+
+            if (!$uiFiles{$source}) {
+
+                $dep_lines .= "$source.$cxxsuffix: $sourcedir$source.boui\n";
+                $dep_lines .= "\trm -f $source.$cxxsuffix\n";
+                if (!$kdeopts{"qtonly"}) {
+                    $dep_lines .= "\t$BOUIC --input $sourcedir$source.boui --output $source --addinclude klocale.h || rm -f $source.$cxxsuffix\n";
+                } else {
+                    $dep_lines .= "\t$BOUIC --input $sourcedir$source.boui --output $source || rm -f $source.$cxxsuffix\n";
+                }
+                $dep_lines .= "\t\$(MOC) $source.h -o $source.moc\n";
+                $dep_lines .= "$source.h: $source.$cxxsuffix\n";
+                $dep_lines .= "$source.moc: $source.$cxxsuffix\n";
+
+                $uiFiles{$source} = 1;
+                $depedmocs{$program} .= " $source.moc";
+                $globalmocs{$source} = "\035$source.h\035$source.cpp";
+            }
+
+            if ($program =~ /_la$/) {
+                $realObjs{$program} .= " $source.lo";
+            } else {
+                $realObjs{$program} .= " $source.\$(OBJEXT)";
+            }
+            $sources{$program} .= " $source.$cxxsuffix";
+            $sources_changed{$program} = 1;
+            $important{$program} .= "$source.h ";
+            $ui_output .= "\\\n\t$source.$cxxsuffix $source.h $source.moc ";
+            push(@cleanfiles, "$source.$cxxsuffix");
+            push(@cleanfiles, "$source.h");
             push(@cleanfiles, "$source.moc");
             $dep_files .= " \$(DEPDIR)/$source.P" if($dep_files !~/$source.P/ );
         }

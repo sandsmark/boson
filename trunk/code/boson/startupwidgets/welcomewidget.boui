@@ -1,0 +1,16 @@
+<!DOCTYPE BoUfoDesigner>
+<BoUfoDesigner>
+ <Widgets preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoWidget" layout="UBorderLayout" name="BoClassName" minimumWidth="" backgroundImageFile="pics/boson-startup-bg.png" >
+  <Widget preferredHeight="" minimumHeight="" opaque="" constraints="north" preferredWidth="" ClassName="BoUfoWidget" layout="UVBoxLayout" name="mWidget10" minimumWidth="" backgroundImageFile="" >
+   <Widget preferredHeight="" minimumHeight="" opaque="" constraints="" preferredWidth="" ClassName="BoUfoLabel" layout="" iconFile="pics/boson-startup-logo.png" name="mLogo" text="" minimumWidth="" backgroundImageFile="" />
+   <Widget opaque="true" minimumHeight="" preferredHeight="" constraints="north" ClassName="BoUfoLabel" preferredWidth="" layout="" iconFile="pics/boson-startup-banner.png" name="mBosonBanner" minimumWidth="" text="" backgroundImageFile="" />
+  </Widget>
+  <Widget opaque="true" minimumHeight="" preferredHeight="" constraints="center" ClassName="BoUfoLabel" preferredWidth="" layout="" iconFile="pics/boson-startup-textframe.png" name="mTextPix" minimumWidth="" text="" backgroundImageFile="" />
+  <Widget opaque="" minimumHeight="" preferredHeight="" constraints="south" ClassName="BoUfoWidget" preferredWidth="" layout="UHBoxLayout" name="mWidget4" minimumWidth="" backgroundImageFile="" >
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" iconFile="" name="mStartNewGame" minimumWidth="" text="S&amp;tart new game" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" iconFile="" name="mLoadGame" minimumWidth="" text="&amp;Load saved game" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" iconFile="" name="mStartEditor" minimumWidth="" text="Start &amp;Editor" backgroundImageFile="" />
+   <Widget opaque="" minimumHeight="" preferredHeight="" constraints="" ClassName="BoUfoPushButton" preferredWidth="" layout="" iconFile="" name="mQuit" minimumWidth="" text="&amp;Quit Boson" backgroundImageFile="" />
+  </Widget>
+ </Widgets>
+</BoUfoDesigner>
