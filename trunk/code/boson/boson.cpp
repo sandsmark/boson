@@ -31,7 +31,6 @@
 #include "bosonplayfield.h"
 #include "global.h"
 #include "bosonprofiling.h"
-#include "bofile.h"
 #include "bodebug.h"
 #include "bodebuglog.h"
 #include "bosonsaveload.h"
