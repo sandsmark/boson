@@ -1462,8 +1462,9 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	d->mLoadingStatus = KGameError;
 	return false;
  }
+ kdDebug() << k_funcinfo << "kgame loading successful" << endl;
 
- if (!started) {
+ if (started) { // AB (02/09/04): by any reason this was "!started" before - can't work, as localId is not initialized then. is this fix correct?
 	// Set local player
 	d->mPlayer = (Player*)findPlayer(localId);
  }
