@@ -146,35 +146,45 @@ int BosonConfig::readChatFramePosition(KConfig* conf)
  return pos;
 }
 
-void BosonConfig::saveSound(bool sound, KConfig* conf)
+void BosonConfig::saveSound(KConfig* conf)
 {
  conf->setGroup("Boson");
- conf->writeEntry("Sound", sound);
+ conf->writeEntry("Sound", sound());
 }
 
 bool BosonConfig::readSound(KConfig* conf)
 {
  conf->setGroup("Boson");
- bool s = conf->readBoolEntry("Sound", boConfig->sound());
+ bool s = conf->readBoolEntry("Sound", sound());
  return s;
 }
 
-void BosonConfig::saveMusic(bool music, KConfig* conf)
+void BosonConfig::saveMusic(KConfig* conf)
 {
  conf->setGroup("Boson");
- conf->writeEntry("Music", music);
+ conf->writeEntry("Music", music());
 }
 
 bool BosonConfig::readMusic(KConfig* conf)
 {
  conf->setGroup("Boson");
- bool m = conf->readBoolEntry("Music", boConfig->music());
+ bool m = conf->readBoolEntry("Music", music());
  return m;
+}
+
+void BosonConfig::setMusic(bool m)
+{
+ d->mMusic = m;
 }
 
 bool BosonConfig::music() const
 {
  return d->mMusic;
+}
+
+void BosonConfig::setSound(bool s)
+{
+ d->mSound = s;
 }
 
 bool BosonConfig::sound() const
@@ -190,7 +200,9 @@ void BosonConfig::reset(KConfig* conf)
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // read function
- 
+ setMusic(readMusic(conf));
+ setSound(readSound(conf));
+
  conf->setGroup(oldGroup);
 }
 
@@ -202,8 +214,8 @@ void BosonConfig::save(KConfig* conf)
  QString oldGroup = conf->group();
  // the old group is already stored here so we don't have to re-set it in every
  // save function
- saveMusic(music(), conf);
- saveSound(sound(), conf);
+ saveMusic(conf);
+ saveSound(conf);
 
  conf->setGroup(oldGroup);
 }

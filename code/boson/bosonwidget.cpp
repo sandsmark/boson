@@ -990,11 +990,13 @@ bool BosonWidget::music() const
 void BosonWidget::slotToggleSound()
 {
  d->mMusic->setSound(!d->mMusic->sound());
+ boConfig->setSound(d->mMusic->sound());
 }
 
 void BosonWidget::slotToggleMusic()
 {
  d->mMusic->setMusic(!d->mMusic->music());
+ boConfig->setMusic(d->mMusic->music());
 }
 
 void BosonWidget::displayAllItems(bool display)
