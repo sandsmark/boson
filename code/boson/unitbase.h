@@ -68,7 +68,6 @@ public:
 		IdSpeed = KGamePropertyBase::IdUser + 7,
 		IdDamage = KGamePropertyBase::IdUser + 8,
 		IdRange = KGamePropertyBase::IdUser + 9,
-		IdReload = KGamePropertyBase::IdUser + 10,
 		IdSightRange = KGamePropertyBase::IdUser + 11,
 		//...
 		IdLast
@@ -201,13 +200,6 @@ public:
 	void setRange(unsigned long int r) { mRange = r; }
 	
 	/**
-	 * @return The number of @ref Unit::advance calls unit the unit has
-	 * reloaded its weapon.
-	 **/
-	unsigned int reload() const { return mReload; }
-	void setReload(unsigned int r) { mReload = r; }
-
-	/**
 	 * @return How far this unit can see. This is a number of cells, so you
 	 * must *= BO_TILE_SIZE to use this on the canvas.
 	 **/
@@ -286,7 +278,6 @@ private:
 	KGameProperty<unsigned long int> mRange;
 	KGameProperty<unsigned int> mSightRange;
 	KGameProperty<long int> mDamage; // can also be repair (negative value)
-	KGameProperty<unsigned int> mReload;
 	KGamePropertyInt mWork;
 
 	const UnitProperties* mUnitProperties;
