@@ -165,9 +165,12 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  emit signalLoadingShowProgressBar(false);
  emit signalLoadingSetLoading(true);
  emit signalLoadingReset();
- connect(boGame, SIGNAL(signalLoadPlayerData(Player*)), this, SLOT(slotLoadPlayerData(Player*)));
- connect(boGame, SIGNAL(signalLoadingPlayersCount(int)), this, SIGNAL(signalLoadingPlayersCount(int)));
- connect(boGame, SIGNAL(signalLoadingPlayer(int)), this, SIGNAL(signalLoadingPlayer(int)));
+ connect(boGame, SIGNAL(signalLoadPlayerData(Player*)),
+		this, SLOT(slotLoadPlayerData(Player*)));
+ connect(boGame, SIGNAL(signalLoadingPlayersCount(int)),
+		this, SIGNAL(signalLoadingPlayersCount(int)));
+ connect(boGame, SIGNAL(signalLoadingPlayer(int)),
+		this, SIGNAL(signalLoadingPlayer(int)));
  boGame->lock();
  bool loaded = boGame->loadFromFile(loadingFileName);
  if (!loaded) {
