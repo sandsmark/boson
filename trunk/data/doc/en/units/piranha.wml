@@ -1,0 +1,23 @@
+#include "top.wml"
+    <h1>
+      Units - Piranha
+    </h1>
+    <p>&nbsp;</p>
+    <table border="0">
+	<tr>
+		<td><img src="piranha.png" border="0">&nbsp;</td>
+		<td valign="top"><img src="../none.png" border="0" height="30"><br>
+		There is no description yet.
+	</tr>
+	<tr><td><br>&nbsp</td></tr>
+    </table>
+        
+<:
+use get_values;
+
+# ( facility type, facility name)
+get_values->getval("mob", "piranha");
+:>
+
+#include "nav.wml" before_url="panther.html" before_text="Panter" after_url="tiger.html" after_text="Tiger" up_url="index.html"
+#include "footer.wml"
