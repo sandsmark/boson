@@ -276,13 +276,14 @@ void Unit::moveTo(int x, int y)
 {
  stopMoving();
 
- if(!owner()->isFogged(x / BO_TILE_SIZE, y / BO_TILE_SIZE))
- {
+ if(!owner()->isFogged(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
 	// No pathfinding if goal not reachable or occupied and we can see it
-	if(! boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties()))
+	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
 		return;
-	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && !mAttacking)
+	}
+	if(boCanvas()->cellOccupied(x / BO_TILE_SIZE, y / BO_TILE_SIZE) && !mAttacking) {
 		return;
+	}
  }
 
  // Actual path to destination is found in advanceMove()
@@ -631,7 +632,7 @@ void MobileUnit::advanceMove()
 
  QPoint wp = currentWaypoint(); // where we go to
  // Check if we can actually go to waypoint (maybe it was fogged)
- if((boCanvas()->cellOccupied(wp.x(), wp.y()) && !mAttacking) ||
+ if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) && !mAttacking) ||
 		!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
  {
 	if(! newPath())
@@ -663,7 +664,7 @@ void MobileUnit::advanceMove()
 	}
 	wp = currentWaypoint();
 	// Check if we can actually go to waypoint
-	if((boCanvas()->cellOccupied(wp.x(), wp.y()) && !mAttacking) ||
+	if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE) && !mAttacking) ||
 			!boCanvas()->cell(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE)->canGo(unitProperties()))
 	{
 		if(! newPath())
