@@ -2032,6 +2032,9 @@ bool Facility::loadFromXML(const QDomElement& root)
 	return false;
  }
 
+ if (d->mConstructionStep > constructionSteps()) {
+	d->mConstructionStep = constructionSteps();
+ }
  unsigned int modelStep = 0;
  if (d->mConstructionStep == constructionSteps()) {
 	modelStep = model()->constructionSteps(); // completed construction
