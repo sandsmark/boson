@@ -714,6 +714,11 @@ int BoFaceNode::findPointIndex(int index) const
  * initially allocated), so you have to allocate all points that you may need
  * right from the beginning.
  *
+ * Note: a "point" is a collection of multiple values, at least the vertex and
+ * usually also the texel. E.g. a mesh could have two points which are both at
+ * (0,0,0) (i.e. the same vertex). But since they have different texels - say
+ * (0,0) and (0,1) - they are two different points.
+ *
  * @short points collection for @ref BoMesh
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -732,20 +737,40 @@ public:
 		boMem->freeFloatArray(mAllocatedPoints);
 		mPoints = 0;
 	}
+
+	/**
+	 * A point is an array describing .. a "point" :) It consists of at
+	 * least the vertex and usually also of the texel. It could also include
+	 * the normal or other data (depending on how we use these data later).
+	 * @return The size of a point
+	 **/
 	inline static int pointSize()
 	{
 		// 3 vertex components, 2 texel components
 		return (3 + 2);
 	}
+
+	/**
+	 * @return The position of the vertex in a point (see @ref pointSize)
+	 **/
 	inline static int vertexPos()
 	{
 		return 0;
 	}
+	/**
+	 * @return The position of a texel in a point (see @ref pointSize)
+	 **/
 	inline static int texelPos()
 	{
 		return 3;
 	}
 
+	/**
+	 * Set the coordinates (i.e. the vertex) of the point at @p index to @p
+	 * vertex.
+	 *
+	 * This method is safe - it won't crash on invalid @p index values.
+	 **/
 	void setVertex(unsigned int index, const BoVector3& vertex)
 	{
 		BO_CHECK_NULL_RET(mPoints);
@@ -758,6 +783,12 @@ public:
 		mPoints[index * pointSize() + vertexPos() + 1] = vertex[1];
 		mPoints[index * pointSize() + vertexPos() + 2] = vertex[2];
 	}
+
+	/**
+	 * Set the texel of the point at @p index to @p texel.
+	 *
+	 * This method is safe - it won't crash on invalid @p index values.
+	 **/
 	void setTexel(unsigned int index, const BoVector3& texel)
 	{
 		BO_CHECK_NULL_RET(mPoints);
@@ -769,6 +800,15 @@ public:
 		mPoints[index * pointSize() + texelPos() + 0] = texel[0];
 		mPoints[index * pointSize() + texelPos() + 1] = texel[1];
 	}
+
+	/**
+	 * @return The vertex of the poiint at @p p.
+	 *
+	 * This method is safe - it won't crash on invalid @p index values.
+	 *
+	 * Note that this method is somewhat slow for using it in mesh
+	 * rendering. It creates a @ref BoVector3 object that is returned then.
+	 **/
 	inline BoVector3 vertex(unsigned int p) const
 	{
 		if (!mPoints) {
@@ -808,6 +848,10 @@ public:
 		return mPointsMovedBy;
 	}
 
+	/**
+	 * Make sure that we can store @p points in this class. You should not
+	 * call this twice!
+	 **/
 	void allocatePoints(int points)
 	{
 		if (mAllocatedPoints) {
@@ -838,6 +882,22 @@ public:
 		}
 	}
 
+	/**
+	 * This is the tricky part of this class (and the main reason for it
+	 * being a separate class!)
+	 *
+	 * Move all points in this class from the internally allocated array to
+	 * @p array. The firs point in the internal array will be at @p index of
+	 * @p array.
+	 *
+	 * This can be used to make sure that <em>all</em> points of a model
+	 * (not only mesh, but the entire model!) are in a single array. This is
+	 * required for many optimizations, that is why we do it after loading
+	 * all meshes.
+	 *
+	 * The internal array is freed once all points got moved to their new
+	 * location.
+	 **/
 	unsigned int movePoints(float* array, int index)
 	{
 		unsigned int pointsMoved = 0;
@@ -853,7 +913,7 @@ public:
 		}
 		pointsMoved = points();
 
-		#warning FIXME: memory fragmentation
+		// FIXME: memory fragmentation
 		// we allocate a lot of floats and free them later (moving the values to
 		// a single array). this will probably lead to quite some memory
 		// fragmentation. we should change this design.
