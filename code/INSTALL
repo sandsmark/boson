@@ -2,16 +2,16 @@
 
 Well.. basically, you need
 
-	boson-0.4.tar.bz2
-	boson-pics-0.4.tar
+	boson-0.5.tar.bz2
+	boson-pics-0.5.tar
 
 both are available at the homepage
-              http://aquila.rezel.enst.fr/boson/
+              http://boson.eu.org/
 
 Expand the source :
 ===================
 
-	Use the command 'bunzip2 boson-0.4.tar.bz2; tar xvf boson-0.4.tar'
+	Use the command 'bunzip2 boson-0.5.tar.bz2; tar xvf boson-0.5.tar'
 
 Making the game :
 =================
@@ -44,7 +44,7 @@ type : "make install"
 Installing data :
 =================
 
-Data are in the file "boson-pics-0.4.tar"
+Data are in the file "boson-pics-0.5.tar"
 
 those files are to be extracted in your ${kde}/share/apps dirs.
 Your ${kde} is probably /opt/kde or /usr/local/kde.
@@ -56,7 +56,7 @@ boson-pics file is in your home :
 =======
 [orzel@eagle ~]$ cd /opt/kde/                           # you may change this line !
 [orzel@eagle ~]$ cd share/apps
-[orzel@eagle ~]$ tar xvf ~/boson-pics-0.4.tar           # if your boson-pics is in your home
+[orzel@eagle ~]$ tar xvf ~/boson-pics-0.5.tar           # if your boson-pics is in your home
 [orzel@eagle ~]$ ls boson                               # check if your data are installed
 =======
 

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Wen Apr 14 20:22:00 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -26,7 +26,7 @@
 #endif
 
 
-#define BOEDITOR_VERSION_TEXT 	"0.4.0"
+#define BOEDITOR_VERSION_TEXT 	"0.5.0"
 
 ///////////////////////////////////////////////////////////////////
 // ressource.h  -- contains macros used for commands

@@ -3,126 +3,50 @@ TODO:
 
 Generic :
 =========
-
-minimap size dynamically choosen (50x50 should use 2x2 pixels/tile)
-
-nmap makes the server crashes. should logDD("new attempt rejected");
-
-check if qcanvas can handle png's transparency
-redo icon/.desktop stuff into makefile.am's
-
-editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
-ben's bug
-
-units construction : progressbar on unit_constructor, then autoput of the unit
-fine-graining for *Theme.cpp : distinc loading of overview..
-units : revoir le design global
-selectPart shouldn't be splitted
-QCanvas : shouldn't segfault when pixmap loading has failed
-
-move boson/handleGameMessage into field
-creating things only if ressources permit it (presently, the server already refuse to build)
-positionning rect in editor/boson
+(b=bug, f=feature)
 
 
-move boson.h into bosonapp.h (socket handling / generic stuff)
-	      and boWindow.h (KTMainWindow ...)
-
-positionning rect in editor/boson
-read/save Options has been removed (was using an olg buggy kdevelop code)
-bug : mobile on very-bottom-right can't be selected [still exact?]
-smoother moves (using float instead of int for VirtualSprite?)
-black background ??
-change miniDisplay to be gpp-indep, then move it to visual
-move logfile initialisation into common/
-fullscreenmode
-Initial dialog:
-	give 'world' name
-	give 'species' names
-	version check whithin the ask_connect msg
-Unit drawing into minimap : moving, etc...
-does units::rect need to be virtual anymore ?
-server : check that each unit does max 1 move each jiffie
-different subclass for my_units and other_units in client
-fog of war
-
-graphism 
-	>now, we have: The picture, the health bar, the status, the progress bar,
-	>Damage (number, not a bar), Amor (number, not a bar), Speed (number, not
-	>a bar). I that fills it up, cool. If its too much, I don't care, we can
-	>cut speed...
-	>
-
-mouse handling :
-	When you select a unit and rightclick somewhere on the radarmap, it will go there.
-	When you left click-and-hold and drag on the radarmap, you see that part
-	on the right window.
-
-
-boson:
-	checkMove should handle the new 'direction'
-
-visual:
-	merge boshot and speciesTheme pixmap loading stuff
-
-editor:
-	close -> how to say KTMW that there's no mainWidget anymore ? 
-	predefined 'template' for construction.
-
-
-0.5 release:
-============
-client and server should be peer-killed proof
-check the .bfp format (no binary changes should be allowed after 0.5)
-	-> check for 'version' 'author' and other meta-information especially
-check compilation in map/
-minimap should work (for ben)
-editor should be pre0.1
-"unit" tree cleaning
-"move" cleaning
-"connect" cleaning
-"sound" and "music" for nils
-
-
-test 'yellow' team colorization with ben's examples..
-0.8 release: (first public release)
-============
-
-list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
-
-	mailing-list
-	web-site
-	kde-announce
-	upload to upload.kde.org/
-	slashdot	www.slahdot.net
-	freshmeat	www.freshmeat.org
-	linuxGames
-	happypenguin
-
-register the website to :
-	yahoo
-	... ? 
-	
-
-
-1.0 release :
-=============
-theme editor
-map editor
-server can handle multiple game
-
-===================================
-
-Even more :
-	Torus Map, where everybody's point of view is in the center of the miniMap in the beginning.
-	Chatting
-	Computer player (AI)
-	Speed optimisation
-	'forgotten' fog of war
-	Game recording for post-analyse
-	kind of acceleration to make starting moves smoother ? (ben)
-	what about drag and dropping units ? :-)
-	theme is configured in a file (explaining, for example, how many
-		different implementation there are for a given pixmap)
-
+#2 b: when destroyed while selected, facilities are still selected (you can keep on building fe)
+#5 f: server detects end-of-game / winner..
+#8 f: editor handles multiple players (adding players..)
+#11 f: fixed units attacking
+#23 f: serverCell should inherits Cell (bosonCell+=requested, serverCell+=knownby)
+#27 f: use of QPoint/QSize all over canvas/toplevel
+#28 f: remove EX() in common/unitType.cpp -> need lot of checking
+#30 f: new boDist() and use of it all over the place
+#34 b: editor : "close map" not working
+#38 b: selected units should be on a TopLevel basis (see multiple window in editor fe)
+#39 f: generic statusbar in visualTopLevel, so we can have units# in editor too
+#41 f: display info on selected units (power, what is doing and so on..)
+#42 f: sound support (arts)
+#43 f: music support (arts)
+#44 f: auto-positionning of newly built mobile units by server (need #23)
+#45 f: auto-attacking units when opponents units are "near"
+#46 b: small shots still have black background (need ben' new graphic)
+#48 f: oil decreasing when units are moving
+#54 f: clean up the maxX/maxY redonduncies
+#55 f: minimap size dynamically choosen (50x50 should use 2x2 pixels/tile)
+#56 b: nmap makes the server crashes. should logDD("new attempt rejected"), or close the socket when eo is here
+#57 f: check if qcanvas can handle png's transparency
+#58 f: editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
+#59 f: units construction : progressbar on unit_constructor, then autoput of the unit
+#60 f: fine-graining for *Theme.cpp : distinct loading of overview..
+#61 f: selectPart shouldn't be splitted (up/down)
+#62 b: report to QCanvas/author : shouldn't segfault when pixmap loading has failed
+#63 f: clean up the network code : what handles what ? and in which file..
+#64 f: proposiong/creating things only if ressources permit it in client (presently, the server already refuse to build)
+#65 f: positionning rect in editor/boson (you see where you'll put the facility)
+#66 f: split boson.h into bosonapp.h (socket handling / generic stuff) and boWindow.h (KTMainWindow ...)
+#67 f: read/save config has been removed (was using an olg buggy kdevelop code)
+#68 b: mobile on very-bottom-right can't be selected [still exact?]
+#69 f: smoother moves between two "sync"
+#70 f: move logfile initialisation into common/
+#71 f: fullscreenmode (for ben :)
+#72 f: in Initial dialog: give 'world' name, 'species' names and  version check whithin the ask_connect msg
+#73 f: clean Unit drawing into minimap : moving, etc...
+#74 f: server : check that each unit does max 1 move each jiffy
+#75 f: dnd the minimap should move the screen
+#76 f: directon are still not handled after new positionning scheme (0.5)
+#77 f: releasiing some predefined 'templates' for the editor
+#78 b: use checkMove() in boeditor as well
 

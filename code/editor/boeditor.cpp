@@ -1,11 +1,11 @@
 /***************************************************************************
-                          boson.cpp  -  description                              
+                          boeditor.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Thu Sep  9 01:27:00 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef EDITORFIELD_H 
-#define EDITORFIELD_H 
+#ifndef EDITORCANVAS_H 
+#define EDITORCANVAS_H 
 
 #include <qintdict.h>
 
@@ -72,6 +72,6 @@ private:
 	bool		modified;
 };
 
-#endif // EDITORFIELD_H
+#endif // EDITORCANVAS_H
 
 

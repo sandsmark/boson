@@ -1,11 +1,11 @@
 /***************************************************************************
-                          boson.h  -  description                              
+                          boeditor.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BOSON_H 
-#define BOSON_H 
+#ifndef BOEDITOR_H 
+#define BOEDITOR_H 
  
 // include files for Qt
 #include <qlist.h>
@@ -89,5 +89,5 @@ private:
 	QList<editorTopLevel>	topLevels;
 };
 
-#endif // BOSON_H
+#endif // BOEDITOR_H
  

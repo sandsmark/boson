@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -22,11 +22,11 @@
 #define BOCONFIG_H 
 
 #define BOSON_VERSION_MAJOR	0
-#define BOSON_VERSION_MINOR	4
+#define BOSON_VERSION_MINOR	5
 #define BOSON_VERSION_PATCH	0
-#define BOSON_VERSION_TEXT	"0.4.0"
+#define BOSON_VERSION_TEXT	"0.5.0"
 #define BOSON_MAGIC		"Orzel"
-#define BOSON_VERSION_MAGIC	"boson/orzel@eagle, 1999"
+#define BOSON_VERSION_MAGIC	"boson/orzel@eagle, 2000"
 #define BOSON_MAGIC_LENGHT	(sizeof(BOSON_MAGIC)/sizeof(char))
 
 #define BOSON_MAX_CONNECTION	(10)

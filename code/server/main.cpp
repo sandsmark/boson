@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : ????
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -40,7 +40,7 @@ void usage(void)
 	char buffer[3000];
 
 	sprintf(buffer, 
-		"boserver (c) 1999 Thomas Capricelli <orzel@yalbi.com>\n"
+		"boserver (c) 1999-2000 Thomas Capricelli <orzel@yalbi.com>\n"
 		"\nusage : boserver [Port]\n\n"
 		"\tPort is the TCP/IP port the server is listening to (default to %d)\n"
 		"\tThe port number should be > 1000\n"

@@ -5,7 +5,7 @@
     version              : $Id$
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
-    copyright            : (C) 1999 by Thomas Capricelli                         
+    copyright            : (C) 1999-2000 by Thomas Capricelli                         
     email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
@@ -154,7 +154,7 @@ void bosonTopLevel::handleOrder(int order)
 	switch(orderType) {
 		default:
 		case OT_NONE:
-			logf(LOG_ERROR, "unexpected mainWidget::handleOrder");
+			logf(LOG_ERROR, "unexpected handleOrder::handleOrder");
 			return;
 			break;
 		case OT_FACILITY:

@@ -26,18 +26,18 @@
 
 <P>
 <P><B>Boson</B> can be found on 
-<A HREF="http://aquila.rezel.enst.fr/boson/">the boson homepage</A>.
-<P>Boson is also available on ftp.kde.org and all its mirrors, in the Incomings directory or in
-the unstable/ tree in the game section. 
+<A HREF="http://boson.eu.org">the boson homepage</A>.
+<P>Boson is also available on ftp.kde.org and all its mirrors, in the Incomings/ directory or in
+unstable/game tree.
 <P>
 <H3><A NAME="ss2.2">2.2 Requirements</A>
 </H3>
 
-<P>In order to successfully compile boson, you need kdelibs-1.0 and kdesupport-1.0, or the latest versions
-of <CODE> libkdecore</CODE>, <CODE> libkdeui</CODE>, <CODE> libkfile</CODE>, <CODE> libkfm</CODE> and <CODE> libQwSpriteField</CODE>.
-All required libraries can be found on 
+<P>In order to successfully compile and use boson, you need kde-qt-addon and kdelibs from KDE-2.0.
+Those libraries can be found on 
 <A HREF="ftp://ftp.kde.org/pub/kde/">ftp://ftp.kde.org/pub/kde/</A>.
-<P>
+You also need Qt-2.1, that can be found either at the KDE site or on 
+<A HREF="http://www.troll.no">http://www.troll.no</A><P>
 <H3><A NAME="ss2.3">2.3 Compilation and installation</A>
 </H3>
 
@@ -53,6 +53,12 @@ the base directory of the Boson distribution:
 </PRE>
 </CODE></BLOCKQUOTE>
 <P>You will probably need to be root for the install stage.
+<P>You may need to add those arguments to ./configure if your qt2/kde2 are installed on non-standart
+places
+<UL>
+<LI>--with-qt-dir=&lt;your-qt-dir&gt;</LI>
+<LI>--prefix=&lt;your-kde-dir&gt;</LI>
+</UL>
 <P>
 <P>Since Boson uses <CODE>autoconf</CODE> you should have not trouble
 compiling it.
