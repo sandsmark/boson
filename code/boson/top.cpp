@@ -977,9 +977,16 @@ void TopWidget::changeLocalPlayer(Player* p, bool init)
 
 void TopWidget::slotEndGame()
 {
- int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
+ BO_CHECK_NULL_RET(boGame);
+ int answer;
+ if (boGame->gameMode()) {
+	answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this game?"),
 		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
- if (answer == KMessageBox::No) {
+ } else {
+	answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to end this editor session?"),
+		i18n("Are you sure?"), KStdGuiItem::yes(), KStdGuiItem::no(), "ConfirmEndGame");
+ }
+ if (answer != KMessageBox::Yes) {
 	return;
  }
  slotGameOver();
