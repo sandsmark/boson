@@ -172,18 +172,6 @@ protected:
 	 **/
 	void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
-	/**
-	 * Calculate matrix*inputVector and return the result into resultVector.
-	 *
-	 * This can be used for calculations that are not speed-sensitive.
-	 * @param resultVector An array of 3 (the forth coordinate is ignored
-	 * because it is unused by boson)
-	 * @param matrix An array of 16, as returned by e.g.
-	 * glGetFloatv(GL_TEXTURE_MATRIX, matrix)
-	 * @param inputVector An array of 3 that should get transformed
-	 **/
-	void myTransform(GLfloat* resultVector, const GLfloat* matrix, const GLfloat* inputVector);
-
 private:
 	void init();
 

@@ -41,6 +41,37 @@ void BoMatrix::loadMatrix(GLenum matrix)
  glGetFloatv(matrix, mData);
 }
 
+void BoMatrix::transform(BoVector3* vector, BoVector3* input)
+{
+ // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
+ // the forth element is unused in boson and therefore we use silently 0.
+#define M(row, col) mData[col * 4 + row] // AB: shamelessy stolen from mesa's  math subdir
+#define v(element) vector->mData[element]
+#define i(element) input->mData[element]
+ v(0) = M(0, 0) * i(0) + M(0, 1) * i(1) + M(0, 2) * i(2) + M(0, 3);
+ v(1) = M(1, 0) * i(0) + M(1, 1) * i(1) + M(1, 2) * i(2) + M(1, 3);
+ v(2) = M(2, 0) * i(0) + M(2, 1) * i(1) + M(2, 2) * i(2) + M(2, 3);
+#undef i
+#undef v
+#undef M
+}
+
+void BoMatrix::transform(BoVector4* vector, BoVector4* input)
+{
+ // v = m * i, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
+ // the forth element is unused in boson and therefore we use silently 0.
+#define M(row, col) mData[col * 4 + row] // AB: shamelessy stolen from mesa's  math subdir
+#define v(element) vector->mData[element]
+#define i(element) input->mData[element]
+ v(0) = M(0, 0) * i(0) + M(0, 1) * i(1) + M(0, 2) * i(2) + M(0, 3);
+ v(1) = M(1, 0) * i(0) + M(1, 1) * i(1) + M(1, 2) * i(2) + M(1, 3);
+ v(2) = M(2, 0) * i(0) + M(2, 1) * i(1) + M(2, 2) * i(2) + M(2, 3);
+ v(3) = M(3, 0) * i(0) + M(3, 1) * i(1) + M(3, 2) * i(2) + M(3, 3);
+#undef i
+#undef v
+#undef M
+}
+
 void BoMatrix::debugMatrix(const GLfloat* m)
 {
  kdDebug() << k_funcinfo << endl;

@@ -47,6 +47,7 @@ class BoVector3
 
 
   private:
+    friend class BoMatrix;
     GLfloat mData[3];
 };
 
@@ -76,6 +77,7 @@ class BoVector4
     inline GLfloat operator[](int i)  { return mData[i]; };
 
   private:
+    friend class BoMatrix;
     GLfloat mData[4];
 };
 
@@ -169,6 +171,15 @@ class BoMatrix
       }
       return true;
     }
+
+    /**
+     * Transform the vector @p input according to this matrix and put the result
+     * into @p v.
+     *
+     * This calculates simply does v = M * input, where M is this matrix.
+     **/
+    void transform(BoVector3* v, BoVector3* input);
+    void transform(BoVector4* v, BoVector4* input);
 
     static void debugMatrix(const GLfloat* matrix);
 
