@@ -5,3 +5,4 @@ boson
 boeditor
 .deps
 .libs
+boson_meta_unload.cpp

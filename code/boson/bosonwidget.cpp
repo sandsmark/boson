@@ -403,6 +403,8 @@ void BosonWidget::addEditorCommandFrame()
 		d->mBigDisplay, SLOT(slotWillConstructUnit(int, VisualUnit*, Player*))); // in addEditorCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)), 
 		d->mCommandFrame, SLOT(slotShowSingleUnit(VisualUnit*)));
+ connect(d->mCommandFrame, SIGNAL(signalCellSelected(int,unsigned char)), 
+		d->mBigDisplay, SLOT(slotWillPlaceCell(int, unsigned char))); // in addEditorCommandFrame()
 
 
 }

@@ -29,6 +29,8 @@ struct ConstructUnit
 	int unitType; // to be constructed unit
 	VisualUnit* facility; // facility that constructs the unit (or NULL in editor mode)
 	Player* owner; // the owner of the unit - probably only for editor mode.
+	int groundType;
+	unsigned char version;
 };
 
 class BosonBigDisplayPrivate
@@ -394,11 +396,21 @@ void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* facility, 
  }
  if (!owner) {
 	kdDebug() << "slotWillConstructUnit(): NULL owner" << endl;
-// FIXME 
+	d->mConstruction.groundType = -1;
+	d->mConstruction.unitType = -1;
+	return;
  }
  d->mConstruction.unitType = unitType;
  d->mConstruction.facility = facility;
  d->mConstruction.owner = owner;
+ d->mConstruction.groundType = -1;
+}
+
+void BosonBigDisplay::slotWillPlaceCell(int groundType, unsigned char version)
+{
+ d->mConstruction.unitType = -1;
+ d->mConstruction.groundType = groundType;
+ d->mConstruction.version = version;
 }
 
 void BosonBigDisplay::slotUnitChanged(VisualUnit* unit)

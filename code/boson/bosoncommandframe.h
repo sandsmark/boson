@@ -68,6 +68,8 @@ signals:
 	 **/
 	void signalUnitSelected(int unitType, VisualUnit* factory, Player* owner);
 
+	void signalCellSelected(int groundType, unsigned char version);
+
 protected slots:
 	/**
 	 * A button has been clicked. Emit the correct signal.
