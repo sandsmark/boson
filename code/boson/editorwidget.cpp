@@ -82,8 +82,6 @@ void EditorWidget::initDisplayManager()
 
  connect(displayManager(), SIGNAL(signalLockAction(bool)),
 		this, SLOT(slotLockAction(bool)));
- connect(display, SIGNAL(signalEditorPreferences()),
-		this, SLOT(slotEditorPreferences()));
  connect(display, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
 		this, SIGNAL(signalChangeLocalPlayer(Player*)));
  connect(display, SIGNAL(signalEditorEditPlayerMinerals()),
@@ -150,16 +148,6 @@ void EditorWidget::slotGameStarted()
 void EditorWidget::startScenarioAndGame()
 {
  BosonWidgetBase::startScenarioAndGame();
-}
-
-void EditorWidget::slotEditorPreferences()
-{
- OptionsDialog* dlg = gamePreferences(true);
- if (!dlg) {
-	boError() << k_funcinfo << "NULL options dialog" << endl;
-	return;
- }
- dlg->show();
 }
 
 void EditorWidget::slotEditPlayerMinerals()

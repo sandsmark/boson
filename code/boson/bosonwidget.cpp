@@ -42,25 +42,13 @@
 
 #include "bosonwidget.moc"
 
-class BosonWidget::BosonWidgetPrivate
-{
-public:
-	BosonWidgetPrivate()
-	{
-	}
-};
-
 BosonWidget::BosonWidget(QWidget* parent)
     : BosonWidgetBase(parent)
 {
- d = new BosonWidgetPrivate;
 }
 
 BosonWidget::~BosonWidget()
 {
- boDebug() << k_funcinfo << endl;
- delete d;
- boDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::initDisplayManager()
@@ -70,16 +58,6 @@ void BosonWidget::initDisplayManager()
  BosonBigDisplayBase* display = displayManager()->activeDisplay();
  BO_CHECK_NULL_RET(display);
  connect(display, SIGNAL(signalSaveGame()), this, SIGNAL(signalSaveGame()));
- connect(display, SIGNAL(signalGamePreferences()), this, SLOT(slotGamePreferences()));
-}
-
-void BosonWidget::initPlayer()
-{
- BosonWidgetBase::initPlayer();
- if (!localPlayer()) {
-	boError() << k_funcinfo << "NULL local player" << endl;
-	return;
- }
 }
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
@@ -144,16 +122,6 @@ void BosonWidget::startScenarioAndGame()
 	}
  }
  boMusic->startLoop();
-}
-
-void BosonWidget::slotGamePreferences()
-{
- OptionsDialog* dlg = gamePreferences(false);
- if (!dlg) {
-	boError() << k_funcinfo << "NULL options dialog" << endl;
-	return;
- }
- dlg->show();
 }
 
 void BosonWidget::saveConfig()

@@ -74,8 +74,6 @@ protected slots:
 
 	void slotGameStarted();
 
-	void slotEditorPreferences();
-
 protected:
 	virtual void initDisplayManager();
 	virtual void initConnections();

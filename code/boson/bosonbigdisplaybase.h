@@ -409,14 +409,13 @@ signals:
 	void signalSaveGame();
 	void signalEndGame();
 	void signalQuit();
-	void signalGamePreferences();
-	void signalEditorPreferences();
 	void signalSelectGroup(int);
 	void signalCreateGroup(int);
 	void signalEditorChangeLocalPlayer(Player*);
 	void signalEditorEditPlayerMinerals();
 	void signalEditorEditPlayerOil();
 	void signalEditorEditHeight(bool);
+	void signalChangeCursor(int, const QString&);
 
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
@@ -443,7 +442,10 @@ protected slots:
 	void slotChangeMaxProfilingAdvanceEntries();
 	void slotChangeMaxProfilingRenderingEntries();
 	void slotToggleStatusbar();
+	void slotPreferences();
+	void slotPreferencesApply();
 	void slotDebugKGame();
+	void slotUpdateOpenGLSettings();
 	void slotEditorSavePlayFieldAs();
 	void slotEditorChangeLocalPlayer(int);
 	void slotEditorDeleteSelectedUnits();
@@ -554,6 +556,7 @@ protected:
 
 	void createRenderItemList();
 
+	void renderUfo();
 	/**
 	 * @param isFlying If TRUE, the provided z value is always used, which
 	 * is expected to be higher than any cells. Otherwise the z value of
