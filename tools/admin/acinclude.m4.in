@@ -3976,7 +3976,7 @@ else
   version="$1"
 fi
 
-AC_MSG_CHECKING([for Python])
+AC_MSG_CHECKING([for Python$version])
 
 python_incdirs="$ac_python_dir/include /usr/include /usr/local/include/ $kde_extra_includes"
 AC_FIND_FILE(Python.h, $python_incdirs, python_incdir)
@@ -4038,7 +4038,7 @@ else
   KDE_TRY_LINK_PYTHON(pthread_and_dl, [$LIBPTHREAD $LIBDL -lutil -lreadline -lncurses -lm])
   KDE_TRY_LINK_PYTHON(m_and_thread_and_db_special, [$LIBPTHREAD -lm -ldb -lutil], [],
 	[AC_MSG_WARN([it seems, Python depends on another library.
-    Pleae set LIBPYTHON to '-lpython$version -lotherlib' before calling configure to fix this
+    Please set LIBPYTHON to '-lpython$version -lotherlib' before calling configure to fix this
     and contact the authors to let them know about this problem])
 	])
 
@@ -4055,10 +4055,14 @@ fi
 
 AC_DEFUN(KDE_CHECK_PYTHON,
 [
-  KDE_CHECK_PYTHON_INTERN("2.2", 
-    [KDE_CHECK_PYTHON_INTERN("2.1", 
-      [KDE_CHECK_PYTHON_INTERN("2.0", [ KDE_CHECK_PYTHON_INTERN($1, $2) ])
-  ])])
+  KDE_CHECK_PYTHON_INTERN("2.3", 
+   [KDE_CHECK_PYTHON_INTERN("2.2", 
+     [KDE_CHECK_PYTHON_INTERN("2.1", 
+       [KDE_CHECK_PYTHON_INTERN("2.0", 
+         [KDE_CHECK_PYTHON_INTERN($1, $2) ])
+       ])
+     ])
+   ])
 ])
 
 AC_DEFUN(KDE_CHECK_STL_SGI,
