@@ -741,14 +741,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 #endif
 		}
 		updateCursor();
-// this update is baad:
-// it makes the game to freeze while the mouse is moved.
-// currently we use a update timer for animated cursor - but this also has a
-// performance problem
-// another idea might be to use QTimer::singleShot() here (not yet tried)
-//#if !ANIMATED_CURSOR_TIMER
-////		updateGL();
-//#endif
 		e->accept();
 		break;
 	case QEvent::MouseButtonDblClick:
@@ -1238,6 +1230,10 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 
  GLfloat moveX = QABS(moveX1 - moveX2);
  GLfloat moveY = -QABS(moveY1 - moveY2);
+#else
+ const float moveX = move;
+ const float moveY = move;
+#endif
  if (pos.x() <= sensity && pos.x() > -1) {
 	x = -moveX;
  } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
@@ -1257,13 +1253,13 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
+		#ifndef NO_OPENGL
+			setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
+		#else
+			scrollBy((int)x, (int)y);
+		#endif
 	}
  }
-#else
- //FIXME untested
- scrollBy(move, move);
-#endif
 }
 
 
