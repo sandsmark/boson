@@ -28,6 +28,7 @@
 #include "../common/map.h"
 
 #include "bosonField.h"
+#include "game.h" 	// who_am_i
   
 bosonField::bosonField(uint w, uint h, QObject *parent, const char *name=0L)
 	: visualField(w,h,parent,name)
@@ -92,6 +93,9 @@ void bosonField::createFix(facilityMsg_t &m)
 	facility.insert(m.key, f);
 
 	emit updateFix(f);
+	
+	if ( FACILITY_CMDBUNKER == m.type && m.who == who_am_i)
+		emit reCenterView(m.x, m.y);
 }
 
 
