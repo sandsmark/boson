@@ -57,6 +57,19 @@ do not compile!
 // compatibility for boson 0.8
 #define BO_COMPAT_0_8_TEXTURE_COUNT 3 // we use 3 textured by default for old maps (grass, desert, water).
 
+bool BosonFileConverter::loadXMLDoc(QDomDocument* doc, const QString& xml) const
+{
+ QString errorMsg;
+ int line = 0;
+ int column = 0;
+ if (!doc->setContent(xml, &errorMsg, &line, &column)) {
+	boError() << k_funcinfo << "Parse errror in line=" << line << ",column="
+			<< column << " errorMsg=" << errorMsg << endl;
+	return false;
+ }
+ return true;
+}
+
 bool BosonFileConverter::convertMapFile_From_0_8_To_0_9(const QByteArray& map, QByteArray* newMap, QByteArray* texMap)
 {
  QDataStream readStream(map, IO_ReadOnly);
@@ -183,15 +196,15 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QMap<QString, QByteArra
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument playersDoc(QString::fromLatin1("Players"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
- if (!kgameDoc.setContent(QString(fileList["kgameXML"]))) {
+ if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
 	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
 	return false;
  }
- if (!playersDoc.setContent(QString(fileList["playersXML"]))) {
+ if (!loadXMLDoc(&playersDoc, QString(fileList["playersXML"]))) {
 	boError() << k_funcinfo << "unable to load players.xml" << endl;
 	return false;
  }
- if (!canvasDoc.setContent(QString(fileList["canvasXML"]))) {
+ if (!loadXMLDoc(&canvasDoc, QString(fileList["canvasXML"]))) {
 	boError() << k_funcinfo << "unable to load canvas.xml" << endl;
 	return false;
  }
@@ -453,7 +466,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  map_description = descriptionXML.local8Bit(); // AB: i have _no_ idea whether this is correct. but I need a QCString, not a QString and this one seems (!) to be the better choice than utf8().
 
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
- if (!kgameDoc.setContent(QString(fileList["kgameXML"]))) {
+ if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
 	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
 	return false;
  }
