@@ -53,6 +53,7 @@
 #include "boglstatewidget.h"
 #include "boconditionwidget.h"
 #include "bocamerawidget.h"
+#include "boeventlistener.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -131,6 +132,7 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
  mDisplayManager = 0;
  mCursor = 0;
  mLocalPlayer = 0;
+ mLocalPlayerInput = 0;
 }
 
 BosonWidgetBase::~BosonWidgetBase()
@@ -871,13 +873,14 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
 	if (oldIO) {
 		mLocalPlayer->removeGameIO(oldIO);
 	}
+	mLocalPlayerInput = 0;
  }
  mLocalPlayer = p;
  if (mLocalPlayer) {
-	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
-	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
+	mLocalPlayerInput = new BosonLocalPlayerInput();
+	connect(mLocalPlayerInput, SIGNAL(signalAction(const BoSpecificAction&)),
 			displayManager(), SLOT(slotAction(const BoSpecificAction&)));
-	mLocalPlayer->addGameIO(input);
+	mLocalPlayer->addGameIO(mLocalPlayerInput);
  }
  if (displayManager()) {
 	displayManager()->activeDisplay()->setLocalPlayerIO(localPlayer()->playerIO());
@@ -1096,8 +1099,7 @@ void BosonWidgetBase::slotSetEnableColormap(bool enable)
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
-#warning TODO!!
-// d->mLocalPlayerScript->execLine(line);
+ mLocalPlayerInput->eventListener()->script()->execLine(line);
 }
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
@@ -1106,7 +1108,7 @@ void BosonWidgetBase::slotAdvance(unsigned int, bool)
 
 void BosonWidgetBase::initScripts()
 {
-// displayManager()->activeDisplay()->setLocalPlayerScript(d->mLocalPlayerScript);
+ displayManager()->activeDisplay()->setLocalPlayerScript(mLocalPlayerInput->eventListener()->script());
 }
 
 void BosonWidgetBase::slotDumpGameLog()
