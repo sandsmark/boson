@@ -38,6 +38,7 @@
 #include <qpair.h>
 #include <qpoint.h>
 #include <qdom.h>
+#include <qstringlist.h>
 
 UnitPlugin::UnitPlugin(Unit* unit)
 {
