@@ -26,6 +26,7 @@
 #include "defines.h"
 #include "bodebug.h"
 #include "bogltooltip.h"
+#include "bogroundrenderer.h"
 
 #include <klocale.h>
 #include <knuminput.h>
@@ -471,6 +472,13 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mUseMaterials->setText(i18n("Use materials"));
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
 
+ hbox = new QHBox(this);
+ (void)new QLabel(i18n("Ground rendering method"), hbox);
+ mGroundRenderer = new QComboBox(hbox);
+ for (int i = 0; i < BoGroundRenderer::Last; i++) {
+	mGroundRenderer->insertItem(BoGroundRenderer::rttiToName(i));
+ }
+ mGroundRenderer->setCurrentItem(0);
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -522,6 +530,9 @@ void OpenGLOptions::apply()
 	}
  }
 
+ boConfig->setUIntValue("GroundRenderer", mGroundRenderer->currentItem());
+ emit signalGroundRendererChanged(mGroundRenderer->currentItem());
+
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
  boConfig->setUseLight(mUseLight->isChecked());
  boConfig->setUseMaterials(mUseMaterials->isChecked());
@@ -538,6 +549,7 @@ void OpenGLOptions::setDefaults()
  setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+ mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
 }
 
 void OpenGLOptions::load()
@@ -550,6 +562,7 @@ void OpenGLOptions::load()
  setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
  mUseLight->setChecked(boConfig->useLight());
  mUseMaterials->setChecked(boConfig->useMaterials());
+ mGroundRenderer->setCurrentItem(boConfig->uintValue("GroundRenderer"));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

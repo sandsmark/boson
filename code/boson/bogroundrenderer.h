@@ -22,6 +22,7 @@
 class Cell;
 class Player;
 class PlayerIO;
+class QString;
 
 class BosonMap;
 class BoMatrix;
@@ -32,8 +33,26 @@ class BoGroundRendererPrivate;
 class BoGroundRenderer
 {
 public:
+	enum Renderer {
+		// note that the numbers must be in order! (i.e. 0, 1, 2, ...)
+		Default = 0,
+		Fast = 1,
+
+		// this _must_ remain the last item of the enum!
+		Last
+	};
+
+public:
 	BoGroundRenderer();
 	virtual ~BoGroundRenderer();
+
+	virtual int rtti() const = 0;
+
+	/**
+	 * This takes an @rtti (see @ref Renderer) and converts it into a @ref
+	 * QString.
+	 **/
+	static QString rttiToName(int rtti);
 
 	/**
 	 * Apply pointers for all OpenGL matrices to this class. You must not
@@ -53,7 +72,7 @@ public:
 	 * could have been rendered three times, always with a different
 	 * texture, but will occur only once here!)
 	 **/
-	virtual unsigned int renderCells(const BosonMap* map);
+	unsigned int renderCells(const BosonMap* map);
 
 	/**
 	 * Render a grid for all cells in @p cells.
@@ -98,6 +117,34 @@ protected:
 
 	const double* viewFrustum() const;
 
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map) = 0;
+
+	/**
+	 * @return The number of cells that were marked to be rendered by @ref
+	 * generateCellList
+	 **/
+	inline unsigned int renderCellsCount() const
+	{
+		return mRenderCellsCount;
+	}
+
+private:
+	BoGroundRendererPrivate* d;
+	unsigned int mRenderCellsCount;
+
+};
+
+class BoDefaultGroundRenderer : public BoGroundRenderer
+{
+public:
+	BoDefaultGroundRenderer();
+	virtual ~BoDefaultGroundRenderer();
+
+	virtual int rtti() const { return Default; }
+
+protected:
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
+
 private:
 	/**
 	 * Render the @p cells with the current texture.
@@ -109,10 +156,17 @@ private:
 	 * One could optimize this by using multitexturing for example!
 	 **/
 	void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart);
-
-private:
-	BoGroundRendererPrivate* d;
 };
 
+class BoFastGroundRenderer : public BoGroundRenderer
+{
+public:
+	BoFastGroundRenderer();
+	virtual ~BoFastGroundRenderer();
+
+	virtual int rtti() const { return Fast; }
+
+	virtual void renderVisibleCells(Cell** cells, unsigned int cellsCount, const BosonMap* map);
+};
 #endif
 

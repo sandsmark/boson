@@ -274,6 +274,11 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugBoundingBoxes = false;
  mDebugFPS = false;
 
+ // these are dynamic entries. usually they are added in the class where they
+ // get used, but sometimes it is also handy to add them here (e.g. when it
+ // isn't 100% clear which class will reference it first).
+ addDynamicEntry(new BoConfigUIntEntry(this, "GroundRenderer", DEFAULT_GROUND_RENDERER));
+
  // load from config
  reset(conf);
 }

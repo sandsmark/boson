@@ -212,6 +212,8 @@ public slots:
 
 	void slotAction(const BoSpecificAction&);
 
+	void slotChangeGroundRenderer(int);
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.

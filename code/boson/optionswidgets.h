@@ -194,6 +194,9 @@ protected:
 
 	void setAlignSelectionBoxes(bool align);
 
+signals:
+	void signalGroundRendererChanged(int);
+
 private:
 	KIntNumInput* mUpdateInterval;
 	QCheckBox* mModelTexturesMipmaps;
@@ -203,6 +206,7 @@ private:
 	QCheckBox* mAlignSelectBoxes;
 	QCheckBox* mUseLight;
 	QCheckBox* mUseMaterials;
+	QComboBox* mGroundRenderer;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget
