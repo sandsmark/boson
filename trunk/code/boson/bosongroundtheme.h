@@ -117,20 +117,6 @@ public:
 
 	QPixmap pixmap(unsigned int texture);
 
-	/**
-	 * This value is intended for the texturing code only (although it could
-	 * be used for pathfinding, too - see below). We need the type of the
-	 * ground in order to pick the correct texture. amount of land/water is
-	 * not sufficient for that, as e.g. desert and water both have
-	 * amountOfLand=255, amountOfWater=0.
-	 *
-	 * @return The type of ground at cells with @p texture. Note that this
-	 * type is dependable for pathfinding in the same way as @ref
-	 * amountOfLand. Also note that textures are mixed in boson, so there
-	 * can (and probably will) be different groundTypes on a single cell!
-	 **/
-	int groundType(unsigned int texture) const;
-
 protected:
 	/**
 	 * @param dir The directory to load the image from. Including the theme

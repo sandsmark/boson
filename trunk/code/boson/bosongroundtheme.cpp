@@ -32,7 +32,6 @@
 struct TextureGroundType
 {
 	QString mFile; // relative to groundTheme dir
-	int mGroundType; // AB: we need a groundType enum for this. of any kind... this variable mustn't depend on that enum though.
 	unsigned char mAmountOfLand;
 	unsigned char mAmountOfWater;
 	QRgb mMiniMapColor;
@@ -209,12 +208,6 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	types[i].mAmountOfLand = (unsigned char)conf.readUnsignedNumEntry("AmountOfLand", 0);
 	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
 	types[i].mMiniMapColor = conf.readUnsignedNumEntry("MiniMapColor", 0);
-
-
-#warning FIXME
-	// currently we use 0=grass,1=desert,2=water in both code and
-	// index.ground. but it is rather a workaround - we should fix it.
-	types[i].mGroundType = (int)i;
  }
  if (!ret) {
 	boError() << k_funcinfo << "Could not load ground theme config file " << file << endl;
@@ -286,14 +279,6 @@ QString BosonGroundTheme::textureFileName(unsigned int texture) const
 	return QString::null;
  }
  return d->mGroundTypes[texture].mFile;
-}
-
-int BosonGroundTheme::groundType(unsigned int texture) const
-{
- if (texture >= textureCount()) {
-	return 0;
- }
- return d->mGroundTypes[texture].mGroundType;
 }
 
 unsigned int BosonGroundTheme::textureCount() const
