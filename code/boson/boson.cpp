@@ -1514,6 +1514,11 @@ void Boson::slotPlayerJoinedGame(KPlayer* p)
 	d->mComputerIOList.append((KGameComputerIO*)io);
  }
  slotAddChatSystemMessage(i18n("Player %1 - %2 joined").arg(p->id()).arg(p->name()));
+
+ if (!localPlayer() && playerCount() == 1) {
+	boWarning() << k_funcinfo << "first player entered the game and no localplayer is set - assume that the localplayer entered" << endl;
+	setLocalPlayer((Player*)p);
+ }
 }
 
 void Boson::slotPlayerLeftGame(KPlayer* p)
