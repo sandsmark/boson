@@ -51,7 +51,9 @@ class PythonScript : public BosonScript
 
     // Resources
     static PyObject* py_minerals(PyObject* self, PyObject* args);
+    static PyObject* py_addMinerals(PyObject* self, PyObject* args);
     static PyObject* py_oil(PyObject* self, PyObject* args);
+    static PyObject* py_addOil(PyObject* self, PyObject* args);
 
 
     // Units
@@ -60,7 +62,9 @@ class PythonScript : public BosonScript
     static PyObject* py_attack(PyObject* self, PyObject* args);
     static PyObject* py_stopUnit(PyObject* self, PyObject* args);
     static PyObject* py_mineUnit(PyObject* self, PyObject* args);
+    static PyObject* py_produceUnit(PyObject* self, PyObject* args);
     static PyObject* py_spawnUnit(PyObject* self, PyObject* args);
+    static PyObject* py_teleportUnit(PyObject* self, PyObject* args);
 
     static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);
     static PyObject* py_unitsInRect(PyObject* self, PyObject* args);
@@ -71,6 +75,8 @@ class PythonScript : public BosonScript
     static PyObject* py_unitType(PyObject* self, PyObject* args);
     static PyObject* py_isUnitMobile(PyObject* self, PyObject* args);
     static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
+    static PyObject* py_canUnitProduce(PyObject* self, PyObject* args);
+    static PyObject* py_productionTypes(PyObject* self, PyObject* args);
 
     static PyObject* py_isUnitAlive(PyObject* self, PyObject* args);
 

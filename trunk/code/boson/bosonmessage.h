@@ -70,6 +70,8 @@ public:
 
 		MoveLayMine = 120,
 
+		MoveTeleport = 150,  // Immediately move unit (set it's position)
+
 	// Player Input in Editor mode
 		MoveEditor = 200, // all editor moves/inputs are prefixed with this
 		MovePlaceUnit = 201,

@@ -32,6 +32,7 @@
 #include "../boitemlist.h"
 #include "../bosonconfig.h"
 #include "../unitproperties.h"
+#include "../unitplugins.h"
 #include "bodebug.h"
 
 #include "pythonscript.h"
@@ -182,6 +183,21 @@ unsigned long int BosonScript::minerals(int playerId)
   return p->minerals();
 }
 
+void BosonScript::addMinerals(int playerId, int amount)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+  stream << (Q_UINT32)playerId;
+  stream << (Q_INT32)amount;
+  game()->sendMessage(b, BosonMessage::IdModifyMinerals);
+}
+
 unsigned long int BosonScript::oil(int playerId)
 {
   if(!game())
@@ -199,6 +215,21 @@ unsigned long int BosonScript::oil(int playerId)
   }
 
   return p->oil();
+}
+
+void BosonScript::addOil(int playerId, int amount)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+  stream << (Q_UINT32)playerId;
+  stream << (Q_INT32)amount;
+  game()->sendMessage(b, BosonMessage::IdModifyOil);
 }
 
 /*****  Unit methods  *****/
@@ -287,6 +318,21 @@ void BosonScript::mineUnit(int player, int id, int x, int y)
   sendInput(player, msg);
 }
 
+void BosonScript::produceUnit(int player, int factory, int production)
+{
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveProduce;
+  stream << (Q_UINT32)ProduceUnit;
+  stream << (Q_UINT32)player;
+  stream << (Q_ULONG)factory;
+  stream << (Q_UINT32)production;
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
+}
+
 void BosonScript::spawnUnit(int player, int type, int x, int y)
 {
   if(!game())
@@ -303,6 +349,26 @@ void BosonScript::spawnUnit(int player, int type, int x, int y)
   stream << (Q_INT32)y;
 
   game()->sendMessage(b, BosonMessage::AddUnit);
+}
+
+void BosonScript::teleportUnit(int player, int id, int x, int y)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return;
+  }
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveTeleport;
+  stream << (Q_UINT32)player;
+  stream << (Q_UINT32)id;
+  stream << (Q_INT32)x;
+  stream << (Q_INT32)y;
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
 }
 
 QValueList<int> BosonScript::unitsOnCell(int x, int y)
@@ -443,6 +509,61 @@ bool BosonScript::canUnitShoot(int id)
   }
 
   return u->unitProperties()->canShoot();
+}
+
+bool BosonScript::canUnitProduce(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return false;
+  }
+
+  return (u->plugin(UnitPlugin::Production));
+}
+
+QValueList<int> BosonScript::productionTypes(int id)
+{
+  QValueList<int> list;
+
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return list;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return list;
+  }
+
+  ProductionPlugin* production = (ProductionPlugin*)u->plugin(UnitPlugin::Production);
+  if(!production)
+  {
+    boError() << k_funcinfo << "Unit with id " << id << " cannot produce" << endl;
+    return list;
+  }
+
+  QValueList<QPair<ProductionType, unsigned long int> > l = production->productionList();
+  QValueList<QPair<ProductionType, unsigned long int> >::iterator it;
+  for(it = l.begin(); it != l.end(); ++it)
+  {
+    if((*it).first == ProduceUnit)
+    {
+      list.append((*it).second);
+    }
+  }
+
+  return list;
 }
 
 bool BosonScript::isUnitAlive(int id)
