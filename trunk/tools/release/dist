@@ -18,8 +18,24 @@ DEST_CODE="$DEST_BASE/code/boson-code-$BO_VERSION"
 DEST_DATA="$DEST_BASE/data/boson-data-$BO_VERSION"
 DEST_MUSIC="$DEST_BASE/music/boson-music-$BO_VERSION"
 
+REALPATH=`which realpath`
+if [ -x $REALPATH ]; then
+	BOSON_BASE=`$REALPATH $BOSON_BASE`
+	BOSON_TOOLS=`$REALPATH $BOSON_TOOLS`
+	BOSON_CODE=`$REALPATH $BOSON_CODE`
+	BOSON_DATA=`$REALPATH $BOSON_DATA`
+	BOSON_MUSIC=`$REALPATH $BOSON_MUSIC`
+else
+	echo "We recommend to install realpath before starting this script!  Might avoid some problems."
+	echo "(it is not mandatory, if you use correct configurations)"
+fi
+
 function clean_all()
 {
+ if [ ! -d $BOSON_TOOLS ]; then
+	echo "WARNING: $BOSON_TOOLS not found. can't do a cvs-clean!"
+	exit 1
+ fi
  echo "WARNING: this will do a"
  echo "      make -f $BOSON_TOOLS/admin/Makefile.common cvs-clean"
  echo "in the following directories:"
