@@ -22,9 +22,9 @@
 #define UNIT_TYPE_H 
 
 enum mobType {
-	MOB_ARROW,
 	MOB_QUAD,
-	MOB_TANK,
+	MOB_AIRCRAFT,
+	MOB_SHIP,
 	MOB_
 	};
 

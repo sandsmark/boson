@@ -40,42 +40,41 @@ class speciesTheme
   speciesTheme(char *themeName);
   ~speciesTheme();
 
-/*
-  QPixmap	*getPixmap(mobType unit, uint direction) { return mobSprite[unit][direction]; }
-  QPixmap	*getPixmap(facilityType unit) { return fixSprite[unit]; }
-
-  QPixmap	*getPixmap(playerMobUnit *u) { return getPixmap(u->getType(), u->direction); }
-  QPixmap	*getPixmap(Facility *u) { return getPixmap(u->getType()); }
-*/
-QwSpritePixmapSequence
+  QwSpritePixmapSequence
 	*getPixmap(facilityType unit) { return fixSprite[unit]; }
 
-QwSpritePixmapSequence
+  QwSpritePixmapSequence
 	*getPixmap(mobType unit) { return mobSprite[unit]; }
 
-  QPixmap	*getOverview(mobType unit) { return mobOverview[unit]; }
-  QPixmap	*getOverview(facilityType unit) { return fixOverview[unit];}
+  QPixmap	*getBigOverview(mobType unit) { return mobBigOverview[unit]; }
+  QPixmap	*getBigOverview(facilityType unit) { return fixBigOverview[unit];}
 
-  QPixmap	*getOverview(playerMobUnit *u) { return getOverview(u->getType()); }
-  QPixmap	*getOverview(Facility *u) { return getOverview(u->getType()); }
+  QPixmap	*getBigOverview(playerMobUnit *u) { return getBigOverview(u->getType()); }
+  QPixmap	*getBigOverview(Facility *u) { return getBigOverview(u->getType()); }
+
+  QPixmap	*getSmallOverview(mobType unit) { return mobSmallOverview[unit]; }
+  QPixmap	*getSmallOverview(facilityType unit) { return fixSmallOverview[unit];}
+
+  QPixmap	*getSmallOverview(playerMobUnit *u) { return getSmallOverview(u->getType()); }
+  QPixmap	*getSmallOverview(Facility *u) { return getSmallOverview(u->getType()); }
 
   bool		isOk(void) { return isLoaded; }
 
   protected:
-//  bool		completeMob();
   bool 		loadMob(int index, QString const &path);
   bool		loadFix(int i, QString const &path);
 
   private:
   bool		isLoaded;
+
 ///orzel: ugly, will be moved with dynamic allocation in constructors for those tabs
 #define mobilePropNb	10
 #define facilityPropNb	10
 
-//  QPixmap	*mobSprite[mobilePropNb][12];	// 12 directions sprites for each units
-//  QPixmap	*fixSprite[facilityPropNb];		// facilities
-  QPixmap	*mobOverview[mobilePropNb];	// pixmaps for the control panel
-  QPixmap	*fixOverview[facilityPropNb];	// pixmaps for the control panel
+  QPixmap	*mobBigOverview[mobilePropNb];		// pixmaps for the control panel
+  QPixmap	*fixBigOverview[facilityPropNb];	// pixmaps for the control panel
+  QPixmap	*mobSmallOverview[mobilePropNb];	// pixmaps for the control panel
+  QPixmap	*fixSmallOverview[facilityPropNb];	// pixmaps for the control panel
 
   QwSpritePixmapSequence
 		*mobSprite[mobilePropNb],	// a mobile
