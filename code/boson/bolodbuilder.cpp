@@ -27,6 +27,7 @@
 #include <qvaluelist.h>
 #include <qptrvector.h>
 #include <qvaluevector.h>
+#include <qptrlist.h>
 
 
 #define COLLAPSE_ALONG_EDGE_PENALTY 0.3f

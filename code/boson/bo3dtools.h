@@ -22,8 +22,6 @@
 
 #include <GL/gl.h>
 
-#include <lib3ds/types.h>
-
 #include "defines.h"
 
 class QString;
@@ -277,12 +275,6 @@ class BoVector3
     {
       return ((mData[0] == 0.0f) && (mData[1] == 0.0f) && (mData[2] == 0.0f));
     }
-
-    /**
-     * Create 3 vectors from @p face in @p mesh and place them into @p v.
-     * @param v An array of size 3 which will contain the vectors of the face.
-     **/
-    static void makeVectors(BoVector3* v, const Lib3dsMesh* mesh, const Lib3dsFace* face);
 
     /**
      * @param v1 An array of 3 vectors (i.e. one triangle)

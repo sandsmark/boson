@@ -22,8 +22,6 @@
 
 #include "bo3dtools.h"
 
-#include <qptrlist.h>
-
 class BoMesh;
 class BoMaterial;
 class BoAdjacentDataBase;
