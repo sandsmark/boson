@@ -28,6 +28,32 @@ class BoEvent;
 class BosonScript;
 
 class BoConditionPrivate;
+
+/**
+ * Objects of BoCondition are always part of a @ref BoEventListener (or part of
+ * another BoCondition object).
+ *
+ * A BoCondition object is a collection of events and status conditions that
+ * <em>all</em> must have been received or fullfilled in order to make the
+ * condition be fullfilled (see @ref thisConditionDone).
+ *
+ * Events that are received are checked using @ref BoEventMatching for whether
+ * they match an event in the condition.
+ * StatusConditions are calls to script functions.
+ *
+ * Another way of fullfilling a BoCondition object, is by fullfilling an
+ * "alternative" object. While all Events/StatusConditions in a BoCondition
+ * object are connected using AND, several BoCondition objects can be connected
+ * using OR (i.e. every single BoCondition is a conjunction and together with
+ * its alternatives, they build up a disjunctive normal form).
+ *
+ * When a condition is fullfilled, you (i.e. the event listener) should call
+ * @ref fireAction, that emits an action (such as emitting an event, or
+ * displaying a system chat message).
+ *
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoCondition
 {
 public:
