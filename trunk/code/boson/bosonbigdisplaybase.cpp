@@ -1673,7 +1673,7 @@ void BosonBigDisplayBase::updateUfoLabelItemWorkStatistics()
  text += i18n("Item work statistics:\n");
  text += i18n("Total items: %1\n").arg(canvas()->allItemsCount());
  text += i18n("-1 (items): %1\n").arg(workCounts[-1]),
- text += i18n("Doing nothing:     %1\n").arg(workCounts[(int)UnitBase::WorkNone]);
+ text += i18n("Idle:     %1\n").arg(workCounts[(int)UnitBase::WorkIdle]);
  text += i18n("Moving or turning: %1\n").
 		arg(workCounts[(int)UnitBase::WorkMove] +
 		workCounts[(int)UnitBase::WorkTurn]);

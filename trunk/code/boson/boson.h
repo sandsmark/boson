@@ -461,7 +461,7 @@ signals:
 	 * This signal is emitted whenever the production list of factory
 	 * changes. This means whenever you add a unit to the queue (see @ref
 	 * Factory::productionList), pause a production (using @ref
-	 * Unit::setWork(Unit::WorkNone)) or continue a production
+	 * Unit::setWork(Unit::WorkIdle)) or continue a production
 	 *
 	 * This is also emitted once a production has been completed.
 	 **/

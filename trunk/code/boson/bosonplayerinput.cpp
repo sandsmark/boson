@@ -211,7 +211,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		}
 		QPtrListIterator<Unit> it(unitsToStop);
 		while (it.current()) {
-			it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkNone... and it doesn't hurt
+			it.current()->stopAttacking();  // call stopAttacking() because it also sets unit's work to WorkIdle ... and it doesn't hurt
 			++it;
 		}
 		break;
@@ -511,7 +511,7 @@ bool BosonPlayerInput::playerInput(QDataStream& stream, Player* player)
 		if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
 			if (factory->currentPluginType() == UnitPlugin::Production) {
 				// do not abort but just pause
-				factory->setWork(Unit::WorkNone);
+				factory->setWork(Unit::WorkIdle);
 				emit signalUpdateProduction(factory);
 			} else {
 				p->setMinerals(p->minerals() + mineralCost);

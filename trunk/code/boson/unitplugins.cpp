@@ -200,7 +200,7 @@ void ProductionPlugin::advance(unsigned int)
 {
  unsigned long int id = currentProductionId();
  if (id <= 0) { // no production
-	unit()->setWork(Unit::WorkNone);
+	unit()->setWork(Unit::WorkIdle);
 	mProductionState = 0;
 	return;
  }
@@ -384,7 +384,7 @@ void RepairPlugin::repair(Unit* u)
  if (unit()->isFacility()) {
 	if (!u->moveTo(unit()->x(), unit()->y(), 1)) {
 		boDebug() << k_funcinfo << u->id() << " cannot find a way to repairyard" << endl;
-		u->setWork(Unit::WorkNone);
+		u->setWork(Unit::WorkIdle);
 	} else {
 		u->setWork(Unit::WorkMove);
 		u->addWaypoint(BoVector2Fixed(unit()->x(), unit()->y()));
@@ -392,7 +392,7 @@ void RepairPlugin::repair(Unit* u)
  } else {
 	if (!unit()->moveTo(u->x(), u->y(), 1)) {
 		boDebug() << k_funcinfo << "Cannot find way to " << u->id() << endl;
-		unit()->setWork(Unit::WorkNone);
+		unit()->setWork(Unit::WorkIdle);
 	} else {
 		unit()->setAdvanceWork(Unit::WorkMove);
 		unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
@@ -473,7 +473,7 @@ HarvesterPlugin::~HarvesterPlugin()
 void HarvesterPlugin::advance(unsigned int)
 {
  if (mHarvestingType == 0) {
-	unit()->setWork(Unit::WorkNone);
+	unit()->setWork(Unit::WorkIdle);
 	return;
  } else if (mHarvestingType == 1) {
 	advanceMine();
@@ -607,7 +607,7 @@ void HarvesterPlugin::advanceMine()
  const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
 	boError() << k_funcinfo << "NULL harvester properties" << endl;
-	unit()->setWork(Unit::WorkNone);
+	unit()->setWork(Unit::WorkIdle);
 	return;
  }
  if (!mResourceMine) {
@@ -628,7 +628,7 @@ void HarvesterPlugin::advanceMine()
 		mineId = QString::number(mResourceMine->unit()->id());
 	}
 	boDebug() << k_funcinfo << "cannot mine at " << mResourceMine << " (" << mineId << ")" << endl;
-	unit()->setWork(Unit::WorkNone);
+	unit()->setWork(Unit::WorkIdle);
 
 	// TODO: handle special case when mine has become empty!
 	// -> we should go to a refinery now
@@ -649,7 +649,7 @@ void HarvesterPlugin::advanceMine()
 	if(!unit()->moveTo(u->x(), u->y(), 1)) {
 		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
-		unit()->setWork(Unit::WorkNone);
+		unit()->setWork(Unit::WorkIdle);
 		return;
 	}
 	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
@@ -717,7 +717,7 @@ void HarvesterPlugin::advanceRefine()
 	if(!unit()->moveTo(u->x(), u->y(), 1)) {
 		boDebug() << k_funcinfo << "Cannot move to refinery (id=" << u->id() <<
 				") at (" << u->x() << "; " << u->y() << ")" << endl;
-		unit()->setWork(Unit::WorkNone);
+		unit()->setWork(Unit::WorkIdle);
 		return;
 	}
 	unit()->addWaypoint(BoVector2Fixed(u->x(), u->y()));
@@ -1007,7 +1007,7 @@ void BombingPlugin::advance(unsigned int)
 //	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
 	if (!unit()->moveTo(mPosX, mPosY, 0)) {
 		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
-		unit()->setWork(Unit::WorkNone);
+		unit()->setWork(Unit::WorkIdle);
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->pathInfo()->moveAttacking = false;
@@ -1048,7 +1048,7 @@ void BombingPlugin::advance(unsigned int)
   boDebug() << k_funcinfo << "Getaway point is at (" << newx << "; " << newy << ")" << endl;
 	if (!unit()->moveTo(newx, newy)) {
 		boWarning() << k_funcinfo << "Aargh! Can't move away from drop-point!" << endl;
-		unit()->setWork(Unit::WorkNone);
+		unit()->setWork(Unit::WorkIdle);
 	} else {
 		unit()->pathInfo()->moveAttacking = false;
 		unit()->addWaypoint(BoVector2Fixed(newx, newy));
@@ -1186,7 +1186,7 @@ void MiningPlugin::advance(unsigned int)
 
 	if (!couldmove) {
 		boDebug() << k_funcinfo << "Can't move away!" << endl;
-		unit()->setWork(Unit::WorkNone);  // We don't want to return here anymore
+		unit()->setWork(Unit::WorkIdle);  // We don't want to return here anymore
 	}
 
 	mWeapon = 0;

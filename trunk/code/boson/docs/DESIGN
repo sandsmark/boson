@@ -68,7 +68,7 @@ UnitProperties also describes whether a unit can do certain things, e.g.
 UnitProperties::canGoOnWater() or UnitProperties::canProduce().
 You will find mostly all proprties of UnitBase in UnitProperties, too, except a
 for a few properties that defaults don't change (e.g. work() - the default is
-*always* WorkNone, even if the unit changes the value immediately on startup).
+*always* WorkIdle, even if the unit changes the value immediately on startup).
 
 Boson uses KGameProperty<type> all over the code. Note that we use PolicyLocal
 nearly everywhere, so the main intention of KGameProperty (sending a property 

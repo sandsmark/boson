@@ -325,7 +325,7 @@ public:
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
-	 * as well! This sets @ref work to @ref WorkNone
+	 * as well! This sets @ref work to @ref WorkIdle
 	 **/
 	virtual void stopMoving();
 	void stopAttacking();
