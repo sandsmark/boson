@@ -1,4 +1,26 @@
 [article]
+date=March 7th 2003 17:07
+title=Status update after long time
+text=It's been quite long since the last update.<br>
+Good new is that we're moving towards 0.8 which will probably be released in
+    late March. Of course there are many
+    <a href="status.php#done">changes</a> in the current CVS version. To name a
+    few bigger:
+    <ul>
+    <li>Better support for upgrades, including weapon upgrades</li>
+    <li>Support for heightmaps. Map is not flat anymore!</li>
+    <li>Better selection code</li>
+    <li>New XML-based saving format. Saving/loading is still experimental, but
+    should work</li>
+    <li>Tooltips for units</li>
+    </ul>
+    Also, our <a href="screenshots.php">screenshots page</a> is updated. No new
+    screens yet, but the page itself is improved. Individual screenshots are now
+    also shown inside HTML-page, you can see the comment and date. And
+    screenshots are on multiple pages, 10 screens each.<br><br>
+    
+
+[article]
 date=January 4th 2003 10:19
 title=New year's update
 text=Here comes another status update.<br>
