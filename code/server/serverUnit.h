@@ -24,13 +24,7 @@
 #include "common/unit.h"
 #include "knownBy.h"
 
-
-#define BUILDING_SPEED		(40)
-#define EMPTYING_DURATION	(40)
 #define SEND_TO_KNOWN		(-1)
-
-#define OIL_HARVESTER_CONTENT		50
-#define MINERAL_HARVESTER_CONTENT	50
 
 class boBuffer;
 
@@ -108,6 +102,20 @@ public:
 	bool	shooted(void);
 
 	virtual QRect	rect(void);
+
+	/* user request */
+	void	u_createMob(mobType);
+	void	u_createFix(facilityType);
+
+	enum {
+		FIX_ACTION_NONE,
+		FIX_ACTION_BUILDING,
+		FIX_ACTION_CONSTRUCT
+	} action;
+
+	union {
+		mobType mob; // FIX_ACTION_CONSTRUCT
+	} action_data;
 };
  
 
