@@ -123,6 +123,9 @@ signals:
 	void signalSetFacilitiesCount(int);
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
+#ifndef NO_OPENGL
+	void signalFPSUpdated(double);
+#endif
 
 protected:
 	/**
@@ -168,6 +171,9 @@ protected slots:
 	void slotCmdFrameDockHidden();
 	void slotChatDockHidden();
 	void slotDebugPlayer(int);
+#ifndef NO_OPENGL
+	void slotUpdateFPS();
+#endif
 
 private slots:
 	void loadGameData3();

@@ -45,6 +45,7 @@
 #include <qtimer.h>
 #include <qcursor.h>
 
+#include <sys/time.h>
 
 
 #ifdef NO_OPENGL
@@ -276,6 +277,12 @@ public:
 		mMouseIO = 0;
 		mLocalPlayer = 0;
 //		mChat = 0;
+
+#ifndef NO_OPENGL
+		mFramecount = 0;
+		mFps = 0;
+		mFpsTime = 0;
+#endif
 	}
 
 	KGameMouseIO* mMouseIO;
@@ -299,6 +306,10 @@ public:
 	GLfloat mAspect; // see gluPerspective
 
 	GLuint mMapDisplayList;
+
+	long long int mFpsTime;
+	double mFps;
+	int mFramecount;
 #endif // !NO_OPENGL
 
 	SelectionRect mSelectionRect;
@@ -430,6 +441,9 @@ void BosonBigDisplayBase::initializeGL()
  if (checkError()) {
 	kdError() << k_funcinfo << endl;
  }
+  struct timeval time;
+  gettimeofday(&time, 0);
+  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -495,6 +509,7 @@ void BosonBigDisplayBase::paintGL()
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
 // glClear(GL_COLOR_BUFFER_BIT);
+ calcFPS();
  glMatrixMode(GL_MODELVIEW); // default matrix mode anyway ; redundant!
  glLoadIdentity();
  if (checkError()) {
@@ -1443,3 +1458,23 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  d->mUpdateTimer.start(ms);
 }
 
+void BosonBigDisplayBase::calcFPS()
+{
+ long long int now;
+ struct timeval time;
+ gettimeofday(&time, 0);
+ now = time.tv_sec * 1000000 + time.tv_usec;
+ // FPS is updated once per second
+ if((now - d->mFpsTime) >= 1000000) {
+	d->mFps = d->mFramecount / ((now - d->mFpsTime) / 1000000.0);
+	d->mFpsTime = now;
+	d->mFramecount = 0;
+	kdDebug() << "FPS: " << d->mFps << endl;
+ }
+ d->mFramecount++;
+}
+
+double BosonBigDisplayBase::fps()
+{
+  return d->mFps;
+}
