@@ -210,10 +210,6 @@ bool BosonStarting::start()
 	return false;
  }
 
- boDebug(270) << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
- canvas->initPathfinder();
- boDebug(270) << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
-
  sendStartingCompleted(true);
  boGame->unlock();
  return true;
