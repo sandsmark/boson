@@ -786,27 +786,27 @@ QStringList BoInfo::checkProprietaryNVidiaDriver() const
  int ret = getInt(BoInfo::DevNVidiaCTL);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/deb/nvidiactl").arg(error));
+	list.append(i18n("Problem with %1: %2").arg("/dev/nvidiactl").arg(error));
  }
  ret = getInt(BoInfo::DevNVidia0);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia0").arg(error));
+	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia0").arg(error));
  }
  ret = getInt(BoInfo::DevNVidia1);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia1").arg(error));
+	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia1").arg(error));
  }
  ret = getInt(BoInfo::DevNVidia2);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia2").arg(error));
+	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia2").arg(error));
  }
  ret = getInt(BoInfo::DevNVidia3);
  if (ret != CharSuccess) {
 	QString error = makeCharacterDeviceErrorString(ret);
-	list.append(i18n("Problem with %1: %2").arg("/deb/nvidia3").arg(error));
+	list.append(i18n("Problem with %1: %2").arg("/dev/nvidia3").arg(error));
  }
  // TODO: finally the nvcheck.sh script checks for duplicated libGL
  // installations. we should do so as well.
