@@ -548,7 +548,7 @@ function counter2_statsbox($boxname, $col1name, $col2name, $sql_table, $sql_col1
     }
 
     // Postprocessing
-    if($i == $limit && $boxlink)
+    if(($i == $limit && $boxlink) || $currentpage > 1)
     {
       // If $limit rows were displayed, then it is possible that some rows were
       //  not displayed. Check it
@@ -556,7 +556,7 @@ function counter2_statsbox($boxname, $col1name, $col2name, $sql_table, $sql_col1
       $result = mysql_query($query);
       $row = mysql_fetch_assoc($result);
       $count = $row['COUNT(*)'];
-      if($count > $limit)
+      if($count > $limit || $currentpage > 1)
       {
         // There are more rows than were shown
         if($currentpage == 0)
@@ -694,7 +694,7 @@ function counter2_get_browser($ua)
   {
     return "Lynx";
   }
-  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.2)|(MSIE 5.5)|(MSIE 6.0)", $ua))
+  else if(eregi("(MSIE 3)|(MSIE 4)|(MSIE 5.0)|(MSIE 5.1)|(MSIE 5.2)|(MSIE 5.5)|(MSIE 6.0)", $ua))
   {
     return "Internet Explorer";
   }
@@ -710,11 +710,19 @@ function counter2_get_browser($ua)
   {
     return "Safari";
   }
-  else if(eregi("(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)", $ua))
+  else if(eregi("(rv:0.9)|(rv:1.0)|(rv:1.1)|(rv:1.2)|(rv:1.3)|(rv:1.4)|(rv:1.5)", $ua))
   {
     return "Mozilla";
   }
-  else if(eregi("(Mozilla/3)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)", $ua))
+  else if(eregi("Links", $ua))
+  {
+    return "Links";
+  }
+  else if(eregi("Java", $ua))
+  {
+    return "Java";
+  }
+  else if(eregi("(Mozilla/3)|(Mozilla/4.0)|(Mozilla/4.08)|(Mozilla/4.5)|(Mozilla/4.6)|(Mozilla/4.7)|(Mozilla/4.75)|(Mozilla/4.79)|(Netscape6)|(Netscape/7)", $ua))
   {
     return "Netscape";
   }
@@ -742,9 +750,9 @@ function counter2_get_os($ua)
   {
     return "Windows 95";
   }
-  else if(eregi("(Windows 98)|(Win98)|(Win 9x)", $ua))
+  else if(eregi("(Windows 98)|(Win98)|(Win 9x)|(Win32)", $ua))
   {
-    return "Windows 98";  // Note: fallback for Win 9x
+    return "Windows 98";  // Note: fallback for Win 9x and Win32
   }
   else if(eregi("(Windows NT 5.0)|(Windows 2000)", $ua))
   {
@@ -769,6 +777,10 @@ function counter2_get_os($ua)
   else if(eregi("FreeBSD", $ua))
   {
     return "FreeBSD";
+  }
+  else if(eregi("NetBSD", $ua))
+  {
+    return "NetBSD";
   }
   else if(eregi("SunOS", $ua))
   {
