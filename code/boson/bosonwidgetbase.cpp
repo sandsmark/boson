@@ -943,7 +943,7 @@ void BosonWidgetBase::slotGrabScreenshot()
  }
  // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
- bool ok = shot.save(file, "JPEG");
+ bool ok = shot.save(file, "JPEG", 90);
  if (!ok) {
 	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
 	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
