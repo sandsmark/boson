@@ -14,7 +14,6 @@ Name=Command Bunker
 OilCost=200
 Producer=10
 ProductionTime=600
-Requirements=2,12
 Shield=0
 SightRange=5
 SupportMiniMap=false
