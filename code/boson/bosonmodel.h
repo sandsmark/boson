@@ -102,6 +102,8 @@ public:
 	 **/
 	void setLongNames(QMap<QString, QString> names) { mTextureNames = names; }
 
+	static void reloadAllTextures();
+
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 
@@ -110,8 +112,11 @@ protected:
 	/**
 	 * Call @ref loadNode for all nodes in this model - also the child
 	 * nodes.
+	 * @param reload Overwrite any existing display lists (i.e. replace
+	 * them) if TRUE, otherwise abort if a display list already exists
+	 * (default)
 	 **/
-	void loadNodes();
+	void loadNodes(bool reload = false);
 
 	/**
 	 * Generate the "normal" display lists, for all frames. This includes
@@ -123,8 +128,9 @@ protected:
 	/**
 	 * Generate the display list for this node, including all child nodes.
 	 * The resulting display list will be placed into node->user.d
+	 * @param reload See @ref loadNodes
 	 **/
-	void loadNode(Lib3dsNode* node);
+	void loadNode(Lib3dsNode* node, bool reload);
 
 	/**
 	 * Render the specified node according to the values for the current

@@ -200,6 +200,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMiniMapZoom = new BoConfigDoubleEntry(this, "MiniMapZoom", DEFAULT_MINIMAP_ZOOM);
  mChatScreenRemoveTime = new BoConfigUIntEntry(this, "ChatScreenRemoveTime", DEFAULT_CHAT_SCREEN_REMOVE_TIME);
  mChatScreenMaxItems = new BoConfigIntEntry(this, "ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
+ mModelTexturesMipmaps = new BoConfigBoolEntry(this, "ModelTexturesMipmaps", true);
  mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
 
  mDebugMode = DebugNormal;
