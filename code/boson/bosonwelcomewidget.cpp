@@ -24,6 +24,7 @@
 #include <qpushbutton.h>
 #include <qlayout.h>
 #include <klocale.h>
+#include <kstandarddirs.h>
 
 /*
  *  Constructs a BosonWelcomeWidget which is a child of 'parent', with the
@@ -51,6 +52,8 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
   bosonpixmap = new QLabel( this, "bosonpixmap" );
   bosonpixmap->setAlignment( int( QLabel::AlignCenter ) );
   lowerlayout->addWidget( bosonpixmap );
+  //FIXME: at least alignment.. maybe even stretch the pixmap?
+  bosonpixmap->setPixmap(QPixmap(locate("data", "boson/pics/biglogo.png")));
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
   lowerlayout->addItem( spacer_2 );
 
