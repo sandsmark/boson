@@ -72,6 +72,7 @@ int main(int argc, char **argv)
  
  Top *widget = new Top;
  bool showMaximized = true; // TODO: make this a config option
+ app.setMainWidget(widget);
 
  if (showMaximized) {
 	widget->showMaximized();
