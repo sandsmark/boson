@@ -62,6 +62,24 @@ private slots:
 	void slotValueChanged(double v) { emit valueChanged((float)v); }
 };
 
+class KMyIntNumInput : public KIntNumInput
+{
+	Q_OBJECT
+public:
+	KMyIntNumInput(QWidget* parent) : KIntNumInput(parent)
+	{
+		connect(this, SIGNAL(valueChanged(int)), this, SLOT(slotValueChanged(int)));
+	}
+	~KMyIntNumInput()
+	{}
+
+signals:
+	void valueChanged(float);
+
+private slots:
+	void slotValueChanged(int v) { emit valueChanged((float)v); }
+};
+
 class ModelPreview : public QGLWidget
 {
 	Q_OBJECT
@@ -84,6 +102,9 @@ signals:
 	void signalCameraXChanged(float);
 	void signalCameraYChanged(float);
 	void signalCameraZChanged(float);
+	void signalFrameChanged(int);
+
+	void signalMaxFramesChanged(int);
 
 public slots:
 	void slotResetView();
@@ -130,6 +151,7 @@ public slots:
 			mCameraZ = c;
 		}
 	}
+	void slotFrameChanged(int f);
 
 protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
@@ -165,6 +187,7 @@ signals:
 	void signalCameraXChanged(float);
 	void signalCameraYChanged(float);
 	void signalCameraZChanged(float);
+	void signalFrameChanged(int);
 	void signalResetDefaults();
 
 protected slots:
@@ -175,15 +198,19 @@ protected slots:
 	void slotCameraXChanged(float c) { mCameraX->setValue(c); }
 	void slotCameraYChanged(float c) { mCameraY->setValue(c); }
 	void slotCameraZChanged(float c) { mCameraZ->setValue(c); }
+	void slotFrameChanged(int f) { mFrame->setValue(f); }
+
+	void slotMaxFramesChanged(int max) { mFrame->setRange(0, max); }
 
 private:
 	KMyFloatNumInput* mFovY;
-	KMyFloatNumInput* mRotateX;
-	KMyFloatNumInput* mRotateY;
-	KMyFloatNumInput* mRotateZ;
+	KMyIntNumInput* mRotateX;
+	KMyIntNumInput* mRotateY;
+	KMyIntNumInput* mRotateZ;
 	KMyFloatNumInput* mCameraX;
 	KMyFloatNumInput* mCameraY;
 	KMyFloatNumInput* mCameraZ;
+	KIntNumInput* mFrame;
 };
 
 class RenderMain : public KMainWindow
