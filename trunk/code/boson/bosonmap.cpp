@@ -983,12 +983,12 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(width, height);
 }
 
-int BosonMap::currentTexture(int texture) const
+int BosonMap::currentTexture(int texture, int advanceCallsCount) const
 {
  BO_CHECK_NULL_RET0(groundTheme());
  BosonTextureArray* t = groundTheme()->textures(texture);
  BO_CHECK_NULL_RET0(t);
- return t->texture((boGame->advanceCallsCount() / groundTheme()->textureAnimationDelay(texture)) % t->count());
+ return t->texture((advanceCallsCount / groundTheme()->textureAnimationDelay(texture)) % t->count());
 }
 
 
