@@ -697,17 +697,13 @@ function counter2_get_os($ua)
   {
     return "Windows 95";
   }
-  else if(eregi("(Windows 98)|(Win98)", $ua))
+  else if(eregi("(Windows 98)|(Win98)|(Win 9x)", $ua))
   {
-    return "Windows 98";
+    return "Windows 98";  // Note: fallback for Win 9x
   }
   else if(eregi("(Windows NT 5.0)|(Windows 2000)", $ua))
   {
     return "Windows 2000";
-  }
-  else if(eregi("(Windows NT 5.1)|(Windows XP)", $ua))
-  {
-    return "Windows XP";
   }
   else if(eregi("(Windows NT 4.0)|(WinNT4.0)|(WinNT)|(Windows NT)", $ua))
   {
@@ -716,6 +712,10 @@ function counter2_get_os($ua)
   else if(eregi("Windows ME", $ua))
   {
     return "Windows ME";
+  }
+  else if(eregi("(Windows NT 5.1)|(Windows XP)|(Windows)", $ua))
+  {
+    return "Windows XP";  // Note: fallback for just Windows
   }
   else if(eregi("OpenBSD", $ua))
   {
