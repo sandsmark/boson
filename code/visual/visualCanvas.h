@@ -44,7 +44,7 @@ class visualCanvas : public QCanvas
 	Q_OBJECT
 
 public:
-	visualCanvas( QPixmap,  uint , uint );
+	visualCanvas( QPixmap,  uint , uint);
 
 /* geometry ? , still public */
 	int		maxX, maxY;	// size of the map
@@ -57,7 +57,6 @@ public:
 	virtual void resize (int, int);
 protected:
 	visualCanvas();		// to be used by editorField
-	void initTheme(void);
 
 signals:
 	void newCell(int,int, groundType g);
