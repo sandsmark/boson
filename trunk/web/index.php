@@ -55,15 +55,11 @@ news_article("Another update", "October 14th 2002 17:54",
     come later ;-)<br>
     So here is list of updated stuff:
     <ul>
-    <li>Mining works</li>
     <li>Missiles are properly rotated</li>
     <li>New map: Basic 2 which is modified version of Basic map</li>
     <li>Added menu entry and shortcut to grab screenshots. Just press Ctrl+G</li>
-    <li>DCOP support. At the moment it's only used for debugging, but in the
-      future we may do other stuff with it as well</li>
     <li>.desktop files were renamed. They now have better suffixes like .boson
       and .unit</li>
-    <li>Map editor is now mostly working. Go create your own map!</li>
     <li>New camera system.</li>
     <li>New loading/saving widget</li>
     <li>Updated units README and added README about particle systems</li>
