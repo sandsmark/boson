@@ -559,6 +559,9 @@ bool Player::isEnemy(Player* p) const
  if (p == this) {
 	return false;
  }
+ if (p == (Player*)boGame->playerList()->getLast()) { // neutral player
+	return false,
+ }
  return true;
 }
 
