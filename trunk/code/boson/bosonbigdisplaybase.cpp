@@ -1176,19 +1176,6 @@ void BosonBigDisplayBase::renderCells()
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(canvas()->map());
  BosonMap* map = canvas()->map();
- BosonTextureArray* textures = map->textures();
- if (!textures) {
-	makeCurrent();
-	// TODO: load a default theme
-#if 0
-	tiles->generateTextures();
-	textures = tiles->textures();
-#endif
-	if (!textures) {
-		boWarning() << k_funcinfo << "NULL textures for cells" << endl;
-		return;
-	}
- }
 
  BO_CHECK_NULL_RET(d->mGroundRenderer);
  d->mRenderedCells = d->mGroundRenderer->renderCells(map);

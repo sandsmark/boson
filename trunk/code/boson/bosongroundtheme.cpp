@@ -30,6 +30,7 @@
 
 #include <qimage.h>
 #include <qvaluevector.h>
+#include <qdir.h>
 
 struct TextureGroundType
 {
@@ -37,6 +38,7 @@ struct TextureGroundType
 	unsigned char mAmountOfLand;
 	unsigned char mAmountOfWater;
 	QRgb mMiniMapColor;
+	int mAnimationDelay;
 };
 
 
@@ -126,12 +128,12 @@ public:
 BosonGroundTheme::BosonGroundTheme()
 {
  d = new BosonGroundThemePrivate;
- mTextures = 0;
+ mTextures.setAutoDelete(true);
 }
 
 BosonGroundTheme::~BosonGroundTheme()
 {
- delete mTextures;
+ mTextures.clear();
  delete d;
 }
 
@@ -211,6 +213,7 @@ bool BosonGroundTheme::loadGroundThemeConfig(const QString& file)
 	types[i].mAmountOfWater = (unsigned char)conf.readUnsignedNumEntry("AmountOfWater", 0);
 	BoVector3 color = BosonConfig::readBoVector3Entry(&conf, "MiniMapColor");
 	types[i].mMiniMapColor = qRgb((int)color.x(), (int)color.y(), (int)color.z());
+	types[i].mAnimationDelay = conf.readUnsignedNumEntry("AnimationDelay", 1);
 
 	// ensure correct values:
 	if (types[i].mAmountOfLand + types[i].mAmountOfWater != 255) {
@@ -242,20 +245,12 @@ bool BosonGroundTheme::loadGroundTheme(QString dir)
  if (dir.right(1) != QString::fromLatin1("/")) {
 	dir += QString::fromLatin1("/");
  }
- delete mTextures;
- mTextures = 0;
+ mTextures.clear();
 
- QValueList<QImage> images;
  for (unsigned int i = 0; i < textureCount(); i++) {
-	QImage image = loadTextureImage(dir, i);
-	if (image.isNull()) {
-		boError() << k_funcinfo << "could not load texture " << i << endl;
-		return false;
-	}
-	images.append(image);
+	loadTextureImages(dir, i);
  }
 
- mTextures = new BosonTextureArray(images);
  d->mGroundThemeDir = dir;
  return true;
 }
@@ -274,6 +269,14 @@ unsigned char BosonGroundTheme::amountOfWater(unsigned int texture) const
 	return 0;
  }
  return d->mGroundTypes[texture].mAmountOfWater;
+}
+
+int BosonGroundTheme::textureAnimationDelay(unsigned int texture) const
+{
+ if (texture >= textureCount()) {
+	return 1;
+ }
+ return d->mGroundTypes[texture].mAnimationDelay;
 }
 
 QRgb BosonGroundTheme::miniMapColor(unsigned int texture) const
@@ -297,19 +300,22 @@ unsigned int BosonGroundTheme::textureCount() const
  return d->mGroundTypes.count();
 }
 
-QImage BosonGroundTheme::loadTextureImage(const QString& dir, unsigned int texture)
+void BosonGroundTheme::loadTextureImages(const QString& dir, unsigned int texture)
 {
- QString file = dir + textureFileName(texture);
- QImage image(file);
- if (image.isNull()) {
-	boWarning() << k_funcinfo << "Could not find texture image for " << texture << ". expected file: " << file << endl;
-
-	// load dummy image.
-	image = QImage(64, 64, 32);
-	image.fill(Qt::green.rgb());
+ QDir d(dir);
+ // Find all name*.png and name*.jpg files
+ QString name = textureFileName(texture);
+ QStringList files = d.entryList(name + "*.png " + name + "*.jpg", QDir::Files, QDir::Name);
+ QStringList absFiles;
+ for (QStringList::Iterator it = files.begin(); it != files.end(); it++) {
+	absFiles.append(dir + "/" + *it);
  }
-
- return image;
+ if (absFiles.isEmpty()) {
+	boError() << k_funcinfo << "No files found from " << dir << " for texture " << texture << " (" << name << ")" << endl;
+	return;
+ }
+ BosonTextureArray* t = new BosonTextureArray(absFiles);
+ mTextures.insert(texture, t);
 }
 
 const QString& BosonGroundTheme::identifier() const
@@ -321,8 +327,7 @@ QPixmap BosonGroundTheme::pixmap(unsigned int texture)
 {
  QPixmap pix;
  if (texture < textureCount()) {
-	QImage image = loadTextureImage(d->mGroundThemeDir, texture);
-	if (!pix.convertFromImage(image)) {
+	if (!pix.load(textureFileName(texture))) {
 		pix = QPixmap();
 	}
  } else {
@@ -336,3 +341,7 @@ QPixmap BosonGroundTheme::pixmap(unsigned int texture)
  return pix;
 }
 
+BosonTextureArray* BosonGroundTheme::textures(int i) const
+{
+ return mTextures[i];
+}

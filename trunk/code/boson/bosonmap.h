@@ -515,7 +515,7 @@ public:
 	void loadGroundTheme(const QString& theme);
 	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
-	BosonTextureArray* textures() const;
+	int currentTexture(int texture) const;
 
 	/**
 	 * Resize the map. Currently this works only if the cells have
