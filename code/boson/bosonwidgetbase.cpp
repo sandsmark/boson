@@ -303,7 +303,7 @@ void BosonWidgetBase::initPlayer()
 	return;
  }
 
- setLocalPlayerRecursively(localPlayer());
+ setLocalPlayer(localPlayer());
 
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
@@ -933,23 +933,7 @@ BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
  return d->mCommandFrame;
 }
 
-void BosonWidgetBase::setLocalPlayer(Player* p, bool init) //AB: probably init = false is obsolete!
-{
- // FIXME: ensure that d->mCmdInput gets removed in BosonWidget before calling
- // this! or maybe while calling this!
- setLocalPlayerRecursively(p);
-
- if (init) {
-	if (!p) {
-		boDebug() << k_funcinfo << "NULL player" << endl;
-		
-		return;
-	}
-	initPlayer();
- }
-}
-
-void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
+void BosonWidgetBase::setLocalPlayer(Player* p)
 {
  mLocalPlayer = p;
  if (displayManager()) {

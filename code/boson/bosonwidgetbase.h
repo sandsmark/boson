@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ public:
 	 **/
 	void setDisplayManager(BoDisplayManager* displayManager);
 
-	void setLocalPlayer(Player* p, bool init);
+	void setLocalPlayer(Player* p);
 
 	void setCanvas(BosonCanvas* canvas);
 
@@ -277,8 +277,6 @@ protected slots:
 	void slotSetEnableColormap(bool);
 
 protected:
-	void setLocalPlayerRecursively(Player* p);
-	
 	void initBigDisplay(BosonBigDisplayBase*);
 
 	void changeCursor(BosonCursor* cursor);
