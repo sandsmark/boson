@@ -23,9 +23,7 @@
 #include <kapplication.h>
 #include <klocale.h>
 #include <kkeydialog.h>
-#include <kconfig.h>
 #include <kstatusbar.h>
-#include <kaction.h>
 #include <kstdaction.h>
 #include <kstdgameaction.h>
 #include <kdebug.h>
