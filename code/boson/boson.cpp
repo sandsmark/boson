@@ -557,19 +557,24 @@ bool Boson::buildUnit(Facility* factory, int unitType, int x, int y)
 			<< endl;
 	return false;
  }
- QRect rect = (QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		a->image(0)->width(), // -1?
-		a->image(0)->height())); // -1?
+
+ QRect rect = (QRect(
+		x * BO_TILE_SIZE,
+		y * BO_TILE_SIZE,
+		a->image(0)->width(),
+		a->image(0)->height()));
  if (!((BosonCanvas*)d->mCanvas)->canGo(p->unitProperties(unitType), rect)) {
 	kdWarning() << "Unit can not be produced here" << endl;
 	return false;
  }
- QCanvasItemList list = d->mCanvas->collisions(QRect(x * BO_TILE_SIZE,
-		y * BO_TILE_SIZE, a->image(0)->width(), // -1?
-		a->image(0)->height())); // -1?
+ QCanvasItemList list = d->mCanvas->collisions(QRect(
+		x * BO_TILE_SIZE,
+		y * BO_TILE_SIZE, 
+		a->image(0)->width(),
+		a->image(0)->height()));
  QCanvasItemList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
-	if (RTTI::isUnit((*it)->rtti())) {
+	if (!RTTI::isUnit((*it)->rtti())) {
 		continue; // this item is not interesting here
 	}
 	Unit* unit = (Unit*)*it;
