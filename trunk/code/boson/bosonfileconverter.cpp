@@ -19,7 +19,6 @@
 
 #include "bosonfileconverter.h"
 
-#include "bosonmap.h" // for BosonMap::mapFileFormatVersion()
 #include "bodebug.h"
 #include "defines.h"
 #include "boversion.h"
@@ -31,28 +30,13 @@
 #include <qdom.h>
 #include <qimage.h>
 
-#define BOSONMAP_VERSION BosonMap::mapFileFormatVersion()
-
 // version number as used by boson 0.8.128 (aka 0x00,0x08,0x80 - development
 // version. got never released)
 #define BOSONMAP_VERSION_0_8_128 0x01
 
  // version number as used by boson 0.9 // AB: until this is released is must always be equal to BOSONMAP_VERSION!
 #define BOSONMAP_VERSION_0_9 BOSONMAP_VERSION
-// AB: hardcode once boson 0.9 is released! (see bosonsaveload.cpp, where it gets
-// defined!)
-#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 BosonSaveLoad::latestSavegameVersion()
-//#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 ( ((0x00) << 16) | ((0x02) << 8) | (0x01) )
-
-
-
-#if BOSON_VERSION_MINOR >= 0x09
-do not compile!
-// You are about to release boson 0.9 - first you have to hardcode the
-// BOSONMAP_VERSION into BOSONMAP_VERSION_0_9 above!
-// same for the
-// BOSON_SAVEGAME_FORMAT_VERSION_0_9
-#endif
+#define BOSON_SAVEGAME_FORMAT_VERSION_0_9 ( ((0x00) << 16) | ((0x02) << 8) | (0x01) )
 
 // compatibility for boson 0.8
 #define BO_COMPAT_0_8_TEXTURE_COUNT 3 // we use 3 textured by default for old maps (grass, desert, water).
