@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "speciestheme.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"
+#include "bosonmodeltextures.h"
 #include "bomesh.h"
 #include "bomaterial.h"
 #include "bosonfont/bosonglfont.h"
@@ -38,6 +39,7 @@
 #include "bomaterialwidget.h"
 #include "bolight.h"
 #include "bomeshrenderermanager.h"
+#include "boglstatewidget.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -47,6 +49,7 @@
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
 #include <kcolordialog.h>
+#include <kmessagebox.h>
 
 #include <qtimer.h>
 #include <qhbox.h>
@@ -57,6 +60,7 @@
 
 #include <GL/glu.h>
 #include <math.h>
+#include <stdlib.h>
 
 #define NEAR 1.0
 #define FAR 100.0
@@ -1417,6 +1421,14 @@ void RenderMain::initKAction()
 		actionCollection(), "debug_models");
  (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),
 		actionCollection(), "debug_species");
+ (void)new KAction(i18n("Show OpenGL states"), KShortcut(), this,
+		SLOT(slotShowGLStates()), actionCollection(),
+		"debug_show_opengl_states");
+ (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
+		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
+ (void)new KAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
+		SLOT(slotReloadMeshRenderer()), actionCollection(),
+		"debug_lazy_reload_meshrenderer");
 
  createGUI(locate("data", "boson/borenderui.rc"));
 }
@@ -1456,6 +1468,35 @@ void RenderMain::slotShowMaterialsWidget()
 	mMaterialWidget->addMaterial(model->material(i));
  }
  mMaterialWidget->show();
+}
+
+void RenderMain::slotShowGLStates()
+{
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
+}
+
+void RenderMain::slotReloadMeshRenderer()
+{
+ bool unusable = false;
+ bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
+ if (r) {
+	return;
+ }
+ boError() << "meshrenderer reloading failed" << endl;
+ if (unusable) {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
+	exit(1);
+ } else {
+	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
+ }
+}
+
+void RenderMain::slotReloadModelTextures()
+{
+ BO_CHECK_NULL_RET(BosonModelTextures::modelTextures());
+ BosonModelTextures::modelTextures()->reloadTextures();
 }
 
 PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)

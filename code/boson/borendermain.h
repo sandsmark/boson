@@ -346,6 +346,9 @@ protected slots:
 	void slotBackgroundColor();
 	void slotShowLightWidget();
 	void slotShowMaterialsWidget();
+	void slotShowGLStates();
+	void slotReloadModelTextures();
+	void slotReloadMeshRenderer();
 
 private:
 	PreviewConfig* mConfig;
