@@ -224,6 +224,8 @@ public slots:
 
 	void slotSetGrabMovie(bool grab);
 
+	void slotShowLight0Widget();
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.
