@@ -179,14 +179,6 @@ protected slots:
 	void slotGameStarted();
 	void slotStartingFailed();
 
-	/**
-	 * See @ref Boson::signalPlayFieldChanged.
-	 *
-	 * This applies the map identifier to the @ref BosonStarting object so
-	 * that it can be started
-	 **/
-	void slotPlayFieldChanged(const QString& id);
-
 	void slotAddLocalPlayer();
 	void slotResetGame();
 
@@ -198,7 +190,6 @@ private:
 	void initDisplayManager();
 	void initBoson();
 	void initStatusBar();
-	void enableGameActions(bool enable);
 
 	void slotWaitForMap();
 

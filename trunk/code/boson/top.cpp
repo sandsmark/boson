@@ -209,8 +209,6 @@ void TopWidget::initBoson()
  // sends an IdStartGame over network. Once this is received signalStartNewGame()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
- connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)),
-		this, SLOT(slotPlayFieldChanged(const QString&)));
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
 
  // for editor (new maps)
@@ -260,13 +258,6 @@ void TopWidget::initStatusBar()
  bar->hide();
 }
 
-void TopWidget::enableGameActions(bool enable)
-{
- if (enable && ! d->mBosonWidget) {
-	boWarning() << k_lineinfo << "NULL BosonWidgetBase!" << endl;
- }
-}
-
 void TopWidget::initBosonWidget()
 {
  if (d->mBosonWidget) {
@@ -306,17 +297,6 @@ void TopWidget::initBosonWidget()
 
  d->mBosonWidget->init(0); // this depends on several virtual methods and therefore can't be called in the c'tor
 
-// factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
-// createGUI("bosonui.rc", false);
-
-}
-
-void TopWidget::slotPlayFieldChanged(const QString& id)
-{
- if (!d->mStarting) {
-	boError() << k_funcinfo << "NULL starting object!!" << endl;
-	return;
- }
 }
 
 void TopWidget::slotStartNewGame()
@@ -491,8 +471,6 @@ void TopWidget::reinitGame()
 		this, SLOT(slotStartingFailed()));
 
  initBoson();
-
- enableGameActions(false);
 }
 
 void TopWidget::slotGameOver()
@@ -518,6 +496,9 @@ void TopWidget::slotToggleStatusbar(bool show)
 bool TopWidget::queryClose()
 {
  boDebug() << k_funcinfo << endl;
+ if (!boGame) {
+	return true;
+ }
  if (boGame->gameStatus() != KGame::Init) {
 	int answer = KMessageBox::warningYesNo(this, i18n("Are you sure you want to quit Boson?\n"
 			"This will end current game."), i18n("Are you sure?"), KStdGuiItem::yes(),
@@ -730,7 +711,6 @@ void TopWidget::slotGameStarted()
  d->mStartup->resetWidgets();
 
  // Init some stuff
- enableGameActions(true);
  d->mStatusBarTimer.start(1000);
  d->mBosonWidget->initGameMode();
 }
