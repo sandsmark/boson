@@ -43,6 +43,8 @@ Game TODOs
   production plugin can be part of a mobile unit, too
 - Add screenshots support to saving/loading widget
 - Shooting sounds should be specified per weapon, not per unit
+- make mineralrefinery-chimney smoke configurable!! less effects==faste- make
+  mineralrefinery-chimney smoke configurable!! less effects==faster
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)

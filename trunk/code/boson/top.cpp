@@ -33,6 +33,7 @@
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonstarting.h"
+#include "rtti.h"
 #include "bodebug.h"
 #include "bodebugdcopiface.h"
 #include "startupwidgets/bosonstartupwidget.h"
@@ -289,6 +290,12 @@ void TopWidget::initStatusBar()
  QLabel* animatedLabel = new QLabel(QString::number(0), debug);
  connect(this, SIGNAL(signalCanvasAnimationsCountUpdated(int)), animatedLabel, SLOT(setNum(int)));
  bar->addWidget(debug);
+ (void)new QLabel(i18n("Units: "), debug);
+ QLabel* unitsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalUnitsUpdated(int)), unitsLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Shots: "), debug);
+ QLabel* shotsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalShotsUpdated(int)), shotsLabel, SLOT(setNum(int)));
 
  QHBox* fps = new QHBox(bar);
  (void)new QLabel(i18n("FPS: "), fps);
@@ -812,6 +819,14 @@ void TopWidget::slotUpdateStatusBar()
  emit signalParticlesCountUpdated(mCanvas->particleSystemsCount());
  emit signalCanvasItemsCountUpdated(mCanvas->allItemsCount());
  emit signalCanvasAnimationsCountUpdated(mCanvas->animationsCount());
+
+ // AB: this *might* be an expensive calculation. this can be a pretty big loop
+ // (> 1000 entries), but there are simple calculations only. maybe we should
+ // add a slotUpdateStatusBarExpensive() or so which gets called every 5 seconds
+ // only
+ mCanvas->updateItemCount();
+ emit signalUnitsUpdated(mCanvas->itemCount(RTTI::UnitStart));
+ emit signalShotsUpdated(mCanvas->itemCount(RTTI::Shot));
 }
 
 void TopWidget::hideMenubar()

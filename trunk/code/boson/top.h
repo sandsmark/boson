@@ -132,14 +132,16 @@ public slots:
 #endif
 
 signals:
-	void signalSetMobilesCount(int);
-	void signalSetFacilitiesCount(int);
+	void signalSetMobilesCount(int);// mobiles of the local player
+	void signalSetFacilitiesCount(int);// facilities of the local player
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
 	void signalFPSUpdated(double);
 	void signalParticlesCountUpdated(int);
 	void signalCanvasItemsCountUpdated(int);
 	void signalCanvasAnimationsCountUpdated(int);
+	void signalUnitsUpdated(int);// number of units on the canvas
+	void signalShotsUpdated(int);// number of shots on the canvas
 
 protected:
 	/**

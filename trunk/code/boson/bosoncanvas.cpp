@@ -57,6 +57,7 @@ public:
 	QPtrList<BosonItem> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
+	QMap<int, unsigned int> mItemCount;
 
 	QPtrList<BosonParticleSystem> mParticles;
 };
@@ -352,12 +353,12 @@ void BosonCanvas::newShot(BosonShot* shot)
  if (!shot->isActive()) {
 	shotHit(shot);
 
-	//AB: check whether this is called inside slotAdvance()! it must NOT be
-	//called there! (don't delete items in a list that we are currently
-	//iterating!)
-	removeAnimation(shot);
-	removeItem(shot);
-	delete shot; // AB: is this a good idea? maybe prefer deleteUnusedShots() instead! (note that deleteUnusedShots() depends on the item still being in the animation list!!
+	// AB: is this a good idea? maybe prefer deleteUnusedShots() instead!
+	// (note that deleteUnusedShots() depends on the item still being in 
+	// the animation list!!)
+	// it won't hurt too much here, cause setAnimated(true) got never called
+	// for a new shot that is inactive. but its ugly anyway.
+	delete shot; 
  }
 }
 
@@ -801,6 +802,26 @@ void BosonCanvas::removeItem(BosonItem* item)
  d->mAllItems.remove(item);
 }
 
+unsigned int BosonCanvas::itemCount(int rtti) const
+{
+ return d->mItemCount[rtti];
+}
+
+void BosonCanvas::updateItemCount()
+{
+ d->mItemCount.clear();
+ BoItemList::Iterator it = d->mAllItems.begin();
+ for (; it != d->mAllItems.end(); ++it) {
+	int rtti = (*it)->rtti();
+	if (RTTI::isUnit(rtti)) {
+		rtti = RTTI::UnitStart;
+	}
+	if (!d->mItemCount.contains(rtti)) {
+		d->mItemCount.insert(rtti, 0);
+	}
+	d->mItemCount[rtti] += 1;
+ }
+}
 
 // this is an extremely time-critical function!
 BoItemList BosonCanvas::collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const
@@ -919,11 +940,6 @@ void BosonCanvas::deleteUnusedShots()
 		BosonShot* shot = (BosonShot*)i;
 		if (!shot->isActive()) {
 			shotHit(shot);
-#warning FIXME ?
-			// AB: this gets called in the d'tor.
-			// do we *really* need this here??
-			removeAnimation(i);
-			removeItem(i);
 			delete i;
 		}
 	}

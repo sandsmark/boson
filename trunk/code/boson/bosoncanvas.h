@@ -101,8 +101,46 @@ public:
 	virtual void removeAnimation(BosonItem* item);
 	unsigned int animationsCount() const;
 
+	/**
+	 * Add @p item to the list of items in the canvas. This should get
+	 * called in the constructor of @ref BosonItem and you should not need
+	 * to care about this.
+	 *
+	 * See also @ref removeItem
+	 **/
 	void addItem(BosonItem* item);
+
+	/**
+	 * Remove @p item from the list of items. You should not need to call
+	 * this yourself, as it is called by the @ref BosonItem destructor.
+	 *
+	 * Be <em>very</em> careful when you call this manually!
+	 **/
 	void removeItem(BosonItem* item);
+
+	/**
+	 * WARNING: you must call @ref updateItemCount before calling this!
+	 * Otherwise you'll get old results!
+	 * @return The number of items on the canvas with @p rtti. See @ref
+	 * BosonItem::rtti. Note that <em>all</em> units get added to @p rtti =
+	 * @ref RTTI::UnitStart!
+	 **/
+	unsigned int itemCount(int rtti) const;
+
+	/**
+	 * Update the values for @ref itemCount. This function iterates over all
+	 * items and therefore might take a little bit time. Don't call it when
+	 * you render frames or so!
+	 **/
+	void updateItemCount();
+
+	/**
+	 * @return A complete list of <em>all</em> items on the canvas. See @ref
+	 * addItem
+	 **/
+	BoItemList allItems() const;
+	unsigned int allItemsCount() const;
+
 
 	BoItemList collisionsAtCells(const QPointArray& cells, const BosonItem* item, bool exact) const;
 	BoItemList collisions(const QRect& rect) const;
@@ -257,12 +295,6 @@ public:
 
 	void addToCells(BosonItem* u);
 	void removeFromCells(BosonItem* u);
-
-	/**
-	 * @return A complete list of <em>all</em> items on the canvas.
-	 **/
-	BoItemList allItems() const;
-	unsigned int allItemsCount() const;
 
 	BosonTiles* tileSet() const;
 
