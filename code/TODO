@@ -6,14 +6,10 @@ Generic :
 
 editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
 ben's bug
-bug : quad on water on other's view ( x,y not synced between two clients)
 
 units construction : progressbar on unit_constructor, then autoput of the unit
 fine-graining for *Theme.cpp : distinc loading of overview..
-boson : check validity before a turnTo
 units : revoir le design global
-speciesTheme : different bitmap for Overview and sequences
-fine-grained groundTheme loading
 selectPart shouldn't be splitted
 QCanvas : shouldn't segfault when pixmap loading has failed
 
@@ -41,8 +37,6 @@ Unit drawing into minimap : moving, etc...
 does units::rect need to be virtual anymore ?
 server : check that each unit does max 1 move each jiffie
 different subclass for my_units and other_units in client
-move visual.h/game.h to global.h
-merge mainView and bosonView/editorView
 fog of war
 
 graphism 
@@ -74,6 +68,13 @@ editor:
 client and server should be peer-killed proof
 check the .bfp format (no binary changes should be allowed after 0.5)
 	-> check for 'version' 'author' and other meta-information especially
+check compilation in map/
+minimap should work (for ben)
+editor should be pre0.1
+"unit" tree cleaning
+"move" cleaning
+"connect" cleaning
+"sound" and "music" for nils
 
 
 test 'yellow' team colorization with ben's examples..

@@ -223,6 +223,7 @@ enum bosonMsgTag {
 
 /* ilen is for integer-lenght */
 /* blen is for byte-lenght */
+#define MSG(foo)	sizeof(foo), &foo
 
 int	sendMsg  (boBuffer *, bosonMsgTag tag, int blen, void *data);
 int	recvMsg  (boBuffer *, bosonMsgTag &tag, int &blen, void *data);

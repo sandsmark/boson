@@ -81,7 +81,7 @@ for (i=im ; i<=iM; i++)
 				sendMsg (
 					player[u->who].buffer,
 					MSG_MAP_DISCOVERED,
-					sizeof(coo), &coo  );
+					MSG(coo) );
 			}
 		}
 }

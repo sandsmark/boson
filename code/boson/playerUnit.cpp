@@ -266,12 +266,12 @@ void playerMobUnit::getWantedAction()
 	/* movve ?*/
 	if (getWantedMove(&data)) {
 		data.move.key		= key;
-		sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
+		sendMsg(buffer, MSG_MOBILE_MOVE_R, MSG(data.move) );
 	}
 
 	if (getWantedShoot(&data)) {
 		data.shoot.key		= key;
-		sendMsg(buffer, MSG_UNIT_SHOOT, sizeof(data.shoot), &data);
+		sendMsg(buffer, MSG_UNIT_SHOOT, MSG(data.shoot) );
 	}
 }
 
@@ -458,16 +458,7 @@ void playerFacility::s_setState(int s)
 
 void playerFacility::getWantedAction()
 {
-
 	if (who != who_am_i) return;
-/*
-	bosonMsgData	data;
-
-	if (getWantedShoot(&data) {
-		data.shoot.key		= key;
-		sendMsg(buffer, MSG_UNIT_SHOOT, sizeof(data.shoot), &data);
-	}
-*/
 }
 
 
@@ -507,7 +498,7 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 //				puts("harvester : arrived home");
 				harvestEndMsg_t    he;
 				he.key = key;
-				sendMsg(buffer, MSG_UNIT_HARVEST_END, sizeof(he), &he);
+				sendMsg(buffer, MSG_UNIT_HARVEST_END, MSG(he) );
 				hstate = goingTo;
 				playerMobUnit::u_goto(harvest_x, harvest_y); // go to base station
 				contain = 0 ;		// emptying
@@ -533,7 +524,7 @@ bool harvesterUnit::getWantedMove(bosonMsgData *msg)
 			if ( contain < 200 ) {
 				harvestMsg_t    harvest;
 				harvest.key = key;
-				sendMsg(buffer, MSG_UNIT_HARVEST, sizeof(harvest), &harvest);
+				sendMsg(buffer, MSG_UNIT_HARVEST, MSG(harvest) );
 			} else {
 				hstate = comingBack;
 //				puts("harvester : change to \"comingBack\" state");
