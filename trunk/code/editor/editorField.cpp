@@ -108,8 +108,8 @@ bool editorField::save(QString filename)
 	QIntDictIterator<visualMobUnit> mobIt(mobiles);
 	QIntDictIterator<visualFacility> fixIt(facilities);
 
-	boAssert (nbMobiles == (int)mobiles.count());
-	boAssert (nbFacilities == (int)facilities.count());
+	nbMobiles = (int)mobiles.count();
+	nbFacilities = (int)facilities.count();
 
 	if (!openWrite(filename.data())) return false;
 
