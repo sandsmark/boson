@@ -110,13 +110,13 @@ public:
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const BoVector2& pos, int radius) const;
+	QValueList<Unit*> unitCollisionsInRange(const BoVector2& pos, float radius) const;
 
 	/**
 	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
 	 * operates in 3d space
 	 **/
-	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, int radius) const;
+	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, float radius) const;
 
 	/**
 	 * Returns whether cell is occupied (there is non-destroyed mobile or
