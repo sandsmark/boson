@@ -145,7 +145,7 @@ class BosonPath
     float mPathCost;
     int mRange;
 
-    class BosonPath::Marking
+    class Marking
     {
       public:
         Marking() { dir = DirNone; f = -1; g = -1; c = -1; level = -1; }
@@ -491,6 +491,10 @@ class BosonPathFlyingNode : public BosonPathNode
 template<class T> class BosonPathHeap : public QValueList<T>
 {
   public:
+    inline QValueListIterator<T> begin() { QValueList<T>::begin(); }
+    inline QValueListIterator<T> end() { return QValueList<T>::end(); }
+    inline void pop_front() { QValueList<T>::pop_front(); }
+    inline T& first() { return QValueList<T>::first(); }
     inline void add(const T& x)
     {
       QValueListIterator<T> it;
