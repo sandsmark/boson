@@ -1032,3 +1032,40 @@ void BosonCanvas::killPlayer(Player* player)
  emit signalOutOfGame(player);
 }
 
+void BosonCanvas::removeFromCells(Unit* u)
+{
+ int x = u->leftEdge() / BO_TILE_SIZE;
+ int y = u->topEdge() / BO_TILE_SIZE;
+ int w = u->width() / BO_TILE_SIZE;
+ int h = u->height() / BO_TILE_SIZE;
+ for (int i = x; i < x + w; i++) {
+	for (int j = y; j < y + h; j++) {
+		Cell* c = cell(i, j);
+		if (!c) {
+			kdError() << k_funcinfo << "NULL cell - x=" << i << ",y=" << j << ",id=" << u->id() << endl;
+			continue;
+		}
+		c->removeUnit(u);
+	}
+ }
+}
+
+void BosonCanvas::addToCells(Unit* u)
+{
+ int x = u->leftEdge() / BO_TILE_SIZE;
+ int y = u->topEdge() / BO_TILE_SIZE;
+ int w = u->width() / BO_TILE_SIZE;
+ int h = u->height() / BO_TILE_SIZE;
+ for (int i = x; i < x + w; i++) {
+	for (int j = y; j < y + h; j++) {
+		Cell* c = cell(i, j);
+		if (!c) {
+			kdError() << k_funcinfo << "NULL cell - x=" << i << ",y=" << j << ",id=" << u->id() << endl;
+			continue;
+		}
+		c->addUnit(u);
+	}
+ }
+}
+
+

@@ -461,36 +461,11 @@ float BosonPath::cost(int x, int y)
     return ERROR_COST;
   }
 
-  float cost;
-
-  // Check if there are units on that tile (slow method?)
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
-  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE, BO_TILE_SIZE);
-#else
-  QRect rect(x * BO_TILE_SIZE, y * BO_TILE_SIZE, BO_TILE_SIZE - 1, BO_TILE_SIZE - 1);
-  // QT uses QCanvasRectangle::boudingRect() for collision detection - but this @_,+p*@ function adds +1 to width and height !!! (QCanvasRectangle::rect() is ok)
-#endif
-  // collisions() consists in this case of a simple
-  // QRect r1=rect,r2=mUnit->boundingRectAdvanced(); return r1.intersects(r2);
-  QCanvasItemList list = mUnit->canvas()->collisions(rect);
-  if(! list.isEmpty())
+  if(c->isOccupied(mUnit, false)) 
   {
-    bool flying = mUnit->isFlying();
-    for(QCanvasItemList::Iterator it = list.begin(); it != list.end(); ++it)
-    {
-      if(RTTI::isUnit((*it)->rtti()))
-      {
-        Unit* unit = (Unit*)*it;
-        if(unit != mUnit && unit->isFlying() == flying && !unit->isDestroyed() && !unit->isMoving())
-        {
-          //kdDebug() << k_lineinfo << ": unit on cell " << x << "," << y << ": " << unit->id() << endl;
-          return ERROR_COST;
-        }
-      }
-    }
+    return ERROR_COST;
   }
-  cost = c->moveCost();
+  float cost = c->moveCost();
 
   return cost + mMinCost;
 }

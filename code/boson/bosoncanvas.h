@@ -183,6 +183,9 @@ public:
 	 **/
 	void killPlayer(Player* player);
 
+	void addToCells(Unit* u);
+	void removeFromCells(Unit* u);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
