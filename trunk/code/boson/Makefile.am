@@ -199,6 +199,7 @@ bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bo3dsdebug_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
 		-l3ds \
+		$(GLLIB) \
 		-lkio $(LIB_KDEUI)
 bo3dsdebug_SOURCES = \
 		boapplication.cpp \
