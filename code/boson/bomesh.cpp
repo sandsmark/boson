@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,8 +38,6 @@
 #if USE_OCCLUSION_CULLING
 #include <GL/glext.h>
 #endif
-
-extern unsigned int glstat_item_faces, glstat_item_vertices, glstat_terrain_faces, glstat_terrain_vertices;
 
 class BoundingObject
 {
