@@ -36,8 +36,6 @@ public:
 	BoDefaultGroundRenderer();
 	virtual ~BoDefaultGroundRenderer();
 
-	virtual int rtti() const { return Default; }
-
 protected:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 

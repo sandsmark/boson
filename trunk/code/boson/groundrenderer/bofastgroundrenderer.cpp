@@ -36,10 +36,13 @@
 BoFastGroundRenderer::BoFastGroundRenderer()
 	: BoGroundRendererBase()
 {
+ mCurrentMap = 0;
+ mCellTextures = 0;
 }
 
 BoFastGroundRenderer::~BoFastGroundRenderer()
 {
+ delete mCellTextures;
 }
 
 void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cellsCount, const BosonMap* map)
@@ -49,6 +52,8 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(mHeightMap2);
  BO_CHECK_NULL_RET(map->groundTheme());
+
+ updateMapCache(map);
 
  BosonGroundTheme* groundTheme = map->groundTheme();
  const float* heightMap = mHeightMap2;
@@ -62,23 +67,11 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		boError() << k_funcinfo << "invalid cell" << endl;
 		continue;
 	}
-	cellTextures[i] = 0;
-	unsigned int maxValue = 0;
-	for (unsigned int j = 0; j < groundTheme->textureCount(); j++) {
-		unsigned int v = 0;
-		v += (int)map->texMapAlpha(j, x, y);
-		v += (int)map->texMapAlpha(j, x + w, y);
-		v += (int)map->texMapAlpha(j, x, y + h);
-		v += (int)map->texMapAlpha(j, x + w, y + h);
-		if (v > maxValue) {
-			maxValue = v;
 
-			// this texture has highest alpha values in the four
-			// corners
-			cellTextures[i] = j;
-		}
-
-	}
+	// AB: this is very wrong - we always use the texture of the top-left
+	// corner for the whole rect. however it should be "good enough" for the
+	// fast renderer.
+	cellTextures[i] = mCellTextures[BoMapCornerArray::arrayPos(x, y, map->width())];
  }
 
  unsigned int usedTextures = 0;
@@ -149,5 +142,37 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  statistics()->setUsedTextures(usedTextures);
 
  glDisable(GL_BLEND);
+}
+
+void BoFastGroundRenderer::updateMapCache(const BosonMap* map)
+{
+ if (mCurrentMap == map) {
+	return;
+ }
+ BO_CHECK_NULL_RET(map);
+ BO_CHECK_NULL_RET(map->groundTheme());
+
+ delete mCellTextures;
+ mCellTextures = new unsigned char[map->width() * map->height()];
+ for (unsigned int x = 0; x < map->width(); x++) {
+	for (unsigned int y = 0; y < map->height(); y++) {
+		unsigned int maxValue = 0;
+		for (unsigned int j = 0; j < map->groundTheme()->textureCount(); j++) {
+			unsigned int v = 0;
+			v += (int)map->texMapAlpha(j, x, y);
+			v += (int)map->texMapAlpha(j, x + 1, y);
+			v += (int)map->texMapAlpha(j, x, y + 1);
+			v += (int)map->texMapAlpha(j, x + 1, y + 1);
+			if (v > maxValue) {
+				maxValue = v;
+
+				// this texture has highest alpha values in the four
+				// corners
+				mCellTextures[BoMapCornerArray::arrayPos(x, y, map->width())] = j;
+			}
+		}
+	}
+ }
+ mCurrentMap = map;
 }
 

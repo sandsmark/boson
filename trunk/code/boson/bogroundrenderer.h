@@ -92,26 +92,8 @@ class BoGroundRenderer : public QObject
 {
 	Q_OBJECT
 public:
-	enum Renderer {
-		// note that the numbers must be in order! (i.e. 0, 1, 2, ...)
-		Default = 0,
-		Fast = 1,
-
-		// this _must_ remain the last item of the enum!
-		Last
-	};
-
-public:
 	BoGroundRenderer();
 	virtual ~BoGroundRenderer();
-
-	/**
-	 * This takes an @rtti (see @ref Renderer) and converts it into a @ref
-	 * QString.
-	 **/
-	static QString rttiToName(int rtti);
-
-	virtual int rtti() const = 0;
 
 	/**
 	 * Apply pointers for all OpenGL matrices to this class. You must not
