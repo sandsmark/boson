@@ -333,10 +333,10 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mGamePaused.setEmittingSignal(false); // make valgrind happy
  d->mGamePaused.registerData(IdGamePaused, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GamePaused");
+ d->mGamePaused.setLocal(false);
  d->mGamePaused.setEmittingSignal(true);
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GameSpeed");
- d->mGamePaused.setLocal(false);
  d->mGameSpeed.setLocal(0);
 
  d->mEventManager = new BoEventManager(this);
