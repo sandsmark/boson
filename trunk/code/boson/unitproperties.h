@@ -270,6 +270,13 @@ public:
 	 **/
 	bool supportMiniMap() const { return mSupportMiniMap; }
 
+	/**
+	 * @return list with types of units player must have before he can build unit
+	 *  of this type
+	 * @see Player::canBuild
+	 **/
+	QValueList<int> requisities() const { return mRequisities; };
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
@@ -296,6 +303,7 @@ private:
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
 	bool mSupportMiniMap;
+	QValueList<int> mRequisities;
 
 	class MobileProperties;
 	class FacilityProperties;
