@@ -200,6 +200,26 @@ void BosonNewEditorWidget::slotNetStart()
 void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 {
  boDebug() << k_funcinfo << endl;
+ QMap<QListViewItem*, QString>::Iterator it;
+ QListViewItem* item = 0;
+ for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && !item; ++it) {
+	if (field) {
+		if (it.data() == field->identifier()) {
+			item = it.key();
+		}
+	} else {
+		if (it.data().isNull()) {
+			// new map
+			item = it.key();
+		}
+	}
+ }
+ if (!item) {
+	boError() << k_funcinfo << "Cannot find playfield item for " << field->identifier() << endl;
+ } else {
+	mChooseBosonMap->setCurrentItem(item);
+ }
+
  if (!field) {
 	slotNewMapToggled(true);
 	return;
@@ -209,19 +229,6 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  slotNewMapToggled(false);
  QStringList list = BosonPlayField::availablePlayFields();
- QMap<QListViewItem*, QString>::Iterator it;
- QListViewItem* item = 0;
- for (it = d->mItem2Map.begin(); it != d->mItem2Map.end() && !item; ++it) {
-	if (it.data() == field->identifier()) {
-		item = it.key();
-	}
- }
- if (!item) {
-	boError() << k_funcinfo << "Cannot find playfield item for " << field->identifier() << endl;
- } else {
-	mChooseBosonMap->setCurrentItem(item);
- }
-
  boDebug() << k_funcinfo << "loading map: " << field->identifier() << endl;
  // am afraid we need the entire data here :-(
  field->loadPlayField(QString::null); // QString::null is allowed, as we already opened the file using preLoadPlayField()
