@@ -105,7 +105,6 @@ public slots:
 	 * that :-)
 	 **/
 	void slotAddUnit(Unit* unit, int x, int y);
-	void slotLoadTiles(const QString&);
 	virtual void advance();
 
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
@@ -116,6 +115,7 @@ signals:
 	void signalUnitDestroyed(Unit* unit);
 
 protected:
+	void loadTiles(const QString&);
 	Cell* cell(int x, int y) const;
 	void play(const QString& fileName); // perhaps in public
 
