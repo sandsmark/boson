@@ -52,14 +52,23 @@ public:
 	};
 
 	enum Direction {
-		North = 0,
+/*		North = 0,
 		NorthEast = 1,
 		East = 2, // and 3 as well...
 		SouthEast = 4,
 		South = 5, // and 6 as well (but slightly to west)
 		SouthWest = 7,
 		West = 7,// FIXME
-		NorthWest = 7 // FIXME
+		NorthWest = 7 // FIXME*/
+// The data files are currently completely broken on this. need to fix them // TODO
+		North = 0,
+		NorthEast = 1,
+		East = 2, 
+		SouthEast = 3,
+		South = 4,
+		SouthWest = 5,
+		West = 6,
+		NorthWest = 7
 		
 	};
 	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
