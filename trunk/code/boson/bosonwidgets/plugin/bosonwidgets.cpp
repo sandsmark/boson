@@ -19,6 +19,7 @@
 
 #include "dummyclasses.h"
 #include "../bogamechat.h"
+#include "../bosonplayfieldview.h"
 
 #include <kdeversion.h>
 #include <kstandarddirs.h>
@@ -95,6 +96,7 @@ BosonWidgetsPlugin::BosonWidgetsPlugin()
 {
  addBosonWidget("BoGameChat", "bosonwidgets/bogamechat.h", "Boson's KGame chat widget (with fixed message id!)", QString::null, QString::null);
  addBosonWidget("BosonMiniMap", "bosonminimap.h", "Mini map widget", QString::null, QString::null);
+ addBosonWidget("BosonPlayFieldView", "bosonwidgets/bosonplayfieldview.h", "PlayField view", QString::null, QString::null);
 
 //kdDebug() << k_funcinfo << endl;
  new KInstance("bosonwidgets");
@@ -128,6 +130,8 @@ QWidget* BosonWidgetsPlugin::create(const QString& key, QWidget* parent, const c
 	// Player, ...
 	// uic should generate code that does use BosonMiniMap.
 	return new BosonMiniMap(parent, name);
+ } else if (key == "BosonPlayFieldView") {
+	return new BosonPlayFieldView(parent, name);
  }
  return 0;
 }
