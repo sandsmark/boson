@@ -57,7 +57,7 @@ Boson* Boson::mBoson = 0;
 #define NO_ADVANCE_DEBUG
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 000006
+#define BOSON_SAVEGAME_FORMAT_VERSION 000007
 
 class BoMessage
 {
@@ -271,7 +271,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			it.current()->stopMoving();
 			++it;
 		}
-		if(unitsToMove.count() == 1) {
+		if (unitsToMove.count() == 1) {
 			unitsToMove.first()->moveTo(pos);
 		} else {
 			it.toFirst();
@@ -535,7 +535,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		unsigned long int mineralCost = 0, oilCost = 0;
 
-		if((ProductionType)productionType == ProduceUnit) {
+		if ((ProductionType)productionType == ProduceUnit) {
 			// Produce unit
 			const UnitProperties* prop = p->unitProperties(id);
 			if (!prop) {
@@ -544,7 +544,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
-		} else if((ProductionType)productionType == ProduceTech) {
+		} else if ((ProductionType)productionType == ProduceTech) {
 			// Produce technology
 			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
@@ -628,7 +628,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 
 		unsigned long int mineralCost = 0, oilCost = 0;
 
-		if((ProductionType)productionType == ProduceUnit) {
+		if ((ProductionType)productionType == ProduceUnit) {
 			const UnitProperties* prop = p->unitProperties(id);
 			if (!prop) {
 				kdError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
@@ -636,7 +636,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
-		} else if((ProductionType)productionType == ProduceTech) {
+		} else if ((ProductionType)productionType == ProduceTech) {
 			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
 				kdError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
@@ -689,7 +689,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		stream >> y;
 
 		// Only units are "built"
-		if((ProductionType)productionType != ProduceUnit) {
+		if ((ProductionType)productionType != ProduceUnit) {
 			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
 			break;
 		}
@@ -710,7 +710,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
-		if(production->completedProductionType() != ProduceUnit) {
+		if (production->completedProductionType() != ProduceUnit) {
 			kdError() << k_lineinfo << "not producing unit!" << endl;
 			break;
 		}
@@ -1088,12 +1088,14 @@ Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
 
 KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 {
- kdDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io 	
+ kdDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
  p->setGame(this);
- if(d->mPlayField && d->mPlayField->map()) {
-	p->initMap(d->mPlayField->map());
+ if (d->mPlayField && d->mPlayField->map()) {
+	// AB: this will never be reached. unused. can probably be removed.
+	p->setMap(d->mPlayField->map());
+	p->initFogOfWar();
  }
  connect(p, SIGNAL(signalUnitLoaded(Unit*, int, int)),
 		this, SIGNAL(signalAddUnit(Unit*, int, int)));
@@ -1137,8 +1139,8 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 				}
 			} else {
 				if (!d->mGameTimer->isActive()) {
-					kdDebug() << "start timer - ms=" 
-							<< ADVANCE_INTERVAL 
+					kdDebug() << "start timer - ms="
+							<< ADVANCE_INTERVAL
 							<< endl;
 					d->mGameTimer->start(ADVANCE_INTERVAL);
 				}
@@ -1493,12 +1495,21 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  // Save KGame stuff
 #if !HAVE_KGAME_SAVEGAME
  kdWarning() << k_funcinfo << "Saving without KGame::savegame() is untested! (KDE 3.1 has KGame::savegame())" << endl;
- if(!KGame::save(stream, saveplayers)) {
+ if (!KGame::save(stream, saveplayers)) {
 #else
- if(!KGame::savegame(stream, network, saveplayers)) {
+ if (!KGame::savegame(stream, network, saveplayers)) {
 #endif
 	kdError() << k_funcinfo << "Can't save KGame!" << endl;
 	return false;
+ }
+
+ // units. they must be loaded *after* the players, so it also needs to be saved
+ // later
+ QPtrListIterator<KPlayer> it(*playerList());
+ for (; it.current(); ++it) {
+	if (!((Player*)it.current())->saveUnits(stream)) {
+		kdError() << k_funcinfo << "Error when saving units" << endl;
+	}
  }
 
  kdDebug() << k_funcinfo << " done" << endl;
@@ -1521,21 +1532,21 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  Q_UINT8 a, b1, b2, b3;
  Q_INT32 c, v;
  stream >> a >> b1 >> b2 >> b3;
- if((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
+ if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
 	kdError() << k_funcinfo << "This file is not Boson SaveGame" << endl;
 	d->mLoadingStatus = InvalidFileFormat;
 	return false;
  }
  stream >> c;
- if(c != cookie()) {
+ if (c != cookie()) {
 	// Error - wrong cookie
 	kdError() << k_funcinfo << "Invalid cookie in header" << endl;
 	d->mLoadingStatus = InvalidCookie;
 	return false;
  }
  stream >> v;
- if(v != BOSON_SAVEGAME_FORMAT_VERSION) {
+ if (v != BOSON_SAVEGAME_FORMAT_VERSION) {
 	// Error - older version
 	// TODO: It may be possible to load this version
 	kdError() << k_funcinfo << "Unsupported format version" << endl;
@@ -1546,29 +1557,55 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  Q_UINT32 localId = 0;
  Q_INT8 started; // network players usually connect before starting a game
  stream >> started;
+ QByteArray mapBuffer;
  if (started) {
 	kdDebug() << k_funcinfo << "Loading a previously saved game" << endl;
 	// Load map
 	BosonPlayField* f = new BosonPlayField;
-	f->loadMap(stream);
-	QByteArray buffer;
-	QDataStream mapstream(buffer, IO_WriteOnly);
+	if (!f->loadMap(stream)) {
+		kdError() << k_funcinfo << "Could not load map" << endl;
+		return false;
+	}
+	QDataStream mapstream(mapBuffer, IO_WriteOnly);
 	f->saveMap(mapstream);
 	delete f;
-
-	emit signalInitMap(buffer);
 
 	// Load local player's id
 	stream >> localId;
  }
 
  // Load KGame stuff
- if(!KGame::loadgame(stream, network, reset)) {
+ kdDebug() << "calling KGame::loadgame" << endl;
+ if (!KGame::loadgame(stream, network, reset)) {
 	// KGame loading error
 	kdError() << k_funcinfo << "KGame loading error" << endl;
 	d->mLoadingStatus = KGameError;
 	return false;
  }
+
+ // KGame::loadgame() also loads the gamestatus. some functions depend on KGame
+ // to be in Init status as long as it is still loading, so we set it manually
+ // here. we first need to set PolicyLocal, to make the change take immediate
+ // effect
+ KGame::GamePolicy oldPolicy = boGame->policy();
+ boGame->setPolicy(KGame::PolicyLocal);
+ boGame->setGameStatus(KGame::Init);
+ boGame->setPolicy(oldPolicy);
+
+ if (started) {
+	// AB: needs to be emitted after KGame::loadgame() which adds the
+	// players
+	emit signalInitMap(mapBuffer);
+ }
+
+ // units. they must be loaded *after* the players
+ QPtrListIterator<KPlayer> it(*playerList());
+ for (; it.current(); ++it) {
+	if (!((Player*)it.current())->loadUnits(stream)) {
+		kdError() << k_funcinfo << "Error when loading units" << endl;
+	}
+ }
+
  kdDebug() << k_funcinfo << "kgame loading successful" << endl;
 
  if (started) { // AB (02/09/04): by any reason this was "!started" before - can't work, as localId is not initialized then. is this fix correct?

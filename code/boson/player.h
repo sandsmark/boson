@@ -64,7 +64,9 @@ public:
 	Unit* findUnit(unsigned long int unitId) const;
 
 	virtual bool load(QDataStream& stream);
+	bool loadUnits(QDataStream& stream); // must be done after the map was initialized
 	virtual bool save(QDataStream& stream);
+	bool saveUnits(QDataStream& stream);
 
 	/**
 	 * @return <em>All</em> units of this player. Please don't use this as
@@ -86,13 +88,14 @@ public:
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
 
+	void setMap(BosonMap* map);
+
 	/**
-	 * Initialize the map for this player - currently this means just the
-	 * fog of war.
+	 * Initialize The fog of war for this player.
 	 * @param fogged Whether the map is fogged initially or not. You can
 	 * specify false here for the editor.
 	 **/
-	void initMap(BosonMap* map, bool fogged = true);
+	void initFogOfWar(bool fogged = true);
 
 	/**
 	 * Called by @ref Facility when the construction has been completed.

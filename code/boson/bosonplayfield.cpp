@@ -204,13 +204,18 @@ bool BosonPlayField::loadScenario(QDomElement& root)
  return mScenario->loadScenario(node);
 }
 
-void BosonPlayField::loadMap(QDataStream& stream)
+bool BosonPlayField::loadMap(QDataStream& stream)
 {
  delete mMap;
  mMap = new BosonMap(this);
- mMap->loadMapGeo(stream);
- mMap->loadCells(stream);
+ if (!mMap->loadMapGeo(stream)) {
+	return false;
+ }
+ if (!mMap->loadCells(stream)) {
+	return false;
+ }
  emit signalNewMap(mMap);
+ return true;
 }
 
 void BosonPlayField::saveMap(QDataStream& stream)
@@ -269,3 +274,10 @@ bool BosonPlayField::modified() const
  }
  return false;
 }
+
+void BosonPlayField::deleteMap()
+{
+ delete mMap;
+ mMap = 0;
+}
+

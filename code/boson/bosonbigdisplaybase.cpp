@@ -492,6 +492,9 @@ void BosonBigDisplayBase::paintGL()
  if (boGame->gameStatus() == KGame::Init) {
 	return;
  }
+ if (!localPlayer()) {
+	kdError() << k_funcinfo << "NULL local player" << endl;
+ }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
@@ -1098,6 +1101,10 @@ void BosonBigDisplayBase::setActive(bool a)
 void BosonBigDisplayBase::setLocalPlayer(Player* p) 
 {
  kdDebug() << k_funcinfo << endl;
+ if (d->mLocalPlayer == p) {
+	kdDebug() << k_funcinfo << "player already set. nothing to do." << endl;
+	return;
+ }
  if (d->mLocalPlayer) {
 	kdDebug() << k_funcinfo << "already a local player present! unset..." << endl;
 	delete d->mMouseIO;

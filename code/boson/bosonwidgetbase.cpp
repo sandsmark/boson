@@ -148,10 +148,6 @@ void BosonWidgetBase::init()
  initChat();
  initCommandFrame();
  initDisplayManager();
- initMap();
- if (!mLoading) {
-	initPlayer();
- }
 
  initConnections();
  actionCollection()->setWidget(this); // needs to be called *before* initKActions()
@@ -164,19 +160,36 @@ void BosonWidgetBase::init()
  // TopWidget!
 
  setFocusPolicy(StrongFocus); // accept key event
- setFocus();
+// setFocus(); // nonsense, since its still hidden
 
  initPlayersMenu();
 }
 
-void BosonWidgetBase::initMap()
+void BosonWidgetBase::initMap(bool initFogOfWar)
 {
  kdDebug() << k_funcinfo << endl;
 
  canvas()->setMap(playField()->map());
  minimap()->setMap(playField()->map());
  minimap()->initMap();
- boGame->setPlayField(playField());
+// boGame->setPlayField(playField()); // already done on startup
+
+ // AB: note that this meets the name "initMap" only slightly. We can't do this
+ // when players are initialized, as the map must be known to them once we start
+ // loading the units (for *loading* games)
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	kdDebug() << "init map for player " << i << endl;
+	Player* p = (Player*)boGame->playerList()->at(i);
+	if (p) {
+		p->setMap(playField()->map());
+		if (initFogOfWar) {
+			// the line below is needed for non-loading code, but
+			// must not be done for loading code :(
+			p->initFogOfWar(playField()->map());
+		}
+	}
+ }
+
 }
 
 void BosonWidgetBase::initMiniMap()
@@ -245,24 +258,13 @@ void BosonWidgetBase::initChat()
 
 void BosonWidgetBase::initPlayer()
 {
+ kdDebug() << k_funcinfo << endl;
  if (!localPlayer()) {
 	kdError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- if (!mLoading) {
-	for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-		Player* p = (Player*)boGame->playerList()->at(i);
-		if (p) {
-			p->initMap(playField()->map(), boGame->gameMode());
-		}
-	}
- }
 
- minimap()->setLocalPlayer(localPlayer());
- displayManager()->setLocalPlayer(localPlayer());
- boGame->setLocalPlayer(localPlayer());
- d->mCommandFrame->setLocalPlayer(localPlayer());
- d->mChat->setFromPlayer(localPlayer());
+ setLocalPlayerRecursively(localPlayer());
 
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
@@ -277,7 +279,7 @@ void BosonWidgetBase::initPlayer()
 void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  initLayout();
- if(!mLoading) {
+ if (!mLoading) {
 	slotStartScenario();
  }
  mLoading = false;
@@ -952,16 +954,37 @@ BosonCommandFrameBase* BosonWidgetBase::cmdFrame() const
  return d->mCommandFrame;
 }
 
-void BosonWidgetBase::setLocalPlayer(Player* p, bool init)
+void BosonWidgetBase::setLocalPlayer(Player* p, bool init) //AB: probably init = false is obsolete!
 {
- mLocalPlayer = p;
+ setLocalPlayerRecursively(p);
 
  if (init) {
 	if (!p) {
-		kdError() << k_funcinfo << "NULL player" << endl;
+		kdDebug() << k_funcinfo << "NULL player" << endl;
+		
 		return;
 	}
 	initPlayer();
+ }
+}
+
+void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
+{
+ mLocalPlayer = p;
+ if (minimap()) {
+	minimap()->setLocalPlayer(localPlayer());
+ }
+ if (displayManager()) {
+	displayManager()->setLocalPlayer(localPlayer());
+ }
+ if (boGame) {
+	boGame->setLocalPlayer(localPlayer());
+ }
+ if (d->mCommandFrame) {
+	d->mCommandFrame->setLocalPlayer(localPlayer());
+ }
+ if (d->mChat) {
+	d->mChat->setFromPlayer(localPlayer());
  }
 }
 

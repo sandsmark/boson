@@ -112,6 +112,7 @@ public:
 
 	void init();
 	virtual void initPlayer();
+	virtual void initMap(bool initFogOfWar);
 	virtual void quitGame();
 
 public slots:
@@ -220,6 +221,7 @@ protected slots:
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
 
 protected:
+	void setLocalPlayerRecursively(Player* p);
 	void checkDockStatus();
 	
 	void initBigDisplay(BosonBigDisplayBase*);
@@ -234,7 +236,6 @@ protected:
 	virtual void initKActions();
 	virtual void initDisplayManager();
 	virtual void initConnections();
-	virtual void initMap();
 	virtual void setBosonXMLFile();
 
 private:

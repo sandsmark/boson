@@ -198,31 +198,30 @@ protected:
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p) { changeLocalPlayer(p); }
-	void slotTilesLoading(int);
-	void slotReceiveMap(const QByteArray& buffer);
 	void slotUpdateFPS();
 
-private slots:
 	/**
-	 * Tile loading is most time consuming action on startup.
+	 * Actually start a game. Note that this is called at the end of the
+	 * loading (game data, map, ...) procedure. This will show the big
+	 * display and also do some final cleanups.
 	 *
-	 * Note that this function doesn't return before all tiles are loaded,
-	 * but still is non-blocking, as @ref QApplication::processEvents is
-	 * called while loading
-	 *
-	 * This slot is called from @ref slotReceiveMap only. Once the map has
-	 * been received we load its tiles.
+	 * Do not confuse with e.g. @ref slotStartNewGame, @ref
+	 * slotStartEditor or @ref slotLoadGame
 	 **/
-	void slotLoadTiles();
+	void slotStartGame();
 
-	void loadGameData3();
+	/**
+	 * @param loading We are loading a game when TRUE.
+	 **/
+	void slotAssignMap(bool loading);
 
+private slots:
 	/**
 	 * Called by the @ref KLoadSaveGameWidget . This will do the actual game loading
 	 * from the file into a stream and then will start the usual data
 	 * loading procedure.
 	 **/
-	void slotLoadGame(const QString& loadingFileName);
+//	void slotLoadGame(const QString& loadingFileName);// in BosonStarting now
 
 private:
 	void initBoson();
@@ -234,7 +233,6 @@ private:
 	void enableGameActions(bool enable);
 
 	void slotWaitForMap();
-	void checkEvents();
 
 	void initStartupWidget(int id);
 	void showStartupWidget(int id);
@@ -244,16 +242,11 @@ private:
 
 
 private:
-	void loadPlayerData(); // sound, models, textures, ...
-	void loadUnitDatas(Player* p, int progress);
-
-private:
 	QWidgetStack* mWs;
 	Player* mPlayer;
 	BosonPlayField* mPlayField;
 	BosonCanvas* mCanvas;
 	KDockWidget* mMainDock;
-	bool mGame;
 	bool mLoading;
 
 	class TopWidgetPrivate;

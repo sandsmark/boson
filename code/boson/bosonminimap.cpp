@@ -378,6 +378,14 @@ void BosonMiniMap::setLocalPlayer(Player* p)
 
 void BosonMiniMap::initFogOfWar(Player* p)
 {
+ if (!p) {
+	kdError() << k_funcinfo << "NULL player" << endl;
+	return;
+ }
+ if (!mMap) {
+	kdError() << k_funcinfo << "NULL map" << endl;
+	return;
+ }
  mUseFog = true;
  for (unsigned int i = 0; i < mMap->width(); i++) {
 	for (unsigned int j = 0; j < mMap->height(); j++) {
