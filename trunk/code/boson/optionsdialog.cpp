@@ -96,26 +96,26 @@ void OptionsDialog::initGeneralPage()
 
  d->mArrowSpeed = new KIntNumInput(10, vbox);
  d->mArrowSpeed->setRange(1, 200);
- d->mArrowSpeed->setLabel(i18n("Arrow Key Steps"));
+ d->mArrowSpeed->setLabel(i18n("Arrow key steps"));
  connect(d->mArrowSpeed, SIGNAL(valueChanged(int)),
 		this, SIGNAL(signalArrowScrollChanged(int)));
 
  d->mGameSpeed = new KIntNumInput(10, vbox);
  d->mGameSpeed->setRange(MIN_GAME_SPEED, MAX_GAME_SPEED);
- d->mGameSpeed->setLabel(i18n("Game Speed"));
+ d->mGameSpeed->setLabel(i18n("Game speed"));
  connect(d->mGameSpeed, SIGNAL(valueChanged(int)),
 		this, SLOT(slotSpeedChanged(int)));
 
  d->mUpdateInterval = new KIntNumInput(50, vbox);
  d->mUpdateInterval->setRange(2, 400);
- d->mUpdateInterval->setLabel(i18n("Update Interval (low values hurt performance)"));
+ d->mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
  connect(d->mUpdateInterval, SIGNAL(valueChanged(int)),
 		this, SLOT(slotUpdateIntervalChanged(int)));
 
  QHBox* hbox = new QHBox(vbox);
 
  hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Command Frame Background Pixmap"), hbox);
+ (void)new QLabel(i18n("Command frame background pixmap"), hbox);
  d->mCmdBackground = new QComboBox(hbox);
  d->mCmdBackgrounds = KGlobal::dirs()->findAllResources("data", "boson/themes/ui/*/cmdpanel*.png");
  d->mCmdBackground->insertItem(i18n("None"));
@@ -126,7 +126,7 @@ void OptionsDialog::initGeneralPage()
 
  d->mMiniMapScale = new KDoubleNumInput(1.0, vbox);
  d->mMiniMapScale->setRange(1.0, 5.0, 1);
- d->mMiniMapScale->setLabel(i18n("Mini Map Scale Factor"));
+ d->mMiniMapScale->setLabel(i18n("Mini Map scale factor"));
  connect(d->mMiniMapScale, SIGNAL(valueChanged(double)), 
 		this, SIGNAL(signalMiniMapScaleChanged(double)));
 }
@@ -144,7 +144,7 @@ void OptionsDialog::initCursorPage()
 		this, SLOT(slotCursorChanged(int)));
 
  hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Cursor Theme"), hbox);
+ (void)new QLabel(i18n("Cursor theme"), hbox);
  d->mCursorTheme = new QComboBox(hbox);
  QStringList list = BosonCursor::availableThemes();
  for (int i = 0; i < (int)list.count(); i++) {
@@ -169,17 +169,17 @@ void OptionsDialog::initScrollingPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&Scrolling"));
  QHBox* hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Enable Right Mouse Button Scrolling"), hbox);
+ (void)new QLabel(i18n("Enable right mouse button scrolling"), hbox);
  d->mRMBScrolling = new QCheckBox(hbox);
  connect(d->mRMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotRMBScrollingToggled(bool)));
 
  hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Enable Middle Mouse Button Scrolling"), hbox);
+ (void)new QLabel(i18n("Enable middle mouse button scrolling"), hbox);
  d->mMMBScrolling = new QCheckBox(hbox);
  connect(d->mMMBScrolling, SIGNAL(toggled(bool)), this, SLOT(slotMMBScrollingToggled(bool)));
 
  hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Sensity of cursor at edge of the windo Scrolling (0 for disabled)"), hbox);
+ (void)new QLabel(i18n("Sensity of cursor at edge of the window scrolling (0 for disabled)"), hbox);
  d->mCursorEdgeSensity = new KIntNumInput(hbox);
  d->mCursorEdgeSensity->setRange(0, 50);
  connect(d->mCursorEdgeSensity, SIGNAL(valueChanged(int)), this, SLOT(slotCursorEdgeSensityChanged(int)));
