@@ -55,6 +55,7 @@ mainWidget::mainWidget( bosonTopLevel *parent, const char *name)
 	setFocusPolicy (StrongFocus);		// accept key event
 	setFocus();
 
+	ressourcesUpdated();
 
 }
 
