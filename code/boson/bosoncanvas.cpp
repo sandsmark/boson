@@ -35,7 +35,7 @@
 #include <qptrdict.h>
 #include <qbitmap.h>
 #include <qdatetime.h>
-#include <qthread.h>
+#include <qtimer.h>
 
 #include <unistd.h>
 
@@ -49,9 +49,6 @@
 #include <qpainter.h>
 #endif
 
-// well... this reduces the ui-blocking effect on startup...
-#define USE_THREAD 1
-
 /**
  * Pixmap loader for the tileset. We use a different thread to provide
  * non-blocking UI.
@@ -63,18 +60,10 @@
  * The first function accessing the canvas (in terms of update()) is @ref
  * initFogOfWar which therefore checks if the thread is finished.
  **/
-#ifdef USE_THREAD
-class TileLoader : public QThread
-#else
 class TileLoader
-#endif
 {
 public:
-#ifdef USE_THREAD
-	TileLoader(BosonCanvas* c) : QThread()
-#else
 	TileLoader(BosonCanvas* c)
-#endif
 	{
 		mCanvas = c;
 		mTile = 0;
@@ -88,13 +77,10 @@ public:
 		mDir = d;
 	}
 
-#ifndef USE_THREAD
 	void start()
 	{
 		run();
 	}
-	bool running() const { return false; }
-#endif
 
 protected:
 	virtual void run()
@@ -464,7 +450,18 @@ void BosonCanvas::setMap(BosonMap* map)
  d->mMap = map;
 }
 
-void BosonCanvas::initMap(const QString& tiles)
+void BosonCanvas::loadTiles(const QString& tiles)
+{
+ QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
+ if (dir == QString::null) {
+	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
+	return;
+ }
+ d->mLoader->setDir(dir);
+ QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
+}
+
+void BosonCanvas::slotLoadTiles()
 {
  kdDebug() << k_funcinfo << endl;
  if (!d->mMap) {
@@ -472,12 +469,6 @@ void BosonCanvas::initMap(const QString& tiles)
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
- QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
- if (dir == QString::null) {
-	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
-	return;
- }
- d->mLoader->setDir(dir);
  d->mLoader->start();
 }
 
@@ -706,10 +697,6 @@ void BosonCanvas::unfogLocal(int x, int y)
 
 void BosonCanvas::initFogOfWar(Player* p)
 {
- while (d->mLoader->running()) {
-	kdDebug() << k_funcinfo << "need to wait for TileLoader to finish" << endl;
-	sleep(1);
- }
  if (!d->mFogPixmap) {
 	QString fogPath = locate("data", "boson/themes/fow.xpm");
 	d->mFogPixmap = new QCanvasPixmapArray(fogPath);

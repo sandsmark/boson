@@ -57,11 +57,14 @@ public:
 
 
 	void initEditor();
-	void editorLoadTiles(const QString& fileName);
+	void editorLoadTiles(const QString& dirName);
 	void setOrderType(int);
 
 protected:
 	void resetLayout();
+
+protected slots:
+	void slotEditorLoadTiles();
 
 public slots:
 	void slotRedrawTiles();

@@ -23,11 +23,7 @@
 #include <kdebug.h>
 
 #include <qimage.h>
-
-BosonTiles::BosonTiles(const QString& fileName) : QPixmap(fileName)
-{
- mTilesImage = 0;
-}
+#include <qapplication.h>
 
 BosonTiles::BosonTiles()
 {
@@ -74,19 +70,19 @@ QPixmap BosonTiles::tile(int g)
 
  g<<=2;
 
- bitBlt(&p, 0, 0, this, big_x(g), big_y(g), BO_TILE_SIZE, BO_TILE_SIZE);
+ bitBlt(&p, 0, 0, mTilesImage, big_x(g), big_y(g), BO_TILE_SIZE, BO_TILE_SIZE);
 
  // a big tile is 2*2 normal tiles - the upper left was painted
  // above. The following will paint the remaining 3 rects
  if (Cell::isBigTrans(g>>2)) {
 	g+=4;
-	bitBlt(&p, BO_TILE_SIZE, 0, this, big_x(g), big_y(g),
+	bitBlt(&p, BO_TILE_SIZE, 0, mTilesImage, big_x(g), big_y(g),
 			BO_TILE_SIZE, BO_TILE_SIZE);
 	g+=4;
-	bitBlt(&p, 0, BO_TILE_SIZE, this, big_x(g), big_y(g),
+	bitBlt(&p, 0, BO_TILE_SIZE, mTilesImage, big_x(g), big_y(g),
 			BO_TILE_SIZE, BO_TILE_SIZE);
 	g+=4;
-	bitBlt(&p, BO_TILE_SIZE, BO_TILE_SIZE, this, big_x(g),
+	bitBlt(&p, BO_TILE_SIZE, BO_TILE_SIZE, mTilesImage, big_x(g),
 			big_y(g), BO_TILE_SIZE, BO_TILE_SIZE);
  }
 
@@ -263,6 +259,10 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
  #undef SETPIXEL
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
+ if (qApp->hasPendingEvents()) {
+	kdDebug() << "process events" << endl;
+	qApp->processEvents(10);
+ }
 }
 
 QString BosonTiles::groundType2Name(Cell::GroundType g)

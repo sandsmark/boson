@@ -141,6 +141,7 @@ public:
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
 	BosonTiles* mTiles;
+	QString mTilesDir;
 
 	OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
@@ -363,16 +364,25 @@ void BoOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
 }
 
-void BoOrderWidget::editorLoadTiles(const QString& fileName)
+void BoOrderWidget::editorLoadTiles(const QString& tiles)
 {
- QString themePath = locate("data", QString("boson/themes/grounds/%1").arg(fileName));
- d->mTiles = new BosonTiles(themePath);
- if (d->mTiles->isNull()) {
-	kdError() << k_funcinfo << "Could not load " << fileName << endl;
-	return;
+ QString themePath = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.desktop").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
+ d->mTilesDir = themePath;
+ if (d->mTilesDir == QString::null) {
+	kdError() << k_funcinfo << "Cannot find " << tiles << endl;
+ } else {
+	QTimer::singleShot(0, this, SLOT(slotEditorLoadTiles()));
  }
 }
 
+void BoOrderWidget::slotEditorLoadTiles()
+{
+ d->mTiles = new BosonTiles();
+ if (!d->mTiles->loadTiles(d->mTilesDir)) {
+	kdError() << k_funcinfo << "Could not load " << d->mTilesDir << endl;
+	return;
+ }
+}
 
 
 class BosonCommandFrame::BosonCommandFramePrivate

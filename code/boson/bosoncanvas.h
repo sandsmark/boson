@@ -69,9 +69,15 @@ public:
 	BosonMap* map() const;
 
 	/**
+	 * Load the tileset. Note that you <em>must not</em> call @ref
+	 * slotAddCell before the tileset has been loaded completely!
+	 *
+	 * Also note that the actual loading happens in @ref slotLoadTiles using
+	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
+	 * use @ref QApplication::processEvents
 	 * @param tileFile currently always "earth.png
 	 **/
-	void initMap(const QString& tileFile);
+	void loadTiles(const QString& tileFile);
 
 	/**
 	 * Reimlemented from QCanvas::addAnimation because of @ref advance
@@ -218,6 +224,11 @@ protected:
 	virtual void drawForeground(QPainter&, const QRect&);
 
 protected slots:
+	/**
+	 * ad the tileset that has been specified using @ref loadTiles. We use
+	 * this slot to provide a non-blocking tile loading.
+	 **/
+	void slotLoadTiles();
 
 
 private:

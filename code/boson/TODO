@@ -42,6 +42,8 @@ Editor (map, unit, scenario) TODOs
   on. Maybe use plain docbook or so
 - use another options dialog. we MUST NOT provide the possibility to change the
   game speed!!
+- don't load BosonTiles twice: once for QCanvas::setTiles and once for
+  BoOrderWidget
 
 General TODOs
 - zooming (QCanvas::setWorldMatrix()) - mostly done
