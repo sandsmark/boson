@@ -106,6 +106,7 @@ private slots:
 	void slotShowChat();
 	void slotConfigureToolbars();
 	void slotMoveCommandFrame(int pos);
+	void slotDebugMode(int);
 
 private:
 	void initStatusBar();

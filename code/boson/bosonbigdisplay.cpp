@@ -29,6 +29,7 @@
 #include "kgamecanvaschat.h"
 #include "bosoncursor.h"
 #include "bosonmusic.h"
+#include "bosonconfig.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -211,7 +212,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 						d->mCursor->setCursor(CursorDefault);
 						d->mCursor->setWidgetCursor(this);
 					} else {
-						kdDebug() << "a" << endl;
+//						kdDebug() << "a" << endl;
 						d->mCursor->setCursor(CursorAttack);
 						d->mCursor->setWidgetCursor(this);
 					}
@@ -374,6 +375,23 @@ void BosonBigDisplay::selectArea()
 {
  if (!d->mSelectionRect) {
 	return;
+ }
+ if (boConfig->debugMode() == BosonConfig::DebugSelection) {
+	QCanvasItemList list;
+	list = d->mSelectionRect->collisions(true);
+	QCanvasItemList::Iterator it;
+	kdDebug() << "Selection count: " << list.count() << endl;
+	for (it = list.begin(); it != list.end(); ++it) {
+		QString s = QString("Selected: RTTI=%1").arg((*it)->rtti());
+		if (RTTI::isUnit((*it)->rtti())) {
+			Unit* u = (Unit*)*it;
+			s += QString(" Unit ID=%1").arg(u->id());
+			if (u->isDestroyed()) {
+				s += QString("(destroyed)");
+			}
+		}
+		kdDebug() << s << endl;
+	}
  }
  QCanvasItemList list;
  QCanvasItemList unitList;

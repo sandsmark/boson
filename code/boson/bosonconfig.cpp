@@ -37,6 +37,9 @@ public:
 	bool mSound;
 	bool mMusic;
 	int mCommandButtonsPerRow;
+
+	// don't save this to the config
+	DebugMode mDebugMode;
 };
 
 BosonConfig::BosonConfig(KConfig* conf)
@@ -47,6 +50,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  d->mSound = true;
  d->mMusic = true;
  d->mCommandButtonsPerRow = 3;
+ d->mDebugMode = DebugNormal;
 
  // load from config
  reset(conf);
@@ -259,4 +263,12 @@ void BosonConfig::save(bool editor, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
+void BosonConfig::setDebugMode(DebugMode m)
+{
+ d->mDebugMode = m;
+}
 
+BosonConfig::DebugMode BosonConfig::debugMode() const
+{
+ return d->mDebugMode;
+}
