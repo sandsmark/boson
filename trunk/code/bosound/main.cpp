@@ -23,10 +23,14 @@
 #include <kapplication.h>
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
 
 #include "boaudiothread.h"
 #include "boaudiocommand.h"
 #include "../boson/boversion.h"
+
+#include <config.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -60,6 +64,8 @@ int main(int argc, char **argv)
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KApplication app(false, false);
+
+ KGlobal::dirs()->addPrefix(BOSON_PREFIX);
 
  KCmdLineArgs* args = KCmdLineArgs::parsedArgs();
  if (args->isSet("commands")) {
