@@ -735,8 +735,11 @@ void BosonGLWidget::paintEvent(QPaintEvent*)
 	// tdfx driver) - dunno why.
 	int w = width();
 	int h = height();
+
+	makeCurrent();
 	resizeGL(w - 1, h - 1);
 	resizeGL(w, h);
+	resized = true;
  }
  slotUpdateGL();
 }
