@@ -6,9 +6,13 @@ Speed=7
 [Boson Unit]
 Armor=4
 ConstructedParticles=
-DestroyedParticles=1001,3001,6001
+DestroyedParticles=1001,6100
 ExplodingDamage=0
 ExplodingDamageRange=0
+ExplodingFragmentCount=10
+ExplodingFragmentHitParticles=2001
+ExplodingFragmentFlyParticles=5101,5110
+RemoveWreckageImmediately=true
 Health=200
 HitPoint=0,0,0.4
 Id=10005
