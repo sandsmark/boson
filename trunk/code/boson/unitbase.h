@@ -27,6 +27,7 @@ class QPoint;
 class QRect;
 class QDataStream;
 class KGamePropertyHandler;
+class QDomElement;
 
 class Player;
 class UnitProperties;
@@ -56,19 +57,16 @@ public:
 	 * go the save way).
 	 **/
 	enum PropertyIds {
+		// properties in UnitBase
 		IdHealth = KGamePropertyBase::IdUser + 0,
 		IdArmor = KGamePropertyBase::IdUser + 1,
 		IdShields = KGamePropertyBase::IdUser + 2,
-		IdId = KGamePropertyBase::IdUser + 3,
-		IdWork = KGamePropertyBase::IdUser + 6,
-		IdAdvanceWork = KGamePropertyBase::IdUser + 7,
-		IdSpeed = KGamePropertyBase::IdUser + 8,
-		IdWeaponDamage = KGamePropertyBase::IdUser + 9,
-		IdWeaponRange = KGamePropertyBase::IdUser + 10,
-		IdSightRange = KGamePropertyBase::IdUser + 12,
-		IdDeletionTimer = KGamePropertyBase::IdUser + 13,
-		IdReloadState = KGamePropertyBase::IdUser + 14,
-		//...
+		IdSightRange = KGamePropertyBase::IdUser + 3,
+		IdWork = KGamePropertyBase::IdUser + 10,
+		IdAdvanceWork = KGamePropertyBase::IdUser + 11,
+		IdDeletionTimer = KGamePropertyBase::IdUser + 15,
+
+		// last entry.
 		IdLast
 	};
 
@@ -98,6 +96,53 @@ public:
 	
 	UnitBase(const UnitProperties* prop);
 	virtual ~UnitBase();
+
+	/**
+	 * Initialize static members
+	 **/
+	static void initStatic();
+
+	/**
+	 * Add a property ID to the list of properties. This must be done before
+	 * calling @ref registerData.
+	 * @param id A <em>unique</em> property ID - you must ensure that one
+	 * unit never uses two identical ids.
+	 * @param name The name of the property. Will be used in the debug
+	 * dialog as well as e.g. in the scenario files. This name must be
+	 * unique as well!
+	 **/
+	static void addPropertyId(int id, const QString& name);
+
+	/**
+	 * @return The id of the specified property name. Or -1 if not found.
+	 * See @ref addPropertyId.
+	 **/
+	static int propertyId(const QString& name);
+
+	/**
+	 * @return A name for the specified property id or QString::null if not
+	 * found. See also @ref addPropertyId
+	 **/
+	static QString propertyName(int id);
+
+	/**
+	 * Shortcut for
+	 * <pre>
+	 * prop->registerData(id, dataHandler(), KGamePropertyBase::PolicyLocal,
+	 * propertyName(id));
+	 * </pre>
+	 *
+	 * Note that you must call @ref addPropertyId before you are able to use
+	 * registerData!
+	 * @param prop The @ref KGamePropertyBase to be registered
+	 * @param id The PropertyId for the @ref KGamePropertyBase. This must be
+	 * unique for every property, i.e. a unit must never have two identical
+	 * property ids.
+	 * @param local If TRUE use @ref KGamePropertyBase::PolicyLocal,
+	 * otherwise @ref KGamePropertyBase::PolicyClean. Don't use FALSE here
+	 * unless you know what you're doing!
+	 **/
+	void registerData(KGamePropertyBase* prop, int id, bool local = true);
 
 	/**
 	 * Change what this unit is currently doing.
@@ -181,14 +226,14 @@ public:
 	 * The ID of the unit. This ID is unique for this game.
 	 * @return The uniuque ID of the unit
 	 **/
-	unsigned long int id() const;
+	unsigned long int id() const { return mId; }
 
 	/**
 	 * Set the ID of this unit. A ID must be unique for the owner, so it
 	 * must be ensured that a ID exists only once per player. Should be done
 	 * on construction only.
 	 **/
-	void setId(unsigned long int id);
+	void setId(unsigned long int id) { mId = id; }
 
 	unsigned long int shields() const;
 	void setShields(unsigned long int shields);
@@ -298,13 +343,25 @@ public:
 
 //	inline QValueList<BosonWeapon>* weapons()  { return &mWeapons; };
 
+	/**
+	 * Save this unit for a scenario file. Note that this may and will
+	 * change. Maybe it will save all values from the unit, maybe not -
+	 * we'll see.
+	 *
+	 * This function adds a new node for every @ref KGamePropertyBase entry
+	 * in the @ref dataHandler
+	 **/
+	virtual bool saveScenario(QDomElement& node);
 
 private:
 	Player* mOwner;
+	unsigned long int mId; // not a KGameProperty, to make saving to XML (i.e. scenario files) more easy.
+
+	class PropertyMap;
+	static PropertyMap* mPropertyMap;
 
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
-	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
 	KGameProperty<unsigned int> mDeletionTimer;
 	KGameProperty<unsigned long int> mHealth;
 	KGameProperty<unsigned int> mSightRange;

@@ -53,32 +53,27 @@ class Unit : public UnitBase, public BosonItem
 {
 public:
 	enum PropertyIds {
+		// properties in Unit
 		IdDirection = UnitBase::IdLast + 1,
 		IdWaypoints = UnitBase::IdLast + 2,
 		IdMoveDestX = UnitBase::IdLast + 3,
 		IdMoveDestY = UnitBase::IdLast + 4,
 		IdMoveRange = UnitBase::IdLast + 5,
-		IdMob_MovingFailed = UnitBase::IdLast + 20,
 
-// move to properties:
-		IdMob_ResourcesMined = UnitBase::IdLast + 21,
-		IdMob_ResourcesX= UnitBase::IdLast + 22,
-		IdMob_ResourcesY= UnitBase::IdLast + 23,
-		IdMob_HarvestingType = UnitBase::IdLast + 24,
+		// properties in MobileUnit
+		IdSpeed = UnitBase::IdLast + 50,
+		IdMovingFailed = UnitBase::IdLast + 51,
+		IdPathRecalculated = UnitBase::IdLast + 52,
 
+		// properties in Facility
+		IdConstructionState = UnitBase::IdLast + 100,
 
-		IdMob_PathRecalculated = UnitBase::IdLast + 25,
-		IdFix_ConstructionState = UnitBase::IdLast + 30,
-
-		IdUnitPropertyLast
-	};
-	enum PluginPropertyIds {
-		IdPlugin_Productions = IdUnitPropertyLast + 1,
-		IdPlugin_ProductionState = IdUnitPropertyLast + 2,
-		IdPlugin_RepairList = IdUnitPropertyLast + 10,
-//		IdPlugin_RepairAdvanceCounter = IdUnitPropertyLast + 11,
-
-		IdPluginProperyLast
+		// properties in UnitPlugins and derived classes
+		IdProductionState = UnitBase::IdLast + 300,
+		IdResourcesMined = UnitBase::IdLast + 301,
+		IdResourcesX = UnitBase::IdLast + 302,
+		IdResourcesY = UnitBase::IdLast + 303,
+		IdHarvestingType = UnitBase::IdLast + 304
 	};
 
 	enum AnimationModes {
@@ -95,6 +90,8 @@ public:
 
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
+
+	static void initStatic();
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
 
@@ -404,6 +401,8 @@ private:
 	class UnitPrivate;
 	UnitPrivate* d;
 	UnitPlugin* mCurrentPlugin; // TODO: save/load the current plugin
+
+	static bool mInitialized; // whether initStatic() was called or not
 
 	// now we come to the interesting slightly hackish performance part :-)
 	// we store a pointer to the advance*() method that is currently used.

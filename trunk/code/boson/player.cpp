@@ -239,13 +239,10 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  switch(prop->id()) {
-	case Unit::IdReloadState:
 	case UnitBase::IdHealth:
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:
-	case UnitBase::IdSpeed:
-	case UnitBase::IdWeaponRange:
-	case UnitBase::IdSightRange: 
+	case UnitBase::IdSightRange:
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
 		// will one day.
@@ -254,10 +251,6 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 	default:
 		// all other Unit IDs are not displayed in BosonUnitView so
 		// there is no need to emit a signal for them.
-		if (prop->id() < KGamePropertyBase::IdUser || prop->id() > Unit::IdUnitPropertyLast) {
-			// not a Unit property?? oops...
-			kdDebug() << k_funcinfo << "Unknown property ID " << prop->id() << endl;
-		}
 		break;
  }
 }

@@ -46,6 +46,8 @@
 
 #define TURN_STEP 5
 
+bool Unit::mInitialized = false;
+
 class Unit::UnitPrivate
 {
 public:
@@ -84,6 +86,9 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 		: UnitBase(prop),
 		BosonItem(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 {
+ if (!mInitialized) {
+	initStatic();
+ }
  d = new UnitPrivate;
  mCurrentPlugin = 0;
  mAdvanceFunction = &Unit::advanceNone;
@@ -95,16 +100,11 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  setWidth(prop->unitWidth());
  setHeight(prop->unitWidth());
 
- d->mDirection.registerData(IdDirection, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Direction");
- d->mWaypoints.registerData(IdWaypoints, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Waypoints");
- d->mMoveDestX.registerData(IdMoveDestX, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "MoveDestX");
- d->mMoveDestY.registerData(IdMoveDestY, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "MoveDestY");
- d->mMoveRange.registerData(IdMoveRange, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "MoveRange");
+ registerData(&d->mDirection, IdDirection);
+ registerData(&d->mWaypoints, IdWaypoints);
+ registerData(&d->mMoveDestX, IdMoveDestX);
+ registerData(&d->mMoveDestY, IdMoveDestY);
+ registerData(&d->mMoveRange, IdMoveRange);
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
@@ -154,6 +154,35 @@ Unit::~Unit()
  delete d;
 }
 
+void Unit::initStatic()
+{
+ // we initialize the properties for Unit, MobileUnit, Facility and the plugins
+ // here
+ // Unit
+ addPropertyId(IdDirection, QString::fromLatin1("Direction"));
+ addPropertyId(IdWaypoints, QString::fromLatin1("Waypoints"));
+ addPropertyId(IdMoveDestX, QString::fromLatin1("MoveDestX"));
+ addPropertyId(IdMoveDestY, QString::fromLatin1("MoveDestY"));
+ addPropertyId(IdMoveRange, QString::fromLatin1("MoveRange"));
+
+ // MobileUnit
+ addPropertyId(IdSpeed, QString::fromLatin1("Speed"));
+ addPropertyId(IdMovingFailed, QString::fromLatin1("MovingFailed"));
+ addPropertyId(IdPathRecalculated, QString::fromLatin1("PathRecalculated"));
+
+ // Facility
+ addPropertyId(IdConstructionState, QString::fromLatin1("ConstructionState"));
+
+ // UnitPlugin and derived classes
+ addPropertyId(IdProductionState, QString::fromLatin1("ProductionState"));
+ addPropertyId(IdResourcesMined, QString::fromLatin1("ResourcesMined"));
+ addPropertyId(IdResourcesX, QString::fromLatin1("ResourcesX"));
+ addPropertyId(IdResourcesY, QString::fromLatin1("ResourcesY"));
+ addPropertyId(IdHarvestingType, QString::fromLatin1("HarvestingType"));
+
+ mInitialized = true;
+}
+
 void Unit::select(bool markAsLeader)
 {
  if (isDestroyed()) {
@@ -194,11 +223,11 @@ void Unit::setTarget(Unit* target)
 	 d->mTarget = 0;
  }
  // Find weapon
- if(d->mTarget) {
+ if (d->mTarget) {
  kdDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
 	QPtrListIterator<BosonWeapon> it(d->mWeapons);
 	while (it.current()) {
-		if(it.current()->canShootAt(target)) {
+		if (it.current()->canShootAt(target)) {
 			kdDebug() << k_funcinfo << "Found weapon that can shoot at target, setting active weapon and returning" << endl;
 			d->mActiveWeapon = it.current();
 			return;
@@ -305,7 +334,7 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->addToCells(this);
  canvas()->unitMoved(this, oldX, oldY);
- if(smokeParticleSystem()) {
+ if (smokeParticleSystem()) {
 	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
  }
 }
@@ -679,7 +708,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
 //	kdDebug() << "gotta reload first" << endl;
 	return;
  }
- if(!w->canShootAt(target)) {
+ if (!w->canShootAt(target)) {
 	kdDebug() << k_funcinfo << "can't shoot at target!" << endl;
 	return;
  }
@@ -890,7 +919,7 @@ bool Unit::canShootAt(Unit *u)
 {
  QPtrListIterator<BosonWeapon> it(d->mWeapons);
  while (it.current()) {
-	if(it.current()->canShootAt(u)) {
+	if (it.current()->canShootAt(u)) {
 		return true;
 	}
 	++it;
@@ -926,12 +955,11 @@ public:
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
- d->mSpeed.registerData(IdSpeed, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Speed");
- d->mMovingFailed.registerData(IdMob_MovingFailed, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "MovingFailed");
- d->mPathRecalculated.registerData(IdMob_PathRecalculated, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "PathRecalculated");
+
+ registerData(&d->mSpeed, IdSpeed);
+ registerData(&d->mMovingFailed, IdMovingFailed);
+ registerData(&d->mPathRecalculated, IdPathRecalculated);
+
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
  d->mPathRecalculated.setLocal(0);
@@ -1293,8 +1321,9 @@ public:
 Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new FacilityPrivate;
- d->mConstructionState.registerData(IdFix_ConstructionState, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Construction State");
+
+ registerData(&d->mConstructionState, IdConstructionState);
+
  d->mConstructionState.setLocal(0);
 
 /* if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
@@ -1424,7 +1453,7 @@ void Facility::setFlamesParticleSystem(BosonParticleSystem* s)
 
 void Facility::deleteParticleSystems()
 {
-/* if(d->mFlamesParticleSystem) {
+/* if (d->mFlamesParticleSystem) {
 	delete d->mFlamesParticleSystem;
  }
  if (d->mSmokeParticleSystem) {

@@ -29,32 +29,38 @@
 
 #include <kdebug.h>
 
+#include <qdom.h>
+#include <qmap.h>
+
+UnitBase::PropertyMap* UnitBase::mPropertyMap = 0;
+
+// this is done this way in order to prevent including qmap.h in the header
+class UnitBase::PropertyMap : public QMap<int, QString>
+{
+};
+
 
 UnitBase::UnitBase(const UnitProperties* prop)
 {
+ if (!mPropertyMap) {
+	initStatic();
+ }
  mProperties = new KGamePropertyHandler();
  mProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
  mOwner = 0;
  mUnitProperties = prop; // WARNING: this might be 0 at this point! MUST be != 0 for Unit, but ScenarioUnit uses 0 here
 
 // PolicyLocal?
- mHealth.registerData(IdHealth, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Health");
- mArmor.registerData(IdArmor, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Armor");
- mShields.registerData(IdShields, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Shields");
- mId.registerData(IdId, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
- mSightRange.registerData(IdSightRange, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "SightRange");
- mWork.registerData(IdWork, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Work");
- mAdvanceWork.registerData(IdAdvanceWork, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "AdvanceWork");
- mDeletionTimer.registerData(IdDeletionTimer, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "DeletionTimer");
+ registerData(&mHealth, IdHealth);
+ registerData(&mArmor, IdArmor);
+ registerData(&mShields, IdShields);
+ registerData(&mSightRange, IdSightRange);
+ registerData(&mWork, IdWork);
+ registerData(&mAdvanceWork, IdAdvanceWork);
+ registerData(&mDeletionTimer, IdDeletionTimer);
  mDeletionTimer.setEmittingSignal(false);
+
+ mId = 0;
 
 
  mWork.setLocal((int)WorkNone);
@@ -62,7 +68,6 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mHealth.setLocal(0); // initially destroyed
  mShields.setLocal(0); // doesn't have any shields
  mArmor.setLocal(0); // doesn't have any armor
- mId.setLocal(0);
  mSightRange.setLocal(0);
  mDeletionTimer.setLocal(0);
 }
@@ -74,6 +79,59 @@ UnitBase::~UnitBase()
 // kdDebug() << k_funcinfo << " done" << endl;
 }
 
+void UnitBase::initStatic()
+{
+ delete mPropertyMap;
+ mPropertyMap = new PropertyMap;
+ addPropertyId(IdHealth, QString::fromLatin1("Health"));
+ addPropertyId(IdArmor, QString::fromLatin1("Armor"));
+ addPropertyId(IdShields, QString::fromLatin1("Shields"));
+ addPropertyId(IdSightRange, QString::fromLatin1("SightRange"));
+ addPropertyId(IdWork, QString::fromLatin1("Work"));
+ addPropertyId(IdAdvanceWork, QString::fromLatin1("AdvanceWork"));
+ addPropertyId(IdDeletionTimer, QString::fromLatin1("DeletionTimer"));
+}
+
+void UnitBase::registerData(KGamePropertyBase* prop, int id, bool local)
+{
+ if (!prop) {
+	kdError() << k_funcinfo << "NULL property" << endl;
+	return;
+ }
+ if (id < KGamePropertyBase::IdUser) {
+	kdWarning() << k_funcinfo << "ID < KGamePropertyBase::IdUser" << endl;
+	// do not return - might still work
+ }
+ QString name = propertyName(id);
+ if (name.isNull()) {
+	kdWarning() << k_funcinfo << "Invalid property name for " << id << endl;
+	// a name isn't strictly necessary, so don't return
+ }
+ prop->registerData(id, dataHandler(),
+		local ? KGamePropertyBase::PolicyLocal : KGamePropertyBase::PolicyClean,
+		name);
+}
+
+void UnitBase::addPropertyId(int id, const QString& name)
+{
+ if (mPropertyMap->contains(id)) {
+	kdError() << k_funcinfo << "Cannot add " << id << " twice!" << endl;
+	return;
+ }
+ if (mPropertyMap->values().contains(name)) {
+	kdError() << k_funcinfo << "Cannot add " << name << " twice!" << endl;
+	return;
+ }
+ mPropertyMap->insert(id, name);
+}
+
+QString UnitBase::propertyName(int id)
+{
+ if (!mPropertyMap->contains(id)) {
+	return QString::null;
+ }
+ return (*mPropertyMap)[id];
+}
 
 const QString& UnitBase::name() const
 {
@@ -88,16 +146,6 @@ unsigned long int UnitBase::shields() const
 unsigned long int UnitBase::armor() const
 {
  return mArmor;
-}
-
-void UnitBase::setId(unsigned long int id)
-{
- mId = id;
-}
-
-unsigned long int UnitBase::id() const
-{
- return mId;
 }
 
 void UnitBase::setArmor(unsigned long int a)
@@ -127,12 +175,14 @@ bool UnitBase::save(QDataStream& stream)
  // they might be one day..
  stream << (Q_UINT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
+ stream << (Q_UINT32)id();
  return ret;
 }
 
 bool UnitBase::load(QDataStream& stream)
 {
  Q_UINT32 typeId;
+ Q_UINT32 id;
  stream >> typeId;
  if (!speciesTheme()) {
 	kdError() << k_funcinfo << "NULL speciesTheme" << endl;
@@ -140,6 +190,8 @@ bool UnitBase::load(QDataStream& stream)
  }
  mUnitProperties = speciesTheme()->unitProperties(typeId);
  bool ret = dataHandler()->load(stream);
+ stream >> id;
+ mId = id;
  return ret;
 }
 
@@ -180,5 +232,46 @@ unsigned int UnitBase::deletionTimer() const
 const PluginProperties* UnitBase::properties(int pluginType) const
 {
  return unitProperties()->properties(pluginType);
+}
+
+bool UnitBase::saveScenario(QDomElement& unit)
+{
+ // FIXME: the unit ID still is a KGameProperty. Should be a normal integer (or
+ // we just don't save it here!)
+ if (!dataHandler()) {
+	kdError() << k_funcinfo << "NULL property handler" << endl;
+	return false;
+ }
+ bool ret = true;
+ QIntDict<KGamePropertyBase> dict = dataHandler()->dict();
+ QIntDictIterator<KGamePropertyBase> it(dict);
+ for (; it.current(); ++it) {
+	QString s = dataHandler()->propertyValue(it.current());
+	if (s == QString::null) {
+		// AB: we need to connect to
+		// KGamePropertyHandler::signalRequestValue if this ever
+		// happens!
+		kdWarning() << k_funcinfo << "Cannot save property "
+				<< it.current()->id() << "="
+				<< dataHandler()->propertyName(it.current()->id())
+				<< " to XML" << endl;
+		ret = false; // saving basically failed. we continue anyway, maybe we can use the rest
+		continue;
+	}
+	// AB: note that we mustn't use KGamePropertyHandler::propertyName() in
+	// the XML! We would save a lot of memory by clearing the names out of
+	// all properties
+//	QDomElement unit = parent.ownerDocument().createElement("Unit");
+	QDomElement property = unit.ownerDocument().createElement("Property");
+	property.setAttribute(QString::fromLatin1("Id"), QString::number(it.current()->id()));
+	// TODO: add an attribute with "name=..." - when loading first use the
+	// Id, and if it's not present use the name. would make files more
+	// readable. we need to write a propertyId->propertyName fuction, as we
+	// can't use propertyName() (see above)
+//	property.setAttribute(QString::fromLatin1("Name"), propertyName);
+
+	property.setAttribute(QString::fromLatin1("Value"), s);
+ }
+ return ret;
 }
 
