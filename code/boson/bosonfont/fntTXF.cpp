@@ -75,20 +75,35 @@ static void tex_make_mip_maps( GLubyte *image, int xsize,
     {
       for ( int y2 = 0 ; y2 < h2 ; y2++ )
       {
+        int x1   = x2 + x2;
+        int x1_1 = ( x1 + 1 ) % w1;
+        int y1   = y2 + y2;
+        int y1_1 = ( y1 + 1 ) % h1;
         for ( int c = 0 ; c < zsize ; c++ )
         {
-          int x1   = x2 + x2;
-          int x1_1 = ( x1 + 1 ) % w1;
-          int y1   = y2 + y2;
-          int y1_1 = ( y1 + 1 ) % h1;
+          int t1 = texels [ l1 ] [ (y1   * w1 + x1  ) * zsize + c ];
+          int t2 = texels [ l1 ] [ (y1_1 * w1 + x1  ) * zsize + c ];
+          int t3 = texels [ l1 ] [ (y1   * w1 + x1_1) * zsize + c ];
+          int t4 = texels [ l1 ] [ (y1_1 * w1 + x1_1) * zsize + c ];
 
-	  int t1 = texels [ l1 ] [ (y1   * w1 + x1  ) * zsize + c ];
-	  int t2 = texels [ l1 ] [ (y1_1 * w1 + x1  ) * zsize + c ];
-	  int t3 = texels [ l1 ] [ (y1   * w1 + x1_1) * zsize + c ];
-	  int t4 = texels [ l1 ] [ (y1_1 * w1 + x1_1) * zsize + c ];
-
-          texels [ l2 ] [ (y2 * w2 + x2) * zsize + c ] =
-                                           ( t1 + t2 + t3 + t4 ) / 4;
+          int t5 = (t1 + t2 + t3 + t4);
+          // AB: now t5/=4; would be the correct next statement.
+          // but then the mipmaps will look bad with small point sizes if you
+          // use white color.
+          // this can be solved by multiplying the values by 4, i.e. by not
+          // dividing by 4.
+#if 0
+          // AB: this is an alternative solution. but i think the results are
+          // not so good.
+          t5 /= 4;
+          t5 = QMAX(t5, t1);
+          t5 = QMAX(t5, t2);
+          if (t5 > 30) {
+            t5 *= 2;
+          }
+#endif
+          t5 = QMIN(t5, 255);
+          texels [ l2 ] [ (y2 * w2 + x2) * zsize + c ] = t5;
         }
       }
     }
@@ -225,16 +240,16 @@ int BofntTexFont::loadTXF( const char *fname, GLenum mag, GLenum min )
 
   for ( i = 0 ; i < num_glyphs ; i++ )
   {
-    glyph.ch = _fnt_readShort();
+    glyph.ch      = _fnt_readShort();
 
-    glyph.w = _fnt_readByte();
-    glyph.h = _fnt_readByte();
-    glyph.x_off = _fnt_readByte();
-    glyph.y_off = _fnt_readByte();
-    glyph.step = _fnt_readByte();
+    glyph.w       = _fnt_readByte();
+    glyph.h       = _fnt_readByte();
+    glyph.x_off   = _fnt_readByte();
+    glyph.y_off   = _fnt_readByte();
+    glyph.step    = _fnt_readByte();
     glyph.unknown = _fnt_readByte();
-    glyph.x = _fnt_readShort();
-    glyph.y = _fnt_readShort();
+    glyph.x       = _fnt_readShort();
+    glyph.y       = _fnt_readShort();
 
     setGlyph( (char) glyph.ch,
           (float)  glyph.step              / (float) max_height,
