@@ -21,6 +21,7 @@
 // this
 #include <qimage.h>
 #include <qfile.h>
+#include <stdlib.h>
 
 int nextPower2(int);
 void usage(const char* command);
