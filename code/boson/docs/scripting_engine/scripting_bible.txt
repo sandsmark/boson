@@ -95,10 +95,9 @@ over the years.  Hopefully the final result will be something that will
 challenge me even though I understand how it was built.
 
 1d) Overview
-First let me point out that the scripting engine can be thought of 3 different
-ways and will interact differently depending on how it is used... It has enough
-in common with the rest of the engine so that all scripting is better off
-developed in 1 package rather than 3 separt packages.
+The scripting engine will be the interface with the triggers, unit actions, and other scripting requirements... It will also work as the interface for the external AI system.
+
+The reason for it pulling double duty is that it will be the de facto language that scripters and game designers will use and it doesn't make sense to duplicate a lot of functionality with different designs.   Thus we provide an integrated system that has the same syntax both of game scripting and AI scripting.
 
 Triggers and Events vs AI Scripting
 Triggers and events are static actions that the game takes depending on a set of
@@ -116,9 +115,9 @@ as... This is where the majority of AI will take place.
 
 2) Scripting Engine Design
 2a) How the engine works
-Scripts are run as if each were a little program... The system needs to be able
-to stop a script at any time and run a different one, then come back to the
-original script...  So it needs to be a multi-tasking system.
+The script engine itself runs the same whether it is behaving as the trigger scripting system or it's working as an AI system...   The only difference is that the trigger script has a higher access level and can send commands to the other ai's.   To implement level designer customer scripting.
+
+Will have to build a scheduler and insure that each script gives up control to other scripts on an as needed basis.
 
 AI's need to be limited to a certain number of actions per turn, each action has
 a cost associated with it...  Therefore for an easy computer opponent may get 1
