@@ -194,6 +194,9 @@ class BoMatrix
       loadMatrix(matrix);
     }
 
+    /**
+     * Load the identity matrix (the "1" for matrices - M * identity = M)
+     **/
     void loadIdentity()
     {
       int i;
@@ -292,6 +295,14 @@ class BoMatrix
     {
       multiply(mat->data());
     }
+
+    /**
+     * Rotate around a specified axis. @p angle specifies the angle, i.e. how
+     * much it is rotated and x,y,z specify the axis.
+     *
+     * See also the OpenGL glRotate() which uses the same syntax.
+     **/
+    void rotate(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
 
     /**
      * Transform the vector @p input according to this matrix and put the result
