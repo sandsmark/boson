@@ -28,6 +28,8 @@
 #include "selectbox.h"
 #include "bosonmessage.h"
 
+#include <qfile.h>// FIXME: used for QFile::exist(). We should avoid this. implement different!
+
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
 
@@ -262,6 +264,7 @@ void Unit::moveTo(const QPoint& pos)
  d->mTarget = 0;
  moveTo(pos.x(), pos.y());
  if (waypointCount() > 0) {
+//	boCanvas()->play(sound(SoundOrderMove));
 	setWork(WorkMove);
 	setAnimated(true);
  }
@@ -402,6 +405,7 @@ void Unit::attackUnit(Unit* target)
 	stopAttacking();
 	return;
  }
+// boCanvas()->play(sound(SoundOrderAttack));
  if (!inRange(target)) {
 	if (!canvas()->allItems().contains(target)) {
 		kdDebug() << "Target seems to be destroyed!" << endl;
@@ -495,9 +499,40 @@ QCanvasItemList Unit::enemyUnitsInRange() const
  return enemy;
 }
 
-QString Unit::soundShoot() const
+QString Unit::sound(UnitSound sound) const
 {
- return speciesTheme()->themePath() + "sounds/shoot.wav";
+ QString fileName;
+ switch (sound) {
+	case SoundShoot:
+		fileName = QString::fromLatin1("sounds/shoot.wav");
+		break;
+	case SoundOrderMove:
+		// TODO: use // ("...move_%1.ogg").arg(kapp->random(number_of_existing_sounds))
+		fileName = QString::fromLatin1("sounds/order_move_0.ogg");
+		break;
+	case SoundOrderAttack:
+		fileName = QString::fromLatin1("sounds/order_attack_0.ogg");
+		break;
+	case SoundOrderSelect:
+		fileName = QString::fromLatin1("sounds/order_select_0.ogg");
+		break;
+	case SoundReportProduced:
+		fileName = QString::fromLatin1("sounds/report_produced_0.ogg");
+		break;
+	case SoundReportDestroyed:
+		fileName = QString::fromLatin1("sounds/report_destroyed_0.ogg");
+		break;
+	case SoundReportUnderAttack:
+		fileName = QString::fromLatin1("sounds/report_underattack_0.ogg");
+		break;
+
+ }
+ QString file = unitProperties()->unitPath() + fileName;
+ kdDebug() << file << endl;
+ if (QFile::exists(file)) {
+	return file;
+ }
+ return speciesTheme()->themePath() + fileName;
 }
 
 QValueList<Unit*> Unit::unitCollisions(bool exact) const

@@ -58,6 +58,7 @@ General TODOs
   released version. also remember to add a configure check for the fixed version
 - make cursors themeable again (quite easy cause we use BosonCursor for all of
   this)
+- remove QFile from unit.cpp
 
 Data TODOs
 - general sound (e.g. speech)

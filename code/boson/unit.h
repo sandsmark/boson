@@ -71,6 +71,17 @@ public:
 		NorthWest = 7
 		
 	};
+
+	enum UnitSound {
+		SoundShoot = 0,
+		SoundOrderMove = 1,
+		SoundOrderAttack = 2,
+		SoundOrderSelect = 3,
+		SoundReportProduced = 4,
+		SoundReportDestroyed = 5,
+		SoundReportUnderAttack = 6
+	};
+
 	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
 	virtual ~Unit();
 
@@ -142,13 +153,13 @@ public:
 	QCanvasItemList unitsInRange() const;
 	QCanvasItemList enemyUnitsInRange() const;
 
-	/**
-	 * @return The absolute filename to the shooting sound of this unit.
-	 **/
-	QString soundShoot() const;
-
 
 	unsigned int reloadState() const;
+
+	/**
+	 * @return The absolute filename to the specified sound.
+	 **/
+	QString sound(UnitSound sound) const;
 
 protected:
 	void shootAt(Unit* target);
