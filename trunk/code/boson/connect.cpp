@@ -176,7 +176,7 @@ switch(tag) {
 	// let's each object speaks
 		bocanvas->requestAction();
 	// latest message is MSG_TIME_CONFIRM
-		sendMsg(buffer, MSG_TIME_CONFIRM, sizeof(data->jiffies), data);
+		sendMsg(buffer, MSG_TIME_CONFIRM, MSG(data->jiffies) );
 		logf(LOG_COMM, "flush : jiffies++ : %u", jiffies);
 		buffer->flush();
 		bocanvas->update();		// QCanvas periodical rendering

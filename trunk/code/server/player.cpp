@@ -53,12 +53,12 @@ void Player::flush(void)
 	if (needFlushing) {
 		msg.mineral	= mineral;
 		msg.oil		= oil;
-		sendMsg(buffer, MSG_PERSO_RESSOURCES, sizeof(msg), &msg);
+		sendMsg(buffer, MSG_PERSO_RESSOURCES, MSG(msg) );
 	}
 	
 
 	/* synchro */
-	sendMsg(buffer, MSG_TIME_INCREASE, sizeof(jiffies), &jiffies);
+	sendMsg(buffer, MSG_TIME_INCREASE, MSG(jiffies) );
 	boAssert(lastConfirmedJiffies == (jiffies-1));
 
 	buffer->flush();	// actually send datas to the player

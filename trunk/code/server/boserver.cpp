@@ -231,7 +231,7 @@ switch(state) {
 			data->accepted.total_player = nbPlayer;
 			data->accepted.sizeX = map_width;;
 			data->accepted.sizeY = map_height;
-			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
+			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, MSG(data->accepted) );
 			break;
 			}
 		UNKNOWN_TAG(state);
@@ -246,7 +246,7 @@ switch(state) {
 			data->accepted.total_player = nbPlayer;
 			data->accepted.sizeX = map_height;
 			data->accepted.sizeY = map_width;;
-			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, sizeof(data->accepted), data);
+			sendMsg(player[playerId].buffer, MSG_DLG_ACCEPTED, MSG(data->accepted) );
 			if (nbPlayer == nbConnected) {
 
 				/* first of all : tell 'verybody that the game is beginning*/
@@ -265,7 +265,7 @@ switch(state) {
 				data->jiffies	= jiffies;
 				boAssert(jiffies == 1); ///orzel : well...
 				for(i=0; i<nbPlayer; i++) {
-				   sendMsg(player[i].buffer, MSG_TIME_INCREASE, sizeof(data->jiffies), data);
+				   sendMsg(player[i].buffer, MSG_TIME_INCREASE, MSG(data->jiffies) );
 				   player[i].buffer->flush();	// buffer is flushed, not the player->flush().
 				   }
 				}
@@ -326,12 +326,12 @@ switch(tag) {
 		fix = facility.find(data->shoot.target_key);
 		if (mob) {
 			/* shooting a mobile */
-			mob->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
+			mob->sendToKnown(MSG_UNIT_SHOOT, MSG(data->shoot) );
 			if (mob->shooted())		// must be last, cause then, mob must be irrelevant (unit has died)
 				mobile.remove(data->shoot.target_key);
 		} else if (fix) {
 			/* shooting a facility */
-			fix->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
+			fix->sendToKnown(MSG_UNIT_SHOOT, MSG(data->shoot) );
 			if (fix->shooted())		// must be last, cause then, fix must be irrelevant (unit has died)
 				facility.remove(data->shoot.target_key);
 		} else	logf(LOG_ERROR, "handleGameMessage : unexpected target_key in shootMsg_t : %d", data->shoot.target_key);
