@@ -101,6 +101,8 @@ protected:
 	 **/
 	int wrapAtPos(const GLubyte* string, int length) const;
 
+	int renderLine(int x, int y, const QString& text, int maxWidth, bool background = true);
+
 private:
 	QFont mFont;
 	QFontMetrics* mFontMetrics;

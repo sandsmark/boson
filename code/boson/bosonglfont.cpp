@@ -26,6 +26,7 @@
 #include <GL/glx.h>
 
 #include <qfont.h>
+#include <qstringlist.h>
 
 BosonGLFont::BosonGLFont(const QString& family)
 {
@@ -108,6 +109,17 @@ int BosonGLFont::height(const QString& text, int maxWidth)
 }
 
 int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth, bool background)
+{
+ int heightSum = 0;
+ QStringList lines = QStringList::split('\n', text);
+ QStringList::Iterator it;
+ for (it = lines.begin(); it != lines.end(); ++it) {
+	heightSum += renderLine(x, y - heightSum, *it, maxWidth, background);
+ }
+ return heightSum;
+}
+
+int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, bool background)
 {
  int w = width(text);
  const int len = text.length();
