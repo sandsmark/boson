@@ -66,6 +66,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"unitType", py_unitType, METH_VARARGS, 0 },
   { (char*)"unitWork", py_unitWork, METH_VARARGS, 0 },
   { (char*)"isUnitMobile", py_isUnitMobile, METH_VARARGS, 0 },
+  { (char*)"isUnitAircraft", py_isUnitAircraft, METH_VARARGS, 0 },
   { (char*)"canUnitShoot", py_canUnitShoot, METH_VARARGS, 0 },
   { (char*)"canUnitTypeShoot", py_canUnitTypeShoot, METH_VARARGS, 0 },
   { (char*)"canUnitProduce", py_canUnitProduce, METH_VARARGS, 0 },
@@ -836,6 +837,17 @@ PyObject* PythonScript::py_isUnitMobile(PyObject*, PyObject* args)
   }
 
   return Py_BuildValue((char*)"i", BosonScript::isUnitMobile(id) ? 1 : 0);
+}
+
+PyObject* PythonScript::py_isUnitAircraft(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::isUnitAircraft(id) ? 1 : 0);
 }
 
 PyObject* PythonScript::py_canUnitShoot(PyObject*, PyObject* args)

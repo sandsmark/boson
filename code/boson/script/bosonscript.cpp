@@ -602,6 +602,24 @@ bool BosonScript::isUnitMobile(int id)
   return u->isMobile();
 }
 
+bool BosonScript::isUnitAircraft(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return false;
+  }
+
+  return u->unitProperties()->isAircraft();
+}
+
 bool BosonScript::canUnitShoot(int id)
 {
   if(!game())
