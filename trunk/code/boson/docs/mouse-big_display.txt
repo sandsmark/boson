@@ -118,8 +118,14 @@ First of all there is one action that *always* needs to be done here:
 
 Modifiers:
 - None                          Do nothing (except that above).
+
+UPDATE: this isn't good. we use CTRL to force attack on a unit. imagine player
+presses CTRL, moves mouse to the position to attack and presses RMB. problem:
+now he had rotated the camera and fscked up his display. same about shift.
 - CTRL                          Rotate the view/camera?
 - Shift                         Zoom in/out?
+
+
 - Action locked                 Ignored. See above - the cursor might need to be
                                 updated to a different outlook, but otherwise
                                 this modifier does not influence the behavior of
@@ -250,6 +256,8 @@ Modifiers:
                                 We could use this for Ben's photoshop feature,
                                 i.e. the same as without Shift, but except
                                 selecting units we deselect them.    TODO
+                                (UPDATE: now we use Shift for deselecting
+                                units).
 - CTRL                          This is an action modifier, i.e. what it does
                                 depends on the performed action and it is used
                                 to configure that action. Usually instead of
@@ -260,7 +268,10 @@ Modifiers:
                                 actions.
 - MouseMove + CTRL              CTRL has the same effect here as for no
                                 modifier.
-- MouseMove + Shift             Currently unused.
+- MouseMove + Shift             Just as above with shift only - but this
+                                deselects all units in the selection rect.
+                                Note that selected units which are outside that
+                                rect must not be touched!
 - MouseMove + Shift + CTRL      The same as MouseMove + CTRL currently.
 - Shift + CTRL                  The same as CTRL, currently.
 - Action locked                 When the action is locked (i.e. the player
