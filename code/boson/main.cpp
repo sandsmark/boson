@@ -34,6 +34,8 @@ static const char *version = "v0.7pre";
 static KCmdLineOptions options[] =
 {
     { "nosound", I18N_NOOP("Disable Sounds"), 0 },
+    { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
+    { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
     { 0, 0, 0 }
 };
 
@@ -78,7 +80,12 @@ int main(int argc, char **argv)
 // } else {
 	widget->show();
 // }
-	
+
+ if (args->isSet("new")) {
+	widget->slotNewGame();
+ } else if (args->isSet("editor")) {
+	widget->slotStartEditor();
+}
  args->clear();
  return app.exec();
 }
