@@ -629,6 +629,8 @@ unsigned int HarvesterPlugin::unloadingSpeed() const
 
 BombingPlugin::BombingPlugin(Unit* owner) : UnitPlugin(owner)
 {
+ owner->registerData(&mPosX, Unit::IdBombingPosX);
+ owner->registerData(&mPosY, Unit::IdBombingPosY);
  mWeapon = 0;
  mPosX = 0;
  mPosY = 0;
@@ -743,6 +745,7 @@ void BombingPlugin::advance(unsigned int)
 MiningPlugin::MiningPlugin(Unit* owner) : UnitPlugin(owner)
 {
  mWeapon = 0;
+ owner->registerData(&mPlacingCounter, Unit::IdMinePlacingCounter);
  mPlacingCounter = 0;
 }
 
@@ -786,7 +789,7 @@ void MiningPlugin::advance(unsigned int)
 	// Don't place the mine immediately
 	if (mPlacingCounter > 0) {
 		boDebug() << k_funcinfo << "mPlacingCounter: " << mPlacingCounter << endl;
-		mPlacingCounter--;
+		mPlacingCounter = mPlacingCounter - 1;
 		return;
 	}
 
