@@ -25,12 +25,12 @@
 #include "unitproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
-#include "defines.h"
 #include "kgamecanvaschat.h"
 #include "bosoncursor.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "global.h"
+#include "defines.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -43,6 +43,8 @@
 #include <qpainter.h>
 #include <qbitmap.h>
 #include <qtimer.h>
+#include <qlabel.h>
+#include <qbitmap.h>
 
 #include "bosonbigdisplay.moc"
 
@@ -76,6 +78,9 @@ public:
 		mSelectionRect = 0;
 
 		mCursor = 0;
+
+		mMinerals = 0;
+		mOil = 0;
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
@@ -91,14 +96,12 @@ public:
 	
 	BosonCursor* mCursor;
 
-	QCanvasText* mMinerals;
-	QCanvasText* mOil;
+	QLabel* mMinerals;
+	QLabel* mOil;
 
 	bool mIsModified; // for editor mode
 
-
 	KGameCanvasChat* mChat;
-
 
 	QCanvasRectangle* mSelectionRect;
 };
@@ -112,6 +115,7 @@ BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
 {
  init();
 }
+
 BosonBigDisplay::BosonBigDisplay(QWidget* parent) : QCanvasView(parent)
 {
  init();
@@ -133,15 +137,11 @@ void BosonBigDisplay::init()
  connect(this, SIGNAL(contentsMoving(int, int)), 
 		this, SLOT(slotContentsMoving(int, int)));
 
- d->mMinerals = new QCanvasText(QString::null, canvas());
- d->mMinerals->setZ(Z_CANVASTEXT);
- d->mMinerals->setColor(white);
- d->mMinerals->show();
- d->mOil = new QCanvasText(QString::null, canvas());
- d->mOil->setZ(Z_CANVASTEXT);
- d->mOil->setColor(white);
- d->mOil->show();
-
+ d->mMinerals = new QLabel(this, "MineralsLabel", WX11BypassWM|WRepaintNoErase|WStaticContents);
+ d->mMinerals->hide();
+ d->mOil= new QLabel(this, "MineralsLabel", WX11BypassWM);
+ d->mOil->hide();
+ 
  d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
@@ -523,6 +523,11 @@ void BosonBigDisplay::resizeEvent(QResizeEvent* e)
  // FIXME: is width()/height() correct? rather the ones from viewport()!
  // use the same line as im resizeContents()!
  emit signalSizeChanged(width(), height());
+
+ int x = visibleWidth() - 5 - QMAX(d->mMinerals->width(), d->mOil->width());
+ d->mMinerals->move(x, 5);
+ d->mOil->move(x, d->mMinerals->y() + d->mMinerals->height() + 2);
+
  slotContentsMoving(contentsX(), contentsY());
 }
 
@@ -671,21 +676,49 @@ void BosonBigDisplay::resizeContents(int w, int h)
 
 void BosonBigDisplay::slotUpdateMinerals(int minerals)
 {
- d->mMinerals->setText(i18n("Minerals: %1").arg(minerals));
+ QString text = i18n("Minerals: %1").arg(minerals);
+ updateLabel(d->mMinerals, text);
 }
 
 void BosonBigDisplay::slotUpdateOil(int oil)
 {
- d->mOil->setText(i18n("Oil: %1").arg(oil));
+ QString text = i18n("Oil: %1").arg(oil);
+ updateLabel(d->mOil, text);
 }
 
-void BosonBigDisplay::slotContentsMoving(int x, int y)
+void BosonBigDisplay::updateLabel(QLabel* label, const QString& text)
 {
- d->mMinerals->move(x + visibleWidth() - 5 - d->mMinerals->boundingRect().width(), y + 5);
- d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
- canvas()->update();
+ QFont f;
+ f.setBold(true);
 
- d->mChat->move(x + 10, y + visibleHeight() - 10); // FIXME: hardcoded!
+ QFontMetrics metrics(f);
+ int w = metrics.width(text);
+ int h = metrics.height();
+ QPixmap pix(w, h);
+ QPainter p(&pix);
+ p.setFont(f);
+ p.setPen(Qt::white);
+ p.drawText(0, h, text);
+ p.end();
+
+ QBitmap mask(pix.width(), pix.height());
+ mask.fill(Qt::color0);
+ p.begin(&mask);
+ p.setFont(f);
+ p.setPen(Qt::color1);
+ p.drawText(0, h, text);
+ p.end();
+ 
+ label->resize(pix.width(), pix.height());
+ label->setMask(mask);
+ label->setPixmap(pix);
+ label->show();
+}
+
+void BosonBigDisplay::slotContentsMoving(int newx, int newy)
+{
+//TODO: use a QLabel here (just like d->mMinerals and d->mOil)
+ d->mChat->move(newx + 10, newy + visibleHeight() - 10); // FIXME: hardcoded!
 }
 
 bool BosonBigDisplay::isModified() const
@@ -761,3 +794,4 @@ void BosonBigDisplay::slotChangeCursor(int mode)
 
  }
 }
+
