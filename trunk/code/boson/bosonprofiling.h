@@ -24,59 +24,8 @@
 class QString;
 class QDataStream;
 class BosonProfilingDialog;
-
-/**
- * Information about the rendering times. Helper class for @ref BosonProfiling.
- *
- * We avoid functions here in order to make it as fast as possible
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class RenderGLTimes
-{
-public:
-	RenderGLTimes()
-	{
-		mClear = 0;
-		mCells = 0;
-		mUnits = 0;
-		mUnitCount = 0;
-		mMissiles = 0;
-		mParticles = 0;
-		mFOW = 0;
-		mText = 0;
-		mFunction = 0;
-	}
-	RenderGLTimes(const RenderGLTimes& c)
-	{
-		*this = c;
-	}
-	RenderGLTimes& operator=(const RenderGLTimes& c)
-	{
-		mClear = c.mClear;
-		mCells = c.mCells;
-		mUnits = c.mUnits;
-		mUnitCount = c.mUnitCount;
-		mMissiles = c.mMissiles;
-		mParticles = c.mParticles;
-		mFOW = c.mFOW;
-		mText = c.mText;
-		mFunction = c.mFunction;
-		return *this;
-	}
-
-	// remember to update operator= and default c'tor if you change
-	// something!
-	// also update operator>>() and operator<<() in the .cpp file
-	long int mClear;
-	long int mCells;
-	long int mUnits;
-	unsigned int mUnitCount;
-	long int mMissiles;
-	long int mParticles;
-	long int mFOW;
-	long int mText;
-	long int mFunction;
-};
+class RenderGLTimes;
+struct timeval;
 
 // note that there are several workarounds in this class to reduce the number of
 // #includes as far as possible. i want to be able to place this header to about
@@ -147,7 +96,6 @@ public:
 	void renderParticles(bool start);
 	void renderFOW(bool start);
 	void renderText(bool start);
-	void debugRender();
 
 	bool saveToFile(const QString& fileName);
 	bool loadFromFile(const QString& fileName);
@@ -162,5 +110,13 @@ private:
 
 	static BosonProfiling* mProfiling;
 };
+
+unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2);
+QDataStream& operator<<(QDataStream& s, const struct timeval& t);
+QDataStream& operator>>(QDataStream& s, struct timeval& t);
+QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t);
+QDataStream& operator>>(QDataStream& s, RenderGLTimes& t);
+
+
 
 #endif

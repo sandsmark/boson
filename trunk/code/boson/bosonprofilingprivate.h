@@ -17,31 +17,75 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#ifndef BOSONPROFILINGPRIVATE_H
+#define BOSONPROFILINGPRIVATE_H
+
 #include "bosonprofiling.h"
 
 #include <qmap.h>
 #include <qvaluelist.h>
+#include <qptrlist.h>
 
 #include <sys/time.h>
+
+/**
+ * Information about the rendering times. Helper class for @ref BosonProfiling.
+ *
+ * We avoid functions here in order to make it as fast as possible
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class RenderGLTimes
+{
+public:
+	RenderGLTimes()
+	{
+	}
+	unsigned long int dFunction() const { return compareTimes(mFunction[0], mFunction[1]); }
+	unsigned long int dClear() const { return compareTimes(mClear[0], mClear[1]); }
+	unsigned long int dCells() const { return compareTimes(mCells[0], mCells[1]); }
+	unsigned long int dUnits() const { return compareTimes(mUnits[0], mUnits[1]); }
+	unsigned long int dMissiles() const { return compareTimes(mMissiles[0], mMissiles[1]); }
+	unsigned long int dParticles() const { return compareTimes(mParticles[0], mParticles[1]); }
+	unsigned long int dFOW() const { return compareTimes(mFOW[0], mFOW[1]); }
+	unsigned long int dText() const { return compareTimes(mText[0], mText[1]); }
+
+	// we use array of size 2 - the first is the start time, the second the
+	// stop time. the difference of both is the consumed time then.
+
+	// remember to update operator>>() and operator<<() in the .cpp file if
+	// you change something here!
+	// something!
+	// also update operator>>() and operator<<() below!
+	struct timeval mFunction[2];
+	struct timeval mClear[2];
+	struct timeval mCells[2];
+	struct timeval mUnits[2];
+	struct timeval mMissiles[2];
+	struct timeval mParticles[2];
+	struct timeval mFOW[2];
+	struct timeval mText[2];
+	unsigned int mUnitCount;
+};
+
 
 class BosonProfiling::BosonProfilingPrivate
 {
 public:
 	BosonProfilingPrivate()
 	{
+		mCurrentRenderTimes = 0;
 	}
 	typedef QValueList<long int> TimesList;
 
 	struct timeval mTimeLoadUnit;
-	struct timeval mTimeRenderFunction; // entire function
-	struct timeval mTimeRenderPart; // a part of the function
 
 	QMap<unsigned long int, TimesList> mUnitTimes;
 
-	QValueList<RenderGLTimes> mRenderTimes;
-	RenderGLTimes mCurrentRenderTimes;
+	QPtrList<RenderGLTimes> mRenderTimes;
+	RenderGLTimes* mCurrentRenderTimes;
 
 	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
 };
 
+#endif
