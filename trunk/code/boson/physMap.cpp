@@ -132,21 +132,22 @@ void physMap::destroyFix(destroyedMsg_t &m)
 
 void physMap::move(moveMsg_t &m)
 {
-	mobile.find(m.key)->s_moveBy(m.dx, m.dy);
+	mobile.find(m.key)->s_moveBy(m.dx, m.dy, m.direction);
 }
 
 void physMap::requestAction(boBuffer *buffer)
 {
 	QIntDictIterator<playerMobUnit> mobIt(mobile);
 	//QIntDictIterator<playerFacility> fixIt(facility);
-	int		dx, dy;
+	int		dx, dy, dir;
 	bosonMsgData	data;
 
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
-		if (mobIt.current()->getWantedMove(dx,dy)){
+		if (mobIt.current()->getWantedMove(dx,dy,dir)){
 			data.move.key	= mobIt.currentKey();
 			data.move.dx	= dx;
 			data.move.dy	= dy;
+			data.move.direction = dir;
 			sendMsg(buffer, MSG_MOBILE_MOVE_R, sizeof(data.move), &data);
 			}
 		}

@@ -18,7 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <math.h>	//sqrt
+//#include <math.h>	// sqrt
+#include <stdlib.h>	// int abs(int);
 #include <assert.h>
 
 #include "playerUnit.h"
@@ -28,9 +29,15 @@
 #include "../map/map.h"
 #include "../common/log.h"
 
+
 /*
  * playerMobUnit
  */
+
+const static pos_x[12] = 
+	{  34,  77,  98,  94,  64,  17, -34, -77, -98, -94, -64, -17};
+const static pos_y[12] = 
+	{ -94, -64, -17, +34, +77, +98, +94, +64, +17, -34, -77, -98};
 
 playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *name=0L)
 	:mobUnit(msg,parent,name)
@@ -39,37 +46,89 @@ playerMobUnit::playerMobUnit(mobileMsg_t *msg, QObject* parent=0, const char *na
 {
 	z(Z_MOBILE);
 	moveTo(msg->x, msg->y);
+
+	asked_dx = asked_dy = 0;
 	
-	//direction = 10;
-	direction = 1;
+	turnTo(4); ///orzel : should be random
 }
 
-int playerMobUnit::getWantedMove(int &dx, int &dy)
+#define VECT_PRODUCT(dir) (pos_x[dir]*(ldy) - pos_y[dir]*(ldx))
+
+int playerMobUnit::getWantedMove(int &dx, int &dy, int &dir)
 {
+int ldx, ldy;
+int vp1, vp2, vp3;
+int newdir;
 
 switch(state){
 	default:
 		logf(LOG_ERROR, "playerMobUnit::getWantedMove : unknown state");
 		return 0;
 		break;
+
 	case MUS_NONE:
 		return 0;
 		break;
-	case MUS_MOVING:
-		dx = dest_x - x() ; dy= dest_y - y();
-		assert(dx!=0 || dy!=0);
-		double factor = (double) mobileProp[type].speed / sqrt((double)( dx*dx + dy*dy));
-		if (factor<1.) {
-//printf("\tfactor = %f\n", factor);
-			dx =(int) ((double)dx*factor);
-			dy =(int) ((double)dy*factor);
+
+	case MUS_TURNING:
+		assert(direction>=0); assert(direction<12);
+		ldx = dest_x - x(); ldy = dest_y - y();
+		vp1 = VECT_PRODUCT(direction);
+		// turning 
+		newdir =  (vp1<0)?getLeft():getRight();
+		vp2 = VECT_PRODUCT( newdir);
+		printf("vp1 = %d, vp2 = %d \n", vp1, vp2);
+		if ( (vp1<0 && vp2>0) || (vp1>0 && vp2<0) ) { // it's the end
+			newdir =   (abs(vp1) > abs(vp2))? newdir:direction;
+			state = MUS_MOVING;
+			//puts("going to MUS_MOVING");
 			}
-//printf("wanted : d(%d.%d) ... ", dx, dy);
-		asked_dx = dx; asked_dy = dy;
+		if (newdir != direction) {
+			turnTo(newdir); ///orzel : is this really useful
+			dx = dy = 0; dir = direction;
+			return 1;
+			}
+		turnTo(newdir); // turning anyway
+		return 0; // no move asked
+		break;
+
+	case MUS_MOVING:
+		ldx = dest_x - x() ; ldy= dest_y - y();
+		vp1 = VECT_PRODUCT(getLeft(2));
+		vp2 = VECT_PRODUCT(direction);
+		vp3 = VECT_PRODUCT(getRight(2));
+//		printf("vp1 = %d, ", vp1); printf("vp2 = %d, ", vp2); printf("vp3 = %d\n", vp3);
+		if ( abs(vp2) > abs(vp1) || abs(vp2) > abs(vp3)) // direction isn't optimal
+			turnTo ( ( abs(vp1) < abs(vp3) )? getLeft():getRight() ); // change it
+
+		if ( ( abs(ldx) + abs(ldy) ) < abs (mobileProp[type].speed) ) {
+			asked_dx = ldx; asked_dy = ldy;
+			}
+		dx = asked_dx ; dy = asked_dy; dir = direction;
 		return 1;
 		break;
 	}
 }
+
+
+void playerMobUnit::turnTo(int newdir)
+{
+//printf("turning from %d to %d\n", direction, newdir);
+	assert(newdir>=0); assert(newdir<12);
+	//if (direction==newdir) return;
+	direction = newdir;
+	asked_dx =  pos_x[direction];
+	asked_dy =  pos_y[direction];
+	double factor = (double) mobileProp[type].speed / 100.;
+	if (factor<1.) {
+		asked_dx =(int) ((double)asked_dx*factor);
+		asked_dy =(int) ((double)asked_dy*factor);
+		}
+	else logf(LOG_ERROR, "turnTo : unexpected mobileProp.speed..."); ///orzel : test should be removed
+
+	frame(direction);
+}
+
 
 int playerMobUnit::getWantedAction()
 {
@@ -80,19 +139,21 @@ int playerMobUnit::getWantedAction()
 
 
 /***** server orders *********/
-void playerMobUnit::s_moveBy(int dx, int dy)
+void playerMobUnit::s_moveBy(int dx, int dy, int dir)
 {
 //orzel : use some kind of fuel
 //printf("Moved  : d(%d.%d)\n", dx, dy);
 if ( who!=gpp.who_am_i) {
 	/* this not my unit */
 	moveBy(dx,dy);
+	direction = dir;
+	frame(direction);
 	return;
 	}
 
 /* else */
 
-if ( MUS_MOVING != state) {
+if ( MUS_MOVING != state && (dx!=0 || dy!=0) ) {
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy while not moving, ignored");
 	return;
 	}
@@ -101,14 +162,18 @@ if ( MUS_MOVING != state) {
 //printf("asked_dx = %d, asked_dy = %d\n", asked_dx, asked_dy);
 if (dx != asked_dx || dy != asked_dy)
 	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected dx,dy");
+if (dir != direction)
+	logf(LOG_ERROR, "playerMobUnit::s_moveBy : unexpected direction");
 
 moveBy(dx,dy);
+
 if (x()==dest_x && y()==dest_y) {
+	//puts("going to MUS_NONE");
 	state = MUS_NONE;
+	asked_dx = asked_dy = 0; // so that willBe returns the good position
 	logf(LOG_GAME_LOW, "mobile[%p] has stopped\n", this);
 	}
 
-asked_dx = asked_dy = 0; // so that willBe returns the good position
 }
 
 
@@ -121,10 +186,12 @@ asked_dx = asked_dy = 0; // so that willBe returns the good position
 void playerMobUnit::u_goto(int mx, int my) // not the same as QwSprite::moveTo
 {
 	dest_x = mx; dest_y = my;
-	if (x()!=dest_x || y()!=dest_y) state = MUS_MOVING;
+	if (x()==dest_x || y()==dest_y) return;
 
-	//printf("u_goto from %p, x.y = %d.%d, MOVING=%s\n", this, mx, my, (state==MUS_MOVING)?"yes":"no");
-	///orzel : moving across complicated environment algorithm
+	state = MUS_TURNING;
+	//puts("going to MUS_TURNING");
+
+///orzel : moving across complicated environment algorithm
 }
 
 
