@@ -282,10 +282,14 @@ bool writePropertiesList(QTextStream& cpp, QDomElement& root)
  // AB: atm all attributes of a Widgets or Widget tag are properties. if
  // that changes one day, we should consider placing the properties into a
  // separate child tag.
+ // (exception: ClassName is not a property)
  cpp << " properties.clear();\n";
  QDomNamedNodeMap attributes = root.attributes();
  for (unsigned int i = 0; i < attributes.count(); i++) {
 	QDomAttr a = attributes.item(i).toAttr();
+	if (a.name() == "ClassName") {
+		continue;
+	}
 	cpp << " properties.insert(\"" << a.name() << "\", \"" << a.value() << "\");\n";
  }
  return true;
