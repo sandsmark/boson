@@ -28,6 +28,7 @@
 #include "player.h"
 #include "boselection.h"
 #include "bodebug.h"
+#include "unit.h"
 
 #include <klocale.h>
 
@@ -495,3 +496,9 @@ void BoDisplayManager::addChatMessage(const QString& text)
  }
 }
 
+void BoDisplayManager::slotUnitRemoved(Unit* u)
+{
+ for(int i = 0; i < 10; i++) {
+	d->mSelectionGroups[i]->removeUnit(u);
+ }
+}

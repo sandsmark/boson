@@ -78,6 +78,8 @@ void BosonWidget::initDisplayManager()
  BosonWidgetBase::initDisplayManager();
  connect(cmdFrame(), SIGNAL(signalAction(int)),
 		displayManager(), SLOT(slotUnitAction(int)));
+ connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
+		displayManager(), SLOT(slotUnitRemoved(Unit*)));
 }
 
 void BosonWidget::initConnections()
