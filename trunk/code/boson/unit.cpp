@@ -744,7 +744,7 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 	range = d->mMoveRange;
  }
  int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(x / BO_TILE_SIZE);
+ int cellY = (int)(y / BO_TILE_SIZE);
  if (!canvas()->cell(cellX, cellY)) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return false;
