@@ -174,6 +174,11 @@ void BoMeshSorter::sortByMaxSize(QValueList<BoMeshSorter::Mesh>* meshes)
  for (it = meshes->begin(); it != meshes->end(); ++it) {
 	BoMeshSorter::Mesh mesh = *it;
 
+	if (!mesh.mesh) {
+		boError() << k_funcinfo << "NULL mesh" << endl;
+		continue;
+	}
+
 	// do some necessary calculations
 	mesh.mesh->calculateMaxMin();
 
@@ -695,11 +700,13 @@ void BosonModel::loadModel()
 	return;
  }
 
+ boDebug(100) << k_funcinfo << "calculate normals" << endl;
  QIntDictIterator<BoMesh> meshIt(d->mMeshes);
  for (; meshIt.current(); ++meshIt) {
 	meshIt.current()->calculateNormals();
  }
 
+ boDebug(100) << k_funcinfo << "merge arrays" << endl;
  mergeArrays();
  mergeMeshesInFrames();
  sortByDepth();
