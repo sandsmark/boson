@@ -91,7 +91,7 @@ QValueList<Unit*> BoItemList::units(bool collidingOnly, bool includeMoving, Unit
 			continue;
 		}
 		if (collidingOnly) {
-			if (!includeMoving && u->isMoving()) {
+			if (!includeMoving && u->movingStatus() != UnitBase::Standing) {
 				continue;
 			}
 			if (!forUnit || (!forUnit->isFlying() && !u->isFlying())) {
@@ -124,7 +124,7 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 			continue;
 		}
 		if (!includeMoving) {
-			if (u->isMoving()) {
+			if (u->movingStatus() != UnitBase::Standing) {
 				continue;
 			}
 		}
@@ -146,7 +146,7 @@ bool BoItemList::isOccupied(bool includeMoving) const
 	if (RTTI::isUnit((*it)->rtti())) {
 		Unit* u = (Unit*)*it;
 		if (!includeMoving) {
-			if (u->isMoving()) {
+			if (u->movingStatus() != UnitBase::Standing) {
 				continue;
 			}
 		}
@@ -174,7 +174,7 @@ void BoItemList::isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const
 		if (u->isFlying() != flying) {
 			continue;
 		}
-		if (u->isMoving()) {
+		if (u->movingStatus() != UnitBase::Standing) {
 			hasmoving = true;
 			hasany = true;
 			return;

@@ -19,6 +19,21 @@
 #ifndef BOSONPATH_H
 #define BOSONPATH_H
 
+/***  COMMON STUFF  ***/
+
+// When destination is reached (path ends) and unit should stop moving, we add
+//  point (PF_END_CODE; PF_END_CODE)
+#define PF_END_CODE -1
+// When path reaches next region and pathfinder has to be called again (to get
+//  low-level path to next region), we add point (PF_NEXT_REGION; PF_NEXT_REGION)
+#define PF_NEXT_REGION -2
+// When we can't go to destination, we add point (PF_CANNOT_GO; PF_CANNOT_GO)
+#define PF_CANNOT_GO -3
+
+
+
+/***  OLD PATHFINDER  ***/
+
 #include "global.h"
 
 #include <qvaluelist.h>
@@ -157,14 +172,6 @@ class BosonPath
 #include <qvaluelist.h>
 #include <qpoint.h>
 
-// When destination is reached (path ends) and unit should stop moving, we add
-//  point (PF_TNG_END_CODE; PF_TNG_END_CODE)
-#define PF_TNG_END_CODE -1
-// When path reaches next region and pathfinder has to be called again (to get
-//  low-level path to next region), we add point (PF_TNG_NEXT_REGION; PF_TNG_NEXT_REGION)
-#define PF_TNG_NEXT_REGION -2
-// When we can't go to destination, we add point (PF_TNG_CANNOT_GO; PF_TNG_CANNOT_GO)
-#define PF_TNG_CANNOT_GO -3
 
 // Cell passage costs
 // This shouldn't be used, as we shouldn't touch occupied cells

@@ -57,19 +57,10 @@ public:
 	enum PropertyIds {
 		// properties in Unit
 		IdWaypoints = UnitBase::IdLast + 2,
-		IdMoveDestX = UnitBase::IdLast + 3,
-		IdMoveDestY = UnitBase::IdLast + 4,
-		IdMoveRange = UnitBase::IdLast + 5,
 		IdWantedRotation = UnitBase::IdLast + 6,
-		IdMoveAttacking = UnitBase::IdLast + 7,
-		IdSearchPath = UnitBase::IdLast + 8,
-		IdSlowDownAtDestination = UnitBase::IdLast + 9,
 		IdPathPoints = UnitBase::IdLast + 10,
 
 		// properties in MobileUnit
-		IdMovingFailed = UnitBase::IdLast + 51,
-		IdPathRecalculated = UnitBase::IdLast + 52,
-		IdPathAge = UnitBase::IdLast + 53,
 
 		// properties in Facility
 		IdConstructionStep = UnitBase::IdLast + 100,
@@ -316,14 +307,16 @@ public:
 
 	// TODO: maybe make this protected?
 	/**
-	 * AB: docs are obsolete. The new pathfinder uses this method in a
-	 * different way than the old one did, so the behavior of this method is
-	 * totally undefined. Avoid calling it!
+	 * Internal moving method.
+	 * This is the most central method for having unit starting moving to specific
+	 * point. You shouldn't use this directly, but instead use 'client methods',
+	 * which will then call this one.
 	 *
-	 * @param attack Unused by the new pathfinder
-	 * @param slowDownAtDestination Unused by the new pathfinder
+	 * Moves unit's _center_ exactly to given position. If range is not 0, unit
+	 * will move until it's less that range _cells_ away from destination.
+	 * Destination is in canvas coords.
 	 **/
-	bool moveTo(float x, float y, int range = 0, bool attack = false, bool slowDownAtDestination = true);
+	bool moveTo(float x, float y, int range = 0);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -366,9 +359,46 @@ public:
 	 **/
 	virtual void setAdvanceWork(WorkType w);
 
+
+	/**
+	 * @return X-coordinate of unit's current destination (where it's moving).
+	 * If unit isn't moving, returned value is undefined.
+	 * Returned value is in canvas coordinates.
+	 **/
 	int destinationX() const;
+	/**
+	 * @return Y-coordinate of unit's current destination (where it's moving).
+	 * If unit isn't moving, returned value is undefined.
+	 * Returned value is in canvas coordinates.
+	 **/
 	int destinationY() const;
+	/**
+	 * @return Current moving range of the unit (how close to destination point it
+	 *  must move).
+	 * If unit isn't moving, returned value is undefined.
+	 * Returned value is in cell coordinates.
+		**/
 	int moveRange() const;
+
+	/**
+	 * @return Whether unit should attack any enemy units in range while moving.
+	 **/
+	bool moveAttacking() const;
+
+	/**
+	 * @return Whether unit should slow down (instead of immediately stopping)
+	 *  before moving destination is reached.
+	 **/
+	bool slowDownAtDestination() const;
+
+	/**
+	 * @return Current pathinfo structure for this unit.
+	 * Note that this is quite internal and shouldn't be used by anything else
+	 * than Unit and it's inheritants if possible.
+	 * It may be made protected later.
+	 **/
+	BosonPathInfo* pathInfo() const;
+
 
 	/**
 	 * @return TRUE if this unit is next to unit (i.e. less than one cell
@@ -457,26 +487,11 @@ protected:
 	 **/
 	virtual void advanceMoveCheck() { }
 
-	/**
-	 * @return Whether unit should attack any enemy units in range while moving
-	 **/
-	int moveAttacking() const;
-
-	int slowDownAtDestination() const;
-
-	/**
-	 * @return Whether new path should be searched
-	 **/
-	int searchPath() const;
-	void setSearchPath(int search);
-
 
 	/**
 	 * Resets internal pathfinder's info structure
 	 **/
 	void resetPathInfo();
-
-	BosonPathInfo* pathInfo() const;
 
 
 	/**
@@ -588,8 +603,6 @@ public:
 	 * How much unit should move, will be added to xspeed and yspeed.
 	 * (x; y) marks unit's current position
 	 *
-	 * This does nothing for the old pathfinder (i.e. if PATHFINDER_TNG is
-	 * not defined)
 	 * @return How much is moved (will be <= maxdist)
 	 **/
 	float moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
@@ -601,7 +614,6 @@ public:
 	 * turns to random direction and true, otherwise returns false.
 	 **/
 	bool checkPathPoint(const QPoint& p);
-	bool checkWaypoint(const QPoint& wp);
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

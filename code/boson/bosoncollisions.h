@@ -140,7 +140,7 @@ public:
 	 **/
 	bool cellsOccupied(const QRect& rect) const;
 
-	bool collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const;
+	QValueList<Unit*> collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const;
 
 private:
 	void init();

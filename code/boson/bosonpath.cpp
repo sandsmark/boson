@@ -417,7 +417,7 @@ bool BosonPath::findFastPath()
   {
     // Full path was found. If partial path was found, pathfinder will be
     //  automatically called again when there's no waypoint left.
-    path.append(QPoint(-1, -1));  // This means that end of path has been reached
+    path.append(QPoint(PF_END_CODE, PF_END_CODE));  // This means that end of path has been reached
   }
 
   //gettimeofday(&time2, 0);
@@ -694,9 +694,9 @@ bool BosonPath::findSlowPath()
 
     if(pathfound == FullPath || pathfound == AlternatePath)
     {
-      // Point with coordinates -1; -1 means that end of the path has been
+      // Point with coordinates PF_END_CODE; PF_END_CODE means that end of the path has been
       //  reached and unit should stop
-      path.append(QPoint(-1, -1));
+      path.append(QPoint(PF_END_CODE, PF_END_CODE));
     }
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
@@ -709,10 +709,10 @@ bool BosonPath::findSlowPath()
     boDebug(500) << "node.y=" << node.y << ",goaly=" << mGoaly << endl;
     boDebug(500) << "node.g=" << node.g << ",MAX_PATH_COST=" << MAX_PATH_COST << endl;
     // Path wasn't found
-    // If path wasn't found we add one point with coordinates -1; -1 to path.
+    // If path wasn't found we add one point with coordinates PF_END_CODE; PF_END_CODE to path.
     //  In Unit::advanceMove(), there is check for this and if coordinates are
     //  those, then moving is stopped
-    path.append(QPoint(-1, -1));
+    path.append(QPoint(PF_END_CODE, PF_END_CODE));
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Time elapsed: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
   }
@@ -1799,12 +1799,12 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     if(nextRegion && pathfound)
     {
       // We have reached next region
-      temp.append(QPoint(PF_TNG_NEXT_REGION, PF_TNG_NEXT_REGION));
+      temp.append(QPoint(PF_NEXT_REGION, PF_NEXT_REGION));
     }
     else
     {
       // We have reached destination (or nearest possible point from it)
-      temp.append(QPoint(PF_TNG_END_CODE, PF_TNG_END_CODE));
+      temp.append(QPoint(PF_END_CODE, PF_END_CODE));
     }
 
     // Copy temp path to real path vector
@@ -2902,14 +2902,12 @@ BosonPath2::PassabilityType BosonPath2::cellPassability(int x, int y)
 
 bool BosonPath2::cellOccupied(int x, int y)
 {
-  // TODO!!!
   return cell(x, y)->isLandOccupied();
 }
 
-float BosonPath2::cellCost(int, int)
+float BosonPath2::cellCost(int x, int y)
 {
-  // TODO!!!
-  return 1.0f;
+  return cell(x, y)->passageCost();
 }
 
 Cell* BosonPath2::cell(int x, int y)

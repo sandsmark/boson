@@ -310,13 +310,14 @@ BoItemList* BosonCollisions::collisions(const QPoint& pos) const
  return collisionsAtCell(pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
 }
 
-bool BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
+QValueList<Unit*> BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const
 {
  boDebug() << k_funcinfo << "v1: (" << v1.x() << "; " << v1.y() << "; " << v1.z() <<
 		");  v2: (" << v2.x() << "; " << v2.y() << "; " << v2.z() << ")" << endl;
+ QValueList<Unit*> units;
  if (!map()) {
 	BO_NULL_ERROR(map());
-	return false;
+	return units;
  }
 
  // Calculate rect in cell coordinates
@@ -339,7 +340,7 @@ bool BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, 
  // Make list of cells
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
-	return false;
+	return units;
  }
  QPtrVector<Cell> cells(size);
  int n = 0;
@@ -376,11 +377,11 @@ bool BosonCollisions::collisionsInBox(const BoVector3& v1, const BoVector3& v2, 
 			//boDebug() << "        " << k_funcinfo << "Checking for collision with item " << s << " with id " << ((Unit*)s)->id() << endl;
 			if (s->bosonCollidesWith(v1, v2)) {
 				// We have a collision
-				return true;
+				units.append((Unit*)s);
 			}
 		}
 	}
  }
- return false;
+ return units;
 }
 

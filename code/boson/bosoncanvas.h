@@ -352,7 +352,7 @@ public:
 	/**
 	 * Checks if any items, except exclude, collide with given box
 	 **/
-	bool collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
+	QValueList<Unit*> collisionsInBox(const BoVector3& v1, const BoVector3& v2, BosonItem* exclude) const { return collisions()->collisionsInBox(v1, v2, exclude); }
 
 	/**
 	 * @param pos The location where the unit should get placed.
