@@ -28,46 +28,65 @@
 
 /*****  BoParticleManager  *****/
 
+BoParticleManager::BoParticleManager()
+{
+  mParticlesDirty = true;
+  mViewportDirty = true;
+}
+
 void BoParticleManager::draw(QPtrList<BosonParticleSystem>* systems, const BoVector3& camera)
 {
   if(systems->count() == 0)
   {
     return;
   }
-  mCameraPos = camera;
-  clear();
-  // Add all particles to the list
   QPtrListIterator<BosonParticleSystem> it(*systems);
   BosonParticleSystem* s;
   float x, y, z;
   BosonParticle* p;
-  while((s = it.current()) != 0)
+  if(mParticlesDirty)
   {
-    ++it;
-    for(int i = 0; i < s->mMaxNum; i++)
+    mCameraPos = camera;
+    clear();
+    // Add all particles to the list
+    while((s = it.current()) != 0)
     {
-      if(s->mParticles[i].life > 0.0)
+      ++it;
+      for(int i = 0; i < s->mMaxNum; i++)
       {
-        p = &(s->mParticles[i]);
-        // Calculate distance from camera. Note that for performance reasons,
-        //  we don't calculate actual distance, but square of it.
-        x = p->pos.x() - mCameraPos.x();
-        y = p->pos.y() - mCameraPos.y();
-        z = p->pos.z() - mCameraPos.z();
-        p->distance = (x*x + y*y + z*z);
-        // Append to list
-        append(p);
+        if(s->mParticles[i].life > 0.0)
+        {
+          p = &(s->mParticles[i]);
+          // Calculate distance from camera. Note that for performance reasons,
+          //  we don't calculate actual distance, but square of it.
+          x = p->pos.x() - mCameraPos.x();
+          y = p->pos.y() - mCameraPos.y();
+          z = p->pos.z() - mCameraPos.z();
+          p->distance = (x*x + y*y + z*z);
+          // Append to list
+          append(p);
+        }
       }
     }
-  }
 
-  if(count() == 0)
+    if(count() == 0)
+    {
+      return;
+    }
+
+    // Sort the list
+    sort();
+    mParticlesDirty = false;
+  }
+  else
   {
-    return;
+    if(!mCameraPos.isEqual(camera))
+    {
+      // Shouldn't happen
+      boWarning() << k_funcinfo << "mParticlesDirty is false, but camera has moved" << endl;
+      mCameraPos = camera;
+    }
   }
-
-  // Sort the list
-  sort();
 
   // Call pre-draw methods
   it.toFirst();
