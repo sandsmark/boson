@@ -4,7 +4,11 @@
       The Boson Handbook
     </h1>
     <p>
-      <i>Revision 0.8 - 16rd of December, 2002</i>
+      <i>Revision 0.8 - 16rd of December, 2002</i><br>
+    <:
+    $gen_time = scalar(localtime());
+    print "\<i\>Generated at $gen_time\</i\>";
+    :>
     </p>
     <h3>
       What is this?
