@@ -350,8 +350,6 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::initializeGL()
 {
- glClearColor(0.0, 0.0, 0.0, 0.0);
-
  qglClearColor(Qt::black);
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
@@ -373,12 +371,13 @@ void BosonBigDisplayBase::initializeGL()
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
 {
+ d->mW = w;
+ d->mH = h;
+
+ kdDebug() << k_funcinfo << w << " " << h << endl;
  glViewport(0, 0, (GLsizei)w, (GLsizei)h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
-
- d->mW = w;
- d->mH = h;
 
  GLfloat fovY = d->mFovY * d->mZoomFactor;
  d->mAspect = (float)w / (float)h;
@@ -497,7 +496,7 @@ void BosonBigDisplayBase::paintGL()
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
-		
+
 	BosonSprite* item = *it;
 
 	GLfloat x = item->x() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
@@ -505,18 +504,25 @@ void BosonBigDisplayBase::paintGL()
 	GLfloat z = item->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 
 	glTranslatef(x, y, z); // AB: we can use the item->vertexPointer(), too!
-	
+
 	// FIXME!!! don't apply here, don't cast here
 	Unit* u = (Unit*)item;
 	if (item->displayList() == 0) {
 		GLuint list = u->speciesTheme()->displayList(u->type());
 		item->setDisplayList(list);
 	}
-	// FIXME: performance: we could create a displaylist that contains the selectbox and simply channe item->displayList()
+	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
 	glCallList(item->displayList());
+
 	if (item->isSelected()) {
+		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
+		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+		glPushMatrix();
+		glScalef(w, h, 1.0);
 		glCallList(item->selectBox()->displayList());
+		glPopMatrix();
 	}
 
 	glTranslatef(-x, -y, -z); 
@@ -1415,7 +1421,7 @@ void BosonBigDisplayBase::calcFPS()
 	d->mFps = d->mFramecount / ((now - d->mFpsTime) / 1000000.0);
 	d->mFpsTime = now;
 	d->mFramecount = 0;
-	kdDebug() << "FPS: " << d->mFps << endl;
+//	kdDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
  }
  d->mFramecount++;
 }

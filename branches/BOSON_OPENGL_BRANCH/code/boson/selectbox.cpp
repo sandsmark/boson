@@ -19,6 +19,8 @@
 
 #include "selectbox.h"
 
+#ifndef NO_OPENGL
+
 #include "bosontexturearray.h"
 
 #include <kdebug.h>
@@ -44,15 +46,15 @@ SelectBoxData::~SelectBoxData()
 GLuint SelectBoxData::list(double factor)
 {
  int list = (int)((POWER_LEVELS - 1) * factor);
- if (!mDisplayLists.contains(factor)) {
+ if (!mDisplayLists.contains(list)) {
 	loadBoxes();
-	if (!mDisplayLists.contains(factor)) {
+	if (!mDisplayLists.contains(list)) {
 		kdError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
 		return 0;
 	}
-	return mDisplayLists[factor];
+	return mDisplayLists[list];
  }
- return mDisplayLists[factor];
+ return mDisplayLists[list];
 }
 
 void SelectBoxData::loadBoxes()
@@ -67,23 +69,13 @@ void SelectBoxData::loadBoxes()
  QValueList<QImage> textureImages;
  glEnable(GL_TEXTURE_2D); // should already be enabled, cause we need it for units. just to be sure...
 
- for (int i = 0; i < POWER_LEVELS; i++) {
-	QImage image(BO_TILE_SIZE, 6, 32); // AB: the sizes are hardcoded. mipmaps might be VERY useful here!
-
-/*
-	// "scrollbar" - or rather "health bar"
-//	KPixmap pix(QPixmap(barWidth(3), barHeight())); // not working by any reason
-	KPixmap pix(QPixmap((int)barWidth(frames() - 1), barHeight()));
-	pix.fill(Qt::green);
-	KPixmapEffect::gradient(pix, Qt::red, Qt::green, 
-			KPixmapEffect::HorizontalGradient);
-	painter.drawPixmap(1, 1, pix);
-	*/
-
-	KImageEffect::gradient(image.size(), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
-	image = QGLWidget::convertToGLFormat(image);
-	textureImages.append(image);
- }
+// AB: the size is hardcoded. mipmaps might be VERY useful here!
+// FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
+// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
+// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
+ QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
+ image = QGLWidget::convertToGLFormat(image);
+ textureImages.append(image);
 
  mTextures = new BosonTextureArray(textureImages);
  if (!mTextures->texture(0)) {
@@ -92,24 +84,9 @@ void SelectBoxData::loadBoxes()
 
  for (unsigned int i = 0; i < POWER_LEVELS; i++) {
 	glNewList(list + i, GL_COMPILE);
-//		glPushMatrix();
-		glColor3f(1.0, 1.0, 1.0);
-		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_BLEND);
-		
 		drawCube();
-
-		glColor3f(1.0, 1.0, 1.0);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_BLEND);
-		glBindTexture(GL_TEXTURE_2D, mTextures->texture(i));
-		glBegin(GL_QUADS);
-			glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 1.0);
-			glTexCoord2f(0.0, 1.0); glVertex3f(0.0, 0.5, 1.0);
-			glTexCoord2f(1.0, 1.0); glVertex3f(0.5, 0.5, 1.0);
-			glTexCoord2f(1.0, 0.0); glVertex3f(0.5, 0.0, 1.0);
-		glEnd();
-//		glPopMatrix();
+		glBindTexture(GL_TEXTURE_2D, mTextures->texture(0));
+		drawHealthBar(i);
 	glEndList();
 	mDisplayLists.insert(i, list+i);
  }
@@ -117,8 +94,11 @@ void SelectBoxData::loadBoxes()
 
 void SelectBoxData::drawCube()
 {
+ glDisable(GL_TEXTURE_2D);
+ glDisable(GL_BLEND);
+ glLineWidth(2.0);
+		
 // FIXME: a lot of redundant vertices here!
-
  // bottom
  glBegin(GL_LINE_LOOP);
 	glVertex3f(0.0, 0.0, 0.0);
@@ -166,6 +146,81 @@ void SelectBoxData::drawCube()
 	glVertex3f(1.0, 1.0, 0.0);
 	glVertex3f(1.0, 0.0, 0.0);
  glEnd();
+
+ glLineWidth(1.0);
+ glEnable(GL_TEXTURE_2D);
+ glEnable(GL_BLEND);
+}
+
+void SelectBoxData::drawHealthBar(int frame)
+{
+ GLfloat texLength = ((float)frame) / (float)(POWER_LEVELS - 1);
+// double factor = (double)frame / (frames() - 1);
+// return (int)(boxWidth() * factor - 2); // -2: the white frame around the box
+ GLfloat length = 1.0 * texLength; // y-direction
+ GLfloat w = 0.15;
+ GLfloat h = 0.15; // height in z-direction
+ GLfloat depth = 0.15;
+// glDisable(GL_TEXTURE_2D);
+ glDisable(GL_BLEND);
+// FIXME: a lot of redundant vertices here!
+ glTranslatef(0.0, 0.0, 1.0 - h);
+
+ // bottom
+ glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, 0.0);
+ glEnd();
+ 
+ // top
+ glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, h);
+	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, h);
+ glEnd();
+
+ // left
+ glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(0.0, length, 0.0);
+ glEnd();
+
+ //right
+ glBegin(GL_QUADS);
+	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(w, 0.0, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, h);
+	glTexCoord2f(texLength, 0.0); glVertex3f(w, length, 0.0);
+ glEnd();
+
+
+ // front
+ glTexCoord2f(0.0, 0.0);
+ glBegin(GL_QUADS);
+	glVertex3f(0.0, length, 0.0);
+	glVertex3f(w, length, 0.0);
+	glVertex3f(w, length, h);
+	glVertex3f(0.0, length, h);
+ glEnd();
+
+ // back
+ glTexCoord2f(texLength, 0.0);
+ glBegin(GL_QUADS);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, length, 0.0);
+	glVertex3f(w, length, 0.0);
+	glVertex3f(w, 0.0, 0.0);
+ glEnd();
+
+ glTranslatef(0.0, 0.0, h - 1.0);
+ glColor3f(1.0, 1.0, 1.0);
+// glEnable(GL_TEXTURE_2D);
+ glEnable(GL_BLEND);
 }
 
 SelectBox::SelectBox(BosonSprite*, BosonCanvas*, bool groupLeader)
@@ -183,11 +238,15 @@ SelectBox::~SelectBox()
 void SelectBox::update(double div)
 {
  mDisplayList = mBoxData->list(div);
- kdDebug() << k_funcinfo << mDisplayList << endl;
 }
 
+#else
 
-//#ifdef NO_OPENGL // AB: FIXME
+ // TODO
+
+#endif // !NO_OPENGL
+
+
 #if 0
 #include <qpainter.h>
 #include <qbitmap.h>
@@ -392,4 +451,4 @@ void SelectBox::setFrame(int f)
 }
 
 
-#endif // NO_OPENGL
+#endif // 0
