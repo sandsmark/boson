@@ -185,6 +185,9 @@ protected slots:
 	void slotCameraPosChanged();
 	void slotUpChanged();
 
+protected:
+	virtual void updateMatrixWidget();
+
 private:
 	BoGLUCameraWidgetPrivate* d;
 };
