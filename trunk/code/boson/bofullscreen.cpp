@@ -146,7 +146,8 @@ void BoFullScreen::resizeToFullScreen(QWidget* w, int width, int height)
  }
  w->reparent(0, QWidget::WType_TopLevel |
 		QWidget::WStyle_Customize |
-		QWidget::WStyle_NoBorder
+		QWidget::WStyle_NoBorder |
+		QWidget::WDestructiveClose
 		/* | w->getWFlags() & 0xffff0000*/,
 		w->mapToGlobal(QPoint(0, 0)));
  w->resize(width, height);
@@ -165,7 +166,8 @@ void BoFullScreen::leaveFullScreen()
 	return;
  }
  BoFullScreen::enterOriginalMode();
- w->reparent(0, 0, QPoint(0, 0)); // TODO: wflags?
+ w->reparent(0, QWidget::WType_TopLevel | QWidget::WDestructiveClose,
+		QPoint(0, 0));
  w->show();
 }
 
