@@ -37,7 +37,7 @@ static char *logLevelName[] = {
 	"LAYER0   ",
 	};
 
-int logf(boLogLevel level, char *fmt, ...)
+int logf(boLogLevel level, const char *fmt, ...)
 {
 static int id = getpid();
 va_list args;
