@@ -302,8 +302,11 @@ public:
 	 **/
 	bool loadTiles() const { return mLoadTiles; }
 
-	float aiDelay() const { return mAIDelay; }
 	void setAiDelay(float delay) { mAIDelay = delay; }
+	float aiDelay() const { return mAIDelay; }
+
+	void setWantDirect(bool w) { mWantDirect = w; }
+	bool wantDirect() const { return mWantDirect; }
 
 public:
 	void save(bool editor = false, KConfig* conf = 0);
@@ -372,6 +375,7 @@ private:
 	DebugMode mDebugMode;
 	bool mLoadTiles;
 	float mAIDelay;
+	bool mWantDirect;
 };
 
 #endif

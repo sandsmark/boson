@@ -223,6 +223,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDisableSound = false;
  mLoadTiles = true;
  mAIDelay = 3.0;
+ mWantDirect = true;
 
  // load from config
  reset(conf);
