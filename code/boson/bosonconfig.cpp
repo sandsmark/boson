@@ -207,7 +207,8 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMagnificationFilter = new BoConfigIntEntry(this, "MagnificationFilter", DEFAULT_MAGNIFICATION_FILTER);
  mMinificationFilter = new BoConfigIntEntry(this, "MinificationFilter", DEFAULT_MINIFICATION_FILTER);
  mMipmapMinificationFilter = new BoConfigIntEntry(this, "MipmapMinificationFilter", DEFAULT_MIPMAP_MINIFICATION_FILTER);
- mAlignSelectionBoxes = new BoConfigBoolEntry(this, "AlignSelectionBoxes", true);
+ mAlignSelectionBoxes = new BoConfigBoolEntry(this, "AlignSelectionBoxes", DEFAULT_ALIGN_SELECTION_BOXES);
+ mRMBAction = new BoConfigIntEntry(this, "RMBAction", DEFAULT_RMB_ACTION);
 
  mDebugMode = DebugNormal;
 

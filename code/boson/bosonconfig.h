@@ -234,6 +234,8 @@ public:
 	void setMipmapMinificationFilter(int f) { mMipmapMinificationFilter->setValue(f); }
 	void setAlignSelectionBoxes(bool enable) { mAlignSelectionBoxes->setValue(enable); }
 	bool alignSelectionBoxes() const { return mAlignSelectionBoxes->value(); }
+	void setRMBAction(UnitAction action) { mRMBAction->setValue((int)action); }
+	UnitAction RMBAction() const { return (UnitAction)(mRMBAction->value()); }
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -316,6 +318,7 @@ private:
 	BoConfigIntEntry* mMinificationFilter;
 	BoConfigIntEntry* mMipmapMinificationFilter;
 	BoConfigBoolEntry* mAlignSelectionBoxes;
+	BoConfigIntEntry* mRMBAction;
 
 	// NOT stored to config file!
 	bool mDisableSound;

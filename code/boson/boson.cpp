@@ -315,9 +315,16 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveMove:
 	{
 		bool attack;
+		Q_UINT8 attackcode;
 		QPoint pos;
 		Q_UINT32 unitCount;
-		stream >> (Q_UINT8)attack;
+		stream >> attackcode;
+		if (attackcode == 0) {
+			attack = false;
+		} else {
+			attack = true;
+		}
+		boDebug() << "MOVING: " << k_funcinfo << "attack: " << attack << endl;
 		stream >> pos;
 		stream >> unitCount;
 		QPtrList<Unit> unitsToMove;

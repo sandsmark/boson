@@ -73,6 +73,13 @@ GeneralOptions::GeneralOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mCmdBackground->insertItem(i18n("None"));
  //TODO: display filename only... - not the complete path
  mCmdBackground->insertStringList(mCmdBackgrounds);
+
+ QHBox* hbox2 = new QHBox(this);
+ (void)new QLabel(i18n("RMB action"), hbox2);
+ mRMBAction = new QComboBox(hbox2);
+ mRMBAction->insertItem(i18n("Attack"), (int)ActionAttack);
+ mRMBAction->insertItem(i18n("Move"), (int)ActionMove);
+ mRMBAction->setCurrentItem((int)DEFAULT_RMB_ACTION);
 }
 
 GeneralOptions::~GeneralOptions()
@@ -95,6 +102,7 @@ void GeneralOptions::apply()
 	file = mCmdBackgrounds[mCmdBackground->currentItem() - 1];
  }
  emit signalCmdBackgroundChanged(file);
+ boConfig->setRMBAction((UnitAction)(mRMBAction->currentItem()));
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -114,6 +122,7 @@ void GeneralOptions::setDefaults()
  setGameSpeed(DEFAULT_GAME_SPEED);
  setMiniMapScale(DEFAULT_MINIMAP_SCALE);
  setCmdBackground(QString::null);
+ setRMBAction(DEFAULT_RMB_ACTION);
 }
 
 void GeneralOptions::setGameSpeed(int ms)
@@ -134,6 +143,11 @@ void GeneralOptions::setCmdBackground(const QString& file)
 	int index = mCmdBackgrounds.findIndex(file);
 	mCmdBackground->setCurrentItem(index + 1);
  }
+}
+
+void GeneralOptions::setRMBAction(UnitAction action)
+{
+ mRMBAction->setCurrentItem((int)action);
 }
 
 
