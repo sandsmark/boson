@@ -351,6 +351,11 @@ void Player::fog(int x, int y)
  if (!d->mMap) {
 	return;
  }
+ if (x + d->mMap->width() * y >= d->mFogged.size()) {
+	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mFogged.size() << ")" << endl;
+	return;
+ }
 //kdDebug() << k_funcinfo << x << "," << y << endl;
  d->mFogged.setBit(x + d->mMap->width() * y);
  // emit signal (actual fog on map + minimap)
@@ -365,6 +370,11 @@ void Player::unfog(int x, int y)
 	return;
  }
 //kdDebug() << k_funcinfo << x << "," << y << endl;
+ if (x + d->mMap->width() * y >= d->mFogged.size()) {
+	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mFogged.size() << ")" << endl;
+	return;
+ }
  d->mFogged.clearBit(x + d->mMap->width() * y);
  // emit signal (actual fog on map + minimap)
  // TODO: any way to emit only for the local player?
@@ -374,6 +384,11 @@ void Player::unfog(int x, int y)
 
 bool Player::isFogged(int x, int y) const
 {
+ if (x + d->mMap->width() * y >= d->mFogged.size()) {
+	kdError() << k_funcinfo << "x=" << x << ",y=" << y << " out of range ("
+			<< d->mFogged.size() << ")" << endl;
+	return true;
+ }
  return d->mFogged.at(x + d->mMap->width() * y);
 }
 
