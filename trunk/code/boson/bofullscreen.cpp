@@ -160,7 +160,9 @@ void BoFullScreen::leaveFullScreen()
 {
  BO_CHECK_NULL_RET(qApp);
  QWidget* w = qApp->mainWidget();
- BO_CHECK_NULL_RET(w);
+ if (!w) {
+	return;
+ }
  if (!w->isTopLevel()) {
 	boError() << k_funcinfo << "w must be a toplevel widget" << endl;
 	return;
