@@ -293,10 +293,10 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
 
 void BosonSound::play(int id)
 {
- kdDebug() << k_funcinfo << "id: " << id << endl;
  if (!boConfig->sound()) {
 	return;
  }
+ kdDebug() << k_funcinfo << "id: " << id << endl;
  BoPlayObject* p = d->mSounds[id];
  if (p && !p->isNull()) {
 	p->playFromBeginning();
