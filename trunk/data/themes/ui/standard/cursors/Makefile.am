@@ -1,6 +1,6 @@
-#cursors_DATA = move.png move.desktop attack.png attack.desktop default.png \
-#		default.desktop
-#EXTRA_DIST = $(cursors_DATA)
+cursors_DATA = move.png move.desktop attack.png attack.desktop default.png \
+		default.desktop
+EXTRA_DIST = $(cursors_DATA)
 
 cursorsdir = $(kde_datadir)/boson/themes/cursors
 
