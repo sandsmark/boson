@@ -308,6 +308,9 @@ public:
 	void setWantDirect(bool w) { mWantDirect = w; }
 	bool wantDirect() const { return mWantDirect; }
 
+	void setWireFrames(bool on) { mWireFrames = on; }
+	bool wireFrames() const { return mWireFrames; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -376,6 +379,7 @@ private:
 	bool mLoadTiles;
 	float mAIDelay;
 	bool mWantDirect;
+	bool mWireFrames;
 };
 
 #endif
