@@ -1,9 +1,0 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Repair Pad
-Id=9
-Health=200
-MineralCost=300
-Producer=10
-WeaponDamage=-10

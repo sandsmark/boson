@@ -1,8 +1,0 @@
-[Boson Unit]
-IsFacility=true
-TerrainType=0
-Name=Prison
-Id=11
-Health=200
-MineralCost=250
-Producer=10
