@@ -27,6 +27,7 @@
 
 class SpeciesTheme;
 class PluginProperties;
+class UpgradeProperties;
 
 class KSimpleConfig;
 
@@ -301,16 +302,35 @@ public:
 
 	QMap<int, QString> sounds() const { return mSounds; }
 
+	/**
+	 * @return List of all possible upgrades to this unit. Note that this
+	 * <em>does not</em> include technologies
+	 **/
+	QPtrList<UpgradeProperties> possibleUpgrades() const { return mUpgrades; }
+
+	/**
+	 * @return List of all not researched upgrades to this unit. Note that this
+	 * <em>does not</em> include technologies
+	 **/
+	QPtrList<UpgradeProperties> unresearchedUpgrades() const { return mNotResearchedUpgrades; }
+
+	void upgradeResearched(UpgradeProperties* upgrade) { mNotResearchedUpgrades.removeRef(upgrade); };
+
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
 	void loadFacilityProperties(KSimpleConfig* conf);
 	void loadAllPluginProperties(KSimpleConfig* conf);
 	void loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
 
+	void loadUpgrades(KSimpleConfig* conf);
+
 	void loadTextureNames(KSimpleConfig* conf);
 	void loadSoundNames(KSimpleConfig* conf);
 private:
 	SpeciesTheme* mTheme;
+
+	friend class UpgradePropertiesBase; // UpgradePropertiesBase::apply() modifies our private vars
+	void setSpeed(float speed); // Because speed is in MobileProperties
 
 	QString mName;
 	QString mUnitPath; // the path to the unit files
@@ -343,6 +363,9 @@ private:
 
 	QMap<QString, QString> mTextureNames;
 	QMap<int, QString> mSounds;
+
+	QPtrList<UpgradeProperties> mUpgrades;
+	QPtrList<UpgradeProperties> mNotResearchedUpgrades;
 };
 
 #endif

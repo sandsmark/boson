@@ -62,7 +62,8 @@ BOSON_SRC = \
 	bosonglfont.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
-	bosonmodeltextures.cpp
+	bosonmodeltextures.cpp \
+	upgradeproperties.cpp
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \

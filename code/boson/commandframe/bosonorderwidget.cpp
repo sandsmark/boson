@@ -89,10 +89,10 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceCell(int)),
 				this, SIGNAL(signalPlaceCell(int)));
-		connect(b, SIGNAL(signalProduceUnit(unsigned long int)),
-				this, SIGNAL(signalProduceUnit(unsigned long int)));
-		connect(b, SIGNAL(signalStopProduction(unsigned long int)),
-				this, SIGNAL(signalStopProduction(unsigned long int)));
+		connect(b, SIGNAL(signalProduce(ProductionType, unsigned long int)),
+				this, SIGNAL(signalProduce(ProductionType, unsigned long int)));
+		connect(b, SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
+				this, SIGNAL(signalStopProduction(ProductionType, unsigned long int)));
 	}
  }
  resetLayout();
@@ -127,26 +127,41 @@ void BosonOrderWidget::setButtonsPerRow(int b)
  resetLayout();
 }
 
-void BosonOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, Player* owner, Facility* factory)
+void BosonOrderWidget::setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory)
+{
+ QValueList<QPair<ProductionType, unsigned long int> > produceList;
+ QPair<ProductionType, unsigned long int> pair;
+ pair.first = type;
+ QValueList<unsigned long int>::Iterator it;
+ for(it = idList.begin(); it != idList.end(); it++) {
+	pair.second = *it;
+	produceList.append(pair);
+ }
+ setOrderButtons(produceList, owner, factory);
+}
+
+void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory)
 {
  ensureButtons(produceList.count());
  hideOrderButtons();
- unsigned long int unitType = 0;
+ unsigned long int id = 0;
+ ProductionType type = ProduceNothing;
  ProductionPlugin* production = 0;
  if (factory) {
 	production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 	if (!production) {
 		kdDebug() << k_funcinfo << "factory cannot produce" << endl;
 	} else if (production->hasProduction()) {
-		unitType = production->currentProduction();
+		type = production->currentProductionType();
+		id = production->currentProductionId();
 	}
  }
  for (unsigned int i = 0; i < produceList.count(); i++) {
-	d->mOrderButton[i]->setUnit(produceList[i], owner);
+	d->mOrderButton[i]->setProduction(produceList[i].first, produceList[i].second, owner);
 	d->mTopLayout->activate();
-	if (unitType > 0 && production) {
+	if (id > 0 && production) {
 		int count = production->productionList().contains(produceList[i]);
-		if (produceList[i] != unitType) {
+		if ((produceList[i].first != type) || (produceList[i].second != id)) {
 			d->mOrderButton[i]->setProductionCount(count);
 			d->mOrderButton[i]->setGrayOut(true);
 		} else {
@@ -277,8 +292,8 @@ void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonOrderButton* c = d->mOrderButton[i];
-	if (c->commandType() == BosonOrderButton::CommandUnit) {
-		if (c->unitType() == production->currentProduction()) {
+	if (c->commandType() == BosonOrderButton::CommandProduce) {
+		if ((c->productionType() == production->currentProductionType()) && (c->productionId() == production->currentProductionId())) {
 			c->advanceProduction(percentage);
 		}
 	}

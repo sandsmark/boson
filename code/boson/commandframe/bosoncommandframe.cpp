@@ -29,6 +29,7 @@
 #include "../pluginproperties.h"
 #include "../boselection.h"
 #include "../defines.h"
+#include "../upgradeproperties.h"
 
 #include <klocale.h>
 #include <kgameprogress.h>
@@ -181,10 +182,10 @@ void BosonCommandFrame::init()
  d->mUnitActions = new BoActionsWidget(unitDisplayBox());
 
 // the order buttons
- connect(orderWidget(), SIGNAL(signalProduceUnit(unsigned long int)),
-		this, SLOT(slotProduceUnit(unsigned long int)));
- connect(orderWidget(), SIGNAL(signalStopProduction(unsigned long int)),
-		this, SLOT(slotStopProduction(unsigned long int)));
+ connect(orderWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
+		this, SLOT(slotProduce(ProductionType, unsigned long int)));
+ connect(orderWidget(), SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
+		this, SLOT(slotStopProduction(ProductionType, unsigned long int)));
  connect(d->mUnitActions, SIGNAL(signalAction(int)),
 		this, SIGNAL(signalAction(int)));
 }
@@ -226,18 +227,39 @@ void BosonCommandFrame::setAction(Unit* unit)
 		return;
 	}
 	ProductionProperties* pp = (ProductionProperties*)selectedUnit()->properties(PluginProperties::Production);
-	QValueList<unsigned long int> produceList = selectedUnit()->speciesTheme()->productions(pp->producerList());
+	QValueList<QPair<ProductionType, unsigned long int> > produceList;
+
+	// Add units to production list
+	QValueList<unsigned long int> unitsList = selectedUnit()->speciesTheme()->productions(pp->producerList());
 	// Filter out things that player can't actually build (requirements aren't
 	//  met yet)
 	QValueList<unsigned long int>::Iterator it;
-	it = produceList.begin();
-	while(it != produceList.end()) {
-		if(!owner->canBuild(*it)) {
-			it = produceList.remove(it);
-		} else {
-			it++;
+	it = unitsList.begin();
+	while(it != unitsList.end()) {
+		if(owner->canBuild(*it)) {
+			QPair<ProductionType, unsigned long int> pair;
+			pair.first = ProduceUnit;
+			pair.second = *it;
+			produceList.append(pair);
+		}
+		it++;
+	}
+
+	// Add technologies to production list
+	QValueList<unsigned long int> techList = selectedUnit()->speciesTheme()->technologies(pp->producerList());
+	// Filter out things that player can't actually build (requirements aren't
+	//  met yet)
+	QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
+	for(tit = techList.begin(); tit != techList.end(); tit++) {
+		if((!selectedUnit()->speciesTheme()->technology(*tit)->isResearched()) && (owner->canResearchTech(*tit))) {
+			QPair<ProductionType, unsigned long int> pair;
+			pair.first = ProduceTech;
+			pair.second = *tit;
+			produceList.append(pair);
 		}
 	}
+
+	// Set buttons
 	orderWidget()->setOrderButtons(produceList, owner, (Facility*)unit);
 	orderWidget()->show();
  }

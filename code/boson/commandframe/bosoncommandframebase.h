@@ -21,6 +21,7 @@
 
 #include <qframe.h>
 #include <qvaluelist.h>
+#include "../global.h"
 
 class Unit;
 class UnitBase;
@@ -132,8 +133,8 @@ signals:
 	 * @param owner The local player. See @ref setLocalPlayer. Note that
 	 * this is (in game mode) the same as factory->owner()
 	 **/
-	void signalProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
-	void signalStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+	void signalProduce(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
+	void signalStopProduction(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner);
 
 	void signalPlaceUnit(unsigned long int unitType, Player* owner);
 
@@ -158,14 +159,14 @@ protected slots:
 
 
 	/**
-	 * Game mode only. Emit @ref signalProduceUnit.
+	 * Game mode only. Emit @ref signalProduce.
 	 **/
-	void slotProduceUnit(unsigned long int unitType);
+	void slotProduce(ProductionType type, unsigned long int id);
 
 	/**
 	 * Game mode only. Emit @ref signalStopProduction.
 	 **/
-	void slotStopProduction(unsigned long int unitType);
+	void slotStopProduction(ProductionType type, unsigned long int id);
 
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.

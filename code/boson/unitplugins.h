@@ -22,6 +22,8 @@
 #include <kgame/kgameproperty.h>
 #include <kgame/kgamepropertylist.h>
 
+#include "global.h"
+
 class Unit;
 class SpeciesTheme;
 class UnitProperties;
@@ -109,21 +111,30 @@ public:
 	}
 
 	/**
-	 * @return The unit type ID (see @ref UnitProperties::typeId) of the
+	 * @return The type ID (see @ref UnitProperties::typeId) of the
 	 * completed production (if any).
 	 **/
-	unsigned long int completedProduction() const;
+	unsigned long int completedProductionId() const;
+	ProductionType completedProductionType() const;
 
 	/**
-	 * @return The unit type ID of the current production. -1 if there is no
+	 * @return The type ID of the current production. -1 if there is no
 	 * production.
 	 **/
-	inline unsigned long int currentProduction() const
+	inline unsigned long int currentProductionId() const
 	{
 		if (!hasProduction()) {
 			return 0;
 		}
-		return mProductions.first();
+		return mProductions.first().second;
+	}
+
+	inline ProductionType currentProductionType() const
+	{
+		if (!hasProduction()) {
+			return ProduceNothing;
+		}
+		return mProductions.first().first;
 	}
 
 	/**
@@ -132,19 +143,19 @@ public:
 	void removeProduction(); // removes first item
 
 	/**
-	 * Remove first occurance of unitType in the production list. Does not
-	 * remove anything if unitType is not in the list.
+	 * Remove first occurance of type ID id in the production list. Does not
+	 * remove anything if id is not in the list.
 	 **/
-	void removeProduction(unsigned long int unitType);
+	void removeProduction(ProductionType type, unsigned long int id);
 
 	/**
-	 * Add unitType (see @ref UnitProprties::typeId) to the construction
-	 * list.
+	 * Add production of type and with id (see @ref UnitProprties::typeId) to the
+	 * construction list.
 	 **/
-	void addProduction(unsigned long int unitType);
+	void addProduction(ProductionType type, unsigned long int id);
 
-	QValueList<unsigned long int> productionList() const { return mProductions; }
-	bool contains(unsigned long int unitType) { return productionList().contains(unitType); }
+	QValueList<QPair<ProductionType, unsigned long int> > productionList() const { return mProductions; }
+	bool contains(ProductionType type, unsigned long int id); // { return productionList().contains(typeId); }
 
 	/**
 	 * @return The percentage of the production progress. 0 means the
@@ -157,7 +168,9 @@ public:
 	virtual void advance(unsigned int);
 
 private:
-	KGamePropertyList<unsigned long int> mProductions;
+//	KGamePropertyList<QPair<ProductionType, unsigned long int> > mProductions;
+	/// TODO: make this KGameProperty
+	QValueList<QPair<ProductionType, unsigned long int> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
 };
 

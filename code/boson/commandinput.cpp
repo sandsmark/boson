@@ -42,13 +42,13 @@ void CommandInput::setCommandFrame(BosonCommandFrameBase* f)
 	kdError() << k_funcinfo << "NULL command frame" << endl;
 	return;
  }
- connect(f, SIGNAL(signalProduceUnit(unsigned long int, UnitBase*, KPlayer*)),
-		this, SLOT(slotProduceUnit(unsigned long int, UnitBase*, KPlayer*)));
- connect(f, SIGNAL(signalStopProduction(unsigned long int, UnitBase*, KPlayer*)),
-		this, SLOT(slotStopProduction(unsigned long int, UnitBase*, KPlayer*)));
+ connect(f, SIGNAL(signalProduce(ProductionType, unsigned long int, UnitBase*, KPlayer*)),
+		this, SLOT(slotProduce(ProductionType, unsigned long int, UnitBase*, KPlayer*)));
+ connect(f, SIGNAL(signalStopProduction(ProductionType, unsigned long int, UnitBase*, KPlayer*)),
+		this, SLOT(slotStopProduction(ProductionType, unsigned long int, UnitBase*, KPlayer*)));
 }
 
-void CommandInput::slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner)
+void CommandInput::slotProduce(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
 	kdError() << k_funcinfo << "NULL player" << endl;
@@ -70,15 +70,17 @@ void CommandInput::slotProduceUnit(unsigned long int unitType, UnitBase* factory
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduce;
+ stream << (Q_UINT32)type;
  stream << (Q_UINT32)owner->id();
  stream << (Q_ULONG)factory->id();
- stream << (Q_UINT32)unitType;
+ stream << (Q_UINT32)id;
 
  QDataStream msg(b, IO_ReadOnly);
  sendInput(msg);
 }
 
-void CommandInput::slotStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner)
+
+void CommandInput::slotStopProduction(ProductionType type, unsigned long int id, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
 	kdError() << k_funcinfo << "NULL player" << endl;
@@ -100,9 +102,10 @@ void CommandInput::slotStopProduction(unsigned long int unitType, UnitBase* fact
  QByteArray b;
  QDataStream stream(b, IO_WriteOnly);
  stream << (Q_UINT32)BosonMessage::MoveProduceStop;
+ stream << (Q_UINT32)type;
  stream << (Q_UINT32)owner->id();
  stream << (Q_ULONG)factory->id();
- stream << (Q_UINT32)unitType;
+ stream << (Q_UINT32)id;
 
  QDataStream msg(b, IO_ReadOnly);
  sendInput(msg);

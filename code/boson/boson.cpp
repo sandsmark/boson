@@ -29,6 +29,8 @@
 #include "bosonscenario.h"
 #include "bosonstatistics.h"
 #include "bosonplayfield.h"
+#include "global.h"
+#include "upgradeproperties.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -479,13 +481,17 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveProduce:
 	{
+		Q_UINT32 productionType;
 		Q_UINT32 owner;
 		Q_ULONG factoryId;
-		Q_UINT32 unitType;
+		Q_UINT32 id;
+
+		stream >> productionType;
+
 		stream >> owner;
 		stream >> factoryId;
-		stream >> unitType;
-		
+		stream >> id;
+
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
@@ -496,53 +502,79 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << "Cannot find unit " << factoryId << endl;
 			break;
 		}
-		if (unitType <= 0) {
-			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
-			break;
-		}
-		const UnitProperties* prop = p->unitProperties(unitType);
-		if (!prop) {
-			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
-			break;
-		}
+
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// maybe not yet fully constructed
 			kdWarning() << k_lineinfo << factory->id() << " cannot produce" << endl;
 			break;
 		}
-		if (factory->currentPluginType() != UnitPlugin::Production) {
-			if (production->currentProduction() == unitType) {
-				// production was stopped - continue it now
-				factory->setPluginWork(UnitPlugin::Production);
-				emit signalUpdateProduction(factory);
+		if (id <= 0) {
+			kdError() << k_lineinfo << "Invalid id " << id << endl;
+			break;
+		}
+
+		unsigned long int mineralCost = 0, oilCost = 0;
+
+		if((ProductionType)productionType == ProduceUnit) {
+			// Produce unit
+			const UnitProperties* prop = p->unitProperties(id);
+			if (!prop) {
+				kdError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
 				break;
 			}
+			mineralCost = prop->mineralCost();
+			oilCost = prop->oilCost();
+		} else if((ProductionType)productionType == ProduceTech) {
+			// Produce technology
+			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
+			if (!prop) {
+				kdError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
+				break;
+			}
+			mineralCost = prop->mineralCost();
+			oilCost = prop->oilCost();
+		} else {
+			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
 		}
-		if (p->minerals() < prop->mineralCost()) {
+
+			if (factory->currentPluginType() != UnitPlugin::Production) {
+				if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
+					// production was stopped - continue it now
+					factory->setPluginWork(UnitPlugin::Production);
+					emit signalUpdateProduction(factory);
+					break;
+				}
+			}
+
+		if (p->minerals() < mineralCost) {
 			emit signalNotEnoughMinerals(p);
 			break;
 		}
-		if (p->oil() < prop->oilCost()) {
+		if (p->oil() < oilCost) {
 			emit signalNotEnoughOil(p);
 			break;
 		}
-		p->setMinerals(p->minerals() - prop->mineralCost());
-		p->setOil(p->oil() - prop->oilCost());
-		production->addProduction(unitType);
+		p->setMinerals(p->minerals() - mineralCost);
+		p->setOil(p->oil() - oilCost);
+		production->addProduction((ProductionType)productionType, (unsigned long int)id);
 		emit signalUpdateProduction(factory);
 		break;
 	}
 	case BosonMessage::MoveProduceStop:
 	{
 		kdDebug() << "MoveProduceStop" << endl;
+		Q_UINT32 productionType;
 		Q_UINT32 owner;
 		Q_ULONG factoryId;
-		Q_UINT32 unitType;
+		Q_UINT32 id;
+
+		stream >> productionType;
+
 		stream >> owner;
 		stream >> factoryId;
-		stream >> unitType;
-		
+		stream >> id;
+
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
@@ -553,33 +585,53 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << "Cannot find unit " << factoryId << endl;
 			break;
 		}
-		if (unitType <= 0) {
-			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
-			break;
-		}
-		const UnitProperties* prop = p->unitProperties(unitType);
-		if (!prop) {
-			kdError() << k_lineinfo << "NULL properties (EVIL BUG)" << endl;
-			break;
-		}
+
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 		if (!production) {
 			// should not happen here!
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
-		if (!production->contains(unitType)) {
-			kdDebug() << unitType << " is not in production queue" << endl;
+		if (!production->contains((ProductionType)productionType, (unsigned long int)id)) {
+			kdDebug() << k_lineinfo << "Production " << productionType << " with id "
+					 << id << " is not in production queue" << endl;
 			return true;
 		}
-		if (production->currentProduction() == unitType) {
+		if (id <= 0) {
+			kdError() << k_lineinfo << "Invalid id " << id << endl;
+			break;
+		}
+
+		unsigned long int mineralCost = 0, oilCost = 0;
+
+		if((ProductionType)productionType == ProduceUnit) {
+			const UnitProperties* prop = p->unitProperties(id);
+			if (!prop) {
+				kdError() << k_lineinfo << "NULL unit properties (EVIL BUG)" << endl;
+				break;
+			}
+			mineralCost = prop->mineralCost();
+			oilCost = prop->oilCost();
+		} else if((ProductionType)productionType == ProduceTech) {
+			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
+			if (!prop) {
+				kdError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
+				break;
+			}
+			mineralCost = prop->mineralCost();
+			oilCost = prop->oilCost();
+		} else {
+			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+		}
+
+		if ((production->currentProductionId() == id) && (production->currentProductionType() == (ProductionType)productionType)) {
 			if (factory->currentPluginType() == UnitPlugin::Production) {
 				// do not abort but just pause
 				factory->setWork(Unit::WorkNone);
 				emit signalUpdateProduction(factory);
 			} else {
-				p->setMinerals(p->minerals() + prop->mineralCost());
-				p->setOil(p->oil() + prop->oilCost());
+				p->setMinerals(p->minerals() + mineralCost);
+				p->setOil(p->oil() + oilCost);
 				production->removeProduction();
 				emit signalUpdateProduction(factory);
 			}
@@ -589,9 +641,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			//FIXME: money should be paid when the production is
 			//actually started! (currently it is paid as soon as an
 			//item is added to the queue)
-			p->setMinerals(p->minerals() + prop->mineralCost());
-			p->setOil(p->oil() + prop->oilCost());
-			production->removeProduction(unitType);
+			p->setMinerals(p->minerals() + mineralCost);
+			p->setOil(p->oil() + oilCost);
+			production->removeProduction((ProductionType)productionType, (unsigned long int)id);
 			emit signalUpdateProduction(factory);
 		}
 		break;
@@ -599,15 +651,25 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	case BosonMessage::MoveBuild:
 	{
 		kdDebug() << "MoveBuild" << endl;
+		Q_UINT32 productionType;
 		Q_ULONG factoryId;
 		Q_UINT32 owner;
 		Q_INT32 x;
 		Q_INT32 y;
+
+		stream >> productionType;
+
 		stream >> factoryId;
 		stream >> owner;
 		stream >> x;
 		stream >> y;
-		
+
+		// Only units are "built"
+		if((ProductionType)productionType != ProduceUnit) {
+			kdError() << k_funcinfo << "Invalid productionType: " << productionType << endl;
+			break;
+		}
+
 		Player* p = (Player*)findPlayer(owner);
 		if (!p) {
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
@@ -624,7 +686,11 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factory->id() << "cannot produce?!" << endl;
 			break;
 		}
-		int unitType = production->completedProduction();
+		if(production->completedProductionType() != ProduceUnit) {
+			kdError() << k_lineinfo << "not producing unit!" << endl;
+			break;
+		}
+		int unitType = production->completedProductionId();
 		kdDebug() << k_lineinfo 
 				<< "factory=" 
 				<< factory->id() 

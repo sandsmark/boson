@@ -303,12 +303,13 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
  }
  ProductionPlugin* production = (ProductionPlugin*)unit->plugin(UnitPlugin::Production);
  if (production) {
-	QValueList<unsigned long int> productions = production->productionList();
+	QValueList<QPair<ProductionType, unsigned long int> > productions = production->productionList();
 	for (unsigned int i = 0; i < productions.count(); i++) {
 		QListViewItem* item = new QListViewItem(d->mProduction);
 		item->setText(0, QString::number(i+1));
-		item->setText(1, QString::number(productions[i]));
+		item->setText(1, QString::number(productions[i].second));
 		item->setText(2, i18n("Ready")); // currently always ready
+		// TODO: also show ProductionType
 	}
  
  }

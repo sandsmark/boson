@@ -656,6 +656,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 	progress = 3000;
 	while (it.current()) {
 		loadUnitDatas(((Player*)it.current()), progress);
+		((Player*)it.current())->speciesTheme()->loadTechnologies();
 		++it;
 		progress += UNITDATAS_LOADINGFACTOR;
 	}

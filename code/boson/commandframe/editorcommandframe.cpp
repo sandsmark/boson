@@ -200,7 +200,7 @@ void EditorCommandFrame::placeMobiles(Player* owner)
 	return;
  }
  hideActions();
- orderWidget()->setOrderButtons(theme->allMobiles(), owner);
+ orderWidget()->setOrderButtons(ProduceUnit, theme->allMobiles(), owner);
  orderWidget()->show();
 }
 
@@ -216,7 +216,7 @@ void EditorCommandFrame::placeFacilities(Player* owner)
 	return;
  }
  hideActions();
- orderWidget()->setOrderButtons(theme->allFacilities(), owner);
+ orderWidget()->setOrderButtons(ProduceUnit, theme->allFacilities(), owner);
  orderWidget()->show();
 }
 

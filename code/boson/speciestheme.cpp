@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "bosonmodel.h"
 #include "sound/bosonmusic.h"
 #include "sound/bosonsound.h"
+#include "upgradeproperties.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -66,6 +67,7 @@ public:
 	}
 
 	QIntDict<UnitProperties> mUnitProperties;
+	QIntDict<TechnologyProperties> mTechnologies;
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<BosonModel> mUnitModels;
@@ -76,6 +78,8 @@ public:
 
 
 	bool mCanChangeTeamColor;
+
+	QMap<QString, QPixmap*> mUpgradePixmaps;
 };
 
 static int defaultColorIndex = 0;
@@ -96,6 +100,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
 {
  d = new SpeciesThemePrivate;
  d->mUnitProperties.setAutoDelete(true);
+ d->mTechnologies.setAutoDelete(true);
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mActionPixmaps.setAutoDelete(true);
@@ -123,6 +128,7 @@ void SpeciesTheme::reset()
  d->mSmallOverview.clear();
  d->mBigOverview.clear();
  d->mUnitProperties.clear();
+ d->mTechnologies.clear();
  d->mActionPixmaps.clear();
 }
 
@@ -278,6 +284,53 @@ bool SpeciesTheme::loadActionGraphics()
  }
  d->mActionPixmaps.insert((int)ActionRepair, repair);
 
+ return true;
+}
+
+QPixmap* SpeciesTheme::techPixmap(unsigned long int techType)
+{
+ return upgradePixmapByName(technology(techType)->pixmapName());
+}
+
+QPixmap* SpeciesTheme::upgradePixmapByName(QString name)
+{
+ if(!d->mUpgradePixmaps[name]) {
+	QPixmap* p = new QPixmap(themePath() + "pixmaps/" + name);
+	if(p->isNull()) {
+		kdError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
+		// Will crash?
+	}
+	d->mUpgradePixmaps[name] = p;
+ }
+ return d->mUpgradePixmaps[name];
+}
+
+bool SpeciesTheme::loadTechnologies()
+{
+ QFile f(themePath() + "technologies.desktop");
+ if(!f.exists()) {
+	kdWarning() << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
+	// We assume that this theme has no technologies and still return true
+	return true;
+ }
+ KSimpleConfig cfg(f.name());
+ QStringList techs = cfg.groupList();
+ if(techs.isEmpty()) {
+	kdWarning() << k_funcinfo << "No technologies found in technologies file (" << f.name() << ")" << endl;
+	return true;
+ }
+ QStringList::Iterator it;
+ for(it = techs.begin(); it != techs.end(); ++it) {
+	kdDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
+	TechnologyProperties* tech = new TechnologyProperties;
+	cfg.setGroup(*it);
+	tech->load(&cfg);
+	if (!d->mTechnologies.find(tech->id())) {
+		d->mTechnologies.insert(tech->id(), tech);
+	} else {
+		kdError() << k_funcinfo << "Technology with id " << tech->id() << " already there!" << endl;
+	}
+ }
  return true;
 }
 
@@ -626,6 +679,32 @@ const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) c
  return d->mUnitProperties[unitType];
 }
 
+UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType) const
+{
+ if (unitType <= 0) {
+	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
+	return 0;
+ }
+ if (!d->mUnitProperties[unitType]) {
+	kdError() << k_lineinfo << "oops - no unit properties for " << unitType << endl;
+	return 0;
+ }
+ return d->mUnitProperties[unitType];
+}
+
+TechnologyProperties* SpeciesTheme::technology(unsigned long int techType) const
+{
+ if (techType <= 0) {
+	kdError() << k_funcinfo << "invalid technology type " << techType << endl;
+	return 0;
+ }
+ if (!d->mTechnologies[techType]) {
+	kdError() << k_lineinfo << "oops - no technology properties for " << techType << endl;
+	return 0;
+ }
+ return d->mTechnologies[techType];
+}
+
 QValueList<unsigned long int> SpeciesTheme::allFacilities() const
 {
  QValueList<unsigned long int> list;
@@ -659,6 +738,39 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producer
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
 		list.append(it.current()->typeId());
+	}
+	++it;
+ }
+ return list;
+}
+
+/*QValueList<unsigned long int> SpeciesTheme::upgrades(QValueList<int> producers) const
+{
+ QPtrList<UpgradeProperties> list;
+ QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ while (it.current()) {
+	QValueList<TechnologyProperties>::Iterator uit(it.current()->unresearchedUpgrades());
+	while (*uit) {
+		if (producers.contains((*uit)->producer())) {
+			list.append(*uit);
+		}
+		++it;
+	}
+//	if (producers.contains(it.current()->producer())) {
+//		list.append(it.current()->typeId());
+//	}
+	++it;
+ }
+ return list;
+}*/
+
+QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<int> producers) const
+{
+ QValueList<unsigned long int> list;
+ QIntDictIterator<TechnologyProperties> it(d->mTechnologies);
+ while (it.current()) {
+	if (producers.contains(it.current()->producer())) {
+		list.append(it.current()->id());
 	}
 	++it;
  }
@@ -790,3 +902,12 @@ void SpeciesTheme::loadGeneralSounds()
  sound()->addSounds(themePath(), sounds);
 }
 
+QIntDict<TechnologyProperties> SpeciesTheme::technologyList() const
+{
+ return d->mTechnologies;
+}
+
+void SpeciesTheme::upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade)
+{
+ d->mUnitProperties[unitType]->upgradeResearched(upgrade);
+}

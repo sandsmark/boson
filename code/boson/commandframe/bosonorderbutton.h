@@ -43,7 +43,7 @@ public:
 	enum CommandType {
 		CommandNothing = 0,
 		CommandCell = 1,
-		CommandUnit = 2,
+		CommandProduce = 2,
 		CommandUnitSelected = 3,
 		CommandAction = 4
 	};
@@ -59,7 +59,7 @@ public:
 	 * Shows only small overview pixmap of unit with type unitType
 	 * This is used to show units that factory can produce
 	 **/
-	void setUnit(unsigned long int unitType, Player* owner);
+	void setProduction(ProductionType type, unsigned long int id, Player* owner);
 
 	/**
 	 * Shows pixmap of action
@@ -79,12 +79,17 @@ public:
 	}
 
 	/**
-	 * @return The unitType that is displayed or 0 if none. See also @ref
+	 * @return The production id that is displayed or 0 if none. See also @ref
 	 * tile and @ref unit
 	 **/
-	unsigned long int unitType() const
+	unsigned long int productionId() const
 	{
-		return (commandType() == CommandUnit) ? mUnitType : 0;
+		return (commandType() == CommandProduce) ? mProductionId : 0;
+	}
+
+	ProductionType productionType() const
+	{
+		return (commandType() == CommandProduce) ? mProductionType : ProduceNothing;
 	}
 
 	/**
@@ -104,7 +109,7 @@ public:
 	 **/
 	Player* productionOwner() const 
 	{ 
-		return (commandType() == CommandUnit) ? mProductionOwner : 0;
+		return (commandType() == CommandProduce) ? mProductionOwner : 0;
 	}
 
 	/**
@@ -157,9 +162,9 @@ signals:
 	 * selected factory (aka facility).
 	 * @param unitType The unit type that is to be produced
 	 **/
-	void signalProduceUnit(unsigned long int unitType);
+	void signalProduce(ProductionType type, unsigned long int id);
 
-	void signalStopProduction(unsigned long int unitType);
+	void signalStopProduction(ProductionType type, unsigned long int id);
 
 	/**
 	 * Emitted when the player clicks on the action
@@ -169,13 +174,14 @@ signals:
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
+	virtual void displayTechPixmap(unsigned long int techType, Player* owner);
 
 	void setPixmap(const QPixmap& pixmap);
 
 protected slots:
 	void slotClicked();
 	void slotRightClicked();
-	
+
 private:
 	friend class BoToolTip;
 
@@ -185,7 +191,8 @@ private:
 
 	Unit* mUnit;
 	// FIXME: use only one int for all command modes
-	unsigned long int mUnitType;
+	unsigned long int mProductionId;
+	ProductionType mProductionType;
 	int mTileNumber;
 	int mAction;
 	CommandType mCommandType;

@@ -28,6 +28,7 @@ class SpeciesTheme;
 class UnitProperties;
 class BosonMap;
 class BosonStatistics;
+class ProductionPlugin;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -134,10 +135,24 @@ public:
 	bool canBuild(unsigned long int unitType) const;
 
 	/**
+	 * @return TRUE if this player can research technology with id id, FALSE
+	 * otherwise
+	 **/
+	bool canResearchTech(unsigned long int id) const;
+
+	/**
 	 * @return TRUE if player has <em>constructed</em> (if it is a facility) unit 
 	 * with type type, FALSE otherwise
 	 **/
 	bool hasUnitWithType(unsigned long int type) const;
+
+	/**
+	 * @return TRUE if player has <em>researched</em> technology
+	 * with id id, FALSE otherwise
+	 **/
+	bool hasTechnology(unsigned long int id) const;
+
+	void technologyResearched(ProductionPlugin* factory, unsigned long int id);
 
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);

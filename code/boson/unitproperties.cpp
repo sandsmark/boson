@@ -21,6 +21,7 @@
 
 #include "speciestheme.h"
 #include "pluginproperties.h"
+#include "upgradeproperties.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -131,6 +132,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  loadAllPluginProperties(&conf);
  loadTextureNames(&conf);
  loadSoundNames(&conf);
+ loadUpgrades(&conf);
 }
 
 void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
@@ -281,3 +283,28 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
  return 0;
 }
 
+void UnitProperties::loadUpgrades(KSimpleConfig* conf)
+{
+ kdDebug() << k_funcinfo << endl;
+ conf->setGroup("Boson Unit");
+ int count = conf->readNumEntry("Upgrades", 0);
+ if(count == 0) {
+	return;
+ }
+ kdDebug() << k_funcinfo << typeId() << "Loading " << count << " upgrades for unit " << typeId() << endl;
+ for(int i = 1; i <= count; i++) {
+	UpgradeProperties* upgrade = new UpgradeProperties(this, i);
+	upgrade->loadPlugin(conf);
+	mUpgrades.append(upgrade);
+	mNotResearchedUpgrades.append(upgrade);
+ }
+ kdDebug() << k_funcinfo << "DONE" << endl;
+}
+
+void UnitProperties::setSpeed(float speed)
+{
+ if (!mMobileProperties) {
+	return;
+ }
+ mMobileProperties->mSpeed = speed;
+}

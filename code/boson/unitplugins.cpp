@@ -29,6 +29,7 @@
 #include "boitemlist.h"
 #include "bosonstatistics.h"
 #include "cell.h"
+#include "upgradeproperties.h"
 
 #include <kdebug.h>
 
@@ -74,12 +75,12 @@ BosonCanvas* UnitPlugin::canvas() const
 
 ProductionPlugin::ProductionPlugin(Unit* unit) : UnitPlugin(unit)
 {
- mProductions.registerData(Unit::IdPlugin_Productions, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "Productions");
+// mProductions.registerData(Unit::IdPlugin_Productions, dataHandler(),
+//		KGamePropertyBase::PolicyLocal, "Productions");
  mProductionState.registerData(Unit::IdPlugin_ProductionState, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "ProductionState");
  mProductionState.setLocal(0);
- mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
+// mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
 }
 
@@ -87,38 +88,60 @@ ProductionPlugin::~ProductionPlugin()
 {
 }
 
-unsigned long int ProductionPlugin::completedProduction() const
+unsigned long int ProductionPlugin::completedProductionId() const
 {
  if (!hasProduction()) {
 	return 0;
  }
- unsigned long int type = currentProduction();
- if (type == 0) {
+ unsigned long int id = currentProductionId();
+ if (id == 0) {
 	return 0;
  }
- if (mProductionState < speciesTheme()->unitProperties(type)->productionTime()) {
-	kdDebug() << "not yet completed: " << type << endl;
-	return 0;
+ if(completedProductionType() == ProduceUnit) {
+	if (mProductionState < speciesTheme()->unitProperties(id)->productionTime()) {
+		kdDebug() << "not yet completed: " << id << endl;
+		return 0;
+	}
+ } else {
+	if (mProductionState < speciesTheme()->technology(id)->productionTime()) {
+		kdDebug() << "not yet completed: " << id << endl;
+		return 0;
+	}
  }
- return type;
+ return id;
 }
 
-void ProductionPlugin::addProduction(unsigned long int unitType)
+ProductionType ProductionPlugin::completedProductionType() const
+{
+ return currentProductionType();
+}
+
+void ProductionPlugin::addProduction(ProductionType type, unsigned long int id)
 {
  ProductionProperties* p = (ProductionProperties*)unit()->unitProperties()->properties(PluginProperties::Production);
  if (!p) {
 	kdError() << k_funcinfo << "NULL production properties" << endl;
 	return;
  }
- if (!speciesTheme()->productions(p->producerList()).contains(unitType)) {
-	kdError() << k_funcinfo << " cannot produce " << unitType << endl;
-	return;
+ if(type == ProduceUnit) {
+	if (!speciesTheme()->productions(p->producerList()).contains(id)) {
+		kdError() << k_funcinfo << " cannot produce unit with id " << id << endl;
+		return;
+	}
+ } else if(type == ProduceTech) {
+	if (!speciesTheme()->technologies(p->producerList()).contains(id)) {
+		kdError() << k_funcinfo << " cannot produce technology with id " << id << endl;
+		return;
+	}
  }
  bool start = false;
  if (!hasProduction()) {
 	start = true;
  }
- mProductions.append(unitType);
+ QPair<ProductionType, unsigned long int> pair;
+ pair.first = type;
+ pair.second = id;
+ mProductions.append(pair);
  if (start) {
 	unit()->setPluginWork(pluginType());
  }
@@ -130,11 +153,11 @@ void ProductionPlugin::removeProduction()
  mProductionState = 0; // start next production (if any)
 }
 
-void ProductionPlugin::removeProduction(unsigned long int unitType)
+void ProductionPlugin::removeProduction(ProductionType type, unsigned long int id)
 {
  for (unsigned int i = 0; i < productionList().count(); i++) {
-	if (mProductions[i] == unitType) {
-		kdDebug() << k_funcinfo << "remove " << unitType << endl;
+	if ((mProductions[i].first == type) && (mProductions[i].second == id)) {
+		kdDebug() << k_funcinfo << "remove; type: " << type << ", id: " << id << endl;
 		mProductions.remove(mProductions.at(i));
 		return;
 	}
@@ -143,20 +166,33 @@ void ProductionPlugin::removeProduction(unsigned long int unitType)
 
 double ProductionPlugin::productionProgress() const
 {
- unsigned int productionTime = speciesTheme()->unitProperties(currentProduction())->productionTime();
+ unsigned int productionTime = 0;
+ if(currentProductionType() == ProduceUnit) {
+	productionTime = speciesTheme()->unitProperties(currentProductionId())->productionTime();
+ } else if(currentProductionType() == ProduceTech) {
+	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
+ } else {
+	kdDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
+ }
  double percentage = (double)(mProductionState * 100) / (double)productionTime;
  return percentage;
 }
 
 bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 {
- if (!hasProduction() || completedProduction() <= 0) {
+ if (!hasProduction() || completedProductionId() <= 0) {
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
+
+ if(completedProductionType() != ProduceUnit) {
+	kdDebug() << k_funcinfo << "Current production is not unit!" << endl;
+	return false;  // Maybe return true, so that tech. is researched? OTOH, this should never be reached anyway ;-)
+ }
+
  QValueList<Unit*> list = canvas()->unitCollisionsInRange(pos, BUILD_RANGE);
 
- const UnitProperties* prop = speciesTheme()->unitProperties(currentProduction());
+ const UnitProperties* prop = speciesTheme()->unitProperties(currentProductionId());
  if (!prop) {
 	kdError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
 	return false;
@@ -186,8 +222,8 @@ bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 
 void ProductionPlugin::advance(unsigned int)
 {
- unsigned long int type = currentProduction();
- if (type <= 0) { // no production
+ unsigned long int id = currentProductionId();
+ if (id <= 0) { // no production
 	unit()->setWork(Unit::WorkNone);
 	mProductionState = 0;
 	return;
@@ -199,21 +235,36 @@ void ProductionPlugin::advance(unsigned int)
  // it gets executed on *every* client but sendInput() should be used on *one*
  // client only!
  // a unit is completed as soon as mProductionState == player()->unitProperties(type)->productionTime()
- unsigned int productionTime = speciesTheme()->unitProperties(type)->productionTime();
+ unsigned int productionTime = 0;
+ if(currentProductionType() == ProduceUnit) {
+	productionTime = speciesTheme()->unitProperties(currentProductionId())->productionTime();
+ } else if(currentProductionType() == ProduceTech) {
+	productionTime = speciesTheme()->technology(currentProductionId())->productionTime();
+ } else {
+	kdDebug() << k_funcinfo << "Unknown productiontype: " << currentProductionType() << endl;
+ }
  if (mProductionState <= productionTime) {
 	if (mProductionState == productionTime) {
-		kdDebug() << "unit " << type << " completed :-)" << endl;
+		kdDebug() << "Production with type " << currentProductionType() << " and id " << id << " completed :-)" << endl;
 		mProductionState = mProductionState + 1;
+
+		if(currentProductionType() != ProduceUnit) {
+			// It's technology
+			player()->technologyResearched(this, id);
+			removeProduction();
+			return;
+		}
+
 		// Auto-place unit
 		// Unit positioning scheme: all tiles starting with tile that is below
 		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
 		// to first free tile.
 		// No auto-placing for facilities
-		if(!speciesTheme()->unitProperties(type)) {
-			kdError() << k_lineinfo << "Unknown type " << type << endl;
+		if(!speciesTheme()->unitProperties(id)) {
+			kdError() << k_lineinfo << "Unknown id " << id << endl;
 			return;
 		}
-		if(speciesTheme()->unitProperties(type)->isFacility()) {
+		if(speciesTheme()->unitProperties(id)->isFacility()) {
 			return;
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
@@ -227,11 +278,10 @@ void ProductionPlugin::advance(unsigned int)
 		int ctry; // Current try
 		currentx = tilex - 1;
 		currenty = tiley - 1;
-		for(int i=1; i <= 3; i++) {
+		for(int i=1; i <= BUILD_RANGE; i++) {
 			tries = 2 * i * twidth + 2 * i * theight + 4;
 			currenty++;
 			for(ctry = 1; ctry <= tries; ctry++) {
-				kdDebug() << "    Try " << ctry << " of " << tries << endl;
 				if(ctry <= twidth + i) {
 					currentx++;
 				} else if(ctry <= twidth + i + theight + 2 * i - 1) {
@@ -247,12 +297,12 @@ void ProductionPlugin::advance(unsigned int)
 				//TODO: use BosonCanvas::canPlaceUnitAt()
 //				if(canvas()->cellOccupied(currentx, currenty)) {
 //				FIXME: should not depend on Facility*
-				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(type), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), this)) {
+				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
 					//depend on Facility! should be Unit
-					((Boson*)player()->game())->buildProducedUnit(this, type, currentx, currenty);
+					((Boson*)player()->game())->buildProducedUnit(this, id, currentx, currenty);
 					return;
 				}
 			}
@@ -262,6 +312,14 @@ void ProductionPlugin::advance(unsigned int)
 		mProductionState = mProductionState + 1;
 	}
  }
+}
+
+bool ProductionPlugin::contains(ProductionType type, unsigned long int id)
+{
+ QPair<ProductionType, unsigned long int> pair;
+ pair.first = type;
+ pair.second = id;
+ return productionList().contains(pair);
 }
 
 RepairPlugin::RepairPlugin(Unit* unit) : UnitPlugin(unit)
