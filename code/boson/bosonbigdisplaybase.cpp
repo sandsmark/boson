@@ -1419,11 +1419,6 @@ void BosonBigDisplayBase::renderCells()
  BosonGroundTheme* groundTheme = map->groundTheme();
  float* heightMap = map->heightMap();
 
- if (groundTheme->textureCount() != 3) {
-	boError() << k_funcinfo << "only 3 texturemaps supported!" << endl;
-	return;
- }
-
  // AB: we can increase performance even more here. lets replace d->mRenderCells
  // by two array defining the coordinates of cells and the heightmap values.
  // we could use that as vertex array for example.
