@@ -507,5 +507,37 @@ private:
 	static Boson* mBoson;
 };
 
+class QSocket;
+class KMessageSocket;
+/**
+ * Hack for a KMessageSocket bug in KDE < 3.2
+ **/
+class BoMyKMessageSocket : public QObject
+{
+	Q_OBJECT
+public:
+	BoMyKMessageSocket() : QObject(0)
+	{
+		mSocketSocket = 0;
+		mSocket = 0;
+		mNextBlockLength = 0;
+		mAwaitingHeader = 0;
+	}
+
+	void setSocket(KMessageSocket* s, QSocket* sock);
+
+public slots:
+	void slotProcessNewData();
+
+signals:
+	void signalReceived(const QByteArray&);
+
+private:
+	QSocket* mSocketSocket;
+	KMessageSocket* mSocket;
+	bool mAwaitingHeader;
+	Q_UINT32 mNextBlockLength;
+};
+
 #endif
 
