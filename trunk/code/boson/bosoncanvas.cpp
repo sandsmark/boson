@@ -27,6 +27,8 @@
 #include "boshot.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
+#include "bosonparticlesystem.h"
+#include "bosonparticlemanager.h"
 #include "defines.h"
 
 #include <kdebug.h>
@@ -54,6 +56,8 @@ public:
 	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
+
+	QPtrList<BosonParticleSystem> mParticles;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -67,6 +71,7 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  d->mDeleteShot.setAutoDelete(true);
+ d->mParticles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
 }
 
@@ -83,6 +88,7 @@ void BosonCanvas::quitGame()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mDeleteShot.clear();
+ d->mParticles.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -335,8 +341,10 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
  if (target->isDestroyed()) {
 	destroyUnit(target); // display the explosion ; not the shoot
  } else {
-	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
-//	(void) new BoShot(target, attackedBy, this);
+	BoVector3 pos((target->x() + target->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
+			-((target->y() + target->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
+			target->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	d->mParticles.append(BosonParticleManager::newShot(pos));
  }
  attackedBy->playSound(SoundShoot);
 }
@@ -359,8 +367,12 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	unit->setWork(UnitBase::WorkDestroyed);
 	owner->unitDestroyed(unit); // remove from player without deleting
 	unit->playSound(SoundReportDestroyed);
-	// Uncomment next line as soon as BoShot works (doesn't crash) with OpenGL
-//	(void) new BoShot(unit, 0, this, true);
+	// Pos is center of unit
+	BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
+			-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
+			unit->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	d->mParticles.append(BosonParticleManager::newExplosion(pos));
+	d->mParticles.append(BosonParticleManager::newSmoke(pos));
 	emit signalUnitDestroyed(unit);
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
@@ -655,3 +667,36 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
+int BosonCanvas::particleSystemsCount()
+{
+ return d->mParticles.count();
+}
+
+void BosonCanvas::updateParticleSystems(float elapsed)
+{
+ int count = d->mParticles.count();
+ if(count <= 0) {
+	return;
+ }
+	BosonParticleSystem* s;
+	for(int i = 0; i < count; i++) {
+	s = d->mParticles.at(i);
+	s->update(elapsed);
+	if(!s->isActive()) {
+		kdDebug() << k_funcinfo << "**********  REMOVING inactive particle system (particle count: " << s->particleCount() << ")!  *****" << endl;
+		d->mParticles.remove();
+		i--;
+		count--;
+	}
+ }
+}
+
+void BosonCanvas::renderParticleSystems()
+{
+ QPtrListIterator<BosonParticleSystem> it((d->mParticles));
+ BosonParticleSystem* s;
+ while((s = it.current()) != 0) {
+	++it;
+	s->draw();
+ }
+}

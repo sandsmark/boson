@@ -260,7 +260,7 @@ protected:
 
 	bool checkError() const;
 
-	void calcFPS();
+	float calcFPS();
 
 	bool selectAll(const UnitProperties* prop, bool replace);
 

@@ -58,7 +58,9 @@ BOSON_SRC = \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp \
-	upgradeproperties.cpp
+	upgradeproperties.cpp \
+	bosonparticlesystem.cpp \
+	bosonparticlemanager.cpp
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \
