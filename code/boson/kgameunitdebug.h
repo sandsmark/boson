@@ -22,6 +22,9 @@
 #include <qwidget.h>
 
 class QListViewItem;
+
+class KGamePropertyBase;
+
 class Boson;
 class Unit;
 
@@ -39,11 +42,14 @@ public:
 
 protected:
 	void addUnit(Unit* unit);
+	void update(QListViewItem*, Unit*);
 
 protected slots:
 	void slotUpdate();
 	void updateWaypoints(QListViewItem*);
 	void updateProduction(QListViewItem*);
+
+	void slotUnitPropertyChanged(KGamePropertyBase*);
 
 private:
 	class KGameUnitDebugPrivate;
