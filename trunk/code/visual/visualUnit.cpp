@@ -26,7 +26,9 @@
 #include "visual.h"
 #include "selectPart.h"
 
-#define PF_DELTA	5   // facilities selection box are DELTA pixels more inside rect()
+#define PF_DELTA	(+10)   // facilities selection boxes are DELTA pixels more inside rect()
+#define PM_DELTA_H	(+4)   // mobiles selection boxes are DELTA pixels more inside rect()
+#define PM_DELTA_V	(+10)   // mobiles selection boxes are DELTA pixels more inside rect()
 
 
 /*
@@ -88,9 +90,10 @@ void visualMobUnit::select()
 	boAssert(!sp_down);
 
 	sp_up = new selectPart(power, z(), selectPart::PART_UP);
-	sp_up->move(r.right(), r.top());
+	sp_up->move(r.right() - PM_DELTA_H, r.top() + PM_DELTA_V);
 	sp_down = new selectPart(9, z(), selectPart::PART_DOWN);
-	sp_down->move(r.left(), r.bottom());
+	sp_down->move(r.left() + PM_DELTA_H, r.bottom() - PM_DELTA_V);
+
 }
 
 
