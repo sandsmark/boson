@@ -28,3 +28,5 @@ bosonaudioprocess_LDADD = \
 bosonaudioprocess_SOURCES = \
 		main.cpp
 
+include ../admin/Doxyfile.am
+
