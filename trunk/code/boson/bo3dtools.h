@@ -241,6 +241,11 @@ class BoVector3
     }
 
     /**
+     * @return Cross product of this vector and v
+     **/
+    BoVector3 operator*(const BoVector3& v) const;
+
+    /**
      * @return A copy of this vector, scaled by 1 / @p f
      **/
     inline BoVector3 operator/(float f) const

@@ -138,7 +138,16 @@ void pointByRotation(float* x, float* y, const float angle, const float radius)
 
 float BoVector3::length() const
 {
- return sqrt(dotProduct());
+  return sqrt(dotProduct());
+}
+
+BoVector3 BoVector3::operator*(const BoVector3& v) const
+{
+  BoVector3 r;
+  r.setX((y() * v.z()) - (z() * v.y()));
+  r.setX((z() * v.x()) - (x() * v.z()));
+  r.setX((x() * v.y()) - (y() * v.x()));
+  return r;
 }
 
 BoVector3 BoVector3::load(const KConfig* cfg, const QString key, const BoVector3& aDefault)
@@ -235,6 +244,7 @@ QDataStream& operator>>(QDataStream& s, BoVector3& v)
   v.mData[2] = z;
   return s;
 }
+
 
 BoVector4 BoVector4::load(const KConfig* cfg, const QString key, const BoVector4& aDefault)
 {
