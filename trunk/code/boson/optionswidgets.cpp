@@ -39,6 +39,7 @@
 #include <qcheckbox.h>
 #include <qvbox.h>
 #include <qtooltip.h>
+#include <qpushbutton.h>
 
 #include "optionswidgets.moc"
 
@@ -425,33 +426,52 @@ void SoundOptions::setUnitSoundsDeactivated(BosonConfig* conf)
 
 OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 {
- // AB: most entries here are very technical (especially the texture filters).
- // put them into a separate widget which can be reached using a "advanced"
- // button. then add some default options (i.e. best speed, average speed, best
- // quality)
- mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, this);
+ QHBox* hbox = new QHBox(this);
+
+ if (!boConfig->hasKey("RenderingSpeed")) {
+	boConfig->addDynamicEntry(new BoConfigIntEntry(boConfig, "RenderingSpeed", (int)Defaults));
+ }
+ (void)new QLabel(i18n("Rendering speed/quality"), hbox);
+ mRenderingSpeed = new QComboBox(hbox);
+ mRenderingSpeed->insertItem(i18n("Defaults"));
+ mRenderingSpeed->insertItem(i18n("Highest quality"));
+ mRenderingSpeed->insertItem(i18n("Lowest quality (e.g. for software rendering)"));
+ connect(mRenderingSpeed, SIGNAL(activated(int)), this, SLOT(slotRenderingSpeedChanged(int)));
+
+ mAlignSelectBoxes = new QCheckBox(this);
+ mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
+
+ QPushButton* showDetails = new QPushButton(i18n("Show &Details"), this);
+ showDetails->setToggleButton(true);
+ connect(showDetails, SIGNAL(toggled(bool)), this, SLOT(slotShowDetails(bool)));
+
+ mAdvanced = new QVBox(this);
+ showDetails->setOn(false);
+ slotShowDetails(false);
+
+ mUpdateInterval = new KIntNumInput(DEFAULT_UPDATE_INTERVAL, mAdvanced);
  mUpdateInterval->setRange(1, 100);
  mUpdateInterval->setLabel(i18n("Update interval (low values hurt performance)"));
  QToolTip::add(mUpdateInterval, i18n("The update interval specifies after how many milli seconds the scene gets re-rendered and therefore directly influence the frames per seconds. But low values prevent boson from doing other important tasks and therefore you might end up in a game that takes several seconds until your units react to your commands! 20ms are usually a good value."));
- mModelTexturesMipmaps = new QCheckBox(this);
+ mModelTexturesMipmaps = new QCheckBox(mAdvanced);
  mModelTexturesMipmaps->setText(i18n("Use mipmaps for model textures"));
  QToolTip::add(mModelTexturesMipmaps, i18n("With mipmapping disabled units often look ugly - but it consumes less memory and therefore might improve rendering speed."));
 
- QHBox* hbox = new QHBox(this);
+ hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Texture Magnification Filter"), hbox);
  mMagnificationFilter = new QComboBox(hbox);
  mMagnificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
  mMagnificationFilter->insertItem(i18n("Use GL_LINEAR (best quality)"));
  QToolTip::add(mMagnificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a bigger size than they are stored at. This applies to all textures.")); // AB: also note how big the impact on speed is!
 
- hbox = new QHBox(this);
+ hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Texture Minification Filter"), hbox);
  mMinificationFilter = new QComboBox(hbox);
  mMinificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
  mMinificationFilter->insertItem(i18n("Use GL_LINEAR (best quality)"));
  QToolTip::add(mMinificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a smaller size than they are stored at. This applies to not-mipmapped textures only.")); // AB: also note how big the impact on speed is!
 
- hbox = new QHBox(this);
+ hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Texture Mipmap Minification Filter"), hbox);
  mMipmapMinificationFilter = new QComboBox(hbox);
  mMipmapMinificationFilter->insertItem(i18n("Use GL_NEAREST (fastest)"));
@@ -462,17 +482,14 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mMipmapMinificationFilter->insertItem(i18n("Use GL_LINEAR_MIPMAP_LINEAR (best quality)"));
  QToolTip::add(mMipmapMinificationFilter, i18n("This selects which filter method is used when the textures need to be displayed at a smaller size than they are stored at. This applies to mipmapped textures (i.e. model textures) only.\nNote: The speed GL_*_MIPMAP_* will probably be noticebly slower, but it's quality is way better!"));
 
- mAlignSelectBoxes = new QCheckBox(this);
- mAlignSelectBoxes->setText(i18n("Align unit selection boxes to camera"));
-
- mUseLight = new QCheckBox(this);
+ mUseLight = new QCheckBox(mAdvanced);
  mUseLight->setText(i18n("Enable light"));
 
- mUseMaterials = new QCheckBox(this);
+ mUseMaterials = new QCheckBox(mAdvanced);
  mUseMaterials->setText(i18n("Use materials"));
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
 
- hbox = new QHBox(this);
+ hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Ground rendering method"), hbox);
  mGroundRenderer = new QComboBox(hbox);
  for (int i = 0; i < BoGroundRenderer::Last; i++) {
@@ -480,7 +497,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  }
  mGroundRenderer->setCurrentItem(0);
 
- hbox = new QHBox(this);
+ hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Level of detail"), hbox);
  mLOD = new QComboBox(hbox);
  mLOD->insertItem(i18n("All details (default)"));
@@ -493,9 +510,103 @@ OpenGLOptions::~OpenGLOptions()
  boDebug(210) << k_funcinfo << endl;
 }
 
+void OpenGLOptions::slotRenderingSpeedChanged(int index)
+{
+ setRenderingSpeed(indexToRenderingSpeed(index));
+}
+
+int OpenGLOptions::renderingSpeed() const
+{
+ return indexToRenderingSpeed(mRenderingSpeed->currentItem());
+}
+
+int OpenGLOptions::indexToRenderingSpeed(int index)
+{
+ switch (index) {
+	default:
+		boWarning(210) << k_funcinfo << "invalid index: " << index << endl;
+	case 0:
+		return Defaults;
+	case 1:
+		return BestQuality;
+	case 2:
+		return Fastest;
+ }
+ return BestQuality;
+}
+
+int OpenGLOptions::renderingSpeedToIndex(int speed)
+{
+ switch (speed) {
+	default:
+		boWarning(210) << k_funcinfo << "invalid value: " << speed << endl;
+	case Defaults:
+		return 0;
+	case BestQuality:
+		return 1;
+	case Fastest:
+		return 2;
+ }
+ return 0;
+}
+
+void OpenGLOptions::setRenderingSpeed(int speed)
+{
+ switch ((RenderingSpeed)speed) {
+	default:
+		boWarning(210) << k_funcinfo << "invalid value: " << speed << endl;
+	case Defaults:
+		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+		mModelTexturesMipmaps->setChecked(DEFAULT_USE_MIPMAPS_FOR_MODELS);
+		setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
+		setMinificationFilter(DEFAULT_MINIFICATION_FILTER);
+		setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
+		mUseLight->setChecked(DEFAULT_USE_LIGHT);
+		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+		setLOD(0);
+	case BestQuality:
+		// we mostly use defaults here.
+		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+		mModelTexturesMipmaps->setChecked(true);
+		setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
+		setMinificationFilter(DEFAULT_MINIFICATION_FILTER);
+		setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
+		mUseLight->setChecked(DEFAULT_USE_LIGHT);
+		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
+		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+		setLOD(0);
+		break;
+	case Fastest:
+		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
+		mModelTexturesMipmaps->setChecked(false);
+		setMagnificationFilter(GL_NEAREST);
+		setMinificationFilter(GL_NEAREST);
+		setMipmapMinificationFilter(GL_NEAREST);
+		mUseLight->setChecked(false);
+		mUseMaterials->setChecked(false);
+		mGroundRenderer->setCurrentItem(BoGroundRenderer::Fast);
+		setLOD(5000);
+		break;
+	
+ }
+ mRenderingSpeed->setCurrentItem(renderingSpeedToIndex(speed));
+}
+
+void OpenGLOptions::slotShowDetails(bool show)
+{
+ if (show) {
+	mAdvanced->show();
+ } else {
+	mAdvanced->hide();
+ }
+}
+
 void OpenGLOptions::apply()
 {
  boDebug(210) << k_funcinfo << endl;
+ boConfig->setIntValue("RenderingSpeed", renderingSpeed());
+
  bool reloadModelTextures = false;
  bool resetTexParameter = false;
  boConfig->setUpdateInterval((unsigned int)mUpdateInterval->value());
@@ -549,6 +660,9 @@ void OpenGLOptions::apply()
 
 void OpenGLOptions::setDefaults()
 {
+ mRenderingSpeed->setCurrentItem(0);
+ slotRenderingSpeedChanged(0);
+
  setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
  mModelTexturesMipmaps->setChecked(DEFAULT_USE_MIPMAPS_FOR_MODELS);
  setMagnificationFilter(DEFAULT_MAGNIFICATION_FILTER);
@@ -563,6 +677,7 @@ void OpenGLOptions::setDefaults()
 
 void OpenGLOptions::load()
 {
+ setRenderingSpeed(boConfig->intValue("RenderingSpeed", Defaults));
  setUpdateInterval(boConfig->updateInterval());
  mModelTexturesMipmaps->setChecked(boConfig->modelTexturesMipmaps());
  setMagnificationFilter(boConfig->magnificationFilter());
