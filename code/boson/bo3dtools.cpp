@@ -794,6 +794,17 @@ void BoQuaternion::toRotation(float* alpha, float* beta, float* gamma)
 }
 
 
+void BoQuaternion::transform(BoVector3* v, const BoVector3* input) const
+{
+ BoQuaternion q = BoQuaternion(0, *input);
+ BoQuaternion tmp = BoQuaternion::multiply(*this, q);
+ // we assume this is a unit quaternion, then the inverse is equal to the
+ // conjugate
+ tmp.multiply(conjugate());
+ v->set(tmp.mV);
+}
+
+
 /*****  Misc methods  *****/
 
 float Bo3dTools::rotationToPoint(float x, float y)

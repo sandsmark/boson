@@ -991,6 +991,10 @@ class BoQuaternion
      * (1,(0,0,0)), i.e. w is 1 and the vector is (0,0,0).
      *
      * This way of combining two rotations does not suffer from gimbal lock.
+     *
+     * Note that this quaternion, as well as @p quat should be normalized
+     * quaternions! See also @ref normalize. The resulting quaternion will be
+     * normalized as well.
      **/
     void multiply(const BoQuaternion& quat)
     {
@@ -1019,8 +1023,46 @@ class BoQuaternion
       return BoQuaternion(mW + q.mW, mV + q.mV);
     }
 
+    /**
+     * @return The conjugate of the quaternion, which is the quaternion with the
+     * vector part negated.
+     **/
+    inline BoQuaternion conjugate() const
+    {
+      return BoQuaternion(mW, BoVector3(-mV[0], -mV[1], -mV[2]));
+    }
+
+    /**
+     * @return The inverse quaternion. This is equal to the @ref conjugate, if
+     * the quaternion is normalized (see @ref normalize). You should prefer @ref
+     * conjugate if you know that the quat is normalized (i.e. always)!
+     **/
+    BoQuaternion inverse() const
+    {
+      // we assume that the quat is normalized.
+      // If it is not, we would have to new_quat.mW /= quat.length()
+      BoQuaternion q = conjugate();
+      float l = length();
+      q.mW /= l;
+      q.mV.scale(1.0f / l);
+      return q;
+    }
+
+    /**
+     * Rotate the vector @input and return the result into @p v.
+     *
+     * Of course we assume that this quaternion is normalized (see @ref
+     * normalize), as only normalized quaternions represent rotations.
+     **/
+    void transform(BoVector3* v, const BoVector3* input) const;
+
     float length() const;
 
+    /**
+     * Normalize the quaternion. Note that only a normalized quaternion
+     * represents a rotation, meaning that non-normalized quaternions are
+     * useless for us!
+     **/
     void normalize()
     {
       float l = length();
