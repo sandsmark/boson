@@ -1,39 +1,29 @@
 
+This is about how to install the *CVS* version of boson!
 
 Well.. basically, you need
 
-	boson-0.5.tar.bz2
-	boson-pics-0.5.tar
+	code/
+	data/
 
-both are available at the homepage
-              http://boson.eu.org/
+from boson CVS.
+see
 
-Expand the source :
-===================
+	http://sourceforge.net/projects/boson
 
-	Use the command 'bunzip2 boson-0.5.tar.bz2; tar xvf boson-0.5.tar'
+for more info about how to get the CVS modules.
 
 Making the game :
 =================
 
 You should _not_ be root to make the game.
 
-Enter the boson dir by typing 'cd boson'
-Configure the whole stuff by entering './configure'
+Enter the code dir by typing 'cd code'
+Configure the whole stuff by entering 'make -f Makefile.cvs && ./configure'
 	(try 'bash configure' if './configure' doesn't work)
 compile the game by typing 'make'
 	This step is the one that is long to finish
 
-
-If it ever complains about "./configure: Command not found", it means
-that you don't have it. Probably that you've downloaded a alpha version,
-usually not intended for end-user. You can still try to compile it, but you
-will need some program like "autoconf" or "automake".
-
-		=========================================
-                =             Try to do                 =
-                =       make -f Makefile.orzel          =
-		=========================================
 
 Installing the game :
 =====================
@@ -44,23 +34,16 @@ type : "make install"
 Installing data :
 =================
 
-Data are in the file "boson-pics-0.5.tar"
+Data are in the CVS module "data/"
 
-those files are to be extracted in your ${kde}/share/apps dirs.
-Your ${kde} is probably /opt/kde or /usr/local/kde.
-You may try "echo $KDEDIR" to know where your kde installation is.
-
-Exemple of what to type if your 'kde' is installed in /opt/kde and your
-boson-pics file is in your home :
-
-=======
-[orzel@eagle ~]$ cd /opt/kde/                           # you may change this line !
-[orzel@eagle ~]$ cd share/apps
-[orzel@eagle ~]$ tar xvf ~/boson-pics-0.5.tar           # if your boson-pics is in your home
-[orzel@eagle ~]$ ls boson                               # check if your data are installed
-=======
-
-
+First enter the data dir (cd data) and link the admin/ dir from the code:
+	ln -s ../code/admin admin
+(you have to adjust the path if th code is not in ..)
+Now do the same steps as above:
+	make -f Makefile.cvs && ./configure && make
+	make install
+The first line should be executed as user. The second line is probably executed
+as root - depends on your KDE installation (root is normal but mine isn't :-))
 
 Here follows the extended help about making/installing boson:
 

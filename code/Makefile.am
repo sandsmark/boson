@@ -1,39 +1,22 @@
+SUBDIRS = $(TOPSUBDIRS)
 
-SUBDIRS = common server visual boson editor 
+$(top_srcdir)/configure.in: configure.in.in $(top_srcdir)/subdirs
+	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common configure.in ;
 
-EXTRA_DIST = AUTHORS COPYING ChangeLog INSTALL README TODO 
+$(top_srcdir)/subdirs:
+	cd $(top_srcdir) && $(MAKE) -f admin/Makefile.common subdirs
 
-#MAKE = nice -20 make -j 3
+$(top_srcdir)/acinclude.m4: $(top_srcdir)/admin/acinclude.m4.in $(top_srcdir)/admin/libtool.m4.in
+	@cd $(top_srcdir) && cat admin/acinclude.m4.in admin/libtool.m4.in > acinclude.m4
 
-api :
-	kdoc -p -dapi/ -ufile:/home/orzel/c/boson/api/ boson */*h
+MAINTAINERCLEANFILES = subdirs configure.in acinclude.m4 configure.files 
 
-orzel.clean : maintainer-clean
-	rm -f configure Makefile{,.in}
-	rm -Rf */.deps
-	rm -f */Makefile{,.in}
-	rm -f `find -name core`
-	rm -f `find -name boson-client.log`
-	rm -f `find -name boson-server.log`
-#	cd .. && tar cvf /work/save/boson/
+package-messages:
+	$(MAKE) -f admin/Makefile.common package-messages
+	$(MAKE) -C po merge
 
-AUTOMAKE_OPTIONS = foreign  1.4
+EXTRA_DIST = admin 
 
-tags:
-	ctags `find * -name '*.h' -o -name '*.cpp' | grep -v moc | grep /`
-
-_common:
-	cd common && make
-
-_server: _common
-	cd server && make
-
-_visual: _common
-	cd visual && make
-
-_boson: _visual
-	cd boson && make
-
-_editor: _visual
-	cd editor && make
-
+dist-hook:
+	cd $(top_distdir) && perl admin/am_edit -padmin
+	cd $(top_distdir) && $(MAKE) -f admin/Makefile.common subdirs

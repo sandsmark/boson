@@ -1,0 +1,16 @@
+<!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
+<kpartgui name="bosoneditor" version="1">
+<MenuBar>
+  <Menu name="game"><text>&amp;Game</text>
+    <Action name="game_debug" />
+  </Menu>
+  <Menu name="editor"><text>&amp;Editor</text>
+    <Action name="editor_build" />
+    <Action name="editor_player" />
+  </Menu>
+</MenuBar>
+<ToolBar>
+  <Action name="editor_build" />
+  <Action name="editor_player" />
+</ToolBar>
+</kpartgui>
