@@ -113,6 +113,9 @@ int main(int argc, char **argv)
 
  top->show();
 
+ // pretend an old game was over. here we actually start
+ top->slotGameOver();
+
  if (boConfig->boolValue("EnableATIDepthWorkaround", false)) {
 	double depth = boConfig->doubleValue("ATIDepthWorkaroundValue", 0.00390625);
 	Bo3dTools::enableReadDepthBufferWorkaround((float)depth);
