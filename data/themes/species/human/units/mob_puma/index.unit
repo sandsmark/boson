@@ -26,6 +26,11 @@ UnitHeight=1.5
 UnitWidth=1.5
 Weapons=1
 
+[OpenGL]
+FrameRangeIdle=50
+FrameSpeedIdle=1
+FrameStartIdle=0
+
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
