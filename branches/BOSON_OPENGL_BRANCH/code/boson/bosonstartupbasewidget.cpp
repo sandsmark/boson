@@ -37,7 +37,7 @@ BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name
 		: QWidget(parent, name)
 {
  QVBoxLayout* topLayout = new QVBoxLayout(this);
- topLayout->addSpacing(6); //FIXME hardcoded
+ topLayout->addSpacing(20); //FIXME hardcoded
 
  QPixmap backgroundPix(locate("data", "boson/pics/boson-startup-bg.png"));
  if (backgroundPix.isNull()) {
@@ -53,8 +53,8 @@ BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name
  mLogo->setBackgroundOrigin(WindowOrigin);
  QPixmap logoPix(locate("data", "boson/pics/boson-startup-logo.png"));
  mLogo->setPixmap(logoPix);
- topLayout->addWidget(mLogo);
- topLayout->addSpacing(15); // FIXME hardcoded
+ topLayout->addWidget(mLogo, 0, AlignHCenter);
+ topLayout->addSpacing(10); // FIXME hardcoded
 
  mPlainWidget = new QWidget(this, "plainwidget");
  QVBoxLayout* l = new QVBoxLayout(mPlainWidget);
