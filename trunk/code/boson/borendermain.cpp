@@ -86,6 +86,7 @@ static KCmdLineOptions options[] =
     { "frame <number>", I18N_NOOP("Initially displayed frame"), 0 },
     { "l", 0, 0 },
     { "lod <number>", I18N_NOOP("Initially displayed LOD"), 0 },
+    { "indirect", I18N_NOOP("Use Indirect rendering (sloooow!!). debugging only."), 0 },
     { 0, 0, 0 }
 };
 
@@ -164,19 +165,23 @@ void ModelPreview::paintGL()
 
  // AB: try to keep this basically similar to BosonBigDisplay::paintGL()
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
- glColor3f(1.0, 1.0, 1.0);
+ glColor3f(1.0f, 1.0f, 1.0f);
 
- /*
- const float infinity = 10000; // damn how long should it be? is there a clean way in opengl for this?
- glBegin(GL_LINES);
- for (float x = 0; x < 10; x = x + 0.1) {
-	glVertex3f(-x, -infinity, 0.0f);
-	glVertex3f(-x, infinity, 0.0f);
-	glVertex3f(x, -infinity, 0.0f);
-	glVertex3f(x, infinity, 0.0f);
+ renderModel();
+
+ glDisable(GL_DEPTH_TEST);
+
+ GLenum e = glGetError();
+ if (e != GL_NO_ERROR) {
+	boError() << k_funcinfo << "OpenGL error: " << (int)e << endl;
  }
- glEnd();
- */
+}
+
+void ModelPreview::renderModel()
+{
+ if (!haveModel()) {
+	return;
+ }
 
  if (mWireFrame) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -234,10 +239,7 @@ void ModelPreview::paintGL()
  glDisable(GL_CULL_FACE);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
- GLenum e = glGetError();
- if (e != GL_NO_ERROR) {
-	boError() << k_funcinfo << "OpenGL error: " << (int)e << endl;
- }
+
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
@@ -764,6 +766,10 @@ int main(int argc, char **argv)
 
  if (args->isSet("maximized")) {
 	main->showMaximized();
+ }
+ if (args->isSet("indirect")) {
+	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
+	boConfig->setWantDirect(false);
  }
  if (args->isSet("species")) {
 	theme = args->getOption("species");
