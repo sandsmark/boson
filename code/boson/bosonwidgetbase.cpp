@@ -119,6 +119,7 @@ BosonWidgetBase::~BosonWidgetBase()
  delete d->mChatDock;
 
  delete mDisplayManager;
+ delete mCursor;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
