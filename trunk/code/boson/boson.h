@@ -175,6 +175,8 @@ public:
 	 **/
 	virtual void unlock();
 
+	bool isLocked() const;
+
 	/**
 	 * Set the game/editor mode. Use TRUE here for normal game mode, FALSE
 	 * for editor mode.
