@@ -19,14 +19,13 @@
 #ifndef UNITPROPERTIES_H
 #define UNITPROPERTIES_H
 
-#include <bo3dtools.h>
-
 class SpeciesTheme;
 class PluginProperties;
 class UpgradeProperties;
 class BosonWeaponProperties;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
+class BoVector3;
 class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
@@ -339,7 +338,7 @@ public:
 	 * some particle systems. Hitpoint is relative to the center of the unit.
 	 * It should be a point on the surface of the unit.
 	 **/
-	 const BoVector3& hitpoint() const { return mHitPoint; };
+	 const BoVector3& hitPoint() const;
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -381,7 +380,7 @@ protected:
 	void setConstructedParticleSystemIds(QValueList<unsigned long int> ids);
 	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
-	void setHitPoint(BoVector3 hitpoint)  { mHitPoint = hitpoint; };
+	void setHitPoint(const BoVector3& hitpoint);
 
 	// These only have effect if there is mobile or facility properties
 	void setCanRefineMinerals(bool r);
@@ -444,7 +443,6 @@ private:
 	unsigned long int mMaxWeaponRange;
 	long int mExplodingDamage;
 	float mExplodingDamageRange;
-	BoVector3 mHitPoint;  // FIXME: better name
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;
