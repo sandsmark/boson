@@ -17,6 +17,8 @@
 
  ************************************************************************/
 
+#ifdef HAVE_FLTK
+
 #include "gl.h"
 
 #include <FL/Fl.H>
@@ -119,6 +121,8 @@ public:
 #define MXGUI_BEGIN_MENU(name) {name, 0, 0, 0, FL_SUBMENU},
 #define MXGUI_END_MENU {0},
 #define MXGUI_FINISH_MENUBAR {0}
+
+#endif // HAVE_FLTK
 
 // GFXGUI_INCLUDED
 #endif
