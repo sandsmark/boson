@@ -138,5 +138,13 @@ enum UnitAnimationModes {
 	UnitAnimationWreckage = 100
 };
 
+enum ScrollDirection {
+	ScrollUp = 0,
+	ScrollRight = 1,
+	ScrollDown = 2,
+	ScrollLeft = 3
+};
+
+
 #endif
 
