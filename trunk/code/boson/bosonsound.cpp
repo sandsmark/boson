@@ -48,7 +48,6 @@ public:
 	~BoPlayObject()
 	{
 		if (mPlayObject) {
-			mPlayObject->halt();
 			delete mPlayObject;
 		}
 	}
