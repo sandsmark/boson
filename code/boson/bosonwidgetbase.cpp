@@ -176,14 +176,6 @@ BosonCanvas* BosonWidgetBase::canvas() const
  return d->mCanvas;
 }
 
-BosonLocalPlayerInput* BosonWidgetBase::localPlayerInput() const
-{
- if (!localPlayer()) {
-	return 0;
- }
- return (BosonLocalPlayerInput*)localPlayer()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
-}
-
 #include <kstandarddirs.h> //locate()
 void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
 {
@@ -328,11 +320,9 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  BO_CHECK_NULL_RET(boGame);
  if (boGame->gameMode()) {
 	BosonBigDisplayInput* i = new BosonBigDisplayInput(b);
-	i->setLocalPlayerInput(localPlayerInput());
 	b->setDisplayInput(i);
  } else {
 	EditorBigDisplayInput* i = new EditorBigDisplayInput(b);
-	i->setLocalPlayerInput(localPlayerInput());
 	b->setDisplayInput(i);
  }
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)),

@@ -112,7 +112,6 @@ public:
 	BosonCanvas* canvas() const;
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Player* localPlayer() const { return mLocalPlayer; }
-	BosonLocalPlayerInput* localPlayerInput() const;
 
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,15 +52,12 @@ public:
 	BosonCollisions* collisions() const;
 	Player* localPlayer() const;
 	PlayerIO* localPlayerIO() const;
-
-	BosonLocalPlayerInput* localPlayerInput() const { return mLocalPlayerInput; }
+	BosonLocalPlayerInput* localPlayerInput() const;
 
 	const QPoint& cursorCanvasPos() const;
 	const BoVector3& cursorCanvasVector() const;
 
 	void setActionType(UnitAction type) { mActionType = type; }
-
-	void setLocalPlayerInput(BosonLocalPlayerInput* input);
 
 	/**
 	 * @return The currently active @ref UnitAction if @ref actionLocked is
@@ -186,7 +183,6 @@ protected:
 
 private:
 	BosonBigDisplayBase* mBigDisplay;
-	BosonLocalPlayerInput* mLocalPlayerInput;
 	bool mActionLocked;
 	UnitAction mActionType;
 	CursorType mCursorType;
