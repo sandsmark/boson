@@ -15,7 +15,7 @@ Speed=3
 CanGoOnLand=true
 CanGoOnWater=false
 
-[Harvester Plugin]
+[HarvesterPlugin]
 CanMineMinerals=false
 CanMineOil=true
 MaxResources=100
