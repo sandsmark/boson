@@ -37,6 +37,7 @@
 #include "bocamerawidget.h"
 #include "bomaterialwidget.h"
 #include "bolight.h"
+#include "bomeshrenderermanager.h"
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -151,6 +152,7 @@ ModelPreview::~ModelPreview()
 {
  qApp->setGlobalMouseTracking(false);
  resetModel();
+ BoMeshRendererManager::manager()->unsetCurrentRenderer();
  delete mUpdateTimer;
  delete mMouseMoveDiff;
  delete mLight;
