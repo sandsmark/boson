@@ -5,9 +5,13 @@ There are already several tracks available - see http://boson.eu.org/download/in
 They were made by Nils Trzebin and you can also get them from the boson music
 website at http://www.rebellion-scs.de/boson/
 
-To install them just create a new directory here (in data/music/)
+To install your own files just create a new directory here (in data/music/)
 and re-run make install. 
 Also make sure that the newly created directory contains a index.desktop file.
 The contents of the file do *currently* not matter.
 That's it.
 
+There are also somee tracks provided by the boson team - see
+http://boson.eu.org/music
+Just untar them in data/
+No need to create additional directories.
