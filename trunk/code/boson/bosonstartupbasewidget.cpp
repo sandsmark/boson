@@ -60,6 +60,7 @@ BosonStartupBaseWidget::BosonStartupBaseWidget(QWidget* parent, const char* name
  QVBoxLayout* l = new QVBoxLayout(mPlainWidget);
  l->setAutoAdd(true);
  mPlainWidget->setBackgroundOrigin(WindowOrigin);
+ mPlainWidget->setPaletteForegroundColor(Qt::white);
  topLayout->addWidget(mPlainWidget);
 }
 
