@@ -63,7 +63,8 @@ void bosonCanvas::setCellFlag(QRect r, Cell::cell_flags flag)
 			// does _not_ affect cells[]
 			//  -> so it's only 'visual'
 			//  -> algorithms not modified by this
-			setTile( i, j, makeCell(GROUND_WATER_OIL) );
+			if (flag==Cell::request_f)
+				setTile( i, j, makeCell(GROUND_WATER_OIL) );
 #endif // DEBUG_REQUEST_F
 		}
 }
@@ -75,7 +76,8 @@ void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
 		for(j=r.top(); j<=r.bottom(); j++) {
 			bocanvas->cell(i,j).unsetFlag( flag);
 #ifdef DEBUG_REQUEST_F
-			setTile( i, j, makeCell(GROUND_GRASS) ); 
+			if (flag==Cell::request_f)
+				setTile( i, j, makeCell(GROUND_GRASS) ); 
 #endif // DEBUG_REQUEST_F
 			 }
 }
