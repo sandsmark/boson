@@ -105,9 +105,12 @@ void BosonParticleSystemProperties::reset()
   mMaxVelo.reset();
   mMinPos.reset();
   mMaxPos.reset();
-  mNormalize = false;
-  mMinScale = 1.0;
-  mMaxScale = 1.0;
+  mNormalizePos = false;
+  mMinPosScale = 1.0;
+  mMaxPosScale = 1.0;
+  mNormalizeVelo = false;
+  mMinVeloScale = 1.0;
+  mMaxVeloScale = 1.0;
   mStartColor.reset();
   mEndColor.reset();
   mMinLife = 1.0;
@@ -143,11 +146,17 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
   mMaxVelo = BoVector3::load(cfg, "MaxVelocity", mMaxVelo);
   mMinPos = BoVector3::load(cfg, "MinPos", mMinPos);
   mMaxPos = BoVector3::load(cfg, "MaxPos", mMaxPos);
-  mNormalize = cfg->readBoolEntry("Normalize", mNormalize);
-  if(mNormalize)
+  mNormalizePos = cfg->readBoolEntry("NormalizePos", mNormalizePos);
+  if(mNormalizePos)
   {
-    mMinScale = (float)(cfg->readDoubleNumEntry("MinScale", mMinScale));
-    mMaxScale = (float)(cfg->readDoubleNumEntry("MaxScale", mMaxScale));
+    mMinPosScale = (float)(cfg->readDoubleNumEntry("MinPosScale", mMinPosScale));
+    mMaxPosScale = (float)(cfg->readDoubleNumEntry("MaxPosScale", mMaxPosScale));
+  }
+  mNormalizeVelo = cfg->readBoolEntry("NormalizeVelo", mNormalizeVelo);
+  if(mNormalizeVelo)
+  {
+    mMinVeloScale = (float)(cfg->readDoubleNumEntry("MinVeloScale", mMinVeloScale));
+    mMaxVeloScale = (float)(cfg->readDoubleNumEntry("MaxVeloScale", mMaxVeloScale));
   }
   mStartColor = BoVector4::load(cfg, "StartColor", mStartColor);
   mEndColor = BoVector4::load(cfg, "EndColor", mEndColor);
@@ -218,9 +227,13 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
     particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
   }
-  if(mNormalize)
+  if(mNormalizeVelo)
   {
-    particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
+    particle->velo.scale(getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
+  }
+  if(mNormalizePos)
+  {
+    particle->pos.scale(getFloat(mMinPosScale, mMaxPosScale) / particle->pos.length());
   }
 }
 

@@ -119,8 +119,8 @@ class BosonParticleSystemProperties
     float mMaxXVelo, mMaxYVelo, mMaxZVelo;*/
     BoVector3 mMinVelo, mMaxVelo;
     BoVector3 mMinPos, mMaxPos;
-    bool mNormalize;
-    float mMinScale, mMaxScale;
+    bool mNormalizePos, mNormalizeVelo;
+    float mMinPosScale, mMaxPosScale, mMinVeloScale, mMaxVeloScale;
     BoVector4 mStartColor, mEndColor;
     float mMinLife, mMaxLife;
     int mMaxNum, mInitNum;
