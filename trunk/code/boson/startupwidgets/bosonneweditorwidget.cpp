@@ -411,6 +411,7 @@ void BosonNewEditorWidget::slotEditExistingToggled(bool checked)
 
 QByteArray BosonNewEditorWidget::createNewMap()
 {
+ boDebug() << k_funcinfo << endl;
  unsigned int width = mWidth->value();
  unsigned int height = mHeight->value();
  if (!BosonMap::isValidMapGeo(width, height)) {
