@@ -60,11 +60,7 @@ draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
-  <ul>
-    <li>Support for height maps in editor</li>
-    <li>3d-terrains in map files</li>
-    <li>The new startup widgets need some work</li>
-  </ul>
+    nothing ;-) - expect 0.8 release soon!
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
   <h4>Internal</h4>
