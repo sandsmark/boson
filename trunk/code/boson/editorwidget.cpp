@@ -183,8 +183,8 @@ void EditorWidget::initKActions()
  d->mPlaceAction->setItems(list);
 
  KShortcut s;
- s.append(QKeySequence(Qt::Key_Delete));
- s.append(QKeySequence(Qt::Key_D));
+ s.append(KKeySequence(QKeySequence(Qt::Key_Delete)));
+ s.append(KKeySequence(QKeySequence(Qt::Key_D)));
  (void)new KAction(i18n("Delete selected unit"), KShortcut(s), displayManager(),
 		SLOT(slotDeleteSelectedUnits()), actionCollection(),
 		"editor_delete_selected_unit");
