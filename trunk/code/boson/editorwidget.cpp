@@ -36,7 +36,6 @@
 #include "botexmapimportdialog.h"
 #include "bosongroundtheme.h"
 #include "commandframe/editorcommandframe.h"
-#include "sound/bosonmusic.h"
 
 #include <kfiledialog.h>
 #include <klocale.h>
