@@ -18,6 +18,30 @@ public:
 
 		GroundLast = 7
 	};
+        enum TransType {
+		TransGrassWater = 0,
+		TransGrassDesert,
+		TransDesertWater,
+		TransDeepWater,
+		TransLast
+	};
+	enum Transition {
+		TransUpLeft = 0,
+		TransUpRight,
+		TransDownLeft,
+		TransDownRight,
+
+		TransUp,
+		TransDown,
+		TransLeft,
+	       	TransRight,
+		
+		TransUpLeftInverted,
+		TransUpRightInverted,
+		TransDownLeftInverted,
+		TransDownRightInverted
+	};
+
 
 	Cell();
 	~Cell();
@@ -33,16 +57,16 @@ public:
 	}
 
 	/**
-	 * @return Guess what?
+	 * This has nothing to do with @ref GroundType! While @ref GroundType
+	 * contains the basic plain tiles only this can also be a transtition!!
 	 **/
-	GroundType groundType() const
+	int groundType() const
 	{
 		return mType;
 	}
 
 	/**
-	 * @return The version of the groundType. Something like "grass->desert" or
-	 * "only grass" or "another only grass" or so. At least I think so...
+	 * @return The version of the groundType. 
 	 **/
 	unsigned char version() const
 	{
@@ -62,8 +86,55 @@ public:
 	 * that this does <em>not</em> check whether the cell is occupied.
 	 **/
 	bool canGo(const UnitProperties* unit) const;
+	static bool canGo(const UnitProperties* unit, GroundType ground);
+
+
+	/**
+	 * @return Whether ground is a plain tile
+	 **/
+	static bool isPlain(int ground);
+	static bool isValidGround(int ground);
+	static bool isTrans(int ground);
+
+	/**
+	 * @return How many tiles of every transition exist.
+	 **/
+	static int tilesPerTransition();
+	static int groundTilesNumber();
+	static int bigTilesPerTransition();
+	static int smallTilesPerTransition();
+
+	static int getTransRef(int g); // does this return a @ref TransType ??
+
+	/**
+	 * @return The tile number with transRef and transTile
+	 **/
+	static int getTransNumber(TransType transRef, int transTile);
+	
+	/**
+	 * @return The number of the big tile with transRef and transTile
+	 **/
+	static int getBigTransNumber(TransType transRef, int transTile);
+
+	static int smallTileNumber(int smallNo, TransType trans, bool inverted);
+
+
+	static bool isSmallTrans(int g);
+	static bool isBigTrans(int g);
+
+	/**
+	 * @return With which groundtype this transition starts.
+	 **/
+	static GroundType from(TransType trans);
+
+	/**
+	 * @return With which groundtype this transition ends.
+	 **/
+	static GroundType to(TransType trans);
 
 protected:
+	static int getTransTile(int g);
+
 	void setVersion(unsigned char v)
 	{
 		mVersion = v;

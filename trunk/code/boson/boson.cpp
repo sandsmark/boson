@@ -162,6 +162,24 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 		break;
 	}
+	case BosonMessage::MoveConstruct:
+	{
+		kdDebug() << "moveConstruct" << endl;
+		Q_LONG unitType;
+		Q_UINT32 owner;
+		Q_INT32 x;
+		Q_INT32 y;
+		stream >> unitType;
+		stream >> owner;
+		stream >> x;
+		stream >> y;
+		
+		Player* p = (Player*)findPlayer(owner);
+		VisualUnit* unit = createUnit(unitType, p);
+		unit->setId(nextUnitId());
+		emit signalAddUnit(unit, x, y);
+		break;
+	}
 	default:
 		kdWarning() << "unexpected playerInput " << msgid << endl;
 		break;

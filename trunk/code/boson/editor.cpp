@@ -150,7 +150,7 @@ void Editor::setupActions()
 // quite complex - but this way we are mostly independant from changes in
 // BosonCommandFrame::OrderType
  QStringList buildList;
- for (int i = 0; i < BosonCommandFrame::Order_Last; i++) {
+ for (int i = 0; i < BosonCommandFrame::OrderLast; i++) {
 	switch ((BosonCommandFrame::OrderType)i) {
 		case BosonCommandFrame::Facilities:
 			buildList.append(i18n("Facilities"));

@@ -27,7 +27,7 @@
 struct ConstructUnit
 {
 	int unitType; // to be constructed unit
-	VisualUnit* facility; // facility that constructs the unit (or NULL in editor mode)
+	VisualUnit* factory; // facility that constructs the unit (or NULL in editor mode)
 	Player* owner; // the owner of the unit - probably only for editor mode.
 	int groundType;
 	unsigned char version;
@@ -293,8 +293,8 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	return;
  }
  VisualUnit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
- if (!unit) { // move the selection to pos
-	if ((selection().first()->unitProperties()->isMobile())) {
+ if (!unit) {
+	if ((selection().first()->unitProperties()->isMobile())) { // move the selection to pos
 		QPtrListIterator<VisualUnit> it(selection());
 		// tell the clients we want to move units:
 		stream << (Q_UINT32)BosonMessage::MoveMove;
@@ -308,6 +308,23 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 			++it;
 		}
 		send = true;
+	} else { // place constructions
+		VisualFacility* fac = (VisualFacility*)selection().first();
+		if (!fac) {
+			kdError() << "huh?" << endl;
+			return;
+		}
+		if (fac->unitProperties()->canProduce() && fac->hasConstruction()) {
+			// create the new unit
+			//TODO: check if unit can be placed here
+			stream << (Q_UINT32)BosonMessage::MoveConstruct;
+			stream << (Q_UINT32)fac->completedConstruction();
+			stream << (Q_UINT32)fac->owner()->id();
+			stream << (Q_INT32)pos.x() / BO_TILE_SIZE;
+			stream << (Q_INT32)pos.y() / BO_TILE_SIZE;
+			fac->removeConstruction();
+			send = true;
+		} 
 	}
  } else { // there is a unit - attack it!
 	QPtrListIterator<VisualUnit> it(selection());
@@ -395,21 +412,23 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 }
 
 
-void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* facility, Player* owner)
+void BosonBigDisplay::slotWillConstructUnit(int unitType, VisualUnit* factory, Player* owner)
 {
- if (!facility) {
-// FIXME 
- }
  if (!owner) {
 	kdDebug() << "slotWillConstructUnit(): NULL owner" << endl;
 	d->mConstruction.groundType = -1;
 	d->mConstruction.unitType = -1;
 	return;
  }
+ kdDebug() << unitType << endl;
  d->mConstruction.unitType = unitType;
- d->mConstruction.facility = facility;
+ d->mConstruction.factory = factory;
  d->mConstruction.owner = owner;
  d->mConstruction.groundType = -1;
+ if (factory) {
+	kdDebug() << "there is a factory " << endl;
+	((VisualFacility*)factory)->addConstruction(unitType);
+ }
 }
 
 void BosonBigDisplay::slotWillPlaceCell(int groundType, unsigned char version)

@@ -60,38 +60,6 @@ public:
 	Unit(int type);
 	virtual ~Unit();
 
-
-	// These should be in UnitProperties (begin)
-
- // FIXME: hardcoded
-//	static int facilityCount() { return 13; }
-//	static int mobileCount() { return 5; }
-//	static int unitCount();
-//	{return facilityCount() + mobileCount(); }
-	
-	/**
-	 * If you need the index of a mobile unit (0 ... mobileCount()-1) use
-	 * this function. This is usually the case for the pixmaps (loading)
-	 * only.
-	 **/
-//	static int mobileIndex(int unitType); 
-//	{ return (unitType - FacilityLast - 1); }
-
-	/**
-	 * The opposite to @ref mobileIndex: if you just have the index of a
-	 * mobile unit (0 ... mobileCount()-1) but need the type use this.
-	 **/
-//	static int mobileType(int index); 
-//	{ return (UnitType)(index + FacilityLast + 1); }
-//	static int facilityIndex(int unitType);
-//	{ return unitType; }
-//	static int facilityType(int index);
-//	{ return (UnitType)index; }
-
-	// These should be in UnitProperties (end)
-
-
-
 	void setWork(WorkType w);
 
 	WorkType work() const;

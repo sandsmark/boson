@@ -526,7 +526,7 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 
 void BosonWidget::slotChangeLocalPlayer(int index)
 {
- kdDebug() << "slotChangeLocalPlayer " << index << endl;
+// kdDebug() << "slotChangeLocalPlayer " << index << endl;
  Player* p = (Player*)d->mBoson->playerList()->at(index);
  changeLocalPlayer(p);
  d->mCommandFrame->slotEditorConstruction(-1, d->mLocalPlayer);
@@ -536,6 +536,7 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
 {
  d->mLocalPlayer = localPlayer; // is this used?
  d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
+ d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
 }
 
 void BosonWidget::slotAddComputerPlayer()
@@ -543,3 +544,4 @@ void BosonWidget::slotAddComputerPlayer()
  // TODO: name, difficulty, ...
  addComputerPlayer(i18n("Computer"));
 }
+

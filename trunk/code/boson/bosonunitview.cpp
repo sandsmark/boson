@@ -51,8 +51,9 @@ BosonUnitView::BosonUnitView(QWidget* parent) : QFrame(parent)
  d = new BosonUnitViewPrivate;
  setFrameStyle(QFrame::Raised | QFrame::Panel);
  setLineWidth(5);
- setMinimumWidth(OVERVIEW_WIDTH);
- setMinimumHeight(OVERVIEW_HEIGHT);
+// setMinimumWidth(OVERVIEW_WIDTH);
+// setMinimumHeight(OVERVIEW_HEIGHT);
+ setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
 // setFixedSize();//TODO
  QVBoxLayout* topLayout = new QVBoxLayout(this, 5);// FIXME 5 is hardcoded
 

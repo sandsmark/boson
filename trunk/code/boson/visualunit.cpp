@@ -153,8 +153,24 @@ void VisualUnit::moveBy(double moveX, double moveY)
 {
 // time critical function
  double oldX = x();
- double oldY = x();
+ double oldY = y();
  QCanvasSprite::moveBy(moveX, moveY);
+ QCanvasItemList list = collisions(true);
+ if (!list.isEmpty()) {
+	QCanvasItemList::Iterator it;
+	for (it = list.begin(); it != list.end(); ++it) {
+		if ((*it)->rtti() >= RTTI::UnitStart) {
+			if (!((VisualUnit*)*it)->isDestroyed()) {
+				kdWarning() << "collided with " << list.count() 
+						<< " units" << endl;
+				kdWarning() << "moving back again" << endl;
+				QCanvasSprite::moveBy(-moveX, -moveY);
+				break;
+			}
+		}
+	}
+ }
+ 
  if (d->mSelectBoxUp) {
 	d->mSelectBoxUp->moveBy(moveX, moveY);
  }
@@ -450,7 +466,7 @@ void VisualMobileUnit::advanceMove()
 			setXVelocity(0);
 		}
 	}
-	if (!boCanvas()->canGo(this, boundingRectAdvanced())) {
+	if (!boCanvas()->canGo(unitProperties(), boundingRectAdvanced())) {
 		// we cannot go there :-(
 		setXVelocity(0);
 	}
@@ -474,7 +490,7 @@ void VisualMobileUnit::advanceMove()
 			setYVelocity(0);
 		}
 	}
-	if (!boCanvas()->canGo(this, boundingRectAdvanced())) {
+	if (!boCanvas()->canGo(unitProperties(), boundingRectAdvanced())) {
 		// we cannot go there :-(
 		setYVelocity(0);
 	}
@@ -492,15 +508,27 @@ void VisualMobileUnit::advanceMove()
  if (collisionList.isEmpty()) {
 	return;
  }
+
+ bool isAircraft = unitProperties()->isAircraft();
  QCanvasItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (collidesWith(*it)) {
 		if ((*it)->rtti() >= RTTI::UnitStart) {
 			VisualUnit* unit = ((VisualUnit*)*it);
 			if (!unit->isDestroyed()) {
-				setXVelocity(0);
-				setYVelocity(0);
-				kdDebug() << id() << " collidesWith " << unit->id() << endl;
+				if (isAircraft) {
+					if (unit->unitProperties()->isAircraft()) {
+						setXVelocity(0);
+						setYVelocity(0);
+						kdDebug() << id() << " collidesWith " << unit->id() << endl;
+					}
+				} else {
+					if (!unit->unitProperties()->isAircraft()) {
+						setXVelocity(0);
+						setYVelocity(0);
+						kdDebug() << id() << " collidesWith " << unit->id() << endl;
+					}
+				}
 			}
 		}
 	}
@@ -521,8 +549,10 @@ public:
 	{
 	}
 
-	KGamePropertyInt mConstructionState;
-	KGamePropertyInt mConstructionDelay;
+	KGamePropertyInt mConstructionState; // state of *this* unit
+	KGamePropertyInt mConstructionDelay; // delay for *this* unit
+
+	KGamePropertyList<int> mConstructions; // what this unit constructs currently
 };
 
 VisualFacility::VisualFacility(int type, Player* owner, QCanvas* canvas) : VisualUnit(type, owner, canvas)
@@ -532,6 +562,8 @@ VisualFacility::VisualFacility(int type, Player* owner, QCanvas* canvas) : Visua
 		KGamePropertyBase::PolicyLocal, "Construction State");
  d->mConstructionDelay.registerData(IdFix_ConstructionDelay, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Construction Delay");
+ d->mConstructions.registerData(IdFix_Constructions, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "Constructions");
  d->mConstructionState.setLocal(0);
 
  setWork(WorkConstructed);
@@ -572,5 +604,30 @@ void VisualFacility::beConstructed()
  } else {
 	setAnimated(false);
  }
+}
+
+bool VisualFacility::hasConstruction() const
+{
+ return !d->mConstructions.isEmpty();
+}
+
+int VisualFacility::completedConstruction() const
+{
+//FIXME: currently a construction is always completed.
+ return d->mConstructions.first();
+}
+
+void VisualFacility::addConstruction(int unitType)
+{
+ if (!unitProperties()->produceList().contains(unitType)) {
+	kdError() << id() << " cannot produce " << unitType << endl;
+	return;
+ }
+ d->mConstructions.append(unitType);
+}
+
+void VisualFacility::removeConstruction()
+{
+ d->mConstructions.pop_front();
 }
 
