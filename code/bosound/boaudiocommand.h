@@ -31,6 +31,9 @@
 class BoAudioCommand
 {
 public:
+	/**
+	 * Add an entry to listCommands() in main.cpp if you add something here!
+	 **/
 	enum Command {
 		CreateMusicObject = 0,
 		CreateSoundObject = 1,
