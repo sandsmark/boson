@@ -22,11 +22,12 @@
 
 #include "defines.h"
 
+#include <klocale.h>
+#include <kstandarddirs.h>
+
 #include <qlabel.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
-#include <klocale.h>
-#include <kstandarddirs.h>
 
 /*
  *  Constructs a BosonWelcomeWidget which is a child of 'parent', with the
@@ -38,39 +39,28 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout"); 
 
-  mWelcomeLabel = new QLabel( this, "welcomelabel" );
-  QFont mWelcomeLabel_font(  mWelcomeLabel->font() );
-  mWelcomeLabel_font.setPointSize( 30 );
-  mWelcomeLabel_font.setBold( TRUE );
-  mWelcomeLabel->setFont( mWelcomeLabel_font ); 
-  mWelcomeLabel->setText( i18n( "Welcome to Boson!" ) );
-  mWelcomeLabel->setAlignment( int( QLabel::AlignCenter ) );
-  mMainLayout->addWidget( mWelcomeLabel );
-  QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
-  mMainLayout->addItem( spacer );
-
   mBosonPixmap = new QLabel( this, "bosonpixmap" );
   mBosonPixmap->setAlignment( int( QLabel::AlignCenter ) );
   mMainLayout->addWidget( mBosonPixmap );
-  mBosonPixmap->setPixmap(QPixmap(locate("data", "boson/pics/biglogo.png")));
+  mBosonPixmap->setPixmap(QPixmap(locate("data", "boson/pics/startup.png")));
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
   mMainLayout->addItem( spacer_2 );
 
   mLowerLayout = new QHBoxLayout( 0, 0, 6, "lowerlayout");
 
-  mButtonsLayout = new QVBoxLayout( 0, 0, 6, "buttonslayout");
+  QHBoxLayout* buttonsLayout = new QHBoxLayout( 0, 0, 6, "buttonslayout");
 
   mNewGameButton = new QPushButton( this, "newgamebutton" );
   mNewGameButton->setText( i18n( "S&tart new game" ) );
   mNewGameButton->setMinimumWidth(150);
-  mButtonsLayout->addWidget( mNewGameButton );
+  buttonsLayout->addWidget( mNewGameButton );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  mButtonsLayout->addItem( spacer_3 );
+  buttonsLayout->addItem( spacer_3 );
 
 #ifndef NO_EDITOR
   mEditorButton = new QPushButton( this, "editorbutton" );
   mEditorButton->setText( i18n( "Start Editor" ) ); // TODO: accel
-  mButtonsLayout->addWidget( mEditorButton );
+  buttonsLayout->addWidget( mEditorButton );
   connect(mEditorButton, SIGNAL(clicked()), this, SIGNAL(signalStartEditor()));
 #else
   mEditorButton = 0;
@@ -78,16 +68,16 @@ BosonWelcomeWidget::BosonWelcomeWidget(QWidget* parent) : QWidget(parent)
 
   mQuitButton = new QPushButton( this, "quitbutton" );
   mQuitButton->setText( i18n( "&Quit Boson" ) );
-  mButtonsLayout->addWidget( mQuitButton );
+  buttonsLayout->addWidget( mQuitButton );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  mButtonsLayout->addItem( spacer_4 );
+  buttonsLayout->addItem( spacer_4 );
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  mButtonsLayout->addItem( spacer_5 );
+  buttonsLayout->addItem( spacer_5 );
 
   QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
   QSpacerItem* spacer_7 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Fixed );
   mLowerLayout->addItem(spacer_6);
-  mLowerLayout->addLayout(mButtonsLayout);
+  mLowerLayout->addLayout(buttonsLayout);
   mLowerLayout->addItem(spacer_7);
 
   mMainLayout->addLayout( mLowerLayout );

@@ -44,10 +44,8 @@ class BosonWelcomeWidget : public QWidget
     QVBoxLayout* mBosonWelcomeWidgetLayout;
     QVBoxLayout* mMainLayout;
     QHBoxLayout* mLowerLayout;
-    QVBoxLayout* mButtonsLayout;
 
   private:
-    QLabel* mWelcomeLabel;
     QLabel* mBosonPixmap;
     QPushButton* mNewGameButton;
     QPushButton* mEditorButton;
