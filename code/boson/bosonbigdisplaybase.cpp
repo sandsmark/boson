@@ -79,6 +79,7 @@
 #include "bosonplayfield.h"
 #include "boglstatewidget.h"
 #include "bosondata.h"
+#include "boconditionwidget.h"
 
 #include <kgame/kgameio.h>
 #include <kgame/kplayer.h>
@@ -97,6 +98,8 @@
 #include <qdir.h>
 #include <qdom.h>
 #include <qguardedptr.h>
+#include <qsignalmapper.h>
+#include <qlayout.h>
 
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
@@ -921,6 +924,51 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  // TODO: help menu
 
 
+ QSignalMapper* scrollMapper = new QSignalMapper(this);
+ connect(scrollMapper, SIGNAL(mapped(int)), this, SLOT(slotScroll(int)));
+ BoUfoAction* a;
+ KShortcut scrollUp(Qt::Key_Up);
+ scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
+ a = new BoUfoAction(i18n("Scroll Up"), scrollUp, scrollMapper,
+		SLOT(map()), actionCollection,
+		"scroll_up");
+ scrollMapper->setMapping(a, ScrollUp);
+ KShortcut scrollDown(Qt::Key_Down);
+ scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
+ a = new BoUfoAction(i18n("Scroll Down"), scrollDown, scrollMapper,
+		SLOT(map()), actionCollection,
+		"scroll_down");
+ scrollMapper->setMapping(a, ScrollDown);
+ KShortcut scrollLeft(Qt::Key_Left);
+ scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
+ a = new BoUfoAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
+		SLOT(map()), actionCollection,
+		"scroll_left");
+ scrollMapper->setMapping(a, ScrollLeft);
+ KShortcut scrollRight(Qt::Key_Right);
+ scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
+ a = new BoUfoAction(i18n("Scroll Right"), scrollRight, scrollMapper,
+		SLOT(map()), actionCollection,
+		"scroll_right");
+ scrollMapper->setMapping(a, ScrollRight);
+ KShortcut rotateLeft(Qt::Key_Q);
+ a = new BoUfoAction(i18n("Rotate Left"), rotateLeft, this,
+		SLOT(slotRotateLeft()), actionCollection,
+		"rotate_left");
+ KShortcut rotateRight(Qt::Key_E);
+ a = new BoUfoAction(i18n("Rotate Right"), rotateRight, this,
+		SLOT(slotRotateRight()), actionCollection,
+		"rotate_right");
+ KShortcut zoomIn(Qt::Key_F);
+ a = new BoUfoAction(i18n("Zoom In"), zoomIn, this,
+		SLOT(slotZoomIn()), actionCollection,
+		"zoom_in");
+ KShortcut zoomOut(Qt::Key_V);
+ a = new BoUfoAction(i18n("Zoom out"), zoomOut, this,
+		SLOT(slotZoomOut()), actionCollection,
+		"zoom_out");
+
+
 
  // Settings
 // (void)BoUfoStdAction::keyBindings(this, SLOT(slotConfigureKeys()), actionCollection);
@@ -1045,9 +1093,9 @@ void BosonBigDisplayBase::initUfoActions(bool gameMode)
  enableColorMap->setChecked(false);
  connect(enableColorMap, SIGNAL(signalToggled(bool)),
 		this, SLOT(slotSetEnableColorMap(bool)));
-// (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
-//		SLOT(slotEditConditions()), actionCollection,
-//		"debug_edit_conditions");
+ (void)new BoUfoAction(i18n("Edit global conditions..."), KShortcut(), this,
+		SLOT(slotEditConditions()), actionCollection,
+		"debug_edit_conditions");
 
 
  BoUfoSelectAction* debugMode = new BoUfoSelectAction(i18n("Mode"), 0, 0,
@@ -3177,13 +3225,13 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
  camera()->changeLookAt(BoVector3Float(x, y, 0));
 }
 
-void BosonBigDisplayBase::rotateLeft(float factor)
+void BosonBigDisplayBase::slotRotateLeft(float factor)
 {
  BO_CHECK_NULL_RET(camera());
  rotate(factor);
 }
 
-void BosonBigDisplayBase::rotateRight(float factor)
+void BosonBigDisplayBase::slotRotateRight(float factor)
 {
  BO_CHECK_NULL_RET(camera());
  rotate(-factor);
@@ -3194,7 +3242,7 @@ void BosonBigDisplayBase::rotate(float delta)
  camera()->changeRotation(delta);
 }
 
-void BosonBigDisplayBase::zoomIn(float factor)
+void BosonBigDisplayBase::slotZoomIn(float factor)
 {
  BO_CHECK_NULL_RET(camera());
 
@@ -3203,7 +3251,7 @@ void BosonBigDisplayBase::zoomIn(float factor)
  zoom(-delta);
 }
 
-void BosonBigDisplayBase::zoomOut(float factor)
+void BosonBigDisplayBase::slotZoomOut(float factor)
 {
  BO_CHECK_NULL_RET(camera());
 
@@ -4765,5 +4813,66 @@ void BosonBigDisplayBase::slotCrashBoson()
 void BosonBigDisplayBase::slotSyncNetwork()
 {
  boGame->syncNetwork();
+}
+
+void BosonBigDisplayBase::slotEditConditions()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
+		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		"editconditions", true, true);
+ QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+ BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
+ layout->addWidget(widget);
+
+ {
+	QDomDocument doc;
+	QDomElement root = doc.createElement("Conditions");
+	doc.appendChild(root);
+	if (!boGame->saveCanvasConditions(root)) {
+		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
+		KMessageBox::information(this, i18n("Canvas conditions could not be imported to the widget"));
+	} else {
+		widget->loadConditions(root);
+	}
+ }
+
+ int ret = dialog->exec();
+ QString xml = widget->toString();
+ delete widget;
+ widget = 0;
+ delete dialog;
+ dialog = 0;
+ if (ret == KDialogBase::Accepted) {
+	QDomDocument doc;
+	bool ret = doc.setContent(xml);
+	QDomElement root = doc.documentElement();
+	if (!ret || root.isNull()) {
+		boError() << k_funcinfo << "invalid XML document created" << endl;
+		KMessageBox::sorry(this, i18n("Oops - an invalid XML document was created. Internal error."));
+		return;
+	}
+	boDebug() << k_funcinfo << "applying canvas conditions" << endl;
+	boGame->loadCanvasConditions(root);
+ }
+}
+
+void BosonBigDisplayBase::slotScroll(int dir)
+{
+ switch ((ScrollDirection)dir) {
+	case ScrollUp:
+		scrollBy(0, -boConfig->arrowKeyStep());
+		break;
+	case ScrollRight:
+		scrollBy(boConfig->arrowKeyStep(), 0);
+		break;
+	case ScrollDown:
+		scrollBy(0, boConfig->arrowKeyStep());
+		break;
+	case ScrollLeft:
+		scrollBy(-boConfig->arrowKeyStep(), 0);
+		break;
+	default:
+		return;
+ }
 }
 

@@ -218,11 +218,6 @@ public:
 	 **/
 	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
 
-	void rotateLeft(float factor = 5);
-	void rotateRight(float factor = 5);
-	void zoomIn(float factor = 5);
-	void zoomOut(float factor = 5);
-
 	void zoom(float delta);
 	void rotate(float delta);
 
@@ -329,6 +324,11 @@ public slots:
 	void slotShowPlaceFacilities(Player*);
 	void slotShowPlaceMobiles(Player*);
 	void slotShowPlaceGround();
+
+	void slotRotateLeft(float factor = 5);
+	void slotRotateRight(float factor = 5);
+	void slotZoomIn(float factor = 5);
+	void slotZoomOut(float factor = 5);
 
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
@@ -446,6 +446,8 @@ protected slots:
 	void slotSetDebugWireFrames(bool);
 	void slotDumpGameLog();
 	void slotSyncNetwork();
+	void slotEditConditions();
+	void slotScroll(int);
 
 protected:
 	virtual void initializeGL();
