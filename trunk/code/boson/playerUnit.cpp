@@ -332,9 +332,9 @@ void playerMobUnit::doMoveTo(int newx, int newy)
 	int dy = newy - y();
 
 	move(newx,newy);
-	puts("a");
+//	puts("a");
 	emit sig_moveTo(newx, newy);
-	puts("b");
+//	puts("b");
 
 	if (sp_up) sp_up->moveBy(dx,dy);
 	if (sp_down) sp_down->moveBy(dx,dy);
