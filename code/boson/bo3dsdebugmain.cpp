@@ -57,10 +57,11 @@ int main(int argc, char ** argv)
 		"http://boson.eu.org");
  data.addAuthor("Andreas Beckermann", I18N_NOOP("Maintainer"), "b_mann@gmx.de");
 
+ QCString argv0(argv[0]);
  KCmdLineArgs::init( argc, argv, &data );
  KCmdLineArgs::addCmdLineOptions( options );
 
- BoApplication app;
+ BoApplication app(argv0);
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QObject::connect(kapp, SIGNAL(lastWindowClosed()), kapp, SLOT(quit()));
 
