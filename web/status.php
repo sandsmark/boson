@@ -48,6 +48,8 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>3d-terrains in map files</li>
   </ul>
   <h2>DONE</h2>
+  <blockquote>
+  <h4>Internal</h4>
   <ul>
     <li>Height map for 3d-terrain</li>
     <li>New map file format (.tar.gz instead of .gz)</li>
@@ -55,6 +57,28 @@ draw_bigbox_text("This is a list of features that I consider as
     <li>Decrease size of textures (fixes problems for 24bpp and 32bpp)</li>
     <li>Don't draw invisible particles</li>
   </ul>
+  <h4>Game</h4>
+  <ul>
+    <li>Big performance improvements</li>
+    <li>Technology upgrades are working now</li>
+    <li>Added minimap image for disabled minimap</li>
+    <li>Weapon specific sound support</li>
+  </ul>
+  <h4>Data</h4>
+  <ul>
+    <li>New facility: Ferry</li>
+    <li>Unit models improvements<li>
+  </ul>
+  <h4>Editor</h4>
+  <ul>
+    <li>Some bugs are fixed</li>
+    <li>Buildings are placed in constructed mode</li>
+    <li>Support for changing map name and description</li>
+  </ul>
+  
+  
+  
+  </blockquote>
   ");
 main_area_end();
 main_table_end();
