@@ -187,7 +187,7 @@ QPixmap* SpeciesTheme::pixmap(const QString& name)
  return mData->pixmap(name);
 }
 
-BoAction* SpeciesTheme::action(const QString& name) const
+const BoAction* SpeciesTheme::action(const QString& name) const
 {
  return mData->action(name);
 }

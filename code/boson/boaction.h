@@ -61,7 +61,7 @@ class BoAction
 class BoSpecificAction
 {
   public:
-    BoSpecificAction(BoAction* action);
+    BoSpecificAction(const BoAction* action);
     BoSpecificAction();
 
     // These are meant to be used by commandframe only
@@ -99,7 +99,7 @@ class BoSpecificAction
     void reset();
     void operator=(const BoSpecificAction& a);
 
-    BoAction* action() const  { return mAction; }
+    const BoAction* action() const  { return mAction; }
     const QString& id() const
     {
       if (!mAction)
@@ -135,7 +135,7 @@ class BoSpecificAction
 
 
   private:
-    BoAction* mAction;
+    const BoAction* mAction;
     long unsigned int mProductionId;
     UnitAction mType;
     Unit* mUnit;

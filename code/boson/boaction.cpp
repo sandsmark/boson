@@ -53,7 +53,7 @@ BoAction::BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, 
 
 /*** BoSpecificAction  ***/
 
-BoSpecificAction::BoSpecificAction(BoAction* action)
+BoSpecificAction::BoSpecificAction(const BoAction* action)
 {
   reset();
   mAction = action;

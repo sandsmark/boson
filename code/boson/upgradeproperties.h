@@ -109,7 +109,7 @@ class UpgradeProperties
     /**
      * @return Action to produce this upgrade
      **/
-    BoAction* produceAction() const { return mProduceAction; }
+    const BoAction* produceAction() const { return mProduceAction; }
     /**
      * @return List of units required by this upgrade
      **/
@@ -164,7 +164,7 @@ class UpgradeProperties
     unsigned int mProductionTime;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
-    BoAction* mProduceAction;
+    const BoAction* mProduceAction;
     const SpeciesTheme* mTheme;
 };
 

@@ -128,7 +128,7 @@ public:
 	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
 	QPixmap* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
 	const BosonParticleSystemProperties* particleSystemProperties(unsigned long int id) const;
-	BoAction* action(const QString& name) const;
+	const BoAction* action(const QString& name) const;
 
 	/**
 	 * @return Pixmap with name @name from the pixmap cache
