@@ -229,8 +229,8 @@ void BosonWidgetBase::initConnections()
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
 		this, SLOT(slotSaveExternalStuffAsXML(QDomElement&))); 
 
- connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&, const Player*)),
-		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&, const Player*)));
+ connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&)),
+		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&)));
 }
 
 void BosonWidgetBase::initDisplayManager()
@@ -498,12 +498,8 @@ void BosonWidgetBase::slotToggleMusic()
  boConfig->setMusic(boMusic->music());
 }
 
-void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
+void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QString& text)
 {
- if (forPlayer && forPlayer != localPlayer()) {
-	return;
- }
-
  // add a chat system-message *without* sending it over network (makes no sense
  // for system messages)
  d->mChat->addSystemMessage(fromName, text);

@@ -231,7 +231,7 @@ protected slots:
 	 * <em>without</em> sending it over network.
 	 * If forPlayer is NULL, message is shown to all players, otherwise only to forPlayer
 	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
 
 protected:
 	void setLocalPlayerRecursively(Player* p);

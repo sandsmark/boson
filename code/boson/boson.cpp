@@ -666,11 +666,15 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			}
 
 		if (p->minerals() < mineralCost) {
-			slotAddChatSystemMessage(i18n("You have not enough minerals!"), p);
+			if (p == localPlayer()) {
+				slotAddChatSystemMessage(i18n("You have not enough minerals!"));
+			}
 			break;
 		}
 		if (p->oil() < oilCost) {
-			slotAddChatSystemMessage(i18n("You have not enough oil!"), p);
+			if (p == localPlayer()) {
+				slotAddChatSystemMessage(i18n("You have not enough oil!"));
+			}
 			break;
 		}
 		p->setMinerals(p->minerals() - mineralCost);
@@ -2354,15 +2358,15 @@ void Boson::slotUpdateProductionOptions()
  emit signalUpdateProductionOptions();
 }
 
-void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
+void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text)
 {
  // just forward it to BosonWidgetBase
- emit signalAddChatSystemMessage(fromName, text, forPlayer);
+ emit signalAddChatSystemMessage(fromName, text);
 }
 
-void Boson::slotAddChatSystemMessage(const QString& text, const Player* forPlayer)
+void Boson::slotAddChatSystemMessage(const QString& text)
 {
- slotAddChatSystemMessage(i18n("Boson"), text, forPlayer);
+ slotAddChatSystemMessage(i18n("Boson"), text);
 }
 
 void Boson::slotDebugOutput(const QString& area, const char* data, int level)
