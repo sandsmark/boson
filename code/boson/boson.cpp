@@ -234,7 +234,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		p->setMinerals(p->minerals() - prop->mineralCost());
 		p->setOil(p->oil() - prop->oilCost());
 		factory->addProduction(unitType);
-		emit signalProduceUnit(factory);
+		emit signalStartProduction(factory);
 		break;
 	}
 	case BosonMessage::MoveBuild:

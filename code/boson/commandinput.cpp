@@ -81,7 +81,6 @@ void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* own
  sendInput(msg);
 }
 
-void CommandInput::slotPlaceCell(int)
+void CommandInput::slotPlaceCell(int) // obsolete
 {
-//TODO
 }

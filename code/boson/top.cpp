@@ -31,14 +31,20 @@
 #include <kdebug.h>
 
 #include <qwmatrix.h>
+#include <qvbox.h>
 
 #include "top.moc"
 
 Top::Top() : TopBase()
 {
- bosonWidget()->addGameCommandFrame();
-
  initKAction();
+
+ QToolBar* t = new QToolBar(i18n("CommandToolBar"), (QMainWindow*)this, QMainWindow::Left); // FIXME - config (left)!
+ QVBox* frame = new QVBox(t);
+		 
+ bosonWidget()->addMiniMap(frame);
+ bosonWidget()->addGameCommandFrame(frame);
+
  initStatusBar();
 
  showMaximized();

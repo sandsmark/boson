@@ -156,12 +156,15 @@ void BosonWidget::init()
 // - BosonMiniMap - the mini map. what else ;-)
 // - CommandFrame - the frame on the right side e.g. for producing units/cells, data
 // about units,
+// UPDATE: BosonMiniMap and CommandFrame are *not* in BosonWidget anymore. They
+// are still handled here (you can find d->mCommandFrame and d->mMiniMap here
+// and they are also new'ed here) but their parent is now a KToolBar. Add these
+// widgets with addMiniMap() and add[Editor|Game]CommandFrame(). 
+// This is all but a nice solution (they belong to TopBase/Top/Editor) but it
+// seems to be the best solution I can find. All other result in very much
+// signal/slot forwarding (from cmdframe/map through BosonWidget to
+// destination).
  d->mBigDisplay = new BosonBigDisplay(d->mCanvas, this);
- d->mMiniMap = new BosonMiniMap(this);
- d->mMiniMap->setCanvas(d->mCanvas);
-// d->mCommandFrame is now in addEditorCommandFrame() or addGameCommandFrame().
-// This is called by Top or Editor after construction of BosonWidget.
-
 
 // beside the three main widgets this widget contains the game itself. Boson is
 // derived from KGame and should manage the game stuff. BosonWidget also
@@ -177,8 +180,6 @@ void BosonWidget::init()
 		d->mCanvas, SLOT(advance()));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		d->mCanvas, SLOT(slotAddUnit(Unit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
- connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
-		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
  connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
  connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
@@ -206,34 +207,15 @@ void BosonWidget::init()
 
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)), // only EDITOR signal
-		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
- connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
-		d->mMiniMap, SLOT(slotMoveRect(int, int)));
- connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
-		d->mMiniMap, SLOT(slotResizeRect(int, int)));
  connect(this, SIGNAL(signalMineralsUpdated(int)),
 		d->mBigDisplay, SLOT(slotUpdateMinerals(int)));
  connect(this, SIGNAL(signalOilUpdated(int)),
 		d->mBigDisplay, SLOT(slotUpdateOil(int)));
 		
- connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
-		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
-
- connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
-		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		this, SLOT(slotRemoveUnit(Unit*)));
- connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
-		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
- d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
- d->mChat->hide();
- d->mBigDisplay->setKGameChat(d->mChat);
-#ifdef BETA1
- d->mBigDisplay->setKGame(d->mBoson);
-#endif
-
+ initChat();
 
  d->mMusic = new BosonMusic(this);
  connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
@@ -258,6 +240,37 @@ void BosonWidget::init()
  d->mCommandPos = (int)OptionsDialog::Left;
  d->mChatPos = (int)OptionsDialog::Bottom;
 }
+
+void BosonWidget::addMiniMap(QWidget* parent)
+{
+ d->mMiniMap = new BosonMiniMap(parent);
+ d->mMiniMap->setCanvas(d->mCanvas);
+ connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
+		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)), // only EDITOR signal
+		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
+ connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
+		d->mMiniMap, SLOT(slotMoveRect(int, int)));
+ connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
+		d->mMiniMap, SLOT(slotResizeRect(int, int)));
+ connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
+		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
+ connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
+		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
+ connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
+		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
+}
+
+void BosonWidget::initChat()
+{
+ d->mChat = new KGameChat(d->mBoson, BosonMessage::IdChat, this);
+ d->mChat->hide();
+ d->mBigDisplay->setKGameChat(d->mChat);
+#ifdef BETA1
+ d->mBigDisplay->setKGame(d->mBoson);
+#endif
+}
+
 
 BosonWidget::~BosonWidget()
 {
@@ -628,9 +641,9 @@ void BosonWidget::recreateMap()
 		d->mMap, SLOT(changeCell(int, int, int, unsigned char)));
 }
 
-void BosonWidget::addEditorCommandFrame()
+void BosonWidget::addEditorCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
- d->mCommandFrame = new BosonCommandFrame(this, true);
+ d->mCommandFrame = new BosonCommandFrame(parent, true);
 
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
@@ -650,13 +663,13 @@ void BosonWidget::addEditorCommandFrame()
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
- slotCommandFramePosition(BosonConfig::commandFramePosition());
+// slotCommandFramePosition(BosonConfig::commandFramePosition());
  slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
-void BosonWidget::addGameCommandFrame()
+void BosonWidget::addGameCommandFrame(QWidget* parent)
 { // remember to call this *after* init() - otherwise connect()s won't work
- d->mCommandFrame = new BosonCommandFrame(this, false);
+ d->mCommandFrame = new BosonCommandFrame(parent, false);
 
 // connect(d->mCommandFrame, SIGNAL(signalProduceUnit(int, Unit*, Player*)),
 //		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
@@ -667,12 +680,12 @@ void BosonWidget::addGameCommandFrame()
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
- connect(d->mBoson, SIGNAL(signalProduceUnit(Facility*)),
+ connect(d->mBoson, SIGNAL(signalStartProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotFacilityProduces(Facility*)));
  connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
  
- slotCommandFramePosition(BosonConfig::commandFramePosition());
+// slotCommandFramePosition(BosonConfig::commandFramePosition());
  slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
@@ -949,8 +962,8 @@ void BosonWidget::recreateLayout(int commandPos, int chatPos)
 // redo layout
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
  d->mFrameLayout = new QVBoxLayout();
- d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
- d->mFrameLayout->addWidget(d->mCommandFrame);
+// d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
+// d->mFrameLayout->addWidget(d->mCommandFrame);
  d->mViewLayout = new QVBoxLayout();
 
  if (chatPos == OptionsDialog::Top) {
@@ -963,9 +976,9 @@ void BosonWidget::recreateLayout(int commandPos, int chatPos)
  
  if (commandPos == OptionsDialog::Right) {
 	d->mTopLayout->addLayout(d->mViewLayout);
-	d->mTopLayout->addLayout(d->mFrameLayout);
+//	d->mTopLayout->addLayout(d->mFrameLayout);
  } else {
-	d->mTopLayout->addLayout(d->mFrameLayout);
+//	d->mTopLayout->addLayout(d->mFrameLayout);
 	d->mTopLayout->addLayout(d->mViewLayout);
  }
  d->mCommandPos = commandPos;
