@@ -237,6 +237,8 @@ void BosonWidget::initConnections()
 void BosonWidget::initDisplayManager()
 {
  d->mDisplayManager = new BoDisplayManager(canvas(), this);
+ connect(d->mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplay*,BosonBigDisplay*)),
+		this, SLOT(slotSetActiveDisplay(BosonBigDisplay*,BosonBigDisplay*)));
  canvas()->setDisplayManager(displaymanager());
  displaymanager()->setLocalPlayer(player());
  initBigDisplay(displaymanager()->addInitialDisplay());
