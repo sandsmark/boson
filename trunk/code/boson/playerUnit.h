@@ -43,7 +43,8 @@ class playerMobUnit : public visualMobUnit
   ~playerMobUnit();
 
   void	getWantedAction();
-
+ 
+  void	shooted(int _power);
 /* Server orders */
   void  doMoveBy(int dx, int dy);
   void  s_moveBy(int dx, int dy, int direction);
@@ -97,17 +98,17 @@ class playerFacility : public visualFacility
   playerFacility(facilityMsg_t *msg, QObject* parent=0L, const char *name=0L);
   ~playerFacility();
 
-  void	getWantedAction();
+	void	getWantedAction();
 
 /* Server orders */
-  void		s_setState(int );
-
+	void	s_setState(int );
+	void	shooted(int _power);
 
 public slots:
-  	void targetDying(Unit *);
-  	void targetMoveBy(int, int);
+  	void	targetDying(Unit *);
+  	void	targetMoveBy(int, int);
 signals:
-	void dying(Unit *);
+	void	dying(Unit *);
 };
 
 #endif // PLAYERUNIT_H

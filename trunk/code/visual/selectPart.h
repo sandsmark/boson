@@ -24,9 +24,10 @@
 
 #include <QwSpriteField.h>
 #include "sprites.h"
+#include "common/unit.h"
 
 
-#define PART_NB		10
+#define PART_NB		(MAX_POWER+1)
 
 
 ///orzel : could be made with only one class with yet another arg  : PART_UP / PART_DOWN 

@@ -32,10 +32,11 @@ class boBuffer;
 
 class serverUnit {
  public:
-	serverUnit(boBuffer *b, int x, int y) { buffer = b; __x=x; __y=y; state = 0; }
+	serverUnit(boBuffer *b, int x, int y) { buffer = b; __x=x; __y=y; state = 0; power = MAX_POWER; }
 
  protected:
  int		__x, __y;
+ int		power;
 
  boBuffer	*buffer;
  int		state;
@@ -62,6 +63,8 @@ public:
 /* request */
  void	r_moveBy(moveMsg_t &, int playerId, boBuffer *);
 
+ bool shooted();
+
 };
  
 
@@ -84,6 +87,8 @@ class serverFacility : public Facility, public serverUnit, public knownBy
 
 /* request */
  void getWantedAction();
+
+ bool shooted();
 };
  
 

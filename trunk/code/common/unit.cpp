@@ -21,10 +21,15 @@
 #include "unit.h"
 #include "map.h"
 
-Unit::Unit(QObject*parent, const char *name)
+Unit::Unit(int _key, int _who, QObject*parent, const char *name)
 	: QObject(parent, name)
 {
-	who = 0;
+	who		= _who;
+	key		= _key;
+	
+	contain		= 0;
+	countDown	= 0;
+	work		= WORK_NONE;
 }
 
 
@@ -33,10 +38,8 @@ Unit::Unit(QObject*parent, const char *name)
  */
 
 mobUnit::mobUnit(mobileMsg_t *msg, QObject* parent, const char *name)
-:Unit(parent,name)
+:Unit(msg->key, msg->who, parent,name)
 {
-	key	= msg->key;
-	who	= msg->who;
 	type	= msg->type;
 
 	isShown = TRUE; ///orzel : should be removed since Qw handles this now...
@@ -64,10 +67,8 @@ QRect mobUnit::rect(void)
  */
 
 Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name)
-:Unit(parent,name)
+:Unit(msg->key, msg->who, parent,name)
 {
-	key	= msg->key;
-	who	= msg->who;
 	type	= msg->type;
 }
 

@@ -74,7 +74,7 @@ void visualMobUnit::select()
 
 	sp_up = new selectPart_up(power, z());
 	sp_up->moveTo(r.right(), r.top());
-	sp_down = new selectPart_down(10, z());
+	sp_down = new selectPart_down(9, z());
 	sp_down->moveTo(r.left(), r.bottom());
 }
 
@@ -110,7 +110,7 @@ void visualFacility::select()
 
 	sp_up = new selectPart_up(power, z());
 	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
-	sp_down = new selectPart_down(10, z());
+	sp_down = new selectPart_down(9, z());
 	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
 }
 

@@ -303,11 +303,17 @@ switch(tag) {
 		ASSERT_DATA_BLENGHT(sizeof(data->shoot));
 		mob = mobile.find(data->shoot.target_key);
 		fix = facility.find(data->shoot.target_key);
-		if (mob)
+		if (mob) {
+			/* shooting a mobile */
 			mob->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
-		else if
-			(fix) fix->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
-		else	logf(LOG_ERROR, "handleGameMessage : unexpected target_key in shootMsg_t : %d", data->shoot.target_key);
+			if (mob->shooted())		// must be last, cause then, mob must be irrelevant (unit has died)
+				mobile.remove(data->shoot.target_key);
+		} else if (fix) {
+			/* shooting a facility */
+			fix->sendToKnown(MSG_UNIT_SHOOT, sizeof(data->shoot), data);
+			if (fix->shooted())		// must be last, cause then, fix must be irrelevant (unit has died)
+				facility.remove(data->shoot.target_key);
+		} else	logf(LOG_ERROR, "handleGameMessage : unexpected target_key in shootMsg_t : %d", data->shoot.target_key);
 
 		break;
 

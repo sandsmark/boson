@@ -42,6 +42,12 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 }
 
 
+
+/*
+ * class serverUnit
+ */
+
+
 /*
  *  MOBILE 
  */
@@ -50,6 +56,36 @@ serverMobUnit::serverMobUnit(boBuffer *b, mobileMsg_t *msg, QObject* parent, con
 	:mobUnit(msg,parent,name)
 	,serverUnit(b,msg->x, msg->y)
 {
+}
+
+bool serverMobUnit::shooted()
+{
+	if (--power <=0) {
+
+		destroyedMsg_t  destroyed;
+
+		/* tell everybody that we no longer exist */
+		destroyed.key = key;
+		destroyed.x = __x;
+		destroyed.y = __y;
+	
+		logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
+
+		sendToKnown( MSG_MOBILE_DESTROYED  , sizeof(destroyed), &destroyed);
+		
+		return true;
+
+	} else {
+		/* broadcast the info */
+		powerMsg_t	_power;
+		
+		_power.key	= key;
+		_power.power	= power;
+		sendToKnown( MSG_UNIT_POWER, sizeof(_power), &_power);
+		
+		return false;
+	}
+
 }
 
 void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
@@ -107,6 +143,36 @@ serverFacility::serverFacility(boBuffer *b, facilityMsg_t *msg, QObject* parent,
 	,serverUnit(b,msg->x * BO_TILE_SIZE, msg->y * BO_TILE_SIZE)
 {
 	counter = BUILDING_SPEED;
+}
+
+bool serverFacility::shooted()
+{
+	if (--power <=0) {
+
+		destroyedMsg_t  destroyed;
+
+		/* tell everybody that we no longer exist */
+		destroyed.key = key;
+		destroyed.x = __x;
+		destroyed.y = __y;
+	
+		logf(LOG_WARNING, "serverUnit::shooted, key = %d", key);
+
+		sendToKnown( MSG_FACILITY_DESTROYED  , sizeof(destroyed), &destroyed);
+
+		return true;
+
+	} else {
+		/* broadcast the info */
+		powerMsg_t	_power;
+		
+		_power.key	= key;
+		_power.power	= power;
+		sendToKnown( MSG_UNIT_POWER, sizeof(_power), &_power);
+
+		return false;
+	}
+
 }
 
 

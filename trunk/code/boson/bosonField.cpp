@@ -144,6 +144,27 @@ void bosonField::requestAction(void)
 		fixIt.current()->getWantedAction();
 }
 
+void bosonField::shooted(powerMsg_t &m)
+{
+	playerMobUnit	* mob;
+	playerFacility	* fix;
+
+	mob = mobile.find(m.key);
+	fix = facility.find(m.key);
+
+	if (mob) {
+		/* shooting a mobile */
+		mob->shooted(m.power);
+	} else if (fix) {
+		/* shooting a facility */
+		fix->shooted(m.power);
+	} else	logf(LOG_ERROR, "bosonField::shooted : unexpected key in powerMsg_t : %d", m.key);
+
+}
+
+
+
+
 void bosonField::shoot(shootMsg_t &m)
 {
 	playerMobUnit	* mob;
