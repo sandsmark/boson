@@ -186,6 +186,8 @@ public:
 	 * We should cann updateGL() directly instead.
 	 **/
 	void updateGLCursor();
+  
+  double fps();
 #endif
 
 public slots:
@@ -239,6 +241,8 @@ protected:
 	GLfloat cameraZ() const;
 
 	bool checkError();
+
+	void calcFPS();
 #endif
 
 	bool selectAll(const UnitProperties* prop);
