@@ -32,6 +32,7 @@ class QDataStream;
 class QTextStream;
 class BosonSaveLoad;
 class BosonStarting;
+class BoMessage;
 
 #define boGame Boson::boson()
 
@@ -173,6 +174,15 @@ public:
 	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
+
+	/**
+	 * Called by @ref networkTransmission. This method actually delivers the
+	 * message to @ref KGame, i.e. call @ref KGame::networkTransmission.
+	 *
+	 * We do <em>not</em> check here whether the message is to be delayed
+	 * any further. Do that in @ref networkTransmission.
+	 **/
+	void networkTransmission(BoMessage*);
 
 	/**
 	 * Lock message delivery until @ref unlock is called.
@@ -485,6 +495,7 @@ protected:
 	 * @ref saveGameLogs).
 	 **/
 	void makeGameLog();
+
 
 protected slots:
 	/**

@@ -425,7 +425,8 @@ public:
 	Q_UINT32 sender;
 	Q_UINT32 clientId;
 	unsigned int advanceCallsCount;
-	QTime mTime;
+	QTime mArrivalTime;
+	QTime mDeliveryTime;
 
 	/**
 	 * Construct a new message. The tinmstamp is set to the current time.
@@ -435,24 +436,33 @@ public:
 	 **/
 	BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0)
 		: byteArray(_message),
-		msgid(msgid),
+		msgid(_msgid),
 		receiver(_receiver),
 		sender(_sender),
 		clientId(_clientId),
 		advanceCallsCount(_advanceCallsCount)
 	{
-		mTime = QTime::currentTime();
+		mArrivalTime = QTime::currentTime();
 	}
 
 	BoMessage(QDataStream& stream, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount = 0)
 		: byteArray(((QBuffer*)stream.device())->readAll()),
-		msgid(msgid),
+		msgid(_msgid),
 		receiver(_receiver),
 		sender(_sender),
 		clientId(_clientId),
 		advanceCallsCount(_advanceCallsCount)
 	{
-		mTime = QTime::currentTime();
+		mArrivalTime = QTime::currentTime();
+	}
+
+	/**
+	 * Set the delivery time to the current time. Both, arrival and delivery
+	 * time are (nearly) equal, except if a message has been delayed.
+	 **/
+	void setDelivered()
+	{
+		mDeliveryTime = QTime::currentTime();
 	}
 
 	QString debug(KGame* game)
@@ -549,6 +559,8 @@ public:
 	}
 	~BoMessageDelayer()
 	{
+		// remaining messages are not stored anywhere else. they are
+		// deleted here.
 		mDelayedMessages.clear();
 	}
 
@@ -599,17 +611,23 @@ public:
 	 * be called then. Otherwise you can simply proceed and call @ref
 	 * KGame::networkTransmission for this message.
 	 *
+	 * The message @p m is stored in this class if the message is delayed.
+	 * That object will be used to deliver it later - do NOT delete the
+	 * message if it is delayed!
+	 *
 	 * @return TRUE if the message can be delivered normally, FALSE if it
 	 * got delayed.
 	 **/
-	bool processMessage(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
+	bool processMessage(BoMessage* m)
 	{
+		if (!m) {
+			return true;
+		}
 		if (mIsLocked || mDelayedWaiting) {
-			BoMessage* m = new BoMessage(stream, msgid, r, s, clientId);
 			boDebug() << k_funcinfo << "delayed " << m->debug(mBoson) << endl;
 			mDelayedMessages.enqueue(m);
 			mDelayedWaiting = true;
-			switch (msgid - KGameMessage::IdUser) {
+			switch (m->msgid - KGameMessage::IdUser) {
 				case BosonMessage::AdvanceN:
 					mAdvanceMessageWaiting++;
 					boWarning(300) << k_funcinfo << "advance message got delayed @" << mBoson->advanceCallsCount() << endl;
@@ -650,9 +668,8 @@ protected:
 			default:
 				break;
 		}
-		mBoson->networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
+		mBoson->networkTransmission(m);
 		mDelayedWaiting = !mDelayedMessages.isEmpty();
-		delete m;
 	}
 
 private:
@@ -2071,26 +2088,26 @@ void Boson::slotReceiveAdvance()
 
 void Boson::networkTransmission(QDataStream& stream, int msgid, Q_UINT32 r, Q_UINT32 s, Q_UINT32 clientId)
 {
- // Log message
-#warning is this a good place?
- // AB: this is a very dangerous place - is it intended?
- // when message B is received after a message A and B gets delayed (i.e.
- // processed later) then the log will look like this:
- // A, B, B
- // because when a delayed message gets processed, networkTransmission() is
- // called again - i.e. B appears twice in the log although it was physically
- // received only once.
- // as a solution to the we might move these two lines a bit down, right before
- // the KGame::networkTransmission() call
- BoMessage* log = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
- d->mMessageLogger.append(log);
+ BoMessage* m = new BoMessage(stream, msgid, r, s, clientId, advanceCallsCount());
 
- if (!d->mMessageDelayer->processMessage(stream, msgid, r, s, clientId)) {
+ if (!d->mMessageDelayer->processMessage(m)) {
 	// the message got delayed. don't deliver it now.
 	return;
  }
  // not delayed - deliver it
- KGame::networkTransmission(stream, msgid, r, s, clientId);
+ networkTransmission(m);
+}
+
+void Boson::networkTransmission(BoMessage* m)
+{
+ if (!m) {
+	BO_NULL_ERROR(m);
+	return;
+ }
+ m->setDelivered();
+ d->mMessageLogger.append(m);
+ QDataStream s(m->byteArray, IO_ReadOnly);
+ KGame::networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
 }
 
 void Boson::lock()
