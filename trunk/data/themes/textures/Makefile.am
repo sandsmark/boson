@@ -1,25 +1,27 @@
 # add your texture to texture_DATA (space separated) to make it install!
 texture_DATA = \
-	5sqtunnelroad.jpg \
 	airportroadcorner2.jpg \
-	battlefrnt.jpg \
-	blueglasblks2.jpg \
-	crome.jpg \
-	docktopside.jpg \
+	concrt1.jpg \
+	concrt2.jpg \
+	concrt3.jpg \
 	doors1.jpg \
 	doors2.jpg \
 	doors3.jpg \
 	doors4.jpg \
 	elecpanelstwo.jpg \
-	etopcrome.jpg \
-	hhroofgray.jpg \
+	metal1.jpg \
+	metal2.jpg \
+	metal3.jpg \
 	metal4.jpg \
+	metal5.jpg \
 	metal6.jpg \
 	metal7.jpg \
-	rome_streets1.jpg \
+	metal8.jpg \
+	roof1.jpg \
+	tnkhull1.jpg \
 	tracks.jpg \
 	trtside.jpg \
-	vehlcamotop.jpg \
+	vehlcamo.jpg \
 	wall1.jpg \
 	wall2.jpg \
 	wheel.jpg \

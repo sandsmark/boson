@@ -8,8 +8,3 @@ MineralCost=250
 Producer=10
 Requirements=4,5,3
 
-[Textures]
-Textures=concrt1.jpg,concrt2.jpg
-concrt1.jpg=rome_streets1.jpg
-concrt2.jpg=docktopside.jpg
-
