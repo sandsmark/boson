@@ -242,7 +242,7 @@ void ProductionPlugin::advance(unsigned int)
 			return;
 		}
 
-		BoGenericULongEvent* unitProduced = new BoGenericULongEvent("UnitWithTypeProduced", id);
+		BoEvent* unitProduced = new BoEvent("UnitWithTypeProduced", QString::number(id));
 		unitProduced->setPlayerId(player()->id());
 		game()->queueEvent(unitProduced);
 

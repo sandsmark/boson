@@ -738,7 +738,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 		unit->setVisible(false);
 	}
 
-	BoGenericULongEvent* unitDestroyed = new BoGenericULongEvent("UnitWithTypeDestroyed", unit->type());
+	BoEvent* unitDestroyed = new BoEvent("UnitWithTypeDestroyed", QString::number(unit->type()));
 	unitDestroyed->setUnitId(unit->id());
 	unitDestroyed->setPlayerId(unit->owner()->id());
 	boGame->queueEvent(unitDestroyed);

@@ -740,7 +740,6 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	matching.setAttribute("IgnorePlayerId", true);
 	matching.setAttribute("IgnoreData1", true);
 	matching.setAttribute("IgnoreData2", true);
-	event.setAttribute("RTTI", 1);
 	event.setAttribute("Name", "UnitWithTypeDestroyed");
 	event.setAttribute("Id", 0);
 	event.setAttribute("UnitId", 0);
@@ -749,6 +748,8 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	event.setAttribute("Location.x", 0.0);
 	event.setAttribute("Location.y", 0.0);
 	event.setAttribute("Location.z", 0.0);
+	event.setAttribute("Data1", "");
+	event.setAttribute("Data2", "");
 	matching.appendChild(event);
 	events.appendChild(matching);
 

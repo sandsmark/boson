@@ -69,22 +69,13 @@ bool BoEventMatching::load(const QDomElement& root)
 	boError(360) << k_funcinfo << "no Event tag" << endl;
 	return false;
  }
- bool ok;
- int rtti = e.attribute("RTTI").toInt(&ok);
- if (!ok) {
-	boError(360) << k_funcinfo << "RTTI is not a valid number" << endl;
-	return false;
- }
- mEvent = BoEvent::createEvent(rtti);
- if (!mEvent) {
-	boError(360) << k_funcinfo << "could not create event for rtti=" << rtti << endl;
-	return false;
- }
+ mEvent = new BoEvent();
  if (!mEvent->load(e)) {
 	boError(360) << k_funcinfo << "could not load event" << endl;
 	return false;
  }
 
+ bool ok;
  // this macro just makes the code more readable. instead of 
  // mIgnoreUnitId = root.attribute("UnitId").toInt(&ok); if (!ok) { ... }
  // we just write LOAD_IGNORE(UnitId).

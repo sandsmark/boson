@@ -26,9 +26,11 @@
 #include <qptrlist.h>
 #include <qmap.h>
 
-BoEvent::BoEvent(const QCString& name)
+BoEvent::BoEvent(const QCString& name, const QString& data1, const QString& data2)
 {
  init(name);
+ mData1 = data1;
+ mData2 = data2;
 }
 
 BoEvent::BoEvent()
@@ -53,12 +55,13 @@ BoEvent::~BoEvent()
 
 bool BoEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
 {
- root.setAttribute("RTTI", rtti());
  root.setAttribute("Name", name());
  root.setAttribute("Id", QString::number(id()));
  root.setAttribute("UnitId", QString::number(unitId()));
  root.setAttribute("DelayedDelivery", QString::number(delayedDelivery()));
  root.setAttribute("HasLocation", QString::number((int)hasLocation()));
+ root.setAttribute("Data1", mData1);
+ root.setAttribute("Data2", mData2);
  if (!location().saveAsXML(root, "Location")) {
 	boError(360) << k_funcinfo << endl;
 	return false;
@@ -121,14 +124,13 @@ bool BoEvent::load(const QDomElement& root)
 	boError(360) << k_funcinfo << "unable to load Location" << endl;
 	return false;
  }
+ mData1 = root.attribute("Data1");
+ mData2 = root.attribute("Data2");
  return true;
 }
 
 bool BoEvent::matches(const BoEventMatching* m, const BoEvent* e) const
 {
- if (rtti() != e->rtti()) {
-	return false;
- }
  if (name() != e->name()) {
 	return false;
  }
@@ -147,137 +149,17 @@ bool BoEvent::matches(const BoEventMatching* m, const BoEvent* e) const
 		}
 	}
  }
+ if (!m->ignoreData1()) {
+	if (data1() != e->data1()) {
+		return false;
+	}
+ }
+ if (!m->ignoreData2()) {
+	if (data2() != e->data2()) {
+		return false;
+	}
+ }
  // id(), location() and delayedDelivery() are not relevant here!
- return true;
-}
-
-BoEvent* BoEvent::createEvent(int rtti)
-{
- BoEvent* event = 0;
- switch (rtti) {
-	case BoEvent::RTTIEvent:
-		event = new BoEvent();
-		break;
-	case BoEvent::RTTIULong:
-		event = new BoGenericULongEvent();
-		break;
-	case BoEvent::RTTIString:
-		event = new BoGenericStringEvent();
-		break;
-	default:
-		boError(360) << k_funcinfo << "unhandled rtti " << rtti << endl;
-		break;
- }
- return event;
-}
-
-BoGenericULongEvent::BoGenericULongEvent()
-	: BoEvent()
-{
- mData1 = 0;
- mData2 = 0;
-}
-
-BoGenericULongEvent::BoGenericULongEvent(const QCString& name, unsigned long int data1, unsigned long int data2)
-	: BoEvent(name)
-{
- mData1 = data1;
- mData2 = data2;
-}
-
-BoGenericULongEvent::~BoGenericULongEvent()
-{
-}
-
-bool BoGenericULongEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
-{
- root.setAttribute("Data1", QString::number(mData1));
- root.setAttribute("Data2", QString::number(mData2));
- return BoEvent::save(root, playerId2Index);
-}
-
-bool BoGenericULongEvent::load(const QDomElement& root)
-{
- bool ok;
- mData1 = root.attribute("Data1").toULong(&ok);
- if (!ok) {
-	boError(360) << k_funcinfo << "Invalid Data1" << endl;
-	return false;
- }
- mData2 = root.attribute("Data2").toULong(&ok);
- if (!ok) {
-	boError(360) << k_funcinfo << "Invalid Data2" << endl;
-	return false;
- }
- return BoEvent::load(root);
-}
-
-bool BoGenericULongEvent::matches(const BoEventMatching* m, const BoEvent* e) const
-{
- if (!BoEvent::matches(m, e)) {
-	return false;
- }
- BoGenericULongEvent* ev = (BoGenericULongEvent*)e;
- if (!m->ignoreData1()) {
-	if (data1() != ev->data1()) {
-		return false;
-	}
- }
- if (!m->ignoreData2()) {
-	if (data2() != ev->data2()) {
-		return false;
-	}
- }
- return true;
-}
-
-
-BoGenericStringEvent::BoGenericStringEvent()
-	: BoEvent()
-{
-}
-
-BoGenericStringEvent::BoGenericStringEvent(const QCString& name, const QString& data1, const QString& data2)
-	: BoEvent(name)
-{
- mData1 = data1;
- mData2 = data2;
-}
-
-BoGenericStringEvent::~BoGenericStringEvent()
-{
-}
-
-bool BoGenericStringEvent::save(QDomElement& root, const QMap<int, int>* playerId2Index) const
-{
- root.setAttribute("Data1", mData1);
- root.setAttribute("Data2", mData2);
- return BoEvent::save(root, playerId2Index);
-}
-
-bool BoGenericStringEvent::load(const QDomElement& root)
-{
- mData1 = root.attribute("Data1");
- mData2 = root.attribute("Data2");
- return BoEvent::load(root);
-}
-
-bool BoGenericStringEvent::matches(const BoEventMatching* m, const BoEvent* e) const
-{
- if (!BoEvent::matches(m, e)) {
-	return false;
- }
- BoGenericStringEvent* ev = (BoGenericStringEvent*)e;
- if (!m->ignoreData1()) {
-	if (data1() != ev->data1()) {
-		return false;
-	}
- }
- if (!m->ignoreData2()) {
-	if (data2() != ev->data2()) {
-		return false;
-	}
- }
  return true;
 }
 

@@ -2060,7 +2060,7 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
  }
 
- BoGenericULongEvent* productionPlaced = new BoGenericULongEvent("ProducedUnitWithTypePlaced", unit->type());
+ BoEvent* productionPlaced = new BoEvent("ProducedUnitWithTypePlaced", QString::number(unit->type()));
  productionPlaced->setUnitId(unit->id());
  productionPlaced->setUnitId(unit->owner()->id());
  productionPlaced->setLocation(BoVector3(unit->x(), unit->y(), unit->z()));
