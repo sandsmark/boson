@@ -40,8 +40,10 @@ class BoCamera
      **/
     BoCamera(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY);
 
-    BoCamera(const BoCamera& c)  { *this = c; };
-
+    BoCamera(const BoCamera& c)
+    {
+      *this = c;
+    }
 
     /**
     * Apply the camera to the scene by doing the necessary OpenGL
@@ -66,9 +68,7 @@ class BoCamera
      **/
     void commitChanges(int ticks);
 
-    int commitTime()  { return mCommitTime; };
-
-    void resetDifferences();
+    int commitTime() const { return mCommitTime; }
 
 
     BoCamera& operator=(const BoCamera& c);
@@ -134,14 +134,14 @@ class BoCamera
      **/
     void setLookAt(const BoVector3& pos, bool now = false);
 
-    GLfloat z() const  { return mPosZ; };
-    GLfloat rotation() const  { return mRotation; };
-    GLfloat radius() const  { return mRadius; };
+    GLfloat z() const  { return mPosZ; }
+    GLfloat rotation() const  { return mRotation; }
+    GLfloat radius() const  { return mRadius; }
     /**
     * @return The point we are looking at. This is the lookAt vector, as it
     * can get used by gluLookAt().
     **/
-    const BoVector3& lookAt() const  { return mLookAt; };
+    const BoVector3& lookAt() const  { return mLookAt; }
 
     /**
     * Set limits for the camera. The camera tries not to move beyond the
@@ -171,7 +171,9 @@ class BoCamera
 
     void checkRotation();
 
-    void setPositionDirty()  { mPosDirty = true; };
+    void setPositionDirty() { mPosDirty = true; }
+
+    void resetDifferences();
 
   private:
     void init();
@@ -198,3 +200,7 @@ class BoCamera
 };
 
 #endif
+
+/*
+ * vim: et sw=2
+ */
