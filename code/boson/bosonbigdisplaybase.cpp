@@ -51,7 +51,12 @@
 #include <qtimer.h>
 #include <qcursor.h>
 
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#else
+// won't compile anymore!
+#warning You dont have sys/time.h - please report this problem to boson-devel@lists.sourceforge.net and provide us with information about your system!
+#endif
 #include <iostream.h>
 
 
