@@ -230,7 +230,7 @@ void BosonCanvas::setTileSet(QPixmap* p)
 	return;
  }
  if (!d->mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
+	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  setTiles(*p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
@@ -239,7 +239,7 @@ void BosonCanvas::setTileSet(QPixmap* p)
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
 		if (!c) {
-			kdError() << k_funcinfo << ": NULL cell" << endl;
+			kdError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
 		slotAddCell(i, j, c->groundType(), c->version());
@@ -252,7 +252,7 @@ void BosonCanvas::setTileSet(QPixmap* p)
 Cell* BosonCanvas::cell(int x, int y) const
 {
  if (!d->mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
+	kdError() << k_funcinfo << "NULL map" << endl;
 	return 0;
  }
  return d->mMap->cell(x, y);
@@ -261,7 +261,7 @@ Cell* BosonCanvas::cell(int x, int y) const
 void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit!" << endl;
+	kdError() << k_funcinfo << "NULL unit!" << endl;
 	return;
  }
  
@@ -487,7 +487,7 @@ void BosonCanvas::slotLoadTiles()
 {
  kdDebug() << k_funcinfo << endl;
  if (!d->mMap) {
-	kdError() << k_funcinfo << ": NULL map" << endl;
+	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
  resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
@@ -616,11 +616,11 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
 void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 {
  if (!target) {
-	kdError() << k_funcinfo << ": NULL target" << endl;
+	kdError() << k_funcinfo << "NULL target" << endl;
 	return;
  }
  if (!attackedBy) {
-	kdError() << k_funcinfo << ": NULL attacker" << endl;
+	kdError() << k_funcinfo << "NULL attacker" << endl;
 	return;
  }
 

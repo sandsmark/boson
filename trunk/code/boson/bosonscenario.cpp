@@ -187,7 +187,7 @@ bool BosonScenario::loadScenarioSettings(QDomElement& node)
 bool BosonScenario::isValid() const
 {
  if (d->mMinPlayers != (uint)d->mMaxPlayers) { // FIXME
-	kdError() << k_funcinfo << ": internal error" << endl;
+	kdError() << k_funcinfo << "internal error" << endl;
 	return false;
  }
  if (d->mMinPlayers < 1) {

@@ -523,12 +523,12 @@ void BosonWidget::slotGamePreferences()
 void BosonWidget::slotAddUnit(Unit* unit, int, int)
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  Player* p = unit->owner();
  if (!p) {
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (p != player()) {

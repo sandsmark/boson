@@ -173,7 +173,7 @@ bool UnitBase::load(QDataStream& stream)
 inline SpeciesTheme* UnitBase::speciesTheme() const
 {
  if (!owner()) {
-	kdWarning() << k_funcinfo << ": NULL owner" << endl;
+	kdWarning() << k_funcinfo << "NULL owner" << endl;
 	return 0;
  }
  return owner()->speciesTheme();

@@ -63,30 +63,30 @@ class BosonNewGameWidget : public QWidget
     QString& playfield();
 
   private:
-    QLabel* header;
-    QLabel* colorlabel;
-    QLabel* maplabel;
+    QLabel* mHeader;
+    QLabel* mColorLabel;
+    QLabel* mMapLabel;
     //KColorCombo* colorcombo;
-    QComboBox* colorcombo;
-    QLabel* namelabel;
-    QLineEdit* nameedit;
-    QComboBox* speciescombo;
-    QComboBox* mapcombo;
-    QLabel* mapname;
-    QLabel* specieslabel;
-    QGroupBox* addaigroup;
-    QLabel* addainamelabel;
-    QLineEdit* addainame;
-    QPushButton* addaibutton;
-    QLabel* playerslabel;
-    QListBox* playerslist;
-    QPushButton* removeplayerbutton;
-    QFrame* line1;
-    KGameChat* chatwidget;
-    QFrame* line2;
-    QPushButton* cancelbutton;
-    QPushButton* networkButton;
-    QPushButton* startgamebutton;
+    QComboBox* mColorCombo;
+    QLabel* mNameLabel;
+    QLineEdit* mNameEdit;
+    QComboBox* mSpeciesCombo;
+    QComboBox* mMapCombo;
+    QLabel* mMapName;
+    QLabel* mSpeciesLabel;
+    QGroupBox* mAddAIGroup;
+    QLabel* mAddAINameLabel;
+    QLineEdit* mAddAIName;
+    QPushButton* mAddAIButton;
+    QLabel* mPlayersLabel;
+    QListBox* mPlayersList;
+    QPushButton* mRemovePlayerButton;
+    QFrame* mLine1;
+    KGameChat* mChatWidget;
+    QFrame* mLine2;
+    QPushButton* mCancelButton;
+    QPushButton* mNetworkButton;
+    QPushButton* mStartGameButton;
 
 
   public slots:
@@ -162,14 +162,14 @@ class BosonNewGameWidget : public QWidget
     void slotSendNewGame();
 
   protected:
-    QVBoxLayout* BosonNewGameWidgetLayout;
-    QVBoxLayout* mainlayout;
-    QHBoxLayout* upperlayout;
-    QVBoxLayout* leftlayout;
-    QGridLayout* youroptionslayout;
-    QHBoxLayout* addaigroupLayout;
-    QVBoxLayout* playerslayout;
-    QHBoxLayout* startgamelayout;
+    QVBoxLayout* mBosonNewGameWidgetLayout;
+    QVBoxLayout* mMainLayout;
+    QHBoxLayout* mUpperLayout;
+    QVBoxLayout* mLeftLayout;
+    QGridLayout* mYourOptionsLayout;
+    QHBoxLayout* mAddAIGroupLayout;
+    QVBoxLayout* mPlayersLayout;
+    QHBoxLayout* mStartGameLayout;
 
   private:
     void initKGame();
