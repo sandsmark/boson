@@ -230,6 +230,12 @@ public:
 	static int texelPos();
 
 	/**
+	 * Prepare to load the points, i.e. allocate memory for them. You can
+	 * set them using @ref setVertex and @ref setTexel.
+	 **/
+	void allocatePoints(unsigned int points);
+
+	/**
 	 * Use material @p mat when rendering this mesh.
 	 **/
 	void setMaterial(BoMaterial* mat);
@@ -442,12 +448,6 @@ protected:
 	// this is meant to check whether the something on the screen will
 	// change if we draw this mesh now.
 	bool checkVisible();
-
-	/**
-	 * Prepare to load the points, i.e. allocate memory for them. You can
-	 * set them using @ref setVertex and @ref setTexel.
-	 **/
-	void allocatePoints(unsigned int points);
 
 
 private:
