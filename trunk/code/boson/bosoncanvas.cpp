@@ -1795,6 +1795,7 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 	item = (BosonItem*)createShot(owner, type.mType, type.mGroup, type.mGroupType);
  }
  if (item) {
+	addItem(item);
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
 	addAnimation(item);
