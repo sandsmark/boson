@@ -58,7 +58,7 @@ class BosonShot : public BosonItem
      * A shot is always moving, so this does a permanent @ref
      * advanceMoveInternal and @ref advanceMoveCheck.
      **/
-    inline virtual void advanceMoveFunction(unsigned int)
+    inline virtual void advanceFunction(unsigned int)
     {
       advanceMoveInternal();
       advanceMoveCheck();
@@ -66,7 +66,7 @@ class BosonShot : public BosonItem
     /**
      * See @ref advanceMoveFunction. This does exactly the same.
      **/
-    inline virtual void advanceMoveFunction2(unsigned int)
+    inline virtual void advanceFunction2(unsigned int)
     {
       advanceMoveInternal();
       advanceMoveCheck();
