@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
 <class>BosonNewGameWidgetBase</class>
 <widget class="QWidget">
     <property name="name">
@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>726</width>
-            <height>439</height>
+            <width>668</width>
+            <height>620</height>
         </rect>
     </property>
     <property name="minimumSize">
@@ -47,118 +47,158 @@
             <property name="title">
                 <string>Players</string>
             </property>
-            <grid>
+            <vbox>
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
-                <widget class="QLabel" row="1" column="0">
+                <widget class="QLayoutWidget">
                     <property name="name">
-                        <cstring>mYourNameTextLabel</cstring>
+                        <cstring>layout4</cstring>
                     </property>
-                    <property name="paletteForegroundColor">
-                        <color>
-                            <red>255</red>
-                            <green>255</green>
-                            <blue>255</blue>
-                        </color>
-                    </property>
-                    <property name="text">
-                        <string>Your Name:</string>
-                    </property>
-                </widget>
-                <widget class="QComboBox" row="2" column="1">
-                    <property name="name">
-                        <cstring>mLocalColor</cstring>
-                    </property>
-                </widget>
-                <widget class="QLineEdit" row="1" column="1">
-                    <property name="name">
-                        <cstring>mLocalPlayerName</cstring>
-                    </property>
-                </widget>
-                <widget class="QComboBox" row="0" column="1">
-                    <property name="name">
-                        <cstring>mChangeSpecies</cstring>
-                    </property>
-                </widget>
-                <widget class="QLabel" row="2" column="0">
-                    <property name="name">
-                        <cstring>mYourColorTextLabel</cstring>
-                    </property>
-                    <property name="paletteForegroundColor">
-                        <color>
-                            <red>255</red>
-                            <green>255</green>
-                            <blue>255</blue>
-                        </color>
-                    </property>
-                    <property name="text">
-                        <string>Your Color:</string>
-                    </property>
-                </widget>
-                <widget class="QLabel" row="0" column="0">
-                    <property name="name">
-                        <cstring>mTextLabelSpecies</cstring>
-                    </property>
-                    <property name="paletteForegroundColor">
-                        <color>
-                            <red>255</red>
-                            <green>255</green>
-                            <blue>255</blue>
-                        </color>
-                    </property>
-                    <property name="text">
-                        <string>Species:</string>
-                    </property>
-                </widget>
-                <widget class="QGroupBox" row="3" column="0" rowspan="1" colspan="2">
-                    <property name="name">
-                        <cstring>groupBox10</cstring>
-                    </property>
-                    <property name="paletteForegroundColor">
-                        <color>
-                            <red>255</red>
-                            <green>255</green>
-                            <blue>255</blue>
-                        </color>
-                    </property>
-                    <property name="title">
-                        <string>Connected Players</string>
-                    </property>
-                    <grid>
+                    <vbox>
                         <property name="name">
                             <cstring>unnamed</cstring>
                         </property>
-                        <widget class="KListBox" row="0" column="0" rowspan="1" colspan="2">
+                        <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>mConnectPlayers</cstring>
+                                <cstring>layout3</cstring>
                             </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>mTextLabelSpecies</cstring>
+                                    </property>
+                                    <property name="paletteForegroundColor">
+                                        <color>
+                                            <red>255</red>
+                                            <green>255</green>
+                                            <blue>255</blue>
+                                        </color>
+                                    </property>
+                                    <property name="text">
+                                        <string>Species:</string>
+                                    </property>
+                                </widget>
+                                <widget class="QComboBox">
+                                    <property name="name">
+                                        <cstring>mChangeSpecies</cstring>
+                                    </property>
+                                </widget>
+                            </hbox>
                         </widget>
-                        <widget class="QPushButton" row="1" column="0">
+                        <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>mAddComputerPlayer</cstring>
+                                <cstring>layout2</cstring>
                             </property>
-                            <property name="backgroundOrigin">
-                                <enum>WidgetOrigin</enum>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Add AI Player</string>
-                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>mYourNameTextLabel</cstring>
+                                    </property>
+                                    <property name="paletteForegroundColor">
+                                        <color>
+                                            <red>255</red>
+                                            <green>255</green>
+                                            <blue>255</blue>
+                                        </color>
+                                    </property>
+                                    <property name="text">
+                                        <string>Your Name:</string>
+                                    </property>
+                                </widget>
+                                <widget class="QLineEdit">
+                                    <property name="name">
+                                        <cstring>mLocalPlayerName</cstring>
+                                    </property>
+                                </widget>
+                            </hbox>
                         </widget>
-                        <widget class="QPushButton" row="1" column="1">
+                        <widget class="QLayoutWidget">
                             <property name="name">
-                                <cstring>mRemovePlayer</cstring>
+                                <cstring>layout1</cstring>
                             </property>
-                            <property name="backgroundOrigin">
-                                <enum>WidgetOrigin</enum>
-                            </property>
-                            <property name="text">
-                                <string>&amp;Remove Player</string>
-                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>mYourColorTextLabel</cstring>
+                                    </property>
+                                    <property name="paletteForegroundColor">
+                                        <color>
+                                            <red>255</red>
+                                            <green>255</green>
+                                            <blue>255</blue>
+                                        </color>
+                                    </property>
+                                    <property name="text">
+                                        <string>Your Color:</string>
+                                    </property>
+                                </widget>
+                                <widget class="BoColorChooser">
+                                    <property name="name">
+                                        <cstring>mLocalColor</cstring>
+                                    </property>
+                                </widget>
+                            </hbox>
                         </widget>
-                    </grid>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>groupBox10</cstring>
+                            </property>
+                            <property name="paletteForegroundColor">
+                                <color>
+                                    <red>255</red>
+                                    <green>255</green>
+                                    <blue>255</blue>
+                                </color>
+                            </property>
+                            <property name="title">
+                                <string>Connected Players</string>
+                            </property>
+                            <grid>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="KListBox" row="0" column="0" rowspan="1" colspan="2">
+                                    <property name="name">
+                                        <cstring>mConnectPlayers</cstring>
+                                    </property>
+                                </widget>
+                                <widget class="QPushButton" row="1" column="0">
+                                    <property name="name">
+                                        <cstring>mAddComputerPlayer</cstring>
+                                    </property>
+                                    <property name="backgroundOrigin">
+                                        <enum>WidgetOrigin</enum>
+                                    </property>
+                                    <property name="text">
+                                        <string>&amp;Add AI Player</string>
+                                    </property>
+                                </widget>
+                                <widget class="QPushButton" row="1" column="1">
+                                    <property name="name">
+                                        <cstring>mRemovePlayer</cstring>
+                                    </property>
+                                    <property name="backgroundOrigin">
+                                        <enum>WidgetOrigin</enum>
+                                    </property>
+                                    <property name="text">
+                                        <string>&amp;Remove Player</string>
+                                    </property>
+                                </widget>
+                            </grid>
+                        </widget>
+                    </vbox>
                 </widget>
-            </grid>
+            </vbox>
         </widget>
         <widget class="QGroupBox" row="0" column="0">
             <property name="name">
@@ -229,12 +269,6 @@
         <slot>slotLocalPlayerHighlightedPlayer(QListBoxItem*)</slot>
     </connection>
     <connection>
-        <sender>mLocalColor</sender>
-        <signal>activated(int)</signal>
-        <receiver>BosonNewGameWidgetBase</receiver>
-        <slot>slotLocalPlayerColorChanged(int)</slot>
-    </connection>
-    <connection>
         <sender>mLocalPlayerName</sender>
         <signal>returnPressed()</signal>
         <receiver>BosonNewGameWidgetBase</receiver>
@@ -264,6 +298,12 @@
         <receiver>BosonNewGameWidgetBase</receiver>
         <slot>slotLocalPlayerPlayFieldChanged(QListViewItem*)</slot>
     </connection>
+    <connection>
+        <sender>mLocalColor</sender>
+        <signal>signalColorSelected(int)</signal>
+        <receiver>BosonNewGameWidgetBase</receiver>
+        <slot>slotLocalPlayerColorChanged(int)</slot>
+    </connection>
 </connections>
 <forwards>
     <forward>class QListViewItem</forward>
@@ -279,6 +319,7 @@
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 <includehints>
+    <includehint>bosonwidgets/bocolorchooser.h</includehint>
     <includehint>klistbox.h</includehint>
     <includehint>bosonwidgets/bosonplayfieldview.h</includehint>
     <includehint>ktextbrowser.h</includehint>
