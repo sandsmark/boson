@@ -30,29 +30,26 @@ bin_PROGRAMS = boeditor
 
 
 #boeditor 
-boeditor_METASOURCES = USE_AUTOMOC
+METASOURCES = AUTO
 boeditor_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boeditor_SOURCES = boeditor.cpp main.cpp mainWidget.cpp editorTopLevel.cpp miniDisplay.cpp editorCanvas.cpp editorBigDisplay.cpp newDlg.cpp
 boeditor_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KFILE)
 #$(LIB_KDEUI)
 
-#(un)install stuff
-install-data-local:
-	$(mkinstalldirs) $(boson_appsdir)/
-	$(INSTALL_DATA) boeditor.kdelnk $(boson_appsdir)/boeditor.kdelnk
-#	$(mkinstalldirs) $(kde_icondir)/
-#	$(INSTALL_DATA) boeditor.xpm $(kde_icondir)/boeditor.xpm
-#	$(mkinstalldirs) $(kde_minidir)/
-#	$(INSTALL_DATA) mini-boeditor.xpm $(kde_minidir)/mini-boeditor.xpm
-
-uninstall-local:
-	-rm -f $(boson_appsdir)/boeditor.kdelnk
-	-rm -f $(kde_icondir)/boeditor.xpm
-	-rm -f $(kde_minidir)/mini-boeditor.xpm
-
-
 #garbage
-CLEANFILES = $(boeditor_METASOURCES) boson-*.log
+CLEANFILES = boson-*.log
 
 EXTRA_DIST = boeditor.cpp boeditor.h main.cpp mainWidget.cpp editorTopLevel.cpp miniDisplay.cpp editorCanvas.cpp editorCanvas.h ressource.h mainWidget.h editorTopLevel.h editorBigDisplay.cpp editorBigDisplay.h newDlg.h
+
+
+appsdir = $(kde_appsdir)/Games/Boson
+rcdir = $(kde_datadir)/boeditor
+
+apps_DATA = boeditor.desktop
+EXTRA_DIST = $(apps_DATA)
+
+KDE_ICON = boeditor
+
+rc_DATA = boeditorui.rc
+
 
