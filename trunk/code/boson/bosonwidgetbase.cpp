@@ -30,10 +30,6 @@
 #include "bosonmap.h"
 #include "bosonscenario.h"
 #include "bosonconfig.h"
-#include "kgameunitdebug.h"
-#include "kgameplayerdebug.h"
-#include "kgamecelldebug.h"
-#include "bosonprofilingdialog.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
@@ -58,7 +54,6 @@
 #include <kgame/kgamechat.h>
 
 #include <qlayout.h>
-#include <qvbox.h>
 #include <qptrlist.h>
 #include <qtimer.h>
 #include <qptrdict.h>
@@ -201,6 +196,7 @@ void BosonWidgetBase::initMap()
  }
  BosonMap* map = boGame->playField()->map();
  canvas()->setMap(map);
+ minimap()->setMap(map);
  minimap()->initMap();
  displayManager()->mapChanged();
 // boGame->setPlayField(playField()); // already done on startup in BosonStarting
@@ -222,7 +218,6 @@ void BosonWidgetBase::initMiniMap()
 {
  mMiniMap = new BosonMiniMap(0);
  minimap()->hide();
- minimap()->setCanvas(canvas());
  minimap()->setBackgroundOrigin(WindowOrigin);
 
  connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
@@ -402,48 +397,6 @@ void BosonWidgetBase::changeCursor(BosonCursor* cursor)
  delete mCursor;
  mCursor = cursor;
  displayManager()->setCursor(mCursor);
-}
-
-void BosonWidgetBase::slotDebug()
-{
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
- if (!boGame->playField()) {
-	boError() << k_funcinfo << "NULL playField" << endl;
-	return;
- }
- BosonMap* map = boGame->playField()->map();
- if (!map) {
-	boError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
- KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this);
-
- QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
- KGameUnitDebug* units = new KGameUnitDebug(b);
- units->setBoson(boGame);
-
- b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
- KGamePlayerDebug* player = new KGamePlayerDebug(b);
- player->setBoson(boGame);
-
- b = dlg->addVBoxPage(i18n("Debug &Cells"));
- KGameCellDebug* cells = new KGameCellDebug(b);
- cells->setMap(map);
-
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
- connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
-		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
- dlg->show();
-}
-
-void BosonWidgetBase::slotProfiling()
-{
- BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
- connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
- dlg->exec();
 }
 
 void BosonWidgetBase::slotHack1()
@@ -661,12 +614,8 @@ void BosonWidgetBase::initKActions()
 		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
 
  // Debug
- (void)new KAction(i18n("&Profiling"), KShortcut(), this,
-		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- (void)new KAction(i18n("&Debug"), KShortcut(), this,
-		SLOT(slotDebug()), actionCollection(), "debug_kgame");
  KToggleAction* mapCoordinates = new KToggleAction(i18n("Debug &map coordinates"),
 		KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
  mapCoordinates->setChecked(false);
@@ -714,71 +663,6 @@ void BosonWidgetBase::initKActions()
  cheating->setChecked(DEFAULT_CHEAT_MODE);
  slotToggleCheating(DEFAULT_CHEAT_MODE);
  checkDockStatus();
-}
-
-void BosonWidgetBase::slotDebugRequestIdName(int msgid, bool , QString& name)
-{
- // we don't use i18n() for debug messages... not worth the work
- switch (msgid) {
-	case BosonMessage::InitMap:
-		name = "Init Map";
-		break;
-	case BosonMessage::ChangeSpecies:
-		name = "Change Species";
-		break;
-	case BosonMessage::ChangePlayField:
-		name = "Change PlayField";
-		break;
-	case BosonMessage::ChangeTeamColor:
-		name = "Change TeamColor";
-		break;
-	case BosonMessage::IdInitFogOfWar:
-		name = "Init Fog of War";
-		break;
-	case BosonMessage::IdStartScenario:
-		name = "Start Scenario";
-		break;
-	case BosonMessage::AddUnit:
-		name = "Add Unit";
-		break;
-	case BosonMessage::AddUnitsXML:
-		name = "Add Units from XML";
-		break;
-	case BosonMessage::AdvanceN:
-		name = "Advance";
-		break;
-	case BosonMessage::IdChat:
-		name = "Chat Message";
-		break;
-	case BosonMessage::IdGameIsStarted:
-		name = "Game is started";
-		break;
-	case BosonMessage::MoveMove:
-		name = "PlayerInput: Move";
-		break;
-	case BosonMessage::MoveAttack:
-		name = "PlayerInput: Attack";
-		break;
-	case BosonMessage::MoveBuild:
-		name = "PlayerInput: Build";
-		break;
-	case BosonMessage::MoveProduce:
-		name = "PlayerInput: Produce";
-		break;
-	case BosonMessage::MoveProduceStop:
-		name = "PlayerInput: Produce Stop";
-		break;
-	case BosonMessage::MoveMine:
-		name = "PlayerInput: Mine";
-		break;
-	case BosonMessage::UnitPropertyHandler:
-	default:
-		// a unit property was changed
-		// all ids > UnitPropertyHandler will be a unit property. we
-		// don't check further...
-		break;
- }
-// boDebug() << name << endl;
 }
 
 void BosonWidgetBase::quitGame()
@@ -1107,7 +991,6 @@ void BosonWidgetBase::slotUnitCountChanged(Player* p)
 
 void BosonWidgetBase::slotToggleCheating(bool on)
 {
- setActionEnabled("debug_kgame", on);
  setActionEnabled("debug_unfog", on);
  setActionEnabled("debug_players", on);
 }

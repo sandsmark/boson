@@ -43,12 +43,7 @@ public:
 	BosonMiniMap(QWidget* parent, const char* name = 0);
 	~BosonMiniMap();
 
-	/**
-	 * We need the canvas in order to find out which unit is at a cell once
-	 * the fog of war is removed and also to retrieve the map itself. See
-	 * @ref map
-	 **/
-	void setCanvas(BosonCanvas*);
+	void setMap(BosonMap*);
 	void initMap();
 
 	void setLocalPlayer(Player*);
@@ -158,8 +153,7 @@ protected:
 	QPixmap* ground() const;
 
 	/**
-	 * Convenience method for mCanvas->map()
-	 * @return The current map. See @ref BosonCanvas::map
+	 * @return The current map.
 	 **/
 	BosonMap* map() const;
 
@@ -187,7 +181,7 @@ private:
 	QPixmap* mUnZoomedGround;
 	bool mUseFog; // useful for the editor to disable the fog of war
 	
-	BosonCanvas* mCanvas;
+	BosonMap* mMap;
 	Player* mLocalPlayer; // needed to distinguish between movements (->fog of war)
 	
 };

@@ -236,6 +236,11 @@ protected slots:
 
 	void slotEditorNewMap(const QByteArray&);
 
+	void slotProfiling();
+	void slotDebugKGame();
+	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
+
+
 private:
 	void initDisplayManager();
 	void initBoson();
