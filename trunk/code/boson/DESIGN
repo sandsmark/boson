@@ -23,19 +23,19 @@ through the network. The actual move is executed when the client(s) receive the
 input from the network. It is received in Boson::playerInput() where the units
 are moved (or whatever this playerinput was for).
 
-The class Unit is the base class for all units (probably will be renamed to
-UnitBase). VisualUnit (might be renamed to Unit) is derived from Unit and
-extends it by all visual parts (e.g. everything of QCanvasSprite).
-Maybe the base class (Unit) will be removed as there is only a single class
-(VisualUnit) derived from it and it doesn't make sense to keep them separated
-(IMHO).
+The class UnitBase is the base class for all units. Unit is derived from
+UnitBase and extends it by all visual parts (e.g. everything of QCanvasSprite)
+and most of the logic stuff. UnitBase contains mostly the properties that are
+used by Unit, as well as all set/get functions.
 The most important method of Unit is owner() which returns a pointer to the
 player. Other important methods are speciesTheme() which is just a
-owner()->speciesTheme() and unitProperties() which is
-speciesTheme()->unitProperties(type()). See SpeciesTheme below for more on this.
+owner()->speciesTheme() and unitProperties() which returns the UnitProprties of
+the unit - see below for information on these classes.
 A unit has a type (Unit::type()) and an id (Unit::id()). The latter is important
-to identify a unit on the canvas (e.g.). The type describes ... the type of the
-unit. You need it to know that a ship is not an aircraft ;-)
+to identify a unit on the canvas (for example). The type describes ... the type
+of the unit. You need it to know that a ship is not an aircraft ;-) The type is
+sipmly a unitProperties()->typeId() so you can usually use unitProperties()
+directly.
 
 The class Player is responsible especially for its units. The other stuff is
 done by KGame (like playerinput) and is not subject of this document. A player
@@ -52,16 +52,18 @@ a separate directory. See the documentation of the data directory for more on
 this.
 SpeciesTheme loads all units from this dir and stores it under
 SpeciesTheme::unitProperties(). You need the type ids to access the units. The
-possible ids should be described in the scenario file (this is completely new
-and not yet done!!)
+possible ids should be listed in the map file (aka the playfield) - unless a map
+allows just any units (this will be the usual case).
 
 UnitProperties contains information about a special unit type. So e.g. an
-aircraft has currenlty an initial health of 100, so UnitProperties::health()
+aircraft has currently an initial health of 100, so UnitProperties::health()
 would return 100 for this. These are just the initial values - they usually
 differ in the actual units. 
 UnitProperties also describes whether a unit can do certain things, e.g.
 UnitProperties::canGoOnWater() or UnitProperties::canProduce().
-
+You will find mostly all proprties of UnitBase in UnitProperties, too, except a
+for a few properties that defaults don't change (e.g. work() - the default is
+*always* WorkNone, even if the unit changes the value immediately on startup).
 
 Boson uses KGameProperty<type> all over the code. Note that we use PolicyLocal
 everywhere, so the main intention of KGameProperty (sending a property to the
@@ -100,16 +102,25 @@ This has a lot of advantages, but also some disadvantages:
   point against upgrading. But games with development version are difficult...
 
 
-3. Widgets (outdated)
+3. Widgets (might get outdated soon)
 The first widget is the toplevel widget, derived from KMainWindow. It is either
 Top or Editor, depending on whether you play the game or create a map. It
-constits mainly of menu/toolbar and BosonWidget.
-BosonWidget is the main widget. It consists of 
-- BosonBigDisplay - the QCanvas view. This is the actual play ground.
-- BosonCommandFrame - The command frame on the right side. You can order you
-  units here, if you selected a factory. 
-- BosonMiniMap - guess!
-BosonCommandFrame now also contains BosonUnitView, which shows the selected
-unit. It might make sense to take this out of BosonCommandFrame and put it
-directly into BosonWidget, but as it is working without problems...
+constits mainly of menu/toolbar and BosonWidget. Top and Editor derive from
+TopBase which should provide most if the functionality. Top and Editor are meant
+to provide only what's needed for the game/editor mode.
+
+BosonWidget is the main widget. There you'll find the rest. Most classes are
+created in BosonWidget and then connected together (using QObject::connect()).
+Also most of the startup logic (e.g. slotNewGame()) is in BosonWidget. Most of
+other game logic can be found in corresponding classes (e.g. clicks on the main
+display, the big display, can be found in BosonBigDisplay and so on).
+
+A few special words on the command frame (the frame at one side where you can
+produce new units, see the mini map, ...): it is implemented as a toolbar. Boson
+was not designed to do it this way, so the command frame in BosonWidget is some
+kind of hack...
+It is constructed with a NULL parent and then needs to be reparented to the top
+widget, in reparentMiniMap(). From that point on *only* BosonWidget will access
+it, although Top/Editor is its parent.
+
 
