@@ -31,6 +31,8 @@
 #include "game.h" 	// who_am_i
   
 
+#define DEBUG_REQUEST_F
+
 /*
  *  BOSON CANVAS
  */
@@ -51,21 +53,31 @@ bosonCanvas::~bosonCanvas()
 	delete [] cells;
 }
 
-
 void bosonCanvas::setCellFlag(QRect r, Cell::cell_flags flag)
 {
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
-		for(j=r.top(); j<=r.bottom(); j++)
+		for(j=r.top(); j<=r.bottom(); j++) {
 			bocanvas->cell(i,j).setFlag( flag);
+#ifdef DEBUG_REQUEST_F
+			// does _not_ affect cells[]
+			//  -> so it's only 'visual'
+			//  -> algorithms not modified by this
+			setTile( i, j, makeCell(GROUND_WATER_OIL) );
+#endif // DEBUG_REQUEST_F
+		}
 }
 
 void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
 {
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
-		for(j=r.top(); j<=r.bottom(); j++)
+		for(j=r.top(); j<=r.bottom(); j++) {
 			bocanvas->cell(i,j).unsetFlag( flag);
+#ifdef DEBUG_REQUEST_F
+			setTile( i, j, makeCell(GROUND_GRASS) ); 
+#endif // DEBUG_REQUEST_F
+			 }
 }
 
 
