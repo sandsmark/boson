@@ -196,7 +196,7 @@ void TopBase::initKAction()
 // Debug - no i18n!
  (void)new KAction("Debug", KShortcut(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "debug_kgame");
  (void)new KAction("Unfog", KShortcut(), mBosonWidget, SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- KSelectAction* s = new KSelectAction("Mode", KShortcut(), this, SLOT(slotDebugMode(int)), actionCollection(), "debug_mode");
+ KSelectAction* s = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
  s = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
  connect(s, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
  QStringList l;
