@@ -90,11 +90,11 @@ UnitProperties::UnitProperties(SpeciesTheme* theme)
  mTheme = theme;
 }
 
-UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName)
+UnitProperties::UnitProperties(SpeciesTheme* theme, const QString& fileName, bool fullload)
 {
  init();
  mTheme = theme;
- loadUnitType(fileName, true);
+ loadUnitType(fileName, fullload);
 }
 
 void UnitProperties::init()
@@ -161,7 +161,9 @@ void UnitProperties::loadUnitType(const QString& fileName, bool full)
  loadTextureNames(&conf);
  loadSoundNames(&conf);
  loadUpgrades(&conf);
- loadWeapons(&conf);
+ if (full) {
+	loadWeapons(&conf);
+ }
 }
 
 void UnitProperties::saveUnitType(const QString& fileName)

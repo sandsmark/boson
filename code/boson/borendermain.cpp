@@ -248,7 +248,7 @@ RenderMain::RenderMain()
 	dir = dir.left(dir.length() - QString("index.species").length());
 	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
 	mSpecies.append(s);
-	s->readUnitConfigs();
+	s->readUnitConfigs(false);
  }
 
  QWidget* w = new QWidget(this);

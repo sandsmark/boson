@@ -79,7 +79,7 @@ public:
 	/**
 	 * @param fileName The filename of the config file for this unit type
 	 **/
-	UnitProperties(SpeciesTheme*, const QString& fileName);
+	UnitProperties(SpeciesTheme*, const QString& fileName, bool fullload = true);
 	~UnitProperties();
 
 
