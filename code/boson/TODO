@@ -58,8 +58,6 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
-- make cursors themeable (quite easy cause we use BosonCursor for all of
-  this)
 - decrease game speed ; increase unit speed. Saves cpu power
 - when scrolling the big display the minerals/oil labels leave a white area
   behind which are repainted a moment later. this white area should not appear
@@ -67,8 +65,6 @@ General TODOs
 - splitViews: we could use one view for players that are allied with the local
   player. we need to transmit the position of the view over network... would be
   a nice idea!
-- boson is crashing if BosonCursor (e.g. the sprite one) cannot load the pixmaps
-  successfully - should be fixed, but not yet tested
 - make sure that kdemultimedia is installed - perhaps disable .ogg support
   somehow if it isn't
 
