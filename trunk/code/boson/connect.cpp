@@ -216,7 +216,7 @@ switch(tag) {
 
 	case MSG_MOBILE_CREATED :
 		ASSERT_DATA_BLENGHT(sizeof(data->mobile));
-		printf("mobile_created : who = %d\n", data->mobile.who);
+		//printf("mobile_created : who = %d\n", data->mobile.who);
 		fflush(stdout);
 		logf(LOG_GAME_HIGH, "mobile(%d) created at %d,%d", 
 			(int)data->mobile.type,

@@ -81,16 +81,8 @@ class physMap : public QObject, public QwSpriteField
   void updateMobile(playerMobUnit *); ///orzel : outdated by Qw ?
   void updateFix(playerFacility *); ///orzel : outdated by Qw ?
 
-
-  protected:
-/* Qw stuff */
-/*  int	coo2index(int x, int y)
-	{ return maxY*x+y;}
-  void	index2coo(uint index, int &x, int &y)
-	{ x = index / maxY; y = index % maxY; } */
-
 //  private:
-public: ///orzel : temp
+  public: ///orzel : temp
 
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;

@@ -67,9 +67,8 @@ no_pixmap->fill(black);
 progress.setProgress(PROGRESS_N);
 
 if (!allLoaded) puts("groundTheme : not all loaded !");
-	else printf(	"\ngroundTheme : %d ground tiles loaded\n"
-			"              %d transition tiles loaded\n",
-	groundPropNb, groundTransPropNb);
+	else logf(LOG_INFO, "groundTheme loaded : %d ground tiles, %d transition tiles",
+		groundPropNb, groundTransPropNb);
 
 }
 
@@ -93,7 +92,7 @@ bool groundTheme::loadTransition(int i, const QString &path, QProgressDialog &pr
 		"_uli", "_uri", "_dli", "_dri", 
 		};
 
-	for (j=0; j<12; j++)
+	for (j=0; j<TILES_PER_TRANSITION; j++)
 		if (!loadGround(i+j, path + trans_ext[j], progress ))
 			return false;
 	return true;

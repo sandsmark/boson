@@ -29,7 +29,7 @@ playerCell::playerCell(groundType g, int i, int j)
 	: Cell(g)
 	, QwSprite(gpp.ground->getPixmap(g))
 {
-z(Z_GROUND);
-moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
+	z(Z_GROUND);
+	moveTo(BO_TILE_SIZE * i , BO_TILE_SIZE * j);
 }
 
