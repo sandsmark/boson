@@ -42,10 +42,14 @@ class BosonLocalPlayerInput : public KGameIO
 {
   Q_OBJECT
   public:
+    enum _LocalPlayerInputRTTI {
+      LocalPlayerInputRTTI = 125 // just any unique number
+    };
+  public:
     BosonLocalPlayerInput();
     virtual ~BosonLocalPlayerInput();
 
-    virtual int rtti() const  { return 125; }; // just any unique number
+    virtual int rtti() const  { return LocalPlayerInputRTTI; }
 
     virtual void produceAction(const BoSpecificAction& action);
 
@@ -79,3 +83,7 @@ class BosonLocalPlayerInput : public KGameIO
 };
 
 #endif // BOSONLOCALPLAYERINPUT_H
+
+/*
+ * vim: et sw=2
+ */
