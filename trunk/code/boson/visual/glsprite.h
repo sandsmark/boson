@@ -20,11 +20,12 @@
 #define GLSPRITE_H
 
 #include "../defines.h"
-#include "../bosonmodel.h"
 
 #include <GL/gl.h>
 
 class BosonCanvas;
+class BosonModel;
+class BoFrame;
 class QRect;
 
 class GLSprite
@@ -98,31 +99,9 @@ public:
 		}
 	}
 
-	void setFrame(int _frame)
-	{
-		if (mGLConstructionStep < model()->constructionSteps()) {
-			// this unit (?) has not yet been constructed
-			// completely.
-			// Note that mGLConstructionStep is totally different
-			// from Unit::constructionStep() !
-			_frame = frame();
-		}
-
-		// FIXME: this if is pretty much nonsense, since e.g. frame()
-		// might be 0 and _frame, too - but the frame still changed,
-		// since we had a construction list before!
-		// we mustn't change the frame when moving and so on. these are
-		// old QCanvas compatible functions. need to be fixed.
-		if (_frame != frame()) {
-			BoFrame* f = model()->frame(_frame);
-			if (f) {
-				setCurrentFrame(f);
-				mFrame = _frame;
-			}
-		}
-	}
+	void setFrame(int _frame);
 	inline int frame() const { return mFrame; }
-	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
+	unsigned int frameCount() const;
 
 	inline float xVelocity() const { return mXVelocity; }
 	inline float yVelocity() const { return mYVelocity; }
@@ -162,11 +141,7 @@ private:
 	inline void setY(float y) { mY = y; }
 	inline void setZ(float z) { mZ = z; }
 
-	inline void setCurrentFrame(BoFrame* frame)
-	{
-		setDisplayList(frame->displayList());
-		setGLDepthMultiplier(frame->depthMultiplier());
-	}
+	void setCurrentFrame(BoFrame* frame);
 
 private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use

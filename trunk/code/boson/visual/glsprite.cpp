@@ -18,6 +18,8 @@
 */
 #include "glsprite.h"
 
+#include "../bosonmodel.h"
+
 #include <kdebug.h>
 
 #include <qrect.h>
@@ -94,5 +96,40 @@ void GLSprite::setGLConstructionStep(unsigned int s)
 	return;
  }
  setCurrentFrame(f);
+}
+
+void GLSprite::setFrame(int _frame)
+{
+ if (mGLConstructionStep < model()->constructionSteps()) {
+	// this unit (?) has not yet been constructed
+	// completely.
+	// Note that mGLConstructionStep is totally different
+	// from Unit::constructionStep() !
+	_frame = frame();
+ }
+
+ // FIXME: this if is pretty much nonsense, since e.g. frame()
+ // might be 0 and _frame, too - but the frame still changed,
+ // since we had a construction list before!
+ // we mustn't change the frame when moving and so on. these are
+ // old QCanvas compatible functions. need to be fixed.
+ if (_frame != frame()) {
+		BoFrame* f = model()->frame(_frame);
+		if (f) {
+			setCurrentFrame(f);
+			mFrame = _frame;
+		}
+	}
+}
+
+unsigned int GLSprite::frameCount() const
+{
+ return model() ? model()->frames() : 0; 
+}
+
+void GLSprite::setCurrentFrame(BoFrame* frame)
+{
+ setDisplayList(frame->displayList());
+ setGLDepthMultiplier(frame->depthMultiplier());
 }
 
