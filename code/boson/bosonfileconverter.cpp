@@ -1107,15 +1107,19 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
 
 
  // Go through all units
- QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
- for (unsigned int i = 0; i < itemsList.count(); i++) {
-	QDomElement e = itemsList.item(i).toElement();
+ for(QDomNode n = canvasRoot.firstChild(); !n.isNull(); n = n.nextSibling()) {
+	QDomElement e = n.toElement();
+	if(e.isNull() || e.tagName() != "Items") {
+		continue;
+	}
 	int playerid = e.attribute("PlayerId").toInt();
 	bool isplayerhuman = ishuman[playerid];
 	// Go through all units and change their absolute health to relative one
-	QDomNodeList itemList = e.elementsByTagName("Item");
-	for (unsigned int j = 0; j < itemList.count(); j++) {
-		QDomElement item = itemList.item(j).toElement();
+	for(QDomNode n2 = e.firstChild(); !n2.isNull(); n2 = n2.nextSibling()) {
+		QDomElement item = n2.toElement();
+		if(item.isNull() || item.tagName() != "Item") {
+			continue;
+		}
 		// We're interested only in units
 		int rtti = item.attribute("Rtti").toInt();
 		if (RTTI::isUnit(rtti)) {
