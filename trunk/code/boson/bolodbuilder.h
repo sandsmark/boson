@@ -51,10 +51,10 @@ public:
 	 **/
 	void appendItem(const type* d)
 	{
-		if (count() == size()) {
-			resize(size() ? (size() * 2) : 8);
+		if (this->count() == this->size()) {
+			resize(this->size() ? (this->size() * 2) : 8);
 		}
-		insert(count(), d);
+		insert(this->count(), d);
 	}
 
 	/**
@@ -69,8 +69,8 @@ public:
 	void removeItem(unsigned int i)
 	{
 		remove(i);
-		if (i < count()) {
-			insert(i, take(count()));
+		if (i < this->count()) {
+			insert(i, take(this->count()));
 		}
 	}
 
@@ -79,9 +79,9 @@ public:
 	 **/
 	void deleteAllItems()
 	{
-		setAutoDelete(true);
-		clear();
-		setAutoDelete(false);
+		this->setAutoDelete(true);
+		this->clear();
+		this->setAutoDelete(false);
 	}
 };
 
