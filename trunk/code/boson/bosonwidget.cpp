@@ -39,6 +39,7 @@
 #include <kdeversion.h>
 
 #include <qsignalmapper.h>
+#include <qtimer.h>
 
 #include "bosonwidget.moc"
 
@@ -256,7 +257,10 @@ void BosonWidget::saveConfig()
 void BosonWidget::slotGameOverDialogFinished()
 {
  d->mGameOverDialog->deleteLater();
- emit signalGameOver();
+
+ // we must not emit directly, as it'd delete the BosonWidget and therefore the
+ // GameOverDialog, but that is later deleted through the event loop
+ QTimer::singleShot(0, this, SIGNAL(signalGameOver()));
 }
 
 void BosonWidget::setBosonXMLFile()
