@@ -905,7 +905,7 @@ bool BosonModel::isAdjacent(BoVector3* v1, BoVector3* v2)
  }
  int equal = 0;
  for (int i = 0; i < 3; i++) {
-	if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v2[i].isEqual(v2[2])) {
+	if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v1[i].isEqual(v2[2])) {
 		equal++;
 	}
  }
@@ -942,7 +942,6 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 
  for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
 	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
-	QPtrListIterator<Lib3dsFace> it(faces);
 	BoVector3 current[3]; // the triangle/face we search for
 	for (int j = 0; j < 3; j++) {
 		// Lib3dsFace stores only the position (index) of the
@@ -950,6 +949,7 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 		current[j].set(mesh->pointL[ adjacentFaces->at(i)->points[j] ].pos);
 	}
 
+	QPtrListIterator<Lib3dsFace> it(faces);
 	for (; it.current(); ++it) {
 		BoVector3 v[3];
 		for (int j = 0; j < 3; j++) {
@@ -958,13 +958,10 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
 		if (BosonModel::isAdjacent(current, v)) {
 			adjacentFaces->append(it.current());
 			found.append(it.current());
-		} else {
-//			kdDebug() << "not adjacent in: " << mesh->name<< endl;
-//			BosonModel::dumpTriangle(v, 0, 0);
 		}
 	}
 	for (unsigned j = 0; j < found.count(); j++) {
-		faces.remove(found.at(j));
+		faces.removeRef(found.at(j));
 	}
  }
 
