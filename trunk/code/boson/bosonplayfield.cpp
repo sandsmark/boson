@@ -33,6 +33,7 @@
 #include <qdom.h>
 #include <qdatastream.h>
 #include <qfileinfo.h>
+#include <qfile.h>
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -167,7 +168,18 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
 	mapXML = file->mapXMLData();
 	playersXML = file->playersData();
  }
+ QMap<QString, QByteArray> files;
+ files.insert("map/map.xml", mapXML);
+ files.insert("players.xml", playersXML);
+ return loadInformation(files);
+}
 
+// AB: note that files must contain the files in the _current_ format. no
+// conversion happens here
+bool BosonPlayFieldInformation::loadInformation(const QMap<QString, QByteArray>& files)
+{
+ QByteArray mapXML = files["map/map.xml"];
+ QByteArray playersXML = files["players.xml"];
  if (!loadPlayersInformation(playersXML)) {
 	boError() << k_funcinfo << "unable to load players information" << endl;
 	return false;
@@ -246,7 +258,6 @@ BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayFiel
  mMap = 0;
  mFile = 0;
  mPreLoaded = false;
- mLoaded = false;
  mPlayFieldInformation = new BosonPlayFieldInformation();
  mDescription = new BPFDescription();
 }
@@ -408,6 +419,10 @@ bool BosonPlayField::loadPlayField(const QMap<QString, QByteArray>& files)
 	return false;
  }
 
+ if (!mPlayFieldInformation->loadInformation(files)) {
+	boError() << k_funcinfo << "Could not load playfield information" << endl;
+	return false;
+ }
  if (!loadMapFromFile(files["map/map.xml"], files["map/heightmap.png"], files["map/texmap"], files["map/water.xml"])) {
 	boError() << k_funcinfo << "error loading the map" << endl;
 	return false;
@@ -573,7 +588,6 @@ void BosonPlayField::deleteMap()
 void BosonPlayField::finalizeLoading()
 {
  mPreLoaded = true;
- mLoaded = true;
 }
 
 QString BosonPlayField::playFieldName() const

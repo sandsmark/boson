@@ -66,6 +66,7 @@ public:
 	}
 
 	bool loadInformation(BPFFile* file);
+	bool loadInformation(const QMap<QString, QByteArray>& files);
 
 protected:
 	bool loadPlayersInformation(const QByteArray& xml);
@@ -173,16 +174,8 @@ public:
 	QString playFieldComment() const;
 
 	/**
-	 * @return Whether the the playfield has been completely loaded. This is
-	 * the case when @ref loadPlayField has been called (<em>not</em> @ref
-	 * preLoadPlayField)
-	 **/
-	bool isLoaded() const { return mLoaded; }
-
-	/**
 	 * @return Whether the the playfield has been pre-loaded. This is
-	 * the case when @ref preLoadPlayField has been called. Note that this
-	 * happens in @ref loadPlayField as well.
+	 * the case when @ref preLoadPlayField has been called.
 	 **/
 	bool isPreLoaded() const { return mPreLoaded; }
 
@@ -258,7 +251,6 @@ private:
 	BosonPlayFieldInformation* mPlayFieldInformation;
 	BPFDescription* mDescription;
 	QString mIdentifier; // AB: this is not yet fully implemented - e.g. it isn't changed when saving or changing the map. should be the filename (see BPFFile::identifier())
-	bool mLoaded;
 	bool mPreLoaded;
 	BPFFile* mFile;
 	QString mFileName;
