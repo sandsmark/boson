@@ -283,6 +283,10 @@ unsigned int BosonItem::frameCount() const
 
 void BosonItem::setCurrentFrame(BoFrame* frame)
 {
+ if (!frame) {
+	boError() << k_funcinfo << "NULL frame" << endl;
+	return;
+ }
  mCurrentFrame = frame;
 
  // the following values cache values from BoFrame, so that we can use them in
