@@ -31,7 +31,7 @@ Weapons=0
 [HarvesterPlugin]
 CanMineMinerals=false
 CanMineOil=true
-MaxResources=40
+MaxResources=150
 MiningSpeed=2
 UnloadingSpeed=5
 
