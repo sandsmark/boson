@@ -608,7 +608,10 @@ void Unit::advanceAttack(unsigned int advanceCount)
  }
 
  if (!inRange(range, target())) {
-	if (!canvas()->allItems().contains(target())) {
+	// AB: warning - this does a lookup on all items and therefore is slow!
+	// --> but we need it as a simple test on the pointer causes trouble if
+	// that pointer is already deleted. any nice solutions?
+	if (!canvas()->allItems()->contains(target())) {
 		boDebug(300) << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
@@ -1348,7 +1351,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
  registerData(&d->mSpeed, IdSpeed);
  registerData(&d->mMovingFailed, IdMovingFailed);
  registerData(&d->mPathRecalculated, IdPathRecalculated);
- registerData(&d->mPathRecalculated, IdPathAge);
+ registerData(&d->mPathAge, IdPathAge);
 
  d->mSpeed.setLocal(0);
  d->mMovingFailed.setLocal(0);
@@ -1645,7 +1648,10 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
 // if (!isNextTo(target())) {  // This doesn't work for some reason :-(  Dunno why.
  if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
 	// We're not next to unit
-	if (!canvas()->allItems().contains(target())) {
+	// AB: warning - this does a lookup on all items and therefore is slow!
+	// --> but we need it as a simple test on the pointer causes trouble if
+	// that pointer is already deleted. any nice solutions?
+	if (!canvas()->allItems()->contains(target())) {
 		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		stopAttacking();
 		return;

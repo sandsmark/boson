@@ -155,7 +155,7 @@ public:
 	 * @return A complete list of <em>all</em> items on the canvas. See @ref
 	 * addItem
 	 **/
-	BoItemList allItems() const;
+	BoItemList* allItems() const;
 	unsigned int allItemsCount() const;
 
 

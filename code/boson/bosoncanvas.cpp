@@ -893,9 +893,9 @@ BosonTiles* BosonCanvas::tileSet() const
  return d->mMap->tileSet();
 }
 
-BoItemList BosonCanvas::allItems() const
+BoItemList* BosonCanvas::allItems() const
 {
- return d->mAllItems;
+ return &d->mAllItems;
 }
 
 unsigned int BosonCanvas::allItemsCount() const
