@@ -491,7 +491,7 @@ class BosonPathFlyingNode : public BosonPathNode
 template<class T> class BosonPathHeap : public QValueList<T>
 {
   public:
-    inline QValueListIterator<T> begin() { QValueList<T>::begin(); }
+    inline QValueListIterator<T> begin() { return QValueList<T>::begin(); }
     inline QValueListIterator<T> end() { return QValueList<T>::end(); }
     inline void pop_front() { QValueList<T>::pop_front(); }
     inline T& first() { return QValueList<T>::first(); }
