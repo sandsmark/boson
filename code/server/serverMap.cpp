@@ -95,6 +95,14 @@ void BosonServer::createMobUnit(mobileMsg_t &data)
 	assert(data.who< BOSON_MAX_CONNECTION);
 	assert(player[data.who].socketState==SSS_CONNECT_OK);
 
+	/* find the right position */
+	if (!findFreePos(data.x, data.y, data.type)) {
+		// we failed, argh, find a better algorithm...
+		logf(LOG_ERROR, "Can't place mobile");
+		return;
+	}
+
+
 	switch(data.type) {
 		default:
 			u = new serverMobUnit(player[data.who].buffer, &data);
@@ -105,18 +113,49 @@ void BosonServer::createMobUnit(mobileMsg_t &data)
 			break;
 	};
 
-
-	placeMob(u);
+	reportMob(u);
+	
 	mobile.insert ( key++, u);
 	checkUnitVisibility(u);
 }
+
+
+bool BosonServer::findFreePos(int &x, int &y, mobType t)
+{
+	int i, j;
+
+	if (testFreePos(x,y,t)) return true; // for *.bpf-loaded mobiles, already in place
+
+	for (i=-5; i<6; i++) // X position we try
+		for (j=-5; j<6; j++) // Y position we try
+			if (testFreePos(x+i, y+j, t)) {
+				x+=i; y+=j;
+				return true;
+			}
+	return false;
+}
+
+bool BosonServer::testFreePos(int x, int y, mobType t)
+{
+	int k, l;
+	int w = mobileProp[t].width/48; // really BO_TILE_SIZE
+	int h = mobileProp[t].height/48; // really BO_TILE_SIZE
+	int goFlag = mobileProp[t].goFlag;
+
+	for (k=0; k<w; k++) // object Width
+		for (l=0; l<h; l++) // object Height
+			if  (!isValid(x+k,y+l) || !cell(x+k,y+l).canGo(goFlag))
+				return false;
+	return true;
+}
+
 
 /*
  * basic placing function
  * should be smarter by veryfing that (x,y) is free, and else
  * try 'around' that place.
  */
-void BosonServer::placeMob(serverMobUnit *u)
+void BosonServer::reportMob(serverMobUnit *u)
 {
 	ulong		k = 0l;
 	int		i,j;
@@ -147,14 +186,14 @@ void BosonServer::createFixUnit(facilityMsg_t &data)
 
 	f = new serverFacility(player[data.who].buffer, &data);
 
-	placeFix(f);
+	reportFix(f);
 
 	facility.insert ( key++, f);
 	checkUnitVisibility(f);
 }
 
 
-void BosonServer::placeFix(serverFacility * f)
+void BosonServer::reportFix(serverFacility * f)
 {
 	ulong		k;
 	int		i,j;
@@ -163,8 +202,10 @@ void BosonServer::placeFix(serverFacility * f)
 	/* who is interested in knowing f's arrival */
 	k = getPlayerMask(f->who);
 	for (i=0; i<r.width(); i++)
-		for (j=0; j<r.height(); j++)
+		for (j=0; j<r.height(); j++) {
 			k |= cell( r.x()+i, r.y()+j).known;
+			cell( r.x()+i, r.y()+j).put_building();
+		}
 	f->setKnown(k);
 
 	/* telling them */
