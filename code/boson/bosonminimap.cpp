@@ -29,12 +29,15 @@
 #include "bodebug.h"
 
 #include <klocale.h>
+#include <kstandarddirs.h>
 
 #include <qpixmap.h>
 #include <qpainter.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
 #include <qvaluelist.h>
+#include <qfileinfo.h>
+#include <qtooltip.h>
 
 #include "bosonminimap.moc"
 
@@ -50,6 +53,8 @@ public:
 		mZoomIn = 0;
 		mZoomOut = 0;
 		mZoomDefault = 0;
+
+		mLogo = 0;
 	}
 
 	QPointArray mSelectionRect;
@@ -63,6 +68,9 @@ public:
 	QPushButton* mZoomIn;
 	QPushButton* mZoomOut;
 	QPushButton* mZoomDefault;
+
+	QPixmap* mLogo;
+	bool mShowMap;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -85,20 +93,25 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  d->mPixmap->installEventFilter(this);
  grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
  d->mZoomIn = new QPushButton(this);
- d->mZoomIn->setText(i18n("Zoom In"));
+ QToolTip::add(d->mZoomIn, i18n("Zoom in"));
  grid->addWidget(d->mZoomIn, 0, 2);
  d->mZoomOut = new QPushButton(this);
- d->mZoomOut->setText(i18n("Zoom Out"));
+ QToolTip::add(d->mZoomOut, i18n("Zoom out"));
  grid->addWidget(d->mZoomOut, 2, 2);
  d->mZoomDefault = new QPushButton(this);
- d->mZoomDefault->setText(i18n("Zoom Default"));
+ QToolTip::add(d->mZoomOut, i18n("Default zoom factor"));
  grid->addWidget(d->mZoomDefault, 4, 2);
 
  d->mSelectionRect.resize(8);
 
+ setPixmapTheme(QString::fromLatin1("standard"));
+ d->mShowMap = false;
+
  connect(d->mZoomIn, SIGNAL(clicked()), this, SLOT(slotZoomIn()));
  connect(d->mZoomOut, SIGNAL(clicked()), this, SLOT(slotZoomOut()));
  connect(d->mZoomDefault, SIGNAL(clicked()), this, SLOT(slotZoomDefault()));
+
+ slotShowMap(false);
 }
 
 BosonMiniMap::~BosonMiniMap()
@@ -227,6 +240,12 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 {
  if (e->type() != QEvent::MouseButtonPress) {
+	return;
+ }
+ if (!d->mShowMap) {
+	return;
+ }
+ if (e->pos().x() >= d->mPixmap->width() || e->pos().y() >= d->mPixmap->height() || e->pos().x() < 0 || e->pos().y() < 0) {
 	return;
  }
  if (e->button() == LeftButton) {
@@ -469,13 +488,11 @@ double BosonMiniMap::zoom() const
 
 void BosonMiniMap::slotShowMap(bool s)
 {
- if (s) {
-	boDebug() << width() << "x" << height() << endl;
-	boDebug() << ground()->width() << "x" << ground()->height() << endl;
-	show();
- } else {
-	hide();
- }
+ d->mZoomIn->setEnabled(s);
+ d->mZoomOut->setEnabled(s);
+ d->mZoomDefault->setEnabled(s);
+ d->mShowMap = s;
+ d->mPixmap->repaint();
 }
 
 void BosonMiniMap::slotZoomIn()
@@ -506,7 +523,6 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 {
  if (e->type() != QEvent::Paint) {
 	return QWidget::eventFilter(o, e);
-	
  }
  if (!ground()) {
 	return QWidget::eventFilter(o, e);
@@ -521,6 +537,17 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 
 	// Resize pixmap (slow)
 	createGround();
+ }
+
+ if (!d->mShowMap) {
+	// don't show the map, but the logo only.
+	if (!d->mLogo || d->mLogo->isNull()) {
+		boWarning() << k_funcinfo << "oops - invalid logo for minimap" << endl;
+		return QWidget::eventFilter(o, e);
+	}
+	bitBlt(d->mPixmap, 0, 0, d->mLogo, 0, 0);
+
+	return QWidget::eventFilter(o, e);
  }
 
  // it might be possible that the minimap is bigger than the size of the
@@ -605,5 +632,64 @@ QPointArray BosonMiniMap::makeCellList(Unit* unit, float x, float y)
  right = QMIN(right, QMAX((int)mapWidth() - 1, 0));
  bottom = QMIN(bottom, QMAX((int)mapHeight() - 1, 0));
  return BosonItem::cells(left, right, top, bottom);
+}
+
+void BosonMiniMap::setPixmapTheme(const QString& theme)
+{
+ QPixmap pixmap = pixmapFromTheme(QString::fromLatin1("minimap-logo.png"), theme);
+ if (pixmap.isNull()) {
+	boError() << k_funcinfo << "Could not load minimap-logo.png from " << theme << endl;
+	if (!d->mLogo) {
+		// create a dummy pixmap to avoid a crash
+		d->mLogo = new QPixmap(100, 100);
+		d->mLogo->fill(Qt::red);
+	}
+ } else {
+	delete d->mLogo;
+	d->mLogo = new QPixmap(pixmap);
+ }
+
+ pixmap = pixmapFromTheme(QString::fromLatin1("minimap-zoom-in.png"), theme);
+ if (pixmap.isNull()) {
+	boError() << k_funcinfo << "Could not load minimap-zoom-in.png from " << theme << endl;
+	// we don't set a dummy pixmap here
+ } else {
+	d->mZoomIn->setPixmap(pixmap);
+ }
+
+ pixmap = pixmapFromTheme(QString::fromLatin1("minimap-zoom-out.png"), theme);
+ if (pixmap.isNull()) {
+	boError() << k_funcinfo << "Could not load minimap-zoom-out.png from " << theme << endl;
+	// we don't set a dummy pixmap here
+ } else {
+	d->mZoomOut->setPixmap(pixmap);
+ }
+
+ pixmap = pixmapFromTheme(QString::fromLatin1("minimap-zoom-default.png"), theme);
+ if (pixmap.isNull()) {
+	boError() << k_funcinfo << "Could not load minimap-zoom-default.png from " << theme << endl;
+	// we don't set a dummy pixmap here
+ } else {
+	d->mZoomDefault->setPixmap(pixmap);
+ }
+
+ if (!d->mShowMap) {
+	d->mPixmap->repaint();
+ }
+}
+
+QPixmap BosonMiniMap::pixmapFromTheme(const QString& file, const QString& theme) const
+{
+ QString f = locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(theme).arg(file));
+ QFileInfo info(f);
+ if (!info.exists()) {
+	f = locate("data", QString::fromLatin1("boson/themes/ui/%1/%2").arg(QString::fromLatin1("standard").arg(file)));
+	info.setFile(f);
+	if (!info.exists()) {
+		boError() << k_funcinfo << "Can't find " << f << " in " << theme << " or standard" << endl;
+		return QPixmap();
+	}
+ }
+ return QPixmap(f);
 }
 

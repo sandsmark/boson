@@ -99,6 +99,12 @@ public slots:
 	 **/
 	void slotShowMap(bool show);
 
+	/**
+	 * Set the theme where to find the pixmaps (logo, zoom pixmaps, ...) in.
+	 * Default is "standard".
+	 **/
+	void setPixmapTheme(const QString& theme);
+
 protected slots:
 	void slotZoomIn();
 	void slotZoomOut();
@@ -157,6 +163,13 @@ protected:
 	BosonMap* map() const;
 
 	QPointArray makeCellList(Unit* unit, float x, float y);
+
+	/**
+	 * @return A pixmap for @p file in the theme @p theme if it is existing.
+	 * If not it will search for @p file in the "standard" theme and if it's
+	 * not there either it'll return a null pixmap.
+	 **/
+	QPixmap pixmapFromTheme(const QString& file, const QString& theme) const;
 
 
 private:

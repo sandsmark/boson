@@ -415,7 +415,7 @@ void BosonCommandFrameBase::reparentMiniMap(QWidget* map)
 	return;
  }
  map->reparent(this, QPoint(0,0));
- map->hide();
+ map->show();
  d->mTopLayout->insertWidget(0, map, 0, AlignHCenter);
 }
 
