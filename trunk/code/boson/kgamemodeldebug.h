@@ -102,8 +102,14 @@ public:
 	 **/
 	void addTheme(SpeciesTheme* theme);
 
+	/**
+	 * @return A text displaying the compontents of the RGBA argument
+	 **/
 	static QString rgbaText(Lib3dsRgba rgba);
-	static QString rgbText(Lib3dsRgba rgb);
+	/**
+	 * @return A text displaying the compontents of the RGB argument
+	 **/
+	static QString rgbText(Lib3dsRgb rgb);
 
 public slots:
 	void slotUpdate();
