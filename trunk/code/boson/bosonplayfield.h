@@ -189,9 +189,6 @@ protected:
 	bool loadDescription(QDataStream& stream);
 
 private:
-	static void initStatic();
-
-private:
 	BosonMap* mMap;
 	BosonScenario* mScenario;
 	BPFDescription* mDescription;
