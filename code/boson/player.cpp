@@ -880,3 +880,20 @@ void Player::loadFogOfWar(const QDomElement& root)
  }
 }
 
+void Player::writeGameLog(QTextStream& log)
+{
+ log << "Player: " << id() << endl;
+ log << minerals() << " " << oil() << endl;
+ log << mobilesCount() << " " << facilitiesCount() << endl;
+
+ QPtrListIterator<Unit> it(d->mUnits);
+ Unit* u;
+ while (it.current()) {
+	u = it.current();
+	log << "Unit: " << u->id() << "  " << u->x() << " " << u->y() << " " << u->z() << "  " << u->rotation() <<
+			"  " << u->speed() << "  " << u->health() << "  " << u->work() << " " << u->advanceWork() << endl;
+	++it;
+ }
+ log << endl;
+}
+

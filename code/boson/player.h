@@ -23,6 +23,8 @@
 
 class QColor;
 class QDomElement;
+class QTextStream;
+
 class Unit;
 class Facility;
 class SpeciesTheme;
@@ -200,6 +202,8 @@ public:
 	bool hasTechnology(unsigned long int id) const;
 
 	void technologyResearched(ProductionPlugin* factory, unsigned long int id);
+
+	void writeGameLog(QTextStream& log);
 
 signals:
 	void signalLoadUnit(unsigned long int unitType, unsigned long int id, Player* owner);
