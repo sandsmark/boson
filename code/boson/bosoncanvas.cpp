@@ -1620,6 +1620,19 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 		ret = false;
 		continue;
 	}
+	ownerId = effect.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "invalid number for OwnerId" << endl;
+		ret = false;
+		continue;
+	}
+
+	// AB: ownerId is an item here
+	// if that item is not present, then it belongs to a player that is not
+	// being loaded in this game. we ignore the effect then.
+	if (!d->mAllItems.findItem(ownerId)) {
+		continue;
+	}
 
 	const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(propId);
 	if (!prop) {
