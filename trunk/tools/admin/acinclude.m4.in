@@ -464,11 +464,7 @@ if test "$1" = "default"; then
     kde_servicetypesdir='\${prefix}/share/servicetypes'
   fi
   if test -z "$kde_moduledir"; then
-    if test "$kde_qtver" = "2"; then
-      kde_moduledir='\${libdir}/kde2'
-    else
-      kde_moduledir='\${libdir}/kde3'
-    fi
+    kde_moduledir='\${libdir}/kde3'
   fi
   if test -z "$kde_styledir"; then
     kde_styledir='\${libdir}/kde3/plugins/styles'
@@ -484,12 +480,7 @@ if test "$1" = "default"; then
 
 else
 
-  if test $kde_qtver = 1; then
-     AC_MSG_RESULT([compiling])
-     KDE_1_CHECK_PATHS
-  else
-     AC_MSG_ERROR([path checking not yet supported for KDE 2])
-  fi
+  AC_MSG_ERROR([path checking not yet supported for KDE 2])
 
 fi
 ])
@@ -650,13 +641,11 @@ AC_SUBST(kde_moduledir)
 AC_SUBST(kde_styledir)
 AC_SUBST(kde_widgetdir)
 AC_SUBST(boson_plugindir)
-if test "$kde_qtver" = 1; then
-  kde_minidir="$kde_icondir/mini"
-else
+
 # for KDE 1 - this breaks KDE2 apps using minidir, but
 # that's the plan ;-/
   kde_minidir="/dev/null"
-fi
+
 dnl AC_SUBST(kde_minidir)
 dnl AC_SUBST(kde_cgidir)
 dnl AC_SUBST(kde_toolbardir)
@@ -1119,9 +1108,6 @@ else
     kde_qtsubver=1
   fi
   kde_qtver=`echo "$1" | sed -e 's#^\([0-9][0-9]*\)\..*#\1#'`
-  if test "$kde_qtver" = "1"; then
-    kde_qtsubver=42
-  fi
 fi
 
 if test -z "$2"; then
@@ -1135,9 +1121,6 @@ if test -z "$2"; then
   if test "$kde_qtver" = "3"; then
     kde_qt_minversion=">= Qt 3.0.3"
   fi
-  if test "$kde_qtver" = "1"; then
-    kde_qt_minversion=">= 1.42 and < 2.0"
-  fi
 else
    kde_qt_minversion=$2
 fi
@@ -1146,28 +1129,12 @@ if test -z "$3"; then
    if test $kde_qtver = 3; then
      kde_qt_verstring="QT_VERSION >= 303"
    fi
-   if test $kde_qtver = 2; then
-     if test $kde_qtsubver -gt 0; then
-       kde_qt_verstring="QT_VERSION >= 222"
-     else
-       kde_qt_verstring="QT_VERSION >= 200"
-     fi
-   fi
-   if test $kde_qtver = 1; then
-    kde_qt_verstring="QT_VERSION >= 142 && QT_VERSION < 200"
-   fi
 else
    kde_qt_verstring=$3
 fi
 
 if test $kde_qtver = 3; then
   kde_qt_dirs="$QTDIR /usr/lib/qt3 /usr/lib/qt"
-fi
-if test $kde_qtver = 2; then
-   kde_qt_dirs="$QTDIR /usr/lib/qt2 /usr/lib/qt"
-fi
-if test $kde_qtver = 1; then
-   kde_qt_dirs="$QTDIR /usr/lib/qt"
 fi
 ])
 
@@ -1604,13 +1571,8 @@ fi
 AC_CACHE_VAL(ac_cv_have_kde,
 [#try to guess kde locations
 
-if test "$kde_qtver" = 1; then
-  kde_check_header="ksock.h"
-  kde_check_lib="libkdecore.la"
-else
-  kde_check_header="ksharedptr.h"
-  kde_check_lib="libkio.la"
-fi
+kde_check_header="ksharedptr.h"
+kde_check_lib="libkio.la"
 
 if test -z "$1"; then
 
@@ -1904,7 +1866,6 @@ AC_DEFUN(KDE_CREATE_LIBS_ALIASES,
    AC_REQUIRE([KDE_CHECK_LIBDL])
    AC_REQUIRE([K_PATH_X])
 
-if test $kde_qtver = 3; then
    AC_SUBST(LIB_KDECORE, "-lkdecore")
    AC_SUBST(LIB_KDEUI, "-lkdeui")
    AC_SUBST(LIB_KIO, "-lkio")
@@ -1917,25 +1878,6 @@ if test $kde_qtver = 3; then
 # these are for backward compatibility
    AC_SUBST(LIB_KSYCOCA, "-lkio")
    AC_SUBST(LIB_KFILE, "-lkio")
-elif test $kde_qtver = 2; then
-   AC_SUBST(LIB_KDECORE, "-lkdecore")
-   AC_SUBST(LIB_KDEUI, "-lkdeui")
-   AC_SUBST(LIB_KIO, "-lkio")
-   AC_SUBST(LIB_KSYCOCA, "-lksycoca")
-   AC_SUBST(LIB_SMB, "-lsmb")
-   AC_SUBST(LIB_KFILE, "-lkfile")
-   AC_SUBST(LIB_KAB, "-lkab")
-   AC_SUBST(LIB_KHTML, "-lkhtml")
-   AC_SUBST(LIB_KSPELL, "-lkspell")
-   AC_SUBST(LIB_KPARTS, "-lkparts")
-   AC_SUBST(LIB_KDEPRINT, "-lkdeprint")
-else
-   AC_SUBST(LIB_KDECORE, "-lkdecore -lXext $(LIB_QT)")
-   AC_SUBST(LIB_KDEUI, "-lkdeui $(LIB_KDECORE)")
-   AC_SUBST(LIB_KFM, "-lkfm $(LIB_KDECORE)")
-   AC_SUBST(LIB_KFILE, "-lkfile $(LIB_KFM) $(LIB_KDEUI)")
-   AC_SUBST(LIB_KAB, "-lkab $(LIB_KIMGIO) $(LIB_KDECORE)")
-fi
 ])
 
 AC_DEFUN(AC_PATH_KDE,
