@@ -63,8 +63,6 @@ void usage(const char* command)
 
 int nextPower2(int n)
 {
- // FIXME: texture must be >= 64x64
- // maybe we should always return a value >= 64
  if (n <= 0) {
 	return 1;
  }
