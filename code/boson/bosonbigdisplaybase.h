@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -326,7 +326,7 @@ public slots:
 
 	/**
 	 * In case the unit has been destroyed make sure that it's removed from
-	 * the local selection. 
+	 * the local selection.
 	 *
 	 * Currently this does not do anything else, but we might add some
 	 * functionality in the future
@@ -444,9 +444,19 @@ protected:
 	void renderCells();
 
 	/**
-	 * Called by @ref paintGL only to render the particles on the screen
+	 * Called by @ref paintGL only to render the particle effects on the screen
 	 **/
 	void renderParticles();
+
+	/**
+	 * Called by @ref paintGL only to render the fog effects on the screen
+	 **/
+	void renderFog();
+
+	/**
+	 * Called by @ref paintGL only to render the fade effects on the screen
+	 **/
+	void renderFadeEffects();
 
 	/**
 	 * @param y The <em>top</em> of the text to-be rendered. See also @ref

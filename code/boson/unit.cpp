@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 #include "bosonmodel.h"
 #include "pluginproperties.h"
 #include "boson.h"
-#include "bosonparticlesystem.h"
+#include "bosoneffect.h"
 #include "bosonweapon.h"
 #include "bopointeriterator.h"
 #include "bodebug.h"
@@ -92,7 +92,7 @@ public:
 	BosonWeapon** mWeapons;
 
 	// OpenGL only:
-	QPtrList<BosonParticleSystem> mParticleSystems;  // No autodelete!!!
+	QPtrList<BosonEffect> mEffects;  // No autodelete!!!
 
 	BosonPathInfo mPathInfo;
 };
@@ -1039,7 +1039,7 @@ bool Unit::saveAsXML(QDomElement& root)
  }
 
 
- // TODO: somehow save active particle systems
+ // TODO: somehow save active effects
 
  return true;
 }
@@ -1329,20 +1329,20 @@ void Unit::turnTo(int deg)
  d->mWantedRotation = deg;
 }
 
-const QPtrList<BosonParticleSystem>* Unit::particleSystems() const
+const QPtrList<BosonEffect>* Unit::effects() const
 {
- return &(d->mParticleSystems);
+ return &(d->mEffects);
 }
 
-void Unit::clearParticleSystems()
+void Unit::clearEffects()
 {
- d->mParticleSystems.clear();
+ d->mEffects.clear();
 }
 
-void Unit::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
+void Unit::setEffects(const QPtrList<BosonEffect>& list)
 {
- d->mParticleSystems = list;
- canvas()->addParticleSystems(d->mParticleSystems);
+ d->mEffects = list;
+ canvas()->addEffects(d->mEffects);
 }
 
 void Unit::loadWeapons()
@@ -1516,7 +1516,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 
  ((Boson*)owner->game())->slotUpdateProductionOptions();
 
- setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+ setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
 
  setRotation((float)(owner->game()->random()->getLong(359)));
  updateRotation();
@@ -2265,7 +2265,7 @@ void Facility::setConstructionStep(unsigned int step)
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	setAnimationMode(UnitAnimationIdle);
-	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  }
 }
 
@@ -2293,9 +2293,9 @@ bool Facility::loadFromXML(const QDomElement& root)
  setGLConstructionStep(modelStep);
 
  // FIXME: remove. this is from Facility::setConstructionStep. we _need_ to load
- // particles in loadFromXML() - then these lines are obsolete.
+ // effects in loadFromXML() - then these lines are obsolete.
  if (d->mConstructionStep == constructionSteps()) {
-	setParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+	setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
  }
 
  return true;

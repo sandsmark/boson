@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ class UnitProperties;
 class BoItemList;
 class BosonItem;
 class ProductionPlugin;
-class BosonParticleSystem;
+class BosonEffect;
 class BosonShot;
 class BosonCanvasStatistics;
 class BoVector3;
@@ -272,7 +272,7 @@ public:
 
 	/**
 	 * Called when unit is damaged (usually by missile).
-	 * It calculates new health for the unit, creates particle systems if needed
+	 * It calculates new health for the unit, creates effects if needed
 	 * and marks unit as destoyed if it doesn't have any hitpoints left anymore.
 	 **/
 	void unitDamaged(Unit* unit, long int damage);
@@ -358,7 +358,7 @@ public:
 	 * @param pos The location where the unit should get placed.
 	 * This is in <em>cell</em>-coordinates. This point specifies the
 	 * <em>upper-left</em> corner of the unit.
-	 * @param factory If NULL then BUILD_RANGE is ignored. Otherwise 
+	 * @param factory If NULL then BUILD_RANGE is ignored. Otherwise
 	 * facilities must be in range of BUILD_RANGE of any player unit and
 	 * mobile units in BUILD_RANGE of the facility.
 	 * @return TRUE if the unit can be placed at pos, otherwise FALSE
@@ -399,11 +399,11 @@ public:
 
 	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
-	unsigned int particleSystemsCount() const;
-	void updateParticleSystems(float elapsed);
-	QPtrList<BosonParticleSystem>* particleSystems() const;
-	void addParticleSystem(BosonParticleSystem* s);
-	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
+	unsigned int effectsCount() const;
+	void updateEffects(float elapsed);
+	QPtrList<BosonEffect>* effects() const;
+	void addEffect(BosonEffect* e);
+	void addEffects(const QPtrList<BosonEffect> effects);
 
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root);
@@ -413,7 +413,7 @@ public slots:
 	 * @param See @ref Boson::signalAdvance
 	 **/
 	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
-	
+
 signals:
 	void signalItemAdded(BosonItem* item);
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
@@ -465,7 +465,7 @@ protected:
 	 **/
 	bool loadItemsFromXML(const QDomElement& root);
 #if 0
-	bool loadParticlesFromXML(const QDomElement& root);
+	bool loadEffectsFromXML(const QDomElement& root);
 #endif
 
 	/**

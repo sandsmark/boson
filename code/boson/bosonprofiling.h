@@ -214,7 +214,7 @@ public:
 	void advance(bool start, unsigned int advanceCount);
 	void advanceFunction(bool start);
 	void advanceDeleteUnusedShots(bool start);
-	void advanceParticles(bool start);
+	void advanceEffects(bool start);
 	void advanceMaximalAdvanceCount(bool start); // in MAXIMAL_ADVANCE_COUNT we do some interesting stuff (especially deleting unused stuff - e.g. wreckages
 	// these are tricky now - they get called multiple times in every
 	// advance call (note that this is a pretty big overhead!)

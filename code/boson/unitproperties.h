@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 class SpeciesTheme;
 class PluginProperties;
 class BosonWeaponProperties;
-class BosonParticleSystem;
-class BosonParticleSystemProperties;
+class BosonEffect;
+class BosonEffectProperties;
 class BoVector3;
 class BoAction;
 class QString;
@@ -264,14 +264,14 @@ public:
 
 	/**
 	 * The time that a unit needs to be produced
-	 * 
-	 * Note that productionTime is the time that is needed to 
+	 *
+	 * Note that productionTime is the time that is needed to
 	 * <em>build</em> the unit, * so <em>before</em> it is being placed on
 	 * the map.
 	 *
 	 * The production time may be influenced by the facility which produces
 	 * the unit and maybe th number of facilities (to name 2 examples).
-	 * @return The number of @ref Unit::advance calls this unit needs 
+	 * @return The number of @ref Unit::advance calls this unit needs
 	 * (usually) to be produced.
 	 **/
 	unsigned int productionTime() const { return mProductionTime; }
@@ -313,14 +313,14 @@ public:
 
 	QMap<int, QString> sounds() const;
 
-	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
-	QValueList<unsigned long int> destroyedParticleSystemIds() const;
+	QPtrList<BosonEffect> newDestroyedEffects(float x, float y, float z) const;
+	QValueList<unsigned long int> destroyedEffectIds() const;
 
-	QPtrList<BosonParticleSystem> newConstructedParticleSystems(float x, float y, float z) const;
-	QValueList<unsigned long int> constructedParticleSystemIds() const;
+	QPtrList<BosonEffect> newConstructedEffects(float x, float y, float z) const;
+	QValueList<unsigned long int> constructedEffectIds() const;
 
 	const QPtrList<PluginProperties>* plugins() const;
-  
+
 	/**
 	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
 	 **/
@@ -340,7 +340,7 @@ public:
 	/**
 	 * @return So called hitpoint of this unit
 	 * Hitpoint is used to calculate target position for missiles and position for
-	 * some particle systems. Hitpoint is relative to the center of the unit.
+	 * some effects. Hitpoint is relative to the center of the unit.
 	 * It should be a point on the surface of the unit.
 	 **/
 	 const BoVector3& hitPoint() const;
@@ -359,8 +359,8 @@ public:
 	unsigned int explodingFragmentCount() const { return mExplodingFragmentCount; };
 	long int explodingFragmentDamage() const { return mExplodingFragmentDamage; };
 	float explodingFragmentDamageRange() const { return mExplodingFragmentDamageRange; };
-	QPtrList<BosonParticleSystem> newExplodingFragmentFlyParticleSystems(BoVector3 pos) const;
-	QPtrList<BosonParticleSystem> newExplodingFragmentHitParticleSystems(BoVector3 pos) const;
+	QPtrList<BosonEffect> newExplodingFragmentFlyEffects(BoVector3 pos) const;
+	QPtrList<BosonEffect> newExplodingFragmentHitEffects(BoVector3 pos) const;
 
 	bool removeWreckageImmediately() const { return mRemoveWreckageImmediately; }
 
@@ -407,8 +407,8 @@ protected:
 	void setRequirements(QValueList<unsigned long int> requirements);
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
-	void setDestroyedParticleSystemIds(QValueList<unsigned long int> ids);
-	void setConstructedParticleSystemIds(QValueList<unsigned long int> ids);
+	void setDestroyedEffectIds(QValueList<unsigned long int> ids);
+	void setConstructedEffectIds(QValueList<unsigned long int> ids);
 	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
 	void setHitPoint(const BoVector3& hitpoint);

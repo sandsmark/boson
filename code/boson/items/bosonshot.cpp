@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
 
 #include "../global.h"
 #include "../bosoncanvas.h"
-#include "../bosonparticlesystem.h"
+#include "../bosoneffect.h"
 #include "../bosonweapon.h"
 #include "../player.h"
 #include "../unitproperties.h"
 #include "../boitemlist.h"
-#include "../bosonparticlesystemproperties.h"
+#include "../bosoneffectproperties.h"
 #include "../boson.h"
 #include "../speciestheme.h"
 #include "../unitproperties.h"
@@ -271,7 +271,7 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   //boDebug(350) << "    pos: (" << pos.x() << "; " << pos.y() << "; " << pos.z() << ");  target: (" <<
   //    target.x() << "; " << target.y() << "; " << target.z() << "); this=" << this << endl;
-  mFlyParticleSystems = 0;
+  mFlyEffects = 0;
   mTarget = target;
   if(!properties())
   {
@@ -303,10 +303,10 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
   mVelo.setZ(target.z() - pos.z());
   mVelo.scale(1 / mTotalDist);
 
-  // Particle systems
-  setParticleSystems(properties()->newFlyParticleSystems(pos, 0.0));
-  // FIXME: name: it has nothing to do with particles anymore
-  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+  // Effects
+  setEffects(properties()->newFlyEffects(pos, 0.0));
+  // FIXME: name: it has nothing to do with effects anymore
+  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 
   // Initialization
   move(pos[0], pos[1], pos[2]);
@@ -324,19 +324,19 @@ BosonShotMissile::BosonShotMissile(Player* owner, BosonCanvas* canvas, const Bos
     setActive(false);
     return;
   }
-  mFlyParticleSystems = 0;
+  mFlyEffects = 0;
 }
 
 BosonShotMissile::~BosonShotMissile()
 {
- delete mFlyParticleSystems;
+ delete mFlyEffects;
 }
 
-void BosonShotMissile::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
+void BosonShotMissile::setEffects(const QPtrList<BosonEffect>& list)
 {
-  delete mFlyParticleSystems;
-  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(list);
-  canvas()->addParticleSystems(*mFlyParticleSystems);
+  delete mFlyEffects;
+  mFlyEffects = new QPtrList<BosonEffect>(list);
+  canvas()->addEffects(*mFlyEffects);
 }
 
 // move the shot by one step
@@ -356,7 +356,7 @@ void BosonShotMissile::advanceMoveInternal()
   float zvelo = mVelo[2] * speed() + (addZ - mZ);
   mZ = addZ;
   setVelocity(mVelo[0] * speed(), mVelo[1] * speed(), zvelo);
-  setXRotation(Bo3dTools::rotationToPoint(mParticleVelo * speed(), zvelo) - 90 );
+  setXRotation(Bo3dTools::rotationToPoint(mEffectVelo * speed(), zvelo) - 90 );
 
   // Check if missile is still active
   BoVector3 dist = mTarget - BoVector3(x() + xVelocity(), y() + yVelocity(), z() + zVelocity());
@@ -484,7 +484,7 @@ bool BosonShotMissile::loadFromXML(const QDomElement& root)
 
   mVelo.set(xvelo, yvelo, zvelo);
   mTarget.set(targetx, targety, targetz);
-  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
+  mEffectVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   setRotation(Bo3dTools::rotationToPoint(mVelo[0], mVelo[1]));
   setSpeed(speed);
   setAccelerationSpeed(properties()->accelerationSpeed());
@@ -808,20 +808,20 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
     BosonShot(owner, canvas, model)
 {
-  mParticleSystems = 0;
+  mEffects = 0;
   mUnitProperties = 0;
 }
 
 BosonShotFragment::~BosonShotFragment()
 {
- delete mParticleSystems;
+ delete mEffects;
 }
 
-void BosonShotFragment::setParticleSystems(const QPtrList<BosonParticleSystem>& list)
+void BosonShotFragment::setEffects(const QPtrList<BosonEffect>& list)
 {
-  delete mParticleSystems;
-  mParticleSystems = new QPtrList<BosonParticleSystem>(list);
-  canvas()->addParticleSystems(*mParticleSystems);
+  delete mEffects;
+  mEffects = new QPtrList<BosonEffect>(list);
+  canvas()->addEffects(*mEffects);
 }
 
 void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
@@ -835,7 +835,7 @@ void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* uni
   mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
   boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
 
-  setParticleSystems(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
+  setEffects(mUnitProperties->newExplodingFragmentFlyEffects(pos));
 
   move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
   setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
@@ -942,7 +942,7 @@ void BosonShotFragment::explode()
   BosonShot::explode();
 
   BoVector3 pos(x() + width() / 2, y() + height() / 2, z());
-  canvas()->addParticleSystems(mUnitProperties->newExplodingFragmentHitParticleSystems(pos));
+  canvas()->addEffects(mUnitProperties->newExplodingFragmentHitEffects(pos));
 }
 
 long int BosonShotFragment::damage() const

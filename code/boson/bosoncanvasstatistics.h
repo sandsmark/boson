@@ -69,7 +69,7 @@ public:
 
 	unsigned int allItemsCount() const;
 
-	unsigned int particleSystemsCount() const;
+	unsigned int effectsCount() const;
 
 	/**
 	 * Increase the number work-count for @p work by 1. For non-Unit items

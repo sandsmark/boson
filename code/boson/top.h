@@ -82,7 +82,7 @@ public:
 	void saveInitialDockConfig();
 
 public slots:
-	/** 
+	/**
 	 * Called when user clicks "start new game" button
 	 * This shows BosonStartGameWidget from where you can start new game
 	 **/
@@ -96,31 +96,31 @@ public slots:
 	 * BosonStartGameWidget
 	 **/
 	void slotStartNewGame();
-	
-	/** 
+
+	/**
 	 * Toggles sound
 	 **/
 	void slotToggleSound();
 
 	/**
-	 * Toggles music 
+	 * Toggles music
 	 **/
 	void slotToggleMusic();
 
 	/**
-	 * Toggles if menubar is shown or hidden 
+	 * Toggles if menubar is shown or hidden
 	 **/
 	void slotToggleMenubar();
 
 	/**
-	 * Toggles if togglebar is shown or hidden 
+	 * Toggles if togglebar is shown or hidden
 	 **/
 	void slotToggleStatusbar();
 
 	void slotConfigureKeys();
 
 	/**
-	 * Toggles if Boson is shown fullscreen or normally 
+	 * Toggles if Boson is shown fullscreen or normally
 	 **/
 	void slotToggleFullScreen();
 
@@ -150,7 +150,7 @@ signals:
 	void signalSetFacilitiesCount(int);// facilities of the local player
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
-	void signalParticlesCountUpdated(int);
+	void signalEffectsCountUpdated(int);
 	void signalCanvasItemsCountUpdated(int);
 	void signalCanvasAnimationsCountUpdated(int);
 	void signalUnitsUpdated(int);// number of units on the canvas

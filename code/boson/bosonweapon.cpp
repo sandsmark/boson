@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
 #include "bosonweapon.h"
 
 #include "speciestheme.h"
-#include "bosonparticlesystem.h"
-#include "bosonparticlesystemproperties.h"
+#include "bosoneffect.h"
+#include "bosoneffectproperties.h"
 #include "unit.h"
 #include "global.h"
 #include "bosoncanvas.h"
@@ -80,14 +80,14 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   {
     boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
   }
-  mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
-  mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
-  mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");
+  mShootEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootEffects");
+  mFlyEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyEffects");
+  mHitEffectIds = BosonConfig::readUnsignedLongNumList(cfg, "HitEffects");
   if(full)
   {
-    mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mShootParticleSystemIds, speciesTheme());
-    mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mFlyParticleSystemIds, speciesTheme());
-    mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(mHitParticleSystemIds, speciesTheme());
+    mShootEffects = BosonEffectProperties::loadEffectProperties(mShootEffectIds, speciesTheme());
+    mFlyEffects = BosonEffectProperties::loadEffectProperties(mFlyEffectIds, speciesTheme());
+    mHitEffects = BosonEffectProperties::loadEffectProperties(mHitEffectIds, speciesTheme());
   }
   // We need to have some kind of model even for bullet (though it won't be shown),
   //  because BosonShot will crash otherwise (actually it's BosonItem)
@@ -126,9 +126,9 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   BoVector3 offset(mOffset);
   offset.canvasToCell();
   BosonConfig::writeEntry(cfg, "Offset", offset);
-  BosonConfig::writeUnsignedLongNumList(cfg, "ShootParticles", mShootParticleSystemIds);
-  BosonConfig::writeUnsignedLongNumList(cfg, "FlyParticles", mFlyParticleSystemIds);
-  BosonConfig::writeUnsignedLongNumList(cfg, "HitParticles", mHitParticleSystemIds);
+  BosonConfig::writeUnsignedLongNumList(cfg, "ShootEffects", mShootEffectIds);
+  BosonConfig::writeUnsignedLongNumList(cfg, "FlyEffects", mFlyEffectIds);
+  BosonConfig::writeUnsignedLongNumList(cfg, "HitEffects", mHitEffectIds);
   cfg->writeEntry("SoundShoot", mSounds[SoundWeaponShoot]);
   cfg->writeEntry("SoundFly", mSounds[SoundWeaponFly]);
   cfg->writeEntry("SoundHit", mSounds[SoundWeaponHit]);
@@ -147,9 +147,9 @@ void BosonWeaponProperties::reset()
   mCanShootAtLandUnits = false;
   mHeight = 0.25;
   mOffset = BoVector3();
-  mShootParticleSystemIds.clear();
-  mFlyParticleSystemIds.clear();
-  mHitParticleSystemIds.clear();
+  mShootEffectIds.clear();
+  mFlyEffectIds.clear();
+  mHitEffectIds.clear();
   mModelFileName = "missile.3ds";
   mSounds.clear();
   mSounds.insert(SoundWeaponShoot, "shoot");
@@ -199,49 +199,19 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
   return s;
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoVector3 pos, float rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newShootEffects(BoVector3 pos, float rotation) const
 {
-  QPtrList<BosonParticleSystem> list;
-  QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
-  while(it.current())
-  {
-    BosonParticleSystem* s = it.current()->newSystem(pos, rotation);
-    if (s) {
-      list.append(s);
-    }
-    ++it;
-  }
-  return list;
+  return BosonEffectProperties::newEffects(&mShootEffects, pos, BoVector3(0, 0, rotation));
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(BoVector3 pos, float rotation) const
+QPtrList<BosonEffect> BosonWeaponProperties::newFlyEffects(BoVector3 pos, float rotation) const
 {
-  QPtrList<BosonParticleSystem> list;
-  QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
-  while(it.current())
-  {
-    BosonParticleSystem* s = it.current()->newSystem(pos, rotation);
-    if (s) {
-      list.append(s);
-    }
-    ++it;
-  }
-  return list;
+  return BosonEffectProperties::newEffects(&mFlyEffects, pos, BoVector3(0, 0, rotation));
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newHitParticleSystems(BoVector3 pos) const
+QPtrList<BosonEffect> BosonWeaponProperties::newHitEffects(BoVector3 pos) const
 {
-  QPtrList<BosonParticleSystem> list;
-  QPtrListIterator<BosonParticleSystemProperties> it(mHitParticleSystems);
-  while(it.current())
-  {
-    BosonParticleSystem* s = it.current()->newSystem(pos);
-    if (s) {
-      list.append(s);
-    }
-    ++it;
-  }
-  return list;
+  return BosonEffectProperties::newEffects(&mHitEffects, pos);
 }
 
 void BosonWeaponProperties::setSound(int event, QString filename)
@@ -386,7 +356,7 @@ void BosonWeapon::shoot(const BoVector3& pos, const BoVector3& target)
     return;
   }
   mProp->newShot(unit(), pos, target);
-  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, -(unit()->rotation())));
+  canvas()->addEffects(mProp->newShootEffects(pos, unit()->rotation()));
   mProp->playSound(SoundWeaponShoot);
   mReloadCounter = mProp->reloadingTime();
 }

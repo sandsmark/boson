@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -411,7 +411,7 @@ void KGameSpeciesDebug::loadSpecies()
  for (it = species.begin(); it != species.end(); ++it) {
 	SpeciesTheme* s = new SpeciesTheme((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()), red); // dummy color - don't use QColor(0,0,0)
 	s->loadObjects();
-	s->loadParticleSystems();
+	s->loadEffects();
 	s->loadActions();
 	s->readUnitConfigs();
 	QValueList<unsigned long int> units = s->allFacilities();

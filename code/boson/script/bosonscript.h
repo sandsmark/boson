@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -317,7 +317,7 @@ class BosonScript
     static void endBenchmark(const QString& name);
     static void setRandomSeed(long int seed);
     static void findPath(int x1, int y1, int x2, int y2);
-    static void addParticleSystem(int player, unsigned int id, BoVector3 pos, float rot = 0.0f);
+    static void addEffect(int player, unsigned int id, BoVector3 pos, float zrot = 0.0f);
 
 
   protected:

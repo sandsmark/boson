@@ -309,7 +309,7 @@ void TopWidget::initKActions()
  // Main actions: Game start/end and quit
 
  //FIXME: slotNewGame() is broken - endGame() is enough for now.
-// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection()); 
+// (void)KStdGameAction::gameNew(this, SLOT(slotNewGame()), actionCollection());
 // (void)KStdGameAction::quit(this, SLOT(close()), actionCollection());
 
  // Settings
@@ -400,9 +400,9 @@ void TopWidget::initStatusBar()
  bar->addWidget(resources);
 
  QHBox* debug = new QHBox(bar);
- (void)new QLabel(i18n("Particles: "), debug);
- QLabel* particlesLabel = new QLabel(QString::number(0), debug);
- connect(this, SIGNAL(signalParticlesCountUpdated(int)), particlesLabel, SLOT(setNum(int)));
+ (void)new QLabel(i18n("Effects: "), debug);
+ QLabel* effectsLabel = new QLabel(QString::number(0), debug);
+ connect(this, SIGNAL(signalEffectsCountUpdated(int)), effectsLabel, SLOT(setNum(int)));
  (void)new QLabel(i18n("Canvas items: "), debug);
  QLabel* itemsLabel = new QLabel(QString::number(0), debug);
  connect(this, SIGNAL(signalCanvasItemsCountUpdated(int)), itemsLabel, SLOT(setNum(int)));
@@ -812,7 +812,7 @@ void TopWidget::loadInitialDockConfig()
  conf->setGroup("BosonInitialDock");
  bool fs = conf->readBoolEntry("FullScreen", false);
  d->mActionFullScreen->setChecked(fs);
- 
+
  if (isVisible()) {
 	slotToggleFullScreen();
 	readDockConfig(kapp->config(), "BosonInitialDock");
@@ -912,7 +912,7 @@ void TopWidget::slotUpdateStatusBar()
  BO_CHECK_NULL_RET(stat);
  // AB: some statusbar labels are *not* updated here (e.g. minerals and units),
  // but whenever their value actually changes.
- emit signalParticlesCountUpdated(stat->particleSystemsCount());
+ emit signalEffectsCountUpdated(stat->effectsCount());
  emit signalCanvasItemsCountUpdated(stat->allItemsCount());
  emit signalCanvasAnimationsCountUpdated(stat->animationsCount());
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 
 #include "speciestheme.h"
 #include "pluginproperties.h"
-#include "bosonparticlesystem.h"
-#include "bosonparticlesystemproperties.h"
+#include "bosoneffect.h"
+#include "bosoneffectproperties.h"
 #include "bosonweapon.h"
 #include "bosonconfig.h"
 #include "bodebug.h"
@@ -50,14 +50,14 @@ public:
 
 	QIntDict<BoAction> mActions;
 
-	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
-	QValueList<unsigned long int> mDestroyedParticleSystemIds;
-	QPtrList<BosonParticleSystemProperties> mConstructedParticleSystems;
-	QValueList<unsigned long int> mConstructedParticleSystemIds;
-	QPtrList<BosonParticleSystemProperties> mExplodingFragmentFlyParticleSystems;
-	QValueList<unsigned long int> mExplodingFragmentFlyParticleSystemIds;
-	QPtrList<BosonParticleSystemProperties> mExplodingFragmentHitParticleSystems;
-	QValueList<unsigned long int> mExplodingFragmentHitParticleSystemIds;
+	QPtrList<BosonEffectProperties> mDestroyedEffects;
+	QValueList<unsigned long int> mDestroyedEffectIds;
+	QPtrList<BosonEffectProperties> mConstructedEffects;
+	QValueList<unsigned long int> mConstructedEffectIds;
+	QPtrList<BosonEffectProperties> mExplodingFragmentFlyEffects;
+	QValueList<unsigned long int> mExplodingFragmentFlyEffectIds;
+	QPtrList<BosonEffectProperties> mExplodingFragmentHitEffects;
+	QValueList<unsigned long int> mExplodingFragmentHitEffectIds;
 	BoVector3 mHitPoint;  // FIXME: better name
 };
 
@@ -161,20 +161,20 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  mExplodingFragmentDamage = conf.readLongNumEntry("ExplodingFragmentDamage", 10);
  mExplodingFragmentDamageRange = (float)conf.readDoubleNumEntry("ExplodingFragmentDamageRange", 0.5);
  mRemoveWreckageImmediately = conf.readBoolEntry("RemoveWreckageImmediately", false);
- d->mExplodingFragmentFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyParticles");
- d->mExplodingFragmentHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitParticles");
+ d->mExplodingFragmentFlyEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyEffects");
+ d->mExplodingFragmentHitEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitEffects");
  if (mFullMode) {
-	d->mExplodingFragmentFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentFlyParticleSystemIds, mTheme);
-	d->mExplodingFragmentHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mExplodingFragmentHitParticleSystemIds, mTheme);
+	d->mExplodingFragmentFlyEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentFlyEffectIds, mTheme);
+	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds, mTheme);
  }
  d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
  d->mHitPoint.cellToCanvas();
 
- d->mDestroyedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedParticles");
- d->mConstructedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedParticles");
+ d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
+ d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
  if (mFullMode) {
-	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mDestroyedParticleSystemIds, mTheme);
-	d->mConstructedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mConstructedParticleSystemIds, mTheme);
+	d->mDestroyedEffects = BosonEffectProperties::loadEffectProperties(d->mDestroyedEffectIds, mTheme);
+	d->mConstructedEffects = BosonEffectProperties::loadEffectProperties(d->mConstructedEffectIds, mTheme);
  }
 
  if (isFacility) {
@@ -220,8 +220,8 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeEntry(&conf, "HitPoint", tmpHitPoint);
  conf.writeEntry("Producer", mProducer);
 
- BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);
- BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedParticles", d->mConstructedParticleSystemIds);
+ BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
+ BosonConfig::writeUnsignedLongNumList(&conf, "ConstructedEffects", d->mConstructedEffectIds);
 
  if (isFacility()) {
 	saveFacilityProperties(&conf);
@@ -570,60 +570,24 @@ const PluginProperties* UnitProperties::properties(int pluginType) const
  return 0;
 }
 
-QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float x, float y, float z) const
+QPtrList<BosonEffect> UnitProperties::newDestroyedEffects(float x, float y, float z) const
 {
- QPtrList<BosonParticleSystem> list;
- QPtrListIterator<BosonParticleSystemProperties> it(d->mDestroyedParticleSystems);
- while (it.current()) {
-	BosonParticleSystem* s = it.current()->newSystem(BoVector3(x, y, z));
-	if (s) {
-		list.append(s);
-	}
-	++it;
- }
- return list;
+ return BosonEffectProperties::newEffects(&d->mDestroyedEffects, BoVector3(x, y, z));
 }
 
-QPtrList<BosonParticleSystem> UnitProperties::newConstructedParticleSystems(float x, float y, float z) const
+QPtrList<BosonEffect> UnitProperties::newConstructedEffects(float x, float y, float z) const
 {
- QPtrList<BosonParticleSystem> list;
- QPtrListIterator<BosonParticleSystemProperties> it(d->mConstructedParticleSystems);
- while (it.current()) {
-	BosonParticleSystem* s = it.current()->newSystem(BoVector3(x, y, z));
-	if (s) {
-		list.append(s);
-	}
-	++it;
- }
- return list;
+ return BosonEffectProperties::newEffects(&d->mConstructedEffects, BoVector3(x, y, z));
 }
 
-QPtrList<BosonParticleSystem> UnitProperties::newExplodingFragmentFlyParticleSystems(BoVector3 pos) const
+QPtrList<BosonEffect> UnitProperties::newExplodingFragmentFlyEffects(BoVector3 pos) const
 {
- QPtrList<BosonParticleSystem> list;
- QPtrListIterator<BosonParticleSystemProperties> it(d->mExplodingFragmentFlyParticleSystems);
- while (it.current()) {
-	BosonParticleSystem* s = it.current()->newSystem(pos);
-	if (s) {
-		list.append(s);
-	}
-	++it;
- }
- return list;
+ return BosonEffectProperties::newEffects(&d->mExplodingFragmentFlyEffects, pos);
 }
 
-QPtrList<BosonParticleSystem> UnitProperties::newExplodingFragmentHitParticleSystems(BoVector3 pos) const
+QPtrList<BosonEffect> UnitProperties::newExplodingFragmentHitEffects(BoVector3 pos) const
 {
- QPtrList<BosonParticleSystem> list;
- QPtrListIterator<BosonParticleSystemProperties> it(d->mExplodingFragmentHitParticleSystems);
- while (it.current()) {
-	BosonParticleSystem* s = it.current()->newSystem(pos);
-	if (s) {
-		list.append(s);
-	}
-	++it;
- }
- return list;
+ return BosonEffectProperties::newEffects(&d->mExplodingFragmentHitEffects, pos);
 }
 
 void UnitProperties::clearPlugins(bool deleteweapons)
@@ -724,24 +688,24 @@ void UnitProperties::addSound(int event, QString filename)
  d->mSounds.insert(event, filename);
 }
 
-void UnitProperties::setDestroyedParticleSystemIds(QValueList<unsigned long int> ids)
+void UnitProperties::setDestroyedEffectIds(QValueList<unsigned long int> ids)
 {
- d->mDestroyedParticleSystemIds = ids;
+ d->mDestroyedEffectIds = ids;
 }
 
-QValueList<unsigned long int> UnitProperties::destroyedParticleSystemIds() const
+QValueList<unsigned long int> UnitProperties::destroyedEffectIds() const
 {
- return d->mDestroyedParticleSystemIds;
+ return d->mDestroyedEffectIds;
 }
 
-void UnitProperties::setConstructedParticleSystemIds(QValueList<unsigned long int> ids)
+void UnitProperties::setConstructedEffectIds(QValueList<unsigned long int> ids)
 {
- d->mConstructedParticleSystemIds = ids;
+ d->mConstructedEffectIds = ids;
 }
 
-QValueList<unsigned long int> UnitProperties::constructedParticleSystemIds() const
+QValueList<unsigned long int> UnitProperties::constructedEffectIds() const
 {
- return d->mConstructedParticleSystemIds;
+ return d->mConstructedEffectIds;
 }
 
 void UnitProperties::reset()
@@ -768,8 +732,8 @@ void UnitProperties::reset()
  mArmor = 0;
  mSupportMiniMap = false;
  d->mRequirements.clear();
- d->mDestroyedParticleSystemIds.clear();
- d->mConstructedParticleSystemIds.clear();
+ d->mDestroyedEffectIds.clear();
+ d->mConstructedEffectIds.clear();
  d->mHitPoint.reset();
  mProducer = 0;
  mExplodingDamage = 0;

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -626,14 +626,14 @@ const QIntDict<UpgradeProperties>& SpeciesTheme::technologyList() const
  return d->mTechnologies;
 }
 
-void SpeciesTheme::loadParticleSystems()
+void SpeciesTheme::loadEffects()
 {
- mData->loadParticleSystemProperties();
+ mData->loadEffectProperties();
 }
 
-const BosonParticleSystemProperties* SpeciesTheme::particleSystemProperties(unsigned long int id)
+const BosonEffectProperties* SpeciesTheme::effectProperties(unsigned long int id)
 {
- return mData->particleSystemProperties(id);
+ return mData->effectProperties(id);
 }
 
 BosonModel* SpeciesTheme::objectModel(const QString& name) const

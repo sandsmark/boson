@@ -135,7 +135,7 @@ QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t)
  s << t.mFunction;
  s << t.mAdvanceFunction;
  s << t.mDeleteUnusedShots;
- s << t.mParticles;
+ s << t.mEffects;
  s << t.mMaximalAdvanceCount;
 
  // now the items (mostly units):
@@ -155,7 +155,7 @@ QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t)
  s >> t.mFunction;
  s >> t.mAdvanceFunction;
  s >> t.mDeleteUnusedShots;
- s >> t.mParticles;
+ s >> t.mEffects;
  s >> t.mMaximalAdvanceCount;
 
  // now the items (mostly units):
@@ -325,9 +325,9 @@ void BosonProfiling::advanceDeleteUnusedShots(bool start)
  d->mCurrentSlotAdvanceTimes->mDeleteUnusedShots.getTime(start);
 }
 
-void BosonProfiling::advanceParticles(bool start)
+void BosonProfiling::advanceEffects(bool start)
 {
- d->mCurrentSlotAdvanceTimes->mParticles.getTime(start);
+ d->mCurrentSlotAdvanceTimes->mEffects.getTime(start);
 }
 
 void BosonProfiling::advanceMaximalAdvanceCount(bool start)
@@ -585,35 +585,35 @@ void BosonProfiling::endBenchmark(const QString& name)
  boDebug() << "ADVANCE RESULTS:" << endl;
  boDebug() << d->mBenchmark->mAdvanceProfiles.count() << " advance calls were profiled" << endl;
  QValueList<ProfileSlotAdvance>::iterator advit;
- unsigned long int advfunction = 0, advancefunction = 0, deleteshots = 0, particles = 0, maximaladvancecount = 0;
- unsigned long int maxadvfunction = 0, maxadvancefunction = 0, maxdeleteshots = 0, maxparticles = 0, maxmaximaladvancecount = 0;
+ unsigned long int advfunction = 0, advancefunction = 0, deleteshots = 0, effects = 0, maximaladvancecount = 0;
+ unsigned long int maxadvfunction = 0, maxadvancefunction = 0, maxdeleteshots = 0, maxeffects = 0, maxmaximaladvancecount = 0;
  unsigned long int count = 0;
  for (advit = d->mBenchmark->mAdvanceProfiles.begin(); advit != d->mBenchmark->mAdvanceProfiles.end(); ++advit) {
 	advfunction += (*advit).dFunction();
 	advancefunction += (*advit).dAdvanceFunction();
 	deleteshots += (*advit).dDeleteUnusedShots();
-	particles += (*advit).dParticles();
+	effects += (*advit).dEffects();
 	maximaladvancecount += (*advit).dMaximalAdvanceCount();
 
 	maxadvfunction = QMAX(maxadvfunction, (*advit).dFunction());
 	maxadvancefunction = QMAX(maxadvancefunction, (*advit).dAdvanceFunction());
 	maxdeleteshots = QMAX(maxdeleteshots, (*advit).dDeleteUnusedShots());
-	maxparticles = QMAX(maxparticles, (*advit).dParticles());
+	maxeffects = QMAX(maxeffects, (*advit).dEffects());
 	maxmaximaladvancecount = QMAX(maxmaximaladvancecount, (*advit).dMaximalAdvanceCount());
 
 	count++;
  }
  (boDebug()).form("%10s |%15s |%15s |%15s |%15s |%15s",
-		"", "function", "advancefunc", "deleteshots", "particles", "maxadvcount") << endl;
+		"", "function", "advancefunc", "deleteshots", "effects", "maxadvcount") << endl;
  (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"TOTAL", advfunction / 1000.0, advancefunction / 1000.0, deleteshots / 1000.0,
-		particles / 1000.0, maximaladvancecount / 1000.0) << endl;
+		effects / 1000.0, maximaladvancecount / 1000.0) << endl;
  (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"average", advfunction / 1000.0 / count, advancefunction / 1000.0 / count, deleteshots / 1000.0 / count,
-		particles / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
+		effects / 1000.0 / count, maximaladvancecount / 1000.0 / count) << endl;
  (boDebug()).form("%10s |%15.3f |%15.3f |%15.3f |%15.3f |%15.3f",
 		"max", maxadvfunction / 1000.0, maxadvancefunction / 1000.0, maxdeleteshots / 1000.0,
-		maxparticles / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
+		maxeffects / 1000.0, maxmaximaladvancecount / 1000.0) << endl << endl;
 
  // Render stuff
  boDebug() << "RENDER RESULTS:" << endl;

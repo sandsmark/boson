@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 
 class Unit;
 class Player;
-class BosonParticleSystem;
-class BosonParticleSystemProperties;
+class BosonEffect;
+class BosonEffectProperties;
 class BosonWeaponProperties;
 class UnitProperties;
 
@@ -211,12 +211,12 @@ class BosonShotMissile : public BosonShot
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
 
-    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
+    virtual const QPtrList<BosonEffect>* effects() const  { return mFlyEffects; }
 
     inline virtual int type() const { return BosonShot::Missile; }
 
   protected:
-    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
+    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void advanceMoveInternal();
 
     virtual void moveToTarget();
@@ -227,9 +227,9 @@ class BosonShotMissile : public BosonShot
     float mTotalDist;
     float mPassedDist;
     float mZ;
-    float mParticleVelo;
+    float mEffectVelo;
     float mMaxHeight;
-    QPtrList<BosonParticleSystem>* mFlyParticleSystems;
+    QPtrList<BosonEffect>* mFlyEffects;
 };
 
 
@@ -350,16 +350,16 @@ class BosonShotFragment : public BosonShot
 
     inline virtual int type() const { return BosonShot::Fragment; }
 
-    virtual const QPtrList<BosonParticleSystem>* particleSystems() const  { return mParticleSystems; }
+    virtual const QPtrList<BosonEffect>* effects() const  { return mEffects; }
 
     virtual void explode();
 
   protected:
-    void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
+    void setEffects(const QPtrList<BosonEffect>& list);
     virtual void advanceMoveInternal();
 
   private:
-    QPtrList<BosonParticleSystem>* mParticleSystems;
+    QPtrList<BosonEffect>* mEffects;
     BoVector3 mVelo;
     const UnitProperties* mUnitProperties;
 };

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -140,7 +140,7 @@ class PythonScript : public BosonScript
     static PyObject* py_endBenchmark(PyObject* self, PyObject* args);
     static PyObject* py_setRandomSeed(PyObject* self, PyObject* args);
     static PyObject* py_findPath(PyObject* self, PyObject* args);
-    static PyObject* py_addParticleSystem(PyObject* self, PyObject* args);
+    static PyObject* py_addEffect(PyObject* self, PyObject* args);
 
   protected:
     static PyObject* QValueListToPyList(QValueList<int>* list);
