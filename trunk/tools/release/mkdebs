@@ -1,0 +1,84 @@
+cd ../../
+
+DATE=`date +%y%m%d`
+CODEDIR=boson-code-$DATE
+DATADIR=boson-data-$DATE
+
+
+echo "*** Generating the Boson deb files"
+rm -f boson-code*.tar.gz
+rm -f boson-data*.tar.gz
+
+echo "**** Preparing code:"
+echo -n "***** Cleaning up..."
+cd code
+#rm -rf debian
+make distclean
+echo "done."
+echo "***** Generating Makefiles:"
+make -s -f Makefile.cvs
+echo "***** Running ./configure:"
+./configure
+
+
+echo "**** Preparing data"
+echo -n "***** Cleaning up..."
+cd ../data/
+#rm -rf debian
+make distclean
+echo "done."
+echo "***** Generating Makefiles..."
+make -s -f Makefile.cvs
+echo "***** Running ./configure:"
+./configure
+cd ..
+
+echo "**** Packing code..."
+echo -n "***** Generating tar file..."
+tar c code > $CODEDIR.tar || echo -e "failed.\n**** WARNING: Could not create tar-file for code"
+echo "done."
+
+echo -n "***** Generating gzip file..."
+gzip $CODEDIR.tar || echo -e "failed.\n**** WARNING: Could not create gzip-file for code"
+echo "done."
+
+echo "**** Packing data..."
+echo -n "***** Generating tar file..."
+tar c data > $DATADIR.tar || echo -e "failed.\n**** WARNING: Could not create tar-file for data"
+echo "done."
+
+echo -n "***** Generating gzip file..." 
+gzip $DATADIR.tar || echo -e "failed.\n**** WARNING: Could not create gzip-file for data"
+echo "done."
+
+echo "**** Renaming the dirs"
+mv code $CODEDIR || echo "**** WARNING: Cannot rename the code dir"
+mv data $DATADIR || echo "**** WARNING: Cannot rename the data dir"
+
+#echo "**** Generating debian dirs"
+#echo "***** For code:"
+#cd $CODEDIR
+#dh_make -s -e felix.seeger@gmx.de -f ../$CODEDIR.tar.gz
+#cd ..
+
+#echo "***** For data:"
+#cd $DATADIR
+#dh_make -s -e felix.seeger@gmx.de -f ../$DATADIR.tar.gz
+#cd ..
+
+echo "**** Building the code dir"
+cd $CODEDIR
+dpkg-buildpackage -rfakeroot
+cd ..
+echo "**** Done."
+echo "Building the data dir"
+cd $DATADIR
+dpkg-buildpackage -rfakeroot
+cd ..
+echo "**** Done"
+
+echo "**** Restoring orginal source dir names"
+mv $CODEDIR code || echo "**** WARNING: Cannot rename the code dir"
+mv $DATADIR data || echo "**** WARNING: Cannot rename the data dir"
+
+echo "*** Finished."
