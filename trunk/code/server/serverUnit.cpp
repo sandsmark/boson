@@ -219,7 +219,7 @@ void serverHarvester::emptying(void)
 		return;
 	}
 	/* destroy (hide) the client harvester */
-	reportHidden(who);
+	reportHidden();
 	counter = EMPTYING_DURATION;
 
 }
