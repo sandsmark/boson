@@ -28,6 +28,8 @@
 #include "ubolabelui.h"
 #include "uboprogress.h"
 #include "uboprogressui.h"
+// AB: even though this starts with "boufo" it is actually a ufo clas
+#include "boufofontrenderer.h"
 
 // AB: make sure that we are compatible to system that have QT_NO_STL defined
 #ifndef QT_NO_STL
@@ -626,6 +628,21 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 		QString font_dir = data_dir + "/font";
 		tk->putProperty("font_dir", font_dir.latin1());
 	}
+
+	ufo::UPluginInfo bosonGLFontPlugin;
+	bosonGLFontPlugin.lib = NULL;
+	bosonGLFontPlugin.category = "font";
+	bosonGLFontPlugin.feature = "boson_font";
+	bosonGLFontPlugin.create = &BoUfoFontRenderer::createPlugin;
+	bosonGLFontPlugin.destroy = &BoUfoFontRenderer::destroyPlugin;
+	// load the plugin
+	tk->loadPlugin(bosonGLFontPlugin);
+
+	// ensure that we use this font
+	// AB: currently disabled. use export UFO_FONT="boson_font" to enable
+//	tk->putProperty("font", "boson_font");
+
+
  } else {
 	// TODO: make sure that it is a UXToolkit
 	boDebug() << k_funcinfo << "have already a toolkit" << endl;
