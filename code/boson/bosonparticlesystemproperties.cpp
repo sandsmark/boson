@@ -146,7 +146,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, flo
 {
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       mTextures, this);
-  s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2] / BO_TILE_SIZE));
+  s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2]));
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
   if(rotation != 0.0)
