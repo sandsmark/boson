@@ -108,9 +108,31 @@ public:
 	bool loadHeightMapImage(const QByteArray&);
 
 	bool saveMapToFile(QDataStream& stream);
-	bool saveMap(QDataStream& stream);
+
+	/**
+	 * Save the complete map into the stream, even the parts that are
+	 * usually stored in different files, such as the height map.
+	 *
+	 * Use this to send the map over network, but remember that there will
+	 * be a lot of data! (probably more a few MB for 500x500 maps!)
+	 **/
+	bool saveCompleteMap(QDataStream& stream);
+
+	/**
+	 * Load the "main" map, i.e. the map geo (it's size) and it's cells from
+	 * the file on disk. This will not load things such as height map, which
+	 * are in a different file.
+	 **/
 	bool loadMapFromFile(QDataStream& stream);
-	bool loadMap(QDataStream& stream);
+
+	/**
+	 * Load the complete map, even those data that are stored in different
+	 * files in the .bpf file. This is e.g. the height map.
+	 *
+	 * The stream must have been creates using @ref saveCompleteMap,
+	 * <em>not</em> @ref saveMapToFile!
+	 **/
+	bool loadCompleteMap(QDataStream& stream);
 
 	QByteArray saveHeightMapImage();
 

@@ -99,7 +99,7 @@ bool Cell::isValidGround(int g)
  if (g < 0) {
 	return false;
  }
- if (g > groundTilesNumber()) { 
+ if (g > groundTilesNumber()) {
 	return false;
  }
  return true;
@@ -202,15 +202,15 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
  int tileNo;
  switch (smallNo) {
 	case 0:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransUpLeftInverted : TransUpLeft);
 		break;
 	case 1:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransDown : TransUp);
 		break;
 	case 2:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransUpRightInverted : TransUpRight);
 		break;
 	case 3:
@@ -226,15 +226,15 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
 				inverted ? TransLeft : TransRight);
 		break;
 	case 6:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransDownLeftInverted : TransDownLeft);
 		break;
 	case 7:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransUp : TransDown);
 		break;
 	case 8:
-		tileNo = getTransNumber(trans, inverted ? 
+		tileNo = getTransNumber(trans, inverted ?
 				TransDownRightInverted : TransDownRight);
 		break;
 	default:

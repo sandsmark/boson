@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ void BosonStarting::setEditorMap(const QByteArray& buffer)
  delete mNewPlayField;
  mNewPlayField = new BosonPlayField(this);
  BosonMap* map = new BosonMap(mNewPlayField);
- map->loadMap(stream);
+ map->loadCompleteMap(stream);
  mNewPlayField->changeMap(map);
 
  // WARNING: this is a hack. See BosonStartEditorWidget class!
