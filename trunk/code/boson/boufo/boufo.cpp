@@ -354,8 +354,6 @@ void BoUfoManager::render()
  glPushMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
-// context()->getGraphics()->resetDeviceAttributes();
-// context()->getGraphics()->resetDeviceViewMatrix();
 #endif
  context()->pushAttributes();
  context()->repaint();
@@ -1264,11 +1262,6 @@ void BoUfoLabel::setText(const QString& text)
 	mLabel->setText("");
  } else {
 	mLabel->setText(text.latin1());
-
-	// AB: the text is not completely displayed if it the widget was smaller previously.
-	// FIXME: buttons (e.g.) probably have the same problem
-//	invalidate();
-	mLabel->invalidate();
  }
 }
 
