@@ -22,8 +22,7 @@
 
 #include "defines.h"
 #include "bosonbigdisplaybase.h"
-#include "bosonbigdisplayinput.h"
-#include "editorbigdisplayinput.h"
+#include "bosonbigdisplayinputbase.h"
 #include "bosonconfig.h"
 #include "boselection.h"
 #include "bodebug.h"
@@ -105,7 +104,6 @@ class BoDisplayManager::BoDisplayManagerPrivate
 public:
 	BoDisplayManagerPrivate()
 	{
-		mCanvas = 0;
 		mActiveDisplay = 0;
 
 		mLayout = 0;
@@ -114,7 +112,6 @@ public:
 	QPtrList<BosonBigDisplayBase> mDisplayList;
 	QPtrList<BoBox> mBoxList;
 
-	BosonCanvas* mCanvas;
 	BosonBigDisplayBase* mActiveDisplay;
 
 	QVBoxLayout* mLayout;
@@ -122,13 +119,12 @@ public:
 	QIntDict<BoSelection> mSelectionGroups;
 };
 
-BoDisplayManager::BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool gameMode) : QWidget(parent, "bosondisplaymanager")
+BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
 {
  d = new BoDisplayManagerPrivate;
  d->mDisplayList.setAutoDelete(true);
  d->mBoxList.setAutoDelete(true);
- d->mCanvas = canvas;
- mGameMode = gameMode;
+
  d->mSelectionGroups.setAutoDelete(true);
  for (int i = 0; i < 10; i++) {
 	BoSelection* s = new BoSelection(this);
@@ -276,8 +272,8 @@ BosonBigDisplayBase* BoDisplayManager::splitActiveDisplayHorizontal()
 BosonBigDisplayBase* BoDisplayManager::addInitialDisplay()
 {
  if (d->mDisplayList.count() != 0) {
-	boError() << k_funcinfo << "already have displays" << endl;
-	return 0;
+	boDebug() << k_funcinfo << "already have displays - returning first..." << endl;
+	return d->mDisplayList.getFirst();
  }
  BoBox* box = new BoBox(this);
  d->mBoxList.append(box);
@@ -295,25 +291,17 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 	return 0;
  }
  boDebug() << k_funcinfo << endl;
- //TODO: what about editor widgets??
- BosonBigDisplayBase* b = 0;
- b = new BosonBigDisplayBase(d->mCanvas, parent);
+ BosonBigDisplayBase* b = new BosonBigDisplayBase(parent);
  connect(b, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
  connect(b, SIGNAL(signalChangeViewport(BosonBigDisplayBase*,
 		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
 		this, SLOT(slotChangeViewport(BosonBigDisplayBase*,
 		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
- if (mGameMode) {
-	b->setDisplayInput(new BosonBigDisplayInput(b));
- } else {
-	b->setDisplayInput(new EditorBigDisplayInput(b));
- }
- connect(b->displayInput(), SIGNAL(signalLockAction(bool)), this, SIGNAL(signalLockAction(bool)));
+
  d->mDisplayList.append(b);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)),
 		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
- b->show();
  return b;
 }
 
@@ -336,8 +324,19 @@ void BoDisplayManager::setLocalPlayer(Player* p)
  }
 }
 
+void BoDisplayManager::setCanvas(BosonCanvas* c)
+{
+ boDebug() << k_funcinfo << endl;
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setCanvas(c);
+	++it;
+ }
+}
+
 void BoDisplayManager::quitGame()
 {
+ boDebug() << k_funcinfo << endl;
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->quitGame();
@@ -390,6 +389,15 @@ void BoDisplayManager::slotScroll(int dir)
 		break;
 	default:
 		return;
+ }
+}
+
+void BoDisplayManager::slotAdvance(unsigned int, bool)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setParticlesDirty(true);
+	++it;
  }
 }
 

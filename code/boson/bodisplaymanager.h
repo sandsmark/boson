@@ -65,7 +65,7 @@ public:
 	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
 	 * BosonBigDisplay widgets are the default (TRUE)
 	 **/
-	BoDisplayManager(BosonCanvas* canvas, QWidget* parent, bool gameMode = true);
+	BoDisplayManager(QWidget* parent);
 	~BoDisplayManager();
 
 	BosonBigDisplayBase* addInitialDisplay();
@@ -90,6 +90,11 @@ public:
 	 * Set the local player for all displays
 	 **/
 	void setLocalPlayer(Player* player);
+
+	/*+
+	 * Set the canvas for all displays
+	 **/
+	void setCanvas(BosonCanvas* canvas);
 
 	void quitGame();
 
@@ -177,6 +182,20 @@ public slots:
 	void slotUnitRemoved(Unit* u);
 
 	/**
+	 * Called by @ref Boson::signalAdvance.
+	 *
+	 * Note that it is <em>not</em> ensured, that @ref
+	 * BosonCanvas::slotAdvance is called first. It might be possible that
+	 * this slot gets called before @ref BosonCanvas::slotAdvance but the
+	 * other way round might be possible as well.
+	 *
+	 * Also note that this should <em>not</em> be used for game logic parts
+	 * that the network might depend on. Use it for OpenGL or similar
+	 * operations (input/output on the local client) only.
+	 **/
+	void slotAdvance(unsigned int, bool);
+
+	/**
 	 * Move the selection of the @ref activeDisplay to the cell at (x,y).
 	 * See also @ref BosonBigDisplayInputBase::slotMoveSelection
 	 **/
@@ -246,8 +265,6 @@ private:
 private:
 	class BoDisplayManagerPrivate;
 	BoDisplayManagerPrivate* d;
-
-	bool mGameMode;
 };
 
 #endif

@@ -68,6 +68,8 @@ public:
 	TopWidgetPrivate()
 	{
 		mStartup = 0;
+
+		mDisplayManager = 0;
 		mBosonWidget = 0;
 
 		mActionStatusbar = 0;
@@ -81,6 +83,7 @@ public:
 
 	BosonStartupWidget* mStartup;
 
+	BoDisplayManager* mDisplayManager;
 	BosonWidgetBase* mBosonWidget;
 
 	KToggleAction* mActionStatusbar;
@@ -150,6 +153,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  loadInitialDockConfig();
 
  d->mIface = new BoDebugDCOPIface();
+
+ initDisplayManager();
 }
 
 TopWidget::~TopWidget()
@@ -161,9 +166,17 @@ TopWidget::~TopWidget()
  }
  boConfig->save(editor);
  endGame();
+ d->mDisplayManager->quitGame();
+ delete d->mDisplayManager;
  delete d->mIface;
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void TopWidget::initDisplayManager()
+{
+ d->mDisplayManager = new BoDisplayManager(0);
+ d->mDisplayManager->hide();
 }
 
 void TopWidget::saveProperties(KConfig *config)
@@ -327,6 +340,7 @@ void TopWidget::initBosonWidget()
 	boWarning() << k_funcinfo << "widget already allocated!" << endl;
 	return;
  }
+ BO_CHECK_NULL_RET(d->mDisplayManager);
  if (boGame->gameMode()) {
 	BosonWidget* w = new BosonWidget(this, mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
@@ -337,6 +351,7 @@ void TopWidget::initBosonWidget()
 	EditorWidget* w = new EditorWidget(this, mMainDock);
 	d->mBosonWidget = w;
  }
+ d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
  // at this point the startup widget should already have called
  // slotChangeLocalPlayer()! if not .. then we're in trouble here...
@@ -585,7 +600,9 @@ void TopWidget::endGame()
 		saveGameDockConfig();
 	}
  }
- // Delete all objects
+ if (d->mDisplayManager) {
+	d->mDisplayManager->quitGame();
+ }
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info

@@ -37,6 +37,8 @@
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
+#include "bosonbigdisplayinput.h"
+#include "editorbigdisplayinput.h"
 #include "boselection.h"
 #include "global.h"
 #include "top.h"
@@ -121,6 +123,10 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
 BosonWidgetBase::~BosonWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
+ if (mDisplayManager) {
+	// we do NOT delete the display manager here
+	setDisplayManager(0);
+ }
  d->mPlayers.clear();
  if (mTop && mTop->factory()) {
 	mTop->factory()->removeClient(this);
@@ -128,11 +134,26 @@ BosonWidgetBase::~BosonWidgetBase()
  delete d->mCommandFrameDock;
  delete d->mChatDock;
 
- delete mDisplayManager;
  delete mCursor;
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
+}
+
+void BosonWidgetBase::setDisplayManager(BoDisplayManager* displayManager)
+{
+ if (mDisplayManager) {
+	mDisplayManager->hide();
+	mDisplayManager->reparent(0, QPoint(0, 0)); // we do NOT own the display manager!
+ }
+ mDisplayManager = displayManager;
+ if (mDisplayManager) {
+	if (mDisplayManager->parent()) {
+		boError() << k_funcinfo << "the displaymanager already has a parent - reparenting..." << endl;
+	}
+	mDisplayManager->reparent(this, QPoint(0, 0));
+	mDisplayManager->show();
+ }
 }
 
 BosonCanvas* BosonWidgetBase::canvas() const
@@ -235,7 +256,9 @@ void BosonWidgetBase::initConnections()
 
 void BosonWidgetBase::initDisplayManager()
 {
- mDisplayManager = new BoDisplayManager(canvas(), this, boGame->gameMode());
+#warning do NOT do these connections here!
+ // dont do the connect()s here, as some objects might not be deleted and
+ // therefore we do the same connect twice if an endgame() occurs!
  connect(cmdFrame(), SIGNAL(signalAction(int)),
 		displayManager(), SLOT(slotUnitAction(int)));
  connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
@@ -248,6 +271,8 @@ void BosonWidgetBase::initDisplayManager()
 		mDisplayManager, SLOT(slotReCenterActiveDisplay(const QPoint&)));
  connect(cmdFrame(), SIGNAL(signalSelectUnit(Unit*)),
 		mDisplayManager, SLOT(slotActiveSelectSingleUnit(Unit*)));
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
+		mDisplayManager, SLOT(slotAdvance(unsigned int, bool)));
 
  displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
 
@@ -299,6 +324,7 @@ void BosonWidgetBase::initPlayer()
 
 void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
+ BO_CHECK_NULL_RET(displayManager());
  initLayout();
  startScenarioAndGame();
 }
@@ -309,10 +335,20 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 	boError() << k_funcinfo << "NULL display" << endl;
 	return;
  }
+ BO_CHECK_NULL_RET(boGame);
+ if (boGame->gameMode()) {
+	b->setDisplayInput(new BosonBigDisplayInput(b));
+ } else {
+	b->setDisplayInput(new EditorBigDisplayInput(b));
+ }
+ connect(b->displayInput(), SIGNAL(signalLockAction(bool)),
+		mDisplayManager, SIGNAL(signalLockAction(bool)));
+ b->setCanvas(canvas());
  b->setLocalPlayer(localPlayer()); // AB: this will also add the mouseIO!
  b->setCursor(mCursor);
  b->setKGameChat(d->mChat);
 
+ b->show();
  b->makeActive();
 }
 
@@ -749,7 +785,6 @@ void BosonWidgetBase::quitGame()
 {
 // this needs to be done first, before the players are removed
  boDebug() << k_funcinfo << endl;
- displayManager()->quitGame();
  canvas()->deleteDestroyed();
  boGame->quitGame();
  boDebug() << k_funcinfo << "done" << endl;
@@ -1012,6 +1047,10 @@ void BosonWidgetBase::setLocalPlayerRecursively(Player* p)
 void BosonWidgetBase::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
+
+#warning FIXME
+ // this should NOT do a reference to mTop!
+ // use either parent() or a signal (i.e. move the code to TopWidget)
  QPixmap shot = QPixmap::grabWindow(mTop->winId());
  QString file = findSaveFileName("boson", "jpg");
  if (file.isNull()) {
