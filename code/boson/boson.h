@@ -38,7 +38,11 @@ class BoEvent;
 class BoEventManager;
 class BoAdvanceMessageTimes;
 class BoDebugMessage;
-class BoVector2;
+class bofixed;
+template<class T> class BoVector2;
+template<class T> class BoRect;
+typedef BoVector2<bofixed> BoVector2Fixed;
+typedef BoRect<bofixed> BoRectFixed;
 
 #define boGame Boson::boson()
 
@@ -174,7 +178,7 @@ public:
 	 * UnitProperties::typeId
 	 * @param pos The position of the new unit.
 	 **/
-	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2 pos);
+	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed pos);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
 

@@ -226,7 +226,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, bofix
   // We want to move without attacking
   stream << (Q_UINT8)0;
   // tell them where to move to:
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
@@ -259,7 +259,7 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, bofixed 
   // We want to move with attacking
   stream << (Q_UINT8)1;
   // tell them where to move to:
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
@@ -288,7 +288,7 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, bofixed x,
   stream << (Q_UINT32)type;
   stream << (Q_ULONG)factory->id();
   stream << (Q_UINT32)factory->owner()->id();
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
@@ -327,7 +327,7 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, bofixed x, bofixed y)
   // tell the clients we want to drop bomb:
   stream << (Q_UINT32)BosonMessage::MoveDropBomb;
   // tell place
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
   // tell them how many units attack:
   stream << (Q_UINT32)1;
   stream << (Q_UINT32)u->id();
@@ -424,7 +424,7 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
   stream << (Q_INT32)owner->id();
   stream << (Q_INT32)unitType;
-  stream << BoVector2(x, y);
+  stream << BoVector2Fixed(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);

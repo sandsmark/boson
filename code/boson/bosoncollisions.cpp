@@ -106,9 +106,9 @@ Unit* BosonCollisions::findUnitAt(const BoVector3 & pos) const
  return findUnitAtCell((int)(pos.x()), (int)(pos.y()), pos.z());
 }
 
-QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2& pos, bofixed radius) const
+QValueList<Unit*> BosonCollisions::unitCollisionsInRange(const BoVector2Fixed& pos, bofixed radius) const
 {
- BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -137,7 +137,7 @@ QValueList<Unit*> BosonCollisions::unitCollisionsInSphere(const BoVector3& pos, 
 {
  // FIXME: code duplicated from unitCollisionsInRange
  boDebug(310) << k_funcinfo << endl;
- BoItemList* l = collisions(BoRect(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
+ BoItemList* l = collisions(BoRectFixed(QMAX(pos.x() - radius, bofixed(0)), QMAX(pos.y() - radius, bofixed(0)),
 		pos.x() + radius, pos.y() + radius));
 
  QValueList<Unit*> list;
@@ -182,7 +182,7 @@ bool BosonCollisions::cellOccupied(int x, int y, Unit* unit, bool excludeMoving)
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
-bool BosonCollisions::cellsOccupied(const BoRect& rect) const
+bool BosonCollisions::cellsOccupied(const BoRectFixed& rect) const
 {
  int right = lround(rect.right());
  int bottom = lround(rect.bottom());
@@ -231,12 +231,12 @@ BoItemList* BosonCollisions::collisionsAtCells(const QPtrVector<Cell>* cells, co
  return collisions;
 }
 
-BoItemList* BosonCollisions::collisions(const BoRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisions(const BoRectFixed& rect, const BosonItem* item, bool exact) const
 {
  return collisionsAtCells(rect, item, exact);
 }
 
-BoItemList* BosonCollisions::collisionsAtCells(const BoRect& rect, const BosonItem* item, bool exact) const
+BoItemList* BosonCollisions::collisionsAtCells(const BoRectFixed& rect, const BosonItem* item, bool exact) const
 {
  if (!map()) {
 	BO_NULL_ERROR(map());
@@ -285,7 +285,7 @@ BoItemList* BosonCollisions::collisionsAtCell(int x, int y) const
  return collisionsAtCells(&cells, 0, true); // FIXME: exact = true has no effect
 }
 
-BoItemList* BosonCollisions::collisions(const BoVector2& pos) const
+BoItemList* BosonCollisions::collisions(const BoVector2Fixed& pos) const
 {
  return collisionsAtCell((int)pos.x(), (int)pos.y());
 }

@@ -37,13 +37,12 @@ class QDomElement;
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoVector2
+template<class T> class BoVector2
 {
   public:
     BoVector2()  { reset(); }
-    BoVector2(bofixed x, bofixed y)  { set(x, y); }
-    BoVector2(const QPoint& p);
-    BoVector2(const bofixed* data)  { set(data); }
+    BoVector2(T x, T y)  { set(x, y); }
+    BoVector2(const T* data)  { set(data); }
     BoVector2(const BoVector2& v)  { set(v); }
     ~BoVector2()  {}
 
@@ -55,16 +54,16 @@ class BoVector2
     /**
      * @return The first (x) coordinate of the vector.
      **/
-    inline bofixed x() const  { return mData[0]; }
+    inline T x() const  { return mData[0]; }
     /**
      * @return The second (y) coordinate of the vector.
      **/
-    inline bofixed y() const  { return mData[1]; }
+    inline T y() const  { return mData[1]; }
 
     /**
      * Assign the values @p x, @p y to the vector.
      **/
-    inline void set(bofixed x, bofixed y)
+    inline void set(T x, T y)
     {
       mData[0] = x;  mData[1] = y;
     }
@@ -75,7 +74,7 @@ class BoVector2
     /**
      * @overload
      **/
-    inline void set(const bofixed* v)  { set(v[0], v[1]); }
+    inline void set(const T* v)  { set(v[0], v[1]); }
 
     /**
      * Assign the x coordinate to the vector.
@@ -90,24 +89,27 @@ class BoVector2
     {
       return mData[0] * mData[0] + mData[1] * mData[1];
     }
-    bofixed length() const;
+    bofixed length() const
+    {
+      return sqrt(dotProduct());
+    }
 
-    inline bofixed operator[](int i) const  { return mData[i]; }
+    inline T operator[](int i) const  { return mData[i]; }
     inline void operator=(const BoVector2& v)  { set(v); }
     inline bool operator==(const BoVector2& v) const
     {
       return isEqual(mData, v.data());
     }
-    static bool isEqual(const bofixed* v1, const bofixed* v2, bofixed diff = 0.001)
+    static bool isEqual(const T* v1, const T* v2, T diff = 0.001)
     {
       // avoid fabsf() as we don't include math.h
-      bofixed d1 = v1[0] - v2[0];
-      bofixed d2 = v1[1] - v2[1];
-      if (d1 < 0.0f)
+      T d1 = v1[0] - v2[0];
+      T d2 = v1[1] - v2[1];
+      if (d1 < 0)
       {
         d1 = -d1;
       }
-      if (d2 < 0.0f)
+      if (d2 < 0)
       {
         d2 = -d2;
       }
@@ -130,7 +132,7 @@ class BoVector2
     {
       return BoVector2(mData[0] - v[0], mData[1] - v[1]);
     }
-    inline BoVector2 operator*(bofixed f) const
+    inline BoVector2 operator*(T f) const
     {
       return BoVector2(mData[0] * f, mData[1] * f);
     }
@@ -151,14 +153,16 @@ class BoVector2
 
 
   private:
-    friend QDataStream& operator<<(QDataStream& s, const BoVector2& v);
-    friend QDataStream& operator>>(QDataStream& s, BoVector2& v);
-
-    bofixed mData[2];
+    T mData[2];
 };
 
-QDataStream& operator<<(QDataStream& s, const BoVector2& v);
-QDataStream& operator>>(QDataStream& s, BoVector2& v);
+typedef BoVector2<float> BoVector2Float;
+typedef BoVector2<bofixed> BoVector2Fixed;
+
+QDataStream& operator<<(QDataStream& s, const BoVector2Float& v);
+QDataStream& operator>>(QDataStream& s, BoVector2Float& v);
+QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v);
+QDataStream& operator>>(QDataStream& s, BoVector2Fixed& v);
 
 
 /**
@@ -166,53 +170,56 @@ QDataStream& operator>>(QDataStream& s, BoVector2& v);
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class BoRect
+template<class T> class BoRect
 {
   public:
-    BoRect(const BoVector2& topLeft, const BoVector2& bottomRight)
+    BoRect(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
     {
       set(topLeft, bottomRight);
     }
-    BoRect(const bofixed left, const bofixed top, const bofixed right, const bofixed bottom)
+    BoRect(const T left, const T top, const T right, const T bottom)
     {
       set(left, top, right, bottom);
     }
 
-    inline void set(const BoVector2& topLeft, const BoVector2& bottomRight)
+    inline void set(const BoVector2<T>& topLeft, const BoVector2<T>& bottomRight)
     {
       mTopLeft = topLeft;
       mBottomRight = bottomRight;
     }
-    inline void set(const bofixed left, const bofixed top, const bofixed right, const bofixed bottom)
+    inline void set(const T left, const T top, const T right, const T bottom)
     {
-      mTopLeft = BoVector2(left, top);
-      mBottomRight = BoVector2(right, bottom);
+      mTopLeft = BoVector2<T>(left, top);
+      mBottomRight = BoVector2<T>(right, bottom);
     }
 
-    inline bofixed left() const  { return mTopLeft.x(); }
-    inline bofixed top() const  { return mTopLeft.y(); }
-    inline bofixed right() const  { return mBottomRight.x(); }
-    inline bofixed bottom() const  { return mBottomRight.y(); }
+    inline T left() const  { return mTopLeft.x(); }
+    inline T top() const  { return mTopLeft.y(); }
+    inline T right() const  { return mBottomRight.x(); }
+    inline T bottom() const  { return mBottomRight.y(); }
 
-    inline const BoVector2& topLeft() const { return mTopLeft; }
-    inline const BoVector2& bottomRight() const { return mBottomRight; }
+    inline const BoVector2<T>& topLeft() const { return mTopLeft; }
+    inline const BoVector2<T>& bottomRight() const { return mBottomRight; }
 
-    inline bofixed x() const  { return mTopLeft.x(); }
-    inline bofixed y() const  { return mTopLeft.y(); }
+    inline T x() const  { return mTopLeft.x(); }
+    inline T y() const  { return mTopLeft.y(); }
 
-    inline bofixed width() const  { return mBottomRight.x() - mTopLeft.x(); }
-    inline bofixed height() const  { return mBottomRight.y() - mTopLeft.y(); }
+    inline T width() const  { return mBottomRight.x() - mTopLeft.x(); }
+    inline T height() const  { return mBottomRight.y() - mTopLeft.y(); }
 
-    inline BoVector2 center() const
+    inline BoVector2<T>center() const
     {
-      return BoVector2((left() + right()) / 2, (top() + bottom()) / 2);
+      return BoVector2<T>((left() + right()) / 2, (top() + bottom()) / 2);
     }
 
 
   private:
-    BoVector2 mTopLeft;
-    BoVector2 mBottomRight;
+    BoVector2<T> mTopLeft;
+    BoVector2<T> mBottomRight;
 };
+
+typedef BoRect<float> BoRectFloat;
+typedef BoRect<bofixed> BoRectFixed;
 
 /**
  * @author Rivo Laks <rivolaks@hot.ee>

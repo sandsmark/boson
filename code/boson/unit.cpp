@@ -111,8 +111,8 @@ public:
 
 		mWeapons = 0;
 	}
-	KGamePropertyList<BoVector2> mWaypoints;
-	KGamePropertyList<BoVector2> mPathPoints;
+	KGamePropertyList<BoVector2Fixed> mWaypoints;
+	KGamePropertyList<BoVector2Fixed> mPathPoints;
 	KGameProperty<int> mWantedRotation;
 
 	// be *very* careful with those - NewGameDialog uses Unit::save() which
@@ -249,6 +249,7 @@ void Unit::initStatic()
 void Unit::select(bool markAsLeader)
 {
  if (isDestroyed()) {
+	boDebug() << k_funcinfo << id() << " is destroyed" << endl;
 	return; // shall we really return?
  }
  BosonItem::select(markAsLeader);
@@ -674,7 +675,7 @@ void Unit::advanceAttack(unsigned int advanceCallsCount)
 	if (!moveTo(target()->x(), target()->y(), range)) {
 		setWork(WorkNone);
 	} else {
-		addWaypoint(BoVector2(target()->x(), target()->y()));
+		addWaypoint(BoVector2Fixed(target()->x(), target()->y()));
 		setAdvanceWork(WorkMove);
 	}
 	return;
@@ -800,7 +801,7 @@ void Unit::advanceTurn(unsigned int)
  }
 }
 
-void Unit::addWaypoint(const BoVector2& pos)
+void Unit::addWaypoint(const BoVector2Fixed& pos)
 {
  d->mWaypoints.append(pos);
 }
@@ -814,7 +815,7 @@ void Unit::waypointDone()
  d->mWaypoints.remove(d->mWaypoints.at(0));
 }
 
-const QValueList<BoVector2>& Unit::waypointList() const
+const QValueList<BoVector2Fixed>& Unit::waypointList() const
 {
  return d->mWaypoints;
 }
@@ -840,7 +841,7 @@ void Unit::resetPathInfo()
 }
 
 
-void Unit::moveTo(const BoVector2& pos, bool attack)
+void Unit::moveTo(const BoVector2Fixed& pos, bool attack)
 {
  d->mTarget = 0;
 
@@ -850,7 +851,7 @@ void Unit::moveTo(const BoVector2& pos, bool attack)
 
  if (moveTo(x, y, 0)) {
 	boDebug() << k_funcinfo << "unit " << id() << ": Will move to (" << x << "; " << y << ")" << endl;
-	addWaypoint(BoVector2(x, y));
+	addWaypoint(BoVector2Fixed(x, y));
 	pathInfo()->moveAttacking = attack;
 	pathInfo()->slowDownAtDest = true;
 	setWork(WorkMove);
@@ -933,7 +934,7 @@ void Unit::newPath()
 		boDebug() << k_funcinfo << "unit " << id() << ": Null cell or can't go to (" <<
 				pathInfo()->dest.x() << "; " << pathInfo()->dest.y() << ") (cell (" << cellX << "; " << cellY << "))" << endl;
 		clearPathPoints();
-		addPathPoint(BoVector2(PF_CANNOT_GO, PF_CANNOT_GO));
+		addPathPoint(BoVector2Fixed(PF_CANNOT_GO, PF_CANNOT_GO));
 		return;
 	}
  }
@@ -964,7 +965,7 @@ void Unit::newPath()
  if (pathPointCount() == 0) {
 	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached
 	boError() << k_funcinfo << "!!!!! No valid points in path !!!!! Fix pathfinder !!!!!" << endl;
-	addPathPoint(BoVector2(PF_CANNOT_GO, PF_CANNOT_GO));
+	addPathPoint(BoVector2Fixed(PF_CANNOT_GO, PF_CANNOT_GO));
  }
  return;
 }
@@ -974,12 +975,12 @@ void Unit::clearWaypoints()
  d->mWaypoints.clear();
 }
 
-const BoVector2& Unit::currentWaypoint() const
+const BoVector2Fixed& Unit::currentWaypoint() const
 {
  return d->mWaypoints[0];
 }
 
-void Unit::addPathPoint(const BoVector2& pos)
+void Unit::addPathPoint(const BoVector2Fixed& pos)
 {
  d->mPathPoints.append(pos);
 }
@@ -989,7 +990,7 @@ unsigned int Unit::pathPointCount() const
  return d->mPathPoints.count();
 }
 
-const BoVector2& Unit::currentPathPoint()
+const BoVector2Fixed& Unit::currentPathPoint()
 {
  return d->mPathPoints.first();
 }
@@ -1008,7 +1009,7 @@ void Unit::pathPointDone()
  d->mPathPoints.pop_front();
 }
 
-const QValueList<BoVector2>& Unit::pathPointList() const
+const QValueList<BoVector2Fixed>& Unit::pathPointList() const
 {
  return d->mPathPoints;
 }
@@ -1110,6 +1111,10 @@ bool Unit::loadFromXML(const QDomElement& root)
  if (!UnitBase::loadFromXML(root)) {
 	boError(260) << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
+ }
+ if (health() > unitProperties()->health()) {
+	boWarning(260) << k_funcinfo << "Unit with Id " << id() << " (Type=" << type() << ") wants health=" << health() << " but only " << unitProperties()->health() << " is possible for that type according to index.unit file. decreasing health to maximum." << endl;
+	setHealth(unitProperties()->health());
  }
  bool ok = false;
  bofixed rotation = root.attribute(QString::fromLatin1("Rotation")).toFloat(&ok);
@@ -1222,7 +1227,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 
  // AB: note that we don't need to do error checking like left < 0, since
  // collisions() does this anyway.
- BoRect rect(leftEdge() - range, topEdge() - range, rightEdge() + range, bottomEdge() + range);
+ BoRectFixed rect(leftEdge() - range, topEdge() - range, rightEdge() + range, bottomEdge() + range);
 
  // TODO: we should do this using PlayerIO. It should return items that are
  // actually visible to us only!
@@ -1695,7 +1700,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  bofixed xspeed = 0;
  bofixed yspeed = 0;
  bofixed dist = speed();
- BoVector2 pp;
+ BoVector2Fixed pp;
 
  // We move through the pathpoints, until we've passed dist distance
  while (dist > 0) {
@@ -1747,7 +1752,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
 		pathPointDone();
 #if NET_DEBUG
-		BoVector2 nextpp = currentPathPoint();
+		BoVector2Fixed nextpp = currentPathPoint();
 		boDebug(401) << k_funcinfo << "next pathpoint is (" << nextpp.x() << "; " << nextpp.y() << ")" << endl;
 #endif
 		// Check for enemies
@@ -1774,7 +1779,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  turnTo();
 }
 
-bofixed MobileUnit::moveTowardsPoint(const BoVector2& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed)
+bofixed MobileUnit::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed)
 {
  //boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
 		//");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
@@ -1873,11 +1878,11 @@ void MobileUnit::advanceMoveCheck()
 
  // Check if top-left point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	BoVector2 point = boundingRectAdvanced().topLeft();
+	BoVector2Fixed point = boundingRectAdvanced().topLeft();
 	QString problem;
-	if (!canvas()->onCanvas(BoVector2(0, point.y()))) {
+	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
 		problem = QString("top==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(BoVector2(point.x(), 0))) {
+	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
 		problem = QString("left==%1").arg(point.x());
 	} else {
 		boError(401) << k_funcinfo
@@ -1902,11 +1907,11 @@ void MobileUnit::advanceMoveCheck()
  }
  // Check if bottom-right point of the unit will be on canvas after moving
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	BoVector2 point = boundingRectAdvanced().bottomRight();
+	BoVector2Fixed point = boundingRectAdvanced().bottomRight();
 	QString problem;
-	if (!canvas()->onCanvas(BoVector2(0, point.y()))) {
+	if (!canvas()->onCanvas(BoVector2Fixed(0, point.y()))) {
 		problem = QString("bottom==%1").arg(point.y());
-	} else if (!canvas()->onCanvas(BoVector2(point.x(), 0))) {
+	} else if (!canvas()->onCanvas(BoVector2Fixed(point.x(), 0))) {
 		problem = QString("right==%1").arg(point.x());
 	} else {
 		boError(401) << k_funcinfo
@@ -2150,7 +2155,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
  // Do nothing (unit is in range)
 }
 
-BoRect MobileUnit::boundingRect() const
+BoRectFixed MobileUnit::boundingRect() const
 {
 // FIXME: workaround for pathfinding which does not yet support units with size
 // > 1.0f
@@ -2159,7 +2164,7 @@ BoRect MobileUnit::boundingRect() const
 	boWarning() << k_funcinfo << "width or height  < 1.0f - not supported!!" << endl;
 	return BosonItem::boundingRect();
  }
- return BoRect(x(), y(), x() + 1.0f, y() + 1.0f);
+ return BoRectFixed(x(), y(), x() + 1.0f, y() + 1.0f);
 }
 
 bool MobileUnit::loadFromXML(const QDomElement& root)
@@ -2230,7 +2235,7 @@ void MobileUnit::newPath()
  Unit::newPath();
 }
 
-bool MobileUnit::checkPathPoint(const BoVector2& p)
+bool MobileUnit::checkPathPoint(const BoVector2Fixed& p)
 {
  boDebug(401) << k_funcinfo << "p: (" << p.x() << "; " << p.y() << ")" << endl;
  // Check for special codes in path point
@@ -2267,7 +2272,7 @@ bool MobileUnit::checkPathPoint(const BoVector2& p)
 		}
 	} else {
 		// There are more waypoints. Take the next one
-		//BoVector2 wp = currentWaypoint();
+		//BoVector2Fixed wp = currentWaypoint();
 		boWarning() << k_funcinfo << "Waypoints aren't supported yet!" << endl;
 		// Stop for now (until we have working implementation)
 		setMovingStatus(Standing);

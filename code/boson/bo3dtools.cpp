@@ -38,27 +38,30 @@ static bool workaround_depth_value_enabled = false;
 
 /*****  BoVector*  *****/
 
-BoVector2::BoVector2(const QPoint& p)
+
+QDataStream& operator<<(QDataStream& s, const BoVector2Fixed& v)
 {
-  set(p.x(), p.y());
+  return s << v[0] << v[1];
 }
 
-bofixed BoVector2::length() const
-{
-  return sqrt(dotProduct());
-}
-
-QDataStream& operator<<(QDataStream& s, const BoVector2& v)
-{
-  return s << v.mData[0] << v.mData[1];
-}
-
-QDataStream& operator>>(QDataStream& s, BoVector2& v)
+QDataStream& operator>>(QDataStream& s, BoVector2Fixed& v)
 {
   bofixed x, y;
   s >> x >> y;
-  v.mData[0] = x;
-  v.mData[1] = y;
+  v.set(x, y);
+  return s;
+}
+
+QDataStream& operator<<(QDataStream& s, const BoVector2Float& v)
+{
+  return s << v[0] << v[1];
+}
+
+QDataStream& operator>>(QDataStream& s, BoVector2Float& v)
+{
+  float x, y;
+  s >> x >> y;
+  v.set(x, y);
   return s;
 }
 

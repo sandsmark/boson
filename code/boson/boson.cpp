@@ -860,7 +860,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // boDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2 pos)
+bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2Fixed pos)
 {
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);
@@ -1295,13 +1295,13 @@ void Boson::makeUnitLog()
 		ts << endl;
 		// Waypoints
 		ts << "        " << u->waypointCount() << " waypoints:";
-		for (QValueList<BoVector2>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
+		for (QValueList<BoVector2Fixed>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
 			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
 		}
 		ts << endl;
 		// Pathpoints
 		ts << "        " << u->pathPointList().count() << " pathpoints:";
-		for (QValueList<BoVector2>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
+		for (QValueList<BoVector2Fixed>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
 			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
 		}
 		ts << endl;

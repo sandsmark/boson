@@ -139,11 +139,11 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
  tip += i18n("\nDestination: %1,%2").arg(u->destinationX()).arg(u->destinationY());
 
  // AB: waypoints are important imho
- QValueList<BoVector2> waypoints = u->waypointList();
+ QValueList<BoVector2Fixed> waypoints = u->waypointList();
  if (waypoints.count() == 0) {
 	tip += i18n("\nNo waypoints");
  } else {
-	QValueList<BoVector2>::Iterator it;
+	QValueList<BoVector2Fixed>::Iterator it;
 	tip += i18n("\nWaypoints: ");
 	for (it = waypoints.begin(); it != waypoints.end(); ++it) {
 		if (it != waypoints.begin()) {
@@ -153,11 +153,11 @@ QString BoToolTipCreatorDebug::createToolTip(const BosonItem* item) const
 	}
  }
 
- QValueList<BoVector2> pathpoints = u->pathPointList();
+ QValueList<BoVector2Fixed> pathpoints = u->pathPointList();
  if (pathpoints.count() == 0) {
 	tip += i18n("\nNo pathpoints");
  } else {
-	QValueList<BoVector2>::Iterator it;
+	QValueList<BoVector2Fixed>::Iterator it;
 	tip += i18n("\nPathpoints: ");
 	for (it = pathpoints.begin(); it != pathpoints.end(); ++it) {
 		if (it != pathpoints.begin()) {

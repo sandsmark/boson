@@ -156,9 +156,9 @@ BosonPath::~BosonPath()
 
 static int pathSlow = 0, pathRange = 0, pathFast = 0;
 
-QValueList<BoVector2> BosonPath::findPath(BosonPathInfo* pathInfo)
+QValueList<BoVector2Fixed> BosonPath::findPath(BosonPathInfo* pathInfo)
 {
-  QValueList<BoVector2> points;
+  QValueList<BoVector2Fixed> points;
   if (!pathInfo || !pathInfo->unit)
   {
     boError(500) << k_funcinfo << "NULL unit" << endl;
@@ -180,7 +180,7 @@ QValueList<BoVector2> BosonPath::findPath(BosonPathInfo* pathInfo)
 
   pathInfo->llpath.clear();
   pathInfo->llpath.reserve(points.count());
-  QValueList<BoVector2>::Iterator it;
+  QValueList<BoVector2Fixed>::Iterator it;
   int i = 0;
   for (it = points.begin(); it != points.end(); ++it, i++) {
     pathInfo->llpath.append(*it);
@@ -188,9 +188,9 @@ QValueList<BoVector2> BosonPath::findPath(BosonPathInfo* pathInfo)
   return points;
 }
 
-QValueList<BoVector2> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
+QValueList<BoVector2Fixed> BosonPath::findLocations(Player* player, int x, int y, int n, int radius, ResourceType type)
 {
-  QValueList<BoVector2> locations;
+  QValueList<BoVector2Fixed> locations;
 
   QValueList<PathNode> open;
   PathNode node, n2;
@@ -277,7 +277,7 @@ QValueList<BoVector2> BosonPath::findLocations(Player* player, int x, int y, int
           ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
           if(res && res->canProvideMinerals() && (res->minerals() != 0))
           {
-            locations.append(BoVector2(n2.x, n2.y));
+            locations.append(BoVector2Fixed(n2.x, n2.y));
             found++;
           }
         }
@@ -299,7 +299,7 @@ QValueList<BoVector2> BosonPath::findLocations(Player* player, int x, int y, int
           ResourceMinePlugin* res = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
           if(res && res->canProvideOil() && (res->oil() != 0))
           {
-            locations.append(BoVector2(n2.x, n2.y));
+            locations.append(BoVector2Fixed(n2.x, n2.y));
             found++;
           }
         }
@@ -466,7 +466,7 @@ bool BosonPath::findFastPath()
   }
 
   // Compose path
-  BoVector2 wp;
+  BoVector2Fixed wp;
   int i;
   for(i = 0; i < steps; i++)
   {
@@ -480,7 +480,7 @@ bool BosonPath::findFastPath()
   {
     // Full path was found. If partial path was found, pathfinder will be
     //  automatically called again when there's no waypoint left.
-    path.append(BoVector2(PF_END_CODE, PF_END_CODE));  // This means that end of path has been reached
+    path.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));  // This means that end of path has been reached
   }
 
   //gettimeofday(&time2, 0);
@@ -696,10 +696,10 @@ bool BosonPath::findSlowPath()
     // Path cost is equal to cost of last node
     mPathCost = node.g;
     // Temporary array - needed because path is first stored from goal to start
-    QValueList<BoVector2> temp;
+    QValueList<BoVector2Fixed> temp;
 
     // Construct waypoint and set it's pos to goal
-    BoVector2 wp;
+    BoVector2Fixed wp;
     int x, y;
     x = mGoalx;
     y = mGoaly;
@@ -740,7 +740,7 @@ bool BosonPath::findSlowPath()
 #ifdef VISUALIZE_PATHS
   {
     QValueList<BoVector3> points;
-    QValueList<BoVector2>::iterator it;
+    QValueList<BoVector2Fixed>::iterator it;
     for(it = path.begin(); it != path.end(); ++it)
     {
       points.append(BoVector3((*it).x(), -(*it).y(), 0.0f));
@@ -758,7 +758,7 @@ bool BosonPath::findSlowPath()
     {
       // Point with coordinates PF_END_CODE; PF_END_CODE means that end of the path has been
       //  reached and unit should stop
-      path.append(BoVector2(PF_END_CODE, PF_END_CODE));
+      path.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));
     }
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
@@ -774,7 +774,7 @@ bool BosonPath::findSlowPath()
     // If path wasn't found we add one point with coordinates PF_END_CODE; PF_END_CODE to path.
     //  In Unit::advanceMove(), there is check for this and if coordinates are
     //  those, then moving is stopped
-    path.append(BoVector2(PF_END_CODE, PF_END_CODE));
+    path.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));
     //gettimeofday(&time2, 0);
     //boDebug(500) << k_funcinfo << "Time elapsed: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
   }
@@ -1049,7 +1049,7 @@ void BosonPath::debug() const
   boDebug(500) << "goalx,goaly = " << mGoalx << "," << mGoaly << endl;
   boDebug(500) << "waypoints: " << path.size() << endl;
   int j = 0;
-  for(QValueList<BoVector2>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
+  for(QValueList<BoVector2Fixed>::const_iterator i = path.begin(); i != path.end(); ++i, j++) {
     boDebug(500) << "waypoint " << j << ":" << endl;
     boDebug(500) << "x,y=" << (*i).x() << "," << (*i).y() << endl;
   }
@@ -1573,7 +1573,7 @@ void BosonPath2::findPath(BosonPathInfo* info)
       info->passable = false;
       info->llpath.clear();
       info->llpath.reserve(1);
-      info->llpath.append(BoVector2(PF_END_CODE, PF_END_CODE));
+      info->llpath.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));
     }
   }
   else
@@ -1919,7 +1919,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     // Note that low-level path must be in canvas-coords, so we convert cell
     //  coords to canvas ones here
     // FIXME: we can get path length, e.g. by adding level var to nodes
-    QValueList<BoVector2> temp;
+    QValueList<BoVector2Fixed> temp;
     // Coordinates of original nodes
     QValueList<QPoint> orignodes;
     // Coordinate of the last node in the path (destination)
@@ -1927,7 +1927,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     int y = n.y;
     orignodes.append(QPoint(x, y));
     QPoint p;
-    BoVector2 canvas; // Point in canvas coords
+    BoVector2Fixed canvas; // Point in canvas coords
     p.setX(x);
     p.setY(y);
     canvas.setX(p.x() + 1.0f / 2);
@@ -1967,19 +1967,19 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     if(nextRegion && pathfound)
     {
       // We have reached next region
-      temp.append(BoVector2(PF_NEXT_REGION, PF_NEXT_REGION));
+      temp.append(BoVector2Fixed(PF_NEXT_REGION, PF_NEXT_REGION));
     }
     else
     {
       // We have reached destination (or nearest possible point from it)
-      temp.append(BoVector2(PF_END_CODE, PF_END_CODE));
+      temp.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));
     }
 
     // Copy temp path to real path vector
 //    boDebug(510) << k_funcinfo << "copying path" << endl;
     info->llpath.clear();
     info->llpath.reserve(temp.count());
-    QValueList<BoVector2>::iterator it;
+    QValueList<BoVector2Fixed>::iterator it;
     for(it = temp.begin(); it != temp.end(); ++it)
     {
       info->llpath.append(*it);
@@ -2278,12 +2278,12 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
     // Note that low-level path must be in canvas-coords, so we convert cell
     //  coords to canvas ones here
     // FIXME: we can get path length, e.g. by adding level var to nodes
-    QValueList<BoVector2> temp;
+    QValueList<BoVector2Fixed> temp;
     // Coordinate of the last node in the path (destination)
     int x = n.x;
     int y = n.y;
     QPoint p;
-    BoVector2 canvas; // Point in canvas coords
+    BoVector2Fixed canvas; // Point in canvas coords
     p.setX(x);
     p.setY(y);
     canvas.setX(p.x() + 1.0f / 2);
@@ -2312,19 +2312,19 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
     if(!goalReached && pathfound)
     {
       // We have reached next region
-      temp.append(BoVector2(PF_NEXT_REGION, PF_NEXT_REGION));
+      temp.append(BoVector2Fixed(PF_NEXT_REGION, PF_NEXT_REGION));
     }
     else
     {
       // We have reached destination (or nearest possible point from it)
-      temp.append(BoVector2(PF_END_CODE, PF_END_CODE));
+      temp.append(BoVector2Fixed(PF_END_CODE, PF_END_CODE));
     }
 
     // Copy temp path to real path vector
 //    boDebug(510) << k_funcinfo << "copying path" << endl;
     info->llpath.clear();
     info->llpath.reserve(temp.count());
-    QValueList<BoVector2>::iterator it;
+    QValueList<BoVector2Fixed>::iterator it;
     for(it = temp.begin(); it != temp.end(); ++it)
     {
       info->llpath.append(*it);
