@@ -539,6 +539,12 @@ bool Player::checkOutOfGame()
 {
  // TODO: make more clever.
  // e.g. currently every small unit, like harvesters, needs to be destroyed...
+ if ((Player*)boGame->playerList()->getLast() == this) {
+	// the last player is per definition the neutral player (which is never
+	// out of the game).
+	mOutOfGame = false;
+	return isOutOfGame();
+ }
  mOutOfGame = (d->mUnits.count() == 0);
  return isOutOfGame();
 }
