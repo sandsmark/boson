@@ -26,7 +26,7 @@ class QImage;
 class BosonTextureArray
 {
 public:
-	BosonTextureArray(QValueList<QImage> images);
+	BosonTextureArray(QValueList<QImage> images, bool useMipmaps = true);
 	BosonTextureArray();
 
 	/**
@@ -62,9 +62,9 @@ public:
 	 * 256x256. If the width or height do not meet the 2^m condition the
 	 * image is scaled.
 	 **/
-	bool createTextures(QValueList<QImage> images);
+	bool createTextures(QValueList<QImage> images, bool useMipmaps = true);
 	
-	static bool createTexture(const QImage& image, GLuint texture);
+	static bool createTexture(const QImage& image, GLuint texture, bool useMipmaps = true);
 
 	/**
 	 * BosonTextureArray scales images if they don't fit the necessary sizes

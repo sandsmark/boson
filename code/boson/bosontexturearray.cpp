@@ -29,10 +29,10 @@ BosonTextureArray::BosonTextureArray()
  init();
 }
 
-BosonTextureArray::BosonTextureArray(QValueList<QImage> images)
+BosonTextureArray::BosonTextureArray(QValueList<QImage> images, bool useMipmaps)
 {
  init();
- if (!createTextures(images)) {
+ if (!createTextures(images, useMipmaps)) {
 	kdWarning() << k_funcinfo << "Could not create textures" << endl;
  }
 }
@@ -59,7 +59,7 @@ BosonTextureArray::~BosonTextureArray()
 // kdDebug() << k_funcinfo << "done" << endl;
 }
 
-bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
+bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool useMipmaps)
 {
  if (!QGLContext::currentContext()) {
 	kdError() << k_funcinfo << "NULL current context!!" << endl;
@@ -71,7 +71,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
  }
  if (image.isNull()) {
 	kdError() << k_funcinfo << "NULL image" << endl;
-	return;
+	return false;
  }
 
  QImage buffer;
@@ -101,21 +101,29 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
 
  // AB: performance: GL_UNSIGNED_BYTE is said to be the fastest format
  // (usually!!) - so don't change it :)
- glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(), 
-		buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
-		buffer.bits());
 
- // FIXME: performance: GL_NEAREST is said to be fastest, GL_LINEAR
- // second fastest
- // FIXME: performance: do we gain anything by using mipmaps here?
- // probably...
- // TODO: performance: combine several textures into a single one and
- // adjust the coordinates in glTexCoord
- // TODO: performance: glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
- // is fast - do we loose anything from it? is this the correct file to
- // place it in? can it go to initializeGL() ?
- glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
- glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+ if (useMipmaps) {
+	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
+			buffer.height(), GL_RGBA, GL_UNSIGNED_BYTE,
+			buffer.bits());
+	if (error) {
+		kdWarning() << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
+	}
+ } else {
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, buffer.width(), 
+			buffer.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+			buffer.bits());
+
+	// FIXME: performance: GL_NEAREST is said to be fastest, GL_LINEAR
+	// second fastest
+	// TODO: performance: combine several textures into a single one and
+	// adjust the coordinates in glTexCoord
+	// TODO: performance: glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST)
+	// is fast - do we loose anything from it? is this the correct file to
+	// place it in? can it go to initializeGL() ?
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+ }
 
  error = glGetError();
  if (error != GL_NO_ERROR) {
@@ -125,7 +133,7 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture)
  return true;
 }
 
-bool BosonTextureArray::createTextures(QValueList<QImage> images)
+bool BosonTextureArray::createTextures(QValueList<QImage> images, bool useMipmaps)
 {
  GLenum error = glGetError();
  if (error != GL_NO_ERROR) {
@@ -158,7 +166,7 @@ bool BosonTextureArray::createTextures(QValueList<QImage> images)
 	mWidths[i] = images[i].width();
 	mHeights[i] = images[i].height();
 
-	createTexture(images[i], mTextures[i]);
+	createTexture(images[i], mTextures[i], useMipmaps);
  }
  return true;
 }

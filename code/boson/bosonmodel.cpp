@@ -284,7 +284,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				Lib3dsVector v[3];
 				Lib3dsTexel tex[3];
 				for (int i = 0; i < 3; i++) {
-					lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[f->points[i]].pos);
+					lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
 					if (mesh->texels != mesh->points) {
 						if (mesh->texels != 0) {
 							kdWarning() << k_funcinfo << "hmm.. points: " << mesh->points 
