@@ -907,7 +907,7 @@ void MobileUnit::advanceMoveCheck()
  QValueList<Unit*> l = unitCollisions(true);
  if (!l.isEmpty()) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
-//	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
+//	kdWarning() << k_funcinfo << "" << id() << " -> " << l.first()->id() 
 //		<< " (count=" << l.count() <<")"  << endl;
 	// do not move at all. Moving is not stopped completely!
 	// work() is still workMove() so we'll continue moving in the next

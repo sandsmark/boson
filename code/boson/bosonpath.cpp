@@ -231,7 +231,7 @@ bool BosonPath::findPath()
       // Make sure that position is valid
       if(! mUnit->canvas()->onCanvas(n2.x * BO_TILE_SIZE, n2.y * BO_TILE_SIZE))
       {
-        //kdWarning() << k_lineinfo << ": not on canvas" << endl;
+        //kdWarning() << k_lineinfo << "not on canvas" << endl;
         continue;
       }
 
@@ -459,7 +459,7 @@ float BosonPath::cost(int x, int y)
   // Check if we can go to that tile, if we can't, return ERROR_COST
   if(! c->canGo(mUnit->unitProperties()))
   {
-    //kdDebug() << k_lineinfo << ": cannot go on " << x << "," << y << endl;
+    //kdDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
     return ERROR_COST;
   }
 

@@ -705,7 +705,7 @@ void BosonBigDisplay::editorActionClicked(const BoAction* action)
  int y = action->pos().y() / BO_TILE_SIZE;
  if (d->mConstruction.unitType > -1) {
 	if (!d->mConstruction.owner) {
-		kdWarning() << k_funcinfo << ": NO OWNER" << endl;
+		kdWarning() << k_funcinfo << "NO OWNER" << endl;
 //		return;
 	}
 	
@@ -732,7 +732,7 @@ void BosonBigDisplay::editorActionClicked(const BoAction* action)
 void BosonBigDisplay::slotWillConstructUnit(int unitType, UnitBase* factory, KPlayer* owner)
 {
  if (!owner) {
-	kdDebug() << k_funcinfo << ": NULL owner" << endl;
+	kdDebug() << k_funcinfo << "NULL owner" << endl;
 	d->mConstruction.groundType = -1;
 	d->mConstruction.unitType = -1;
 	return;

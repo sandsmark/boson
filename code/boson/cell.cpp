@@ -49,7 +49,7 @@ void Cell::makeCell(int groundType, unsigned char version)
 bool Cell::canGo(const UnitProperties* prop) const
 { // probably a time critical function!
  if (!prop) {
-	kdError() << k_funcinfo << ": NULL unit properties" << endl;
+	kdError() << k_funcinfo << "NULL unit properties" << endl;
 	return false;
  }
  if (isPlain(groundType())) {
@@ -266,7 +266,7 @@ int Cell::moveCost() const
 		break;
 	case GroundUnknown:
 	default:
-		kdWarning() << k_funcinfo << ": invalid ground" << endl;
+		kdWarning() << k_funcinfo << "invalid ground" << endl;
 		cost = 0;
 		break;
  }

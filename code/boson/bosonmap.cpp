@@ -147,7 +147,7 @@ bool BosonMap::verifyMap(QDataStream& stream)
  // Qt marshalling for a string is 4-byte-len + data
  stream >> i;
  if (TAG_FIELD_LEN + 1 != i) {
-//	kdError() << k_funcinfo << ": Magic doesn't match(len), check file name" << endl;// not an error - probably an XML file
+//	kdError() << k_funcinfo << "Magic doesn't match(len), check file name" << endl;// not an error - probably an XML file
 	return false;
  }
 
@@ -158,7 +158,7 @@ bool BosonMap::verifyMap(QDataStream& stream)
  }
 
  if (strncmp(magic, TAG_FIELD, TAG_FIELD_LEN) ) {
-//	kdError() << k_funcinfo << ": Magic doesn't match(string), check file name" << endl;
+//	kdError() << k_funcinfo << "Magic doesn't match(string), check file name" << endl;
 	return false;
  }
  return true;
@@ -186,22 +186,22 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  
  // check 'realityness'
  if (mapWidth < 10) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "mapWidth < 10" << endl;
 	return false;
  }
  if (mapHeight < 10) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "mapHeight < 10" << endl;
 	return false;
  }
  if (mapWidth > MAX_MAP_WIDTH) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "mapWidth > " << MAX_MAP_WIDTH << endl;
 	return false;
  }
  if (mapHeight > MAX_MAP_HEIGHT) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
 	return false;
  }
@@ -221,7 +221,7 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 bool BosonMap::loadCells(QDataStream& stream)
 {
  if (!d->mCells) {
-	kdError() << k_funcinfo << ": NULL cells" << endl;
+	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
 // load all cells:
@@ -234,7 +234,7 @@ bool BosonMap::loadCells(QDataStream& stream)
 		}
 		Cell* c = cell(i, j);
 		if (!c) {
-			kdError() << k_funcinfo << ": NULL cell" << endl;
+			kdError() << k_funcinfo << "NULL cell" << endl;
 			continue;
 		}
 		if ((Cell::GroundType)groundType == Cell::GroundUnknown) {
@@ -375,11 +375,11 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
  version = (unsigned char)node.attribute("Version").toInt(); // not nice...
 
  if (x >= (int)width()) {
-	kdError() << k_lineinfo << ": x >= width" << endl;
+	kdError() << k_lineinfo << "x >= width" << endl;
 	return false;
  }
  if (y >= (int)height()) {
-	kdError() << k_lineinfo << ": y >= height" << endl;
+	kdError() << k_lineinfo << "y >= height" << endl;
 	return false;
  }
  return true;
@@ -388,7 +388,7 @@ bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsi
 bool BosonMap::saveCells(QDomElement& node)
 {
  if (!d->mCells) {
-	kdError() << k_funcinfo << ": NULL cells" << endl;
+	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
  QDomDocument doc = node.ownerDocument();
@@ -405,7 +405,7 @@ bool BosonMap::saveCells(QDomElement& node)
 bool BosonMap::saveCell(QDomElement& node, int x, int y, Cell* cell)
 {
  if (!cell) {
-	kdError() << k_funcinfo << ": NULL cell" << endl;
+	kdError() << k_funcinfo << "NULL cell" << endl;
 	return false;
  }
  QDomDocument doc = node.ownerDocument();
@@ -436,7 +436,7 @@ bool BosonMap::saveCells(QDataStream& stream)
 	for (unsigned int j = 0; j < height(); j++) {
 		Cell* c = cell(i, j);
 		if (!c) {
-			kdError() << k_funcinfo << ": NULL Cell" << endl;
+			kdError() << k_funcinfo << "NULL Cell" << endl;
 			// do not abort - otherwise all clients receiving this
 			// stream are completely broken as we expect
 			// width()*height() cells
@@ -468,7 +468,7 @@ bool BosonMap::isValid() const
 	return false;
  }
  if (!d->mCells) {
-	kdError() << k_funcinfo << ": NULL cells" << endl;
+	kdError() << k_funcinfo << "NULL cells" << endl;
 	return false;
  }
 
@@ -483,7 +483,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  Q_INT8 version;
  stream >> g; // not groundType - first TAG_CELL
  if (g != TAG_CELL) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "missing TAG_CELL!" << endl;
 	return false;
  }
@@ -496,7 +496,7 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  
  stream >> version;
  if (version > 4) {
-	kdError() << k_funcinfo << ": broken map file!" << endl;
+	kdError() << k_funcinfo << "broken map file!" << endl;
 	kdError() << "invalid cell: version >= 4!" << endl;
 	kdDebug() << version << endl;
  }

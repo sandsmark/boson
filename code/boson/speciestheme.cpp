@@ -231,7 +231,7 @@ QCanvasPixmapArray* SpeciesTheme::pixmapArray(int unitType)
 	array = d->mSprite[unitType];
  }
  if (!array) {
-	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
 			<< endl;
 	return 0;
  }
@@ -246,7 +246,7 @@ QPixmap* SpeciesTheme::bigOverview(int unitType)
 	pix = d->mBigOverview[unitType];
  }
  if (!pix) {
-	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
 			<< endl;
 	return 0;
  }
@@ -261,7 +261,7 @@ QPixmap* SpeciesTheme::smallOverview(int unitType)
 	pix = d->mSmallOverview[unitType];
  }
  if (!pix) {
-	kdError() << k_funcinfo << ": Cannot find unit type " << unitType 
+	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
 			<< endl;
 	return 0;
  }
@@ -409,7 +409,7 @@ bool SpeciesTheme::loadUnitPixmap(const QString &fileName, QPixmap &pix, bool wi
  }
 
  if (image.isNull() || w < 32 || h < 32)  {
-	kdError() << k_funcinfo << ": image is null" << endl;
+	kdError() << k_funcinfo << "image is null" << endl;
 	return false;
  }
 
@@ -430,24 +430,24 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
  const QRgb backGround = qRgb(255, 0, 255) & RGB_MASK;
 
  if (image.isNull()) {
-	kdError() << k_funcinfo << ": Could not load " << fileName << endl;
+	kdError() << k_funcinfo << "Could not load " << fileName << endl;
 	return false;
  }
  if (image.width() < 25) {
-	kdError() << fileName << ": width < 25" << endl;
+	kdError() << fileName << "width < 25" << endl;
 	return false;
  }
  if (image.height() < 25) {
-	kdError() << fileName << ": height < 25" << endl;
+	kdError() << fileName << "height < 25" << endl;
 	return false;
  }
  if (image.depth() != 32) {
-	kdError() << fileName << ": depth != 32" << endl;
+	kdError() << fileName << "depth != 32" << endl;
  }
 
  QImage mask(image.width(), image.height(), 1, 2, QImage::LittleEndian);
  if (mask.isNull()) {
-	kdError() << k_funcinfo << ": NULL mask" << endl;
+	kdError() << k_funcinfo << "NULL mask" << endl;
 	return false;
  }
  mask.setColor(0, 0xffffff);
@@ -475,12 +475,12 @@ bool SpeciesTheme::loadShotPixmap(const QString& fileName, QPixmap& pix)
 void SpeciesTheme::loadNewUnit(UnitBase* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
  const UnitProperties* prop = unitProperties(unit);
  if (!prop) {
-	kdError() << k_funcinfo << ": NULL properties for " << unit->type() << endl;
+	kdError() << k_funcinfo << "NULL properties for " << unit->type() << endl;
 	return;
  }
  unit->setHealth(prop->health());
@@ -546,7 +546,7 @@ void SpeciesTheme::readUnitConfigs()
 const UnitProperties* SpeciesTheme::unitProperties(UnitBase* unit) const
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	return 0;
  }
  return unitProperties(unit->type());
@@ -656,7 +656,7 @@ bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 	QString number;
 	number.sprintf("%04d", i);
 	if (!loadShotPixmap(fileName.arg(number), p)) {
-		kdError() << k_funcinfo << ": Could not load"
+		kdError() << k_funcinfo << "Could not load"
 				<< fileName.arg(number) << endl;
 		return false; }
 	pixList.append(p);

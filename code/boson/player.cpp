@@ -153,7 +153,7 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
 QCanvasPixmapArray* Player::pixmapArray(int unitType) const
 {
  if (!speciesTheme()) {
-	kdError() << k_funcinfo << ": NULL theme" << endl;
+	kdError() << k_funcinfo << "NULL theme" << endl;
 	return 0;
  }
  return speciesTheme()->pixmapArray(unitType);
@@ -176,7 +176,7 @@ void Player::addUnit(Unit* unit)
 void Player::unitDestroyed(Unit* unit)
 {
  if (!unit) {
-	kdError() << k_funcinfo << ": Cannot remove NULL unit" << endl;
+	kdError() << k_funcinfo << "Cannot remove NULL unit" << endl;
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
@@ -193,7 +193,7 @@ void Player::unitDestroyed(Unit* unit)
 void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 {
  if (!prop) {
-	kdError() << k_funcinfo << ": NULL property" << endl;
+	kdError() << k_funcinfo << "NULL property" << endl;
 	return;
  }
 
@@ -210,7 +210,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 // (evil hack end)
 
  if (!unit) {
-	kdError() << k_funcinfo << ": NULL unit" << endl;
+	kdError() << k_funcinfo << "NULL unit" << endl;
 	kdDebug() << "player=" << id() << ",propId=" << prop->id() << ",units=" << d->mUnits.count() << endl;
 	return;
  }
@@ -326,7 +326,7 @@ QPtrList<Unit> Player::allUnits() const
 const UnitProperties* Player::unitProperties(int unitType) const
 {
  if (!speciesTheme()) {
-	kdError() << k_funcinfo << ": NULL theme" << endl;
+	kdError() << k_funcinfo << "NULL theme" << endl;
 	return 0;
  }
 

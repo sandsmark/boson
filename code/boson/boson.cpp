@@ -194,7 +194,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				continue;
 			}
 			if (unit->owner() != player) {
-				kdDebug() << "unit " << unitId << ": only owner can move units!" << endl;
+				kdDebug() << "unit " << unitId << "only owner can move units!" << endl;
 				continue;
 			}
 			if (unit->isDestroyed()) {
@@ -772,12 +772,12 @@ void Boson::slotSendAdvance()
 Unit* Boson::createUnit(int unitType, Player* owner)
 {
  if (!owner) {
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return 0;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << k_funcinfo << ": No theme for this player" << endl;
+	kdError() << k_funcinfo << "No theme for this player" << endl;
 	return 0; // BAAAAD - will crash
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
@@ -826,7 +826,7 @@ Unit* Boson::findUnit(unsigned long int id, Player* searchIn) const
 
 KPlayer* Boson::createPlayer(int rtti, int io, bool isVirtual)
 {
- kdDebug() << k_funcinfo << ": rtti=" << rtti << ",io=" << io 	
+ kdDebug() << k_funcinfo << "rtti=" << rtti << ",io=" << io 	
 		<< ",isVirtual=" << isVirtual << endl;
  Player* p = new Player();
 // connect(p, SIGNAL(signalLoadUnit(int, unsigned long int, Player*)), 
@@ -900,11 +900,11 @@ void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
 	return;
  }
  if (!owner) {
-	kdWarning() << k_funcinfo << ": NULL owner! using first player" << endl;
+	kdWarning() << k_funcinfo << "NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
  }
  if (!owner) { // no player here
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
 
@@ -923,11 +923,11 @@ void Boson::sendAddUnits(const QString& xmlDocument, Player* owner)
 	return;
  }
  if (!owner) {
-	kdWarning() << k_funcinfo << ": NULL owner! using first player" << endl;
+	kdWarning() << k_funcinfo << "NULL owner! using first player" << endl;
 	owner = (Player*)playerList()->at(0);
  }
  if (!owner) { // no player here
-	kdError() << k_funcinfo << ": NULL owner" << endl;
+	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QByteArray buffer;
@@ -941,7 +941,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 {
  *remove = false;
  if (!player) {
-	kdError() << k_funcinfo << ": NULL player" << endl;
+	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  if (!isAdmin()) {
@@ -1056,7 +1056,7 @@ QValueList<QColor> Boson::availableTeamColors() const
  QPtrListIterator<KPlayer> it(*playerList());
  while (it.current()) {
 	if (((Player*)it.current())->speciesTheme()) {
-//		kdError() << k_funcinfo << "NULL speciesTheme for " << it.current()->id() << endl;
+		kdDebug() << k_funcinfo <<  endl;
 		colors.remove(((Player*)it.current())->speciesTheme()->teamColor());
 	}
 	++it;

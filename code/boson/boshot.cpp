@@ -48,7 +48,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
  d->mDelay = SHOT_DELAY;
 
  if (!target) {
-	kdError() << k_funcinfo << ": NULL target" << endl;
+	kdError() << k_funcinfo << "NULL target" << endl;
 	deleteMe();
 	return;
  }
@@ -56,7 +56,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
  SpeciesTheme* theme;
  if (!destroyed) {
 	if (!attacker) {
-		kdError() << k_funcinfo << ": NULL attacker" << endl;
+		kdError() << k_funcinfo << "NULL attacker" << endl;
 		deleteMe();
 		return;
 	} else {
@@ -66,7 +66,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
 		theme = target->speciesTheme();
  }
  if (!theme) {
-	kdError() << k_funcinfo << ": NULL attacker theme" << endl;
+	kdError() << k_funcinfo << "NULL attacker theme" << endl;
 	deleteMe();
 	return;
  }
@@ -94,7 +94,7 @@ BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* c, bool destroyed)
 	setZ(target->z() + 1);
  }
  if (!sequence) {
-	kdError() << k_funcinfo << ": NULL sequence" << endl;
+	kdError() << k_funcinfo << "NULL sequence" << endl;
 	deleteMe();
 	return;
  }

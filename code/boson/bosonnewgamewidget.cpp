@@ -61,156 +61,156 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   initKGame();
   initPlayer();
 
-  BosonNewGameWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNewGameWidgetLayout");
+  mBosonNewGameWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNewGameWidgetLayout");
 
-  mainlayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
+  mMainLayout = new QVBoxLayout( 0, 0, 6, "mainlayout");
 
-  header = new QLabel( this, "header" );
-  QFont header_font(  header->font() );
+  mHeader = new QLabel( this, "header" );
+  QFont header_font(  mHeader->font() );
   header_font.setPointSize( 30 );
   header_font.setBold( TRUE );
-  header->setFont( header_font ); 
-  header->setText( i18n( "Start New Game" ) );
-  header->setAlignment( int( QLabel::AlignCenter ) );
-  mainlayout->addWidget( header );
+  mHeader->setFont( header_font ); 
+  mHeader->setText( i18n( "Start New Game" ) );
+  mHeader->setAlignment( int( QLabel::AlignCenter ) );
+  mMainLayout->addWidget( mHeader );
   QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Preferred );
-  mainlayout->addItem( spacer );
+  mMainLayout->addItem( spacer );
 
-  upperlayout = new QHBoxLayout( 0, 0, 6, "upperlayout"); 
+  mUpperLayout = new QHBoxLayout( 0, 0, 6, "upperlayout"); 
 
-  leftlayout = new QVBoxLayout( 0, 0, 6, "leftlayout"); 
+  mLeftLayout = new QVBoxLayout( 0, 0, 6, "eftlayout"); 
 
-  youroptionslayout = new QGridLayout( 0, 1, 1, 0, 6, "youroptionslayout"); 
+  mYourOptionsLayout = new QGridLayout( 0, 1, 1, 0, 6, "youroptionslayout"); 
   QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  youroptionslayout->addMultiCell( spacer_2, 2, 2, 2, 3 );
+  mYourOptionsLayout->addMultiCell( spacer_2, 2, 2, 2, 3 );
 
-  colorlabel = new QLabel( this, "colorlabel" );
-  colorlabel->setText( i18n( "Your Color:" ) );
+  mColorLabel = new QLabel( this, "colorlabel" );
+  mColorLabel->setText( i18n( "Your Color:" ) );
 
-  youroptionslayout->addWidget( colorlabel, 1, 0 );
+  mYourOptionsLayout->addWidget( mColorLabel, 1, 0 );
 
-  maplabel = new QLabel( this, "maplabel" );
-  maplabel->setText( i18n( "Map:" ) );
+  mMapLabel = new QLabel( this, "maplabel" );
+  mMapLabel->setText( i18n( "Map:" ) );
 
-  youroptionslayout->addMultiCellWidget( maplabel, 3, 3, 0, 1 );
+  mYourOptionsLayout->addMultiCellWidget( mMapLabel, 3, 3, 0, 1 );
   QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  youroptionslayout->addMultiCell( spacer_3, 0, 0, 1, 2 );
+  mYourOptionsLayout->addMultiCell( spacer_3, 0, 0, 1, 2 );
   QSpacerItem* spacer_4 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  youroptionslayout->addItem( spacer_4, 1, 2 );
+  mYourOptionsLayout->addItem( spacer_4, 1, 2 );
 
-  colorcombo = new QComboBox( this, "colorcombo" );
+  mColorCombo = new QComboBox( this, "colorcombo" );
 
-  youroptionslayout->addMultiCellWidget( colorcombo, 1, 1, 3, 4 );
+  mYourOptionsLayout->addMultiCellWidget( mColorCombo, 1, 1, 3, 4 );
 
-  namelabel = new QLabel( this, "namelabel" );
-  namelabel->setText( i18n( "Your Name:" ) );
+  mNameLabel = new QLabel( this, "namelabel" );
+  mNameLabel->setText( i18n( "Your Name:" ) );
 
-  youroptionslayout->addWidget( namelabel, 0, 0 );
+  mYourOptionsLayout->addWidget( mNameLabel, 0, 0 );
 
-  nameedit = new QLineEdit( this, "nameedit" );
-  nameedit->setText(boConfig->readLocalPlayerName());
+  mNameEdit = new QLineEdit( this, "nameedit" );
+  mNameEdit->setText(boConfig->readLocalPlayerName());
 
-  youroptionslayout->addWidget( nameedit, 0, 4 );
+  mYourOptionsLayout->addWidget( mNameEdit, 0, 4 );
   QSpacerItem* spacer_5 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  youroptionslayout->addItem( spacer_5, 3, 2 );
+  mYourOptionsLayout->addItem( spacer_5, 3, 2 );
 
-  speciescombo = new QComboBox( FALSE, this, "speciescombo" );
+  mSpeciesCombo = new QComboBox( FALSE, this, "speciescombo" );
 
-  youroptionslayout->addWidget( speciescombo, 2, 4 );
+  mYourOptionsLayout->addWidget( mSpeciesCombo, 2, 4 );
 
-  mapcombo = new QComboBox( FALSE, this, "mapcombo" );
-  mapcombo->hide();
-  mapname = new QLabel(this, "mapname");
-  mapname->hide();
+  mMapCombo = new QComboBox( FALSE, this, "mapcombo" );
+  mMapCombo->hide();
+  mMapName = new QLabel(this, "mapname");
+  mMapName->hide();
 
-  specieslabel = new QLabel( this, "specieslabel" );
-  specieslabel->setText( i18n( "Your Species:" ) );
+  mSpeciesLabel = new QLabel( this, "specieslabel" );
+  mSpeciesLabel->setText( i18n( "Your Species:" ) );
 
-  youroptionslayout->addWidget( specieslabel, 2, 0 );
-  leftlayout->addLayout( youroptionslayout );
+  mYourOptionsLayout->addWidget( mSpeciesLabel, 2, 0 );
+  mLeftLayout->addLayout( mYourOptionsLayout );
   QSpacerItem* spacer_6 = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
-  leftlayout->addItem( spacer_6 );
+  mLeftLayout->addItem( spacer_6 );
 
-  addaigroup = new QGroupBox( this, "addaigroup" );
-  addaigroup->setTitle( i18n( "Add Computer Player" ) );
-  addaigroup->setColumnLayout(0, Qt::Vertical );
-  addaigroup->layout()->setSpacing( 6 );
-  addaigroup->layout()->setMargin( 11 );
-  addaigroupLayout = new QHBoxLayout( addaigroup->layout() );
-  addaigroupLayout->setAlignment( Qt::AlignTop );
+  mAddAIGroup = new QGroupBox( this, "addaigroup" );
+  mAddAIGroup->setTitle( i18n( "Add Computer Player" ) );
+  mAddAIGroup->setColumnLayout(0, Qt::Vertical );
+  mAddAIGroup->layout()->setSpacing( 6 );
+  mAddAIGroup->layout()->setMargin( 11 );
+  mAddAIGroupLayout = new QHBoxLayout( mAddAIGroup->layout() );
+  mAddAIGroupLayout->setAlignment( Qt::AlignTop );
 
-  addainamelabel = new QLabel( addaigroup, "addainamelabel" );
-  addainamelabel->setText( i18n( "Name:" ) );
-  addaigroupLayout->addWidget( addainamelabel );
+  mAddAINameLabel = new QLabel( mAddAIGroup, "addainamelabel" );
+  mAddAINameLabel->setText( i18n( "Name:" ) );
+  mAddAIGroupLayout->addWidget( mAddAINameLabel );
 
-  addainame = new QLineEdit( addaigroup, "addainame" );
-  addainame->setText(boConfig->readComputerPlayerName());
-  addaigroupLayout->addWidget( addainame );
+  mAddAIName = new QLineEdit( mAddAIGroup, "addainame" );
+  mAddAIName->setText(boConfig->readComputerPlayerName());
+  mAddAIGroupLayout->addWidget( mAddAIName );
   QSpacerItem* spacer_7 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  addaigroupLayout->addItem( spacer_7 );
+  mAddAIGroupLayout->addItem( spacer_7 );
 
-  addaibutton = new QPushButton( addaigroup, "addaibutton" );
-  addaibutton->setText( i18n( "&Add" ) );
-  addaigroupLayout->addWidget( addaibutton );
-  leftlayout->addWidget( addaigroup );
-  upperlayout->addLayout( leftlayout );
+  mAddAIButton = new QPushButton( mAddAIGroup, "addaibutton" );
+  mAddAIButton->setText( i18n( "&Add" ) );
+  mAddAIGroupLayout->addWidget( mAddAIButton );
+  mLeftLayout->addWidget( mAddAIGroup );
+  mUpperLayout->addLayout( mLeftLayout );
   QSpacerItem* spacer_8 = new QSpacerItem( 20, 20, QSizePolicy::Preferred, QSizePolicy::Minimum );
-  upperlayout->addItem( spacer_8 );
+  mUpperLayout->addItem( spacer_8 );
 
-  playerslayout = new QVBoxLayout( 0, 0, 6, "playerslayout"); 
+  mPlayersLayout = new QVBoxLayout( 0, 0, 6, "playerslayout"); 
 
-  playerslabel = new QLabel( this, "playerslabel" );
-  QFont playerslabel_font(  playerslabel->font() );
-  playerslabel->setFont( playerslabel_font ); 
-  playerslabel->setText( i18n( "Connected Players:" ) );
-  playerslayout->addWidget( playerslabel );
+  mPlayersLabel = new QLabel( this, "playerslabel" );
+  QFont playerslabel_font(  mPlayersLabel->font() );
+  mPlayersLabel->setFont( playerslabel_font ); 
+  mPlayersLabel->setText( i18n( "Connected Players:" ) );
+  mPlayersLayout->addWidget( mPlayersLabel );
 
-  playerslist = new QListBox( this, "playerslist" );
-  playerslayout->addWidget( playerslist );
+  mPlayersList = new QListBox( this, "playerslist" );
+  mPlayersLayout->addWidget( mPlayersList );
 
-  removeplayerbutton = new QPushButton( this, "removeplayerbutton" );
-  removeplayerbutton->setEnabled( FALSE );
-  removeplayerbutton->setText( i18n( "&Remove Player" ) );
-  playerslayout->addWidget( removeplayerbutton );
-  upperlayout->addLayout( playerslayout );
-  mainlayout->addLayout( upperlayout );
+  mRemovePlayerButton = new QPushButton( this, "removeplayerbutton" );
+  mRemovePlayerButton->setEnabled( FALSE );
+  mRemovePlayerButton->setText( i18n( "&Remove Player" ) );
+  mPlayersLayout->addWidget( mRemovePlayerButton );
+  mUpperLayout->addLayout( mPlayersLayout );
+  mMainLayout->addLayout( mUpperLayout );
 
-  line1 = new QFrame( this, "line1" );
-  line1->setProperty( "frameShape", (int)QFrame::HLine );
-  line1->setFrameShadow( QFrame::Sunken );
-  line1->setFrameShape( QFrame::HLine );
-  mainlayout->addWidget( line1 );
+  mLine1 = new QFrame( this, "AIne1" );
+  mLine1->setProperty( "frameShape", (int)QFrame::HLine );
+  mLine1->setFrameShadow( QFrame::Sunken );
+  mLine1->setFrameShape( QFrame::HLine );
+  mMainLayout->addWidget( mLine1 );
 
-  chatwidget = new KGameChat(0, BosonMessage::IdChat, this );
-  chatwidget->setKGame(game());
-  chatwidget->setFromPlayer(player());
-  mainlayout->addWidget( chatwidget );
+  mChatWidget = new KGameChat(0, BosonMessage::IdChat, this );
+  mChatWidget->setKGame(game());
+  mChatWidget->setFromPlayer(player());
+  mMainLayout->addWidget( mChatWidget );
 
-  line2 = new QFrame( this, "line2" );
-  line2->setProperty( "frameShape", (int)QFrame::HLine );
-  line2->setFrameShadow( QFrame::Sunken );
-  line2->setFrameShape( QFrame::HLine );
-  mainlayout->addWidget( line2 );
+  mLine2 = new QFrame( this, "line2" );
+  mLine2->setProperty( "frameShape", (int)QFrame::HLine );
+  mLine2->setFrameShadow( QFrame::Sunken );
+  mLine2->setFrameShape( QFrame::HLine );
+  mMainLayout->addWidget( mLine2 );
 
-  startgamelayout = new QHBoxLayout( 0, 0, 6, "startgamelayout"); 
+  mStartGameLayout = new QHBoxLayout( 0, 0, 6, "startgamelayout"); 
 
-  cancelbutton = new QPushButton( this, "cancelbutton" );
-  cancelbutton->setText( i18n( "&Cancel" ) );
-  startgamelayout->addWidget( cancelbutton );
+  mCancelButton = new QPushButton( this, "cancelbutton" );
+  mCancelButton->setText( i18n( "&Cancel" ) );
+  mStartGameLayout->addWidget( mCancelButton );
   QSpacerItem* spacer_9 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  startgamelayout->addItem( spacer_9 );
+  mStartGameLayout->addItem( spacer_9 );
 
-  networkButton = new QPushButton( this, "networkbutton" );
-  networkButton->setText( i18n( "&Network Options" ) );
-  startgamelayout->addWidget( networkButton );
+  mNetworkButton = new QPushButton( this, "networkbutton" );
+  mNetworkButton->setText( i18n( "&Network Options" ) );
+  mStartGameLayout->addWidget( mNetworkButton );
   QSpacerItem* spacer_10 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-  startgamelayout->addItem( spacer_10 );
+  mStartGameLayout->addItem( spacer_10 );
 
-  startgamebutton = new QPushButton( this, "startgamebutton" );
-  startgamebutton->setText( i18n( "S&tart Game" ) );
-  startgamelayout->addWidget( startgamebutton );
-  mainlayout->addLayout( startgamelayout );
-  BosonNewGameWidgetLayout->addLayout( mainlayout );
+  mStartGameButton = new QPushButton( this, "startgamebutton" );
+  mStartGameButton->setText( i18n( "S&tart Game" ) );
+  mStartGameLayout->addWidget( mStartGameButton );
+  mMainLayout->addLayout( mStartGameLayout );
+  mBosonNewGameWidgetLayout->addLayout( mMainLayout );
   
   mHighlightedPlayer = 0l;
 
@@ -221,17 +221,17 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   slotSetAdmin(game()->isAdmin());
 
   // signals and slots connections
-  connect(removeplayerbutton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
-  connect(cancelbutton, SIGNAL(clicked()), this, SLOT(slotCancel()));
-  connect(networkButton, SIGNAL(clicked()), this, SLOT(slotNetworkOptions()));
-  connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotStart()));
-  connect(addaibutton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
-  connect(playerslist, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
+  connect(mRemovePlayerButton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
+  connect(mCancelButton, SIGNAL(clicked()), this, SLOT(slotCancel()));
+  connect(mNetworkButton, SIGNAL(clicked()), this, SLOT(slotNetworkOptions()));
+  connect(mStartGameButton, SIGNAL(clicked()), this, SLOT(slotStart()));
+  connect(mAddAIButton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
+  connect(mPlayersList, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
 
-  connect(nameedit, SIGNAL(returnPressed()), this, SLOT(slotMyNameChanged()));
-  connect(colorcombo, SIGNAL(activated(int)), this, SLOT(slotMyColorChanged(int)));
-  connect(mapcombo, SIGNAL(activated(int)), this, SLOT(slotMyMapChanged(int)));
-  connect(speciescombo, SIGNAL(activated(int)), this, SLOT(slotMySpeciesChanged(int)));
+  connect(mNameEdit, SIGNAL(returnPressed()), this, SLOT(slotMyNameChanged()));
+  connect(mColorCombo, SIGNAL(activated(int)), this, SLOT(slotMyColorChanged(int)));
+  connect(mMapCombo, SIGNAL(activated(int)), this, SLOT(slotMyMapChanged(int)));
+  connect(mSpeciesCombo, SIGNAL(activated(int)), this, SLOT(slotMySpeciesChanged(int)));
 }
 
 /*
@@ -240,10 +240,10 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
 BosonNewGameWidget::~BosonNewGameWidget()
 {
   // Save stuff like player name, color etc.
-  boConfig->saveLocalPlayerName(nameedit->text());
+  boConfig->saveLocalPlayerName(mNameEdit->text());
   boConfig->saveLocalPlayerColor(mPlayercolor);
 
-  boConfig->saveComputerPlayerName(addainame->text());
+  boConfig->saveComputerPlayerName(mAddAIName->text());
 }
 
 /*****  Init* methods  *****/
@@ -295,13 +295,13 @@ void BosonNewGameWidget::initMaps()
   {
     KSimpleConfig cfg(list[i]);
     cfg.setGroup("Boson PlayField");
-    mapcombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
+    mMapCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 //    d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
 //    QString fileName = list[i].left(list[i].length() - strlen(".desktop")) + QString::fromLatin1(".bpf");
 //    d->mPlayFieldIndex2FileName.insert(i, fileName);
     mMapIndex2Identifier.insert(i, cfg.readEntry("Identifier", i18n("Unknown")));
   }
-  mapcombo->setCurrentItem(0);
+  mMapCombo->setCurrentItem(0);
   mMap = 0;
   if(game()->isAdmin())
     slotMyMapChanged(0);
@@ -318,29 +318,29 @@ void BosonNewGameWidget::initSpecies()
   for (unsigned int i = 0; i < list.count(); i++) {
     KSimpleConfig cfg(list[i]);
     cfg.setGroup("Boson Species");
-    speciescombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
+    mSpeciesCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 //    d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
     mSpeciesIndex2Identifier.insert(i, cfg.readEntry("Identifier", "Unknown"));
   }
-  speciescombo->setCurrentItem(0);
+  mSpeciesCombo->setCurrentItem(0);
 //  slotSpeciesChanged(0);
 }
 
 void BosonNewGameWidget::initColors()
 {
   mAvailableColors.clear();
-  colorcombo->clear();
+  mColorCombo->clear();
   mAvailableColors = game()->availableTeamColors();
   mAvailableColors.prepend(player()->speciesTheme()->teamColor());
   for(unsigned int i = 0; i < mAvailableColors.count(); i++)
   {
     QPainter painter;
-    QRect rect(0, 0, colorcombo->width(), QFontMetrics(painter.font()).height() + 4);
+    QRect rect(0, 0, mColorCombo->width(), QFontMetrics(painter.font()).height() + 4);
     QPixmap pixmap(rect.width(), rect.height());
     painter.begin(&pixmap);
     painter.fillRect(rect, QBrush(mAvailableColors[i]));
     painter.end();
-    colorcombo->insertItem(pixmap);
+    mColorCombo->insertItem(pixmap);
   }
 }
 
@@ -348,7 +348,7 @@ void BosonNewGameWidget::initColors()
 
 void BosonNewGameWidget::slotMyNameChanged()
 {
-  player()->setName(nameedit->text());
+  player()->setName(mNameEdit->text());
 }
 
 void BosonNewGameWidget::slotMyColorChanged(int index)
@@ -406,10 +406,10 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << ": there are " << game()->playerList()->count() << " players in game now" << endl;
+  kdDebug() << k_funcinfo << "there are " << game()->playerList()->count() << " players in game now" << endl;
   QListBoxText* t = new QListBoxText(p->name());
   mItem2Player.insert(t, p);
-  playerslist->insertItem(t);
+  mPlayersList->insertItem(t);
 
   connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
       this, SLOT(slotPropertyChanged(KGamePropertyBase*, KPlayer*)));
@@ -419,14 +419,14 @@ void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 
 void BosonNewGameWidget::slotPlayerLeftGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << ": there are " << game()->playerList()->count() << "players in game now" << endl;
+  kdDebug() << k_funcinfo << "there are " << game()->playerList()->count() << " players in game now" << endl;
   this->disconnect(p);
   QPtrDictIterator<KPlayer> it(mItem2Player);
   while(it.current())
   {
     if (it.current() == p)
     {
-      playerslist->removeItem(playerslist->index((QListBoxItem*)it.currentKey()));
+      mPlayersList->removeItem(mPlayersList->index((QListBoxItem*)it.currentKey()));
       initColors();
       return;
     }
@@ -450,7 +450,7 @@ void BosonNewGameWidget::slotPropertyChanged(KGamePropertyBase* prop, KPlayer* p
       ++it;
     }
     QListBoxText* t = new QListBoxText(p->name());
-    playerslist->changeItem(t, playerslist->index(old));
+    mPlayersList->changeItem(t, mPlayersList->index(old));
     mItem2Player.remove(old);
     mItem2Player.insert(t, p);
   }
@@ -458,7 +458,7 @@ void BosonNewGameWidget::slotPropertyChanged(KGamePropertyBase* prop, KPlayer* p
 
 void BosonNewGameWidget::slotMapChanged(const QString& id)
 {
-//  mapname->setText(name);
+//  mMapName->setText(name);
   // id is map identifier, we want to display name
   QMap<int, QString>::iterator it;
   for(it = mMapIndex2Identifier.begin(); it != mMapIndex2Identifier.end(); ++it)
@@ -466,7 +466,7 @@ void BosonNewGameWidget::slotMapChanged(const QString& id)
     if(it.data() == id)
     {
       int index = it.key();
-      mapname->setText(mapcombo->text(index));
+      mMapName->setText(mMapCombo->text(index));
       return;
     }
   }
@@ -519,7 +519,7 @@ void BosonNewGameWidget::slotAddAIPlayer()
     return;
   }
   Player* p = new Player();
-  p->setName(addainame->text());
+  p->setName(mAddAIName->text());
   QColor color = game()->availableTeamColors().first();
   p->loadTheme(SpeciesTheme::speciesDirectory(SpeciesTheme::defaultSpecies()), color);
 
@@ -537,9 +537,13 @@ void BosonNewGameWidget::slotCancel()
 void BosonNewGameWidget::slotRemovePlayer()
 {
   if(mHighlightedPlayer == player())
+  {
     slotCancel();
+  }
   else
+  {
     game()->removePlayer(mHighlightedPlayer);
+  }
 }
 
 void BosonNewGameWidget::slotNetworkOptions()
@@ -552,13 +556,13 @@ void BosonNewGameWidget::slotPlayerSelected(QListBoxItem* item)
   mHighlightedPlayer = mItem2Player[item];
   if(!mHighlightedPlayer)
   {
-    removeplayerbutton->setEnabled(false);
+    mRemovePlayerButton->setEnabled(false);
     return;
   }
   if(game()->isAdmin() || !mHighlightedPlayer->isVirtual())
-    removeplayerbutton->setEnabled(true);
+    mRemovePlayerButton->setEnabled(true);
   else
-    removeplayerbutton->setEnabled(false);
+    mRemovePlayerButton->setEnabled(false);
 }
 
 void BosonNewGameWidget::slotSetAdmin(bool admin)
@@ -567,17 +571,17 @@ void BosonNewGameWidget::slotSetAdmin(bool admin)
     return;
   if(admin)
   {
-    mapcombo->show();
-    mapname->hide();
-    youroptionslayout->addWidget( mapcombo, 3, 4 );
-    startgamebutton->setEnabled(true);
+    mMapCombo->show();
+    mMapName->hide();
+    mYourOptionsLayout->addWidget( mMapCombo, 3, 4 );
+    mStartGameButton->setEnabled(true);
   }
   else
   {
-    mapcombo->hide();
-    mapname->show();
-    youroptionslayout->addWidget( mapname, 3, 4 );
-    startgamebutton->setEnabled(false);
+    mMapCombo->hide();
+    mMapName->show();
+    mYourOptionsLayout->addWidget( mMapName, 3, 4 );
+    mStartGameButton->setEnabled(false);
   }
   mAdmin = admin;
 }

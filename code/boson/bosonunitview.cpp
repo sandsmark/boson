@@ -76,11 +76,11 @@ void BosonUnitView::setUnit(Unit* u)
 	return;
  }
  if (!unit->owner()) {
-	kdError() << k_funcinfo << ": no owner" << endl;
+	kdError() << k_funcinfo << "no owner" << endl;
 	return;
  }
  if (!unit->owner()->speciesTheme()) {
-	kdError() << k_funcinfo << ": No speciesTheme" << endl;
+	kdError() << k_funcinfo << "No speciesTheme" << endl;
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
