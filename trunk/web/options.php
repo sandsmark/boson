@@ -40,7 +40,7 @@ if($change_style != "")
   $style=$change_style;
 
 // Headers
-html_print_header("Options, style: $style");
+html_print_header("Style options");
 print_header();
 
 // Main table
