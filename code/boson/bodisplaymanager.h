@@ -76,10 +76,11 @@ public:
 	BosonBigDisplay* splitActiveDisplayVertical();
 	BosonBigDisplay* splitActiveDisplayHorizontal();
 
+	void paintResources();
+	void paintChatMessages();
+
 public slots:
 
-	void slotUpdateMinerals(int);
-	void slotUpdateOil(int);
 
 	void slotEditorWillPlaceCell(int);
 	void slotEditorWillPlaceUnit(int unitType, UnitBase* fac, KPlayer*);

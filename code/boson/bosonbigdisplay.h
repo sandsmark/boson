@@ -69,6 +69,16 @@ public:
 	};
 
 	void setLocalPlayer(Player* p);
+	
+	/**
+	 * Used by @ref BoDisplayManager - don't use anywhere else, if possible.
+	 *
+	 * This is meant to return the local player of this display. One day it
+	 * might be possible to have a different player in a different display
+	 * (think e.g. of allied players).
+	 * @return The local player of this display
+	 **/
+	Player* localPlayer() const;
 
 	/**
 	 * Set the @ref KGameChat object to the @ref KGameCanvasChat.
@@ -99,9 +109,6 @@ public slots:
 	void slotUnitChanged(Unit* unit);
 
 	virtual void resizeContents(int w, int h);
-
-	void slotUpdateMinerals(int minerals);
-	void slotUpdateOil(int oil);
 
 	void slotMoveSelection(int cellX, int cellY);
 

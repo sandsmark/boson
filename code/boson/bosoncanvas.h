@@ -28,6 +28,7 @@ class Player;
 class Unit;
 class UnitProperties;
 class BoShot;
+class BoDisplayManager;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -165,9 +166,6 @@ public:
 	void setWorkChanged(Unit* u);
 
 
-	virtual void addView(QCanvasView*);
-	virtual void removeView(QCanvasView*);
-
 	/**
 	 * Called from another threead to set the tileset. Note that until this
 	 * was called there is <em>no</em> cell and <em>no</em> tile on the
@@ -185,6 +183,8 @@ public:
 
 	void addToCells(Unit* u);
 	void removeFromCells(Unit* u);
+
+	void setDisplayManager(BoDisplayManager* m);
 
 public slots:
 	/**
@@ -223,8 +223,6 @@ protected:
 	 * @param oldWork See @ref UnitBase::WorkType
 	 **/
 	void changeWork();
-
-	virtual void drawForeground(QPainter&, const QRect&);
 
 protected slots:
 	/**

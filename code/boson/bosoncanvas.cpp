@@ -27,6 +27,7 @@
 #include "bosonmusic.h"
 #include "unitgroup.h"
 #include "bosontiles.h"
+#include "bodisplaymanager.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -43,11 +44,6 @@
 
 #include "bosoncanvas.moc"
 
-#define BOSON_CANVASTEXT_TEST 1
-
-#if BOSON_CANVASTEXT_TEST
-#include <qpainter.h>
-#endif
 
 /**
  * Pixmap loader for the tileset. We use a different thread to provide
@@ -129,10 +125,7 @@ public:
 
 		mLoader = 0;
 
-#if BOSON_CANVASTEXT_TEST
-		mMinerals = 0;
-		mOil = 0;
-#endif
+		mDisplayManager = 0;
 	}
 	
 	QPixmap mPix;
@@ -140,7 +133,7 @@ public:
 	QPtrList<BoShot> mDeleteShot;
 	QPtrDict<QCanvasSprite> mFogOfWar;
 	QCanvasPixmapArray* mFogPixmap;
-	QPtrList<QCanvasView> mViewList;
+	BoDisplayManager* mDisplayManager;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -157,11 +150,6 @@ public:
 	QValueList<UnitGroup> mGroups;
 
 	TileLoader* mLoader;
-
-#if BOSON_CANVASTEXT_TEST
-	QCanvasRectangle* mMinerals;
-	QCanvasRectangle* mOil;
-#endif
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -187,12 +175,6 @@ void BosonCanvas::init()
 
  d->mLoader = new TileLoader(this);
  
-#if BOSON_CANVASTEXT_TEST
- d->mMinerals = new QCanvasRectangle(this);
- d->mOil = new QCanvasRectangle(this);
- d->mMinerals->hide();
- d->mOil->hide();
-#endif
 }
 
 BosonCanvas::~BosonCanvas()
@@ -909,44 +891,11 @@ void BosonCanvas::deleteShot(BoShot* s)
  d->mDeleteShot.append(s);
 }
 
-
-// Testing code
-void BosonCanvas::drawForeground(QPainter& p, const QRect&)
-{
-// maybe paint the "Minerals: " and "Oil: " texts here? same with chat messages?
-// we can also (and probably will) paint the fog of war here.
-/*
- QCanvasView* v = d->mViewList.first();
- int x = v->contentsX() + v->visibleWidth() - 200;
- int y = v->contentsY()+50;
- p.drawText(x, y, "Test");
-// update();
- */
-}
-
-void BosonCanvas::addView(QCanvasView* v)
-{
- QCanvas::addView(v);
- d->mViewList.append(v);
-}
-
-void BosonCanvas::removeView(QCanvasView* v)
-{
- QCanvas::removeView(v);
- d->mViewList.removeRef(v);
-}
-
 void BosonCanvas::update()
 {
  QCanvas::update();
-#ifndef DISABLE_BOSON_CANVASTEXT
- QCanvasView* v = d->mViewList.first(); // where we paint minerals, oil and chattext to
- int x = v->visibleWidth() - 100;
- int y = 50;
- QPainter p(v->viewport());
- p.drawText(x, y, "Test");
- p.end();
-#endif
+ d->mDisplayManager->paintResources();
+ d->mDisplayManager->paintChatMessages();
 }
 
 void BosonCanvas::killPlayer(Player* player)
@@ -996,4 +945,8 @@ void BosonCanvas::addToCells(Unit* u)
  }
 }
 
+void BosonCanvas::setDisplayManager(BoDisplayManager* m)
+{
+ d->mDisplayManager = m;
+}
 
