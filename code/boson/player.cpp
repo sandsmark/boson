@@ -645,8 +645,8 @@ bool Player::saveAsXML(QDomElement& root)
 {
  BosonProfiler profiler(BosonProfiling::SavePlayerToXML);
 
- // AB: probably we'll never use this... (KGame should take care of the id)
- root.setAttribute(QString::fromLatin1("Id"), id());
+ // note: we need to save the index in the list, not the actual id()
+ root.setAttribute(QString::fromLatin1("Id"), game()->playerList()->findRef(this));
 
  root.setAttribute(QString::fromLatin1("NetworkPriority"), networkPriority());
 

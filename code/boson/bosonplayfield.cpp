@@ -19,6 +19,7 @@
 
 #include "bosonplayfield.h"
 
+#include "boversion.h"
 #include "bosonmap.h"
 #include "bosonfileconverter.h"
 #include "bosondata.h"
@@ -759,7 +760,6 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
 	return false;
  }
 
- // FIXME: the should load the default description only! i.e. C/description.xml
  QByteArray descriptionXML = mFile->descriptionData();
  if (descriptionXML.size() == 0) {
 	boError() << k_funcinfo << "empty default description.xml" << endl;
@@ -777,6 +777,11 @@ bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
  if (externalXML.size() != 0) {
 	// AB: externalXML is optional only. only for loading games.
 	destFiles.insert("external.xml", externalXML);
+ }
+
+ if (!convertFilesToCurrentFormat(destFiles)) {
+	boError() << k_funcinfo << "conversion to current file format failed" << endl;
+	return false;
  }
 
 
@@ -893,5 +898,125 @@ bool BosonPlayField::savePlayFieldToFiles(QMap<QString, QByteArray>& files)
  files.insert("C/description.xml", descriptionXML);
  boDebug() << k_funcinfo << "succeeded" << endl;
  return true;
+}
+
+bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles)
+{
+ if (destFiles.isEmpty()) {
+	boError() << k_funcinfo << "no files availble" << endl;
+	return false;
+ }
+ // AB: this was added after 0.9, so at this point the files in destFiles are
+ // _at least_ from boson 0.9.
+
+ if (!destFiles.contains("map/texmap")) {
+	boError() << k_funcinfo << "no map/texmap there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("map/heightmap.png")) {
+	boError() << k_funcinfo << "no map/heightmap.png there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("map/map.xml")) {
+	boError() << k_funcinfo << "no map/map.xml there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("players.xml")) {
+	boError() << k_funcinfo << "no players.xml there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("canvas.xml")) {
+	boError() << k_funcinfo << "no canvas.xml there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("kgame.xml")) {
+	boError() << k_funcinfo << "no kgame.xml there." << endl;
+	return false;
+ }
+ if (!destFiles.contains("C/description.xml")) {
+	boError() << k_funcinfo << "no C/description.xml there." << endl;
+	return false;
+ }
+
+ // AB: all other files are optional for boson 0.9
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ if (!kgameDoc.setContent(QString(destFiles["kgame.xml"]))) {
+	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
+	return false;
+ }
+ QDomElement kgameRoot = kgameDoc.documentElement();
+ bool ok = false;
+ unsigned int version = kgameRoot.attribute("Version").toUInt(&ok);
+ if (!ok) {
+	boError() << k_funcinfo << "Version attribute in kgame.xml is not a valid number" << endl;
+	return false;
+ }
+ if (version < BOSON_SAVEGAME_FORMAT_VERSION_0_9) {
+	boError() << k_funcinfo << "this function expects at least file format from 0.9 (" << BOSON_SAVEGAME_FORMAT_VERSION_0_9 << ") - found: " << version << endl;
+	return false;
+ }
+
+ // AB: this is the point where you should insert your conversion code !
+ bool handled = false;
+ if (!convertFilesToCurrentFormat(destFiles, version, &handled)) {
+	boError() << k_funcinfo << "conversion failed" << endl;
+	return false;
+ }
+
+ if (handled) {
+	// the files got converted to a different format.
+	// -> call this function again and check whether we can convert any
+	// further (e.g. 0.9 -> 0.9.1 in the first call, 0.9.1->0.10 in the 2nd
+	// or so)
+
+	 // first check whether the version got changed (prevent infinite loop)
+	if (!kgameDoc.setContent(QString(destFiles["kgame.xml"]))) {
+		boError() << k_funcinfo << "unable to load kgame.xml after conversion" << endl;
+		return false;
+	}
+	QDomElement kgameRoot = kgameDoc.documentElement();
+	ok = false;
+	unsigned int newVersion = kgameRoot.attribute("Version").toUInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "Version attribute in kgame.xml is not a valid number" << endl;
+		return false;
+	}
+	if (newVersion == version) {
+		boError() << k_funcinfo << "format " << version << " got converted, but version has not been changed" << endl;
+		return false;
+	}
+
+	// check whether we can convert any further
+	return convertFilesToCurrentFormat(destFiles);
+ }
+
+ return true;
+}
+
+bool BosonPlayField::convertFilesToCurrentFormat(QMap<QString, QByteArray>& destFiles, unsigned int version, bool* handled)
+{
+ // AB: this is where the conversion should be done!
+ // (of course - most actual conversion code will be in BosonFileConverter)
+
+ *handled = true;
+ bool ret = false;
+ switch (version) {
+	case BOSON_SAVEGAME_FORMAT_VERSION_0_9:
+	{
+		BosonFileConverter converter;
+		if (!converter.convertPlayField_From_0_9_To_0_9_1(destFiles)) {
+			boError() << k_funcinfo << "could not convert from boson 0.9 to boson 0.9.1 file format" << endl;
+			ret = false;
+		} else {
+			ret = true;
+		}
+		break;
+	}
+	default:
+		*handled = false;
+		ret = true;
+		break;
+ }
+ return ret;
 }
 

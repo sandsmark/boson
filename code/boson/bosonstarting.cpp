@@ -389,30 +389,23 @@ bool BosonStarting::startScenario()
 	return false;
  }
  QDomElement root = doc.documentElement();
- QDomNodeList list = root.elementsByTagName("Player");
- if (list.count() < 1) {
+ QDomNodeList playersList = root.elementsByTagName("Player");
+ if (playersList.count() < 1) {
 	boError() << k_funcinfo << "no Player tag found" << endl;
 	return false;
  }
- QMap<int, int> player2Number;
- for (unsigned int i = 0; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	player2Number.insert(i, e.attribute("Id").toInt());
- }
- QValueList<QDomElement> players;
- players.append(list.item(0).toElement());
- for (unsigned int i = 1; i < list.count(); i++) {
-	QDomElement e = list.item(i).toElement();
-	int number = player2Number[i];
-	bool inserted = false;
-	for (unsigned int j = 0; j < players.count() && !inserted; j++) {
-		if (player2Number[j] > number) {
-			players.insert(players.at(j), e);
-			inserted = true;
-		} else if (j + 1 == players.count()) {
-			players.append(e);
-			inserted = true;
-		}
+ for (unsigned int i = 0; i < playersList.count(); i++) {
+	QDomElement e = playersList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Player tag" << endl;
+		return false;
+	}
+
+	// the IDs in the file must be in sequential order.
+	unsigned int id = e.attribute("Id").toUInt();
+	if (id != i) {
+		boError() << k_funcinfo << "unexpected Id " << id << " for Player tag. expected " << i << endl;
+		return false;
 	}
  }
 
@@ -423,28 +416,46 @@ bool BosonStarting::startScenario()
  }
  QDomElement canvasRoot = canvasDoc.documentElement();
  QDomNodeList itemsList = canvasRoot.elementsByTagName("Items");
+ for (unsigned int i = 0; i < itemsList.count(); i++) {
+	QDomElement e = itemsList.item(i).toElement();
 
- // players is now a list of Player nodes, sorted by their Id (acutally at this
- // point it is the playernumber only)
- for (unsigned int i = 0; i < boGame->playerCount(); i++) {
-	int id = boGame->playerList()->at(i)->id();
-	QDomElement e = players[i];
-	int number = e.attribute("Id").toInt();
-	e.setAttribute("Id", id);
-
-	// also change the id in the OwnerId attribute of the Items tag
-	for (unsigned int j = 0; j < itemsList.count(); j++) {
-		QDomElement items = itemsList.item(j).toElement();
-		bool ok = false;
-		int ownerNumber = items.attribute("OwnerId").toInt(&ok);
-		if (!ok) {
-			boError() << k_funcinfo << "invalid OnwerOd" << endl;
-			continue;
-		}
-		if (ownerNumber == number) {
-			items.setAttribute("OwnerId", id);
-		}
+	// the IDs in the file must be in sequential order.
+	unsigned int id = e.attribute("Id").toUInt();
+	if (id != i) {
+		boError() << k_funcinfo << "Unexpected Id " << id << " for Items tag. expected " << i << endl;
+		return false;
 	}
+ }
+
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	// in the file we have only "dummy" IDs, i.e. sequentially ordered
+	// numbers from 0..maxPlayers. we need the actual IDs to start loading,
+	// so we need to replace the dummy IDs.
+	int actualId = boGame->playerList()->at(i)->id();
+
+	QDomElement e = playersList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Player tag " << i << endl;
+		return false;
+	}
+	if (e.attribute("Id").toUInt() != i) {
+		boError() << k_funcinfo << "unexpected Id for Player tag " << i << endl;
+		return false;
+	}
+	e.setAttribute("Id", actualId);
+
+	// the Items tag must be fixed as well.
+	e = itemsList.item(i).toElement();
+	if (e.isNull()) {
+		boError() << k_funcinfo << "invalid Items tag " << i << endl;
+		return false;
+	}
+	if (e.attribute("Id").toUInt() != i) {
+		boError() << k_funcinfo << "unexpected Id for Items tag " << i << endl;
+		return false;
+	}
+	e.setAttribute("Id", actualId);
+
  }
  root.setAttribute("LocalPlayerId", mPlayer->id());
  playersXML = doc.toCString();
