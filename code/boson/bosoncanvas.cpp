@@ -394,7 +394,7 @@ void BoCanvasAdvance::maximalAdvanceCountTasks(unsigned int advanceCallsCount)
  }
  static int profilingMaxAdvanceCountSum = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
  static int profilingDeletionList = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
- static int profilingRemoveFromDestroyed = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: update destroyed lsit");
+ static int profilingRemoveFromDestroyed = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: update destroyed list");
  static int profilingDeleteItems = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleting items");
  static int profilingDeleteShots = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleteUnusedShots()");
  BosonProfiler profiler2(profilingMaxAdvanceCountSum);
