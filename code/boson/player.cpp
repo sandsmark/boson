@@ -419,23 +419,13 @@ bool Player::loadUnits(QDataStream& stream)
 	}
 
 	// Set additional properties
-	d->mUnits.append(unit);
-	unit->dataHandler()->registerHandler(dataHandlerID, this,
-			SLOT(sendProperty(int, QDataStream&, bool*)),
-			SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+	addUnit(unit, dataHandlerID);
 	unit->setId(id);
 
 	// Call unit's loading methods
 	if (!unit->load(stream)) {
 		boError() << k_funcinfo << "Error while loading unit with id=" << id << endl;
 		return false;
-	}
-
-	// Increase unit count
-	if (unit->isMobile()) {
-		d->mMobilesCount++;
-	} else {
-		d->mFacilitiesCount++;
 	}
  }
  return true;
