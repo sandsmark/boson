@@ -212,6 +212,25 @@ public:
 	unsigned int delayedMessageCount() const;
 
 	/**
+	 * The number of delayed advance messages is really important in a game.
+	 * In theory we should have correct timing, which ensures, that no
+	 * advance message ever gets delayed. in practice, this just isn't the
+	 * case.
+	 *
+	 * Once an advance message is delayed, everything in the game lags by a
+	 * certain amount of time (the interval in which advance messages are
+	 * sent). You should do everything to process all delayed messages asap,
+	 * as multiple delayed advance messages can be noticed by the user (he
+	 * clicks, to make a unit move, but the unit moves after some seconds
+	 * only).
+	 *
+	 * Usually the best way to get rid of delayed advance messages is to
+	 * drop frames. Frame rendering takes a huge amount of time!
+	 * @return The number of advance messages in @ref delayedMessageCount.
+	 **/
+	unsigned int delayedAdvanceMessageCount() const;
+
+	/**
 	 * @return Number of advance calls that have been made in this game (aka
 	 * cycles)
 	 **/
@@ -454,6 +473,12 @@ protected:
 	 **/
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml);
 
+	/**
+	 * Create a game log (see @ref writeGameLog) and store it for later use (see
+	 * @ref saveGameLogs).
+	 **/
+	void makeGameLog();
+
 protected slots:
 	/**
 	 * A network message arrived. Most game logic stuff is done here as
@@ -482,6 +507,8 @@ protected slots:
 
 	void slotDebugOutput(const QString& area, const char* data, int level);
 
+private:
+	friend class BoAdvance;
 private:
 	class BosonPrivate;
 	BosonPrivate* d;
