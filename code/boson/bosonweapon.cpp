@@ -27,6 +27,7 @@
 #include "bosoncanvas.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
+#include "unitproperties.h"
 
 #include <ksimpleconfig.h>
 
@@ -245,7 +246,7 @@ bool BosonWeapon::canShootAt(Unit* u) const
 
 void BosonWeapon::shoot(Unit* u)
 {
-  shoot(BoVector3(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z()));
+  shoot(BoVector3(u->x() + u->width() / 2, u->y() + u->height() / 2, u->z()) + u->unitProperties()->hitpoint());
 }
 
 void BosonWeapon::shoot(const BoVector3& target)

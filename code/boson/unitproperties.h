@@ -19,6 +19,8 @@
 #ifndef UNITPROPERTIES_H
 #define UNITPROPERTIES_H
 
+#include <bo3dtools.h>
+
 class SpeciesTheme;
 class PluginProperties;
 class UpgradeProperties;
@@ -312,16 +314,32 @@ public:
 	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
 	QValueList<unsigned long int> destroyedParticleSystemIds() const;
 
+	QPtrList<BosonParticleSystem> newConstructedParticleSystems(float x, float y, float z) const;
+	QValueList<unsigned long int> constructedParticleSystemIds() const;
+
 	const QPtrList<PluginProperties>* plugins() const;
   
 	/**
 	 * @return maximum range of weapons of this unit e.g. range of weapon with the longest range
 	 **/
-	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };  
+	unsigned long int maxWeaponRange() const  { return mMaxWeaponRange; };
 
+	/**
+	 * @return Damage done by explosion when this unit is destroyed
+	 **/
+	long int explodingDamage() const { return mExplodingDamage; };
+	/**
+	 * @return Radius of explosion when this unit is destroyed
+	 **/
+	float explodingDamageRange() const { return mExplodingDamageRange; };
 
-	long int explodingDamage() const { return mExplodingDamage; }; 
-	float explodingDamageRange() const { return mExplodingDamageRange; }; 
+	/**
+	 * @return So called hitpoint of this unit
+	 * Hitpoint is used to calculate target position for missiles and position for
+	 * some particle systems. Hitpoint is relative to the center of the unit.
+	 * It should be a point on the surface of the unit.
+	 **/
+	 const BoVector3& hitpoint() const { return mHitPoint; };
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -360,8 +378,10 @@ protected:
 	void setArmor(unsigned long int armor)  { mArmor = armor; };
 	void setShields(unsigned long int shields)  { mShields = shields; };
 	void setDestroyedParticleSystemIds(QValueList<unsigned long int> ids);
+	void setConstructedParticleSystemIds(QValueList<unsigned long int> ids);
 	void setExplodingDamageRange(float range)  { mExplodingDamageRange = range; };
 	void setExplodingDamage(long int damage)  { mExplodingDamage = damage; };
+	void setHitPoint(BoVector3 hitpoint)  { mHitPoint = hitpoint; };
 
 	// These only have effect if there is mobile or facility properties
 	void setCanRefineMinerals(bool r);
@@ -424,6 +444,7 @@ private:
 	unsigned long int mMaxWeaponRange;
 	long int mExplodingDamage;
 	float mExplodingDamageRange;
+	BoVector3 mHitPoint;  // FIXME: better name
 
 	MobileProperties* mMobileProperties;
 	FacilityProperties* mFacilityProperties;

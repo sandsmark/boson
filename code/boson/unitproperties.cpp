@@ -53,6 +53,8 @@ public:
 
 	QPtrList<BosonParticleSystemProperties> mDestroyedParticleSystems;
 	QValueList<unsigned long int> mDestroyedParticleSystemIds;
+	QPtrList<BosonParticleSystemProperties> mConstructedParticleSystems;
+	QValueList<unsigned long int> mConstructedParticleSystemIds;
 };
 
 class UnitProperties::MobileProperties
@@ -152,10 +154,14 @@ void UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
  mExplodingDamage = conf.readLongNumEntry("ExplodingDamage", 0);
  mExplodingDamageRange = (float)(conf.readDoubleNumEntry("ExplodingDamageRange", 0));
+ mHitPoint = BoVector3::load(&conf, "HitPoint");  // FIXME: better name
+ mHitPoint.scale(BO_TILE_SIZE);
 
  d->mDestroyedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedParticles");
+ d->mConstructedParticleSystemIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedParticles");
  if (mFullMode) {
 	d->mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mDestroyedParticleSystemIds, mTheme);
+	d->mConstructedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(d->mConstructedParticleSystemIds, mTheme);
  }
 
  if (isFacility) {
@@ -197,6 +203,9 @@ void UnitProperties::saveUnitType(const QString& fileName)
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("ExplodingDamage", mExplodingDamage);
  conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
+ BoVector3 tmpHitPoint(mHitPoint);
+ tmpHitPoint.scale(1.0 / BO_TILE_SIZE);
+ tmpHitPoint.save(&conf, "HitPoint");
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedParticles", d->mDestroyedParticleSystemIds);
@@ -539,6 +548,20 @@ QPtrList<BosonParticleSystem> UnitProperties::newDestroyedParticleSystems(float 
  return list;
 }
 
+QPtrList<BosonParticleSystem> UnitProperties::newConstructedParticleSystems(float x, float y, float z) const
+{
+ QPtrList<BosonParticleSystem> list;
+ QPtrListIterator<BosonParticleSystemProperties> it(d->mConstructedParticleSystems);
+ while (it.current()) {
+	BosonParticleSystem* s = it.current()->newSystem(BoVector3(x, y, z));
+	if (s) {
+		list.append(s);
+	}
+	++it;
+ }
+ return list;
+}
+
 void UnitProperties::clearPlugins(bool deleteweapons)
 {
  // FIXME: deleteweapons is very ugly hack here. In unit editor, we store
@@ -642,6 +665,16 @@ void UnitProperties::setDestroyedParticleSystemIds(QValueList<unsigned long int>
 QValueList<unsigned long int> UnitProperties::destroyedParticleSystemIds() const
 {
  return d->mDestroyedParticleSystemIds;
+}
+
+void UnitProperties::setConstructedParticleSystemIds(QValueList<unsigned long int> ids)
+{
+ d->mConstructedParticleSystemIds = ids;
+}
+
+QValueList<unsigned long int> UnitProperties::constructedParticleSystemIds() const
+{
+ return d->mConstructedParticleSystemIds;
 }
 
 void UnitProperties::reset()

@@ -156,8 +156,27 @@ void BosonParticleSystem::update(float elapsed)
 
   mNum = 0;
   mRadius = 0.0;
-  mAge -= elapsed;
-  bool createnew = (mCreateCache >= 1.0) && (mAge >= 0.0);
+  bool createnew;
+  if(mAge == -1)
+  {
+    // -1 means forever
+    createnew = (mCreateCache >= 1.0);
+  }
+  else if(mAge > 0.0)
+  {
+    // system still producing new particles
+    mAge -= elapsed;
+    if(mAge < 0.0)
+    {
+      mAge = 0.0;
+    }
+    createnew = (mCreateCache >= 1.0) && (mAge > 0.0);
+  }
+  else
+  {
+    // system not producing new particles anymore
+    createnew = false;
+  }
 
   // Update particles
   for(int i = 0; i < mMaxNum; i++)

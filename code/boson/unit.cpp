@@ -42,6 +42,7 @@
 #include <krandomsequence.h>
 
 #include <qpointarray.h>
+#include <qptrlist.h>
 
 #include "defines.h"
 
@@ -79,6 +80,7 @@ public:
 
 	// OpenGL only:
 	BosonParticleSystem* mSmokeParticleSystem;
+	QPtrList<BosonParticleSystem> mActiveParticleSystems;  // No autodelete!!!
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -947,7 +949,7 @@ BoItemList Unit::enemyUnitsInRange(unsigned long int range) const
  return enemy;
 }
 
-QValueList<Unit*> Unit::unitCollisions(bool exact) const
+QValueList<Unit*> Unit::unitCollisions(bool exact)
 {
  QValueList<Unit*> units;
  boDebug(310) << k_funcinfo << endl;
@@ -1070,6 +1072,16 @@ void Unit::setSmokeParticleSystem(BosonParticleSystem* s)
  d->mSmokeParticleSystem = s;
 }
 
+QPtrList<BosonParticleSystem>* Unit::activeParticleSystems() const
+{
+ return &(d->mActiveParticleSystems);
+}
+
+void Unit::setActiveParticleSystems(QPtrList<BosonParticleSystem> list)
+{
+ d->mActiveParticleSystems = list;
+}
+
 void Unit::loadWeapons()
 {
  QPtrListIterator<PluginProperties> it(*(unitProperties()->plugins()));
@@ -1144,6 +1156,9 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 
  setRotation((float)(owner->game()->random()->getLong(359)));
  ((Boson*)owner->game())->slotUpdateProductionOptions();
+
+ setActiveParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+ canvas->addParticleSystems(*activeParticleSystems());
 }
 
 MobileUnit::~MobileUnit()
@@ -1568,6 +1583,8 @@ void Facility::setConstructionStep(unsigned int step)
 	owner()->facilityCompleted(this);
 	((Boson*)owner()->game())->slotUpdateProductionOptions();
 	setAnimationMode(AnimationIdle);
+	setActiveParticleSystems(unitProperties()->newConstructedParticleSystems(x() + width() / 2, y() + height() / 2, z()));
+	canvas()->addParticleSystems(*activeParticleSystems());
  }
 }
 
