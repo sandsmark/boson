@@ -1,0 +1,108 @@
+
+
+TODO:
+
+
+0.1 release : (june, 15th?)
+=============
+
+
+
+click-zone for selection is still badly centered
+how to handle selection drawing ?
+good (with _no_ layout)  positionning of widget.
+boAssert( celldiscovered has j<max) seems to have problems
+menu clean-up :-)
+when clicking (no box) on two mobiles, both are selected, but shouldn't
+	then -> client units : shouldn't move over each other
+checkvisibility -> units
+	server : add a 'known' state to serverUnits
+	broadcast 'moving' to all people knowing me, and then update 'known'
+integration of Ben mobiles (with different colors)
+use different pixmap according to 'direction'
+server : check that each unit does max 1 move each jiffie
+version check whithin the ask_connect msg
+check that loading of pixmap has been done well
+map : inheritate Cell, and put serverCell back in server dir
+
+check Makefile.am for installation "make install"
+
+Website : documentation about
+	communication protocol,
+	how-to-make-theme(with naming convention)
+
+0.2 release:
+============
+
+have to install local CVS
+
+basic map editor
+server GUI
+client and server should be peer-killed proof
+
+smooth  known-unknown transition (maybe later thant .2)
+
+0.5 release: (first public release)
+============
+
+list of places to announce (mailing-list, portal, friends, school, packager ..)
+
+mailing list ?
+
+
+si succes :
+	quemander du matos a suse ???? :-))
+	demander une adresse a kde  ?
+
+
+1.0 release :
+=============
+theme editor
+map editor
+on-demand theme loading ??
+
+server can handle multiple game ?
+theme is configured in a file (explaining, for example, how many
+	different implementation there are for a given pixmap)
+
+2.0 release :
+=============
+
+
+
+===================================
+Preliminaries:
+..
+
+First steps :
+
+1a) client/server communication
+1b) map drawing
+1c) selection info dlgbox
+1d) 
+1e) unit specifications (classes)
+1f) server specifications
+
+
+
+Implementations
+*2a) full client/server message passing
+2b) full unflicked area drawing
+2c) unit implementation
+2d) 
+
+Version alpha / first public release.
+
+Fine tuning :
+3a) Parameters tuning
+3b) Help / tutorials
+3c) theme drawing helpers (icon, map)
+*3d) log files
+3e) Chatting
+
+Even more :
+4a) Computer player (AI)
+4b) Speed optimisation
+4c) Game recording for post-analyse
+
+

@@ -1,0 +1,14 @@
+Begin3
+Title:          Boson 
+Version:        0.1
+Entered-date:   Feb 1999
+Description:    client/server warcraft-like game, whithout AI.
+Keywords:       server, warcraft, starcraft, strategy, game, KDE, X11, Qt 
+Author:         Thomas Capricelli <capricel@enst.fr> 
+Maintained-by:  Thomas Capricelli <capricel@enst.fr> 
+Primary-site:   http://www.ecoledoc.lip6.fr/~capricel/download/boson-0.1.bz2
+Home-page:      http://www.ecoledoc.lip6.fr/~capricel/boson/
+Original-site:  
+Platform:       Linux and other Unices, needs Qt and the KDE libs
+Copying-policy: GNU Public License
+End
