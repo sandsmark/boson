@@ -201,7 +201,6 @@ BosonShot* BosonWeaponProperties::newShot(Unit* attacker, BoVector3 pos, BoVecto
 
 QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoVector3 pos, float rotation) const
 {
-  BoVector3 realpos = pos + mOffset;
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
   while(it.current())
@@ -370,7 +369,7 @@ void BosonWeapon::shoot(const BoVector3& pos, const BoVector3& target)
     return;
   }
   mProp->newShot(unit(), pos, target);
-  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, unit()->rotation()));
+  canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, -(unit()->rotation())));
   mProp->playSound(SoundWeaponShoot);
   mReloadCounter = mProp->reloadingTime();
 }
