@@ -984,7 +984,7 @@ void BosonBigDisplayBase::renderItems()
 	if (RTTI::isUnit(item->rtti())) {
 		u = (Unit*)item;
 	}
-
+/*
 	if (u && u->waypointList().count() > 0) {
 		// render a line from the current position of the unit to the
 		// point it is moving to.
@@ -1009,6 +1009,7 @@ void BosonBigDisplayBase::renderItems()
 		glColor3ub(255, 0, 0);
 		renderPathLines(list, u->isFlying(), u->z());
 	}
+*/
 	glColor3ub(255, 255, 255);
 
 	++it;
