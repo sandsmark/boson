@@ -171,7 +171,6 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 				return false;
 			}
 			r.moveBy(local.x(), local.y());
-			bocanvas->setCellFlag ( r, Cell::request_f );
 			if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
 
 			if (!path.addCheckLoop(asked)) {
@@ -180,6 +179,9 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 				state = MUS_NONE;
 				return false;
 			}
+			// it's ok, let's request the move and tell it to bocanvas
+			///orzel : XXX probaly a but if the SERVER refuses the move because another player has already moved on this tile
+			bocanvas->setCellFlag ( r, Cell::request_f );
 			return true;
 	}
 
@@ -361,14 +363,15 @@ void playerMobUnit::do_moveTo(QPoint npos)
 	boAssert(int(x())%BO_TILE_SIZE==0);
 	boAssert(int(y())%BO_TILE_SIZE==0);
 
+	// free the requested cells
+	bocanvas->unsetCellFlag ( gridRect(), Cell::request_f );
+
 
 	bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 
 	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
 
 	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
-	// free the requested cells
-	bocanvas->unsetCellFlag ( gridRect(), Cell::request_f );
 
 	// CELLS
 
