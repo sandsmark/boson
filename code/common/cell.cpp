@@ -54,8 +54,14 @@ void Cell::setGround(groundType g)
 
 bool Cell::canGo(uint goFlag)
 {
+
+	if (flags&request_f) {
+		printf("requested cell\n");
+		return true;
+	}
+
 	if (!isKnown()) {
-		printf("unknown cell\n");
+		printf("unknown cell(1)\n");
 		return true;
 	}
 

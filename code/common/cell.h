@@ -39,11 +39,12 @@ public:
 	/** tel if a given mobile can "go" on this cell */
 	bool canGo(uint goFlag);
 
-	enum cell_flags {
-		known_f	= 0x01,
-		building_f = 0x02,
-		field_unit_f = 0x03,
-		flying_unit_f = 0x04
+	enum cell_flags { // one bit/flag
+		known_f	=	0x01,
+		building_f = 	0x02,
+		field_unit_f =	0x04,
+		flying_unit_f =	0x08,
+		request_f =	0x10
 	} flags;
 
 	void	setFlag(cell_flags f) { flags = (cell_flags) (flags|f); } //  { flags |= f;} gives warning ??
