@@ -34,6 +34,7 @@ public:
 		ChangeTeamColor = 4,
 		IdNewGame = 5,
 		IdNewEditor = 6,
+		IdStartGameClicked = 7,
 
 	// once a newgame is started:
 		IdInitFogOfWar = 10,

@@ -52,6 +52,8 @@ void BosonStartWidgetBase::initKGame()
 {
  connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), 
 		this, SLOT(slotPlayFieldChanged(const QString&)));
+ connect(boGame, SIGNAL(signalStartGameClicked()),
+		this, SLOT(slotStart()));
 
  // We must manually set maximum players number to some bigger value, because
  //  KGame in KDE 3.0.0 (what about 3.0.1?) doesn't support infinite number of
@@ -114,5 +116,10 @@ void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
 	field = BosonPlayField::playField(mMapId);
  }
  setCurrentPlayField(field);
+}
+
+void BosonStartWidgetBase::slotStartGameClicked()
+{
+ boGame->sendMessage(0, BosonMessage::IdStartGameClicked);
 }
 

@@ -78,9 +78,11 @@ private:
 
 public slots:
 	/**
-	 * Called when user clicks on "Start game" button
-	 * This widget should then be hidden and game should be started
+	 * Called when user clicks on "Start game" button. Sends a message to
+	 * @ref Boson which emits a signal, which @ref slotStart is connected to
 	 **/
+	virtual void slotStartGameClicked();
+
 	virtual void slotStart();
 
 	/** Adds AI (computer-controlled) player to game

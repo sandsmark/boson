@@ -157,7 +157,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 
 
  if (args->isSet("start")) {
-	w->slotStart();
+	w->slotStartGameClicked();
  }
 }
 
@@ -184,7 +184,7 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
 
 
  if (args->isSet("start")) {
-	w->slotStart();
+	w->slotStartGameClicked();
  }
 }
 

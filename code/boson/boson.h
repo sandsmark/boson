@@ -216,6 +216,15 @@ public slots:
 
 signals:
 	/**
+	 * This signal is for the start game/editor widgets only. Don't use it
+	 * outside.
+	 *
+	 * It is emitted once a message has arrived inidicating that the "start
+	 * game" button was clicked.
+	 **/
+	void signalStartGameClicked();
+
+	/**
 	 * Emitted once the game admin starts the game, i.e. clicks on "start
 	 * game" in the new game widget (see @ref BosonNewGameWidget)
 	 *
