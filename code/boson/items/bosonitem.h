@@ -75,7 +75,9 @@ public:
 
 	/**
 	 * @return The y-coordinate of the unit on the canvas. Note that this is
-	 * <em>not</em> the OpenGL coordinate!
+	 * <em>not</em> the OpenGL coordinate! <em>NOT</em> canvas coordinates as
+	 * @ref x() and @ref y() (acutally canvas and OpenGL coordiantes are
+	 * equal for z)
 	 **/
 	inline float y() const { return mY; }
 
@@ -105,10 +107,33 @@ public:
 	QRect boundingRect() const;
 	QRect boundingRectAdvanced() const;
 
+	/**
+	 * Move the item to @p nx, @p ny, @p nz. Note that it is moved without
+	 * parameter checking, i.e. we don't check whether these cooridnates are
+	 * valid.
+	 **/
 	inline void move(float nx, float ny, float nz)
 	{
 		moveBy(nx - x(), ny - y(), nz - z());
 	}
+
+	/**
+	 * Move the item by the specified values. Note that no validity checking
+	 * is done!
+	 *
+	 * Also note that when you move an item by e.g. (1,1,0) that this new
+	 * position is <em>not</em> guaranteed to an actual position on the 
+	 * ground. I mean when the item (e.g. a unit) is on grass and you move
+	 * it by a certain amount so that it moves to another cell, then it is
+	 * possible that that cell is at a different height than previous cell.
+	 * You might end up with a "flying" unit or a unit that goes inside a
+	 * mountain. You need to check that in your moving code!
+	 *
+	 * This is the central moving method of BosonItem, all other moving
+	 * methods use this one. If you want to do special things (like validity
+	 * checking) you should reimplement this method and call it in your
+	 * implementation.
+	 **/
 	virtual void moveBy(float dx, float dy, float dz)
 	{
 		if (dx || dy || dz) {
@@ -216,6 +241,13 @@ public:
 		mZVelocity = vz;
 	}
 
+	/**
+	 * Set the animation mode. Only possible if the construction of the unit
+	 * is completed (i.e. the construction step is greater or equal to @ref
+	 * glConstructionSteps).
+	 *
+	 * See @ref BosonModel::animation for more information about @p mode.
+	 **/
 	void setAnimationMode(int mode);
 
 
@@ -298,6 +330,9 @@ public:
 
 	inline float xRotation() const { return mXRotation; }
 	void setXRotation(float r) { mXRotation = r; }
+
+	inline float yRotation() const { return mYRotation; }
+	void setYRotation(float r) { mYRotation = r; }
 
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
@@ -382,6 +417,7 @@ private:
 // shouldn't be stored in save() either
 	float mRotation;
 	float mXRotation;
+	float mYRotation;
 	float mGLDepthMultiplier;
 	GLuint mDisplayList;
 	unsigned int mGLConstructionStep;
