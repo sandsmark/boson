@@ -18,7 +18,7 @@
 */
 #include "bosonunitview.h"
 
-#include "unit.h"
+#include "unitbase.h"
 #include "player.h"
 #include "unitproperties.h"
 #include "speciestheme.h"
@@ -68,9 +68,10 @@ BosonUnitView::~BosonUnitView()
  delete d;
 }
 
-void BosonUnitView::setUnit(Unit* unit)
+void BosonUnitView::setUnit(Unit* u)
 {
- BosonCommandWidget::setUnit(unit);
+ UnitBase* unit = (UnitBase*)u;
+ BosonCommandWidget::setUnit(u);
  if (!unit) {
 	return;
  }
