@@ -149,10 +149,15 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
  // e.g.:
  if (args->isSet("playfield")) {
 	QString identifier = args->getOption("playfield");
-	if (!identifier.right(4) == QString::fromLatin1(".bpf")) {
+	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
 	w->sendPlayFieldChanged(identifier);
+ }
+
+
+ if (args->isSet("start")) {
+	w->slotStart();
  }
 }
 
@@ -171,10 +176,15 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
  // e.g.:
  if (args->isSet("playfield")) {
 	QString identifier = args->getOption("playfield");
-	if (!identifier.right(4) == QString::fromLatin1(".bpf")) {
+	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
 	w->sendPlayFieldChanged(identifier);
+ }
+
+
+ if (args->isSet("start")) {
+	w->slotStart();
  }
 }
 
