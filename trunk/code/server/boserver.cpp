@@ -28,7 +28,7 @@
 
 FILE *logfile = (FILE *) 0L;
 
-BosonServer::BosonServer(const char *mapfile, const char *name=0L)
+BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	: KTMainWindow(name)
 {
 
@@ -38,7 +38,7 @@ gpp.nbConnected = 0;
 initLog();
 logf(LOG_INFO, "Entering BosonServer constructor");
 
-initSocket();
+initSocket(port);
 logf(LOG_INFO, "Socket is initialized");
 
 initMap(mapfile);
@@ -60,7 +60,7 @@ logf(LOG_INFO,"============New Log File===============");
 }
 
 
-void BosonServer::initSocket()
+void BosonServer::initSocket(int port)
 {
 int i;
 
@@ -70,7 +70,7 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++) {
 	gpp.player[i].id = i;
 	}
 
-socket = new KServerSocket(BOSON_DEFAULT_PORT);
+socket = new KServerSocket( port);
 state = SS_INIT;
 
 if (-1 == socket->socket()) {
