@@ -101,13 +101,13 @@ BOPROFILING_SRC= \
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
-		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
-		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
 boson_SOURCES = \
@@ -117,13 +117,13 @@ boson_SOURCES = \
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
-		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
-		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lkdegames \
 		$(GLLIB) -l3ds \
 		-lkio $(LIB_KDEUI)
 bounit_SOURCES = \
@@ -153,12 +153,12 @@ borender_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 borender_LDADD = \
 		$(top_builddir)/boson/bodebug/libbodebug.la \
 		$(top_builddir)/boson/items/libbosonitems.la \
-		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
-		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lkdegames \
 		$(GLLIB) -l3ds \
 		$(LIB_KDEUI)
 borender_SOURCES = \
