@@ -81,6 +81,12 @@ public:
 
 	void setGrayOut(bool g);
 
+	/**
+	 * Add a small number to the shown pixmap. The number displays how many
+	 * units of this type are in queue for production.
+	 **/
+	void setProductionCount(int count);
+
 public slots:
 	void slotUnitChanged(Unit*);
 

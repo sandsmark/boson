@@ -616,9 +616,7 @@ bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
  
  // the current production is done.
  factory->removeProduction();
- if (!factory->hasProduction()) {
-	emit signalCompletedProduction(factory);
- }
+ emit signalCompletedProduction(factory);
  return true;
 }
 

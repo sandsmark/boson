@@ -290,24 +290,24 @@ void BosonCommandFrame::hideOrderButtons()
 void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* owner, Facility* factory)
 {
  initOrderButtons(produceList.count());
+ int unitType = -1;
+ if (factory) {
+	if (factory->hasProduction()) {
+		unitType = factory->currentProduction();
+	}
+ }
  for (unsigned int i = 0; i < produceList.count(); i++) {
-	if (factory) {
-		int unitType = -1;
-		if (factory->hasProduction()) {
-			unitType = factory->currentProduction();
-		}
-		if (unitType > 0) {
-			if (produceList[i] != unitType) {
-				d->mOrderButton[i]->setGrayOut(true);
-			} else {
-				d->mOrderButton[i]->setGrayOut(false);
-			}
-			d->mOrderButton[i]->setEnabled(false);
+	if (unitType > 0) {
+		if (produceList[i] != unitType) {
+			d->mOrderButton[i]->setGrayOut(true);
 		} else {
-			d->mOrderButton[i]->setEnabled(true);
 			d->mOrderButton[i]->setGrayOut(false);
 		}
+//		d->mOrderButton[i]->setEnabled(false); // obsolete :-)
+		int count = factory->productionList().contains(produceList[i]);
+		d->mOrderButton[i]->setProductionCount(count);
 	} else {
+		d->mOrderButton[i]->setProductionCount(0);
 		d->mOrderButton[i]->setEnabled(true);
 		d->mOrderButton[i]->setGrayOut(false);
 	}
