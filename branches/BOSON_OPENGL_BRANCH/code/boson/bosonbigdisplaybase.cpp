@@ -757,7 +757,15 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		break;
 	case QEvent::MouseButtonRelease:
 		if (e->button() == LeftButton) {
-			removeSelectionRect();
+			if (e->state() & ControlButton) {
+				// rotating
+			} else if (e->state() & ShiftButton) {
+				// z-position
+			} else if (e->state() & AltButton) {
+				// unused, since Alt+LMB is already used by KDE to move the window :(
+			} else {
+				removeSelectionRect();
+			}
 		} else if (e->button() == RightButton) {
 			if (d->mMouseMoveDiff.isRMBMove()) {
 				d->mMouseMoveDiff.stop();
