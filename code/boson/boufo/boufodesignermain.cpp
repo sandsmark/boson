@@ -599,20 +599,12 @@ void BoWidgetTree::slotMoveUp()
 
  BO_CHECK_NULL_RET(item);
  BO_CHECK_NULL_RET(parent);
- QDomElement widget = mItem2Element[item];
- QDomElement parentElement = mItem2Element[parent];
- if (prev) {
-	QDomElement previous = mItem2Element[prev];
-	parentElement.insertBefore(widget, previous);
- } else {
-	parentElement.appendChild(widget);
- }
-
- emit signalHierarchyChanged();
+ moveElement(item, parent, prev);
 }
 
 void BoWidgetTree::slotMoveDown()
 {
+// boDebug() << k_funcinfo << endl;
  QListViewItem* item = mListView->selectedItem();
  if (!item) {
 	boError() << k_funcinfo << "nothing selected" << endl;
@@ -653,19 +645,60 @@ void BoWidgetTree::slotMoveDown()
 
  BO_CHECK_NULL_RET(item);
  BO_CHECK_NULL_RET(parent);
- QDomElement widget = mItem2Element[item];
- QDomElement parentElement = mItem2Element[parent];
- if (parentElement.isNull() || widget.isNull()) {
-	boError() << k_funcinfo << "oops - null element" << endl;
+ moveElement(item, parent, next);
+}
+
+void BoWidgetTree::moveElement(QListViewItem* widget, QListViewItem* parent, QListViewItem* before)
+{
+ BO_CHECK_NULL_RET(widget);
+ BO_CHECK_NULL_RET(parent);
+ QListViewItem* oldParent = widget->parent();
+ BO_CHECK_NULL_RET(oldParent);
+
+ QDomElement w = mItem2Element[widget];
+ QDomElement p = mItem2Element[parent];
+ QDomElement b;
+ if (before) {
+	b = mItem2Element[before];
+	if (b.isNull()) {
+		boError() << k_funcinfo << "oops - null element for before" << endl;
+		return;
+	}
+ }
+ if (w.isNull()) {
+	boError() << k_funcinfo << "oops - null element for widget" << endl;
 	return;
  }
- QDomElement nextElement;
- if (next) {
-	nextElement = mItem2Element[next];
-	parentElement.insertBefore(widget, nextElement);
- } else {
-	parentElement.appendChild(widget);
+ if (p.isNull()) {
+	boError() << k_funcinfo << "oops - null element for parent" << endl;
+	return;
  }
+
+ bool selected = widget->isSelected(); // should be the case
+ oldParent->takeItem(widget);
+ parent->insertItem(widget);
+
+ if (b.isNull()) {
+	p.appendChild(w);
+	QListViewItem* after = parent->firstChild();
+	while (after->nextSibling()) {
+		after = after->nextSibling();
+	}
+	widget->moveItem(after);
+ } else {
+	p.insertBefore(w, b);
+
+	QListViewItem* after = 0;
+	QListViewItem* n = parent->firstChild();
+	for (; n; n = n->nextSibling()) {
+		if (n == before) {
+			break;
+		}
+		after = n;
+	}
+	widget->moveItem(after);
+ }
+ widget->listView()->setSelected(widget, selected);
 
  emit signalHierarchyChanged();
 }
@@ -942,6 +975,7 @@ BoUfoDesignerMain::BoUfoDesignerMain()
  layout->addWidget(splitter);
 
  mWidgets = new BoWidgetList(splitter);
+ splitter->setResizeMode(mWidgets, QSplitter::KeepSize);
  connect(mWidgets, SIGNAL(signalWidgetSelected(const QString&)),
 		this, SLOT(slotWidgetClassSelected(const QString&)));
  mWidgets->show();
@@ -954,6 +988,7 @@ BoUfoDesignerMain::BoUfoDesignerMain()
  mPreview->show();
 
  QSplitter* vsplitter = new QSplitter(Vertical, splitter);
+ splitter->setResizeMode(vsplitter, QSplitter::KeepSize);
  mWidgetTree = new BoWidgetTree(vsplitter);
  connect(mWidgetTree, SIGNAL(signalWidgetSelected(const QDomElement&)),
 		this, SLOT(slotSelectWidget(const QDomElement&)));
@@ -1228,10 +1263,6 @@ void BoUfoDesignerMain::slotTreeHierarchyChanged()
 	widgetsRoot = root.namedItem("Widgets").toElement();
  }
 
-#if 1
- // AB: atm we _do_ need to rebuild the tree
- mWidgetTree->updateGUI(widgetsRoot);
-#endif
  mPreview->updateGUI(widgetsRoot);
 
  // TODO: select currently selected widget in the preview

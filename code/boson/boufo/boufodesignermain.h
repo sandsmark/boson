@@ -132,6 +132,7 @@ signals:
 
 protected:
 	void updateGUI(const QDomElement& root, QListViewItem* item);
+	void moveElement(QListViewItem* widget, QListViewItem* parent, QListViewItem* before);
 
 protected slots:
 	void slotSelectionChanged(QListViewItem*);
