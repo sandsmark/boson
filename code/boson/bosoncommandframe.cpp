@@ -31,6 +31,7 @@
 
 #include <kstandarddirs.h>
 #include <klocale.h>
+#include <kgameprogress.h>
 #include <kdebug.h>
 
 #include <qlayout.h>
@@ -40,6 +41,7 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qmap.h>
+#include <qtimer.h>
 
 #include "defines.h"
 
@@ -80,6 +82,9 @@ public:
 
 		mOwner = 0;
 		mFactory = 0;
+		mFacility = 0; // TODO: merge with mFactory
+
+		mConstructionProgress = 0;
 	}
 
 	QIntDict<BosonCommandWidget> mOrderButton;
@@ -99,8 +104,13 @@ public:
 
 	Player* mOwner;
 	Unit* mFactory; // the unit that is producing
+	Facility* mFacility;
 
 	QMap<int, int> mOrder2Type; // map order button -> unitType
+
+	KGameProgress* mConstructionProgress;
+
+	QTimer mUpdateTimer;
 };
 
 BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(parent, "cmd frame")
@@ -129,7 +139,8 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
  d->mOrderWidget = new QWidget(d->mScrollView->viewport());
  d->mScrollView->addChild(d->mOrderWidget);
  d->mScrollView->viewport()->setBackgroundMode(backgroundMode());
-// d->mOrderWidget->setMinimumWidth(d->mScrollView->viewport()->width()); // might cause problems if scrollview is resized. maybe subclass QScrollView
+ d->mConstructionProgress = new KGameProgress(d->mOrderWidget);
+ d->mConstructionProgress->hide();
  
  show();
 }
@@ -141,6 +152,7 @@ void BosonCommandFrame::init()
  setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding));
  setMinimumSize(230, 200); // FIXME hardcoded value
 
+ connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
 }
 
 void BosonCommandFrame::initEditor()
@@ -191,12 +203,14 @@ void BosonCommandFrame::resetLayout()
  if (d->mOrderLayout) {
 	delete d->mOrderLayout;
  }
+ int buttons = boConfig->commandButtonsPerRow();
  d->mOrderLayout = new QGridLayout(d->mOrderWidget);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonCommandWidget* b = d->mOrderButton[i];
-	int buttons = boConfig->commandButtonsPerRow();
 	d->mOrderLayout->addWidget(b, i / buttons, i % buttons);
  }
+ int column = (d->mOrderButton.count() - 1) / buttons + 1;
+ d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, column, column, 0, buttons - 1);
  d->mOrderLayout->activate();
 }
 
@@ -233,7 +247,7 @@ void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
  d->mUnitView->setUnit(unit);
 }
 
-void BosonCommandFrame::slotSetConstruction(Unit* unit)
+void BosonCommandFrame::slotSetProduction(Unit* unit)
 {
  hideOrderButtons(); // this makes sure that they are even hidden if the unit 
                      // cannot produce
@@ -247,17 +261,21 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
 	return;
  }
 
- // don't display construction items of units of other players. 
+ // don't display production items of units of other players. 
  if (owner != d->mOwner) {
 	return;
  }
 
- const UnitProperties* prop = unit->unitProperties();
- if (!prop->canProduce()) {
-	return;
- }
  if (!unit->isFacility()) {
 	kdError() << k_lineinfo << "Only facilities can produce" << endl;
+	return;
+ }
+ if (!((Facility*)unit)->completedConstruction()) {
+	slotShowConstructionProgress((Facility*)unit);
+	return;
+ }
+ const UnitProperties* prop = unit->unitProperties();
+ if (!prop->canProduce()) {
 	return;
  }
  QValueList<int> produceList = prop->produceList();
@@ -273,10 +291,13 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
 
 void BosonCommandFrame::hideOrderButtons()
 {
+ d->mUpdateTimer.stop();
+ d->mConstructionProgress->hide();
  if (d->mFactory) {
 	disconnect(d->mFactory->owner(), 0, this, 0);
  }
  d->mFactory = 0;
+ d->mFacility = 0;
  QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->setUnit(0);
@@ -316,7 +337,7 @@ void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* own
  }
 }
 
-void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
+void BosonCommandFrame::slotEditorProduction(int index, Player* owner)
 {
  hideOrderButtons();
  if (index == -1) {
@@ -407,7 +428,7 @@ void BosonCommandFrame::slotRedrawTiles()
 	case OrderMobiles:
 		break;
 	default:
-		kdError() << "unexpected construction index " << index << endl;
+		kdError() << "unexpected production index " << index << endl;
 		break;
  }
 }
@@ -474,7 +495,7 @@ void BosonCommandFrame::slotFacilityProduces(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- slotSetConstruction(f);
+ slotSetProduction(f);
 }
 
 void BosonCommandFrame::slotProductionCompleted(Facility* f)
@@ -483,7 +504,7 @@ void BosonCommandFrame::slotProductionCompleted(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- slotSetConstruction(f);
+ slotSetProduction(f);
 }
 
 void BosonCommandFrame::slotSetButtonsPerRow(int b)
@@ -492,3 +513,26 @@ void BosonCommandFrame::slotSetButtonsPerRow(int b)
  resetLayout();
 }
 
+void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
+{
+ if (!fac) {
+	kdError() << k_funcinfo << "NULL facility" << endl;
+	return;
+ }
+ d->mFacility = fac;
+ d->mConstructionProgress->show();
+ d->mConstructionProgress->setValue(d->mFacility->constructionProgress());
+ d->mUpdateTimer.start(1000);
+}
+
+void BosonCommandFrame::slotUpdate()
+{
+ if (d->mFacility) {
+	slotShowConstructionProgress(d->mFacility);
+	if (d->mFacility->completedConstruction()) {
+		slotSetProduction(d->mFacility);
+	}
+ } else {
+	d->mUpdateTimer.stop();
+ }
+}

@@ -613,7 +613,7 @@ void BosonWidget::slotEditorConstructionChanged(int index)
  if (d->mLocalPlayer) {
 	kdDebug() << "local player: " << d->mLocalPlayer->id() << endl;
  }
- d->mCommandFrame->slotEditorConstruction(index, d->mLocalPlayer);
+ d->mCommandFrame->slotEditorProduction(index, d->mLocalPlayer);
 }
 
 void BosonWidget::recreateMap()
@@ -662,7 +662,7 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
 		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
-		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
+		d->mCommandFrame, SLOT(slotSetProduction(Unit*)));
  connect(d->mBigDisplay, SIGNAL(signalSelectUnit(Unit*)), 
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
@@ -785,7 +785,7 @@ void BosonWidget::slotChangeLocalPlayer(int index)
 // kdDebug() << k_funcinfo << endl;
  Player* p = (Player*)d->mBoson->playerList()->at(index);
  changeLocalPlayer(p);
- d->mCommandFrame->slotEditorConstruction(-1, d->mLocalPlayer);
+ d->mCommandFrame->slotEditorProduction(-1, d->mLocalPlayer);
 }
 
 void BosonWidget::changeLocalPlayer(Player* localPlayer)
