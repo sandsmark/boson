@@ -27,8 +27,6 @@
 #include "bosonmodeltextures.h"
 #include "bomesh.h"
 #include "bomaterial.h"
-#include "bosonfont/bosonglfont.h"
-#include "bosonfont/bosonglfontchooser.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
@@ -48,6 +46,11 @@
 #include "info/boinfo.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
+#endif
+#define BOSONFONT 0
+#if BOSONFONT
+#include "bosonfont/bosonglfont.h"
+#include "bosonfont/bosonglfontchooser.h"
 #endif
 
 #include <kcmdlineargs.h>
@@ -161,7 +164,9 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mRenderAxis = false;
  mRenderGrid = false;
 
+#if BOSONFONT
  mDefaultFont = 0;
+#endif
 
  mCamera = new BoCamera;
  mLight = 0;
@@ -205,11 +210,12 @@ void ModelPreview::initializeGL()
  }
  recursive = true;
  makeCurrent();
+#if BOSONFONT
  delete mDefaultFont;
- boDebug() << k_funcinfo << boConfig->stringValue("GLFont", QString::null) << endl;
  BoFontInfo defaultFontInfo;
  defaultFontInfo.fromString(boConfig->stringValue("GLFont", QString::null));
  mDefaultFont = new BosonGLFont(defaultFontInfo);
+#endif
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
@@ -452,14 +458,11 @@ void ModelPreview::initUfoAction()
 
 void ModelPreview::setFont(const BoFontInfo& font)
 {
+#if BOSONFONT
  makeCurrent();
  delete mDefaultFont;
  mDefaultFont = new BosonGLFont(font);
-}
-
-const BoFontInfo& ModelPreview::fontInfo() const
-{
- return mDefaultFont->fontInfo();
+#endif
 }
 
 void ModelPreview::resizeGL(int w, int h)
@@ -731,7 +734,6 @@ void ModelPreview::renderMeshSelection()
 
 void ModelPreview::renderText()
 {
- BO_CHECK_NULL_RET(mDefaultFont);
 }
 
 BoFrame* ModelPreview::frame(unsigned int f) const
@@ -974,13 +976,15 @@ void ModelPreview::slotReloadModelTextures()
 
 void ModelPreview::slotShowChangeFont()
 {
+#if BOSONFONT
  BoFontInfo f;
- f = fontInfo();
+ f = mDefaultFont->fontInfo();
  int result = BosonGLFontChooser::getFont(f, this);
  if (result == QDialog::Accepted) {
 	setFont(f);
 	boConfig->setStringValue("GLFont", fontInfo().toString());
  }
+#endif
 }
 
 

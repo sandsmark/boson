@@ -109,7 +109,6 @@ public:
 	virtual void resizeGL(int, int);
 
 	void setFont(const BoFontInfo& font);
-	const BoFontInfo& fontInfo() const;
 
 	void load(SpeciesTheme* s, const UnitProperties* prop);
 	void loadObjectModel(SpeciesTheme* s, const QString& file);
