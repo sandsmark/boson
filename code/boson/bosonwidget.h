@@ -77,7 +77,7 @@ public:
 
 	void startEditor();
 
-	void saveConfig();
+	void saveConfig(bool editor = false);
 
 	void zoom(const QWMatrix&);
 
