@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
-#ifdef BOSON_COMPILE_STATIC
+#ifdef BOSON_LINK_STATIC
  KApplication::disableAutoDcopRegistration();
 #endif
 
