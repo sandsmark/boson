@@ -103,11 +103,11 @@ void BosonUnitView::setUnit(Unit* u)
 	return;
  }
  if (!unit->owner()) {
-	boError() << k_funcinfo << "no owner" << endl;
+	boError(220) << k_funcinfo << "no owner" << endl;
 	return;
  }
  if (!unit->owner()->speciesTheme()) {
-	boError() << k_funcinfo << "No speciesTheme" << endl;
+	boError(220) << k_funcinfo << "No speciesTheme" << endl;
 	return;
  }
  d->mName->setText(unit->unitProperties()->name());
@@ -123,12 +123,12 @@ void BosonUnitView::setUnit(Unit* u)
 void BosonUnitView::displayUnitPixmap(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  QPixmap* big = owner->speciesTheme()->bigOverview(unitType);
  if (!big) {
-	boError() << "Cannot find Big Overview for " << unitType << endl;
+	boError(220) << "Cannot find Big Overview for " << unitType << endl;
 	return;
  }
  setPixmap(*big);

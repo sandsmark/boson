@@ -104,7 +104,7 @@ void EditorCommandFrame::setProduction(Unit* unit)
 {
  // same as above - we might use this for configuration widgets. but we'll
  // better use plugins (see setSelectedUnit())
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BosonCommandFrameBase::setProduction(0); // will hide all order buttons
  if (!unit) {
 	return;
@@ -115,17 +115,17 @@ void EditorCommandFrame::setSelectedUnit(Unit* unit)
 {
  // currently we don't provide any plugins here. just like above we might
  // provide plugins for configurations.
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BosonCommandFrameBase::setSelectedUnit(unit);
  if (!selectedUnit()) {
 	return;
  }
  if (selectedUnit() != unit) {
-	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
+	boError(220) << k_funcinfo << "selectedUnit() != unit" << endl;
 	return;
  }
  if (d->mUnitConfigWidget->showUnit(unit)) {
-	boDebug() << k_funcinfo << "show unit " << endl;
+	boDebug(220) << k_funcinfo << "show unit " << endl;
 	return;
  }
 }
@@ -167,14 +167,14 @@ void EditorCommandFrame::placeGround()
 
 void EditorCommandFrame::placeMobiles(Player* owner)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	boError() << k_funcinfo << "NULL speciestheme" << endl;
+	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
  QValueList<long unsigned int> units = theme->allMobiles();
@@ -192,14 +192,14 @@ void EditorCommandFrame::placeMobiles(Player* owner)
 
 void EditorCommandFrame::placeFacilities(Player* owner)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	boError() << k_funcinfo << "NULL speciestheme" << endl;
+	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
  QValueList<long unsigned int> units = theme->allFacilities();

@@ -115,9 +115,9 @@ bool EditorUnitConfigWidget::display(Unit* unit)
 void EditorUnitConfigWidget::updateUnit(Unit* unit)
 {
  BO_CHECK_NULL_RET(unit);
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  if (d->mUnitId != unit->id()) {
-	boError() << k_funcinfo << "Data are for not for the correct unit! data id=" << d->mUnitId << " selected unit: " << unit->id() << endl;
+	boError(220) << k_funcinfo << "Data are for not for the correct unit! data id=" << d->mUnitId << " selected unit: " << unit->id() << endl;
 	return;
  }
  unit->setHealth(d->mHealth->value());

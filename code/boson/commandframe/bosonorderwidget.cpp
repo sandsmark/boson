@@ -124,7 +124,7 @@ void BosonOrderWidget::setButtonsPerRow(int b)
 
 void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)
 {
- boDebug() << k_funcinfo << actions.count() << " actions" << endl;
+ boDebug(220) << k_funcinfo << actions.count() << " actions" << endl;
 
  hideCellConfigWidgets();
  ensureButtons(actions.count());
@@ -138,7 +138,7 @@ void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)
  if (factory) {
 	production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 	if (!production) {
-		boDebug() << k_funcinfo << "factory cannot produce" << endl;
+		boDebug(220) << k_funcinfo << "factory cannot produce" << endl;
 	} else if (production->hasProduction()) {
 		type = production->currentProductionType();
 		id = production->currentProductionId();
@@ -184,7 +184,7 @@ void BosonOrderWidget::hideOrderButtons()
 
 void BosonOrderWidget::setOrderButtonsGround()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BO_CHECK_NULL_RET(d->mGroundTheme);
  showCellConfigWidgets();
  hideOrderButtons();
@@ -226,10 +226,10 @@ void BosonOrderWidget::showUnits(QPtrList<Unit> units)
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
 	if ((d->mOrderButton[i]->type() == BosonOrderButton::ShowUnit) && (d->mOrderButton[i]->unit() == it.current())) {
-		boDebug() << "unit already displayed - update..." << endl;
+		boDebug(220) << "unit already displayed - update..." << endl;
 		d->mOrderButton[i]->slotUnitChanged(it.current());
 	} else {
-//		boDebug() << "show unit at " << i << endl;
+//		boDebug(220) << "show unit at " << i << endl;
 		d->mOrderButton[i]->setUnit(it.current());
 	}
  }
@@ -239,16 +239,16 @@ void BosonOrderWidget::showUnits(QPtrList<Unit> units)
 void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
 {
  if (!factory->isFacility()) {
-	boError() << k_lineinfo << "NOT factory" << endl;
+	boError(220) << k_lineinfo << "NOT factory" << endl;
 	return;
  }
  ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
  if (!production) {
-	boError() << k_funcinfo << factory->id() << " cannot produce" << endl;
+	boError(220) << k_funcinfo << factory->id() << " cannot produce" << endl;
 	return;
  }
  if (!production->hasProduction()) {
-	boDebug() << k_funcinfo << "no production" << endl;
+	boDebug(220) << k_funcinfo << "no production" << endl;
 	return;
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
@@ -279,10 +279,10 @@ bool BosonOrderWidget::isProduceAction() const
 
 void BosonOrderWidget::slotPlaceGround(unsigned int texture)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BO_CHECK_NULL_RET(d->mGroundTheme);
  if (texture >= d->mGroundTheme->textureCount()) {
-	boError() << k_funcinfo << "invalid texture " << texture << " textureCount="
+	boError(220) << k_funcinfo << "invalid texture " << texture << " textureCount="
 			<< d->mGroundTheme->textureCount() << endl;
 	return;
  }

@@ -202,14 +202,14 @@ void BosonCommandFrame::initPlugins()
 
 void BosonCommandFrame::setSelectedUnit(Unit* unit)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
  BosonCommandFrameBase::setSelectedUnit(unit);
  if (!selectedUnit()) {
 	// all plugin widgets have been hidden already. same about unit actions.
 	return;
  }
  if (selectedUnit() != unit) {
-	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
+	boError(220) << k_funcinfo << "selectedUnit() != unit" << endl;
 	return;
  }
  if (d->mConstructionProgress->showUnit(unit)) {
@@ -231,7 +231,7 @@ void BosonCommandFrame::setSelectedUnit(Unit* unit)
 
 void BosonCommandFrame::setProduction(Unit* unit)
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(220) << k_funcinfo << endl;
 
  BosonCommandFrameBase::setProduction(unit);
  if (!unit) {
@@ -240,11 +240,11 @@ void BosonCommandFrame::setProduction(Unit* unit)
  Player* owner = unit->owner();
  SpeciesTheme* speciesTheme = unit->speciesTheme();
  if (!owner) {
-	boError() << k_funcinfo << "NULL owner" << endl;
+	boError(220) << k_funcinfo << "NULL owner" << endl;
 	return;
  }
  if (!speciesTheme) {
-	boError() << k_funcinfo << "NULL speciestheme" << endl;
+	boError(220) << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
 
@@ -262,7 +262,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
  if (!pp) {
 	// must not happen if the units has the production
 	// plugin
-	boError() << k_funcinfo << "no production properties!" << endl;
+	boError(220) << k_funcinfo << "no production properties!" << endl;
 	return;
  }
  QValueList<BoSpecificAction> actions;
@@ -314,7 +314,7 @@ void BosonCommandFrame::slotUpdate()
 		if (!selectedUnit()->isFacility()) {
 			// can't happen, since d->mConstructionProgress already
 			// checks this
-			boError() << k_funcinfo << "No facility" << endl;
+			boError(220) << k_funcinfo << "No facility" << endl;
 			return;
 		}
 	} else {
