@@ -547,6 +547,9 @@ public:
 	void setEnableColormap(bool enable) { mEnableColormap = enable; }
 	bool enableColormap() const { return mEnableColormap; }
 
+	void setDisableModelLoading(bool d) { mDisableModelLoading = d; }
+	bool disableModelLoading() const { return mDisableModelLoading; }
+
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -629,6 +632,7 @@ private:
 	bool mDebugAdvanceCalls;
 	bool mShowResources;
 	bool mEnableColormap;
+	bool mDisableModelLoading;
 	unsigned int mDefaultLodCount;
 };
 

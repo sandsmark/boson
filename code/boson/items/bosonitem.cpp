@@ -24,6 +24,7 @@
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "../bosoneffect.h"
 #include "../bosonpropertyxml.h"
+#include "../bosonconfig.h"
 #include "../bo3dtools.h"
 #include "bosonitempropertyhandler.h"
 #include "bosonitemrenderer.h"
@@ -142,7 +143,11 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mSelectBox = 0;
 
  mCells = new QPtrVector<Cell>();
- mRenderer = new BosonItemRenderer(this);
+ mRenderer = 0;
+
+ if (!boConfig->disableModelLoading()) {
+	mRenderer = new BosonItemRenderer(this);
+ }
 }
 
 BosonItem::~BosonItem()
