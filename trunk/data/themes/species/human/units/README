@@ -125,6 +125,33 @@ Requirements=List
         List is comma separated list of unit IDs. Player must have
         built all those units before he can build this unit.
         Default is an empty list.
+ExplodingDamage=Number
+        How much damage is applied to nearby units when this unit explodes (is
+        destroyed)
+        Default is 0
+ExplodingDamageRange=Number
+        In how big radius nearby units will be damaged when this unit explodes.
+        Default is 0
+HitPoint=Vector
+        Defines "hitpoint" of this unit. Hitpoint is used for shooting, all
+        units will shoot at this point when attacking this unit. It should be
+        point on the unit's surface.
+        Vector consists of 3 floating-point numbers, separated by commas, e.g.
+        1.2,0.6,-0.3 and is relative to the center of the unit.
+        Default is 0,0,0 (center of the unit).
+DestroyedParticles=List
+        Comma separated list of particle systems which will be created when this
+        unit is destroyed. You can create e.g. smoke and explosion with this.
+        Default is an empty list.
+ConstructedParticles=List
+        Comma separated list of particle systems which will be created when this
+        unit is constructed. You can create e.g. light smoke for factory
+        chimneys with it.
+        Default is an empty list.
+Weapons=Number
+        How many weapons this unit has.
+        See below for more information about weapons.
+        Default is 0.
 -------------------------------------------------------------------------------
 
 
@@ -277,12 +304,12 @@ DamageRange=Number
         Must be >= 0. Default is 1.
 FullDamageRange=Number
         Specifys the range where all units will be fully damaged.
-        Must not be bigger than DamageRange. Default is 1.
-        
-MaxHeight=Number
-        What's the maximum height of missile of this weapon when it flies. If
+        Must not be bigger than DamageRange.
+        Default is a quarter of DamageRange.
+Height=Number
+        What's the height of missile of this weapon when it flies. If
         you increase this, your missiles will fly with bigger arc.
-        Default is 1.
+        Default is 0.25.
 Model=filename
         Model of this weapon. If weapon's speed is 0, model
         will never be visible, so you won't need it.
@@ -306,9 +333,11 @@ SoundShoot=soundfile
         Default is shoot.
 SoundFly=soundfile
         Sound file which is played during the weapons flies. (for missiles)
+        Not yet used.
         Default is missile_fly.
 SoundHit=soundfile
         Sound file which is played when the weapon hits it's target.
+        Not yet used.
         Default is hit.
 -------------------------------------------------------------------------------
 
