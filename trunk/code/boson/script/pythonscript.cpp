@@ -101,6 +101,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"startBenchmark", py_startBenchmark, METH_VARARGS, 0 },
   { (char*)"endBenchmark", py_endBenchmark, METH_VARARGS, 0 },
   { (char*)"setRandomSeed", py_setRandomSeed, METH_VARARGS, 0 },
+  { (char*)"findPath", py_findPath, METH_VARARGS, 0 },
   { (char*)"addParticleSystem", py_addParticleSystem, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
@@ -1042,6 +1043,18 @@ PyObject* PythonScript::py_setRandomSeed(PyObject*, PyObject* args)
     return 0;
   }
   BosonScript::setRandomSeed(seed);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_findPath(PyObject*, PyObject* args)
+{
+  int x1, y1, x2, y2;
+  if(!PyArg_ParseTuple(args, (char*)"iiii", &x1, &y1, &x2, &y2))
+  {
+    return 0;
+  }
+  BosonScript::findPath(x1, y1, x2, y2);
   Py_INCREF(Py_None);
   return Py_None;
 }

@@ -68,6 +68,8 @@ public:
 		if (_registerList) {
 			registerList();
 		}
+		mLandOccupied = false;
+		mAirOccupied = false;
 	}
 
 	BoItemList(const BoItemList&, bool _registerList = true);
@@ -83,8 +85,8 @@ public:
 	unsigned int remove(BosonItem* item) { return mList.remove(item); }
 	inline unsigned int count() const { return mList.count(); }
 	inline bool isEmpty() const { return mList.isEmpty(); }
-	Iterator begin() { return mList.begin(); }
-	ConstIterator begin() const { return mList.begin(); }
+	inline Iterator begin() { return mList.begin(); }
+	inline ConstIterator begin() const { return mList.begin(); }
 	inline Iterator end() { return mList.end(); }
 	inline ConstIterator end() const { return mList.end(); }
 	// AB: FIXME: we don't care about the number of items in the list. make
@@ -152,11 +154,36 @@ public:
 	 **/
 	bool isOccupied(bool includeMoving = true) const;
 
+	/**
+	 * Checks if cell is occupied for land units.
+	 * This differs from isOccupied(...) methods in that it uses pre-calculated
+	 * occupied status.
+	 * Also note, that this doesn't check for moving units.
+	 * @return TRUE if cell is occupied by standing land unit, otherwise FALSE
+	 **/
+	inline bool isLandOccupied() const { return mLandOccupied; }
+
+	/**
+	 * Checks if cell is occupied for land units.
+	 * This differs from isOccupied(...) methods in that it uses pre-calculated
+	 * occupied status.
+	 * Also note, that this doesn't check for moving units.
+	 * @return TRUE if cell is occupied by standing land unit, otherwise FALSE
+	 **/
+	inline bool isAirOccupied() const { return mAirOccupied; }
+
+	void recalculateLandOccupiedStatus();
+	void recalculateAirOccupiedStatus();
+
+	float passageCost() const;
+
 protected:
 	void registerList();
 
 private:
 	QValueList<BosonItem*> mList;
+	bool mLandOccupied;  // Occupied for land units?
+	bool mAirOccupied;  // Occupied for air units?
 };
 
 #endif

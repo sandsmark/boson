@@ -1187,6 +1187,50 @@ void BosonBigDisplayBase::renderText()
 	y -= d->mDefaultFont->height();
 	y -= d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
+#ifdef PATHFINDER_TNG
+ if (boConfig->debugPFData()) {
+	Cell* cellundercursor = boGame->canvas()->cellAt(d->mCanvasPos.x(), d->mCanvasPos.y());
+	BosonPathRegion* r = 0;
+	if (cellundercursor) {
+		r = cellundercursor->region();
+	}
+
+	QString cell = QString::fromLatin1("Cell pos: (%1; %2)")
+			.arg((cellundercursor == 0) ? -1 : cellundercursor->x()).arg((cellundercursor == 0) ? -1 : cellundercursor->y());
+	w = QMAX(w, d->mDefaultFont->width(cell));
+	QString cellpassable = QString::fromLatin1("  passable: %1").arg((cellundercursor == 0) ? "n/a" : (cellundercursor->passable() ? "true" : "false"));
+	w = QMAX(w, d->mDefaultFont->width(cellpassable));
+	QString celloccupied = QString::fromLatin1("  occupied: %1").arg((cellundercursor == 0) ? "n/a" : (cellundercursor->isLandOccupied() ? "true" : "false"));
+	w = QMAX(w, d->mDefaultFont->width(celloccupied));
+	QString regid = QString::fromLatin1("Region  : %1").arg((r == 0) ? -1 : r->id);
+	w = QMAX(w, d->mDefaultFont->width(regid));
+	QString regcost = QString::fromLatin1("    cost: %1").arg((r == 0) ? -1.0f : r->cost, 5, 'g', 3);
+	w = QMAX(w, d->mDefaultFont->width(regcost));
+	QString regcenter = QString::fromLatin1("  center: (%1; %2)").arg((r == 0) ? -1.0f : r->centerx).arg((r == 0) ? -1.0f : r->centery);
+	w = QMAX(w, d->mDefaultFont->width(regcenter));
+	QString regcells = QString::fromLatin1("   cells: %1").arg((r == 0) ? -1 : r->cellsCount);
+	w = QMAX(w, d->mDefaultFont->width(regcells));
+	QString reggroup = QString::fromLatin1("   group: 0x%1").arg((r == 0) ? 0 : (int)r->group);
+	w = QMAX(w, d->mDefaultFont->width(reggroup));
+	QString regneighs = QString::fromLatin1("  neighs: %1").arg((r == 0) ? -1 : (int)r->neighbors.count());
+	w = QMAX(w, d->mDefaultFont->width(regneighs));
+	QString neighbors;
+	if (r && r->neighbors.count() > 0) {
+		for (unsigned int i = 0; i < r->neighbors.count(); i++) {
+			neighbors += QString::fromLatin1("\n  id: %1; border: %2; cost: %3").arg(r->neighbors[i].region->id).arg(r->neighbors[i].bordercells).arg(r->neighbors[i].cost, 5, 'g', 3);
+		}
+	}
+	// We create temporary cellinfo and reginfo strings, because QString support
+	//  only 9 markers in arg() (%1, %2 ... %9)
+	QString cellinfo = QString::fromLatin1("%1\n%2\n%3").arg(cell).arg(cellpassable).arg(celloccupied);
+	QString reginfo = QString::fromLatin1("%1\n%2\n%3\n%4\n%5\n%6%7").arg(regid).arg(regcost).arg(regcenter).arg(regcells).arg(reggroup).arg(regneighs).arg(neighbors);
+	QString text = QString::fromLatin1("%1\n%2").arg(cellinfo).arg(reginfo);
+
+	x = d->mViewport[2] - border - w;
+	y -= d->mDefaultFont->height();
+	y -= d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
+ }
+#endif
  if (boConfig->debugOpenGLMatrices()) {
 	int x = border;
 	int y = d->mViewport[3] - border;

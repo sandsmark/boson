@@ -47,6 +47,7 @@
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
 #include "bosonwidgets/bogamechat.h"
+#include "bosonpath.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -217,6 +218,13 @@ void BosonWidgetBase::initMap()
  displayManager()->mapChanged();
 // boGame->setPlayField(playField()); // already done on startup in BosonStarting
 
+#ifdef PATHFINDER_TNG
+ boDebug() << "PATHFINDER: " << k_funcinfo << "trying to init..." << endl;
+ canvas()->initPathfinder();
+ boDebug() << "PATHFINDER: " << k_funcinfo << "initing done :-)" << endl;
+#endif
+
+
  // AB: note that this meets the name "initMap" only slightly. We can't do this
  // when players are initialized, as the map must be known to them once we start
  // loading the units (for *loading* games)
@@ -344,6 +352,23 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
  startScenarioAndGame();
 
  initScripts();
+
+#ifdef PATHFINDER_TNG
+ // FIXME: this isn't correct I suppose. But atm it's only used for debugging
+ //  anyway (and I don't intend to use it for anything else)
+ BosonPath::setDisplay(displayManager()->displayList()->first());
+ BosonPath::setCanvas(canvas());
+ boDebug() << k_funcinfo << "Setting display and canvas for pathfinder" << endl;
+ canvas()->pathfinder()->setDisplay(displayManager()->displayList()->first());
+ canvas()->pathfinder()->setCanvas(canvas());
+ boDebug() << k_funcinfo << "Trying searching sample path" << endl;
+ BosonPathInfo i;
+ i.start = QPoint(5 * BO_TILE_SIZE, 5 * BO_TILE_SIZE);
+ i.dest = QPoint(45 * BO_TILE_SIZE, 35 * BO_TILE_SIZE);
+ boDebug() << k_funcinfo << "Let's go!" << endl;
+ canvas()->pathfinder()->findPath(&i);
+ boDebug() << k_funcinfo << "sample path searching complete" << endl;
+#endif
 }
 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)

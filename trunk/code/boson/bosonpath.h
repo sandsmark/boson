@@ -26,9 +26,16 @@
 
 #define SEARCH_STEPS 25  // How many steps of path to find
 
+// Defines whether next-generation pathfinder will be used or not
+// NOTE: TNG is a bit buggy atm, especially concerning collision-detection, with
+//  big groups
+//#define PATHFINDER_TNG
+
 
 class Unit;
 class Player;
+class BosonBigDisplayBase;
+class BosonCanvas;
 
 class PathNode;
 
@@ -83,6 +90,9 @@ class BosonPath
      */
     float pathCost() const { return mPathCost; };
 
+    static void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
+    static void setCanvas(BosonCanvas* c)  { mCanvas = c; }
+
   protected:
     /**
      * In this list are waypoints of path
@@ -118,6 +128,9 @@ class BosonPath
     float mPathCost;
     int mRange;
 
+    static BosonBigDisplayBase* mDisplay;
+    static BosonCanvas* mCanvas;
+
     class BosonPath::Marking
     {
       public:
@@ -130,6 +143,484 @@ class BosonPath
     };
     Marking mMark[SEARCH_STEPS * 2 + 1][SEARCH_STEPS * 2 + 1];
 };
+
+
+
+#ifdef PATHFINDER_TNG
+/***********************************************************
+*****           N E W   P A T H F I N D E R
+***********************************************************/
+
+#include <qptrvector.h>
+#include <qvaluevector.h>
+#include <qptrlist.h>
+#include <qvaluelist.h>
+#include <qpoint.h>
+
+// When destination is reached (path ends) and unit should stop moving, we add
+//  point (PF_TNG_END_CODE; PF_TNG_END_CODE)
+#define PF_TNG_END_CODE -1
+// When path reaches next region and pathfinder has to be called again (to get
+//  low-level path to next region), we add point (PF_TNG_NEXT_REGION; PF_TNG_NEXT_REGION)
+#define PF_TNG_NEXT_REGION -2
+// When we can't go to destination, we add point (PF_TNG_CANNOT_GO; PF_TNG_CANNOT_GO)
+#define PF_TNG_CANNOT_GO -3
+
+// Cell passage costs
+// This shouldn't be used, as we shouldn't touch occupied cells
+#define PF_TNG_COST_STANDING_UNIT 1000.0f
+#define PF_TNG_COST_MOVING_UNIT 1.0f
+#define PF_TNG_COST_WAITING_UNIT 2.5f
+#define PF_TNG_COST_ENGAGING_UNIT 3.5f
+#define PF_TNG_COST_MUSTSEARCH_UNIT 0.5f
+#define PF_TNG_COST_INTERNAL_UNIT 100.0f
+
+
+class BosonPathSector;
+class BosonPathRegion;
+class BosonPathRegionGroup;
+class BosonPathNode;
+class BosonPath2;
+class BosonPathInfo;
+class BosonPathHighLevelPath;
+
+class BosonMap;
+class Cell;
+class BosonBigDisplayBase;
+class BosonCanvas;
+
+
+/**
+ * @short Next-generation pathfinder for Boson
+ *
+ * This is the next generation of Boson pathfinder
+ * It uses hierarchical pathfinding, first, high-level path is found using
+ * regions, then low level path is found between every two regions.
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonPath2
+{
+  public:
+    /**
+     * Passability type of a cell or region
+     * @li NotPassable  not passable for some reason (e.g. too big slope)
+     *    Note that this does _not_ check if tile is occupied
+     * @li Land  land units can move on this cell/region
+     * @li Water  water units can move on this cell/region
+     **/
+    enum PassabilityType { NotPassable = 0, Land, Water };
+
+
+    /**
+     * Construct pathfinder, using given map
+     **/
+    BosonPath2(BosonMap* map);
+
+
+    /**
+     * Finds path
+     * All info related to path is read from info and will also be written there
+     **/
+    void findPath(BosonPathInfo* info);
+
+
+    /**
+     * Finds high-level path for given data struct
+     **/
+    void findHighLevelPath(BosonPathInfo* info);
+    /**
+     * Finds low-level path for given data struct
+     **/
+    void findLowLevelPath(BosonPathInfo* info);
+
+
+    void cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2);
+
+    void releaseHighLevelPath(BosonPathHighLevelPath* hlpath);
+
+
+    /**
+     * Initializes all necessary data structures
+     **/
+    void init();
+    /**
+     * Constructs and inits sectors
+     **/
+    void initSectors();
+    /**
+     * Constructs and inits regions
+     **/
+    void initRegions();
+    /**
+     * Calculates for every cell whether it's passable (slope <= 45 degrees) or
+     * not
+     **/
+    void initCellPassability();
+    /**
+     * Finds neighbors in given area
+     **/
+    void findRegionNeighbors(int x1, int y1, int x2, int y2);
+    /**
+     * Calculates passing cost for each region/neighbor pair in given list
+     **/
+    void initRegionCosts(QPtrVector<BosonPathRegion>& regions);
+    void initRegionGroups(QPtrVector<BosonPathRegion>& regions);
+    void findRegionsInGroup(BosonPathRegionGroup* group, BosonPathRegion* start);
+
+
+    void colorizeRegions();
+    void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
+    void setCanvas(BosonCanvas* c)  { mCanvas = c; }
+
+
+    /**
+     * Deletes high-level path and removes it from cache
+     **/
+    void removeHighLevelPath(BosonPathHighLevelPath* path);
+    /**
+     * Tries to find high-level path from cache
+     * @return found path, or 0 if there was no suitable path in cache
+     **/
+    BosonPathHighLevelPath* findCachedHighLevelPath(BosonPathInfo* info);
+    /**
+     * Adds given gigh-level path to cache
+     **/
+    void addCachedHighLevelPath(BosonPathHighLevelPath* path);
+    /**
+     * Searches high level path (aka high-level pathfinder)
+     **/
+    void searchHighLevelPath(BosonPathInfo* info);
+    void findHighLevelGoal(BosonPathInfo* info);
+
+    float highLevelDistToGoal(BosonPathRegion* r, BosonPathInfo* info);
+    float highLevelCost(BosonPathRegion* r, BosonPathInfo* info);
+    float lowLevelDistToGoal(int x, int y, BosonPathInfo* info);
+    float lowLevelCost(int x, int y, BosonPathInfo* info);
+
+    static void neighbor(int& x, int& y, Direction d);
+
+
+    /**
+     * Returns sector at given pos. Note that these are "sector coordinates",
+     * not cell or canvas ones. You shouldn't need to use this method.
+     **/
+    BosonPathSector* sector(int x, int y);
+
+    /**
+     * @return region that has cell at given pos (in cell coords) or 0 if no
+     *  region has this cell (usually because cell is occupied or not passable)
+     **/
+    BosonPathRegion* cellRegion(int x, int y);
+    inline BosonPathRegion* cellRegion(const QPoint& p)  { return cellRegion(p.x(), p.y()); }
+    /**
+     * @return passability type of given cell
+     **/
+    PassabilityType cellPassability(int x, int y);
+    /**
+     * @return whether given cell is occupied or not
+     **/
+    bool cellOccupied(int x, int y);
+    /**
+     * @return cost of given cell
+     **/
+    float cellCost(int x, int y);
+    /**
+     * @return Cell at given pos
+     **/
+    Cell* cell(int x, int y);
+    /**
+     * @return Whether cell at (x; y) is valid (i.e. it's on the map)
+     **/
+    bool isValidCell(int x, int y);
+    /**
+     * Adds region r to the list of regions
+     * @return id for new region
+     * Note that this method does not create new regions
+     **/
+    int addRegion(BosonPathRegion* r);
+    /**
+     * Removes region r from the list of regions and frees it's id
+     * Note that this method does not delete any regions
+     **/
+    void removeRegion(BosonPathRegion* r);
+
+
+  private:
+    BosonMap* mMap;
+    BosonPathSector* mSectors;
+    unsigned int mSectorWidth;
+    unsigned int mSectorHeight;
+    QPtrList<BosonPathHighLevelPath> mHLPathCache;
+    bool* mRegionIdUsed;
+    QPtrVector<BosonPathRegion> mRegions;
+    QPtrList<BosonPathRegionGroup> mRegionGroups;
+    BosonBigDisplayBase* mDisplay;
+    BosonCanvas* mCanvas;
+};
+
+/**
+ * Helper class for pathfinder
+ *
+ * This class holds information about a sector.
+ * Sector is a rectangular area on the map. Sectors are divided into regions
+ * (collections of fully-passable cells inside a sector).
+ **/
+class BosonPathSector
+{
+  public:
+    BosonPathSector();
+
+    void setPathfinder(BosonPath2* pf);
+
+    void setGeometry(int x, int y, int w, int h);
+    bool hasCell(int x, int y);
+
+    void initRegions();
+    void reinitRegions();
+    void updateRegions();
+
+    // List of regions in this sector. Note that it can be empty list
+    QPtrVector<BosonPathRegion> regions;
+    // Dimensions of the sector - upper-left corner and size
+    int x, y;
+    int w, h;
+    // Pointer to pathfinder object
+    BosonPath2* pathfinder;
+};
+
+/**
+ * Helper class for pathfinder
+ *
+ * Region is a collection of fully connected cells inside a single sector.
+ **/
+class BosonPathRegion
+{
+  public:
+    class Neighbor
+    {
+      public:
+        Neighbor()  {region = 0; cost = 0.0f; bordercells = 0; }
+
+        BosonPathRegion* region;
+        float cost;
+        int bordercells;
+    };
+
+    BosonPathRegion(BosonPathSector* sector);
+    ~BosonPathRegion();
+
+    void findCells(int x, int y);
+    void findBorderCells();
+    void calculateCosts();
+    void calculateCosts(BosonPathRegion* neighbor);
+    void calculateCosts(unsigned int index);
+    void addNeighbor(BosonPathRegion* r);
+    void removeNeighbor(BosonPathRegion* r);
+
+    // Neighbors of this region (have common edge with this region)
+    //  Note that neighbors are always in other sectors than this region
+    QValueVector<Neighbor> neighbors;
+    // Sector, to which this region belongs
+    BosonPathSector* sector;
+
+    // Passability type of this region - whether land or water units can use it
+    BosonPath2::PassabilityType passabilityType;
+    // How many cells this region has
+    int cellsCount;
+    // Center of this region (average of centers of all cells)
+    float centerx, centery;
+    // Cost of passing this region
+    float cost;
+    // Unique id of this region
+    int id;
+    // Group that this region belongs to
+    BosonPathRegionGroup* group;
+
+    // FIXME: HACK!!!
+    // Upper node in the path (the one we came from), used to traceback path.
+    //  Note that only region is saved, no costs (they're not needed... I guess)
+    BosonPathRegion* parent;
+};
+
+/**
+ * Helper class for pathfinder
+ *
+ * RegionGroup is a group of connected regions. If two points are inside a
+ * single RegionGroup, then there's a path between them
+ **/
+class BosonPathRegionGroup
+{
+  public:
+    // Passability type of this region - whether land or water units can use it
+    BosonPath2::PassabilityType passabilityType;
+    //int id;
+    // All regions in this group
+    QPtrList<BosonPathRegion> regions;
+};
+
+class BosonPathNode
+{
+  public:
+    BosonPathNode() { x = 0; y = 0; g = 0; h = 0; }
+    BosonPathNode(int _x, int _y) { x = _x; y = _y; g = 0; h = 0; }
+
+    int x;
+    int y;
+
+    float g;
+    float h;
+};
+
+template<class T> class BosonPathHeap : public QValueList<T>
+{
+  public:
+    inline void add(const T& x)
+    {
+      QValueListIterator<T> it;
+      for(it = begin(); it != end(); ++it)
+      {
+        if((x.g + x.h) <= ((*it).g + (*it).h))
+        {
+          insert(it, x);
+          break;
+        }
+      }
+      if(it == end()) {
+        append(x);
+      }
+    }
+
+    /*inline void changeCost(const T& x)
+    {
+      QValueList<PathNode>::iterator it;
+      for(it = list.begin(); it != list.end(); ++it)
+      {
+        if(*it == x)
+        {
+          // Change cost
+          *it = x;
+          break;
+        }
+      }
+      if(it == list.end()) {
+        // ERROR: No such item in the list
+        return;
+      }
+    }*/
+
+    inline void takeFirst(T& x)
+    {
+      x = first();
+      pop_front();
+    }
+};
+
+/**
+ * Helper class for pathfinder
+ *
+ * This class stores neccessary information when finding path for a unit.
+ * Pathfinding results will also be stored here.
+ * This class acts as a link between pathfinder and unit (pathfinder client)
+ **/
+class BosonPathInfo
+{
+  public:
+    BosonPathInfo()  { reset(); range = 0; waiting = 0; }
+    void reset()
+    {
+      unit = 0;
+      hlpath = 0;
+      hlstep = 0;
+      llpath.clear();
+      startRegion = 0;
+      possibleDestRegions.clear();
+      destRegion = 0;
+      passable = true;
+      canMoveOnLand = true;
+      canMoveOnWater = false;
+      moveAttacking = true;
+      slowDownAtDest = true;
+    }
+
+    // Unit that we're searching path for
+    Unit* unit;
+
+    // Pointer to high-level path
+    BosonPathHighLevelPath* hlpath;
+    // High-level path step used atm
+    unsigned int hlstep;
+
+    // Low-level path, containing waypoints
+    QValueVector<QPoint> llpath;
+
+    // Start and destination point, in canvas coords
+    QPoint start;
+    QPoint dest;
+
+    // Range, in cells
+    // If range is 0, we try to get as close to destination point as possible,
+    //  if it's bigger than 0, we either get exactly to this range, or won't
+    //  find path (if it isn't possible)
+    int range;
+
+    // Regions containing start and dest points
+    BosonPathRegion* startRegion;
+    // Note that this is the real destination region where we're going to. It
+    //  may also change in case better destination region will become available
+    //  from destination regions list.
+    BosonPathRegion* destRegion;
+    // List of all possible destination regions. Usually this includes all
+    //  regions within given range from destination point. Actual destination
+    //  point is chosen from this list
+    QPtrVector<BosonPathRegion> possibleDestRegions;
+
+    // IS it possible to get from start to detination?
+    // FIXME: better name
+    bool passable;
+
+    bool canMoveOnLand;
+    bool canMoveOnWater;
+
+
+    // Are these ok here???
+    bool moveAttacking;
+    bool slowDownAtDest;
+    int waiting;
+};
+
+class BosonPathHighLevelPath
+{
+  public:
+    // Starting region
+    BosonPathRegion* startRegion;
+    // Destination region
+    BosonPathRegion* destRegion;
+
+    // All the regions in this path, starting from start
+    QPtrVector<BosonPathRegion> path;
+
+    // Is this path still valid?
+    bool valid;
+
+    // This is for reference counting. Once nobody uses the path, it will be
+    //  deleted
+    int users;
+};
+
+class BosonPathHighLevelNode
+{
+  public:
+    BosonPathHighLevelNode()  { region = 0; g = 0; h = 0; }
+
+    inline bool operator==(const BosonPathHighLevelNode& x)  { return (region == x.region); }
+
+    BosonPathRegion* region;
+    float g;
+    float h;
+};
+
+#endif // PATHFINDER_TNG
 
 
 #endif // BOSONPATH_H

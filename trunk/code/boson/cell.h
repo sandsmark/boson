@@ -22,6 +22,7 @@
 #include "boitemlist.h"
 
 class UnitProperties;
+class BosonPathRegion;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -80,6 +81,13 @@ public:
 	inline bool isOccupied(bool includeMoving = true) const { return mItems.isOccupied(includeMoving); }
 	inline void isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const { mItems.isOccupied(forUnit, hasmoving, hasany); }
 
+	inline bool isLandOccupied() const { return mItems.isLandOccupied(); }
+	inline bool isAirOccupied() const { return mItems.isAirOccupied(); }
+	inline void recalculateLandOccupiedStatus() { return mItems.recalculateLandOccupiedStatus(); }
+	inline void recalculateAirOccupiedStatus() { return mItems.recalculateAirOccupiedStatus(); }
+
+	inline float passageCost() const { return mItems.passageCost(); }
+
 	// AB: bah. I want to have models for minerals/oil and use a BosonItem,
 	// instead of hardcoding them into the ground.
 	// we should iterate through mItems and search for the oil/minerals RTTI
@@ -92,6 +100,12 @@ public:
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
+	inline void setRegion(BosonPathRegion* r) { mRegion = r; }
+	inline BosonPathRegion* region() { return mRegion; }
+
+	inline void setPassable(bool p) { mPassable = p; }
+	inline bool passable() { return mPassable; }
+
 
 private:
 	int mX;
@@ -102,6 +116,10 @@ private:
 	// specify the amount of water/land on this tile. 0==0%, 127==50%, 255==100%
 	unsigned char mAmountOfLand;
 	unsigned char mAmountOfWater;
+
+	BosonPathRegion* mRegion;
+
+	bool mPassable;
 };
 
 #endif

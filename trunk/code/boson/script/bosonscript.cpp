@@ -965,6 +965,21 @@ void BosonScript::setRandomSeed(long int seed)
   boGame->sendSystemMessage(seed, KGameMessage::IdSyncRandom);
 }
 
+void BosonScript::findPath(int x1, int y1, int x2, int y2)
+{
+#ifdef PATHFINDER_TNG
+ boDebug() << k_funcinfo << "Trying searching script path" << endl;
+ BosonPathInfo i;
+ i.start = QPoint(x1, y1);
+ i.dest = QPoint(x2, y2);
+ boDebug() << k_funcinfo << "Let's go!" << endl;
+ canvas()->pathfinder()->findPath(&i);
+ boDebug() << k_funcinfo << "script path searching complete" << endl;
+#else
+ boWarning() << k_funcinfo << "findPath() is only available with new pathfinder!" << endl;
+#endif
+}
+
 void BosonScript::addParticleSystem(int player, unsigned int id, BoVector3 pos, float rot)
 {
   if(!game())

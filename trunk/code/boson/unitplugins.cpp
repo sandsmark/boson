@@ -858,6 +858,8 @@ void BombingPlugin::advance(unsigned int)
 // if ((x() != d->mMoveDestX) || (y() != d->mMoveDestY)) {
 // if (dist > 2) {
 	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
+#warning FIXME!!! NEW_PF!!!
+#ifndef PATHFINDER_TNG
 	if (!unit()->moveTo(mPosX, mPosY, 0, false, false)) {
 		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
 		unit()->setWork(Unit::WorkNone);
@@ -865,6 +867,7 @@ void BombingPlugin::advance(unsigned int)
 		//d->mSlowDownAtDestination = 0;
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
+#endif
 	return;
  }
 

@@ -25,6 +25,7 @@
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "../bosonparticlesystem.h"
 #include "../bosonpropertyxml.h"
+#include "../bo3dtools.h"
 #include "bosonitempropertyhandler.h"
 #include "bodebug.h"
 
@@ -244,34 +245,63 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int
 
 bool BosonItem::bosonCollidesWith(BosonItem* item) const
 {
- // First we test z-coordinate
- if (QMAX(z(), item->z()) > QMIN(z() + depth(), item->z() + item->depth())) {
-	// z-coordinates doesn't intersect. Then items doesn't collide either
+ BoVector3 itempos(item->x() + xVelocity(), item->y() + yVelocity(), item->z() + zVelocity());
+ return bosonCollidesWith(itempos, itempos + BoVector3(item->width(), item->height(), item->depth()));
+}
+
+bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) const
+{
+// boDebug() << "  ++> " << k_funcinfo << "Item coords: (" << x() << "; " << y() << "; " << z() <<
+//		"); size: (" << width() << "; " << height() << "; " << depth() << ")" << endl;
+
+ // Check z-coord first
+ if (QMAX(z() + zVelocity(), v1.z()) >= QMIN(z() + zVelocity() + depth(), v2.z())) {
+	// z-coordinates don't intersect
 	return false;
  }
 
- // Then bounding rect intersect test
- // Taken from QRect::intersects() but I didn't use this method for speed reasons
- if ((QMAX(x(), item->x()) > QMIN(x() + width() - 1, item->x() + item->width() - 1)) ||
-		(QMAX(y(), item->y()) > QMIN(y() + height() - 1, item->y() + item->height() - 1))) {
-	// Bounding rects does not intersect
-	return false;
- }
+ // Half the width and height of the other box
+ float halfw = (v2.x() - v1.x()) / 2;
+ float halfh = (v2.y() - v1.y()) / 2;
 
+ float centerx = v1.x() + halfw;
+ float centery = v1.y() + halfh;
 
- if (!(RTTI::isUnit(rtti()) && RTTI::isUnit(item->rtti()))) {
-	// At least one item is not unit
-	// Non-unit items collide if their bounding boxes collide
+ // BB 1
+ float minx1, miny1, maxx1, maxy1;
+ minx1 = x() + xVelocity() - halfw;
+ miny1 = y() + xVelocity() - halfh + BO_TILE_SIZE;
+ maxx1 = x() + yVelocity() + width() + halfw;
+ maxy1 = y() + yVelocity() + height() + halfw - BO_TILE_SIZE;
+ if ((centerx > minx1) && (centerx < maxx1) && (centery > miny1) && (centery < maxy1)) {
+	// Box's center is in BB 1
+//	boDebug() << "        " << k_funcinfo << "Items COLLIDE (1)!!!" << endl;
 	return true;
  }
 
- // Both items are units
- // Units are special because they must be able to move diagonally. When moving
- //  diagonally, it's ok if their bounding boxes intersect on xy plane. Then we
- //  check if this item's center isn't inside other item's bounding rect
- // FIXME: maybe we need same for items. ATM, units can't diagonally cross tiles
- //  with mines
- return item->boundingRectAdvanced().contains(QPoint((int)(x() + xVelocity() + width() / 2), (int)(y() + yVelocity() + height() / 2)), true);
+ // BB 2
+ float minx2, miny2, maxx2, maxy2;
+ minx2 = x() + xVelocity() - halfw + BO_TILE_SIZE;
+ miny2 = y() + xVelocity() - halfh;
+ maxx2 = x() + yVelocity() + width() + halfw - BO_TILE_SIZE;
+ maxy2 = y() + yVelocity() + height() + halfw;
+ if ((centerx > minx2) && (centerx < maxx2) && (centery > miny2) && (centery < maxy2)) {
+	// Box's center is in BB 2
+//	boDebug() << "        " << k_funcinfo << "Items COLLIDE (2)!!!" << endl;
+	return true;
+ }
+
+ // Check manhattan dist between centers
+ float mycenterx = x() + xVelocity() + width() / 2;
+ float mycentery = y() + yVelocity() + height() / 2;
+ if (QABS(mycenterx - centerx) + QABS(mycentery - centery) < (width() / 2 + halfw + height() / 2 + halfh - BO_TILE_SIZE)) {
+	// Box's center still collides with us
+//	boDebug() << "        " << k_funcinfo << "Items COLLIDE! (3)!!" << endl;
+	return true;
+ }
+
+// boDebug() << "        " << k_funcinfo << "Items don't collide" << endl;
+ return false;
 }
 
 void BosonItem::setAnimated(bool a)

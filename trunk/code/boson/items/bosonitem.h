@@ -36,6 +36,7 @@ class Cell;
 class BosonParticleSystem;
 class BosonItemPropertyHandler;
 class Player;
+class BoVector3;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -342,7 +343,17 @@ public:
 	 **/
 	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int right, int top, int bottom, int mapWidth, int mapHeight);
 
+	/**
+	 * @return Whether this unit collides with given unit.
+	 * It uses width, height and depth of the unit for accurate collision
+	 * detection.
+	 **/
 	bool bosonCollidesWith(BosonItem* item) const;
+
+	/**
+	 * Same as above, but uses box with given coords instead of actual item.
+	 **/
+	bool bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) const;
 
 	inline float xVelocity() const { return mXVelocity; }
 	inline float yVelocity() const { return mYVelocity; }
