@@ -14,7 +14,7 @@
       What is this?
     </h3>
     <p>
-      This is the handbook to the realtime-strategy game Boson. It will guide you the 
+      This is the handbook to the realtime-strategy game Boson. It will guide you the
       way through all the problems coming with the game and will answer most of your
       questions.
       NOTE: this handbook is far from being completed.
@@ -33,7 +33,7 @@
               <dt>1.3 <a href="installation.html">Installation</a></dt>
             </dl>
           </dd>
-          
+
     <dd>&nbsp;</dd>
           <dt>2 <a href="game/index.html">In the game</a></dt>
           <dd>
@@ -51,7 +51,7 @@
             <dt>2.10 <a href="game/technologies.html">Technologies</a></dt>
             </dl>
           </dd>
-          
+
     <dd>&nbsp;</dd>
         <dt>3 <a href="facilities/index.html">Facilities</a></dt>
         <dd>
@@ -71,7 +71,7 @@
             <dt>3.13 <a href="facilities/samsite.html">Sam-Site</a></dt>
             </dl>
         </dd>
-          
+
     <dd>&nbsp;</dd>
           <dt>4 <a href="units/index.html">Units</a></dt>
           <dd>
@@ -89,6 +89,7 @@
               <dt>4.11 <a href="units/tornado.html">Tornado</a></dt>
               <dt>4.12 <a href="units/transall.html">Transall</a></dt>
               <dt>4.13 <a href="units/puma.html">Puma</a></dt>
+              <dt>4.14 <a href="units/koyote.html">Koyote</a></dt>
             </dl>
           </dd>
           <dd>&nbsp;</dd>
@@ -102,12 +103,12 @@
           </dd>
           <dd>&nbsp;</dd>
           <dt>6 <a href="faq.html">FAQ</a></dt>
-          
+
           <dt>7 <a href="credits.html">Credits</a></dt>
         </dl>
       </dd>
     </dl>
-    
+
     <hr color=#004000>
     <h2>
       The Boson Handbook - maintained by <a href="mailto:halux2001@users.sourceforge.net">Felix Seeger</a>
