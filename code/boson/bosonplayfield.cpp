@@ -171,12 +171,12 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	boError() << k_funcinfo << "Oops - broken file " << file << endl;
 	return false;
  }
- if (!loadDescriptionXML(mFile->descriptionData())) {
+ if (!loadDescriptionFromFile(mFile->descriptionData())) {
 	boError() << k_funcinfo << "Could not load description file" << endl;
 	return false;
  }
  mIdentifier = mFile->identifier();
- if (!loadScenarioXML(mFile->scenarioData())) {
+ if (!loadScenarioFromFile(mFile->scenarioData())) {
 	boError() << k_funcinfo << "Error loading scenario from " << file << endl;
 	return false;
  }
@@ -201,8 +201,26 @@ bool BosonPlayField::loadPlayField(const QString& file)
 	return false;
  }
 
- // this takes most loading time
- if (!loadMapXML(mFile->mapData(), mFile->heightMapData())) {
+ QByteArray map = mFile->mapData();
+ if (map.size() == 0) {
+	// xml is obsolete. will be removed!
+	QByteArray buffer = mFile->mapXMLData();
+	if (buffer.size() == 0) {
+		boError() << k_funcinfo << "Error loading map from " << file << endl;
+		return false;
+	}
+	boWarning() << k_funcinfo << "no map found in " << file << " - using map.xml instead. note that this is obsolete!" << endl;
+
+	BosonMap tmpMap;
+	bool ret = loadMapFromXML(buffer, &tmpMap);
+	if (!ret) {
+		boError() << k_funcinfo << "Error loading map from " << file << endl;
+		return false;
+	}
+	QDataStream stream(map, IO_WriteOnly);
+	tmpMap.saveMapToFile(stream);
+ }
+ if (!loadMapFromFile(map, mFile->heightMapData())) {
 	boError() << k_funcinfo << "Error loading map from " << file << endl;
 	return false;
  }
@@ -213,7 +231,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
  return true;
 }
 
-bool BosonPlayField::loadDescriptionXML(const QByteArray& xml)
+bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
 {
  if (xml.size() == 0) {
 	boError() << k_funcinfo << "Oops - NULL description file" << endl;
@@ -224,14 +242,39 @@ bool BosonPlayField::loadDescriptionXML(const QByteArray& xml)
  return true;
 }
 
-bool BosonPlayField::loadMapXML(const QByteArray& xml, const QByteArray& heightMapImage)
+bool BosonPlayField::loadMapFromFile(const QByteArray& map, const QByteArray& heightMapImage)
 {
- if (xml.size() == 0) {
-	boError() << k_funcinfo << "empty byte array for map.xml" << endl;
+ boDebug() << k_funcinfo << endl;
+ if (map.size() == 0) {
+	boError() << k_funcinfo << "empty byte array for map" << endl;
 	return false;
  }
  if (heightMapImage.size() == 0) {
 	boError() << k_funcinfo << "empty height map array" << endl;
+	return false;
+ }
+ delete mMap;
+ mMap = new BosonMap(this);
+ QDataStream stream(map, IO_ReadOnly);
+ bool ret = mMap->loadMapFromFile(stream);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map" << endl;
+	return false;
+ }
+ boWarning() << k_funcinfo << "should load height map now" << endl;
+ ret = mMap->loadHeightMapImage(heightMapImage);
+ if (!ret) {
+	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
+	return false;
+ }
+ emit signalNewMap(mMap);
+ return ret;
+}
+
+bool BosonPlayField::loadMapFromXML(const QByteArray& xml, BosonMap* map)
+{
+ if (xml.size() == 0) {
+	boError() << k_funcinfo << "empty byte array for map.xml" << endl;
 	return false;
  }
  QDomDocument doc("BosonMap");
@@ -248,24 +291,15 @@ bool BosonPlayField::loadMapXML(const QByteArray& xml, const QByteArray& heightM
 	boError() << k_funcinfo << "No map found in file" << endl;
 	return false;
  }
- delete mMap;
- mMap = new BosonMap(this);
- bool ret = mMap->loadMap(root);
+ bool ret = map->loadMap(root);
  if (!ret) {
 	boError() << k_funcinfo << "Could not load map" << endl;
 	return false;
  }
- boWarning() << k_funcinfo << "should load height map now" << endl;
- ret = mMap->loadHeightMapImage(heightMapImage);
- if (!ret) {
-	boError() << k_funcinfo << "Could not load map (height map failed)" << endl;
-	return false;
- }
- emit signalNewMap(mMap);
  return ret;
 }
 
-bool BosonPlayField::loadScenarioXML(const QByteArray& xml)
+bool BosonPlayField::loadScenarioFromFile(const QByteArray& xml)
 {
  if (xml.size() == 0) {
 	boError() << k_funcinfo << "empty byte array" << endl;
@@ -316,17 +350,17 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  if (mDescription->name().isEmpty()) {
 	mDescription->setName(fileInfo.baseName());
  }
- QString description = saveDescriptionXML();
+ QString description = saveDescriptionToFile();
  if (description.isEmpty()) {
 	boError() << k_funcinfo << "Unable to save description" << endl;
 	return false;
  }
- QString map = saveMapXML();
+ QByteArray map = saveMapToFile();
  if (map.isEmpty()) {
 	boError() << k_funcinfo << "Unable to save map" << endl;
 	return false;
  }
- QString scenario = saveScenarioXML();
+ QString scenario = saveScenarioToFile();
  if (scenario.isEmpty()) {
 	boError() << k_funcinfo << "Unable to save scenario" << endl;
 	return false;
@@ -351,7 +385,7 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  BPFFile* f = new BPFFile(fileName, false);
  QString user = f->directory()->user();
  QString group = f->directory()->group();
- f->writeFile(QString::fromLatin1("%1/map.xml").arg(topDir), user, group, map.length(), map.data());
+ f->writeFile(QString::fromLatin1("%1/map").arg(topDir), user, group, map.size(), map);
  f->writeFile(QString::fromLatin1("%1/scenario.xml").arg(topDir), user, group, scenario.length(), scenario.data());
  f->writeFile(QString::fromLatin1("%1/heightmap.png").arg(topDir), user, group, heightMap.size(), heightMap.data());
  f->writeFile(QString::fromLatin1("%1/%2/description.xml").arg(topDir).arg(QString::fromLatin1("C")), user, group, description.length(), description.data());
@@ -363,7 +397,7 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  return true;
 }
 
-QString BosonPlayField::saveDescriptionXML()
+QString BosonPlayField::saveDescriptionToFile()
 {
  if (!mDescription) {
 	BO_NULL_ERROR(mDescription);
@@ -372,23 +406,22 @@ QString BosonPlayField::saveDescriptionXML()
  return mDescription->toString();
 }
 
-QString BosonPlayField::saveMapXML()
+QByteArray BosonPlayField::saveMapToFile()
 {
  if (!mMap) {
 	boError() << k_funcinfo << "NULL map" << endl;
-	return QString::null;
+	return QByteArray();
  }
- QDomDocument doc("BosonMap");
- QDomElement root = doc.createElement("BosonMap");
- doc.appendChild(root);
- if (!mMap->saveMap(root)) {
+ QByteArray file;
+ QDataStream stream(file, IO_WriteOnly);
+ if (!mMap->saveMapToFile(stream)) {
 	boError() << k_funcinfo << "Error saving map" << endl;
-	return QString::null;
+	return QByteArray();
  }
- return doc.toString();
+ return file;
 }
 
-QString BosonPlayField::saveScenarioXML()
+QString BosonPlayField::saveScenarioToFile()
 {
  if (!mScenario) {
 	boError() << k_funcinfo << "NULL scenario" << endl;

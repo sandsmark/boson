@@ -189,13 +189,14 @@ signals:
 	void signalNewMap(BosonMap*);
 
 protected:
-	bool loadDescriptionXML(const QByteArray& xml);
-	bool loadMapXML(const QByteArray& xml, const QByteArray& heightMapImage);
-	bool loadScenarioXML(const QByteArray& xml);
+	bool loadDescriptionFromFile(const QByteArray& xml);
+	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage);
+	bool loadMapFromXML(const QByteArray& xml, BosonMap* map);
+	bool loadScenarioFromFile(const QByteArray& xml);
 
-	QString saveDescriptionXML();
-	QString saveMapXML();
-	QString saveScenarioXML();
+	QString saveDescriptionToFile();
+	QByteArray saveMapToFile();
+	QString saveScenarioToFile();
 
 private:
 	static void initStatic();

@@ -46,9 +46,18 @@ public:
 	QByteArray fileData(const QString& fileName) const;
 
 	/**
-	 * @return The content of the map.xml file
+	 * @return The content of the map file
 	 **/
 	QByteArray mapData() const
+	{
+		return fileData(QString::fromLatin1("map"));
+	}
+
+	/**
+	 * @return The content of the map.xml file. Note that this file is
+	 * obsolete! Use @ref mapData instead
+	 **/
+	QByteArray mapXMLData() const
 	{
 		return fileData(QString::fromLatin1("map.xml"));
 	}

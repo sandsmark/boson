@@ -58,9 +58,14 @@ bool BPFFile::checkTar() const
  }
  const KArchiveDirectory* top = (const KArchiveDirectory*)dir->entry(entries[0]);
  entries = top->entries();
- if (!entries.contains(QString::fromLatin1("map.xml"))) {
-	boError() << k_funcinfo << "can't find map.xml" << endl;
-	return false;
+ // we want a "map" file (binary), but also use a "map.xml" if present (although
+ // obsolete)
+ if (!entries.contains(QString::fromLatin1("map"))) {
+	boWarning() << k_funcinfo << "can't find map - trying map.xml instead" << endl;
+	if (!entries.contains(QString::fromLatin1("map.xml"))) {
+		boError() << k_funcinfo << "can't find map.xml" << endl;
+		return false;
+	}
  }
  if (!entries.contains(QString::fromLatin1("C"))) { // default language
 	boError() << k_funcinfo << "can't find C" << endl;

@@ -79,10 +79,11 @@ public:
 	bool loadMap(QDomElement& node);
 	bool loadHeightMapImage(const QByteArray&);
 
+	bool saveMapToFile(QDataStream& stream);
 	bool saveMap(QDataStream& stream);
+	bool loadMapFromFile(QDataStream& stream);
 	bool loadMap(QDataStream& stream);
 
-	bool saveMap(QDomElement& node);
 	QByteArray saveHeightMapImage();
 
 	/**
@@ -154,10 +155,6 @@ protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
 
 	void saveCell(QDataStream& stream, int groundType, unsigned char b);
-
-	bool saveMapGeo(QDomElement&);
-	bool saveCells(QDomElement&);
-	bool saveCell(QDomElement&, int x, int y, Cell* cell);
 
 	/**
 	 * Save the map geo into stream. This creates a stream in the format
