@@ -17,6 +17,8 @@ Game TODOs
 - display how many (and which) units are still in queue for production
 - connect to Boson::signalNotEnough[Minerals|Oild]() and give some visual
   feedback
+- BosonPath needs to be improved greatly
+- AI
 
 
 Editor (map, unit, scenario) TODOs
