@@ -44,7 +44,117 @@ static bool lineSegmentIntersects(const float* plane, const BoVector3& start, co
 
 static int g_cellsVisibleCalls = 0;
 
+class CellTreeNode;
 static float distanceFromPlane(const float* plane, const BoVector3& pos);
+static float distanceFromPlane(const float* plane, const CellTreeNode* node, const BosonMap* map);
+
+
+// a quadtree of the cells on the map
+class CellTreeNode
+{
+public:
+	/**
+	 * @param l The left side of the rect (i.e. the x coordinate of the
+	 * most-left cell).
+	 * @param t The top side of the rect (i.e. the y coordinate of the
+	 * most-top cell).
+	 * @param r The right side of the rect (i.e. the x coordinate of the
+	 * most-right cell). This eqals @p l, if width of the rect is 1.
+	 * @param b The bottom side of the rect (i.e. the y coordinate of the
+	 * most-bottom cell). This equals @p t if the height of the rect is 1.
+	 **/
+	CellTreeNode(int l, int t, int r, int b)
+	{
+		mTopLeft = 0;
+		mTopRight = 0;
+		mBottomLeft = 0;
+		mBottomRight = 0;
+		mLeft = l;
+		mTop = t;
+		mRight = r;
+		mBottom = b;
+		mCellsCount = (r - l + 1) * (b - t + 1);
+		if (mRight < mLeft || mBottom < mTop) {
+			boError() << k_funcinfo << "invalid coordinates" << endl;
+			mCellsCount = 1;
+		}
+	}
+	~CellTreeNode()
+	{
+		delete mTopLeft;
+		delete mTopRight;
+		delete mBottomLeft;
+		delete mBottomRight;
+	}
+	void createChilds(const BosonMap* map);
+
+
+	// AB: note that we cannot easily save additional information such as
+	// maxheight or texmap information here, because we use the tree in
+	// editor mode as well, and there these information may change at any
+	// time without letting the tree know.
+//	bool mIsLeaf;
+	int mLeft;
+	int mTop;
+	int mRight;
+	int mBottom;
+	int mCellsCount;
+	CellTreeNode* mTopLeft;
+	CellTreeNode* mTopRight;
+	CellTreeNode* mBottomLeft;
+	CellTreeNode* mBottomRight;
+};
+
+void CellTreeNode::createChilds(const BosonMap* map)
+{
+ const int l = mLeft;
+ const int t = mTop;
+ const int r = mRight;
+ const int b = mBottom;
+
+ if (l == r && b == t) {
+	// we are a leaf
+	return;
+ }
+ if (l > r || t > b || l < 0 || t < 0) {
+	boError() << k_funcinfo << "invalid values: left="
+			<< l << ", top=" << t
+			<< ", right=" << r
+			<< ", bottom=" << b << endl;
+	return;
+ }
+ if (r >= (int)map->width()) {
+	boError() << k_funcinfo << "right side is too high: " << r << ", map width: " << map->width() << endl;
+	return;
+ }
+ if (b >= (int)map->height()) {
+	boError() << k_funcinfo << "bottom side is too high: " << b << ", map height: " << map->height() << endl;
+	return;
+ }
+ int hmid = l + (r - l) / 2;
+ int vmid = t + (b - t) / 2;
+
+ mTopLeft = new CellTreeNode(l, t, hmid, vmid);
+ mTopLeft->createChilds(map);
+
+ if (vmid + 1 <= b) {
+	// (t != b) => we have a bottom rect.
+	mBottomLeft = new CellTreeNode(l, vmid + 1, hmid, b);
+	mBottomLeft->createChilds(map);
+ }
+ if (hmid + 1 <= r) {
+	// (l != r) => we have a right rect
+	mTopRight = new CellTreeNode(hmid + 1, t, r, vmid);
+	mTopRight->createChilds(map);
+ }
+ if (vmid + 1 <= b && hmid + 1 <= r) {
+	// ((l != r) && (t != b)) => we have a bottom-right rect
+	mBottomRight = new CellTreeNode(hmid + 1, vmid + 1, r, b);
+	mBottomRight->createChilds(map);
+ }
+}
+
+
 
 /**
  * This class takes care of building a list (an array in this case) of cells
@@ -85,7 +195,7 @@ private:
 
 /**
  * This class uses a tree find out whether cells are visible. Whenever @ref
- * checkCells is called on a valid rect, it calls itself again 4 times. Once for
+ * addVisibleCells is called on a valid rect, it calls itself again 4 times. Once for
  * the top-left quarter, the top-right, bottom-left and bottom-right quarter of
  * the rect.
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -97,8 +207,12 @@ public:
 	{
 		mCount = 0;
 		mMap = 0;
+		mRoot = 0;
 	}
-	~CellListBuilderTree() {}
+	~CellListBuilderTree()
+	{
+		delete mRoot;
+	}
 
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
@@ -108,26 +222,38 @@ protected:
 	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
 	 * cells to @p cells.
 	 **/
-	void checkCells(int* cells, int x, int y, int x2, int y2);
+	void addVisibleCells(int* cells, const CellTreeNode* node);
 
 	/**
-	 * @return Whether the cells in the rect (x,y) to (x2,y2) are visible.
+	 * @return Whether the cells in the rect of the node are visible.
 	 * If they are visible, @p partially is set to FALSE, when all cells are
 	 * visible, otherwise to TRUE (rect is partially visible only). If no
 	 * cell is visible (i.e. this returns FALSE) @p partially is set to
 	 * FALSE.
 	 **/
-	bool cellsVisible(int x, int y, int x2, int y2, bool* partially) const;
+	bool cellsVisible(const CellTreeNode* node, bool* partially) const;
 
 	/**
-	 * Add all cells in the rect (x, y) to (x2, y2) to @p cells
+	 * Add all cells in the rect of the node to @p cells
 	 **/
-	void addCells(int* cells, int x, int y, int x2, int y2);
+	void addCells(int* cells, const CellTreeNode* node);
+
+	void recreateTree(const BosonMap* map);
+
+	/**
+	 * @return TRUE if the @p node is supposed to be displayed as a single
+	 * quad. This is either the case if the node contains exactly one cell
+	 * only, or if the distance from the player is high enough for this
+	 * level of detail.
+	 **/
+	bool doLOD(const CellTreeNode* node) const;
 
 private:
 	// these variables are valid only while we are in generateCellList() !
 	const BosonMap* mMap;
 	unsigned int mCount;
+
+	CellTreeNode* mRoot;
 };
 
 /**
@@ -339,7 +465,7 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
  int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
  size = QMIN((int)(map->width() * map->height()), size);
  if (size > *renderCellsSize) {
-	renderCells = new int[size * 2];
+	renderCells = BoGroundRenderer::makeCellArray(size);
 	*renderCellsSize = size;
  }
 
@@ -381,7 +507,7 @@ int* CellListBuilderNoTree::generateCellList(const BosonMap* map, int* origRende
 		if (Bo3dTools::sphereInFrustum(viewFrustum(), BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
-			BoGroundRenderer::setCell(renderCells, count, c->x(), c->y());
+			BoGroundRenderer::setCell(renderCells, count, c->x(), c->y(), 1, 1);
 			count++;
 		}
 	}
@@ -829,60 +955,89 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
 	// we don't know in advance how many cells we might need, so we allocate
 	// width * height
 	*renderCellsSize = map->width() * map->height();
-	renderCells = new int[*renderCellsSize * 2];
+	renderCells = BoGroundRenderer::makeCellArray(*renderCellsSize);
+ }
+ if (mMap != map) {
+	mMap = 0;
+	boDebug() << k_funcinfo << "recreating map tree" << endl;
+	static int profTreeCreation = boProfiling->requestEventId("mapTreeGeneration");
+	BosonProfiler prof(profTreeCreation);
+	recreateTree(map);
  }
  mMap = map;
  mCount = 0;
 
  g_cellsVisibleCalls = 0;
- checkCells(renderCells, 0, 0, map->width() - 1, map->height() - 1);
+ addVisibleCells(renderCells, mRoot);
 // boDebug() << k_funcinfo << g_cellsVisibleCalls << " calls - will render cells: " << mCount << endl;
 
  *renderCellsCount = mCount;
- mMap = 0;
+// mMap = 0;
  mCount = 0;
  return renderCells;
 }
 
-void CellListBuilderTree::addCells(int* cells, int l, int t, int r, int b)
+bool CellListBuilderTree::doLOD(const CellTreeNode* node) const
 {
-// boDebug() << k_funcinfo << "l=" << l << ",t=" << t << ",r=" << r << ",b=" << b << endl;
- for (int x = l; x <= r; x++) {
-	for (int y = t; y <= b; y++) {
-		Cell* c = mMap->cell(x, y);
-		BoGroundRenderer::setCell(cells, mCount, c->x(), c->y());
-		mCount++;
-	}
+ if (!node) {
+	return false;
+ }
+ const int count = node->mCellsCount;
+ if (count == 1) {
+	return true;
+ }
+ const float* plane = &viewFrustum()[5 * 4]; // NEAR plane
+
+ // FIXME: distanceFromPlane() tests the distance of all 4 corners of the rect
+ // only. this is perfectly legal if the whole rect is inside the viewfrustum,
+ // however if it is partially visible only, this may not be sufficient!
+ float d = distanceFromPlane(plane, node, mMap);
+ if (d > 240.0f && count <= 64 ||
+		d > 120.0f && count <= 16 ||
+		d > 40.0f && count <= 8 ||
+		d > 20.0f && count <= 2) {
+//	boDebug() << d << endl;
+	return true;
+ }
+ return false;
+}
+
+void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node)
+{
+ if (!node) {
+	return;
+ }
+ const int l = node->mLeft;
+ const int t = node->mTop;
+ const int r = node->mRight;
+ const int b = node->mBottom;
+ if (doLOD(node)) {
+	BoGroundRenderer::setCell(cells, mCount, l, t, r - l + 1, b - t + 1);
+	mCount++;
+ } else {
+	addCells(cells, node->mTopLeft);
+	addCells(cells, node->mTopRight);
+	addCells(cells, node->mBottomLeft);
+	addCells(cells, node->mBottomRight);
  }
 }
 
-bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* partially) const
+bool CellListBuilderTree::cellsVisible(const CellTreeNode* node, bool* partially) const
 {
  g_cellsVisibleCalls++;
- if (x2 < x || y2 < y) {
+ if (!node) {
 	*partially = false;
 	return false;
  }
- if (x2 >= (int)mMap->width()) {
-	boError() << k_funcinfo << "x2 too high: " << x2 << endl;
-	return false; // we want people to notice the bug
- }
- if (y2 >= (int)mMap->height()) {
-	boError() << k_funcinfo << "y2 too high: " << y2 << endl;
-	return false; // we want people to notice the bug
- }
- if (x < 0) {
-	boError() << k_funcinfo << "x is negative: " << x << endl;
-	return false; // we want people to notice the bug
- }
- if (y < 0) {
-	boError() << k_funcinfo << "y is negative: " << y << endl;
-	return false; // we want people to notice the bug
- }
+ const int x = node->mLeft;
+ const int x2 = node->mRight;
+ const int y = node->mTop;
+ const int y2 = node->mBottom;
 
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
  if (w * h <= 4) {
+	*partially = false;
 	return true;
  }
  float hmid = (float)x + ((float)w) / 2.0f;
@@ -925,55 +1080,96 @@ bool CellListBuilderTree::cellsVisible(int x, int y, int x2, int y2, bool* parti
  return true;
 }
 
-void CellListBuilderTree::checkCells(int* cells, int l, int t, int r, int b)
+void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node)
 {
- if (l == r && b == t) {
-	return;
- }
- if (l > r || t > b || l < 0 || t < 0) {
-	boError() << k_funcinfo << "invalid values: left="
-			<< l << ", top=" << t
-			<< ", right=" << r
-			<< ", bottom=" << b << endl;
+ if (!node) {
 	return;
  }
  bool partially = false;
- int hmid = l + (r - l) / 2;
- int vmid = t + (b - t) / 2;
- if (cellsVisible(l, t, hmid, vmid, &partially)) {
-	// top-left rect
-	if (!partially) {
+ if (cellsVisible(node, &partially)) {
+	if (!partially || doLOD(node)) {
 		// all cells visible
-		addCells(cells, l, t, hmid, vmid);
+		addCells(cells, node);
 	} else {
-		checkCells(cells, l, t, hmid, vmid);
+		addVisibleCells(cells, node->mTopLeft);
+		addVisibleCells(cells, node->mTopRight);
+		addVisibleCells(cells, node->mBottomLeft);
+		addVisibleCells(cells, node->mBottomRight);
 	}
  }
- if (cellsVisible(l, vmid + 1, hmid, b, &partially)) {
-	// bottom-left rect
-	if (!partially) {
-		addCells(cells, l, vmid + 1, hmid, b);
-	} else {
-		checkCells(cells, l, vmid + 1, hmid, b);
-	}
+}
+
+void CellListBuilderTree::recreateTree(const BosonMap* map)
+{
+ BO_CHECK_NULL_RET(map);
+
+ delete mRoot;
+ mRoot = new CellTreeNode(0, 0, map->width() - 1, map->height() - 1);
+ mRoot->createChilds(map);
+}
+
+static float distanceFromPlane(const float* plane, const BoVector3& pos)
+{
+ return pos.x() * plane[0] + pos.y() * plane[1] + pos.z() * plane[2] + plane[3];
+}
+static float distanceFromPlane(const float* plane, const CellTreeNode* node, const BosonMap* map)
+{
+ const int l = node->mLeft;
+ const int t = node->mTop;
+ const int r = node->mRight;
+ const int b = node->mBottom;
+ const float x = (float)node->mLeft;
+ const float y = (float)-node->mTop;
+ const float x2 = ((float)node->mRight) + BO_GL_CELL_SIZE;
+ const float y2 = ((float)-node->mBottom) - BO_GL_CELL_SIZE;
+ const float zTopLeft = map->heightAtCorner(l, t);
+ const float zTopRight = map->heightAtCorner(r + 1, t);
+ const float zBottomLeft = map->heightAtCorner(l, b + 1);
+ const float zBottomRight = map->heightAtCorner(r + 1, b + 1);
+ const float d1 = distanceFromPlane(plane, BoVector3(x, y, zTopLeft));
+ const float d2 = distanceFromPlane(plane, BoVector3(x2, y, zTopRight));
+ const float d3 = distanceFromPlane(plane, BoVector3(x, y2, zBottomLeft));
+ const float d4 = distanceFromPlane(plane, BoVector3(x2, y2, zBottomRight));
+ float d = QMAX(d1, d2);
+ d = QMAX(d, d3);
+ d = QMAX(d, d4);
+ return d;
+}
+
+QString BoGroundRendererBase::debugStringForPoint(const BoVector3& pos) const
+{
+ QString s;
+ s += QString("Mouse pos: (%1,%2,%3) ").
+	arg(pos[0], 6, 'f', 3).
+	arg(pos[1], 6, 'f', 3).
+	arg(pos[2], 6, 'f', 3);
+ s += QString("Mouse canvas pos: (%1,%2,%3) ").
+	arg(pos[0] * BO_TILE_SIZE, 6, 'f', 3).
+	arg(-pos[1] * BO_TILE_SIZE, 6, 'f', 3).
+	arg(pos[2], 6, 'f', 3);
+
+ if (!viewFrustum()) {
+	s += "NULL viewFrustum() - cannot do anything";
+	return s;
  }
- if (cellsVisible(hmid + 1, t, r, vmid, &partially)) {
-	// top-right rect
-	if (!partially) {
-		// all cells visible
-		addCells(cells, hmid + 1, t, r, vmid);
-	} else {
-		checkCells(cells, hmid + 1, t, r, vmid);
-	}
- }
- if (cellsVisible(hmid + 1, vmid + 1, r, b, &partially)) {
-	// bottom-right rect
-	if (!partially) {
-		// all cells visible
-		addCells(cells, hmid + 1, vmid + 1, r, b);
-	} else {
-		checkCells(cells, hmid + 1, vmid + 1, r, b);
-	}
- }
+ const float* bottomPlane = &viewFrustum()[2 * 4];
+ const float* nearPlane = &viewFrustum()[5 * 4];
+ const float* farPlane = &viewFrustum()[4 * 4];
+
+#if 0
+ s += QString("\nPlane: (%1,%2,%3,%4)").
+	arg(plane[0], 6, 'f', 3).
+	arg(plane[1], 6, 'f', 3).
+	arg(plane[2], 6, 'f', 3).
+	arg(plane[3], 6, 'f', 3);
+#endif
+
+ s += QString("\n");
+
+// s += QString("distance from BOTTOM plane: %1\n").arg(distanceFromPlane(bottomPlane, pos), 6, 'f', 3);
+ s += QString("distance from NEAR plane: %1\n").arg(distanceFromPlane(nearPlane, pos), 6, 'f', 3);
+// s += QString("distance from FAR plane: %1\n").arg(distanceFromPlane(farPlane, pos), 6, 'f', 3);
+
+ return s;
 }
 

@@ -47,6 +47,8 @@ public:
 	 **/
 	virtual void generateCellList(const BosonMap* map);
 
+	virtual QString debugStringForPoint(const BoVector3& pos) const;
+
 private:
 	CellListBuilder* mCellListBuilder;
 };

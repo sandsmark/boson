@@ -55,7 +55,8 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
  unsigned int* cellTextures = new unsigned int[cellsCount];
  for (unsigned int i = 0; i < cellsCount; i++) {
 	int x, y;
-	BoGroundRenderer::getCell(renderCells, i, &x, &y);
+	int w, h;
+	BoGroundRenderer::getCell(renderCells, i, &x, &y, &w, &h);
 	if (x < 0 || y < 0) {
 		boError() << k_funcinfo << "invalid cell" << endl;
 		continue;
@@ -65,9 +66,9 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 	for (unsigned int j = 0; j < groundTheme->textureCount(); j++) {
 		unsigned int v = 0;
 		v += (int)map->texMapAlpha(j, x, y);
-		v += (int)map->texMapAlpha(j, x + 1, y);
-		v += (int)map->texMapAlpha(j, x, y + 1);
-		v += (int)map->texMapAlpha(j, x + 1, y + 1);
+		v += (int)map->texMapAlpha(j, x + w, y);
+		v += (int)map->texMapAlpha(j, x, y + h);
+		v += (int)map->texMapAlpha(j, x + w, y + h);
 		if (v > maxValue) {
 			maxValue = v;
 
@@ -100,7 +101,13 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		}
 		int x;
 		int y;
-		BoGroundRenderer::getCell(renderCells, j, &x, &y);
+		int w;
+		int h;
+		BoGroundRenderer::getCell(renderCells, j, &x, &y, &w, &h);
+		if (w != 1 || h != 1 || x < 0 || y < 0) {
+			boError() << k_funcinfo << x << " " << y << " " << w << " " << h << endl;
+			continue;
+		}
 		count++;
 
 		int celloffset = y * cornersWidth + x;
@@ -110,9 +117,9 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 
 		float upperLeftHeight = *heightMapUpperLeft;
-		float upperRightHeight = *(heightMapUpperLeft + 1);
-		float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth);
-		float lowerRightHeight = *(heightMapUpperLeft + cornersWidth + 1);
+		float upperRightHeight = *(heightMapUpperLeft + w);
+		float lowerLeftHeight = *(heightMapUpperLeft + cornersWidth * h);
+		float lowerRightHeight = *(heightMapUpperLeft + cornersWidth * h + w);
 
 
 		// Map cell's y-coordinate to range (offsetCount - 1) ... 0
@@ -121,14 +128,15 @@ void BoFastGroundRenderer::renderVisibleCells(int* renderCells, unsigned int cel
 		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
 		glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
+#warning see default ground renderer - do we have to take w,h into account for the offsets?
 		glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
-		glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
+		glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight);
 
 		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
+		glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight);
 
 		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
-		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+		glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
 		quads++;
 	}
 	glEnd();
