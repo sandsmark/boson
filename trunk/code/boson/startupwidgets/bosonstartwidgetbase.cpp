@@ -72,25 +72,7 @@ void BosonStartWidgetBase::initPlayFields()
 
 void BosonStartWidgetBase::slotSendPlayFieldChanged(int index)
 {
- BO_CHECK_NULL_RET(boGame);
- if (!boGame->isAdmin()) {
-	boWarning() << "Only admin can change the playfield" << endl;
-	//TODO: revert the change
-	return;
- }
- QString identifier;
- if (index < 0) {
-	// warning: valid in editor mode only!
-	identifier = QString::null;
- } else {
-	QStringList list = BosonPlayField::availablePlayFields();
-	if (index >= (int)list.count()) {
-		boError() << k_funcinfo << "invalid index " << index << endl;
-		return;
-	}
-	identifier = list[index];
- }
- networkInterface()->sendChangePlayField(identifier);
+ networkInterface()->sendChangePlayField(index);
 }
 
 void BosonStartWidgetBase::slotPlayFieldChanged(const QString& id)
