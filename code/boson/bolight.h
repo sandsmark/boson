@@ -59,15 +59,25 @@ class BoLight
     const BoVector4& diffuse()  { return mDiffuse; }
     const BoVector4& specular()  { return mSpecular; }
 
-    void setAmbient(BoVector4 a);
-    void setDiffuse(BoVector4 d);
-    void setSpecular(BoVector4 s);
+    void setAmbient(const BoVector4& a);
+    void setDiffuse(const BoVector4& d);
+    void setSpecular(const BoVector4& s);
 
     const BoVector4& position()  { return mPos; }
-    void setPosition(BoVector4 pos);
+    void setPosition(const BoVector4& pos);
 
     BoVector3 position3()  { return BoVector3(mPos.x(), mPos.y(), mPos.z()); }
-    void setPosition3(BoVector3 pos)  { setPosition(BoVector4(pos.x(), pos.y(), pos.z(), mPos.w())); };
+    void setPosition3(const BoVector3& pos)  { setPosition(BoVector4(pos.x(), pos.y(), pos.z(), mPos.w())); };
+
+    void setConstantAttenuation(float a);
+    void setLinearAttenuation(float a);
+    void setQuadraticAttenuation(float a);
+    void setAttenuation(const BoVector3& a);
+
+    float constantAttenuation()  { return mAttenuation.x(); }
+    float linearAttenuation()  { return mAttenuation.y(); }
+    float quadraticAttenuation()  { return mAttenuation.z(); }
+    BoVector3 attenuation()  { return mAttenuation; }
 
     int id()  { return mId; }
 
@@ -78,6 +88,7 @@ class BoLight
     BoVector4 mDiffuse;
     BoVector4 mSpecular;
     BoVector4 mPos;
+    BoVector3 mAttenuation;
     bool mEnabled;
     int mId;
 };
