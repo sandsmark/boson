@@ -615,6 +615,7 @@ class BosonPathInfo
 class BosonPathHighLevelPath
 {
   public:
+    BosonPathHighLevelPath()  { startRegion = 0; destRegion = 0; valid = false; users = 0; }
     // Starting region
     BosonPathRegion* startRegion;
     // Destination region
@@ -649,7 +650,7 @@ class BosonPathHighLevelNode
  *
  * The @ref BosonPath (and friends) classes are supposed to tell this class
  * about path visualization issues (e.g. where to paint which lines and so on).
- * This class then takes care about letting @ref BosonBigDisplayBase and / or 
+ * This class then takes care about letting @ref BosonBigDisplayBase and / or
  * @ref BosonCanvas know about these (e.g. by emitting a signal).
  **/
 class BosonPathVisualization : public QObject
