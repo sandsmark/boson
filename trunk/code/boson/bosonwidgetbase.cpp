@@ -278,15 +278,11 @@ void BosonWidgetBase::initDisplayManager()
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
-
- connect(localPlayerInput(), SIGNAL(signalAction(const BoSpecificAction&)),
-		mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
- displayManager()->setLocalPlayerInput(localPlayerInput());
 }
 
 void BosonWidgetBase::addInitialDisplay()
 {
- initBigDisplay(displayManager()->addInitialDisplay());
+ displayManager()->addInitialDisplay();
 
  // we need to add the display first (in order to create a valid GL context) and
  // then load the cursor
@@ -315,13 +311,6 @@ void BosonWidgetBase::initPlayer()
 	return;
  }
 
- if (!localPlayerInput()) {
-	boError() << k_funcinfo << "NULL local player input" << endl;
- } else {
-	localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
-	localPlayer()->addGameIO(localPlayerInput());
- }
-
  setLocalPlayerRecursively(localPlayer());
 
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
@@ -333,9 +322,31 @@ void BosonWidgetBase::initPlayer()
  slotUnitCountChanged(localPlayer());
 }
 
+void BosonWidgetBase::initLocalPlayerInput()
+{
+ mLocalPlayerInput = new BosonLocalPlayerInput();
+ localPlayerInput()->setCommandFrame(d->mCommandFrame);
+
+ localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
+ localPlayer()->addGameIO(localPlayerInput());
+
+ connect(localPlayerInput(), SIGNAL(signalAction(const BoSpecificAction&)),
+		mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
+}
+
 void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference to initEditorMode anymore. maybe just initGame() or so??
 {
  BO_CHECK_NULL_RET(displayManager());
+
+ initLocalPlayerInput();
+
+ // Init all bigdisplays
+ QPtrListIterator<BosonBigDisplayBase> it(*displayManager()->displayList());
+ while (it.current()) {
+	initBigDisplay(it.current());
+	++it;
+ }
+
  initLayout();
  startScenarioAndGame();
 }
@@ -344,6 +355,10 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 {
  if (!b) {
 	boError() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+ if (b->isInputInitialized()) {
+	// Already initialized
 	return;
  }
  BO_CHECK_NULL_RET(boGame);
@@ -365,6 +380,8 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
 
  b->show();
  b->makeActive();
+
+ b->setInputInitialized(true);
 }
 
 void BosonWidgetBase::initCommandFrame()
@@ -375,9 +392,6 @@ void BosonWidgetBase::initCommandFrame()
  d->mCommandFrame = createCommandFrame(d->mCommandFrameDock);
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrame->reparentMiniMap(minimap());
-
- mLocalPlayerInput = new BosonLocalPlayerInput();
- localPlayerInput()->setCommandFrame(d->mCommandFrame);
 
  connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
  connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));

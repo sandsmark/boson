@@ -586,6 +586,8 @@ public:
 	PlacementPreview mPlacementPreview;
 	BoGLToolTip* mToolTips;
 
+	bool mInputInitialized;
+
 	float mDebugMapCoordinatesX;
 	float mDebugMapCoordinatesY;
 	float mDebugMapCoordinatesZ;
@@ -625,6 +627,7 @@ void BosonBigDisplayBase::init()
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
  d->mParticlesDirty = true;
+ d->mInputInitialized = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
@@ -772,11 +775,6 @@ void BosonBigDisplayBase::initializeGL()
  // update system information (we initializeGL() must have been called before
  // this makes sense)
  BoInfo::boInfo()->update(this);
-
- // Is this safe here?
- // If recursive is not set back to false, OGL won't be initialized next time
- //  BosonBigDisplay is created
- recursive = false;
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -1494,15 +1492,20 @@ void BosonBigDisplayBase::renderCells()
 
 void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap, unsigned char* texMapStart)
 {
+ // Texture offsets
+ const int offsetCount = 5;
+ const float offset = 1 / (float)offsetCount;
+ const float texOffsets[] = {0, 0.2, 0.4, 0.6, 0.8};  // texOffsets[x] = offset * x
+
  glBegin(GL_QUADS);
  for (int i = 0; i < count; i++) {
 	Cell* c = cells[i];
 	int x = c->x();
 	int y = c->y();
 
-	int offset = y * cornersWidth + x;
-	unsigned char* texMapUpperLeft = texMapStart + offset;
-	float* heightMapUpperLeft = heightMap + offset;
+	int celloffset = y * cornersWidth + x;
+	unsigned char* texMapUpperLeft = texMapStart + celloffset;
+	float* heightMapUpperLeft = heightMap + celloffset;
 
 	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
@@ -1517,20 +1520,23 @@ void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap,
 	unsigned char lowerLeftAlpha = *(texMapUpperLeft + cornersWidth);
 	unsigned char lowerRightAlpha = *(texMapUpperLeft + cornersWidth + 1);
 
+	// Map cell's y-coordinate to range (offsetCount - 1) ... 0
+	y = offsetCount - (y % offsetCount) - 1;
+
 	glColor4ub(255, 255, 255, upperLeftAlpha);
-	glTexCoord2fv(textureUpperLeft);
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount] + offset);
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight);
 
 	glColor4ub(255, 255, 255, lowerLeftAlpha);
-	glTexCoord2fv(textureLowerLeft);
+	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[y % offsetCount]);
 	glVertex3f(cellXPos, cellYPos - BO_GL_CELL_SIZE, lowerLeftHeight);
 
 	glColor4ub(255, 255, 255, lowerRightAlpha);
-	glTexCoord2fv(textureLowerRight);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount]);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos - BO_GL_CELL_SIZE, lowerRightHeight);
 
 	glColor4ub(255, 255, 255, upperRightAlpha);
-	glTexCoord2fv(textureUpperRight);
+	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
 	glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
  }
  glEnd();
@@ -2351,6 +2357,8 @@ void BosonBigDisplayBase::quitGame()
  d->mRenderedCells = 0;
 // setCamera(Camera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
  d->mCamera = Camera();
+
+ setInputInitialized(false);
 }
 
 bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
@@ -3346,5 +3354,15 @@ void BosonBigDisplayBase::showEvent(QShowEvent* e)
  BosonGLWidget::showEvent(e);
  BO_CHECK_NULL_RET(displayInput());
  displayInput()->updateCursor();
+}
+
+bool BosonBigDisplayBase::isInputInitialized()
+{
+ return d->mInputInitialized;
+}
+
+void BosonBigDisplayBase::setInputInitialized(bool initialized)
+{
+ d->mInputInitialized = initialized;
 }
 
