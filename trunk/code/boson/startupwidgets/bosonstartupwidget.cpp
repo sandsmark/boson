@@ -461,6 +461,7 @@ void BosonStartupWidget::initBackgroundOrigin(QWidget* widget)
 // game!
 void BosonStartupWidget::slotShowWelcomeWidget()
 {
+ boDebug() << k_funcinfo << endl;
  showWidget(IdWelcome);
 
  // reset the game now:
@@ -475,6 +476,10 @@ void BosonStartupWidget::slotShowWelcomeWidget()
  }
  d->mWidgetStack->raiseWidget((int)IdWelcome);
  emit signalResetGame();
+
+ // the startup widget gets hidden when game is started, so when we want to show
+ // the welcome widget we also need to show the startup widget
+ show();
 }
 
 void BosonStartupWidget::resetWidgets()
