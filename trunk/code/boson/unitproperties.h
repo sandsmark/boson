@@ -34,7 +34,7 @@ public:
 	UnitProperties(const QString& fileName);
 	~UnitProperties();
 
-	unsigned long int health() const;
+	unsigned long int health() const { return mHealth; }
 	unsigned long int shields() const;
 	unsigned long int armor() const;
 	unsigned long int prize() const;
@@ -42,18 +42,18 @@ public:
 	/**
 	 * @return The weapon range of this unit.
 	 **/
-	unsigned long int range() const;
+	unsigned long int range() const { return mRange; }
 
 	/**
 	 * @return The number of advance calls until the weapon is reloaded
 	 **/
-	unsigned int reload() const;
+	unsigned int reload() const { return mReload; }
 
 	/**
 	 * The damage this unit makes to other units. Negative values means
 	 * repairing
 	 **/
-	long int damage() const;
+	long int damage() const { return mDamage; }
 	
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
@@ -61,8 +61,13 @@ public:
 	 * that you can construct several units of the same type ID in a game -
 	 * they will all be of the same type (e.g. they are all ships).
 	 **/
-	int typeId() const;  // we MUST use int (not unsigned int) as -1 is used for invalid
-	const QString& name() const;
+	int typeId() const { return mTypeId; };  // we MUST use int (not unsigned int) as -1 is used for invalid
+
+	/**
+	 * @return The name of this unit type. Examples are "Aircraft", "Quad",
+	 * "Ship"
+	 **/
+	const QString& name() const { return mName; };
 
 	void loadUnitType(const QString& fileName);
 
@@ -93,18 +98,18 @@ public:
 	 * @return Whether this is an aircraft unit. Currently there is only
 	 * one.
 	 **/
-	bool isAircraft() const;
+	bool isAircraft() const { return mTerrain == Air; }
 
 	/**
 	 * @return Whether this is a ship
 	 **/
-	bool isShip() const;
+	bool isShip() const { return mTerrain == Water; }
 
 	/**
 	 * @return Whether this is a land unit.
 	 **/
-	bool isLand() const;
-
+	bool isLand() const { return mTerrain == Land; }
+	
 	/**
 	 * @return Whether this facility (if it is one) can produce anything.
 	 **/
@@ -116,7 +121,11 @@ public:
 	 **/
 	QValueList<int> produceList() const;
 
-	const QString& unitPath() const;
+	/**
+	 * @return The path to the unit files. That is the directory where the
+	 * index.desktop file and the pixmap files are stored.
+	 **/
+	const QString& unitPath() const { return mUnitPath; };
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -124,6 +133,14 @@ protected:
 	
 private:
 	UnitPropertiesPrivate* d;
+	QString mName;
+	QString mUnitPath; // the path to the unit files
+	int mTypeId; // note: -1 is invalid!
+	unsigned long int mHealth;
+	unsigned long int mRange;
+	long int mDamage;
+	unsigned int mReload;
+	TerrainType mTerrain;
 };
 
 #endif

@@ -20,10 +20,7 @@ public:
 	{
 		mUnitPropID = 0;
 	
-		mSpecies = 0;
 	}
-
-	SpeciesTheme* mSpecies;
 
 	QPtrList<Unit> mUnits;
 
@@ -32,6 +29,7 @@ public:
 
 Player::Player() : KPlayer()
 {
+ mSpecies = 0;
  d = new PlayerPrivate;
  d->mUnits.setAutoDelete(true);
  setAsyncInput(true);
@@ -46,8 +44,8 @@ Player::~Player()
 // kdDebug() << "clear handler" << endl;
  dataHandler()->clear();
 // kdDebug() << "delete theme" << endl;
- if (d->mSpecies) {
-	delete d->mSpecies;
+ if (mSpecies) {
+	delete mSpecies;
  }
  delete d;
 // kdDebug() << "~Player done" << endl;
@@ -140,19 +138,19 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 
 void Player::loadTheme(const QString& species, const QRgb& teamColor)
 {
- if (d->mSpecies) {
-	delete d->mSpecies;
+ if (mSpecies) {
+	delete mSpecies;
  }
- d->mSpecies = new SpeciesTheme(species, teamColor);
+ mSpecies = new SpeciesTheme(species, teamColor);
 }
 
 QCanvasPixmapArray* Player::pixmapArray(int unitType) const
 {
- if (!d->mSpecies) {
+ if (!speciesTheme()) {
 	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return 0;
  }
- return d->mSpecies->pixmapArray(unitType);
+ return speciesTheme()->pixmapArray(unitType);
 }
 
 
@@ -176,11 +174,6 @@ void Player::unitDestroyed(Unit* unit)
 	return;
  }
  d->mUnits.take(d->mUnits.findRef(unit));
-}
-
-SpeciesTheme* Player::speciesTheme() const
-{
- return d->mSpecies;
 }
 
 void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)

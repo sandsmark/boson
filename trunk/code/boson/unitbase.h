@@ -91,7 +91,7 @@ public:
 	/**
 	 * @return The owner (player) of the unit
 	 **/
-	Player* owner() const;
+	Player* owner() const { return mOwner; }
 	void setOwner(Player* owner);
 
 	KGamePropertyHandler* dataHandler() const;
@@ -193,6 +193,7 @@ public:
 	
 private:
 	UnitBasePrivate* d;
+	Player* mOwner;
 };
 
 #endif
