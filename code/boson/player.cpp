@@ -404,14 +404,14 @@ const UnitProperties* Player::unitProperties(unsigned long int unitType) const
  return speciesTheme()->unitProperties(unitType);
 }
 
-void Player::initMap(BosonMap* map)
+void Player::initMap(BosonMap* map, bool fogged)
 {
  d->mMap = map;
  if (!map) {
 	d->mFogged.resize(0);
 	return;
  }
- d->mFogged.fill(true, map->width() * map->height());
+ d->mFogged.fill(fogged, map->width() * map->height());
 }
 
 void Player::fog(int x, int y)

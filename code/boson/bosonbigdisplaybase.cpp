@@ -281,6 +281,7 @@ public:
 	{
 		mLocalPlayer = 0;
 		mChat = 0;
+		mMouseIO = 0;
 
 		mFramecount = 0;
 		mFps = 0;
@@ -291,6 +292,7 @@ public:
 	Player* mLocalPlayer;
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
+	KGameMouseIO* mMouseIO;
 
 	BosonGLChat* mChat;
 
@@ -1045,15 +1047,19 @@ void BosonBigDisplayBase::addMouseIO(Player* p)
 	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
+ if (d->mMouseIO) {
+	kdError() << k_funcinfo << "mouse IO already present for this display!" << endl;
+	return;
+ }
  if (p->hasRtti(KGameIO::MouseIO)) {
 	// FIXME: this is only invalid if the IO is for the same big display!
 	kdWarning() << k_funcinfo << "player already has a mouse IO" << endl;
 	return;
  }
- KGameMouseIO* mouseIO = new KGameMouseIO(this, true);
- connect(mouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
+ d->mMouseIO = new KGameMouseIO(this, true);
+ connect(d->mMouseIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
 		this, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
- p->addGameIO(mouseIO);
+ p->addGameIO(d->mMouseIO);
 }
 
 void BosonBigDisplayBase::makeActive()
@@ -1077,8 +1083,10 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
 {
  kdDebug() << k_funcinfo << endl;
  if (d->mLocalPlayer) {
-	kdError() << k_funcinfo << "already a local player present!! unset first (TODO)!" << endl;
-	return;
+	kdDebug() << k_funcinfo << "already a local player present! unset..." << endl;
+	delete d->mMouseIO;
+	d->mMouseIO = 0;
+	d->mLocalPlayer = 0;
  }
  d->mLocalPlayer = p;
  if (!p) {

@@ -86,7 +86,13 @@ public:
 	void setMinerals(unsigned long int m);
 	void setOil(unsigned long int o);
 
-	void initMap(BosonMap* map);
+	/**
+	 * Initialize the map for this player - currently this means just the
+	 * fog of war.
+	 * @param fogged Whether the map is fogged initially or not. You can
+	 * specify false here for the editor.
+	 **/
+	void initMap(BosonMap* map, bool fogged = true);
 
 	/**
 	 * Called by @ref Facility when the construction has been completed.
