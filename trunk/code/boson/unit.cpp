@@ -19,6 +19,7 @@
 
 #include "unit.h"
 #include "player.h"
+#include "playerio.h"
 #include "bosoncanvas.h"
 #include "cell.h"
 #include "speciestheme.h"
@@ -742,7 +743,11 @@ bool Unit::moveTo(float x, float y, int range, bool attack, bool slowDownAtDest)
  // Set slowDownAtDestination temporarily to false to achieve that.
  // Maybe also when advanceWork() == WorkMove ?
  boDebug() << k_funcinfo << "work(): " << work() << "; advanceWork(): " << advanceWork() << endl;
- if(work() == WorkMove) {
+ if (!ownerIO()) {
+	BO_NULL_ERROR(ownerIO());
+	return false;
+ }
+ if (work() == WorkMove) {
 	d->mSlowDownAtDestination = 0;
  }
  stopMoving();
@@ -752,21 +757,17 @@ bool Unit::moveTo(float x, float y, int range, bool attack, bool slowDownAtDest)
  }
  int cellX = (int)(x / BO_TILE_SIZE);
  int cellY = (int)(y / BO_TILE_SIZE);
- if (!canvas()->cell(cellX, cellY)) {
+ Cell* cell = canvas()->cell(cellX, cellY);
+ if (!cell) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return false;
  }
- if (!owner()->isFogged(cellX, cellY)) {
-	Cell* c = canvas()->cell(cellX, cellY);
-	if (!c) {
-		boError() << k_funcinfo << "unit " << id() << ": NULL cell at " << x << "," << y << endl;
-		return false;
-	}
-	// No pathfinding if goal not reachable or occupied and we can see it
-	if (!c->canGo(unitProperties())) {
+ if (ownerIO()->canSee(cell)) {
+	if (!ownerIO()->canGo(this, cell)) {
+		// No pathfinding if goal not reachable or occupied and we can see it
 		boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
-		return false;
 	}
+	return false;
  }
 
  // Center of the destination cell
@@ -1080,7 +1081,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
  }
 // boDebug() << id() << " shoots at unit " << target->id() << endl;
  w->shoot(target);
- owner()->statistics()->increaseShots();
+ ownerIO()->statistics()->increaseShots();
 }
 
 BoItemList* Unit::unitsInRange(unsigned long int range) const
@@ -1095,6 +1096,9 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
  // collisions() does this anyway.
  QRect rect;
  rect.setCoords(left - range, top - range, right + range, bottom + range);
+
+ // TODO: we should do this using PlayerIO. It should return items that are
+ // actually visible to us only!
  BoItemList* items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
  items->remove((BosonItem*)this);
 
@@ -1109,7 +1113,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 	if (u->isDestroyed()) {
 		continue;
 	}
-	if (owner()->isFogged((int)u->x() / BO_TILE_SIZE, (int)u->y() / BO_TILE_SIZE)) {
+	if (!ownerIO()->canSee(u)) {
 		continue;
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
@@ -1127,7 +1131,7 @@ BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
  BoItemList::Iterator it = units->begin();
  for (; it != units->end(); ++it) {
 	u = (Unit*)*it;
-	if (owner()->isEnemy(u->owner())) {
+	if (ownerIO()->isEnemyUnit(u)) {
 		enemy->append(u);
 	}
  }
@@ -1343,7 +1347,7 @@ int Unit::distance(const BoVector3& pos) const
 
 const QColor* Unit::teamColor() const
 {
- return &owner()->teamColor();
+ return &ownerIO()->teamColor();
 }
 
 int Unit::searchPath() const
