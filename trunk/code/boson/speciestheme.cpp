@@ -19,6 +19,8 @@
 #include "speciestheme.h"
 #include "unitbase.h"
 #include "unitproperties.h"
+#include "bosonmusic.h"
+#include "bosonsound.h"
 
 #include "defines.h"
 
@@ -119,6 +121,8 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
  mThemePath = speciesDir;
  kdDebug() << "theme path: " << themePath() << endl;
 
+ boMusic->addSounds(themePath());
+
  // the initial values for the units - config files :-)
  readUnitConfigs();
 
@@ -185,6 +189,9 @@ bool SpeciesTheme::loadUnit(int type)
 	}
 	d->mSmallOverview.insert(type, p);
  }
+
+ BosonSound* sound = boMusic->bosonSound(themePath());
+ sound->addUnitSounds(prop);
  return true;
 }
 

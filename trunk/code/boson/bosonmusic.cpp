@@ -20,6 +20,10 @@
 #include "bosonmusic.h"
 #include "defines.h"
 
+#include "unit.h"
+#include "speciestheme.h"
+#include "bosonsound.h"
+
 #include <kglobal.h>
 #include <kstandarddirs.h>
 #include <kapplication.h>
@@ -31,6 +35,7 @@
 
 #include <qtimer.h>
 #include <qstringlist.h>
+#include <qdict.h>
 
 #include "bosonmusic.moc"
 
@@ -49,33 +54,43 @@ public:
 		mPlayObject = 0;
 
 		mTicker = 0;
+
+		mBosonSound = 0;
 	}
 
 	KArtsDispatcher mDispatcher;
 	KArtsServer mServer;
 	KPlayObject* mPlayObject;
 
+	QDict<BosonSound> mBosonSound;
+
 	QTimer* mTicker;
 
 	QStringList mFiles;
 	bool mLoop;
 
-	bool mMusic;
-	bool mSound;
+	bool mPlayMusic;
+	bool mPlaySound;
 };
 
 BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 {
  d = new BosonMusicPrivate;
- d->mMusic = true;
- d->mSound = true;
+ d->mPlayMusic = true;
+ d->mPlaySound = true;
  d->mTicker = new QTimer(this);
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
+ d->mBosonSound.setAutoDelete(true);
 }
 
 BosonMusic::~BosonMusic()
 {
+ d->mBosonSound.clear();
+ delete d->mTicker;
+ if (d->mPlayObject) {
+	delete d->mPlayObject;
+ }
  delete d;
 }
 
@@ -110,7 +125,7 @@ bool BosonMusic::load(const QString& file)
  if (d->mPlayObject) {
 	delete d->mPlayObject;
  }
- KPlayObjectFactory factory(d->mServer.server());
+ KPlayObjectFactory factory(server().server());
  d->mPlayObject = factory.createPlayObject(file, true);
  if (d->mPlayObject->isNull()) {
 	delete d->mPlayObject;
@@ -183,26 +198,38 @@ bool BosonMusic::isLoop() const
  return d->mLoop;
 }
 
-void BosonMusic::playSound(const QString& file)
+void BosonMusic::playSound(const QString& file) // obsolete
 {
+ kdWarning() << k_funcinfo << "is obsolete" << endl;
+return;
  if (!sound()) {
 	return;
  }
  kdDebug() << k_funcinfo << file << endl;
 
- KPlayObjectFactory factory(d->mServer.server());
+ KPlayObjectFactory factory(server().server());
  KPlayObject* sound = factory.createPlayObject(file, true);
  sound->play();
 }
 
+void BosonMusic::playSound(const QString& species, int id)
+{
+ bosonSound(species)->play(id);
+}
+
+void BosonMusic::playSound(Unit* unit, int event)
+{
+ bosonSound(unit->speciesTheme()->themePath())->play(unit, event);
+}
+
 bool BosonMusic::sound() const
 {
- return d->mSound;
+ return d->mPlaySound;
 }
 
 bool BosonMusic::music() const
 {
- return d->mMusic;
+ return d->mPlayMusic;
 }
 
 void BosonMusic::setMusic(bool music_)
@@ -210,7 +237,7 @@ void BosonMusic::setMusic(bool music_)
  if (music() == music_) {
 	return;
  }
- d->mMusic = music_;
+ d->mPlayMusic = music_;
  if (music()) {
 	play();
  } else {
@@ -223,6 +250,22 @@ void BosonMusic::setSound(bool sound_)
  if (sound() == sound_) {
 	return;
  }
- d->mSound = sound_;
+ d->mPlaySound = sound_;
 }
 
+void BosonMusic::addSounds(const QString& species)
+{
+ if (!d->mBosonSound.find(species)) {
+	d->mBosonSound.insert(species, new BosonSound);
+ }
+}
+
+BosonSound* BosonMusic::bosonSound(const QString& species) const
+{
+ return d->mBosonSound[species];
+}
+
+KArtsServer& BosonMusic::server() const
+{
+ return d->mServer;
+}

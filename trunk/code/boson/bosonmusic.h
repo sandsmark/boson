@@ -22,6 +22,9 @@
 #include <qobject.h>
 
 class QStringList;
+class KArtsServer;
+class BosonSound;
+class Unit;
 
 #define boMusic BosonMusic::bosonMusic()
 
@@ -92,7 +95,15 @@ public:
 	 * overhead.
 	 * @param file File to be played. Absolute filename.
 	 **/
-	void playSound(const QString& file);
+	void playSound(const QString& file); // obsolete
+
+	void playSound(Unit* unit, int event);
+	void playSound(const QString& species, int id);
+
+	BosonSound* bosonSound(const QString& species) const;
+	void addSounds(const QString& species);
+
+	KArtsServer& server() const;
 
 protected slots:
 	void slotUpdateTicker();

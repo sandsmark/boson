@@ -256,7 +256,7 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
  }
 
  setSelectionMode(SelectSingle);
- boMusic->playSound(unit->sound(Unit::SoundOrderSelect));
+ boMusic->playSound(unit, Unit::SoundOrderSelect);
  addUnitSelection(unit);
  //canvas->update(); // TODO?
 }
@@ -291,7 +291,7 @@ void BosonBigDisplay::removeSelectionRect()
 	} else {
 		Unit* u = selection().first();
 		if (u->owner() == d->mLocalPlayer) {
-			boMusic->playSound(u->sound(Unit::SoundOrderSelect));
+			boMusic->playSound(u, Unit::SoundOrderSelect);
 		}
 	}
  }
@@ -478,7 +478,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 	}
 	send = true;
 	Unit* u = selection().first();
-	boMusic->playSound(u->sound(Unit::SoundOrderAttack));
+	boMusic->playSound(u, Unit::SoundOrderAttack);
  }
 }
 
