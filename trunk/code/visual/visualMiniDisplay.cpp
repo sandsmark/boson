@@ -85,11 +85,12 @@ void visualMiniDisplay::sync(void)
 					setPoint( i, j, black, &p);
 					break;
 				case GROUND_WATER :
-				case GROUND_WATER_OIL:
+//				case GROUND_WATER_OIL:
 					setPoint( i, j, blue, &p);
 					break;
 				case GROUND_GRASS :
 				case GROUND_GRASS_OIL :
+				case GROUND_GRASS_MINERAL :
 					setPoint( i, j, green, &p);
 					break;
 				case GROUND_DESERT :
@@ -142,11 +143,12 @@ void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 			setPoint( i, j, black, &p);
 			break;
 		case GROUND_WATER :
-		case GROUND_WATER_OIL:
+//		case GROUND_WATER_OIL:
 			setPoint( i, j, blue, &p);
 			break;
 		case GROUND_GRASS :
 		case GROUND_GRASS_OIL :
+		case GROUND_GRASS_MINERAL :
 			setPoint( i, j, green, &p);
 			break;
 		case GROUND_DESERT :
