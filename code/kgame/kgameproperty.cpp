@@ -24,7 +24,7 @@
 #include "kplayer.h"
 #include "kgame.h"
 
-#include <kdebug.h>
+#include <bodebug.h>
 
 #define KPLAYERHANDLER_LOAD_COOKIE 6239
 
@@ -91,7 +91,7 @@ int KGamePropertyBase::registerData(int id, KGamePropertyHandler* owner,Property
 {
 // we don't support changing the id
  if (!owner) {
-	kdWarning(11001) << k_funcinfo << "Resetting owner=0. Sure you want to do this?" << endl;
+	boWarning(11001) << k_funcinfo << "Resetting owner=0. Sure you want to do this?" << endl;
 	mOwner=0;
 	return -1;
  }
@@ -129,7 +129,7 @@ bool KGamePropertyBase::sendProperty()
  if (mOwner) {
 	return mOwner->sendProperty(s);
  } else {
-	kdError(11001) << k_funcinfo << "Cannot send because there is no receiver defined" << endl;
+	boError(11001) << k_funcinfo << "Cannot send because there is no receiver defined" << endl;
 	return false;
  }
 }
@@ -143,7 +143,7 @@ bool KGamePropertyBase::sendProperty(const QByteArray& data)
  if (mOwner) {
 	return mOwner->sendProperty(s);
  } else {
-	kdError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
+	boError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
 	return false;
  }
 }
@@ -176,18 +176,18 @@ void KGamePropertyBase::setLock(bool l)
  if (mOwner) {
 	mOwner->sendProperty(s);
  } else {
-	kdError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
+	boError(11001) << k_funcinfo << ": Cannot send because there is no receiver defined" << endl;
 	return ;
  }
 }
 
 void KGamePropertyBase::emitSignal()
 {
- //kdDebug(11001) << k_funcinfo << ": mOwnerP="<< mOwner << " id=" << id()   << endl;
+ //boDebug(11001) << k_funcinfo << ": mOwnerP="<< mOwner << " id=" << id()   << endl;
  if (mOwner ) {
 	mOwner->emitSignal(this);
  } else {
-	kdError(11001) << k_funcinfo << ":id="<<id()<<" Cannot emitSignal because there is no handler set" << endl;
+	boError(11001) << k_funcinfo << ":id="<<id()<<" Cannot emitSignal because there is no handler set" << endl;
  }
 }
 

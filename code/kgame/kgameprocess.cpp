@@ -115,12 +115,12 @@ void KGameProcess::processArgs(int argc, char *argv[])
   if (argc>2)
   {
     v=atoi(argv[2]);
-    //kdDebug(11001) << "cookie (unused) " << v << endl;
+    //boDebug(11001) << "cookie (unused) " << v << endl;
   }
   if (argc>1)
   {
     v=atoi(argv[1]);
-    //kdDebug(11001) << "id (unused) " << v << endl;
+    //boDebug(11001) << "id (unused) " << v << endl;
   }
   fprintf(stderr,"processArgs \n");
   fflush(stderr);

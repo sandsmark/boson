@@ -24,7 +24,7 @@
 #include "kplayer.h"
 #include "kgame.h"
 
-#include <kdebug.h>
+#include <bodebug.h>
 
 KGameSequence::KGameSequence() : QObject()
 {
@@ -48,10 +48,10 @@ void KGameSequence::setCurrentPlayer(KPlayer* player)
 
 KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
 {
- kdDebug(11001) << "=================== NEXT PLAYER =========================="<<endl;
+ boDebug(11001) << "=================== NEXT PLAYER =========================="<<endl;
  if (!game())
  {
-   kdError() << k_funcinfo << "NULL game object" << endl;
+   boError() << k_funcinfo << "NULL game object" << endl;
    return 0;
  }
  unsigned int minId,nextId,lastId;
@@ -65,7 +65,7 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
    lastId = 0;
  }
 
- kdDebug(11001) << "nextPlayer: lastId="<<lastId<<endl;
+ boDebug(11001) << "nextPlayer: lastId="<<lastId<<endl;
 
  // remove when this has been checked
  minId = 0x7fff;  // we just need a very large number...properly MAX_UINT or so would be ok...
@@ -100,7 +100,7 @@ KPlayer *KGameSequence::nextPlayer(KPlayer *last,bool exclusive)
    nextplayer=minplayer;
  }
 
- kdDebug(11001) << k_funcinfo << " ##### lastId=" << lastId << " exclusive="
+ boDebug(11001) << k_funcinfo << " ##### lastId=" << lastId << " exclusive="
         << exclusive << "  minId=" << minId << " nextid=" << nextId
         << " count=" << game()->playerList()->count()  << endl;
  if (nextplayer)
