@@ -13,7 +13,7 @@ UnitHeight=1.5
 ProductionTime=100
 SightRange=7
 DestroyedParticles=1001
-Weapons=1
+Weapons=3
 
 [Boson Mobile Unit]
 Speed=6
@@ -43,3 +43,16 @@ Speed=15
 DamageRange=2
 HitParticles=2001
 FlyParticles=5001
+
+[Weapon_2]
+Name=God killer
+Model=missile.3ds
+Range=7
+Reload=600
+CanShootAtAirUnits=true
+CanShootAtLandUnits=true
+Damage=50
+Speed=1
+DamageRange=9
+HitParticles=4001
+FlyParticles=1002
