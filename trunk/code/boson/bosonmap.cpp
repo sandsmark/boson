@@ -261,9 +261,8 @@ bool BoTexMap::importTexMap(const QImage* img)
  boDebug() << k_funcinfo << endl;
 
  for (unsigned int y = 0; y < height(); y++) {
-	QRgb* line = (QRgb*)img->scanLine(y);
 	for (unsigned int x = 0; x < width(); x++) {
-		QRgb pixel = line[x];
+		QRgb pixel = img->pixel(x, y);
 		setTexMapAlpha(0, x, y, qRed(pixel));
 		setTexMapAlpha(1, x, y, qGreen(pixel));
 		setTexMapAlpha(2, x, y, qBlue(pixel));
@@ -271,9 +270,8 @@ bool BoTexMap::importTexMap(const QImage* img)
  }
  if (useAlpha) {
 	for (unsigned int y = 0; y < height(); y++) {
-		QRgb* line = (QRgb*)img->scanLine(y);
 		for (unsigned int x = 0; x < width(); x++) {
-			QRgb pixel = line[x];
+			QRgb pixel = img->pixel(x, y);
 			setTexMapAlpha(3, x, y, qAlpha(pixel));
 		}
 	}
@@ -842,7 +840,7 @@ QByteArray BosonMap::saveHeightMapImage()
 	boDebug() << k_funcinfo << "real height map" << endl;
 	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
 	for (int y = 0; y < image.height(); y++) {
-		uint* p = (uint*)image.scanLine(y);
+		uint* p = (uint*)image.scanLine(y); // AB: maybe use setPixel() instead, due to endianness
 		for (int x = 0; x < image.width(); x++) {
 			float value = mHeightMap->heightAt(x, y);
 			int v = BoHeightMap::heightToPixel(value);
@@ -887,7 +885,7 @@ QByteArray BosonMap::saveTexMapImage(unsigned int texture)
 	boDebug() << k_funcinfo << "real texmap" << endl;
 	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
 	for (int y = 0; y < image.height(); y++) {
-		uint* p = (uint*)image.scanLine(y);
+		uint* p = (uint*)image.scanLine(y); // AB: maybe use setPixel() instead, due to endianness
 		for (int x = 0; x < image.width(); x++) {
 			int v = (int)texMapAlpha(texture, x, y);
 			*p = qRgb(v, v, v);
