@@ -1071,6 +1071,7 @@ public:
 	BoFaceView(QWidget* parent) : KListView(parent)
 	{
 		mUseLib3dsCoordinates = true;
+		mShowPointIndices = false;
 
 		QFontMetrics metrics(font());
 		setShowToolTips(true);
@@ -1104,6 +1105,10 @@ public:
 	{
 		mUseLib3dsCoordinates = c;
 	}
+	void setShowPointIndices(bool p)
+	{
+		mShowPointIndices = p;
+	}
 
 	QListViewItem* addFace(int index, Lib3dsFace* face, Lib3dsMesh* mesh)
 	{
@@ -1118,6 +1123,22 @@ public:
 		}
 		item->setText(0, no);
 
+		setPoints(item, face, mesh);
+		item->setText(4, face->material);
+		QString flags = QString::number(face->flags);
+		item->setText(5, flags);
+		item->setText(6, QString::number(face->smoothing));
+		item->setText(7, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+
+		return item;
+	}
+
+protected:
+	/**
+	 * Set the points and the normal columns
+	 **/
+	void setPoints(QListViewItem* item, Lib3dsFace* face, Lib3dsMesh* mesh)
+	{
 		// note: calculating the inverse of the mesh matrix is slow but
 		// we do it for every face. causes less work for the API - the
 		// class is easier to use then.
@@ -1136,18 +1157,19 @@ public:
 		}
 
 		for (int j = 0; j < 3; j++) {
-			if (mUseLib3dsCoordinates) {
-				v.set(mesh->pointL[ face->points[j] ].pos);
+			if (!mShowPointIndices) {
+				if (mUseLib3dsCoordinates) {
+					v.set(mesh->pointL[ face->points[j] ].pos);
+				} else {
+					v = meshVertex[j];
+				}
+				item->setText(j + 1, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
 			} else {
-				v = meshVertex[j];
+				QString index;
+				index.sprintf("%03d", face->points[j]);
+				item->setText(j+ 1, index);
 			}
-			item->setText(j + 1, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
 		}
-		item->setText(4, face->material);
-		QString flags = QString::number(face->flags);
-		item->setText(5, flags);
-		item->setText(6, QString::number(face->smoothing));
-		item->setText(7, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
 
 		BoVector3 p, q;
 		p = meshVertex[2] - meshVertex[1];
@@ -1157,11 +1179,11 @@ public:
 			normal.normalize();
 		}
 		item->setText(8, QString("%1;%2;%3").arg(normal[0]).arg(normal[1]).arg(normal[2]));
-		return item;
 	}
 
 private:
 	bool mUseLib3dsCoordinates;
+	bool mShowPointIndices;
 };
 
 BoNodeObjectDataWidget::BoNodeObjectDataWidget(QWidget* parent) : QWidget(parent, "nodeobjectdatawidget")
@@ -1375,6 +1397,7 @@ public:
 		mConnectedFacesList = 0;
 		mUnconnectedFacesList = 0;
 		mUseLib3dsCoordinates = 0;
+		mShowPointIndices = 0;
 		mHideConnectableWidgets = 0;
 		mMeshMatrix = 0;
 		mInvMeshMatrix = 0;
@@ -1416,6 +1439,7 @@ public:
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
 	QCheckBox* mUseLib3dsCoordinates;
+	QCheckBox* mShowPointIndices;
 	QCheckBox* mHideConnectableWidgets;
 	BoMatrixWidget* mMeshMatrix;
 	BoMatrixWidget* mInvMeshMatrix;
@@ -1549,6 +1573,10 @@ void KGameModelDebug::initMeshPage()
  d->mUseLib3dsCoordinates->setChecked(true);
  connect(d->mUseLib3dsCoordinates, SIGNAL(toggled(bool)), this, SLOT(slotUseLib3dsCoordinates(bool)));
  QToolTip::add(d->mUseLib3dsCoordinates, i18n("Display the coordinates of the points of a face as they appear in a .3ds file. If unchecked display them as they get rendered (i.e. in mesh coordinates)."));
+ d->mShowPointIndices = new QCheckBox(i18n("Show point indices instead of coordinates"), faceView);
+ d->mShowPointIndices->setChecked(false);
+ connect(d->mShowPointIndices, SIGNAL(toggled(bool)), this, SLOT(slotShowPointIndices(bool)));
+ QToolTip::add(d->mShowPointIndices, i18n("Display the index of the point in the vertex pool (of the mesh), not the coordinates"));
  d->mHideConnectableWidgets = new QCheckBox(i18n("Hide \"connectable\" widgets"), faceView);
  d->mHideConnectableWidgets->setChecked(true);
  connect(d->mHideConnectableWidgets, SIGNAL(toggled(bool)), this, SLOT(slotHideConnectableWidgets(bool)));
@@ -1873,6 +1901,11 @@ void KGameModelDebug::slotUseLib3dsCoordinates(bool)
  slotDisplayMesh(d->mMeshView->currentItem());
 }
 
+void KGameModelDebug::slotShowPointIndices(bool)
+{
+ slotDisplayMesh(d->mMeshView->currentItem());
+}
+
 void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 {
  d->mFaceList->clear();
@@ -1891,6 +1924,7 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 
  // faces
  d->mFaceList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
+ d->mFaceList->setShowPointIndices(d->mShowPointIndices->isChecked());
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* face = &mesh->faceL[i];
 	QListViewItem* item = d->mFaceList->addFace(i, face, mesh);
@@ -2026,6 +2060,8 @@ void KGameModelDebug::slotConnectToFace(QListViewItem* item)
  QPtrList<Lib3dsFace> faces;
  d->mConnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
  d->mUnconnectedFacesList->setUseLib3dsCoordinates(d->mUseLib3dsCoordinates->isChecked());
+ d->mConnectedFacesList->setShowPointIndices(d->mShowPointIndices->isChecked());
+ d->mUnconnectedFacesList->setShowPointIndices(d->mShowPointIndices->isChecked());
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* f = &mesh->faceL[i];
 	if (connected.contains(f)) {
