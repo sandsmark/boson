@@ -35,8 +35,6 @@
 #include <lib3ds/vector.h>
 #include <lib3ds/material.h>
 
-void myTransform(float* resultVector, float* matrix, float* inputVector);
-
 BosonModelTextures* BosonModel::mModelTextures = 0;
 
 BoFrame::BoFrame()
@@ -725,7 +723,7 @@ void BosonModel::dumpTriangle(Lib3dsVector* v, GLuint texture, Lib3dsTexel* tex)
  kdDebug() << text << endl;
 }
 
-void myTransform(float* r, float* m, float* v)
+void BosonModel::myTransform(GLfloat* r, GLfloat* m, GLfloat* v)
 {
  // r = m * v, m is a 4x4 OpenGL matrix, r and v are both a 3x1 column vector.
  // the forth element is unused in boson and therefore we use silently 0.
