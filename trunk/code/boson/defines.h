@@ -87,7 +87,7 @@
 #define DEFAULT_MOUSE_WHEEL_ACTION CameraZoom
 #define DEFAULT_MOUSE_WHEEL_SHIFT_ACTION CameraRotate
 #define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
-#define DEFAULT_USE_LIGHT true
+#define DEFAULT_USE_LIGHT false // not really supported yet
 #define DEFAULT_USE_MIPMAPS_FOR_MODELS true
 
 // not in BosonConfig (not necessarily in OptionsDialog):
