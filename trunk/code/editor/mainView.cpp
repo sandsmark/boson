@@ -30,7 +30,7 @@
 
 #include "mainView.h"		// myself
 
-mainView::mainView(editorField *field, QWidget *parent=0, const char *name=0)
+mainView::mainView(editorField *field, QWidget *parent, const char *name)
 	:QWidget(parent, name)
 { 
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);

@@ -43,7 +43,7 @@ enum object_type {
 	OT_NONE,
 	OT_GROUND,
 	OT_FACILITY,
-	OT_UNIT,
+	OT_UNIT
 };
 
 class editorView : public visualView

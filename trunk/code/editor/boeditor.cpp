@@ -151,17 +151,17 @@ void BoEditorApp::initMenuBar()
   // menuBar entry file_menu
 
   QPopupMenu *file_menu = new QPopupMenu();
-  file_menu->insertItem(BarIcon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
+  file_menu->insertItem(BarIcon("mini/bosonapp"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
   file_menu->insertSeparator();
-  file_menu->insertItem(BarIcon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
-  file_menu->insertItem(BarIcon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
+  file_menu->insertItem(BarIcon("filenew"), i18n("&New"), ID_FILE_NEW );
+  file_menu->insertItem(BarIcon("fileopen"), i18n("&Open..."), ID_FILE_OPEN );
   file_menu->insertItem(i18n("Open &recent..."), file_menu_recent, ID_FILE_RECENT );
   file_menu->insertSeparator();
-  file_menu->insertItem(BarIcon("filefloppy.xpm") ,i18n("&Save"), ID_FILE_SAVE );
+  file_menu->insertItem(BarIcon("filefloppy") ,i18n("&Save"), ID_FILE_SAVE );
   file_menu->insertItem(i18n("Save &as"), ID_FILE_SAVE_AS );
   file_menu->insertItem(i18n("&Close"), ID_FILE_CLOSE );
   file_menu->insertSeparator();
-  file_menu->insertItem(BarIcon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
+  file_menu->insertItem(BarIcon("fileprint"), i18n("&Print"), ID_FILE_PRINT );
   file_menu->insertSeparator(); 
   file_menu->insertItem(i18n("C&lose Window"), ID_FILE_CLOSE_WINDOW);
   file_menu->insertSeparator();
@@ -181,12 +181,12 @@ void BoEditorApp::initMenuBar()
   // 
   QPopupMenu *edit_menu = new QPopupMenu();
 
-  edit_menu->insertItem(BarIcon("mini.destroy.xpm"), i18n("&Destroy"), ID_EDIT_DESTROY );
+  edit_menu->insertItem(BarIcon("mini.destroy"), i18n("&Destroy"), ID_EDIT_DESTROY );
   edit_menu->setAccel(CTRL+Key_D, ID_EDIT_DESTROY);
 
   /*
-  edit_menu->insertItem(BarIcon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
-  edit_menu->insertItem(BarIcon("editpaste.xpm"), i18n("&Paste"), ID_EDIT_PASTE );
+  edit_menu->insertItem(BarIcon("editcopy"), i18n("&Copy"), ID_EDIT_COPY );
+  edit_menu->insertItem(BarIcon("editpaste"), i18n("&Paste"), ID_EDIT_PASTE );
  
   //edit_menu key accelerators
   edit_menu->setAccel(CTRL+Key_X, ID_EDIT_CUT);
@@ -245,15 +245,15 @@ void BoEditorApp::initToolBars()
   // TOOLBAR
   // set tool_bar_0 the current toolBar and the position due to config file
   tool_bar_0 = toolBar(0);
-  tool_bar_0->insertButton(BarIcon("configure.xpm"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
-  tool_bar_0->insertButton(BarIcon("flag.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
-  tool_bar_0->insertButton(BarIcon("stop.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
-  tool_bar_0->insertButton(BarIcon("filedel.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
-  tool_bar_0->insertButton(BarIcon("home.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
-  tool_bar_0->insertButton(BarIcon("idea.xpm"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
+  tool_bar_0->insertButton(BarIcon("configure"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
+  tool_bar_0->insertButton(BarIcon("flag"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
+  tool_bar_0->insertButton(BarIcon("stop"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
+  tool_bar_0->insertButton(BarIcon("filedel"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
+  tool_bar_0->insertButton(BarIcon("home"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
+  tool_bar_0->insertButton(BarIcon("idea"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
   tool_bar_0->insertSeparator();
-  tool_bar_0->insertButton(BarIcon("exit.xpm"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
-  tool_bar_0->insertButton(BarIcon("help.xpm"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
+  tool_bar_0->insertButton(BarIcon("exit"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
+  tool_bar_0->insertButton(BarIcon("help"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
 
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC TOOLBARS HERE -e.g. tool_bar_1:

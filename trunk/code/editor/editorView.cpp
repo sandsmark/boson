@@ -42,7 +42,7 @@
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
+editorView::editorView (visualField *p, QWidget *parent, const char *name)
 	:visualView(p,parent,name)
 {
 	int		i;

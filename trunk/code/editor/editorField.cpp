@@ -22,7 +22,7 @@
 
 #include "editorField.h"
   
-editorField::editorField(QObject *parent, const char *name=0L)
+editorField::editorField(QObject *parent, const char *name)
 	: visualField(parent,name)
 {
 	mobiles.resize(149);
