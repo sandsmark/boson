@@ -6,5 +6,6 @@ METASOURCES = AUTO
 
 libbopui_la_SOURCES = \
 	bopui.cpp \
-	bopuiaction.cpp
+	bopuiaction.cpp \
+	bopumenubar.cpp
 
