@@ -1175,8 +1175,7 @@ void BosonCanvas::removeItem(BosonItem* item)
 {
  removeAnimation(item);
  d->mAllItems.remove(item);
- BoItemList::Iterator it;
- for (it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
+ for (BoItemList::Iterator it = d->mAllItems.begin(); it != d->mAllItems.end(); ++it) {
 	(*it)->itemRemoved(item);
  }
  if (RTTI::isUnit(item->rtti())) {
@@ -1187,8 +1186,7 @@ void BosonCanvas::removeItem(BosonItem* item)
  }
 
  // remove from all advance lists
- QMap<int, QPtrList<BosonItem> >::Iterator it;
- for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+ for (QMap<int, QPtrList<BosonItem> >::Iterator it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).removeRef(item);
  }
  d->mChangeAdvanceList.removeRef(item);
