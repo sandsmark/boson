@@ -6,4 +6,4 @@ Id=1
 Health=200
 MineralCost=250
 Producer=10
-Requisities=0,5
+Requisities=4,5,3

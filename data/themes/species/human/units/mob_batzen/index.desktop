@@ -9,6 +9,7 @@ WeaponRange=4
 WeaponDamage=10
 Reload=10
 Producer=0
+Requisities=3
 
 [Boson Mobile Unit]
 Speed=4

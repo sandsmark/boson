@@ -6,3 +6,4 @@ Id=12
 Health=300
 MineralCost=400
 Producer=10
+Requisities=5,2,3

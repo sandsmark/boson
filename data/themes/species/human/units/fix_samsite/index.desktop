@@ -11,3 +11,4 @@ Reload=15
 CanShootAtAirUnits=true
 CanShootAtLandUnits=false
 Producer=10
+Requisities=5,0,2
