@@ -22,6 +22,7 @@
 #include <bodebug.h>
 #include "boson.h"
 #include "bosonmessage.h"
+#include "boeventloop.h"
 
 #include <kgame/kgamemessage.h>
 #include <kgame/kplayer.h>
@@ -31,6 +32,7 @@
 #include <qptrlist.h>
 #include <qptrqueue.h>
 #include <qbuffer.h>
+#include <qapplication.h>
 
 BoMessage::BoMessage(QByteArray& _message, int _msgid, Q_UINT32 _receiver, Q_UINT32 _sender, Q_UINT32 _clientId, unsigned int _advanceCallsCount)
 		: byteArray(_message),
@@ -194,6 +196,7 @@ bool BoMessageDelayer::processMessage(BoMessage* m)
 				// not, usually.
 				boWarning(300) << k_funcinfo << "advance call " << mBoson->advanceCallsCount() << ": now " << mAdvanceMessageWaiting << " advance messages delayed" << endl;
 			}
+			((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
 			break;
 		default:
 			break;
@@ -225,6 +228,7 @@ void BoMessageDelayer::processDelayed()
 	case BosonMessage::AdvanceN:
 //		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		mAdvanceMessageWaiting--;
+		((BoEventLoop*)qApp->eventLoop())->setAdvanceMessagesWaiting(mAdvanceMessageWaiting);
 		break;
 	default:
 		break;

@@ -25,6 +25,7 @@
 #include "boversion.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include "boeventloop.h"
 #include <config.h>
 
 #include <kaboutdata.h>
@@ -95,6 +96,8 @@ int main(int argc, char **argv)
 #ifdef BOSON_COMPILE_STATIC
  KApplication::disableAutoDcopRegistration();
 #endif
+
+ BoEventLoop eventLoop(0, "main event loop");
  BoApplication app;
  KGlobal::locale()->insertCatalogue("libkdegames");
 
