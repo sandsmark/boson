@@ -7,6 +7,7 @@
 #include <kdebug.h>
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
+#include <kmessagebox.h>
 
 #include <qpushbutton.h>
 #include <qvgroupbox.h>
@@ -41,10 +42,8 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
  d = new KGameDialogBosonConfigPrivate;
 
  QVGroupBox* mapBox = new QVGroupBox(i18n("Map and Scenario"), this);
-// QVBoxLayout* mapLayout = new QVBoxLayout(mapBox, 5, 5);
  d->mMapCombo = new QComboBox(mapBox);
  connect(d->mMapCombo, SIGNAL(activated(int)), this, SLOT(slotMapChanged(int)));
-// mapLayout->addWidget(d->mMapCombo);
  QStringList list = BosonMap::availableMaps();
  for (unsigned int i = 0; i < list.count(); i++) {
 	KSimpleConfig cfg(list[i]);
@@ -60,7 +59,6 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
  d->mScenarioCombo = new QComboBox(mapBox);
  connect(d->mScenarioCombo, SIGNAL(activated(int)), 
 		this, SLOT(slotScenarioChanged(int)));
-// mapLayout->addWidget(d->mScenarioCombo);
 
  QPushButton* addComputerPlayer = new QPushButton(i18n("&Add Computer Player"), this);
  connect(addComputerPlayer, SIGNAL(pressed()), 
@@ -87,7 +85,6 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
 	kdError() << "invalid index " << index << endl;
 	return;
  }
- emit signalMapChanged(d->mMapIndex2FileName[index]);
 
  // update possible scenario files:
  QStringList list = BosonScenario::availableScenarios(d->mMapIndex2Identifier[index]);
@@ -100,6 +97,13 @@ void KGameDialogBosonConfig::slotMapChanged(int index)
 	QString fileName = list[i].left(list[i].length() - strlen(".desktop")) + QString::fromLatin1(".bsc");
 	d->mScenarioIndex2FileName.insert(i, fileName);
  }
+ 
+ if (d->mScenarioIndex2FileName.count() == 0) {
+	kdError() << "No valid scenario files" << endl;
+	KMessageBox::sorry(this, i18n("No valid scenario files for this map!"));
+	return;
+ }
+ emit signalMapChanged(d->mMapIndex2FileName[index]);
  d->mScenarioCombo->setCurrentItem(0);
  slotScenarioChanged(0);
 }
