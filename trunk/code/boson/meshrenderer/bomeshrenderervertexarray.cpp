@@ -60,6 +60,7 @@ public:
 
 BoMeshRendererVertexArray::BoMeshRendererVertexArray() : BoMeshRenderer()
 {
+ mPreviousModel = 0;
 }
 
 BoMeshRendererVertexArray::~BoMeshRendererVertexArray()
@@ -144,6 +145,9 @@ void BoMeshRendererVertexArray::setModel(BosonModel* model)
  if (!model) {
 	return;
  }
+ if (mPreviousModel == model) {
+	return;
+ }
  BoMeshRendererModelDataVA* data = (BoMeshRendererModelDataVA*)model->meshRendererModelData();
  BO_CHECK_NULL_RET(data);
 
@@ -151,6 +155,8 @@ void BoMeshRendererVertexArray::setModel(BosonModel* model)
  glVertexPointer(3, GL_FLOAT, stride, data->mPoints);
  glTexCoordPointer(2, GL_FLOAT, stride, data->mPoints + 3);
  glNormalPointer(GL_FLOAT, stride, data->mPoints + (3 + 2));
+
+ mPreviousModel = model;
 }
 
 void BoMeshRendererVertexArray::initFrame()
@@ -162,6 +168,8 @@ void BoMeshRendererVertexArray::initFrame()
  glEnableClientState(GL_VERTEX_ARRAY);
  glEnableClientState(GL_NORMAL_ARRAY);
  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+ mPreviousModel = 0;
 }
 
 void BoMeshRendererVertexArray::deinitFrame()

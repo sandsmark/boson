@@ -31,6 +31,8 @@ public:
 	virtual void setModel(BosonModel* model);
 
 protected:
+	virtual void initFrame();
+	virtual void deinitFrame();
 	virtual unsigned int render(const QColor* teamColor, BoMesh* mesh, BoMeshLOD* lod);
 
 	virtual BoMeshRendererModelData* createModelData() const;
@@ -49,6 +51,8 @@ protected:
 
 	bool hasVBOExtension() const;
 
+private:
+	const BosonModel* mPreviousModel;
 };
 
 #endif

@@ -62,6 +62,9 @@ protected:
 
 	unsigned int countModelPoints(const BosonModel* model) const;
 	void fillModelPointsArray(BosonModel* model, float* array, unsigned int maxLODCount, unsigned int* offsets, unsigned int* pointCount);
+
+private:
+	const BosonModel* mPreviousModel;
 };
 
 #endif
