@@ -66,7 +66,7 @@ public:
 	int mWork;
 	int mWidth;
 	int mHeight;
-	
+	int mBoundingRect;
 };
 
 KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
@@ -91,6 +91,7 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
  d->mWidth = d->mUnitList->addColumn(i18n("Width"));
  d->mHeight = d->mUnitList->addColumn(i18n("Height"));
+ d->mBoundingRect = d->mUnitList->addColumn(i18n("BoundingRect"));
  layout->addWidget(d->mUnitList);
 
  QVBoxLayout* l = new QVBoxLayout(layout);
@@ -185,6 +186,9 @@ void KGameUnitDebug::update(QListViewItem* item, Unit* unit)
  item->setText(d->mSpeed, QString::number(unit->speed()));
  item->setText(d->mWidth, QString::number(unit->width()));
  item->setText(d->mHeight, QString::number(unit->height()));
+
+ QRect r = unit->boundingRect();
+ item->setText(d->mBoundingRect, QString("%1,%2,%3,%4").arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height()));
 }
 
 void KGameUnitDebug::slotUnitPropertyChanged(KGamePropertyBase* prop)
