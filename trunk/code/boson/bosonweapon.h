@@ -43,25 +43,25 @@ class BosonWeaponProperties
      * @return The weapon range of this unit. It's a number of cells, so multiply
      *  with BO_TILE_SIZE to use it on the canvas.
     **/
-    inline unsigned long int range()  { return mRange; };
+    inline unsigned long int range() const  { return mRange; };
     /**
      * @return Whether this unit can shoot at aircrafts.
      **/
-    inline bool canShootAtAirUnits()  { return mCanShootAtAirUnits; };
+    inline bool canShootAtAirUnits() const  { return mCanShootAtAirUnits; };
     /**
      * @return Whether this unit can shoot at land units
      **/
-    inline bool canShootAtLandUnits()  { return mCanShootAtLandUnits; };
+    inline bool canShootAtLandUnits() const  { return mCanShootAtLandUnits; };
     /**
      * @return The number of advance calls until the weapon is reloaded
      **/
-    inline unsigned int reloadingTime()  { return mReload; };
+    inline unsigned int reloadingTime() const  { return mReload; };
 
-    inline unsigned long int id()  { return mId; };
+    inline unsigned long int id() const  { return mId; };
 
-    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz)
+    BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz) const
         { return mShotProp->newShot(attacker, x, y, z, tx, ty, tz); };
-    QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z);
+    QPtrList<BosonParticleSystem> newShootParticleSystems(float x, float y, float z) const;
         //{ if(mShootParticleSystem) return mShootParticleSystem->newSystem(x, y, z); };
 
   private:
@@ -86,17 +86,17 @@ class BosonWeapon
     ~BosonWeapon();
 
     inline void reload()  { if(mReloadCounter > 0) mReloadCounter--; };
-    
+
     bool canShootAt(Unit* u);
-    inline bool reloaded()  { return (mReloadCounter == 0); };
-    
-    inline BosonWeaponProperties* properties()  { return mProp; };
+    inline bool reloaded() const  { return (mReloadCounter == 0); };
+
+    inline const BosonWeaponProperties* properties() const  { return mProp; };
 
     void shoot(Unit* u);
     void shoot(float x, float y, float z);
 
   private:
-    BosonWeaponProperties* mProp;
+    const BosonWeaponProperties* mProp;
     Unit* mUnit;
     int mReloadCounter;
 };

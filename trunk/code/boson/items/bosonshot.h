@@ -56,28 +56,28 @@ class BosonShotProperties
     /**
      * @return Damage range of missile of this unit, e.g. range in what units will be damaged
      **/
-    unsigned long int damageRange() { return mDamageRange; }
+    unsigned long int damageRange() const { return mDamageRange; };
     /**
      * The damage this unit makes to other units. Negative values means
      * repairing
     **/
-    long int damage() { return mDamage; }
+    long int damage() const { return mDamage; };
     /**
      * @return Speed of missile of this unit (per second) or 0 if speed is infinite
      **/
-    unsigned long int speed()  { return mSpeed; }
+    unsigned long int speed() const  { return mSpeed; };
 
-    inline SpeciesTheme* theme()  { return mTheme; }
+    inline SpeciesTheme* theme() const  { return mTheme; };
 
-    inline long unsigned int id()  { return mId; }
-
-    inline BosonModel* model()  { return mModel; }
+    inline long unsigned int id() const  { return mId; };
+    
+    inline BosonModel* model()  { return mModel; };
 
     BosonShot* newShot(Unit* attacker, float x, float y, float z, float tx, float ty, float tz);
 
-    QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z);
+    QPtrList<BosonParticleSystem> newFlyParticleSystems(float x, float y, float z) const;
         //{ if(mFlyParticleSystem) return mFlyParticleSystem->newSystem(x, y, z); };
-    QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z);
+    QPtrList<BosonParticleSystem> newHitParticleSystems(float x, float y, float z) const;
         //{ if(mHitParticleSystem) return mHitParticleSystem->newSystem(x, y, z); };
 
   private:
@@ -104,12 +104,12 @@ class BosonShot : public BosonItem
 
 //    inline BoVector3 pos()  { return mPos; }
 
-    inline Player* owner()  { return mOwner; }
-    inline BosonShotProperties* properties()  { return mProp; }
+    inline Player* owner()  { return mOwner; };
+    inline const BosonShotProperties* properties() const  { return mProp; };
+    
+    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; };
 
-    inline QPtrList<BosonParticleSystem>* flyParticleSystems()  { return &mFlyParticleSystems; }
-
-    inline bool isActive() { return mActive; }
+    inline bool isActive() const  { return mActive; };
 
     inline virtual int rtti() const  { return RTTI::Shot; }
 
@@ -118,7 +118,7 @@ class BosonShot : public BosonItem
     unsigned int mSteps;
     bool mActive;
     Player* mOwner;
-    BosonShotProperties* mProp;
+    const BosonShotProperties* mProp;
     QPtrList<BosonParticleSystem> mFlyParticleSystems;
 };
 
