@@ -145,8 +145,9 @@ class BoLODFace
 public:
 	BoLODVertex* vertex[3];
 	BoVector3 normal;
+	unsigned long int smoothGroup;
 
-	BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2);
+	BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2, unsigned long int smoothgroup = 0);
 	~BoLODFace();
 
 	void computeNormal();
@@ -181,7 +182,7 @@ public:
 
 
 
-BoLODFace::BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2)
+BoLODFace::BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2, unsigned long int sg)
 {
  if (v0 == v1 || v1 == v2 || v2 == v0) {
 	boError(120) << k_funcinfo << "Vertices (" << v0->id << ", " << v1->id << ", " << v2->id << ") must be unique!" << endl;
@@ -190,6 +191,7 @@ BoLODFace::BoLODFace(BoLODVertex* v0, BoLODVertex* v1, BoLODVertex* v2)
  vertex[0] = v0;
  vertex[1] = v1;
  vertex[2] = v2;
+ smoothGroup = sg;
  computeNormal();
  for (int i = 0; i < 3; i++) {
 	vertex[i]->face.appendItem(this);
@@ -462,7 +464,7 @@ void BoLODBuilder::buildLOD()
 	//		mVertices[face(i)->pointIndex()[0]]->id << ", " <<
 	//		mVertices[face(i)->pointIndex()[1]]->id << " and " << mVertices[face(i)->pointIndex()[2]]->id << endl;
 	BoLODFace* f = new BoLODFace(mVertices[face(i)->pointIndex()[0]],
-			mVertices[face(i)->pointIndex()[1]], mVertices[face(i)->pointIndex()[2]]);
+			mVertices[face(i)->pointIndex()[1]], mVertices[face(i)->pointIndex()[2]], face(i)->smoothGroup());
 	mFaces.insert(i, f);
  }
  //boDebug(120) << k_funcinfo << "faces added" << endl;
@@ -533,7 +535,7 @@ QValueList<BoFace> BoLODBuilder::getLOD(float percent, float maxcost)
 
  for (i = 0; i < facesCount(); i++) {
 	BoLODFace* f = new BoLODFace(mVertices[face(i)->pointIndex()[0]],
-			mVertices[face(i)->pointIndex()[1]], mVertices[face(i)->pointIndex()[2]]);
+			mVertices[face(i)->pointIndex()[1]], mVertices[face(i)->pointIndex()[2]], face(i)->smoothGroup());
 	mFaces.insert(i, f);
  }
 
@@ -573,6 +575,7 @@ QValueList<BoFace> BoLODBuilder::getLOD(float percent, float maxcost)
 	points[2] = mFaces[i]->vertex[2]->id;
 	f.setPointIndex(points);
 	f.setAllNormals(mFaces[i]->normal);
+	f.setSmoothGroup(mFaces[i]->smoothGroup);
 	faceList.append(f);
  }
 
