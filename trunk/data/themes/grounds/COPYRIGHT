@@ -1,0 +1,26 @@
+All ground files are published under the terms of the GNU GPL.
+
+Here you can find sources of the files - or most of them (we'll probably forget to
+add newly added files here. mail boson-devel@lists.sourceforge.net if a file is
+missing here).
+Some files might have been under a less restrictive license (meaning: it allows
+re-licensing) or even under the public domain. They got relicensed by us. Feel
+free to use either the original license or the GPL. If the files were modified
+by us you *have* to use GPL (or mail us:)).
+
+
+Every ground consits of lots of pixmaps. I try to name them all - i.e. number of
+types and number of versions per type. please keep in mind that more
+versions/types/whatever might get added and we probably won't add them here.
+
+
+"earth"
+Currently there are desert, dwater, grass, grass_mineral, grass_oil, water
+and water_oil. each type has 4 versions.
+additionally the dummy file hidden-00.png.
+there are transitions dirs desert_water, dwater_water, grass_desert, grass_water.
+every transition has 28 types each with 4 versions. 
+finally there is a dir "oil", 4 versions for every ground type.
+All files were made by Benjamin Adler <benadler@gmx.net>
+
+
