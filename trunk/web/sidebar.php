@@ -48,6 +48,7 @@ function sidebar_links_box()
 {
 sidebar_box_begin("Links");
 draw_link("Main page", "index.php");
+draw_link("All news", "all-news.php");
 draw_link("Screenshots", "screenshots.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
@@ -58,6 +59,15 @@ draw_link("Related links", "links.php");
 draw_link("Change style", "options.php");
 sidebar_box_end();
 }
+
+function sidebar_old_news()
+{
+sidebar_box_begin("Older News");
+display_old_news();
+sidebar_box_end();
+}
+
+
 
 function sidebar_stats_box()
 {
