@@ -36,6 +36,11 @@ class BoAutoGameCamera;
 class BoCamera
 {
   public:
+    enum CameraType
+    {
+      Camera = 0,
+      GameCamera = 1
+    };
     BoCamera();
     BoCamera(const BoCamera& c)
     {
@@ -44,6 +49,8 @@ class BoCamera
 
 
     virtual ~BoCamera();
+
+    virtual int cameraType() const { return Camera; }
 
     /**
      * Set the auto camera. A BoCamera object has always exactly one auto
@@ -149,6 +156,8 @@ class BoGameCamera : public BoCamera
     virtual ~BoGameCamera()
     {
     }
+
+    virtual int cameraType() const { return GameCamera; }
 
     /**
      * @return @ref autoCamera casted to a @ref BoAutoGameCamera.
