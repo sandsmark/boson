@@ -64,6 +64,12 @@ public:
 	QMap<int, unsigned int> mItemCount;
 
 	QPtrList<BosonParticleSystem> mParticles;
+
+	// by default ALL items are in "work" == -1. if an item changes its work
+	// (i.e. it is a unit and it called setAdvanceWork()) then it will go to
+	// another list (once slotAdvance() reaches its end)
+	QMap<int, QPtrList<BosonItem> > mWork2AdvanceList;
+	QPtrList<BosonItem> mChangeAdvanceList; // work has been changed - request to change advance list
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -95,6 +101,11 @@ void BosonCanvas::quitGame()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mParticles.clear();
+ QMap<int, QPtrList<BosonItem> >::Iterator it;
+ for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+	(*it).clear();
+ }
+ d->mChangeAdvanceList.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -126,10 +137,144 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
+#define USE_ADVANCE_LISTS 1
  boProfiling->advance(true, advanceCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  boProfiling->advanceFunction(true);
+
+#if USE_ADVANCE_LISTS
+ // first we need to call *all* BosonItem::advance() functions.
+ // AB: profiling information will be inaccurate because of this... we are
+ // collecting for every item advance() here, and below for some items
+ // advanceFunction(). those will be listed as *different* items...
+ for (; animIt.current(); ++animIt) {
+	unsigned int id;
+	int work;
+	BosonItem* s = animIt.current();
+	if (RTTI::isUnit(s->rtti())) {
+		id = ((Unit*)s)->id();
+		work = (int)((Unit*)s)->advanceWork();
+	} else {
+		id = 0;
+		work = -1;
+	}
+	boProfiling->advanceItemStart(s->rtti(), id, work);
+	boProfiling->advanceItem(true);
+	s->advance(advanceCount);
+	boProfiling->advanceItem(false);
+	boProfiling->advanceItemStop();
+ }
+
+ // now the rest - mainly call BosonItem::advanceFunction().
+ // this depends on in which list an item resides (changed when Unit::work()
+ // changes). normal items are usually in -1.
+ QMap<int, QPtrList<BosonItem> >::Iterator it;
+ for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+	int work = it.key();
+	bool skip = false;
+	switch (work) {
+		// TODO: instead of a big switch we should maintain a
+		// d->mWork2AdvancePeriod map
+		case -1:
+			// *always* execute this!
+			skip = false;
+			break;
+		case (int)UnitBase::WorkNone:
+			if (advanceCount % 10 != 0) {
+				skip = true;
+			}
+			break;
+		case (int)UnitBase::WorkMove:
+			skip = false;
+			break;
+		case (int)UnitBase::WorkAttack:
+			if (advanceCount % 5 != 0) {
+				skip = true;
+			}
+			break;
+		case (int)UnitBase::WorkConstructed:
+			if (advanceCount % 20 != 0) {
+				skip = true;
+			}
+			break;
+		case (int)UnitBase::WorkDestroyed:
+			if (advanceCount % 20 != 0) {
+				skip = true;
+			}
+			break;
+		case (int)UnitBase::WorkFollow:
+			if (advanceCount % 5 != 0) {
+				skip = true;
+			}
+			break;
+		case (int)UnitBase::WorkPlugin:
+			skip = false;
+			break;
+		case (int)UnitBase::WorkTurn:
+			skip = false;
+			break;
+		default:
+			// shouldn't happen! (TODO: add a warning! havent done
+			// so in favor of testing)
+			skip = false;
+			break;
+	}
+	if (skip) {
+		continue;
+	}
+	QPtrListIterator<BosonItem> itemIt(*it);
+	for (; itemIt.current(); ++itemIt) {
+		unsigned int id;
+		int work;
+		BosonItem* s = itemIt.current();
+		if (RTTI::isUnit(s->rtti())) {
+			id = ((Unit*)s)->id();
+			work = (int)((Unit*)s)->advanceWork();
+		} else {
+			id = 0;
+			work = -1;
+		}
+		boProfiling->advanceItemStart(s->rtti(), id, work);
+		boProfiling->advanceItemFunction(true);
+		if (advanceFlag) { // bah - inside the loop..
+			s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		} else {
+			s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		}
+		boProfiling->advanceItemFunction(false);
+
+		// AB: moveBy() is *NOT* called if advanceFunction() isn't
+		// called for an item!!
+		// --> i.e. if it isn't in one of the lists that are executed
+		// here
+		boProfiling->advanceItemMove(true);
+		if (s->xVelocity() || s->yVelocity() || s->zVelocity()) {
+			s->moveBy(s->xVelocity(), s->yVelocity(), s->zVelocity());
+		}
+		boProfiling->advanceItemMove(false);
+		boProfiling->advanceItemStop();
+	}
+ }
+
+ // we completed iterating through the advance lists. now we might have to
+ // change the list for some items.
+ QPtrListIterator<BosonItem> changeIt(d->mChangeAdvanceList);
+ for (; changeIt.current(); ++changeIt) {
+	BosonItem* item = changeIt.current();
+	removeFromAdvanceLists(item); // AB: this will probably take too much time :(
+	if (!RTTI::isUnit(item->rtti())) {
+		// oops - this should not (yet?) happen!
+		// --> append to default list
+		d->mWork2AdvanceList[-1].append(item);
+		continue;
+	}
+	Unit* unit = (Unit*)item;
+	d->mWork2AdvanceList[unit->advanceWork()].append(item);
+ }
+ d->mChangeAdvanceList.clear();
+
+#else // USE_ADVANCE_LISTS
  if (advanceFlag) {
 	// note: the advance methods must not change the advanceFunction()s
 	// here!
@@ -203,6 +348,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		++animIt;
 	}
  }
+#endif
  boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
@@ -286,12 +432,22 @@ void BosonCanvas::addAnimation(BosonItem* item)
 {
  if (!d->mAnimList.contains(item)) {
 	d->mAnimList.append(item);
+
+	// by default it goes to "work" == -1. units will change this.
+	d->mWork2AdvanceList[-1].append(item);
  }
 }
 
 void BosonCanvas::removeAnimation(BosonItem* item)
 {
  d->mAnimList.removeRef(item);
+
+ // remove from all advance lists
+ QMap<int, QPtrList<BosonItem> >::Iterator it;
+ for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+	(*it).removeRef(item);
+ }
+ d->mChangeAdvanceList.removeRef(item);
 }
 
 void BosonCanvas::unitMoved(Unit* unit, float oldX, float oldY)
@@ -841,4 +997,32 @@ void BosonCanvas::load(QDataStream& stream)
 			p, this, stream);
  }
 }
+
+void BosonCanvas::changeAdvanceList(BosonItem* item)
+{
+ if (!d->mChangeAdvanceList.contains(item)) { // AB: this requires a complete search (I guess at least)! might be slow
+	d->mChangeAdvanceList.append(item);
+ }
+}
+
+void BosonCanvas::removeFromAdvanceLists(BosonItem* item)
+{
+ // this is slow :(
+ // we need to iterator through all lists and all lists need to search for the
+ // item. since all (except one) will fail finding the item they need to search
+ // very long (remember: a search for a not-existing item usually takes long).
+ // we cannot use an "oldWork" variable or so, as we can never depend 100% on
+ // it. there may be several situations where it is unreliable (loading games,
+ // changing advancWork() very often in one advance call, ...)
+ //
+ // possible solutions may be to add a QPtrDict which maps item->list. so
+ // whenever we add an item to a list, we also add this item to that dict (and
+ // of course remove when it when it gets removed from the list). then we could
+ // get the correct list in constant time.
+ QMap<int, QPtrList<BosonItem> >::Iterator it;
+ for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
+	(*it).removeRef(item);
+ }
+}
+
 

@@ -99,9 +99,14 @@ public:
 	 **/
 	float* heightMap() const;
 
-	virtual void addAnimation(BosonItem* item);
-	virtual void removeAnimation(BosonItem* item);
+	void addAnimation(BosonItem* item);
+	void removeAnimation(BosonItem* item);
 	unsigned int animationsCount() const;
+
+	/**
+	 * Request to change the advance list in the next advance phase.
+	 **/
+	void changeAdvanceList(BosonItem*);
 
 	/**
 	 * Add @p item to the list of items in the canvas. This should get
@@ -335,6 +340,8 @@ signals:
 protected:
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
+
+	void removeFromAdvanceLists(BosonItem* item);
 
 private:
 	void init();
