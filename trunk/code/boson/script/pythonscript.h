@@ -35,6 +35,7 @@ class PythonScript : public BosonScript
     virtual ~PythonScript();
 
     virtual void loadScript(QString file);
+    virtual void loadScriptFromString(const QString& string);
 
     virtual void advance();
     virtual void init();
