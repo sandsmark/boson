@@ -128,6 +128,7 @@ void Unit::setTarget(Unit* target)
  }
  if (!target->isDestroyed()) {
 	setWork(WorkAttack);
+	setAnimated(true);
  }
 }
 
@@ -269,31 +270,20 @@ unsigned int Unit::waypointCount() const
 void Unit::moveTo(const QPoint& pos)
 {
  d->mTarget = 0;
- clearWaypoints();
- // Find our position
-// QRect currentPos = boundingRect();
-// int x = currentPos.center().x();
-// int y = currentPos.center().y();
- // Find path to target
- QValueList<QPoint> path = BosonPath::findPath(this, pos.x(), pos.y());
-/* BosonPath path(this, x / BO_TILE_SIZE, y / BO_TILE_SIZE,
-		pos.x() / BO_TILE_SIZE, pos.y() / BO_TILE_SIZE);
- if (path.findPath()) {
-	kdDebug() << k_lineinfo << "found path :-))" << endl;
- } else {
-	kdWarning() << k_funcinfo << ": could not find path" << endl;
- }
- kdDebug() << path.path.size() << endl;
- for(vector<QPoint>::iterator it = path.path.begin(); it != path.path.end(); ++it) {
-	kdDebug() << "adding waypoint" << endl;
-	addWaypoint((*it));
- }*/
- for (int unsigned i = 0; i < path.count(); i++) {
-	 addWaypoint(path[i]);
- }
- if (path.count() > 0) {
+ moveTo(pos.x(), pos.y());
+ if (waypointCount() > 0) {
 	setWork(WorkMove);
 	setAnimated(true);
+ }
+}
+
+void Unit::moveTo(int x, int y)
+{
+ clearWaypoints();
+ // Find path to target
+ QValueList<QPoint> path = BosonPath::findPath(this, x, y);
+ for (int unsigned i = 0; i < path.count(); i++) {
+	 addWaypoint(path[i]);
  }
 }
 
@@ -307,7 +297,7 @@ const QPoint& Unit::currentWaypoint() const
  return d->mWaypoints[0];
 }
 
-void Unit::stopMoving(bool send)
+void Unit::stopMoving()
 {
  kdDebug() << "stopMoving" << endl;
  clearWaypoints();
@@ -344,9 +334,11 @@ void Unit::stopMoving(bool send)
  // sendStopMoving below still resides here as of testing and debugging. Remove
  // it as soon as it's sure that we don't need it anymore. Will save a lot of
  // network traffik!
- if (send) {
+ 
+ // UPDATE (01/12/22): This is now obsolete. we don't need it anymore.
+// if (send) {
 //	owner()->sendStopMoving(this);
- }
+// }
 }
 
 void Unit::stopAttacking()
@@ -419,10 +411,18 @@ void Unit::attackUnit(Unit* target)
 		stopAttacking();
 		return;
 	}
-	// FIXME: no waypoint yet...
+	// TODO: make sure that the attakced unit has not moved!!
+	// if it has moved the waypoints should be regenerated (perhaps if the
+	// unit moved across one or more cells?)
+	if (waypointCount() == 0) {
+		moveTo(target->x(), target->y());
+	}
 	kdDebug() << "unit not in range - moving..." << endl;
 	advanceMove();
 	return;
+ }
+ if (waypointCount() > 0) {
+	clearWaypoints();
  }
  if (d->mReloadState != 0) {
 //	kdDebug() << "gotta reload first" << endl;

@@ -185,8 +185,6 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			if (unit->range() > 0 && unit->damage() > 0) {
 				kdDebug() << unitId << " attacks " << attackedUnitId << endl;
 				unit->setTarget(attackedUnit);
-				unit->setWork(Unit::WorkAttack);
-				unit->setAnimated(true);
 			}
 		}
 		break;
