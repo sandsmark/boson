@@ -41,10 +41,12 @@
 
 #include <klocale.h>
 #include <kdeversion.h>
+#include <kcrash.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamemessage.h>
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kmessageclient.h>
+#include <kmessagebox.h>
 
 #include <qbuffer.h>
 #include <qtimer.h>
@@ -74,6 +76,15 @@ Boson* Boson::mBoson = 0;
  * the list.
  **/
 static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputerIO>& computerIOList);
+
+/**
+ * See @ref KCrash::setEmergencyFunction
+ *
+ * This tries to save log messages, especially the player input that was made
+ * until now. This might help at reproducing the crash.
+ **/
+static void emergencySave(int signal);
+class BoMessageLogger;
 
 
 /**
@@ -510,6 +521,14 @@ public:
 		return true; // not delayed.
 	}
 
+	// force to delay @p m
+	bool delay(BoMessage* m)
+	{
+		mDelayedMessages.enqueue(m);
+		mDelayedWaiting = true;
+		return true;
+	}
+
 protected:
 	/**
 	 * Process the first delayed message for delivery. Called by @ref unlock
@@ -575,7 +594,7 @@ public:
 		mLoggedMessages.append(message);
 	}
 
-	bool saveGameLog(QIODevice* logDevice)
+	bool saveHumanReadableMessageLog(QIODevice* logDevice)
 	{
 		if (!logDevice) {
 			BO_NULL_ERROR(logDevice);
@@ -597,6 +616,79 @@ public:
 			log.writeRawBytes(m->byteArray.data(), m->byteArray.size());
 			log << endl;
 			++it;
+		}
+		return true;
+	}
+	bool saveMessageLog(QIODevice* logDevice)
+	{
+		if (!logDevice) {
+			BO_NULL_ERROR(logDevice);
+			return false;
+		}
+		if (!logDevice->isOpen()) {
+			boError() << k_funcinfo << "device not open" << endl;
+			return false;
+		}
+		QDataStream stream(logDevice);
+		stream << (Q_UINT32)mLoggedMessages.count();
+		QPtrListIterator<BoMessage> it(mLoggedMessages);
+		while (it.current()) {
+			const BoMessage* m = it.current();
+			stream << (Q_UINT32)m->advanceCallsCount;
+			stream << (Q_INT32)m->msgid;
+			stream << (Q_UINT32)m->sender;
+			stream << (Q_UINT32)m->receiver;
+			stream << (Q_UINT32)m->clientId;
+			stream << m->mArrivalTime;
+			stream << m->mDeliveryTime;
+			stream << m->byteArray;
+			++it;
+		}
+		return true;
+	}
+	static bool loadMessageLog(QIODevice* logDevice, QPtrList<BoMessage>* messages)
+	{
+		if (!logDevice) {
+			BO_NULL_ERROR(logDevice);
+			return false;
+		}
+		if (!logDevice->isOpen()) {
+			boError() << k_funcinfo << "device not open" << endl;
+			return false;
+		}
+		if (!messages) {
+			BO_NULL_ERROR(messages);
+			return false;
+		}
+		if (!messages->isEmpty()) {
+			boError() << k_funcinfo << "logged messages not empty" << endl;
+			return false;
+		}
+		QDataStream stream(logDevice);
+		Q_UINT32 count;
+		stream >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			Q_UINT32 advanceCallsCount;
+			Q_INT32 msgid;
+			Q_UINT32 sender;
+			Q_UINT32 receiver;
+			Q_UINT32 clientId;
+			QTime arrivalTime;
+			QTime deliveryTime;
+			QByteArray byteArray;
+			stream >> advanceCallsCount;
+			stream >> msgid;
+			stream >> sender;
+			stream >> receiver;
+			stream >> clientId;
+			stream >> arrivalTime;
+			stream >> deliveryTime;
+			stream >> byteArray;
+
+			BoMessage* m = new BoMessage(byteArray, msgid, receiver, sender, clientId, advanceCallsCount);
+			m->mArrivalTime = arrivalTime;
+			m->mDeliveryTime = deliveryTime;
+			messages->append(m);
 		}
 		return true;
 	}
@@ -674,10 +766,16 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
  d->mGameSpeed.setLocal(0);
 
  setMinPlayers(1);
+
+ if (KCrash::emergencySaveFunction() != NULL) {
+	boError() << k_funcinfo << "oops - already an emergencySaveFunction set! overwriting!" << endl;
+ }
+ KCrash::setEmergencySaveFunction(emergencySave);
 }
 
 Boson::~Boson()
 {
+ KCrash::setEmergencySaveFunction(NULL);
  delete d->mMessageDelayer;
  delete d->mAdvance;
  delete d->mGameTimer;
@@ -1595,6 +1693,8 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		break;
 	case BosonMessage::IdGameIsStarted:
 	{
+		int flag = 0;
+		stream >> flag;
 		if (sender != messageClient()->adminId()) {
 			boError() << k_funcinfo << "only ADMIN is allowed to send IdGameIsStarted message! sender="
 					<< sender << " ADMIN="
@@ -1602,15 +1702,29 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 			break;
 		}
 
-		if (isServer()) {
-			connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
-		} else {
-			boWarning() << "is not server - cannot start the game!" << endl;
-		}
-
 		ensureComputerIOListValid(this, d->mComputerIOList);
 
 		emit signalGameStarted();
+
+		if (flag != 0 && flag != 1) {
+			boError() << k_funcinfo << "invalid flag value " << flag << endl;
+			flag = 0;
+		}
+		if (flag == 0) {
+			if (isServer()) {
+				connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
+			} else if (!isServer()) {
+				boWarning() << "is not server - cannot start the game!" << endl;
+			}
+		} else if (flag == 1) {
+			boWarning() << k_funcinfo << "starting to re-play from log..." << endl;
+
+			if (!loadFromLogFile()) {
+				slotAddChatSystemMessage(i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
+//				KMessageBox::sorry(0, i18n("You requested to load from a log file, but the game could not be started using the specified file.\nThe current game is now unusable."));
+			} else {
+			}
+		}
 		break;
 	}
 	case BosonMessage::ChangeSpecies:
@@ -2292,35 +2406,53 @@ void Boson::writeGameLog(QTextStream& log)
 // boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
 }
 
-void Boson::saveGameLogs(const QString& prefix)
+bool Boson::saveGameLogs(const QString& prefix)
 {
+ // AB: note that this could even be called _after_ boson has crashed!
+ // try to avoid most methods/classes/pointers
+ // (actually the profiling and boDebug stuff shouldnt be here, either)
  BosonProfiler p(BosonProfiling::SaveGameLogs);
 
+ // this one can be used to reproduce a game.
+ // therefore we start with this one, if everything else fails we still have it.
+ QFile messageLog(prefix + ".messagelog");
+ if (!messageLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << prefix << ".messagelog' for writing!" << endl;
+	return false;
+ }
+ if (!d->mMessageLogger.saveMessageLog(&messageLog)) {
+	boError() << k_funcinfo << "unable to write message log" << endl;
+	return false;
+ }
+ messageLog.close();
+ boDebug() << k_funcinfo << "message log saved to " << messageLog.name() << endl;
+
  // Write gamelog
- QFile gl(prefix + ".gamelog");
- if (!gl.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << prefix << ".gamelog' for writing gamelog!" << endl;
-	return;
+ QFile gameLog(prefix + ".gamelog");
+ if (!gameLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << gameLog.name() << "' for writing gamelog!" << endl;
+	return false;
  }
  QValueList<QByteArray>::iterator it;
  for (it = d->mGameLogs.begin(); it != d->mGameLogs.end(); it++) {
-	gl.writeBlock(qUncompress(*it));
+	gameLog.writeBlock(qUncompress(*it));
  }
- gl.close();
+ gameLog.close();
 
  // Write network message log
- QFile nl(prefix + ".netlog");
- if (!nl.open(IO_WriteOnly)) {
-	boError() << k_funcinfo << "Can't open output file '" << prefix << ".netlog' for writing!" << endl;
-	return;
+ QFile netLog(prefix + ".netlog");
+ if (!netLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << netLog.name() << "' for writing!" << endl;
+	return false;
  }
- if (!d->mMessageLogger.saveGameLog(&nl)) {
-	boError() << k_funcinfo << "unable to write message log" << endl;
-	return;
+ if (!d->mMessageLogger.saveHumanReadableMessageLog(&netLog)) {
+	boError() << k_funcinfo << "unable to write (human readable) message log" << endl;
+	return false;
  }
- nl.close();
+ netLog.close();
 
  boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+ return true;
 }
 
 unsigned int Boson::advanceCallsCount() const
@@ -2397,3 +2529,91 @@ static void ensureComputerIOListValid(Boson* boson, const QPtrList<KGameComputer
  }
 
 }
+
+
+
+// TODO: save all files in a certain directory, not in home
+static void emergencySave(int signal)
+{
+ Boson* boson = Boson::boson();
+ if (!boson) {
+	return;
+ }
+ fprintf(stdout, "emergencySave(): retrieving current time for filenames\n");
+ QDateTime time = QDateTime::currentDateTime();
+ QString year, month, day, hour, minute, second;
+ year.sprintf("%d", time.date().year());
+ month.sprintf("%02d", time.date().month());
+ day.sprintf("%02d", time.date().day());
+ hour.sprintf("%02d", time.time().hour());
+ minute.sprintf("%02d", time.time().minute());
+ second.sprintf("%02d", time.time().second());
+ QString prefix = QString("boson_crash-%1%2%3%4%5%6").
+	 	arg(year).
+		arg(month).
+		arg(day).
+		arg(hour).
+		arg(minute).
+		arg(second);
+ fprintf(stdout, "emergencySave(): trying to save game logs\n");
+ if (!boson->saveGameLogs(prefix)) {
+	fprintf(stderr, "emergencySave(): game logs could not be saved\n");
+ } else {
+	fprintf(stdout, "emergencySave(): game logs saved\n");
+ }
+}
+
+
+// At this point the game has been completely loaded/started already, all we
+// have to do is to load the messages.
+// (this is called after IdGameIsStarted is received)
+bool Boson::loadFromLogFile()
+{
+ if (!d->mStartingObject) {
+	BO_NULL_ERROR(d->mStartingObject);
+	return false;
+ }
+ QString file = d->mStartingObject->logFile();
+ if (file.isEmpty()) {
+	boError() << k_funcinfo << "empty log filename" << endl;
+	return false;
+ }
+ QFile f(file);
+ if (!f.open(IO_ReadOnly)) {
+	boError() << k_funcinfo << "could not open " << file << " for reading" << endl;
+	return false;
+ }
+ QPtrList<BoMessage> messages;
+ messages.setAutoDelete(true);
+ BoMessageLogger::loadMessageLog(&f, &messages);
+ BoMessage* start = 0;
+ QPtrListIterator<BoMessage> it(messages);
+ while (it.current()) {
+	if (it.current()->msgid == KGameMessage::IdUser + BosonMessage::IdGameIsStarted) {
+		start = it.current();
+	}
+	++it;
+ }
+ if (!start) {
+	boError() << k_funcinfo << "no IdGameIsStarted message found" << endl;
+	return false;
+ }
+
+ while (!messages.isEmpty() && messages.getFirst() != start) {
+	messages.removeFirst();
+ }
+ if (messages.getFirst() != start) {
+	boError() << k_funcinfo << "oops - something went wrong" << endl;
+	return false;
+ }
+ messages.removeFirst();
+
+ while (!messages.isEmpty()) {
+	BoMessage* m = messages.take(0);
+	d->mMessageDelayer->delay(m);
+ }
+
+ d->mMessageDelayer->unlock();
+ return true;
+}
+

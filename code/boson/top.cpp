@@ -476,7 +476,6 @@ void TopWidget::slotPlayFieldChanged(const QString& id)
 	boError() << k_funcinfo << "NULL starting object!!" << endl;
 	return;
  }
- d->mStarting->setPlayFieldId(id);
 }
 
 void TopWidget::slotStartNewGame()
@@ -1138,6 +1137,19 @@ void TopWidget::slotNewGame(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotNewGame(args);
+}
+
+void TopWidget::slotLoadFromLog(const QString& logFile)
+{
+ if (!d->mStartup) {
+	boError() << k_funcinfo << "NULL startup widget" << endl;
+	return;
+ }
+ BO_CHECK_NULL_RET(boGame);
+ boDebug() << k_funcinfo << "trying to load from log file " << logFile << endl;
+ d->mStartup->slotNewGame(0);
+ BO_CHECK_NULL_RET(d->mStarting);
+ d->mStarting->setLoadFromLogFile(logFile);
 }
 
 void TopWidget::slotStartingFailed()

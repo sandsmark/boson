@@ -266,7 +266,7 @@ public:
 	unsigned int advanceCallsCount() const;
 
 	void writeGameLog(QTextStream& log);
-	void saveGameLogs(const QString& prefix);
+	bool saveGameLogs(const QString& prefix);
 
 
 	/**
@@ -275,7 +275,6 @@ public:
 	 * only.
 	 **/
 	void startScenario(BosonStarting*);
-
 
 public: // small KGame extenstions for boson
 	/**
@@ -487,6 +486,7 @@ protected:
 	 **/
 	void makeGameLog();
 
+	bool loadFromLogFile();
 
 protected slots:
 	/**
