@@ -71,7 +71,6 @@
 #include <klocale.h>
 #include <kmessagebox.h>
 #include <kapplication.h>
-#include "boeventloop.h"
 
 #include <qtimer.h>
 #include <qcursor.h>
@@ -644,8 +643,6 @@ void BosonBigDisplayBase::initializeGL()
  }
 
  boWaterManager->initOpenGL();
-
- connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 
  recursive = false;
 }
