@@ -13,7 +13,7 @@ HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html ind
 
 # help files
 data_DATA = $(HTML_DOCS) logotp3.gif
-datadir = $(kde_htmldir)/en/boson
+datadir = $(kde_htmldir)/en/Boson
 
 doit: index.sgml
 	ksgml2html index.sgml en

@@ -145,6 +145,25 @@ There will soon be <tt/icons/-to-click-on-to-get-things-simplier, but until then
 to performs all of those steps.
 
 
+<sect1> User input <p>
+
+	On the keyboard, you may use the arrow keys to move across the map.
+
+	The left button of the mouse let you select objects
+	Left-click on a facility or a mobile unit to select it.
+	If you left-click on the ground and drag the mouse (while still having the button down), it will draw
+a selection rectangle that will select everything in it when you release the button.
+
+	The right-button let you do <tt/actions/ : on the ground it will make a mobile unit to move there,
+on a <tt/friend/ mobile unit, it will follow it, on a <tt/ennemy/, it will attack it.
+	Note that so far, only <tt/move/ is implemented :-)
+
+
+	The middle-button is used to move across the map. By middle-clicking on any place, the point you've clicked on
+will become the new center of the map. If you click on the center, if will do nothing. If you click on the border, you'll make
+a big jump.
+
+
 <sect>Questions and Answers<p>
 
 <sect1>Nothing happens when I click on the K-menu/Games/boson item.
