@@ -47,6 +47,7 @@ bool editorField::load(QString filename)
 	facilityMsg_t	fix;
 	Cell		c;
 
+	freeRessources();
 
 	if (!openRead(filename.data())) return false;
 
@@ -97,6 +98,8 @@ bool editorField::save(QString filename)
 	QIntDictIterator<visualMobUnit> mobIt(mobiles);
 	QIntDictIterator<visualFacility> fixIt(facilities);
 
+	boAssert (nbMobiles == mobiles.count());
+	boAssert (nbFacilities == facilities.count());
 
 	if (!openWrite(filename.data())) return false;
 
@@ -123,13 +126,19 @@ bool editorField::save(QString filename)
 }
 
 
-void editorField::freeCells()
+void editorField::freeRessources()
 {
 	int i;
+
 	/* freeing of cells */
 	for (i=0; i< map_width; i++)
 		delete [] cells[i];
 	delete [] cells;
+
+	/* freeing of mobiles */
+	mobiles.clear();
+	/* freeing of facilities */
+	facilities.clear();
 }
 
 
