@@ -275,7 +275,10 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
-		return (Unit*)*it;
+		Unit* u = (Unit*)*it;
+		if (!u->isDestroyed()) {
+			return u;
+		}
 	}
  }
  return 0;
