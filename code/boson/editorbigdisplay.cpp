@@ -20,13 +20,10 @@
 #include "editorbigdisplay.moc"
 
 #include "unit.h"
-#include "unitplugins.h"
 #include "bosoncanvas.h"
 #include "player.h"
-#include "unitproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
-#include "bosonconfig.h"
 #include "global.h"
 #include "boselection.h"
 #include "defines.h"

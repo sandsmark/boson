@@ -46,9 +46,7 @@
 
 #include <klocale.h>
 #include <kmessagebox.h>
-#include <kapplication.h>
 
-#include <qimage.h>
 #include <qtimer.h>
 #include <qcursor.h>
 #include <qpointarray.h>

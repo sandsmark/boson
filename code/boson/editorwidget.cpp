@@ -21,18 +21,13 @@
 
 #include "defines.h"
 #include "bosonminimap.h"
-#include "bosoncanvas.h"
 #include "boson.h"
 #include "bosonmap.h"
 #include "player.h"
-#include "bosonmessage.h"
 #include "bosonplayfield.h"
-#include "bosonscenario.h"
-#include "bosonconfig.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "global.h"
-#include "bosonbigdisplay.h"
 #include "commandinput.h"
 #include "bodebug.h"
 #include "commandframe/editorcommandframe.h"
@@ -44,8 +39,6 @@
 #include <kdeversion.h>
 #include <kmessagebox.h>
 
-#include <qtimer.h>
-#include <qregexp.h>
 #include <qintdict.h>
 
 #include "editorwidget.moc"

@@ -22,29 +22,19 @@
 
 #include "defines.h"
 #include "bosonwidget.h"
-#include "editorwidget.h"
-#include "bosonconfig.h"
 #include "boson.h"
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
-#include "bosoncanvas.h"
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bosonprofiling.h"
-#include "bodisplaymanager.h"
-#include "bosonbigdisplaybase.h"
 #include "startupwidgets/bosonloadingwidget.h"
 #include "bodebug.h"
 
-#include <kapplication.h>
 #include <klocale.h>
-#include <kconfig.h>
 
-#include <qcursor.h>
-#include <qwidgetstack.h>
 #include <qtimer.h>
-#include <qhbox.h>
 #include <qfile.h>
 
 BosonStarting::BosonStarting(QObject* parent) : QObject(parent)

@@ -48,10 +48,7 @@
 #include <klocale.h>
 #include <kaction.h>
 #include <kconfig.h>
-#include <kdockwidget.h>
-#include <kstdgameaction.h>
 #include <kpopupmenu.h>
-#include <kmessagebox.h>
 #include <kgame/kgamedebugdialog.h>
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgamechat.h>

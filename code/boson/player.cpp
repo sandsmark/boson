@@ -27,7 +27,6 @@
 #include "bosonstatistics.h"
 #include "boson.h"
 #include "upgradeproperties.h"
-#include "unitplugins.h"
 #include "bodebug.h"
 
 #include <kgame/kgamepropertyhandler.h>

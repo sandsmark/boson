@@ -29,7 +29,6 @@
 #include "sound/bosonsound.h"
 #include "upgradeproperties.h"
 #include "bosonparticlemanager.h"
-#include "bosonweapon.h"
 #include "bodebug.h"
 
 #include <kstandarddirs.h>
