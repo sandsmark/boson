@@ -34,10 +34,6 @@
 	uint	goFlag;		// where can it go ? 
 */
 
-// speed = 1          up, left, right, down
-// speed = 2 idem 1 + upper-left, uppert-right corner...
-// speed = 3 idem 2 + two-tile up, two-tile left..
-
 mobileProperties_t mobileProp[] = {
 	{"ship",		96, 96,  2, 100,	200, 100, 3, BO_GO_SEA},	// MOB_SHIP
 	{"quad",		32, 32,  3, 70,		200, 100, 2, BO_GO_EARTH},	// MOB_QUAD
@@ -77,5 +73,21 @@ facilityProperties_t facilityProp[] = {
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));
 const int mobilePropNb = (sizeof(mobileProp)/sizeof(mobileProp [0]));
 
+// 43334
+// 32123
+// 31013  <= 0 is the center, other figures tells the boDist();
+// 32123
+// 43334
+int	boDist(int a, int b)
+{
+	// abs
+	if (a<0) a=-a;
+	if (b<0) b=-b;
+
+	if ( 0==a && 2==b) return 3;
+	if ( 0==b && 2==a) return 3;
+
+	return a+b;
+}
 
 

@@ -83,6 +83,22 @@ enum facilityType {
 typedef unsigned int uint;
 #endif
 
+/*
+ * speed/range handling, we define a new distance :)
+ */
+// dist = 1          up, left, right, down
+// dist = 2 idem 1 + upper-left, uppert-right corner...
+// dist = 3 idem 2 + two-tile up, two-tile left..
+//
+// 43334
+// 32123
+// 31013  <= 0 is the center, other figures tells the boDist();
+// 32123
+// 43334
+int	boDist(int, int);
+
+
+
 /**
  * UNIT properties
  */
