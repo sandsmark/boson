@@ -49,7 +49,7 @@ protected:
 	void resetEventsPage();
 	void resetFilesPage();
 
-	void initRenderItem(QListViewItem* item, const QString& type, long int time);
+	void initRenderItem(QListViewItem* item, const QString& type, long int time, long int function);
 	QString profilingName(int profilingEvent) const;
 
 protected slots:
