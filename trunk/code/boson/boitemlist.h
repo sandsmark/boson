@@ -49,14 +49,23 @@ public:
 	 * @param foobar Dummy param. If we use registerList only then
 	 * BoItemList list = collisions() will use the returned pointer as a
 	 * bool param.
-	 * @param registerList Whether to register to the @ref
+	 * @param _registerList Whether to register to the @ref
 	 * BoItemListHandler. If you use FALSE this list will <em>not</em> be
 	 * deleted. This can be useful to store it permanently in a class. For
 	 * all "usual" cases, where a function is the complete scope of a list
 	 * you should use TRUE.
 	 **/
-	BoItemList(int foobar, bool registerList = true);
-	BoItemList(const BoItemList&, bool registerList = true);
+	BoItemList(int foobar, bool _registerList = true)
+		: QValueList<BosonItem*>()
+	{
+		Q_UNUSED(foobar);
+		if (_registerList) {
+			registerList();
+		}
+	}
+
+	BoItemList(const BoItemList&, bool _registerList = true);
+
 	~BoItemList();
 
 
