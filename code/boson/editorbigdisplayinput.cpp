@@ -211,8 +211,8 @@ bool EditorBigDisplayInput::actionPlace(const BoVector3Fixed& canvasVector, bool
  bofixed y = canvasVector.y();
  if(!exact || d->mPlacement.isGround())
  {
-	x = (int)x;
-	x = (int)x;
+	x = rintf(x);
+	y = rintf(y);
  }
  if (!canvas()->cell((int)x, (int)y)) {
 	return false;
