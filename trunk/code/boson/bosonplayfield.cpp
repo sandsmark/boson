@@ -266,6 +266,19 @@ void BosonPlayField::applyScenario(Boson* boson)
  mScenario->applyScenario(boson);
 }
 
+void BosonPlayField::changeScenario(BosonScenario* s)
+{
+ delete mScenario;
+ mScenario = s;
+}
+
+void BosonPlayField::changeMap(BosonMap* m)
+{
+ delete mMap;
+ mMap = m;
+ emit signalNewMap(mMap);
+}
+
 bool BosonPlayField::modified() const
 {
  if (mMap && mMap->modified()) {
