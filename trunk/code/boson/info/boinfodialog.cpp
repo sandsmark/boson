@@ -181,9 +181,10 @@ BoInfoDialog::BoInfoDialog(QWidget* parent, bool modal)
  d = new BoInfoDialogPrivate;
  if (!BoInfo::boInfo()) {
 	BoInfo::initBoInfo();
-	// GLX and OpenGL demand that we initialize the context first. 
+	// GLX and OpenGL demand that we initialize the context first.
 	// same about X, which we need Display and Screen for.
 	BosonGLWidget* tmp = new BosonGLWidget(this);
+	tmp->makeCurrent();
 	tmp->hide();
 	BoInfo::boInfo()->update(tmp);
 	delete tmp;

@@ -21,8 +21,6 @@
 
 #include <qstring.h>
 
-class BosonGLWidget;
-
 class QStringList;
 class QWidget;
 class QVariant;
@@ -64,9 +62,9 @@ class BoInfoPrivate;
  *
  * Getting the data for this class is really easy: call @ref update and you are
  * done. Everything is stored internally from now on and you can access it. Note
- * that @ref update will need a @ref BosonGLWidget, since most X data need at
- * least a widget and OpenGL/GLX wants us to initialize the OpenGL context
- * before we can do anything useful.
+ * that @ref update will need a @ref QWidget , since most X data need at
+ * least a widget. Also note that to get useful data for OpenGL/GLU/GLX you need
+ * to have a current GLX context (use @ref BosonGLWidget::makeCurrent).
  *
  * You can use @ref getBool, @ref getString, ... to get the data, but most
  * entries have their own functions, such as @ref kdeVersion. You should prefer
@@ -185,7 +183,7 @@ public:
 	 **/
 	static BoInfo* boInfo();
 
-	void update(BosonGLWidget* w = 0);
+	void update(QWidget* w = 0);
 
 	bool loadFromFile(const QString& file);
 	bool saveToFile(const QString& file) const;
@@ -279,7 +277,8 @@ public:
 	/**
 	 * @return TRUE if this class has data about OpenGL/GLU/GLX or FALSE if
 	 * these data have not yet been initialized. To get data about them you
-	 * have to call @ref update with a valid @ref BosonGLWidget.
+	 * have to call @ref update after making a GLX context current (see @ref
+	 * BosonGLWidget::makeCurrent)
 	 **/
 	bool haveOpenGLData() const
 	{
@@ -588,7 +587,7 @@ protected:
 	bool libraryDependsOn(const QString& lib, const QString& dependsOn) const;
 
 	void reset();
-	void updateOpenGLInfo(BosonGLWidget* w);
+	void updateOpenGLInfo(QWidget* w); // note: you must make a GLX context current before calling this!
 	void updateXInfo(QWidget* w);
 	void updateOSInfo();
 	void updateLibraryInfo();

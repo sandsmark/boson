@@ -21,7 +21,6 @@
 #include "bodebug.h"
 
 #include "../boversion.h"
-#include "../bosonglwidget.h" // FIXME: avoid this dependancy
 #include "../defines.h"
 
 #include <kdeversion.h>
@@ -31,7 +30,6 @@
 #include <kstaticdeleter.h>
 
 #include <qstringlist.h>
-#include <qwidget.h>
 #include <qmap.h>
 #include <qvariant.h>
 #include <qdom.h>
@@ -65,7 +63,6 @@
 #define XEXTLIBGLCORE_A "/usr/X11R6/lib/modules/extensions/libGLcore.a"
 #define XEXTLIBGLX_SO "/usr/X11R6/lib/modules/extensions/libglx.so" // proprietary
 #define NVIDIAXDRIVER "/usr/X11R6/lib/modules/drivers/nvidia_drv.o" // proprietary
-
 
 static KStaticDeleter<BoInfo> sd;
 BoInfo* BoInfo::mBoInfo = 0;
@@ -243,7 +240,7 @@ void BoInfo::copyFrom(const BoInfo& b)
  load(rstream);
 }
 
-void BoInfo::update(BosonGLWidget* widget)
+void BoInfo::update(QWidget* widget)
 {
  reset();
 
