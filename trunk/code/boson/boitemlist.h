@@ -90,8 +90,6 @@ public:
 	 **/
 	bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const;
 
-	void willBeOccupiedBy(Unit* unit);
-
 protected:
 	/**
 	 * You are meant to use e.g. @ref appendUnit but not append. We change the
