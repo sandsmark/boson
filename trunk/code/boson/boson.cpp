@@ -1570,6 +1570,23 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			break;
 		}
 
+		// First make sure unit can be placed there
+		// We must only check if cells aren't occupied and if unit can go there,
+		//  because everything else should be checked before placing anything. But
+		//  occupied status of cell might have changed already.
+		const UnitProperties* prop = p->speciesTheme()->unitProperties(unitType);
+		int width = prop->unitWidth();
+		int height = prop->unitHeight();
+		QRect r(cellX * BO_TILE_SIZE, cellY * BO_TILE_SIZE, width, height);
+		if (!d->mCanvas->canGo(prop, r)) {
+			boWarning() << k_funcinfo << "Unit with type " << unitType << " can't go to (" << cellX << "; " << cellY << ")" << endl;
+			break;
+		}
+		if (d->mCanvas->collisions()->cellsOccupied(r)) {
+			boWarning() << k_funcinfo << "Cells at (" << cellX << "; " << cellY << ") are occupied" << endl;
+			break;
+		}
+
 		BoVector3 pos((float)cellX * BO_TILE_SIZE, (float)cellY * BO_TILE_SIZE, 0.0f);
 		Unit* u = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
 		// Facilities will be fully constructed by default
