@@ -636,7 +636,7 @@ void BosonWidgetBase::initKActions()
  enablecolormap->setChecked(false);
  connect(enablecolormap, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetEnableColormap(bool)));
- (void)new KAction(i18n("Edit global conditions"), KShortcut(), this,
+ (void)new KAction(i18n("Edit global conditions..."), KShortcut(), this,
 		SLOT(slotEditConditions()), actionCollection(),
 		"debug_edit_conditions");
 
