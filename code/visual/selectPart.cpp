@@ -21,8 +21,6 @@
 #include "../common/log.h"
 
 #include "selectPart.h"
-#include "sprites.h"
-
 
 #define SP_THICK	4
 #define SP_CORNER_LEN	15
@@ -31,11 +29,35 @@
 #define SP_H		(SP_CORNER_LEN+SP_CORNER_POS)
 
 static void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power);
+static QwSpritePixmapSequence *initStatic(bool isDown);
 
-QwSpritePixmapSequence * selectPart_up::qsps = 0l;
-QwSpritePixmapSequence * selectPart_down::qsps = 0l;
+QwSpritePixmapSequence * selectPart::qsps_up = 0l;
+QwSpritePixmapSequence * selectPart::qsps_down = 0l;
+
+/*
+ *  selectPart
+ */
+selectPart::selectPart(int _f, int _z, bool isDown)
+{
+	if (isDown) {
+		if (!qsps_down) qsps_down = initStatic(true);
+		setSequence(qsps_down);
+	} else {
+		if (!qsps_up) qsps_up = initStatic(false);
+		setSequence(qsps_up);
+	}
+	boAssert(_f>=0);
+	boAssert(_f<PART_NB);
+	if (_f<0 ) _f = 0;
+	if (_f>= PART_NB ) _f = PART_NB-1;
+	frame(_f);
+	z( _z + 1);
+}
 
 
+/*
+ *  Drawing functions
+ */
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 {
 	QPen	pen(red);
@@ -52,129 +74,64 @@ void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 }
 
 
-/*
- *  selectPart_up
- */
-selectPart_up::selectPart_up(int _f, int _z)
-{
-	if (!qsps) initStatic();
-	setSequence(qsps);
-	boAssert( _f>=0);
-	boAssert( _f<PART_NB);
-	if (_f<0 ) _f = 0;
-	if (_f>= PART_NB ) _f = PART_NB-1;
-	frame( _f);
-	z( _z + 1);
-}
-
-void selectPart_up::initStatic()
+QwSpritePixmapSequence *initStatic(bool isDown)
 {
 	int i;
 	QList<QPixmap>	pixmaps;
-	QPixmap		*pix;
+	QPixmap		*pix, *_pix;
 	QList<QPoint>	points;
 	QPoint		*point;
-	QBitmap		*mask;
+	QBitmap		*_mask;
 	QPainter	painter;
+	
+	_pix = new QPixmap(SP_W, SP_H);
+	_mask = new QBitmap(SP_W, SP_H);
 
-	pix = new QPixmap(SP_W, SP_H);
-	mask = new QBitmap(SP_W, SP_H);
+	pixmaps.setAutoDelete( TRUE ); 
+	points.setAutoDelete( TRUE ); 
 
 	for(i=0; i<PART_NB; i++) {
 		
 		/* draw it */
-		pix->fill();
+		_pix->fill();
 	
-		painter.begin(pix);
+		painter.begin(_pix);
+		if (isDown) {
+			painter.rotate(180);
+			painter.translate(-SP_W+1, -SP_H+1);
+		}
 		drawSelectBox(painter, red, green, i);
 		painter.end();
 	
 		/* draw the mask */
-		mask->fill(black);
+		_mask->fill(black);
 	
-		painter.begin(mask);
+		painter.begin(_mask);
+		if (isDown) {
+			painter.rotate(180);
+			painter.translate(-SP_W+1, -SP_H+1);
+		}
 		drawSelectBox(painter, white, white, i);
 		painter.end();
 	
+		/* merge results */
+		_pix->setMask(*_mask);
+
 		/* create entries in QList */
-		pix->setMask(*mask);
-		pix = new QPixmap(*pix);
+		pix = new QPixmap(*_pix);
 		pixmaps.append (pix);
-		point = new QPoint(SP_W-2, SP_CORNER_POS);
+
+		if (isDown)
+			point = new QPoint(1, SP_H-2 - SP_CORNER_POS);
+		else
+			point = new QPoint(SP_W-2, SP_CORNER_POS);
 		points.append (point);
 		}
 
-//	delete mask; ///orzel : shoud I ?
-	qsps = new QwSpritePixmapSequence(pixmaps,points);
+	delete _mask;
+	delete _pix;
 
-	delete mask;
-	delete pix;
-}
+	return new QwSpritePixmapSequence(pixmaps,points);
 
-
-/*
- *  selectPart_down
- */
-selectPart_down::selectPart_down(int _f, int _z)
-{
-	if (!qsps) initStatic();
-	setSequence(qsps);
-	boAssert(_f>=0);
-	boAssert(_f<PART_NB);
-	if (_f<0 ) _f = 0;
-	if (_f>= PART_NB ) _f = PART_NB-1;
-	frame(_f);
-	z( _z + 1);
-}
-
-
-void selectPart_down::initStatic()
-{
-	int i;
-	QList<QPixmap>	pixmaps;
-	QPixmap		*pix;
-	QList<QPoint>	points;
-	QPoint		*point;
-	QBitmap		*mask;
-	QPainter	painter;
-	
-	pix = new QPixmap(SP_W, SP_H);
-	mask = new QBitmap(SP_W, SP_H);
-
-	for(i=0; i<PART_NB; i++) {
-		
-		/* draw it */
-		pix->fill();
-	
-		painter.begin(pix);
-		painter.rotate(180);
-		painter.translate(-SP_W+1, -SP_H+1);
-		drawSelectBox(painter, red, green, i);
-		painter.end();
-	
-		/* draw the mask */
-		mask->fill(black);
-	
-		painter.begin(mask);
-		painter.rotate(180);
-		painter.translate(-SP_W+1, -SP_H+1);
-		drawSelectBox(painter, white, white, i);
-		painter.end();
-	
-		/* create entries in QList */
-		pix->setMask(*mask);
-		pix = new QPixmap(*pix);
-		pixmaps.append (pix);
-		point = new QPoint(1, SP_H-2 - SP_CORNER_POS);
-		points.append (point);
-		}
-
-
-
-//	delete mask; ///orzel : shoud I ?
-	qsps = new QwSpritePixmapSequence(pixmaps,points);
-
-	delete mask;
-	delete pix;
 }
 
