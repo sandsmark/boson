@@ -94,7 +94,12 @@ public:
 	KGameCanvasChat* mChat;
 };
 
-BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
+BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
+		parent, "bigdisplay", 
+		WRepaintNoErase |// this should remove some flickering
+		WStaticContents | 
+		WResizeNoErase
+		)
 {
  init();
 }
@@ -131,6 +136,7 @@ void BosonBigDisplay::init()
  d->mChat = new KGameCanvasChat(this);
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
+
 }
 
 BosonBigDisplay::~BosonBigDisplay()
