@@ -71,6 +71,8 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  d->mUnitList->addColumn(i18n("Speed"));
 // connect(d->mUnitList, SIGNAL(executed(QListBoxItem*)), 
 //		this, SLOT(slotSelectUnit(QListBoxItem*)));
+ d->mUnitList->addColumn(i18n("Image Width"));
+ d->mUnitList->addColumn(i18n("Image Height"));
  layout->addWidget(d->mUnitList);
 
  QVBoxLayout* l = new QVBoxLayout(layout);
@@ -153,6 +155,8 @@ void KGameUnitDebug::addUnit(Unit* unit)
  item->setText(6, unit->name());
  item->setText(7, QString::number(unit->health()));
  item->setText(8, QString::number(unit->speed()));
+ item->setText(9, QString::number(unit->width()));
+ item->setText(10, QString::number(unit->height()));
 }
 
 void KGameUnitDebug::updateWaypoints(QListViewItem* item)
