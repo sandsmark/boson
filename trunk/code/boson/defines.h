@@ -88,5 +88,8 @@
 #define DEFAULT_MOUSE_WHEEL_SHIFT_ACTION CameraRotate
 #define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
 
+// not in BosonConfig (not necessarily in OptionsDialog):
+#define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)
+
 #endif
 

@@ -2,12 +2,13 @@
 <kpartgui name="bosonbase" version="1">
 <MenuBar>
   <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
-    <Action name="debug_kgame" />
     <Action name="debug_profiling" />
-    <Action name="debug_unfog" />
     <Action name="debug_mode" />
-    <Action name="debug_players" />
     <Action name="debug_map_coordinates" />
+    <Action name="debug_enable_cheating" />
+    <Action name="debug_kgame" />
+    <Action name="debug_unfog" />
+    <Action name="debug_players" />
   </Menu>
   <Menu name="settings"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge"/>

@@ -149,6 +149,8 @@ protected slots:
 
 	void slotHack1();
 
+	void slotToggleCheating(bool on);
+
 	// These 2 are used to save/load camera, shots, particle systems etc.
 	void slotLoadExternalStuff(QDataStream& stream);
 	void slotSaveExternalStuff(QDataStream& stream);
@@ -265,6 +267,8 @@ protected:
 	 * stored (i.e. no file of this name exists yet) or QString::null.
 	 **/
 	QString findSaveFileName(const QString& prefix, const QString& suffix);
+
+	void setActionEnabled(const char* name, bool enabled);
 
 private:
 	void initChat();
