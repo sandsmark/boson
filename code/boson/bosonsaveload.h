@@ -166,10 +166,9 @@ public:
 	 **/
 	bool loadFromFile(const QString& file);
 
-	/**
-	 * Use Boson::saveToFile instead.
-	 **/
 	bool saveToFile(Player* localPlayer, const QString& file);
+	bool saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
+	bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
 	LoadingStatus loadingStatus() const;
 
@@ -218,10 +217,10 @@ protected:
 	 **/
 	bool loadFromFile(const QMap<QString, QByteArray>& files);
 
-	QString saveKGameAsXML();
-	QString savePlayersAsXML(Player* localPlayer);
-	QString saveCanvasAsXML();
-	QString saveExternalAsXML();
+	QCString saveKGameAsXML();
+	QCString savePlayersAsXML(Player* localPlayer);
+	QCString saveCanvasAsXML();
+	QCString saveExternalAsXML();
 
 	bool loadVersionFromXML(const QString&); // takes kgame.xml
 	bool loadKGameFromXML(const QString&);

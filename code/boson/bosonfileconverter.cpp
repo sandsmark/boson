@@ -196,15 +196,15 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QMap<QString, QByteArra
  QDomDocument kgameDoc(QString::fromLatin1("Boson"));
  QDomDocument playersDoc(QString::fromLatin1("Players"));
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
- if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
+ if (!loadXMLDoc(&kgameDoc, QString(fileList["kgame.xml"]))) {
 	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
 	return false;
  }
- if (!loadXMLDoc(&playersDoc, QString(fileList["playersXML"]))) {
+ if (!loadXMLDoc(&playersDoc, QString(fileList["players.xml"]))) {
 	boError() << k_funcinfo << "unable to load players.xml" << endl;
 	return false;
  }
- if (!loadXMLDoc(&canvasDoc, QString(fileList["canvasXML"]))) {
+ if (!loadXMLDoc(&canvasDoc, QString(fileList["canvas.xml"]))) {
 	boError() << k_funcinfo << "unable to load canvas.xml" << endl;
 	return false;
  }
@@ -267,7 +267,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QMap<QString, QByteArra
  // players.xml is not touched.
  QDomElement shotsTag = canvasRoot.namedItem(QString::fromLatin1("Shots")).toElement();
  if (shotsTag.isNull()) {
-	boError() << k_funcinfo << "not Shots tag in canvas.xml" << endl;
+	boError() << k_funcinfo << "no Shots tag in canvas.xml" << endl;
 	return false;
  }
  list = shotsTag.elementsByTagName(QString::fromLatin1("Shot"));
@@ -309,11 +309,86 @@ bool BosonFileConverter::convertSaveGame_From_0_8_To_0_9(QMap<QString, QByteArra
  kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION_0_8_128);
 
  QCString kgameXML = kgameDoc.toCString();
- fileList.insert("kgameXML", kgameXML);
- fileList.insert("playersXML", playersXML);
- fileList.insert("canvasXML", canvasXML);
+ fileList.insert("kgame.xml", kgameXML);
+ fileList.insert("player.xml", playersXML);
+ fileList.insert("canvas.xml", canvasXML);
 
- return convertSaveGame_From_0_8_128_To_0_9(fileList);;
+#if 1
+ QByteArray oldMap = fileList["map"];
+ QByteArray newMap;
+ QByteArray texMap;
+ QByteArray map;
+ QDataStream mapStream(map, IO_WriteOnly);
+ bool ret = convertMapFile_From_0_8_To_0_9(oldMap, &newMap, &texMap);
+ if (!ret) {
+	boError() << k_funcinfo << "converting map from 0.8 to 0.9 failed" << endl;
+	return false;
+ }
+ mapStream << newMap;
+ Q_INT32 width, height;
+ {
+	QDataStream oldStream(oldMap, IO_ReadOnly);
+	oldStream >> width;
+	oldStream >> height;
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height; j++) {
+			// skip the cells
+			Q_INT32 g;
+			Q_INT8 v;
+			oldStream >> g;
+			oldStream >> v;
+		}
+	}
+	for (int i = 0; i < width + 1; i++) {
+		for (int j = 0; j < height + 1; j++) {
+			float v;
+			oldStream >> v;
+			mapStream << v;
+		}
+	}
+ }
+ {
+	QDataStream stream(texMap, IO_ReadOnly);
+	QString texMapCookie;
+	Q_UINT32 texMapVersion;
+	Q_UINT32 textureCount;
+	stream >> texMapCookie;
+	if (texMapCookie != QString::fromLatin1("BoTexMap")) {
+		boError() << k_funcinfo << "invalid magic cookie for texmap: " << texMapCookie << endl;
+		return false;
+	}
+	stream >> texMapVersion;
+	if (texMapVersion != BOSONMAP_VERSION_0_8_128) {
+		boError() << k_funcinfo << "invalid version for texmap (expected " << BOSONMAP_VERSION_0_8_128 << "): " << texMapVersion << endl;
+		return false;
+	}
+	stream >> textureCount;
+	if (textureCount == 0) {
+		boError() << k_funcinfo << "no texture in texmap?!" << endl;
+		return false;
+	}
+	if (textureCount > 100) {
+		boError() << k_funcinfo << "more than 100 textures?!?!" << endl;
+		return false;
+	}
+	mapStream << QString::fromLatin1("BoTexMap"); // the texmap magic cookie
+	mapStream << (Q_UINT32)BOSONMAP_VERSION_0_9; // the texmap version
+	mapStream << (Q_UINT32)textureCount;
+	for (unsigned int i = 0; i < textureCount; i++) {
+		for (int x = 0; x < width + 1; x++) {
+			for (int y = 0; y < height + 1; y++) {
+				Q_UINT8 alpha;
+					stream >> alpha;
+				mapStream << (Q_UINT8)alpha;
+			}
+		}
+	}
+ }
+
+ fileList.insert("map", map);
+#endif
+
+ return convertSaveGame_From_0_8_128_To_0_9(fileList);
 }
 
 bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByteArray>& fileList)
@@ -322,20 +397,20 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  // note that 0.8.128 got never released and is a development only version. no
  // such files should exist. this function is also used to convert from 0.8 to
  // 0.9.
- if (!fileList.contains("kgameXML")) {
+ if (!fileList.contains("kgame.xml")) {
 	boError() << k_funcinfo << "not a boson 0.8.128 file. missing kgameXML file" << endl;
 	return false;
  }
- if (!fileList.contains("playersXML")) {
+ if (!fileList.contains("players.xml")) {
 	boError() << k_funcinfo << "not a boson 0.8.128 file. missing playersXML file" << endl;
 	return false;
  }
- if (!fileList.contains("canvasXML")) {
+ if (!fileList.contains("canvas.xml")) {
 	boError() << k_funcinfo << "not a boson 0.8.128 file. missing canvasXML file" << endl;
 	return false;
  }
- if (!fileList.contains("externalXML")) {
-	boError() << k_funcinfo << "not a boson 0.8.128 file. missing map file" << endl;
+ if (!fileList.contains("external.xml")) {
+	boError() << k_funcinfo << "not a boson 0.8.128 file. missing externalXML file" << endl;
 	return false;
  }
  if (!fileList.contains("map")) {
@@ -343,7 +418,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
 	return false;
  }
  QDomDocument kgameDoc;
- if (!loadXMLDoc(&kgameDoc, QString(fileList["kgameXML"]))) {
+ if (!loadXMLDoc(&kgameDoc, QString(fileList["kgame.xml"]))) {
 	boError() << k_funcinfo << "unable to load kgame.xml" << endl;
 	return false;
  }
@@ -353,7 +428,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
 	return false;
  }
  QDomElement dataHandler = kgameRoot.namedItem("DataHandler").toElement();
- if (!dataHandler.isNull()) {
+ if (dataHandler.isNull()) {
 	boError() << k_funcinfo << "no DataHandler tag found in kgame.xml" << endl;
 	return false;
  }
@@ -381,7 +456,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  }
  QDomDocument canvasDoc(QString::fromLatin1("Canvas"));
  QDomElement canvasRoot = canvasDoc.documentElement();
- if (!loadXMLDoc(&canvasDoc, QString(fileList["canvasXML"]))) {
+ if (!loadXMLDoc(&canvasDoc, QString(fileList["canvas.xml"]))) {
 	boError() << k_funcinfo << "unable to load canvas.xml" << endl;
 	return false;
  }
@@ -460,6 +535,11 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  delete[] heightMap;
  heightMap = 0;
 
+ if (stream.atEnd()) {
+	boError() << k_funcinfo << "no texmap in savegame. not supported." << endl;
+	return false;
+ }
+
  // texmap.
  // this is used as-is, just copied to a new file (i.e. stream).
  QDataStream texMapStream(map_texMap, IO_WriteOnly);
@@ -517,17 +597,18 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  map_description = descriptionXML.local8Bit(); // AB: i have _no_ idea whether this is correct. but I need a QCString, not a QString and this one seems (!) to be the better choice than utf8().
 
 
- kgameRoot.setAttribute(QString::fromLatin1("SaveGameVersion"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
+ kgameRoot.removeAttribute(QString::fromLatin1("SaveGameVersion"));
+ kgameRoot.setAttribute(QString::fromLatin1("Version"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
  QCString kgameXML = kgameDoc.toCString();
  QCString canvasXML = canvasDoc.toCString();
 
  fileList.remove("map");
- fileList.insert("map/mapXML", map_mapXML);
+ fileList.insert("map/map.xml", map_mapXML);
  fileList.insert("map/heightmap.png", map_heightMap);
  fileList.insert("map/texmap", map_texMap);
- fileList.insert("C/descriptionXML", map_description);
- fileList.insert("kgameXML", kgameXML);
- fileList.insert("canvasXML", canvasXML);
+ fileList.insert("C/description.xml", map_description);
+ fileList.insert("kgame.xml", kgameXML);
+ fileList.insert("canvas.xml", canvasXML);
 
  delete[] heightMap;
  heightMap = 0;
@@ -535,7 +616,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  return true;
 }
 
-bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML)
+bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML, QByteArray* kgameXML)
 {
  if (!playersXML) {
 	BO_NULL_ERROR(playersXML);
@@ -543,6 +624,10 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
  }
  if (!canvasXML) {
 	BO_NULL_ERROR(canvasXML);
+	return false;
+ }
+ if (!kgameXML) {
+	BO_NULL_ERROR(kgameXML);
 	return false;
  }
  boDebug() << k_funcinfo << endl;
@@ -813,8 +898,16 @@ bool BosonFileConverter::convertScenario_From_0_8_To_0_9(const QByteArray& scena
  }
 
  delete[] scenarioPlayers;
+
+ QDomDocument kgameDoc(QString::fromLatin1("Boson"));
+ QDomElement kgameRoot = kgameDoc.createElement(QString::fromLatin1("Boson"));
+ kgameDoc.appendChild(kgameRoot);
+ // AB: SAVEGAME is not really true..
+ kgameRoot.setAttribute(QString::fromLatin1("Version"), (unsigned int)BOSON_SAVEGAME_FORMAT_VERSION_0_9);
+
  *playersXML = playersDoc.toCString();
  *canvasXML = canvasDoc.toCString();
+ *kgameXML = kgameDoc.toCString();
 
  return true;
 }

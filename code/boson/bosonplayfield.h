@@ -93,6 +93,9 @@ public:
 
 	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
 	QByteArray loadFromDiskToStream(QMap<QString, QByteArray>* destFiles = 0);
+
+	bool savePlayFieldToFiles(QMap<QString, QByteArray>& destFiles);
+
 	/**
 	 * Stream all (virtual) files in @p files.
 	 **/

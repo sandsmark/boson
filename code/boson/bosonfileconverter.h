@@ -65,7 +65,7 @@ public:
 	 * Convert a set of files from boson 0.8.128 (i.e. 0x00, 0x08, 0x80) to
 	 * boson 0.9.
 	 *
-	 * The difference applies to the file "map" only, which get split up
+	 * The difference applies to the file "map" mostly, which get split up
 	 * into different files.
 	 **/
 	bool convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByteArray>& list);
@@ -77,7 +77,7 @@ public:
 	 * In boson 0.9 the scenario.xml file is replaced by players.xml and
 	 * canvas.xml - such as they also appear in savegames.
 	 **/
-	bool convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML);
+	bool convertScenario_From_0_8_To_0_9(const QByteArray& scenarioXML, QByteArray* playersXML, QByteArray* canvasXML, QByteArray* kgameXML);
 
 protected:
 	bool loadXMLDoc(QDomDocument* doc, const QString& xml) const;
