@@ -21,12 +21,12 @@
 #include "../bosoncanvas.h"
 #include "../rtti.h"
 #include "../selectbox.h"
-#include "../bosonmodel.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
 #include "../bosoneffect.h"
 #include "../bosonpropertyxml.h"
 #include "../bo3dtools.h"
 #include "bosonitempropertyhandler.h"
+#include "bosonitemrenderer.h"
 #include "bodebug.h"
 
 #include <qrect.h>
@@ -117,10 +117,8 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
 {
  mOwner = owner;
  mCanvas = canvas;
- mModel = model;
 
  mId = 0;
- mCurrentAnimation = 0;
  mX = mY = mZ = 0.0f;
  mWidth = mHeight = 0;
  mDepth = 0.0;
@@ -128,11 +126,6 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  mRotation = 0.0f;
  mXRotation = 0.0f;
  mYRotation = 0.0f;
- mGLDepthMultiplier = 1.0f;
- mFrame = 0;
- mGLConstructionStep = 0;
- mAnimationCounter = 0;
- mCurrentFrame = 0;
  mIsVisible = true;
  mEffects = 0;
 
@@ -145,14 +138,11 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
  mAccelerationSpeed = 0;
  mDecelerationSpeed = 0;
 
- mCurrentAnimation = 0;
- // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
- mBoundingSphereRadius = 1.732f; // TODO: can we extract this from the model? this probably needs to change with different frames!
-
  mIsAnimated = true; // obsolete! remove!
  mSelectBox = 0;
 
  mCells = new QPtrVector<Cell>();
+ mRenderer = new BosonItemRenderer(this);
 
  if (mCanvas) {
 	mCanvas->addItem(this);
@@ -160,21 +150,10 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
 	BO_NULL_ERROR(mCanvas);
  }
 
- if (!mModel) {
-	boError() << k_funcinfo << "NULL model - we will crash!" << endl;
+ if (!mRenderer->setModel(model)) {
+	boError() << k_funcinfo << "oops - setModel() failed. must not happen currently" << endl;
 	return;
  }
-
- // set the default animation mode
- setAnimationMode(UnitAnimationIdle);
-
- // FIXME the correct frame must be set after this constructor!
- if (mGLConstructionStep >= glConstructionSteps()) {
-	setCurrentFrame(mModel->frame(frame()));
- } else {
-	setCurrentFrame(mModel->constructionStep(mGLConstructionStep));
- }
-
 }
 
 BosonItem::~BosonItem()
@@ -308,11 +287,6 @@ bool BosonItem::bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) cons
  return false;
 }
 
-void BosonItem::setAnimated(bool a)
-{
-	// obsolete!! remove!!
-}
-
 void BosonItem::select(bool markAsLeader)
 {
  if (mSelectBox) {
@@ -340,111 +314,6 @@ QRect BosonItem::boundingRectAdvanced() const
  int top = (int)(topEdge() + yVelocity());
  return QRect(QPoint(left, top),
 		QPoint(left + width() - 1, top + height() - 1));
-}
-
-void BosonItem::setGLDepthMultiplier(float d)
-{
- mGLDepthMultiplier = d;
-}
-
-void BosonItem::setGLConstructionStep(unsigned int s)
-{
- // note: in case of s >= model()->constructionSteps() we use the last
- // constructionStep that is defined in the model until an actual frame is set.
- BoFrame* f = model()->constructionStep(s);
- if (!f) {
-	boWarning() << k_funcinfo << "NULL construction step " << s << endl;
-	return;
- }
- mGLConstructionStep = s;
- setCurrentFrame(f);
-}
-
-unsigned int BosonItem::glConstructionSteps() const
-{
- return model()->constructionSteps();
-}
-
-void BosonItem::setFrame(int _frame)
-{
- if (mGLConstructionStep < glConstructionSteps()) {
-	// this unit (?) has not yet been constructed
-	// completely.
-	// Note that mGLConstructionStep is totally different
-	// from Unit::constructionStep() !
-	_frame = frame();
- }
-
- // FIXME: this if is pretty much nonsense, since e.g. frame()
- // might be 0 and _frame, too - but the frame still changed,
- // since we had a construction list before!
- // we mustn't change the frame when moving and so on. these are
- // old QCanvas compatible functions. need to be fixed.
- if (_frame != frame()) {
-		BoFrame* f = model()->frame(_frame);
-		if (f) {
-			setCurrentFrame(f);
-			mFrame = _frame;
-		} else {
-			boWarning() << k_funcinfo << "invalid frame " << _frame << endl;
-		}
-	}
-}
-
-unsigned int BosonItem::frameCount() const
-{
- return model() ? model()->frames() : 0;
-}
-
-void BosonItem::setCurrentFrame(BoFrame* frame)
-{
- if (!frame) {
-	boError() << k_funcinfo << "NULL frame" << endl;
-	return;
- }
- mCurrentFrame = frame;
-
- // the following values cache values from BoFrame, so that we can use them in
- // inline functions (or with direct access). otherwise we'd have to #include
- // bosonmodel.h in bosonitem.h (-> bad)
-
- setGLDepthMultiplier(frame->depthMultiplier());
-}
-
-void BosonItem::setAnimationMode(int mode)
-{
- if (mGLConstructionStep < glConstructionSteps()) {
-	return;
- }
- BosonAnimation* anim = model()->animation(mode);
- if (!anim) {
-	if (mCurrentAnimation) {
-		return;
-	}
-	anim = model()->animation(0);
-	if (!anim) {
-		boError() << k_funcinfo << "NULL default animation mode!" << endl;
-		return;
-	}
- }
- mCurrentAnimation = anim;
- setFrame(mCurrentAnimation->start());
-}
-
-void BosonItem::animate()
-{
- if (!mCurrentAnimation || !mCurrentAnimation->speed()) {
-	return;
- }
- mAnimationCounter++;
- if (mAnimationCounter >= mCurrentAnimation->speed()) {
-	unsigned int f = frame() + 1;
-	if (f >= mCurrentAnimation->start() + mCurrentAnimation->range()) {
-		f = mCurrentAnimation->start();
-	}
-	setFrame(f);
-	mAnimationCounter = 0;
- }
 }
 
 void BosonItem::addToCells()
@@ -477,10 +346,7 @@ void BosonItem::setSize(int width, int height, float depth)
 
 void BosonItem::renderItem(unsigned int lod)
 {
- BO_CHECK_NULL_RET(mModel);
- BO_CHECK_NULL_RET(mCurrentFrame);
- mModel->prepareRendering();
- mCurrentFrame->renderFrame(teamColor(), lod);
+ mRenderer->renderItem(lod);
 }
 
 BosonCollisions* BosonItem::collisions() const
@@ -605,18 +471,9 @@ bool BosonItem::loadFromXML(const QDomElement& root)
  return true;
 }
 
-unsigned int BosonItem::lodCount() const
+void BosonItem::advance(unsigned int)
 {
- if (!mModel) {
-	return 1;
- }
- return mModel->lodCount();
+ mRenderer->animate();
 }
 
-unsigned int BosonItem::preferredLod(float dist) const
-{
- if (!mModel) {
-	return 0;
- }
- return mModel->preferredLod(dist);
-}
+

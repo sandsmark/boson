@@ -30,6 +30,7 @@
 #include "bosoneffectproperties.h"
 #include "defines.h"
 #include "items/bosonshot.h"
+#include "items/bosonitemrenderer.h"
 #include "bosonweapon.h"
 #include "bosonstatistics.h"
 #include "bosonprofiling.h"
@@ -1610,7 +1611,7 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 		return item;
 	}
 	theme->loadNewUnit(unit);
-	unit->setAnimationMode(UnitAnimationIdle);
+	unit->itemRenderer()->setAnimationMode(UnitAnimationIdle);
 	if (unit->isFlying()) {
 		// AB: we have currently not decided how to treat flying units,
 		// so we just place them at a height of 2.0 on construction.
@@ -1618,17 +1619,6 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 		// when the height of the ground is at 2.0, we don't recognize
 		// that either.
 		unit->move(unit->x(), unit->y(), 2.0f);
-	}
-
-
-	if (!boGame->gameMode()) {
-		// editor won't display the construction but always completed
-		// facilities. otherwise it's hard to recognize where they were actually
-		// placed
-		if (unit->glConstructionSteps() > 0) {
-			unit->setGLConstructionStep(unit->glConstructionSteps());
-		}
-		unit->setAnimationMode(UnitAnimationIdle);
 	}
  }
 
@@ -1665,6 +1655,13 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  }
  if (d->mAnimList.count() != d->mAllItems.count()) {
 	boError() << k_funcinfo << "animlist.count() (" << d->mAnimList.count() << ") != allitems.count() (" << d->mAllItems.count() << ")" << endl;
+ }
+ if (!boGame->gameMode()) {
+	// editor won't display the construction but always completed
+	// facilities. otherwise it's hard to recognize where they were actually
+	// placed
+	item->itemRenderer()->setShowGLConstructionSteps(false);
+	item->itemRenderer()->setAnimationMode(UnitAnimationIdle);
  }
  return item;
 }

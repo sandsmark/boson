@@ -16,8 +16,8 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef BOSONSPRITE_H
-#define BOSONSPRITE_H
+#ifndef BOSONITEM_H
+#define BOSONITEM_H
 
 #include "../defines.h"
 
@@ -30,13 +30,13 @@ class BosonCollisions;
 class SelectBox;
 class BosonModel;
 class BosonAnimation;
-class BoFrame;
 class QRect;
 class Cell;
 class BosonEffect;
 class BosonItemPropertyHandler;
 class Player;
 class BoVector3;
+class BosonItemRenderer;
 
 class KGamePropertyHandler;
 class KGamePropertyBase;
@@ -152,8 +152,8 @@ public:
 	BosonItem(Player* owner, BosonModel* model, BosonCanvas*);
 	virtual ~BosonItem();
 
+	BosonItemRenderer* itemRenderer() const { return mRenderer; }
 	inline BosonCanvas* canvas() const { return mCanvas; }
-	inline BosonModel* model() const { return mModel; }
 	BosonCollisions* collisions() const;
 	inline Player* owner() const { return mOwner; }
 
@@ -408,40 +408,12 @@ public:
 	inline bool isVisible() const { return mIsVisible; }
 
 	/**
-	 * Set the animation mode. Only possible if the construction of the unit
-	 * is completed (i.e. the construction step is greater or equal to @ref
-	 * glConstructionSteps).
-	 *
-	 * See @ref BosonModel::animation for more information about @p mode.
-	 **/
-	void setAnimationMode(int mode);
-
-
-	/**
-	 * Make this item animated, i.e. call @ref advance on it. You don't need
-	 * to set it animated if you don't reimplement @ref advance. See also
-	 * @ref BosonCanvas::addAnimation and @ref BosonCanvas::slotAdvance
-	 **/
-	void setAnimated(bool a);
-
-	/**
-	 * Increase the animation timer and once it exceeds the @ref
-	 * BoAnimation::speed set a new frame.
-	 **/
-	void animate();
-
-	/**
 	 * See @ref Unit::advance
 	 *
 	 * This advance implementation manages the animation of the item. Call
 	 * it in your implementation, if you want to provide animations!
 	 **/
-	inline virtual void advance(unsigned int )
-	{
-		if (mCurrentAnimation) {
-			animate();
-		}
-	}
+	virtual void advance(unsigned int );
 
 	/**
 	 * See @ref Unit::advanceFunction
@@ -479,54 +451,8 @@ public:
 	virtual void itemRemoved(BosonItem* item) { Q_UNUSED(item); }
 
 	/**
-	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
-	 * achieve the depth (height in z-direction) of the unit. Note that this
-	 * value <em>must not</em> be used in pathfinding or so, but only in
-	 * OpenGL!
-	 **/
-	inline float glDepthMultiplier() const { return mGLDepthMultiplier; }
-
-	/**
-	 * See @ref glDepthMultiplier. Note that the depth of the unit
-	 * (i.e. the height in z-direction) is allowed to change for
-	 * different frames, but the depth multiplier not!
-	 **/
-	void setGLDepthMultiplier(float d);
-
-	void setGLConstructionStep(unsigned int step);
-
-	/**
-	 * Convenience method. Note that the glConstructionSteps differ from the
-	 * @ref Facility::constructionSteps completely!
-	 * @return model()->constructionSteps()
-	 **/
-	unsigned int glConstructionSteps() const;
-
-	/**
-	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
-	 * OpenGL! Especially not in pathfinding!
-	 * @ return The radius of the bounding sphere. See @ref
-	 * BosonBigDisplayBase::sphereInFrustum
-	 **/
-	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
-
-	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
-
-	/**
-	 * @return See @ref BosonModel::lodCount.
-	 **/
-	unsigned int lodCount() const;
-
-	/**
-	 * @return See @ref BosonModel::PreferredLod
-	 **/
-	unsigned int preferredLod(float distanceFromCamera) const;
-
-	/**
 	 * @return unit's current rotation around z-axis. This is used for rotating
-	 * unit to correct direction when moving. Note that this value
-	 * <em>mustn't</em> be used for pathfinding and similar actions, as of
-	 * floating point operations!
+	 * unit to correct direction when moving.
 	 **/
 	inline float rotation() const { return mRotation; }
 	void setRotation(float r) { mRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
@@ -556,8 +482,6 @@ public:
 	 **/
 	virtual void clearEffects();
 
-// TODO: add something like virtual bool canBeSelected() const = 0; or so! some
-// objects (like missiles) just can't be selected usually.
 	/**
 	 * Select this unit, i.e. construct the select box - see @ref isSelected.
 	 * Note that @ref SelectBox is constructed very fast - the box is
@@ -576,7 +500,6 @@ public:
 	virtual bool saveAsXML(QDomElement&);
 	virtual bool loadFromXML(const QDomElement&);
 
-protected:
 	/**
 	 * @return The team color this item should get rendered with. This
 	 * should be the @ref Player::teamColor of the owner, if applicable. For
@@ -584,19 +507,6 @@ protected:
 	 * valid)
 	 **/
 	virtual const QColor* teamColor() const = 0;
-
-private:
-	/**
-	 * Change the currently displayed frame. Note that you can't set the
-	 * construction frames here, as they are generated on the fly and don't
-	 * reside as an actual frame in the .3ds file.
-	 *
-	 * You usually don't want to call this, but rather @ref setAnimationMode
-	 * instead.
-	 **/
-	void setFrame(int _frame);
-	inline int frame() const { return mFrame; }
-	unsigned int frameCount() const;
 
 private:
 	/**
@@ -612,8 +522,6 @@ private:
 		mZ = z;
 		mCellsDirty = true;
 	}
-
-	void setCurrentFrame(BoFrame* frame);
 
 	/**
 	 * Add the item to the cells on the canvas. This should get called
@@ -631,9 +539,8 @@ private:
 	void removeFromCells();
 
 private:
+	BosonItemRenderer* mRenderer;
 	BosonCanvas* mCanvas;
-	BosonModel* mModel;
-	BosonAnimation* mCurrentAnimation;
 	Player* mOwner;
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
@@ -654,24 +561,9 @@ private:
 	float mAccelerationSpeed;
 	float mDecelerationSpeed;
 
-// OpenGL values. should not be used for pathfinding and so on. Most stoff
-// shouldn't be stored in save() either
 	float mRotation;
 	float mXRotation;
 	float mYRotation;
-	float mGLDepthMultiplier;
-	BoFrame* mCurrentFrame;
-	unsigned int mGLConstructionStep;
-	unsigned int mFrame;
-	unsigned int mAnimationCounter;
-
-	// these are for OpenGL performance only. no need to store in save() and
-	// don't use for anything except OpenGL!
-//	float mCenterX;
-//	float mCenterY;
-//	float mCenterZ;
-	float mBoundingSphereRadius;
-
 
 	bool mIsAnimated;
 	SelectBox* mSelectBox;
