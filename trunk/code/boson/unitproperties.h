@@ -51,10 +51,29 @@ public:
 	UnitProperties(const QString& fileName);
 	~UnitProperties();
 
+	/**
+	 * @return Default health aka power aka whatever of this unit.
+	 **/
 	unsigned long int health() const { return mHealth; }
+
+	/**
+	 * @return The default shields value of this unit. Not yet used.
+	 **/
 	unsigned long int shields() const;
+
+	/**
+	 * @return The default armor value of this unit. Not yet used.
+	 **/
 	unsigned long int armor() const;
+
+	/**
+	 * @return How much this unit costs (of your mineral account)
+	 **/
 	unsigned long int mineralCost() const;
+
+	/**
+	 * @return How much this unit costs (of your oil account)
+	 **/
 	unsigned long int oilCost() const;
 
 	/**
@@ -67,6 +86,10 @@ public:
 	 **/
 	unsigned int reload() const { return mReload; }
 
+	/**
+	 * return How far this unit can see. Is a number of cells, so multiply
+	 * with BO_TILE_SIZE to use it on the canvas.
+	 **/
 	unsigned int sightRange() const { return mSightRange; }
 
 	/**
@@ -89,6 +112,13 @@ public:
 	 **/
 	const QString& name() const { return mName; };
 
+	/**
+	 * Load the file. This sets all values of UnitProperties. All values are
+	 * readOnly, as UnitProperties is meant to change never.
+	 *
+	 * The file should contain units/your_unit_dir/index.desktop at the end
+	 * and should be an absolute path.
+	 **/
 	void loadUnitType(const QString& fileName);
 
 	/**
@@ -101,7 +131,10 @@ public:
 	 **/
 	bool isFacility() const;
 
-// only if this unit is a mobile unit:
+	/**
+	 * @return The speed of the mobiel unit. 0 if this is a facility. See
+	 * @ref isFacility
+	 **/
 	double speed() const;
 
 	/**

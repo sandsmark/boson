@@ -36,18 +36,34 @@ class UnitProperties;
 class SpeciesTheme;
 
 /**
+ * Ok, ok - this class is useless. All it does is providing a lot of properties
+ * and the basic stuff of all units. But there is no point for an own class.
+ * Maybe we'll put all of this directly to @ref Unit. But when I created the
+ * basic design I still thought of some inheritance but never made this true. 
+ *
+ * So here you can find most of the stuff about the unit, like health, weapon
+ * damage, sight range and so on. But all the useful stuff is in @ref Unit.
+ * @short The base class of all Units.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class UnitBase
 {
 public:
+	/**
+	 * Property IDs for the @ref KGameProperty's. Note that you can change
+	 * the numbers without any problem as long as all numbers appear only
+	 * once and are greater than (or equal) @ref KGamePropretyBase::IdUser.
+	 * All Ids Below are inernal KGame IDs (although we don't have to
+	 * care as that matters only for @ref KGame and @ref KPlayer - but let's
+	 * go the save way).
+	 **/
 	enum PropertyIds {
 		IdHealth = KGamePropertyBase::IdUser + 0,
 		IdArmor = KGamePropertyBase::IdUser + 1,
 		IdShields = KGamePropertyBase::IdUser + 2,
 		IdId = KGamePropertyBase::IdUser + 3, // useful? perhaps use dataHandler()->id() instead
 		IdCost = KGamePropertyBase::IdUser + 4,
-		IdType = KGamePropertyBase::IdUser + 5,
+//		IdType = KGamePropertyBase::IdUser + 5, // obsolete
 		IdWork = KGamePropertyBase::IdUser + 6,
 		IdSpeed = KGamePropertyBase::IdUser + 7,
 		IdDamage = KGamePropertyBase::IdUser + 8,
@@ -78,12 +94,19 @@ public:
 		WorkConstructed = 5 
 	};
 	
-	UnitBase(int type);
+	UnitBase(const UnitProperties* prop);
 	virtual ~UnitBase();
 
-	void setWork(WorkType w);
+	/**
+	 * Change what this unit is currently doing.
+	 **/
+	void setWork(WorkType w) { mWork= w; }
 
-	WorkType work() const;
+	/**
+	 * @return What this unit is currently doing. See @ref WorkTyp on
+	 * information what this can be.
+	 **/
+	WorkType work() const { return (WorkType)mWork.value(); }
 
 	/**
 	 * @return Guess what? See @ref UnitProperties::name
@@ -100,9 +123,12 @@ public:
 	 * armor?
 	 * @return The health of the unit.
 	 **/
-	virtual unsigned long int health() const;
+	virtual unsigned long int health() const { return mHealth; };
 
-	virtual void setHealth(unsigned long int h);
+	/**
+	 * Change the health/power of this unit.
+	 **/
+	virtual void setHealth(unsigned long int h) { mHealth = h; }
 
 	bool isDestroyed() const
 	{
@@ -113,6 +139,11 @@ public:
 	 * @return The owner (player) of the unit
 	 **/
 	Player* owner() const { return mOwner; }
+
+	/**
+	 * Set the owner of this unit. Note that this should be done on
+	 * construction only! We do not yet support changing the owner!
+	 **/
 	void setOwner(Player* owner);
 
 	KGamePropertyHandler* dataHandler() const;
@@ -123,6 +154,11 @@ public:
 	 **/
 	unsigned long int id() const;
 
+	/**
+	 * Set the ID of this unit. A ID must be unique for the owner, so it
+	 * must be ensured that a ID exists only once per player. Should be done
+	 * on construction only.
+	 **/
 	void setId(unsigned long int id);
 
 	unsigned long int shields() const;
@@ -135,33 +171,67 @@ public:
 	 * The type of the unit as described in the index.desktop file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
-	virtual int type() const;
+	inline int type() const;
 
+	/**
+	 * @return The RTTI of this unit. You can use @ref RTTI::isUnit to find
+	 * out if a @ref QCanvasSprite is a unit.
+	 **/
 	virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
 
-	/*
-	 * For mobile units this means where the unit is currently moving to.
-	 * For a facility this means where produced units shall be placed.
-	 *
-	 * Must be reimplemented in derived classes.
+	/**
+	 * @return How much damage the weapon can make to other units. Note that
+	 * a negative value means that this unit can repair!
 	 **/
-//	virtual const QPoint& destination() const = 0; // TODO
+	long int damage() const { return mDamage; }
 
-	long int damage() const; // not unsigned - can also repair :-)
-	void setDamage(long int d); // not unsigned - can also repair :-)
-	unsigned long int range() const;
-	void setRange(unsigned long int r);
-	unsigned int reload() const; // number of advance() calls until reloaded
-	void setReload(unsigned int r);
+	/**
+	 * Change the damage this unit can do to other units
+	 **/
+	void setDamage(long int d) { mDamage = d; }
+	
+	/**
+	 * @return The weapon range of this unit
+	 **/
+	unsigned long int range() const { return mRange; }
 
-	unsigned int sightRange() const;
-	void setSightRange(unsigned int);
+	/**
+	 * Change the weapong range of this unit
+	 **/
+	void setRange(unsigned long int r) { mRange = r; }
+	
+	/**
+	 * @return The number of @ref Unit::advance calls unit the unit has
+	 * reloaded its weapon.
+	 **/
+	unsigned int reload() const { return mReload; }
+	void setReload(unsigned int r) { mReload = r; }
 
+	/**
+	 * @return How far this unit can see. This is a number of cells, so you
+	 * must *= BO_TILE_SIZE to use this on the canvas.
+	 **/
+	unsigned int sightRange() const { return mSightRange; }
+	void setSightRange(unsigned int r) { mSightRange = r; }
+
+	/**
+	 * @return The speed of the unit. Must be replaced in derived classes to
+	 * be of use as this just return 0.
+	 **/
 	virtual double speed() const { return 0.0; }
 	virtual void setSpeed(double ) { }
 
-
+	/**
+	 * Save the unit to a stream. You can use @ref load to load the same
+	 * unit again. Note that if derived classes add properties which are no
+	 * @ref KGameProperty they must replace this function.
+	 **/
 	virtual bool save(QDataStream& stream);
+
+	/**
+	 * Load a unit from a stream. Note that just like @ref save derived
+	 * classes must replace this if they add non-KGameProperty properties.
+	 **/
 	virtual bool load(QDataStream& stream);
 
 	/**
@@ -171,11 +241,11 @@ public:
 	 * The @ref UnitProperties describes a unit type generally. This
 	 * includes the name of tha unit as well as all initial values.
 	 *
-	 * Note that the @ref UnitProperties class is a property of @ref
-	 * SpeciesTheme and therefore of the @ref owner of this unit. If this
-	 * unit does not yet have an owner this always returns 0!!
+	 * The @ref UnitProperties which you get is the same that you provided
+	 * in the constructor. Note that if you get NULL here you don't have to
+	 * care about crashes as the game will crash anyway.
 	 **/
-	inline const UnitProperties* unitProperties() const;
+	const UnitProperties* unitProperties() const { return mUnitProperties; }
 
 	/**
 	 * Convenience method for owner()->speciesTheme().
@@ -211,6 +281,15 @@ private:
 	UnitBasePrivate* d;
 	
 	Player* mOwner;
+
+	KGameProperty<unsigned long int> mHealth;
+	KGameProperty<unsigned long int> mRange;
+	KGameProperty<unsigned int> mSightRange;
+	KGameProperty<long int> mDamage; // can also be repair (negative value)
+	KGameProperty<unsigned int> mReload;
+	KGamePropertyInt mWork;
+
+	const UnitProperties* mUnitProperties;
 };
 
 #endif

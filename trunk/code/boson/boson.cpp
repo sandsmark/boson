@@ -346,9 +346,9 @@ Unit* Boson::createUnit(int unitType, Player* owner)
 
  Unit* unit = 0;
  if (prop->isMobile()) {
-	unit = new MobileUnit(unitType, owner, d->mCanvas);
+	unit = new MobileUnit(prop, owner, d->mCanvas);
  } else if (prop->isFacility()) {
-	unit = new Facility(unitType, owner, d->mCanvas);
+	unit = new Facility(prop, owner, d->mCanvas);
  } else { // should be impossible
 	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;

@@ -29,12 +29,12 @@ class UnitProperties;
 
 /**
  * Implementation of the visual parts of a unit. As far as possible all stuff
- * should go to UnitBase directly - except the visual stuff.
- *
- * Probably most things here can be moved to UnitBase. is a FIXME
+ * should go to UnitBase directly - except the visual stuff. (UPDATE 01/12/27:
+ * most stuff is in Unit, UnitBase is kind of obsolete, might be removed
+ * someday)
  *
  * Not that Unit does <em>not</em> inherit @ref QObject! Signals/Slots are
- * therefore not possible!
+ * therefore not possible! This is done to save as much memory as possible.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class Unit : public UnitBase, public QCanvasSprite
@@ -62,7 +62,7 @@ public:
 		NorthWest = 7 // FIXME
 		
 	};
-	Unit(int type, Player* owner, QCanvas* canvas);
+	Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
 	virtual ~Unit();
 
 	virtual int rtti() const { return UnitBase::rtti(); }
@@ -171,7 +171,7 @@ private:
 class MobileUnit : public Unit
 {
 public:
-	MobileUnit(int type, Player* owner, QCanvas* canvas);
+	MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas);
 	virtual ~MobileUnit();
 
 	virtual void setSpeed(double s);
@@ -193,7 +193,7 @@ private:
 class Facility : public Unit
 {
 public:
-	Facility(int type, Player* owner, QCanvas* canvas);
+	Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas);
 	virtual ~Facility();
 
 	/**
