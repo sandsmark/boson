@@ -53,6 +53,8 @@
 
 #include <GL/gl.h>
 
+QColor BoUfoLabel::mDefaultForegroundColor = Qt::black;
+
 
 
 /**
@@ -471,6 +473,8 @@ BoUfoManager::BoUfoManager(int w, int h, bool opaque)
 	}
 	if (data_dir.isEmpty()) {
 		boWarning() << k_funcinfo << "cannot determine data_dir" << endl;
+//		tk->putProperty("data_dir", "/usr/local/share/ufo");
+//		tk->putProperty("font_dir", "/usr/local/share/ufo/font");
 	} else {
 		data_dir += "boson/ufo";
 		tk->putProperty("data_dir", data_dir.latin1());
@@ -575,24 +579,27 @@ void BoUfoManager::dispatchEvents()
 void BoUfoManager::render()
 {
  BO_CHECK_NULL_RET(context());
-// BO_CHECK_NULL_RET(display());
-#if 0
- glDisable(GL_TEXTURE_2D);
- glMatrixMode(GL_PROJECTION);
- glPushMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
-#endif
  context()->pushAttributes();
- context()->repaint();
- context()->popAttributes();
 #if 0
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
+ context()->repaint();
+#else
+ context()->getGraphics()->resetDeviceAttributes();
+ context()->getGraphics()->resetDeviceViewMatrix();
+
+ // AB: ufo currently (0.7.4) enables blending by default. however we don't use
+ // it currently!
+ // (and additionally we never should when we are in software rendering)
+ glDisable(GL_BLEND);
+
+ context()->getRepaintManager()->clearDirtyRegions();
+ context()->getRootPane()->paint(context()->getGraphics());
+
+ // AB: used by UXContext::repaint(), but we don't need it anyway
+ // (just does a glFlush() call)
+// context()->getGraphics()->flush();
 #endif
- 
+ context()->popAttributes();
+
 // TODO glViewport(0, 0, w, h);
 // -> libufo sets a different viewport, but doesn't reset to the original one
 }
@@ -794,6 +801,92 @@ bool BoUfoManager::sendKeyReleaseEvent(QKeyEvent* e)
  } else {
 	e->ignore();
  }
+ return ret;
+}
+
+void BoUfoManager::setUfoToolkitProperty(const QString& key, const QString& value)
+{
+ ufo::UXToolkit* tk = toolkit();
+ if (!tk) {
+	return;
+ }
+ tk->putProperty(key.latin1(), value.latin1());
+}
+
+QString BoUfoManager::ufoToolkitProperty(const QString& key) const
+{
+ const ufo::UXToolkit* tk = toolkit();
+ if (!tk) {
+	return QString::null;
+ }
+ return QString::fromLatin1(tk->getProperty(key.latin1()).c_str());
+}
+
+QMap<QString, QString> BoUfoManager::toolkitProperties() const
+{
+ QMap<QString, QString> p;
+ ufo::UXToolkit* tk = toolkit();
+ if (!tk) {
+	return p;
+ }
+#define UFO_PROPERTY(x) p.insert(QString(x), QString(tk->getProperty(x).c_str()))
+ UFO_PROPERTY("user_name");
+ UFO_PROPERTY("real_name");
+ UFO_PROPERTY("home_dir");
+ UFO_PROPERTY("tmp_dir");
+ UFO_PROPERTY("prg_name");
+ UFO_PROPERTY("look_and_feel");
+ UFO_PROPERTY("theme_config");
+ UFO_PROPERTY("video_driver");
+ UFO_PROPERTY("data_dir");
+ UFO_PROPERTY("font");
+ UFO_PROPERTY("font_dir");
+#undef UFO_PROPERTY
+ return p;
+}
+
+QValueList<ufo::UFontInfo> BoUfoManager::listFonts(const ufo::UFontInfo& fontInfo)
+{
+#warning TODO (for fontinfo)
+ // TODO: once we use BoUfoFontInfo, we first need to set the current font
+ // plugin here!
+ // setUfoToolkitProperty("font", fontInfo->fontPlugin());
+
+ QValueList<ufo::UFontInfo> ret;
+ std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts(fontInfo);
+ for (unsigned int i = 0; i < fonts.size(); i++) {
+	ret.append(fonts[i]);
+ }
+ return ret;
+}
+
+QValueList<ufo::UFontInfo> BoUfoManager::listFonts()
+{
+ QString originalFontPlugin = ufoToolkitProperty("font");
+ if (!toolkit()) {
+	BO_NULL_ERROR(toolkit());
+	return QValueList<ufo::UFontInfo>();
+ }
+
+ QStringList fontPlugins;
+ std::vector<ufo::UPluginInfo> pluginInfos = toolkit()->getPluginInfos();
+ for (unsigned int i = 0; i < pluginInfos.size(); i++) {
+	if (pluginInfos[i].category == "font") {
+		fontPlugins.append(pluginInfos[i].feature.c_str());
+	}
+ }
+
+// QValueList<BoUfoFontInfo> ret;
+ QValueList<ufo::UFontInfo> ret;
+ for (QStringList::iterator it = fontPlugins.begin(); it != fontPlugins.end(); ++it) {
+	setUfoToolkitProperty("font", *it);
+	std::vector<ufo::UFontInfo> fonts = toolkit()->listFonts();
+	for (unsigned int i = 0; i < fonts.size(); i++) {
+		// BoUfoFontInfo info(*it, ...);
+		ret.append(fonts[i]);
+	}
+ }
+ setUfoToolkitProperty("font", originalFontPlugin);
  return ret;
 }
 
@@ -1871,6 +1964,49 @@ void BoUfoComboBox::setPreferredSize(const ufo::UDimension& s)
  mComboBox->setPreferredSize(s);
 }
 
+void BoUfoComboBox::clear()
+{
+ mComboBox->removeAllItems();
+}
+
+int BoUfoComboBox::currentItem() const
+{
+ return mComboBox->getCurrentItem();
+}
+
+void BoUfoComboBox::setCurrentItem(int i)
+{
+ mComboBox->setCurrentItem(i);
+}
+
+QString BoUfoComboBox::currentText() const
+{
+ return QString::fromLatin1(mComboBox->getCurrentText().c_str());
+}
+
+QStringList BoUfoComboBox::items() const
+{
+ QStringList list;
+ std::vector<ufo::UItem*> items = mComboBox->getItems();
+ for (unsigned int i = 0; i < items.size(); i++) {
+	list.append(items[i]->itemToString().c_str());
+ }
+ return list;
+}
+
+void BoUfoComboBox::setItems(const QStringList& items)
+{
+ clear();
+ for (QStringList::const_iterator it = items.begin(); it != items.end(); ++it) {
+	mComboBox->addItem((*it).latin1());
+ }
+}
+
+unsigned int BoUfoComboBox::count() const
+{
+ return mComboBox->getItemCount();
+}
+
 
 BoUfoListBox::BoUfoListBox() : BoUfoWidget()
 {
@@ -1886,9 +2022,151 @@ void BoUfoListBox::init()
  CONNECT_UFO_TO_QT(BoUfoListBox, mListBox, SelectionChanged);
 }
 
+void BoUfoListBox::setSelectionMode(BoUfoListBox::SelectionMode mode)
+{
+ ufo::UListBox::SelectionMode ufoMode;
+ switch (mode) {
+	default:
+	case NoSelection:
+		ufoMode = ufo::UListBox::NoSelection;
+		break;
+	case SingleSelection:
+		ufoMode = ufo::UListBox::SingleSelection;
+		break;
+	case MultiSelection:
+		ufoMode = ufo::UListBox::MultipleSelection;
+		break;
+ }
+ mListBox->setSelectionMode(ufoMode);
+}
+
+BoUfoListBox::SelectionMode BoUfoListBox::selectionMode() const
+{
+ switch (mListBox->getSelectionMode()) {
+	case ufo::UListBox::NoSelection:
+		 return NoSelection;
+	case ufo::UListBox::SingleSelection:
+		 return SingleSelection;
+	case ufo::UListBox::MultipleSelection:
+		return MultiSelection;
+ }
+ return NoSelection;
+}
+
 void BoUfoListBox::clear()
 {
  mListBox->removeAllItems();
+}
+
+int BoUfoListBox::selectedItem() const
+{
+ return mListBox->getSelectedIndex();
+}
+
+void BoUfoListBox::setSelectedItem(int i)
+{
+ mListBox->setSelectedIndex(i);
+}
+
+bool BoUfoListBox::isSelected(int index) const
+{
+ return mListBox->isSelectedIndex(index);
+}
+
+bool BoUfoListBox::isTextSelected(const QString& text) const
+{
+ QStringList items = selectedItemsText();
+ if (items.contains(text)) {
+	return true;
+ }
+ return false;
+}
+
+void BoUfoListBox::unselectAll()
+{
+ mListBox->setSelectedIndices(std::vector<unsigned int>());
+}
+
+void BoUfoListBox::setItemSelected(int index, bool select)
+{
+ switch (selectionMode()) {
+	default:
+	case NoSelection:
+		break;
+	case SingleSelection:
+		if (select) {
+			if (selectedItem() == index) {
+				return;
+			}
+			unselectAll();
+			mListBox->setSelectedIndex(index);
+			return;
+		} else {
+			// FIXME: use mListBox->setSelectedIndex(index, false);
+			// once such a thing exists!
+			unselectAll();
+		}
+		break;
+	case MultiSelection:
+		// TODO: implement. ufo doesn't support multi selections yet.
+		if (select) {
+			mListBox->setSelectedIndex(index);
+		} else {
+			unselectAll();
+		}
+		break;
+ }
+}
+
+QString BoUfoListBox::selectedText() const
+{
+ int i = selectedItem();
+ if (i < 0) {
+	return QString::null;
+ }
+ return items()[i];
+}
+
+QValueList<unsigned int> BoUfoListBox::selectedItems() const
+{
+ QValueList<unsigned int> ret;
+ std::vector<unsigned int> sel = mListBox->getSelectedIndices();
+ for (unsigned int i = 0; i < sel.size(); i++) {
+	ret.append(sel[i]);
+ }
+ return ret;
+}
+
+QStringList BoUfoListBox::selectedItemsText() const
+{
+ // note: this may be pretty slow for large lists, it is just a trivial
+ // implementation!
+ // this doesnt matter since we don't have large lists in boson currently
+ QStringList ret;
+ QStringList allItems = items();
+ QValueList<unsigned int> sel = selectedItems();
+ for (QValueList<unsigned int>::iterator it = sel.begin(); it != sel.end(); ++it) {
+	ret.append(allItems[*it]);
+ }
+ return ret;
+}
+
+QStringList BoUfoListBox::items() const
+{
+ QStringList list;
+ std::vector<ufo::UItem*> items = mListBox->getItems();
+ for (unsigned int i = 0; i < items.size(); i++) {
+	list.append(items[i]->itemToString().c_str());
+ }
+ return list;
+}
+
+void BoUfoListBox::setItems(const QStringList& items)
+{
+ clear();
+ for (QStringList::const_iterator it = items.begin(); it != items.end(); ++it) {
+	mListBox->addItem((*it).latin1());
+ }
 }
 
 unsigned int BoUfoListBox::count() const
@@ -1939,7 +2217,18 @@ void BoUfoLabel::init()
  mLabel = new ufo::ULabel();
  widget()->add(mLabel);
  mLabel->setOpaque(false);
- setForegroundColor(QColor(255, 255, 255));
+// setForegroundColor(Qt::white);
+ setForegroundColor(defaultForegroundColor());
+}
+
+void BoUfoLabel::setDefaultForegroundColor(const QColor& c)
+{
+ mDefaultForegroundColor = c;
+}
+
+const QColor& BoUfoLabel::defaultForegroundColor()
+{
+ return mDefaultForegroundColor;
 }
 
 void BoUfoLabel::setOpaque(bool o)
