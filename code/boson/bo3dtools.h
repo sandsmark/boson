@@ -836,6 +836,28 @@ class Bo3dTools
      * @return @p rad as degree.
      **/
     static float rad2deg(float rad);
+
+    /**
+     * See @ref BosonBigDisplayBase::extractFrustum for more information about this stuff.
+     *
+     * We use a bounding spere so that we can easily rotate it.
+     * @return 0 if the object is not in the frustum (i.e. is not visible)
+     * otherwise the distance from the near plane. We might use this for the
+     * level of detail.
+     * @param viewFrustum This is the viewFrustum, as it is used by @ref
+     * BosonBigDisplayBase. The view frustum is a 6x4 matrix
+     **/
+    // FIXME: we should use float* instead of double*
+    static float sphereInFrustum(double* viewFrustum, const BoVector3&, float radius);
+
+    /**
+     * @overload
+     **/
+    inline static float sphereInFrustum(double* viewFrustum, float x, float y, float z, float radius)
+    {
+      BoVector3 pos(x,y,z);
+      return sphereInFrustum(viewFrustum, pos, radius);
+    }
 };
 
 
