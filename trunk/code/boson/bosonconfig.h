@@ -21,6 +21,7 @@
 
 #include "global.h"
 #include <qstring.h>
+#include <qvaluelist.h>
 
 class QColor;
 class KConfig;
@@ -263,6 +264,18 @@ public:
 	void reset(KConfig* conf = 0);
 
 	void addConfigEntry(BoConfigEntry*);
+
+	/**
+	 * Loads list of unsinged long int's from KConfig (which only supports loading
+	 * list of _int's_)
+	 **/
+	static QValueList<unsigned long int> readUnsignedLongNumList(KConfig* cfg, QString key);
+
+	/**
+	 * Loads list of float's from KConfig
+	 **/
+	static QValueList<float> readFloatNumList(KConfig* cfg, QString key);
+
 
 protected:
 	int readCommandButtonsPerRow(KConfig* conf);

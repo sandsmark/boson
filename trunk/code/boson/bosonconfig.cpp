@@ -432,3 +432,25 @@ bool BosonConfig::unitSoundActivated(UnitSoundEvent e) const
  return !mUnitSoundsDeactivated->contains((int)e);
 }
 
+QValueList<unsigned long int> BosonConfig::readUnsignedLongNumList(KConfig* cfg, QString key)
+{
+  QValueList<unsigned long int> list;
+  QValueList<int> tmplist = cfg->readIntListEntry(key);
+  QValueList<int>::Iterator it;
+  for(it = tmplist.begin(); it != tmplist.end(); it++)
+  {
+    list.append((unsigned long int)(*it));
+  }
+  return list;
+}
+
+QValueList<float> BosonConfig::readFloatNumList(KConfig* cfg, QString key)
+{
+  QStringList strlist = cfg->readListEntry(key);
+  QValueList<float> list;
+  for(QStringList::Iterator it = strlist.begin(); it != strlist.end(); it++)
+  {
+    list.append((*it).toFloat());
+  }
+  return list;
+}

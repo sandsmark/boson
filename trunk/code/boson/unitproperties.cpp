@@ -22,10 +22,10 @@
 #include "speciestheme.h"
 #include "pluginproperties.h"
 #include "upgradeproperties.h"
-#include "bo.h"
 #include "bosonparticlesystem.h"
 #include "bosonparticlemanager.h"
 #include "bosonweapon.h"
+#include "bosonconfig.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -116,9 +116,9 @@ void UnitProperties::loadUnitType(const QString& fileName)
  for(it = tmpRequirements.begin(); it != tmpRequirements.end(); it++) {
 	mRequirements.append((unsigned long int)(*it));
  }*/
- mRequirements = Bo::readUnsignedLongNumList(&conf, "Requirements");
+ mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
 
- QValueList<unsigned long int> weaponIds = Bo::readUnsignedLongNumList(&conf, "Weapons");
+ QValueList<unsigned long int> weaponIds = BosonConfig::readUnsignedLongNumList(&conf, "Weapons");
  QValueList<unsigned long int>::Iterator it;
  for(it = weaponIds.begin(); it != weaponIds.end(); it++) {
 	mWeapons.append(mTheme->weaponProperties(*it));
@@ -139,7 +139,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
 	++wit;
  }
 
- mDestroyedParticleSystems = Bo::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
+ mDestroyedParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(&conf, "DestroyedParticles", mTheme);
 
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);
