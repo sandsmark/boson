@@ -61,11 +61,10 @@ draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-    <li>Better support for height maps in editor</li>
+    <li>Support for height maps in editor</li>
     <li>3d-terrains in map files</li>
     <li>The new startup widgets need some work</li>
     <li>New save game format</li>
-    <li>Consistent mouse actions</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
