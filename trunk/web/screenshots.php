@@ -239,8 +239,8 @@ if($show_ss == -1)
     while ($index < sizeof($screens) and $index < $last)
     {
         echo "<tr>";
-            $screens[$index + 1]->draw_thumb();
             $screens[$index]->draw_thumb();
+            $screens[$index + 1]->draw_thumb();
         echo "</tr>";
         $index=$index+2;
     }
