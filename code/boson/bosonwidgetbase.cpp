@@ -661,17 +661,22 @@ void BosonWidgetBase::initKActions()
  (void)new KAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
 		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
 
- // Debug - no i18n!
- (void)new KAction("&Profiling", KShortcut(), this,
+ // Debug
+ (void)new KAction(i18n("&Profiling"), KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
- (void)new KAction("&Unfog", KShortcut(), this,
+ (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- (void)new KAction("&Debug", KShortcut(), this,
+ (void)new KAction(i18n("&Debug"), KShortcut(), this,
 		SLOT(slotDebug()), actionCollection(), "debug_kgame");
- KToggleAction* mapCoordinates = new KToggleAction("Debug &map coordinates", KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
+ KToggleAction* mapCoordinates = new KToggleAction(i18n("Debug &map coordinates"),
+		KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
  mapCoordinates->setChecked(false);
- connect(mapCoordinates, SIGNAL(toggled(bool)), displayManager(), SLOT(slotSetDebugMapCoordinates(bool)));
- 
+ connect(mapCoordinates, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugMapCoordinates(bool)));
+ KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
+		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
+ connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
+
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
  connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
@@ -682,6 +687,8 @@ void BosonWidgetBase::initKActions()
  debugMode->setCurrentItem(0);
  d->mActionDebugPlayers = new KActionMenu("Players", actionCollection(), "debug_players");
 
+ cheating->setChecked(DEFAULT_CHEAT_MODE);
+ slotToggleCheating(DEFAULT_CHEAT_MODE);
  checkDockStatus();
 }
 
@@ -1067,6 +1074,23 @@ void BosonWidgetBase::slotUnitCountChanged(Player* p)
  emit signalFacilitiesCount(p->facilitiesCount());
 }
 
+void BosonWidgetBase::slotToggleCheating(bool on)
+{
+ setActionEnabled("debug_kgame", on);
+ setActionEnabled("debug_unfog", on);
+ setActionEnabled("debug_players", on);
+}
+
+void BosonWidgetBase::setActionEnabled(const char* name, bool on)
+{
+ KAction* a = actionCollection()->action(name);
+ if (!a) {
+	boError() << k_funcinfo << "NULL " << name << " action" << endl;
+ } else {
+	a->setEnabled(on);
+ }
+}
+
 void BosonWidgetBase::slotLoadExternalStuff(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
@@ -1082,3 +1106,4 @@ void BosonWidgetBase::slotSaveExternalStuff(QDataStream& stream)
  // TODO: save camera  (BosonBigDisplayBase?)
  // TODO: save unitgroups  (BoDisplayManager?)
 }
+
