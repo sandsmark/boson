@@ -24,9 +24,6 @@
 
 #include <kgame/kgameproperty.h>
 
-class QPoint;
-class QRect;
-class QDataStream;
 class KGamePropertyHandler;
 class QDomElement;
 template<class T, class T2> class QMap;
@@ -43,7 +40,7 @@ class BosonItemPropertyHandler;
  * Ok, ok - this class is useless. All it does is providing a lot of properties
  * and the basic stuff of all units. But there is no point for an own class.
  * Maybe we'll put all of this directly to @ref Unit. But when I created the
- * basic design I still thought of some inheritance but never made this true. 
+ * basic design I still thought of some inheritance but never made this true.
  *
  * So here you can find most of the stuff about the unit, like health, weapon
  * damage, sight range and so on. But all the useful stuff is in @ref Unit.
@@ -121,7 +118,7 @@ public:
 		Removing = 4,
 		MustSearch = 5
 	};
-	
+
 	UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~UnitBase();
 
@@ -131,7 +128,7 @@ public:
 	 * Change what this unit is currently doing.
 	 **/
 	virtual void setWork(WorkType w)
-	{ 
+	{
 		mWork = w;
 		setAdvanceWork(w);
 	}
@@ -241,7 +238,7 @@ public:
 	 * care about crashes as the game will crash anyway.
 	 **/
 	const UnitProperties* unitProperties() const { return mUnitProperties; }
-	
+
 	/**
 	 * Convenience method for unitProperties()->properties().
 	 *
@@ -275,7 +272,7 @@ public:
 	 * airport. For these units we need to know whether they are flying or
 	 * not.
 	 * @return Whether this unit is currently flying. Always false if @ref
-	 * unitProperties()->isAircraft is false. Currently this is juste the 
+	 * unitProperties()->isAircraft is false. Currently this is juste the
 	 * same as @ref unitProperties()->isAircraft.
 	 **/
 	bool isFlying() const;
