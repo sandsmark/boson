@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -23,7 +23,7 @@
 
 
 #include <visualView.h>
-#include "../common/groundType.h"
+#include "common/groundType.h"
 
 class QCheckBox;
 class QPushButton;
@@ -32,7 +32,6 @@ class playerFacility;
 class QLabel;
 class QWidgetStack;
 class QScrollView;
-//class visualBigDisplay;
 class QVBoxLayout;
 class QComboBox;
 

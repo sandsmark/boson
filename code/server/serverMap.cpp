@@ -22,7 +22,7 @@
 
 #include <qpainter.h>
 
-#include "../common/map.h"
+#include "common/map.h"
 
 #include "serverCell.h"
 #include "boserver.h"
@@ -40,7 +40,6 @@ key = 127; // why not ?
 
 	assert (openRead(mapfile));
 	///orzel, was ugly.. should handle openRead()==false correctly 
-	nbPlayer= nbPlayer;
 	worldName = new QString(_worldName);
 	assert (loadGround());
 }

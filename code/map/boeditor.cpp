@@ -22,9 +22,9 @@
 
 // _do_ use the local boFile.h copy !
 #include "boFile.h"
-#include "../common/msgData.h"
-#include "../common/groundType.h"
-#include "../common/cell.h"
+#include "common/msgData.h"
+#include "common/groundType.h"
+#include "common/cell.h"
 
 #include "map.h"
 

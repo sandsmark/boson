@@ -21,8 +21,8 @@
 #ifndef MSGDATA_H 
 #define MSGDATA_H 
 
-#include "../common/groundType.h"
-#include "../common/unitType.h"
+#include "common/groundType.h"
+#include "common/unitType.h"
 
 #define BOSON_NO_DATA	0, ((bosonMsgData *) 0L)
 

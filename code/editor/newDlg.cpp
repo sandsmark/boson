@@ -18,19 +18,14 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include <stdlib.h>	// atoi
-
 #include <qpushbutton.h>
 #include <qlabel.h>
 #include <qscrollbar.h>
-//#include <qslider.h>
 #include <qpixmap.h>
 #include <qcombobox.h>
 #include <qlineedit.h> 
 
 #include "newDlg.h"
-
-//#include "common/log.h"
 
 newDlg::newDlg(QWidget *parent, const char *name)
 	:QDialog(parent,name,true)

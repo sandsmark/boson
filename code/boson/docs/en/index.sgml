@@ -2,10 +2,10 @@
 <article>
 <title>The Boson Handbook
 <author>Thomas Capricelli <tt>orzel@yalbi.com</tt>
-<date>Version 0.3 , Sun Sep 12 13:28:38 CEST 1999
+<date>Version 0.4 , Wed Dec 22 02:56:26 EST 1999
 
 <abstract>
-This Handbook describes Boson Version 0.3
+This Handbook describes Boson Version 0.4
 </abstract>
 
 <toc>
@@ -31,17 +31,12 @@ Please contact : <tt/Thomas Capricelli/
 <sect1>Changes
 <p>
 
-Boson 0.3 is the third alpha release, it's meant to be a developper-only release and
-isn't yet intended for playing.
+Boson 0.4 is the fourth alpha release, it's meant to be the last developper-only release. It's
+still no yet intended for playing.
 
-This release features :
+New features in this released are : 
 <itemize>
-	<item> Network layer and synchronisation.
-	<item> Map file structure.
-	<item> Selection and mutliple selection (control+click)
-	<item> Units/Mobiles displaying.
-	<item> One can <tt/move/ units
-	<item> Units can move only on 'allowed' ground and don't overlap.
+	<item>///orzel
 </itemize>
 
 <p>
@@ -53,7 +48,7 @@ If you ever want to contribute to the project, please contact
 
 Every kind of help is welcome : 
 <itemize>
-	<item> Graphist (ground, species)
+	<item> Graphist (ground, facilities, units)
 	<item> Web page maintainer
 	<item> Documentation writer
 	<item> Alpha-tester ( wanna see segfaults ?)
@@ -68,8 +63,8 @@ Every kind of help is welcome :
 <bf/Boson/ can be found on <htmlurl
 url="http://aquila.rezel.enst.fr/boson/" name="the boson homepage" >.
 
-Until the first public release (should be 0.5), this is the only place you can find it. Then, it
-will probably also be available on the main kde ftp site, and perhaps on some other places.
+Boson is also available on ftp.kde.org and all its mirrors, in the Incomings directory or in
+the unstable/ tree in the game section. 
 
 <sect1>Requirements
 <p>
@@ -103,49 +98,22 @@ Should you run into problems please report them to the the author at
 <sect> Usage <p>
 
 In this section, we will explain you the basis to actually be able to play Boson.
-The first thing to know is that, because of the lack of any IA player (artificial intelligence),
+The first thing to know is that, because of the lack of any AI player (artificial intelligence),
 you won't be able to play alone. You need to have at least another player to play against.
 
-<sect1> Launching the server <p>
-
-The <tt/server/ is the central piece of the game, the place where everything is coordinated, and the
-link between the different players. It must be launched on one and only one computer. Let's say for
-the example that this computer is called 'eagle'
-
-If you have successfully installed boson, you should have a program called <tt/boserver/. 
-This is the first program to launch so that every single player may connect to it.
-
-You should run it in <tt/background/, typing
-<tscreen><verb>
-[eagle]% boserver&
-</verb></tscreen>
-
-You can also click on <tt/boserver/, in the <tt/K-Menu/, under the group <tt/Games/.
-
-Don't worry about the still naked interface of it, just hide it if you don't like it, there's nothing
-in the window, but it _does_ do a lot of things behing.
 
 <sect1> Launching Boson<p>
+	When you first launch boson (usually by clicking on the K-menu/Game/Boson), you are
+presented with a blank window. 
 
-	Every single player should perform this step on his computer. There is no problem if
-one of them is on the same computer as the server.
+	Every player uses the  <tt/connect to Server/ item in the <tt/file/ menu.
 
-<tscreen><verb>
-[gauss]% boson eagle&
-</verb></tscreen>
+	One (and only one) of the players have to start a server, the name of the server will then be
+the name of its computer.
 
-By giving the <tt/eagle/ argument to boson, you tell him on which computer he can find the server
-in order to connect to it.
+	Other players have to enter the name of the server in the dialog box, and then hit <tt/connect/
 
-You can also click on <tt/boson/, in the <tt/K-Menu/, under the group <tt/Games/, but doing this way
-you won't be able to give any argument, so that boson will try to connect to the same computer. You can do this
-only if the boserver has been launched on _your_ computer.
-
-There will soon be <tt/icons/-to-click-on-to-get-things-simplier, but until then, you need
-to performs all of those steps.
-
-
-<sect1> User input <p>
+<sect1> User interaction <p>
 
 	On the keyboard, you may use the arrow keys to move across the map.
 
@@ -154,13 +122,14 @@ to performs all of those steps.
 	If you left-click on the ground and drag the mouse (while still having the button down), it will draw
 a selection rectangle that will select everything in it when you release the button.
 
+	When a unit or a facility is selected, the lower bar is as big as is the energy of the selected item. The more
+red it is, the less energy it has. When the energy becomes null, the item is destroyed.
+
 	The right-button let you do <tt/actions/ : on the ground it will make a mobile unit to move there,
 on a <tt/friend/ mobile unit, it will follow it, on a <tt/ennemy/, it will attack it.
-	Note that so far, only <tt/move/ is implemented :-)
-
 
 	The middle-button is used to move across the map. By middle-clicking on any place, the point you've clicked on
-will become the new center of the map. If you click on the center, if will do nothing. If you click on the border, you'll make
+will become the new center of the map. If you click on the center, it will do nothing. If you click on the border, you'll make
 a big jump.
 
 
@@ -168,7 +137,7 @@ a big jump.
 
 <sect1>Nothing happens when I click on the K-menu/Games/boson item.
 <p>
-	If you haven't installed the boson-pics-0.3 package, boson will die as soon as launched.
+	If you haven't installed the boson-pics-0.4 package, boson will die as soon as launched.
 Install the package. If it's still won't be launched, do it in a terminal emulator (kvt, konsole, xterm)
 and send me 
 <itemize>

@@ -21,9 +21,9 @@
 #include <qdatastream.h>
 #include <qfile.h>
 
-#include "../common/log.h"
-#include "../common/cell.h"
-#include "../common/msgData.h"
+#include "common/log.h"
+#include "common/cell.h"
+#include "common/msgData.h"
 #include "boFile.h"
 
 
@@ -32,7 +32,7 @@
 #define		TAG_CELL	(0xde)
 #define		TAG_MAP		(0xad)
 #define		TAG_PEOPLE	(0xf0)
-#define		TAG_FIELD	"boeditor_magic_0_1"
+#define		TAG_FIELD	"boeditor_magic_0_2"
 
 
 boFile::boFile()
@@ -65,7 +65,7 @@ bool boFile::openRead(const char *filename)
 	*stream >> magic;
 
 	if (strcmp(magic, TAG_FIELD)) {
-		puts("Magic doesn't match, check file name");
+		logf(LOG_ERROR, "boFile : Magic doesn't match, check file name");
 		delete magic;
 		return false;
 		}

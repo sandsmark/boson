@@ -21,15 +21,14 @@
 #include <stdlib.h>	// int abs(int);
 #include <assert.h>
 
-#include "../common/map.h"
-#include "../common/log.h"
+#include "common/map.h"
+#include "common/log.h"
 
 #include "visualCell.h"
 
 #include "selectPart.h"
 #include "playerUnit.h"
 #include "bosonField.h"
-//#include "speciesTheme.h"
 #include "game.h"
 
 

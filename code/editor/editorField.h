@@ -23,9 +23,7 @@
 
 #include <qintdict.h>
 
-#include "../common/boFile.h"
-//#include "../common/unitType.h"
-//#include "../common/unit.h"	// Facility
+#include "common/boFile.h"
 
 #include "visualUnit.h"		// visualMobUnit
 #include "visualField.h"

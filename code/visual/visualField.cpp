@@ -23,9 +23,9 @@
 #include <kapp.h>
 #include <kmsgbox.h>
 
-#include "../common/log.h"
-#include "../common/boconfig.h"
-#include "../common/map.h"
+#include "common/log.h"
+#include "common/boconfig.h"
+#include "common/map.h"
 
 #include "visualField.h"
 #include "speciesTheme.h"

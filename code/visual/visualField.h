@@ -27,10 +27,7 @@
 
 #include <QwSpriteField.h>
 
-//#include "../common/msgData.h"
-#include "../common/groundType.h"
-//#include "../common/unitType.h"
-//#include "../common/unit.h"	// Facility
+#include "common/groundType.h"
 
 #include "visualUnit.h"		// visualMobUnit
 #include "visualCell.h"

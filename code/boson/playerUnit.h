@@ -106,7 +106,7 @@ public:
 private:
 	groundType	underlyingGround(void);
 
-	harvestState hstate;
+	harvestState	hstate;
 	int		base_x, base_y;
 	int		harvest_x, harvest_y;
 };

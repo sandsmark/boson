@@ -22,12 +22,9 @@
 
 #include <assert.h>
 
-//#include <kapp.h>
-//#include <kmsgbox.h>
-
-#include "../common/log.h"
-#include "../common/boconfig.h" // MAX_PLAYERS
-#include "../common/map.h"
+#include "common/log.h"
+#include "common/boconfig.h" // MAX_PLAYERS
+#include "common/map.h"
 
 #include "bosonField.h"
 #include "boshot.h"

@@ -38,7 +38,7 @@
 #include <ksock.h>
 
 // application specific includes
-#include "../common/msgData.h"
+#include "common/msgData.h"
 
 #include "bosonField.h"
 #include "mainView.h"

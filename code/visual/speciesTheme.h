@@ -22,9 +22,9 @@
 #define SPECIESTHEME_H 
 
 
-#include "../common/cell.h"
-#include "../common/unitType.h"
-#include "../common/unit.h"
+#include "common/cell.h"
+#include "common/unitType.h"
+#include "common/unit.h"
 
 class QString;
 class QBitArray;

@@ -28,15 +28,12 @@
 
 #include <QwSpriteField.h>
 
-//#include "../common/msgData.h"
-#include "../common/groundType.h"
-#include "../common/unitType.h"
-#include "../common/unit.h"	// Facility
+#include "common/groundType.h"
+#include "common/unitType.h"
+#include "common/unit.h"	// Facility
 
 #include "speciesTheme.h"
 #include "visualView.h"
-//#include "orderWin.h"
-//#include "game.h"
 
 class Cell;
 class Unit;

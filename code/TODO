@@ -1,30 +1,43 @@
-
-
 TODO:
 
 
 Generic :
 =========
 
+editor/boson : mapping different signal to ONE function (int signal_nb) is possible with qt2
+ben's bug
+bug : quad on water on other's view ( x,y not synced between two clients)
+
+units construction : progressbar on unit_constructor, then autoput of the unit
+fine-graining for *Theme.cpp : distinc loading of overview..
+boson : check validity before a turnTo
+units : revoir le design global
+speciesTheme : different bitmap for Overview and sequences
+fine-grained groundTheme loading
+selectPart shouldn't be splitted
 QCanvas : shouldn't segfault when pixmap loading has failed
 
 move boson/handleGameMessage into field
 creating things only if ressources permit it (presently, the server already refuse to build)
 positionning rect in editor/boson
+
+
 move boson.h into bosonapp.h (socket handling / generic stuff)
 	      and boWindow.h (KTMainWindow ...)
+
+positionning rect in editor/boson
 read/save Options has been removed (was using an olg buggy kdevelop code)
 bug : mobile on very-bottom-right can't be selected [still exact?]
 smoother moves (using float instead of int for VirtualSprite?)
 black background ??
 change miniDisplay to be gpp-indep, then move it to visual
 move logfile initialisation into common/
+fullscreenmode
 Initial dialog:
 	give 'world' name
 	give 'species' names
 	version check whithin the ask_connect msg
 Unit drawing into minimap : moving, etc...
-how to handle non 1x1 tiles ? 
 does units::rect need to be virtual anymore ?
 server : check that each unit does max 1 move each jiffie
 different subclass for my_units and other_units in client
@@ -56,13 +69,11 @@ editor:
 	predefined 'template' for construction.
 
 
-0.4 release:
+0.5 release:
 ============
 client and server should be peer-killed proof
-color-changing while loading -> team
-facility construction in editor
 
-0.5 release: (first public release)
+0.8 release: (first public release)
 ============
 
 list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
@@ -74,6 +85,7 @@ list of places to announce (mailing-list, portal, friends, school, packager,kde 
 	slashdot	www.slahdot.net
 	freshmeat	www.freshmeat.org
 	linuxGames
+	happypenguin
 
 register the website to :
 	yahoo

@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "visualView.h"
-#include "../common/log.h"
+#include "common/log.h"
 #include "speciesTheme.h"
 #include "visual.h"
 
@@ -109,8 +109,6 @@ m->unSelect();
 if (mobSelected.isEmpty()) {
 	emit setSelected((QPixmap *)0l);
 	emit setOrders(-1);
-	/*orderButton[0]->hide();
-	orderButton[0]->disconnect(this); */
 	}
 
 return m;
@@ -202,12 +200,4 @@ void visualView::selectArea(int x1, int y1, int x2, int y2)
 				selectMob(u->key, u); //, puts("bof");
 		}
 }
-
-/*
-void visualView::putSomething(void)
-{
-	setSelectionMode( SELECT_PUT);
-}
-*/
-
 

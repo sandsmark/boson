@@ -31,8 +31,8 @@
 
 #include <qstring.h>
 
-#include "../common/unitType.h"
-#include "../common/groundType.h"
+#include "common/unitType.h"
+#include "common/groundType.h"
 
 
 class QDataStream;

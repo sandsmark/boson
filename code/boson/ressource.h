@@ -25,7 +25,7 @@
 #include <config.h>
 #endif
 
-#include "../common/boconfig.h"	// for *VERSION*
+#include "common/boconfig.h"	// for *VERSION*
 
 ///////////////////////////////////////////////////////////////////
 // ressource.h  -- contains macros used for commands

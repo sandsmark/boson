@@ -98,7 +98,10 @@ int recvMsg(boBuffer *buffer, bosonMsgTag &tag, int &blen, void *_data)
 	/* coherency check */
 	assert(ilen >= 0);
 	assert(blen <= (int)sizeof(bosonMsgData) );
-	if (blen > (int)sizeof(bosonMsgData) ) blen = sizeof(bosonMsgData);
+	if (blen > (int)sizeof(bosonMsgData) ) {
+		logf(LOG_ERROR, "Unexpected data lenght in recvMsg : %d, truncated in %d", blen, sizeof(bosonMsgData));
+		blen = sizeof(bosonMsgData);
+	}
 	if (ilen > 0 && tag < MSG_END_SOCKET_LAYER)
 		logf(LOG_WARNING, "Unexpected data in a socket layer message, ignored");
 

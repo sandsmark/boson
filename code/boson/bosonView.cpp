@@ -28,16 +28,15 @@
 
 #include <kapp.h>
 
-#include "../common/log.h"
-#include "../common/map.h"
-#include "../common/unitType.h"
+#include "common/log.h"
+#include "common/map.h"
+#include "common/unitType.h"
 
 #include "speciesTheme.h"
 
 #include "game.h"
 #include "bosonView.h"
 #include "bosonField.h"
-//#include "playerUnit.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2

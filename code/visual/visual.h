@@ -21,7 +21,7 @@
 #ifndef VISUAL_H 
 #define VISUAL_H 
 
-#include "../common/boconfig.h"
+#include "common/boconfig.h"
 
 class groundTheme;
 class speciesTheme;

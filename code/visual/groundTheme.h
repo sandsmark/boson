@@ -22,7 +22,7 @@
 #define GROUNDTHEME_H 
 
 #include <qstring.h>
-#include "../common/groundType.h"
+#include "common/groundType.h"
 
 class QBitArray;
 class QPixmap;

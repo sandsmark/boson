@@ -21,10 +21,6 @@
 #ifndef SERVERCONNECT_H 
 #define SERVERCONNECT_H 
 
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif 
-
 enum serverSocketState {
 	SSS_NO_CONNECT = -1,
 	SSS_INIT = 1,

@@ -27,7 +27,6 @@ class	visualMiniDisplay;
 class	editorBigDisplay;
 class	visualView;
 class	editorField;
-class	infoWin;
 
 class mainView : public QWidget 
 {

@@ -18,9 +18,9 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "../common/msgData.h"
-#include "../common/bobuffer.h"
-#include "../common/log.h"
+#include "common/msgData.h"
+#include "common/bobuffer.h"
+#include "common/log.h"
 
 #include "player.h"
 #include "game.h"

@@ -20,18 +20,11 @@
 
 #include <qpainter.h>
 #include <qpixmap.h>
-//#include <qcolor.h>
 
-//#include "../common/log.h"
-#include "../common/map.h"
+#include "common/map.h"
 
 #include "visualMiniDisplay.h"
-//#include "playerCell.h"
-//#include "speciesTheme.h"
-//#include "groundTheme.h"
-//#include "visualView.h"
 #include "visualUnit.h"
-//#include "game.h"
 
 
 void visualMiniDisplay::drawMobile(visualMobUnit *unit)

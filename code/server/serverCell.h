@@ -21,8 +21,8 @@
 #ifndef SERVERCELL_H 
 #define SERVERCELL_H 
 
-#include "../common/cell.h"
-#include "../server/knownBy.h"
+#include "common/cell.h"
+#include "server/knownBy.h"
 
 /** 
   * This is a cell in the server point of view

@@ -22,7 +22,7 @@
 #define SERVER_GAME_H 
 
 #include "player.h"
-#include "../common/boconfig.h"
+#include "common/boconfig.h"
 
 class QString;
 class BosonServer;
@@ -30,7 +30,6 @@ class BosonServer;
 extern Player		player[BOSON_MAX_CONNECTION];
 extern QString		*worldName;
 extern uint		jiffies;
-extern uint		nbPlayer;
 extern uint		nbConnected;
 extern BosonServer	*server;
 

@@ -27,6 +27,7 @@ class boBuffer {
 
 public:
 	boBuffer(int socket, unsigned int size=BOSON_BUFFER_SIZE);
+	~boBuffer();
 
 	void reset(void) { pos = 0; };
 	void flush(void);

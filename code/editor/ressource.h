@@ -26,8 +26,7 @@
 #endif
 
 
-//#include "../common/boconfig.h"	// for *VERSION*
-#define BOEDITOR_VERSION_TEXT 	"0.3.0"
+#define BOEDITOR_VERSION_TEXT 	"0.4.0"
 
 ///////////////////////////////////////////////////////////////////
 // ressource.h  -- contains macros used for commands

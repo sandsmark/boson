@@ -18,9 +18,9 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "../common/log.h"
-#include "../common/map.h"
-#include "../common/bobuffer.h"
+#include "common/log.h"
+#include "common/map.h"
+#include "common/bobuffer.h"
 
 #include "serverUnit.h"
 #include "boserver.h"

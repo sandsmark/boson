@@ -22,9 +22,10 @@
 
 #include <QwSpriteField.h>
 
+
 #include <kapp.h>		// kde_datadir()
 
-#include "../common/log.h"
+#include "common/log.h"
 #include "groundTheme.h"
 
 
