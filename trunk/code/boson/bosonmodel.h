@@ -120,7 +120,10 @@ public:
 	//the same mesh, but 4 different positions)
 	unsigned int meshCount() const { return mMeshCount; }
 
-	void renderFrame(const QColor* teamColor);
+	/**
+	 * @param lod See @ref BoMesh::renderMesh
+	 **/
+	void renderFrame(const QColor* teamColor, unsigned int lod = 0);
 
 	void mergeMeshes();
 	void sortByDepth();

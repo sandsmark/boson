@@ -1332,12 +1332,8 @@ void BoMesh::calculateNormals(unsigned int _lod)
  }
 }
 
-void BoMesh::renderMesh(const QColor* teamColor)
+void BoMesh::renderMesh(const QColor* teamColor, unsigned int _lod)
 {
- // use a parameter for this
- unsigned int _lod = 0;
-
-
  BoMeshLOD* lod = levelOfDetail(_lod);
  if (!lod) {
 	BO_NULL_ERROR(lod);
@@ -1347,6 +1343,11 @@ void BoMesh::renderMesh(const QColor* teamColor)
  unsigned int pointsCacheCount = lod->pointsCacheCount();
  int type = lod->type();
  BoFaceNode* nodes = lod->nodes();
+
+ if (!nodes) {
+	// nothing to do.
+	return;
+ }
 
 
  bool resetColor = false; // needs to be true after we changed the current color

@@ -443,7 +443,7 @@ public:
 	 **/
 	GLuint textureObject() const;
 
-	void renderMesh(const QColor* color);
+	void renderMesh(const QColor* color, unsigned int lod = 0);
 
 	void loadDisplayList(const QColor* teamColor, bool reload = false);
 	GLuint displayList(unsigned int lod) const;
