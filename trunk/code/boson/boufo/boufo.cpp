@@ -104,13 +104,13 @@ static ufo::UMod_t convertQtMouseButtonToUfo(int button)
 {
  ufo::UMod_t ubutton = ufo::UMod::NoModifier;
  switch (button) {
-	case QMouseEvent::LeftButton:
+	case Qt::LeftButton:
 		ubutton = ufo::UMod::LeftButton;
 		break;
-	case QMouseEvent::RightButton:
+	case Qt::RightButton:
 		ubutton = ufo::UMod::RightButton;
 		break;
-	case QMouseEvent::MidButton:
+	case Qt::MidButton:
 		ubutton = ufo::UMod::MiddleButton;
 		break;
 	default:
@@ -118,6 +118,53 @@ static ufo::UMod_t convertQtMouseButtonToUfo(int button)
 		break;
  }
  return ubutton;
+}
+
+static int convertUfoMouseButtonToQt(ufo::UMod_t button)
+{
+ int qbutton = Qt::NoButton;
+ switch (button) {
+	case ufo::UMod::LeftButton:
+		qbutton = Qt::LeftButton;
+		break;
+	case ufo::UMod::RightButton:
+		qbutton = Qt::RightButton;
+		break;
+	case ufo::UMod::MiddleButton:
+		qbutton = Qt::MidButton;
+		break;
+	default:
+		qbutton = Qt::NoButton;
+		break;
+ }
+ return qbutton;
+}
+
+static int convertUfoModifierStateToQt(ufo::UMod_t modifiers)
+{
+ int s = Qt::NoButton;
+ if (modifiers & ufo::UMod::LeftButton) {
+	s |= Qt::LeftButton;
+ }
+ if (modifiers & ufo::UMod::RightButton) {
+	s |= Qt::RightButton;
+ }
+ if (modifiers & ufo::UMod::MiddleButton) {
+	s |= Qt::MidButton;
+ }
+ if (modifiers & ufo::UMod::Shift) {
+	s |= Qt::ShiftButton;
+ }
+ if (modifiers & ufo::UMod::Ctrl) {
+	s |= Qt::ControlButton;
+ }
+ if (modifiers & ufo::UMod::Alt) {
+	s |= Qt::AltButton;
+ }
+ if (modifiers & ufo::UMod::Meta) {
+	s |= Qt::MetaButton;
+ }
+ return s;
 }
 
 static ufo::UKeyCode_t convertQtKeyToUfo(int key)
@@ -1175,7 +1222,10 @@ void BoUfoWidget::uslotMouseExited(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMouseMoved(ufo::UMouseEvent* e)
 {
- emit signalMouseMoved(e);
+ int button = convertUfoMouseButtonToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getButton());
+ QMouseEvent me(QEvent::MouseMove, QPoint(e->getX(), e->getY()), button, state);
+ emit signalMousePressed(&me);
 }
 
 void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
@@ -1185,12 +1235,20 @@ void BoUfoWidget::uslotMouseDragged(ufo::UMouseEvent* e)
 
 void BoUfoWidget::uslotMousePressed(ufo::UMouseEvent* e)
 {
- emit signalMousePressed(e);
+ int button = convertUfoMouseButtonToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getButton());
+ state &= ~button;
+ QMouseEvent me(QEvent::MouseButtonPress, QPoint(e->getX(), e->getY()), button, state);
+ emit signalMousePressed(&me);
 }
 
 void BoUfoWidget::uslotMouseReleased(ufo::UMouseEvent* e)
 {
- emit signalMouseReleased(e);
+ int button = convertUfoMouseButtonToQt(e->getButton());
+ int state = convertUfoModifierStateToQt(e->getButton());
+ state |= button;
+ QMouseEvent me(QEvent::MouseButtonRelease, QPoint(e->getX(), e->getY()), button, state);
+ emit signalMouseReleased(&me);
 }
 
 void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
@@ -1198,9 +1256,18 @@ void BoUfoWidget::uslotMouseClicked(ufo::UMouseEvent* e)
  emit signalMouseClicked(e);
 }
 
+// TODO: uslotMouseClicked, QEvent::MouseButtonDblClick
 void BoUfoWidget::uslotMouseWheel(ufo::UMouseWheelEvent* e)
 {
- emit signalMouseWheel(e);
+ Orientation orientation;
+ if (e->getWheel() == 0) {
+	orientation = Qt::Vertical;
+ } else {
+	orientation = Qt::Horizontal;
+ }
+ int state = convertUfoModifierStateToQt(e->getModifiers());
+ QWheelEvent we(QPoint(e->getX(), e->getY()), e->getDelta(), state, orientation);
+ emit signalMouseWheel(&we);
 }
 
 void BoUfoWidget::uslotKeyPressed(ufo::UKeyEvent* e)

@@ -41,7 +41,7 @@ public:
 	void setMiniMap(BosonGLMiniMap*);
 
 protected slots:
-	void slotMouseEvent(ufo::UMouseEvent*);
+	void slotMouseEvent(QMouseEvent*);
 
 protected:
 	QPoint widgetToCell(const QPoint& pos);
