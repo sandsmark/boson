@@ -361,7 +361,7 @@ void UpgradeProperties::loadPlugin(KSimpleConfig* cfg)
   d->mApplyToTypes.append(unitProperties()->typeId());
 }
 
-void UpgradeProperties::savePlugin(KSimpleConfig* /*cfg*/)
+void UpgradeProperties::savePlugin(KSimpleConfig* cfg)
 {
   /// TODO!!!
 }

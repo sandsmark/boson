@@ -222,7 +222,7 @@ void BosonWidget::slotGamePreferences()
  dlg->show();
 }
 
-void BosonWidget::slotOutOfGame(Player* /*p*/)
+void BosonWidget::slotOutOfGame(Player* p)
 {
  // TODO write BosonGameOverWidget, add it to widgetstack in TopWidget and then
  //  use it instead

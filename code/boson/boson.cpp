@@ -1760,7 +1760,7 @@ void Boson::slotAddChatSystemMessage(const QString& text)
  slotAddChatSystemMessage(i18n("Boson"), text);
 }
 
-void Boson::slotDebugOutput(const QString& area, const char* data, int /*level*/)
+void Boson::slotDebugOutput(const QString& area, const char* data, int level)
 {
  slotAddChatSystemMessage(area, data);
 }

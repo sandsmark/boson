@@ -72,9 +72,14 @@ int main(int argc, char **argv)
  }
  
  TopWidget *widget = new TopWidget;
+ bool showMaximized = true; // TODO: make this a config option
  app.setMainWidget(widget);
 
- widget->show();
+// if (showMaximized) {
+//	widget->showMaximized();
+// } else {
+	widget->show();
+// }
 
  if (args->isSet("new")) {
 	widget->slotNewGame();

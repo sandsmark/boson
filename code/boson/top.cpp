@@ -585,7 +585,7 @@ void TopWidget::slotLoadGame(const QString& fileName)
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-void TopWidget::slotSaveGame(const QString& fileName, const QString& /*description*/)
+void TopWidget::slotSaveGame(const QString& fileName, const QString& description)
 {
  boDebug() << k_funcinfo << endl;
  QString file = fileName;
@@ -691,6 +691,7 @@ void TopWidget::slotStartGame()
  d->mBosonWidget->initMap();//AB: see slotAssingMap()!! // FIXME REMOVE
  */
 
+ int progress = 0; // FIXME: wrong value!
  showStartupWidget(IdBosonWidget);
  removeStartupWidget(IdNewGame);
  removeStartupWidget(IdStartEditor);
