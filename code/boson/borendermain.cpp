@@ -347,7 +347,7 @@ void ModelPreview::renderModel(int mode)
 		}
 
 		// FIXME: this isn't good here...
-		mModel->enablePointer();
+		mModel->prepareRendering();
 
 		if (mode == GL_SELECT) {
 			glDisable(GL_BLEND);
