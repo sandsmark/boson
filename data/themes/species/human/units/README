@@ -12,7 +12,7 @@ fix_ might be useful when working on the units. But this depends on you.
 
 Currently a unit must have at least 2 overview bitmaps (overview-big.png and
 overview-small.png) which are shown when the unit is selected (big) and as a
-button in the construction facility (small). 
+button in the construction facility (small).
 The big overview must have a size of 100x100
 The small overview must have a size of 50x50
 Optionally, units may have overview pixmap for manual (overview-manual.png, size
@@ -52,34 +52,42 @@ IsFacility=boolean  - True if this is a facility, false if this is a mobile
                       Default is "Unknown".
 * Id=Number         - A unique (!) ID for this unit. Must be > 0.
                       No default!
-UnitWidth=Number    - The width of the unit in cells. You can use floating point
-                      numbers - e.g. 1.5 will make the unit occupy 1.5 cells.
+UnitWidth=Number    - The width of the unit in cells.
+                      You can use floating point numbers - e.g. 1.5 will make
+                      the unit occupy 1.5 cells.
                       Please don't use values like 1.3333 (might cause rounding
                       trouble) or 1.23876381687 (nonsense value).
                       Default is 1.0
-UnitHeight=Number   - The height of the unit in cells. You can use floating point
-                      numbers - e.g. 1.5 will make the unit occupy 1.5 cells.
+UnitHeight=Number   - The height of the unit in cells.
+                      You can use floating point numbers - e.g. 1.5 will make
+                      the unit occupy 1.5 cells.
+                      Please don't use values like 1.3333 (might cause rounding
+                      trouble) or 1.23876381687 (nonsense value).
+                      Default is 1.0
+UnitDepth=Number    - The height in z-direction of the unit in cells.
+                      You can use floating point numbers - e.g. 1.5 will make
+                      the unit occupy 1.5 cells.
                       Please don't use values like 1.3333 (might cause rounding
                       trouble) or 1.23876381687 (nonsense value).
                       Default is 1.0
 Health=Number       - Health, power, whatever. Make this greater and the unit will
-                      live longer. 
+                      live longer.
                       Must be > 0. Default is 100.
-Shield=Number       - Not yet supported. 
+Shield=Number       - Not yet supported.
                       Default is 0.
-Armor=Number        - Not yet supported. 
+Armor=Number        - Not yet supported.
                       Default is 0.
-MineralCost=Number  - How much mineral do you have to pay if you build this? 
+MineralCost=Number  - How much mineral do you have to pay if you build this?
                       Must be >= 0. Default is 100.
-OilCost=Number      - How much oil do you have to pay if you build this? 
+OilCost=Number      - How much oil do you have to pay if you build this?
                       Must be >= 0. Default is 0.
 SightRange=Number   - The sight range of this unit.
                       the sight range is how far (in cells!) this unit can see.
                       Must be >= 0. Default is 5 (currently).
 WeaponDamage=Number - The damage this unit makes to other units when firing. Can
-                      also be negative - the unit repairs then. 
+                      also be negative - the unit repairs then.
                       Default is 0.
-WeaponRange=Number  - The weapon range of this unit. 
+WeaponRange=Number  - The weapon range of this unit.
                       Note: when WeaponDamage <= 0 this has no effect!
                       Must be >= 0. Default is 0.
 Reload=Number       - The time to reload the weapon. "Time" means number of
@@ -88,18 +96,18 @@ Reload=Number       - The time to reload the weapon. "Time" means number of
 TerrainType=Number  - The default terrain type of the unit. One of 0 (Land),
                       1 (Water) or 2 (Air).
                       You must decide for one - even if the unit is some kind
-                      of mixture. If so you will probably use Land (0). 
+                      of mixture. If so you will probably use Land (0).
                       Must be 0, 1 or 2. The default is 0 (=Land Unit)
 ProductionTime=Number - The number of advance calls needed to produce this unit
                         Must be >= 0. Default is (currently) 100.
 CanShootAtAirUnits=bool  - Can this unit shoot at aircrafts?
                            Default true for TerrainType=2, otherwise false.
 CanShootAtLandUnits=bool - Can this unit shoot at ground units? True or False.
-                           Default is true for TerrainType=0 or TerrainType=1, 
+                           Default is true for TerrainType=0 or TerrainType=1,
                            otherwise false.
-Producer=Number     - Specifies which kind of factory is able to produce this 
-                      unit. Possible values are: 0=war factory (heavy land 
-                      units, all types of vehicles), 1=shipyard (all ships), 
+Producer=Number     - Specifies which kind of factory is able to produce this
+                      unit. Possible values are: 0=war factory (heavy land
+                      units, all types of vehicles), 1=shipyard (all ships),
                       2=airport (all aircrafts), 3=barracks (soldiers,
                       human units), 10=command bunker (all facilities).
                       Please note that there is currently only a single factory
@@ -136,18 +144,18 @@ Speed=Number         - Value of the speed of the unit. A unit will move that man
                        pixels per advance call. This is a double number so values
                        like "0.452463" are possible as well.
                        Must be >= 0. Default is 0
-CanGoOnLand=boolean  - Whether this unit can go over land. 
+CanGoOnLand=boolean  - Whether this unit can go over land.
                        This is true by default for TerrainType = Land or
                        Aircraft.
-CanGoOnWater=boolean - Whether this unit can go over water. 
-                       This is true by default for TerrainType = Water or 
+CanGoOnWater=boolean - Whether this unit can go over water.
+                       This is true by default for TerrainType = Water or
                        Aircraft.
 
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------
 [Boson Facility]
-CanProduce=Boolean  - True if something can be produced here. 
+CanProduce=Boolean  - True if something can be produced here.
                       Default is false. (OBSOLETE)
 ConstructionSteps=Number  - Number of frames for the construction (when the
                             facility is built) animation.
@@ -165,7 +173,7 @@ entry here it will use the "short name".
 [Textures]
 Textures=List            -  List of textures. Only the "short name" that should
                            get mapped have to be listed here. All listed files
-                           need to have an entry in this group (if it isn't 
+                           need to have an entry in this group (if it isn't
                            there it is ignored. no error).
                            Defaul is an empty list
 texture.jpg=LongName.jpg - "texture.jpg" is the "short name" of the texture,
