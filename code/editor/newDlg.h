@@ -39,9 +39,9 @@ class newDlg : public QDialog
 public:
 	newDlg(QWidget *parent=0l, const char *name=0l);
 
-	QString		sc_name;
-	int		sc_width;
-	int		sc_height;
+	QScrollBar	*scb_width;
+	QScrollBar	*scb_height;
+	QLineEdit	*qle_name, *qle_author;
 
 private slots:
 	void	qcb_activated(int);
@@ -51,10 +51,6 @@ private:
 	QLabel		*_height, *_width, *_pixLabel;
 	int		type;
 	QColor		qc_grass, qc_desert, qc_water;
-public:
-	QScrollBar	*scb_width;
-	QScrollBar	*scb_height;
-	QLineEdit	*qle_name, *qle_author;
 };
 
 
