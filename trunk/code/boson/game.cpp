@@ -34,6 +34,7 @@ int			nb_player;
 speciesTheme		*myspecy	= 0l;
 int			who_am_i	= 0;
 /* The map which handle grouds and units*/
+visualField		*vfield;
 bosonField		*field		= 0l;
 /* synchronization */
 uint			jiffies		= 0l;
