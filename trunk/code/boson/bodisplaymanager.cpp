@@ -34,6 +34,9 @@
 #include <qvbox.h>
 #include <qintdict.h>
 #include <qdom.h>
+#include <qfile.h>
+#include <qfileinfo.h>
+#include <qpixmap.h>
 
 #include "bodisplaymanager.moc"
 
@@ -107,19 +110,20 @@ class BoDisplayManager::BoDisplayManagerPrivate
 public:
 	BoDisplayManagerPrivate()
 	{
-		mActiveDisplay = 0;
-
 		mLayout = 0;
+
+		mActiveDisplay = 0;
 	}
-
-	QPtrList<BosonBigDisplayBase> mDisplayList;
-	QPtrList<BoBox> mBoxList;
-
-	BosonBigDisplayBase* mActiveDisplay;
 
 	QVBoxLayout* mLayout;
 
+	QPtrList<BosonBigDisplayBase> mDisplayList;
+	QPtrList<BoBox> mBoxList;
+	BosonBigDisplayBase* mActiveDisplay;
+
 	QIntDict<BoSelection> mSelectionGroups;
+
+	bool mGrabMovie;
 };
 
 BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisplaymanager")
@@ -127,6 +131,7 @@ BoDisplayManager::BoDisplayManager(QWidget* parent) : QWidget(parent, "bosondisp
  d = new BoDisplayManagerPrivate;
  d->mDisplayList.setAutoDelete(true);
  d->mBoxList.setAutoDelete(true);
+ d->mGrabMovie = false;
 
  d->mSelectionGroups.setAutoDelete(true);
  for (int i = 0; i < 10; i++) {
@@ -406,6 +411,7 @@ void BoDisplayManager::slotAdvance(unsigned int, bool)
 	it.current()->advanceCamera();
 	++it;
  }
+ grabMovieFrame();
 }
 
 void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
@@ -707,5 +713,54 @@ void BoDisplayManager::slotChangeGroundRenderer(int g)
 	it.current()->changeGroundRenderer(g);
 	++it;
  }
+}
+
+void BoDisplayManager::slotSetGrabMovie(bool grab)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ d->mGrabMovie = grab;
+}
+
+void BoDisplayManager::grabMovieFrame()
+{
+ if (!d->mActiveDisplay) {
+	return;
+ }
+ if (!d->mGrabMovie) {
+	return;
+ }
+ QByteArray shot = d->mActiveDisplay->grabMovie();
+
+ if (shot.size() == 0) {
+	return;
+ }
+
+ // Save frame
+ static int frame = -1;
+ QString file;
+ if (frame == -1) {
+	int i;
+	for (i = 0; i <= 10000; i++) {
+		file.sprintf("%s-%04d.%s", "boson-movie", i, "jpg");
+		if (!QFile::exists(file)) {
+			frame = i;
+			break;
+		}
+	}
+	if (i == 10000) {
+		boWarning() << k_funcinfo << "Can't find free filename???" << endl;
+		frame = 50000;
+	}
+ }
+ file.sprintf("%s-%04d.%s", "boson-movie", frame++, "jpg");
+ file = QFileInfo(file).absFilePath();
+
+ //boDebug() << k_funcinfo << "Saving movie frame to " << file << endl;
+ bool ok = QPixmap(shot).save(file, "JPEG", 90);
+ if (!ok) {
+	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+ }
+ boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
 }
 
