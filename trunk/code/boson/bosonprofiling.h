@@ -21,6 +21,30 @@
 
 #define boProfiling BosonProfiling::bosonProfiling()
 
+#ifdef __GNUC__
+#define prof_funcinfo QString("[%1]").arg(__PRETTY_FUNCTION__)
+#else
+#define prof_funcinfo QString("[%1: %2]").arg(__FILE__).arg(__LINE__)
+#endif
+
+/**
+ * Use this macro to profile a method. Place it at the beginning of a method and
+ * the profiling values appear in the profiling dialog
+ **/
+#define PROFILE_METHOD \
+	static int methodProfiler_id = boProfiling->requestEventId(prof_funcinfo); \
+	BosonProfiler methodProfiler(methodProfiler_id);
+/**
+ * Same as above, but provides two parameters for advanced uses:
+ * @param name The name of the @ref BosonProfiler object. You can use this to
+ * stop the profiling object at some point for example.
+ * @param desc A description of what is profiled, in addition to the
+ * (automatically added) method name.
+ **/
+#define PROFILE_METHOD_2(name, desc) \
+	static int name##_id = boProfiling->requestEventId(prof_funcinfo + " - " + desc); \
+	BosonProfiler name(name##_id);
+
 class QString;
 class QDataStream;
 class ProfilingEntry;
