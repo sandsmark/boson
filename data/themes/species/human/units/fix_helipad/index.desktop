@@ -6,7 +6,7 @@ Id=1
 Health=200
 MineralCost=250
 Producer=10
-Requisities=4,5,3
+Requirements=4,5,3
 
 [Textures]
 Textures=rome_str.jpg,airportr.jpg,elecpane.jpg

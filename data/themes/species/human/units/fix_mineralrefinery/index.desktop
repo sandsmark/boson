@@ -6,7 +6,7 @@ Id=13
 Health=100
 MineralCost=100
 Producer=10
-Requisities=5,2
+Requirements=5,2
 
 [Boson Facility]
 CanRefineMinerals=true

@@ -6,7 +6,7 @@ Id=8
 Health=250
 MineralCost=400
 Producer=10
-Requisities=5,2
+Requirements=5,2
 
 [Boson Facility]
 CanRefineOil=true

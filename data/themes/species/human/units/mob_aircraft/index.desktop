@@ -11,7 +11,7 @@ Reload=15
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
 Producer=2
-Requisities=1
+Requirements=1
 
 [Boson Mobile Unit]
 Speed=6
