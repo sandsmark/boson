@@ -1,5 +1,8 @@
 The Boson handbook uses wml (http://www.thewml.org).
 
+----------
+Includes
+----------
 At the moment there are three includes. You can find them in includes ;)
 - top.wml
 - nav.wml
@@ -22,6 +25,21 @@ nav.wml
 
 footer.wml
 	It adds the "maintained by" line and the default </body></html>
+
+
+----------
+Perl
+----------
+Some parts of the handbook are using perl to get some "live data"
+This is also done through wml. You can add perl simply like this:
+<:
+$test = "<tr><td>TEST</td></tr>";
+print $test
+:>
+Everything that goes to stdout will be included in the html file.
+Stderr will end in a wml error.
+
+
 
 
 have fun
