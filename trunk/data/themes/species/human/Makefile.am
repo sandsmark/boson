@@ -1,4 +1,4 @@
-SUBDIRS=explosions objects particles pixmaps units sounds
+SUBDIRS=objects particles pixmaps units sounds
 
 species_DATA = index.species index.technologies
 speciesdir = $(kde_datadir)/boson/themes/species/human
