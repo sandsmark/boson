@@ -18,6 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>  // random
+
 #include "common/log.h"
 #include "common/map.h"
 
@@ -60,10 +62,14 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 				for (i=-2; i< 3; i++)
 					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
-							if (y+j>=0 && y+j<_canvas->maxY)
+							if (y+j>=0 && y+j<_canvas->maxY) {
+								setTile(c, random()%4 );
 								_canvas->changeCell( x+i, y+j, c); // some kind of randomness in 'c' here
-			} else
+							}
+			} else {
+				setTile(c, random()%4 );
 				_canvas->changeCell( x, y, c); // some kind of randomness in 'c' here
+			}
 
 			vtl->setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
@@ -101,7 +107,7 @@ void editorBigDisplay::setSelectedObject(object_type t, int n)
 		case OT_NONE:
 			break;
 		case OT_GROUND:
-			c = cell ( (groundType) n, 0 ); // tile will be randomized by the actionClicked
+			c = cell ( (groundType) n, 0);
 			break;
 		case OT_FACILITY:
 			f = (facilityType)n;
