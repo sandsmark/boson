@@ -586,12 +586,16 @@ void BosonProfilingDialog::resetLoadUnitPage()
 	unsigned long int time = 0;
 	int i = 0;
 	for (; timesIt != (*it).end(); ++timesIt, i++) {
-		QListViewItemNumber* item = new QListViewItemNumber(unit);
-		item->setText(0, QString::number(i));
-		item->setTime(1, time, time);
+		// sum the times up first
 		time += *timesIt;
 	}
-	unit->setText(1, QString::number(time)); // all summed up
+	timesIt = (*it).begin();
+	for (; timesIt != (*it).end(); ++timesIt, i++) {
+		QListViewItemNumber* item = new QListViewItemNumber(unit);
+		item->setText(0, QString::number(i));
+		item->setTime(1, *timesIt, time);
+	}
+	unit->setTime(1, time, time); // all summed up
 	unit->setOpen(true);
  }
 }
