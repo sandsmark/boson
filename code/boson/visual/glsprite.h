@@ -24,16 +24,15 @@
 
 #include <GL/gl.h>
 
-#include "../bosontexturearray.h"
+#include "../bosonmodel.h"
 
-class BosonTextureArray;
 class BosonCanvas;
 class QRect;
 
 class GLSprite
 {
 public:
-	GLSprite(BosonTextureArray* array, BosonCanvas*);
+	GLSprite(BosonModel* mode, BosonCanvas*);
 	virtual ~GLSprite();
 
 	virtual void setCanvas(BosonCanvas*);
@@ -73,10 +72,12 @@ public:
 		mVertexPointer[11] = glZ;
 	}
 
+	inline BosonModel* model() const { return mModel; }
+
 	// FIXME: QCanvasSprite uses image->width() here :-(
 	// note: for GLunit all frames must hace the same width/height
-	int width() const { return textures() ? textures()->width(frame()) : 0; }
-	int height() const { return textures() ? textures()->height(frame()) : 0; }
+	inline int width() const { return model() ? model()->width(frame()) : 0; }
+	inline int height() const { return model() ? model()->height(frame()) : 0; }
 
 	// AB: we don't support a hotspot here!
 	float leftEdge() const { return x(); }
@@ -123,7 +124,7 @@ public:
 
 	int frame() const { return mFrame; }
 	void setFrame(int frame) { move(x(), y(), z(), frame); }
-	unsigned int frameCount() const { return textures() ? textures()->count() : 0; }
+	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
 
 	float xVelocity() const { return mXVelocity; }
 	float yVelocity() const { return mYVelocity; }
@@ -135,23 +136,9 @@ public:
 		mYVelocity = vy;
 	}
 
-	inline BosonTextureArray* textures() const { return mTextures; }
-	void setTextures(BosonTextureArray* tex) { mTextures = tex; }
-	inline GLuint currentTexture() const { return texture(frame()); }
-	inline GLuint texture(unsigned int number) const
-	{
-		return textures() ? textures()->texture(number) : 0;
-	}
-
-	// FIXME: once we move to display lists we need to fix width() and height()!
-	// note: this is designed so that the display list can change at any time! e.g. if the unit gets destroyed we might diplay a different model
-	void setDisplayList(GLuint list)
-	{
-		mDisplayList = list;
-	}
 	inline GLuint displayList() const 
 	{
-		return mDisplayList; 
+		return model()->displayList();
 	}
 
 private:
@@ -165,8 +152,8 @@ private:
 	int mFrame;
 	float mXVelocity;
 	float mYVelocity;
-	BosonTextureArray* mTextures;
 	GLfloat mVertexPointer[3*4]; // topleft;bottomleft;bottomright;topright
+	BosonModel* mModel;
 	GLuint mDisplayList;
 };
 

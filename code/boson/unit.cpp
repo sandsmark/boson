@@ -31,6 +31,7 @@
 #include "kspritetooltip.h"
 #include "unitplugins.h"
 #include "boitemlist.h"
+#include "bosonmodel.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -64,7 +65,7 @@ public:
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
 		: UnitBase(prop), 
 #ifndef NO_OPENGL
-		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->textureArray(prop->typeId()) : 0, canvas)
+		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
 #else
 		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->pixmapArray(prop->typeId()) : 0, canvas)
 #endif
@@ -92,6 +93,12 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  // TODO: the tooltips do not yet work with OpenGL!!
 #ifdef NO_OPENGL
  KSpriteToolTip::add(rtti(), unitProperties()->name());
+#else
+ if (!model()) {
+	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
+	return;
+ }
+ model()->setFrame(0);
 #endif
 }
 

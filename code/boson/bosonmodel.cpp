@@ -19,6 +19,7 @@
 
 #include "bosonmodel.h"
 
+#include "defines.h"
 #include "bosontexturearray.h"
 
 #include <kdebug.h>
@@ -32,10 +33,13 @@
 #include <lib3ds/vector.h>
 #include <lib3ds/material.h>
 
-BosonModel::BosonModel(GLuint list)
+BosonModel::BosonModel(GLuint list, int width, int height)
 {
  init();
  mDisplayList = list;
+ mFrames.insert(0, list);
+ mWidth = width;
+ mHeight = height;
 }
 
 BosonModel::BosonModel(const QString& dir, const QString& file)
@@ -66,6 +70,10 @@ BosonModel::BosonModel(const QString& dir, const QString& file)
 	return;
  }
  kdDebug() << k_funcinfo << "loaded from " << fullFile << endl;
+
+ // WARNING: FIXME!
+ mWidth = BO_TILE_SIZE;
+ mHeight = BO_TILE_SIZE;
 }
 
 void BosonModel::init()
@@ -73,6 +81,9 @@ void BosonModel::init()
  m3ds = 0;
  mDisplayList = 0;
  mTextureArray = 0;
+ mWidth = 0;
+ mHeight = 0;
+ mFrame = 0;
 }
 
 BosonModel::~BosonModel()
@@ -131,22 +142,22 @@ void BosonModel::createDisplayLists()
 {
  Lib3dsNode* node = m3ds->nodes;
 
- // the first call to renderNode() will create all necessary call lists
- for (; node; node = node->next) {
-	renderNode(node);
+ kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
+ GLuint listBase = glGenLists(m3ds->frames); 
+ for (int i = 0; i < m3ds->frames; i++) {
+	m3ds->current_frame = i;
+	lib3ds_file_eval(m3ds, m3ds->current_frame);
+	glNewList(listBase + m3ds->current_frame, GL_COMPILE);
+		glPushMatrix();
+		glScalef(0.004, 0.004, 0.004); // FIXME
+		for (; node; node = node->next) {
+			renderNode(node);
+		}
+		glPopMatrix();
+	glEndList();
+	mFrames.insert(m3ds->current_frame, listBase + m3ds->current_frame);
  }
-
- node = m3ds->nodes;
- GLuint list = glGenLists(1);
- glNewList(list, GL_COMPILE);
-	glPushMatrix();
-	glScalef(0.004, 0.004, 0.004);
-	for (; node; node = node->next) {
-		renderNode(node);
-	}
-	glPopMatrix();
- glEndList();
- mDisplayList = list;
+ mDisplayList = listBase; //AB: FIXME
 }
 
 // AB: note that this function was nearly completely copied from the lib3ds
@@ -164,13 +175,25 @@ void BosonModel::renderNode(Lib3dsNode* node)
 	if (strcmp(node->name, "$$$DUMMY") == 0) {
 		return;
 	}
+#if 0
+	// the original implementation creates a display list for ALL nodes.
+	// to use this with frames we'd have to re-assign 0 to user.d between
+	// all frames.
+	// I'm not sure which is better - storing all GL calls in a single
+	// display list or using a lot of glCallList() in the main list.
+	//
+	// I am sure that re-rendering every time is slower on loading.. but
+	// what about runtime?
 	if (!node->user.d) {
+#endif
 		Lib3dsMesh* mesh = lib3ds_file_mesh_by_name(m3ds, node->name);
 		if (!mesh) {
 			return;
 		}
+#if 0
 		node->user.d = glGenLists(1);
 		glNewList(node->user.d, GL_COMPILE);
+#endif
 
 		unsigned int p;
 		Lib3dsMatrix invMeshMatrix;
@@ -231,8 +254,11 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				}
 			}
 		}
+#if 0
 		glEndList();
+#endif
 	}
+#if 0
 	if (node->user.d) {
 		glPushMatrix();
 		Lib3dsObjectData* d = &node->data.object;
@@ -242,5 +268,18 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		glPopMatrix();
 	}
  }
+#endif
+}
+
+void BosonModel::setFrame(unsigned int frame)
+{
+ if (!mFrames.contains(frame)) {
+	kdWarning() << k_funcinfo << "Invalid frame " << frame << endl;
+	if (!mFrames.contains(mFrame)) {
+		mFrame = 0;
+	}
+	return;
+ }
+ mFrame = frame;
 }
 

@@ -19,13 +19,10 @@
 #ifndef BOSONMODEL_H
 #define BOSONMODEL_H
 
-#include <qvaluelist.h>
 #include <qmap.h>
-//#include <qpointarray.h>
 #include <GL/gl.h>
 
-#include <lib3ds/file.h>
-#include <lib3ds/node.h>
+#include <lib3ds/types.h>
 
 class BosonTextureArray;
 
@@ -38,14 +35,27 @@ public:
 	/**
 	 * Construct a model using an already created display list
 	 **/
-	BosonModel(GLuint list);
+	BosonModel(GLuint list, int width, int height);
 	BosonModel(const QString& dir, const QString& file);
 	~BosonModel();
 
+	void setFrame(unsigned int frame);
+	unsigned int frame() const { return mFrame; }
+
+	/**
+	 * @return The display list of the current @ref frame.
+	 **/
 	inline GLuint displayList() const 
 	{
 		return mDisplayList;
 	}
+
+	//FIXME!!
+	//FIXME: do we need frame at all? we already demand all frames to be at
+	//the same size
+	inline int width(int /*frame*/) const { return mWidth; }
+	inline int height(int /*frame*/) const { return mHeight; }
+	inline unsigned int frames() const { return mFrames.count(); }
 
 protected:
 	void loadTextures();
@@ -67,8 +77,14 @@ private:
 	GLuint mDisplayList;
 	Lib3dsFile* m3ds;
 	QMap<QString, GLuint> mTextures;
+	QMap<int, GLuint> mFrames;
 	BosonTextureArray* mTextureArray;
 	QString mDirectory;
+	unsigned int mFrame;
+
+	// warning! width and height are still in canvas sizes!
+	int mWidth;
+	int mHeight;
 };
 #endif
 

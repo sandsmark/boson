@@ -30,6 +30,7 @@
 class BosonCanvas;
 class QPointArray;
 class SelectBox;
+class BosonModel;
 
 #ifndef NO_OPENGL
 class BosonSprite : public GLSprite
@@ -39,7 +40,7 @@ class BosonSprite : public QCanvasSprite
 {
 public:
 #ifndef NO_OPENGL
-	BosonSprite(BosonTextureArray* array, BosonCanvas*);
+	BosonSprite(BosonModel* model, BosonCanvas*);
 #else
 	BosonSprite(QCanvasPixmapArray* array, BosonCanvas*);
 #endif

@@ -27,6 +27,7 @@
 #ifndef NO_OPENGL
 #include <GL/gl.h>
 class BosonTextureArray;
+class BosonModel;
 #else
 class QCanvasPixmapArray;
 #endif
@@ -89,6 +90,7 @@ public:
 	// TODO an OpenGL implementation for shot()
 
 	GLuint displayList(int unitType);
+	BosonModel* unitModel(int unitType);
 #else
 	/**
 	 * @return The pixmap array for unitType or NULL if none was found for
