@@ -61,6 +61,7 @@ Game TODOs
 - particles: there are only very few different textures used by particles
   (specified in particles.boson). we would gain a lot of speed by grouping all
   particles with one texture on the screen into a single glBegin()/glEnd() pair
+- Add screenshots support to saving/loading widget
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
