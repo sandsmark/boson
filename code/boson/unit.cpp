@@ -781,6 +781,9 @@ bool Facility::canPlaceProductionAt(const QPoint& pos) const
 
 int Facility::completedProduction() const
 {
+ if (!hasProductions()) {
+	return -1;
+ }
  int type = currentProduction();
  if (d->mProductionState < owner()->unitProperties(type)->productionTime()) {
 	kdDebug() << "not yet completed: " << type << endl;
