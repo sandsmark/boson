@@ -550,12 +550,6 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
  connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)), 
 		active->selection(), SLOT(slotSelectSingleUnit(Unit*)));
 
- if (old) {
-	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),
-			old, SLOT(slotMoveSelection(int, int)));
- }
- connect(minimap(), SIGNAL(signalMoveSelection(int, int)),
-		active, SLOT(slotMoveSelection(int, int)));
 
  // note: all other bigdisplays should unselect now.
 

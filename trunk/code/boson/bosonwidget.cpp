@@ -323,3 +323,18 @@ void BosonWidget::setBosonXMLFile()
  setXMLFile("bosonui.rc", true);
 }
 
+void BosonWidget::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
+{
+ if (!active) {
+	boWarning() << k_funcinfo << "NULL display" << endl;
+	return;
+ }
+ BosonWidgetBase::slotSetActiveDisplay(active, old);
+ if (old) {
+	disconnect(minimap(), SIGNAL(signalMoveSelection(int, int)),
+			old, SLOT(slotMoveSelection(int, int)));
+ }
+  connect(minimap(), SIGNAL(signalMoveSelection(int, int)),
+		  active, SLOT(slotMoveSelection(int, int)));
+
+}

@@ -204,7 +204,7 @@ protected slots:
 	 * @param active The new active display.
 	 * @param old The previously active display, if non-NULL
 	 **/
-	void slotSetActiveDisplay(BosonBigDisplayBase* display, BosonBigDisplayBase* old);
+	virtual void slotSetActiveDisplay(BosonBigDisplayBase* display, BosonBigDisplayBase* old);
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
