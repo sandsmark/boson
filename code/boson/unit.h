@@ -231,16 +231,6 @@ public:
 	 **/
 	virtual void advanceTurn(unsigned int);
 
-	/**
-	 * @return the @ref ProductionPlugin if this unit is able to produce
-	 * units (this means: the @ref UnitProperties allow productions and the
-	 * unit is e.g. fully constructed). Note that a @ref MobileUnit can not
-	 * yet have such a plugin, since a log of @ref isFacility tests are in
-	 * the code :-(
-	 **/
-	virtual ProductionPlugin* productionPlugin() const { return 0; }
-	virtual RepairPlugin* repairPlugin() const { return 0; }
-
 	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
@@ -536,8 +526,6 @@ public:
 	 * isConstructionComplete
 	 **/
 	virtual void advanceConstruction(unsigned int advanceCount);
-
-	virtual RepairPlugin* repairPlugin() const;
 
 	/**
 	 * @return NULL if the facility has not yet been fully constructed,

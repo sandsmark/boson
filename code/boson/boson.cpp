@@ -522,6 +522,8 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	}
 	case BosonMessage::MoveRepair:
 	{
+		boWarning() << "MoveRepair is a TODO" << endl;
+		break;
 		// move mobile units to repairyard
 		//
 		// TODO there are several ways of repairing:
@@ -550,7 +552,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			boError() << k_lineinfo << "Cannot find " << repairId << " for player " << repairOwnerId << endl;
 			break;
 		}
-		RepairPlugin* repair = repairYard->repairPlugin();
+		RepairPlugin* repair = (RepairPlugin*)repairYard->plugin(UnitPlugin::Repair);
 		if (!repair) {
 			boError() << k_lineinfo << "repairyard cannot repair?!" << endl;
 			break;
