@@ -19,6 +19,9 @@
 #ifndef KGAMECANVASCHAT_H
 #define KGAMECANVASCHAT_H
 
+#include "defines.h"
+
+#ifdef NO_OPENGL
 #include <qobject.h>
 
 class QCanvas;
@@ -101,5 +104,7 @@ private:
 
 	QCanvas* mCanvas;
 };
+
+#endif // !NO_OPENGL
 
 #endif
