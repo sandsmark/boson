@@ -51,7 +51,9 @@ public:
 	BosonCanvas* canvas() const { return mCanvas; };
 
 	void loadGameDockConfig();
+	void loadInitialDockConfig();
 	void saveGameDockConfig();
+	void saveInitialDockConfig();
 
 public slots:
 	/** 
@@ -59,12 +61,6 @@ public slots:
 	 * This shows BosonStartGameWidget from where you can start new game
 	 **/
 	void slotNewGame();
-	
-	/** 
-	 * Quits Boson
-	 * If there is game running, it first end the game and then quits
-	 **/
-	void slotQuit();
 	
 	/**
 	 * Starts loading new game. Called when user clicks "Start game" button in
@@ -128,6 +124,9 @@ protected:
 	 * with @ref saveProperties
 	 **/
 	void readProperties(KConfig *);
+
+	virtual bool queryClose();
+	virtual bool queryExit();
 
 protected slots:
 	void slotCanvasTilesLoading(int);
