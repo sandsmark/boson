@@ -123,7 +123,7 @@ void serverDlg::receivedStdout(KProcess *p, char *buffer, int buflen)
 {
 	boAssert(proc==p);
 	
-	if (buflen != strlen(BOSON_SERVER_LAUNCHED) || !strcmp(BOSON_SERVER_LAUNCHED "\n", buffer)) {
+	if (buflen != (int)strlen(BOSON_SERVER_LAUNCHED) || !strcmp(BOSON_SERVER_LAUNCHED "\n", buffer)) {
 		buffer[buflen]='\0';
 		logf(LOG_ERROR, "received \"%s\", waiting for \"%s\"", buffer, BOSON_SERVER_LAUNCHED);
 		return;
