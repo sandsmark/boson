@@ -32,6 +32,7 @@
 #include <kstandarddirs.h>
 #include <kmessagebox.h>
 #include <klocale.h>
+#include <kfiledialog.h>
 
 // TODO: add a "browse" button to allow a normal KFileDialog to be used
 
@@ -113,6 +114,13 @@ void KLoadSaveGameWidget::init()
  bottomLayout->addWidget(d->mDeleteButton);
  bottomLayout->addStretch(1);
  connect(d->mDeleteButton, SIGNAL(clicked()), this, SLOT(slotDelete()));
+
+ // I don't like this button at this point. but I don't know where it fits
+ // better...
+ QPushButton* browse = new QPushButton(i18n("&Browse..."), bottom);
+ bottomLayout->addWidget(browse);
+ bottomLayout->addStretch(1);
+ connect(browse, SIGNAL(clicked()), this, SLOT(slotBrowse()));
 
  d->mLoadSaveButton = new QPushButton(bottom);
  bottomLayout->addWidget(d->mLoadSaveButton);
@@ -197,6 +205,9 @@ void KLoadSaveGameWidget::updateGames()
  for (unsigned int i = 0; i < list.count(); i++) {
 	QString file = d->mDir.absPath() + QString::fromLatin1("/") + list[i];
 	readFile(file, i);
+ }
+ if (!d->mSave && list.count() == 0) {
+	// TODO: display "no games" label !
  }
 
  if (d->mSave) {
@@ -306,12 +317,16 @@ void KLoadSaveGameWidget::slotClicked(KSaveGameWidget* w)
  if (!w) {
 	return;
  }
- d->mSelectedGame = w;
- QPtrListIterator<KSaveGameWidget> it(d->mButtons);
- for (; it.current(); ++it) {
-	if (it.current()->isSelected() && it.current() != d->mSelectedGame) {
-		it.current()->unselect();
+ if (w->isSelected()) {
+	d->mSelectedGame = w;
+	QPtrListIterator<KSaveGameWidget> it(d->mButtons);
+	for (; it.current(); ++it) {
+		if (it.current()->isSelected() && it.current() != d->mSelectedGame) {
+			it.current()->unselect();
+		}
 	}
+ } else {
+	d->mSelectedGame = 0;
  }
  if (d->mSave) {
 	// saving without a button selected will create a new file
@@ -379,6 +394,32 @@ QString KLoadSaveGameWidget::saveFileName()
  r += file;
  return r;
 }
+
+void KLoadSaveGameWidget::slotBrowse()
+{
+ QString file;
+ if (d->mSave) {
+	file = KFileDialog::getSaveFileName();
+ } else {
+	file = KFileDialog::getOpenFileName();
+ }
+
+ if (file.isEmpty()) {
+	return;
+ }
+
+ if (d->mSave) {
+	// TODO: use the same way to enter the description as we use in
+	// slotLoadSave() !
+	// I mean once we use it at all...
+	emit signalSaveGame(file, QString::null);
+ } else {
+	emit signalLoadGame(file);
+ }
+}
+
+
+
 
 
 class KSaveGameWidget::KSaveGameWidgetPrivate

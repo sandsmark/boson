@@ -202,6 +202,7 @@ protected:
 protected slots:
 	void slotDelete();
 	void slotLoadSave();
+	void slotBrowse();
 	void slotClicked(KSaveGameWidget*);
 
 private:
