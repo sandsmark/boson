@@ -25,6 +25,7 @@
 #include "bosoncanvas.h"
 #include "bosonglfont.h"
 #include "items/bosonitem.h"
+#include "bosonconfig.h"
 
 #include <qmap.h>
 #include <qtimer.h>
@@ -223,8 +224,8 @@ BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
  connect(&d->mTimer, SIGNAL(timeout()), this, SLOT(slotTimeOut()));
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
 
- setUpdatePeriod(DEFAULT_TOOLTIP_UPDATE_PERIOD);
- setToolTipCreator(BoToolTipCreator::Extended);
+ setUpdatePeriod(boConfig->toolTipUpdatePeriod());
+ setToolTipCreator(boConfig->toolTipCreator());
 }
 
 BoGLToolTip::~BoGLToolTip()
