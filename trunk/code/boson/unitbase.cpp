@@ -136,14 +136,14 @@ bool UnitBase::save(QDataStream& stream)
  // TODO: we need to save and load Unit::mCurrentPlugin->pluginType() !!
  // note that multiple plugins of the same type are not *yet* supported! but
  // they might be one day..
- stream << (Q_INT32)unitProperties()->typeId();
+ stream << (Q_UINT32)unitProperties()->typeId();
  bool ret = dataHandler()->save(stream);
  return ret;
 }
 
 bool UnitBase::load(QDataStream& stream)
 {
- Q_INT32 typeId;
+ Q_UINT32 typeId;
  stream >> typeId;
  if (!speciesTheme()) {
 	kdError() << k_funcinfo << "NULL speciesTheme" << endl;
