@@ -41,12 +41,12 @@
 #include "sound/bosonaudiointerface.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
-#include "kgamecelldebug.h"
 #include "bosonprofilingdialog.h"
 #include "bosondata.h"
 #include "bosongroundtheme.h"
 #include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
+//#include "kgamecelldebug.h"
 
 #include <kgamedebugdialog.h>
 #include <kgameio.h>
@@ -1187,6 +1187,7 @@ void TopWidget::slotDebugKGame()
  KGamePlayerDebug* player = new KGamePlayerDebug(b);
  player->setBoson(boGame);
 
+#if 0
  if (boGame->playField()) {
 	BosonMap* map = boGame->playField()->map();
 	if (!map) {
@@ -1194,9 +1195,14 @@ void TopWidget::slotDebugKGame()
 		return;
 	}
 	b = dlg->addVBoxPage(i18n("Debug &Cells"));
+
+	// AB: this hardly does anything atm (04/04/23), but it takes a lot of
+	// time and memory to be initialized on big maps (on list item per cell,
+	// on a 500x500 map thats a lot)
 	KGameCellDebug* cells = new KGameCellDebug(b);
 	cells->setMap(map);
  }
+#endif
 
  connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
 		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
