@@ -781,7 +781,7 @@ bool Facility::canPlaceProductionAt(const QPoint& pos) const
 
 int Facility::completedProduction() const
 {
- if (!hasProductions()) {
+ if (!hasProduction()) {
 	return -1;
  }
  int type = currentProduction();
