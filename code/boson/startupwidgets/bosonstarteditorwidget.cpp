@@ -85,19 +85,23 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  mapLayout->addWidget(tileSetLabel, 0, 0);
  mapLayout->addWidget(mTileSetCombo, 0, 1);
 
+
  // AB: this should be changeable, even when the map/editor is started, but
  // thats very low priority. if the player wants to resize, he's probably
  // creating a mostly new map anyway (but we should support resizing without
  // discarding the map!)
- QLabel* mapSizeLabel = new QLabel(i18n("Map Size:"), map);
- QHBox* mapSize = new QHBox(map);
- mMapWidth = new KIntNumInput(mapSize);
- (void)new QLabel(" X ", mapSize);
- mMapHeight = new KIntNumInput(mapSize);
+ QLabel* mapWidthLabel = new QLabel(i18n("Map Width:"), map);
+ mMapWidth = new KIntNumInput(map);
  mMapWidth->setRange(10, MAX_MAP_WIDTH);
+ mapLayout->addWidget(mapWidthLabel, 1, 0);
+ mapLayout->addWidget(mMapWidth, 1, 1);
+
+ QLabel* mapHeightLabel = new QLabel(i18n("Map Height:"), map);
+ mMapHeight = new KIntNumInput(map);
  mMapHeight->setRange(10, MAX_MAP_HEIGHT);
- mapLayout->addWidget(mapSizeLabel, 1, 0);
- mapLayout->addWidget(mapSize, 1, 1);
+ mapLayout->addWidget(mapHeightLabel, 2, 0);
+ mapLayout->addWidget(mMapHeight, 2, 1);
+
 
  // AB: note that once the map/editor is started this must still be changeable!
  // TODO: also add a min players - but that might be more important for the
@@ -105,8 +109,8 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  QLabel* maxPlayersLabel = new QLabel(i18n("Max Players:"), map);
  mMaxPlayers = new KIntNumInput(map);
  mMaxPlayers->setRange(1, BOSON_MAX_PLAYERS);
- mapLayout->addWidget(maxPlayersLabel, 2, 0);
- mapLayout->addWidget(mMaxPlayers, 2, 1);
+ mapLayout->addWidget(maxPlayersLabel, 3, 0);
+ mapLayout->addWidget(mMaxPlayers, 3, 1);
 
  // TODO: species!
  // I guess we shouldn't restrict the user on what species are allowed here.
