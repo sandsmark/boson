@@ -94,7 +94,8 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 	int range = mobileProp[type].range;
 
 
-	asked	= gridRect().topLeft();	// destinaton asked, let's begin where we already are
+	QRect	r = gridRect();
+	asked	= r.topLeft();		// destinaton asked, let's begin where we already are
 	QPoint	dv = dest - asked;	// delta do the destination
 	QPoint	local = asked;		// temporory variable
 	bool	ret;
@@ -118,7 +119,7 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			//
 			// "Raw" move algorithm
 			//
-			bocanvas->unsetCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+			bocanvas->unsetCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 			ret = true;
 			if ( abs(dv.x()) > abs(dv.y()) ) {
 				// x is greater
@@ -138,10 +139,13 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 						ret = false;
 				}
 			}
-			bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+			bocanvas->setCellFlag ( r, (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 			wstate = asked = local;
 			asked_state = MUS_MOVING;
- 			if (ret) {
+			// request those cells so that nobody takes them
+			if (ret) {
+				r.moveTopLeft(asked);
+				bocanvas->setCellFlag ( r, Cell::request_f );
  				if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
  			} else {
  				failed_move++;
@@ -336,6 +340,8 @@ void playerMobUnit::do_moveTo(QPoint npos)
 	move(BO_TILE_SIZE*npos.x() , BO_TILE_SIZE*npos.y() );
 
 	bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
+	// free the requested cells
+	bocanvas->unsetCellFlag ( gridRect(), Cell::request_f );
 
 	// CELLS
 
