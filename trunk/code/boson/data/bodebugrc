@@ -25,7 +25,7 @@
 # For file output you can give a filename by *Filename=<file>
 # otherwise bodebug.dbg in the current directory is used.
 #
-# ekzample:
+# example:
 #
 # For the debug area 100 you want output of debug messages
 # to a file /var/log/dbg.log and error messages as message boxes.
@@ -44,4 +44,8 @@ InfoOutput=4
 
 #  Collisions is off by default
 [310]
+InfoOutput=4
+
+# BoScript if off by default
+[700}
 InfoOutput=4
