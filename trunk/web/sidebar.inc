@@ -81,7 +81,7 @@ draw_link("Movies", "movies.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
 draw_link("More information", "info.php");
-draw_extended_link("FAQ", "http://www.freehackers.org/boson/handbook/faq.html", "target=\"_blank\"");
+draw_extended_link("FAQ", "http://boson.halux2001.de/handbook/en/faq.html", "target=\"_blank\"");
 echo "<br>";
 draw_link("Announcements", "announcements.php");
 draw_link("Stories", "stories.php");
