@@ -42,7 +42,7 @@ class QColor;
 // atm we don't have code for vertex normals anyway.
 //
 // use 0 here to use vertex normals.
-#define BOMESH_USE_1_NORMAL_PER_FACE 1
+#define BOMESH_USE_1_NORMAL_PER_FACE 0
 
 class BoFace
 {
@@ -65,6 +65,14 @@ public:
 	const int* pointIndex() const
 	{
 		return mPointIndex;
+	}
+
+	bool hasPoint(int point) const
+	{
+		if((mPointIndex[0] == point) || (mPointIndex[1] == point) || (mPointIndex[2] == point)) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -101,8 +109,19 @@ public:
 #endif
 	}
 
+	void setSmoothGroup(unsigned long int group)
+	{
+		mSmoothGroup = group;
+	}
+	unsigned long int smoothGroup() const
+	{
+		return mSmoothGroup;
+	}
+
 private:
 	int mPointIndex[3];
+
+	unsigned long int mSmoothGroup;
 
 #if BOMESH_USE_1_NORMAL_PER_FACE
 	BoVector3 mNormals[1];
