@@ -1313,6 +1313,7 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
+ root.appendChild(handler);
  if (!propertyXML.saveAsXML(handler, d->mProperties)) {
 	boError() << k_funcinfo << "unable to save the datahandler" << endl;
 	return false;
