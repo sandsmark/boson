@@ -43,6 +43,7 @@ class BosonPlayField;
 class OptionsDialog;
 class BosonLocalPlayerInput;
 class BosonItem;
+class PlayerIO;
 
 /**
  * This is the actual main widget of boson for the game
@@ -112,6 +113,7 @@ public:
 	BosonCanvas* canvas() const;
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Player* localPlayer() const { return mLocalPlayer; }
+	PlayerIO* localPlayerIO() const;
 
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame
@@ -243,6 +245,7 @@ protected slots:
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
 	void slotDebugToggleWireFrames(bool);
+	void slotDebugMemory();
 	void slotGrabScreenshot();
 	void slotGrabProfiling();
 	void slotShowGLStates();

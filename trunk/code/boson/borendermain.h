@@ -339,6 +339,7 @@ protected slots:
 	void slotUnitChanged(int);
 	void slotObjectChanged(int);
 	void slotDebugModels();
+	void slotDebugMemory();
 	void slotDebugSpecies();
 	void slotVertexPointSize();
 	void slotGridUnitSize();
