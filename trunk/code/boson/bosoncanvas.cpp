@@ -376,9 +376,9 @@ void BosonCanvas::unitHit(Unit* unit, long int damage)
 //	if (unit->health() <= (unit->unitProperties()->health() / 2.0)) {
 	if (factor >= 1.0) {
 		// If unit has less than 50% hitpoints, it's smoking
-		BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-				-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
-				unit->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+		BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE,
+				-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE),
+				unit->z() * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE);
 		BosonParticleSystem* s;
 		if (!unit->smokeParticleSystem()) {
 			s = BosonParticleManager::newSmallSmoke(pos);
@@ -447,9 +447,9 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	owner->unitDestroyed(unit); // remove from player without deleting
 	unit->playSound(SoundReportDestroyed);
 	// Pos is center of unit
-	BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-			-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
-			unit->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE,
+			-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE),
+			unit->z() * BO_GL_CELL_SIZE / (float)BO_TILE_SIZE);
 	d->mParticles.append(BosonParticleManager::newExplosion(pos));
 	d->mParticles.append(BosonParticleManager::newSmoke(pos));
 	// For tank, we want bigger explosion
