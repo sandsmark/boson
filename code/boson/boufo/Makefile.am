@@ -1,6 +1,6 @@
 SUBDIRS = bouic .
 
-INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
+INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug $(all_includes)
 
 noinst_LTLIBRARIES = libboufo.la
 bin_PROGRAMS = boufodesigner
@@ -10,12 +10,13 @@ METASOURCES = AUTO
 KDE_CXXFLAGS = $(UFO_CFLAGS)
 
 libboufo_la_SOURCES = \
-	ubolabelui.cpp \
 	boufo.cpp \
-	boufoaction.cpp
+	boufoaction.cpp \
+	uboboxlayout.cpp \
+	ubolabelui.cpp
 
 libboufo_la_LIBADD = \
-	$(UFO_LIBS)
+	$(LIB_UFO)
 
 boufodesigner_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boufodesigner_LDADD = \
