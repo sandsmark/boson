@@ -317,6 +317,8 @@ class BosonPath2
      * not cell or canvas ones. You shouldn't need to use this method.
      **/
     BosonPathSector* sector(int x, int y);
+    unsigned int sectorWidth() const  { return mSectorWidth; }
+    unsigned int sectorHeight() const  { return mSectorHeight; }
 
     /**
      * @return region that has cell at given pos (in cell coords) or 0 if no
