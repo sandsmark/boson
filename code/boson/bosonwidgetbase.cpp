@@ -272,8 +272,6 @@ void BosonWidgetBase::initPlayer()
 	return;
  }
 
- setLocalPlayer(localPlayer());
-
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
 
