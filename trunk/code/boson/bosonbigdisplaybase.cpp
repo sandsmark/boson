@@ -70,6 +70,8 @@
 
 #include <klocale.h>
 #include <kmessagebox.h>
+#include <kapplication.h>
+#include "boeventloop.h"
 
 #include <qtimer.h>
 #include <qcursor.h>
@@ -98,6 +100,32 @@
 #if HAVE_GL_GLEXT_H
 #include <GL/glext.h>
 #endif
+
+class BoVisibleEffects
+{
+public:
+	void clearAll()
+	{
+		// note that mParticelList is a special case and is not cleared
+		mFogEffects.clear();
+		mParticles.clear();
+		mBulletEffects.clear();
+		mFadeEffects.clear();
+		mAll.clear();
+	}
+
+	QPtrList<BosonEffectFog> mFogEffects;
+	QPtrList<BosonEffectParticle> mParticles;
+	QPtrList<BosonEffectBulletTrail> mBulletEffects;
+	QPtrList<BosonEffectFade> mFadeEffects;
+
+	QPtrList<BosonEffect> mAll;
+
+	BoParticleList mParticleList;
+	bool mParticlesDirty;
+};
+
+static void updateEffects(BoVisibleEffects& v);
 
 /**
  * @return A string that displays @p plane. The plane consists of a normal
@@ -322,8 +350,7 @@ public:
 	QPoint mCanvasPos; // obsolete
 	BoVector3 mCanvasVector;
 
-	BoParticleList mParticleList;
-	bool mParticlesDirty;
+	BoVisibleEffects mVisibleEffects;
 
 	PlacementPreview mPlacementPreview;
 	BoGLToolTip* mToolTips;
@@ -386,7 +413,7 @@ void BosonBigDisplayBase::init()
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
- d->mParticlesDirty = true;
+ d->mVisibleEffects.mParticlesDirty = true;
  d->mInputInitialized = false;
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
@@ -618,6 +645,8 @@ void BosonBigDisplayBase::initializeGL()
 
  boWaterManager->initOpenGL();
 
+ connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
+
  recursive = false;
 }
 
@@ -685,6 +714,9 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "OpenGL error at start of paintGL" << endl;
  }
 
+ makeVisibleEffectsList(&d->mVisibleEffects);
+ updateEffects(d->mVisibleEffects);
+
  d->mFrameCount++;
  calcFPS();
  if (boGame->delayedMessageCount() >= 10 && d->mFrameCount != 0) {
@@ -735,7 +767,7 @@ void BosonBigDisplayBase::paintGL()
  glPushMatrix();
 
 
- renderFog();
+ renderFog(d->mVisibleEffects);
 
  // first render the cells.
  // we use blending a lot here and render in different stages, most of the time
@@ -799,7 +831,7 @@ void BosonBigDisplayBase::paintGL()
 
  // Render particle systems
  boProfiling->renderParticles(true);
- renderParticles();
+ renderParticles(d->mVisibleEffects);
  boProfiling->renderParticles(false);
 
  glDisable(GL_DEPTH_TEST);
@@ -821,7 +853,7 @@ void BosonBigDisplayBase::paintGL()
 	glEnd();
  }
 
- renderBulletTrailEffects();
+ renderBulletTrailEffects(d->mVisibleEffects);
  glEnable(GL_TEXTURE_2D);
 
  glDisable(GL_FOG);
@@ -844,7 +876,7 @@ void BosonBigDisplayBase::paintGL()
 // glEnable(GL_BLEND);
  renderMiniMap();
 
- renderFadeEffects();
+ renderFadeEffects(d->mVisibleEffects);
 
  renderCursor();
 
@@ -1558,35 +1590,11 @@ void BosonBigDisplayBase::renderCells()
  }
 }
 
-void BosonBigDisplayBase::renderParticles()
+void BosonBigDisplayBase::renderParticles(BoVisibleEffects& visible)
 {
  BO_CHECK_NULL_RET(localPlayerIO());
  // Return if there aren't any effects
- if (canvas()->effectsCount() == 0) {
-	return;
- }
-
- // We sort out non-visible systems ourselves
- QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
- QPtrList<BosonEffectParticle> visible;
- BosonEffectParticle* s = 0;
- for (; allIt.current(); ++allIt) {
-	if (allIt.current()->hasStarted() && allIt.current()->type() > BosonEffect::Particle) {
-		// This is a particle effect
-		s = (BosonEffectParticle*)allIt.current();
-		//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
-		// TODO: maybe we should just add particleDist() to bounding sphere radius
-		//  of the system?
-		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-			if (localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
-				visible.append(s);
-			}
-		}
-	}
- }
-
- // Return if none of particle systems are visible
- if (visible.count() == 0) {
+ if (visible.mParticles.isEmpty()) {
 	return;
  }
 
@@ -1595,14 +1603,14 @@ void BosonBigDisplayBase::renderParticles()
  //  we don't resort the list if there hasn't been any advance() calls and
  //  camera hasn't changed either
  BosonParticle* p = 0;
- //bool wassorted = d->mParticlesDirty;  // only for debug, commented because of compiler warning
- if (d->mParticlesDirty) {
+ //bool wassorted = d->mVisibleEffects.mParticlesDirty;  // only for debug, commented because of compiler warning
+ if (d->mVisibleEffects.mParticlesDirty) {
 	float x, y, z;
 	BoVector3 dir;
-	d->mParticleList.clear();
+	visible.mParticleList.clear();
 	// Add all particles to the list
-	QPtrListIterator<BosonEffectParticle> visibleIt(visible);
-	s = 0;
+	QPtrListIterator<BosonEffectParticle> visibleIt(visible.mParticles);
+	BosonEffectParticle* s = 0;
 	for (; visibleIt.current(); ++visibleIt) {
 		s = visibleIt.current();
 		// If particleDist is non-zero, calculate vector for moving particles closer
@@ -1622,20 +1630,18 @@ void BosonBigDisplayBase::renderParticles()
 				y = p->pos.y() - camera()->cameraPos().y();
 				z = p->pos.z() - camera()->cameraPos().z();
 				p->distance = (x*x + y*y + z*z);
-				// Append to list
-				d->mParticleList.append(p);
+				visible.mParticleList.append(p);
 			}
 		}
 	}
 
-	// If there's no particles, return
-	if (d->mParticleList.count() == 0) {
+	if (visible.mParticleList.count() == 0) {
 		return;
 	}
 
 	// Sort the list
-	d->mParticleList.sort();
-	d->mParticlesDirty = false;
+	visible.mParticleList.sort();
+	setParticlesDirty(false);
  }
 
  /// Draw particles
@@ -1657,7 +1663,7 @@ void BosonBigDisplayBase::renderParticles()
  bool betweenbeginend = false;  // If glBegin has been called, but glEnd() hasn't. Very hackish.
  BoVector3 a, b, c, e;  // Vertex positions. e is used instead of d which clashes with private class
 
- QPtrListIterator<BosonParticle> it(d->mParticleList);
+ QPtrListIterator<BosonParticle> it(d->mVisibleEffects.mParticleList);
  //boDebug(150) << k_funcinfo << "Drawing " << i.count() << " particles" << endl;
  for (; it.current(); ++it) {
 	p = it.current();
@@ -1732,19 +1738,12 @@ void BosonBigDisplayBase::renderParticles()
  }
 }
 
-void BosonBigDisplayBase::renderFog()
+void BosonBigDisplayBase::renderFog(BoVisibleEffects& visible)
 {
  // Render fog effects
  // TODO: support multiple fog effects (ATM only 1st one is rendered)
- QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
- QPtrList<BosonEffectFog> fogeffects;
- for (; allIt.current(); ++allIt) {
-	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::Fog) {
-		fogeffects.append((BosonEffectFog*)allIt.current());
-	}
- }
- if (!fogeffects.isEmpty()) {
-	BosonEffectFog* f = fogeffects.first();
+ if (!visible.mFogEffects.isEmpty()) {
+	BosonEffectFog* f = visible.mFogEffects.first();
 	glEnable(GL_FOG);
 	glFogfv(GL_FOG_COLOR, f->color().data());
 	glFogf(GL_FOG_START, f->startDistance());
@@ -1756,22 +1755,15 @@ void BosonBigDisplayBase::renderFog()
  }
 }
 
-void BosonBigDisplayBase::renderBulletTrailEffects()
+void BosonBigDisplayBase::renderBulletTrailEffects(BoVisibleEffects& visible)
 {
- QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
- QPtrList<BosonEffectBulletTrail> bulleteffects;
- for (; allIt.current(); ++allIt) {
-	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::BulletTrail) {
-		bulleteffects.append((BosonEffectBulletTrail*)allIt.current());
-	}
- }
- if (!bulleteffects.isEmpty()) {
+ if (!visible.mBulletEffects.isEmpty()) {
 	BosonEffectBulletTrail* b;
 	float currentwidth = -1.0f;
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBegin(GL_LINES);
-	QPtrListIterator<BosonEffectBulletTrail> it(bulleteffects);
+	QPtrListIterator<BosonEffectBulletTrail> it(visible.mBulletEffects);
 	while (it.current()) {
 		b = it.current();
 		if (b->width() != currentwidth) {
@@ -1791,17 +1783,9 @@ void BosonBigDisplayBase::renderBulletTrailEffects()
  }
 }
 
-void BosonBigDisplayBase::renderFadeEffects()
+void BosonBigDisplayBase::renderFadeEffects(BoVisibleEffects& visible)
 {
- // Render fade effects
- QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
- QPtrList<BosonEffectFade> fadeeffects;
- for (; allIt.current(); ++allIt) {
-	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::Fade) {
-		fadeeffects.append((BosonEffectFade*)allIt.current());
-	}
- }
- if (!fadeeffects.isEmpty()) {
+ if (!visible.mFadeEffects.isEmpty()) {
 	BosonEffectFade* f;
 //	glMatrixMode(GL_PROJECTION);
 //	glPushMatrix();
@@ -1813,7 +1797,7 @@ void BosonBigDisplayBase::renderFadeEffects()
 	float yscale = (GLfloat)d->mViewport[3];
 	glEnable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
-	QPtrListIterator<BosonEffectFade> it(fadeeffects);
+	QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
 	while (it.current()) {
 		f = it.current();
 		glBlendFunc(f->blendFunc()[0], f->blendFunc()[1]);
@@ -2383,7 +2367,7 @@ void BosonBigDisplayBase::quitGame()
  setCursor(0);
  selection()->clear();
  d->mPlacementPreview.clear();
- d->mParticleList.clear();
+ d->mVisibleEffects.mParticleList.clear();
  delete d->mMouseIO;
  d->mMouseIO = 0;
  delete d->mInput,
@@ -2860,7 +2844,7 @@ void BosonBigDisplayBase::cameraChanged()
 	renderer->generateCellList(map);
  }
 
- d->mParticlesDirty = true;
+ setParticlesDirty(true);
 
  const QValueVector<BoLight*>* lights = BoLightManager::lights();
  for (unsigned int i = 0; i < lights->size(); i++) {
@@ -3062,7 +3046,7 @@ const BoVector3& BosonBigDisplayBase::cursorCanvasVector() const
 
 void BosonBigDisplayBase::setParticlesDirty(bool dirty)
 {
- d->mParticlesDirty = dirty;
+ d->mVisibleEffects.mParticlesDirty = dirty;
 }
 
 void BosonBigDisplayBase::setPlacementPreviewData(const UnitProperties* prop, bool canPlace)
@@ -3937,3 +3921,50 @@ void BosonBigDisplayScriptConnector::slotCommitCameraChanges(int ticks)
  mDisplay->autoCamera()->commitChanges(ticks);
 }
 
+void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
+{
+ v->clearAll();
+
+ QPtrListIterator<BosonEffect> it(*canvas()->effects());
+ while (it.current()) {
+	if (!it.current()->hasStarted()) {
+		// nothing to do. effect hasn't started yet.
+	} else if (it.current()->type() == BosonEffect::Fog) {
+		v->mFogEffects.append((BosonEffectFog*)it.current());
+		v->mAll.append(it.current());
+	} else if (it.current()->type() == BosonEffect::BulletTrail) {
+		// FIXME: in frustum?
+		v->mBulletEffects.append((BosonEffectBulletTrail*)it.current());
+		v->mAll.append(it.current());
+	} else if (it.current()->type() == BosonEffect::Fade) {
+		v->mFadeEffects.append((BosonEffectFade*)it.current());
+		v->mAll.append(it.current());
+	} else if (it.current()->type() > BosonEffect::Particle) {
+		BosonEffectParticle* s = (BosonEffectParticle*)it.current();
+		//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
+		// TODO: maybe we should just add particleDist() to bounding sphere radius
+		//  of the system?
+		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
+			if (localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
+				v->mParticles.append(s);
+				v->mAll.append(it.current());
+			}
+		}
+	} else {
+		boWarning() << k_funcinfo << "unexpected type " << it.current()->type();
+		v->mAll.append(it.current());
+	}
+	++it;
+ }
+}
+
+static void updateEffects(BoVisibleEffects& v)
+{
+ static int id = boProfiling->requestEventId("updateEffects(): doDelayedUpdates");
+ BosonProfiler prof(id);
+ QPtrListIterator<BosonEffect> it(v.mAll);
+ while (it.current()) {
+	it.current()->doDelayedUpdates();
+	++it;
+ }
+}

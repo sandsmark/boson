@@ -69,6 +69,7 @@ BosonEffect::BosonEffect(const BosonEffectProperties* prop)
   mStarted = false;
   mDelay = 0.0f;
   mOwnerId = 0;
+  mUpdateCounter = 0;
   if(prop)
   {
     mDelay = prop->delay();
@@ -77,6 +78,19 @@ BosonEffect::BosonEffect(const BosonEffectProperties* prop)
 
 BosonEffect::~BosonEffect()
 {
+}
+
+void BosonEffect::doDelayedUpdates()
+{
+  if(mUpdateCounter > 40)
+  {
+    mUpdateCounter = 40;
+  }
+  while(mUpdateCounter > 0)
+  {
+    update(0.05f);
+    mUpdateCounter--;
+  }
 }
 
 void BosonEffect::update(float elapsed)
@@ -615,3 +629,6 @@ bool BosonEffectBulletTrail::loadFromXML(const QDomElement& root)
   return true;
 }
 
+/*
+ * vim: et sw=2
+ */

@@ -40,6 +40,7 @@ class BoPixmapRenderer;
 class BoLight;
 class BoFontInfo;
 class BosonScript;
+class BoVisibleEffects;
 
 class KGameChat;
 class KGameIO;
@@ -453,19 +454,19 @@ protected:
 	/**
 	 * Called by @ref paintGL only to render the particle effects on the screen
 	 **/
-	void renderParticles();
+	void renderParticles(BoVisibleEffects&);
 
 	/**
 	 * Called by @ref paintGL only to render the fog effects on the screen
 	 **/
-	void renderFog();
+	void renderFog(BoVisibleEffects&);
 
-	void renderBulletTrailEffects();
+	void renderBulletTrailEffects(BoVisibleEffects&);
 
 	/**
 	 * Called by @ref paintGL only to render the fade effects on the screen
 	 **/
-	void renderFadeEffects();
+	void renderFadeEffects(BoVisibleEffects&);
 
 	/**
 	 * @param y The <em>top</em> of the text to-be rendered. See also @ref
@@ -474,6 +475,8 @@ protected:
 	 * BosonGLFont::renderText)
 	 **/
 	int renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
+
+	void makeVisibleEffectsList(BoVisibleEffects* v);
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
