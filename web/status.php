@@ -63,7 +63,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <h3>Sound</h3>
  <ul>
      <li>Sound is played using OpenAL now (if you use arts you need a patched OpenAL,
-     or use \"artsshell suspend ; ./boson\"</li>
+     or use \"artsshell suspend ; boson\")</li>
      <li>Dependency on arts and kdemultimedia removed</li>
      <li>Sound is enabled by default again</li>
 </ul>
