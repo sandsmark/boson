@@ -47,23 +47,13 @@ mobUnit::mobUnit(mobileMsg_t *msg)
 
 void mobUnit::fill(mobileMsg_t &msg)
 {
-	QRect r = rect();
+	QRect r = gridRect();
 
 	msg.who = who;
 	msg.x   = r.x();
 	msg.y   = r.y();
 	msg.type= type;
 }
-
-
-QRect mobUnit::rect(void)
-{
-	register int
-		w = mobileProp[type].width,
-		h = mobileProp[type].height;
-	return QRect(-w/2 , -h/2 , w, h);
-}
-
 
 /*
  * FACILITY
@@ -77,11 +67,11 @@ Facility::Facility(facilityMsg_t *msg)
 
 void Facility::fill(facilityMsg_t &msg)
 {
-	QRect r = rect();
+	QRect r = gridRect();
 
 	msg.who = who;
-	msg.x   = r.x() / BO_TILE_SIZE;
-	msg.y   = r.y() / BO_TILE_SIZE;
+	msg.x   = r.x();
+	msg.y   = r.y();
 	msg.type= type;
 }
 
