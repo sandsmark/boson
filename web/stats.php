@@ -62,7 +62,7 @@ main_area_begin();
     if($ipp == "")
     {
       // If not given, fall back to default
-      $ipp = 20;
+      $ipp = 40;
     }
     else
     {
