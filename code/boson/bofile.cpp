@@ -65,7 +65,11 @@ bool BoFile::checkTar() const
 	return false;
  }
  QStringList entries = dir->entries();
- if (entries.count() != 1) {
+ if (entries.count() < 1) {
+	boWarning() << k_funcinfo << "not a valid file (no toplevel entry)" << endl;
+	return false;
+ }
+ if (entries.count() > 1) {
 	boWarning() << k_funcinfo << "not a valid file (multiple toplevel entries)" << endl;
 	return false;
  }
