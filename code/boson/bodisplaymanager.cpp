@@ -456,6 +456,7 @@ void BoDisplayManager::paintChatMessages()
 
 void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
 {
+ boConfig->setUpdateInterval(ms);
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
 	it.current()->setUpdateInterval(ms);
