@@ -64,6 +64,35 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 }
 
 
+speciesTheme::~speciesTheme()
+{
+	unsigned int i, n;
+	
+	for (i=0, n = mobiles->size(); i<n; i++)
+		if (mobiles[i]) {
+			delete mobSprite[i];
+			delete mobSmallOverview[i];
+			delete mobBigOverview[i];
+		}
+
+	for (i=0, n = facilities->size(); i<n; i++)
+		if (mobiles[i]) {
+			delete fixSprite[i];
+			delete fixSmallOverview[i];
+			delete fixBigOverview[i];
+		}
+	delete mobBigOverview;
+	delete fixBigOverview;
+	delete mobSmallOverview;
+	delete fixSmallOverview;
+	
+	delete mobSprite;
+	delete fixSprite;
+	delete mobiles;
+	delete facilities;
+	delete themePath;
+}
+
 
 bool speciesTheme::loadMob(int index)
 {
