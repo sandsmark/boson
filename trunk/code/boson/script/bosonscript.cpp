@@ -718,6 +718,99 @@ QValueList<int> BosonScript::allPlayerUnits(int id)
   return list;
 }
 
+int BosonScript::allPlayerUnitsCount(int id)
+{
+  int count = 0;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return count;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(id));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << id << endl;
+    return count;
+  }
+
+  QPtrListIterator<Unit> it(*(p->allUnits()));
+  while(it.current())
+  {
+    if(!it.current()->isDestroyed())
+    {
+      count++;
+    }
+    ++it;
+  }
+  return count;
+}
+QValueList<int> BosonScript::playerUnitsOfType(int playerid, int type)
+{
+  QValueList<int> list;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return list;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return list;
+  }
+
+  QPtrListIterator<Unit> it(*(p->allUnits()));
+  while(it.current())
+  {
+    if(!it.current()->isDestroyed())
+    {
+      if((int)it.current()->type() == type)
+      {
+        list.append(it.current()->id());
+      }
+    }
+    ++it;
+  }
+  return list;
+}
+
+int BosonScript::playerUnitsOfTypeCount(int playerid, int type)
+{
+  int count = 0;
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return count;
+  }
+
+  Player* p = (Player*)(game()->findPlayer(playerid));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerid << endl;
+    return count;
+  }
+
+  QPtrListIterator<Unit> it(*(p->allUnits()));
+  while(it.current())
+  {
+    if(!it.current()->isDestroyed())
+    {
+      if((int)it.current()->type() == type)
+      {
+        count++;
+      }
+    }
+    ++it;
+  }
+  return count;
+}
+
+
 /*****  Camera methods  *****/
 
 void BosonScript::moveCamera(const BoVector3& pos)

@@ -85,6 +85,9 @@ class PythonScript : public BosonScript
     static PyObject* py_isUnitAlive(PyObject* self, PyObject* args);
 
     static PyObject* py_allPlayerUnits(PyObject* self, PyObject* args);
+    static PyObject* py_allPlayerUnitsCount(PyObject* self, PyObject* args);
+    static PyObject* py_playerUnitsOfType(PyObject* self, PyObject* args);
+    static PyObject* py_playerUnitsOfTypeCount(PyObject* self, PyObject* args);
 
 
     // Camera

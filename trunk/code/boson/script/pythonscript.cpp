@@ -717,6 +717,42 @@ PyObject* PythonScript::py_allPlayerUnits(PyObject*, PyObject* args)
   return QValueListToPyList(&units);
 }
 
+PyObject* PythonScript::py_allPlayerUnitsCount(PyObject* self, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::allPlayerUnitsCount(id));
+}
+
+PyObject* PythonScript::py_playerUnitsOfType(PyObject* self, PyObject* args)
+{
+  int id, type;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &type))
+  {
+    return 0;
+  }
+
+  QValueList<int> units = BosonScript::playerUnitsOfType(id, type);
+
+  return QValueListToPyList(&units);
+}
+
+PyObject* PythonScript::py_playerUnitsOfTypeCount(PyObject* self, PyObject* args)
+{
+  int id, type;
+  if(!PyArg_ParseTuple(args, (char*)"ii", &id, &type))
+  {
+    return 0;
+  }
+
+  return Py_BuildValue((char*)"i", BosonScript::playerUnitsOfTypeCount(id, type));
+}
+
+
 
 /*****  Camera functions  *****/
 

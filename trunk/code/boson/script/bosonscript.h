@@ -239,8 +239,26 @@ class BosonScript
 
     /**
      * @return List containing ids of all units of player with id id
+     * Warning: this method might be slow in case player has many units
      **/
     static QValueList<int> allPlayerUnits(int id);
+    /**
+     * @return How many units player with given id has
+     *
+     * If you don't need a list of units, this method is faster, than
+     *  @ref allPlayerUnits, but it might still be a bit slow when player has
+     *  many units
+     **/
+    static int allPlayerUnitsCount(int id);
+    /**
+     * @return List containing all units with given type, belonging to player
+     *  with given id
+     **/
+    static QValueList<int> playerUnitsOfType(int playerid, int type);
+    /**
+     * @return how many units of given type player with given id has
+     **/
+    static int playerUnitsOfTypeCount(int playerid, int type);
 
 
     // Camera
