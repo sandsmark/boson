@@ -16,30 +16,27 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef KGAMECANVASCHAT_H
-#define KGAMECANVASCHAT_H
+#ifndef BOSONCHAT_H
+#define BOSONCHAT_H
 
 #include <qobject.h>
 
-class QCanvas;
 class KPlayer;
 class KGame;
 class KGameChat;
+class QStringList;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KGameCanvasChat : public QObject
+class BosonChat : public QObject
 {
 	Q_OBJECT
 public:
-	KGameCanvasChat(QObject* parent);
-	~KGameCanvasChat();
+	BosonChat(QObject* parent);
+	~BosonChat();
 
 	void setChat(KGameChat* chat);
-
-	QCanvas* canvas() const { return mCanvas; }
-	void setCanvas(QCanvas* c) { mCanvas = c; }
 
 	/**
 	 * Maximal displayed messages. use -1 for unlimited (<em>very</em> bad
@@ -52,7 +49,7 @@ public:
 	/**
 	 * See @ref setMaxItems
 	 **/
-	int maxItems() const;
+	inline int maxItems() const { return mMaxItems; }
 
 	/**
 	 * @return The id of the messages produced by KGameCanvasChat. This id
@@ -62,7 +59,7 @@ public:
 	int messageId() const;
 
 	void setKGame(KGame* game);
-	KGame* game() const;
+	KGame* game() const { return mGame; }
 
 	/**
 	 * Equivalent to addMessage(game()->findPlayer(playerId));
@@ -75,31 +72,28 @@ public:
 	 **/
 	void addMessage(KPlayer* player, const QString& message);
 
+	/**
+	 * Final addMessage function that gets called by all overloaded
+	 * versions. The text message will be displayed without further
+	 * modification
+	 **/
 	virtual void addMessage(const QString& message);
 
+	const QStringList& messages() const;
 
-	void clear();
-
-	/**
-	 * @param x The Left side (== x coordinate of all texts)
-	 * @param y Currently the lowest possible value. TODO: make configurable
-	 * - either the text is coming from above, moving down ; or coming from
-	 * below, moving up (current situation).
-	 * */
-	void move(int x, int y);
-
-	int z() const;
-	void setZ(int z);
+	virtual void clear();
 
 protected slots:
 	void slotUnsetKGame();
 	void slotReceiveMessage(int msgid, const QByteArray&, Q_UINT32 receiver, Q_UINT32 sender);
 
 private:
-	class KGameCanvasChatPrivate;
-	KGameCanvasChatPrivate* d;
+	class BosonChatPrivate;
+	BosonChatPrivate* d;
 
-	QCanvas* mCanvas;
+	int mMaxItems;
+	KGame* mGame;
+	KGameChat* mChat;
 };
 
 #endif

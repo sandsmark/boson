@@ -19,8 +19,9 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
-#include "../config.h"
+#include <config.h>
 
+#define NO_OPENGL
 //#define NO_EDITOR
 
 // undefine this to enable experimental canvastext. baaad performance!

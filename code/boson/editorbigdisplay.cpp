@@ -26,7 +26,6 @@
 #include "unitproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
-#include "kgamecanvaschat.h"
 #include "bosoncursor.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"

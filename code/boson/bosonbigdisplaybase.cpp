@@ -19,6 +19,7 @@
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
 
+#include "defines.h"
 #include "unit.h"
 #include "unitplugins.h"
 #include "bosoncanvas.h"
@@ -26,14 +27,14 @@
 #include "unitproperties.h"
 #include "cell.h"
 #include "bosonmessage.h"
-#include "kgamecanvaschat.h"
 #include "bosoncursor.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "global.h"
 #include "kspritetooltip.h"
 #include "boselection.h"
-#include "defines.h"
+#include "visual/bosonchat.h"
+#include "visual/bosoncanvaschat.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -77,7 +78,7 @@ public:
 	BosonCursor* mCursor;
 	KSpriteToolTip* mUnitTips;
 
-	KGameCanvasChat* mChat;
+	BosonChat* mChat;
 
 	BoSelection* mSelection;
 	QCanvasRectangle* mSelectionRect;
@@ -110,9 +111,9 @@ void BosonBigDisplayBase::init()
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
 		this, SLOT(slotCursorEdgeTimeout()));
 
- d->mChat = new KGameCanvasChat(this);
- d->mChat->setCanvas(canvas());
- d->mChat->setZ(Z_CANVASTEXT);
+ d->mChat = (BosonChat*)new BosonCanvasChat(this);
+ ((BosonCanvasChat*)d->mChat)->setCanvas(canvas());
+ ((BosonCanvasChat*)d->mChat)->setZ(Z_CANVASTEXT);
 
  d->mUnitTips = new KSpriteToolTip(this);
 
