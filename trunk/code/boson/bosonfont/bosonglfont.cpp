@@ -234,7 +234,7 @@ BosonGLFont::BosonGLFont(const QString& family)
  }
  mFont = 0;
 
-#if 0
+#if 1
  if (!loadGLXFont(family)) {
 	boError() << k_funcinfo << "GLX font for " << family << "could not be loaded" << endl;
  }
