@@ -22,3 +22,18 @@ AUTOMAKE_OPTIONS = foreign  1.4
 tags:
 	ctags `find * -name '*.h' -o -name '*.cpp' | grep -v moc | grep /`
 
+_common:
+	cd common && make
+
+_server: _common
+	cd server && make
+
+_visual: _common
+	cd visual && make
+
+_boson: _visual
+	cd boson && make
+
+_editor: _visual
+	cd editor && make
+
