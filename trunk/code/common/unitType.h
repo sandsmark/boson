@@ -36,7 +36,6 @@ enum mobType {
 
 
 #define	CONSTRUCTION_STEP	(4)
-#define EMPTYING_DURATION	(15)
 
 enum facilityType {
 	FACILITY_COMSAT = 0,

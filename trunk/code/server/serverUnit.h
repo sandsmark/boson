@@ -26,9 +26,10 @@
 #include "knownBy.h"
 
 
-#define BUILDING_SPEED	40
-class boBuffer;
+#define BUILDING_SPEED		(40)
+#define EMPTYING_DURATION	(40)
 
+class boBuffer;
 
 class serverUnit {
  public:
