@@ -23,14 +23,12 @@
 #include "bodebug.h"
 
 Cell::Cell()
-	: mType(GroundUnknown),
-	mVersion(0),
-	mX(0),
+	: mX(0),
 	mY(0),
-	mItems(BoItemList(2, false))
+	mItems(BoItemList(2, false)),
+	mAmountOfLand(0),
+	mAmountOfWater(0)
 {
- mAmountOfLand = 0;
- mAmountOfWater = 0;
 }
 
 Cell::~Cell()
@@ -41,11 +39,6 @@ void Cell::setPosition(int x, int y)
 {
  mX = x;
  mY = y;
-}
-
-void Cell::setGroundType(GroundType t)
-{
- mType = t;
 }
 
 void Cell::makeCell(unsigned char amountOfLand, unsigned char amountOfWater)
@@ -60,11 +53,6 @@ void Cell::makeCell(unsigned char amountOfLand, unsigned char amountOfWater)
 
  mAmountOfLand = amountOfLand;
  mAmountOfWater = amountOfWater;
-
- // AB: we fall back to GroundGrass untill the GroundType has been removed
- // completely. version doesn't matter during game anyway.
- setGroundType(Cell::GroundGrass);
- setVersion(0);
 }
 
 bool Cell::canGo(const UnitProperties* prop) const
