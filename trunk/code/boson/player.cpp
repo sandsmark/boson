@@ -374,6 +374,12 @@ bool Player::loadUnits(QDataStream& stream)
 	// Create unit with Boson
 	Unit* unit = ((Boson*)game())->loadUnit(type, this);
 
+	if (!unit) {
+		boError() << k_funcinfo << "NULL unit loaded" << endl;
+		// we cannot load properly anymore.
+		return false;
+	}
+
 	// Set additional properties
 	d->mUnits.append(unit);
 	unit->dataHandler()->registerHandler(dataHandlerID, this,
