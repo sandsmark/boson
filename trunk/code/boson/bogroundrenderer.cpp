@@ -43,10 +43,10 @@
 #include <math.h>
 
 // a couple of helper functions. these should be in Bo3dTools.
-static bool isInFrontOfPlane(const double* plane, const BoVector3& vector);
-static bool lineIntersects(const double* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection);
-static bool lineIntersects_points(const double* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
-static bool lineSegmentIntersects(const double* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
+static bool isInFrontOfPlane(const float* plane, const BoVector3& vector);
+static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection);
+static bool lineIntersects_points(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
+static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection);
 #define EPSILON 0.0001f // zero for floating point numbers
 
 class BoGroundRendererPrivate
@@ -73,7 +73,7 @@ public:
 	const BoMatrix* mModelviewMatrix;
 	const BoMatrix* mProjectionMatrix;
 	const int* mViewport;
-	const double* mViewFrustum;
+	const float* mViewFrustum;
 
 	PlayerIO* mLocalPlayerIO;
 };
@@ -113,12 +113,12 @@ void BoGroundRenderer::setMatrices(const BoMatrix* modelviewMatrix, const BoMatr
  d->mViewport = viewport;
 }
 
-void BoGroundRenderer::setViewFrustum(const double* viewFrustum)
+void BoGroundRenderer::setViewFrustum(const float* viewFrustum)
 {
  d->mViewFrustum = viewFrustum;
 }
 
-const double* BoGroundRenderer::viewFrustum() const
+const float* BoGroundRenderer::viewFrustum() const
 {
  return d->mViewFrustum;
 }
@@ -242,7 +242,7 @@ Cell** BoGroundRenderer::createVisibleCellList(int* cells, PlayerIO* playerIO)
  return renderCells;
 }
 
-static bool isInFrontOfPlane(const double* plane, const BoVector3& vector)
+static bool isInFrontOfPlane(const float* plane, const BoVector3& vector)
 {
  float d = vector[0] * plane[0] + vector[1] * plane[1] + vector[2] * plane[2] + plane[3];
  if (d >= 0.0f) {
@@ -260,7 +260,7 @@ static bool isInFrontOfPlane(const double* plane, const BoVector3& vector)
  * line segment.
  * @param t internal
  **/
-static bool lineIntersects(const double* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection)
+static bool lineIntersects(const float* plane, const BoVector3& pos, const BoVector3& direction, BoVector3* intersection)
 {
  const float planeDistance = plane[3];
  const BoVector3 planeNormal = BoVector3(plane[0], plane[1], plane[2]);
@@ -293,14 +293,14 @@ static bool lineIntersects(const double* plane, const BoVector3& pos, const BoVe
 }
 
 // just like above, but takes 2 points on the line, not 1 point and a direction
-static bool lineIntersects_points(const double* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
+static bool lineIntersects_points(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
 {
  const BoVector3 pos = start;
  BoVector3 direction = end - start;
  return lineIntersects(plane, pos, direction, intersection);
 }
 
-static bool lineSegmentIntersects(const double* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
+static bool lineSegmentIntersects(const float* plane, const BoVector3& start, const BoVector3& end, BoVector3* intersection)
 {
  bool ret = lineIntersects_points(plane, start, end, intersection);
 
@@ -402,7 +402,7 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
  int newLine = 4;
 
  for (int i = 0; i < 6; i++) {
-	const double* plane = &d->mViewFrustum[i * 4];
+	const float* plane = &d->mViewFrustum[i * 4];
 	// the possibilities:
 	// - the line is completely in front of the plane. nothing to do then.
 	// - the line intersects with the plane at some point.

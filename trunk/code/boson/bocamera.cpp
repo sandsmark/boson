@@ -77,7 +77,7 @@ void BoCamera::setAutoCamera(BoAutoCamera* a)
   }
 }
 
-void BoCamera::setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up)
+void BoCamera::setGluLookAt(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up)
 {
   mLookAt = lookAt;
   mCameraPos = cameraPos;
@@ -127,14 +127,31 @@ bool BoCamera::saveAsXML(QDomElement& root)
  return true;
 }
 
+// FIXME: make it const!
+BoMatrix BoCamera::rotationMatrix()
+{
+  // emulate gluLookAt()
+  BoMatrix m;
+  m.setLookAtRotation(cameraPos(), lookAt(), up());
+  return m;
+}
+
+// FIXME: make it const!
+BoQuaternion BoCamera::quaternion()
+{
+  // emulate gluLookAt()
+  BoQuaternion q;
+  q.setRotation(cameraPos(), lookAt(), up());
+  return q;
+}
+
 void BoCamera::applyCameraToScene()
 {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
-  gluLookAt(cameraPos().x(), cameraPos().y(), cameraPos().z(),
-      lookAt().x(), lookAt().y(), lookAt().z(),
-      up().x(), up().y(), up().z());
+  glMultMatrixf(rotationMatrix().data());
+  glTranslatef(-cameraPos().x(), -cameraPos().y(), -cameraPos().z());
 }
 
 const BoVector3& BoCamera::cameraPos()
@@ -242,7 +259,7 @@ void BoGameCamera::updatePosition()
 
   BoVector3 cameraPos(lookAt().x() + diffX, lookAt().y() + diffY, lookAt().z() + z());
   BoVector3 up(-diffX, -diffY, 0.0f);
-  setGluLookAt(lookAt(), cameraPos, up);
+  setGluLookAt(cameraPos, lookAt(), up);
 
   setPositionDirty(false);
 }
@@ -349,7 +366,7 @@ void BoGameCamera::checkPosition()
   }
   if(changed)
   {
-    setGluLookAt(lookAt_, cameraPos_, up_);
+    setGluLookAt(cameraPos_, lookAt_, up_);
     setPositionDirty();
   }
 }

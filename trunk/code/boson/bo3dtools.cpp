@@ -505,6 +505,133 @@ void BoMatrix::toRotation(float* alpha, float* beta, float* gamma)
  *gamma = Bo3dTools::rad2deg(*gamma);
 }
 
+void BoMatrix::toGluLookAt(BoVector3* lookAt, BoVector3* up, const BoVector3& cameraPos) const
+{
+ BoVector3 x, z;
+ x.setX(element(0, 0));
+ x.setY(element(0, 1));
+ x.setZ(element(0, 2));
+ z.setX(element(2, 0));
+ z.setY(element(2, 1));
+ z.setZ(element(2, 2));
+
+ *lookAt = cameraPos - z;
+ extractUp(*up, x, z);
+}
+
+void BoMatrix::extractUp(BoVector3& up, const BoVector3& x, const BoVector3& z) const
+{
+// keep these formulas in mind:
+// (you can get them from x := up cross z , (we assume that no normalizing necessary!)
+// up[2] = (x[1] + (x[0] * z[0]) / z[1] + (x[2] * z[2] / z[1])) / (z[0] + z[1]);
+// up[1] = (x[0] + up[2] * z[1]) / z[2];
+// up[0] = ((x[0] + up[2] * z[1] * z[0]) / z[2] + x[2]) / z[1];
+
+ // AB: note that every component of z can actually become zero. i tested all three.
+ if (fabsf(z[1]) <= 0.0001f) {
+	// we can use
+	// x[0] := up[1] * z[2] - up[2] * z[1] => x[0] = up[1] * z[2]
+	// ==> up[1] = x[0] / z[2]
+	// or
+	// x[2] := up[0] * z[1] - up[1] * z[0] => x[2] = -up[1] * z[0]
+	// ==> up[1] = x[2] / z[0]
+	if (fabsf(z[0]) <= 0.0001f && fabsf(z[2]) <= 0.0001f) {
+		// is this possible? where to fall back to?
+		boError() << "oops - x[0] != 0, x[2] != 0, z[0] == z[2] == 0  !" << endl;
+		up.setY(0.0f);
+	} else if (fabs(z[2]) > 0.0001f) {
+		up.setY(x[0] / z[2]);
+	} else { // fabs(z[0]) > 0.0001
+		up.setY(-x[2] / z[0]);
+	}
+
+	// only one equation for two variables left :-(
+	// x[1] := up[2] * z[0] - up[0] * z[2];
+	if (fabsf(z[2]) <= 0.0001f && fabs(z[0]) <= 0.0001f) {
+		// all of z are zero. this is probably invalid anyway.
+		// AB: to be proven.
+		up.setX(0.0f);
+		up.setX(0.0f);
+	} else if (fabsf(z[2]) <= 0.0001f) {
+		up.setZ(x[1] / z[0]);
+		// up[0] doesn't influence the matrix anyway
+		up.setX(0.0f);
+	} else if (fabsf(z[0]) <= 0.0001f) {
+		up.setX(-x[1] / z[2]);
+		// up[2] doesn't influence the matrix anyway
+		up.setZ(0.0f);
+	} else {
+		// multiple solutions possible.
+		up.setX(0.0f);
+		up.setZ(x[1] / z[0]);
+	}
+	return;
+ } else if (fabsf(z[2]) <= 0.0001f) {
+	// here we can assume that z[1] != 0, as we already checked above
+
+	// we can use
+	// x[0] := up[1] * z[2] - up[2] * z[1] => x[0] = -up[2] * z[1]
+	// ==> up[2] = -x[0] / z[1]
+	// or
+	// x[1] := up[2] * z[0] - up[0] * z[2] => x[1] = up[2] * z[0]
+	// ==> up[2] = x[1] / z[0]
+
+	// we use the first, as we already know that z[1] != 0
+	up.setZ(-x[0] / z[1]);
+
+	// one equation left:
+	// x[2] := up[0] * z[1] - up[1] * z[0]
+	if (fabsf(z[0]) <= 0.0001f) {
+		up.setX(x[2] / z[1]);
+		// up[1] does't influence the matrix anyway
+		up.setY(0.0f);
+	} else {
+		// multiple solutions possible
+		up.setY(0.0f);
+		up.setX(x[2] / z[1]);
+	}
+	return;
+ } else if (fabs(z[0]) <= 0.0001f) {
+	// here we can assume that z[1] != 0 and z[2] != 0
+
+	// we can use
+	// x[1] := up[2] * z[0] - up[0] * z[2] => x[1] = -up[0] * z[2]
+	// ==> up[0] = -x[1] / z[2]
+	// or
+	// x[2] := up[0] * z[1] - up[1] * z[0] => x[2] = up[0] * z[1]
+	// ==> up[0] = x[2] / z[1]
+
+	up.setX(x[2] / z[1]);
+
+	// one equation left:
+	// x[0] := up[1] * z[2] - up[2] * z[1]
+	// multiple solutions possible, as z[1] and z[2] are both != 0
+
+	up.setZ(0.0f);
+	up.setY(x[0] / z[2]);
+	return;
+ }
+
+ double foo1;
+ double foo2;
+ double foo3;
+
+ foo3 = 0;
+
+ // this code depends on z[0] != 0, z[1] != 0 and z[2] != 0 !
+ foo1 = (x[2] * z[2]) / (2 * z[1] * z[0]);
+ foo2 = x[0] / (2 * z[1]);
+
+ up.setZ(foo1 - foo2);
+
+ foo1 = x[0] + up.z() * z[1];
+ up.setY(foo1 / z[2]);
+
+ up.setX((up.y() * z[0] + x[2]) / z[1]);
+ 
+}
+
+
 
 /*****  BoQuaternion  *****/
 
@@ -772,7 +899,7 @@ float Bo3dTools::rad2deg(float rad)
   return rad * RAD2DEG;
 }
 
-float Bo3dTools::sphereInFrustum(const double* viewFrustum, const BoVector3& pos, float radius)
+float Bo3dTools::sphereInFrustum(const float* viewFrustum, const BoVector3& pos, float radius)
 {
   // FIXME: performance: we might unroll the loop and then make this function
   // inline. We call it pretty often!
@@ -792,7 +919,7 @@ float Bo3dTools::sphereInFrustum(const double* viewFrustum, const BoVector3& pos
   return distance + radius;
 }
 
-int Bo3dTools::sphereCompleteInFrustum(const double* viewFrustum, const BoVector3& pos, float radius)
+int Bo3dTools::sphereCompleteInFrustum(const float* viewFrustum, const BoVector3& pos, float radius)
 {
   float distance;
   int c = 0;
