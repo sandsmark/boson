@@ -534,6 +534,8 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
  } else {
 	list.append(pl);
  }
+ bool minimapUpdatesEnabled = minimap()->isUpdatesEnabled();
+ minimap()->setUpdatesEnabled(false);
  for (unsigned int i = 0; i < list.count(); i++) {
 	Player* p = (Player*)list.at(i);
 	for (unsigned int x = 0; x < map->width(); x++) {
@@ -543,6 +545,8 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 	}
 	boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Unfogged player %1 - %2").arg(p->id()).arg(p->name()));
  }
+ minimap()->setUpdatesEnabled(minimapUpdatesEnabled);
+ minimap()->update();
 }
 
 void BosonWidgetBase::slotSplitDisplayHorizontal()
