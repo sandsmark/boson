@@ -25,6 +25,9 @@ public:
 		Water=1,
 		Air=2
 	};
+	
+	UnitProperties();
+
 	/**
 	 * @param fileName The filename of the config file for this unit type
 	 **/

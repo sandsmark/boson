@@ -52,6 +52,11 @@ public:
 	FacilityProperties* mFacilityProperties;
 };
 
+UnitProperties::UnitProperties()
+{
+ d = new UnitPropertiesPrivate;
+}
+
 UnitProperties::UnitProperties(const QString& fileName)
 {
  d = new UnitPropertiesPrivate;
@@ -114,7 +119,7 @@ void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Facility");
  d->mFacilityProperties = new FacilityProperties;
- d->mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", (isShip() || isAircraft()));
+ d->mFacilityProperties->mCanProduce = conf->readBoolEntry("CanProduce", false);
  d->mFacilityProperties->mProduceList = conf->readIntListEntry("ProduceList");
 }
 

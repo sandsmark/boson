@@ -347,7 +347,6 @@ void BosonBigDisplay::setLocalPlayer(Player* p)
 
 void BosonBigDisplay::resizeEvent(QResizeEvent* e)
 {
- kdDebug() << "resizeEvent" << endl;
  QCanvasView::resizeEvent(e);
  emit signalSizeChanged(width(), height());
 }
