@@ -48,15 +48,11 @@ class BoMeshRendererManagerPrivate
 public:
 	BoMeshRendererManagerPrivate()
 	{
-		mNextRendererId = 0;
-
 		mLibrary = 0;
 		mLibraryFactory = 0;
 	}
 
 	QPtrList<BosonModel> mAllModels;
-
-	int mNextRendererId;
 
 	QLibrary* mLibrary;
 	KLibFactory* mLibraryFactory;
