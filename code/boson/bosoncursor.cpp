@@ -245,6 +245,8 @@ public:
 	int mCurrentFrame;
 
 	BoCursorSprite* mCursor;
+	unsigned int mHotspotX;
+	unsigned int mHotspotY;
 };
 
 BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
@@ -252,6 +254,8 @@ BosonSpriteCursor::BosonSpriteCursor() : BosonCursor()
  d = new BosonSpriteCursorPrivate;
  d->mCursorPixmaps.setAutoDelete(true);
  connect(&d->mAnimateTimer, SIGNAL(timeout()), this, SLOT(slotAdvance()));
+ d->mHotspotX = 0;
+ d->mHotspotY = 0;
 }
 
 BosonSpriteCursor::~BosonSpriteCursor()
@@ -387,14 +391,12 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
 	c.setGroup("Boson Cursor");
 	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
 	unsigned int frames = c.readUnsignedNumEntry("FrameCount", 1);
-	unsigned int hotspotX = 0;
-	unsigned int hotspotY = 0;
+	mHotspotX = c.readUnsignedNumEntry(QString("HotspotX"), 0);
+	mHotspotY = c.readUnsignedNumEntry(QString("HotspotY"), 0);
 	QValueList<QPixmap> pixmaps;
 	QPointArray points(frames);
 	for (unsigned int j = 0; j < frames; j++) {
-		hotspotX = c.readUnsignedNumEntry(QString("HotspotX_%1").arg(j), hotspotX);
-		hotspotY = c.readUnsignedNumEntry(QString("HotspotY_%1").arg(j), hotspotY);
-		points.setPoint(j, hotspotX, hotspotY);
+		points.setPoint(j, mHotspotX, mHotspotY);
 		QPixmap p;
 		QString number;
 		number.sprintf("%04d", j);
