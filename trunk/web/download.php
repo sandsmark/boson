@@ -32,6 +32,15 @@ include("variables.php");
 
 /*****  Start of main stuff  *****/
 
+if($dl)
+{
+  // User wanted to download something.
+  // Count download and redirect browser
+  counter2_download($dl);
+  header("Location: http://prdownloads.sourceforge.net/boson/".$dl."?download");
+  exit;
+}
+
 do_start_stuff();
 
 // Headers
@@ -61,13 +70,13 @@ draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-all-0.8.tar.bz2?download\">here</a>
+<a href=\"download.php?dl=boson-all-0.8.tar.bz2\">here</a>
 (31 515 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-code-0.8.tar.bz2?download\">here</a>
+<a href=\"download.php?dl=boson-code-0.8.tar.bz2\">here</a>
 (808 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.
 Note that you also need to download  the data package to play Boson.<br><br>");
@@ -75,14 +84,14 @@ Note that you also need to download  the data package to play Boson.<br><br>");
 draw_bigbox_subheader("Data package");
 draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-data-0.8.tar.bz2?download\">here</a>
+<a href=\"download.php?dl=boson-data-0.8.tar.bz2\">here</a>
 (15 149 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
-<a href=\"http://prdownloads.sourceforge.net/boson/boson-music-0.8.tar.bz2?download\">here</a>
+<a href=\"download.php?dl=boson-music-0.8.tar.bz2\">here</a>
 (16 544 KB) or via SF.net's web interface from
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
 
