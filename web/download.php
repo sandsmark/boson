@@ -60,30 +60,30 @@ draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
 one. You can get it from
-<a href=\"download.php?dl=boson-all-0.8.tar.bz2\">here</a>
-(31 515 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-all-0.9.tar.bz2\">here</a>
+(23 802 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=194601\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Source code");
 draw_bigbox_text("You can download a tarball (.tar.bz2) with the code from
-<a href=\"download.php?dl=boson-code-0.8.tar.bz2\">here</a>
-(808 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.
+<a href=\"download.php?dl=boson-code-0.9.tar.bz2\">here</a>
+(946 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=194601\">here</a>.
 Note that you also need to download  the data package to play Boson.<br><br>");
 
 draw_bigbox_subheader("Data package");
 draw_bigbox_text("This tarball contains the data files needed for playing Boson.
 You can download it from
-<a href=\"download.php?dl=boson-data-0.8.tar.bz2\">here</a>
-(15 149 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-data-0.9.tar.bz2\">here</a>
+(7117 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=194601\">here</a>.<br><br>");
 
 draw_bigbox_subheader("Music");
 draw_bigbox_text("You don't need the music package to play Boson, but it's
 recommended. :-) You can download the tarball from
-<a href=\"download.php?dl=boson-music-0.8.tar.bz2\">here</a>
-(16 544 KB) or via SF.net's web interface from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=149745\">here</a>.<br><br>");
+<a href=\"download.php?dl=boson-music-0.9.tar.bz2\">here</a>
+(16 548 KB) or via SF.net's web interface from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=194601\">here</a>.<br><br>");
 
 /*draw_bigbox_subheader("Gentoo");
 draw_bigbox_text("A boson ebuild is available in the standard gentoo portage and
@@ -111,13 +111,15 @@ again. These package were provided by
 draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">SF.net's web interface</a>.<br>
-Available versions are
+Available versions are:<br>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=149745\">Boson 0.8</a>
+(released on 31st March 2003),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=121263\">Boson 0.7</a>
-(released on 10th November 2002),
+(released on 10th November 2002),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=98577\">Boson 0.6.1</a>
-(released on 9th July 2002),
+(released on 9th July 2002),<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=93970\">Boson 0.6</a>
-(released on 10th June 2002) and
+(released on 10th June 2002) and<br>
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&amp;release_id=17261\">Boson 0.5</a>
 (released on 30th October 2000).<br><br>");
 
