@@ -21,7 +21,6 @@
 #include "bosonstarting.moc"
 
 #include "defines.h"
-#include "bosonwidget.h"
 #include "boson.h"
 #include "player.h"
 #include "bosonplayfield.h"
