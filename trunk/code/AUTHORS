@@ -8,38 +8,18 @@ The boson team is better described on the official boson homepage
   Team : 
 ==========
 
-Thomas Capricelli <orzel@kde.org>
-http://orzel.freehackers.org/
+--- Code ---
+Initial design and implementation                               Thomas Capricelli <orzel@kde.org>
+Core developer and maintainer                                   Andreas Beckermann <b_mann@gmx.de>
+Core developer                                                         Rivo Laks <rivolaks@hot.ee>
+Release coordinator                                                  Thomas Capricelli <orzel@kde.org>
 
-	Initial Code design & implementation.
-	Webmaster, mailing-list maintainer, ftpmaster.
+--- Multimedia ---
+Graphics of the main themes (earth, humans)             Benjamin Adler <BenniAdler@bigfoot.de>
+Music (progressive, jungle themes) and sounds           Nils Trzebin (http://www.rebellion-scs.de/boson/)
+Music ('soft' theme)                                                   Ludovic Grossard (http://perso.libertysurf.fr/grossard/boson/)
 
-
-Andreas Beckermann <b_mann@gmx.de>
-
-	Code redesign & implementation ;-)
-
-
-Benjamin Adler <BenniAdler@bigfoot.de>
-
-	Graphics of the main themes (earth, humans)
-	Homepage Design
-
-
-Nils Trzebin
-http://www.rebellion-scs.de/boson/
-
-	Music ( progressive, jungle themes)
-	and sounds.
-
-
-Ludovic Grossard
-http://perso.libertysurf.fr/grossard/boson/
-
-	Music ( 'soft' theme)
-
-
-Rivo Laks <rivolaks@hot.ee>
-
-	Coding (pathfinding & unit movement)
-
+--- Other ---
+Webmaster, initial homepage, mailing-list maintainer    Thomas Capricelli <orzel@kde.org>
+Homepage design                                                      Rivo Laks <rivolaks@hot.ee> and Benjamin Adler <BenniAdler@bigfoot.de>
+Boson Handbook                                                       Felix Seeger <felix.seeger@gmx.de>
