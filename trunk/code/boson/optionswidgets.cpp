@@ -28,6 +28,7 @@
 #include "bogltooltip.h"
 #include "bogroundrenderer.h"
 #include "bo3dtools.h"
+#include "bofullscreen.h"
 #include "bosonfont/bosonglfont.h"
 #include "bosonfont/bosonglfontchooser.h"
 
@@ -466,6 +467,18 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mFontInfo = new BoFontInfo();
  connect(mFont, SIGNAL(clicked()), this, SLOT(slotChangeFont()));
 
+ QHBox* resolutionBox = new QHBox(this);
+ (void)new QLabel(i18n("Resolution:"), resolutionBox);
+ mResolution = new QComboBox(resolutionBox);
+ mResolution->insertItem(i18n("Keep unchanged"));
+ if (BoFullScreen::availableModes().count() != 0) {
+	mResolution->insertStringList(BoFullScreen::availableModes());
+	mResolution->setEnabled(true);
+} else {
+	mResolution->setEnabled(false);
+ }
+ mResolution->setCurrentItem(0);
+
  QPushButton* showDetails = new QPushButton(i18n("Show &Details"), this);
  showDetails->setToggleButton(true);
  connect(showDetails, SIGNAL(toggled(bool)), this, SLOT(slotShowDetails(bool)));
@@ -725,6 +738,16 @@ void OpenGLOptions::apply()
  }
  boConfig->setBoolValue("SmoothShading", mSmoothShading->isChecked());
 
+ if (mResolution->isEnabled() && mResolution->currentItem() > 0) {
+	// first entry is "do not change", then a list, as provided by
+	// BoFullScreen
+	int index = mResolution->currentItem() - 1;
+	if (!BoFullScreen::enterMode(index)) {
+		boError() << k_funcinfo << "could not enter mode" << index << endl;
+	 }
+ }
+ mResolution->setCurrentItem(0);
+
  emit signalOpenGLSettingsUpdated();
 
  boDebug(210) << k_funcinfo << "done" << endl;
@@ -747,6 +770,7 @@ void OpenGLOptions::setDefaults()
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
  mSmoothShading->setChecked(true);
+ mResolution->setCurrentItem(0);
 }
 
 void OpenGLOptions::load()
@@ -772,6 +796,7 @@ void OpenGLOptions::load()
  mFont->setText(mFontInfo->guiName());
  mSmoothShading->setChecked(boConfig->boolValue("SmoothShading", true));
  mFontChanged = false;
+ mResolution->setCurrentItem(0);
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
