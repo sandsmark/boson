@@ -51,6 +51,7 @@
 #include "bosonpath.h"
 #include "bomeshrenderermanager.h"
 #include "bogroundrenderermanager.h"
+#include "boglstatewidget.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -743,6 +744,9 @@ void BosonWidgetBase::initKActions()
  d->mActionDebugPlayers = new KActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
 
+ (void)new KAction(i18n("Show OpenGL states"), KShortcut(), this,
+		SLOT(slotShowGLStates()), actionCollection(),
+		"debug_show_opengl_states");
  (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
 		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
  (void)new KAction(i18n("Light0..."), KShortcut(), displayManager(),
@@ -1257,5 +1261,12 @@ void BosonWidgetBase::slotReloadGroundRenderer()
  } else {
 	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed but library should still be usable"));
  }
+}
+
+void BosonWidgetBase::slotShowGLStates()
+{
+ boDebug() << k_funcinfo << endl;
+ BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
+ w->show();
 }
 

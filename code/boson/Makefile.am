@@ -100,6 +100,7 @@ BOSON_COMMON_SRC = \
 	bobincoder.cpp \
 	bolight.cpp \
 	bopluginmanager.cpp \
+	boglstatewidget.cpp \
 	bofullscreen.cpp
 
 

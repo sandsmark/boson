@@ -19,6 +19,7 @@
     <Action name="debug_fps" />
     <Action name="debug_gamelog" />
     <Action name="debug_light0" />
+    <Action name="debug_show_opengl_states" />
     <Menu name="debug_lazy"><text>&amp;Lazyness</text>
       <Action name="debug_lazy_reload_model_textures" />
       <Action name="debug_lazy_reload_meshrenderer" />

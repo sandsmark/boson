@@ -97,6 +97,7 @@ public:
 		OpenGLVendorString = 21,
 		OpenGLRendererString = 22,
 		OpenGLExtensionsString = 23,
+		OpenGLValuesString = 24,
 		GLUVersionString = 30,
 		GLUExtensionsString = 31,
 		GLXClientVersionString = 40,
@@ -307,6 +308,13 @@ public:
 	 * we actually want to do that we should cache the list somewhere.
 	 **/
 	QStringList openGLExtensions() const;
+
+	/**
+	 * @return A list of all implementation dependant OpenGL values (those
+	 * that can be retrieved using glGetIntegerv() and friends). An example
+	 * is GL_MAX_TEXTURE_SIZE.
+	 **/
+	QStringList openGLValues() const;
 
 	/**
 	 * @return A string describing the GLU version.
