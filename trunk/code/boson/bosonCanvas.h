@@ -37,6 +37,8 @@ class QPainter;
 class Unit;
 
 
+#define RADAR_PULSE_PERIOD	150		// every RADAR_PULSE_PERIOD jiffies, the radar emits a bip
+
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
@@ -100,6 +102,7 @@ private:
 	Cell	*cells;
 	time_t	ping;
 	time_t	last_sync;
+	int	radar_pulse;
 	int	my_fix;
 	int	my_mobiles;
 };

@@ -235,6 +235,10 @@ switch(tag) {
 		ping = t - last_sync;
 		last_sync = t; }
 		emit pingUpdated((int)ping);
+		if (--radar_pulse<0) {
+			radar_pulse = RADAR_PULSE_PERIOD;
+			play("radar_pulse.wav");
+		}
 		break;
 
 	case MSG_MAP_DISCOVERED :

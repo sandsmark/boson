@@ -484,6 +484,7 @@ void playerMobUnit::targetMoveTo(QPoint npos)
 void playerMobUnit::shooted(int _power)
 {
 	power = _power;
+	bocanvas->play("shoot.wav");
 	if (sp_up) sp_up->setFrame(_power);
 }
   
@@ -493,7 +494,7 @@ void playerMobUnit::destroy(void)
 	setZ( Z_DESTROYED_MOBILE );
 	bocanvas->unsetCellFlag ( gridRect() , (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 	_destroyed = true;
-	bocanvas->play("confirm1.wav");
+	bocanvas->play("mobile_destroyed.wav");
 	unSelect();
 	emit dying(this);
 }
@@ -531,6 +532,7 @@ void playerFacility::getWantedAction()
 void playerFacility::shooted(int _power)
 {
 	power = _power;
+	bocanvas->play("shoot.wav");
 	if (sp_up) sp_up->setFrame(_power);
 }
   
@@ -540,6 +542,7 @@ void playerFacility::destroy(void)
 	setZ( Z_DESTROYED_FACILITY );
 	bocanvas->unsetCellFlag ( gridRect(), Cell::building_f );
 	_destroyed = true;
+	bocanvas->play("fix_destroyed.wav");
 	unSelect();
 	emit dying(this);
 }
