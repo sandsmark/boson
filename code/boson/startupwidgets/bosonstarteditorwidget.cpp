@@ -46,10 +46,7 @@
 BosonStartEditorWidget::BosonStartEditorWidget(BosonStartupNetwork* interface, QWidget* parent)
     : BosonStartWidgetBase(interface, parent)
 {
- if (!boGame) {
-	boError() << k_funcinfo << "NULL game" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(boGame);
 
  initKGame();
 
@@ -131,6 +128,9 @@ BosonStartEditorWidget::BosonStartEditorWidget(BosonStartupNetwork* interface, Q
 
  // by default this widget creates a new map
  initNewMap();
+
+ BO_CHECK_NULL_RET(networkInterface());
+ connect(networkInterface(), SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
 }
 
 BosonStartEditorWidget::~BosonStartEditorWidget()
@@ -146,7 +146,6 @@ void BosonStartEditorWidget::initKGame()
  boDebug() << k_funcinfo << " minPlayers(): " << boGame->minPlayers() << endl;
  boDebug() << k_funcinfo << " maxPlayers(): " << boGame->maxPlayers() << endl;
 
- connect(boGame, SIGNAL(signalPlayFieldChanged(const QString&)), this, SLOT(slotPlayFieldChanged(const QString&)));
 }
 
 void BosonStartEditorWidget::slotStart()
