@@ -220,6 +220,56 @@ class BosonEffectPropertiesFade : public BosonEffectProperties
 
 
 /**
+ * @short Properties for light effect
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BosonEffectPropertiesLight : public BosonEffectProperties
+{
+  public:
+    BosonEffectPropertiesLight();
+
+
+    virtual BosonEffect::Type type() const  { return BosonEffect::Light; };
+
+
+    virtual bool load(KSimpleConfig* cfg, const QString& group, bool inherited = false);
+
+
+    virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+
+
+    const BoVector4& startAmbient() const  { return mStartAmbientColor; }
+    const BoVector4& startDiffuse() const  { return mStartDiffuseColor; }
+    const BoVector4& startSpecular() const  { return mStartSpecularColor; }
+    const BoVector4& endAmbient() const  { return mEndAmbientColor; }
+    const BoVector4& endDiffuse() const  { return mEndDiffuseColor; }
+    const BoVector4& endSpecular() const  { return mEndSpecularColor; }
+    const BoVector3& startAttenuation() const  { return mStartAttenuation; }
+    const BoVector3& endAttenuation() const  { return mEndAttenuation; }
+    const BoVector3& position() const  { return mPosition; }
+    float life() const  { return mLife; }
+
+
+  protected:
+    void reset();
+
+
+    BoVector4 mStartAmbientColor;
+    BoVector4 mStartDiffuseColor;
+    BoVector4 mStartSpecularColor;
+    BoVector4 mEndAmbientColor;
+    BoVector4 mEndDiffuseColor;
+    BoVector4 mEndSpecularColor;
+    BoVector3 mStartAttenuation;
+    BoVector3 mEndAttenuation;
+    BoVector3 mPosition;
+    float mLife;
+};
+
+
+
+/**
  * @short Properties for collection effect
  *
  * Collection is special in that there is actually no BosonEffectCollection

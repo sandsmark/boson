@@ -29,7 +29,7 @@
 /*****  BoLightManager  *****/
 
 bool BoLightManager::mInited = false;
-QValueVector<bool> BoLightManager::mIds;
+QValueVector<BoLight*> BoLightManager::mLights;
 
 void BoLightManager::init()
 {
@@ -42,7 +42,7 @@ void BoLightManager::init()
   glGetIntegerv(GL_MAX_LIGHTS, &maxlights);
   boDebug() << k_funcinfo << maxlights << " lights are supported" << endl;
 
-  mIds.resize(maxlights, false);
+  mLights.resize(maxlights, false);
 
   mInited = true;
 }
@@ -51,9 +51,9 @@ int BoLightManager::nextFreeId()
 {
   init();
 
-  for(unsigned int i = 0; i < mIds.size(); i++)
+  for(unsigned int i = 0; i < mLights.size(); i++)
   {
-    if(mIds[i] == false)
+    if(mLights[i] == 0)
     {
       boDebug() << k_funcinfo << "Light " << i << " not used" << endl;
       return i;
@@ -63,11 +63,49 @@ int BoLightManager::nextFreeId()
   return -1;
 }
 
-void BoLightManager::setIdUsed(int id, bool used)
+void BoLightManager::setLight(int id, BoLight* light)
 {
   init();
 
-  mIds[id] = used;
+  mLights[id] = light;
+}
+
+const QValueVector<BoLight*>* BoLightManager::lights()
+{
+  init();
+
+  return &mLights;
+}
+
+BoLight* BoLightManager::light(int id)
+{
+  init();
+
+  return mLights[id];
+}
+
+BoLight* BoLightManager::createLight()
+{
+  BoLight* light = new BoLight;
+  if(light->id() == -1)
+  {
+    // Light could not be created
+    delete light;
+    return 0;
+  }
+  return light;
+}
+
+void BoLightManager::deleteLight(int id)
+{
+  init();
+
+  BoLight* l = mLights[id];
+  if(l)
+  {
+    mLights[id] = 0;
+    delete l;
+  }
 }
 
 
@@ -81,7 +119,7 @@ BoLight::BoLight()
   {
     return;  // All lights already in use
   }
-  BoLightManager::setIdUsed(mId, true);
+  BoLightManager::setLight(mId, this);
 
   // Disable
   mEnabled = false;
@@ -95,7 +133,7 @@ BoLight::~BoLight()
     return;
   }
   setEnabled(false);
-  BoLightManager::setIdUsed(mId, false);
+  BoLightManager::setLight(mId, 0);
 }
 
 void BoLight::setAmbient(const BoVector4& a)

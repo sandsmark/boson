@@ -97,6 +97,13 @@ class BoVector3
       mData[0] += v.mData[0] * s;  mData[1] += v.mData[1] * s;  mData[2] += v.mData[2] * s;
     }
 
+    inline void setBlended(const BoVector3& a, float af, const BoVector3& b, float bf)
+    {
+      mData[0] = a.mData[0] * af + b.mData[0] * bf;
+      mData[1] = a.mData[1] * af + b.mData[1] * bf;
+      mData[2] = a.mData[2] * af + b.mData[2] * bf;
+    }
+
 #if 0
     // AB: this function is NOT used all over boson's code and I find it very
     // confusing. The name looks like it would scale both vertices and add the
