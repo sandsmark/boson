@@ -27,6 +27,21 @@
 
 #include <math.h>
 
+
+BoAutoCamera::InterpolationData::InterpolationData(const BoVector3Float& _pos, float _time)
+{
+  pos = _pos;
+  time = _time;
+}
+
+BoAutoCamera::InterpolationDataFloat::InterpolationDataFloat(float _value, float _time)
+{
+  value = _value;
+  time = _time;
+}
+
+
+
 BoAutoCamera::BoAutoCamera(BoCamera* camera)
 {
   init();
@@ -36,11 +51,13 @@ BoAutoCamera::BoAutoCamera(BoCamera* camera)
 BoAutoCamera& BoAutoCamera::operator=(const BoAutoCamera& c)
 {
   mCamera = c.mCamera;
-  mLookAtDiff = c.mLookAtDiff;
-  mCommitTime = c.mCommitTime;
-  mRemainingTime = c.mRemainingTime;
+  mCurrentTime = c.mCurrentTime;
   mMoveMode = c.mMoveMode;
-  mMovedAmount = c.mMovedAmount;
+  mInterpolationMode = c.mInterpolationMode;
+  mPosPoints = c.mPosPoints;
+  mUpPoints = c.mUpPoints;
+  mLookAtPoints = c.mLookAtPoints;
+  mMoving = c.mMoving;
 
   return *this;
 }
@@ -48,52 +65,125 @@ BoAutoCamera& BoAutoCamera::operator=(const BoAutoCamera& c)
 void BoAutoCamera::init()
 {
   mCamera = 0;
-  mMoveMode = Linear;
-
-  resetDifferences();
+  mMoveMode = Immediate;
+  mInterpolationMode = Linear;
+  mCurrentTime = 0;
+  mMoving = false;
 }
 
 void BoAutoCamera::changeLookAt(const BoVector3Float& diff)
 {
-  mLookAtDiff = diff;
+  InterpolationData d;
+  d.pos = camera()->lookAt() + diff;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setLookAt(d.pos);
+    return;
+  }
+  mLookAtPoints.append(d);
 }
 
 void BoAutoCamera::changeUp(const BoVector3Float& diff)
 {
-  mUpDiff = diff;
+  InterpolationData d;
+  d.pos = camera()->up() + diff;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setUp(d.pos);
+    return;
+  }
+  mUpPoints.append(d);
 }
 
 void BoAutoCamera::changeCameraPos(const BoVector3Float& diff)
 {
-  mCameraPosDiff = diff;
+  InterpolationData d;
+  d.pos = camera()->cameraPos() + diff;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setCameraPos(d.pos);
+    return;
+  }
+  mPosPoints.append(d);
 }
 
 void BoAutoCamera::setLookAt(const BoVector3Float& pos)
 {
-  mLookAtDiff = pos - camera()->lookAt();
+  InterpolationData d;
+  d.pos = pos;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setLookAt(d.pos);
+    return;
+  }
+  mLookAtPoints.append(d);
 }
 
 void BoAutoCamera::setUp(const BoVector3Float& pos)
 {
-  mUpDiff = pos - camera()->up();
+  InterpolationData d;
+  d.pos = pos;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setUp(d.pos);
+    return;
+  }
+  mUpPoints.append(d);
 }
 
 void BoAutoCamera::setCameraPos(const BoVector3Float& pos)
 {
-  mCameraPosDiff = pos - camera()->cameraPos();
+  InterpolationData d;
+  d.pos = pos;
+  if(mMoveMode == Immediate)
+  {
+    camera()->setCameraPos(d.pos);
+    return;
+  }
+  mPosPoints.append(d);
 }
 
-void BoAutoCamera::commitChanges(int ticks)
+void BoAutoCamera::commitChanges(float ticks)
 {
-  mCommitTime = ticks;
-  mRemainingTime = ticks;
-  mMovedAmount = 0.0f;
-  if(ticks <= 0)
+  if(moveMode() == Immediate)
   {
-    // Advance immediately. commitTime still has to be at least 1
-    mCommitTime = 1;
-    mRemainingTime = 1;
-    advance();
+    boWarning() << k_funcinfo << "commitChanges() has no effect in immediate mode!" << endl;
+    moveCompleted();
+    mMoving = false;
+    return;
+  }
+  else if(moveMode() == SegmentInterpolation)
+  {
+    float endtime = mCurrentTime + ticks;
+    prepareSegmentInterpolation(endtime);
+  }
+
+  mMoving = true;
+}
+
+void BoAutoCamera::prepareSegmentInterpolation(float endtime)
+{
+  // Make sure there's either 0 or 2 (start and final) points in each list
+  if(mPosPoints.count())
+  {
+    BoVector3Float final = mPosPoints.last().pos;
+    mPosPoints.clear();
+    mPosPoints.append(InterpolationData(camera()->cameraPos(), mCurrentTime));
+    mPosPoints.append(InterpolationData(final, endtime));
+  }
+  if(mUpPoints.count())
+  {
+    BoVector3Float final = mUpPoints.last().pos;
+    mUpPoints.clear();
+    mUpPoints.append(InterpolationData(camera()->up(), mCurrentTime));
+    mUpPoints.append(InterpolationData(final, endtime));
+  }
+  if(mLookAtPoints.count())
+  {
+    BoVector3Float final = mLookAtPoints.last().pos;
+    mLookAtPoints.clear();
+    mLookAtPoints.append(InterpolationData(camera()->lookAt(), mCurrentTime));
+    mLookAtPoints.append(InterpolationData(final, endtime));
   }
 }
 
@@ -103,115 +193,310 @@ void BoAutoCamera::setMoveMode(MoveMode mode)
   mMoveMode = mode;
 }
 
-float BoAutoCamera::moveFactor() const
+void BoAutoCamera::setInterpolationMode(InterpolationMode mode)
 {
-  float factor = 1.0f;
-  if(moveMode() == Sinusoidal)
-  {
-    // FIXME: make this more simple!
-    factor = (-cos((mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else if(moveMode() == SinusoidEnd)
-  {
-    // FIXME: make this more simple!
-    factor = -cos(M_PI_2 + (mCommitTime - remainingTime() + 1) / (float)mCommitTime * M_PI_2) - mMovedAmount;
-    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  else
-  {
-    factor = 1.0 / mCommitTime;
-    boDebug(230) << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
-  }
-  return factor;
+  boDebug(230) << k_funcinfo << "mode: " << mode << endl;
+  mInterpolationMode = mode;
 }
 
-void BoAutoCamera::advance()
+bool BoAutoCamera::getCurrentVector(QValueList<InterpolationData>& points, float time, BoVector3Float& result)
 {
-  if(remainingTime() <= 0)
-  {
-    return;
-  }
-  bool changed = advance2();
-
-  // FIXME: cache factor!
-  float factor = moveFactor();
-  mMovedAmount += factor;
-
-  if(!changed)
-  {
-//    boError(230) << k_funcinfo << "remainingTime: " << reaminingTime() << ", but no changes ?!" << endl;
-    mRemainingTime = 0;
-    mCommitTime = 0;
-    mMovedAmount = 0.0f;
-  }
-  else
-  {
-    setPositionDirty();
-    mRemainingTime--;
-    if(mRemainingTime == 0)
-    {
-      // Failsafe
-      resetDifferences();
-    }
-  }
-}
-
-bool BoAutoCamera::advance2()
-{
-  if(remainingTime() <= 0)
+  // Make sure there are any points in the list
+  if(points.count() == 0)
   {
     return false;
   }
 
-  boDebug(230) << k_funcinfo << "mRemainingTime: " << remainingTime() << endl;
-
-  // How much of differences to add
-  float factor = moveFactor();
-  boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
-  bool changed = false;
-
-  if(!mLookAtDiff.isNull())
+  // If we have a single point in the list, then the resulting vector will be
+  //  constant.
+  if(points.count() == 1)
   {
-    // How much lookAt point will move
-    BoVector3Float lookAtChange(mLookAtDiff * factor);
-    // Change lookAt point and difference
-    camera()->setLookAt(camera()->mLookAt + lookAtChange);
-    changed = true;
-  }
-  if(!mUpDiff.isNull())
-  {
-    // How much lookAt point will move
-    BoVector3Float upChange(mUpDiff * factor);
-    // Change lookAt point and difference
-    camera()->setUp(camera()->mUp + upChange);
-    changed = true;
-  }
-  if(!mCameraPosDiff.isNull())
-  {
-    // How much lookAt point will move
-    BoVector3Float cameraPosChange(mCameraPosDiff * factor);
-    // Change lookAt point and difference
-    camera()->setCameraPos(camera()->mCameraPos + cameraPosChange);
-    changed = true;
+    result = points.first().pos;
+    return true;
   }
 
-  return changed;
+  // If time of the last data in the list is in past (i.e. it has already been
+  //  used), then the resulting vector is now constant
+  if(points.last().time < (time + 1))
+  {
+    return false;
+  }
+
+  // The points for interpolation (we interpolate between a and b).
+  // Note that beforea and afterb are used by only cubic interpolation.
+  // Init all datas to first element in the list.
+  InterpolationData beforea = points.first();
+  InterpolationData a = beforea;
+  InterpolationData b = beforea;
+  InterpolationData afterb = beforea;
+
+  // Get points a and b from the list
+  QValueList<InterpolationData>::Iterator it;
+  for(it = points.begin(); it != points.end(); ++it)
+  {
+    if((*it).time >= time)
+    {
+      // That's point b
+      b = *it;
+      // Get point afterb
+      ++it;
+      if(it != points.end())
+      {
+        afterb = *it;
+      }
+      else
+      {
+        // b is already at the end of the list
+        afterb = b;
+      }
+      break;
+    }
+    else
+    {
+      // Update points a and beforea
+      beforea = a;
+      a = *it;
+    }
+  }
+
+  // Calculate factor.
+  // If factor is 0, we're at point a, if it's 0.5 we're between a and b, if
+  //  it's 1, we're at b, etc
+  float factor = -1.0f;
+  if(time == a.time)
+  {
+    factor = 0;
+  }
+  else if(time == b.time)
+  {
+    factor = 1;
+  }
+  else
+  {
+    factor = (time - a.time) / (b.time - a.time);
+  }
+
+  // Do the interpolation
+  if(mInterpolationMode == Linear)
+  {
+    result = a.pos * (1-factor) + b.pos * factor;
+  }
+  else if(mInterpolationMode == Sinusoidal)
+  {
+    float f = (1 - cos(factor * 3.1415927)) * 0.5;
+    result = a.pos * (1-f) + b.pos * f;
+  }
+  else if(mInterpolationMode == SinusoidStart)
+  {
+    float f = (1 - cos(factor * 3.1415927 * 2)) * 0.5;
+    result = a.pos * (1-f) + b.pos * f;
+  }
+  else if(mInterpolationMode == SinusoidEnd)
+  {
+    float f = (1 - cos(factor * 3.1415927 * 2)) * 0.5;
+    result = a.pos * (1-f) + b.pos * f;
+  }
+  else if(mInterpolationMode == Cubic)
+  {
+    BoVector3Float p = (afterb.pos - b.pos) - (beforea.pos - a.pos);
+    BoVector3Float q = (beforea.pos - a.pos) - p;
+    BoVector3Float r = b.pos - beforea.pos;
+    BoVector3Float s = a.pos;
+    result = p * (factor*factor*factor) + q * (factor*factor) + r * factor + s;
+  }
+  return true;
 }
 
-void BoAutoCamera::resetDifferences()
+bool BoAutoCamera::getCurrentValue(QValueList<InterpolationDataFloat>& values, float time, float& result)
 {
-  mLookAtDiff.reset();
-  mUpDiff.reset();
-  mCameraPosDiff.reset();
-  mCommitTime = 0;
-  mRemainingTime = 0;
-  mMovedAmount = 0.0f;
+  // FIXME: LOTS of code duplication (with the getCurrentVector() method above)
+
+  // Make sure there are any points in the list
+  if(values.count() == 0)
+  {
+    return false;
+  }
+
+  // If we have a single point in the list, then the resulting vector will be
+  //  constant.
+  if(values.count() == 1 && values.first().time >= time)
+  {
+    result = values.first().value;
+    return true;
+  }
+
+  // If time of the last data in the list is in past (i.e. it has already been
+  //  used), then the resulting vector is now constant
+  if(values.last().time < time)
+  {
+    return false;
+  }
+
+  // The points for interpolation (we interpolate between a and b).
+  // Note that beforea and afterb are used by only cubic interpolation.
+  // Init all datas to first element in the list.
+  InterpolationDataFloat beforea = values.first();
+  InterpolationDataFloat a = beforea;
+  InterpolationDataFloat b = beforea;
+  InterpolationDataFloat afterb = beforea;
+
+  // Get points a and b from the list
+  QValueList<InterpolationDataFloat>::Iterator it;
+  for(it = values.begin(); it != values.end(); ++it)
+  {
+    if((*it).time >= time)
+    {
+      // That's point b
+      b = *it;
+      // Get point afterb
+      ++it;
+      if(it != values.end())
+      {
+        afterb = *it;
+      }
+      else
+      {
+        // b is already at the end of the list
+        afterb = b;
+      }
+      break;
+    }
+    else
+    {
+      // Update points a and beforea
+      beforea = a;
+      a = *it;
+    }
+  }
+
+  // Calculate factor.
+  // If factor is 0, we're at point a, if it's 0.5 we're between a and b, if
+  //  it's 1, we're at b, etc
+  float factor = -1.0f;
+  if(time == a.time)
+  {
+    factor = 0;
+  }
+  else if(time == b.time)
+  {
+    factor = 1;
+  }
+  else
+  {
+    factor = (time - a.time) / (time - b.time);
+  }
+
+  // Do the interpolation
+  if(mInterpolationMode == Linear)
+  {
+    result = a.value * (1-factor) + b.value * factor;
+  }
+  else if(mInterpolationMode == Sinusoidal)
+  {
+    float f = (1 - cos(factor * 3.1415927)) * 0.5;
+    result = a.value * (1-f) + b.value * f;
+  }
+  else if(mInterpolationMode == SinusoidStart)
+  {
+    float f = (1 - cos(factor * 3.1415927 * 2)) * 0.5;
+    result = a.value * (1-f) + b.value * f;
+  }
+  else if(mInterpolationMode == SinusoidEnd)
+  {
+    float f = (1 - cos(factor * 3.1415927 * 2)) * 0.5;
+    result = a.value * (1-f) + b.value * f;
+  }
+  else if(mInterpolationMode == Cubic)
+  {
+    float p = (afterb.value - b.value) - (beforea.value - a.value);
+    float q = (beforea.value - a.value) - p;
+    float r = b.value - beforea.value;
+    float s = a.value;
+    result = p * factor*factor*factor + q * factor*factor + r * factor + s;
+  }
+  return true;
+}
+
+void BoAutoCamera::advance()
+{
+  mCurrentTime += 1;
+
+  if(!mMoving)
+  {
+    return;
+  }
+
+  if(advanceVectors())
+  {
+    setPositionDirty();
+  }
+  else
+  {
+    mMoving = false;
+    moveCompleted();
+  }
+}
+
+bool BoAutoCamera::advanceVectors()
+{
+  bool moving = false;
+  BoVector3Float pos;
+  BoVector3Float up;
+  BoVector3Float lookat;
+
+  if(getCurrentVector(mPosPoints, mCurrentTime, pos))
+  {
+    moving = true;
+    camera()->setCameraPos(pos);
+  }
+  if(getCurrentVector(mUpPoints, mCurrentTime, up))
+  {
+    moving = true;
+    camera()->setUp(up);
+  }
+  if(getCurrentVector(mLookAtPoints, mCurrentTime, lookat))
+  {
+    moving = true;
+    camera()->setLookAt(lookat);
+  }
+
+  return moving;
+}
+
+void BoAutoCamera::moveCompleted()
+{
+  mLookAtPoints.clear();
+  mUpPoints.clear();
+  mPosPoints.clear();
 }
 
 void BoAutoCamera::setPositionDirty(bool d)
 {
   camera()->setPositionDirty(d);
+}
+
+void BoAutoCamera::addLookAtPoint(const BoVector3Float& pos, float time)
+{
+  InterpolationData d;
+  d.pos = pos;
+  d.time = time;
+  mLookAtPoints.append(d);
+}
+
+void BoAutoCamera::addUpPoint(const BoVector3Float& pos, float time)
+{
+  InterpolationData d;
+  d.pos = pos;
+  d.time = time;
+  mUpPoints.append(d);
+}
+
+void BoAutoCamera::addCameraPosPoint(const BoVector3Float& pos, float time)
+{
+  InterpolationData d;
+  d.pos = pos;
+  d.time = time;
+  mPosPoints.append(d);
 }
 
 
@@ -227,6 +512,8 @@ bool BoAutoCamera::loadFromXML(const QDomElement& root)
   return true;
 }
 
+
+
 BoAutoGameCamera::BoAutoGameCamera(BoGameCamera* camera)
         : BoAutoCamera(camera)
 {
@@ -236,40 +523,52 @@ BoAutoGameCamera::BoAutoGameCamera(BoGameCamera* camera)
 BoAutoGameCamera& BoAutoGameCamera::operator=(const BoAutoGameCamera& c)
 {
   BoAutoCamera::operator=(c);
-  mPosZDiff = c.mPosZDiff;
-  mRotationDiff = c.mRotationDiff;
-  mRadiusDiff = c.mRadiusDiff;
+
+  mZPoints = c.mZPoints;
+  mRotationPoints = c.mRotationPoints;
+  mRadiusPoints = c.mRadiusPoints;
+
   return *this;
 }
 
 void BoAutoGameCamera::init()
 {
-  mPosZDiff = 0.0f;
-  mRotationDiff = 0.0f;
-  mRadiusDiff = 0.0f;
 }
 
 void BoAutoGameCamera::changeZ(GLfloat diff)
 {
-  float newz = gameCamera()->z() + diff;
-
-  // Change radius too, so that camera angle will remain same
-  // TODO: maybe provide another method for that, e.g. changeZWithRadius().
-  //  Then changeZ() would change _only_ z
-  float factor = newz / gameCamera()->z();
-  mPosZDiff = newz;
-  mRadiusDiff = gameCamera()->radius() * factor;
+  InterpolationDataFloat d;
+  d.value = gameCamera()->z() + diff;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setZ(d.value);
+    return;
+  }
+  mZPoints.append(d);
 }
 
 void BoAutoGameCamera::changeRadius(GLfloat diff)
 {
-  float radius = gameCamera()->radius() + diff;
-  mRadiusDiff = radius;
+  InterpolationDataFloat d;
+  d.value = gameCamera()->radius() + diff;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setRadius(d.value);
+    return;
+  }
+  mRadiusPoints.append(d);
 }
 
 void BoAutoGameCamera::changeRotation(GLfloat diff)
 {
-  mRotationDiff = diff;
+  InterpolationDataFloat d;
+  d.value = gameCamera()->rotation() + diff;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setRotation(d.value);
+    return;
+  }
+  mRotationPoints.append(d);
 }
 
 bool BoAutoGameCamera::saveAsXML(QDomElement& root)
@@ -287,61 +586,106 @@ bool BoAutoGameCamera::loadFromXML(const QDomElement& root)
 
 void BoAutoGameCamera::setRadius(GLfloat r)
 {
-  mRadiusDiff = r - gameCamera()->radius();
+  InterpolationDataFloat d;
+  d.value = r;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setRadius(d.value);
+    return;
+  }
+  mRadiusPoints.append(d);
 }
 
 void BoAutoGameCamera::setRotation(GLfloat r)
 {
-  mRotationDiff = r - gameCamera()->rotation();
-  boDebug(230) << k_funcinfo << "rotation diff set to: " << mRotationDiff << endl;
+  InterpolationDataFloat d;
+  d.value = r;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setRotation(d.value);
+    return;
+  }
+  mRotationPoints.append(d);
 }
 
 void BoAutoGameCamera::setZ(GLfloat z)
 {
-  mPosZDiff = z - gameCamera()->z();
+  InterpolationDataFloat d;
+  d.value = z;
+  if(moveMode() == Immediate)
+  {
+    gameCamera()->setZ(d.value);
+    return;
+  }
+  mZPoints.append(d);
 }
 
-bool BoAutoGameCamera::advance2()
+bool BoAutoGameCamera::advanceVectors()
 {
-  bool changed = BoAutoCamera::advance2();
-  if(remainingTime() <= 0)
+  bool moving = false;
+  if(BoAutoCamera::advanceVectors())
   {
-    return changed;
+    moving = true;
   }
 
-  // How much of differences to add
-  float factor = moveFactor();
+  float z;
+  float rotation;
+  float radius;
 
-  if(mPosZDiff)
+  if(getCurrentValue(mZPoints, currentTime(), z))
   {
-    float diff = (mPosZDiff * factor);
-    gameCamera()->setZ(gameCamera()->mPosZ + diff);
-    changed = true;
+    moving = true;
+    gameCamera()->setZ(z);
+  }
+  if(getCurrentValue(mRotationPoints, currentTime(), rotation))
+  {
+    moving = true;
+    gameCamera()->setRotation(rotation);
+  }
+  if(getCurrentValue(mRadiusPoints, currentTime(), radius))
+  {
+    moving = true;
+    gameCamera()->setRadius(radius);
   }
 
-  if(mRotationDiff)
-  {
-    float diff = (mRotationDiff * factor);
-    gameCamera()->setRotation(gameCamera()->mRotation + diff);
-    gameCamera()->checkRotation();
-    changed = true;
-  }
-
-  if(mRadiusDiff)
-  {
-    float diff = (mRadiusDiff * factor);
-    gameCamera()->setRadius(gameCamera()->mRadius + diff);
-    changed = true;
-  }
-  return changed;
+  return moving;
 }
 
-void BoAutoGameCamera::resetDifferences()
+void BoAutoGameCamera::moveCompleted()
 {
-  BoAutoCamera::resetDifferences();
-  mPosZDiff = 0;
-  mRotationDiff = 0;
-  mRadiusDiff = 0;
+  BoAutoCamera::moveCompleted();
+
+  mZPoints.clear();
+  mRotationPoints.clear();
+  mRadiusPoints.clear();
+}
+
+void BoAutoGameCamera::prepareSegmentInterpolation(float endtime)
+{
+  BoAutoCamera::prepareSegmentInterpolation(endtime);
+
+  // Make sure there's either 0 or 2 (start and final) points in each list
+  if(mZPoints.count())
+  {
+    float final = mZPoints.last().value;
+    mZPoints.clear();
+    mZPoints.append(InterpolationDataFloat(gameCamera()->z(), currentTime()));
+    mZPoints.append(InterpolationDataFloat(final, endtime));
+  }
+  if(mRotationPoints.count())
+  {
+    float final = mRotationPoints.last().value;
+    mRotationPoints.clear();
+    mRotationPoints.append(InterpolationDataFloat(gameCamera()->rotation(), currentTime()));
+    mRotationPoints.append(InterpolationDataFloat(final, endtime));
+  }
+  if(mRadiusPoints.count())
+  {
+    float final = mRadiusPoints.last().value;
+    mRadiusPoints.clear();
+    mRadiusPoints.append(InterpolationDataFloat(gameCamera()->radius(), currentTime()));
+    mRadiusPoints.append(InterpolationDataFloat(final, endtime));
+  }
 }
 
 

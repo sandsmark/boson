@@ -22,6 +22,8 @@
 
 #include "bo3dtools.h"
 
+#include <qvaluelist.h>
+
 class BoCamera;
 class BoGameCamera;
 class QDomElement;
@@ -40,11 +42,29 @@ class QDomElement;
 class BoAutoCamera
 {
   public:
-    enum MoveMode {
+    /**
+     * Movement mode of the camera.
+     * @li Immediate the camera will immediately move when you call e.g.
+     *      @ref setLookAt(). Use this if you want camera immediately to look
+     *      at the new position.
+     * @li SegmentInterpolation interpolates between two positions. Use this to
+     *      move camera from onew position to another.
+     * @li FullInterpolation interpolates between given set of points. Use this
+     *      for cinematics where you want fluid camera movement.
+     **/
+    enum MoveMode
+    {
+      Immediate = 1,
+      SegmentInterpolation = 10,
+      FullInterpolation = 11
+    };
+    enum InterpolationMode
+    {
       Linear = 1,
       Sinusoidal = 2,
       SinusoidStart = 3,
-      SinusoidEnd = 4
+      SinusoidEnd = 4,
+      Cubic = 10
     };
 
     BoAutoCamera(BoCamera* camera);
@@ -65,19 +85,16 @@ class BoAutoCamera
      * camera.
      **/
     void advance();
-    virtual bool advance2();
+    virtual bool advanceVectors();
 
     /**
      * Commits changes made to camera in ticks game ticks. If ticks <= 0, then
      * changes will take effect immediately.
      **/
-    void commitChanges(int ticks);
+    void commitChanges(float ticks = 0);
 
     void setMoveMode(MoveMode mode);
-
-    int commitTime() const { return mCommitTime; }
-    int remainingTime() const { return mRemainingTime; }
-    float movedAmount() const { return mMovedAmount; }
+    void setInterpolationMode(InterpolationMode mode);
 
 
     BoAutoCamera& operator=(const BoAutoCamera& c);
@@ -100,28 +117,59 @@ class BoAutoCamera
     void setUp(const BoVector3Float& pos);
     void setCameraPos(const BoVector3Float& pos);
 
+    void addLookAtPoint(const BoVector3Float& pos, float time);
+    void addUpPoint(const BoVector3Float& pos, float time);
+    void addCameraPosPoint(const BoVector3Float& pos, float time);
+
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool saveAsXML(QDomElement& root);
 
 
   protected:
-    virtual void resetDifferences();
+    class InterpolationData
+    {
+      public:
+        InterpolationData()  { time = -1.0f; }
+        InterpolationData(const BoVector3Float& pos, float time);
+        BoVector3Float pos;
+        float time;
+    };
+    class InterpolationDataFloat
+    {
+      public:
+        InterpolationDataFloat()  { time = -1.0f; }
+        InterpolationDataFloat(float value, float time);
+        float value;
+        float time;
+    };
+
+    virtual void moveCompleted();
+    virtual void prepareSegmentInterpolation(float endtime);
+
+    bool getCurrentVector(QValueList<InterpolationData>& points, float time, BoVector3Float& result);
+    bool getCurrentValue(QValueList<InterpolationDataFloat>& values, float time, float& result);
 
     void setPositionDirty(bool d = true);
+    float currentTime()  { return mCurrentTime; }
 
   protected:
     MoveMode moveMode() const { return mMoveMode; }
+    InterpolationMode interpolationMode() const { return mInterpolationMode; }
     float moveFactor() const;
 
   private:
     void init();
 
   private:
+
     BoCamera* mCamera;
-    BoVector3Float mLookAtDiff, mUpDiff, mCameraPosDiff;
-    int mCommitTime, mRemainingTime;
+    float mCurrentTime;
     MoveMode mMoveMode;
-    float mMovedAmount;
+    InterpolationMode mInterpolationMode;
+    QValueList<InterpolationData> mLookAtPoints;
+    QValueList<InterpolationData> mPosPoints;
+    QValueList<InterpolationData> mUpPoints;
+    bool mMoving;
 };
 
 class BoAutoGameCamera : public BoAutoCamera
@@ -141,11 +189,7 @@ class BoAutoGameCamera : public BoAutoCamera
     BoAutoGameCamera& operator=(const BoAutoGameCamera& c);
     BoGameCamera* gameCamera() const { return (BoGameCamera*)camera(); }
 
-    /**
-     * Advances camera. This smoothly (and linearly) applies changes made to
-     * camera.
-     **/
-    virtual bool advance2();
+    virtual bool advanceVectors();
 
     // These will _move_ given things by given values
     // Also, they don't commit changes
@@ -179,15 +223,16 @@ class BoAutoGameCamera : public BoAutoCamera
     virtual bool saveAsXML(QDomElement& root);
 
   protected:
-   virtual void resetDifferences();
+    virtual void moveCompleted();
+    virtual void prepareSegmentInterpolation(float endtime);
 
   private:
     void init();
 
   private:
-    GLfloat mPosZDiff;
-    GLfloat mRotationDiff;
-    GLfloat mRadiusDiff;
+    QValueList<InterpolationDataFloat> mZPoints;
+    QValueList<InterpolationDataFloat> mRotationPoints;
+    QValueList<InterpolationDataFloat> mRadiusPoints;
 };
 
 #endif
