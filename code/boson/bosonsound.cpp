@@ -48,7 +48,7 @@ public:
 	}
 	~BoPlayObject()
 	{
-		delete mPlayObject;
+		killObject();
 	}
 	const QString& file() const { return mFile; }
 	KPlayObject* object() const { return mPlayObject; }
@@ -59,6 +59,19 @@ public:
 			return object()->isNull();
 		}
 		return true;
+	}
+
+	void killObject()
+	{
+		if (mPlayObject) {
+			Arts::disconnect(object()->object(), "left",
+					mParent->effectStack(), "inleft");
+			Arts::disconnect(object()->object(), "right",
+					mParent->effectStack(), "inright");
+			delete mPlayObject;
+			mPlayObject = 0;
+		}
+
 	}
 
 	void play()
@@ -96,11 +109,24 @@ public:
 	void reload()
 	{
 		kdDebug() << k_funcinfo << endl;
-		delete mPlayObject;
+		killObject();
+
 		KPlayObjectFactory factory(mParent->server().server());
-		mPlayObject = factory.createPlayObject(file(), true);
+		mPlayObject = factory.createPlayObject(file(), false);
 		if (mPlayObject && !mPlayObject->isNull()) {
 			mPlayed = false;
+
+			// code taken from noatun's engine.cpp
+			// we connect the playobject to the effect stack of the
+			// parent.
+			// There is defined 'how' the object should be played -
+			// e.g. which volume.
+
+			object()->object()._node()->start(); // I really don't know what this means...
+			Arts::connect(object()->object(), "left", 
+					mParent->effectStack(), "inleft");
+			Arts::connect(object()->object(), "right", 
+					mParent->effectStack(), "inright");
 		} else {
 			delete mPlayObject;
 			mPlayObject = 0;
@@ -115,7 +141,7 @@ public:
 		}
 		if (object()->state() != Arts::posIdle) {
 			kdDebug() << k_funcinfo << "not posIdle" << endl;
-			return;
+//			return; // AB: ? ??? 
 		}
 		if (mPlayed) {
 			reload();
@@ -150,18 +176,55 @@ class BosonSound::BosonSoundPrivate
 public:
 	BosonSoundPrivate()
 	{
+		mId = -1;
 	}
 
 	QIntDict<BoPlayObject> mSounds;
 
 	UnitSounds mUnitSounds; // whoaa... QMap< int, QMap< int, QPtrList< BoPlayObject> > > // <-- probably a design problem!! (probably ??? )
 	SoundEvents mDefaultSounds;
+
+	Arts::StereoEffectStack mEffectStack; // all effects are placed in the stack. we connect a playobject to this and so the playoubject uses all effects.
+	Arts::StereoVolumeControl mVolumeControl; // changes the volume.
+	Arts::Synth_AMAN_PLAY mAmanPlay; // don't ask me what this is. From natun's code. doesn't work without this.
+
+	long mId;
+
+	bool mPlaySounds;
+
 };
 
 BosonSound::BosonSound()
 {
  d = new BosonSoundPrivate;
  d->mSounds.setAutoDelete(true);
+
+ // taken from noatun's code:
+ d->mAmanPlay = Arts::DynamicCast(server().server().createObject("Arts::Synth_AMAN_PLAY"));
+ if (d->mAmanPlay.isNull()) {
+	kdError() << k_lineinfo << "Synth_AMAN_Play is NULL" << endl;
+	d->mPlaySounds = false; // something evil happened...
+	return;
+ }
+ d->mAmanPlay.title("boson");
+ d->mAmanPlay.autoRestoreID("boson"); // whatever this is...
+ d->mAmanPlay.start();
+
+ d->mEffectStack = Arts::DynamicCast(server().server().createObject("Arts::StereoEffectStack"));
+ if (d->mEffectStack.isNull()) {
+	kdError() << k_lineinfo << "NULL effect stack" << endl;
+	d->mPlaySounds = false; // something evil happened...
+	return;
+ }
+ d->mEffectStack.start();
+ Arts::connect(d->mEffectStack, d->mAmanPlay);
+
+ // the volume control
+/* d->mVolumeControl = Arts::DynamicCast(server().server().createObject("Arts::StereoVolumeControl"));
+ d->mVolumeControl.start();
+ d->mId = d->mEffectStack.insertBottom(d->mVolumeControl, "VolumeControl");
+*/
+ d->mPlaySounds = true;
 }
 
 BosonSound::~BosonSound()
@@ -169,15 +232,31 @@ BosonSound::~BosonSound()
  kdDebug() << k_funcinfo << endl;
  d->mSounds.clear();
  UnitSounds::Iterator unitsIt;
- for (unitsIt = d->mUnitSounds.begin(); unitsIt != d->mUnitSounds.end(); ++unitsIt) {
+ unitsIt = d->mUnitSounds.begin();
+ for (; unitsIt != d->mUnitSounds.end(); ++unitsIt) {
 	SoundEvents::Iterator eventsIt;
 	for (eventsIt = (*unitsIt).begin(); eventsIt != (*unitsIt).end(); ++eventsIt) {
 		QPtrListIterator<BoPlayObject> it = (*eventsIt);
-		while (it.current()) {
-			delete it.current();
+		while ((*eventsIt).count() > 0) {
+			BoPlayObject* p = (*eventsIt).take(0);
+			delete p;
 		}
 	}
  }
+ SoundEvents::Iterator eventsIt;
+ for (eventsIt = d->mDefaultSounds.begin(); eventsIt != d->mDefaultSounds.end(); ++eventsIt) {
+	QPtrListIterator<BoPlayObject> it = (*eventsIt);
+	while ((*eventsIt).count() > 0) {
+		BoPlayObject* p = (*eventsIt).take(0);
+		delete p;
+	}
+ }
+ 
+ if (d->mId != -1) {
+	d->mEffectStack.remove(d->mId);
+ }
+ d->mVolumeControl = Arts::StereoVolumeControl::null();
+ d->mEffectStack = Arts::StereoEffectStack::null();
  delete d;
 }
 
@@ -289,6 +368,9 @@ void BosonSound::addEventSound(int unitType, int event, const QString& file)
 
 void BosonSound::play(int id)
 {
+ if (!d->mPlaySounds) { 
+	return; // something evil happened to our sound server...
+ }
  if (!boConfig->sound()) {
 	return;
  }
@@ -301,6 +383,9 @@ void BosonSound::play(int id)
 
 void BosonSound::play(Unit* unit, int event)
 {
+ if (!d->mPlaySounds) { 
+	return; // something evil happened to our sound server...
+ }
  if (!boConfig->sound()) {
 	return;
  }
@@ -318,8 +403,13 @@ void BosonSound::play(Unit* unit, int event)
  }
 
  if (!p || p->isNull()) {
+	kdDebug() << k_funcinfo << "NULL sound" << endl;
 	return;
  }
-
  p->playFromBeginning();
+}
+
+Arts::StereoEffectStack BosonSound::effectStack() 
+{ 
+ return d->mEffectStack; 
 }
