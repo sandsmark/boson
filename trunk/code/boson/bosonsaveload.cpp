@@ -30,6 +30,7 @@
 #include "player.h"
 #include "bodebug.h"
 #include "bosonfileconverter.h"
+#include "bosonlocalplayerinput.h"
 
 // FIXME do not include
 #include <startupwidgets/bosonloadingwidget.h>
@@ -418,6 +419,9 @@ QCString BosonSaveLoad::savePlayersAsXML()
 		boError() << k_funcinfo << "Unable to save player " << p->id() << endl;
 		return QCString();
 	}
+	if (p->hasRtti(BosonLocalPlayerInput::LocalPlayerInputRTTI)) {
+		element.setAttribute("IsLocalPlayer", 1);
+	}
 	root.appendChild(element);
  }
 
@@ -541,6 +545,13 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		}
 	}
 	p->loadFromXML(player);
+	if (player.hasAttribute("IsLocalPlayer")) {
+		if (player.attribute("IsLocalPlayer").toUInt() == 1) {
+			p->addGameIO(new BosonLocalPlayerInput());
+		} else {
+			boWarning() << k_funcinfo << "IsLocalPlayer tag should always be 1 if specified!" << endl;
+		}
+	}
  }
  return true;
 }
