@@ -22,7 +22,6 @@
 #include "defines.h"
 #include "bosonminimap.h"
 #include "bosoncanvas.h"
-#include "bosonbigdisplaybase.h"
 #include "boson.h"
 #include "player.h"
 #include "bosonconfig.h"

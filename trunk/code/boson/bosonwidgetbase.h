@@ -217,13 +217,6 @@ protected slots:
 	void slotAddUnit(Unit* unit, int x, int y);
 	void slotRemoveUnit(Unit* unit);
 
-	/**
-	 * Make display the currently active view
-	 * @param active The new active display.
-	 * @param old The previously active display, if non-NULL
-	 **/
-	virtual void slotSetActiveDisplay(BosonBigDisplayBase* display, BosonBigDisplayBase* old);
-
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
 	/**

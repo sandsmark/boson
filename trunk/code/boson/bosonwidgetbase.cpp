@@ -36,10 +36,10 @@
 #include "bosonprofilingdialog.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
+#include "bosonbigdisplaybase.h"
 #include "boselection.h"
 #include "global.h"
 #include "top.h"
-#include "bosonbigdisplaybase.h"
 #include "bodebug.h"
 #include "bosonprofiling.h"
 #include "optionsdialog.h"
@@ -236,15 +236,23 @@ void BosonWidgetBase::initConnections()
 void BosonWidgetBase::initDisplayManager()
 {
  mDisplayManager = new BoDisplayManager(canvas(), this, boGame->gameMode());
- connect(mDisplayManager, SIGNAL(signalActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)),
-		this, SLOT(slotSetActiveDisplay(BosonBigDisplayBase*, BosonBigDisplayBase*)));
  connect(cmdFrame(), SIGNAL(signalAction(int)),
 		displayManager(), SLOT(slotUnitAction(int)));
  connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
-
+ connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)),
+		minimap(), SLOT(slotMoveRect(
+		const QPoint&, const QPoint&, const QPoint&, const QPoint&)));
+ connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
+		mDisplayManager, SLOT(slotReCenterActiveDisplay(const QPoint&)));
+ connect(cmdFrame(), SIGNAL(signalSelectUnit(Unit*)),
+		mDisplayManager, SLOT(slotActiveSelectSingleUnit(Unit*)));
 
  displayManager()->setLocalPlayer(localPlayer()); // this does nothing.
+
+ connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
+		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
 }
 
 void BosonWidgetBase::addInitialDisplay()
@@ -560,51 +568,6 @@ void BosonWidgetBase::slotSplitDisplayVertical()
 void BosonWidgetBase::slotRemoveActiveDisplay()
 {
  displayManager()->removeActiveDisplay();
-}
-
-void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old)
-{
- if (!active) {
-	boWarning() << k_funcinfo << "NULL display" << endl;
-	return;
- }
-
- if (old) {
-	disconnect(old, SIGNAL(signalChangeViewport(const QPoint&,
-			const QPoint&, const QPoint&, const QPoint&)),
-			minimap(), SLOT(slotMoveRect(const QPoint&,
-			const QPoint&, const QPoint&, const QPoint&)));
-	disconnect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-			old, SLOT(slotReCenterDisplay(const QPoint&)));
-	connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
-			old->selection(), SLOT(slotSelectSingleUnit(Unit*)));
- }
- connect(active, SIGNAL(signalChangeViewport(const QPoint&,const QPoint&,
-		const QPoint&, const QPoint&)),
-		minimap(), SLOT(slotMoveRect(const QPoint&, const QPoint&,
-		const QPoint&, const QPoint&)));
- connect(minimap(), SIGNAL(signalReCenterView(const QPoint&)),
-		active, SLOT(slotReCenterDisplay(const QPoint&)));
- connect(d->mCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
-		active->selection(), SLOT(slotSelectSingleUnit(Unit*)));
-
-
- // note: all other bigdisplays should unselect now.
-
- if (!localPlayer()) {
-	boWarning() << k_funcinfo << "NULL localplayer" << endl;
-	return;
- }
-
- // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
- // the signal to the big display and let it decide whether the
- // signalSingleUnitSelected should be emitted
- if (old) {
-	disconnect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
-			old, SLOT(slotUnitChanged(Unit*)));
- }
- connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
-		active, SLOT(slotUnitChanged(Unit*)));
 }
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)

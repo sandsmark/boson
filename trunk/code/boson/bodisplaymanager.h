@@ -172,6 +172,7 @@ public slots:
 	void slotUpdateIntervalChanged(unsigned int);
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
+	void slotUnitChanged(Unit* unit);
 
 	void slotUnitRemoved(Unit* u);
 
@@ -180,6 +181,18 @@ public slots:
 	 * See also @ref BosonBigDisplayInputBase::slotMoveSelection
 	 **/
 	void slotMoveActiveSelection(int x, int y);
+
+	/**
+	 * Move the viewport of the @ref activeDisplay so that it displays @p
+	 * center in the center of the screen.
+	 **/
+	void slotReCenterActiveDisplay(const QPoint& center);
+
+	/**
+	 * Select the a single unit in the @ref activeDisplay. See also @ref
+	 * BoSelection::slotSelectSingleUnit
+	 **/
+	void slotActiveSelectSingleUnit(Unit*);
 
 	void slotSetDebugMapCoordinates(bool);
 	void slotSetDebugShowCellGrid(bool);
@@ -212,6 +225,12 @@ signals:
 	 **/
 	void signalSelectionChanged(BoSelection*);
 
+	/**
+	 * Emitted when the viewport of the @ref activeDisplay is changed. The
+	 * params specify the new viewport (in cell coordinates).
+	 **/
+	void signalChangeActiveViewport(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
+
 protected:
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplayBase*) const;
@@ -219,6 +238,7 @@ protected:
 
 protected slots:
 	void slotMakeActiveDisplay(BosonBigDisplayBase*);
+	void slotChangeViewport(BosonBigDisplayBase* display, const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight);
 
 private:
 	void markActive(BosonBigDisplayBase* display, bool active);

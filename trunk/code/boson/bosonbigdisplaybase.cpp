@@ -517,7 +517,6 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  quitGame();
  delete mSelection;
  delete d->mChat;
-// delete d->mUnitTips;
  delete d->mDefaultFont;
  delete[] d->mRenderCells;
  delete d->mToolTips;
@@ -567,21 +566,15 @@ void BosonBigDisplayBase::init()
 	return;
  }
 
- // and another hack..
-// setMinimumSize(QSize(400,400));
-
-// initGL();// AB: initializeGL() is virtual
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
 
- connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
+ connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
 		this, SLOT(slotCursorEdgeTimeout()));
 
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvance(unsigned int, bool)));
  connect(canvas(), SIGNAL(signalRemovedItem(BosonItem*)),
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
-
- //TODO: sprite tooltips
 
  setUpdateInterval(boConfig->updateInterval());
 }
@@ -2241,7 +2234,6 @@ void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
  }
 }
 
-
 void BosonBigDisplayBase::moveSelectionRect(const QPoint& widgetPos)
 {
  if (d->mSelectionRect.isVisible()) {
@@ -2698,7 +2690,7 @@ void BosonBigDisplayBase::cameraChanged()
  mapCoordinatesToCell(QPoint(0, d->mViewport[3]), &cellBL);
  mapCoordinatesToCell(QPoint(d->mViewport[2], 0), &cellTR);
  mapCoordinatesToCell(QPoint(d->mViewport[2], d->mViewport[3]), &cellBR);
- emit signalChangeViewport(cellTL, cellTR, cellBL, cellBR);
+ emit signalChangeViewport(this, cellTL, cellTR, cellBL, cellBR);
 }
 
 Camera* BosonBigDisplayBase::camera() const
