@@ -1770,7 +1770,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  stream >> a >> b1 >> b2 >> b3;
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
-	boError() << k_funcinfo << "This file is not Boson SaveGame" << endl;
+	boError() << k_funcinfo << "This file is no Boson SaveGame" << endl;
 	d->mLoadingStatus = InvalidFileFormat;
 	return false;
  }
