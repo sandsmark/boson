@@ -42,7 +42,6 @@ main_table_begin();
 // Sidebar
 sidebar_begin();
   sidebar_links_box();
-  sidebar_announcements_box();
   sidebar_download_box();
   sidebar_stats_box();
 sidebar_end();
