@@ -211,7 +211,7 @@ public:
 
 	// AB: the syntax of these is the same as for render() above. e.g. you
 	// mustn't call the advance*() stuff here recursive or so
-	void advance(bool start, unsigned int advanceCount);
+	void advance(bool start, unsigned int advanceCallsCount);
 	void advanceFunction(bool start);
 	void advanceDeleteUnusedShots(bool start);
 	void advanceEffects(bool start);

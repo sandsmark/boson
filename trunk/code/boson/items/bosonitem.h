@@ -439,12 +439,12 @@ public:
 	/**
 	 * See @ref Unit::advanceFunction
 	 **/
-	inline virtual void advanceFunction(unsigned int /*advanceCount*/) { }
+	inline virtual void advanceFunction(unsigned int /*advanceCallCount*/) { }
 
 	/**
 	 * See @ref Unit::advanceFunction2
 	 **/
-	inline virtual void advanceFunction2(unsigned int /*advanceCount*/) { }
+	inline virtual void advanceFunction2(unsigned int /*advanceCallCount*/) { }
 
 	/**
 	 * Used to synchronize the advance function for the next advance call.

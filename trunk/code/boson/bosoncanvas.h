@@ -440,7 +440,7 @@ public slots:
 	/**
 	 * @param See @ref Boson::signalAdvance
 	 **/
-	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
+	void slotAdvance(unsigned int advanceCallsCount, bool advanceFlag);
 
 signals:
 	void signalItemAdded(BosonItem* item);

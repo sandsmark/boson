@@ -760,43 +760,18 @@ public:
 		mSum = 0;
 		mCount = 0;
 	}
-	void add(int advanceCount, unsigned long int value)
+	void add(unsigned long int value)
 	{
 		mSum += value;
 		mCount++;
-		if (!mAdvanceCountSum.contains(advanceCount)) {
-			mAdvanceCountSum.insert(advanceCount, 0);
-		}
-		mAdvanceCountSum[advanceCount] += value;
-		mAdvanceCountCount[advanceCount] += 1;
 	}
 	unsigned long long sum() const { return mSum; }
 	unsigned long average() const { return mSum / mCount; }
 	unsigned int count() const { return mCount; }
 
-	unsigned long long sum(unsigned int advanceCount) const
-	{ return mAdvanceCountSum[advanceCount]; }
-	unsigned long average(unsigned int advanceCount) const
-	{ return sum(advanceCount) / count(advanceCount); }
-	unsigned int count(unsigned int advanceCount) const
-	{ return mAdvanceCountCount[advanceCount]; }
-
-	QValueList<unsigned int> advanceCalls() const
-	{
-		// returns the advancecount numbers of all advance calls in this
-		// class
-		return mAdvanceCountSum.keys();
-	}
-	bool hasAdvanceCall(unsigned int call) const
-	{
-		return mAdvanceCountSum.contains(call);
-	}
-
 private:
 	unsigned int mCount;
 	unsigned long long mSum;
-	QMap<unsigned int, unsigned long long> mAdvanceCountSum;
-	QMap<unsigned int, unsigned long long> mAdvanceCountCount;
 };
 
 void BosonProfilingDialog::slotResetSlotAdvancePage()
@@ -836,12 +811,12 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
  for (; it.current(); ++it, slotAdvanceCount++) {
 	QValueList<unsigned long int> values = it.current()->values();
 	for (unsigned int i = 0; i < slotAdvanceValueNames.count(); i++) {
-		slotAdvanceSums[i].add(it.current()->mAdvanceCount, values[i]);
+		slotAdvanceSums[i].add(values[i]);
 	}
 	if (!d->mSlotAdvanceSumAverageOnly->isChecked()) {
 		// TODO: we should display sums, too
 		unsigned long int func = values[0];
-		unsigned int call = it.current()->mAdvanceCount;
+		unsigned int call = it.current()->mAdvanceCallsCount;
 		QListViewItemNumber* item = new QListViewItemNumber(d->mSlotAdvance);
 		initSlotAdvanceItem(item, call, slotAdvanceValueNames[0], values[0], func);
 		item->setText(0, QString::number(slotAdvanceCount));
@@ -865,52 +840,6 @@ void BosonProfilingDialog::resetSlotAdvanceWidget()
  }
  average->setOpen(true);
  sum->setOpen(true);
-
- // a separate summary for ever advance count. we do special things there, e.g.
- // shots are delete for MAXIMAL_ADVANCE_COUNT only. so this might be useful to
- // improve certain functions
- if (d->mSlotAdvanceSumAverageForCount->isChecked()) {
-	// TODO: we should display sums, too
-	QValueList<unsigned int> advanceCalls;
-	for (unsigned int i = 0; i < slotAdvanceValueNames.count(); i++) {
-		QValueList<unsigned int> list = slotAdvanceSums[i].advanceCalls();
-		for (unsigned int j = 0; j < list.count(); j++) {
-			if (!advanceCalls.contains(list[j])) {
-				advanceCalls.append(list[j]);
-			}
-		}
-	}
-
-	for (unsigned int i = 0; i < advanceCalls.count(); i++) {
-		QListViewItemNumber* average = new QListViewItemNumber(d->mSlotAdvance);
-		QListViewItemNumber* sum = new QListViewItemNumber(d->mSlotAdvance);
-		average->setText(0, i18n("Average - use with care"));
-		sum->setText(0, i18n("Sum"));
-		initSlotAdvanceItem(average, advanceCalls[i],
-				slotAdvanceValueNames[0],
-				slotAdvanceSums[0].average(advanceCalls[i]),
-				slotAdvanceSums[0].average(advanceCalls[i]));
-		initSlotAdvanceItem(sum, advanceCalls[i],
-				slotAdvanceValueNames[0],
-				slotAdvanceSums[0].sum(advanceCalls[i]),
-				slotAdvanceSums[0].sum(advanceCalls[i]));
-		for (unsigned int j = 1; j < slotAdvanceValueNames.count(); j++) {
-			if (!slotAdvanceSums[j].hasAdvanceCall(advanceCalls[i])) {
-				continue;
-			}
-			initSlotAdvanceItem(new QListViewItemNumber(average),
-					advanceCalls[i],
-					slotAdvanceValueNames[j],
-					slotAdvanceSums[j].average(advanceCalls[i]),
-					slotAdvanceSums[0].average(advanceCalls[i]));
-			initSlotAdvanceItem(new QListViewItemNumber(sum),
-					advanceCalls[i],
-					slotAdvanceValueNames[j],
-					slotAdvanceSums[j].sum(advanceCalls[i]),
-					slotAdvanceSums[0].sum(advanceCalls[i]));
-		}
-	}
- }
 
  d->mSlotAdvanceSummary->set(&pd->mSlotAdvanceTimes.first()->mFunction.mData[0],
 		&pd->mSlotAdvanceTimes.last()->mFunction.mData[1],
@@ -972,7 +901,7 @@ void BosonProfilingDialog::resetItemAdvanceWidget()
  if (!itemAdvanceCount) {
 	return;
  }
- for (unsigned int i = 1; i < itemAdvanceSums.count(); i++) {
+ for (unsigned int i = 0; i < itemAdvanceSums.count(); i++) {
 	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Sum (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i], itemAdvanceSums[0]);
 	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i] / itemAdvanceCount, itemAdvanceSums[0] / itemAdvanceCount);
  }
@@ -1022,18 +951,18 @@ void BosonProfilingDialog::addItemAdvance(ProfileSlotAdvance* slotAdvance)
 //			it.current(), slotAdvance->mAdvanceCount, 
 //			i18n("Function"), it.current()->mFunction.diff(), function);
 	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-			it.current(), slotAdvance->mAdvanceCount,
+			it.current(), slotAdvance->mAdvanceCallsCount,
 			i18n("Advance"), it.current()->mAdvance.diff(), function);
 	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-			it.current(), slotAdvance->mAdvanceCount,
+			it.current(), slotAdvance->mAdvanceCallsCount,
 			i18n("AdvanceFunction"), it.current()->mAdvanceFunction.diff(), function);
 	initItemAdvanceItem(new QListViewItemNumber(d->mItemAdvance),
-			it.current(), slotAdvance->mAdvanceCount,
+			it.current(), slotAdvance->mAdvanceCallsCount,
 			i18n("Move"), it.current()->mMove.diff(), function);
  }
 }
 
-void BosonProfilingDialog::initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCount, const QString& type, unsigned long int time, unsigned long int function)
+void BosonProfilingDialog::initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCallsCount, const QString& type, unsigned long int time, unsigned long int function)
 
 {
  QString isUnit;
@@ -1048,7 +977,7 @@ void BosonProfilingDialog::initItemAdvanceItem(QListViewItemNumber* item, Profil
 	id = i18n("-");
 	work = i18n("-");
  }
- item->setText(0, QString::number(advanceCount));
+ item->setText(0, QString::number(advanceCallsCount));
  item->setText(1, isUnit);
  item->setText(2, id);
  item->setText(4, QString::number(a->mRtti));
@@ -1123,7 +1052,7 @@ void BosonProfilingDialog::resetEventsPage()
 		item->setTime(1, *timesIt, *timesIt);
 		sum += *timesIt;
 	}
-	event->setOpen(true);
+//	event->setOpen(true);
 	if (i) {
 		QListViewItemNumber* s = new QListViewItemNumber(event);
 		s->setText(0, i18n("Sum"));

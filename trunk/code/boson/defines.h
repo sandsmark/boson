@@ -49,8 +49,6 @@
 #define BOSONMAP_TEXMAP_MAGIC_COOKIE QString::fromLatin1("BoTexMap")
 
 
-#define MAXIMAL_ADVANCE_COUNT 19 // maximal value of advanceCount param emitted by Boson::signalAdvance
-
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested
 
 #define MAX_GAME_SPEED 25 // the advance period - lower means faster

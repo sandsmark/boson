@@ -97,8 +97,8 @@ protected:
 
 	void initRenderItem(QListViewItemNumber* item, const QString& type, long int time, long int function);
 
-	void initSlotAdvanceItem(QListViewItemNumber* item, int advanceCount, const QString& type, long int time, long int function);
-	void initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCount, const QString& type, unsigned long int time, unsigned long int function);
+	void initSlotAdvanceItem(QListViewItemNumber* item, int advanceCallsCount, const QString& type, long int time, long int function);
+	void initItemAdvanceItem(QListViewItemNumber* item, ProfileItemAdvance* a, unsigned int advanceCallsCount, const QString& type, unsigned long int time, unsigned long int function);
 	void initItemAdvanceItemSummary(QListViewItemNumber* item, const QString& description, const QString& type, unsigned long int time, unsigned long int function, int work = -1);
 
 	QString profilingName(int profilingEvent) const;

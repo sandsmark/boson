@@ -163,9 +163,9 @@ public:
 class ProfileSlotAdvance
 {
 public:
-	ProfileSlotAdvance(unsigned int advanceCount)
+	ProfileSlotAdvance(unsigned int advanceCallsCount)
 	{
-		mAdvanceCount = advanceCount;
+		mAdvanceCallsCount = advanceCallsCount;
 		mItems.setAutoDelete(true);
 	}
 	// Dummy ctor for QValueList. You shouldn't normally use it
@@ -211,7 +211,7 @@ public:
 	ProfilingEntry mDeleteUnusedShots;
 	ProfilingEntry mEffects;
 	ProfilingEntry mMaximalAdvanceCount;
-	unsigned int mAdvanceCount;
+	unsigned int mAdvanceCallsCount;
 
 	QPtrList<ProfileItemAdvance> mItems;
 };

@@ -350,7 +350,7 @@ public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();
 
-	void slotAdvanceComputerPlayers(unsigned int advanceCount, bool advanceFlag);
+	void slotAdvanceComputerPlayers(unsigned int advanceCallsCount, bool advanceFlag);
 
 	/**
 	 * Emits @ref signalUpdateProductionOptions
@@ -400,13 +400,13 @@ signals:
 
 	/**
 	 * Order the canvas to call @ref BosonCanvas::slotAdvance
-	 * @param advanceCount The number of this advance call. This is used to
+	 * @param advanceCallsCount The number of this advance call. This is used to
 	 * decide what should be done - e.g. there is no need to check for new
 	 * enemies every advance call. This value is increased after the signal
-	 * was emitted and reset to 0 when a certain value is reached.
+	 * was emitted
 	 * @param advanceFlag see @ref advanceFlag
 	 **/
-	void signalAdvance(unsigned int advanceCount, bool advanceFlag);
+	void signalAdvance(unsigned int advanceCallsCount, bool advanceFlag);
 
 	/**
 	 * Emitted when the editor is meant to change the map.

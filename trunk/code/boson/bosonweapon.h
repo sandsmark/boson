@@ -259,9 +259,9 @@ class BosonWeapon : public UnitPlugin
     /**
      * Reload the weapon.
      **/
-    virtual void advance(unsigned int advanceCount)
+    virtual void advance(unsigned int advanceCallsCount)
     {
-      Q_UNUSED(advanceCount);
+      Q_UNUSED(advanceCallsCount);
       reload();
     }
 
