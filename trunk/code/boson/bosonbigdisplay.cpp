@@ -180,6 +180,12 @@ void BosonBigDisplay::actionClicked(const BoAction& action, QDataStream& stream,
 				return;
 			}
 			*send = true;
+		} else if(selection()->hasMobileUnit() && unit->isMobile()) {
+			// Follow
+			if (!actionFollow(stream, action.canvasPos())) {
+				return;
+			}
+			*send = true;
 		} else {
 			// selection and clicked unit both are friendly
 			// no repairyard and no refinery
@@ -342,6 +348,29 @@ bool BosonBigDisplay::actionRefine(QDataStream& stream, const QPoint& canvasPos)
 // TODO:
 // Unit* u = selection()->leader();
 // boMusic->playSound(u, Unit::SoundOrderRefine);
+ return true;
+}
+
+bool BosonBigDisplay::actionFollow(QDataStream& stream, const QPoint& canvasPos)
+{
+ Unit* unit = canvas()->findUnitAt(canvasPos);
+ QPtrList<Unit> list = selection()->allUnits();
+ QPtrListIterator<Unit> it(list);
+ // tell the clients we want to follow:
+ stream << (Q_UINT32)BosonMessage::MoveFollow;
+ // tell them which unit to follow:
+ stream << (Q_ULONG)unit->id();
+ // tell them how many units follow:
+ stream << (Q_UINT32)list.count();
+ while (it.current()) {
+	// tell them which unit is going to follow:
+	stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
+	++it;
+ }
+ Unit* u = selection()->leader();
+ if (u->owner() == localPlayer()) {
+	boMusic->playSound(u, Unit::SoundOrderMove);
+ }
  return true;
 }
 

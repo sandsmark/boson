@@ -139,6 +139,12 @@ public:
 	virtual void advanceAttack();
 
 	/**
+	 * Follow another unit.
+	 * Note that this method is somewhat similar to @ref advanceAttack
+	 **/
+	virtual void advanceFollow() { }
+
+	/**
 	 * This is called when there is nothing else to do for this unit.
 	 * Usually the unit will check for enemy units in range and fire at
 	 * them.
@@ -322,6 +328,7 @@ public:
 	virtual void advanceRefine();
 	virtual void advanceMove(); // move one step futher to path
 	virtual void advanceMoveCheck();
+	virtual void advanceFollow();
 
 
 	/**

@@ -632,6 +632,44 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		buildProducedUnit(factory, unitType, x, y);
 		break;
 	}
+	case BosonMessage::MoveFollow:
+	{
+		Q_ULONG followUnitId;
+		Q_UINT32 unitCount;
+		stream >> followUnitId;
+		stream >> unitCount;
+		Unit* followUnit = findUnit(followUnitId, 0);
+		if (!followUnit) {
+			kdError() << "Cannot follow NULL unit" << endl;
+			return true;
+		}
+		for (unsigned int i = 0; i < unitCount; i++) {
+			Q_ULONG unitId;
+			stream >> unitId;
+			if (unitId == followUnitId) {
+				kdWarning() << "Cannot follow myself" << endl;
+				continue;
+			}
+			Unit* unit = findUnit(unitId, player);
+			if (!unit) {
+				kdDebug() << "unit " << unitId << " not found for this player" << endl;
+				continue;
+			}
+			if (unit->isDestroyed()) {
+				kdDebug() << "cannot follow with destroyed units" << endl;
+				continue;
+			}
+			if (followUnit->isDestroyed()) {
+				kdDebug() << "Cannot follow destroyed units" << endl;
+				continue;
+			}
+			unit->setTarget(followUnit);
+			if (unit->target()) {
+				unit->setWork(Unit::WorkFollow);
+			}
+		}
+		break;
+	}
 	default:
 		kdWarning() << k_funcinfo << "unexpected playerInput " << msgid << endl;
 		break;

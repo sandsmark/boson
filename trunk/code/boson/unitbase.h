@@ -84,6 +84,7 @@ public:
 	 * @li WorkConstructed - Is <em>being</em> constructed
 	 * @li WorkDestroyed - Is destroyed
 	 * @li WorkRefine - Is refining oil or minerals
+	 * @li WorkFollow - Is following another unit
 	 **/
 	enum WorkType {
 		WorkNone = 0,
@@ -93,7 +94,8 @@ public:
 		WorkAttack = 4,
 		WorkConstructed = 5,
 		WorkDestroyed = 6,
-		WorkRefine = 7
+		WorkRefine = 7,
+		WorkFollow = 8
 	};
 	
 	UnitBase(const UnitProperties* prop);
