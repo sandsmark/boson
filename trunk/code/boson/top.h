@@ -48,7 +48,8 @@ public:
 		IdStartEditor = 2,
 		IdBosonWidget = 3,
 		IdNetwork = 4,
-		IdLoading = 5
+		IdLoading = 5,
+		IdLoadSaveGame = 6
 	};
 
 	/**
@@ -244,13 +245,20 @@ protected slots:
 	 **/
 	void slotAssignMap();
 
-private slots:
+	/**
+	 * Cancenl the load/save widget and return to the game (if running), or
+	 * the welcome widget.
+	 **/
+	void slotCancelLoadSave();
+
 	/**
 	 * Called by the @ref KLoadSaveGameWidget . This will do the actual game loading
 	 * from the file into a stream and then will start the usual data
 	 * loading procedure.
 	 **/
-//	void slotLoadGame(const QString& loadingFileName);// in BosonStarting now
+	void slotLoadGame(const QString& fileName);
+
+	void slotSaveGame(const QString& fileName, const QString& description);
 
 private:
 	void initBoson();
