@@ -192,8 +192,8 @@ void EditorWidget::initKActions()
  (void)new KAction(i18n("Edit &Oil"), KShortcut(), this,
 		SLOT(slotEditPlayerOil()), actionCollection(),
 		"editor_player_oil");
- d->mChangeHeight = new KToggleAction(i18n("Edit &Height"), KShortcut(),
-		this, 0, actionCollection(), "editor_height");
+ d->mChangeHeight = new KToggleAction(i18n("Edit &Height"), "bo_edit_height", 
+		KShortcut(),this, 0, actionCollection(), "editor_height"); 
  connect(d->mChangeHeight, SIGNAL(toggled(bool)),
 		this, SLOT(slotEditHeight(bool)));
  (void)new KAction(i18n("&Import height map"), KShortcut(), this,
