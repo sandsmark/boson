@@ -54,6 +54,10 @@ UnitBase::UnitBase(const UnitProperties* prop)
  registerData(&mWork, IdWork);
  registerData(&mAdvanceWork, IdAdvanceWork);
  registerData(&mDeletionTimer, IdDeletionTimer);
+
+ // these properties are fully internal (i.e. nothing is displayed in any
+ // widget) and they change very often. So we increase speed greatly by not
+ // emitting any signal.
  mDeletionTimer.setEmittingSignal(false);
  mShieldReloadCounter.setEmittingSignal(false);
 
