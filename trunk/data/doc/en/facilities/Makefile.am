@@ -10,7 +10,7 @@ BO_DOC_DIR = facilities
 
 # list all wml files here
 BO_DOCS = index.wml commandbunker.wml comsat.wml helipad.wml map.wml \
-	mineralrefinery.wml oiltower.wml powerplant.wml \
+	mineralrefinery.wml powerplant.wml \
 	oilrefinery.wml repairpad.wml samsite.wml techcenter.wml turret.wml \
 	weaponsfactory.wml map.wml
 
