@@ -68,7 +68,7 @@ public:
 
 	void removeItem(unsigned int i)
 	{
-		remove(i);
+		this->remove(i);
 		if (i < this->count()) {
 			insert(i, take(this->count()));
 		}
