@@ -43,11 +43,19 @@ main_area_begin();
 // Contacts
 draw_bigbox_begin("Status");
 draw_bigbox_text("Most recent version, 0.9, was released on 3rd November 2003.<br>
-  Next version will be 0.10, but release date it not yet set.
-  <br><br>");
+  Next version will be 0.10, but release date it not yet set.<br>
+  Next bugfux release will be 0.9.1, release will come soon.<br>
+  <br>");
 
 //draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
+draw_bigbox_text("What has been changed since 0.9 (will go into 0.9.1):
+<ul>
+ <li>Network with kdegames from KDE < 3.2 is fixed</li>
+ <li>Minor file format fix, that causes less trouble with network</li>
+ <li>Ground texture pixmaps are loaded correctly in the editor</li>
+ <li>Factory productions are saved correctly</li>
+</ul>");
 /*
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
