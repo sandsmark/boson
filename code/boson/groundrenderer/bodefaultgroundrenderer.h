@@ -53,7 +53,7 @@ private:
 	 *
 	 * One could optimize this by using multitexturing for example!
 	 **/
-	void renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
+	unsigned int renderCellsNow(Cell** cells, int count, int cornersWidth, const float* heightMap, const float* normalMap, const unsigned char* texMapStart);
 	void renderCellColors(Cell** cells, int count, int width, const unsigned char* colorMap, const float* heightMap);
 };
 

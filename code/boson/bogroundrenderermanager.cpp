@@ -161,3 +161,12 @@ void BoGroundRendererManager::setMatrices(const BoMatrix* m, const BoMatrix* p, 
  }
 }
 
+QString BoGroundRendererManager::currentStatisticsData() const
+{
+ BoGroundRenderer* current = currentRenderer();
+ if (!current) {
+	return QString::null;
+ }
+ return current->statisticsData();
+}
+

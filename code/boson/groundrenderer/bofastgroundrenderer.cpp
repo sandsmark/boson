@@ -77,6 +77,8 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 	}
  }
 
+ unsigned int usedTextures = 0;
+ unsigned int renderedQuads = 0;
  int count = 0;
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	glBindTexture(GL_TEXTURE_2D, map->currentTexture(i));
@@ -88,8 +90,7 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 	const int cornersWidth = map->width() + 1;
 
 
-	// AB: this is a cutnpaste implementation from BoGroundRendererBase. don't
-	// expect it to be totally correct.
+	unsigned int quads = 0;
 	glBegin(GL_QUADS);
 	for (unsigned int j = 0; j < cellsCount; j++) {
 		if (cellTextures[j] != i) {
@@ -127,10 +128,19 @@ void BoFastGroundRenderer::renderVisibleCells(Cell** renderCells, unsigned int c
 
 		glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[y % offsetCount] + offset);
 		glVertex3f(cellXPos + BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+		quads++;
 	}
 	glEnd();
+
+	renderedQuads += quads;
+	if (quads != 0) {
+		usedTextures++;
+	}
  }
  delete[] cellTextures;
+
+ statistics()->setRenderedQuads(renderedQuads);
+ statistics()->setUsedTextures(usedTextures);
 
  glDisable(GL_BLEND);
 }
