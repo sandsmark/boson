@@ -216,8 +216,6 @@ public:
 	virtual bool loadFromXML(const QDomElement& root);
 
 private:
-//	KGamePropertyList<QPair<ProductionType, unsigned long int> > mProductions;
-	/// TODO: make this KGameProperty
 	QValueList<QPair<ProductionType, unsigned long int> > mProductions;
 	KGameProperty<unsigned int> mProductionState;
 };
@@ -330,7 +328,7 @@ private:
 
 	KGameProperty<int> mHarvestingType; // either mining or refining
 
-	Unit* mRefinery; // TODO we need to store this when Unit::save() is called!
+	Unit* mRefinery;
 };
 
 /**
@@ -383,6 +381,37 @@ public:
 private:
 	BosonWeapon* mWeapon; // FIXME: must be saved in Unit::save()
 	KGameProperty<int> mPlacingCounter;
+};
+
+/**
+ * @short Plugin for mineral/oil mines
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class RessourceMinePlugin : public UnitPlugin
+{
+public:
+	RessourceMinePlugin(Unit* owner);
+	~RessourceMinePlugin();
+
+	virtual int pluginType() const { return RessourceMine; }
+
+	virtual bool loadFromXML(const QDomElement& root);
+	virtual bool saveAsXML(QDomElement& root) const;
+	virtual void advance(unsigned int advanceCount);
+
+	/**
+	 * @return How much minerals are left here. -1 means unlimited.
+	 **/
+	int minerals() const;
+
+	/**
+	 * @return How much oil is left here. -1 means unlimited.
+	 **/
+	int oil() const;
+
+private:
+	KGameProperty<int> mOil;
+	KGameProperty<int> mMinerals;
 };
 
 #endif

@@ -1008,3 +1008,50 @@ bool MiningPlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
+RessourceMinePlugin::RessourceMinePlugin(Unit* unit)
+		: UnitPlugin(unit)
+{
+ unit->registerData(&mMinerals, Unit::IdRessourceMineMinerals);
+ unit->registerData(&mMinerals, Unit::IdRessourceMineOil);
+ mMinerals.setLocal(0);
+ mOil.setLocal(0);
+}
+
+RessourceMinePlugin::~RessourceMinePlugin()
+{
+}
+
+bool RessourceMinePlugin::saveAsXML(QDomElement& root) const
+{
+ // everything is saved using KGameProperty
+ Q_UNUSED(root);
+ return true;
+}
+
+bool RessourceMinePlugin::loadFromXML(const QDomElement& root)
+{
+ // everything is already loaded using KGameProperty - we do safety checks here
+ RessourceMineProperties* prop = (RessourceMineProperties*)properties(PluginProperties::RessourceMine);
+ if (!prop) {
+	BO_NULL_ERROR(prop);
+	return false;
+ }
+ if (!prop->canProvideMinerals()) {
+	if (mMinerals != 0) {
+		boWarning() << k_funcinfo << "unit can't have minerals, but minerals not 0" << endl;
+	}
+	mMinerals = 0;
+ }
+ if (!prop->canProvideOil()) {
+	if (mOil != 0) {
+		boWarning() << k_funcinfo << "unit can't have oil, but oil not 0" << endl;
+	}
+	mOil = 0;
+ }
+ return true;
+}
+
+void RessourceMinePlugin::advance(unsigned int)
+{
+}
+

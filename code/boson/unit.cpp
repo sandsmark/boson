@@ -146,7 +146,11 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  }
  if (prop->properties(PluginProperties::Refinery)) {
 	boDebug() << k_funcinfo << "Unit has refinery properties!!!" << endl;
+	boWarning() << k_funcinfo << "TODO: refinery plugin" << endl;
 //	d->mPlugins.append(new RefinePlugin(this));
+ }
+ if (prop->properties(PluginProperties::RessourceMine)) {
+	d->mPlugins.append(new RessourceMinePlugin(this));
  }
 
  loadWeapons();
