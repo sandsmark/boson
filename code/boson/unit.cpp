@@ -465,7 +465,7 @@ void Unit::shootAt(Unit* target)
  }
  kdDebug() << id() << " shoots at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, weaponDamage());
- reloadWeapon();
+ resetReload();
 }
 
 QCanvasItemList Unit::unitsInRange() const
