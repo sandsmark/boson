@@ -441,5 +441,5 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
  p.drawRect(selectionRect);
 
  p.end();
-
+ return QWidget::eventFilter(o, e);
 }
