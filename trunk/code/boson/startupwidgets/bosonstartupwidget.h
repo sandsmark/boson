@@ -104,15 +104,6 @@ signals:
 	void signalSaveGame(const QString& fileName, const QString& description);
 
 	/**
-	 * Emitted by the editor. The first player that gets added for editor is
-	 * meant to be the local player.
-	 * FIXME: this is ugly. newgame widget uses @ref signalAddLocalPlayer
-	 * and editorwidget uses signalSetLocalPlayer. We should somehow use the
-	 * same signal for both.
-	 **/
-	void signalSetLocalPlayer(Player*);
-
-	/**
 	 * The load/save widget has been canceled. We should return to the
 	 * welcome widget or to the game (depends on whether a game is currently
 	 * running).
