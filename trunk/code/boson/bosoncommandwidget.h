@@ -21,6 +21,7 @@
 
 #include <qwidget.h>
 #include <qpushbutton.h>
+#include "global.h"
 
 class Unit;
 class Player;
@@ -43,11 +44,29 @@ public:
 		CommandNothing = 0,
 		CommandCell = 1,
 		CommandUnit = 2,
-		CommandUnitSelected = 3
+		CommandUnitSelected = 3,
+		CommandAction = 4
 	};
 
+	/**
+	 * Shows small overview pixmap of unit, it's health and reload state (if it
+	 * can shoot)
+	 * This is used when you select multiple units
+	 **/
 	virtual void setUnit(Unit* unit);
+
+	/**
+	 * Shows only small overview pixmap of unit with type unitType
+	 * This is used to show units that factory can produce
+	 **/
 	void setUnit(int unitType, Player* owner);
+
+	/**
+	 * Shows pixmap of action
+	 * This is used to show available unit actions (such as attack, move or stop)
+	 **/
+	void setAction(UnitAction action, Player* owner);
+
 	void setCell(int tileNo, BosonTiles* tileSet);
 
 	/**
@@ -66,6 +85,14 @@ public:
 	int unitType() const 
 	{
 		return (commandType() == CommandUnit) ? mUnitType : -1;
+	}
+
+	/**
+	 * @return The displayed action or -1 if none
+	 **/
+	int action() const
+	{
+		return (commandType() == CommandAction) ? mAction : -1;
 	}
 
 	/**
@@ -134,6 +161,11 @@ signals:
 
 	void signalStopProduction(int unitType);
 
+	/**
+	 * Emitted when the player clicks on the action
+	 **/
+	void signalAction(int);
+
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(int unitType, Player* owner);
@@ -152,8 +184,10 @@ private:
 	BosonCommandWidgetPrivate* d;
 
 	Unit* mUnit;
+	// FIXME: use only one int for all command modes
 	int mUnitType;
 	int mTileNumber;
+	int mAction;
 	CommandType mCommandType;
 
 	Player* mProductionOwner;

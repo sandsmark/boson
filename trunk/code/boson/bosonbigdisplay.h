@@ -67,6 +67,7 @@ public:
 	
 public slots:
 	void slotMoveSelection(int cellX, int cellY);
+	void slotUnitAction(int actionType);
 
 signals:
 
@@ -84,7 +85,18 @@ protected:
 	 **/
 	void actionClicked(const BoAction* action, QDataStream& stream, bool& send);
 
+	// action*() methods family. These methods were previously integrated into
+	//  actionClicked(), but now it's broken into multiple methods
+	bool actionMine(QDataStream& stream, const QPoint& pos);
+	void actionMove(QDataStream& stream, const QPoint& pos);
+	bool actionBuild(QDataStream& stream, const QPoint& pos);
+	void actionAttack(QDataStream& stream, const QPoint& pos);
+	void actionRepair(QDataStream& stream, const QPoint& pos);
+	bool actionRefine(QDataStream& stream, const QPoint& pos);
+
 	virtual void updateCursor();
+
+	virtual bool actionLocked();
 
 //	void addMouseIO(Player* p);
 
