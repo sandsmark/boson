@@ -544,9 +544,6 @@ void BosonBigDisplayBase::paintGL()
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
- glEnable(GL_BLEND); // AB: once we have 3d models for all units we can get rid of this. we need it for the cursor only then.
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 
  boProfiling->renderUnits(true);
  BoItemList allItems = mCanvas->allBosonItems();
@@ -621,8 +618,6 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "when units rendered" << endl;
  }
 
- glDisable(GL_BLEND);
- // TODO: disable GL_BLEND for cells? we'll need it for the cursor only
  boProfiling->renderCells(true);
  renderCells();
  boProfiling->renderCells(false);
@@ -672,6 +667,11 @@ void BosonBigDisplayBase::paintGL()
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
  glLoadIdentity();
+
+ // alpha blending is used for both, cursor and text
+ glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
  if (cursor()) {
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	GLfloat x = (GLfloat)pos.x();
@@ -684,12 +684,15 @@ void BosonBigDisplayBase::paintGL()
  }
  renderText();
 
+ glDisable(GL_BLEND);
+
  // now restore the old 3D-matrix
  glMatrixMode(GL_PROJECTION);
  glPopMatrix();
  glMatrixMode(GL_MODELVIEW);
  glPopMatrix();
  boProfiling->renderText(false);
+
 
 
  if (d->mSelectionRect.isVisible()) {
@@ -750,8 +753,6 @@ void BosonBigDisplayBase::renderText()
  int y = d->mViewport[3] - d->mDefaultFont->height() - border;
 
  // Alpha-blended rectangle
- glEnable(GL_BLEND);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glColor4f(0.0, 0.0, 0.0, 0.5);
  glRecti(x - alphaborder, d->mViewport[3] - border + alphaborder,
 		d->mViewport[2] - border + alphaborder, d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
