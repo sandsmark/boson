@@ -56,7 +56,7 @@ public:
     uint cnt=0;
     for( it = begin(); it != end(); ++it )
     {
-      if (me==it) 
+      if (me==it)
       {
         return cnt;
       }
@@ -90,8 +90,8 @@ public:
   }
 
   void  prepend( const type& d) { insert(begin(),d); }
-  
-  void  append( const type& d ) 
+
+  void  append( const type& d )
   {
     QByteArray b;
     QDataStream s(b, IO_WriteOnly);
@@ -195,7 +195,7 @@ public:
   void command(QDataStream &s,int cmd,bool)
   {
     KGamePropertyBase::command(s, cmd);
-//    boDebug(11001) << "---> LIST id="<<id()<<" got command ("<<cmd<<") !!!" <<endl; 
+//    boDebug(11001) << "---> LIST id="<<id()<<" got command ("<<cmd<<") !!!" <<endl;
     Iterator it;
     switch(cmd)
     {
@@ -206,7 +206,7 @@ public:
         s >> i >> data;
         it=at(i);
         QValueList<type>::insert(it,data);
-//        boDebug(11001) << "CmdInsert:id="<<id()<<" i="<<i<<" data="<<data <<endl; 
+//        boDebug(11001) << "CmdInsert:id="<<id()<<" i="<<i<<" data="<<data <<endl;
         if (isEmittingSignal()) emitSignal();
         break;
       }
@@ -215,7 +215,7 @@ public:
         type data;
 	s >> data;
         QValueList<type>::append(data);
-//        boDebug(11001) << "CmdAppend:id=" << id() << " data=" << data << endl; 
+//        boDebug(11001) << "CmdAppend:id=" << id() << " data=" << data << endl;
         if (isEmittingSignal()) emitSignal();
 	break;
       }
@@ -225,14 +225,14 @@ public:
         s >> i;
         it=at(i);
         QValueList<type>::remove(it);
-//        boDebug(11001) << "CmdRemove:id="<<id()<<" i="<<i <<endl; 
+//        boDebug(11001) << "CmdRemove:id="<<id()<<" i="<<i <<endl;
         if (isEmittingSignal()) emitSignal();
         break;
       }
       case CmdClear:
       {
         QValueList<type>::clear();
-//        boDebug(11001) << "CmdClear:id="<<id()<<endl; 
+//        boDebug(11001) << "CmdClear:id="<<id()<<endl;
         if (isEmittingSignal()) emitSignal();
         break;
       }
@@ -241,6 +241,11 @@ public:
         break;
     }
   }
+
+  inline Iterator begin() { return QValueList<type>::begin(); }
+  inline Iterator end() { return QValueList<type>::end(); }
+  inline Iterator at(uint i) { return QValueList<type>::at(i); }
+  inline uint count() { return QValueList<type>::count(); }
 
 protected:
   void extractProperty(const QByteArray& b)
