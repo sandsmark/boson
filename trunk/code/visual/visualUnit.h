@@ -36,7 +36,7 @@ class visualUnit : public QCanvasSprite
 {
 public:
 	visualUnit(QCanvasPixmapArray* s) : QCanvasSprite(s, vcanvas)
-		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0; }
+		{ power = MAX_POWER; sp_down = 0l; sp_up = 0l; contain = 0;  show(); }
 	
 	void	unSelect();
 	void	updateContain(uint c) { contain = c;}
