@@ -140,7 +140,7 @@ bool editorField::Save(QString filename)
 }
 
 
-bool editorField::New(uint w, uint h, const QString &name)
+bool editorField::New(groundType fill_ground, uint w, uint h, const QString &name)
 {
 	int i,j;
 
@@ -164,7 +164,7 @@ bool editorField::New(uint w, uint h, const QString &name)
 	/* initialisation */
 	for (i=0; i< map_width; i++)
 		for (j=0; j< map_height; j++) {
-			cells[i][j].set( GROUND_WATER, i, j);
+			cells[i][j].set( fill_ground, i, j);
 			cells[i][j].setFrame((3*i+5*j)%4);
 		}
 

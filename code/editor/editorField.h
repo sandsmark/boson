@@ -55,7 +55,7 @@ public:
 
   bool Load(QString filename);
   bool Save(QString filename);
-  bool New(uint w, uint h, const QString &name);
+  bool New(groundType fill_ground, uint w, uint h, const QString &name);
 
   bool isModified() {return modified; }
 

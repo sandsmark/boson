@@ -473,7 +473,20 @@ void BoEditorApp::slotFileNew()
 
 	/* the physical map is created when a game is created */
 	vfield = field = new editorField();
-	if (!field->New(newdlg->scb_width->value(), newdlg->scb_height->value(), newdlg->qle_name->text() ) ) {
+
+	groundType g;
+	switch(newdlg->type) {
+		default:
+			g =  GROUND_WATER;
+			break;
+		case 1:
+			g =  GROUND_GRASS;
+			break;
+		case 2:
+			g =  GROUND_DESERT;
+			break;
+	};
+	if (!field->New(g, newdlg->scb_width->value(), newdlg->scb_height->value(), newdlg->qle_name->text() ) ) {
 		delete field;
 		field = 0;
 		delete newdlg;
