@@ -34,8 +34,8 @@
 #include "bosonprofiling.h"
 #include "bofile.h"
 #include "bodebug.h"
-#include "bosonpropertyxml.h"
 #include "bosonweapon.h"
+#include "bosonsaveload.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
 #include <klocale.h>
@@ -48,7 +48,6 @@
 #include <qptrqueue.h>
 #include <qdom.h>
 #include <qdatastream.h>
-#include <qfile.h>
 
 #ifndef KGAME_HAVE_KGAME_PORT
 #include <qsocket.h>
@@ -182,7 +181,7 @@ public:
 
 		mAdvanceDividerCount = 0;
 
-		mLoadingStatus = Boson::NotLoaded;
+		mLoadingStatus = BosonSaveLoad::NotLoaded;
 	}
 
 	QTimer* mGameTimer;
@@ -208,7 +207,7 @@ public:
 	KGameProperty<unsigned int> mAdvanceCount;
 	KGamePropertyInt mAdvanceFlag;
 
-	Boson::LoadingStatus mLoadingStatus;
+	BosonSaveLoad::LoadingStatus mLoadingStatus;
 };
 
 Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
@@ -1809,406 +1808,31 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  delete m;
 }
 
+void Boson::initSaveLoad(BosonSaveLoad* b)
+{
+ if (b) {
+	b->setCanvas(d->mCanvas);
+	b->setPlayField(d->mPlayField);
+ }
+}
+
 bool Boson::saveToFile(const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
- BosonProfiler profiler(BosonProfiling::SaveGameToXML);
- if (playerCount() < 1) {
-	boError() << k_funcinfo << "no players in game. cannot save" << endl;
-	return false;
- }
- if (gameStatus() == KGame::Init) {
-	boError() << k_funcinfo << "Running game must not be in Init state" << endl;
-	return false;
- }
- if (!d->mPlayField) {
-	BO_NULL_ERROR(d->mPlayField);
-	return false;
- }
- boProfiling->start(BosonProfiling::SaveKGameToXML);
- QString kgameXML = saveKGameAsXML();
- boProfiling->stop(BosonProfiling::SaveKGameToXML);
- if (kgameXML.isNull()) {
-	return false;
- }
-
- boProfiling->start(BosonProfiling::SavePlayersToXML);
- QString playersXML = savePlayersAsXML();
- boProfiling->stop(BosonProfiling::SavePlayersToXML);
- if (playersXML.isNull()) {
-	return false;
- }
-
- boProfiling->start(BosonProfiling::SaveCanvasToXML);
- QString canvasXML = saveCanvasAsXML();
- boProfiling->stop(BosonProfiling::SaveCanvasToXML);
- if (canvasXML.isNull()) {
-	return false;
- }
-
- boProfiling->start(BosonProfiling::SaveExternalToXML);
- QString externalXML = saveExternalAsXML();
- boProfiling->stop(BosonProfiling::SaveExternalToXML);
- if (externalXML.isNull()) {
-	return false;
- }
-
-
-
- // we store the map as binary. XML would take a lot of space and time to save
- // and load.
- QByteArray map;
- QDataStream stream(map, IO_WriteOnly);
- boProfiling->start(BosonProfiling::SavePlayFieldToXML);
- d->mPlayField->savePlayFieldForRemote(stream); // we emulate a network stream.
- boProfiling->stop(BosonProfiling::SavePlayFieldToXML);
-
- BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
- BSGFile f(file, false);
- if (!f.writeFile(QString::fromLatin1("kgame.xml"), kgameXML)) {
-	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("players.xml"), playersXML)) {
-	boError() << k_funcinfo << "Could not write players.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("canvas.xml"), canvasXML)) {
-	boError() << k_funcinfo << "Could not write canvas.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("external.xml"), externalXML)) {
-	boError() << k_funcinfo << "Could not write external.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("map"), map)) {
-	boError() << k_funcinfo << "Could not write map to " << file << endl;
-	return false;
- }
- writeProfiler.stop(); // in case we add something below one day :)
-
- return true;
-}
-
-QString Boson::saveKGameAsXML()
-{
- QDomDocument doc(QString::fromLatin1("Boson"));
- QDomElement root = doc.createElement(QString::fromLatin1("Boson")); // XML file for the Boson object
- doc.appendChild(root);
- root.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION);
-
- // store the dataHandler()
- BosonCustomPropertyXML propertyXML;
- QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
- if (!propertyXML.saveAsXML(handler, dataHandler())) { // AB: we should exclude gameStatus from this! we should stay in KGame::Init! -> add a BosonPropertyXML::remove() or so
-	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
-	return QString::null;
- }
- root.appendChild(handler);
-
- // here we could add additional data for the Boson object.
- // but I believe all data should get into the datahandler as far as possible
-
- return doc.toString();
-}
-
-QString Boson::savePlayersAsXML()
-{
- QDomDocument doc(QString::fromLatin1("Players"));
- QDomElement root = doc.createElement(QString::fromLatin1("Players"));
- doc.appendChild(root);
-
- KGamePlayerList* list = playerList();
- for (KPlayer* p = list->first(); p; p = list->next()) {
-	// KGame also stored ID, RTTI and KPlayer::calcIOValue() here.
-	// I believe we won't need them. ID might be useful for network games,
-	// but we load from a file here.
-	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
-	if (!((Player*)p)->saveAsXML(element)) {
-		boError() << k_funcinfo << "Unable to save player " << p->id() << endl;
-		continue;
-	}
-	root.appendChild(element);
- }
-
- // save the ID of the local player
- if (d->mPlayer) {
-	root.setAttribute(QString::fromLatin1("LocalPlayerId"), (unsigned int)d->mPlayer->id());
- } else {
-	// this might be the case for network games.
-	// (when a player enters the game it is saved on the ADMIN and loaded on
-	// the new client).
-	// But currently we don't use XML for that. Maybe we will never do.
-	boWarning() << k_funcinfo << "NULL local player" << endl;
- }
-
- return doc.toString();
-}
-
-QString Boson::saveCanvasAsXML()
-{
- QDomDocument doc(QString::fromLatin1("Canvas"));
- QDomElement root = doc.createElement(QString::fromLatin1("Canvas")); // XML file for canvas
- doc.appendChild(root);
-
- d->mCanvas->saveAsXML(root);
-
- return doc.toString();
-}
-
-QString Boson::saveExternalAsXML()
-{
- QDomDocument doc(QString::fromLatin1("External"));
- QDomElement root = doc.createElement(QString::fromLatin1("External")); // XML file for external data
- doc.appendChild(root);
-
- emit signalSaveExternalStuffAsXML(root);
-
- return doc.toString();
+ BosonSaveLoad* save = new BosonSaveLoad(this);
+ bool ret = save->saveToFile(d->mPlayer, file);
+ delete save;
+ return ret;
 }
 
 bool Boson::loadFromFile(const QString& file)
 {
  boDebug(260) << k_funcinfo << endl;
- d->mLoadingStatus = LoadingInProgress;
- BSGFile f(file, true);
- if (!f.checkTar()) {
-	boError(260) << k_funcinfo << "Could not load from " << file << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- // kgame.xml is mandatory in all boson savegame versions. We can get the
- // savegame format version from there (which is also mandatory) so we load this
- // first.
- QString kgameXML;
- kgameXML = QString(f.kgameData());
- if (kgameXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- QString playersXML;
- QString canvasXML;
- QString externalXML;
- QByteArray map;
-
- playersXML = QString(f.playersData());
- canvasXML = QString(f.canvasData());
- externalXML = QString(f.externalData());
- map = f.mapData();
-
- if (playersXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty playersXML" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (canvasXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty canvasXML" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (externalXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty externalXML" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (map.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty map" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- reset();
- if (playerCount() != 0) {
-	boError(260) << k_funcinfo << "not all players removed!" << endl;
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- if (!loadKGameFromXML(kgameXML)) {
-	return false;
- }
-
- // KGame::loadgame() also loads KGame::d->mUniquePlayerNumber !!
- // KGame::loadgame() also loads a seed for KGame::random() (not so important)
-
- // now load the players (not the units!)
- QMap<Player*, QDomElement> player2Element;
- QDomDocument doc(QString::fromLatin1("Boson"));
- if (!loadXMLDoc(&doc, playersXML)) {
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomElement root = doc.documentElement();
- if (!root.hasAttribute(QString::fromLatin1("LocalPlayerId"))) {
-	boError(260) << k_funcinfo << "missing attribute: LocalPlayerId" << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- bool ok = false;
- unsigned int localId = root.attribute(QString::fromLatin1("LocalPlayerId")).toUInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "invalid LocalPlayerId: " << root.attribute(QString::fromLatin1("LocalPlayerId")) << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Player"));
- if (list.count() < 1) {
-	boError(260) << k_funcinfo << "no Player tags in file" << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- boDebug(260) << k_funcinfo << "loading " << list.count() << " players" << endl;
- emit signalLoadingPlayersCount(list.count());
- for (unsigned int i = 0; i < list.count(); i++) {
-	boDebug(260) << k_funcinfo << "creating player " << i << endl;
-	QDomElement player = list.item(i).toElement();
-	if (player.isNull()) {
-		boError(260) << k_funcinfo << "NULL player node" << endl;
-		continue;
-	}
-	Player* p = (Player*)createPlayer(0, 0, false); // we ignore all params anyway.
-	p->loadFromXML(player);
-	systemAddPlayer((KPlayer*)p);
-	player2Element.insert(p, player);
- }
- boDebug(260) << k_funcinfo << "searching local player" << endl;
- d->mPlayer = (Player*)findPlayer(localId);
- if (!d->mPlayer) {
-	boWarning(260) << k_funcinfo << "local player NOT found" << endl;
- }
-
-
- // now load the map (must happen before loading units)
- // AB: can we move this before loading the players?
- emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
- emit signalInitMap(map);
-
-
- // Load player data (e.g. unit configs, unit models, ...
- // TODO: since we use XML for savegames now we should be able to include this
- // to regular startup code in BosonStarting!
- KPlayer* p;
- int current = 0;
- for (p = playerList()->first(); p; p = playerList()->next(), current++) {
-	emit signalLoadingPlayer(current);
-	emit signalLoadPlayerData((Player*)p);
-	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
- }
-
-
- boDebug(260) << k_funcinfo << "loading units" << endl;
- QMap<Player*, QDomElement>::Iterator it;
- for (it = player2Element.begin(); it != player2Element.end(); ++it) {
-	Player* p = it.key();
-	if (!p->speciesTheme()) {
-		boError() << k_funcinfo << "NULL speciesTheme" << endl;
-		continue;
-	}
-	QDomElement e = it.data();
-	p->loadUnitsFromXML(e);
- }
-
- // Load canvas (shots)
- if (!loadCanvasFromXML(canvasXML)) {
-	return false;
- }
-
- // Load external stuff (camera)
- if (!loadExternalFromXML(externalXML)) {
-	return false;
- }
-
- d->mLoadingStatus = LoadingCompleted;
- return true;
-}
-
-bool Boson::loadKGameFromXML(const QString& xml)
-{
- boDebug() << k_funcinfo << endl;
- QDomDocument doc(QString::fromLatin1("Boson"));
- if (!loadXMLDoc(&doc, xml)) {
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomElement root = doc.documentElement();
- bool ok = false;
- unsigned int version = root.attribute(QString::fromLatin1("SaveGameVersion")).toUInt(&ok);
- if (!ok) {
-	boError() << k_funcinfo << "savegame version not a valid number: " << root.attribute(QString::fromLatin1("SaveGameVersion")) << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- if (version != latestSavegameVersion()) {
-	boError() << "savegame version " << version << " not supported (latest is " << latestSavegameVersion() << ")" << endl;
-	d->mLoadingStatus = InvalidVersion;
-	return false;
- }
-
- // load the datahandler
- QDomElement handler = root.namedItem(QString::fromLatin1("DataHandler")).toElement();
- if (handler.isNull()) {
-	boError() << k_funcinfo << "No DataHandler tag found" << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- BosonCustomPropertyXML propertyXML;
- if (!propertyXML.loadFromXML(handler, dataHandler())) {
-	boError() << k_funcinfo << "unable to load KGame data handler" << endl;
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
-#warning dont load gamestatus!
- // FIXME: the property handler also loads KGame::gameStatus(), but it must
- // remain in Init state until we completed loading!
- // this is a workaround for this problem:
- {
-	// set gameStatus to Init. Will be set to Run later
-	QByteArray b;
-	QDataStream s(b, IO_WriteOnly);
-	KGameMessage::createPropertyHeader(s, KGamePropertyBase::IdGameStatus);
-	s << (int)KGame::Init;
-	QDataStream readStream(b, IO_ReadOnly);
-	dataHandler()->processMessage(readStream, dataHandler()->id(), false);
- }
-
- return true;
-}
-
-bool Boson::loadCanvasFromXML(const QString& xml)
-{
- boDebug() << k_funcinfo << endl;
- QDomDocument doc(QString::fromLatin1("Canvas"));
- if (!loadXMLDoc(&doc, xml)) {
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomElement root = doc.documentElement();
-
- if (!d->mCanvas->loadFromXML(root)) {
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
-
- return true;
-}
-
-bool Boson::loadExternalFromXML(const QString& xml)
-{
- boDebug() << k_funcinfo << endl;
- // Load external stuff (camera)
- QDomDocument doc(QString::fromLatin1("External"));
- if (!loadXMLDoc(&doc, xml)) {
-	d->mLoadingStatus = InvalidXML;
-	return false;
- }
- QDomElement root = doc.documentElement();
-
- emit signalLoadExternalStuffFromXML(root);
-
- return true;
+ BosonSaveLoad* load = new BosonSaveLoad(this);
+ bool ret = load->loadFromFile(file);
+ d->mLoadingStatus = load->loadingStatus();
+ delete load;
+ return ret;
 }
 
 bool Boson::save(QDataStream& stream, bool saveplayers)
@@ -2223,6 +1847,10 @@ bool Boson::save(QDataStream& stream, bool saveplayers)
 #endif
 }
 
+
+// AB: note: this is NOT called for saving to a file but for saving to stream
+// only. saving to stream happens when a new player joins (we transfer the
+// current game to that player)
 bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
 {
  // AB: we need to save:
@@ -2318,7 +1946,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  // network is false for normal game-loading
  boDebug() << k_funcinfo << endl;
 
- d->mLoadingStatus = LoadingInProgress;
+ d->mLoadingStatus = BosonSaveLoad::LoadingInProgress;
  emit signalLoadingType(BosonLoadingWidget::LoadSavedGameHeader);
 
  // Load magic data
@@ -2329,22 +1957,22 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if ((a != 128) || (b1 != 'B' || b2 != 'S' || b3 != 'G')) {
 	// Error - not Boson SaveGame
 	boError() << k_funcinfo << "This file is no Boson SaveGame" << endl;
-	d->mLoadingStatus = InvalidFileFormat;
+	d->mLoadingStatus = BosonSaveLoad::InvalidFileFormat;
 	return false;
  }
  stream >> c;
  if (c != cookie()) {
 	// Error - wrong cookie
 	boError() << k_funcinfo << "Invalid cookie in header (found: " << c << "; should be: " << cookie() << ")" << endl;
-	d->mLoadingStatus = InvalidCookie;
+	d->mLoadingStatus = BosonSaveLoad::InvalidCookie;
 	return false;
  }
  stream >> v;
- if (v != latestSavegameVersion()) {
+ if (v != BosonSaveLoad::latestSavegameVersion()) {
 	// Error - older version
 	// TODO: It may be possible to load this version
-	boError() << k_funcinfo << "Unsupported format version (found: " << v << "; latest: " << latestSavegameVersion() << ")" << endl;
-	d->mLoadingStatus = InvalidVersion;
+	boError() << k_funcinfo << "Unsupported format version (found: " << v << "; latest: " << BosonSaveLoad::latestSavegameVersion() << ")" << endl;
+	d->mLoadingStatus = BosonSaveLoad::InvalidVersion;
 	return false;
  }
 
@@ -2381,7 +2009,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  if (!KGame::loadgame(stream, network, reset)) {
 	// KGame loading error
 	boError() << k_funcinfo << "KGame loading error" << endl;
-	d->mLoadingStatus = KGameError;
+	d->mLoadingStatus = BosonSaveLoad::KGameError;
 	return false;
  }
  boDebug() << k_funcinfo << "kgame loading successful" << endl;
@@ -2439,19 +2067,14 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
 	return false;
  }
 
- d->mLoadingStatus = LoadingCompleted;
+ d->mLoadingStatus = BosonSaveLoad::LoadingCompleted;
  boDebug() << k_funcinfo << " done" << endl;
  return true;
 }
 
-Boson::LoadingStatus Boson::loadingStatus() const
+int Boson::loadingStatus() const
 {
- return d->mLoadingStatus;
-}
-
-unsigned long int Boson::latestSavegameVersion()
-{
- return BOSON_SAVEGAME_FORMAT_VERSION;
+ return (int)d->mLoadingStatus;
 }
 
 void Boson::toggleAdvanceFlag()

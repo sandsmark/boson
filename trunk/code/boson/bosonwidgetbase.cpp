@@ -23,6 +23,7 @@
 #include "bosonminimap.h"
 #include "bosoncanvas.h"
 #include "boson.h"
+#include "bosonsaveload.h"
 #include "player.h"
 #include "unit.h"
 #include "bosonmessage.h"
@@ -756,7 +757,7 @@ void BosonWidgetBase::startScenarioAndGame()
  //  already loaded as well
  // FIXME: this is hackish but I don't know any other way of checking if game
  //  is loaded or new one here. Feel free to improve
- if (boGame->loadingStatus() != Boson::LoadingCompleted) {
+ if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
 	displayManager()->slotCenterHomeBase();
  }
 

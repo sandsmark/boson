@@ -24,6 +24,7 @@
 #include "editorwidget.h"
 #include "bosonconfig.h"
 #include "boson.h"
+#include "bosonsaveload.h"
 #include "player.h"
 #include "bosonplayfield.h"
 #include "bosoncanvas.h"
@@ -574,20 +575,20 @@ void TopWidget::slotLoadGame(const QString& fileName)
  if (!d->mStarting->loadGame(fileName)) {
 	// There was a loading error
 	// Find out what went wrong...
-	Boson::LoadingStatus status = boGame->loadingStatus();
+	BosonSaveLoad::LoadingStatus status = boGame->loadingStatus();
 	QString text, caption;
-	if (status == Boson::InvalidFileFormat || status == Boson::InvalidCookie) {
+	if (status == BosonSaveLoad::InvalidFileFormat || status == BosonSaveLoad::InvalidCookie) {
 		text = i18n("This file is not a Boson SaveGame!");
 		caption = i18n("Invalid file format!");
-	} else if (status == Boson::InvalidVersion) {
+	} else if (status == BosonSaveLoad::InvalidVersion) {
 		text = i18n("This file has unsupported saving format!\n"
 				"Probably it is saved with too old version of Boson");
 		caption = i18n("Unsupported file format version!");
-	} else if (status == Boson::KGameError) {
+	} else if (status == BosonSaveLoad::KGameError) {
 		text = i18n("Error loading saved game!");
 		caption = i18n("An error occured while loading saved game!\n"
 				"Probably the game wasn't saved properly");
-	} else if (status == Boson::InvalidXML || status == Boson::BSGFileError) {
+	} else if (status == BosonSaveLoad::InvalidXML || status == BosonSaveLoad::BSGFileError) {
 		text = i18n("Error loading saved game!");
 		caption = i18n("An error occured while loading saved game!\n"
 				"Probably the game wasn't saved properly or this file is not a Boson SaveGame!");
