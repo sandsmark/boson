@@ -25,6 +25,7 @@
 #include <kdebug.h>
 
 #include <qimage.h>
+#include <qgl.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -140,6 +141,10 @@ void BosonModel::loadTextures()
 
 void BosonModel::createDisplayLists()
 {
+ if (!QGLContext::currentContext()) {
+	kdError() << k_funcinfo << "NULL current context" << endl;
+	return;
+ }
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames); 
  for (int i = 0; i < m3ds->frames; i++) {
