@@ -193,7 +193,7 @@ void bosonField::move(moveMsg_t &msg)
 		return;
 	}
 
-	m->s_moveBy(msg.dx, msg.dy, msg.direction);
+	m->s_moveTo(msg.newx, msg.newy, msg.direction);
 }
 
 void bosonField::requestAction(void)
