@@ -1101,16 +1101,17 @@ void BosonBigDisplayBase::renderText()
 
  // Alpha-blended rectangle
  glEnable(GL_BLEND);
- glColor4f(0.0, 0.0, 0.0, 0.5);
- glRecti(x - alphaborder, d->mViewport[3] - border + alphaborder,
-		d->mViewport[2] - border + alphaborder,
-		d->mViewport[3] - (2 * d->mDefaultFont->height()) - border - alphaborder);
- glColor3f(1.0, 1.0, 1.0);
+ glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+ glRecti(x - alphaborder, y + d->mDefaultFont->height() + alphaborder,
+		x + w + alphaborder,
+		y - d->mDefaultFont->height() - alphaborder); // y is at bottom of first line, subtract fontheight and we're at the bottom of 2nd line
+ glColor3ub(255, 255, 255);
  glRasterPos2i(x, y);
  glCallLists(minerals.length(), GL_UNSIGNED_BYTE, (GLubyte*)minerals.latin1());
  y -= d->mDefaultFont->height();
  glRasterPos2i(x, y);
  glCallLists(oil.length(), GL_UNSIGNED_BYTE, (GLubyte*)oil.latin1());
+
  if (d->mDebugMapCoordinates) {
 	canvasToWorld(d->mCanvasPos.x(), d->mCanvasPos.y(), 0.0,
 			&d->mDebugMapCoordinatesX,
@@ -1122,8 +1123,18 @@ void BosonBigDisplayBase::renderText()
 			arg((double)d->mDebugMapCoordinatesZ, 6, 'f', 3).
 			arg(d->mCanvasPos.x(), 4, 10).
 			arg(d->mCanvasPos.y(), 4, 10);
+	w = d->mDefaultFont->width(s);
+	x = d->mViewport[2] - border - w;
 	y -= d->mDefaultFont->height();
-	glRasterPos2i(d->mViewport[2] - border - d->mDefaultFont->width(s), y);
+	y -= alphaborder * 2;
+
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glRecti(x - alphaborder, y + d->mDefaultFont->height() + alphaborder,
+			x + w + alphaborder,
+			y - alphaborder);
+
+	glColor3ub(255, 255, 255);
+	glRasterPos2i(x, y);
 	glCallLists(s.length(), GL_UNSIGNED_BYTE, (GLubyte*)s.latin1());
  }
 
