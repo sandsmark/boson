@@ -1,0 +1,15 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Tank
+Id=10001
+Health=100
+MineralCost=100
+Range=100
+Damage=100
+Reload=50
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=true
+CanGoOnWater=false
