@@ -898,52 +898,62 @@ void BosonBigDisplayBase::paintGL()
 	glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
 
 #warning FIXME: z value!
+	bool modelPreview = false;
+	bool cellPreview = false;
+	if (d->mPlacementPreviewModel && d->mPlacementPreviewModel->frame(0)) {
+		modelPreview = true;
+	}
+	if (d->mCellPlacementTexture != 0) {
+		cellPreview = true;
+	}
 	const float z = 0.1;
 	QPoint pos(d->mPlacementCanvasPos);
-	if (d->mPlacementPreviewModel && d->mPlacementPreviewModel->frame(0)) {
+	int w = 0;
+	int h = 0;
+	if (modelPreview) {
+		w = d->mPlacementPreviewProperties->unitWidth();
+		h = d->mPlacementPreviewProperties->unitHeight();
+	}
+	float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
+	float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
+	if (pos.x() >= 0) {
+		x = x - pos.x() % BO_TILE_SIZE;
+	} else {
+		x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
+	}
+	if (pos.y() >= 0) {
+		y = y - pos.y() % BO_TILE_SIZE;
+	} else {
+		y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
+	}
+	x /= BO_TILE_SIZE;
+	y /= BO_TILE_SIZE;
+	glTranslatef(x, -y, z);
+	if (modelPreview) {
 		BoFrame* f = d->mPlacementPreviewModel->frame(0);
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		int w = d->mPlacementPreviewProperties->unitWidth();
-		int h = d->mPlacementPreviewProperties->unitHeight();
-		float x = ((pos.x() + w / 2)) * BO_GL_CELL_SIZE;
-		float y = ((pos.y() + h / 2)) * BO_GL_CELL_SIZE;
-		if (pos.x() >= 0) {
-			x = x - pos.x() % BO_TILE_SIZE;
-		} else {
-			x = x - (BO_TILE_SIZE + pos.x() % BO_TILE_SIZE);
-		}
-		if (pos.y() >= 0) {
-			y = y - pos.y() % BO_TILE_SIZE;
-		} else {
-			y = y - (BO_TILE_SIZE + pos.y() % BO_TILE_SIZE);
-		}
-		x /= BO_TILE_SIZE;
-		y /= BO_TILE_SIZE;
-		glTranslatef(x, -y, z);
 		d->mPlacementPreviewModel->enablePointer();
 		f->renderFrame(&localPlayer()->teamColor());
-		glTranslatef(-x, y, -z);
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	} else if (d->mCellPlacementTexture) {
-		float x = ((float)pos.x()) * BO_GL_CELL_SIZE;
-		float y = ((float)pos.y()) * BO_GL_CELL_SIZE;
+	} else if (cellPreview) {
 		glBindTexture(GL_TEXTURE_2D, d->mCellPlacementTexture);
 		glBegin(GL_QUADS);
 			glTexCoord2fv(textureUpperLeft);
-			glVertex3f(x, -y, z);
+			glVertex3f(0.0f, 0.0f, 0.0f);
 
 			glTexCoord2fv(textureLowerLeft);
-			glVertex3f(x, -y - BO_GL_CELL_SIZE, z);
+			glVertex3f(0.0f, - BO_GL_CELL_SIZE, 0.0f);
 
 			glTexCoord2fv(textureLowerRight);
-			glVertex3f(x + BO_GL_CELL_SIZE, -y - BO_GL_CELL_SIZE, z);
+			glVertex3f(BO_GL_CELL_SIZE, -BO_GL_CELL_SIZE, 0.0f);
 
 			glTexCoord2fv(textureUpperRight);
-			glVertex3f(x + BO_GL_CELL_SIZE, -y, z);
+			glVertex3f(BO_GL_CELL_SIZE, 0.0f, 0.0f);
 		glEnd();
 	}
+	glTranslatef(-x, y, -z);
 	glColor4ub(255, 255, 255, 255);
 	glDisable(GL_BLEND);
 	// AB: see above. if GL_REPLACES ever becomes default we have to set it
