@@ -61,6 +61,39 @@
 //  shouldn't occupy multiple cells while firing at enemies.
 #define CHECK_ENEMIES_ONLY_AT_WAYPOINT
 
+void printBinaryFloat(const char* name, float var)
+{
+ fprintf(stderr, "    %s: %f: ", name, var);
+ int var2 = *((int*)&var);
+ for (int i = 31; i >= 0; i--) {
+	if (var2 & 0x1 << i) {
+		fprintf(stderr, "1");
+	} else {
+		fprintf(stderr, "0");
+	}
+ }
+ int sign = (var2 & (0x1 << 31)) ? 1 : 0;
+ int e = 0;
+ float m = 0;
+ for (int i = 30; i >= 23; i--) {
+	e <<= 1;
+	if (var2 & (0x1 << i)) {
+		e += 1;
+	}
+ }
+ for (int i = 0; i < 23; i++) {
+	m /= 2.0f;
+	if (var2 & (0x1 << i)) {
+		m += (0.5f);
+	}
+ }
+ // ieee stuff. mantissa always has a leading 1, exponent has a bias of 127
+ m += 1.0f;
+ e -= 127;
+ fprintf(stderr, " - sign=%d, e=%d, m=%f\n", sign, e, m);
+}
+
+
 bool Unit::mInitialized = false;
 
 class Unit::UnitPrivate
@@ -1698,20 +1731,12 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 			") to (" << x + xspeed << "; " << y + yspeed <<
 			"); pp: (" << (float)pp.x() << "; " << (float)pp.y() <<
 			"); dist: " << dist << "/" << speed() << endl;
-#define printBinary(var) { \
-		fprintf(stderr, "    %s: ", #var); \
-		int* var2 = (int*)&var; \
-		for (int i = 31; i >= 0; i--) { if ((*var2) & 0x1 << i) {fprintf(stderr, "1");} else{fprintf(stderr, "0");} } \
-		fprintf(stderr, "\n"); \
-}
-	printBinary(x);
-	printBinary(y);
-	printBinary(xspeed);
-	printBinary(yspeed);
-	float ppx = (float)pp.x();
-	float ppy = (float)pp.y();
-	printBinary(ppx);
-	printBinary(ppy);
+	printBinaryFloat("x", x);
+	printBinaryFloat("y", y);
+	printBinaryFloat("xspeed", xspeed);
+	printBinaryFloat("yspeed", yspeed);
+	printBinaryFloat("pp.x()", (float)pp.x());
+	printBinaryFloat("pp.y()", (float)pp.y());
 	// Check if we reached that pathpoint
 	if ((x + xspeed == (float)pp.x()) && (y + yspeed == (float)pp.y())) {
 		// Unit has reached pathpoint
