@@ -170,8 +170,9 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
         getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
     BoVector3 velo(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
-    s->matrix().transform(&pos, &pos);
-    particle->pos += pos;
+    BoVector3 pos2;
+    s->matrix().transform(&pos2, &pos);
+    particle->pos += pos2;
     s->matrix().transform(&(particle->velo), &velo);
   }
   else

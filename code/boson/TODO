@@ -41,9 +41,7 @@ Game TODOs
 - many methods depend on a factory to be a facility. remove this dependance. a
   production plugin can be part of a mobile unit, too
 - Add screenshots support to saving/loading widget
-- Shooting sounds should be specified per weapon, not per unit
-- make mineralrefinery-chimney smoke configurable!! less effects==faste- make
-  mineralrefinery-chimney smoke configurable!! less effects==faster
+- make mineralrefinery-chimney smoke configurable!! less effects==faster
 
 Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
