@@ -58,7 +58,7 @@ static KCmdLineOptions options[] =
 int main(int argc, char **argv)
 {
 //FIXME:
- KAboutData about("boson",
+ KAboutData about("boeditor",
 		I18N_NOOP("Boson Map Editor"),
 		version,
 		description,
