@@ -25,6 +25,7 @@
 #include "unit.h"
 #include "bodebug.h"
 #include "bosonconfig.h"
+#include "bosonweapon.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -33,26 +34,26 @@
 #include <qvaluelist.h>
 
 
-/**********  UpgradePropertiesBase  **********/
-class UpgradePropertiesBase::UpgradePropertiesBasePrivate
+class UpgradeProperties::UpgradePropertiesPrivate
 {
 public:
-  UpgradePropertiesBasePrivate()
+  UpgradePropertiesPrivate()
   {
   }
 
   QValueList<unsigned long int> mRequireUnits;
   QValueList<unsigned long int> mRequireTechnologies;
   QValueList<unsigned long int> mApplyToTypes;
+
+  QMap<QString, QString> mEntryList;
 };
 
-UpgradePropertiesBase::UpgradePropertiesBase(bool isTechnology, unsigned long int id)
+UpgradeProperties::UpgradeProperties()
 {
-  d = new UpgradePropertiesBasePrivate;
-  mTechnology = isTechnology;
+  d = new UpgradePropertiesPrivate;
 
   mResearched = false;
-  mId = id;
+  mId = 0;
   mName = "";
   mMineralCost = 0;
   mOilCost = 0;
@@ -61,12 +62,12 @@ UpgradePropertiesBase::UpgradePropertiesBase(bool isTechnology, unsigned long in
   mPixmapName = "";
 }
 
-UpgradePropertiesBase::~UpgradePropertiesBase()
+UpgradeProperties::~UpgradeProperties()
 {
   delete d;
 }
 
-bool UpgradePropertiesBase::canBeResearched(Player* player)
+bool UpgradeProperties::canBeResearched(Player* player)
 {
   if(!d->mRequireUnits.isEmpty())
   {
@@ -94,283 +95,405 @@ bool UpgradePropertiesBase::canBeResearched(Player* player)
   return true;
 }
 
-void UpgradePropertiesBase::load(KSimpleConfig* cfg)
+void UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 {
-  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
-  // Load basic stuff
-  if(mTechnology)
-  {
-    // Config group is set earlier
-    mId = cfg->readUnsignedLongNumEntry("Id", 0);
-    if(mId == 0) {
-      boError() << k_funcinfo << "Invalid id: 0" << endl;
-    }
-    mName = cfg->readEntry("Name", i18n("unknown"));
-    mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
-    mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
-    mProducer = cfg->readUnsignedNumEntry("Producer", 0);
-    mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
-    mPixmapName = cfg->readEntry("Pixmap", "none.png");
-    d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
-    d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(cfg, "ApplyToTypes");
-    mApplyToFacilities = cfg->readBoolEntry("ApplyToFacilities", false);
-    mApplyToMobiles = cfg->readBoolEntry("ApplyToMobiles", false);
-  }
-  else
-  {
-    if(!cfg->hasGroup(QString("Upgrade_%1").arg(mId)))
-    {
-      boError() << k_funcinfo << "While loading upgrade with id " << mId << ": No config group for upgrade" << endl;
-      return;
-    }
-    cfg->setGroup(QString("Upgrade_%1").arg(mId));
-  }
-  d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
+  boDebug(600) << k_funcinfo << "Loading from group " << group << endl;
 
-  boDebug() << "    " << k_funcinfo << "Loading upgrade properties" << endl;
-  // Load upgrade properties
-  mHealth.loadValue(cfg, "Health");
-  mArmor.loadValue(cfg, "Armor");
-  mShields.loadValue(cfg, "Shields");
-  mUnitMineralCost.loadValue(cfg, "UnitMineralCost");
-  mUnitOilCost.loadValue(cfg, "UnitOilCost");
-  mSightRange.loadValue(cfg, "SightRange");
-  mUnitProductionTime.loadValue(cfg, "UnitProductionTime");
-  mSpeed.loadValue(cfg, "Speed");
+  // Load entry list
+  d->mEntryList = cfg->entryMap(group);
+
+  // Load basic stuff
+  cfg->setGroup(group);
+  mId = cfg->readUnsignedLongNumEntry("Id", 0);
+  if(mId == 0) {
+    boError(600) << k_funcinfo << "Invalid id: 0" << endl;
+    return;
+  }
+  mName = cfg->readEntry("Name", i18n("unknown"));
+  mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
+  mOilCost = cfg->readUnsignedLongNumEntry("OilCost", 0);
+  mProducer = cfg->readUnsignedNumEntry("Producer", 0);
+  mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
+  mPixmapName = cfg->readEntry("Pixmap", "none.png");
+  d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
+  d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
+  d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(cfg, "ApplyToTypes");
+  mApplyToFacilities = cfg->readBoolEntry("ApplyToFacilities", false);
+  mApplyToMobiles = cfg->readBoolEntry("ApplyToMobiles", false);
+
+  // Remove unwanted entries from the entry list
+  d->mEntryList.remove("Id");
+  d->mEntryList.remove("ApplyToTypes");
+  d->mEntryList.remove("ApplyToFacilities");
+  d->mEntryList.remove("ApplyToMobiles");
+  d->mEntryList.remove("Name");
+  d->mEntryList.remove("MineralCost");
+  d->mEntryList.remove("OilCost");
+  d->mEntryList.remove("Producer");
+  d->mEntryList.remove("ProductionTime");
+  d->mEntryList.remove("Pixmap");
+  d->mEntryList.remove("RequireUnits");
+  d->mEntryList.remove("RequireTechnologies");
 }
 
 
-void UpgradePropertiesBase::apply(Player* player)
+void UpgradeProperties::apply(Player* player)
 {
-  boDebug() << k_funcinfo << "isTech: " << isTechnology() << "; id: " << id() << endl;
+  boDebug(600) << k_funcinfo << "id: " << id() << endl;
   if(!isResearched())
   {
-    boError() << k_funcinfo << "Trying to apply non-researched upgrade" << endl;
+    boError(600) << k_funcinfo << "Trying to apply non-researched upgrade" << endl;
+    return;
   }
 
   // Add unit types to list
   QValueList<unsigned long int> list = d->mApplyToTypes;
-  if(isTechnology())
+  if(mApplyToFacilities)
   {
-    if(mApplyToFacilities)
-    {
-      list += player->speciesTheme()->allFacilities();
-    }
-    if(mApplyToMobiles)
-    {
-      list += player->speciesTheme()->allMobiles();
-    }
+    list += player->speciesTheme()->allFacilities();
   }
-  QValueList<unsigned long int>::Iterator it;
+  if(mApplyToMobiles)
+  {
+    list += player->speciesTheme()->allMobiles();
+  }
+  QValueList<unsigned long int>::Iterator tit;
   QString addingTo = "Adding to types:";
-  for(it = list.begin(); it != list.end(); it++)
+  for(tit = list.begin(); tit != list.end(); tit++)
   {
     addingTo += " ";
-    addingTo += QString::number(*it);
+    addingTo += QString::number(*tit);
   }
-  boDebug() << "  " << k_funcinfo << addingTo << endl;
+  boDebug(600) << "  " << k_funcinfo << addingTo << endl;
   // TODO: check for double typeIDs
 
-  mHealth.applyProperty(&list, player, Health);
-  mArmor.applyProperty(&list, player, Armor);
-  mShields.applyProperty(&list, player, Shields);
-  mUnitMineralCost.applyProperty(&list, player, MineralCost);
-  mUnitOilCost.applyProperty(&list, player, OilCost);
-  mSightRange.applyProperty(&list, player, SightRange);
-  mUnitProductionTime.applyProperty(&list, player, ProductionTime);
-  mSpeed.applyProperty(&list, player, Speed);
-}
-
-
-QValueList<unsigned long int> UpgradePropertiesBase::requiredUnits() const
-{
-  return d->mRequireUnits;
-}
-
-
-QValueList<unsigned long int> UpgradePropertiesBase::requiredTechnologies() const
-{
-  return d->mRequireTechnologies;
-}
-
-/**********  UpgradeProperties*Value  **********/
-
-template<class TYPE> QString UpgradePropertiesValue<TYPE>::loadBaseValue(KSimpleConfig* cfg, QString key)
-{
-  QString str;
-  specified = cfg->hasKey(key);
-  if(specified)
+  // Iterate through entries map and apply them
+  QMap<QString, QString>::Iterator it;
+  UpgradeType type;
+  int weaponid;
+  for(it = d->mEntryList.begin(); it != d->mEntryList.end(); it++)
   {
-    str = cfg->readEntry(key, "0");
-    boDebug() << "          " << k_funcinfo << "Loaded string: '" << str << "' (key was: " << key << ")" << endl;
-    if(str.left(1) == "+" || str.left(1) == "-")
+    // Reset weaponid
+    weaponid = -1;
+    if(it.key() == "Health")
     {
-      type = Relative;
+      boDebug(600) << k_funcinfo << "Found entry: Health;  value: " << it.data() << endl;
+      type = Health;
     }
-    else if(str.right(1) == "%")
+    else if(it.key() == "Armor")
     {
-      type = Percent;
-      str = str.left(str.length() - 1);
+      boDebug(600) << k_funcinfo << "Found entry: Armor;  value: " << it.data() << endl;
+      type = Armor;
+    }
+    else if(it.key() == "Shields")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: Shields;  value: " << it.data() << endl;
+      type = Shields;
+    }
+    else if(it.key() == "UnitMineralCost")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: UnitMineralCost;  value: " << it.data() << endl;
+      type = MineralCost;
+    }
+    else if(it.key() == "UnitOilCost")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: UnitOilCost;  value: " << it.data() << endl;
+      type = OilCost;
+    }
+    else if(it.key() == "SightRange")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: SightRange;  value: " << it.data() << endl;
+      type = SightRange;
+    }
+    else if(it.key() == "UnitProductionTime")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: UnitProductionTime;  value: " << it.data() << endl;
+      type = ProductionTime;
+    }
+    else if(it.key() == "Speed")
+    {
+      boDebug(600) << k_funcinfo << "Found entry: Speed;  value: " << it.data() << endl;
+      type = Speed;
+    }
+    else if(it.key().left(7) == "Weapon_")
+    {
+      boDebug(600) << k_funcinfo << "Found weapon entry: " << it.key() << "=" << it.data() << "; parsing..." << endl;
+      // Find weapon id
+      QString str = it.key().right(it.key().length() - 7);
+      int i = str.find(':');
+      boDebug(600) << "        " << k_funcinfo << "str: " << str << "; i: " << i << endl;
+      if(i < 1)
+      {
+        boError(600) << k_funcinfo << "Invalid weapon key: " << it.key() << endl;
+        continue;
+      }
+      weaponid = str.left(i).toInt();
+      boDebug(600) << "    " << k_funcinfo << "Weapon id as a string: \"" << str.left(i) << "\", as int: "
+          << weaponid << endl;
+      // Extract "weapon key", e.g. Damage, Range etc. from key
+      str = str.right(str.length() - i - 1);  // -1 is ":"
+      boDebug(600) << "        " << k_funcinfo << "weapon key: " << str << endl;
+      if(str == "Damage")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponDamage;  value: " << str << endl;
+        type = WeaponDamage;
+      }
+      else if(str == "DamageRange")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponDamageRange;  value: " << str << endl;
+        type = WeaponDamageRange;
+      }
+      else if(str == "FullDamageRange")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponFullDamageRange;  value: " << str << endl;
+        type = WeaponFullDamageRange;
+      }
+      else if(str == "Range")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponRange;  value: " << str << endl;
+        type = WeaponRange;
+      }
+      else if(str == "Reload")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponReload;  value: " << str << endl;
+        type = WeaponReload;
+      }
+      else if(str == "Speed")
+      {
+        boDebug(600) << k_funcinfo << "Found entry: WeaponSpeed;  value: " << str << endl;
+        type = WeaponSpeed;
+      }
+      else
+      {
+        boWarning(600) << k_funcinfo << "Unrecogniced weapon key: \"" << str << "\", skipping" << endl;
+        continue;
+      }
     }
     else
     {
-      type = Absolute;
+      boWarning(600) << k_funcinfo << "Unrecogniced key: \"" << it.key() << "\", skipping" << endl;
+      continue;
     }
-  }
-  return str;
-}
-
-void UpgradePropertiesUIntValue::loadValue(KSimpleConfig* cfg, QString key)
-{
-  QString str = loadBaseValue(cfg, key);
-  boDebug() << "      " << k_funcinfo << "Key: " << key << "; was specified: " << specified << endl;
-  if(specified)
-  {
-    value = str.toULong();
-    boDebug() << "        " << k_funcinfo << "Value as string: " << str << "; converted: " << value << "; type: " << type << endl;
+    applyProperty(&list, player, it.data(), type, weaponid);
   }
 }
 
-void UpgradePropertiesFloatValue::loadValue(KSimpleConfig* cfg, QString key)
+void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
+    Player* player, const QString& data, UpgradeType type, int weaponid)
 {
-  QString str = loadBaseValue(cfg, key);
-  boDebug() << k_funcinfo << "Key: " << key << "; was specified: " << specified << endl;
-  if(specified)
-  {
-    value = str.toFloat();
-    boDebug() << "    " << k_funcinfo << "Value as string: " << str << "; converted: " << value << "; type: " << type << endl;
-  }
-}
-
-void UpgradePropertiesUIntValue::applyProperty(QValueList<unsigned long int>* typeIds,
-    Player* player, UpgradeType type)
-{
-  if(!specified)
-  {
-    return;
-  }
-  boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
+  // Note that I don't use k_funcinfo here, because I get _very_ long lines with it
+  boDebug(600) << "    " << "[UpgradeProperties::applyProperty(...)] " << "Applying property (type: " << type << ") to " << typeIds->count() << " props. weaponid: " << weaponid << endl;
   QValueList<unsigned long int>::Iterator it;
-  unsigned long int oldvalue;
+  unsigned long int oldvalueuint;
+  float oldvaluef;
   for(it = typeIds->begin(); it != typeIds->end(); it++)
   {
-    boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
     UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
-    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->typeId() << "; name: " << prop->name() << endl;
-    switch(type)
+    boDebug(600) << "        " << "[UpgradeProperties::applyProperty(...)]" << "Applying to prop with id: " << prop->typeId() << "; name: " << prop->name() << endl;
+    if(weaponid == -1)
     {
-      case Health:
+      // Not a weapon upgrade
+      switch(type)
       {
-        oldvalue = prop->health();
-        boDebug() << "        " << k_funcinfo << "Applying health; old value: " << oldvalue << endl;
-        prop->setHealth(applyValue(oldvalue));
-        boDebug() << "        " << k_funcinfo << "New value: " << prop->health() << endl;
-        break;
-      }
-      case Armor:
-      {
-        oldvalue = prop->armor();
-        prop->setArmor(applyValue(oldvalue));
-        break;
-      }
-      case Shields:
-      {
-        oldvalue = prop->shields();
-        prop->setShields(applyValue(oldvalue));
-        break;
-      }
-      case MineralCost:
-      {
-        prop->setMineralCost(applyValue(prop->mineralCost()));
-        break;
-      }
-      case OilCost:
-      {
-        prop->setOilCost(applyValue(prop->oilCost()));
-        break;
-      }
-      case SightRange:
-      {
-        oldvalue = prop->sightRange();
-        prop->setSightRange(applyValue(oldvalue));
-        break;
-      }
-      case ProductionTime:
-      {
-        prop->setProductionTime(applyValue(prop->productionTime()));
-        break;
-      }
-      default:
-      {
-        boError() << k_funcinfo << "Invalid UpgradeType: " << type << endl;
-        break;
+        case Health:
+        {
+          oldvalueuint = prop->health();
+          prop->setHealth(applyValue(data, oldvalueuint));
+          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          break;
+        }
+        case Armor:
+        {
+          oldvalueuint = prop->armor();
+          prop->setArmor(applyValue(data, oldvalueuint));
+          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          break;
+        }
+        case Shields:
+        {
+          oldvalueuint = prop->shields();
+          prop->setShields(applyValue(data, oldvalueuint));
+          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          break;
+        }
+        case MineralCost:
+        {
+          oldvalueuint = prop->mineralCost();
+          prop->setMineralCost(applyValue(data, oldvalueuint));
+          break;
+        }
+        case OilCost:
+        {
+          oldvalueuint = prop->oilCost();
+          prop->setOilCost(applyValue(data, oldvalueuint));
+          break;
+        }
+        case SightRange:
+        {
+          oldvalueuint = prop->sightRange();
+          prop->setSightRange(applyValue(data, oldvalueuint));
+          applyPropertyToUnits((float)oldvalueuint, *it, player, type);
+          break;
+        }
+        case ProductionTime:
+        {
+          oldvalueuint = prop->productionTime();
+          prop->setProductionTime(applyValue(data, oldvalueuint));
+          break;
+        }
+        case Speed:
+        {
+          oldvaluef = prop->speed();
+          prop->setSpeed(applyValue(data, oldvaluef));
+        }
+        default:
+        {
+          boError(600) << "[UpgradeProperties::applyProperty(...)]" << "Invalid UpgradeType: " << type << endl;
+          break;
+        }
       }
     }
-    // Apply to already existing units
-    boDebug() << "    " << k_funcinfo << "Applying to existing units with typeid " << *it << endl;
-    applyPropertyToUnits(oldvalue, *it, player, type);
+    else
+    {
+      // It's a weapon upgrade
+      // Weapon's ids actually start from 1. So we add 1 to weaponid here
+      BosonWeaponProperties* wep = const_cast<BosonWeaponProperties*>(prop->weaponProperties(weaponid + 1));
+      if(!wep)
+      {
+        boError(600) << "[UpgradeProperties::applyProperty(...)]" << "NULL const weaponproperties (id: " << weaponid << ")" << endl;
+        return;
+      }
+      switch(type)
+      {
+        case WeaponDamage:
+        {
+          oldvalueuint = wep->damage();
+          wep->setDamage(applyValue(data, oldvalueuint));
+          break;
+        }
+        case WeaponDamageRange:
+        {
+          oldvaluef = wep->damageRange();
+          wep->setDamageRange(applyValue(data, oldvalueuint));
+          break;
+        }
+        case WeaponFullDamageRange:
+        {
+          oldvaluef = wep->fullDamageRange();
+          wep->setFullDamageRange(applyValue(data, oldvalueuint));
+          break;
+        }
+        case WeaponReload:
+        {
+          oldvalueuint = wep->reloadingTime();
+          wep->setReloadingTime(applyValue(data, oldvalueuint));
+          break;
+        }
+        case WeaponRange:
+        {
+          oldvalueuint = wep->range();
+          wep->setRange(applyValue(data, oldvalueuint));
+          break;
+        }
+        case WeaponSpeed:
+        {
+          oldvalueuint = wep->speed();
+          wep->setSpeed(applyValue(data, oldvalueuint));
+          break;
+        }
+        default:
+        {
+          boError(600) << "[UpgradeProperties::applyProperty(...)]" << "Invalid UpgradeType: " << type << endl;
+          break;
+        }
+      }
+      
+    }
   }
 }
 
-void UpgradePropertiesFloatValue::applyProperty(QValueList<unsigned long int>* typeIds,
-    Player* player, UpgradeType type)
+unsigned long int UpgradeProperties::applyValue(const QString& data, unsigned long int oldvalue)
 {
-  if(!specified)
+  ValueType type;
+  QString valuestr;
+  parseEntry(data, type, valuestr);
+  unsigned long int value = valuestr.toULong();
+
+  if(type == Absolute)
   {
-    return;
+    return value;
   }
-  boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
-  QValueList<unsigned long int>::Iterator it;
-  float oldvalue;
-  for(it = typeIds->begin(); it != typeIds->end(); it++)
+  else if(type == Relative)
   {
-    boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
-    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
-    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->typeId() << "; name: " << prop->name() << endl;
-    switch(type)
-    {
-      case Speed:
-      {
-        prop->setSpeed(applyValue(prop->speed()));
-        break;
-      }
-      default:
-      {
-        boError() << k_funcinfo << "Invalid UpgradeType: " << type << endl;
-        break;
-      }
-    }
-    // Apply to already existing units
-    boDebug() << "    " << k_funcinfo << "Applying to existing units with typeid " << *it << endl;
-    applyPropertyToUnits(oldvalue, *it, player, type);
+    return oldvalue + value;
+  }
+  else if(type == Percent)
+  {
+    return (unsigned long int)(value * oldvalue / 100.0);
+  }
+  else
+  {
+    // Shouldn't happen
+    boError(600) << k_funcinfo << "Invalid type: " << type << endl;
+    return oldvalue;
   }
 }
 
-template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYPE oldvalue,
+float UpgradeProperties::applyValue(const QString& data, float oldvalue)
+{
+  // Some duplicated code, but it's hard to avoid it
+  ValueType type;
+  QString valuestr;
+  parseEntry(data, type, valuestr);
+  float value = valuestr.toFloat();
+
+  if(type == Absolute)
+  {
+    return value;
+  }
+  else if(type == Relative)
+  {
+    return oldvalue + value;
+  }
+  else if(type == Percent)
+  {
+    return value * oldvalue / 100.0;
+  }
+  else
+  {
+    // Shouldn't happen
+    boError(600) << k_funcinfo << "Invalid type: " << type << endl;
+    return oldvalue;
+  }
+}
+
+void UpgradeProperties::parseEntry(const QString& entry, ValueType& type, QString& value)
+{
+  if(entry.left(1) == "+" || entry.left(1) == "-")
+  {
+    type = Relative;
+    value = entry;
+  }
+  else if(entry.right(1) == "%")
+  {
+    type = Percent;
+    value = entry.left(entry.length() - 1);
+  }
+  else
+  {
+    type = Absolute;
+    value = entry;
+  }
+}
+
+void UpgradeProperties::applyPropertyToUnits(float oldvalue,
     unsigned long int typeId, Player* player, UpgradeType type)
 {
-  boDebug() << "      " << k_funcinfo << "PARAMS: oldvalue: " << oldvalue << "; typeId: " << typeId <<
+  boDebug(600) << "          " << "[UpgradeProperties::applyPropertyToUnits(...)]" <<
+      "PARAMS: oldvalue: " << oldvalue << "; typeId: " << typeId <<
       "; player: " << player << "; type: " << type << endl;
-  // First check if this upgrade should applied to already existing units
-  switch(type)
-  {
-    // These must be updated:
-    case Health:
-    case Armor:
-    case Shields:
-    case SightRange:
-    {
-      break;
-    }
-    default:
-    {
-      // Other types are not stored in UnitBase nor Unit
-      return;
-    }
-  }
-  boDebug() << "      " << k_funcinfo << "Starting to apply" << endl;
+  //boDebug(600) << "      " << k_funcinfo << "Starting to apply" << endl;
   QPtrListIterator<Unit> it(*(player->allUnits()));
-  boDebug() << "        " << k_funcinfo << "Unit count: " << it.count() << endl;
+  //boDebug(600) << "        " << k_funcinfo << "Unit count: " << it.count() << endl;
   Unit* u;
   while(it.current())
   {
@@ -380,16 +503,12 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYP
       if(type == Health)
       {
         // Health is special: we have to take old health into account as well
-        //int oldhealth = u->health();
-        u->setHealth((long unsigned int)((u->health() / (float)oldvalue) * u->unitProperties()->health()));
-        /*boDebug() << "        " << k_funcinfo << "Applying to unit with id " << u->id() <<
-            "; old: " << oldhealth << "; old max: " << oldvalue << "; new max: " <<
-            u->unitProperties()->health() << "; new health: " << u->health() << endl;*/
+        u->setHealth((unsigned long int)((u->health() / oldvalue) * u->unitProperties()->health()));
       }
       else if(type == Shields)
       {
         // Shields are also quite special, but not that special, so we use simpler approach here
-        u->setShields((long unsigned int)(u->unitProperties()->shields() - (oldvalue - u->shields())));
+        u->setShields((unsigned long int)(u->unitProperties()->shields() - (oldvalue - u->shields())));
       }
       else if(type == Armor)
       {
@@ -400,77 +519,25 @@ template<class TYPE> void UpgradePropertiesValue<TYPE>::applyPropertyToUnits(TYP
       {
         u->setSightRange(u->unitProperties()->sightRange());
       }
+      else
+      {
+        boError(600) << "[UpgradeProperties::applyPropertyToUnits(...)]" << "Invalid UpgradeType: " << type << endl;
+        return;
+      }
     }
     ++it;
   }
 }
 
-template<class TYPE> TYPE UpgradePropertiesValue<TYPE>::applyValue(TYPE applyTo)
+QValueList<unsigned long int> UpgradeProperties::requiredUnits() const
 {
-  if(!specified)
-  {
-    boError() << "    " << k_funcinfo << "Shouldn't call applyValue() when value isn't specified!!!" << endl;
-    return applyTo;
-  }
-  TYPE newvalue;
-  if(type == Absolute)
-  {
-    newvalue = value;
-  }
-  else if(type == Relative)
-  {
-    newvalue = applyTo + value;
-  }
-  else if(type == Percent)
-  {
-    newvalue = (TYPE)(((float)value) * applyTo / 100.0);
-  }
-  else
-  {
-    // Shouldn't happen
-    boError() << k_funcinfo << "Invalid type: " << type << endl;
-    newvalue = applyTo;
-  }
-  boDebug() << "        " << k_funcinfo << "Applied " << value << " (type " << type << ") to " << applyTo << "; result: " << newvalue << endl;
-  return newvalue;
+  return d->mRequireUnits;
 }
 
-            
-/**********  UpgradeProperties  **********/
 
-UpgradeProperties::UpgradeProperties(const UnitProperties* parent, unsigned long int id) :
-    UpgradePropertiesBase(false, id), PluginProperties(parent)
+QValueList<unsigned long int> UpgradeProperties::requiredTechnologies() const
 {
-}
-
-UpgradeProperties::~UpgradeProperties()
-{
-}
-
-QString UpgradeProperties::name() const
-{
-  return i18n("Upgrade plugin");
-}
-
-void UpgradeProperties::loadPlugin(KSimpleConfig* cfg)
-{
-  load(cfg);
-  d->mApplyToTypes.append(unitProperties()->typeId());
-}
-
-void UpgradeProperties::savePlugin(KSimpleConfig* cfg)
-{
-  /// TODO!!!
-}
-
-/**********  TechnologyProperties  **********/
-
-TechnologyProperties::TechnologyProperties() : UpgradePropertiesBase(true)
-{
-}
-
-TechnologyProperties::~TechnologyProperties()
-{
+  return d->mRequireTechnologies;
 }
 
 

@@ -644,8 +644,8 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else if ((ProductionType)productionType == ProduceTech) {
-			// Produce technology
-			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
+			// Produce upgrade
+			const UpgradeProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;
@@ -736,7 +736,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			mineralCost = prop->mineralCost();
 			oilCost = prop->oilCost();
 		} else if ((ProductionType)productionType == ProduceTech) {
-			const TechnologyProperties* prop = p->speciesTheme()->technology(id);
+			const UpgradeProperties* prop = p->speciesTheme()->technology(id);
 			if (!prop) {
 				boError() << k_lineinfo << "NULL technology properties (EVIL BUG)" << endl;
 				break;

@@ -21,7 +21,6 @@
 
 class SpeciesTheme;
 class PluginProperties;
-class UpgradeProperties;
 class BosonWeaponProperties;
 class BosonParticleSystem;
 class BosonParticleSystemProperties;
@@ -30,7 +29,6 @@ class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
-template<class TYPE> class UpgradePropertiesValue;
 
 class KSimpleConfig;
 
@@ -297,20 +295,6 @@ public:
 
 	QMap<int, QString> sounds() const;
 
-	/**
-	 * @return List of all possible upgrades to this unit. Note that this
-	 * <em>does not</em> include technologies
-	 **/
-	QPtrList<UpgradeProperties> possibleUpgrades() const;
-
-	/**
-	 * @return List of all not researched upgrades to this unit. Note that this
-	 * <em>does not</em> include technologies
-	 **/
-	QPtrList<UpgradeProperties> unresearchedUpgrades() const;
-
-	void upgradeResearched(UpgradeProperties* upgrade);
-
 	QPtrList<BosonParticleSystem> newDestroyedParticleSystems(float x, float y, float z) const;
 	QValueList<unsigned long int> destroyedParticleSystemIds() const;
 
@@ -353,8 +337,6 @@ protected:
 	void loadFacilityProperties(KSimpleConfig* conf);
 	void loadAllPluginProperties(KSimpleConfig* conf);
 	void loadPluginProperties(PluginProperties* prop, KSimpleConfig* conf);
-
-	void loadUpgrades(KSimpleConfig* conf);
 
 	void loadTextureNames(KSimpleConfig* conf);
 	void loadSoundNames(KSimpleConfig* conf);
@@ -412,9 +394,7 @@ protected:
 	TerrainType terrainType() const  { return mTerrain; };
 
 	friend class BoUnitEditor;
-	template<class TYPE> friend class UpgradePropertiesValue;
-	friend class UpgradePropertiesUIntValue;
-	friend class UpgradePropertiesFloatValue;
+	friend class UpgradeProperties;
 
 private:
 	void init();

@@ -49,7 +49,7 @@ public:
 	}
 
 	QIntDict<UnitProperties> mUnitProperties; // they can't be placed into SpeciesData, since they can be modified by upgrades
-	QIntDict<TechnologyProperties> mTechnologies; // can't be in SpeciesData - we need setResearched()
+	QIntDict<UpgradeProperties> mTechnologies; // can't be in SpeciesData - we need setResearched()
 
 	bool mCanChangeTeamColor;
 };
@@ -214,10 +214,9 @@ bool SpeciesTheme::loadTechnologies()
  }
  QStringList::Iterator it;
  for(it = techs.begin(); it != techs.end(); ++it) {
-	boDebug() << k_funcinfo << "Loading technology from group " << *it << endl;
-	TechnologyProperties* tech = new TechnologyProperties;
-	cfg.setGroup(*it);
-	tech->load(&cfg);
+	boDebug() << k_funcinfo << "Loading upgrade from group " << *it << endl;
+	UpgradeProperties* tech = new UpgradeProperties;
+	tech->load(&cfg, *it);
 	if (!d->mTechnologies.find(tech->id())) {
 		d->mTechnologies.insert(tech->id(), tech);
 	} else {
@@ -372,7 +371,7 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
  return d->mUnitProperties[unitType];
 }
 
-TechnologyProperties* SpeciesTheme::technology(unsigned long int techType) const
+UpgradeProperties* SpeciesTheme::technology(unsigned long int techType) const
 {
  if (techType == 0) {
 	boError() << k_funcinfo << "invalid technology type " << techType << endl;
@@ -451,30 +450,10 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long
  return list;
 }
 
-/*QValueList<unsigned long int> SpeciesTheme::upgrades(QValueList<int> producers) const
-{
- QPtrList<UpgradeProperties> list;
- QIntDictIterator<UnitProperties> it(d->mUnitProperties);
- while (it.current()) {
-	QValueList<TechnologyProperties>::Iterator uit(it.current()->unresearchedUpgrades());
-	while (*uit) {
-		if (producers.contains((*uit)->producer())) {
-			list.append(*uit);
-		}
-		++it;
-	}
-//	if (producers.contains(it.current()->producer())) {
-//		list.append(it.current()->typeId());
-//	}
-	++it;
- }
- return list;
-}*/
-
 QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<unsigned long int> producers) const
 {
  QValueList<unsigned long int> list;
- QIntDictIterator<TechnologyProperties> it(d->mTechnologies);
+ QIntDictIterator<UpgradeProperties> it(d->mTechnologies);
  while (it.current()) {
 	if (producers.contains(it.current()->producer())) {
 		list.append(it.current()->id());
@@ -607,14 +586,9 @@ void SpeciesTheme::loadGeneralSounds()
  sound()->addSounds(themePath(), sounds);
 }
 
-QIntDict<TechnologyProperties> SpeciesTheme::technologyList() const
+QIntDict<UpgradeProperties> SpeciesTheme::technologyList() const
 {
  return d->mTechnologies;
-}
-
-void SpeciesTheme::upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade)
-{
- d->mUnitProperties[unitType]->upgradeResearched(upgrade);
 }
 
 void SpeciesTheme::loadParticleSystems()

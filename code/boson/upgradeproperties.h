@@ -27,76 +27,30 @@ class KSimpleConfig;
 class UnitProperties;
 template<class T> class QValueList;
 
-class UpgradePropertiesBase;
-
-enum UpgradeType { Health = 0, Armor, Shields, MineralCost, OilCost, SightRange,
-    ProductionTime, Speed };
-
-
-template<class TYPE> class UpgradePropertiesValue
-{
-  public:
-    enum ValueType { Absolute = 0, Relative, Percent };
-
-    UpgradePropertiesValue()  { specified = false; };
-
-    virtual void loadValue(KSimpleConfig* cfg, QString key) = 0;
-    virtual QString loadBaseValue(KSimpleConfig* cfg, QString key);
-    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        UpgradeType type) = 0;
-    void applyPropertyToUnits(TYPE oldvalue, unsigned long int typeId,
-        Player* player, UpgradeType type);
-    TYPE applyValue(TYPE applyTo);
-
-    ValueType type;
-    TYPE value;
-    bool specified;
-};
-
-class UpgradePropertiesUIntValue : public UpgradePropertiesValue<unsigned long int>
-{
-  public:
-    virtual void loadValue(KSimpleConfig* cfg, QString key);
-    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        UpgradeType type);
-};
-class UpgradePropertiesFloatValue : public UpgradePropertiesValue<float>
-{
-  public:
-    virtual void loadValue(KSimpleConfig* cfg, QString key);
-    virtual void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
-        UpgradeType type);
- };
 
 /**
- * @short Base class for properties of upgrades and technologies
+ * @short Upgrades class
  *
- * In Boson, there are 2 types of upgrades: upgrades and technologies.
- * Upgrades are unit-specific, they only affect single unit, while technology
- * can affect many units at once
- *
- * This class stores all properties of upgrade or technology.
+ * This class stores all properties of an upgrade.
  * It has methods to check if upgrade can be researched, to apply changed
  * values to UnitProperties etc.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
-class UpgradePropertiesBase
+class UpgradeProperties
 {
   public:
     /**
-     * Constructs UpgradePropertiesBase
-     * @param isTechnology If it is technology or upgrade
-     * @param id Id of this _upgrade_. Technologies will get id when they're loaded
+     * Constructs UpgradeProperties
+     * You should call @ref load after that.
      **/
-    UpgradePropertiesBase(bool isTechnology, unsigned long int id = 0);
-    virtual ~UpgradePropertiesBase();
+    UpgradeProperties();
+    virtual ~UpgradeProperties();
 
     /**
-     * Load upgrade or tech. properties
-     * Note that if it's technology, you _MUST_ have set right group before
+     * Load upgrade properties
      **/
-    virtual void load(KSimpleConfig* cfg);
+    virtual void load(KSimpleConfig* cfg, const QString& group);
 
     /**
      * @return Whether it is possible by player to research this upgrade (all
@@ -116,13 +70,8 @@ class UpgradePropertiesBase
      void setResearched(bool r) { mResearched = r; };
 
     /**
-     * @return Whether it is technology, not upgrade
-     **/
-    bool isTechnology() const { return mTechnology; };
-
-    /**
      * One of the most important methods in this class
-     * It applies upgrade to units
+     * It applies upgrade to units and UnitProperties
      * You must call setResearched(true) before this can have any effect
      * @param player owner of this class (and UnitProperties)
      **/
@@ -168,22 +117,24 @@ class UpgradePropertiesBase
 
 
   protected:
-    class UpgradePropertiesBasePrivate;
-    UpgradePropertiesBasePrivate* d;
+    enum UpgradeType { Health = 0, Armor, Shields, MineralCost, OilCost, SightRange,
+        ProductionTime, Speed,
+        WeaponDamage, WeaponDamageRange, WeaponFullDamageRange, WeaponReload,
+        WeaponRange, WeaponSpeed };
+    enum ValueType { Absolute = 0, Relative, Percent };
 
-    UpgradePropertiesUIntValue mHealth;
-    UpgradePropertiesUIntValue mArmor;
-    UpgradePropertiesUIntValue mShields;
-    UpgradePropertiesUIntValue mUnitMineralCost;
-    UpgradePropertiesUIntValue mUnitOilCost;
-    UpgradePropertiesUIntValue mSightRange;
-    UpgradePropertiesUIntValue mUnitProductionTime;
-    UpgradePropertiesFloatValue mSpeed;
+    void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
+        const QString& data, UpgradeType type, int weaponid = -1);
+    void applyPropertyToUnits(float oldvalue, unsigned long int typeId,
+        Player* player, UpgradeType type);
+    unsigned long int applyValue(const QString& data, unsigned long int oldvalue);
+    float applyValue(const QString& data, float oldvalue);
+    void parseEntry(const QString& entry, ValueType& type, QString& value);
 
+    class UpgradePropertiesPrivate;
+    UpgradePropertiesPrivate* d;
 
     bool mResearched;
-    bool mTechnology;
-
     unsigned long int mId;
     QString mName;
     unsigned long int mMineralCost;
@@ -193,28 +144,6 @@ class UpgradePropertiesBase
     QString mPixmapName;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
-};
-
-/**
- * @author Rivo Laks <rivolaks@hot.ee>
- **/
-class UpgradeProperties : public UpgradePropertiesBase, public PluginProperties
-{
-  public:
-    UpgradeProperties(const UnitProperties* parent, unsigned long int id);
-    virtual ~UpgradeProperties();
-
-    virtual QString name() const;
-    virtual int pluginType() const { return Upgrade; };
-    virtual void loadPlugin(KSimpleConfig* cfg);
-    virtual void savePlugin(KSimpleConfig* cfg);
-};
-
-class TechnologyProperties : public UpgradePropertiesBase
-{
-  public:
-    TechnologyProperties();
-    virtual ~TechnologyProperties();
 };
 
 #endif // UPGRADEPROPERTIES_H
