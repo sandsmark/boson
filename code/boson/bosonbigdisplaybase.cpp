@@ -1279,7 +1279,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		QWheelEvent* wheel = (QWheelEvent*)e;
 		float delta = -wheel->delta() / 120;//120: see QWheelEvent::delta()
 		int action;
-		if (e->state() & ShiftButton) {
+		if (wheel->state() & ShiftButton) {
 			action = boConfig->mouseWheelShiftAction();
 		} else {
 			action = boConfig->mouseWheelAction();
@@ -1330,7 +1330,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				break;
 			}
 		}
-		e->accept();
+		wheel->accept();
 		break;
 	}
 	case QEvent::MouseMove:
