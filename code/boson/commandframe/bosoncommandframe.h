@@ -39,7 +39,6 @@ class BosonCommandFrame : public BosonCommandFrameBase
 {
 	Q_OBJECT
 public:
-
 	BosonCommandFrame(QWidget* parent);
 	~BosonCommandFrame();
 
