@@ -44,6 +44,8 @@
 #include <qpushbutton.h>
 #include <qcheckbox.h>
 
+#include <GL/glu.h>
+
 #define NEAR 1.0
 #define FAR 100.0
 
@@ -81,10 +83,10 @@ static KCmdLineOptions options[] =
 };
 
 
-ModelPreview::ModelPreview(QWidget* parent) : QGLWidget(parent)
+ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
 {
  mUpdateTimer = new QTimer(this);
- connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+ connect(mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
 
  mCurrentFrame = 0;
  mModel = 0;

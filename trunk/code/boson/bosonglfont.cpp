@@ -20,12 +20,20 @@
 #define QT_CLEAN_NAMESPACE // we don't use QT-1 syntax anyway. if we don't define this INT32 in qnamespace.h conflicts with the one in Xmd.h included by **nvidia** glx.h
 #include "bosonglfont.h"
 
+#include "bosonglwidget.h"
+#include "bodebug.h"
+
 #include <GL/glx.h>
 
 #include <qfont.h>
 
 BosonGLFont::BosonGLFont(const QString& family)
 {
+ if (!BoContext::currentContext()) {
+	boError() << k_funcinfo << "NULL current context" << endl;
+	mFontMetrics = 0;
+	return;
+ }
  mFont = QFont(family);
  mFontMetrics = new QFontMetrics(mFont);
 
@@ -40,3 +48,10 @@ BosonGLFont::~BosonGLFont()
  delete mFontMetrics;
 }
 
+int BosonGLFont::width(const QString& text)
+{
+ if (!mFontMetrics) {
+	return 0;
+ }
+ return metrics()->width(text);
+}

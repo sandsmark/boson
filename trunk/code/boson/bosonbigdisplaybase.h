@@ -22,7 +22,7 @@
 #include "defines.h"
 #include "bo3dtools.h"
 
-#include <qgl.h>
+#include "bosonglwidget.h"
 
 class BosonCanvas;
 class BosonCursor;
@@ -100,7 +100,7 @@ private:
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonBigDisplayBase : public QGLWidget
+class BosonBigDisplayBase : public BosonGLWidget
 {
 	Q_OBJECT
 public:

@@ -79,6 +79,7 @@
 
 //#define BO_LIGHT 1
 
+#include <GL/glu.h>
 
 float textureUpperLeft[2] = { 0.0, 1.0 };
 float textureLowerLeft[2] = { 0.0, 0.0 };
@@ -406,8 +407,6 @@ public:
 	                // buffer - see http://www.mesa3d.org/brianp/sig97/perfopt.htm
 
 
-	bool mInitialized;
-
 	SelectionRect mSelectionRect;
 	MouseMoveDiff mMouseMoveDiff;
 
@@ -430,7 +429,7 @@ public:
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
-		: QGLWidget(parent, "bigdisplay")
+		: BosonGLWidget(parent)
 {
  boDebug() << k_funcinfo << endl;
  mCanvas = c;
@@ -455,7 +454,6 @@ void BosonBigDisplayBase::init()
  mCursor = 0;
  d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
- d->mInitialized = false;
  d->mIsQuit = false;
  d->mParticlesDirty = true;
 
@@ -484,8 +482,8 @@ void BosonBigDisplayBase::init()
  // and another hack..
 // setMinimumSize(QSize(400,400));
 
- glInit();
- connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
+// initGL();// AB: initializeGL() is virtual
+ connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
@@ -499,7 +497,7 @@ void BosonBigDisplayBase::init()
 
 void BosonBigDisplayBase::initializeGL()
 {
- if (d->mInitialized) {
+ if (isInitialized()) {
 	// already called initializeGL()
 	return;
  }
@@ -561,7 +559,7 @@ void BosonBigDisplayBase::initializeGL()
  gettimeofday(&time, 0);
  d->mFpsTime = time.tv_sec * 1000000 + time.tv_usec;
 
- if (!format().directRendering()) {
+ if (!directRendering()) {
 	// i guess this should be normal for nvidia cards? can someone with a
 	// nvidia card confirm this?
 	boWarning() << k_funcinfo << "direct rendering has NOT been enabled!" << endl;
@@ -570,15 +568,9 @@ void BosonBigDisplayBase::initializeGL()
  // this needs to be done in initializeGL():
  d->mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
 
- // the actual GL initializing should be done now.
- d->mInitialized = true;
-
- // this is usually done by QT anyway - except if the window was hidden when
- // loading was completed (for example). But we need to initialize at least the
- // depth buffer...
- // AB: this might even fix our resize-problem (see slotHack1() in BosonWidget)
- resizeGL(width(), height());
-
+ boDebug() << k_funcinfo << "starting timer" << endl;
+ // start rendering (will also start the timer if necessary)
+ QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 
 void BosonBigDisplayBase::resizeGL(int w, int h)
@@ -619,8 +611,8 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 void BosonBigDisplayBase::paintGL()
 {
- if (!d->mInitialized) {
-	glInit();
+ if (!isInitialized()) {
+	initGL();
 	return;
  }
  if (d->mIsQuit) {
@@ -928,15 +920,16 @@ void BosonBigDisplayBase::paintGL()
 	boError() << k_funcinfo << "selection rect rendered" << endl;
  }
 
- if (d->mUpdateInterval) {
-	d->mUpdateTimer.start(d->mUpdateInterval);
- }
 
 #ifdef BO_LIGHT
  glEnable(GL_LIGHTING);
 #endif
 
  glPopMatrix();
+
+ if (d->mUpdateInterval) {
+	d->mUpdateTimer.start(d->mUpdateInterval);
+ }
 
  boProfiling->render(false);
 }
@@ -953,7 +946,7 @@ void BosonBigDisplayBase::renderText()
  // remember that painGL() is very speed sensitive!
  QString minerals = i18n("Minerals: %1").arg(localPlayer()->minerals());
  QString oil = i18n("Oil:      %1").arg(localPlayer()->oil());
- int w = QMAX(d->mDefaultFont->metrics()->width(minerals), d->mDefaultFont->metrics()->width(oil));
+ int w = QMAX(d->mDefaultFont->width(minerals), d->mDefaultFont->width(oil));
  int x = d->mViewport[2] - w - border;
  int y = d->mViewport[3] - d->mDefaultFont->height() - border;
 
@@ -1628,7 +1621,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
- return QGLWidget::eventFilter(o, e);
+ return BosonGLWidget::eventFilter(o, e);
 }
 
 void BosonBigDisplayBase::slotUnitChanged(Unit* unit)
@@ -1876,10 +1869,8 @@ void BosonBigDisplayBase::generateCellList()
  // we need to regenerate the cell list whenever the modelview or the projection
  // matrix changes. then the displayed cells have most probably changed.
 
- // some clever guy made QGLContet::initialized() protected - so we need to
- // implement our own version here :-(
- if (!d->mInitialized) {
-	glInit();
+ if (!isInitialized()) {
+	initGL();
 	return;
  }
  if (boGame->gameStatus() == KGame::Init) {
@@ -1919,8 +1910,8 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
 
 void BosonBigDisplayBase::cameraChanged()
 {
- if (!d->mInitialized) {
-	glInit();
+ if (!isInitialized()) {
+	initGL();
  }
  makeCurrent();
 
@@ -2026,7 +2017,7 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
  boDebug() << k_funcinfo << ms << endl;
  d->mUpdateInterval = ms;
- QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
+ QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 
 float BosonBigDisplayBase::calcFPS()
@@ -2056,8 +2047,8 @@ double BosonBigDisplayBase::fps() const
 
 void BosonBigDisplayBase::setViewport(int x, int y, GLsizei w, GLsizei h)
 {
- if (!d->mInitialized) {
-	glInit();
+ if (!isInitialized()) {
+	initGL();
  }
  makeCurrent();
  glViewport(x, y, w, h);

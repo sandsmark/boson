@@ -29,12 +29,12 @@
  * We can use these cached values in order to prevent loading the metrics in
  * paintGL()
  * You can use the @ref displayList of BosonGLFont to easily render text in
- * a QGL widget. An example use:
- * Call in QGLWidget::initializeGL():
+ * a GL widget. An example use:
+ * Call in BosonGLWidget::initializeGL():
  * <pre>
  * BosonGLFont* glFont = new BosonGLFont("fixed");
  * </pre>
- * and then in you QGLWidget::paintGL():
+ * and then in you BosonGLWidget::paintGL():
  * <pre>
  * QString text = QString::fromLatin1();
  * glListBase(bosonGLFont->displayList());
@@ -51,13 +51,14 @@ public:
 	 *
 	 * Note that non-latin1 characters might be buggy!
 	 *
-	 * Also note that you must call @ref QGLWidget::makeCurrent to make
+	 * Also note that you must call @ref BosonGLWidget::makeCurrent to make
 	 * before constructing a BosonGLFont
 	 **/
 	BosonGLFont(const QString& family);
 	~BosonGLFont();
 	inline QFontMetrics* metrics() const { return mFontMetrics; }
 	inline int height() const { return mFontMetrics->height(); }
+	int width(const QString& text);
 
 	/**
 	 * @return The base of the OpenGL display lists.
