@@ -441,7 +441,7 @@ bool Boson::constructUnit(VisualFacility* factory, int unitType, int x, int y)
 		a->image(0)->height())); // -1?
  QCanvasItemList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
-	if ((*it)->rtti() < RTTI::UnitStart) {
+	if (RTTI::isUnit((*it)->rtti())) {
 		continue; // this item is not interesting here
 	}
 	VisualUnit* unit = (VisualUnit*)*it;

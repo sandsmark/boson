@@ -134,7 +134,7 @@ VisualUnit* BosonCanvas::findUnitAt(const QPoint& pos)
  QCanvasItemList::Iterator it;
 
  for (it = list.begin(); it != list.end(); ++it) {
-	if (((*it)->rtti()) >= RTTI::UnitStart) { // AKA isUnit
+	if (RTTI::isUnit((*it)->rtti())) {
 		return (VisualUnit*)*it;
 	}
  }

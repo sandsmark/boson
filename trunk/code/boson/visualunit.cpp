@@ -159,7 +159,7 @@ void VisualUnit::moveBy(double moveX, double moveY)
  if (!list.isEmpty()) {
 	QCanvasItemList::Iterator it;
 	for (it = list.begin(); it != list.end(); ++it) {
-		if ((*it)->rtti() >= RTTI::UnitStart) {
+		if (RTTI::isUnit((*it)->rtti())) {
 			if (!((VisualUnit*)*it)->isDestroyed()) {
 				kdWarning() << "collided with " << list.count() 
 						<< " units" << endl;
@@ -407,12 +407,11 @@ QCanvasItemList VisualUnit::unitsInRange() const
  QCanvasItemList inRange;
  QCanvasItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
-	if ((*it)->rtti() >= RTTI::UnitStart) {
+	if (RTTI::isUnit((*it)->rtti())) {
 		// TODO: remove the items from inRange which are not actually in range (hint:
 		// pythagoras)
 		inRange.append(*it);
 	}
-	++it;
  }
  return inRange;
 }
@@ -423,7 +422,7 @@ QCanvasItemList VisualUnit::enemyUnitsInRange() const
  QCanvasItemList enemy;
  QCanvasItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
-	 if (((VisualUnit*)(*it))->owner() != owner()) {
+	if (((VisualUnit*)(*it))->owner() != owner()) {
 		enemy.append(*it);
 	}
  }
@@ -548,7 +547,7 @@ void VisualMobileUnit::advanceMove()
  QCanvasItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (collidesWith(*it)) {
-		if ((*it)->rtti() >= RTTI::UnitStart) {
+		if (RTTI::isUnit((*it)->rtti())) {
 			VisualUnit* unit = ((VisualUnit*)*it);
 			if (!unit->isDestroyed()) {
 				if (isAircraft) {
