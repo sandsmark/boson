@@ -30,8 +30,9 @@
 
 #define ERROR_COST 100000
 #define MAX_PATH_COST 5000
-#define FOGGED_COST 2.5
-#define SEARCH_STEPS 10  // How many steps of path to find
+#define FOGGED_COST 3
+
+#define marking(x, y) mark[x - mStartx + SEARCH_STEPS][y - mStarty + SEARCH_STEPS]
 
 // If you uncomment next line, you will enable in-line moving style.
 //  With this moving style, unit movement is less agressive and units
@@ -39,16 +40,6 @@
 //  This is useful when moving big group of units through narrow places
 //  on map, but in general, default style is better IMO
 //#define MOVE_IN_LINE
-
-class BosonPath::Marking
-{
-  public:
-    Marking() { dir = DirNone; f = -1; g = -1; level = -1; }
-    Direction dir;
-    float f;
-    float g;
-    short int level;
-};
 
 class BosonPath::PathNode
 {
@@ -113,12 +104,12 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, i
   mGoaly = goaly;
   mRange = range;
   /// TODO: those variables needs tuning and *lots* of testing!
-  mModifier = 3;
-  mCrossDivider = 10;
+  mModifier = 6;
+  mCrossDivider = 100;
   mMinCost = 3;
   mAbortPath = (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1);
 
-  boDebug(500) << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
+  //boDebug(500) << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
 }
 
 BosonPath::~BosonPath()
@@ -146,26 +137,42 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
 
 bool BosonPath::findPath()
 {
-  // We now have 2 different pathfinding methods: fast and slow
+  // We now have 3 different pathfinding methods: fast and slow pathfinders and
+  //  range checker.
   // Fast method searches with dumb but very fast algorithm and fails if there
   //  is any units on the way
+  // Range checker checks if it's possible to get closer to target. This will
+  //  speed up pathfinding for multiple units
   // Slow method is the one used before. It should always find some path and it
   //  can find path around other units. It's at least about 10 times slower
   //  though (with a simple path)
+  struct timeval time1, time2;
+  gettimeofday(&time1, 0);
   if(findFastPath())
   {
+    gettimeofday(&time2, 0);
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
     return true;
   }
   else
   {
-    return findSlowPath();
+    if(rangeCheck())
+    {
+      gettimeofday(&time2, 0);
+      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      return false;
+    }
+    bool a = findSlowPath();
+    gettimeofday(&time2, 0);
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    return a;
   }
 }
 
 bool BosonPath::findFastPath()
 {
-  struct timeval time1, time2;
-  gettimeofday(&time1, 0);
+  //struct timeval time1, time2;
+  //gettimeofday(&time1, 0);
 
   int x[SEARCH_STEPS];
   int y[SEARCH_STEPS];
@@ -241,9 +248,9 @@ bool BosonPath::findFastPath()
     if(cost(lastx, lasty) == ERROR_COST)
     {
       // Path can't be found using fast method
-      gettimeofday(&time2, 0);
-      boDebug(500) << k_funcinfo << "Can't find path using fast method. Time elapsed: "
-          << time2.tv_usec - time1.tv_usec << " microsec." << endl;
+      //gettimeofday(&time2, 0);
+      //boDebug(500) << k_funcinfo << "Can't find path using fast method. Time elapsed: "
+      //    << time2.tv_usec - time1.tv_usec << " microsec." << endl;
       return false;
     }
   }
@@ -267,23 +274,22 @@ bool BosonPath::findFastPath()
     path.push_back(wp);
   }
 
-  gettimeofday(&time2, 0);
-  boDebug(500) << k_funcinfo << "Path found (using fast method)! Time elapsed: " <<
-      time2.tv_usec - time1.tv_usec << "microsec." << endl;
+  //gettimeofday(&time2, 0);
+  //boDebug(500) << k_funcinfo << "Path found (using fast method)! Time elapsed: " <<
+  //    time2.tv_usec - time1.tv_usec << "microsec." << endl;
 
   return true;
 }
 
 bool BosonPath::findSlowPath()
 {
-  struct timeval time1, time2;
-  gettimeofday(&time1, 0);
+  //struct timeval time1, time2;
+  //gettimeofday(&time1, 0);
 
   mNodesRemoved = 0;
   mPathLength = 0;
   mPathCost = 0;
   PathStyle pathfound = NoPath;
-  Marking mark[mUnit->canvas()->mapWidth()][mUnit->canvas()->mapHeight()];
 #ifdef USE_STL
   vector<PathNode> open;
 #else
@@ -311,16 +317,15 @@ bool BosonPath::findSlowPath()
   open.push_back(node);
 
   // mark values on 'virtual map'
-  mark[node.x][node.y].f = node.g + node.h;
-  mark[node.x][node.y].g = node.g;
-  mark[node.x][node.y].level = 0; // same as node.level
+  marking(node.x, node.y).f = node.g + node.h;
+  marking(node.x, node.y).g = node.g;
+  marking(node.x, node.y).level = 0; // same as node.level
   
   // Create second node
   PathNode n2;
 
   bool goalUnReachable = false;
   nearest = node;
-
 
   // Main loop
   while(! open.empty())
@@ -337,7 +342,7 @@ bool BosonPath::findSlowPath()
     { // this is usually the case - except if we cannot go on the intended goal
       getFirst(open, node);
       // if f < 0 then it's not in OPEN
-      mark[node.x][node.y].f = -1;
+      marking(node.x, node.y).f = -1;
       mNodesRemoved++;
     }
 
@@ -428,15 +433,15 @@ bool BosonPath::findSlowPath()
       }
 
       // if g == -1 then it isn't visited yet
-      if(mark[n2.x][n2.y].g == -1)
+      if(marking(n2.x, n2.y).g == -1)
       {
         // First, mark the spot
         // direction of Marking always points to _previous_ element in path
-        mark[n2.x][n2.y].dir = reverseDir(d);
+        marking(n2.x, n2.y).dir = reverseDir(d);
         // Store costs
-        mark[n2.x][n2.y].f = n2.g + n2.h;
-        mark[n2.x][n2.y].g = n2.g;
-        mark[n2.x][n2.y].level = n2.level;
+        marking(n2.x, n2.y).f = n2.g + n2.h;
+        marking(n2.x, n2.y).g = n2.g;
+        marking(n2.x, n2.y).level = n2.level;
         // Push node to OPEN
         open.push_back(n2);
 #ifdef USE_STL
@@ -448,10 +453,10 @@ bool BosonPath::findSlowPath()
       else
       {
         // PathNode is in OPEN or CLOSED
-        if(mark[n2.x][n2.y].f != -1)
+        if(marking(n2.x, n2.y).f != -1)
         {
           // It's in OPEN
-          if(n2.g < mark[n2.x][n2.y].g)
+          if(n2.g < marking(n2.x, n2.y).g)
           {
             // Our current node has lower cost than the one, that was here, so
             //  we modify the path
@@ -474,11 +479,11 @@ bool BosonPath::findSlowPath()
               break; // or what?
             }
             // Mark new direction from this node to previous one
-            mark[n2.x][n2.y].dir = reverseDir(d);
+            marking(n2.x, n2.y).dir = reverseDir(d);
             // Then modify costs and level of spot
-            mark[n2.x][n2.y].g = n2.g;
-            mark[n2.x][n2.y].f = n2.g + n2.h;
-            mark[n2.x][n2.y].level = n2.level;
+            marking(n2.x, n2.y).g = n2.g;
+            marking(n2.x, n2.y).f = n2.g + n2.h;
+            marking(n2.x, n2.y).level = n2.level;
             // Replace cost and level of node that was in OPEN
             (*find).g = n2.g;
             (*find).level = n2.level;
@@ -519,7 +524,7 @@ bool BosonPath::findSlowPath()
     // Add waypoints to temporary path in reversed direction (goal to start)
     // We don't add start
     int counter = 0;  // failsave
-    // the directions pointing to the cells are in mark[x1][y1] -> x1,y1 starts
+    // the directions pointing to the cells are in marking(x1, y1) -> x1,y1 starts
     // at x,y (aka mGoalx,mGoaly) nad go to mStartx,mStarty
     while(((x != mStartx) || (y != mStarty)) && counter < 100)
     {
@@ -527,7 +532,7 @@ bool BosonPath::findSlowPath()
       // Add waypoint
       temp.push_back(wp);
       mPathLength++;
-      d = mark[x][y].dir; // the direction to the next cell
+      d = marking(x, y).dir; // the direction to the next cell
       neighbor(x, y, d);
 //      wp.setX(x * BO_TILE_SIZE + BO_TILE_SIZE / 2);
 //      wp.setY(y * BO_TILE_SIZE + BO_TILE_SIZE / 2);
@@ -556,9 +561,9 @@ bool BosonPath::findSlowPath()
     //  -2; -2 to the path, indicating that this is just partial path.
     if(pathfound != FullPath && pathfound != AlternatePath)
       path.push_back(QPoint(-2, -2));
-    gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
-        time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    //gettimeofday(&time2, 0);
+    //boDebug(500) << k_funcinfo << "Path found (using slow method)! Time elapsed: " <<
+    //    time2.tv_usec - time1.tv_usec << "microsec." << endl;
   }
   else
   {
@@ -571,11 +576,86 @@ bool BosonPath::findSlowPath()
     //  In Unit::advanceMove(), there is check for this and if coordinates are
     //  those, then moving is stopped
     path.push_back(QPoint(-1, -1));
-    gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "Time elapsed: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    //gettimeofday(&time2, 0);
+    //boDebug(500) << k_funcinfo << "Time elapsed: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
   }
 
   return (pathfound != NoPath);
+}
+
+bool BosonPath::rangeCheck()
+{
+  // This method checks if it's possible to go to better place than where unit
+  //  currently is
+  // First check if unit is in range
+  if(inRange(mStartx, mStarty))
+  {
+    return true;
+  }
+
+  // If unit's not in range, it might still be possible that it can't get closer
+  //  to goal than it already is. This is usually the case when you move many
+  //  units at once. Then one unit will go to goal, but others will try to find path to
+  //  goal and waste time.
+  // First quick check if goal is occupied if range is 0
+  int dist = QMAX(QABS(mStartx - mGoalx), QABS(mStarty - mGoaly));
+  if(mRange == 0)
+  {
+    if(cost(mGoalx, mGoaly) != ERROR_COST)
+    {
+      return false;
+    }
+    else if(dist == 1)
+    {
+      // Goal is occupied and unit's next to it - can't get any closer
+      return true;
+    }
+  }
+
+  int w = mUnit->canvas()->mapWidth();
+  int h = mUnit->canvas()->mapHeight();
+  int x, y;
+  for(int range = 1; range < dist; range++)
+  {
+    // Bad duplicated code. But it's faster this way
+    // First check upper and lower sides of "rectangle"
+    for(x = mGoalx - range; x <= mGoalx + range; x++)
+    {
+      if((x < 0) || (x >= w))
+      {
+        continue;
+      }
+      if(cost(x, mGoaly - range) != ERROR_COST)
+      {
+        mRange = QMAX(mRange, range);
+        return false;
+      }
+      if(cost(x, mGoaly + range) != ERROR_COST)
+      {
+        mRange = QMAX(mRange, range);
+        return false;
+      }
+    }
+    // Then right and left sides. Note that corners are already checked
+    for(y = mGoaly - range + 1; y < mGoaly + range; y++)
+    {
+      if((y < 0) || (y >= h))
+      {
+        continue;
+      }
+      if(cost(mGoalx - range, y) != ERROR_COST)
+      {
+        mRange = QMAX(mRange, range);
+        return false;
+      }
+      if(cost(mGoalx + range, y) != ERROR_COST)
+      {
+        mRange = QMAX(mRange, range);
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 float BosonPath::dist(int ax, int ay, int bx, int by)
@@ -619,48 +699,64 @@ void BosonPath::neighbor(int& x, int& y, Direction d)
 
 float BosonPath::cost(int x, int y)
 {
+  // Use cached value if possible
+  if(marking(x, y).c != -1)
+  {
+    return marking(x, y).c;
+  }
+
+  float co;
   // Check at the very beginning if tile is fogged - if it is, we return one value and save time
   if(mUnit->owner()->isFogged(x, y))
   {
     //boDebug() << "Tile at (" << x << ", " << y << ") is fogged, returning FOGGED_COST" << endl;
-    return FOGGED_COST + mMinCost;
+    co = FOGGED_COST + mMinCost;
   }
-
-  Cell* c = mUnit->canvas()->cell(x, y);
-  if (!c) {
-    boError(500) << k_funcinfo << "NULL cell" << endl;
-    return ERROR_COST;
-  }
-
-  // Check if we can go to that tile, if we can't, return ERROR_COST
-  if(! c->canGo(mUnit->unitProperties()))
+  else
   {
-    //boDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
-    return ERROR_COST;
-  }
-
+    // Cell is visible, check if it's ok
+    Cell* c = mUnit->canvas()->cell(x, y);
+    if(!c)
+    {
+      boError(500) << k_funcinfo << "NULL cell" << endl;
+      co = ERROR_COST;
+    }
+    else
+    {
+      // cell is ok
+      // Check if we can go to that tile, if we can't, cost will be ERROR_COST
+      if(! c->canGo(mUnit->unitProperties()))
+      {
+        //boDebug() << k_lineinfo << "cannot go on " << x << "," << y << endl;
+        co = ERROR_COST;
+      }
+      else
+      {
 #ifndef MOVE_IN_LINE
-  // If we are close to our starting point or to our goal, then consider cell
-  //  to be occupied even if only moving units are on it (we assume they can't
-  //  move away fast enough)
- bool includeMoving = false;
-  if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) <= 2) // Change 2 to 1???
-  {
-    includeMoving = true;
-  }
-/*  else if(mRange == 0 && QMAX(QABS(x - mGoalx), QABS(y - mGoaly)) < 3)
-  {
-      includeMoving = true;
-  }*/
-  if(c->isOccupied(mUnit, includeMoving))
+        // If we are close to our starting point or to our goal, then consider cell
+        //  to be occupied even if only moving units are on it (we assume they can't
+        //  move away fast enough)
+       bool includeMoving = false;
+        if(QMAX(QABS(x - mStartx), QABS(y - mStarty)) <= 2) // Change 2 to 1???
+        {
+          includeMoving = true;
+        }
+        if(c->isOccupied(mUnit, includeMoving))
 #else
-  if(c->isOccupied(mUnit, false))
+        if(c->isOccupied(mUnit, false))
 #endif
-  {
-    return ERROR_COST;
+        {
+          co = ERROR_COST;
+        }
+        else
+        {
+          co = c->moveCost() + mMinCost;
+        }
+      }
+    }
   }
-
-  return c->moveCost() + mMinCost;
+  marking(x, y).c = co;
+  return co;
 }
 
 #ifdef USE_STL
