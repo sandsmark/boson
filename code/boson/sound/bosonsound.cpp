@@ -129,9 +129,15 @@ public:
 		result._node()->start();
 		result._addChild(uplink, "uplink");
 
+// this seems to be our major speed problem. usually it works just fine, but
+// sometimes it takes 1-2 seconds!
+// --> the game freezes for that time
+// UPDATE (03/06/06): all audio code is in it's own process now, so this isn't
+// critical anymore. but still, this is a problem, but boson doesn't freeze
+// anymore.
 		mPlayObject = result;
-		mPlayed = false;
 
+		mPlayed = false;
 	}
 
 	void playFromBeginning()
@@ -333,6 +339,7 @@ void BosonSound::playSound(const QString& name)
 	int no = kapp->random() % list.count();
 	p = list.at(no);
  } else {
+	boWarning(200) << k_funcinfo << "empty list for " << name << endl;
 	return;
  }
 
