@@ -21,28 +21,16 @@
 #include "bosonstarteditorwidget.moc"
 
 #include "../defines.h"
-#include "../bosonmessage.h"
-#include "../player.h"
-#include "../speciestheme.h"
 #include "../boson.h"
-#include "../bosonplayfield.h"
-#include "../bosonmap.h"
-#include "../bosonscenario.h"
 #include "bosonstartupnetwork.h"
 #include "bosonneweditorwidget.h"
 #include "bodebug.h"
 
 #include <klocale.h>
-#include <knuminput.h>
-#include <kmessagebox.h>
 #include <kdialog.h>
 
-#include <qlabel.h>
-#include <qcombobox.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
-#include <qvgroupbox.h>
-#include <qhbox.h>
 
 class BosonStartEditorWidgetPrivate
 {
