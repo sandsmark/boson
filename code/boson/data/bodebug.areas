@@ -8,6 +8,9 @@
 200	Boson Sound
 210	OptionsDialog
 250	BosonScenario
+
+# LoadGame, as in SaveGame (not as in "loading data on startup")
+260	LoadGame
 300	Boson Advance
 310	Collisions
 350	BosonShot
