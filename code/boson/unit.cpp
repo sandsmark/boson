@@ -101,6 +101,9 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  model()->setFrame(0);
 
 // create the plugins
+// note: we use fixed KGame-property IDs, so we can't add any plugin twice. if
+// we ever want to support this, we need to use dynamically assigned (see
+// KGameProperty docs) - i use fixed ids to make debugging easier.
  if (prop->properties(PluginProperties::Production)) {
 	d->mPlugins.append(new ProductionPlugin(this));
  }
@@ -1057,12 +1060,10 @@ class Facility::FacilityPrivate
 public:
 	FacilityPrivate()
 	{
-		mProductionPlugin = 0;
 		mRepairPlugin = 0;
 	}
 
 	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
-	ProductionPlugin* mProductionPlugin;
 	RepairPlugin* mRepairPlugin;
 };
 
@@ -1073,9 +1074,6 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 		KGamePropertyBase::PolicyLocal, "Construction State");
  d->mConstructionState.setLocal(0);
 
- if (prop->properties(PluginProperties::Production)) {
-	d->mProductionPlugin = new ProductionPlugin(this);
- }
  if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
 	d->mRepairPlugin = new RepairPlugin(this);
  }
@@ -1085,7 +1083,6 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 Facility::~Facility()
 {
  // TODO: write a plugin framework and manage plugins in a list.
- delete d->mProductionPlugin;
  delete d->mRepairPlugin;
  delete d;
 }
