@@ -324,12 +324,7 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
  BO_CHECK_NULL_RET(field->description());
  boDebug() << k_funcinfo << "id: " << field->identifier() << endl;
  QStringList list = boData->availablePlayFields();
- boDebug() << k_funcinfo << "loading map: " << field->identifier() << endl;
- // am afraid we need the entire data here :-(
- field->loadPlayField(QString::null); // QString::null is allowed, as we already opened the file using preLoadPlayField()
- BO_CHECK_NULL_RET(field->map());
 
- BosonMap* map = field->map();
  const BosonPlayFieldInformation* information = field->information();
  BPFDescription* description = field->description();
 
@@ -342,10 +337,10 @@ void BosonNewEditorWidget::slotNetPlayFieldChanged(BosonPlayField* field)
 	mMapDescription->setText(description->comment());
  }
 
- mWidth->setValue(map->width());
- mWidthNum->setValue(map->width());
- mHeight->setValue(map->height());
- mHeightNum->setValue(map->height());
+ mWidth->setValue(information->mapWidth());
+ mWidthNum->setValue(information->mapWidth());
+ mHeight->setValue(information->mapHeight());
+ mHeightNum->setValue(information->mapHeight());
  mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
  mMaxPlayers->setValue(information->maxPlayers());
  mMaxPlayersNum->setValue(information->maxPlayers());
