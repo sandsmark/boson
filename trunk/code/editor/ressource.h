@@ -59,6 +59,7 @@
 #define ID_EDIT_REDO                11020
 #define ID_EDIT_COPY                11030
 #define ID_EDIT_CUT                 11040
+#define ID_EDIT_DESTROY             11045
 #define ID_EDIT_PASTE               11050
 #define ID_EDIT_SELECT_ALL          11060
 

@@ -21,6 +21,8 @@
 #include <qlayout.h>
 #include <qkeycode.h>
 
+#include "visual/visual.h"
+
 #include "editorField.h"
 #include "visualMiniDisplay.h"
 #include "editorBigDisplay.h"
@@ -81,5 +83,26 @@ void mainView::keyReleaseEvent ( QKeyEvent * e )
 }
 
 
+void mainView::slotEditDestroy(void)
+{
+	int mkey;
+	editorField  *field = (editorField*)vfield;
+
+	if (view->fixSelected) {
+		/* destroy fix */
+		mkey = view->fixSelected->key;
+		view->unSelectFix();
+		field->facilities.remove(mkey);
+	} else {
+		/* destroy mobiles */
+		QIntDictIterator<visualMobUnit> selIt(view->mobSelected);
+		for (selIt.toFirst(); selIt;) {			// ++ not needed, selIt should be increased
+			mkey = selIt.currentKey(); 		// by the .remove() in unselect
+			view->unSelectMob(mkey);
+			field->mobiles.remove(mkey);
+		}
+	}
+	field->update();
+}
 
 

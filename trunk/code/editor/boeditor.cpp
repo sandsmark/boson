@@ -42,6 +42,7 @@ FILE *logfile = (FILE *) 0L;
 /*
  * visual/visual.h
  */
+visualField		*vfield;
 groundTheme		*ground = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 int			nb_player;
@@ -172,9 +173,13 @@ void BoEditorApp::initMenuBar()
 
   ///////////////////////////////////////////////////////////////////
   // menuBar entry edit_menu
-/*
+  // 
   QPopupMenu *edit_menu = new QPopupMenu();
-  edit_menu->insertItem(Icon("editcut.xpm"), i18n("Cu&t"), ID_EDIT_CUT );
+
+  edit_menu->insertItem(Icon("mini.destroy.xpm"), i18n("&Destroy"), ID_EDIT_DESTROY );
+  edit_menu->setAccel(CTRL+Key_D, ID_EDIT_DESTROY);
+
+  /*
   edit_menu->insertItem(Icon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
   edit_menu->insertItem(Icon("editpaste.xpm"), i18n("&Paste"), ID_EDIT_PASTE );
  
@@ -182,11 +187,10 @@ void BoEditorApp::initMenuBar()
   edit_menu->setAccel(CTRL+Key_X, ID_EDIT_CUT);
   edit_menu->setAccel(CTRL+Key_C, ID_EDIT_COPY);
   edit_menu->setAccel(CTRL+Key_V, ID_EDIT_PASTE);
-*/
  
   ///////////////////////////////////////////////////////////////////
   // menuBar entry view_menu
-/*  QPopupMenu *view_menu = new QPopupMenu();
+  QPopupMenu *view_menu = new QPopupMenu();
   view_menu->setCheckable(true);
   view_menu->insertItem(i18n("Tool&bar"), ID_VIEW_TOOLBAR_0);
   view_menu->insertItem(i18n("&Statusbar"), ID_VIEW_STATUSBAR );
@@ -209,7 +213,7 @@ void BoEditorApp::initMenuBar()
   // set menu_bar the current menuBar and the position due to config file
   menu_bar = menuBar();
   menu_bar->insertItem(i18n("&File"), file_menu);
-//  menu_bar->insertItem(i18n("&Edit"), edit_menu);
+  menu_bar->insertItem(i18n("&Edit"), edit_menu);
 //  menu_bar->insertItem(i18n("&View"), view_menu);
 
   ///////////////////////////////////////////////////////////////////
@@ -223,7 +227,7 @@ void BoEditorApp::initMenuBar()
   // CONNECT THE SUBMENU SLOTS WITH SIGNALS
 
   CONNECT_CMD(file_menu);
-//  CONNECT_CMD(edit_menu);
+  CONNECT_CMD(edit_menu);
 //  CONNECT_CMD(view_menu);
 
   connect(file_menu_recent, SIGNAL(activated(int)),SLOT(slotFileRecent(int)));  
@@ -279,13 +283,14 @@ void BoEditorApp::initView()
 { 
 
 /* the physical map is created when a game is created */
-	field = new editorField(200,200);
+	vfield = field = new editorField(200,200);
 	assert (true == field->load(*currentFile));
 
 /* a mainView is each window containing : field, mini, order...
    this one is the first one, other can pop up as well */
 
 	mainView *mainview = new mainView(field, this, "main_view_0");
+	connect(this, SIGNAL(destroyObjects()), mainview, SLOT(slotEditDestroy()));
 	resize(800,628);
 	setView(mainview);
 }
@@ -503,6 +508,12 @@ void BoEditorApp::slotFileClose()
 	//close();
 }
 
+void BoEditorApp::slotEditDestroy()
+{
+	// XXX orzel : dirty, needs to be cleaned up after app/window split
+	emit destroyObjects();
+}
+
 
 void BoEditorApp::slotFileRecent(int w)
 {
@@ -542,6 +553,7 @@ BEGIN_CMD(BoEditorApp)
   ON_CMD(ID_FILE_SAVE      ,		slotFileSave(),		i18n("Saving the map"))
   ON_CMD(ID_FILE_SAVE_AS   ,		slotFileSaveAs(),	i18n("Saving the map under a new name..."))
   ON_CMD(ID_FILE_CLOSE     ,		slotFileClose(),	i18n("Closing the file..."))
+  ON_CMD(ID_EDIT_DESTROY   ,		slotEditDestroy(),	i18n("Destroying object..."))
 
 //  ON_CMD(ID_VIEW_TOOLBAR_0,           slotViewToolBar_0(),      i18n(""))
 //  ON_CMD(ID_VIEW_STATUSBAR,           slotViewStatusBar(),      i18n(""))
@@ -568,6 +580,7 @@ BEGIN_STATUS_MSG(BoEditorApp)
   ON_STATUS_MSG(ID_FILE_CLOSE_WINDOW,i18n("Closes the current window"))
 
   ON_STATUS_MSG(ID_APP_EXIT,         i18n("Exits BoEditor"))  
+  ON_STATUS_MSG(ID_EDIT_DESTROY,     i18n("Destroy the current object"))  
 
 /*
 
