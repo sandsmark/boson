@@ -589,7 +589,7 @@ void BosonEffectParticleTrail::update(float elapsed)
 
   bool createnew = false;
 
-  if(movedlength >= 0.0 && !mObsolete)
+  if(movedlength > 0.0 && !mObsolete)
   {
     // Scale movevector by (1 / movedlength), so that we can later do
     //  movevector * x  and have the position for x-th particle
