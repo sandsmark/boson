@@ -18,11 +18,22 @@ package-messages:
 	$(MAKE) -f admin/Makefile.common package-messages
 	$(MAKE) -C po merge
 
-EXTRA_DIST = admin 
+EXTRA_DIST = admin
 
 dist-hook:
 	cd $(top_distdir) && perl admin/am_edit -padmin
 	cd $(top_distdir) && $(MAKE) -f admin/Makefile.common subdirs
 
+
+# Doxygen
 include admin/Doxyfile.am
+
+apidox-am-toplevel-yes: apidox-am-toplevel-boson
+
+apidox-am-toplevel-boson: $(top_builddir)/apidocs/qt/qt.tag
+
+$(top_builddir)/apidocs/qt/qt.tag:
+	@echo "*** Creating a tag file for the Qt library:"; \
+	$(mkinstalldirs) $(top_builddir)/apidocs/qt; \
+	doxytag -t $(top_builddir)/apidocs/qt/qt.tag $(QTDOCDIR)
 
