@@ -146,7 +146,7 @@ gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
  dnl AB: the AC_DEFINE is pretty useless, as we abort anyway, if GL not there
  AC_DEFINE(HAVE_GL, 1, [Defines if you have GL (Mesa, OpenGL, ...)])
  if test "$GL_LDFLAGS" = ""; then
-	GLLIB='-Xmu -lGLU -lGL $(LIB_X11)'
+	GLLIB='-lXmu -lGLU -lGL $(LIB_X11)'
  else
 	GLLIB="$GL_LDFLAGS -Xmu -lGLU -lGL "'$(LIB_X11)'
  fi
