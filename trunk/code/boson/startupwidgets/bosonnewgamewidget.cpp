@@ -187,11 +187,7 @@ void BosonNewGameWidget::initPlayFields()
 	if (mapId.isNull()) {
 		mapId = BosonPlayField::defaultPlayField();
 	}
-	int index = list.findIndex(mapId);
-	if (index < 0) {
-		index = list.findIndex(BosonPlayField::defaultPlayField());
-	}
-	networkInterface()->sendChangePlayField(index);
+	networkInterface()->sendChangePlayField(mapId);
  }
 }
 
