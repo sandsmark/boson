@@ -1999,7 +1999,6 @@ void BosonBigDisplayBase::generateCellList()
  int size = (cellMaxX - cellMinX + 1) * (cellMaxY - cellMinY + 1);
  size = QMIN((int)(map->width() * map->height()), size);
  if (size > d->mRenderCellsSize) {
-	boDebug() << k_funcinfo << "resize cells array - new size: " << size << endl;
 	delete[] d->mRenderCells;
 	d->mRenderCells = new Cell*[size];
 	d->mRenderCellsSize = size;
