@@ -150,6 +150,7 @@ signals:
 
 protected slots:
 	void slotCommandFramePosition(int);
+	void slotChatFramePosition(int);
 	
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);
@@ -177,6 +178,8 @@ protected:
 	 * will have to call @ref BosonMap::loadMap before using it!
 	 **/
 	void recreateMap();
+
+	void recreateLayout(int commandFramePos, int chatFramePos);
 
 protected slots:
 	void slotPlayerJoinedGame(KPlayer* p);

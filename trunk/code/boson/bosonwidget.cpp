@@ -82,6 +82,7 @@ public:
 
 		mTopLayout = 0;
 		mFrameLayout = 0;
+		mViewLayout = 0;
 
 		mMusic = 0;
 
@@ -103,6 +104,9 @@ public:
 
 	QHBoxLayout* mTopLayout;
 	QVBoxLayout* mFrameLayout; // minimap and command frame
+	QVBoxLayout* mViewLayout; // chat and bigdisplay
+	int mCommandPos;
+	int mChatPos;
 
 	BosonMusic* mMusic;
 	
@@ -245,6 +249,9 @@ void BosonWidget::init()
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
  d->mBoson->slotSetGameSpeed(DEFAULT_GAME_SPEED);
+
+ d->mCommandPos = (int)OptionsDialog::Left;
+ d->mChatPos = (int)OptionsDialog::Bottom;
 }
 
 BosonWidget::~BosonWidget()
@@ -490,8 +497,8 @@ void BosonWidget::slotGamePreferences()
  connect(dlg, SIGNAL(finished()), dlg, SLOT(slotDelayedDestruct())); // seems not to be called if you quit with "cancel"!
  dlg->setGameSpeed(d->mBoson->gameSpeed());
  dlg->setArrowScrollSpeed(d->mArrowKeyStep);
- dlg->setCommandFramePosition((d->mTopLayout->findWidget(d->mBigDisplay) == 0) ?
-		OptionsDialog::Right : OptionsDialog::Left);
+ dlg->setCommandFramePosition((OptionsDialog::CommandFramePosition)d->mCommandPos);
+ dlg->setChatFramePosition((OptionsDialog::ChatFramePosition)d->mChatPos);
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -499,6 +506,8 @@ void BosonWidget::slotGamePreferences()
 		d->mBoson, SLOT(slotSetGameSpeed(int)));
  connect(dlg, SIGNAL(signalCommandFramePositionChanged(int)),
 		this, SLOT(slotCommandFramePosition(int)));
+ connect(dlg, SIGNAL(signalChatFramePositionChanged(int)),
+		this, SLOT(slotChatFramePosition(int)));
  dlg->show();
 }
 
@@ -608,6 +617,7 @@ void BosonWidget::addEditorCommandFrame()
 
 
  slotCommandFramePosition(BosonConfig::commandFramePosition());
+ slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
 void BosonWidget::addGameCommandFrame()
@@ -629,6 +639,7 @@ void BosonWidget::addGameCommandFrame()
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
  
  slotCommandFramePosition(BosonConfig::commandFramePosition());
+ slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
 void BosonWidget::startEditor()
@@ -782,10 +793,11 @@ void BosonWidget::saveConfig()
 	kdError() << k_funcinfo << ": NULL local player" << endl;
 	return;
  }
+ kdDebug() << k_funcinfo << endl;
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
- BosonConfig::saveCommandFramePosition((d->mTopLayout->findWidget(d->mBigDisplay) == 0) ?
-		 (int)OptionsDialog::Right : (int)OptionsDialog::Left);
+ BosonConfig::saveCommandFramePosition(d->mCommandPos);
+ BosonConfig::saveChatFramePosition(d->mChatPos);
  BosonConfig::saveSound(sound());
  BosonConfig::saveMusic(music());
 }
@@ -856,6 +868,20 @@ void BosonWidget::slotInitFogOfWar()
 
 void BosonWidget::slotCommandFramePosition(int pos)
 {
+ recreateLayout(pos, d->mChatPos);
+}
+
+void BosonWidget::slotChatFramePosition(int chatPos)
+{
+ recreateLayout(d->mCommandPos, chatPos);
+}
+
+void BosonWidget::recreateLayout(int commandPos, int chatPos)
+{
+ if (d->mViewLayout) {
+	delete d->mViewLayout;
+	d->mViewLayout = 0;
+ }
  if (d->mFrameLayout) {
 	delete d->mFrameLayout;
  }
@@ -867,24 +893,25 @@ void BosonWidget::slotCommandFramePosition(int pos)
  d->mFrameLayout = new QVBoxLayout();
  d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
  d->mFrameLayout->addWidget(d->mCommandFrame);
+ d->mViewLayout = new QVBoxLayout();
 
- QVBoxLayout* viewLayout = new QVBoxLayout();
- viewLayout->addWidget(d->mBigDisplay);
- viewLayout->addWidget(d->mChat);
- if (pos == OptionsDialog::Left) {
-	d->mTopLayout->addLayout(d->mFrameLayout);
-//	d->mTopLayout->addWidget(d->mBigDisplay);
-	d->mTopLayout->addLayout(viewLayout);
- } else if (pos == OptionsDialog::Right) {
-//	d->mTopLayout->addWidget(d->mBigDisplay);
-	d->mTopLayout->addLayout(viewLayout);
+ if (chatPos == OptionsDialog::Top) {
+	d->mViewLayout->addWidget(d->mChat);
+	d->mViewLayout->addWidget(d->mBigDisplay);
+ } else {
+	d->mViewLayout->addWidget(d->mBigDisplay);
+	d->mViewLayout->addWidget(d->mChat);
+ }
+ 
+ if (commandPos == OptionsDialog::Right) {
+	d->mTopLayout->addLayout(d->mViewLayout);
 	d->mTopLayout->addLayout(d->mFrameLayout);
  } else {
-	kdError() << k_funcinfo << pos << " not implemented" << endl;
-	// use Left as default
 	d->mTopLayout->addLayout(d->mFrameLayout);
-	d->mTopLayout->addWidget(d->mBigDisplay);
+	d->mTopLayout->addLayout(d->mViewLayout);
  }
+ d->mCommandPos = commandPos;
+ d->mChatPos = chatPos;
  d->mTopLayout->activate();
 }
 
