@@ -1465,7 +1465,7 @@ float Unit::distance(const Unit* u) const
  // !!! This method returns square of actual distance. You may want to use sqrt() !!!
  float dx = centerX() - u->centerX();
  float dy = centerY() - u->centerY();
- float dz = z() - u->z();
+ float dz = centerZ() - u->centerZ();
  return dx*dx + dy*dy + dz*dz;
 }
 
@@ -1474,7 +1474,7 @@ float Unit::distance(const BoVector3& pos) const
  // !!! This method returns square of actual distance. You may want to use sqrt() !!!
  float dx = pos.x() - centerX();
  float dy = pos.y() - centerY();
- float dz = pos.z() - z();
+ float dz = pos.z() - centerZ();
  return dx*dx + dy*dy + dz*dz;
 }
 
