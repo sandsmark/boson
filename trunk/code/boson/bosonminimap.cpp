@@ -175,16 +175,9 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
+// FIXME: fog of war
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;
-	return;
- }
- Cell* c = d->mMap->cell(x, y);
- if (!c) {
-	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
-	return;
- }
- if (c->isFogged()) {
 	return;
  }
  SpeciesTheme* theme = unit->speciesTheme();
@@ -255,9 +248,9 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  int y = (int)(oldY / BO_TILE_SIZE);
  Cell* c = d->mMap->cell(x, y);
  if (c) {
-	if (!c->isFogged()) {
+//	if (!c->isFogged()) {
 		slotAddCell(x, y, c->groundType(), c->version());
-	}
+//	}
  } else {
 	kdWarning() << k_funcinfo << ": NULL cell" << endl;
  }
