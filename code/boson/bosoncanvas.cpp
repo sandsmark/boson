@@ -50,6 +50,7 @@ class BosonCanvas::BosonCanvasPrivate
 {
 public:
 	BosonCanvasPrivate()
+		: mAllItems(BoItemList(0, false))
 	{
 		mMap = 0;
 	}

@@ -512,14 +512,14 @@ Unit* Unit::bestEnemyUnitInRange()
 	return 0l;
  }
  // Return if no enemies in range
- BoItemList list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
- if (!list.count() > 0) {
-	return 0l;
+ BoItemList* list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
+ if (!list->count() > 0) {
+	return 0;
  }
 
  // Initialize some variables
  Unit* best = 0l;
- BoItemList::Iterator it = list.begin();
+ BoItemList::Iterator it = list->begin();
  Unit* u = 0l;
  float dist = 0;
  // Candidates to best unit, see below
@@ -528,7 +528,7 @@ Unit* Unit::bestEnemyUnitInRange()
  Unit* c3 = 0l;
 
  // Iterate through the list of enemies and pick the best ones
- for (; it != list.end(); ++it) {
+ for (; it != list->end(); ++it) {
 	u = ((Unit*)*it);
 	dist = QMAX(QABS((int)(u->x() - x()) / BO_TILE_SIZE), QABS((int)(u->y() - y()) / BO_TILE_SIZE));
 	// Quick check if we can shoot at u
@@ -1066,7 +1066,7 @@ void Unit::shootAt(BosonWeapon* w, Unit* target)
  owner()->statistics()->increaseShots();
 }
 
-BoItemList Unit::unitsInRange(unsigned long int range) const
+BoItemList* Unit::unitsInRange(unsigned long int range) const
 {
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
@@ -1078,13 +1078,13 @@ BoItemList Unit::unitsInRange(unsigned long int range) const
  // collisions() does this anyway.
  QRect rect;
  rect.setCoords(left - range, top - range, right + range, bottom + range);
- BoItemList items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
- items.remove((BosonItem*)this);
+ BoItemList* items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
+ items->remove((BosonItem*)this);
 
- BoItemList inRange;
- BoItemList::Iterator it = items.begin();
+ BoItemList* inRange = new BoItemList();
+ BoItemList::Iterator it = items->begin();
  Unit* u;
- for (; it != items.end(); ++it) {
+ for (; it != items->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
@@ -1097,21 +1097,21 @@ BoItemList Unit::unitsInRange(unsigned long int range) const
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
 	// pythagoras)
-	inRange.append(*it);
+	inRange->append(*it);
  }
  return inRange;
 }
 
-BoItemList Unit::enemyUnitsInRange(unsigned long int range) const
+BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
 {
- BoItemList units = unitsInRange(range);
- BoItemList enemy;
+ BoItemList* units = unitsInRange(range);
+ BoItemList* enemy = new BoItemList();
  Unit* u;
- BoItemList::Iterator it = units.begin();
- for (; it != units.end(); ++it) {
+ BoItemList::Iterator it = units->begin();
+ for (; it != units->end(); ++it) {
 	u = (Unit*)*it;
 	if (owner()->isEnemy(u->owner())) {
-		enemy.append(u);
+		enemy->append(u);
 	}
  }
  return enemy;
@@ -1121,14 +1121,14 @@ QValueList<Unit*> Unit::unitCollisions(bool exact)
 {
  QValueList<Unit*> units;
  boDebug(310) << k_funcinfo << endl;
- BoItemList collisionList = collisions()->collisionsAtCells(cells(), (BosonItem*)this, exact);
- if (collisionList.isEmpty()) {
+ BoItemList* collisionList = collisions()->collisionsAtCells(cells(), (BosonItem*)this, exact);
+ if (collisionList->isEmpty()) {
 	return units;
  }
 
  BoItemList::Iterator it;
  Unit* unit;
- for (it = collisionList.begin(); it != collisionList.end(); ++it) {
+ for (it = collisionList->begin(); it != collisionList->end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}

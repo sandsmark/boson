@@ -25,6 +25,7 @@
 #include "bosonconfig.h"
 #include "boson.h"
 #include "player.h"
+#include "boitemlisthandler.h"
 #include "bosonplayfield.h"
 #include "bosoncanvas.h"
 #include "bosonmessage.h"
@@ -137,6 +138,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  BosonConfig::initBosonConfig();
  BosonProfiling::initProfiling();
  BosonMusic::initBosonMusic();
+ BoItemListHandler::initStatic();
  boMusic->setSound(boConfig->sound());
  boMusic->setMusic(boConfig->music());
 

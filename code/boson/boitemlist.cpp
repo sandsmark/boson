@@ -18,10 +18,51 @@
 */
 
 #include "boitemlist.h"
+#include "boitemlisthandler.h"
 
-//#include "bodebug.h"
+#include "bodebug.h"
 #include "rtti.h"
 #include "unit.h"
+
+BoItemList::BoItemList() : QValueList<BosonItem*>()
+{
+ registerList();
+}
+
+BoItemList::BoItemList(int dummy, bool _registerList) : QValueList<BosonItem*>()
+{
+ Q_UNUSED(dummy);
+ if (_registerList) {
+	registerList();
+ }
+}
+
+BoItemList::BoItemList(const BoItemList& list, bool _registerList) : QValueList<BosonItem*>(list)
+{
+ if (_registerList) {
+	registerList();
+ }
+}
+
+BoItemList::~BoItemList()
+{
+ BoItemListHandler* handler = BoItemListHandler::itemListHandler();
+ if (handler) {
+	handler->unregisterList(this);
+ } else {
+	boWarning() << k_funcinfo << "NULL item list handler" << endl;
+ }
+}
+
+void BoItemList::registerList()
+{
+ BoItemListHandler* handler = BoItemListHandler::itemListHandler();
+ if (handler) {
+	handler->registerList(this);
+ } else {
+	boWarning() << k_funcinfo << "NULL item list handler" << endl;
+ }
+}
 
 QValueList<BosonItem*> BoItemList::items(bool collidingOnly, bool includeMoving, Unit* forUnit) const 
 {
@@ -116,3 +157,4 @@ bool BoItemList::isOccupied(bool includeMoving) const
 
  return false;
 }
+
