@@ -687,6 +687,16 @@ QValueList<unsigned long int> SpeciesTheme::allMobiles() const
  return list;
 }
 
+QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
+{
+ QValueList<const UnitProperties*> list;
+ QIntDictIterator<UnitProperties> it(d->mUnitProperties);
+ for (; it.current(); ++it) {
+	list.append(it.current());
+ }
+ return list;
+}
+
 QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producers) const
 {
  QValueList<unsigned long int> list;
