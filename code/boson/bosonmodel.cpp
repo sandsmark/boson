@@ -308,6 +308,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 						glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
 					glEnd();
 				} else {
+					glBindTexture(GL_TEXTURE_2D, 0);
 					glBegin(GL_TRIANGLES);
 						glVertex3fv(v[0]);
 						glVertex3fv(v[1]);
