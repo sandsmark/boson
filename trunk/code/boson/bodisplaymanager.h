@@ -23,7 +23,7 @@
 #include <qptrlist.h>
 
 class BoBox;
-class BosonBigDisplay;
+class BosonBigDisplayBase;
 class UnitBase;
 class BosonCursor;
 class Player;
@@ -55,18 +55,18 @@ public:
 	BoDisplayManager(QCanvas* canvas, QWidget* parent);
 	~BoDisplayManager();
 
-	BosonBigDisplay* addInitialDisplay();
+	BosonBigDisplayBase* addInitialDisplay();
 
 	/**
 	 * @return The currently active display. Use @ref
-	 * BosonBigDisplay::makeActive to change it
+	 * BosonBigDisplayBase::makeActive to change it
 	 **/
-	BosonBigDisplay* activeDisplay() const;
+	BosonBigDisplayBase* activeDisplay() const;
 
 	/**
 	 * @return A list containing ALL displays. Try to avoid this function.
 	 **/
-	QPtrList<BosonBigDisplay> displays() const;
+	QPtrList<BosonBigDisplayBase> displays() const;
 
 	/**
 	 * Set the cursor for all displays
@@ -81,8 +81,8 @@ public:
 	void quitGame();
 
 	void removeActiveDisplay();
-	BosonBigDisplay* splitActiveDisplayVertical();
-	BosonBigDisplay* splitActiveDisplayHorizontal();
+	BosonBigDisplayBase* splitActiveDisplayVertical();
+	BosonBigDisplayBase* splitActiveDisplayHorizontal();
 
 	void paintResources();
 	void paintChatMessages();
@@ -113,7 +113,7 @@ signals:
 	 * @param old The previously active display (if any) or NULL if
 	 * there was no.
 	 **/
-	void signalActiveDisplay(BosonBigDisplay* active, BosonBigDisplay* old);
+	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
 
 protected:
 	enum ScrollDirection {
@@ -123,15 +123,15 @@ protected:
 		ScrollLeft = 3
 	};
 
-	BosonBigDisplay* addDisplay(QWidget* parent);
-	BoBox* findBox(BosonBigDisplay*) const;
+	BosonBigDisplayBase* addDisplay(QWidget* parent);
+	BoBox* findBox(BosonBigDisplayBase*) const;
 	void recreateLayout();
 
 protected slots:
-	void slotMakeActiveDisplay(BosonBigDisplay*);
+	void slotMakeActiveDisplay(BosonBigDisplayBase*);
 
 private:
-	void markActive(BosonBigDisplay* display, bool active);
+	void markActive(BosonBigDisplayBase* display, bool active);
 
 private:
 	class BoDisplayManagerPrivate;
