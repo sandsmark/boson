@@ -244,7 +244,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
- emit signalAdvance();
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const

@@ -211,8 +211,6 @@ public slots:
 	 **/
 	void slotUnitChanged(Unit* unit);
 
-	void slotAdvance();
-
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 
@@ -221,6 +219,20 @@ signals:
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
 	void slotCursorEdgeTimeout();
+
+	/**
+	 * Called by @ref Boson::signalAdvance.
+	 *
+	 * Note that it is <em>not</em> ensured, that @ref
+	 * BosonCanvas::slotAdvance is called first. It might be possible that
+	 * this slot gets called before @ref BosonCanvas::slotAdvance but the
+	 * other way round might be possible as well.
+	 *
+	 * Also note that this should <em>not</em> be used for game logic parts
+	 * that the network might depend on. Use it for OpenGL or similar
+	 * operations (input/output on the local client) only.
+	 **/
+	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 
 protected:
 	enum CanSelectUnit {

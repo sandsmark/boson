@@ -267,7 +267,6 @@ signals:
 	void signalUnitMoved(Unit* unit, float oldX, float oldY);
 	void signalUnitRemoved(Unit* unit);
 	void signalOutOfGame(Player*);
-	void signalAdvance();
 
 protected:
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }

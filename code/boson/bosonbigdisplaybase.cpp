@@ -478,7 +478,7 @@ void BosonBigDisplayBase::init()
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
 
- connect(canvas(), SIGNAL(signalAdvance()), this, SLOT(slotAdvance()));
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)), this, SLOT(slotAdvance(unsigned int, bool)));
 
  //TODO: sprite tooltips
 
@@ -1682,6 +1682,10 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	QPoint canvasPos;
 	worldToCanvas(x, y, z, &canvasPos);
 	Unit* unit = 0l;
+#warning FIMXE
+	// this is not good: isFogged() should get checked *everywhere* where a
+	// player tries to select a unit!
+	// maybe in selectSingle() or so.
 	if (!localPlayer()->isFogged(canvasPos.x() / BO_TILE_SIZE, canvasPos.y() / BO_TILE_SIZE)) {
 		unit = canvas()->findUnitAt(canvasPos);
 	}
@@ -2248,7 +2252,8 @@ const QPoint& BosonBigDisplayBase::cursorCanvasPos() const
  return d->mCanvasPos;
 }
 
-void BosonBigDisplayBase::slotAdvance()
+void BosonBigDisplayBase::slotAdvance(unsigned int /*advanceCount*/, bool)
 {
  d->mParticlesDirty = true;
 }
+
