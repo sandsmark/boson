@@ -6,16 +6,14 @@ SUBDIRS =
 
 # please specify the subdirectry here, e.g. "units" or "facilities". leave empty
 # for toplevel directory.
-BO_DOC_DIR=game
+BO_DOC_DIR=editor
 
 # list all wml files here
-BO_DOCS=index.wml attacking.wml buildfac.wml buildunit.wml cursor.wml \
-		scrolling.wml moving.wml configure.wml repairing.wml technologies.wml
+BO_DOCS=index.wml overview.wml elements.wml facilities.wml
 
 # list additional data here - these files will get installed
-doc_DATA=default.gif move.gif attack.gif
+doc_DATA=
 
 # Condiguration ends here!
 
 docdir=$(kde_htmldir)/$(KDE_LANG)/boson/$(BO_DOC_DIR)
-

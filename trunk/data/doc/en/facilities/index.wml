@@ -33,5 +33,5 @@
     </dl>
     
 
-#include "nav.wml" before_url="../game/repairing.html" before_text="Repairing" after_url="map.html" after_text="Facilities dependency tree"        
+#include "nav.wml" before_url="../game/technologies.html" before_text="Technologies" after_url="map.html" after_text="Facilities dependency tree"        
 #include "footer.wml"

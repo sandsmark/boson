@@ -1,0 +1,11 @@
+#include "top.wml"
+
+    <h1>
+      Building Facilities
+    </h1>
+    <p>&nbsp;</p>
+    <p>
+    Nothing yet.
+    </p>
+#include "nav.wml" before_url="elements.html" before_text="Elements of a game" after_url="../faq.html" after_text="FAQ"
+#include "footer.wml"

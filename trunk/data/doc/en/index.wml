@@ -4,7 +4,7 @@
       The Boson Handbook
     </h1>
     <p>
-      <i>Revision 0.03 - Boson 0.7 - 17th of August, 2002</i>
+      <i>Revision 0.04 - Boson 0.7 - 31th of August, 2002</i>
     </p>
     <h3>
       What is this?
@@ -42,6 +42,7 @@
               <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
               <dt>2.7 <a href="game/attacking.html">Attacking</a></dt>
               <dt>2.8 <a href="game/repairing.html">Repairing</a></dt>
+	      <dt>2.9 <a href="game/technologies.html">Technologies</a></dt>
             </dl>
           </dd>
           
@@ -80,19 +81,19 @@
               <dt>4.7 <a href="units/aircraft.html">Aircraft</a></dt>
             </dl>
           </dd>
-          <!--
-	  <dd>&nbsp;</dd>
+          <dd>&nbsp;</dd>
           <dt>5 <a href="editor/index.html">The Boson editor</a></dt>
           <dd>
             <dl>
               <dt>5.1 <a href="editor/overview.html">Overview</a></dt>
+              <dt>5.2 <a href="editor/elements.html">Elements of a game</a></dt>
+              <dt>5.3 <a href="editor/facilities.html">Building facilities</a></dt>
             </dl>
           </dd>
-	  -->
-	  <dd>&nbsp;</dd>
-          <dt>5 <a href="faq.html">FAQ</a></dt>
+          <dd>&nbsp;</dd>
+          <dt>6 <a href="faq.html">FAQ</a></dt>
           
-          <dt>6 <a href="credits.html">Credits</a></dt>
+          <dt>7 <a href="credits.html">Credits</a></dt>
         </dl>
       </dd>
     </dl>

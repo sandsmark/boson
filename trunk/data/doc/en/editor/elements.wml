@@ -21,5 +21,9 @@
     You can add canyons to place units and for a good battle field, lakes for the ships and so on.
     </p><p>&nbsp;</p>
     
-#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="" after_text=""
+    <h4>The player</h4>
+    <p>
+    You have to switch between the players. You can only create facilities for one player at one time.
+    </p>
+#include "nav.wml" before_url="overview.html" before_text="Overview" after_url="facilities.html" after_text="Building facilities"
 #include "footer.wml"
