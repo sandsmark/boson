@@ -909,6 +909,23 @@ void BoUfoSelectAction::setCurrentItem(int id)
  }
 }
 
+int BoUfoSelectAction::currentItem() const
+{
+ QPtrList<BoUfoAction> list = actions();
+ QPtrListIterator<BoUfoAction> it(list);
+ for (int i = 0; it.current(); ++it, i++) {
+	if (!it.current()->inherits("BoUfoToggleAction")) {
+		boWarning() << k_funcinfo << "oops - not a BoUfoToggleAction" << endl;
+		continue;
+	}
+	BoUfoToggleAction* t = (BoUfoToggleAction*)it.current();
+	if (t->isChecked()) {
+		return itemId(t);
+	}
+ }
+ return -1;
+}
+
 
 class BoUfoActionCollectionPrivate
 {
@@ -1256,6 +1273,7 @@ const BoUfoStdActionInfo g_actionInfo[] = {
 	{ BoUfoStdAction::FileOpen, KStdAccel::Open, 0, "file_open", I18N_NOOP("&Open..."), 0, "fileopen"},
 	{ BoUfoStdAction::FileSave, KStdAccel::Save, 0, "file_save", I18N_NOOP("&Save"), 0, "filesave"},
 	{ BoUfoStdAction::FileSaveAs, KStdAccel::AccelNone, 0, "file_save_as", I18N_NOOP("Save &As..."), 0, "filesaveas"},
+	{ BoUfoStdAction::FileClose, KStdAccel::Close, 0, "file_close", I18N_NOOP("&Close"), 0, "fileclose"},
 	{ BoUfoStdAction::FileQuit, KStdAccel::Quit, 0, "file_quit", I18N_NOOP("&Quit"), 0, "filequit"},
 
 	// Game menu
@@ -1354,6 +1372,7 @@ ACTION(fileNew, FileNew, BoUfoAction)
 ACTION(fileOpen, FileOpen, BoUfoAction)
 ACTION(fileSave, FileSave, BoUfoAction)
 ACTION(fileSaveAs, FileSaveAs, BoUfoAction)
+ACTION(fileClose, FileClose, BoUfoAction)
 ACTION(fileQuit, FileQuit, BoUfoAction)
 
 ACTION(gameNew, GameNew, BoUfoAction)

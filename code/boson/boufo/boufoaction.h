@@ -180,6 +180,11 @@ public:
 	void setItems(const QStringList&);
 	virtual void setCurrentItem(int id);
 
+	/**
+	 * @return The Id of the current item. See @ref setCurrentItem
+	 **/
+	int currentItem() const;
+
 private:
 	BoUfoSelectActionPrivate* d;
 };
@@ -238,7 +243,7 @@ public:
 	enum StdAction {
 		// File menu
 		FileNew = 1, FileOpen, FileSave, FileSaveAs,
-		FileQuit,
+		FileClose, FileQuit,
 
 		// Game menu
 		GameNew, GameLoad, GameSave, GameSaveAs,
@@ -265,6 +270,8 @@ public:
 	static BoUfoAction* fileSave(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);
 	static BoUfoAction* fileSaveAs(const QObject* receiver = 0, const char* slot = 0,
+			BoUfoActionCollection* parent = 0, const char* name = 0);
+	static BoUfoAction* fileClose(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);
 	static BoUfoAction* fileQuit(const QObject* receiver = 0, const char* slot = 0,
 			BoUfoActionCollection* parent = 0, const char* name = 0);
