@@ -23,7 +23,38 @@
 #include <klocale.h>
 #include <kdebug.h>
 
-QString BosonConfig::localPlayerName(KConfig* conf)
+BosonConfig* BosonConfig::mBosonConfig = 0;
+
+class BosonConfig::BosonConfigPrivate
+{
+public:
+	BosonConfigPrivate()
+	{
+	}
+
+	bool mSound;
+	bool mMusic;
+};
+
+BosonConfig::BosonConfig(KConfig* conf)
+{
+ d = new BosonConfigPrivate;
+ d->mSound = true;
+ d->mMusic = true;
+ reset(conf);
+}
+
+BosonConfig::~BosonConfig()
+{
+ delete d;
+}
+
+void BosonConfig::initBosonConfig()
+{
+ mBosonConfig = new BosonConfig;
+}
+
+QString BosonConfig::readLocalPlayerName(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -57,7 +88,7 @@ void BosonConfig::saveGameSpeed(int speed, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
-int BosonConfig::gameSpeed(KConfig* conf)
+int BosonConfig::readGameSpeed(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -69,7 +100,7 @@ int BosonConfig::gameSpeed(KConfig* conf)
  return speed;
 }
 
-int BosonConfig::commandFramePosition(KConfig* conf)
+int BosonConfig::readCommandFramePosition(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -103,7 +134,7 @@ void BosonConfig::saveChatFramePosition(int pos, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
-int BosonConfig::chatFramePosition(KConfig* conf)
+int BosonConfig::readChatFramePosition(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
@@ -117,46 +148,62 @@ int BosonConfig::chatFramePosition(KConfig* conf)
 
 void BosonConfig::saveSound(bool sound, KConfig* conf)
 {
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
  conf->setGroup("Boson");
  conf->writeEntry("Sound", sound);
- conf->setGroup(oldGroup);
 }
 
-bool BosonConfig::sound(KConfig* conf)
+bool BosonConfig::readSound(KConfig* conf)
 {
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
  conf->setGroup("Boson");
- bool sound = conf->readBoolEntry("Sound", true);
- conf->setGroup(oldGroup);
- return sound;
+ bool s = conf->readBoolEntry("Sound", boConfig->sound());
+ return s;
 }
 
 void BosonConfig::saveMusic(bool music, KConfig* conf)
 {
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
  conf->setGroup("Boson");
  conf->writeEntry("Music", music);
- conf->setGroup(oldGroup);
 }
 
-bool BosonConfig::music(KConfig* conf)
+bool BosonConfig::readMusic(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ bool m = conf->readBoolEntry("Music", boConfig->music());
+ return m;
+}
+
+bool BosonConfig::music() const
+{
+ return d->mMusic;
+}
+
+bool BosonConfig::sound() const
+{
+ return d->mSound;
+}
+
+void BosonConfig::reset(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
- conf->setGroup("Boson");
- bool music = conf->readBoolEntry("Music", true);
+ // the old group is already stored here so we don't have to re-set it in every
+ // read function
+ 
  conf->setGroup(oldGroup);
- return music;
+}
+
+void BosonConfig::save(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ // the old group is already stored here so we don't have to re-set it in every
+ // save function
+ saveMusic(music(), conf);
+ saveSound(sound(), conf);
+
+ conf->setGroup(oldGroup);
 }
