@@ -74,9 +74,7 @@ public:
 
 	/* concerning contents */
 	playerFacility *getFacility(long key) { return facility.find(key); }
-	bool		checkMove(QPoint pos, uint goFlag) {
-		return cell(pos).canGo( goFlag, ground( tile(pos.x(), pos.y())));
-	}
+	bool		checkMove(QRect r, uint goFlag );
 
 	//private :
 	QIntDict<playerMobUnit>	mobile;

@@ -30,7 +30,7 @@
 #include "game.h" 	// who_am_i
   
 
-#define DEBUG_REQUEST_F
+#undef DEBUG_REQUEST_F
 
 /*
  *  BOSON CANVAS
@@ -57,7 +57,7 @@ void bosonCanvas::setCellFlag(QRect r, Cell::cell_flags flag)
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
 		for(j=r.top(); j<=r.bottom(); j++) {
-			bocanvas->cell(i,j).setFlag( flag);
+			cell(i,j).setFlag( flag);
 #ifdef DEBUG_REQUEST_F
 			// does _not_ affect cells[]
 			//  -> so it's only 'visual'
@@ -73,7 +73,7 @@ void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
 	int i,j;
 	for(i=r.left(); i<=r.right(); i++)
 		for(j=r.top(); j<=r.bottom(); j++) {
-			bocanvas->cell(i,j).unsetFlag( flag);
+			cell(i,j).unsetFlag( flag);
 #ifdef DEBUG_REQUEST_F
 			if (flag==Cell::request_f || flag==Cell::request_flying_f)
 				setTile( i, j, makeCell(GROUND_GRASS) ); 
@@ -81,6 +81,17 @@ void bosonCanvas::unsetCellFlag(QRect r, Cell::cell_flags flag)
 			 }
 }
 
+
+bool bosonCanvas::checkMove(QRect r, uint goFlag )
+	
+{
+	int	i,j;
+
+	for(i=r.left(); i<=r.right(); i++)
+		for(j=r.top(); j<=r.bottom(); j++)
+			if (!cell(i, j).canGo( goFlag, ground( tile(i,j)))) return false;
+	return true;
+}
 
 void bosonCanvas::hideMob(destroyedMsg_t &m)
 {
