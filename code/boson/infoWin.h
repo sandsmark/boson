@@ -45,6 +45,9 @@ class infoWin : public QFrame
 public:
 	infoWin(QWidget *parent=0, const char *name=0);
 
+public slots:
+	void setSelected(QPixmap*);
+
 private:
 /* state view (for selected items) */
 	QWidgetStack	*stack;
