@@ -1,3 +1,6 @@
+
+COMPILE_FIRST = bodebug
+
 SUBDIRS = $(TOPSUBDIRS)
 
 $(top_srcdir)/configure.in: configure.in.in $(top_srcdir)/subdirs
@@ -20,3 +23,6 @@ EXTRA_DIST = admin
 dist-hook:
 	cd $(top_distdir) && perl admin/am_edit -padmin
 	cd $(top_distdir) && $(MAKE) -f admin/Makefile.common subdirs
+
+include admin/Doxyfile.am
+
