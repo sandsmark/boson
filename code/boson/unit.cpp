@@ -91,9 +91,6 @@ public:
 	QPtrList<UnitPlugin> mPlugins;
 	BosonWeapon** mWeapons;
 
-	// OpenGL only:
-	QPtrList<BosonEffect> mEffects;  // No autodelete!!!
-
 	BosonPathInfo mPathInfo;
 };
 
@@ -1087,9 +1084,6 @@ bool Unit::saveAsXML(QDomElement& root)
 	}
  }
 
-
- // TODO: somehow save active effects
-
  return true;
 }
 
@@ -1378,22 +1372,6 @@ void Unit::turnTo(int deg)
  d->mWantedRotation = deg;
 }
 
-const QPtrList<BosonEffect>* Unit::effects() const
-{
- return &(d->mEffects);
-}
-
-void Unit::clearEffects()
-{
- d->mEffects.clear();
-}
-
-void Unit::setEffects(const QPtrList<BosonEffect>& list)
-{
- d->mEffects = list;
- canvas()->addEffects(d->mEffects);
-}
-
 void Unit::loadWeapons()
 {
  if (d->mWeapons) {
@@ -1565,6 +1543,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* c
 
  ((Boson*)owner->game())->slotUpdateProductionOptions();
 
+ // FIXME: loading!
  setEffects(unitProperties()->newConstructedEffects(x() + width() / 2, y() + height() / 2, z()));
 
  setRotation((float)(owner->game()->random()->getLong(359)));

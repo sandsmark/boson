@@ -541,14 +541,18 @@ public:
 	void setEffectsPosition(float x, float y, float z);
 	void setEffectsRotation(float xrot, float yrot, float zrot);
 
+	/**
+	 * @return List of active effects this item has.
+	 * This may include e.g. smoke for factories.
+	 **/
 	virtual const QPtrList<BosonEffect>* effects() const;
+	virtual void setEffects(const QPtrList<BosonEffect>& effects, bool addtocanvas = true);
+	virtual void addEffect(BosonEffect* e, bool addtocanvas = true);
 
 	/**
 	 * Clear the effects list. Note that the effects are
 	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
 	 * anyway. Just the @ref effects list is meant to be cleared.
-	 *
-	 * The default implementation simply does nothing.
 	 **/
 	virtual void clearEffects();
 
@@ -675,6 +679,8 @@ private:
 	QPtrVector<Cell>* mCells;
 	bool mCellsDirty;
 	bool mIsVisible;
+
+	QPtrList<BosonEffect>* mEffects;
 };
 
 #endif

@@ -31,7 +31,6 @@ class Facility;
 class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
-class BosonEffect;
 class BosonWeapon;
 class BosonPathInfo;
 class BoVector3;
@@ -408,19 +407,6 @@ public:
 
 	void playSound(UnitSoundEvent event);
 
-	/**
-	 * @return List of active effects this unit has.
-	 * This may include e.g. smoke for factories.
-	 **/
-	virtual const QPtrList<BosonEffect>* effects() const;
-
-	/**
-	 * Clear the effects list. Note that the effects are
-	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
-	 * anyway. Just the @ref effects list is meant to be cleared.
-	 **/
-	virtual void clearEffects();
-
 	void loadWeapons();
 
 	bool canShootAt(Unit* u);
@@ -455,8 +441,6 @@ public:
 
 
 protected:
-	void setEffects(const QPtrList<BosonEffect>& list);
-
 	void shootAt(BosonWeapon* w, Unit* target);
 
 	/**

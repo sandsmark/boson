@@ -700,6 +700,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 		for (; it.current(); ++it) {
 			boDebug() << k_funcinfo << "Making effect " << it.current() << " obsolete" << endl;
 			it.current()->makeObsolete();
+			it.current()->setOwnerId(0);
 		}
 		unit->clearEffects();
 	}
@@ -1074,12 +1075,11 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "unable to load items from XML" << endl;
 	return false;
  }
-/*
+
  if (!loadEffectsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
 	// AB: do NOT return. this is NOT critical.
  }
-*/
 
  QDomElement handler = root.namedItem("DataHandler").toElement();
  if (handler.isNull()) {
@@ -1359,12 +1359,6 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 	unsigned int propId = 0;
 	unsigned int ownerId = 0;
 
-	ownerId = effect.attribute(QString::fromLatin1("OwnerId")).toUInt(&ok);
-	if (!ownerId || !ok) {
-		boError() << k_funcinfo << "invalid number for OwnerId" << endl;
-		ret = false;
-		continue;
-	}
 	propId = effect.attribute(QString::fromLatin1("PropId")).toUInt(&ok);
 	if (!propId || !ok) {
 		boError() << k_funcinfo << "invalid number for PropId" << endl;
@@ -1372,13 +1366,6 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 		continue;
 	}
 
-	Player* owner = (Player*)boGame->findPlayer(ownerId);
-	if (!owner) {
-		// AB: this is totally valid. less players in game, than in the
-		// file.
-		// This is from loadItemsFromXML(), is this still valid here?
-		continue;
-	}
 	const BosonEffectProperties* prop = boEffectPropertiesManager->effectProperties(propId);
 	if (!prop) {
 		boError() << k_funcinfo << "Null effect properties with id " << propId << endl;
@@ -1387,39 +1374,11 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 	}
 
 	BoVector3 pos, rot;
-	pos.setX(effect.attribute("Posx").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Posx attribute for Effect tag missing or invalid" << endl;
+	if (!pos.loadFromXML(effect, "Position")) {
 		ret = false;
 		continue;
 	}
-	pos.setY(effect.attribute("Posy").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Posy attribute for Effect tag missing or invalid" << endl;
-		ret = false;
-		continue;
-	}
-	pos.setZ(effect.attribute("Posz").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Posz attribute for Effect tag missing or invalid" << endl;
-		ret = false;
-		continue;
-	}
-	rot.setX(effect.attribute("Rotx").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Rotx attribute for Effect tag missing or invalid" << endl;
-		ret = false;
-		continue;
-	}
-	rot.setY(effect.attribute("Roty").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Roty attribute for Effect tag missing or invalid" << endl;
-		ret = false;
-		continue;
-	}
-	rot.setZ(effect.attribute("Rotz").toFloat(&ok));
-	if (!ok) {
-		boError() << k_funcinfo << "Rotz attribute for Effect tag missing or invalid" << endl;
+	if (!rot.loadFromXML(effect, "Rotation")) {
 		ret = false;
 		continue;
 	}
@@ -1434,7 +1393,20 @@ bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 	if(!e->loadFromXML(effect))
 	{
 		ret = false;
+		delete e;
 		continue;
+	}
+	addEffect(e);
+	if (e->ownerId()) {
+		// Find effect's owner
+		BosonItem* owner = d->mAllItems.findItem(e->ownerId());
+		if (owner) {
+			owner->addEffect(e, false);
+		} else {
+			boWarning() << k_funcinfo << "Can't find owner with id " << e->ownerId() << " for effect!" << endl;
+			e->makeObsolete();  // Maybe delete immediately?
+			ret = false;
+		}
 	}
  }
 
@@ -1497,7 +1469,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	items.appendChild(item);
  }
 
-/*
  // Save effects
  QDomElement effects = doc.createElement(QString::fromLatin1("Effects"));
  root.appendChild(effects);
@@ -1508,7 +1479,6 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	effects.appendChild(e);
 	++effectIt;
  }
-*/
 
  BosonPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
