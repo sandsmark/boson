@@ -5,8 +5,8 @@ Name=Batzen
 Id=10006
 Health=100
 MineralCost=150
-Range=4
-Damage=10
+WeaponRange=4
+WeaponDamage=10
 Reload=10
 Producer=0
 

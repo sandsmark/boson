@@ -5,8 +5,8 @@ Name=Ship
 Id=10000
 Health=120
 MineralCost=200
-Range=5
-Damage=25
+WeaponRange=5
+WeaponDamage=25
 Reload=20
 Producer=1
 

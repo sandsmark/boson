@@ -48,13 +48,14 @@ MineralCost=Number  - How much mineral do you have to pay if you build this?
                       Default is 100.
 OilCost=Number      - How much oil do you have to pay if you build this? 
                       Default is 0.
-Range=Number        - The weapon range (>= 0) of this unit. 
-                      Default is 0.
 SightRange=Number   - The sight range (>= 0) of this unit. 
                       the sight range is how far (in cells!) this unit can see.
                       Default is 5 (currently).
-Damage=Number       - The damage this unit makes to other units when firing. Can
+WeaponDamage=Number - The damage this unit makes to other units when firing. Can
                       also be negative - the unit repairs then. 
+                      Default is 0.
+WeaponRange=Number  - The weapon range (>= 0) of this unit. 
+                      Note: when WeaponDamage <= 0 this has no effect!
                       Default is 0.
 Reload=Number       - The time (>= 0) to reload the weapon. "Time" means number of
                       advance calls (ca 1 per 50ms). 

@@ -5,8 +5,8 @@ Name=Quad
 Id=10001
 Health=50
 MineralCost=100
-Range=4
-Damage=10
+WeaponRange=4
+WeaponDamage=10
 Reload=5
 Producer=0
 

@@ -145,9 +145,9 @@ Work=Number         - What this unit is doing at the moment. See
                       UnitBase::WorkType for possible values.
                       Default is UnitBase::WorkNone (0)
 ReloadState=Number  - Not yet supported
-Damage=Number       - How much damage this unit does to other units.
+WeaponDamage=Number - How much damage this unit does to other units.
                       Default depends on the index.desktop file of the unit.
-Range=Number        - The weapon Range of this unit.
+WeaponRange=Number  - The weapon Range of this unit.
                       Default depends on the index.desktop file of the unit.
 SightRange=Number   - How far this unit can see.
                       Default depends on the index.desktop file of the unit.
