@@ -507,7 +507,7 @@ bool BoGameCamera::saveAsXML(QDomElement& root)
 
 bool BoGameCamera::loadFromXML(const QDomElement& root)
 {
-  bool ret = loadFromXML(root);
+  bool ret = BoCamera::loadFromXML(root);
 
   bool ok;
   mPosZ = root.attribute("PosZ").toFloat(&ok);
