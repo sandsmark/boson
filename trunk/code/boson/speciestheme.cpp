@@ -26,11 +26,10 @@
 #include "bosonconfig.h"
 #include "bosonprofiling.h"
 #include "bosonmodel.h"
-#include "sound/bosonmusic.h"
-#include "sound/bosonsound.h"
 #include "upgradeproperties.h"
 #include "bodebug.h"
 #include "bosonweapon.h"
+#include "sound/bosonaudiointerface.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -124,8 +123,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  mThemePath = speciesDir;
  boDebug() << "theme path: " << themePath() << endl;
  mData = SpeciesData::speciesData(themePath());
-
- mSound = boMusic->addSounds(themePath());
+ mSound = boAudio->addSounds(themePath());
 
  // don't preload units here as the species can still be changed in new game
  // dialog
@@ -553,7 +551,7 @@ void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
  if (!boConfig->unitSoundActivated(event)) {
 	return;
  }
- sound()->play(unit->unitProperties()->sound(event));
+ sound()->playSound(unit->unitProperties()->sound(event));
 }
 
 void SpeciesTheme::playSound(SoundEvent event)
@@ -568,10 +566,10 @@ void SpeciesTheme::playSound(SoundEvent event)
 // if (!boConfig->soundActivated(event)) {
 //	return;
 // }
- sound()->play(event);
+ sound()->playSound(event);
 }
 
-void SpeciesTheme::playSound(const BosonWeaponProperties* weaponprop, WeaponSoundEvent event)
+void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoundEvent event)
 {
  if (boConfig->disableSound()) {
 	return;
@@ -582,7 +580,7 @@ void SpeciesTheme::playSound(const BosonWeaponProperties* weaponprop, WeaponSoun
  if (boConfig->deactivateWeaponSounds()) {
 	return;
  }
- sound()->play(weaponprop->sound(event));
+ sound()->playSound(weaponProp->sound(event));
 }
 
 void SpeciesTheme::loadGeneralSounds()

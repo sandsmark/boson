@@ -49,7 +49,7 @@ BoGlobal::BoGlobal()
  mBosonConfig = 0;
  mBosonProfiling = 0;
  mBosonData = 0;
- mBosonMusic = 0;
+ mBosonAudio = 0;
  mBoItemListHandler = 0;
 }
 
@@ -128,11 +128,11 @@ void BoGlobal::setPointer(void* pointer, int id)
 	case BoGlobalObjectBase::BoGlobalData:
 		setBosonData((BosonData*)pointer);
 		break;
-	case BoGlobalObjectBase::BoGlobalMusic:
-		setBosonMusic((BosonMusic*)pointer);
-		break;
 	case BoGlobalObjectBase::BoGlobalItemListHandler:
 		setBoItemListHandler((BoItemListHandler*)pointer);
+		break;
+	case BoGlobalObjectBase::BoGlobalAudio:
+		setBosonAudio((BosonAudioInterface*)pointer);
 		break;
 	default:
 		break;

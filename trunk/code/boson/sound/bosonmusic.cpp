@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,22 +19,19 @@
 
 #include "bosonmusic.h"
 
-#include "../defines.h"
-#include "../bosonconfig.h"
-#include "../boglobal.h"
 #include "bodebug.h"
-#include "bosonsound.h"
+#include "bosonaudio.h"
 
-#include <kglobal.h>
-#include <kstandarddirs.h>
+// FIXME: we use kapp->random(). is that thread safe? probably not...
 #include <kapplication.h>
 
 #include <arts/kplayobject.h>
 #include <arts/kplayobjectfactory.h>
 #include <arts/kartsserver.h>
-#include <arts/kartsdispatcher.h>
 
+// FIXME we should not use a QTimer here!
 #include <qtimer.h>
+
 #include <qstringlist.h>
 #include <qdict.h>
 
@@ -43,84 +40,43 @@
 
 #define TICKER_VALUE 500 // same as in kaboodle
 
-static BoGlobalObject<BosonMusic> globalMusic(BoGlobalObjectBase::BoGlobalMusic);
-
 class BosonMusic::BosonMusicPrivate
 {
 public:
 	BosonMusicPrivate()
 	{
-		mDispatcher = 0;
-		mServer = 0;
+		mParent = 0;
 
 		mPlayObject = 0;
 
 		mTicker = 0;
 	}
 
-	KArtsDispatcher* mDispatcher;
-	KArtsServer* mServer;
+	BosonAudio* mParent;
 	KPlayObject* mPlayObject;
-
-	QDict<BosonSound> mBosonSound;
 
 	QTimer* mTicker;
 
 	QStringList mFiles;
 	bool mLoop;
-
-	bool mPlayMusic;
-	bool mPlaySound;
 };
 
-BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
+BosonMusic::BosonMusic(BosonAudio* parent) : QObject(0, "bosonmusic")
 {
  d = new BosonMusicPrivate;
- d->mPlayMusic = true;
- d->mPlaySound = true;
+ d->mParent = parent;
  d->mTicker = new QTimer(this);
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
- d->mBosonSound.setAutoDelete(true);
- if (boConfig->disableSound()) {
-	d->mPlayMusic = false;
-	d->mPlaySound = false;
+ if (!d->mParent) {
+	boError(200) << k_funcinfo << "NULL parent" << endl;
 	return;
- }
- d->mDispatcher = new KArtsDispatcher(this);
- d->mServer = new KArtsServer(this);
- if (d->mServer->server().isNull()) {
-	boWarning(200) << "Cannot access KArtsServer - sound disabled" << endl;
-	// TODO: message box
-	d->mPlayMusic = false;
-	d->mPlaySound = false;
-	boConfig->setDisableSound(true);
- } else {
-	Arts::TraderQuery query;
-	query.supports("Interface", "Arts::PlayObject");
-	query.supports("Extension", "ogg");
-	std::vector<Arts::TraderOffer>* offers = query.query();
-	if (offers->empty()) {
-		boWarning(200) << "Your arts installation does not support .ogg files! Disabling sounds now..." << endl;
-		// TODO: message box
-		d->mPlayMusic = false;
-		d->mPlaySound = false;
-		boConfig->setDisableSound(true);
-	} else {
-		boDebug(200) << k_funcinfo << "ogg support seems to be ok" << endl;
-		std::vector<Arts::TraderOffer>::iterator it;
-		for (it = offers->begin(); it != offers->end(); it++) {
-			boDebug(200) << "ogg offer: " << it->interfaceName().c_str() << endl;
-		}
-	}
-	delete offers;
  }
 }
 
 BosonMusic::~BosonMusic()
 {
-boDebug(200) << k_funcinfo << endl;
- d->mBosonSound.clear();
+ boDebug(200) << k_funcinfo << endl;
  delete d->mTicker;
  if (d->mPlayObject) {
 	if (!d->mPlayObject->isNull()) {
@@ -129,29 +85,21 @@ boDebug(200) << k_funcinfo << endl;
 	}
 	delete d->mPlayObject;
  }
- delete d->mServer;
- delete d->mDispatcher;
  delete d;
 }
 
-BosonMusic* BosonMusic::bosonMusic()
+void BosonMusic::playMusic()
 {
- return BoGlobal::boGlobal()->bosonMusic();
-}
-
-void BosonMusic::play()
-{
- if (boConfig->disableSound()) {
-	return;
- }
  if (!d->mPlayObject || d->mPlayObject->isNull()) {
+	boDebug(200) << k_funcinfo << "no playobject" << endl;
 	return;
  }
+ boDebug(200) << k_funcinfo << "playing now" << endl;
  d->mPlayObject->play();
  d->mTicker->start(TICKER_VALUE);
 }
 
-void BosonMusic::stop()
+void BosonMusic::stopMusic()
 {
  if (d->mPlayObject && !d->mPlayObject->isNull()) {
 	d->mPlayObject->pause(); // AB: or halt() ??
@@ -159,71 +107,57 @@ void BosonMusic::stop()
  d->mTicker->stop();
 }
 
-bool BosonMusic::load(const QString& file)
+bool BosonMusic::loadMusic(const QString& file)
 {
- if (boConfig->disableSound()) {
-	return false;
- }
  boDebug(200) << k_funcinfo << file << endl;
  delete d->mPlayObject;
- KPlayObjectFactory factory(server().server());
+ KPlayObjectFactory factory(d->mParent->server().server());
  d->mPlayObject = factory.createPlayObject(file, true);
  if (d->mPlayObject->isNull()) {
 	delete d->mPlayObject;
 	d->mPlayObject = 0;
 	return false;
  }
- if (music()) {
-	play();
- }
+ play();
  return true;
 }
 
-QStringList BosonMusic::availableMusic() const
+void BosonMusic::startMusicLoop()
 {
- QStringList list = KGlobal::dirs()->findAllResources("data",
-		"boson/music/*.mp3", true);
- list += KGlobal::dirs()->findAllResources("data",
-		"boson/music/*.ogg", true);
- if (list.isEmpty()) {
-	boDebug(200) << "no music found" << endl;
-	return list;
- }
- return list;
-}
-
-void BosonMusic::startLoop()
-{
- startLoop(availableMusic());
-}
-
-void BosonMusic::startLoop(const QStringList& files)
-{
- // the loop is played in *random order*!
- d->mFiles = files;
- if (d->mFiles.count() == 0) {
-	d->mLoop = false;
-	return;
- }
  d->mLoop = true;
- int pos = kapp->random() %d->mFiles.count();
- if (!load(d->mFiles[pos])) {
+#warning FIXME thread safe?
+ int pos = kapp->random() % d->mFiles.count();
+ if (!loadMusic(d->mFiles[pos])) {
 	d->mFiles.remove(d->mFiles.at(pos));
  }
 }
 
+void BosonMusic::addToMusicList(const QString& file)
+{
+ d->mFiles.append(file);
+}
+
+void BosonMusic::clearMusicList()
+{
+ d->mFiles.clear();
+}
+
 void BosonMusic::slotUpdateTicker()
 {
+#warning we should avoid slots in this thread
+// slots should be possible, but dangerous. what e.g. about QTimer, which gets
+// used here? does it use an event for the timer? probably! events are not
+// allowed!
  if (!d->mPlayObject || d->mPlayObject->isNull()) {
 	return;
  }
  if (d->mPlayObject->state() == Arts::posIdle) {
 	if (isLoop()) {
 		// continue the loop
-		startLoop(d->mFiles);
+		startMusicLoop();
 	} else if (d->mFiles.count() != 0) {
 		// play the next file that can be loaded
-		while (d->mFiles.count() > 0 && !load(d->mFiles[0])) {
+		while (d->mFiles.count() > 0 && !loadMusic(d->mFiles[0])) {
 			d->mFiles.pop_front();
 		}
 	}
@@ -239,52 +173,13 @@ bool BosonMusic::isLoop() const
  return d->mLoop;
 }
 
-bool BosonMusic::sound() const
+void BosonMusic::setMusic(bool m)
 {
- return d->mPlaySound;
+ d->mParent->setMusic(m);
 }
 
 bool BosonMusic::music() const
 {
- return d->mPlayMusic;
-}
-
-void BosonMusic::setMusic(bool music_)
-{
- if (music() == music_) {
-	return;
- }
- d->mPlayMusic = music_;
- if (music()) {
-	play();
- } else {
-	stop();
- }
-}
-
-void BosonMusic::setSound(bool sound_)
-{
- if (sound() == sound_) {
-	return;
- }
- d->mPlaySound = sound_;
-}
-
-BosonSound* BosonMusic::addSounds(const QString& species)
-{
- if (!d->mBosonSound.find(species)) {
-	d->mBosonSound.insert(species, new BosonSound);
- }
- return d->mBosonSound[species];
-}
-
-BosonSound* BosonMusic::bosonSound(const QString& species) const
-{
- return d->mBosonSound[species];
-}
-
-KArtsServer& BosonMusic::server() const
-{
- return *d->mServer;
+ return d->mParent->music();
 }
 

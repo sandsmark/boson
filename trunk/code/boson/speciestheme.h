@@ -28,7 +28,7 @@
 
 class BosonTextureArray;
 class BosonModel;
-class BosonSound;
+class BosonSoundInterface;
 class UnitProperties;
 class UnitBase;
 class Unit;
@@ -230,7 +230,7 @@ public:
 	/**
 	 * @return The @ref BosonSound object for this species.
 	 **/
-	BosonSound* sound() const { return mSound; }
+	BosonSoundInterface* sound() const { return mSound; }
 
 	/**
 	 * Play the specified event for the specified unit.
@@ -299,7 +299,7 @@ private:
 
 	QString mThemePath;
 	QColor mTeamColor;
-	BosonSound* mSound;
+	BosonSoundInterface* mSound;
 	SpeciesData* mData;
 };
 

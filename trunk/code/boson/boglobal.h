@@ -24,7 +24,7 @@ class BoInfo;
 class BosonConfig;
 class BosonProfiling;
 class BosonData;
-class BosonMusic;
+class BosonAudioInterface;
 class BoItemListHandler;
 
 class BoGlobalPrivate;
@@ -76,8 +76,8 @@ public:
 	void setBosonData(BosonData* b) { mBosonData = b; }
 	BosonData* bosonData() const { return mBosonData; }
 
-	void setBosonMusic(BosonMusic* b) { mBosonMusic = b; }
-	BosonMusic* bosonMusic() const { return mBosonMusic; }
+	void setBosonAudio(BosonAudioInterface* b) { mBosonAudio = b; }
+	BosonAudioInterface* bosonAudio() const { return mBosonAudio; }
 
 	void setBoItemListHandler(BoItemListHandler* b) { mBoItemListHandler = b; }
 	BoItemListHandler* boItemListHandler() const { return mBoItemListHandler; }
@@ -121,7 +121,7 @@ private:
 	BosonConfig* mBosonConfig;
 	BosonProfiling* mBosonProfiling;
 	BosonData* mBosonData;
-	BosonMusic* mBosonMusic;
+	BosonAudioInterface* mBosonAudio;
 	BoItemListHandler* mBoItemListHandler;
 };
 
@@ -152,11 +152,12 @@ public:
 		// a BosonData object
 		BoGlobalData = 4,
 
-		// a BosonMusic object
-		BoGlobalMusic = 5,
-
 		// a BoItemListHandler object
-		BoGlobalItemListHandler = 6
+		BoGlobalItemListHandler = 6,
+
+		// a BosonAudioInterface object
+		BoGlobalAudio = 7
+
 	};
 
 public:

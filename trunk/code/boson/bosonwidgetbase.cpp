@@ -44,7 +44,7 @@
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
 #include "commandframe/bosoncommandframe.h"
-#include "sound/bosonmusic.h"
+#include "sound/bosonaudiointerface.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -236,18 +236,18 @@ void BosonWidgetBase::initConnections()
 		this, SLOT(slotRemoveUnit(Unit*)));
 
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
-		canvas(), SLOT(slotAddUnit(Unit*, int, int))); 
+		canvas(), SLOT(slotAddUnit(Unit*, int, int)));
  connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
 
  connect(boGame, SIGNAL(signalLoadExternalStuff(QDataStream&)),
-		this, SLOT(slotLoadExternalStuff(QDataStream&))); 
+		this, SLOT(slotLoadExternalStuff(QDataStream&)));
  connect(boGame, SIGNAL(signalSaveExternalStuff(QDataStream&)),
-		this, SLOT(slotSaveExternalStuff(QDataStream&))); 
+		this, SLOT(slotSaveExternalStuff(QDataStream&)));
  connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
-		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&))); 
+		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
  connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
-		this, SLOT(slotSaveExternalStuffAsXML(QDomElement&))); 
+		this, SLOT(slotSaveExternalStuffAsXML(QDomElement&)));
 
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&)));
@@ -510,24 +510,24 @@ void BosonWidgetBase::slotInitFogOfWar()
 
 bool BosonWidgetBase::sound() const
 {
- return boMusic->sound();
+ return boAudio->sound();
 }
 
 bool BosonWidgetBase::music() const
 {
- return boMusic->music();
+ return boAudio->music();
 }
 
 void BosonWidgetBase::slotToggleSound()
 {
- boMusic->setSound(!boMusic->sound());
- boConfig->setSound(boMusic->sound());
+ boAudio->setSound(!boAudio->sound());
+ boConfig->setSound(boAudio->sound());
 }
 
 void BosonWidgetBase::slotToggleMusic()
 {
- boMusic->setMusic(!boMusic->music());
- boConfig->setMusic(boMusic->music());
+ boAudio->setMusic(!boAudio->music());
+ boConfig->setMusic(boAudio->music());
 }
 
 void BosonWidgetBase::slotAddChatSystemMessage(const QString& fromName, const QString& text)

@@ -37,7 +37,7 @@
 #include "bodebug.h"
 #include "bodebugdcopiface.h"
 #include "startupwidgets/bosonstartupwidget.h"
-#include "sound/bosonmusic.h"
+#include "sound/bosonaudiointerface.h"
 #include "kgameunitdebug.h"
 #include "kgameplayerdebug.h"
 #include "kgamecelldebug.h"
@@ -139,8 +139,8 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 	KMessageBox::sorry(this, i18n("Unable to preload playFields. Check your installation!"));
 	exit(1);
  }
- boMusic->setSound(boConfig->sound());
- boMusic->setMusic(boConfig->music());
+ boAudio->setSound(boConfig->sound());
+ boAudio->setMusic(boConfig->music());
 
 
  d->mStartup = new BosonStartupWidget(mMainDock);
@@ -579,14 +579,14 @@ void TopWidget::slotAssignMap()
 
 void TopWidget::slotToggleSound()
 {
- boMusic->setSound(!boMusic->sound());
- boConfig->setSound(boMusic->sound());
+ boAudio->setSound(!boAudio->sound());
+ boConfig->setSound(boAudio->sound());
 }
 
 void TopWidget::slotToggleMusic()
 {
- boMusic->setMusic(!boMusic->music());
- boConfig->setMusic(boMusic->music());
+ boAudio->setMusic(!boAudio->music());
+ boConfig->setMusic(boAudio->music());
 }
 
 void TopWidget::slotConfigureKeys()
