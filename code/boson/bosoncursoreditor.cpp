@@ -305,7 +305,7 @@ void BosonCursorEditor::slotApplySpriteConfig()
 
 void BosonCursorEditor::slotChangeBaseDirectory()
 {
- QString dir = KFileDialog::getExistingDirectory();
+ QString dir = BoFileDialog::getExistingDirectory();
  if (dir != QString::null) {
 	changeBaseDirectory(dir);
  }

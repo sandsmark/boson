@@ -19,12 +19,12 @@
 #include <kdebug.h>
 #include <kconfig.h>
 #include <kapplication.h>
-#include <kfiledialog.h>
 
 #include "unitproperties.h"
 #include "bosonweapon.h"
 #include "pluginproperties.h"
 #include "bo3dtools.h"
+#include "bofiledialog.h"
 
 QString listToString(QValueList<unsigned long int> list)
 {
@@ -143,7 +143,7 @@ void BoUnitEditor::slotSaveUnit()
     QString dir = mUnitPath->text();
     QDir d;
     if(dir.isEmpty()) {
-	dir = KFileDialog::getExistingDirectory(QString::null, 0,
+	dir = BoFileDialog::getExistingDirectory(QString::null, 0,
 						i18n("Please select directory for your new unit"));
 	if(dir.isEmpty()) { // No directory was chosen
 	    return;
@@ -339,7 +339,7 @@ void BoUnitEditor::slotOpenUnit()
     }
     
     // Open new unit
-    QString dir = KFileDialog::getExistingDirectory();
+    QString dir = BoFileDialog::getExistingDirectory();
     if((dir == QString::null) || (!QFile::exists(dir + "/index.unit"))) {
 	KMessageBox::error(this, i18n("No unit configuration file was found in this directory!"), i18n("Invalid directory!"));
 	return;

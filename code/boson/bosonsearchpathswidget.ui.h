@@ -6,7 +6,8 @@
 ** a constructor, and a destroy() slot in place of a destructor.
 *****************************************************************************/
 
-#include <kfiledialog.h>
+#include "bofiledialog.h"
+
 #include <klocale.h>
 #include <kdebug.h>
 
@@ -45,7 +46,7 @@ void BosonSearchPathsWidget::slotAddPath()
 
 void BosonSearchPathsWidget::slotBrowse()
 {
-   mNewPath->setText(KFileDialog::getExistingDirectory());
+   mNewPath->setText(BoFileDialog::getExistingDirectory());
 }
 
 QStringList BosonSearchPathsWidget::currentPaths()

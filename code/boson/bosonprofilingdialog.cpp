@@ -22,6 +22,7 @@
 #include "bosonprofiling.h"
 #include "bosonprofilingprivate.h"
 #include "bodebug.h"
+#include "bofiledialog.h"
 #include "rtti.h"
 
 #include <klocale.h>
@@ -1076,7 +1077,7 @@ void BosonProfilingDialog::slotUpdate()
 void BosonProfilingDialog::slotSaveToFile()
 {
  QString file;
- file = KFileDialog::getSaveFileName();
+ file = BoFileDialog::getSaveFileName();
  if (file.isNull()) {
 	return;
  }
@@ -1088,7 +1089,7 @@ void BosonProfilingDialog::slotSaveToFile()
 void BosonProfilingDialog::slotLoadFromFile()
 {
  QString file;
- file = KFileDialog::getOpenFileName();
+ file = BoFileDialog::getOpenFileName();
  if (file.isNull()) {
 	return;
  }
