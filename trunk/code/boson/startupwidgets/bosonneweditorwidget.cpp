@@ -33,7 +33,6 @@
 #include "../bosonmap.h"
 #include "../bosongroundtheme.h"
 #include "../bosondata.h"
-#include "../cell.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
