@@ -48,15 +48,22 @@ draw_bigbox_text("Most recent version, 0.9.1, was released on 16th November 2003
 
 //draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
-/*draw_bigbox_text("What has been changed since 0.9 (will go into 0.9.1):
+draw_bigbox_text("What has been changed since 0.9.1:
 <ul>
- <li>Network with kdegames from KDE < 3.2 is fixed</li>
- <li>Minor file format fix, that causes less trouble with network</li>
- <li>Ground texture pixmaps are loaded correctly in the editor</li>
- <li>Factory productions are saved correctly</li>
- <li>Try to find a usable GL font, even if Qt doesn't find any</li>
- <li>Don't crash when using proprietary NVidia drivers and no usable font was found (reported to NVidia nearly a year ago)</li>
-</ul>");*/
+ <li>Support for textured fonts. They are faster and more powerful, but most
+ important: not even proprietary NVidia drivers crash when they are invalid.
+ Thanks a lot to <a href=\"http://plib.sf.net\">plib</a> where this code has
+ been shamelessy stolen</li>
+ <li>Neutral player and species has been added. You cannot play this, it is
+ meant for civilian units or things like trees and so on.</li>
+ <li>Texture compression is used, if available which can reduce texture size an
+ therefore improve speed.</li>
+ <li>Sound is enabled by default again</li>
+ <li>OpenGL minimap</li>
+ <li>The path a unit is using is displayed when it is selected</li>
+ <li>The menu is properly removed when a game is ended, fixing menu duplication
+ (see <a href=\"http://bugs.kde.org/show_bug.cgi?id=66715\">66715</a>)</li>
+</ul>");
 /*
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
