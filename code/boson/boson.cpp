@@ -964,6 +964,7 @@ void Boson::networkTransmission(BoMessage* m)
 	return;
  }
  m->setDelivered();
+ m->deliveredOnAdvanceCallsCount = advanceCallsCount();
  d->mMessageLogger.append(m);
  QDataStream s(m->byteArray, IO_ReadOnly);
  KGame::networkTransmission(s, m->msgid, m->receiver, m->sender, m->clientId);
