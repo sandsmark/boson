@@ -56,7 +56,7 @@ class BoEditorApp : public KTMainWindow
 
 public: 
   /** construtor */
-  BoEditorApp(char *servername=0l); 
+  BoEditorApp(char *filename=0l); 
   /** destructor */
   ~BoEditorApp();
 
@@ -93,7 +93,7 @@ protected:
     * by calling readOptions() and calls the initXX functions to set up
     * the main view items
     */
-  void init(char *servername=0l);  
+  void init(char *filename=0l);  
   /** initMenuBar creates the menu_bar and inserts the menuitems */
   void initMenuBar(); 
   /** this creates the toolbars. Change the toobar look and add more in this
@@ -169,7 +169,7 @@ private:
 
 /* The map which handle grouds and units*/
     editorField		*field;
-    QString		*filename;
+    QString		*currentFile;
 
 };   
  
