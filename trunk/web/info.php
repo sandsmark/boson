@@ -72,6 +72,7 @@ draw_bigbox_text("These requirements apply to the latest stable release
     * XFree 4.x server (with OpenGL support) - see <a href=\"http://www.xfree86.org/\" target=\"_blank\">http://www.xfree86.org/</a><br>
     * Qt 3.0.3 or better - see <a href=\"http://www.trolltech.com/\" target=\"_blank\">http://www.trolltech.com/</a><br>
     * KDE 3.0.1 or better (3.1 is recommended) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
+    * Python 2.0 or better (2.3 is recommended) - see <a href=\"http://www.python.org/\" target=\"_blank\">http://www.python.org/</a><br>
     * kdegames/libkdegames - usually shipped with KDE<br>
     * kdemultimedia - also shipped with KDE<br>
     * libvorbis (for sound and music) - see <a href=\"http://www.vorbis.com/\" target=\"_blank\">http://www.vorbis.com/</a><br>
