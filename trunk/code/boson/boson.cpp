@@ -1757,7 +1757,7 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
- boDebug() << k_funcinfo << advanceCallsCount() << endl;
+// boDebug() << k_funcinfo << advanceCallsCount() << endl;
  bool flag = advanceFlag();
  // we need to toggle the flag *now*, in case one of the Unit::advance*()
  // methods changes the advance function. this change must not appear to the
@@ -1770,12 +1770,12 @@ void Boson::slotReceiveAdvance()
 	QByteArray log;
 	QTextStream ts(log, IO_WriteOnly);
 	writeGameLog(ts);
-	boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
+//	boDebug() << k_funcinfo << "Log size: " << log.size() << endl;
 	BosonProfiler p(1745);
 	QByteArray comp = qCompress(log);
 	d->mGameLogs.append(comp);
-	boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
-	boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
+//	boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+//	boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
  }
 
  d->mAdvanceCallsCount = d->mAdvanceCallsCount + 1;
@@ -1888,7 +1888,7 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
  d->mDelayedWaiting = false;
  switch (m->msgid - KGameMessage::IdUser) {
 	case BosonMessage::AdvanceN:
-		boWarning() << k_funcinfo << "delayed advance msg will be sent!" << endl;
+		boWarning(300) << k_funcinfo << "delayed advance msg will be sent!" << endl;
 		d->mAdvanceMessageWaiting--;
 		break;
 	default:
@@ -2275,7 +2275,7 @@ void Boson::writeGameLog(QTextStream& log)
  }
 
  log << endl << endl;
- boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
+// boDebug() << k_funcinfo << "Done, elapsed: " << p.stop() << endl;
 }
 
 void Boson::saveGameLogs(const QString& prefix)
