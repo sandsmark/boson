@@ -172,6 +172,12 @@ protected:
 	 **/
 	QPixmap pixmapFromTheme(const QString& file, const QString& theme) const;
 
+	/**
+	 * Repaint the internal minimap pixmap, if updates are enabled.
+	 * Otherwise this is a noop.
+	 **/
+	void repaintMiniMapPixmap();
+
 
 private:
 	class BosonMiniMapPrivate;
