@@ -249,7 +249,7 @@ public:
 	 **/
 	void setId(unsigned long int id) { mId = id; }
 
-	unsigned long int shields() const;
+	inline unsigned long int shields() const { return mShields; }
 	void setShields(unsigned long int shields);
 
 	unsigned long int armor() const;

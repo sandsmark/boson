@@ -155,11 +155,6 @@ const QString& UnitBase::name() const
  return unitProperties()->name();
 }
 
-unsigned long int UnitBase::shields() const
-{
- return mShields;
-}
-
 unsigned long int UnitBase::armor() const
 {
  return mArmor;
