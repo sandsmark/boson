@@ -25,6 +25,7 @@
 
 #include <qstring.h>
 #include <qfileinfo.h>
+#include <qstringlist.h>
 
 #include "bodebug.h"
 #include "../bo3dtools.h"
@@ -150,6 +151,7 @@ PythonScript::PythonScript(Player* p) : BosonScript(p)
 
   PyOS_FiniInterrupts();
 
+  mMainModule = 0;
   mDict = 0;
   mScriptInstances++;
 }
@@ -237,8 +239,8 @@ bool PythonScript::loadScriptFromString(const QString& string)
 {
   getPythonLock();
 
-  PyObject* m = PyImport_AddModule((char*)"__main__");
-  PyObject* maindict = PyModule_GetDict(m);
+  mMainModule = PyImport_AddModule((char*)"__main__");
+  mDict = PyModule_GetDict(mMainModule);
 
   QString code;
   code += "import sys\n";
@@ -246,7 +248,7 @@ bool PythonScript::loadScriptFromString(const QString& string)
   code += "sys.path.insert(0, '')\n";
   code += string;
 
-  PyObject* obj = PyRun_String(code.ascii(), Py_file_input, maindict, maindict);
+  PyObject* obj = PyRun_String(code.ascii(), Py_file_input, mDict, mDict);
   if(!obj)
   {
     PyErr_Print();
@@ -255,7 +257,6 @@ bool PythonScript::loadScriptFromString(const QString& string)
     freePythonLock();
     return false;
   }
-  mDict = PyModule_GetDict(m);
 
   mLoadedScripts += string;
   mLoadedScripts += '\n';
@@ -389,6 +390,56 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     return;
   }
 
+  // Break function name string into module and function name
+  PyObject* dict = 0;
+  QString funcname = function;
+  // If it contains module name, it must contain dot.
+  if(function.find('.') == -1)
+  {
+    // Function is in __main__ module
+    dict = mDict;
+  }
+  else
+  {
+    // Find the module
+    QStringList modulelist = QStringList::split('.', function);
+    PyObject* lastdict = mDict;
+    // There should be this many modules in the modulelist, the last string is
+    //  name of the function.
+    int modulecount = modulelist.count() - 1;
+    int i = 0;
+    // Recursively go through the modulelist and find the module where the
+    //  function is.
+    for(QStringList::Iterator it = modulelist.begin(); (it != modulelist.end()) && (i < modulecount); ++it, i++)
+    {
+      // Find object with given name in lastmodule
+      PyObject* o = PyDict_GetItemString(lastdict, (char*)(*it).latin1());
+      if(!o)
+      {
+        boError() << k_funcinfo << "Couldn't find object '" << *it << "'! Full function name was '" << function << "'" << endl;
+        return;
+      }
+      // Make sure o is module
+      if(!PyModule_Check(o))
+      {
+        boError() << k_funcinfo << "'" << *it << "' is not a module! Full function name was '" << function << "'" << endl;
+        return;
+      }
+      lastdict = PyModule_GetDict(o);
+    }
+
+    dict = lastdict;
+    funcname = modulelist.last();
+  }
+  // Make sure we have valid dict
+  if(!dict)
+  {
+    boError() << k_funcinfo << "Couldn't find dict!" << endl;
+    return;
+  }
+
+
+  // Create the argument list for the function call
   PyObject* funcargs = PyTuple_New(args.length());
 
   for(unsigned int i = 0; i < args.length(); i++)
@@ -431,7 +482,33 @@ void PythonScript::callEventHandler(const BoEvent* e, const QString& function, c
     PyTuple_SetItem(funcargs, i, o);
   }
 
-  callFunction(function.latin1(), funcargs);
+
+  // Make the function call
+  // TODO: make a callFunction() method which takes module as an argument. Then
+  //  we could get rid of duplicated code here.
+  getPythonLock();
+
+  PyObject* func = PyDict_GetItemString(dict, (char*)funcname.ascii());
+  if(!func)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "No such function: " << funcname << endl;
+    freePythonLock();
+    return;
+  }
+
+  PyObject* pValue = PyObject_CallObject(func, funcargs);
+  if(!pValue)
+  {
+    PyErr_Print();
+    boError() << k_funcinfo << "Error while calling function " << funcname << endl;
+  }
+  else
+  {
+    Py_DECREF(pValue);
+  }
+
+  freePythonLock();
 }
 
 void PythonScript::advance()
@@ -453,18 +530,78 @@ void PythonScript::setPlayerId(int id)
   callFunction("setPlayerId", args);
 }
 
-bool PythonScript::save(QDataStream& stream) const
+bool PythonScript::save(QDataStream& stream)
 {
   boDebug() << k_funcinfo << endl;
+
+  getPythonLock();
+
+  // Save main module to a PyObject
+  PyObject* savedmodule = saveModule(mMainModule);
+
+  // Save all items in savedict
+  PyObject* data = PyMarshal_WriteObjectToString(savedmodule);
+  if(!data)
+  {
+    boError() << k_funcinfo << "null data!" << endl;
+    PyErr_Print();
+    freePythonLock();
+    return false;
+  }
+
+  boDebug() << k_funcinfo << "Data string length is " << PyString_Size(data) << endl;
+
+  stream << mLoadedScripts;
+  // We can't just stream PyString_AsString(data), because it might contain
+  //  NULL bytes.
+  stream.writeBytes(PyString_AsString(data), PyString_Size(data));
+
+  freePythonLock();
+
+  boDebug() << k_funcinfo << "END" << endl;
+  return true;
+}
+
+PyObject* PythonScript::saveModule(PyObject* module) const
+{
+  /**
+   * Python module saving format:
+   *
+   * * PyDict
+   *   * "variables" - PyDict
+   *     * All variables in the module, saved in a PyDict
+   *   * "submodules" - PyDict
+   *     * All submodules in the module, saved in a PyDict. Note that this
+   *       module can be empty, then module has no submodules.
+   **/
+  boDebug() << k_funcinfo << endl;
+  // Find dictionary of the module
+  PyObject* moduledict = PyModule_GetDict(module);
+
+  // Top-level dictionary for this module. This is the one that contains two
+  //  PyDicts with keys "variables" and "submodules"
+  PyObject* maindict = PyDict_New();
+
+  // Create a dict containing submodules of this module
+  PyObject* submodules = PyDict_New();
   // Create a dict containing only variables (not functions)
-  PyObject* savedict = PyDict_New();
+  PyObject* variables = PyDict_New();
+
+  // Iterate through all entries in this module's dict and add them to
+  //  variables or submodules dict if possible.
   PyObject* key;
   PyObject* value;
   int pos = 0;
-  while(PyDict_Next(mDict, &pos, &key, &value))
+  while(PyDict_Next(moduledict, &pos, &key, &value))
   {
     // Check if value is any of the known types
     // Note that I'm using Andi's coding style here to keep the code small
+    // Skip certain internal Python data
+    if((strncmp(PyString_AsString(key), "__", 2) == 0) || (strcmp(PyString_AsString(key), "sys") == 0))
+    {
+      // Skip everything with name "__*" and "sys"
+      continue;
+    }
     // This is basically taken from w_object() in Python/marshal.c
     if(value == NULL) {
     } else if(value == Py_None) {
@@ -478,8 +615,14 @@ bool PythonScript::save(QDataStream& stream) const
     } else if(PyString_Check(value)) {
     } else if(PyTuple_Check(value)) {
     } else if(PyList_Check(value)) {
+    } else if(PyDict_Check(value)) {
     } else if(PyCode_Check(value)) {
     } else if(PyObject_CheckReadBuffer(value)) {
+    } else if(PyModule_Check(value)) {
+      // Add module to submodules' list
+      boDebug() << k_funcinfo << "Saving module '" << PyString_AsString(key) << "', exact: " << PyModule_CheckExact(value) << endl;
+      PyDict_SetItem(submodules, key, saveModule(value));
+      continue;
     } else {
       // This is unknown type (most likely a function)
       // Note that we also don't support complex and unicode objects because
@@ -488,27 +631,72 @@ bool PythonScript::save(QDataStream& stream) const
     }
     // Add the object to dict
     boDebug() << k_funcinfo << "Saving object '" << PyString_AsString(key) << "'" << endl;
-    PyDict_SetItem(savedict, key, value);
+    PyDict_SetItem(variables, key, value);
   }
 
-  // Save all items in savedict
-  PyObject* data = PyMarshal_WriteObjectToString(savedict);
-  if(!data)
-  {
-    boError() << k_funcinfo << "null data!" << endl;
-    PyErr_Print();
-    return false;
-  }
-
-  boDebug() << k_funcinfo << "Data string length is " << PyString_Size(data) << endl;
-
-  stream << mLoadedScripts;
-  // We can't just stream PyString_AsString(data), because it might contain
-  //  NULL bytes.
-  stream.writeBytes(PyString_AsString(data), PyString_Size(data));
+  // Add variables and submodules to maindict
+  PyDict_SetItemString(maindict, (char*)"__BO_variables", variables);
+  PyDict_SetItemString(maindict, (char*)"__BO_submodules", submodules);
 
   boDebug() << k_funcinfo << "END" << endl;
-  return true;
+  return maindict;
+}
+
+void PythonScript::loadModule(PyObject* module, PyObject* data)
+{
+  boDebug() << k_funcinfo << endl;
+  // Find dictionary of the module
+  PyObject* moduledict = PyModule_GetDict(module);
+
+  // Get variable and submodule dicts
+  PyObject* variables = PyDict_GetItemString(data, (char*)"__BO_variables");
+  PyObject* submodules = PyDict_GetItemString(data, (char*)"__BO_submodules");
+
+  // Make sure the dicts are valid
+  if(!variables)
+  {
+    boError() << k_funcinfo << "Couldn't find variables dict!" << endl;
+    return;
+  }
+  if(!submodules)
+  {
+    boError() << k_funcinfo << "Couldn't find submodules dict!" << endl;
+    return;
+  }
+
+  // Load the variables
+  boDebug() << k_funcinfo << "Loading and merging " << PyDict_Size(variables) << " variables" << endl;
+  PyDict_Merge(moduledict, variables, true);
+
+  // Load the submodules
+  boDebug() << k_funcinfo << "Loading and merging " << PyDict_Size(submodules) << " submodules" << endl;
+  PyObject* key;
+  PyObject* value;
+  int pos = 0;
+  while(PyDict_Next(submodules, &pos, &key, &value))
+  {
+    // Check if current module already has module with this name
+    PyObject* m = PyDict_GetItem(moduledict, key);
+    if(m)
+    {
+      if(!PyModule_Check(m))
+      {
+        boError() << k_funcinfo << "Parent module has non-module item '" << PyString_AsString(key) << "'! Can't load module with same name!" << endl;
+        continue;
+      }
+    }
+    else
+    {
+      // Create new module
+      m = PyModule_New(PyString_AsString(key));
+      PyDict_SetItem(moduledict, key, m);
+    }
+    // Load the module
+    boDebug() << k_funcinfo << "Loading module '" << PyString_AsString(key) << "'" << endl;
+    loadModule(m, value);
+  }
+
+  boDebug() << k_funcinfo << "END" << endl;
 }
 
 bool PythonScript::load(QDataStream& stream)
@@ -521,20 +709,28 @@ bool PythonScript::load(QDataStream& stream)
   stream.readBytes(data, datalen);
 
   // Load dict object from data
-  PyObject* dict = PyMarshal_ReadObjectFromString(data, datalen);
-  if(!dict)
+  getPythonLock();
+  PyObject* maindict = PyMarshal_ReadObjectFromString(data, datalen);
+  if(!maindict)
   {
-    boError() << k_funcinfo << "Could not load dict!" << endl;
+    boError() << k_funcinfo << "Could not load main dict!" << endl;
     return false;
   }
+  // loadScriptFromString() also acquires the python lock, so we must free it
+  //  here and re-acquire it later.
+  freePythonLock();
 
   // Load script
   loadScriptFromString(mLoadedScripts);
-  // Load dict
-  PyDict_Merge(mDict, dict, true);
+
+  // Load data
+  getPythonLock();
+  loadModule(mMainModule, maindict);
+  freePythonLock();
 
   delete[] data;
 
+  boDebug() << k_funcinfo << "END" << endl;
   return true;
 }
 
