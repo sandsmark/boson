@@ -833,6 +833,7 @@ void BosonBigDisplayBase::renderCells()
 	GLfloat cellYPos = -(float)c->y() * BO_GL_CELL_SIZE;
 	if (c->tile() != tile) {
 		texture = tiles->textures()->texture(c->tile());
+		tile = c->tile();
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 	}
