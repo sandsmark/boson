@@ -530,7 +530,7 @@ void BosonCanvas::leaderMoved(Unit* unit, double oldX, double oldY)
  QValueListIterator<UnitGroup> it;
  for(it = d->mGroups.begin(); it != d->mGroups.end(); ++it) {
 	if((*it).isLeader(unit)) {
-		(*it).leaderMoved(unit->x() - oldX, unit->y() - oldY);
+		(*it).leaderMoved((int)(unit->x() - oldX), (int)(unit->y() - oldY));
 		break;
 	}
  }
@@ -674,7 +674,7 @@ Cell* BosonCanvas::cellAt(Unit* unit) const
 
 Cell* BosonCanvas::cellAt(double x, double y) const
 {
- return cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
+ return cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 }
 
 BosonMap* BosonCanvas::map() const

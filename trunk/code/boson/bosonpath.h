@@ -32,7 +32,7 @@
 
 #ifdef USE_STL
  #include <vector.h>
- #include <stl_heap.h>
+ #include <queue>
 #endif
 
 #include <qvaluelist.h>

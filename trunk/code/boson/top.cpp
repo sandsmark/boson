@@ -573,7 +573,7 @@ void TopWidget::loadGameData3() // FIXME rename!
  for(it = unitIds.begin(); it != unitIds.end(); ++it) {
 	current++;
 	player()->speciesTheme()->loadUnit(*it);
-	d->mLoading->setProgress(3000 + ((double)current / total * 1600));
+	d->mLoading->setProgress((int)(3000 + ((double)current / total * 1600)));
  }
 
 
@@ -620,7 +620,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 
 void TopWidget::slotCanvasTilesLoading(int progress)
 {
- d->mLoading->setProgress(600 + (progress / 1244.0 * 2200));
+ d->mLoading->setProgress((int)(600 + (progress / 1244.0 * 2200)));
  // No checkEvents() here as events are already processed in BosonTiles::???
 }
 
