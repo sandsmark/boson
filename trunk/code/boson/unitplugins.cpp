@@ -285,7 +285,9 @@ void ProductionPlugin::advance(unsigned int)
 			}
 		}
 		boDebug() << k_funcinfo << "Cannot find free cell around facility :-(" << endl;
-		game()->slotAddChatSystemMessageForLocalPlayer(player(), i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
+		game()->slotAddChatSystemMessage(
+				i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()),
+				player());
 	} else {
 		mProductionState = mProductionState + 1;
 	}
