@@ -124,6 +124,9 @@ signals:
 	 **/
 	void signalFacilitiesCount(int facilities);
 
+	void signalMineralsUpdated(int);
+	void signalOilUpdated(int);
+
 protected slots:
 	void slotStartScenario();
 	void slotSendChangeSpecies(const QString& species);

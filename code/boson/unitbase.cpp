@@ -46,11 +46,10 @@ public:
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
-	KGameProperty<unsigned long int> mCost;
+//	KGameProperty<unsigned long int> mCost;
 	KGameProperty<unsigned long int> mRange;
 	KGameProperty<unsigned int> mSightRange;
 	KGameProperty<long int> mDamage; // can also repair (negative value)
-	KGameProperty<double> mSpeed;
 	KGameProperty<unsigned int> mReload;
 
 	KGameProperty<int> mType; // *only* touched on construction (at least currently ;))
@@ -72,14 +71,12 @@ UnitBase::UnitBase(int type)
 		KGamePropertyBase::PolicyLocal, "Shields");
  d->mId.registerData(IdId, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
- d->mCost.registerData(IdCost, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Cost");
+// d->mCost.registerData(IdCost, dataHandler(), 
+//		KGamePropertyBase::PolicyLocal, "Cost");
  d->mType.registerData(IdType, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Type");
  d->mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
- d->mSpeed.registerData(IdSpeed, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "Speed");
  d->mDamage.registerData(IdDamage, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Damage");
  d->mRange.registerData(IdRange, dataHandler(), 
@@ -96,7 +93,7 @@ UnitBase::UnitBase(int type)
  d->mShields.setLocal(0); // doesn't have any shields
  d->mArmor.setLocal(0); // doesn't have any armor
  d->mId.setLocal(0);
- d->mCost.setLocal(0);
+// d->mCost.setLocal(0);
  d->mDamage.setLocal(0);
  d->mRange.setLocal(0);
  d->mReload.setLocal(0);
@@ -150,6 +147,7 @@ unsigned long int UnitBase::id() const
  return d->mId;
 }
 
+/*
 unsigned long int UnitBase::cost() const
 {
  return d->mCost;
@@ -159,6 +157,7 @@ void UnitBase::setCost(unsigned long int c)
 {
  d->mCost = c;
 }
+*/
 
 void UnitBase::setArmor(unsigned long int a)
 {
@@ -193,16 +192,6 @@ void UnitBase::setWork(WorkType work)
 UnitBase::WorkType UnitBase::work() const
 {
  return (WorkType)d->mWork.value();
-}
-
-void UnitBase::setSpeed(double speed)
-{
- d->mSpeed = speed;
-}
-
-double UnitBase::speed() const
-{
- return d->mSpeed;
 }
 
 long int UnitBase::damage() const

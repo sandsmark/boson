@@ -44,9 +44,12 @@ public:
 
 	QPtrList<Unit> mUnits;
 
+	BosonMap* mMap; // just a pointer
 	int mUnitPropID; // used for KGamePropertyHandler
-	QBitArray mFogged;
-	BosonMap* mMap;
+	
+	QBitArray mFogged; // TODO: use KGameProperty
+	KGameProperty<unsigned long int> mMinerals;
+	KGameProperty<unsigned long int> mOil;
 };
 
 Player::Player() : KPlayer()
@@ -57,6 +60,13 @@ Player::Player() : KPlayer()
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
+// TODO d->mFogged.registerData() or something like this
+ d->mMinerals.registerData(IdMineralCost, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "MineralCost");
+ d->mOil.registerData(IdOilCost, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "OilCost");
+ d->mMinerals.setLocal(0);
+ d->mOil.setLocal(0);
 }
 
 Player::~Player()
@@ -410,3 +420,24 @@ bool Player::isFogged(int x, int y) const
 {
  return d->mFogged.at(x + d->mMap->width() * y);
 }
+
+unsigned long int Player::minerals() const
+{
+ return d->mMinerals;
+}
+
+unsigned long int Player::oil() const
+{
+ return d->mOil;
+}
+
+void Player::setOil(unsigned long int o)
+{
+ d->mOil = o;
+}
+
+void Player::setMinerals(unsigned long int m)
+{
+ d->mMinerals = m;
+}
+

@@ -381,7 +381,6 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
  unit->setShields(prop->shields());
- unit->setCost(prop->prize());
  unit->setRange(prop->range());
  unit->setDamage(prop->damage());
  unit->setReload(prop->reload());

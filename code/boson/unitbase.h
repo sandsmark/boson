@@ -132,19 +132,6 @@ public:
 	void setArmor(unsigned long int armor);
 
 	/**
-	 * @return The price of the unit. It can be changed using @ref setCost
-	 * but this shouldn't be necessary very often (beside the initial
-	 * creation).
-	 **/
-	virtual unsigned long int cost() const; // we don't need this. in UnitProperties it's enough!
-
-	/**
-	 * Change the price of the unit. This usually doesn't change often
-	 * within a game but it is at least possible...
-	 **/
-	void setCost(unsigned long int price);
-
-	/**
 	 * The type of the unit as described in the index.desktop file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
@@ -170,15 +157,8 @@ public:
 	unsigned int sightRange() const;
 	void setSightRange(unsigned int);
 
-	// TODO: ONLY mobile units!
-	// I dont want to have classes UnitBase, MobileUnit, FixUnit, Unit,
-	// VisualMobileUnit and VisualFixUnit.
-	// Should the speed stay in UnitBase - memory overhead for facilities
-	// or should it go to VisualMobileUnit - kind of unclean?
-	// Or will we use the speed for something else as well (facilities)?
-	// E.g. produce speed?
-	double speed() const;
-	void setSpeed(double s);
+	virtual double speed() const { return 0.0; }
+	virtual void setSpeed(double ) { }
 
 
 	virtual bool save(QDataStream& stream);

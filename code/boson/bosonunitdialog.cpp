@@ -53,7 +53,7 @@ public:
 		mUnitId = 0;
 		mUnitName = 0;
 		mHealth = 0;
-		mPrize = 0;
+//		mPrize = 0;
 		mWeaponRange = 0;
 		mWeaponDamage = 0;
 		mWeaponReload = 0;
@@ -75,7 +75,7 @@ public:
 	KIntNumInput* mUnitId;
 	QLineEdit* mUnitName;
 	KIntNumInput* mHealth;
-	KIntNumInput* mPrize;
+//	KIntNumInput* mPrize;
 	KIntNumInput* mWeaponRange;
 	KIntNumInput* mWeaponDamage;
 	KIntNumInput* mWeaponReload;
@@ -143,9 +143,10 @@ void BosonUnitDialog::initProperties()
  d->mHealth->setLabel(i18n("Health/Power of the unit"), AlignVCenter);
  layout->addMultiCellWidget(d->mHealth, 2, 2, 0, 1);
 
- d->mPrize = new KIntNumInput(d->mUnitProperties);
- d->mPrize->setLabel(i18n("Prize"), AlignVCenter);
- layout->addMultiCellWidget(d->mPrize, 3, 3, 0, 1);
+#warning costs
+// d->mPrize = new KIntNumInput(d->mUnitProperties);
+// d->mPrize->setLabel(i18n("Prize"), AlignVCenter);
+// layout->addMultiCellWidget(d->mPrize, 3, 3, 0, 1);
  
  d->mWeaponRange = new KIntNumInput(d->mUnitProperties);
  d->mWeaponRange->setLabel(i18n("Range"), AlignVCenter);
@@ -218,7 +219,7 @@ void BosonUnitDialog::slotChangeUnitDir()
  d->mUnitId->setValue(d->mUnit->typeId());
  d->mUnitName->setText(d->mUnit->name());
  d->mHealth->setValue(d->mUnit->health());
- d->mPrize->setValue(d->mUnit->prize());
+// d->mPrize->setValue(d->mUnit->prize());
  d->mWeaponRange->setValue(d->mUnit->range());
  d->mWeaponDamage->setValue(d->mUnit->damage());
  d->mWeaponReload->setValue(d->mUnit->reload());
@@ -253,7 +254,7 @@ void BosonUnitDialog::slotCreateUnit()
  cfg.writeEntry("Name", d->mUnitName->text());
  cfg.writeEntry("Id", (int)d->mUnitId->value());
  cfg.writeEntry("Health", (unsigned long int)d->mHealth->value());
- cfg.writeEntry("Prize", (unsigned long int)d->mPrize->value());
+// cfg.writeEntry("Prize", (unsigned long int)d->mPrize->value());
  cfg.writeEntry("Range", (unsigned long int)d->mWeaponRange->value());
  cfg.writeEntry("Damage", (long int)d->mWeaponDamage->value());
  cfg.writeEntry("Reload", (unsigned int)d->mWeaponReload->value());

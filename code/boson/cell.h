@@ -20,9 +20,6 @@
 #define __CELL_H__
 
 class UnitProperties;
-class QCanvas;
-class QCanvasSprite;
-class QCanvasPixmapArray;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
