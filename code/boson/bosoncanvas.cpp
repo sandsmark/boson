@@ -579,6 +579,11 @@ unsigned int BosonCanvas::mapHeight() const
  return map() ? map()->height() : 0;
 }
 
+float* BosonCanvas::heightMap() const
+{
+ return map() ? map()->heightMap() : 0;
+}
+
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius) const
 {
  BoItemList l = collisions(QRect(
