@@ -446,32 +446,10 @@ protected slots:
 	 * dont exist anymore / their data doesnt exist anymore)
 	 **/
 	void slotRemovedItemFromCanvas(BosonItem* item);
-	void slotUnitRemoved(Unit* unit);
 
 	void slotMouseIODestroyed();
 
 	void slotInitMiniMapFogOfWar();
-
-	/**
-	 * Select the specified selection group
-	 * @param number The selection group to be selected. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotSelectSelectionGroup(int number);
-
-	/**
-	 * Copy the current selection to the specified selection group.
-	 * @param number The group to be created. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotCreateSelectionGroup(int number);
-
-	/**
-	 * Clear the specified selection group.
-	 * @param number The group to be created. Must be in range 0..9 where 1
-	 * is the first group and 0 the 10th group.
-	 **/
-	void slotClearSelectionGroup(int number);
 
 	void slotAdvance(unsigned int, bool);
 	void slotSetGrabMovie(bool);
@@ -664,10 +642,6 @@ protected:
 
 	void setCamera(const BoGameCamera& c);
 	void cameraChanged();
-
-	bool checkError() const;
-
-	void calcFPS();
 
 	void grabMovieFrameAndSave();
 
