@@ -148,11 +148,7 @@ bool BosonShot::saveAsXML(QDomElement& root)
     boError() << k_funcinfo << "Error saving BosonItem" << endl;
     return false;
   }
-  root.setAttribute("x", x());
-  root.setAttribute("y", y());
-  root.setAttribute("z", z());
 
-  root.setAttribute("Rtti", rtti());
   root.setAttribute("Type", type());
 
   // the unittype defines the group of the shot (through the weapons of that
@@ -177,30 +173,7 @@ bool BosonShot::loadFromXML(const QDomElement& root)
     return false;
   }
   bool ok;
-  bofixed x;
-  bofixed y;
-  bofixed z;
-  x = root.attribute("x").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for x tag" << endl;
-    return false;
-  }
-  y = root.attribute("y").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for y tag" << endl;
-    return false;
-  }
-  z = root.attribute("z").toFloat(&ok);
-  if(!ok)
-  {
-    boError() << k_funcinfo << "Invalid value for z tag" << endl;
-    return false;
-  }
-
   mActive = true; // Inactive shots won't be saved
-  move(x, y, z);
 
   return true;
 }
