@@ -91,16 +91,18 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
  QGridLayout* grid  = new QGridLayout(this, 5, 3);
  d->mPixmap = new QWidget(this);
  d->mPixmap->installEventFilter(this);
+
  grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
  d->mZoomIn = new QPushButton(this);
- QToolTip::add(d->mZoomIn, i18n("Zoom in"));
  grid->addWidget(d->mZoomIn, 0, 2);
- d->mZoomOut = new QPushButton(this);
- QToolTip::add(d->mZoomOut, i18n("Zoom out"));
- grid->addWidget(d->mZoomOut, 2, 2);
  d->mZoomDefault = new QPushButton(this);
+ grid->addWidget(d->mZoomDefault, 2, 2);
+ d->mZoomOut = new QPushButton(this);
+ grid->addWidget(d->mZoomOut, 4, 2);
+
+ QToolTip::add(d->mZoomIn, i18n("Zoom in"));
+ QToolTip::add(d->mZoomOut, i18n("Zoom out"));
  QToolTip::add(d->mZoomOut, i18n("Default zoom factor"));
- grid->addWidget(d->mZoomDefault, 4, 2);
 
  d->mSelectionRect.resize(8);
 
@@ -123,13 +125,13 @@ BosonMiniMap::~BosonMiniMap()
 
 int BosonMiniMap::mapWidth() const
 {
- BO_CHECK_NULL_RET0(map())
+ BO_CHECK_NULL_RET0(map());
  return map()->width();
 }
 
 int BosonMiniMap::mapHeight() const
 {
- BO_CHECK_NULL_RET0(map())
+ BO_CHECK_NULL_RET0(map());
  return map()->height();
 }
 
