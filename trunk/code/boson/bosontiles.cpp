@@ -4,12 +4,23 @@
 
 #include <kdebug.h>
 
+#include <qimage.h>
+
 BosonTiles::BosonTiles(const QString& fileName) : QPixmap(fileName)
 {
+ mTilesImage = 0;
+}
+
+BosonTiles::BosonTiles()
+{
+ mTilesImage = new QImage(big_w() * BO_TILE_SIZE, big_h() * BO_TILE_SIZE, 32);
 }
 
 BosonTiles::~BosonTiles()
 {
+ if (mTilesImage) {
+	delete mTilesImage;
+ }
 }
 
 QPixmap BosonTiles::plainTile(Cell::GroundType type)
@@ -85,4 +96,262 @@ int BosonTiles::big_x(int g)
 int BosonTiles::big_y(int g)
 {
  return ((g / big_w()) * BO_TILE_SIZE);
+}
+
+bool BosonTiles::loadTiles(const QString& dir)
+{
+ // dir is e.g. /opt/kde3/share/apps/boson/themes/grounds/earth/ -> "earth" is
+ // the important part!
+ mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
+
+// begin()
+ for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
+	loadGround(i, dir + groundType2Name((Cell::GroundType)i));
+ }
+ for (int i = 0; i < Cell::TransLast; i++) {                // load transitions
+	int j = 0;
+	for (j = 0; j < Cell::smallTilesPerTransition(); j++) {
+//		loadTransition( Cell::getTransNumber((Cell::TransType)i, j) );
+	}
+	for ( ; j < Cell::tilesPerTransition(); j += 4) {
+//		loadTransition( Cell::getTransNumber((Cell::TransType)i, j) );
+	}
+ }
+// end()
+ return true;
+}
+
+bool BosonTiles::save(const QString& fileName)
+{
+ if (!mTilesImage) {
+	kdError() << "NULL image" << endl;
+	return false;
+ }
+ return mTilesImage->save(fileName, "PNG");
+}
+
+bool BosonTiles::loadGround(int j, const QString& path)
+{
+ QString tile;
+ QImage p;
+ for (int i = 0; i < 4; i++) {
+	tile.sprintf(".%.2d.bmp", i);
+	p.load(path + tile);
+	if (p.isNull()) {
+		kdError() << "BosonTiles::loadGround(): couldn't load image" << endl;
+		return false;
+	}
+	putOne(4 * j + i, p);
+	if (Cell::isBigTrans(j)) {
+		putOne(4 * (j + 1) + i, p, BO_TILE_SIZE, 0);
+		putOne(4 * (j + 2) + i, p, 0, BO_TILE_SIZE);
+		putOne(4 * (j + 3) + i, p, BO_TILE_SIZE, BO_TILE_SIZE);
+	}
+ }
+ return true;
+}
+
+void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
+{
+// AB it seems that this copies the image p into the image (and if _debug is
+// true puts some extra information on it)
+ bool _debug = false; //TODO
+ int x = BosonTiles::big_x(z);
+ int y = BosonTiles::big_y(z);
+
+ 
+ #define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )
+ #define SETPIXEL2(x,y) \
+	SETPIXEL(2*(x), 2*(y));		\
+	SETPIXEL(2*(x)+1, 2*(y));	\
+	SETPIXEL(2*(x), 2*(y)+1);	\
+	SETPIXEL(2*(x)+1, 2*(y)+1)
+ #define SETPIXEL3(x,y) \
+	SETPIXEL2(2*(x), 2*(y));	\
+	SETPIXEL2(2*(x)+1, 2*(y));	\
+	SETPIXEL2(2*(x), 2*(y)+1);	\
+	SETPIXEL2(2*(x)+1, 2*(y)+1)
+ 
+ if (_debug) {
+	int i;
+	for(i = 0; i < BO_TILE_SIZE; i++) {
+		SETPIXEL(0,i);
+		SETPIXEL(BO_TILE_SIZE-1,i);
+		SETPIXEL(i,0);
+		SETPIXEL(i,BO_TILE_SIZE-1);
+	}	// print the # version
+	switch(z%4) {
+		case 0:
+			SETPIXEL3(3,4);
+			SETPIXEL3(4,3);
+			SETPIXEL3(5,3);
+			SETPIXEL3(5,4);
+			SETPIXEL3(5,5);
+			SETPIXEL3(5,6);
+			SETPIXEL3(5,7);
+			break;
+		case 1:
+			SETPIXEL3(4,4);
+			SETPIXEL3(5,3);
+			SETPIXEL3(6,3);
+			SETPIXEL3(7,4);
+			SETPIXEL3(6,5);
+			SETPIXEL3(5,6);
+			SETPIXEL3(4,7);
+			SETPIXEL3(5,7);
+			SETPIXEL3(6,7);
+			SETPIXEL3(7,7);
+			break;
+		case 2:
+			SETPIXEL3(4,3);
+			SETPIXEL3(5,3);
+
+			SETPIXEL3(4,5);
+			SETPIXEL3(5,5);
+
+			SETPIXEL3(4,7);
+			SETPIXEL3(5,7);
+
+			SETPIXEL3(6,4);
+			SETPIXEL3(6,5);
+			SETPIXEL3(6,6);
+			break;
+		case 3:
+			SETPIXEL3(6,3);
+			SETPIXEL3(5,4);
+			SETPIXEL3(4,5);
+			SETPIXEL3(4,6);
+			SETPIXEL3(5,6);
+			SETPIXEL3(6,6);
+			SETPIXEL3(7,6);
+
+			SETPIXEL3(7,5);
+			SETPIXEL3(7,7);
+			break;
+		default:
+			kdError() << "Unexpected value in BosonTiles::putOne()" << endl;
+			return;
+	}
+
+ }
+
+ #undef SETPIXEL3
+ #undef SETPIXEL2
+ #undef SETPIXEL
+
+ bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
+}
+
+QString BosonTiles::groundType2Name(Cell::GroundType g)
+{
+ switch (g) {
+	case Cell::GroundUnknown:
+		return QString::fromLatin1("hidden");
+	case Cell::GroundDeepWater:
+		return QString::fromLatin1("dwater");
+	case Cell::GroundWater:
+		return QString::fromLatin1("water");
+	case Cell::GroundGrass:
+		return QString::fromLatin1("grass");
+	case Cell::GroundDesert:
+		return QString::fromLatin1("desert");
+	case Cell::GroundGrassMineral:
+		return QString::fromLatin1("grass_mineral");
+	case Cell::GroundGrassOil:
+		return QString::fromLatin1("grass_oil");
+	default:
+		kdError() << "Invalid GroundType " << (int)g << endl;
+		break;
+ }
+ return QString::fromLatin1("");
+}
+
+QString BosonTiles::transition2Name(Cell::TransType t)
+{
+ QString s = QString("%1_%2").arg(groundType2Name(Cell::from(t))).
+		arg(groundType2Name(Cell::to(t)));
+ return s;
+}
+
+bool BosonTiles::loadTransition(int gt)
+{
+ int ref = Cell::getTransRef(gt);
+ int t, tile;
+
+
+ if (!Cell::isTrans(gt)) {
+	kdError() << "No transition " << gt << endl;
+	return false;
+ }
+
+ t = Cell::getTransTile(gt);
+ if (t < Cell::smallTilesPerTransition()) {
+	tile = t;
+ } else {
+	t -= Cell::smallTilesPerTransition(); // bigtile #
+	t /= 4; // which one
+	tile = t + Cell::smallTilesPerTransition(); // tile is the index in trans_ext
+ }
+ return loadGround(gt, transition2Name((Cell::TransType)ref) + trans_ext(tile));
+}
+
+QString BosonTiles::trans_ext(int t)
+{
+/*
+ static const char *trans_ext[Cell::tilesPerTransition()] = {
+	".01", ".03", ".07", ".05",	// 48x48 transitions
+	".02", ".06", ".08", ".04",
+	".09", ".10", ".12", ".11",
+	".13", ".14", ".15", ".16",	// 96x96 transitions
+	".17", ".18", ".19", ".20",
+	".21", ".22", ".23", ".24",
+	".25", ".26", ".27", ".28",
+	};
+ */
+ QString s;
+ if (t > 11) {
+	s.sprintf(".%2d", t + 1);
+ } else {
+	// AB: this is unclean. can we do  this without switch, i.e. like above?
+	switch (t) {
+		case 0:
+			s.sprintf(".%2d", 1);
+			break;
+		case 1:
+			s.sprintf(".%2d", 3);
+			break;
+		case 2:
+			s.sprintf(".%2d", 7);
+			break;
+		case 3:
+			s.sprintf(".%2d", 5);
+			break;
+		case 4:
+			s.sprintf(".%2d", 2);
+			break;
+		case 5:
+			s.sprintf(".%2d", 6);
+			break;
+		case 6:
+			s.sprintf(".%2d", 8);
+			break;
+		case 7:
+			s.sprintf(".%2d", 4);
+			break;
+		case 8:
+			s.sprintf(".%2d", 9);
+			break;
+		case 9:
+			s.sprintf(".%2d", 10);
+			break;
+		case 10:
+			s.sprintf(".%2d", 12);
+			break;
+		case 11:
+			s.sprintf(".%2d", 11);
+			break;
+
+	}
+ }
+ return s;
 }
