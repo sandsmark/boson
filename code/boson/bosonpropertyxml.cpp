@@ -23,10 +23,12 @@
 #include "bodebug.h"
 
 #include <kgame/kgameproperty.h>
+#include <kgame/kgamepropertylist.h>
 #include <kgame/kgamepropertyhandler.h>
 
 #include <qdom.h>
 #include <qintdict.h>
+#include <qpointarray.h>
 
 BosonPropertyXML::BosonPropertyXML(QObject* parent) : QObject(parent)
 {
@@ -50,12 +52,15 @@ QString BosonPropertyXML::propertyValue(KGamePropertyBase* prop)
 	value = QString::number(((KGameProperty<unsigned long int>*)prop)->value());
  } else if (*t == typeid(float)) {
 	value = QString::number(((KGameProperty<float>*)prop)->value());
+ } else if (*t == typeid(char)) {
+	value = ((KGameProperty<char>*)prop)->value();
  } else if (*t == typeid(QString)) {
 	value = ((KGameProperty<QString>*)prop)->value();
  } else if (*t == typeid(Q_INT8)) {
 	// AB: do not use i18n() here!
 	value = ((KGameProperty<Q_INT8>*)prop)->value() ? QString::fromLatin1("True") : QString::fromLatin1("False");
- } else {
+ }
+ if (value.isNull()) {
 	emit signalRequestValue(prop, value);
  }
  if (value.isNull()) {
@@ -87,6 +92,10 @@ void BosonPropertyXML::propertySetValue(KGamePropertyBase* prop, const QString& 
 	((KGameProperty<unsigned long int>*)prop)->setValue(value.toULong(&ok));
  } else if (*t == typeid(float)) {
 	((KGameProperty<float>*)prop)->setValue(value.toULong(&ok));
+ } else if (*t == typeid(char)) {
+	if (value.length() >= 1) {
+		((KGameProperty<char>*)prop)->setValue(value[0]);
+	}
  } else if (*t == typeid(QString)) {
 	((KGameProperty<QString>*)prop)->setValue(value);
  } else if (*t == typeid(Q_INT8)) {
@@ -165,5 +174,94 @@ bool BosonPropertyXML::loadFromXML(const QDomElement& root, KGamePropertyHandler
  }
  dataHandler->blockSignals(false);
  return true;
+}
+
+
+QTextStream& operator<<(QTextStream& s, const QPoint& p)
+{
+ // inefficient but easy to code and read.
+ // just stream x coordinate, followed by y coordinate, separated by
+ // space.
+ s << QString::number(p.x());
+ s << char(' ');
+ s << QString::number(p.y());
+ return s;
+}
+
+QTextStream& operator>>(QTextStream& s, QPoint& p)
+{
+ int x, y;
+ char c;
+ s >> x;
+ s >> c; // single space
+ s >> y;
+ p.setX(x);
+ p.setY(y);
+ return s;
+}
+
+BosonCustomPropertyXML::BosonCustomPropertyXML(QObject* parent) : BosonPropertyXML(parent)
+{
+ connect(this, SIGNAL(signalRequestValue(KGamePropertyBase*, QString&)),
+		this, SLOT(slotRequestValue(KGamePropertyBase*, QString&)));
+ connect(this, SIGNAL(signalRequestSetValue(KGamePropertyBase*, const QString&)),
+		this, SLOT(slotRequestSetValue(KGamePropertyBase*, const QString&)));
+}
+
+void BosonCustomPropertyXML::slotRequestValue(KGamePropertyBase* prop, QString& value)
+{
+ BO_CHECK_NULL_RET(prop);
+ const type_info* t = prop->typeinfo();
+ if (*t == typeid(QPoint)) {
+	KGameProperty<QPoint>* p = (KGameProperty<QPoint>*)prop;
+	QTextStream s(&value, IO_WriteOnly);
+	s << p->value();
+ } else if (*t == typeid(KGamePropertyBase*)) {
+	// prop->typeinfo() returns info on a KGamePropertyBase pointer when
+	// typeinfo() wasn't reimplemented. This is the case for all
+	// non-KGameProperty<foobar> objects.
+	// we need to do our own type checking here.
+	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
+		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
+		// inefficient but easy to code and read.
+		// first we stream the length of the array and then every point.
+		// each separated by a space.
+		QTextStream s(&value, IO_WriteOnly);
+		s << QString::number(list->count());
+		KGamePropertyList<QPoint>::Iterator it;
+		for (it = list->begin(); it != list->end(); ++it) {
+			s << ' ';
+			s << *it;
+		}
+	}
+ }
+
+}
+
+void BosonCustomPropertyXML::slotRequestSetValue(KGamePropertyBase* prop, const QString& value)
+{
+ BO_CHECK_NULL_RET(prop);
+ const type_info* t = prop->typeinfo();
+ if (*t == typeid(QPoint)) {
+	QTextStream s((QString*)&value, IO_WriteOnly);
+	KGameProperty<QPoint>* p = (KGameProperty<QPoint>*)prop;
+	QPoint point;
+	s >> point;
+	p->setValue(point);
+ } else if (*t == typeid(KGamePropertyBase)) {
+	if (typeid(*prop) == typeid(KGamePropertyList<QPoint>)) {
+		KGamePropertyList<QPoint>* list = (KGamePropertyList<QPoint>*)prop;
+		unsigned int count = 0;
+		char c;
+		QPoint point;
+		QTextStream s((QString*)&value, IO_WriteOnly);
+		s >> count;
+		for (unsigned int i = 0; i < count; i++) {
+			s >> c;
+			s >> point;
+			list->append(point);
+		}
+	}
+ }
 }
 

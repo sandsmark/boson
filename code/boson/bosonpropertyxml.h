@@ -23,9 +23,26 @@
 
 class QString;
 class QDomElement;
+class QPoint;
+class QTextStream;
 class KGamePropertyBase;
 class KGamePropertyHandler;
 
+/**
+ * Helper class for @ref KGamePropertyHandler. You can use it to store a
+ * property handler in an xml file completely (and of course load it again).
+ *
+ * All you need to do is to create an object of this class and call @ref
+ * saveAsXML() as long as you use "simple" datatypes only in your @ref
+ * KGameProperty objects. "simple" are all primitive datatypes (int, float,
+ * bool, double, char, ...) as well as a @ref QString.
+ *
+ * If you use additional datatypes you need to write your own code to convert
+ * them into a string a back from a string. Just connect that code to @ref
+ * signalRequestValue and @ref signalRequestSetValue.
+ * @short Store a @ref KGamePropertyHandler in a XML file
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BosonPropertyXML : public QObject
 {
 	Q_OBJECT
@@ -54,5 +71,46 @@ signals:
 	 **/
 	void signalRequestSetValue(KGamePropertyBase* prop, const QString& value);
 };
+
+/**
+ * This class does exactly the same as @ref BosonPropertyXML, but is more
+ * specific to boson. We implement more complex datatypes here, such as a @ref
+ * QPointArray.
+ *
+ * If you want to add additional datatypes to boson's xml files - add them in
+ * this class!
+ * @short Class that implements more complex datatypes for @ref BosonPropertyXML
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonCustomPropertyXML : public BosonPropertyXML
+{
+	Q_OBJECT
+public:
+	BosonCustomPropertyXML(QObject* parent = 0);
+
+protected slots:
+	/**
+	 * Retrieve the value from @p prop and place it (encoded as a string)
+	 * into @ref value.
+	 * @param prop The property that should get saved
+	 * @param value The string that will be placed into the XML file. Set to
+	 * @ref QString::null if you can't handle this property.
+	 **/
+	void slotRequestValue(KGamePropertyBase* prop, QString& value);
+
+	/**
+	 * Set the property @p prop to the value specified in @p value.
+	 * @param prop The property that is the destination of the new value.
+	 * @param value The text from the XML file
+	 **/
+	void slotRequestSetValue(KGamePropertyBase* prop, const QString& value);
+
+protected:
+	void save(const QPoint& point, QString& string);
+	void save(const QPointArray& pointArray, QString& string);
+};
+
+QTextStream& operator>>(QTextStream& s, QPoint& p);
+QTextStream& operator<<(QTextStream& s, const QPoint& p);
 
 #endif
