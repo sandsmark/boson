@@ -1,23 +1,38 @@
 
 
+Well.. basically, you need
 
-Well.. basically, you should do 
+	boson-0.1.tar.bz2
+	boson-pics-0.1.tar
 
+both are available at the homepage
+              http://aquila.rezel.enst.fr/boson/
+
+Expand the source :
+===================
+
+	Use the command 'bunzip2 boson-0.1.tar.bz2; tar xvf boson-0.1.tar'
 
 Making the game :
 =================
-You shouldn't be root to make the game.
 
-Type : "./configure; make"
+You should _not_ be root to make the game.
 
-If it ever complain about "./configure: Command not found", it means
+Enter the boson dir by typing 'cd boson'
+Configure the whole stuff by entering './configure'
+	(try 'bash configure' if './configure' doesn't work)
+compile the game by typing 'make'
+	This step is the one that is long to finish
+
+
+If it ever complains about "./configure: Command not found", it means
 that you don't have it. Probably that you've downloaded a alpha version,
 usually not intended for end-user. You can still try to compile it, but you
 will need some program like "autoconf" or "automake".
 
 		=========================================
-				Try to do
-			make -f Makefile.orzel
+                =             Try to do                 =
+                =       make -f Makefile.orzel          =
 		=========================================
 
 Installing the game :
@@ -26,7 +41,28 @@ You have to be _root_ to install it.
 type : "make install"
 
 
-Here follow the extended help about making/installing boson:
+Installing data :
+=================
+
+Data are in the file "boson-pics-0.1.tar"
+
+those files are to be extracted in your ${kde}/share/apps dirs.
+Your ${kde} is probably /opt/kde or /usr/local/kde.
+You may try "echo $KDEDIR" to know where your kde installation is.
+
+Exemple of what to type if your 'kde' is installed in /opt/kde and your
+boson-pics file is in your home :
+
+=======
+[orzel@eagle ~]$ cd /opt/kde/                           # you may change this line !
+[orzel@eagle ~]$ cd share/apps
+[orzel@eagle ~]$ tar xvf ~/boson-pics-0.1.tar           # if your boson-pics is in your home
+[orzel@eagle ~]$ ls boson                               # check if your data are installed
+=======
+
+
+
+Here follows the extended help about making/installing boson:
 
 
 Basic Installation
