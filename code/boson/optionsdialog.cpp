@@ -104,7 +104,7 @@ void OptionsDialog::initGeneralPage()
 		this, SLOT(slotSpeedChanged(int)));
 
  d->mUpdateInterval = new KIntNumInput(50, vbox);
- d->mUpdateInterval->setRange(10, 5000);
+ d->mUpdateInterval->setRange(2, 400);
  d->mUpdateInterval->setLabel(i18n("Update Interval (low values hurt performance)"));
  connect(d->mUpdateInterval, SIGNAL(valueChanged(int)),
 		this, SLOT(slotUpdateIntervalChanged(int)));
