@@ -42,8 +42,16 @@ class PythonScript : public BosonScript
     virtual void execLine(const QString& line);
 
 
+    // Players
+
+    static PyObject* py_areEnemies(PyObject* self, PyObject* args);
+    static PyObject* py_playerId(PyObject* self, PyObject* args);
     // Resources
     // Units
+    static PyObject* py_moveUnit(PyObject* self, PyObject* args);
+    static PyObject* py_moveUnitWithAttacking(PyObject* self, PyObject* args);
+    static PyObject* py_attack(PyObject* self, PyObject* args);
+    static PyObject* py_stopUnit(PyObject* self, PyObject* args);
     // Camera
     static PyObject* py_moveCamera(PyObject* self, PyObject* args);
     static PyObject* py_moveCameraBy(PyObject* self, PyObject* args);

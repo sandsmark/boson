@@ -20,9 +20,14 @@
 #ifndef BOSONSCRIPT_H
 #define BOSONSCRIPT_H
 
-class QString;
 class BoVector3;
 class BosonBigDisplayBase;
+class Player;
+class Boson;
+class BoCamera;
+
+class QString;
+class QDataStream;
 
 #define boScript BosonScript::bosonScript()
 
@@ -76,10 +81,23 @@ class BosonScript
 
 
     void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; };
+    void setPlayer(Player* p)  { mPlayer = p; };
+
+    BosonBigDisplayBase* display()  { return mDisplay; };
+    Player* player()  { return mPlayer; };
+    Boson* game();
+    BoCamera* camera();
 
 
+    // Players
+    bool areEnemies(int playerId1, int playerId2);
+    int playerId();
     // Resources
     // Units
+    void moveUnit(int id, int x, int y);
+    void moveUnitWithAttacking(int id, int x, int y);
+    void attack(int attackerId, int targetId);
+    void stopUnit(int id);
     // Camera
     void moveCamera(BoVector3 pos);
     void moveCameraBy(BoVector3 pos);
@@ -94,10 +112,14 @@ class BosonScript
     float cameraRadius();
     float cameraZ();
 
+  protected:
+    void sendInput(QDataStream& stream);
+
   private:
     static BosonScript* mScript;
 
     BosonBigDisplayBase* mDisplay;
+    Player* mPlayer;
 };
 
 #endif //BOSONSCRIPT_H
