@@ -23,7 +23,10 @@
 
 #include <qframe.h>
 
-#include <kmsgbox.h>
+#include <kmessagebox.h>
+#include <klocale.h>
+#include <kmenubar.h>
+#include <ksock.h>
 
 #include "common/boconfig.h"
 #include "common/log.h"
@@ -70,16 +73,10 @@ if (logfile != stderr) fclose(logfile);
 
 void BosonApp::enableCommand(int id_)
 {
-  ///////////////////////////////////////////////////////////////////
-  // enable menu and toolbar functions by their ID's
-  menu_bar->setItemEnabled(id_,true);
 }
 
 void BosonApp::disableCommand(int id_)
 {
-  ///////////////////////////////////////////////////////////////////
-  // disable menu and toolbar functions by their ID's
-  menu_bar->setItemEnabled(id_,false);
 }
 
 
@@ -120,18 +117,18 @@ void BosonApp::initMenuBar()
   ///////////////////////////////////////////////////////////////////
   // menuBar entry file_menu
   QPopupMenu *file_menu = new QPopupMenu();
-  file_menu->insertItem(Icon("mini/socket.xpm"), i18n("Connect to server"), ID_FILE_CONNECT );
-  file_menu->insertItem(Icon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
+  file_menu->insertItem(BarIcon("mini/socket"), i18n("Connect to server"), ID_FILE_CONNECT );
+  file_menu->insertItem(BarIcon("mini/bosonapp"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
 /*  file_menu->insertSeparator();
-  file_menu->insertItem(Icon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
-  file_menu->insertItem(Icon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
+  file_menu->insertItem(Icon("filenew"), i18n("&New"), ID_FILE_NEW );
+  file_menu->insertItem(Icon("fileopen"), i18n("&Open..."), ID_FILE_OPEN );
   file_menu->insertItem(i18n("Open &recent..."), file_menu_recent, ID_FILE_RECENT );
   file_menu->insertSeparator();
-  file_menu->insertItem(Icon("filefloppy.xpm") ,i18n("&Save"), ID_FILE_SAVE );
+  file_menu->insertItem(Icon("filefloppy") ,i18n("&Save"), ID_FILE_SAVE );
   file_menu->insertItem(i18n("Save &as"), ID_FILE_SAVE_AS );
   file_menu->insertItem(i18n("&Close"), ID_FILE_CLOSE );
   file_menu->insertSeparator();
-  file_menu->insertItem(Icon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
+  file_menu->insertItem(Icon("fileprint"), i18n("&Print"), ID_FILE_PRINT );
   file_menu->insertSeparator(); */
   file_menu->insertItem(i18n("C&lose Window"), ID_FILE_CLOSE_WINDOW);
   file_menu->insertSeparator();
@@ -150,9 +147,9 @@ void BosonApp::initMenuBar()
   // menuBar entry edit_menu
 /*
   QPopupMenu *edit_menu = new QPopupMenu();
-  edit_menu->insertItem(Icon("editcut.xpm"), i18n("Cu&t"), ID_EDIT_CUT );
-  edit_menu->insertItem(Icon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
-  edit_menu->insertItem(Icon("editpaste.xpm"), i18n("&Paste"), ID_EDIT_PASTE );
+  edit_menu->insertItem(Icon("editcut"), i18n("Cu&t"), ID_EDIT_CUT );
+  edit_menu->insertItem(Icon("editcopy"), i18n("&Copy"), ID_EDIT_COPY );
+  edit_menu->insertItem(Icon("editpaste"), i18n("&Paste"), ID_EDIT_PASTE );
  
   //edit_menu key accelerators
   edit_menu->setAccel(CTRL+Key_X, ID_EDIT_CUT);
@@ -175,12 +172,6 @@ void BosonApp::initMenuBar()
   
 
   ///////////////////////////////////////////////////////////////////
-  // menuBar entry help_menu
-  QPopupMenu *help_menu ;///orzel = new QPopupMenu();
-  help_menu = kapp->getHelpMenu(true, i18n(IDS_APP_ABOUT));
-
-
-  ///////////////////////////////////////////////////////////////////
   // MENUBAR CONFIGURATION
   // set menu_bar the current menuBar and the position due to config file
   menu_bar = menuBar();
@@ -192,8 +183,10 @@ void BosonApp::initMenuBar()
   // INSERT YOUR APPLICATION SPECIFIC MENUENTRIES HERE
 
 
+  /*
   menu_bar->insertSeparator(); 
   menu_bar->insertItem(i18n("&Help"), help_menu);
+  */
 
   ///////////////////////////////////////////////////////////////////
   // CONNECT THE SUBMENU SLOTS WITH SIGNALS
@@ -288,8 +281,10 @@ void BosonApp::addRecent(const char *filename)
 
 void BosonApp::dlgModified()
 {
-  int qret=KMsgBox::yesNoCancel(this, i18n("Warning"),		
-	    i18n("The current file has been modified. \nSave Changes ?"));     
+	int qret=KMessageBox::warningYesNoCancel(this,
+		i18n("The current file has been modified. \nSave Changes ?"),
+		i18n("Warning") );     
+
   switch (qret)
    {
    case 1:
@@ -307,7 +302,8 @@ void BosonApp::dlgModified()
 bool BosonApp::queryExit()
 {
 
-  int exit=KMsgBox::yesNo(this, i18n("Exit"), i18n("Really Quit ?"));
+	int exit=KMessageBox::questionYesNo(this, i18n("Really Quit ?"), i18n("Exit"));
+	// XXX : not this, but ::Close() ?
 
   if(exit==1)
     return true;
@@ -363,7 +359,7 @@ void BosonApp::slotAppExit()
   if(this->queryExit())
     {
       //saveOptions();
-      KTMainWindow::deleteAll();
+//      KTMainWindow::deleteAll();
       kapp->quit();
     }
   else return;
@@ -411,11 +407,12 @@ void BosonApp::slotStatusHelpMsg(const char *text)
 void BosonApp::serverDied(KProcess *)
 {
 	logf(LOG_FATAL,"boson : server died unexpectedly ");
-  	KMsgBox::message(0l , "unexpected server death",
+  	KMessageBox::error(0l ,
 			"The server has died unexpectedly, please report the bug"
 			"to the author <orzel@yalbi.com>. Please send the boson-server.log"
 			"and boson-client.log you may find in the directory from where"
-		        "you've launched boson (probably your home if you've used a menu entry"
+		        "you've launched boson (probably your home if you've used a menu entry",
+			"unexpected server death"
 			);
 	return;
 }

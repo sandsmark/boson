@@ -29,7 +29,6 @@
 
 #include <qintdict.h>
 
-#include <ksock.h>
 #include <ktmainwindow.h>
 
 #include "common/boconfig.h"
@@ -43,6 +42,8 @@
 
 class serverCell;
 class Unit;
+class KSocket;
+class KServerSocket;
 class Facility;
 class mobUnit;
 class serverMobUnit;

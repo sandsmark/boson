@@ -4,7 +4,7 @@ all: Makefile
 	make all
 
 Makefile: configure
-	./configure
+	./configure --with-qt-dir=/opt/be/qt --with-kde-dir=/opt/be  --prefix=/opt/be
 
 configure: Makefile.in
 	autoconf
@@ -13,4 +13,4 @@ Makefile.in: Makefile.am
 	aclocal
 	autoheader
 	automake
-	perl automoc
+	perl am_edit

@@ -60,7 +60,7 @@ selectPart::selectPart(int _f, int _z, sp_type type)
  */
 void drawSelectBox(QPainter &painter, QColor c1, QColor c2, int power)
 {
-	QPen	pen(red);
+	QPen	pen(Qt::red);
 	int	len =  3 * ( PART_NB-power);
 
 	painter.setPen(pen);
@@ -100,18 +100,18 @@ QwSpritePixmapSequence *initStatic(selectPart::sp_type type)
 			painter.rotate(180);
 			painter.translate(-SP_W+1, -SP_H+1);
 		}
-		drawSelectBox(painter, red, green, i);
+		drawSelectBox(painter, Qt::red, Qt::green, i);
 		painter.end();
 	
 		/* draw the mask */
-		_mask->fill(black);
+		_mask->fill(Qt::black);
 	
 		painter.begin(_mask);
 		if (selectPart::PART_DOWN == type) {
 			painter.rotate(180);
 			painter.translate(-SP_W+1, -SP_H+1);
 		}
-		drawSelectBox(painter, white, white, i);
+		drawSelectBox(painter, Qt::white, Qt::white, i);
 		painter.end();
 	
 		/* merge results */

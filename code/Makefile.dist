@@ -21,6 +21,6 @@ all:
 	aclocal
 	autoheader
 	automake
-	perl automoc
+	perl am_edit
 	autoconf
 

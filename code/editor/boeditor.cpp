@@ -26,6 +26,9 @@
 #include <qdir.h>
 
 #include <kfiledialog.h>
+#include <klocale.h>
+#include <kmenubar.h>
+#include <kmessagebox.h>
 
 #include "common/boconfig.h"
 #include "common/bobuffer.h"
@@ -147,17 +150,17 @@ void BoEditorApp::initMenuBar()
   // menuBar entry file_menu
 
   QPopupMenu *file_menu = new QPopupMenu();
-  file_menu->insertItem(Icon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
+  file_menu->insertItem(BarIcon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
   file_menu->insertSeparator();
-  file_menu->insertItem(Icon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
-  file_menu->insertItem(Icon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
+  file_menu->insertItem(BarIcon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
+  file_menu->insertItem(BarIcon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
   file_menu->insertItem(i18n("Open &recent..."), file_menu_recent, ID_FILE_RECENT );
   file_menu->insertSeparator();
-  file_menu->insertItem(Icon("filefloppy.xpm") ,i18n("&Save"), ID_FILE_SAVE );
+  file_menu->insertItem(BarIcon("filefloppy.xpm") ,i18n("&Save"), ID_FILE_SAVE );
   file_menu->insertItem(i18n("Save &as"), ID_FILE_SAVE_AS );
   file_menu->insertItem(i18n("&Close"), ID_FILE_CLOSE );
   file_menu->insertSeparator();
-  file_menu->insertItem(Icon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
+  file_menu->insertItem(BarIcon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
   file_menu->insertSeparator(); 
   file_menu->insertItem(i18n("C&lose Window"), ID_FILE_CLOSE_WINDOW);
   file_menu->insertSeparator();
@@ -177,12 +180,12 @@ void BoEditorApp::initMenuBar()
   // 
   QPopupMenu *edit_menu = new QPopupMenu();
 
-  edit_menu->insertItem(Icon("mini.destroy.xpm"), i18n("&Destroy"), ID_EDIT_DESTROY );
+  edit_menu->insertItem(BarIcon("mini.destroy.xpm"), i18n("&Destroy"), ID_EDIT_DESTROY );
   edit_menu->setAccel(CTRL+Key_D, ID_EDIT_DESTROY);
 
   /*
-  edit_menu->insertItem(Icon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
-  edit_menu->insertItem(Icon("editpaste.xpm"), i18n("&Paste"), ID_EDIT_PASTE );
+  edit_menu->insertItem(BarIcon("editcopy.xpm"), i18n("&Copy"), ID_EDIT_COPY );
+  edit_menu->insertItem(BarIcon("editpaste.xpm"), i18n("&Paste"), ID_EDIT_PASTE );
  
   //edit_menu key accelerators
   edit_menu->setAccel(CTRL+Key_X, ID_EDIT_CUT);
@@ -204,12 +207,6 @@ void BoEditorApp::initMenuBar()
   
 
   ///////////////////////////////////////////////////////////////////
-  // menuBar entry help_menu
-  QPopupMenu *help_menu ;///orzel = new QPopupMenu();
-  help_menu = kapp->getHelpMenu(true, i18n(IDS_APP_ABOUT));
-
-
-  ///////////////////////////////////////////////////////////////////
   // MENUBAR CONFIGURATION
   // set menu_bar the current menuBar and the position due to config file
   menu_bar = menuBar();
@@ -220,9 +217,6 @@ void BoEditorApp::initMenuBar()
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC MENUENTRIES HERE
 
-
-  menu_bar->insertSeparator(); 
-  menu_bar->insertItem(i18n("&Help"), help_menu);
 
   ///////////////////////////////////////////////////////////////////
   // CONNECT THE SUBMENU SLOTS WITH SIGNALS
@@ -246,15 +240,15 @@ void BoEditorApp::initToolBars()
   // TOOLBAR
   // set tool_bar_0 the current toolBar and the position due to config file
   tool_bar_0 = toolBar(0);
-  tool_bar_0->insertButton(Icon("configure.xpm"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
-  tool_bar_0->insertButton(Icon("flag.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
-  tool_bar_0->insertButton(Icon("stop.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
-  tool_bar_0->insertButton(Icon("filedel.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
-  tool_bar_0->insertButton(Icon("home.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
-  tool_bar_0->insertButton(Icon("idea.xpm"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
+  tool_bar_0->insertButton(BarIcon("configure.xpm"), ID_FILE_NEW_WINDOW, true, i18n("New window"));
+  tool_bar_0->insertButton(BarIcon("flag.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Move"));
+  tool_bar_0->insertButton(BarIcon("stop.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Stop"));
+  tool_bar_0->insertButton(BarIcon("filedel.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Attack"));
+  tool_bar_0->insertButton(BarIcon("home.xpm"), ID_FILE_NEW_WINDOW, true, i18n("Go Back"));
+  tool_bar_0->insertButton(BarIcon("idea.xpm"), ID_FILE_NEW_WINDOW, true, i18n("repair"));
   tool_bar_0->insertSeparator();
-  tool_bar_0->insertButton(Icon("exit.xpm"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
-  tool_bar_0->insertButton(Icon("help.xpm"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
+  tool_bar_0->insertButton(BarIcon("exit.xpm"), ID_APP_EXIT, SIGNAL(pressed()), this, SLOT(slotAppExit()), true, i18n("Exit"));
+  tool_bar_0->insertButton(BarIcon("help.xpm"), ID_HELP, SIGNAL(pressed()), kapp, SLOT(appHelpActivated()), true, i18n("Help"));
 
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC TOOLBARS HERE -e.g. tool_bar_1:
@@ -285,10 +279,12 @@ void BoEditorApp::slotFileClose()
 	if (!field) return;
 	
 	if (field->isModified())
-		switch (KMsgBox::yesNoCancel(this, "File not saved", 
+		switch (KMessageBox::warningYesNoCancel(this,
 				"Current file isn't saved\n"
-				"Do you want to save it, discard change, or cancel ?", 0,
-				"Save It", "Discard Changes" )) {
+				"Do you want to save it, discard change, or cancel ?"
+				"File not saved", 
+				"Save It",
+				"Discard Changes" )) {
 			case 1: // save it
 				slotFileSave();
 				break;
@@ -341,8 +337,9 @@ void BoEditorApp::addRecentFile(const char *filename)
 
 void BoEditorApp::dlgModified()
 {
-  int qret=KMsgBox::yesNoCancel(this, i18n("Warning"),		
-	    i18n("The current file has been modified. \nSave Changes ?"));     
+	int qret=KMessageBox::warningYesNoCancel(this,
+		i18n("The current file has been modified. \nSave Changes ?"),
+		i18n("Warning") );     
   switch (qret)
    {
    case 1:
@@ -360,7 +357,7 @@ void BoEditorApp::dlgModified()
 bool BoEditorApp::queryExit()
 {
 
-  int exit=KMsgBox::yesNo(this, i18n("Exit"), i18n("Really Quit ?"));
+  int exit=KMessageBox::questionYesNo(this, i18n("Really Quit ?"), i18n("Exit") );
 
   if(exit==1)
     return true;
@@ -421,7 +418,7 @@ void BoEditorApp::slotAppExit()
   if(this->queryExit())
     {
       //saveOptions();
-      KTMainWindow::deleteAll();
+//      KTMainWindow::deleteAll();
       kapp->quit();
     }
   else return;
@@ -461,7 +458,7 @@ void BoEditorApp::slotFileNewWindow()
 void BoEditorApp::slotFileNew()
 {
 	if(field && field->isModified()) {
-  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
+  		KMessageBox::error(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
 
@@ -490,7 +487,7 @@ void BoEditorApp::slotFileNew()
 		delete field;
 		field = 0;
 		delete newdlg;
-  		KMsgBox::message(this, i18n("Warning"),	i18n("Creation of new scenario failed :-((("));	
+  		KMessageBox::error(this, i18n("Warning"),	i18n("Creation of new scenario failed :-((("));	
 		return;
 	}
 
@@ -520,7 +517,7 @@ void BoEditorApp::slotFileNew()
 void BoEditorApp::slotFileOpen()
 {
 	if(field && field->isModified()) {
-  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
+  		KMessageBox::error(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
 	
@@ -528,7 +525,7 @@ void BoEditorApp::slotFileOpen()
 	if(!fileToOpen.isEmpty()){
 		QFileInfo saveAsInfo(fileToOpen);
 		doLoad(fileToOpen);
-		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
+		setCaption(name("BoEditor") + (": "+saveAsInfo.fileName()) );
 		addRecentFile(fileToOpen);
 	}
 
@@ -571,13 +568,13 @@ void BoEditorApp::slotFileOpenRecent(int id_)
 {
 
 	if(field && field->isModified()) {
-  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
+  		KMessageBox::error(this, i18n("Warning"),	i18n("Present file isn't saved"));	
 		return;
 	}
 
 	*currentFile = recentList->at(id_);
 	field->Load( *currentFile);
-	setCaption(kapp->appName()+": "+recentList->at(id_));
+	setCaption( QString (name("BoEditor")) + ": "+recentList->at(id_));
 
 	enableCommand(ID_FILE_SAVE);
 	enableCommand(ID_FILE_SAVE_AS);
@@ -601,7 +598,7 @@ void BoEditorApp::slotFileSaveAs()
 		*currentFile = newName;
 		assert(field->Save(newName));
 		addRecentFile(newName);
-		setCaption(kapp->appName()+": "+saveAsInfo.fileName());
+		setCaption(name("BoEditor") + (": "+saveAsInfo.fileName()) );
 	}
 }
 

@@ -26,7 +26,7 @@
 
 #include <QwSpriteField.h>
 
-#include <kapp.h>
+#include <kstddirs.h>
 
 #include "common/log.h"
 #include "common/unit.h"
@@ -55,7 +55,7 @@ speciesTheme::speciesTheme(char *themeName, QRgb color)
 	boAssert ( mobiles->fill(false) );
 	boAssert ( facilities->fill(false) );
 
-	themePath = new QString(kapp->kde_datadir() + "/boson/themes/species/" + themeName);
+	themePath = new QString( locate ("data", "boson/themes/species/") + themeName);
 
 	/* preload some units */ 
 	loadFix(FACILITY_CMDBUNKER);

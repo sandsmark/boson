@@ -20,6 +20,8 @@
 
 #include <assert.h>
 
+#include <ksock.h>
+
 #include "boserver.h"
 #include "connect.h"
 #include "game.h"

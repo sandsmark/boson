@@ -22,8 +22,9 @@
 
 #include <qgroupbox.h>
 
-#include <kapp.h>
-#include <kmsgbox.h>
+#include <ksock.h>
+#include <kstddirs.h>
+#include <kmessagebox.h>
 
 #include "common/bobuffer.h"
 #include "common/unitType.h"
@@ -56,7 +57,7 @@ BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 	label = new QLabel(box);
 	label->move( 10, 10);		// biglogo is 352x160
 	label->setAutoResize(true);
-	label->setPixmap( QPixmap(kapp->kde_datadir() + "/boson/pics/boserver-gui.bmp") );
+	label->setPixmap( QPixmap( locate("data", "boson/pics/boserver-gui.bmp")) );
 
 		/* port */
 	buf.sprintf("listening on port %d", port);
@@ -79,9 +80,10 @@ BosonServer::BosonServer(int port, const char *mapfile, const char *name=0L)
 
 	initSocket(port);
 	if ( SS_DOWN == state) {
- 		KMsgBox::message(0l, "boserver ERROR",
+ 		KMessageBox::error(0l,
 				"Network error : server can't bind to socket\n"
-				"Check that no other boserver is running"
+				"Check that no other boserver is running",
+				"boserver ERROR"
 				);
 		exit(-1);
 		return;
@@ -136,7 +138,7 @@ if (-1 == socket->socket()) {
 else
 	logf(LOG_COMM, "KserverSocket ok", socket->socket());
 	logf(LOG_COMM, "\tsocket = %d, port = %u, address = %lu",
-			socket->socket(), socket->getPort(), socket->getAddr());
+			socket->socket(), socket->port(), socket->ipv4_addr());
 
 connect(
 	socket, SIGNAL(accepted(KSocket *)),
@@ -173,7 +175,7 @@ for(i=0; i<BOSON_MAX_CONNECTION; i++)
 
 	logf(LOG_INFO, "New incoming connection, put in slot[%d]", i);
 	logf(LOG_COMM,"\tsocket = %d, addr = %lu",
-			newConnection->socket(), newConnection->getAddr());
+			newConnection->socket(), newConnection->ipv4_addr());
 
 	/* Signal handling */
 	connect(
