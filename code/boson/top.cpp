@@ -723,6 +723,11 @@ void TopWidget::loadGameData3() // FIXME rename!
 		progress += UNITDATAS_LOADINGFACTOR;
 	}
  }
+ // these are sounds like minimap activated. 
+ // FIXME: are there sounds of other player (i.e. non-localplayers) we need,
+ // too?
+ // FIXME: do we need to support player-independant sounds?
+ mPlayer->speciesTheme()->loadGeneralSounds();
 
  d->mLoading->setProgress(progress);
  d->mLoading->setLoading(BosonLoadingWidget::InitGame);

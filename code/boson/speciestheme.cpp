@@ -734,3 +734,35 @@ void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
  sound()->play(unit->unitProperties()->sound(event));
 }
 
+void SpeciesTheme::playSound(SoundEvent event)
+{
+ if (boConfig->disableSound()) {
+	return;
+ }
+ if (!sound()) {
+	return;
+ }
+ //TODO;
+// if (!boConfig->soundActivated(event)) {
+//	return;
+// }
+ sound()->play(event);
+}
+
+void SpeciesTheme::loadGeneralSounds()
+{
+// TODO: sound mapping!
+// speciestheme designers should be able to rename the sounds for certain
+// events, just like for unit sounds!
+ if (boConfig->disableSound()) {
+	return;
+ }
+ if (!sound()) {
+	return;
+ }
+ QMap<int, QString> sounds;
+ sounds.insert(SoundReportMinimapActivated, "report_minimap_activated");
+ sounds.insert(SoundReportMinimapDeactivated, "report_minimap_deactivated");
+ sound()->addSounds(themePath(), sounds);
+}
+
