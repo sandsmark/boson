@@ -239,13 +239,6 @@ protected slots:
 	void slotUpdateStatusBar();
 
 	/**
-	 * Assign the map (from starting/loading a game) to the game.
-	 *
-	 * From this point on we can actually use the map.
-	 **/
-	void slotAssignMap();
-
-	/**
 	 * Cancenl the load/save widget and return to the game (if running), or
 	 * the welcome widget.
 	 **/

@@ -518,10 +518,6 @@ void TopWidget::slotStartNewGame()
  changeLocalPlayer(boGame->localPlayer());
  d->mBosonWidget->initPlayer();
 
- boGame->createCanvas();
-
- d->mBosonWidget->setCanvas(boGame->canvasNonConst());
-
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
  // start the game. Once it's done it'll send IdGameIsStarted (see
@@ -612,16 +608,6 @@ void TopWidget::slotCancelLoadSave()
  }
 }
 
-void TopWidget::slotAssignMap()
-{
- if (boGame->gameStatus() != KGame::Init) {
-	boWarning() << k_funcinfo << "not in Init status" << endl;
-	return;
- }
- boDebug() << k_funcinfo << endl;
- d->mBosonWidget->initMap();
-}
-
 void TopWidget::slotToggleSound()
 {
  boAudio->setSound(!boAudio->sound());
@@ -687,7 +673,6 @@ void TopWidget::reinitGame()
 
  delete d->mStarting;
  d->mStarting = new BosonStarting(this); // manages startup of games
- connect(d->mStarting, SIGNAL(signalAssignMap()), this, SLOT(slotAssignMap()));
  connect(d->mStarting, SIGNAL(signalLoadingReset()),
 		d->mStartup, SLOT(slotLoadingReset()));
  connect(d->mStarting, SIGNAL(signalLoadingSetAdmin(bool)),
@@ -1032,22 +1017,32 @@ void TopWidget::slotAddLocalPlayer()
 
 void TopWidget::slotGameStarted()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
  BO_CHECK_NULL_RET(boGame);
  if (boGame->gameStatus() != KGame::Run) {
-	boWarning() << k_funcinfo << "not in Run status" << endl;
+	boWarning(270) << k_funcinfo << "not in Run status" << endl;
 	return;
  }
-// AB: first init map (see slotAssginMap()), THEN init player. we need map for
-// player loading (unit positions, ...)
 
- boDebug() << k_funcinfo << "init player" << endl;
+ boDebug(270) << k_funcinfo << "init player" << endl;
  if (!boGame->localPlayer()) {
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
  changeLocalPlayer(boGame->localPlayer());
  d->mBosonWidget->initPlayer();
+
+ if (d->mBosonWidget->canvas()) {
+	boWarning(270) << k_funcinfo << "BosonWidget::canvas() is non-NULL ("
+			<< d->mBosonWidget->canvas()
+			<< ")! This is very unexpected!" << endl;
+	boWarning(270) << k_funcinfo << "setting it to " << d->mBosonWidget->canvas() << endl;
+
+ }
+ d->mBosonWidget->setCanvas(boGame->canvasNonConst());
+ d->mBosonWidget->initMap();
+
+ d->mDisplayManager->setCanvas(boGame->canvasNonConst());
 
  // now show the bosonwidget and hide the startup widgets.
  mMainDock->setWidget(d->mBosonWidget);
