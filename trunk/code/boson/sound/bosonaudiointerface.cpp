@@ -68,6 +68,7 @@ BosonAudioInterface::BosonAudioInterface()
  d->mMusicInterface = new BosonMusicInterface(this);
 
  if (boConfig->disableSound()) {
+	boWarning(200) << k_funcinfo << "sound disabled permanently!" << endl;
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
 	return;
@@ -98,6 +99,8 @@ BosonAudioInterface::BosonAudioInterface()
 	d->mProcess = 0;
 	return;
  }
+
+ boDebug(200) << k_funcinfo << "audio process started." << endl;
 
  sendCommand(new BoAudioCommand(BoAudioCommand::CreateMusicObject));
 }
