@@ -389,7 +389,7 @@ void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
  }
 }
 
-QPtrList<BosonParticleSystem>* BosonItem::particleSystems()
+QPtrList<BosonParticleSystem>* BosonItem::particleSystems() const
 {
  return 0l;
 }

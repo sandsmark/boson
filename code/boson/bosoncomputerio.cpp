@@ -22,6 +22,7 @@
 #include "bodebug.h"
 #include "unit.h"
 #include "unitproperties.h"
+#include "bosonconfig.h"
 
 #include <kgame/kgame.h>
 
@@ -29,16 +30,14 @@
 
 #include "bosoncomputerio.moc"
 
-// FIXME
-float aidelay;
 
 BosonComputerIO::BosonComputerIO() : KGameComputerIO()
 {
  boDebug() << k_funcinfo << endl;
- boDebug() << k_funcinfo << "aidelay: " << aidelay << endl;
- if (aidelay != 0.0) {
-	boDebug() << k_funcinfo << "reaction period will be: " << (int)(aidelay * 20) << endl;
-	setReactionPeriod((int)(aidelay * 20));
+ boDebug() << k_funcinfo << "aidelay: " << boConfig->aiDelay() << endl;
+ if (boConfig->aiDelay() != 0.0) {
+	boDebug() << k_funcinfo << "reaction period will be: " << (int)(boConfig->aiDelay() * 20) << endl;
+	setReactionPeriod((int)(boConfig->aiDelay() * 20));
  }
  mUnit = -1;
  mTarget = 0l;
@@ -55,10 +54,6 @@ BosonComputerIO::~BosonComputerIO()
 
 void BosonComputerIO::reaction()
 {
- if (aidelay == 0.0) {
-	return;
- }
-
  boDebug() << k_funcinfo << endl;
 
  if(!mTarget || mTarget->isDestroyed()) {

@@ -35,8 +35,9 @@
 #endif
 
 #ifdef USE_STL
- #include <vector.h>
- #include <queue>
+ #include <vector>
+ using std::vector;
+ using std::greater;
 #endif
 
 #define SEARCH_STEPS 25  // How many steps of path to find

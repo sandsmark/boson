@@ -48,10 +48,6 @@ static KCmdLineOptions options[] =
     { 0, 0, 0 }
 };
 
-// FIXME: I don't like static vars
-#warning FIXME!!!
-extern float aidelay;
-
 int main(int argc, char **argv)
 {
 //FIXME:
@@ -86,19 +82,18 @@ int main(int argc, char **argv)
  if (!args->isSet("loadtiles")) {
 	boConfig->setLoadTiles(false);
  }
- aidelay = 2.0;  // default
  if (!args->isSet("ai")) {
 	boDebug() << k_funcinfo << "ai arg is not set" << endl;
-	aidelay = 0.0;
+	boConfig->setAiDelay(0.0);
  } else if (args->isSet("aidelay")) {
 	QString delay = args->getOption("aidelay");
 	bool ok;
-	aidelay = delay.toFloat(&ok);
-	boDebug() << k_funcinfo << "aidelay set to " << aidelay << endl;
+	boConfig->setAiDelay(delay.toFloat(&ok));
+	boDebug() << k_funcinfo << "aidelay set to " << boConfig->aiDelay() << endl;
 	if (!ok) {
 		boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
 		// Fall back to default
-		aidelay = 2.0;
+		boConfig->setAiDelay(3.0);
 	}
  }
 

@@ -86,8 +86,8 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   mVelo.scale(prop->speed() / mLength);
   //boDebug(350) << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
   // Particle systems
-  mFlyParticleSystems = prop->newFlyParticleSystems(pos, -rotation());
-  canvas->addParticleSystems(mFlyParticleSystems);
+  mFlyParticleSystems = new QPtrList<BosonParticleSystem>(prop->newFlyParticleSystems(pos, 0.0));
+  canvas->addParticleSystems(*mFlyParticleSystems);
   mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   // Initialization
   mActive = true;

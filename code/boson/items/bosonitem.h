@@ -337,7 +337,7 @@ public:
 	void moveParticleSystems(float x, float y, float z);
 	void rotateParticleSystems(float angle, float x, float y, float z);
 
-	virtual QPtrList<BosonParticleSystem>* particleSystems();
+	virtual QPtrList<BosonParticleSystem>* particleSystems() const;
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
 // objects (like missiles) just can't be selected usually.
