@@ -450,7 +450,7 @@ bool BosonFileConverter::convertSaveGame_From_0_8_128_To_0_9(QMap<QString, QByte
  fileList.insert("map/mapXML", map_mapXML);
  fileList.insert("map/heightmap.png", map_heightMap);
  fileList.insert("map/texmap", map_texMap);
- fileList.insert("map/C/descriptionXML", map_description);
+ fileList.insert("C/descriptionXML", map_description);
  fileList.insert("kgameXML", kgameXML);
 
  delete[] heightMap;
