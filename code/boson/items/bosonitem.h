@@ -458,6 +458,16 @@ public:
 	inline virtual void syncAdvanceFunction2() { }
 
 	/**
+	 * Called when @p item is removed from the canvas (right before the item
+	 * is deleted).
+	 * If this item stores any references to @p item, it should remove them
+	 * NOW.
+	 *
+	 * The default implementation does nothing
+	 **/
+	virtual void itemRemoved(BosonItem* item) { Q_UNUSED(item); }
+
+	/**
 	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
 	 * achieve the depth (height in z-direction) of the unit. Note that this
 	 * value <em>must not</em> be used in pathfinding or so, but only in

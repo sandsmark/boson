@@ -226,14 +226,6 @@ public:
 	void addItem(BosonItem* item);
 
 	/**
-	 * Remove @p item from the list of items. You should not need to call
-	 * this yourself, as it is called by the @ref BosonItem destructor.
-	 *
-	 * Be <em>very</em> careful when you call this manually!
-	 **/
-	void removeItem(BosonItem* item);
-
-	/**
 	 * @return A complete list of <em>all</em> items on the canvas. See @ref
 	 * addItem
 	 **/
@@ -469,6 +461,9 @@ protected:
 	 * Used by @ref loadFromXML.
 	 **/
 	bool loadItemsFromXML(const QDomElement& root);
+#if 0
+	bool loadParticlesFromXML(const QDomElement& root);
+#endif
 
 	/**
 	 * Parses @p item and will create a @ref BosonItem correspoding to the
@@ -478,6 +473,21 @@ protected:
 	BosonItem* createItemFromXML(const QDomElement& item, Player* owner);
 
 	bool loadItemFromXML(const QDomElement& element, BosonItem* item);
+
+	/**
+	 * NEVER delete an item directly - always use this method to do so!
+	 *
+	 * You should usually not call this, as it will get called when needed
+	 * (e.g. in @ref deleteUnits and @ref deleteUnusedShots and so on)
+	 **/
+	void deleteItem(BosonItem* item);
+
+	/**
+	 * Remove @p item from the list of items.
+	 *
+	 * Be <em>very</em> careful when you call this manually!
+	 **/
+	void removeItem(BosonItem* item);
 
 	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
 	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }

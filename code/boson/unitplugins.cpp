@@ -434,6 +434,10 @@ bool RepairPlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
+void RepairPlugin::itemRemoved(BosonItem*)
+{
+}
+
 
 HarvesterPlugin::HarvesterPlugin(Unit* unit)
 		: UnitPlugin(unit)
@@ -448,7 +452,9 @@ HarvesterPlugin::HarvesterPlugin(Unit* unit)
  mResourcesX.setLocal(0);
  mResourcesY.setLocal(0);
  mHarvestingType.setLocal(0);
- mRefinery = 0l;
+
+ mRefinery = 0;
+ mRessourceMine = 0;
 }
 
 HarvesterPlugin::~HarvesterPlugin()
@@ -470,22 +476,33 @@ void HarvesterPlugin::advance(unsigned int)
 bool HarvesterPlugin::saveAsXML(QDomElement& root) const
 {
  unsigned int refineryId = 0;
+ unsigned int mine = 0;
  if (mRefinery) {
 	refineryId = mRefinery->id();
  }
+ if (mRessourceMine) {
+	mine = mRessourceMine->unit()->id();
+ }
  root.setAttribute(QString::fromLatin1("Refinery"), refineryId);
+ root.setAttribute(QString::fromLatin1("RessourceMine"), mine);
  return true;
 }
 
 bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 {
  unsigned int refineryId = 0;
+ unsigned int mineId = 0;
  bool ok = false;
+
+ mRefinery = 0;
+ mRessourceMine = 0;
+
  refineryId = root.attribute(QString::fromLatin1("Refinery")).toUInt(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid number for Refinery attribute" << endl;
 	return false;
  }
+ mineId = root.attribute(QString::fromLatin1("RessourceMine")).toUInt(&ok);
  if (refineryId != 0) {
 	// AB: retrieving from Boson is not 100% nice, but definitely necessary
 	// and valid at this point. we need to get the pointer, even if the
@@ -493,21 +510,69 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
 	// --> it was saved this way, so we must load it this way.
 	mRefinery = game()->findUnit(refineryId, 0);
  }
+ if (mineId != 0) {
+	Unit* u = game()->findUnit(mineId, 0);
+	if (!u) {
+		boError() << k_funcinfo << "cannot find ressource mine " << mineId << endl;
+	} else {
+		mRessourceMine = (RessourceMinePlugin*)u->plugin(UnitPlugin::RessourceMine);
+		if (!mRessourceMine) {
+			boError() << k_funcinfo << "unit " << mineId << " is not a ressource mine" << endl;
+		}
+	}
+ }
  return true;
+}
+
+bool HarvesterPlugin::canMine(Unit* unit) const
+{
+ if (!unit) {
+	return false;
+ }
+ return canMine((RessourceMinePlugin*)unit->plugin(UnitPlugin::RessourceMine));
+}
+bool HarvesterPlugin::canMine(RessourceMinePlugin* p) const
+{
+ if (!p) {
+	return false;
+ }
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
+ if (!prop) {
+	boError() << k_funcinfo << "NULL harvester properties" << endl;
+	return false;
+ }
+ if (prop->canMineMinerals() && p->canProvideMinerals() && p->minerals() > 0) {
+	return true;
+ }
+ if (prop->canMineOil() && p->canProvideOil() && p->oil() > 0) {
+	return true;
+ }
+ return false;
+}
+
+bool HarvesterPlugin::canMine(Cell* cell) const
+{
+ return false;
 }
 
 
 void HarvesterPlugin::advanceMine()
 {
- const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
+ const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
  if (!prop) {
 	boError() << k_funcinfo << "NULL harvester properties" << endl;
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
+ if (!canMine(mRessourceMine)) {
+	// TODO: search a new ressource mine
+	boDebug() << k_funcinfo << "cannot mine there" << endl;
+	unit()->setWork(Unit::WorkNone);
+	return;
+ }
+
  // Check if unit is at mining location. If not, go there
- if((mResourcesX / BO_TILE_SIZE != unit()->x() / BO_TILE_SIZE) || (mResourcesY / BO_TILE_SIZE != unit()->y() / BO_TILE_SIZE))
- {
+ if ((mResourcesX / BO_TILE_SIZE != unit()->x() / BO_TILE_SIZE) || (mResourcesY / BO_TILE_SIZE != unit()->y() / BO_TILE_SIZE)) {
 	unit()->moveTo(mResourcesX, mResourcesY);
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
@@ -676,18 +741,6 @@ void HarvesterPlugin::setRefinery(Unit* refinery)
  mRefinery = refinery;
 }
 
-bool HarvesterPlugin::canMine(Cell* cell) const
-{
- if (canMineMinerals() && cell->hasMinerals() && cell->canGo(unitProperties())) {
-	return true;
- }
- // FIXME: there's no "oil cells" anymore
- if (canMineOil() && cell->hasOil() && cell->canGo(unitProperties())) {
-	return true;
- }
- return false;
-}
-
 bool HarvesterPlugin::canMineMinerals() const
 {
  const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
@@ -733,6 +786,12 @@ unsigned int HarvesterPlugin::unloadingSpeed() const
  return prop->unloadingSpeed();
 }
 
+void HarvesterPlugin::itemRemoved(BosonItem* item)
+{
+ if (item == (BosonItem*)mRefinery) {
+	setRefinery(0);
+ }
+}
 
 BombingPlugin::BombingPlugin(Unit* owner) : UnitPlugin(owner)
 {
@@ -1099,5 +1158,9 @@ int RessourceMinePlugin::minerals() const
 int RessourceMinePlugin::oil() const
 {
  return mOil;
+}
+
+void RessourceMinePlugin::itemRemoved(BosonItem*)
+{
 }
 
