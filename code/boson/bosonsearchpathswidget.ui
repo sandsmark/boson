@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
 <class>BosonSearchPathsWidget</class>
 <comment>Little widget to select paths
 Written for Boson Unit Editor, but may also be useful in other places</comment>
@@ -42,7 +42,7 @@ Written for Boson Unit Editor, but may also be useful in other places</comment>
             </property>
         </widget>
         <spacer row="3" column="1">
-            <property name="name" stdset="0">
+            <property name="name">
                 <cstring>mSpacer</cstring>
             </property>
             <property name="orientation">
@@ -108,10 +108,25 @@ Written for Boson Unit Editor, but may also be useful in other places</comment>
         <receiver>BosonSearchPathsWidget</receiver>
         <slot>slotRemovePath()</slot>
     </connection>
+    <connection>
+        <sender>mCurrentPaths</sender>
+        <signal>highlighted(int)</signal>
+        <receiver>BosonSearchPathsWidget</receiver>
+        <slot>slotPathSelected(int)</slot>
+    </connection>
+    <connection>
+        <sender>mNewPath</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>BosonSearchPathsWidget</receiver>
+        <slot>slotCurrentPathChanged(const QString&amp;)</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in implementation">bosonsearchpathswidget.ui.h</include>
 </includes>
+<variables>
+    <variable access="private">int mCurrentPath;</variable>
+</variables>
 <slots>
     <slot>slotAppendPath( QString path )</slot>
     <slot>slotSetPaths( QStringList paths )</slot>
@@ -119,6 +134,9 @@ Written for Boson Unit Editor, but may also be useful in other places</comment>
     <slot>slotAddPath()</slot>
     <slot>slotBrowse()</slot>
     <slot returnType="QStringList">currentPaths()</slot>
+    <slot access="protected">slotPathSelected( int index )</slot>
+    <slot access="protected">slotCurrentPathChanged( const QString &amp; path )</slot>
+    <slot>init()</slot>
 </slots>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
