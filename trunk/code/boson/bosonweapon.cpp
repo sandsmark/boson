@@ -75,6 +75,11 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mHeight = (float)(cfg->readDoubleNumEntry("Height", 0.25));
   mOffset = BosonConfig::readBoVector3Entry(cfg, "Offset");
   mOffset.cellToCanvas();
+  mAutoUse = cfg->readBoolEntry("AutoUse", true);
+  if(mAutoUse && (mShotType == BosonShot::Mine || mShotType == BosonShot::Bomb))
+  {
+    boWarning() << k_funcinfo << "AutoUse=true doesn't make sense for mines and bombs" << endl;
+  }
   mShootParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "ShootParticles");
   mFlyParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "FlyParticles");
   mHitParticleSystemIds = BosonConfig::readUnsignedLongNumList(cfg, "HitParticles");

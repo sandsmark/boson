@@ -329,6 +329,9 @@ void UnitProperties::loadWeapons(KSimpleConfig* conf)
 	BosonWeaponProperties* p = new BosonWeaponProperties(this, i + 1);
 	p->loadPlugin(conf, mFullMode);
 	d->mPlugins.append(p);
+	if (!p->autoUse()) {
+		continue;
+	}
 	if (p->canShootAtAirUnits()) {
 		mCanShootAtAirUnits = true;
 		if(p->range() > mMaxAirWeaponRange) {

@@ -133,6 +133,13 @@ class BosonWeaponProperties : public PluginProperties
     QMap<int, QString> sounds() const;
 
     unsigned long int id() const  { return mId; };
+
+    /**
+     * @return Whether this weapon can be used automatically by the unit
+     * You can set it to false for more powerful weapons, which take a lot of
+     *  time to reload, to make sure unit won't "waste" them for weak enemies.
+     **/
+    bool autoUse() const  { return mAutoUse; }
     
     /**
      * Creates new shot
@@ -178,6 +185,7 @@ class BosonWeaponProperties : public PluginProperties
     void setOffset(BoVector3 o)  { mOffset = o; };
     void setHeight(float height)  { mHeight = height; };
     void setSound(int event, QString filename);
+    void setAutoUse(bool use)  { mAutoUse = use; }
 
     void reset();
     void loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault = false);
@@ -211,6 +219,7 @@ class BosonWeaponProperties : public PluginProperties
     BoVector3 mOffset;
     QMap<int, QString> mSounds;
     QIntDict<BoAction> mActions;
+    bool mAutoUse;
 };
 
 

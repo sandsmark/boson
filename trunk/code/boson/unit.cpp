@@ -459,6 +459,10 @@ bool Unit::attackEnemyUnitsInRange()
  for (; *wit; ++wit) {
 	BosonWeapon* w = *wit;
 
+	if (!w->properties()->autoUse()) {
+		continue;
+	}
+
 	if (!w->reloaded()) {
 		continue;
 	}
@@ -641,7 +645,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  BosonWeapon* w;
  for (; *wit; ++wit) {
 	w = *wit;
-	if (w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
+	if (w->properties()->autoUse() && w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
 			boDebug(300) << "    " << k_funcinfo << "target destroyed, returning" << endl;
