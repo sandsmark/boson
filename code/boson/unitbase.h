@@ -21,15 +21,13 @@
 
 #include "rtti.h"
 
-#include <qstring.h>
-#include <qdatastream.h>
-
 #include <kgame/kgameproperty.h>
 
 class KGamePropertyHandler;
 
 class QPoint;
 class QRect;
+class QDataStream;
 
 class Player;
 class UnitProperties;

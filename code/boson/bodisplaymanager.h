@@ -26,6 +26,7 @@ class BoBox;
 class BosonBigDisplay;
 class UnitBase;
 class BosonCursor;
+class Player;
 
 class KPlayer;
 
@@ -61,7 +62,15 @@ public:
 
 	QPtrList<BosonBigDisplay> displays() const;
 
-	void setCursor(BosonCursor*);
+	/**
+	 * Set the cursor for all displays
+	 **/
+	void setCursor(BosonCursor* cursor);
+
+	/**
+	 * Set the local player for all displays
+	 **/
+	void setLocalPlayer(Player* player);
 
 	void removeActiveDisplay();
 	BosonBigDisplay* splitActiveDisplayVertical();

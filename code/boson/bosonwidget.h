@@ -20,7 +20,6 @@
 #define BOSONWIDGET_H
 
 #include <qwidget.h>
-#include <qdatastream.h>
 
 class KPlayer;
 class KGameIO;
