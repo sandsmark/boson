@@ -213,13 +213,21 @@ Cell* BosonCanvas::cells() const
 
 void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
+ static int profilingSlotAdvance = boProfiling->requestEventId("Advance: slotAdvance()");
+ static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance()");
+ static int profilingAdvanceFunctionAndMove = boProfiling->requestEventId("Advance: BosonItem::advanceFunction() and move()");
+ static int profilingAdvanceEffects = boProfiling->requestEventId("Advance: updateEffects()");
+ static int profilingMaxAdvanceCount = boProfiling->requestEventId("Advance: special MAXIMAL_ADVANCE_COUNT tasks");
 #define DO_ITEM_PROFILING 0
+ BosonProfiler profiler(profilingSlotAdvance);
+
  boProfiling->advance(true, advanceCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  boProfiling->advanceFunction(true);
  d->mStatistics->resetWorkCounts();
 
+ boProfiling->start(profilingAdvance);
  // first we need to call *all* BosonItem::advance() functions.
  // AB: profiling information will be inaccurate because of this... we are
  // collecting for every item advance() here, and below for some items
@@ -246,7 +254,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	boProfiling->advanceItemStop();
 #endif
  }
+ boProfiling->stop(profilingAdvance);
 
+ boProfiling->start(profilingAdvanceFunctionAndMove);
  // now the rest - mainly call BosonItem::advanceFunction().
  // this depends on in which list an item resides (changed when Unit::work()
  // changes). normal items are usually in -1.
@@ -343,6 +353,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 #endif
 	}
  }
+ boProfiling->stop(profilingAdvanceFunctionAndMove);
 
  // now we need to make sure that the correct advance function will be called in
  // the next advance call.
@@ -379,12 +390,21 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
+ boProfiling->start(profilingAdvanceEffects);
  boProfiling->advanceEffects(true);
  updateEffects(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
  boProfiling->advanceEffects(false);
+ boProfiling->stop(profilingAdvanceEffects);
 
+ boProfiling->start(profilingMaxAdvanceCount);
  boProfiling->advanceMaximalAdvanceCount(true);
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
+	static int profilingMaxAdvanceCountSum = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
+	static int profilingDeletionList = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
+	static int profilingRemoveFromDestroyed = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: update destroyed lsit");
+	static int profilingDeleteItems = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleting items");
+	static int profilingDeleteShots = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleteUnusedShots()");
+	BosonProfiler profiler2(profilingMaxAdvanceCountSum);
 	boDebug(300) << "MAXIMAL_ADVANCE_COUNT" << endl;
 	// there are 2 different timers for deletion of canvas items.
 	// The first is done in BosonCanvas - we only delete anything when
@@ -395,6 +415,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	// diappear at once...
 	QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
 	QPtrList<BosonItem> deleteList;
+	boProfiling->start(profilingDeletionList);
 	while (deletionIt.current()) {
 		deletionIt.current()->increaseDeletionTimer();
 		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
@@ -402,21 +423,29 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		}
 		++deletionIt;
 	}
+	boProfiling->stop(profilingDeletionList);
 
+	boProfiling->start(profilingRemoveFromDestroyed);
 	QPtrListIterator<BosonItem> destroyedIt(deleteList);
 	while (destroyedIt.current()) {
 		d->mDestroyedUnits.removeRef((Unit*)destroyedIt.current());
 		++destroyedIt;
 	}
+	boProfiling->stop(profilingRemoveFromDestroyed);
 
 
+	boProfiling->start(profilingDeleteItems);
 	deleteItems(deleteList);
+	boProfiling->stop(profilingDeleteItems);
 
+	boProfiling->start(profilingDeleteShots);
 	boProfiling->advanceDeleteUnusedShots(true);
 	deleteUnusedShots();
 	boProfiling->advanceDeleteUnusedShots(false);
+	boProfiling->stop(profilingDeleteShots);
  }
  boProfiling->advanceMaximalAdvanceCount(false);
+ boProfiling->stop(profilingMaxAdvanceCount);
  boProfiling->advance(false, advanceCount);
 }
 
