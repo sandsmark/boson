@@ -530,6 +530,7 @@ void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
  resetModel();
  BO_CHECK_NULL_RET(s);
  BO_CHECK_NULL_RET(prop);
+ makeCurrent();
  s->loadUnitModel(prop);
  mModel = s->unitModel(prop->typeId());
  BO_CHECK_NULL_RET(mModel);
@@ -544,6 +545,7 @@ void ModelPreview::loadObjectModel(SpeciesTheme* s, const QString& file)
 	boError() << k_funcinfo << "empty filename" << endl;
 	return;
  }
+ makeCurrent();
  s->loadObjects();
  mModel = s->objectModel(file);
  if (!mModel) {
