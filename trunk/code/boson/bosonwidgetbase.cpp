@@ -484,6 +484,7 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 
 void BosonWidgetBase::initKActions()
 {
+#if 0
  QSignalMapper* scrollMapper = new QSignalMapper(this);
  connect(scrollMapper, SIGNAL(mapped(int)), this, SLOT(slotScroll(int)));
  KAction* a;
@@ -527,6 +528,7 @@ void BosonWidgetBase::initKActions()
  a = new KAction(i18n("Zoom out"), zoomOut, this,
 		SLOT(slotZoomOut()), actionCollection(),
 		"zoom_out");
+#endif
 
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
@@ -538,8 +540,6 @@ void BosonWidgetBase::initKActions()
 
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
 		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
- (void)new KAction(i18n("Grab &Profiling data"), KShortcut(Qt::CTRL + Qt::Key_P),
-		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
  KToggleAction* movie = new KToggleAction(i18n("Grab &Movie"),
 		KShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_M), 0, 0, actionCollection(), "game_grab_movie");
  movie->setChecked(false);
@@ -554,39 +554,16 @@ void BosonWidgetBase::initKActions()
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- (void)new KAction(i18n("Edit global conditions..."), KShortcut(), this,
-		SLOT(slotEditConditions()), actionCollection(),
-		"debug_edit_conditions");
 
 
- KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
-		actionCollection(), "debug_mode");
- connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));
- QStringList l;
- l.append(i18n("Normal"));
- l.append(i18n("Debug Selection"));
- debugMode->setItems(l);
- debugMode->setCurrentItem(0);
  d->mActionDebugPlayers = new KActionMenu(i18n("Players"),
 		actionCollection(), "debug_players");
 
- (void)new KAction(i18n("Show OpenGL states"), KShortcut(), this,
-		SLOT(slotShowGLStates()), actionCollection(),
-		"debug_show_opengl_states");
  (void)new KAction(i18n("&Reload model textures"), KShortcut(), this,
 		SLOT(slotReloadModelTextures()), actionCollection(), "debug_lazy_reload_model_textures");
  (void)new KAction(i18n("Light0..."), KShortcut(), this,
 		SLOT(slotShowLight0Widget()), actionCollection(),
 		"debug_light0");
- (void)new KAction(i18n("Reload &meshrenderer plugin"), KShortcut(), this,
-		SLOT(slotReloadMeshRenderer()), actionCollection(),
-		"debug_lazy_reload_meshrenderer");
- (void)new KAction(i18n("Reload &groundrenderer plugin"), KShortcut(), this,
-		SLOT(slotReloadGroundRenderer()), actionCollection(),
-		"debug_lazy_reload_groundrenderer");
- (void)new KAction(i18n("Crash boson"), KShortcut(), this,
-		SLOT(slotCrashBoson()), actionCollection(),
-		"debug_crash_boson");
 #ifdef BOSON_USE_BOMEMORY
  (void)new KAction(i18n("Debug M&emory"), KShortcut(), this,
 		SLOT(slotDebugMemory()), actionCollection(),
@@ -643,11 +620,6 @@ void BosonWidgetBase::startScenarioAndGame()
  if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
 	slotCenterHomeBase();
  }
-}
-
-void BosonWidgetBase::slotDebugMode(int index)
-{
- boConfig->setDebugMode((BosonConfig::DebugMode)index);
 }
 
 void BosonWidgetBase::slotDebugMemory()
@@ -840,24 +812,6 @@ void BosonWidgetBase::slotGrabScreenshot()
  }
 }
 
-void BosonWidgetBase::slotGrabProfiling()
-{
- QString file = findSaveFileName("boprofiling", "boprof");
- if (file.isNull()) {
-	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
-	return;
- }
- // TODO: chat message about file location!
- boDebug() << k_funcinfo << "Saving profiling to " << file << endl;
- bool ok = boProfiling->saveToFile(file);
- if (!ok) {
-	boError() << k_funcinfo << "Error saving profiling to " << file << endl;
-	boGame->slotAddChatSystemMessage(i18n("An error occured while saving profiling log to %1").arg(file));
- } else {
-	boGame->slotAddChatSystemMessage(i18n("Profiling log saved to %1").arg(file));
- }
-}
-
 QString BosonWidgetBase::findSaveFileName(const QString& prefix, const QString& suffix)
 {
  QString file;
@@ -978,45 +932,6 @@ void BosonWidgetBase::slotReloadModelTextures()
  //BosonModelTextures::modelTextures()->reloadTextures();
 }
 
-void BosonWidgetBase::slotReloadMeshRenderer()
-{
- bool unusable = false;
- bool r = BoMeshRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
-	return;
- }
- boError() << "meshrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading meshrenderer failed but library should still be usable"));
- }
-}
-
-void BosonWidgetBase::slotReloadGroundRenderer()
-{
- bool unusable = false;
- bool r = BoGroundRendererManager::manager()->reloadPlugin(&unusable);
- if (r) {
-	return;
- }
- boError() << "groundrenderer reloading failed" << endl;
- if (unusable) {
-	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed, library is now unusable. quitting."));
-	exit(1);
- } else {
-	KMessageBox::sorry(this, i18n("Reloading groundrenderer failed but library should still be usable"));
- }
-}
-
-void BosonWidgetBase::slotShowGLStates()
-{
- boDebug() << k_funcinfo << endl;
- BoGLStateWidget* w = new BoGLStateWidget(0, 0, WDestructiveClose);
- w->show();
-}
-
 void BosonWidgetBase::changeToConfigCursor()
 {
  slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
@@ -1038,113 +953,12 @@ void BosonWidgetBase::initMap()
  // implemented by EditorWidget
 }
 
-void BosonWidgetBase::slotCrashBoson()
-{
- ((QObject*)0)->name();
-}
-
 PlayerIO* BosonWidgetBase::localPlayerIO() const
 {
  if (localPlayer()) {
 	return localPlayer()->playerIO();
  }
  return 0;
-}
-
-void BosonWidgetBase::slotEditConditions()
-{
- KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
-		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Cancel, 0,
-		"editconditions", true, true);
- QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
- BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
- layout->addWidget(widget);
-
- {
-	QDomDocument doc;
-	QDomElement root = doc.createElement("Conditions");
-	doc.appendChild(root);
-	if (!boGame->saveCanvasConditions(root)) {
-		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
-		KMessageBox::information(this, i18n("Canvas conditions could not be imported to the widget"));
-	} else {
-		widget->loadConditions(root);
-	}
- }
-
- int ret = dialog->exec();
- QString xml = widget->toString();
- delete widget;
- widget = 0;
- delete dialog;
- dialog = 0;
- if (ret == KDialogBase::Accepted) {
-	QDomDocument doc;
-	bool ret = doc.setContent(xml);
-	QDomElement root = doc.documentElement();
-	if (!ret || root.isNull()) {
-		boError() << k_funcinfo << "invalid XML document created" << endl;
-		KMessageBox::sorry(this, i18n("Oops - an invalid XML document was created. Internal error."));
-		return;
-	}
-	boDebug() << k_funcinfo << "applying canvas conditions" << endl;
-	boGame->loadCanvasConditions(root);
- }
-}
-
-void BosonWidgetBase::slotScroll(int dir)
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- switch ((ScrollDirection)dir) {
-	case ScrollUp:
-		display->scrollBy(0, -boConfig->arrowKeyStep());
-		break;
-	case ScrollRight:
-		display->scrollBy(boConfig->arrowKeyStep(), 0);
-		break;
-	case ScrollDown:
-		display->scrollBy(0, boConfig->arrowKeyStep());
-		break;
-	case ScrollLeft:
-		display->scrollBy(-boConfig->arrowKeyStep(), 0);
-		break;
-	default:
-		return;
- }
-}
-
-void BosonWidgetBase::slotRotateLeft()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->rotateLeft();
-}
-
-void BosonWidgetBase::slotRotateRight()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->rotateRight();
-}
-
-void BosonWidgetBase::slotZoomIn()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->zoomIn();
-}
-
-void BosonWidgetBase::slotZoomOut()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->zoomOut();
 }
 
 void BosonWidgetBase::slotCenterHomeBase()
@@ -1155,10 +969,3 @@ void BosonWidgetBase::slotCenterHomeBase()
  display->slotCenterHomeBase();
 }
 
-void BosonWidgetBase::slotResetViewProperties()
-{
- BO_CHECK_NULL_RET(displayManager());
- BosonBigDisplayBase* display = displayManager()->activeDisplay();
- BO_CHECK_NULL_RET(display);
- display->slotResetViewProperties();
-}

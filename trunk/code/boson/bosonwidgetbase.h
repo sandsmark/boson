@@ -137,8 +137,6 @@ public slots:
 
 	void slotShowLight0Widget();
 	void slotReloadModelTextures();
-	void slotReloadMeshRenderer();
-	void slotReloadGroundRenderer();
 
 	/**
 	 * Sends signals to update mobiles/facilities count for player p
@@ -164,8 +162,6 @@ protected slots:
 	void slotRunScriptLine(const QString& line);
 
 	void slotAdvance(unsigned int, bool);
-
-	void slotCrashBoson();
 
 signals:
 	// hmm.. these *never* get emitted?
@@ -213,13 +209,9 @@ signals:
 protected slots:
 	void slotChatDockHidden();
 
-	void slotDebugMode(int);
 	void slotDebugPlayer(int);
 	void slotDebugMemory();
 	void slotGrabScreenshot();
-	void slotGrabProfiling();
-	void slotShowGLStates();
-	void slotEditConditions();
 
 	void slotCmdBackgroundChanged(const QString& file);
 
@@ -239,13 +231,7 @@ protected slots:
 	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
 
 
-	void slotScroll(int direction);
-	void slotRotateLeft();
-	void slotRotateRight();
-	void slotZoomIn();
-	void slotZoomOut();
 	void slotCenterHomeBase();
-	void slotResetViewProperties();
 
 protected:
 	void initBigDisplay(BosonBigDisplayBase*);
