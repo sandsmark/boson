@@ -601,8 +601,8 @@ void BosonGLWidget::setContext(BoContext* context)
  XSetWindowAttributes a;
 
  a.colormap = choose_cmap(x11Display(), vi);	// find best colormap
- a.background_pixel = backgroundColor().pixel( vi->screen );
- a.border_pixel = black.pixel( vi->screen );
+ a.background_pixel = backgroundColor().pixel();
+ a.border_pixel = black.pixel();
  Window p = RootWindow( x11Display(), vi->screen );
  if (parentWidget()) {
 	p = parentWidget()->winId();
