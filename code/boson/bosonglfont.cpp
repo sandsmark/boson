@@ -36,6 +36,7 @@ BosonGLFont::BosonGLFont(const QString& family)
 
 BosonGLFont::~BosonGLFont()
 {
+ glDeleteLists(mFontDisplayList, 256);
  delete mFontMetrics;
 }
 

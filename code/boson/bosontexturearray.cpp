@@ -122,6 +122,10 @@ bool BosonTextureArray::createTexture(const QImage& image, GLuint texture, bool 
  // AB: performance: GL_UNSIGNED_BYTE is said to be the fastest format
  // (usually!!) - so don't change it :)
 
+ // AB: performance: we don't use the alpha component for most textures. so we
+ // could replace the first GL_RGBA parameter by GL_RGB (leave the second at
+ // GL_RGBA!). note that at least the cursor needs alpha!
+
  if (useMipmaps) {
 	resetMipmapTexParameter();
 	int error = gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGBA, buffer.width(),
