@@ -25,6 +25,7 @@
 class KPlayer;
 class KGameIO;
 class QKeyEvent;
+class KGamePropertyBase;
 
 class BosonCanvas;
 class BosonCommandFrame;
@@ -133,6 +134,8 @@ protected slots:
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
+
+	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
 
 protected:
 	void changeSpecies(const QString& species);

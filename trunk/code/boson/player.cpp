@@ -61,9 +61,9 @@ Player::Player() : KPlayer()
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
 // TODO d->mFogged.registerData() or something like this
- d->mMinerals.registerData(IdMineralCost, dataHandler(),
+ d->mMinerals.registerData(IdMinerals, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "MineralCost");
- d->mOil.registerData(IdOilCost, dataHandler(),
+ d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "OilCost");
  d->mMinerals.setLocal(0);
  d->mOil.setLocal(0);
@@ -196,7 +196,7 @@ void Player::addUnit(Unit* unit)
  unit->setOwner(this); // already done in c'tor of Unit
  unit->dataHandler()->registerHandler(BosonMessage::UnitPropertyHandler + d->mUnitPropID, this,
 		SLOT(sendProperty(int, QDataStream&, bool*)),
-		SLOT(emitSignal(KGamePropertyBase*)));
+		SIGNAL(signalUnitPropertyChanged(KGamePropertyBase*)));
  connect(unit->dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)), 
 		this, SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 

@@ -50,6 +50,7 @@
 #include <kmessagebox.h>
 #include <kgame/kgameio.h>
 #include <kgame/kgamedebugdialog.h>
+#include <kgame/kgamepropertyhandler.h>
 
 #include <qlayout.h>
 #include <qevent.h>
@@ -272,6 +273,8 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
  // signalSingleUnitSelected should be emitted
  connect(p, SIGNAL(signalUnitChanged(Unit*)), 
 		d->mBigDisplay, SLOT(slotUnitChanged(Unit*)));
+ connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
+		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
  if (d->mMap) {
 	p->initMap(d->mMap);
  }
@@ -741,3 +744,20 @@ void BosonWidget::slotUnfog(int x, int y)
  d->mCanvas->unfogLocal(x, y);
 }
 
+void BosonWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
+{
+ if (p != d->mLocalPlayer) {
+	// not yet used
+	return;
+ }
+ switch (prop->id()) {
+	case Player::IdMinerals:
+		emit signalMineralsUpdated(d->mLocalPlayer->minerals());
+		break;
+	case Player::IdOil:
+		emit signalOilUpdated(d->mLocalPlayer->oil());
+		break;
+	default:
+		break;
+ }
+}

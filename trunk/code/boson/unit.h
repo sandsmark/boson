@@ -49,6 +49,18 @@ public:
 		IdFix_Constructions = UnitBase::IdLast + 6
 
 	};
+
+	enum Direction {
+		North = 0,
+		NorthEast = 1,
+		East = 2, // and 3 as well...
+		SouthEast = 4,
+		South = 5, // and 6 as well (but slightly to west)
+		SouthWest = 7,
+		West = 7,// FIXME
+		NorthWest = 7 // FIXME
+		
+	};
 	Unit(int type, Player* owner, QCanvas* canvas);
 	virtual ~Unit();
 

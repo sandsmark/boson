@@ -26,6 +26,8 @@ General TODOs
   is a up (aka previous page) button. SO we can add any number of pixmaps with
   this limited number of orderbuttons.
 - player should select team color in new game dialog
+- fimd out whether signalUnitPropertyChanged() is a good thing at all. Might
+  save some performance if we don't use it.
 
 
 Data TODOs
