@@ -931,6 +931,8 @@ bool TopWidget::queryClose()
 bool TopWidget::queryExit()
 {
  if (!boGame) {
+	// note: this _will_ happen if exit() is called before boGame was
+	// created!
 	return true;
  }
  if (boGame->gameStatus() != KGame::Init) {
