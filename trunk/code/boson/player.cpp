@@ -64,7 +64,7 @@ public:
 	QBitArray mFogged; // TODO: use KGameProperty
 	KGameProperty<unsigned long int> mMinerals;
 	KGameProperty<unsigned long int> mOil;
-	KGamePropertyBool mIsNeutral;
+	KGamePropertyBool mIsNeutralPlayer;
 
 	BosonStatistics* mStatistics;
 
@@ -74,7 +74,7 @@ public:
 	PlayerIO* mPlayerIO;
 };
 
-Player::Player(bool isNeutral) : KPlayer()
+Player::Player(bool isNeutralPlayer) : KPlayer()
 {
  boDebug() << k_funcinfo << endl;
  mSpecies = 0;
@@ -95,9 +95,9 @@ Player::Player(bool isNeutral) : KPlayer()
 		KGamePropertyBase::PolicyLocal, "MineralCost");
  d->mOil.registerData(IdOil, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "OilCost");
- d->mIsNeutral.registerData(IdIsNeutral, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "IsNeutral");
- d->mIsNeutral = isNeutral;
+ d->mIsNeutralPlayer.registerData(IdIsNeutralPlayer, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "IsNeutralPlayer");
+ d->mIsNeutralPlayer = isNeutralPlayer;
  d->mPlayerIO = new PlayerIO(this);
 
  quitGame(); // this will reset some variables
@@ -114,9 +114,9 @@ Player::~Player()
  boDebug() << k_funcinfo << "done" << endl;
 }
 
-bool Player::isNeutral() const
+bool Player::isNeutralPlayer() const
 {
- return d->mIsNeutral;
+ return d->mIsNeutralPlayer;
 }
 
 PlayerIO* Player::playerIO() const
@@ -211,7 +211,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 void Player::loadTheme(const QString& species, const QColor& teamColor)
 {
  if (species == QString::fromLatin1("Neutral")) {
-	if (!isNeutral()) {
+	if (!isNeutralPlayer()) {
 		boError() << k_funcinfo << "only neutral player can have neutral theme" << endl;
 		return;
 	}
@@ -554,15 +554,37 @@ BosonStatistics* Player::statistics() const
  return d->mStatistics;
 }
 
-bool Player::isEnemy(Player* p) const
+bool Player::isEnemy(const Player* p) const
 {
- if (p == this) {
-	return false;
- }
- if (p == (Player*)boGame->playerList()->getLast()) { // neutral player
+ if (isAllied(p) || isNeutral(p)) {
 	return false;
  }
  return true;
+}
+
+bool Player::isNeutral(const Player* p) const
+{
+ // one day we might implement advanced relationships between players, so that
+ // for two players A,B there may be the following cases:
+ // 1. A and B are allies
+ // 2. A and B are enemies
+ // 3. A and B are neutral to each other
+
+ // atm only the "neutral player" is neutral to another player.
+ if ((const Player*)game()->playerList()->getLast() == p) {
+	return true;
+ }
+ return false;
+}
+
+bool Player::isAllied(const Player* p) const
+{
+ if (p == this) {
+	return true;
+ }
+
+ // allied players are not implemented yet
+ return false;
 }
 
 int Player::mobilesCount()

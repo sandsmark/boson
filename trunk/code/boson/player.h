@@ -45,7 +45,7 @@ public:
 		IdFogged = KGamePropertyBase::IdUser + 1,
 		IdMinerals = KGamePropertyBase::IdUser + 2,
 		IdOil = KGamePropertyBase::IdUser + 3,
-		IdIsNeutral = KGamePropertyBase::IdUser + 4
+		IdIsNeutralPlayer = KGamePropertyBase::IdUser + 4
 	};
 
 	/**
@@ -62,7 +62,7 @@ public:
 	 * player index if possible. This method is used to ensure that if there
 	 * is a last player in the list it actually is the neutral player.
 	 **/
-	bool isNeutral() const;
+	bool isNeutralPlayer() const;
 
 	PlayerIO* playerIO() const;
 
@@ -185,9 +185,29 @@ public:
 
 	/**
 	 * @return TRUE if player is an enemy or FALSE if it is e.g. allied with
-	 * us.
+	 * us. See also @ref isNeutral and @ref isAllied
 	 **/
-	bool isEnemy(Player* player) const;
+	bool isEnemy(const Player* player) const;
+
+	/**
+	 * A player is neutral to another player if it is neither an enemy nor
+	 * an allied. When two players are neutral to each other they are meant
+	 * not to shoot at each other, but they won't share their ressources
+	 * (sight range, repair units, refineries, ...) either.
+	 * @return TRUE if @p p is neutral to this player, i.e. neither an
+	 * allied nor an enemy player, otherwise FALSE. See also @ref isAllied
+	 * and @ref isEnemy
+	 **/
+	bool isNeutral(const Player* p) const;
+
+	/**
+	 * An allied player will share some of their ressources, such as sight
+	 * ranges of units (they will see the map of each other), maybe
+	 * refineries and so on. Also they won't shoot at each other.
+	 * @return TRUE if the player @p p is allied with this this player. See
+	 * also @ref isEnemy and @ref isNeutral
+	 **/
+	bool isAllied(const Player* p) const;
 
 	int mobilesCount();
 	int facilitiesCount();
