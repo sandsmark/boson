@@ -27,7 +27,6 @@
 #include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
 #include "bosonloadingwidget.h"
 #include "bosonstartupbasewidget.h"
-#include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "boson.h"
 #include "player.h"
@@ -39,6 +38,7 @@
 #include "bosonprofiling.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
+#include "sound/bosonmusic.h"
 
 #include <kapplication.h>
 #include <klocale.h>

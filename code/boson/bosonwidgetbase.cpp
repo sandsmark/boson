@@ -35,7 +35,6 @@
 #include "kgameplayerdebug.h"
 #include "kgamecelldebug.h"
 #include "bosonprofilingdialog.h"
-#include "bosonmusic.h"
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "boselection.h"
@@ -43,6 +42,7 @@
 #include "top.h"
 #include "bosonbigdisplay.h"
 //#include "editorbigdisplay.h"
+#include "sound/bosonmusic.h"
 
 #include <kapplication.h>
 #include <klocale.h>
