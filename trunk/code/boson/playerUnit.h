@@ -105,6 +105,7 @@ private :
 	QPoint		dest;
 	QPoint		asked;
 	mobUnitState	asked_state;
+	uint		failed_move;
 
 };
 

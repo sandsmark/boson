@@ -140,9 +140,16 @@ bool playerMobUnit::getWantedMove(QPoint &wstate)
 			}
 			bocanvas->setCellFlag ( gridRect(), (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 			wstate = asked = local;
-			wstate = asked;
 			asked_state = MUS_MOVING;
+ 			if (ret) {
+ 				if (failed_move>3) failed_move = 0; // prevent 3-timeunit loop
+ 			} else {
+ 				failed_move++;
+ 				if (failed_move>4) state = MUS_NONE; // prevent 'keep on trying when it can obviously not go further'
+ 			}
+//			printf("returning %s, failed_move = %d\n", ret?"true":"false", failed_move);
 			return ret;
+
 	}
 
 	// dead code : should not be reached :
@@ -383,6 +390,7 @@ void playerMobUnit::u_goto(QPoint mpos) // not the same as QCanvasSprite::moveTo
 		target = 0l;
 		//puts("u_goto disconnecting target");
 	}
+	failed_move = 0;
 	do_goto(mpos/BO_TILE_SIZE);
 }
 	
@@ -422,6 +430,7 @@ void playerMobUnit::u_attack(bosonUnit *u)
 		return;
 	}
 
+	failed_move = 0;
 	do_goto(p/BO_TILE_SIZE);
 }
 
