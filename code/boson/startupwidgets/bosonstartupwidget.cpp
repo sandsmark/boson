@@ -161,7 +161,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
-	d->mNetworkInterface->sendChangePlayField(identifier);
+	networkInterface()->sendChangePlayField(identifier);
  }
  if (args->isSet("computer")) {
 	QString count = args->getOption("computer");
@@ -204,12 +204,12 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
 	if (identifier.right(4) != QString::fromLatin1(".bpf")) {
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
-	d->mNetworkInterface->sendChangePlayField(identifier);
+	networkInterface()->sendChangePlayField(identifier);
  }
 
 
  if (args->isSet("start")) {
-	d->mNetworkInterface->sendStartGameClicked();
+	networkInterface()->sendStartGameClicked();
  }
 }
 
@@ -267,7 +267,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNewGame:
 	{
-		BosonStartGameWidget* startGame = new BosonStartGameWidget(d->mNetworkInterface, this);
+		BosonStartGameWidget* startGame = new BosonStartGameWidget(networkInterface(), this);
 		connect(startGame, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(startGame, SIGNAL(signalShowNetworkOptions()),
@@ -293,7 +293,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdStartEditor:
 	{
-		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(d->mNetworkInterface, this);
+		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(networkInterface(), this);
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 
@@ -475,7 +475,7 @@ void BosonStartupWidget::slotShowWelcomeWidget()
  }
  d->mWidgetStack->raiseWidget((int)IdWelcome);
  emit signalResetGame();
- d->mNetworkInterface->setGame(boGame);
+ networkInterface()->setGame(boGame);
 
  // the startup widget gets hidden when game is started, so when we want to show
  // the welcome widget we also need to show the startup widget
@@ -496,5 +496,10 @@ void BosonStartupWidget::removeWidget(WidgetId widgetId)
 	d->mWidgetStack->removeWidget(w);
 	delete w;
  }
+}
+
+BosonStartupNetwork* BosonStartupWidget::networkInterface() const
+{
+ return d->mNetworkInterface;
 }
 
