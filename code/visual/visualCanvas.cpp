@@ -89,9 +89,9 @@ void visualCanvas::setCell(int i, int j, cell_t c)
 	boAssert(i< tilesHorizontally() );
 	boAssert(j< tilesVertically() );
 
-//	printf("setCell :  i,j,c = %d,%d,%d...", i, j, c); fflush(stdout);
+//	printf("setCell :  i,j,c = %d,%d,%d\n", i, j, c); fflush(stdout);
+
 	setTile( i, j, c);
-//	printf("ok\n"); fflush(stdout);
 
 	emit newCell(i,j, ground(c));
 }
