@@ -46,72 +46,6 @@
 #include "bosoncanvas.moc"
 
 
-/**
- * Pixmap loader for the tileset. We use a different thread to provide
- * non-blocking UI. UPDATE: not correct anymore!
- *
- * It is important that you <em>DON'T</em> access the canvas (especially
- * update()) before this is completed! The canvas does <em>not</em> have tiles
- * before that!
- *
- * The first function accessing the canvas (in terms of update()) is @ref
- * initFogOfWar which therefore checks if the thread is finished.
- * UPDATE: doc is obsolete - class could get removed. we use OpenGL and totally
- * different loading code than we did at that time
- **/
-class TileLoader
-{
-public:
-	TileLoader(BosonCanvas* c)
-	{
-		mCanvas = c;
-		mTile = 0;
-		mTiles = new BosonTiles;
-	}
-	virtual ~TileLoader()
-	{
-		delete mTiles;
-	}
-
-	void setDir(const QString& d)
-	{
-		mDir = d;
-	}
-
-	void start()
-	{
-		run();
-	}
-	BosonTiles* tileSet() const
-	{
-		return mTiles;
-	}
-
-protected:
-	virtual void run()
-	{
-		kdDebug() << k_funcinfo << endl;
-		QTime time;
-		time.start();
-		mTiles->loadTiles(mDir);
-		mTile = new QPixmap(mTiles->pixmap());
-		kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
-		if (mTile->isNull()) {
-			kdError() << k_funcinfo << "NULL pixmap" << endl;
-			return;
-		}
-		mCanvas->setTileSet(mTile);
-		delete mTile;
-		mTile = 0;
-		kdDebug() << k_funcinfo << "done" << endl;
-	}
-private:
-	QString mDir;
-	QPixmap* mTile;
-	BosonCanvas* mCanvas;
-	BosonTiles* mTiles;
-};
-
 class BosonCanvas::BosonCanvasPrivate
 {
 public:
@@ -119,7 +53,7 @@ public:
 	{
 		mMap = 0;
 
-		mLoader = 0;
+		mTiles = 0;
 	}
 	
 	QPixmap mPix;
@@ -132,7 +66,8 @@ public:
 
 	BoItemList mAllItems;
 
-	TileLoader* mLoader;
+	BosonTiles* mTiles;
+	QString mTilesDir;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -148,15 +83,18 @@ void BosonCanvas::init()
  d->mDeleteShot.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
 
- d->mLoader = new TileLoader(this);
- connect(d->mLoader->tileSet(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
+ d->mTiles = new BosonTiles();
+ connect(d->mTiles, SIGNAL(signalTilesLoaded()),
+		this, SIGNAL(signalTilesLoaded()));
+ connect(d->mTiles, SIGNAL(signalTilesLoading(int)),
+		this, SIGNAL(signalTilesLoading(int)));
 }
 
 BosonCanvas::~BosonCanvas()
 {
 kdDebug()<< k_funcinfo << endl;
  quitGame();
- delete d->mLoader;
+ delete d->mTiles;
  delete d;
 kdDebug()<< k_funcinfo <<"done"<< endl;
 }
@@ -173,36 +111,6 @@ void BosonCanvas::deleteDestroyed()
  d->mDestroyedUnits.setAutoDelete(true);
  d->mDestroyedUnits.clear();
  d->mDestroyedUnits.setAutoDelete(false);
-}
-
-void BosonCanvas::setTileSet(QPixmap* p)
-{
- // called from TileLoader.
- kdDebug() << k_funcinfo << endl;
- if (p->isNull()) {
-	kdError() << k_funcinfo << "NULL pixmap" << endl;
-	return;
- }
- if (width() == 0 || height() == 0) {
-	kdError() << "Cannot load tiles" << endl;
-	return;
- }
- if (!d->mMap) {
-	kdError() << k_funcinfo << "NULL map" << endl;
-	return;
- }
-
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
-		Cell* c = d->mMap->cell(i, j);
-		if (!c) {
-			kdError() << k_funcinfo << "NULL cell" << endl;
-			continue;
-		}
-		slotAddCell(i, j, c->groundType(), c->version());
-	}
- }
- emit signalTilesLoaded();
 }
 
 Cell* BosonCanvas::cell(int x, int y) const
@@ -344,7 +252,7 @@ void BosonCanvas::loadTiles(const QString& tiles, bool withtimer)
 	kdError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
 	return;
  }
- d->mLoader->setDir(dir);
+ d->mTilesDir = dir;
  if (withtimer) {
 	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
  } else {
@@ -359,14 +267,12 @@ void BosonCanvas::slotLoadTiles()
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- resize(d->mMap->width() * BO_TILE_SIZE, d->mMap->height() * BO_TILE_SIZE);
- d->mLoader->start();
- d->mMap->setTileSet(d->mLoader->tileSet());
-}
+ QTime time;
+ time.start();
+ d->mTiles->loadTiles(d->mTilesDir);
+ kdDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
 
-void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
-{
- // AB: nothing to do here in OpenGL ? seems so..
+ d->mMap->setTileSet(d->mTiles);
 }
 
 void BosonCanvas::addAnimation(BosonSprite* item)
@@ -798,14 +704,5 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  cells[0] = pos / BO_TILE_SIZE;
 // kdDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
-}
-
-void BosonCanvas::resize(int w, int h)
-{
- if (width() == w && height() == h) {
-	return;
- }
- mWidth = w;
- mHeight = h;
 }
 
