@@ -159,6 +159,7 @@ BoMessageDelayer::~BoMessageDelayer()
  // remaining messages are not stored anywhere else. they are
  // deleted here.
  mDelayedMessages->clear();
+ delete mDelayedMessages;
 }
 
 void BoMessageDelayer::lock()
@@ -249,6 +250,7 @@ BoMessageLogger::BoMessageLogger()
 BoMessageLogger::~BoMessageLogger()
 {
  mLoggedMessages->clear();
+ delete mLoggedMessages;
 }
 
 void BoMessageLogger::append(BoMessage* message)
