@@ -11,6 +11,7 @@ bosonwidgets_la_LIBADD = \
 	$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 	$(LIB_BOMEMORY) \
 	$(LIB_KGAME) \
+	$(LIB_KDEUI) \
 	$(LIB_KDECORE)
 bosonwidgets_la_SOURCES = bosonwidgets.cpp dummyclasses.cpp
 
