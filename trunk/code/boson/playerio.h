@@ -19,8 +19,6 @@
 #ifndef PLAYERIO_H
 #define PLAYERIO_H
 
-class QColor;
-class QPoint;
 class Player;
 class Cell;
 class BosonItem;
@@ -31,9 +29,14 @@ class BoItemList;
 class BosonCanvas;
 class BosonStatistics;
 class SpeciesTheme;
-template<class T> class QPtrVector;
 class KGameIO;
+
+template<class T> class QPtrVector;
+template<class T> class QPtrList;
 class QObject;
+class QString;
+class QColor;
+class QPoint;
 
 class PlayerIOPrivate;
 
@@ -58,6 +61,8 @@ public:
 	~PlayerIO();
 
 	Player* player() const { return mPlayer; }
+	const QString& name() const;
+	unsigned long int playerId() const;
 
 	/**
 	 * Connect to the specified signal of the player. Works like any usual
