@@ -128,6 +128,37 @@ public:
 	float mMinZ;
 };
 
+// store the current values (e.g. current texture, color) to avoid redundant
+// OpenGL calls
+class BoRenderData
+{
+public:
+	BoRenderData()
+	{
+		mColor[0] = mColor[1] = mColor[2] = 255;
+	}
+
+	bool colorChanged(GLubyte* c)
+	{
+		bool changed = c[0] != mColor[0] || c[1] != mColor[1] || c[2] != mColor[2];
+		if (changed) {
+			mColor[0] = c[0];
+			mColor[1] = c[1];
+			mColor[2] = c[2];
+		}
+		return changed;
+	}
+
+	bool colorToDefault()
+	{
+		GLubyte c[3];
+		c[0] = c[1] = c[2] = 255;
+		return colorChanged(c);
+	}
+
+	GLubyte mColor[3];
+};
+
 BosonModel::BosonModel(GLuint list, float width, float height) // FIXME we use int here..
 {
  // dummy implementation - we don't load a model, but rather use the provided
@@ -161,6 +192,7 @@ BosonModel::BosonModel(const QString& dir, const QString& file, float width, flo
 void BosonModel::init()
 {
  m3ds = 0;
+ mTeamColor = 0;
  mDisplayList = 0;
  mWidth = 0;
  mHeight = 0;
@@ -176,12 +208,8 @@ void BosonModel::init()
 BosonModel::~BosonModel()
 {
  kdDebug() << k_funcinfo << endl;
+ finishLoading();
  mModelTextures->removeModel(this);
- if (m3ds) {
-	// FIXME: we can do this once the model has been loaded completely
-	lib3ds_file_free(m3ds);
-	m3ds = 0;
- }
  mFrames.clear();
  kdDebug() << k_funcinfo << "done" << endl;
 }
@@ -209,8 +237,6 @@ void BosonModel::loadModel()
 	boProfiling->stop(BosonProfiling::LoadModel);
 	return;
  }
- glEnable(GL_TEXTURE_2D);
- glEnable(GL_DEPTH_TEST);
  boProfiling->start(BosonProfiling::LoadModelTextures);
  loadTextures();
  boProfiling->stop(BosonProfiling::LoadModelTextures);
@@ -225,9 +251,6 @@ void BosonModel::loadModel()
  }
  kdDebug() << k_funcinfo << "loaded from " << fullFile << endl;
 
- // WARNING: FIXME!
-// mWidth = BO_TILE_SIZE;
-// mHeight = BO_TILE_SIZE;
  boProfiling->stop(BosonProfiling::LoadModel);
 }
 
@@ -338,6 +361,7 @@ void BosonModel::createDisplayLists()
 		}
 		glPopMatrix();
 	glEndList();
+
 	BoFrame* frame = new BoFrame;
 	frame->setDisplayList(list);
 	frame->setDepthMultiplier(helper.lengthZ() * scale / BO_GL_CELL_SIZE);
@@ -476,6 +500,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 		lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
 		lib3ds_matrix_inv(invMeshMatrix);
 		GLuint myTex = 0;
+		bool resetColor = false; // needs to be true after we changed the current color
 
 		for (p = 0; p < mesh->faces; ++p) {
 			Lib3dsFace* f = &mesh->faceL[p];
@@ -506,58 +531,62 @@ void BosonModel::renderNode(Lib3dsNode* node)
 				myTex = 0;
 			}
 	
-			{
-				Lib3dsVector v[3];
-				Lib3dsTexel tex[3];
-				for (int i = 0; i < 3; i++) {
-					lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
-					if (mesh->texels != mesh->points) {
-						if (mesh->texels != 0) {
-							kdWarning() << k_funcinfo << "hmm.. points: " << mesh->points
-									<< " , texels: " << mesh->texels << endl;
-						}
-						myTex = 0;
-					} else {
-						tex[i][0] = mesh->texelL[f->points[i]][0];
-						tex[i][1] = mesh->texelL[f->points[i]][1];
+			Lib3dsVector v[3];
+			Lib3dsTexel tex[3];
+			for (int i = 0; i < 3; i++) {
+				lib3ds_vector_transform(v[i], invMeshMatrix, mesh->pointL[ f->points[i] ].pos);
+				if (mesh->texels != mesh->points) {
+					if (mesh->texels != 0) {
+						kdWarning() << k_funcinfo << "hmm.. points: " << mesh->points
+								<< " , texels: " << mesh->texels << endl;
 					}
-				}
-				if (QString::fromLatin1(mesh->name).lower() == QString::fromLatin1("teamcolor")) {
-					myTex = 0; // teamcolor objects are *not* textured
-//					glColor3f(); // TODO
-				}
-				glBindTexture(GL_TEXTURE_2D, myTex);
-				if (myTex) {
-					Lib3dsTextureMap* t = &mat->texture1_map;
-					glMatrixMode(GL_TEXTURE);
-					glPushMatrix();
-					if (t->scale[0] || t->scale[1]) {
-						glScalef(t->scale[0], t->scale[1], 1.0);
-					}
-					glTranslatef(t->offset[0], t->offset[1], 0.0);
-					if (t->rotation != 0.0) {
-						glRotatef(t->rotation, 0.0, 0.0, 1.0);
-					}
-					glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
-					float scale = mesh->map_data.scale;
-					if (scale != 0.0 && scale != 1.0) {
-						glScalef(scale, scale, 1.0);
-					}
-					glBegin(GL_TRIANGLES);
-						glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
-						glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
-						glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
-					glEnd();
-					glPopMatrix();
-					glMatrixMode(GL_MODELVIEW);
+					myTex = 0;
 				} else {
-					glBegin(GL_TRIANGLES);
-						glVertex3fv(v[0]);
-						glVertex3fv(v[1]);
-						glVertex3fv(v[2]);
-					glEnd();
+					tex[i][0] = mesh->texelL[f->points[i]][0];
+					tex[i][1] = mesh->texelL[f->points[i]][1];
 				}
 			}
+			if (QString::fromLatin1(mesh->name).lower() == QString::fromLatin1("teamcolor")) {
+				myTex = 0; // teamcolor objects are *not* textured
+				if (mTeamColor) {
+					glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
+					resetColor = true;
+				}
+			}
+			glBindTexture(GL_TEXTURE_2D, myTex);
+			if (myTex) {
+				Lib3dsTextureMap* t = &mat->texture1_map;
+				glMatrixMode(GL_TEXTURE);
+				glPushMatrix();
+				if (t->scale[0] || t->scale[1]) {
+					glScalef(t->scale[0], t->scale[1], 1.0);
+				}
+				glTranslatef(t->offset[0], t->offset[1], 0.0);
+				if (t->rotation != 0.0) {
+					glRotatef(t->rotation, 0.0, 0.0, 1.0);
+				}
+				glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
+				float scale = mesh->map_data.scale;
+				if (scale != 0.0 && scale != 1.0) {
+					glScalef(scale, scale, 1.0);
+				}
+				glBegin(GL_TRIANGLES);
+					glTexCoord2fv(tex[0]); glVertex3fv(v[0]);
+					glTexCoord2fv(tex[1]); glVertex3fv(v[1]);
+					glTexCoord2fv(tex[2]); glVertex3fv(v[2]);
+				glEnd();
+				glPopMatrix();
+				glMatrixMode(GL_MODELVIEW);
+			} else {
+				glBegin(GL_TRIANGLES);
+					glVertex3fv(v[0]);
+					glVertex3fv(v[1]);
+					glVertex3fv(v[2]);
+				glEnd();
+			}
+		}
+		if (resetColor) {
+			glColor3f(1.0, 1.0, 1.0);
 		}
 		glEndList();
 	}
@@ -623,5 +652,24 @@ void BosonModel::setCurrentFrame(BoFrame* f)
 {
  mDepthMultiplier = f->depthMultiplier();
  mDisplayList = f->displayList();
+}
+
+void BosonModel::setTeamColor(const QColor& c)
+{
+ delete mTeamColor;
+ mTeamColor = new QColor(c);
+}
+
+void BosonModel::finishLoading()
+{
+ delete mTeamColor;
+ mTeamColor = 0;
+ if (m3ds) {
+	lib3ds_file_free(m3ds);
+	m3ds = 0;
+ }
+ delete mTeamColor;
+ mTeamColor = 0;
+ mTextureNames.clear();
 }
 

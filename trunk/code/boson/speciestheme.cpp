@@ -711,10 +711,12 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 		((float)prop->unitWidth()) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
 		((float)prop->unitHeight()) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
  m->setLongNames(prop->longTextureNames());
+ m->setTeamColor(teamColor());
  m->loadModel();
  if (prop->isFacility()) {
 	m->generateConstructionLists();
  }
+ m->finishLoading();
  d->mUnitModels.insert(prop->typeId(), m);
 }
 

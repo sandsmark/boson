@@ -27,7 +27,7 @@
 
 class BosonModelTextures;
 class BoFrame;
-
+class QColor;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -49,7 +49,23 @@ public:
 	BosonModel(const QString& dir, const QString& file, float width, float height);
 	~BosonModel();
 
+	/**
+	 * Will use c as color for all meshes of the model with the name
+	 * "teamcolor". Note that this <em>must</em> be called before @ref
+	 * loadModel
+	 **/
+	void setTeamColor(const QColor& c);
+
 	void loadModel();
+
+	/**
+	 * Cleanup some variables. Deletes e.g. the 3ds file and the teamcolor
+	 * object. Note that you must not call e.g. @ref loadModel or @ref
+	 * generateConstructionLists after this!
+	 *
+	 * You can continue using the generated display lists.
+	 **/
+	void finishLoading();
 
 	/**
 	 * Generate display lists for steps construction steps. The unit will
@@ -121,14 +137,18 @@ private:
 	void setCurrentFrame(BoFrame* frame);
 
 private:
-	Lib3dsFile* m3ds;
 	static BosonModelTextures* mModelTextures;
-	QMap<QString, QString> mTextureNames;
-	GLuint mDisplayList;
-	QIntDict<BoFrame> mFrames;
-	QIntDict<BoFrame> mConstructionSteps;
+
 	QString mDirectory;
 	QString mFile;
+	Lib3dsFile* m3ds;
+
+	QMap<QString, QString> mTextureNames;
+	QIntDict<BoFrame> mFrames;
+	QIntDict<BoFrame> mConstructionSteps;
+	QColor* mTeamColor;
+
+	GLuint mDisplayList;
 	unsigned int mFrame;
 	unsigned int mConstructionStep;
 
