@@ -210,7 +210,7 @@ void BosonNewGameWidget::setLocalPlayer(Player* p)
 
 void BosonNewGameWidget::initLocalPlayer()
 {
- boDebug() << k_funcinfo << "playerCount(): " << boGame->playerCount() << endl;
+ boDebug() << k_funcinfo << endl;
  if (!localPlayer()) {
 	boWarning() << k_funcinfo << "waiting for local player to join first" << endl;
 	return;
