@@ -85,7 +85,6 @@ class BosonLocalPlayerInput : public KGameIO
     void signalAction(const BoSpecificAction& action);
 
   private:
-    BosonCommandFrameInterface* mCommandFrame;
     BoEventListener* mEventListener;
 };
 

@@ -25,6 +25,7 @@
 
 #include <ksimpleconfig.h>
 #include <qstring.h>
+#include <qptrlist.h>
 
 
 /***  BoAction  ***/
@@ -55,14 +56,28 @@ BoAction::BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, 
 
 BoSpecificAction::BoSpecificAction(const BoAction* action)
 {
+  mAllUnits = new QPtrList<Unit>();
   reset();
   mAction = action;
   mOk = true;
 }
 
+BoSpecificAction::BoSpecificAction(const BoSpecificAction& action)
+{
+  mAllUnits = new QPtrList<Unit>();
+  reset();
+  *this = action;
+}
+
 BoSpecificAction::BoSpecificAction()
 {
+  mAllUnits = new QPtrList<Unit>();
   reset();
+}
+
+BoSpecificAction::~BoSpecificAction()
+{
+  delete mAllUnits;
 }
 
 void BoSpecificAction::reset()
@@ -71,6 +86,7 @@ void BoSpecificAction::reset()
   mProductionId = 0;
   mType = ActionInvalid;
   mUnit = 0;
+  mAllUnits->clear();
   mWeapon = 0;
   mOk = false;
 }
@@ -94,10 +110,22 @@ ProductionType BoSpecificAction::productionType() const
 void BoSpecificAction::setUnit(Unit* u)
 {
   mUnit = u;
-  if(mUnit) {
+  if(mUnit)
+  {
     mProductionOwner = mUnit->owner();
   }
   // Don't reset owner if unit is 0 (needed for editor)
+}
+
+void BoSpecificAction::setAllUnits(const QPtrList<Unit>& units, Unit* leader)
+{
+  *mAllUnits = units;
+  setUnit(leader);
+}
+
+const QPtrList<Unit>& BoSpecificAction::allUnits() const
+{
+  return *mAllUnits;
 }
 
 void BoSpecificAction::operator=(const BoSpecificAction& a)
@@ -107,6 +135,7 @@ void BoSpecificAction::operator=(const BoSpecificAction& a)
   mProductionOwner = a.mProductionOwner;
   mType = a.mType;
   mUnit = a.mUnit;
+  *mAllUnits = *a.mAllUnits;
   mWeapon = a.mWeapon;
   mOk = a.mOk;
 }

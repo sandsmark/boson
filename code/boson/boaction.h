@@ -26,6 +26,7 @@
 
 class QPixmap;
 class KSimpleConfig;
+template<class T> class QPtrList;
 
 class Player;
 class Unit;
@@ -62,7 +63,9 @@ class BoSpecificAction
 {
   public:
     BoSpecificAction(const BoAction* action);
+    BoSpecificAction(const BoSpecificAction&);
     BoSpecificAction();
+    ~BoSpecificAction();
 
     // These are meant to be used by commandframe only
     long unsigned int productionId() const  { return mProductionId; }
@@ -73,6 +76,17 @@ class BoSpecificAction
     Unit* unit() const  { return mUnit; }
     // Production owner is also set to u->owner()
     void setUnit(Unit* u);
+
+    /**
+     * Set the list of units the action applies to. @p leader is the leader of
+     * the selection (for example the first unit in the list).
+     *
+     * The leader of the selection is used for actions that don't make sense on
+     * multiple units (e.g. when producing something). It is equivalent to
+     * calling @ref setUnit(leader) after setAllUnits.
+     **/
+    void setAllUnits(const QPtrList<Unit>& units, Unit* leader = 0);
+    const QPtrList<Unit>& allUnits() const;
 
     BosonWeaponProperties* weapon() const  { return mWeapon; }
     void setWeapon(BosonWeaponProperties* w)  { mWeapon = w; }
@@ -139,6 +153,7 @@ class BoSpecificAction
     long unsigned int mProductionId;
     UnitAction mType;
     Unit* mUnit;
+    QPtrList<Unit>* mAllUnits;
     Player* mProductionOwner;
     BosonWeaponProperties* mWeapon;
     bool mOk;

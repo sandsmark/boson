@@ -105,7 +105,7 @@ void BoActionsWidget::hideButtons()
  }
 }
 
-void BoActionsWidget::showUnitActions(Unit* unit)
+void BoActionsWidget::showUnitActions(Unit* unit, const QPtrList<Unit>& allUnits)
 {
  boDebug(220) << k_funcinfo << "unit: " << unit << endl;
  if (!unit) {
@@ -123,6 +123,7 @@ void BoActionsWidget::showUnitActions(Unit* unit)
 	boDebug(220) << k_funcinfo << "Adding action: type: " << it.currentKey() << "; id: " <<
 			it.current()->id() << "; text: " << it.current()->text() << endl;
 	BoSpecificAction a(it.current());
+	a.setAllUnits(allUnits);
 	a.setUnit(unit);
 	a.setType((UnitAction)it.currentKey());
 	actions.append(a);
