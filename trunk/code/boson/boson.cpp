@@ -1515,13 +1515,17 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		emit signalStartScenario();
 		break;
 	case BosonMessage::IdNewGame:
+	{
 		setGameMode(true);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
+	}
 	case BosonMessage::IdNewEditor:
+	{
 		setGameMode(false);
 		QTimer::singleShot(0, this, SIGNAL(signalStartNewGame()));
 		break;
+	}
 	case BosonMessage::IdStartGameClicked:
 		// this is kind of a workaround.
 		// for --start we need to call slotStart() in the start widgets
@@ -1638,12 +1642,18 @@ void Boson::initFogOfWar(BosonStarting* starting)
  if (!starting) { // ensure that this is actually called from BosonStarting
 	return;
  }
+ if (isRunning()) {
+	return;
+ }
  QTimer::singleShot(0, this, SIGNAL(signalInitFogOfWar()));
 }
 
 void Boson::startScenario(BosonStarting* starting)
 {
  if (!starting) { // ensure that this is actually called from BosonStarting
+	return;
+ }
+ if (isRunning()) {
 	return;
  }
  QTimer::singleShot(0, this, SIGNAL(signalStartScenario()));
