@@ -19,8 +19,9 @@
 #ifndef BOSONCURSOR_H
 #define BOSONCURSOR_H
 
-#include <qobject.h>
 #include "defines.h"
+#include <qobject.h>
+#include <GL/gl.h>
 
 class QCanvas;
 class QCanvasPixmapArray;
@@ -29,6 +30,8 @@ class QPoint;
 class QWidget;
 class QCursor;
 class BosonCanvas;
+class BosonTextureArray;
+
 
 
 // AB: we'll leave the QCanvas code in this file, even if its unused, so that
@@ -40,6 +43,9 @@ class BosonCanvas;
 /**
  * UPDATE (02/03/09): the documentation is kind of obsolete. We use derived
  * classes now
+ *
+ * UÜDATE (02/07/24): again docs are obsolete - mostly BosonSpriteCursor. We use
+ * OpenGL now.
  * 
  * This is the cursor class for boson. There are two different types of cursors.
  * First of all the default x/qt-cursors. They are used by every KDE/QT program.
@@ -59,12 +65,11 @@ class BosonCanvas;
  * BosonCursor.
  *
  * In theory you only have to create an instance of BosonCursor and then call
- * @ref insertMode, @ref setCanvas, @ref setCursor and @ref move. Here an example:
+ * @ref insertMode, @ref setCursor and @ref move. Here an example:
  * <pre>
  * mCursor = new BosonCanvas;
  * mCursor->insertMode(CursorMove, mPixmapArrayMove, QCursor(Qt::BlankCursor));
- * mCursor->setCanvas(CursorMove, this);
- * // mCursor->setCursor(CursorMove); // you can leave this out as you specified before
+ * mCursor->setCursor(CursorMove);
 * [...]
 * MyCanvasView::contentsMouseMoveEvent(QMouseEvent* e)
 * {
@@ -206,9 +211,6 @@ public:
 	static QStringList availableThemes();
 	static QString defaultTheme();
 
-signals:
-	void signalUpdate();
-
 private:
 	int mMode;
 };
@@ -248,10 +250,17 @@ public:
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 };
 
-#ifndef NO_OPENGL
-#include <GL/gl.h>
-class BosonTextureArray;
-#endif
+
+class BosonSpriteCursorData
+{
+public:
+	BosonSpriteCursorData();
+	~BosonSpriteCursorData();
+
+	BosonTextureArray* mArray;
+	unsigned int mHotspotX;
+	unsigned int mHotspotY;
+};
 
 class BosonSpriteCursor : public BosonCursor
 {
@@ -263,56 +272,41 @@ public:
 	virtual void setCursor(int mode);
 	virtual void setWidgetCursor(QWidget* w);
 
-	/**
-	 * Set the canvas for the sprite cursor. 
-	 * @param mode The initial mode. See @ref insertMode
-	 * @param z The z-coordinate of the sprite. Should be as high as
-	 * possible.
-	 **/
-	void setCanvas(BosonCanvas* canvas, int mode, int z = 100000);
-
-	// TODO: use float instead of double
-	virtual void move(double x, double y);
-
 	virtual void hideCursor();
 
 	virtual void showCursor();
 
 	virtual bool insertMode(int mode, QString baseDir, QString cursor);
 
-	inline unsigned int hotspotX() const { return mHotspotX; }
-	inline unsigned int hotspotY() const { return mHotspotY; }
+	inline unsigned int hotspotX() const 
+	{
+		return mCurrentData ? mCurrentData->mHotspotX : 0;
+	}
+	inline unsigned int hotspotY() const 
+	{
+		return mCurrentData ? mCurrentData->mHotspotY : 0;
+	}
+	GLuint currentTexture() const
+	{
+		return mCurrentData ? mCurrentTexture : 0;
+	}
 
-#ifndef NO_OPENGL
-	bool insertMode(int mode, BosonTextureArray* pixmaps);
-	GLuint currentTexture() const;
+	bool insertMode(int mode, BosonSpriteCursorData* data);
 	void setCurrentTextureArray(BosonTextureArray* array);
-#else
-	bool insertMode(int mode, QCanvasPixmapArray* pixmaps);
-	QCanvasSprite* cursorSprite() const;
-	/**
-	 * @return The position of the cursor on the canvas
-	 **/
-	virtual QPoint pos() const;
-
-#endif
+	void setCurrentData(BosonSpriteCursorData* data);
 
 protected slots:
 	void slotAdvance();
 
 protected:
-#ifndef NO_OPENGL
-	BosonTextureArray* loadSpriteCursor(QString baseDir, QString cursor);
-#else
-	QCanvasPixmapArray* loadSpriteCursor(QString baseDir, QString cursor);
-#endif
+	BosonSpriteCursorData* loadSpriteCursor(QString baseDir, QString cursor);
 
 private:
 	class BosonSpriteCursorPrivate;
 	BosonSpriteCursorPrivate* d;
 
-	unsigned int mHotspotX;
-	unsigned int mHotspotY;
+	BosonSpriteCursorData* mCurrentData;
+	GLuint mCurrentTexture;
 };
 
 
