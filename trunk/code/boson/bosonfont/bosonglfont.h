@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -228,6 +228,14 @@ public:
 	 **/
 	int renderText(int x, int y, const QString& text, int maxWidth, bool background = true);
 
+	/**
+	 * @internal
+	 * This is public only for libufo support. Don't use it in normal boson
+	 * code! Use @ref renderText instead!
+	 **/
+	int renderStringInternal(int x, int y, const GLubyte* string, unsigned int len);
+
+
 protected:
 	bool loadGLXFont(const BoFontInfo& font);
 	bool loadTXFFont(const BoFontInfo& font);
@@ -250,9 +258,8 @@ protected:
 	 **/
 	int wrapAtPos(const GLubyte* string, int length) const;
 
-	int renderLine(int x, int y, const QString& text, int maxWidth, bool background = true);
 
-	int renderStringInternal(int x, int y, const GLubyte* string, unsigned int len);
+	int renderLine(int x, int y, const QString& text, int maxWidth, bool background = true);
 
 private:
 	BoFont* mFont;

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2005 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 
 #include "fnt.h"
 
-#include "../bosonglwidget.h"
-#include "../botexture.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -36,6 +34,7 @@
 
 #include <qfont.h>
 #include <qstringlist.h>
+#include <qpaintdevice.h>
 
 BoFontInfo::BoFontInfo()
 {
@@ -47,7 +46,10 @@ BoFontInfo::BoFontInfo()
  mStrikeOut = false;
  mTextured = true;
 
- QStringList list = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
+ QStringList list;
+ if (KGlobal::_instance) {
+	list = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
+ }
  if (!list.isEmpty()) {
 	QStringList list2 = list.grep("AvantGarde-Demi.txf");
 	if (!list2.isEmpty()) {
@@ -235,6 +237,7 @@ bool BoGLXFont::loadFont(const QString& family)
 {
  mFont = QFont(family);
  mFont.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
+
  mFont.setFixedPitch(true); // necessary on some systems. we support fixed size fonts only anyway.
 
  int handle = (int)mFont.handle();
@@ -384,11 +387,7 @@ int BoTXFFont::renderString(int x, int y, const GLubyte* string, unsigned int le
 
 BosonGLFont::BosonGLFont(const BoFontInfo& font)
 {
- boDebug() << k_funcinfo << "creating font for " << font.name() << endl;
- if (!BoContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
-	return;
- }
+// boDebug() << k_funcinfo << "creating font for " << ((font.name().isEmpty()) ? QString("(empty name)") : font.name()) << endl;
  mFont = 0;
 
  mFontInfo = font;
@@ -406,10 +405,6 @@ BosonGLFont::BosonGLFont()
 BosonGLFont::BosonGLFont(const QString& family)
 {
  boDebug() << k_funcinfo << "creating font for " << family << endl;
- if (!BoContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
-	return;
- }
  mFont = 0;
 
  mFontInfo.setName(family);
@@ -454,10 +449,6 @@ bool BosonGLFont::loadFont(const BoFontInfo& font)
 
 bool BosonGLFont::loadGLXFont(const BoFontInfo& font)
 {
- if (!BoContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
-	return false;
- }
  BoGLXFont* f = new BoGLXFont();
  if (!f->loadFont(font.name())) {
 	delete f;
@@ -470,10 +461,6 @@ bool BosonGLFont::loadGLXFont(const BoFontInfo& font)
 
 bool BosonGLFont::loadTXFFont(const BoFontInfo& font)
 {
- if (!BoContext::currentContext()) {
-	boError() << k_funcinfo << "NULL current context" << endl;
-	return false;
- }
  BoTXFFont* f = new BoTXFFont();
  if (!f->loadFont(font.name())) {
 	delete f;
@@ -637,7 +624,10 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
  if (background) {
 	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
+#warning fixme: texturemanager
+#if 0
 	boTextureManager->disableTexturing();
+#endif
 	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 	glRecti(x, y - maxHeight, x + w, y);
 	glPopAttrib();
@@ -659,7 +649,7 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
 		h = (line + 1) * height();
 		if (h > maxHeight) {
 			boError() << k_funcinfo
-					<< "oops - invalid height! h= " << h
+					<< "oops - invalid height! h=" << h
 					<< " maxHeight=" << maxHeight << endl;
 			h = maxHeight;
 		}
