@@ -6,11 +6,12 @@ Id=10008
 Health=80
 MineralCost=120
 OilCost=80
-Producer=3
+Producer=0
 Requirements=3
 Armor=2
 Shield=20
 ProductionTime=100
+SightRange=5
 Weapons=1
 DestroyedParticles=1002,3003,6001
 

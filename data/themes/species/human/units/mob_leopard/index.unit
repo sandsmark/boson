@@ -6,11 +6,12 @@ Id=10001
 Health=200
 MineralCost=150
 OilCost=80
-Producer=3
+Producer=0
 Requirements=3
 Armor=1
 Shield=10
 ProductionTime=90
+SightRange=5
 Weapons=1
 DestroyedParticles=1002,3002,6001
 
