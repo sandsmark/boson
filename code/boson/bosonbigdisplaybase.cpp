@@ -1184,10 +1184,10 @@ void BosonBigDisplayBase::renderParticles()
 		betweenbeginend = true;
 	}
 
-	a = p->system->mPos + p->pos + ((-x + y) * p->size);
-	b = p->system->mPos + p->pos + (( x + y) * p->size);
-	c = p->system->mPos + p->pos + (( x - y) * p->size);
-	e = p->system->mPos + p->pos + ((-x - y) * p->size);
+	a = p->pos + ((-x + y) * p->size);
+	b = p->pos + (( x + y) * p->size);
+	c = p->pos + (( x - y) * p->size);
+	e = p->pos + ((-x - y) * p->size);
 
 	glColor4fv(p->color.data());  // Is it worth to cache color as well?
 	glTexCoord2f(0.0, 1.0);  glVertex3fv(a.data());

@@ -85,7 +85,7 @@ class BosonWeaponProperties : public PluginProperties
     BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
     QPtrList<BosonParticleSystem> newShootParticleSystems(BoVector3 pos, float rotation) const;
-    QPtrList<BosonParticleSystem> newFlyParticleSystems(BoVector3 pos) const;
+    QPtrList<BosonParticleSystem> newFlyParticleSystems(BoVector3 pos, float rotation) const;
     QPtrList<BosonParticleSystem> newHitParticleSystems(BoVector3 pos) const;
 
     QValueList<unsigned long int> shootParticleSystemIds() const  { return mShootParticleSystemIds; };

@@ -131,9 +131,8 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoV
   QPtrListIterator<BosonParticleSystemProperties> it(mShootParticleSystems);
   while(it.current())
   {
-    BosonParticleSystem* s = it.current()->newSystem(pos);
+    BosonParticleSystem* s = it.current()->newSystem(pos, rotation);
     if (s) {
-      s->setRotation(BoVector3(0, 0, -rotation));
       list.append(s);
     }
     ++it;
@@ -141,13 +140,13 @@ QPtrList<BosonParticleSystem> BosonWeaponProperties::newShootParticleSystems(BoV
   return list;
 }
 
-QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(BoVector3 pos) const
+QPtrList<BosonParticleSystem> BosonWeaponProperties::newFlyParticleSystems(BoVector3 pos, float rotation) const
 {
   QPtrList<BosonParticleSystem> list;
   QPtrListIterator<BosonParticleSystemProperties> it(mFlyParticleSystems);
   while(it.current())
   {
-    BosonParticleSystem* s = it.current()->newSystem(pos);
+    BosonParticleSystem* s = it.current()->newSystem(pos, rotation);
     if (s) {
       list.append(s);
     }

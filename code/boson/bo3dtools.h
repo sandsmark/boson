@@ -64,12 +64,18 @@ class BoVector3
     inline const GLfloat* data() const { return mData; }
     inline void operator=(BoVector3 v)  { mData[0] = v.mData[0];  mData[1] = v.mData[1];  mData[2] = v.mData[2]; };
     inline void operator=(const GLfloat* v)  { mData[0] = v[0];  mData[1] = v[1];  mData[2] = v[2]; };
+    inline void operator+=(BoVector3 v)  { mData[0] += v.mData[0]; mData[1] += v.mData[1]; mData[2] += v.mData[2]; };
     inline GLfloat operator[](int i) const  { return mData[i]; };
 
     inline BoVector3 operator+(const BoVector3& v)  { return BoVector3(mData[0] + v.mData[0], mData[1] + v.mData[1], mData[2] + v.mData[2]); };
     inline BoVector3 operator-(const BoVector3& v)  { return BoVector3(mData[0] - v.mData[0], mData[1] - v.mData[1], mData[2] - v.mData[2]); };
     inline BoVector3 operator*(float f)  { return BoVector3(mData[0] * f, mData[1] * f, mData[2] * f); };
     inline BoVector3 operator-()  { return BoVector3(-mData[0], -mData[1], -mData[2]); };
+
+    /**
+     * @return Whether all components of this vector are zeros
+     **/
+    inline bool isNull()  { return ((mData[0] == 0.0) && (mData[1] == 0.0) && (mData[2] == 0.0)); };
 
     /**
      * Loads BoVector3 from KConfig
@@ -312,8 +318,8 @@ class BoMatrix
      *
      * This calculates simply does v = M * input, where M is this matrix.
      **/
-    void transform(BoVector3* v, BoVector3* input);
-    void transform(BoVector4* v, BoVector4* input);
+    void transform(BoVector3* v, BoVector3* input) const;
+    void transform(BoVector4* v, BoVector4* input) const;
 
     /**
      * Invert this matrix and place the result into @p inverse
