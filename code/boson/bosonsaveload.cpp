@@ -245,10 +245,6 @@ bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localP
 	boError() << k_funcinfo << "NULL boson object" << endl;
 	return false;
  }
- if (!d->mCanvas) {
-	BO_NULL_ERROR(d->mCanvas);
-	return false;
- }
  BosonProfiler profiler(BosonProfiling::SaveGameToXML);
  if (d->mBoson->playerCount() < 1) {
 	boError() << k_funcinfo << "no players in game. cannot save" << endl;
@@ -466,6 +462,8 @@ QCString BosonSaveLoad::saveCanvasAsXML()
 
  if (d->mCanvas) {
 	d->mCanvas->saveAsXML(root);
+ } else {
+	boDebug() << k_funcinfo << "NULL canvas - saving nothing" << endl;
  }
 
  return doc.toCString();
@@ -530,199 +528,6 @@ bool BosonSaveLoad::loadNewGame(const QByteArray& playersXML, const QByteArray& 
 	return false;
  }
 
- return true;
-}
-
-bool BosonSaveLoad::loadFromFile(const QString& file)
-{
- boDebug(260) << k_funcinfo << endl;
- d->mLoadingStatus = LoadingInProgress;
- BSGFile f(file, true);
-
- if (!f.checkTar()) {
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("tar archive invalid"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- QMap<QString, QByteArray> list;
- list.insert("kgame.xml", f.kgameData());
- list.insert("players.xml", f.playersData());
- list.insert("canvas.xml", f.canvasData());
- list.insert("external.xml", f.externalData());
- list.insert("map", f.mapData());
-
- bool ret = loadFromFile(list);
- if (!ret) {
-	boError(260) << k_funcinfo << "Could not load from " << file << endl;
- }
- return ret;
-}
-
-bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
-{
- boDebug(260) << k_funcinfo << endl;
- d->mLoadingStatus = LoadingInProgress;
-
- if (fileList.count() < 1) {
-	boError(260) << k_funcinfo << "empty filelist" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("No files in archive found"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- // kgame.xml is mandatory in all boson savegame versions. We can get the
- // savegame format version from there (which is also mandatory) so we load this
- // first.
- QString kgameXML = fileList["kgame.xml"];
- if (kgameXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty kgame.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- unsigned int version = savegameFormatVersion(kgameXML);
- if (version > latestSavegameVersion()) {
-	boError(260) << k_funcinfo << "version " << version << " is too recent. Can read up to " << latestSavegameVersion() << " only." << endl;
-	d->mLoadingStatus = InvalidVersion;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("savegame version (%1) is too recent. Can read up to %2 only.").arg(version).arg(latestSavegameVersion()));
-	return false;
- }
-
- if (version != latestSavegameVersion()) {
-	addLoadError(SaveLoadError::LoadInvalidVersion, i18n("File format version (%1) not supported. Unable to load this file.").arg(version));
-	return false;
- }
-
- if (fileList.count() != 8) {
-	boError(260) << k_funcinfo << "invalid file count: " << fileList.count() << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("Trying to load invalid number of files: %1 - must be 5.").arg(fileList.count()));
-	return false;
- }
-
- boDebug() << k_funcinfo << "file format version is current. trying to load..." << endl;
-
- QString playersXML;
- QString canvasXML;
- QString externalXML;
- QString mapXML;
- QByteArray heightMap;
- QByteArray texMap;
- QString descriptionXML;
-
- playersXML = QString(fileList["players.xml"]);
- canvasXML = QString(fileList["canvas.xml"]);
- externalXML = QString(fileList["external.xml"]);
- mapXML = QString(fileList["map/map.xml"]);
- heightMap = fileList["map/heightmap.png"];
- texMap = fileList["map/texmap"];
- descriptionXML = QString(fileList["C/description.xml"]);
-
- if (playersXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty playersXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: players.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (canvasXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty canvasXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: canvas.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (externalXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty externalXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: external.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (mapXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty mapXML" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/map.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (heightMap.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty heightmap.png" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/heightmap.png"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (texMap.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty texmap" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: map/texmap"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
- if (descriptionXML.isEmpty()) {
-	boError(260) << k_funcinfo << "Empty description" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty file: C/description.xml"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- bool ok = d->mBoson->reset();
- if (!ok) {
-	addLoadError(SaveLoadError::General, i18n("KGame::reset() failed"));
-	d->mLoadingStatus = KGameError;
-	return false;
- }
- if (d->mBoson->playerCount() != 0) {
-	boError(260) << k_funcinfo << "not all players removed!" << endl;
-	addLoadError(SaveLoadError::LoadBSGFileError, i18n("bug: not all players removed from game"));
-	d->mLoadingStatus = BSGFileError;
-	return false;
- }
-
- if (!loadVersionFromXML(kgameXML)) {
-	return false;
- }
- if (!loadKGameFromXML(kgameXML)) {
-	return false;
- }
-
- // we may need to fix these issues:
- // KGame::loadgame() also loads KGame::d->mUniquePlayerNumber !!
- // KGame::loadgame() also loads a seed for KGame::random() (not so important)
-
- if (!loadPlayersFromXML(playersXML)) {
-	return false;
- }
-
- boDebug(260) << k_funcinfo << d->mBoson->playerCount() << " players loaded" << endl;
-
- // now load the map (must happen before loading units)
- // AB: can we move this before loading the players?
- emit signalLoadingType(BosonLoadingWidget::ReceiveMap);
-// emit signalInitMap(map); // AB: kinda obsolete!
-
-
- // Load player data (e.g. unit configs, unit models, ...
- // TODO: since we use XML for savegames now we should be able to include this
- // to regular startup code in BosonStarting!
- KPlayer* p;
- int current = 0;
- for (p = d->mBoson->playerList()->first(); p; p = d->mBoson->playerList()->next(), current++) {
-	emit signalLoadingPlayer(current);
-	emit signalLoadPlayerData((Player*)p);
-	emit signalLoadingType(BosonLoadingWidget::LoadSavedUnits);
- }
-
- boDebug(260) << k_funcinfo << "loading units" << endl;
-
- // Load canvas (items - i.e. units and shots)
- if (!loadCanvasFromXML(canvasXML)) {
-	addLoadError(SaveLoadError::General, i18n("error while loading canvas"));
-	return false;
- }
-
- // Load external stuff (camera)
- if (!loadExternalFromXML(externalXML)) {
-	addLoadError(SaveLoadError::General, i18n("error while loading external data"));
-	return false;
- }
-
- d->mLoadingStatus = LoadingCompleted;
  return true;
 }
 

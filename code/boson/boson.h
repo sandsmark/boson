@@ -186,7 +186,6 @@ public:
 		return mGameMode;
 	}
 
-	bool loadFromFile(const QString& file);
 	bool saveToFile(const QString& file);
 
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
