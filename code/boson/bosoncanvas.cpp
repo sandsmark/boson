@@ -502,6 +502,9 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
 
 bool BosonCanvas::cellOccupied(int x, int y)
 {
+	return !(unitsAtCell(x, y).isEmpty());
+	// alternative version (faster but duplicated code):
+	/*
 	QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
 			BO_TILE_SIZE, BO_TILE_SIZE));
 	if(list.isEmpty())
@@ -518,5 +521,6 @@ bool BosonCanvas::cellOccupied(int x, int y)
 		return true;
 	}
 	return false;
+	*/
 }
 
