@@ -19,6 +19,7 @@ texture_DATA = \
 	camo8.jpg \
 	camo9.jpg \
 	camo10.jpg \
+	camo11.jpg \
 	concrt1.jpg \
 	concrt2.jpg \
 	concrt3.jpg \
@@ -49,6 +50,12 @@ texture_DATA = \
 	metal16.jpg \
 	metal17.jpg \
 	metal18.jpg \
+	metal20.jpg \
+	metal21.jpg \
+	metal22.jpg \
+	metal23.jpg \
+	metal24.jpg \
+	metal25.jpg \
 	minerals.jpg \
 	missile1.jpg \
 	mslback1.jpg \
