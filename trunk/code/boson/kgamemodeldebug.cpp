@@ -553,6 +553,10 @@ void KGameModelDebug::addTheme(SpeciesTheme* theme)
 	QString file = (*it)->unitPath() + SpeciesTheme::unitModelFile();
 	addModel(file, (*it)->name());
  }
+ QStringList objects = theme->allObjectModels();
+ for (unsigned int i = 0; i < objects.count(); i++) {
+	addModel(theme->themePath() + QString::fromLatin1("objects/") + objects[i], objects[i]);
+ }
 }
 
 void KGameModelDebug::slotModelChanged(int index)
