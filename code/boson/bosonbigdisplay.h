@@ -238,6 +238,8 @@ protected:
 	 **/
 	void updateLabel(QLabel* label, const QString& text);
 
+	virtual void drawContents(QPainter*, int, int, int, int);
+
 
 protected slots:
 	void slotMouseEvent(KGameIO*, QDataStream& stream, QMouseEvent* e, bool *eatevent);

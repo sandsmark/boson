@@ -141,6 +141,11 @@ public:
 	virtual void move(double x, double y);
 
 	/**
+	 * @return @ref QCursor::pos by default
+	 **/
+	virtual QPoint pos() const;
+
+	/**
 	 * Insert a mode to the internal dictionary. You can load your
 	 * cursors using this function. You probably want to use an enum in your
 	 * game for the mode id, like "Attack" and "Move" and so on.
@@ -243,6 +248,11 @@ public:
 	virtual void showCursor();
 
 	virtual void insertMode(int mode, QString baseDir, QString cursor);
+
+	/**
+	 * @return The position of the cursor on the canvas
+	 **/
+	virtual QPoint pos() const;
 
 protected slots:
 	void slotAdvance();
