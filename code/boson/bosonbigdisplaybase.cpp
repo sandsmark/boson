@@ -37,6 +37,7 @@
 #include "bosonconfig.h"
 #include "selectbox.h"
 #include "bosonglchat.h"
+#include "bosonufochat.h"
 #include "bosonprofiling.h"
 #include "bosoneffect.h"
 #include "bosoneffectparticle.h"
@@ -338,6 +339,7 @@ public:
 		mRenderCounts = 0;
 		mAdvanceCalls = 0;
 		mGamePaused = 0;
+		mUfoChat = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -423,6 +425,7 @@ public:
 	BoUfoLabel* mRenderCounts;
 	BoUfoLabel* mAdvanceCalls;
 	BoUfoLabel* mGamePaused;
+	BosonUfoChat* mUfoChat;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -735,6 +738,14 @@ void BosonBigDisplayBase::initUfoGUI()
  contentWidget->addWidget(north);
  north->setLayoutClass(BoUfoWidget::UBorderLayout);
 
+ BoUfoVBox* south = new BoUfoVBox();
+ south->setConstraints("south");
+ contentWidget->addWidget(south);
+
+ BoUfoVBox* center = new BoUfoVBox();
+ center->setConstraints("center");
+ contentWidget->addWidget(center);
+
  BoUfoVBox* northEast = new BoUfoVBox();
  northEast->setConstraints("east");
  north->addWidget(northEast);
@@ -809,12 +820,15 @@ void BosonBigDisplayBase::initUfoGUI()
  d->mAdvanceCalls = new BoUfoLabel();
  northWest->addWidget(d->mAdvanceCalls);
 
+ // FIXME: this is supposed to be in the center of the screen, but the "center"
+ // constraint on a UBorderLayout is not sufficient for that.
  d->mGamePaused = new BoUfoLabel(i18n("The game is paused"));
- northCenter->addWidget(d->mGamePaused);
+ center->addWidget(d->mGamePaused);
+
+ d->mUfoChat = new BosonUfoChat();
+ south->addWidget(d->mUfoChat);
 
 
- // TODO: renderTextChat()
- // TODO: renderTextGamePaused()
  // TODO: tooltips ?
 }
 
@@ -1727,11 +1741,9 @@ void BosonBigDisplayBase::renderText()
  y = renderTextOpenGLCamera(x, y);
  y = renderTextRenderCounts(x, y);
  y = renderTextAdvanceCalls(x, y);
-#endif
 
  renderTextChat(border, border);
 
-#if !UFO_LABELS_ONLY
  renderTextGamePaused();
 #endif
  if (d->mToolTips->showTip()) {
@@ -3077,11 +3089,13 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
 {
  d->mChat->setChat(chat);
+ d->mUfoChat->setChat(chat);
 }
 
 void BosonBigDisplayBase::addChatMessage(const QString& message)
 {
  d->mChat->addMessage(message);
+ d->mUfoChat->addMessage(message);
 }
 
 void BosonBigDisplayBase::slotCursorEdgeTimeout()
