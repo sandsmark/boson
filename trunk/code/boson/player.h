@@ -193,8 +193,6 @@ signals:
 
 	void signalUnitChanged(Unit* unit);
 
-	void signalUnitPropertyChanged(KGamePropertyBase*);
-
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
 
