@@ -1,5 +1,5 @@
 /***************************************************************************
-                          viewMap.cpp  -  description                              
+                          bosonViewMap.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,68 +18,24 @@
  *                                                                         *
  ***************************************************************************/
 
+#ifndef BOSON_VIEW_MAP_H 
+#define BOSON_VIEW_MAP_H 
+
 #include "viewMap.h"
 
-
-viewMap::viewMap(physMap *p, QObject *parent, const char *name=0L)
-	: QObject(parent, name)
-	,fixSelected( 0L )
-	,selectionMode(SELECT_NONE)
+class bosonViewMap : public viewMap
 {
-	/* map geometry */
-	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
-	viewX = viewY = 0;
-	phys = p;
-}
+	Q_OBJECT
 
+public:
+	bosonViewMap(physMap *, QObject *parent=0, const char *name=0L);
 
-void viewMap::reCenterView(int x, int y)
-{
-	int oldX = viewX, oldY = viewY;
+	/* from display classes */
+	void leftClicked(int, int);		// selecting, moving...
+	/* to handle orderButton 'clicked' event */
+	void u_goto(void);
+};
 
-	viewX  = x - viewL/2;
-	viewY  = y - viewH/2;
-
-	checkMove();
-
-	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
-		}
-}
-
-
-void viewMap::reSizeView(int l, int h)
-{
-	int	Xcenter = viewX + viewL/2,
-		Ycenter = viewY + viewH/2;
-
-	viewL = l;
-	viewH = h;
-
-	reCenterView(Xcenter, Ycenter);
-}
-
-void viewMap::relativeMoveView(int dx, int dy)
-{
-	int oldX = viewX, oldY = viewY;
-
-	viewX += dx;
-	viewY += dy;
-
-	checkMove();
-
-	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
-		}
-}
-
-void viewMap::checkMove()
-{
-	viewX = QMIN(viewX, phys->maxX - viewL);
-	viewY = QMIN(viewY, phys->maxY - viewH);
-
-	viewX = QMAX(viewX, 0);
-	viewY = QMAX(viewY, 0);
-}
+#endif // BOSON_VIEW_MAP_H
 
 

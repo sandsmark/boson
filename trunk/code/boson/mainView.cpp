@@ -19,12 +19,13 @@
  ***************************************************************************/
 
 #include <qlayout.h>
+#include <qkeycode.h>
 
 #include "infoWin.h"
 #include "playerMap.h"
 #include "miniMap.h"
 #include "fieldMap.h"
-#include "viewMap.h"
+#include "bosonViewMap.h"
 
 #include "mainView.h"		// myself
 
@@ -34,9 +35,12 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 	QHBoxLayout	*topLayout = new QHBoxLayout(this);
 	QVBoxLayout	*leftLayout = new QVBoxLayout();
 
+	setFocusPolicy (StrongFocus);		// accept key event
+	setFocus();
+
 	topLayout->addLayout(leftLayout,0);
 
-		view = new viewMap(phys); // the view associated with this window
+		view = new bosonViewMap(phys); // the view associated with this window
 		mini = new miniMap(view, this);
 		mini->setFixedSize(200,200);
 		leftLayout->addWidget(mini);
@@ -52,4 +56,26 @@ mainView::mainView(playerMap *phys, QWidget *parent=0, const char *name=0)
 //	leftLayout->addStretch(10);
 	topLayout->activate();
 }
+
+#define ARROW_KEY_STEP	2
+
+void mainView::keyReleaseEvent ( QKeyEvent * e )
+{
+	switch (e->key()) {
+		case Key_Left:
+			view->relativeMoveView(-ARROW_KEY_STEP,0);
+			break;
+		case Key_Right:
+			view->relativeMoveView(ARROW_KEY_STEP,0);
+			break;
+		case Key_Up:
+			view->relativeMoveView(0, -ARROW_KEY_STEP);
+			break;
+		case Key_Down:
+			view->relativeMoveView(0, ARROW_KEY_STEP);
+			break;
+	}
+}
+
+
 

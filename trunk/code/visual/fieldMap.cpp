@@ -56,3 +56,4 @@ fieldMap::~fieldMap()
 {
 	QwAbsSpriteFieldView::view(0);
 }
+

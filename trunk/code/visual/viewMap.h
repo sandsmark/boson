@@ -34,7 +34,7 @@ enum selectionMode_t {
 /*	SELECT_FACILITY, 
 	SELECT_MOBILE, */
 	SELECT_RECT,		/* is drawing a selection rect */
-	SELECT_MOVE,		// is waiting for 'where to move' 
+//	SELECT_ACTION,		// something is selected
 /*	SELECT_, 
 	SELECT_, 
 	SELECT_,  */
@@ -72,7 +72,12 @@ public slots:
 	void relativeReCenterView(int x, int y) {reCenterView(x+viewX, y+viewY);}
 	void reSizeView(int l, int h);
 
+public:
+	void relativeMoveView(int dx, int dy);
+
 private:
+	void checkMove();
+
 	int	viewL, viewH;	// size of the viewing window
 	int	viewX, viewY;	// relative position of the upper-left corner
 
@@ -90,16 +95,16 @@ signals:
 	void		setSelected(QPixmap *); //null -> nothing is selected
 	void		setOrders(unsigned long);  //orzel : should be something like 'actionSet'
 
+	/*
 public slots:
-	/* from display classes */
 	void leftClicked(int, int);		// selecting, moving...
-	/* to handle orderButton 'clicked' event */
 	void u_goto(void);
+	*/
 
 public: ///orzel : bof...
 	visualFacility		*fixSelected;
 	QIntDict<visualMobUnit>	mobSelected;
-private:
+protected:
 	selectionMode_t		selectionMode;
 	int			selectionWho; // -1 is nobody
 

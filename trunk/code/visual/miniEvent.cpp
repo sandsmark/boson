@@ -29,7 +29,7 @@ void miniMap::mousePressEvent(QMouseEvent *e)
 	x = e->x();
 	y = e->y();
 
-	if (e->button() & RightButton) {
+	if (e->button() & LeftButton) {
 		emit reCenterView(x,y);
 		return;
 		}

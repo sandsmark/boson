@@ -1,5 +1,5 @@
 /***************************************************************************
-                          viewMap.cpp  -  description                              
+                          bosonViewMap.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,68 +18,54 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "viewMap.h"
+#include "../common/log.h"
 
+#include "bosonViewMap.h"
+#include "playerUnit.h"
+#include "game.h"
 
-viewMap::viewMap(physMap *p, QObject *parent, const char *name=0L)
-	: QObject(parent, name)
-	,fixSelected( 0L )
-	,selectionMode(SELECT_NONE)
+bosonViewMap::bosonViewMap(physMap *p, QObject *parent, const char *name=0L)
+	:viewMap(p,parent,name)
 {
-	/* map geometry */
-	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
-	viewX = viewY = 0;
-	phys = p;
 }
 
 
-void viewMap::reCenterView(int x, int y)
+
+void bosonViewMap::leftClicked(int mx, int my)		// selecting, moving...
 {
-	int oldX = viewX, oldY = viewY;
+QIntDictIterator<visualMobUnit> mobIt(mobSelected);
 
-	viewX  = x - viewL/2;
-	viewY  = y - viewH/2;
+/*
+if (SELECT_MOVE != getSelectionMode()) {
+	logf(LOG_ERROR,"viewMap::leftClicked while not in SELECT_MOVE state");
+	emit setOrders(0l);
+	return;
+	}
+*/
+if (mobSelected.isEmpty()) {
+	logf(LOG_ERROR,"viewMap::leftClicked : unexpected empty mobSelected");
+	setSelectionMode(SELECT_NONE);
+	emit setOrders(0l);
+	return;
+	}
 
-	checkMove();
+/* ACTION */
 
-	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
-		}
-}
+	if (gpp.who_am_i != selectionWho)
+		return; 		// nothing to do
 
+for (mobIt.toFirst(); mobIt; ++mobIt) {
+	boAssert(mobIt.current()->who == gpp.who_am_i);
+	((playerMobUnit *)mobIt.current())->u_goto(mx,my);
+	}
 
-void viewMap::reSizeView(int l, int h)
+} 
+
+/*
+void viewMap::u_goto(void)
 {
-	int	Xcenter = viewX + viewL/2,
-		Ycenter = viewY + viewH/2;
-
-	viewL = l;
-	viewH = h;
-
-	reCenterView(Xcenter, Ycenter);
-}
-
-void viewMap::relativeMoveView(int dx, int dy)
-{
-	int oldX = viewX, oldY = viewY;
-
-	viewX += dx;
-	viewY += dy;
-
-	checkMove();
-
-	if (viewX != oldX || viewY != oldY) {
-		emit repaint(FALSE);
-		}
-}
-
-void viewMap::checkMove()
-{
-	viewX = QMIN(viewX, phys->maxX - viewL);
-	viewY = QMIN(viewY, phys->maxY - viewH);
-
-	viewX = QMAX(viewX, 0);
-	viewY = QMAX(viewY, 0);
-}
-
-
+boAssert( SELECT_NONE == getSelectionMode() );
+//boAssert(selectionWho == gpp.who_am_i);
+///orzel : should change the cursor over fieldMap
+setSelectionMode(SELECT_MOVE);
+} */

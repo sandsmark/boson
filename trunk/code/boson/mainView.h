@@ -25,7 +25,7 @@
 
 class	miniMap;
 class	fieldMap;
-class	viewMap;
+class	bosonViewMap;
 class	playerMap;
 class	infoWin;
 
@@ -35,13 +35,16 @@ class mainView : public QWidget
 public:
 	mainView(playerMap *phys, QWidget *parent=0, const char *name=0);
 
+protected:
+	virtual void keyReleaseEvent (QKeyEvent * e );
+
 private:
-/* the map object we are playing in */
-    miniMap		*mini;
-    fieldMap		*field;
-    viewMap		*view;
-/* Window displayer information */
-    infoWin		*info;
+	/* the map object we are playing in */
+	miniMap		*mini;
+	fieldMap	*field;
+	bosonViewMap	*view;
+	/* Window displayer information */
+	infoWin		*info;
 };
 
 
