@@ -146,6 +146,7 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
 {
+ boDebug() << k_funcinfo << endl;
  Q_UINT32 mapWidth;
  Q_UINT32 mapHeight;
 
@@ -182,22 +183,10 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  delete[] mHeightMap;
  delete[] mTexMap;
 
- boDebug() << k_funcinfo << endl;
- mCells = new Cell[width() * height()];
- mHeightMap = new float[(width() + 1) * (height() + 1)];
- mTexMap = 0; // it is NOT loaded here
- for (unsigned int x = 0; x < width(); x++) {
-	for (unsigned y = 0; y < height(); y++) {
-		Cell* c = cell(x, y);
-		if (!c) {
-			boError() << k_funcinfo << "Evil internal error!" << endl;
-			continue;
-		}
-		c->setPosition(x, y);
-	}
- }
- // AB: is it clever to load a height map here? we have to allocate a lot of
- // memory for it - even when preloading maps that will never get used
+ mHeightMap = 0;
+ mCells = 0;
+ mTexMap = 0;
+
  return true;
 }
 
@@ -216,6 +205,7 @@ bool BosonMap::loadGroundTheme(QDataStream& stream)
 
 bool BosonMap::loadCells(QDataStream& stream)
 {
+ createCells();
  if (!mCells) {
 	boError() << k_funcinfo << "NULL cells" << endl;
 	return false;
@@ -253,21 +243,43 @@ bool BosonMap::importHeightMapImage(const QImage& image)
  return loadHeightMapImage(b);
 }
 
-bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
+bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 {
  boDebug() << k_funcinfo << endl;
- if (heightMap.size() == 0) {
+ if (width() == 0) {
+	boError() << k_funcinfo << "width() == 0" << endl;
+	return false;
+ }
+ if (height() == 0) {
+	boError() << k_funcinfo << "height() == 0" << endl;
+	return false;
+ }
+ if (heightMapBuffer.size() == 0) {
 	// initialize the height map with 0.0
 //	boDebug() << k_funcinfo << "loading dummy height map" << endl;
+	float* heightMap = new float[(width() + 1) * (height() + 1)];
 	for (unsigned int x = 0; x < width() + 1; x++) {
 		for (unsigned int y = 0; y < height() + 1; y++) {
-			mHeightMap[y * (width() + 1) + x] = 0.0;
+			heightMap[y * (width() + 1) + x] = 0.0f;
 		}
 	}
+	QByteArray buffer;
+	QDataStream writeStream(buffer, IO_WriteOnly);
+	bool ret = saveHeightMap(writeStream, width(), height(), heightMap);
+	if (ret) {
+		QDataStream readStream(buffer, IO_ReadOnly);
+		ret = loadHeightMap(readStream);
+		if (!ret) {
+			boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
+		}
+	} else {
+		boError() << k_funcinfo << "unable to create heightMap stream" << endl;
+	}
+	delete[] heightMap;
 	return true;
  }
  boDebug() << k_funcinfo << "loading real height map" << endl;
- QImage map(heightMap);
+ QImage map(heightMapBuffer);
  if (!map.isGrayscale()) {
 	// we load a valid height map (i.e. a dummy height map) but still return
 	// false for error checking.
@@ -297,6 +309,9 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	// skip all (including alpha) other values.
 	increment = 4;
  }
+
+
+ float* heightMap = new float[(width() + 1) * (height() + 1)];
  for (unsigned int y = 0; y < height() + 1; y++) {
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
@@ -307,22 +322,33 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	int imageX = 0;
 	unsigned char* line = map.scanLine(y);
 	for (unsigned int x = 0; x < width() + 1; x++, imageX += increment) {
-		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
+		heightMap[y * (width() + 1) + x] = pixelToHeight(line[imageX]);
 	}
  }
-
- // No need to recalculate cell values here since actual values will be loaded
- //  from network stream later... right?
- boDebug() << k_funcinfo << "done" << endl;
- return true;
+ QByteArray buffer;
+ QDataStream writeStream(buffer, IO_WriteOnly);
+ bool ret = saveHeightMap(writeStream, width(), height(), heightMap);
+ if (ret) {
+	QDataStream readStream(buffer, IO_ReadOnly);
+	ret = loadHeightMap(readStream);
+	if (!ret) {
+		boError() << k_funcinfo << "unable to load heightmap from stream" << endl;
+	}
+ } else {
+	boError() << k_funcinfo << "unable to create heightMap stream" << endl;
+ }
+ delete[] heightMap;
+ return ret;
 }
 
 bool BosonMap::loadHeightMap(QDataStream& stream)
 {
- if (!mHeightMap) {
-	boError() << k_funcinfo << "NULL heightmap" << endl;
-	return false;
+ if (mHeightMap) {
+	boWarning() << k_funcinfo << "heightmap already present - deleting" << endl;
+	delete[] mHeightMap;
+	mHeightMap = 0;
  }
+ mHeightMap = new float[(width() + 1) * (height() + 1)];
  boDebug() << k_funcinfo << "loading height map from network stream" << endl;
  for (unsigned int x = 0; x < width() + 1; x++) {
 	for (unsigned int y = 0; y < height() + 1; y++) {
@@ -526,23 +552,32 @@ bool BosonMap::saveCells(QDataStream& stream)
 
 bool BosonMap::saveHeightMap(QDataStream& stream)
 {
- if (!mHeightMap) {
-	stream << QImage();
-	return true;
+ return saveHeightMap(stream, width(), height(), mHeightMap);
+}
+
+bool BosonMap::saveHeightMap(QDataStream& stream, unsigned int mapWidth, unsigned int mapHeight, float* heightMap)
+{
+ if (mapWidth == 0) {
+	boError() << k_funcinfo << "mapWidth==0" << endl;
+	return false;
  }
- if (!mHeightMap) {
+ if (mapHeight== 0) {
+	boError() << k_funcinfo << "mapHeight==0" << endl;
+	return false;
+ }
+ if (!heightMap) {
 	boDebug() << k_funcinfo << "saving dummy heightmap to network stream" << endl;
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			stream << (float)0.0;
+	for (unsigned int x = 0; x < mapWidth + 1; x++) {
+		for (unsigned int y = 0; y < mapHeight + 1; y++) {
+			stream << (float)0.0f;
 		}
 	}
 	return true;
  }
  boDebug() << k_funcinfo << "saving real heightmap to network stream" << endl;
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		stream << (float)mHeightMap[y * (width() + 1) + x];
+ for (unsigned int x = 0; x < mapWidth + 1; x++) {
+	for (unsigned int y = 0; y < mapHeight + 1; y++) {
+		stream << (float)heightMap[y * (mapWidth + 1) + x];
 	}
  }
  return true;
@@ -592,6 +627,26 @@ QByteArray BosonMap::saveHeightMapImage()
  io.setImage(image);
  io.write();
  return array;
+}
+
+void BosonMap::createCells()
+{
+ if (mCells) {
+	boWarning() << k_funcinfo << "cells have already been created! deleting now" << endl;
+	delete[] mCells;
+	mCells = 0;
+ }
+ mCells = new Cell[width() * height()];
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned y = 0; y < height(); y++) {
+		Cell* c = cell(x, y);
+		if (!c) {
+			boError() << k_funcinfo << "Evil internal error!" << endl;
+			continue;
+		}
+		c->setPosition(x, y);
+	}
+ }
 }
 
 bool BosonMap::isValid() const
@@ -894,10 +949,15 @@ int BosonMap::heightToPixel(float height)
 bool BosonMap::generateCellsFromTexMap()
 {
  boDebug() << k_funcinfo << endl;
+ if (mCells) {
+	boWarning() << k_funcinfo << "cells already constructed!" << endl;
+	delete[] mCells;
+ }
  if (width() * height() <= 0) {
 	boError() << k_funcinfo << "invalid map size - width=" << width() << " height=" << height() << endl;
 	return false;
  }
+ createCells();
  if (mGroundTheme->textureCount() == 0) {
 	boError() << k_funcinfo << "0 textures in map" << endl;
 	return false;
