@@ -32,7 +32,7 @@ class QDomElement;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrameBase;
+class BosonCommandFrameInterface;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -291,9 +291,9 @@ protected:
 	void changeCursor(BosonCursor* cursor);
 
 	BosonCursor* cursor() const { return mCursor; }
-	BosonCommandFrameBase* cmdFrame() const;
+	BosonCommandFrameInterface* cmdFrame() const;
 
-	virtual BosonCommandFrameBase* createCommandFrame(QWidget* parent) = 0;
+	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent) = 0;
 
 	virtual void initKActions();
 	virtual void initDisplayManager();

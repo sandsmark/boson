@@ -43,6 +43,16 @@
 
 #define UPDATE_TIMEOUT 200
 
+BosonCommandFrameInterface* BosonCommandFrameFactory::createCommandFrame2(QWidget* parent, bool game)
+{
+ if (game) {
+	return new BosonCommandFrame(parent);
+ } else {
+	return new EditorCommandFrame(parent);
+ }
+ return 0;
+}
+
 class BoScrollView : public QScrollView
 {
 public:
@@ -118,7 +128,7 @@ public:
 	BoSelection* mSelection;
 };
 
-BosonCommandFrameBase::BosonCommandFrameBase(QWidget* parent) : QFrame(parent, "cmd frame")
+BosonCommandFrameBase::BosonCommandFrameBase(QWidget* parent) : BosonCommandFrameInterface(parent, "cmd frame")
 {
  d = new BosonCommandFrameBasePrivate;
  mSelectedUnit = 0;
@@ -175,16 +185,6 @@ BosonCommandFrameBase::~BosonCommandFrameBase()
 {
  d->mUnitDisplayWidgets.clear();
  delete d;
-}
-
-BosonCommandFrameBase* BosonCommandFrameBase::createCommandFrame(QWidget* parent, bool game)
-{
- if (game) {
-	return new BosonCommandFrame(parent);
- } else {
-	return new EditorCommandFrame(parent);
- }
- return 0;
 }
 
 BosonOrderWidget* BosonCommandFrameBase::selectionWidget() const
@@ -432,23 +432,12 @@ bool BosonCommandFrameBase::checkUpdateTimer() const
  return use;
 }
 
-void BosonCommandFrameBase::reparentMiniMap(QWidget* map)
-{
- if (!map) {
-	boError(220) << k_funcinfo << "NULL map" << endl;
-	return;
- }
- map->reparent(this, QPoint(0,0));
- map->show();
- d->mTopLayout->insertWidget(0, map, 0, AlignHCenter);
-}
-
 void BosonCommandFrameBase::resizeEvent(QResizeEvent* e)
 {
  if (minimumSize().width() < sizeHint().width()) {
 //	setMinimumWidth(sizeHint().width());
  }
- QFrame::resizeEvent(e);
+ BosonCommandFrameInterface::resizeEvent(e);
 }
 
 QScrollView* BosonCommandFrameBase::addPlacementView()

@@ -47,6 +47,7 @@ libboson_la_SOURCES = \
 	bosoncollisions.cpp \
 	boson.cpp \
 	bosonnetworksynchronizer.cpp \
+	bosoncommandframeinterface.cpp \
 	bosonplayerinput.cpp \
 	bomessage.cpp \
 	bosonsaveload.cpp \
@@ -139,7 +140,6 @@ libboson_la_LIBADD = \
 		$(top_builddir)/boson/items/libbosonitems.la \
 		$(top_builddir)/boson/sound/libbosonsoundinterface.la \
 		$(top_builddir)/boson/info/libbosoninfo.la \
-		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/bosonwidgets/libbosonwidgets.la \
 		$(top_builddir)/boson/script/libbosonscript.la \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \
@@ -154,6 +154,7 @@ libboson_la_LIBADD = \
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries) -Xlinker -export-dynamic
 boson_LDADD = \
 		$(top_builddir)/boson/startupwidgets/libbosonstartupwidgets.la \
+		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
