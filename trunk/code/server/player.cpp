@@ -18,7 +18,12 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "../common/msgData.h"
+#include "../common/bobuffer.h"
+#include "../common/log.h"
+
 #include "player.h"
+#include "game.h"
 
 
 Player::Player(void)
@@ -32,4 +37,47 @@ Player::Player(void)
 	fixUnitDestroyed = 0;
 	mobUnitDestroyed = 0;
 	UnitDestroyed = 0;
+	
+	mineral = BO_INITIAL_MINERAL;
+	oil	= BO_INITIAL_OIL;
+	
+	needFlushing = true;
 }
+
+
+
+void Player::flush(void)
+{
+	static bosonMsgData	msg;	// static so that no need to reallocate it at every call
+
+	/* ressources have changed ? */
+	if (needFlushing) {
+		msg.ressources.mineral	= mineral;
+		msg.ressources.oil	= oil;
+		sendMsg(buffer, MSG_PERSO_RESSOURCES, sizeof(msg.ressources), &msg);
+	}
+	
+
+	/* synchro */
+	msg.jiffies = jiffies;
+	sendMsg(buffer, MSG_TIME_INCREASE, sizeof(msg.jiffies), &msg);
+	boAssert(lastConfirmedJiffies == (jiffies-1));
+
+	buffer->flush();	// actually send datas to the player
+	needFlushing = false;
+}
+
+void Player::changeOil(int delta)
+{
+	oil += delta;
+	needFlushing = true;
+}
+
+
+void Player::changeMineral(int delta)
+{
+	mineral += delta;
+	needFlushing = true;
+}
+
+

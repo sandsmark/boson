@@ -246,6 +246,13 @@ switch(tag) {
 		field->shoot(data->shoot);
 		break;
 
+	case MSG_PERSO_RESSOURCES :
+		ASSERT_DATA_BLENGHT(sizeof(data->ressources));
+		/* syncing */
+		oil	= data->ressources.oil;
+		mineral = data->ressources.mineral;
+		break;
+
 	}
 
 

@@ -30,6 +30,11 @@ class KSocket;
 class BosonServer;
 class boBuffer;
 
+
+#define BO_INITIAL_OIL		300
+#define BO_INITIAL_MINERAL	2000
+
+
 /**
   * Those are infos about one player
   */
@@ -47,7 +52,7 @@ public :
   KSocket		*socket;
   QString		*name;
   BosonServer		*server;
-  int			 id;
+  int			 id;		// 'id' means that this player is (global)player[id], see game.h
   boBuffer		*buffer;
 
   uint 			lastConfirmedJiffies;
@@ -56,6 +61,16 @@ public :
   uint			fixUnitDestroyed;
   uint			mobUnitDestroyed;
   uint			UnitDestroyed;
+  
+/* ressources */
+  bool			needFlushing;
+  uint			oil;
+  uint			mineral;
+
+/* methods */
+  void			flush(void);
+  void			changeOil(int delta);
+  void			changeMineral(int delta);
 
 };
 
