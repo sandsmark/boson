@@ -363,12 +363,13 @@ void Unit::advanceNone(unsigned int advanceCount)
 		++wit;
 		BoItemList list = enemyUnitsInRange(w);
 		if (list.count() > 0) {
+			Unit* u = 0;
 			BoItemList::Iterator it = list.begin();
 			// First check if we have any military units in range
 			for (; it != list.end(); ++it) {
 				if (((Unit*)*it)->unitProperties()->canShoot()) {
 					if (w->canShootAt((Unit*)*it)) {
-						shootAt(w, (Unit*)*it);
+						u = (Unit*)(*it);
 						break;
 					}
 				}
@@ -377,10 +378,25 @@ void Unit::advanceNone(unsigned int advanceCount)
 			if (it == list.end()) {
 				for (it = list.begin(); it != list.end(); ++it) {
 					if (w->canShootAt((Unit*)*it)) {
-						shootAt(w, (Unit*)*it);
+						u = (Unit*)(*it);
 						break;
 					}
 				}
+			}
+			if(u) {
+				float rot = rotationToPoint(u->x() - x(), u->y() - y());
+				if(rot < rotation() - 5 || rot > rotation() + 5) {
+					// Rotate to face target
+					if(QABS(rotation() - rot) > (2 * speed())) {
+						turnTo((int)rot);
+						setAdvanceWork(WorkTurn);
+						return;
+					} else {
+						// If we can get wanted rotation with only little turning, then we don't call turnTo()
+						setRotation(rot);
+					}
+				}
+				shootAt(w, u);
 			}
 		}
 	}
