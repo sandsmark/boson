@@ -79,12 +79,6 @@ public:
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);
 
-	static void saveCommandFramePosition(CommandFramePosition pos, KConfig* conf = 0);
-	static CommandFramePosition readCommandFramePosition(KConfig* conf = 0);
-
-	static void saveChatFramePosition(ChatFramePosition pos, KConfig* conf = 0);
-	static ChatFramePosition readChatFramePosition(KConfig* conf = 0);
-
 	static void saveCursorMode(CursorMode mode, KConfig* conf = 0);
 	static CursorMode readCursorMode(KConfig* conf = 0);
 
