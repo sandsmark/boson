@@ -1,0 +1,62 @@
+/***************************************************************************
+                         newDlg.h  -  description                              
+                             -------------------                                         
+
+    version              : $Id$
+    begin                : Thu Apr 20 18:29:17 CEST 2000
+                                           
+    copyright            : (C) 2000 by Thomas Capricelli                         
+    email                : orzel@yalbi.com                                   
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   * 
+ *                                                                         *
+ ***************************************************************************/
+
+#ifndef NEW_DLG_H 
+#define NEW_DLG_H 
+
+#include <qdialog.h>
+
+class QPushButton;
+class QLabel;
+//class QSlider;
+class QPixmap;
+class QLineEdit;
+class QScrollBar;
+
+
+
+class newDlg : public QDialog 
+{
+	Q_OBJECT
+
+public:
+	newDlg(QWidget *parent=0l, const char *name=0l);
+
+	QString		sc_name;
+	int		sc_width;
+	int		sc_height;
+
+private slots:
+	void	qcb_activated(int);
+	void	redrawPreview(void);
+private:
+	QPixmap		*pix;
+	QLabel		*_height, *_width, *_pixLabel;
+	int		type;
+	QColor		qc_grass, qc_desert, qc_water;
+public:
+	QScrollBar	*scb_width;
+	QScrollBar	*scb_height;
+	QLineEdit	*qle_name, *qle_author;
+};
+
+
+#endif // NEW_DLG_H 
+
