@@ -10,3 +10,6 @@ Requirements=5
 UnitWidth=2.0
 UnitHeight=2.0
 
+[Boson Facility]
+ConstructionSteps=20
+

@@ -10,7 +10,7 @@ UnitWidth=3.0
 UnitHeight=3.0
 
 [Boson Facility]
-CanProduce=true
+ConstructionSteps=20
 
 [ProductionPlugin]
 ProducerList=10
