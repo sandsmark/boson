@@ -157,7 +157,7 @@ void Unit::moveBy(double moveX, double moveY)
  double oldX = x();
  double oldY = y();
  QCanvasSprite::moveBy(moveX, moveY);
-/*
+
 // FIXME 
  QCanvasItemList list = collisions(true);
  if (!list.isEmpty()) {
@@ -175,7 +175,7 @@ void Unit::moveBy(double moveX, double moveY)
 		}
 	}
  }
- */
+
 
  if (d->mSelectBoxUp) {
 	d->mSelectBoxUp->moveBy(moveX, moveY);
@@ -519,13 +519,13 @@ void MobileUnit::advanceMove()
  if(abs(wp.x() - x) < speed()) {
 	xspeed = wp.x() - x;
  } else {
-	xspeed = speed();
+	xspeed = (double)speed();
 	if(wp.x() < x) {
 		xspeed = -xspeed;
 	}
  }
  // Same with y coordinate
- if(abs(wp.y() - y) < speed()) {
+ if(abs(wp.y() - y) < (double)speed()) {
 	yspeed = wp.y() - y;
  } else {
 	yspeed = speed();
