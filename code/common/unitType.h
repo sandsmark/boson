@@ -79,7 +79,6 @@ typedef unsigned int uint;
 struct unitProperties_t {
 /* from here.... */
 	char 	*name;		// The name of the funny thing...
-	uint	orders;		// which orders it's able to understand
 	int	width;
 	int	height;
 	int	visibility;	// how far it can see
@@ -96,7 +95,6 @@ struct unitProperties_t {
 struct mobileProperties_t {
 /* from here.... */
 	char 	*name;		// The name of the funny thing...
-	uint	orders;		// which orders it's able to understand
 	int	width;		// pixel-size
 	int	height;		// pixel-size
 	int	visibility;	// how far it can see
@@ -131,7 +129,6 @@ extern const int mobilePropNb;
 struct facilityProperties_t  {
 /* from here.... */
 	char 	*name;		// Guess it, geek..
-	uint	orders;		// which orders it's able to understand
 	int	width;		// tile-size
 	int	height;		// tile-size
 	int	visibility;	// how far it can see

@@ -23,6 +23,7 @@
 #include <kapp.h>
 
 #include "../common/log.h"
+#include "../common/map.h"
 
 #include "visualBigDisplay.h"
 #include "visualCell.h"

@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "unit.h"
+#include "map.h"
 
 Unit::Unit(QObject*parent, const char *name)
 	: QObject(parent, name)
@@ -74,8 +75,8 @@ Facility::Facility(facilityMsg_t *msg, QObject* parent, const char *name)
 QRect Facility::rect(void)
 {
 	return QRect( _x(), _y(),
-		BO_TILE_SIZE * facilityProp[type].width,
-		BO_TILE_SIZE * facilityProp[type].height);
+		facilityProp[type].width,
+		facilityProp[type].height);
 }
 
 
