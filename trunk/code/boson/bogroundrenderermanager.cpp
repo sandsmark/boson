@@ -87,7 +87,7 @@ void BoGroundRendererManager::initStatic()
  sd.setObject(mManager);
 }
 
-bool BoGroundRendererManager::makeRendererCurrent(int id)
+bool BoGroundRendererManager::makeRendererIdCurrent(int id)
 {
  bool ret = false;
  switch (id) {
@@ -103,8 +103,9 @@ bool BoGroundRendererManager::makeRendererCurrent(int id)
  if (ret && mCurrentRenderer) {
 	QString renderer = mCurrentRenderer->className();
 	boConfig->setStringValue("GroundRendererClass", renderer);
+	return ret;
  }
- boWarning() << k_funcinfo << "unknown id " << id << "using default renderer" << endl;
+ boWarning() << k_funcinfo << "unknown id " << id << " using default renderer" << endl;
  return makeRendererCurrent(QString::null);
 }
 

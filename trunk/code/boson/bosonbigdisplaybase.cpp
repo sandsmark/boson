@@ -52,6 +52,7 @@
 #include "boautocamera.h"
 #include "bogroundrenderer.h"
 #include "bogroundrenderermanager.h"
+#include "bomeshrenderermanager.h"
 #include "bolight.h"
 #include "bosonglminimap.h"
 #include "bomaterial.h"
@@ -357,6 +358,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  BoFullScreen::enterOriginalMode();
 
  quitGame();
+ BoMeshRendererManager::manager()->unsetCurrentRenderer();
  BoGroundRendererManager::manager()->unsetCurrentRenderer();
  delete d->mRenderItemList;
  delete mSelection;
@@ -406,7 +408,8 @@ void BosonBigDisplayBase::init()
  BoGroundRendererManager::manager()->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
  BoGroundRendererManager::manager()->setViewFrustum(d->mViewFrustum);
 
- changeGroundRenderer(boConfig->uintValue("GroundRenderer", DEFAULT_GROUND_RENDERER));
+ BoMeshRendererManager::manager()->makeRendererCurrent(QString::null);
+ BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
 
  setUpdatesEnabled(false);
 
@@ -3133,7 +3136,7 @@ void BosonBigDisplayBase::updateOpenGLSettings()
 
 void BosonBigDisplayBase::changeGroundRenderer(int renderer)
 {
- bool ret = BoGroundRendererManager::manager()->makeRendererCurrent(renderer);
+ bool ret = BoGroundRendererManager::manager()->makeRendererIdCurrent(renderer);
  BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
  if (!ret) {
 	if (r) {
