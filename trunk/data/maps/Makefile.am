@@ -28,4 +28,3 @@ install-data-local:
 		fi \
 	done
 
-EXTRA_DIST = $(maps_DATA)
