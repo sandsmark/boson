@@ -277,7 +277,7 @@ void BosonCommandFrameBase::setSelectedUnit(Unit* unit)
  // For enemy units, we show nothing.
  // For friendly units, we show plugins.
  // For our own units, we show everything
- if (!localPlayerIO() || localPlayerIO()->isEnemyUnit(unit)) {
+ if (!localPlayerIO() || localPlayerIO()->isEnemy(unit)) {
 	hidePluginWidgets();
 	selectionWidget()->hideOrderButtons();
 	return;

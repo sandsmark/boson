@@ -1253,7 +1253,7 @@ BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
  BoItemList::Iterator it = units->begin();
  for (; it != units->end(); ++it) {
 	u = (Unit*)*it;
-	if (ownerIO()->isEnemyUnit(u)) {
+	if (ownerIO()->isEnemy(u)) {
 		enemy->append(u);
 	}
  }
