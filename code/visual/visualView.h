@@ -1,5 +1,5 @@
 /***************************************************************************
-                          viewMap.h  -  description                              
+                          visualView.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,16 +18,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef VIEW_MAP_H 
-#define VIEW_MAP_H 
+#ifndef VISUALVIEW_H 
+#define VISUALVIEW_H 
 
 #include <qintdict.h>
 
 #include <visualUnit.h>
-#include "physMap.h"
-
-class physMap;
-
+#include "visualField.h"
 
 enum selectionMode_t {
 	SELECT_NONE, 		/* is doing nothing */
@@ -45,12 +42,12 @@ enum selectionMode_t {
   * It's used by mainMap and miniMap
   * It's also the place where selections are handled
   */
-class viewMap : public QObject
+class visualView : public QObject
 {
 	Q_OBJECT
 
 public:
-	viewMap(physMap *, QObject *parent=0, const char *name=0L);
+	visualView(visualField *, QObject *parent=0, const char *name=0L);
 
 	int X(void) { return viewX; }
 	int Y(void) { return viewY; }
@@ -58,11 +55,11 @@ public:
 	int L(void) { return viewL; }
 	int H(void) { return viewH; }
 
-	int maxX(void) { return (phys)?phys->maxX:0; }
-	int maxY(void) { return (phys)?phys->maxY:0; }
+	int maxX(void) { return (field)?field->maxX:0; }
+	int maxY(void) { return (field)?field->maxY:0; }
 
 	///orzel : should be moved private ?
-	physMap	*phys;
+	visualField	*field;
 
 signals:
 	void repaint(bool);
@@ -110,6 +107,6 @@ protected:
 
 };
 
-#endif // VIEW_MAP_H
+#endif // VISUALVIEW_H
 
 

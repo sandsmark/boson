@@ -40,7 +40,7 @@
 // application specific includes
 #include "../common/msgData.h"
 
-#include "editorMap.h"
+#include "editorField.h"
 #include "mainView.h"
 
 /**
@@ -168,7 +168,7 @@ private:
 
 
 /* The map which handle grouds and units*/
-    editorMap		*phys;
+    editorField		*field;
     QString		*filename;
 
 };   

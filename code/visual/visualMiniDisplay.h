@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonViewMap.h  -  description                              
+                          visualMiniDisplay.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -18,24 +18,54 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BOSON_VIEW_MAP_H 
-#define BOSON_VIEW_MAP_H 
+#ifndef VISUALMINIDISPLAY_H 
+#define VISUALMINIDISPLAY_H 
 
-#include "viewMap.h"
+#include "../common/groundType.h"
 
-class bosonViewMap : public viewMap
+#include <qframe.h> ///orzel qwidget.h
+
+class Cell;
+class Unit;
+class QPixmap;
+class visualCell;
+class visualView;
+class visualMobUnit;
+class visualFacility;
+
+/** 
+  * This is the little map, which "zoom" the battle field
+  */
+class visualMiniDisplay : public QWidget
 {
-	Q_OBJECT
+
+  Q_OBJECT
 
 public:
-	bosonViewMap(physMap *, QObject *parent=0, const char *name=0L);
+  visualMiniDisplay(visualView *v, QWidget *parent=0, const char *name=0L);
 
-	/* from display classes */
-	void leftClicked(int, int);		// selecting, moving...
-	/* to handle orderButton 'clicked' event */
-	void u_goto(void);
+signals:
+  void	reCenterView(int x, int y);
+  void  reSizeView(int l, int h);
+
+public slots:
+  void newCell(int,int, groundType);
+  void drawMobile(visualMobUnit *mob);
+  void drawFix(visualFacility *fix);
+
+protected:
+  void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+
+/* events */
+  virtual void paintEvent(QPaintEvent *evt);
+  virtual void mousePressEvent(QMouseEvent *e);
+
+private:
+
+  visualView	*view;
+  QPixmap	*ground;
+
 };
 
-#endif // BOSON_VIEW_MAP_H
-
+#endif // VISUALMINIDISPLAY_H
 

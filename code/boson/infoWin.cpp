@@ -31,8 +31,8 @@
 #include "../common/log.h"
 
 #include "infoWin.h"
-//#include "bosonViewMap.h"
-//#include "fieldMap.h"
+//#include "bosonView.h"
+//#include "visualBigDisplay.h"
 //#include "speciesTheme.h"
 //#include "game.h"
 

@@ -31,8 +31,8 @@
 #include "../common/log.h"
 
 #include "infoWin.h"
-#include "viewMap.h"
-//#include "fieldMap.h"
+//#include "visualView.h"
+//#include "visualBigDisplay.h"
 //#include "speciesTheme.h"
 #include "visual.h"
 

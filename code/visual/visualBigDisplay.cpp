@@ -1,5 +1,5 @@
 /***************************************************************************
-                          fieldMap.cpp  -  description                              
+                          visualBigDisplay.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -24,16 +24,16 @@
 
 #include "../common/log.h"
 
-#include "fieldMap.h"
+#include "visualBigDisplay.h"
 #include "visualCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
-#include "viewMap.h"
+#include "visualView.h"
   
 
-fieldMap::fieldMap(/*orderWin *o,*/ viewMap *v, QWidget*parent, const char *name, WFlags f)
+visualBigDisplay::visualBigDisplay(/*orderWin *o,*/ visualView *v, QWidget*parent, const char *name, WFlags f)
 	: QWidget(parent, name, f)
-	, QwAbsSpriteFieldView(v->phys)
+	, QwAbsSpriteFieldView(v->field)
 {
 
 //setBackgroundColor(black);
@@ -42,7 +42,7 @@ fieldMap::fieldMap(/*orderWin *o,*/ viewMap *v, QWidget*parent, const char *name
 /* related orderWindows */
 //order = o;
 
-/* the viewMap */
+/* the visualView */
 view = v;
 
 // connect(, SIGNAL(), this, SLOT());
@@ -52,8 +52,52 @@ connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
 
 }
 
-fieldMap::~fieldMap()
+visualBigDisplay::~visualBigDisplay()
 {
 	QwAbsSpriteFieldView::view(0);
 }
+
+
+QRect visualBigDisplay::viewArea() const
+{
+//printf("visualBigDisplay::viewArea = %d.%d, %dx%d\n", BO_TILE_SIZE * view->X(), BO_TILE_SIZE * view->Y(), width(), height());
+return QRect(BO_TILE_SIZE * view->X(), BO_TILE_SIZE * view->Y(), width(), height());
+boAssert(width() / BO_TILE_SIZE == view->L());
+boAssert(height() / BO_TILE_SIZE == view->H());
+}
+
+void visualBigDisplay::flush(const  QRect & area)
+{
+/* nothing special.. */
+///orzel : to change is some kind of off-screen buffering is used
+}
+
+void visualBigDisplay::beginPainter (QPainter &p)
+{
+///orzel : to change if some kind of off-screen buffering is used
+
+p.begin(this);
+p.translate( - BO_TILE_SIZE * view->X(), - BO_TILE_SIZE * view->Y());
+p.setBackgroundColor(black);
+
+boAssert(p.backgroundColor() == black);
+
+//p.setBackgroundMode(OpaqueMode);
+}
+
+
+void visualBigDisplay::paintEvent(QPaintEvent *evt)
+{
+	if (viewing) {
+		QRect r = evt->rect();
+///orzel : should be removed :
+		r = rect();
+//printf("r = %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
+		r.moveBy(view->X() * BO_TILE_SIZE, view->Y() * BO_TILE_SIZE);
+//printf("visualBigDisplay::paintEvents, moved : %d.%d, %dx%d\n", r.x(), r.y(), r.width(), r.height());
+		viewing->updateInView(this, r);
+	}
+
+}
+
 

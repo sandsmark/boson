@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef INFO_WIN_H
-#define INFO_WIN_H
+#ifndef INFOWIN_H
+#define INFOWIN_H
 
 
 #include <qframe.h>
@@ -32,7 +32,7 @@ class playerFacility;
 class QLabel;
 class QWidgetStack;
 class QScrollView;
-//class fieldMap;
+//class visualBigDisplay;
 class QVBoxLayout;
 
 #define ORDER_BUTTONS_NB  (8)
@@ -53,12 +53,12 @@ private:
 	QPixmap		*view_none;
 
 private:
-//	fieldMap	*field;
+//	visualBigDisplay	*field;
 
 /* GUI */
 	QPushButton	*orderButton[ORDER_BUTTONS_NB];
 };
 
 
-#endif // INFO_WIN_H
+#endif // INFOWIN_H
 

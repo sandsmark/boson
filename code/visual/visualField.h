@@ -1,9 +1,9 @@
 /***************************************************************************
-                          playerMap.h  -  description                              
+                          visualField.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Thu Sep  9 01:27:00 CET 1999
+    begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,55 +18,65 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLAYER_MAP_H 
-#define PLAYER_MAP_H 
+#ifndef VISUALFIELD_H 
+#define VISUALFIELD_H 
 
-#include <qintdict.h>
 
-#include "../common/msgData.h"
+#include <qobject.h>
+//#include <qintdict.h>
+
+#include <QwSpriteField.h>
+
+//#include "../common/msgData.h"
+#include "../common/groundType.h"
 //#include "../common/unitType.h"
-#include "../common/unit.h"	// Facility
+//#include "../common/unit.h"	// Facility
 
-#include "playerUnit.h"		// playerMobUnit
-//#include "playerCell.h"
-#include "physMap.h"
+//#include "visualUnit.h"		// visualMobUnit
+#include "visualCell.h"
 
 class QRect;
 class QPainter;
 class Cell;
-class Unit;
-
+//class Unit;
+class groundTheme;
+class speciesTheme;
+class visualFacility;
+class visualMobUnit;
 
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
   */
-class playerMap : public physMap
+class visualField : public QObject, public QwSpriteField
 {
-  Q_OBJECT
 
- public:
-  playerMap(uint l, uint h, QObject *parent=0, const char *name=0L);
+	Q_OBJECT
 
+public:
+	visualField(uint l, uint h, QObject *parent=0, const char *name=0L);
+
+/* geometry ? , still public */
+	int		maxX, maxY;	// size of the map
+///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
+
+/* modify contents */
+	void setCell(int i, int j, groundType g);
+
+/*
   void createMob(mobileMsg_t &);
   void destroyMob(destroyedMsg_t &);
 
   void createFix(facilityMsg_t &);
   void destroyFix(destroyedMsg_t &);
+*/
 
-  void move(moveMsg_t &);
-  void requestAction(boBuffer *);
-
-/* concerning contents */
-  playerFacility *getFacility(long key) { return facility.find(key); }
-
-  public: ///orzel : temp
-
-  QIntDict<playerMobUnit>	mobile;
-  QIntDict<playerFacility>	facility;
-
+signals:
+	void newCell(int,int, groundType g);
+	void updateMobile(visualMobUnit *); // for miniMap
+	void updateFix(visualFacility *); // for miniMap
 };
 
-#endif // PLAYER_MAP_H
+#endif // VISUALFIELD_H
 
 

@@ -1,9 +1,9 @@
 /***************************************************************************
-                          miniMap.h  -  description                              
+                          editorBigDisplay.h  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Jan  9 19:35:36 CET 1999
+    begin                : Tue Sep 21 01:18:00 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,54 +18,40 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MINI_MAP_H 
-#define MINI_MAP_H 
+#ifndef EDITORBIGDISPLAY_H 
+#define EDITORBIGDISPLAY_H 
 
-#include "../common/groundType.h"
+#include "visualBigDisplay.h"
 
-#include <qframe.h> ///orzel qwidget.h
-
-class Cell;
-class Unit;
-class QPixmap;
+class QPopupMenu;
 class visualCell;
-class viewMap;
-class visualMobUnit;
-class visualFacility;
 
 /** 
-  * This is the little map, which "zoom" the battle field
+  * Add all editor-specific 'bells and whistles' to the visual/visualBigDisplay 
   */
-class miniMap : public QWidget
+class editorBigDisplay : public visualBigDisplay 
 {
 
-  Q_OBJECT
+	Q_OBJECT
 
 public:
-  miniMap(viewMap *v, QWidget *parent=0, const char *name=0L);
-
-signals:
-  void	reCenterView(int x, int y);
-  void  reSizeView(int l, int h);
-
-public slots:
-  void newCell(int,int, groundType);
-  void drawMobile(visualMobUnit *mob);
-  void drawFix(visualFacility *fix);
+	editorBigDisplay(visualView *v, QWidget *parent=0, const char *name=0L, WFlags f=0);
 
 protected:
-  void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
+	virtual void mousePressEvent(QMouseEvent *e);
 
-/* events */
-  virtual void paintEvent(QPaintEvent *evt);
-  virtual void mousePressEvent(QMouseEvent *e);
+private slots:
+	void setCell(int);
+	void setTransTile(int);
+	void setTransType(int);
+	void setTransItem(int);
 
 private:
-
-  viewMap	*view;
-  QPixmap	*ground;
+	QPopupMenu	*popup;
+	visualCell	*selectedCell;
 
 };
 
-#endif // MINI_MAP_H
+#endif // EDITORBIGDISPLAY_H
+
 

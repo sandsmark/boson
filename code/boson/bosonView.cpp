@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonViewMap.cpp  -  description                              
+                          bosonView.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -20,30 +20,30 @@
 
 #include "../common/log.h"
 
-#include "bosonViewMap.h"
+#include "bosonView.h"
 #include "playerUnit.h"
 #include "game.h"
 
-bosonViewMap::bosonViewMap(physMap *p, QObject *parent, const char *name=0L)
-	:viewMap(p,parent,name)
+bosonView::bosonView(visualField *p, QObject *parent, const char *name=0L)
+	:visualView(p,parent,name)
 {
 }
 
 
 
-void bosonViewMap::leftClicked(int mx, int my)		// selecting, moving...
+void bosonView::leftClicked(int mx, int my)		// selecting, moving...
 {
 QIntDictIterator<visualMobUnit> mobIt(mobSelected);
 
 /*
 if (SELECT_MOVE != getSelectionMode()) {
-	logf(LOG_ERROR,"viewMap::leftClicked while not in SELECT_MOVE state");
+	logf(LOG_ERROR,"visualView::leftClicked while not in SELECT_MOVE state");
 	emit setOrders(0l);
 	return;
 	}
 */
 if (mobSelected.isEmpty()) {
-	logf(LOG_ERROR,"viewMap::leftClicked : unexpected empty mobSelected");
+	logf(LOG_ERROR,"bosonView::leftClicked : unexpected empty mobSelected");
 	setSelectionMode(SELECT_NONE);
 	emit setOrders(0l);
 	return;
@@ -66,6 +66,6 @@ void viewMap::u_goto(void)
 {
 boAssert( SELECT_NONE == getSelectionMode() );
 //boAssert(selectionWho == gpp.who_am_i);
-///orzel : should change the cursor over fieldMap
+///orzel : should change the cursor over visualBigDisplay 
 setSelectionMode(SELECT_MOVE);
 } */

@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GROUND_THEME_H 
-#define GROUND_THEME_H 
+#ifndef GROUNDTHEME_H 
+#define GROUNDTHEME_H 
 
 //#ifdef HAVE_CONFIG_H
 //#include <config.h>
@@ -55,5 +55,5 @@ class groundTheme
 };
 
 
-#endif // GROUND_THEME_H
+#endif // GROUNDTHEME_H
 

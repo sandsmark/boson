@@ -1,9 +1,9 @@
 /***************************************************************************
-                          miniDisplay.cpp  -  description                              
+                          visualMiniDisplay.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sat Feb 17, 1999
+    begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -20,20 +20,54 @@
 
 #include <assert.h>
 
+#include <qpixmap.h>
+
+#include "../common/log.h"
+
+#include "visualMiniDisplay.h"
+#include "visualView.h"
+
+
+
+/*
 #include <qpainter.h>
 #include <qpixmap.h>
 #include <qcolor.h>
 
-#include "../common/log.h"
 #include "../common/map.h"
 
 #include "miniMap.h"
 #include "visualCell.h"
 #include "speciesTheme.h"
 #include "groundTheme.h"
-#include "viewMap.h"
+ */ 
 
-void miniMap::paintEvent(QPaintEvent *evt)
+visualMiniDisplay::visualMiniDisplay(visualView *v, QWidget*parent, const char *name=0L)
+	: QWidget(parent, name)
+{
+
+	visualField *field = v -> field;
+
+/* the visualView */
+	view = v;
+
+/* create the (back)ground pixmap */
+	ground = new QPixmap(v->maxX(), v->maxY());
+	ground->fill(black);
+
+/* make the connection */
+	connect(field, SIGNAL(newCell(int,int, groundType)), this, SLOT(newCell(int,int, groundType)));
+	connect(field, SIGNAL(updateMobile(playerMobUnit *)), this, SLOT(drawMobile(playerMobUnit *)));
+	connect(field, SIGNAL(updateFix(playerFacility *)), this, SLOT(drawFix(playerFacility *)));
+
+// connect(, SIGNAL(), this, SLOT());
+	connect(view, SIGNAL(repaint(bool)), this, SLOT(repaint(bool)));
+	connect(this, SIGNAL(reCenterView(int, int)), view, SLOT(reCenterView(int, int)));
+	connect(this, SIGNAL(reSizeView(int, int)), view, SLOT(reSizeView(int, int)));
+}
+
+
+void visualMiniDisplay::paintEvent(QPaintEvent *evt)
 {
 	QPainter p;
 
@@ -51,13 +85,13 @@ void miniMap::paintEvent(QPaintEvent *evt)
 
 }
 
-void miniMap::newCell(int i, int j, groundType g) //, QPainter *p)
+void visualMiniDisplay::newCell(int i, int j, groundType g) //, QPainter *p)
 {
 	QPainter p;
 	assert(i<view->maxX());
 	assert(j<view->maxY());
 
-	//printf("miniMap::newCell : receiving %d\n", (int)g);
+	//printf("visualMiniDisplay::newCell : receiving %d\n", (int)g);
 
 
 	if (IS_TRANS(g))
@@ -66,7 +100,7 @@ void miniMap::newCell(int i, int j, groundType g) //, QPainter *p)
 	p.begin(ground);
 	switch(g) {
 		default:
-			logf(LOG_ERROR, "miniMap::drawCell : unexpected groundType");
+			logf(LOG_ERROR, "visualMiniDisplay::drawCell : unexpected groundType");
 		case GROUND_WATER :
 			setPoint( i, j, blue, &p);
 			break;
@@ -82,7 +116,7 @@ void miniMap::newCell(int i, int j, groundType g) //, QPainter *p)
 	repaint(FALSE);
 }
 
-void miniMap::setPoint(int x, int y, const QColor &color, QPainter *p)
+void visualMiniDisplay::setPoint(int x, int y, const QColor &color, QPainter *p)
 {
 	if (!p) {
 		logf(LOG_ERROR, "setPoint: p == 0...");
@@ -91,4 +125,21 @@ void miniMap::setPoint(int x, int y, const QColor &color, QPainter *p)
 	p->setPen(color);
 	p->drawPoint(x,y);
 }
+
+
+
+void visualMiniDisplay::mousePressEvent(QMouseEvent *e)
+{
+	int x, y;
+
+	x = e->x();
+	y = e->y();
+
+	if (e->button() & LeftButton) {
+		emit reCenterView(x,y);
+		return;
+		}
+
+}
+
 

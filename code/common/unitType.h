@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef UNIT_TYPE_H 
-#define UNIT_TYPE_H 
+#ifndef UNITTYPE_H 
+#define UNITTYPE_H 
 
 #include "groundType.h"
 
@@ -135,5 +135,5 @@ struct facilityProperties_t  {
 extern facilityProperties_t facilityProp[];
 extern const int facilityPropNb;
  
-#endif // UNIT_TYPE_H
+#endif // UNITTYPE_H
 

@@ -1,9 +1,9 @@
 /***************************************************************************
-                          viewSelect.cpp  -  description                              
+                          visualView.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
-    begin                : Sun Sep 19 01:01:00 CET 1999
+    begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
     email                : capricel@enst.fr                                     
@@ -18,14 +18,74 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "visualView.h"
 #include "../common/log.h"
-
 #include "speciesTheme.h"
-#include "viewMap.h"
 #include "visual.h"
 
 
-visualFacility * viewMap::unSelectFix(void)
+visualView::visualView(visualField *f, QObject *parent, const char *name=0L)
+	: QObject(parent, name)
+	,fixSelected( 0L )
+	,selectionMode(SELECT_NONE)
+{
+	/* map geometry */
+	viewL = viewH = 5; ///orzel : arbitraire, (doit etre/)sera fixe par un mainMap..
+	viewX = viewY = 0;
+	field = f;
+}
+
+
+void visualView::reCenterView(int x, int y)
+{
+	int oldX = viewX, oldY = viewY;
+
+	viewX  = x - viewL/2;
+	viewY  = y - viewH/2;
+
+	checkMove();
+
+	if (viewX != oldX || viewY != oldY) {
+		emit repaint(FALSE);
+		}
+}
+
+
+void visualView::reSizeView(int l, int h)
+{
+	int	Xcenter = viewX + viewL/2,
+		Ycenter = viewY + viewH/2;
+
+	viewL = l;
+	viewH = h;
+
+	reCenterView(Xcenter, Ycenter);
+}
+
+void visualView::relativeMoveView(int dx, int dy)
+{
+	int oldX = viewX, oldY = viewY;
+
+	viewX += dx;
+	viewY += dy;
+
+	checkMove();
+
+	if (viewX != oldX || viewY != oldY) {
+		emit repaint(FALSE);
+		}
+}
+
+void visualView::checkMove()
+{
+	viewX = QMIN(viewX, field->maxX - viewL);
+	viewY = QMIN(viewY, field->maxY - viewH);
+
+	viewX = QMAX(viewX, 0);
+	viewY = QMAX(viewY, 0);
+}
+
+visualFacility * visualView::unSelectFix(void)
 {
 visualFacility *f = fixSelected;
 
@@ -38,7 +98,7 @@ emit setSelected((QPixmap *)0l);
 return f;
 }
 
-visualMobUnit *viewMap::unSelectMob(long key)
+visualMobUnit *visualView::unSelectMob(long key)
 {
 visualMobUnit *m = mobSelected[key];
 mobSelected.remove(key);
@@ -54,21 +114,21 @@ if (mobSelected.isEmpty()) {
 return m;
 }
 
-void viewMap::unSelectAll(void)
+void visualView::unSelectAll(void)
 {
 	selectionWho =  -1; ///orzel : should be a WHO_NOBOCY;
 	emit setOrders(0l);
 }
 
 
-void viewMap::selectFix(visualFacility *f)
+void visualView::selectFix(visualFacility *f)
 {
 	fixSelected = f; fixSelected->select();
 	emit setSelected( vpp.species[f->who]->getBigOverview(f));
 	logf(LOG_GAME_LOW, "select facility");
 }
 
-void viewMap::selectMob(long key, visualMobUnit *m)
+void visualView::selectMob(long key, visualMobUnit *m)
 {
 	if (mobSelected.isEmpty()) {
 		boAssert( selectionWho = -1);

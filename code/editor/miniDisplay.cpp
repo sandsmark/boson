@@ -25,16 +25,16 @@
 //#include "../common/log.h"
 #include "../common/map.h"
 
-#include "miniMap.h"
+#include "visualMiniDisplay.h"
 //#include "playerCell.h"
 //#include "speciesTheme.h"
 //#include "groundTheme.h"
-//#include "viewMap.h"
+//#include "visualView.h"
 #include "visualUnit.h"
 //#include "game.h"
 
 
-void miniMap::drawMobile(visualMobUnit *unit)
+void visualMiniDisplay::drawMobile(visualMobUnit *unit)
 {
 	QPainter p;
 	p.begin(ground);
@@ -44,7 +44,7 @@ void miniMap::drawMobile(visualMobUnit *unit)
 }
 
 
-void miniMap::drawFix(visualFacility *fix)
+void visualMiniDisplay::drawFix(visualFacility *fix)
 {
 	QPainter p;
 	p.begin(ground);

@@ -18,8 +18,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef ORDER_TYPE_H 
-#define ORDER_TYPE_H 
+#ifndef ORDERTYPE_H 
+#define ORDERTYPE_H 
 
 enum orderType {
 
@@ -39,5 +39,5 @@ enum orderType {
 	ORDER_REPAIR	= 0x10008,	/* repair the building */
 	};
 
-#endif // ORDER_TYPE_H
+#endif // ORDERTYPE_H
 

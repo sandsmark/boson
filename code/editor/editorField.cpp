@@ -1,5 +1,5 @@
 /***************************************************************************
-                          editorMap.cpp  -  description                              
+                          editorField.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -28,15 +28,15 @@
 #include "../common/boconfig.h" // MAX_PLAYERS
 #include "../common/map.h"
 
-#include "editorMap.h"
+#include "editorField.h"
   
-editorMap::editorMap(uint w, uint h, QObject *parent, const char *name=0L)
-	: physMap(w,h,parent,name)
+editorField::editorField(uint w, uint h, QObject *parent, const char *name=0L)
+	: visualField(w,h,parent,name)
 {
 }
 
 
-bool editorMap::load(QString filename)
+bool editorField::load(QString filename)
 {
 	int	i, j;
 	playField field(filename);
@@ -86,7 +86,7 @@ bool editorMap::load(QString filename)
 
 }
 
-bool editorMap::save(QString filename)
+bool editorField::save(QString filename)
 {
 	int	i, j;
 	bool	ret;

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          playerMap.cpp  -  description                              
+                          bosonField.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -27,16 +27,16 @@
 #include "../common/boconfig.h" // MAX_PLAYERS
 #include "../common/map.h"
 
-#include "playerMap.h"
+#include "bosonField.h"
   
-playerMap::playerMap(uint w, uint h, QObject *parent, const char *name=0L)
-	: physMap(w,h,parent,name)
+bosonField::bosonField(uint w, uint h, QObject *parent, const char *name=0L)
+	: visualField(w,h,parent,name)
 {
 }
 
 
 /*
-void playerMap::setCell(int i, int j, groundType g)
+void bosonField::setCell(int i, int j, groundType g)
 {
 	boAssert(i>=0); boAssert(j>=0);
 	boAssert(i<width()); boAssert(j<height());
@@ -48,7 +48,7 @@ void playerMap::setCell(int i, int j, groundType g)
 */
 
 
-void playerMap::createMob(mobileMsg_t &m)
+void bosonField::createMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
@@ -61,7 +61,7 @@ void playerMap::createMob(mobileMsg_t &m)
 }
 
 
-void playerMap::destroyMob(destroyedMsg_t &m)
+void bosonField::destroyMob(destroyedMsg_t &m)
 {
 	playerMobUnit *mob ;
 	
@@ -71,14 +71,14 @@ void playerMap::destroyMob(destroyedMsg_t &m)
 		boAssert(m.y == mob->y());
 		}
 	else {
-		logf(LOG_ERROR, "playerMap::destroyMob : can't find m.key");
+		logf(LOG_ERROR, "bosonField::destroyMob : can't find m.key");
 		return;
 		}
 
 	boAssert( mobile.remove(m.key) == true );
 }
 
-void playerMap::createFix(facilityMsg_t &m)
+void bosonField::createFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
@@ -91,7 +91,7 @@ void playerMap::createFix(facilityMsg_t &m)
 }
 
 
-void playerMap::destroyFix(destroyedMsg_t &m)
+void bosonField::destroyFix(destroyedMsg_t &m)
 {
 	playerFacility * f;
 	
@@ -101,7 +101,7 @@ void playerMap::destroyFix(destroyedMsg_t &m)
 		boAssert(m.y == f->x());
 		}
 	else {
-		logf(LOG_ERROR, "playerMap::destroyFix : can't find m.key");
+		logf(LOG_ERROR, "bosonField::destroyFix : can't find m.key");
 		return;
 		}
 
@@ -109,12 +109,12 @@ void playerMap::destroyFix(destroyedMsg_t &m)
 }
 
 
-void playerMap::move(moveMsg_t &m)
+void bosonField::move(moveMsg_t &m)
 {
 	mobile.find(m.key)->s_moveBy(m.dx, m.dy, m.direction);
 }
 
-void playerMap::requestAction(boBuffer *buffer)
+void bosonField::requestAction(boBuffer *buffer)
 {
 	QIntDictIterator<playerMobUnit> mobIt(mobile);
 	//QIntDictIterator<playerFacility> fixIt(facility);
