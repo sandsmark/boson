@@ -145,8 +145,6 @@ class BosonShot : public BosonItem
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     virtual void explode();
 
@@ -191,12 +189,6 @@ class BosonShotBullet : public BosonShot
       setActive(false);
       return true;
     }
-    virtual bool save(QDataStream&) { return true; }
-    virtual bool load(QDataStream&)
-    {
-      setActive(false);
-      return true;
-    }
 
     inline virtual int type() const { return BosonShot::Bullet; }
 
@@ -223,8 +215,6 @@ class BosonShotMissile : public BosonShot
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; }
 
@@ -266,8 +256,6 @@ class BosonShotExplosion : public BosonShot
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     inline virtual int type() const { return BosonShot::Explosion; }
 
@@ -302,8 +290,6 @@ class BosonShotMine : public BosonShot
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     inline virtual int type() const { return BosonShot::Mine; }
 
@@ -331,8 +317,6 @@ class BosonShotBomb : public BosonShot
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     inline virtual int type() const { return BosonShot::Bomb; }
 
@@ -362,8 +346,6 @@ class BosonShotFragment : public BosonShot
 
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
-    virtual bool save(QDataStream& stream);
-    virtual bool load(QDataStream& stream);
 
     virtual long int damage() const;
     virtual float damageRange() const;

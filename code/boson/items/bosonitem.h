@@ -520,8 +520,6 @@ public:
 	 **/
 	virtual void unselect();
 
-	virtual bool save(QDataStream&) = 0;
-	virtual bool load(QDataStream&) = 0;
 	virtual bool saveAsXML(QDomElement&);
 	virtual bool loadFromXML(const QDomElement&);
 

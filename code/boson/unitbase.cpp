@@ -152,21 +152,6 @@ bool UnitBase::saveAsXML(QDomElement& root)
  return true;
 }
 
-// AB: obsolete?
-bool UnitBase::save(QDataStream& stream)
-{
- // TODO: we need to save and load Unit::mCurrentPlugin->pluginType() !!
- // note that multiple plugins of the same type are not *yet* supported! but
- // they might be one day..
- bool ret = dataHandler()->save(stream); // TODO: move to BosonItem
- if (mWeaponProperties) {
-	// call weaponDataHandler() only, if it was called in c'tor, as it is
-	// created here otherwise
-	ret = ret && weaponDataHandler()->save(stream);
- }
- return ret;
-}
-
 bool UnitBase::loadFromXML(const QDomElement& root)
 {
  if (root.isNull()) {
@@ -184,18 +169,6 @@ bool UnitBase::loadFromXML(const QDomElement& root)
 	}
  }
  return true;
-}
-
-// AB: obsolete?
-bool UnitBase::load(QDataStream& stream)
-{
- bool ret = dataHandler()->load(stream);
-  if (mWeaponProperties) {
-	// call weaponDataHandler() only, if it was called in c'tor, as it is
-	// created here otherwise
-	ret = ret && weaponDataHandler()->load(stream);
- }
- return ret;
 }
 
 SpeciesTheme* UnitBase::speciesTheme() const

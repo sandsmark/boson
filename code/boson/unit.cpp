@@ -918,37 +918,6 @@ bool Unit::saveAsXML(QDomElement& root)
  return true;
 }
 
-bool Unit::save(QDataStream& stream)
-{
- //we should probably add pure virtual methods save() and load() to the plugins,
- //in order to store non-KGameProperty data there, too
- // note that UnitBase::save() also saves KGameProperty data of plugins and
- // weapons
- if (!UnitBase::save(stream)) {
-	boError() << "Unit not saved properly" << endl;
-	return false;
- }
- stream << (float)x();
- stream << (float)y();
- stream << (float)z();
-
- // store the current plugin:
- int pluginIndex = 0;
- if (currentPlugin()) {
-	pluginIndex = d->mPlugins.findRef(currentPlugin());
- }
- stream << (Q_INT32)pluginIndex;
-
- // also store the target:
- unsigned long int targetId = 0;
- if (target()) {
-	targetId = target()->id();
- }
- stream << (Q_UINT32)targetId;
-
- return true;
-}
-
 bool Unit::loadFromXML(const QDomElement& root)
 {
  if (!UnitBase::loadFromXML(root)) {
@@ -1021,54 +990,6 @@ bool Unit::loadFromXML(const QDomElement& root)
 
  move(x, y, z);
  setRotation(rotation);
- setAdvanceWork(advanceWork());
- return true;
-}
-
-bool Unit::load(QDataStream& stream)
-{
- if (!UnitBase::load(stream)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
- //AB: the frame number was loaded/saved as well. i removed this because we
- //shouldn't have this in loading code. frame is dependant on the current
- //actions/animations/... but not relevant to actual game code. it is just the
- //visible appearance
- float x;
- float y;
- float z;
- Q_INT32 pluginIndex;
- Q_UINT32 targetId;
-
- stream >> x;
- stream >> y;
- stream >> z;
- stream >> pluginIndex;
- stream >> targetId;
-
- if (pluginIndex <= 0) {
-	mCurrentPlugin = 0;
- } else {
-	if ((unsigned int)pluginIndex >= d->mPlugins.count()) {
-		boWarning() << k_funcinfo << "Invalid current plugin index: " << pluginIndex << endl;
-		mCurrentPlugin = 0;
-	} else {
-		mCurrentPlugin = d->mPlugins.at(pluginIndex);
-	}
- }
-
- // note: don't use setTarget() here, as it does some additional calculations
- if (targetId == 0) {
-	d->mTarget = 0;
- } else {
-	d->mTarget = boGame->findUnit(targetId, 0);
-	if (!d->mTarget) {
-		boWarning() << k_funcinfo << "Could not find target with unitId=" << targetId << endl;
-	}
- }
-
- move(x, y, z);
  setAdvanceWork(advanceWork());
  return true;
 }
@@ -1818,20 +1739,6 @@ bool MobileUnit::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool MobileUnit::load(QDataStream& stream)
-{
- if (!Unit::load(stream)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
-
- float speed;
- stream >> speed;
- setSpeed(speed);
-
- return true;
-}
-
 bool MobileUnit::saveAsXML(QDomElement& root)
 {
  if (!Unit::saveAsXML(root)) {
@@ -1840,18 +1747,6 @@ bool MobileUnit::saveAsXML(QDomElement& root)
  }
 
  root.setAttribute("Speed", speed());
-
- return true;
-}
-
-bool MobileUnit::save(QDataStream& stream)
-{
- if (!Unit::save(stream)) {
-	boError() << k_funcinfo << "Unit not saved properly" << endl;
-	return false;
- }
-
- stream << speed();
 
  return true;
 }
@@ -2046,31 +1941,10 @@ bool Facility::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool Facility::load(QDataStream& stream)
-{
- if (!Unit::load(stream)) {
-	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
-
- setConstructionStep(d->mConstructionStep);
-
- return true;
-}
-
 bool Facility::saveAsXML(QDomElement& root)
 {
  if (!Unit::saveAsXML(root)) {
 	boError() << k_funcinfo << "Unit not loaded properly" << endl;
-	return false;
- }
- return true;
-}
-
-bool Facility::save(QDataStream& stream)
-{
- if (!Unit::save(stream)) {
-	boError() << "Unit not loaded properly" << endl;
 	return false;
  }
  return true;

@@ -350,10 +350,13 @@ public:
 	 **/
 	void deleteUnits(QPtrList<Unit>* units);
 
-	bool load(QDataStream& stream);
-	bool save(QDataStream& stream);
 	bool loadFromXML(const QDomElement& root);
 	bool saveAsXML(QDomElement& root);
+
+	// AB: we need this in the movie, but is it really good to make it
+	// public??
+	// NO!
+	bool loadItemFromXML(const QDomElement& unit, Player* owner);
 
 public slots:
 	/**
@@ -398,7 +401,7 @@ protected:
 
 	void removeFromAdvanceLists(BosonItem* item);
 
-	bool loadItemFromXML(const QDomElement& unit, Player* owner);
+
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);

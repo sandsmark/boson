@@ -231,19 +231,6 @@ public:
 	virtual bool loadFromXML(const QDomElement& root);
 
 	/**
-	 * Save the unit to a stream. You can use @ref load to load the same
-	 * unit again. Note that if derived classes add properties which are no
-	 * @ref KGameProperty they must replace this function.
-	 **/
-	virtual bool save(QDataStream& stream);
-
-	/**
-	 * Load a unit from a stream. Note that just like @ref save derived
-	 * classes must replace this if they add non-KGameProperty properties.
-	 **/
-	virtual bool load(QDataStream& stream);
-
-	/**
 	 * These are <em>not</em> the @ref KGameProperties! See @ref dataHandler
 	 * for these.
 	 *
