@@ -96,6 +96,12 @@ public:
 	QValueList<QColor> availableTeamColors() const;
 
 	/**
+	 * @param unitId The unit to search for
+	 * @param searchIn The player to search the unit in. 0 for all players
+	 **/
+	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
+
+	/**
 	 * The factory completed to produce a unit and is now told to build
 	 * (place) it.
 	 * @param factory Where the unit is being build
@@ -269,12 +275,6 @@ protected:
 	virtual bool playerInput(QDataStream& stream, KPlayer* player);
 
 	unsigned long int nextUnitId();
-
-	/**
-	 * @param unitId The unit to search for
-	 * @param searchIn The player to search the unit in. 0 for all players
-	 **/
-	Unit* findUnit(unsigned long int unitId, Player* searchIn) const;
 
 	/**
 	 * Create a new unit. No resources of the player are reduced, the unit

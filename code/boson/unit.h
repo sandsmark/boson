@@ -399,7 +399,7 @@ private:
 private:
 	class UnitPrivate;
 	UnitPrivate* d;
-	UnitPlugin* mCurrentPlugin; // TODO: save/load the current plugin
+	UnitPlugin* mCurrentPlugin;
 
 	static bool mInitialized; // whether initStatic() was called or not
 
