@@ -80,6 +80,7 @@ public slots:
 
 protected:
 	virtual bool queryExit();
+	void	setSelectionMode(selectionMode_t t);
 
 	/*
 	 * put object 

@@ -62,8 +62,8 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 
 	switch( vtl->getSelectionMode()) {
 		default:
-			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
 		case visualTopLevel::SELECT_NONE:
+//			logf(LOG_WARNING, "visualBigDisplay::viewportMouseMoveEvent : unknown selectionMode(1), mode is %d", vtl->getSelectionMode());
 			break;
 		case visualTopLevel::SELECT_RECT:
 			p.begin( viewport() );
@@ -88,6 +88,15 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 			break;
 
 		case visualTopLevel::SELECT_PUT:
+			p.begin( viewport() );
+			p.setPen(pen);
+			p.setRasterOp(XorROP);
+			selectPos = QPoint( e->x() - e->x()%BO_TILE_SIZE , e->y() - e->y()%BO_TILE_SIZE );
+			p.drawRect(oldPos.x(), oldPos.y(), putSize.width(), putSize.height() );
+//			printf("viewportMouseMoveEvent : SELECT_PUT\n"); fflush (stdout);
+			oldPos = selectPos;
+			p.drawRect(oldPos.x(), oldPos.y(), putSize.width(), putSize.height() );
+			p.end();
 			break;
 	}
 }
@@ -95,7 +104,7 @@ void visualBigDisplay::viewportMouseMoveEvent(QMouseEvent *e)
 void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 {
 	QPainter p;
-	QPen pen(green, 2);
+	QPen pen(red, 2);
 
 	switch( vtl->getSelectionMode()) {
 		default:
@@ -107,7 +116,7 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 			return;		// keep on filling
 
 		case visualTopLevel::SELECT_RECT:
-			p.begin(this);
+			p.begin( viewport() );
 			p.setPen(pen);
 			p.setRasterOp(XorROP);
 			/* erase rect */
@@ -121,6 +130,12 @@ void visualBigDisplay::viewportMouseReleaseEvent(QMouseEvent *)
 			break;
 
 		case visualTopLevel::SELECT_PUT:
+ 			// erase rect
+			p.begin( viewport() );
+			p.setPen(pen);
+			p.setRasterOp(XorROP);
+			p.drawRect(oldPos.x(), oldPos.y(), putSize.width(), putSize.height() );
+			p.end();
 			break;
 
 	}
@@ -134,17 +149,6 @@ void visualBigDisplay::resizeEvent(QResizeEvent *e)
 	emit reSizeView (	QSize((width()+BO_TILE_SIZE-1)/BO_TILE_SIZE,
 				(height()+BO_TILE_SIZE-1)/BO_TILE_SIZE ) );
 }
-
-
-/*
-void visualBigDisplay::putSomething(void)
-{
-	vtl->setSelectionMode( visualTopLevel::SELECT_PUT);
-	oldPos = selectPos = QPoint(0,0);
-	vtl->unSelectFix();
-	return;
-}
-*/
 
 
 void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
@@ -182,6 +186,9 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 		if (!sfg) {
 			// nothing has been found : it's a ground-click
 			// Here, we have to draw a "selection box"...
+			if ( vtl->getSelectionMode() != visualTopLevel::SELECT_FILL)
+				return;
+			// else :
 			vtl->setSelectionMode( visualTopLevel::SELECT_RECT);
 			selectPos = oldPos = QPoint (e->x(), e->y());
 			vtl->unSelectFix();
@@ -217,6 +224,12 @@ void visualBigDisplay::viewportMousePressEvent(QMouseEvent *e)
 	} // LeftButton 
 
 
+}
+
+void visualBigDisplay::ready4put(QSize s)
+{
+	putSize = s;
+	oldPos = QPoint(-500, -500);
 }
 
 
