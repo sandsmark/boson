@@ -59,7 +59,7 @@ public:
 	void addSound(int id, const QString& file);
 
 	/**
-	 * @return boMusic->server();
+	 * @return boMusic->server(); see @ref BosonMusic::server
 	 **/
 	KArtsServer& server() const;
 
