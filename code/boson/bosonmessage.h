@@ -72,6 +72,7 @@ public:
 		MoveEditor = 200, // all editor moves/inputs are prefixed with this
 		MovePlaceUnit = 201,
 		MovePlaceCell = 202,
+		MoveChangeHeight = 203,
 
 
 	// the last message ID:

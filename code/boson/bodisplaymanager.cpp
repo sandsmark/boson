@@ -301,6 +301,7 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  } else {
 	b->setDisplayInput(new EditorBigDisplayInput(b));
  }
+ connect(b->displayInput(), SIGNAL(signalLockAction(bool)), this, SIGNAL(signalLockAction(bool)));
  d->mDisplayList.append(b);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)), 
 		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));

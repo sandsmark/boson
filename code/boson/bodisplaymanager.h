@@ -171,6 +171,11 @@ signals:
 	 **/
 	void signalActiveDisplay(BosonBigDisplayBase* active, BosonBigDisplayBase* old);
 
+	/**
+	 * See @ref BosonBigDisplayInputBase::signalLockAction
+	 **/
+	void signalLockAction(bool);
+
 protected:
 	BosonBigDisplayBase* addDisplay(QWidget* parent);
 	BoBox* findBox(BosonBigDisplayBase*) const;

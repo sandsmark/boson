@@ -99,6 +99,16 @@ public:
 	 **/
 	float* heightMap() const;
 
+	/**
+	 * See @ref BosonMap::setHeightAtCorner
+	 **/
+	void setHeightAtCorner(int x, int y, float height);
+
+	/**
+	 * @return BosonMap::heightAtCorner
+	 **/
+	float heightAtCorner(int x, int y) const;
+
 	void addAnimation(BosonItem* item);
 	void removeAnimation(BosonItem* item);
 	unsigned int animationsCount() const;

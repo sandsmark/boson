@@ -781,6 +781,21 @@ float* BosonCanvas::heightMap() const
  return map() ? map()->heightMap() : 0;
 }
 
+void BosonCanvas::setHeightAtCorner(int x, int y, float height)
+{
+ BO_CHECK_NULL_RET(map());
+ map()->setHeightAtCorner(x, y, height);
+}
+
+float BosonCanvas::heightAtCorner(int x, int y) const
+{
+ if (!map()) {
+	BO_NULL_ERROR(map());
+	return 1.0f;
+ }
+ return map()->heightAtCorner(x, y);
+}
+
 void BosonCanvas::killPlayer(Player* player)
 {
  while (player->allUnits()->count() > 0) {

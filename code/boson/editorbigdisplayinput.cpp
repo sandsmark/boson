@@ -158,6 +158,11 @@ void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& s
 			*send = true;
 		}
 		return;
+	} else if (actionType() == ActionChangeHeight) {
+		bool up = !action.controlButton();
+		if (actionChangeHeight(stream, action.canvasPos(), up)) {
+			*send = true;
+		}
 	}
  }
 }
@@ -232,6 +237,51 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const QPoint& canva
 	// setModified(true);
  }
  return ret;
+}
+
+bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const QPoint& canvasPos, bool up)
+{
+ boDebug() << k_funcinfo << endl;
+ if (!canvas()) {
+	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!canvas()->onCanvas(canvasPos)) {
+	return false;
+ }
+ int cellX = canvasPos.x() / BO_TILE_SIZE;
+ int cellY = canvasPos.y() / BO_TILE_SIZE;
+ if (!canvas()->cell(cellX, cellY)) {
+	return false;
+ }
+ int cornerX = 0;
+ int cornerY = 0;
+ // we need the corner that was clicked, not the cell!
+ if (canvasPos.x() % BO_TILE_SIZE >= BO_TILE_SIZE) {
+	// a right corner
+	cornerX = cellX + 1;
+ } else {
+	cornerX = cellX;
+ }
+ if (canvasPos.x() % BO_TILE_SIZE >= BO_TILE_SIZE) {
+	cornerY = cellY + 1;
+ } else {
+	cornerY = cellY;
+ }
+
+ float height = canvas()->heightAtCorner(cornerX, cornerY);
+ if (up) {
+	height += 0.5f;
+ } else {
+	height -= 0.5f;
+ }
+ stream << (Q_UINT32)BosonMessage::MoveEditor;
+ stream << (Q_UINT32)BosonMessage::MoveChangeHeight;
+ stream << (Q_UINT32)1; // we change one corner only
+ stream << (Q_INT32)cornerX;
+ stream << (Q_INT32)cornerY;
+ stream << (float)height;
+ return true;
 }
 
 // the place*() methods get called when an item in (e.g.) the commandframe is
@@ -312,7 +362,8 @@ void EditorBigDisplayInput::unitAction(int actionType)
  boDebug() << k_funcinfo << actionType << endl;
  switch (actionType) {
 	case ActionBuild:
-		setActionType(ActionBuild);
+	case ActionChangeHeight:
+		setActionType((UnitAction)actionType);
 		lockAction();
 		break;
 	default:
