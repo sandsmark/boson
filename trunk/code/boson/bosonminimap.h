@@ -50,6 +50,11 @@ public:
 
 	void setLocalPlayer(Player*);
 	
+	/**
+	 * Display only those parts of the map that are visible to the player
+	 * @param p Display this players sight. If NULL show the entire map
+	 **/
+	void initFogOfWar(Player* p);
 
 signals:
 	void signalReCenterView(const QPoint& pos);

@@ -76,12 +76,10 @@ Unit::Unit(int type, Player* owner, QCanvas* canvas)
 
 Unit::~Unit()
 {
-// kdDebug() << k_funcinfo << endl;
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
  delete d;
-// kdDebug() << k_funcinfo << " done" << endl;
 }
 
 void Unit::select()
@@ -560,7 +558,6 @@ void MobileUnit::advanceMove()
  int y = position.center().y();
  double xspeed = 0;
  double yspeed = 0;
-// kdDebug() << "advancemove" << endl;
 
  // First check if we're at waypoint
  if((x == wp.x()) && (y == wp.y()))
@@ -808,3 +805,4 @@ void Facility::advanceProduction()
 	d->mProductionState = d->mProductionState + 1;
  }
 }
+
