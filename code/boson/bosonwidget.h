@@ -83,7 +83,7 @@ public:
 
 	BosonCanvas* canvas() const;
 	inline BosonMiniMap* minimap() const { return mMiniMap; }
-	inline BoDisplayManager* displaymanager() const { return mDisplayManager; }
+	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Boson* game() const;
 	BosonPlayField* playField() const;
 	Player* player() const;
