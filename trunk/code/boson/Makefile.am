@@ -155,6 +155,7 @@ boprofiling_SOURCES = \
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
 		-lkio $(LIB_KDEUI) $(GLLIB)
 bocursor_SOURCES = \
 		boapplication.cpp \
