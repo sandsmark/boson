@@ -174,7 +174,7 @@ CursorMode BosonConfig::readCursorMode(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int mode = conf->readNumEntry("CursorMode", CursorKDE);//AB: maybe change to CursorSprite again, once the crash that appears sometimes is fixed
+ int mode = conf->readNumEntry("CursorMode", CursorSprite);
  conf->setGroup(oldGroup);
  return (CursorMode)mode;
 }
