@@ -138,6 +138,7 @@ void BosonLoadingWidget::setTotalSteps(int steps)
 void BosonLoadingWidget::setTotalSteps(int steps, int playerCount)
 {
  steps += playerCount * unitDataLoadingFactor();
+ setTotalSteps(steps);
 }
 
 void BosonLoadingWidget::showProgressBar(bool show)
