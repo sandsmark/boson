@@ -73,7 +73,7 @@ public:
 		CommandBunker = 10
 	};
 
-	UnitProperties();
+	UnitProperties(bool fullmode = true);
 	UnitProperties(SpeciesTheme*);
 
 	/**
@@ -359,9 +359,15 @@ protected:
 	void setCanGoOnWater(bool c);
 
 	void clearPlugins();
+
 	void createMobileProperties();
 	void createFacilityProperties();
+
+	void reset();
+
 	void addPlugin(PluginProperties* prop);
+	void addTextureMapping(QString shortname, QString longname);
+	void addSound(int event, QString filename);
 
 	TerrainType terrainType() const  { return mTerrain; };
 

@@ -86,14 +86,14 @@ public:
 	virtual void savePlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Production; }
 
-	QValueList<int> producerList() const { return mProducerList; }
+	QValueList<unsigned long int> producerList() const { return mProducerList; }
 
 protected:
-	void setProducerList(QValueList<int> list)  { mProducerList = list; }
+	void setProducerList(QValueList<unsigned long int> list)  { mProducerList = list; }
 	friend class BoUnitEditor;
 
 private:
-	QValueList<int> mProducerList;
+	QValueList<unsigned long int> mProducerList;
 };
 
 class RepairProperties : public PluginProperties

@@ -22,6 +22,7 @@
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "bodebug.h"
+#include "bosonconfig.h"
 
 #include <klocale.h>
 #include <ksimpleconfig.h>
@@ -102,13 +103,13 @@ void ProductionProperties::loadPlugin(KSimpleConfig* config)
 	return;
  }
  config->setGroup(propertyGroup());
- mProducerList = config->readIntListEntry("ProducerList");
+ mProducerList = BosonConfig::readUnsignedLongNumList(config, "ProducerList");
 }
 
 void ProductionProperties::savePlugin(KSimpleConfig* config)
 {
  config->setGroup(propertyGroup());
- config->writeEntry("ProducerList", mProducerList);
+ BosonConfig::writeUnsignedLongNumList(config, "ProducerList", mProducerList);
 }
 
 
