@@ -221,5 +221,31 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
 
 int Cell::moveCost() const
 {
- return 0;
+ int cost = 0;
+ switch (groundType()) {
+	case GroundDeepWater:
+		cost = 0;
+		break;
+	case GroundWater:
+		cost = 0;
+		break;
+	case GroundGrass:
+		cost = 0;
+		break;
+	case GroundDesert:
+		cost = 1;
+		break;
+	case GroundGrassMineral:
+		cost = 3;
+		break;
+	case GroundGrassOil:
+		cost = 2;
+		break;
+	case GroundUnknown:
+	default:
+		kdWarning() << k_funcinfo << ": invalid ground" << endl;
+		cost = 0;
+		break;
+ }
+ return cost;
 }
