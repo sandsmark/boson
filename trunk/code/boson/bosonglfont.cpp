@@ -107,13 +107,20 @@ int BosonGLFont::height(const QString& text, int maxWidth)
  return lines * height();
 }
 
-int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth)
+int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth, bool background)
 {
  int w = width(text);
  const int len = text.length();
  GLubyte* string = (GLubyte*)text.latin1();
  // we must never ever use more height than height(..) claims we do
  int maxHeight = height(text, maxWidth);
+ if (background) {
+	glEnable(GL_BLEND);
+	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+	glRecti(x, y - maxHeight, x + w, y);
+	glDisable(GL_BLEND);
+	glColor3ub(255, 255, 255);
+ }
  if (w < maxWidth) {
 	glRasterPos2i(x, y - maxHeight);
 	glCallLists(len, GL_UNSIGNED_BYTE, string);

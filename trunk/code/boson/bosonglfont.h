@@ -77,10 +77,13 @@ public:
 	 * @param x The left position of the text
 	 * @param y The position directly <em>above</em> the text. This function
 	 * won't render text above y, but below only.
+	 * @param background If TRUE this will add an alpha blended background
+	 * of the text so that it is even visible if the background color of the
+	 * screen is the same as the text color.
 	 * @return The height that was needed to render the text. See also @ref
 	 * height
 	 **/
-	int renderText(int x, int y, const QString& text, int maxWidth);
+	int renderText(int x, int y, const QString& text, int maxWidth, bool background = true);
 
 protected:
 	/**
