@@ -56,9 +56,6 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mIsAnimated = false;
  mSelectBox = 0;
 
- // set the default animation mode
- setAnimationMode(0);
-
  if (mCanvas) {
 	mCanvas->addItem(this);
  } else {
@@ -70,6 +67,8 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
 	return;
  }
 
+ // set the default animation mode
+ setAnimationMode(0);
 
  // FIXME the correct frame must be set after this constructor!
  if (mGLConstructionStep >= glConstructionSteps()) {
