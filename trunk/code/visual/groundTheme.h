@@ -21,20 +21,16 @@
 #ifndef GROUNDTHEME_H 
 #define GROUNDTHEME_H 
 
-//#ifdef HAVE_CONFIG_H
-//#include <config.h>
-//#endif 
-
+#include <qstring.h>
 #include "../common/groundType.h"
 
-class QString;
 class QBitArray;
 class QPixmap;
 class QwSpritePixmapSequence;
 
 /** 
-  * This class handle drawing of the ground in the Boson player (client)
-  */
+ * This class is a ground-pixmap loader / cache
+ */
 class groundTheme
 {
 public:
@@ -44,16 +40,16 @@ public:
 	QwSpritePixmapSequence *getPixmap(groundType gt);
 
 private:
-	bool loadGround		(int i, const QString &path);
-	bool loadTransition	(int i);
+	void loadGround		(int i, const QString &path);
+	void loadTransition	(groundType gt);
 
 	QString		*themePath;
-	QBitArray	*transitions;
+	QString		transName[TRANS_LAST];
+	QBitArray	*pixLoaded;
 
 	QwSpritePixmapSequence **groundPix;
 
 };
-
 
 #endif // GROUNDTHEME_H
 
