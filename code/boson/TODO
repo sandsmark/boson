@@ -41,6 +41,8 @@ Game TODOs
 - Add screenshots support to saving/loading widget
 - call updateCursor() every advance call, so that the cursor changes also if a
   unit moved below it.
+- Add support for playing sound in a loop. E.g. for missile fly sound
+- Add support for miner sounds (mining/unloading)
 
 Editor (map, unit, scenario) TODOs
 - unit editor: add an additional page for the description of the unit (longer
@@ -90,4 +92,6 @@ Data TODOs
 - background story - especially descriptions of the units
 - maps
 - other species
-
+- sounds for miner (mining/unloading, maybe when player commands unit to mine)
+- better shooting sounds
+- explosion sounds
