@@ -34,6 +34,7 @@
 #include <qpainter.h>
 #include <qpushbutton.h>
 #include <qlayout.h>
+#include <qvaluelist.h>
 
 #include "bosonminimap.moc"
 
@@ -240,21 +241,107 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 
 void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
+ // x and y are canvas coordinates
+ moveUnit(unit, makeCellList(unit, x, y), QPointArray());
+}
+
+void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
+{
+ BO_CHECK_NULL_RET(unit)
+ QPointArray newCells = makeCellList(unit, unit->x(), unit->y());
+ QPointArray oldCells = makeCellList(unit, oldX, oldY);
+ moveUnit(unit, newCells, oldCells);
+}
+
+void BosonMiniMap::moveUnit(Unit* unit, const QPointArray& newCells, const QPointArray& oldCells)
+{
+ // all parameters use cell coordinates!
+ // note that using unit->x() and unit->y() as well as unit->cells() and such
+ // stuff can be undefined at this point! especially when adding units
+ // (oldX==oldY==-1)!
  BO_CHECK_NULL_RET(mLocalPlayer)
  BO_CHECK_NULL_RET(unit)
- // x and y are pixel coordinates
- x = x / BO_TILE_SIZE;
- y = y / BO_TILE_SIZE;
- if (mLocalPlayer->isFogged(x, y)) {
-	return;
+ BO_CHECK_NULL_RET(map())
+ if (newCells.count() == oldCells.count()) {
+	if (!unit->isDestroyed()) {
+		bool moved = false;
+		for (unsigned int i = 0; i < newCells.count() && !moved; i++) {
+			if (newCells[i] != oldCells[i]) {
+				moved = true;
+			}
+		}
+		if (!moved) {
+			// Unit is still on the same cells. Don't update (performance)
+			return;
+		}
+	} else {
+		// don't return - probably remove unit from the minimap
+	}
+ }
+
+ if (oldCells.count() != 0) {
+	// unit is moving.
+	// pretty much everything can happen here now. the cell that the unit
+	// left can be fogged for the local player, can have another unit, ...
+	// so we need to update all cells that the unit has left.
+	for (unsigned int i = 0; i < oldCells.count(); i++) {
+		bool found = false;
+		for (unsigned int j = 0; j < newCells.count(); j++) {
+			if (newCells[j] == oldCells[i]) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			updateCell(oldCells[i].x(), oldCells[i].y());
+		}
+	}
  }
  QColor color = unit->owner()->teamColor();
- if (unit->isFacility()) {
-	setPoint(x, y, color);
- } else {
+ for (unsigned int i = 0; i < newCells.count(); i++) {
+	int x = newCells[i].x();
+	int y = newCells[i].y();
+	if (x < 0 || x >= mapWidth() || y < 0 || y >= mapHeight()) {
+		continue;
+	}
+	if (mLocalPlayer && mLocalPlayer->isFogged(x, y)) {
+		// we don't call slotFog() here now, as it should be fogged
+		// already. maybe we should do this anyway?
+		continue;
+	}
 	setPoint(x, y, color);
  }
  d->mPixmap->repaint(false);
+}
+
+void BosonMiniMap::updateCell(int x, int y)
+{
+ BO_CHECK_NULL_RET(map())
+ BO_CHECK_NULL_RET(ground())
+ BO_CHECK_NULL_RET(mCanvas)
+ if (x < 0 || x >= mapWidth()) {
+	return;
+ }
+ if (y < 0 || y >= mapHeight()) {
+	return;
+ }
+ // AB: note that mLocalPlayer == NULL is valid in editor mode here!
+ if (mLocalPlayer) {
+	if (mLocalPlayer->isFogged(x, y)) {
+		slotFog(x, y);
+		return;
+	}
+ }
+ Cell* cell = map()->cell(x, y);
+ if (!cell) {
+	return;
+ }
+ QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
+ if (list.isEmpty()) {
+	changeCell(x, y, cell->groundType(), cell->version());
+ } else {
+	setPoint(x, y, list.first()->owner()->teamColor());
+ }
 }
 
 void BosonMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, const QPoint& bottomLeft, const QPoint& bottomRight)
@@ -299,27 +386,6 @@ void BosonMiniMap::initMap()
 	}
  }
  mUseFog = oldFog;
-}
-
-void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
-{
- BO_CHECK_NULL_RET(map())
- BO_CHECK_NULL_RET(mLocalPlayer)
- BO_CHECK_NULL_RET(unit)
- int x = (int)(oldX / BO_TILE_SIZE);
- int y = (int)(oldY / BO_TILE_SIZE);
- if ((x == (int)(unit->x() / BO_TILE_SIZE)) && (y == (int)(unit->y() / BO_TILE_SIZE))) {
-	// Unit is still on the same cell. Don't update (performance)
-	return;
- }
- if (!mLocalPlayer->isFogged(x, y)) {
-	Cell* cell = map()->cell(x, y);
-	BO_CHECK_NULL_RET(cell)
-	changeCell(x, y, cell->groundType(), cell->version());
- }
- x = (int)unit->x();
- y = (int)unit->y();
- slotAddUnit(unit, x, y);
 }
 
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
@@ -480,7 +546,7 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 		moveY[i / 2]  = -(mapHeight() - mapHeight() / zoom());
 	}
  }
- 
+
  // TODO: there are four different points which might be out of the display.
  // check all of them! remeber that it might be that if we move the display so
  // that the third point can be displayed the second might be out of the
@@ -520,5 +586,24 @@ void BosonMiniMap::createGround()
  p.scale(zoom() * scale(), zoom() * scale());
  p.drawPixmap(0, 0, *mUnZoomedGround);
  p.end();
+}
+
+QPointArray BosonMiniMap::makeCellList(Unit* unit, float x, float y)
+{
+ QPointArray array;
+ if (!unit) {
+	BO_NULL_ERROR(unit)
+	return QPointArray();
+ }
+ if (!map()) {
+	BO_NULL_ERROR(map())
+	return QPointArray();
+ }
+ int left, right, top, bottom;
+ BosonItem::leftTopCell(&left, &top, x, y);
+ BosonItem::rightBottomCell(&right, &bottom, x + unit->width() - 1, y + unit->height() - 1);
+ right = QMIN(right, QMAX((int)mapWidth() - 1, 0));
+ bottom = QMIN(bottom, QMAX((int)mapHeight() - 1, 0));
+ return BosonItem::cells(left, right, top, bottom);
 }
 

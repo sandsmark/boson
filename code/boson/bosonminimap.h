@@ -112,6 +112,19 @@ protected:
 	void createGround();
 
 	/**
+	 * Move a unit. If @p oldX or @p oldY are -1 then they are ignored
+	 * (added a unit)
+	 **/
+	void moveUnit(Unit* unit, int x, int y, int oldX, int oldY);
+	void moveUnit(Unit* unit, const QPointArray& newCells, const QPointArray& oldCells);
+
+	/**
+	 * Update the cell. Checks whether cell is fogged, checks for units on
+	 * the cell, ...
+	 **/
+	void updateCell(int x, int y);
+
+	/**
 	 * Change the groundtype and version of a cell. Note that at this point
 	 * you cannot be sure that the @ref BosonMap already has the new values
 	 * at this cell. Better use @p groundType.
@@ -142,6 +155,8 @@ protected:
 	 * @return The current map. See @ref BosonCanvas::map
 	 **/
 	BosonMap* map() const;
+
+	QPointArray makeCellList(Unit* unit, float x, float y);
 
 
 private:
