@@ -32,6 +32,8 @@ public:
 	double mSpeed;
 	bool mCanGoOnLand; // a nice candidate for bitfields...
 	bool mCanGoOnWater;
+	bool mCanMineMinerals;
+	bool mCanMineOil;
 };
 
 class FacilityProperties
@@ -128,6 +130,8 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
  d->mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0);
  d->mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand", (isLand() || isAircraft()));
  d->mMobileProperties->mCanGoOnWater = conf->readBoolEntry("CanGoOnWater", (isShip() || isAircraft()));
+ d->mMobileProperties->mCanMineMinerals = conf->readBoolEntry("CanMineMinerals", false);
+ d->mMobileProperties->mCanMineOil= conf->readBoolEntry("CanMineOil", false);
 }
 
 void UnitProperties::loadFacilityProperties(KSimpleConfig* conf)
@@ -212,3 +216,20 @@ unsigned int UnitProperties::productionTime() const
 {
  return mProductionTime;
 }
+
+bool UnitProperties::canMineMinerals() const
+{
+ if (!d->mMobileProperties) {
+	return false;
+ }
+ return d->mMobileProperties->mCanMineMinerals;
+}
+
+bool UnitProperties::canMineOil() const
+{
+ if (!d->mMobileProperties) {
+	return false;
+ }
+ return d->mMobileProperties->mCanMineOil;
+}
+

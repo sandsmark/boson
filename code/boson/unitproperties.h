@@ -179,6 +179,18 @@ public:
 	bool canProduce() const;
 
 	/**
+	 * @return TRUE if this unit can mine minerals. FALSE otherwise. Also
+	 * FALSE for facilities.
+	 **/
+
+	bool canMineMinerals() const;
+	/**
+	 * @return TRUE if this unit can mine oil. FALSE otherwise. Also
+	 * FALSE for facilities.
+	 **/
+	bool canMineOil() const;
+
+	/**
 	 * @return A list of units which can be produced by this facility (if
 	 * any).
 	 **/

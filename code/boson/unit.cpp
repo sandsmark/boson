@@ -207,8 +207,13 @@ void Unit::advance(int phase)
 
 void Unit::advanceMine()
 {
- kdDebug() << "mining not yet implemented" << endl;
- setWork(WorkNone);
+ if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassMineral) {
+	kdDebug() << "mining... minerals" << endl;
+ } else if (boCanvas()->cellAt(this)->groundType() == Cell::GroundGrassOil) {
+	kdDebug() << "mining... oil" << endl;
+ } else {
+	setWork(WorkNone);
+ }
 }
 
 void Unit::advanceNone()
