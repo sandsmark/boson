@@ -36,11 +36,13 @@
 #include <qptrdict.h>
 #include <qvgroupbox.h>
 #include <qgrid.h>
+#include <qheader.h>
 
 #include <klistbox.h>
 #include <klistview.h>
 #include <klocale.h>
 #include <kdebug.h>
+#include <kpopupmenu.h>
 
 #include <lib3ds/file.h>
 #include <lib3ds/node.h>
@@ -97,7 +99,6 @@ public:
 
 	void setMatrix(Lib3dsMatrix m)
 	{
-		kdDebug() << k_funcinfo << endl;
 		BoMatrix matrix;
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
@@ -275,20 +276,113 @@ private:
 	QLabel* mWireSize;
 };
 
-class BoTextureWidget : public QWidget
+class BoFaceView : public KListView
 {
 public:
-	BoTextureWidget(QWidget* parent) : QWidget(parent)
+	BoFaceView(QWidget* parent) : KListView(parent)
+	{
+		QFontMetrics metrics(font());
+		setShowToolTips(true);
+		addColumn(i18n("Point1"));
+		addColumn(i18n("Point2"));
+		addColumn(i18n("Point3"));
+
+		// we try to keep the size as low as possible here - the list is
+		// too wide anyway.
+		// the titles won't be displayed, but the content should display
+		// fine at least in most cases.
+		addColumn(i18n("Material"), metrics.width(i18n("Material")));
+		addColumn(i18n("Flags"), metrics.width(QString::number(11)));
+		addColumn(i18n("Smoothing"), metrics.width(QString::number(1111)));
+		addColumn(i18n("Normal"), metrics.width(QString::number(11111)));
+
+		resize(100, height());
+	}
+
+	~BoFaceView()
 	{
 	}
 
-	~BoTextureWidget()
+	QListViewItem* addFace(Lib3dsFace* face, Lib3dsMesh* mesh)
 	{
+		QListViewItem* item = new QListViewItem(this);
+		for (int j = 0; j < 3; j++) {
+			Lib3dsVector v;
+			lib3ds_vector_copy(v, mesh->pointL[ face->points[j] ].pos);
+			item->setText(j, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
+		}
+		item->setText(3, face->material);
+		QString flags = QString::number(face->flags);
+		item->setText(4, flags);
+		item->setText(5, QString::number(face->smoothing));
+		item->setText(6, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+		return item;
 	}
-
-private:
-	
 };
+
+BoListView::BoListView(QWidget* parent) : KListView(parent)
+{
+ mPopup = 0;
+}
+
+BoListView::~BoListView()
+{
+}
+
+void BoListView::allowHide(int column)
+{
+ if (!mPopup) {
+	header()->setClickEnabled(true);
+	header()->installEventFilter(this);
+	mPopup = new KPopupMenu(this);
+	mPopup->insertTitle(i18n("View columns"));
+	mPopup->setCheckable(true);
+
+	connect(mPopup, SIGNAL(activated(int)), this, SLOT(slotToggleHideColumn(int)));
+ }
+ if (column < 0) {
+	for (int i = 0; i < columns(); i++) {
+		allowHide(i);
+	}
+ } else {
+	mPopup->insertItem(columnText(column), column);
+	mPopup->setItemChecked(column, true);
+
+	kdDebug() << k_funcinfo << columnText(column) << "==" << column << endl;
+ }
+}
+
+void BoListView::slotToggleHideColumn(int id)
+{
+ kdDebug() << k_funcinfo << id << endl;
+ if (!mPopup) {
+	kdWarning() << k_funcinfo << "NULL popup menu" << endl;
+	return;
+ }
+ if (mPopup->indexOf(id) == -1) {
+	kdError() << k_funcinfo << "Invalid id " << id << endl;
+	return;
+ }
+ bool hide = mPopup->isItemChecked(id);
+ mPopup->setItemChecked(id, !hide);
+ if (hide) {
+	removeColumn(id);
+ } else {
+	addColumn("test1");
+ }
+}
+
+bool BoListView::eventFilter(QObject* o, QEvent* e)
+{
+ // shamelessy stolen from KMail :)
+ if (mPopup && (e->type() == QEvent::MouseButtonPress &&
+		static_cast<QMouseEvent*>(e)->button() == RightButton &&
+		o->isA("QHeader"))) {
+	mPopup->popup( static_cast<QMouseEvent*>(e)->globalPos() );
+	return true;
+ }
+ return KListView::eventFilter(o, e);
+}
 
 class KGameModelDebug::KGameModelDebugPrivate
 {
@@ -307,6 +401,8 @@ public:
 
 		mMeshView = 0;
 		mFaceList = 0;
+		mConnectedFacesList = 0;
+		mUnconnectedFacesList = 0;
 		mMeshMatrix = 0;
 
 		m3ds = 0;
@@ -327,7 +423,10 @@ public:
 
 	KListView* mMeshView;
 	QPtrDict<Lib3dsMesh> mListItem2Mesh;
-	KListView* mFaceList;
+	QPtrDict<Lib3dsFace> mListItem2Face;
+	BoFaceView* mFaceList;
+	BoFaceView* mConnectedFacesList;
+	BoFaceView* mUnconnectedFacesList;
 	BoMatrixWidget* mMeshMatrix;
 
 	int mCurrentItem;
@@ -375,6 +474,7 @@ void KGameModelDebug::initMaterialPage()
  d->mMaterialBox = new KListBox(d->mMaterialPage);
  connect(d->mMaterialBox, SIGNAL(executed(QListBoxItem*)), this, SLOT(slotDisplayMaterial(QListBoxItem*)));
  l->addWidget(d->mMaterialBox, 0);
+ QFontMetrics metrics(font());
 
  d->mMaterialData = new BoMaterialWidget(d->mMaterialPage);
  l->addWidget(d->mMaterialData, 1);
@@ -383,17 +483,18 @@ void KGameModelDebug::initMaterialPage()
  l->addWidget(d->mTextureView, 1);
  d->mTextureView->addColumn(i18n("Map"));
  d->mTextureView->addColumn(i18n("Name"));
- d->mTextureView->addColumn(i18n("Flags"));
- d->mTextureView->addColumn(i18n("Percent"));
- d->mTextureView->addColumn(i18n("Blur"));
- d->mTextureView->addColumn(i18n("Scale"));
- d->mTextureView->addColumn(i18n("Offset"));
- d->mTextureView->addColumn(i18n("Rotation"));
- d->mTextureView->addColumn(i18n("Tint1"));
- d->mTextureView->addColumn(i18n("Tint2"));
- d->mTextureView->addColumn(i18n("Tint_R"));
- d->mTextureView->addColumn(i18n("Tint_G"));
- d->mTextureView->addColumn(i18n("Tint_B"));
+ d->mTextureView->addColumn(i18n("Flags"), metrics.width(QString::number(111)));
+ d->mTextureView->addColumn(i18n("Percent"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Blur"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Scale"), metrics.width(QString::number(1111111)));
+ d->mTextureView->addColumn(i18n("Offset"), metrics.width(QString::number(1111111)));
+ d->mTextureView->addColumn(i18n("Rotation"), metrics.width(QString::number(111)));
+ d->mTextureView->addColumn(i18n("Tint1"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Tint2"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Tint_R"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Tint_G"), metrics.width(QString::number(11)));
+ d->mTextureView->addColumn(i18n("Tint_B"), metrics.width(QString::number(11)));
+ d->mTextureView->setMinimumWidth(100);
 
  d->mTabWidget->addTab(d->mMaterialPage, i18n("M&aterials"));
 }
@@ -402,31 +503,34 @@ void KGameModelDebug::initMeshPage()
 {
  d->mMeshPage = new QWidget(d->mTabWidget);
  QHBoxLayout* l = new QHBoxLayout(d->mMeshPage, 10, 10);
+ QFontMetrics metrics(font());
 
  QVBoxLayout* meshViewLayout = new QVBoxLayout();
  l->addLayout(meshViewLayout, 0);
  d->mMeshView = new KListView(d->mMeshPage);
- d->mMeshView->addColumn(i18n("Name"));
- d->mMeshView->addColumn(i18n("Color"));
- d->mMeshView->addColumn(i18n("Points count"));
- d->mMeshView->addColumn(i18n("Texels count"));
- d->mMeshView->addColumn(i18n("Faces count"));
- d->mMeshView->addColumn(i18n("Flags count"));
+ d->mMeshView->addColumn(i18n("Name"), metrics.width(i18n("Name")));
+ d->mMeshView->addColumn(i18n("Color"), metrics.width(QString::number(111)));
+ d->mMeshView->addColumn(i18n("Points count"), metrics.width(QString::number(111)));
+ d->mMeshView->addColumn(i18n("Texels count"), metrics.width(QString::number(111)));
+ d->mMeshView->addColumn(i18n("Faces count"), metrics.width(QString::number(111)));
+ d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
  meshViewLayout->addWidget(d->mMeshView);
+ d->mMeshView->resize(d->mMeshView->height(), 150);
 
  QVBoxLayout* faceLayout = new QVBoxLayout();
  l->addLayout(faceLayout, 1);
- d->mFaceList = new KListView(d->mMeshPage);
- d->mFaceList->setShowToolTips(true);
- d->mFaceList->addColumn(i18n("Point1"));
- d->mFaceList->addColumn(i18n("Point2"));
- d->mFaceList->addColumn(i18n("Point3"));
- d->mFaceList->addColumn(i18n("Material"));
- d->mFaceList->addColumn(i18n("Flags"));
- d->mFaceList->addColumn(i18n("Smoothing"));
- d->mFaceList->addColumn(i18n("Normal"));
+ d->mFaceList = new BoFaceView(d->mMeshPage);
+ connect(d->mFaceList, SIGNAL(executed(QListViewItem*)), this, SLOT(slotConnectToFace(QListViewItem*)));
+ QLabel* connectableLabel = new QLabel(i18n("Connectable to selected face:"), d->mMeshPage);
+ d->mConnectedFacesList = new BoFaceView(d->mMeshPage);
+ QLabel* unconnectableLabel = new QLabel(i18n("Unconnectable to selected face:"), d->mMeshPage);
+ d->mUnconnectedFacesList = new BoFaceView(d->mMeshPage);
  faceLayout->addWidget(d->mFaceList);
+ faceLayout->addWidget(connectableLabel);
+ faceLayout->addWidget(d->mConnectedFacesList);
+ faceLayout->addWidget(unconnectableLabel);
+ faceLayout->addWidget(d->mUnconnectedFacesList);
 
  QVBoxLayout* meshDataLayout = new QVBoxLayout();
  l->addLayout(meshDataLayout);
@@ -494,6 +598,7 @@ void KGameModelDebug::updateMaterialPage()
  d->mMaterialBox->clear();
  d->mMaterialData->setMaterial(0);
  d->mTextureView->clear();
+ d->mListItem2Material.clear();
  if (!d->m3ds) {
 	return;
  }
@@ -509,6 +614,8 @@ void KGameModelDebug::updateMeshPage()
 {
  d->mMeshView->clear();
  d->mFaceList->clear();
+ d->mListItem2Mesh.clear();
+ d->mListItem2Face.clear();
 
  if (!d->m3ds) {
 	return;
@@ -520,6 +627,7 @@ void KGameModelDebug::slotConstructMeshList()
 {
  kdDebug() << k_funcinfo << endl;
  d->mMeshView->clear();
+ d->mListItem2Mesh.clear();
  if (!d->m3ds) {
 	return;
  }
@@ -540,6 +648,7 @@ void KGameModelDebug::slotConstructMeshList()
 void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
 {
  d->mFaceList->clear();
+ d->mListItem2Face.clear();
 
  Lib3dsMesh* mesh = d->mListItem2Mesh[item];
  if (!mesh) {
@@ -550,17 +659,8 @@ void KGameModelDebug::slotDisplayMesh(QListViewItem* item)
  // faces
  for (unsigned int i = 0; i < mesh->faces; i++) {
 	Lib3dsFace* face = &mesh->faceL[i];
-	QListViewItem* item = new QListViewItem(d->mFaceList);
-	for (int j = 0; j < 3; j++) {
-		Lib3dsVector v;
-		lib3ds_vector_copy(v, mesh->pointL[ face->points[j] ].pos);
-		item->setText(j, QString("%1;%2;%3").arg(v[0]).arg(v[1]).arg(v[2]));
-	}
-	item->setText(3, face->material);
-	QString flags = QString::number(face->flags);
-	item->setText(4, flags);
-	item->setText(5, QString::number(face->smoothing));
-	item->setText(6, QString("%1;%2;%3").arg(face->normal[0]).arg(face->normal[1]).arg(face->normal[2]));
+	QListViewItem* item = d->mFaceList->addFace(face, mesh);
+	d->mListItem2Face.insert(item, face);
  }
 
  // mesh->matrix
@@ -630,5 +730,33 @@ void KGameModelDebug::addTextureMap(const QString& name, _Lib3dsTextureMap* t)
  item->setText(10, rgbText(t->tint_r));
  item->setText(11, rgbText(t->tint_g));
  item->setText(12, rgbText(t->tint_b));
+}
+
+void KGameModelDebug::slotConnectToFace(QListViewItem* item)
+{
+ Lib3dsFace* face = d->mListItem2Face[item];
+ d->mConnectedFacesList->clear();
+ d->mUnconnectedFacesList->clear();
+ if (!face) {
+	kdWarning() << k_funcinfo << "NULL face" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << endl;
+ QPtrList<Lib3dsFace> connected;
+ Lib3dsMesh* mesh = d->mListItem2Mesh[d->mMeshView->selectedItem()];
+ if (!mesh) {
+	kdError() << k_funcinfo << "NULL mesh" << endl;
+	return;
+ }
+ BosonModel::findAdjacentFaces(&connected, mesh, face);
+ QPtrList<Lib3dsFace> faces;
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* f = &mesh->faceL[i];
+	if (connected.contains(f)) {
+		d->mConnectedFacesList->addFace(f, mesh);
+	} else {
+		d->mUnconnectedFacesList->addFace(f, mesh);
+	}
+ }
 }
 

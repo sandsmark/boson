@@ -19,9 +19,6 @@
 #ifndef BOSONMODEL_H
 #define BOSONMODEL_H
 
-#include <qmap.h>
-#include <qvaluelist.h>
-#include <qintdict.h>
 #include <GL/gl.h>
 
 #include <lib3ds/types.h>
@@ -29,6 +26,11 @@
 class BosonModelTextures;
 class KSimpleConfig;
 class QColor;
+class QString;
+class QStringList;
+class BoVector3;
+template<class T> class QPtrList; //hmm is this working for all compilers? can templates be forwarded safely?
+template<class T, class T2> class QMap;
 
 /**
  * This class represents the Frame* entries in the index.desktop files. Here you
@@ -118,16 +120,16 @@ public:
 	void generateConstructionLists();
 
 	BoFrame* frame(unsigned int frame) const;
-	inline unsigned int frames() const { return mFrames.count(); }
+	unsigned int frames() const;
 
 	BoFrame* constructionStep(unsigned int step);
-	inline unsigned int constructionSteps() const { return mConstructionSteps.count(); }
+	unsigned int constructionSteps() const;
 
 	/**
 	 * Since .3ds files seem to supprt filenames of 8+3 chars only you can
 	 * provide a map which assigns longer names here.
 	 **/
-	void setLongNames(QMap<QString, QString> names) { mTextureNames = names; }
+	void setLongNames(QMap<QString, QString> names);
 
 	static void reloadAllTextures();
 
@@ -165,7 +167,19 @@ public:
 	 * @return The animation assigned to @p mode. See @ref
 	 * insertAnimationMode. 
 	 **/
-	BosonAnimation* animation(int mode) const { return mAnimations[mode]; }
+	BosonAnimation* animation(int mode) const;
+
+	/**
+	 * @return The absolute filename to the .3ds file of this model.
+	 **/
+	QString file() const;
+
+	/**
+	 * @return A list of all textures used in this model. Note that these
+	 * are the plain names, i.e. not necessarily the final filenames. Use
+	 * @ref cleanTextureName to receive the final fileName.
+	 **/
+	static QStringList textures(Lib3dsFile* file);
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
@@ -214,13 +228,30 @@ protected:
 	 * from the .3ds file to the "long name" that can be specified e.g. in
 	 * units index.desktop files. See setLongNames
 	 **/
-	QString cleanTextureName(const char* name);
+	QString cleanTextureName(const char* name) const;
 
 	/**
 	 * @return The directory that contains the .3ds file. Usually the unit
 	 * directory
 	 **/
-	const QString& baseDirectory() const { return mDirectory; }
+	const QString& baseDirectory() const;
+
+public:
+	/**
+	 * @return Whether the triangle @p face1 is adjacent to the triangle @p
+	 * face2. That means that at least 2 points (i.e. vectors) are equal.
+	 **/
+	static bool isAdjacent(BoVector3* face1, BoVector3* face2);
+
+	/**
+	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.
+	 * The search will start at @p search if @p search is non-NULL,
+	 * otherwise the first face of @p mesh is used.
+	 *
+	 * Once an adjacent face is found this function also searches for
+	 * adjacent faces of the new face and so on.
+	 **/
+	static void findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMesh* mesh, Lib3dsFace* search = 0);
 
 	/**
 	 * @param v A single vector
@@ -228,33 +259,33 @@ protected:
 	void dumpVector(Lib3dsVector v);
 
 	/**
-	 * @param v An array of 3 Lib3dsVector
+	 * @param v An array of 3 BoVector3
 	 * @param texture none if 0, otherwise the textue object
 	 * @param tex if texture is non-null this must be the texture
 	 * coordinates (array of 3) as provided for glTexCoord*()
 	 **/
-	void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
+	static void dumpTriangle(BoVector3* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
+	static void dumpTriangle(Lib3dsVector* v, GLuint texture = 0, Lib3dsTexel* tex = 0);
 
 private:
 	void init();
 
 private:
+	class Private;
+	friend class KGameModelDebug;
+
+private:
 	static BosonModelTextures* mModelTextures;
 
-	QString mDirectory;
-	QString mFile;
+	Private* d;
 	Lib3dsFile* m3ds;
 
-	QMap<QString, QString> mTextureNames;
-	QIntDict<BoFrame> mFrames;
-	QIntDict<BoFrame> mConstructionSteps;
-	QValueList<GLuint> mNodeDisplayLists;
 	QColor* mTeamColor;
-
-	QIntDict<BosonAnimation> mAnimations;
 
 	float mWidth;
 	float mHeight;
 };
+
+
 #endif
 
