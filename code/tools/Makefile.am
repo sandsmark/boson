@@ -19,17 +19,21 @@
 ############################################################################
 
 # include files
-INCLUDES= $(all_includes)
+INCLUDES= $(all_includes) -I../visual
 
 #LDFLAGS =  -s 
 
-noinst_PROGRAMS = createGround
+noinst_PROGRAMS = createGround stats
 
 METASOURCES = AUTO
 
 createGround_SOURCES = createGround.cpp
 createGround_LDADD   = ../common/libboson.a -lqt
 createGround_LDFLAGS = $(all_libraries) $(KDE_RPATH)
+
+stats_SOURCES = stats.cpp
+stats_LDADD   = -lqt
+stats_LDFLAGS = 
 
 #basic.bpf
 data_DATA = earth.png
