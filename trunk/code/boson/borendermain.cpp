@@ -353,6 +353,7 @@ void ModelPreview::initUfoGUI()
  topWidget->addWidget(camera);
 #endif
  topWidget->addWidget(defaults);
+ topWidget->addWidget(new BoUfoWidget()); // takes all remaining space
 
  updateMeshUnderMouseLabel();
 
