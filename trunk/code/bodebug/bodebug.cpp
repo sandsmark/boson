@@ -73,7 +73,8 @@ static KStaticDeleter< QIntDict<BoDebugEntry> > kdd;
 
 static QString getDescrFromNum(unsigned int _num)
 {
-  if (!KDebugCache) {
+  if (!KDebugCache)
+  {
     kdd.setObject(KDebugCache, new QIntDict<BoDebugEntry>);
     // Do not call this deleter from ~KApplication
     KGlobal::unregisterStaticDeleter(&kdd);
@@ -82,19 +83,25 @@ static QString getDescrFromNum(unsigned int _num)
 
   BoDebugEntry *ent = KDebugCache->find( _num );
   if ( ent )
+  {
     return ent->descr;
+  }
 
   if ( !KDebugCache->isEmpty() ) // areas already loaded
+  {
     return QString::null;
+  }
 
   QString filename(locate("config","bodebug.areas"));
-  if (filename.isEmpty()) {
+  if (filename.isEmpty())
+  {
     qDebug("oops - bodebug.areas not found! check your installation!");
     QMessageBox::critical( 0L, i18n("Fatal error"), i18n("bodebug.areas not found!\nCheck your installation!"));
     exit(1);
   }
   QFile file(filename);
-  if (!file.open(IO_ReadOnly)) {
+  if (!file.open(IO_ReadOnly))
+  {
     qWarning("Couldn't open %s", filename.local8Bit().data());
     file.close();
     return "";
@@ -105,34 +112,46 @@ static QString getDescrFromNum(unsigned int _num)
 
   QTextStream *ts = new QTextStream(&file);
   ts->setEncoding( QTextStream::Latin1 );
-  while (!ts->eof()) {
+  while (!ts->eof())
+  {
     const QString data(ts->readLine());
     int i = 0;
     int len = data.length();
 
     QChar ch = data[0];
-    if (ch == '#' || ch.isNull()) {
+    if (ch == '#' || ch.isNull())
+    {
       continue;
     }
-    while (ch.isSpace()) {
+    while (ch.isSpace())
+    {
       if (!(i < len))
+      {
         continue;
+      }
       ++i;
       ch = data[i];
     }
-    if (ch.isNumber()) {
+    if (ch.isNumber())
+    {
       int numStart = i ;
-      while (ch.isNumber())  {
+      while (ch.isNumber())
+      {
         if (!(i < len))
+        {
           continue;
+        }
         ++i;
         ch = data[i];
       }
       number = data.mid(numStart,i).toULong(&longOK);
     }
-    while (ch.isSpace()) {
+    while (ch.isSpace())
+    {
       if (!(i < len))
+      {
         continue;
+      }
       ++i;
       ch = data[i];
     }
@@ -147,7 +166,9 @@ static QString getDescrFromNum(unsigned int _num)
 
   ent = KDebugCache->find( _num );
   if ( ent )
+  {
       return ent->descr;
+  }
 
   return QString::null;
 }
@@ -184,17 +205,26 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       //AB: this is necessary here, otherwise all output with area 0 won't be
       //prefixed with anything, unless something with area != 0 is called before
       if ( KGlobal::_instance )
+      {
         boDebug_data->aAreaName = KGlobal::instance()->instanceName();
+      }
   }
 
-  if (boDebug_data->config && boDebug_data->oldarea != nArea) {
+  if (boDebug_data->config && boDebug_data->oldarea != nArea)
+  {
     boDebug_data->config->setGroup( QString::number(static_cast<int>(nArea)) );
     boDebug_data->oldarea = nArea;
     if ( nArea > 0 && KGlobal::_instance )
+    {
       boDebug_data->aAreaName = getDescrFromNum(nArea);
+    }
     if ((nArea == 0) || boDebug_data->aAreaName.isEmpty())
+    {
       if ( KGlobal::_instance )
+      {
         boDebug_data->aAreaName = KGlobal::instance()->instanceName();
+      }
+    }
   }
 
   int nPriority = 0;
@@ -234,7 +264,9 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
   // If the application doesn't have a QApplication object it can't use
   // a messagebox.
   if (!kapp && (nOutput == 1))
+  {
     nOutput = 2;
+  }
 
   // Output
   switch( nOutput )
@@ -264,16 +296,24 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       char buf[BUFSIZE] = "";
       int nSize;
       if ( !boDebug_data->aAreaName.isEmpty() )
+      {
         nSize = snprintf( buf, BUFSIZE, "%s: %s", boDebug_data->aAreaName.ascii(), data);
+      }
       else
+      {
         nSize = snprintf( buf, BUFSIZE, "%s", data);
+      }
 
       QFile aOutputFile( aOutputFileName );
       aOutputFile.open( IO_WriteOnly | IO_Append );
       if ( ( nSize == -1 ) || ( nSize >= BUFSIZE ) )
+      {
         aOutputFile.writeBlock( buf, BUFSIZE-1 );
+      }
       else
+      {
         aOutputFile.writeBlock( buf, nSize );
+      }
       aOutputFile.close();
       break;
     }
@@ -282,7 +322,9 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       // Since we are in kdecore here, we cannot use KMsgBox and use
       // QMessageBox instead
       if ( !boDebug_data->aAreaName.isEmpty() )
+      {
         aCaption += QString("(") + boDebug_data->aAreaName + ")";
+      }
       QMessageBox::warning( 0L, aCaption, data, i18n("&OK") );
       break;
     }
@@ -297,7 +339,9 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       // Uncomment this to get the pid of the app in the output (useful for e.g. kioslaves)
       // if ( !boDebug_data->aAreaName.isEmpty() ) fprintf( output, "%d %s: ", (int)getpid(), boDebug_data->aAreaName.ascii() );
       if ( !boDebug_data->aAreaName.isEmpty() )
+      {
         fprintf( output, "%s: ", boDebug_data->aAreaName.ascii() );
+      }
       fputs(  data, output);
       break;
     }
@@ -316,7 +360,8 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
       // the user will need to call BoDebug::self() in order to connect
       // any signal to BoDebug. So if it is NULL, the signal won't be
       // used anyway.
-      if (BoDebug::selfNonCreate()) {
+      if (BoDebug::selfNonCreate())
+      {
         emit BoDebug::self()->emitSignal(boDebug_data->aAreaName, data, (BoDebug::DebugLevels)nLevel);
       }
       break;
@@ -326,7 +371,9 @@ static void kDebugBackend( unsigned short nLevel, unsigned int nArea, const char
   // check if we should abort
   if( ( nLevel == BoDebug::KDEBUG_FATAL )
       && ( !boDebug_data->config || boDebug_data->config->readNumEntry( "AbortFatal", 1 ) ) )
+  {
     abort();
+  }
 }
 
 bodbgstream &perror( bodbgstream &s) { return s << QString::fromLocal8Bit(strerror(errno)); }
@@ -343,7 +390,9 @@ bodbgstream boFatal(bool cond, int area) { if (cond) return bodbgstream("FATAL: 
 void bodbgstream::flush()
 {
   if (output.isEmpty() || !print)
+  {
     return;
+  }
   kDebugBackend( level, area, output.local8Bit().data() );
   output = QString::null;
 }
@@ -361,7 +410,8 @@ bodbgstream &bodbgstream::form(const char *format, ...)
 
 bodbgstream::~bodbgstream()
 {
-  if (!output.isEmpty()) {
+  if (!output.isEmpty())
+  {
     fprintf(stderr, "ASSERT: debug output not ended with \\n\n");
     *this << "\n";
   }
@@ -383,7 +433,9 @@ bodbgstream& bodbgstream::operator << (QWidget* widget)
     if(widget->name(0)==0)
     {
       string += " to unnamed widget, ";
-    } else {
+    }
+    else
+    {
       string += (QString)" to widget " + widget->name() + ", ";
     }
     string += "geometry="
