@@ -36,7 +36,6 @@ BOSON_SRC = \
 	bosonwidgetbase.cpp \
 	bosonwidget.cpp \
 	editorwidget.cpp \
-	boshot.cpp \
 	bosontiles.cpp \
 	bosonconfig.cpp \
 	optionsdialog.cpp \
