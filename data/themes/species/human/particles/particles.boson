@@ -181,6 +181,14 @@ Size=1.0
 Align=true
 Texture=smoke
 
+[UnitExplosionShockWave]
+Id=4003
+Inherits=GeneralShockWave
+StartColor=1,1,1,0.6
+EndColor=1,1,1,0
+EndSize=4
+MinLife=0.6
+MaxLife=0.8
 
 [GeneralSmokeTrace]
 Id=5001

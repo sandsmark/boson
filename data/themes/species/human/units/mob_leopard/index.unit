@@ -6,12 +6,12 @@ Speed=4
 [Boson Unit]
 Armor=2
 ConstructedParticles=
-DestroyedParticles=1002,3002,6002,7001
+DestroyedParticles=1002,3002,6002,7001,4003
 ExplodingDamage=0
 ExplodingDamageRange=0
 ExplodingDamage=0
 ExplodingDamageRange=0
-ExplodingFragmentCount=20
+ExplodingFragmentCount=3
 ExplodingFragmentDamage=10
 ExplodingFragmentHitParticles=2001
 ExplodingFragmentFlyParticles=5101,5110
