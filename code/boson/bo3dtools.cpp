@@ -786,7 +786,34 @@ float Bo3dTools::sphereInFrustum(const double* viewFrustum, const BoVector3& pos
       return 0;
     }
   }
+
+  // we return distance from near plane + radius, which is how far the object is
+  // away from the camera!
   return distance + radius;
+}
+
+int Bo3dTools::sphereCompleteInFrustum(const double* viewFrustum, const BoVector3& pos, float radius)
+{
+  float distance;
+  int c = 0;
+  for(int p = 0; p < 6; p++)
+  {
+    distance = viewFrustum[p * 4 + 0] * pos[0] + viewFrustum[p * 4 + 1] * pos[1] +
+        viewFrustum[p * 4 + 2] * pos[2] + viewFrustum[p * 4 + 3];
+    if(distance <= -radius)
+    {
+      return 0;
+    }
+    if(distance > radius)
+    {
+      c++;
+    }
+  }
+  if(c == 6)
+  {
+    return 2;
+  }
+  return 1;
 }
 
 bool Bo3dTools::boProject(const BoMatrix& modelviewMatrix, const BoMatrix& projectionMatrix, const int* viewport, GLfloat x, GLfloat y, GLfloat z, QPoint* pos)
