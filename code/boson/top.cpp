@@ -24,6 +24,7 @@
 #include "bosonnewgamewidget.h"
 #include "bosonserveroptionswidget.h" // TODO rename: bosonnetworkoptionswidget
 #include "bosonloadingwidget.h"
+#include "bosonstartupbasewidget.h"
 #include "bosonmusic.h"
 #include "bosonconfig.h"
 #include "boson.h"
@@ -104,7 +105,6 @@ public:
 #if KDE_VERSION < 310
 	bool mLoadingDockConfig;
 #endif
-	int mLogoHeight;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -122,8 +122,6 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
 
  setView(mMainDock);
  setMainDockWidget(mMainDock);
-
- d->mLogoHeight = 100;
 
  BosonConfig::initBosonConfig();
 
@@ -342,11 +340,13 @@ void TopWidget::initWelcomeWidget()
  if(d->mWelcome) {
 	return;
  }
- d->mWelcome = new BosonWelcomeWidget(mWs);
+ BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
+ mWs->addWidget(startup, ID_WIDGETSTACK_WELCOME);
+ d->mWelcome = new BosonWelcomeWidget(startup->plainWidget());
+ startup->initBackgroundOrigin();
  connect(d->mWelcome, SIGNAL(signalNewGame()), this, SLOT(slotNewGame()));
  connect(d->mWelcome, SIGNAL(signalStartEditor()), this, SLOT(slotStartEditor()));
  connect(d->mWelcome, SIGNAL(signalQuit()), this, SLOT(close()));
- mWs->addWidget(d->mWelcome, ID_WIDGETSTACK_WELCOME);
 }
 
 void TopWidget::showWelcomeWidget()
@@ -355,11 +355,6 @@ void TopWidget::showWelcomeWidget()
 	initWelcomeWidget();
  }
  raiseWidget(ID_WIDGETSTACK_WELCOME);
-// loadWidgetBackground(d->mWelcome);
-// TODO: add a BosonStartupWidget and derive d->mWelcome, d->mLoading, ... from
-// it. Then we can place setLogoSpacer() into loadWidgetBackground(). this could
-// then be directly in BosonStartupWidget...
- d->mWelcome->setLogoSpacer(d->mLogoHeight);
 }
 
 void TopWidget::initNewGameWidget()
@@ -367,12 +362,13 @@ void TopWidget::initNewGameWidget()
  if(d->mNewGame) {
 	return;
  }
- d->mNewGame = new BosonNewGameWidget(this, mWs);
+ BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
+ mWs->addWidget(startup, ID_WIDGETSTACK_NEWGAME);
+ d->mNewGame = new BosonNewGameWidget(this, startup->plainWidget());
+ startup->initBackgroundOrigin();
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
  connect(d->mNewGame, SIGNAL(signalShowNetworkOptions()), this, SLOT(slotShowNetworkOptions()));
- mWs->addWidget(d->mNewGame, ID_WIDGETSTACK_NEWGAME);
- loadWidgetBackground(d->mNewGame);
- d->mNewGame->setLogoSpacer(d->mLogoHeight);
+ d->mNewGame->show();
 }
 
 void TopWidget::showNewGameWidget()
@@ -389,11 +385,11 @@ void TopWidget::initStartEditorWidget()
  if(d->mStartEditor) {
 	return;
  }
- d->mStartEditor = new BosonStartEditorWidget(this, mWs);
+ BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
+ mWs->addWidget(startup, ID_WIDGETSTACK_STARTEDITOR);
+ d->mStartEditor = new BosonStartEditorWidget(this, startup->plainWidget());
+ startup->initBackgroundOrigin();
  connect(d->mStartEditor, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
- mWs->addWidget(d->mStartEditor, ID_WIDGETSTACK_STARTEDITOR);
- loadWidgetBackground(d->mStartEditor);
- d->mStartEditor->setLogoSpacer(d->mLogoHeight);
 #endif
 }
 
@@ -430,11 +426,11 @@ void TopWidget::initNetworkOptions()
  if(d->mNetworkOptions) {
 	return;
  }
- d->mNetworkOptions = new BosonNetworkOptionsWidget(this, mWs);
+ BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
+ mWs->addWidget(startup, ID_WIDGETSTACK_NETWORK);
+ d->mNetworkOptions = new BosonNetworkOptionsWidget(this, startup->plainWidget());
+ startup->initBackgroundOrigin();
  connect(d->mNetworkOptions, SIGNAL(signalOkClicked()), this, SLOT(slotHideNetworkOptions()));
- mWs->addWidget(d->mNetworkOptions, ID_WIDGETSTACK_NETWORK);
- loadWidgetBackground(d->mNetworkOptions);
- d->mNetworkOptions->setLogoSpacer(d->mLogoHeight);
 }
 
 void TopWidget::showNetworkOptions()
@@ -451,10 +447,10 @@ void TopWidget::initLoadingWidget()
  if(d->mLoading) {
 	return;
  }
- d->mLoading = new BosonLoadingWidget(mWs);
- mWs->addWidget(d->mLoading, ID_WIDGETSTACK_LOADING);
- loadWidgetBackground(d->mLoading);
- d->mLoading->setLogoSpacer(d->mLogoHeight);
+ BosonStartupBaseWidget* startup = new BosonStartupBaseWidget(mWs);
+ mWs->addWidget(startup, ID_WIDGETSTACK_LOADING);
+ d->mLoading = new BosonLoadingWidget(startup->plainWidget());
+ startup->initBackgroundOrigin();
 }
 
 void TopWidget::showLoadingWidget()
@@ -964,33 +960,5 @@ void TopWidget::raiseWidget(int id)
 		break;
  }
  mWs->raiseWidget(id);
-}
-
-void TopWidget::loadWidgetBackground(QWidget* widget)
-{
- if (!widget) {
-	return;
- }
-  QPixmap backgroundPix(locate("data", "boson/pics/boson-startup-bg.png"));
-  if (backgroundPix.isNull()) {
-	 kdError() << "Could not find background pixmap. Please install the data package first!" << endl;
-	 return;
-  }
-  widget->setPaletteBackgroundPixmap(backgroundPix);
-
-  // warning! hack!
-  // we need to change the backgroundorigin of all child widgets to
-  // WindowOrigin. is there a better way?
-  // update: probably not, since we also need to change the grand-childs (thats
-  // why we need *Window*Origin - ParentOrigin doesnt work with grandchilds).
-  QObjectList* l = widget->queryList("QWidget", 0, true, true);
-  QObjectListIt it(*l);
-  QWidget* w;
-  while ((w = (QWidget*)it.current()) != 0) {
-	 w->setBackgroundOrigin(WindowOrigin);
-	 ++it;
-  }
-  delete l;
-  // (hack end)
 }
 

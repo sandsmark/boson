@@ -17,41 +17,42 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef BOSONWELCOMEWIDGET_H
-#define BOSONWELCOMEWIDGET_H
+#ifndef BOSONSTARTUPBASEWIDGET_H
+#define BOSONSTARTUPBASEWIDGET_H
 
 #include <qwidget.h>
 
-class QVBoxLayout;
-class QHBoxLayout;
-class QGridLayout;
 class QLabel;
-class QPushButton;
 
-class BosonWelcomeWidget : public QWidget
-{
-  Q_OBJECT
-  public:
-    BosonWelcomeWidget(QWidget* parent);
-    ~BosonWelcomeWidget();
+class BosonStartupBaseWidget : public QWidget
+{ 
+	Q_OBJECT
+public:
+	BosonStartupBaseWidget(QWidget* parent, const char* name = 0);
+	~BosonStartupBaseWidget();
 
-  signals:
-    void signalNewGame();
-    void signalStartEditor();
-    void signalQuit();
+	/**
+	 * Needs to be called once all widgets of the derived class are
+	 * constructed. TODO: maybe modify the style() instead and ensure that
+	 * if style changes it is also modified. Would be a <em>lot</em>
+	 * cleaner than this hack
+	 **/
+	void initBackgroundOrigin();
 
-  protected:
-    QVBoxLayout* mBosonWelcomeWidgetLayout;
-    QVBoxLayout* mMainLayout;
+	/**
+	 * @return The content widget - use this as parent for all widgets of
+	 * the derived class!
+	 **/
+	QWidget* plainWidget() const
+	{
+		return mPlainWidget;
+	}
 
-  private:
-    QPushButton* mNewGameButton;
-    QPushButton* mEditorButton;
-    QPushButton* mQuitButton;
+protected:
 
-    QLabel* mBanner;
-    QLabel* mTextFrame;
-
+private:
+	QWidget* mPlainWidget;
+	QLabel* mLogo;
 };
 
-#endif // BOSONWELCOMEWIDGET_H
+#endif

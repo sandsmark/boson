@@ -47,9 +47,6 @@ BosonNetworkOptionsWidget::BosonNetworkOptionsWidget(TopWidget* top, QWidget* pa
 
   mBosonNetworkOptionsWidgetLayout = new QVBoxLayout( this, 11, 6, "BosonNetworkOptionsWidgetLayout"); 
 
-  mLogoSpacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Fixed );
-  mBosonNetworkOptionsWidgetLayout->addItem( mLogoSpacer );
-
   mHeader = new QLabel( this, "header" );
   QFont header_font(  mHeader->font() );
   header_font.setPointSize( 30 );
@@ -257,7 +254,3 @@ Boson* BosonNetworkOptionsWidget::game()
   return mTop->game();
 }
 
-void BosonNetworkOptionsWidget::setLogoSpacer(int height)
-{
-  mLogoSpacer->changeSize( 20, height, QSizePolicy::Minimum, QSizePolicy::Fixed );
-}

@@ -39,7 +39,6 @@ class QListBox;
 class QListBoxItem;
 class QPushButton;
 class QColor;
-class QSpacerItem;
 
 class Boson;
 class Player;
@@ -54,8 +53,6 @@ class BosonStartEditorWidget : public QWidget
   public:
     BosonStartEditorWidget(TopWidget* top, QWidget* parent);
     ~BosonStartEditorWidget();
-
-    void setLogoSpacer(int height);
 
   public slots:
     void slotStart();
@@ -83,7 +80,6 @@ class BosonStartEditorWidget : public QWidget
     QVBoxLayout* mBosonStartEditorWidgetLayout;
     QVBoxLayout* mMainLayout;
     QHBoxLayout* mStartGameLayout;
-    QSpacerItem* mLogoSpacer;
 
     QPushButton* mCancelButton;
     QPushButton* mStartGameButton;

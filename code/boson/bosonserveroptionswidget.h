@@ -32,7 +32,6 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 class QRadioButton;
-class QSpacerItem;
 
 class TopWidget;
 class Boson;
@@ -43,8 +42,6 @@ class BosonNetworkOptionsWidget : public QWidget
   public:
     BosonNetworkOptionsWidget(TopWidget* top, QWidget* parent);
     ~BosonNetworkOptionsWidget();
-
-    void setLogoSpacer(int height);
 
   public slots:
     void slotDisconnect();
@@ -82,7 +79,6 @@ class BosonNetworkOptionsWidget : public QWidget
     QVBoxLayout* mConnectionStyleGroupLayout;
     QGridLayout* mLayout6;
     QHBoxLayout* mLayout13;
-    QSpacerItem* mLogoSpacer;
 
   private:
     void setConnected(bool connected, bool master);
