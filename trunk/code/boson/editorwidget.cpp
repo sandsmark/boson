@@ -154,6 +154,7 @@ void EditorWidget::initKActions()
  BosonWidgetBase::initKActions();
 // KStdAction::save(this, SLOT(slotSavePlayField()), actionCollection(), "file_save_playfield");
  KStdAction::saveAs(this, SLOT(slotSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
+ KStdAction::quit(this, SIGNAL(signalQuit()), actionCollection());
 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)),
@@ -175,12 +176,16 @@ void EditorWidget::initKActions()
  s.append(QKeySequence(Qt::Key_Delete));
  s.append(QKeySequence(Qt::Key_D));
  (void)new KAction(i18n("Delete selected unit"), KShortcut(s), displayManager(),
-		  SLOT(slotDeleteSelectedUnits()), actionCollection(),
-		  "editor_delete_selected_unit");
+		SLOT(slotDeleteSelectedUnits()), actionCollection(),
+		"editor_delete_selected_unit");
 
- (void)new KAction(i18n("Map &description"), KShortcut(), this, 
-		  SLOT(slotEditMapDescription()), actionCollection(),
-		  "editor_map_description");
+ (void)new KAction(i18n("Map &description"), KShortcut(), this,
+		SLOT(slotEditMapDescription()), actionCollection(),
+		"editor_map_description");
+
+ (void)new KAction(i18n("Player &Settings"), KShortcut(), this,
+		SLOT(slotEditPlayerSettings()), actionCollection(),
+		"editor_player_settings");
 
 // KStdAction::preferences(bosonWidget(), SLOT(slotGamePreferences()), actionCollection()); // FIXME: slotEditorPreferences()
 }
@@ -209,7 +214,7 @@ void EditorWidget::slotSavePlayFieldAs()
  boDebug() << k_funcinfo << endl;
  QString startIn; // shall we provide this??
  QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
- if (fileName == QString::null) {
+ if (fileName.isNull()) {
 	return;
  }
  QFileInfo info(fileName);
@@ -380,5 +385,11 @@ void EditorWidget::slotEditMapDescription()
  dialog->exec();
 
  delete dialog;
+}
+
+void EditorWidget::slotEditPlayerSettings()
+{
+ BO_CHECK_NULL_RET(boGame);
+
 }
 
