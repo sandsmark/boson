@@ -23,7 +23,7 @@
 
 #include <qrect.h>
 
-GLSprite::GLSprite(BosonTextureArray* array, BosonCanvas* canvas)
+GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
 {
  mCanvas = canvas;
  for (int i = 0; i < 3*4; i++) {
@@ -38,7 +38,7 @@ GLSprite::GLSprite(BosonTextureArray* array, BosonCanvas* canvas)
  mXVelocity = 0.0;
  mYVelocity = 0.0;
 
- mTextures = array;
+ mModel = model;
  mDisplayList = 0;
 }
 

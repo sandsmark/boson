@@ -25,8 +25,8 @@
 #include <kdebug.h>
 
 #ifndef NO_OPENGL
-BosonSprite::BosonSprite(BosonTextureArray* array, BosonCanvas* canvas)
-	: GLSprite(array, canvas)
+BosonSprite::BosonSprite(BosonModel* model, BosonCanvas* canvas)
+	: GLSprite(model, canvas)
 #else
 BosonSprite::BosonSprite(QCanvasPixmapArray* array, BosonCanvas* canvas)
 	: QCanvasSprite(array, (QCanvas*)canvas)

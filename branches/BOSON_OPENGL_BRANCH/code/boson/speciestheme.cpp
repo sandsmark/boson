@@ -41,7 +41,6 @@
 #include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
-#include <qfile.h> // FIXME: remove! it is just a temporary hack for QFile::exists() below
 
 #ifndef NO_GL
 #include <qgl.h>
@@ -350,6 +349,21 @@ BosonTextureArray* SpeciesTheme::textureArray(int unitType)
  return array;
 }
 
+BosonModel* SpeciesTheme::unitModel(int unitType)
+{
+ BosonModel* model = d->mUnitModels[unitType];
+ if (!model) {
+	loadUnit(unitType);
+	model = d->mUnitModels[unitType];
+ }
+ if (!model) {
+	kdError() << k_funcinfo << "Cannot load display list for " << unitType 
+			<< endl;
+	return 0;
+ }
+ return model;
+}
+
 GLuint SpeciesTheme::textureNumber(int unitType, int dir)
 {
  BosonTextureArray* array = d->mSpriteTextures[unitType];
@@ -656,10 +670,6 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
 	kdError() << k_funcinfo << "NULL properties for " << unit->type() << endl;
 	return;
  }
-#ifndef NO_OPENGL
- //hmm... we need to #include unit.h cause of this...
-// ((Unit*)unit)->setTextures(d->mSpriteTextures[prop->typeId()]); // AB: casting to BosonSprite* is not enough :-(
-#endif
 
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
@@ -680,7 +690,6 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
 	unit->setSpeed(prop->speed());
  } else if (prop->isFacility()) {
  
-	
  }
 }
 
@@ -947,8 +956,10 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  if (QFile::exists(prop->unitPath() + QString::fromLatin1("unit.3ds"))) {
 	m = new BosonModel(prop->unitPath(), QString::fromLatin1("unit.3ds"));
  } else {
+	// this should get removed!
+	BosonTextureArray* array = textureArray(prop->typeId());
 	GLuint list = createDisplayList(prop->typeId());
-	m = new BosonModel(list);
+	m = new BosonModel(list, array->width(0), array->height(0));
  }
 #else
  QLuint list = createDisplayList(prop->typeId());
