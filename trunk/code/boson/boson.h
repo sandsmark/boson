@@ -341,6 +341,9 @@ public: // small KGame extenstions for boson
 
 	BoEventManager* eventManager() const;
 
+	bool loadCanvasConditions(const QDomElement& root);
+	bool saveCanvasConditions(QDomElement& root) const;
+
 public slots:
 	void slotSetGameSpeed(int speed);
 	void slotTogglePause();

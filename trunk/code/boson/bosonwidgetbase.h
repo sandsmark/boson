@@ -247,6 +247,7 @@ protected slots:
 	void slotGrabScreenshot();
 	void slotGrabProfiling();
 	void slotShowGLStates();
+	void slotEditConditions();
 
 	void slotCmdBackgroundChanged(const QString& file);
 

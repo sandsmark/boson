@@ -52,6 +52,7 @@
 #include "bomeshrenderermanager.h"
 #include "bogroundrenderermanager.h"
 #include "boglstatewidget.h"
+#include "boconditionwidget.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -657,6 +658,9 @@ void BosonWidgetBase::initKActions()
  enablecolormap->setChecked(false);
  connect(enablecolormap, SIGNAL(toggled(bool)),
 		this, SLOT(slotSetEnableColormap(bool)));
+ (void)new KAction(i18n("Edit global conditions"), KShortcut(), this,
+		SLOT(slotEditConditions()), actionCollection(),
+		"debug_edit_conditions");
 
 
  KSelectAction* debugMode = new KSelectAction(i18n("Mode"), KShortcut(),
@@ -1237,5 +1241,46 @@ PlayerIO* BosonWidgetBase::localPlayerIO() const
 	return localPlayer()->playerIO();
  }
  return 0;
+}
+
+void BosonWidgetBase::slotEditConditions()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Conditions"),
+		KDialogBase::Ok | KDialogBase::Cancel, KDialogBase::Cancel, 0,
+		"editconditions", true, true);
+ QVBoxLayout* layout = new QVBoxLayout(dialog->plainPage());
+ BoConditionWidget* widget = new BoConditionWidget(dialog->plainPage());
+ layout->addWidget(widget);
+
+ {
+	QDomDocument doc;
+	QDomElement root = doc.createElement("Conditions");
+	doc.appendChild(root);
+	if (!boGame->saveCanvasConditions(root)) {
+		boError() << k_funcinfo << "unable to save canvas conditions from game" << endl;
+		KMessageBox::information(this, i18n("Canvas conditions could not be imported to the widget"));
+	} else {
+		widget->loadConditions(root);
+	}
+ }
+
+ int ret = dialog->exec();
+ QString xml = widget->toString();
+ delete widget;
+ widget = 0;
+ delete dialog;
+ dialog = 0;
+ if (ret == KDialogBase::Accepted) {
+	QDomDocument doc;
+	bool ret = doc.setContent(xml);
+	QDomElement root = doc.documentElement();
+	if (!ret || root.isNull()) {
+		boError() << k_funcinfo << "invalid XML document created" << endl;
+		KMessageBox::sorry(this, i18n("Oops - an invalid XML document was created. Internal error."));
+		return;
+	}
+	boDebug() << k_funcinfo << "applying canvas conditions" << endl;
+	boGame->loadCanvasConditions(root);
+ }
 }
 
