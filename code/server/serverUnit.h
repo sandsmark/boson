@@ -77,14 +77,14 @@ class serverHarvester : public serverMobUnit
 {
 public:
 	serverHarvester(boBuffer *b, mobileMsg_t *msg)
-		:serverMobUnit( b, msg) { base_x = msg->x; base_y = msg->y; }
+		:serverMobUnit( b, msg), home(msg->x, msg->y) {}
 	
 	void	emptying(void);
 	virtual void	getWantedAction(void);
 
 private:
-	bool	atHome(void);
-	int	base_x, base_y;
+	bool	atHome(void)  { return gridRect().topLeft() == home; }
+	QPoint	home;
 };
 
 
