@@ -1,10 +1,41 @@
+dnl Check for an existing KGame installation. If existent kgame/kgame.h should
+dnl be present
+AC_DEFUN(AC_CHECK_KGAME,
+[
+AC_MSG_CHECKING([for kgame/kgame.h])
+AC_FIND_FILE(kgame/kgame.h, $kde_includes, kgame)
+if test "$kgame" = NO ; then
+  AC_MSG_RESULT([no])
+  AC_MSG_ERROR([kgame/kgame.h was not found. Please install kdegames/libkdegames first])
+else
+  AC_MSG_RESULT([$kgame])
+fi
+])
+AC_CHECK_KGAME
+
+dnl Temporary check: KDE Beta 1 doesn't have KShortcut
 AC_DEFUN(AC_CHECK_KSHORTCUT,
 [
 AC_FIND_FILE(kshortcut.h, $kde_includes, kshortcut)
-if "$kshortcut" eq "NO"; then
+if test "$kshortcut" = NO || test -z "$kshortcut" ; then
   AC_DEFINE_UNQUOTED(HAVE_KSHORTCUT, 0, [ ])
 else 
   AC_DEFINE_UNQUOTED(HAVE_KSHORTCUT, 1, [ ])
 fi
 ])
 AC_CHECK_KSHORTCUT
+
+
+dnl Temporary check: KDE Beta 1 doesn't have KGameProgress but KProgress
+AC_DEFUN(AC_CHECK_KGAMEPROGRESS,
+[
+AC_FIND_FILE(kgameprogress.h, $kde_includes, kgameprogress)
+if test "$kgameprogress" = NO ; then
+  AC_DEFINE_UNQUOTED(HAVE_KGAMEPROGRSS, 0, [ ])
+else 
+  AC_DEFINE_UNQUOTED(HAVE_KGAMEPROGRESS, 1, [ ])
+fi
+])
+AC_CHECK_KGAMEPROGRESS
+
+
