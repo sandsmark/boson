@@ -44,6 +44,7 @@ libboson_la_SOURCES = \
 	bosoncanvasstatistics.cpp \
 	bosoncollisions.cpp \
 	boson.cpp \
+	bosonnetworksynchronizer.cpp \
 	bosonplayerinput.cpp \
 	bomessage.cpp \
 	bosonsaveload.cpp \
