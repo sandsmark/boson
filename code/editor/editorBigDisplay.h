@@ -40,14 +40,10 @@ public:
 	virtual void actionClicked(int, int);		// selecting, moving...
 
 private slots:
-	void setCell(int);
-	void setTransTile(int);
-	void setTransRef(int);
-	void setItem(int);
+	void setSelectedTile(groundType _g) { g =  _g ;}
 
 private:
-	QPopupMenu	*popup;
-	visualCell	*selectedCell;
+	groundType	g;
 
 };
 

@@ -370,7 +370,7 @@ void BoEditorApp::readOptions()
 	KConfig *config = kapp->getConfig();
  
 	config->setGroup("APPEARANCE");
-	rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,700,600));
+	rMainGeom = config->readRectEntry("MainGeometry",&QRect(0,0,800,600));
 
 //	bViewToolbar_0 = config->readBoolEntry("ShowToolbar_0", true);
 //	bViewStatusbar = config->readBoolEntry("ShowStatusbar", true);

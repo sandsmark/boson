@@ -85,10 +85,11 @@ for (i=im ; i<=iM; i++)
 			data.coo.x = i+x;
 			data.coo.y = j+y;
 			data.coo.g = c->getGroundType();
-			sendMsg (
-				gpp.player[u->who].buffer,
-				MSG_MAP_DISCOVERED,
-				sizeof(data.coo), &data);
+			if (GROUND_UNKNOWN != data.coo.g)
+				sendMsg (
+					gpp.player[u->who].buffer,
+					MSG_MAP_DISCOVERED,
+					sizeof(data.coo), &data  );
 			}
 		}
 }

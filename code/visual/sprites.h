@@ -32,6 +32,7 @@
 #define Z_MOBILE	(+100)
 #define Z_FACILITY	(+50)
 #define Z_GROUND	(+10)
+#define Z_INVISIBLE	(-10)
 
 
 #define IS_MOBILE(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_FACILITY) )

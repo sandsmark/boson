@@ -59,6 +59,9 @@ public:
 
 /* concerning contents */
   visualFacility *getFacility(long key) { return facilities.find(key); }
+  
+  void	deleteCell(int, int);
+  void	setCell(int, int, groundType );
 
 public:
 //private:
