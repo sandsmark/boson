@@ -3,14 +3,16 @@ IsFacility=false
 TerrainType=0
 Name=Grizzly
 Id=10006
-Health=100
-MineralCost=150
-OilCost=80
+Health=200
+MineralCost=300
+OilCost=150
 Producer=0
 Requirements=3
-Armor=1
-ProductionTime=80
+Armor=3
+Shield=35
+ProductionTime=120
 Weapons=1
+SightRange=9
 DestroyedParticles=1002
 
 [Boson Mobile Unit]

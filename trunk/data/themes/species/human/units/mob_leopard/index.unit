@@ -3,24 +3,25 @@ IsFacility=false
 TerrainType=0
 Name=Leopard
 Id=10001
-Health=100
+Health=200
 MineralCost=150
 OilCost=80
 Producer=0
 Requirements=3
 Armor=1
-ProductionTime=80
+Shield=10
+ProductionTime=90
 Weapons=1
 DestroyedParticles=1002
 
 [Boson Mobile Unit]
-Speed=3
+Speed=6
 CanGoOnLand=true
 CanGoOnWater=false
 
 [Weapon_0]
 Range=6
-Reload=45
+Reload=30
 CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=20
