@@ -41,8 +41,8 @@ BosonComputerIO::BosonComputerIO() : KGameComputerIO()
  boDebug() << k_funcinfo << endl;
  // advance() method in script is called every advance call now, so it's
  //  script's job to to something useful only every aidelay() advance calls.
- boDebug() << k_funcinfo << "aidelay: " << boConfig->aiDelay() << endl;
- if (boConfig->aiDelay() != 0.0) {
+ boDebug() << k_funcinfo << "aidelay: " << boConfig->doubleValue("AIDelay") << endl;
+ if (boConfig->doubleValue("AIDelay") != 0.0) {
 	setReactionPeriod(1);
  }
  mEventListener = 0;
@@ -71,7 +71,7 @@ void BosonComputerIO::initIO(KPlayer* p)
 
 void BosonComputerIO::reaction()
 {
- if (boConfig->aiDelay() == 0.0) {
+ if (boConfig->doubleValue("AIDelay") == 0.0) {
 	return;
  }
  static int id = boProfiling->requestEventId("BosonComputerIO::reaction()");

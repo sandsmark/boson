@@ -52,7 +52,12 @@ public:
 		Color = 6
 	};
 public:
-	BoConfigEntry(BosonConfig* parent, const QString& key);
+	/**
+	 * @param saveConfig If TRUE (the default) this value will be saved by
+	 * @ref BosonConfig::save to the config file. If it is FALSE, the value
+	 * will not be saved (may be useful for debugging options).
+	 **/
+	BoConfigEntry(BosonConfig* parent, const QString& key, bool saveConfig = true);
 	virtual ~BoConfigEntry();
 
 	/**
@@ -71,15 +76,21 @@ public:
 
 	const QString& key() const { return mKey; }
 
+	bool saveConfig() const
+	{
+		return mSaveConfig;
+	}
+
 private:
 	QString mKey;
+	bool mSaveConfig;
 };
 
 //AB: we can't use a template because of KConfig::readEntry()
 class BoConfigBoolEntry : public BoConfigEntry
 {
 public:
-	BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue);
+	BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue, bool saveConfig = true);
 	virtual ~BoConfigBoolEntry() {}
 
 	bool value() const { return mValue; }
@@ -97,7 +108,7 @@ private:
 class BoConfigIntEntry : public BoConfigEntry
 {
 public:
-	BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue);
+	BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue, bool saveConfig = true);
 	virtual ~BoConfigIntEntry() {}
 
 	unsigned int value() const { return mValue; }
@@ -112,11 +123,10 @@ private:
 	int mValue;
 };
 
-
 class BoConfigUIntEntry : public BoConfigEntry
 {
 public:
-	BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue);
+	BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue, bool saveConfig = true);
 	virtual ~BoConfigUIntEntry() {}
 
 	unsigned int value() const { return mValue; }
@@ -134,7 +144,7 @@ private:
 class BoConfigDoubleEntry : public BoConfigEntry
 {
 public:
-	BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue);
+	BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue, bool saveConfig = true);
 	virtual ~BoConfigDoubleEntry() {}
 
 	double value() const { return mValue; }
@@ -152,7 +162,7 @@ private:
 class BoConfigStringEntry : public BoConfigEntry
 {
 public:
-	BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue);
+	BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue, bool saveConfig = true);
 	virtual ~BoConfigStringEntry() {}
 
 	const QString& value() const { return mValue; }
@@ -170,7 +180,7 @@ private:
 class BoConfigColorEntry : public BoConfigEntry
 {
 public:
-	BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue);
+	BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue, bool saveConfig = true);
 	virtual ~BoConfigColorEntry() {}
 
 	QColor value() const;
@@ -406,6 +416,17 @@ public:
 	void addDynamicEntry(BoConfigEntry* entry, KConfig* conf = 0);
 
 	/**
+	 * Convenience method for @ref addDynamicEntry
+	 **/
+	void addDynamicEntryBool(const QString& configKey, bool defaultValue = false, bool saveConfig = true);
+	void addDynamicEntryInt(const QString& configKey, int defaultValue = 0, bool saveConfig = true);
+	void addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue = 0, bool saveConfig = true);
+	void addDynamicEntryDouble(const QString& configKey, double defaultValue = 0.0, bool saveConfig = true);
+	void addDynamicEntryString(const QString& configKey, QString defaultValue = QString::null, bool saveConfig = true);
+	void addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig = true);
+	void addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig = true);
+
+	/**
 	 * @return TRUE if a dynamic entry with @p key was added with @ref
 	 * addDynamicEntry, otherwise FALSE.
 	 **/
@@ -497,85 +518,6 @@ public:
 	QColor colorValue(const QString& key, const QColor& _default) const;
 
 
-// below we have config values that are *not* stored when quitting boson
-public:
-	DebugMode debugMode() const { return mDebugMode; }
-
-	/**
-	 * Change the debugging mode. Note that this isn't saved to the config,
-	 * so this is lost on quit.
-	 **/
-	void setDebugMode(DebugMode m) { mDebugMode = m; }
-
-	/**
-	 * Disable sound loading and playing. Note that this value is
-	 * <em>not</em> saved into the config file (it is a command line arg)!
-	 **/
-	void setDisableSound(bool d) { mDisableSound = d; }
-
-	/**
-	 * FALSE (default) if sound files should be loaded normally, otherwise
-	 * TRUE.
-	 **/
-	bool disableSound() const { return mDisableSound; }
-
-	void setAiDelay(float delay) { mAIDelay = delay; }
-	float aiDelay() const { return mAIDelay; }
-
-	void setWantDirect(bool w) { mWantDirect = w; }
-	bool wantDirect() const { return mWantDirect; }
-
-	void setWireFrames(bool on) { mWireFrames = on; }
-	bool wireFrames() const { return mWireFrames; }
-
-	void setDebugOpenGLMatrices(bool debug) { mDebugOpenGLMatrices = debug; }
-	bool debugOpenGLMatrices() const { return mDebugOpenGLMatrices; }
-
-	void setDebugMapCoordinates(bool debug) { mDebugMapCoordinates = debug; }
-	bool debugMapCoordinates() const { return mDebugMapCoordinates; }
-
-	void setDebugPFData(bool debug) { mDebugPFData = debug; }
-	bool debugPFData() const { return mDebugPFData; }
-
-	void setDebugShowCellGrid(bool debug) { mDebugShowCellGrid = debug; }
-	bool debugShowCellGrid() const { return mDebugShowCellGrid; }
-
-	void setDebugItemWorkStatistics(bool debug) { mDebugItemWorkStatistics = debug; }
-	bool debugItemWorkStatistics() const { return mDebugItemWorkStatistics; }
-
-	void setDebugOpenGLCamera(bool debug) { mDebugOpenGLCamera = debug; }
-	bool debugOpenGLCamera() const { return mDebugOpenGLCamera; }
-
-	void setDebugRenderCounts(bool debug) { mDebugRenderCounts = debug; }
-	bool debugRenderCounts() const { return mDebugRenderCounts; }
-
-	void setDebugBoundingBoxes(bool debug) { mDebugBoundingBoxes = debug; }
-	bool debugBoundingBoxes() const { return mDebugBoundingBoxes; }
-
-	unsigned int defaultLodCount() const { return mDefaultLodCount; }
-	void setDefaultLodCount(unsigned int c) { mDefaultLodCount = c; }
-
-	void setDebugFPS(bool debug) { mDebugFPS = debug; }
-	bool debugFPS() const { return mDebugFPS; }
-
-	void setDebugAdvanceCalls(bool debug) { mDebugAdvanceCalls = debug; }
-	bool debugAdvanceCalls() const { return mDebugAdvanceCalls; }
-
-	void setDebugTextureMemory(bool debug) { mDebugTextureMemory = debug; }
-	bool debugTextureMemory() const { return mDebugTextureMemory; }
-
-	void setShowResources(bool show) { mShowResources = show; }
-	bool showResources() const { return mShowResources; }
-
-	void setEnableColormap(bool enable) { mEnableColormap = enable; }
-	bool enableColormap() const { return mEnableColormap; }
-
-	void setDisableModelLoading(bool d) { mDisableModelLoading = d; }
-	bool disableModelLoading() const { return mDisableModelLoading; }
-
-	void setTextureFOW(bool t) { mTextureFOW = t; }
-	bool textureFOW() const { return mTextureFOW; }
-
 public:
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
@@ -643,29 +585,6 @@ private:
 	BoConfigUIntEntry* mMaxProfilingEventEntries;
 	BoConfigUIntEntry* mMaxProfilingAdvanceEntries;
 	BoConfigUIntEntry* mMaxProfilingRenderingEntries;
-
-	// NOT stored to config file!
-	bool mDisableSound;
-	DebugMode mDebugMode;
-	float mAIDelay;
-	bool mWantDirect;
-	bool mWireFrames;
-	bool mDebugOpenGLMatrices;
-	bool mDebugMapCoordinates;
-	bool mDebugPFData;
-	bool mDebugShowCellGrid;
-	bool mDebugItemWorkStatistics;
-	bool mDebugOpenGLCamera;
-	bool mDebugRenderCounts;
-	bool mDebugBoundingBoxes;
-	bool mDebugFPS;
-	bool mDebugAdvanceCalls;
-	bool mDebugTextureMemory;
-	bool mShowResources;
-	bool mEnableColormap;
-	bool mDisableModelLoading;
-	bool mTextureFOW;
-	unsigned int mDefaultLodCount;
 };
 
 #endif

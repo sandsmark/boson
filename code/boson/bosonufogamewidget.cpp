@@ -340,10 +340,10 @@ void BosonUfoGameWidget::updateUfoLabels()
  QString oil = QString::number(localPlayerIO()->oil());
  d->mMineralsLabel->setText(minerals);
  d->mOilLabel->setText(oil);
- d->mResourcesBox->setVisible(boConfig->showResources());
+ d->mResourcesBox->setVisible(boConfig->boolValue("show_resources"));
 
  d->mFPSLabel->setText(i18n("FPS: %1").arg(display()->fps()));
- d->mFPSLabel->setVisible(boConfig->debugFPS());
+ d->mFPSLabel->setVisible(boConfig->boolValue("debug_fps"));
 
  bool renderGroundRendererDebug = false;
  if (renderGroundRendererDebug) {
@@ -362,7 +362,7 @@ void BosonUfoGameWidget::updateUfoLabels()
  }
 
 
- if (boConfig->debugMapCoordinates()) {
+ if (boConfig->boolValue("debug_map_coordinates")) {
 	QPoint widgetPos;
 	GLfloat x = 0.0f, y = 0.0f, z = 0.0f;
 	BoVector3Fixed canvasVector;
@@ -384,7 +384,7 @@ void BosonUfoGameWidget::updateUfoLabels()
 	d->mMapCoordinatesCanvasLabel->setText(canvas);
 	d->mMapCoordinatesWindowLabel->setText(window);
  }
- d->mMapCoordinates->setVisible(boConfig->debugMapCoordinates());
+ d->mMapCoordinates->setVisible(boConfig->boolValue("debug_map_coordinates"));
 
  updateUfoLabelPathFinderDebug();
  updateUfoLabelMatricesDebug();
@@ -398,7 +398,7 @@ void BosonUfoGameWidget::updateUfoLabels()
 
 void BosonUfoGameWidget::updateUfoLabelPathFinderDebug()
 {
- if (!boConfig->debugPFData()) {
+ if (!boConfig->boolValue("debug_pf_data")) {
 	d->mPathFinderDebug->setVisible(false);
 	return;
  }
@@ -437,7 +437,7 @@ void BosonUfoGameWidget::updateUfoLabelPathFinderDebug()
 
 void BosonUfoGameWidget::updateUfoLabelMatricesDebug()
 {
- if (!boConfig->debugOpenGLMatrices()) {
+ if (!boConfig->boolValue("debug_matrices")) {
 	d->mMatricesDebug->setVisible(false);
 	return;
  }
@@ -504,12 +504,12 @@ void BosonUfoGameWidget::updateUfoLabelMatricesDebug()
  // lines in ULabel
  d->mMatricesDebugText->setText(i18n("%1\n%2\n%3\n\n%4")
 		.arg(text).arg(resultText).arg(realCoords)
-	 	.arg(planes));
+		.arg(planes));
 }
 
 void BosonUfoGameWidget::updateUfoLabelItemWorkStatistics()
 {
- if (!boConfig->debugItemWorkStatistics()) {
+ if (!boConfig->boolValue("debug_works")) {
 	d->mItemWorkStatistics->setVisible(false);
 	return;
  }
@@ -538,7 +538,7 @@ void BosonUfoGameWidget::updateUfoLabelItemWorkStatistics()
 
 void BosonUfoGameWidget::updateUfoLabelOpenGLCamera()
 {
- if (!boConfig->debugOpenGLCamera()) {
+ if (!boConfig->boolValue("debug_camera")) {
 	d->mOpenGLCamera->setVisible(false);
 	return;
  }
@@ -564,7 +564,7 @@ void BosonUfoGameWidget::updateUfoLabelOpenGLCamera()
 
 void BosonUfoGameWidget::updateUfoLabelRenderCounts()
 {
- if (!boConfig->debugRenderCounts()) {
+ if (!boConfig->boolValue("debug_rendercounts")) {
 	d->mRenderCounts->setVisible(false);
 	return;
  }
@@ -599,7 +599,7 @@ void BosonUfoGameWidget::updateUfoLabelRenderCounts()
 
 void BosonUfoGameWidget::updateUfoLabelAdvanceCalls()
 {
- if (!boConfig->debugAdvanceCalls()) {
+ if (!boConfig->boolValue("debug_advance_calls")) {
 	d->mAdvanceCalls->setVisible(false);
 	return;
  }
@@ -614,7 +614,7 @@ void BosonUfoGameWidget::updateUfoLabelAdvanceCalls()
 
 void BosonUfoGameWidget::updateUfoLabelTextureMemory()
 {
- if (!boConfig->debugTextureMemory()) {
+ if (!boConfig->boolValue("debug_texture_memory")) {
 	d->mTextureMemory->setVisible(false);
 	return;
  }

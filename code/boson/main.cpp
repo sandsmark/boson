@@ -152,13 +152,13 @@ int main(int argc, char **argv)
         boError() << k_funcinfo << "default-lodcount was not a valid number" << endl;
         return 1;
     }
-    boConfig->setDefaultLodCount(v);
+    boConfig->setIntValue("DefaultLodCount", v);
  }
  if (args->isSet("models")) {
-    boConfig->setDisableModelLoading(false);
+    boConfig->setBoolValue("ForceDisableModelLoading", false);
  } else {
     boWarning() << "model loading disabled - you will not see any units!" << endl;
-    boConfig->setDisableModelLoading(true);
+    boConfig->setBoolValue("ForceDisableModelLoading", true);
  }
  if (args->isSet("new")) {
     top->slotNewGame(args);
@@ -191,25 +191,25 @@ void postBosonConfigInit()
     return;
  }
  if (args->isSet("sound")) {
-    boConfig->setDisableSound(false);
+    boConfig->setBoolValue("ForceDisableSound", false);
  }
  if (!args->isSet("ai")) {
     boDebug() << k_funcinfo << "ai arg is not set" << endl;
-    boConfig->setAiDelay(0.0);
+    boConfig->setDoubleValue("AiDelay", 0.0);
  } else if (args->isSet("aidelay")) {
     QString delay = args->getOption("aidelay");
     bool ok;
-    boConfig->setAiDelay(delay.toFloat(&ok));
-    boDebug() << k_funcinfo << "aidelay set to " << boConfig->aiDelay() << endl;
+    boConfig->setDoubleValue("AiDelay", delay.toFloat(&ok));
+    boDebug() << k_funcinfo << "aidelay set to " << boConfig->doubleValue("AIDelay") << endl;
     if (!ok) {
         boError() << k_funcinfo << "aidelay is not a valid float!" << endl;
         // Fall back to default
-        boConfig->setAiDelay(3.0);
+        boConfig->setDoubleValue("AiDelay", 3.0);
     }
  }
  if (args->isSet("indirect")) {
     boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
-    boConfig->setWantDirect(false);
+    boConfig->setBoolValue("ForceWantDirect", false);
  }
 }
 

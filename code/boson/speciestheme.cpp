@@ -581,7 +581,7 @@ bool SpeciesTheme::loadUnitModel(const UnitProperties* prop)
 
 void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
 {
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	return;
  }
  if (!sound()) {
@@ -595,7 +595,7 @@ void SpeciesTheme::playSound(UnitBase* unit, UnitSoundEvent event)
 
 void SpeciesTheme::playSound(SoundEvent event)
 {
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	return;
  }
  if (!sound()) {
@@ -610,7 +610,7 @@ void SpeciesTheme::playSound(SoundEvent event)
 
 void SpeciesTheme::playSound(const BosonWeaponProperties* weaponProp, WeaponSoundEvent event)
 {
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	return;
  }
  if (!sound()) {
@@ -627,7 +627,7 @@ void SpeciesTheme::loadGeneralSounds()
 // TODO: sound mapping!
 // speciestheme designers should be able to rename the sounds for certain
 // events, just like for unit sounds!
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	return;
  }
  if (!sound()) {

@@ -87,7 +87,7 @@ BosonAudioInterface::BosonAudioInterface()
 
  d->mMusicInterface = new BosonMusicInterface(this);
 
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	boWarning(200) << k_funcinfo << "sound disabled permanently!" << endl;
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
@@ -108,7 +108,7 @@ BosonAudioInterface::BosonAudioInterface()
 	boWarning(200) << k_funcinfo << "Unable to start audio process" << endl;
 	d->mPlayMusic = false;
 	d->mPlaySound = false;
-	boConfig->setDisableSound(true);
+	boConfig->setBoolValue("ForceDisableSound", true);
 	delete d->mProcess;
 	d->mProcess = 0;
 	return;
@@ -168,7 +168,7 @@ bool BosonAudioInterface::sound() const
 
 void BosonAudioInterface::setMusic(bool m)
 {
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	m = false;
  }
 
@@ -189,7 +189,7 @@ void BosonAudioInterface::setMusic(bool m)
 
 void BosonAudioInterface::setSound(bool s)
 {
- if (boConfig->disableSound()) {
+ if (boConfig->boolValue("ForceDisableSound")) {
 	s = false;
  }
  d->mPlaySound = s;

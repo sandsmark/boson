@@ -143,7 +143,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  int* renderCells = createVisibleCellList(&cellsCount, localPlayerIO());
  BO_CHECK_NULL_RET0(renderCells);
 
- if (boConfig->textureFOW()) {
+ if (boConfig->boolValue("TextureFOW")) {
 	// Enable fog texture (TU 1)
 	initFogTexture(map);
 	boTextureManager->activateTextureUnit(1);
@@ -170,7 +170,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
  // Render cells
  renderVisibleCells(renderCells, cellsCount, map);
 
- if (boConfig->textureFOW()) {
+ if (boConfig->boolValue("TextureFOW")) {
 	// end using fog texture
 	boTextureManager->activateTextureUnit(1);
 	boTextureManager->unbindTexture();
@@ -207,7 +207,7 @@ void BoGroundRenderer::renderCellGrid(int* cells, int cellsCount, const float* h
  if (cellsCount <= 0) {
 	return;
  }
- if (boConfig->debugShowCellGrid()) {
+ if (boConfig->boolValue("debug_cell_grid")) {
 	glDisable(GL_LIGHTING);
 	glDisable(GL_NORMALIZE);
 	glDisable(GL_DEPTH_TEST);
@@ -333,7 +333,7 @@ int* BoGroundRenderer::makeCellArray(unsigned int count)
 
 void BoGroundRenderer::cellChanged(int x, int y)
 {
- if (!boConfig->textureFOW()) {
+ if (!boConfig->boolValue("TextureFOW")) {
 	return;
  }
  if (!mFogTextureData) {

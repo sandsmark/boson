@@ -83,7 +83,7 @@ void BoDefaultGroundRenderer::renderVisibleCells(int* renderCells, unsigned int 
  statistics()->setRenderedQuads(renderedQuads);
  statistics()->setUsedTextures(usedTextures);
 
- if (boConfig->enableColormap()) {
+ if (boConfig->boolValue("debug_colormap")) {
 	boTextureManager->disableTexturing();
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);

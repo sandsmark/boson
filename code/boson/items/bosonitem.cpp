@@ -529,7 +529,7 @@ bool BosonItem::initItemRenderer()
 	}
  }
 
- if (boConfig->disableModelLoading()) {
+ if (boConfig->boolValue("ForceDisableModelLoading")) {
 	providesModel = false;
  }
 
