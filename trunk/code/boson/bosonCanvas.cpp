@@ -41,6 +41,7 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	mobile.resize(149);
 	facility.resize(149);
 
+	my_fix = my_mobiles = 0;
 
 	// ping initialisation, not relevant
 	last_sync = time(NULL);
@@ -111,7 +112,7 @@ void bosonCanvas::unHideMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
-	assert(m.who < nb_player);
+	assert( m.who < nb_player);
 	u = mobile.find(m.key);
 	if (u) u->doShow();
 	else logf(LOG_ERROR, "bosonCanvas::unHideMob : can't find m.key");
@@ -125,7 +126,7 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 {
 	playerMobUnit *u;
 
-	assert(m.who < nb_player);
+	assert( m.who < nb_player);
 
 	switch (m.type) {
 		default:
@@ -140,7 +141,9 @@ void bosonCanvas::createMob(mobileMsg_t &m)
 	mobile.insert(m.key, u);
 
 	emit updateMobile(u);
-	emit mobileNbUpdated(mobile.count());
+
+	if (m.who == who_am_i)
+		emit mobileNbUpdated(++my_mobiles);
 }
 
 
@@ -160,9 +163,12 @@ void bosonCanvas::destroyMob(destroyedMsg_t &m)
 	QPoint p  = mob->center();
 	new boShot ( p.x(), p.y(), mob->z(), boShot::SHOT_UNIT);
 
+	if (mob->who == who_am_i)
+		emit mobileNbUpdated(--my_mobiles);
+
 	mob->destroy();
 	boAssert( mobile.remove(m.key) == true );
-	emit mobileNbUpdated(mobile.count());
+
 }
 
 
@@ -181,7 +187,7 @@ void bosonCanvas::unHideFix(facilityMsg_t &m)
 {
 	playerFacility *f;
 
-	assert(m.who < (uint) nb_player);
+	assert( m.who < nb_player);
 	f = facility.find(m.key);
 	if (f) f->doShow();
 	else logf(LOG_ERROR, "bosonCanvas::unHideFix : can't find m.key");
@@ -200,7 +206,9 @@ void bosonCanvas::createFix(facilityMsg_t &m)
 	facility.insert(m.key, f);
 
 	emit updateFix(f);
-	emit facilityNbUpdated(facility.count());
+
+	if (m.who == who_am_i)
+		emit facilityNbUpdated(++my_fix);
 }
 
 
@@ -220,9 +228,11 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 	QPoint p = f->center();
 	new boShot ( p.x(), p.y(), f->z(), boShot::SHOT_FACILITY);
 
+	if (f->who == who_am_i)
+		emit facilityNbUpdated(--my_fix);
+
 	f->destroy();
 	boAssert( facility.remove(msg.key) == true);
-	emit facilityNbUpdated(facility.count());
 }
 
 

@@ -97,6 +97,8 @@ private:
 	Cell	*cells;
 	time_t	ping;
 	time_t	last_sync;
+	int	my_fix;
+	int	my_mobiles;
 };
 
 #endif // BOSONFIELD_H
