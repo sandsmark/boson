@@ -109,16 +109,16 @@ public:
 	{
 		mPosX = x;
 		mPosY = y;
-		mPosZ = z;
+		mPosZ = QMAX(NEAR + 1.0, QMIN(FAR - 1.0, z));
 	}
-	void setPosX(GLfloat x) { setPos(x, mPosY, mPosZ); }
-	void setPosY(GLfloat y) { setPos(mPosX, y, mPosZ); }
-	void setPosZ(GLfloat z) { setPos(mPosX, mPosY, z); }
-	GLfloat posX() const { return mPosX; }
-	GLfloat posY() const { return mPosY; }
-	GLfloat posZ() const { return mPosZ; }
-	GLfloat centerX() const { return posX() + mCenterDiffX; }
-	GLfloat centerY() const { return posY() + mCenterDiffY; }
+	void setX(GLfloat x) { setPos(x, mPosY, mPosZ); }
+	void setY(GLfloat y) { setPos(mPosX, y, mPosZ); }
+	void setZ(GLfloat z) { setPos(mPosX, mPosY, z); }
+	GLfloat x() const { return mPosX; }
+	GLfloat y() const { return mPosY; }
+	GLfloat z() const { return mPosZ; }
+	GLfloat centerX() const { return x() + mCenterDiffX; }
+	GLfloat centerY() const { return y() + mCenterDiffY; }
 
 	void setZoomFactor(GLfloat f) { mZoomFactor = f; }
 	GLfloat zoomFactor() const { return mZoomFactor; }
@@ -793,17 +793,23 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	{
 		d->mMouseMoveDiff.moveToPos(e->pos());
 		if (e->state() & AltButton) {
-			// zooming
-			kdDebug() << "zoom factor: " << d->mCamera.zoomFactor()<< endl;
-			setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
+			// we don't support zooming. you can achieve nearly the
+			// same by changing d->mCamera.z()
+//			// zooming
+//			kdDebug() << "zoom factor: " << d->mCamera.zoomFactor()<< endl;
+//			setZoomFactor(d->mCamera.zoomFactor() + ((float)d->mMouseMoveDiff.dy()) / 10);
 		} else if (e->state() & LeftButton) {
 			if (e->state() & ControlButton) {
-				d->mCamera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
-				d->mCamera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
+				Camera camera = d->mCamera;
+				camera.increaseCenterDiffXBy(d->mMouseMoveDiff.dx());
+				camera.increaseCenterDiffYBy(-d->mMouseMoveDiff.dy());
+				setCamera(camera);
 			} else if (e->state() & ShiftButton) {
 				// move the z-position of the cameraa
-				setCameraPos(cameraX(), cameraY(), cameraZ() + d->mMouseMoveDiff.dy());
-				kdDebug() << "posZ: " << d->mCamera.posZ() << endl;
+				Camera camera = d->mCamera;
+				camera.setZ(cameraZ() + d->mMouseMoveDiff.dy());
+				setCamera(camera);
+				kdDebug() << "posZ: " << d->mCamera.z() << endl;
 			} else if (e->state() & AltButton) {
 				// we can't use Alt+LMB since KDE already uses it to move the window :(
 			} else {
@@ -831,7 +837,10 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 				int moveX = d->mMouseMoveDiff.dx();
 				int moveY = d->mMouseMoveDiff.dy();
 				mapDistance(moveX, moveY, &dx, &dy);
-				setCameraPos(cameraX() + dx, cameraY() + dy, cameraZ());
+				Camera camera = d->mCamera;
+				camera.setX(cameraX() + dx);
+				camera.setY(cameraY() + dy);
+				setCamera(camera);
 			} else {
 				d->mMouseMoveDiff.stop();
 			}
@@ -983,24 +992,25 @@ void BosonBigDisplayBase::slotCenterHomeBase()
  //TODO
  // find the command center of the local player
  QPoint pos(0, 0); // note: we use *cell* coordinates!
- 
+
  slotReCenterDisplay(pos);
 }
 
 void BosonBigDisplayBase::slotResetViewProperties()
 {
- d->mCamera = Camera();
-
  d->mFovY = 60.0;
  d->mAspect = 1.0;
- setCamera(d->mCamera);
+ setCamera(Camera());
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
-//TODO don't center the corners - e.g. 0;0 should be top left, never center
- setCameraPos(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, cameraZ());
+//TODO don't center the corners - e.g. 0;0 should be top left, never center 
+ Camera camera = d->mCamera;
+ camera.setX(((float)pos.x()) * BO_GL_CELL_SIZE);
+ camera.setY(-((float)pos.y()) * BO_GL_CELL_SIZE);
+ setCamera(camera);
 }
 
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
@@ -1355,7 +1365,10 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
+		Camera camera = d->mCamera;
+		camera.setX(cameraX() + x);
+		camera.setY(cameraY() + y);
+		setCamera(camera);
 	}
  }
 }
@@ -1365,7 +1378,10 @@ void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
  GLdouble x, y;
  mapDistance(dx, dy, &x, &y);
- setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
+ Camera camera = d->mCamera;
+ camera.setX(cameraX() + x);
+ camera.setY(cameraY() + y);
+ setCamera(camera);
 }
 
 void BosonBigDisplayBase::generateMapDisplayList()
@@ -1439,34 +1455,6 @@ void BosonBigDisplayBase::generateMapDisplayList()
  d->mMapDisplayList = list;
 }
 
-void BosonBigDisplayBase::setCameraPos(GLfloat x, GLfloat y, GLfloat z)
-{
- GLdouble w = 0;
- GLdouble h = 0;
-#if 0
- GLdouble x1, x2;
- GLdouble y1, y2;
- GLdouble tmp;
- // we cannot simply map 0,0 and compare it with the mapped d->mW,d->mH since
- // the screen might be rotated... but thats not supported anyway
- mapCoordinates(QPoint(0,0), &x1, &y1, &tmp);
- mapCoordinates(QPoint(d->mW,0), &x2, &tmp, &tmp);
- mapCoordinates(QPoint(0,d->mH), &tmp, &y2, &tmp);
- w = x2-x1;
- h = y2-y1;
-#endif
-
- Camera camera = d->mCamera;
-
- // FIXME: these tests are not really good anymore. especially when map is
- // rotated.
- camera.setPosX(QMAX(w / 2, QMIN(((float)mCanvas->mapWidth()) * BO_GL_CELL_SIZE - w / 2, x)));
- camera.setPosY(QMIN(h / 2, QMAX((-((float)mCanvas->mapHeight()) * BO_GL_CELL_SIZE) - h / 2, y)));
- camera.setPosZ(QMAX(NEAR+0.5, QMIN(FAR-0.5, z)));
-
- setCamera(camera);
-}
-
 void BosonBigDisplayBase::setCamera(const Camera& camera)
 {
  if (!d->mInitialized) {
@@ -1512,17 +1500,17 @@ void BosonBigDisplayBase::setCamera(const Camera& camera)
 
 GLfloat BosonBigDisplayBase::cameraX() const
 {
- return d->mCamera.posX();
+ return d->mCamera.x();
 }
 
 GLfloat BosonBigDisplayBase::cameraY() const
 {
- return d->mCamera.posY();
+ return d->mCamera.y();
 }
 
 GLfloat BosonBigDisplayBase::cameraZ() const
 {
- return d->mCamera.posZ();
+ return d->mCamera.z();
 }
 
 bool BosonBigDisplayBase::checkError() const
@@ -1592,7 +1580,7 @@ double BosonBigDisplayBase::fps() const
 void BosonBigDisplayBase::setZoomFactor(float f)
 {
  kdDebug() << k_funcinfo << f << endl;
- d->mCamera.setZoomFactor(f);
+ d->mCamera.setZoomFactor(f); // no need to call setCamera(), since resizeGL() does it
  resizeGL(d->mViewport[2], d->mViewport[3]);
 }
 
