@@ -146,9 +146,9 @@ gluLookAt(0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 100.0, 0.0);
  dnl AB: the AC_DEFINE is pretty useless, as we abort anyway, if GL not there
  AC_DEFINE(HAVE_GL, 1, [Defines if you have GL (Mesa, OpenGL, ...)])
  if test "$GL_LDFLAGS" = ""; then
-	GLLIB='-lGLU -lGL $(LIB_X11)'
+	GLLIB='-Xmu -lGLU -lGL $(LIB_X11)'
  else
-	GLLIB="$GL_LDFLAGS -lGLU -lGL "'$(LIB_X11)'
+	GLLIB="$GL_LDFLAGS -Xmu -lGLU -lGL "'$(LIB_X11)'
  fi
  if test "$GL_INCLUDE" = ""; then
 	GLINC=""
@@ -219,3 +219,49 @@ AC_DEFUN(AC_BOSON_STATIC,
   fi
 ])
 AC_BOSON_STATIC
+
+
+AC_DEFUN(AC_BOSON_CHECK_VIDMODE,
+[
+  AC_LANG_SAVE
+  AC_LANG_C
+  bo_vidmode_extension="no"
+  bo_save_ldflags="$LDFLAGS"
+  bo_save_cflags="$CFLAGS"
+  bo_save_libs="$LIBS"
+  bo_lib_vidmode="-lXext -lXxf86vm"
+  AC_MSG_CHECKING(for XFree86 VidMode extension)
+  LDFLAGS="$LDFLAGS $X_LDFLAGS"
+  CFLAGS="$CFLAGS $X_INCLUDES"
+  LIBS="$LIBS -lX11 $bo_lib_vidmode"
+
+  AC_TRY_LINK(
+	[
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86vmode.h>
+	],[
+Display* dpy = 0;
+int ev, er;
+XF86VidModeQueryExtension(dpy, &ev, &er);
+	],
+	[bo_vidmode_extension=yes],
+	[bo_vidmode_extension=no]
+  )
+
+  if test "x$bo_vidmode_extension" = "xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE_UNQUOTED(HAVE_XFREE86_VIDMODE, 1, [ Defines if you have the XFree86 VidMode extension ])
+    LIB_VIDMODE="$bo_lib_vidmode"
+  else
+    AC_MSG_RESULT([no])
+    LIB_VIDMODE=""
+  fi
+
+  AC_LANG_RESTORE
+  LDFLAGS="$bo_save_ldflags"
+  CFLAGS="$bo_save_cflags"
+  LIBS="$bo_save_libs"
+  AC_SUBST(LIB_VIDMODE)
+])
+AC_BOSON_CHECK_VIDMODE
+
