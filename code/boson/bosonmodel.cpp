@@ -50,6 +50,13 @@ BoFrame::BoFrame(const BoFrame& f)
  mRadius = f.mRadius;
 }
 
+BoFrame::~BoFrame()
+{
+ if (mDisplayList != 0) {
+	glDeleteLists(mDisplayList, 1);
+ }
+}
+
 class BosonModel::BoHelper
 {
 public:
@@ -163,6 +170,7 @@ void BosonModel::init()
  mWidth = 0;
  mHeight = 0;
  mFrames.setAutoDelete(true);
+ mConstructionSteps.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
 	mModelTextures = new BosonModelTextures();
  }
@@ -173,7 +181,15 @@ BosonModel::~BosonModel()
  kdDebug() << k_funcinfo << endl;
  finishLoading();
  mModelTextures->removeModel(this);
+ kdDebug() << k_funcinfo << "delete " << mFrames.count() << " frames" << endl;
  mFrames.clear();
+ kdDebug() << k_funcinfo << "delete " << mConstructionSteps.count() << " construction frames" << endl;
+ mConstructionSteps.clear();
+ kdDebug() << k_funcinfo << "delete " << mNodeDisplayLists.count() << " child display lists" << endl;
+ QValueList<GLuint>::Iterator it = mNodeDisplayLists.begin();
+ for (; it != mNodeDisplayLists.end(); ++it) {
+	glDeleteLists((*it), 1);
+ }
  kdDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -248,6 +264,10 @@ void BosonModel::createDisplayLists()
  }
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames);
+ if (listBase == 0) {
+	kdError() << k_funcinfo << "NULL display lists created" << endl;
+	return;
+ }
  float scale = 1.0; // note: all frame must share the same scaling factor. this means that the model mustn't grow in x or y direction (width or height). It can grow/shrink in z-direction however.
 
  // ok so lets start now. A .3ds file can contain several frames. A different
@@ -363,6 +383,10 @@ void BosonModel::generateConstructionLists()
 
  float scale = helper.scale(mWidth, mHeight);
  GLuint base = glGenLists(nodes);
+ if (base == 0) {
+	kdError() << k_funcinfo << "NULL display lists created" << endl;
+	return;
+ }
  for (unsigned int i = 0; i < nodes; i++) {
 	GLuint list = base + i;
 	BoFrame* step = new BoFrame(*frame0);
@@ -454,7 +478,12 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			return;
 		}
 		node->user.d = glGenLists(1);
+		if (node->user.d == 0) {
+			kdError() << k_funcinfo << "NULL display list created" << endl;
+			return;
+		}
 		glNewList(node->user.d, GL_COMPILE);
+		mNodeDisplayLists.append(node->user.d);
 
 		unsigned int p;
 		Lib3dsMatrix invMeshMatrix;
