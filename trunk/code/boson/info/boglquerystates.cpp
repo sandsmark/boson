@@ -158,6 +158,8 @@ public:
         ADD(GL_STENCIL_BITS, "GL_STENCIL_BITS");
         ADD(GL_STEREO, "GL_STEREO");
         ADD(GL_SUBPIXEL_BITS, "GL_SUBPIXEL_BITS");
+        // ARB
+        ADD(GL_MAX_TEXTURE_UNITS_ARB, "GL_MAX_TEXTURE_UNITS_ARB");
 #undef ADD
     }
 
@@ -203,6 +205,8 @@ public:
         UPDATE(GL_STENCIL_BITS);
         UPDATE(GL_STEREO);
         UPDATE(GL_SUBPIXEL_BITS);
+        // ARB
+        UPDATE(GL_MAX_TEXTURE_UNITS_ARB);
 #undef UPDATE
     }
     QStringList list() const
