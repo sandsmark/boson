@@ -2272,7 +2272,6 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  boDebug() << k_funcinfo << endl;
 
  d->mLoadingStatus = BosonSaveLoad::LoadingInProgress;
- emit signalLoadingType(BosonLoadingWidget::LoadSavedGameHeader);
 
  // Load magic data
  Q_UINT8 a, b1, b2, b3;
