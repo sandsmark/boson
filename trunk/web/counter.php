@@ -263,6 +263,13 @@ function counter2($page)
     mysql_query($query);
   }
 
+  // Log unknown user agents to a file so we can improve browser/os detection code
+  if(($browser == "Unknown") || ($os == "Unknown"))
+  {
+    $file = fopen($basedir . "unknown_uas", "a");
+    fputs($file, "$HTTP_USER_AGENT\n");
+    fclose($file);
+  }
 
   // Print some (all) stats
   /*echo "
