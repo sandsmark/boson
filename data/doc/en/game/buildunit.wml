@@ -9,5 +9,5 @@
       - <a href="../facilities/warfactory.html">War factory</a><br>
     </p>
     
-#include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Moving units"    
+#include "nav.wml" before_url="buildfac.html" before_text="Build facilities" after_url="moving.html" after_text="Selecting and moving units"    
 #include "footer.wml"

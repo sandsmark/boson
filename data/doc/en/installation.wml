@@ -2,44 +2,70 @@
     <h1>
       Installation
     </h1>
+    <!--
     <p>
-      First you need to untar the code (if you downloaded a .tar.bz2 package -
-      skip this for cvs):
-      <pre>
-        tar xjvf code.tar.bz2
-        tar xjvf data.tar.bz2
-      </pre>
-      If you are using the cvs version you need to link the admin dir from code
-      to data first:
-      <pre>
-        cd data
-        ln -s ../code/admin
-      </pre>
-      Now you can enter the code dir and start compiling:
-      <pre>
-        cd code
-        ./configure
-        make
-        su
-        make install
-      </pre>
-      Note that you should not be root for compiling, but you usually need to be
-      root for make install.<br>
-      Repeat this for the data:
-      <pre>
-        cd data
-        ./configure
-        make
-        su
-        make install
-      </pre>
-      In case that the above fails because there is no ./configure you need to
-      generate it first:
-      <pre>
-        make -f Makefile.cvs
-      </pre>
-      Now boson should be installed on your system.
+    - <a href="#1">Using tarballs</a><br>
+    - <a href="#2">Using CVS</a><br>
+    - <a href="#3">Using RPM and other binary releases</a><br><br>
     </p>
+    -->
+    <br>
+    <h4>Using tarballs</h4>
+    <p>
+    You need:<br>
+     - boson-code-XXX.tar.bz2<br>
+     - boson-data-XXX.tar.bz2<br>
+     - boson-music-XXX.tar.bz2 (optional)<br><br>
+    You can also fetch boson-all-XXX.tar.bz2 which contains just everything.<br><br>
+
+    You have to do this for every package you downloaded:
+    <pre>
+    tar xjvf boson-YYY-XXX.tar.bz2
+    cd "package_name"
+    ./configure
+    make
+    su -c "make install"
+    </pre>
+
+    <br>
+    <h4>Using CVS</h4>
+    <p>
+    CVS login:
+    <pre>
+    export CVSROOT=":pserver:anonymous@cvs.boson.sourceforge.net:/cvsroot/boson"
+    cvs login
+    </pre>
+    Please just press the Enter key when you are prompted for a password.<br>
+    Now you can checkout the source.<br>
+    <pre>
+    cvs -z3 co -P code
+    cvs -z3 co -P data
+    </pre>
+    Compilation of code:
+    <pre>
+    cd "package_name"
+    make -f Makefile.cvs
+    ./configure
+    make
+    su -c "make install"
+    </pre>
+    Compilation of data:
+    <pre>
+    cd data && ln -s ../code/admin admin 
+    make -f Makefile.cvs
+    ./configure --prefix=/opt/kde3
+    make
+    su -c "make install"
+    </pre>
     
+    <br>
+    <h4>RPM / binary releases</h4>
+    <p>
+    There are rpm packages available on our File Release site on SourceForge.<br>
+    They are inofficial because we don't test them.<br>
+    If you feel like building a RPM for boson (for any platform), we'll be happy to put a link here and/or add them to our site.<br>
+
+
+ 
 #include "nav.wml" before_url="started.html" before_text="Getting started" after_url="game/index.html" after_text="In the game"
 #include "footer.wml"
