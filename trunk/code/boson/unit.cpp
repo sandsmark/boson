@@ -907,8 +907,14 @@ void Facility::addProduction(int unitType)
 	kdError() << id() << " cannot produce " << unitType << endl;
 	return;
  }
+ bool start = false;
+ if (!hasProduction()) {
+	start = true;
+ }
  d->mProductions.append(unitType);
- setWork(WorkProduce);
+ if (start) {
+	setWork(WorkProduce);
+ }
  setAnimated(true);
 }
 
