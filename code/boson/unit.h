@@ -222,7 +222,7 @@ public:
 	 * attack. -1 keeps the previously set range.
 	 * @return true if unit can go to destination, false otherwise
 	 **/
-	bool moveTo(int x, int y, int range = 0);
+	bool moveTo(double x, double y, int range = 0);
 
 	/**
 	 * Just stop moving. Don't call this if you don't want to stop attacking
@@ -444,7 +444,7 @@ public:
 	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
-	virtual void moveTo(int x, int y, int range = 0);
+	virtual void moveTo(double x, double y, int range = 0);
 
 	/**
 	 * Advance the construction animation. This is usually called when
