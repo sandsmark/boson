@@ -40,6 +40,7 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mOwner = owner;
   mProp = prop;
+  setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2); // AB: pretty much a random value
   if (!mProp)
   {
     boError(350) << k_funcinfo << "NULL weapon properties!" << endl;
