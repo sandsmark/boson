@@ -1895,6 +1895,7 @@ bool Facility::loadFromXML(const QDomElement& root)
 	boError() << k_funcinfo << "Unit not loaded properly" << endl;
 	return false;
  }
+ setConstructionStep(d->mConstructionStep);
  return true;
 }
 
@@ -1927,3 +1928,4 @@ bool Facility::save(QDataStream& stream)
  }
  return true;
 }
+
