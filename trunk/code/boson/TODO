@@ -80,6 +80,9 @@ General TODOs
 - color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin
+- BsoonPath::PathNode needs to be public to compile in gcc 2.96
+  Why? It is used internally only... Failing e.g. here:
+  inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 
 Data TODOs
 - sound for minimap activated/deactivated
@@ -92,3 +95,5 @@ Data TODOs
      read by the game
 - the text on the startup pixmap should be translatable. maybe we can use a
   QPainter to paint on it?
+- can we use a coded gradient instead of the startup-bg pix? would allow every
+  size then
