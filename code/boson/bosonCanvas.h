@@ -34,6 +34,12 @@ class QPainter;
 class Unit;
 
 
+class bosonCell {
+	public:
+	private:
+	int  flags;
+} ;
+
 
 /** 
   * This class encapsulate the "physical" idea of the map : size, contents..
@@ -43,7 +49,8 @@ class bosonCanvas : public visualCanvas
 	Q_OBJECT
 
 public:
-	bosonCanvas( QPixmap, uint l, uint h);
+	bosonCanvas( QPixmap, uint w, uint h);
+	~bosonCanvas();
 
   void createMob(mobileMsg_t &);
   void unHideMob(mobileMsg_t &);
@@ -67,6 +74,10 @@ public:
 //private :
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;
+
+protected:
+	bosonCell	&cell(int x, int y) {return cells[ x + y * maxX ]; }
+	bosonCell	*cells;
   
 signals:
 	void reCenterView(int x, int y);

@@ -37,6 +37,14 @@ bosonCanvas::bosonCanvas( QPixmap p, uint w, uint h)
 	facility.resize(149);
 //	mobile.setAutoDelete(TRUE);
 //	facility.setAutoDelete(TRUE);   
+
+	cells = new bosonCell[w*h];
+}
+
+
+bosonCanvas::~bosonCanvas()
+{
+	delete [] cells;
 }
 
 
