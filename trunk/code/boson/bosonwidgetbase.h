@@ -171,6 +171,8 @@ protected slots:
 
 	void slotApplyOptions();
 
+	// AB: this isn't really nice in the widget class. a dedicated
+	// scriptmanager class would be nicer.
 	void slotRunScriptLine(const QString& line);
 
 	void slotAdvance(unsigned int, bool);
