@@ -2,19 +2,10 @@ Game TODOs
 - waypoints
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
-- rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units
-  and. We could also use QCanvas::drawForeground() to get rid of the
-  QCanvasSprites. But there is also a problem when scrolling the widget - all
-  units are visible for a moment then (until the fow is drawn). Bug is in
-  QCanvas: when the widget is scrolled QCanvas does not use double buffering
-  let the Cell display black. Don't use a QCanvasSprite for the fog of war.
-  Terrible performance.
 - AI
 - follow-mode for units
 - BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
   repaint for setGrayOut() and setProductionCount()
-- BosonSpriteCursor::slotAdvance() calls canvas->update(). it should not as it
-  hurts performance. But it is necessary for slow game speed :(
 - mine/harvest minerals/oil is only at an experimantal state ; same about
   refining
 - oil towers: they should be placed on an oil field. oil tankers go to the
@@ -32,7 +23,7 @@ Game TODOs
 - TopWidget::slotNewGame() is broken
 - "welcome to Boson" text in startup screen should be translateable (we can use
   QPainter to paint it to pixmap)
-- Do not start game before all players has loaded their data
+- Do not start game before all players have loaded their data
 - BosonTiles::mTilesImage is unused in game mode. free memory
 - mark selected units, i.e. display the group number in the selectbox (and also
   in the cmd frame for every unit)
@@ -80,11 +71,7 @@ General TODOs
   somehow if it isn't
 - make sure that libogg and so on is installed! even if kdemultimedia is
   installed it may still be that ogg support is missing
-- sometimes when splitting displays (maybe only when splitting vertically) it
-  happens that no mouse IO is being added (and is therefore unusable and
-  unremovable
 - use KDock for the dispalys
-- color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin  update: it's not wrong, it's disabled-color
 - pixmaps on startup widgets should be centered horizontally
@@ -92,8 +79,6 @@ General TODOs
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
-- support different hotspot for different cursor mode (attack,move,...) but
-  *not* for different frames in a single frame
 
 Data TODOs
 - sound for minimap activated/deactivated
