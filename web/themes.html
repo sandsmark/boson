@@ -38,7 +38,12 @@
 
     <P>All of Boson's graphics will be completely themeable. That means not only that you can change "skins" whenever you like, but it also means that you can combine different themes in one game.</P>
 
-    <P>Currently, only one theme ("standard") is being made, which will be available for download together with the first release of Boson. To give others a possibility to start creating themes before Boson is released and to make themes-creation in general easier, this page describes the file formats, directory structures and naming conventions.</P>
+	There are two kind of themes : ground themes to change the look of the place you're fighting on, and
+species themes so that every player may choose his specy. 
+
+    <P>Currently, only one ground theme ("earth") and two species themes ("human_red", "human_blue") are available.
+
+    <P>To give others a possibility to start creating themes before Boson is released and to make themes-creation in general easier, this page describes the file formats, directory structures and naming conventions.</P>
 
     </FONT>
 
@@ -61,7 +66,12 @@
   <TR><TD>
 
     <BR>
+
+    <P>The best way to understand the tree structure and the naming convention is
+of course to download and unzip the boson-pics-*.tgz file and have a look at it.</P>
   
+    <BR> <BR>
+
     <FONT FACE="helvetica" SIZE="2">
 
     <P>Subdirectory of {$KDEDIR}/share/apps/boson/themes</P>
@@ -74,49 +84,51 @@
 
           <PRE>
 
+
 |-grounds
-    |-standard
-        |-grass-water
-        |-grass-desert
-        |-water-desert
-        |-water-water
-        |-decorations
-|-resources
-    |-standard
-        |-oil
-        |-minerals
+  |-earth
+    |-grass_water
+    |-grass_desert
+    |-water_desert
+    |-dwater_water
+|-species
+  |-blue_human
+    |-units
+      |-aircraft
+      |-quad
+      |-ship
+    |-facilities
+      |-warfactory
+      |-barracks
+      |-bunker
+      |-comsat
+      |-helipad
+      |-oiltower
+      |-powerplant
+      |-samsite
+  |-red_human
+    |-units
+      |-aircraft
+      |-quad
+      |-ship
+    |-facilities
+      |-warfactory
+      |-barracks
+      |-bunker
+      |-comsat
+      |-helipad
+      |-oiltower
+      |-powerplant
+      |-samsite
 |-panels
-    |-standard
-|-manuals
-    |-standard
-|-units
-    |-standard
-        |-red
-            |-quad
-            |-ship
-            |-etc...
-        |-green
-            |-quad
-            |-ship
-            |-etc...
-        |-blue
-            |-quad
-            |-ship
-            |-etc...
-|-facilities
-    |-standard
-        |-red
-            |-commandcenter
-            |-powerplant
-            |-etc...
-        |-green
-            |-commandcenter
-            |-powerplant
-            |-etc...
-        |-blue
-            |-commandcenter
-            |-powerplant
-            |-etc...
+  |-standard
+|-resources
+  |-standard
+    |-oil
+    |-minerals    
+
+
+
            </PRE>
 
           <FONT FACE="helvetica" SIZE="2">
@@ -159,7 +171,7 @@
 
     <LI>All images for Boson are made in the Bitmap (*.bmp) format with true color (24 or 32 bit).
 
-    <LI>The bitmaps for the terrain all have a size of 48 x 48 pixels. There are four different types of terrain (In the standard theme, that is grass, desert, shallow water and deep water).
+    <LI>The bitmaps for the terrain all have a size of 48 x 48 pixels. There are four different types of terrain  : that is grass, desert, water and deep water.
 
     <LI>Most buildings have a size of 2x2 sprites, which is 96 x 96 pixels. Other themes have to use the same sizes. Some buildings have different sizes.
 
@@ -199,7 +211,7 @@
   
     <FONT FACE="helvetica" SIZE="2">
 
-    <P>Boson's standard theme has four different grounds (grass, desert, shallow water and deep water). To use all these grounds, we need to create transitions between them (beach between grass and water).
+    <P>Boson's standard theme has four different grounds (grass, desert, water and deep water). To use all these grounds, we need to create transitions between them (beach between grass and water).
 
     </FONT>
 
