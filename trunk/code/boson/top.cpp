@@ -997,7 +997,7 @@ void TopWidget::raiseWidget(StartupWidgetIds id)
 		break;
  }
  if (!mWs->widget((int)id)) {
-	kdWarning() << k_funcinfo << "NULL widget " << id << endl;
+	boWarning() << k_funcinfo << "NULL widget " << id << endl;
 	return;
  }
  mWs->raiseWidget((int)id);
