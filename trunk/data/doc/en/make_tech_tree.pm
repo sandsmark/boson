@@ -37,7 +37,7 @@ my $unitpath = "$ENV{TOP_SRCDIR}/themes/species/human/units/";
 
 
 my @units;
-opendir(UNITDIR, $unitpath) or die ("Oops - can't open dir $unitpath\n");
+opendir(UNITDIR, $unitpath) or die ("Oops - can\'t open dir $unitpath\n");
 
 foreach my $entry (readdir(UNITDIR)) {
     if ($unittype eq "fixed") {
@@ -62,45 +62,50 @@ my %requirements;
 my %names;
 foreach my $unit (@units) {
 	my @file;
-	open(FILE, "< $unit") or die ("Unable to open $unit");
-	my $requirement;
-	my $id;
-	my $name;
-	my $has_group = 0;
-	my $eof = 0;
-	while (<FILE>) {
-		next if ($eof);
-		chomp;
-		$_ =~ s/\034//g; # continuation lines
-		if (!$has_group) {
-			if ($_ =~ /\[Boson Unit\]/) {
-				$has_group = 1;
-			}
-			next;
-		} elsif ($has_group && $_ =~ /\[.*\]/) {
-			$eof = 1;
-		}
-		if ($_ =~ /^Requirements\s*=\s*/) {
-			$_ =~ s/^Requirements\s*=\s*//;
-			$requirement = $_;
-		} elsif ($_ =~ /^Id\s*=\s*/) {
-			$_ =~ s/^Id\s*=\s*//;
-			$id = $_;
-		} elsif ($_ =~ /^Name\s*=\s*/) {
-			$_ =~ s/^Name\s*=\s*//;
-			$name = $_;
-		}
-	}
-	close(FILE);
-	if ($id && $name) {
-		push(@idlist, $id);
-		$names{$id} = $name;
-		if ($requirement) {
-			$requirements{$id} = $requirement;
-		}
-	} else {
-		print_mesg("No unit found in $unit\n");
-	}
+    if ($unit =~ /prison|barracks/) {
+        next;
+    }
+    else: {
+	    open(FILE, "< $unit") or die ("Unable to open $unit");
+	    my $requirement;
+        my $id;
+        my $name;
+        my $has_group = 0;
+        my $eof = 0;
+    	while (<FILE>) {
+	    	next if ($eof);
+		    chomp;
+    		$_ =~ s/\034//g; # continuation lines
+    		if (!$has_group) {
+    			if ($_ =~ /\[Boson Unit\]/) {
+    				$has_group = 1;
+    			}
+    			next;
+    		} elsif ($has_group && $_ =~ /\[.*\]/) {
+    			$eof = 1;
+    		}
+    		if ($_ =~ /^Requirements\s*=\s*/) {
+    			$_ =~ s/^Requirements\s*=\s*//;
+    			$requirement = $_;
+    		} elsif ($_ =~ /^Id\s*=\s*/) {
+    			$_ =~ s/^Id\s*=\s*//;
+    			$id = $_;
+    		} elsif ($_ =~ /^Name\s*=\s*/) {
+    			$_ =~ s/^Name\s*=\s*//;
+    			$name = $_;
+    		}
+    	}
+    	close(FILE);
+    	if ($id && $name) {
+    		push(@idlist, $id);
+    		$names{$id} = $name;
+    		if ($requirement) {
+    			$requirements{$id} = $requirement;
+    		}
+    	} else {
+    		print_mesg("No unit found in $unit\n");
+    	}
+    }
 }
 
 my $count = 0; # fallback, in case a unit can't be painted at all (e.g. recursive requirements)
