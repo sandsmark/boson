@@ -73,7 +73,7 @@ public:
 	 * @return The displayed unit or 0 if no unit is displayed. See also
 	 * @ref tile and @ref unitType
 	 **/
-	Unit* unit() const 
+	Unit* unit() const
 	{
 		return (commandType() == CommandUnitSelected) ? mUnit : 0;
 	}
@@ -107,7 +107,7 @@ public:
 	 * entry (i.e. an order button) then it is the player that produces
 	 * here.
 	 **/
-	Player* productionOwner() const 
+	Player* productionOwner() const
 	{ 
 		return (commandType() == CommandProduce) ? mProductionOwner : 0;
 	}
@@ -116,7 +116,7 @@ public:
 	 * @return The displayed tilenumber or -1 if none is displayed. See also
 	 * @ref unit and @ref unitType
 	 **/
-	int tile() const 
+	int tile() const
 	{ 
 		return (commandType() == CommandCell) ? mTileNumber : -1;
 	}
