@@ -25,6 +25,7 @@
 #include <qptrlist.h>
 
 class BoMesh;
+class BoMaterial;
 class BoAdjacentDataBase;
 class QColor;
 
@@ -45,6 +46,7 @@ public:
 		mPointIndex[1] = points[1];
 		mPointIndex[2] = points[2];
 	}
+
 	const int* pointIndex() const
 	{
 		return mPointIndex;
@@ -124,7 +126,14 @@ public:
 	 **/
 	int findPointIndex(int index) const;
 
-	const int* pointIndex() const { return mFace->pointIndex(); }
+	inline const BoFace* face() const
+	{
+		return mFace;
+	}
+	const int* pointIndex() const
+	{
+		return face()->pointIndex();
+	}
 
 	void delNode();
 
@@ -152,6 +161,13 @@ public:
 	 **/
 	BoMesh(unsigned int faces);
 	~BoMesh();
+
+	/**
+	 * Use material @p mat when rendering this mesh.
+	 **/
+	void setMaterial(BoMaterial* mat);
+
+	BoMaterial* material() const;
 
 	/**
 	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
@@ -213,6 +229,14 @@ public:
 	 * Generate a point list (as it can be used by glDrawElements()) from
 	 * the node list (see @ref nodes).
 	 *
+	 * The point cache is an array of all vertices that are referenced by
+	 * the nodes/faces (exact: nodes, although the difference is not too
+	 * big). So if face 1 references the vertices 2,4,7 and face 2
+	 * references 7,5,9 then the point cache is 2,4,7,7,5,9
+	 *
+	 * The point cache can be used directly for the indices in
+	 * glDrawElements().
+	 *
 	 * This cache will be invalid once @ref connectNodes or @ref addNodes
 	 * gets called (i.e. the order of points get changed in any way).
 	 **/
@@ -251,11 +275,12 @@ public:
 	 * and FALSE if it is not a teamcolor object.
 	 **/
 	bool isTeamColor() const;
-	
-	void setTextured(bool isTextured);
-	void setTextureObject(GLuint tex);
+
+	/**
+	 * @return material()->textureObject() if @ref material is non-null,
+	 * otherwise 0.
+	 **/
 	GLuint textureObject() const;
-	bool textured() const;
 
 	void renderMesh(const QColor* color);
 

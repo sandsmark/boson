@@ -20,6 +20,7 @@
 #include "bomesh.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include "bomaterial.h"
 #include "bomemorytrace.h"
 
 #include <qptrlist.h>
@@ -359,6 +360,8 @@ public:
 	{
 		mNodes = 0;
 
+		mMaterial = 0;
+
 		mAllocatedPoints = 0;
 		mPoints = 0;
 
@@ -366,21 +369,24 @@ public:
 		mPointsCacheCount = 0;
 
 		mBoundingObject = 0;
+
 	}
 	int mType;
 	BoNode* mNodes;
-	bool mIsTextured;
 	bool mIsTeamColor;
 
-	GLuint mTexture;
+	BoMaterial* mMaterial;
+
 	GLuint mDisplayList;
 
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoNode> mAllNodes;
 
+	QValueVector<BoMaterial> mAllMaterials;
+
 	unsigned int mPointCount;
-	float* mPoints;
 	float* mAllocatedPoints;
+	float* mPoints;
 
 	// the list of points in the final order (after connectNodes() or
 	// addNodes() was called). iterating through nodes() is equalivent (for
@@ -396,6 +402,7 @@ public:
 	float mMaxZ;
 
 	BoundingObject* mBoundingObject;
+
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -421,9 +428,7 @@ void BoMesh::init()
  d = new BoMeshPrivate;
  d->mAllNodes.setAutoDelete(true);
  d->mType = GL_TRIANGLES;
- d->mIsTextured = false;
  d->mIsTeamColor = false;
- d->mTexture = 0;
  d->mDisplayList = 0;
  d->mPointCount = 0;
 
@@ -433,6 +438,16 @@ void BoMesh::init()
  d->mMaxY = 0.0f;
  d->mMinZ = 0.0f;
  d->mMaxZ = 0.0f;
+}
+
+void BoMesh::setMaterial(BoMaterial* mat)
+{
+ d->mMaterial = mat;
+}
+
+BoMaterial* BoMesh::material() const
+{
+ return d->mMaterial;
 }
 
 unsigned int BoMesh::facesCount() const
@@ -462,6 +477,7 @@ void BoMesh::createFaces(unsigned int faces)
 	BoNode* node = new BoNode(&d->mAllFaces[face]);
 	d->mAllNodes.append(node);
  }
+
 }
 
 void BoMesh::setFace(int index, const BoFace& face)
@@ -827,24 +843,12 @@ void BoMesh::deleteNodes(BoNode* node)
  }
 }
 
-void BoMesh::setTextured(bool tex)
-{
- d->mIsTextured = tex;
-}
-
-void BoMesh::setTextureObject(GLuint tex)
-{
- d->mTexture = tex;
-}
-
-bool BoMesh::textured() const
-{
- return d->mIsTextured;
-}
-
 GLuint BoMesh::textureObject() const
 {
- return d->mTexture;
+ if (material()) {
+	return material()->textureObject();
+ }
+ return 0;
 }
 
 void BoMesh::allocatePoints(unsigned int points)
@@ -912,15 +916,13 @@ void BoMesh::renderMesh(const QColor* teamColor)
  //
  // so optimization should happen here - if possible at all...
 
- if (!textured()) {
-	glBindTexture(GL_TEXTURE_2D, 0);
+ BoMaterial::activate(material());
+ if (!material() && isTeamColor()) {
 	if (teamColor) {
 		glPushAttrib(GL_CURRENT_BIT);
 		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
 		resetColor = true;
 	}
- } else {
-	glBindTexture(GL_TEXTURE_2D, textureObject());
  }
 
 #define USE_OCCLUSION_CULLING 0
@@ -932,7 +934,32 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	if (!d->mPointsCache || d->mPointsCacheCount == 0) {
 		boError() << k_funcinfo << "no point cache!" << endl;
 	} else {
-		glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+		if (type() != GL_TRIANGLES) {
+			// TODO: glNormal() calls!
+			glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+		} else {
+			glBegin(type());
+			// we cannot use the points cache, as we also need the
+			// normals. for now we iterate over the nodes, which is
+			// just as fine, as we cannot use glDrawElements()
+			// anyway (as normals are not (yet?) compatible with it)
+			BoNode* node = nodes();
+			while (node) {
+				const int* points = node->pointIndex();
+				glArrayElement(points[0]);
+				glArrayElement(points[1]);
+				glArrayElement(points[2]);
+				node = node->next();
+			}
+#if 0
+			for (unsigned int i = 0; i < d->mPointsCacheCount; i++) {
+//				glNormal3fv();
+				glArrayElement(d->mPointsCache[i]);
+			}
+#endif
+			glEnd();
+
+		}
 	}
  }
 
@@ -941,6 +968,13 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	// we need to reset the color (mainly for the placement preview)
 	glPopAttrib();
 	resetColor = false;
+ }
+
+ // we need this currently, because of the selection rects. we should avoid
+ // this.
+ // maybe place BoMaterial::deactivate() into SelectBox ?
+ if (material()) {
+	material()->deactivate();
  }
 }
 
@@ -995,7 +1029,6 @@ bool BoMesh::isTeamColor() const
 void BoMesh::setIsTeamColor(bool c)
 {
  d->mIsTeamColor = c;
- // AB: this implies setTextured(false) ! -> should be called for this, too!
 }
 
 GLuint BoMesh::displayList() const
@@ -1045,6 +1078,9 @@ void BoMesh::movePoints(float* array, int index)
 
 void BoMesh::createPointCache()
 {
+ // the point cache is an array of all vertex indices of the faces. so if face1
+ // references vertices 2,3,1 and face 2 references vertices 5,4,7 then the
+ // point cache will be 2,3,1,5,4,7 (assuming we don't use GL_TRIANGLES)
  boMem->freeUIntArray(d->mPointsCache);
  d->mPointsCacheCount = 0;
  BoNode* node = nodes();
