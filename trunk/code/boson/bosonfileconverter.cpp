@@ -126,34 +126,6 @@ bool MapToTexMap_From_0_8_To_0_9::convert(int* groundTypes, QByteArray* newMap, 
  convertToTexMap_From_0_8_To_0_9(groundTypes, tex);
  boDebug() << "writing texmap to stream" << endl;
  for (unsigned int i = 0; i < BO_COMPAT_0_8_TEXTURE_COUNT && ret; i++) {
-	Q_INT32 groundType = 0;
-	QRgb miniMapColor = Qt::black.rgb();
-	Q_UINT8 amountOfLand = 0;
-	Q_UINT8 amountOfWater = 0;
-	if (i == 0) { // grass
-		groundType = 0;
-		miniMapColor = Qt::darkGreen.rgb();
-		amountOfLand = 255;
-		amountOfWater = 0;
-	} else if (i == 1) { // desert
-		groundType = 1;
-		miniMapColor = Qt::darkYellow.rgb();
-		amountOfLand = 255;
-		amountOfWater = 0;
-	} else if (i == 2) { // water
-		groundType = 2;
-		miniMapColor = Qt::blue.rgb();
-		amountOfLand = 0;
-		amountOfWater = 255;
-	} else {
-		boError() << k_funcinfo << "invalid texture " << i << " - only 3 textures supported here!" << endl;
-		ret = false;
-		continue;
-	}
-	writeTexMapStream << (Q_INT32)groundType;
-	writeTexMapStream << (QRgb)miniMapColor;
-	writeTexMapStream << (Q_UINT8)amountOfLand;
-	writeTexMapStream << (Q_UINT8)amountOfWater;
 	for (unsigned int x = 0; x < (unsigned int)mMapWidth + 1; x++) {
 		for (unsigned int y = 0; y < (unsigned int)mMapHeight + 1; y++) {
 			writeTexMapStream << (Q_UINT8)tex[texMapArrayPos(i, x, y)];
