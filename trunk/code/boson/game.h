@@ -28,7 +28,7 @@
 class bosonProperties_t {
 
 public:
-	speciesTheme	*myspecies;
+	speciesTheme	*myspecy;
 	int		who_am_i;
 };
 
