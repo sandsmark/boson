@@ -22,6 +22,7 @@
 #include "bosonwidget.h"
 #include "player.h"
 #include "bosontiles.h"
+#include "bosonconfig.h"
 #include "global.h"
 
 #include <kapplication.h>
@@ -50,8 +51,7 @@ static const char *version = "v0.6";
 
 static KCmdLineOptions options[] =
 {
-//    { "e", 0, 0 },
-//    { "editor", I18N_NOOP( "Map editor"), 0 },
+    { "sound", I18N_NOOP("Enable Sounds"), 0 },
     { 0, 0, 0 }
 };
 
@@ -79,25 +79,22 @@ int main(int argc, char **argv)
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
-    // see if we are starting with session management
- if (app.isRestored()) {
- //FIXME: do we use this at all?? probably not...
-	RESTORE(Editor)
- } else {
-// no session.. just start up normally
-	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-	Editor *widget = new Editor;
-
-	bool showMaximized = true;
-	if (showMaximized) {
-		widget->showMaximized();
-	} else {
-		widget->show();
-	}
-	
-	args->clear();
+ BosonConfig::initBosonConfig();
+ KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ if (!args->isSet("sound")) {
+	boConfig->setDisableSound(true);
  }
- return app.exec();
+ Editor *widget = new Editor;
+
+ bool showMaximized = true;
+ if (showMaximized) {
+	widget->showMaximized();
+ } else {
+	widget->show();
+ }
+	
+ args->clear();
+  return app.exec();
 }
 
 

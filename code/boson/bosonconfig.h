@@ -103,6 +103,18 @@ public:
 	 **/
 	void setDebugMode(DebugMode m);
 
+	/**
+	 * Disable sound loading and playing. Note that this value is 
+	 * <em>not</em> saved into the config file (it is a command line arg)!
+	 **/
+	void setDisableSound(bool d) { mDisableSound = d; }
+
+	/**
+	 * FALSE (default) if sound files should be loaded normally, otherwise
+	 * TRUE.
+	 **/
+	bool disableSound() const { return mDisableSound; }
+
 	void save(bool editor = false, KConfig* conf = 0);
 	void reset(KConfig* conf = 0);
 
@@ -124,6 +136,10 @@ private:
 	
 	class BosonConfigPrivate;
 	BosonConfigPrivate* d;
+
+	bool mSound;
+	bool mMusic;
+	bool mDisableSound;
 };
 
 #endif

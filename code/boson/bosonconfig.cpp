@@ -34,8 +34,6 @@ public:
 	{
 	}
 
-	bool mSound;
-	bool mMusic;
 	int mCommandButtonsPerRow;
 	unsigned int mArrowKeyStep;
 
@@ -48,11 +46,13 @@ BosonConfig::BosonConfig(KConfig* conf)
  d = new BosonConfigPrivate;
  
  // set the initial defaults
- d->mSound = true;
- d->mMusic = true;
+ mSound = true;
+ mMusic = true;
  d->mCommandButtonsPerRow = 3;
  d->mDebugMode = DebugNormal;
  d->mArrowKeyStep = 10;
+
+ mDisableSound = false;
 
  // load from config
  reset(conf);
@@ -260,22 +260,22 @@ bool BosonConfig::readMusic(KConfig* conf)
 
 void BosonConfig::setMusic(bool m)
 {
- d->mMusic = m;
+ mMusic = m;
 }
 
 bool BosonConfig::music() const
 {
- return d->mMusic;
+ return mMusic;
 }
 
 void BosonConfig::setSound(bool s)
 {
- d->mSound = s;
+ mSound = s;
 }
 
 bool BosonConfig::sound() const
 {
- return d->mSound;
+ return mSound;
 }
 
 void BosonConfig::saveArrowKeyStep(KConfig* conf)

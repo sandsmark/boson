@@ -19,6 +19,8 @@
 
 #include "top.h"
 
+#include "bosonconfig.h"
+
 #include <kapplication.h>
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
@@ -31,11 +33,7 @@ static const char *version = "v0.6pre";
 
 static KCmdLineOptions options[] =
 {
-//    { "+[URL]", I18N_NOOP( "Document to open." ), 0 },
-//    { "s", 0, 0 },
-//    { "server", I18N_NOOP( "Only server - no GUI"), 0 },
-//    { "e", 0, 0 },
-//    { "editor", I18N_NOOP( "Map editor"), 0 },
+    { "nosound", I18N_NOOP("Disable Sounds"), 0 },
     { 0, 0, 0 }
 };
 
@@ -66,24 +64,22 @@ int main(int argc, char **argv)
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
 
-    // see if we are starting with session management
- if (app.isRestored()) {
- //FIXME: do we use this at all?? probably not...
-	RESTORE(Top)
- } else {
-// no session.. just start up normally
-	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
-	Top *widget = new Top;
-	bool showMaximized = true; // TODO: make this a config option
-
-	if (showMaximized) {
-		widget->showMaximized();
-	} else {
-		widget->show();
-	}
-	
-	args->clear();
+ BosonConfig::initBosonConfig();
+ KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
+ if (!args->isSet("sound")) {
+	boConfig->setDisableSound(true);
  }
+ 
+ Top *widget = new Top;
+ bool showMaximized = true; // TODO: make this a config option
+
+ if (showMaximized) {
+	widget->showMaximized();
+ } else {
+	widget->show();
+ }
+	
+ args->clear();
  return app.exec();
 }
 
