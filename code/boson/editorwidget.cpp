@@ -231,25 +231,33 @@ void EditorWidget::slotSavePlayFieldAs()
  boDebug() << k_funcinfo << endl;
  QString startIn; // shall we provide this??
  QString fileName = KFileDialog::getSaveFileName(startIn, "*.bpf", this);
- if (fileName != QString::null) {
-	if (QFileInfo(fileName).extension().isEmpty()) {
-		fileName += ".bpf";
-	}
-	bool ok = playField()->savePlayField(fileName);
-	if (!ok) {
-		boError() << k_funcinfo << "An error occured" << endl;
+ if (fileName == QString::null) {
+	return;
+ }
+ if (QFileInfo(fileName).extension().isEmpty()) {
+	fileName += ".bpf";
+ }
+ savePlayField(fileName);
+}
 
-		// TODO: get an error message from the playfield and display the
-		// reason for the error
-		KMessageBox::sorry(this, i18n("Could not save to %1").arg(fileName));
-	} else {
-		boDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
-	}
+void EditorWidget::savePlayField(const QString& fileName)
+{
+ playField()->applyScenario(boGame); // this must be called before we are able to save the playfield! otherwise the old units will be used
+ bool ok = playField()->savePlayField(fileName);
+ if (!ok) {
+	boError() << k_funcinfo << "An error occured" << endl;
+
+	// TODO: get an error message from the playfield and display the
+	// reason for the error
+	KMessageBox::sorry(this, i18n("Could not save to %1").arg(fileName));
+ } else {
+	boDebug() << k_funcinfo << "Saved successful to " << fileName << endl;
  }
 }
 
 void EditorWidget::slotSavePlayField()
 {
+ kdWarning() << k_funcinfo << "not yet implemented" << endl;
 }
 
 void EditorWidget::slotChangeLocalPlayer(int index)

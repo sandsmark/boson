@@ -5,6 +5,7 @@
 100	BosonModel
 110	Boson Textures
 200	Boson Sound
+250	BosonScenario
 300	Boson Advance
 
 # Use 400-449 for Unit::advance*()

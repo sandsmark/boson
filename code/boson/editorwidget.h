@@ -106,6 +106,8 @@ protected:
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
 
+	void savePlayField(const QString& fileName);
+
 	EditorCommandFrame* editorCmdFrame() const;
 
 private:
