@@ -58,10 +58,10 @@ QCursor BosonCursor::cursor() const
 QStringList BosonCursor::availableThemes()
 {
  QStringList list = KGlobal::dirs()->findAllResources("data",
-		"boson/themes/cursors/*/index.desktop");
+		"boson/themes/cursors/*/index.cursor");
  QStringList retList;
  for (unsigned int i = 0; i < list.count(); i++) {
-	retList.append(list[i].left(list[i].length() - strlen("/index.desktop")));
+	retList.append(list[i].left(list[i].length() - strlen("/index.cursor")));
  }
 
  return retList;
@@ -70,7 +70,7 @@ QStringList BosonCursor::availableThemes()
 QString BosonCursor::defaultTheme()
 {
  QString cursorDir = KGlobal::dirs()->findResourceDir("data",
-		"boson/themes/cursors/default/index.desktop") +
+		"boson/themes/cursors/default/index.cursor") +
 		QString::fromLatin1("boson/themes/cursors/default");
  return cursorDir;
 }
@@ -325,10 +325,10 @@ BosonOpenGLCursorData* BosonOpenGLCursor::loadSpriteCursor(QString baseDir, QStr
  if (baseDir.right(1) != QString::fromLatin1("/")) {
 	baseDir += QString::fromLatin1("/");
  }
- KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
+ KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.cursor"));
  boDebug() << baseDir << endl;
  if (!c.hasGroup("Boson Cursor")) {
-	boWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
+	boWarning() << k_funcinfo << "index.cursor is missing default group" << endl;
 	return 0;
  }
  c.setGroup("Boson Cursor");

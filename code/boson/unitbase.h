@@ -242,7 +242,7 @@ public:
 	void setArmor(unsigned long int armor);
 
 	/**
-	 * The type of the unit as described in the index.desktop file of this
+	 * The type of the unit as described in the index.unit file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
 	unsigned long int type() const;

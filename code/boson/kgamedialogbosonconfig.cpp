@@ -87,7 +87,7 @@ KGameDialogBosonConfig::KGameDialogBosonConfig(QWidget* parent)
 	cfg.setGroup("Boson PlayField");
 	d->mPlayFieldCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 	d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-	QString fileName = list[i].left(list[i].length() - strlen(".desktop")) 
+	QString fileName = list[i].left(list[i].length() - strlen(".boson"))
 			+ QString::fromLatin1(".bpf");
 	d->mPlayFieldIndex2FileName.insert(i, fileName);
 	d->mPlayFieldIndex2Identifier.insert(i, cfg.readEntry("Identifier", 

@@ -86,7 +86,7 @@ void UnitProperties::loadUnitType(const QString& fileName)
  KSimpleConfig conf(fileName);
  conf.setGroup(QString::fromLatin1("Boson Unit"));
 
- mUnitPath = fileName.left(fileName.length() - QString("index.desktop").length());
+ mUnitPath = fileName.left(fileName.length() - QString("index.unit").length());
  /// FIXME: maybe rename to Type or TypeID (Id is confusing IMHO) - rivol
  mTypeId = conf.readUnsignedLongNumEntry("Id", 0); // 0 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
  if (typeId() <= 0) {

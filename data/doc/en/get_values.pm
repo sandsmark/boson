@@ -1,7 +1,7 @@
 package get_values;
 use strict;
 
-# Script to get the unit/facility information from the .desktop files.
+# Script to get the unit/facility information from the .unit files.
 
 sub getval() {
         # You need the facility type (fix / mod) the name and the filesystem level (root is the doc/language dir)
@@ -31,11 +31,11 @@ sub getval() {
 
         my $path1;
         my $path2;
-        $path1 = "$ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.desktop";
+        $path1 = "$ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.unit";
         $path2 = "$ENV{TOP_SRCDIR}/doc/en/values.list";
 
         # Open index.destop and values.list
-        open( FILE, "<$path1") || die "Cannot open $type\_$name/index.desktop: $ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.desktop";
+        open( FILE, "<$path1") || die "Cannot open $type\_$name/index.unit $ENV{TOP_SRCDIR}/themes/species/human/units/$type\_$name/index.unit";
         open( FILE2, "<$path2") || die "Cannot open values.list: $ENV{TOP_SRCDIR}/doc/en/values.list";
         my @CONTENT;
         my @CONTENT2;

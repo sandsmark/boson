@@ -1,5 +1,5 @@
 1. A boson playfield file
-1.1 The .desktop files
+1.1 The .boson files
 1.2 The .bpf file
 2.1 BosonMap
 2.2 BosonScenario
@@ -24,18 +24,18 @@ classes!
 The playfield filename can be any (you'll probably use the english map name) with a
 suffix of ".bpf" .
 
-1.1 The .desktop files
+1.1 The .boson files
 ----------------------
-Additionally there is a file with the same name but a suffix of .desktop.
+Additionally there is a file with the same name but a suffix of .boson.
 So the basic map would have the files
 basic.bpf
-basic.desktop
+basic.boson
 
-The .desktop file contains further information about the playfield. This is 
+The .boson file contains further information about the playfield. This is 
 mainly the localized name and a short description. It also contains the 
 "identifier", a short, unique (!!) name for the map that is referred to by the 
 scenario files.
-The structure of the .desktop file:
+The structure of the .boson file:
 
 [Boson PlayField]
 Name=Basic
@@ -44,7 +44,7 @@ Comment=Basic is... Basic!
 Comment[de]=German translation of the comment
 Identifier=Basic
 
-The .desktop file consists of a single group "[Boson PlayField]". It supports the
+The .boson file consists of a single group "[Boson PlayField]". It supports the
 following entries:
 Name=Text       - The name of the map. Translated versions can be created with
                   [de] after Name, where de is the language. See KDE/KConfig for
@@ -123,6 +123,7 @@ But a player without units doesn't make much sense does it? So read on...
 
 2.2.2.1 Unit
 ------------
+WARNING: a lot of things are outdated here!
 The most important tag of Player. All possibl entries you can use are arguments
 - this might be baaad xml structure... Perhaps I'll change it later but
   currently that's the way it is.
@@ -133,28 +134,28 @@ Entries marked with a * are mandatory!
 * y=Number          - The tile/cell y-position of the initial position of the
                       unit
 * UnitType=Number   - The type ID of this unit. See
-                      themes/species/human/units/*/index.desktop for possible
+                      themes/species/human/units/*/index.unit for possible
                       IDs.
 Health=Number       - The health/power of the unit.
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 Armor=Number        - Armor of the unit (not yet used)
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 Shields=Number      - Shields of the unit (not yet used)
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 Work=Number         - What this unit is doing at the moment. See
                       UnitBase::WorkType for possible values.
                       Default is UnitBase::WorkNone (0)
 ReloadState=Number  - Not yet supported
 WeaponDamage=Number - How much damage this unit does to other units.
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 WeaponRange=Number  - The weapon Range of this unit.
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 SightRange=Number   - How far this unit can see.
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 
 There are also a few entries that apply to mobile units only:
 Speed=Number        - The speed of the unit
-                      Default depends on the index.desktop file of the unit.
+                      Default depends on the index.unit file of the unit.
 
 There are also a few entries that apply to facilities only:
 ConstructionCompleted=Anything - If this argument is given the unit will be
@@ -162,7 +163,7 @@ ConstructionCompleted=Anything - If this argument is given the unit will be
                                  to be constructed as if it was just placed
                                  there.
 ConstructionStep=Number  - A value 0..UnitProperties::constructionSteps(). (see
-                           entry ConstructionSteps in the index.desktop file of the unit)
+                           entry ConstructionSteps in the index.unit file of the unit)
                            This specifies the initial frame number of the
                            construction animation.
                            Default is 0

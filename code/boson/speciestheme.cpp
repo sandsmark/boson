@@ -235,7 +235,7 @@ bool SpeciesTheme::loadUnit(unsigned long int type)
 bool SpeciesTheme::loadActionGraphics()
 {
  // Keep this code in sync with UnitAction enum in global.h!
- // TODO: make this configurable (introduce index.desktop or ui.desktop in
+ // TODO: make this configurable (introduce index.boson or ui.boson in
  //  theme path)
  QString actionPath = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/attack.png");
  actionPath += "boson/themes/ui/standard/";
@@ -312,7 +312,7 @@ QPixmap* SpeciesTheme::upgradePixmapByName(QString name)
 
 bool SpeciesTheme::loadTechnologies()
 {
- QFile f(themePath() + "technologies.desktop");
+ QFile f(themePath() + "index.technologies");
  if(!f.exists()) {
 	boWarning() << k_funcinfo << "Technologies file (" << f.name() << ") does not exists. No technologies loaded" << endl;
 	// We assume that this theme has no technologies and still return true
@@ -599,7 +599,7 @@ void SpeciesTheme::readUnitConfigs()
 		continue;
 	}
 	QString file = dir.path() + QString::fromLatin1("/") + dirList[i] +
-			QString::fromLatin1("/index.desktop");
+			QString::fromLatin1("/index.unit");
 	if (QFile::exists(file)) {
 		list.append(file);
 	}
@@ -743,8 +743,8 @@ QValueList<unsigned long int> SpeciesTheme::technologies(QValueList<int> produce
 
 QStringList SpeciesTheme::availableSpecies()
 {
- QStringList list = KGlobal::dirs()->findAllResources("data", 
-		"boson/themes/species/*/index.desktop");
+ QStringList list = KGlobal::dirs()->findAllResources("data",
+		"boson/themes/species/*/index.species");
  if (list.isEmpty()) {
 	boWarning() << "No species found!" << endl;
 	return list;
@@ -764,7 +764,7 @@ QString SpeciesTheme::speciesDirectory(const QString& identifier)
 	KSimpleConfig cfg(l[i]);
 	cfg.setGroup("Boson Species");
 	if (cfg.readEntry("Identifier") == identifier) {
-		QString d = l[i].left(l[i].length() - strlen("index.desktop"));
+		QString d = l[i].left(l[i].length() - strlen("index.species"));
 		return d;
 	}
  }
@@ -773,7 +773,7 @@ QString SpeciesTheme::speciesDirectory(const QString& identifier)
 
 QString SpeciesTheme::identifier() const
 {
- KSimpleConfig cfg(themePath() + QString::fromLatin1("index.desktop"));
+ KSimpleConfig cfg(themePath() + QString::fromLatin1("index.species"));
  cfg.setGroup("Boson Species");
  return cfg.readEntry("Identifier");
 }
@@ -820,7 +820,7 @@ void SpeciesTheme::loadUnitModel(const UnitProperties* prop)
  // now we load animation information. this is just which frame is used for
  // which animation mode - no frame/node/display list modifying needs to be
  // made.
- KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.desktop"));
+ KSimpleConfig cfg(prop->unitPath() + QString::fromLatin1("index.unit"));
  cfg.setGroup("OpenGL");
  m->loadAnimationMode(Unit::AnimationIdle, &cfg, QString::fromLatin1("Idle"));
  m->loadAnimationMode(Unit::AnimationWreckage, &cfg, QString::fromLatin1("Wreckage"));

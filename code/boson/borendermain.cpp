@@ -247,7 +247,7 @@ RenderMain::RenderMain()
  QStringList list = SpeciesTheme::availableSpecies();
  for (unsigned int i = 0; i < list.count(); i++) {
 	QString dir = list[i];
-	dir = dir.left(dir.length() - QString("index.desktop").length());
+	dir = dir.left(dir.length() - QString("index.species").length());
 	SpeciesTheme* s = new SpeciesTheme(dir, QColor());
 	mSpecies.append(s);
 	s->readUnitConfigs();

@@ -183,7 +183,7 @@ void BosonCursorEditor::init()
 
 void BosonCursorEditor::loadInitialCursor()
 {
- QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/default/index.desktop"); // there must be a cleaner way!
+ QString dir = KGlobal::dirs()->findResourceDir("data", "boson/themes/cursors/default/index.cursor"); // there must be a cleaner way!
  dir += QString::fromLatin1("boson/themes/cursors/");
  setCursor(CursorKDE);
  mSpriteConfig->setEnabled(false);
@@ -200,7 +200,7 @@ QStringList BosonCursorEditor::findCursorThemes(const QString& directory)
  QStringList list;
  for (unsigned int i = 0; i < subdirs.count(); i++) {
 	QString path = dir.absPath() + QString::fromLatin1("/") + subdirs[i];
-	if (QFile::exists(path + QString::fromLatin1("/index.desktop"))) {
+	if (QFile::exists(path + QString::fromLatin1("/index.cursor"))) {
 		list.append(path);
 	}
  }
@@ -209,7 +209,7 @@ QStringList BosonCursorEditor::findCursorThemes(const QString& directory)
 
 void BosonCursorEditor::loadSpriteConfig(const QString& dir)
 {
- QString file(dir + QString::fromLatin1("/index.desktop"));
+ QString file(dir + QString::fromLatin1("/index.cursor"));
  mSpriteConfig->load(file);
 }
 
@@ -265,10 +265,10 @@ void BosonCursorEditor::addType(const QString& theme, const QString& type)
  mCursorTypes.append(path + type);
 
  QString name = type;
- KSimpleConfig cfg(path + type + QString::fromLatin1("/index.desktop"));
+ KSimpleConfig cfg(path + type + QString::fromLatin1("/index.cursor"));
  if (!cfg.hasGroup("Boson Cursor")) {
-	boWarning() << k_funcinfo << "Invalid index.desktop file for " << path + type << endl;
-	name += QString::fromLatin1(" (Invalid index.desktop)");
+	boWarning() << k_funcinfo << "Invalid index.cursor file for " << path + type << endl;
+	name += QString::fromLatin1(" (Invalid index.cursor)");
  }
  mCursorType->insertItem(name);
 }
@@ -296,7 +296,7 @@ void BosonCursorEditor::setCursor(int mode)
 
 void BosonCursorEditor::slotApplySpriteConfig()
 {
- QString file = mCursorTypes[mCursorType->currentItem()] + QString::fromLatin1("/index.desktop");
+ QString file = mCursorTypes[mCursorType->currentItem()] + QString::fromLatin1("/index.cursor");
  mSpriteConfig->save(file);
  int mode = mCursorMode->currentItem();
  QString theme = mCursorThemes[mCursorTheme->currentItem()];
@@ -324,7 +324,7 @@ void BosonCursorEditor::changeBaseDirectory(const QString& dir)
  mCursorTypes.clear();
  mBaseDirectory->setText(dir);
  for (int i = 0; i < (int)themes.count(); i++) {
-	KSimpleConfig cfg(themes[i] + QString::fromLatin1("/index.desktop"));
+	KSimpleConfig cfg(themes[i] + QString::fromLatin1("/index.cursor"));
 	if (!cfg.hasGroup("Boson Cursor")) {
 		boWarning() << "invalid cursor " << themes[i] << endl;
 	} else {

@@ -66,9 +66,9 @@ class BosonTextureArray;
  * /opt/kde3/share/apps/boson/cursors/move.png
  * </pre>
  * The sprites cursors now expect an additional file in its subdir:
- * index.desktop. This file has one group (BosonCursor) and defines the hotspots
+ * index.cursor . This file has one group (BosonCursor) and defines the hotspots
  * and the filenames as well as the number of files that belong to your cursor.
- * Look at example index.desktop files in the cursors dir of boson for the usage.
+ * Look at example index.cursor files in the cursors dir of boson for the usage.
  * @author Andreas Beckermann <b_mann@gmx.de>
  * @short Cursor class for animated cursors
  **/
@@ -132,6 +132,12 @@ public:
 	 **/
 	virtual void renderCursor(GLfloat , GLfloat ) {}
 
+	/**
+	 * @return All cursor themes that can be found, i.e. that have a
+	 * "index.cursor" file. I.e. there must be a fine
+	 * cursors/theme_name/index.cursor, so that cursors/theme_name is a
+	 * cursor theme.
+	 **/
 	static QStringList availableThemes();
 	static QString defaultTheme();
 

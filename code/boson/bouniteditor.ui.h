@@ -139,7 +139,7 @@ void BoUnitEditor::slotSaveUnit()
 			i18n("Directory isn't writable"));
 	return;
     }
-    KSimpleConfig cfg(d.absPath() + "/index.desktop");
+    KSimpleConfig cfg(d.absPath() + "/index.unit");
     cfg.setGroup("Boson Unit");
     // General page
     cfg.writeEntry("Name", mUnitName->text());
@@ -319,7 +319,7 @@ void BoUnitEditor::slotLoadUnit( QString dir )
     
     mUnitPath->setText(dir);
     
-    KSimpleConfig cfg(dir + "/index.desktop");
+    KSimpleConfig cfg(dir + "/index.unit");
     cfg.setGroup("Boson Unit");
     // General page
     mUnitName->setText(cfg.readEntry("Name", i18n("Unknown")));
@@ -448,17 +448,17 @@ void BoUnitEditor::loadUnitsList()
 		continue;
 	    }
 	    QString file = dir.path() + "/" + *it2;
-	    if(QFile::exists(file + "/index.desktop")) {
+	    if(QFile::exists(file + "/index.unit")) {
 		units.append(file);
 	    }
 	}
-	if(QFile::exists(dir.path() + "/index.desktop")) {
+	if(QFile::exists(dir.path() + "/index.unit")) {
 	    units.append(dir.path());
 	}
     }
     
     for (QStringList::Iterator it = units.begin(); it != units.end(); ++it) {
-	KSimpleConfig cfg(*it + "/index.desktop");
+	KSimpleConfig cfg(*it + "/index.unit");
 	cfg.setGroup("Boson Unit");
 	QString name = cfg.readEntry("Name", i18n("Unknown"));
 	int id = cfg.readLongNumEntry("Id", 0);
@@ -492,7 +492,7 @@ void BoUnitEditor::slotOpenUnit()
     
     // Open new unit
     QString dir = KFileDialog::getExistingDirectory();
-    if((dir == QString::null) || (!QFile::exists(dir + "/index.desktop"))) {
+    if((dir == QString::null) || (!QFile::exists(dir + "/index.unit"))) {
 	KMessageBox::error(this, i18n("No unit configuration file was found in this directory!"), i18n("Invalid directory!"));
 	return;
     }

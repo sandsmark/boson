@@ -66,7 +66,7 @@ public:
 	~SpeciesTheme();
 
 	/**
-	 * Load a theme. Look for index.desktop files in the units directory,
+	 * Load a theme. Look for index.unit files in the units directory,
 	 * read and store these information - see @ref readUnitConfigs.
 	 *
 	 * Note that loadTheme is quite fast as it does <em>not</em> preload the
@@ -239,7 +239,7 @@ public:
 
 	/**
 	 * @return A list of all possible species. Note that the list contains
-	 * the index.dektop files - so remove index.desktop from every entry to
+	 * the index.species files - so remove index.species from every entry to
 	 * get the actual species directory.
 	 **/
 	static QStringList availableSpecies();

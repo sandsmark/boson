@@ -156,7 +156,7 @@ public:
 	 * Load the file. This sets all values of UnitProperties. All values are
 	 * readOnly, as UnitProperties is meant to change never.
 	 *
-	 * The file should contain units/your_unit_dir/index.desktop at the end
+	 * The file should contain units/your_unit_dir/index.unit at the end
 	 * and should be an absolute path.
 	 **/
 	void loadUnitType(const QString& fileName);
@@ -230,7 +230,7 @@ public:
 
 	/**
 	 * @return The path to the unit files. That is the directory where the
-	 * index.desktop file and the pixmap files are stored.
+	 * index.unit file and the pixmap files are stored.
 	 **/
 	const QString& unitPath() const { return mUnitPath; };
 
