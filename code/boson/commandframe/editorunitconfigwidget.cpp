@@ -41,6 +41,7 @@ public:
 		mName = 0;
 		mId = 0;
 		mHealth = 0;
+		mShields = 0;
 		mConstructionStep = 0;
 	}
 
@@ -48,6 +49,7 @@ public:
 	QLabel* mName;
 	QLabel* mId;
 	KIntNumInput* mHealth;
+	KIntNumInput* mShields;
 	KIntNumInput* mConstructionStep;
 };
 
@@ -73,6 +75,11 @@ EditorUnitConfigWidget::EditorUnitConfigWidget(BosonCommandFrameBase* frame, QWi
  connect(d->mHealth, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
  layout->addWidget(d->mHealth);
 
+ d->mShields = new KIntNumInput(this);
+ d->mShields->setLabel(i18n("Shields: "), AlignVCenter);
+ connect(d->mShields, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
+ layout->addWidget(d->mShields);
+
  d->mConstructionStep = new KIntNumInput(this);
  d->mConstructionStep->setLabel(i18n("Construction step: "), AlignVCenter);
  connect(d->mConstructionStep, SIGNAL(valueChanged(int)), this, SIGNAL(signalUpdateUnit()));
@@ -97,17 +104,35 @@ bool EditorUnitConfigWidget::display(Unit* unit)
  d->mName->setText(unit->name());
  d->mId->setText(QString::number(unit->id()));
 
- d->mHealth->setRange(1, unit->unitProperties()->health());
+ const UnitProperties* prop = unit->unitProperties();
+ Facility* fac = 0;
+ MobileUnit* mob = 0;
+ if (unit->isFacility()) {
+	fac = (Facility*)unit;
+ } else {
+	mob = (MobileUnit*)unit;
+ }
+
+ d->mHealth->setRange(1, prop->health());
  d->mHealth->setValue(unit->health());
- if (!unit->isFacility()) {
-	d->mConstructionStep->setEnabled(false);
+ if (!fac || (fac && fac->constructionSteps() == 0)) {
+	d->mConstructionStep->hide();
+	d->mConstructionStep->setRange(0, 0);
 	d->mConstructionStep->setValue(0);
  } else {
-	Facility* fac = (Facility*)unit;
-	d->mConstructionStep->setEnabled(true);
+	d->mConstructionStep->show();
 	d->mConstructionStep->setRange(0, fac->constructionSteps());
 	d->mConstructionStep->setValue(fac->currentConstructionStep());
  }
+
+ d->mShields->setRange(0, prop->shields());
+ d->mShields->setValue(unit->shields());
+ if (prop->shields() != 0) {
+	d->mShields->show();
+ } else {
+	d->mShields->hide();
+ }
+
  blockSignals(false);
  return true;
 }
@@ -121,9 +146,12 @@ void EditorUnitConfigWidget::updateUnit(Unit* unit)
 	return;
  }
  unit->setHealth(d->mHealth->value());
+ unit->setShields(d->mShields->value());
  if (unit->isFacility()) {
 	Facility* fac = (Facility*)unit;
-	fac->setConstructionStep(d->mConstructionStep->value());
+	if (fac->constructionSteps() != 0) {
+		fac->setConstructionStep(d->mConstructionStep->value());
+	}
  }
 }
 
