@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@
 static const char *description =
     I18N_NOOP("A realtime strategy game for KDE");
 
-static const char *version = "v0.6";
+static const char *version = "v0.6pre";
 
 static KCmdLineOptions options[] =
 {
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001 The Boson team",
+		"(C) 1999-2000,2001-2002 The Boson team",
 		0,
 		"http://boson.eu.org",
 		"b_mann@gmx.de");
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
  }
 	
  args->clear();
-  return app.exec();
+ return app.exec();
 }
 
 
