@@ -79,6 +79,8 @@ public:
 	 **/
 	QByteArray descriptionData() const;
 
+	static QString fileNameToIdentifier(const QString& fileName);
+
 private:
 	QString mIdentifier;
 };
