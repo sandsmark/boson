@@ -4,7 +4,7 @@
 # there are none, comment this out
 SUBDIRS = data items commandframe sound startupwidgets bodebug
 
-bin_PROGRAMS = boson bounit boprofiling bocursor borender
+bin_PROGRAMS = botriangles_test boson bounit boprofiling bocursor borender
 
 INCLUDES = -I$(kde_includes)/arts -I$(top_srcdir)/boson/bodebug $(all_includes)
 
@@ -74,6 +74,15 @@ BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \
 	bosonprofiling.cpp \
 	boprofilingmain.cpp
+
+botriangles_test_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+botriangles_test_LDADD = \
+		$(top_builddir)/boson/bodebug/libbodebug.la \
+		$(LIB_QT) $(LIB_KDECORE) \
+		-l3ds
+botriangles_test_SOURCES = \
+		bomesh.cpp bo3dtools.cpp bosonconfig.cpp \
+		botriangles_test.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = \

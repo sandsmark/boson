@@ -265,7 +265,6 @@ public:
 	 **/
 	static bool isAdjacent(BoVector3* face1, BoVector3* face2);
 	static int findPoint(const BoVector3& point, const BoVector3* array);
-	static void makeVectors(BoVector3* dest, Lib3dsMesh* mesh, Lib3dsFace* face);
 
 	/**
 	 * Find adjacent faces in @p mesh and place them into @p adjacentFaces.

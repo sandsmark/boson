@@ -662,12 +662,16 @@ void BosonWidgetBase::initKActions()
 		this, SLOT(slotGrabProfiling()), actionCollection(), "game_grab_profiling");
 
  // Debug - no i18n!
- (void)new KAction("Profiling", KShortcut(), this,
+ (void)new KAction("&Profiling", KShortcut(), this,
 		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
- (void)new KAction("Unfog", KShortcut(), this,
+ (void)new KAction("&Unfog", KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- (void)new KAction("Debug", KShortcut(), this,
+ (void)new KAction("&Debug", KShortcut(), this,
 		SLOT(slotDebug()), actionCollection(), "debug_kgame");
+ KToggleAction* mapCoordinates = new KToggleAction("Debug &map coordinates", KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
+ mapCoordinates->setChecked(false);
+ connect(mapCoordinates, SIGNAL(toggled(bool)), displayManager(), SLOT(slotSetDebugMapCoordinates(bool)));
+ 
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");
  connect(debugMode, SIGNAL(activated(int)), this, SLOT(slotDebugMode(int)));

@@ -78,7 +78,8 @@
 #define CAMERA_MAX_Z FAR - 50
 #define CAMERA_MAX_RADIUS 80
 
-//#define BO_LIGHT 1
+// #define BO_LIGHT 1
+// #define CLEAR_DEPTH_FULL 1
 
 #include <GL/glu.h>
 
@@ -443,6 +444,8 @@ public:
 	GLuint mCellPlacementTexture;
 
 	BosonBigDisplayInputBase* mInput;
+
+	bool mDebugMapCoordinates;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
@@ -475,6 +478,7 @@ void BosonBigDisplayBase::init()
  d->mIsQuit = false;
  d->mParticlesDirty = true;
  d->mCellPlacementTexture = 0;
+ d->mDebugMapCoordinates = false;
 
  mSelection = new BoSelection(this);
  d->mChat = new BosonGLChat(this);
@@ -613,10 +617,17 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
  glMatrixMode(GL_MODELVIEW);
 
 
+#ifdef GL_CLEAR_DEPTH_FULL
+ glDepthFunc(GL_GREATER);
+ glClearDepth(0.0);
+ glClear(GL_DEPTH_BUFFER_BIT);
+ glDepthRange(0.0, 1.0);
+#else
  glClearDepth(1.0);
  glClear(GL_DEPTH_BUFFER_BIT);
  glDepthRange(0.0, 0.5);
  glDepthFunc(GL_LESS);
+#endif
  d->mEvenFlag = true;
 
 
@@ -699,13 +710,18 @@ void BosonBigDisplayBase::paintGL()
  // cells! i.e. render cells *after* units!
 
  boProfiling->renderClear(true);
+#ifdef CLEAR_DEPTH_FULL
+ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#else
  glClear(GL_COLOR_BUFFER_BIT);
+#endif
  boProfiling->renderClear(false);
 
  glColor3f(1.0, 1.0, 1.0);
 
  // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
  // this trick avoids clearing the depth buffer:
+#ifndef CLEAR_DEPTH_FULL
  if (d->mEvenFlag) {
 	glDepthFunc(GL_LESS);
 	glDepthRange(0.0, 0.5);
@@ -714,6 +730,7 @@ void BosonBigDisplayBase::paintGL()
 	glDepthRange(1.0, 0.5);
  }
  d->mEvenFlag = !d->mEvenFlag;
+#endif
 
  // note: we don't call gluLookAt() here because of performance. instead we just
  // push the matrix here and pop it at the end of paintGL() again. gluLookAt()
@@ -731,6 +748,9 @@ void BosonBigDisplayBase::paintGL()
  BoItemList allItems = mCanvas->allItems();
  BoItemList::Iterator it = allItems.begin();
  unsigned int renderedUnits = 0;
+
+ // AB: this are problematic for triangle strips! they need to be in a special
+ // format to make culling work!
  glEnable(GL_CULL_FACE);
  glCullFace(GL_BACK);
  for (; it != allItems.end(); ++it) {
@@ -843,6 +863,7 @@ void BosonBigDisplayBase::paintGL()
  }
 
  boProfiling->renderCells(true);
+ glEnable(GL_DEPTH_TEST);
  renderCells();
  boProfiling->renderCells(false);
 
@@ -936,7 +957,7 @@ void BosonBigDisplayBase::paintGL()
  glDisable(GL_LIGHTING);
 
  if (cursor()) {
-//	renderCursor();
+	// FIXME: use cursorCanvasPos()
 	QPoint pos = mapFromGlobal(QCursor::pos());
 	GLfloat x = (GLfloat)pos.x();
 	GLfloat y = (GLfloat)d->mViewport[3] - (GLfloat)pos.y();
@@ -963,7 +984,7 @@ void BosonBigDisplayBase::paintGL()
 	GLfloat x1, y1, x2, y2;
 	GLfloat z; // currently the z-coordinate of the rect is not used - we set our own below
 
-	glColor3f(1.0, 0.0, 0.0); // FIXME hardcoded
+	glColor3ub(255, 0, 0); // FIXME hardcoded
 	
 	d->mSelectionRect.start(&x1, &y1, &z);
 	d->mSelectionRect.end(&x2, &y2, &z);
@@ -982,7 +1003,7 @@ void BosonBigDisplayBase::paintGL()
 		glVertex3f(w, 0.0, 0.0);
 	glEnd();
 
-	glColor3f(1.0, 1.0, 1.0);
+	glColor3ub(255, 255, 255);
 	glPopMatrix();
  }
  if (checkError()) {
@@ -1005,6 +1026,23 @@ void BosonBigDisplayBase::paintGL()
  if ( showProfilingMessage && boProfiling->renderEntries() >= MAX_PROFILING_ENTRIES) {
 	boGame->slotAddChatSystemMessage(i18n("%1 frames have been recorded by boProfiling. You can make profiling snapshots using CTRL+P").arg(boProfiling->renderEntries()));
 	boGame->slotAddChatSystemMessage(i18n("TODO: newlines for chat messages"));
+ }
+
+ if (d->mDebugMapCoordinates) {
+	GLfloat x, y, z;
+	canvasToWorld(d->mCanvasPos.x(), d->mCanvasPos.y(), 0.0, &x, &y, &z);
+	glColor3ub(255, 0, 0);
+	glBegin(GL_LINES);
+		glVertex3f(x - 0.25, y, z);
+		glVertex3f(x + 0.25, y, z);
+
+		glVertex3f(x, y - 0.25, z);
+		glVertex3f(x, y + 0.25, z);
+
+		glVertex3f(x, y, z - 0.25);
+		glVertex3f(x, y, z + 0.25);
+	glEnd();
+	glColor3ub(255, 255, 255);
  }
 }
 
@@ -1315,6 +1353,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
+ boDebug() << posZ << endl;
  QPoint canvasPos;
  worldToCanvas(posX, posY, posZ, &canvasPos);
 
@@ -1641,12 +1680,19 @@ void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPo
 {
  pos->setX((int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE));
  pos->setY((int)(-y / BO_GL_CELL_SIZE * BO_TILE_SIZE));
+ // AB: z remains as-is
+}
+
+void BosonBigDisplayBase::canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const
+{
+ *glx = (((GLfloat)x) * BO_GL_CELL_SIZE) / BO_TILE_SIZE;
+ *gly = (((GLfloat)-y) * BO_GL_CELL_SIZE) / BO_TILE_SIZE;
+ *glz = z;
 }
 
 bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const
 {
  GLint realy = d->mViewport[3] - (GLint)pos.y() - 1;
-
  // we basically calculate a line here .. nearX/Y/Z is the starting point,
  // farX/Y/Z is the end point. From these points we can calculate a direction.
  // using this direction and the points nearX(Y)/farX(Y) you can build triangles
@@ -1664,6 +1710,13 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
 	return false;
  }
 
+ // we need to find out which z position is at the point pos. this is important
+ // for mapping 2d values (screen coordinates) to 3d (world coordinates)
+// GLfloat zAtPoint = 0.0;
+// glReadPixels(pos.x(), d->mViewport[3] - (GLint)pos.y() - 1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zAtPoint);
+
+// boDebug() << k_funcinfo << zAtPoint << endl;
+
  // simple maths .. however it took me pretty much time to do this.. I haven't
  // done this for way too long time!
  GLdouble tanAlphaX = (nearX - farX) / (nearZ - farZ);
@@ -1673,7 +1726,8 @@ bool BosonBigDisplayBase::mapCoordinates(const QPoint& pos, GLdouble* posX, GLdo
  *posY = (GLfloat)(nearY - tanAlphaY * nearZ);
 
  // AB: what should we do with posZ ??
-
+ *posZ = 0.0f;
+// *posZ = zAtPoint;
  return true;
 }
 
@@ -2487,5 +2541,10 @@ void BosonBigDisplayBase::slotMoveSelection(int x, int y)
 {
  BO_CHECK_NULL_RET(displayInput());
  displayInput()->slotMoveSelection(x, y);
+}
+
+void BosonBigDisplayBase::setDebugMapCoordinates(bool debug)
+{
+ d->mDebugMapCoordinates = debug;
 }
 

@@ -159,6 +159,8 @@ public slots:
 
 	void slotUnitRemoved(Unit* u);
 
+	void slotSetDebugMapCoordinates(bool);
+
 signals:
 	/**
 	 * Emitted when the currently active display changes.

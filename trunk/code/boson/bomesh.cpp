@@ -20,12 +20,78 @@
 #include "bomesh.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
-#include "bosonmodel.h"
 
 #include <qptrlist.h>
 
 #include <lib3ds/mesh.h>
 #include <GL/gl.h>
+
+class BoAdjacentDataBase
+{
+public:
+	BoAdjacentDataBase(const QPtrList<BoNode>& allNodes)
+	{
+		addNodes(allNodes);
+	}
+
+	/**
+	 * Add all nodes to the databse. construct the lists of adjacent
+	 * nodes/faces.
+	 **/
+	void addNodes(const QPtrList<BoNode>& allNodes)
+	{
+		mAllNodes = allNodes;
+		QPtrListIterator<BoNode> it(allNodes);
+		for (; it.current(); ++it) {
+			QPtrListIterator<BoNode> it2(allNodes);
+			it2 = it;
+			++it2; // we don't care about it==it2, so skip it
+			for (; it2.current(); ++it2) {
+				if (it.current() == it2.current()) {
+					continue;
+				}
+				if (mDataBase[it.current()].containsRef(it2.current())) {
+					continue;
+				}
+				// mDataBase[it2.current()].containsRef(it.current())
+				// doesn't need to be checked, as we always add
+				// adjacent nodes/faces to both lists
+				if (BoNode::isAdjacent(it.current(), it2.current())) {
+					mDataBase[it.current()].append(it2.current());
+					mDataBase[it2.current()].append(it.current());
+				}
+			}
+		}
+	}
+	void debug()
+	{
+		QPtrListIterator<BoNode> it(mAllNodes);
+		for (; it.current(); ++it) {
+			boDebug() << "adjacent to " << it.current()->debugString() << " (Face " << mAllNodes.find(it.current()) + 1 << "):" << endl;
+			QPtrList<BoNode> a = adjacent(it.current());
+			QPtrListIterator<BoNode> it2(a);
+			for (; it2.current(); ++it2) {
+				boDebug() << it2.current()->debugString() << " (Face " << mAllNodes.find(it2.current()) + 1 << ")" << endl;
+			}
+
+		}
+	}
+
+	/**
+	 * @return a list of faces that are adjacent to @p node
+	 **/
+	QPtrList<BoNode> adjacent(BoNode* node) const
+	{
+		if (!node) {
+			return mAllNodes;
+		}
+		return mDataBase[node];
+	}
+
+private:
+	QMap<BoNode*, QPtrList<BoNode> > mDataBase;
+	QPtrList<BoNode> mAllNodes;
+};
 
 
 void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* connected, Lib3dsFace* face, Lib3dsMesh* mesh);
@@ -48,6 +114,13 @@ BoNode::~BoNode()
 void BoNode::setFace(Lib3dsFace* face)
 {
  mFace = face;
+ // we store the index of the point in the mesh only. that is necessary for
+ // TRIANGLE_STRIPs
+ // --> equal vertices don't have to use the same texture coordinates, so we
+ // can't connect them.
+ mPointIndex[0] = face->points[0];
+ mPointIndex[1] = face->points[1];
+ mPointIndex[2] = face->points[2];
 }
 
 void BoNode::setPrevious(BoNode* previous)
@@ -95,7 +168,45 @@ void BoNode::init()
  mPrevious = 0;
  mFace = 0;
  mRelevantPoint = -1;
+ mPointIndex[0] = -1;
+ mPointIndex[1] = -1;
+ mPointIndex[2] = -1;
 }
+
+bool BoNode::isAdjacent(BoNode* f1, BoNode* f2)
+{
+ const int* v1 = f1->pointIndex();
+ const int* v2 = f2->pointIndex();
+ int equal = 0;
+ for (int i = 0; i < 3; i++) {
+	if (v1[i] == v2[0] || v1[i] == v2[1] || v1[i] == v2[2]) {
+		equal++;
+	}
+ }
+ return equal >= 2;
+}
+
+QString BoNode::debugString() const
+{
+ QString s;
+ s = QString("%1  %2  %3").arg(mPointIndex[0]).arg(mPointIndex[1]).arg(mPointIndex[2]);
+ return s;
+}
+
+int BoNode::findPointIndex(int index) const
+{
+ if (mPointIndex[0] == index) {
+	return 0;
+ }
+ if (mPointIndex[1] == index) {
+	return 1;
+ }
+ if (mPointIndex[2] == index) {
+	return 2;
+ }
+ return -1;
+}
+
 
 class BoMeshPrivate
 {
@@ -103,186 +214,330 @@ public:
 	BoMeshPrivate()
 	{
 		mFaces = 0;
+		mMesh = 0;
 	}
 	int mType;
 	BoNode* mFaces;
+
+	Lib3dsMesh* mMesh;
+
+	QPtrList<BoNode> mAllNodes;
 };
 
-BoMesh::BoMesh()
+BoMesh::BoMesh(Lib3dsMesh* mesh)
 {
  d = new BoMeshPrivate;
  d->mType = GL_TRIANGLES;
+ d->mMesh = mesh;
+ d->mAllNodes.setAutoDelete(true);
+ createNodes();
 }
 
 BoMesh::~BoMesh()
 {
- deleteFaces();
+ d->mAllNodes.clear();
  delete d;
 }
 
-void BoMesh::addFaces(Lib3dsMesh* mesh)
+void BoMesh::createNodes()
 {
- BO_CHECK_NULL_RET(mesh);
- if (d->mFaces) {
-	deleteFaces();
- }
- if (mesh->faces < 1) {
-	boWarning() << k_funcinfo << "no faces in " << mesh->name << endl;
+ BO_CHECK_NULL_RET(d->mMesh);
+ if (d->mAllNodes.count() > 0) {
+	boDebug() << "nodes already created. nothing to do." << endl;
 	return;
  }
- d->mFaces = new BoNode();
- d->mFaces->setFace(&mesh->faceL[0]);
- BoNode* node = d->mFaces;
- for (unsigned int face = 1; face < mesh->faces; face++) {
-	Lib3dsFace* f = &mesh->faceL[face];
-	BoNode* next = new BoNode(node);
-	next->setFace(f);
-	node = next;
+ if (d->mMesh->faces < 1) {
+	boWarning() << k_funcinfo << "no faces in " << d->mMesh->name << endl;
+	return;
+ }
+
+ for (unsigned int face = 0; face < d->mMesh->faces; face++) {
+	Lib3dsFace* f = &d->mMesh->faceL[face];
+	BoNode* node = new BoNode();
+	node->setFace(f);
+	d->mAllNodes.append(node);
+ }
+}
+
+void BoMesh::disconnectFaces()
+{
+ QPtrListIterator<BoNode> it(d->mAllNodes);
+ for (; it.current(); ++it) {
+	it.current()->setNext(0);
+	it.current()->setPrevious(0);
+ }
+ d->mFaces = 0;
+}
+
+void BoMesh::addFaces()
+{
+ BO_CHECK_NULL_RET(d->mMesh);
+ if (d->mFaces) {
+	disconnectFaces();
+ }
+ if (d->mAllNodes.isEmpty()) {
+	boError() << k_funcinfo << "no nodes for " << d->mMesh->name << endl;
+	return;
+ }
+ BoNode* previous = 0;
+ QPtrListIterator<BoNode> it(d->mAllNodes);
+ d->mFaces = it.current(); // d->mFaces is the first node
+ previous = d->mFaces;
+ ++it;
+ for (; it.current(); ++it) {
+//	previous->setNext(it.current()); // TODO: do we need this?
+	it.current()->setPrevious(previous);
+	previous = it.current();
  }
  d->mType = GL_TRIANGLES;
 }
 
-void BoMesh::connectFaces(Lib3dsMesh* mesh)
-{
- BO_CHECK_NULL_RET(mesh);
- if (d->mFaces) {
-	deleteFaces();
- }
- if (mesh->faces < 1) {
-	boWarning() << k_funcinfo << "no faces in " << mesh->name << endl;
-	return;
- }
- boDebug() << "trying to connect faces for " << mesh->name << endl;
 
- // first we contruct a list of all faces
- QPtrList<Lib3dsFace> allFaces;
- for (unsigned int p = 0; p < mesh->faces; p++) {
-	allFaces.append(&mesh->faceL[p]);
+
+bool BoMesh::connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const
+{
+ static int call = 0;
+ static int max = 0;
+ call++;
+ if (call > max) {
+	max = call;
  }
- if (allFaces.count() == 0) {
-	boError() << k_funcinfo << "no faces" << endl;
+ boDebug() << "connectFaces() - call " << call << " max=" << max << endl;
+ if (call == 11) {
+	return true;
+ }
+ if (faces.isEmpty()) {
+	return true;
+ }
+ if (!found->isEmpty()) {
+	boError() << k_funcinfo << "found must be empty" << endl;
+	return false;
+ }
+ if (node && faces.containsRef(node)) {
+	boError() << k_funcinfo << "list shouldn't contain that node" << endl;
+	return false;
+ }
+ QPtrList<BoNode> adjacent = database->adjacent(node);
+ QPtrList<BoNode> remainingFaces = faces;
+ QPtrListIterator<BoNode> it(adjacent);
+ int x = 0;
+ for (; it.current(); ++it) {
+	if (!remainingFaces.containsRef(it.current())) {
+		continue;
+	}
+	BoNode* next = it.current();
+
+	if (node) {
+		if (node->relevantPoint() < 0) {
+			boError() << k_funcinfo << "negative relevant (node) point" << endl;
+			continue;
+		}
+		int nodePoint = next->findPointIndex(node->pointIndex()[node->relevantPoint()]);
+		if (nodePoint < 0) {
+			// the point that has just been rendered isn't in this
+			// face. not the next face.
+			continue;
+		}
+		BoNode* previous = node->previous();
+		if (previous) {
+			if (previous->relevantPoint() < 0) {
+				boError() << k_funcinfo << "negative relevant (previous) point" << endl;
+				continue;
+			}
+			int previousPoint = next->findPointIndex(previous->pointIndex()[previous->relevantPoint()]);
+			if (previousPoint < 0) {
+				continue;
+			}
+			if (nodePoint == previousPoint) {
+				boError() << k_funcinfo << "node and previous point are the same point!" << endl;
+				continue;
+			}
+			int relevantPoint = -1;
+			for (int i = 0; i < 3; i++) {
+				if (i == nodePoint) {
+					continue;
+				}
+				if (i == previousPoint) {
+					continue;
+				}
+				if (relevantPoint != -1) {
+					boError() << k_funcinfo << "two relevant points - bad!" << endl;
+				}
+				relevantPoint = i;
+			}
+			if (relevantPoint < 0) {
+				boDebug() << k_funcinfo << "no relevant point found" << endl;
+				continue;
+			}
+			next->setRelevantPoint(relevantPoint);
+		} else {
+			const int* pointIndex = next->pointIndex();
+			int relevantPoint = -1;
+			for (int i = 0; i < 3; i++) {
+				if (i == nodePoint) {
+					continue;
+				}
+				if (node->findPointIndex(pointIndex[i]) >= 0) {
+					// the next relevant point must not be
+					// in the current node
+					continue;
+				}
+				if (relevantPoint != -1) {
+					boError() << "oops" << endl;
+				}
+				relevantPoint = i;
+			}
+			if (relevantPoint < 0) {
+				boError() << k_funcinfo << "no relevant point found" << endl;
+				continue;
+			}
+			next->setRelevantPoint(relevantPoint);
+		}
+		node->setNext(next);
+	} else {
+		// the relevant point for the first node are *all* points.
+		// we use only one here - this is the last rendered point (i.e.
+		// the third point) before the next face.
+		bool ok = false;
+		for (int i = 0; i < 3 && !ok; i++) {
+			next->setRelevantPoint(i);
+			remainingFaces.removeRef(next);
+			QPtrList<BoNode> newFound;
+			ok = connectFaces(database, remainingFaces, &newFound, next);
+			remainingFaces.append(next);
+			if (ok) {
+				found->append(next);
+				QPtrListIterator<BoNode> it2(newFound);
+				for (; it2.current(); ++it2) {
+					found->append(it2.current());
+				}
+				int firstPoint = -1;
+				int secondPoint = -1;
+				int thirdPoint = i;
+				// note: next == first at this point
+				for (int j = 0; j < 3; j++) {
+					if (j == thirdPoint) {
+						continue;
+					}
+					if (next->next()->findPointIndex(next->pointIndex()[j]) >= 0) {
+						secondPoint = j;
+						continue;
+					}
+					firstPoint = j;
+				}
+				if (secondPoint < 0 || firstPoint < 0) {
+					boError() << k_funcinfo << "invalid points: " << firstPoint << " " << secondPoint << endl;
+				} else {
+					next->encodeRelevantPoint(firstPoint, secondPoint, thirdPoint);
+				}
+				return true;
+			}
+		}
+		next->setNext(0);
+		next->setPrevious(0);
+	}
+	remainingFaces.removeRef(next);
+	QPtrList<BoNode> newFound;
+	bool ok = connectFaces(database, remainingFaces, &newFound, next);
+	if (!ok) {
+		// reset next and remove next from node
+		next->setNext(0);
+		next->setPrevious(0);
+		next->setRelevantPoint(-1);
+		if (node) {
+			node->setNext(0);
+		}
+
+		// next wasn't the next node - so it is available again
+		remainingFaces.append(next);
+	} else {
+		// that is good - n actually was the next node. now we happend
+		// all nodes to found and return.
+		found->append(next);
+		QPtrListIterator<BoNode> it2(newFound);
+		for (; it2.current(); ++it2) {
+			found->append(it2.current());
+		}
+		boWarning() << "next node found (call " << call << ")" << endl;
+		call--;
+		return true;
+	}
+	x++;
+ }
+// boDebug() << "no next in adjacent count=" << adjacent.count()  << endl;
+
+
+ boDebug() << "none found (call " << call << ")" << endl;
+ call--;
+ return false;
+}
+
+void BoMesh::connectFaces()
+{
+ BO_CHECK_NULL_RET(d->mMesh);
+ if (d->mFaces) {
+	disconnectFaces();
+ }
+ if (d->mAllNodes.isEmpty()) {
+	boError() << k_funcinfo << "no nodes for " << d->mMesh->name << endl;
 	return;
  }
+ boDebug() << "trying to connect faces for " << d->mMesh->name << endl;
+
+ QPtrList<BoNode> allFaces = d->mAllNodes;
+
+ // this constructs lists of all adjacent faces for all faces.
+ BoAdjacentDataBase database(allFaces);
 
  // now we need to connect them if possible.
- BoNode* first = 0;
- BoNode* last = 0;
- BoNode* current;
- d->mFaces = new BoNode();
- current = first = last = d->mFaces;
- current->setFace(allFaces.first());
- allFaces.removeFirst();
+// BoNode* node = allFaces.first();
+// allFaces.removeFirst();
+ QPtrList<BoNode> connected;
+ bool ok = connectFaces(&database, allFaces, &connected, 0);
 
- do {
-	QPtrListIterator<Lib3dsFace> it(allFaces);
-	BoNode* next = 0;
-	for (; it.current(); ++it) {
-		int points = 0;
-		BoVector3 currentPoints[3];
-		BoVector3 otherPoints[3];
-		BosonModel::makeVectors(currentPoints, mesh, current->face());
-		BosonModel::makeVectors(otherPoints, mesh, it.current());
-		for (int i = 0; i < 3; i++) {
-			if (BosonModel::findPoint(currentPoints[i], otherPoints) >= 0) {
-				points++;
-			}
-		}
-		if (points >= 2) {
-			BoNode* n = new BoNode();
-			n->setFace(it.current());
-			allFaces.remove(it);
-
-			if (current == first) {
-				current->setPrevious(n);
-				first = n;
-				next = n;
-				current = n;
-			} else if (current == last) {
-				current->setNext(n);
-				last = n;
-				next = n;
-				current = n;
-			} else {
-				boError() << k_funcinfo << "invalid current value" << endl;
-			}
-			break;
-		}
-	}
-	if (next == 0) {
-		if (current == first) {
-			// the current node is the final first node. now we
-			// search in the other direction for the last node.
-			current = last;
-		} else if (current == last) {
-			// we found both first and last node. at this point
-			// allFaces should be empty.
-			// otherwise we could not connect all faces
-			// if allFaces is empty then this won't be reached at
-			// all!
-			current = 0;
-		}
-	}
- } while (current != 0 && allFaces.count() > 0);
- if (!allFaces.isEmpty()) {
-	boWarning() << k_funcinfo << "not all faces could be connected in " << mesh->name << "!" << endl;
-	//TODO: delete faces and call addFaces()
+ if (!ok) {
+	boDebug() << "no connected faces" << endl;
+	disconnectFaces();
+	addFaces();
 	return;
  }
- if (!first || !last) {
-	boError() << k_funcinfo << "Invalid first/last pointers" << endl;
-	//TODO: delete faces and call addFaces()
+ if (connected.count() == 0) {
+	boError() << k_funcinfo << "no connected faces" << endl;
+	disconnectFaces();
+	addFaces();
 	return;
  }
+ /*
+ if (ok != (allFaces.count() == connected.count())) {
+	boError() << k_funcinfo << "wrong return value!" << endl;
+	disconnectFaces();
+	addFaces();
+	return;
+ }
+ */
 
- // now we try to find the relevant (for rendering) points.
- // that is the point that is *not* in the previous face.
- // WARNING: we assume that this point *does* exist for all faces!
- first->setRelevantPoint(-1); // all are relevant in the first node
- for (BoNode* n = first->next(); n; n = n->next()) {
-	BoNode* p = n->previous();
+ BoNode* first = connected.first();
+ while (first->previous()) {
+	first = first->previous();
+ }
 
-	// AB: we should store the vertices in BoNode. we could speed up much
-	// stuff (also the loopthe loop  above) with that.
-	BoVector3 points[3];
-	BoVector3 previousPoints[3];
-	BosonModel::makeVectors(points, mesh, n->face());
-	BosonModel::makeVectors(previousPoints, mesh, p->face());
-	int found = 0; // for error checking
-	int relevant = -1;
-	for (int i = 0; i < 3; i++) {
-		int p = BosonModel::findPoint(points[i], previousPoints);
-		if (p >= 0) {
-			found++;
-		} else {
-			relevant = i;
-		}
-	}
-	if (found < 2) {
-		boError() << k_funcinfo << "faces are not adjacent!" << endl;
-		//TODO: delete faces and call addFaces()
-		return;
-	} else if (found == 3) {
-		// note that it *is* possible that all 3 points are equal!
-		// e.g. for a vector ((1,2,3),(4,5,6),(1,2,3))
-		// --> this would be a line only (represented as face/triangle). but
-		// since we demand at least 2 points to be equal this would lead to
-		// exactly 3 points equal (we have at least one model where this
-		// happens)
-		// now we need to find a relevant point that will get
-		// rendered...
-		boWarning() << k_funcinfo << "FIXME: random relevant point in mesh " << mesh->name << endl;
-		relevant = 0; // FIXME
-	}
-	if (relevant < 0) {
-		boError() << k_funcinfo << "no relevant point found" << endl;
-	} else {
-		n->setRelevantPoint(relevant);
-	}
+ d->mFaces = first;
+
+ if (!first->next()) {
+	boError() << k_funcinfo << "oops - first node has no next node!" << endl;
+	disconnectFaces();
+	addFaces();
+	return;
+ }
+ if (!first->next()->next()) {
+	boError() << k_funcinfo << "oops - first node has no next node!" << endl;
+	disconnectFaces();
+	addFaces();
+	return;
  }
 
  d->mFaces = first;
  d->mType = GL_TRIANGLE_STRIP;
- boDebug() << "faces connected" << endl;
 }
 
 void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* connected, Lib3dsFace* face, Lib3dsMesh* mesh)
@@ -298,7 +553,7 @@ void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* co
 	return;
  }
  BoVector3 searchFace[3]; // the vectors of the face we search connectables for
- BosonModel::makeVectors(searchFace, mesh, face);
+ BoVector3::makeVectors(searchFace, mesh, face);
 
  BoVector3 v[3];
  QPtrList<Lib3dsFace> found;
@@ -306,8 +561,8 @@ void findConnectable(const QPtrList<Lib3dsFace>& faces, QPtrList<Lib3dsFace>* co
 
  QPtrListIterator<Lib3dsFace> it(faces);
  for (; it.current(); ++it) {
-	BosonModel::makeVectors(v, mesh, it.current());
-	if (BosonModel::isAdjacent(searchFace, v)) {
+	BoVector3::makeVectors(v, mesh, it.current());
+	if (BoVector3::isAdjacent(searchFace, v)) {
 		found.clear();
 		facesLeft = faces;
 		facesLeft.removeRef(it.current());
@@ -346,7 +601,15 @@ void BoMesh::deleteFaces()
 		// list, otherwise we have an infinite loop here
 		first = first->previous();
 	}
-	BoNode* next = first;
+ }
+}
+
+void BoMesh::deleteNodes(BoNode* node)
+{
+ // node is the *first* node!
+ if (node) {
+	node->setPrevious(0);
+	BoNode* next = node;
 	do {
 		BoNode* current = next;
 		next = current->next();
@@ -354,3 +617,9 @@ void BoMesh::deleteFaces()
 	} while (next);
  }
 }
+
+Lib3dsMesh* BoMesh::mesh() const
+{
+ return d->mMesh;
+}
+

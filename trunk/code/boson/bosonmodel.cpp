@@ -756,11 +756,11 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 #warning memory leak
  //AB: memory leak!
  //AB: we need to do this once per modelnode only (for every player)
- BoMesh* boMesh = new BoMesh();
+ BoMesh* boMesh = new BoMesh(mesh);
 #if USE_STRIP
-	boMesh->connectFaces(mesh);
+	boMesh->connectFaces();
 #else
-	boMesh->addFaces(mesh);
+	boMesh->addFaces();
 #endif
  // TODO: count number of nodes in this mesh and compare to mesh->faces
 
@@ -1006,38 +1006,12 @@ BosonAnimation* BosonModel::animation(int mode) const
 
 bool BosonModel::isAdjacent(BoVector3* v1, BoVector3* v2)
 {
- if (!v1 || !v2) {
-	return false;
- }
- int equal = 0;
- for (int i = 0; i < 3; i++) {
-	if (v1[i].isEqual(v2[0]) || v1[i].isEqual(v2[1]) || v1[i].isEqual(v2[2])) {
-		equal++;
-	}
- }
-
-// face1 is adjacent to face2 if at least 2 points are equal.
-// equal faces are possible, too.
- return (equal >= 2);
+ return BoVector3::isAdjacent(v1, v2);
 }
 
 int BosonModel::findPoint(const BoVector3& point, const BoVector3* array)
 {
- for (int i = 0; i < 3; i++) {
-	if (array[i].isEqual(point)) {
-		return i;
-	}
- }
- return -1;
-}
-
-void BosonModel::makeVectors(BoVector3* v, Lib3dsMesh* mesh, Lib3dsFace* face)
-{
- // Lib3dsFace stores only the position (index) of the
- // actual point. the actual points are in mesh->pointL
- v[0].set(mesh->pointL[ face->points[0] ].pos);
- v[1].set(mesh->pointL[ face->points[1] ].pos);
- v[2].set(mesh->pointL[ face->points[2] ].pos);
+ return BoVector3::findPoint(point, array);
 }
 
 // yes, i know this would be a great function for a recursive algorithm. but i
@@ -1067,13 +1041,13 @@ void BosonModel::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMe
  for (unsigned int i = 0; i < adjacentFaces->count(); i++) {
 	QPtrList<Lib3dsFace> found; // these need to get removed from faces list
 	BoVector3 current[3]; // the triangle/face we search for
-	BosonModel::makeVectors(current, mesh, adjacentFaces->at(i));
+	BoVector3::makeVectors(current, mesh, adjacentFaces->at(i));
 
 	QPtrListIterator<Lib3dsFace> it(faces);
 	for (; it.current(); ++it) {
 		BoVector3 v[3];
-		BosonModel::makeVectors(v, mesh, it.current());
-		if (BosonModel::isAdjacent(current, v)) {
+		BoVector3::makeVectors(v, mesh, it.current());
+		if (BoVector3::isAdjacent(current, v)) {
 			adjacentFaces->append(it.current());
 			found.append(it.current());
 		}
@@ -1104,7 +1078,7 @@ int countAdjacentFaces(Lib3dsMesh* mesh, const QPtrList<Lib3dsFace>& faces, Lib3
 	for (int i = 0; i < 3; i++) {
 		v[i].set(mesh->pointL[ f->points[i] ].pos);
 	}
-	if (BosonModel::isAdjacent(faceVector, v)) {
+	if (BoVector3::isAdjacent(faceVector, v)) {
 		count++;
 	}
  }
@@ -1133,79 +1107,23 @@ void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib
  if (!node) {
 	boError() << k_funcinfo << "NULL node" << endl;
  }
- if (boMesh->type() == GL_TRIANGLE_STRIP) {
-	// AB: we need at least 3 faces, as we assume to have these before we enter the
-	// loop.
+ if (boMesh->type() == GL_TRIANGLE_STRIP && false) {
+	 boDebug() << "painting _STRIP" << endl;
 	if (!node->next()) {
 		boError() << k_funcinfo << "less than 2 faces in mesh " << mesh->name << "! this is not supported" << endl;
 		return;
 	}
-	if (!node->next()->next()) {
-		boError() << k_funcinfo << "less than 3 faces in mesh " << mesh->name << "! this is not supported" << endl;
-		return;
-	}
+	int firstPoint;
+	int secondPoint;
+	int thirdPoint;
+	node->decodeRelevantPoint(&firstPoint, &secondPoint, &thirdPoint);
 
-	// for triangle strips we need to render the first 2 points before we
-	// start to enter the loop. the loop depends on the 2 previous points to
-	// be known.
-	BoVector3 points[3];
-	BoVector3 nextPoints[3];
-	BoVector3 nextPoints2[3];
-	Lib3dsFace* firstFace = node->face();
-	BosonModel::makeVectors(points, mesh, node->face());
-	BosonModel::makeVectors(nextPoints, mesh, node->next()->face());
-	BosonModel::makeVectors(nextPoints2, mesh, node->next()->next()->face());
-
-	int firstPoint = -1; // this point doesn't have to be in another face
-	int secondPoint = -1; // the point that is at least in the next face
-	int thirdPoint = -1; // the point that is at least in the next face and in the face after the next
-	for (int i = 0; i < 3; i++) {
-		if (findPoint(points[i], nextPoints) >= 0) {
-			if (findPoint(points[i], nextPoints2) >= 0) {
-				thirdPoint = i;
-				break;
-			}
-		}
-	}
-	if (thirdPoint < 0) {
-		boError() << k_funcinfo << "could not find third point. faces are not connectable. fatal error." << endl;
-		thirdPoint = 0; // to prevent a crash. we can't return, since display list already started
-	}
-	for (int i = 0; i < 3; i++) {
-		if (i == thirdPoint) {
-			continue;
-		}
-		if (findPoint(points[i], nextPoints) >= 0) {
-			secondPoint = i;
-			break;
-		}
-	}
-	if (secondPoint < 0) {
-		boError() << k_funcinfo << "could not find second point. faces are not connectable. fatal error." << endl;
-		secondPoint = 0;
-	}
-	for (int i = 0; i < 3; i++) {
-		if (i == thirdPoint) {
-			continue;
-		}
-		if (i == secondPoint) {
-			continue;
-		}
-		firstPoint = i;
-		break;
-	}
-	if (firstPoint < 0) {
-		boError() << k_funcinfo << "Cannot find first point?!" << endl;
-	}
-
-	// the third point is rendered in the loop - it is just a helper
-	// variable here
-	renderPoint(mesh, firstFace, firstPoint, textured, invMeshMatrix, texMatrix);
-	renderPoint(mesh, firstFace, secondPoint, textured, invMeshMatrix, texMatrix);
-	renderPoint(mesh, firstFace, thirdPoint, textured, invMeshMatrix, texMatrix);
+	renderPoint(mesh, node->face(), firstPoint, textured, invMeshMatrix, texMatrix);
+	renderPoint(mesh, node->face(), secondPoint, textured, invMeshMatrix, texMatrix);
+	renderPoint(mesh, node->face(), thirdPoint, textured, invMeshMatrix, texMatrix);
 
 	// we skip the entire first face. all points have been rendered above.
-	node = boMesh->faces()->next();
+	node = node->next();
 	for (; node; node = node->next()) {
 		int point = node->relevantPoint();
 		if (point < 0 || point > 2) {
@@ -1215,7 +1133,7 @@ void BosonModel::renderMesh(BoMesh* boMesh, Lib3dsMesh* mesh, bool textured, Lib
 		renderPoint(mesh, node->face(), point, textured, invMeshMatrix, texMatrix);
 	}
  } else {
-	for (; node; node = node->next()) {
+	for (node = node->next(); node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
 			renderPoint(mesh, node->face(), i, textured, invMeshMatrix, texMatrix);
 		}
