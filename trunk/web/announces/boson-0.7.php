@@ -100,8 +100,7 @@ There are two methods of installing Boson from tarballs. The easier way is to gr
 However, that file is very big, and if you are on a slow connection, you may
 wish to simply get the code and data packages. The required packages can be
 found at:
-<a
-href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">http://sourceforge.net/project/showfiles.php?group_id=15087</a>
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263</a>
 </p>
 
 <p class=\"announcement\">
@@ -217,7 +216,7 @@ ago.
 base.<br />
 &lt;Andi&gt; Excellent. Are they trembling?<br />
 &lt;Felix&gt; No sir.<br />
-&lt;Andi&gt; What do you mean "No sir."? Why not?<br />
+&lt;Andi&gt; What do you mean \"No sir.\"? Why not?<br />
 &lt;Scott&gt; General, the enemy infantry and armored divisions haven't fired a single shot at us. They don't even
 seem to care that we are attacking them!<br />
 &lt;Andi&gt; They will pay dearly for this..<br />

@@ -49,14 +49,19 @@ function sidebar_links_box()
 {
 sidebar_box_begin("Links");
 draw_link("Main page", "index.php");
+echo "<br>";
 draw_link("All news", "all-news.php");
 draw_link("Screenshots", "screenshots.php");
 draw_link("Download", "download.php");
 draw_link("Install", "install.php");
-draw_link("Announcements", "announcements.php");
 draw_link("More information", "info.php");
+echo "<br>";
+draw_link("Announcements", "announcements.php");
+draw_link("Stories", "stories.php");
+echo "<br>";
 draw_link("Status", "status.php");
 draw_link("Contact us", "contact.php");
+echo "<br>";
 draw_link("Related links", "links.php");
 draw_link("Change style", "options.php");
 sidebar_box_end();
@@ -125,6 +130,7 @@ function sidebar_announcements_box()
 sidebar_box_begin("Announcements");
 draw_link("Boson 0.6", "announces/boson-0.6.php");
 draw_link("Boson 0.6.1", "announces/boson-0.6.1.php");
+draw_link("Boson 0.7", "announces/boson-0.7.php");
 sidebar_box_end();
 }
 

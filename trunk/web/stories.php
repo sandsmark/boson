@@ -2,7 +2,7 @@
 
 
 /*****  Variables  *****/
-$filename="status.php";
+$filename="stories.php";
 
 /*****  Some includes  *****/
 include("common.php");
@@ -17,7 +17,7 @@ include("variables.php");
 do_start_stuff();
 
 // Headers
-html_print_header("Status");
+html_print_header("Boson stories");
 print_header();
 
 // Main table
@@ -33,12 +33,13 @@ sidebar_end();
 main_area_begin();
 
 // Contacts
-draw_bigbox_begin("Status");
-draw_bigbox_text("Boson is currently still under heavy development.<br><br>
-  In the latest CVS version, there are no significant changes, compared
-  to the latest stable release ($latestversion).<br><br>
-  We're currently heading for release of version 0.8, but it is currently
-  unclear when it will be released.<br><br>");
+draw_bigbox_begin("Boson stories");
+draw_bigbox_text("Boson stories:
+    <ul>
+    <li><a href=\"stories/story-20021017.php\">Story #1&nbsp;&nbsp;(Oct. 17, 2002)</a></li>
+    <li><a href=\"stories/story-20021108.php\">Story #2&nbsp;&nbsp;(Nov. 08, 2002)</a></li>
+    </ul>");
+draw_bigbox_end();
 
 main_area_end();
 main_table_end();
