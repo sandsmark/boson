@@ -247,6 +247,10 @@ void BosonWidgetBase::initChat()
 
 void BosonWidgetBase::initPlayer()
 {
+ if (!localPlayer()) {
+	kdError() << k_funcinfo << "NULL local player" << endl;
+	return;
+ }
  if(!mLoading) {
 	for (unsigned int i = 0; i < game()->playerCount(); i++) {
 		Player* p = (Player*)game()->playerList()->at(i);
