@@ -81,13 +81,13 @@ void BoButton::setPixmap(const QPixmap& pix)
  if (mGrayOut) {
 	KPixmap p(pix);
 	KPixmapEffect::desaturate(p, 1.0);
-	if (mProductionCount > 0) {
+	if (mProductionCount != 0) {
 		addProductionCount(&p);
 	}
 	QPushButton::setPixmap(p);
  } else {
 	QPixmap p(pix);
-	if (mProductionCount > 0) {
+	if (mProductionCount != 0) {
 		addProductionCount(&p);
 	}
 	QPushButton::setPixmap(p);
@@ -98,7 +98,7 @@ void BoButton::setProductionCount(int c)
 {
  mProductionCount = c;
  QPixmap p(mPixmap);
- if (mProductionCount > 0) {
+ if (mProductionCount != 0) {
 	addProductionCount(&p);
  }
  QPushButton::setPixmap(p);
@@ -130,11 +130,21 @@ void BoButton::mouseReleaseEvent(QMouseEvent* e)
 
 void BoButton::addProductionCount(QPixmap* pix)
 {
+ QColor color(green);
+ QFont f;
+ f.setBold(true);
  QPainter painter(pix);
- painter.setPen(black);
- painter.setBrush(black);
- painter.drawText(5, 5 + painter.fontMetrics().height(),
-		QString::number(mProductionCount));
+ painter.setPen(color);
+ painter.setFont(f);
+ 
+ if (mProductionCount > 0) {
+	painter.drawText(5, 5 + painter.fontMetrics().height(),
+			QString::number(mProductionCount));
+ } else if (mProductionCount == -1) {
+	// TODO: if the i18n()'ed text does not fit into the widget change the
+	// font size!
+	painter.drawText(5, 5 + painter.fontMetrics().height(), i18n("Pause"));
+ }
  painter.end();
 }
 

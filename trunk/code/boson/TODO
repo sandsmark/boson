@@ -21,6 +21,8 @@ Game TODOs
   terrible for memory usage... it *might* be worth...
 - follow-mode for units
 - _much_ better moving for multiple units in group
+- BosonCommandWidget should paint the order pixmap only *once* no more. E.g. we
+  repaint for setGrayOu() and setProductionCount()
 
 
 Editor (map, unit, scenario) TODOs
