@@ -41,35 +41,26 @@ class BosonMiniMap::BosonMiniMapPrivate
 public:
 	BosonMiniMapPrivate()
 	{
-		mGround = 0;
-
 		mMapWidth = -1;
 		mMapHeight = -1;
-
-		mMap = 0;
-		mLocalPlayer = 0;
-		mCanvas = 0;
-
-		mUseFog = false;
 	}
 
-	QPixmap* mGround;
 	int mMapWidth;
 	int mMapHeight;
 
 	QSize mSize;
 	QPoint mPos;
-
-	BosonMap* mMap;
-	BosonCanvas* mCanvas;
-	Player* mLocalPlayer;
-
-	bool mUseFog;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
 {
  d = new BosonMiniMapPrivate;
+ mGround = 0;
+ mMap = 0;
+ mLocalPlayer = 0;
+ mCanvas = 0;
+ mUseFog = false;
+ 
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 }
 
@@ -90,7 +81,7 @@ int BosonMiniMap::mapHeight() const
 
 QPixmap* BosonMiniMap::ground() const
 {
- return d->mGround;
+ return mGround;
 }
 
 void BosonMiniMap::slotCreateMap(int w, int h)
@@ -98,13 +89,13 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  if (w == mapWidth() && h == mapHeight()) {
 	return;
  }
- if (d->mGround) {
-	delete d->mGround;
+ if (mGround) {
+	delete mGround;
  }
  d->mMapWidth = w;
  d->mMapHeight = h;
- d->mGround = new QPixmap(mapWidth(), mapHeight());
- d->mGround->fill(COLOR_UNKNOWN);
+ mGround = new QPixmap(mapWidth(), mapHeight());
+ mGround->fill(COLOR_UNKNOWN);
 
  setMinimumWidth(mapWidth() + 5);
  setMinimumHeight(mapHeight() + 5);
@@ -189,7 +180,7 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
- if (d->mLocalPlayer->isFogged(x, y)) {
+ if (mLocalPlayer->isFogged(x, y)) {
 	return;
  }
  SpeciesTheme* theme = unit->speciesTheme();
@@ -222,34 +213,34 @@ void BosonMiniMap::slotResizeRect(int w, int h)
 
 void BosonMiniMap::setMap(BosonMap* map)
 {
- d->mMap = map;
+ mMap = map;
 }
 
 void BosonMiniMap::setCanvas(BosonCanvas* c)
 {
- d->mCanvas = c;
+ mCanvas = c;
 }
 
 void BosonMiniMap::initMap()
 {
- if (!d->mMap) {
+ if (!mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
- slotCreateMap(d->mMap->width(), d->mMap->height());
- bool oldFog = d->mUseFog;
- d->mUseFog = true;
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+ slotCreateMap(mMap->width(), mMap->height());
+ bool oldFog = mUseFog;
+ mUseFog = true;
+ for (unsigned int i = 0; i < mMap->width(); i++) {
+	for (unsigned int j = 0; j < mMap->height(); j++) {
 		slotUnfog(i, j);
 	}
  }
- d->mUseFog = oldFog;
+ mUseFog = oldFog;
 }
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
 {
- if (!d->mMap) {
+ if (!mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
 	return;
  }
@@ -259,8 +250,8 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  }
  int x = (int)(oldX / BO_TILE_SIZE);
  int y = (int)(oldY / BO_TILE_SIZE);
- if (!d->mLocalPlayer->isFogged(x, y)) {
-	Cell* c = d->mMap->cell(x, y);
+ if (!mLocalPlayer->isFogged(x, y)) {
+	Cell* c = mMap->cell(x, y);
 	if (!c) {
 		kdError() << k_lineinfo << "NULL cell" << endl;
 		return;
@@ -280,7 +271,7 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
  }
  int x = (int)(unit->x() / BO_TILE_SIZE);
  int y = (int)(unit->y() / BO_TILE_SIZE);
- Cell* c = d->mMap->cell(x, y);
+ Cell* c = mMap->cell(x, y);
  if (!c) {
 	kdError() << k_funcinfo << ": NULL cell" << endl;
 	return;
@@ -290,16 +281,16 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 
 void BosonMiniMap::slotUnfog(int x, int y)
 {
- if (!d->mUseFog) {
+ if (!mUseFog) {
 	return;
  }
- Cell* c = d->mMap->cell(x, y);
+ Cell* c = mMap->cell(x, y);
  if (!c) {
 	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
  }
  slotAddCell(x, y, c->groundType(), c->version());
- QValueList<Unit*> list = d->mCanvas->unitsAtCell(x, y);
+ QValueList<Unit*> list = mCanvas->unitsAtCell(x, y);
  if (!list.isEmpty()) {
 	Unit* u = list.first();
 	slotAddUnit(u, u->x() / BO_TILE_SIZE, u->y() / BO_TILE_SIZE);
@@ -308,10 +299,10 @@ void BosonMiniMap::slotUnfog(int x, int y)
 
 void BosonMiniMap::slotFog(int x, int y)
 {
- if (!d->mUseFog) {
+ if (!mUseFog) {
 	return;
  }
- Cell* c = d->mMap->cell(x, y);
+ Cell* c = mMap->cell(x, y);
  if (!c) {
 	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
 	return;
@@ -321,14 +312,14 @@ void BosonMiniMap::slotFog(int x, int y)
 
 void BosonMiniMap::setLocalPlayer(Player* p)
 {
- d->mLocalPlayer = p;
+ mLocalPlayer = p;
 }
 
 void BosonMiniMap::initFogOfWar(Player* p)
 {
- d->mUseFog = true;
- for (unsigned int i = 0; i < d->mMap->width(); i++) {
-	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+ mUseFog = true;
+ for (unsigned int i = 0; i < mMap->width(); i++) {
+	for (unsigned int j = 0; j < mMap->height(); j++) {
 		if (p && p->isFogged(i, j)) {
 			slotFog(i, j);
 		} else {

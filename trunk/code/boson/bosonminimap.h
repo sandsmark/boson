@@ -89,5 +89,13 @@ protected:
 private:
 	class BosonMiniMapPrivate;
 	BosonMiniMapPrivate* d;
+
+	QPixmap* mGround;
+	bool mUseFog; // useful for the editor to disable the fog of war
+	
+	BosonMap* mMap;
+	BosonCanvas* mCanvas;
+	Player* mLocalPlayer; // needed to distinguish between movements (->fog of war)
+	
 };
 #endif
