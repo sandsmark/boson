@@ -403,6 +403,8 @@ void BosonBigDisplayBase::init()
 		d->mViewFrustum[i * 4 + j] = 0.0;
 	}
  }
+ BoGroundRendererManager::manager()->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
+ BoGroundRendererManager::manager()->setViewFrustum(d->mViewFrustum);
 
  changeGroundRenderer(boConfig->uintValue("GroundRenderer", DEFAULT_GROUND_RENDERER));
 
@@ -2003,9 +2005,6 @@ void BosonBigDisplayBase::setLocalPlayer(Player* p)
  d->mLocalPlayer = p;
 
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
- if (BoGroundRendererManager::manager()->currentRenderer()) {
-	 BoGroundRendererManager::manager()->currentRenderer()->setLocalPlayerIO(localPlayerIO());
- }
 
  delete d->mMouseIO;
  d->mMouseIO = 0;
@@ -3154,12 +3153,6 @@ void BosonBigDisplayBase::changeGroundRenderer(int renderer)
 	exit(1);
 	return;
  }
-
- // AB: these should be stored in the manager class and applied to the renderer
- // whenever it changes
- r->setMatrices(&d->mModelviewMatrix, &d->mProjectionMatrix, d->mViewport);
- r->setViewFrustum(d->mViewFrustum);
- r->setLocalPlayerIO(localPlayerIO());
 }
 
 void BosonBigDisplayBase::generateMovieFrames(const QValueList<QByteArray>& data, const QString& directory)
