@@ -20,12 +20,13 @@
 #include "bodisplaymanager.h"
 #include "bodisplaymanager.moc"
 
+#include "defines.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplay.h"
 #include "editorbigdisplay.h"
 #include "bosonconfig.h"
 #include "player.h"
-#include "defines.h"
+#include "boselection.h"
 
 #include <klocale.h>
 
@@ -33,6 +34,7 @@
 #include <qlayout.h>
 #include <qvbox.h>
 #include <qpainter.h>
+#include <qintdict.h>
 
 #include <kdebug.h>
 
@@ -118,6 +120,8 @@ public:
 	BosonBigDisplayBase* mActiveDisplay;
 
 	QVBoxLayout* mLayout;
+
+	QIntDict<BoSelection> mSelectionGroups;
 };
 
 BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode) : QWidget(parent, "bosondisplaymanager")
@@ -127,10 +131,16 @@ BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMo
  d->mBoxList.setAutoDelete(true);
  d->mCanvas = canvas;
  mGameMode = gameMode;
+ d->mSelectionGroups.setAutoDelete(true);
+ for (int i = 0; i < 10; i++) {
+	BoSelection* s = new BoSelection(this);
+	d->mSelectionGroups.insert(i, s);
+ }
 }
 
 BoDisplayManager::~BoDisplayManager()
 {
+ d->mSelectionGroups.clear();
  d->mDisplayList.clear();
  d->mBoxList.clear();
  delete d;
@@ -435,5 +445,52 @@ void BoDisplayManager::paintResources()
 void BoDisplayManager::paintChatMessages()
 {
  // TODO
+}
+
+void BoDisplayManager::slotSelectGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	kdError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ if (!activeDisplay()) {
+	kdError() << k_funcinfo << "NULL active display" << endl;
+	return;
+ }
+ activeDisplay()->selection()->copy(d->mSelectionGroups[number]);
+}
+
+void BoDisplayManager::slotCreateGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	kdError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ if (!activeDisplay()) {
+	kdError() << k_funcinfo << "NULL active display" << endl;
+	return;
+ }
+ d->mSelectionGroups[number]->copy(activeDisplay()->selection());
+}
+
+void BoDisplayManager::slotClearGroup(int number)
+{
+ if (number < 0 || number >= 10) {
+	kdError() << k_funcinfo << "Invalid group " << number << endl;
+	return;
+ }
+ if (!d->mSelectionGroups[number]) {
+	kdError() << k_funcinfo << "NULL group " << number << endl;
+	return;
+ }
+ d->mSelectionGroups[number]->clear();
 }
 
