@@ -45,6 +45,9 @@ public:
 		mCommandFrame = 0;
 		mChat = 0;
 		mCmdBackground = 0;
+		mGroupMove = 0;
+		mMiniMapScale = 0;
+		
 		mCursor = 0;
 		mCursorTheme = 0;
 	}
@@ -54,7 +57,8 @@ public:
 	QComboBox* mCommandFrame;
 	QComboBox* mChat;
 	QComboBox* mCmdBackground;
-	QComboBox* mGroupmove;
+	QComboBox* mGroupMove;
+	KDoubleNumInput* mMiniMapScale;
 	
 	QComboBox* mCursor;
 	QComboBox* mCursorTheme;
@@ -121,6 +125,13 @@ void OptionsDialog::initGeneralPage()
  connect(d->mCmdBackground, SIGNAL(activated(int)), 
 		this, SLOT(slotCmdBackgroundChanged(int)));
 
+ d->mMiniMapScale = new KDoubleNumInput(1.0, vbox);
+ d->mMiniMapScale->setRange(1.0, 5.0, 0.5);
+ d->mMiniMapScale->setLabel(i18n("Mini Map Scale Factor"));
+ connect(d->mMiniMapScale, SIGNAL(valueChanged(double)), 
+		this, SIGNAL(signalMiniMapScaleChanged(double)));
+
+
  setCommandFramePosition(CmdFrameLeft);
  setChatFramePosition(ChatFrameBottom);
 }
@@ -166,11 +177,11 @@ void OptionsDialog::initPathfindingPage()
  QVBox* vbox = addVBoxPage(i18n("&Pathfinding"));
  QHBox* hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Group Movement"), hbox);
- d->mGroupmove = new QComboBox(hbox);
- d->mGroupmove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
- d->mGroupmove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
- d->mGroupmove->insertItem(i18n("New style (much better, but not fully working yet)"), GroupMoveNew);
- connect(d->mGroupmove, SIGNAL(activated(int)),
+ d->mGroupMove = new QComboBox(hbox);
+ d->mGroupMove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
+ d->mGroupMove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
+ d->mGroupMove->insertItem(i18n("New style (much better, but not fully working yet)"), GroupMoveNew);
+ connect(d->mGroupMove, SIGNAL(activated(int)),
 		this, SIGNAL(signalGroupMoveChanged(int)));
 
  setGroupMove(boConfig->readGroupMoveMode());
@@ -219,7 +230,12 @@ void OptionsDialog::setCursor(CursorMode mode)
 
 void OptionsDialog::setGroupMove(GroupMoveMode mode)
 {
- d->mGroupmove->setCurrentItem(mode);
+ d->mGroupMove->setCurrentItem(mode);
+}
+
+void OptionsDialog::setMiniMapScale(double scale)
+{
+ d->mMiniMapScale->setValue(scale);
 }
 
 void OptionsDialog::slotCursorChanged(int index)

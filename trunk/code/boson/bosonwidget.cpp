@@ -371,6 +371,12 @@ void BosonWidget::slotArrowScrollChanged(int speed)
  boConfig->setArrowKeyStep(speed);
 }
 
+void BosonWidget::slotMiniMapScaleChanged(double scale)
+{
+ boConfig->setMiniMapScale(scale);
+ d->mMiniMap->repaint();
+}
+
 void BosonWidget::slotNewGame()
 {
 // kdDebug() << k_funcinfo << endl;
@@ -511,6 +517,7 @@ void BosonWidget::slotGamePreferences()
  dlg->setArrowScrollSpeed(boConfig->arrowKeyStep());
  dlg->setCommandFramePosition(d->mCommandPos);
  dlg->setChatFramePosition(d->mChatPos);
+ dlg->setMiniMapScale(boConfig->miniMapScale());
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));
@@ -523,15 +530,14 @@ void BosonWidget::slotGamePreferences()
 		this, SLOT(slotCommandFramePosition(int)));
  connect(dlg, SIGNAL(signalChatFramePositionChanged(int)),
 		this, SLOT(slotChatFramePosition(int)));
-
  connect(dlg, SIGNAL(signalCursorChanged(int, const QString&)),
 		this, SLOT(slotChangeCursor(int, const QString&)));
-
  connect(dlg, SIGNAL(signalGroupMoveChanged(int)),
 		this, SLOT(slotChangeGroupMove(int)));
-
  connect(dlg, SIGNAL(signalCmdBackgroundChanged(const QString&)),
 		this, SLOT(slotCmdBackgroundChanged(const QString&)));
+ connect(dlg, SIGNAL(signalMiniMapScaleChanged(double)), 
+		this, SLOT(slotMiniMapScaleChanged(double)));
 
  dlg->show();
 }

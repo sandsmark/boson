@@ -47,6 +47,7 @@ public:
 	void setChatFramePosition(ChatFramePosition position);
 	void setCursor(CursorMode mode);
 	void setGroupMove(GroupMoveMode mode);
+	void setMiniMapScale(double s);
 
 signals:
 	void signalArrowScrollChanged(int);
@@ -66,6 +67,7 @@ signals:
 	void signalGroupMoveChanged(int index);
 
 	void signalCmdBackgroundChanged(const QString& file);
+	void signalMiniMapScaleChanged(double);
 
 protected slots:
 	/**
