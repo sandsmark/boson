@@ -6,3 +6,4 @@ Makefile.in
 *.lo
 libbosonscript.la
 libbosonscript_la_meta_unload.*
+*.pyc
