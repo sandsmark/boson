@@ -1009,14 +1009,14 @@ void BosonWidgetBase::slotGrabScreenshot()
 {
  boDebug() << k_funcinfo << "Taking screenshot!" << endl;
  QPixmap shot = QPixmap::grabWindow(mTop->winId());
- QString file = findSaveFileName("boson", "png");
+ QString file = findSaveFileName("boson", "jpg");
  if (file.isNull()) {
 	boWarning() << k_funcinfo << "Can't find free filename???" << endl;
 	return;
  }
  // TODO: chat message about file location!
  boDebug() << k_funcinfo << "Saving screenshot to " << file << endl;
- bool ok = shot.save(file, "PNG");
+ bool ok = shot.save(file, "JPEG");
  if (!ok) {
 	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
 	boGame->slotAddChatSystemMessage(i18n("An error occured while saving screenshot to %1").arg(file));
