@@ -403,8 +403,10 @@ void BosonBigDisplayBase::init()
 
 void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 {
+ BosonCanvas* previousCanvas = mCanvas;
  if (mCanvas) {
-	disconnect(mCanvas, 0, this, 0);
+	disconnect(previousCanvas, 0, this, 0);
+	disconnect(previousCanvas, 0, mSelection, 0);
  }
  mCanvas = canvas;
  if (!mCanvas) {
@@ -414,7 +416,6 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 		this, SLOT(slotRemovedItemFromCanvas(BosonItem*)));
  connect(mCanvas, SIGNAL(signalRemovedItem(BosonItem*)),
 		mSelection, SLOT(slotRemoveItem(BosonItem*)));
-
  slotResetViewProperties();
 }
 
@@ -777,6 +778,7 @@ void BosonBigDisplayBase::renderItems()
 
  unsigned int lod = 0;
 
+ BoItemList* selectedItems = new BoItemList(0, false);
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
 	BosonItem* item = *it;
@@ -829,21 +831,7 @@ void BosonBigDisplayBase::renderItems()
 	glPopMatrix();
 
 	if (item->isSelected()) {
-		// FIXME: performance: create a display lists in the SelectBox which also contains the scale!
-		// FIXME: should selection boxes be drawn with lighting disabled?
-		GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-		GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-		GLfloat depth = item->glDepthMultiplier();
-		glPushMatrix();
-		if (w != 1.0 || h != 1.0 || depth != 1.0) {
-			glScalef(w, h, depth);
-		}
-		if (boConfig->alignSelectionBoxes()) {
-			glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
-		}
-		glCallList(item->selectBox()->displayList());
-		glPopMatrix();
-		glColor3ub(255, 255, 255);
+		selectedItems->append(item);
 	}
 
 	glTranslatef(-x, -y, -z);
@@ -875,6 +863,47 @@ void BosonBigDisplayBase::renderItems()
 		glEnable(GL_TEXTURE_2D);
 	}
  }
+ glPushAttrib(GL_ENABLE_BIT);
+ glDisable(GL_LIGHTING);
+ glDisable(GL_NORMALIZE);
+ it = selectedItems->begin();
+ while (it != selectedItems->end()) {
+	BosonItem* item = *it;
+	if (!item->isSelected()) {
+		boError() << k_funcinfo << "not selected" << endl;
+		++it;
+		continue;
+	}
+	if (!item->selectBox()) {
+		boError() << k_funcinfo << "selected but NULL selectBox" << endl;
+		++it;
+		continue;
+	}
+
+	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+	GLfloat z = item->z();
+
+	GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+	GLfloat depth = item->glDepthMultiplier();
+	glPushMatrix();
+	glTranslatef(x, y, z);
+	if (w != 1.0 || h != 1.0 || depth != 1.0) {
+		glScalef(w, h, depth);
+	}
+	if (boConfig->alignSelectionBoxes()) {
+		glRotatef(camera()->rotation(), 0.0, 0.0, 1.0);
+	}
+	glCallList(item->selectBox()->displayList());
+	glPopMatrix();
+	glColor3ub(255, 255, 255);
+
+	++it;
+ }
+ delete selectedItems;
+ selectedItems = 0;
+ glPopAttrib();
  d->mRenderedItems += d->mRenderItemList->count();
  d->mRenderItemList->clear();
 }
