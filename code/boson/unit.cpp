@@ -1754,10 +1754,15 @@ void MobileUnit::advanceMoveCheck()
 				stopMoving();
 				setWork(WorkNone);
 				return;
-			} else if ((pathInfo()->waiting >= 20) && (pathInfo()->waiting % 20 == 0)) {
-				// We will recalculate path every 20 advance calls (every 1 sec)
+			} else if (pathInfo()->waiting % (20 + QMAX(pathInfo()->pathrecalced * 20, 80)) == 0) {
+				// First wait 20 adv. calls (1 sec) before recalculating path, then 40
+				//  calls, then 60 etc, but never more than 100 calls.
+				boDebug() << k_funcinfo << "unit " << id() << ": Recalcing path, waiting: " << pathInfo()->waiting <<
+						"; pathrecalced: " << pathInfo()->pathrecalced << endl;
 				newPath();
-				// FIXME: USE NEW PATH!!!
+				pathInfo()->pathrecalced++;
+				pathInfo()->waiting = 0;
+				// New path will be used next advance call
 			}
 			pathInfo()->waiting++;
 			return;
@@ -1908,6 +1913,7 @@ void MobileUnit::advanceMoveCheck()
  }
 #endif // USE_NEW_COLLISION_DETECTION
  pathInfo()->waiting = 0;
+ pathInfo()->pathrecalced = 0;
 
  //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
 }
