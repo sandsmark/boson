@@ -187,12 +187,15 @@ void Player::loadTheme(const QString& species, const QColor& teamColor)
  mSpecies = new SpeciesTheme(species, teamColor);
 }
 
-void Player::addUnit(Unit* unit)
+void Player::addUnit(Unit* unit, int dataHandlerId)
 {
- d->mUnitPropID++;// used for ID of KGamePropertyHandler
  d->mUnits.append(unit);
  unit->setOwner(this); // already done in c'tor of Unit
- unit->dataHandler()->registerHandler(BosonMessage::UnitPropertyHandler + d->mUnitPropID, this,
+ if (dataHandlerId == -1) {
+	dataHandlerId = BosonMessage::UnitPropertyHandler + d->mUnitPropID;
+	d->mUnitPropID++;// used for ID of KGamePropertyHandler
+ }
+ unit->dataHandler()->registerHandler(dataHandlerId, this,
 		SLOT(sendProperty(int, QDataStream&, bool*)),
 		SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
 
@@ -751,8 +754,11 @@ bool Player::loadFromXML(const QDomElement& root)
 	boError(260) << k_funcinfo << "Id was no valid number" << endl;
 	return false;
  }
- Q_UNUSED(id);
-// setId(id); // AB: KGame should take care of this. we should not need this. (remember that we depend on KGame::d->mUniquePlayerNumber to be in sync!)
+
+ // WARNING: KGame from KDE < 3.2 was assigning an Id on its own in
+ // KGame::systemAddPlayer() when it was not yet set. But due to other problems
+ // it does _not_ do that anymore, so we have to set our own Id!
+ setId(id);
  int networkPriority = root.attribute(QString::fromLatin1("NetworkPriority")).toInt(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "NetworkPriority was no valid number" << endl;
@@ -878,22 +884,14 @@ bool Player::loadUnitsFromXML(const QDomElement& root)
 	Unit* unit = ((Boson*)game())->loadUnit(type, this);
 
 	// Set additional properties
-	d->mUnits.append(unit);
-	unit->dataHandler()->registerHandler(dataHandlerId, this,
-			SLOT(sendProperty(int, QDataStream&, bool*)),
-			SLOT(slotUnitPropertyChanged(KGamePropertyBase*)));
+	addUnit(unit, dataHandlerId);
 	unit->setId(id);
 
 	// Call unit's loading methods
 	if (!unit->loadFromXML(e)) {
 		boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
-	}
-
-	// Increase unit count
-	if (unit->isMobile()) {
-		d->mMobilesCount++;
-	} else {
-		d->mFacilitiesCount++;
+		// no need to return
+		// also it is dangerous now, as we already called addUnit()!
 	}
  }
  return true;

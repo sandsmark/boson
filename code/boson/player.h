@@ -22,6 +22,7 @@
 #include <kgame/kplayer.h>
 
 class QColor;
+class QDomElement;
 class Unit;
 class Facility;
 class SpeciesTheme;
@@ -29,7 +30,6 @@ class UnitProperties;
 class BosonMap;
 class BosonStatistics;
 class ProductionPlugin;
-class QDomElement;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -62,7 +62,13 @@ public:
 
 	void loadTheme(const QString& species, const QColor& teamColor);
 
-	void addUnit(Unit* unit);
+	/**
+	 * Add @p unit to this player.
+	 * @param dataHandlerId Used for loading only. The datahandler ID is
+	 * already known, so use that value. If -1 we will use the next
+	 * integer value.
+	 **/
+	void addUnit(Unit* unit, int datHandlerId = -1);
 	void unitDestroyed(Unit* unit);
 	SpeciesTheme* speciesTheme() const { return mSpecies; }
 
