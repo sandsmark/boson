@@ -865,7 +865,7 @@ bool Unit::saveAsXML(QDomElement& root)
  // AB: we use too many attributes ... maybe we should add a few more elements :)
  root.setAttribute(QString::fromLatin1("x"), x());
  root.setAttribute(QString::fromLatin1("y"), y());
- root.setAttribute(QString::fromLatin1("z"), y());
+ root.setAttribute(QString::fromLatin1("z"), z());
 
  // store the current plugin:
  if (currentPlugin()) {
