@@ -46,6 +46,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  registerData(&mHealth, IdHealth);
  registerData(&mArmor, IdArmor);
  registerData(&mShields, IdShields);
+ registerData(&mShieldReloadCounter, IdShieldReloadCounter);
  registerData(&mSightRange, IdSightRange);
  registerData(&mWork, IdWork);
  registerData(&mAdvanceWork, IdAdvanceWork);
@@ -59,6 +60,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mAdvanceWork.setLocal((int)WorkNone);
  mHealth.setLocal(0); // initially destroyed
  mShields.setLocal(0); // doesn't have any shields
+ mShieldReloadCounter.setLocal(0);
  mArmor.setLocal(0); // doesn't have any armor
  mSightRange.setLocal(0);
  mDeletionTimer.setLocal(0);
@@ -267,3 +269,18 @@ bool UnitBase::saveScenario(QDomElement& unit)
  return ret;
 }
 
+void UnitBase::reloadShields(int by)
+{
+ // AB: the other way would be more clever - start with mShieldReloadCounter at
+ // 10, decrease by "by" and actually reload shields when it reaches 0. the we
+ // reset to 10 and so on.
+ // would allow configurable reload times more easily.
+ if (mShieldReloadCounter >= MAX_SHIELD_RELOAD_COUNT) {
+	if (shields() < unitProperties()->shields()) {
+		setShields(shields() + 1);
+	}
+	mShieldReloadCounter = 0;
+ } else {
+	mShieldReloadCounter = mShieldReloadCounter + by;
+ }
+}
