@@ -38,27 +38,32 @@ main_area_begin();
 draw_bigbox_begin("Boson 0.6.1 announcement");
 draw_bigbox_text("
 <p class=\"announcement\">
-Release of Boson 0.6.1, a Real Time Strategy (RTS) game for the K Desktop Environment.
+Release of Boson 0.6.1, a Real Time Strategy (RTS) game for the K Desktop
+Environment.
 </p>
 
 <p class=\"announcement\">
-Where 0.6 was a complete rewrite to libkdegames and KDE 3.0, 0.6.1 is a minor bug fix release.
+Where 0.6 was a complete rewrite to libkdegames and KDE 3.0, 0.6.1 is a minor
+bug fix release.
 </p>
 
 <p class=\"announcement\">
-Boson currently requires a minimum of 2 players due to lack of an artificial intelligence. We are in need of more
-developers, especially graphics artists. If you have any spare time and the ability to code in Qt/C++ or you know your
-way around a graphics editor, we would appreciate the help.
+Boson currently requires a minimum of 2 players due to lack of an artificial
+intelligence. We are in need of more developers, especially graphics artists. If
+you have any spare time and the ability to code in Qt/C++ or you know your way
+around a graphics editor, we would appreciate the help.
 </p>
 
 <p class=\"announcement\">
-The 0.6 release does not include the map editor for functionality and stability reasons.
+The 0.6 release does not include the map editor for functionality and stability
+reasons.
 </p>
 
 <p class=\"announcement\">
-List of bug fixes since 0.6:<br>
+List of bug fixes since <a href=\"boson-0.6.php\">0.6</a>:<br>
  - The chat widget is now hidden by default<br>
- - Stopping unit/building production now only returns money if building was started (opposed to still in queue)<br>
+ - Stopping unit/building production now only returns money if building was
+   started (opposed to still in queue)<br>
  - Boson will now compile with gcc 2.96, 3.1, and possibly 3.0<br>
  - Many small fixes<br>
 </p>
@@ -71,9 +76,10 @@ To compile and install Boson, you will need the following:<br>
 </p>
 
 <p class=\"announcement\">
-note: You do not need the entire KDE distribution. Simply installing kdelibs, kdebase, arts, kdegames, and
-kdemultimedia should suffice. If you are using precompiled packages (such as rpms and debs), make sure you have the
-devel- packages for each!
+note: You do not need the entire KDE distribution. Simply installing kdelibs,
+kdebase, arts, kdegames, and kdemultimedia should suffice. If you are using
+precompiled packages (such as rpms and debs), make sure you have the devel-
+packages for each!
 </p>
 
 <p class=\"announcement\">
@@ -81,19 +87,21 @@ Installing Boson:<br>
 
 There are two methods of installing Boson from tarballs. The easier way is to grab
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-all-0.6.1.tar.bz2?download\">boson-all-0.6.1.tar.bz2</a>. However,
-that file is very big, and if you are on a slow connection, you may wish to simply get the code and data packages. The
-required packages can be found at:
+that file is very big, and if you are on a slow connection, you may wish to
+simply get the code and data packages. The required packages can be found at:
 <a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087\">http://sourceforge.net/project/showfiles.php?group_id=15087</a>
 </p>
 
 <p class=\"announcement\">
-Let me say that again: download either boson-all or both boson-code and boson-data. Do not waste your time downloading
-all three! If you are updating via CVS and you have 0.6 installed already, do not update the data module. It has not
-changed since 0.6.
+Let me say that again: download either boson-all or both boson-code and
+boson-data. Do not waste your time downloading all three! If you are updating
+via CVS and you have 0.6 installed already, do not update the data module. It
+has not changed since 0.6.
 </p>
 
 <p class=\"announcement\">
-If you decided to grab the individual packages, you can optionally download the music files for Boson at:
+If you decided to grab the individual packages, you can optionally download the
+music files for Boson at:
 <a href=\"http://boson.eu.org/music/\">http://boson.eu.org/music/</a>
 </p>
 
