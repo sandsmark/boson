@@ -217,8 +217,6 @@ void BosonWidget::initConnections()
 		canvas(), SLOT(slotAdvance(unsigned int)));
  connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
 		canvas(), SLOT(slotAddUnit(Unit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
- connect(game(), SIGNAL(signalNewGroup(Unit*, QPtrList<Unit>)),
-		canvas(), SLOT(slotNewGroup(Unit*, QPtrList<Unit>)));
 
  connect(game(), SIGNAL(signalAddUnit(Unit*, int, int)),
 		this, SLOT(slotAddUnit(Unit*, int, int)));
