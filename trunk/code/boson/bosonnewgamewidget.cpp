@@ -20,23 +20,6 @@
 #include "bosonnewgamewidget.h"
 #include "bosonnewgamewidget.moc"
 
-#include <kgame/kgamechat.h>
-#include <qcombobox.h>
-#include <qframe.h>
-#include <qgroupbox.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qlistbox.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qpainter.h>
-
-#include <klocale.h>
-#include <kgame/kgameproperty.h>
-#include <kdebug.h>
-#include <ksimpleconfig.h>
-#include <kmessagebox.h>
-
 #include "bosonconfig.h"
 #include "bosonmessage.h"
 #include "player.h"
@@ -49,6 +32,22 @@
 #include "bosonscenario.h"
 #include "defines.h"
 
+#include <klocale.h>
+#include <kgame/kgameproperty.h>
+#include <kgame/kgamechat.h>
+#include <kdebug.h>
+#include <ksimpleconfig.h>
+#include <kmessagebox.h>
+
+#include <qcombobox.h>
+#include <qframe.h>
+#include <qgroupbox.h>
+#include <qlabel.h>
+#include <qlineedit.h>
+#include <qlistbox.h>
+#include <qpushbutton.h>
+#include <qlayout.h>
+#include <qpainter.h>
 
 /*
  *  Constructs a BosonNewGameWidget which is a child of 'parent', with the 
@@ -225,7 +224,7 @@ BosonNewGameWidget::BosonNewGameWidget(TopWidget* top, QWidget* parent)
   connect(removeplayerbutton, SIGNAL(clicked()), this, SLOT(slotRemovePlayer()));
   connect(cancelbutton, SIGNAL(clicked()), this, SLOT(slotCancel()));
   connect(serverbutton, SIGNAL(clicked()), this, SLOT(slotServerOptions()));
-  connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotStart()));
+  connect(startgamebutton, SIGNAL(clicked()), this, SLOT(slotSendNewGame()));
   connect(addaibutton, SIGNAL(clicked()), this, SLOT(slotAddAIPlayer()));
   connect(playerslist, SIGNAL(highlighted(QListBoxItem*)), this, SLOT(slotPlayerSelected(QListBoxItem*)));
 
@@ -333,7 +332,7 @@ void BosonNewGameWidget::initColors()
   colorcombo->clear();
   mAvailableColors = game()->availableTeamColors();
   mAvailableColors.prepend(player()->speciesTheme()->teamColor());
-  for(int i = 0; i < mAvailableColors.count(); i++)
+  for(unsigned int i = 0; i < mAvailableColors.count(); i++)
   {
     QPainter painter;
     QRect rect(0, 0, colorcombo->width(), QFontMetrics(painter.font()).height() + 4);
@@ -407,7 +406,7 @@ void BosonNewGameWidget::slotMySpeciesChanged(int index)
 
 void BosonNewGameWidget::slotPlayerJoinedGame(KPlayer* p)
 {
-  kdDebug() << k_funcinfo << ": there are " << game()->playerList()->count() << "players in game now" << endl;
+  kdDebug() << k_funcinfo << ": there are " << game()->playerList()->count() << " players in game now" << endl;
   QListBoxText* t = new QListBoxText(p->name());
   mItem2Player.insert(t, p);
   playerslist->insertItem(t);
@@ -488,14 +487,20 @@ void BosonNewGameWidget::slotColorChanged(Player*)
 
 void BosonNewGameWidget::slotStart()
 {
-  if(game()->playerCount() > mMaxPlayers)
+  if (!game()->isAdmin())
+  {
+    // should not happen anyway
+    KMessageBox::sorry(this, i18n("Only ADMIN can start a game"));
+    return;
+  }
+  if((int)game()->playerCount() > mMaxPlayers)
   {
     KMessageBox::sorry(this, i18n("There are too many players in game.\n"
         "Current map supports only %1 players, currently, there are %2 players in game.\n"
         "Please remove some players.").arg(mMaxPlayers).arg(game()->playerCount()),
         i18n("Too many players"));
   }
-  else if(game()->playerCount() < mMinPlayers)
+  else if((int)game()->playerCount() < mMinPlayers)
   {
     KMessageBox::sorry(this, i18n("There are too few players in game.\n"
         "Current map requires at least %1 players, currently, there are only %2 players in game.\n"
@@ -503,13 +508,18 @@ void BosonNewGameWidget::slotStart()
         i18n("Too few players"));
   }
   else
-    emit signalStartGame();
+  {
+    slotSendNewGame();
+//    emit signalStartGame();
+  }
 }
 
 void BosonNewGameWidget::slotAddAIPlayer()
 {
   if(!game())
+  {
     return;
+  }
   Player* p = new Player();
   p->setName(addainame->text());
   QColor color = game()->availableTeamColors().first();
@@ -593,3 +603,9 @@ inline BosonPlayField* BosonNewGameWidget::map()
 {
   return mTop->map();
 }
+
+void BosonNewGameWidget::slotSendNewGame() // FIXME: no slot
+{
+  game()->sendMessage(0, BosonMessage::IdNewGame);
+}
+

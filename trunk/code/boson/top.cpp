@@ -221,18 +221,21 @@ void TopWidget::initMusic()
 {
  // IMO it's too early for this here, but Player::loadTheme() crashes when it's
  //  not done here
- kdDebug() << k_funcinfo << "BEGIN" << endl;
+// kdDebug() << k_funcinfo << "BEGIN" << endl;
  BosonMusic::initBosonMusic();
- kdDebug() << k_funcinfo << "1" << endl;
  boMusic->setSound(boConfig->sound());
- kdDebug() << k_funcinfo << "2" << endl;
  boMusic->setMusic(boConfig->music());
- kdDebug() << k_funcinfo << "END" << endl;
+// kdDebug() << k_funcinfo << "END" << endl;
 }
 
 void TopWidget::initBoson()
 {
  mBoson = new Boson(this);
+
+ // new games are handled in this order: ADMIN clicks on start games - this
+ // sends an IdStartGame over network. Once this is received signalStartGame()
+ // is emitted and we start here
+ connect(mBoson, SIGNAL(signalStartNewGame()), this, SLOT(slotStartGame()));
 }
 
 void TopWidget::initPlayer()
@@ -332,7 +335,6 @@ void TopWidget::initNewGameWidget()
 	return;
  }
  d->mNewGame = new BosonNewGameWidget(this, mWs);
- connect(d->mNewGame, SIGNAL(signalStartGame()), this, SLOT(slotStartGame()));
  connect(d->mNewGame, SIGNAL(signalCancelled()), this, SLOT(slotShowMainMenu()));
  connect(d->mNewGame, SIGNAL(signalShowServerOptions()), this, SLOT(slotShowServerOptions()));
  mWs->addWidget(d->mNewGame, 2);
