@@ -632,6 +632,10 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
  }
  boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMapBuffer);
+ if (map.isNull()) {
+	boError() << k_funcinfo << "received an invalid image buffer - null image" << endl;
+	return false;
+ }
  if (!map.isGrayscale()) {
 	// we load a valid height map (i.e. a dummy height map) but still return
 	// false for error checking.
@@ -651,30 +655,16 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMapBuffer)
 	loadHeightMapImage(QByteArray());
 	return false;
  }
- int increment = 1;
- if (map.bytesPerLine() > map.width() + 1) {
-	// QT doesn't save images as grayscale. it returns bytesPerLine() ==
-	// width() (i.e. 8bits per pixel) for all *actual* grayscale images
-	// and bytesPerLine() == width() * 4 for grayscale images that Qt
-	// has created (i.e. RGB/RGBA images). we only use grayscale here, that
-	// means red=blue=green component. so we can just pick the first and
-	// skip all (including alpha) other values.
-	increment = 4;
- }
-
 
  BoHeightMap heightMap(width() + 1, height() + 1);
  for (unsigned int y = 0; y < height() + 1; y++) {
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
 	// do we have to care about this? (since we are using 16bpp)
-	// AB: we use 32bpp (qt doesnt support 16bpp on X11)
-	// AB: hmm accordint to "file" we use 6bpp only... ok thats easier
-	// then :)
-	int imageX = 0;
-	unsigned char* line = map.scanLine(y);
-	for (unsigned int x = 0; x < width() + 1; x++, imageX += increment) {
-		heightMap.setHeightAt(x, y, BoHeightMap::pixelToHeight(line[imageX]));
+	// AB: the comment about endianness might be obsolete here as it applies
+	// to scanLine(), but we use pixel() instead now!
+	for (unsigned int x = 0; x < width() + 1; x++) {
+		heightMap.setHeightAt(x, y, BoHeightMap::pixelToHeight(qRed(map.pixel(x, y))));
 	}
  }
  QByteArray buffer;
