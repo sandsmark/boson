@@ -398,9 +398,7 @@ protected:
 
 	void removeFromAdvanceLists(BosonItem* item);
 
-
-	bool loadUnitFromXML(const QDomElement& unit, Player* owner);
-	bool loadShotFromXML(const QDomElement& shot, Player* owner);
+	bool loadItemFromXML(const QDomElement& unit, Player* owner);
 
 	Unit* createUnit(Player* owner, unsigned long int unitType);
 	BosonShot* createShot(Player* owner, unsigned long int shotType, unsigned long int unitType, unsigned long int weaponPropertyId);

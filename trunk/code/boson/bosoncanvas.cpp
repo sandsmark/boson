@@ -1119,21 +1119,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 		if (item.isNull()) {
 			continue;
 		}
-		bool ok = false;
-		unsigned int rtti = item.attribute(QString::fromLatin1("Rtti")).toUInt(&ok);
-		if (!ok) {
-			boError(260) << k_funcinfo << "Rtti attribute of Item " << j << " is not a valid number" << endl;
-			continue;
-		}
-		ok = false;
-		if (RTTI::isUnit(rtti)) {
-			ok = loadUnitFromXML(item, owner);
-		} else if (RTTI::isShot(rtti)) {
-			ok = loadShotFromXML(item, owner);
-		} else {
-			boError(260) << k_funcinfo << "unknown Rtti " << rtti << endl;
-		}
-		if (!ok) {
+		if (!loadItemFromXML(item, owner)) {
 			boError(260) << k_funcinfo << "Item " << j << " was not loaded correctly" << endl;
 			continue;
 		}
@@ -1142,130 +1128,131 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool BosonCanvas::loadUnitFromXML(const QDomElement& unit, Player* owner)
+bool BosonCanvas::loadItemFromXML(const QDomElement& item, Player* owner)
 {
- if (unit.isNull()) {
+ if (item.isNull()) {
 	return false;
  }
  if (!owner) {
 	return false;
  }
- if (!unit.hasAttribute(QString::fromLatin1("Type")) && !unit.hasAttribute(QString::fromLatin1("UnitType"))) {
-	boError(260) << k_funcinfo << "missing attribute: UnitType for Unit tag" << endl;
-	return false;
- }
- if (!unit.hasAttribute(QString::fromLatin1("Id"))) {
-	boError(260) << k_funcinfo << "missing attribute: Id for Unit tag" << endl;
-	return false;
- }
- if (!unit.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
-	boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Unit tag" << endl;
-	return false;
- }
  bool ok = false;
- unsigned long int type;
- unsigned long int id;
- int dataHandlerId;
- type = unit.attribute(QString::fromLatin1("Type")).toULong(&ok);
+ int rtti = item.attribute(QString::fromLatin1("Rtti")).toInt(&ok);
  if (!ok) {
-	type = unit.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid UnitType number for Unit tag" << endl;
-		return false;
-	}
- }
- id = unit.attribute(QString::fromLatin1("Id")).toULong(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "Invalid Id number for Unit tag" << endl;
-	return false;
- }
- dataHandlerId = unit.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
- if (!ok) {
-	boError(260) << k_funcinfo << "Invalid DataHandlerId number for Unit tag" << endl;
+	boError(260) << k_funcinfo << "Rtti attribute of Item is not a valid number" << endl;
 	return false;
  }
 
- // Create unit with Boson
- Unit* u = boGame->loadUnit(type, owner);
-
- // Set additional properties
- owner->addUnit(u, dataHandlerId);
- u->setId(id);
-
- // Call unit's loading methods
- if (!u->loadFromXML(unit)) {
-	boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
-	// no need to return false
-	// also it is dangerous now, as we already called addUnit()!
- }
-
- return true;
-}
-
-bool BosonCanvas::loadShotFromXML(const QDomElement& shot, Player* owner)
-{
- if (shot.isNull()) {
-	return false;
- }
- if (!owner) {
-	return false;
- }
- if (!shot.hasAttribute(QString::fromLatin1("Type"))) {
-	boError(260) << k_funcinfo << "missing attribute: Type for Shot tag" << endl;
-	return false;
- }
-
- bool ok = false;
  unsigned long int type = 0;
  unsigned long int group = 0;
  unsigned long int groupType = 0;
- type = shot.attribute(QString::fromLatin1("Type")).toULong(&ok);
+
+ if (!item.hasAttribute(QString::fromLatin1("Type"))) {
+	// check for deprecated attributes
+	if (!item.hasAttribute(QString::fromLatin1("UnitType"))) {
+		boError(260) << k_funcinfo << "missing attribute: Type for Item tag" << endl;
+		return false;
+	} else {
+		type = item.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	}
+ } else {
+	type = item.attribute(QString::fromLatin1("Type")).toULong(&ok);
+ }
  if (!ok) {
-	boError(260) << k_funcinfo << "Invalid Type number for Shot tag" << endl;
+	boError(260) << k_funcinfo << "Invalid Type number for Item tag" << endl;
 	return false;
  }
 
- const BosonWeaponProperties* weapon = 0;
- if (shot.hasAttribute(QString::fromLatin1("Group"))) {
-	group = shot.attribute(QString::fromLatin1("Group")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid Group number for Item tag" << endl;
-		return false;
-	}
- } else if (shot.hasAttribute(QString::fromLatin1("UnitType"))) {
-	// compatibility
-	group = shot.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid UnitType number for Item tag" << endl;
-		return false;
+ if (item.hasAttribute(QString::fromLatin1("Group"))) {
+	group = item.attribute(QString::fromLatin1("Group")).toULong(&ok);
+ } else {
+	// check for deprecated attributes.
+	if (item.hasAttribute(QString::fromLatin1("UnitType")) && item.hasAttribute(QString::fromLatin1("Type"))) {
+		// old Shot tags used "Type" for the type and "UnitType" for the
+		// "Group" attribute.
+		group = item.attribute(QString::fromLatin1("UnitType")).toULong(&ok);
+	} else {
+		// "Group" attribute is not present.
+		// this is totally valid! items don't have to provide a Group
+		// attribute.
+		ok = true;
 	}
  }
- if (shot.hasAttribute(QString::fromLatin1("GroupType"))) {
-	groupType = shot.attribute(QString::fromLatin1("GroupType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid GroupType number for Item tag" << endl;
-		return false;
-	}
- } else if (shot.hasAttribute(QString::fromLatin1("WeaponType"))) {
-	// compatibility
-	groupType = shot.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
-	if (!ok) {
-		boError(260) << k_funcinfo << "Invalid WeaponType number for Item tag" << endl;
-		return false;
-	}
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid Group number for Item tag" << endl;
+	return false;
  }
 
- BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, type, group, groupType);
- if (!s) {
-	boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
+ if (item.hasAttribute(QString::fromLatin1("GroupType"))) {
+	groupType = item.attribute(QString::fromLatin1("GroupType")).toULong(&ok);
+ } else {
+	// check for deprecated attributes.
+	if (item.hasAttribute(QString::fromLatin1("WeaponType"))) {
+		groupType = item.attribute(QString::fromLatin1("WeaponType")).toULong(&ok);
+	}
+ }
+ if (!ok) {
+	boError(260) << k_funcinfo << "Invalid GroupType number for Item tag" << endl;
 	return false;
  }
- if (!s->loadFromXML(shot)) {
-	boWarning(260) << k_funcinfo << "Could not load shot correctly" << endl;
-	delete s;
+
+
+ if (RTTI::isUnit(rtti)) {
+	if (!item.hasAttribute(QString::fromLatin1("Id"))) {
+		boError(260) << k_funcinfo << "missing attribute: Id for Item tag" << endl;
+		return false;
+	}
+	if (!item.hasAttribute(QString::fromLatin1("DataHandlerId"))) {
+		boError(260) << k_funcinfo << "missing attribute: DataHandlerId for Item tag" << endl;
+		return false;
+	}
+	unsigned long int id = 0;
+	int dataHandlerId = 0;
+
+	id = item.attribute(QString::fromLatin1("Id")).toULong(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid Id number for Item tag" << endl;
+		return false;
+	}
+	dataHandlerId = item.attribute(QString::fromLatin1("DataHandlerId")).toInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "Invalid DataHandlerId number for Item tag" << endl;
+		return false;
+	}
+
+	// Create unit with Boson
+	Unit* u = boGame->loadUnit(type, owner);
+
+	// Set additional properties
+	owner->addUnit(u, dataHandlerId);
+	u->setId(id);
+
+	// Call unit's loading methods
+	if (!u->loadFromXML(item)) {
+		boWarning(260) << k_funcinfo << "Could not load unit " << id << " correctly" << endl;
+		// no need to return false
+		// also it is dangerous now, as we already called addUnit()!
+	}
+
+	return true;
+ } else if (RTTI::isShot(rtti)) {
+	BosonShot* s = (BosonShot*)createItem(RTTI::Shot, owner, type, group, groupType);
+	if (!s) {
+		boError() << k_funcinfo << "Invalid shot - type=" << type << " group=" << group << " groupType=" << groupType << endl;
+		return false;
+	}
+	if (!s->loadFromXML(item)) {
+		boWarning(260) << k_funcinfo << "Could not load shot correctly" << endl;
+		delete s;
+		return false;
+	}
+	ok = true;
+	return true;
+ } else {
+	boError(260) << k_funcinfo << "unknown Rtti " << rtti << endl;
 	return false;
  }
- return true;
+ return false;
 }
 
 bool BosonCanvas::saveAsXML(QDomElement& root)
