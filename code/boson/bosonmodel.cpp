@@ -677,6 +677,15 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 	d->mNodeDisplayLists.append(node->user.d);
 	glBindTexture(GL_TEXTURE_2D, myTex);
 
+	if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+		myTex = 0; // teamcolor objects are *not* textured
+		if (mTeamColor) {
+			glPushAttrib(GL_CURRENT_BIT);
+			glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
+			resetColor = true;
+		}
+	}
+
 	glBegin(GL_TRIANGLES); // note: you shouldn't do calculations after a glBegin() but we compile a display list only, so its ok
 	for (p = 0; p < mesh->faces; p++) {
 		Lib3dsFace* f = &mesh->faceL[p];
@@ -690,7 +699,7 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 							<< " , texels: " << mesh->texels << endl;
 				}
 				myTex = 0;
-			} else {
+			} else if (myTex) {
 				// mesh->texelL[f->points[i]] is our
 				// vector. it has x and y only, z is
 				// therefore 0.0
@@ -700,13 +709,6 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 				texMatrix.transform(&b, &a);
 				tex[i][0] = b[0];
 				tex[i][1] = b[1];
-			}
-		}
-		if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
-			myTex = 0; // teamcolor objects are *not* textured
-			if (mTeamColor) {
-				glColor3ub((GLubyte)mTeamColor->red(), (GLubyte)mTeamColor->green(), (GLubyte)mTeamColor->blue());
-				resetColor = true;
 			}
 		}
 		if (myTex) {
@@ -721,8 +723,11 @@ void BosonModel::loadNode(Lib3dsNode* node, bool reload)
 		
 	}
 	glEnd();
+
 	if (resetColor) {
-		glColor3f(1.0, 1.0, 1.0);
+		// we need to reset the color (mainly for the placement preview)
+		glPopAttrib();
+		resetColor = false;
 	}
 	glEndList();
  }
