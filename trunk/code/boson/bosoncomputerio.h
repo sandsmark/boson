@@ -23,6 +23,7 @@
 
 class Player;
 class Unit;
+class BosonScript;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -38,14 +39,14 @@ public:
 
 	virtual int rtti() const { return KGameIO::ComputerIO; }
 
+	void initScript();
+
 protected:
 	virtual void reaction();
 	Player* boPlayer() const { return (Player*)player(); }
-	Unit* findTarget();
 
 private:
-	int mUnit;
-	Unit* mTarget;
+	BosonScript* mScript;
 };
 
 #endif

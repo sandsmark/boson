@@ -2,9 +2,12 @@ print "Loading python script..."
 import BoScript;
 
 cycle = 0;
+player = -1;
 
-def init():
+def init(id):
+  global player;
   print "Init called";
+  player = id;
   method1();
   oldAIInit();
 
@@ -35,17 +38,17 @@ def advanceA10Game(cycle):
     print "let's attack with some units";
     units = [25, 26, 32, 33, 82, 88, 89 ];
     for unit in units:
-      BoScript.moveUnitWithAttacking(unit, 46 * 48, 46 * 48);
+      BoScript.moveUnitWithAttacking(player, unit, 46 * 48, 46 * 48);
   elif cycle == 140:
     print "stop two units";
-    BoScript.stopUnit(25);
-    BoScript.stopUnit(26);
+    BoScript.stopUnit(player, 25);
+    BoScript.stopUnit(player, 26);
   elif cycle == 160:
     print "move unit";
-    BoScript.moveUnit(88, 20 * 48, 46 * 48);
+    BoScript.moveUnit(player, 88, 20 * 48, 46 * 48);
   elif cycle == 180:
     print "attack unit";
-    BoScript.attack(32, 1);
+    BoScript.attack(player, 32, 1);
 
 def advanceMaxPayne(cycle):
   x = cycle % 150;
@@ -128,7 +131,7 @@ def printUnitInfo():
   myunits = 0
   print "There are ", len(units), " units on the map"
   for unit in units:
-    if BoScript.isMyUnit(unit) == 1:
+    if BoScript.unitOwner(unit) == player:
       myunits = myunits + 1;
   print "I have ", myunits, " of them";
 
@@ -140,7 +143,8 @@ aiunit = -1;
 aitarget = -1;
 
 def oldAIInit():
-  print "oldAIInit() called";
+  global player;
+  print "oldAIInit() called for player ", player;
   global aidelay;
   aidelay = int(BoScript.aiDelay() * 20);
   print "  aidelay set to ", aidelay;
@@ -148,37 +152,39 @@ def oldAIInit():
 def oldAIAdvance():
   global aidelay, aicycle, aiunit, aitarget;
   # AI will do something every aidelay advance calls
-  aicycle = aicycle + 1;
-  if not aicycle == aidelay:
-    return;
-  print "oldAIAdvance() executing";
+#   aicycle = aicycle + 1;
+#   if not aicycle == aidelay:
+#     return;
+  #print "oldAIAdvance() executing";
   # reset aicycle
+  global player;
+  print "oldAIAdvance() called for player ", player;
   aicycle = 0;
   # check if target is still alive
   if aitarget == -1 or BoScript.isUnitAlive(aitarget) == 0:
-    print "  Target not set";
+    #print "  Target not set";
     aitarget = oldAIFindTarget();
     if aitarget == -1:
       print "No enemies left. Disabling self";
       aidelay = 0;
       return;
-  print "  Target is ", aitarget;
+  #print "  Target is ", aitarget;
   # find attacker
   attacker = -1;
-  units = BoScript.allMyUnits();
+  units = BoScript.allPlayerUnits(player);
   while attacker == -1:
     aiunit = aiunit + 1;
     if aiunit >= len(units):
       aiunit = -1;
-      print "No attacker found, returning";
+      #print "No attacker found, returning";
       return;
     u = units[aiunit];
     if BoScript.isUnitMobile(u) and BoScript.canUnitShoot(u):
       attacker = u;
-      print "  attacker set to ", attacker;
-  print "  Sending ", aiunit, ". unit with id ", attacker, " to attack";
+      #print "  attacker set to ", attacker;
+  #print "  Sending ", aiunit, ". unit with id ", attacker, " to attack";
   targetpos = BoScript.unitPosition(aitarget);
-  BoScript.moveUnitWithAttacking(attacker, targetpos[0], targetpos[1]);
+  BoScript.moveUnitWithAttacking(player, attacker, targetpos[0], targetpos[1]);
 
 
 def oldAIFindTarget():
@@ -186,7 +192,7 @@ def oldAIFindTarget():
   target = -1;
   # iterate through all players
   for p in players:
-    if not BoScript.areEnemies(p, BoScript.playerId()):
+    if not BoScript.areEnemies(p, player):
       continue;
     units = BoScript.allPlayerUnits(p);
     # iterate through all units of player

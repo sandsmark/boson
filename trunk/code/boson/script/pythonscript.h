@@ -24,12 +24,13 @@
 
 typedef struct _object PyObject;
 struct PyMethodDef;
+typedef struct _ts PyThreadState;
 class QString;
 
 class PythonScript : public BosonScript
 {
   public:
-    PythonScript();
+    PythonScript(Player* p);
     virtual ~PythonScript();
 
     virtual void loadScript(QString file);
@@ -38,13 +39,13 @@ class PythonScript : public BosonScript
     virtual void init();
 
     virtual void callFunction(QString function);
+    virtual void callFunction(QString function, PyObject* args);
 
     virtual void execLine(const QString& line);
 
 
     // Players
     static PyObject* py_areEnemies(PyObject* self, PyObject* args);
-    static PyObject* py_playerId(PyObject* self, PyObject* args);
     static PyObject* py_allPlayers(PyObject* self, PyObject* args);
 
 
@@ -58,6 +59,7 @@ class PythonScript : public BosonScript
     static PyObject* py_moveUnitWithAttacking(PyObject* self, PyObject* args);
     static PyObject* py_attack(PyObject* self, PyObject* args);
     static PyObject* py_stopUnit(PyObject* self, PyObject* args);
+    static PyObject* py_mineUnit(PyObject* self, PyObject* args);
 
     static PyObject* py_unitsOnCell(PyObject* self, PyObject* args);
     static PyObject* py_unitsInRect(PyObject* self, PyObject* args);
@@ -69,10 +71,8 @@ class PythonScript : public BosonScript
     static PyObject* py_isUnitMobile(PyObject* self, PyObject* args);
     static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
 
-    static PyObject* py_isMyUnit(PyObject* self, PyObject* args);
     static PyObject* py_isUnitAlive(PyObject* self, PyObject* args);
 
-    static PyObject* py_allMyUnits(PyObject* self, PyObject* args);
     static PyObject* py_allPlayerUnits(PyObject* self, PyObject* args);
 
 
@@ -99,9 +99,20 @@ class PythonScript : public BosonScript
   protected:
     static PyObject* QValueListToPyList(QValueList<int>* list);
 
+    static void initScripting();
+    static void uninitScripting();
+
+    void getPythonLock();
+    void freePythonLock();
+
   private:
+    PyObject* mDict;
+    PyThreadState* mInterpreter;
+
     static PyMethodDef mCallbacks[];
-    static PyObject* mDict;
+    static bool mScriptingInited;
+    static int mScriptInstances;
+    static PyThreadState* mThreadState;
 };
 
 #endif //PYTHONSCRIPT_H

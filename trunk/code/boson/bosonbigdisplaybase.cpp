@@ -448,7 +448,7 @@ void BosonBigDisplayBase::init()
  d->mDebugMapCoordinatesX = 0.0f;
  d->mDebugMapCoordinatesY = 0.0f;
  d->mDebugMapCoordinatesZ = 0.0f;
- boScript->setDisplay(this);
+ BosonScript::setDisplay(this);
 
  d->mRenderItemList = new BoItemList(1, false);
 
