@@ -35,6 +35,7 @@ class BosonStarting;
 class BoMessage;
 class BoEvent;
 class BoEventManager;
+class BoAdvanceMessageTimes;
 
 #define boGame Boson::boson()
 
@@ -220,6 +221,9 @@ public:
 	virtual bool savegame(QDataStream& stream, bool network, bool saveplayers = true);
 	virtual bool loadgame(QDataStream& stream, bool network, bool reset);
 
+	virtual bool event(QEvent* event);
+	virtual bool eventFilter(QObject* o, QEvent* event);
+
 	/**
 	 * @return See @ref BosonSaveLoad::LoadingStatus
 	 **/
@@ -282,6 +286,14 @@ public:
 
 	void queueEvent(BoEvent* event);
 
+	BoEventManager* eventManager() const;
+
+	bool loadCanvasConditions(const QDomElement& root);
+	bool saveCanvasConditions(QDomElement& root) const;
+
+	// for debugging
+	const QPtrList<BoAdvanceMessageTimes>& advanceMessageTimes() const;
+
 public: // small KGame extenstions for boson
 	/**
 	 * Used internally by @ref KGame. Simply create and return a new @ref
@@ -340,11 +352,6 @@ public: // small KGame extenstions for boson
 			systemAddPlayer(player);
 		}
 	}
-
-	BoEventManager* eventManager() const;
-
-	bool loadCanvasConditions(const QDomElement& root);
-	bool saveCanvasConditions(QDomElement& root) const;
 
 public slots:
 	void slotSetGameSpeed(int speed);
@@ -527,6 +534,21 @@ private:
 
 	bool mGameMode;
 	static Boson* mBoson;
+};
+
+struct timeval;
+class BoAdvanceMessageTimes
+{
+public:
+	BoAdvanceMessageTimes(int gameSpeed);
+	~BoAdvanceMessageTimes();
+
+	void receiveAdvanceCall();
+
+	struct timeval mAdvanceMessage;
+	struct timeval* mAdvanceCalls;
+	int mGameSpeed;
+	int mCurrentCall;
 };
 
 #endif
