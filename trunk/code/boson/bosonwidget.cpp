@@ -183,7 +183,7 @@ void BosonWidget::initMap()
  canvas()->setMap(playField()->map());
  minimap()->setMap(playField()->map());
  minimap()->initMap();
- game()->setMap(playField());
+ game()->setPlayField(playField());
 }
 
 void BosonWidget::initMiniMap()
@@ -294,9 +294,6 @@ void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)
  switch (mode) {
 	case CursorSprite:
 		b = new BosonSpriteCursor;
-		break;
-	case CursorExperimental:
-		b = new BosonExperimentalCursor;
 		break;
 	case CursorKDE:
 		b = new BosonKDECursor;
@@ -978,3 +975,4 @@ void BosonWidget::slotGameOverDialogFinished()
  d->mGameOverDialog->delayedDestruct();
  emit signalGameOver();
 }
+
