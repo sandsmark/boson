@@ -1,3 +1,10 @@
+boson-data (0.9.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Enabled debug
+
+ -- Mickael Marchand <marchand@kde.org>  Sun, 16 Nov 2003 12:17:39 +0100
+
 boson-data (0.9-1) unstable; urgency=low
 
   * New upstream release

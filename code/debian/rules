@@ -52,7 +52,7 @@ configure-stamp:
 	#fi
 
  	# run configure with build tree $(objdir)
-	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) $(configkde) --enable-final --enable-debug=full
+	./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE) $(configkde) --enable-debug=full --disable-final
 
 	touch configure-stamp
 

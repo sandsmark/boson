@@ -1,3 +1,10 @@
+boson-base (0.9.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Enable debug
+
+ -- Mickael Marchand <marchand@kde.org>  Sun, 16 Nov 2003 12:23:48 +0100
+
 boson-base (0.9-1) unstable; urgency=low
 
   * New upstream release 
@@ -18,4 +25,3 @@ boson-base (0.8-1) unstable; urgency=low
   * Initial Release. (Closes: #170074) 
 
  -- Mickael Marchand <marchand@kde.org>  Mon, 12 May 2003 23:25:02 +0200
-
