@@ -20,6 +20,7 @@
 
 # include files
 INCLUDES= $(all_includes)
+boson_appsdir = $(kde_appsdir)/Games/Boson
 
 # compilation
 CXXFLAGS = -pipe -Wall -g # -O2
@@ -39,15 +40,15 @@ boserver_LDADD   = ../common/libboson.a  -lkdeui -lkdecore -lqt -lXext -lX11 $(L
 
 #(un)install
 install-data-local:
-	$(mkinstalldirs) $(kde_appsdir)/
-	$(INSTALL_DATA) boserver.kdelnk $(kde_appsdir)/Games/boserver.kdelnk
+	$(mkinstalldirs) $(boson_appsdir)/
+	$(INSTALL_DATA) boserver.kdelnk $(boson_appsdir)/boserver.kdelnk
 	$(mkinstalldirs) $(kde_icondir)/
 	$(INSTALL_DATA) boserver.xpm $(kde_icondir)/boserver.xpm
 	$(mkinstalldirs) $(kde_minidir)/
 	$(INSTALL_DATA) mini-boserver.xpm $(kde_minidir)/mini-boserver.xpm
 
 uninstall-local:
-	-rm -f $(kde_appsdir)/boserver.kdelnk
+	-rm -f $(boson_appsdir)/boserver.kdelnk
 	-rm -f $(kde_icondir)/boserver.xpm
 	-rm -f $(kde_minidir)/mini-boserver.xpm
 

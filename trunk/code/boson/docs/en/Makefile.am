@@ -15,8 +15,9 @@ HTML_DOCS = index-1.html index-2.html index-3.html index-4.html index-5.html ind
 data_DATA = $(HTML_DOCS) logotp3.gif
 datadir = $(kde_htmldir)/en/boson
 
-$(HTML_DOCS) : index.sgml
+doit: index.sgml
 	ksgml2html index.sgml en
+	echo "timestamp" > doit
 
 EXTRA_DIST = $(data_DATA)
 
