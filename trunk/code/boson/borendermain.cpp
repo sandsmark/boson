@@ -26,6 +26,7 @@
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
+#include "kgamespeciesdebug.h"
 #include "bodebug.h"
 #include "sound/bosonmusic.h"
 #include "boversion.h"
@@ -449,6 +450,21 @@ void RenderMain::slotDebugModels()
  dialog->show();
 }
 
+void RenderMain::slotDebugSpecies()
+{
+ KDialogBase* dialog = new KDialogBase(KDialogBase::Plain, i18n("Debug Species"),
+		KDialogBase::Cancel, KDialogBase::Cancel, this,
+		"debugspeciesdialog", false, true);
+ connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
+ QWidget* w = dialog->plainPage();
+ QVBoxLayout* l = new QVBoxLayout(w);
+ KGameSpeciesDebug* species = new KGameSpeciesDebug(w);
+ l->addWidget(species);
+ species->loadSpecies();
+
+ dialog->show();
+}
+
 
 SpeciesTheme* RenderMain::findTheme(const QString& theme) const
 {
@@ -568,6 +584,8 @@ void RenderMain::initKAction()
 
  (void)new KAction(i18n("Debug &Models"), 0, this, SLOT(slotDebugModels()),
 		actionCollection(), "debug_models");
+ (void)new KAction(i18n("Debug &Species"), 0, this, SLOT(slotDebugSpecies()),
+		actionCollection(), "debug_species");
 
  createGUI(locate("data", "boson/borenderui.rc"));
 }
