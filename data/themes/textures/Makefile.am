@@ -98,7 +98,8 @@ texture_DATA = \
 	tnkside1.jpg \
 	water1.jpg \
 	tree-piece-2.png \
-	minmine.jpg
+	minmine.jpg \
+	pine1.png
 
 # no further editing need here
 
