@@ -359,6 +359,18 @@ bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QSt
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+
+ QStringList scripts = QStringList(files.keys()).grep("scripts");
+ for (QStringList::iterator it = scripts.begin(); it != scripts.end(); ++it) {
+	QString path = *it;
+	int lastSlash = path.findRev('/');
+	QString dir = path.left(lastSlash);
+	QString baseName = path.right(path.length() - (lastSlash + 1));
+	if (!f.writeFile(baseName, QString(files[path]), dir)) {
+		boError() << k_funcinfo << "Could not write " << baseName << " to " << file << endl;
+		return false;
+	}
+ }
  return true;
 }
 
@@ -683,59 +695,11 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	BosonPropertyXML::removeProperty(handler, KGamePropertyBase::IdName);
  }
 
- QDomDocument canvasDoc("Canvas");
- if (!loadXMLDoc(&canvasDoc, QString(files["canvas.xml"]))) {
-	boError() << k_funcinfo << "invalid canvas.xml file saved" << endl;
-	return false;
- }
- QDomElement canvasRoot = canvasDoc.documentElement();
-
- int itemsIndex = -1;
- QDomNode itemsNode;
- for (QDomNode itemsNode = canvasRoot.firstChild(); !itemsNode.isNull(); itemsNode = itemsNode.nextSibling()) {
-	QDomElement items = itemsNode.toElement();
-	if (items.isNull()) {
-		continue;
-	}
-	if (items.tagName() != "Items") {
-		continue;
-	}
-	itemsIndex++;
-	bool ok = false;
-	unsigned int id = items.attribute("PlayerId").toUInt(&ok);
-	if (!ok) {
-		boError() << k_funcinfo << "invalid value for PlayerId attribute of Items tag" << endl;
-		return false;
-	}
-	if (id != (unsigned int)itemsIndex) {
-		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Items tag - expected " << itemsIndex << endl;
-		return false;
-	}
-
-	for (QDomNode node = items.firstChild(); !node.isNull(); node = node.nextSibling()) {
-		QDomElement item = node.toElement();
-		if (item.isNull()) {
-			continue;
-		}
-		if (item.tagName() != "Item") {
-			continue;
-		}
-		item.setAttribute("Id", 0);
-	}
-	QDomElement handler = items.namedItem("DataHandler").toElement();
-	if (handler.isNull()) {
-		continue;
-	}
-	BosonPropertyXML::removeProperty(handler, BosonCanvas::IdNextItemId);
- }
-
  QByteArray kgameXML = kgameDoc.toCString();
  QByteArray playersXML = playersDoc.toCString();
- QByteArray canvasXML = canvasDoc.toCString();
  files.remove("external.xml");
  files.insert("kgame.xml", kgameXML);
  files.insert("players.xml", playersXML);
- files.insert("canvas.xml", canvasXML);
 
  QStringList list = files.keys();
  list = list.grep(QRegExp("^scripts\\/.*\\/data\\/"));
