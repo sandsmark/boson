@@ -142,7 +142,6 @@ draw_bigbox_text("This is a list of features that we consider as
     conversion on startup</li>
     <li>Find out whether save/load is still working</li>
     <li>Find out whether playfield saving is still working</li>
-    <li>Fix #79494</li>
   </ul>");
 draw_bigbox_end();
 main_area_end();
