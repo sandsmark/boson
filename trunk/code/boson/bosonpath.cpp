@@ -39,7 +39,7 @@
 //  wait until they can move, they don't search path around other units.
 //  This is useful when moving big group of units through narrow places
 //  on map, but in general, default style is better IMO
-//#define MOVE_IN_LINE
+#define MOVE_IN_LINE
 
 class BosonPath::PathNode
 {
@@ -135,6 +135,8 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
   return points;
 }
 
+int pathSlow = 0, pathRange = 0, pathFast = 0;
+
 bool BosonPath::findPath()
 {
   // We now have 3 different pathfinding methods: fast and slow pathfinders and
@@ -151,7 +153,8 @@ bool BosonPath::findPath()
   if(findFastPath())
   {
     gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    pathFast++;
     return true;
   }
   else
@@ -159,12 +162,14 @@ bool BosonPath::findPath()
     if(rangeCheck())
     {
       gettimeofday(&time2, 0);
-      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      pathRange++;
       return false;
     }
     bool a = findSlowPath();
     gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED: " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    pathSlow++;
     return a;
   }
 }
@@ -757,7 +762,7 @@ float BosonPath::cost(int x, int y)
         }
         if(c->isOccupied(mUnit, includeMoving))
 #else
-        if(c->isOccupied(mUnit, false))
+        if(c->isOccupied(mUnit, true))
 #endif
         {
           co = ERROR_COST;
