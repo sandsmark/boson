@@ -257,11 +257,11 @@ protected slots:
 	void slotUnitRemoved(Unit* unit);
 
 	/**
-	 * Directly add a chat message from the system (i.e. the game)
-	 * <em>without</em> sending it over network.
-	 * If forPlayer is NULL, message is shown to all players, otherwise only to forPlayer
+	 * Directly adds a chat message (without sending to netowrk). If @p
+	 * forPlayer is non-NULL, the message is displayed only, if it equals
+	 * the local player.
 	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
 
 
 	void slotSetDebugMapCoordinates(bool);
