@@ -1,6 +1,8 @@
 [Desktop Entry]
 Comment=Unit Editor for Boson
+Comment[de]=Ein Einheiten-Editor für Boson
 Name=BoUnit
+Name[de]=BoUnit
 Exec=bounit
 MapNotify=true
 TerminalOptions=
