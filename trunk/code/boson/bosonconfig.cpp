@@ -50,7 +50,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  d->mCommandButtonsPerRow = 3;
  d->mDebugMode = DebugNormal;
  mArrowKeyStep = 10;
- mMiniMapScale = 1.0;
+ mMiniMapScale = 2.0;
 
  mDisableSound = false;
 
