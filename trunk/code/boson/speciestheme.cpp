@@ -581,7 +581,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  }
 }
 
-void SpeciesTheme::readUnitConfigs()
+void SpeciesTheme::readUnitConfigs(bool full)
 {
  if (d->mUnitProperties.count() != 0) {
 	boError() << "Cannot read unit configs again. Returning untouched..."
@@ -609,7 +609,7 @@ void SpeciesTheme::readUnitConfigs()
 	return;
  }
  for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
-	UnitProperties* prop = new UnitProperties(this, *it);
+	UnitProperties* prop = new UnitProperties(this, *it, full);
 	if (!d->mUnitProperties.find(prop->typeId())) {
 		d->mUnitProperties.insert(prop->typeId(), prop);
 	} else {

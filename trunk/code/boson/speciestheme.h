@@ -274,7 +274,7 @@ public:
 	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
 	 * have to load the config file theirselves.
 	 **/
-	void readUnitConfigs();
+	void readUnitConfigs(bool full = true);
 
 protected:
 	bool loadUnitGraphics(const UnitProperties* prop);
