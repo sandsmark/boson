@@ -10,17 +10,27 @@ bin_PROGRAMS = boson boeditor bounit
 INCLUDES = -I$(kde_includes)/arts $(all_includes)
 
 # all boson(game)-only parts
-BOSON_SRC = main.cpp top.cpp 
+BOSON_SRC = main.cpp \
+	top.cpp  \
+	bosonwelcomewidget.cpp \
+	bosonnewgamewidget.cpp \
+	bosonserveroptionswidget.cpp \
+	bosonloadingwidget.cpp
 #optionsdialog.cpp # should be boson-only but... currently we need it for both.
 
 # all map editor-only parts. 
-BOEDITOR_SRC = editor.cpp bosonunitdialog.cpp
+BOEDITOR_SRC = editor.cpp \
+	bosonunitdialog.cpp \
+	editorinput.cpp \
+	topbase.cpp
 
 # all used-by-both files.
 # actually editorinput.cpp should be in BOEDITOR_SRC but it is used by
 # bosonwidget.cpp...
 COMMON_SRC = \
-	cell.cpp unitproperties.cpp unitbase.cpp \
+	cell.cpp \
+	unitproperties.cpp \
+	unitbase.cpp \
 	boitemlist.cpp \
 	boselection.cpp \
 	kspritetooltip.cpp \
@@ -29,7 +39,8 @@ COMMON_SRC = \
 	bosonplayfield.cpp \
 	bosoncanvas.cpp \
 	boson.cpp \
-	speciestheme.cpp player.cpp \
+	speciestheme.cpp \
+	player.cpp \
 	bosoncommandframe.cpp \
 	kgamedialogbosonconfig.cpp \
 	bosonbigdisplay.cpp \
@@ -38,7 +49,6 @@ COMMON_SRC = \
 	kgameunitdebug.cpp \
 	bodisplaymanager.cpp \
 	bosonwidget.cpp \
-	editorinput.cpp \
 	boshot.cpp \
 	bosontiles.cpp \
 	bosonconfig.cpp \
@@ -47,8 +57,6 @@ COMMON_SRC = \
 	kgamedialogcomputerconfig.cpp \
 	bosonpath.cpp \
 	unit.cpp \
-	newgamedialog.cpp \
-	topbase.cpp \
 	bosoncommandwidget.cpp \
 	bosonmusic.cpp \
 	selectbox.cpp \

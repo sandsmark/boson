@@ -70,15 +70,15 @@ int main(int argc, char **argv)
 	boConfig->setDisableSound(true);
  }
  
- Top *widget = new Top;
+ TopWidget *widget = new TopWidget;
  bool showMaximized = true; // TODO: make this a config option
  app.setMainWidget(widget);
 
- if (showMaximized) {
-	widget->showMaximized();
- } else {
+// if (showMaximized) {
+//	widget->showMaximized();
+// } else {
 	widget->show();
- }
+// }
 	
  args->clear();
  return app.exec();

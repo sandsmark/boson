@@ -22,25 +22,22 @@
 #include <qwidget.h>
 
 class KPlayer;
-class KGameIO;
-class KGameMouseIO;
-class QKeyEvent;
 class KGamePropertyBase;
-class KToolBar;
 class KActionCollection;
 
 class BosonCanvas;
 class BosonCommandFrame;
 class BosonBigDisplay;
 class Unit;
-class UnitBase;
 class Player;
-class BosonMap;
+class TopWidget;
+class BoDisplayManager;
+class Boson;
+class BosonMiniMap;
+class BosonPlayField;
 
 /**
- * This is the actual main widget of boson for both, the game and the editor
- * mode. The widget also contains most of the important objects, like the @ref 
- * KGame object (see @ref Boson). 
+ * This is the actual main widget of boson for the game
  *
  * This widget conists of 3 sub-widgets:
  * @li a @ref BosonBigDisplay. This is the actual game view. Here the user can
@@ -49,14 +46,15 @@ class BosonMap;
  * @li a @ref BosonCommandFrame. The frame where unit can be ordered, the
  * selected unit is displayed and so on.
  *
+ * BosonMiniMap and BosonCommandFrame are in KDockWidgets, which you can drag
+ * around and place to wherever you want
+ *
  * The @ref BosonCommandFrame is currently a quite tricky part as the frame
  * differs heavily between game and editor mode. Maybe it will become two
  * classes one day, but the basic structure will stay.
- * 
+ *
  * BosonWidget is responsible for connecting all of these widgets and objects
- * together, which is mostly done on constructing. The editor specific parts are
- * being initialized in @ref startEditor, the game specific parts are being
- * initialized by the new game dialog.
+ * together, which is mostly done on constructing.
  *
  * All game specific stuff should be done in other classes - e.g. visual stuff
  * (click on a unit) in @ref BosonBigDisplay, constructing in @ref
@@ -72,22 +70,25 @@ public:
 	/**
 	 * Default Constructor
 	 **/
-	BosonWidget(QWidget* parent);
+	BosonWidget(TopWidget* top, QWidget* parent);
 
 	/**
 	 * Default Destructor
 	 **/
 	virtual ~BosonWidget();
 
-	void startGameMode();
-	void startEditor();
+	inline BosonCanvas* canvas();
+	inline BosonMiniMap* minimap();
+	inline BoDisplayManager* displaymanager();
+	inline Boson* game();
+	inline BosonPlayField* map();
+	inline Player* player();
+
+	void initGameMode();
 
 	void saveConfig(bool editor = false);
 
 	void zoom(const QWMatrix&);
-
-	void addEditorCommandFrame(QWidget* parent);
-	void addGameCommandFrame(QWidget* parent);
 
 	bool sound() const;
 	bool music() const;
@@ -101,28 +102,23 @@ public:
 
 	void setShowChat(bool s);
 
-	void editorSavePlayField(const QString& fileName);
-
 	void debugKillPlayer(KPlayer* p);
 
-	void initKeys(bool editorMode = false);
+	void initKeys();
 	KActionCollection* actionCollection() const;
+
+	bool isCmdFrameVisible() const;
+	bool isChatVisible() const;
+	void toggleCmdFrameVisible();
+	void toggleChatVisible();
+	void setChatVisible(bool visible);
+	void setCmdFrameVisible(bool visible);
 
 
 public slots:
 	void slotDebug();
-	void slotNewGame();
 	void slotGamePreferences();
 	void slotEndGame();
-
-	void slotLoadPlayField(const QString& identifier);
-	void slotChangeLocalPlayer(int playerNumber);
-
-	/**
-	 * Called by @ref EditorTop, the map editor, when the construction frame
-	 * shall be changed (mobile -> facilities or the other way round)
-	 **/
-	void slotEditorConstructionChanged(int index);
 
 	void slotToggleSound();
 	void slotToggleMusic();
@@ -145,15 +141,6 @@ signals:
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor (and debug)
 
 	/**
-	 * Emitted when a new tileset shall be loaded. This is usually emitted
-	 * only once (at program startup), at least currently.
-	 *
-	 * The editor should load the new tileset and probably also update all
-	 * cells on the screen. Currently tileSet is always "earth.png"
-	 **/
-	void signalEditorLoadTiles(const QString& tileSet);
-
-	/**
 	 * Emitted when the number of units of the local player changes.
 	 **/
 	void signalMobilesCount(int mobileUnits);
@@ -170,9 +157,12 @@ signals:
 
 	void signalMoveCommandFrame(int);
 
+	void signalInitDone();
+
+	void signalChatDockHidden();
+	void signalCmdFrameDockHidden();
+
 protected slots:
-	void slotChatFramePosition(int);
-	void slotCommandFramePosition(int);
 	void slotCmdBackgroundChanged(const QString& file);
 	void slotMiniMapScaleChanged(double);
 
@@ -184,10 +174,8 @@ protected slots:
 	 * @param direction See @ref ScrollDirection
 	 **/
 	void slotScroll(int direction);
-	
+
 	void slotStartScenario();
-	void slotSendChangeSpecies(const QString& species);
-	void slotSendChangeTeamColor(const QColor& color);
 
 	void slotUnfog(int x, int y);
 	void slotFog(int x, int y);
@@ -202,21 +190,9 @@ protected slots:
 	void slotChangeCursor(int mode, const QString& dir);
 	void slotChangeGroupMove(int mode);
 
-	void slotPlayerJoinedGame(KPlayer* p);
 	void slotArrowScrollChanged(int speed);
 	void slotAddUnit(Unit* unit, int x, int y);
 	void slotRemoveUnit(Unit* unit);
-	void slotStartGame();
-
-	void slotReceiveMap(const QByteArray& map);
-
-	void slotAddComputerPlayer(Player*);
-
-	/**
-	 * Delete an existing @ref BosonMap object and create a new one. You
-	 * will have to call @ref BosonMap::loadMap before using it!
-	 **/
-	void slotNewMap(BosonMap* map);
 
 	/**
 	 * Make display the currently active view
@@ -245,17 +221,21 @@ protected:
 
 	void addDummyComputerPlayer(const QString& name); // used by editor only
 
-	virtual void changeLocalPlayer(Player* p);
-
 	void quitGame();
 
 
-	void recreateLayout();
 	void normalizeVPositions();
 	void normalizeHPositions(int vpos);
 
 	void initBigDisplay(BosonBigDisplay*);
-	void addMiniMap();
+
+	void initMap();
+	void initMiniMap();
+	void initConnections();
+	void initDisplayManager();
+	void initPlayer();
+	void initGameCommandFrame();
+	void initLayout();
 
 	void addMouseIO(BosonBigDisplay*);
 
