@@ -21,8 +21,8 @@ CanGoOnWater=false
 
 [Upgrade_1]
 RequireTechnologies=12
-WeaponRange=5
-WeaponDamage=15
+Range=5
+Damage=15
 Health=60
 
 [Weapon_0]
