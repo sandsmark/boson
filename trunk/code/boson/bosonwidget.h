@@ -36,41 +36,12 @@ class Boson;
 class BosonMiniMap;
 class BosonPlayField;
 
-/**
- * This is the actual main widget of boson for the game
- *
- * [obsolete docs got removed]
- *
- * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
- **/
 class BosonWidget : public BosonWidgetBase
 {
 	Q_OBJECT
 public:
-	/**
-	 * Default Constructor
-	 **/
 	BosonWidget(QWidget* parent);
-
-	/**
-	 * Default Destructor
-	 **/
 	virtual ~BosonWidget();
-
-signals:
-	void signalGameOver();
-	void signalSaveGame();
-	void signalLoadGame();
-
-protected slots:
-	virtual void slotChangeCursor(int mode, const QString& dir);
-
-protected:
-	virtual void initDisplayManager();
-
-private:
-	class BosonWidgetPrivate;
-	BosonWidgetPrivate* d;
 };
 
 #endif

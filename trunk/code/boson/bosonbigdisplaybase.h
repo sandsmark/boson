@@ -248,7 +248,7 @@ public:
 	void advanceLineVisualization();
 
 	BosonCursor* cursor() const { return mCursor; }
-	void setCursor(BosonCursor* c) { mCursor = c; }
+	void setCursor(BosonCursor* c);
 	BoSelection* selection() const { return mSelection; }
 
 	void setFont(const BoFontInfo& font);
@@ -412,10 +412,6 @@ signals:
 	void signalSelectGroup(int);
 	void signalCreateGroup(int);
 	void signalEditorChangeLocalPlayer(Player*);
-	void signalEditorEditPlayerMinerals();
-	void signalEditorEditPlayerOil();
-	void signalEditorEditHeight(bool);
-	void signalChangeCursor(int, const QString&);
 
 protected slots:
 	void slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent);
@@ -446,6 +442,7 @@ protected slots:
 	void slotPreferencesApply();
 	void slotDebugKGame();
 	void slotUpdateOpenGLSettings();
+	void slotChangeCursor(int, const QString&);
 	void slotEditorSavePlayFieldAs();
 	void slotEditorChangeLocalPlayer(int);
 	void slotEditorDeleteSelectedUnits();
@@ -455,6 +452,9 @@ protected slots:
 	void slotEditorImportTexMap();
 	void slotEditorExportHeightMap();
 	void slotEditorExportTexMap();
+	void slotEditorEditHeight(bool);
+	void slotEditorEditPlayerMinerals();
+	void slotEditorEditPlayerOil();
 
 protected:
 	/**

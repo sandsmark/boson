@@ -30,53 +30,31 @@
 #include "bosonplayfield.h"
 #include "bosonmap.h"
 #include "bosonconfig.h"
-#include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplayinput.h"
 #include "editorbigdisplayinput.h"
-#include "boselection.h"
 #include "global.h"
 #include "bodebug.h"
-#include "bosonprofiling.h"
-#include "optionsdialog.h"
-#include "boaction.h"
 #include "bosonlocalplayerinput.h"
 #include "bosoncomputerio.h"
 #include "bosonmodeltextures.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
 #include "bosonwidgets/bogamechat.h"
-#include "bosonpath.h"
-#include "bomeshrenderermanager.h"
-#include "bogroundrenderermanager.h"
-#include "boglstatewidget.h"
-#include "bocamerawidget.h"
 #include "boeventlistener.h"
 #include "bowater.h"
 #include "bo3dtools.h"
 
 #include <kapplication.h>
 #include <klocale.h>
-#include <kaction.h>
 #include <kconfig.h>
-#include <kpopupmenu.h>
-#include <kgame/kgamedebugdialog.h>
-#include <kgame/kgamepropertyhandler.h>
-#include <klineedit.h>
-#include <kdockwidget.h>
-#include <kmessagebox.h>
 
 #include <qlayout.h>
 #include <qptrlist.h>
-#include <qtimer.h>
 #include <qptrdict.h>
-#include <qsignalmapper.h>
-#include <qfile.h>
-#include <qfileinfo.h>
 #include <qdatastream.h>
 #include <qdom.h>
-#include <qimage.h>
 
 #include <stdlib.h>
 
@@ -104,7 +82,6 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
  d->mInitialized = false;
 
  mDisplayManager = 0;
- mCursor = 0;
  mLocalPlayer = 0;
  mLocalPlayerInput = 0;
 }
@@ -112,17 +89,11 @@ BosonWidgetBase::BosonWidgetBase(QWidget* parent)
 BosonWidgetBase::~BosonWidgetBase()
 {
  boDebug() << k_funcinfo << endl;
- if (factory()) {
-	// remove the bosonwidget-specific menus from the XML GUI (menubar,
-	// toolbar, ...)
-	factory()->removeClient(this);
- }
  if (displayManager()) {
 	// we do NOT delete the display manager here
 	setDisplayManager(0);
  }
 
- delete mCursor;
  delete d->mChat;
 
  delete d;
@@ -142,8 +113,6 @@ void BosonWidgetBase::setDisplayManager(BoDisplayManager* displayManager)
 	}
 	mDisplayManager->reparent(this, QPoint(0, 0));
 	mDisplayManager->show();
-
-	changeToConfigCursor();
  }
 }
 
@@ -195,11 +164,14 @@ void BosonWidgetBase::initDisplayManager()
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		display, SLOT(slotUnitChanged(Unit*)));
 
- connect(display, SIGNAL(signalEndGame()), this, SIGNAL(signalEndGame()));
- connect(display, SIGNAL(signalQuit()), this, SIGNAL(signalQuit()));
- connect(display, SIGNAL(signalCursorChanged(int, const QString&)),
-		this, SLOT(slotChangeCursor(int, const QString&)));
-
+ connect(display, SIGNAL(signalEndGame()),
+		this, SIGNAL(signalEndGame()));
+ connect(display, SIGNAL(signalQuit()),
+		this, SIGNAL(signalQuit()));
+ connect(display, SIGNAL(signalSaveGame()),
+		this, SIGNAL(signalSaveGame()));
+ connect(display, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+		this, SIGNAL(signalChangeLocalPlayer(Player*)));
 }
 
 void BosonWidgetBase::initChat(KDockWidget* )
@@ -273,7 +245,6 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  // (setLocalPlayer() is also called when changing player in editor mode)
  b->setLocalPlayerIO(localPlayer()->playerIO()); // AB: this will also add the mouseIO!
 
- b->setCursor(mCursor);
  b->setKGameChat(d->mChat->chatWidget());
 
  b->show();
@@ -287,17 +258,6 @@ void BosonWidgetBase::initLayout()
 
  QVBoxLayout* topLayout = new QVBoxLayout(this);
  topLayout->addWidget(displayManager());
-}
-
-void BosonWidgetBase::changeCursor(BosonCursor* cursor)
-{
- if (!cursor) {
-	boError() << k_funcinfo << "NULL cursor" << endl;
-	return;
- }
- delete mCursor;
- mCursor = cursor;
- displayManager()->activeDisplay()->setCursor(mCursor);
 }
 
 void BosonWidgetBase::slotItemAdded(BosonItem* item)
@@ -518,11 +478,6 @@ void BosonWidgetBase::initScripts()
  displayManager()->activeDisplay()->setLocalPlayerScript(mLocalPlayerInput->eventListener()->script());
 }
 
-void BosonWidgetBase::changeToConfigCursor()
-{
- slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
-}
-
 void BosonWidgetBase::setCanvas(BosonCanvas* canvas)
 {
  d->mCanvas = canvas;
@@ -532,11 +487,6 @@ void BosonWidgetBase::setCanvas(BosonCanvas* canvas)
 		this, SLOT(slotItemAdded(BosonItem*)));
 
  BosonScript::setCanvas(d->mCanvas);
-}
-
-void BosonWidgetBase::initMap()
-{
- // implemented by EditorWidget
 }
 
 PlayerIO* BosonWidgetBase::localPlayerIO() const

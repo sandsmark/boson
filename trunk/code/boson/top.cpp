@@ -270,16 +270,16 @@ void TopWidget::initBosonWidget()
  if (boGame->gameMode()) {
 	BosonWidget* w = new BosonWidget(mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
-	connect(w, SIGNAL(signalLoadGame()), this, SLOT(slotLoadGame()));
-	connect(w, SIGNAL(signalGameOver()), this, SLOT(slotGameOver()));
 	d->mBosonWidget = w;
  } else {
 	EditorWidget* w = new EditorWidget(mMainDock);
 	d->mBosonWidget = w;
  }
 
+ // signalChangeLocalPlayer() is used in editor mode
  connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
 		this, SLOT(slotChangeLocalPlayer(Player*)));
+
  connect(d->mBosonWidget, SIGNAL(signalEndGame()),
 		this, SLOT(slotEndGame()));
  connect(d->mBosonWidget, SIGNAL(signalQuit()),
@@ -694,7 +694,6 @@ void TopWidget::slotGameStarted()
 
  }
  d->mBosonWidget->setCanvas(boGame->canvasNonConst());
- d->mBosonWidget->initMap();
 
  d->mDisplayManager->setCanvas(boGame->canvasNonConst());
 

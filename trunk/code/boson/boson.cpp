@@ -43,6 +43,7 @@
 #include "bosonnetworksynchronizer.h"
 #include "boeventloop.h"
 #include "bosonpath.h"
+#include "bosonmap.h"
 
 #include <klocale.h>
 #include <kdeversion.h>
@@ -450,7 +451,15 @@ bool Boson::eventFilter(QObject* o, QEvent* e)
 void Boson::setPlayField(BosonPlayField* p)
 {
  boDebug() << k_funcinfo << endl;
+ if (d->mPlayField) {
+	boError() << k_funcinfo << "already have a playfield - unsetting is not yet supported" << endl;
+	return;
+ }
  d->mPlayField = p;
+ if (d->mPlayField) {
+	connect(this, SIGNAL(signalChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)),
+			d->mPlayField->map(), SLOT(slotChangeTexMap(int, int, unsigned int, unsigned int*, unsigned char*)));
+ }
 }
 
 BosonPlayField* Boson::playField() const

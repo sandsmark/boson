@@ -105,15 +105,11 @@ public:
 	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
 	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
 	 * and @ref BosonCanvas::loadTiles
-	 *
-	 * Note that this also calls @ref slotChangeCursor in order to load the
-	 * initial cursor.
 	 **/
 	void addInitialDisplay();
 
 	void init(KDockWidget* chatDock);
 	virtual void initPlayer();
-	virtual void initMap();
 	virtual void quitGame();
 
 
@@ -140,11 +136,6 @@ protected slots:
 	void slotRunScriptLine(const QString& line);
 
 signals:
-	// hmm.. these *never* get emitted?
-	// // hmm.. these *never* get emitted?!!
-//	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)
-//	void signalPlayerLeftGame(KPlayer* p); // used by the map editor (and debug)
-
 	/**
 	 * Emitted when the number of units of the local player changes.
 	 **/
@@ -166,13 +157,12 @@ signals:
 	 **/
 	void signalQuit();
 	void signalEndGame();
+	void signalSaveGame();
 
 	void signalChangeLocalPlayer(Player* p);
 
 protected slots:
 	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
-
-	virtual void slotChangeCursor(int mode, const QString& dir) = 0;
 
 	void slotItemAdded(BosonItem*);
 	void slotUnitRemoved(Unit* unit);
@@ -187,10 +177,6 @@ protected slots:
 
 protected:
 	void initBigDisplay(BosonBigDisplayBase*);
-
-	void changeCursor(BosonCursor* cursor);
-
-	BosonCursor* cursor() const { return mCursor; }
 
 	virtual void initDisplayManager();
 	virtual void initConnections();
@@ -207,11 +193,6 @@ protected:
 	 **/
 	virtual void startScenarioAndGame();
 
-	/**
-	 * Call @ref slotChangeCursor with the config values
-	 **/
-	void changeToConfigCursor();
-
 private:
 	void initChat(KDockWidget* chatDock);
 
@@ -223,8 +204,6 @@ private:
 	BosonWidgetBasePrivate* d;
 
 	Player* mLocalPlayer;
-
-	BosonCursor* mCursor;
 
 	BoDisplayManager* mDisplayManager;
 	BosonLocalPlayerInput* mLocalPlayerInput;

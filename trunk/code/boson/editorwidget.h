@@ -36,47 +36,13 @@ class BosonMiniMap;
 class BosonPlayField;
 class BosonGroundTheme;
 
-/**
- * [obsolete docs got removed]
- *
- * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
- **/
 class EditorWidget : public BosonWidgetBase
 {
 	Q_OBJECT
 public:
-	/**
-	 * Default Constructor
-	 **/
 	EditorWidget(QWidget* parent);
 
-	/**
-	 * Default Destructor
-	 **/
 	virtual ~EditorWidget();
-
-	virtual void initMap();
-
-public slots:
-signals:
-
-protected slots:
-	virtual void slotChangeCursor(int mode, const QString& dir);
-
-	void slotEditPlayerMinerals();
-	void slotEditPlayerOil();
-	void slotEditHeight(bool);
-
-	void slotLockAction(bool);
-
-protected:
-	virtual void initDisplayManager();
-
-private:
-	class EditorWidgetPrivate;
-	EditorWidgetPrivate* d;
-
-	QString mCursorTheme; // path to cursor pixmaps
 };
 
 #endif

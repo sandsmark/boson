@@ -88,6 +88,7 @@
 #include "bpfdescriptiondialog.h"
 #include "botexmapimportdialog.h"
 #include "optionsdialog.h"
+#include "boaction.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
@@ -1302,6 +1303,7 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete d->mCanvasRenderer;
  SpeciesData::clearSpeciesData();
  delete d;
+ delete mCursor;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -1370,6 +1372,12 @@ void BosonBigDisplayBase::init()
 
  qApp->setGlobalMouseTracking(true);
  qApp->installEventFilter(this);
+}
+
+void BosonBigDisplayBase::setCursor(BosonCursor* cursor)
+{
+ delete mCursor;
+ mCursor = cursor;
 }
 
 void BosonBigDisplayBase::setLocalPlayerScript(BosonScript* script)
@@ -2031,15 +2039,15 @@ void BosonBigDisplayBase::initUfoEditorActions()
 		SLOT(slotEditorEditMapDescription()), actionCollection,
 		"editor_map_description");
  (void)new BoUfoAction(i18n("Edit &Minerals"), KShortcut(), this,
-		SIGNAL(signalEditorEditPlayerMinerals()), actionCollection,
+		SIGNAL(slotEditorEditPlayerMinerals()), actionCollection,
 		"editor_player_minerals");
  (void)new BoUfoAction(i18n("Edit &Oil"), KShortcut(), this,
-		SIGNAL(signalEditorEditPlayerOil()), actionCollection,
+		SIGNAL(slotEditorEditPlayerOil()), actionCollection,
 		"editor_player_oil");
  d->mActionEditorChangeHeight = new BoUfoToggleAction(i18n("Edit &Height"),
 		KShortcut(), this, 0, actionCollection, "editor_height");
  connect(d->mActionEditorChangeHeight, SIGNAL(signalToggled(bool)),
-		this, SIGNAL(signalEditorEditHeight(bool)));
+		this, SLOT(slotEditorEditHeight(bool)));
  (void)new BoUfoAction(i18n("&Import height map"), KShortcut(), this,
 		SLOT(slotEditorImportHeightMap()), actionCollection,
 		"editor_import_heightmap");
@@ -4917,6 +4925,8 @@ void BosonBigDisplayBase::resetGameMode()
 {
  BO_CHECK_NULL_RET(ufoManager());
 
+ slotChangeCursor(boConfig->cursorMode(), boConfig->cursorDir());
+
  // by default the cmdframe is in game mode.
  d->mUfoCommandFrame->setGameMode(true);
 
@@ -5654,6 +5664,71 @@ void BosonBigDisplayBase::slotEditorExportTexMap()
  }
 }
 
+void BosonBigDisplayBase::slotEditorEditHeight(bool on)
+{
+ BO_CHECK_NULL_RET(displayInput());
+ if (on) {
+	BoSpecificAction action;
+	action.setType(ActionChangeHeight);
+	displayInput()->action(action);
+ } else {
+	displayInput()->unlockAction();
+ }
+}
+
+void BosonBigDisplayBase::slotEditorEditPlayerMinerals()
+{
+ // atm disabled, as we must not include player.h in this file
+ // these methods (e.g. all editor dependent methods) should get moved to a
+ // different file anyway.
+ // maybe all game/editor menu items will be handled by a dedicated KGameIO
+ // class.
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->minerals());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Minerals for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	// cancel pressed
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setMinerals(v);
+#endif
+}
+
+void BosonBigDisplayBase::slotEditorEditPlayerOil()
+{
+ // atm disabled, as we must not include player.h in this file
+#if 0
+ BO_CHECK_NULL_RET(localPlayer());
+ bool ok = false;
+ QString value = QString::number(localPlayer()->oil());
+ QIntValidator val(this);
+ val.setBottom(0);
+ val.setTop(1000000); // we need to set a top, because int is limited. this should be enough, i hope (otherwise feel free to increase)
+ value = KLineEditDlg::getText(i18n("Oil for player %1").arg(localPlayer()->name()), value, &ok, this, &val);
+ if (!ok) {
+	return;
+ }
+ boDebug() << k_funcinfo << value << endl;
+ unsigned long int v = value.toULong(&ok);
+ if (!ok) {
+	boWarning() << k_funcinfo << "value " << value << " not valid" << endl;
+	return;
+ }
+ localPlayer()->setOil(v);
+#endif
+}
+
 void BosonBigDisplayBase::slotPreferences()
 {
  if (!boGame) {
@@ -5697,5 +5772,57 @@ void BosonBigDisplayBase::slotPreferencesApply()
 void BosonBigDisplayBase::slotUpdateOpenGLSettings()
 {
  updateOpenGLSettings();
+}
+
+void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir_)
+{
+ BO_CHECK_NULL_RET(boGame);
+ boDebug() << k_funcinfo << endl;
+ if (!boGame->gameMode()) {
+	// editor mode
+	mode = CursorKDE;
+ }
+ BosonCursor* b;
+ switch (mode) {
+	case CursorOpenGL:
+		b = new BosonOpenGLCursor;
+		break;
+	case CursorKDE:
+	default:
+		b = new BosonKDECursor;
+		mode = CursorKDE; // in case we had an unknown/invalid mode
+		break;
+ }
+
+ QString cursorDir = cursorDir_;
+ if (cursorDir.isNull()) {
+	cursorDir = BosonCursor::defaultTheme();
+ }
+
+ bool ok = true;
+ if (!b->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
+	ok = false;
+ }
+ if (!ok) {
+	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
+	delete b;
+	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
+		// load fallback cursor
+		slotChangeCursor(CursorKDE, QString::null);
+		return;
+	}
+	// continue to use the old cursor
+	return;
+ }
+ setCursor(b);
+
+ boConfig->setCursorMode(mode);
+ boConfig->setCursorDir(cursorDir);
 }
 
