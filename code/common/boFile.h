@@ -6,7 +6,7 @@
     begin                : Sat Feb 14 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -74,7 +74,7 @@ protected :
 	bool	isOk() {return !error; }
 
 
-private:
+protected:
 
 	enum {
 		None,		// nothing has happened

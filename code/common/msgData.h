@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -23,11 +23,18 @@
 
 #include "../common/groundType.h"
 #include "../common/unitType.h"
-#include "../common/refused.h"
 
 #define BOSON_NO_DATA	0, ((bosonMsgData *) 0L)
 
 class boBuffer;
+
+enum refusedType {
+	REFUSED_PLAYING,	/* A game is currently running, not used yet */
+	REFUSED_BAD_VERSION,	/* Your client version isn't compatible with the server's one, not used yet */
+	REFUSED_PRIVATE,	/* this is a private game, you haven't been invited, not used yet */
+	REFUSED_TOO_LOW,	/* your connection is too low, not used yet */
+	REFUSED_,
+	};
 
 /* MSG_DLG_ASK */ ///orzel still unused
 struct askMsg_t		{ int major, minor, patch; };

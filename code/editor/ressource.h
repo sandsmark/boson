@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -27,7 +27,7 @@
 
 
 //#include "../common/boconfig.h"	// for *VERSION*
-#define BOEDITOR_VERSION_TEXT 	"0.2.0"
+#define BOEDITOR_VERSION_TEXT 	"0.3.0"
 
 ///////////////////////////////////////////////////////////////////
 // ressource.h  -- contains macros used for commands
@@ -82,7 +82,7 @@
 #define IDS_APP_ABOUT		"BoEditor Version " BOEDITOR_VERSION_TEXT \
 				"(c) 1999" \
 				"\nThomas Capricelli" \
-				" <capricel@enst.fr>"
+				" <orzel@yalbi.com>"
 
 
 ///////////////////////////////////////////////////////////////////

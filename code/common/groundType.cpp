@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -45,3 +45,4 @@ const groundTransProperties_t groundTransProp[] = {
 
 const int groundPropNb = (sizeof(groundProp)/sizeof(groundProp [0]));
 const int groundTransPropNb = (sizeof(groundTransProp)/sizeof(groundTransProp [0]));
+

@@ -1,5 +1,5 @@
 /***************************************************************************
-                          bosonView.cpp  -  description                              
+                          infoWin.cpp  -  description                              
                              -------------------                                         
 
     version              : $Id$
@@ -33,49 +33,46 @@
 
 #include "speciesTheme.h"
 
+#include "infoWin.h"
+//#include "bosonView.h"
+//#include "visualBigDisplay.h"
 #include "game.h"
-#include "bosonView.h"
-//#include "playerUnit.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2
 
-
-
-
-bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
-	:visualView(p,parent,name)
+infoWin::infoWin(QWidget *parent, const char *name)
+	:QFrame(parent, name)
 {
 	int i;
-	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
+QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
-	connect(p, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
+setFrameStyle(QFrame::Sunken | QFrame::Panel);
+setLineWidth(5);
 
-	setFrameStyle(QFrame::Sunken | QFrame::Panel);
-	setLineWidth(5);
 
-	/* stack */
-	stack = new QWidgetStack(this, "qwidgetstack");
-	stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
-	stack->setLineWidth(5);
-	stack->setGeometry(10,10,180,110);
+/* stack */
+stack = new QWidgetStack(this, "qwidgetstack");
+stack->setFrameStyle(QFrame::Raised | QFrame::Panel);
+stack->setLineWidth(5);
+stack->setGeometry(10,10,180,110);
 
-	/* stack/one */
-	view_none = new QPixmap(path);
-	if (view_none->isNull())
-		printf("bosonView::bosonView : Can't load overview_none \n");
+/* stack/one */
+view_none = new QPixmap(path);
+if (view_none->isNull())
+	printf("infoWin::infoWin : Can't load overview_none \n");
 
-	view_one = new QLabel(stack,"preview");
-	view_one->setPixmap(*view_none);
-	stack->addWidget(view_one, VIEW_ONE);
+view_one = new QLabel(stack,"preview");
+view_one->setPixmap(*view_none);
+stack->addWidget(view_one, VIEW_ONE);
 
-	/* stack/many */
-	view_many = new QScrollView(stack,"scrollview");
-	stack->addWidget(view_many, VIEW_MANY);
+/* stack/many */
+view_many = new QScrollView(stack,"scrollview");
+stack->addWidget(view_many, VIEW_MANY);
 
-	stack->raiseWidget(VIEW_ONE);
+stack->raiseWidget(VIEW_ONE);
 
-	/* orders buttons */
+/* orders buttons */
 	for (i=0; i< 11; i++) {
 		orderButton[i] = new QPushButton(this, "orderButtons");
 		orderButton[i]->setGeometry( 10+(i%3)*60, 128+(i/3)*60, 55, 55);
@@ -92,37 +89,34 @@ bosonView::bosonView(visualField *p, QWidget *parent, const char *name=0L)
 	connect(orderButton[8], SIGNAL(clicked(void)), this, SLOT(bc8(void)));
 	connect(orderButton[9], SIGNAL(clicked(void)), this, SLOT(bc9(void)));
 	connect(orderButton[10], SIGNAL(clicked(void)), this, SLOT(bc10(void)));
-		
+	
 	orderType = OT_NONE;
 }
 
-void bosonView::setSelected(QPixmap *p)
+void infoWin::setSelected(QPixmap *p)
 {
 	view_one->setPixmap( p?*p:*view_none);
+	setOrderType( OT_NONE, -1);
 }
 
 
-void bosonView::handleOrder(int order)
+void infoWin::handleOrder(int order)
 {
 	switch(orderType) {
 		default:
 		case OT_NONE:
-			logf(LOG_ERROR, "unexpected bosonView::handleOrder");
+			logf(LOG_ERROR, "unexpected infoWin::handleOrder");
 			return;
 			break;
 		case OT_FACILITY:
-			construct.type.fix = (facilityType) order;
-			setSelectionMode( SELECT_PUT);
 			break;
 		case OT_MOBILE:
-			construct.type.mob = (mobType) order;
-			setSelectionMode( SELECT_PUT);
 			break;
 	}
 }
 
 
-void bosonView::setOrders( int what, int who)
+void infoWin::setOrderType( int what, int who)
 {
 	int i;
 
@@ -150,27 +144,6 @@ void bosonView::setOrders( int what, int who)
 			for (i=MOB_LAST; i<11; i++) orderButton[i]->hide();
 			break;
 		default:
-			logf(LOG_ERROR, "bosonView::setOrders : unexpected 'what' argument");
+			logf(LOG_ERROR, "infoWin::setOrderType : unexpected 'what' argument");
 	}
 }
-
-
-void bosonView::object_put(int x, int y)
-{
-	switch(orderType) {
-		case OT_FACILITY:
-			construct.x = X() + (x / BO_TILE_SIZE) ;
-			construct.y = Y() + (y / BO_TILE_SIZE) ;
-			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
-			break;
-		case OT_MOBILE:
-			construct.x = X() * BO_TILE_SIZE + x;
-			construct.y = Y() * BO_TILE_SIZE + y;
-			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
-			break;
-		default:
-			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");
-	}
-}
-
-
