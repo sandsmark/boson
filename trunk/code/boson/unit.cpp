@@ -285,39 +285,39 @@ bool Unit::moveTo(int x, int y)
  d->mMoveDestX = x;
  d->mMoveDestY = y;
 
- // we need to find path here!
- newPath();
+ // Do not find path here!!! It would break pathfinding for groups. Instead, we
+ //  set searchpath to true and find path in MobileUnit::advanceMove()
+ searchpath = true;
+
  return true;
 }
 
-bool Unit::newPath()
+void Unit::newPath()
 {
  kdDebug() << k_funcinfo << endl;
  if (owner()->isVirtual()) {
 	// only the owner of the unit calculates the path and then transmits it
 	// over network. a "virtual" player is one which is duplicated on
 	// another client - but the actual player is on another client.
-	return false;
+	return;
  }
  if(!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
-	if(! boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)->
-			canGo(unitProperties())) {
-		return false;
-	}
-	if(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE,
-			this) && work() != WorkAttack) {
-		return false;
+	if((! boCanvas()->cell(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)->canGo(unitProperties())) ||
+			(boCanvas()->cellOccupied(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE, this) && work() != WorkAttack)) {
+		// If we can't move to destination, then we add waypoint with coordinates
+		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
+		//  coordinates are -1; -1 then we stop moving.
+		clearWaypoints(true);
+		addWaypoint(QPoint(-1, -1));
+		return;
 	}
  }
  QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY);
- if(path.count() < 1) {// Is it actually needed?
-	return false;
- }
  clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
  }
- return true;
+ return;
 }
 
 void Unit::clearWaypoints(bool send)
@@ -659,13 +659,11 @@ void MobileUnit::advanceMove()
  }
 
 
- // we must *not* depend on the return value of newPath()!
-/* if(searchpath) {
-	if(!newPath()) {
-		stopMoving();
-	}
+ if(searchpath) {
+	newPath();
 	searchpath = false;
- }*/
+	return;
+ }
 
  if(waypointCount() == 0) {
 	// waypoints are PolicyClean - so they might need some advanceMove()
@@ -677,6 +675,11 @@ void MobileUnit::advanceMove()
  }
 
  QPoint wp = currentWaypoint(); // where we go to
+ // If both waypoint's coordinates are -1, then it means that path to
+ //  destination can't be found and we should stop
+ if((wp.x() == -1) &&(wp.y() == -1))
+	stopMoving();
+
  // Check if we can actually go to waypoint (maybe it was fogged)
  if((boCanvas()->cellOccupied(wp.x() / BO_TILE_SIZE, wp.y() / BO_TILE_SIZE, this, true) &&
 		work() != WorkAttack) || 
@@ -688,9 +691,7 @@ void MobileUnit::advanceMove()
 	// We have to clear waypoints first to make sure that they aren't used next
 	//  advance() call (when new waypoints haven't arrived yet)
 	clearWaypoints();
-	if(! newPath()) {
-		stopMoving();
-	}
+	newPath();
 	return;
  }
 
@@ -724,11 +725,9 @@ void MobileUnit::advanceMove()
 		// We have to clear waypoints first to make sure that they aren't used next
 		//  advance() call (when new waypoints haven't arrived yet)
 		clearWaypoints();
-		if(! newPath())
-			stopMoving();
+		newPath();
 		return;
 	}
-	
  }
  
  // Try to go to same x and y coordinates as waypoint's coordinates
@@ -833,8 +832,7 @@ void MobileUnit::advanceMoveCheck()
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.
 
-		if(! newPath())
-			stopMoving();
+		newPath();
 		d->mMovingFailed = 0;
 	}
 	return;
