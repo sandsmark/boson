@@ -473,7 +473,7 @@ void BoEditorApp::slotFileNew()
 
 	/* the physical map is created when a game is created */
 	vfield = field = new editorField();
-	if (!field->New(newdlg->sc_width, newdlg->sc_height, newdlg->sc_name)) {
+	if (!field->New(newdlg->scb_width->value(), newdlg->scb_height->value(), newdlg->qle_name->text() ) ) {
 		delete field;
 		field = 0;
 		delete newdlg;
