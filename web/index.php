@@ -38,7 +38,16 @@ sidebar_begin();
   sidebar_links_box();
   sidebar_download_box();
     sidebar_box_begin("Poll");
-      poll_show();
+      $id = poll_last_id();
+      if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+      {
+        // User has already voted, show small version of results
+        poll_results_small($id);
+      }
+      else
+      {
+        poll_show($id);
+      }
     sidebar_box_end();
   sidebar_old_news();
   sidebar_stats_box();

@@ -70,13 +70,6 @@ function poll_show($id = -1)
     $row = mysql_fetch_assoc($result);
     $id = $row['id'];
 
-    if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
-    {
-      // User has already voted
-      poll_results_small($id);
-      return;
-    }
-        
     // Question
     echo "
     <font class=\"pollquestion\">".$row['question']."</font><br>
@@ -231,7 +224,6 @@ function poll_results_small($id = -1)
   // init database connection
   poll_init();
 
-
   if($id == -1)
   {
     // Select most recent poll
@@ -251,18 +243,17 @@ function poll_results_small($id = -1)
     $row = mysql_fetch_assoc($result);
 
     // Question
-    if (strlen($row['question']) >= 32)
+    if (strlen($row['question']) >= 60)
     {
-      $small_row = substr($row['question'],0,32)."...";
+      $small_row = substr($row['question'], 0, 60)."...";
     }
     else
     {
       $small_row = $row['question'];
     }
     echo "
-    <font class=\"smallpollanswer\">Results for:<br>
-    ".$small_row."</font><br>
-    <table>";
+    <font class=\"smallpollanswer\">Results for:</font><br>
+    <font class=\"smallpollquestion\">$small_row</font><br>";
     // Count all answers
     $i = 1;
     $total = 0;
@@ -291,25 +282,20 @@ function poll_results_small($id = -1)
         $prct = ceil($row['count'.$i] * 100 / $total);
       }
       // Make some things smaller
-      $width = $width/3;
       $small_answer = $row['answer'.$i];
-      if (strlen($small_answer) >= 15)
+      if (strlen($small_answer) >= 30)
       {
-        $small_answer = substr($small_answer,0,15)."...";
+        $small_answer = substr($small_answer, 0, 30)."...";
       }
-      
+
       echo "
-      <tr>
-        <td><font class=\"smallpollanswer\">".$small_answer."</font></td>
-        <td><font class=\"smallpollanswer\">"." $prct %</font></td>
-        <td><img class=\"statsbar\" src=\"stats-bar-$style.png\" width=\"$width\" height=\"8\" alt=\"\"></td>
-      </tr>
-      ";
+      <font class=\"smallpollanswer\">".$small_answer."</font><br>
+      &nbsp;&nbsp;&nbsp;<img class=\"statsbar\" src=\"stats-bar-$style.png\" width=\"$width\" height=\"8\" alt=\"\">
+      <font class=\"smallpollanswer\">"." $prct %</font><br>";
       $i++;
     }
     echo "
-      </table><br>";
-    echo "
+      <br>
       <font class=\"smallpollanswer\">Total votes: $total<br>
       <br>
       <a href=\"${basedir}poll.php?action=results&id=$id\">Details</a></font><br>";
@@ -449,6 +435,30 @@ function poll_add($question, $answer1, $answer2, $answer3 = "", $answer4 = "", $
   fclose($fp);
 }
 
+function poll_last_id()
+{
+  global $poll_disable;
+  if($poll_disable)
+  {
+    return;
+  }
+
+  // init database connection
+  poll_init();
+
+  $query = "SELECT id FROM poll ORDER BY id DESC LIMIT 1";
+  $result = mysql_query($query);
+  if(mysql_num_rows($result) == 0)
+  {
+    // Poll doesn't exist! Evil!
+    return 0;
+  }
+  else
+  {
+    $row = mysql_fetch_assoc($result);
+    return $row['id'];
+  }
+}
 
 
 function poll_init()
