@@ -33,7 +33,7 @@ class BoFastGroundRenderer : public BoGroundRendererBase
 {
 	Q_OBJECT
 public:
-	BoFastGroundRenderer(bool useTree = true);
+	BoFastGroundRenderer();
 	virtual ~BoFastGroundRenderer();
 
 	virtual int rtti() const { return Fast; } // obsolete. use className() instead
@@ -41,13 +41,5 @@ public:
 	virtual void renderVisibleCells(int* cells, unsigned int cellsCount, const BosonMap* map);
 };
 
-class BoFastGroundRendererNoTree : public BoFastGroundRenderer
-{
-	Q_OBJECT
-public:
-	BoFastGroundRendererNoTree() : BoFastGroundRenderer(false)
-	{
-	}
-};
 #endif
 

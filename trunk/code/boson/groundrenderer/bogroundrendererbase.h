@@ -38,7 +38,7 @@ class BoGroundRendererBase : public BoGroundRenderer
 {
 	Q_OBJECT
 public:
-	BoGroundRendererBase(bool useCellTree);
+	BoGroundRendererBase();
 	virtual ~BoGroundRendererBase();
 
 	/**
