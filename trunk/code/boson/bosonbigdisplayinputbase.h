@@ -31,6 +31,7 @@ class BoAction;
 class Player;
 class Unit;
 class UnitProperties;
+class BoItemList;
 
 template<class T> class QPtrList;
 
@@ -117,12 +118,12 @@ public:
 	/**
 	 * Select units in the given rect
 	 **/
-	void selectArea(const QRect& rect, bool replace);
+	void selectArea(BoItemList* itemsInArea, bool replace);
 
 	/**
 	 * Deselect units in the given rect
 	 **/
-	void unselectArea(const QRect& rect);
+	void unselectArea(BoItemList* itemsInArea);
 
 	/**
 	 * Select a list of units. You should prefer this to a direct @ref

@@ -674,6 +674,11 @@ void BosonWidgetBase::initKActions()
  cellGrid->setChecked(false);
  connect(cellGrid, SIGNAL(toggled(bool)),
 		displayManager(), SLOT(slotSetDebugShowCellGrid(bool)));
+ KToggleAction* matrices = new KToggleAction(i18n("Debug Ma&trices"),
+		KShortcut(), 0, 0, actionCollection(), "debug_matrices");
+ matrices->setChecked(false);
+ connect(matrices, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugMatrices(bool)));
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));

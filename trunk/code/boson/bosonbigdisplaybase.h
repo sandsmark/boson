@@ -32,6 +32,7 @@ class Unit;
 class UnitProperties;
 class Camera;
 class BosonBigDisplayInputBase;
+class BoItemList;
 
 class KGameChat;
 class KGameIO;
@@ -184,6 +185,7 @@ public:
 
 	void setDebugMapCoordinates(bool debug);
 	void setDebugShowCellGrid(bool debug);
+	void setDebugMatrices(bool debug);
 
 	/**
 	 * Scroll by a certain distance.
@@ -194,11 +196,20 @@ public:
 	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
 
 
+	bool boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
+	bool boUnProject(const QPoint& pos, BoVector3* v, float z = -1.0) const;
+
 	// we should probably make these 4 methods protected. i cant imagine any
 	// useful public use
-	bool mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const;
+	/*
+	 * @param useRealDepth If TRUE this function will calculate the real
+	 * coordinates at @p pos, if FALSE it will calculate the coordinate at
+	 * @p pos with z=0.0. This is useful for e.g. @ref mapDistance, where
+	 * different z values could deliver wrong values.
+	 **/
+	bool mapCoordinates(const QPoint& pos, GLfloat* posX, GLfloat* posY, GLfloat* posZ, bool useRealDepth = true) const;
 	bool mapCoordinatesToCell(const QPoint& pos, QPoint* cell);
-	bool mapDistance(int windowDistanceX, int windowDistanceY, GLdouble* dx, GLdouble* dy) const;
+	bool mapDistance(int windowDistanceX, int windowDistanceY, GLfloat* dx, GLfloat* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
 	void canvasToWorld(int x, int y, float z, GLfloat* glx, GLfloat* gly, GLfloat* glz) const;
 
@@ -352,6 +363,8 @@ protected:
 	 **/
 	void renderParticles();
 
+	void renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
+
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -408,16 +421,18 @@ protected:
 	void calcFPS();
 
 	/**
-	 * Start the selection at x,y,z. Either select the unit at this position
-	 * or start to draw the selection rect.
-	 **/
-	void startSelection(GLdouble x, GLdouble y, GLdouble z);
-
-	/**
 	 * Move the selection rect. @ref selectionStart is still the start point
 	 * but @ref selectionEnd is now x,y,z
 	 **/
-	void moveSelectionRect(GLfloat x, GLfloat y, GLfloat z);
+	void moveSelectionRect(const QPoint& widgetPos);
+
+	/**
+	 * Calculate the maximum and minimum world coordinates from the
+	 * specified rectangles.
+	 *
+	 * The rect @p rect is in window coordinates (e.g. the selection rect).
+	 **/
+	void calculateWorldRect(const QRect& rect, float* minX, float* minY, float* maxX, float* maxY) const;
 
 	/**
 	 * Remove a currently drawn selection rect and select all units inside
@@ -428,14 +443,7 @@ protected:
 	 **/
 	void removeSelectionRect(bool replace);
 
-	void selectionStart(GLfloat* x, GLfloat* y, GLfloat* z) const;
-	void selectionEnd(GLfloat* x, GLfloat* y, GLfloat* z) const;
-
-	/**
-	 * @return The canvas coordinates of the selection rect
-	 **/
-	QRect selectionRectCanvas() const;
-
+	BoItemList* selectionRectItems();
 
 	void addMouseIO(Player* p);
 
