@@ -331,22 +331,22 @@ void Unit::moveTo(const QPoint& pos)
  }
 }
 
-bool Unit::moveTo(int x, int y, int range)
+bool Unit::moveTo(double x, double y, int range)
 {
  stopMoving();
 
  if (range == -1) {
 	range = d->mMoveRange;
  }
- if(!owner()->isFogged(x / BO_TILE_SIZE, y / BO_TILE_SIZE)) {
+ if(!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
 	// No pathfinding if goal not reachable or occupied and we can see it
-	if(!boCanvas()->cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE)->canGo(unitProperties())) {
+	if(!boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE)->canGo(unitProperties()))) {
 		return false;
 	}
  }
 
- d->mMoveDestX = x;
- d->mMoveDestY = y;
+ d->mMoveDestX = (int)x;
+ d->mMoveDestY = (int)y;
  d->mMoveRange = range;
 
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
@@ -1177,7 +1177,7 @@ QRect MobileUnit::boundingRect() const
 	kdWarning() << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
 	return QCanvasSprite::boundingRect();
  }
- return QRect(x(), y(), BO_TILE_SIZE, BO_TILE_SIZE);
+ return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
 
 void MobileUnit::clearWaypoints(bool send)
@@ -1295,7 +1295,7 @@ void Facility::setTarget(Unit* u)
  Unit::setTarget(u);
 }
 
-void Facility::moveTo(int x, int y, int range)
+void Facility::moveTo(double x, double y, int range)
 {
  if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;

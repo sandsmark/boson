@@ -280,7 +280,7 @@ void BosonSpriteCursor::setCursor(int mode)
 			kdError() << k_funcinfo << "pixmap array not valid for mode=" << mode << endl;
 			return;
 		}
-		if (d->mCursor->frame() >= a->count()) {
+		if (d->mCursor->frame() >= (int)a->count()) {
 			d->mCursor->setFrame(0);
 		}
 		d->mCurrentFrames = a;
@@ -417,7 +417,7 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
 
 QPoint BosonSpriteCursor::pos() const
 {
- return QPoint(d->mCursor->x(), d->mCursor->y());
+ return QPoint((int)d->mCursor->x(), (int)d->mCursor->y());
 }
 
 
@@ -555,13 +555,13 @@ void BosonExperimentalCursor::setWidgetCursor(QWidget* w)
 void BosonExperimentalCursor::move(double x, double y)
 {
 	return;
- d->mCursor->move(x, y); // TODO: hotspot!
+ d->mCursor->move((int)x, (int)y); // TODO: hotspot!
 
  // from kdesktop/startupod.cpp:
 // XRaiseWindow(qt_xdisplay(), d->mCursor->winId());
 // QApplication::flushX();
 
- paintCursor(0, QPoint(x, y));
+ paintCursor(0, QPoint((int)x, (int)y));
 }
 
 bool BosonExperimentalCursor::insertMode(int mode, QCanvasPixmapArray* array)

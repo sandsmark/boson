@@ -84,7 +84,7 @@ public:
 		unsigned int max = prop->maxResources();
 		unsigned int r = miner->resourcesMined();
 		double p = (double)(r * 100) / (double)max;
-		mProgress->setValue(p);
+		mProgress->setValue((int)p);
 	}
 	
 private:
@@ -304,7 +304,7 @@ void BoOrderWidget::slotRedrawTiles()
 	case OrderMobiles:
 		break;
 	default:
-		kdError() << "unexpected production index " << index << endl;
+		kdError() << "unexpected production index " << d->mOrderType << endl;
 		break;
  }
 }
@@ -664,7 +664,7 @@ void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
 	return;
  }
  d->mConstructionProgress->show();
- d->mConstructionProgress->setValue(((Facility*)d->mSelectedUnit)->constructionProgress());
+ d->mConstructionProgress->setValue((int)((Facility*)d->mSelectedUnit)->constructionProgress());
  d->mUpdateTimer.start(1000);
 }
 
