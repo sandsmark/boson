@@ -1353,7 +1353,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
- boDebug() << posZ << endl;
+// boDebug() << posZ << endl;
  QPoint canvasPos;
  worldToCanvas(posX, posY, posZ, &canvasPos);
 
