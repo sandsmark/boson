@@ -1100,6 +1100,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	color = PLACEMENTPREVIEW_DISALLOW_COLOR;
  }
  glEnable(GL_BLEND);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glColor4ub(255, color, color, PLACEMENTPREVIEW_ALPHA);
 
 #warning FIXME: z value!
@@ -1429,9 +1430,7 @@ void BosonBigDisplayBase::renderCells()
 	cellsCount++;
  }
 
- glEnable(GL_BLEND);
- glBlendFunc(GL_ONE, GL_ZERO);
- glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+ glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
  // we draw the cells in different stages. the depth test must get enabled
  // before the last stage, so that the new information (i.e. the z pos of the
@@ -1443,7 +1442,7 @@ void BosonBigDisplayBase::renderCells()
  for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	GLuint tex = textures->texture(i);
 	if (i == 1) {
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+		glEnable(GL_BLEND);
 	} else if (i == groundTheme->textureCount() - 1) {
 		glEnable(GL_DEPTH_TEST);
 	}
