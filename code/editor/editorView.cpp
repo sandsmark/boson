@@ -49,7 +49,7 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	:visualView(p,parent,name)
 {
 	int		i;
-	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
+	QCheckBox	*qcheck;
 
 	setFrameStyle(QFrame::Sunken | QFrame::Panel);
 	setLineWidth(5);
@@ -62,9 +62,7 @@ editorView::editorView (visualField *p, QWidget *parent, const char *name=0L)
 	stack->setGeometry(10,10,110,110);
 
 	/* stack/one */
-	view_none = new QPixmap(path);
-	if (view_none->isNull())
-		logf(LOG_ERROR, "editorView::editorView : Can't load overview_none");
+	view_none = new QPixmap(); // XXX : legal ? 
 
 	view_one = new QLabel(stack,"preview");
 	view_one->setPixmap(*view_none);

@@ -49,7 +49,6 @@ bosonView::bosonView(QWidget *parent, const char *name=0L)
 	:visualView(::field,parent,name)
 {
 	int i;
-	QString path(kapp->kde_datadir() + "/boson/themes/panels/standard/overview_none.xpm" );
 
 	connect(field, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
 
@@ -69,9 +68,7 @@ bosonView::bosonView(QWidget *parent, const char *name=0L)
 	stack->setGeometry(10,23,180,110);
 
 	/* stack/one */
-	view_none = new QPixmap(path);
-	if (view_none->isNull())
-		printf("bosonView::bosonView : Can't load overview_none \n");
+	view_none = new QPixmap(); // XXX legal ? 
 
 	view_one = new QLabel(stack,"preview");
 	view_one->setPixmap(*view_none);
