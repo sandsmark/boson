@@ -233,6 +233,10 @@ class BosonScript
      **/
     static bool canUnitShoot(int id);
     /**
+     * @return Whether unit with given type can shoot
+     **/
+    static bool canUnitTypeShoot(int playerid, int type);
+    /**
      * @return Whether unit with id id can produce (other units or upgrades)
      **/
     static bool canUnitProduce(int id);
@@ -241,9 +245,17 @@ class BosonScript
      **/
     static bool canUnitMineMinerals(int id);
     /**
+     * @return Can player's unit with given type mine minerals
+     **/
+    static bool canUnitTypeMineMinerals(int playerid, int type);
+    /**
      * @return Can unit with id id mine oil
      **/
     static bool canUnitMineOil(int id);
+    /**
+     * @return Can unit with given type mine minerals
+     **/
+    static bool canUnitTypeMineOil(int playerid, int type);
 
     /**
      * @return List of unit types unit with id id can produce
