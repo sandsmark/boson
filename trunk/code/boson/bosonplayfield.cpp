@@ -77,15 +77,15 @@ QString BosonPlayField::defaultPlayField()
 
 QStringList BosonPlayField::availablePlayFields()
 {
- QStringList list = KGlobal::dirs()->findAllResources("data", 
-		"boson/maps/*.desktop");
+ QStringList list = KGlobal::dirs()->findAllResources("data",
+		"boson/maps/*.boson");
  if (list.isEmpty()) {
 	boError() << k_funcinfo << "Cannot find any playfield?!" << endl;
 	return list;
  }
  QStringList validList;
  for (unsigned int i = 0; i < list.count(); i++) {
-	QString fileName = list[i].left(list[i].length() -  strlen(".desktop"));
+	QString fileName = list[i].left(list[i].length() -  strlen(".boson"));
 	fileName += QString::fromLatin1(".bpf");
 	if (QFile::exists(fileName)) {
 		validList.append(list[i]);
@@ -246,12 +246,12 @@ QString BosonPlayField::playFieldFileName(const QString& identifier)
 	KSimpleConfig cfg(l[i]);
 	cfg.setGroup("Boson PlayField");
 	if (cfg.readEntry("Identifier") == identifier) {
-		QString m = l[i].left(l[i].length() - strlen(".desktop"));
+		QString m = l[i].left(l[i].length() - strlen(".boson"));
 		m += QString::fromLatin1(".bpf");
 		if (QFile::exists(m)) {
 			return m;
 		} else {
-			boError() << "Cannot find " << m << " for valid .desktop file" << endl;
+			boError() << "Cannot find " << m << " for valid .boson file" << endl;
 		}
 	}
  }

@@ -53,7 +53,7 @@ get_values->getval("fix", "warfactory", 2);
 :>
 We import get_values (get_values.pm) and than we call the getval method.
 The first param is the facility type, fix == building | mob == unit
-The name, you need to enter the name that is used for the folder where the index.desktop file is
+The name, you need to enter the name that is used for the folder where the index.unit file is
 The filesystem level is needed to add some ../ to the path. A maximum of 3 is supported at the moment, 1 is ./
 
 You can define the values which will be writen to the html files in values.list.

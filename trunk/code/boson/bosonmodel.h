@@ -33,7 +33,7 @@ template<class T> class QPtrList; //hmm is this working for all compilers? can t
 template<class T, class T2> class QMap;
 
 /**
- * This class represents the Frame* entries in the index.desktop files. Here you
+ * This class represents the Frame* entries in the index.unit files. Here you
  * can find where this animation starts and ends and so.
  * See @ref BosonModel::insertAnimationMode
  * @author Andreas Beckermann <b_mann@gmx.de>
@@ -226,7 +226,7 @@ protected:
 	 * Convert a 3ds texture name to a clean name. That means call
 	 * QString::lower() on it, currently. It'll also map the "short name"
 	 * from the .3ds file to the "long name" that can be specified e.g. in
-	 * units index.desktop files. See setLongNames
+	 * units index.unit files. See setLongNames
 	 **/
 	QString cleanTextureName(const char* name) const;
 

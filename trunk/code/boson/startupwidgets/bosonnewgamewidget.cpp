@@ -307,7 +307,7 @@ void BosonNewGameWidget::initMaps()
     cfg.setGroup("Boson PlayField");
     mMapCombo->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 //    d->mPlayFieldIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-//    QString fileName = list[i].left(list[i].length() - strlen(".desktop")) + QString::fromLatin1(".bpf");
+//    QString fileName = list[i].left(list[i].length() - strlen(".boson")) + QString::fromLatin1(".bpf");
 //    d->mPlayFieldIndex2FileName.insert(i, fileName);
     mMapIndex2Identifier.insert(i, cfg.readEntry("Identifier", i18n("Unknown")));
   }

@@ -23,7 +23,7 @@
  * This class consists of a single enum @ref Rtti which defines the rtti values
  * used in Boson. Note that @ref VisualUnit has many different rtti values as
  * there are different units. I want to implement code-independent units (i.e.
- * they get defined in index.desktop files on runtime) and therefore one
+ * they get defined in index.unit files on runtime) and therefore one
  * doesn't know the actual number of rttis used by @ref VisualUnit. So don't
  * add any rttis here after @ref UnitStart!
  *

@@ -153,7 +153,7 @@ CursorOptions::CursorOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mCursorTheme = new QComboBox(hbox);
  QStringList list = BosonCursor::availableThemes();
  for (int i = 0; i < (int)list.count(); i++) {
-	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.desktop"));
+	KSimpleConfig cfg(list[i] + QString::fromLatin1("/index.cursor"));
 	if (!cfg.hasGroup("Boson Cursor")) {
 		boWarning() << "invalid cursor " << list[i] << endl;
 	} else {
