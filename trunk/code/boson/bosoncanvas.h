@@ -28,7 +28,6 @@ class BosonMap;
 class Cell;
 class Player;
 class Unit;
-class Facility;
 class UnitProperties;
 class BoShot;
 class BoDisplayManager;

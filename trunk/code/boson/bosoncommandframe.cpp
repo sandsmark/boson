@@ -714,7 +714,7 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
 void BosonCommandFrame::slotUpdateProduction(Unit* f)
 {
  if (!f) {
-	kdError() << k_funcinfo << "NULL facility" << endl;
+	kdError() << k_funcinfo << "NULL production plugin" << endl;
 	return;
  }
  if ((d->mSelectedUnit) == f) {

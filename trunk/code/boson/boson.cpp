@@ -398,7 +398,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		}
 #warning TODO
 //		if (!refinery->plugin(UnitPlugin::Refinery)) {
-		if (!refinery->isFacility()) {
+		if (!refinery->isFacility()) { // FIXME do not depend on facility!
 			kdWarning() << k_lineinfo << "refinery must be a facility" << endl;
 			break;
 		}
@@ -491,13 +491,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
-		Facility* factory = (Facility*)findUnit(factoryId, p);
+		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
 			kdError() << "Cannot find unit " << factoryId << endl;
-			break;
-		}
-		if (!((Unit*)factory)->isFacility()) {
-			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
 		if (unitType <= 0) {
@@ -617,13 +613,9 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << "Cannot find player " << owner << endl;
 			break;
 		}
-		Facility* factory = (Facility*)findUnit(factoryId, p);
+		Unit* factory = findUnit(factoryId, p);
 		if (!factory) {
 			kdError() << "Cannot find unit " << factoryId << endl;
-			break;
-		}
-		if (!((Unit*)factory)->isFacility()) {
-			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
 		ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
@@ -644,7 +636,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
 		}
-		buildProducedUnit(factory, unitType, x, y);
+		buildProducedUnit(production, unitType, x, y);
 		break;
 	}
 	case BosonMessage::MoveFollow:
@@ -1087,18 +1079,13 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // kdDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(Facility* factory, unsigned long int unitType, int x, int y)
+bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y)
 {
  if (!factory) {
-	kdError() << k_funcinfo << "NULL factory cannot produce" << endl;
+	kdError() << k_funcinfo << "NULL factory plugin cannot produce" << endl;
 	return false;
  }
- ProductionPlugin* production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
- if (!production) {
-	kdError() << k_funcinfo << "factory " << factory->id() << " cannot produce" << endl;
-	return false;
- }
- Player* p = factory->owner();
+ Player* p = factory->player();
  if (!p) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return false;
@@ -1116,8 +1103,8 @@ bool Boson::buildProducedUnit(Facility* factory, unsigned long int unitType, int
  }
 
  // the current production is done.
- production->removeProduction();
- emit signalUpdateProduction(factory);
+ factory->removeProduction();
+ emit signalUpdateProduction(factory->unit());
  return true;
 }
 
