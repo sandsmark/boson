@@ -284,7 +284,7 @@ void ProductionPlugin::advance(unsigned int)
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
 					//depend on Facility! should be Unit
-					((Boson*)player()->game())->buildProducedUnit(this, id, currentx, currenty);
+					((Boson*)player()->game())->buildProducedUnit(this, id, BoVector2(currentx, currenty));
 					return;
 				}
 			}
@@ -941,9 +941,9 @@ BombingPlugin::~BombingPlugin()
 {
 }
 
-void BombingPlugin::bomb(int weaponId, float x, float y)
+void BombingPlugin::bomb(int weaponId, BoVector2 pos)
 {
- boDebug() << k_funcinfo << "wep: " << weaponId << "; pos: (" << x << "; " << y << ")" << endl;
+ boDebug() << k_funcinfo << "wep: " << weaponId << "; pos: (" << pos.x() << "; " << pos.y() << ")" << endl;
  BosonWeapon* w = unit()->weapon(weaponId);
  if (!w) {
 	boError() << k_funcinfo << "No weapon with id " << weaponId << endl;
@@ -956,14 +956,15 @@ void BombingPlugin::bomb(int weaponId, float x, float y)
 
  unit()->stopMoving();
 
- int cellX = (int)(x);
- int cellY = (int)(y);
+ int cellX = (int)pos.x();
+ int cellY = (int)pos.y();
  if (!canvas()->cell(cellX, cellY)) {
-	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
+	boError() << k_funcinfo << cellX << "," << cellY << " is no valid cell!" << endl;
 	return;
  }
 
  // This is where unit has to be when making the drop
+ // TODO: maybe use given position?
  mPosX = cellX + 1.0f / 2;
  mPosY = cellY + 1.0f / 2;
  boDebug() << k_funcinfo << "Drop-point: (" << mPosX << "; " << mPosY << ")" << endl;

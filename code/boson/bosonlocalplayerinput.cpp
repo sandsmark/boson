@@ -214,7 +214,7 @@ void BosonLocalPlayerInput::harvest(const HarvesterPlugin* harvester, const Reso
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, int x, int y)
+void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, float x, float y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -226,7 +226,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, int x
   // We want to move without attacking
   stream << (Q_UINT8)0;
   // tell them where to move to:
-  stream << QPoint(x, y);
+  stream << BoVector2(x, y);
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
@@ -245,7 +245,7 @@ void BosonLocalPlayerInput::moveWithoutAttack(const QPtrList<Unit>& units, int x
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, int x, int y)
+void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, float x, float y)
 {
   boDebug() << k_funcinfo << endl;
   // FIXME: maybe moveWithAttack() and moveWithoutAttack() should be merged to
@@ -259,7 +259,7 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, int x, i
   // We want to move with attacking
   stream << (Q_UINT8)1;
   // tell them where to move to:
-  stream << QPoint(x, y);
+  stream << BoVector2(x, y);
   // tell them how many units:
   stream << (Q_UINT32)units.count();
   Unit* unit = 0;
@@ -278,7 +278,7 @@ void BosonLocalPlayerInput::moveWithAttack(const QPtrList<Unit>& units, int x, i
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, int x, int y)
+void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, float x, float y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -288,8 +288,7 @@ void BosonLocalPlayerInput::build(ProductionType type, Unit* factory, int x, int
   stream << (Q_UINT32)type;
   stream << (Q_ULONG)factory->id();
   stream << (Q_UINT32)factory->owner()->id();
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);
@@ -319,7 +318,7 @@ void BosonLocalPlayerInput::attack(const QPtrList<Unit>& units, Unit* target)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, int x, int y)
+void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, float x, float y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -328,8 +327,7 @@ void BosonLocalPlayerInput::dropBomb(Unit* u, int weapon, int x, int y)
   // tell the clients we want to drop bomb:
   stream << (Q_UINT32)BosonMessage::MoveDropBomb;
   // tell place
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
   // tell them how many units attack:
   stream << (Q_UINT32)1;
   stream << (Q_UINT32)u->id();
@@ -416,7 +414,7 @@ void BosonLocalPlayerInput::follow(const QPtrList<Unit>& units, Unit* target)
   sendInput(msg);
 }
 
-void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, int x, int y)
+void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType, float x, float y)
 {
   boDebug() << k_funcinfo << endl;
   QByteArray b;
@@ -426,8 +424,7 @@ void BosonLocalPlayerInput::placeUnit(Player* owner, unsigned long int unitType,
   stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
   stream << (Q_INT32)owner->id();
   stream << (Q_INT32)unitType;
-  stream << (Q_INT32)x;
-  stream << (Q_INT32)y;
+  stream << BoVector2(x, y);
 
   QDataStream msg(b, IO_ReadOnly);
   sendInput(msg);

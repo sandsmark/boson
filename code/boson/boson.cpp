@@ -841,7 +841,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // boDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int cellX, int cellY)
+bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2 pos)
 {
  if (!d->mCanvas) {
 	BO_NULL_ERROR(d->mCanvas);
@@ -856,12 +856,12 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return false;
  }
- if (!(d->mCanvas)->canPlaceUnitAtCell(p->unitProperties(unitType), QPoint(cellX, cellY), 0)) {
+ if (!(d->mCanvas)->canPlaceUnitAt(p->unitProperties(unitType), pos, 0)) {
 	boDebug() << k_funcinfo << "Cannot create unit here" << endl;
 	return false;
  }
- BoVector3 pos((float)cellX, (float)cellY, 0.0f);
- Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos);
+ BoVector3 pos3(pos.x(), pos.y(), 0.0f);
+ Unit* unit = (Unit*)d->mCanvas->createNewItem(RTTI::UnitStart + unitType, p, ItemType(unitType), pos3);
  if (!unit) {
 	boError() << k_funcinfo << "NULL unit" << endl;
 	return false;

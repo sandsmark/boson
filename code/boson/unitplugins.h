@@ -35,6 +35,7 @@ class Player;
 class PluginProperties;
 class Boson;
 class BosonItem;
+class BoVector2;
 class BosonWeapon;
 
 class QDomElement;
@@ -367,7 +368,7 @@ public:
 
 	virtual int pluginType() const { return Bombing; }
 
-	void bomb(int weaponId, float x, float y);
+	void bomb(int weaponId, BoVector2 pos);
 
 	virtual void advance(unsigned int);
 

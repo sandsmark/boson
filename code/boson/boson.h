@@ -38,6 +38,7 @@ class BoEvent;
 class BoEventManager;
 class BoAdvanceMessageTimes;
 class BoDebugMessage;
+class BoVector2;
 
 #define boGame Boson::boson()
 
@@ -171,10 +172,9 @@ public:
 	 * @param factory Where the unit is being build
 	 * @param unitType which type of unit being buid. See @ref
 	 * UnitProperties::typeId
-	 * @param x The x-coordinate of the new unit.
-	 * @param y The y-coordinate of the new unit.
+	 * @param pos The position of the new unit.
 	 **/
-	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, int x, int y);
+	bool buildProducedUnit(ProductionPlugin* factory, unsigned long int unitType, BoVector2 pos);
 
 	virtual void networkTransmission(QDataStream&, int msgid, Q_UINT32 receiver, Q_UINT32 sender, Q_UINT32 clientID);
 

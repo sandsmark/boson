@@ -138,7 +138,7 @@ void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if (!canvas()->onCanvas((int)(*it)->x(), (int)(*it)->y())) {
+	if (!canvas()->onCanvas((*it)->x(), (*it)->y())) {
 		boError() << k_funcinfo << "item is not on the canvas" << endl;
 		continue;
 	}
