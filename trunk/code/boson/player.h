@@ -201,6 +201,12 @@ signals:
 	void signalUnitLoaded(Unit* unit, int x, int y);
 
 public slots:
+	/**
+	 * Called when a @ref KGameProperty object of a @ref Unit changes.
+	 *
+	 * WARNING: we assume that this actually <em>is</em> a unit property and
+	 * its property handler must be a @ref UnitPropertyHandler!
+	 **/
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);
 	void slotNetworkData(int msgid, const QByteArray& msg, Q_UINT32 sender, KPlayer*);
 

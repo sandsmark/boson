@@ -21,11 +21,11 @@
 #include "unitbase.h"
 
 #include "unitproperties.h"
+#include "unitpropertyhandler.h" // not related to unitproperties!
 #include "player.h"
 #include "speciestheme.h"
 #include "bodebug.h"
 
-#include <kgame/kgamepropertyhandler.h>
 #include <kstaticdeleter.h>
 
 #include <qdom.h>
@@ -39,7 +39,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  if (!mPropertyMap) {
 	initStatic();
  }
- mProperties = new KGamePropertyHandler();
+ mProperties = new UnitPropertyHandler(this);
  mProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
  mOwner = 0;
@@ -317,13 +317,18 @@ void UnitBase::reloadShields(int by)
  }
 }
 
+KGamePropertyHandler* UnitBase::dataHandler() const
+{
+ return (KGamePropertyHandler*)mProperties;
+}
+
 KGamePropertyHandler* UnitBase::weaponDataHandler()
 {
  if (mWeaponProperties) {
-	return mWeaponProperties;
+	return (KGamePropertyHandler*)mWeaponProperties;
  }
- mWeaponProperties = new KGamePropertyHandler();
+ mWeaponProperties = new UnitPropertyHandler(this);
  mWeaponProperties->setPolicy(KGamePropertyBase::PolicyLocal); // fallback
- return mWeaponProperties;
+ return (KGamePropertyHandler*)mWeaponProperties;
 }
 

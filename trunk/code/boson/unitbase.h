@@ -34,6 +34,7 @@ class Player;
 class UnitProperties;
 class PluginProperties;
 class SpeciesTheme;
+class UnitPropertyHandler;
 
 /**
  * Ok, ok - this class is useless. All it does is providing a lot of properties
@@ -227,7 +228,7 @@ public:
 	 * objects of this unit. Note that you should use @ref weaponDataHandler
 	 * for weapon properties instead.
 	 **/
-	KGamePropertyHandler* dataHandler() const { return mProperties; }
+	KGamePropertyHandler* dataHandler() const;
 
 	/**
 	 * @return The @ref KGamePropertyHandler for weapon properties. The
@@ -391,8 +392,8 @@ private:
 	KGamePropertyInt mWork;
 	KGamePropertyInt mAdvanceWork;
 
-	KGamePropertyHandler* mProperties;
-	KGamePropertyHandler* mWeaponProperties;
+	UnitPropertyHandler* mProperties;
+	UnitPropertyHandler* mWeaponProperties;
 
 	const UnitProperties* mUnitProperties;
 
