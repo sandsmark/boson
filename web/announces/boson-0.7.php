@@ -134,12 +134,16 @@ Tarball checksums and sizes for the paranoid:
 </p>
 <pre>
 File name               Size   MD5 Checksum
-boson-all-0.7.tar.bz2   35 MB  
-boson-code-0.7.tar.bz2  675 kB 
-boson-data-0.7.tar.bz2  19 MB  
-boson-music-0.7.tar.bz2 16 MB 
+boson-all-0.7.tar.bz2   35 MB  ab46f3432d10d144a37348377030b590
+boson-code-0.7.tar.bz2  675 kB df9a9ff12ebb2d0e0c0b3915757b5745
+boson-data-0.7.tar.bz2  19 MB  53d5a058099ee75a1c93ad6dbd811688
+boson-music-0.7.tar.bz2 16 MB  650a3fbda64d884b63fb2e139212a144
 </pre>
 
+<p class=\"announcement\">
+note: To get the checksum of a file, type:<br />
+<pre>% md5sum &lt;file&gt;</pre>
+</p>
 <p class=\"announcement\">
 The Boson Team
 </p>
