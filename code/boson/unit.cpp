@@ -358,7 +358,7 @@ void Unit::advanceNone(unsigned int advanceCount)
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
 
- if (advanceCount % 20 != 0) {
+ if (advanceCount % 5 != 0) {
 	return;
  }
  
@@ -367,73 +367,127 @@ void Unit::advanceNone(unsigned int advanceCount)
 
 bool Unit::attackEnemyUnitsInRange()
 {
- bool shotAtAnything = false;
- if (unitProperties()->canShoot()) {
-	BoItemList list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
-	BosonWeapon* w;
-	if(list.count() > 0) {
-		QPtrListIterator<BosonWeapon> wit(d->mWeapons);
-		Unit* bestunit = 0;
-		Unit* bestnonshooting = 0;
-		BoItemList::Iterator it = list.begin();
-		Unit* u = 0;
-		while (( w = wit.current()) != 0) {
-			++wit;
-			bestunit = 0;
-			bestnonshooting = 0;
-			it = list.begin();
-			for (; it != list.end(); ++it) {
-				u = ((Unit*)*it);
-				// Quick check if we can shoot at u
-				if (u->isFlying()) {
-					if(!unitProperties()->canShootAtAirUnits()) {
-						continue;
-					}
-				} else {
-					if(!unitProperties()->canShootAtLandUnits()) {
-						continue;
-					}
-				}
-				// Shoot at units that can shoot first, then at units that cannot shoot
-				if (u->unitProperties()->canShoot()) {
-					if (w->canShootAt(u) && inRange(w->properties()->range(), u)) {
-						bestunit = u;
-						break;
-					}
-				} else {
-					// FIXME: duplicated code!
-					if (w->canShootAt(u) && inRange(w->properties()->range(), u)) {
-						bestnonshooting = u;
-						break;
-					}
-				}
-			}
-			// If we didn't find any military units to shoot at, we shoot at others (if we found any)
-			if (!bestunit && bestnonshooting) {
-				bestunit = bestnonshooting;
-			}
-			if (bestunit) {
-				if (isMobile()) {
-					float rot = rotationToPoint(bestunit->x() - x(), bestunit->y() - y());
-					if (rot < rotation() - 5 || rot > rotation() + 5) {
-						// Rotate to face target
-						if (QABS(rotation() - rot) > (2 * speed())) {
-							turnTo((int)rot);
-							setAdvanceWork(WorkTurn);
-							return true;
-						} else {
-							// If we can get wanted rotation with only little turning, then we don't call turnTo()
-							setRotation(rot);
-						}
-					}
-				}
-				shootAt(w, bestunit);
-				shotAtAnything = true;
-			}
+ if(!unitProperties()->canShoot()) {
+	return false;
+ }
+
+ // TODO: Note that this is not completely realistic nor good: it may be good to
+ //  e.g. not waste some weapon with very big damage and reload values for very
+ //  weak unit. So there room left for improving :-)
+ QPtrListIterator<BosonWeapon> wit(d->mWeapons);
+ BosonWeapon* w;
+ while (( w = wit.current()) != 0) {
+	++wit;
+
+	if (!w->reloaded()) {
+		continue;
+	}
+
+	// We use target to store best enemy in range so we don't have to look for it every time.
+	// If there's no target or target isn't in range anymore, find new best enemy unit in range
+	if (!target() || target()->isDestroyed() ||
+			!inRange(unitProperties()->maxWeaponRange(), target())) {
+		d->mTarget = bestEnemyUnitInRange();
+		if (!target()) {
+			return false;
+		}
+	}
+
+	// If unit is mobile, rotate to face the target if it isn't facing it yet
+	if (isMobile()) {
+	float rot = rotationToPoint(target()->x() - x(), target()->y() - y());
+	if (rot < rotation() - 5 || rot > rotation() + 5) {
+		// Rotate to face target
+		if (QABS(rotation() - rot) > (2 * speed())) {
+			turnTo((int)rot);
+			setAdvanceWork(WorkTurn);
+			return true;
+		} else {
+			// If we can get wanted rotation with only little turning, then we don't call turnTo()
+			setRotation(rot);
 		}
 	}
  }
- return shotAtAnything;
+
+	// And finally... let it have everything we've got
+	if (w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
+		shootAt(w, target());
+		if (target()->isDestroyed()) {
+			d->mTarget = 0l;
+		}
+	}
+ }
+
+ return true;
+
+}
+
+Unit* Unit::bestEnemyUnitInRange()
+{
+ // Return if unit can't shoot
+ if (!unitProperties()->canShoot()) {
+	return 0l;
+ }
+ // Return if no enemies in range
+ BoItemList list = enemyUnitsInRange(unitProperties()->maxWeaponRange());
+ if (!list.count() > 0) {
+	return 0l;
+ }
+
+ // Initialize some variables
+ Unit* best = 0l;
+ BoItemList::Iterator it = list.begin();
+ Unit* u = 0l;
+ // Candidates to best unit, see below
+ Unit* c1 = 0l;
+ Unit* c2 = 0l;
+ Unit* c3 = 0l;
+
+ // Iterate through the list of enemies and pick the best ones
+ for (; it != list.end(); ++it) {
+	u = ((Unit*)*it);
+	// Quick check if we can shoot at u
+	if (u->isFlying()) {
+		if(!unitProperties()->canShootAtAirUnits()) {
+			continue;
+		}
+	} else {
+		if(!unitProperties()->canShootAtLandUnits()) {
+			continue;
+		}
+	}
+
+	// Check if it's the best unit so far.
+	// This is presedence of enemies:
+	//  1. enemies that can shoot at us
+	//  2. enemies that can shoot, but not at us
+	//  3. others
+	// Shoot at units that can shoot first, then at units that cannot shoot
+	if (u->unitProperties()->canShoot()) {
+		if ((isFlying() && u->unitProperties()->canShootAtAirUnits()) ||
+				(!isFlying() && u->unitProperties()->canShootAtLandUnits())) {
+			// u is type 1 - it can shoot at us
+			// TODO: check also for health here - first kill weaker units
+			c1 = u;
+		} else {
+			// u is type 2 - it can shoot but not at us
+			c2 = u;
+		}
+	} else {
+		// u is type 3 - it can't shoot
+		c3 = u;
+	}
+ }
+
+ // Pick the best unit from the candidates
+ if(c1) {
+	best = c1;
+ } else if(c2) {
+	best = c2;
+ } else if(c3) {
+	best = c3;
+ }
+ return best;
 }
 
 void Unit::advanceAttack(unsigned int advanceCount)
@@ -808,7 +862,7 @@ bool Unit::load(QDataStream& stream)
 
 bool Unit::inRange(unsigned long int r, Unit* target) const
 {
- return (QMAX(QABS(target->x() - x()), QABS(target->y() - y())) <= r * BO_TILE_SIZE);
+ return (QMAX(QABS((int)(target->x() - x()) / BO_TILE_SIZE), QABS((int)(target->y() - y()) / BO_TILE_SIZE)) <= r);
 }
 
 void Unit::shootAt(BosonWeapon* w, Unit* target)
@@ -1146,6 +1200,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	// Check for any enemy units in range
 	if (attackEnemyUnitsInRange()) {
 		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+		setVelocity(0.0, 0.0, 0.0);  // To prevent moving
 		return;
 	}
  }
