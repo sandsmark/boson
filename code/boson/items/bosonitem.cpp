@@ -362,3 +362,8 @@ void BosonItem::renderItem()
  }
 }
 
+BosonCollisions* BosonItem::collisions() const
+{
+ return canvas()->collisions();
+}
+

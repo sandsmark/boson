@@ -55,6 +55,11 @@ BosonCanvas* BosonBigDisplayInputBase::canvas() const
  return bigDisplay()->canvas();
 }
 
+BosonCollisions* BosonBigDisplayInputBase::collisions() const
+{
+ return canvas()->collisions();
+}
+
 Player* BosonBigDisplayInputBase::localPlayer() const
 {
  return bigDisplay()->localPlayer();
@@ -87,7 +92,7 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
 	BoItemList list;
 	QRect r = rect;
-	list = canvas()->collisions(r);
+	list = collisions()->collisions(r);
 	BoItemList::Iterator it;
 	boDebug() << "Selection count: " << list.count() << endl;
 	for (it = list.begin(); it != list.end(); ++it) {
@@ -108,7 +113,7 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
  QPtrList<Unit> unitList;
  Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
  BoItemList::Iterator it;
- list = canvas()->collisions(r);
+ list = collisions()->collisions(r);
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
@@ -150,7 +155,7 @@ void BosonBigDisplayInputBase::selectArea(const QRect& rect, bool replace)
 void BosonBigDisplayInputBase::unselectArea(const QRect& rect)
 {
  BoItemList list;
- list = canvas()->collisions(rect);
+ list = collisions()->collisions(rect);
  BoItemList::Iterator it;
  for (it = list.begin(); it != list.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
