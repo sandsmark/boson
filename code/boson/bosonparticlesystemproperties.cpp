@@ -209,31 +209,35 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
   particle->maxage = particle->life;
   particle->color = mStartColor;
   particle->size = mStartSize;
+  BoVector3 pos;  // particle's relative position to particle system
+  pos.set(getFloat(mMinPos[0], mMaxPos[0]), getFloat(mMinPos[1], mMaxPos[1]),
+      getFloat(mMinPos[2], mMaxPos[2]));
+  if(mNormalizePos)
+  {
+    //boDebug(150) << k_funcinfo << "Normalizing particle pos (scale: " << mMinPosScale << " - " << mMaxPosScale << ")" << endl;
+    //boDebug(150) << k_funcinfo << "Current pos: (" << particle->pos.x() << ", " << particle->pos.y() << ", " << particle->pos.z() << "); length: " << particle->pos.length() << endl;
+    //float scale = getFloat(mMinPosScale, mMaxPosScale);
+    //boDebug(150) << k_funcinfo << "Scaling by " << scale << " / " << particle->pos.length() << " = " << scale / particle->pos.length() << endl;
+    pos.scale(getFloat(mMinPosScale, mMaxPosScale) / pos.length());
+    //boDebug(150) << k_funcinfo << "New pos: (" << particle->pos.x() << ", " << particle->pos.y() << ", " << particle->pos.z() << "); length: " << particle->pos.length() << endl;
+  }
   if(s->isRotated())
   {
-    BoVector3 pos(getFloat(mMinPos[0], mMaxPos[0]),
-        getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
+    BoVector3 pos2 = pos;
     BoVector3 velo(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
-    BoVector3 pos2;
-    s->matrix().transform(&pos2, &pos);
-    particle->pos += pos2;
+    s->matrix().transform(&pos, &pos2);
     s->matrix().transform(&(particle->velo), &velo);
   }
   else
   {
-    particle->pos += BoVector3(getFloat(mMinPos[0], mMaxPos[0]),
-        getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
-    particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
+    particle->velo.set(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
   }
+  particle->pos += pos;
   if(mNormalizeVelo)
   {
     particle->velo.scale(getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
-  }
-  if(mNormalizePos)
-  {
-    particle->pos.scale(getFloat(mMinPosScale, mMaxPosScale) / particle->pos.length());
   }
 }
 

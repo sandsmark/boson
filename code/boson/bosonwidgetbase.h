@@ -229,8 +229,9 @@ protected slots:
 	/**
 	 * Directly add a chat message from the system (i.e. the game)
 	 * <em>without</em> sending it over network.
+	 * If forPlayer is NULL, message is shown to all players, otherwise only to forPlayer
 	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
 protected:
 	void setLocalPlayerRecursively(Player* p);
