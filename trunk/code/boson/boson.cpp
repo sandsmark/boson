@@ -236,7 +236,7 @@ void BoAdvance::receiveAdvanceCall()
 {
  BO_CHECK_NULL_RET(mCurrentAdvanceMessageTimes);
  mCurrentAdvanceMessageTimes->receiveAdvanceCall();
-// boDebug() << k_funcinfo << advanceCallsCount() << endl;
+ boDebug(300) << k_funcinfo << advanceCallsCount() << endl;
  bool flag = advanceFlag();
  // we need to toggle the flag *now*, in case one of the Unit::advance*()
  // methods changes the advance function. this change must not appear to the
@@ -248,6 +248,8 @@ void BoAdvance::receiveAdvanceCall()
  // -> slots may be called in random order, but we need well defined order
  // (otherwise network may get broken soon)
  mBoson->eventManager()->advance();
+
+ boDebug(300) << k_funcinfo << advanceCallsCount() << " DONE" << endl;
 
  mAdvanceCallsCount = mAdvanceCallsCount + 1;
 }
