@@ -104,7 +104,7 @@ public:
 		mActionChat = 0;
 		mActionCmdFrame = 0;
 
-		mScript = 0;
+		mLocalPlayerScript = 0;
 
 		mCanvas = 0;
 
@@ -123,7 +123,7 @@ public:
 
 	bool mInitialized;
 
-	BosonScript* mScript;
+	BosonScript* mLocalPlayerScript;
 
 	BosonCanvas* mCanvas;
 
@@ -1137,12 +1137,12 @@ void BosonWidgetBase::slotSetEnableColormap(bool enable)
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
- d->mScript->execLine(line);
+ d->mLocalPlayerScript->execLine(line);
 }
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
 {
- d->mScript->advance();
+ d->mLocalPlayerScript->advance();
 }
 
 void BosonWidgetBase::initScripts()
@@ -1160,10 +1160,10 @@ void BosonWidgetBase::initScripts()
  }
 
  // Init script for local player
- d->mScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
+ d->mLocalPlayerScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
  // No script will be loaded
- d->mScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
- d->mScript->init();
+ d->mLocalPlayerScript->loadScript(locate("data", "boson/scripts/localplayer-script.py"));
+ d->mLocalPlayerScript->init();
 }
 
 void BosonWidgetBase::slotDumpGameLog()
