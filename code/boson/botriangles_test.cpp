@@ -59,7 +59,9 @@ void loadNode(Lib3dsNode* node3ds)
 	return;
  }
 
- BoMesh* boMesh = new BoMesh(mesh);
+#warning FIXME
+ // TODO: we need to load this stuff here...
+ BoMesh* boMesh = new BoMesh(mesh->faces);
  boMesh->connectFaces();
  BoNode* node = boMesh->faces();
  if (!node) {
@@ -74,6 +76,7 @@ void loadNode(Lib3dsNode* node3ds)
  int faceCount = 1;
  for (; node; node = node->next(), faceCount++) {
 	BoVector3 v[3];
+#warning FIXME
 	BoVector3::makeVectors(v, mesh, node->face());
 	QString s = QString("Face %1: ").arg(faceCount);
 	for (int i = 0; i < 3; i++) {

@@ -22,7 +22,6 @@
 
 #include "bo3dtools.h"
 
-#include <lib3ds/types.h>
 #include <qptrlist.h>
 
 class BoMesh;
@@ -39,12 +38,11 @@ public:
 	void setPrevious(BoNode* previous);
 	void setNext(BoNode* next);
 
-	void setFace(Lib3dsFace* f);
-
-	Lib3dsFace* face() const
-	{
-		return mFace;
-	}
+	/**
+	 * @param points An array of three with inidces to the vertices and
+	 * texels (in case the mesh is textured) of this face in @ref BoMesh.
+	 **/
+	void setFace(const int* points);
 
 	BoNode* next() const
 	{
@@ -111,7 +109,6 @@ private:
 private:
 	BoNode* mNext;
 	BoNode* mPrevious;
-	Lib3dsFace* mFace;
 	int mRelevantPoint;
 	int mPointIndex[3];
 };
@@ -121,10 +118,34 @@ class BoMeshPrivate;
 class BoMesh
 {
 public:
-	BoMesh(Lib3dsMesh* mesh);
+	/**
+	 * @param faces The number of faces (triangles) in this mesh to be
+	 * created. You must use @ref setFace to initialize them.
+	 **/
+	BoMesh(unsigned int faces);
 	~BoMesh();
 
-	void loadPoints();
+	/**
+	 * @param See @ref BoNode::setFace. Remember to add the actual points to
+	 * this mesh! See especially @ref setVertex
+	 **/
+	void setFace(int index, const int* points);
+
+	/**
+	 * Prepare to load the points, i.e. allocate memory for them. You can
+	 * set them using @ref setVertex and @ref setTexel.
+	 **/
+	void allocatePoints(unsigned int points, bool texels);
+
+	/**
+	 * You must call @ref allocatePoints before calling this!
+	 **/
+	void setVertex(unsigned int index, const BoVector3&);
+
+	/**
+	 * The third coordinate is discarded.
+	 **/
+	void setTexel(unsigned int index, const BoVector3&);
 
 	/**
 	 * Try to connect all faces in @ref mesh, so that we can use
@@ -162,17 +183,21 @@ public:
 
 	BoNode* faces() const;
 
-	void setMaterial(Lib3dsMaterial* mat);
+	/**
+	 * Set whether this mesh is a teamcolor object or not.
+	 **/
+	void setIsTeamColor(bool teamColor);
+
+	/**
+	 * @return TRUE if this is a teamcolor object (which also is not textured)
+	 * and FALSE if it is not a teamcolor object.
+	 **/
+	bool isTeamColor() const;
+	
 	void setTextured(bool isTextured);
 	void setTextureObject(GLuint tex);
 	GLuint textureObject() const;
 	bool textured() const;
-
-	Lib3dsMesh* mesh() const;
-
-	static Lib3dsMaterial* material(Lib3dsMesh* mesh, Lib3dsFile* file);
-	static QString textureName(Lib3dsMesh* mesh, Lib3dsFile* file);
-	static bool isTeamColor(const Lib3dsMesh* mesh);
 
 	void renderMesh();
 	void renderPoint(int index);
@@ -192,14 +217,7 @@ public:
 	unsigned int points() const;
 
 protected:
-	/**
-	 * Load the texels with their (final) coordinates.
-	 **/
-	void loadTexels();
-
-	void loadVertices();
-
-	void createNodes();
+	void createNodes(unsigned int faces);
 	bool connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const;
 
 private:

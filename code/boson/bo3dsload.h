@@ -77,11 +77,18 @@ public:
 	static QStringList textures(Lib3dsFile* file);
 	QStringList textures() const;
 
+	static bool isTeamColor(const Lib3dsMesh* mesh);
+	static QString textureName(const Lib3dsMesh* mesh, Lib3dsFile* file);
+	static Lib3dsMaterial* material(const Lib3dsMesh* mesh, Lib3dsFile* file);
+
 protected:
 	void loadMesh(Lib3dsNode* node);
 	void loadFrame(int frame);
 	void countNodes(Lib3dsNode* node, int* count);
 	void loadFrameNode(BoFrame* frame, int* index, Lib3dsNode* node);
+	void loadVertices(BoMesh* mesh, Lib3dsMesh* mesh);
+	void loadTexels(BoMesh* mesh, Lib3dsMesh* mesh, Lib3dsMaterial* material);
+	void loadFaces(BoMesh* mesh, Lib3dsMesh* mesh);
 
 	/**
 	 * Render the specified node according to the values for the current

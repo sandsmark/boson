@@ -164,25 +164,31 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 	boWarning() << k_funcinfo << "no faces in " << mesh->name << " of " << file() << endl;
 	return;
  }
+ if (mesh->points < 1) {
+	boWarning() << k_funcinfo << "no points in " << mesh->name << " of " << file() << endl;
+	return;
+ }
  if (mesh->texels != 0 && mesh->texels != mesh->points) {
 	boError(100) << k_funcinfo << "hmm.. points: " << mesh->points
 			<< " , texels: " << mesh->texels << endl;
 	return;
  }
 
- QString textureName = BoMesh::textureName(mesh, m3ds);
+ QString textureName = Bo3DSLoad::textureName(mesh, m3ds);
 
- BoMesh* boMesh = new BoMesh(mesh);
+ BoMesh* boMesh = new BoMesh(mesh->faces);
  mMesh2Mesh.insert(mesh, boMesh);
  mData->addMesh(boMesh);
+ boMesh->setIsTeamColor(Bo3DSLoad::isTeamColor(mesh));
  mData->setTexture(boMesh, textureName);
 
- boMesh->setMaterial(BoMesh::material(mesh, m3ds));
  boMesh->setTextured(!textureName.isEmpty()); // this may get changed if BosonModel::cleanTextureName() can't find our texture
 
- boMesh->loadPoints();
+ boMesh->allocatePoints(mesh->points, mesh->texels != 0);
+ loadVertices(boMesh, mesh);
+ loadTexels(boMesh, mesh, Bo3DSLoad::material(mesh, m3ds));
 
-// boMesh->setTextureObject(myTex);
+ loadFaces(boMesh, mesh);
 }
 
 void Bo3DSLoad::loadFrame(int frame)
@@ -389,5 +395,176 @@ void Bo3DSLoad::findAdjacentFaces(QPtrList<Lib3dsFace>* adjacentFaces, Lib3dsMes
  }
 
  boDebug() << k_funcinfo << "adjacent: " << adjacentFaces->count() << " of " << mesh->faces << endl;
+}
+
+bool Bo3DSLoad::isTeamColor(const Lib3dsMesh* mesh)
+{
+ if (!mesh) {
+	BO_NULL_ERROR(mesh);
+	return false;
+ }
+ if (QString::fromLatin1(mesh->name).find("teamcolor", 0, false) == 0) {
+	return true;
+ }
+ return false;
+}
+
+QString Bo3DSLoad::textureName(const Lib3dsMesh* mesh, Lib3dsFile* file)
+{
+ if (!mesh || mesh->faces == 0) {
+	return QString::null;
+ }
+ if (mesh->texels == 0) {
+	return QString::null;
+ }
+ Lib3dsMaterial* mat = Bo3DSLoad::material(mesh, file);
+ if (!mat) {
+	return QString::null;
+ }
+ if (Bo3DSLoad::isTeamColor(mesh)) {
+	// teamcolor objects are not textured.
+	return QString::null;
+ }
+
+ // this is the texture map of the object.
+ // t->name is the (file-)name and in
+ // mesh->texelL you can find the texture
+ // coordinates for glTexCoord*()
+ // note that mesh->texels can be 0 - then the
+ // mesh doesn't have any texture. otherwise it
+ // must be equal to mesh->points
+ Lib3dsTextureMap* t = &mat->texture1_map;
+
+ // AB: note that we use BosonModel::cleanTextureName() for the final name. here
+ // we return the name from the 3ds file only.
+ return QString(t->name);
+}
+
+Lib3dsMaterial* Bo3DSLoad::material(const Lib3dsMesh* mesh, Lib3dsFile* file)
+{
+if (!mesh || mesh->faces == 0) {
+	return 0;
+ }
+ // AB: all faces in this mesh must use the same material!
+ Lib3dsFace* f = &mesh->faceL[0];
+ Lib3dsMaterial* mat = 0;
+ if (f->material[0]) {
+	mat = lib3ds_file_material_by_name(file, f->material);
+ }
+ return mat;
+}
+
+void Bo3DSLoad::loadVertices(BoMesh* boMesh, Lib3dsMesh* mesh)
+{
+ BO_CHECK_NULL_RET(boMesh);
+ BO_CHECK_NULL_RET(mesh);
+ if (mesh->points < 1) {
+	boError() << k_funcinfo << "no points in mesh" << endl;
+	return;
+ }
+ Lib3dsMatrix invMeshMatrix;
+ lib3ds_matrix_copy(invMeshMatrix, mesh->matrix);
+ lib3ds_matrix_inv(invMeshMatrix);
+ BoMatrix matrix(&invMeshMatrix[0][0]);
+
+ BoVector3 vector;
+ BoVector3 v;
+ for (unsigned int i = 0; i < mesh->points; i++) {
+	vector.set(mesh->pointL[i].pos);
+	matrix.transform(&v, &vector);
+	boMesh->setVertex(i, v);
+ }
+}
+
+void Bo3DSLoad::loadTexels(BoMesh* boMesh, Lib3dsMesh* mesh, Lib3dsMaterial* material)
+{
+ BO_CHECK_NULL_RET(boMesh);
+ BO_CHECK_NULL_RET(mesh);
+ if (mesh->texels == 0) {
+	return;
+ }
+ if (mesh->faces == 0) {
+	return;
+ }
+ if (mesh->points == 0) {
+	return;
+ }
+ if (!material) {
+	return;
+ }
+
+ BoMatrix texMatrix;
+ // *ggg* this is a nice workaround.
+ // it's hard to do this with a Lib3dsMatrix by several
+ // reasons - so we do these calculations in OpenGL
+ // (*NOT* in a display list - immediate mode) and then
+ // get the texture matrix.
+ // With this matrix we can easily calculate the actual
+ // texture coordinates.
+ // btw: this means that all calculations are done only
+ // once (on startup) and therefore we'll have some
+ // speedup
+
+ // AB: this part isn't time critical anymore. you can
+ // call even OpenGL commands without runtime slowdowns.
+ // We calculate the actual texture map coordinates only
+ // once and then use the final calculations in the
+ // display list.
+ glMatrixMode(GL_TEXTURE);
+ glLoadIdentity(); // should already be there
+ Lib3dsTextureMap* t = &material->texture1_map;
+ if ((t->scale[0] || t->scale[1]) && (t->scale[0] != 1.0 || t->scale[1] != 1.0)) {
+	// 3ds does these things pretty unhandy. it doesn't
+	// scale as opengl does, but rather emulates scaling the
+	// texture itself (i.e. when the texture is centered on
+	// an object it will still be centered after scaling).
+	// so we need to translate them before scaling.
+	glTranslatef((1.0 - t->scale[0]) / 2, (1.0 - t->scale[1]) / 2, 0.0);
+	glScalef(t->scale[0], t->scale[1], 1.0);
+ }
+ if (t->rotation != 0.0) {
+	glRotatef(-t->rotation, 0.0, 0.0, 1.0);
+ }
+ glTranslatef(-t->offset[0], -t->offset[1], 0.0);
+ glTranslatef(mesh->map_data.pos[0], mesh->map_data.pos[1], mesh->map_data.pos[2]);
+ float scale = mesh->map_data.scale;
+ if (scale != 0.0 && scale != 1.0) {
+	// doesn't seem to be used in our models
+	glScalef(scale, scale, 1.0);
+ }
+ texMatrix.loadMatrix(GL_TEXTURE_MATRIX);
+ if (texMatrix.isNull()) {
+	boWarning(100) << k_funcinfo << "Invalid texture matrix was generated!" << endl;
+	texMatrix.loadIdentity();
+ }
+ // AB: we don't use glPushMatrix() / glPopMatrix() here to make sure that the
+ // texture matrix is *always* the identity! we don't use the texture matrix
+ glLoadIdentity(); // reset to identity
+ glMatrixMode(GL_MODELVIEW);
+
+
+ // now we have the final texture matrix in texMatrix.
+ // all texel coordinates have to be transformed using this matrix.
+ BoVector3 a;
+ BoVector3 b;
+ for (unsigned int i = 0; i < mesh->texels; i++) {
+	a.set(mesh->texelL[i][0], mesh->texelL[i][1], 0.0);
+	texMatrix.transform(&b, &a);
+	boMesh->setTexel(i, b);
+ }
+}
+
+void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
+{
+ BO_CHECK_NULL_RET(boMesh);
+ BO_CHECK_NULL_RET(mesh);
+ for (unsigned int i = 0; i < mesh->faces; i++) {
+	Lib3dsFace* f = &mesh->faceL[i];
+	int points[3];
+	points[0] = f->points[0];
+	points[1] = f->points[1];
+	points[2] = f->points[2];
+	boMesh->setFace(i, points);
+ }
 }
 
