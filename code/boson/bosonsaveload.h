@@ -48,7 +48,8 @@ public:
 		Unknown = 0,
 		General = 1,
 		LoadBSGFileError = 2,
-		LoadInvalidXML = 3
+		LoadInvalidXML = 3,
+		LoadPlayersError = 4
 	};
 
 	/**
