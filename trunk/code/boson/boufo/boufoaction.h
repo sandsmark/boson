@@ -164,7 +164,7 @@ public:
 		return mUfoItem;
 	}
 
-protected:
+public:
 	void uslotActivated(ufo::UActionEvent*);
 	void uslotHighlighted(ufo::UActionEvent*);
 	void uslotWidgetRemoved(ufo::UWidget*);
