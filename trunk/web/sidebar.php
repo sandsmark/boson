@@ -55,6 +55,7 @@ draw_link("More information", "info.php");
 draw_link("Status", "status.php");
 draw_link("Contact us", "contact.php");
 draw_link("Related links", "links.php");
+draw_link("Change style", "options.php");
 sidebar_box_end();
 }
 

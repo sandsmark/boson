@@ -88,11 +88,16 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">
 
 function do_start_stuff()
 {
-// Cookie stuff
+// Visit cookie stuff
 global $visitcount, $HTTP_COOKIE_VARS;
 $visitcount=(int)$HTTP_COOKIE_VARS["Visits"];
 $visitcount++;
 setcookie("Visits", (string)$visitcount, time() + 3600 * 24 * 365 * 25); // Expires after 25 years
+
+// Style cookie stuff
+global $style;
+if($HTTP_COOKIE_VARS["Style"] != "")
+  $style=$HTTP_COOKIE_VARS["Style"];
 
 // Last modification stuff
 global $filename, $lastupdate;
