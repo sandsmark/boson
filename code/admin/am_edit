@@ -1703,22 +1703,23 @@ sub tag_BOSONDOCFILES ()
 
     my $bodocdir;
     if ($MakefileData =~ /\nBO_DOC_DIR\s*=\s*(\S*)\s*\n/) {
-        $bodocdir= '$(BO_DOC_DIR)';
+        $bodocdir= $1;
     } else {
-        $bodocdir= ".";
+        $bodocdir= "";
     }
-    print("docdir: $bodocdir\n");
+    # removing trailing slash
+    $bodocdir =~ s,/\s*$,,;
 
     my @filelist = split(' ', $files);
     my @wmlfiles;
     my @htmlfiles;
     foreach (@filelist) {
         if ($_ =~ /\.wml$/) {
-	    my $file = $_;
-	    push(@wmlfiles, $file);
-	    $file =~ s/\.wml$/\.html/;
+            my $file = $_;
+            push(@wmlfiles, $file);
+            $file =~ s/\.wml$/\.html/;
             push(@htmlfiles, $file);
-	}
+        }
     }
     my $lines = "";
     $lines .= "boson-docs: ";
@@ -1731,7 +1732,10 @@ sub tag_BOSONDOCFILES ()
     $lines .= "\t\$(mkinstalldirs) \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir\n";
 
     foreach (@htmlfiles) {
-        $lines .= "\t\$(INSTALL_DATA) $_ \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir\n";
+        $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n"; # not nice - but we need to skip installation, since the files can't be compiled.
+        $lines .= "\t  \$(INSTALL_DATA) $_ \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir ;\\\n";
+        $lines .= "\t  echo \$(INSTALL_DATA) $_ \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir ;\\\n";
+        $lines .= "\tfi\n";
     }
 
     $lines .= "\n";
@@ -1750,10 +1754,20 @@ sub tag_BOSONDOCFILES ()
     foreach (@htmlfiles) {
         my $htmlfile = $_;
         my $wmlfile = shift(@wmlfiles);
-        $lines .= "\n$htmlfile:\n";
+        my $basedir;
+        if ($bodocdir eq "") {
+            $basedir = "./";
+        } else {
+            $basedir = "../";
+            my $slashcount = $bodocdir =~ tr,/,,;
+            for (my $i = 0; $i < $slashcount; $i++) {
+                $basedir .= "../";
+            }
+        }
+        $lines .= "\n$htmlfile: $wmlfile\n";
         $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n";
-        $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
-        $lines .= "\t  echo \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\t  echo \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -D basedir=$basedir -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
         $lines .= "\tfi\n";
         $lines .= "\n";
     }
