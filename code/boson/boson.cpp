@@ -756,8 +756,10 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotAdvanceComputerPlayers(unsigned int, bool)));
  connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
+ d->mGamePaused.setEmittingSignal(false); // make valgrind happy
  d->mGamePaused.registerData(IdGamePaused, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GamePaused");
+ d->mGamePaused.setEmittingSignal(true);
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
 		KGamePropertyBase::PolicyClean, "GameSpeed");
  d->mGamePaused.setLocal(false);
