@@ -44,7 +44,7 @@
     <p>
     You can submit a bugreport through <a href="http://bugs.kde.org/wizard.cgi" target="_blank">bugs.kde.org</a>.<br>
     Or simply start Boson, you will find the "Report Bug..." entry in the "Help" menu.<br>
-    Please include a stacktrace if you have one. Also, if self compiled, configuring with --enable-debug=full helps us.
+    Please include a backtrace if you have one. Also, if self compiled, configuring with --enable-debug=full helps us.
     </p>
     <br>
     
@@ -64,7 +64,7 @@
     <h3>Game</h3>
     <a name="game_4">- Where is the menubar ?</a>
     <p>
-    To enable the application menubar press the left mouse button on the welcome screen and click on "Show Menubar".
+    To enable the application menubar press the right mouse button on the welcome screen and click on "Show Menubar".
     </p>
     <br>
 
