@@ -913,7 +913,7 @@ void
 UWidget::setFont(const UFont * font) {
 	m_font = font;
 	unmarkUIAttribute(AttribFont);
-	// FIXME: invalidate?
+	invalidate();
 	repaint();
 }
 

@@ -3,6 +3,7 @@ This is a copy of libufo cvs with a couple of patches applied.
 Patches applied currently (this list may not be complete):
 - Patch to uboboxlayout.cpp to make multiline labels work
 - Patch to utexturefont.cpp to return the correct face in listFonts()
+- Patch to uwidget.cpp: call invalidate() in setFont()
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo
