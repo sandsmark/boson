@@ -56,6 +56,12 @@ General TODOs
   this)
 - decrease game speed ; increase unit speed. Saves cpu power
 - add check for STL to configure script
+- when scrolling the big display the minerals/oil labels leave a white area
+  behind which are repainted a moment later. this white area should not appear
+  at all...
+- splitViews: we could use one view for players that are allied with the local
+  player. we need to transmit the position of the view over network... would be
+  a nice idea!
 
 Data TODOs
 - general sound (e.g. speech)

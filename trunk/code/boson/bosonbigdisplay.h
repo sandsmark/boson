@@ -30,6 +30,7 @@ class Player;
 class KPlayer;
 class KGame;
 class KGameChat;
+class BosonCursor;
 
 class QLabel;
 
@@ -67,12 +68,6 @@ public:
 		SelectRect = 2
 	};
 
-	enum CursorMode {
-		CursorAttack = 0,
-		CursorMove = 1,
-		CursorDefault = 2
-	};
-
 	void setLocalPlayer(Player* p);
 
 	/**
@@ -89,6 +84,13 @@ public:
 	void setKGameChat(KGameChat* c);
 	
 	void addChatMessage(const QString&);
+
+	void setHPos(unsigned int);
+	void setVPos(unsigned int);
+	unsigned int hPos() const;
+	unsigned int vPos() const;
+
+	void setCursor(BosonCursor* cursor);
 
 public slots:
 	/**
@@ -111,13 +113,6 @@ public slots:
 
 	void slotUpdateMinerals(int minerals);
 	void slotUpdateOil(int oil);
-
-	/**
-	 * Change the type of cursor that is used. There are currently @ref
-	 * BosonSpriteCursor and @ref BosonNormalCursor. See @ref CursorMode for
-	 * possible values.
-	 **/
-	void slotChangeCursor(int cursorMode);
 
 signals:
 	/**

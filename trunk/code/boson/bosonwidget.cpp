@@ -41,6 +41,7 @@
 #include "kgameunitdebug.h"
 #include "bosonmusic.h"
 #include "commandinput.h"
+#include "bosoncursor.h"
 #include "global.h"
 
 #include "defines.h"
@@ -86,6 +87,8 @@ public:
 		mViewLayout = 0;
 
 		mChat = 0;
+
+		mCursor = 0;
 	}
 	
 	QPtrList<BosonBigDisplay> mDisplayList;
@@ -115,6 +118,10 @@ public:
 	int mArrowKeyStep;
 
 	KGameChat* mChat;
+
+	BosonCursor* mCursor;
+
+	QPtrDict<KGameMouseIO> mIOList;
 };
 
 BosonWidget::BosonWidget(QWidget* parent)
@@ -133,6 +140,7 @@ void BosonWidget::init()
  d->mMobilesCount = 0;
  d->mFacilitiesCount = 0;
  d->mDisplayList.setAutoDelete(true);
+ d->mIOList.setAutoDelete(true);
 
  BosonConfig::initBosonConfig(); // initialize global config
  BosonMusic::initBosonMusic(); 
@@ -172,8 +180,9 @@ void BosonWidget::init()
  connect(d->mBoson, SIGNAL(signalNotEnoughOil(Player*)),
 		this, SLOT(slotNotEnoughOil(Player*)));
 
+ slotChangeCursor(boConfig->readCursorMode());
+ 
  addBigDisplay();
-// addBigDisplay();
  initChat();
 
  connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
@@ -233,9 +242,18 @@ void BosonWidget::initChat()
 BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
+ if (d->mCursor->isA("BosonSpriteCursor")) {
+	boConfig->saveCursorMode(CursorSprite);
+ } else if (d->mCursor->isA("BosonExperimentalCursor")) {
+	boConfig->saveCursorMode(CursorExperimental);
+ } else {
+	boConfig->saveCursorMode(CursorNormal);
+ }
+ d->mIOList.clear();
  delete d->mUnitTips;
  d->mDisplayList.clear();
  d->mBigDisplay = 0;
+ delete d->mCursor;
 
 // delete the destroyed units first
  d->mCanvas->deleteDestroyed();
@@ -258,18 +276,15 @@ BosonWidget::~BosonWidget()
 void BosonWidget::addLocalPlayer()
 {
  if (d->mLocalPlayer) {
+	d->mIOList.clear();
 	delete d->mLocalPlayer;
  }
  Player* p = new Player;
  p->setName(BosonConfig::readLocalPlayerName());
- KGameMouseIO* bigDisplayIO = new KGameMouseIO(d->mBigDisplay->viewport(), true);
- connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)),
-		d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*, QDataStream&, QMouseEvent*, bool*)));
  connect(p, SIGNAL(signalUnfog(int, int)),
 		this, SLOT(slotUnfog(int, int)));
  connect(p, SIGNAL(signalFog(int, int)),
 		this, SLOT(slotFog(int, int)));
- p->addGameIO(bigDisplayIO);
  d->mBoson->addPlayer(p);
 
  CommandInput* cmdInput = new CommandInput;
@@ -277,6 +292,9 @@ void BosonWidget::addLocalPlayer()
  p->addGameIO(cmdInput);
 
  changeLocalPlayer(p);
+ for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
+	addMouseIO(d->mDisplayList.at(i));
+ }
 }
 
 void BosonWidget::addDummyComputerPlayer(const QString& name)
@@ -517,7 +535,7 @@ void BosonWidget::slotGamePreferences()
 // note: this is difficult for several views! probably d->mBigDisplay should be
 // the primary view then.
  connect(dlg, SIGNAL(signalCursorChanged(int)),
-		d->mBigDisplay, SLOT(slotChangeCursor(int)));
+		this, SLOT(slotChangeCursor(int)));
 
  dlg->show();
 }
@@ -563,6 +581,7 @@ void BosonWidget::slotRemoveUnit(Unit* unit)
 void BosonWidget::quitGame()
 {
 // TODO: set SpeciesTheme::defaultColor() back!! is a static variable!!
+ d->mIOList.clear();
  d->mCanvas->quitGame();
  d->mBoson->quitGame();
  
@@ -933,8 +952,21 @@ void BosonWidget::recreateLayout(int chatPos)
  if (chatPos == ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
  }
- for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
-	d->mViewLayout->addWidget(d->mDisplayList.at(i));
+ for (unsigned int vpos = 0; vpos < d->mDisplayList.count(); vpos++) {
+	QPtrList<BosonBigDisplay> list;
+	QHBoxLayout* l = 0;
+	for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
+		if (d->mDisplayList.at(i)->vPos() == vpos) {
+			list.append(d->mDisplayList.at(i));
+		}
+	}
+	if (list.count() > 0) {
+		l = new QHBoxLayout(d->mViewLayout);
+	}
+	for (unsigned int i = 0; i < list.count(); i++) {
+		l->addWidget(list.at(i));
+		l->activate();
+	}
  }
  if (chatPos != ChatFrameTop) {
 	d->mViewLayout->addWidget(d->mChat);
@@ -1048,6 +1080,8 @@ void BosonWidget::slotUnfogAll(Player* player)
 void BosonWidget::addBigDisplay()
 {
  BosonBigDisplay* b = new BosonBigDisplay(d->mCanvas, this);
+ b->setCursor(d->mCursor);
+ b->show();
  d->mDisplayList.append(b);
 
  connect(this, SIGNAL(signalMineralsUpdated(int)),
@@ -1071,5 +1105,105 @@ void BosonWidget::addBigDisplay()
  }
 
  d->mBigDisplay = b;
+ addMouseIO(b);
 
 }
+
+void BosonWidget::addMouseIO(BosonBigDisplay* b)
+{
+ if (d->mLocalPlayer) {
+	if (d->mIOList[b]) {
+		kdError() << "This view already has a mouse io!!" << endl;
+		return;
+	}
+	KGameMouseIO* bigDisplayIO = 
+			new KGameMouseIO(d->mBigDisplay->viewport(), true);
+	connect(bigDisplayIO, SIGNAL(signalMouseEvent(KGameIO*, QDataStream&,
+			QMouseEvent*, bool*)),
+			d->mBigDisplay, SLOT(slotMouseEvent(KGameIO*,
+			QDataStream&, QMouseEvent*, bool*)));
+	d->mLocalPlayer->addGameIO(bigDisplayIO);
+	d->mIOList.insert(b, bigDisplayIO);
+ }
+}
+
+void BosonWidget::slotSplitViewHorizontal()
+{
+ int vp = d->mBigDisplay->vPos();
+ int hp = d->mBigDisplay->hPos();
+ addBigDisplay();
+ d->mBigDisplay->setVPos(vp + 1);
+ d->mBigDisplay->setVPos(hp);
+ recreateLayout(d->mChatPos);
+}
+
+void BosonWidget::slotSplitViewVertical()
+{
+ int vp = d->mBigDisplay->vPos();
+ int hp = d->mBigDisplay->hPos();
+ addBigDisplay();
+ d->mBigDisplay->setVPos(vp);
+ d->mBigDisplay->setVPos(hp + 1);
+ recreateLayout(d->mChatPos);
+}
+
+void BosonWidget::slotRemoveActiveView()
+{
+ if (d->mDisplayList.count() <= 1) {
+	return;
+ }
+ if (!d->mBigDisplay) {
+	return;
+ }
+ delete d->mBigDisplay;
+ d->mBigDisplay = d->mDisplayList.first();
+}
+
+void BosonWidget::slotChangeCursor(int mode)
+{
+ // note: this doesn't make sense here when we use several views!
+ BosonCursor* b;
+ switch (mode) {
+	case CursorSprite:
+		b = new BosonSpriteCursor;
+		break;
+	case CursorExperimental:
+		b = new BosonExperimentalCursor;
+		break;
+	case CursorNormal:
+	default:
+		b = new BosonNormalCursor;
+		break;
+ }
+ if (d->mCursor) {
+	delete d->mCursor;
+ }
+ d->mCursor = b;
+ for (unsigned int i = 0; i < d->mDisplayList.count(); i++) {
+	d->mDisplayList.at(i)->setCursor(d->mCursor);
+ }
+
+ QString cursorDir = KGlobal::dirs()->findResourceDir("data", 
+		"boson/themes/cursors/move/index.desktop") +
+		QString::fromLatin1("boson/themes/cursors");
+ d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
+ d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
+ d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
+// d->mCursor->setWidgetCursor(d->mBigDisplay);
+
+ // some cursors need special final initializations. do themn now
+ switch (mode) {
+	case CursorSprite:
+		((BosonSpriteCursor*)d->mCursor)->setCanvas(d->mCanvas,
+				CursorDefault, Z_CANVAS_CURSOR);
+		break;
+	case CursorExperimental:
+		break;
+	case CursorNormal:
+	default:
+		break;
+
+ }
+}
+
+

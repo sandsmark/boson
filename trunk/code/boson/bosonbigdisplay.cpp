@@ -104,6 +104,9 @@ public:
 	KGameCanvasChat* mChat;
 
 	QCanvasRectangle* mSelectionRect;
+
+	unsigned int mHPos;
+	unsigned int mVPos;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
@@ -124,6 +127,8 @@ BosonBigDisplay::BosonBigDisplay(QWidget* parent) : QCanvasView(parent)
 void BosonBigDisplay::init()
 {
  d = new BosonBigDisplayPrivate;
+ d->mHPos = 0;
+ d->mVPos = 0;
 
 // setSizePolicy(QSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding ));
 // setResizePolicy(QScrollView::AutoOne);
@@ -146,18 +151,11 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
- slotChangeCursor(boConfig->readCursorMode());
+// slotChangeCursor(boConfig->readCursorMode());
 }
 
 BosonBigDisplay::~BosonBigDisplay()
 {
- if (d->mCursor->isA("BosonSpriteCursor")) {
-	boConfig->saveCursorMode(CursorSprite);
- } else if (d->mCursor->isA("BosonExperimentalCursor")) {
-	boConfig->saveCursorMode(CursorExperimental);
- } else {
-	boConfig->saveCursorMode(CursorNormal);
- }
  delete d->mSelectionRect;
  delete d->mChat;
  delete d;
@@ -764,52 +762,33 @@ void BosonBigDisplay::leaveEvent(QEvent*)
  d->mCursor->hideCursor();
 }
 
-void BosonBigDisplay::slotChangeCursor(int mode)
+void BosonBigDisplay::setCursor(BosonCursor* cursor)
 {
- // note: this doesn't make sense here when we use several views!
- BosonCursor* b;
- switch (mode) {
-	case CursorSprite:
-		b = new BosonSpriteCursor;
-		break;
-	case CursorExperimental:
-		b = new BosonExperimentalCursor;
-		break;
-	case CursorNormal:
-	default:
-		b = new BosonNormalCursor;
-		break;
- }
- if (d->mCursor) {
-	delete d->mCursor;
- }
- d->mCursor = b;
-
- QString cursorDir = KGlobal::dirs()->findResourceDir("data", 
-		"boson/themes/cursors/move/index.desktop") +
-		QString::fromLatin1("boson/themes/cursors");
- d->mCursor->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"));
- d->mCursor->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"));
- d->mCursor->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"));
- d->mCursor->setWidgetCursor(this);
-
- // some cursors need special final initializations. do themn now
- switch (mode) {
-	case CursorSprite:
-		((BosonSpriteCursor*)d->mCursor)->setCanvas(canvas(),
-				CursorDefault, Z_CANVAS_CURSOR);
-		break;
-	case CursorExperimental:
-		break;
-	case CursorNormal:
-	default:
-		break;
-
- }
+ d->mCursor = cursor;
 }
 
 void BosonBigDisplay::drawContents(QPainter* p, int x, int y, int w, int h)
 {
  QCanvasView::drawContents(p, x, y, w, h);
+}
+
+void BosonBigDisplay::setHPos(unsigned int p)
+{
+ d->mHPos = p;
+}
+
+void BosonBigDisplay::setVPos(unsigned int p)
+{
+ d->mVPos = p;
+}
+
+unsigned int BosonBigDisplay::hPos() const
+{
+ return d->mHPos;
+}
+
+unsigned int BosonBigDisplay::vPos() const
+{
+ return d->mVPos;
 }
 
