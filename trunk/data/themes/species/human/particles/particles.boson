@@ -1,53 +1,55 @@
 [GeneralExplosion]
 Id=1001
-MinVelocity=-0.5,-0.5,0
-MaxVelocity=0.5,0.5,0.4
+MinVelocity=0,0,0
+MaxVelocity=0,0,0
 MinPos=-0.1,-0.1,0.0
 MaxPos=0.1,0.1,0.2
-StartColor=1.0,0.4,0.05,0.7
-EndColor=1.0,0.1,0.0,0.0
-MinLife=0.5
-MaxLife=1.5
-MaxNum=50
-InitNum=30
-BlendFunc=GL_ONE
-Rate=60
-StartSize=0.3
-EndSize=0.6
+StartColor=1.0,1.0,1.0,1.0
+EndColor=1.0,1.0,1.0,0.1.0
+MinLife=1.8
+MaxLife=1.8
+ParticleDist=1.0
+MaxNum=1
+InitNum=1
+BlendFunc=GL_ONE_MINUS_SRC_ALPHA
+Rate=0
+StartSize=1.2
+EndSize=1.2
 SystemLife=0.3
 Mass=0
 Align=true
-Texture=explosion
+Texture=explosion-01
 
 [FireBallExplosion]
 Id=1002
 Inherits=GeneralExplosion
-NormalizeVelo=true
-MinVeloScale=0.4
-MaxVeloScale=0.7
+;NormalizeVelo=true
+MinVeloScale=0.0
+MaxVeloScale=0.0
 
 [BigExplosion]
 Id=1010
 Inherits=GeneralExplosion
-MinVelocity=-1.0,-1.0,0
-MaxVelocity=1.0,1.0,0.6
+MinVelocity=0,0,0
+MaxVelocity=0,0,0
 MinPos=-0.4,-0.4,0.0
 MaxPos=0.4,0.4,0.3
-MinLife=0.5
-MaxLife=1.5
-MaxNum=100
-InitNum=50
-Rate=80
-StartSize=0.4
-EndSize=0.8
+MinLife=2.3
+MaxLife=2.3
+MaxNum=1
+InitNum=1
+ParticleDist=2.0
+Rate=0
+StartSize=1.7
+EndSize=1.7
 SystemLife=0.7
 
 [BigBallExplosion]
 Id=1011
 Inherits=BigExplosion
-NormalizeVelo=true
-MinVeloScale=0.5
-MaxVeloScale=1.4
+;NormalizeVelo=true
+MinVeloScale=0
+MaxVeloScale=0
 
 
 
@@ -70,7 +72,7 @@ EndSize=0.35
 SystemLife=0
 Mass=0
 Align=true
-Texture=explosion
+Texture=explosion-01
 
 [GeneralBulletHit]
 Id=2010
@@ -90,7 +92,7 @@ StartSize=0.05
 EndSize=0.2
 SystemLife=0
 Align=true
-Texture=explosion
+Texture=explosion-old
 
 
 
@@ -104,7 +106,7 @@ StartColor=0.3,0.3,0.3,0.7
 EndColor=0.3,0.3,0.3,0.0
 MinLife=3.0
 MaxLife=8.0
-MaxNum=100
+MaxNum=80
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Rate=6
@@ -134,12 +136,12 @@ MinPos=-0.4,-0.4,0
 MaxPos=0.4,0.4,0.4
 MinVelocity=-0.1,-0.1,0.3
 MaxVelocity=0.1,0.1,0.5
-MinLife=1.5
-MaxLife=20
-MaxNum=180
+MinLife=3
+MaxLife=10
+MaxNum=150
 Rate=15
-StartSize=0.3
-EndSize=1.2
+StartSize=0.5
+EndSize=1.3
 
 [BigDarkSmoke]
 Id=3011
@@ -232,7 +234,7 @@ StartSize=0.05
 EndSize=0.1
 SystemLife=-1
 Align=true
-Texture=explosion
+Texture=explosion-old
 
 [FragmentSmokeTrace]
 Id=5101
@@ -270,7 +272,7 @@ StartSize=0.1
 EndSize=0.2
 SystemLife=-1
 Align=true
-Texture=explosion
+Texture=explosion-old
 
 
 
@@ -280,17 +282,17 @@ MinVelocity=-0.05,-0.05,0
 MaxVelocity=0.05,0.05,0.1
 MinPos=-0.3,-0.3,-0.1
 MaxPos=0.3,0.3,0.35
-StartColor=0.3,0.3,0.3,0.6
+StartColor=0.3,0.3,0.3,0.5
 EndColor=0.4,0.4,0.4,0.0
 MinLife=10
 MaxLife=15
-MaxNum=10
+MaxNum=6
 InitNum=0
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=10
+Rate=3
 StartSize=0.4
 EndSize=0.6
-SystemLife=1
+SystemLife=2
 Align=true
 Mass=0.2
 Texture=smoke
@@ -312,11 +314,10 @@ Id=6010
 Inherits=GeneralExplosionSmoke
 MinPos=-0.5,-0.5,-0.2
 MaxPos=0.5,0.5,0.4
-MaxNum=32
-Rate=13
+MaxNum=12
+Rate=6
 StartSize=0.6
 EndSize=0.9
-SystemLife=2.5
 
 [BigDarkExplosionSmoke]
 Id=6011
@@ -539,7 +540,7 @@ EndSize=0.1
 SystemLife=0.25
 Mass=0
 Align=true
-Texture=explosion
+Texture=explosion-old
 
 [LeopardShootFlash]
 Id=12010
@@ -605,7 +606,7 @@ StartSize=0.8
 EndSize=1.0
 BlendFunc=GL_ONE
 SystemLife=0.5
-Texture=explosion
+Texture=explosion-old
 
 [DaisyCutter-NukeExplosion]
 Id=20025
@@ -707,7 +708,7 @@ StartSize=0.25
 EndSize=0.4
 SystemLife=-1
 Align=true
-Texture=explosion
+Texture=explosion-old
 
 [A10-light1]
 Id=21010
