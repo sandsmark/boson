@@ -441,11 +441,16 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		stream << pos;
 		// tell them how many units:
 		stream << (Q_UINT32)selection().count();
+		Unit* unit = 0;
 		while (it.current()) {
+			if (!unit) {
+				unit = it.current();
+			}
 			// tell them which unit to move:
 			stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
 			++it;
 		}
+		boMusic->playSound(unit, Unit::SoundOrderMove);
 		send = true;
 	} else { // place constructions
 		// FIXME: another option: add the waypoint to the facility and
