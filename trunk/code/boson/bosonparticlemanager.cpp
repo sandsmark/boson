@@ -58,8 +58,8 @@ void BosonParticleManager::loadTextures(QString texdir)
 
 BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
 {
-//  kdDebug() << "PARTICLE:" << "        " << k_funcinfo << "called, type: " << type << "pos: (" << x << ", " << y << ", " << z  << ")" << endl;
-  int maxnum = 0, initnum = 0, blendfunc = GL_ONE_MINUS_SRC_ALPHA;
+  //cout << "PARTICLE: " << k_funcinfo << "called, type: " << type << endl;
+  int maxnum = 0, initnum = 3, blendfunc = GL_ONE_MINUS_SRC_ALPHA;
   float rate = 0, size = 0, age = 0;
   BosonParticleSystem::ExternalFunction initfunc = 0, updatefunc = &updateFadeOutParticle;
 
@@ -77,7 +77,6 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   else if(type == Smoke)
   {
     maxnum = 200;
-    initnum = 0;
     rate = 35;
     size = 1.0;
     age = 20;
@@ -94,7 +93,6 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   else if(type == Fire)
   {
     maxnum = 120;
-    initnum = 0;
     rate = 30;
     size = 1.0;
     age = 3600 * 24 * 30;  // 30 days ;-)
@@ -105,7 +103,6 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   else if(type == SmallSmoke)
   {
     maxnum = 125;
-    initnum = 0;
     rate = 25;
     size = 0.7;
     age = 3600 * 24 * 30;

@@ -100,6 +100,8 @@ public:
 
 	void loadParticles();
 
+	void loadObjectModels();
+
 	/**
 	 * @return Pixmap for the specified action
 	 **/
@@ -110,6 +112,8 @@ public:
 	QPixmap* upgradePixmapByName(QString name);
 
 	BosonModel* unitModel(unsigned long int unitType);
+
+	BosonModel* objectModel(ObjectType type);
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the

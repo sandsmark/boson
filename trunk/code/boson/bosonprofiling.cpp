@@ -31,7 +31,7 @@ BosonProfiling* BosonProfiling::mProfiling = 0;
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 #define MAX_ENTRIES 300
-#define PROFILING_VERSION 0x02 // increase if you change the file format of saved files!
+#define PROFILING_VERSION 0x03 // increase if you change the file format of saved files!
 
 QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
 {
@@ -39,6 +39,7 @@ QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
  s << (Q_LONG)t.mCells;
  s << (Q_LONG)t.mUnits;
  s << (Q_UINT32)t.mUnitCount;
+ s << (Q_LONG)t.mMissiles;
  s << (Q_LONG)t.mParticles;
  s << (Q_LONG)t.mFOW;
  s << (Q_LONG)t.mText;
@@ -52,6 +53,7 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  Q_LONG cells;
  Q_LONG units;
  Q_UINT32 unitCount;
+ Q_LONG missiles;
  Q_LONG particles;
  Q_LONG fow;
  Q_LONG text;
@@ -60,6 +62,7 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  s >> cells;
  s >> units;
  s >> unitCount;
+ s >> missiles;
  s >> particles;
  s >> fow;
  s >> text;
@@ -68,6 +71,7 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  t.mCells = cells;
  t.mUnits = units;
  t.mUnitCount = unitCount;
+ t.mMissiles = missiles;
  t.mParticles = particles;
  t.mFOW = fow;
  t.mText = text;
@@ -163,6 +167,17 @@ void BosonProfiling::renderUnits(bool start, unsigned int units)
 	gettimeofday(&time, 0);
 	d->mCurrentRenderTimes.mUnits = COMPARE_TIMES(d->mTimeRenderPart, time);
 	d->mCurrentRenderTimes.mUnitCount = units;
+ }
+}
+
+void BosonProfiling::renderMissiles(bool start)
+{
+ if (start) {
+	gettimeofday(&d->mTimeRenderPart, 0);
+ } else {
+	struct timeval time;
+	gettimeofday(&time, 0);
+	d->mCurrentRenderTimes.mMissiles = COMPARE_TIMES(d->mTimeRenderPart, time);
  }
 }
 

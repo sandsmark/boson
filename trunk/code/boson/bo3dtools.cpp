@@ -24,9 +24,9 @@
 #include <math.h>
 
 
-void BoVector3::normalize()
+float BoVector3::length()
 {
- scale(1.0 / sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]));
+ return sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]);
 }
 
 void BoMatrix::loadMatrix(const GLfloat* m)

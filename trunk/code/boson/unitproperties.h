@@ -153,7 +153,17 @@ public:
 	 * repairing
 	 **/
 	long int weaponDamage() const { return mWeaponDamage; }
-	
+
+	/**
+	 * @return Speed of missile of this unit (per second) or 0 if speed is infinite
+	 **/
+	unsigned long int missileSpeed() const { return mMissileSpeed; };
+
+	/**
+	 * @return Damage range of missile of this unit, e.g. range in what units will be damaged
+	 **/
+	unsigned long int missileDamageRange() const { return mMissileDamageRange; };
+
 	/**
 	 * @return The Type ID of the unit. This ID is unique for this
 	 * UnitProperties. There is no other unit with the same type ID. Note
@@ -354,6 +364,8 @@ private:
 	QValueList<unsigned long int> mRequirements;
 	unsigned long int mArmor;
 	unsigned long int mShields;
+	unsigned long int mMissileSpeed;
+	unsigned long int mMissileDamageRange;
 
 	class MobileProperties;
 	class FacilityProperties;

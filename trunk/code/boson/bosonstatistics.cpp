@@ -20,6 +20,7 @@
 #include "bosonstatistics.h"
 
 #include "unitbase.h"
+#include "player.h"
 
 #include <qdatastream.h>
 
@@ -85,9 +86,9 @@ void BosonStatistics::increaseRefinedOil(unsigned int increaseBy)
  mRefinedOil += increaseBy;
 }
 
-void BosonStatistics::addDestroyedMobileUnit(UnitBase* destroyed, UnitBase* destroyedBy)
+void BosonStatistics::addDestroyedMobileUnit(UnitBase* destroyed, Player* destroyedBy)
 {
- if (destroyed->owner() == destroyedBy->owner()) {
+ if (destroyed->owner() == destroyedBy) {
 	mDestroyedOwnMobileUnits++;
 	mPoints += pointsPerDestroyedOwnMobileUnit();
 	return;
@@ -96,9 +97,9 @@ void BosonStatistics::addDestroyedMobileUnit(UnitBase* destroyed, UnitBase* dest
  mPoints += pointsPerDestroyedMobileUnit();
 }
 
-void BosonStatistics::addDestroyedFacility(UnitBase* destroyed, UnitBase* destroyedBy)
+void BosonStatistics::addDestroyedFacility(UnitBase* destroyed, Player* destroyedBy)
 {
- if (destroyed->owner() == destroyedBy->owner()) {
+ if (destroyed->owner() == destroyedBy) {
 	mDestroyedOwnFacilities++;
 	mPoints += pointsPerDestroyedOwnFacility();
 	return;

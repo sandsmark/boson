@@ -39,6 +39,7 @@ public:
 		mCells = 0;
 		mUnits = 0;
 		mUnitCount = 0;
+		mMissiles = 0;
 		mParticles = 0;
 		mFOW = 0;
 		mText = 0;
@@ -54,6 +55,7 @@ public:
 		mCells = c.mCells;
 		mUnits = c.mUnits;
 		mUnitCount = c.mUnitCount;
+		mMissiles = c.mMissiles;
 		mParticles = c.mParticles;
 		mFOW = c.mFOW;
 		mText = c.mText;
@@ -68,6 +70,7 @@ public:
 	long int mCells;
 	long int mUnits;
 	unsigned int mUnitCount;
+	long int mMissiles;
 	long int mParticles;
 	long int mFOW;
 	long int mText;
@@ -139,6 +142,7 @@ public:
 	void renderClear(bool start);
 	void renderCells(bool start);
 	void renderUnits(bool start, unsigned int number = 0);
+	void renderMissiles(bool start);
 	void renderParticles(bool start);
 	void renderFOW(bool start);
 	void renderText(bool start);

@@ -29,6 +29,8 @@
 #include "bosonparticlesystem.h"
 #include "bosonparticlemanager.h"
 #include "defines.h"
+#include "bosonmissile.h"
+#include "bosonstatistics.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -56,6 +58,7 @@ public:
 	BoItemList mAllItems;
 
 	QPtrList<BosonParticleSystem> mParticles;
+	QPtrList<BosonMissile> mMissiles;
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
@@ -69,6 +72,7 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  d->mParticles.setAutoDelete(true);
+ d->mMissiles.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
 }
 
@@ -85,6 +89,7 @@ void BosonCanvas::quitGame()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mParticles.clear();
+ d->mMissiles.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -165,6 +170,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	}
 	++animIt;
  }
+
+ updateMissiles();
 
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
 	kdDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
@@ -286,8 +293,9 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
  }
 }
 
-void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
+void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy)
 {
+ kdDebug() << k_funcinfo << endl;
  if (!target) {
 	kdError() << k_funcinfo << "NULL target" << endl;
 	return;
@@ -297,61 +305,91 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 	return;
  }
 
+ attackedBy->playSound(SoundShoot);
+
+ BosonMissile* m = new BosonMissile(attackedBy, target);
+ if(!m->isActive()) {
+	missileHit(m);
+ } else {
+	d->mMissiles.append(m);
+ }
+}
+
+void BosonCanvas::missileHit(BosonMissile* m)
+{
+ if (!m) {
+	kdError() << k_funcinfo << "NULL missile" << endl;
+	return;
+ }
+ d->mParticles.append(BosonParticleManager::newShot(m->pos()));
+ QValueList<Unit*> l = unitCollisionsInRange(QPoint(m->pos()[0] * BO_TILE_SIZE, -(m->pos()[1] * BO_TILE_SIZE)),
+		m->damageRange() * BO_TILE_SIZE - 2);  // - 2 is needed to prevent units on next cells from also being damaged
+ for (unsigned int i = 0; i < l.count(); i++) {
+	unitHit(l[i], m->damage());
+	if (l[i]->isDestroyed()) {
+		if (l[i]->isFacility()) {
+			m->owner()->statistics()->addDestroyedFacility(l[i], m->owner());
+		} else {
+			m->owner()->statistics()->addDestroyedMobileUnit(l[i], m->owner());
+		}
+	}
+ }
+}
+
+void BosonCanvas::unitHit(Unit* unit, long int damage)
+{
  // Shield
- if(target->shields() > 0) {
-	if(target->shields() >= (unsigned long int)damage) {
+ if(unit->shields() > 0) {
+	if(unit->shields() >= (unsigned long int)damage) {
 		// Unit will not be damaged (it has enough shields)
-		target->setShields(target->shields() - damage);
+		unit->setShields(unit->shields() - damage);
 		// TODO: show some shield animation
-		attackedBy->playSound(SoundShoot);
 		return;
 	} else {
-		damage -= target->shields();
-		target->setShields(0);
+		damage -= unit->shields();
+		unit->setShields(0);
 		// Also show shield animation?
 	}
  }
 
  if (damage < 0) {
-	target->setHealth(target->health() + ((unsigned long)-damage));
+	unit->setHealth(unit->health() + ((unsigned long)-damage));
  } else {
-	// Usually, target's armor is substracted from attacker's weaponDamage, but
+	// Usually, unit's armor is substracted from attacker's weaponDamage, but
 	//  if target has only little health left, then armor doesn't have full effect
-	int health = (int)target->health();
-	if (health <= (int)(target->unitProperties()->health() / 10.0)) {
+	int health = (int)unit->health();
+	if (health <= (int)(unit->unitProperties()->health() / 10.0)) {
 		// If unit has only 10% or less of it's hitpoint left, armor has no effect (it's probably destroyed)
-	} else if (health <= (int)(target->unitProperties()->health() / 2.5)) {
+	} else if (health <= (int)(unit->unitProperties()->health() / 2.5)) {
 		// Unit has 40% or less of hitpoints left. Only half of armor is "working"
-		damage -= (int)(target->armor() / 2.0);
+		damage -= (int)(unit->armor() / 2.0);
 	} else {
-		damage -= target->armor();
+		damage -= unit->armor();
 	}
 	if(damage < 0) {
 		damage = 0;
 	}
 	health -= damage;
-	target->setHealth((health >= 0) ? health : 0);
+	unit->setHealth((health >= 0) ? health : 0);
  }
  
- if (target->isDestroyed()) {
-	destroyUnit(target); // display the explosion ; not the shoot
+ if (unit->isDestroyed()) {
+	destroyUnit(unit); // display the explosion ; not the shoot
  } else {
-	BoVector3 pos((target->x() + target->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
-			-((target->y() + target->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
-			target->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
-	d->mParticles.append(BosonParticleManager::newShot(pos));
-
-	float factor = 2.0 - target->health() / (target->unitProperties()->health() / 2.0);
-//	if(target->health() <= (target->unitProperties()->health() / 2.0)) {
+	float factor = 2.0 - unit->health() / (unit->unitProperties()->health() / 2.0);
+//	if(unit->health() <= (unit->unitProperties()->health() / 2.0)) {
 	if(factor >= 1.0) {
 		// If unit has less than 50% hitpoints, it's smoking
+		BoVector3 pos((unit->x() + unit->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE,
+				-((unit->y() + unit->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE),
+				unit->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 		BosonParticleSystem* s;
-		if(!target->smokeParticleSystem()) {
+		if(!unit->smokeParticleSystem()) {
 			s = BosonParticleManager::newSmallSmoke(pos);
-			target->setSmokeParticleSystem(s);
+			unit->setSmokeParticleSystem(s);
 			d->mParticles.append(s);
 		}
-		s = target->smokeParticleSystem();
+		s = unit->smokeParticleSystem();
 		// FIXME: maybe move this to BosonParticleManager?
 		s->setCreateRate(factor * 25);
 //		s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
@@ -359,30 +397,29 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 		s->setColor(BoVector4(c, c, c, 0.25));
 
 		// Facilities are burning too
-		if(target->isFacility()) {
-			if(!((Facility*)target)->flamesParticleSystem()) {
+		if(unit->isFacility()) {
+			if(!((Facility*)unit)->flamesParticleSystem()) {
 				s = BosonParticleManager::newFire(pos);
-				((Facility*)target)->setFlamesParticleSystem(s);
+				((Facility*)unit)->setFlamesParticleSystem(s);
 				d->mParticles.append(s);
 			}
-			s = ((Facility*)target)->flamesParticleSystem();
+			s = ((Facility*)unit)->flamesParticleSystem();
 			// FIXME: maybe move this to BosonParticleManager?
 			s->setCreateRate(factor * 30);
 			s->setVelocity(BoVector3(0, 0, factor * 0.5));  // This is only hint for BosonParticleManager
 		}
 	} else {
 		// If it has more hitpoints, it's not burning ;-)
-		if(target->isFacility()) {
-			if(((Facility*)target)->flamesParticleSystem()) {
-				((Facility*)target)->flamesParticleSystem()->setAge(0);
+		if(unit->isFacility()) {
+			if(((Facility*)unit)->flamesParticleSystem()) {
+				((Facility*)unit)->flamesParticleSystem()->setAge(0);
 			}
 		}
-		if(target->smokeParticleSystem()) {
-			target->smokeParticleSystem()->setAge(0);
+		if(unit->smokeParticleSystem()) {
+			unit->smokeParticleSystem()->setAge(0);
 		}
 	}
  }
- attackedBy->playSound(SoundShoot);
 }
 
 void BosonCanvas::destroyUnit(Unit* unit)
@@ -480,8 +517,8 @@ kdDebug() << k_funcinfo << endl;
 		continue;
 	}
 //	kdDebug() << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
-	int w = pos.x() - (int)u->x();
-	int h = pos.y() - (int)u->y();
+	int w = pos.x() - (int)(u->x() + u->width() / 2);
+	int h = pos.y() - (int)(u->y() + u->height() / 2);
 //	kdDebug() << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (w * w + h * h <= radius * radius) {
@@ -725,7 +762,7 @@ QPtrList<BosonParticleSystem>* BosonCanvas::particleSystems()
 
 void BosonCanvas::updateParticleSystems(float elapsed)
 {
- int count = d->mParticles.count();
+/* int count = d->mParticles.count();
  if(count <= 0) {
 	return;
  }
@@ -738,6 +775,12 @@ void BosonCanvas::updateParticleSystems(float elapsed)
 		d->mParticles.remove();
 		i--;
 		count--;
+	}
+ }*/
+ for(BosonParticleSystem* s = d->mParticles.first(); s; s = d->mParticles.next()) {
+	s->update(elapsed);
+	if(!s->isActive()) {
+		d->mParticles.removeRef(s);
 	}
  }
 }
@@ -752,3 +795,29 @@ void BosonCanvas::renderParticleSystems()
  }
 }
 
+void BosonCanvas::updateMissiles()
+{
+/* QPtrListIterator<BosonMissile> it(d->mMissiles);
+ BosonMissile* m;
+ while((m = it.current()) != 0) {
+	m->update();
+	if(!m->isActive()) {
+		missileHit(m);
+		d->mMissiles.remove();
+	} else {
+		++it;
+	}
+ }*/
+ for(BosonMissile* m = d->mMissiles.first(); m; m = d->mMissiles.next()) {
+	m->update();
+	if(!m->isActive()) {
+		missileHit(m);
+		d->mMissiles.remove();
+	}
+ }
+}
+
+QPtrList<BosonMissile>* BosonCanvas::missiles()
+{
+ return &(d->mMissiles);
+}

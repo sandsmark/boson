@@ -681,6 +681,7 @@ void TopWidget::loadGameData3() // FIXME rename!
 	while (it.current()) {
 		loadUnitDatas(((Player*)it.current()), progress);
 		((Player*)it.current())->speciesTheme()->loadTechnologies();
+		((Player*)it.current())->speciesTheme()->loadObjectModels();
 		++it;
 		progress += UNITDATAS_LOADINGFACTOR;
 	}

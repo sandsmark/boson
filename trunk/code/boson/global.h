@@ -93,5 +93,9 @@ enum ProductionType {
 	ProduceTech = 2
 };
 
+enum ObjectType {
+	ObjectMissile = 0
+};
+
 
 #endif
