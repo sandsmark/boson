@@ -81,6 +81,8 @@ class PythonScript : public BosonScript
     static PyObject* py_isUnitMobile(PyObject* self, PyObject* args);
     static PyObject* py_canUnitShoot(PyObject* self, PyObject* args);
     static PyObject* py_canUnitProduce(PyObject* self, PyObject* args);
+    static PyObject* py_canUnitMineMinerals(PyObject* self, PyObject* args);
+    static PyObject* py_canUnitMineOil(PyObject* self, PyObject* args);
     static PyObject* py_productionTypes(PyObject* self, PyObject* args);
 
     static PyObject* py_isUnitAlive(PyObject* self, PyObject* args);

@@ -653,6 +653,52 @@ bool BosonScript::canUnitProduce(int id)
   return (u->plugin(UnitPlugin::Production));
 }
 
+bool BosonScript::canUnitMineMinerals(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return false;
+  }
+
+  HarvesterPlugin* res = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+  if(res && res->canMineMinerals())
+  {
+    return true;
+  }
+  return false;
+}
+
+bool BosonScript::canUnitMineOil(int id)
+{
+  if(!game())
+  {
+    boError() << k_funcinfo << "NULL game" << endl;
+    return false;
+  }
+
+  Unit* u = game()->findUnit(id, 0);
+  if(!u)
+  {
+    boError() << k_funcinfo << "No unit with id" << id << endl;
+    return false;
+  }
+
+  HarvesterPlugin* res = (HarvesterPlugin*)u->plugin(UnitPlugin::Harvester);
+  if(res && res->canMineOil())
+  {
+    return true;
+  }
+  return false;
+}
+
 QValueList<int> BosonScript::productionTypes(int id)
 {
   QValueList<int> list;
