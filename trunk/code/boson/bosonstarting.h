@@ -27,6 +27,7 @@ class Player;
 class Boson;
 class BosonCanvas;
 
+class BosonStartingPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
@@ -62,6 +63,20 @@ public:
 	bool loadGame(const QString& fileName);
 
 	/**
+	 * Called by @ref Boson once a message indicating that a client
+	 * completed game starting has been received.
+	 *
+	 * That message is sent by this class.
+	 * @param buffer The message that was sent. At the moment this is empty.
+	 * It might be used for additional data one day, e.g. to check whether
+	 * loading was successfull - we also might use this to find out about
+	 * starting failure.
+	 * @param The sender of the message, i.e. the client that completed
+	 * loading.
+	 **/
+	void startingCompletedReceived(const QByteArray& buffer, Q_UINT32 client);
+
+	/**
 	 * Check whether there are events and process them. See @ref
 	 * QApplication::processEvents.
 	 *
@@ -79,7 +94,7 @@ public:
 	 * it is a very bad idea.
 	 **/
 	void checkEvents();
-	
+
 signals:
 	void signalStartingFailed();
 
@@ -126,7 +141,6 @@ protected:
 	void loadUnitDatas(Player* p);
 	bool startScenario();
 	bool start();
-	bool startGame();
 	bool loadTiles();
 	bool loadGameData3();
 
@@ -135,13 +149,15 @@ protected:
 	 **/
 	bool addLoadGamePlayers(const QString& playersXML);
 
+	void sendStartingCompleted(bool success);
+
 private:
+	BosonStartingPrivate* d;
+
 	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;
 	BosonPlayField* mNewPlayField;
 	Player* mPlayer;
-
-	bool mLoading; //AB: find a way around this!
 
 	QString mPlayFieldId; // which playfield will get started. note: only ADMIN should use the id!
 	                      // all other clients should receive the data from

@@ -41,6 +41,7 @@ public:
 //		IdStartScenario = 11,
 //		AddUnitsXML = 12, // add units from an xml (BosonScenario) file/stream
 		IdGameIsStarted = 25, // the game is started as soon as this is received
+		IdGameStartingCompleted = 26,
 
 	// usually withing a game
 //		AddUnit = 30, // whenever a unit is added

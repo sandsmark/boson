@@ -44,6 +44,7 @@
 #include <kgame/kgameio.h>
 #include <kgame/kgamemessage.h>
 #include <kgame/kgamepropertyhandler.h>
+#include <kgame/kmessageclient.h>
 
 #include <qbuffer.h>
 #include <qtimer.h>
@@ -1683,7 +1684,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
  return true;
 }
 
-void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 )
+void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UINT32 sender)
 {
  QDataStream stream(buffer, IO_ReadOnly);
  switch (msgid) {
@@ -1735,12 +1736,22 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		QTimer::singleShot(0, this, SIGNAL(signalStartGameClicked()));
 		break;
 	case BosonMessage::IdGameIsStarted:
-		if (!isRunning()) {
-			boError() << "Received IdGameIsStarted but it isn't" << endl;
-			return;
+	{
+		if (sender != messageClient()->adminId()) {
+			boError() << k_funcinfo << "only ADMIN is allowed to send IdGameIsStarted message! sender="
+					<< sender << " ADMIN="
+					<< messageClient()->adminId() << endl;
+			break;
+		}
+
+		if (isServer()) {
+			connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
+		} else {
+			boWarning() << "is not server - cannot start the game!" << endl;
 		}
 		emit signalGameStarted();
 		break;
+	}
 	case BosonMessage::ChangeSpecies:
 	{
 		Q_UINT32 id;
@@ -1832,6 +1843,24 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 		}
 		break;
 	}
+	case BosonMessage::IdGameStartingCompleted:
+	{
+		// this message is a kind of ACK from the client. it indicates
+		// that the starting is done and we are waiting for the ADMIN to
+		// start the game. he will do so once all clients have sent this
+		// message.
+		if (!d->mStartingObject) {
+			BO_NULL_ERROR(d->mStartingObject);
+			break;
+		}
+		if (gameStatus() != KGame::Init) {
+			// the message is not allowed here
+			boError() << k_funcinfo << "not in Init state" << endl;
+			break;
+		}
+		d->mStartingObject->startingCompletedReceived(buffer, sender);
+		break;
+	}
 	default:
 		boWarning() << k_funcinfo << "unhandled msgid " << msgid << endl;
 		break;
@@ -1852,16 +1881,6 @@ void Boson::initFogOfWar(BosonStarting* starting)
 bool Boson::isServer() const
 {
  return isAdmin(); // or isMaster() ??
-}
-
-void Boson::startGame()
-{
- setGameStatus(KGame::Run);
- if (isServer()) {
-	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
- } else {
-	boWarning() << "is not server - cannot start the game!" << endl;
- }
 }
 
 void Boson::slotSendAdvance()
