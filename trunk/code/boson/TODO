@@ -68,7 +68,7 @@ General TODOs
   player. we need to transmit the position of the view over network... would be
   a nice idea!
 - boson is crashing if BosonCursor (e.g. the sprite one) cannot load the pixmaps
-  successfully
+  successfully - should be fixed, but not yet tested
 
 Data TODOs
 - general sound (e.g. speech) - in progress

@@ -170,6 +170,8 @@ QCursor* BosonNormalCursor::loadQCursor(QString baseDir, QString cursor)
  if (p.load(file)) {
 	p.setMask(p.createHeuristicMask());
 	qcursor = new QCursor(p);
+ } else {
+	qcursor = new QCursor(Qt::arrowCursor);
  }
  return qcursor;
 }
@@ -351,7 +353,7 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
  KSimpleConfig c(baseDir + cursor + QString::fromLatin1("/index.desktop"));
  kdDebug() << baseDir << endl;
  if (!c.hasGroup("Boson Cursor")) {
-	kdWarning() << k_funcinfo << "index.desktop is missing default group - sprite cursor disabled" << endl;
+	kdWarning() << k_funcinfo << "index.desktop is missing default group" << endl;
  } else {
 	c.setGroup("Boson Cursor");
 	QString filePrefix = c.readEntry("FilePrefix", QString::fromLatin1("cursor-"));
@@ -381,6 +383,14 @@ QCanvasPixmapArray* BosonSpriteCursor::loadSpriteCursor(QString baseDir, QString
 	} else {
 		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
 	}
+ }
+ if (!array) {
+	QValueList<QPixmap> p;
+	QPointArray points(1);
+	points.setPoint(0, 0, 0);
+	p.append(*KCursor::arrowCursor().bitmap());
+	kdWarning() << "loading fallback cursor..." << endl;
+	array = new QCanvasPixmapArray();
  }
  return array;
 }
@@ -637,6 +647,14 @@ QCanvasPixmapArray* BosonExperimentalCursor::loadCursor(QString baseDir, QString
 	} else {
 		kdError() << k_funcinfo << "No pixmaps loaded from " << baseDir + cursor << endl;
 	}
+ }
+ if (!array) {
+	QValueList<QPixmap> p;
+	QPointArray points(1);
+	points.setPoint(0, 0, 0);
+	p.append(*KCursor::arrowCursor().bitmap());
+	kdWarning() << "loading fallback cursor..." << endl;
+	array = new QCanvasPixmapArray();
  }
  return array;
 }
