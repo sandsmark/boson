@@ -22,9 +22,8 @@
 #define SPRITES_H 
 
 #define	S_BASE		1000
-#define	S_PART_UP	(S_BASE+	10)
-#define	S_PART_DOWN	(S_PART_UP+	10)
-#define	S_GROUND	(S_PART_DOWN+	10)
+#define	S_PART		(S_BASE+	10)
+#define	S_GROUND	(S_PART+	10)
 #define	S_MOBILE	(S_GROUND+	200)
 #define	S_FACILITY	(S_MOBILE+	100)
 #define	S_SHOT		(S_FACILITY+	100)

@@ -27,8 +27,7 @@
 #include "sprites.h"
 
 
-class selectPart_up;
-class selectPart_down;
+class selectPart;
 
 
 class visualUnit : public QwSprite
@@ -45,8 +44,8 @@ public:
 protected:
 	int		power;
 	/* attachement */
-	selectPart_up	*sp_up;
-	selectPart_down	*sp_down;
+	selectPart	*sp_up;
+	selectPart	*sp_down;
 	
 public:
 	int	key;

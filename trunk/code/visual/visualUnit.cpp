@@ -88,9 +88,9 @@ void visualMobUnit::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(power, z());
+	sp_up = new selectPart(power, z(), false);
 	sp_up->moveTo(r.right(), r.top());
-	sp_down = new selectPart_down(9, z());
+	sp_down = new selectPart(9, z(), true);
 	sp_down->moveTo(r.left(), r.bottom());
 }
 
@@ -124,9 +124,9 @@ void visualFacility::select()
 	boAssert(!sp_up);
 	boAssert(!sp_down);
 
-	sp_up = new selectPart_up(power, z());
+	sp_up = new selectPart(power, z(), false);
 	sp_up->moveTo(r.right() - PF_DELTA, r.top() + PF_DELTA);
-	sp_down = new selectPart_down(9, z());
+	sp_down = new selectPart(9, z(), true);
 	sp_down->moveTo(r.left() + PF_DELTA, r.bottom() - PF_DELTA);
 }
 
