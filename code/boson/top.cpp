@@ -986,10 +986,6 @@ void TopWidget::slotAddLocalPlayer()
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
  }
- if (boGame->localPlayer()) {
-	boError() << k_funcinfo << "already a local player present! remove first!" << endl;// maybe use boWarning() only
-	return;
- }
  if (boGame->playerCount() != 0) {
 	boError() << k_funcinfo << "there are already players in the game!" << endl;
 	return;
