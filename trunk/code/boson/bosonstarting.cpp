@@ -106,12 +106,15 @@ void BosonStarting::startNewGame()
  // (more or less) KGame bug in KDE < 3.1 that causes KGame to go into an
  // infinite loop when calling checkEvents() from a slot that gets called from a
  // network message (exact: from KMessageDirect::received())
- QTimer::singleShot(0, this, SLOT(slotStartGame()));
+ QTimer::singleShot(0, this, SLOT(slotStart()));
 }
 
-void BosonStarting::slotStartGame()
+void BosonStarting::slotStart()
 {
  if (!start()) {
+	// in case we forgot this somewhere
+	boGame->unlock();
+
 	boError() << k_funcinfo << "game starting failed" << endl;
 	emit signalStartingFailed();
 	return;
@@ -180,7 +183,30 @@ bool BosonStarting::start()
 	mPlayer = boGame->localPlayer();
  }
 
- return loadTiles();
+ boGame->lock();
+ if (!loadTiles()) {
+	boError() << k_funcinfo << "Could not load tiles" << endl;
+	boGame->unlock();
+	return false;
+ }
+ if (!loadGameData3()) {
+	boError() << k_funcinfo << "loading game data failed" << endl;
+	boGame->unlock();
+	return false;
+ }
+ emit signalLoadingType(BosonLoadingWidget::StartingGame);
+ if (!startScenario()) {
+	boError() << k_funcinfo << "starting scenario failed" << endl;
+	boGame->unlock();
+	return false;
+ }
+ if (!startGame()) {
+	boError() << k_funcinfo << "starting game failed" << endl;
+	boGame->unlock();
+	return false;
+ }
+ boGame->unlock();
+ return true;
 }
 
 bool BosonStarting::loadGame(const QString& loadingFileName)
@@ -193,32 +219,17 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
 	//TODO: set Boson::loadingStatus()
 	return false;
  }
-
- // Load game
- emit signalLoadingShowProgressBar(false);
- emit signalLoadingSetLoading(true);
- emit signalLoadingReset();
- connect(boGame, SIGNAL(signalLoadPlayerData(Player*)),
-		this, SLOT(slotLoadPlayerData(Player*)));
- connect(boGame, SIGNAL(signalLoadingPlayersCount(int)),
-		this, SIGNAL(signalLoadingPlayersCount(int)));
- connect(boGame, SIGNAL(signalLoadingPlayer(int)),
-		this, SIGNAL(signalLoadingPlayer(int)));
- boGame->lock();
- bool loaded = boGame->loadFromFile(loadingFileName);
- if (!loaded) {
+ BosonPlayField loadField;
+ if (!loadField.preLoadPlayField(loadingFileName)) {
+	boError() << k_funcinfo << "could not preload " << loadingFileName << endl;
 	return false;
  }
- bool ret = loadTiles();
- boGame->unlock();
- if (!ret) {
-	boError() << k_funcinfo << "loading failed" << endl;
-	return false;
+ mNewGameData = loadField.loadFromDiskToStream();
+ if (mNewGameData.size() == 0) {
+	boError() << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
  }
-
- mLoading = false;
-
- startGame();
+ // AB: we call it from TopWidget now
+// startNewGame(); // will use singleshot!
  return true;
 }
 
@@ -248,7 +259,6 @@ bool BosonStarting::loadTiles()
 	boError() << k_funcinfo << "NULL map" << endl;
 	return false;
  }
- boGame->lock();
  boProfiling->start(BosonProfiling::LoadTiles);
 
  emit signalLoadingType(BosonLoadingWidget::LoadTiles);
@@ -261,16 +271,7 @@ bool BosonStarting::loadTiles()
  BosonData::bosonData()->loadGroundTheme(QString::fromLatin1("earth"));
 
  boProfiling->stop(BosonProfiling::LoadTiles);
-
- bool ret = loadGameData3();
-
- boGame->unlock();
-
- if (!ret) {
-	boError() << k_funcinfo << "loading failed" << endl;
-	return false;
- }
- return ret;
+ return true;
 }
 
 bool BosonStarting::loadGameData3() // FIXME rename!
@@ -297,22 +298,7 @@ bool BosonStarting::loadGameData3() // FIXME rename!
  }
 
  boProfiling->stop(BosonProfiling::LoadGameData3);
-
- emit signalLoadingType(BosonLoadingWidget::StartingGame);
-
  boDebug() << k_funcinfo << "done" << endl;
- if (!mLoading) {
-	if (!startScenario()) {
-		boError() << k_funcinfo << "starting scenario failed" << endl;
-		return false;
-	}
-
-	// load games will do that themselves.
-	if (!startGame()) {
-		boError() << k_funcinfo << "starting game failed" << endl;
-		return false;
-	}
- }
  return true;
 }
 
@@ -352,6 +338,7 @@ bool BosonStarting::loadPlayerData()
 void BosonStarting::slotLoadPlayerData(Player* p)
 {
  BO_CHECK_NULL_RET(p);
+ BO_CHECK_NULL_RET(p->speciesTheme());
  boDebug() << k_funcinfo << p->id() << endl;
  // Order of calls below is very important!!! Don't change this unless you're sure you know what you're doing!!!
  emit signalLoadingType(BosonLoadingWidget::LoadActions);
@@ -428,7 +415,8 @@ bool BosonStarting::startScenario()
  QString errorMsg;
  int line = 0, column = 0;
  QDomDocument doc;
- if (!doc.setContent(QCString(playersXML), &errorMsg, &line, &column)) {
+ // AB QCString() causes problems :(
+ if (!doc.setContent(QString(playersXML), &errorMsg, &line, &column)) {
 	boError() << k_funcinfo << "unable to load playersXML - parse error at line=" << line << ",column=" << column << " errorMsg=" << errorMsg << endl;
 	return false;
  }

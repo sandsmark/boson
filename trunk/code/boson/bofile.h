@@ -219,6 +219,14 @@ public:
 	{
 		return fileData(QString::fromLatin1("players.xml"));
 	}
+	QByteArray kgameData() const
+	{
+		return fileData(QString::fromLatin1("kgame.xml"));
+	}
+	QByteArray externalData() const
+	{
+		return fileData(QString::fromLatin1("external.xml"));
+	}
 
 	/**
 	 * @return An identifier (the filename) for this file. You should use

@@ -684,6 +684,7 @@ bool Player::loadFromXML(const QDomElement& root)
  // this does NOT load the units!
 
  bool ok = false;
+#if 0
  int id = root.attribute(QString::fromLatin1("Id")).toInt(&ok);
  if (!ok) {
 	boError(260) << k_funcinfo << "Id was no valid number" << endl;
@@ -700,6 +701,7 @@ bool Player::loadFromXML(const QDomElement& root)
 	return false;
  }
  setNetworkPriority(networkPriority);
+#endif
 
  boDebug(260) << k_funcinfo << "load data handler" << endl;
  // load the data handler

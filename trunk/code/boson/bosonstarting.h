@@ -110,7 +110,7 @@ signals:
 	void signalLoadingUnit(int current);
 
 protected slots:
-	void slotStartGame();
+	void slotStart();
 
 
 	void slotLoadPlayerData(Player* p);

@@ -259,22 +259,6 @@ bool BPFFile::checkTar() const
 	return false;
  }
 
- // we want a "map" file (binary), but also use a "map.xml" if present (although
- // obsolete)
- if (!hasFile(QString::fromLatin1("map"))) {
-	boWarning() << k_funcinfo << "can't find map - trying map.xml instead" << endl;
-	if (!hasFile(QString::fromLatin1("map.xml"))) {
-		boError() << k_funcinfo << "can't find map.xml" << endl;
-		return false;
-	} else {
-		boDebug() << "map.xml found" << endl;
-	}
- }
-
- if (!hasDirectory(QString::fromLatin1("C"))) { // default language
-	boError() << k_funcinfo << "can't find C" << endl;
-	return false;
- }
  return true;
 }
 

@@ -214,7 +214,7 @@ unsigned long int BosonSaveLoad::savegameFormatVersion(const QString& kgameXML)
  }
  QDomElement root = doc.documentElement();
  bool ok = false;
- unsigned int version = root.attribute(QString::fromLatin1("SaveGameVersion")).toUInt(&ok);
+ unsigned int version = root.attribute(QString::fromLatin1("Version")).toUInt(&ok);
  if (!ok) {
 	return 0;
  }
@@ -234,9 +234,13 @@ bool BosonSaveLoad::loadXMLDoc(QDomDocument* doc, const QString& xml)
  return true;
 }
 
-bool BosonSaveLoad::saveToFile(Player* localPlayer, const QString& file)
+bool BosonSaveLoad::saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer)
 {
- boDebug() << k_funcinfo << file << endl;
+ boDebug() << k_funcinfo << endl;
+ if (!files.isEmpty()) {
+	boError() << k_funcinfo << "files list must be empty" << endl;
+	return false;
+ }
  if (!d->mBoson) {
 	boError() << k_funcinfo << "NULL boson object" << endl;
 	return false;
@@ -258,84 +262,152 @@ bool BosonSaveLoad::saveToFile(Player* localPlayer, const QString& file)
 	BO_NULL_ERROR(d->mPlayField);
 	return false;
  }
+ if (!d->mPlayField->savePlayFieldToFiles(files)) {
+	boError() << k_funcinfo << "saving the playfield failed" << endl;
+	return false;
+ }
  boProfiling->start(BosonProfiling::SaveKGameToXML);
- QString kgameXML = saveKGameAsXML();
+ QByteArray kgameXML = saveKGameAsXML();
  boProfiling->stop(BosonProfiling::SaveKGameToXML);
  if (kgameXML.isNull()) {
 	return false;
  }
 
  boProfiling->start(BosonProfiling::SavePlayersToXML);
- QString playersXML = savePlayersAsXML(localPlayer);
+ QByteArray playersXML = savePlayersAsXML(localPlayer);
  boProfiling->stop(BosonProfiling::SavePlayersToXML);
  if (playersXML.isNull()) {
 	return false;
  }
 
  boProfiling->start(BosonProfiling::SaveCanvasToXML);
- QString canvasXML = saveCanvasAsXML();
+ QByteArray canvasXML = saveCanvasAsXML();
  boProfiling->stop(BosonProfiling::SaveCanvasToXML);
  if (canvasXML.isNull()) {
 	return false;
  }
 
  boProfiling->start(BosonProfiling::SaveExternalToXML);
- QString externalXML = saveExternalAsXML();
+ QByteArray externalXML = saveExternalAsXML();
  boProfiling->stop(BosonProfiling::SaveExternalToXML);
  if (externalXML.isNull()) {
 	return false;
  }
 
-
-
- // we store the map as binary. XML would take a lot of space and time to save
- // and load.
- QByteArray map;
- QDataStream stream(map, IO_WriteOnly);
- boProfiling->start(BosonProfiling::SavePlayFieldToXML);
- d->mPlayField->savePlayFieldForRemote(stream); // we emulate a network stream.
- boProfiling->stop(BosonProfiling::SavePlayFieldToXML);
-
- BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
- BSGFile f(file, false);
- if (!f.writeFile(QString::fromLatin1("kgame.xml"), kgameXML)) {
-	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("players.xml"), playersXML)) {
-	boError() << k_funcinfo << "Could not write players.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("canvas.xml"), canvasXML)) {
-	boError() << k_funcinfo << "Could not write canvas.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("external.xml"), externalXML)) {
-	boError() << k_funcinfo << "Could not write external.xml to " << file << endl;
-	return false;
- }
- if (!f.writeFile(QString::fromLatin1("map"), map)) {
-	boError() << k_funcinfo << "Could not write map to " << file << endl;
-	return false;
- }
- writeProfiler.stop(); // in case we add something below one day :)
+ files.insert("kgame.xml", kgameXML);
+ files.insert("players.xml", playersXML);
+ files.insert("canvas.xml", canvasXML);
+ files.insert("external.xml", externalXML);
 
  return true;
 }
 
-QString BosonSaveLoad::saveKGameAsXML()
+bool BosonSaveLoad::saveToFile(Player* localPlayer, const QString& file)
+{
+ QMap<QString, QByteArray> files;
+ if (!saveToFiles(files, localPlayer)) {
+	boError() << k_funcinfo << "saving failed" << endl;
+	return false;
+ }
+ return saveToFile(files, file);
+}
+
+bool BosonSaveLoad::saveToFile(const QMap<QString, QByteArray>& files, const QString& file)
+{
+ boDebug() << k_funcinfo << file << endl;
+ BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
+ QByteArray kgameXML = files["kgame.xml"];
+ QByteArray playersXML = files["players.xml"];
+ QByteArray canvasXML = files["canvas.xml"];
+ QByteArray externalXML = files["external.xml"];
+ QByteArray mapXML = files["map/map.xml"];
+ QByteArray heightMap = files["map/heightmap.png"];
+ QByteArray texMap = files["map/texmap"];
+ QByteArray descriptionXML = files["C/description.xml"];
+ if (kgameXML.size() == 0) {
+	boError() << k_funcinfo << "no kgameXML found" << endl;
+	return false;
+ }
+ if (canvasXML.size() == 0) {
+	boError() << k_funcinfo << "no canvasXML found" << endl;
+	return false;
+ }
+ if (playersXML.size() == 0) {
+	boError() << k_funcinfo << "no playersXML found" << endl;
+	return false;
+ }
+ if (canvasXML.size() == 0) {
+	boError() << k_funcinfo << "no canvasXML found" << endl;
+	return false;
+ }
+ if (externalXML.size() == 0) {
+	// do nothing - is optional only.
+ }
+ if (mapXML.size() == 0) {
+	boError() << k_funcinfo << "no mapXML found" << endl;
+	return false;
+ }
+ if (heightMap.size() == 0) {
+	boError() << k_funcinfo << "no heightMap found" << endl;
+	return false;
+ }
+ if (texMap.size() == 0) {
+	boError() << k_funcinfo << "no texMap found" << endl;
+	return false;
+ }
+ if (descriptionXML.size() == 0) {
+	boError() << k_funcinfo << "no descriptionXML found" << endl;
+	return false;
+ }
+ BSGFile f(file, false);
+ if (!f.writeFile(QString::fromLatin1("kgame.xml"), QString(kgameXML))) {
+	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("players.xml"), QString(playersXML))) {
+	boError() << k_funcinfo << "Could not write players.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("canvas.xml"), QString(canvasXML))) {
+	boError() << k_funcinfo << "Could not write canvas.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("external.xml"), QString(externalXML))) {
+	boError() << k_funcinfo << "Could not write external.xml to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("map.xml"), QString(mapXML), QString::fromLatin1("map"))) {
+	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("heightmap.png"), heightMap, QString::fromLatin1("map"))) {
+	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("texmap"), texMap, QString::fromLatin1("map"))) {
+	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+ if (!f.writeFile(QString::fromLatin1("description.xml"), QString(descriptionXML), QString::fromLatin1("C"))) {
+	boError() << k_funcinfo << "Could not write map to " << file << endl;
+	return false;
+ }
+ return true;
+}
+
+QCString BosonSaveLoad::saveKGameAsXML()
 {
  QDomDocument doc(QString::fromLatin1("Boson"));
  QDomElement root = doc.createElement(QString::fromLatin1("Boson")); // XML file for the Boson object
  doc.appendChild(root);
- root.setAttribute(QString::fromLatin1("SaveGameVersion"), BOSON_SAVEGAME_FORMAT_VERSION);
+ root.setAttribute(QString::fromLatin1("Version"), BOSON_SAVEGAME_FORMAT_VERSION);
 
  // store the dataHandler()
  BosonCustomPropertyXML propertyXML;
  QDomElement handler = doc.createElement(QString::fromLatin1("DataHandler"));
  if (!propertyXML.saveAsXML(handler, d->mBoson->dataHandler())) { // AB: we should exclude gameStatus from this! we should stay in KGame::Init! -> add a BosonPropertyXML::remove() or so
 	boError() << k_funcinfo << "unable to save KGame data handler" << endl;
-	return QString::null;
+	return QCString();
  }
  // IdGameStatus must _not_ be saved. it must remain in Init state when loading,
  // until loading is completed.
@@ -345,10 +417,10 @@ QString BosonSaveLoad::saveKGameAsXML()
  // here we could add additional data for the Boson object.
  // but I believe all data should get into the datahandler as far as possible
 
- return doc.toString();
+ return doc.toCString();
 }
 
-QString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
+QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 {
  QDomDocument doc(QString::fromLatin1("Players"));
  QDomElement root = doc.createElement(QString::fromLatin1("Players"));
@@ -356,7 +428,7 @@ QString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 
  if (!d->mBoson) {
 	BO_NULL_ERROR(d->mBoson);
-	return doc.toString();
+	return doc.toCString();
  }
 
  KGame::KGamePlayerList* list = d->mBoson->playerList();
@@ -383,10 +455,10 @@ QString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 	boWarning() << k_funcinfo << "NULL local player" << endl;
  }
 
- return doc.toString();
+ return doc.toCString();
 }
 
-QString BosonSaveLoad::saveCanvasAsXML()
+QCString BosonSaveLoad::saveCanvasAsXML()
 {
  QDomDocument doc(QString::fromLatin1("Canvas"));
  QDomElement root = doc.createElement(QString::fromLatin1("Canvas")); // XML file for canvas
@@ -396,10 +468,10 @@ QString BosonSaveLoad::saveCanvasAsXML()
 	d->mCanvas->saveAsXML(root);
  }
 
- return doc.toString();
+ return doc.toCString();
 }
 
-QString BosonSaveLoad::saveExternalAsXML()
+QCString BosonSaveLoad::saveExternalAsXML()
 {
  QDomDocument doc(QString::fromLatin1("External"));
  QDomElement root = doc.createElement(QString::fromLatin1("External")); // XML file for external data
@@ -407,7 +479,7 @@ QString BosonSaveLoad::saveExternalAsXML()
 
  emit signalSaveExternalStuffAsXML(root);
 
- return doc.toString();
+ return doc.toCString();
 }
 
 
@@ -474,10 +546,10 @@ bool BosonSaveLoad::loadFromFile(const QString& file)
  }
 
  QMap<QString, QByteArray> list;
- list.insert("kgameXML", f.kgameData());
- list.insert("playersXML", f.playersData());
- list.insert("canvasXML", f.canvasData());
- list.insert("externalXML", f.externalData());
+ list.insert("kgame.xml", f.kgameData());
+ list.insert("players.xml", f.playersData());
+ list.insert("canvas.xml", f.canvasData());
+ list.insert("external.xml", f.externalData());
  list.insert("map", f.mapData());
 
  bool ret = loadFromFile(list);
@@ -502,7 +574,7 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  // kgame.xml is mandatory in all boson savegame versions. We can get the
  // savegame format version from there (which is also mandatory) so we load this
  // first.
- QString kgameXML = fileList["kgameXML"];
+ QString kgameXML = fileList["kgame.xml"];
  if (kgameXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty kgameXML" << endl;
 	addLoadError(SaveLoadError::LoadBSGFileError, i18n("empty kgame.xml"));
@@ -571,13 +643,13 @@ bool BosonSaveLoad::loadFromFile(const QMap<QString, QByteArray>& fileList)
  QByteArray texMap;
  QString descriptionXML;
 
- playersXML = QString(fileList["playersXML"]);
- canvasXML = QString(fileList["canvasXML"]);
- externalXML = QString(fileList["externalXML"]);
- mapXML = QString(fileList["map/mapXML"]);
+ playersXML = QString(fileList["players.xml"]);
+ canvasXML = QString(fileList["canvas.xml"]);
+ externalXML = QString(fileList["external.xml"]);
+ mapXML = QString(fileList["map/map.xml"]);
  heightMap = fileList["map/heightmap.png"];
  texMap = fileList["map/texmap"];
- descriptionXML = QString(fileList["C/descriptionXML"]);
+ descriptionXML = QString(fileList["C/description.xml"]);
 
  if (playersXML.isEmpty()) {
 	boError(260) << k_funcinfo << "Empty playersXML" << endl;
@@ -700,9 +772,9 @@ bool BosonSaveLoad::loadVersionFromXML(const QString& xml)
  }
  QDomElement root = doc.documentElement();
  bool ok = false;
- unsigned int version = root.attribute(QString::fromLatin1("SaveGameVersion")).toUInt(&ok);
+ unsigned int version = root.attribute(QString::fromLatin1("Version")).toUInt(&ok);
  if (!ok) {
-	boError() << k_funcinfo << "savegame version not a valid number: " << root.attribute(QString::fromLatin1("SaveGameVersion")) << endl;
+	boError() << k_funcinfo << "savegame version not a valid number: " << root.attribute(QString::fromLatin1("Version")) << endl;
 	addLoadError(SaveLoadError::LoadInvalidXML, i18n("savegame version in kgame.xml is not a valid number"));
 	d->mLoadingStatus = InvalidXML;
 	return false;
