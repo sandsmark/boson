@@ -50,6 +50,8 @@ public slots:
   void newCell(int,int, groundType);
   void drawMobile(visualMobUnit *mob);
   void drawFix(visualFacility *fix);
+  /** synchronize with the bocanvas (both ground and units) */
+  void	sync(void);
 
 protected:
   void setPoint(int x, int y, const QColor &color, QPainter *p=0L);
@@ -61,7 +63,7 @@ protected:
 private:
 
   visualTopLevel	*vtl;
-  QPixmap	*ground;
+  QPixmap	*_ground;
 
 };
 

@@ -64,6 +64,7 @@ signals:
 	void newCell(int,int, groundType g);
 	void updateMobile(visualMobUnit *); // for miniMap
 	void updateFix(visualFacility *); // for miniMap
+	void syncMini(void);
 
 //	void	mobileDestroyed( int);
 //	void	fixDestroyed( int);
