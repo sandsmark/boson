@@ -10,16 +10,16 @@ themes/species/*/units/unit_dir - unit_dir is the unique directory of the unit.
 It doesn't matter how you name this directory - however a prefix like mob_ and
 fix_ might be useful when working on the units. But this depends on you.
 
-Currently a unit must have at least 2 overview bitmaps (overview.big.bmp and
-overview.small.bmp) which are shown when the unit is selected (big) and as a
+Currently a unit must have at least 2 overview bitmaps (overview-big.bmp and
+overview-small.bmp) which are shown when the unit is selected (big) and as a
 button in the construction facility (small). 
 The big overview must have s size of 180*110 (AB: ??? probably smaller)
 The small overview must have a size of ??
-A facility has 5 sprites, a mobile
-unit 9.  The sprites of the facilities show the 4 construction steps 
+A facility has 5 sprites, a mobile unit 9.  
+The sprites of the facilities show the 4 construction steps 
 (from initial to completely built) while a mobile unit has 8 different directions. 
 The last one is the "destroyed" pix. 
-The files of the sprites are named field.000N.bmp where N is the number of the
+The files of the sprites are named field-000N.bmp where N is the number of the
 sprite (0..8 or 0..4).
 
 Additionally all units have index.desktop file in their directories. This file
