@@ -55,11 +55,6 @@
 #include <iostream.h>
 
 
-#ifdef NO_OPENGL
-#include <qwmatrix.h>
-
-#else
-
 #include "bosontexturearray.h"
 #include "bosonglfont.h"
 
@@ -77,7 +72,6 @@ float textureCoordPointer[] = { 0.0, 0.0,
                                 1.0, 1.0,
                                 1.0, 0.0};
 GLubyte unitIndices[] = { 0, 1, 2, 3 };
-#endif // !NO_OPENGL
 
 class Camera
 {
@@ -285,12 +279,10 @@ public:
 		mLocalPlayer = 0;
 		mChat = 0;
 
-#ifndef NO_OPENGL
 		mFramecount = 0;
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
-#endif
 	}
 
 	Player* mLocalPlayer;
@@ -299,7 +291,6 @@ public:
 
 	BosonChat* mChat;
 
-#ifndef NO_OPENGL
 	Camera mCamera;
 
 	int mW; // width ... we should use glGetIntegerv(GL_VIEWPORT, view); and then view[foo] instead.
@@ -320,7 +311,6 @@ public:
 
 
 	bool mInitialized;
-#endif // !NO_OPENGL
 
 	SelectionRect mSelectionRect;
 	MouseMoveDiff mMouseMoveDiff;
@@ -331,7 +321,7 @@ public:
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(BosonCanvas* c, QWidget* parent)
-		: MyHack(parent, "bigdisplay")
+		: QGLWidget(parent, "bigdisplay")
 {
  kdDebug() << k_funcinfo << endl;
  mCanvas = c;
@@ -361,7 +351,6 @@ void BosonBigDisplayBase::init()
  mSelection = new BoSelection(this);
  d->mChat = new BosonChat(this);
 
-#ifndef NO_OPENGL
  slotResetViewProperties();
  d->mW = 0;
  d->mH = 0;
@@ -379,17 +368,6 @@ void BosonBigDisplayBase::init()
  glInit();
  generateMapDisplayList();
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(updateGL()));
-#else
- setCanvas(c);
- setVScrollBarMode(AlwaysOff);
- setHScrollBarMode(AlwaysOff);
- connect(this, SIGNAL(contentsMoving(int, int)),
-		this, SLOT(slotContentsMoving(int, int)));
- disconnect(this, SIGNAL(contentsMoving(int,int)), this, SLOT(cMoving(int,int)));
-
- connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(update()));
-
-#endif // !NO_OPENGL
 
  connect(&d->mCursorEdgeTimer, SIGNAL(timeout()), 
 		this, SLOT(slotCursorEdgeTimeout()));
@@ -399,7 +377,6 @@ void BosonBigDisplayBase::init()
  setUpdateInterval(boConfig->updateInterval());
 }
 
-#ifndef NO_OPENGL
 void BosonBigDisplayBase::initializeGL()
 {
  if (d->mInitialized) {
@@ -771,34 +748,19 @@ void BosonBigDisplayBase::renderText()
  glCallLists((*it).length(), GL_UNSIGNED_BYTE, (GLubyte*)(*it).latin1()); // list.begin()
 
  glColor3f(1.0, 1.0, 1.0);
- 
 }
-
-#endif // !NO_OPENGL
 
 
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
  GLdouble posX, posY, posZ;
-#ifndef NO_OPENGL
  if (!mapCoordinates(e->pos(), &posX, &posY, &posZ)) {
 	kdError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
  }
-#endif
  QPoint canvasPos; // FIXME we should write a canvas that uses GL-coordinates instead. currently we are maintaining 3 kinds of coordinates - canvas,window,world(GL)
-#ifndef NO_OPENGL
  worldToCanvas(posX, posY, posZ, &canvasPos);
-#else
- QWMatrix wm = inverseWorldMatrix(); // for zooming
- canvasPos = viewportToContents(e->pos());
- wm.map(canvasPos.x(), canvasPos.y(), &canvasPos.rx(), &canvasPos.ry());
- posX = (GLfloat)canvasPos.x();
- posX = (GLfloat)canvasPos.y();
- posY = 0.0;
-#endif
 
- 
  switch (e->type()) {
 	case QEvent::Wheel:
 	{
@@ -901,13 +863,8 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		} else if (e->button() == MidButton) {
 			if (boConfig->mmbMove()) {
 				int cellX, cellY;
-#ifndef NO_OPENGL
 				cellX = (int)(posX / BO_GL_CELL_SIZE);
 				cellY = (int)(-posY / BO_GL_CELL_SIZE);
-#else
-				cellX = canvasPos.x() / BO_TILE_SIZE;
-				cellY = canvasPos.y() / BO_TILE_SIZE;
-#endif
 				slotReCenterDisplay(QPoint(cellX, cellY));
 				updateCursor();
 			}
@@ -1020,28 +977,20 @@ void BosonBigDisplayBase::slotCenterHomeBase()
 
 void BosonBigDisplayBase::slotResetViewProperties()
 {
-#ifndef NO_OPENGL
  d->mCamera = Camera();
 
  d->mFovY = 60.0;
  d->mAspect = 1.0;
  setCameraPos(d->mCamera.posX(), d->mCamera.posY(), d->mCamera.posZ());
  resizeGL(d->mW, d->mH);
-#endif
 }
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
-#ifndef NO_OPENGL
 //TODO don't center the corners - e.g. 0;0 should be top left, never center
  setCameraPos(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, cameraZ());
-#else
- center(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE);
- canvas()->update();
-#endif
 }
 
-#ifndef NO_OPENGL
 void BosonBigDisplayBase::worldToCanvas(GLfloat x, GLfloat y, GLfloat /*z*/, QPoint* pos) const
 {
  pos->setX((int)(x / BO_GL_CELL_SIZE * BO_TILE_SIZE));
@@ -1135,8 +1084,6 @@ bool BosonBigDisplayBase::mapDistance(int windx, int windy, GLdouble* dx, GLdoub
  return true;
 }
 
-#endif // !NO_OPENGL
-
 void BosonBigDisplayBase::enterEvent(QEvent*)
 {
  if (!cursor()) {
@@ -1173,11 +1120,7 @@ bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 	default:
 		break;
  }
-#ifndef NO_OPENGL
  return QGLWidget::eventFilter(o, e);
-#else
- return QCanvasView::eventFilter(o, e);
-#endif
 }
 
 bool BosonBigDisplayBase::selectAll(const UnitProperties* prop)
@@ -1232,9 +1175,7 @@ void BosonBigDisplayBase::selectionEnd(GLfloat* x, GLfloat* y, GLfloat* z) const
 void BosonBigDisplayBase::startSelection(GLdouble x, GLdouble y, GLdouble z)
 {
  QPoint canvasPos;
-#ifndef NO_OPENGL
  worldToCanvas(x, y, z, &canvasPos);
-#endif
  /*
  Unit* unit = canvas()->findUnitAt(canvasPos);
  kdDebug() << k_funcinfo << x << " " << y << " " << z << endl;
@@ -1289,9 +1230,7 @@ void BosonBigDisplayBase::removeSelectionRect()
 	GLfloat x,y,z;
 	d->mSelectionRect.start(&x, &y, &z);
 	QPoint canvasPos;
-#ifndef NO_OPENGL
 	worldToCanvas(x, y, z, &canvasPos);
-#endif
 	Unit* unit = canvas()->findUnitAt(canvasPos);
 	selection()->clear();
 	if (unit) {
@@ -1374,13 +1313,8 @@ QRect BosonBigDisplayBase::selectionRectCanvas() const
  GLfloat startx, starty, startz, endx, endy, endz;
  selectionStart(&startx, &starty, &startz);
  selectionEnd(&endx, &endy, &endz);
-#ifndef NO_OPENGL
  worldToCanvas(startx, starty, startz, &start);
  worldToCanvas(endx, endy, endz, &end);
-#else
- start = QPoint(startx, starty);
- end = QPoint(endx, endy);
-#endif
  QRect r(start, end);
  r = r.normalize();
  return r;
@@ -1405,15 +1339,10 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
  QPoint pos = w->mapFromGlobal(QCursor::pos());
 
  const int move = 20; // FIXME hardcoded - use BosonConfig instead
-#ifndef NO_OPENGL
  GLdouble dx, dy;
  mapDistance(move, move, &dx, &dy);
  GLfloat moveX = (GLfloat)dx;
  GLfloat moveY = (GLfloat)dy;
-#else
- const float moveX = move;
- const float moveY = move;
-#endif
  if (pos.x() <= sensity && pos.x() > -1) {
 	x = -moveX;
  } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
@@ -1433,11 +1362,7 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 	}
 	d->mCursorEdgeCounter++;
 	if (d->mCursorEdgeCounter > 30) {
-		#ifndef NO_OPENGL
 			setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
-		#else
-			scrollBy((int)x, (int)y);
-		#endif
 	}
  }
 }
@@ -1445,16 +1370,11 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 
 void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
-#ifndef NO_OPENGL
  GLdouble x, y;
  mapDistance(dx, dy, &x, &y);
  setCameraPos(cameraX() + x, cameraY() + y, cameraZ());
-#else 
- QCanvasView::scrollBy(dx, dy);
-#endif
 }
 
-#ifndef NO_OPENGL
 void BosonBigDisplayBase::generateMapDisplayList()
 {
  makeCurrent();
@@ -1574,11 +1494,6 @@ GLfloat BosonBigDisplayBase::cameraZ() const
  return d->mCamera.posZ();
 }
 
-void BosonBigDisplayBase::updateGLCursor()
-{
- // FIXME: use updateGL() directly instead. this function is just for testing.
-}
-
 bool BosonBigDisplayBase::checkError() const
 {
  bool ret = true;
@@ -1614,7 +1529,6 @@ bool BosonBigDisplayBase::checkError() const
  }
  return ret;
 }
-#endif // !NO_OPENGL
 
 void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
 {
@@ -1623,7 +1537,6 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(updateGL()));
 }
 
-#ifndef NO_OPENGL
 void BosonBigDisplayBase::calcFPS()
 {
  long long int now;
@@ -1644,18 +1557,11 @@ double BosonBigDisplayBase::fps() const
 {
   return d->mFps;
 }
-#endif
 
 void BosonBigDisplayBase::setZoomFactor(float f)
 {
-#ifndef NO_OPENGL
  kdDebug() << k_funcinfo << f << endl;
  d->mCamera.setZoomFactor(f);
  resizeGL(d->mW, d->mH);
-#else
- QWMatrix w;
- w.scale((double)f, (double)f);
- setWorldMatrix(w);
-#endif
 }
 

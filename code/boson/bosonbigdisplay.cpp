@@ -402,15 +402,11 @@ void BosonBigDisplay::updateCursor()
  }
 
  QPoint widgetPos = mapFromGlobal(QCursor::pos());
-#ifndef NO_OPENGL
  QPoint canvasPos;
  GLdouble x, y, z;
  mapCoordinates(widgetPos, &x, &y, &z);
  worldToCanvas(x, y, z, &canvasPos);
-#else
- QPoint canvasPos = viewportToContents(widgetPos);
-#endif
- 
+
  if (!d->mLockCursor) {
 	if (!selection()->isEmpty()) {
 		if (selection()->leader()->owner() == localPlayer()) {

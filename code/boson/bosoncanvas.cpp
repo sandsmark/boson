@@ -57,6 +57,8 @@
  *
  * The first function accessing the canvas (in terms of update()) is @ref
  * initFogOfWar which therefore checks if the thread is finished.
+ * UPDATE: doc is obsolete - class could get removed. we use OpenGL and totally
+ * different loading code than we did at that time
  **/
 class TileLoader
 {
@@ -111,20 +113,12 @@ private:
 	BosonTiles* mTiles;
 };
 
-class FogOfWar 
-#ifndef NO_OPENGL
 #warning FOW is not yet implemented for OpenGL
-#else
-: public QCanvasSprite
-#endif
+class FogOfWar
 {
 public:
 	FogOfWar(QCanvasPixmapArray* a, BosonCanvas* c) 
-#ifndef NO_OPENGL
 		// TODO
-#else
-		: QCanvasSprite(a, (QCanvas*)c) 
-#endif
 	{
 	}
 	virtual int rtti() const { return RTTI::FogOfWar; }
@@ -134,11 +128,9 @@ public:
 		return false;
 	}
 
-#ifndef NO_OPENGL
 	void setVisible(bool) {}
 	void move(float , float ) { }
 	void setZ(float) { }
-#endif
 };
 
 class BosonCanvas::BosonCanvasPrivate
@@ -180,12 +172,7 @@ public:
 };
 
 BosonCanvas::BosonCanvas(QObject* parent)
-#ifndef NO_OPENGL
-		: CanvasHack(parent, "BosonCanvas")
-#else
-		: CanvasHack(parent, "BosonCanvas")
-
-#endif
+		: QObject(parent, "BosonCanvas")
 {
  init();
 }
@@ -250,10 +237,7 @@ void BosonCanvas::setTileSet(QPixmap* p)
 	kdError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
-#ifdef NO_OPENGL
- setTiles(*p, d->mMap->width(), d->mMap->height(), BO_TILE_SIZE, BO_TILE_SIZE); 
-#endif
- 
+
  for (unsigned int i = 0; i < d->mMap->width(); i++) {
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
@@ -447,10 +431,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	}
 	d->mDeleteShot.clear();
  }
-
- // note we do *not* call update() here anymore! it is done in in Boson, after
- // signalAdvance() was emitted. This way we are able to call slotAdvance()
- // twice in a loop without the need to update before all calls are done
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
@@ -513,14 +493,7 @@ void BosonCanvas::slotLoadTiles()
 
 void BosonCanvas::slotAddCell(int x, int y, int groundType, unsigned char version)
 {
-#ifdef NO_OPENGL
- int tile = Cell::tile(groundType, version);
- if (tile < 0 || tile >= (int)d->mMap->width() * (int)d->mMap->height()) {
-	kdWarning() << "Invalid tile " << tile << endl;
-	return;
- }
- setTile(x, y, tile);
-#endif
+ // AB: nothing to do here in OpenGL ? seems so..
 }
 
 void BosonCanvas::addAnimation(BosonSprite* item)
@@ -909,21 +882,6 @@ void BosonCanvas::deleteShot(BoShot* s)
  d->mDeleteShot.append(s);
 }
 
-void BosonCanvas::update()
-{
-#ifdef NO_OPENGL
- QCanvas::update();
- d->mDisplayManager->paintResources();
- d->mDisplayManager->paintChatMessages();
-#endif
-
- // TODO: only if canvas is changed
- // maybe only if relevant parts are changed
- // AB: we don't do this anymore here. we use an update timer which updates the
- // screen in a certain interval instead.
-// d->mDisplayManager->slotUpdateCanvas();
-}
-
 void BosonCanvas::killPlayer(Player* player)
 {
  while (player->allUnits().count() > 0) {
@@ -1091,7 +1049,6 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
-#ifndef NO_OPENGL
 void BosonCanvas::resize(int w, int h)
 {
  if (width() == w && height() == h) {
@@ -1100,5 +1057,4 @@ void BosonCanvas::resize(int w, int h)
  mWidth = w;
  mHeight = h;
 }
-#endif
 

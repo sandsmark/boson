@@ -172,7 +172,8 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
 	return;
  }
  display->setActive(active);
-#ifdef NO_OPENGL
+ // obsolete for OpenGL?
+ /*
  if (active) {
 	if (d->mDisplayList.count() > 1) {
 		display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this) + 3);
@@ -182,7 +183,7 @@ void BoDisplayManager::markActive(BosonBigDisplayBase* display, bool active)
  } else {
 	display->setLineWidth(style().pixelMetric(QStyle::PM_DefaultFrameWidth, this));
  }
-#endif
+ */
 }
 
 BosonBigDisplayBase* BoDisplayManager::activeDisplay() const
@@ -451,41 +452,6 @@ void BoDisplayManager::paintResources()
 void BoDisplayManager::paintChatMessages()
 {
  // TODO
-}
-
-void BoDisplayManager::slotUpdate()
-{
- //AB: currently multiple GL-displays are not supported
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	//AB: should be updateGL(); -> the updateGLCursor() is just a hack for
-	//an #ifdef in BosonBigDisplayBase
-#ifndef NO_OPENGL
-	it.current()->updateGLCursor();
-#else
-	it.current()->update();
-	kdDebug() << "should not be called at all" << endl;
-#endif
-	++it;
- }
-}
-
-//FIXME: same as above - but called from the canvas only
-void BoDisplayManager::slotUpdateCanvas()
-{
- //AB: currently multiple GL-displays are not supported
- kdDebug() << k_funcinfo << "is obsolete - we use an update timer instead!" << endl;
- QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
- while (it.current()) {
-	//AB: should be updateGL(); -> the updateGLCanvas() is just a hack for
-	//an #ifdef in BosonBigDisplayBase
-#ifndef NO_OPENGL
-	it.current()->updateGL();
-#else
-	it.current()->update();
-#endif
-	++it;
- }
 }
 
 void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)

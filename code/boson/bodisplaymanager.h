@@ -176,9 +176,6 @@ public slots:
 	void slotCenterHomeBase();
 	void slotResetViewProperties();
 
-	void slotUpdate();
-	void slotUpdateCanvas(); // same as above - but called from the canvas only
-
 signals:
 	/**
 	 * Emitted when the currently active display changes.

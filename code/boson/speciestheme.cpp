@@ -25,14 +25,8 @@
 #include "bosonmusic.h"
 #include "bosonsound.h"
 #include "bosonprofiling.h"
-
-#ifndef NO_OPENGL
 #include "bosontexturearray.h"
 #include "bosonmodel.h"
-#include <qgl.h>
-#else
-#include <qcanvas.h>
-#endif
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -43,6 +37,7 @@
 #include <qbitmap.h>
 #include <qintdict.h>
 #include <qdir.h>
+#include <qgl.h>
 
 /**
  * By any reason QPixmap uses the alpha mask if existing, even if a custom 
@@ -73,16 +68,10 @@ public:
 	QIntDict<UnitProperties> mUnitProperties;
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
-#ifndef NO_OPENGL
 	QIntDict<BosonTextureArray> mSpriteTextures;
 	QIntDict<BosonModel> mUnitModels;
 
 	// TODO: the shots have no OpenGL implementation yet!
-#else
-	QIntDict<QCanvasPixmapArray> mSprite;
-	QIntDict<QCanvasPixmapArray> mFacilityBigShot;
-	QIntDict<QCanvasPixmapArray> mMobileBigShot;
-#endif
 
 	QIntDict<QPixmap> mActionPixmaps;
 
@@ -111,17 +100,10 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mActionPixmaps.setAutoDelete(true);
-#ifndef NO_OPENGL
  d->mSpriteTextures.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
-#else
- d->mSprite.setAutoDelete(true);
- d->mFacilityBigShot.setAutoDelete(true);
- d->mMobileBigShot.setAutoDelete(true);
- mShot = 0;
-#endif
  d->mCanChangeTeamColor = true;
- 
+
  if (!loadTheme(speciesDir, teamColor)) {
 	kdError() << "Theme " << speciesDir << " not properly loaded" << endl;
  }
@@ -136,17 +118,8 @@ SpeciesTheme::~SpeciesTheme()
 
 void SpeciesTheme::reset()
 {
-#ifndef NO_OPENGL
  d->mSpriteTextures.clear();
  d->mUnitModels.clear();
-#else
- d->mSprite.clear();
- d->mFacilityBigShot.clear();
- d->mMobileBigShot.clear();
- d->mActionPixmaps.clear();
- delete mShot;
- mShot = 0;
-#endif
  d->mSmallOverview.clear();
  d->mBigOverview.clear();
  d->mUnitProperties.clear();
@@ -207,23 +180,8 @@ bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
 	}
 	imageList.append(image);
  }
-#ifndef NO_OPENGL
  loadUnitTextures(prop->typeId(), imageList);
  loadUnitModel(prop);
-#else
- QValueList<QPixmap> pixmapList;
- for (unsigned int i = 0; i < imageList.count(); i++) {
-	QPixmap p(imageList[i]);
-	pixmapList.append(p);
- }
- imageList.clear();
- QCanvasPixmapArray* pixmapArray = new QCanvasPixmapArray(pixmapList);
- if (!pixmapArray->isValid()) {
-	kdError() << "invalid array" << endl;
-	return false;
- }
- d->mSprite.insert(prop->typeId(), pixmapArray);
-#endif
 
 // big overview 
  if (d->mBigOverview[type]) {
@@ -310,7 +268,6 @@ bool SpeciesTheme::loadActionGraphics()
 
 int SpeciesTheme::unitWidth(unsigned long int unitType)
 {
-#ifndef NO_OPENGL
  BosonTextureArray* array = d->mSpriteTextures[unitType];
  if (!array) {
 	loadUnit(unitType);
@@ -321,28 +278,10 @@ int SpeciesTheme::unitWidth(unsigned long int unitType)
 	}
  }
  return array->width(0);
-#else
- if (!d->mSprite[unitType]) {
-	loadUnit(unitType);
-	if (!d->mSprite[unitType]) {
-		kdError() << "Cannot load data files for " << unitType << endl;
-		return 0;
-	}
- }
- QCanvasPixmapArray* array = d->mSprite[unitType];
- if (array) {
-	QCanvasPixmap* pix = array->image(0);
-	if (pix) {
-		return pix->width();
-	}
- }
- return 0;
-#endif
 }
 
 int SpeciesTheme::unitHeight(unsigned long int unitType)
 {
-#ifndef NO_OPENGL
  BosonTextureArray* array = d->mSpriteTextures[unitType];
  if (!array) {
 	loadUnit(unitType);
@@ -353,26 +292,8 @@ int SpeciesTheme::unitHeight(unsigned long int unitType)
 	}
  }
  return array->height(0);
-#else
- if (!d->mSprite[unitType]) {
-	loadUnit(unitType);
-	if (!d->mSprite[unitType]) {
-		kdError() << "Cannot load data files for " << unitType << endl;
-		return 0;
-	}
- }
- QCanvasPixmapArray* array = d->mSprite[unitType];
- if (array) {
-	QCanvasPixmap* pix = array->image(0);
-	if (pix) {
-		return pix->height();
-	}
- }
- return 0;
-#endif
 }
 
-#ifndef NO_OPENGL
 BosonTextureArray* SpeciesTheme::textureArray(unsigned long int unitType)
 {
  BosonTextureArray* array = d->mSpriteTextures[unitType];
@@ -439,24 +360,6 @@ GLuint SpeciesTheme::displayList(unsigned long int unitType)
  }
  return model->displayList();
 }
-#else
-
-QCanvasPixmapArray* SpeciesTheme::pixmapArray(unsigned long int unitType)
-{
- QCanvasPixmapArray* array = d->mSprite[unitType];
- if (!array) {
-	loadUnit(unitType);
-	array = d->mSprite[unitType];
- }
- if (!array) {
-	kdError() << k_funcinfo << "Cannot find unit type " << unitType 
-			<< endl;
-	return 0;
- }
- return array;
-}
-
-#endif // !NO_OPENGL
 
 QPixmap* SpeciesTheme::bigOverview(unsigned long int unitType)
 {
@@ -838,92 +741,15 @@ QValueList<unsigned long int> SpeciesTheme::productions(QValueList<int> producer
 
 bool SpeciesTheme::loadShot()
 {
-#ifndef NO_OPENGL
  kdWarning() << k_funcinfo << "not yet implemented for OpenGL" << endl;
  return true;
-#else
- if (mShot) {
-	return true;
- }
- QString fileName = themePath() + "explosions/shots/shot_00-%1.png"; // FIXME: shot.00 is hardcoded. is .01, .02 ... possible?
-
- QValueList<QPixmap> pixList;
- QPointArray points(SHOT_FRAMES);
- 
- for (int i = 0; i < SHOT_FRAMES; i++) {
-	QPixmap p;
-	QString number;
-	number.sprintf("%04d", i);
-	if (!loadShotPixmap(fileName.arg(number), p)) { 
-		kdError() << "Could not load " << fileName.arg(number) << endl;
-		return false;
-	}
-	pixList.append(p);
-	points.setPoint(i, p.width() >> 1, p.height() >> 1);
- }
-
- mShot = new QCanvasPixmapArray(pixList, points);
- return true;
-#endif
 }
 
 bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 {
-#ifndef NO_OPENGL
  kdWarning() << k_funcinfo << "not yet implemented for OpenGL" << endl;
  return true;
-#else
- if (isFacility) {
-	if (d->mFacilityBigShot[version]) {
-		return true;
-	}
- } else {
-	if (d->mMobileBigShot[version]) {
-		return true;
-	}
- }
- int frames = (isFacility ?  FACILITY_SHOT_FRAMES : MOBILE_SHOT_FRAMES);
- QString path = themePath() + "explosions/" + 
-		(isFacility ? "facilities/" : "units/");
- QString v;
- v.sprintf("%02d", version);
- QString fileName = path + QString("expl_%1-").arg(v) + "%1.png";
-
- QValueList<QPixmap> pixList;
- QPointArray points(frames);
- 
- for (int i = 0; i < frames; i++) {
-	QPixmap p;
-	QString number;
-	number.sprintf("%04d", i);
-	if (!loadShotPixmap(fileName.arg(number), p)) {
-		kdError() << k_funcinfo << "Could not load"
-				<< fileName.arg(number) << endl;
-		return false; }
-	pixList.append(p);
-	points.setPoint(i, p.width() >> 1, p.height() >> 1);
- }
- 
- QCanvasPixmapArray* array = new QCanvasPixmapArray(pixList, points);
- if (isFacility) {
-	d->mFacilityBigShot.insert(version, array);
- } else {
-	d->mMobileBigShot.insert(version, array);
- }
- return true;
-#endif
 }
-
-#ifdef NO_OPENGL
-QCanvasPixmapArray* SpeciesTheme::bigShot(bool isFacility, unsigned int version) const
-{
- if (isFacility) {
-	return d->mFacilityBigShot.find(version);
- } else {
-	return d->mMobileBigShot.find(version);
- }
-}
-#endif
 
 QStringList SpeciesTheme::availableSpecies()
 {
@@ -981,7 +807,6 @@ QValueList<QColor> SpeciesTheme::defaultColors()
  return colors;
 }
 
-#ifndef NO_OPENGL
 void SpeciesTheme::loadUnitTextures(unsigned long int unitType, QValueList<QImage> list)
 {
  if (list.isEmpty()) {
@@ -1039,5 +864,4 @@ GLuint SpeciesTheme::createDisplayList(unsigned long int typeId)
  return list;
 }
 
-#endif // !NO_OPENGL
 

@@ -21,14 +21,7 @@
 
 #include "defines.h"
 
-#ifndef NO_OPENGL
 #include <qgl.h>
-#else
-#include <qcanvas.h>
-#define GLfloat float 
-#define GLdouble double 
-
-#endif // !NO_OPENGL
 
 class BosonCanvas;
 class BosonCursor;
@@ -99,25 +92,10 @@ private:
 	bool mForceAttack;
 };
 
-// moc is stupid
-#ifndef NO_OPENGL
-class MyHack : public QGLWidget
-{
-public:
- MyHack(QWidget* p, const char* name) : QGLWidget(p, name){}
-};
-#else
-class MyHack : public QCanvasView
-{
-public:
- MyHack(QWidget* p, const char* name) : QCanvasView(p, name){}
-};
-#endif
-
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonBigDisplayBase : public MyHack
+class BosonBigDisplayBase : public QGLWidget
 {
 	Q_OBJECT
 public:
@@ -168,30 +146,16 @@ public:
 	 * Note that these are pixel values, so depending on the current zoom
 	 * factor this may be a long or a short distance in world-coordinates
 	 **/
-#ifndef NO_OPENGL
-	void scrollBy(int x, int y);
-#else
-	virtual void scrollBy(int x, int y);
-#endif
+	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
 
 
-#ifndef NO_OPENGL
 	// we should probably make these 2 methods protected. i cant imagine any
 	// useful public use
 	bool mapCoordinates(const QPoint& pos, GLdouble* posX, GLdouble* posY, GLdouble* posZ) const;
 	bool mapDistance(int windowDistanceX, int windowDistanceY, GLdouble* dx, GLdouble* dy) const;
 	void worldToCanvas(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
 
-	/**
-	 * A hack for an internal #if. Called by the display manager only,
-	 * when the (animated) cursor has changed its frame. 
-	 *
-	 * We should cann updateGL() directly instead.
-	 **/
-	void updateGLCursor();
-  
 	double fps() const;
-#endif
 
 public slots:
 	void slotCenterHomeBase();
@@ -223,7 +187,6 @@ protected slots:
 	void slotCursorEdgeTimeout();
 
 protected:
-#ifndef NO_OPENGL
 	virtual void initializeGL();
 	virtual void resizeGL(int w, int h);
 	virtual void paintGL();
@@ -232,17 +195,14 @@ protected:
 	 * Called by @ref paintGL only to render text on the screen
 	 **/
 	void renderText();
-#endif
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
 
 	virtual void updateCursor() = 0;
-
 	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send) = 0;
 
-#ifndef NO_OPENGL
 	void generateMapDisplayList();
 
 	void setCameraPos(GLfloat x, GLfloat y, GLfloat z);
@@ -253,7 +213,6 @@ protected:
 	bool checkError() const;
 
 	void calcFPS();
-#endif
 
 	bool selectAll(const UnitProperties* prop);
 

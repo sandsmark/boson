@@ -17,8 +17,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef NO_OPENGL
-
 #define QT_CLEAN_NAMESPACE // we don't use QT-1 syntax anyway. if we don't define this INT32 in qnamespace.h conflicts with the one in Xmd.h included by **nvidia** glx.h
 #include "bosonglfont.h"
 
@@ -41,4 +39,3 @@ BosonGLFont::~BosonGLFont()
  delete mFontMetrics;
 }
 
-#endif // !NO_OPENGL

@@ -20,11 +20,9 @@
 #define GLSPRITE_H
 
 #include "../defines.h"
-#ifndef NO_OPENGL
+#include "../bosonmodel.h"
 
 #include <GL/gl.h>
-
-#include "../bosonmodel.h"
 
 class BosonCanvas;
 class QRect;
@@ -155,6 +153,5 @@ private:
 	BosonModel* mModel;
 };
 
-#endif // !NO_OPENGL
-
 #endif // GLUNIT_H
+

@@ -26,13 +26,8 @@
 
 #include <qpointarray.h>
 
-#ifndef NO_OPENGL
 BosonSprite::BosonSprite(BosonModel* model, BosonCanvas* canvas)
 	: GLSprite(model, canvas)
-#else
-BosonSprite::BosonSprite(QCanvasPixmapArray* array, BosonCanvas* canvas)
-	: QCanvasSprite(array, (QCanvas*)canvas)
-#endif
 {
  if (canvas) {
 	canvas->addItem(this);
@@ -52,7 +47,6 @@ BosonSprite::~BosonSprite()
 
 void BosonSprite::setCanvas(BosonCanvas* c)
 {
-#ifndef NO_OPENGL
  bool v = isVisible();
  setVisible(false);
  if (boCanvas()) {
@@ -67,9 +61,6 @@ void BosonSprite::setCanvas(BosonCanvas* c)
 	// boCanvas()->addAnimation(this);
  }
  setVisible(v);
-#else
- QCanvasSprite::setCanvas((QCanvas*)c);
-#endif
 }
 
 QPointArray BosonSprite::cells() const
@@ -96,28 +87,6 @@ QPointArray BosonSprite::cells() const
  }
  return c;
 }
-
-#ifdef NO_OPENGL
-bool BosonSprite::collidesWith(QCanvasItem* item) const
-{
- // this function is for non-opengl use only. it should not be called from
- // anywhere inside boson - use bosonCollidesWith() instead. this is just for
- // any calls from inside QCanvas, if they ever occur (should not)
- if(!RTTI::isUnit(item->rtti())) {
-	// Never collide with selectpart, shot or fog of war
-	if(item->rtti() == RTTI::SelectPart || item->rtti() == RTTI::BoShot || item->rtti() == RTTI::FogOfWar) {
-		return false;
-	}
-	if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
-		QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
-		return itemrect.intersects(boundingRectAdvanced());
-	}
-	return QCanvasSprite::collidesWith(item);
- }
- // since it is a unit it must be a BosonSprite* too
- return bosonCollidesWith((BosonSprite*)item);
-}
-#endif // NO_OPENGL
 
 bool BosonSprite::bosonCollidesWith(BosonSprite* item) const
 {

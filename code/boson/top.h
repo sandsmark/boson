@@ -123,9 +123,7 @@ signals:
 	void signalSetFacilitiesCount(int);
 	void signalMineralsUpdated(int);
 	void signalOilUpdated(int);
-#ifndef NO_OPENGL
 	void signalFPSUpdated(double);
-#endif
 
 protected:
 	/**
