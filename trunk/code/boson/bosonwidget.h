@@ -77,6 +77,7 @@ public:
 	 **/
 	virtual ~BosonWidget();
 
+	void startGame();
 	void startEditor();
 
 	void saveConfig(bool editor = false);
