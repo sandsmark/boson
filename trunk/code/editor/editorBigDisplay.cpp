@@ -63,7 +63,7 @@ void editorBigDisplay::actionClicked(QPoint mp, int state)
 				for (i=-2; i< 3; i++)
 					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
-							if (y+j>=0 && y+j<_canvas->maxY) {
+							if (y+j>=0 && y+j<_canvas->maxY) { // XXXX   !vcanvas->isValid()
 								setVersion(c, random()%4 );
 								_canvas->changeCell( x+i, y+j, c); // some kind of randomness in 'c' here
 							}
@@ -110,6 +110,8 @@ void editorBigDisplay::object_put(QPoint p)
 			break;
 	}
 
+	editorTopLevel *etl = (editorTopLevel*)vtl;
+	etl->setSelectionMode( visualTopLevel::SELECT_NONE);
 	_canvas->update(); // could be smarter.
 }
 
