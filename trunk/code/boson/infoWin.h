@@ -35,9 +35,6 @@ class QScrollView;
 //class visualBigDisplay;
 class QVBoxLayout;
 
-#define ORDER_BUTTONS_NB  (8)
-
-
 class infoWin : public QFrame
 {
   Q_OBJECT
@@ -45,8 +42,24 @@ class infoWin : public QFrame
 public:
 	infoWin(QWidget *parent=0, const char *name=0);
 
+	enum orderType_t { OT_NONE =0 , OT_FACILITY, OT_MOBILE};
+
 public slots:
 	void setSelected(QPixmap*);
+	void setOrderType(int what, int who);
+
+private slots:
+	void bc0(void) { handleOrder(0); } // button clicked
+	void bc1(void) { handleOrder(1); } // button clicked
+	void bc2(void) { handleOrder(2); } // button clicked
+	void bc3(void) { handleOrder(3); } // button clicked
+	void bc4(void) { handleOrder(4); } // button clicked
+	void bc5(void) { handleOrder(5); } // button clicked
+	void bc6(void) { handleOrder(6); } // button clicked
+	void bc7(void) { handleOrder(7); } // button clicked
+	void bc8(void) { handleOrder(8); } // button clicked
+	void bc9(void) { handleOrder(9); } // button clicked
+	void bc10(void) { handleOrder(10); } // button clicked
 
 private:
 /* state view (for selected items) */
@@ -56,10 +69,12 @@ private:
 	QPixmap		*view_none;
 
 private:
+	void	handleOrder(int);
 //	visualBigDisplay	*field;
 
 /* GUI */
-	QPushButton	*orderButton[ORDER_BUTTONS_NB];
+	QPushButton	*orderButton[11];
+	orderType_t	orderType;
 };
 
 

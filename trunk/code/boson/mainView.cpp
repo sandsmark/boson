@@ -47,6 +47,7 @@ mainView::mainView(bosonField *field, QWidget *parent=0, const char *name=0)
 
 		info = new infoWin(this, "infowin");
 		connect (view, SIGNAL(setSelected(QPixmap*)), info, SLOT(setSelected(QPixmap*)));
+		connect (view, SIGNAL(setOrders(int,int)), info, SLOT(setOrderType(int,int)));
 		leftLayout->addWidget(info, 10);
 
 /* This is the main map, the game area */

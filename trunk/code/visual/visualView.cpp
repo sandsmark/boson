@@ -106,7 +106,7 @@ m->unSelect();
 
 if (mobSelected.isEmpty()) {
 	emit setSelected((QPixmap *)0l);
-	emit setOrders(0l);
+	emit setOrders(0);
 	/*orderButton[0]->hide();
 	orderButton[0]->disconnect(this); */
 	}
@@ -117,7 +117,7 @@ return m;
 void visualView::unSelectAll(void)
 {
 	selectionWho =  -1; ///orzel : should be a WHO_NOBOCY;
-	emit setOrders(0l);
+	emit setOrders(0);
 }
 
 
@@ -126,6 +126,17 @@ void visualView::selectFix(visualFacility *f)
 	fixSelected = f;
 	fixSelected->select();
 	emit setSelected( vpp.species[f->who]->getBigOverview(f));
+	
+	switch (f->getType()) {
+		case FACILITY_CMDBUNKER:
+			emit setOrders(1, f->who);
+			break;
+		case FACILITY_WAR_FACTORY:
+			emit setOrders(2, f->who);
+			break;
+		default:
+			break;
+	}
 	logf(LOG_GAME_LOW, "select facility");
 }
 
@@ -134,11 +145,6 @@ void visualView::selectMob(long key, visualMobUnit *m)
 	if (mobSelected.isEmpty()) {
 		boAssert( selectionWho = -1);
 		selectionWho = m->who;
-//		if (selectionWho == gpp.who_am_i) {
-			emit setOrders(1l);
-			/*connect(orderButton[0], SIGNAL(clicked()), this, SLOT(u_goto()));
-			orderButton[0]->show(); */
-//			}
 		}
 	else {
 		boAssert( selectionWho>=0 );
