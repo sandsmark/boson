@@ -306,11 +306,16 @@ void BosonNewGameWidget::initSpecies()
  for (unsigned int i = 0; i < list.count(); i++) {
 	KSimpleConfig cfg(list[i]);
 	cfg.setGroup("Boson Species");
+	QString identifier = cfg.readEntry("Identifier", "Unknown");
+	if (identifier == QString::fromLatin1("Neutral")) {
+		boDebug() << identifier << "is neutral" << endl;
+		continue;
+	}
 	mPlayerSpecies->insertItem(cfg.readEntry("Name", i18n("Unknown")), i);
 	// comments aren't used. Maybe remove this dict?
 	d->mSpeciesIndex2Comment.insert(i, cfg.readEntry("Comment", i18n("None")));
-	d->mSpeciesIndex2Identifier.insert(i, cfg.readEntry("Identifier", "Unknown"));
-	if (cfg.readEntry("Identifier", "Unknown") == SpeciesTheme::defaultSpecies()) {
+	d->mSpeciesIndex2Identifier.insert(i, identifier);
+	if (identifier == SpeciesTheme::defaultSpecies()) {
 		defaultIndex = i;
 	}
  }
