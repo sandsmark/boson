@@ -33,7 +33,7 @@
 
 FILE *logfile = (FILE *) 0L;
 
-BosonApp::BosonApp()
+BosonApp::BosonApp(char *servername)
 {
 
   logfile = fopen(BOSON_LOGFILE_CLIENT, "a+b");
@@ -56,7 +56,7 @@ BosonApp::BosonApp()
 
   ///////////////////////////////////////////////////////////////////
   // call init() to invoke all other construction parts
-  init();
+  init(servername);
 }
 
 BosonApp::~BosonApp()
@@ -82,7 +82,7 @@ void BosonApp::disableCommand(int id_)
 }
 
 
-void BosonApp::init()
+void BosonApp::init(char *servername )
 { 
 
   jiffies = 0;
@@ -92,7 +92,7 @@ void BosonApp::init()
   initToolBars();
   initStatusBar();
   initView();
-  initSocket();
+  initSocket(servername);
 
   ///////////////////////////////////////////////////////////////////
   // enable bars dependend on config file setups
@@ -113,23 +113,24 @@ void BosonApp::init()
   disableCommand(ID_EDIT_COPY);*/
 }
 
-void BosonApp::initSocket()
+void BosonApp::initSocket(char *servername)
 {
 char charbuf[1024];
 
-if (gethostname(charbuf, 1023)) {
-	printf("can't get hostname, aborting\n");
-	return;
-	}
+if (!servername)
+	if (gethostname(charbuf, 1023)) {
+		printf("can't get hostname, aborting\n");
+		return;
+	} else servername = charbuf;
 
 /* let's say the server is on the local machine, hum..  */
-socket = new KSocket(charbuf,  BOSON_DEFAULT_PORT);
+socket = new KSocket(servername,  BOSON_DEFAULT_PORT);
 
 if (-1 == socket->socket())  {
-	logf(LOG_FATAL, "BosonApp : beuh, unable to connect socket\n");
+	logf(LOG_FATAL, "BosonApp : beuh, unable to connect socket to \"%s\" server\n", servername);
 	socketState = PSS_CONNECT_DOWN;
 	return;
-	}
+}
 
 buffer = new boBuffer(socket->socket(), BOSON_BUFFER_SIZE );
 
