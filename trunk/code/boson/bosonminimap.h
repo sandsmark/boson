@@ -41,18 +41,11 @@ public:
 	BosonMiniMap(QWidget* parent);
 	~BosonMiniMap();
 
-	QPixmap* ground() const;
-
 	/**
-	 * @return Number of horizontal cells on this map
+	 * We need the canvas in order to find out which unit is at a cell once
+	 * the fog of war is removed and also to retrieve the map itself. See
+	 * @ref map
 	 **/
-	int mapWidth() const;
-	/**
-	 * @return Number of vertical cells on this map
-	 **/
-	int mapHeight() const;
-
-	void setMap(BosonMap* map);
 	void setCanvas(BosonCanvas*);
 	void initMap();
 
@@ -72,14 +65,20 @@ signals:
 	void signalMoveSelection(int cellX, int cellY);
 
 public slots:
-	void slotCreateMap(int w, int h);
 	/**
-	  * @param x The x - coordinate of the cell
-	  * @param y The x - coordinate of the cell
-	  * @param groundType The type of the cell. See @ref Cell::GroundType
-	  * @param b Unused
-	  **/
-	void slotAddCell(int x, int y, int groundType, unsigned char b);
+	 * Change the groundtype and version of a cell. Note that at this point
+	 * you cannot be sure that the @ref BosonMap already has the new values
+	 * at this cell. Better use @p groundType.
+	 *
+	 * This slot also ensures that no unit is at the cell and that is isnt
+	 * fogged.
+	 * @param x The x - coordinate of the cell
+	 * @param y The x - coordinate of the cell
+	 * @param groundType The type of the cell. See @ref Cell::GroundType
+	 * @param version Unused
+	 **/
+	void slotChangeCell(int x, int y, int groundType, unsigned char version);
+
 	void slotAddUnit(Unit* unit, int x, int y);
 
 	/**
@@ -95,7 +94,7 @@ public slots:
 	void slotFog(int x, int y);
 
 	/**
-	 * Show or hide the minimap, depending on show. This slot is called when
+	 * Show or hide the minimap, depending on @p show. This slot is called when
 	 * the radar station is constructed or destroyed.
 	 **/
 	void slotShowMap(bool show);
@@ -109,7 +108,41 @@ protected:
 	void setPoint(int x, int y, const QColor& color);
 	virtual void mousePressEvent(QMouseEvent*);
 	virtual bool eventFilter(QObject* o, QEvent* e);
+	void createMap();
 	void createGround();
+
+	/**
+	 * Change the groundtype and version of a cell. Note that at this point
+	 * you cannot be sure that the @ref BosonMap already has the new values
+	 * at this cell. Better use @p groundType.
+	 *
+	 * This function doesn't check whether a unit is present at the cell or
+	 * whether it is fogged.
+	 * (useful to init the map)
+	 * @param x The x - coordinate of the cell
+	 * @param y The x - coordinate of the cell
+	 * @param groundType The type of the cell. See @ref Cell::GroundType
+	 * @param version Unused
+	 **/
+	void changeCell(int x, int y, int groundType, unsigned char version);
+
+	/**
+	 * @return Number of horizontal cells on this map
+	 **/
+	int mapWidth() const;
+	/**
+	 * @return Number of vertical cells on this map
+	 **/
+	int mapHeight() const;
+
+	QPixmap* ground() const;
+
+	/**
+	 * Convenience method for mCanvas->map()
+	 * @return The current map. See @ref BosonCanvas::map
+	 **/
+	BosonMap* map() const;
+
 
 private:
 	class BosonMiniMapPrivate;
@@ -119,7 +152,6 @@ private:
 	QPixmap* mUnZoomedGround;
 	bool mUseFog; // useful for the editor to disable the fog of war
 	
-	BosonMap* mMap;
 	BosonCanvas* mCanvas;
 	Player* mLocalPlayer; // needed to distinguish between movements (->fog of war)
 	
