@@ -130,8 +130,6 @@ public:
 	 **/
 	QByteArray exportTexMap(unsigned int texture) const;
 
-	bool savePlayField(const QString& fileName);
-
 	/**
 	 * Make @p map the new map of this playfield. Called by the editor
 	 * only.
