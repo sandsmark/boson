@@ -22,15 +22,15 @@
 INCLUDES= $(all_includes)
 
 # compilation
-LDFLAGS =  -s 
+#LDFLAGS =  -s 
 
 # libbovisual.a
 noinst_LIBRARIES = libbovisual.a
 libbovisual_a_SOURCES = visualBigDisplay.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualTopLevel.cpp visualUnit.cpp 
-libbovisual_a_METASOURCES = USE_AUTOMOC
+METASOURCES = AUTO
 
 #garbage
-CLEANFILES = $(libbovisual_a_METASOURCES) boson-*.log
+CLEANFILES = boson-*.log
 
 EXTRA_DIST = visualBigDisplay.cpp visualMiniDisplay.cpp visualCanvas.cpp selectPart.cpp speciesTheme.cpp visualTopLevel.cpp visualUnit.cpp visualBigDisplay.h visualMiniDisplay.h visualCanvas.h selectPart.h speciesTheme.h sprites.h visualTopLevel.h visual.h visualUnit.h
 

@@ -21,7 +21,7 @@
 # include files
 INCLUDES= -I../visual $(all_includes)
 
-LDFLAGS =  -s 
+#LDFLAGS =  -s 
 
 
 bin_PROGRAMS = boson 
