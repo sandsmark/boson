@@ -62,11 +62,11 @@ def oldAIInit():
 def oldAIAdvance():
   global aidelay, aicycle, aiunit, aitarget
   # AI will do something every aidelay advance calls
-  #   aicycle = aicycle + 1
-  #   if not aicycle == aidelay:
-  #     return
-  # boprint("debug", "oldAIAdvance() executing")
-  # reset aicycle
+  aicycle = aicycle + 1
+  if not aicycle == aidelay:
+    return
+  boprint("debug", "oldAIAdvance() executing")
+  reset aicycle
   global player
   boprint("info", "oldAIAdvance() called for player: %s" % player)
   aicycle = 0
