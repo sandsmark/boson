@@ -157,8 +157,8 @@ assert(player[data.who].socketState==SSS_CONNECT_OK);
 f = new serverFacility(player[data.who].buffer, &data);
 
 /* who is interested in knowing u's arrival */
-i2 = facilityProp[data.type].width;
-j2 = facilityProp[data.type].height;
+i2 = facilityProp[data.type].width / BO_TILE_SIZE;
+j2 = facilityProp[data.type].height / BO_TILE_SIZE;
 
 k = getPlayerMask(data.who);
 for (i=0; i<i2; i++)
