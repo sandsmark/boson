@@ -181,7 +181,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, flo
 {
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       mTextures, this);
-  pos.canvasToOGL();
+  pos.canvasToWorld();
   s->setPosition(pos);
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);

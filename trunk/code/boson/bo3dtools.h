@@ -83,7 +83,7 @@ class BoVector3
     // Conversion from one coordinate system to another. Should we use BO_GL_CELL_SIZE here?
     inline void canvasToCell()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] /= (float)BO_TILE_SIZE; };
     inline void cellToCanvas()  { mData[0] *= (float)BO_TILE_SIZE; mData[1] *= (float)BO_TILE_SIZE; };
-    inline void canvasToOGL()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE); };
+    inline void canvasToWorld()  { mData[0] /= (float)BO_TILE_SIZE; mData[1] = -(mData[1] / (float)BO_TILE_SIZE); };
 
     /**
      * @return Whether all components of this vector are zeros
