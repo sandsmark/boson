@@ -32,6 +32,7 @@
 #include "../bosonscenario.h"
 #include "../bosondata.h"
 #include "../bosonwidgets/bosonplayfieldview.h"
+#include "../bosonwidgets/bocolorchooser.h"
 #include "bosonstartupnetwork.h"
 #include "bodebug.h"
 
@@ -102,6 +103,8 @@ BosonNewGameWidget::BosonNewGameWidget(BosonStartupNetwork* interface, QWidget* 
 
  connect(networkInterface(), SIGNAL(signalSetAdmin(bool)),
 		this, SLOT(slotNetSetAdmin(bool)));
+
+ mLocalColor->setColors(SpeciesTheme::defaultColors());
 
  slotNetSetAdmin(boGame->isAdmin());
 }
@@ -253,17 +256,13 @@ void BosonNewGameWidget::initColors()
 	return;
  }
  mAvailableColors.clear();
- mLocalColor->clear();
  mAvailableColors = boGame->availableTeamColors();
  mAvailableColors.prepend(localPlayer()->speciesTheme()->teamColor());
+
+ // first set all taken, then make those available, that are still available
+ mLocalColor->setAllTaken(true);
  for(unsigned int i = 0; i < mAvailableColors.count(); i++) {
-	QPainter painter;
-	QRect rect(0, 0, mLocalColor->width(), QFontMetrics(painter.font()).height() + 4);
-	QPixmap pixmap(rect.width(), rect.height());
-	painter.begin(&pixmap);
-	painter.fillRect(rect, QBrush(mAvailableColors[i]));
-	painter.end();
-	mLocalColor->insertItem(pixmap);
+	mLocalColor->setTaken(mAvailableColors[i], false);
  }
 }
 
