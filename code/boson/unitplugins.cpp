@@ -50,7 +50,7 @@ unsigned long int ProductionPlugin::completedProduction() const
 	return 0;
  }
  unsigned long int type = currentProduction();
- if (type <= 0) {
+ if (type == 0) {
 	return 0;
  }
  if (mProductionState < unit()->owner()->unitProperties(type)->productionTime()) {
@@ -102,7 +102,7 @@ double ProductionPlugin::productionProgress() const
 
 bool ProductionPlugin::canPlaceProductionAt(const QPoint& pos)
 {
- if (!hasProduction() || completedProduction() < 0) {
+ if (!hasProduction() || completedProduction() <= 0) {
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
