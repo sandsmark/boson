@@ -988,7 +988,7 @@ void BosonScript::addParticleSystem(int player, unsigned int id, BoVector3 pos, 
     return;
   }
   BosonParticleSystem* s = prop->newSystem(pos, rot);
-  BosonCanvas* c = const_cast<BosonCanvas*>(boGame->canvas());
+  BosonCanvas* c = boGame->canvasNonConst();
   c->addParticleSystem(s);
 }
 
