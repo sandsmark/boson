@@ -23,7 +23,7 @@
 
 #include <GL/gl.h>
 
-#include <qptrvector.h>
+#include <qglobal.h>
 
 class BosonCanvas;
 class BosonCollisions;
@@ -34,10 +34,94 @@ class BoFrame;
 class QRect;
 class Cell;
 class BosonParticleSystem;
+class BosonItemPropertyHandler;
+
+class KGamePropertyHandler;
+class KGamePropertyBase;
 class QColor;
 template<class T> class QPtrList;
+template<class T> class QPtrVector;
+template<class T1, class T2> class QMap;
 class QDomElement;
 class QDataStream;
+class QString;
+
+/**
+ * This is the base class of @ref BosonItem. It exists only to logically
+ * separate the code that provides access to @ref KGamePropertyHandler and
+ * friends from all other code.
+ *
+ * You will most probably want to look at @ref BosonItem instead.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BosonItemProperties
+{
+public:
+	BosonItemProperties();
+	virtual ~BosonItemProperties();
+
+	virtual int rtti() const = 0;
+
+	/**
+	 * Initialize static members
+	 **/
+	static void initStatic();
+
+	/**
+	 * Add a property ID to the list of properties. This must be done before
+	 * calling @ref registerData.
+	 * @param id A <em>unique</em> property ID - you must ensure that one
+	 * unit never uses two identical ids.
+	 * @param name The name of the property. Will be used in the debug
+	 * dialog as well as e.g. in the scenario files. This name must be
+	 * unique as well!
+	 **/
+	static void addPropertyId(int id, const QString& name);
+
+	/**
+	 * @return The id of the specified property name. Or -1 if not found.
+	 * See @ref addPropertyId.
+	 **/
+	static int propertyId(const QString& name);
+
+	/**
+	 * @return A name for the specified property id or QString::null if not
+	 * found. See also @ref addPropertyId
+	 **/
+	static QString propertyName(int id);
+
+	/**
+	 * Shortcut for
+	 * <pre>
+	 * prop->registerData(id, dataHandler(), KGamePropertyBase::PolicyLocal,
+	 * propertyName(id));
+	 * </pre>
+	 *
+	 * Note that you must call @ref addPropertyId before you are able to use
+	 * registerData!
+	 * @param prop The @ref KGamePropertyBase to be registered
+	 * @param id The PropertyId for the @ref KGamePropertyBase. This must be
+	 * unique for every property, i.e. a unit must never have two identical
+	 * property ids.
+	 * @param local If TRUE use @ref KGamePropertyBase::PolicyLocal,
+	 * otherwise @ref KGamePropertyBase::PolicyClean. Don't use FALSE here
+	 * unless you know what you're doing!
+	 **/
+	void registerData(KGamePropertyBase* prop, int id, bool local = true);
+
+	/**
+	 * @return The @ref KGamePropertyHandler for all the properties of this
+	 * item. It is in fact a @ref BosonItemPropertyHandler, you can cast to
+	 * it safely.
+	 **/
+	KGamePropertyHandler* dataHandler() const;
+
+private:
+	BosonItemPropertyHandler* mProperties;
+	static QMap<int, QString>* mPropertyMap;
+
+};
 
 
 /**
@@ -56,7 +140,7 @@ class QDataStream;
  * @short Base class for all visual OpenGL objects in boson.
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonItem
+class BosonItem : public BosonItemProperties
 {
 public:
 	/**
@@ -438,8 +522,8 @@ public:
 
 	virtual bool save(QDataStream&) = 0;
 	virtual bool load(QDataStream&) = 0;
-	virtual bool saveAsXML(QDomElement&) = 0;
-	virtual bool loadFromXML(const QDomElement&) = 0;
+	virtual bool saveAsXML(QDomElement&);
+	virtual bool loadFromXML(const QDomElement&);
 
 protected:
 	/**
