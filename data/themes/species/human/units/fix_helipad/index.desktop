@@ -5,3 +5,4 @@ Name=Helipad
 Id=1
 Health=100
 MineralCost=100
+Producer=10

@@ -10,3 +10,4 @@ Damage=30
 Reload=30
 CanShootAtAirUnits=true
 CanShootAtLandUnits=false
+Producer=10

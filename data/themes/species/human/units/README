@@ -66,11 +66,22 @@ TerrainType=Number  - The default terrain type of the unit. One of 0 (Land),
                       The default is 0 (=Land Unit)
 ProductionTime=Number - The number of advance calls needed to produce this unit
                         Default is (currenlty) 100.
-CanShootAtAirUnits  - Can this unit shoot at aircrafts?
-                      Default true for TeeeainType=2, otherwise false.
-CanShootAtLandUnits - Can this unit shoot at ground units? True or False.
-                      Default is true for TerrainType=0 or TerrainType=1, 
-                      otherwise false.
+CanShootAtAirUnits=bool  - Can this unit shoot at aircrafts?
+                           Default true for TeeeainType=2, otherwise false.
+CanShootAtLandUnits=bool - Can this unit shoot at ground units? True or False.
+                           Default is true for TerrainType=0 or TerrainType=1, 
+                           otherwise false.
+Producer=Number     - Specifies which kind of factory is able to produce this 
+                      unit. Possible values are: 0=war factory (heavy land 
+                      units, all types of vehicles), 1=shipyard (all ships), 
+                      2=airport (all aircrafts), 3=barracks (soldiers,
+                      human units), 10=command bunker (all facilities).
+                      Please note that there is currently only a single factory
+                      for every Producer type, but we might add more one day
+                      (e.g. a mobile factory). The possible productions of those
+                      factories will also depend on the Producer type.
+                      The default is the value of "TerrainType" for mobile units
+                      and 10 (= command bunker) for facilities.
 -------------------------------------------------------------------------------
 
 The entries marked with * are mandatory.
@@ -112,9 +123,10 @@ CanMineOil=boolean   - Whether this unit can mine oil.
 [Boson Facility]
 CanProduce=Boolean  - True if something can be produced here. 
                       Default is false.
-Produce=List        - CanProduce must be true for this.
-                      The List is a comma separated list of TypeIds. This entry
-                      provides the producable units if this unit is a factory. 
+ProducerList=List   - CanProduce must be true for this.
+                      The List is a comma separated list of Producer IDs.
+                      The facility will be able to produce all units with the
+                      "Producer" entry that is listed here.
                       Default is an empty List.
 -------------------------------------------------------------------------------
 

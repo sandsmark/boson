@@ -8,6 +8,7 @@ MineralCost=100
 Range=100
 Damage=100
 Reload=50
+Producer=0
 
 [Boson Mobile Unit]
 Speed=3

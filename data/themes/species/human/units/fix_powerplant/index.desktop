@@ -5,3 +5,4 @@ Name=Power Plant
 Id=2
 Health=100
 MineralCost=100
+Producer=10

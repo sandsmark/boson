@@ -5,6 +5,7 @@ Name=Mineral Harvester
 Id=10003
 Health=100
 MineralCost=100
+Producer=0
 
 [Boson Mobile Unit]
 Speed=3

@@ -5,3 +5,4 @@ Name=Repair Pad
 Id=9
 Health=100
 MineralCost=100
+Producer=10
