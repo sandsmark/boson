@@ -98,8 +98,8 @@ protected slots:
 
 protected:
 	void setPoint(int x, int y, const QColor& color);
-	virtual void paintEvent(QPaintEvent*);
 	virtual void mousePressEvent(QMouseEvent*);
+	virtual bool eventFilter(QObject* o, QEvent* e);
 	
 private:
 	class BosonMiniMapPrivate;

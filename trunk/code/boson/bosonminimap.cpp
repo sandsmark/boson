@@ -88,6 +88,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
 
  QGridLayout* grid  = new QGridLayout(this, 5, 3);
  d->mPixmap = new QWidget(this);
+ d->mPixmap->installEventFilter(this);
  grid->addMultiCellWidget(d->mPixmap, 0, 5, 0, 1);
  d->mZoomIn = new QPushButton(this);
  d->mZoomIn->setText(i18n("Zoom In"));
@@ -169,7 +170,7 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
-// repaint(false);// performance - units will be added and therefore repaint()
+// d->mPixmap->repaint(false);// performance - units will be added and therefore repaint()
 // is already called
 }
 
@@ -189,46 +190,6 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
 	p.setPen(COLOR_UNKNOWN);
 	p.drawPoint(x, y);
  }
- p.end();
-}
-
-void BosonMiniMap::paintEvent(QPaintEvent*)
-{
- if (!ground()) {
-	return;
- }
- if (scale() != boConfig->miniMapScale()
-		|| zoom() != boConfig->miniMapZoom()) {
-	d->mScale = boConfig->miniMapScale();
-	d->mZoom = boConfig->miniMapZoom();
-	d->mPixmap->setFixedWidth(mGround->width() * scale());
-	d->mPixmap->setFixedHeight(mGround->height() * scale());
-	d->mPixmap->erase();
- }
- QRect selectionRect(d->mSelectionPos, d->mSelectionSize);
- QPainter p;
- p.begin(d->mPixmap);
- p.scale(scale(), scale());
- p.scale(zoom(), zoom());
- if (zoom() > 1.0) {
-	d->mPainterMoveX = d->mSelectionPos.x() + mGround->width() / zoom() <= mGround->width() ?
-			-d->mSelectionPos.x() :
-			-(mGround->width() - mGround->width() / zoom());
-	d->mPainterMoveY = d->mSelectionPos.y() + mGround->height() / zoom() <= mGround->height() ?
-			-d->mSelectionPos.y() :
-			-(mGround->height() - mGround->height() / zoom());
-	p.translate(d->mPainterMoveX, d->mPainterMoveY);
- }
- p.drawPixmap(0, 0, *ground());
- 
- // the little rectangle
- // there seems to be a small bug - if you scroll to the lower right corner
- // there are at both sides (right + bottom) a few pixels left. the rect should
- // be at the border (frame?).
- p.setPen(white);
- p.setRasterOp(XorROP);
- p.drawRect(selectionRect);
-
  p.end();
 }
 
@@ -262,19 +223,19 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
  } else {
 	setPoint(x, y, color);
  }
- repaint(false);
+ d->mPixmap->repaint(false);
 }
 
 void BosonMiniMap::slotMoveRect(int x, int y)
 {
  d->mSelectionPos = QPoint(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
- repaint(false);
+ d->mPixmap->repaint(false);
 }
 
 void BosonMiniMap::slotResizeRect(int w, int h)
 {
  d->mSelectionSize = QSize(w / BO_TILE_SIZE, h / BO_TILE_SIZE);
- repaint(false);
+ d->mPixmap->repaint(false);
 }
 
 void BosonMiniMap::setMap(BosonMap* map)
@@ -420,7 +381,7 @@ void BosonMiniMap::slotZoomIn()
 	return;
  }
  boConfig->setMiniMapZoom(boConfig->miniMapZoom() + ZOOM_STEP);
- repaint();
+ d->mPixmap->repaint();
 }
 
 void BosonMiniMap::slotZoomOut()
@@ -429,12 +390,56 @@ void BosonMiniMap::slotZoomOut()
 	return;
  }
  boConfig->setMiniMapZoom(boConfig->miniMapZoom() - ZOOM_STEP);
- repaint();
+ d->mPixmap->repaint();
 }
 
 void BosonMiniMap::slotZoomDefault()
 {
  boConfig->setMiniMapZoom(1.0);
- repaint();
+ d->mPixmap->repaint();
 }
 
+bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
+{
+ if (e->type() != QEvent::Paint) {
+	return QWidget::eventFilter(o, e);
+	
+ }
+ if (!ground()) {
+	return QWidget::eventFilter(o, e);
+ }
+ if (scale() != boConfig->miniMapScale()
+		|| zoom() != boConfig->miniMapZoom()) {
+	d->mScale = boConfig->miniMapScale();
+	d->mZoom = boConfig->miniMapZoom();
+	d->mPixmap->setFixedWidth(mGround->width() * scale());
+	d->mPixmap->setFixedHeight(mGround->height() * scale());
+	d->mPixmap->erase();
+ }
+ QRect selectionRect(d->mSelectionPos, d->mSelectionSize);
+ QPainter p;
+ p.begin(d->mPixmap);
+ p.scale(scale(), scale());
+ p.scale(zoom(), zoom());
+ if (zoom() > 1.0) {
+	d->mPainterMoveX = d->mSelectionPos.x() + mGround->width() / zoom() <= mGround->width() ?
+			-d->mSelectionPos.x() :
+			-(mGround->width() - mGround->width() / zoom());
+	d->mPainterMoveY = d->mSelectionPos.y() + mGround->height() / zoom() <= mGround->height() ?
+			-d->mSelectionPos.y() :
+			-(mGround->height() - mGround->height() / zoom());
+	p.translate(d->mPainterMoveX, d->mPainterMoveY);
+ }
+ p.drawPixmap(0, 0, *ground());
+ 
+ // the little rectangle
+ // there seems to be a small bug - if you scroll to the lower right corner
+ // there are at both sides (right + bottom) a few pixels left. the rect should
+ // be at the border (frame?).
+ p.setPen(white);
+ p.setRasterOp(XorROP);
+ p.drawRect(selectionRect);
+
+ p.end();
+
+}
