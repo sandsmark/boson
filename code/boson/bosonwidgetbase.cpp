@@ -637,7 +637,7 @@ void BosonWidgetBase::initKActions()
 		displayManager(), SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 
  // Dockwidgets show/hide
- d->mActionChat = new KToggleAction(i18n("Show &Chat"),
+ d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
 		KShortcut(Qt::CTRL+Qt::Key_C), this, SLOT(slotToggleChatVisible()),
 		actionCollection(), "options_show_chat");
  d->mActionCmdFrame = new KToggleAction(i18n("Show C&ommandframe"),
