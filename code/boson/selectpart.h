@@ -67,6 +67,12 @@ public:
 	 **/
 	static int frames();
 
+	/**
+	 * @param factor the number that should be muliplited with @ref frames
+	 * - 1. Should be health/maxHealth.
+	 **/
+	void update(double factor);
+
 protected:
 	QCanvasPixmapArray* initStatic(SelectPartType type);
 

@@ -94,63 +94,51 @@ void drawSelectBox(QPainter &painter, bool bw, int power)
  if (bw) {
 	// mask
 	// "scrollbar"
-	painter.fillRect(0  ,0, SP_W       ,2*SP_THICK, Qt::white);
+	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::white);
 	// selection corner
-	painter.fillRect(
-			SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
-			SP_CORNER_LEN		, SP_THICK, Qt::white);
-	painter.fillRect(
-			SP_W - SP_THICK		, SP_CORNER_POS,
-			SP_THICK		, SP_CORNER_LEN, Qt::white);
+	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
+			SP_CORNER_LEN, SP_THICK, Qt::white);
+	painter.fillRect(SP_W - SP_THICK, SP_CORNER_POS,
+			SP_THICK, SP_CORNER_LEN, Qt::white);
  } else {
 	// read rendering 
 	/* "scrollbar" */
-	painter.fillRect(0  ,0, SP_W       ,2*SP_THICK, Qt::red);
-	painter.fillRect(len,0, SP_W - len ,2*SP_THICK, Qt::green);
+	painter.fillRect(0, 0, SP_W, 2 * SP_THICK, Qt::red);
+	painter.fillRect(len, 0, SP_W - len,2 * SP_THICK, Qt::green);
 	/* selection corner */
-	painter.fillRect(
-			SP_W - SP_CORNER_LEN	, SP_CORNER_POS,
-			SP_CORNER_LEN		, SP_THICK, Qt::white);
-	painter.fillRect(
-			SP_W - SP_THICK		, SP_CORNER_POS,
-			SP_THICK		, SP_CORNER_LEN, Qt::white);
+	painter.fillRect(SP_W - SP_CORNER_LEN, SP_CORNER_POS,
+			SP_CORNER_LEN, SP_THICK, Qt::white);
+	painter.fillRect(SP_W - SP_THICK, SP_CORNER_POS,
+			SP_THICK, SP_CORNER_LEN, Qt::white);
  }
-
 }
 
 
 QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
 {
- QList<QPixmap>	pixmaps;
- QPixmap *pix, *_pix;
- QList<QPoint> points;
- QPoint *point;
  QPainter painter;
-	
- _pix = new QPixmap(SP_W, SP_H);
-	
- /* draw the mask */
- QBitmap _mask (SP_W, SP_H);
- _mask.fill(Qt::black);
 
- painter.begin(&_mask);
+ /* draw the mask */
+ QBitmap mask (SP_W, SP_H);
+ mask.fill(Qt::black);
+
+ painter.begin(&mask);
  if (SelectPart::PartDown == type) {
 	painter.rotate(180);
-	painter.translate(-SP_W+1, -SP_H+1);
+	painter.translate(-SP_W + 1, -SP_H + 1);
  }
  drawSelectBox(painter, true); 
  painter.end();
-	
 
-
- pixmaps.setAutoDelete( TRUE ); 
- points.setAutoDelete( TRUE ); 
+ QPixmap pix(SP_W, SP_H);
+ QValueList<QPixmap> pixmaps;
+ QPointArray points(PART_NB);
 
  for(int i = 0; i < PART_NB; i++) {
 	/* draw it */
-	_pix->fill();
+	pix.fill();
 
-	painter.begin(_pix);
+	painter.begin(&pix);
 	if (SelectPart::PartDown == type) {
 		painter.rotate(180);
 		painter.translate(-SP_W+1, -SP_H+1);
@@ -159,22 +147,23 @@ QCanvasPixmapArray* SelectPart::initStatic(SelectPartType type)
 	painter.end();
 
 	/* merge results */
-	_pix->setMask(_mask);
+	pix.setMask(mask);
 
-	/* create entries in QList */
-	pix = new QPixmap(*_pix);
-	pixmaps.append (pix);
+	/* create entries in QValueList */
+	pixmaps.append(pix);
 
 	if (SelectPart::PartDown == type) {
-		point = new QPoint(1, SP_H-2 - SP_CORNER_POS);
+		points.setPoint(i, 1, SP_H-2 - SP_CORNER_POS);
 	} else {
-		point = new QPoint(SP_W-2, SP_CORNER_POS);
+		points.setPoint(i, SP_W-2, SP_CORNER_POS);
 	}
-	points.append (point);
  }
 
- delete _pix;
+ return new QCanvasPixmapArray(pixmaps, points);
+}
 
- return new QCanvasPixmapArray(pixmaps,points);
+void SelectPart::update(double factor)
+{
+ setFrame((frames() - 1) * factor);
 }
 
