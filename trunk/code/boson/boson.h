@@ -509,6 +509,8 @@ protected slots:
 	 **/
 	void slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 receiver, Q_UINT32 sender);
 
+	void slotClientLeftGame(int clientId, int oldgamestatus, KGame*);
+
 	/**
 	 * Send an advance message. When this is received by the clients @ref
 	 * BosonCanvasCanvas::slotAdvance ist called.

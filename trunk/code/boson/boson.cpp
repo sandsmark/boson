@@ -331,6 +331,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  connect(this, SIGNAL(signalAdvance(unsigned int, bool)),
 		this, SLOT(slotAdvanceComputerPlayers(unsigned int, bool)));
+ connect(this, SIGNAL(signalClientLeftGame(int, int, KGame*)),
+		this, SLOT(slotClientLeftGame(int, int, KGame*)));
  connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
  d->mGamePaused.setEmittingSignal(false); // make valgrind happy
@@ -846,10 +848,14 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 	boError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
+#if 0
+ // AB: this can be called for the client, too!
+ // -> when ADMIN leaves, the IOs of the clients have to be replaced.
  if (!isAdmin()) {
 	boError() << k_funcinfo << "only ADMIN can do this" << endl;
 	return;
  }
+#endif
  slotAddChatSystemMessage(i18n("Player %1(%2) left the game. Units of that player remain on the map.").arg(player->name()).arg(player->id()));
 // boDebug() << k_funcinfo << endl;
 }
@@ -1612,5 +1618,26 @@ void Boson::slotBoDebugError(const BoDebugMessage& m)
 	area = i18n("Debug");
  }
  slotAddChatSystemMessage(area, i18n("ERROR: %1").arg(m.message()));
+}
+
+void Boson::slotClientLeftGame(int clientId, int oldgamestatus, KGame*)
+{
+ Q_UNUSED(clientId);
+ Q_UNUSED(oldgamestatus);
+ if (isServer()) {
+
+	// AB: we don't know whether we had been the server before the client
+	// left the game. so we just restart the timer and be happy in any way
+	// (note that checking for d->mGameTimer->isActive() is not sufficient
+	// as a) that behavior may change and b) it is not active when the game
+	// is already paused)
+	boDebug() << k_funcinfo << "we are the server now" << endl;
+	d->mGameTimer->stop();
+	QObject::disconnect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
+	connect(d->mGameTimer, SIGNAL(timeout()), this, SLOT(slotSendAdvance()));
+
+	// start the timer if game is not paused
+	slotPropertyChanged(&d->mGamePaused);
+ }
 }
 
