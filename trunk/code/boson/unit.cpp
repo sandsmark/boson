@@ -74,7 +74,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
 
  d->mDirection.setLocal(0); // not yet used
  setAnimated(true);
- searchpath = false;
 }
 
 Unit::~Unit()
@@ -286,10 +285,8 @@ bool Unit::moveTo(int x, int y)
  d->mMoveDestX = x;
  d->mMoveDestY = y;
 
- // Do not find new path here!!! Instead, set work to WorkMove and searchpath
- //  to true and then find path later in advanceMove()
- //newPath();
- searchpath = true;
+ // we need to find path here!
+ newPath();
  return true;
 }
 
@@ -661,12 +658,14 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- if(searchpath) {
+
+ // we must *not* depend on the return value of newPath()!
+/* if(searchpath) {
 	if(!newPath()) {
 		stopMoving();
 	}
 	searchpath = false;
- }
+ }*/
 
  if(waypointCount() == 0) {
 	// waypoints are PolicyClean - so they might need some advanceMove()
