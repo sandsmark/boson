@@ -77,11 +77,6 @@ class BosonShot : public BosonItem
     BosonShot(Player* owner, BosonCanvas* canvas);
 
     /**
-     * @return Owner of this shot, i.e. the player whose unit fired the shot.
-     * Used for statistics
-     **/
-    Player* owner() const { return mOwner; }
-    /**
      * @return Weapon properties of this shot if it has one.
      * Note that it's perfectly legal to return NULL pointer here, so you should
      * always check it before doing anything with it.
@@ -163,7 +158,6 @@ class BosonShot : public BosonItem
     void init();
 
     bool mActive;
-    Player* mOwner;
     const BosonWeaponProperties* mProp;
 };
 
