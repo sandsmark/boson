@@ -185,6 +185,8 @@ enum bosonMsgTag {
 	MSG_FACILITY_CONSTRUCT,		// request construction
 	MSG_FACILITY_CREATED,		// confirm construction for you, advise for others
 	MSG_FACILITY_DESTROYED,
+	MSG_FACILITY_HIDDEN, 		// destroyedMsg
+	MSG_FACILITY_UNHIDDEN,		// facilityMsg
 	MSG_FACILITY_CHANGED,
 	MSG_FACILITY_,
 
@@ -194,6 +196,8 @@ enum bosonMsgTag {
 	MSG_MOBILE_CONSTRUCT,
 	MSG_MOBILE_CREATED,
 	MSG_MOBILE_DESTROYED,
+	MSG_MOBILE_HIDDEN,		// destroyedMsg
+	MSG_MOBILE_UNHIDDEN,		// mobileMsg
 
 /* General units management */
 	MSG_UNIT_SHOOT,
