@@ -85,6 +85,8 @@ private:
 	// warning! width and height are still in canvas sizes!
 	int mWidth;
 	int mHeight;
+
+	int mPoints; // for debugging
 };
 #endif
 

@@ -164,12 +164,14 @@ void BosonModel::createDisplayLists()
 	return;
  }
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
- GLuint listBase = glGenLists(m3ds->frames); 
+ GLuint listBase = glGenLists(m3ds->frames);
+ int allPoints = 0;
  for (int i = 0; i < m3ds->frames; i++) {
 	m3ds->current_frame = i;
 	lib3ds_file_eval(m3ds, m3ds->current_frame);
 	Lib3dsNode* p = m3ds->nodes;
 	GLuint list = listBase + m3ds->current_frame;
+	mPoints = 0;
 	glNewList(list, GL_COMPILE);
 		glPushMatrix();
 		glScalef(0.004, 0.004, 0.004); // FIXME
@@ -184,8 +186,11 @@ void BosonModel::createDisplayLists()
 		glPopMatrix();
 	glEndList();
 	mFrames.insert(m3ds->current_frame, list);
+//	kdDebug() << k_funcinfo << "points in frame " << m3ds->current_frame << ": " << mPoints << endl;
+	allPoints += mPoints;
  }
  setFrame(frame());
+ kdDebug() << k_funcinfo << "points in model (all frames): " << allPoints << endl;
 }
 
 // AB: note that this function was nearly completely copied from the lib3ds
@@ -251,6 +256,7 @@ void BosonModel::renderNode(Lib3dsNode* node)
 			}
 	
 			{
+				mPoints += 3;
 				Lib3dsVector v[3];
 				Lib3dsTexel tex[3];
 				for (int i = 0; i < 3; i++) {
