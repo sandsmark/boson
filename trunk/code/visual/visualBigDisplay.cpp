@@ -6,7 +6,7 @@
     begin                : Sat Jan  9 19:35:36 CET 1999
                                            
     copyright            : (C) 1999 by Thomas Capricelli                         
-    email                : capricel@enst.fr                                     
+    email                : orzel@yalbi.com                                     
  ***************************************************************************/
 
 /***************************************************************************
@@ -170,7 +170,6 @@ void visualBigDisplay::unSelectAll(void)
 
 	/* deal with mobiles */
 	for (selIt.toFirst(); selIt;) { 		// ++ not needed, selIt should be increased
-		selIt.current()->unSelect();		// deal with selectPart
 		unSelectMob(selIt.currentKey());	// by the .remove() in unselect
 	}
 	boAssert(view->mobSelected.isEmpty());
@@ -224,6 +223,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			else
 				view->selectMob(m->key, m);
 
+			view->field->update();
 			return;
 		}
 
@@ -232,6 +232,7 @@ void visualBigDisplay::mousePressEvent(QMouseEvent *e)
 			unSelectAll();		// anyway 
 			view->selectFix(f);
 
+			view->field->update();
 			return;
 		}
 
