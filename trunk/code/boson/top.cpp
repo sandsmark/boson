@@ -47,8 +47,6 @@
 #include "bosongroundtheme.h"
 #include "bofullscreen.h"
 #include "bosonlocalplayerinput.h"
-#include "bodebuglogdialog.h"
-//#include "kgamecelldebug.h"
 
 #include <kgamedebugdialog.h>
 #include <kgameio.h>
@@ -303,28 +301,14 @@ void TopWidget::initKActions()
  d->mActionMenubar = KStdAction::showMenubar(this, SLOT(slotToggleMenubar()), actionCollection());
  d->mActionStatusbar = KStdAction::showStatusbar(this, SLOT(slotToggleStatusbar()), actionCollection());
 
- // Sound & Music
- KToggleAction* sound = new KToggleAction(i18n("Soun&d"), 0, this,
-		SLOT(slotToggleSound()), actionCollection(), "options_sound");
- sound->setChecked(boConfig->sound());
- KToggleAction* music = new KToggleAction(i18n("M&usic"), 0, this,
-		SLOT(slotToggleMusic()), actionCollection(), "options_music");
- music->setChecked(boConfig->music());
-
  // Display
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
 
  // Debug
- (void)new KAction(i18n("&Profiling..."), KShortcut(), this,
-		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
  (void)new KAction(i18n("&Debug KGame..."), KShortcut(), this,
 		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
- (void)new KAction(i18n("Debug &BoDebug log..."), KShortcut(), this,
-		SLOT(slotBoDebugLogDialog()), actionCollection(), "debug_bodebuglog");
- (void)new KAction(i18n("Sleep 1s"), KShortcut(), this,
-		SLOT(slotSleep1s()), actionCollection(), "debug_sleep_1s");
 
  createGUI("topui.rc", false);
 
@@ -589,18 +573,6 @@ void TopWidget::slotCancelLoadSave()
 	}
 	d->mStartup->slotShowWelcomeWidget();
  }
-}
-
-void TopWidget::slotToggleSound()
-{
- boAudio->setSound(!boAudio->sound());
- boConfig->setSound(boAudio->sound());
-}
-
-void TopWidget::slotToggleMusic()
-{
- boAudio->setMusic(!boAudio->music());
- boConfig->setMusic(boAudio->music());
 }
 
 void TopWidget::slotConfigureKeys()
@@ -1203,12 +1175,6 @@ void TopWidget::slotDebugKGame()
  displayNonModalDialog(dlg);
 }
 
-void TopWidget::slotProfiling()
-{
- BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
- displayNonModalDialog(dlg);
-}
-
 void TopWidget::displayNonModalDialog(KDialogBase* dialog)
 {
  connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
@@ -1270,16 +1236,4 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
  changeLocalPlayer(p);
 }
 
-void TopWidget::slotBoDebugLogDialog()
-{
- BoDebugLogDialog* dialog = new BoDebugLogDialog(this);
- connect(dialog, SIGNAL(finished()), dialog, SLOT(deleteLater()));
- dialog->slotUpdate();
- dialog->show();
-}
-
-void TopWidget::slotSleep1s()
-{
- sleep(1);
-}
 

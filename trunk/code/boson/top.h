@@ -99,16 +99,6 @@ public slots:
 	void slotStartNewGame();
 
 	/**
-	 * Toggles sound
-	 **/
-	void slotToggleSound();
-
-	/**
-	 * Toggles music
-	 **/
-	void slotToggleMusic();
-
-	/**
 	 * Toggles if menubar is shown or hidden
 	 **/
 	void slotToggleMenubar();
@@ -262,7 +252,6 @@ protected slots:
 
 	void slotEditorNewMap(const QByteArray&);
 
-	void slotProfiling();
 	void slotDebugKGame();
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
@@ -280,9 +269,6 @@ protected slots:
 	 * (probably @ref KToggleAction) objects of @ref BosonWidgetBase.
 	 **/
 	void slotCheckGameDockStatus();
-
-	void slotBoDebugLogDialog();
-	void slotSleep1s();
 
 private:
 	void initDisplayManager();

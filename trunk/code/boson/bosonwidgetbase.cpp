@@ -530,8 +530,6 @@ void BosonWidgetBase::initKActions()
 
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
- (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R),
-		this, SLOT(slotResetViewProperties()), actionCollection(), "game_reset_view_properties");
 
  // Dockwidgets show/hide
  d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
@@ -549,81 +547,13 @@ void BosonWidgetBase::initKActions()
 		displayManager(), SLOT(slotSetGrabMovie(bool)));
 
  // Debug
- KToggleAction* resources = new KToggleAction(i18n("Show resources"),
-		KShortcut(), 0, 0, actionCollection(), "show_resources");
- resources->setChecked(true);
- connect(resources, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetShowResources(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- KToggleAction* mapCoordinates = new KToggleAction(i18n("Debug &map coordinates"),
-		KShortcut(), 0, 0, actionCollection(), "debug_map_coordinates");
- mapCoordinates->setChecked(false);
- connect(mapCoordinates, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugMapCoordinates(bool)));
- KToggleAction* PFData = new KToggleAction(i18n("Debug pathfinder data"),
-		KShortcut(), 0, 0, actionCollection(), "debug_pf_data");
- PFData->setChecked(false);
- connect(PFData, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugPFData(bool)));
- KToggleAction* cellGrid = new KToggleAction(i18n("Show Cell &Grid"),
-		KShortcut(), 0, 0, actionCollection(), "debug_cell_grid");
- cellGrid->setChecked(false);
- connect(cellGrid, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugShowCellGrid(bool)));
- KToggleAction* matrices = new KToggleAction(i18n("Debug Ma&trices"),
-		KShortcut(), 0, 0, actionCollection(), "debug_matrices");
- matrices->setChecked(false);
- connect(matrices, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugMatrices(bool)));
- KToggleAction* works = new KToggleAction(i18n("Debug Item works"),
-		KShortcut(), 0, 0, actionCollection(), "debug_works");
- works->setChecked(false);
- connect(works, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugItemWorks(bool)));
- KToggleAction* camera = new KToggleAction(i18n("Debug camera"),
-		KShortcut(), 0, 0, actionCollection(), "debug_camera");
- camera->setChecked(false);
- connect(camera, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugCamera(bool)));
- KToggleAction* rendercounts = new KToggleAction(i18n("Debug Rendering counts"),
-		KShortcut(), 0, 0, actionCollection(), "debug_rendercounts");
- rendercounts->setChecked(false);
- connect(rendercounts, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugRenderCounts(bool)));
  KToggleAction* cheating = new KToggleAction(i18n("Enable &Cheating"),
 		KShortcut(), 0, 0, actionCollection(), "debug_enable_cheating");
  connect(cheating, SIGNAL(toggled(bool)), this, SLOT(slotToggleCheating(bool)));
- KToggleAction* wireFrames = new KToggleAction(i18n("Render &Wireframes"),
-		KShortcut(), 0, 0, actionCollection(), "debug_wireframes");
- connect(wireFrames, SIGNAL(toggled(bool)), this, SLOT(slotDebugToggleWireFrames(bool)));
- wireFrames->setChecked(false);
- slotDebugToggleWireFrames(false);
- KToggleAction* boundingboxes = new KToggleAction(i18n("Render item's bounding boxes"),
-		KShortcut(), 0, 0, actionCollection(), "debug_boundingboxes");
- boundingboxes->setChecked(false);
- connect(boundingboxes, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugBoundingBoxes(bool)));
- KToggleAction* fps = new KToggleAction(i18n("Debug FPS"),
-		KShortcut(), 0, 0, actionCollection(), "debug_fps");
- fps->setChecked(false);
- connect(fps, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetDebugFPS(bool)));
- KToggleAction* debugAdvanceCalls = new KToggleAction(i18n("Debug &Advance calls"),
-		KShortcut(), 0, 0, actionCollection(), "debug_advance_calls");
- connect(debugAdvanceCalls, SIGNAL(toggled(bool)), this, SLOT(slotSetDebugAdvanceCalls(bool)));
- KToggleAction* debugTextureMemory = new KToggleAction(i18n("Debug &Texture Memory"),
-		KShortcut(), 0, 0, actionCollection(), "debug_texture_memory");
- connect(debugTextureMemory, SIGNAL(toggled(bool)), this, SLOT(slotSetDebugTextureMemory(bool)));
  (void)new KAction(i18n("&Unfog"), KShortcut(), this,
 		SLOT(slotUnfogAll()), actionCollection(), "debug_unfog");
- (void)new KAction(i18n("Dump game &log"), KShortcut(), this,
-		SLOT(slotDumpGameLog()), actionCollection(), "debug_gamelog");
- KToggleAction* enablecolormap = new KToggleAction(i18n("Enable colormap"),
-		KShortcut(), 0, 0, actionCollection(), "debug_colormap_enable");
- enablecolormap->setChecked(false);
- connect(enablecolormap, SIGNAL(toggled(bool)),
-		this, SLOT(slotSetEnableColormap(bool)));
  (void)new KAction(i18n("Edit global conditions..."), KShortcut(), this,
 		SLOT(slotEditConditions()), actionCollection(),
 		"debug_edit_conditions");
@@ -953,11 +883,6 @@ void BosonWidgetBase::slotToggleCheating(bool on)
  setActionEnabled("debug_players", on);
 }
 
-void BosonWidgetBase::slotDebugToggleWireFrames(bool on)
-{
- boConfig->setWireFrames(on);
-}
-
 void BosonWidgetBase::setActionEnabled(const char* name, bool on)
 {
  KAction* a = actionCollection()->action(name);
@@ -1020,71 +945,6 @@ void BosonWidgetBase::slotApplyOptions()
  displayManager()->setToolTipUpdatePeriod(boConfig->toolTipUpdatePeriod());
 }
 
-void BosonWidgetBase::slotSetDebugMapCoordinates(bool debug)
-{
- boConfig->setDebugMapCoordinates(debug);
-}
-
-void BosonWidgetBase::slotSetDebugPFData(bool debug)
-{
- boConfig->setDebugPFData(debug);
-}
-
-void BosonWidgetBase::slotSetDebugShowCellGrid(bool debug)
-{
- boConfig->setDebugShowCellGrid(debug);
-}
-
-void BosonWidgetBase::slotSetDebugMatrices(bool debug)
-{
- boConfig->setDebugOpenGLMatrices(debug);
-}
-
-void BosonWidgetBase::slotSetDebugItemWorks(bool debug)
-{
- boConfig->setDebugItemWorkStatistics(debug);
-}
-
-void BosonWidgetBase::slotSetDebugCamera(bool debug)
-{
- boConfig->setDebugOpenGLCamera(debug);
-}
-
-void BosonWidgetBase::slotSetDebugRenderCounts(bool debug)
-{
- boConfig->setDebugRenderCounts(debug);
-}
-
-void BosonWidgetBase::slotSetDebugBoundingBoxes(bool debug)
-{
- boConfig->setDebugBoundingBoxes(debug);
-}
-
-void BosonWidgetBase::slotSetDebugFPS(bool debug)
-{
- boConfig->setDebugFPS(debug);
-}
-
-void BosonWidgetBase::slotSetDebugAdvanceCalls(bool debug)
-{
- boConfig->setDebugAdvanceCalls(debug);
-}
-
-void BosonWidgetBase::slotSetDebugTextureMemory(bool debug)
-{
- boConfig->setDebugTextureMemory(debug);
-}
-
-void BosonWidgetBase::slotSetShowResources(bool show)
-{
- boConfig->setShowResources(show);
-}
-
-void BosonWidgetBase::slotSetEnableColormap(bool enable)
-{
- boConfig->setEnableColormap(enable);
-}
-
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
  mLocalPlayerInput->eventListener()->script()->execLine(line);
@@ -1097,11 +957,6 @@ void BosonWidgetBase::slotAdvance(unsigned int, bool)
 void BosonWidgetBase::initScripts()
 {
  displayManager()->activeDisplay()->setLocalPlayerScript(mLocalPlayerInput->eventListener()->script());
-}
-
-void BosonWidgetBase::slotDumpGameLog()
-{
- boGame->saveGameLogs("boson");
 }
 
 void BosonWidgetBase::slotShowLight0Widget()
