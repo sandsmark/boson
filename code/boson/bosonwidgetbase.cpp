@@ -1143,9 +1143,7 @@ void BosonWidgetBase::slotRunScriptLine(const QString& line)
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
 {
- BosonProfiler p(901);
  d->mScript->advance();
- boDebug() << k_funcinfo << "Took " << p.stop() << " us" << endl;
 }
 
 void BosonWidgetBase::initScripts()
