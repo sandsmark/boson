@@ -749,19 +749,35 @@ bool Facility::canPlaceProductionAt(const QPoint& pos) const
 	kdDebug() << k_lineinfo << "no completed construction" << endl;
 	return false;
  }
- if (pos.x() > x() + width() + BUILD_RANGE ||
-		pos.y() > y() + height() + BUILD_RANGE) {
-	 kdDebug() << "pos.x()=" << pos.x() << ",x+width+BUILD_RANGE=" << x() + width() + BUILD_RANGE << endl;
-	 kdDebug() << "pos.y()=" << pos.y() << ",y+height+BUILD_RANGE=" << y() + height() + BUILD_RANGE << endl;
-	 return false;
+ QValueList<Unit*> list = boCanvas()->unitCollisionsInRange(pos, BUILD_RANGE);
+
+ const UnitProperties* prop = owner()->unitProperties(currentProduction());
+ if (!prop) {
+	kdError() << k_lineinfo << "NULL unit properties - EVIL BUG!" << endl;
+	return false;
  }
- if (pos.x() < (x() > BUILD_RANGE ? x() - BUILD_RANGE : 0) || 
-		pos.y() < (y() > BUILD_RANGE ? y() - BUILD_RANGE : 0)) {
-	 kdDebug() << "pos.x()=" << pos.x() << ",x-BUILD_RANGE=" << x() - BUILD_RANGE << endl;
-	 kdDebug() << "pos.y()=" << pos.y() << ",y-BUILD_RANGE=" << y() - BUILD_RANGE << endl;
-	 return false;
+ if (prop->isFacility()) {
+	// a facility can be placed within BUILD_RANGE of *any* friendly
+	// facility on map
+	for (unsigned int i = 0; i < list.count(); i++) {
+		if (list[i]->isFacility() && list[i]->owner() == owner()) {
+			kdDebug() << "Facility in BUILD_RANGE" << endl;
+			// TODO: also check whether a unit is already at that position!!
+			return true;
+		}
+	}
+ } else {
+	// a mobile unit can be placed within BUILD_RANGE of its factory *only*
+	for (unsigned int i = 0; i < list.count(); i++) {
+		if (list[i] == (Unit*)this) {
+			// TODO: also check whether a unit is already at that position!!
+			return true;
+		}
+	}
  }
- return true;
+
+
+ return false;
 }
 
 int Facility::completedProduction() const

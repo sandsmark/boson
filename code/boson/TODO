@@ -45,6 +45,7 @@ General TODOs
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
+- Use BosonCanvas::unitCollisionsInRange() wherever useful
 
 
 Data TODOs
