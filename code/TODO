@@ -45,11 +45,13 @@ mouse handling :
 	on the right window.
 
 
+boson:
+	checkMove should handle the new 'direction'
+
 visual:
 	merge boshot and speciesTheme pixmap loading stuff
 
 editor:
-	oil-cells aren't shown
 	close -> how to say KTMW that there's no mainWidget anymore ? 
 	predefined 'template' for construction.
 
