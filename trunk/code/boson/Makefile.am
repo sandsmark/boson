@@ -79,9 +79,9 @@ boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 boson_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC) $(COMMON_SRC)
 
-boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
-boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
+#boeditor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+#boeditor_LDADD = -lkdegames -lqtmcop -lsoundserver_idl -lartskde $(LIB_KDEUI) 
+#boeditor_SOURCES = $(BOEDITOR_SRC) $(COMMON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bounit_LDADD = -lkio $(LIB_KDEUI) 
