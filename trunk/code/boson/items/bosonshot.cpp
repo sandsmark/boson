@@ -888,21 +888,7 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
     const UnitProperties* unitproperties) :
     BosonShot(owner, canvas, model)
 {
-  mUnitProperties = unitproperties;
-
-  KRandomSequence* r = owner->game()->random();
-  mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
-  mVelo.normalize();
-  mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
-  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
-  boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
-
-  mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
-  canvas->addParticleSystems(*mParticleSystems);
-
-  move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
-  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
-  setVisible(true);
+  activate(pos, unitproperties);
 }
 
 BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
@@ -910,6 +896,25 @@ BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonMo
 {
   mParticleSystems = 0;
   mUnitProperties = 0;
+}
+
+void BosonShotFragment::activate(const BoVector3& pos, const UnitProperties* unitproperties)
+{
+  mUnitProperties = unitproperties;
+
+  KRandomSequence* r = owner()->game()->random();
+  mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
+  mVelo.normalize();
+  mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
+  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
+  boDebug() << k_funcinfo << "Velocity is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
+
+  mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
+  canvas()->addParticleSystems(*mParticleSystems);
+
+  move(pos.x(), pos.y(), pos.z() + 0.2);  // +0.2 prevents immediate contact with the terrain
+  setRotation(Bo3dTools::rotationToPoint(mVelo.x(), mVelo.y()));
+  setVisible(true);
 }
 
 bool BosonShotFragment::saveAsXML(QDomElement& root)

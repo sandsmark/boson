@@ -358,6 +358,8 @@ class BosonShotFragment : public BosonShot
         const UnitProperties* unitproperties);
     BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model);
 
+    void activate(const BoVector3& pos, const UnitProperties* unitProperties);
+
     virtual bool saveAsXML(QDomElement& root);
     virtual bool loadFromXML(const QDomElement& root);
     virtual bool save(QDataStream& stream);
