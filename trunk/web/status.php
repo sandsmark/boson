@@ -61,10 +61,11 @@ draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
   <ul>
-    <li>Support for height maps in editor</li>
+    <li>Better support for height maps in editor</li>
     <li>3d-terrains in map files</li>
-    <li>New startup widgets</li>
+    <li>The new startup widgets need some work</li>
     <li>New save game format</li>
+    <li>Consistent mouse actions</li>
   </ul>
   <h2><a name=\"done\"></a>DONE</h2>
   <blockquote>
@@ -78,6 +79,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Particles are drawn depth-sorted</li>
     <li>Big performance improvements</li>
     <li>Binary map format (decreases size of map files a lot, especially for big maps)</li>
+    <li>Some new startup widgets</li>
   </ul>
   <h4>Game</h4>
   <ul>
@@ -89,6 +91,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Damaged units are getting darker</li>
     <li>Save screenshots as jpg and show the full path as a chat message</li>
     <li>New minimap zooming buttons</li>
+    <li>Light support</li>
     <li>Fixed texture coordinates bug (meaning: it looks better)</li>
   </ul>
   <h4>Data</h4>
@@ -104,6 +107,7 @@ draw_bigbox_text("This is a list of features that we consider as
     <li>Buildings are placed in constructed mode</li>
     <li>Better support for big maps</li>
     <li>Support for changing map name and description</li>
+    <li>Height map supports</li>
   </ul>
   
   
