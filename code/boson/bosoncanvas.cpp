@@ -823,6 +823,9 @@ bool BosonCanvas::cellOccupied(int x, int y) const
 
 bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) const
 {
+ if (!unit) {
+	return cellOccupied(x, y);
+ }
  if (unit->isFlying()) {
 	return false; // even if there are other flying units - different altitudes!
  }
@@ -834,7 +837,7 @@ bool BosonCanvas::cellOccupied(int x, int y, Unit* unit, bool excludeMoving) con
  return cell(x, y)->isOccupied(unit, includeMoving);
 }
 
-bool BosonCanvas::cellsOccupied(const QRect& rect) const
+bool BosonCanvas::cellsOccupied(const QRect& rect, Unit* unit, bool excludeMoving) const
 {
  const int left = rect.left() / BO_TILE_SIZE;
  const int top = rect.top() / BO_TILE_SIZE;
@@ -843,7 +846,7 @@ bool BosonCanvas::cellsOccupied(const QRect& rect) const
 
  for (int x = left; x < right; x++) {
 	for (int y = top; y < bottom; y++) {
-		if (cellOccupied(x, y)) {
+		if (cellOccupied(x, y, unit, excludeMoving)) {
 			return true;
 		}
 	}

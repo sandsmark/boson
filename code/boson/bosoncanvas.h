@@ -165,9 +165,14 @@ public:
 	/**
 	 * Check if any cell in rect is occupied. Note that rect consists of
 	 * <em>canvas coordinates</em>, not of cell-coordinates.
+	 * @param rect Check all cells on this rect
+	 * @param u This unit may be on the cells, it is not relevant for
+	 * occupation status
+	 * @param excludeMoving Only valid if u is non-NULL. If TRUE moving
+	 * units are ignored for occupation checking
 	 * @return TRUE if any cell in rect is occupied, otherwise FALSE.
 	 **/
-	bool cellsOccupied(const QRect& rect) const;
+	bool cellsOccupied(const QRect& rect, Unit* u = 0, bool excludeMoving = false) const;
 
 	/**
 	 * @param owner If non-NULL and unit is a facilty we also check whether
