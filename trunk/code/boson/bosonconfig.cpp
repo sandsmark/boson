@@ -25,6 +25,8 @@
 #include <klocale.h>
 #include <kdebug.h>
 
+#include <GL/gl.h>
+
 static KStaticDeleter<BosonConfig> sd;
 BosonConfig* BosonConfig::mBosonConfig = 0;
 
@@ -202,6 +204,9 @@ BosonConfig::BosonConfig(KConfig* conf)
  mChatScreenMaxItems = new BoConfigIntEntry(this, "ChatScreenMaxItems", DEFAULT_CHAT_SCREEN_MAX_ITEMS);
  mModelTexturesMipmaps = new BoConfigBoolEntry(this, "ModelTexturesMipmaps", true);
  mUnitSoundsDeactivated = new BoConfigIntListEntry(this, "DeactivateUnitSounds", QValueList<int>());
+ mMagnificationFilter = new BoConfigIntEntry(this, "MagnificationFilter", DEFAULT_MAGNIFICATION_FILTER);
+ mMinificationFilter = new BoConfigIntEntry(this, "MinificationFilter", DEFAULT_MINIFICATION_FILTER);
+ mMipmapMinificationFilter = new BoConfigIntEntry(this, "MipmapMinificationFilter", DEFAULT_MIPMAP_MINIFICATION_FILTER);
 
  mDebugMode = DebugNormal;
 

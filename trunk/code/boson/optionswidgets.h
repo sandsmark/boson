@@ -152,6 +152,7 @@ private:
 	QMap<QCheckBox*, UnitSoundEvent> mCheckBox2UnitSoundEvent;
 };
 
+
 class OpenGLOptions : public QVBox, public OptionsWidget
 {
 	Q_OBJECT
@@ -168,9 +169,31 @@ public:
 signals:
 	void signalUpdateIntervalChanged(unsigned int);
 
+protected:
+	/**
+	 * @return GL_NEAREST or GL_LINEAR for all textures.
+	 **/
+	int magnificationFilter() const;
+	void setMagnificationFilter(int f);
+
+	/**
+	 * @return GL_NEAREST or GL_LINEAR for normal textures.
+	 **/
+	int minificationFilter() const;
+	void setMinificationFilter(int f);
+
+	/**
+	 * @return GL_NEAREST, GL_LINEAR, GL_*_MIPMAP_* for mipmapped textures
+	 **/
+	int mipmapMinificationFilter() const;
+	void setMipmapMinificationFilter(int f);
+
 private:
 	KIntNumInput* mUpdateInterval;
 	QCheckBox* mModelTexturesMipmaps;
+	QComboBox* mMagnificationFilter;
+	QComboBox* mMinificationFilter;
+	QComboBox* mMipmapMinificationFilter;
 };
 
 class ChatOptions : public QVBox, public OptionsWidget

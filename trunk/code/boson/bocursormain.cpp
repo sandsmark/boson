@@ -22,6 +22,7 @@
 
 #include "bosoncursoreditor.h"
 #include "bosoncursor.h"
+#include "bosonconfig.h"
 #include "global.h"
 
 #include <kapplication.h>
@@ -180,6 +181,8 @@ int main(int argc, char **argv)
  KCmdLineArgs::init(argc, argv, &about);
  KCmdLineArgs::addCmdLineOptions(options);
  KApplication app;
+
+ BosonConfig::initBosonConfig();
 
  KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
  QWidget* w = new QWidget(0);
