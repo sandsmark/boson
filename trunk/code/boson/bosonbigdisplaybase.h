@@ -320,7 +320,7 @@ protected:
 
 	bool checkError() const;
 
-	float calcFPS();
+	void calcFPS();
 
 	/**
 	 * Select all units of the specified type.
