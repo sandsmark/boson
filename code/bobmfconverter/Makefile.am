@@ -25,5 +25,5 @@ bobmfconverter_LDADD = \
 		$(LIB_KDECORE) \
 		-l3ds \
 		$(GLLIB) \
-		$(top_srcdir)/bobmfconverter/libgfx/libgfx.la \
-		$(top_srcdir)/bobmfconverter/mixkit/libmixkit.la
+		$(top_builddir)/bobmfconverter/libgfx/libgfx.la \
+		$(top_builddir)/bobmfconverter/mixkit/libmixkit.la
