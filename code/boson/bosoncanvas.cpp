@@ -1076,7 +1076,7 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
  }
  if (!loadEffectsFromXML(root)) {
 	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
-	// AB: do NOT return. this is NOT critical.
+	return false;
  }
 
  QDomElement handler = root.namedItem("DataHandler").toElement();
