@@ -81,23 +81,108 @@ private:
 	QValueList<Q_UINT32> mClientsLeft;
 };
 
-class BoLongSyncMessage
+class BoPlayerSyncMessage
 {
 public:
-	void setMessageLogger(BoMessageLogger* l)
-	{
-		mMessageLogger = l;
-	}
 	void setGame(Boson* game)
 	{
 		mGame = game;
 	}
 
-	QByteArray makeLog(BosonCanvas* canvas);
-	static QString findError(QDataStream& s1, QDataStream& s2);
+	QByteArray makeLog()
+	{
+		QByteArray playersBuffer;
+		QDataStream playersStream(playersBuffer, IO_WriteOnly);
+		QPtrListIterator<KPlayer> playerIt(*mGame->playerList());
+		playersStream << (Q_UINT32)mGame->playerList()->count();
+		while (playerIt.current()) {
+			Player* p = (Player*)playerIt.current();
+			playersStream << (Q_UINT32)p->minerals();
+			playersStream << (Q_UINT32)p->oil();
+			++playerIt;
+		}
+		return playersBuffer;
+	}
+	static QString findError(const QByteArray& b1, const QByteArray& b2)
+	{
+		return findPlayersError(b1, b2);
+	}
 
 protected:
-	QByteArray makeCanvasLog(BosonCanvas* canvas);
+	static QString findPlayersError(const QByteArray& b1, const QByteArray& b2)
+	{
+		KMD5 md5(b1);
+		KMD5 md5_2(b2);
+		if (md5.hexDigest() != md5_2.hexDigest()) {
+			boWarning(370) << k_funcinfo << "there must be an error in the players log!!" << endl;
+		} else {
+			boDebug(370) << "error is not in the players log" << endl;
+			return QString::null;
+		}
+		QDataStream s1(b1, IO_ReadOnly);
+		QDataStream s2(b2, IO_ReadOnly);
+		Q_UINT32 count, count2;
+		s1 >> count;
+		s1 >> count2;
+		if (count != count2) {
+			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
+		}
+		for (unsigned int i = 0; i < count; i++) {
+			Q_UINT32 minerals, minerals2;
+			Q_UINT32 oil, oil2;
+			s1 >> minerals;
+			s2 >> minerals2;
+			s1 >> oil;
+			s2 >> oil2;
+#define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
+			CHECK(minerals, minerals2);
+			CHECK(oil, oil2);
+#undef CHECK
+		}
+		return i18n("There is an error in the players log (MD5 sums don't match), but it could not be found.");
+	}
+
+private:
+	Boson* mGame;
+};
+
+class BoCanvasSyncMessage
+{
+public:
+	void setGame(Boson* game)
+	{
+		mGame = game;
+	}
+
+	/**
+	 * @param interval This is supposed to be the interval of how often this
+	 * log is created (in advance messages). You can use -1 if you don't
+	 * know that value, however you get the best results by using it. E.g.
+	 * if you call it if (advanceMessageCounter % 10 == 5), then the
+	 * interval is 10.
+	 **/
+	QByteArray makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+	{
+		int itemCount = canvas->allItems()->count();
+		int size = 40;
+		if (itemCount == 0 || itemCount <= size) {
+			return makeLog(canvas, -1, -1);
+		}
+
+		// this formula increases the start index by count after every
+		// log.
+		// it also makes sure that exactly size items end up in the log.
+		int start = ((advanceMessageCount / interval) * size) % itemCount;
+		return makeLog(canvas, start, size);
+	}
+	static QString findError(const QByteArray& b1, const QByteArray& b2)
+	{
+		return findCanvasError(b1, b2);
+	}
+
+protected:
+	QByteArray makeLog(BosonCanvas* canvas, int start, int count);
+
 	static QString findCanvasError(const QByteArray& b1, const QByteArray& b2)
 	{
 		if (b1.size() == 0 || b2.size() == 0) {
@@ -141,40 +226,7 @@ protected:
 		}
 		return i18n("There is an error in the canvas log (MD5 sums don't match), but it could not be found.");
 	}
-	static QString findPlayersError(const QByteArray& b1, const QByteArray& b2)
-	{
-		KMD5 md5(b1);
-		KMD5 md5_2(b2);
-		if (md5.hexDigest() != md5_2.hexDigest()) {
-			boWarning(370) << k_funcinfo << "there must be an error in the players log!!" << endl;
-		} else {
-			boDebug(370) << "error is not in the players log" << endl;
-			return QString::null;
-		}
-		QDataStream s1(b1, IO_ReadOnly);
-		QDataStream s2(b2, IO_ReadOnly);
-		Q_UINT32 count, count2;
-		s1 >> count;
-		s1 >> count2;
-		if (count != count2) {
-			return i18n("Have players: %1 should be: %2").arg(count2).arg(count);
-		}
-		for (unsigned int i = 0; i < count; i++) {
-			Q_UINT32 minerals, minerals2;
-			Q_UINT32 oil, oil2;
-			s1 >> minerals;
-			s2 >> minerals2;
-			s1 >> oil;
-			s2 >> oil2;
-#define CHECK(x,x2) if (x != x2) { return i18n("Different players in players log: variable %1: found %2, expected %3").arg(#x).arg(x2).arg(x); }
-			CHECK(minerals, minerals2);
-			CHECK(oil, oil2);
-#undef CHECK
-		}
-		return i18n("There is an error in the players log (MD5 sums don't match), but it could not be found.");
-	}
 
-protected:
 	static void streamItem(QDataStream& stream, BosonItem* i)
 	{
 		stream << (Q_UINT32)i->id();
@@ -245,59 +297,34 @@ protected:
 		return QString::null;
 	}
 
+
+
 private:
-	BoMessageLogger* mMessageLogger;
 	Boson* mGame;
 };
 
-QByteArray BoLongSyncMessage::makeLog(BosonCanvas* canvas)
+QByteArray BoCanvasSyncMessage::makeLog(BosonCanvas* canvas, int start, int count)
 {
- QMap<QString, QByteArray> streams;
- streams.insert("CanvasStream", makeCanvasLog(canvas));
+ // AB it would be sufficient to stream data of a couple of items only.
+ // that would be a lot faster.
+ // e.g. only every nth item, where n is rotating, i.e. first log uses
+ // items (n=10) 0, 10, 20, ... second log uses items 1, 11, 21, ... and
+ // so on. we'd still cover all items but would have to stream a lot data
+ // less
 
- QByteArray playersBuffer;
- QDataStream playersStream(playersBuffer, IO_WriteOnly);
- QPtrListIterator<KPlayer> playerIt(*mGame->playerList());
- playersStream << (Q_UINT32)mGame->playerList()->count();
- while (playerIt.current()) {
-	Player* p = (Player*)playerIt.current();
-	playersStream << (Q_UINT32)p->minerals();
-	playersStream << (Q_UINT32)p->oil();
-	++playerIt;
+ if (start < 0 || count < 0) {
+	start = 0;
+	count = canvas->allItems()->count();
  }
- streams.insert("PlayersStream", playersBuffer);
 
- // AB: we cannot use this yet.
- // the message log may contain old messages as well, from a previous game or
- // so. these would be present for one client only.
- QByteArray messagesBuffer;
-#if 0
- QBuffer messagesBuffer2(messagesBuffer);
- messagesBuffer2.open(IO_WriteOnly);
- mMessageLogger->saveMessageLog(&messagesBuffer2, 100);
- stream << messages;
-#endif
- streams.insert("MessagesStream", messagesBuffer);
-
- QByteArray b;
- QDataStream logStream(b, IO_WriteOnly);
- logStream << streams;
-
- return b;
-}
-
-QByteArray BoLongSyncMessage::makeCanvasLog(BosonCanvas* canvas)
-{
  BoItemList list;
  BoItemList::Iterator it;
- for (it = canvas->allItems()->begin(); it != canvas->allItems()->end(); ++it) {
-	// AB it would be sufficient to stream data of a couple of items only.
-	// that would be a lot faster.
-	// e.g. only every nth item, where n is rotating, i.e. first log uses
-	// items (n=10) 0, 10, 20, ... second log uses items 1, 11, 21, ... and
-	// so on. we'd still cover all items but would have to stream a lot data
-	// less
-	list.append(*it);
+ int index = 0;
+ for (it = canvas->allItems()->begin(); it != canvas->allItems()->end() && (int)list.count() < count; ++it) {
+	if (index >= start || index < ((start + count) % canvas->allItems()->count())) {
+		list.append(*it);
+	}
+	index++;
  }
 
  QByteArray buffer;
@@ -322,6 +349,60 @@ QByteArray BoLongSyncMessage::makeCanvasLog(BosonCanvas* canvas)
  return buffer;
 }
 
+
+
+class BoLongSyncMessage
+{
+public:
+	void setMessageLogger(BoMessageLogger* l)
+	{
+		mMessageLogger = l;
+	}
+	void setGame(Boson* game)
+	{
+		mGame = game;
+		mPlayerSync.setGame(mGame);
+	}
+
+	QByteArray makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval);
+	static QString findError(QDataStream& s1, QDataStream& s2);
+
+protected:
+private:
+	BoMessageLogger* mMessageLogger;
+	Boson* mGame;
+
+	BoPlayerSyncMessage mPlayerSync;
+	BoCanvasSyncMessage mCanvasSync;
+};
+
+QByteArray BoLongSyncMessage::makeLog(BosonCanvas* canvas, unsigned int advanceMessageCount, unsigned int interval)
+{
+ QMap<QString, QByteArray> streams;
+ streams.insert("CanvasStream", mCanvasSync.makeLog(canvas, advanceMessageCount, interval));
+
+ QByteArray playersBuffer = mPlayerSync.makeLog();
+ streams.insert("PlayersStream", playersBuffer);
+
+ // AB: we cannot use this yet.
+ // the message log may contain old messages as well, from a previous game or
+ // so. these would be present for one client only.
+ QByteArray messagesBuffer;
+#if 0
+ QBuffer messagesBuffer2(messagesBuffer);
+ messagesBuffer2.open(IO_WriteOnly);
+ mMessageLogger->saveMessageLog(&messagesBuffer2, 100);
+ stream << messages;
+#endif
+ streams.insert("MessagesStream", messagesBuffer);
+
+ QByteArray b;
+ QDataStream logStream(b, IO_WriteOnly);
+ logStream << streams;
+
+ return b;
+}
+
 QString BoLongSyncMessage::findError(QDataStream& s1, QDataStream& s2)
 {
  QMap<QString, QByteArray> streams, streams2;
@@ -333,11 +414,11 @@ QString BoLongSyncMessage::findError(QDataStream& s1, QDataStream& s2)
 	error = i18n("Different streams count: %1, but should be %2").arg(streams2.count()).arg(streams.count());
 	return error;
  }
- error = findCanvasError(streams["CanvasStream"], streams2["CanvasStream"]);
+ error = BoCanvasSyncMessage::findError(streams["CanvasStream"], streams2["CanvasStream"]);
  if (!error.isNull()) {
 	return error;
  }
- error = findPlayersError(streams["PlayersStream"], streams2["PlayersStream"]);
+ error = BoPlayerSyncMessage::findError(streams["PlayersStream"], streams2["PlayersStream"]);
  if (!error.isNull()) {
 	return error;
  }
@@ -390,11 +471,14 @@ void BosonNetworkSynchronizer::receiveAdvanceMessage(BosonCanvas* canvas)
  BO_CHECK_NULL_RET(canvas);
  // a message is sent every 250 ms
  mAdvanceMessageCounter++;
- if (mAdvanceMessageCounter % 10 == 5) { // every 2,5s
-	QByteArray log = createLongSyncLog(canvas);
+
+ unsigned int shortInterval = 10; // every 2,5s
+ unsigned int longInterval = 100; // every 25s
+ if (mAdvanceMessageCounter % shortInterval == 5) {
+	QByteArray log = createLongSyncLog(canvas, mAdvanceMessageCounter, shortInterval);
 	storeLogAndSend(log);
  }
- if (mAdvanceMessageCounter % 100 == 50) { // every 25s
+ if (mAdvanceMessageCounter % longInterval == 50) {
  }
 }
 
@@ -504,7 +588,7 @@ void BosonNetworkSynchronizer::sendAck(const QCString& md5, bool verify, unsigne
 }
 
 
-QByteArray BosonNetworkSynchronizer::createLongSyncLog(BosonCanvas* canvas) const
+QByteArray BosonNetworkSynchronizer::createLongSyncLog(BosonCanvas* canvas, unsigned int advanceMessageCounter, unsigned int interval) const
 {
  static int myProfilingId = boProfiling->requestEventId("CreateLongSyncLog");
  BosonProfiler profiler(myProfilingId);
@@ -512,7 +596,7 @@ QByteArray BosonNetworkSynchronizer::createLongSyncLog(BosonCanvas* canvas) cons
  BoLongSyncMessage m;
  m.setGame(mGame);
  m.setMessageLogger(mMessageLogger);
- return m.makeLog(canvas);
+ return m.makeLog(canvas, advanceMessageCounter, interval);
 }
 
 void BosonNetworkSynchronizer::addChatSystemMessage(const QString& msg)
