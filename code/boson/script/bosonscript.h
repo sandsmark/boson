@@ -50,7 +50,8 @@ class BosonScript
     BosonScript();
     virtual ~BosonScript();
 
-    static BosonScript* bosonScript()  { return mScript; };
+    static BosonScript* bosonScript() { return mScript; }
+    static void deleteBosonScript();
 
     /**
      * Loads script from file.
@@ -80,18 +81,18 @@ class BosonScript
      virtual void execLine(const QString& line) = 0;
 
 
-    void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; };
-    void setPlayer(Player* p)  { mPlayer = p; };
+    void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
+    void setPlayer(Player* p)  { mPlayer = p; }
 
-    BosonBigDisplayBase* display()  { return mDisplay; };
-    Player* player()  { return mPlayer; };
-    Boson* game();
-    BoCamera* camera();
+    BosonBigDisplayBase* display() const { return mDisplay; }
+    Player* player() const { return mPlayer; }
+    Boson* game() const;
+    BoCamera* camera() const;
 
 
     // Players
-    bool areEnemies(int playerId1, int playerId2);
-    int playerId();
+    bool areEnemies(int playerId1, int playerId2) const;
+    int playerId() const;
     // Resources
     // Units
     void moveUnit(int id, int x, int y);
@@ -107,10 +108,10 @@ class BosonScript
     void setCameraMoveMode(int mode);
     void commitCameraChanges(int ticks);
 
-    BoVector3 cameraPos();
-    float cameraRotation();
-    float cameraRadius();
-    float cameraZ();
+    BoVector3 cameraPos() const;
+    float cameraRotation() const;
+    float cameraRadius() const;
+    float cameraZ() const;
 
   protected:
     void sendInput(QDataStream& stream);

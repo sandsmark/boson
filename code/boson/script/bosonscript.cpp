@@ -66,6 +66,12 @@ BosonScript::~BosonScript()
   mScript = 0;
 }
 
+void BosonScript::deleteBosonScript()
+{
+ delete mScript;
+ mScript = 0;
+}
+
 void BosonScript::sendInput(QDataStream& stream)
 {
   if(!player())
@@ -77,7 +83,7 @@ void BosonScript::sendInput(QDataStream& stream)
   player()->forwardInput(stream);
 }
 
-Boson* BosonScript::game()
+Boson* BosonScript::game() const
 {
   if(!player())
   {
@@ -88,7 +94,7 @@ Boson* BosonScript::game()
   return (Boson*)player()->game();
 }
 
-BoCamera* BosonScript::camera()
+BoCamera* BosonScript::camera() const
 {
   if(!display())
   {
@@ -101,7 +107,7 @@ BoCamera* BosonScript::camera()
 
 /*****  Player methods  *****/
 
-bool BosonScript::areEnemies(int playerId1, int playerId2)
+bool BosonScript::areEnemies(int playerId1, int playerId2) const
 {
   if(!game())
   {
@@ -128,7 +134,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2)
   return p1->isEnemy(p2);
 }
 
-int BosonScript::playerId()
+int BosonScript::playerId() const
 {
   if(!player())
   {
@@ -251,22 +257,22 @@ void BosonScript::commitCameraChanges(int ticks)
   camera()->commitChanges(ticks);
 }
 
-BoVector3 BosonScript::cameraPos()
+BoVector3 BosonScript::cameraPos() const
 {
   return camera()->lookAt();
 }
 
-float BosonScript::cameraRotation()
+float BosonScript::cameraRotation() const
 {
   return camera()->rotation();
 }
 
-float BosonScript::cameraRadius()
+float BosonScript::cameraRadius() const
 {
   return camera()->radius();
 }
 
-float BosonScript::cameraZ()
+float BosonScript::cameraZ() const
 {
   return camera()->z();
 }
