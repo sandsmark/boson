@@ -985,7 +985,7 @@ void TopWidget::changeLocalPlayer(Player* p)
  // but it is NULL when the startup widgets call it
  boGame->setLocalPlayer(p);
  if (d->mBosonWidget) {
-	d->mBosonWidget->setLocalPlayer(p, false); // AB: false: do not call initPlayer()
+	d->mBosonWidget->setLocalPlayer(p);
  }
 }
 
