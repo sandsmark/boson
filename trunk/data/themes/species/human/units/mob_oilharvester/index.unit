@@ -9,13 +9,13 @@ ConstructedEffects=
 DestroyedEffects=1001,3001,6001,7001
 ExplodingDamage=250
 ExplodingDamageRange=2.5
-Health=200
+Health=150
 HitPoint=0,0,0.62
 Id=10002
 IsFacility=false
-MineralCost=600
+MineralCost=350
 Name=Oil Harvester
-OilCost=600
+OilCost=250
 Producer=0
 ProductionTime=500
 Requirements=8,3
@@ -31,7 +31,7 @@ Weapons=0
 [HarvesterPlugin]
 CanMineMinerals=false
 CanMineOil=true
-MaxResources=150
+MaxResources=120
 MiningSpeed=2
 UnloadingSpeed=5
 
