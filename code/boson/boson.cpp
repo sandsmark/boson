@@ -741,7 +741,7 @@ public:
 		mGameTimer = 0;
 		mCanvas = 0;
 		mPlayField = 0;
-		mPlayer = 0;
+		mLocalPlayer = 0;
 
 		mLoadingStatus = BosonSaveLoad::NotLoaded;
 
@@ -754,7 +754,7 @@ public:
 
 	BosonCanvas* mCanvas;
 	BosonPlayField* mPlayField;
-	Player* mPlayer;
+	Player* mLocalPlayer;
 	QPtrList<KGameComputerIO> mComputerIOList;
 
 	KGamePropertyInt mGameSpeed;
@@ -862,14 +862,9 @@ BosonPlayField* Boson::playField() const
  return d->mPlayField;
 }
 
-Player* Boson::localPlayer() const
-{
- return d->mPlayer;
-}
-
 void Boson::setLocalPlayer(Player* p)
 {
- d->mPlayer = p;
+ d->mLocalPlayer = p;
 }
 
 void Boson::setStartingObject(BosonStarting* s)
@@ -2160,7 +2155,7 @@ bool Boson::saveToFile(const QString& file)
  boDebug() << k_funcinfo << file << endl;
  QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
- bool ret = save->saveToFiles(files, d->mPlayer);
+ bool ret = save->saveToFiles(files, d->mLocalPlayer);
  delete save;
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
@@ -2175,7 +2170,7 @@ bool Boson::savePlayFieldToFile(const QString& file)
  boDebug() << k_funcinfo << file << endl;
  QMap<QString, QByteArray> files;
  BosonSaveLoad* save = new BosonSaveLoad(this);
- bool ret = save->savePlayFieldToFiles(files, d->mPlayer);
+ bool ret = save->savePlayFieldToFiles(files, d->mLocalPlayer);
  if (!ret) {
 	boError() << k_funcinfo << "saving failed" << endl;
 	return ret;
@@ -2350,20 +2345,13 @@ void Boson::slotUpdateProductionOptions()
 
 void Boson::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* p)
 {
- if (p && p != localPlayer()) {
-	return;
- }
-
  // just forward it to BosonWidgetBase
- emit signalAddChatSystemMessage(fromName, text);
+ emit signalAddChatSystemMessage(fromName, text, p);
 }
 
 void Boson::slotAddChatSystemMessage(const QString& text, const Player* p)
 {
- if (p && p != localPlayer()) {
-	return;
- }
- slotAddChatSystemMessage(i18n("Boson"), text);
+ slotAddChatSystemMessage(i18n("Boson"), text, p);
 }
 
 void Boson::slotDebugOutput(const QString& area, const char* data, int level)

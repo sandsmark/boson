@@ -100,7 +100,6 @@ public:
 	BosonPlayField* playField() const;
 
 	void setLocalPlayer(Player*);
-	Player* localPlayer() const;
 
 	/**
 	 * Set the object that will get used to start the game. Some starting
@@ -455,7 +454,7 @@ signals:
 	 **/
 	void signalChangeTexMap(int x, int y, unsigned int textureCount, unsigned int* textures, unsigned char* alpha);
 
-	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
+	void signalAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
 	void signalLoadExternalStuff(QDataStream& stream);
 	void signalSaveExternalStuff(QDataStream& stream);
