@@ -3,26 +3,23 @@
 TODO:
 
 
-0.1 release :
-=============
+Generic :
+=========
 
+bug : mobile on very-bottom-right can't be selected [still exact?]
+smoother moves (using float instead of int for VirtualSprite?)
+black background ??
 change miniDisplay to be gpp-indep, then move it to visual
-bug : boserver segfault when map file doesn't exist
-bug : segfault some times after failing to load some pixmap (fe ComStat/Field.003.bmp)
-configuration for server
 move logfile initialisation into common/
 Initial dialog:
 	give 'world' name
 	give 'species' names
 	version check whithin the ask_connect msg
 Unit drawing into minimap : moving, etc...
-make a toolbar with concerned buttons (move, stop, etc..)
-take out the menu
-DND of the map onto the minimap
 how to handle non 1x1 tiles ? 
 does units::rect need to be virtual anymore ?
-when clicking (no box) on two mobiles, both are selected, but shouldn't
 server : check that each unit does max 1 move each jiffie
+different subclass for my_units and other_units in client
 
 graphism 
 	>now, we have: The picture, the health bar, the status, the progress bar,
@@ -32,73 +29,24 @@ graphism
 	>
 
 mouse handling :
-	When you select a unit, rightclick somewhere and it will go there.
-	When you select a unit and rightclick on an enemy unit, it will attack.
-	When you select a unit and rightclick on resources, it will gather.
 	When you select a unit and rightclick somewhere on the radarmap, it will go there.
 	When you left click-and-hold and drag on the radarmap, you see that part
 	on the right window.
-check that loading of pixmap has been done well
-	OK for species, ground still needs checking
-
-#good (with _no_ layout)  positionning of widget.
-#boAssert( celldiscovered has j<max) seems to have problems
-#integration of Ben mobiles (with different colors)
-#click-zone for selection is still badly centered
-#map : inheritate Cell, and put serverCell back in server dir
-#checkvisibility -> units
-#	server : add a 'known' state to serverUnits
-#	broadcast 'moving' to all people knowing me, and then update 'known'
-#everything should be seen by others if ground is known.
-#use different pixmap according to 'direction'
-#new web page (ben ?)
-#bug : select mobile, move, somewhere, can't move somewhere else...
-#mobiles can go only on the ground they are allowed to.
-#client units : shouldn't move over each other
-#make a toolbar with concerned buttons (move, stop, etc..)
-#take out the menu
-#check Makefile.am for installation "make install"
-#Map should be installed in apps/boson/map
-
-Website : documentation about
-	communication protocol,
-	how-to-make-theme(with naming convention)
-
-with an online computer
-=======================
-	html pages on CVS
-	mailing list
-	html page under www.yalbi.com/boson/
 
 
-
-0.2 release:
+0.3 release:
 ============
-
-basic map editor
-	ben's editor :
-	>All I want is a
-	>area, where I can put my maps together to make some terrain, because I
-	>want to see how well it is tilable. It would be great if these maps
-	>would "snap" to the corners of a 96x96 grid and if you could
-	>-optionally- see the gridlines. There doesn't need to be any "save"
-	>feature or so, I can take screenshots if I ever need to. Oh, and it
-	>would be great if I could just drag'n'drop the bitmaps from KFM, but
-	>that isn't that important...
+on-demand theme loading ?? to speeds launching up
+source documentation
 server GUI
 client and server should be peer-killed proof
-bug : mobile on very-bottom-right can't be selected [still exact?]
-what about drag and dropping units ? :-)
+attack feature
 
-smooth  known-unknown transition
-see again "virtual(?) Unit::getWidth" and checkUnitDiscovered badly centered
-different subclass for my_units and other_units in client
-document headers for kdoc
-smoother moves (using float instead of int for VirtualSprite?)
-DND of the map onto the minimap
-how to handle non 1x1 tiles ? 
 
-black background ??
+0.4 release:
+============
+fog of war ?
+construction feature
 
 
 0.5 release: (first public release)
@@ -107,62 +55,27 @@ black background ??
 list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
 mailing list ?
 
-then:
-=====
 
-kind of acceleration to make starting moves smoother ? (ben)
-forgotten fog of war
-player*Unit::map should be put global
+
 
 
 1.0 release :
 =============
 theme editor
 map editor
-on-demand theme loading ?? to speeds launching up
-
-server can handle multiple game ?
-theme is configured in a file (explaining, for example, how many
-	different implementation there are for a given pixmap)
-
-2.0 release :
-=============
-
-
+server can handle multiple game
 
 ===================================
-Preliminaries:
-..
-
-First steps :
-
-1a) client/server communication
-1b) map drawing
-1c) selection info dlgbox
-1d) 
-1e) unit specifications (classes)
-1f) server specifications
-
-
-
-Implementations
-*2a) full client/server message passing
-2b) full unflicked area drawing
-2c) unit implementation
-2d) 
-
-Version alpha / first public release.
-
-Fine tuning :
-3a) Parameters tuning
-3b) Help / tutorials
-3c) theme drawing helpers (icon, map)
-*3d) log files
-3e) Chatting
 
 Even more :
-4a) Computer player (AI)
-4b) Speed optimisation
-4c) Game recording for post-analyse
+	Chatting
+	Computer player (AI)
+	Speed optimisation
+	'forgotten' fog of war
+	Game recording for post-analyse
+	kind of acceleration to make starting moves smoother ? (ben)
+	what about drag and dropping units ? :-)
+	theme is configured in a file (explaining, for example, how many
+		different implementation there are for a given pixmap)
 
 
