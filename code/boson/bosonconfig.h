@@ -527,6 +527,9 @@ public:
 	void setDebugFPS(bool debug) { mDebugFPS = debug; }
 	bool debugFPS() const { return mDebugFPS; }
 
+	void setDebugAdvanceCalls(bool debug) { mDebugAdvanceCalls = debug; }
+	bool debugAdvanceCalls() const { return mDebugAdvanceCalls; }
+
 	void setShowResources(bool show) { mShowResources = show; }
 	bool showResources() const { return mShowResources; }
 
@@ -607,6 +610,7 @@ private:
 	bool mDebugRenderCounts;
 	bool mDebugBoundingBoxes;
 	bool mDebugFPS;
+	bool mDebugAdvanceCalls;
 	bool mShowResources;
 	bool mEnableColormap;
 	unsigned int mDefaultLodCount;
