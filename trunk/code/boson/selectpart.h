@@ -76,6 +76,8 @@ public:
 protected:
 	QCanvasPixmapArray* initStatic(SelectPartType type);
 
+	static void drawSelectBox(QPainter& painter, bool bw, int power = 0);
+
 private:
 	void init(SelectPartType type);
 
