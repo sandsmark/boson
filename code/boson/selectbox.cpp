@@ -46,6 +46,11 @@ SelectBoxData::~SelectBoxData()
 
 GLuint SelectBoxData::list(double factor)
 {
+ if (factor > 1.0) {
+	factor = 1.0;
+ } else if (factor < 0.0) {
+	factor = 0.0;
+ }
  int list = (int)((POWER_LEVELS - 1) * factor);
  if (!mDisplayLists.contains(list)) {
 	loadBoxes();
