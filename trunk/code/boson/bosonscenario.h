@@ -7,7 +7,7 @@
 class Unit;
 class Boson;
 class Player;
-class KGamePropertyHandler;
+class QDomElement;
 
 class BosonScenarioPrivate;
 
@@ -38,6 +38,7 @@ public:
 	 **/
 	// TODO: which map can be used with this scenario??
 	bool loadScenario(const QString& fileName);
+	bool saveScenario(const QString& fileName, bool binary = false);
 	
 	/**
 	 * @return The (hardcoded) default map
@@ -56,22 +57,23 @@ public:
 	 **/
 	void startScenario(Boson* boson);
 
-	KGamePropertyHandler* dataHandler() const;
-
 	bool isValid() const;
 
 protected:
 	/**
+	 * Save the scenario to the stream.
+	 **/
+	bool saveScenario(QDataStream& stream);
+
+	/**
+	 * Save the scenario as XML to dev
+	 **/
+	bool saveXMLScenario(QIODevice* dev);
+	
+	/**
 	 * Add unit to the game. See also @ref Boson::slotSendAddUnit
 	 **/
 	void addUnit(Boson* boson, Player* owner, int unitType, int x, int y);
-
-	/**
-	 * Load the scenario from a stream. 
-	 **/
-	bool loadScenario(QDataStream& stream);
-
-	bool loadUnits(QDataStream& stream, unsigned int playerNumber);
 
 	/**
 	 * Read the magic string from stream.
@@ -79,6 +81,24 @@ protected:
 	 * Otherwise FALSE (not a boson map file)
 	 **/
 	bool verifyScenario(QDataStream& stream); // TODO
+	bool loadScenarioSettings(QDataStream& stream);
+	bool loadPlayers(QDataStream& stream);
+	bool loadPlayer(QDataStream& stream, unsigned int playerNumber);
+
+
+	bool saveValidityHeader(QDataStream& stream);
+	bool saveScenarioSettings(QDataStream& stream);
+	bool savePlayers(QDataStream& stream);
+	bool savePlayer(QDataStream& stream, unsigned int playerNumber);
+
+	bool saveScenarioSettings(QDomElement&);
+	bool savePlayers(QDomElement&);
+	bool savePlayer(QDomElement&, unsigned int playerNumber);
+
+	bool loadScenarioSettings(QDomElement&);
+	bool loadPlayers(QDomElement&);
+	bool loadPlayer(QDomElement&);
+
 
 private:
 	void init();
