@@ -89,7 +89,6 @@ void BoItemListHandler::slotDeleteLists()
  d->mLists.clear();
 
  if (lists.count() > 0) {
-	boDebug() << k_funcinfo << lists.count() << endl;
 	QPtrListIterator<BoItemList> it(lists);
 	for (; it.current(); ++it) {
 		delete it.current();
