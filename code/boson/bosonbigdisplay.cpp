@@ -723,37 +723,6 @@ void BosonBigDisplay::slotUpdateOil(int oil)
 // updateLabel(d->mOil, text);
 }
 
-void BosonBigDisplay::updateLabel(QLabel* label, const QString& text)
-{
-/*
- QFont f;
- f.setBold(true);
-
- QFontMetrics metrics(f);
- int w = metrics.width(text);
- int h = metrics.height();
- QPixmap pix(w, h);
- QPainter p(&pix);
- p.setFont(f);
- p.setPen(Qt::white);
- p.drawText(0, h, text);
- p.end();
-
- QBitmap mask(pix.width(), pix.height());
- mask.fill(Qt::color0);
- p.begin(&mask);
- p.setFont(f);
- p.setPen(Qt::color1);
- p.drawText(0, h, text);
- p.end();
- 
- label->resize(pix.width(), pix.height());
- label->setMask(mask);
- label->setPixmap(pix);
- label->show();
- */
-}
-
 void BosonBigDisplay::slotContentsMoving(int newx, int newy)
 {
 // int x = visibleWidth() - 5 - QMAX(d->mMinerals->width(), d->mOil->width());
@@ -789,11 +758,6 @@ void BosonBigDisplay::leaveEvent(QEvent*)
 void BosonBigDisplay::setCursor(BosonCursor* cursor)
 {
  d->mCursor = cursor;
-}
-
-void BosonBigDisplay::drawContents(QPainter* p, int x, int y, int w, int h)
-{
- QCanvasView::drawContents(p, x, y, w, h);
 }
 
 void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
