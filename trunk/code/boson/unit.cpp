@@ -104,7 +104,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
  }
- model()->setFrame(0);
+ setFrame(0);
 
  if (isFlying()) {
 	// FIXME i guess we can store z-position as opengl coordinates
@@ -524,7 +524,7 @@ bool Unit::save(QDataStream& stream)
  stream << (float)x();
  stream << (float)y();
  stream << (float)z();
- stream << (Q_INT8)isVisible();
+ stream << (Q_INT8)true; // FIXME: replacement for isVisible() which is obsolete
  stream << (Q_INT32)frame();
  return true;
 }
@@ -550,7 +550,7 @@ bool Unit::load(QDataStream& stream)
  setX(x);
  setY(y);
  setZ(z);
- setVisible(visible);
+// setVisible(visible);//obsolete
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
  } else {
@@ -1233,14 +1233,14 @@ void Facility::setConstructionStep(unsigned int step)
  }
  // warning: constructionSteps() and BosonModel::constructionSteps() are
  // *totally* different values!!
- unsigned int modelStep; // TODO
+ unsigned int modelStep = 0;
  if (step == constructionSteps()) {
 	modelStep = model()->constructionSteps(); // completed construction
  } else {
 	modelStep = model()->constructionSteps() * step / constructionSteps();
-	kdDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
+//	kdDebug() << k_funcinfo << "step="<<step<<",modelstep="<<modelStep<<endl;
  }
- model()->setConstructionStep(modelStep);
+ setGLConstructionStep(modelStep); // the displayed construction step. note that currentConstructionStep() is a *different* value!
  d->mConstructionState = step;
  if (step == constructionSteps()) {
 	setWork(WorkNone);

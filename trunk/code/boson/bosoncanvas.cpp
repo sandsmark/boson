@@ -226,7 +226,7 @@ void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
  }
 
  unit->move(x, y);
- unit->show();
+// unit->show();
 }
 
 Unit* BosonCanvas::findUnitAt(const QPoint& pos)

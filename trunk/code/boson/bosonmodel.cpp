@@ -37,30 +37,18 @@
 
 BosonModelTextures* BosonModel::mModelTextures = 0;
 
-class BoFrame
+BoFrame::BoFrame()
 {
-public:
-	BoFrame()
-	{
-		mDisplayList = 0;
-		mRadius = 0.0;
-	}
-	BoFrame(const BoFrame& f)
-	{
-		mDisplayList = f.mDisplayList;
-		mDepthMultiplier = f.mDepthMultiplier;
-		mRadius = f.mRadius;
-	}
+ mDisplayList = 0;
+ mRadius = 0.0;
+}
 
-	void setDisplayList(GLuint l) { mDisplayList = l; }
-	GLuint displayList() const { return mDisplayList; }
-	float depthMultiplier() const { return mDepthMultiplier; }
-	void setDepthMultiplier(float d) { mDepthMultiplier = d; }
-
-	GLuint mDisplayList;
-	float mDepthMultiplier;
-	float mRadius;
-};
+BoFrame::BoFrame(const BoFrame& f)
+{
+ mDisplayList = f.mDisplayList;
+ mDepthMultiplier = f.mDepthMultiplier;
+ mRadius = f.mRadius;
+}
 
 class BosonModel::BoHelper
 {
@@ -159,27 +147,6 @@ public:
 	GLubyte mColor[3];
 };
 
-BosonModel::BosonModel(GLuint list, float width, float height) // FIXME we use int here..
-{
- // dummy implementation - we don't load a model, but rather use the provided
- // list.
- // Mostly used because we do not yet have models for all units
- boProfiling->start(BosonProfiling::LoadModelDummy);
- init();
- mDisplayList = list;
- BoFrame* frame = new BoFrame;
- mFrames.insert(0, frame);
- frame->setDisplayList(list);
- frame->mRadius = width > height ? (float)width : (float)height;
- frame->mRadius /= BO_TILE_SIZE;
- frame->mRadius *= BO_GL_CELL_SIZE;
-
- mWidth = width;
- mHeight = height;
-
- boProfiling->stop(BosonProfiling::LoadModelDummy);
-}
-
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
 {
  init();
@@ -193,12 +160,8 @@ void BosonModel::init()
 {
  m3ds = 0;
  mTeamColor = 0;
- mDisplayList = 0;
  mWidth = 0;
  mHeight = 0;
- mFrame = 0;
- mConstructionStep = 0;
- mDepthMultiplier = 1.0;
  mFrames.setAutoDelete(true);
  if (!mModelTextures) { // TODO static deleter!
 	mModelTextures = new BosonModelTextures();
@@ -244,11 +207,6 @@ void BosonModel::loadModel()
  createDisplayLists();
  boProfiling->stop(BosonProfiling::LoadModelDisplayLists);
 
- if (!mDisplayList) {
-	kdError() << k_funcinfo << "Still null display list" << endl;
-	boProfiling->stop(BosonProfiling::LoadModel);
-	return;
- }
  kdDebug() << k_funcinfo << "loaded from " << fullFile << endl;
 
  boProfiling->stop(BosonProfiling::LoadModel);
@@ -368,7 +326,6 @@ void BosonModel::createDisplayLists()
 //	frame->setDepthMultiplier(helper.lengthZ() / BO_GL_CELL_SIZE);
 	mFrames.insert(m3ds->current_frame, frame);
  }
- setFrame(frame());
 }
 
 void BosonModel::generateConstructionLists()
@@ -609,49 +566,17 @@ void BosonModel::renderNode(Lib3dsNode* node)
  }
 }
 
-void BosonModel::setFrame(unsigned int frame)
+BoFrame* BosonModel::frame(unsigned int frame) const
 {
- if (constructionStep() < constructionSteps()) {
-	// not yet constructed
-	return;
- }
- BoFrame* f = mFrames[frame];
- if (!f) {
-	kdWarning() << k_funcinfo << "Invalid frame " << frame << endl;
-	if (!mFrames[mFrame]) {
-		mFrame = 0;
-	}
-	return;
- }
- mFrame = frame;
- setCurrentFrame(f);
+ return mFrames[frame];
 }
 
-void BosonModel::setConstructionStep(unsigned int step)
+BoFrame* BosonModel::constructionStep(unsigned int step)
 {
- BoFrame* f = mConstructionSteps[step];
- if (!f) {
-	if (step >= mConstructionSteps.count()) {
-		mConstructionStep = step;
-		f = mConstructionSteps[constructionSteps() - 1];
-		if (f) {
-			// we use the last construction step until an actual
-			// frame is assigned.
-			setCurrentFrame(f);
-		}
-	} else {
-		kdWarning() << k_funcinfo << "Invalid construction step " << step << endl;
-	}
-	return;
+ if (step >= mConstructionSteps.count()) {
+	step = mConstructionSteps.count() - 1;
  }
- mConstructionStep = step;
- setCurrentFrame(f);
-}
-
-void BosonModel::setCurrentFrame(BoFrame* f)
-{
- mDepthMultiplier = f->depthMultiplier();
- mDisplayList = f->displayList();
+ return mConstructionSteps[step];
 }
 
 void BosonModel::setTeamColor(const QColor& c)
