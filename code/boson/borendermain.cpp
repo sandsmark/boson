@@ -53,6 +53,7 @@
 #include <qinputdialog.h>
 
 #include <GL/glu.h>
+#include <math.h>
 
 #define NEAR 1.0
 #define FAR 100.0
@@ -120,6 +121,8 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mDisallowPlacement = false;
  mWireFrame = false;
  mConstruction = false;
+ mRenderAxis = false;
+ mRenderGrid = false;
 
  mDefaultFont = 0;
 
@@ -134,6 +137,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
  boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
  boConfig->addDynamicEntry(new BoConfigColorEntry(boConfig, "BoRenderBackgroundColor", Qt::black));
+ boConfig->addDynamicEntry(new BoConfigDoubleEntry(boConfig, "GridUnitSize", 0.1));
 }
 
 ModelPreview::~ModelPreview()
@@ -174,17 +178,23 @@ void ModelPreview::paintGL()
  glMatrixMode(GL_MODELVIEW);
  glLoadIdentity();
 
- camera()->applyCameraToScene();
-
  QColor background = boConfig->colorValue("BoRenderBackgroundColor", Qt::black);
  glClearColor((GLfloat)background.red() / 255.0f, (GLfloat)background.green() / 255.0f, background.blue() / 255.0f, 0.0f);
 
  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  glColor3ub(255, 255, 255);
 
+ camera()->applyCameraToScene();
+
+ if (mRenderGrid) {
+	renderGrid();
+ }
+ if (mRenderAxis) {
+	renderAxii();
+ }
+
  renderModel();
  renderMeshSelection();
-// renderGrid();
 
  glDisable(GL_DEPTH_TEST);
 
@@ -196,11 +206,67 @@ void ModelPreview::paintGL()
  }
 }
 
+void ModelPreview::renderAxii()
+{
+ glPushAttrib(GL_ENABLE_BIT);
+ glDisable(GL_TEXTURE_2D);
+ glDisable(GL_BLEND);
+ glColor3ub(255, 0, 0);
+
+ // FIXME: we _cannot_ use really high numbers (has strange effects on the lines
+ // - if you make the numbers high enough, they even won't appear at all)
+ // i guess we should get the size of the bounding box of the model, add a
+ // certain value to that and use that size as maximum.
+ // -> the axii would be big enough for the model then
+ // 10.0 is high enough for us atm, as we scale every model to 1.0 anyway.
+ float max = 10.0f;
+ glBegin(GL_LINES);
+	glVertex3f(-max, 0.0f, 0.0f);
+	glVertex3f(max, 0.0f, 0.0f);
+
+	glVertex3f(0.0f, -max, 0.0f);
+	glVertex3f(0.0f, max, 0.0f);
+
+	glVertex3f(0.0f, 0.0f, -max);
+	glVertex3f(0.0f, 0.0f, max);
+
+	const float offset = 1.1f;
+	const float distance = 0.1f; // distance of the letter to the line
+
+	// "X"
+	glVertex3f(offset, distance, 0.0f);
+	glVertex3f(offset + 0.666f, distance + 1.0f, 0.0f);
+	glVertex3f(offset, distance + 1.0f, 0.0f);
+	glVertex3f(offset + 0.666f, distance, 0.0f);
+
+	// "Y"
+	glVertex3f(distance, offset + 1.0f, 0.0f);
+	glVertex3f(distance + 0.5f, offset + 0.5f, 0.0f);
+	glVertex3f(distance + 0.5f, offset + 0.5f, 0.0f);
+	glVertex3f(distance + 1.0f, offset + 1.0f, 0.0f);
+	glVertex3f(distance + 0.5f, offset + 0.5f, 0.0f);
+	glVertex3f(distance + 0.5f, offset, 0.0f);
+
+	// "Z"
+	glVertex3f(0.0f, distance + 1.0f, -offset);
+	glVertex3f(0.0f, distance + 1.0f, -offset - 1.0f);
+	glVertex3f(0.0f, distance + 1.0f, -offset - 1.0f);
+	glVertex3f(0.0f, distance, -offset);
+	glVertex3f(0.0f, distance, -offset);
+	glVertex3f(0.0f, distance, -offset - 1.0f);
+ glEnd();
+
+ glColor3ub(255, 255, 255);
+ glPopAttrib();
+}
+
 void ModelPreview::renderModel(int mode)
 {
  if (!haveModel()) {
 	return;
  }
+
+ glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT); // doesnt include client states
 
  if (mWireFrame) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -256,159 +322,48 @@ void ModelPreview::renderModel(int mode)
 	}
  }
 
- glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+ glPopAttrib();
  glDisableClientState(GL_VERTEX_ARRAY);
  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
- glDisable(GL_CULL_FACE);
- glDisable(GL_TEXTURE_2D);
- glDisable(GL_DEPTH_TEST);
-
 }
 
 void ModelPreview::renderGrid()
 {
- if (!haveModel()) {
-	return;
- }
+ glPushAttrib(GL_ENABLE_BIT);
  glDisable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
- float w = mModel->width();
- float h = mModel->height();
- if ((float)((int)w) != w) {
-	w = (float)((int)w + 1);
+ float size = 2.0f;
+ if (mModel) {
+	size = fmaxf(mModel->width(), mModel->height());
  }
- if ((float)((int)h) != h) {
-	h = (float)((int)h + 1);
- }
- if ((int)w % 2 != 0) {
-	w += 1.0f;
- }
- if ((int)h % 2 != 0) {
-	h += 1.0f;
- }
- // depth doesn't have to be mod 2 == 0. we render from bottom (0.0) to
- // top (depth), not from -depth/2 to depth/2
- float depth = 1.0f;
+ size = ceilf(size);
+ glColor3ub(0, 255, 0);
+ const float unit = (float)boConfig->doubleValue("GridUnitSize");
 
- const float xyz = 0.05f; // FIXME: name
+ // the XY plane
+ int lines = (int)((2 * size) / unit);
+ // fix rounding errors...
+ if (unit * lines < 2 * size) {
+	lines++;
+ }
  glBegin(GL_LINES);
-	// bottom
-	glVertex3f(-(w / 2), -(h / 2 + xyz), 0.0f);
-	glVertex3f(-(w / 2), (h / 2 + xyz), 0.0f);
+	// AB: we dont use for (float x = -size; x <= size; x +=unit) due to
+	// rounding errors
+	for (int i = 0; i <= lines; i++) {
+		float x = -size + i * unit;
+		glVertex3f(x, -size, 0.0f);
+		glVertex3f(x, size, 0.0f);
 
-	glVertex3f(-(w / 2 + xyz), -(h / 2), 0.0f);
-	glVertex3f((w / 2 + xyz), -(h / 2), 0.0f);
-
-	glVertex3f((w / 2), -(h / 2 + xyz), 0.0f);
-	glVertex3f((w / 2), (h / 2 + xyz), 0.0f);
-
-	glVertex3f(-(w / 2 + xyz), (h / 2), 0.0f);
-	glVertex3f((w / 2 + xyz), (h / 2), 0.0f);
-
-	// top
-	glVertex3f(-(w / 2), -(h / 2 + xyz), depth);
-	glVertex3f(-(w / 2), (h / 2 + xyz), depth);
-
-	glVertex3f(-(w / 2 + xyz), -(h / 2), depth);
-	glVertex3f((w / 2 + xyz), -(h / 2), depth);
-
-	glVertex3f((w / 2), -(h / 2 + xyz), depth);
-	glVertex3f((w / 2), (h / 2 + xyz), depth);
-
-	glVertex3f(-(w / 2 + xyz), (h / 2), depth);
-	glVertex3f((w / 2 + xyz), (h / 2), depth);
-
-	const float marker = 0.025f;
-	for (float i = -(w / 2) + 1.0f; i < w / 2; i += 1.0f) {
-		glVertex3f(i, (h / 2 - marker), 0.0f);
-		glVertex3f(i, (h / 2 + marker), 0.0f);
-
-		glVertex3f(i, -(h / 2 - marker), 0.0f);
-		glVertex3f(i, -(h / 2 + marker), 0.0f);
-
-		glVertex3f(i, -(h / 2 - marker), depth);
-		glVertex3f(i, -(h / 2 + marker), depth);
-
-		glVertex3f(i, (h / 2 - marker), depth);
-		glVertex3f(i, (h / 2 + marker), depth);
+		float y = -size + i * unit;
+		glVertex3f(-size, y, 0.0f);
+		glVertex3f(size, y, 0.0f);
 	}
-	for (float i = -(h / 2) + 1.0f; i < h / 2; i += 1.0f) {
-		glVertex3f((h / 2 - marker), i, 0.0f);
-		glVertex3f((h / 2 + marker), i, 0.0f);
-
-		glVertex3f(-(h / 2 - marker), i, 0.0f);
-		glVertex3f(-(h / 2 + marker), i, 0.0f);
-
-		glVertex3f(-(h / 2 - marker), i, depth);
-		glVertex3f(-(h / 2 + marker), i, depth);
-
-		glVertex3f((h / 2 - marker), i, depth);
-		glVertex3f((h / 2 + marker), i, depth);
-	}
-
-	// bottom-to-top
-	glVertex3f((w / 2), -(h / 2), -xyz);
-	glVertex3f((w / 2), -(h / 2), depth + xyz);
-
-	glVertex3f((w / 2), (h / 2), -xyz);
-	glVertex3f((w / 2), (h / 2), depth + xyz);
-
-	glVertex3f(-(w / 2), (h / 2), -xyz);
-	glVertex3f(-(w / 2), (h / 2), depth + xyz);
-
-	glVertex3f(-(w / 2), -(h / 2), -xyz);
-	glVertex3f(-(w / 2), -(h / 2), depth + xyz);
-
-	// TODO: markers for depth, just like for w and h above.
-	// not yet important, as depth is 1.0 always
  glEnd();
 
- // mark the origin
- // (AB: maybe use a different color? if yes then use that for z-axis, too,
- // which is rendered above!
- glEnable(GL_LINE_STIPPLE);
- glLineStipple(1, 0x00FF);
- glBegin(GL_LINES);
-	glVertex3f(0.0f, -(h / 2 + xyz), 0.0f);
-	glVertex3f(0.0f, (h / 2 + xyz), 0.0f);
 
-	glVertex3f(-(w / 2 + xyz), 0.0f, 0.0f);
-	glVertex3f((w / 2 + xyz), 0.0f, 0.0f);
+ glColor3ub(255, 255, 255);
+ glPopAttrib();
 
-	glVertex3f(0.0f, -(h / 2 + xyz), depth);
-	glVertex3f(0.0f, (h / 2 + xyz), depth);
-
-	glVertex3f(-(w / 2 + xyz), 0.0f, depth);
-	glVertex3f((w / 2 + xyz), 0.0f, depth);
-
- glEnd();
- glDisable(GL_LINE_STIPPLE);
-
-#if 0
- glListBase(mDefaultFont->displayList());
-
- glRasterPos3f(0.0f, 0.0f, 0.0f);
- glTranslatef((w / 2), 0.0f, 0.0f);
- mDefaultFont->renderString(QString::fromLatin1("X-Axis"));
- glTranslatef(-(w / 2), 0.0f, 0.0f);
-
- glRasterPos3f(0.0f, 0.0f, 0.0f);
- glTranslatef(0.0f, (h / 2), 0.0f);
- mDefaultFont->renderString(QString::fromLatin1("Y-Axis"));
- glTranslatef(0.0f, -(h / 2), 0.0f);
-
- glRasterPos3f(0.0f, 0.0f, 0.0f);
- glTranslatef(0.0f, 0.0f, depth / 2);
- mDefaultFont->renderString(QString::fromLatin1("Z-Axis"));
- glTranslatef(0.0f, 0.0f, -depth / 2);
-
- glRasterPos3f(0.0f, 0.0f, 0.0f);
-#endif
- // TODO: write texts to every axis: "X-Axis", "Y-Axis", "Z-Axis". Also numbers
- // indicating the units would be nice, i.e. -w/2,-h/2,0.0 at the start of an
- // axis and w/2,h/2,depth at the end of an axis.
- // we cannot easily do that with the code above (BosonGLFont), as normal fonts
- // can't be rotated,scaled,... we need to use textured fonts.
 }
 
 void ModelPreview::renderMeshSelection()
@@ -694,7 +649,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
  for (int i = 0; i < hits; i++) {
 	unsigned int names = buffer[pos];
 	pos++;
-	unsigned int minZ = buffer[pos];
+	unsigned int minZ = buffer[pos]; // note: depth is [0;1] and multiplied by 2^32-1
 	pos++;
 //	unsigned int maxZ = buffer[pos];
 	pos++;
@@ -714,6 +669,7 @@ int ModelPreview::pickObject(const QPoint& cursor)
 //		boDebug() << k_funcinfo << m->name() << endl;
 		if (minZ < closestZ) {
 			mesh = name;
+			closestZ = minZ;
 		}
 	} else {
 		boWarning() << k_funcinfo << "no such mesh: " << name << endl;
@@ -825,6 +781,8 @@ void ModelPreview::wheelEvent(QWheelEvent* e)
 	// FIXME: this should be disallowed!
 	orientation = BoVector3(1.0f, 0.0f, 0.0f);
  }
+ // TODO: we should check whether all meshes are still in front of the NEAR plane!
+
  eye.add(orientation * -delta);
  lookAt.add(orientation * -delta);
  updateCamera(eye, lookAt, up);
@@ -903,9 +861,21 @@ void ModelPreview::hideMesh(unsigned int mesh, bool hide)
 	}
 	f->setHidden(mesh, hide);
  }
- if ((int)mesh == mSelectedMesh) {
+ if (isSelected(mesh)) {
 	selectMesh(-1);
  }
+}
+
+bool ModelPreview::isSelected(unsigned int mesh) const
+{
+ // AB: one day we will use a list of selected meshes
+ if (mSelectedMesh < 0) {
+	return false;
+ }
+ if ((unsigned int)mSelectedMesh == mesh) {
+	return true;
+ }
+ return false;
 }
 
 void ModelPreview::slotHideSelectedMesh()
@@ -992,6 +962,8 @@ RenderMain::RenderMain()
  connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
  connect(mConfig, SIGNAL(signalWireFrameChanged(bool)), mPreview, SLOT(slotWireFrameChanged(bool)));
  connect(mConfig, SIGNAL(signalConstructionChanged(bool)), mPreview, SLOT(slotConstructionChanged(bool)));
+ connect(mConfig, SIGNAL(signalRenderAxisChanged(bool)), mPreview, SLOT(slotRenderAxisChanged(bool)));
+ connect(mConfig, SIGNAL(signalRenderGridChanged(bool)), mPreview, SLOT(slotRenderGridChanged(bool)));
  connect(mConfig, SIGNAL(signalHideMesh()), mPreview, SLOT(slotHideSelectedMesh()));
  connect(mConfig, SIGNAL(signalHideOthers()), mPreview, SLOT(slotHideUnSelectedMeshes()));
  connect(mConfig, SIGNAL(signalUnHideAll()), mPreview, SLOT(slotUnHideAllMeshes()));
@@ -1217,6 +1189,18 @@ void RenderMain::slotVertexPointSize()
  }
 }
 
+void RenderMain::slotGridUnitSize()
+{
+ bool ok = false;
+ double size = boConfig->doubleValue("GridUnitSize", 0.1);
+ size = QInputDialog::getDouble(i18n("Grid unit size"),
+		i18n("Grid unit size"),
+		size, 0.0, 1.0, 2, &ok, this);
+ if (ok) {
+	boConfig->setDoubleValue("GridUnitSize", size);
+ }
+}
+
 void RenderMain::slotShowVertexPoints(bool s)
 {
  boConfig->setBoolValue("ShowVertexPoints", s);
@@ -1359,6 +1343,9 @@ void RenderMain::initKAction()
  (void)new KAction(i18n("Vertex point size..."), 0, this,
 		SLOT(slotVertexPointSize()),
 		actionCollection(), "options_vertex_point_size");
+ (void)new KAction(i18n("Grid unit size..."), 0, this,
+		SLOT(slotGridUnitSize()),
+		actionCollection(), "options_grid_unit_size");
  (void)new KAction(i18n("Background color..."), 0, this,
 		SLOT(slotBackgroundColor()),
 		actionCollection(), "options_background_color");
@@ -1444,6 +1431,14 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  mConstruction = new QCheckBox(i18n("Show construction"), this);
  connect(mConstruction, SIGNAL(toggled(bool)), this, SIGNAL(signalConstructionChanged(bool)));
  topLayout->addWidget(mConstruction);
+
+ mRenderAxis = new QCheckBox(i18n("Render axis"), this);
+ connect(mRenderAxis, SIGNAL(toggled(bool)), this, SIGNAL(signalRenderAxisChanged(bool)));
+ topLayout->addWidget(mRenderAxis);
+
+ mRenderGrid = new QCheckBox(i18n("Render grid"), this);
+ connect(mRenderGrid, SIGNAL(toggled(bool)), this, SIGNAL(signalRenderGridChanged(bool)));
+ topLayout->addWidget(mRenderGrid);
 
  mCameraWidget = new BoCameraWidget(this, "bocamerawidget");
  topLayout->addWidget(mCameraWidget);

@@ -147,6 +147,14 @@ public slots:
 		mWireFrame = on;
 	}
 	void slotConstructionChanged(bool on);
+	void slotRenderAxisChanged(bool on)
+	{
+		mRenderAxis = on;
+	}
+	void slotRenderGridChanged(bool on)
+	{
+		mRenderGrid = on;
+	}
 
 	void slotHideSelectedMesh();
 	void slotHideUnSelectedMeshes();
@@ -159,6 +167,7 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent*);
 	virtual void wheelEvent(QWheelEvent*);
 
+	void renderAxii();
 	void renderModel(int mode = -1);
 	void renderGrid();
 	void renderMeshSelection();
@@ -183,6 +192,8 @@ protected:
 	 * Use -1 to select nothing.
 	 **/
 	void selectMesh(int mesh);
+
+	bool isSelected(unsigned int mesh) const;
 
 	/**
 	 * Hide @p mesh in all frames
@@ -212,6 +223,8 @@ private:
 	bool mDisallowPlacement;
 	bool mWireFrame;
 	bool mConstruction;
+	bool mRenderAxis;
+	bool mRenderGrid;
 
 	BoMouseMoveDiff* mMouseMoveDiff;
 
@@ -236,6 +249,8 @@ signals:
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
 	void signalWireFrameChanged(bool);
 	void signalConstructionChanged(bool);
+	void signalRenderAxisChanged(bool);
+	void signalRenderGridChanged(bool);
 	void signalHideMesh();
 	void signalHideOthers();
 	void signalUnHideAll();
@@ -263,6 +278,8 @@ private:
 	QCheckBox* mWireFrame;
 	QCheckBox* mConstruction;
 	BoCameraWidget* mCameraWidget;
+	QCheckBox* mRenderAxis;
+	QCheckBox* mRenderGrid;
 };
 
 /**
@@ -312,6 +329,7 @@ protected slots:
 	void slotDebugModels();
 	void slotDebugSpecies();
 	void slotVertexPointSize();
+	void slotGridUnitSize();
 	void slotShowVertexPoints(bool);
 	void slotBackgroundColor();
 
