@@ -1376,7 +1376,7 @@ void BosonBigDisplayBase::renderCells()
 		Cell* c = d->mRenderCells[i];
 		int x = c->x();
 		int y = c->y();
-		const float dist = 0.00f;
+		const float dist = 0.0f;
 		GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
 		GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
 			glVertex3f(cellXPos, cellYPos, heightMap[y * heightMapWidth + x] + dist);
@@ -1833,6 +1833,8 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		int moveX = d->mMouseMoveDiff.dx();
 		int moveY = d->mMouseMoveDiff.dy();
 		mapDistance(moveX, moveY, &dx, &dy);
+		// FIXME: we must also change camera's z-coordinate here to ensure that no
+		//  cells go through near clip.
 		camera()->moveLookAtBy(dx, dy, 0);
 		cameraChanged();
 	} else {
@@ -2582,7 +2584,6 @@ void BosonBigDisplayBase::generateCellList()
  // you zoom out (and therefore there are lots of cells visible) it is still too
  // slow.
 
- float radius = sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2));
  int count = 0;
  for (int x = cellMinX; x <= cellMaxX; x++) {
 	for (int y = cellMinY; y <= cellMaxY; y++) {
@@ -2592,8 +2593,8 @@ void BosonBigDisplayBase::generateCellList()
 		
 		GLfloat glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
 		GLfloat glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
-	
-		if (sphereInFrustum(glX, glY, 0.0, radius)) {
+
+		if (sphereInFrustum(BoVector3(glX, glY, c->averageHeight()), c->boundingSphereRadius())) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
 			d->mRenderCells[count] = c;

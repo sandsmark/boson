@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -247,6 +247,11 @@ protected:
 
 	static float pixelToHeight(int p);
 	static int heightToPixel(float height);
+
+	/**
+	 * Recalculates cell's bounding sphere radius and it's average height
+	 **/
+	void recalculateCellValues(int x, int y);
 
 
 protected slots:
