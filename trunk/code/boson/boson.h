@@ -129,7 +129,7 @@ signals:
 	 * the cmd panel should grey out the order buttons or maybe completely
 	 * disable them.
 	 **/
-	void signalProduceUnit(Facility* factory);
+	void signalStartProduction(Facility* factory);
 
 	/**
 	 * Emitted when a factory has no units left to produce. Especially

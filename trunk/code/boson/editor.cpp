@@ -43,6 +43,7 @@
 
 #include <qintdict.h>
 #include <qwmatrix.h>
+#include <qvbox.h>
 
 #include "editor.moc"
 
@@ -137,7 +138,10 @@ Editor::Editor() : TopBase()
 {
  d = new EditorPrivate;
 
- bosonWidget()->addEditorCommandFrame();
+ QToolBar* t = new QToolBar(i18n("CommandToolBar"), this, QMainWindow::Left);// FIXME: config (left)
+ QVBox* frame = new QVBox(t);
+ bosonWidget()->addMiniMap(frame);
+ bosonWidget()->addEditorCommandFrame(frame);
  connect(bosonWidget(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(bosonWidget(), SIGNAL(signalPlayerLeftGame(KPlayer*)), 
@@ -146,7 +150,6 @@ Editor::Editor() : TopBase()
 		this, SLOT(slotGameStarted()));
 
  initKAction();
-
  initStatusBar();
 
  showMaximized();

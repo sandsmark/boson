@@ -26,6 +26,7 @@ class KPlayer;
 class KGameIO;
 class QKeyEvent;
 class KGamePropertyBase;
+class KToolBar;
 
 class BosonCanvas;
 class BosonCommandFrame;
@@ -80,8 +81,9 @@ public:
 
 	void zoom(const QWMatrix&);
 
-	void addEditorCommandFrame();
-	void addGameCommandFrame();
+	void addEditorCommandFrame(QWidget* parent);
+	void addGameCommandFrame(QWidget* parent);
+	void addMiniMap(QWidget* parent);
 
 	bool sound() const;
 	bool music() const;
@@ -201,6 +203,7 @@ protected slots:
 
 private:
 	void init();
+	void initChat();
 
 private:
 	class BosonWidgetPrivate;
