@@ -617,6 +617,7 @@ void BoGameCamera::changeRotation(GLfloat diff)
 
 void BoGameCamera::setLookAt(const BoVector3& pos)
 {
+  BO_CHECK_NULL_RET(mCanvas);
 #ifdef NEW_Z_CALCULATIONS
   // We must set lookAt point in 2 passes: first we set it using setLookAt(),
   //  then we validate it (this may change lookAt) and finally we calculate
