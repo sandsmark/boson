@@ -21,6 +21,9 @@
 
 #include "../config.h"
 
+// undefine this to enable experimental canvastext. baaad performance!
+#define NO_BOSON_CANVASTEXT
+
 #define BOSON_COOKIE 992
 
 #define BO_TILE_SIZE 48

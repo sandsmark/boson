@@ -855,10 +855,15 @@ void BosonBigDisplay::setContentsPos(int x, int y)
 // this hack is not really perfect. we still have some flickering in the
 // resources display since it is redrawn on *every* QCanvas::update() call now.
 // But hey - at least its working now :-)
+#ifndef NO_BOSON_CANVASTEXT
+	kdDebug() << k_funcinfo<<endl;
  viewport()->setUpdatesEnabled(false);
  QScrollView::setContentsPos(x, y);
  viewport()->setUpdatesEnabled(true);
  viewport()->update();
+#else
+ QScrollView::setContentsPos(x, y);
+#endif
 }
 
 void BosonBigDisplay::slotCursorEdgeTimeout()
