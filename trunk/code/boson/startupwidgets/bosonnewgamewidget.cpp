@@ -440,6 +440,11 @@ void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(p);
+ if (((Player*)p)->isNeutralPlayer()) {
+	// Don't show neutral player in players' list
+	boDebug() << k_funcinfo << "Added player is neutral player. Returning" << endl;
+	return;
+ }
  QListBoxPlayerText* t = new QListBoxPlayerText(p->name());
  t->setColor(((Player*)p)->teamColor());
  d->mItem2Player.insert(t, p);
@@ -488,6 +493,13 @@ void BosonNewGameWidget::slotNetPlayerJoinedGame(KPlayer* p)
 void BosonNewGameWidget::slotNetPlayerLeftGame(KPlayer* p)
 {
  boDebug() << k_funcinfo << "there are " << boGame->playerList()->count() << " players in game now" << endl;
+
+ if (((Player*)p)->isNeutralPlayer()) {
+	// Neutral player shouldn't be removed because it's not added until the game
+	//  starts.
+	boError() << k_funcinfo << "Neutral player removed from game?!" << endl;
+	return;
+ }
 
  if (p == (KPlayer*)localPlayer() && boGame->isNetwork()) {
 	// Localplayer was removed and w have a net game.
