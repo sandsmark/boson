@@ -53,10 +53,19 @@ construction feature
 ============
 
 list of places to announce (mailing-list, portal, friends, school, packager,kde ..)
-mailing list ?
 
+	mailing-list
+	web-site
+	kde-announce
+	upload to upload.kde.org/
+	slashdot	www.slahdot.net
+	freshmeat	www.freshmeat.org
+	linuxGames
 
-
+register the website to :
+	yahoo
+	... ? 
+	
 
 
 1.0 release :
@@ -68,6 +77,7 @@ server can handle multiple game
 ===================================
 
 Even more :
+	Torus Map, where everybody's point of view is in the center of the miniMap in the beginning.
 	Chatting
 	Computer player (AI)
 	Speed optimisation

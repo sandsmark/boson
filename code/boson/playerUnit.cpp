@@ -135,7 +135,7 @@ bool playerMobUnit::checkMove(int dx, int dy)
 
 //	printf("%p would hit :", this);
 	for(; p; next(p) )
-		if (exact(p)) {
+		if (exact(p)) {     // ugly, should be find-tuned
 			// p is what would be hit if ....
 			ty = at(p)->rtti();
 			if (ty < S_GROUND) continue;	// S_PART
@@ -179,7 +179,8 @@ bool playerMobUnit::checkMove(int dx, int dy)
 				}
 			logf(LOG_ERROR, "playerMobUnit::checkMove : type is %d, ", ty);
 			}
-	end(p);
+	//end(p); 
+	// not needed because we have reached the end of the list
 
 	return true;
 }
