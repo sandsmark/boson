@@ -337,11 +337,11 @@ void BosonEffectParticleTrail::update(float elapsed)
   // How much and how have we moved since last update?
   BoVector3 movevector = mPosition - mLastPos;
   float movedlength = movevector.length();
-  boDebug() << k_funcinfo << "movedlength: " << movedlength << "(" << mParticleCount << " particles)" << endl;
+  //boDebug() << k_funcinfo << "movedlength: " << movedlength << "(" << mParticleCount << " particles)" << endl;
 
   // Where to create next particle?
   float createpos = 1.0 - mCreateCache;
-  boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "createpos: " << createpos << endl;
+  //boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "createpos: " << createpos << endl;
 
   bool createnew = false;
 
@@ -354,7 +354,7 @@ void BosonEffectParticleTrail::update(float elapsed)
     // How many particles to create?
     mCreateCache += (movedlength / mSpacing);
 
-    boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "mSpacing: " << mSpacing << endl;
+    //boDebug() << k_funcinfo << "mCreateCache: " << mCreateCache << "mSpacing: " << mSpacing << endl;
     if((mCreateCache < 1.0) && (mNum <= 0))
     {
       return;
@@ -365,7 +365,6 @@ void BosonEffectParticleTrail::update(float elapsed)
   }
   else
   {
-    boDebug() << k_funcinfo << "branch 2" << endl;
     // We haven't moved since last update() or the system is obsolete (= don't
     //  create new particles)
     if(mNum <= 0)

@@ -1573,7 +1573,7 @@ MobileUnit::~MobileUnit()
 
 void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
 {
- boDebug(401) << k_funcinfo << endl;
+ //boDebug(401) << k_funcinfo << endl;
 
  if (pathInfo()->waiting) {
 	// If path is blocked and we're waiting, then there's no point in
@@ -1667,7 +1667,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
  // x and y are center of the unit here
  float x = BosonItem::x() + width() / 2;
  float y = BosonItem::y() + height() / 2;
- boDebug(401) << k_funcinfo << "unit " << id() << ": pos: (" << x << "; "<< y << ")" << endl;
+ //boDebug(401) << k_funcinfo << "unit " << id() << ": pos: (" << x << "; "<< y << ")" << endl;
  // If we're close to destination, decelerate, otherwise  accelerate
  // TODO: we should also slow down when turning at pathpoint.
  // TODO: support range != 0
@@ -1711,7 +1711,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	}
 
 	pp = currentPathPoint();
-	boDebug(401) << k_funcinfo << "unit " << id() << ": Current pp: (" << pp.x() << "; "<< pp.y() << ")" << endl;
+	//boDebug(401) << k_funcinfo << "unit " << id() << ": Current pp: (" << pp.x() << "; "<< pp.y() << ")" << endl;
 
 	// Move towards it
 	dist -= moveTowardsPoint(pp, x + xspeed, y + yspeed, dist, xspeed, yspeed);
@@ -1733,7 +1733,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	return;
  }
 
- boDebug(401) << k_funcinfo << "unit " << id() << ": Setting velo to: (" << xspeed << "; "<< yspeed << ")" << endl;
+ //boDebug(401) << k_funcinfo << "unit " << id() << ": Setting velo to: (" << xspeed << "; "<< yspeed << ")" << endl;
  setVelocity(xspeed, yspeed, 0.0);
  d->lastxvelo = xspeed;
  d->lastyvelo = yspeed;
@@ -1744,8 +1744,8 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 
 float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxdist, float &xspeed, float &yspeed)
 {
- boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
-		");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
+ //boDebug(401) << k_funcinfo << "p: (" << (float)p.x() << "; "<< (float)p.y() << "); pos: (" << x << "; "<< y <<
+		//");  maxdist: " << maxdist << "; xspeed: " << xspeed << "; yspeed: " << yspeed << endl;
  // Passed distance
  float dist = 0.0f;
  // Calculate difference between point and our current position
@@ -1783,7 +1783,7 @@ float MobileUnit::moveTowardsPoint(const QPoint& p, float x, float y, float maxd
 
 void MobileUnit::advanceMoveCheck()
 {
- boDebug(401) << k_funcinfo << endl;
+ //boDebug(401) << k_funcinfo << endl;
 
  // Take special action if path is (was) blocked and we're waiting
  if (pathInfo()->waiting) {
