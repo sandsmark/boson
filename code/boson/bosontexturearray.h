@@ -88,6 +88,21 @@ public:
 	 **/
 	static void resetAllTexParameter();
 
+	/**
+	 * Copy all textures that are currently registered (i.e. have been
+	 * created, by using a BosonTextureArray object) from @p src to @p dest.
+	 *
+	 * The textures are actually copied, i.e. the memory is duplicated. You
+	 * should prefer sharing the contexts instead, if possible.
+	 *
+	 * The @p src context must provide all texture objects, whereas @p dest
+	 * must not have any texture object at these numbers.
+	 *
+	 * Textures that have been created using @ref createTexture, without
+	 * creating a new BosonTextureArray object, can not be copied.
+	 **/
+	static void copyAllTextures(BoContext* src, BoContext* dest);
+
 private:
 	/**
 	 * Inspired by source code of Mesa-4.0.1 see teximage.c for the original

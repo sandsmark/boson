@@ -256,3 +256,86 @@ int BosonTextureArray::nextPower2(int n)
  return i;
 }
 
+void BosonTextureArray::copyAllTextures(BoContext* src, BoContext* dest)
+{
+ BO_CHECK_NULL_RET(src);
+ BO_CHECK_NULL_RET(dest);
+ if (mAllTextures.count() == 0) {
+	boDebug() << k_funcinfo << "no textures to be copied" << endl;
+	return;
+ }
+ struct Texture {
+	GLuint textureObject;
+	unsigned char* buffer;
+	GLint width;
+	GLint height;
+	GLint internalFormat;
+
+	bool useMipmaps;
+ };
+
+ Texture* textures;
+ textures = new Texture[mAllTextures.count()];
+
+ boDebug() << k_funcinfo << "copy " << mAllTextures.count() << " textures" << endl;
+ src->makeCurrent();
+ QIntDictIterator<BoTextureInfo> it(mAllTextures);
+ unsigned int i = 0;
+ while (it.current()) {
+	unsigned int size = 1;
+	Texture* tex = &textures[i];
+	tex->useMipmaps = it.current()->mMipmap;
+	tex->textureObject = it.current()->mTexture;
+	glBindTexture(GL_TEXTURE_2D, tex->textureObject);
+
+	tex->buffer = 0;
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &tex->width);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &tex->height);
+	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &tex->internalFormat);
+	size = tex->width * tex->height * 4; // 4 components
+	switch (tex->internalFormat) {
+		case GL_RGB:
+		case GL_RGBA:
+			break;
+		default:
+			boWarning() << k_funcinfo << "internal format neither GL_RGB nor GL_RGBA" << endl;
+			continue;
+	}
+	tex->buffer = new unsigned char[size];
+
+	// AB: format GL_RGBA?
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->buffer);
+
+	++it;
+	i++;
+ }
+
+ boDebug() << k_funcinfo << "copying textures to new context" << endl;
+ dest->makeCurrent();
+ for (unsigned int i = 0; i < mAllTextures.count(); i++) {
+	Texture* tex = &textures[i];
+	glBindTexture(GL_TEXTURE_2D, tex->textureObject);
+	if (!tex->buffer) {
+		boError(110) << k_funcinfo << "NULL buffer" << endl;
+		continue;
+	}
+	if (tex->useMipmaps) {
+		int error = gluBuild2DMipmaps(GL_TEXTURE_2D, tex->internalFormat,
+				tex->width, tex->height, GL_RGBA, GL_UNSIGNED_BYTE,
+				tex->buffer);
+		if (error) {
+			boWarning(110) << k_funcinfo << "gluBuild2DMipmaps returned error: " << error << endl;
+		}
+	} else {
+		glTexImage2D(GL_TEXTURE_2D, 0, tex->internalFormat,
+				tex->width, tex->height, 0, GL_RGBA,
+				GL_UNSIGNED_BYTE, tex->buffer);
+	}
+	delete[] tex->buffer;
+	tex->buffer = 0;
+ }
+
+ delete[] textures;
+ boDebug() << k_funcinfo << "done" << endl;
+}
+
