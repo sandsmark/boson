@@ -312,6 +312,10 @@ img.statsbar {
   font-weight: bold;
 }
 
+.smallpollanswer {
+  font-size: 13px;
+}
+
 .pollanswer {
 }
 

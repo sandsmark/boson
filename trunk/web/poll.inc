@@ -23,6 +23,8 @@
 $poll_inited = false;
 $poll_disable = false;
 
+include_once("common.inc");
+
 if(file_exists("${basedir}database.inc"))
 {
   include_once("${basedir}database.inc");
@@ -33,18 +35,20 @@ else
   $poll_disable = true;
 }
 
-
 function poll_show($id = -1)
 {
   global $poll_disable;
+  global $HTTP_COOKIE_VARS;
+
   if($poll_disable)
   {
+    echo "Local developer mode.<br>
+    No database configured.";
     return;
   }
-
+  
   // init database connection
   poll_init();
-
 
   if($id == -1)
   {
@@ -65,6 +69,14 @@ function poll_show($id = -1)
   {
     $row = mysql_fetch_assoc($result);
     $id = $row['id'];
+
+    if($HTTP_COOKIE_VARS["voted-$id"] == "yes")
+    {
+      // User has already voted
+      poll_results_small($id);
+      return;
+    }
+        
     // Question
     echo "
     <font class=\"pollquestion\">".$row['question']."</font><br>
@@ -109,7 +121,6 @@ function poll_vote($id, $answer)
     // Release database lock
     flock($fp, LOCK_UN) or die ("Cannot release lock file");
     fclose($fp);
-
     return ""; // Error
   }
   else
@@ -208,6 +219,104 @@ function poll_results($id = -1)
 
   }
 }
+
+function poll_results_small($id = -1)
+{
+  global $poll_disable, $style;
+  if($poll_disable)
+  {
+    return;
+  }
+
+  // init database connection
+  poll_init();
+
+
+  if($id == -1)
+  {
+    // Select most recent poll
+    $query = "SELECT * FROM poll ORDER BY id DESC LIMIT 1";
+  }
+  else
+  {
+    $query = "SELECT * FROM poll WHERE id = '$id' LIMIT 1";
+  }
+  $result = mysql_query($query);
+  if(mysql_num_rows($result) == 0)
+  {
+    echo "No poll found with id $id";
+  }
+  else
+  {
+    $row = mysql_fetch_assoc($result);
+
+    // Question
+    if (strlen($row['question']) >= 32)
+    {
+      $small_row = substr($row['question'],0,32)."...";
+    }
+    else
+    {
+      $small_row = $row['question'];
+    }
+    echo "
+    <font class=\"smallpollanswer\">Results for:<br>
+    ".$small_row."</font><br>
+    <table>";
+    // Count all answers
+    $i = 1;
+    $total = 0;
+    $max = 0;
+    while($i <= 10)
+    {
+      $total = $total + $row['count'.$i];
+      if($row['count'.$i] > $max)
+      {
+        $max = $row['count'.$i];
+      }
+      $i++;
+    }
+    // Display results
+    $i = 1;
+    while($i <= 10 && $row['answer'.$i] != "")
+    {
+      if($row['count'.$i] == 0)
+      {
+        $width = 0;
+        $prct = 0;
+      }
+      else
+      {
+        $width = ceil($row['count'.$i] * 100 / $max);
+        $prct = ceil($row['count'.$i] * 100 / $total);
+      }
+      // Make some things smaller
+      $width = $width/3;
+      $small_answer = $row['answer'.$i];
+      if (strlen($small_answer) >= 15)
+      {
+        $small_answer = substr($small_answer,0,15)."...";
+      }
+      
+      echo "
+      <tr>
+        <td><font class=\"smallpollanswer\">".$small_answer."</font></td>
+        <td><font class=\"smallpollanswer\">"." $prct %</font></td>
+        <td><img class=\"statsbar\" src=\"stats-bar-$style.png\" width=\"$width\" height=\"8\" alt=\"\"></td>
+      </tr>
+      ";
+      $i++;
+    }
+    echo "
+      </table><br>";
+    echo "
+      <font class=\"smallpollanswer\">Total votes: $total<br>
+      <br>
+      <a href=\"${basedir}poll.php?action=results&id=$id\">Details</a></font><br>";
+
+  }
+}
+
 
 function poll_list()
 {
@@ -315,10 +424,17 @@ function poll_add($question, $answer1, $answer2, $answer3 = "", $answer4 = "", $
   // database lock file
   $lockfile = ".poll.lock";
 
-  // acquire database lock
-  $fp = fopen($basedir . $lockfile, "w");
-  flock($fp, LOCK_EX) or die ("Failure accesing $file");
-
+  if(is_writeable($lockfile))
+  {
+    $fp = fopen($basedir . $lockfile, "w");
+    flock($fp, LOCK_EX) or die ("Failure accesing $file");
+  }
+  else
+  {
+    echo "<br>Local developer mode.<br>
+    Can't write to lockfile.<br><br>";
+    return;
+  }
 
   $now = gmdate("U");  // Time ATM in seconds
   $query = "INSERT INTO poll VALUES (0, '$question', $now,
