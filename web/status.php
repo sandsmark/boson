@@ -54,14 +54,14 @@ draw_bigbox_text("This is a list of features that I consider as
 	  <li>Use UnitProperties in bounit</li>
 	  <li>Commandframe (un)-docking must be fixed. See #48058</li>
 	  <li>All units must have their own 3D model</li>
+	  <li>Generate the technology tree dynamically.</li>
 	</ul>
 	<h2>DONE</h2>
 	<ul>
 	  <li>Port to OpenGL</li>
 	  <li>Full 3D support using .3ds models</li>
 	  <li>Explosions using particle effects</li>
-	  <li>Lots of good documentations. There is also a technology tree that
-	  is generated dynamically.</li>
+	  <li>Lots of good documentations. Facility values are dynamically integrated in the docs and there is also a technology tree now.</li>
 	  <li>Improved pathfinding</li>
 	  <li>Experimental support for visible missiles</li>
 	  <li>Greatly improved configurability for the cursor (including GUI for
