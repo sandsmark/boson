@@ -87,7 +87,13 @@ int main(int argc, char **argv)
 // no session.. just start up normally
 	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 	Editor *widget = new Editor;
-	widget->show();
+
+	if (showMaximized) {
+		widget->showMaximized();
+	} else {
+		widget->show();
+	}
+	
 	args->clear();
  }
  return app.exec();
