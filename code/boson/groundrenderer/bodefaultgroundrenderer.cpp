@@ -132,8 +132,8 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 		continue;
 	}
 
-	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+	GLfloat cellXPos = (float)x;
+	GLfloat cellYPos = -(float)y;
 
 	float upperLeftHeight = *heightMapUpperLeft;
 	float upperRightHeight = *(heightMapUpperLeft + upperRightOffset);
@@ -162,19 +162,19 @@ unsigned int BoDefaultGroundRenderer::renderCellsNow(int* cells, int count, int 
 	glColor4ub(255, 255, 255, lowerLeftAlpha);
 	glNormal3fv(lowerLeftNormal);
 	glTexCoord2f(texOffsets[x % offsetCount], texOffsets[texy % offsetCount]);
-	glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight);
+	glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight);
 
 	BoMaterial::setDefaultAlpha((float)lowerRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, lowerRightAlpha);
 	glNormal3fv(lowerRightNormal);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount]);
-	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight);
+	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight);
 
 	BoMaterial::setDefaultAlpha((float)upperRightAlpha / 255.0f);
 	glColor4ub(255, 255, 255, upperRightAlpha);
 	glNormal3fv(upperRightNormal);
 	glTexCoord2f(texOffsets[x % offsetCount] + offset, texOffsets[texy % offsetCount] + offset);
-	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight);
+	glVertex3f(cellXPos + w, cellYPos, upperRightHeight);
 
 	renderedQuads++;
  }
@@ -203,8 +203,8 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 	const unsigned char* color = colorMap + coloroffset * 3;
 	const float* heightMapUpperLeft = heightMap + heightoffset;
 
-	GLfloat cellXPos = (float)x * BO_GL_CELL_SIZE;
-	GLfloat cellYPos = -(float)y * BO_GL_CELL_SIZE;
+	GLfloat cellXPos = (float)x;
+	GLfloat cellYPos = -(float)y;
 
 	float upperLeftHeight = *heightMapUpperLeft;
 	float upperRightHeight = *(heightMapUpperLeft + w);
@@ -215,13 +215,13 @@ void BoDefaultGroundRenderer::renderCellColors(int* cells, int count, int width,
 	glVertex3f(cellXPos, cellYPos, upperLeftHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos, cellYPos - h * BO_GL_CELL_SIZE, lowerLeftHeight + 0.05);
+	glVertex3f(cellXPos, cellYPos - h, lowerLeftHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos - h * BO_GL_CELL_SIZE, lowerRightHeight + 0.05);
+	glVertex3f(cellXPos + w, cellYPos - h, lowerRightHeight + 0.05);
 
 	glColor4ub(color[0], color[1], color[2], alpha);
-	glVertex3f(cellXPos + w * BO_GL_CELL_SIZE, cellYPos, upperRightHeight + 0.05);
+	glVertex3f(cellXPos + w, cellYPos, upperRightHeight + 0.05);
  }
  glEnd();
 }
