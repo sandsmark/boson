@@ -307,10 +307,19 @@ void BosonAudioAL::executeCommand(BoAudioCommand* command, BosonMusic* music, Bo
 		}
 		break;
 	case BoAudioCommand::EnableSound:
+		boDebug(200) << k_funcinfo << "enable sound: " << command->dataInt() << endl;
 		setSound((bool)command->dataInt());
 		break;
 	case BoAudioCommand::EnableMusic:
+		boDebug(200) << k_funcinfo << "enable music: " << command->dataInt() << endl;
 		setMusic((bool)command->dataInt());
+		if (music) {
+			if (this->music()) {
+				music->playMusic();
+			} else {
+				music->stopMusic();
+			}
+		}
 		break;
 	case BoAudioCommand::PlayMusic:
 		if (music) {
