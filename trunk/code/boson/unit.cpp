@@ -1799,6 +1799,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  // If we're close to destination, decelerate, otherwise  accelerate
  // TODO: we should also slow down when turning at pathpoint.
  // TODO: support range != 0
+ bofixed oldspeed = speed();
  if (pathInfo()->slowDownAtDest && QMAX(QABS(x - bofixed(pathInfo()->dest.x())), QABS(y - bofixed(pathInfo()->dest.y()))) <= decelerationDistance()) {
 	decelerate();
  } else {
@@ -1887,6 +1888,11 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
  setMovingStatus(Moving);
 
  turnTo();
+
+ // If we just started moving and now want to turn, then set velocity back to 0
+ if ((advanceWork() == WorkTurn) && (oldspeed == 0)) {
+	setVelocity(0, 0, 0);
+ }
 }
 
 bofixed MobileUnit::moveTowardsPoint(const BoVector2Fixed& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed)
