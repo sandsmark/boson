@@ -174,7 +174,8 @@ void BosonMiniMap::paintEvent(QPaintEvent*)
 void BosonMiniMap::mousePressEvent(QMouseEvent *e)
 {
  if (e->button() & LeftButton) {
-	emit signalReCenterView( e->pos() );
+	
+	emit signalReCenterView( e->pos() / pointSize() );
 	return;
  }
 }
