@@ -56,6 +56,8 @@ General TODOs
   using collisions(QRect(x,y,w-1,h-1)) ; a bug report has been sent. Remember to
   change this again if that is (a) really a qt bug and (b) it is fixed in a
   released version. also remember to add a configure check for the fixed version
+- make cursors themeable again (quite easy cause we use BosonCursor for all of
+  this)
 
 Data TODOs
 - general sound (e.g. speech)

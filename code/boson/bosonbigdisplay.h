@@ -67,8 +67,6 @@ public:
 
 	void setLocalPlayer(Player* p);
 
-	void loadCursors(const QString& dir);
-
 	/**
 	 * This makes only sense when in editor mode: change the @ref
 	 * isModified status.

@@ -27,6 +27,7 @@
 #include "bosonmessage.h"
 #include "defines.h"
 #include "kgamecanvaschat.h"
+#include "bosoncursor.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -69,6 +70,8 @@ public:
 		mChat = 0;
 
 		mSelectionRect = 0;
+
+		mCursor = 0;
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
@@ -82,8 +85,7 @@ public:
 
 	ConstructUnit mConstruction;
 	
-	QPixmap mCursorMove;
-	QPixmap mCursorAttack;
+	BosonCursor* mCursor;
 
 	QCanvasText* mMinerals;
 	QCanvasText* mOil;
@@ -140,6 +142,8 @@ void BosonBigDisplay::init()
  d->mChat->setCanvas(canvas());
  d->mChat->setZ(Z_CANVASTEXT);
 
+ d->mCursor = new BosonCursor;
+ d->mCursor->setCanvas(canvas());
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -196,19 +200,20 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
 			if (unit) {
 				if (unit->owner() == d->mLocalPlayer) {
-					setCursor(KCursor::arrowCursor());
+					d->mCursor->setCursor(BosonCursor::OwnUnit);
+					d->mCursor->setCursor(this);
 				} else {
-					setCursor(QCursor(d->mCursorAttack));
+					d->mCursor->setCursor(BosonCursor::Attack);
+					d->mCursor->setCursor(this);
 				}
 			} else if (selection().first()->isMobile()) {
-				setCursor(QCursor(d->mCursorMove));
 //				kdDebug() << "change cursor" << endl;
-//				setCursor(BlankCursor);
-//				d->mCursorPixmap->show();
+				d->mCursor->setCursor(BosonCursor::Move);
+				d->mCursor->setCursor(this);
 			}
 		}
-//		d->mCursorPixmap->move(e->pos().x(), e->pos().y());
-//		d->mCursorPixmap->move(pos().x(), pos().y());
+		d->mCursor->move(pos.x(), pos.y());
+		canvas()->update();
 		e->accept();
 		break;
 	}
@@ -300,7 +305,8 @@ void BosonBigDisplay::clearSelection()
 	++it;
  }
  d->mSelectionList.clear();
- setCursor(KCursor::arrowCursor());
+ d->mCursor->setCursor(BosonCursor::Default);
+ d->mCursor->setCursor(this);
  emit signalSingleUnitSelected(0);
 }
 
@@ -617,26 +623,6 @@ void BosonBigDisplay::resizeContents(int w, int h)
  QWMatrix wm = inverseWorldMatrix();
  QRect br = wm.mapRect(QRect(0,0,width(),height()));
  emit signalSizeChanged(br.width(), br.height());
-}
-
-void BosonBigDisplay::loadCursors(const QString& dir)
-{
- QString move = dir + QString::fromLatin1("/move.xpm");
- QString attack = dir + QString::fromLatin1("/attack.xpm");
- if (d->mCursorMove.load(move)) {
-	QBitmap mask(move);
-	d->mCursorMove.setMask(mask);
- } else {
-	kdError() << "Cannot load " << move << endl;
- }
- if (d->mCursorAttack.load(attack)) {
-	QBitmap mask(attack);
-	d->mCursorAttack.setMask(mask);
- } else {
-	kdError() << "Cannot load " << attack << endl;
- }
-// d->mCursorPixmap = new QCanvasSprite(&d->mCursorMove, canvas());
-// d->mCursorPixmap->hide();
 }
 
 void BosonBigDisplay::slotUpdateMinerals(int minerals)
