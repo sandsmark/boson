@@ -499,6 +499,9 @@ void BosonWidget::slotGamePreferences()
  dlg->setCommandFramePosition(d->mCommandPos);
  dlg->setChatFramePosition(d->mChatPos);
  dlg->setMiniMapScale(boConfig->miniMapScale());
+ dlg->setRMBScrolling(boConfig->rmbMove());
+ dlg->setMMBScrolling(boConfig->mmbMove());
+ dlg->setCursorEdgeSensity(boConfig->cursorEdgeSensity());
 
  connect(dlg, SIGNAL(signalArrowScrollChanged(int)),
 		this, SLOT(slotArrowScrollChanged(int)));

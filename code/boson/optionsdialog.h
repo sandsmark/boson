@@ -49,6 +49,10 @@ public:
 	void setGroupMove(GroupMoveMode mode);
 	void setMiniMapScale(double s);
 
+	void setRMBScrolling(bool);
+	void setMMBScrolling(bool);
+	void setCursorEdgeSensity(int);
+
 signals:
 	void signalArrowScrollChanged(int);
 	void signalSpeedChanged(int);
@@ -80,10 +84,15 @@ protected slots:
 
 	void slotCmdBackgroundChanged(int index);
 
+	void slotRMBScrollingToggled(bool);
+	void slotMMBScrollingToggled(bool);
+	void slotCursorEdgeSensityChanged(int);
+
 protected:
 	void initGeneralPage();
 	void initCursorPage();
 	void initPathfindingPage();
+	void initScrollingPage();
 
 private:
 	class OptionsDialogPrivate;
