@@ -58,6 +58,7 @@ Player::Player() : KPlayer()
  mSpecies = 0;
  d = new PlayerPrivate;
  d->mUnits.setAutoDelete(true);
+ mOutOfGame = false;
  setAsyncInput(true);
  connect(this, SIGNAL(signalNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)),
 		this, SLOT(slotNetworkData(int, const QByteArray&, Q_UINT32, KPlayer*)));
@@ -414,5 +415,11 @@ void Player::facilityCompleted(Facility* fac)
  }
 }
 
-
+bool Player::checkOutOfGame()
+{
+ // TODO: make more clever.
+ // e.g. currently ever small unit, like harvesters, needs to be destroyed...
+ mOutOfGame = (d->mUnits.count() == 0);
+ return isOutOfGame();
+}
 

@@ -177,6 +177,8 @@ void BosonWidget::init()
  d->mCanvas = new BosonCanvas(this);
  connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
 		this, SLOT(slotRemoveUnit(Unit*)));
+ connect(d->mCanvas, SIGNAL(signalOutOfGame(Player*)),
+		this, SLOT(slotOutOfGame(Player*)));
 
  d->mDisplayManager = new BoDisplayManager(d->mCanvas, this);
  connect(this, SIGNAL(signalMineralsUpdated(int)),
@@ -298,7 +300,7 @@ void BosonWidget::addDummyComputerPlayer(const QString& name)
 void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 {
  if (!player) {
-	kdError() << k_funcinfo << ": NULL player" << endl;
+	kdError() << k_funcinfo << "NULL player" << endl;
 	return;
  }
  Player* p = (Player*)player;
@@ -1255,3 +1257,25 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* display)
 		display, SLOT(slotUnitChanged(Unit*)));
 }
 
+void BosonWidget::slotOutOfGame(Player* p)
+{
+ int inGame = 0;
+ Player* winner = 0;
+ for (unsigned int i = 0; i < d->mBoson->playerList()->count(); i++) {
+	if (!((Player*)d->mBoson->playerList()->at(i))->isOutOfGame()) {
+		winner = (Player*)d->mBoson->playerList()->at(i);
+		inGame++;
+	}
+ }
+ if (inGame <= 1 && winner) {
+	kdDebug() << k_funcinfo << "We have a winner! id=" << winner->id() << endl;
+ } else if (!winner) {
+	kdError() << k_funcinfo << "no player left ?!" << endl;
+	return;
+ }
+}
+
+void BosonWidget::debugKillPlayer(KPlayer* p)
+{
+ d->mCanvas->killPlayer((Player*)p);
+}

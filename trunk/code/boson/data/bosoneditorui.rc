@@ -29,6 +29,7 @@
     <Action name="debug_kgame" />
     <Action name="debug_unfog" />
     <Action name="debug_mode" />
+    <Action name="debug_players" />
   </Menu>
   <Menu name="window" append="settings_merge"><text>&amp;Window</text>
     <Action name="splitviewh" />

@@ -101,6 +101,22 @@ public:
 	 **/
 	bool hasMiniMap() const;
 
+	/**
+	 * @return If the player is already "destroyed", i.e. doesn't have the
+	 * right to do anything. Note that this doesn't check if the player has
+	 * units left or something, but simply returns what was checked before.
+	 * Use @ref checkOutOfGame if you need an up-to-date information!
+	 **/
+	bool isOutOfGame() const { return mOutOfGame; }
+
+	/**
+	 * Check if the player still fullfills the scenario conditions. If not
+	 * the player will be out of the game - i.e. from this point on @ref
+	 * isOutOfGame will always return true.
+	 * @return @ref isOutOfGame after it was updated.
+	 **/
+	bool checkOutOfGame();
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
@@ -122,6 +138,7 @@ private:
 	PlayerPrivate* d;
 
 	SpeciesTheme* mSpecies;
+	bool mOutOfGame;
 };
 
 #endif

@@ -138,17 +138,12 @@ Editor::Editor() : TopBase()
  initStatusBar();
 
  bosonWidget()->addEditorCommandFrame(commandFrame());
- connect(bosonWidget(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
-		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
- connect(bosonWidget(), SIGNAL(signalPlayerLeftGame(KPlayer*)), 
-		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  connect(bosonWidget(), SIGNAL(signalGameStarted()), 
 		this, SLOT(slotGameStarted()));
 
  showMaximized();
 
  bosonWidget()->startEditor();
-
 }
 
 Editor::~Editor()
@@ -265,6 +260,7 @@ void Editor::slotPlayerJoinedGame(KPlayer* player)
  if (!player) {
 	return;
  }
+ TopBase::slotPlayerJoinedGame(player);
  Player* p = (Player*)player;
  QStringList players = d->mPlayerAction->items();
  d->mPlayers.insert(players.count(), p);
@@ -282,6 +278,7 @@ void Editor::slotPlayerLeftGame(KPlayer* player)
  if (!player) {
 	return;
  }
+ TopBase::slotPlayerLeftGame(player);
  Player* p = (Player*)p;
  QIntDictIterator<Player> it(d->mPlayers);
  while (it.current() && it.current() != player) {

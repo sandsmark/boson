@@ -171,6 +171,12 @@ public:
 	 **/
 	void setTileSet(QPixmap* tileSet);
 
+	/**
+	 * Remove all remaining units of player (if any). After this point the
+	 * player is not able to do anything!
+	 **/
+	void killPlayer(Player* player);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -198,6 +204,7 @@ public slots:
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
+	void signalOutOfGame(Player*);
 
 protected:
 	/**
@@ -209,7 +216,7 @@ protected:
 	void changeWork();
 
 	virtual void drawForeground(QPainter&, const QRect&);
-	
+
 protected slots:
 
 

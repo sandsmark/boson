@@ -122,6 +122,10 @@ void Boson::quitGame()
 bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 {
  Player* player = (Player*)p;
+ if (player->isOutOfGame()) {
+	kdWarning() << k_funcinfo << "Player must not send input anymore!!" << endl;
+	return true;
+ }
  Q_UINT32 msgid;
  stream >> msgid;
  switch (msgid) {
