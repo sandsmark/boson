@@ -206,3 +206,46 @@ void RefineryProperties::savePlugin(KSimpleConfig* config)
  config->writeEntry("CanRefineMinerals", mCanRefineMinerals);
  config->writeEntry("CanRefineOil", mCanRefineOil);
 }
+
+
+RessourceMineProperties::RessourceMineProperties(const UnitProperties* parent)
+	: PluginProperties(parent)
+{
+ mMinerals = 0;
+ mOil = 0;
+}
+
+RessourceMineProperties::~RessourceMineProperties()
+{
+}
+
+QString RessourceMineProperties::name() const
+{
+ return i18n("Ressource Mine Plugin");
+}
+
+QString RessourceMineProperties::propertyGroup()
+{
+ return QString::fromLatin1("RessourceMinePlugin");
+}
+
+void RessourceMineProperties::loadPlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
+	return;
+ }
+ mMinerals = config->readBoolEntry("CanProvideMinerals", false);
+ mOil = config->readBoolEntry("CanProvideOil", false);
+}
+
+void RessourceMineProperties::savePlugin(KSimpleConfig* config)
+{
+ if (!config->hasGroup(propertyGroup())) {
+	boError() << k_funcinfo << "unit has no harvester plugin" << endl;
+	return;
+ }
+ config->writeEntry("CanProvideMinerals", mMinerals);
+ config->writeEntry("CanProvideOil", mOil);
+}
+

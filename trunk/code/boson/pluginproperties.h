@@ -31,6 +31,19 @@ class KSimpleConfig;
 // note that we can have PluginProperties that do <em>not</em> have any UnitPlugin, and
 // we can also have UnitPlugins that <em>don't</em> have any 
 /**
+ * The PluginProperties class extends the properties of @ref UnitProperties.
+ * Every derived class must provide a static propertyGroup function returning
+ * the @ref KConfig group in the index.unit file this plugin does belong to.
+ * That group is used to load the plugin.
+ *
+ * Note that this has nothing to do with the @ref UnitPlugins class. The @ref
+ * UnitPlugins class provides plugins for actual @ref Unit objects, whereas
+ * this class allows extending the @ref UnitProperties objects. But although
+ * they are not (technically) related, usually there is exactly one
+ * class derived from PluginProperties for every class derived from @ref
+ * UnitPlugins. I encourage you to follow this, even
+ * though it is not necessary, but it will make the code easier.
+ *
  * @short Base class for plugin properties for @ref UnitProperties
  * @authorAndreas Beckermann <b_mann@gmx.de>
  **/
@@ -42,7 +55,8 @@ public:
 		Repair = 1,
 		Harvester = 2,
 		Refinery = 3,
-		Weapon = 4
+		Weapon = 4,
+		RessourceMine = 5
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -196,6 +210,27 @@ protected:
 private:
 	bool mCanRefineMinerals;
 	bool mCanRefineOil;
+};
+
+class RessourceMineProperties : public PluginProperties
+{
+public:
+	RessourceMineProperties(const UnitProperties* parent);
+	~RessourceMineProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return RessourceMine; }
+
+	bool canProvideMinerals() const { return mMinerals; }
+	bool canProvideOil() const { return mOil; }
+
+private:
+	bool mMinerals;
+	bool mOil;
 };
 
 #endif
