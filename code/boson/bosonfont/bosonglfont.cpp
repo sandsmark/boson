@@ -553,6 +553,15 @@ int BosonGLFont::widestChar() const
 
 int BosonGLFont::height(const QString& text, int maxWidth)
 {
+ if (text.contains('\n')) {
+	int h = 0;
+	QStringList lines = QStringList::split('\n', text);
+	QStringList::Iterator it = lines.begin();
+	for (; it != lines.end(); ++it) {
+		h += height(*it, maxWidth);
+	}
+	return h;
+ }
  if (widestChar() <= 0) {
 	return 0;
  }
@@ -583,6 +592,9 @@ int BosonGLFont::height(const QString& text, int maxWidth)
 
 int BosonGLFont::renderText(int x, int y, const QString& text, int maxWidth, bool background)
 {
+ if (text.isEmpty()) {
+	return 0;
+ }
  int heightSum = 0;
  if (x < 0) {
 	x = 0;
@@ -610,6 +622,9 @@ int BosonGLFont::height() const
 
 int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, bool background)
 {
+ if (text.isEmpty()) {
+	return 0;
+ }
  int w = width(text);
  if (w >= maxWidth) {
 	w = maxWidth;
