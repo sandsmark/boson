@@ -263,14 +263,22 @@ public:
 
 	/**
 	 * You must call @ref allocatePoints before calling this!
+	 * @param index The index of the vertex in the vertex pool (relative to
+	 * this mesh). It must be < @ref points.
 	 **/
 	void setVertex(unsigned int index, const BoVector3&);
-	void setNormal(unsigned int index, const BoVector3&);
+
+	/**
+	 * @param vertex The vertex in the face this normal applies to. This
+	 * must be 0..2 or -1 for all vertices.
+	 **/
+	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
 
 	void calculateNormals();
 
 	/**
 	 * The third coordinate is discarded.
+	 * @param index See @ref setVertex.
 	 **/
 	void setTexel(unsigned int index, const BoVector3&);
 
@@ -353,17 +361,30 @@ public:
 
 
 	/**
-	 * Create a BoVector3 at index @p p
+	 * Create a BoVector3 at index @p p from the vertex pool.
+	 *
+	 * @param p The index of the vertex in the vertex pool. Must be 
+	 * < @ref points.
 	 **/
 	BoVector3 vertex(unsigned int p) const;
 
 	/**
-	 * @return The normal of of the point at @p p. Note that the normal
-	 * applies to the entire face, which consists of all three points at
-	 * (p - p % 3) to (p - p % 3 + 2)
+	 * @overload
+	 *
+	 * This will create a @ref BoVector3 for the vertex @p i in @p face.
+	 **/
+	BoVector3 vertex(unsigned int face, unsigned int i) const;
+
+
+	BoVector3 normal(unsigned int face, unsigned int vertex) const;
+	/**
+	 * @overload
 	 **/
 	BoVector3 normal(unsigned int p) const;
 
+	/**
+	 * @return The number of points in this mesh. See also @ref facesCount
+	 **/
 	unsigned int points() const;
 
 	/**
