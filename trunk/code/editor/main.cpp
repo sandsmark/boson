@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <assert.h>
+#include <stdlib.h> // exit()
 
 #include <klocale.h>
 #include <kcmdlineargs.h>
@@ -38,7 +39,7 @@ editorCanvas *ecanvas;
  
 extern QPixmap *bigBackground;
 
-int main(int argc, char* argv[])
+int main(/*int argc, char* argv[] */)
 { 
 	KAboutData aboutData(
 		"boeditor"
@@ -54,7 +55,7 @@ int main(int argc, char* argv[])
 	aboutData.addAuthor("Thomas Capricelli", I18N_NOOP("Game Design & Coding"), "orzel@yalbi.com", "http://aquila.rezel.enst.fr/thomas/");
 	aboutData.addAuthor("Benjamin Adler", I18N_NOOP("Graphics & Homepage Design"), "benadler@bigfoot.de");
 		                                                              
-	static char *fake_arg= "boeditor";
+	static char *fake_arg= (char*)"boeditor";
 	KCmdLineArgs::init( 1, &fake_arg, &aboutData );
 	//KCmdLineArgs::init( argc, argv, &aboutData );
 
