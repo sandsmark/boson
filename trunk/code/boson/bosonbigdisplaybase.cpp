@@ -56,6 +56,7 @@
 #include "bomaterial.h"
 #include "info/boinfo.h"
 #include "script/bosonscript.h"
+#include "bosonpath.h"
 
 #include <kgame/kgameio.h>
 
@@ -332,6 +333,8 @@ public:
 	QIntDict<BoLight> mLights;
 
 	BosonGLMiniMap* mGLMiniMap;
+
+	QValueList<BoLineVisualization> mLineVisualizationList;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -752,10 +755,26 @@ void BosonBigDisplayBase::paintGL()
  renderParticles();
  boProfiling->renderParticles(false);
 
-
  glDisable(GL_DEPTH_TEST);
  glDisable(GL_LIGHTING);
  glDisable(GL_NORMALIZE);
+
+
+ // Render lineviz's
+ glDisable(GL_TEXTURE_2D);
+ QValueList<BoLineVisualization>::iterator it;
+ for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
+	glColor4fv((*it).color.data());
+	glPointSize((*it).pointsize);
+	glBegin(GL_LINE_STRIP);
+	QValueList<BoVector3>::iterator pit;
+	for (pit = (*it).points.begin(); pit != (*it).points.end(); ++pit) {
+		glVertex3fv((*pit).data());
+	}
+	glEnd();
+ }
+ glEnable(GL_TEXTURE_2D);
+
 
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect
 
@@ -1132,7 +1151,7 @@ void BosonBigDisplayBase::renderText()
 	}
 	x = d->mViewport[2] - border - w;
 	y -= d->mDefaultFont->height();
-	d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
+	y -= d->mDefaultFont->renderText(x, y, text, d->mViewport[2] - x);
  }
  if (boConfig->debugOpenGLMatrices()) {
 	int x = border;
@@ -3260,6 +3279,24 @@ void BosonBigDisplayBase::slotInitMiniMapFogOfWar()
 	d->mGLMiniMap->initFogOfWar(localPlayerIO());
  } else {
 	d->mGLMiniMap->initFogOfWar(0);
+ }
+}
+
+void BosonBigDisplayBase::addLineVisualization(BoLineVisualization v)
+{
+ d->mLineVisualizationList.append(v);
+}
+
+void BosonBigDisplayBase::advanceLineVisualization()
+{
+ QValueList<BoLineVisualization>::iterator it;
+ for (it = d->mLineVisualizationList.begin(); it != d->mLineVisualizationList.end(); ++it) {
+	(*it).timeout--;
+	if ((*it).timeout == 0) {
+		// expired - remove it
+		d->mLineVisualizationList.erase(it);
+		--it;
+	}
  }
 }
 

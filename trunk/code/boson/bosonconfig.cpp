@@ -298,6 +298,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mWireFrames = false;
  mDebugOpenGLMatrices = false;
  mDebugMapCoordinates = false;
+ mDebugPFData = false;
  mDebugShowCellGrid = false;
  mDebugItemWorkStatistics = false;
  mDebugOpenGLCamera = false;
@@ -305,6 +306,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugBoundingBoxes = false;
  mDebugFPS = false;
  mShowResources = true;
+ mEnableColormap = false;
 
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
@@ -314,7 +316,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigBoolEntry(this, "EnableATIDepthWorkaround", false));
  addDynamicEntry(new BoConfigDoubleEntry(this, "ATIDepthWorkaroundValue", 0.00390625));
  addDynamicEntry(new BoConfigStringEntry(this, "GLFont", QString::null));
- addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", QString::null));
+ addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
 
  // load from config
  reset(conf);

@@ -398,6 +398,81 @@ private:
 
 
 /**
+ * Data structure for holding region-coloring info about the map
+ *
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
+class BoColorMap: public BoMapCornerArray
+{
+public:
+	BoColorMap(unsigned int width, unsigned int height)
+			: BoMapCornerArray(width, height)
+	{
+		if (width == 0) {
+			width = 1;
+		}
+		if (height == 0) {
+			height = 1;
+		}
+		mColorMap = new unsigned char[colorMapArrayPos(width - 1, height - 1) + 3];
+	}
+
+	virtual ~BoColorMap()
+	{
+		delete[] mColorMap;
+	}
+
+	// Normal maps won't be saved/loaded (they're auto-generated)
+	virtual bool save(QDataStream&) { return true; }
+	virtual bool load(QDataStream&) { return true; }
+
+	inline const unsigned char* colorMap() const { return mColorMap; }
+
+	/**
+	 * @return The normal at @p x, @þ y. This function is safe, i.e. if @þ x
+	 * or @p y are invalid we won't crash.
+	 **/
+	const unsigned char* colorAt(int x, int y) const
+	{
+		if (x < 0 || y < 0) {
+			// AB: the very first normal in the array is returned. it will
+			// be invalid anyway, no matter what we return.
+			x = 0;
+			y = 0;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			// AB: the very first normal in the array is returned. it will
+			// be invalid anyway, no matter what we return.
+			x = 0;
+			y = 0;
+		}
+		return mColorMap + colorMapArrayPos(x, y);
+	}
+
+	void setColorAt(int x, int y, const unsigned char* c)
+	{
+		if (x < 0 || y < 0) {
+			return;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return;
+		}
+		mColorMap[colorMapArrayPos(x, y) + 0] = c[0];
+		mColorMap[colorMapArrayPos(x, y) + 1] = c[1];
+		mColorMap[colorMapArrayPos(x, y) + 2] = c[2];
+	}
+
+	inline int colorMapArrayPos(int x, int y) const
+	{
+		return arrayPos(x, y) * 3;
+	}
+
+private:
+	unsigned char* mColorMap;
+};
+
+
+/**
  * This class represents a boson map. It is part of a @ref BosonPlayField (a
  * .bpf file) and gets stored on disk as binary.
  *
@@ -447,6 +522,8 @@ public:
 	 **/
 	void recalculateNormalsInRect(int x1, int y1, int x2, int y2);
 	bool generateCellsFromTexMap();
+
+	void createColorMap();
 
 	/**
 	 * Resize the map. Currently this works only if the cells have
@@ -546,6 +623,7 @@ public:
 	int currentTexture(int texture) const;
 	inline const float* heightMap() const { return mHeightMap->heightMap(); }
 	inline const float* normalMap() const { return mNormalMap->normalMap(); }
+	inline BoColorMap* colorMap() const { return mColorMap; }
 	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
 	/**
@@ -779,6 +857,7 @@ private:
 	Cell* mCells;
 	BoHeightMap* mHeightMap;
 	BoNormalMap* mNormalMap;
+	BoColorMap* mColorMap;
 	BoTexMap* mTexMap;
 	bool mModified;
 

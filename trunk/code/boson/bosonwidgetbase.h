@@ -262,6 +262,7 @@ protected slots:
 
 
 	void slotSetDebugMapCoordinates(bool);
+	void slotSetDebugPFData(bool);
 	void slotSetDebugShowCellGrid(bool);
 	void slotSetDebugMatrices(bool);
 	void slotSetDebugItemWorks(bool);
@@ -270,6 +271,7 @@ protected slots:
 	void slotSetDebugBoundingBoxes(bool);
 	void slotSetDebugFPS(bool);
 	void slotSetShowResources(bool show);
+	void slotSetEnableColormap(bool);
 
 protected:
 	void setLocalPlayerRecursively(Player* p);

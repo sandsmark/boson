@@ -501,6 +501,9 @@ public:
 	void setDebugMapCoordinates(bool debug) { mDebugMapCoordinates = debug; }
 	bool debugMapCoordinates() const { return mDebugMapCoordinates; }
 
+	void setDebugPFData(bool debug) { mDebugPFData = debug; }
+	bool debugPFData() const { return mDebugPFData; }
+
 	void setDebugShowCellGrid(bool debug) { mDebugShowCellGrid = debug; }
 	bool debugShowCellGrid() const { return mDebugShowCellGrid; }
 
@@ -521,6 +524,9 @@ public:
 
 	void setShowResources(bool show) { mShowResources = show; }
 	bool showResources() const { return mShowResources; }
+
+	void setEnableColormap(bool enable) { mEnableColormap = enable; }
+	bool enableColormap() const { return mEnableColormap; }
 
 public:
 	void save(bool editor = false, KConfig* conf = 0);
@@ -588,6 +594,7 @@ private:
 	bool mWireFrames;
 	bool mDebugOpenGLMatrices;
 	bool mDebugMapCoordinates;
+	bool mDebugPFData;
 	bool mDebugShowCellGrid;
 	bool mDebugItemWorkStatistics;
 	bool mDebugOpenGLCamera;
@@ -595,6 +602,7 @@ private:
 	bool mDebugBoundingBoxes;
 	bool mDebugFPS;
 	bool mShowResources;
+	bool mEnableColormap;
 };
 
 #endif

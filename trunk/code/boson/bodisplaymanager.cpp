@@ -451,6 +451,7 @@ void BoDisplayManager::slotAdvance(unsigned int, bool)
  while (it.current()) {
 	it.current()->setParticlesDirty(true);
 	it.current()->advanceCamera();
+	it.current()->advanceLineVisualization();
 	++it;
  }
  grabMovieFrame();
