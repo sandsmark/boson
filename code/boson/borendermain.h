@@ -248,6 +248,7 @@ public:
 
 	void changeUnit(const QString& speciesIdentifier, const QString& unit);
 	void changeUnit(const QString& speciesIdentifier, unsigned long int unitType);
+	void changeObject(const QString& speciesIdentifier, const QString& file);
 
 	void emitSignalFovY(float f) { emit mPreview->signalFovYChanged(f); }
 	void emitSignalRotateX(float r) { emit mPreview->signalRotateXChanged(r); }
