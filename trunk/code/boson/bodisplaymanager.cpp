@@ -207,6 +207,27 @@ void BoDisplayManager::slotPlaceGround(unsigned int textureCount, unsigned char*
  activeDisplay()->displayInput()->placeGround(textureCount, alpha);
 }
 
+void BoDisplayManager::slotShowPlaceFacilities(Player* p)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ activeDisplay()->slotShowPlaceFacilities(p);
+}
+
+void BoDisplayManager::slotShowPlaceMobiles(Player* p)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ activeDisplay()->slotShowPlaceMobiles(p);
+}
+
+void BoDisplayManager::slotShowPlaceGround()
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+
+ activeDisplay()->slotShowPlaceGround();
+}
+
 void BoDisplayManager::slotMoveActiveSelection(int x, int y)
 {
  BO_CHECK_NULL_RET(activeDisplay());

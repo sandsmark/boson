@@ -33,7 +33,6 @@
 #include "boaction.h"
 #include "botexmapimportdialog.h"
 #include "bosongroundtheme.h"
-#include "bosoncommandframeinterface.h"
 
 #include <kfiledialog.h>
 #include <klocale.h>
@@ -85,11 +84,6 @@ EditorWidget::~EditorWidget()
 void EditorWidget::initDisplayManager()
 {
  BosonWidgetBase::initDisplayManager();
- // FIXME: do it with actions
- connect(cmdFrame(), SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
-		displayManager(), SLOT(slotPlaceGround(unsigned int, unsigned char*)));
- connect(cmdFrame(), SIGNAL(signalPlaceUnit(unsigned long int, Player*)),
-		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
 
  connect(displayManager(), SIGNAL(signalLockAction(bool)),
 		this, SLOT(slotLockAction(bool)));
@@ -115,19 +109,9 @@ void EditorWidget::initMap()
 	return;
  }
  BosonMap* map = boGame->playField()->map();
- connect(map, SIGNAL(signalGroundThemeChanged(BosonGroundTheme*)),
-		this, SLOT(slotGroundThemeChanged(BosonGroundTheme*)));
 
  connect(boGame, SIGNAL(signalChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)),
 		map, SLOT(slotChangeTexMap(int,int,unsigned int,unsigned int*,unsigned char*)));
-
- // AB: maybe we don't need the connect() above concerning groundtheme. it can't
- // be changed once the map is started
- if (!map->groundTheme()) {
-	BO_NULL_ERROR(map->groundTheme());
- } else {
-	slotGroundThemeChanged(map->groundTheme());
- }
 }
 
 void EditorWidget::initPlayer()
@@ -136,15 +120,6 @@ void EditorWidget::initPlayer()
 
  // FIXME: GL minimap!
 // minimap()->slotShowMap(true);
-}
-
-BosonCommandFrameInterface* EditorWidget::createCommandFrame(QWidget* parent)
-{
- BosonCommandFrameInterface* frame = BosonCommandFrameInterface::createCommandFrame(parent, false);
-// connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
-//		frame, SLOT(slotUpdateProduction(Unit*)));
-
- return frame;
 }
 
 void EditorWidget::slotChangeCursor(int , const QString& )
@@ -285,20 +260,15 @@ void EditorWidget::slotChangeLocalPlayer(int index)
 void EditorWidget::slotPlace(int index)
 {
  boDebug() << k_funcinfo << "index: " << index << endl;
- BosonCommandFrameInterface* cmd = cmdFrame();
- if (!cmd) {
-	boError() << k_funcinfo << "NULL cmd frame" << endl;
-	return;
- }
  switch (index) {
 	case 0:
-		cmd->placeFacilities(localPlayer());
+		displayManager()->slotShowPlaceFacilities(localPlayer());
 		break;
 	case 1:
-		cmd->placeMobiles(localPlayer());
+		displayManager()->slotShowPlaceMobiles(localPlayer());
 		break;
 	case 2:
-		cmd->placeGround();
+		displayManager()->slotShowPlaceGround();
 		break;
 	default:
 		boError() << k_funcinfo << "Invalid index " << index << endl;
@@ -348,12 +318,6 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
  d->mPlayers.removeRef((Player*)player);
 
  d->mPlayerAction->setItems(players);
-}
-
-void EditorWidget::slotGroundThemeChanged(BosonGroundTheme* theme)
-{
- BO_CHECK_NULL_RET(cmdFrame());
- cmdFrame()->setGroundTheme(theme);
 }
 
 void EditorWidget::slotGameStarted()

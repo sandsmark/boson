@@ -32,7 +32,6 @@ class QDomElement;
 
 class BosonCursor;
 class BosonCanvas;
-class BosonCommandFrameInterface;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -49,13 +48,6 @@ class PlayerIO;
  * This is the actual main widget of boson for the game
  *
  * [obsolete docs got deleted]
- *
- * BosonCommandFrame is in a KDockWidget, which you can drag
- * around and place to wherever you want
- *
- * The @ref BosonCommandFrame is currently a quite tricky part as the frame
- * differs heavily between game and editor mode. Maybe it will become two
- * classes one day, but the basic structure will stay.
  *
  * All game specific stuff should be done in other classes - e.g. visual stuff
  * (click on a unit) in @ref BosonBigDisplay, constructing in @ref
@@ -86,14 +78,6 @@ public:
 	 * This depends on whether the chat (dock-)widget is currently visible.
 	 **/
 	void setActionChat(bool chatVisible);
-
-	/**
-	 * Set the @ref KToggleAction that is responsible for the cmdframe to
-	 * either checked or not checked.
-	 *
-	 * This depends on whether the cmdframe (dock-)widget is currently visible.
-	 **/
-	void setActionCmdFrame(bool cmdFrameVisible);
 
 
 	/**
@@ -137,7 +121,7 @@ public:
 	 **/
 	void addInitialDisplay();
 
-	void init(KDockWidget* chatDock, KDockWidget* commandFrameDock);
+	void init(KDockWidget* chatDock);
 	virtual void initPlayer();
 	virtual void initMap();
 	virtual void quitGame();
@@ -222,7 +206,6 @@ signals:
 	 **/
 	void signalLoadBosonGameDock();
 	void signalToggleChatVisible();
-	void signalToggleCmdFrameVisible();
 	/**
 	 * Ask the receiver of this signal (i.e. the parent) to check the dock
 	 * status (whether the chat/cmdframe widgets are visible) and set the
@@ -235,7 +218,6 @@ signals:
 
 protected slots:
 	void slotChatDockHidden();
-	void slotCmdFrameDockHidden();
 
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
@@ -292,9 +274,6 @@ protected:
 	void changeCursor(BosonCursor* cursor);
 
 	BosonCursor* cursor() const { return mCursor; }
-	BosonCommandFrameInterface* cmdFrame() const;
-
-	virtual BosonCommandFrameInterface* createCommandFrame(QWidget* parent) = 0;
 
 	virtual void initKActions();
 	virtual void initDisplayManager();
@@ -332,7 +311,6 @@ protected:
 private:
 	void initChat(KDockWidget* chatDock);
 
-	void initCommandFrame(KDockWidget* commandFrameDock);
 	void initLayout();
 	void initScripts();
 

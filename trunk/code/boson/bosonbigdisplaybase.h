@@ -326,6 +326,10 @@ public slots:
 	void slotFog(int x, int y);
 	void slotUnfog(int x, int y);
 
+	void slotShowPlaceFacilities(Player*);
+	void slotShowPlaceMobiles(Player*);
+	void slotShowPlaceGround();
+
 signals:
 	void signalMakeActive(BosonBigDisplayBase*);
 

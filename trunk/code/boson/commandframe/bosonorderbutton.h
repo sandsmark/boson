@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,22 +19,23 @@
 #ifndef BOSONORDERBUTTON_H
 #define BOSONORDERBUTTON_H
 
-#include <qwidget.h>
-#include <qpushbutton.h>
+#include "../boufo/boufo.h"
 #include "../global.h"
 #include "../boaction.h"
+#include <qpixmap.h>
 
 class Unit;
 class Player;
 class BosonGroundTheme;
-class BoButton;
-class BoProgress;
+class BoOrderButtonButton;
+class BoUfoProgress;
 class BoToolTip;
 
+class BosonOrderButtonPrivate;
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonOrderButton : public QWidget
+class BosonOrderButton : public BoUfoWidget
 {
 	Q_OBJECT
 public:
@@ -48,7 +49,7 @@ public:
 	enum ShowingType { ShowNothing = 0, ShowUnit, ShowAction, ShowCell };
 
 
-	BosonOrderButton(QWidget* parent);
+	BosonOrderButton();
 	~BosonOrderButton();
 
 	/**
@@ -156,10 +157,6 @@ protected slots:
 	void slotRightClicked();
 
 private:
-	friend class BoToolTip;
-
-private:
-	class BosonOrderButtonPrivate;
 	BosonOrderButtonPrivate* d;
 
 	Unit* mUnit;
@@ -169,22 +166,23 @@ private:
 
 	ShowingType mType;
 
-	BoButton* mPixmap;
-	BoProgress* mHealth;
+	BoOrderButtonButton* mPixmap;
+	BoUfoProgress* mHealth;
 };
 
-class BoButton : public QPushButton
+/**
+ * @internal
+ **/
+class BoOrderButtonButton : public BoUfoPushButton
 {
 	Q_OBJECT
 public:
-	BoButton(QWidget* p) : QPushButton(p)
+	BoOrderButtonButton() : BoUfoPushButton()
 	{
 		mGrayOut = false;
 		mProductionCount = 0;
 	}
 	
-	virtual QSize sizeHint() const;
-
 	virtual void setPixmap(const QPixmap& p);
 
 	void setProductionCount(int c);
@@ -193,16 +191,16 @@ public:
 signals:
 	void rightClicked();
 
-protected:
-	virtual void drawButton(QPainter*);
-	virtual void mouseReleaseEvent(QMouseEvent*);
+protected slots:
+	void slotMouseReleaseEvent(ufo::UMouseEvent*);
 
+protected:
 	void addProductionCount(QPixmap* pix);
 	
 private:
 	bool mGrayOut;
 	int mProductionCount;
-	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* order button!!!
+	QPixmap mPixmap;
 };
 
 #endif

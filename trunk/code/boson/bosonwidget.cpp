@@ -30,7 +30,6 @@
 #include "global.h"
 #include "gameoverdialog.h"
 #include "bodebug.h"
-#include "bosoncommandframeinterface.h"
 #include "sound/bosonaudiointerface.h"
 
 #include <kstdgameaction.h>
@@ -86,17 +85,6 @@ void BosonWidget::initPlayer()
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
-}
-
-BosonCommandFrameInterface* BosonWidget::createCommandFrame(QWidget* parent)
-{
- BosonCommandFrameInterface* frame = BosonCommandFrameInterface::createCommandFrame(parent, true);
- connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
-		frame, SLOT(slotUpdateProduction(Unit*)));
- connect(boGame, SIGNAL(signalUpdateProductionOptions()),
-		frame, SLOT(slotUpdateProductionOptions()));
-
- return frame;
 }
 
 void BosonWidget::slotChangeCursor(int mode, const QString& cursorDir_)

@@ -273,7 +273,6 @@ protected slots:
 	void slotLoadBosonGameDock();
 
 	void slotToggleChatDockVisible();
-	void slotToggleCmdFrameDockVisible();
 
 	/**
 	 * Check whether the game dock widgets (see @ref initGameDockWidgets)

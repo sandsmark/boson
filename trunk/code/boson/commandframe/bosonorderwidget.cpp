@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,47 +25,38 @@
 #include "../unitplugins.h"
 #include "../unitproperties.h"
 #include "../bosongroundtheme.h"
-#include "../bosonconfig.h"
-#include "../defines.h"
 #include "bodebug.h"
 
-#include <kstandarddirs.h>
 #include <klocale.h>
 
-#include <qlayout.h>
 #include <qintdict.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
-#include <qtimer.h>
 #include <qvaluelist.h>
 #include <qptrlist.h>
 #include <qstring.h>
 
 
-class BosonOrderWidget::BosonOrderWidgetPrivate
+class BosonOrderWidgetPrivate
 {
 public:
 	BosonOrderWidgetPrivate()
 	{
-		mTopLayout = 0;
-		mOrderLayout = 0;
-
 		mGroundTheme = 0;
 	}
 
 	QIntDict<BosonOrderButton> mOrderButton;
-	QVBoxLayout* mTopLayout;
-	QGridLayout* mOrderLayout;
 	
 	BosonGroundTheme* mGroundTheme;
 
 	bool mIsProduceAction;
 };
 
-BosonOrderWidget::BosonOrderWidget(QWidget* parent, const char* name) : QWidget(parent, name)
+BosonOrderWidget::BosonOrderWidget()
+	: BoUfoWidget()
 {
  d = new BosonOrderWidgetPrivate;
  d->mIsProduceAction = false;
+
+ setLayoutClass(UFlowLayout);
 }
 
 BosonOrderWidget::~BosonOrderWidget()
@@ -80,9 +71,9 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
  }
  for (unsigned int i = 0; i < number; i++) {
 	if (!d->mOrderButton[i]) {
-		BosonOrderButton* b = new BosonOrderButton(this);
+		BosonOrderButton* b = new BosonOrderButton();
 		b->hide();
-		b->setBackgroundOrigin(WindowOrigin);
+		addWidget(b);
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceGround(unsigned int)),
 				this, SLOT(slotPlaceGround(unsigned int)));
@@ -92,27 +83,9 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 				this, SIGNAL(signalSelectUnit(Unit*)));
 	}
  }
- resetLayout();
 }
 
-void BosonOrderWidget::resetLayout()
-{
- delete d->mOrderLayout;
- delete d->mTopLayout;
- d->mTopLayout = new QVBoxLayout(this);
- int buttons = DEFAULT_CMD_BUTTONS_PER_ROW;
- d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
- d->mTopLayout->addStretch(1);
- for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	BosonOrderButton* b = d->mOrderButton[i];
-	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
- }
- int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
- d->mOrderLayout->setRowStretch(row, 1);
- d->mOrderLayout->activate();
-}
-
-void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)
+void BosonOrderWidget::setOrderButtons(const QValueList<BoSpecificAction>& actions)
 {
  boDebug(220) << k_funcinfo << actions.count() << " actions" << endl;
 
@@ -138,7 +111,6 @@ void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)
  QPair<ProductionType, long unsigned int> pair;
  for (unsigned int i = 0; i < actions.count(); i++) {
 	d->mOrderButton[i]->setAction(actions[i]);
-	d->mTopLayout->activate();
 	if (id > 0 && production) {
 		pair.first = actions[i].productionType();
 		pair.second = actions[i].productionId();
@@ -183,11 +155,6 @@ void BosonOrderWidget::setOrderButtonsGround()
  }
 }
 
-void BosonOrderWidget::initEditor()
-{
- // old code new'ed mInverted and mTransRef here
-}
-
 void BosonOrderWidget::hideCellConfigWidgets()
 {
  // we should hide widgets for groundtexture mixing here (if they are created)
@@ -198,7 +165,7 @@ void BosonOrderWidget::showCellConfigWidgets()
  // we should show widgets for groundtexture mixing here (if they are created)
 }
 
-void BosonOrderWidget::showUnits(QPtrList<Unit> units)
+void BosonOrderWidget::showUnits(const QPtrList<Unit>& units)
 {
  ensureButtons(units.count());
  unsigned int i;

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,15 +26,18 @@
 #include "../global.h"
 #include "../boaction.h"
 
+#include "../boufo/boufo.h"
+
 class Unit;
 class Facility;
 class Player;
-class BosonOrderButton;
 class BosonGroundTheme;
+class BosonOrderButton;
 
 template<class T> class QPtrList;
 template<class T> class QValueList;
 
+class BosonOrderWidgetPrivate;
 /**
  * This is scrollable widget in the commandframe that contains buttons of unit
  * actions (when single unit is selected) or selected units (when multiple
@@ -42,18 +45,12 @@ template<class T> class QValueList;
  *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonOrderWidget : public QWidget
+class BosonOrderWidget : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BosonOrderWidget(QWidget* parent, const char* name = 0);
+	BosonOrderWidget();
 	~BosonOrderWidget();
-
-	/**
-	 * Initialize this widget for editor mode. In editor mode the widget
-	 * also displays widgets for modifying cells.
-	 **/
-	void initEditor();
 
 	/**
 	 * Ensure that at least @p number buttons are available.
@@ -73,7 +70,7 @@ public:
 	 * See also @ref hideOrderButtons, @ref showUnits and @ref
 	 * setOrderButtonsGround
 	 **/
-	void setOrderButtons(QValueList<BoSpecificAction> actions);
+	void setOrderButtons(const QValueList<BoSpecificAction>& actions);
 
 	/**
 	 * Use the @ref BosonGroundTheme, for the order buttons, i.e. allow
@@ -88,7 +85,7 @@ public:
 	 * Use @ref setOrderButtons or @ref hideOrderButtons if the player
 	 * selected one unit only.
 	 **/
-	void showUnits(QPtrList<Unit> units);
+	void showUnits(const QPtrList<Unit>& units);
 
 	void productionAdvanced(Unit* factory, double percentage);
 
@@ -107,8 +104,6 @@ public:
 	void resetButton(BosonOrderButton* button);
 
 protected:
-	void resetLayout();
-
 	/**
 	 * In editor mode hide the widget to configure cells. Should be called
 	 * when no cells are displayed.
@@ -143,7 +138,6 @@ signals:
 	void signalSelectUnit(Unit*);
 
 private:
-	class BosonOrderWidgetPrivate;
 	BosonOrderWidgetPrivate* d;
 };
 

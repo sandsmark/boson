@@ -69,6 +69,8 @@
 #include "boufo/boufo.h"
 #include "bosonufochat.h"
 #include "bosonufominimap.h"
+#include "commandframe/bosoncommandframe.h"
+#include "bosonlocalplayerinput.h"
 
 #include <kgame/kgameio.h>
 
@@ -344,6 +346,7 @@ public:
 		mGamePaused = 0;
 		mUfoChat = 0;
 		mUfoMiniMap = 0;
+		mUfoCommandFrame = 0;
 	}
 
 	PlayerIO* mLocalPlayerIO;
@@ -435,6 +438,7 @@ public:
 	BoUfoLabel* mGamePaused;
 	BosonUfoChat* mUfoChat;
 	BosonUfoMiniMap* mUfoMiniMap;
+	BosonCommandFrame* mUfoCommandFrame;
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
@@ -592,6 +596,14 @@ void BosonBigDisplayBase::setCanvas(BosonCanvas* canvas)
 	d->mGLMiniMap->createMap(map, d->mViewport);
  } else {
 	BO_NULL_ERROR(d->mGLMiniMap);
+ }
+
+ if (!boGame->gameMode()) { // AB: is this valid at this point?
+	// AB: this connect is useless, as the groundtheme can't be changed
+	// anymore once the game is started
+	connect(map, SIGNAL(signalGroundThemeChanged(BosonGroundTheme*)),
+			d->mUfoCommandFrame, SLOT(slotSetGroundTheme(BosonGroundTheme*)));
+	d->mUfoCommandFrame->slotSetGroundTheme(map->groundTheme());
  }
 }
 
@@ -809,6 +821,16 @@ void BosonBigDisplayBase::initUfoGUI()
  d->mUfoMiniMap = new BosonUfoMiniMap();
  d->mUfoMiniMap->setMiniMap(d->mGLMiniMap);
  northWest->addWidget(d->mUfoMiniMap);
+
+ d->mUfoCommandFrame = new BosonCommandFrame();
+ d->mUfoCommandFrame->slotSelectionChanged(selection());
+ connect(this, SIGNAL(signalSelectionChanged(BoSelection*)),
+		d->mUfoCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
+ connect(d->mUfoCommandFrame, SIGNAL(signalSelectUnit(Unit*)),
+		selection(), SLOT(slotSelectSingleUnit(Unit*)));
+
+ // TODO: move to somewhere more useful, not to northWest
+ northWest->addWidget(d->mUfoCommandFrame);
 
  d->mMatricesDebug = new BoUfoVBox();
  d->mMatricesDebugProjection = new BoUfoMatrix();
@@ -2432,10 +2454,35 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 	d->mGLMiniMap->setLocalPlayerIO(localPlayerIO());
  }
 
+ if (previousPlayerIO) {
+	BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)previousPlayerIO->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+	if (i) {
+		disconnect(i, 0, d->mUfoCommandFrame, 0);
+		disconnect(d->mUfoCommandFrame, 0, i, 0);
+	}
+ }
+
+ d->mUfoCommandFrame->setLocalPlayerIO(localPlayerIO());
  if (!localPlayerIO()) {
 	return;
  }
+
+ // AB: this is not really nice here, but it needs to be done somewhere. maybe
+ // we should add a "setGameMode()" method to the bigdisplay, but here it is ok
+ // for now, too - at the time when the local player IO is added, the mode is
+ // already fixed.
+ d->mUfoCommandFrame->setGameMode(boGame->gameMode());
+
+
  addMouseIO(localPlayerIO());
+
+ BosonLocalPlayerInput* i = (BosonLocalPlayerInput*)localPlayerIO()->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+ if (i) {
+	connect(d->mUfoCommandFrame, SIGNAL(signalAction(const BoSpecificAction&)),
+			i, SLOT(slotAction(const BoSpecificAction&)));
+ } else {
+	boError() << k_funcinfo << "local player does not have any BosonLocalPlayerInput!" << endl;
+ }
 
  if (canvas()) {
 	slotInitMiniMapFogOfWar();
@@ -3310,6 +3357,11 @@ void BosonBigDisplayBase::setDisplayInput(BosonBigDisplayInputBase* input)
 	delete d->mInput;
  }
  d->mInput = input;
+
+ connect(d->mUfoCommandFrame, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
+		input, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
+ connect(d->mUfoCommandFrame, SIGNAL(signalPlaceUnit(unsigned int, Player*)),
+		input, SLOT(slotPlaceUnit(unsigned int, Player*)));
 }
 
 BosonBigDisplayInputBase* BosonBigDisplayBase::displayInput() const
@@ -4190,3 +4242,31 @@ static void updateEffects(BoVisibleEffects& v)
 	++it;
  }
 }
+
+void BosonBigDisplayBase::slotShowPlaceFacilities(Player* p)
+{
+ if (boGame->gameMode()) {
+	boError() << k_funcinfo << "not in editor mode" << endl;
+	return;
+ }
+ d->mUfoCommandFrame->placeFacilities(p);
+}
+
+void BosonBigDisplayBase::slotShowPlaceMobiles(Player* p)
+{
+ if (boGame->gameMode()) {
+	boError() << k_funcinfo << "not in editor mode" << endl;
+	return;
+ }
+ d->mUfoCommandFrame->placeMobiles(p);
+}
+
+void BosonBigDisplayBase::slotShowPlaceGround()
+{
+ if (boGame->gameMode()) {
+	boError() << k_funcinfo << "not in editor mode" << endl;
+	return;
+ }
+ d->mUfoCommandFrame->placeGround();
+}
+

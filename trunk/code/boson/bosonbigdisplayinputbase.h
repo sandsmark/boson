@@ -173,6 +173,15 @@ public slots:
 	 **/
 	virtual void slotMoveSelection(int x, int y) { Q_UNUSED(x); Q_UNUSED(y); }
 
+	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha)
+	{
+		placeGround(textureCount, alpha);
+	}
+	void slotPlaceUnit(unsigned int unitType, Player* owner)
+	{
+		placeUnit(unitType, owner);
+	}
+
 protected:
 	enum CanSelectUnit {
 		CanSelectMultipleOk = 0, // the unit can be selected - multiple selections allowed

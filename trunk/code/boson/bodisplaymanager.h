@@ -118,6 +118,10 @@ public slots:
 	 **/
 	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha);
 
+	void slotShowPlaceFacilities(Player*);
+	void slotShowPlaceMobiles(Player*);
+	void slotShowPlaceGround();
+
 	/**
 	 * Editor mode only: delete all currently selected units.
 	 **/

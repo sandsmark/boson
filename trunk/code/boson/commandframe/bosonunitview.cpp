@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,12 +28,7 @@
 
 #include <klocale.h>
 
-#include <qlabel.h>
-#include <qvbox.h>
-#include <qhbox.h>
-#include <qlayout.h>
-
-class BosonUnitView::BosonUnitViewPrivate
+class BosonUnitViewPrivate
 {
 public:
 	BosonUnitViewPrivate()
@@ -47,31 +42,42 @@ public:
 
 	}
 
-	QLabel* mName;
-	QLabel* mHealth;
-	QLabel* mOwner;
-	QLabel* mId; // mostly for debugging
-	QLabel* mArmor;
-	QLabel* mShields;
-	QLabel* mSight;
+	BoUfoLabel* mName;
+	BoUfoLabel* mHealth;
+	BoUfoLabel* mOwner;
+	BoUfoLabel* mId; // mostly for debugging
+	BoUfoLabel* mArmor;
+	BoUfoLabel* mShields;
+	BoUfoLabel* mSight;
 };
 
 // this unit view consists of 2 parts 
 // - the big overview (aka 'preview') pixmap
 // - the actual "unit view" - some QLabels describing the selected unit
-BosonUnitView::BosonUnitView(QWidget* parent) : BosonOrderButton(parent)
+BosonUnitView::BosonUnitView()
+	: BosonOrderButton()
 {
  d = new BosonUnitViewPrivate;
- QVBox* v = new QVBox(this);
 
- d->mName = new QLabel(v);
- d->mHealth = new QLabel(v);
- d->mOwner = new QLabel(v);
- d->mId = new QLabel(v);
- d->mArmor = new QLabel(v);
- d->mShields = new QLabel(v);
- d->mSight = new QLabel(v);
+ BoUfoVBox* v = new BoUfoVBox();
+ addWidget(v);
 
+ d->mName = new BoUfoLabel();
+ d->mHealth = new BoUfoLabel();
+ d->mOwner = new BoUfoLabel();
+ d->mId = new BoUfoLabel();
+ d->mArmor = new BoUfoLabel();
+ d->mShields = new BoUfoLabel();
+ d->mSight = new BoUfoLabel();
+ v->addWidget(d->mName);
+ v->addWidget(d->mHealth);
+ v->addWidget(d->mOwner);
+ v->addWidget(d->mId);
+ v->addWidget(d->mArmor);
+ v->addWidget(d->mShields);
+ v->addWidget(d->mSight);
+
+#if 0
  QFont f1, f2;
  f1 = d->mName->font();
  f2.setPointSize(10);
@@ -85,6 +91,7 @@ BosonUnitView::BosonUnitView(QWidget* parent) : BosonOrderButton(parent)
  d->mArmor->setFont(f2);
  d->mShields->setFont(f2);
  d->mSight->setFont(f2);
+#endif
 
  setUnit(0);
 }
@@ -167,3 +174,4 @@ void BosonUnitView::slotUnitChanged(Unit* u)
  d->mSight->setText(i18n("Sight range: %1").arg(u->sightRange()));
  BosonOrderButton::slotUnitChanged(u);
 }
+

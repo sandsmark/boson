@@ -44,7 +44,6 @@
 #include "bosonlocalplayerinput.h"
 #include "bosoncomputerio.h"
 #include "bosonmodeltextures.h"
-#include "bosoncommandframeinterface.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
 #include "bosonwidgets/bogamechat.h"
@@ -97,26 +96,22 @@ class BosonWidgetBase::BosonWidgetBasePrivate
 public:
 	BosonWidgetBasePrivate()
 	{
-		mCommandFrame = 0;
 		mChat = 0;
 
 		mActionDebugPlayers = 0;
 		mActionZoom = 0;
 		mActionChat = 0;
-		mActionCmdFrame = 0;
 
 		mCanvas = 0;
 
 		mLightWidget = 0;
 	}
 
-	BosonCommandFrameInterface* mCommandFrame;
 	BoGameChatWidget* mChat;
 
 	KActionMenu* mActionDebugPlayers;
 	KSelectAction* mActionZoom;
 	KToggleAction* mActionChat;
-	KToggleAction* mActionCmdFrame;
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
@@ -154,7 +149,6 @@ BosonWidgetBase::~BosonWidgetBase()
  d->mPlayers.clear();
 
  delete mCursor;
- delete d->mCommandFrame;
  delete d->mChat;
 
  delete d;
@@ -185,7 +179,7 @@ BosonCanvas* BosonWidgetBase::canvas() const
 }
 
 #include <kstandarddirs.h> //locate()
-void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
+void BosonWidgetBase::init(KDockWidget* chatDock)
 {
  // NOTE: order of init* methods is very important here, so don't change it,
  //  unless you know what you're doing!
@@ -194,7 +188,6 @@ void BosonWidgetBase::init(KDockWidget* chatDock, KDockWidget* commandFrameDock)
  }
  d->mInitialized = true;
  initChat(chatDock);
- initCommandFrame(commandFrameDock);
  initDisplayManager();
 
  initConnections();
@@ -233,10 +226,6 @@ void BosonWidgetBase::initDisplayManager()
  BO_CHECK_NULL_RET(display);
  // dont do the connect()s here, as some objects might not be deleted and
  // therefore we do the same connect twice if an endgame() occurs!
- connect(displayManager(), SIGNAL(signalSelectionChanged(BoSelection*)),
-		cmdFrame(), SLOT(slotSelectionChanged(BoSelection*)));
- connect(cmdFrame(), SIGNAL(signalSelectUnit(Unit*)),
-		displayManager(), SLOT(slotActiveSelectSingleUnit(Unit*)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
 		displayManager(), SLOT(slotAdvance(unsigned int, bool)));
  connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
@@ -337,15 +326,6 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  b->show();
 
  b->setInputInitialized(true);
-}
-
-void BosonWidgetBase::initCommandFrame(KDockWidget* commandFrameDock)
-{
- d->mCommandFrame = createCommandFrame(commandFrameDock);
- commandFrameDock->setWidget(d->mCommandFrame);
-
- connect(commandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
- connect(commandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));
 }
 
 void BosonWidgetBase::initLayout()
@@ -567,9 +547,6 @@ void BosonWidgetBase::initKActions()
  d->mActionChat = new KToggleAction(i18n("Show Cha&t"),
 		KShortcut(Qt::CTRL+Qt::Key_C), this, SIGNAL(signalToggleChatVisible()),
 		actionCollection(), "options_show_chat");
- d->mActionCmdFrame = new KToggleAction(i18n("Show C&ommandframe"),
-		KShortcut(Qt::CTRL+Qt::Key_F), this, SIGNAL(signalToggleCmdFrameVisible()),
-		actionCollection(), "options_show_cmdframe");
 
  (void)new KAction(i18n("&Grab Screenshot"), KShortcut(Qt::CTRL + Qt::Key_G),
 		this, SLOT(slotGrabScreenshot()), actionCollection(), "game_grab_screenshot");
@@ -717,11 +694,6 @@ void BosonWidgetBase::setActionChat(bool chatVisible)
  d->mActionChat->setChecked(chatVisible);
 }
 
-void BosonWidgetBase::setActionCmdFrame(bool cmdFrameVisible)
-{
- d->mActionCmdFrame->setChecked(cmdFrameVisible);
-}
-
 
 void BosonWidgetBase::saveConfig()
 {
@@ -841,11 +813,6 @@ void BosonWidgetBase::slotChatDockHidden()
  setFocus();
 }
 
-void BosonWidgetBase::slotCmdFrameDockHidden()
-{
- d->mActionCmdFrame->setChecked(false);
-}
-
 void BosonWidgetBase::setBosonXMLFile()
 {
  QString file = locate("config", "ui/ui_standards.rc", instance());
@@ -897,11 +864,6 @@ void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
  delete menu;
 }
 
-BosonCommandFrameInterface* BosonWidgetBase::cmdFrame() const
-{
- return d->mCommandFrame;
-}
-
 void BosonWidgetBase::setLocalPlayer(Player* p)
 {
  if (mLocalPlayer) {
@@ -916,11 +878,6 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
 	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
 			displayManager(), SLOT(slotAction(const BoSpecificAction&)));
 	mLocalPlayer->addGameIO(input);
-	if (!cmdFrame()) {
-		boError() << k_funcinfo << "cmdFrame() is NULL - this should not be possible here!" << endl;
-	} else {
-		input->setCommandFrame(cmdFrame());
-	}
  }
  if (displayManager()) {
 	displayManager()->activeDisplay()->setLocalPlayerIO(localPlayer()->playerIO());
@@ -928,9 +885,6 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
  if (!boGame) {
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
- }
- if (cmdFrame()) {
-	cmdFrame()->setLocalPlayer(localPlayer());
  }
  if (d->mChat) {
 	d->mChat->chatWidget()->setFromPlayer(localPlayer());
