@@ -9,10 +9,10 @@ SUBDIRS =
 BO_DOC_DIR=game
 
 # list all wml files here
-BO_DOCS=index.wml buildfac.wml buildunit.wml scrolling.wml moving.wml configure.wml
+BO_DOCS=index.wml buildfac.wml buildunit.wml cursor.wml scrolling.wml moving.wml configure.wml
 
 # list additional data here - these files will get installed
-doc_DATA=
+doc_DATA=default.gif move.gif attack.gif
 
 # Condiguration ends here!
 

@@ -35,7 +35,7 @@
     <p>
       <h4>4. Cursor Keys</h4>
       You can also use the cursor keys to scroll the display. There is not much
-      to say about this - except that you can configure the step-size of a curser key.
+      to say about this - except that you can configure the step-size of a cursor key.
       Go to Settings->Configure Boson and change the number for "Arrow Key Steps".
       Simply enter your desired pixel value.
     </p>
@@ -55,6 +55,6 @@
     </p>
     
 
-#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="curser.html" after_text="The cursors"    
+#include "nav.wml" before_url="configure.html" before_text="Configure Boson" after_url="cursor.html" after_text="The cursors"    
 #include "footer.wml"
 
