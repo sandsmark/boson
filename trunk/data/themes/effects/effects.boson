@@ -1161,6 +1161,14 @@ Range=10
 
 
 
+[Weather-LightLGrayFog]
+Id=61001
+Type=Fog
+Color=0.8,0.8,0.8,1.0
+Start=0
+End=350
+
+
 
 [FadeIn-Black-500ms]
 Id=70005
