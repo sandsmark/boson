@@ -176,8 +176,6 @@ public:
 	 **/
 	double productionProgress() const;
 
-	bool canPlaceProductionAt(const QPoint& pos);
-
 	virtual void advance(unsigned int);
 
 private:
