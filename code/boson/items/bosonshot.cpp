@@ -85,16 +85,16 @@ BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanv
   // Set velocity
   mVelo.scale(prop->speed() / mLength);
   //boDebug(350) << "MISSILE: " << k_funcinfo << "    Normalized & scaled (final) velocity: (" << mVelo[0] << "; " << mVelo[1] << "; " << mVelo[2] << ")" << endl;
+  // Particle systems
+  mFlyParticleSystems = prop->newFlyParticleSystems(pos, -rotation());
+  canvas->addParticleSystems(mFlyParticleSystems);
+  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
   // Initialization
   mActive = true;
   move(pos[0], pos[1], pos[2]);
   setAnimated(true);
   setRotation(rotationToPoint(mVelo[0], mVelo[1]));
   mZ = 0; // For parable calculations only, must be 0 at the beginning
-  // Particle systems
-  mFlyParticleSystems = prop->newFlyParticleSystems(pos, -rotation());
-  canvas->addParticleSystems(mFlyParticleSystems);
-  mParticleVelo = sqrt(mVelo[0] * mVelo[0] + mVelo[1] * mVelo[1]) / (float)BO_TILE_SIZE;
 }
 
 BosonShot::BosonShot(const BosonWeaponProperties* prop, Player* owner, BosonCanvas* canvas, QDataStream& stream) :
@@ -120,23 +120,6 @@ void BosonShot::advanceMoveInternal()
   mZ = addZ;
   setVelocity(mVelo[0], mVelo[1], zvelo);
   setXRotation(rotationToPoint(mParticleVelo, zvelo) - 90 );
-  //AB: maybe reimplement moveBy() for this?
-  // Move all "fly" particles.
-  BoVector3 move(mVelo[0], mVelo[1], zvelo);
-  move.canvasToOGL();
-  QPtrListIterator<BosonParticleSystem> it(mFlyParticleSystems);
-  while(it.current())
-  {
-    if(it.current() == 0)
-    {
-      mFlyParticleSystems.remove(it);
-      break;
-    }
-    BoVector3 newpos(it.current()->position());
-    newpos.add(move);
-    it.current()->setPosition(it.current()->position() + move);
-    ++it;
-  }
   if(mStep >= mTotalSteps)
   {
     mActive = false;

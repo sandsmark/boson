@@ -279,9 +279,9 @@ bool BosonPath::findFastPath()
   if((x[i] != mGoalx) || (y[i] != mGoaly))
   {
     // Only partial path was found
-    wp.setX(-2);
-    wp.setY(-2);
-    path.push_back(wp);
+//    wp.setX(-2);
+//    wp.setY(-2);
+//    path.push_back(wp);
   } else {
     path.push_back(QPoint(-1, -1));  // This means that end of path has been reached
   }
@@ -573,7 +573,7 @@ bool BosonPath::findSlowPath()
     //  -2; -2 to the path, indicating that this is just partial path.
     if(pathfound != FullPath && pathfound != AlternatePath)
     {
-      path.push_back(QPoint(-2, -2));
+//      path.push_back(QPoint(-2, -2));
     }
     else
     {

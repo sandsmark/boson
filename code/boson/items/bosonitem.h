@@ -33,6 +33,8 @@ class BosonAnimation;
 class BoFrame;
 class QRect;
 class Cell;
+class BosonParticleSystem;
+template<class T> class QPtrList;
 
 
 /**
@@ -142,6 +144,7 @@ public:
 			removeFromCells();
 			setPos(x() + dx, y() + dy, z() + dz);
 			addToCells();
+			moveParticleSystems(x(), y(), z());
 		}
 	}
 
@@ -322,14 +325,19 @@ public:
 	 * floating point operations!
 	 **/
 	inline float rotation() const { return mRotation; }
-	void setRotation(float r) { mRotation = r; }
+	virtual void setRotation(float r) { rotateParticleSystems(r - mRotation, 0.0, 0.0, 1.0); mRotation = r; }
 
 	inline float xRotation() const { return mXRotation; }
-	void setXRotation(float r) { mXRotation = r; }
+	virtual void setXRotation(float r) { rotateParticleSystems(r - mXRotation, 1.0, 0.0, 0.0); mXRotation = r; }
 
 	inline float yRotation() const { return mYRotation; }
-	void setYRotation(float r) { mYRotation = r; }
+	virtual void setYRotation(float r) { rotateParticleSystems(r - mYRotation, 0.0, 1.0, 0.0); mYRotation = r; }
 
+
+	virtual void moveParticleSystems(float x, float y, float z);
+	virtual void rotateParticleSystems(float angle, float x, float y, float z);
+
+	virtual QPtrList<BosonParticleSystem>* particleSystems();
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
 // objects (like missiles) just can't be selected usually.

@@ -558,7 +558,7 @@ void BosonCanvas::shotHit(BosonShot* s)
 	return;
  }
  // Set age of flying particle systems (e.g. smoke traces) to 0 so they won't create any new particles
- QPtrListIterator<BosonParticleSystem> it(*(s->flyParticleSystems()));
+ QPtrListIterator<BosonParticleSystem> it(*(s->particleSystems()));
  while (it.current()) {
 	it.current()->setAge(0);
 	++it;
@@ -697,22 +697,12 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	Player* owner = unit->owner();
 	d->mDestroyedUnits.append(unit);
 
-	if (unit->isFacility()) {
-		boDebug() << k_funcinfo << "destoying facility" << endl;
-		if (((Facility*)unit)->flamesParticleSystem()) {
-			((Facility*)unit)->flamesParticleSystem()->setAge(0);
-		}
-	}
-	if (unit->smokeParticleSystem()) {
-		unit->smokeParticleSystem()->setAge(0);
-	}
-
-	QPtrListIterator<BosonParticleSystem> it(*(unit->activeParticleSystems()));
+	QPtrListIterator<BosonParticleSystem> it(*(unit->particleSystems()));
 	for (; it.current(); ++it) {
 		boDebug() << k_funcinfo << "Setting age to 0 for particle system" << it.current() << endl;
 		it.current()->setAge(0);
 	}
-	unit->activeParticleSystems()->clear();
+	unit->particleSystems()->clear();
 
 	// the unit is added to a list - now displayed as a wreckage only.
 	removeUnit(unit);
