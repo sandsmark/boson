@@ -21,8 +21,8 @@
     <p>
     There are many reasons, some things that can help:<br>
     - Check your hardware: <a href="started.html">here</a><br>
-    - Try resizing the window or switch to fullscreen mode<br>
-    - Reduce the update interval in the Boson settings<br>
+    - Try resizing the window and/or make it smaller<br>
+    - Increase the update interval in the Boson settings<br>
     - Change the color depth of your XServer<br>
     </p>
 
