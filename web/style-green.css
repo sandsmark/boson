@@ -291,6 +291,10 @@ a.statslink:hover {
   font-weight: bold;
 }
 
+.stats_views_average {
+  font-weight: bold;
+}
+
 .stats_visits {
   font-weight: bold;
 }
