@@ -72,6 +72,11 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 {
  // Note that some code here is taken from units() (code duplication), but it
  //  makes this method much faster
+ 
+ bool flying = false;
+ if (forUnit) {
+	flying = forUnit->isFlying();
+ }
 
  for (ConstIterator it = begin(); it != end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
@@ -79,7 +84,7 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
 		if (forUnit == u) {
 			continue;
 		}
-		if (u->isFlying() != forUnit->isFlying()) {
+		if (u->isFlying() != flying) {
 			continue;
 		}
 		if (u->isMoving()) {
