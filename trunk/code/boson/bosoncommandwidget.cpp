@@ -61,6 +61,7 @@ class BoButton : public QPushButton
 public:
 	BoButton(QWidget* p) : QPushButton(p)
 	{
+		mGrayOut = false;
 	}
 
 	virtual QSize sizeHint() const
@@ -72,11 +73,38 @@ public:
 		}
 		return QSize(pixmap()->width(), pixmap()->height());
 	}
+	void setGrayOut(bool g)
+	{
+		mGrayOut = g;
+		setPixmap(mPixmap);
+	}
+
+	virtual void setPixmap(const QPixmap& pix)
+	{
+		mPixmap = pix;
+		if (mGrayOut) {
+			KPixmap p(pix);
+			KPixmapEffect::desaturate(p, 1.0);
+			QPushButton::setPixmap(p);
+		} else {
+			QPushButton::setPixmap(pix);
+		}
+	}
 protected:
 	virtual void drawButton(QPainter* p)
 	{
+		// we want to have a *visible* pixmap - not just a grey pixmap!
+		bool e = isEnabled();
+		clearWState(WState_Disabled);
 		drawButtonLabel(p);
+		if (!e) {
+			setWState(WState_Disabled);
+		}
 	}
+
+private:
+	bool mGrayOut;
+	QPixmap mPixmap; // FIXME: this means addiditional memory space for *every* command button!!!
 };
 
 class BosonCommandWidget::BosonCommandWidgetPrivate
@@ -174,6 +202,8 @@ void BosonCommandWidget::setUnit(Unit* unit)
  d->mReload->show(); // TODO don't show if unit cannot shoot
 
  show();
+ setEnabled(true);
+ setGrayOut(false);
 }
 
 void BosonCommandWidget::setUnit(int unitType, Player* owner)
@@ -204,6 +234,8 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  d->mReload->hide();
 
  show();
+ // note: setEnabled() and setGrayOut() are handled in BosonCommandFrame for
+ // this!
 }
 
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
@@ -221,6 +253,8 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
  d->mReload->hide();
 
  show();
+ setEnabled(true);
+ setGrayOut(false);
 }
 
 void BosonCommandWidget::displayUnitPixmap(Unit* unit) 
@@ -251,12 +285,6 @@ void BosonCommandWidget::setPixmap(const QPixmap& pixmap)
 {
  d->mPixmap->setPixmap(pixmap);
  d->mPixmap->show();
-}
-
-void BosonCommandWidget::mousePressEvent(QMouseEvent* e)
-{ // obsolete
- // a click on this widget is always a "hit" (see QButton::hitButton()).
-// slotClicked();
 }
 
 void BosonCommandWidget::setToolTip(const QString& text)
@@ -360,7 +388,7 @@ void BosonCommandWidget::unset()
 
 void BosonCommandWidget::advanceProduction(double percentage)
 {
- kdDebug() << k_funcinfo << percentage << endl;
+// kdDebug() << k_funcinfo << percentage << endl;
  if (!d->mOwner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
  }
@@ -398,4 +426,9 @@ void BosonCommandWidget::advanceProduction(double percentage)
  p.end();
 
  setPixmap(small);
+}
+
+void BosonCommandWidget::setGrayOut(bool g)
+{
+ d->mPixmap->setGrayOut(g);
 }
