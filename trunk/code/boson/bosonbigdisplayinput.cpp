@@ -276,7 +276,7 @@ bool BosonBigDisplayInput::actionBuild(QDataStream& stream, const BoVector3& can
  }
  if (!canvas()->canPlaceUnitAt(prop, QPoint((int)canvasVector.x(), (int)canvasVector.y()), production)) {
 	boDebug() << k_funcinfo << "Cannot place production here" << endl;
-	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()), localPlayer());
+	boGame->slotAddChatSystemMessage(i18n("You can't place a %1 there").arg(prop->name()));
 	return false;
  }
 

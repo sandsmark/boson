@@ -220,13 +220,13 @@ public slots:
 	 * You can find this method in this class, because it is accessible from
 	 * mostly everywhere, where it might be needed
 	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text);
 
 	/**
 	 * Convinence method for the above slot. Simply uses "Boson" as
 	 * fromName.
 	 **/
-	void slotAddChatSystemMessage(const QString& text, const Player* forPlayer = 0);
+	void slotAddChatSystemMessage(const QString& text);
 
 signals:
 	/**
@@ -336,7 +336,7 @@ signals:
 	 **/
 	void signalChangeCell(int x, int y, int groundType, unsigned char version );
 
-	void signalAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
+	void signalAddChatSystemMessage(const QString& fromName, const QString& text);
 
 	void signalLoadExternalStuff(QDataStream& stream);
 	void signalSaveExternalStuff(QDataStream& stream);
