@@ -1052,6 +1052,7 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
  humanhealths.insert(11, 200);
  humanhealths.insert( 9, 350);
  humanhealths.insert( 6, 150);
+ humanhealths.insert(12, 500);
  humanhealths.insert(10, 150);
  humanhealths.insert( 3, 600);
  humanhealths.insert(10011, 150);
@@ -1064,7 +1065,6 @@ bool BosonFileConverter::convertPlayField_From_0_10_83_To_0_11(QMap<QString, QBy
  humanhealths.insert(10009, 230);
  humanhealths.insert(10005, 200);
  humanhealths.insert(10000, 250);
- humanhealths.insert(10000, 100);
  humanhealths.insert(10010, 200);
  humanhealths.insert(10004, 180);
  humanhealths.insert(10007, 300);
