@@ -1846,3 +1846,21 @@ BoEventListener* BosonCanvas::eventListener() const
  return d->mEventListener;
 }
 
+bool BosonCanvas::saveConditions(QDomElement& root) const
+{
+ if (!eventListener()) {
+	BO_NULL_ERROR(eventListener());
+	return false;
+ }
+ return eventListener()->saveConditions(root);
+}
+
+bool BosonCanvas::loadConditions(const QDomElement& root)
+{
+ if (!eventListener()) {
+	BO_NULL_ERROR(eventListener());
+	return false;
+ }
+ return eventListener()->loadConditions(root);
+}
+
