@@ -53,7 +53,7 @@
 #define MAX_MAP_WIDTH 500
 
 // playfield that gets used by default
-#define DEFAULT_PLAYFIELD QString::fromLatin1("Basic2")
+#define DEFAULT_PLAYFIELD QString::fromLatin1("basic2.bpf")
 
 
 // default values

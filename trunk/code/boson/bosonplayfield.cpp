@@ -121,7 +121,7 @@ QString BosonPlayField::defaultPlayField()
  if (l.count() == 0) {
 	return QString::null;
  }
- boWarning() << "cannot find " << DEFAULT_PLAYFIELD << " map - using " << l[0] << " instead" << endl;
+ boWarning() << k_funcinfo << "cannot find " << DEFAULT_PLAYFIELD << " map - using " << l[0] << " instead" << endl;
  return l[0];
 }
 

@@ -23,6 +23,7 @@
 #include "../defines.h"
 
 #include <qdom.h>
+#include <qfileinfo.h>
 
 BPFFile::BPFFile(const QString& file, bool readOnly) : KTar(file, QString::fromLatin1("application/x-gzip"))
 {
@@ -32,7 +33,8 @@ BPFFile::BPFFile(const QString& file, bool readOnly) : KTar(file, QString::fromL
  } else {
 	open(IO_WriteOnly);
  }
- mIdentifier = fileName();
+ QFileInfo fileInfo(fileName());
+ mIdentifier = fileInfo.fileName();
 }
 
 BPFFile::~BPFFile()
