@@ -34,7 +34,7 @@ void begin (const char *themeName)
 	int i ; 
 	QString transS;
 
-	themePath	= "/usr/share/apps//boson.qt2//themes/grounds/";
+	themePath	= "/opt/kde2/share/apps/boson/themes/grounds/";
 	themePath	+= themeName;
 	themePath	+= "/";
 
