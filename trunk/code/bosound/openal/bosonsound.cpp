@@ -79,8 +79,16 @@ public:
 			// not a critical error here.
 		}
 		resetAL();
+		if (checkALError()) {
+			boError(200) << k_funcinfo << "resetAL() failed." << endl;
+			return;
+		}
 		mPlayed = false;
 		alGenBuffers(1, &mBuffer);
+		if (checkALError()) {
+			boError(200) << k_funcinfo << "alGenBuffers() failed." << endl;
+			return;
+		}
 		alGenSources(1, &mSource);
 		if (checkALError()) {
 			boError(200) << k_funcinfo << "unable to create buffer and source" << endl;
@@ -117,14 +125,15 @@ public:
 protected:
 	void resetAL()
 	{
+		if (alIsSource(mSource) == AL_TRUE) {
+			alSourceStop(mSource);
+			alDeleteSources(1, &mSource);
+		}
+		mSource = 0;
 		if (alIsBuffer(mBuffer) == AL_TRUE) {
 			alDeleteBuffers(1, &mBuffer);
 		}
 		mBuffer = 0;
-		if (alIsSource(mSource) == AL_TRUE) {
-			alDeleteSources(1, &mSource);
-		}
-		mSource = 0;
 	}
 	bool checkALError()
 	{
