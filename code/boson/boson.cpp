@@ -269,8 +269,8 @@ VisualUnit* Boson::createUnit(int unitType, Player* owner)
  }
  SpeciesTheme* theme = owner->speciesTheme();
  if (!theme) {
-	kdError() << "No theme for this player" << endl;
-	return 0; // BAAAAD
+	kdError() << "Boson::createUnit(): No theme for this player" << endl;
+	return 0; // BAAAAD - will crash
  }
  const UnitProperties* prop = theme->unitProperties(unitType);
  if (!prop) {
