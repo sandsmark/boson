@@ -38,6 +38,7 @@
 Top::Top() : TopBase()
 {
  initKAction();
+ initCommandFrame();
 
  bosonWidget()->addGameCommandFrame(commandFrame());
 

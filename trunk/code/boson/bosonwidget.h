@@ -122,6 +122,8 @@ public slots:
 	void slotToggleSound();
 	void slotToggleMusic();
 
+	void slotSetCommandButtonsPerRow(int b);
+
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor
 	void signalPlayerLeftGame(KPlayer* p); // used by the map editor

@@ -138,6 +138,10 @@ Editor::Editor() : TopBase()
 {
  d = new EditorPrivate;
 
+ initKAction();
+ initCommandFrame();
+ initStatusBar();
+
  bosonWidget()->addEditorCommandFrame(commandFrame());
  connect(bosonWidget(), SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
@@ -145,9 +149,6 @@ Editor::Editor() : TopBase()
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
  connect(bosonWidget(), SIGNAL(signalGameStarted()), 
 		this, SLOT(slotGameStarted()));
-
- initKAction();
- initStatusBar();
 
  showMaximized();
 

@@ -1049,3 +1049,8 @@ void BosonWidget::addChatSystemMessage(const QString& fromName, const QString& t
  d->mChat->addSystemMessage(fromName, text);
  d->mBigDisplay->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
 }
+
+void BosonWidget::slotSetCommandButtonsPerRow(int b)
+{
+ d->mCommandFrame->slotSetButtonsPerRow(b);
+}

@@ -90,6 +90,8 @@ public slots:
 
 	void slotShowUnit(Unit* unit); // TODO if this is the only unit -> use slotShowSingleUnit 
 
+	void slotSetButtonsPerRow(int b);
+
 signals:
 	/**
 	 * Emitted when a unit should be produced.
@@ -144,6 +146,8 @@ protected:
 	 * Hide all buttons
 	 **/
 	void hideOrderButtons();
+
+	void resetLayout();
 	
 private:
 	void init();
