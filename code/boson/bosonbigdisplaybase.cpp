@@ -592,7 +592,7 @@ void BosonBigDisplayBase::initializeGL()
 	BoInfo::boInfo()->update(this);
  }
 
- if(boConfig->useVBO()) {
+ if (boConfig->useVBO()) {
 #ifdef GL_ARB_vertex_buffer_object
 	if (!BoInfo::boInfo()->openGLExtensions().contains("GL_ARB_vertex_buffer_object")) {
 		boWarning() << k_funcinfo << "VBOs not supported!" << endl;
