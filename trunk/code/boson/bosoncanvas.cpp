@@ -141,11 +141,11 @@ public:
 	{
 		mCanvas = c;
 	}
-	void advance(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void advance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
 
 protected:
-	void advanceItems(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount, bool advanceFlag);
-	void itemAdvance(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
+	void advanceItems(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag);
+	void itemAdvance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount); // calls BosonItem::advance()
 
 	// AB: note that animItems is not used here currently. we use
 	// mCanvas->d->mWork2AdvanceList.
@@ -159,7 +159,7 @@ private:
 	BosonCanvas* mCanvas;
 };
 
-void BoCanvasAdvance::advance(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  boProfiling->advance(true, advanceCallsCount);
 
@@ -192,7 +192,7 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem> animItems, unsigned int 
  boProfiling->advance(false, advanceCallsCount);
 }
 
-void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount, bool advanceFlag)
+void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount, bool advanceFlag)
 {
  static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance()");
  static int profilingAdvanceFunctionAndMove = boProfiling->requestEventId("Advance: BosonItem::advanceFunction() and move()");
@@ -225,9 +225,22 @@ void BoCanvasAdvance::advanceItems(const QPtrList<BosonItem> animItems, unsigned
  mCanvas->unlockAdvanceFunction();
 }
 
-void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem> animItems, unsigned int advanceCallsCount)
+void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem>& animItems, unsigned int advanceCallsCount)
 {
+ static int profilingAnimateAdvance = boProfiling->requestEventId("Advance: BosonItem::animate() and advance() (in itemAdvance())");
+ static int profilingAnimate = boProfiling->requestEventId("Advance: BosonItem::animate() (in itemAdvance())");
+ static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance() (in itemAdvance())");
+ BosonProfiler profAnimateAdvance(profilingAnimateAdvance);
+ BosonProfiler profAnimate(profilingAnimate);
+
  QPtrListIterator<BosonItem> animIt(animItems);
+ for (; animIt.current(); ++animIt) {
+	animIt.current()->animate(advanceCallsCount);
+ }
+ profAnimate.stop();
+ BosonProfiler profAdvance(profilingAdvance);
+
+ animIt.toFirst();
  for (; animIt.current(); ++animIt) {
 	unsigned int id;
 	int work;
@@ -244,6 +257,7 @@ void BoCanvasAdvance::itemAdvance(const QPtrList<BosonItem> animItems, unsigned 
 	boProfiling->advanceItemStart(s->rtti(), id, work);
 	boProfiling->advanceItem(true);
 #endif
+	s->animate(advanceCallsCount);
 	s->advance(advanceCallsCount);
 #if DO_ITEM_ADVANCE_PROFILING
 	boProfiling->advanceItem(false);
