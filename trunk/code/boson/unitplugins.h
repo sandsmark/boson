@@ -340,8 +340,6 @@ public:
 	virtual void itemRemoved(BosonItem*);
 
 protected:
-	void setRefinery(RefineryPlugin* refinery);
-
 	bool isAtResourceMine() const;
 	bool isAtRefinery() const;
 	bool isNextTo(const Unit* unit) const;
