@@ -517,12 +517,18 @@ void BosonBigDisplayBase::initializeGL()
 
  glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 
+ glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE); // we don't use modulate (the default)
+
+
  float lightAmb[] = {0.6, 0.6, 0.6, 1.0};
  float lightDif[] = {1.0, 1.0, 1.0, 1.0};
  float lightPos[] = {-500.0, 300.0, 200.0, 1.0};
  glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmb);
  glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDif);
  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+#warning make configurable
+ // light makes things slower!
  glEnable(GL_LIGHT0);
  glEnable(GL_LIGHTING);
 
