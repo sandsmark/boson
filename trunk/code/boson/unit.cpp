@@ -1193,6 +1193,7 @@ public:
 	FacilityPrivate()
 	{
 		mProductionPlugin = 0;
+		mRepairPlugin = 0;
 	}
 
 	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
