@@ -15,8 +15,8 @@ BO_DOCS = index.wml bunker.wml comsat.wml helipad.wml map.wml \
 	warfactory.wml
 
 # list additional data here - these files will get installed
-doc_DATA=barracks.png command_bunker.png comsat.png helipad.png \
-mineral_refinery.png oiltower.png powerplant.png prison.png \
+doc_DATA=command_bunker.png comsat.png helipad.png \
+mineral_refinery.png oiltower.png powerplant.png \
 oil_refinery.png repairpad.png samsite.png techcenter.png turret.png \
 tree.png warfactory.png
 
