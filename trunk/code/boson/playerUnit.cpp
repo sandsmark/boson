@@ -493,6 +493,7 @@ void playerMobUnit::destroy(void)
 	setZ( Z_DESTROYED_MOBILE );
 	bocanvas->unsetCellFlag ( gridRect() , (BO_GO_AIR==goFlag())? Cell::flying_unit_f:Cell::field_unit_f );
 	_destroyed = true;
+	bocanvas->play("confirm1.wav");
 	unSelect();
 	emit dying(this);
 }

@@ -30,7 +30,9 @@ SUBDIRS = docs
 METASOURCES = AUTO
 boson_LDFLAGS = $(all_libraries) $(KDE_RPATH)
 boson_SOURCES = boson.cpp connect.cpp bosonBigDisplay.cpp game.cpp main.cpp mainWidget.cpp miniDisplay.cpp bosonCanvas.cpp playerUnit.cpp connectDlg.cpp serverDlg.cpp boshot.cpp bosonTopLevel.cpp
-boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a $(LIB_KDEUI)
+boson_LDADD   =  ../visual/libbovisual.a ../common/libboson.a                  \
+                       $(LIB_KDEUI) $(kde_libraries)/libsoundserver_idl.la     \
+                       $(kde_libraries)/libqtmcop.la 
 
 
 appsdir = $(kde_appsdir)/Games/Boson

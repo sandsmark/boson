@@ -82,6 +82,9 @@ public:
 	playerFacility *getFacility(long key) { return facility.find(key); }
 	bool		checkMove(QRect r, uint goFlag );
 
+	// sound stuff
+	void	play(char *);
+
 	//private :
 	QIntDict<playerMobUnit>	mobile;
 	QIntDict<playerFacility> facility;
