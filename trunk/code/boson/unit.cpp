@@ -441,7 +441,7 @@ void Unit::advanceAttack(unsigned int advanceCount)
  if (advanceCount % 5 != 0) {
 	return;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(300) << k_funcinfo << endl;
  if (!target()) {
 	boWarning() << k_funcinfo << "cannot attack NULL target" << endl;
 	stopAttacking();
@@ -453,18 +453,18 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	return;
  }
  if (target()->isDestroyed()) {
-	boDebug() << "Target is destroyed!" << endl;
+	boDebug(300) << "Target is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
- boDebug() << "    " << k_funcinfo << "checking if unit's in range" << endl;
+ boDebug(300) << "    " << k_funcinfo << "checking if unit's in range" << endl;
  if (!inRange(d->mActiveWeapon->properties()->range(), target())) {
 	if (!canvas()->allBosonItems().contains(target())) {
-		boDebug() << "Target seems to be destroyed!" << endl;
+		boDebug(300) << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
-	boDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	boDebug(300) << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), d->mActiveWeapon->properties()->range())) {
 		setWork(WorkNone);
 	} else {
@@ -484,9 +484,9 @@ void Unit::advanceAttack(unsigned int advanceCount)
 		}
 	}
  }
- boDebug() << "    " << k_funcinfo << "shooting at target" << endl;
+ boDebug(300) << "    " << k_funcinfo << "shooting at target" << endl;
  shootAt(d->mActiveWeapon, target());
- boDebug() << "    " << k_funcinfo << "done shooting" << endl;
+ boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
  if (target()->isDestroyed()) {
 	stopAttacking();
  }
@@ -914,7 +914,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 
 void Unit::setAdvanceWork(WorkType w)
 {
- boDebug() << k_funcinfo << "unit " << id() << endl;
+ boDebug(300) << k_funcinfo << "unit " << id() << endl;
  // velicities should be 0 anyway - this is the final fallback in case it was 
  // missing by any reason
  setVelocity(0.0, 0.0);
@@ -927,7 +927,7 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
-		boDebug() << k_funcinfo << "unit " << id() << ": setting work to WorkMove" << endl;
+		boDebug(300) << k_funcinfo << "unit " << id() << ": setting work to WorkMove" << endl;
 		setAdvanceFunction(&Unit::advanceMove, owner()->advanceFlag());
 		break;
 	case WorkAttack:
@@ -949,13 +949,13 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceTurn, owner()->advanceFlag());
 		break;
  }
- boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
+ boDebug(300) << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 {
- boDebug() << k_funcinfo << "unit " << id() << endl;
- boDebug() << k_funcinfo << "unit " << id() << ": advanceFlag: " << advanceFlag << "; canvas()->advanceFunctionLocked(): " << canvas()->advanceFunctionLocked() << "; func: " << func << endl;
+ boDebug(300) << k_funcinfo << "unit " << id() << endl;
+ boDebug(300) << k_funcinfo << "unit " << id() << ": advanceFlag: " << advanceFlag << "; canvas()->advanceFunctionLocked(): " << canvas()->advanceFunctionLocked() << "; func: " << func << endl;
  if (canvas()->advanceFunctionLocked()) {
 	if (advanceFlag) {
 		mAdvanceFunction = func;
@@ -966,7 +966,7 @@ void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 	mAdvanceFunction = func;
 	mAdvanceFunction2 = func;
  }
- boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
+ boDebug(300) << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -1135,7 +1135,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  } else if (moveAttacking()) {
 	// Check for any enemy units in range
 	if (attackEnemyUnitsInRange()) {
-		boDebug() << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
+		boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 		return;
 	}
  }
@@ -1329,7 +1329,7 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
 	return;
  }
  if (target()->isDestroyed()) {
-	boDebug() << k_funcinfo << "Unit is destroyed!" << endl;
+	boDebug(401) << k_funcinfo << "Unit is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
@@ -1337,11 +1337,11 @@ void MobileUnit::advanceFollow(unsigned int advanceCount)
  if (QMAX(QABS(x() - target()->x()), QABS(y() - target()->y())) > BO_TILE_SIZE) {
 	// We're not next to unit
 	if (!canvas()->allBosonItems().contains(target())) {
-		boDebug() << k_funcinfo << "Unit seems to be destroyed!" << endl;
+		boDebug(401) << k_funcinfo << "Unit seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
-	boDebug() << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
+	boDebug(401) << k_funcinfo << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), 1)) {
 		setWork(WorkNone);
 	} else {
