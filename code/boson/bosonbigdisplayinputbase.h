@@ -110,6 +110,11 @@ public:
 	void selectArea(const QRect& rect, bool replace);
 
 	/**
+	 * Deselect units in the given rect
+	 **/
+	void unselectArea(const QRect& rect);
+
+	/**
 	 * Select a list of units. You should prefer this to a direct @ref
 	 * BoSelection::selectUnits
 	 **/
