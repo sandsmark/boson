@@ -112,6 +112,11 @@ class FogOfWar : public QCanvasSprite
 public:
 	FogOfWar(QCanvasPixmapArray* a, QCanvas* c) : QCanvasSprite(a, c) {}
 	virtual int rtti() const { return RTTI::FogOfWar; }
+
+	virtual bool collidesWith(const QCanvasItem*) const
+	{
+		return false;
+	}
 };
 
 class BosonCanvas::BosonCanvasPrivate
