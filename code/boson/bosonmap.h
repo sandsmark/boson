@@ -20,7 +20,6 @@
 #define BOSONMAPDOM_H
 
 #include <qobject.h>
-#include <qstring.h>
 
 class Cell;
 class UnitBase;

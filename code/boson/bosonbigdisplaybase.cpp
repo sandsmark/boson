@@ -42,6 +42,8 @@
 #include <kgame/kgameio.h>
 
 #include <klocale.h>
+#include <kmessagebox.h>
+#include <kapplication.h>
 #include <kdebug.h>
 
 #include <qimage.h>
@@ -65,6 +67,7 @@
 #define FAR 100.0
 
 
+#define DEBUG_RENDER_TIMES 0
 #define COMPARE_TIMES(time1, time2) ( ((time2.tv_sec - time1.tv_sec) * 1000000) + (time2.tv_usec - time1.tv_usec) )
 
 float textureUpperLeft[2] = { 0.0, 0.0 };
@@ -345,6 +348,19 @@ void BosonBigDisplayBase::init()
 #ifndef NO_OPENGL
 void BosonBigDisplayBase::initializeGL()
 {
+ // AB: we need at least GLU 1.3 for gluCheckExtension() !
+ // TODO: find out if we might be able to run boson with older versions - if yes
+ // use the code from http://www.mesa3d.org/brianp/sig97/exten.htm#Compile to
+ // check for extensions
+ // TODO: check for extensions on configure/compile time, too!
+ /*
+ const* string = (char*)glGetString(GL_EXTENSIONS);
+ if (!gluCheckExtension("GL_EXT_texture_object", string)) { // introduced in OpenGL 1.1 as standard feature
+	KMessageBox::sorry(this, i18n("Your OpenGL implementation seems not to support texture objects - don't even try to run boson without them!"));
+	kapp->exit(1);
+	return;
+ }
+ */
  qglClearColor(Qt::black);
  glShadeModel(GL_FLAT); // GL_SMOOTH is default - but esp. in software rendering way slower. in hardware it *may* be equal (concerning speed) to GL_FLAT
  glDisable(GL_DITHER); // we don't need this, I guess (and its enabled by default)
@@ -396,9 +412,11 @@ void BosonBigDisplayBase::resizeGL(int w, int h)
 
 void BosonBigDisplayBase::paintGL()
 {
+#if DEBUG_RENDER_TIMES
  struct timeval time1, time2, funcStart;
  long int clearTime = 0, misc1 = 0, render_cells = 0, render_units = 0, timer_start = 0, creating_iterator = 0, misc2 = 0, render_text = 0, function_time = 0;
  gettimeofday(&funcStart, 0);
+#endif
  d->mUpdateTimer.stop();
 //kdDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
@@ -436,11 +454,15 @@ void BosonBigDisplayBase::paintGL()
  // http://www.mesa3d.org/brianp/sig97/perfopt.htm
  // in 3.5!
  
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time1, 0);
+#endif
  glClear(GL_COLOR_BUFFER_BIT);
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  clearTime = COMPARE_TIMES(time1, time2);
  time1 = time2;
+#endif
  // the guy who wrote http://www.mesa3d.org/brianp/sig97/perfopt.htm is *really* clever!
  // this trick avoids clearing the depth buffer:
  if (d->mEvenFlag) {
@@ -471,7 +493,7 @@ void BosonBigDisplayBase::paintGL()
 		centerX, centerY, centerZ, 
 		upX, upY, upZ);
  if (checkError()) {
-	kdError() << k_funcinfo << "2" << endl;
+	kdError() << k_funcinfo << "after gluLookAt()" << endl;
  }
 
  glEnable(GL_TEXTURE_2D);
@@ -485,13 +507,17 @@ void BosonBigDisplayBase::paintGL()
 	}
 	kdDebug() << k_funcinfo << "Successfully generated map display list" << endl;
  }
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  misc1 = COMPARE_TIMES(time1, time2);
 
  gettimeofday(&time1, 0);
+#endif
  glCallList(d->mMapDisplayList);
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  render_cells = COMPARE_TIMES(time1, time2);
+#endif
 
  if (checkError()) {
 	kdError() << k_funcinfo << "cells rendered" << endl;
@@ -500,13 +526,16 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_DEPTH_TEST); // FIXME: this should be the first occurance of glEnable(GL_DEPTH_TEST)!
  glEnable(GL_BLEND); // AB: once we have 3d models for all units we can get rid of this. we need it for the cursor only then.
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
- //wow.. we have a LOT of space for tuning here!
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time1, 0);
+#endif
  BoItemList allItems = mCanvas->allBosonItems();
  BoItemList::Iterator it = allItems.begin();
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  creating_iterator = COMPARE_TIMES(time1, time2);
  gettimeofday(&time1, 0);
+#endif
  for (; it != allItems.end(); ++it) {
 	//FIXME: order by z-coordinates! first those which are
 	//closer to surface, then flying units
@@ -541,9 +570,11 @@ void BosonBigDisplayBase::paintGL()
 
 	glTranslatef(-x, -y, -z); 
  }
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  render_units = COMPARE_TIMES(time1, time2);
  time1 = time2;
+#endif
  if (checkError()) {
 	kdError() << k_funcinfo << "when units rendered" << endl;
  }
@@ -617,21 +648,27 @@ void BosonBigDisplayBase::paintGL()
 	kdError() << k_funcinfo << "selection rect rendered" << endl;
  }
 
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  misc2 = COMPARE_TIMES(time1, time2);
  time1 = time2;
+#endif
  renderText();
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  render_text = COMPARE_TIMES(time1, time2);
-
  gettimeofday(&time1, 0);
+#endif
+
  if (d->mUpdateInterval) {
 	d->mUpdateTimer.start(d->mUpdateInterval);
  }
+
+#if DEBUG_RENDER_TIMES
  gettimeofday(&time2, 0);
  timer_start = COMPARE_TIMES(time1, time2);
  function_time = COMPARE_TIMES(funcStart, time2);
-
+ 
  cout << k_funcinfo << endl
 		<< "clearing:    " << clearTime << endl 
 		<< "misc1:       " << misc1 << endl
@@ -641,6 +678,7 @@ void BosonBigDisplayBase::paintGL()
 		<< "text:        " << render_text << endl
 		<< "timerStart:  " << timer_start << endl
 		<< "function:    " << function_time << endl;
+#endif
 }
 
 void BosonBigDisplayBase::renderText()
@@ -962,12 +1000,12 @@ void BosonBigDisplayBase::slotResetViewProperties()
 
 void BosonBigDisplayBase::slotReCenterDisplay(const QPoint& pos)
 {
-#ifdef NO_OPENGL
- center(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE);
- canvas()->update();
-#else
+#ifndef NO_OPENGL
 //TODO don't center the corners - e.g. 0;0 should be top left, never center
  setCameraPos(((float)pos.x()) * BO_GL_CELL_SIZE, -((float)pos.y()) * BO_GL_CELL_SIZE, cameraZ());
+#else
+ center(pos.x() * BO_TILE_SIZE, pos.y() * BO_TILE_SIZE);
+ canvas()->update();
 #endif
 }
 
@@ -1366,10 +1404,11 @@ void BosonBigDisplayBase::generateMapDisplayList()
 	return;
  }
  if (!mCanvas->tileSet()->textures()) {
-	// hmm currently this happens on startup - should get fixed. paintGL()
-	// must be called only once those are loaded!
-	kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
-	return;
+	mCanvas->tileSet()->generateTextures();
+	if (!mCanvas->tileSet()->textures()) {
+		kdWarning() << k_funcinfo << "NULL textures for cells" << endl;
+		return;
+	}
  }
 
 

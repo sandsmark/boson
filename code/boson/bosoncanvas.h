@@ -21,9 +21,13 @@
 
 #include "defines.h"
 
+#ifndef NO_OPENGL
+#include <qobject.h>
+#include <qvaluelist.h>
+#else
 #include <qcanvas.h>
+#endif
 
-class KPlayer;
 class BosonMap;
 class Cell;
 class Player;
@@ -35,6 +39,10 @@ class BoDisplayManager;
 class BosonTiles;
 class BoItemList;
 class BosonSprite;
+
+class KPlayer;
+
+
 
 // buggy moc
 #ifndef NO_OPENGL
