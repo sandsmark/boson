@@ -4,4 +4,4 @@
 <dt>5.2 <a href="map.html">Working with the map</a></dt>
 <dt>5.3 <a href="facilities.html">Building facilities and units</a></dt>
 
-#include "indexes_footer.wml" before_url="../units/tornado.html" before_text="Tornado" after_url="overview.html" after_text="Overview" up_url="../index.html"
+#include "indexes_footer.wml" before_url="../units/koyote.html" before_text="Koyote" after_url="overview.html" after_text="Overview" up_url="../index.html"
