@@ -43,9 +43,15 @@ public:
 	QPixmap big2(int bigNo, TransType trans, bool inverted); // bigNo = 0..4
 
 	QPixmap small(int smallNo, TransType trans, bool inverted);
+	/**
+	 * @return a tile number for @ref tile
+	 **/
+	static int smallTileNumber(int smallNo, TransType transRef, bool inverted);
 	
 	// call this like the original fillGroundPixmap() in editorTopLevel.cpp
 	QPixmap tile(int g);
+
+	static int getBigTransNumber(TransType transRef, int transTile);
 
 protected:
 	int big_w() const;
@@ -56,15 +62,14 @@ protected:
 	static int tilesPerTransition();
 	static int groundTilesNumber(); 
 	static int getTransNumber(TransType transRef, int transTile);
-	static int getBigTransNumber(TransType transRef, int transTile);
 	static int getTransRef(int g);
 	static int getTransTile(int g);
 	static bool isTrans(int g);
 	static bool isSmallTrans(int g);
 	static bool isBigTrans(int g);
 
-	Cell::GroundType from(TransType trans) const;
-	Cell::GroundType to(TransType trans) const;
+	static Cell::GroundType from(TransType trans);
+	static Cell::GroundType to(TransType trans);
 
 };
 

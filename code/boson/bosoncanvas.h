@@ -77,6 +77,9 @@ public slots:
 	void slotAddUnit(VisualUnit* unit, int x, int y);
 	void slotLoadTiles(const QString&);
 	virtual void advance();
+
+	void slotAddCell(int x, int y, int groundType, unsigned char b);
+	
 	
 signals:
 	void signalUnitMoved(VisualUnit* unit, double oldX, double oldY);
@@ -87,7 +90,6 @@ protected:
 	void play(const QString& fileName); // perhaps in public
 
 protected slots:
-//	void slotLoadCell(int x, int y, int groundType, unsigned char b);
 
 
 private:

@@ -74,6 +74,7 @@ void BosonBigDisplay::init()
  setVScrollBarMode(AlwaysOff);
  setHScrollBarMode(AlwaysOff);
  d->mConstruction.unitType = -1; // FIXME: 0 would be better but this is a unit...
+ d->mConstruction.groundType = -1;
 }
 
 BosonBigDisplay::~BosonBigDisplay()
@@ -385,6 +386,11 @@ void BosonBigDisplay::editorActionClicked(const QPoint& pos)
 	
 	emit signalConstructUnit(d->mConstruction.unitType, x, y,
 			d->mConstruction.owner);
+ } else if (d->mConstruction.groundType > -1) {
+//	kdDebug() << "place ground " << d->mConstruction.groundType << endl;
+	int version = 0; // FIXME: random()%4;
+	// int version = d->mConstruction.version; // one of these lines - random here or in command frame?
+	emit signalAddCell(x, y, d->mConstruction.groundType, version);
  }
 }
 
