@@ -134,7 +134,6 @@ BosonWidget::BosonWidget(TopWidget* top, QWidget* parent)
 BosonWidget::~BosonWidget()
 {
  kdDebug() << k_funcinfo << endl;
- d->mTop->saveGameDockConfig();
  delete d->mCommandFrameDock;
  delete d->mChatDock;
 
