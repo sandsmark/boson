@@ -416,7 +416,7 @@ QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 
  if (!d->mBoson) {
 	BO_NULL_ERROR(d->mBoson);
-	return doc.toCString();
+	return QCString();
  }
 
  KGame::KGamePlayerList* list = d->mBoson->playerList();
@@ -428,7 +428,7 @@ QCString BosonSaveLoad::savePlayersAsXML(Player* localPlayer)
 	QDomElement element = doc.createElement(QString::fromLatin1("Player"));
 	if (!((Player*)p)->saveAsXML(element)) {
 		boError() << k_funcinfo << "Unable to save player " << p->id() << endl;
-		continue;
+		return QCString();
 	}
 	root.appendChild(element);
  }
