@@ -31,6 +31,31 @@ class Unit;
 class Player;
 
 /**
+ * This is the actual main widget of boson for both, the game and the editor
+ * mode. The widget also contains most of the important objects, like the @ref 
+ * KGame object (see @ref Boson). 
+ *
+ * This widget conists of 3 sub-widgets:
+ * @li a @ref BosonBigDisplay. This is the actual game view. Here the user can
+ * click on units, move units, ...
+ * @li a @ref BosonMiniMap. Well, this is just the mini map (wow ;))
+ * @li a @ref BosonCommandFrame. The frame where unit can be ordered, the
+ * selected unit is displayed and so on.
+ *
+ * The @ref BosonCommandFrame is currently a quite tricky part as the frame
+ * differs heavily between game and editor mode. Maybe it will become two
+ * classes one day, but the basic structure will stay.
+ * 
+ * BosonWidget is responsible for connecting all of these widgets and objects
+ * together, which is mostly done on constructing. The editor specific parts are
+ * being initialized in @ref startEditor, the game specific parts are being
+ * initialized by the new game dialog.
+ *
+ * All game specific stuff should be done in other classes - e.g. visual stuff
+ * (click on a unit) in @ref BosonBigDisplay, constructing in @ref
+ * BosonCommandFrame and so on. These classes should emit signals which get
+ * connected by BosonWidget to the necessary slots - probably mainly to @ref
+ * Boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class BosonWidget : public QWidget 
@@ -118,8 +143,6 @@ protected slots:
 	void slotReceiveMap(const QByteArray& map);
 
 	void slotAddComputerPlayer(Player*);
-
-	void slotAddCell(int,int,int,unsigned char);
 
 private:
 	void init();

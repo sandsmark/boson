@@ -19,6 +19,7 @@
 #ifndef __BOSONMAPDOM_H__
 #define __BOSONMAPDOM_H__
 
+#include <qobject.h>
 #include <qstring.h>
 #include <qdatastream.h>
 
@@ -49,11 +50,12 @@ class QStringList;
  * least)
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonMap
+class BosonMap : public QObject
 {
+	Q_OBJECT
 public:
-	BosonMap();
-	BosonMap(const QString& fileName);
+	BosonMap(QObject* parent = 0);
+	BosonMap(const QString& fileName, QObject* parent = 0);
 	~BosonMap();
 
 	/**
@@ -137,9 +139,10 @@ public:
 
 	Cell* cell(int x, int y) const;
 
-	void changeCell(int x, int y, int groundType, unsigned char b);
-
 	static QString mapFileName(const QString& mapIdentifier);
+
+public slots:
+	void changeCell(int x, int y, int groundType, unsigned char b);
 
 protected:
 	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
