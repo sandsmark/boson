@@ -51,7 +51,7 @@
 #define ABORTPATH (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1)
 
 
-#define marking(x, y) mark[x - mStartx + SEARCH_STEPS][y - mStarty + SEARCH_STEPS]
+#define marking(x, y) mMark[x - mStartx + SEARCH_STEPS][y - mStarty + SEARCH_STEPS]
 
 
 // If you uncomment next line, you will enable in-line moving style.
