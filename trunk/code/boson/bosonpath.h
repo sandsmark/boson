@@ -243,6 +243,8 @@ class BosonPath2
      **/
     void findLowLevelPath(BosonPathInfo* info);
 
+    void findFlyingUnitPath(BosonPathInfo* info);
+
 
     void cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2);
 
@@ -306,6 +308,7 @@ class BosonPath2
     float highLevelCost(BosonPathRegion* r, BosonPathInfo* info);
     float lowLevelDistToGoal(int x, int y, BosonPathInfo* info);
     float lowLevelCost(int x, int y, BosonPathInfo* info);
+    float lowLevelCostAir(int x, int y, BosonPathInfo* info);
 
     static void neighbor(int& x, int& y, Direction d);
 
@@ -480,6 +483,15 @@ class BosonPathNode
     float h;
 };
 
+class BosonPathFlyingNode : public BosonPathNode
+{
+  public:
+    BosonPathFlyingNode() : BosonPathNode()  { depth = 0; }
+    BosonPathFlyingNode(int _x, int _y) : BosonPathNode()  { depth = 0; }
+
+    int depth;
+};
+
 template<class T> class BosonPathHeap : public QValueList<T>
 {
   public:
@@ -547,6 +559,7 @@ class BosonPathInfo
       passable = true;
       canMoveOnLand = true;
       canMoveOnWater = false;
+      flying = false;
       moveAttacking = true;
       slowDownAtDest = true;
     }
@@ -589,6 +602,7 @@ class BosonPathInfo
 
     bool canMoveOnLand;
     bool canMoveOnWater;
+    bool flying;
 
 
     // Are these ok here???

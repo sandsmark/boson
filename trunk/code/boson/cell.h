@@ -86,7 +86,8 @@ public:
 	inline void recalculateLandOccupiedStatus() { return mItems.recalculateLandOccupiedStatus(); }
 	inline void recalculateAirOccupiedStatus() { return mItems.recalculateAirOccupiedStatus(); }
 
-	inline float passageCost() const { return mItems.passageCost(); }
+	inline float passageCostLand() const { return mItems.passageCostLand(); }
+	inline float passageCostAir() const { return mItems.passageCostAir(); }
 
 	// AB: bah. I want to have models for minerals/oil and use a BosonItem,
 	// instead of hardcoding them into the ground.

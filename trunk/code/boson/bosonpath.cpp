@@ -1043,6 +1043,7 @@ const int yoffsets[] = { -1, -1,  0,  1,  1,  1,  0, -1};
 #define HIGH_CROSS_DIVIDER 1000.0f
 #define TNG_NEAREST_G_FACTOR 0.2f
 #define TNG_LOW_BASE_COST 1.5f
+#define TNG_FLYING_STEPS 15
 
 #define REVERSEDIR(d) ((d + 4) % 8)
 
@@ -1500,44 +1501,54 @@ void BosonPath2::findPath(BosonPathInfo* info)
   boDebug(510) << k_funcinfo << endl;
   BosonProfiler profiler(BosonProfiling::FindPath);
   totalcalls++;
-  // Update start and goal region(s)
-  findHighLevelGoal(info);
-  // We _must_ have start region. Otherwise something is very broken
-  if(!info->startRegion)
-  {
-    long int elapsed = profiler.stop();
-    totalelapsed += elapsed;
-    boDebug(500) << k_funcinfo << "ELAPSED (failed 1): " << elapsed << " microsec." << endl;
-    boError(510) << k_funcinfo << "No start region!" << endl;
-    info->passable = false;
-    return;
-  }
-  if((info->range > 0) && info->possibleDestRegions.isEmpty())
-  {
-    // If range is not 0, we need to get exactly to that range. Otherwise we
-    //  won't even search for path
-    info->passable = false;
-    long int elapsed = profiler.stop();
-    totalelapsed += elapsed;
-    boDebug(500) << k_funcinfo << "ELAPSED (failed 2): " << elapsed << " microsec." << endl;
-    return;
-  }
 
-  // Find high-level path
-  findHighLevelPath(info);
-  if(!info->hlpath)
+  if(info->flying)
   {
-    // No high-level path was found
-    long int elapsed = profiler.stop();
-    totalelapsed += elapsed;
-    boDebug(500) << k_funcinfo << "ELAPSED (failed 3): " << elapsed << " microsec." << endl;
-    boError(510) << k_funcinfo << "No HL path found!" << endl;
-    info->passable = false;
-    return;
+    // Flying units are special and have their own pathfinding function
+    findFlyingUnitPath(info);
   }
+  else
+  {
+    // Land unit
+    // Update start and goal region(s)
+    findHighLevelGoal(info);
+    // We _must_ have start region. Otherwise something is very broken
+    if(!info->startRegion)
+    {
+      long int elapsed = profiler.stop();
+      totalelapsed += elapsed;
+      boDebug(500) << k_funcinfo << "ELAPSED (failed 1): " << elapsed << " microsec." << endl;
+      boError(510) << k_funcinfo << "No start region!" << endl;
+      info->passable = false;
+      return;
+    }
+    if((info->range > 0) && info->possibleDestRegions.isEmpty())
+    {
+      // If range is not 0, we need to get exactly to that range. Otherwise we
+      //  won't even search for path
+      info->passable = false;
+      long int elapsed = profiler.stop();
+      totalelapsed += elapsed;
+      boDebug(500) << k_funcinfo << "ELAPSED (failed 2): " << elapsed << " microsec." << endl;
+      return;
+    }
 
-  // Search low-level path
-  findLowLevelPath(info);
+    // Find high-level path
+    findHighLevelPath(info);
+    if(!info->hlpath)
+    {
+      // No high-level path was found
+      long int elapsed = profiler.stop();
+      totalelapsed += elapsed;
+      boDebug(500) << k_funcinfo << "ELAPSED (failed 3): " << elapsed << " microsec." << endl;
+      boError(510) << k_funcinfo << "No HL path found!" << endl;
+      info->passable = false;
+      return;
+    }
+
+    // Search low-level path
+    findLowLevelPath(info);
+  }
 
   long int elapsed = profiler.stop();
   totalelapsed += elapsed;
@@ -1847,6 +1858,330 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     // We add special point to the end of the path, telling unit what to do when
     //  it has reached the end of this path
     if(nextRegion && pathfound)
+    {
+      // We have reached next region
+      temp.append(QPoint(PF_NEXT_REGION, PF_NEXT_REGION));
+    }
+    else
+    {
+      // We have reached destination (or nearest possible point from it)
+      temp.append(QPoint(PF_END_CODE, PF_END_CODE));
+    }
+
+    // Copy temp path to real path vector
+//    boDebug(510) << k_funcinfo << "copying path" << endl;
+    info->llpath.clear();
+    info->llpath.reserve(temp.count());
+    QValueList<QPoint>::iterator it;
+    for(it = temp.begin(); it != temp.end(); ++it)
+    {
+      info->llpath.append(*it);
+    }
+//    boDebug(510) << k_funcinfo << "found path has " << info->llpath.count() << " steps" << endl;
+
+    // Set passable flag to true
+    info->passable = true;
+    tm_copypath = pr.elapsed();
+
+
+#ifdef VISUALIZE_PATHS
+    // Add LineVisualization stuff
+    if(mDisplay && mCanvas)
+    {
+      float x, y;
+      BoLineVisualization viz;
+      viz.pointsize = 3;
+      viz.timeout = 100;
+      // Orange color
+      viz.color.set(1.0f, 0.5f, 0.0f, 0.8f);
+      for(unsigned int point = 0; point < info->llpath.count(); point++)
+      {
+        x = info->llpath[point].x() / BO_TILE_SIZE;
+        y = info->llpath[point].y() / BO_TILE_SIZE;
+//        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
+        viz.points.append(BoVector3(x, -y, mCanvas->heightAtPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE) + 0.5));
+      }
+      mDisplay->addLineVisualization(viz);
+    }
+#endif
+    tm_viz = pr.elapsed();
+  }
+
+//  boDebug(510) << k_funcinfo << "Deleting visited @ " << visited << endl;
+  delete[] visited;
+  delete[] inopen;
+  delete[] parentdirections;
+  tm_uninit = pr.stop();
+
+  boDebug(510) << k_funcinfo << "Took " << tm_uninit << " usec:" << endl <<
+      "    area init: " << tm_initarea << ";  maps init: " << tm_initmaps - tm_initarea << ";  misc init: " << tm_initmisc - tm_initmaps << endl <<
+      "    main loop: " << tm_mainloop - tm_initmisc << endl <<
+      "    path copy: " << tm_copypath - tm_mainloop << ";  viz: " << tm_viz - tm_copypath << ";  maps uninit: " << tm_uninit - tm_viz << endl;
+
+#undef VISITED
+#undef INOPEN
+#undef PARENTDIR
+}
+
+void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
+{
+  if(!info->flying)
+  {
+    boDebug() << k_funcinfo << "Called for non-flying unit" << endl;
+    return;
+  }
+
+  // We use usual A* pathfinder for flying units. It's quite similar to the old
+  //  pathfinder and it only searches TNG_FLYING_STEPS steps ahead. As there
+  //  usually aren't too many flying units, it should be enough.
+
+  long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
+  BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'l' + 'o' + 'f' + 'l' + 'y');
+
+  // List of open nodes
+  BosonPathHeap<BosonPathFlyingNode> open;
+
+  // Unit's position
+  int unitx = info->start.x() / BO_TILE_SIZE;
+  int unity = info->start.y() / BO_TILE_SIZE;
+
+  // Search area's coordinates and size.
+  int areax = QMAX(unitx - TNG_FLYING_STEPS, 0);
+  int areay = QMAX(unity - TNG_FLYING_STEPS, 0);
+//  int areaw = QMIN(TNG_FLYING_STEPS * 2 + 1, (int)mMap->width() - areax);
+//  int areah = QMIN(TNG_FLYING_STEPS * 2 + 1, (int)mMap->height() - areay);
+  int areaw = QMIN(unitx + TNG_FLYING_STEPS + 1, (int)mMap->width()) - areax;
+  int areah = QMIN(unity + TNG_FLYING_STEPS + 1, (int)mMap->height()) - areay;
+  tm_initarea = pr.elapsed();
+//  boDebug(510) << k_funcinfo << "Area is: (" << areax << "x" << areay << "+" << areaw << "x" << areah << ")" << endl;
+  // Create list of nodes that are in visited and of those in open.
+  // This is used for performance reasons, it's faster than seacrhing open for
+  //  every node.
+  unsigned int maxnodes = areaw * areah;
+//  boDebug(510) << k_funcinfo << "Creating visited and inopen bool maps for " << maxnodes << " nodes" << endl;
+  bool* visited = new bool[maxnodes];
+//  boDebug(510) << k_funcinfo << "Created visited @ " << visited << endl;
+  bool* inopen = new bool[maxnodes];
+#define VISITED(x, y) visited[(y - areay) * areaw + (x - areax)]
+#define INOPEN(x, y) inopen[(y - areay) * areaw + (x - areax)]
+  for(unsigned int i = 0; i < maxnodes; i++)
+  {
+    visited[i] = false;
+    inopen[i] = false;
+  }
+  // Direction to the parent node, used to traceback path
+  char* parentdirections = new char[maxnodes];
+#define PARENTDIR(x, y) parentdirections[(y - areay) * areaw + (x - areax)]
+  // We don't init parentdirections, because for each visited cell, we set
+  //  direction anyway, and we don't use directions for unvisited cells (unless
+  //  there's a bug somewhere)
+  tm_initmaps = pr.elapsed();
+
+
+  // Find cell that the unit is on atm.
+  BosonPathFlyingNode first, n, n2;
+  first.x = unitx;
+  first.y = unity;
+  first.depth = 0;
+  first.g = 0;
+  first.h = lowLevelDistToGoal(first.x, first.y, info);
+
+//  boDebug(510) << "    " << k_funcinfo << "OPEN_ADD: " << "pos: (" << first.x << "; " << first.y <<
+//      "); g: " << first.g << "; h: " << first.h << endl;
+  open.add(first);
+  VISITED(first.x, first.y) = true;
+  INOPEN(first.x, first.y) = true;
+
+  // Is the path found?
+  bool pathfound = false;
+  bool goalReached = false;
+
+  // When range is 0 and we can't get exactly to destination point, we will go
+  //  to nearest possible point
+  BosonPathFlyingNode nearest = first;
+  tm_initmisc = pr.elapsed();
+
+  // Destination in cell coordinates
+  int destcellx = info->dest.x() / BO_TILE_SIZE;
+  int destcelly = info->dest.y() / BO_TILE_SIZE;
+
+
+  // Main loop
+  while(!open.isEmpty())
+  {
+    // Take first node from open
+    open.takeFirst(n);
+    INOPEN(n.x, n.y) = false;
+//    boDebug(510) << "    " << k_funcinfo << "OPEN_TAKE: " << "pos: (" << n.x << "; " << n.y <<
+//        "); g: " << n.g << "; h: " << n.h << ";  open.count(): " << open.count() << endl;
+
+    // We only search TNG_FLYING_STEPS steps ahead
+    if(n.depth >= TNG_FLYING_STEPS)
+    {
+        pathfound = true;
+        break;
+    }
+    // Check if it's the goal
+    if(info->range > 0)
+    {
+      if(QMAX(QABS(n.x - destcellx), QABS(n.y - destcelly)) <= info->range)
+      {
+        // This is one of the destination cells
+//        boDebug(510) << "" << k_funcinfo << "goal cell found, braking" << endl;
+        pathfound = true;
+        goalReached = true;
+        break;
+      }
+    }
+    else
+    {
+      // range 0 means to get as close as possible
+      if((n.x == destcellx) && (n.y == destcelly))
+      {
+        // we're at dest cell
+        pathfound = true;
+        goalReached = true;
+        break;
+      }
+    }
+
+    // Add all neighbors of the cell to open
+    for(unsigned char i = 0; i < 8; i++)
+    {
+      n2.x = n.x + xoffsets[i];
+      n2.y = n.y + yoffsets[i];
+
+      // Make sure cell is in search area
+      if((n2.x < areax) || (n2.x >= areax + areaw) || (n2.y < areay) || (n2.y >= areay + areah))
+      {
+        // Shouldn't happen.
+        boError() << k_funcinfo << "Cell (" << n2.x << "; " << n2.y << ") not in search area!" << endl;
+        continue;
+      }
+
+
+      if(!VISITED(n2.x, n2.y))
+      {
+        // Not visited yet - calculate costs
+        n2.g = n.g + lowLevelCostAir(n2.x, n2.y, info);
+        n2.h = lowLevelDistToGoal(n2.x, n2.y, info);
+
+        // Check if n2 is nearest node so far
+        if((n2.h + n2.g * TNG_NEAREST_G_FACTOR) < (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR))
+        {
+          nearest = n2;
+        }
+
+        // Add node to open
+//        boDebug(510) << "        " << k_funcinfo << "OPEN_ADD: " << "pos: (" << n2.x << "; " << n2.y <<
+//            "); g: " << n2.g << "; h: " << n2.h << endl;
+        open.add(n2);
+        VISITED(n2.x, n2.y) = true;
+        INOPEN(n2.x, n2.y) = true;
+        // This direction points to the parent, i.e. previous element in the
+        //  path, so we need to reverse direction
+        PARENTDIR(n2.x, n2.y) = REVERSEDIR(i);
+      }
+      else if(INOPEN(n2.x, n2.y))
+      {
+        // Node is already in open - change cost
+        QValueList<BosonPathFlyingNode>::iterator it;
+        // Find node in open
+        for(it = open.begin(); it != open.end(); ++it)
+        {
+          if((n2.x == (*it).x) && (n2.y == (*it).y))
+          {
+            break;
+          }
+        }
+        if(it == open.end())
+        {
+          boError(510) << k_funcinfo << "No region with pos (" << n2.x << "; " << n2.y << ") found in OPEN!!!" << endl;
+          continue;
+        }
+
+        // Calculate costs
+        n2.g = n.g + lowLevelCostAir(n2.x, n2.y, info);
+        if((*it).g < n2.g)
+        {
+          // Old path is better - leave it untouched
+          continue;
+        }
+        // Distance won't change
+        n2.h = (*it).h;
+
+        // Check if n2 is nearest node so far
+        if((n2.h + n2.g * TNG_NEAREST_G_FACTOR) < (nearest.h + nearest.g * TNG_NEAREST_G_FACTOR))
+        {
+          nearest = n2;
+        }
+
+//        boDebug(510) << "        " << k_funcinfo << "OPEN_REPLACE: " << "pos: (" << n2.x << "; " << n2.y <<
+//            "); g_old: " << (*it).g << "; g_new: " << n2.g << "; h: " << n2.h << endl;
+        // Delete old node from open
+        open.remove(it);
+        // And add new one
+        open.add(n2);
+        PARENTDIR(n2.x, n2.y) = REVERSEDIR(i);
+      }
+    }
+  }
+
+  tm_mainloop = pr.elapsed();
+//  boDebug(510) << k_funcinfo << "path searching finished" << endl;
+
+  // Traceback path
+  if(!pathfound && info->range > 0)
+  {
+    boError(510) << k_funcinfo << "No path found!!!" << endl;
+    info->passable = false;
+  }
+  else
+  {
+    if(!pathfound)
+    {
+      // We didn't find exact path to destination, so use nearest point instead
+      n = nearest;
+//      boDebug(510) << k_funcinfo << "Using NEAREST node at (" << n.x << "; " << n.y << "); g: " <<
+//          n.g << "; h: " << n.h << endl;
+    }
+    // First copy path to list. We use temporary list here because vector doesn't
+    //  have prepend() and path's length isn't known
+    // Note that low-level path must be in canvas-coords, so we convert cell
+    //  coords to canvas ones here
+    // FIXME: we can get path length, e.g. by adding level var to nodes
+    QValueList<QPoint> temp;
+    // Coordinate of the last node in the path (destination)
+    int x = n.x;
+    int y = n.y;
+    QPoint p;
+    QPoint canvas; // Point in canvas coords
+    p.setX(x);
+    p.setY(y);
+    canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+    temp.prepend(canvas);
+//    boDebug(510) << k_funcinfo << "Added first point at (" << x << "; " << y << ")" << endl;
+    while((x != first.x) || (y != first.y))
+    {
+      // Take next region
+//      boDebug(510) << k_funcinfo << "parent direction is " << PARENTDIR(p.x(), p.y()) << endl;
+      x += xoffsets[(int)PARENTDIR(p.x(), p.y())];
+      y += yoffsets[(int)PARENTDIR(p.x(), p.y())];
+      p.setX(x);
+      p.setY(y);
+      canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+      canvas.setY(p.y() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
+      // We must prepend regions, not append them, because we go from destination
+      //  to start here
+      temp.prepend(canvas);
+//      boDebug(510) << k_funcinfo << "Added point (" << canvas.x() << "; " << canvas.y() << ")" << endl;
+    }
+
+    // If path was found but goal wasn't reached, then we found only a partial
+    //  path. We add PF_NEXT_REGION point, which will make pathfinder be called
+    //  again once end of this path is reached.
+    if(!goalReached && pathfound)
     {
       // We have reached next region
       temp.append(QPoint(PF_NEXT_REGION, PF_NEXT_REGION));
@@ -2810,11 +3145,11 @@ void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
   // Go through all the cells in goal area and check if it's possible to get
   //  there
   bool connected = false;
-  if(info->canMoveOnLand && info->canMoveOnWater)
+  if(!info->flying && info->canMoveOnLand && info->canMoveOnWater)
   {
     // TODO: add support for such units
     boDebug() << k_funcinfo << "Took " << pr.stop() << " usec" << endl;
-    boError(510) << k_funcinfo << "Units that can move on both water and land, aren't supported yet!!!" << endl;
+    boError(510) << k_funcinfo << "Land units that can move on both water and land aren't supported yet!!!" << endl;
     return;
   }
   QPtrList<BosonPathRegion> destRegions;
@@ -2915,7 +3250,12 @@ float BosonPath2::lowLevelDistToGoal(int x, int y, BosonPathInfo* info)
 
 float BosonPath2::lowLevelCost(int x, int y, BosonPathInfo* info)
 {
-  return TNG_LOW_BASE_COST + cell(x, y)->passageCost();
+  return TNG_LOW_BASE_COST + cell(x, y)->passageCostLand();
+}
+
+float BosonPath2::lowLevelCostAir(int x, int y, BosonPathInfo* info)
+{
+  return TNG_LOW_BASE_COST + cell(x, y)->passageCostAir();
 }
 
 void BosonPath2::neighbor(int& x, int& y, Direction d)
@@ -2971,7 +3311,7 @@ bool BosonPath2::cellOccupied(int x, int y)
 
 float BosonPath2::cellCost(int x, int y)
 {
-  return cell(x, y)->passageCost();
+  return cell(x, y)->passageCostLand();
 }
 
 Cell* BosonPath2::cell(int x, int y)

@@ -33,7 +33,7 @@ class Unit;
  * something).
  *
  * Note that since nothing of the above except units is implemented in boson so
- * all items in the list are units, currently. 
+ * all items in the list are units, currently.
  *
  * UPDATE: the list now consists of BosonItem and therefore <em>items</em>,
  * not just units. we may add some additional code to separate units (in favor
@@ -113,7 +113,7 @@ public:
 	 * @return The units on this cell
 	 **/
 	QValueList<Unit*> units(bool collidingOnly = true, bool includeMoving = true, Unit* forUnit = 0, QValueList<BosonItem*>* nonUnit = 0) const;
-	
+
 	/**
 	 * @param collidingOnly if TRUE return only items that are interesting
 	 * for collision detection
@@ -175,7 +175,8 @@ public:
 	void recalculateLandOccupiedStatus();
 	void recalculateAirOccupiedStatus();
 
-	float passageCost() const;
+	float passageCostLand() const;
+	float passageCostAir() const;
 
 protected:
 	void registerList();
