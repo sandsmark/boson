@@ -44,6 +44,7 @@
 #include "commandinput.h"
 #include "bodisplaymanager.h"
 #include "gameoverdialog.h"
+#include "boselection.h"
 #include "global.h"
 
 #include "defines.h"
@@ -1047,7 +1048,14 @@ void BosonWidget::initBigDisplay(BosonBigDisplay* b)
 			b, SLOT(slotEditorMouseEvent(QMouseEvent*, bool*)));
  } else {
 	addMouseIO(b);
+	connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)),
+			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
  }
+
+ connect(b->selection(), SIGNAL(signalSingleUnitSelected(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
+ connect(b->selection(), SIGNAL(signalSelectUnit(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
  b->makeActive();
 }
@@ -1169,10 +1177,6 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay*
 			d->mMiniMap, SLOT(slotResizeRect(int, int)));
 	disconnect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 			old, SLOT(slotReCenterView(const QPoint&)));
-	disconnect(old, SIGNAL(signalSingleUnitSelected(Unit*)), 
-			d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
-	disconnect(old, SIGNAL(signalSelectUnit(Unit*)), 
-			d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
  }
  connect(active, SIGNAL(contentsMoving(int, int)),
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
@@ -1180,10 +1184,6 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay*
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		active, SLOT(slotReCenterView(const QPoint&)));
- connect(active, SIGNAL(signalSingleUnitSelected(Unit*)), 
-		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
- connect(active, SIGNAL(signalSelectUnit(Unit*)), 
-		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
  if (d->mEditorMode) {
@@ -1197,13 +1197,9 @@ void BosonWidget::slotSetActiveDisplay(BosonBigDisplay* active, BosonBigDisplay*
 	if (old) {
 		disconnect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
 				old, SLOT(slotMoveSelection(int, int)));
-		disconnect(old, SIGNAL(signalSingleUnitSelected(Unit*)),
-				d->mCommandFrame, SLOT(slotSetAction(Unit*)));
 	}
 	connect(d->mMiniMap, SIGNAL(signalMoveSelection(int, int)),
 			active, SLOT(slotMoveSelection(int, int)));
-	connect(active, SIGNAL(signalSingleUnitSelected(Unit*)),
-			d->mCommandFrame, SLOT(slotSetAction(Unit*)));
  }
 
 

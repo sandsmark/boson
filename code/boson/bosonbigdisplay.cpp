@@ -30,6 +30,7 @@
 #include "bosonconfig.h"
 #include "global.h"
 #include "kspritetooltip.h"
+#include "boselection.h"
 #include "defines.h"
 
 #include <kgame/kgameio.h>
@@ -66,40 +67,35 @@ class BosonBigDisplay::BosonBigDisplayPrivate
 public:
 	BosonBigDisplayPrivate()
 	{
-		mSelectionMode = BosonBigDisplay::SelectNone;
 		mIsRMBMove = false;
 
 		mLocalPlayer = 0;
+		mCursor = 0;
+		mUnitTips = 0;
 
 		mChat = 0;
 
+		mSelection = 0;
 		mSelectionRect = 0;
-
-		mCursor = 0;
-
-		mUnitTips = 0;
 	}
 
-	BosonBigDisplay::SelectionMode mSelectionMode;
-	QPtrList<Unit> mSelectionList;
-	QPoint mSelectionStart;
-	QPoint mSelectionEnd;
 	bool mIsRMBMove;
 	QPoint mRMBMove; // position where RMB move started
 	QTimer mCursorEdgeTimer;
 	int mCursorEdgeCounter;
 
 	Player* mLocalPlayer;
+	BosonCursor* mCursor;
+	KSpriteToolTip* mUnitTips;
 
 	ConstructUnit mConstruction;
 	
-	BosonCursor* mCursor;
-
 	KGameCanvasChat* mChat;
-	
-	KSpriteToolTip* mUnitTips;
 
+	BoSelection* mSelection;
 	QCanvasRectangle* mSelectionRect;
+	QPoint mSelectionStart;
+	QPoint mSelectionEnd;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c,
@@ -140,6 +136,8 @@ void BosonBigDisplay::init()
 
  d->mUnitTips = new KSpriteToolTip(this);
 
+ d->mSelection = new BoSelection(this);
+
  disconnect(this, SIGNAL(contentsMoving(int,int)), this, SLOT(cMoving(int,int)));
 }
 
@@ -165,8 +163,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
 		if (unit) {
 			if (!selectAll(unit->unitProperties())) {
-				clearSelection();
-				addUnitSelection(unit);
+				d->mSelection->selectUnit(unit);
 			}
 		}
 		break;
@@ -203,37 +200,8 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				scrollBy(pos.x() - d->mRMBMove.x(), pos.y() - d->mRMBMove.y());
 				d->mRMBMove = pos;
 			}
-		} else {
-			// no button pressed
-			if (selectionMode() == SelectRect || selectionMode() == SelectSingle) {
-				if (selection().count() == 0) {
-					kdWarning() << "mode=" << selectionMode() << " but nothing selected" << endl;
-					break;
-				}
-				if (selection().first()->owner() == d->mLocalPlayer) {
-					Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
-					if (unit) {
-						if (unit->owner() == d->mLocalPlayer) {
-							d->mCursor->setCursor(CursorDefault);
-							d->mCursor->setWidgetCursor(this);
-						} else {
-							d->mCursor->setCursor(CursorAttack);
-							d->mCursor->setWidgetCursor(this);
-						}
-					} else if (selection().first()->isMobile()) {
-						d->mCursor->setCursor(CursorMove);
-						d->mCursor->setWidgetCursor(this);
-						d->mCursor->showCursor();
-					}
-				} else {
-					d->mCursor->setCursor(CursorDefault);
-					d->mCursor->setWidgetCursor(this);
-				}
-			}
 		}
-//		d->mCursor->move(e->globalPos().x(), e->globalPos().y());
-		d->mCursor->move(pos.x(), pos.y());
-		d->mCursor->setWidgetCursor(viewport());
+		updateCursor();
 		canvas()->update();
 		e->accept();
 		break;
@@ -249,10 +217,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 				int oldX = contentsX();
 				int oldY = contentsY();
 				center(pos.x(), pos.y());
-				QPoint p = d->mCursor->pos();
-				d->mCursor->move(p.x() + contentsX() - oldX,
-						p.y() + contentsY() - oldY);
-				d->mCursor->setWidgetCursor(viewport());
+				updateCursor();
 				canvas()->update();
 			}
 		} else if (e->button() == RightButton) {
@@ -273,17 +238,17 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
  if (!unit) {
 	// nothing has been found : it's a ground-click
 	// Here, we have to draw a "selection box"...
-	setSelectionMode(SelectRect);
 	d->mSelectionStart = pos;
 	d->mSelectionEnd = pos;
-	// the box is drawn on mouse move
-
-	emit signalSingleUnitSelected(0);
+	// create the rect so it is drawn once the mouse is moved
+	drawSelectionRect();
 	return;
  }
 
- setSelectionMode(SelectSingle);
- addUnitSelection(unit);
+ d->mSelection->selectUnit(unit);
+
+ // cannot be placed into d->mSelection cause we don't have d->mLocalPlayer
+ // there
  if (d->mLocalPlayer == unit->owner()) {
 	boMusic->playSound(unit, Unit::SoundOrderSelect);
  }
@@ -292,7 +257,7 @@ void BosonBigDisplay::startSelection(const QPoint& pos)
 
 void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 {
- if (selectionMode() == SelectRect) {
+ if (d->mSelectionRect && d->mSelectionRect->isVisible()) {
 	d->mSelectionEnd = newEnd;
 
 	// draw the new selection rect
@@ -305,7 +270,7 @@ void BosonBigDisplay::moveSelectionRect(const QPoint& newEnd)
 
 void BosonBigDisplay::removeSelectionRect()
 {
- if (selectionMode() == SelectRect) {
+ if (d->mSelectionRect && d->mSelectionRect->isVisible()) {
 	// here as there is a performance problem in
 	// mousemove:
 	selectArea();
@@ -313,10 +278,8 @@ void BosonBigDisplay::removeSelectionRect()
 	// remove the rect:
 	delete d->mSelectionRect;
 	d->mSelectionRect = 0;
-	if (selection().isEmpty()) {
-		setSelectionMode(SelectNone);
-	} else {
-		Unit* u = selection().first();
+	if (!d->mSelection->isEmpty()) {
+		Unit* u = d->mSelection->leader();
 		if (u->owner() == d->mLocalPlayer) {
 			boMusic->playSound(u, Unit::SoundOrderSelect);
 		}
@@ -324,82 +287,33 @@ void BosonBigDisplay::removeSelectionRect()
  }
 }
 
-void BosonBigDisplay::setSelectionMode(SelectionMode mode)
-{
- clearSelection();
- d->mSelectionMode = mode;
-}
-
-BosonBigDisplay::SelectionMode BosonBigDisplay::selectionMode() const
-{
- return d->mSelectionMode;
-}
-
 void BosonBigDisplay::clearSelection()
 {
- d->mSelectionMode = SelectNone;
- QPtrListIterator<Unit> it(d->mSelectionList);
- while (it.current()) {
-	it.current()->unselect();
-	++it;
- }
- d->mSelectionList.clear();
- d->mCursor->setCursor(CursorDefault);
- d->mCursor->setWidgetCursor(this);
- //FIXME: we emit this even if the selection was empty before, too - is this
- //good?
- emit signalSingleUnitSelected(0);
-}
-
-void BosonBigDisplay::addUnitSelection(Unit* unit)
-{
- if (!unit) {
-	kdError() << k_funcinfo << "NULL unit" << endl;
-	return;
- }
- if (selectionMode() != SelectSingle && unit->owner() != d->mLocalPlayer) {
-	kdDebug() << k_funcinfo << ": not owner" << endl;
-	return;
- }
- if (unit->isDestroyed()) {
-	kdDebug() << k_lineinfo << "don't select destroyed unit" << endl;
-	return;
- }
- if (d->mSelectionList.contains(unit)) {
-	return;
- }
- d->mSelectionList.append(unit);
- unit->select();
- if (selectionMode() == SelectSingle) {
-	emit signalSingleUnitSelected(unit);
- } else {
-	emit signalSelectUnit(unit);
- }
+ d->mSelection->clear();
+ updateCursor();
 }
 
 bool BosonBigDisplay::selectAll(const UnitProperties* prop)
 {
-// AB: currently disabled, until selections are fixed
-return false;
-
  if (!d->mLocalPlayer) {
 	kdError() << k_funcinfo << "NULL player" << endl;
 	return false;
  }
- clearSelection();
- QPtrList<Unit> list = d->mLocalPlayer->allUnits();
  if (prop->isFacility()) {
 	// we don't select all facilities, but only the one that was
 	// double-clicked. it makes no sense for facilities
 	return false;
  }
- QPtrListIterator<Unit> it(list);
+ QPtrList<Unit> allUnits = d->mLocalPlayer->allUnits();
+ QPtrList<Unit> list;
+ QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {
 	if (it.current()->unitProperties() == prop) {
-		addUnitSelection(it.current());
+		list.append(it.current());
 	}
 	++it;
  }
+ d->mSelection->selectUnits(list);
  return true;
 }
 
@@ -413,14 +327,10 @@ const QPoint& BosonBigDisplay::selectionEnd() const
  return d->mSelectionEnd;
 }
 
-QPtrList<Unit>& BosonBigDisplay::selection() const
-{
- return d->mSelectionList;
-}
-
 void BosonBigDisplay::selectArea()
 {
  if (!d->mSelectionRect) {
+	kdDebug() << "no rect" << endl;
 	return;
  }
  if (boConfig->debugMode() == BosonConfig::DebugSelection) {
@@ -441,7 +351,9 @@ void BosonBigDisplay::selectArea()
 	}
  }
  QCanvasItemList list;
- QCanvasItemList unitList;
+ QPtrList<Unit> unitList;
+ Unit* fallBackUnit= 0; // in case no localplayer mobile unit can be found we'll select this instead
+ QCanvasItemList playerUnitList;
  QCanvasItemList::Iterator it;
  list = d->mSelectionRect->collisions(true);
  for (it = list.begin(); it != list.end(); ++it) {
@@ -453,16 +365,23 @@ void BosonBigDisplay::selectArea()
 		continue;
 	}
 	if (unit->unitProperties()->isMobile()) {
-		unitList.append(*it);
+		if (unit->owner() == d->mLocalPlayer) {
+			unitList.append(unit);
+		} else {
+			fallBackUnit = unit;
+		}
+	} else {
+		fallBackUnit = unit; 
 	}
 	
  }
 
- if (unitList.count() == 1) {
-	setSelectionMode(SelectSingle);
- }
- for (it = unitList.begin(); it != unitList.end(); ++it) {
-	addUnitSelection((Unit*)*it);
+ if (unitList.count() > 0) {
+	d->mSelection->selectUnits(unitList);
+ } else if (fallBackUnit) {
+	d->mSelection->selectUnit(fallBackUnit);
+ } else {
+	d->mSelection->clear();
  }
 }
 
@@ -495,16 +414,16 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 // this method should not perform any tasks but rather send the input through
 // the KGameIO. this way it is very easy (it should be at least) to write a
 // computer player
- if (selection().isEmpty()) {
+ if (d->mSelection->isEmpty()) {
 	return;
  }
  Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
  if (!unit) {
-	if ((selection().first()->isMobile())) { // move the selection to pos
-		if (selection().count() == 1) {
+	if (d->mSelection->hasMobileUnit()) { // move the selection to pos
+		if (d->mSelection->count() == 1) {
 			// there are special things to do for a single selected unit
 			// (e.g. mining if the unit is a harvester)
-			MobileUnit* u = (MobileUnit*)selection().first();
+			MobileUnit* u = (MobileUnit*)d->mSelection->leader();
 			if (u->canMine(((BosonCanvas*)canvas())->cellAt(pos.x(), pos.y()))) {
 				stream << (Q_UINT32)BosonMessage::MoveMine;
 				stream << (Q_ULONG)u->id();
@@ -514,7 +433,8 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 			}
 		}
 
-		QPtrListIterator<Unit> it(selection());
+		QPtrList<Unit> list = d->mSelection->allUnits();
+		QPtrListIterator<Unit> it(list);
 		// tell the clients we want to move units:
 		stream << (Q_UINT32)BosonMessage::MoveMove;
 		// tell which mode we use for moving units
@@ -522,7 +442,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		// tell them where to move to:
 		stream << pos;
 		// tell them how many units:
-		stream << (Q_UINT32)selection().count();
+		stream << (Q_UINT32)list.count();
 		Unit* unit = 0;
 		while (it.current()) {
 			if (!unit) {
@@ -540,7 +460,7 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		// FIXME: another option: add the waypoint to the facility and
 		// apply it to any unit that gets constructed by that facility.
 		// For this we'd probably have to use LMB for unit placing
-		Facility* fac = (Facility*)selection().first();
+		Facility* fac = (Facility*)d->mSelection->leader();
 		if (!fac->hasProduction() || !fac->canPlaceProductionAt(pos)) {
 			return;
 		}
@@ -553,20 +473,21 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 		send = true;
 	}
  } else { // there is a unit - attack it!
-	QPtrListIterator<Unit> it(selection());
+	QPtrList<Unit> list = d->mSelection->allUnits();
+	QPtrListIterator<Unit> it(list);
 	// tell the clients we want to attack:
 	stream << (Q_UINT32)BosonMessage::MoveAttack;
 	// tell them which unit to attack:
 	stream << (Q_ULONG)unit->id();
 	// tell them how many units attack:
-	stream << (Q_UINT32)selection().count();
+	stream << (Q_UINT32)list.count();
 	while (it.current()) {
 		// tell them which unit is going to attack:
 		stream << (Q_ULONG)it.current()->id(); // MUST BE UNIQUE!
 		++it;
 	}
 	send = true;
-	Unit* u = selection().first();
+	Unit* u = d->mSelection->leader();
 	if (unit->owner() == d->mLocalPlayer) {
 		boMusic->playSound(u, Unit::SoundOrderAttack);
 	}
@@ -721,20 +642,9 @@ void BosonBigDisplay::slotUnitChanged(Unit* unit)
 	kdError() << k_funcinfo << "NULL unit" << endl;
 	return;
  }
-// kdDebug() << k_funcinfo << endl;
- if (selection().contains(unit)) {
-//	kdDebug() << "is selected" << endl;
+ if (d->mSelection->contains(unit)) {
 	if (unit->isDestroyed()) {
-		d->mSelectionList.removeRef(unit);
-		unit->unselect();
-		emit signalUnselectUnit(unit);
-		if (selection().isEmpty()) {
-			setSelectionMode(SelectNone);
-		}
-	}
-	if (selectionMode() == SelectSingle) {
-//		kdDebug() << "is only unit" << endl;
-		emit signalSingleUnitSelected(unit); // update
+		d->mSelection->removeUnit(unit);
 	}
  }
 }
@@ -783,7 +693,7 @@ void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
 	kdError() << "NULL local player" << endl;
 	return;
  }
- if (!selection().count()) {
+ if (d->mSelection->isEmpty()) {
 	return;
  }
  QByteArray buffer;
@@ -811,6 +721,7 @@ void BosonBigDisplay::setActive(bool a)
 	qApp->setGlobalMouseTracking(false);
 	qApp->removeEventFilter(this);
  }
+ d->mSelection->activate(a);
 }
 
 void BosonBigDisplay::setContentsPos(int x, int y)
@@ -871,3 +782,42 @@ bool BosonBigDisplay::eventFilter(QObject* o, QEvent* e)
  }
  return QCanvasView::eventFilter(o, e);
 }
+
+BoSelection* BosonBigDisplay::selection() const
+{
+ return d->mSelection;
+}
+
+void BosonBigDisplay::updateCursor()
+{
+ QPoint pos = viewportToContents(mapFromGlobal(QCursor::pos()));
+
+ if (!d->mSelection->isEmpty()) {
+	if (d->mSelection->leader()->owner() == d->mLocalPlayer) {
+		Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
+		if (unit) {
+			if (unit->owner() == d->mLocalPlayer) {
+				d->mCursor->setCursor(CursorDefault);
+				d->mCursor->setWidgetCursor(this);
+			} else {
+				d->mCursor->setCursor(CursorAttack);
+				d->mCursor->setWidgetCursor(this);
+			}
+		} else if (d->mSelection->leader()->isMobile()) {
+			d->mCursor->setCursor(CursorMove);
+			d->mCursor->setWidgetCursor(this);
+			d->mCursor->showCursor();
+		}
+	} else {
+		d->mCursor->setCursor(CursorDefault);
+		d->mCursor->setWidgetCursor(this);
+	}
+ } else {
+	d->mCursor->setCursor(CursorDefault);
+	d->mCursor->setWidgetCursor(this);
+ }
+
+ d->mCursor->move(pos.x(), pos.y());
+ d->mCursor->setWidgetCursor(viewport());
+}
+
