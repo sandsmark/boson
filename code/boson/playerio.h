@@ -29,6 +29,7 @@ class BosonCanvas;
 class BosonStatistics;
 class SpeciesTheme;
 class KGameIO;
+class KGameIOList;
 class bofixed;
 template<class T> class BoVector3;
 typedef BoVector3<bofixed> BoVector3Fixed;
@@ -80,6 +81,8 @@ public:
 	bool hasRtti(int rtti) const;
 
 	KGameIO* findRttiIO(int rtti) const;
+
+	QPtrList<KGameIO>* ioList();
 
 	/**
 	 * @return Player::addGameIO
