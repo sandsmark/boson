@@ -43,7 +43,6 @@
 #include "boson.h"
 #include "bodebug.h"
 #include "items/bosonshot.h"
-#include "items/bosonitemrenderer.h"
 #include "unitplugins.h"
 #include "bosonmodel.h"
 #include "bo3dtools.h"
@@ -922,7 +921,6 @@ void BosonBigDisplayBase::renderItems()
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
 	BosonItem* item = *it;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
 
 	// FIXME: can't we use BoVector3 and it's conversion methods here?
 	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
@@ -957,7 +955,7 @@ void BosonBigDisplayBase::renderItems()
 	if (useLOD) {
 		// TODO: we could compare squared distances here and get rid of sqrt()
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
-		lod = itemRenderer->preferredLod(dist);
+		lod = item->preferredLod(dist);
 	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
@@ -1001,7 +999,6 @@ void BosonBigDisplayBase::renderItems()
  BoMaterial::deactivate();
  while (it != selectedItems->end()) {
 	BosonItem* item = *it;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
 	if (!item->isSelected()) {
 		boError() << k_funcinfo << "not selected" << endl;
 		++it;
@@ -1019,7 +1016,7 @@ void BosonBigDisplayBase::renderItems()
 
 	GLfloat w = ((float)item->width()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
 	GLfloat h = ((float)item->height()) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat depth = itemRenderer->glDepthMultiplier();
+	GLfloat depth = item->glDepthMultiplier();
 	glPushMatrix();
 	glTranslatef(x, y, z);
 	if (w != 1.0 || h != 1.0 || depth != 1.0) {
@@ -1255,6 +1252,22 @@ void BosonBigDisplayBase::renderText()
  if (boConfig->debugFPS()) {
 	y -= 5;
 	y -= d->mDefaultFont->renderText(x, y, i18n("FPS: %1").arg(fps()), width() - x);
+ }
+
+ bool renderGroundRendererDebug = false;
+ if (renderGroundRendererDebug) {
+	BoVector3 cursor = BoVector3(d->mCanvasPos.x(), d->mCanvasPos.y(), boGame->canvas()->heightAtPoint(d->mCanvasPos.x(), d->mCanvasPos.y()));
+	cursor.canvasToWorld();
+	BoGroundRenderer* r = BoGroundRendererManager::manager()->currentRenderer();
+	if (r) {
+		QString s = r->debugStringForPoint(cursor);
+		if (!s.isEmpty()) {
+			x = d->mViewport[2] - border - (d->mDefaultFont->width(s));
+			y -= d->mDefaultFont->renderText(x, y, s, d->mViewport[2] - x);
+		}
+	} else {
+		BO_NULL_ERROR(s);
+	}
  }
 
  y = renderTextMapCoordinates(x, y, w, border);
@@ -2733,16 +2746,10 @@ void BosonBigDisplayBase::createRenderItemList()
  BoItemList::Iterator it = allItems->begin();
  for (; it != allItems->end(); ++it) {
 	BosonItem* item = *it;
-	BosonItemRenderer* itemRenderer = item->itemRenderer();
 
-	if (!item->isVisible()) {
+	if (!item->isVisible() || !item->itemRenderer()) {
 		continue;
 	}
-
-	// FIXME: can't we use BoVector3 and it's conversion methods here?
-	GLfloat x = (item->x() + item->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
-	GLfloat y = -((item->y() + item->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
-	GLfloat z = item->z(); // this is already in the correct format!
 
 	// TODO: performance: we can improve this greatly:
 	// simply group the items to bigger sphere or boxes. every box is of
@@ -2758,7 +2765,7 @@ void BosonBigDisplayBase::createRenderItemList()
 	// UPDATE: we could instead use the "sectors" that we are planning to
 	// use for collision detection and pathfinding also for the frustum
 	// tests (they wouldn't do floating point calculations)
-	if (!sphereInFrustum(x, y, z, itemRenderer->boundingSphereRadius())) {
+	if (!item->itemInFrustum(d->mViewFrustum)) {
 		// the unit is not visible, currently. no need to draw anything.
 		continue;
 	}

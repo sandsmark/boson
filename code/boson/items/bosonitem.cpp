@@ -335,7 +335,9 @@ void BosonItem::setSize(int width, int height, float depth)
 
 void BosonItem::renderItem(unsigned int lod)
 {
- mRenderer->renderItem(lod);
+ if (itemRenderer()) {
+	itemRenderer()->renderItem(lod);
+ }
 }
 
 BosonCollisions* BosonItem::collisions() const
@@ -462,7 +464,52 @@ bool BosonItem::loadFromXML(const QDomElement& root)
 
 void BosonItem::advance(unsigned int)
 {
- mRenderer->animate();
+ if (itemRenderer()) {
+	itemRenderer()->animate();
+ }
 }
 
+unsigned int BosonItem::preferredLod(float dist) const
+{
+ if (itemRenderer()) {
+	return itemRenderer()->preferredLod(dist);
+ }
+ return 0;
+}
+
+float BosonItem::glDepthMultiplier() const
+{
+ if (itemRenderer()) {
+	return itemRenderer()->glDepthMultiplier();;
+ }
+ return 1.0f;
+}
+
+void BosonItem::setRendererToEditorMode()
+{
+ if (!itemRenderer()) {
+	return;
+ }
+ // editor won't display the construction but always completed
+ // facilities. otherwise it's hard to recognize where they
+ // were actually placed
+ itemRenderer()->setShowGLConstructionSteps(false);
+ itemRenderer()->setAnimationMode(UnitAnimationIdle);
+}
+
+bool BosonItem::initItemRenderer()
+{
+ if (itemRenderer()) {
+	return itemRenderer()->setModel(getModelForItem());
+ }
+ return false;
+}
+
+bool BosonItem::itemInFrustum(const float* frustum) const
+{
+ if (itemRenderer()) {
+	return itemRenderer()->itemInFrustum(frustum);
+ }
+ return false;
+}
 

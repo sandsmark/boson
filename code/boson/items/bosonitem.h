@@ -294,6 +294,29 @@ public:
 	void renderItem(unsigned int lod = 0);
 
 	/**
+	 * @return itemRenderer()->preferredLod(dist)
+	 **/
+	unsigned int preferredLod(float dist) const;
+
+	/**
+	 * @return itemRenderer()->glDepthMultiplier()
+	 **/
+	float glDepthMultiplier() const;
+
+	/**
+	 * Tell the @ref itemRenderer to operate in editor mode, e.g. display
+	 * non-constructed facilities in constructed state
+	 **/
+	void setRendererToEditorMode();
+
+	bool initItemRenderer();
+
+	/**
+	 * @return TRUE if the item is in @p frustum, otherwise FALSE
+	 **/
+	bool itemInFrustum(const float* frustum) const;
+
+	/**
 	 * @return The select box of this item, or NULL if it is not selected.
 	 * See @ref isSelected.
 	 **/

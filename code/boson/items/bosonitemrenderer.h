@@ -134,6 +134,11 @@ public:
 	 **/
 	unsigned int preferredLod(float distanceFromCamera) const;
 
+	/**
+	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
+	 **/
+	bool itemInFrustum(const float* frustum) const;
+
 protected:
 	const QColor* teamColor() const;
 

@@ -53,7 +53,6 @@ bool BosonItemRenderer::setModel(BosonModel* model)
 	return false;
  }
 
- // set the default animation mode
  setAnimationMode(UnitAnimationIdle);
 
  // FIXME the correct frame must be set after this constructor!
@@ -214,5 +213,22 @@ void BosonItemRenderer::setShowGLConstructionSteps(bool s)
  } else {
 	setCurrentFrame(mModel->frame(frame()));
  }
+}
+
+bool BosonItemRenderer::itemInFrustum(const float* frustum) const
+{
+ if (!frustum) {
+	return false;
+ }
+ if (!mItem) {
+	BO_NULL_ERROR(mItem);
+	return false;
+ }
+ // FIXME: can't we use BoVector3 and it's conversion methods here?
+ GLfloat x = (mItem->x() + mItem->width() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE;
+ GLfloat y = -((mItem->y() + mItem->height() / 2) * BO_GL_CELL_SIZE / BO_TILE_SIZE);
+ GLfloat z = mItem->z(); // this is already in the correct format!
+ BoVector3 pos(x, y, z);
+ return Bo3dTools::sphereInFrustum(frustum, pos, boundingSphereRadius());
 }
 

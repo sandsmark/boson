@@ -1763,7 +1763,9 @@ BosonItem* BosonCanvas::createNewItem(int rtti, Player* owner, const ItemType& t
 		return item;
 	}
 	theme->loadNewUnit(unit);
-	unit->itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	if (unit->itemRenderer()) {
+		unit->itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	}
 	if (unit->isFlying()) {
 		// AB: we have currently not decided how to treat flying units,
 		// so we just place them at a height of 2.0 on construction.
@@ -1800,14 +1802,10 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 	item->move(pos.x(), pos.y(), pos.z());
 	addAnimation(item);
 	if (!boGame->gameMode()) {
-		// editor won't display the construction but always completed
-		// facilities. otherwise it's hard to recognize where they were actually
-		// placed
-		item->itemRenderer()->setShowGLConstructionSteps(false);
-		item->itemRenderer()->setAnimationMode(UnitAnimationIdle);
+		item->setRendererToEditorMode();
 	}
-	if (!item->itemRenderer()->setModel(item->getModelForItem())) {
-		boError() << k_funcinfo << "setModel() failed. cannot create item." << endl;
+	if (!item->initItemRenderer()) {
+		boError() << k_funcinfo << "initModel() failed. cannot create item." << endl;
 		deleteItem(item);
 		item = 0;
 	}
