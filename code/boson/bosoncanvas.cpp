@@ -428,7 +428,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->advance(false, advanceCount);
- boDebug() << k_funcinfo << "WorkNone: " << d->mWorkCounts[(int)UnitBase::WorkNone] << endl;
+// boDebug() << k_funcinfo << "WorkNone: " << d->mWorkCounts[(int)UnitBase::WorkNone] << endl;
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const
