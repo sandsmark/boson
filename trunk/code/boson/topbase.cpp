@@ -476,8 +476,8 @@ void TopBase::slotConfigureKeys()
 void TopBase::slotToggleFullScreen()
 {
  if (((KToggleAction*)actionCollection()->action("window_fullscreen"))->isChecked()) {
-	showNormal();
- } else {
 	showFullScreen();
+ } else {
+	showNormal();
  }
 }
