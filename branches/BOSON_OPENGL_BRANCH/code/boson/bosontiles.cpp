@@ -158,7 +158,11 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  }
 
  delete mTextures;
- mTextures = new BosonTextureArray(mTextureImages);
+ QValueList<QImage> images;
+ for (unsigned int i = 0; i < mTextureImages.count(); i++) {
+	images.append(mTextureImages[i]);
+ }
+ mTextures = new BosonTextureArray(images);
  mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
 
  emit signalTilesLoaded();
@@ -203,12 +207,15 @@ bool BosonTiles::loadGround(int j, const QString& path)
 
 void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 {
-// AB it seems that this copies the image p into the image (and if _debug is
-// true puts some extra information on it)
+// AB: copy the image p to the big pixmap (used by e.g. the map editor and the QCanvas version) abd to the texture images list (used by OpenGL only)
+// TODO: remove the big pixmap for non-QCanvas version. the image list can provide the same functionality in Editor mode
+// TODO: clear the image list in non-editor mode once the textures were generated
  int x = BosonTiles::big_x(z);
  int y = BosonTiles::big_y(z);
 
- mTextureImages.append(p);
+ QImage small(BO_TILE_SIZE, BO_TILE_SIZE, 32);
+ bitBlt(&small, 0, 0, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
+ mTextureImages.insert(z, small);
 
  
  #define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )
@@ -292,7 +299,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
-	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
+//	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
 	qApp->processEvents(10);
  }
 }
