@@ -336,10 +336,20 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
 // already sent!!!
 // we cannot remove them, cause we'd have blocking UI then
 
- if (boGame->isAdmin() && !mLoading) {
+ if (!mLoading) {
+#if 0
 	// Send InitFogOfWar and StartScenario messages if we're starting new game
 	boGame->sendMessage(0, BosonMessage::IdInitFogOfWar);
 	boGame->sendMessage(0, BosonMessage::IdStartScenario);
+#endif
+	// AB: these emit signals only. maybe we should check whether we can
+	// emit these signals from BosonStarting directly, without touchin
+	// boGame at all!
+
+	// these will emit the signals using a QTimer::singleShot(), i.e. return
+	// immediately
+	boGame->initFogOfWar(this);
+	boGame->startScenario(this);
  } else if (mLoading) {
 	// If we're loading saved game, init fog of war for local player
 #warning LOADING code: FIXME
@@ -354,6 +364,8 @@ void BosonStarting::slotLoadGameData3() // FIXME rename!
  boDebug() << k_funcinfo << "done" << endl;
  if (!mLoading) {
 	if (boGame->isAdmin()) {
+		// WARNING: this sends messages!
+		// -> Boson::sendAddUnits()
 		startScenario();
 	}
 

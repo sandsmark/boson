@@ -31,6 +31,7 @@ class QDomDocument;
 class QDataStream;
 class QTextStream;
 class BosonSaveLoad;
+class BosonStarting;
 
 #define boGame Boson::boson()
 
@@ -238,6 +239,21 @@ public:
 
 	void writeGameLog(QTextStream& log);
 	void saveGameLogs(const QString& prefix);
+
+
+	/**
+	 * Init the fog of war. This must not be called anymore, once a game is
+	 * started, therefore it is allowed from a @ref BosonStarting object
+	 * only.
+	 **/
+	void initFogOfWar(BosonStarting*);
+
+	/**
+	 * Start the scenario. This must not be called anymore, once a game is
+	 * started, therefore it is allowed from a @ref BosonStarting object
+	 * only.
+	 **/
+	void startScenario(BosonStarting*);
 
 
 public: // small KGame extenstions for boson
