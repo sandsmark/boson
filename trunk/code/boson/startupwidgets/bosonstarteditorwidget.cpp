@@ -29,7 +29,6 @@
 #include "../top.h"
 #include "../bosonplayfield.h"
 #include "../bosonscenario.h"
-#include "../speciestheme.h"
 #include "bodebug.h"
 
 #include <klocale.h>

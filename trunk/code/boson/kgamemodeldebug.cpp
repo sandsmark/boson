@@ -33,7 +33,6 @@
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qtabwidget.h>
-#include <qcheckbox.h>
 #include <qptrdict.h>
 #include <qvgroupbox.h>
 #include <qgrid.h>

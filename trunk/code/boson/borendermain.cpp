@@ -36,7 +36,6 @@
 #include <kmainwindow.h>
 #include <kaction.h>
 #include <kpopupmenu.h>
-#include <klocale.h>
 #include <kstandarddirs.h>
 #include <kdialogbase.h>
 
