@@ -79,7 +79,8 @@ int main(/*int argc, char* argv[] */)
 	vcanvas = ecanvas = new editorCanvas(*bigBackground);
 
 	// first window, more may be added later with edit/new window
-	(new editorTopLevel(&app))->show();
+	// app
+	app.slot_newWindow();
 
 	/// XXX,orzel :  not be...... but $KDEDIR and so on
 	app.do_open("/opt/be/share/apps/boson/map/basic.bpf");
