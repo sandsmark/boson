@@ -19,6 +19,8 @@
 #ifndef BOSONWIDGET_H
 #define BOSONWIDGET_H
 
+#include <kxmlguiclient.h>
+
 #include <qwidget.h>
 
 class KPlayer;
@@ -64,7 +66,7 @@ class BosonPlayField;
  * Boson.
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class BosonWidget : public QWidget 
+class BosonWidget : public QWidget, virtual public KXMLGUIClient
 {
 	Q_OBJECT
 public:
@@ -106,7 +108,6 @@ public:
 	void debugKillPlayer(KPlayer* p);
 
 	void initKeys();
-	KActionCollection* actionCollection() const;
 
 	bool isCmdFrameVisible() const;
 	bool isChatVisible() const;
@@ -193,7 +194,7 @@ protected slots:
 	 * @param active The new active display.
 	 * @param old The previously active display, if non-NULL
 	 **/
-	void slotSetActiveDisplay(BosonBigDisplay* display, BosonBigDisplay* old);
+	void slotSetActiveDisplay(BosonBigDisplayBase* display, BosonBigDisplayBase* old);
 
 	void slotOutOfGame(Player* p);
 
