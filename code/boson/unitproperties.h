@@ -392,7 +392,7 @@ protected:
 	// Methods to set values. They are only meant to be used by upgrades and unit
 	//  editor. Don't use them unless you know what you are doing
 	void setName(const QString& name);
-	void setId(unsigned long int id)  { mTypeId = id; };
+	void setTypeId(unsigned long int id)  { mTypeId = id; };
 	void setUnitWidth(unsigned int unitWidth)  { mUnitWidth = unitWidth; };
 	void setUnitHeight(unsigned int unitHeight)  { mUnitHeight = unitHeight; };
 	void setUnitDepth(float unitDepth)  { mUnitDepth = unitDepth; };
