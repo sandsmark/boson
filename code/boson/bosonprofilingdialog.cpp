@@ -615,6 +615,7 @@ void BosonProfilingDialog::loadFromFile(const QString& file)
 	return;
  }
  d->mCurrentFileName = file;
+ setCaption(file);
  reset();
 }
 
