@@ -115,11 +115,11 @@ typedef unsigned char byte;
 #endif
 
 typedef unsigned int cell_t;
-inline byte		tile(cell_t c) { return (byte) (c&0x03); }
+inline byte		version(cell_t c) { return (byte) (c&0x03); }
 inline groundType	ground(cell_t c) { return (groundType) (c>>2); }
-inline cell_t		cell(groundType g, int t=0) { return (cell_t) (g<<2 | (t&0x3)); }
+inline cell_t		cell(groundType g, int v=0) { return (cell_t) (g<<2 | (v&0x3)); }
 inline void		setGround(cell_t &c, groundType g) {  c&=0x3; c|= (g<<2); }
-inline void		setVersion(cell_t &c, byte t) {  c&=~0x3; c|= (t&0x3); }
+inline void		setVersion(cell_t &c, byte v) {  c&=~0x3; c|= (v&0x3); }
 /***** cell_t ******/
 
 
