@@ -32,17 +32,27 @@
 */
 
 mobileProperties_t mobileProp[] = {
-	{"Ship",	0, 96, 96,  2, 3, BO_GO_SEA},	// MOB_SHIP
-	{"Quad",	0, 32, 32,  3, 4, BO_GO_EARTH},	// MOB_QUAD
-	{"Aircraft",	0, 72, 72,  3, 6, BO_GO_AIR},	// MOB_AIRCRAFT
+	{"ship",	0, 96, 96,  2, 3, BO_GO_SEA},	// MOB_SHIP
+	{"quad",	0, 32, 32,  3, 4, BO_GO_EARTH},	// MOB_QUAD
+	{"aircraft",	0, 72, 72,  3, 6, BO_GO_AIR},	// MOB_AIRCRAFT
 	};
 
+/*
+	char 	*name;		// Guess it, geek..
+	uint	orders;		// which orders it's able to understand
+	int	width;		// tile-size
+	int	height;		// tile-size
+	int	visibility;	// how far it can see
+*/
 facilityProperties_t facilityProp[] = {
-	{"AirField"	, 0, 3, 2, 7},			// FACILITY_AIRFIELD
-	{"ComSat"	, 0, 2, 2, 7},			// FACILITY_COMSAT
-	{"HeliPad"	, 0, 2, 2, 7},			// FACILITY_HELIPAD
-	{"PowerPlant"	, 0, 2, 2, 7},			// FACILITY_POWERPLANT
-	{"WarFactory"	, 0, 2, 2, 7}, 			// FACILITY_WAR_FACTORY
+	{"comsat"	, 0, 2, 2, 7},			// FACILITY_COMSAT
+	{"helipad"	, 0, 2, 2, 6},			// FACILITY_HELIPAD
+	{"powerplant"	, 0, 2, 2, 3},			// FACILITY_POWERPLANT
+	{"warfactory"	, 0, 2, 2, 3}, 			// FACILITY_WAR_FACTORY
+	{"barracks"	, 0, 2, 2, 3}, 			// FACILITY_BARRACKS
+	{"bunker"	, 0, 2, 2, 3}, 			// FACILITY_BUNKER
+	{"samsite"	, 0, 1, 1, 4}, 			// FACILITY_SAMSITE
+	{"oiltower"	, 0, 1, 1, 2}, 			// FACILITY_OILTOWER
 	};
 
 const int facilityPropNb = (sizeof(facilityProp)/sizeof(facilityProp [0]));

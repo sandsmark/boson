@@ -30,7 +30,7 @@ const groundProperties_t noGroundProp =
 	GROUND_DESERT,
 */
 const groundProperties_t groundProp[] = {
-//	{"deep_water", },
+	{"dwater", },
 	{"water", },
 	{"grass", },
 	{"desert", },
@@ -38,7 +38,9 @@ const groundProperties_t groundProp[] = {
 
 const groundTransProperties_t groundTransProp[] = {
 	{"grass->water", GROUND_GRASS, GROUND_WATER},		// TRANS_GW,
-	{"grass->desert", GROUND_GRASS, GROUND_DESERT, },	// TRANS_GD,
+	{"grass->desert", GROUND_GRASS, GROUND_DESERT},		// TRANS_GD,
+	{"water->desert", GROUND_WATER, GROUND_DESERT},		// TRANS_WD,
+	{"dwater->water", GROUND_DEEP_WATER, GROUND_WATER},	// TRANS_DWD,
 	};
 
 const int groundPropNb = (sizeof(groundProp)/sizeof(groundProp [0]));
