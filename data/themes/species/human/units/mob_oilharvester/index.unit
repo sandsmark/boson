@@ -5,8 +5,8 @@ Speed=4
 
 [Boson Unit]
 Armor=0
-ConstructedParticles=
-DestroyedParticles=1001,3001,6001,7001
+ConstructedEffects=
+DestroyedEffects=1001,3001,6001,7001
 ExplodingDamage=200
 ExplodingDamageRange=2
 Health=150

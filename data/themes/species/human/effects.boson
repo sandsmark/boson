@@ -1,5 +1,6 @@
 [GeneralExplosion]
 Id=1001
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=-0.1,-0.1,0.0
@@ -55,6 +56,7 @@ MaxVeloScale=0
 
 [GeneralMissileHit]
 Id=2001
+Type=ParticleGeneric
 MinVelocity=-0.3,-0.3,0.1
 MaxVelocity=0.3,0.3,0.2
 MinPos=-0.1,-0.1,0.1
@@ -76,6 +78,7 @@ Texture=explosion-01
 
 [GeneralBulletHit]
 Id=2010
+Type=ParticleGeneric
 MinVelocity=-0.2,-0.2,0.0
 MaxVelocity=0.2,0.2,0.2
 MinPos=-0.05,-0.05,0.05
@@ -98,6 +101,7 @@ Texture=explosion-old
 
 [GeneralSmoke]
 Id=3001
+Type=ParticleGeneric
 MinVelocity=-0.05,-0.05,0.5
 MaxVelocity=0.05,0.05,0.7
 MinPos=0,0,0
@@ -153,6 +157,7 @@ EndColor=0.2,0.2,0.2,0.0
 
 [GeneralShockWave]
 Id=4001
+Type=ParticleGeneric
 MinPos=0,0,0.05
 MaxPos=0,0,0.05
 StartColor=1,1,1,1
@@ -168,7 +173,8 @@ Texture=shockwave
 
 [BigShockWave]
 Id=4002
-MinVelocity=-5,-5,0  
+Type=ParticleGeneric
+MinVelocity=-5,-5,0
 MaxVelocity=5,5,0.05
 MinPos=-0.1,-0.1,0.0
 MaxPos=0.1,0.1,0.05
@@ -179,7 +185,7 @@ StartColor=1.0,1.0,0.8,0.4
 EndColor=1.0,1.0,0.9,0.3
 MinLife=0.4
 MaxLife=3.0
-MaxNum=350   
+MaxNum=350
 InitNum=350
 BlendFunc=GL_ONE_MINUS_SRC_ALPHA
 Size=1.0
@@ -196,88 +202,71 @@ MinLife=0.6
 MaxLife=0.8
 
 
-[GeneralSmokeTrace]
+[GeneralSmokeTrail]
 Id=5001
+Type=ParticleTrail
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
-MinPos=-0.0,-0.5,0
-MaxPos=-0.0,-0.7,0
-StartColor=0.5,0.5,0.5,0.6
-EndColor=0.6,0.6,0.6,0.0
-MinLife=1.3
-MaxLife=2.5
-MaxNum=30
-InitNum=0
-BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=10
+MinOffset=-0.0,-0.6,0
+MaxOffset=-0.0,-0.6,0
+StartColor=0.4,0.4,0.4,0.8
+EndColor=0.5,0.5,0.5,0.0
+MinLife=2
+MaxLife=3
 StartSize=0.1
 EndSize=0.3
-SystemLife=-1
-Align=true
+MaxSpeed=30
+Spacing=10
 Texture=smoke
 
-[GeneralFireTrace]
+
+[GeneralFireTrail]
 Id=5010
+Type=ParticleTrail
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
-MinPos=-0.05,-0.35,-0.05
-MaxPos=0.05,-0.7,0.05
+MinOffset=0,-0.4,0
+MaxOffset=0,-0.4,0
 StartColor=1.0,0.8,0.3,0.4
 EndColor=1.0,0.2,0.0,0.0
-MinLife=0.1
-MaxLife=0.1
-MaxNum=30
-InitNum=0
+MinLife=0.15
+MaxLife=0.25
 BlendFunc=GL_ONE
-Rate=200
-StartSize=0.05
-EndSize=0.1
-SystemLife=-1
-Align=true
+StartSize=0.07
+EndSize=0.2
+MaxSpeed=30
+Spacing=5
 Texture=explosion-old
 
-[FragmentSmokeTrace]
+
+[FragmentSmokeTrail]
 Id=5101
-Inherits=GeneralSmokeTrace
-MinPos=-0.0,-0.1,0
-MaxPos=-0.0,-0.3,0
+Inherits=GeneralSmokeTrail
+MinOffset=-0.0,-0.3,0
+MaxOffset=-0.0,-0.3,0
 StartColor=0.5,0.5,0.5,0.6
 EndColor=0.6,0.6,0.6,0.0
 MinLife=1.3
 MaxLife=2.5
-MaxNum=15
-InitNum=0
-BlendFunc=GL_ONE_MINUS_SRC_ALPHA
-Rate=5
-StartSize=0.1
-EndSize=0.3
-SystemLife=-1
-Align=true
+Spacing=12
 Texture=smoke
 
-[FragmentFireTrace]
+[FragmentFireTrail]
 Id=5110
-Inherits=GeneralFireTrace
-MinPos=-0.05,0.0,-0.05
-MaxPos=0.05,-0.2,0.05
+Inherits=GeneralFireTrail
+MinOffset=0,-0.1,0
+MaxOffset=0,-0.1,0
 StartColor=1.0,0.8,0.3,0.4
 EndColor=1.0,0.2,0.0,0.0
-MinLife=0.2
-MaxLife=0.2
-MaxNum=10
-InitNum=0
-BlendFunc=GL_ONE
-Rate=50
 StartSize=0.1
-EndSize=0.2
-SystemLife=-1
-Align=true
-Texture=explosion-old
+EndSize=0.25
+Spacing=7
 
 
 
 [GeneralExplosionSmoke]
 Id=6001
+Type=ParticleGeneric
 MinVelocity=-0.05,-0.05,0
 MaxVelocity=0.05,0.05,0.1
 MinPos=-0.3,-0.3,-0.1
@@ -342,6 +331,7 @@ Mass=0.3
 
 [DarkGround]
 Id=7001
+Type=ParticleGeneric
 MinPos=-0,0,0.05
 MaxPos=0,0,0.05
 StartColor=0.2,0.2,0.2,1.0
@@ -369,6 +359,7 @@ EndSize=4
 
 [GeneralFlames]
 Id=8001
+Type=ParticleGeneric
 MinVelocity=0.1,-0.1,0.8
 MaxVelocity=0.1,-0.1,0.8
 MinPos=-0.1,-0.1,0.3
@@ -391,6 +382,7 @@ Texture=flames
 
 [VeryLightMineralRefinerySmoke1]
 Id=10001
+Type=ParticleGeneric
 MinVelocity=0,0,0.03
 MaxVelocity=0,0,0.15
 MinPos=0.3,0.7,1.4
@@ -433,6 +425,7 @@ EndColor=0.9,0.9,0.9,0.0
 
 [VeryLightOilRefinerySmoke1]
 Id=10010
+Type=ParticleGeneric
 MinVelocity=0,0,0.03
 MaxVelocity=0,0,0.1
 MinPos=0.71,0.25,1.9
@@ -461,6 +454,7 @@ MaxPos=0.71,-0.65,2
 
 [VeryLightPowerPlantSmoke1]
 Id=10020
+Type=ParticleGeneric
 MinVelocity=0,0,0.03
 MaxVelocity=0,0,0.1
 MinPos=0.3,0.4,1.05
@@ -483,6 +477,7 @@ Texture=smoke
 
 [TransallPropTrace1]
 Id=11001
+Type=ParticleGeneric
 MinVelocity=-0.05,-0.2,-0.05
 MaxVelocity=0.05,-0.2,0.05
 MinPos=-1.05,-0.2,0.32
@@ -523,6 +518,7 @@ MaxPos=1.05,-0.3,0.32
 
 [GeneralShootFlash]
 Id=12000
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=0,0,0
@@ -588,6 +584,7 @@ MaxPos=-0.24,0.37,0.28
 
 [DaisyCutter-MainExplosion]
 Id=20010
+Type=ParticleGeneric
 MinVelocity=-0.5,-0.5,0.3
 MaxVelocity=0.5,0.5,0
 MinPos=-2.5,-2.5,0.7
@@ -610,6 +607,7 @@ Texture=explosion-old
 
 [DaisyCutter-NukeExplosion]
 Id=20025
+Type=ParticleGeneric
 MinVelocity=0,0,0.8
 MaxVelocity=0,0,0.8
 MinPos=-1.0,-1.0,2.0
@@ -629,6 +627,7 @@ Texture=nuke-explosion
 
 [DaisyCutter-ShockWave]
 Id=20030
+Type=ParticleGeneric
 MinVelocity=-1,-1,0
 MaxVelocity=1,1,0
 NormalizeVelo=true
@@ -650,6 +649,7 @@ Texture=smoke
 
 [DaisyCutter-DustCloud]
 Id=20040
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=-5,-5,0.6
@@ -672,6 +672,7 @@ Texture=smoke
 
 [DaisyCutter-GeneralSmokeTrace]
 Id=20110
+Type=ParticleGeneric
 MinVelocity=0.2,0.2,0.2
 MaxVelocity=0.2,0.2,0.2
 MinPos=-0.3,-0.6,0
@@ -692,6 +693,7 @@ Texture=smoke
 
 [DaisyCutter-MissileFireTrace]
 Id=20120
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=-0.3,-0.4,0
@@ -712,6 +714,7 @@ Texture=explosion-old
 
 [A10-light1]
 Id=21010
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=-0.15,-0.4,0.12
@@ -740,6 +743,7 @@ MaxPos=0.15,-0.4,0.12
 
 [A10-shoot]
 Id=21100
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=0.25,0.0,0.0
@@ -760,6 +764,7 @@ Texture=halo
 
 [A10-hit-halo]
 Id=21200
+Type=ParticleGeneric
 MinVelocity=0,0,0
 MaxVelocity=0,0,0
 MinPos=-0.5,-0.5,-0.5
@@ -783,6 +788,7 @@ Texture=halo
 
 [GeneralSnow]
 Id=50001
+Type=ParticleGeneric
 MinVelocity=-0.1,-0.1,-1.2
 MaxVelocity=0.1,0.1,-0.8
 MinPos=-2.5,-2.5,4
@@ -804,6 +810,7 @@ Texture=snow
 
 [GeneralSnow-Heavy]
 Id=50002
+Type=ParticleGeneric
 MinVelocity=-0.1,-0.1,-1.2
 MaxVelocity=0.1,0.1,-0.8
 MinPos=-2.5,-2.5,4
@@ -825,6 +832,7 @@ Texture=snow
 
 [GeneralSnow-Light]
 Id=50003
+Type=ParticleGeneric
 MinVelocity=-0.1,-0.1,-1.2
 MaxVelocity=0.1,0.1,-0.8
 MinPos=-2.5,-2.5,4
