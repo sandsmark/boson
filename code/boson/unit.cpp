@@ -905,6 +905,7 @@ Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) :
  setWork(WorkConstructed);
 
  d->mProductions.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
+ d->mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
 }
 
 Facility::~Facility()
@@ -1112,7 +1113,6 @@ void Facility::advanceProduction()
 		kdDebug() << "Cannot find free cell around facility :-(" << endl;
 	} else {
 		d->mProductionState = d->mProductionState + 1;
-		owner()->productionAdvanced(this, productionProgress());
 	}
  }
 }

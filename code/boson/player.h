@@ -87,14 +87,6 @@ public:
 
 	void initMap(BosonMap* map);
 
-	/**
-	 * Called by @ref Unit. This informs a player (and only this player, so
-	 * the owner of the factory) that the production of a unit has advanced.
-	 *
-	 * This just emits @ref signalProductionAdvanced
-	 **/
-	void productionAdvanced(Unit* factory, double percentage);
-
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
@@ -104,17 +96,6 @@ signals:
 
 	void signalFog(int x, int y);
 	void signalUnfog(int x, int y);
-
-	/**
-	 * A production has advanced by one step. You might want to use this to
-	 * give some visual feedback to the player (see @ref
-	 * BosonCommandWidget).
-	 *
-	 * Note that this is probably called several times per second, so it is
-	 * surely a bad idea (tm) to give visual feedback on every call of this
-	 * signal.
-	 **/
-	void signalProductionAdvanced(Unit* factory, double percentage);
 
 public slots:
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);

@@ -267,7 +267,6 @@ void BosonCommandFrame::slotSetProduction(Unit* unit)
  }
 
  if (!unit->isFacility()) {
-	kdError() << k_lineinfo << "Only facilities can produce" << endl;
 	return;
  }
  if (!((Facility*)unit)->completedConstruction()) {
@@ -281,12 +280,13 @@ void BosonCommandFrame::slotSetProduction(Unit* unit)
  QValueList<int> produceList = prop->produceList();
  setOrderButtons(produceList, owner, (Facility*)unit);
  d->mFactory = unit;
- connect(d->mFactory->owner(), SIGNAL(signalProductionAdvanced(Unit*, double)),
-		this, SLOT(slotProductionAdvanced(Unit*, double)));
  
  d->mOrderType = OrderMobiles; // kind of FIXME: it doesn't matter whether this
                           // is OrderMobiles or OrderFacilities. The difference
 			  // is only in editor.cpp for the KActions.
+ if (((Facility*)unit)->hasProduction()) {
+	d->mUpdateTimer.start(500);
+ }
 }
 
 void BosonCommandFrame::hideOrderButtons()
@@ -468,13 +468,17 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
  d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
 }
 
-void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
+void BosonCommandFrame::productionAdvanced(Unit* factory, double percentage)
 {
  if (d->mFactory != factory) {
 	return;
  }
  if (!factory->isFacility()) {
 	kdError() << k_lineinfo << "NOT factory" << endl;
+	return;
+ }
+ if (!((Facility*)factory)->hasProduction()) {
+	kdDebug() << k_funcinfo << "no production" << endl;
 	return;
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
@@ -485,9 +489,7 @@ void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
 		}
 	}
  }
-
 }
-
 
 void BosonCommandFrame::slotFacilityProduces(Facility* f)
 {
@@ -527,10 +529,17 @@ void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
 
 void BosonCommandFrame::slotUpdate()
 {
+ kdDebug() << k_funcinfo << endl;
  if (d->mFacility) {
 	slotShowConstructionProgress(d->mFacility);
 	if (d->mFacility->completedConstruction()) {
 		slotSetProduction(d->mFacility);
+	}
+ } else if (d->mFactory) {
+	if (!((Facility*)d->mFactory)->hasProduction()) {
+		slotProductionCompleted((Facility*)d->mFactory);
+	} else {
+		productionAdvanced(d->mFactory, ((Facility*)d->mFactory)->productionProgress());
 	}
  } else {
 	d->mUpdateTimer.stop();

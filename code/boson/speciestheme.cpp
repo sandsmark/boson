@@ -486,7 +486,7 @@ const UnitProperties* SpeciesTheme::unitProperties(UnitBase* unit) const
 const UnitProperties* SpeciesTheme::unitProperties(int unitType) const
 {
  if (unitType < 0) {
-	kdError() << "invalid unit type " << unitType << endl;
+	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
  if (!d->mUnitProperties[unitType]) {
