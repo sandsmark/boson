@@ -74,22 +74,22 @@ is tested against gcc-2.95.3 (gentoo 1.2 and previous) and gcc-3.2 (gentoo 1.4
 and following). To get boson downloaded, compiled and installed, please issue a
 <pre>emerge boson</pre><br>");*/
 
-/*draw_bigbox_subheader("RPM/binary releases");
+draw_bigbox_subheader("RPM/binary releases");
 draw_bigbox_text("Note that RPM packages are not provided by the Boson team and
 are inofficial. If you feel like building a RPM for boson (for any platform),
 we'll be happy to put a link here and/or add them to our site.<br><br>You can
 get a RPM package of Boson from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-0.7-1.i386.rpm?download\">here</a>
-(XX XXX KB) or from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=XXXXX\">SF.net</a>.
+(38 140 KB) or from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">SF.net</a>.
 This package is compiled for Red Hat 7.3 on i386.<br><br>
 We also have a RPM source package which is like all-in-one package, just that
 it's packaged with RPM. You can get it from
 <a href=\"http://prdownloads.sourceforge.net/boson/boson-0.7-1.src.rpm?download\">here</a>
-(XX XXX KB) or from
-<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=XXXXX\">SF.net</a>
+(36 293 KB) or from
+<a href=\"http://sourceforge.net/project/showfiles.php?group_id=15087&release_id=121263\">SF.net</a>
 again. These package were provided by
-<a href=\"mailto:krzyko@users.sourceforge.net\">Krzysztof Kosz</a><br><br>");*/
+<a href=\"mailto:krzyko@users.sourceforge.net\">Krzysztof Kosz</a><br><br>");
 
 draw_bigbox_subheader("Older versions");
 draw_bigbox_text("Currently, you can download old releases only via
