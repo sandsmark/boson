@@ -24,6 +24,7 @@
 class BosonBigDisplayBase;
 class BosonItem;
 class QString;
+class BosonGLFont;
 
 class BoGLToolTipPrivate;
 /**
@@ -36,7 +37,16 @@ public:
 	BoGLToolTip(BosonBigDisplayBase*);
 	virtual ~BoGLToolTip();
 
-	virtual bool eventFilter(QObject* o, QEvent* e);
+	/**
+	 * Render the tooltip at the cursor position @p cursorX and @p cursor Y.
+	 * An offset is added to that cursor position and the "best" direction
+	 * (left to the cursor / right to the cursor, ...) is chosen.
+	 * @param viewportMatrix The current viewport matrix as it is used by
+	 * the @ref BosonBigDisplayBase widget that was specified in the
+	 * construcotr.
+	 * @param font The desired font for the tooltip
+	 **/
+	void renderToolTip(int cursorX, int cursorY, int* viewportMatrix, BosonGLFont* font);
 
 	/**
 	 * @return TRUE when the @ref currentTip should get displayed in this
@@ -44,54 +54,62 @@ public:
 	 **/
 	bool showTip() const { return mShowTip; }
 
-	const QString& currentTip() const { return mCurrentTip; }
-
 	/**
-	 * Initialize the global/static tip manager. This is done automatically
-	 * in the BoGLToolTip c'tor, so you usually don't need to call this.
+	 * @return How many ms it takes for a tooltip to be shown, i.e. for how
+	 * long the mouse must not be moved.
 	 **/
-	static void initTipManager();
-
 	static int toolTipDelay();
 
 	/**
-	 * Add a tip that gets displayed for every item which @ref
-	 * BosonItem::rtti equals rtti. Note that you can override this tip if
-	 * you add a tip providing the pointer of the @ref BosonItem
-	 * @param rtti The @ref BosonItem::rtti this tip is displayed for
-	 * @param tip Well... the tip!
+	 * @return How often the tooltip data is updated. E.g. if this returns 5
+	 * then every 5 ms the data is updated. See @ref slotUpdate
 	 **/
-	static void add(int rtti, const QString& tip);
+	int updatePeriod() const { return mUpdatePeriod; }
 
 	/**
-	 * Add a tip for a single item only. Note that this tip does
-	 * <em>not</em> get removed once the unit is deleted! Use @ref remove in
-	 * your destructor!
-	 *
-	 * This tip overrides any rtti-dependant tip.
-	 * @param item The @ref BosonItem this tip is displayed for
-	 * @param tip Well... the tip!
+	 * See @ref updatePeriod and @ref slotUpdate.
 	 **/
-	static void add(BosonItem* item, const QString& tip);
-	static void remove(BosonItem* item);
-	static void remove(int rtti);
+	void setUpdatePeriod(int ms);
 
-	static void ignore(int rtti);
-	static void ignore(BosonItem* item);
-	static void unignore(int rtti);
-	static void unignore(BosonItem* item);
-	
+	virtual bool eventFilter(QObject* o, QEvent* e);
+
 protected:
 	void hideTip();
 
 protected slots:
+	/**
+	 * Called when @ref toolTipDelay has expired (i.e. the mouse has not
+	 * been moved for @ref toolTipDelay ms). This slot will check whether
+	 * there is a relevant item below the cursor on the @ref
+	 * BosonBigDisplayBase widget. If there is one it will update the
+	 * tooltip (in case that item was not under the cursor when this slot
+	 * had been called the last time).
+	 *
+	 * If a tooltip is meant to be displayed @ref showTip will be set to
+	 * TRUE. Use @ref renderToolTip to render the tip.
+	 *
+	 * Also see @ref slotUpdate, which takes care that the displayed data
+	 * remains current.
+	 **/
 	void slotTimeOut();
+
+	/**
+	 * This slot gets called every @ref updatePeriod ms. It will update the
+	 * data about the currently displayed tooltip. I.e. if the tooltip is
+	 * for a unit, the data about that unit is updated. Note that this slot
+	 * does not check whether the unit is still under the cursor.
+	 *
+	 * This slot is used to display dynamic data, to keep it fast. You don't
+	 * need to update the tip whenever it is rendered to display the current
+	 * health (e.g.). An internal timer takes care of updating it regulary.
+	 **/
+	void slotUpdate();
 
 private:
 	BoGLToolTipPrivate* d;
 	BosonBigDisplayBase* mView;
-	QString mCurrentTip;
 	bool mShowTip;
+	int mUpdatePeriod;
 };
 
 #endif

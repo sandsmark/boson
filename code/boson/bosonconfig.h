@@ -259,6 +259,9 @@ public:
 	void setCursorDir(const QString& dir) { mCursorDir->setValue(dir); }
 	QString cursorDir() const { return mCursorDir->value(); }
 
+	void setToolTipUpdatePeriod(int ms) { mToolTipUpdatePeriod->setValue(ms); }
+	int toolTipUpdatePeriod() const { return mToolTipUpdatePeriod->value(); }
+
 
 // below we have config values that are *not* stored when quitting boson
 public:
@@ -294,7 +297,7 @@ public:
 	bool loadTiles() const { return mLoadTiles; }
 
 	float aiDelay() const { return mAIDelay; }
-  void setAiDelay(float delay) { mAIDelay = delay; }
+	void setAiDelay(float delay) { mAIDelay = delay; }
 
 public:
 	void save(bool editor = false, KConfig* conf = 0);
@@ -355,6 +358,7 @@ private:
 	BoConfigBoolEntry* mUseLight;
 	BoConfigStringEntry* mCursorDir;
 	BoConfigIntEntry* mCursorMode;
+	BoConfigIntEntry* mToolTipUpdatePeriod;
 
 	// NOT stored to config file!
 	bool mDisableSound;

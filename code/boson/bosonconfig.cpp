@@ -215,6 +215,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mUseLight = new BoConfigBoolEntry(this, "UseLight", DEFAULT_USE_LIGHT);
  mCursorMode = new BoConfigIntEntry(this, "CursorMode", (int)DEFAULT_CURSOR);
  mCursorDir = new BoConfigStringEntry(this, "CursorDir", DEFAULT_CURSOR_DIR);
+ mToolTipUpdatePeriod = new BoConfigIntEntry(this, "ToolTipUpdatePeriod", DEFAULT_TOOLTIP_UPDATE_PERIOD);
 
  mDebugMode = DebugNormal;
 

@@ -90,6 +90,7 @@
 #define DEFAULT_DEACTIVATE_WEAPON_SOUNDS false
 #define DEFAULT_USE_LIGHT false // not really supported yet
 #define DEFAULT_USE_MIPMAPS_FOR_MODELS true
+#define DEFAULT_TOOLTIP_UPDATE_PERIOD 300
 
 // not in BosonConfig (not necessarily in OptionsDialog):
 #define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)
