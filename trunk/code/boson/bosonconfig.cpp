@@ -57,6 +57,9 @@ BosonConfig::~BosonConfig()
 
 void BosonConfig::initBosonConfig()
 {
+ if (mBosonConfig) {
+	return;
+ }
  mBosonConfig = new BosonConfig;
 }
 
