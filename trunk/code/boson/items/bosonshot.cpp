@@ -142,6 +142,11 @@ const QColor* BosonShot::teamColor() const
 
 bool BosonShot::saveAsXML(QDomElement& root)
 {
+  if (!BosonItem::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error saving BosonItem" << endl;
+    return false;
+  }
   root.setAttribute("x", x());
   root.setAttribute("y", y());
   root.setAttribute("z", z());
@@ -165,6 +170,11 @@ bool BosonShot::saveAsXML(QDomElement& root)
 
 bool BosonShot::loadFromXML(const QDomElement& root)
 {
+  if (!BosonItem::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error loading BosonItem" << endl;
+    return false;
+  }
   bool ok;
   float x;
   float y;

@@ -132,6 +132,9 @@ void UnitBase::setOwner(Player* owner)
 
 bool UnitBase::saveAsXML(QDomElement& root)
 {
+ if (!BosonItem::saveAsXML(root)) {
+	return false;
+ }
  QDomDocument doc = root.ownerDocument();
  root.setAttribute(QString::fromLatin1("Rtti"), (int)rtti());
  root.setAttribute(QString::fromLatin1("Type"), (unsigned int)type());
@@ -154,6 +157,9 @@ bool UnitBase::saveAsXML(QDomElement& root)
 
 bool UnitBase::loadFromXML(const QDomElement& root)
 {
+ if (!BosonItem::loadFromXML(root)) {
+	return false;
+ }
  if (root.isNull()) {
 	boError() << k_funcinfo << "NULL root node" << endl;
 	return false;
