@@ -78,13 +78,26 @@ public:
 	 **/
 	Unit* findUnitAt(const QPoint& pos);
 
+	BosonItem* findItemAt(const QPoint& pos);
+
 	/**
+	 * See @ref findItemAtCell.
 	 * @param x The x-coordinate of the cell
 	 * @param y The y-coordinate of the cell
 	 * @return The unit on this cell. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
 	Unit* findUnitAtCell(int x, int y);
+
+	/*
+	 * @param x The x-coordinate of the cell
+	 * @param y The y-coordinate of the cell
+	 * @param unitOnly If TRUE this returns units only (see @ref
+	 * findUnitAtCell), otherwise any item.
+	 * @return The first item that is found on that cell. If that item is a
+	 * unit then it'll be returned only if it is not destroyed.
+	 **/
+	BosonItem* findItemAtCell(int x, int y, bool unitOnly);
 
 	/**
 	 * Test whether the unit can go over rect. This method only tests for
