@@ -242,11 +242,6 @@ public:
 protected:
 	void initKAction();
 
-	/**
-	 * @return all units (mobile and fix) in this theme.
-	 **/
-	QValueList<unsigned long int> allUnits(SpeciesTheme*) const;
-
 protected:
 	/**
 	 * Connect both objects to the signal. Both objects need to provide the
@@ -262,6 +257,7 @@ protected:
 
 protected slots:
 	void slotUnitChanged(int);
+	void slotDebugModels();
 
 private:
 	PreviewConfig* mConfig;

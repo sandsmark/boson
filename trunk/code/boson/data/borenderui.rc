@@ -4,5 +4,8 @@
   <Menu name="view"><text>&amp;View</text>
     <Action name="view_species" />
   </Menu>
+  <Menu name="debug"><text>&amp;Debug</text>
+    <Action name="debug_models" />
+  </Menu>
 </MenuBar>
 </kpartgui>
