@@ -19,6 +19,7 @@
 #ifndef UPGRADEPROPERTIES_H
 #define UPGRADEPROPERTIES_H
 
+#include "bomath.h"
 #include <qstring.h>
 
 class Player;
@@ -129,17 +130,17 @@ class UpgradeProperties
 
     void applyProperty(QValueList<unsigned long int>* typeIds, Player* player,
         const QString& data, UpgradeType type, int weaponid = -1) const;
-    void applyPropertyToUnits(float oldvalue, unsigned long int typeId,
+    void applyPropertyToUnits(bofixed oldvalue, unsigned long int typeId,
         Player* player, UpgradeType type) const;
 
 
     unsigned long int applyValue(const QString& data, unsigned long int oldvalue) const;
-    float applyValue(const QString& data, float oldvalue) const;
+    bofixed applyValue(const QString& data, bofixed oldvalue) const;
     void parseEntry(const QString& entry, ValueType& type, QString& value) const;
 
   private:
     /**
-     * Note: you are meant to use primitive data (int, uint, float, ...) only
+     * Note: you are meant to use primitive data (int, uint, bofixed, ...) only
      * here!
      * You should avoid classes
      *

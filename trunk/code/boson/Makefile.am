@@ -27,6 +27,7 @@ INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
 
 libboson_la_SOURCES = \
+	bomath.cpp \
 	boapplication.cpp \
 	boglobal.cpp \
 	bosonconfig.cpp \
@@ -88,6 +89,7 @@ libboson_la_SOURCES = \
 	bolodbuilder.cpp \
 	bomaterial.cpp \
 	\
+	bogameproperty.cpp \
 	bosonglchat.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \

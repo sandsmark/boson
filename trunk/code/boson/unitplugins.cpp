@@ -577,14 +577,14 @@ bool HarvesterPlugin::isNextTo(const Unit* u) const
 	return false;
  }
 
- float distx, disty;
+ bofixed distx, disty;
  distx = fabsf((u->x() + u->width() / 2) - (unit()->x() + unit()->width() / 2));
  disty = fabsf((u->y() + u->height() / 2) - (unit()->y() + unit()->height() / 2));
  // We might get some precision trouble with floats, so we do this:
  distx = fmaxf(distx - 1, 0);
  disty = fmaxf(disty - 1, 0);
 
- float allowedx, allowedy;
+ bofixed allowedx, allowedy;
  allowedx = unit()->width() / 2 + u->width() / 2;
  allowedy = unit()->height() / 2 + u->height() / 2;
 
@@ -751,7 +751,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
  BO_CHECK_NULL_RET0(neutral);
  QPtrListIterator<Unit> it(*(neutral->allUnits()));
  ResourceMinePlugin* mine = 0;
- float mineDist = 0.0f;
+ bofixed mineDist = 0.0f;
  while (it.current()) {
 	Unit* u = it.current();
 	if (!player()->playerIO()->canSee(u)) {
@@ -764,7 +764,7 @@ ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
 		continue;
 	}
 	if (m->isUsableTo(this)) {
-		float dist = QMAX(QABS(unit()->x() - u->x()), QABS(unit()->y() - u->y()));
+		bofixed dist = QMAX(QABS(unit()->x() - u->x()), QABS(unit()->y() - u->y()));
 		if ((dist < mineDist) || (mineDist == 0.0f)) {
 			mineDist = dist;
 			mine = m;
@@ -785,7 +785,7 @@ RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 	return 0;
  }
  RefineryPlugin* ref = 0;
- float refdist = 0.0f;
+ bofixed refdist = 0.0f;
  while (it.current()) {
 	RefineryPlugin* r = (RefineryPlugin*)it.current()->plugin(UnitPlugin::Refinery);
 	if (!r) {
@@ -793,7 +793,7 @@ RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 		continue;
 	}
 	if (r->isUsableTo(this)) {
-		float dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
+		bofixed dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
 		if ((dist < refdist) || (refdist == 0.0f)) {
 			refdist = dist;
 			ref = r;
@@ -977,9 +977,9 @@ void BombingPlugin::advance(unsigned int)
 {
  // Check if we're at the drop point
  // Unit's center point
- float unitx = unit()->centerX();
- float unity = unit()->centerY();
- float dist = QMAX(QABS(unitx - mPosX), QABS(unity - mPosY));
+ bofixed unitx = unit()->centerX();
+ bofixed unity = unit()->centerY();
+ bofixed dist = QMAX(QABS(unitx - mPosX), QABS(unity - mPosY));
 // boDebug() << k_funcinfo << "dist: " << dist << endl;
 // boDebug() << k_funcinfo << "my pos is: (" << unitx << "; " << unity << ");  drop-point is: (" << mPosX << "; " << mPosY << ")" << endl;
  if ((unitx != mPosX) || (unity != mPosY)) {
@@ -990,7 +990,7 @@ void BombingPlugin::advance(unsigned int)
 	} else {
 		unit()->pathInfo()->slowDownAtDest = false;
 		unit()->pathInfo()->moveAttacking = false;
-		unit()->addWaypoint(BoVector2(mPosX, mPosY));
+		unit()->addWaypoint(BoVector2(bofixed(mPosX), bofixed(mPosY)));
 		unit()->setAdvanceWork(Unit::WorkMove);
 	}
 	return;
@@ -1003,10 +1003,10 @@ void BombingPlugin::advance(unsigned int)
 	mWeapon->dropBomb();
 	// And get the hell out of there
 	// Go away from bomb's explosion radius
-	float dist = mWeapon->properties()->damageRange() + unit()->width() / 2;
+	bofixed dist = mWeapon->properties()->damageRange() + unit()->width() / 2;
   boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
-	float newx = unitx;
-	float newy = unity;
+	bofixed newx = unitx;
+	bofixed newy = unity;
 	// TODO: quite messy code, maybe it can be cleaned up somehow
 	int rot = (int)unit()->rotation() % 360;
 	if (rot >= 45 && rot <= 135) {
@@ -1117,11 +1117,11 @@ void MiningPlugin::advance(unsigned int)
 
 	// Go one cell away from the mine. Maybe go away from explosion radius?
 	// FIXME: code taken from BombingPlugin. This could probably be written better
-	float dist = 1.0f + unit()->width() / 2.0f;
+	bofixed dist = 1.0f + unit()->width() / 2.0f;
 	boDebug() << k_funcinfo << "Getaway dist: " << dist << "; rot: " << unit()->rotation() << endl;
-	float oldx = unit()->x();
-	float oldy = unit()->y();
-	float newx, newy;
+	bofixed oldx = unit()->x();
+	bofixed oldy = unit()->y();
+	bofixed newx, newy;
 	bool couldmove = false;
 
 	// TODO: quite messy code, maybe it can be cleaned up somehow
@@ -1151,8 +1151,8 @@ void MiningPlugin::advance(unsigned int)
 		}
 
 		// Make sure coords are valid
-		newx = QMAX(0, QMIN(newx, (canvas()->mapWidth() - 1)));
-		newy = QMAX(0, QMIN(newy, (canvas()->mapHeight() - 1)));
+		newx = QMAX(bofixed(0), QMIN(newx, bofixed((canvas()->mapWidth() - 1))));
+		newy = QMAX(bofixed(0), QMIN(newy, bofixed((canvas()->mapHeight() - 1))));
 
 		boDebug() << k_funcinfo << "i: " << i << "; Getaway point is at (" << newx << "; " << newy << ")" << endl;
 		if (unit()->moveTo(newx, newy)) {

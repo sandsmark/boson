@@ -21,6 +21,7 @@
 
 #include "bosoncollisions.h"
 #include "defines.h"
+#include "bomath.h"
 
 #include <qobject.h>
 
@@ -198,14 +199,14 @@ public:
 	 * This is calculated from heights at the corners of the cell that the point
 	 * is on. Water surface level is also taken insto account
 	 **/
-	float heightAtPoint(float x, float y) const;
+	float heightAtPoint(bofixed x, bofixed y) const;
 
 	/**
 	 * @return Height at point x,y (in canvas coordinates)
 	 * This is calculated from heights at the corners of the cell that the point
 	 *  is on. Note that this method _does not_ take water level into account.
 	 **/
-	float terrainHeightAtPoint(float x, float y) const;
+	float terrainHeightAtPoint(bofixed x, bofixed y) const;
 
 	void addAnimation(BosonItem* item);
 	void removeAnimation(BosonItem* item);
@@ -241,7 +242,7 @@ public:
 	 *
 	 * Also adjust the mini map - see @ref signalUnitMoved
 	 **/
-	void unitMoved(Unit* unit, float oldX, float oldY);
+	void unitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 
 	void unitMovingStatusChanges(Unit* u, int oldstatus, int newstatus);
 
@@ -264,7 +265,7 @@ public:
 	 * @param range Radius of explosion. All units range or less cells away will be damaged
 	 * @param owner Player who caused the explosion. Used for statistics. May be null
 	 **/
-	void explosion(const BoVector3& pos, long int damage, float range, float fullrange, Player* owner);
+	void explosion(const BoVector3& pos, long int damage, bofixed range, bofixed fullrange, Player* owner);
 
 	/**
 	 * Called when unit is damaged (usually by missile).
@@ -292,14 +293,14 @@ public:
 	 **/
 	void removeUnit(Unit* unit);
 
-	void updateSight(Unit*, float oldX, float oldY);
+	void updateSight(Unit*, bofixed oldX, bofixed oldY);
 
 	Cell* cellAt(Unit* unit) const;
 
 	/**
 	 * @return The cell at @p x, @p y in <em>canvas</em>-coordinates
 	 **/
-	Cell* cellAt(float x, float y) const;
+	Cell* cellAt(bofixed x, bofixed y) const;
 
 	/**
 	 * @return The cell at @p x, @p y (in cell coordinates - see @ref cellAt
@@ -328,12 +329,12 @@ public:
 	/**
 	 * Convenience method. See @ref BosonCollisions::findUnitAtCell
 	 **/
-	Unit* findUnitAtCell(int x, int y, float z) const { return collisions()->findUnitAtCell(x, y, z); }
+	Unit* findUnitAtCell(int x, int y, bofixed z) const { return collisions()->findUnitAtCell(x, y, z); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::findItemAtCell
 	 **/
-	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) const { return collisions()->findItemAtCell(x, y, z, unitOnly); }
+	BosonItem* findItemAtCell(int x, int y, bofixed z, bool unitOnly) const { return collisions()->findItemAtCell(x, y, z, unitOnly); }
 
 	/**
 	 * Convenience method. See @ref BosonCollisions::cellOccupied
@@ -367,7 +368,7 @@ public:
 
 	bool onCanvas(const BoVector2& pos) const;
 	bool onCanvas(const BoVector3& pos) const;
-	bool onCanvas(float x, float y) const
+	bool onCanvas(bofixed x, bofixed y) const
 	{
 		return x >= 0.0f && y >= 0.0f && x <= mapWidth() && y <= mapHeight();
 	}
@@ -417,7 +418,7 @@ public slots:
 
 signals:
 	void signalItemAdded(BosonItem* item);
-	void signalUnitMoved(Unit* unit, float oldX, float oldY);
+	void signalUnitMoved(Unit* unit, bofixed oldX, bofixed oldY);
 	void signalUnitRemoved(Unit* unit);
 
 	/**

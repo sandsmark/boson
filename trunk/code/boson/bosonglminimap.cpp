@@ -128,7 +128,7 @@ void BosonGLMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight,
  d->mSelectionRect.setPoint(7, topLeft);
 }
 
-void BosonGLMiniMap::slotUnitMoved(Unit* unit, float oldX, float oldY)
+void BosonGLMiniMap::slotUnitMoved(Unit* unit, bofixed oldX, bofixed oldY)
 {
  BO_CHECK_NULL_RET(unit);
  QPtrVector<Cell> newCells;
@@ -146,12 +146,12 @@ void BosonGLMiniMap::slotUnitDestroyed(Unit* unit)
  moveUnit(unit, &cells, 0);
 }
 
-void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, float x, float y)
+void BosonGLMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, bofixed x, bofixed y)
 {
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(unit);
- float right = QMIN(x + unit->width(), map()->width());
- float bottom = QMIN(y + unit->height(), map()->height());
+ bofixed right = QMIN(x + unit->width(), bofixed(map()->width()));
+ bofixed bottom = QMIN(y + unit->height(), bofixed(map()->height()));
  BosonItem::makeCells(map()->cells(), cells, BoRect(x, y, right, bottom), map()->width(), map()->height());
 }
 

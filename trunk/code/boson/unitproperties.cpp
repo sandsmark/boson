@@ -72,9 +72,9 @@ public:
 	{
 	}
 
-	float mSpeed;
-	float mAccelerationSpeed;
-	float mDecelerationSpeed;
+	bofixed mSpeed;
+	bofixed mAccelerationSpeed;
+	bofixed mDecelerationSpeed;
 	int mRotationSpeed;
 	bool mCanGoOnLand;
 	bool mCanGoOnWater;
@@ -156,7 +156,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  }
  mUnitWidth = conf.readDoubleNumEntry("UnitWidth", 1.0);
  mUnitHeight = (conf.readDoubleNumEntry("UnitHeight", 1.0));
- mUnitDepth = (float)conf.readDoubleNumEntry("UnitDepth", 1.0);
+ mUnitDepth = conf.readDoubleNumEntry("UnitDepth", 1.0);
  d->mName = conf.readEntry("Name", i18n("Unknown"));
  mHealth = conf.readUnsignedLongNumEntry("Health", 100);
  mMineralCost = conf.readUnsignedLongNumEntry("MineralCost", 100);
@@ -169,10 +169,10 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
  isFacility = conf.readBoolEntry("IsFacility", false);
  d->mRequirements = BosonConfig::readUnsignedLongNumList(&conf, "Requirements");
  mExplodingDamage = conf.readLongNumEntry("ExplodingDamage", 0);
- mExplodingDamageRange = (float)(conf.readDoubleNumEntry("ExplodingDamageRange", 0));
+ mExplodingDamageRange = conf.readDoubleNumEntry("ExplodingDamageRange", 0);
  mExplodingFragmentCount = conf.readUnsignedNumEntry("ExplodingFragmentCount", 0);
  mExplodingFragmentDamage = conf.readLongNumEntry("ExplodingFragmentDamage", 10);
- mExplodingFragmentDamageRange = (float)conf.readDoubleNumEntry("ExplodingFragmentDamageRange", 0.5);
+ mExplodingFragmentDamageRange = conf.readDoubleNumEntry("ExplodingFragmentDamageRange", 0.5);
  mRemoveWreckageImmediately = conf.readBoolEntry("RemoveWreckageImmediately", false);
  d->mExplodingFragmentFlyEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentFlyEffects");
  d->mExplodingFragmentHitEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ExplodingFragmentHitEffects");
@@ -181,6 +181,7 @@ bool UnitProperties::loadUnitType(const QString& fileName, bool fullmode)
 	d->mExplodingFragmentHitEffects = BosonEffectProperties::loadEffectProperties(d->mExplodingFragmentHitEffectIds);
  }
  d->mHitPoint = BosonConfig::readBoVector3Entry(&conf, "HitPoint");  // FIXME: better name
+ d->mHitPoint.cellToCanvas();
 
  d->mDestroyedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "DestroyedEffects");
  d->mConstructedEffectIds = BosonConfig::readUnsignedLongNumList(&conf, "ConstructedEffects");
@@ -212,8 +213,8 @@ void UnitProperties::saveUnitType(const QString& fileName)
 
  conf.writeEntry("Id", typeId());
  conf.writeEntry("TerrainType", (int)mTerrain);
- conf.writeEntry("UnitWidth", mUnitWidth);
- conf.writeEntry("UnitHeight", mUnitHeight);
+ conf.writeEntry("UnitWidth", (double)mUnitWidth);
+ conf.writeEntry("UnitHeight", (double)mUnitHeight);
  conf.writeEntry("UnitDepth", (double)mUnitDepth);
  conf.writeEntry("Name", d->mName);
  conf.writeEntry("Health", mHealth);
@@ -227,8 +228,10 @@ void UnitProperties::saveUnitType(const QString& fileName)
  conf.writeEntry("IsFacility", isFacility());
  BosonConfig::writeUnsignedLongNumList(&conf, "Requirements", d->mRequirements);
  conf.writeEntry("ExplodingDamage", mExplodingDamage);
- conf.writeEntry("ExplodingDamageRange", mExplodingDamageRange);
- BosonConfig::writeEntry(&conf, "HitPoint", d->mHitPoint);
+ conf.writeEntry("ExplodingDamageRange", (double)mExplodingDamageRange);
+ BoVector3 tmpHitPoint(d->mHitPoint);
+ tmpHitPoint.canvasToCell();
+ BosonConfig::writeEntry(&conf, "HitPoint", tmpHitPoint);
  conf.writeEntry("Producer", mProducer);
 
  BosonConfig::writeUnsignedLongNumList(&conf, "DestroyedEffects", d->mDestroyedEffectIds);
@@ -249,14 +252,14 @@ void UnitProperties::loadMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
  createMobileProperties();
- mMobileProperties->mSpeed = (float)conf->readDoubleNumEntry("Speed", 0) / 48.0f;
+ mMobileProperties->mSpeed = conf->readDoubleNumEntry("Speed", 0) / 48.0f;
  if (mMobileProperties->mSpeed < 0) {
 	boWarning() << k_funcinfo << "Invalid Speed value: " << mMobileProperties->mSpeed <<
 			" for unit " << typeId() << ", defaulting to 0" << endl;
 	mMobileProperties->mSpeed = 0;
  }
- mMobileProperties->mAccelerationSpeed = (float)conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
- mMobileProperties->mDecelerationSpeed = (float)conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
+ mMobileProperties->mAccelerationSpeed = conf->readDoubleNumEntry("AccelerationSpeed", 0.1) / 48.0f;
+ mMobileProperties->mDecelerationSpeed = conf->readDoubleNumEntry("DecelerationSpeed", 0.2) / 48.0f;
  mMobileProperties->mRotationSpeed = conf->readNumEntry("RotationSpeed", (int)(mMobileProperties->mSpeed * 48.0f * 2));
  mMobileProperties->mCanGoOnLand = conf->readBoolEntry("CanGoOnLand",
 		(isLand() || isAircraft()));
@@ -393,9 +396,9 @@ void UnitProperties::loadActions()
 void UnitProperties::saveMobileProperties(KSimpleConfig* conf)
 {
  conf->setGroup("Boson Mobile Unit");
- conf->writeEntry("Speed", (double)(mMobileProperties->mSpeed  * 48.0f));
- conf->writeEntry("AccelerationSpeed", (double)(mMobileProperties->mAccelerationSpeed  * 48.0f));
- conf->writeEntry("DecelerationSpeed", (double)(mMobileProperties->mDecelerationSpeed  * 48.0f));
+ conf->writeEntry("Speed", (double)mMobileProperties->mSpeed);
+ conf->writeEntry("AccelerationSpeed", (double)mMobileProperties->mAccelerationSpeed);
+ conf->writeEntry("DecelerationSpeed", (double)mMobileProperties->mDecelerationSpeed);
  conf->writeEntry("RotationSpeed", mMobileProperties->mRotationSpeed);
  conf->writeEntry("CanGoOnLand", mMobileProperties->mCanGoOnLand);
  conf->writeEntry("CanGoOnWater", mMobileProperties->mCanGoOnWater);
@@ -519,26 +522,26 @@ bool UnitProperties::isFacility() const
  return (mFacilityProperties != 0);
 }
 
-float UnitProperties::speed() const
+bofixed UnitProperties::speed() const
 {
  if (!mMobileProperties) {
-	return 0;
+	return bofixed();
  }
  return mMobileProperties->mSpeed;
 }
 
-float UnitProperties::accelerationSpeed() const
+bofixed UnitProperties::accelerationSpeed() const
 {
  if (!mMobileProperties) {
-	return 0;
+	return bofixed();
  }
  return mMobileProperties->mAccelerationSpeed;
 }
 
-float UnitProperties::decelerationSpeed() const
+bofixed UnitProperties::decelerationSpeed() const
 {
  if (!mMobileProperties) {
-	return 0;
+	return bofixed();
  }
  return mMobileProperties->mDecelerationSpeed;
 }
@@ -652,21 +655,21 @@ void UnitProperties::setConstructionSteps(unsigned int steps)
  }
 }
 
-void UnitProperties::setSpeed(float speed)
+void UnitProperties::setSpeed(bofixed speed)
 {
  if (mMobileProperties) {
 	mMobileProperties->mSpeed = speed;
  }
 }
 
-void UnitProperties::setAccelerationSpeed(float speed)
+void UnitProperties::setAccelerationSpeed(bofixed speed)
 {
  if (mMobileProperties) {
 	mMobileProperties->mAccelerationSpeed = speed;
  }
 }
 
-void UnitProperties::setDecelerationSpeed(float speed)
+void UnitProperties::setDecelerationSpeed(bofixed speed)
 {
  if (mMobileProperties) {
 	mMobileProperties->mDecelerationSpeed = speed;
@@ -761,10 +764,10 @@ void UnitProperties::reset()
  mFacilityProperties = 0;
  // Mobile stuff (because unit is mobile by default)
  createMobileProperties();
- mMobileProperties->mSpeed = 0 / 48.0f; // Hmm, this doesn't make any sense IMO
- mMobileProperties->mAccelerationSpeed = 0.5 / 48.0f;
- mMobileProperties->mDecelerationSpeed = 1.0 / 48.0f;
- mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed * 48.0f);
+ mMobileProperties->mSpeed = 0; // Hmm, this doesn't make any sense IMO
+ mMobileProperties->mAccelerationSpeed = 0.5;
+ mMobileProperties->mDecelerationSpeed = 1.0;
+ mMobileProperties->mRotationSpeed = (int)(2 * mMobileProperties->mSpeed);
  mMobileProperties->mCanGoOnLand = true;
  mMobileProperties->mCanGoOnWater = false;
  // Sounds

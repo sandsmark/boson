@@ -126,12 +126,8 @@ public:
 	 * Moves unit by specified amount and also calculates new z-coordinate and
 	 * rotation.
 	 * This should only be called by BosonCanvas' advance methods.
-	 *
-	 * Note that we use float all over in boson, since mesa uses float
-	 * internally. We won't gain precision by double but we will lose some
-	 * performance
 	 **/
-	virtual void moveBy(float x, float y, float z);
+	virtual void moveBy(bofixed x, bofixed y, bofixed z);
 
 	/**
 	 * There is not much to do here. Keep the stuff in this function as
@@ -318,7 +314,7 @@ public:
 	 * will move until it's less that range _cells_ away from destination.
 	 * Destination is in canvas coords.
 	 **/
-	bool moveTo(float x, float y, int range = 0);
+	bool moveTo(bofixed x, bofixed y, int range = 0);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -367,13 +363,13 @@ public:
 	 * If unit isn't moving, returned value is undefined.
 	 * Returned value is in canvas coordinates.
 	 **/
-	float destinationX() const;
+	bofixed destinationX() const;
 	/**
 	 * @return Y-coordinate of unit's current destination (where it's moving).
 	 * If unit isn't moving, returned value is undefined.
 	 * Returned value is in canvas coordinates.
 	 **/
-	float destinationY() const;
+	bofixed destinationY() const;
 	/**
 	 * @return Current moving range of the unit (how close to destination point it
 	 *  must move).
@@ -514,7 +510,7 @@ protected:
 	 * implemented. moveZ is simply set to the highest z value of the
 	 * corners of all cells it occupies.
 	 **/
-	void updateZ(float moveByX, float moveByY, float* moveZ, float* rotateX, float* rotateY);
+	void updateZ(bofixed moveByX, bofixed moveByY, bofixed* moveZ, bofixed* rotateX, bofixed* rotateY);
 
 	virtual const QColor* teamColor() const;
 
@@ -594,7 +590,7 @@ public:
 	 *
 	 * @return How much is moved (will be <= maxdist)
 	 **/
-	float moveTowardsPoint(const BoVector2& p, float x, float y, float maxdist, float &xspeed, float &yspeed);
+	bofixed moveTowardsPoint(const BoVector2& p, bofixed x, bofixed y, bofixed maxdist, bofixed &xspeed, bofixed &yspeed);
 
 	virtual void newPath();
 
@@ -679,7 +675,7 @@ public:
 	 * Does nothing if @ref isConstructionComplete is false - otherwise the
 	 * same as @ref Unit::moveTo
 	 **/
-	virtual void moveTo(float x, float y, int range = 0);
+	virtual void moveTo(bofixed x, bofixed y, int range = 0);
 
 	/**
 	 * Advance the construction animation. This is usually called when

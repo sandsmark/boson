@@ -20,6 +20,7 @@
 #define BOSONITEM_H
 
 #include "../defines.h"
+#include "../bomath.h"
 
 #include <GL/gl.h>
 
@@ -202,7 +203,7 @@ public:
 	 * this has <em>nothing</em> to do with the OpenGL coordinates.
 	 * These are the internal canvas coordinates.
 	 **/
-	inline float x() const { return mX; }
+	inline bofixed x() const { return mX; }
 
 	/**
 	 * @return The y-coordinate of the unit on the canvas. Note that this is
@@ -210,38 +211,38 @@ public:
 	 * @ref x() and @ref y() (acutally canvas and OpenGL coordiantes are
 	 * equal for z)
 	 **/
-	inline float y() const { return mY; }
+	inline bofixed y() const { return mY; }
 
 	/**
 	 * @return The z-position of the item.
 	 **/
-	inline float z() const { return mZ; }
+	inline bofixed z() const { return mZ; }
 
 	/**
 	 * @param width Width in cells
 	 * @param height Height in cells
 	 **/
-	void setSize(float width, float height, float depth);
+	void setSize(bofixed width, bofixed height, bofixed depth);
 
 	// note: for GLunit all frames must have the same width/height!
 	// different depth is ok!
-	inline float width() const { return mWidth; }
-	inline float height() const { return mHeight; }
+	inline bofixed width() const { return mWidth; }
+	inline bofixed height() const { return mHeight; }
 	/**
 	 * @return item's height in z-direction.
 	 * This does not depend on any OpenGL stuff (model, frame etc) and should be
 	 * same on all clients, so it can be used for collision detection and
 	 * pathfinding
 	 **/
-	inline float depth() const { return mDepth; }
+	inline bofixed depth() const { return mDepth; }
 
-	inline float leftEdge() const { return x(); }
-	inline float topEdge() const { return y(); }
-	inline float rightEdge() const { return leftEdge() + width(); }
-	inline float bottomEdge() const { return topEdge() + height(); }
+	inline bofixed leftEdge() const { return x(); }
+	inline bofixed topEdge() const { return y(); }
+	inline bofixed rightEdge() const { return leftEdge() + width(); }
+	inline bofixed bottomEdge() const { return topEdge() + height(); }
 
-	inline float centerX() const { return x() + width() / 2.0f; };
-	inline float centerY() const { return y() + height() / 2.0f; };
+	inline bofixed centerX() const { return x() + width() / 2; };
+	inline bofixed centerY() const { return y() + height() / 2; };
 	BoVector2 center() const;
 
 	BoRect boundingRect() const;
@@ -252,7 +253,7 @@ public:
 	 * parameter checking, i.e. we don't check whether these cooridnates are
 	 * valid.
 	 **/
-	inline void move(float nx, float ny, float nz)
+	inline void move(bofixed nx, bofixed ny, bofixed nz)
 	{
 		moveBy(nx - x(), ny - y(), nz - z());
 	}
@@ -274,7 +275,7 @@ public:
 	 * checking) you should reimplement this method and call it in your
 	 * implementation.
 	 **/
-	virtual void moveBy(float dx, float dy, float dz)
+	virtual void moveBy(bofixed dx, bofixed dy, bofixed dz)
 	{
 		if (dx || dy || dz) {
 			removeFromCells();
@@ -342,7 +343,7 @@ public:
 	 * instance. You can use it to find out which cells a unit would occupy
 	 * if it was at a certain position.
 	 **/
-	inline static void leftTopCell(int* left, int* top, float leftEdge, float topEdge)
+	inline static void leftTopCell(int* left, int* top, bofixed leftEdge, bofixed topEdge)
 	{
 		*left = (int)(leftEdge);
 		*top = (int)(topEdge);
@@ -363,7 +364,7 @@ public:
 	 * instance. You can use it to find out which cells a unit would occupy
 	 * if it was at a certain position.
 	 **/
-	inline static void rightBottomCell(int* right, int* bottom, float rightEdge, float bottomEdge)
+	inline static void rightBottomCell(int* right, int* bottom, bofixed rightEdge, bofixed bottomEdge)
 	{
 		*right = (int)(rightEdge);
 		*bottom= (int)(bottomEdge);
@@ -404,10 +405,10 @@ public:
 	 **/
 	bool bosonCollidesWith(const BoVector3& v1, const BoVector3& v2) const;
 
-	inline float xVelocity() const { return mXVelocity; }
-	inline float yVelocity() const { return mYVelocity; }
-	inline float zVelocity() const { return mZVelocity; }
-	void setVelocity(float vx, float vy, float vz = 0.0)
+	inline bofixed xVelocity() const { return mXVelocity; }
+	inline bofixed yVelocity() const { return mYVelocity; }
+	inline bofixed zVelocity() const { return mZVelocity; }
+	void setVelocity(bofixed vx, bofixed vy, bofixed vz = 0)
 	{
 		mXVelocity = vx;
 		mYVelocity = vy;
@@ -417,13 +418,13 @@ public:
 	/**
 	 * @return Current speed of this item
 	 **/
-	inline float speed() const { return mCurrentSpeed; }
-	inline void setSpeed(float s) { mCurrentSpeed = s; }
+	inline bofixed speed() const { return mCurrentSpeed; }
+	inline void setSpeed(bofixed s) { mCurrentSpeed = s; }
 	/**
 	 * @return Maximum speed this item may have
 	 **/
-	inline float maxSpeed() const { return mMaxSpeed; }
-	inline void setMaxSpeed(float maxspeed) { mMaxSpeed = maxspeed; }
+	inline bofixed maxSpeed() const { return mMaxSpeed; }
+	inline void setMaxSpeed(bofixed maxspeed) { mMaxSpeed = maxspeed; }
 	/**
 	 * Raises speed by @ref accelerationSpeed unless @ref currentSpeed is
 	 * @ref maxSpeed
@@ -432,25 +433,25 @@ public:
 	/**
 	 * Lowers speed by @ref decelerationSpeed unless @ref currentSpeed is 0
 	 **/
-	inline void decelerate() { mCurrentSpeed = QMAX(0, speed() - decelerationSpeed()); }
+	inline void decelerate() { mCurrentSpeed = QMAX(bofixed(0), speed() - decelerationSpeed()); }
 	/**
 	 * @return How fast this unit accelerates.
 	 * Acceleration speed shows how much speed of unit changes per advance call.
 	 **/
-	inline float accelerationSpeed() const { return mAccelerationSpeed; }
-	inline void setAccelerationSpeed(float s) { mAccelerationSpeed = s; }
+	inline bofixed accelerationSpeed() const { return mAccelerationSpeed; }
+	inline void setAccelerationSpeed(bofixed s) { mAccelerationSpeed = s; }
 	/**
 	 * @return How fast this unit decelerates.
 	 * Deceleration speed shows how much speed of unit changes per advance call.
 	 **/
-	inline float decelerationSpeed() const { return mDecelerationSpeed; }
-	inline void setDecelerationSpeed(float s) { mDecelerationSpeed = s; }
+	inline bofixed decelerationSpeed() const { return mDecelerationSpeed; }
+	inline void setDecelerationSpeed(bofixed s) { mDecelerationSpeed = s; }
 	/**
 	 * @return How much this unit moves before stopping completely
 	 * This is distance that item will move before it completely stops when it
 	 * starts deceleration now and continues it until stopping
 	 **/
-	inline float decelerationDistance() const { return (mCurrentSpeed / mDecelerationSpeed) / 2 * mCurrentSpeed; }
+	inline bofixed decelerationDistance() const { return (mCurrentSpeed / mDecelerationSpeed) / 2 * mCurrentSpeed; }
 
 
 	inline void setVisible(bool v) { mIsVisible = v; }
@@ -503,18 +504,18 @@ public:
 	 * @return unit's current rotation around z-axis. This is used for rotating
 	 * unit to correct direction when moving.
 	 **/
-	inline float rotation() const { return mRotation; }
-	void setRotation(float r) { mRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	inline bofixed rotation() const { return mRotation; }
+	void setRotation(bofixed r) { mRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
-	inline float xRotation() const { return mXRotation; }
-	void setXRotation(float r) { mXRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	inline bofixed xRotation() const { return mXRotation; }
+	void setXRotation(bofixed r) { mXRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
-	inline float yRotation() const { return mYRotation; }
-	void setYRotation(float r) { mYRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
+	inline bofixed yRotation() const { return mYRotation; }
+	void setYRotation(bofixed r) { mYRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
 
-	void setEffectsPosition(float x, float y, float z);
-	void setEffectsRotation(float xrot, float yrot, float zrot);
+	void setEffectsPosition(bofixed x, bofixed y, bofixed z);
+	void setEffectsRotation(bofixed xrot, bofixed yrot, bofixed zrot);
 
 	/**
 	 * @return List of active effects this item has.
@@ -564,7 +565,7 @@ private:
 	 *
 	 * You should call @ref addToCells after this function.
 	 **/
-	inline void setPos(float x, float y, float z)
+	inline void setPos(bofixed x, bofixed y, bofixed z)
 	{
 		mX = x;
 		mY = y;
@@ -594,25 +595,25 @@ private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
 	unsigned long int mId;
-	float mX;
-	float mY;
-	float mZ;
-	float mWidth;
-	float mHeight;
-	float mDepth;
+	bofixed mX;
+	bofixed mY;
+	bofixed mZ;
+	bofixed mWidth;
+	bofixed mHeight;
+	bofixed mDepth;
 
-	float mXVelocity;
-	float mYVelocity;
-	float mZVelocity;
+	bofixed mXVelocity;
+	bofixed mYVelocity;
+	bofixed mZVelocity;
 
-	float mCurrentSpeed;
-	float mMaxSpeed;
-	float mAccelerationSpeed;
-	float mDecelerationSpeed;
+	bofixed mCurrentSpeed;
+	bofixed mMaxSpeed;
+	bofixed mAccelerationSpeed;
+	bofixed mDecelerationSpeed;
 
-	float mRotation;
-	float mXRotation;
-	float mYRotation;
+	bofixed mRotation;
+	bofixed mXRotation;
+	bofixed mYRotation;
 
 	bool mIsAnimated;
 	SelectBox* mSelectBox;

@@ -32,6 +32,8 @@ template<class T> class QPtrList;
 template<class T> class QValueList;
 template<class T> class QPtrVector;
 
+#include "bomath.h"
+
 
 
 /**
@@ -68,7 +70,7 @@ public:
 	 * @return The unit on this cell. Won't return a
 	 * destroyed unit (wreckage)
 	 **/
-	Unit* findUnitAtCell(int x, int y, float z) const;
+	Unit* findUnitAtCell(int x, int y, bofixed z) const;
 
 	/*
 	 * @param x The x-coordinate of the cell
@@ -81,7 +83,7 @@ public:
 	 * @return The first item that is found on that cell. If that item is a
 	 * unit then it'll be returned only if it is not destroyed.
 	 **/
-	BosonItem* findItemAtCell(int x, int y, float z, bool unitOnly) const;
+	BosonItem* findItemAtCell(int x, int y, bofixed z, bool unitOnly) const;
 
 	void setMap(BosonMap* map) { mMap = map; }
 	inline BosonMap* map() const { return mMap; }
@@ -110,13 +112,13 @@ public:
 	 * units inside the rect which are also in the circle. Maybe we could
 	 * check for the circle directly.
 	 **/
-	QValueList<Unit*> unitCollisionsInRange(const BoVector2& pos, float radius) const;
+	QValueList<Unit*> unitCollisionsInRange(const BoVector2& pos, bofixed radius) const;
 
 	/**
 	 * Same as @ref unitCollisionInRange, but also checks for z-coordinate and
 	 * operates in 3d space
 	 **/
-	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, float radius) const;
+	QValueList<Unit*> unitCollisionsInSphere(const BoVector3& pos, bofixed radius) const;
 
 	/**
 	 * Returns whether cell is occupied (there is non-destroyed mobile or

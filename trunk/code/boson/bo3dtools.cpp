@@ -937,10 +937,10 @@ QString BoQuaternion::debugString(int prec) const
 
 /*****  Misc methods  *****/
 
-float Bo3dTools::rotationToPoint(float x, float y)
+bofixed Bo3dTools::rotationToPoint(bofixed x, bofixed y)
 {
-  float add = 0;
-  float arg = 0;
+  bofixed add = 0;
+  bofixed arg = 0;
   if(x > 0)
   {
     if(y < 0)
@@ -975,7 +975,7 @@ float Bo3dTools::rotationToPoint(float x, float y)
   return (atan(arg) * RAD2DEG) + add;
 }
 
-void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const float radius)
+void Bo3dTools::pointByRotation(bofixed* x, bofixed* y, const bofixed& angle, const bofixed& radius)
 {
   // Some quick tests
   if(angle == 0)
@@ -1002,10 +1002,9 @@ void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const flo
     *y = 0;
     return;
   }
-  double tmpx, tmpy;
-  tmpy = 1.0;
-  tmpx = tan(angle / RAD2DEG);
-  double length = sqrt(tmpx * tmpx + tmpy * tmpy);
+  bofixed tmpx = tan(angle / RAD2DEG);
+  bofixed tmpy = 1;
+  bofixed length = sqrt(tmpx * tmpx + tmpy * tmpy);
   tmpx = tmpx / length * radius;
   tmpy = tmpy / length * radius;
   if(angle < 90)
@@ -1030,12 +1029,29 @@ void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const flo
   }
 }
 
-float Bo3dTools::deg2rad(float deg)
+void Bo3dTools::pointByRotation(float* _x, float* _y, const float _angle, const float _radius)
+{
+  // AB: we use a bofixed implementation by default.
+  // the float one lacks some precision because of that, but I believe that
+  // doesn't hurt.
+  // if that precision is required, we need to implement this method twice, but
+  // we must not use a float implementation, because of network stability
+  // (floating point operations can have different results on differenct
+  // computers)
+  bofixed x, y;
+  bofixed angle(_angle);
+  bofixed radius(_radius);
+  pointByRotation(&x, &y, angle, radius);
+  *_x = x;
+  *_y = y;
+}
+
+bofixed Bo3dTools::deg2rad(bofixed deg)
 {
   return deg * DEG2RAD;
 }
 
-float Bo3dTools::rad2deg(float rad)
+bofixed Bo3dTools::rad2deg(bofixed rad)
 {
   return rad * RAD2DEG;
 }
