@@ -99,7 +99,7 @@ public:
 	void stop(ProfilingEvent event);
 
 	void loadUnit();
-	void loadUnitDone(int typeId);
+	void loadUnitDone(unsigned long int typeId);
 
 	void render(bool start); // always call this first, before any other render*()
 	void renderClear(bool start);

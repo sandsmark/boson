@@ -82,6 +82,8 @@ public:
 	 * @li WorkMine - a mining unit is working...
 	 * @li WorkAttack - Currently attacks a unit
 	 * @li WorkConstructed - Is <em>being</em> constructed
+	 * @li WorkDestroyed - Is destroyed
+	 * @li WorkRefine - Is refining oil or minerals
 	 **/
 	enum WorkType {
 		WorkNone = 0,
@@ -122,7 +124,7 @@ public:
 	virtual void setAdvanceWork(WorkType w) { mAdvanceWork = w; }
 
 	/**
-	 * @return What this unit is currently doing. See @ref WorkTyp on
+	 * @return What this unit is currently doing. See @ref WorkType on
 	 * information what this can be.
 	 **/
 	inline WorkType work() const { return (WorkType)mWork.value(); }
@@ -198,7 +200,7 @@ public:
 	 * The type of the unit as described in the index.desktop file of this
 	 * unit. See also @ref UnitProperties::typeId
 	 **/
-	int type() const;
+	unsigned long int type() const;
 
 	/**
 	 * @return The RTTI of this unit. You can use @ref RTTI::isUnit to find

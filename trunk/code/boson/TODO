@@ -58,7 +58,6 @@ Editor (map, unit, scenario) TODOs
 General TODOs
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
-- use typeId = 0 as invalid (NOT -1!)
 - add revision (CVS) number of files to the connection protocol. If the versions
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this

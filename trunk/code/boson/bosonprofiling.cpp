@@ -86,7 +86,7 @@ void BosonProfiling::loadUnit()
  gettimeofday(&d->mTimeLoadUnit, 0);
 }
 
-void BosonProfiling::loadUnitDone(int typeId)
+void BosonProfiling::loadUnitDone(unsigned long int typeId)
 {
  struct timeval time2;
  gettimeofday(&time2, 0);

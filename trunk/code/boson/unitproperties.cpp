@@ -99,8 +99,8 @@ void UnitProperties::loadUnitType(const QString& fileName)
 
  mUnitPath = fileName.left(fileName.length() - QString("index.desktop").length());
  /// FIXME: maybe rename to Type or TypeID (Id is confusing IMHO) - rivol
- mTypeId = conf.readNumEntry("Id", -1); // -1 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
- if (typeId() < 0) {
+ mTypeId = conf.readUnsignedLongNumEntry("Id", 0); // 0 == invalid // Note: Id == Unit::type() , NOT Unit::id() !
+ if (typeId() <= 0) {
 	kdError() << "Invalid TypeId: " << typeId() << " in unit file " << fileName << endl;
 	// we continue - but we'll crash soon
  }
@@ -127,7 +127,13 @@ void UnitProperties::loadUnitType(const QString& fileName)
  mCanShootAtLandUnits = conf.readBoolEntry("CanShootAtLandUnits", (isLand() || isShip()) && weaponDamage());
  mSupportMiniMap = conf.readBoolEntry("SupportMiniMap", false);
  isFacility = conf.readBoolEntry("IsFacility", false);
- mRequisities = conf.readIntListEntry("Requisities");
+ // KConfig doesn't support reading list of _unsigned_ int's so we must cast
+ //  them ourselves
+ QValueList<int> tmpRequisities = conf.readIntListEntry("Requisities");
+ QValueList<int>::Iterator it;
+ for(it = tmpRequisities.begin(); it != tmpRequisities.end(); it++) {
+	mRequisities.append((unsigned long int)(*it));
+ }
 
  if (isFacility) {
 	mProducer = conf.readUnsignedNumEntry("Producer", (unsigned int)CommandBunker);

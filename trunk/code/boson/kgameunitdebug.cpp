@@ -305,7 +305,7 @@ void KGameUnitDebug::updateProduction(QListViewItem* item)
  }
  ProductionPlugin* production = ((Facility*)unit)->productionPlugin();
  if (production) {
-	QValueList<int> productions = production->productionList();
+	QValueList<unsigned long int> productions = production->productionList();
 	for (unsigned int i = 0; i < productions.count(); i++) {
 		QListViewItem* item = new QListViewItem(d->mProduction);
 		item->setText(0, QString::number(i+1));

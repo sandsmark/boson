@@ -818,9 +818,9 @@ void TopWidget::loadUnitDatas(Player* p, int progress)
  d->mLoading->setLoading(BosonLoadingWidget::LoadUnits);
  checkEvents();
  // First get all id's of units
- QValueList<int> unitIds = p->speciesTheme()->allFacilities();
+ QValueList<unsigned long int> unitIds = p->speciesTheme()->allFacilities();
  unitIds += p->speciesTheme()->allMobiles();
- QValueList<int>::iterator it;
+ QValueList<unsigned long int>::iterator it;
  int current = 0;
  int total = unitIds.count();
  for(it = unitIds.begin(); it != unitIds.end(); ++it) {

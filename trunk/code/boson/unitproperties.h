@@ -28,8 +28,11 @@ class SpeciesTheme;
 class KSimpleConfig;
 
 /**
- * Represents the config file of a unit. See README of the config file for
- * infos.
+ * Represents the config file of a unit. This holds all information about unit
+ * type, such as unit's maximum health, damage it causes or armor it has.
+ *
+ * See themes/species/human/units/README in the data directory for infos.
+ *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class UnitProperties
@@ -74,7 +77,7 @@ public:
 	SpeciesTheme* theme() const { return mTheme; }
 	
 	/**
-	 * @return Default health aka power aka whatever of this unit.
+	 * @return Default health aka power aka hitpoints of this unit.
 	 **/
 	unsigned long int health() const { return mHealth; }
 
@@ -126,8 +129,9 @@ public:
 	 * UnitProperties. There is no other unit with the same type ID. Note
 	 * that you can construct several units of the same type ID in a game -
 	 * they will all be of the same type (e.g. they are all ships).
+	 * 0 means invalid typeId.
 	 **/
-	int typeId() const { return mTypeId; };  // we MUST use int (not unsigned int) as -1 is used for invalid
+	unsigned long int typeId() const { return mTypeId; };
 
 	/**
 	 * @return The name of this unit type. Examples are "Aircraft", "Quad",
@@ -279,7 +283,7 @@ public:
 	 *  of this type
 	 * @see Player::canBuild
 	 **/
-	QValueList<int> requisities() const { return mRequisities; };
+	QValueList<unsigned long int> requisities() const { return mRequisities; };
 
 protected:
 	void loadMobileProperties(KSimpleConfig* conf);
@@ -293,7 +297,7 @@ private:
 
 	QString mName;
 	QString mUnitPath; // the path to the unit files
-	int mTypeId; // note: -1 is invalid!
+	unsigned long int mTypeId; // note: 0 is invalid!
 	unsigned long int mHealth;
 	unsigned long int mWeaponRange;
 	unsigned int mSightRange;
@@ -307,7 +311,7 @@ private:
 	bool mCanShootAtAirUnits;
 	bool mCanShootAtLandUnits;
 	bool mSupportMiniMap;
-	QValueList<int> mRequisities;
+	QValueList<unsigned long int> mRequisities;
 
 	class MobileProperties;
 	class FacilityProperties;

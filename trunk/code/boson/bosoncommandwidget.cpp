@@ -95,7 +95,7 @@ protected:
 				break;
 			case BosonCommandWidget::CommandUnit:
 			{
-				if (commandWidget()->unitType() < 0) {
+				if (commandWidget()->unitType() <= 0) {
 					kdWarning() << k_funcinfo << "CommandUnit, but no unittype" << endl;
 					return QString::null;
 				}
@@ -326,7 +326,7 @@ void BosonCommandWidget::setUnit(Unit* unit)
  setGrayOut(false);
 }
 
-void BosonCommandWidget::setUnit(int unitType, Player* owner)
+void BosonCommandWidget::setUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -395,7 +395,7 @@ void BosonCommandWidget::displayUnitPixmap(Unit* unit)
  displayUnitPixmap(unit->type(), unit->owner());
 }
 
-void BosonCommandWidget::displayUnitPixmap(int unitType, Player* owner)
+void BosonCommandWidget::displayUnitPixmap(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -490,6 +490,7 @@ void BosonCommandWidget::unset()
  mUnit = 0;
  mUnitType = 0;
  mTileNumber = 0;
+ mAction = -1;
  mCommandType = CommandNothing;
  mProductionOwner = 0;
 }
@@ -500,7 +501,7 @@ void BosonCommandWidget::advanceProduction(double percentage)
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- if (mUnitType < 0) {
+ if (mUnitType <= 0) {
 	kdError() << k_funcinfo << "unitType: " << mUnitType << endl;
 	return;
  }

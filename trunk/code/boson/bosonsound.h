@@ -71,13 +71,13 @@ public:
 	Arts::StereoEffectStack effectStack();
 
 protected:
-	void addEvent(int unitType, int unitSound, QDir& dir);
-	void addEventSound(int unitType, int unitSound, const QString& file);
+	void addEvent(unsigned long int unitType, int unitSound, QDir& dir);
+	void addEventSound(unsigned long int unitType, int unitSound, const QString& file);
 
 private:
 	typedef QPtrList<BoPlayObject> SoundList;
 	typedef QMap<int, SoundList> SoundEvents;
-	typedef QMap<int, SoundEvents> UnitSounds;
+	typedef QMap<unsigned long int, SoundEvents> UnitSounds;
 	class BosonSoundPrivate;
 	BosonSoundPrivate* d;
 };

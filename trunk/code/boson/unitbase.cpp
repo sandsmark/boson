@@ -141,7 +141,7 @@ KGamePropertyHandler* UnitBase::dataHandler() const
  return &d->mProperties;
 }
 
-int UnitBase::type() const
+unsigned long int UnitBase::type() const
 {
  return unitProperties()->typeId();
 }

@@ -29,6 +29,10 @@ class QDomElement;
 class BosonPlayField;
 
 /**
+ * This is probably the most important class in Boson.
+ * It is derived from KGame, so it is responsible for handling players' input
+ * and all the network stuff.
+ *
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
 class Boson : public KGame
@@ -41,6 +45,19 @@ public:
 		IdAdvanceCount = 10002
 	};
 
+	/**
+	 * Describes current status when loading saved game
+	 * This is mostly used for error checking
+	 *
+	 * Possible values:
+	 * @li NotLoaded - Game is not yet loaded (loading method isn't called yet)
+	 * @li LoadingInProgress - Loading is in progress
+	 * @li LoadingCompleted - Loading is completed (successfully)
+	 * @li InvalidFileFormat - File format was invalid (error)
+	 * @li InvalidCookie - Cookie in the file header was invalid (error)
+	 * @li InvalidVersion - SaveGame version was invalid. Probably the game was saved with too old version of Boson (error)
+	 * @li KGameError - Error while loading KGame stuff
+	 **/
 	enum LoadingStatus {
 		NotLoaded = 1,
 		LoadingInProgress,
@@ -70,8 +87,8 @@ public:
 	virtual KPlayer* createPlayer(int rtti, int io, bool isVirtual);
 	void removeAllPlayers();
 
-	Unit* createUnit(int unitType, Player* owner); // public for Player::load
-	Unit* loadUnit(int unitType, Player* owner);
+	Unit* createUnit(unsigned long int unitType, Player* owner); // public for Player::load
+	Unit* loadUnit(unsigned long int unitType, Player* owner);
 
 	QValueList<QColor> availableTeamColors() const;
 
@@ -84,7 +101,7 @@ public:
 	 * @param x The x-coordinate of the new unit.
 	 * @param y The y-coordinate of the new unit.
 	 **/
-	bool buildProducedUnit(Facility* factory, int unitType, int x, int y);
+	bool buildProducedUnit(Facility* factory, unsigned long int unitType, int x, int y);
 
 	/**
 	 * Behaves slightly similar to @ref slotSendAddUnit but this function
@@ -124,7 +141,7 @@ public slots:
 	 * @param y The y-coordinate (on the canvas) of the unit
 	 * @param owner The owner of the new unit.
 	 **/
-	void slotSendAddUnit(int unitType, int x, int y, Player* owner);
+	void slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner);
 
 	void slotAdvanceComputerPlayers(unsigned int advanceCount);
 
@@ -216,7 +233,7 @@ protected:
 	 * Create a new unit. No resources of the player are reduced, the unit
 	 * is created immediately.
 	 **/
-	Unit* addUnit(int unitType, Player* owner, int x, int y);
+	Unit* addUnit(unsigned long int unitType, Player* owner, int x, int y);
 
 	/**
 	 * Create a unit from node. This behaves similar to the above function,

@@ -41,15 +41,15 @@ CommandInput::~CommandInput()
 
 void CommandInput::setCommandFrame(BosonCommandFrame* f)
 {
- connect(f, SIGNAL(signalProduceUnit(int, UnitBase*, KPlayer*)),
-		this, SLOT(slotProduceUnit(int, UnitBase*, KPlayer*)));
- connect(f, SIGNAL(signalStopProduction(int, UnitBase*, KPlayer*)),
-		this, SLOT(slotStopProduction(int, UnitBase*, KPlayer*)));
+ connect(f, SIGNAL(signalProduceUnit(unsigned long int, UnitBase*, KPlayer*)),
+		this, SLOT(slotProduceUnit(unsigned long int, UnitBase*, KPlayer*)));
+ connect(f, SIGNAL(signalStopProduction(unsigned long int, UnitBase*, KPlayer*)),
+		this, SLOT(slotStopProduction(unsigned long int, UnitBase*, KPlayer*)));
 // connect(d->mCommandFrame, SIGNAL(signalCellSelected(int)),
 //		this, SLOT(slotPlaceCell(int)));
 }
 
-void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* owner)
+void CommandInput::slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
 	kdError() << k_funcinfo << "NULL player" << endl;
@@ -73,13 +73,13 @@ void CommandInput::slotProduceUnit(int unitType, UnitBase* factory, KPlayer* own
  stream << (Q_UINT32)BosonMessage::MoveProduce;
  stream << (Q_UINT32)owner->id();
  stream << (Q_ULONG)factory->id();
- stream << (Q_INT32)unitType;
+ stream << (Q_UINT32)unitType;
 
  QDataStream msg(b, IO_ReadOnly);
  sendInput(msg);
 }
 
-void CommandInput::slotStopProduction(int unitType, UnitBase* factory, KPlayer* owner)
+void CommandInput::slotStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner)
 {
  if (!player()) {
 	kdError() << k_funcinfo << "NULL player" << endl;
@@ -103,7 +103,7 @@ void CommandInput::slotStopProduction(int unitType, UnitBase* factory, KPlayer* 
  stream << (Q_UINT32)BosonMessage::MoveProduceStop;
  stream << (Q_UINT32)owner->id();
  stream << (Q_ULONG)factory->id();
- stream << (Q_INT32)unitType;
+ stream << (Q_UINT32)unitType;
 
  QDataStream msg(b, IO_ReadOnly);
  sendInput(msg);

@@ -41,8 +41,8 @@ public:
 
 protected slots:
 //	void slotPlaceCell(int tile); // we don't use CommandInput for the editor
-	void slotProduceUnit(int unitType, UnitBase* factory, KPlayer* owner);
-	void slotStopProduction(int unitType, UnitBase* factory, KPlayer* owner);
+	void slotProduceUnit(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
+	void slotStopProduction(unsigned long int unitType, UnitBase* factory, KPlayer* owner);
 };
 
 #endif

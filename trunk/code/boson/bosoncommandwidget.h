@@ -59,7 +59,7 @@ public:
 	 * Shows only small overview pixmap of unit with type unitType
 	 * This is used to show units that factory can produce
 	 **/
-	void setUnit(int unitType, Player* owner);
+	void setUnit(unsigned long int unitType, Player* owner);
 
 	/**
 	 * Shows pixmap of action
@@ -79,12 +79,12 @@ public:
 	}
 
 	/**
-	 * @return The unitType that is displayed or -1 if none. See also @ref
+	 * @return The unitType that is displayed or 0 if none. See also @ref
 	 * tile and @ref unit
 	 **/
-	int unitType() const 
+	unsigned long int unitType() const
 	{
-		return (commandType() == CommandUnit) ? mUnitType : -1;
+		return (commandType() == CommandUnit) ? mUnitType : 0;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public:
 	}
 
 	/**
-	 * Only valid if @ref unitType is >= 0! If @ref unitType is -1 then this
+	 * Only valid if @ref unitType is > 0! If @ref unitType is 0 then this
 	 * will also be NULL !
 	 * @return Usually NULL, except if the widget displays a production
 	 * entry (i.e. an order button) then it is the player that produces
@@ -157,9 +157,9 @@ signals:
 	 * selected factory (aka facility).
 	 * @param unitType The unit type that is to be produced
 	 **/
-	void signalProduceUnit(int unitType);
+	void signalProduceUnit(unsigned long int unitType);
 
-	void signalStopProduction(int unitType);
+	void signalStopProduction(unsigned long int unitType);
 
 	/**
 	 * Emitted when the player clicks on the action
@@ -168,7 +168,7 @@ signals:
 
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
-	virtual void displayUnitPixmap(int unitType, Player* owner);
+	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
 
 	void setPixmap(const QPixmap& pixmap);
 
@@ -185,7 +185,7 @@ private:
 
 	Unit* mUnit;
 	// FIXME: use only one int for all command modes
-	int mUnitType;
+	unsigned long int mUnitType;
 	int mTileNumber;
 	int mAction;
 	CommandType mCommandType;

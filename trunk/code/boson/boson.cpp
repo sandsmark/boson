@@ -462,7 +462,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 	{
 		Q_UINT32 owner;
 		Q_ULONG factoryId;
-		Q_INT32 unitType;
+		Q_UINT32 unitType;
 		stream >> owner;
 		stream >> factoryId;
 		stream >> unitType;
@@ -481,7 +481,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
-		if (unitType < 0) {
+		if (unitType <= 0) {
 			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
 			break;
 		}
@@ -523,7 +523,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 		kdDebug() << "MoveProduceStop" << endl;
 		Q_UINT32 owner;
 		Q_ULONG factoryId;
-		Q_INT32 unitType;
+		Q_UINT32 unitType;
 		stream >> owner;
 		stream >> factoryId;
 		stream >> unitType;
@@ -542,7 +542,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 			kdError() << k_lineinfo << factoryId << " is not a facility" << endl;
 			break;
 		}
-		if (unitType < 0) {
+		if (unitType <= 0) {
 			kdError() << k_lineinfo << "Invalid unitType " << unitType << endl;
 			break;
 		}
@@ -624,7 +624,7 @@ bool Boson::playerInput(QDataStream& stream, KPlayer* p)
 				<< ",unitid=" 
 				<< unitType 
 				<< endl;
-		if (unitType < 0) {
+		if (unitType <= 0) {
 			// hope this is working...
 			kdWarning() << k_lineinfo << "not yet completed" << endl;
 			break;
@@ -646,7 +646,7 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	case BosonMessage::AddUnit:
 	{
 		Q_INT32 owner;
-		Q_INT32 unitType;
+		Q_UINT32 unitType;
 		Q_INT32 x;
 		Q_INT32 y;
 
@@ -818,7 +818,7 @@ void Boson::slotSendAdvance()
  sendMessage(10, BosonMessage::AdvanceN);
 }
 
-Unit* Boson::createUnit(int unitType, Player* owner)
+Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -850,7 +850,7 @@ Unit* Boson::createUnit(int unitType, Player* owner)
  return unit;
 }
 
-Unit* Boson::loadUnit(int unitType, Player* owner)
+Unit* Boson::loadUnit(unsigned long int unitType, Player* owner)
 {
  if (!owner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
@@ -977,7 +977,7 @@ void Boson::slotLoad(QDataStream& /*stream*/)
 // kdDebug() << "next id: " << d->mNextUnitId << endl;
 }
 
-void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
+void Boson::slotSendAddUnit(unsigned long int unitType, int x, int y, Player* owner)
 { // used by the editor directly
  if (!isServer()) {
 	return;
@@ -994,7 +994,7 @@ void Boson::slotSendAddUnit(int unitType, int x, int y, Player* owner)
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << (Q_INT32)owner->id();
- stream << (Q_INT32)unitType;
+ stream << (Q_UINT32)unitType;
  stream << (Q_INT32)x;
  stream << (Q_INT32)y;
  sendMessage(buffer, BosonMessage::AddUnit);
@@ -1034,7 +1034,7 @@ void Boson::slotReplacePlayerIO(KPlayer* player, bool* remove)
 // kdDebug() << k_funcinfo << endl;
 }
 
-bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
+bool Boson::buildProducedUnit(Facility* factory, unsigned long int unitType, int x, int y)
 {
  if (!factory) {
 	kdError() << k_funcinfo << "NULL factory cannot produce" << endl;
@@ -1067,7 +1067,7 @@ bool Boson::buildProducedUnit(Facility* factory, int unitType, int x, int y)
  return true;
 }
 
-Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
+Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
 {
  Unit* unit = createUnit(unitType, (Player*)p);
  unit->setId(nextUnitId());
@@ -1077,7 +1077,7 @@ Unit* Boson::addUnit(int unitType, Player* p, int x, int y)
 
 Unit* Boson::addUnit(QDomElement& node, Player* p)
 {
- int unitType = 0;
+ unsigned long int unitType = 0;
  unsigned int x = 0;
  unsigned int y = 0;
  if (!BosonScenario::loadBasicUnit(node, unitType, x, y)) {
