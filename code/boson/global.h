@@ -29,15 +29,6 @@
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
 
-enum CommandFramePosition {
-	CmdFrameLeft = 0,
-	CmdFrameRight = 1,
-	CmdFrameUndocked = 2
-};
-enum ChatFramePosition {
-	ChatFrameTop = 0,
-	ChatFrameBottom = 1
-};
 enum CursorMode {
 	CursorSprite = 0,
 	CursorNormal = 1,
@@ -46,8 +37,8 @@ enum CursorMode {
 };
 enum GroupMoveMode {
 	GroupMoveOld = 0,
-	GroupMoveFollow = 1,
-	GroupMoveNew = 2
+	GroupMoveNew = 1,
+	GroupMoveFollow = 2
 };
 
 enum Direction {

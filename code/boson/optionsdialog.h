@@ -43,8 +43,6 @@ public:
 
 	void setArrowScrollSpeed(int);
 
-	void setCommandFramePosition(CommandFramePosition position);
-	void setChatFramePosition(ChatFramePosition position);
 	void setCursor(CursorMode mode);
 	void setGroupMove(GroupMoveMode mode);
 	void setMiniMapScale(double s);
@@ -56,16 +54,6 @@ public:
 signals:
 	void signalArrowScrollChanged(int);
 	void signalSpeedChanged(int);
-
-	/**
-	 * @param index see @ref CommandFramePosition
-	 **/
-	void signalCommandFramePositionChanged(int index); 
-
-	/**
-	 * @param index see @ref ChatFramePosition
-	 **/
-	void signalChatFramePositionChanged(int index); 
 
 	void signalCursorChanged(int index, const QString& cursorDir);
 	void signalGroupMoveChanged(int index);

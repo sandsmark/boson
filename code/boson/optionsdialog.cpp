@@ -42,8 +42,6 @@ public:
 	{
 		mArrowSpeed = 0;
 		mGameSpeed = 0;
-		mCommandFrame = 0;
-		mChat = 0;
 		mCmdBackground = 0;
 		mGroupMove = 0;
 		mMiniMapScale = 0;
@@ -58,8 +56,6 @@ public:
 
 	KIntNumInput* mArrowSpeed;
 	KIntNumInput* mGameSpeed;
-	QComboBox* mCommandFrame;
-	QComboBox* mChat;
 	QComboBox* mCmdBackground;
 	QComboBox* mGroupMove;
 	KDoubleNumInput* mMiniMapScale;
@@ -108,22 +104,7 @@ void OptionsDialog::initGeneralPage()
 		this, SLOT(slotSpeedChanged(int)));
 
  QHBox* hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Position of Command Frame"), hbox);
- d->mCommandFrame = new QComboBox(hbox);
- d->mCommandFrame->insertItem(i18n("Left"), CmdFrameLeft);
- d->mCommandFrame->insertItem(i18n("Right"), CmdFrameRight);
- d->mCommandFrame->insertItem(i18n("Undocked"), CmdFrameUndocked);
- connect(d->mCommandFrame, SIGNAL(activated(int)), 
-		this, SIGNAL(signalCommandFramePositionChanged(int)));
 
- hbox = new QHBox(vbox);
- (void)new QLabel(i18n("Position of Chat Frame"), hbox);
- d->mChat = new QComboBox(hbox);
- d->mChat->insertItem(i18n("Top"), ChatFrameTop);
- d->mChat->insertItem(i18n("Bottom"), ChatFrameBottom);
- connect(d->mChat, SIGNAL(activated(int)), 
-		this, SIGNAL(signalChatFramePositionChanged(int)));
- 
  hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Command Frame Background Pixmap"), hbox);
  d->mCmdBackground = new QComboBox(hbox);
@@ -139,10 +120,6 @@ void OptionsDialog::initGeneralPage()
  d->mMiniMapScale->setLabel(i18n("Mini Map Scale Factor"));
  connect(d->mMiniMapScale, SIGNAL(valueChanged(double)), 
 		this, SIGNAL(signalMiniMapScaleChanged(double)));
-
-
- setCommandFramePosition(CmdFrameLeft);
- setChatFramePosition(ChatFrameBottom);
 }
 
 void OptionsDialog::initCursorPage()
@@ -188,7 +165,7 @@ void OptionsDialog::initPathfindingPage()
  (void)new QLabel(i18n("Group Movement"), hbox);
  d->mGroupMove = new QComboBox(hbox);
  d->mGroupMove->insertItem(i18n("Old Style (All units move to same position)"), GroupMoveOld);
- d->mGroupMove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
+// d->mGroupMove->insertItem(i18n("Experimental follow-style (units follow leader)"), GroupMoveFollow);
  d->mGroupMove->insertItem(i18n("New style (much better, but not fully working yet)"), GroupMoveNew);
  connect(d->mGroupMove, SIGNAL(activated(int)),
 		this, SIGNAL(signalGroupMoveChanged(int)));
@@ -230,16 +207,6 @@ void OptionsDialog::setGameSpeed(int speed)
 void OptionsDialog::setArrowScrollSpeed(int value)
 {
  d->mArrowSpeed->setValue(value);
-}
-
-void OptionsDialog::setCommandFramePosition(CommandFramePosition position)
-{
- d->mCommandFrame->setCurrentItem(position);
-}
-
-void OptionsDialog::setChatFramePosition(ChatFramePosition position)
-{
- d->mChat->setCurrentItem(position);
 }
 
 void OptionsDialog::setCursor(CursorMode mode)
