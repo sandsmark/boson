@@ -616,7 +616,7 @@ void SpeciesTheme::readUnitConfigs()
 	if (!d->mUnitProperties.find(prop->typeId())) {
 		d->mUnitProperties.insert(prop->typeId(), prop);
 	} else {
-		kdError() << "UnitType " << prop->typeId() << "already there!"
+		kdError() << "UnitType " << prop->typeId() << " already there!"
 				<< endl;
 	}
  }
