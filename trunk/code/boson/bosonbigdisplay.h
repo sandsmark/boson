@@ -114,6 +114,8 @@ public slots:
 	void slotUpdateMinerals(int minerals);
 	void slotUpdateOil(int oil);
 
+	void slotMoveSelection(int cellX, int cellY);
+
 signals:
 	/**
 	 * Emitted when a single unit (@ref selectionMode == Select_Single) is

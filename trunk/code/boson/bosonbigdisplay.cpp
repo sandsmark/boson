@@ -813,3 +813,23 @@ unsigned int BosonBigDisplay::vPos() const
  return d->mVPos;
 }
 
+void BosonBigDisplay::slotMoveSelection(int cellX, int cellY)
+{
+ if (!d->mLocalPlayer) {
+	kdError() << "NULL local player" << endl;
+	return;
+ }
+ if (!selection().count()) {
+	return;
+ }
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ bool send = false;
+ actionClicked(QPoint(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2,
+		cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2), stream, send);
+ if (send) {
+	QDataStream msg(buffer, IO_ReadOnly);
+	d->mLocalPlayer->forwardInput(msg, true);
+ }
+}
+
