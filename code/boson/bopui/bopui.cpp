@@ -90,7 +90,10 @@ void puSetWindowSizeQt(int w, int h)
 	BO_NULL_ERROR(window);
 	return;
  }
- window->resize(w, h);
+ if (window->width() != w || window->height() != h) {
+	boDebug() << k_funcinfo << w << " " << h << endl;
+	window->resize(w, h);
+ }
 }
 
 void puInitQt()

@@ -43,6 +43,7 @@
 #include "bomeshrenderermanager.h"
 #include "boglstatewidget.h"
 #include "bopui/bopui.h"
+#include "bopui/bopuiaction.h"
 #include "info/boinfo.h"
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
@@ -153,7 +154,7 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  connect(this, SIGNAL(signalFrameChanged(int)), this, SLOT(slotFrameChanged(int)));
  connect(this, SIGNAL(signalLODChanged(int)), this, SLOT(slotLODChanged(int)));
 
- setMinimumSize(200, 200);
+ setMinimumSize(400, 400);
 
  boConfig->addDynamicEntry(new BoConfigBoolEntry(boConfig, "ShowVertexPoints", true));
  boConfig->addDynamicEntry(new BoConfigUIntEntry(boConfig, "VertexPointSize", 3));
@@ -306,6 +307,62 @@ void ModelPreview::initPUIGUI()
  layout->addWidget(camera);
  layout->addWidget(defaults);
 
+ BoPUIActionCollection::initActionCollection(this);
+
+#warning TODO: KToggleAction
+
+ // TODO BoPUIStdAction
+#warning FIXME: use KMainWindow::close()
+ (void)new BoPUIAction(i18n("Quit"), KShortcut(),
+		this, SLOT(close()),
+		actionCollection(), "file_quit");
+ (void)new BoPUIAction(i18n("Vertex point size..."), 0,
+		this, SIGNAL(signalChangeVertexPointSize()),
+		actionCollection(), "options_vertex_point_size");
+ (void)new BoPUIAction(i18n("Grid unit size..."), 0,
+		this, SIGNAL(signalChangeGridUnitSize()),
+		actionCollection(), "options_grid_unit_size");
+ (void)new BoPUIAction(i18n("Background color..."), 0,
+		this, SIGNAL(signalChangeBackgroundColor()),
+		actionCollection(), "options_background_color");
+ (void)new BoPUIAction(i18n("Light..."), 0,
+		this, SIGNAL(signalShowLightWidget()),
+		actionCollection(), "options_light"); // AB: actually this is NOT a setting
+ (void)new BoPUIAction(i18n("Materials..."), 0,
+		this, SIGNAL(signalShowMaterialsWidget()),
+		actionCollection(), "options_materials"); // AB: actually this is NOT a setting
+ (void)new BoPUIAction(i18n("Font..."), 0,
+		this, SIGNAL(signalShowChangeFont()),
+		actionCollection(), "options_font"); // AB: actually this is NOT a setting
+
+
+ (void)new BoPUIAction(i18n("Debug &Models"), 0,
+		this, SIGNAL(signalDebugModels()),
+		actionCollection(), "debug_models");
+#ifdef BOSON_USE_BOMEMORY
+ (void)new BoPUIAction(i18n("Debug M&emory"), 0,
+		this, SIGNAL(signalDebugMemory()),
+		actionCollection(), "debug_memory");
+#endif
+ (void)new BoPUIAction(i18n("Debug &Species"), 0,
+		this, SIGNAL(signalDebugSpecies()),
+		actionCollection(), "debug_species");
+ (void)new BoPUIAction(i18n("Show OpenGL states"), KShortcut(),
+		this, SIGNAL(signalShowGLStates()),
+		actionCollection(), "debug_show_opengl_states");
+ (void)new BoPUIAction(i18n("&Reload model textures"), KShortcut(),
+		this, SIGNAL(signalReloadModelTextures()),
+		actionCollection(), "debug_lazy_reload_model_textures");
+ (void)new BoPUIAction(i18n("Reload &meshrenderer plugin"), KShortcut(),
+		this, SIGNAL(signalReloadMeshRenderer()),
+		actionCollection(), "debug_lazy_reload_meshrenderer");
+
+
+
+ if (!actionCollection()->createGUI(locate("data", "boson/borenderui.rc"))) {
+	boError() << k_funcinfo << "createGUI() failed" << endl;
+ }
+
  mPUILayout->addLayout(layout);
  mPUILayout->doLayout();
 }
@@ -331,6 +388,9 @@ void ModelPreview::resizeGL(int w, int h)
  gluPerspective(mFovY, (float)w / (float)h, NEAR, FAR);
  glMatrixMode(GL_MODELVIEW);
 
+ if (menuBar()) {
+	menuBar()->createMenu();
+ }
  mPUILayout->doLayout();
 }
 
@@ -1204,6 +1264,31 @@ RenderMain::RenderMain()
 
  mMaterialWidget = new BoMaterialWidget(0);
  mMaterialWidget->hide();
+
+ connect(mPreview, SIGNAL(signalChangeVertexPointSize()),
+		this, SLOT(slotVertexPointSize()));
+ connect(mPreview, SIGNAL(signalChangeGridUnitSize()),
+		this, SLOT(slotGridUnitSize()));
+ connect(mPreview, SIGNAL(signalChangeBackgroundColor()),
+		this, SLOT(slotBackgroundColor()));
+ connect(mPreview, SIGNAL(signalShowLightWidget()),
+		this, SLOT(slotShowLightWidget()));
+ connect(mPreview, SIGNAL(signalShowMaterialsWidget()),
+		this, SLOT(slotShowMaterialsWidget()));
+ connect(mPreview, SIGNAL(signalShowChangeFont()),
+		this, SLOT(slotChangeFont()));
+ connect(mPreview, SIGNAL(signalDebugModels()),
+		this, SLOT(slotDebugModels()));
+ connect(mPreview, SIGNAL(signalDebugMemory()),
+		this, SLOT(slotDebugMemory()));
+ connect(mPreview, SIGNAL(signalDebugSpecies()),
+		this, SLOT(slotDebugSpecies()));
+ connect(mPreview, SIGNAL(signalShowGLStates()),
+		this, SLOT(slotShowGLStates()));
+ connect(mPreview, SIGNAL(signalReloadModelTextures()),
+		this, SLOT(slotReloadModelTextures()));
+ connect(mPreview, SIGNAL(signalReloadMeshRenderer()),
+		this, SLOT(slotReloadMeshRenderer()));
 
 
  mPreview->slotResetView();

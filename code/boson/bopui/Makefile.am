@@ -5,5 +5,6 @@ noinst_LTLIBRARIES = libbopui.la
 METASOURCES = AUTO
 
 libbopui_la_SOURCES = \
-	bopui.cpp
+	bopui.cpp \
+	bopuiaction.cpp
 

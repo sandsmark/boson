@@ -139,6 +139,20 @@ signals:
 
 	void signalMeshSelected(int);
 
+
+	void signalChangeVertexPointSize();
+	void signalChangeGridUnitSize();
+	void signalChangeBackgroundColor();
+	void signalShowLightWidget();
+	void signalShowMaterialsWidget();
+	void signalShowChangeFont();
+	void signalDebugModels();
+	void signalDebugMemory();
+	void signalDebugSpecies();
+	void signalShowGLStates();
+	void signalReloadModelTextures();
+	void signalReloadMeshRenderer();
+
 public slots:
 	void slotResetView();
 	void slotFovYChanged(float f)
