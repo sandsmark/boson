@@ -30,6 +30,7 @@
 #include <klocale.h>
 
 #include <GL/gl.h>
+#include <stdlib.h>
 
 class BoGlobalConfigObject : public BoGlobalObject<BosonConfig>
 {
@@ -309,7 +310,7 @@ BoVector3 BosonConfig::readBoVector3Entry(const KConfig* cfg, const QString& key
 {
  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 3) {
- 	if (list.count() != 0) {
+	if (list.count() != 0) {
 		boError() << k_funcinfo
 				<< "BoVector3 entry must have 3 floats, not "
 				<< list.count() << endl;
@@ -333,7 +334,7 @@ BoVector4 BosonConfig::readBoVector4Entry(const KConfig* cfg, const QString& key
 {
  QValueList<float> list = BosonConfig::readFloatNumList(cfg, key);
  if (list.count() != 4) {
- 	if (list.count() != 0) {
+	if (list.count() != 0) {
 		boError() << k_funcinfo
 				<< "BoVector4 entry must have 4 floats, not "
 				<< list.count() << endl;
@@ -377,7 +378,7 @@ QString BosonConfig::readLocalPlayerName(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- QString name = conf->readEntry("LocalPlayer", i18n("You"));
+ QString name = conf->readEntry("LocalPlayer", getenv("LOGNAME"));
  conf->setGroup(oldGroup);
  return name;
 }
