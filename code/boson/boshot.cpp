@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include <kstddirs.h>
+#include <kinstance.h>
 
 #include <qimage.h>
 
@@ -60,9 +61,21 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 
 		/* small shot (unit hitten) */
 		if (!shotSequ) { // static imagepool initialization
-			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/") + "explosion%02d" );
+//			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/explosion00.pbm") + "explosion%02d" );
+			QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/shot/explosion0000.pbm");
+//			printf("path is %s\n", (const char*)path);
+			path += "boson/themes/species/human/explosions/shot/explosion%1";
+//			printf("path is %s\n", (const char*)path);
 			shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
 			//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
+//			printf("image0 is %d %d\n", shotSequ->image(0)->width(), shotSequ->image(0)->height());
+			boAssert(!shotSequ->image(0)->isNull());
+			if (shotSequ->image(0)->width()!=8 || shotSequ->image(0)->height()!=11) {
+				delete shotSequ;
+				shotSequ = 0;
+				delete this;
+				return;
+			}
 		}
 
 		setSequence(shotSequ);		// set image set
@@ -79,6 +92,7 @@ boShot::boShot(int _x, int _y, int _z, bool isBig)
 void  boShot::timerEvent( QTimerEvent * )
 {
 	counter++;
+//	printf("boShot::timerEvent : counter = %d\n", counter);
 	if (counter<maxCounter) {
 		setFrame(counter);
 		return;
@@ -97,8 +111,13 @@ QCanvasPixmapArray *loadBig(void) // XXX should be factorized with speciesTheme.
 	QList<QPoint>	point_l;
 	QPixmap		*p;
 	QPoint		*pp;
-	QString		path( locate ( "data", "boson/themes/species/human/explosions/big") );
+//	QString		path( locate ( "data", "boson/themes/species/human/explosions/big/big.00.bmp") );
 
+	QString		path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/big/big.00.bmp");
+
+
+	path += "boson/themes/species/human/explosions/big";
+//	printf("path is %s\n", (const char*)path);
 	// XXX will use  speciesTheme::loadPixmap() (made non-speciesTheme dep and public)
 	// and QCanvasPixmap(const QPixmap&, QPoint hotspot);
 
