@@ -520,10 +520,10 @@ boDebug() << k_funcinfo << endl;
 		// this item is not important for us here
 		continue;
 	}
-//	boDebug() << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
+//	boDebug(310) << "unit at x=" << u->x() << ",y=" << u->y() << ",pos=" << pos.x() << "," << pos.y() << endl;
 	int w = pos.x() - (int)(u->x() + u->width() / 2);
 	int h = pos.y() - (int)(u->y() + u->height() / 2);
-//	boDebug() << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
+//	boDebug(310) << "w*w=" << w*w << ",h*h=" << h*h << " <= r*r=" << radius*radius<< endl;
 
 	if (w * w + h * h <= radius * radius) {
 //		boDebug() << "adding " << u->id() << endl;
@@ -704,7 +704,13 @@ BoItemList BosonCanvas::bosonCollisions(const QPointArray& cells, const BosonIte
  for (unsigned int i = 0; i < cells.count(); i++) {
 	c = cell(cells[i].x(), cells[i].y());
 	if (!c) {
-		boWarning() << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
+		boWarning(310) << k_funcinfo << "NULL cell " << cells[i].x() << " " << cells[i].y() << endl;
+		if (cells[i].x() < 0) {
+			boError(310) << k_funcinfo << "x < 0 - please check the calling funktion! this shouldn't happen!" << endl;
+		}
+		if (cells[i].y() < 0) {
+			boError(310) << k_funcinfo << "y < 0 - please check the calling funktion! this shouldn't happen!" << endl;
+		}
 		continue;
 	}
 	cellItems = c->items();
@@ -750,7 +756,7 @@ BoItemList BosonCanvas::bosonCollisions(const QPoint& pos) const
  // pos is canvas coordinates!
  QPointArray cells(1);
  cells[0] = pos / BO_TILE_SIZE;
-// boDebug() << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
+ boDebug(310) << k_funcinfo << cells[0].x() << " " << cells[0].y() << endl;
  return bosonCollisions(cells, 0, true); // FIXME: ecact = true has no effect
 }
 
