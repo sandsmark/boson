@@ -315,7 +315,9 @@ void BosonCanvas::updateSight(Unit* unit, double, double)
  for (int i = left; i < right; i++) {
 	for (int j = top; j < bottom; j++) {
 		if (i*i + j*j < (int)sight) {
-			unit->owner()->unfog(x + i, y + j);
+			if (unit->owner()->isFogged(x + i, y + j)) {
+				unit->owner()->unfog(x + i, y + j);
+			}
 		} else {
 			//TODO
 			// cell(i, j) is not in sight anymore. Check if any
