@@ -557,6 +557,10 @@ void BosonBigDisplayBase::paintGL()
 // glRotatef(a1, 0.0, 0.0, 1.0);
 // glRotatef(a2, 0.0, 1.0, 0.0);
 
+ if (checkError()) {
+	kdError() << k_funcinfo << "before unit rendering" << endl;
+ }
+
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
 
@@ -651,7 +655,7 @@ void BosonBigDisplayBase::paintGL()
  boProfiling->renderUnits(false, renderedUnits);
 
  if (checkError()) {
-	kdError() << k_funcinfo << "when units rendered" << endl;
+	kdError() << k_funcinfo << "after unit rendering" << endl;
  }
 
  boProfiling->renderCells(true);
