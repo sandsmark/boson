@@ -244,35 +244,35 @@ void extractUp(BoVector3Float& up, const BoVector3Float& x, const BoVector3Float
 }
 
 
-class BoPUICameraWidgetPrivate
+class BoUfoCameraWidgetPrivate
 {
 public:
-	BoPUICameraWidgetPrivate()
+	BoUfoCameraWidgetPrivate()
 	{
 		mTab = 0;
 
 		mCamera = 0;
 	}
-	BoPUITabWidget* mTab;
-	QPtrList<BoPUICameraConfigWidgetBase> mConfigWidgets;
-	QMap<BoPUICameraConfigWidgetBase*, QString> mConfigWidget2Name;
+	BoUfoTabWidget* mTab;
+	QPtrList<BoUfoCameraConfigWidgetBase> mConfigWidgets;
+	QMap<BoUfoCameraConfigWidgetBase*, QString> mConfigWidget2Name;
 
 	BoCamera* mCamera;
 };
 
-BoPUICameraWidget::BoPUICameraWidget(QObject* parent, const char* name) : BoPUIWidget(parent, name)
+BoUfoCameraWidget::BoUfoCameraWidget() : BoUfoWidget()
 {
- d = new BoPUICameraWidgetPrivate;
- BoPUIVLayout* topLayout = new BoPUIVLayout(0);
- mLayout->addLayout(topLayout);
+ d = new BoUfoCameraWidgetPrivate;
+ BoUfoVBox* topLayoutWidget = new BoUfoVBox();
+ addWidget(topLayoutWidget);
 
- d->mTab = new BoPUITabWidget(this, "cameratabwidget");
- topLayout->addWidget(d->mTab);
+ d->mTab = new BoUfoTabWidget();
+ topLayoutWidget->addWidget(d->mTab);
 
- BoPUIGameCameraWidget* bosonCamera = new BoPUIGameCameraWidget(d->mTab, "gamecamera");
- BoPUIGLUCameraWidget* gluLookAtCamera = new BoPUIGLUCameraWidget(d->mTab, "glulookatcamera");
- BoPUIPlainCameraWidget* plainCamera = new BoPUIPlainCameraWidget(d->mTab, "plaincamera");
- BoPUIOrbiterCameraWidget* orbiterCamera = new BoPUIOrbiterCameraWidget(d->mTab, "orbitercamera");
+ BoUfoGLUCameraWidget* gluLookAtCamera = new BoUfoGLUCameraWidget();
+ BoUfoGameCameraWidget* bosonCamera = new BoUfoGameCameraWidget();
+ BoUfoPlainCameraWidget* plainCamera = new BoUfoPlainCameraWidget();
+ BoUfoOrbiterCameraWidget* orbiterCamera = new BoUfoOrbiterCameraWidget();
 
  addConfigWidget(i18n("Orbiter camera"), orbiterCamera);
  addConfigWidget(i18n("Game camera"), bosonCamera);
@@ -280,13 +280,13 @@ BoPUICameraWidget::BoPUICameraWidget(QObject* parent, const char* name) : BoPUIW
  addConfigWidget(i18n("gluLookAt camera"), gluLookAtCamera);
 }
 
-BoPUICameraWidget::~BoPUICameraWidget()
+BoUfoCameraWidget::~BoUfoCameraWidget()
 {
  d->mConfigWidgets.clear();
  delete d;
 }
 
-void BoPUICameraWidget::addConfigWidget(const QString& name, BoPUICameraConfigWidgetBase* c)
+void BoUfoCameraWidget::addConfigWidget(const QString& name, BoUfoCameraConfigWidgetBase* c)
 {
  BO_CHECK_NULL_RET(c);
  d->mConfigWidgets.append(c);
@@ -294,17 +294,14 @@ void BoPUICameraWidget::addConfigWidget(const QString& name, BoPUICameraConfigWi
  c->setCamera(d->mCamera);
  connect(c, SIGNAL(signalCameraChanged()),
 		this, SLOT(slotUpdateFromCamera()));
- if (d->mCamera) {
-	d->mTab->addTab(c, d->mConfigWidget2Name[c]);
-	c->updateFromCamera();
- } else {
-	c->hide();
- }
+
+ d->mTab->addTab(c, d->mConfigWidget2Name[c]);
+ c->updateFromCamera();
 }
 
-void BoPUICameraWidget::slotUpdateFromCamera()
+void BoUfoCameraWidget::slotUpdateFromCamera()
 {
- QPtrListIterator<BoPUICameraConfigWidgetBase> it(d->mConfigWidgets);
+ QPtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
  for (; it.current(); ++it) {
 	if (it.current()->camera()) {
 		if (!it.current()->updatesBlocked()) {
@@ -314,16 +311,16 @@ void BoPUICameraWidget::slotUpdateFromCamera()
  }
 }
 
-void BoPUICameraWidget::setCamera(BoCamera* camera)
+void BoUfoCameraWidget::setCamera(BoCamera* camera)
 {
  d->mCamera = camera;
  int cameraType = -1;
  if (d->mCamera) {
 	cameraType = d->mCamera->cameraType();
  }
- QPtrListIterator<BoPUICameraConfigWidgetBase> it(d->mConfigWidgets);
+ QPtrListIterator<BoUfoCameraConfigWidgetBase> it(d->mConfigWidgets);
  for (; it.current(); ++it) {
-	d->mTab->removeTab(it.current());
+//	d->mTab->removeTab(it.current());
 	it.current()->hide();
 	if (it.current()->needCameraType() != BoCamera::Camera) {
 		if (it.current()->needCameraType() != cameraType) {
@@ -331,15 +328,15 @@ void BoPUICameraWidget::setCamera(BoCamera* camera)
 			continue;
 		}
 	}
-	d->mTab->addTab(it.current(), d->mConfigWidget2Name[it.current()]);
+//	d->mTab->addTab(it.current(), d->mConfigWidget2Name[it.current()]);
 	it.current()->setCamera(d->mCamera);
  }
  slotUpdateFromCamera();
 }
 
 
-BoPUICameraConfigWidgetBase::BoPUICameraConfigWidgetBase(QObject* parent, const char* name)
-	: BoPUIWidget(parent, name)
+BoUfoCameraConfigWidgetBase::BoUfoCameraConfigWidgetBase()
+	: BoUfoWidget()
 {
  mCamera = 0;
 
@@ -347,10 +344,10 @@ BoPUICameraConfigWidgetBase::BoPUICameraConfigWidgetBase(QObject* parent, const 
 }
 
 
-class BoPUIGLUCameraWidgetPrivate
+class BoUfoGLUCameraWidgetPrivate
 {
 public:
-	BoPUIGLUCameraWidgetPrivate()
+	BoUfoGLUCameraWidgetPrivate()
 	{
 		mLookAtX = 0;
 		mLookAtY = 0;
@@ -364,54 +361,52 @@ public:
 
 		mOrientation = 0;
 	}
-	BoPUINumInput* mLookAtX;
-	BoPUINumInput* mLookAtY;
-	BoPUINumInput* mLookAtZ;
-	BoPUINumInput* mCameraPosX;
-	BoPUINumInput* mCameraPosY;
-	BoPUINumInput* mCameraPosZ;
-	BoPUINumInput* mUpX;
-	BoPUINumInput* mUpY;
-	BoPUINumInput* mUpZ;
+	BoUfoNumInput* mLookAtX;
+	BoUfoNumInput* mLookAtY;
+	BoUfoNumInput* mLookAtZ;
+	BoUfoNumInput* mCameraPosX;
+	BoUfoNumInput* mCameraPosY;
+	BoUfoNumInput* mCameraPosZ;
+	BoUfoNumInput* mUpX;
+	BoUfoNumInput* mUpY;
+	BoUfoNumInput* mUpZ;
 
-	BoPUILabel* mOrientation;
+	BoUfoLabel* mOrientation;
 };
 
-BoPUIGLUCameraWidget::BoPUIGLUCameraWidget(QObject* parent, const char* name)
-	: BoPUICameraConfigWidgetBase(parent, name)
+BoUfoGLUCameraWidget::BoUfoGLUCameraWidget()
+	: BoUfoCameraConfigWidgetBase()
 {
- d = new BoPUIGLUCameraWidgetPrivate;
+ d = new BoUfoGLUCameraWidgetPrivate;
+ BoUfoVBox* layoutWidget = new BoUfoVBox();
+ addWidget(layoutWidget);
 
- BoPUIVLayout* layout = new BoPUIVLayout(0);
- mLayout->addLayout(layout);
+ d->mLookAtX = new BoUfoNumInput();
+ d->mLookAtY = new BoUfoNumInput();
+ d->mLookAtZ = new BoUfoNumInput();
+ d->mCameraPosX = new BoUfoNumInput();
+ d->mCameraPosY = new BoUfoNumInput();
+ d->mCameraPosZ = new BoUfoNumInput();
+ d->mUpX = new BoUfoNumInput();
+ d->mUpY = new BoUfoNumInput();
+ d->mUpZ = new BoUfoNumInput();
 
- d->mLookAtX = new BoPUINumInput(this);
- d->mLookAtY = new BoPUINumInput(this);
- d->mLookAtZ = new BoPUINumInput(this);
- d->mCameraPosX = new BoPUINumInput(this);
- d->mCameraPosY = new BoPUINumInput(this);
- d->mCameraPosZ = new BoPUINumInput(this);
- d->mUpX = new BoPUINumInput(this);
- d->mUpY = new BoPUINumInput(this);
- d->mUpZ = new BoPUINumInput(this);
+ layoutWidget->addWidget(d->mLookAtX);
+ layoutWidget->addWidget(d->mLookAtY);
+ layoutWidget->addWidget(d->mLookAtZ);
+ layoutWidget->addWidget(d->mCameraPosX);
+ layoutWidget->addWidget(d->mCameraPosY);
+ layoutWidget->addWidget(d->mCameraPosZ);
+ layoutWidget->addWidget(d->mUpX);
+ layoutWidget->addWidget(d->mUpY);
+ layoutWidget->addWidget(d->mUpZ);
 
- BoPUILabel* orientationLabel = new BoPUILabel(i18n("Orientation: "), this);
- d->mOrientation = new BoPUILabel(this);
-
- layout->addWidget(d->mLookAtX);
- layout->addWidget(d->mLookAtY);
- layout->addWidget(d->mLookAtZ);
- layout->addWidget(d->mCameraPosX);
- layout->addWidget(d->mCameraPosY);
- layout->addWidget(d->mCameraPosZ);
- layout->addWidget(d->mUpX);
- layout->addWidget(d->mUpY);
- layout->addWidget(d->mUpZ);
-
- BoPUIHLayout* orientationLayout = new BoPUIHLayout(0);
- orientationLayout->addWidget(orientationLabel);
- orientationLayout->addWidget(d->mOrientation);
- layout->addLayout(orientationLayout);
+ BoUfoWidget* orientationLayoutWidget = new BoUfoWidget();
+ layoutWidget->addWidget(orientationLayoutWidget);
+ BoUfoLabel* orientationLabel = new BoUfoLabel(i18n("Orientation: "));
+ d->mOrientation = new BoUfoLabel();
+ orientationLayoutWidget->addWidget(orientationLabel);
+ orientationLayoutWidget->addWidget(d->mOrientation);
 
  d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
  d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
@@ -462,17 +457,17 @@ BoPUIGLUCameraWidget::BoPUIGLUCameraWidget(QObject* parent, const char* name)
 		this, SLOT(slotUpChanged()));
 }
 
-BoPUIGLUCameraWidget::~BoPUIGLUCameraWidget()
+BoUfoGLUCameraWidget::~BoUfoGLUCameraWidget()
 {
  delete d;
 }
 
-int BoPUIGLUCameraWidget::needCameraType() const
+int BoUfoGLUCameraWidget::needCameraType() const
 {
  return BoCamera::Camera;
 }
 
-void BoPUIGLUCameraWidget::updateFromCamera()
+void BoUfoGLUCameraWidget::updateFromCamera()
 {
  BO_CHECK_NULL_RET(camera());
  d->mLookAtX->setValue(camera()->lookAt().x());
@@ -488,7 +483,7 @@ void BoPUIGLUCameraWidget::updateFromCamera()
  updateMatrixWidget();
 }
 
-void BoPUIGLUCameraWidget::slotLookAtChanged()
+void BoUfoGLUCameraWidget::slotLookAtChanged()
 {
  BO_CHECK_NULL_RET(camera());
  BoVector3Float lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
@@ -496,7 +491,7 @@ void BoPUIGLUCameraWidget::slotLookAtChanged()
  emitSignalCameraChanged();
 }
 
-void BoPUIGLUCameraWidget::slotCameraPosChanged()
+void BoUfoGLUCameraWidget::slotCameraPosChanged()
 {
  BO_CHECK_NULL_RET(camera());
  BoVector3Float cameraPos(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
@@ -504,7 +499,7 @@ void BoPUIGLUCameraWidget::slotCameraPosChanged()
  emitSignalCameraChanged();
 }
 
-void BoPUIGLUCameraWidget::slotUpChanged()
+void BoUfoGLUCameraWidget::slotUpChanged()
 {
  BO_CHECK_NULL_RET(camera());
  BoVector3Float up(d->mUpX->value(), d->mUpY->value(), d->mUpZ->value());
@@ -512,7 +507,7 @@ void BoPUIGLUCameraWidget::slotUpChanged()
  emitSignalCameraChanged();
 }
 
-void BoPUIGLUCameraWidget::updateMatrixWidget()
+void BoUfoGLUCameraWidget::updateMatrixWidget()
 {
  BoVector3Float cameraPos = BoVector3Float(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
  BoVector3Float lookAt = BoVector3Float(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
@@ -522,10 +517,10 @@ void BoPUIGLUCameraWidget::updateMatrixWidget()
 }
 
 
-class BoPUIPlainCameraWidgetPrivate
+class BoUfoPlainCameraWidgetPrivate
 {
 public:
-	BoPUIPlainCameraWidgetPrivate()
+	BoUfoPlainCameraWidgetPrivate()
 	{
 		mCameraPosX = 0;
 		mCameraPosY = 0;
@@ -542,46 +537,46 @@ public:
 		mTranslateFirst = 0;
 		mShowMatrices = 0;
 	}
-	BoPUINumInput* mCameraPosX;
-	BoPUINumInput* mCameraPosY;
-	BoPUINumInput* mCameraPosZ;
-	BoPUINumInput* mRotateX;
-	BoPUINumInput* mRotateY;
-	BoPUINumInput* mRotateZ;
+	BoUfoNumInput* mCameraPosX;
+	BoUfoNumInput* mCameraPosY;
+	BoUfoNumInput* mCameraPosZ;
+	BoUfoNumInput* mRotateX;
+	BoUfoNumInput* mRotateY;
+	BoUfoNumInput* mRotateZ;
 
-	BoPUIWidget* mMatrices;
-	BoPUIMatrixWidget* mMatrix;
-	BoPUIMatrixWidget* mCameraMatrix;
-	BoPUIMatrixWidget* mEulerToGluLookAtMatrix;
+	BoUfoVBox* mMatrices;
+	BoUfoMatrixWidget* mMatrix;
+	BoUfoMatrixWidget* mCameraMatrix;
+	BoUfoMatrixWidget* mEulerToGluLookAtMatrix;
 
-	BoPUICheckBox* mTranslateFirst;
-	BoPUICheckBox* mShowMatrices;
+	BoUfoCheckBox* mTranslateFirst;
+	BoUfoCheckBox* mShowMatrices;
 };
 
-BoPUIPlainCameraWidget::BoPUIPlainCameraWidget(QObject* parent, const char* name)
-	: BoPUICameraConfigWidgetBase(parent, name)
+BoUfoPlainCameraWidget::BoUfoPlainCameraWidget()
+	: BoUfoCameraConfigWidgetBase()
 {
- d = new BoPUIPlainCameraWidgetPrivate;
+ d = new BoUfoPlainCameraWidgetPrivate;
 
- BoPUIVLayout* layout = new BoPUIVLayout(0);
- mLayout->addLayout(layout);
+ BoUfoVBox* layoutWidget = new BoUfoVBox();
+ addWidget(layoutWidget);
 
- d->mCameraPosX = new BoPUINumInput(this);
- d->mCameraPosY = new BoPUINumInput(this);
- d->mCameraPosZ = new BoPUINumInput(this);
- d->mRotateX = new BoPUINumInput(this);
- d->mRotateY = new BoPUINumInput(this);
- d->mRotateZ = new BoPUINumInput(this);
+ d->mCameraPosX = new BoUfoNumInput();
+ d->mCameraPosY = new BoUfoNumInput();
+ d->mCameraPosZ = new BoUfoNumInput();
+ d->mRotateX = new BoUfoNumInput();
+ d->mRotateY = new BoUfoNumInput();
+ d->mRotateZ = new BoUfoNumInput();
 
  // note: *first* rotate, then camerapos
  // --> gluLookAt() does this equally. translation to eye pos happens at the
  // end.
- layout->addWidget(d->mRotateX);
- layout->addWidget(d->mRotateY);
- layout->addWidget(d->mRotateZ);
- layout->addWidget(d->mCameraPosX);
- layout->addWidget(d->mCameraPosY);
- layout->addWidget(d->mCameraPosZ);
+ layoutWidget->addWidget(d->mRotateX);
+ layoutWidget->addWidget(d->mRotateY);
+ layoutWidget->addWidget(d->mRotateZ);
+ layoutWidget->addWidget(d->mCameraPosX);
+ layoutWidget->addWidget(d->mCameraPosY);
+ layoutWidget->addWidget(d->mCameraPosZ);
 
  d->mCameraPosX->setLabel(i18n("Camera position X:"), AlignLeft | AlignVCenter);
  d->mCameraPosY->setLabel(i18n("Camera position Y:"), AlignLeft | AlignVCenter);
@@ -619,71 +614,72 @@ BoPUIPlainCameraWidget::BoPUIPlainCameraWidget(QObject* parent, const char* name
  // translating first is more logical from a user point of view, but sometimes
  // rotating first is important from a technical point of view (gluLookAt()
  // rotates first)
- d->mTranslateFirst = new BoPUICheckBox(i18n("Translate first"), this);
+ d->mTranslateFirst = new BoUfoCheckBox(i18n("Translate first"));
 // QToolTip::add(d->mTranslateFirst, i18n("Here you can define whether the view is first translated and then rotated, or the other way round. If that doesn't mean anything to you - leave it at the default."));
  d->mTranslateFirst->setChecked(true);
  connect(d->mTranslateFirst, SIGNAL(signalToggled(bool)),
 		this, SLOT(slotTranslateFirstChanged()));
- layout->addWidget(d->mTranslateFirst);
+ layoutWidget->addWidget(d->mTranslateFirst);
 
- d->mShowMatrices = new BoPUICheckBox(i18n("Show matrices"), this);
+ d->mShowMatrices = new BoUfoCheckBox(i18n("Show matrices"));
  d->mShowMatrices->setChecked(false);
  connect(d->mShowMatrices, SIGNAL(signalToggled(bool)),
 		this, SLOT(slotShowMatricesChanged(bool)));
- layout->addWidget(d->mShowMatrices);
+ layoutWidget->addWidget(d->mShowMatrices);
 
- d->mMatrices = new BoPUIWidget(true, this);
- layout->addWidget(d->mMatrices);
- BoPUIWidget* box; // TODO: provide a groupbox here
- BoPUILabel* boxText;
+
+ d->mMatrices = new BoUfoVBox();
+ layoutWidget->addWidget(d->mMatrices);
+ BoUfoVBox* box; // TODO: provide a groupbox here
+ BoUfoLabel* boxText;
 
 // box = new QVGroupBox(i18n("Generated matrix"), d->mMatrices);
- box = new BoPUIWidget(true, this);
- boxText = new BoPUILabel(i18n("Generated matrix"), box);
- d->mMatrix = new BoPUIMatrixWidget(box);
- box->layout()->addWidget(boxText);
- box->layout()->addWidget(d->mMatrix);
- d->mMatrices->layout()->addWidget(box);
-#warning TODO: tooltips for PUI
+ box = new BoUfoVBox();
+ boxText = new BoUfoLabel(i18n("Generated matrix"));
+ d->mMatrix = new BoUfoMatrixWidget();
+ box->addWidget(boxText);
+ box->addWidget(d->mMatrix);
+ d->mMatrices->addWidget(box);
+#warning TODO: tooltips for Ufo
 // QToolTip::add(d->mMatrix, i18n("This is the matrix that should be created for the current rotation and cameraPos settings.\nThis matrix id <em>directly</em> calculated from the angle values you have entered."));
 
 // box = new QVGroupBox(i18n("Camera matrix"), d->mMatrices);
- box = new BoPUIWidget(true, this);
- boxText = new BoPUILabel(i18n("Camera matrix"), box);
- d->mCameraMatrix = new BoPUIMatrixWidget(box);
- box->layout()->addWidget(boxText);
- box->layout()->addWidget(d->mCameraMatrix);
- d->mMatrices->layout()->addWidget(box);
+ box = new BoUfoVBox();
+ boxText = new BoUfoLabel(i18n("Camera matrix"));
+ d->mCameraMatrix = new BoUfoMatrixWidget();
+ box->addWidget(boxText);
+ box->addWidget(d->mCameraMatrix);
+ d->mMatrices->addWidget(box);
 // QToolTip::add(d->mCameraMatrix, i18n("This is the matrix is generated by a the camera.\nIf the code has no bugs, this should be equal to the matrices above and below.\nOpenGL commands are used to generate this matrix, so it is absolutely depedable."));
 
 // box = new QVGroupBox(i18n("gluLookAt"), d->mMatrices);
- box = new BoPUIWidget(true, this);
- boxText = new BoPUILabel(i18n("gluLookAt"), box);
- d->mEulerToGluLookAtMatrix = new BoPUIMatrixWidget(box);
- box->layout()->addWidget(boxText);
- box->layout()->addWidget(d->mEulerToGluLookAtMatrix);
- d->mMatrices->layout()->addWidget(box);
+ box = new BoUfoVBox();
+ boxText = new BoUfoLabel(i18n("gluLookAt"));
+ d->mEulerToGluLookAtMatrix = new BoUfoMatrixWidget();
+ box->addWidget(boxText);
+ box->addWidget(d->mEulerToGluLookAtMatrix);
+ d->mMatrices->addWidget(box);
 // QToolTip::add(d->mEulerToGluLookAtMatrix, i18n("This matrix converts the cameraPos vector and the rotation angles back to gluLookAt() values.\nIt is important, that this matrix is correct, in order to ensure a correct camera."));
 
- slotShowMatricesChanged(d->mShowMatrices->isChecked());
+ slotShowMatricesChanged(d->mShowMatrices->checked());
 }
 
-BoPUIPlainCameraWidget::~BoPUIPlainCameraWidget()
+BoUfoPlainCameraWidget::~BoUfoPlainCameraWidget()
 {
  delete d;
 }
 
-int BoPUIPlainCameraWidget::needCameraType() const
+int BoUfoPlainCameraWidget::needCameraType() const
 {
  return BoCamera::Camera;
 }
 
-void BoPUIPlainCameraWidget::slotTranslateFirstChanged()
+void BoUfoPlainCameraWidget::slotTranslateFirstChanged()
 {
  updateFromCamera();
 }
 
-void BoPUIPlainCameraWidget::slotShowMatricesChanged(bool show)
+void BoUfoPlainCameraWidget::slotShowMatricesChanged(bool show)
 {
  if (show) {
 	d->mMatrices->show();
@@ -692,7 +688,7 @@ void BoPUIPlainCameraWidget::slotShowMatricesChanged(bool show)
  }
 }
 
-void BoPUIPlainCameraWidget::updateFromCamera()
+void BoUfoPlainCameraWidget::updateFromCamera()
 {
  BO_CHECK_NULL_RET(camera());
 
@@ -718,7 +714,7 @@ void BoPUIPlainCameraWidget::updateFromCamera()
 }
 
 
-void BoPUIPlainCameraWidget::slotCameraChanged()
+void BoUfoPlainCameraWidget::slotCameraChanged()
 {
  BO_CHECK_NULL_RET(camera());
 
@@ -759,12 +755,12 @@ void BoPUIPlainCameraWidget::slotCameraChanged()
  emitSignalCameraChanged();
 }
 
-bool BoPUIPlainCameraWidget::translateFirst() const
+bool BoUfoPlainCameraWidget::translateFirst() const
 {
- return d->mTranslateFirst->isChecked();
+ return d->mTranslateFirst->checked();
 }
 
-void BoPUIPlainCameraWidget::updateMatrixWidget()
+void BoUfoPlainCameraWidget::updateMatrixWidget()
 {
  BoVector3Float cameraPos = BoVector3Float(d->mCameraPosX->value(), d->mCameraPosY->value(), d->mCameraPosZ->value());
  BoMatrix rotationMatrix;
@@ -821,10 +817,10 @@ void BoPUIPlainCameraWidget::updateMatrixWidget()
 
 
 
-class BoPUIGameCameraWidgetPrivate
+class BoUfoGameCameraWidgetPrivate
 {
 public:
-	BoPUIGameCameraWidgetPrivate()
+	BoUfoGameCameraWidgetPrivate()
 	{
 		mLookAtX = 0;
 		mLookAtY = 0;
@@ -834,34 +830,34 @@ public:
 
 		mGameRestrictions = 0;
 	}
-	BoPUINumInput* mLookAtX;
-	BoPUINumInput* mLookAtY;
-	BoPUINumInput* mLookAtZ;
-	BoPUINumInput* mRotation;
-	BoPUINumInput* mRadius;
+	BoUfoNumInput* mLookAtX;
+	BoUfoNumInput* mLookAtY;
+	BoUfoNumInput* mLookAtZ;
+	BoUfoNumInput* mRotation;
+	BoUfoNumInput* mRadius;
 
 	// allow to use any values, without game restrictions, for inputs
-	BoPUICheckBox* mGameRestrictions;
+	BoUfoCheckBox* mGameRestrictions;
 };
 
-BoPUIGameCameraWidget::BoPUIGameCameraWidget(QObject* parent, const char* name)
-	: BoPUICameraConfigWidgetBase(parent, name)
+BoUfoGameCameraWidget::BoUfoGameCameraWidget()
+	: BoUfoCameraConfigWidgetBase()
 {
- d = new BoPUIGameCameraWidgetPrivate;
+ d = new BoUfoGameCameraWidgetPrivate;
 
- BoPUIVLayout* layout = new BoPUIVLayout(0);
- mLayout->addLayout(layout);
- d->mLookAtX = new BoPUINumInput(this);
- d->mLookAtY = new BoPUINumInput(this);
- d->mLookAtZ = new BoPUINumInput(this);
- d->mRotation = new BoPUINumInput(this);
- d->mRadius = new BoPUINumInput(this);
+ BoUfoVBox* layoutWidget = new BoUfoVBox();
+ addWidget(layoutWidget);
+ d->mLookAtX = new BoUfoNumInput();
+ d->mLookAtY = new BoUfoNumInput();
+ d->mLookAtZ = new BoUfoNumInput();
+ d->mRotation = new BoUfoNumInput();
+ d->mRadius = new BoUfoNumInput();
 
- layout->addWidget(d->mLookAtX);
- layout->addWidget(d->mLookAtY);
- layout->addWidget(d->mLookAtZ);
- layout->addWidget(d->mRotation);
- layout->addWidget(d->mRadius);
+ layoutWidget->addWidget(d->mLookAtX);
+ layoutWidget->addWidget(d->mLookAtY);
+ layoutWidget->addWidget(d->mLookAtZ);
+ layoutWidget->addWidget(d->mRotation);
+ layoutWidget->addWidget(d->mRadius);
 
  d->mLookAtX->setLabel(i18n("Look at X:"), AlignLeft | AlignVCenter);
  d->mLookAtY->setLabel(i18n("Look at Y:"), AlignLeft | AlignVCenter);
@@ -869,11 +865,11 @@ BoPUIGameCameraWidget::BoPUIGameCameraWidget(QObject* parent, const char* name)
  d->mRotation->setLabel(i18n("Rotation:"), AlignLeft | AlignVCenter);
  d->mRadius->setLabel(i18n("Radius:"), AlignLeft | AlignVCenter);
 
- d->mGameRestrictions = new BoPUICheckBox(i18n("Use game restrictions"), this);
+ d->mGameRestrictions = new BoUfoCheckBox(i18n("Use game restrictions"), this);
  d->mGameRestrictions->setChecked(true);
  connect(d->mGameRestrictions, SIGNAL(signalToggled(bool)),
 		this, SLOT(slotToggleGameRestrictions()));
- layout->addWidget(d->mGameRestrictions);
+ layoutWidget->addWidget(d->mGameRestrictions);
  slotToggleGameRestrictions();
 
  connect(d->mLookAtX, SIGNAL(signalValueChanged(float)), this, SLOT(slotLookAtChanged()));
@@ -885,23 +881,23 @@ BoPUIGameCameraWidget::BoPUIGameCameraWidget(QObject* parent, const char* name)
 #warning fixme
  // FIXME: we probably need a puLargeInput or so here
  // -> we need line breaks
- BoPUILabel* text = new BoPUILabel(this);
+ BoUfoLabel* text = new BoUfoLabel();
  text->setText(i18n("Note: The game camera can not display all points of view. So if you change the camera somewhere else the values here will be out of sync!"));
 // text->setAlignment(text->alignment() | WordBreak);
- layout->addWidget(text);
+ layoutWidget->addWidget(text);
 }
 
-BoPUIGameCameraWidget::~BoPUIGameCameraWidget()
+BoUfoGameCameraWidget::~BoUfoGameCameraWidget()
 {
  delete d;
 }
 
-int BoPUIGameCameraWidget::needCameraType() const
+int BoUfoGameCameraWidget::needCameraType() const
 {
  return BoCamera::GameCamera;
 }
 
-void BoPUIGameCameraWidget::updateFromCamera()
+void BoUfoGameCameraWidget::updateFromCamera()
 {
  BO_CHECK_NULL_RET(gameCamera());
  d->mLookAtX->setValue(gameCamera()->lookAt().x());
@@ -911,7 +907,7 @@ void BoPUIGameCameraWidget::updateFromCamera()
  d->mRotation->setValue(gameCamera()->rotation());
 }
 
-void BoPUIGameCameraWidget::slotLookAtChanged()
+void BoUfoGameCameraWidget::slotLookAtChanged()
 {
  BO_CHECK_NULL_RET(camera());
  BoVector3Float lookAt(d->mLookAtX->value(), d->mLookAtY->value(), d->mLookAtZ->value());
@@ -919,25 +915,25 @@ void BoPUIGameCameraWidget::slotLookAtChanged()
  emitSignalCameraChanged();
 }
 
-void BoPUIGameCameraWidget::slotRotationChanged()
+void BoUfoGameCameraWidget::slotRotationChanged()
 {
  BO_CHECK_NULL_RET(gameCamera());
  gameCamera()->setRotation(d->mRotation->value());
  emitSignalCameraChanged();
 }
 
-void BoPUIGameCameraWidget::slotRadiusChanged()
+void BoUfoGameCameraWidget::slotRadiusChanged()
 {
  BO_CHECK_NULL_RET(camera());
  gameCamera()->setRadius(d->mRadius->value());
  emitSignalCameraChanged();
 }
 
-void BoPUIGameCameraWidget::slotToggleGameRestrictions()
+void BoUfoGameCameraWidget::slotToggleGameRestrictions()
 {
  d->mRotation->setRange(-180.0f, 180.0f);
  d->mRotation->setStepSize(1.0f);
- if (!d->mGameRestrictions->isChecked()) {
+ if (!d->mGameRestrictions->checked()) {
 	d->mLookAtX->setRange(MIN_LOOKAT_X, MAX_LOOKAT_X);
 	d->mLookAtY->setRange(MIN_LOOKAT_Y, MAX_LOOKAT_Y);
 	d->mLookAtZ->setRange(-50.0f, 50.0f);
@@ -956,10 +952,10 @@ void BoPUIGameCameraWidget::slotToggleGameRestrictions()
 
 
 
-class BoPUIOrbiterCameraWidgetPrivate
+class BoUfoOrbiterCameraWidgetPrivate
 {
 public:
-	BoPUIOrbiterCameraWidgetPrivate()
+	BoUfoOrbiterCameraWidgetPrivate()
 	{
 		mOrbiter = 0;
 	}
@@ -967,29 +963,29 @@ public:
 	BoOrbiterWidget* mOrbiter;
 };
 
-BoPUIOrbiterCameraWidget::BoPUIOrbiterCameraWidget(QObject* parent, const char* name)
-	: BoPUICameraConfigWidgetBase(parent, name)
+BoUfoOrbiterCameraWidget::BoUfoOrbiterCameraWidget()
+	: BoUfoCameraConfigWidgetBase()
 {
- d = new BoPUIOrbiterCameraWidgetPrivate;
+ d = new BoUfoOrbiterCameraWidgetPrivate;
 
- BoPUIVLayout* layout = new BoPUIVLayout(0);
- mLayout->addLayout(layout);
+ BoUfoVBox* layoutWidget = new BoUfoVBox();
+ addWidget(layoutWidget);
 // d->mOrbiter = new BoOrbiterWidget(this);
 // connect(d->mOrbiter, SIGNAL(signalChanged(BoCamera*)), this, SLOT(slotCameraChanged()));
-// layout->addWidget(d->mOrbiter, 1);
+// layoutWidget->addWidget(d->mOrbiter, 1);
 }
 
-BoPUIOrbiterCameraWidget::~BoPUIOrbiterCameraWidget()
+BoUfoOrbiterCameraWidget::~BoUfoOrbiterCameraWidget()
 {
  delete d;
 }
 
-int BoPUIOrbiterCameraWidget::needCameraType() const
+int BoUfoOrbiterCameraWidget::needCameraType() const
 {
  return BoCamera::Camera;
 }
 
-void BoPUIOrbiterCameraWidget::updateFromCamera()
+void BoUfoOrbiterCameraWidget::updateFromCamera()
 {
  BO_CHECK_NULL_RET(camera());
 
@@ -1003,108 +999,90 @@ void BoPUIOrbiterCameraWidget::updateFromCamera()
  updateMatrixWidget();
 }
 
-void BoPUIOrbiterCameraWidget::updateMatrixWidget()
+void BoUfoOrbiterCameraWidget::updateMatrixWidget()
 {
 }
 
-void BoPUIOrbiterCameraWidget::slotCameraChanged()
+void BoUfoOrbiterCameraWidget::slotCameraChanged()
 {
  BO_CHECK_NULL_RET(camera());
 
  emitSignalCameraChanged();
 }
 
-void BoPUIOrbiterCameraWidget::setCamera(BoCamera* camera)
+void BoUfoOrbiterCameraWidget::setCamera(BoCamera* camera)
 {
- BoPUICameraConfigWidgetBase::setCamera(camera);
+ BoUfoCameraConfigWidgetBase::setCamera(camera);
  if (d->mOrbiter) {
 	d->mOrbiter->setCamera(camera);
  }
 }
 
 
-BoPUILightCameraWidget::BoPUILightCameraWidget(QObject* parent, bool showGlobalValues) : BoPUIWidget(parent)
+BoUfoLightCameraWidget::BoUfoLightCameraWidget(bool showGlobalValues) : BoUfoWidget()
 {
  mCamera = 0;
+ setLayoutClass(UVBoxLayout);
 
- BoPUIVLayout* layout = new BoPUIVLayout(0);
- mLayout->addLayout(layout);
+ BoUfoVBox* layoutWidget = new BoUfoVBox();
+ addWidget(layoutWidget);
 
- mCameraWidget = new BoPUICameraWidget(this);
- layout->addWidget(mCameraWidget);
+ mCameraWidget = new BoUfoCameraWidget();
+ layoutWidget->addWidget(mCameraWidget);
 
- mDirectional = new BoPUICheckBox(i18n("Directional light"), this);
- layout->addWidget(mDirectional);
+ mDirectional = new BoUfoCheckBox(i18n("Directional light"));
+ layoutWidget->addWidget(mDirectional);
 
-// QHBox* hbox = 0;
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Constant Attenuation"), hbox);
- mConstantAttenuation = new BoPUINumInput(this);
+ mConstantAttenuation = new BoUfoNumInput();
  mConstantAttenuation->setLabel(i18n("Constant Attenuation"));
- layout->addWidget(mConstantAttenuation);
+ layoutWidget->addWidget(mConstantAttenuation);
 
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Linear Attenuation"), hbox);
- mLinearAttenuation = new BoPUINumInput(this);
+ mLinearAttenuation = new BoUfoNumInput();
  mLinearAttenuation->setLabel(i18n("Linear Attenuation"));
- layout->addWidget(mLinearAttenuation);
+ layoutWidget->addWidget(mLinearAttenuation);
 
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Quadratic Attenuation"), hbox);
- mQuadraticAttenuation = new BoPUINumInput(this);
+ mQuadraticAttenuation = new BoUfoNumInput();
  mQuadraticAttenuation->setLabel(i18n("Quadratic Attenuation"));
- layout->addWidget(mQuadraticAttenuation);
+ layoutWidget->addWidget(mQuadraticAttenuation);
 
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Ambient:"), hbox);
- BoPUIHLayout* ambientLayout = new BoPUIHLayout(0);
- layout->addLayout(ambientLayout);
- BoPUILabel* ambientLabel = new BoPUILabel(i18n("Ambient:"), this);
- mAmbientR = new BoPUINumInput(this);
- mAmbientG = new BoPUINumInput(this);
- mAmbientB = new BoPUINumInput(this);
- mAmbientA = new BoPUINumInput(this);
- ambientLayout->addWidget(ambientLabel);
- ambientLayout->addWidget(mAmbientR);
- ambientLayout->addWidget(mAmbientG);
- ambientLayout->addWidget(mAmbientB);
- ambientLayout->addWidget(mAmbientA);
+ BoUfoHBox* ambientLayoutWidget = new BoUfoHBox();
+ layoutWidget->addWidget(ambientLayoutWidget);
+ BoUfoLabel* ambientLabel = new BoUfoLabel(i18n("Ambient:"));
+ mAmbientR = new BoUfoNumInput();
+ mAmbientG = new BoUfoNumInput();
+ mAmbientB = new BoUfoNumInput();
+ mAmbientA = new BoUfoNumInput();
+ ambientLayoutWidget->addWidget(ambientLabel);
+ ambientLayoutWidget->addWidget(mAmbientR);
+ ambientLayoutWidget->addWidget(mAmbientG);
+ ambientLayoutWidget->addWidget(mAmbientB);
+ ambientLayoutWidget->addWidget(mAmbientA);
 
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Diffuse:"), hbox);
- BoPUIHLayout* diffuseLayout = new BoPUIHLayout(0);
- layout->addLayout(diffuseLayout);
- BoPUILabel* diffuseLabel = new BoPUILabel(i18n("Diffuse:"), this);
- mDiffuseR = new BoPUINumInput(this);
- mDiffuseG = new BoPUINumInput(this);
- mDiffuseB = new BoPUINumInput(this);
- mDiffuseA = new BoPUINumInput(this);
- diffuseLayout->addWidget(diffuseLabel);
- diffuseLayout->addWidget(mDiffuseR);
- diffuseLayout->addWidget(mDiffuseG);
- diffuseLayout->addWidget(mDiffuseB);
- diffuseLayout->addWidget(mDiffuseA);
+ BoUfoHBox* diffuseLayoutWidget = new BoUfoHBox();
+ layoutWidget->addWidget(diffuseLayoutWidget);
+ BoUfoLabel* diffuseLabel = new BoUfoLabel(i18n("Diffuse:"));
+ mDiffuseR = new BoUfoNumInput();
+ mDiffuseG = new BoUfoNumInput();
+ mDiffuseB = new BoUfoNumInput();
+ mDiffuseA = new BoUfoNumInput();
+ diffuseLayoutWidget->addWidget(diffuseLabel);
+ diffuseLayoutWidget->addWidget(mDiffuseR);
+ diffuseLayoutWidget->addWidget(mDiffuseG);
+ diffuseLayoutWidget->addWidget(mDiffuseB);
+ diffuseLayoutWidget->addWidget(mDiffuseA);
 
-// hbox = new QHBox(this);
-// layout->addWidget(hbox);
-// (void)new QLabel(i18n("Specular:"), hbox);
- BoPUIHLayout* specularLayout = new BoPUIHLayout(0);
- layout->addLayout(specularLayout);
- BoPUILabel* specularLabel = new BoPUILabel(i18n("Specular:"), this);
- mSpecularR = new BoPUINumInput(this);
- mSpecularG = new BoPUINumInput(this);
- mSpecularB = new BoPUINumInput(this);
- mSpecularA = new BoPUINumInput(this);
- specularLayout->addWidget(specularLabel);
- specularLayout->addWidget(mSpecularR);
- specularLayout->addWidget(mSpecularG);
- specularLayout->addWidget(mSpecularB);
- specularLayout->addWidget(mSpecularA);
+ BoUfoHBox* specularLayoutWidget = new BoUfoHBox();
+ layoutWidget->addWidget(specularLayoutWidget);
+ BoUfoLabel* specularLabel = new BoUfoLabel(i18n("Specular:"));
+ mSpecularR = new BoUfoNumInput();
+ mSpecularG = new BoUfoNumInput();
+ mSpecularB = new BoUfoNumInput();
+ mSpecularA = new BoUfoNumInput();
+ specularLayoutWidget->addWidget(specularLabel);
+ specularLayoutWidget->addWidget(mSpecularR);
+ specularLayoutWidget->addWidget(mSpecularG);
+ specularLayoutWidget->addWidget(mSpecularB);
+ specularLayoutWidget->addWidget(mSpecularA);
 
  mAmbientR->setRange(0.0f, 1.0f);
  mAmbientG->setRange(0.0f, 1.0f);
@@ -1154,16 +1132,13 @@ BoPUILightCameraWidget::BoPUILightCameraWidget(QObject* parent, bool showGlobalV
  mGlobalAmbientB = 0;
  mGlobalAmbientA = 0;
  if (showGlobalValues) {
-//	hbox = new QHBox(this);
-//	layout->addWidget(hbox);
-//	(void)new QLabel(i18n("Global Ambient:"), hbox);
-	BoPUIHLayout* globalAmbientLayout = new BoPUIHLayout(0);
-	layout->addLayout(globalAmbientLayout);
-	BoPUILabel* globalAmbientLabel = new BoPUILabel(i18n("Global Ambient:"), this);
-	mGlobalAmbientR = new BoPUINumInput(this);
-	mGlobalAmbientG = new BoPUINumInput(this);
-	mGlobalAmbientB = new BoPUINumInput(this);
-	mGlobalAmbientA = new BoPUINumInput(this);
+	BoUfoHBox* globalAmbientLayoutWidget = new BoUfoHBox();
+	layoutWidget->addWidget(globalAmbientLayoutWidget);
+	BoUfoLabel* globalAmbientLabel = new BoUfoLabel(i18n("Global Ambient:"));
+	mGlobalAmbientR = new BoUfoNumInput();
+	mGlobalAmbientG = new BoUfoNumInput();
+	mGlobalAmbientB = new BoUfoNumInput();
+	mGlobalAmbientA = new BoUfoNumInput();
 	mGlobalAmbientR->setRange(0.0f, 1.0f);
 	mGlobalAmbientG->setRange(0.0f, 1.0f);
 	mGlobalAmbientB->setRange(0.0f, 1.0f);
@@ -1172,11 +1147,11 @@ BoPUILightCameraWidget::BoPUILightCameraWidget(QObject* parent, bool showGlobalV
 	mGlobalAmbientG->setStepSize(0.1f);
 	mGlobalAmbientB->setStepSize(0.1f);
 	mGlobalAmbientA->setStepSize(0.1f);
-	globalAmbientLayout->addWidget(globalAmbientLabel);
-	globalAmbientLayout->addWidget(mGlobalAmbientR);
-	globalAmbientLayout->addWidget(mGlobalAmbientG);
-	globalAmbientLayout->addWidget(mGlobalAmbientB);
-	globalAmbientLayout->addWidget(mGlobalAmbientA);
+	globalAmbientLayoutWidget->addWidget(globalAmbientLabel);
+	globalAmbientLayoutWidget->addWidget(mGlobalAmbientR);
+	globalAmbientLayoutWidget->addWidget(mGlobalAmbientG);
+	globalAmbientLayoutWidget->addWidget(mGlobalAmbientB);
+	globalAmbientLayoutWidget->addWidget(mGlobalAmbientA);
 	connect(mGlobalAmbientR, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
 	connect(mGlobalAmbientG, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
 	connect(mGlobalAmbientB, SIGNAL(signalValueChanged(float)), this, SLOT(slotLightModelChanged()));
@@ -1186,12 +1161,12 @@ BoPUILightCameraWidget::BoPUILightCameraWidget(QObject* parent, bool showGlobalV
  mBlockLightChanges = false;
 }
 
-BoPUILightCameraWidget::~BoPUILightCameraWidget()
+BoUfoLightCameraWidget::~BoUfoLightCameraWidget()
 {
  delete mCamera;
 }
 
-void BoPUILightCameraWidget::setLight(BoLight* light, BoContext* context)
+void BoUfoLightCameraWidget::setLight(BoLight* light, BoContext* context)
 {
  boDebug() << k_funcinfo << endl;
  if (mCamera) {
@@ -1224,9 +1199,10 @@ void BoPUILightCameraWidget::setLight(BoLight* light, BoContext* context)
  mSpecularG->setValue(mLight->specular().y());
  mSpecularB->setValue(mLight->specular().z());
  mSpecularA->setValue(mLight->specular().w());
- mConstantAttenuation->setEnabled(!mDirectional->isChecked());
- mLinearAttenuation->setEnabled(!mDirectional->isChecked());
- mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
+
+ mConstantAttenuation->setEnabled(!mDirectional->checked());
+ mLinearAttenuation->setEnabled(!mDirectional->checked());
+ mQuadraticAttenuation->setEnabled(!mDirectional->checked());
 
  if (mShowGlobalValues) {
 	GLfloat amb[4];
@@ -1240,7 +1216,7 @@ void BoPUILightCameraWidget::setLight(BoLight* light, BoContext* context)
  mBlockLightChanges = false;
 }
 
-void BoPUILightCameraWidget::slotLightChanged()
+void BoUfoLightCameraWidget::slotLightChanged()
 {
  if (!mLight) {
 	return;
@@ -1255,7 +1231,7 @@ void BoPUILightCameraWidget::slotLightChanged()
  BoContext* old = BoContext::currentContext();
  mContext->makeCurrent();
 
- mLight->setDirectional(mDirectional->isChecked());
+ mLight->setDirectional(mDirectional->checked());
  mLight->setAmbient(BoVector4Float(mAmbientR->value(), mAmbientG->value(), mAmbientB->value(), mAmbientA->value()));
  mLight->setDiffuse(BoVector4Float(mDiffuseR->value(), mDiffuseG->value(), mDiffuseB->value(), mDiffuseA->value()));
  mLight->setSpecular(BoVector4Float(mSpecularR->value(), mSpecularG->value(), mSpecularB->value(), mSpecularA->value()));
@@ -1268,12 +1244,12 @@ void BoPUILightCameraWidget::slotLightChanged()
  }
 
  // when directional light is enabled attenuation is per definition disabled
- mConstantAttenuation->setEnabled(!mDirectional->isChecked());
- mLinearAttenuation->setEnabled(!mDirectional->isChecked());
- mQuadraticAttenuation->setEnabled(!mDirectional->isChecked());
+ mConstantAttenuation->setEnabled(!mDirectional->checked());
+ mLinearAttenuation->setEnabled(!mDirectional->checked());
+ mQuadraticAttenuation->setEnabled(!mDirectional->checked());
 }
 
-void BoPUILightCameraWidget::slotLightModelChanged()
+void BoUfoLightCameraWidget::slotLightModelChanged()
 {
  if (!mLight) {
 	return;
@@ -1304,12 +1280,15 @@ void BoPUILightCameraWidget::slotLightModelChanged()
  }
 }
 
-#include <plib/pu.h>
 class BosonGLWidgetLight : public BosonGLWidget
 {
 public:
 	BosonGLWidgetLight(QWidget* parent) : BosonGLWidget(parent)
 	{
+		mUfoManager = 0;
+		mTopWidget = 0;
+
+		setMouseTracking(true);
 	}
 	~BosonGLWidgetLight()
 	{
@@ -1321,14 +1300,24 @@ public:
 	}
 	virtual void paintGL()
 	{
+		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3ub(255, 255, 255);
-		puSetWindow(winId());
-		puDisplay();
+		if (mUfoManager) {
+			mUfoManager->dispatchEvents();
+			mUfoManager->render();
+		}
+	}
+	virtual void makeCurrent()
+	{
+		BosonGLWidget::makeCurrent();
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+		}
 	}
 
 public:
-	BoPUIVLayout* mLayout;
+	BoUfoWidget* mTopWidget;
 
 protected:
 	virtual void initializeGL()
@@ -1341,6 +1330,7 @@ protected:
 		if (recursive) {
 			return;
 		}
+		makeCurrent();
 		recursive = true;
 		glClearColor(0.7f, 0.7f, 0.7f, 1.0f);
 		glShadeModel(GL_FLAT);
@@ -1349,82 +1339,79 @@ protected:
 		glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
 		glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
 		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-		puSetWindow(winId());
-		mLayout = new BoPUIVLayout(this);
+		mUfoManager = new BoUfoManager(width(), height());
+		mTopWidget = mUfoManager->contentWidget();
+//		mTopWidget->setLayoutClass(BoUfoWidget::UVBoxLayout);
 		recursive = false;
 	}
 	virtual void resizeGL(int w, int h)
 	{
-		puSetWindow(winId());
-		mLayout->doLayout();
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postResizeEvent(width(), height());
+
+			// FIXME is this required? if so do it in
+			// postResizeEvent()
+			mUfoManager->contentWidget()->invalidate();
+		}
 		repaint(false);
 	}
 
 	virtual void mousePressEvent(QMouseEvent* e)
 	{
-		puSetWindow(winId());
-		int puButton;
-		switch (e->button()) {
-			case QMouseEvent::LeftButton:
-				puButton = PU_LEFT_BUTTON;
-				break;
-			case QMouseEvent::RightButton:
-				puButton = PU_RIGHT_BUTTON;
-				break;
-			case QMouseEvent::MidButton:
-				puButton = PU_MIDDLE_BUTTON;
-				break;
-			default:
-				puButton = PU_NOBUTTON;
-				break;
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postMousePressEvent(e);
 		}
-		puMouse(puButton, PU_DOWN, e->x(), e->y());
 		repaint(false);
 	}
 	virtual void mouseReleaseEvent(QMouseEvent* e)
 	{
-		puSetWindow(winId());
-		int puButton;
-		switch (e->button()) {
-			case QMouseEvent::LeftButton:
-				puButton = PU_LEFT_BUTTON;
-				break;
-			case QMouseEvent::RightButton:
-				puButton = PU_RIGHT_BUTTON;
-				break;
-			case QMouseEvent::MidButton:
-				puButton = PU_MIDDLE_BUTTON;
-				break;
-			default:
-				puButton = PU_NOBUTTON;
-				break;
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postMouseReleaseEvent(e);
 		}
-		puMouse(puButton, PU_UP, e->x(), e->y());
 		repaint(false);
 	}
 	virtual void mouseMoveEvent(QMouseEvent* e)
 	{
-		puSetWindow(winId());
-		puMouse(e->x(), e->y());
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postMouseMoveEvent(e);
+		}
+		repaint(false);
+	}
+	virtual void wheelEvent(QWheelEvent* e)
+	{
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postWheelEvent(e);
+		}
 		repaint(false);
 	}
 	virtual void keyPressEvent(QKeyEvent* e)
 	{
-		puSetWindow(winId());
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postKeyPressEvent(e);
+		}
 		BosonGLWidget::keyPressEvent(e);
-		puKeyboard(e->ascii(), PU_DOWN);
 		e->ignore();
 		repaint(false);
 	}
 	virtual void keyReleaseEvent(QKeyEvent* e)
 	{
-		puSetWindow(winId());
+		if (mUfoManager) {
+			mUfoManager->makeContextCurrent();
+			mUfoManager->postKeyReleaseEvent(e);
+		}
 		BosonGLWidget::keyPressEvent(e);
-		puKeyboard(e->ascii(), PU_UP);
 		e->ignore();
 		repaint(false);
 	}
 
+private:
+	BoUfoManager* mUfoManager;
 };
 
 BoLightCameraWidget1::BoLightCameraWidget1(QWidget* parent, bool showGlobalValues)
@@ -1435,9 +1422,8 @@ BoLightCameraWidget1::BoLightCameraWidget1(QWidget* parent, bool showGlobalValue
  l->addWidget(mWidget);
  mWidget->initialize();
 
- puSetWindow(mWidget->winId());
- mLightWidget = new BoPUILightCameraWidget(mWidget);
- mWidget->mLayout->addWidget(mLightWidget);
+ mLightWidget = new BoUfoLightCameraWidget();
+ mWidget->mTopWidget->addWidget(mLightWidget);
  repaint(false);
 }
 

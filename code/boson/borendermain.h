@@ -52,7 +52,6 @@ class BoMaterialWidget;
 class KCmdLineArgs;
 class QCheckBox;
 class BoFontInfo;
-class BoPUILayout;
 class BoUfoManager;
 template<class T> class BoVector3;
 typedef BoVector3<float> BoVector3Float;
@@ -251,7 +250,6 @@ protected:
 	int pickObject(const QPoint& pos);
 
 private:
-	void initPUIGUI();
 	void initUfoGUI();
 
 private:
@@ -264,7 +262,6 @@ private:
 	int mSelectedMesh;
 
 	BoUfoManager* mUfoManager;
-	BoPUILayout* mPUILayout;
 	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!

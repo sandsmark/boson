@@ -4,5 +4,5 @@ Makefile.in
 .libs
 *.moc
 *.lo
-libbopui.la
-libbopui_la_meta_unload.*
+libboufo.la
+libboufo_la_meta_unload.*

@@ -86,15 +86,15 @@ private:
 	int mPrecision;
 };
 
-#include "bopui/bopui.h"
+#include "boufo/boufo.h"
 
-class BoPUIMatrixWidgetPrivate;
-class BoPUIMatrixWidget : public BoPUIWidget
+class BoUfoMatrixWidgetPrivate;
+class BoUfoMatrixWidget : public BoUfoWidget
 {
 	Q_OBJECT
 public:
-	BoPUIMatrixWidget(QObject* parent = 0, const char* name = 0);
-	~BoPUIMatrixWidget();
+	BoUfoMatrixWidget();
+	~BoUfoMatrixWidget();
 
 	void setMatrix(const BoMatrix* m);
 	void setMatrix(const BoMatrix& m);
@@ -125,10 +125,10 @@ public:
 	 * This will use the matrix of @p widget as 2nd matrix and @ref mark the
 	 * elements in both widgets.
 	 **/
-	bool compareMatrices(BoPUIMatrixWidget* widget, float diff = 0.001f);
+	bool compareMatrices(BoUfoMatrixWidget* widget, float diff = 0.001f);
 
 private:
-	BoPUIMatrixWidgetPrivate* d;
+	BoUfoMatrixWidgetPrivate* d;
 	int mPrecision;
 };
 

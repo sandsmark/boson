@@ -484,8 +484,6 @@ BosonGLWidget::BosonGLWidget(QWidget* parent, bool direct) : QWidget(parent)
  boDebug() << k_funcinfo << endl;
  d = new BosonGLWidgetPrivate;
  d->mWantDirect = direct;
- mActionCollection = 0;
- mMenuBar = 0;
  init();
 }
 

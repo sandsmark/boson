@@ -156,38 +156,37 @@ bool BoMatrixWidget::compareMatrices(BoMatrixWidget* widget, float diff)
 }
 
 
-class BoPUIMatrixWidgetPrivate
+class BoUfoMatrixWidgetPrivate
 {
 public:
-	BoPUIMatrixWidgetPrivate()
+	BoUfoMatrixWidgetPrivate()
 	{
-		mLayout = 0;
 	}
 	BoMatrix mMatrix;
-	QGridLayout* mLayout;
-	QIntDict<BoPUILabel> mLabel;
+	QIntDict<BoUfoLabel> mLabel;
 };
 
 
-BoPUIMatrixWidget::BoPUIMatrixWidget(QObject* parent, const char* name) : BoPUIWidget(parent, name)
+BoUfoMatrixWidget::BoUfoMatrixWidget() : BoUfoWidget()
 {
- d = new BoPUIMatrixWidgetPrivate;
-// d->mLayout = new QGridLayout(this, 0, 1);
+ d = new BoUfoMatrixWidgetPrivate;
+ BoUfoVBox* vbox = new BoUfoVBox(); // FIXME: we need a grid layout!
+ addWidget(vbox);
  for (int i = 0; i < 16; i++) {
-	BoPUILabel* l = new BoPUILabel(this);
+	BoUfoLabel* l = new BoUfoLabel();
 	d->mLabel.insert(i, l);
 //	d->mLayout->addWidget(l, i % 4, i / 4); // TODO: grid layout
-	mLayout->addWidget(l);
+	vbox->addWidget(l); // FIXME: grid layout
  }
  mPrecision = 6;
 }
 
-BoPUIMatrixWidget::~BoPUIMatrixWidget()
+BoUfoMatrixWidget::~BoUfoMatrixWidget()
 {
  delete d;
 }
 
-void BoPUIMatrixWidget::setMatrix(const BoMatrix* m)
+void BoUfoMatrixWidget::setMatrix(const BoMatrix* m)
 {
  if (!m) {
 	boError() << k_funcinfo << "NULL matrix" << endl;
@@ -196,7 +195,7 @@ void BoPUIMatrixWidget::setMatrix(const BoMatrix* m)
  setMatrix(*m);
 }
 
-void BoPUIMatrixWidget::setMatrix(const BoMatrix& m)
+void BoUfoMatrixWidget::setMatrix(const BoMatrix& m)
 {
  d->mMatrix = m;
  for (int i = 0; i < 4; i++) {
@@ -208,7 +207,7 @@ void BoPUIMatrixWidget::setMatrix(const BoMatrix& m)
  }
 }
 
-void BoPUIMatrixWidget::setMatrix(Lib3dsMatrix m)
+void BoUfoMatrixWidget::setMatrix(Lib3dsMatrix m)
 {
  BoMatrix matrix;
  for (int i = 0; i < 4; i++) {
@@ -219,13 +218,13 @@ void BoPUIMatrixWidget::setMatrix(Lib3dsMatrix m)
  setMatrix(&matrix);
 }
 
-void BoPUIMatrixWidget::setIdentity()
+void BoUfoMatrixWidget::setIdentity()
 {
  BoMatrix m;
  setMatrix(&m);
 }
 
-void BoPUIMatrixWidget::clear()
+void BoUfoMatrixWidget::clear()
 {
  d->mMatrix.loadIdentity();
  setMatrix(d->mMatrix);
@@ -234,12 +233,12 @@ void BoPUIMatrixWidget::clear()
  }
 }
 
-const BoMatrix& BoPUIMatrixWidget::matrix() const
+const BoMatrix& BoUfoMatrixWidget::matrix() const
 {
  return d->mMatrix;
 }
 
-void BoPUIMatrixWidget::mark(unsigned int i)
+void BoUfoMatrixWidget::mark(unsigned int i)
 {
  if (i >= 16) {
 	return;
@@ -254,7 +253,7 @@ void BoPUIMatrixWidget::mark(unsigned int i)
 #endif
 }
 
-void BoPUIMatrixWidget::unmark(unsigned int i)
+void BoUfoMatrixWidget::unmark(unsigned int i)
 {
  if (i >= 16) {
 	return;
@@ -265,7 +264,7 @@ void BoPUIMatrixWidget::unmark(unsigned int i)
 #endif
 }
 
-bool BoPUIMatrixWidget::compareMatrices(const BoMatrix& m, float diff)
+bool BoUfoMatrixWidget::compareMatrices(const BoMatrix& m, float diff)
 {
  bool ok = true;
  for (unsigned int i = 0; i < 16; i++) {
@@ -279,7 +278,7 @@ bool BoPUIMatrixWidget::compareMatrices(const BoMatrix& m, float diff)
  return ok;
 }
 
-bool BoPUIMatrixWidget::compareMatrices(BoPUIMatrixWidget* widget, float diff)
+bool BoUfoMatrixWidget::compareMatrices(BoUfoMatrixWidget* widget, float diff)
 {
  if (!widget) {
 	return false;

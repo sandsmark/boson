@@ -19,11 +19,18 @@
 
 // note the copyright above: this is LGPL!
 
-#include "bopuiaction.h"
-#include "bopuiaction.moc"
+#include <ufo/widgets/umenubar.hpp>
+#include <ufo/widgets/umenu.hpp>
+#include <ufo/widgets/urootpane.hpp>
+#include <ufo/signals/uobjectslot.hpp>
+#include <ufo/signals/usignal.hpp>
+#include <ufo/ufo.hpp>
 
+#include "boufoaction.h"
+#include "boufoaction.moc"
+
+#include "boufo.h"
 #include <bodebug.h>
-#include "bopumenubar.h"
 #include "../bosonglwidget.h"
 
 #include <kshortcut.h>
@@ -38,8 +45,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PU_USE_NONE
-#include <plib/pu.h>
 
 // AB: in contrast to KDE, we allow only (exactly) one MenuBar. No more, no
 // less.
@@ -53,14 +58,14 @@
 // is useless.
 //
 // Some of the unsupported tags: <TearOffHandle>, <ActionList>
-class BoPUIXMLBuilder
+class BoUfoXMLBuilder
 {
 public:
-	BoPUIXMLBuilder(BoPUIActionCollection* c)
+	BoUfoXMLBuilder(BoUfoActionCollection* c)
 	{
 		mActionCollection = c;
 	}
-	~BoPUIXMLBuilder()
+	~BoUfoXMLBuilder()
 	{
 	}
 	bool reset()
@@ -112,16 +117,16 @@ public:
 		}
 		return true;
 	}
-	bool makeGUI(BoPUIMenuBar* bar)
+	bool makeGUI(BoUfoMenuBar* bar)
 	{
 		QDomElement root = mDoc.documentElement();
 		if (root.isNull()) {
 			return false;
 		}
 
-		bool ret = makePUIMenuBar(bar);
+		bool ret = makeUfoMenuBar(bar);
 		if (!ret) {
-			boError() << k_funcinfo << "unable to create PUI MenuBar" << endl;
+			boError() << k_funcinfo << "unable to create Ufo MenuBar" << endl;
 		}
 		return ret;
 	}
@@ -241,15 +246,15 @@ protected:
 		return true;
 	}
 
-	bool makePUIMenuBar(BoPUIMenuBar* bar);
-	bool makePUIMenu(const QDomElement& menuBar, BoPUIMenuBarMenu* puiMenu);
+	bool makeUfoMenuBar(BoUfoMenuBar* bar);
+	bool makeUfoMenu(const QDomElement& menuBar, BoUfoMenuBarMenu* ufoMenu);
 
 private:
 	QDomDocument mDoc;
-	BoPUIActionCollection* mActionCollection;
+	BoUfoActionCollection* mActionCollection;
 };
 
-bool BoPUIXMLBuilder::mergeMenu(QDomElement& baseMenu, QDomElement& addMenu)
+bool BoUfoXMLBuilder::mergeMenu(QDomElement& baseMenu, QDomElement& addMenu)
 {
  if (baseMenu.isNull() || addMenu.isNull()) {
 	boError() << k_funcinfo << endl;
@@ -295,7 +300,7 @@ bool BoPUIXMLBuilder::mergeMenu(QDomElement& baseMenu, QDomElement& addMenu)
  return true;
 }
 
-bool BoPUIXMLBuilder::cleanElements(QDomElement& element)
+bool BoUfoXMLBuilder::cleanElements(QDomElement& element)
 {
  if (element.isNull()) {
 	return false;
@@ -358,7 +363,7 @@ bool BoPUIXMLBuilder::cleanElements(QDomElement& element)
 }
 
 
-bool BoPUIXMLBuilder::makePUIMenuBar(BoPUIMenuBar* bar)
+bool BoUfoXMLBuilder::makeUfoMenuBar(BoUfoMenuBar* bar)
 {
  QDomElement root = mDoc.documentElement();
  QDomElement menuBar = root.namedItem("MenuBar").toElement();
@@ -367,20 +372,20 @@ bool BoPUIXMLBuilder::makePUIMenuBar(BoPUIMenuBar* bar)
 	return false;
  }
 
- bool ret = makePUIMenu(menuBar, bar);
+ bool ret = makeUfoMenu(menuBar, bar);
  if (!ret) {
 	boError() << k_funcinfo << "cold not make menu" << endl;
 	return false;
  }
 
  // creation of data structures completed.
- // create actual plib menubar
+ // create actual ufo menubar
  bar->createMenu();
 
  return true;
 }
 
-bool BoPUIXMLBuilder::makePUIMenu(const QDomElement& parentElement, BoPUIMenuBarMenu* puiMenu)
+bool BoUfoXMLBuilder::makeUfoMenu(const QDomElement& parentElement, BoUfoMenuBarMenu* ufoMenu)
 {
  // note: plib does not support
  // - menu items that are directly in a menubar (without a
@@ -398,14 +403,14 @@ bool BoPUIXMLBuilder::makePUIMenu(const QDomElement& parentElement, BoPUIMenuBar
 		// nothing to do.
 	} else if (element.tagName() == QString("Action")) {
 		QString name = element.attribute("name");
-		BoPUIAction* a = mActionCollection->action(name);
+		BoUfoAction* a = mActionCollection->action(name);
 		if (!a) {
 			boError() << k_funcinfo << "did not find action " << name << endl;
 		} else {
-			puiMenu->addMenuItem(a->text(), a, SLOT(slotActivated()));
+			ufoMenu->addMenuItem(a->text(), a, SLOT(slotActivated()));
 		}
 	} else if (element.tagName() == QString("Separator")) {
-		puiMenu->addSeparator();
+		ufoMenu->addSeparator();
 	} else if (element.tagName() == QString("Menu")) {
 		QString menuName;
 		QStringList list;
@@ -417,14 +422,14 @@ bool BoPUIXMLBuilder::makePUIMenu(const QDomElement& parentElement, BoPUIMenuBar
 			menuName = menuText.text();
 		}
 
-		BoPUIMenuBarMenu* puiSubMenu = new BoPUIMenuBarMenu(menuName, puiMenu);
-		bool ret = makePUIMenu(element, puiSubMenu);
+		BoUfoMenuBarMenu* ufoSubMenu = new BoUfoMenuBarMenu(menuName, ufoMenu);
+		bool ret = makeUfoMenu(element, ufoSubMenu);
 		if (!ret) {
 			boError() << k_funcinfo << "creation of submenu failed" << endl;
-			delete puiSubMenu;
+			delete ufoSubMenu;
 			return false;
 		}
-		puiMenu->addSubMenu(puiSubMenu);
+		ufoMenu->addSubMenu(ufoSubMenu);
 	} else {
 		boWarning() << k_funcinfo << "unrecognized tag " << element.tagName() << endl;
 	}
@@ -434,10 +439,10 @@ bool BoPUIXMLBuilder::makePUIMenu(const QDomElement& parentElement, BoPUIMenuBar
 }
 
 
-class BoPUIActionPrivate
+class BoUfoActionPrivate
 {
 public:
-	BoPUIActionPrivate()
+	BoUfoActionPrivate()
 	{
 	}
 	KShortcut mDefaultShortcut;
@@ -445,20 +450,20 @@ public:
 	KShortcut mShortcut;
 };
 
-BoPUIAction::BoPUIAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoPUIActionCollection* parent, const char* name)
+BoUfoAction::BoUfoAction(const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot, BoUfoActionCollection* parent, const char* name)
 	: QObject(parent, name)
 {
  init(parent, text, cut, receiver, slot);
 }
 
-BoPUIAction::~BoPUIAction()
+BoUfoAction::~BoUfoAction()
 {
  delete d;
 }
 
-void BoPUIAction::init(BoPUIActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot)
+void BoUfoAction::init(BoUfoActionCollection* parent, const QString& text, const KShortcut& cut, const QObject* receiver, const char* slot)
 {
- d = new BoPUIActionPrivate;
+ d = new BoUfoActionPrivate;
  mParentCollection = parent;
  d->mDefaultShortcut = cut;
  d->mText = text;
@@ -479,39 +484,39 @@ void BoPUIAction::init(BoPUIActionCollection* parent, const QString& text, const
  // --> see KAction::initShortcut()
 }
 
-const QString& BoPUIAction::text() const
+const QString& BoUfoAction::text() const
 {
  return d->mText;
 }
 
-void BoPUIAction::slotActivated()
+void BoUfoAction::slotActivated()
 {
  emit signalActivated();
 }
 
-class BoPUIActionCollectionPrivate
+class BoUfoActionCollectionPrivate
 {
 public:
-	BoPUIActionCollectionPrivate()
+	BoUfoActionCollectionPrivate()
 	{
 	}
-	QDict<BoPUIAction> mActionDict;
+	QDict<BoUfoAction> mActionDict;
 };
 
-BoPUIActionCollection::BoPUIActionCollection(QObject* parent, const char* name)
+BoUfoActionCollection::BoUfoActionCollection(QObject* parent, const char* name)
 	: QObject(parent, name)
 {
- d = new BoPUIActionCollectionPrivate;
+ d = new BoUfoActionCollectionPrivate;
  d->mActionDict.setAutoDelete(true);
 }
 
-BoPUIActionCollection::~BoPUIActionCollection()
+BoUfoActionCollection::~BoUfoActionCollection()
 {
  d->mActionDict.clear();
  delete d;
 }
 
-void BoPUIActionCollection::insert(BoPUIAction* action)
+void BoUfoActionCollection::insert(BoUfoAction* action)
 {
  char unnamed[100];
  const char* name = action->name();
@@ -526,12 +531,12 @@ void BoPUIActionCollection::insert(BoPUIAction* action)
  d->mActionDict.insert(name, action);
 }
 
-BoPUIAction* BoPUIActionCollection::action(const QString& name) const
+BoUfoAction* BoUfoActionCollection::action(const QString& name) const
 {
  return d->mActionDict[name];
 }
 
-bool BoPUIActionCollection::hasAction(const QString& name) const
+bool BoUfoActionCollection::hasAction(const QString& name) const
 {
  if (!action(name)) {
 	return false;
@@ -539,24 +544,25 @@ bool BoPUIActionCollection::hasAction(const QString& name) const
  return true;
 }
 
-bool BoPUIActionCollection::createGUI(const QString& file)
+bool BoUfoActionCollection::createGUI(const QString& file)
 {
  if (!parent()) {
 	BO_NULL_ERROR(parent());
 	return false;
  }
- if (!parent()->inherits("BosonGLWidget")) {
-	boError() << k_funcinfo << "parent() is not a BosonGLWidget" << endl;
+ if (!parent()->inherits("BoUfoManager")) {
+	boError() << k_funcinfo << "parent() is not a BoUfoManager" << endl;
 	return false;
  }
- BosonGLWidget* w = (BosonGLWidget*)parent();
- puSetWindow(w->winId());
- BoPUIMenuBar::initMenuBar(w);
- if (!w->menuBar()) {
-	BO_NULL_ERROR(w->menuBar());
+// BosonGLWidget* w = (BosonGLWidget*)parent();
+ BoUfoManager* m = (BoUfoManager*)parent();
+// puSetWindow(w->winId());
+ BoUfoMenuBar::initMenuBar(m);
+ if (!m->menuBar()) {
+	BO_NULL_ERROR(m->menuBar());
 	return false;
  }
- BoPUIXMLBuilder builder(this);
+ BoUfoXMLBuilder builder(this);
  if (!builder.reset()) {
 	boError() << k_funcinfo << "builder reset failed" << endl;
 	return false;
@@ -569,225 +575,190 @@ bool BoPUIActionCollection::createGUI(const QString& file)
 	boError() << k_funcinfo << "failed cleaning the xml doc" << endl;
 	return false;
  }
- return builder.makeGUI(w->menuBar());
+ return builder.makeGUI(m->menuBar());
 }
 
-void BoPUIActionCollection::initActionCollection(BosonGLWidget* w)
+void BoUfoActionCollection::initActionCollection(BoUfoManager* m)
 {
- BO_CHECK_NULL_RET(w);
- if (w->actionCollection()) {
+ BO_CHECK_NULL_RET(m);
+ if (m->actionCollection()) {
 	return;
  }
- BoPUIActionCollection* c = new BoPUIActionCollection(w, "actioncollection");
- w->setActionCollection(c);
+ BoUfoActionCollection* c = new BoUfoActionCollection(m, "actioncollection");
+ m->setActionCollection(c);
 }
 
 
-void bo_pui_menu_item_callback(puObject* object)
-{
- BO_CHECK_NULL_RET(object);
- BO_CHECK_NULL_RET(object->getUserData());
- BoPUIMenuBarItem* item = (BoPUIMenuBarItem*)object->getUserData();
- item->activate();
-}
-
-class BoPUIMenuBarPrivate
+class BoUfoMenuBarPrivate
 {
 public:
-	BoPUIMenuBarPrivate()
+	BoUfoMenuBarPrivate()
 	{
+		mUfoManager = 0;
 		mActionCollection = 0;
 
 		mBar = 0;
 	}
 
-	BoPUIActionCollection* mActionCollection;
+	BoUfoManager* mUfoManager;
+	BoUfoActionCollection* mActionCollection;
 
-	bopuMenuBar* mBar;
+	ufo::UMenuBar* mBar;
 };
 
-BoPUIMenuBar::BoPUIMenuBar(BoPUIActionCollection* c, QObject* parent, const char* name)
-	: BoPUIMenuBarMenu(QString::null, parent, name)
+BoUfoMenuBar::BoUfoMenuBar(BoUfoManager* parent, const char* name)
+	: BoUfoMenuBarMenu(QString::null, parent, name)
 {
- d = new BoPUIMenuBarPrivate;
- d->mActionCollection = c;
+ d = new BoUfoMenuBarPrivate;
+ d->mUfoManager = parent;
+ d->mActionCollection = parent->actionCollection();
 }
 
-BoPUIMenuBar::~BoPUIMenuBar()
+BoUfoMenuBar::~BoUfoMenuBar()
 {
- clearPUI();
+ clearUfo();
  delete d;
 }
 
-bopuMenuBar* BoPUIMenuBar::puiMenuBar() const
+ufo::UMenuBar* BoUfoMenuBar::ufoMenuBar() const
 {
  return d->mBar;
 }
 
-void BoPUIMenuBar::clearPUI()
+void BoUfoMenuBar::clearUfo()
 {
- if (d->mBar) {
-	puDeleteObject(d->mBar);
+ if (d->mBar && d->mUfoManager) {
+	d->mUfoManager->setMenuBar(0); // deletes the ufo menubar
 	d->mBar = 0;
  }
 }
 
-void BoPUIMenuBar::createMenu()
+void BoUfoMenuBar::createMenu()
 {
- BO_CHECK_NULL_RET(parent());
- if (!parent()->inherits("BosonGLWidget")) {
-	boError() << k_funcinfo << "parent() is not a BosonGLWidget" << endl;
-	return;
- }
- BosonGLWidget* w = (BosonGLWidget*)parent();
- puSetWindow(w->winId());
- clearPUI();
- d->mBar = new bopuMenuBar();
+ BO_CHECK_NULL_RET(d->mUfoManager);
+ BO_CHECK_NULL_RET(d->mUfoManager->rootPane());
+ d->mUfoManager->makeContextCurrent();
+ clearUfo();
+ d->mBar = new ufo::UMenuBar();
+ d->mUfoManager->rootPane()->setMenuBar(d->mBar);
 
- QValueList<BoPUIMenuBarItem*>::Iterator it;
+ boDebug() << k_funcinfo << "creating submenus" << endl;
+ createUfoSubMenu(d->mBar);
+#if 0
+ QValueList<BoUfoMenuBarItem*>::Iterator it;
  int i = 0;
  for (it = items().begin(); it != items().end(); ++it, i++) {
-	if ((*it)->isA("BoPUIMenuBarMenu")) {
-		BoPUIMenuBarMenu* menu = (BoPUIMenuBarMenu*)*it;
-		menu->createPUISubMenu();
-	} else if ((*it)->isA("BoPUIMenuBarItem")) {
+	if ((*it)->isA("BoUfoMenuBarMenu")) {
+		BoUfoMenuBarMenu* menu = (BoUfoMenuBarMenu*)*it;
+		menu->createUfoSubMenu();
+	} else if ((*it)->isA("BoUfoMenuBarItem")) {
 		boWarning() << k_funcinfo << "menu items outside of a submenu are not supported by plib. won't add " << (*it)->text() << endl;
 	}
  }
- d->mBar->close();
+#endif
 }
 
-void BoPUIMenuBar::initMenuBar(BosonGLWidget* w)
+void BoUfoMenuBar::initMenuBar(BoUfoManager* m)
 {
- BO_CHECK_NULL_RET(w);
- BO_CHECK_NULL_RET(w->actionCollection());
- if (w->menuBar()) {
+ BO_CHECK_NULL_RET(m);
+ BO_CHECK_NULL_RET(m->actionCollection());
+ if (m->menuBar()) {
 	return;
  }
- BoPUIMenuBar* bar = new BoPUIMenuBar(w->actionCollection(), w, "menubar");
- w->setMenuBar(bar);
+ BoUfoMenuBar* bar = new BoUfoMenuBar(m, "menubar");
+ m->setMenuBar(bar);
 }
 
 
 
-class BoPUIMenuBarMenuPrivate
+class BoUfoMenuBarMenuPrivate
 {
 public:
-	BoPUIMenuBarMenuPrivate()
+	BoUfoMenuBarMenuPrivate()
 	{
 	}
-	QValueList<BoPUIMenuBarItem*> mItems;
+	QValueList<BoUfoMenuBarItem*> mItems;
 };
 
-BoPUIMenuBarMenu::BoPUIMenuBarMenu(const QString& text, QObject* parent, const char* name)
-	: BoPUIMenuBarItem(text, parent, name)
+BoUfoMenuBarMenu::BoUfoMenuBarMenu(const QString& text, QObject* parent, const char* name)
+	: BoUfoMenuBarItem(text, parent, name)
 {
- d = new BoPUIMenuBarMenuPrivate;
+ d = new BoUfoMenuBarMenuPrivate;
 }
 
-BoPUIMenuBarMenu::~BoPUIMenuBarMenu()
+BoUfoMenuBarMenu::~BoUfoMenuBarMenu()
 {
- QValueList<BoPUIMenuBarItem*>::Iterator it;
+ QValueList<BoUfoMenuBarItem*>::Iterator it;
  for (it = d->mItems.begin(); it != d->mItems.end(); ++it) {
 	delete *it;
  }
  d->mItems.clear();
- clearPUI();
  delete d;
 }
 
-void BoPUIMenuBarMenu::clearPUI()
-{
- // obsolete :-)
-}
-
-void BoPUIMenuBarMenu::addSeparator()
+void BoUfoMenuBarMenu::addSeparator()
 {
  addMenuItem(i18n("--------"), 0, 0);
 }
 
-void BoPUIMenuBarMenu::addMenuItem(const QString& text, const QObject* receiver, const char* slot)
+void BoUfoMenuBarMenu::addMenuItem(const QString& text, const QObject* receiver, const char* slot)
 {
- BoPUIMenuBarItem* item = new BoPUIMenuBarItem(text, this);
+ BoUfoMenuBarItem* item = new BoUfoMenuBarItem(text, this);
  if (receiver && slot) {
 	connect(item, SIGNAL(signalActivated()), receiver, slot);
  }
  d->mItems.append(item);
 }
 
-void BoPUIMenuBarMenu::addSubMenu(BoPUIMenuBarMenu* menu)
+void BoUfoMenuBarMenu::addSubMenu(BoUfoMenuBarMenu* menu)
 {
  d->mItems.append(menu);
 }
 
-unsigned int BoPUIMenuBarMenu::itemCount() const
+unsigned int BoUfoMenuBarMenu::itemCount() const
 {
  return d->mItems.count();
 }
 
-QValueList<BoPUIMenuBarItem*>& BoPUIMenuBarMenu::items() const
+QValueList<BoUfoMenuBarItem*>& BoUfoMenuBarMenu::items() const
 {
  return d->mItems;
 }
 
-void BoPUIMenuBarMenu::createPUISubMenu()
+void BoUfoMenuBarMenu::createUfoSubMenu(ufo::UWidget* parentWidget)
 {
- BO_CHECK_NULL_RET(parent());
- if (!parent()->inherits("BoPUIMenuBarMenu")) {
-	boError() << k_funcinfo << "parent() is not a BoPUIMenuBarMenu" << endl;
-	return;
- }
- puPopupMenu* currentPopupMenu = 0;
- BoPUIMenuBar* bar = 0;
- if (parent()->inherits("BoPUIMenuBar")) {
-	bar = (BoPUIMenuBar*)parent();
- } else if (parent()->inherits("BoPUIMenuBarMenu")) {
-	QObject* p = parent()->parent();
-	while (!bar && p) {
-		if (p->inherits("BoPUIMenuBar")) {
-			bar = (BoPUIMenuBar*)p;
-		} else if (p->inherits("BoPUIMenuBarMenu")) {
-			p = p->parent();
-		} else {
-			boError() << k_funcinfo << "unexpected parent class" << endl;
-			return;
-		}
-	}
-	if (!bar) {
-		boError() << k_funcinfo << "could not find the BoPUIMenuBar parent" << endl;
-		return;
-	}
-	puGroup* g = puGetCurrGroup();
-	BO_CHECK_NULL_RET(g);
-	if (g->getType() & PUCLASS_POPUPMENU) {
-		currentPopupMenu = (puPopupMenu*)g;
-	}
- } else {
-	boError() << k_funcinfo << "unexpected parent() class" << endl;
-	return;
- }
+ BO_CHECK_NULL_RET(parentWidget);
 
- BO_CHECK_NULL_RET(bar->puiMenuBar());
- clearPUI();
+ boDebug() << k_funcinfo << "creating " << text() << endl;
 
- puPopupMenu* p = bar->puiMenuBar()->addSubMenu(currentPopupMenu, puiText());
  for (unsigned int i = 0; i < itemCount(); i++) {
-	int index = itemCount() - 1 - i;
-	if (items()[index]->isA("BoPUIMenuBarMenu")) {
-		BoPUIMenuBarMenu* m = (BoPUIMenuBarMenu*)items()[index];
-		m->createPUISubMenu();
+	if (items()[i]->isA("BoUfoMenuBarMenu")) {
+		BoUfoMenuBarMenu* m = (BoUfoMenuBarMenu*)items()[i];
+
+		// TODO: we could provide an icon
+		ufo::UMenu* menu = new ufo::UMenu(m->text());
+		menu->sigActivated().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarMenu::uslotActivated));
+		menu->sigHighlighted().connect(slot(*((BoUfoMenuBarItem*)m), &BoUfoMenuBarItem::uslotHighlighted));
+
+		// FIXME: or addWidget() ?
+		parentWidget->add(menu);
+
+		m->createUfoSubMenu(menu);
 	} else {
-		bar->puiMenuBar()->addMenuItem(p,
-				items()[index]->puiText(),
-				bo_pui_menu_item_callback,
-				(void*)items()[index]);
+		BoUfoMenuBarItem* item = items()[i];
+		ufo::UMenuItem* menuItem = new ufo::UMenuItem(item->text());
+
+		menuItem->sigActivated().connect(slot(*item, &BoUfoMenuBarItem::uslotActivated));
+		menuItem->sigHighlighted().connect(slot(*item, &BoUfoMenuBarItem::uslotHighlighted));
+
+		// FIXME: or addWidget() ?
+		parentWidget->add(menuItem);
 	}
  }
- bar->puiMenuBar()->closeSubMenu(p);
 }
 
 
-BoPUIMenuBarItem::BoPUIMenuBarItem(const QString& _text, QObject* parent, const char* name)
+BoUfoMenuBarItem::BoUfoMenuBarItem(const QString& _text, QObject* parent, const char* name)
 	: QObject(parent, name)
 {
  mText = _text;
@@ -795,17 +766,22 @@ BoPUIMenuBarItem::BoPUIMenuBarItem(const QString& _text, QObject* parent, const 
  if (text.isNull()) {
 	text = "";
  }
- text.remove("&"); // TODO: does plib support accels?
- mPUIText = new char[text.length() + 1];
- strncpy(mPUIText, text.latin1(), text.length() + 1);
 }
 
-BoPUIMenuBarItem::~BoPUIMenuBarItem()
+BoUfoMenuBarItem::~BoUfoMenuBarItem()
 {
- delete[] mPUIText;
 }
 
-void BoPUIMenuBarItem::activate()
+void BoUfoMenuBarItem::uslotActivated(ufo::UActionEvent*)
+{
+ activate();
+}
+
+void BoUfoMenuBarItem::uslotHighlighted(ufo::UActionEvent*)
+{
+}
+
+void BoUfoMenuBarItem::activate()
 {
  emit signalActivated();
 }
