@@ -224,7 +224,7 @@ void TopWidget::initBoson()
  Boson::initBoson();
 
  // new games are handled in this order: ADMIN clicks on start games - this
- // sends an IdStartGame over network. Once this is received signalStartGame()
+ // sends an IdStartGame over network. Once this is received signalStartNewGame()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
 
