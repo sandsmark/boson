@@ -96,7 +96,8 @@ texture_DATA = \
 	hay1.jpg \
 	hay2.jpg \
 	tnkside1.jpg \
-	water1.jpg
+	water1.jpg \
+	tree-piece-2.png
 
 # no further editing need here
 
