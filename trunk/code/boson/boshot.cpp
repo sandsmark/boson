@@ -18,6 +18,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdlib.h>		// random.
 #include <kstddirs.h>
 #include <kinstance.h>
 
@@ -28,61 +29,70 @@
 #include "visual.h"
 
 
-QCanvasPixmapArray * boShot::shotSequ = 0l;
-QCanvasPixmapArray * boShot::bigShotSequ = 0l;
+QCanvasPixmapArray	*boShot::shotSequ;
+QCanvasPixmapArray	*boShot::unitSequ[UNITS_SHOTS_NB];
+QCanvasPixmapArray	*boShot::fixSequ[FIX_SHOTS_NB];
+
+QBitArray		boShot::qba_units(UNITS_SHOTS_NB);
+QBitArray		boShot::qba_fix(FIX_SHOTS_NB);
 
 
 
-static QCanvasPixmapArray *loadBig(void);
 static bool loadPixmap(const QString &path, QPixmap **pix);
 
-
-#define BIG_W	71
-#define BIG_H	100
+#define SHOTS "shots/explosion%1"
+#define _SHOTS "shots/explosion0000"
 
 /*
  *  boshot
  */
-boShot::boShot(int _x, int _y, int _z, bool isBig)
+boShot::boShot(int _x, int _y, int _z, shot_style style)
 	: QCanvasSprite (0, vcanvas)
 {
 
-	if (isBig) {
+	int	version;
+	switch(style) {
 
-		/* BIG explosion (unit destroyed) */
-		if (!bigShotSequ)
-			bigShotSequ = loadBig();
-		setSequence(bigShotSequ);	// set image set
-		maxCounter = BIG_SHOT_FRAMES;
-		_x -= BIG_W >> 1; // re-center the shot
-		_y -= BIG_H >> 1;
-
-	} else {
-
-		/* small shot (unit hitten) */
-		if (!shotSequ) { // static imagepool initialization
-//			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/explosion00.pbm") + "explosion%02d" );
-			QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/shot/explosion0000.pbm");
-//			printf("path is %s\n", (const char*)path);
-			path += "boson/themes/species/human/explosions/shot/explosion%1";
-//			printf("path is %s\n", (const char*)path);
-			shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
-			//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
-//			printf("image0 is %d %d\n", shotSequ->image(0)->width(), shotSequ->image(0)->height());
-			boAssert(!shotSequ->image(0)->isNull());
-			if (shotSequ->image(0)->width()!=8 || shotSequ->image(0)->height()!=11) {
-				delete shotSequ;
-				shotSequ = 0;
-				delete this;
-				return;
+		case SHOT_SHOT:
+			/* small shot (unit hitten) */
+			if (!shotSequ) { // static imagepool initialization
+	//			QString path( locate ( "data", "boson/themes/species/human/explosions/shot/explosion00.pbm") + "explosion%02d" );
+				QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/" _SHOTS ".pbm");
+	//			printf("path is %s\n", (const char*)path);
+				path += "boson/themes/species/human/explosions/" SHOTS ;
+	//			printf("path is %s\n", (const char*)path);
+				shotSequ = new QCanvasPixmapArray(path+".ppm", SHOT_FRAMES);
+				//shotSequ = new QCanvasPixmapArray(path+".ppm", path+".pbm", SHOT_FRAMES);
+	//			printf("image0 is %d %d\n", shotSequ->image(0)->width(), shotSequ->image(0)->height());
+				boAssert(!shotSequ->image(0)->isNull());
+				if (shotSequ->image(0)->width()!=8 || shotSequ->image(0)->height()!=11) {
+					delete shotSequ;
+					shotSequ = 0;
+					delete this;
+					return;
+				}
 			}
-		}
+			setSequence(shotSequ);		// set image set
+			maxCounter = SHOT_FRAMES;
+			break;
 
-		setSequence(shotSequ);		// set image set
-		maxCounter = SHOT_FRAMES;
-
-	}
-
+		case SHOT_UNIT:
+			version = random()% UNITS_SHOTS_NB;
+			boAssert(loadBig(style, version));
+			maxCounter = UNITS_SHOT_FRAMES;
+			setSequence(unitSequ[version]);
+			break;
+		case SHOT_FACILITY:
+			version = random()% FIX_SHOTS_NB;
+			boAssert(loadBig(style, version));
+			maxCounter = FIX_SHOT_FRAMES;
+			setSequence(fixSequ[version]);
+			/*
+			_x -= BIG_W >> 1;
+			_y -= BIG_H >> 1;
+			*/
+			break;
+	};
 
 	counter = 0; setFrame( 0);		// position the first image of the animation
 	move(_x, _y); setZ( _z + 1);	// position in the canvas
@@ -103,8 +113,14 @@ void  boShot::timerEvent( QTimerEvent * )
 }
 
 
-QCanvasPixmapArray *loadBig(void) // XXX should be factorized with speciesTheme.cpp stuff...
+bool boShot::loadBig(shot_style style, int version)
 {
+
+
+	boAssert(style!=SHOT_SHOT);
+	if (SHOT_SHOT==style) return false;
+
+	boAssert(version>=0);
 
 	int		j;
 	char		buffer[200];
@@ -112,28 +128,58 @@ QCanvasPixmapArray *loadBig(void) // XXX should be factorized with speciesTheme.
 	QList<QPoint>	point_l;
 	QPixmap		*p;
 	QPoint		*pp;
-//	QString		path( locate ( "data", "boson/themes/species/human/explosions/big/big.00.bmp") );
+	QString		path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/" _SHOTS ".pbm");
+	int		frame_nb;
 
-	QString		path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/themes/species/human/explosions/big/big.00.bmp");
+	path += "boson/themes/species/human/explosions/";
 
+	switch(style) {
+		default:
+			logf(LOG_ERROR, "unexpected style in boShot,loadBig");
+			return false;
+		case SHOT_UNIT:
+			if (qba_units.testBit(version)) return true;
+			frame_nb =  UNITS_SHOT_FRAMES;
+			path+= "units/";
+			break;
 
-	path += "boson/themes/species/human/explosions/big";
+		case SHOT_FACILITY:
+			if (qba_fix.testBit(version)) return true;
+			frame_nb =  FIX_SHOT_FRAMES;
+			path+= "facilities/";
+			break;
+	}
+
+	sprintf(buffer, "expl.%02d", version);
+	path += buffer;
 //	printf("path is %s\n", (const char*)path);
-	// XXX will use  speciesTheme::loadPixmap() (made non-speciesTheme dep and public)
-	// and QCanvasPixmap(const QPixmap&, QPoint hotspot);
 
-
-	for(j=0; j< BIG_SHOT_FRAMES ; j++) {
-		sprintf(buffer, "/big.%02d.bmp", j);
+	for(j=0; j< frame_nb; j++) {
+		sprintf(buffer, ".%04d.bmp", j);
 		if (!loadPixmap(path + buffer, &p)) {
 			logf(LOG_ERROR, "boshot::loadBig Can't load %s/big.%02d.bmp...\n", (const char *)path, j);
+			return false;
 		}
 		pix_l.append(p);
 		pp = new QPoint( 0, 0);
 		point_l.append(pp);
 	}
 
-	return new QCanvasPixmapArray(pix_l, point_l);
+	switch(style) {
+		default:
+			logf(LOG_ERROR, "unexpected style in boShot,loadBig(2)");
+			return false;
+		case SHOT_UNIT:
+			unitSequ[version] = new QCanvasPixmapArray(pix_l, point_l);
+			qba_units.setBit(version);
+			break;
+
+		case SHOT_FACILITY:
+			fixSequ[version] = new QCanvasPixmapArray(pix_l, point_l);
+			qba_fix.setBit(version);
+			break;
+	}
+	return true;
 }
 
 
