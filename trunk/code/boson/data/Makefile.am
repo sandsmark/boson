@@ -1,6 +1,6 @@
 
 
-appsdir = $(kde_appsdir)/Games
+appsdir = $(kde_appsdir)/Games/TacticStrategy
 apps_DATA = boson.desktop boeditor.desktop
 KDE_ICON = boson boeditor
 
