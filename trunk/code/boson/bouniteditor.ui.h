@@ -254,11 +254,11 @@ void BoUnitEditor::init()
     QRegExpValidator* v = new QRegExpValidator(QRegExp("[0-9,]*"), this);
     mUnitProducerList->setValidator(v);
     mUnitRequirements->setValidator(v);
-    mUnitDestroyedParticles->setValidator(v);
-    mUnitConstructedParticles->setValidator(v);
-    mWeaponShootParticles->setValidator(v);
-    mWeaponFlyParticles->setValidator(v);
-    mWeaponHitParticles->setValidator(v);
+    mUnitDestroyedEffects->setValidator(v);
+    mUnitConstructedEffects->setValidator(v);
+    mWeaponShootEffects->setValidator(v);
+    mWeaponFlyEffects->setValidator(v);
+    mWeaponHitEffects->setValidator(v);
     
     // Clear everything to default values
     if(mUnits.isEmpty()) {
@@ -445,8 +445,8 @@ void BoUnitEditor::slotUpdateUnitProperties()
     mUnit->addSound(SoundReportDestroyed, mUnitSoundReportDestroyed->text());
     mUnit->addSound(SoundReportUnderAttack, mUnitSoundReportUnderAttack->text());
     // Other page
-    mUnit->setDestroyedParticleSystemIds(stringToList(mUnitDestroyedParticles->text()));
-    mUnit->setConstructedParticleSystemIds(stringToList(mUnitConstructedParticles->text()));
+    mUnit->setDestroyedEffectIds(stringToList(mUnitDestroyedEffects->text()));
+    mUnit->setConstructedEffectIds(stringToList(mUnitConstructedEffects->text()));
     mUnit->setExplodingDamageRange(mUnitExplodingDamageRange->value());
     mUnit->setExplodingDamage(mUnitExplodingDamage->value());
     BoVector3 hitpoint(mUnitHitPointX->value(), mUnitHitPointY->value(), mUnitHitPointZ->value());
@@ -547,8 +547,8 @@ void BoUnitEditor::slotUpdateWidgets()
     mUnitSoundReportDestroyed->setText(mUnit->sound(SoundReportDestroyed));
     mUnitSoundReportUnderAttack->setText(mUnit->sound(SoundReportUnderAttack));
     // Other page
-    mUnitDestroyedParticles->setText(listToString(mUnit->destroyedParticleSystemIds()));
-    mUnitConstructedParticles->setText(listToString(mUnit->constructedParticleSystemIds()));
+    mUnitDestroyedEffects->setText(listToString(mUnit->destroyedEffectIds()));
+    mUnitConstructedEffects->setText(listToString(mUnit->constructedEffectIds()));
     mUnitExplodingDamageRange->setValue(mUnit->explodingDamageRange());
     mUnitExplodingDamage->setValue(mUnit->explodingDamage());
     BoVector3 hitpoint = mUnit->hitPoint();
@@ -578,9 +578,9 @@ void BoUnitEditor::slotUpdateWeaponProps()
     BoVector3 offset(mWeaponOffsetX->value(), mWeaponOffsetY->value(), mWeaponOffsetZ->value());
     offset.cellToCanvas();
     w->setOffset(offset);
-    w->setShootParticleSystemIds(stringToList(mWeaponShootParticles->text()));
-    w->setFlyParticleSystemIds(stringToList(mWeaponFlyParticles->text()));
-    w->setHitParticleSystemIds(stringToList(mWeaponHitParticles->text()));
+    w->setShootEffectIds(stringToList(mWeaponShootEffects->text()));
+    w->setFlyEffectIds(stringToList(mWeaponFlyEffects->text()));
+    w->setHitEffectIds(stringToList(mWeaponHitEffects->text()));
     w->setSound(SoundWeaponShoot, mWeaponSoundShoot->text());
 }
 
@@ -656,9 +656,9 @@ void BoUnitEditor::slotUpdateWeaponWidgets()
     mWeaponOffsetX->setValue(o.x());
     mWeaponOffsetY->setValue(o.y());
     mWeaponOffsetZ->setValue(o.z());
-    mWeaponShootParticles->setText(listToString(w->shootParticleSystemIds()));
-    mWeaponFlyParticles->setText(listToString(w->flyParticleSystemIds()));
-    mWeaponHitParticles->setText(listToString(w->hitParticleSystemIds()));
+    mWeaponShootEffects->setText(listToString(w->shootEffectIds()));
+    mWeaponFlyEffects->setText(listToString(w->flyEffectIds()));
+    mWeaponHitEffects->setText(listToString(w->hitEffectIds()));
     mWeaponSoundShoot->setText(w->sound(SoundWeaponShoot));
 }
 

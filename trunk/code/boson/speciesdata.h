@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class BosonModel;
 class BosonSound;
 class UnitProperties;
 class UnitBase;
-class BosonParticleSystemProperties;
+class BosonEffectProperties;
 class BosonWeaponProperties;
 class BoAction;
 
@@ -104,10 +104,10 @@ public:
 	bool loadUnitOverview(const UnitProperties* prop, const QColor& teamColor);
 
 	/**
-	 * Load the @ref BosonParticleSystemProperties for all particles
-	 * speciefied in the particles.boson file of this theme.
+	 * Load the @ref BosonEffectProperties for all effect
+	 * speciefied in the effects.boson file of this theme.
 	 **/
-	void loadParticleSystemProperties();
+	void loadEffectProperties();
 
 	/**
 	 * Load the objects specified in $speciesdir/objects/objects.boson
@@ -132,7 +132,7 @@ public:
 
 	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
 	QPixmap* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
-	const BosonParticleSystemProperties* particleSystemProperties(unsigned long int id) const;
+	const BosonEffectProperties* effectProperties(unsigned long int id) const;
 	const BoAction* action(const QString& name) const;
 
 	/**

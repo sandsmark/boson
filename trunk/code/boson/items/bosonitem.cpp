@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 #include "../selectbox.h"
 #include "../bosonmodel.h"
 #include "../cell.h" // for deleteitem. i dont want this. how can we avoid this? don't use qptrvector probably.
-#include "../bosonparticlesystem.h"
+#include "../bosoneffect.h"
 #include "../bosonpropertyxml.h"
 #include "../bo3dtools.h"
 #include "bosonitempropertyhandler.h"
@@ -491,37 +491,35 @@ BosonCollisions* BosonItem::collisions() const
  return canvas()->collisions();
 }
 
-void BosonItem::moveParticleSystems(float x, float y, float z)
+void BosonItem::setEffectsPosition(float x, float y, float z)
 {
- if (particleSystems() && particleSystems()->count() > 0) {
+ if (effects() && effects()->count() > 0) {
 	BoVector3 pos(x + width() / 2, y + height() / 2, z);
 	pos.canvasToWorld();
-	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
+	QPtrListIterator<BosonEffect> it(*effects());
 	for (; it.current(); ++it) {
 		it.current()->setPosition(pos);
 	}
  }
 }
 
-void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
+void BosonItem::setEffectsRotation(float xrot, float yrot, float zrot)
 {
- if (angle == 0.0) {
-	return;
- }
- if (particleSystems() && particleSystems()->count() > 0) {
-	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
+ BoVector3 rot(xrot, yrot, zrot);
+ if (effects() && effects()->count() > 0) {
+	QPtrListIterator<BosonEffect> it(*effects());
 	for (; it.current(); ++it) {
-		it.current()->setRotation(angle, x, y, z);
+		it.current()->setRotation(rot);
 	}
  }
 }
 
-const QPtrList<BosonParticleSystem>* BosonItem::particleSystems() const
+const QPtrList<BosonEffect>* BosonItem::effects() const
 {
  return 0l;
 }
 
-void BosonItem::clearParticleSystems()
+void BosonItem::clearEffects()
 {
 }
 

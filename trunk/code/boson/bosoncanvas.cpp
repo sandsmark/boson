@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@
 #include "unitproperties.h"
 #include "speciestheme.h"
 #include "boitemlist.h"
-#include "bosonparticlesystem.h"
-#include "bosonparticlesystemproperties.h"
+#include "bosoneffect.h"
+#include "bosoneffectproperties.h"
 #include "defines.h"
 #include "items/bosonshot.h"
 #include "bosonweapon.h"
@@ -90,7 +90,7 @@ public:
 	QPtrList<BosonItem> mAnimList; // see BosonCanvas::slotAdvance()
 
 	BoItemList mAllItems;
-	QPtrList<BosonParticleSystem> mParticles;
+	QPtrList<BosonEffect> mEffects;
 
 	// by default ALL items are in "work" == -1. if an item changes its work
 	// (i.e. it is a unit and it called setAdvanceWork()) then it will go to
@@ -122,7 +122,7 @@ void BosonCanvas::init()
 {
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
- d->mParticles.setAutoDelete(true);
+ d->mEffects.setAutoDelete(true);
  mAdvanceFunctionLocked = false;
  mCollisions = new BosonCollisions();
  d->mStatistics = new BosonCanvasStatistics(this);
@@ -152,7 +152,7 @@ void BosonCanvas::quitGame()
 {
  deleteDestroyed();
  d->mAnimList.clear();
- d->mParticles.clear();
+ d->mEffects.clear();
  QMap<int, QPtrList<BosonItem> >::Iterator it;
  for (it = d->mWork2AdvanceList.begin(); it != d->mWork2AdvanceList.end(); ++it) {
 	(*it).clear();
@@ -454,9 +454,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  boProfiling->advanceFunction(false);
  unlockAdvanceFunction();
 
- boProfiling->advanceParticles(true);
- updateParticleSystems(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
- boProfiling->advanceParticles(false);
+ boProfiling->advanceEffects(true);
+ updateEffects(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
+ boProfiling->advanceEffects(false);
 
  boProfiling->advanceMaximalAdvanceCount(true);
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
@@ -551,7 +551,7 @@ void BosonCanvas::removeAnimation(BosonItem* item)
 void BosonCanvas::unitMoved(Unit* unit, float oldX, float oldY)
 {
  updateSight(unit, oldX, oldY);
- 
+
 // test if any unit has this unit as target. If sou then adjust the destination.
 //TODO
 
@@ -575,7 +575,7 @@ void BosonCanvas::updateSight(Unit* unit, float , float)
 		x + sight) - x;
  int bottom = ((y + sight > d->mMap->height()) ?  d->mMap->height() :
 		y + sight) - y;
- 
+
  sight *= sight;
 // boDebug() << k_funcinfo << endl;
 // boDebug() << "left=" << left << ",right=" << right << endl;
@@ -610,17 +610,17 @@ void BosonCanvas::shotHit(BosonShot* s)
 	boError() << k_funcinfo << "NULL shot" << endl;
 	return;
  }
- // Set age of flying particle systems (e.g. smoke traces) to 0 so they won't create any new particles
- if (s->particleSystems() && s->particleSystems()->count() > 0) {
-	QPtrListIterator<BosonParticleSystem> it(*(s->particleSystems()));
+ // Make shot's effects (e.g. smoke traces) obsolete
+ if (s->effects() && s->effects()->count() > 0) {
+	QPtrListIterator<BosonEffect> it(*(s->effects()));
 	while (it.current()) {
-		it.current()->setAge(0);
+		it.current()->makeObsolete();
 		++it;
 	}
  }
  if (s->properties()) {
-	// Add hit particle systems
-	addParticleSystems(s->properties()->newHitParticleSystems(BoVector3(s->x(), s->y(), s->z())));
+	// Add hit effects
+	addEffects(s->properties()->newHitEffects(BoVector3(s->x(), s->y(), s->z())));
 
 	// Play hit sound
 	s->properties()->playSound(SoundWeaponHit);
@@ -692,7 +692,7 @@ void BosonCanvas::unitDamaged(Unit* unit, long int damage)
 	health -= damage;
 	unit->setHealth((health >= 0) ? health : 0);
  }
- 
+
  if (unit->isDestroyed()) {
 	destroyUnit(unit); // display the explosion ; not the shoot
  } else {
@@ -757,14 +757,14 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// This stops everything
 	unit->stopAttacking();
 
-	// Stop particle emitting for all systems this unit has
-	if (unit->particleSystems() && unit->particleSystems()->count() > 0) {
-		QPtrListIterator<BosonParticleSystem> it(*(unit->particleSystems()));
+	// Make all unit's effects obsolete
+	if (unit->effects() && unit->effects()->count() > 0) {
+		QPtrListIterator<BosonEffect> it(*(unit->effects()));
 		for (; it.current(); ++it) {
-			boDebug() << k_funcinfo << "Setting age to 0 for particle system" << it.current() << endl;
-			it.current()->setAge(0);
+			boDebug() << k_funcinfo << "Making effect " << it.current() << " obsolete" << endl;
+			it.current()->makeObsolete();
 		}
-		unit->clearParticleSystems();
+		unit->clearEffects();
 	}
 
 	// the unit is added to a list - now displayed as a wreckage only.
@@ -773,8 +773,8 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Pos is center of unit
 	BoVector3 pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
 	//pos += unit->unitProperties()->hitPoint();
-	// Add destroyed particle systems
-	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
+	// Add destroyed effects
+	addEffects(unit->unitProperties()->newDestroyedEffects(pos[0], pos[1], pos[2]));
 	// Make explosion if needed
 	const UnitProperties* prop = unit->unitProperties();
 	if (prop->explodingDamage() > 0) {
@@ -1019,17 +1019,17 @@ void BosonCanvas::removeItem(BosonItem* item)
 
 }
 
-unsigned int BosonCanvas::particleSystemsCount() const
+unsigned int BosonCanvas::effectsCount() const
 {
- return particleSystems()->count();
+ return effects()->count();
 }
 
-QPtrList<BosonParticleSystem>* BosonCanvas::particleSystems() const
+QPtrList<BosonEffect>* BosonCanvas::effects() const
 {
- return &(d->mParticles);
+ return &(d->mEffects);
 }
 
-void BosonCanvas::updateParticleSystems(float elapsed)
+void BosonCanvas::updateEffects(float elapsed)
 {
 /* int count = d->mParticles.count();
  if (count <= 0) {
@@ -1046,10 +1046,10 @@ void BosonCanvas::updateParticleSystems(float elapsed)
 		count--;
 	}
  }*/
- for (BosonParticleSystem* s = d->mParticles.first(); s; s = d->mParticles.next()) {
-	s->update(elapsed);
-	if (!s->isActive()) {
-		d->mParticles.removeRef(s);
+ for (BosonEffect* e = d->mEffects.first(); e; e = d->mEffects.next()) {
+	e->update(elapsed);
+	if (!e->isActive()) {
+		d->mEffects.removeRef(e);
 	}
  }
 }
@@ -1066,16 +1066,16 @@ void BosonCanvas::deleteUnusedShots()
  }
 }
 
-void BosonCanvas::addParticleSystem(BosonParticleSystem* s)
+void BosonCanvas::addEffect(BosonEffect* e)
 {
- d->mParticles.append(s);
+ d->mEffects.append(e);
 }
 
-void BosonCanvas::addParticleSystems(const QPtrList<BosonParticleSystem> systems)
+void BosonCanvas::addEffects(const QPtrList<BosonEffect> effects)
 {
- QPtrListIterator<BosonParticleSystem> it(systems);
+ QPtrListIterator<BosonEffect> it(effects);
  for (; it.current(); ++it) {
-	addParticleSystem(it.current());
+	addEffect(it.current());
  }
 }
 
@@ -1096,8 +1096,8 @@ bool BosonCanvas::loadFromXML(const QDomElement& root)
 	return false;
  }
 #if 0
- if (!loadParticlesFromXML(root)) {
-	boError(260) << k_funcinfo << "unable to load particles from XML" << endl;
+ if (!loadEffectsFromXML(root)) {
+	boError(260) << k_funcinfo << "unable to load effects from XML" << endl;
 	// AB: do NOT return. this is NOT critical.
  }
 #endif
@@ -1352,10 +1352,11 @@ bool BosonCanvas::loadItemFromXML(const QDomElement& element, BosonItem* item)
 }
 
 #if 0
-bool BosonCanvas::loadParticlesFromXML(const QDomElement& root)
+bool BosonCanvas::loadEffectsFromXML(const QDomElement& root)
 {
+ // TODO!
  bool ret = true;
- QDomNodeList list = root.elementsByTagName(QString::fromLatin1("ParticleSystem"));
+ QDomNodeList list = root.elementsByTagName(QString::fromLatin1("Effect"));
  for (unsigned int i = 0; i < list.count(); i++) {
 	QDomElement e = list.item(i).toElement();
 	bool ok = false;
@@ -1434,12 +1435,12 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	items.appendChild(item);
  }
 #if 0
- QPtrListIterator<BosonParticleSystem> particleIt(d->mParticles);
- while (particleIt.current()) {
-	QDomElement e = doc.createElement(QString::fromLatin1("ParticleSystem"));
-	particleIt.current()->saveAsXML(e);
+ QPtrListIterator<BosonEffect> effectIt(d->mEffects);
+ while (effectIt.current()) {
+	QDomElement e = doc.createElement(QString::fromLatin1("Effect"));
+	effectIt.current()->saveAsXML(e);
 	root.appendChild(e);
-	++particleIt;
+	++effectIt;
  }
 #endif
 

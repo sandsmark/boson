@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 
 #include "unitproperties.h"
 #include "bosonmodel.h"
-#include "bosonparticlesystemproperties.h"
+#include "bosoneffectproperties.h"
 #include "bodebug.h"
 #include "boaction.h"
 
@@ -91,9 +91,9 @@ BosonModel* BosonModelFactory::createObjectModel(const KSimpleConfig* config, co
 
 
 /**
- * By any reason QPixmap uses the alpha mask if existing, even if a custom 
- * mask using setMask() is supplied. We use this hack to delete the alpha mask 
- * if existing, so we can use our custom mask in 
+ * By any reason QPixmap uses the alpha mask if existing, even if a custom
+ * mask using setMask() is supplied. We use this hack to delete the alpha mask
+ * if existing, so we can use our custom mask in
  * BosonCommandWidget::advanceProduction()
  **/
 class OverviewPixmap : public QPixmap
@@ -101,7 +101,7 @@ class OverviewPixmap : public QPixmap
 public:
 	OverviewPixmap() : QPixmap() {}
 	OverviewPixmap(const QImage& image) : QPixmap(image) {}
-	void killAlphaMask() 
+	void killAlphaMask()
 	{
 		delete data->alphapm;
 		data->alphapm = 0;
@@ -120,7 +120,7 @@ public:
 	// we should separate our OpenGL context from BosonBigDisplay first
 	QString mThemePath;
 	QIntDict<TeamColorData> mTeamData;
-	QIntDict<BosonParticleSystemProperties> mParticleProperties;
+	QIntDict<BosonEffectProperties> mEffectProperties;
 	QDict<BoAction> mActions;
 	QDict<QPixmap> mPixmaps;
 
@@ -156,7 +156,7 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 	return;
  }
  d = new SpeciesDataPrivate;
- d->mParticleProperties.setAutoDelete(true);
+ d->mEffectProperties.setAutoDelete(true);
  d->mTeamData.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
@@ -168,7 +168,7 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 SpeciesData::~SpeciesData()
 {
  boDebug() << k_funcinfo << endl;
- d->mParticleProperties.clear();
+ d->mEffectProperties.clear();
  d->mTeamData.clear();
  d->mUnitModels.clear();
  d->mObjectModels.clear();
@@ -362,7 +362,7 @@ bool SpeciesData::loadUnitImage(const QColor& teamColor, const QString &fileName
  if (withMask) {
 	QBitmap m;
 	m.convertFromImage(*mask);
-	pix.setMask( m ); 
+	pix.setMask( m );
  }
  delete mask;
  _image = pix.convertToImage();
@@ -392,51 +392,64 @@ QPixmap* SpeciesData::smallOverview(unsigned long int unitType, const QColor& te
 }
 
 
-void SpeciesData::loadParticleSystemProperties()
+void SpeciesData::loadEffectProperties()
 {
- if (d->mParticleProperties.count() > 0) {
+ if (d->mEffectProperties.count() > 0) {
 	// already loaded, probably for another player
 	return;
  }
- BosonParticleSystemProperties::initStatic(themePath() + "/particles");
- QString fileName = themePath() + QString::fromLatin1("particles/particles.boson");
+ BosonEffect::initStatic(themePath() + "/particles");
+ QString fileName = themePath() + QString::fromLatin1("effects.boson");
  if (!KStandardDirs::exists(fileName)) {
-	boDebug() << k_funcinfo << "no particles.boson file found" << endl;
-	// We assume that this theme has no particles and don't complain
+	boDebug() << k_funcinfo << "no effects.boson file found" << endl;
+	// We assume that this theme has no effects and don't complain
 	return;
  }
  KSimpleConfig cfg(fileName);
- QStringList particles = cfg.groupList();
- if (particles.isEmpty()) {
-	boWarning() << k_funcinfo << "No particle systems found in particles "
+ QStringList effects = cfg.groupList();
+ if (effects.isEmpty()) {
+	boWarning() << k_funcinfo << "No effects found in effects "
 			<< "file (" << fileName << ")" << endl;
 	return;
  }
- boDebug(150) << k_funcinfo << "Loading " << particles.count()
-		<< " particle systems from config file" << endl;
+ boDebug(150) << k_funcinfo << "Loading " << effects.count()
+		<< " effects from config file" << endl;
  QStringList::Iterator it;
- for (it = particles.begin(); it != particles.end(); ++it) {
-	boDebug(150) << k_funcinfo << "Loading particle system from group " << *it << endl;
-	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg, *it);
-	if (!d->mParticleProperties.find(particleprop->id())) {
-		d->mParticleProperties.insert(particleprop->id(), particleprop);
-	} else {
-		boError(150) << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
+ for (it = effects.begin(); it != effects.end(); ++it) {
+	boDebug(150) << k_funcinfo << "Loading effect from group " << *it << endl;
+	// TODO: Is it possible to remove 'this' from here (used by
+	//  BosonEffectPropertiesCollection)
+	BosonEffectProperties* effectprop = BosonEffectPropertiesFactory::loadEffectProperties(&cfg, *it);
+	if (!effectprop) {
+		// Error has already been given
+		continue;
 	}
+	if (!d->mEffectProperties.find(effectprop->id())) {
+		d->mEffectProperties.insert(effectprop->id(), effectprop);
+	} else {
+		boError(150) << k_funcinfo << "effect with id " << effectprop->id() << " already there!" << endl;
+	}
+ }
+ // BosonEffectProperties (more specifically, collection properties) need 2-wave
+ //  loading
+ QIntDictIterator<BosonEffectProperties> eit(d->mEffectProperties);
+ while (eit.current()) {
+	eit.current()->finishLoading(this);
+	++eit;
  }
 }
 
-const BosonParticleSystemProperties* SpeciesData::particleSystemProperties(unsigned long int id) const
+const BosonEffectProperties* SpeciesData::effectProperties(unsigned long int id) const
 {
  if (id == 0) {
 	// We don't print error here because 0 means "none" in configurations
 	return 0;
  }
- if (!d->mParticleProperties[id]) {
-	boError() << k_funcinfo << "oops - no particle system properties for " << id << endl;
+ if (!d->mEffectProperties[id]) {
+	boError() << k_funcinfo << "oops - no effect properties for " << id << endl;
 	return 0;
  }
- return d->mParticleProperties[id];
+ return d->mEffectProperties[id];
 }
 
 const BoAction* SpeciesData::action(const QString& name) const

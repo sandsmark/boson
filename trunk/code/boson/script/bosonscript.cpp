@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #include "../bosonpath.h"
 #include "../bolight.h"
 #include "../speciestheme.h"
-#include "../bosonparticlesystemproperties.h"
+#include "../bosoneffectproperties.h"
 #include "../playerio.h"
 #include "../pluginproperties.h"
 #include "../unitbase.h"
@@ -1120,7 +1120,7 @@ void BosonScript::findPath(int x1, int y1, int x2, int y2)
 #endif
 }
 
-void BosonScript::addParticleSystem(int player, unsigned int id, BoVector3 pos, float rot)
+void BosonScript::addEffect(int player, unsigned int id, BoVector3 pos, float zrot)
 {
   if(!game())
   {
@@ -1136,14 +1136,14 @@ void BosonScript::addParticleSystem(int player, unsigned int id, BoVector3 pos, 
     return;
   }
 
-  const BosonParticleSystemProperties* prop = p->speciesTheme()->particleSystemProperties(id);
+  const BosonEffectProperties* prop = p->speciesTheme()->effectProperties(id);
   if(!prop)
   {
-    boError() << k_funcinfo << "No particle system properties with id " << id << " for player " << player << endl;
+    boError() << k_funcinfo << "No effect properties with id " << id << " for player " << player << endl;
     return;
   }
-  BosonParticleSystem* s = prop->newSystem(pos, rot);
+  QPtrList<BosonEffect> list = BosonEffectProperties::newEffects(prop, pos, BoVector3(0, 0, zrot));
   BosonCanvas* c = boGame->canvasNonConst();
-  c->addParticleSystem(s);
+  c->addEffects(list);
 }
 

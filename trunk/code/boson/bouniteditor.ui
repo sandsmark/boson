@@ -11,7 +11,7 @@
             <x>0</x>
             <y>0</y>
             <width>882</width>
-            <height>620</height>
+            <height>622</height>
         </rect>
     </property>
     <property name="caption">
@@ -1751,10 +1751,10 @@ See also full damage range.</string>
                                                 </property>
                                                 <widget class="QLabel" row="4" column="0">
                                                     <property name="name">
-                                                        <cstring>mWeaponFlyParticlesLabel</cstring>
+                                                        <cstring>mWeaponFlyEffectsLabel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>Fly particles:</string>
+                                                        <string>Fly effects:</string>
                                                     </property>
                                                 </widget>
                                                 <widget class="KDoubleNumInput" row="2" column="2">
@@ -1810,10 +1810,10 @@ See also full damage range.</string>
                                                 </spacer>
                                                 <widget class="QLabel" row="3" column="0">
                                                     <property name="name">
-                                                        <cstring>mWeaponShootParticlesLabel</cstring>
+                                                        <cstring>mWeaponShootEffectsLabel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>Shoot particles:</string>
+                                                        <string>Shoot effects:</string>
                                                     </property>
                                                 </widget>
                                                 <spacer row="0" column="1">
@@ -1835,14 +1835,14 @@ See also full damage range.</string>
                                                 </spacer>
                                                 <widget class="QLineEdit" row="4" column="2">
                                                     <property name="name">
-                                                        <cstring>mWeaponFlyParticles</cstring>
+                                                        <cstring>mWeaponFlyEffects</cstring>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>Ids of particle systems used when missile of this weapon flies</string>
+                                                        <string>Ids of effects used when missile of this weapon flies</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>&lt;p&gt;Comma-separated list of ids of particle systems used when missile of this weapon flies. These particle systems are aligned to the missile and are moved when missile moved. You can create e.g. smoke with it.&lt;/p&gt;
-&lt;p&gt;If your weapon's speed is 0, you don't need this, because particles will never be created nor used&lt;/p&gt;</string>
+                                                        <string>&lt;p&gt;Comma-separated list of ids of effects used when missile of this weapon flies. These effects are aligned to the missile and are moved when missile moved. You can create e.g. smoke with it.&lt;/p&gt;
+&lt;p&gt;If your weapon's speed is 0, you don't need this, because flying effects will never be created nor used&lt;/p&gt;</string>
                                                     </property>
                                                 </widget>
                                                 <spacer row="2" column="1">
@@ -2062,21 +2062,21 @@ See also full damage range.</string>
                                                 </widget>
                                                 <widget class="QLineEdit" row="3" column="2">
                                                     <property name="name">
-                                                        <cstring>mWeaponShootParticles</cstring>
+                                                        <cstring>mWeaponShootEffects</cstring>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>Ids of particle systems created when you shoot from this weapon</string>
+                                                        <string>Ids of effects created when you shoot from this weapon</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>Comma-separated list of ids of particle systems created when you shoot from this weapon</string>
+                                                        <string>Comma-separated list of ids of effects created when you shoot from this weapon</string>
                                                     </property>
                                                 </widget>
                                                 <widget class="QLabel" row="5" column="0">
                                                     <property name="name">
-                                                        <cstring>mWeaponHitParticlesLabel</cstring>
+                                                        <cstring>mWeaponHitEffectsLabel</cstring>
                                                     </property>
                                                     <property name="text">
-                                                        <string>Hit particles:</string>
+                                                        <string>Hit effects:</string>
                                                     </property>
                                                 </widget>
                                                 <widget class="QLabel" row="6" column="0">
@@ -2123,13 +2123,13 @@ See also full damage range.</string>
                                                 </spacer>
                                                 <widget class="QLineEdit" row="5" column="2">
                                                     <property name="name">
-                                                        <cstring>mWeaponHitParticles</cstring>
+                                                        <cstring>mWeaponHitEffects</cstring>
                                                     </property>
                                                     <property name="toolTip" stdset="0">
-                                                        <string>Ids of particle systems used when shot of this weapon hits it's target</string>
+                                                        <string>Ids of effects used when shot of this weapon hits it's target</string>
                                                     </property>
                                                     <property name="whatsThis" stdset="0">
-                                                        <string>Comma-separated list of ids of particle systems created when shot of this weapon hits it's target</string>
+                                                        <string>Comma-separated list of ids of effects created when shot of this weapon hits it's target</string>
                                                     </property>
                                                 </widget>
                                                 <widget class="QLabel" row="1" column="0">
@@ -3189,10 +3189,10 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
                         </property>
                         <widget class="QGroupBox">
                             <property name="name">
-                                <cstring>mUnitParticleGroup</cstring>
+                                <cstring>mUnitEffectsGroup</cstring>
                             </property>
                             <property name="title">
-                                <string>Particle systems</string>
+                                <string>Effects</string>
                             </property>
                             <grid>
                                 <property name="name">
@@ -3217,21 +3217,21 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
                                 </spacer>
                                 <widget class="QLabel" row="1" column="0">
                                     <property name="name">
-                                        <cstring>mDestroyedParticlesLabel</cstring>
+                                        <cstring>mDestroyedEffectsLabel</cstring>
                                     </property>
                                     <property name="text">
-                                        <string>Destroyed particles:</string>
+                                        <string>Destroyed effects:</string>
                                     </property>
                                 </widget>
                                 <widget class="QLineEdit" row="0" column="2">
                                     <property name="name">
-                                        <cstring>mUnitConstructedParticles</cstring>
+                                        <cstring>mUnitConstructedEffects</cstring>
                                     </property>
                                     <property name="toolTip" stdset="0">
-                                        <string>Ids of particle systems created when unit will be constructed</string>
+                                        <string>Ids of effects created when unit will be constructed</string>
                                     </property>
                                     <property name="whatsThis" stdset="0">
-                                        <string>Here you can specify ids of particle systems that will be created when unit will be constructed. You must specify list of numbers separated by commas, e.g. 1001,3001</string>
+                                        <string>Here you can specify ids of effects that will be created when unit will be constructed. You must specify list of numbers separated by commas, e.g. 1001,3001</string>
                                     </property>
                                 </widget>
                                 <spacer row="1" column="1">
@@ -3253,22 +3253,22 @@ Note that you must also use weapon damage &lt; 0 to repair (because at the momen
                                 </spacer>
                                 <widget class="QLineEdit" row="1" column="2">
                                     <property name="name">
-                                        <cstring>mUnitDestroyedParticles</cstring>
+                                        <cstring>mUnitDestroyedEffects</cstring>
                                     </property>
                                     <property name="toolTip" stdset="0">
-                                        <string>Ids of particle systems created when unit will be destroyed</string>
+                                        <string>Ids of effects created when unit will be destroyed</string>
                                     </property>
                                     <property name="whatsThis" stdset="0">
-                                        <string>Here you can specify ids of particle systems that will be created when unit will be destroyed.
+                                        <string>Here you can specify ids of effects that will be created when unit will be destroyed.
 You must specify list of numbers separated by commas, e.g. 1001,3001</string>
                                     </property>
                                 </widget>
                                 <widget class="QLabel" row="0" column="0">
                                     <property name="name">
-                                        <cstring>mConstructedParticlesLabel</cstring>
+                                        <cstring>mConstructedEffectsLabel</cstring>
                                     </property>
                                     <property name="text">
-                                        <string>Constructed particles:</string>
+                                        <string>Constructed effects:</string>
                                     </property>
                                 </widget>
                             </grid>
@@ -3891,19 +3891,19 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mWeaponShootParticles</sender>
+        <sender>mWeaponShootEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mWeaponFlyParticles</sender>
+        <sender>mWeaponFlyEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mWeaponHitParticles</sender>
+        <sender>mWeaponHitEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotConfigChanged()</slot>
@@ -4035,13 +4035,13 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mUnitConstructedParticles</sender>
+        <sender>mUnitConstructedEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotConfigChanged()</slot>
     </connection>
     <connection>
-        <sender>mUnitDestroyedParticles</sender>
+        <sender>mUnitDestroyedEffects</sender>
         <signal>textChanged(const QString&amp;)</signal>
         <receiver>BoUnitEditor</receiver>
         <slot>slotConfigChanged()</slot>
@@ -4152,6 +4152,10 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>klistbox.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
@@ -4160,7 +4164,18 @@ You must specify list of numbers separated by commas, e.g. 1001,3001</string>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>klineedit.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
+    <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>
     <includehint>knuminput.h</includehint>

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -176,7 +176,7 @@ public:
 	unsigned long int dFunction() const { return mFunction.diff(); }
 	unsigned long int dAdvanceFunction() const { return mAdvanceFunction.diff(); }
 	unsigned long int dDeleteUnusedShots() const { return mDeleteUnusedShots.diff(); }
-	unsigned long int dParticles() const { return mParticles.diff(); }
+	unsigned long int dEffects() const { return mEffects.diff(); }
 	unsigned long int dMaximalAdvanceCount() const { return mMaximalAdvanceCount.diff(); }
 
 
@@ -186,7 +186,7 @@ public:
 		values.append(dFunction()); // MUST be the first entry!
 		values.append(dAdvanceFunction());
 		values.append(dDeleteUnusedShots());
-		values.append(dParticles());
+		values.append(dEffects());
 		values.append(dMaximalAdvanceCount());
 		return values;
 	}
@@ -198,7 +198,7 @@ public:
 		names.append(i18n("Function"));
 		names.append(i18n("Advance Function"));
 		names.append(i18n("Delete Unused Shots"));
-		names.append(i18n("Particles"));
+		names.append(i18n("Effects"));
 		names.append(i18n("MaximalAdvanceCount"));
 		return names;
 	}
@@ -209,7 +209,7 @@ public:
 	ProfilingEntry mFunction; // the entire slotAdvance() function
 	ProfilingEntry mAdvanceFunction; // the advanceFunction()/advanceFunction2() stuff
 	ProfilingEntry mDeleteUnusedShots;
-	ProfilingEntry mParticles;
+	ProfilingEntry mEffects;
 	ProfilingEntry mMaximalAdvanceCount;
 	unsigned int mAdvanceCount;
 

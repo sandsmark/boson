@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,8 +27,8 @@
 #include <qpushbutton.h>
 #include <qlayout.h>
 
-/* 
- *  Constructs a BosonLoadingWidget which is a child of 'parent', with the 
+/*
+ *  Constructs a BosonLoadingWidget which is a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'.
  */
 BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
@@ -53,7 +53,7 @@ BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
   QSpacerItem* spacer_2 = new QSpacerItem( 30, 20, QSizePolicy::Fixed, QSizePolicy::Minimum );
   layout5->addItem( spacer_2 );
 
-  QVBoxLayout* layout4 = new QVBoxLayout( 0, 0, 6, "Layout4"); 
+  QVBoxLayout* layout4 = new QVBoxLayout( 0, 0, 6, "Layout4");
 
   mPleaseWaitLabel = new QLabel( this, "pleasewaitlabel" );
   mPleaseWaitLabel->setPaletteForegroundColor( QColor( 255, 255, 255 ));
@@ -76,7 +76,7 @@ BosonLoadingWidget::BosonLoadingWidget(QWidget* parent)
   mBosonLoadingWidgetLayout->addItem( spacer_5 );
 }
 
-/*  
+/*
  *  Destroys the object and frees any allocated resources
  */
 BosonLoadingWidget::~BosonLoadingWidget()
@@ -197,10 +197,10 @@ void BosonLoadingWidget::update()
       text = i18n("Loading datas for player %1 of %2 (objects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
-    case LoadParticleSystems:
+    case LoadEffects:
     {
       setProgress(700 + (mCurrentPlayer * 2000) + 75);
-      text = i18n("Loading datas for player %1 of %2 (particle systems)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
+      text = i18n("Loading datas for player %1 of %2 (effects)...").arg(mCurrentPlayer + 1).arg(mTotalPlayers);
       break;
     }
     case LoadUnitConfigs:

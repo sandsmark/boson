@@ -74,8 +74,6 @@ BOSON_COMMON_SRC = \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp \
 	upgradeproperties.cpp \
-	bosonparticlesystem.cpp \
-	bosonparticlesystemproperties.cpp \
 	bosonstarting.cpp \
 	bofile.cpp \
 	bpfdescription.cpp \
@@ -101,7 +99,11 @@ BOSON_COMMON_SRC = \
 	bolight.cpp \
 	bopluginmanager.cpp \
 	boglstatewidget.cpp \
-	bofullscreen.cpp
+	bofullscreen.cpp \
+	bosoneffect.cpp \
+	bosoneffectproperties.cpp \
+	bosoneffectparticle.cpp \
+	bosoneffectpropertiesparticle.cpp
 
 
 

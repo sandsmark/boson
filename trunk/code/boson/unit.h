@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ class Facility;
 class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
-class BosonParticleSystem;
+class BosonEffect;
 class BosonWeapon;
 class BosonPathInfo;
 class BoVector3;
@@ -92,7 +92,7 @@ public:
 	 * none. Always NULL if @ref work != WorkPlugin
 	 **/
 	inline UnitPlugin* currentPlugin() const { return mCurrentPlugin; }
-	
+
 	/**
 	 * @return The @refUnitPlugin::pluginType of the @ref currentPlugin or
 	 * 0 if there is no plugin.
@@ -135,7 +135,7 @@ public:
 	 * simple as possible as it's called for <em>every</em> unit on
 	 * <em>every</em> advance call. An example of what could be done here is
 	 * to increase the realod state.
-	 * 
+	 *
 	 * The really interesting things get done in the advanceXYZ() functions
 	 * below. They are called from @ref BosonCanvas::slotAdvance(). For
 	 * every @ref UnitBase::WorkType there is at least one advance function which
@@ -177,7 +177,7 @@ public:
 		(this->*mAdvanceFunction2)(advanceCount);
 	}
 
-	
+
 	/**
 	 * Synchronize the advance function variable. This needs to be called
 	 * after @ref advanceFunction has been called for <em>all</em> units.
@@ -236,7 +236,7 @@ public:
 	 * default - reimplemented in @ref Facility
 	 **/
 	virtual void advanceConstruction(unsigned int) { }
-	
+
 	/**
 	 * Called when the unit has been destroyed. Maybe compute a destruction
 	 * animation here, or animate the wreckage.
@@ -409,17 +409,17 @@ public:
 	void playSound(UnitSoundEvent event);
 
 	/**
-	 * @return List of active particle systems this unit has.
+	 * @return List of active effects this unit has.
 	 * This may include e.g. smoke for factories.
 	 **/
-	virtual const QPtrList<BosonParticleSystem>* particleSystems() const;
+	virtual const QPtrList<BosonEffect>* effects() const;
 
 	/**
-	 * Clear the particle systems list. Note that the particles are
+	 * Clear the effects list. Note that the effects are
 	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
-	 * anyway. Just the @ref particleSystems list is meant to be cleared.
+	 * anyway. Just the @ref effects list is meant to be cleared.
 	 **/
-	virtual void clearParticleSystems();
+	virtual void clearEffects();
 
 	void loadWeapons();
 
@@ -455,7 +455,7 @@ public:
 
 
 protected:
-	void setParticleSystems(const QPtrList<BosonParticleSystem>& list);
+	void setEffects(const QPtrList<BosonEffect>& list);
 
 	void shootAt(BosonWeapon* w, Unit* target);
 
@@ -465,9 +465,9 @@ protected:
 	 **/
 	QValueList<Unit*> unitCollisions(bool exact = false);
 
-	/** 
+	/**
 	 * Finds new path to destination.
-	 * Destination must have been set before in variables movedestx and 
+	 * Destination must have been set before in variables movedestx and
 	 * movedesty - usually using @ref moveTo
 	 *
 	 * This is in Unit instead of @ref MobileUnit so that we can apply a
@@ -631,7 +631,7 @@ private:
 	// a d pointer is probably not very good here - far too much memory consumption
 	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
 	// have to change the headers every time...
-	class MobileUnitPrivate; 
+	class MobileUnitPrivate;
 	MobileUnitPrivate* d;
 };
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ class BosonLoadingWidget : public QWidget
         ReceiveMap,  // Map is being received over the net
         LoadMap,  // Map has been received and is being loaded
         LoadTiles,  // Map tiles (textures) // AB: obsolete!
-        LoadParticleSystems,  // Loading particle systems for a player
+        LoadEffects,  // Loading effects for a player
         LoadUnitConfigs,  // Loading unit config files for a player
         LoadUnits,  // Loading unit models and textures for a player
         LoadTechnologies,  // Loading technologies for a player

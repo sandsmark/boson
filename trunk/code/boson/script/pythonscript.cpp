@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"endBenchmark", py_endBenchmark, METH_VARARGS, 0 },
   { (char*)"setRandomSeed", py_setRandomSeed, METH_VARARGS, 0 },
   { (char*)"findPath", py_findPath, METH_VARARGS, 0 },
-  { (char*)"addParticleSystem", py_addParticleSystem, METH_VARARGS, 0 },
+  { (char*)"addEffect", py_addEffect, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -1163,7 +1163,7 @@ PyObject* PythonScript::py_findPath(PyObject*, PyObject* args)
   return Py_None;
 }
 
-PyObject* PythonScript::py_addParticleSystem(PyObject*, PyObject* args)
+PyObject* PythonScript::py_addEffect(PyObject*, PyObject* args)
 {
   int player, id;
   float x, y, z, rot = 0.0f;
@@ -1171,7 +1171,7 @@ PyObject* PythonScript::py_addParticleSystem(PyObject*, PyObject* args)
   {
     return 0;
   }
-  BosonScript::addParticleSystem(player, id, BoVector3(x, y, z), rot);
+  BosonScript::addEffect(player, id, BoVector3(x, y, z), rot);
   Py_INCREF(Py_None);
   return Py_None;
 }

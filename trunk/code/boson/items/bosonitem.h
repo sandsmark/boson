@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class BosonAnimation;
 class BoFrame;
 class QRect;
 class Cell;
-class BosonParticleSystem;
+class BosonEffect;
 class BosonItemPropertyHandler;
 class Player;
 class BoVector3;
@@ -177,7 +177,7 @@ public:
 
 	/**
 	 * @return The x-coordinate of the left edge of the object.Note that
-	 * this has <em>nothing</em> to do with the OpenGL coordinates. 
+	 * this has <em>nothing</em> to do with the OpenGL coordinates.
 	 * These are the internal canvas coordinates.
 	 **/
 	inline float x() const { return mX; }
@@ -236,7 +236,7 @@ public:
 	 * is done!
 	 *
 	 * Also note that when you move an item by e.g. (1,1,0) that this new
-	 * position is <em>not</em> guaranteed to an actual position on the 
+	 * position is <em>not</em> guaranteed to an actual position on the
 	 * ground. I mean when the item (e.g. a unit) is on grass and you move
 	 * it by a certain amount so that it moves to another cell, then it is
 	 * possible that that cell is at a different height than previous cell.
@@ -254,7 +254,7 @@ public:
 			removeFromCells();
 			setPos(x() + dx, y() + dy, z() + dz);
 			addToCells();
-			moveParticleSystems(x(), y(), z());
+			setEffectsPosition(x(), y(), z());
 		}
 	}
 
@@ -529,28 +529,28 @@ public:
 	 * floating point operations!
 	 **/
 	inline float rotation() const { return mRotation; }
-	void setRotation(float r) { rotateParticleSystems(-r, 0.0, 0.0, 1.0); mRotation = r; }
+	void setRotation(float r) { mRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
 	inline float xRotation() const { return mXRotation; }
-	void setXRotation(float r) { rotateParticleSystems(r, 1.0, 0.0, 0.0); mXRotation = r; }
+	void setXRotation(float r) { mXRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
 	inline float yRotation() const { return mYRotation; }
-	void setYRotation(float r) { rotateParticleSystems(r, 0.0, 1.0, 0.0); mYRotation = r; }
+	void setYRotation(float r) { mYRotation = r; setEffectsRotation(mXRotation, mYRotation, mRotation); }
 
 
-	void moveParticleSystems(float x, float y, float z);
-	void rotateParticleSystems(float angle, float x, float y, float z);
+	void setEffectsPosition(float x, float y, float z);
+	void setEffectsRotation(float xrot, float yrot, float zrot);
 
-	virtual const QPtrList<BosonParticleSystem>* particleSystems() const;
+	virtual const QPtrList<BosonEffect>* effects() const;
 
 	/**
-	 * Clear the particle systems list. Note that the particles are
+	 * Clear the effects list. Note that the effects are
 	 * <em>not</em> deleted - @ref BosonCanvas will take care of this
-	 * anyway. Just the @ref particleSystems list is meant to be cleared.
+	 * anyway. Just the @ref effects list is meant to be cleared.
 	 *
 	 * The default implementation simply does nothing.
 	 **/
-	virtual void clearParticleSystems();
+	virtual void clearEffects();
 
 // TODO: add something like virtual bool canBeSelected() const = 0; or so! some
 // objects (like missiles) just can't be selected usually.

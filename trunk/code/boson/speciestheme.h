@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ class UnitProperties;
 class UnitBase;
 class Unit;
 class UpgradeProperties;
-class BosonParticleSystemProperties;
+class BosonEffectProperties;
 class BosonWeaponProperties;
 class SpeciesData;
 class BoAction;
@@ -64,7 +64,7 @@ public:
 	 * unit pixmaps.
 	 **/
 	SpeciesTheme(const QString& species, const QColor& color);
-	
+
 	~SpeciesTheme();
 
 	/**
@@ -96,13 +96,13 @@ public:
 	 **/
 	bool loadTechnologies();
 
-	void loadParticleSystems();
+	void loadEffects();
 
 	void loadObjects();
 
 	void loadActions();
 
-	const BosonParticleSystemProperties* particleSystemProperties(unsigned long int id);
+	const BosonEffectProperties* effectProperties(unsigned long int id);
 
 	/**
 	 * @return The i18n'ed name of the specified unit action. Can be used
@@ -137,8 +137,8 @@ public:
 
 	/**
 	 * @return The small pixmap (the one that is displayed on the order
-	 * buttons in @ref BosonCommandFrame to construct this unit) for 
-	 * unitType or NULL if none was found for this unitType. See also 
+	 * buttons in @ref BosonCommandFrame to construct this unit) for
+	 * unitType or NULL if none was found for this unitType. See also
 	 * @ref UnitProperties::typeId
 	 **/
 	QPixmap* smallOverview(unsigned long int unitType);
@@ -167,7 +167,7 @@ public:
 	/**
 	 * Reads the default entries from the config file of the specified unit
 	 * and applies them. If values are not available in the file the
-	 * hardcoded defaults are used. 
+	 * hardcoded defaults are used.
 	 *
 	 * Use this if you actually want to create a new unit (e.g. produce
 	 * one), don't use it if values will differ from the defaults (although
@@ -269,7 +269,7 @@ public:
 	 * @return The identifier of the current theme
 	 **/
 	QString identifier() const;
-	
+
 	static QValueList<QColor> defaultColors();
 
 	/**

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2003-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,9 +72,9 @@ unsigned int BosonCanvasStatistics::itemCount(int rtti) const
  return d->mItemCount[rtti];
 }
 
-unsigned int BosonCanvasStatistics::particleSystemsCount() const
+unsigned int BosonCanvasStatistics::effectsCount() const
 {
- return mCanvas->particleSystemsCount();
+ return mCanvas->effectsCount();
 }
 
 QMap<int, int>* BosonCanvasStatistics::workCounts() const

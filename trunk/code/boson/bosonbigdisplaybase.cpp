@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@
 #include "selectbox.h"
 #include "bosonglchat.h"
 #include "bosonprofiling.h"
-#include "bosonparticlesystem.h"
+#include "bosoneffect.h"
+#include "bosoneffectparticle.h"
 #include "boson.h"
 #include "bodebug.h"
 #include "items/bosonshot.h"
@@ -713,6 +714,10 @@ void BosonBigDisplayBase::paintGL()
  glPushMatrix();
 
 
+
+ // Render fog
+ renderFog();
+
  // first render the cells.
  // we use blending a lot here and render in different stages, most of the time
  // with depth testing disabled. so it makes a lot of sense to start with cell
@@ -794,6 +799,8 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_TEXTURE_2D);
 
 
+ // Disable fog
+ glDisable(GL_FOG);
  boProfiling->renderText(true); // AB: actually this is text and cursor and selectionrect and minimap
 
  // cursor and text are drawn in a 2D-matrix, so that we can use window
@@ -812,6 +819,8 @@ void BosonBigDisplayBase::paintGL()
  glEnable(GL_TEXTURE_2D);
 // glEnable(GL_BLEND);
  renderMiniMap();
+
+ renderFadeEffects();
 
  renderCursor();
 
@@ -1422,21 +1431,26 @@ void BosonBigDisplayBase::renderCells()
 void BosonBigDisplayBase::renderParticles()
 {
  BO_CHECK_NULL_RET(localPlayerIO());
- // Return if there aren't any particle systems
- if (canvas()->particleSystemsCount() == 0) {
+ // Return if there aren't any effects
+ if (canvas()->effectsCount() == 0) {
 	return;
  }
 
  // We sort out non-visible systems ourselves
- QPtrListIterator<BosonParticleSystem> allIt(*(canvas()->particleSystems()));
- QPtrList<BosonParticleSystem> visible;
- BosonParticleSystem* s = 0;
+ QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
+ QPtrList<BosonEffectParticle> visible;
+ BosonEffectParticle* s = 0;
  for (; allIt.current(); ++allIt) {
-	s = allIt.current();
-	//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
-	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
-		if (localPlayerIO()->canSee(s->x(), s->y())) {
-			visible.append(s);
+	if (allIt.current()->type() > BosonEffect::Particle) {
+		// This is a particle effect
+		s = (BosonEffectParticle*)allIt.current();
+		//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
+		// TODO: maybe we should just add particleDist() to bounding sphere radius
+		//  of the system?
+		if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
+			if (localPlayerIO()->canSee((int)s->position().x(), -(int)s->position().y())) {
+				visible.append(s);
+			}
 		}
 	}
  }
@@ -1453,12 +1467,11 @@ void BosonBigDisplayBase::renderParticles()
  BosonParticle* p = 0;
  //bool wassorted = d->mParticlesDirty;  // only for debug, commented because of compiler warning
  if (d->mParticlesDirty) {
-	BosonParticleSystem* s;
 	float x, y, z;
 	BoVector3 dir;
 	d->mParticleList.clear();
 	// Add all particles to the list
-	QPtrListIterator<BosonParticleSystem> visibleIt(visible);
+	QPtrListIterator<BosonEffectParticle> visibleIt(visible);
 	s = 0;
 	for (; visibleIt.current(); ++visibleIt) {
 		s = visibleIt.current();
@@ -1470,9 +1483,9 @@ void BosonBigDisplayBase::renderParticles()
 			s->setParticleDistVector(dir);
 		}
 
-		for (int i = 0; i < s->mMaxNum; i++) {
-			if (s->mParticles[i].life > 0.0) {
-				p = &(s->mParticles[i]);
+		for (unsigned int i = 0; i < s->particleCount(); i++) {
+			if (s->particle(i)->life > 0.0) {
+				p = s->particle(i);
 				// Calculate distance from camera. Note that for performance reasons,
 				//  we don't calculate actual distance, but square of it.
 				x = p->pos.x() - camera()->cameraPos().x();
@@ -1518,15 +1531,15 @@ void BosonBigDisplayBase::renderParticles()
  for (; it.current(); ++it) {
 	p = it.current();
 	// We change blend function and texture only if it's necessary
-	if (blendfunc != p->system->mBlendFunc[1]) {
+	if (blendfunc != p->system->blendFunc()[1]) {
 		// Note that we only check for dest blending function currently, because src
 		//  is always same. If this changes in the future, change this as well!
 		if (betweenbeginend) {
 			glEnd();
 			betweenbeginend = false;
 		}
-		glBlendFunc(p->system->mBlendFunc[0], p->system->mBlendFunc[1]);
-		blendfunc = p->system->mBlendFunc[1];
+		glBlendFunc(p->system->blendFunc()[0], p->system->blendFunc()[1]);
+		blendfunc = p->system->blendFunc()[1];
 	}
 	if (texture != p->tex) {
 		if (betweenbeginend) {
@@ -1544,7 +1557,7 @@ void BosonBigDisplayBase::renderParticles()
 	// Is it worth to duplicate this code just to save few vector additions for
 	//  systems with particleDist() == 0.0 ?
 	if (p->system->particleDist() != 0.0) {
-		if (p->system->mAlign) {
+		if (p->system->alignParticles()) {
 			a = p->pos + ((-x + y) * p->size) + p->system->particleDistVector();
 			b = p->pos + (( x + y) * p->size) + p->system->particleDistVector();
 			c = p->pos + (( x - y) * p->size + p->system->particleDistVector());
@@ -1556,7 +1569,7 @@ void BosonBigDisplayBase::renderParticles()
 			e = p->pos + (BoVector3(-0.5, -0.5, 0.0) * p->size) + p->system->particleDistVector();
 		}
 	} else {
-		if (p->system->mAlign) {
+		if (p->system->alignParticles()) {
 			a = p->pos + ((-x + y) * p->size);
 			b = p->pos + (( x + y) * p->size);
 			c = p->pos + (( x - y) * p->size);
@@ -1585,6 +1598,69 @@ void BosonBigDisplayBase::renderParticles()
 
  if (checkError()) {
 	boError() << k_funcinfo << "OpenGL error" << endl;
+ }
+}
+
+void BosonBigDisplayBase::renderFog()
+{
+ // Render fog effects
+ // TODO: support multiple fog effects (ATM only 1st one is rendered)
+ QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
+ QPtrList<BosonEffectFog> fogeffects;
+ for (; allIt.current(); ++allIt) {
+	if (allIt.current()->type() == BosonEffect::Fog) {
+		fogeffects.append((BosonEffectFog*)allIt.current());
+	}
+ }
+ if(!fogeffects.isEmpty()) {
+	BosonEffectFog* f = fogeffects.first();
+	glEnable(GL_FOG);
+	glFogfv(GL_FOG_COLOR, f->color().data());
+	glFogf(GL_FOG_START, f->startDistance());
+	glFogf(GL_FOG_END, f->endDistance());
+	glFogi(GL_FOG_MODE, GL_LINEAR);
+ } else {
+	// Disable fog
+	glDisable(GL_FOG);
+ }
+}
+
+void BosonBigDisplayBase::renderFadeEffects()
+{
+ // Render fade effects
+ QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
+ QPtrList<BosonEffectFade> fadeeffects;
+ for (; allIt.current(); ++allIt) {
+	if (allIt.current()->type() == BosonEffect::Fade) {
+		fadeeffects.append((BosonEffectFade*)allIt.current());
+	}
+ }
+ if (!fadeeffects.isEmpty()) {
+	BosonEffectFade* f;
+//	glMatrixMode(GL_PROJECTION);
+//	glPushMatrix();
+	// Scale so that (0; 0) is bottom-left corner of the viewport and (1; 1) is
+	//  top-right corner
+//	glScalef(1 / (GLfloat)d->mViewport[2], 1 / (GLfloat)d->mViewport[3], 1);
+	// FIXME!!!
+	float xscale = (GLfloat)d->mViewport[2];
+	float yscale = (GLfloat)d->mViewport[3];
+	glEnable(GL_BLEND);
+	glDisable(GL_TEXTURE_2D);
+	QPtrListIterator<BosonEffectFade> it(fadeeffects);
+	while (it.current()) {
+		f = it.current();
+		glBlendFunc(f->blendFunc()[0], f->blendFunc()[1]);
+		glColor4fv(f->color().data());
+		BoVector4 geo = f->geometry();  // x, y, w, h
+		glRectf(geo[0] * xscale, geo[1] * yscale, (geo[0] + geo[2]) * xscale, (geo[1] + geo[3]) * yscale);  // x, y, x2, y2
+		++it;
+	}
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	glColor3ub(255, 255, 255);
+//	glPopMatrix();
+//	glMatrixMode(GL_MODELVIEW);
  }
 }
 

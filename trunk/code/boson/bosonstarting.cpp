@@ -285,8 +285,8 @@ void BosonStarting::slotLoadPlayerData(Player* p) // FIXME: not a slot anymore
  p->speciesTheme()->loadActions();
  emit signalLoadingType(BosonLoadingWidget::LoadObjects);
  p->speciesTheme()->loadObjects();
- emit signalLoadingType(BosonLoadingWidget::LoadParticleSystems);
- p->speciesTheme()->loadParticleSystems();
+ emit signalLoadingType(BosonLoadingWidget::LoadEffects);
+ p->speciesTheme()->loadEffects();
  emit signalLoadingType(BosonLoadingWidget::LoadUnitConfigs);
  p->speciesTheme()->readUnitConfigs();
  loadUnitDatas(p);
@@ -525,7 +525,7 @@ bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
 	}
 	Player* player = (Player*)boGame->createPlayer(0, 0, false);
 	if (id == localId) {
-		
+
 	}
 	player->setId(id);
 	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);

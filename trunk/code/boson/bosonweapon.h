@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@
 
 class KSimpleConfig;
 class SpeciesTheme;
-class BosonParticleSystem;
-class BosonParticleSystemProperties;
+class BosonEffect;
+class BosonEffectProperties;
 class Unit;
 class BoAction;
 class QString;
@@ -142,7 +142,7 @@ class BosonWeaponProperties : public PluginProperties
      *  time to reload, to make sure unit won't "waste" them for weak enemies.
      **/
     bool autoUse() const  { return mAutoUse; }
-    
+
     /**
      * Creates new shot
      * @param attacker Unit that fired this shot
@@ -153,13 +153,13 @@ class BosonWeaponProperties : public PluginProperties
      **/
     BosonShot* newShot(Unit* attacker, BoVector3 pos, BoVector3 target) const;
 
-    QPtrList<BosonParticleSystem> newShootParticleSystems(BoVector3 pos, float rotation) const;
-    QPtrList<BosonParticleSystem> newFlyParticleSystems(BoVector3 pos, float rotation) const;
-    QPtrList<BosonParticleSystem> newHitParticleSystems(BoVector3 pos) const;
+    QPtrList<BosonEffect> newShootEffects(BoVector3 pos, float rotation) const;
+    QPtrList<BosonEffect> newFlyEffects(BoVector3 pos, float rotation) const;
+    QPtrList<BosonEffect> newHitEffects(BoVector3 pos) const;
 
-    QValueList<unsigned long int> shootParticleSystemIds() const  { return mShootParticleSystemIds; };
-    QValueList<unsigned long int> flyParticleSystemIds() const  { return mFlyParticleSystemIds; };
-    QValueList<unsigned long int> hitParticleSystemIds() const  { return mHitParticleSystemIds; };
+    QValueList<unsigned long int> shootEffectIds() const  { return mShootEffectIds; };
+    QValueList<unsigned long int> flyEffectIds() const  { return mFlyEffectIds; };
+    QValueList<unsigned long int> hitEffectIds() const  { return mHitEffectIds; };
 
     virtual QString name() const;
     virtual void loadPlugin(KSimpleConfig* config)  { loadPlugin(config, true); };
@@ -168,7 +168,7 @@ class BosonWeaponProperties : public PluginProperties
     virtual int pluginType() const  { return Weapon; };
 
     QIntDict<BoAction>* actions()  { return &mActions; };
-    
+
   protected:
     void setWeaponName(QString str)  { mName = str; };
     void setDamage(long int damage)  { mDamage = damage; };
@@ -181,9 +181,9 @@ class BosonWeaponProperties : public PluginProperties
     void setSpeed(float speed)  { mSpeed = speed; };
     void setAccelerationSpeed(float speed)  { mAccelerationSpeed = speed; };
     void setModelFileName(QString file)  { mModelFileName = file; };
-    void setShootParticleSystemIds(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
-    void setFlyParticleSystemIds(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
-    void setHitParticleSystemIds(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
+    void setShootEffectIds(QValueList<unsigned long int> ids)  { mShootEffectIds = ids; };
+    void setFlyEffectIds(QValueList<unsigned long int> ids)  { mFlyEffectIds = ids; };
+    void setHitEffectIds(QValueList<unsigned long int> ids)  { mHitEffectIds = ids; };
     void setOffset(BoVector3 o)  { mOffset = o; };
     void setHeight(float height)  { mHeight = height; };
     void setSound(int event, QString filename);
@@ -211,13 +211,13 @@ class BosonWeaponProperties : public PluginProperties
     BosonModel* mModel;
     QString mModelFileName;
     QString mName;
-    QPtrList<BosonParticleSystemProperties> mShootParticleSystems;
-    QPtrList<BosonParticleSystemProperties> mFlyParticleSystems;
-    QPtrList<BosonParticleSystemProperties> mHitParticleSystems;
+    QPtrList<BosonEffectProperties> mShootEffects;
+    QPtrList<BosonEffectProperties> mFlyEffects;
+    QPtrList<BosonEffectProperties> mHitEffects;
     // FIXME: these are only needed in editor mode. In normal mode, they only waste memory
-    QValueList<unsigned long int> mShootParticleSystemIds;
-    QValueList<unsigned long int> mFlyParticleSystemIds;
-    QValueList<unsigned long int> mHitParticleSystemIds;
+    QValueList<unsigned long int> mShootEffectIds;
+    QValueList<unsigned long int> mFlyEffectIds;
+    QValueList<unsigned long int> mHitEffectIds;
     BoVector3 mOffset;
     QMap<int, QString> mSounds;
     QIntDict<BoAction> mActions;
