@@ -1131,77 +1131,77 @@ void BosonMenuInput::slotSetGrabMovie(bool grab)
 
 void BosonMenuInput::slotSetShowResources(bool show)
 {
- boConfig->setShowResources(show);
+ boConfig->setBoolValue("show_resources", show);
 }
 
 void BosonMenuInput::slotSetDebugMapCoordinates(bool debug)
 {
- boConfig->setDebugMapCoordinates(debug);
+ boConfig->setBoolValue("debug_map_coordinates", debug);
 }
 
 void BosonMenuInput::slotSetDebugPFData(bool debug)
 {
- boConfig->setDebugPFData(debug);
+ boConfig->setBoolValue("debug_pf_data", debug);
 }
 
 void BosonMenuInput::slotSetDebugShowCellGrid(bool debug)
 {
- boConfig->setDebugShowCellGrid(debug);
+ boConfig->setBoolValue("debug_cell_grid", debug);
 }
 
 void BosonMenuInput::slotSetDebugMatrices(bool debug)
 {
- boConfig->setDebugOpenGLMatrices(debug);
+ boConfig->setBoolValue("debug_matrices", debug);
 }
 
 void BosonMenuInput::slotSetDebugItemWorks(bool debug)
 {
- boConfig->setDebugItemWorkStatistics(debug);
+ boConfig->setBoolValue("debug_works", debug);
 }
 
 void BosonMenuInput::slotSetDebugCamera(bool debug)
 {
- boConfig->setDebugOpenGLCamera(debug);
+ boConfig->setBoolValue("debug_camera", debug);
 }
 
 void BosonMenuInput::slotSetDebugRenderCounts(bool debug)
 {
- boConfig->setDebugRenderCounts(debug);
+ boConfig->setBoolValue("debug_rendercounts", debug);
 }
 
 void BosonMenuInput::slotSetDebugWireFrames(bool on)
 {
- boConfig->setWireFrames(on);
+ boConfig->setBoolValue("debug_wireframes", on);
 }
 
 void BosonMenuInput::slotSetDebugBoundingBoxes(bool debug)
 {
- boConfig->setDebugBoundingBoxes(debug);
+ boConfig->setBoolValue("debug_boundingboxes", debug);
 }
 
 void BosonMenuInput::slotSetDebugFPS(bool debug)
 {
- boConfig->setDebugFPS(debug);
+ boConfig->setBoolValue("debug_fps", debug);
 }
 
 void BosonMenuInput::slotSetDebugAdvanceCalls(bool debug)
 {
- boConfig->setDebugAdvanceCalls(debug);
+ boConfig->setBoolValue("debug_advance_calls", debug);
 }
 
 void BosonMenuInput::slotSetDebugTextureMemory(bool debug)
 {
- boConfig->setDebugTextureMemory(debug);
+ boConfig->setBoolValue("debug_texture_memory", debug);
 }
 
 void BosonMenuInput::slotSetEnableColorMap(bool enable)
 {
- boConfig->setEnableColormap(enable);
+ boConfig->setBoolValue("debug_colormap", enable);
 }
 
 void BosonMenuInput::slotSetDebugMode(int index)
 {
- boConfig->setDebugMode((BosonConfig::DebugMode)index);
+ boConfig->setIntValue("DebugMode", (int)((BosonConfig::DebugMode)index));
 }
 
 void BosonMenuInput::slotDebugKillPlayer(Q_UINT32 playerId)

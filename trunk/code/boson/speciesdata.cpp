@@ -216,7 +216,7 @@ bool SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& )
 	BO_NULL_ERROR(prop);
 	return false;
  }
- if (boConfig->disableModelLoading()) {
+ if (boConfig->boolValue("ForceDisableModelLoading")) {
 	return true;
  }
  BosonModel* m = d->mUnitModels[prop->typeId()];
@@ -422,7 +422,7 @@ const BoAction* SpeciesData::action(const QString& name) const
 BosonModel* SpeciesData::objectModel(const QString& name) const
 {
  BosonModel* m = d->mObjectModels[name];
- if (!m && !boConfig->disableModelLoading()) {
+ if (!m && !boConfig->boolValue("ForceDisableModelLoading")) {
 	boError() << k_funcinfo << "No object with name " << name << endl;
 	return 0;
  }
@@ -453,7 +453,7 @@ bool SpeciesData::loadObjects(const QColor& teamColor)
 
 	cfg.setGroup(*it);
 
-	if (boConfig->disableModelLoading()) {
+	if (boConfig->boolValue("ForceDisableModelLoading")) {
 		continue;
 	}
 	BosonModel* m = d->mObjectModels.find(*it);

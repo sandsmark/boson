@@ -65,9 +65,10 @@ private:
 static BoGlobalConfigObject globalConfig;
 
 
-BoConfigEntry::BoConfigEntry(BosonConfig* parent, const QString& key)
+BoConfigEntry::BoConfigEntry(BosonConfig* parent, const QString& key, bool saveConfig)
 {
  mKey = key;
+ mSaveConfig = saveConfig;
  parent->addConfigEntry(this);
 }
 
@@ -80,8 +81,8 @@ void BoConfigEntry::activate(KConfig* conf)
  conf->setGroup("Boson");
 }
 
-BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigBoolEntry::BoConfigBoolEntry(BosonConfig* parent, const QString& key, bool defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mValue = defaultValue;
 }
@@ -98,8 +99,8 @@ void BoConfigBoolEntry::load(KConfig* conf)
  mValue = conf->readBoolEntry(key(), mValue);
 }
 
-BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigIntEntry::BoConfigIntEntry(BosonConfig* parent, const QString& key, int defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mValue = defaultValue;
 }
@@ -116,8 +117,8 @@ void BoConfigIntEntry::load(KConfig* conf)
  mValue = conf->readNumEntry(key(), mValue);
 }
 
-BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigUIntEntry::BoConfigUIntEntry(BosonConfig* parent, const QString& key, unsigned int defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mValue = defaultValue;
 }
@@ -134,8 +135,8 @@ void BoConfigUIntEntry::load(KConfig* conf)
  mValue = conf->readUnsignedNumEntry(key(), mValue);
 }
 
-BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigDoubleEntry::BoConfigDoubleEntry(BosonConfig* parent, const QString& key, double defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mValue = defaultValue;
 }
@@ -152,8 +153,8 @@ void BoConfigDoubleEntry::load(KConfig* conf)
  mValue = conf->readDoubleNumEntry(key(), mValue);
 }
 
-BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigStringEntry::BoConfigStringEntry(BosonConfig* parent, const QString& key, QString defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mValue = defaultValue;
 }
@@ -173,7 +174,8 @@ void BoConfigStringEntry::load(KConfig* conf)
 class BoConfigIntListEntry : public BoConfigEntry
 {
 public:
-	BoConfigIntListEntry(BosonConfig* parent, const QString& key, QValueList<int> defaultValue) : BoConfigEntry(parent, key)
+	BoConfigIntListEntry(BosonConfig* parent, const QString& key, QValueList<int> defaultValue, bool saveConfig = true)
+		: BoConfigEntry(parent, key, saveConfig)
 	{
 		mValue = defaultValue;
 	}
@@ -208,8 +210,8 @@ private:
 	QValueList<int> mValue;
 };
 
-BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue)
-		: BoConfigEntry(parent, key)
+BoConfigColorEntry::BoConfigColorEntry(BosonConfig* parent, const QString& key, const QColor& defaultValue, bool saveConfig)
+		: BoConfigEntry(parent, key, saveConfig)
 {
  mRGBValue = defaultValue.rgb();
 }
@@ -299,29 +301,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  mMaxProfilingAdvanceEntries = new BoConfigUIntEntry(this, "MaxProfilingAdvanceEntries", 1000);
  mMaxProfilingRenderingEntries = new BoConfigUIntEntry(this, "MaxProfilingRenderingEntries", 300);
 
- mDebugMode = DebugNormal;
-
- mDisableSound = true; // disabled by default, to make bounit and other non-sound applications work correctly, without calling setDisableSound(true) explicitly.
- mAIDelay = 3.0;
- mWantDirect = true;
- mWireFrames = false;
- mDebugOpenGLMatrices = false;
- mDebugMapCoordinates = false;
- mDebugPFData = false;
- mDebugShowCellGrid = false;
- mDebugItemWorkStatistics = false;
- mDebugOpenGLCamera = false;
- mDebugRenderCounts = false;
- mDebugBoundingBoxes = false;
- mDebugFPS = false;
- mDebugAdvanceCalls = false;
- mDebugTextureMemory = false;
- mShowResources = true;
- mEnableColormap = false;
- mDisableModelLoading = false;
- mTextureFOW = true;
- mDefaultLodCount = 5;
-
  // these are dynamic entries. usually they are added in the class where they
  // get used, but sometimes it is also handy to add them here (e.g. when it
  // isn't 100% clear which class will reference it first).
@@ -333,6 +312,33 @@ BosonConfig::BosonConfig(KConfig* conf)
  addDynamicEntry(new BoConfigBoolEntry(this, "SmoothShading", true));
  addDynamicEntry(new BoConfigStringEntry(this, "MeshRenderer", "BoMeshRendererVertexArray"));
  addDynamicEntry(new BoConfigStringEntry(this, "GroundRendererClass", DEFAULT_GROUND_RENDERER));
+
+
+ // the following are NOT stored into the config file
+ addDynamicEntryBool("debug_fps", false, false);
+
+ // sound is disabled by default, to make bounit and other non-sound applications work correctly, without calling setDisableSound(true) explicitly.
+ addDynamicEntryBool("ForceDisableSound", true, false); // command line arg! do NOT save to config
+
+ addDynamicEntryInt("DebugMode", (int)DebugNormal, false);
+ addDynamicEntryDouble("AIDelay", 3.0, false);
+ addDynamicEntryBool("ForceWantDirect", true, false); // command line arg! do NOT save to config
+ addDynamicEntryBool("debug_wireframes", false, false);
+ addDynamicEntryBool("debug_matrices", false, false);
+ addDynamicEntryBool("debug_map_coordinates", false, false);
+ addDynamicEntryBool("debug_pf_data", false, false);
+ addDynamicEntryBool("debug_cell_grid", false, false);
+ addDynamicEntryBool("debug_works", false, false);
+ addDynamicEntryBool("debug_camera", false, false);
+ addDynamicEntryBool("debug_rendercounts", false, false);
+ addDynamicEntryBool("debug_boundingboxes", false, false);
+ addDynamicEntryBool("debug_advance_calls", false, false);
+ addDynamicEntryBool("debug_texture_memory", false, false);
+ addDynamicEntryBool("show_resources", true, false);
+ addDynamicEntryBool("debug_colormap", false, false);
+ addDynamicEntryBool("ForceDisableModelLoading", false, false); // command line arg! do NOT save to config
+ addDynamicEntryBool("TextureFOW", true, false);
+ addDynamicEntryInt("DefaultLodCount", 5, false);
 
  // load from config
  reset(conf);
@@ -651,7 +657,9 @@ void BosonConfig::reset(KConfig* conf)
  // read function
  QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
  for (; it.current(); ++it) {
-	it.current()->load(conf);
+	if (it.current()->saveConfig()) {
+		it.current()->load(conf);
+	}
  }
 
  conf->setGroup(oldGroup);
@@ -667,7 +675,9 @@ void BosonConfig::save(bool /*editor*/, KConfig* conf)
  // save function
  QPtrListIterator<BoConfigEntry> it(d->mConfigEntries);
  for (; it.current(); ++it) {
-	it.current()->save(conf);
+	if (it.current()->saveConfig()) {
+		it.current()->save(conf);
+	}
  }
 
  conf->setGroup(oldGroup);
@@ -746,6 +756,41 @@ void BosonConfig::addDynamicEntry(BoConfigEntry* entry, KConfig* conf)
 	conf = kapp->config();
  }
  entry->load(conf);
+}
+
+void BosonConfig::addDynamicEntryBool(const QString& configKey, bool defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigBoolEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryInt(const QString& configKey, int defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigIntEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryUInt(const QString& configKey, unsigned int defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigUIntEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryDouble(const QString& configKey, double defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigDoubleEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryString(const QString& configKey, QString defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigStringEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryColor(const QString& configKey, QColor defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigColorEntry(this, configKey, defaultValue, saveConfig));
+}
+
+void BosonConfig::addDynamicEntryIntList(const QString& configKey, const QValueList<int>& defaultValue, bool saveConfig)
+{
+ addDynamicEntry(new BoConfigIntListEntry(this, configKey, defaultValue, saveConfig));
 }
 
 bool BosonConfig::hasKey(const QString& key) const

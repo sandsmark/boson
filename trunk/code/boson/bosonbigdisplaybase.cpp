@@ -664,7 +664,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 {
  BoTextureManager::BoTextureBindCounter bindCounter(boTextureManager, &d->mTextureBindsItems);
  BosonItemRenderer::startItemRendering();
- if (boConfig->wireFrames()) {
+ if (boConfig->boolValue("debug_wireframes")) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
  }
  glEnable(GL_DEPTH_TEST);
@@ -718,7 +718,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
 
-	if (boConfig->debugBoundingBoxes()) {
+	if (boConfig->boolValue("debug_boundingboxes")) {
 		renderBoundingBox(item);
 	}
  }
@@ -734,7 +734,7 @@ void BosonCanvasRenderer::renderItems(const BoItemList* allCanvasItems)
  d->mRenderItemList->clear();
 
  BosonItemRenderer::stopItemRendering();
- if (boConfig->wireFrames()) {
+ if (boConfig->boolValue("debug_wireframes")) {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
  }
 }
@@ -1477,7 +1477,7 @@ public:
 };
 
 BosonBigDisplayBase::BosonBigDisplayBase(QWidget* parent)
-		: BosonUfoGLWidget(parent, "bigdisplay", boConfig->wantDirect())
+		: BosonUfoGLWidget(parent, "bigdisplay", boConfig->boolValue("ForceWantDirect"))
 {
  boDebug() << k_funcinfo << endl;
  init();
@@ -1766,7 +1766,7 @@ void BosonBigDisplayBase::initializeGL()
  boTextureManager->initOpenGL();
  boWaterManager->initOpenGL();
 
- boConfig->setTextureFOW(boTextureManager->textureUnits() > 1);
+ boConfig->setBoolValue("TextureFOW", boTextureManager->textureUnits() > 1);
 
  connect(kapp->eventLoop(), SIGNAL(signalUpdateGL()), this, SLOT(slotUpdateGL()));
 

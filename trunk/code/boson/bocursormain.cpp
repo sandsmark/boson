@@ -230,6 +230,6 @@ static void postBosonConfigInit()
 	boError() << k_funcinfo << "NULL BosonConfig object" << endl;
 	return;
  }
- conf->setDisableSound(true);
+ conf->setBoolValue("ForceDisableSound", true);
 }
 

@@ -1796,7 +1796,7 @@ int main(int argc, char **argv)
  }
  if (args->isSet("indirect")) {
 	boWarning() << k_funcinfo << "use indirect rendering (slow!)" << endl;
-	boConfig->setWantDirect(false);
+	boConfig->setBoolValue("ForceWantDirect", false);
  }
  if (args->isSet("species")) {
 	theme = args->getOption("species");
@@ -1880,5 +1880,5 @@ int main(int argc, char **argv)
 
 void postBosonConfigInit()
 {
- boConfig->setDisableSound(true);
+ boConfig->setBoolValue("ForceDisableSound", true);
 }

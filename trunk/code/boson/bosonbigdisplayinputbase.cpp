@@ -109,7 +109,7 @@ void BosonBigDisplayInputBase::selectArea(BoItemList* itemsInArea, bool replace)
  BO_CHECK_NULL_RET(canvas());
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(itemsInArea);
- if (boConfig->debugMode() == BosonConfig::DebugSelection) {
+ if (boConfig->boolValue("DebugMode") == (int)BosonConfig::DebugSelection) {
 	const BoItemList* list = itemsInArea;
 	BoItemList::ConstIterator it;
 	boDebug() << "Selection count: " << list->count() << endl;

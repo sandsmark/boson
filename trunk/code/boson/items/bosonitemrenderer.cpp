@@ -42,7 +42,7 @@ BosonItemRenderer::~BosonItemRenderer()
 
 void BosonItemRenderer::startItemRendering()
 {
- if (!boConfig->disableModelLoading()) {
+ if (!boConfig->boolValue("ForceDisableModelLoading")) {
 	BosonModel::startModelRendering();
  } else {
 	glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT);
@@ -54,7 +54,7 @@ void BosonItemRenderer::startItemRendering()
 
 void BosonItemRenderer::stopItemRendering()
 {
- if (!boConfig->disableModelLoading()) {
+ if (!boConfig->boolValue("ForceDisableModelLoading")) {
 	BosonModel::stopModelRendering();
  } else {
 	glPopAttrib();
