@@ -21,6 +21,8 @@
 #ifndef BOSONFIELD_H 
 #define BOSONFIELD_H 
 
+#include <time.h>
+
 #include <qintdict.h>
 
 #include "common/msgData.h"
@@ -87,10 +89,12 @@ public:
 signals:
 	void	oilUpdated(int);
 	void	mineralUpdated(int);
+	void	pingUpdated(int);
 
 private:
 	Cell	*cells;
-
+	time_t	ping;
+	time_t	last_sync;
 };
 
 #endif // BOSONFIELD_H
