@@ -5,7 +5,7 @@ Speed=4
 
 [Boson Unit]
 Armor=2
-DestroyedParticles=1002,3002,6001,7001
+DestroyedParticles=1002,3002,6002,7001
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=200
@@ -41,7 +41,7 @@ CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=40
 DamageRange=1
-FlyParticles=5001
+FlyParticles=
 HitParticles=2001
 MaxHeight=1
 Name=Cannon

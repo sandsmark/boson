@@ -5,7 +5,7 @@ Speed=3
 
 [Boson Unit]
 Armor=0
-DestroyedParticles=1010,3010,7001
+DestroyedParticles=1010,3010,6010
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=150
@@ -41,7 +41,7 @@ CanShootAtLandUnits=true
 Damage=20
 DamageRange=1
 FlyParticles=
-HitParticles=2002
+HitParticles=2010
 MaxHeight=1
 Name=Cannon
 Offset=0,0,0

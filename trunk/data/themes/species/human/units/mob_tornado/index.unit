@@ -5,7 +5,7 @@ Speed=10
 
 [Boson Unit]
 Armor=5
-DestroyedParticles=1001,3001
+DestroyedParticles=1001,3001,6001
 ExplodingDamage=0
 ExplodingDamageRange=0
 Health=250
@@ -43,10 +43,10 @@ Shoot=shoot
 
 [Weapon_0]
 CanShootAtAirUnits=true
-CanShootAtLandUnits=true
+CanShootAtLandUnits=false
 Damage=10
 DamageRange=1
-HitParticles=2002
+HitParticles=2010
 Height=1
 Name=Cannon
 Offset=0,0,0
@@ -56,10 +56,10 @@ ShootParticles=
 Speed=0
 
 [Weapon_1]
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
 Damage=25
-DamageRange=2
+DamageRange=1.5
 FlyParticles=5001
 HitParticles=2001
 MaxHeight=1
