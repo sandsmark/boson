@@ -24,6 +24,7 @@
 #include "pluginproperties.h"
 #include "speciestheme.h"
 #include "player.h"
+#include "playerio.h"
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "boitemlist.h"
@@ -537,32 +538,6 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
-bool HarvesterPlugin::canMine(const Unit* unit) const
-{
- if (!unit) {
-	return false;
- }
- return canMine((ResourceMinePlugin*)unit->plugin(UnitPlugin::ResourceMine));
-}
-bool HarvesterPlugin::canMine(const ResourceMinePlugin* p) const
-{
- if (!p) {
-	return false;
- }
- const HarvesterProperties* prop = (HarvesterProperties*)properties(PluginProperties::Harvester);
- if (!prop) {
-	boError() << k_funcinfo << "NULL harvester properties" << endl;
-	return false;
- }
- if (prop->canMineMinerals() && p->canProvideMinerals() && p->minerals() != 0) {
-	return true;
- }
- if (prop->canMineOil() && p->canProvideOil() && p->oil() != 0) {
-	return true;
- }
- return false;
-}
-
 bool HarvesterPlugin::isAtResourceMine() const
 {
  if (!mResourceMine) {
@@ -626,7 +601,18 @@ void HarvesterPlugin::advanceMine()
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
- if (!canMine(mResourceMine)) {
+ if (!mResourceMine) {
+	ResourceMinePlugin* mine = findClosestResourceMine();
+	if (!mine || !mine->unit()) {
+		boDebug() << k_funcinfo << "no resource mine found" << endl;
+		mHarvestingType = 0; // stop
+	} else {
+		boDebug() << k_funcinfo << "resource mine: " << mine->unit()->id() << endl;
+		mineAt(mine);
+	}
+	return;
+ }
+ if (!mResourceMine || !mResourceMine->isUsableTo(this)) {
 	// TODO: search a new resource mine
 	QString mineId = "no id";
 	if (mResourceMine && mResourceMine->unit()) {
@@ -694,6 +680,7 @@ void HarvesterPlugin::advanceRefine()
  if (!mRefinery) {
 	RefineryPlugin* refinery = findClosestRefinery();
 	if (!refinery || !refinery->unit()) {
+		boDebug() << k_funcinfo << "no refinery found" << endl;
 		mHarvestingType = 0; // stop
 	} else {
 		boDebug() << k_funcinfo << "refinery: " << refinery->unit()->id() << endl;
@@ -747,6 +734,45 @@ void HarvesterPlugin::advanceRefine()
  boDebug() << k_funcinfo << "resources left: " << resourcesMined() << endl;
 }
 
+ResourceMinePlugin* HarvesterPlugin::findClosestResourceMine() const
+{
+ BO_CHECK_NULL_RET0(game());
+ BO_CHECK_NULL_RET0(game()->playerList());
+ BO_CHECK_NULL_RET0(player());
+ BO_CHECK_NULL_RET0(player()->playerIO());
+
+ // FIXME: we should use player()->playerIO()->getUnitsOf(playerCount() - 1)
+ // instead
+ // --> that should give us all units that are visible to us only
+ Player* neutral = (Player*)game()->playerList()->getLast();
+
+ BO_CHECK_NULL_RET0(neutral);
+ QPtrListIterator<Unit> it(*(neutral->allUnits()));
+ ResourceMinePlugin* mine = 0;
+ float mineDist = 0.0f;
+ while (it.current()) {
+	Unit* u = it.current();
+	if (!player()->playerIO()->canSee(u)) {
+		++it;
+		continue;
+	}
+	ResourceMinePlugin* m = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+	if (!m) {
+		++it;
+		continue;
+	}
+	if (m->isUsableTo(this)) {
+		float dist = QMAX(QABS(unit()->x() - u->x()), QABS(unit()->y() - u->y()));
+		if ((dist < mineDist) || (mineDist == 0.0f)) {
+			mineDist = dist;
+			mine = m;
+		}
+	}
+	++it;
+ }
+ return mine;
+}
+
 RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
 {
  BO_CHECK_NULL_RET0(player());
@@ -758,17 +784,13 @@ RefineryPlugin* HarvesterPlugin::findClosestRefinery() const
  }
  RefineryPlugin* ref = 0;
  float refdist = 0.0f;
- boDebug() << k_funcinfo << "going throught units list. count: " << it.count() << endl;
  while (it.current()) {
-	boDebug() << k_funcinfo << "        testing unit " << it.current()->id() << endl;
 	RefineryPlugin* r = (RefineryPlugin*)it.current()->plugin(UnitPlugin::Refinery);
 	if (!r) {
 		++it;
 		continue;
 	}
-	boDebug() << k_funcinfo << "    unit " << it.current()->id() << " has refinery plugin" << endl;
-	if ((prop->canMineMinerals() && r->canRefineMinerals()) || (prop->canMineOil() && r->canRefineOil())) {
-		boDebug() << k_funcinfo << "    unit " << it.current()->id() << " would be suitable..." << endl;
+	if (r->isUsableTo(this)) {
 		float dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
 		if ((dist < refdist) || (refdist == 0.0f)) {
 			refdist = dist;
@@ -791,6 +813,10 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
 	boDebug() << k_funcinfo << "sorry, resource mine is already destroyed. cannot use it" << endl;
 	return;
  }
+ if (!resource->isUsableTo(this)) {
+	boError() << k_funcinfo << resource->unit()->id() << " not a suitable resource mine" << endl;
+	return;
+ }
  if (!unit()->moveTo(resource->unit()->x(), resource->unit()->y(), 1)) {
 	boDebug() << k_funcinfo << "cannot find a way to resource mine" << endl;
 	boDebug() << k_funcinfo << "TODO: search another resource mine" << endl;
@@ -801,7 +827,6 @@ void HarvesterPlugin::mineAt(ResourceMinePlugin* resource)
  mResourceMine = resource;
 
  mHarvestingType = 1;
- mRefinery = 0;  // we'll search the closest refinery after mining
 }
 
 
@@ -829,7 +854,6 @@ void HarvesterPlugin::refineAt(RefineryPlugin* refinery)
  mRefinery = refinery;
 
  mHarvestingType = 2; // refining
- mResourceMine = 0; // we'll search the closest one after refining
 }
 
 
@@ -1242,6 +1266,20 @@ bool ResourceMinePlugin::canProvideOil() const
  return prop->canProvideOil();
 }
 
+bool ResourceMinePlugin::isUsableTo(const HarvesterPlugin* harvester) const
+{
+ if (!harvester) {
+	return false;
+ }
+ if (harvester->canMineMinerals() && canProvideMinerals() && minerals() != 0) {
+	return true;
+ }
+ if (harvester->canMineOil() && canProvideOil() && oil() != 0) {
+	return true;
+ }
+ return false;
+}
+
 unsigned int ResourceMinePlugin::mineMinerals(const HarvesterPlugin* harvester)
 {
  if (!harvester) {
@@ -1250,6 +1288,10 @@ unsigned int ResourceMinePlugin::mineMinerals(const HarvesterPlugin* harvester)
  }
  if (!canProvideMinerals()) {
 	boDebug() << k_funcinfo << "no minerals available. sorry." << endl;
+	return 0;
+ }
+ if (!isUsableTo(harvester)) {
+	boDebug() << k_funcinfo << "harvester cannot mine here" << endl;
 	return 0;
  }
 
@@ -1264,6 +1306,10 @@ unsigned int ResourceMinePlugin::mineOil(const HarvesterPlugin* harvester)
  }
  if (!canProvideOil()) {
 	boDebug() << k_funcinfo << "no oil available. sorry." << endl;
+	return 0;
+ }
+ if (!isUsableTo(harvester)) {
+	boDebug() << k_funcinfo << "harvester cannot mine here" << endl;
 	return 0;
  }
 

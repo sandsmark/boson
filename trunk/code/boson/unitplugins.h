@@ -305,10 +305,6 @@ public:
 	void mineAt(ResourceMinePlugin* resource);
 	void refineAt(RefineryPlugin* refinery);
 
-
-	bool canMine(const Unit*) const;
-	bool canMine(const ResourceMinePlugin*) const;
-
 	/**
 	 * @return PluginProperties::canMineMinerals
 	 **/
@@ -344,6 +340,7 @@ protected:
 	bool isAtRefinery() const;
 	bool isNextTo(const Unit* unit) const;
 
+	ResourceMinePlugin* findClosestResourceMine() const;
 	RefineryPlugin* findClosestRefinery() const;
 
 private:
@@ -428,6 +425,8 @@ public:
 	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool saveAsXML(QDomElement& root) const;
 	virtual void advance(unsigned int advanceCount);
+
+	bool isUsableTo(const HarvesterPlugin* harvester) const;
 
 	/**
 	 * @return How much minerals are left here. -1 means unlimited.
