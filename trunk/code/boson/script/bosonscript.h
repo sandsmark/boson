@@ -263,12 +263,14 @@ class BosonScript
     static BoVector4 lightAmbient(int id);
     static BoVector4 lightDiffuse(int id);
     static BoVector4 lightSpecular(int id);
+    static BoVector3 lightAttenuation(int id);
     static bool lightEnabled(int id);
 
     static void setLightPos(int id, BoVector4 pos);
     static void setLightAmbient(int id, BoVector4 a);
     static void setLightDiffuse(int id, BoVector4 a);
     static void setLightSpecular(int id, BoVector4 a);
+    static void setLightAttenuation(int id, BoVector3 a);
     static void setLightEnabled(int id, bool enable);
 
     static int addLight();

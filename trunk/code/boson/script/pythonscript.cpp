@@ -85,11 +85,13 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"lightAmbient", py_lightAmbient, METH_VARARGS, 0 },
   { (char*)"lightDiffuse", py_lightDiffuse, METH_VARARGS, 0 },
   { (char*)"lightSpecular", py_lightSpecular, METH_VARARGS, 0 },
+  { (char*)"lightAttenuation", py_lightAttenuation, METH_VARARGS, 0 },
   { (char*)"lightEnabled", py_lightEnabled, METH_VARARGS, 0 },
   { (char*)"setLightPos", py_setLightPos, METH_VARARGS, 0 },
   { (char*)"setLightAmbient", py_setLightAmbient, METH_VARARGS, 0 },
   { (char*)"setLightDiffuse", py_setLightDiffuse, METH_VARARGS, 0 },
   { (char*)"setLightSpecular", py_setLightSpecular, METH_VARARGS, 0 },
+  { (char*)"setLightAttenuation", py_setLightAttenuation, METH_VARARGS, 0 },
   { (char*)"setLightEnabled", py_setLightEnabled, METH_VARARGS, 0 },
   { (char*)"addLight", py_addLight, METH_VARARGS, 0 },
   { (char*)"removeLight", py_removeLight, METH_VARARGS, 0 },
@@ -869,6 +871,18 @@ PyObject* PythonScript::py_lightSpecular(PyObject*, PyObject* args)
   return Py_BuildValue((char*)"(ffff)", s.x(), s.y(), s.z(), s.w());
 }
 
+PyObject* PythonScript::py_lightAttenuation(PyObject*, PyObject* args)
+{
+  int id;
+  if(!PyArg_ParseTuple(args, (char*)"i", &id))
+  {
+    return 0;
+  }
+
+  BoVector3 a = BosonScript::lightAttenuation(id);
+  return Py_BuildValue((char*)"(fff)", a.x(), a.y(), a.z());
+}
+
 PyObject* PythonScript::py_lightEnabled(PyObject*, PyObject* args)
 {
   int id;
@@ -936,6 +950,21 @@ PyObject* PythonScript::py_setLightSpecular(PyObject*, PyObject* args)
   }
 
   BosonScript::setLightSpecular(id, BoVector4(r, g, b, a));
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setLightAttenuation(PyObject*, PyObject* args)
+{
+  int id;
+  float c, l, q;
+  if(!PyArg_ParseTuple(args, (char*)"i(fff)", &id, &c, &l, &q))
+  {
+    return 0;
+  }
+
+  BosonScript::setLightAttenuation(id, BoVector3(c, l, q));
 
   Py_INCREF(Py_None);
   return Py_None;

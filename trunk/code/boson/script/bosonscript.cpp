@@ -820,6 +820,18 @@ BoVector4 BosonScript::lightSpecular(int id)
   return l->specular();
 }
 
+BoVector3 BosonScript::lightAttenuation(int id)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return BoVector3();
+  }
+
+  return l->attenuation();
+}
+
 bool BosonScript::lightEnabled(int id)
 {
   BoLight* l = light(id);
@@ -878,6 +890,18 @@ void BosonScript::setLightSpecular(int id, BoVector4 s)
   }
 
   l->setSpecular(s);
+}
+
+void BosonScript::setLightAttenuation(int id, BoVector3 a)
+{
+  BoLight* l = light(id);
+  if(!l)
+  {
+    boError() << k_funcinfo << "No light with id " << id << endl;
+    return;
+  }
+
+  l->setAttenuation(a);
 }
 
 void BosonScript::setLightEnabled(int id, bool enable)
