@@ -44,7 +44,7 @@ private slots:
 	void setWho		(int w) { who = w; }
 
 private:
-	groundType	g;
+	cell_t		c;
 	mobType		m;
 	facilityType	f;
 	object_type	otype;

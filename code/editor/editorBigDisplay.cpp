@@ -28,7 +28,7 @@ editorBigDisplay::editorBigDisplay(editorTopLevel *v, QWidget *p, const char *n,
 	:visualBigDisplay(v,p,n,f)
 {
 
-	g = GROUND_UNKNOWN;
+	c = cell(GROUND_UNKNOWN, 0);
 	otype = OT_NONE;
 
 	setWho(0);
@@ -52,18 +52,18 @@ void editorBigDisplay::actionClicked(int mx, int my, int state)
 			break;
 
 		case OT_GROUND:
-			if ( IS_BIG_TRANS(g) )
+			if ( IS_BIG_TRANS(ground(c)) )
 			       if ( x+1>=_canvas->maxX || y+1>=_canvas->maxY) return;
 
-			if ( IS_PLAIN(g) && (state&ShiftButton) ) {
+			if ( IS_PLAIN(ground(c)) && (state&ShiftButton) ) {
 				int i,j;
 				for (i=-2; i< 3; i++)
 					if (x+i>=0 && x+i<_canvas->maxX)
 						for (j=-2; j< 3; j++)
 							if (y+j>=0 && y+j<_canvas->maxY)
-								_canvas->changeCell( x+i, y+j, g);
+								_canvas->changeCell( x+i, y+j, c);
 			} else
-				_canvas->changeCell( x, y, g);
+				_canvas->changeCell( x, y, c);
 
 			vtl->setSelectionMode( editorTopLevel::SELECT_FILL);
 			break;
@@ -101,7 +101,7 @@ void editorBigDisplay::setSelectedObject(object_type t, int n)
 		case OT_NONE:
 			break;
 		case OT_GROUND:
-			g = (groundType) n;
+			c = cell ( (groundType) n,  /* XXX +random()%4 */(n*(n+1)+7*t ) %4 );
 			break;
 		case OT_FACILITY:
 			f = (facilityType)n;
