@@ -23,9 +23,6 @@
 #include "bosonneweditorwidgetbase.h"
 
 #include <qwidget.h>
-#include <qptrdict.h>
-#include <qcolor.h>
-#include <qvaluelist.h>
 
 class BosonStartupNetwork;
 class BosonPlayField;
