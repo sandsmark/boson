@@ -39,11 +39,7 @@ Top::Top() : TopBase()
 {
  initKAction();
 
- QToolBar* t = new QToolBar(i18n("CommandToolBar"), (QMainWindow*)this, QMainWindow::Left); // FIXME - config (left)!
- QVBox* frame = new QVBox(t);
-		 
- bosonWidget()->addMiniMap(frame);
- bosonWidget()->addGameCommandFrame(frame);
+ bosonWidget()->addGameCommandFrame(commandFrame());
 
  initStatusBar();
 

@@ -35,6 +35,7 @@
 #include <qwmatrix.h>
 #include <qlabel.h>
 #include <qhbox.h>
+#include <qvbox.h>
 
 #include "topbase.moc"
 
@@ -52,6 +53,8 @@ public:
 	KToggleAction* mStatusbarAction;
 	KToggleAction* mChatAction;
 	KSelectAction* mZoomAction;
+
+	QVBox* mCommandFrame; // kind of.. also contains the minimap
 };
 
 TopBase::TopBase()
@@ -65,9 +68,15 @@ TopBase::TopBase()
  setCentralWidget(mBosonWidget);
 
  initKAction();
-
  initStatusBar();
 
+ QToolBar* bar = new QToolBar(i18n("CommandFrame"), this, QMainWindow::Left); // FIXME: config (left)
+ d->mCommandFrame = new QVBox(bar);
+ mBosonWidget->addMiniMap(d->mCommandFrame);
+
+ setDockEnabled(bar, DockTop, false);
+ setDockEnabled(bar, DockBottom, false);
+ 
  showMaximized();
 }
 
@@ -218,4 +227,8 @@ kdDebug() << "zoom index=" << index << endl;
  mBosonWidget->zoom(m);
 }
 
+QFrame* TopBase::commandFrame() const
+{
+ return d->mCommandFrame;
+}
 

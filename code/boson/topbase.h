@@ -58,7 +58,8 @@ protected:
 	 **/
 	void readProperties(KConfig *);
 
-	BosonWidget* bosonWidget() { return mBosonWidget; }
+	BosonWidget* bosonWidget() const { return mBosonWidget; }
+	QFrame* commandFrame() const;
 
 private slots:
 	void slotZoom(int index);
