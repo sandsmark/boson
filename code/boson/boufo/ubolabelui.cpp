@@ -226,6 +226,7 @@ makeCompoundText(const std::string& text, const UFontMetrics* metrics, int maxWi
 	allLines += lines;
 	lineCount += count;
  }
+// printf("required width for text=%s is=%d\n", text.c_str(), width);
  if (size) {
 	*size = UDimension(width, lineCount * metrics->getHeight());
  }
@@ -306,6 +307,8 @@ UBoLabelUI::stylePaintCompoundTextAndIcon(UGraphics * g, UCompound * w,
 	viewRect.w = w->getWidth() - insets.getHorizontal();
 	viewRect.h = w->getHeight() - insets.getVertical();
 
+//	printf("stylePaintCompoundTextAndIcon(): have viewRect=(%d,%d,%d,%d)\n", viewRect.x, viewRect.y, viewRect.w, viewRect.h);
+
 	// due to focus we add some spacing to the view rect
 
 	// AB: this is a problem: viewRect is the size of
@@ -383,6 +386,7 @@ UBoLabelUI::styleLayoutCompoundWidget(
 	if (text.length() != 0) {
 		UDimension textDimension;
 		clipText = makeCompoundText(text, metrics, maxTextWidth, &textDimension);
+//		printf("styleLayoutCompoundWidget(): maxTextWidth=%d, texDimension=(%dx%d)\n", maxTextWidth, textDimension.w, textDimension.h);
 
 		textRect->w = textDimension.w;
 		textRect->h = textDimension.h;
@@ -431,6 +435,14 @@ UBoLabelUI::styleLayoutCompoundWidget(
 
 	textRect->x += dx;
 	textRect->y += dy;
+
+
+	// FIXME!!
+	// -> this may not be necessary if the widget is large enough. however
+	// currently the layout does not work correctly and therefore y can
+	// become negative.
+	textRect->y = std::max(0, textRect->y); // AB
+//	printf("textRect: x=%d y=%d\n", textRect->x, textRect->y);
 
 	iconRect->x += dx;
 	iconRect->y += dy;
@@ -603,6 +615,7 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 #endif
 
 	UInsets in = w->getInsets();
+//	printf("returning preferred width width for text=%s : %d (in.getHorizontal()=%d)\n", text.c_str(), max_width + in.getHorizontal(), in.getHorizontal());
 	return UDimension(
 		max_width + in.getHorizontal(),
 		max_height + in.getVertical()
@@ -610,4 +623,50 @@ UBoLabelUI::getStyleCompoundPreferredSize(
 	//return UDimension(max_width, max_height);
 }
 
+// AB: HACK!
+// -> this is copied largely from getStyleCompundPreferredSize(), with minor
+// modifications only.
+// we should merge both methods.
+int UBoLabelUI::getHeightForWidth(const UWidget * widget_, int w)
+{
+	const UCompound* widget = dynamic_cast<const UCompound*>(widget_);
+	if (!widget) {
+		return 0;
+	}
+
+	// assume that icon is on the left and text on the right side
+	const UFontMetrics * metrics = widget->getFont()->getFontMetrics();
+	UInsets insets = widget->getInsets();
+	const UIcon* icon = widget->getIcon();
+	const std::string& text = widget->getText();
+
+	int availableWidth = w;
+	int h = 0;
+	availableWidth -= insets.getHorizontal();
+	h += insets.getVertical();
+	if (widget->isFocusable()) {
+		availableWidth -= 2;
+		h += 2;
+	}
+
+	int iconWidth = 0;
+	int iconHeight = 0;
+	if (icon) {
+		iconWidth = icon->getIconWidth();
+		iconHeight = icon->getIconHeight();
+	}
+	availableWidth -= iconWidth;
+
+	UDimension textDimension;
+	if (text.length() > 0) {
+		int maxTextW = availableWidth;
+		if (iconWidth) {
+			maxTextW -= widget->getIconTextGap();
+		}
+		makeCompoundText(text, metrics, maxTextW, &textDimension);
+	}
+	h += std::max(iconHeight, textDimension.h);
+
+	return h;
+}
 
