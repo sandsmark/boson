@@ -85,8 +85,8 @@
           <dt>5 <a href="editor/index.html">The Boson editor</a></dt>
           <dd>
             <dl>
-              <dt>5.1 <a href="editor/overview.html">Overview</a></dt>
-              <dt>5.2 <a href="editor/elements.html">Elements of a game</a></dt>
+              <dt>5.1 <a href="editor/elements.html">Elements of a game</a></dt>
+              <dt>5.2 <a href="editor/map.html">Working with the map</a></dt>
               <dt>5.3 <a href="editor/facilities.html">Building facilities</a></dt>
             </dl>
           </dd>

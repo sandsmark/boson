@@ -5,9 +5,9 @@
     </h1>
     <p>&nbsp;</p>
     <p>
-    You can build facilities the same way as in a normal boson game.<br>
-    To get a selection of facilities select <i>Facilities</i> or <i>Mobiles</i> under the <i>Editor --&gt; Place</i> menu.
-    Now you can place them on the map with your right mouse button.
+    Select the <i>Facilities</i> or <i>Mobiles</i> selection from the second dropdown menu.<br>
+    You can build the them like in a normal boson game.<br>
+    Place them on the map with your right mouse button.
     </p>
 #include "nav.wml" before_url="map.html" before_text="Working with the map" after_url="../faq.html" after_text="FAQ" up_url="index.html"
 #include "footer.wml"
