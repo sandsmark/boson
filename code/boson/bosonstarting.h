@@ -130,6 +130,11 @@ protected:
 	bool loadTiles();
 	bool loadGameData3();
 
+	/**
+	 * Add the players for a loaded game.
+	 **/
+	bool addLoadGamePlayers(const QString& playersXML);
+
 private:
 	QByteArray mNewGameData;
 	BosonPlayField* mDestPlayField;

@@ -169,21 +169,36 @@ bool BosonStarting::loadGame(const QString& loadingFileName)
  //  starting new game
  mLoading = true;
  if (loadingFileName.isNull()) {
-	boError() << k_funcinfo << "Cannot load game with NULL filename" << endl;
+	boError(260) << k_funcinfo << "Cannot load game with NULL filename" << endl;
 	//TODO: set Boson::loadingStatus()
 	return false;
  }
  BosonPlayField loadField;
  if (!loadField.preLoadPlayField(loadingFileName)) {
-	boError() << k_funcinfo << "could not preload " << loadingFileName << endl;
+	boError(260) << k_funcinfo << "could not preload " << loadingFileName << endl;
 	return false;
  }
- mNewGameData = loadField.loadFromDiskToStream();
- if (mNewGameData.size() == 0) {
-	boError() << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
+
+ QMap<QString, QByteArray> files;
+ if (!loadField.loadFromDiskToFiles(files)) {
+	boError(260) << k_funcinfo << "could not load " << loadingFileName << endl;
+	return false;
  }
- // AB: we call it from TopWidget now
-// startNewGame(); // will use singleshot!
+ mNewGameData = BosonPlayField::streamFiles(files);
+ if (mNewGameData.size() == 0) {
+	boError(260) << k_funcinfo << "empty playfield loaded from " << loadingFileName << endl;
+	return false;
+ }
+
+ if (!files.contains("players.xml")) {
+	boError(260) << k_funcinfo << "did not find players.xml" << endl;
+	return false;
+}
+ if (!addLoadGamePlayers(files["players.xml"])) {
+	boError(260) << k_funcinfo << "adding players failed" << endl;
+	return false;
+ }
+
  return true;
 }
 
@@ -464,6 +479,75 @@ bool BosonStarting::startGame()
 	return true;
  }
  boGame->sendMessage(0, BosonMessage::IdGameIsStarted);
+ return true;
+}
+
+bool BosonStarting::addLoadGamePlayers(const QString& playersXML)
+{
+ QDomDocument playersDoc;
+ if (!playersDoc.setContent(playersXML)) {
+	boError(260) << k_funcinfo << "error loading players.xml" << endl;
+	return false;
+ }
+ QDomElement playersRoot = playersDoc.documentElement();
+ if (boGame->playerCount() != 0) {
+	boError(260) << k_funcinfo << "no player are allowed at this point" << endl;
+	return false;
+ }
+ QDomNodeList list = playersRoot.elementsByTagName("Player");
+ if (list.count() == 0) {
+	boError(260) << k_funcinfo << "no players in savegame" << endl;
+	return false;
+ }
+ bool ok = false;
+ unsigned int localId = playersRoot.attribute("LocalPlayerId").toUInt(&ok);
+ if (!ok) {
+	boError(260) << k_funcinfo << "no LocalPlayerId" << endl;
+	return false;
+ }
+ boDebug(260) << k_funcinfo << "adding " << list.count() << " players" << endl;
+ for (unsigned int i = 0; i < list.count(); i++) {
+	// AB: TODO: store "PlayerNumber" in the xml file only (use the same
+	// number for the canvas.xml as ownerid / ownernumber).
+	// We should assign new IDs.
+	// -­> makes the code easier to be used in newgames, too and we will
+	// support network then.
+	QDomElement p = list.item(i).toElement();
+	unsigned int id = p.attribute("Id").toUInt(&ok);
+	if (!ok) {
+		boError(260) << k_funcinfo << "invalid Id" << endl;
+		return false;
+	}
+	QString species = p.attribute(QString::fromLatin1("SpeciesTheme"));
+	QColor color;
+	color.setRgb(p.attribute(QString::fromLatin1("TeamColor")).toUInt(&ok));
+	if (!ok) {
+		boError(260) << k_funcinfo << "invalid teamcolor" << endl;
+		return false;
+	}
+	if (species.isEmpty()) {
+		boError(260) << k_funcinfo << "invalid SpeciesTheme" << endl;
+		// TODO: check whether species actually exists and can get
+		// loaded
+		return false;
+	}
+	if (boGame->findPlayer(id)) {
+		boError(260) << k_funcinfo << "id " << id << " already in the game" << endl;
+		return false;
+	}
+	Player* player = (Player*)boGame->createPlayer(0, 0, false);
+	if (id == localId) {
+		
+	}
+	player->setId(id);
+	player->loadTheme(SpeciesTheme::speciesDirectory(species), color);
+
+	// AB: we _must_ add the players _before_ we load the game, in order to
+	// keep network working.
+//	boGame->systemAddPlayer((KPlayer*)player); // BosonSaveLoad uses this
+	boGame->addPlayer((KPlayer*)player);
+ }
+
  return true;
 }
 
