@@ -34,8 +34,8 @@
 // version. got never released)
 #define BOSONMAP_VERSION_0_8_128 0x01
 
- // version number as used by boson 0.9 // AB: until this is released is must always be equal to BOSONMAP_VERSION!
-#define BOSONMAP_VERSION_0_9 BOSONMAP_VERSION
+// version number as used by boson 0.9
+#define BOSONMAP_VERSION_0_9 0x01
 #define BOSON_SAVEGAME_FORMAT_VERSION_0_9 ( ((0x00) << 16) | ((0x02) << 8) | (0x01) )
 
 // compatibility for boson 0.8
