@@ -1,10 +1,10 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=5
+Speed=6
 
 [Boson Unit]
-Armor=6
+Armor=7
 ConstructedEffects=
 DestroyedEffects=1001,6100
 ExplodingDamage=0
@@ -49,7 +49,7 @@ Shoot=shoot
 [Weapon_0]
 CanShootAtAirUnits=true
 CanShootAtLandUnits=true
-Damage=15
+Damage=18
 DamageRange=1
 FlyEffects=
 Height=1
@@ -57,7 +57,7 @@ HitEffects=2010
 Name=Cannon
 Offset=0,0,0
 Range=5
-Reload=25
+Reload=22
 ShootEffects=12030
 SoundFly=
 SoundHit=hit
