@@ -203,20 +203,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  switch(prop->id()) {
-	case UnitBase::IdWork:
-	case UnitBase::IdId:
-	case UnitBase::IdDamage:
-//	case UnitBase::IdReload:
-	case Unit::IdDirection:
-	case Unit::IdWaypoints:
-	case Unit::IdMoveDestX:
-	case Unit::IdMoveDestY:
-	case Unit::IdFix_ConstructionState:
-	case Unit::IdFix_Productions:
-	case Unit::IdFix_ProductionState:
-		// these IDs are not to be displayed in BosonUnitView.
-		break;
-	case Unit::IdReloadState: // perhaps emit this as well - display timer "when can unit shoot" or so
+	case Unit::IdReloadState:
 	case UnitBase::IdHealth:
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:
@@ -227,11 +214,15 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
 		// will one day.
-//		kdDebug() << "emit unit changed" << endl;
 		emit signalUnitChanged(unit);
 		break;
 	default:
-		kdDebug() << k_funcinfo << "Unknown property ID " << prop->id() << endl;
+		// all other Unit IDs are not displayed in BosonUnitView so
+		// there is no need to emit a signal for them.
+		if (prop->id() < KGamePropertyBase::IdUser || prop->id() > Unit::IdUnitPropertyLast) {
+			// not a Unit property?? oops...
+			kdDebug() << k_funcinfo << "Unknown property ID " << prop->id() << endl;
+		}
 		break;
  }
 }
