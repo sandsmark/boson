@@ -75,7 +75,8 @@ private:
 	QPushButton	*orderButton[11];
 
 	orderType_t	orderType;
-	constructMsg_t	construct;
+	mobConstrMsg_t	mobConstruct;
+	fixConstrMsg_t	fixConstruct;
 };
 
 #endif // BOSONTOPLEVEL_H
