@@ -43,7 +43,7 @@ visualProperties_t vpp = {
 BoEditorApp::BoEditorApp(char *servername)
 {
 
-  logfile = fopen(BOSON_LOGFILE_CLIENT, "a+b");
+  logfile = fopen(BOSON_LOGFILE_EDITOR, "a+b");
   if (!logfile) {
 	logfile = stderr;
 	logf(LOG_ERROR, "Can't open logfile, using stderr");
@@ -54,8 +54,8 @@ BoEditorApp::BoEditorApp(char *servername)
   setCaption("BoEditor " VERSION);
   ///////////////////////////////////////////////////////////////////
   // create basics 
-//  recentList = new QStrList(true);
-//  recentList->setAutoDelete(true);
+  recentList = new QStrList(true);
+  recentList->setAutoDelete(true);
 
   ///////////////////////////////////////////////////////////////////
   // read the config file options
@@ -128,18 +128,17 @@ void BoEditorApp::initMenuBar()
 
   ///////////////////////////////////////////////////////////////////
   // file_menu entry file_menu_recent  (for recent documents)
-
-
-/*  QPopupMenu *file_menu_recent = new QPopupMenu();
-  for (uint i = 0; i < recentList->count(); i++)
-    file_menu_recent->insertItem(recentList->at(i)); */
+	file_menu_recent = new QPopupMenu();
+	for (uint i = 0; i < recentList->count(); i++)
+		file_menu_recent->insertItem(recentList->at(i));
 
 
   ///////////////////////////////////////////////////////////////////
   // menuBar entry file_menu
+
   QPopupMenu *file_menu = new QPopupMenu();
   file_menu->insertItem(Icon("mini/bosonapp.xpm"), i18n("New &Window"), ID_FILE_NEW_WINDOW );
-/*  file_menu->insertSeparator();
+  file_menu->insertSeparator();
   file_menu->insertItem(Icon("filenew.xpm"), i18n("&New"), ID_FILE_NEW );
   file_menu->insertItem(Icon("fileopen.xpm"), i18n("&Open..."), ID_FILE_OPEN );
   file_menu->insertItem(i18n("Open &recent..."), file_menu_recent, ID_FILE_RECENT );
@@ -149,17 +148,17 @@ void BoEditorApp::initMenuBar()
   file_menu->insertItem(i18n("&Close"), ID_FILE_CLOSE );
   file_menu->insertSeparator();
   file_menu->insertItem(Icon("fileprint.xpm"), i18n("&Print"), ID_FILE_PRINT );
-  file_menu->insertSeparator(); */
+  file_menu->insertSeparator(); 
   file_menu->insertItem(i18n("C&lose Window"), ID_FILE_CLOSE_WINDOW);
   file_menu->insertSeparator();
   file_menu->insertItem(i18n("E&xit"), ID_APP_EXIT );
 
   // file_menu key accelerators
-/*  file_menu->setAccel(CTRL+Key_N, ID_FILE_NEW);
+  file_menu->setAccel(CTRL+Key_N, ID_FILE_NEW);
   file_menu->setAccel(CTRL+Key_O, ID_FILE_OPEN);
   file_menu->setAccel(CTRL+Key_S, ID_FILE_SAVE);
   file_menu->setAccel(CTRL+Key_W, ID_FILE_CLOSE);
-  file_menu->setAccel(CTRL+Key_P, ID_FILE_PRINT); */
+  file_menu->setAccel(CTRL+Key_P, ID_FILE_PRINT); 
   file_menu->setAccel(CTRL+Key_Q, ID_APP_EXIT);
 
 
@@ -219,7 +218,7 @@ void BoEditorApp::initMenuBar()
 //  CONNECT_CMD(edit_menu);
 //  CONNECT_CMD(view_menu);
 
-  //connect(file_menu_recent, SIGNAL(activated(int)),SLOT(slotFileRecent(int)));  
+  connect(file_menu_recent, SIGNAL(activated(int)),SLOT(slotFileRecent(int)));  
 
   ///////////////////////////////////////////////////////////////////
   // INSERT YOUR APPLICATION SPECIFIC CONNECTS HERE
@@ -291,7 +290,6 @@ void BoEditorApp::resizeEvent(QResizeEvent *evt)
     updateRects();
 }
 
-/*
 void BoEditorApp::addRecent(const char *filename)
 {
   if(filename && strlen(filename) == 0 || recentList->contains(filename))
@@ -310,7 +308,6 @@ void BoEditorApp::addRecent(const char *filename)
     file_menu_recent->insertItem(recentList->at(i));
 
 }
-*/
 
 void BoEditorApp::dlgModified()
 {
@@ -415,6 +412,10 @@ void BoEditorApp::slotViewStatusBar()
 }
 */
 
+void BoEditorApp::slotFileRecent(int w)
+{
+}
+
 
 void BoEditorApp::slotStatusMsg(const char *text)
 {
@@ -456,7 +457,7 @@ END_CMD()
 BEGIN_STATUS_MSG(BoEditorApp)
   ON_STATUS_MSG(ID_FILE_NEW_WINDOW,  i18n("Opens a new view window"))
 
-/*  ON_STATUS_MSG(ID_FILE_NEW,         i18n("Creates a new document"))
+  ON_STATUS_MSG(ID_FILE_NEW,         i18n("Creates a new document"))
   ON_STATUS_MSG(ID_FILE_OPEN,        i18n("Opens an existing document"))
   ON_STATUS_MSG(ID_FILE_RECENT,      i18n("Opens a recent document"))
 
@@ -464,7 +465,7 @@ BEGIN_STATUS_MSG(BoEditorApp)
   ON_STATUS_MSG(ID_FILE_SAVE_AS,     i18n("Save the document as..."))
   ON_STATUS_MSG(ID_FILE_CLOSE,       i18n("Closes the actual file"))
 
-  ON_STATUS_MSG(ID_FILE_PRINT,       i18n("Prints the current document")) */
+  ON_STATUS_MSG(ID_FILE_PRINT,       i18n("Prints the current document")) 
 
   ON_STATUS_MSG(ID_FILE_CLOSE_WINDOW,i18n("Closes the current window"))
 

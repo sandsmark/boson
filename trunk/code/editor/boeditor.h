@@ -89,7 +89,7 @@ protected:
   /** resizeEvent for the main view */
   virtual void resizeEvent(QResizeEvent *evt);
   /** add filename to the recentList */
-//  void addRecent(const char *filename);
+  void addRecent(const char *filename);
   /** method asks the modified flag and creates a modified dialog for saving */
   void dlgModified();
   /** overloaded for Message box on last window exit */
@@ -108,6 +108,8 @@ protected:
   protected slots:      
     /** exits the application */
     void slotAppExit();
+    /** open a recently open map */
+    void slotFileRecent(int);
     /** toggle the toolbar*/
 //    void slotViewToolBar_0(); 
     /** toggle the statusbar*/
@@ -127,7 +129,7 @@ private:
     KStatusBar *status_bar;
     QPopupMenu *file_menu_recent;
     QPopupMenu *view_menu;
-//    QStrList *recentList; 
+    QStrList *recentList; 
     /** rMainGeom keeps the acutal size of your application and is used to
       * restore your last used application size. */
     QRect rMainGeom;
