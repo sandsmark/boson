@@ -39,6 +39,16 @@ echo "
       currently latest version available.</b><br><br>
     </td></tr>";
 
+draw_bigbox_subheader("<a name=\"0.7-fix\"></a>IMPORTANT: 0.7-texture-fix package");
+draw_bigbox_text("This package fixes slowdown problems with 0.7. It contains
+textures, which were previously too big and didn't fit into the memory of the
+video card and caused slowdowns.<br>
+To apply: <a href=\"download/0.7-textures-fix.tar.bz2\">download this
+package</a> (162 KB) and then either unpack it to the directory where boson's
+textures were installed (might be something like
+/opt/kde/share/apps/boson/themes/textures/) or unpack it to themes/textures
+directory of data package and re-execute 'make install' command.<br><br>");
+
 draw_bigbox_subheader("All-in-one package");
 draw_bigbox_text("This is a big package that contains source code, data files
 and music. You do not need to download any package below if you download this
