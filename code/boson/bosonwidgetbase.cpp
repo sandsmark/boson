@@ -171,7 +171,7 @@ void BosonWidgetBase::init()
  setFocusPolicy(StrongFocus); // accept key event
  setFocus();
 
- initDebugPlayersMenu();
+ initPlayersMenu();
 }
 
 void BosonWidgetBase::initMap()
@@ -870,21 +870,12 @@ kdDebug() << "zoom index=" << index << endl;
  setZoomFactor(factor);
 }
 
-void BosonWidgetBase::initDebugPlayersMenu()
+void BosonWidgetBase::initPlayersMenu()
 {
  QPtrListIterator<KPlayer> it(*(game()->playerList()));
  while (it.current()) {
-	// note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
-	KActionMenu* menu = new KActionMenu(it.current()->name(), this, QString("debug_players_%1").arg(it.current()->name()));
-
-	connect(menu->popupMenu(), SIGNAL(activated(int)),
-			this, SLOT(slotDebugPlayer(int)));
-	menu->popupMenu()->insertItem("Kill Player", ID_DEBUG_KILLPLAYER);
-
-	d->mActionDebugPlayers->insert(menu);
-	d->mPlayers.insert(menu, it.current());
-
- ++it;
+	slotPlayerJoinedGame(it.current());
+	++it;
  }
 }
 
@@ -930,5 +921,42 @@ void BosonWidgetBase::setBosonXMLFile()
 {
  setXMLFile(locate("config", "ui/ui_standards.rc", instance()));
  setXMLFile("bosonbaseui.rc", true);
+}
+
+void BosonWidgetBase::slotPlayerJoinedGame(KPlayer* player)
+{
+ if (!player) {
+	return;
+ }
+ // note: NOT listed in the *ui.rc files! we create it dynamically when the player enters ; not using the xml framework
+ KActionMenu* menu = new KActionMenu(player->name(), this, QString("debug_players_%1").arg(player->name()));
+
+ connect(menu->popupMenu(), SIGNAL(activated(int)),
+		this, SLOT(slotDebugPlayer(int)));
+ menu->popupMenu()->insertItem("Kill Player", ID_DEBUG_KILLPLAYER);
+
+ d->mActionDebugPlayers->insert(menu);
+ d->mPlayers.insert(menu, player);
+}
+
+void BosonWidgetBase::slotPlayerLeftGame(KPlayer* player)
+{
+ if (!player) {
+	return;
+ }
+ KActionMenu* menu = 0;
+ QPtrDictIterator<KPlayer> it(d->mPlayers);
+ for (; it.current() && !menu; ++it) {
+	if (it.current() == player) {
+		menu = (KActionMenu*)it.currentKey();
+	}
+ }
+ if (!menu) {
+	kdWarning() << k_funcinfo << "NULL player debug menu" << endl;
+	return;
+ }
+ d->mActionDebugPlayers->remove(menu);
+ d->mPlayers.remove(player);
+ delete menu;
 }
 
