@@ -833,222 +833,155 @@ private:
 	unsigned int mPointCount;
 };
 
-/**
- * This class is a collection of all data that depend on the current level of
- * detail (LOD).
- *
- * Note that some values/arrays (such as the point cache) are automatically
- * generated <em>after</em> the LOD has been generated. This happens for all
- * meshes and all LODs, so you don't have to worry about this for LOD. But it
- * also depends on the current LOD, so it is in this class.
- * @author Andreas Beckermann <b_mann@gmx.de>
- **/
-class BoMeshLOD
+class BoMeshLODPrivate
 {
 public:
-	BoMeshLOD()
+	BoMeshLODPrivate()
 	{
-		mNodes = 0;
-		mPointsCache = 0;
-		mPointsCacheCount = 0;
-		mAllNodes.setAutoDelete(true);
-		mDisplayList = 0;
-
-		mType = GL_TRIANGLES;
 	}
-	~BoMeshLOD()
-	{
-		mAllNodes.clear();
-		delete[] mPointsCache;
-		if (mDisplayList) {
-			glDeleteLists(mDisplayList, 1);
-		}
-	}
-
-	void createFaces(unsigned int faces)
-	{
-		if (faces < 1) {
-			boWarning(100) << k_funcinfo << "no faces in mesh" << endl;
-			return;
-		}
-		if (mAllFaces.count() != 0) {
-			boWarning(100) << "faces already created. resizing" << endl;
-		}
-		mAllFaces.resize(faces);
-
-		// there are exactly as many nodes as faces in a mesh.
-		// Every node represents exactly one face. Nodes represent the "connections" of
-		// faces.
-		if (mAllNodes.count() > 0) {
-			boDebug(100) << "nodes already created. deleting." << endl;
-			mAllNodes.clear();
-		}
-		for (unsigned int face = 0; face < faces; face++) {
-			BoFaceNode* node = new BoFaceNode(&mAllFaces[face]);
-			mAllNodes.append(node);
-		}
-	}
-
-
-	/**
-	 * @param data The full-detailed mesh data, i.e. LOD 0.
-	 * @param lod The to-be-generated level of detail.
-	 **/
-	void generateLOD(BoMeshLOD* data, unsigned int lod)
-	{
-		BO_CHECK_NULL_RET(data);
-		boDebug(100) << k_funcinfo << "generate lod=" << lod << endl;
-		boDebug(100) << k_funcinfo << "TODO: implement" << endl;
-	}
-
-	inline BoFaceNode* nodes() const
-	{
-		return mNodes;
-	}
-	inline int type() const
-	{
-		return mType;
-	}
-	inline unsigned int* pointsCache() const
-	{
-		return mPointsCache;
-	}
-	inline unsigned int pointsCacheCount() const
-	{
-		return mPointsCacheCount;
-	}
-	/**
-	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
-	 * the constructor to create the correct number.
-	 **/
-	unsigned int facesCount() const
-	{
-		return mAllFaces.count();
-	}
-
-	void setFace(int index, const BoFace& face)
-	{
-		mAllFaces[index] = face;
-	}
-	const BoFace* face(unsigned int f) const
-	{
-		if (f >= facesCount()) {
-			return 0;
-		}
-		return &mAllFaces[f];
-	}
-
-	void setDisplayList(GLuint list)
-	{
-		mDisplayList = list;
-	}
-	inline GLuint displayList() const
-	{
-		return mDisplayList;
-	}
-
-	/**
-	 * @param vertex The vertex in the face this normal applies to. This
-	 * must be 0..2 or -1 for all vertices.
-	 **/
-	void setNormal(unsigned int face, int vertex, const BoVector3& normal)
-	{
-		if (face >= facesCount()) {
-			boError() << k_funcinfo << "invalid face " << face
-					<< " max=" << facesCount() << endl;
-			return;
-		}
-		if (vertex >= 3) {
-			boError() << k_funcinfo << "vertex must be 0..2  or -1 not " << vertex << endl;
-			vertex = vertex % 3;
-		}
-
-		if (vertex < 0) {
-			mAllFaces[face].setAllNormals(normal);
-		} else {
-			mAllFaces[face].setNormal(vertex, normal);
-		}
-	}
-
-	/**
-	 * Called by @ref movePoints. This adds @p moveBy to every @ref
-	 * BoFace::pointIndex.
-	 **/
-	void movePointIndices(int moveBy)
-	{
-		for (unsigned int i = 0; i < facesCount(); i++) {
-			BoFace* face = &mAllFaces[i];
-			const int* orig = face->pointIndex();
-			int p[3];
-			p[0] = moveBy + orig[0];
-			p[1] = moveBy + orig[1];
-			p[2] = moveBy + orig[2];
-			face->setPointIndex(p);
-		}
-		if (mPointsCache) {
-			// we need to regenerate the cache
-			createPointCache();
-		}
-	}
-
-	void createPointCache();
-
-	/**
-	 * Ensure that all values in the point cache are valid. After this
-	 * function is done, all entries in the point cache are greate or equal
-	 * @p min and less or equal @p max.
-	 *
-	 * Note the "or equal" for @p max!
-	 **/
-	void ensurePointCacheValid(unsigned int min, unsigned int max)
-	{
-		if (!mPointsCache) {
-			return;
-		}
-		for (unsigned int i = 0; i < mPointsCacheCount; i++) {
-			if (mPointsCache[i] < min) {
-				boWarning(100) << k_funcinfo << "point cache at "
-						<< i << " is less than " << min
-						<< ": " << mPointsCache[i]
-						<< ". Fixing." << endl;
-				mPointsCache[i] = min;
-			} else if (mPointsCache[i] > max) {
-				boWarning(100) << k_funcinfo << "point cache at "
-						<< i << " is greater than " << max
-						<< ": " << mPointsCache[i]
-						<< ". Fixing." << endl;
-				mPointsCache[i] = max;
-			}
-		}
-	}
-
-	void disconnectNodes()
-	{
-		mType = BoFaceConnector::connectNodes(mAllNodes, mNodes);
-	}
-	void connectNodes()
-	{
-		mType = BoFaceConnector::connectNodes(mAllNodes, mNodes);
-	}
-	void addNodes()
-	{
-		mType = BoFaceConnector::addNodes(mAllNodes, mNodes);
-	}
-
-private:
 	QValueVector<BoFace> mAllFaces;
 	QPtrList<BoFaceNode> mAllNodes;
-	BoFaceNode* mNodes;
-	int mType;
-
-	// the list of points in the final order (after connectNodes() or
-	// addNodes() was called). iterating through nodes() is equalivent (for
-	// some modes the BoFaceNode::relevantPoint() will have to be used though)
-	unsigned int* mPointsCache;
-	unsigned int mPointsCacheCount;
-
-	GLuint mDisplayList;
 };
+
+BoMeshLOD::BoMeshLOD()
+{
+ mNodes = 0;
+ mPointsCache = 0;
+ mPointsCacheCount = 0;
+ d->mAllNodes.setAutoDelete(true);
+ mDisplayList = 0;
+
+ mType = GL_TRIANGLES;
+}
+
+BoMeshLOD::~BoMeshLOD()
+{
+ d->mAllNodes.clear();
+ delete[] mPointsCache;
+ if (mDisplayList) {
+	glDeleteLists(mDisplayList, 1);
+ }
+}
+
+void BoMeshLOD::createFaces(unsigned int faces)
+{
+ if (faces < 1) {
+	boWarning(100) << k_funcinfo << "no faces in mesh" << endl;
+	return;
+ }
+ if (d->mAllFaces.count() != 0) {
+	boWarning(100) << "faces already created. resizing" << endl;
+ }
+ d->mAllFaces.resize(faces);
+
+ // there are exactly as many nodes as faces in a mesh.
+ // Every node represents exactly one face. Nodes represent the "connections" of
+ // faces.
+ if (d->mAllNodes.count() > 0) {
+	boDebug(100) << "nodes already created. deleting." << endl;
+	d->mAllNodes.clear();
+ }
+ for (unsigned int face = 0; face < faces; face++) {
+	BoFaceNode* node = new BoFaceNode(&d->mAllFaces[face]);
+	d->mAllNodes.append(node);
+ }
+}
+
+void BoMeshLOD::generateLOD(BoMeshLOD* data, unsigned int lod)
+{
+ BO_CHECK_NULL_RET(data);
+ boDebug(100) << k_funcinfo << "generate lod=" << lod << endl;
+ boDebug(100) << k_funcinfo << "TODO: implement" << endl;
+}
+
+unsigned int BoMeshLOD::facesCount() const
+{
+ return d->mAllFaces.count();
+}
+
+void BoMeshLOD::setFace(int index, const BoFace& face)
+{
+ d->mAllFaces[index] = face;
+}
+
+const BoFace* BoMeshLOD::face(unsigned int f) const
+{
+ if (f >= facesCount()) {
+	return 0;
+ }
+ return &d->mAllFaces[f];
+}
+
+void BoMeshLOD::setNormal(unsigned int face, int vertex, const BoVector3& normal)
+{
+ if (face >= facesCount()) {
+	boError() << k_funcinfo << "invalid face " << face
+			<< " max=" << facesCount() << endl;
+	return;
+ }
+ if (vertex >= 3) {
+	boError() << k_funcinfo << "vertex must be 0..2  or -1 not " << vertex << endl;
+	vertex = vertex % 3;
+ }
+
+ if (vertex < 0) {
+	d->mAllFaces[face].setAllNormals(normal);
+ } else {
+	d->mAllFaces[face].setNormal(vertex, normal);
+ }
+}
+
+void BoMeshLOD::movePointIndices(int moveBy)
+{
+ for (unsigned int i = 0; i < facesCount(); i++) {
+	BoFace* face = &d->mAllFaces[i];
+	const int* orig = face->pointIndex();
+	int p[3];
+	p[0] = moveBy + orig[0];
+	p[1] = moveBy + orig[1];
+	p[2] = moveBy + orig[2];
+	face->setPointIndex(p);
+ }
+ if (mPointsCache) {
+	// we need to regenerate the cache
+	createPointCache();
+ }
+}
+
+void BoMeshLOD::ensurePointCacheValid(unsigned int min, unsigned int max)
+{
+ if (!mPointsCache) {
+	return;
+ }
+ for (unsigned int i = 0; i < mPointsCacheCount; i++) {
+	if (mPointsCache[i] < min) {
+		boWarning(100) << k_funcinfo << "point cache at "
+				<< i << " is less than " << min
+				<< ": " << mPointsCache[i]
+				<< ". Fixing." << endl;
+		mPointsCache[i] = min;
+	} else if (mPointsCache[i] > max) {
+		boWarning(100) << k_funcinfo << "point cache at "
+				<< i << " is greater than " << max
+				<< ": " << mPointsCache[i]
+				<< ". Fixing." << endl;
+		mPointsCache[i] = max;
+	}
+ }
+}
+
+void BoMeshLOD::disconnectNodes()
+{
+ mType = BoFaceConnector::connectNodes(d->mAllNodes, mNodes);
+}
+void BoMeshLOD::connectNodes()
+{
+ mType = BoFaceConnector::connectNodes(d->mAllNodes, mNodes);
+}
+void BoMeshLOD::addNodes()
+{
+ mType = BoFaceConnector::addNodes(d->mAllNodes, mNodes);
+}
 
 void BoMeshLOD::createPointCache()
 {
@@ -1062,7 +995,7 @@ void BoMeshLOD::createPointCache()
 	boError(100) << k_funcinfo << "NULL node" << endl;
 	return;
  }
- if (mAllFaces.count() < 1) {
+ if (d->mAllFaces.count() < 1) {
 	return;
  }
  int nodesCount = 0;

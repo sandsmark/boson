@@ -206,6 +206,110 @@ private:
 };
 
 
+class BoMeshLODPrivate;
+/**
+ * This class is a collection of all data that depend on the current level of
+ * detail (LOD).
+ *
+ * Note that some values/arrays (such as the point cache) are automatically
+ * generated <em>after</em> the LOD has been generated. This happens for all
+ * meshes and all LODs, so you don't have to worry about this for LOD. But it
+ * also depends on the current LOD, so it is in this class.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshLOD
+{
+public:
+	BoMeshLOD();
+	~BoMeshLOD();
+
+	void createFaces(unsigned int faces);
+
+	/**
+	 * @param data The full-detailed mesh data, i.e. LOD 0.
+	 * @param lod The to-be-generated level of detail.
+	 **/
+	void generateLOD(BoMeshLOD* data, unsigned int lod);
+
+	inline BoFaceNode* nodes() const
+	{
+		return mNodes;
+	}
+	inline int type() const
+	{
+		return mType;
+	}
+	inline unsigned int* pointsCache() const
+	{
+		return mPointsCache;
+	}
+	inline unsigned int pointsCacheCount() const
+	{
+		return mPointsCacheCount;
+	}
+
+	/**
+	 * @return The number of faces/triangles (i.e. nodes) in this mesh. Use
+	 * the constructor to create the correct number.
+	 **/
+	unsigned int facesCount() const;
+
+	void setFace(int index, const BoFace& face);
+	const BoFace* face(unsigned int f) const;
+
+	void setDisplayList(GLuint list)
+	{
+		mDisplayList = list;
+	}
+	inline GLuint displayList() const
+	{
+		return mDisplayList;
+	}
+
+	/**
+	 * @param vertex The vertex in the face this normal applies to. This
+	 * must be 0..2 or -1 for all vertices.
+	 **/
+	void setNormal(unsigned int face, int vertex, const BoVector3& normal);
+
+	/**
+	 * Called by @ref movePoints. This adds @p moveBy to every @ref
+	 * BoFace::pointIndex.
+	 **/
+	void movePointIndices(int moveBy);
+
+	void createPointCache();
+
+	/**
+	 * Ensure that all values in the point cache are valid. After this
+	 * function is done, all entries in the point cache are greate or equal
+	 * @p min and less or equal @p max.
+	 *
+	 * Note the "or equal" for @p max!
+	 **/
+	void ensurePointCacheValid(unsigned int min, unsigned int max);
+
+	void disconnectNodes();
+	void connectNodes();
+	void addNodes();
+
+private:
+	BoMeshLODPrivate* d;
+
+private:
+	BoFaceNode* mNodes;
+	int mType;
+
+	// the list of points in the final order (after connectNodes() or
+	// addNodes() was called). iterating through nodes() is equalivent (for
+	// some modes the BoFaceNode::relevantPoint() will have to be used though)
+	unsigned int* mPointsCache;
+	unsigned int mPointsCacheCount;
+
+	GLuint mDisplayList;
+};
+
+
 class BoMeshPrivate;
 class BoMesh
 {
