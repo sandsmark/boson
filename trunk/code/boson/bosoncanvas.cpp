@@ -1226,7 +1226,7 @@ void BosonCanvas::deleteUnits(QPtrList<Unit>* units)
 		continue;
 	}
 	for (deleteIt.toFirst(); deleteIt.current(); ++deleteIt) {
-		if (u->target() == deleteIt.current()->target()) {
+		if (u->target() == deleteIt.current()) {
 			u->setTarget(0);
 		}
 	}

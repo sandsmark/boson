@@ -1944,6 +1944,7 @@ bool Boson::loadFromFile(const QString& file)
 	return false;
  }
  boDebug(260) << k_funcinfo << "loading " << list.count() << " players" << endl;
+ emit signalLoadingPlayersCount(list.count());
  for (unsigned int i = 0; i < list.count(); i++) {
 	boDebug(260) << k_funcinfo << "creating player " << i << endl;
 	QDomElement player = list.item(i).toElement();
