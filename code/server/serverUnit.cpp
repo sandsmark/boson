@@ -177,8 +177,8 @@ void serverHarvester::getWantedAction(void)
 		server->placeMob(this); // replace it
 
 		/* actual transfer */
-		contain = 0;
 		player[who].changeRessources(0, contain);
+		contain = 0;
 		}
 
 }
