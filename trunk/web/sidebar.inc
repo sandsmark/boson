@@ -118,7 +118,6 @@ echo "
 <font class=\"lastupdatevalue\">$lastupdate GMT</font>.<br></font>";
 
 // Counter
-counter();
 counter2($filename);
 
 echo "
