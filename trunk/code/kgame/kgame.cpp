@@ -1284,10 +1284,18 @@ void KGame::slotServerDisconnected() // Client side
     }
   }
 
+
+  // AB: this might be better after the setMaster() call, as we could make
+  // signalReplacePlayerIO() work only with isAdmin()==true
   for ( player=removeList.first(); player != 0; player=removeList.next() )
   {
-    boDebug(11001) << " ---> Removing player " << player->id() <<  endl;
-    systemRemovePlayer(player,true); // no network necessary
+    bool remove = true;
+    emit signalReplacePlayerIO(player, &remove);
+    if (remove)
+    {
+      boDebug(11001) << " ---> Removing player " << player->id() <<  endl;
+      systemRemovePlayer(player,true); // no network necessary
+    }
   }
 
   setMaster();
@@ -1307,7 +1315,8 @@ void KGame::slotServerDisconnected() // Client side
   for ( player=d->mPlayerList.first(); player != 0; player=d->mPlayerList.next() ) 
   {
     int oldid=player->id();
-    player->setId(KGameMessage::createPlayerId(player->id(),gameId()));
+    d->mUniquePlayerNumber++;
+    player->setId(KGameMessage::createPlayerId(d->mUniquePlayerNumber,gameId()));
     boDebug(11001) << "Player id " << oldid <<" changed to " << player->id() << " as we are now local" << endl;
   }
   // TODO clear inactive lists ?
