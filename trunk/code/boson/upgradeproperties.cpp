@@ -58,12 +58,13 @@ UpgradeProperties::UpgradeProperties(SpeciesTheme* theme)
 
   mResearched = false;
   mId = 0;
-  mName = "";
   mMineralCost = 0;
   mOilCost = 0;
   mProducer = 0;
   mProductionTime = 0;
   mProduceAction = 0;
+  mApplyToFacilities = false;
+  mApplyToMobiles = false;
 }
 
 UpgradeProperties::~UpgradeProperties()
@@ -99,7 +100,7 @@ bool UpgradeProperties::canBeResearched(Player* player)
   return true;
 }
 
-void UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
+bool UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
 {
   boDebug(600) << k_funcinfo << "Loading from group " << group << endl;
 
@@ -111,7 +112,7 @@ void UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
   mId = cfg->readUnsignedLongNumEntry("Id", 0);
   if(mId == 0) {
     boError(600) << k_funcinfo << "Invalid id: 0" << endl;
-    return;
+    return false;
   }
   mName = cfg->readEntry("Name", i18n("unknown"));
   mMineralCost = cfg->readUnsignedLongNumEntry("MineralCost", 0);
@@ -138,6 +139,7 @@ void UpgradeProperties::load(KSimpleConfig* cfg, const QString& group)
   d->mEntryList.remove("Pixmap");
   d->mEntryList.remove("RequireUnits");
   d->mEntryList.remove("RequireTechnologies");
+  return true;
 }
 
 

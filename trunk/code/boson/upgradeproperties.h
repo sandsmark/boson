@@ -54,7 +54,7 @@ class UpgradeProperties
     /**
      * Load upgrade properties
      **/
-    virtual void load(KSimpleConfig* cfg, const QString& group);
+    virtual bool load(KSimpleConfig* cfg, const QString& group);
 
     /**
      * @return Whether it is possible by player to research this upgrade (all
@@ -65,13 +65,13 @@ class UpgradeProperties
     /**
      * @return Whether this upgrade/tech. is already researched
      **/
-     bool isResearched() const { return mResearched; };
+     bool isResearched() const { return mResearched; }
 
     /**
      * Set 'researched' status of this upgrade (whether it's already researched)
      * Use this only in Player class!!!
      **/
-     void setResearched(bool r) { mResearched = r; };
+     void setResearched(bool r) { mResearched = r; }
 
     /**
      * One of the most important methods in this class
@@ -85,31 +85,31 @@ class UpgradeProperties
     /**
      * @return Id of this upgrade
      **/
-    unsigned long int id() const { return mId; };
+    unsigned long int id() const { return mId; }
     /**
      * @return Name of this upgrade
      **/
-    const QString& upgradeName() const { return mName; };
+    const QString& upgradeName() const { return mName; }
     /**
      * @return Mineral cost of this upgrade
      **/
-    unsigned long int mineralCost() const { return mMineralCost; };
+    unsigned long int mineralCost() const { return mMineralCost; }
     /**
      * @return Oil cost of this upgrade
      **/
-    unsigned long int oilCost() const { return mOilCost; };
+    unsigned long int oilCost() const { return mOilCost; }
     /**
      * @return producer of this upgrade. Producer ids are used
      **/
-    unsigned int producer() const { return mProducer; };
+    unsigned int producer() const { return mProducer; }
     /**
      * @return How much time it takes to produce this upgrade
      **/
-    unsigned int productionTime() const { return mProductionTime; };
+    unsigned int productionTime() const { return mProductionTime; }
     /**
      * @return Action to produce this upgrade
      **/
-    BoAction* produceAction() const { return mProduceAction; };
+    BoAction* produceAction() const { return mProduceAction; }
     /**
      * @return List of units required by this upgrade
      **/
