@@ -118,12 +118,12 @@ public:
 	 * @return The unit model for @p unitType. Will <em>not</em> load the
 	 * model - see @ref loadUnitModel
 	 **/
-	BosonModel* unitModel(unsigned long int unitType, const QColor& teamColor) const;
+	BosonModel* unitModel(unsigned long int unitType) const;
 
 	/**
 	 * @return The specified object model with id @name.
 	 **/
-	BosonModel* objectModel(const QString& file, const QColor& teamColor);
+	BosonModel* objectModel(const QString& file) const;
 
 	QPixmap* actionPixmap(UnitAction action) const;
 	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;

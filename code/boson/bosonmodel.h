@@ -111,7 +111,7 @@ public:
 	//the same mesh, but 4 different positions)
 	int meshCount() const { return mMeshCount; }
 
-	void renderFrame();
+	void renderFrame(const QColor* teamColor);
 
 	void mergeMeshes();
 	void sortByDepth();
@@ -168,20 +168,11 @@ public:
 	unsigned int meshCount() const;
 	QIntDict<BoMesh> allMeshes() const;
 
-	/**
-	 * Will use c as color for all meshes of the model with the name
-	 * "teamcolor". Note that this <em>must</em> be called before @ref
-	 * loadModel
-	 **/
-	// AB: WARNING: this is the reason why we have to load every model for
-	// every player, even if they use the same species!
-	void setTeamColor(const QColor& c);
-
 	void loadModel();
 
 	/**
-	 * Cleanup some variables. Deletes e.g. the 3ds file and the teamcolor
-	 * object. Note that you must not call e.g. @ref loadModel or @ref
+	 * Cleanup some variables. Deletes e.g. the 3ds file.
+	 * Note that you must not call e.g. @ref loadModel or @ref
 	 * generateConstructionFrames after this!
 	 *
 	 * You can continue using the generated display lists.
@@ -194,6 +185,16 @@ public:
 	 * constructed.
 	 **/
 	void generateConstructionFrames();
+
+	/**
+	 * Create all display lists for all frames in this model (including the
+	 * construction steps, if any).
+	 *
+	 * This should get called <em>after</em> all other loading methods (e.g.
+	 * @ref generateConstructionFrames) have been called.
+	 **/
+	void createDisplayLists(const QColor* teamColor);
+
 
 	/**
 	 * @return The frame @p frame that resideds in the .3ds file. These are
@@ -282,13 +283,6 @@ protected:
 	void loadTextures(const QStringList& textures);
 
 	/**
-	 * Generate the "normal" display lists, for all frames. This includes
-	 * all nodes of the file. See also @ref generateConstructionFrames, which
-	 * doesn't use all nodes.
-	 **/
-	void createDisplayLists();
-
-	/**
 	 * Most 3ds files use dimensions like 40.0 width or more. We use 1.0 for
 	 * a normal one-cell unit.
 	 *
@@ -350,8 +344,6 @@ private:
 	static BosonModelTextures* mModelTextures;
 
 	Private* d;
-
-	QColor* mTeamColor;
 
 	float mWidth;
 	float mHeight;
