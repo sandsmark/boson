@@ -52,32 +52,45 @@ void Cell::setGround(groundType g)
 	setFlag(known_f);
 }
 
-bool Cell::canGo(mobType type )
+bool Cell::canGo(uint goFlag)
 {
-	if (!isKnown()) return true;
-	uint goFlag = mobileProp[type].goFlag;
+	if (!isKnown()) {
+		printf("unknown cell\n");
+		return true;
+	}
 
 	// ... in the air
-	if (goFlag & BO_GO_AIR) return flying_unit();
+	if (goFlag & BO_GO_AIR) { 
+		printf("flying\n");
+		return flying_unit();
+	}
 
 	// on field
-	if ( building() || field_unit() ) return false;
+	if ( building() || field_unit() ) {
+		printf("building/field_unit\n");
+		return false;
+	}
 
 	//  nothing ? depends on the ground
 	switch(ground) {
 		case g_unknown:
+			printf("unknown cell\n");
 			return true;
 			break;
 		case g_dwater:
+			printf("dwater\n");
 			return goFlag & BO_GO_DEEP_WATER;
 			break;
 		case g_water:
+			printf("water\n");
 			return goFlag & BO_GO_WATER;
 			break;
 		case g_grass:
+			printf("grass\n");
 			return goFlag & BO_GO_GRASS;
 			break;
 		case g_desert:
+			printf("desert\n");
 			return goFlag & BO_GO_DESERT;
 			break;
 	}
