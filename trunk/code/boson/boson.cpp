@@ -43,6 +43,7 @@
 #include "bosonplayerinput.h"
 #include "bosonnetworksynchronizer.h"
 #include "boeventloop.h"
+#include "bosonpath.h"
 
 #include <klocale.h>
 #include <kdeversion.h>
@@ -67,6 +68,7 @@
 Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
+#define COLLECT_UNIT_LOGS
 
 /**
  * Function that checks whether the ComputerIO list is still valid (i.e. players
@@ -290,6 +292,7 @@ public:
 	BosonSaveLoad::LoadingStatus mLoadingStatus;
 
 	QValueList<QByteArray> mGameLogs;
+	QValueList<QByteArray> mUnitLogs;
 	BoMessageLogger mMessageLogger;
 
 	BoAdvance* mAdvance;
@@ -943,6 +946,9 @@ void Boson::slotReceiveAdvance()
  if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
 	makeGameLog();
  }
+#ifdef COLLECT_UNIT_LOGS
+ makeUnitLog();
+#endif
 
  d->mAdvance->receiveAdvanceCall();
 }
@@ -1243,6 +1249,66 @@ void Boson::makeGameLog()
 // boDebug() << k_funcinfo << "Compressed log size: " << comp.size() << endl;
 }
 
+void Boson::makeUnitLog()
+{
+ QByteArray log;
+ QTextStream ts(log, IO_WriteOnly);
+
+ ts << "CYCLE " << advanceCallsCount() << ":" << endl;
+ QPtrListIterator<KPlayer> it(*playerList());
+ while (it.current()) {
+	ts << "Player " << it.current()->id() << endl;;
+	QPtrListIterator<Unit> uit(*((Player*)it.current())->allUnits());
+	while (uit.current()) {
+		Unit* u = uit.current();
+		BosonPathInfo* path = u->pathInfo();
+		// Generic info
+		ts << "Unit " << u->id() << ":  pos(" << u->x() << "; " << u->y() << "; " << u->z() <<
+				"); rot(" << u->xRotation() << "; " << u->yRotation() << "; " << u->rotation() <<
+				"); speed: " << u->speed() << "; maxSpeed: " << u->maxSpeed() <<
+				"); work: " << (int)u->work() << "; advWork: " << (int)u->advanceWork() <<
+				"); movingStatus: " << (int)u->movingStatus() << "; advWork: " << (int)u->advanceWork() <<
+				"; health: " << u->health();
+		// Target
+		if (u->target()) {
+			ts << " target: " << u->target()->id();
+		}
+		ts << endl;
+		// Waypoints
+		ts << "        " << u->waypointCount() << " waypoints:";
+		for (QValueList<QPoint>::const_iterator pit = u->waypointList().begin(); pit != u->waypointList().end(); pit++) {
+			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
+		}
+		ts << endl;
+		// Pathpoints
+		ts << "        " << u->pathPointList().count() << " pathpoints:";
+		for (QValueList<QPoint>::const_iterator pit = u->pathPointList().begin(); pit != u->pathPointList().end(); pit++) {
+			ts << " (" << (*pit).x() << "; " << (*pit).y() << ")";
+		}
+		ts << endl;
+		// PathInfo
+		if (path) {
+			ts << "        " << "PathInfo:  start(" << path->start.x() << "; " << path->start.y() <<
+					"); dest(" << path->dest.x() << "; " << path->dest.y() << "); hlstep: " << path->hlstep <<
+					"; range: " << path->range << "; passable: " << path->passable <<
+					"; canMove(" << path->canMoveOnLand << "; " << path->canMoveOnWater <<
+					"); flying: " << path->flying << "; pass: " << (int)path->passability <<
+					"; attack: " << path->moveAttacking << "; slow: " << path->slowDownAtDest <<
+					"; waiting: " << path->waiting << "; recalc: " << path->pathrecalced << endl;
+		}
+
+		++uit;
+	}
+	ts << endl;
+	++it;
+ }
+ ts << endl;
+ ts << endl;
+
+ QByteArray comp = qCompress(log);
+ d->mUnitLogs.append(comp);
+}
+
 void Boson::writeGameLog(QTextStream& log)
 {
  BosonProfiler p(BosonProfiling::WriteGameLog);
@@ -1290,6 +1356,20 @@ bool Boson::saveGameLogs(const QString& prefix)
 	gameLog.writeBlock(qUncompress(*it));
  }
  gameLog.close();
+
+#ifdef COLLECT_UNIT_LOGS
+ // Write unitlog
+ QFile unitLog(prefix + ".unitlog");
+ if (!unitLog.open(IO_WriteOnly)) {
+	boError() << k_funcinfo << "Can't open output file '" << unitLog.name() << "' for writing unitlog!" << endl;
+	return false;
+ }
+ QValueList<QByteArray>::iterator uit;
+ for (uit = d->mUnitLogs.begin(); uit != d->mUnitLogs.end(); uit++) {
+	unitLog.writeBlock(qUncompress(*uit));
+ }
+ unitLog.close();
+#endif
 
  // Write network message log
  QFile netLog(prefix + ".netlog");

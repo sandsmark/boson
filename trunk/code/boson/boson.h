@@ -207,7 +207,7 @@ public:
 	 * for editor mode.
 	 **/
 	void setGameMode(bool isGame = true) { mGameMode = isGame; }
-	
+
 	/**
 	 * Note: not yet fully supported!
 	 * @return TRUE if we are in game mode or FALSE if we are in editor mode
@@ -496,6 +496,7 @@ protected:
 	 * @ref saveGameLogs).
 	 **/
 	void makeGameLog();
+	void makeUnitLog();
 
 	bool loadFromLogFile();
 
