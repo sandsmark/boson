@@ -1030,7 +1030,7 @@ void Boson::slotReceiveAdvance()
 {
  // Log game state
  if (advanceCallsCount() % boConfig->gameLogInterval() == 0) {
-	makeGameLog();
+	//makeGameLog();
  }
 #ifdef COLLECT_UNIT_LOGS
  makeUnitLog();
