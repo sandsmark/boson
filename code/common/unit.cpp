@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "unit.h"
-#include "../map/map.h"
 
 Unit::Unit(QObject*parent, const char *name)
 	: QObject(parent, name)

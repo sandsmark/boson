@@ -25,7 +25,7 @@
 
 #include "../common/unitType.h"
 #include "../common/msgData.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 
 enum workType {

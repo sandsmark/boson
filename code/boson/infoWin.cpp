@@ -34,7 +34,7 @@
 #include "viewMap.h"
 //#include "fieldMap.h"
 //#include "speciesTheme.h"
-#include "game.h"
+//#include "game.h"
 
 #define VIEW_ONE	1
 #define VIEW_MANY	2

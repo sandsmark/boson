@@ -25,7 +25,7 @@
 
 #include "../common/log.h"
 #include "../common/boconfig.h" // MAX_PLAYERS
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "playerMap.h"
   

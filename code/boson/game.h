@@ -21,7 +21,7 @@
 #ifndef BOSON_GAME_H 
 #define BOSON_GAME_H 
 
-#include "../visual/visual.h"
+#include "visual.h"
 
 
 //class bosonProperties_t : public visualProperties_t {

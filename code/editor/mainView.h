@@ -1,5 +1,5 @@
 /***************************************************************************
-                       boson/editor/mainView.h -  description 
+                       editor/mainView.h -  description 
                              -------------------                                         
 
     version              : $Id$

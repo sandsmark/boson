@@ -40,6 +40,7 @@ private:
     miniMap		*mini;
     fieldMap		*field;
     viewMap		*view;
+/* Window displayer information */
     infoWin		*info;
 };
 

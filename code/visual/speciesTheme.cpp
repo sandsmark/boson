@@ -29,7 +29,7 @@
 
 #include "../common/log.h"
 #include "../common/unit.h"
-#include "../map/map.h"
+#include "../common/map.h"
 
 #include "speciesTheme.h"
 

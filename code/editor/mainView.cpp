@@ -1,5 +1,5 @@
 /***************************************************************************
-                       boson/editor/mainView.cpp -  description 
+                       editor/mainView.cpp -  description 
                              -------------------                                         
 
     version              : $Id$

@@ -22,9 +22,9 @@
 #define BOCONFIG_H 
 
 #define BOSON_VERSION_MAJOR	0
-#define BOSON_VERSION_MINOR	1
+#define BOSON_VERSION_MINOR	2
 #define BOSON_VERSION_PATCH	0
-#define BOSON_VERSION_TEXT	"0.0.1"
+#define BOSON_VERSION_TEXT	"0.2.0"
 #define BOSON_MAGIC		"Orzel"
 #define BOSON_VERSION_MAGIC	"boson/orzel@eagle, 1999"
 #define BOSON_MAGIC_LENGHT	(sizeof(BOSON_MAGIC)/sizeof(char))
