@@ -349,8 +349,7 @@ void TopWidget::showWelcomeWidget()
  if(!d->mWelcome) {
 	initWelcomeWidget();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_WELCOME);
- menuBar()->hide();
+ raiseWidget(ID_WIDGETSTACK_WELCOME);
 }
 
 void TopWidget::initNewGameWidget()
@@ -369,8 +368,7 @@ void TopWidget::showNewGameWidget()
  if(!d->mNewGame) {
 	initNewGameWidget();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_NEWGAME);
- menuBar()->hide();
+ raiseWidget(ID_WIDGETSTACK_NEWGAME);
 }
 
 void TopWidget::initStartEditorWidget()
@@ -391,8 +389,7 @@ void TopWidget::showStartEditorWidget()
  if(!d->mStartEditor) {
 	initStartEditorWidget();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
- menuBar()->hide();
+ raiseWidget(ID_WIDGETSTACK_STARTEDITOR);
 #endif
 }
 
@@ -410,7 +407,7 @@ void TopWidget::showBosonWidget()
  if(!d->mBosonWidget) {
 	initBosonWidget();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
+ raiseWidget(ID_WIDGETSTACK_BOSONWIDGET);
  menuBar()->show();
 }
 
@@ -429,7 +426,7 @@ void TopWidget::showNetworkOptions()
  if(!d->mNetworkOptions) {
 	initNetworkOptions();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_NETWORK);
+ raiseWidget(ID_WIDGETSTACK_NETWORK);
  menuBar()->hide();
 }
 
@@ -447,7 +444,7 @@ void TopWidget::showLoadingWidget()
  if(!d->mLoading) {
 	initLoadingWidget();
  }
- mWs->raiseWidget(ID_WIDGETSTACK_LOADING);
+ raiseWidget(ID_WIDGETSTACK_LOADING);
  menuBar()->hide();
 }
 
@@ -921,3 +918,32 @@ bool TopWidget::queryExit()
  return true;
 }
 
+void TopWidget::raiseWidget(int id)
+{
+ switch (id) {
+	case ID_WIDGETSTACK_WELCOME:
+		setMinimumSize(d->mWelcome->size());
+		setMaximumSize(d->mWelcome->size());
+		menuBar()->hide();
+		break;
+	case ID_WIDGETSTACK_NEWGAME:
+	case ID_WIDGETSTACK_LOADING:
+	case ID_WIDGETSTACK_NETWORK:
+		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+		menuBar()->hide();
+		break;
+	case ID_WIDGETSTACK_BOSONWIDGET:
+#ifndef NO_EDITOR
+	case ID_WIDGETSTACK_STARTEDITOR
+#endif
+		setMinimumSize(BOSON_MINIMUM_WIDTH, BOSON_MINIMUM_HEIGHT);
+		setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+		menuBar()->show();
+		break;
+	default:
+		kdDebug() << k_funcinfo << "unknown id " << id << endl;
+		break;
+ }
+ mWs->raiseWidget(id);
+}

@@ -55,6 +55,8 @@
 
 #define REMOVE_WRECKAGES_TIME 20 // remove wreckages after a certain time
 
+#define BOSON_MINIMUM_WIDTH 640
+#define BOSON_MINIMUM_HEIGHT 480
 
 #define Z_MOBILE 400
 #define Z_FACILITY 300
