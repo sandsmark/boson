@@ -64,10 +64,10 @@ draw_bigbox_text("These requirements apply to the latest stable release
     * KDE 3.1 or better (3.0 is untested) - see <a href=\"http://www.kde.org/\" target=\"_blank\">http://www.kde.org/</a><br>
     * Python 2.0 or better (2.3 is recommended) - see <a href=\"http://www.python.org/\" target=\"_blank\">http://www.python.org/</a><br>
     * kdegames/libkdegames - usually shipped with KDE<br>
-    * kdemultimedia - also shipped with KDE<br>
     * libvorbis (for sound and music) - see <a href=\"http://www.vorbis.com/\" target=\"_blank\">http://www.vorbis.com/</a><br>
     * lib3ds (Units and building rendering) - see <a href=\"http://lib3ds.sf.net/\" target=\"_blank\">http://lib3ds.sf.net/</a><br>
     * OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)<br>
+    * OpenAL (audio library) - see <a href=\"http://www.openal.org/\"target=\"_blank\">http://www.openal.org/</a><br>
     * WML and Perl  - For the handbook - see <a href=\"http://www.thewml.org\" target=\"_blank\">http://www.thewml.org</a><br><br>");
 
 draw_bigbox_subheader("<a name=\"compiler\"></a>Compiler requirements");
