@@ -164,7 +164,7 @@ void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
   // Group must have been set before
   // Save type
   QString shottype;
-  if(mShotType = BosonShot::Bullet)
+  if(mShotType == BosonShot::Bullet)
   {
     shottype == "Bullet";
   }
