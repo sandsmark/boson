@@ -200,7 +200,7 @@ void boFile::load(cell_t &c)
 	*stream >> b;
 	boAssert( b<4);
 
-	c = cell( (groundType)g, b);
+	c = makeCell( (groundType)g, b);
 }
 
 /** write ***/
