@@ -82,9 +82,6 @@ public:
 	QIntDict<playerMobUnit>	mobile;
 	QIntDict<playerFacility> facility;
 
-signals:
-	void reCenterView(int x, int y);
-
 private:
 	Cell	*cells;
 
