@@ -997,7 +997,9 @@ void BosonBigDisplayBase::renderCells()
 
 void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent* e, bool *eatevent)
 {
- GLdouble posX, posY, posZ;
+ GLdouble posX = 0.0;
+ GLdouble posY = 0.0;
+ GLdouble posZ = 0.0;
  if (!mapCoordinates(e->pos(), &posX, &posY, &posZ)) {
 	boError() << k_funcinfo << "Cannot map coordinates" << endl;
 	return;
@@ -1091,7 +1093,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 			}
 		}
 		QPoint widgetPos = mapFromGlobal(QCursor::pos());
-		GLdouble x, y, z;
+		GLdouble x = 0.0, y = 0.0, z = 0.0;
 		mapCoordinates(widgetPos, &x, &y, &z);
 		worldToCanvas(x, y, z, &(d->mCanvasPos));
 		updateCursor();
