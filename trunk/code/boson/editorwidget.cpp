@@ -142,7 +142,7 @@ void EditorWidget::slotChangeCursor(int , const QString& )
  changeCursor(new BosonKDECursor());
 }
 
-void EditorWidget::slotOutOfGame(Player* p)
+void EditorWidget::slotOutOfGame(Player* /*p*/)
 {
 }
 

@@ -210,8 +210,6 @@ void BosonCommandFrame::setSelectedUnit(Unit* unit)
 	boError() << k_funcinfo << "selectedUnit() != unit" << endl;
 	return;
  }
- Player* owner = unit->owner();
-
  if (d->mConstructionProgress->showUnit(unit)) {
 	// still constructing - hide everything except construction progress
 	hidePluginWidgets();
