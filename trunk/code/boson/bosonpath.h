@@ -599,6 +599,8 @@ class BosonPathInfo
     bool canMoveOnLand;
     bool canMoveOnWater;
     bool flying;
+    // This is only for the pathfinder
+    BosonPath2::PassabilityType passability;
 
 
     // Are these ok here???
@@ -615,7 +617,11 @@ class BosonPathInfo
 class BosonPathHighLevelPath
 {
   public:
-    BosonPathHighLevelPath()  { startRegion = 0; destRegion = 0; valid = false; users = 0; }
+    BosonPathHighLevelPath()
+    {
+      startRegion = 0; destRegion = 0; valid = false; users = 0;
+      passability = BosonPath2::NotPassable;
+    }
     // Starting region
     BosonPathRegion* startRegion;
     // Destination region
@@ -626,6 +632,10 @@ class BosonPathHighLevelPath
 
     // Is this path still valid?
     bool valid;
+
+    // Passability of this path. I.e. if it's land, then this path is passable
+    //  for land units
+    BosonPath2::PassabilityType passability;
 
     // This is for reference counting. Once nobody uses the path, it will be
     //  deleted
