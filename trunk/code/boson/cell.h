@@ -188,6 +188,8 @@ public:
 	 **/
 	inline bool isOccupied(Unit* forUnit = 0, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
 
+	inline void willBeOccupiedBy(Unit* unit) { return mItems.willBeOccupiedBy(unit); }; // FIXME: better name?
+
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 

@@ -378,6 +378,9 @@ public:
 	inline Facility* refinery() const;
 	virtual QRect boundingRect() const;
 
+	virtual void clearWaypoints(bool send = false);
+	virtual void waypointDone();
+
 private:
 	// a d pointer is probably not very good here - far too much memory consumption
 	// same apllies to Unit and UnitBase. But it speeds up compiling as we don't

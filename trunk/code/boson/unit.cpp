@@ -710,6 +710,7 @@ public:
 	KGameProperty<unsigned int> mPathRecalculated;
 
 	HarvesterProperties* mHarvesterProperties;
+	bool mTargetCellMarked;
 };
 
 MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
@@ -741,6 +742,7 @@ MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canva
 	d->mHarvesterProperties->mResourcesY.setLocal(0);
  }
  setWork(WorkNone);
+ d->mTargetCellMarked = false;
 }
 
 MobileUnit::~MobileUnit()
@@ -920,6 +922,10 @@ void MobileUnit::advanceMoveCheck()
 		d->mPathRecalculated = d->mPathRecalculated + 1;
 	}
 	return;
+ }
+ else if (! d->mTargetCellMarked) {
+	boCanvas()->cell(currentWaypoint().x() / BO_TILE_SIZE, currentWaypoint().y() / BO_TILE_SIZE)->willBeOccupiedBy(this);
+	d->mTargetCellMarked = true;
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
@@ -1172,6 +1178,18 @@ QRect MobileUnit::boundingRect() const
 	return QCanvasSprite::boundingRect();
  }
  return QRect(x(), y(), BO_TILE_SIZE, BO_TILE_SIZE);
+}
+
+void MobileUnit::clearWaypoints(bool send)
+{
+ Unit::clearWaypoints(send);
+ d->mTargetCellMarked = false;
+}
+
+void MobileUnit::waypointDone()
+{
+ Unit::waypointDone();
+ d->mTargetCellMarked = false;
 }
 
 /////////////////////////////////////////////////

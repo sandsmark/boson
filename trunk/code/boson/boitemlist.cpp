@@ -105,3 +105,7 @@ bool BoItemList::isOccupied(Unit* forUnit, bool includeMoving) const
  return false;
 }
 
+void BoItemList::willBeOccupiedBy(Unit* unit)
+{
+ appendUnit(unit);
+}
