@@ -264,7 +264,6 @@ void Unit::moveTo(const QPoint& pos)
  d->mTarget = 0;
  moveTo(pos.x(), pos.y());
  if (waypointCount() > 0) {
-//	boCanvas()->play(sound(SoundOrderMove));
 	setWork(WorkMove);
 	setAnimated(true);
  }
@@ -405,7 +404,6 @@ void Unit::attackUnit(Unit* target)
 	stopAttacking();
 	return;
  }
-// boCanvas()->play(sound(SoundOrderAttack));
  if (!inRange(target)) {
 	if (!canvas()->allItems().contains(target)) {
 		kdDebug() << "Target seems to be destroyed!" << endl;
