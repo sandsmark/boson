@@ -33,13 +33,10 @@ GLSprite::GLSprite(BosonModel* model, BosonCanvas* canvas)
 
  mIsVisible = false;
 
- mFrame = 0;
-
  mXVelocity = 0.0;
  mYVelocity = 0.0;
 
  mModel = model;
- mDisplayList = 0;
 }
 
 GLSprite::~GLSprite()

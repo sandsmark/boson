@@ -105,24 +105,24 @@ public:
 			setZ(z() + dz);
 		}
 	}
-	void move(float x, float y, float z, int frame)
+	void move(float x, float y, float z, int _frame)
 	{
 		if (isVisible()) {
 			setVisible(false);
 			move(x, y, z);
-			if (frame >= 0 && frame < (int)frameCount()) {
-				mFrame = frame;
+			if (_frame != frame()) {
+				model()->setFrame(_frame);
 			}
 			setVisible(true);
 		} else {
 			move(x, y, z);
-			if (frame >= 0 && frame < (int)frameCount()) {
-				mFrame = frame;
+			if (_frame != frame()) {
+				model()->setFrame(_frame);
 			}
 		}
 	}
 
-	int frame() const { return mFrame; }
+	int frame() const { return model()->frame(); }
 	void setFrame(int frame) { move(x(), y(), z(), frame); }
 	unsigned int frameCount() const { return model() ? model()->frames() : 0; }
 
@@ -149,12 +149,10 @@ private:
 	float mY;
 	float mZ;
 	bool mIsVisible;
-	int mFrame;
 	float mXVelocity;
 	float mYVelocity;
 	GLfloat mVertexPointer[3*4]; // topleft;bottomleft;bottomright;topright
 	BosonModel* mModel;
-	GLuint mDisplayList;
 };
 
 #endif // !NO_OPENGL

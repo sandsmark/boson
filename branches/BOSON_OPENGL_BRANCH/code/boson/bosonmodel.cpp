@@ -140,24 +140,29 @@ void BosonModel::loadTextures()
 
 void BosonModel::createDisplayLists()
 {
- Lib3dsNode* node = m3ds->nodes;
-
  kdDebug() << k_funcinfo << "creating " << m3ds->frames << " lists" << endl;
  GLuint listBase = glGenLists(m3ds->frames); 
  for (int i = 0; i < m3ds->frames; i++) {
 	m3ds->current_frame = i;
 	lib3ds_file_eval(m3ds, m3ds->current_frame);
-	glNewList(listBase + m3ds->current_frame, GL_COMPILE);
+	Lib3dsNode* p = m3ds->nodes;
+	GLuint list = listBase + m3ds->current_frame;
+	glNewList(list, GL_COMPILE);
 		glPushMatrix();
 		glScalef(0.004, 0.004, 0.004); // FIXME
-		for (; node; node = node->next) {
-			renderNode(node);
+		for (; p; p = p->next) {
+			glPushMatrix();
+			Lib3dsObjectData* d = &p->data.object;
+			glMultMatrixf(&p->matrix[0][0]);
+			glTranslatef(-d->pivot[0], -d->pivot[1], -d->pivot[2]);
+			renderNode(p);
+			glPopMatrix();
 		}
 		glPopMatrix();
 	glEndList();
-	mFrames.insert(m3ds->current_frame, listBase + m3ds->current_frame);
+	mFrames.insert(m3ds->current_frame, list);
  }
- mDisplayList = listBase; //AB: FIXME
+ setFrame(frame());
 }
 
 // AB: note that this function was nearly completely copied from the lib3ds
@@ -281,5 +286,6 @@ void BosonModel::setFrame(unsigned int frame)
 	return;
  }
  mFrame = frame;
+ mDisplayList = mFrames[mFrame];
 }
 
