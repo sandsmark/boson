@@ -61,8 +61,9 @@ BOSON_COMMON_SRC = \
 	gameoverdialog.cpp \
 	unitplugins.cpp \
 	bosontexturearray.cpp \
-	bo3dsload.cpp \
 	bosonmodel.cpp \
+	bosonmodelloader.cpp \
+	bo3dsload.cpp \
 	bosonglfont.cpp \
 	bosonglchat.cpp \
 	bosonprofiling.cpp \
