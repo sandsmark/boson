@@ -226,6 +226,10 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
 	BO_NULL_ERROR(selection());
 	return false;
  }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  Unit* resourceUnit = canvas()->findUnitAt(canvasVector);
  if (!resourceUnit) {
 	return false;
@@ -268,6 +272,10 @@ bool BosonBigDisplayInput::actionMoveWithoutAttack(const BoVector3& canvasVector
 	BO_NULL_ERROR(localPlayer());
 	return false;
  }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  localPlayerInput()->moveWithoutAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
@@ -287,6 +295,10 @@ bool BosonBigDisplayInput::actionMoveWithAttack(const BoVector3& canvasVector)
 	BO_NULL_ERROR(selection());
 	return false;
  }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  // AB: note that only x and y are relevant from canvasVector !
  // z is ignored
  localPlayerInput()->moveWithAttack(selection()->allUnits(), (int)canvasVector.x(), (int)canvasVector.y());
@@ -300,6 +312,10 @@ bool BosonBigDisplayInput::actionBuild(const BoVector3& canvasVector)
 {
  if (!localPlayer()) {
 	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
  if (!selection()) {
@@ -343,6 +359,10 @@ bool BosonBigDisplayInput::actionAttack(const BoVector3& canvasVector)
 	BO_NULL_ERROR(localPlayer());
 	return false;
  }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
+	return false;
+ }
  if (!selection()) {
 	BO_NULL_ERROR(selection());
 	return false;
@@ -364,6 +384,10 @@ bool BosonBigDisplayInput::actionDropBomb(const BoVector3& canvasVector)
 {
  if (!localPlayer()) {
 	BO_NULL_ERROR(localPlayer());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
  if (!selection()) {
@@ -388,6 +412,10 @@ bool BosonBigDisplayInput::actionRepair(const BoVector3& canvasVector)
  }
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
  Unit* unit = canvas()->findUnitAt(canvasVector);
@@ -416,6 +444,10 @@ bool BosonBigDisplayInput::actionRefine(const BoVector3& canvasVector)
  }
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
  Unit* unit = canvas()->findUnitAt(canvasVector);
@@ -459,6 +491,10 @@ bool BosonBigDisplayInput::actionFollow(const BoVector3& canvasVector)
  }
  if (!canvas()) {
 	BO_NULL_ERROR(canvas());
+	return false;
+ }
+ if (!localPlayerInput()) {
+	BO_NULL_ERROR(localPlayerInput());
 	return false;
  }
  Unit* unit = canvas()->findUnitAt(canvasVector);
