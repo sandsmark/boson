@@ -299,21 +299,20 @@ void BosonCommandFrame::setOrderButtons(QValueList<int> produceList, Player* own
 	}
  }
  for (unsigned int i = 0; i < produceList.count(); i++) {
+	d->mOrderButton[i]->setUnit(produceList[i], owner);
 	if (unitType > 0) {
 		if (produceList[i] != unitType) {
 			d->mOrderButton[i]->setGrayOut(true);
 		} else {
 			d->mOrderButton[i]->setGrayOut(false);
+			d->mOrderButton[i]->advanceProduction(factory->productionProgress());
 		}
-//		d->mOrderButton[i]->setEnabled(false); // obsolete :-)
 		int count = factory->productionList().contains(produceList[i]);
 		d->mOrderButton[i]->setProductionCount(count);
 	} else {
 		d->mOrderButton[i]->setProductionCount(0);
-		d->mOrderButton[i]->setEnabled(true);
 		d->mOrderButton[i]->setGrayOut(false);
 	}
-	d->mOrderButton[i]->setUnit(produceList[i], owner);
  }
 }
 

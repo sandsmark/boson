@@ -1006,9 +1006,14 @@ void Facility::advanceProduction()
 		kdDebug() << "Cannot find free cell around facility :-(" << endl;
 	} else {
 		d->mProductionState = d->mProductionState + 1;
-		double percentage = (double)(d->mProductionState * 100) / (double)productionTime;
-		owner()->productionAdvanced(this, percentage);
+		owner()->productionAdvanced(this, productionProgress());
 	}
  }
 }
 
+double Facility::productionProgress() const
+{
+ unsigned int productionTime = owner()->unitProperties(currentProduction())->productionTime();
+ double percentage = (double)(d->mProductionState * 100) / (double)productionTime;
+ return percentage;
+}
