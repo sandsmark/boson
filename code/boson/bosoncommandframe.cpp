@@ -48,14 +48,62 @@
 
 #include "bosoncommandframe.moc"
 
+#define UPDATE_TIMEOUT 500
+
+class BoMinerWidget : public QWidget
+{
+public:
+	BoMinerWidget(QWidget* parent) : QWidget(parent)
+	{
+		QHBoxLayout* layout = new QHBoxLayout(this);
+
+		mMinerType = new QLabel(this);
+		layout->addWidget(mMinerType);
+		
+		layout->addStretch(1);
+
+		mProgress = new KGameProgress(this);
+		layout->addWidget(mProgress);
+	}
+
+	~BoMinerWidget()
+	{
+	}
+
+	void setMiner(MobileUnit* miner)
+	{
+		const UnitProperties* prop = miner->unitProperties();
+		if (!prop->canMineMinerals() && !prop->canMineOil()) {
+			return;
+		}
+		if (prop->canMineMinerals()) {
+			mMinerType->setText(i18n("Mineral Filling:"));
+		} else {
+			mMinerType->setText(i18n("Oil Filling:"));
+		}
+
+		unsigned int max = prop->maxResources();
+		unsigned int r = miner->resourcesMined();
+		double p = (double)(r * 100) / (double)max;
+		mProgress->setValue(p);
+	}
+	
+private:
+	QLabel* mMinerType;
+	KGameProgress* mProgress;
+};
+
 class BoConstructionProgress : public QWidget
 {
 public:
 	BoConstructionProgress(QWidget* parent) : QWidget(parent)
 	{
 		QHBoxLayout* layout = new QHBoxLayout(this);
-		QLabel* label = new QLabel(i18n("Construction Progress:"), this);
+		QLabel* label = new QLabel(i18n("Construction:"), this);
 		layout->addWidget(label);
+
+		layout->addStretch(1);
+
 		mProgress = new KGameProgress(this);
 		layout->addWidget(mProgress);
 	}
@@ -154,7 +202,6 @@ void BoOrderWidget::resetLayout()
 	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
  }
  int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
-// d->mOrderLayout->addMultiCellWidget(d->mConstructionProgress, row, row, 0, buttons - 1);
  d->mOrderLayout->setRowStretch(row, 1);
  d->mOrderLayout->activate();
 }
@@ -195,9 +242,7 @@ void BoOrderWidget::setOrderButtons(QValueList<int> produceList, Player* owner, 
 		d->mOrderButton[i]->setProductionCount(0);
 		d->mOrderButton[i]->setGrayOut(false);
 	}
-//	d->mOrderButton[i]->show();
  }
-// show();
 }
 
 void BoOrderWidget::hideOrderButtons()
@@ -341,10 +386,10 @@ public:
 		mUnitView = 0;
 
 		mOwner = 0;
-		mFactory = 0;
-		mFacility = 0; // TODO: merge with mFactory
+		mSelectedUnit = 0;
 
 		mConstructionProgress = 0;
+		mMinerWidget = 0;
 	}
 
 	QVBoxLayout* mTopLayout;
@@ -355,10 +400,12 @@ public:
 	QPtrList<QWidget> mActionWidgets;
 	BoOrderWidget* mOrderWidget;
 	BoConstructionProgress* mConstructionProgress;
+	BoMinerWidget* mMinerWidget;
 
 	Player* mOwner;
-	Unit* mFactory; // the unit that is producing
-	Facility* mFacility;
+
+	// for the action widgets
+	Unit* mSelectedUnit;
 
 
 	QTimer mUpdateTimer;
@@ -407,6 +454,13 @@ BosonCommandFrame::BosonCommandFrame(QWidget* parent, bool editor) : QFrame(pare
  d->mConstructionProgress->hide();
  d->mActionWidgets.append(d->mConstructionProgress);
 
+// the miner display (minerals/oil)
+ d->mMinerWidget = new BoMinerWidget(actionWidget);
+ d->mMinerWidget->setBackgroundOrigin(WindowOrigin);
+ actionLayout->addWidget(d->mMinerWidget);
+ d->mMinerWidget->hide();
+ d->mActionWidgets.append(d->mMinerWidget);
+ 
  actionLayout->addStretch(1);
  setBackgroundOrigin(WindowOrigin);
  show();
@@ -466,25 +520,33 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 	return;
  }
 
+ d->mSelectedUnit = unit;
+
+ const UnitProperties* prop = unit->unitProperties();
  if (unit->isFacility()) {
-	Facility* fac = (Facility*)unit;
+	Facility* fac = (Facility*)d->mSelectedUnit;
 	if (!fac->isConstructionComplete()) {
 		slotShowConstructionProgress(fac);
 		return;
 	}
-	const UnitProperties* prop = unit->unitProperties();
 	if (prop->canProduce()) {
 		QValueList<int> produceList = fac->speciesTheme()->productions(prop->producerList());
 		d->mOrderWidget->setOrderButtons(produceList, owner, (Facility*)unit);
-		d->mFactory = unit;
 		if (fac->hasProduction()) {
-			d->mUpdateTimer.start(500);
+			d->mUpdateTimer.start(UPDATE_TIMEOUT);
 		}
 		d->mOrderWidget->show();
 		return;
 	}
  } else {
-//	d->mOrderWidget->show();
+	MobileUnit* mob = (MobileUnit*)d->mSelectedUnit;
+	if (prop->canMineMinerals() || prop->canMineOil()) {
+		d->mMinerWidget->setMiner(mob);
+		d->mMinerWidget->show();
+		if (!d->mUpdateTimer.isActive()) {
+			d->mUpdateTimer.start(UPDATE_TIMEOUT);
+		}
+	}
 	return;
  }
 }
@@ -492,11 +554,7 @@ void BosonCommandFrame::slotSetAction(Unit* unit)
 void BosonCommandFrame::hideActions()
 {
  d->mUpdateTimer.stop();
- if (d->mFactory) {
-	disconnect(d->mFactory->owner(), 0, this, 0);
- }
- d->mFactory = 0;
- d->mFacility = 0;
+ d->mSelectedUnit = 0;
  d->mOrderWidget->hideOrderButtons();
  QPtrListIterator<QWidget> it(d->mActionWidgets);
  while (it.current()) {
@@ -555,11 +613,11 @@ void BosonCommandFrame::setLocalPlayer(Player* p)
 
 void BosonCommandFrame::slotProduceUnit(int unitType)
 {
- emit signalProduceUnit(unitType, d->mFactory, d->mOwner);
+ emit signalProduceUnit(unitType, (UnitBase*)d->mSelectedUnit, d->mOwner);
 }
 void BosonCommandFrame::slotStopProduction(int unitType)
 {
- emit signalStopProduction(unitType, d->mFactory, d->mOwner);
+ emit signalStopProduction(unitType, (UnitBase*)d->mSelectedUnit, d->mOwner);
 }
 
 void BosonCommandFrame::slotShowUnit(Unit* unit)
@@ -574,7 +632,7 @@ void BosonCommandFrame::slotFacilityProduces(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- if (d->mFactory == f) {
+ if (((Facility*)d->mSelectedUnit) == f) {
 	slotSetAction(f);
  }
 }
@@ -585,7 +643,7 @@ void BosonCommandFrame::slotProductionCompleted(Facility* f)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- if (d->mFactory == f) {
+ if (((Facility*)d->mSelectedUnit) == f) {
 	slotSetAction(f);
  }
 }
@@ -596,9 +654,8 @@ void BosonCommandFrame::slotShowConstructionProgress(Facility* fac)
 	kdError() << k_funcinfo << "NULL facility" << endl;
 	return;
  }
- d->mFacility = fac;
  d->mConstructionProgress->show();
- d->mConstructionProgress->setValue(d->mFacility->constructionProgress());
+ d->mConstructionProgress->setValue(((Facility*)d->mSelectedUnit)->constructionProgress());
  d->mUpdateTimer.start(1000);
 }
 
@@ -609,20 +666,37 @@ void BosonCommandFrame::slotSetButtonsPerRow(int b)
 
 void BosonCommandFrame::slotUpdate()
 {
- if (d->mFacility) {
-	slotShowConstructionProgress(d->mFacility);
-	if (d->mFacility->isConstructionComplete()) {
-		slotSetAction(d->mFacility);
-	}
- } else if (d->mFactory) {
-	if (!((Facility*)d->mFactory)->hasProduction()) {
-		slotProductionCompleted((Facility*)d->mFactory);
-	} else {
-		d->mOrderWidget->productionAdvanced(d->mFactory, 
-				((Facility*)d->mFactory)->productionProgress());
-	}
- } else {
+ if (!d->mSelectedUnit) {
 	d->mUpdateTimer.stop();
+	return;
+ }
+ bool used = false;
+ if (!d->mConstructionProgress->isHidden()) {
+	slotShowConstructionProgress((Facility*)d->mSelectedUnit);
+	if (((Facility*)d->mSelectedUnit)->isConstructionComplete()) {
+		slotSetAction(d->mSelectedUnit);
+	} else {
+		used = true;
+	}
+ }
+ if (!d->mOrderWidget->isHidden()) {
+	if (!((Facility*)d->mSelectedUnit)->hasProduction()) {
+		slotProductionCompleted((Facility*)d->mSelectedUnit);
+	} else {
+		d->mOrderWidget->productionAdvanced(d->mSelectedUnit, 
+				((Facility*)d->mSelectedUnit)->productionProgress());
+		used = true;
+	}
+ }
+ if (!d->mMinerWidget->isHidden()) {
+	if (d->mSelectedUnit->work() == Unit::WorkMine) {
+		used = true;
+	}
+	d->mMinerWidget->setMiner((MobileUnit*)d->mSelectedUnit);
+ }
+ if (!used) {
+	d->mUpdateTimer.stop();
+	return;
  }
 }
 
