@@ -33,6 +33,7 @@ class BosonModelLoaderData;
 template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
+class BoMeshRendererModelData;
 
 /**
  * This class represents the Frame* entries in the index.unit files. Here you
@@ -287,6 +288,29 @@ public:
 	QString file() const;
 
 	/**
+	 * @return A pointer to the points (vertices and texture coordinates)
+	 * for this model. You must call @ref mergeArraysbefore you can use
+	 * this.
+	**/
+	float* pointArray() const;
+
+	/**
+	 * @return The number of points in @ref pointArray
+	 **/
+	unsigned int pointArraySize() const;
+
+	/**
+	 * Called before the very first model in a set of models is rendered.
+	 * See @ref BoMeshRenderer::startModelRendering
+	 **/
+	static void startModelRendering();
+
+	/**
+	 * See @ref BoMeshRenderer::stopModelRendering
+	 **/
+	static void stopModelRendering();
+
+	/**
 	 * Prepare this model for being rendered next. This must be called once
 	 * before rendering anything (frame, mesh, ..) in this model.
 	 *
@@ -307,14 +331,31 @@ public:
 	unsigned int preferredLod(float distanceFromCamera) const;
 
 	/**
-	 * @return Whether VBOs (vertex buffer objects) should be used for rendering
-	 */
-	static bool useVBO();
-	/**
-	 * Set whether VBOs should be used for rendering.
-	 * This should be called _only when initing_ from BosonBigDisplayBase.
+	 * @return The @ref BoMeshRenderer specific data of the model for the
+	 * current renderer. Such data may e.g. be display lists, vertex buffers,
+	 * ...
 	 **/
-	static void setUseVBO(bool use);
+	inline BoMeshRendererModelData* meshRendererModelData() const
+	{
+		return mMeshRendererModelData;
+	}
+
+	void setMeshRendererModelData(BoMeshRendererModelData* data);
+
+	/**
+	 * Note that this will return useful values only once the model has been
+	 * loaded completely!
+	 * @return The vertex at @p v. @p v is the index in the model array,
+	 * just like it is used in @ref BoFace::pointIndex. Note that in
+	 * @ref BoMes::vertex the indices are local to the mesh!
+	 **/
+	BoVector3 vertex(unsigned int v) const;
+
+	/**
+	 * @return The texel at @p t. Note that @p t is treated the same way as
+	 * in @ref vertex!
+	 **/
+	BoVector3 texel(unsigned int t) const;
 
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
@@ -396,9 +437,32 @@ private:
 
 	float mWidth;
 	float mHeight;
-	static bool mUseVBO;
+	BoMeshRendererModelData* mMeshRendererModelData;
+	static bool mUseVBO; // obsolete
 };
 
+/**
+ * This class stores data that is used by the current meshrenderer only. See
+ * @ref BoMeshRenderer for information on the meshrenderer.
+ *
+ * A derived class can contain any data that you like/need (including but not
+ * limited to point arrays, vertex buffer objects, ...). It is created and
+ * initialized in @ref BoMeshRenderer::initModelData.
+ *
+ * The default implementation does not store anything.
+ *
+ * A data object can be retrieved from a @ref BosonModel using @ref
+ * BosonModel::meshRendererModelData.
+ * @short A simple data storage class for @ref BosonModel and @ref
+ * BoMeshRenderer
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
+class BoMeshRendererModelData
+{
+public:
+	BoMeshRendererModelData() {}
+	virtual ~BoMeshRendererModelData() {}
+};
 
 #endif
 
