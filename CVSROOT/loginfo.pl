@@ -39,8 +39,13 @@ while(<>) {
 #        next if /(^Update of .home.kde.*|^In directory cvs.*)/; 
 
 	if( $beforelogmsg == 0 && /^CCMAIL:/ ) {
-		$ccrecipients = "\nCc: ".substr( $_, 7, -1);
-		next
+		my $email = substr( $_, 7, -1);
+		if (length($ccrecipients)) {
+			$ccrecipients .= ", ".$email
+		} 
+		else {
+			$ccrecipients = "\nCc: ".$email
+		}
 	}
 
 	if( /CVS.?SILENT/ ) {
