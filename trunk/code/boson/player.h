@@ -27,6 +27,7 @@ class QCanvasPixmapArray;
 class Unit;
 class SpeciesTheme;
 class UnitProperties;
+class BosonMap;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -73,10 +74,18 @@ public:
 	 **/
 	const UnitProperties* unitProperties(int unitType) const;
 
+	void fog(int x, int y);
+	void unfog(int x, int y);
+
+	void initMap(BosonMap* map);
+
 signals:
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
 	void signalUnitChanged(Unit* unit);
+
+	void signalFog(int x, int y);
+	void signalUnfog(int x, int y);
 
 public slots:
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);

@@ -68,8 +68,6 @@ public:
 	void setMap(BosonMap* map);
 	BosonMap* map() const;
 
-	void setLocalPlayer(Player*);
-	
 	/**
 	 * @param tileFile currently always "earth.png
 	 **/
@@ -104,6 +102,9 @@ public:
 	Cell* cellAt(double x, double y) const;
 	Cell* cell(int x, int y) const;
 
+	void fogLocal(int x, int y);
+	void unfogLocal(int x, int y);
+
 public slots:
 	/**
 	 * The game (@ref Boson) reports that a unit shall be added - lets do
@@ -118,8 +119,6 @@ public slots:
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
-	void signalUnfog(int x, int y);
-	void signalFog(int x, int y);
 
 protected:
 	void loadTiles(const QString&);
