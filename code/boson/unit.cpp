@@ -158,6 +158,12 @@ Unit::~Unit()
 	delete *it;
  }
  delete[] d->mWeapons;
+#ifdef PATHFINDER_TNG
+ if(pathInfo()->hlpath) {
+	canvas()->pathfinder()->releaseHighLevelPath(pathInfo()->hlpath);
+	pathInfo()->hlpath = 0;
+ }
+#endif
  delete d;
 }
 
