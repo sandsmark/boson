@@ -20,6 +20,7 @@
 #define BOSONCONFIG_H
 
 #include <qstring.h>
+#include <qcolor.h>
 
 #include "global.h"
 
@@ -68,6 +69,12 @@ public:
 
 	static QString readLocalPlayerName(KConfig* conf = 0);
 	static void saveLocalPlayerName(const QString& name, KConfig* conf = 0);
+
+	static QString readComputerPlayerName(KConfig* conf = 0);
+	static void saveComputerPlayerName(const QString& name, KConfig* conf = 0);
+
+	static QColor readLocalPlayerColor(KConfig* conf = 0);
+	static void saveLocalPlayerColor(const QColor& color, KConfig* conf = 0);
 
 	static void saveGameSpeed(int speed, KConfig* conf = 0);
 	static int readGameSpeed(KConfig* conf = 0);

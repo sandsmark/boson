@@ -98,6 +98,52 @@ void BosonConfig::saveLocalPlayerName(const QString& name, KConfig* conf)
  conf->setGroup(oldGroup);
 }
 
+QString BosonConfig::readComputerPlayerName(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ QString name = conf->readEntry("ComputerPlayer", i18n("Computer"));
+ conf->setGroup(oldGroup);
+ return name;
+}
+
+void BosonConfig::saveComputerPlayerName(const QString& name, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("ComputerPlayer", name);
+ conf->setGroup(oldGroup);
+}
+
+QColor BosonConfig::readLocalPlayerColor(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ QColor color = conf->readColorEntry("LocalPlayerColor", &Qt::red);
+ conf->setGroup(oldGroup);
+ return color;
+}
+
+void BosonConfig::saveLocalPlayerColor(const QColor& color, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("LocalPlayerColor", color);
+ conf->setGroup(oldGroup);
+}
+
 void BosonConfig::saveGameSpeed(int speed, KConfig* conf)
 {
  if (!conf) {
