@@ -191,21 +191,6 @@ public:
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
-	/**
-	 * @return Radius of the bounding sphere of this cell
-	 * It is precalculated and cached here for better performance.
-	 * It's meant to be used in drawing code (OpenGL) only
-	 **/
-	inline float boundingSphereRadius() const { return mRadius; }
-	void setBoundingSphereRadius(float r) { mRadius = r; }
-
-	/**
-	 * @return Average height of this cell
-	 * Also cached here and used in OpenGL code (see above)
-	 **/
-	inline float averageHeight() const { return mZ; }
-	void setAverageHeight(float h) { mZ = h; }
-
 protected:
 	void setVersion(unsigned char v)
 	{
@@ -221,9 +206,6 @@ private:
 	int mY;
 
 	BoItemList mItems;
-
-	float mRadius;
-	float mZ;  // Average height (z-coordinate) of the cell
 };
 
 #endif

@@ -28,8 +28,6 @@ Cell::Cell()
  setGroundType(GroundUnknown);
  mX = 0;
  mY = 0;
- mRadius = 0;
- mZ = 0;
 }
 
 Cell::~Cell()

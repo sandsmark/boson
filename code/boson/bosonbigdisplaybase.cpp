@@ -1757,7 +1757,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 			delta *= 1; // no effect, btw
 		}
 		camera()->changeZ(delta);
-		z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + CAMERA_MIN_Z) {
 			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
 		}
@@ -1794,7 +1794,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 	if (buttonState & LEFT_BUTTON) {
 		d->mMouseMoveDiff.startZoom();
 		camera()->changeZ(d->mMouseMoveDiff.dy());
-		float z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + CAMERA_MIN_Z) {
 			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
 		}
@@ -1841,7 +1841,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		// FIXME: we must also change camera's z-coordinate here to ensure that no
 		//  cells go through near clip.
 		camera()->moveLookAtBy(dx, dy, 0);
-		float z = canvas()->cell((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()))->averageHeight();
+		float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
 		if (camera()->z() < z + CAMERA_MIN_Z) {
 			camera()->changeZ(z + CAMERA_MIN_Z - camera()->z());
 		}
@@ -2538,6 +2538,7 @@ void BosonBigDisplayBase::generateCellList()
 	// we construct the display before the map is received
 	return;
  }
+ BosonProfiler p(50);
  BosonMap* map = mCanvas->map();
  if (!map) {
 	boError() << k_funcinfo << "NULL map" << endl;
@@ -2594,16 +2595,31 @@ void BosonBigDisplayBase::generateCellList()
  // slow.
 
  int count = 0;
+ Cell* c;
+ GLfloat glX, glY, minz, maxz, z;
  for (int x = cellMinX; x <= cellMaxX; x++) {
 	for (int y = cellMinY; y <= cellMaxY; y++) {
 		// WARNING: x,y MUST be valid!!! there is *no* additional check
 		// here!
-		Cell* c = &allCells[map->cellArrayPos(x, y)];
-		
-		GLfloat glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
-		GLfloat glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
+		c = &allCells[map->cellArrayPos(x, y)];
 
-		if (sphereInFrustum(BoVector3(glX, glY, c->averageHeight()), c->boundingSphereRadius())) {
+		glX = (float)c->x() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2;
+		glY = -((float)c->y() * BO_GL_CELL_SIZE + BO_GL_CELL_SIZE / 2);
+
+		// Calculate average height and radius of bounding sphere of the cell
+		// Reset variables
+		minz = 1000;
+		maxz = -1000;
+
+		for (int i = x; i <= x + 1; i++) {
+			for (int j = y; j <= y + 1; j++) {
+				minz = QMIN(minz, map->heightAtCorner(i, j));
+				maxz = QMAX(maxz, map->heightAtCorner(i, j));
+			}
+		}
+		z = (maxz - minz) / 2;
+
+		if (sphereInFrustum(BoVector3(glX, glY, (minz + maxz) / 2), sqrt(2 * (BO_GL_CELL_SIZE/2) * (BO_GL_CELL_SIZE/2) + z * z))) {
 			// AB: instead of storing the cell here we should store
 			// cell coordinates and create a vertex array with that
 			d->mRenderCells[count] = c;

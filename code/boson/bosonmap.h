@@ -186,6 +186,8 @@ public:
 	float heightAtCorner(int x, int y) const;
 	void setHeightAtCorner(int x, int y, float height);
 
+	float cellAverageHeight(int x, int y);
+
 public slots:
 	void slotChangeCell(int x, int y, int groundType, unsigned char b);
 
@@ -247,12 +249,6 @@ protected:
 
 	static float pixelToHeight(int p);
 	static int heightToPixel(float height);
-
-	/**
-	 * Recalculates cell's bounding sphere radius and it's average height
-	 **/
-	void recalculateCellValues(int x, int y);
-
 
 protected slots:
 	/**
