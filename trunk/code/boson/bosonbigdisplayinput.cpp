@@ -617,7 +617,7 @@ bool BosonBigDisplayInput::selectAll(const UnitProperties* prop, bool replace)
 	// double-clicked. it makes no sense for facilities
 	return false;
  }
- QPtrList<Unit> allUnits = localPlayer()->allUnits();
+ QPtrList<Unit> allUnits = *(localPlayer()->allUnits());
  QPtrList<Unit> list;
  QPtrListIterator<Unit> it(allUnits);
  while (it.current()) {

@@ -430,8 +430,7 @@ void HarvesterPlugin::advanceRefine()
 	return;
  }
  if (!refinery()) {
-	QPtrList<Unit> list = player()->allUnits();
-	QPtrListIterator<Unit> it(list);
+	QPtrListIterator<Unit> it(*(player()->allUnits()));
 	const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
 	if (!prop) {
 		boError() << k_funcinfo << "NULL harvester plugin" << endl;

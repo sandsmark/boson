@@ -86,7 +86,7 @@ public:
 	 * @return <em>All</em> units of this player. Please don't use this as
 	 * it is very unclean. This is meant for KGameUnitDebug only.
 	 **/
-	QPtrList<Unit> allUnits() const;
+	QPtrList<Unit>* allUnits() const;
 
 	/**
 	 * Convenience method for theme()->unitProperties()

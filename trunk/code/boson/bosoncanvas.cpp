@@ -722,8 +722,8 @@ bool BosonCanvas::cellsOccupied(const QRect& rect) const
 
 void BosonCanvas::killPlayer(Player* player)
 {
- while (player->allUnits().count() > 0) {
-	destroyUnit(player->allUnits().first());
+ while (player->allUnits()->count() > 0) {
+	destroyUnit(player->allUnits()->first());
  }
  player->setMinerals(0);
  player->setOil(0);

@@ -402,9 +402,9 @@ bool Player::loadUnits(QDataStream& stream)
  return true;
 }
 
-QPtrList<Unit> Player::allUnits() const
+QPtrList<Unit>* Player::allUnits() const
 {
- return d->mUnits;
+ return &(d->mUnits);
 }
 
 const UnitProperties* Player::unitProperties(unsigned long int unitType) const
@@ -667,6 +667,7 @@ void Player::technologyResearched(ProductionPlugin*, unsigned long int id)
 	}
  }
  ((Boson*)game())->slotUpdateProductionOptions();
+ // TODO: also update unit view
 }
 
 bool Player::advanceFlag() const
