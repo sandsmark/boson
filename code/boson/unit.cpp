@@ -1134,6 +1134,18 @@ void MobileUnit::setRefinery(Facility* refinery)
  }
 }
 
+QRect MobileUnit::boundingRect() const
+{
+// FIXME: workaround for pathfinding which does not yet support units with size
+// > BO_TILE_SIZE
+// we simply return a boundingrect which has size BO_TILE_SIZE
+ if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
+	kdWarning() << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
+	return QCanvasSprite::boundingRect();
+ }
+ return QRect((int)x() + (width() - BO_TILE_SIZE) / 2, (int)y() + (height() - BO_TILE_SIZE) / 2, BO_TILE_SIZE, BO_TILE_SIZE);
+}
+
 /////////////////////////////////////////////////
 // Facility
 /////////////////////////////////////////////////

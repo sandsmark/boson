@@ -21,6 +21,9 @@ Game TODOs
 - mine/harvest minerals/oil is only at an experimantal state
 - oil towers: they should be placed on an oil field. oil tankers go to the
   towers and receive the oil from them, which they take to the refinery
+- dont refine resources if refinery is still constructed
+- pathfinding doesn't support units with size > BO_TILE_SIZE. get rid of
+  MobileUnit::boundingRect() hack
 
 
 Editor (map, unit, scenario) TODOs
