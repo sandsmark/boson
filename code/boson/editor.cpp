@@ -88,6 +88,7 @@ int main(int argc, char **argv)
 	KCmdLineArgs *args = KCmdLineArgs::parsedArgs();
 	Editor *widget = new Editor;
 
+	bool showMaximized = true;
 	if (showMaximized) {
 		widget->showMaximized();
 	} else {
