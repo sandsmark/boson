@@ -631,3 +631,27 @@ bool BosonBigDisplay::selectAll(const UnitProperties* prop, bool replace)
  return false;
 }
 
+BosonBigDisplayBase::PlacementPreview BosonBigDisplay::placementPreview() const
+{
+ BosonBigDisplayBase::PlacementPreview p;
+ p.draw = false;
+ Unit* factory = selection()->leader();
+ if (factory) {
+	ProductionPlugin* production = (ProductionPlugin*)(factory->plugin(UnitPlugin::Production));
+	if (production && production->completedProductionId() > 0 && production->completedProductionType() == ProduceUnit) {
+		// We have completed production
+		const UnitProperties* u = localPlayer()->unitProperties(production->currentProductionId());
+		if (u->isFacility()) {
+			// Mobiles are auto-placed, no preview is needed for them
+			p.w = u->unitWidth() / (float)BO_TILE_SIZE;
+			p.h = u->unitHeight() / (float)BO_TILE_SIZE;
+			QPoint pos(cursorCanvasPos() / BO_TILE_SIZE);
+			p.x = pos.x();
+			p.y = pos.y();
+			p.canPlace = (canvas())->canPlaceUnitAt(u, pos, production);
+			p.draw = true;
+		}
+	}
+ }
+ return p;
+}
