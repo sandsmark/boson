@@ -740,9 +740,7 @@ BoItemList Unit::unitsInRange(BosonWeapon* w) const
  int n = 0;
  for (int i = left; i <= right; i++) { 
 	for (int j = top; j <= bottom; j++) {
-///		if (!owner()->isFogged(i, j)) {
-			cells[n++] = QPoint(i, j);
-//		}
+		cells[n++] = QPoint(i, j);
 	}
  }
 
@@ -754,7 +752,11 @@ BoItemList Unit::unitsInRange(BosonWeapon* w) const
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
 	}
-	if (((Unit*)(*it))->isDestroyed()) {
+	Unit* u = (Unit*)(*it);
+	if (u->isDestroyed()) {
+		continue;
+	}
+	if (owner()->isFogged(u->x() / BO_TILE_SIZE, u->y() / BO_TILE_SIZE)) {
 		continue;
 	}
 	// TODO: remove the items from inRange which are not actually in range (hint:

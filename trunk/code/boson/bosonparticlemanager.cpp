@@ -315,7 +315,7 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   }
   mRate = (float)(cfg->readDoubleNumEntry("Rate", 0));
   mSize = (float)(cfg->readDoubleNumEntry("Size", 1));
-  mAge = (float)(cfg->readDoubleNumEntry("Age", 0));
+  mAge = (float)(cfg->readDoubleNumEntry("SystemLife", 0));
   mAlign = cfg->readBoolEntry("Align", true);
   mTextureName = cfg->readEntry("Texture", "default.png");
   addTexture(mTextureName);
