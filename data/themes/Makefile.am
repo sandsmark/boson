@@ -1,4 +1,4 @@
-SUBDIRS = species grounds
+SUBDIRS = species grounds ui
 
 misc_DATA = fow.xpm
 miscdir = $(kde_datadir)/boson/themes
