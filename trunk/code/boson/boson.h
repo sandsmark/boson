@@ -273,13 +273,6 @@ public:
 
 
 	/**
-	 * Init the fog of war. This must not be called anymore, once a game is
-	 * started, therefore it is allowed from a @ref BosonStarting object
-	 * only.
-	 **/
-	void initFogOfWar(BosonStarting*);
-
-	/**
 	 * Start the scenario. This must not be called anymore, once a game is
 	 * started, therefore it is allowed from a @ref BosonStarting object
 	 * only.
