@@ -71,7 +71,7 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <ul>
     <li>Use vertex arrays and vertex buffer objects by default if possible,
     increases speed by a few FPS</li>
-    <li>First steps for transparent textures (transparent surfaces support)</li>
+    <li>First steps for transparent textures (transparent surfaces support), doesn't work yet</li>
     <li>New effects system which replaces particle systems. At the moment this is an
     internal change only</li>
     <li>Units are correctly rotated, depending on the slope of the terrain that
@@ -82,13 +82,12 @@ draw_bigbox_text("What has been changed since 0.9.1:
  <h3>Game</h3>
  <ul>
     <li>OpenGL minimap</li>
+    <li>Support for harvesting</li>
     <li>New pathfinding code</li>
     <li>Special pathfinding code for flying units</li>
     <li>The game starts only once all clients have loaded their game data</li>
     <li>Neutral player and species has been added. You cannot play this, it is
     meant for civilian units or things like trees and so on</li>
-    <li>Support for oil harvesting. Mineral harvesting is not yet supported due to
-    the lack of a mineral mine model</li>
     <li>Oil tower is a neutral unit now</li>
     <li>Day/night support, the default AI script now triggers day/night changes</li>
     <li>Flying units can't fly on unpassable cells (slope > 45 degrees)</li>
