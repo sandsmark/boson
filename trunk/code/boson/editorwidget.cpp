@@ -149,9 +149,8 @@ void EditorWidget::slotOutOfGame(Player* p)
 void EditorWidget::initKActions()
 {
  BosonWidgetBase::initKActions();
- (void)new KAction(i18n("Save &PlayField as..."), KShortcut(), this,
-		SLOT(slotSavePlayFieldAs()), actionCollection(),
-		"file_save_playfield_as");
+// KStdAction::save(this, SLOT(slotSavePlayField()), actionCollection(), "file_save_playfield");
+ KStdAction::saveAs(this, SLOT(slotSavePlayFieldAs()), actionCollection(), "file_save_playfield_as");
 
  d->mPlayerAction = new KSelectAction(i18n("&Player"), KShortcut(), actionCollection(), "editor_player");
  connect(d->mPlayerAction, SIGNAL(activated(int)),
@@ -206,8 +205,15 @@ void EditorWidget::slotSavePlayFieldAs()
  if (fileName == QString::null) {
 	return;
  }
- if (QFileInfo(fileName).extension().isEmpty()) {
+ QFileInfo info(fileName);
+ if (info.extension().isEmpty()) {
 	fileName += ".bpf";
+ }
+ if (info.exists()) {
+	int r = KMessageBox::warningContinueCancel(this, i18n("The file \"%1\" already exists. Are you sure you want to overwrite it?").arg(info.fileName()), i18n("Overwrite File?"));
+	if (r != KMessageBox::Yes) {
+		return;
+	}
  }
  savePlayField(fileName);
 }
