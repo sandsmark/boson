@@ -43,6 +43,7 @@
 #include "optionsdialog.h"
 #include "boaction.h"
 #include "bosonlocalplayerinput.h"
+#include "bosoncomputerio.h"
 #include "commandframe/bosoncommandframebase.h"
 #include "sound/bosonaudiointerface.h"
 #include "script/bosonscript.h"
@@ -87,6 +88,8 @@ public:
 
 		mChat = 0;
 		mChatDock = 0;
+
+		mScript = 0;
 	}
 
 	BosonCommandFrameBase* mCommandFrame;
@@ -103,6 +106,8 @@ public:
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
 	bool mInitialized;
+
+	BosonScript* mScript;
 };
 
 BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
@@ -111,7 +116,6 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
  d = new BosonWidgetBasePrivate;
  d->mInitialized = false;
  mTop = top;
- BosonScript::newScriptParser(BosonScript::Python);
 
  mMiniMap = 0;
  mDisplayManager = 0;
@@ -137,8 +141,6 @@ BosonWidgetBase::~BosonWidgetBase()
  delete d->mChatDock;
 
  delete mCursor;
-
- BosonScript::deleteBosonScript();
 
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
@@ -194,7 +196,8 @@ void BosonWidgetBase::init()
 
  initPlayersMenu();
 
- boScript->setCanvas(canvas());
+ BosonScript::setCanvas(canvas());
+ BosonScript::setGame(boGame);
 }
 
 void BosonWidgetBase::initMap()
@@ -324,8 +327,6 @@ void BosonWidgetBase::initPlayer()
 
  setLocalPlayerRecursively(localPlayer());
 
- boScript->setPlayer(localPlayer());
-
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
 
@@ -362,8 +363,8 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 
  initLayout();
  startScenarioAndGame();
- boScript->loadScript(locate("data", "boson/scripts/boson-script.py"));
- boScript->init();
+
+ initScripts();
 }
 
 void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
@@ -1187,10 +1188,29 @@ void BosonWidgetBase::slotSetDebugFPS(bool debug)
 
 void BosonWidgetBase::slotRunScriptLine(const QString& line)
 {
- boScript->execLine(line);
+ d->mScript->execLine(line);
 }
 
 void BosonWidgetBase::slotAdvance(unsigned int, bool)
 {
- boScript->advance();
 }
+
+void BosonWidgetBase::initScripts()
+{
+ // Init computer player scripts
+ QPtrListIterator<KPlayer> it(*boGame->playerList());
+ for (; it.current(); ++it) {
+	QPtrListIterator<KGameIO> ioit(*it.current()->ioList());
+	for (; ioit.current(); ++ioit) {
+		if (ioit.current()->rtti() == KGameIO::ComputerIO) {
+			BosonComputerIO* io = (BosonComputerIO*)ioit.current();
+			io->initScript();
+		}
+	}
+ }
+
+ // Init script for local player
+ d->mScript = BosonScript::newScriptParser(BosonScript::Python, localPlayer());
+ // No script will be loaded
+}
+

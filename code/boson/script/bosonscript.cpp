@@ -40,74 +40,59 @@
 #include <qpoint.h>
 
 
-BosonScript* BosonScript::mScript = 0;
+BosonBigDisplayBase* BosonScript::mDisplay = 0;
+BosonCanvas* BosonScript::mCanvas = 0;
+Boson* BosonScript::mGame = 0;
 
-
-BosonScript* BosonScript::newScriptParser(Language lang)
+BosonScript* BosonScript::newScriptParser(Language lang, Player* p)
 {
   boDebug() << k_funcinfo << endl;
-  if(mScript)
-  {
-    boError() << k_funcinfo << "script already created" << endl;
-    return mScript;
-  }
   BosonScript* s = 0;
   if(lang == Python)
   {
-    s = new PythonScript();
+    s = new PythonScript(p);
   }
   else
   {
     boDebug() << k_funcinfo << "Invalid script language: " << lang << endl;
     s = 0;
   }
-  mScript = s;
   return s;
 }
 
-BosonScript::BosonScript()
+BosonScript::BosonScript(Player* p)
 {
   boDebug() << k_funcinfo << endl;
-  mDisplay = 0;
-  mPlayer = 0;
-  mCanvas = 0;
+  mPlayer = p;
 }
 
 BosonScript::~BosonScript()
 {
   boDebug() << k_funcinfo << endl;
-  mScript = 0;
 }
 
-void BosonScript::deleteBosonScript()
+void BosonScript::sendInput(int playerId, QDataStream& stream)
 {
- delete mScript;
- mScript = 0;
-}
+  boDebug() << k_funcinfo << "PlayerID: " << playerId << endl;
 
-void BosonScript::sendInput(QDataStream& stream)
-{
-  if(!player())
+  if(!game())
   {
-    boError() << k_funcinfo << "Player not set!" << endl;
+    boError() << k_funcinfo << "NULL game" << endl;
     return;
   }
 
-  player()->forwardInput(stream);
-}
+  Player* p = (Player*)(game()->findPlayer(playerId));
 
-Boson* BosonScript::game() const
-{
-  if(!player())
+  if(!p)
   {
-    boError() << k_funcinfo << "NULL player" << endl;
-    return 0;
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return;
   }
 
-  return (Boson*)player()->game();
+  p->forwardInput(stream);
 }
 
-BoCamera* BosonScript::camera() const
+BoCamera* BosonScript::camera()
 {
   if(!display())
   {
@@ -118,9 +103,20 @@ BoCamera* BosonScript::camera() const
   return display()->camera();
 }
 
+int BosonScript::playerId() const
+{
+  if(!player())
+  {
+    boError() << k_funcinfo << "NULL player" << endl;
+    return -1;
+  }
+
+  return player()->id();
+}
+
 /*****  Player methods  *****/
 
-bool BosonScript::areEnemies(int playerId1, int playerId2) const
+bool BosonScript::areEnemies(int playerId1, int playerId2)
 {
   if(!game())
   {
@@ -147,18 +143,7 @@ bool BosonScript::areEnemies(int playerId1, int playerId2) const
   return p1->isEnemy(p2);
 }
 
-int BosonScript::playerId() const
-{
-  if(!player())
-  {
-    boError() << k_funcinfo << "NULL player" << endl;
-    return -1;
-  }
-
-  return player()->id();
-}
-
-QValueList<int> BosonScript::allPlayers() const
+QValueList<int> BosonScript::allPlayers()
 {
   QValueList<int> players;
 
@@ -178,28 +163,46 @@ QValueList<int> BosonScript::allPlayers() const
 }
 
 /*****  Resource methods  *****/
-unsigned long int BosonScript::mineralsAmount() const
+unsigned long int BosonScript::minerals(int playerId)
 {
-  if(!player())
+  if(!game())
   {
-    boError() << k_funcinfo << "NULL player" << endl;
+    boError() << k_funcinfo << "NULL game" << endl;
     return 0;
   }
-  return player()->minerals();
+
+  Player* p = (Player*)(game()->findPlayer(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  return p->minerals();
 }
 
-unsigned long int BosonScript::oilAmount() const
+unsigned long int BosonScript::oil(int playerId)
 {
-  if(!player())
+  if(!game())
   {
-    boError() << k_funcinfo << "NULL player" << endl;
+    boError() << k_funcinfo << "NULL game" << endl;
     return 0;
   }
-  return player()->oil();
+
+  Player* p = (Player*)(game()->findPlayer(playerId));
+
+  if(!p)
+  {
+    boError() << k_funcinfo << "No player with id " << playerId << endl;
+    return 0;
+  }
+
+  return p->oil();
 }
 
 /*****  Unit methods  *****/
-void BosonScript::moveUnit(int id, int x, int y)
+void BosonScript::moveUnit(int player, int id, int x, int y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -216,10 +219,10 @@ void BosonScript::moveUnit(int id, int x, int y)
   stream << (Q_ULONG)id;
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(msg);
+  sendInput(player, msg);
 }
 
-void BosonScript::moveUnitWithAttacking(int id, int x, int y)
+void BosonScript::moveUnitWithAttacking(int player, int id, int x, int y)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -236,10 +239,10 @@ void BosonScript::moveUnitWithAttacking(int id, int x, int y)
   stream << (Q_ULONG)id;
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(msg);
+  sendInput(player, msg);
 }
 
-void BosonScript::attack(int attackerId, int targetId)
+void BosonScript::attack(int player, int attackerId, int targetId)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -253,10 +256,10 @@ void BosonScript::attack(int attackerId, int targetId)
   stream << (Q_ULONG)attackerId;
 
   QDataStream msg(b, IO_ReadOnly);
-  sendInput(msg);
+  sendInput(player, msg);
 }
 
-void BosonScript::stopUnit(int id)
+void BosonScript::stopUnit(int player, int id)
 {
   QByteArray b;
   QDataStream stream(b, IO_WriteOnly);
@@ -268,7 +271,20 @@ void BosonScript::stopUnit(int id)
   stream << (Q_ULONG)id;
 
   QDataStream msg(b, IO_WriteOnly);
-  sendInput(msg);
+  sendInput(player, msg);
+}
+
+void BosonScript::mineUnit(int player, int id, int x, int y)
+{
+  QByteArray b;
+  QDataStream stream(b, IO_WriteOnly);
+
+  stream << (Q_UINT32)BosonMessage::MoveMine;
+  stream << (Q_ULONG)id;
+  stream << QPoint(x, y);
+
+  QDataStream msg(b, IO_ReadOnly);
+  sendInput(player, msg);
 }
 
 QValueList<int> BosonScript::unitsOnCell(int x, int y)
@@ -411,17 +427,6 @@ bool BosonScript::canUnitShoot(int id)
   return u->unitProperties()->canShoot();
 }
 
-bool BosonScript::isMyUnit(int id)
-{
-  if(!player())
-  {
-    boError() << k_funcinfo << "NULL player" << endl;
-    return false;
-  }
-
-  return (player()->findUnit(id));
-}
-
 bool BosonScript::isUnitAlive(int id)
 {
   if(!game())
@@ -437,27 +442,6 @@ bool BosonScript::isUnitAlive(int id)
   }
 
   return !u->isDestroyed();
-}
-
-QValueList<int> BosonScript::allMyUnits()
-{
-  QValueList<int> list;
-  if(!player())
-  {
-    boError() << k_funcinfo << "NULL player" << endl;
-    return list;
-  }
-
-  QPtrListIterator<Unit> it(*(player()->allUnits()));
-  while(it.current())
-  {
-    if(!it.current()->isDestroyed())
-    {
-      list.append(it.current()->id());
-    }
-    ++it;
-  }
-  return list;
 }
 
 QValueList<int> BosonScript::allPlayerUnits(int id)
@@ -527,28 +511,28 @@ void BosonScript::commitCameraChanges(int ticks)
   camera()->commitChanges(ticks);
 }
 
-BoVector3 BosonScript::cameraPos() const
+BoVector3 BosonScript::cameraPos()
 {
   return camera()->lookAt();
 }
 
-float BosonScript::cameraRotation() const
+float BosonScript::cameraRotation()
 {
   return camera()->rotation();
 }
 
-float BosonScript::cameraRadius() const
+float BosonScript::cameraRadius()
 {
   return camera()->radius();
 }
 
-float BosonScript::cameraZ() const
+float BosonScript::cameraZ()
 {
   return camera()->z();
 }
 
 /*****  AI methods  *****/
-float BosonScript::aiDelay() const
+float BosonScript::aiDelay()
 {
   return boConfig->aiDelay();
 }

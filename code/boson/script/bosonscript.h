@@ -26,6 +26,7 @@ class Player;
 class Boson;
 class BoCamera;
 class BosonCanvas;
+class Boson;
 
 class QString;
 class QDataStream;
@@ -33,14 +34,12 @@ class QPoint;
 
 template<class T> class QValueList;
 
-#define boScript BosonScript::bosonScript()
-
 
 /**
  * Base class for scripting interfaces in Boson
  *
- * This class should provide all necessary methods for communication between
- * the script and main program.
+ * This class provides methods for communication between the main program and
+ * the script.
  *
  * @author Rivo Laks <rivolaks@hot.ee>
  **/
@@ -49,12 +48,9 @@ class BosonScript
   public:
     enum Language { Python = 1 };
 
-    static BosonScript* newScriptParser(Language lang);
+    static BosonScript* newScriptParser(Language lang, Player* p);
 
     virtual ~BosonScript();
-
-    static BosonScript* bosonScript() { return mScript; }
-    static void deleteBosonScript();
 
     /**
      * Loads script from file.
@@ -84,81 +80,143 @@ class BosonScript
      virtual void execLine(const QString& line) = 0;
 
 
-    void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
-    void setPlayer(Player* p)  { mPlayer = p; }
-    void setCanvas(BosonCanvas* c)  { mCanvas = c; }
-
-    BosonBigDisplayBase* display() const  { return mDisplay; }
     Player* player() const  { return mPlayer; }
-    Boson* game() const;
-    BoCamera* camera() const;
-    BosonCanvas* canvas() const  { return mCanvas; }
+    int playerId() const;
+
+
+    static void setDisplay(BosonBigDisplayBase* d)  { mDisplay = d; }
+    static void setGame(Boson* g)  { mGame = g; }
+    static void setCanvas(BosonCanvas* c)  { mCanvas = c; }
+
+    static BosonBigDisplayBase* display()  { return mDisplay; }
+    static Boson* game()  { return mGame; };
+    static BoCamera* camera();
+    static BosonCanvas* canvas()  { return mCanvas; }
 
 
     // Players
-    bool areEnemies(int playerId1, int playerId2) const;
-    int playerId() const;
-    QValueList<int> allPlayers() const;
+    /**
+     * @return True if players with ids playerId1 and playerId2 are enemies,
+     *  otherwise false
+     **/
+    static bool areEnemies(int playerId1, int playerId2);
+    /**
+     * @return List containing ids of all players in the game
+     **/
+    static QValueList<int> allPlayers();
 
 
     // Resources
-    unsigned long int mineralsAmount() const;
-    unsigned long int oilAmount() const;
+    /**
+     * @return Amount of minerals local player has
+     **/
+    static unsigned long int minerals(int playerId);
+    /**
+     * @return Amount of oil local player has
+     **/
+    static unsigned long int oil(int playerId);
 
 
     // Units
-    void moveUnit(int id, int x, int y);
-    void moveUnitWithAttacking(int id, int x, int y);
-    void attack(int attackerId, int targetId);
-    void stopUnit(int id);
+    /**
+     * Moves unit with id id to (x, y)
+     * Unit will go directly to given position and will ignore any units on the
+     * way
+     **/
+    static void moveUnit(int player, int id, int x, int y);
+    /**
+     * Moves unit with id id to (x, y)
+     * Unit will shoot at any enemy units on the way
+     **/
+    static void moveUnitWithAttacking(int player, int id, int x, int y);
+    /**
+     * Unit with id attackerId will attack unit targetId
+     **/
+    static void attack(int player, int attackerId, int targetId);
+    /**
+     * Stops unit with id id from doing anything
+     **/
+    static void stopUnit(int player, int id);
+    /**
+     * Sends unit with id id to mine at (x, y)
+     **/
+    static void mineUnit(int player, int id, int x, int y);
 
-    QValueList<int> unitsOnCell(int x, int y);
-    QValueList<int> unitsInRect(int x1, int y1, int x2, int y2);
-    bool cellOccupied(int x, int y);
+    /**
+     * @return List of units on cell (x, y)
+     **/
+    static QValueList<int> unitsOnCell(int x, int y);
+    /**
+     * @return List of units in rectangle (x1, y1, x2 ,y2)
+     * Note that coordinates are cell coordinates.
+     **/
+    static QValueList<int> unitsInRect(int x1, int y1, int x2, int y2);
+    /**
+     * @return Whether there are any units on cell (x, y)
+     **/
+    static bool cellOccupied(int x, int y);
 
-    QPoint unitPosition(int id);
-    int unitOwner(int id);
-    int unitType(int id);
-    bool isUnitMobile(int id);
-    bool canUnitShoot(int id);
+    /**
+     * @return Position of unit with id id
+     **/
+    static QPoint unitPosition(int id);
+    /**
+     * @return Id of the owner of unit with id id
+     **/
+    static int unitOwner(int id);
+    /**
+     * @return Type of unit with id id
+     **/
+    static int unitType(int id);
+    /**
+     * @return Whether unit with id id is mobile unit
+     **/
+    static bool isUnitMobile(int id);
+    /**
+     * @return Whether unit with id id can shoot
+     **/
+    static bool canUnitShoot(int id);
 
-    bool isMyUnit(int id);
-    bool isUnitAlive(int id);
+    /**
+     * @return Whether unit with id id exists and is not destroyed
+     **/
+    static bool isUnitAlive(int id);
 
-    QValueList<int> allMyUnits();
-    QValueList<int> allPlayerUnits(int id);
+    /**
+     * @return List containing ids of all units of player with id id
+     **/
+    static QValueList<int> allPlayerUnits(int id);
 
 
     // Camera
-    void moveCamera(BoVector3 pos);
-    void moveCameraBy(BoVector3 pos);
-    void setCameraRotation(float r);
-    void setCameraRadius(float r);
-    void setCameraZ(float z);
-    void setCameraMoveMode(int mode);
-    void commitCameraChanges(int ticks);
+    static void moveCamera(BoVector3 pos);
+    static void moveCameraBy(BoVector3 pos);
+    static void setCameraRotation(float r);
+    static void setCameraRadius(float r);
+    static void setCameraZ(float z);
+    static void setCameraMoveMode(int mode);
+    static void commitCameraChanges(int ticks);
 
-    BoVector3 cameraPos() const;
-    float cameraRotation() const;
-    float cameraRadius() const;
-    float cameraZ() const;
+    static BoVector3 cameraPos();
+    static float cameraRotation();
+    static float cameraRadius();
+    static float cameraZ();
 
 
     // AI
-    float aiDelay() const;
+    static float aiDelay();
 
   protected:
-    BosonScript();
+    BosonScript(Player* p);
 
-  protected:
-    void sendInput(QDataStream& stream);
+    static void sendInput(int player, QDataStream& stream);
 
   private:
-    static BosonScript* mScript;
-
-    BosonBigDisplayBase* mDisplay;
     Player* mPlayer;
-    BosonCanvas* mCanvas;
+
+    static BosonBigDisplayBase* mDisplay;
+    static BosonCanvas* mCanvas;
+    static Boson* mGame;
 };
 
 #endif //BOSONSCRIPT_H
