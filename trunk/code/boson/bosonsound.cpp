@@ -104,6 +104,10 @@ public:
 		KMimeType::Ptr mimeType = KMimeType::findByURL(file(), 0, true, true);
 
 		Arts::PlayObject result;
+		if (mParent->server().server().isNull()) {
+			kdWarning() << k_funcinfo << "NULL server" << endl;
+			return;
+		}
 		result = mParent->server().server().createPlayObjectForURL(
 				string(file()), string(mimeType->name()),
 				false); // false as we connect it to the soundcard ourselfes
