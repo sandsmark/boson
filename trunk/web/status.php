@@ -42,14 +42,13 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Status");
-draw_bigbox_text("Boson is currently still under heavy development.<br>
-  We're currently heading for Boson 0.9, which will probably be released later
-  this year.<br>
-  <a href=\"download.php#cvs\">CVS version</a> already contains many new
-  features, see below.<br><br>");
+draw_bigbox_text("Most recent version, 0.9, was released on 3rd November 2003.<br>
+  Next version will be 0.10, but release date it not yet set.
+  <br><br>");
 
-draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
+//draw_bigbox_subheader("<a name=\"features\"></a>Feature list");
 
+/*
 draw_bigbox_text("This is a list of features that we consider as
   &quot;to-be-done&quot; for the next release.
   <h2>TODO</h2>
@@ -60,65 +59,25 @@ draw_bigbox_text("This is a list of features that we consider as
 
   <h4>Internal</h4>
   <ul>
-    <li>Units can be rendered as wireframes</li>
-    <li>Rotation speed of units can be configured</li>
-    <li>Bounding boxes of items can be rendered</li>
-    <li>Shots split to subclasses</li>
-    <li>Pathfinder is much faster now</li>
-    <li>Separate process is used for audio</li>
-    <li>OpenGL setting profiles (default/fastest/best quality)</li>
-    <li>Redesigned start widgets</li>
-    <li>Campaign support for the map selector</li>
-    <li>Game and network logs can be saved</li>
   </ul>
 
   <h4>Rendering</h4>
   <ul>
-    <li>New terrain rendering code. Terrain is now drawn using several layers
-        which are blended together. This creates nice effect for transitions and
-        looks really nice</li>
-    <li>Added supports for lights and halos using particles</li>
-    <li>Added support for explosion fragments when unit is destroyed</li>
-    <li>Materials are supported for models</li>
-    <li>Models have normals now, meaning that everything should be lit correctly</li>
-    <li>Better support for wind for particle systems</li>
-    <li>New kind of smoke for wreckages</li>
-    <li>Improved particle systems</li>
-    <li>Weapon flashes when shooting</li>
-    <li>Support for smooth surfaces</li>
-    <li>Terrain normals (i.e. terrain is lit correctly)</li>
-    <li>Experimental LOD support</li>
   </ul>
 
 
   <h4>Game</h4>
   <ul>
-    <li>Acceleration/deceleration support for units</li>
-    <li>Support for mines</li>
-    <li>Support for bombs (basically a falling mine)</li>
-    <li>New actions patch</li>
-    <li>Basic scripting support</li>
-    <li>Movies can be grabbed from running game (but it's extremely slow)</li>
-    <li>Better wreckage handling (aircraft wreckages no more hang in the air and
-        other ones slowly disappear into the ground)</li>
   </ul>
 
   <h4>Data</h4>
   <ul>
-    <li>Fixed Puma model</li>
-    <li>New Leopard model</li>
-    <li>New unit: Koyote (a nice helicopter with a cannon)</li>
-    <li>New unit: Warthog (A-10 plane with heavy anti-tank missiles)</li>
-    <li>New unit: Wolf (a truck which may carry other units in the future)</li>
   </ul>
 
   <h4>Editor</h4>
   <ul>
-    <li>You can now add multiple units and draw multiple tiles in editor using
-        click+drag</li>
-    <li>Height maps can be exported</li>
-    <li>Texture maps can be exported/imported in editor</li>
   </ul>");
+*/
 draw_bigbox_end();
 main_area_end();
 

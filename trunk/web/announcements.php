@@ -54,6 +54,7 @@ draw_bigbox_text("All Boson announcements:
     <li><a href=\"announces/boson-0.6.1.php\">Boson 0.6.1 press release</a></li>
     <li><a href=\"announces/boson-0.7.php\">Boson 0.7 press release</a></li>
     <li><a href=\"announces/boson-0.8.php\">Boson 0.8 press release</a></li>
+    <li><a href=\"announces/boson-0.9.php\">Boson 0.9 press release</a></li>
     </ul>
     <p class=\"bigboxtext\">");
 draw_bigbox_end();
