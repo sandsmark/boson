@@ -74,6 +74,10 @@
 BosonBigDisplayBase* BosonPath::mDisplay = 0;
 BosonCanvas* BosonPath::mCanvas = 0;
 
+static long int totalelapsed = 0;
+static int totalcalls = 0;
+
+
 class PathNode
 {
   public:
@@ -136,6 +140,8 @@ BosonPath::~BosonPath()
 {
 }
 
+static int pathSlow = 0, pathRange = 0, pathFast = 0;
+
 QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int range)
 {
   QValueList<QPoint> points;
@@ -151,6 +157,8 @@ QValueList<QPoint> BosonPath::findPath(Unit* unit, int goalx, int goaly, int ran
   {
     boWarning(500) << "no path found" << endl;
   }
+  boDebug() << k_funcinfo << "Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls <<
+      ";  handled in (R/F/S): " << pathRange << "/" << pathFast << "/" << pathSlow << endl;
   points = path.path; // faster than manually coping all points
   return points;
 }
@@ -269,8 +277,6 @@ QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n,
 }
 
 
-int pathSlow = 0, pathRange = 0, pathFast = 0;
-
 bool BosonPath::findPath()
 {
   // We now have 3 different pathfinding methods: fast and slow pathfinders and
@@ -283,9 +289,11 @@ bool BosonPath::findPath()
   //  can find path around other units. It's at least about 10 times slower
   //  though (with a simple path)
   BosonProfiler profiler(BosonProfiling::FindPath);
+  totalcalls++;
   if(findFastPath())
   {
     long int elapsed = profiler.stop();
+    totalelapsed += elapsed;
     boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << elapsed << " microsec." << endl;
     pathFast++;
     return true;
@@ -295,12 +303,14 @@ bool BosonPath::findPath()
     if(rangeCheck())
     {
       long int elapsed = profiler.stop();
+      totalelapsed += elapsed;
       boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << elapsed << " microsec." << endl;
       pathRange++;
       return false;
     }
     bool ret = findSlowPath();
     long int elapsed = profiler.stop();
+    totalelapsed += elapsed;
     boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << elapsed << " microsec. nodes removed: " << mNodesRemoved << endl;
     pathSlow++;
     return ret;
@@ -1048,7 +1058,7 @@ bool BosonPathSector::hasCell(int cx, int cy)
 
 void BosonPathSector::reinitRegions()
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   // First we have to current regions
   // Set region pointer to NULL for all cells in this sector
   for(int ay = y; ay < (y + h); ay++)
@@ -1059,12 +1069,12 @@ void BosonPathSector::reinitRegions()
     }
   }
   // Delete all regions we have atm
-  boDebug(510) << k_funcinfo << "clearing " << regions.count() << " regions" << endl;
+//  boDebug(510) << k_funcinfo << "clearing " << regions.count() << " regions" << endl;
   regions.clear();
   // And find new ones
-  boDebug(510) << k_funcinfo << "initing new regions" << endl;
+//  boDebug(510) << k_funcinfo << "initing new regions" << endl;
   initRegions();
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPathSector::initRegions()
@@ -1075,7 +1085,7 @@ void BosonPathSector::initRegions()
     {
       if(!pathfinder->cellRegion(ax, ay))
       {
-        boDebug(510) << k_funcinfo << "Cell at (" << ax << "; " << ay << ") doesn't have region" << endl;
+//        boDebug(510) << k_funcinfo << "Cell at (" << ax << "; " << ay << ") doesn't have region" << endl;
         // This cell has no region yet
         if(pathfinder->cellPassability(ax, ay) == BosonPath2::NotPassable)
         {
@@ -1125,22 +1135,22 @@ BosonPathRegion::BosonPathRegion(BosonPathSector* s)
 
 BosonPathRegion::~BosonPathRegion()
 {
-  boDebug(510) << k_funcinfo << "id: " << id << "; this: " << this << endl;
+//  boDebug(510) << k_funcinfo << "id: " << id << "; this: " << this << endl;
   // Remove ourselves from neighbor lists of other regions
-  boDebug(510) << k_funcinfo << "removing from " << neighbors.count() << " neighbors" << endl;
+//  boDebug(510) << k_funcinfo << "removing from " << neighbors.count() << " neighbors" << endl;
   for(unsigned int i = 0; i < neighbors.count(); i++)
   {
     neighbors[i].region->removeNeighbor(this);
   }
   // And remove ourselves from pathfinder's regions list
-  boDebug(510) << k_funcinfo << "removing self from regions list" << endl;
+//  boDebug(510) << k_funcinfo << "removing self from regions list" << endl;
   sector->pathfinder->removeRegion(this);
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPathRegion::findCells(int x, int y)
 {
-  boDebug(510) << k_funcinfo << "Starting at (" << x << "; " << y << ")" << endl;
+//  boDebug(510) << k_funcinfo << "Starting at (" << x << "; " << y << ")" << endl;
   QValueVector<BosonPathNode> open(sector->w * sector->h);
   bool* visited = new bool[sector->w * sector->h];
   for(int i = 0; i < sector->w * sector->h; i++)
@@ -1221,8 +1231,8 @@ void BosonPathRegion::findCells(int x, int y)
   // Calculate cost
   cost /= sqrt((float)cellsCount);
 
-  boDebug(510) << k_funcinfo << "Region " << id << ": cells: " << cellsCount << "; center: (" <<
-      centerx << "; " << centery << "); cost: " << cost << endl;
+//  boDebug(510) << k_funcinfo << "Region " << id << ": cells: " << cellsCount << "; center: (" <<
+//      centerx << "; " << centery << "); cost: " << cost << endl;
 
   delete[] visited;
 #undef VISITED
@@ -1302,7 +1312,10 @@ void BosonPathRegion::calculateCosts(unsigned int index)
   // FIXME: I believe this can be done _much_ faster
   // Find number of cells in this region that have neighbor cells in another
   //  region. You can move to that other region via those cells
-  for(int y = sector->y; y < (sector->y + sector->h); y++)
+  // THIS IS SLOOOOW!!! cellsOccupiedStatusChanged() for a single cell took
+  //  about 15ms on average and about 13ms of it was spent recalculating region
+  //  costs. So now we don't use this anymore.
+  /*for(int y = sector->y; y < (sector->y + sector->h); y++)
   {
     for(int x = sector->x; x < (sector->x + sector->w); x++)
     {
@@ -1341,14 +1354,15 @@ void BosonPathRegion::calculateCosts(unsigned int index)
         }
       }
     }
-  }
+  }*/
 
   // Calculate 'neighbor cost' for neighbor.
   // It's cost of going from this region to neighbor region. The more border
   // cells this region has with us, the less the cost will be.
+  //neighbors[index].cost = (float)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
   neighbors[index].cost = (float)TNG_MAX_BORDER_COST / neighbors[index].bordercells;
-  boDebug(510) << k_funcinfo << "Passage cost from " << id << " to " << neighbors[index].region->id <<
-      " is " << neighbors[index].cost << " (" << neighbors[index].bordercells << " border cells)" << endl;
+//  boDebug(510) << k_funcinfo << "Passage cost from " << id << " to " << neighbors[index].region->id <<
+//      " is " << neighbors[index].cost << " (" << neighbors[index].bordercells << " border cells)" << endl;
 /*  for(unsigned int i = 0; i < neighbors.count(); i++)
   {
     // Find this region in neighbor's neighbor list
@@ -1372,7 +1386,8 @@ void BosonPathRegion::addNeighbor(BosonPathRegion* r)
   {
     if(neighbors[i].region == r)
     {
-      // We already have this neighbor. Do nothing
+      // We already have this neighbor. Increase border cell count
+      neighbors[i].bordercells++;
       return;
     }
   }
@@ -1382,12 +1397,13 @@ void BosonPathRegion::addNeighbor(BosonPathRegion* r)
   float dx = QABS(r->centerx - centerx);
   float dy = QABS(r->centery - centery);
   n.cost = sqrt(dx * dx + dy * dy);
+  n.bordercells = 1;
   neighbors.append(n);
 }
 
 void BosonPathRegion::removeNeighbor(BosonPathRegion* r)
 {
-  boDebug(510) << k_funcinfo << "ids: r: " << r->id << "; this: " << id << ";;  pointers: r: " << r << "; this: " << this << endl;
+//  boDebug(510) << k_funcinfo << "ids: r: " << r->id << "; this: " << id << ";;  pointers: r: " << r << "; this: " << this << endl;
 #ifdef REMOVE_NEIGHBOR_USE_IT
   QValueVector<Neighbor>::iterator it;
   int i = 0;
@@ -1395,17 +1411,17 @@ void BosonPathRegion::removeNeighbor(BosonPathRegion* r)
   {
     if((*it).region == r)
     {
-      boDebug(510) << k_funcinfo << "Found neighbor region at " << i << "(" << *it << ")" << endl;
+//      boDebug(510) << k_funcinfo << "Found neighbor region at " << i << "(" << *it << ")" << endl;
       // Remove this neighbor
       // We want to keep this vector linear (i.e. no holes in the middle), so we
       //  have to move the last element to the position of the removed one
       if(it != neighbors.end() - 1)
       {
-        boDebug(510) << k_funcinfo << "neighbor isn't the last, moving another region" << endl;
+//        boDebug(510) << k_funcinfo << "neighbor isn't the last, moving another region" << endl;
         neighbors.insert(it, neighbors.last());
       }
       // Delete last item
-      boDebug(510) << k_funcinfo << "erasing last region" << endl;
+//      boDebug(510) << k_funcinfo << "erasing last region" << endl;
       neighbors.erase(neighbors.end() - 1);
       return;
     }
@@ -1416,16 +1432,16 @@ void BosonPathRegion::removeNeighbor(BosonPathRegion* r)
   {
     if(neighbors[i].region == r)
     {
-      boDebug(510) << k_funcinfo << "Found neighbor region at " << i << endl;
+//      boDebug(510) << k_funcinfo << "Found neighbor region at " << i << endl;
       // Remove this neighbor
       // We want to keep this vector linear (i.e. no holes in the middle), so we
       //  have to move the last element to the position of the removed one
       if((neighbors.count() > 1) && (i < neighbors.count() - 1))
       {
-        boDebug(510) << k_funcinfo << "neighbor isn't the last, moving another region from " << neighbors.count() - 1 << " to " << i << endl;
+//        boDebug(510) << k_funcinfo << "neighbor isn't the last, moving another region from " << neighbors.count() - 1 << " to " << i << endl;
         neighbors[i] = neighbors[neighbors.count() - 1];
       }
-      boDebug(510) << k_funcinfo << "erasing last region" << endl;
+//      boDebug(510) << k_funcinfo << "erasing last region" << endl;
       neighbors.pop_back();
       return;
     }
@@ -1451,23 +1467,30 @@ BosonPath2::~BosonPath2()
 void BosonPath2::init()
 {
   boDebug(510) << k_funcinfo << endl;
+  BosonProfiler profiler(10076);
   initCellPassability();
   initSectors();
   initRegions();
   findRegionNeighbors(0, 0, mMap->width() - 1, mMap->height() - 1);
   initRegionCosts(mRegions);
   initRegionGroups(mRegions);
-  boDebug(510) << k_funcinfo << "END" << endl;
+  long int elapsed = profiler.stop();
+  boDebug(510) << k_funcinfo << "END, elapsed: " << elapsed / 1000.0 << " ms" << endl;
 }
 
 void BosonPath2::findPath(BosonPathInfo* info)
 {
   boDebug(510) << k_funcinfo << endl;
+  BosonProfiler profiler(BosonProfiling::FindPath);
+  totalcalls++;
   // Update start and goal region(s)
   findHighLevelGoal(info);
   // We _must_ have start region. Otherwise something is very broken
   if(!info->startRegion)
   {
+    long int elapsed = profiler.stop();
+    totalelapsed += elapsed;
+    boDebug(500) << k_funcinfo << "ELAPSED (failed 1): " << elapsed << " microsec." << endl;
     boError(510) << k_funcinfo << "No start region!" << endl;
     info->passable = false;
     return;
@@ -1477,6 +1500,9 @@ void BosonPath2::findPath(BosonPathInfo* info)
     // If range is not 0, we need to get exactly to that range. Otherwise we
     //  won't even search for path
     info->passable = false;
+    long int elapsed = profiler.stop();
+    totalelapsed += elapsed;
+    boDebug(500) << k_funcinfo << "ELAPSED (failed 2): " << elapsed << " microsec." << endl;
     return;
   }
 
@@ -1485,6 +1511,9 @@ void BosonPath2::findPath(BosonPathInfo* info)
   if(!info->hlpath)
   {
     // No high-level path was found
+    long int elapsed = profiler.stop();
+    totalelapsed += elapsed;
+    boDebug(500) << k_funcinfo << "ELAPSED (failed 3): " << elapsed << " microsec." << endl;
     boError(510) << k_funcinfo << "No HL path found!" << endl;
     info->passable = false;
     return;
@@ -1493,12 +1522,15 @@ void BosonPath2::findPath(BosonPathInfo* info)
   // Search low-level path
   findLowLevelPath(info);
 
-  boDebug(510) << k_funcinfo << "END" << endl;
+  long int elapsed = profiler.stop();
+  totalelapsed += elapsed;
+  boDebug(500) << k_funcinfo << "ELAPSED (success!!!): " << elapsed << " microsec." << endl;
+  boDebug() << k_funcinfo << "ENDm Total time elapsed: " << totalelapsed / 1000000.0 << " sec; calls: " << totalcalls << endl;
 }
 
 void BosonPath2::findHighLevelPath(BosonPathInfo* info)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   // First check if unit already has high-level path
   if(info->hlpath)
   {
@@ -1506,7 +1538,7 @@ void BosonPath2::findHighLevelPath(BosonPathInfo* info)
     if(info->hlpath->valid)
     {
       // It's valid, so we don't have to calculate anything
-      boDebug(510) << k_funcinfo << "old path is valid - return" << endl;
+//      boDebug(510) << k_funcinfo << "old path is valid - return" << endl;
       return;
     }
     else
@@ -1530,13 +1562,13 @@ void BosonPath2::findHighLevelPath(BosonPathInfo* info)
     // Cached highlevel path was found. Return.
     info->hlpath->users++;
     info->hlstep = 0;
-    boDebug(510) << k_funcinfo << "using cached path - return" << endl;
+//    boDebug(510) << k_funcinfo << "using cached path - return" << endl;
     return;
   }
 
   // No cached path was found either - search new one
   searchHighLevelPath(info);
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPath2::findLowLevelPath(BosonPathInfo* info)
@@ -1863,22 +1895,18 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
 {
   boDebug(510) << k_funcinfo << "area: (" << x1 << "x" << y1 << "-" << x2 << "x" << y2 << ")" << endl;
+  long int tm_calcsectorarea, tm_regionlist, tm_hlpathinvalidate, tm_regionreinit, tm_recalcneighbor,
+      tm_regionlists2, tm_recalcregioncosts, tm_regiongroups, tm_end;
+  BosonProfiler profiler(10085);
+
   // Calculate changed area in sector coords
   int sx1, sy1, sx2, sy2;
   sx1 = x1 / mSectorWidth;
   sy1 = y1 / mSectorHeight;
   sx2 = x2 / mSectorWidth;
   sy2 = y2 / mSectorHeight;
-
-/*  if(x2 % mSectorWidth != 0)
-  {
-    sx2 = QMIN(sx2 + 1, mMap->width());
-  }
-  if(y2 % mSectorHeight != 0)
-  {
-    sy2 = QMIN(sy2 + 1, mMap->height());
-  }*/
-  boDebug(510) << k_funcinfo << "sector area: (" << sx1 << "x" << sy1 << "-" << sx2 << "x" << sy2 << ")" << endl;
+//  boDebug(510) << k_funcinfo << "sector area: (" << sx1 << "x" << sy1 << "-" << sx2 << "x" << sy2 << ")" << endl;
+  tm_calcsectorarea = profiler.elapsed();
 
   // First we need to make list of all to-be-deleted regions to revalidate
   //  high-level paths later
@@ -1895,11 +1923,13 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       }
     }
   }
+  tm_regionlist = profiler.elapsed();
+
   // Validate high-level paths. If high-level path contains any of to-be-deleted
   //  regions, it will be considered to be invalid
   QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
   QPtrList<BosonPathHighLevelPath> invalidpaths;
-  boDebug(510) << k_funcinfo << "Validating " << it.count() << " HL paths" << endl;
+//  boDebug(510) << k_funcinfo << "Validating " << it.count() << " HL paths" << endl;
   BosonPathHighLevelPath* p;
   while(it.current())
   {
@@ -1928,6 +1958,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       delete p;
     }
   }
+  tm_hlpathinvalidate = profiler.elapsed();
 
   // Reinit regions in changed sectors
   // FIXME: probably this can be done _much_ faster, e.g. check first if
@@ -1937,11 +1968,12 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   {
     for(int x = sx1; x <= sx2; x++)
     {
-      boDebug(510) << k_funcinfo << "reiniting regions for sector at (" << x << "; " << y << ")" << endl;
+//      boDebug(510) << k_funcinfo << "reiniting regions for sector at (" << x << "; " << y << ")" << endl;
       sector(x, y)->reinitRegions();
       regionscount += sector(x, y)->regions.count();
     }
   }
+  tm_regionreinit = profiler.elapsed();
 
   // Recalculate region neighbors
   int nx1, ny1, nx2, ny2;
@@ -1956,11 +1988,10 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   nx2 = QMIN((sx2 + 1) * ((int)mSectorWidth), ((int)mMap->width()) - 1);
   ny2 = QMIN((sy2 + 1) * ((int)mSectorHeight), ((int)mMap->height()) - 1);
 
-  boDebug(510) << k_funcinfo << "finding neighbors in area: (" << nx1 << "x" << ny1 << "-" << nx2 << "x" << ny2 << ")" << endl;
-  //findRegionNeighbors(nx1, ny1, nx2, ny2);
-//  findRegionNeighbors(QMAX(nx1, 0), QMAX(ny1, 0), QMIN(nx2, mMap->width() - 1), QMIN(ny2, mMap->height() - 1));
+//  boDebug(510) << k_funcinfo << "finding neighbors in area: (" << nx1 << "x" << ny1 << "-" << nx2 << "x" << ny2 << ")" << endl;
   findRegionNeighbors(QMAX(sx1 * (int)mSectorWidth - 1, 0), QMAX(sy1 * (int)mSectorHeight - 1, 0),
       QMIN((sx2 + 1) * (int)mSectorWidth, (int)mMap->width() - 1), QMIN((sy2 + 1) * (int)mSectorHeight, (int)mMap->height() - 1));
+  tm_recalcneighbor = profiler.elapsed();
 
   // Recalculate neighbor costs
   QPtrVector<BosonPathRegion> regions(regionscount);  // All regions in affected sectors
@@ -1968,7 +1999,7 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
   {
     for(int x = sx1; x <= sx2; x++)
     {
-      boDebug(510) << k_funcinfo << "adding regions in sector at (" << x << "; " << y << ") to regions" << endl;
+//      boDebug(510) << k_funcinfo << "adding regions in sector at (" << x << "; " << y << ") to regions" << endl;
       for(unsigned int i = 0; i < sector(x, y)->regions.count(); i++)
       {
         regions.insert(regions.count(), sector(x, y)->regions[i]);
@@ -1999,17 +2030,26 @@ void BosonPath2::cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2)
       }
     }
   }
-  boDebug(510) << k_funcinfo << "recalculating costs for regions" << endl;
+  tm_regionlists2 = profiler.elapsed();
+//  boDebug(510) << k_funcinfo << "recalculating costs for regions" << endl;
   initRegionCosts(regions);
   initRegionCosts(neighbors);
+  tm_recalcregioncosts = profiler.elapsed();
 
   // Reinit region groups info
   initRegionGroups(regions);
+  tm_regiongroups = profiler.elapsed();
 
   // Take care of eyecandy, too
-  boDebug(510) << k_funcinfo << "recalculating colormap" << endl;
+//  boDebug(510) << k_funcinfo << "recalculating colormap" << endl;
   colorizeRegions();
-  boDebug(510) << k_funcinfo << "END" << endl;
+  tm_end = profiler.stop();
+  boDebug(510) << k_funcinfo << "END, took " <<  tm_end / 1000.0 << " ms in total:" << endl <<
+      "sectarea: " << tm_calcsectorarea << ";  reglist: " << tm_regionlist - tm_calcsectorarea <<
+      ";  hlpathinvalidate: " << tm_hlpathinvalidate - tm_regionlist << ";  regreinit: " << tm_regionreinit - tm_hlpathinvalidate << endl <<
+      "recalcneighbor: " << tm_recalcneighbor - tm_regionreinit << ";  reglists2: " << tm_regionlists2 - tm_recalcneighbor <<
+      ";  recalcregcosts: " << tm_recalcregioncosts - tm_regionlists2 << "; reggroups: " << tm_regiongroups - tm_recalcregioncosts <<
+      ";  colorize: " << tm_end - tm_regiongroups << endl;
 }
 
 void BosonPath2::releaseHighLevelPath(BosonPathHighLevelPath* hlpath)
@@ -2039,19 +2079,19 @@ void BosonPath2::releaseHighLevelPath(BosonPathHighLevelPath* hlpath)
 
 void BosonPath2::initSectors()
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   // Calculate number of sectors we'll have
   // TODO: make dynamic, depending on the map size
   mSectorWidth = 10;
   mSectorHeight = 10;
   // this is not the best approach, but works
   int sectorscount = ((mMap->width() / mSectorWidth) + 1) * ((mMap->height() / mSectorHeight) + 1);
-  boDebug(510) << k_funcinfo << "there will be " << sectorscount << " sectors (map is " <<
-      mMap->width() << "x" << mMap->height() << ")" << endl;
+//  boDebug(510) << k_funcinfo << "there will be " << sectorscount << " sectors (map is " <<
+//      mMap->width() << "x" << mMap->height() << ")" << endl;
 
   // Create sector array
   mSectors = new BosonPathSector[sectorscount];
-  boDebug(510) << k_funcinfo << "Sectors are at " << mSectors << endl;
+//  boDebug(510) << k_funcinfo << "Sectors are at " << mSectors << endl;
 
   // Create sectors
   for(unsigned int y = 0; y * mSectorHeight < mMap->height(); y++)
@@ -2060,23 +2100,23 @@ void BosonPath2::initSectors()
     {
       // C++ doesn't allow any intialization when creating an array with new, so
       //  we must use this a bit hackish solution
-      boDebug(510) << k_funcinfo << "Initing sector " << sector(x, y) << " at ("<< x << "; " << y << ")" << endl;
+//      boDebug(510) << k_funcinfo << "Initing sector " << sector(x, y) << " at ("<< x << "; " << y << ")" << endl;
       sector(x, y)->setPathfinder(this);
       sector(x, y)->setGeometry(x * mSectorWidth, y * mSectorWidth,
           QMIN(mSectorWidth, mMap->width() - x * mSectorWidth), QMIN(mSectorHeight, mMap->height() - y * mSectorWidth));
     }
   }
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPath2::initRegions()
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   // Init ids pool
   // It should be possible to have height*width / 4 regions at most
   // +1 is because of possible modulo
   int maxregcount = mMap->width() * mMap->height() / 4 + 1;
-  boDebug(510) << k_funcinfo << "there can be " << maxregcount << " regions at most" << endl;
+//  boDebug(510) << k_funcinfo << "there can be " << maxregcount << " regions at most" << endl;
   mRegionIdUsed = new bool[maxregcount];
   for(int i = 0; i < maxregcount; i++)
   {
@@ -2086,24 +2126,24 @@ void BosonPath2::initRegions()
   // Allocate some space for regions
   // It assumes every sector has 1.2 regions on average
   int regioncount = (int)(((mMap->width() / mSectorWidth) + 1) * ((mMap->height() / mSectorHeight) + 1) * 1.2);
-  boDebug(510) << k_funcinfo << "allocating space for " << regioncount << " regions" << endl;
+//  boDebug(510) << k_funcinfo << "allocating space for " << regioncount << " regions" << endl;
   mRegions.resize(regioncount);
 
   for(unsigned int y = 0; y * mSectorHeight < mMap->height(); y++)
   {
     for(unsigned int x = 0; x * mSectorWidth < mMap->width(); x++)
     {
-      boDebug(510) << k_funcinfo << "initing regions for sector at (" << x << "; " << y << ")" << endl;
+//      boDebug(510) << k_funcinfo << "initing regions for sector at (" << x << "; " << y << ")" << endl;
       sector(x, y)->initRegions();
     }
   }
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPath2::initCellPassability()
 {
 #define RAD2DEG (180.0/M_PI)
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   const float maxPassableSlope = 45.0f; // If slope <= this, then it's passable, otherwise not
   float minh, maxh, slope;
   for(unsigned int y = 0; y < mMap->height(); y++)
@@ -2135,13 +2175,13 @@ void BosonPath2::initCellPassability()
 
       if(slope > maxPassableSlope)
       {
-        boDebug(510) << k_funcinfo << "Cell at (" << x << "; " << y << ") won't be passable, slope: " << slope << endl;
+//        boDebug(510) << k_funcinfo << "Cell at (" << x << "; " << y << ") won't be passable, slope: " << slope << endl;
       }
 
       cell(x, y)->setPassable(slope <= maxPassableSlope);
     }
   }
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 #undef RAD2DEG
 }
 
@@ -2158,7 +2198,7 @@ void BosonPath2::initRegionGroups(QPtrVector<BosonPathRegion>& regions)
 
     // Create new group for this region
     BosonPathRegionGroup* group = new BosonPathRegionGroup;
-    boDebug(510) << k_funcinfo << "GROUP_NEW: created new group @ " << group << endl;
+//    boDebug(510) << k_funcinfo << "GROUP_NEW: created new group @ " << group << endl;
     group->passabilityType = regions[i]->passabilityType;
     findRegionsInGroup(group, regions[i]);
   }
@@ -2166,7 +2206,7 @@ void BosonPath2::initRegionGroups(QPtrVector<BosonPathRegion>& regions)
 
 void BosonPath2::findRegionsInGroup(BosonPathRegionGroup* group, BosonPathRegion* start)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   QPtrList<BosonPathRegion> open;
 
   BosonPathRegion* n;
@@ -2193,8 +2233,8 @@ void BosonPath2::findRegionsInGroup(BosonPathRegionGroup* group, BosonPathRegion
       if(n2->group != group)
       {
         // n2 should belong to this group, but doesn't
-        boDebug(510) << k_funcinfo << "Trying to add region " << n2->id << " to group @ " << group <<
-            " (atm @ " << n2->group << ")" << endl;
+//        boDebug(510) << k_funcinfo << "Trying to add region " << n2->id << " to group @ " << group <<
+//            " (atm @ " << n2->group << ")" << endl;
         if(!n2->group)
         {
           // n2 had no group, put it into this group
@@ -2211,12 +2251,12 @@ void BosonPath2::findRegionsInGroup(BosonPathRegionGroup* group, BosonPathRegion
           // TODO: we could compare regions count of groups to decide which
           //  group will be removed (bigger should stay)
           // Put all regions in group to n2's group
-          boDebug(510) << k_funcinfo << "GROUP_JOIN: joining " << group <<
-              " into " << n2->group << endl;
-          boDebug(510) << k_funcinfo << "src group (" << group << ") has " <<
-              group->regions.count() << " regions" << endl;
-          boDebug(510) << k_funcinfo << "dest group (" << n2->group << ") has " <<
-              n2->group->regions.count() << " regions" << endl;
+//          boDebug(510) << k_funcinfo << "GROUP_JOIN: joining " << group <<
+//              " into " << n2->group << endl;
+//          boDebug(510) << k_funcinfo << "src group (" << group << ") has " <<
+//              group->regions.count() << " regions" << endl;
+//          boDebug(510) << k_funcinfo << "dest group (" << n2->group << ") has " <<
+//              n2->group->regions.count() << " regions" << endl;
           QPtrListIterator<BosonPathRegion> it(group->regions);
           while(it.current())
           {
@@ -2238,7 +2278,7 @@ void BosonPath2::findRegionsInGroup(BosonPathRegionGroup* group, BosonPathRegion
 
 void BosonPath2::findRegionNeighbors(int x1, int y1, int x2, int y2)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   BosonPathRegion* r;
   BosonPathRegion* r2;
   unsigned int i;
@@ -2280,7 +2320,7 @@ void BosonPath2::findRegionNeighbors(int x1, int y1, int x2, int y2)
       }
     }
   }
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPath2::initRegionCosts(QPtrVector<BosonPathRegion>& regions)
@@ -2303,7 +2343,6 @@ void BosonPath2::initRegionCosts(QPtrVector<BosonPathRegion>& regions)
 void BosonPath2::colorizeRegions()
 {
   long int e1, e2, e3;
-  boDebug(510) << k_funcinfo << endl;
   BosonProfiler p(51070);
   // We colorize regions with 6 colors
   const unsigned char colors[7][3] = {
@@ -2449,13 +2488,13 @@ void BosonPath2::colorizeRegions()
 
   e3 = p.stop();
 
-  boDebug(510) << k_funcinfo << "DONE; total elapsed: " << e3 / 1000.0 << " ms (p1: " << e1 / 1000.0 <<
-      " ms;  p2: " << (e2 - e1) / 1000.0 << " ms;  p3: " << (e3 - e2) / 1000.0 << " ms)" << endl;
+//  boDebug(510) << k_funcinfo << "DONE; total elapsed: " << e3 / 1000.0 << " ms (p1: " << e1 / 1000.0 <<
+//      " ms;  p2: " << (e2 - e1) / 1000.0 << " ms;  p3: " << (e3 - e2) / 1000.0 << " ms)" << endl;
 }
 
 void BosonPath2::removeHighLevelPath(BosonPathHighLevelPath* path)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   if(path->users > 0)
   {
     boError(510) << k_funcinfo << "Highlevel path still has " << path->users << " users!" << endl;
@@ -2466,12 +2505,12 @@ void BosonPath2::removeHighLevelPath(BosonPathHighLevelPath* path)
   {
     boError(510) << k_funcinfo << "No such item in the list?" << endl;
   }
-  boDebug(510) << k_funcinfo << "END" << endl;
+//  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 BosonPathHighLevelPath* BosonPath2::findCachedHighLevelPath(BosonPathInfo* info)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   QPtrListIterator<BosonPathHighLevelPath> it(mHLPathCache);
   while(it.current())
   {
@@ -2488,7 +2527,7 @@ BosonPathHighLevelPath* BosonPath2::findCachedHighLevelPath(BosonPathInfo* info)
 
 void BosonPath2::addCachedHighLevelPath(BosonPathHighLevelPath* path)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   mHLPathCache.append(path);
 }
 
@@ -2712,11 +2751,10 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
   delete[] inopen;
   tm_uninit = pr.stop();
 
-  boDebug(510) << k_funcinfo << "Took " << tm_uninit << " usec:" << endl <<
+  boDebug(510) << k_funcinfo << "END, Took " << tm_uninit << " usec:" << endl <<
       "    maps init: " << tm_initmaps << ";  misc init: " << tm_initmisc - tm_initmaps << endl <<
       "    main loop: " << tm_mainloop - tm_initmisc << endl <<
       "    path copy: " << tm_copypath - tm_mainloop << ";  viz: " << tm_viz - tm_copypath << ";  maps uninit: " << tm_uninit - tm_viz << endl;
-  boDebug(510) << k_funcinfo << "END" << endl;
 }
 
 void BosonPath2::findHighLevelGoal(BosonPathInfo* info)
@@ -2922,32 +2960,32 @@ bool BosonPath2::isValidCell(int x, int y)
 
 int BosonPath2::addRegion(BosonPathRegion* r)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   mRegionIdUsed[mRegions.count()] = true;
   if(mRegions.size() <= mRegions.count())
   {
     // We need more space
-    boDebug(510) << k_funcinfo << "resizing regions vector from " << mRegions.size() << " to " << mRegions.size() + 20 << endl;
+//    boDebug(510) << k_funcinfo << "resizing regions vector from " << mRegions.size() << " to " << mRegions.size() + 20 << endl;
     mRegions.resize(mRegions.size() + 20);
   }
-  boDebug(510) << k_funcinfo << "inserting region " << r << " to " << mRegions.count() << endl;
+//  boDebug(510) << k_funcinfo << "inserting region " << r << " to " << mRegions.count() << endl;
   mRegions.insert(mRegions.count(), r);
-  boDebug(510) << k_funcinfo << "new region will get id " << mRegions.count() - 1 << endl;
+//  boDebug(510) << k_funcinfo << "new region will get id " << mRegions.count() - 1 << endl;
   return mRegions.count() - 1;
 }
 
 void BosonPath2::removeRegion(BosonPathRegion* r)
 {
-  boDebug(510) << k_funcinfo << endl;
+//  boDebug(510) << k_funcinfo << endl;
   mRegions.take(r->id);  // We don't want to delete region, remove() would delete it
-  boDebug(510) << k_funcinfo << "removed region with id " << r->id << "; count is: " <<
-      mRegions.count() << "; next free id is: " << mRegions.count() << endl;
+//  boDebug(510) << k_funcinfo << "removed region with id " << r->id << "; count is: " <<
+//      mRegions.count() << "; next free id is: " << mRegions.count() << endl;
   if((mRegions.count() > 0) && (r->id < (int)mRegions.count()))
   {
     // Move last region to freed position. Note that last region is at count(),
     //  not at count() - 1, because there's now a null element in the middle of
     //  the vector
-    boDebug(510) << k_funcinfo << "Moving region " << mRegions.at(mRegions.count()) << " from " << mRegions.count() << " to " << r->id << endl;
+//    boDebug(510) << k_funcinfo << "Moving region " << mRegions.at(mRegions.count()) << " from " << mRegions.count() << " to " << r->id << endl;
     BosonPathRegion* r2 = mRegions.take(mRegions.count());
     mRegions.insert(r->id, r2);
     // Assign freed id to it
