@@ -27,6 +27,7 @@
 #include "unit.h"
 #include "player.h"
 #include "bodebug.h"
+#include "bosonprofiling.h"
 
 #include <klocale.h>
 #include <kstandarddirs.h>
@@ -58,6 +59,9 @@ public:
 		mZoomDefault = 0;
 
 		mLogo = 0;
+
+		mGroundPainter = 0;
+		mUnZoomedGroundPainter = 0;
 	}
 
 	QPointArray mSelectionRect;
@@ -74,6 +78,10 @@ public:
 
 	QPixmap* mLogo;
 	bool mShowMap;
+
+	// used for initializing mostly
+	QPainter* mGroundPainter;
+	QPainter* mUnZoomedGroundPainter;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent, const char* name) : QWidget(parent, name ? name : "minimap")
@@ -88,6 +96,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent, const char* name) : QWidget(parent, 
  d->mZoom = 1.0;
  d->mPainterMoveX = 0;
  d->mPainterMoveY = 0;
+ d->mShowMap = false;
 
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
@@ -110,7 +119,6 @@ BosonMiniMap::BosonMiniMap(QWidget* parent, const char* name) : QWidget(parent, 
  d->mSelectionRect.resize(8);
 
  setPixmapTheme(QString::fromLatin1("standard"));
- d->mShowMap = false;
 
  connect(d->mZoomIn, SIGNAL(clicked()), this, SLOT(slotZoomIn()));
  connect(d->mZoomOut, SIGNAL(clicked()), this, SLOT(slotZoomOut()));
@@ -145,9 +153,12 @@ QPixmap* BosonMiniMap::ground() const
 
 void BosonMiniMap::createMap()
 {
- BO_CHECK_NULL_RET(map());
  delete mGround;
  mGround = 0;
+ delete mUnZoomedGround;
+ mUnZoomedGround = 0;
+
+ BO_CHECK_NULL_RET(map());
  mUnZoomedGround = new QPixmap(mapWidth(), mapHeight());
  mUnZoomedGround->fill(COLOR_UNKNOWN);
  createGround();
@@ -213,7 +224,7 @@ void BosonMiniMap::changeCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
- repaintMiniMapPixmap();
+// repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::setPoint(int x, int y, const QColor& color)
@@ -223,26 +234,30 @@ void BosonMiniMap::setPoint(int x, int y, const QColor& color)
  // setPoint() is close to time critical (only close), so we might want to cache
  // that or so.
  BO_CHECK_NULL_RET(ground());
- QPainter p;
- QPainter p2;
- p.begin(ground());
- p.setPen(color);
- p.setBrush(color);
- p2.begin(mUnZoomedGround);
- p2.setPen(color);
- int pointsize = (int)(d->mScale * d->mZoom);
- if (color.isValid()) {
-	p.drawRect(x * pointsize, y * pointsize, pointsize, pointsize);
-	p2.drawPoint(x, y);
- } else {
+ if (!color.isValid()) {
 	boWarning() << k_funcinfo << "invalid color" << endl;
-	p.setPen(COLOR_UNKNOWN);
-	p2.setPen(COLOR_UNKNOWN);
-	p.drawRect(x * pointsize, y * pointsize, pointsize, pointsize);
-	p2.drawPoint(x, y);
+	setPoint(x, y, COLOR_UNKNOWN);
+	return;
  }
- p.end();
- p2.end();
+ QPainter* groundPainter;
+ QPainter* unZoomedGroundPainter;
+ if (d->mGroundPainter && d->mUnZoomedGroundPainter) {
+	groundPainter = d->mGroundPainter;
+	unZoomedGroundPainter = d->mUnZoomedGroundPainter;
+ } else {
+	groundPainter = new QPainter(ground());
+	unZoomedGroundPainter = new QPainter(mUnZoomedGround);
+ }
+ groundPainter->setPen(color);
+ groundPainter->setBrush(color);
+ unZoomedGroundPainter->setPen(color);
+ int pointsize = (int)(d->mScale * d->mZoom);
+ groundPainter->drawRect(x * pointsize, y * pointsize, pointsize, pointsize);
+ unZoomedGroundPainter->drawPoint(x, y);
+ if (!d->mGroundPainter) {
+	delete groundPainter;
+	delete unZoomedGroundPainter;
+ }
 }
 
 void BosonMiniMap::mousePressEvent(QMouseEvent *e)
@@ -413,19 +428,16 @@ BosonMap* BosonMiniMap::map() const
 
 void BosonMiniMap::initMap()
 {
+ if (!map()) {
+	createMap();
+	repaintMiniMapPixmap();
+	return;
+ }
  BO_CHECK_NULL_RET(map());
  setUpdatesEnabled(false);
  createMap();
- bool oldFog = mUseFog;
- mUseFog = true;
- for (unsigned int i = 0; i < map()->width(); i++) {
-	for (unsigned int j = 0; j < map()->height(); j++) {
-		slotUnfog(i, j);
-	}
- }
- mUseFog = oldFog;
  setUpdatesEnabled(true);
- repaintMiniMapPixmap();
+// repaintMiniMapPixmap();
 }
 
 void BosonMiniMap::slotUnitDestroyed(Unit* unit)
@@ -479,21 +491,41 @@ void BosonMiniMap::setLocalPlayer(Player* p)
 
 void BosonMiniMap::initFogOfWar(Player* p)
 {
+ BO_CHECK_NULL_RET(map());
+
+ // a few performance tricks...
+ setUpdatesEnabled(false);
+ d->mGroundPainter = new QPainter(ground());
+ d->mUnZoomedGroundPainter = new QPainter(mUnZoomedGround);
  if (!p) {
-	boError() << k_funcinfo << "NULL player" << endl;
-	return;
- }
- BO_CHECK_NULL_RET(map())
- mUseFog = true;
- for (unsigned int i = 0; i < map()->width(); i++) {
-	for (unsigned int j = 0; j < map()->height(); j++) {
-		if (p && p->isFogged(i, j)) {
-			slotFog(i, j);
-		} else {
+	// a NULL player means that we should display the complete map. fog of
+	// war gets disabled.
+	mUseFog = true; // needs to be enabled to initialize the map...
+	for (unsigned int i = 0; i < map()->width(); i++) {
+		for (unsigned int j = 0; j < map()->height(); j++) {
 			slotUnfog(i, j);
 		}
 	}
+	mUseFog = false;
+ } else {
+	mUseFog = true;
+	for (unsigned int i = 0; i < map()->width(); i++) {
+		for (unsigned int j = 0; j < map()->height(); j++) {
+			if (p && p->isFogged(i, j)) {
+				slotFog(i, j);
+			} else {
+				slotUnfog(i, j);
+			}
+		}
+	}
  }
+ delete d->mGroundPainter;
+ d->mGroundPainter = 0;
+ delete d->mUnZoomedGroundPainter;
+ d->mUnZoomedGroundPainter = 0;
+ setUpdatesEnabled(true);
+
+ repaintMiniMapPixmap();
 }
 
 double BosonMiniMap::scale() const
@@ -617,14 +649,14 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
 
 void BosonMiniMap::createGround()
 {
- if (mGround) {
-	delete mGround;
- }
+ delete mGround;
  mGround = new QPixmap((int)(mapWidth() * zoom() * scale()), (int)(mapHeight() * zoom() * scale()));
  QPainter p;
  p.begin(mGround);
  p.scale(zoom() * scale(), zoom() * scale());
- p.drawPixmap(0, 0, *mUnZoomedGround);
+ if (mUnZoomedGround) {
+	p.drawPixmap(0, 0, *mUnZoomedGround);
+ }
  p.end();
 }
 

@@ -247,6 +247,9 @@ void BosonWidgetBase::initConnections()
 
  connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&)),
 		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&)));
+
+ connect(boGame, SIGNAL(signalInitFogOfWar()),
+		this, SLOT(slotInitFogOfWar()));
 }
 
 void BosonWidgetBase::initDisplayManager()
@@ -468,8 +471,11 @@ void BosonWidgetBase::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer
 
 void BosonWidgetBase::slotInitFogOfWar()
 {
-// AB: could be placed into BosonWidget, since Editor doesnt have this
- minimap()->initFogOfWar(localPlayer());
+ if (boGame->gameMode()) {
+	minimap()->initFogOfWar(localPlayer());
+ } else {
+	minimap()->initFogOfWar(0);
+ }
 }
 
 bool BosonWidgetBase::sound() const
