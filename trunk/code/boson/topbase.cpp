@@ -27,6 +27,7 @@
 #include <kstatusbar.h>
 #include <kaction.h>
 #include <kstdaction.h>
+#include <kshortcut.h>
 #include <kdebug.h>
 
 #include <qwmatrix.h>
@@ -76,7 +77,7 @@ TopBase::~TopBase()
 void TopBase::initKAction()
 {
 // Debug - no i18n!
- (void)new KAction("Debug", QKeySequence(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
+ (void)new KAction("Debug", KShortcut(), mBosonWidget, SLOT(slotDebug()), actionCollection(), "game_debug");
 
  d->mToolbarAction = KStdAction::showToolbar(this, SLOT(slotShowToolbar()), actionCollection());
  d->mStatusbarAction = KStdAction::showStatusbar(this, SLOT(slotShowStatusbar()), actionCollection());
@@ -96,7 +97,7 @@ void TopBase::initKAction()
 		SLOT(slotToggleMusic()), actionCollection(), "options_music");
  music->setChecked(mBosonWidget->music());
 
- d->mZoomAction = new KSelectAction(i18n("&Zoom"), QKeySequence(), actionCollection(), "options_zoom");
+ d->mZoomAction = new KSelectAction(i18n("&Zoom"), KShortcut(), actionCollection(), "options_zoom");
  connect(d->mZoomAction, SIGNAL(activated(int)), 
 		this, SLOT(slotZoom(int)));
  QStringList items;
