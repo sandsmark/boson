@@ -1124,6 +1124,7 @@ Unit* Boson::createUnit(unsigned long int unitType, Player* owner)
  }
  owner->addUnit(unit); // can also be in Unit c'tor - is this clean?
  theme->loadNewUnit(unit);
+ unit->setAnimationMode(Unit::AnimationIdle);
  if (unit->isFlying()) {
 	unit->moveBy(0.0f, 0.0f, 2.0 * BO_TILE_SIZE / BO_GL_CELL_SIZE);
  }
@@ -1369,6 +1370,15 @@ Unit* Boson::addUnit(unsigned long int unitType, Player* p, int x, int y)
  }
  unit->setId(nextUnitId());
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
+ if (!gameMode()) {
+	// editor won't display the construction, but always completed
+	// facilities. otherwise it's hard to recognize where they were actually
+	// placed
+	if (unit->glConstructionSteps() > 0) {
+		unit->setGLConstructionStep(unit->glConstructionSteps());
+	}
+	unit->setAnimationMode(Unit::AnimationIdle);
+ }
  return unit;
 }
 
@@ -1395,6 +1405,15 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
  }
  
  emit signalAddUnit(unit, x * BO_TILE_SIZE, y * BO_TILE_SIZE);
+ if (!gameMode()) {
+	// editor won't display the construction, but always completed
+	// facilities. otherwise it's hard to recognize where they were actually
+	// placed
+	if (unit->glConstructionSteps() > 0) {
+		unit->setGLConstructionStep(unit->glConstructionSteps());
+	}
+	unit->setAnimationMode(Unit::AnimationIdle);
+ }
  return unit;
 }
 
