@@ -751,7 +751,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 		}
 		if (owner->facilitiesCount() == 0) {
 			BoEvent* allFacilitiesDestroyed = new BoEvent("AllFacilitiesDestroyed");
-			allFacilitiesDestroyed->setPlayerId(id());
+			allFacilitiesDestroyed->setPlayerId(unit->owner()->id());
 			boGame->queueEvent(allFacilitiesDestroyed);
 		}
 		if (owner->allUnits()->count() == 0) {
