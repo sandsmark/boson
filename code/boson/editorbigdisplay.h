@@ -97,7 +97,7 @@ protected:
 	/**
 	 * In editor mode this does just nothing.
 	 **/
-	virtual void updateCursor();
+	virtual void updateCursor() {}
 
 	virtual bool actionLocked() const { return false; }
 

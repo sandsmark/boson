@@ -27,7 +27,7 @@ class UnitBase;
 class Facility;
 class Player;
 class CommandInput;
-class BosonCommandWidget;
+class BosonOrderButton;
 
 class QPixmap;
 class KPlayer;
@@ -73,7 +73,7 @@ public:
 	 * Resets button by setting it's production count to 0 and making it
 	 * not-grayed-out
 	 **/
-	void resetButton(BosonCommandWidget* button);
+	void resetButton(BosonOrderButton* button);
 
 protected:
 	void resetLayout();

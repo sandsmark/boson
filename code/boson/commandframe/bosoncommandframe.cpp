@@ -19,17 +19,18 @@
 
 #include "bosoncommandframe.h"
 
-#include "unit.h"
-#include "unitplugins.h"
-#include "player.h"
-#include "speciestheme.h"
-#include "unitproperties.h"
-#include "pluginproperties.h"
+#include "bosonorderbutton.h"
 #include "bosonunitview.h"
-#include "cell.h"
-#include "bosontiles.h"
-#include "bosoncommandwidget.h"
-#include "bosonconfig.h"
+#include "../unit.h"
+#include "../unitplugins.h"
+#include "../player.h"
+#include "../speciestheme.h"
+#include "../unitproperties.h"
+#include "../pluginproperties.h"
+#include "../cell.h"
+#include "../bosontiles.h"
+#include "../bosonconfig.h"
+#include "../defines.h"
 
 #include <kstandarddirs.h>
 #include <klocale.h>
@@ -44,7 +45,6 @@
 #include <qtimer.h>
 #include <qlabel.h>
 
-#include "defines.h"
 
 #include "bosoncommandframe.moc"
 
@@ -134,7 +134,7 @@ public:
 		mButtonOffset = 0;
 	}
 
-	QIntDict<BosonCommandWidget> mOrderButton;
+	QIntDict<BosonOrderButton> mOrderButton;
 	QVBoxLayout* mTopLayout;
 	QGridLayout* mOrderLayout; 
 	
@@ -170,7 +170,7 @@ void BoOrderWidget::ensureButtons(unsigned int number)
  }
  for (unsigned int i = 0; i < number; i++) {
 	if (!d->mOrderButton[i]) {
-		BosonCommandWidget* b = new BosonCommandWidget(this);
+		BosonOrderButton* b = new BosonOrderButton(this);
 		b->hide();
 		b->setBackgroundOrigin(WindowOrigin);
 		d->mOrderButton.insert(i, b);
@@ -202,7 +202,7 @@ void BoOrderWidget::resetLayout()
  d->mOrderLayout = new QGridLayout(d->mTopLayout, -1, -1);
  d->mTopLayout->addStretch(1);
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	BosonCommandWidget* b = d->mOrderButton[i];
+	BosonOrderButton* b = d->mOrderButton[i];
 	d->mOrderLayout->addWidget(b, i / buttons, i % buttons, AlignHCenter);
  }
  int row = ((d->mOrderButton.count() - 1) / buttons) + 1;
@@ -255,7 +255,7 @@ void BoOrderWidget::setOrderButtons(QValueList<unsigned long int> produceList, P
 
 void BoOrderWidget::hideOrderButtons()
 {
- QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
+ QIntDictIterator<BosonOrderButton> it(d->mOrderButton);
  while (it.current()) {
 	it.current()->setUnit(0);
 	++it;
@@ -386,13 +386,13 @@ void BoOrderWidget::initEditor()
 void BoOrderWidget::showUnit(Unit* unit)
 {
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandUnitSelected) {
+	if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandUnitSelected) {
 		if (d->mOrderButton[i]->unit() == unit) {
 			kdDebug() << "unit already displayed - update..." << endl;
 			d->mOrderButton[i]->slotUnitChanged(unit);
 			return;
 		}
-	} else if (d->mOrderButton[i]->commandType() == BosonCommandWidget::CommandNothing) {
+	} else if (d->mOrderButton[i]->commandType() == BosonOrderButton::CommandNothing) {
 //		kdDebug() << "show unit at " << i << endl;
 		d->mOrderButton[i]->setUnit(unit);
 		return;
@@ -419,8 +419,8 @@ void BoOrderWidget::productionAdvanced(Unit* factory, double percentage)
 	return;
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
-	BosonCommandWidget* c = d->mOrderButton[i];
-	if (c->commandType() == BosonCommandWidget::CommandUnit) {
+	BosonOrderButton* c = d->mOrderButton[i];
+	if (c->commandType() == BosonOrderButton::CommandUnit) {
 		if (c->unitType() == production->currentProduction()) {
 			c->advanceProduction(percentage);
 		}
@@ -448,7 +448,7 @@ void BoOrderWidget::slotEditorLoadTiles()
  }
 }
 
-void BoOrderWidget::resetButton(BosonCommandWidget* button)
+void BoOrderWidget::resetButton(BosonOrderButton* button)
 {
  button->setProductionCount(0);
  button->setGrayOut(false);

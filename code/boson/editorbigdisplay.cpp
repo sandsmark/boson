@@ -25,25 +25,16 @@
 #include "player.h"
 #include "unitproperties.h"
 #include "cell.h"
-#include "bosonmessage.h"
-#include "bosoncursor.h"
+//#include "bosonmessage.h"
 #include "bosonconfig.h"
 #include "global.h"
-#include "kspritetooltip.h"
 #include "boselection.h"
 #include "defines.h"
+//#include "kspritetooltip.h"//TODO
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
 #include <klocale.h>
-
-#include <qptrlist.h>
-#include <qpoint.h>
-#include <qpainter.h>
-#include <qbitmap.h>
-#include <qlabel.h>
-#include <qtimer.h>
-#include <qcursor.h>
 
 // this just stores a *selection* for constructing. This means e.g. if you click
 // on a unit (in the command frame!) the unit type is placed here as well as the
@@ -110,7 +101,6 @@ void EditorBigDisplay::setLocalPlayer(Player* p)
 }
 
 void EditorBigDisplay::actionClicked(const BoAction& action, QDataStream& , bool* )
-//void EditorBigDisplay::editorActionClicked(const BoAction& action)
 {
 // kdDebug() << k_funcinfo << endl;
  int x = action.canvasPos().x() / BO_TILE_SIZE;
@@ -172,11 +162,6 @@ void EditorBigDisplay::slotWillPlaceCell(int groundType)
  d->mConstruction.unitType = -1;
  d->mConstruction.groundType = groundType;
 }*/
-
-void EditorBigDisplay::updateCursor()
-{
- // does nothing. 
-}
 
 /*
 void EditorBigDisplay::addMouseIO(Player* p)

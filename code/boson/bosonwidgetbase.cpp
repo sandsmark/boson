@@ -25,7 +25,6 @@
 #include "boson.h"
 #include "player.h"
 #include "unit.h"
-#include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "bosonplayfield.h"
 #include "bosonmap.h"
@@ -42,6 +41,7 @@
 #include "top.h"
 #include "bosonbigdisplay.h"
 //#include "editorbigdisplay.h"
+#include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
 #include <kapplication.h>

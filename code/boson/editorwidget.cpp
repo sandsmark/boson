@@ -24,7 +24,6 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
-#include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "bosonplayfield.h"
 #include "bosonscenario.h"
@@ -34,6 +33,7 @@
 #include "global.h"
 #include "bosonbigdisplay.h"
 #include "commandinput.h"
+#include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
 #include <klocale.h>

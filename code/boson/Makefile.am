@@ -2,7 +2,7 @@
 
 # this has all of the subdirectories that make will recurse into.  if
 # there are none, comment this out
-SUBDIRS = data visual sound
+SUBDIRS = data visual commandframe sound
 
 bin_PROGRAMS = boson bounit boprofiling bocursor
 
@@ -29,12 +29,10 @@ BOSON_SRC = \
 	boson.cpp \
 	speciestheme.cpp \
 	player.cpp \
-	bosoncommandframe.cpp \
 	kgamedialogbosonconfig.cpp \
 	bosonbigdisplaybase.cpp \
 	bosonbigdisplay.cpp \
 	bosonminimap.cpp \
-	bosonunitview.cpp \
 	kgameunitdebug.cpp \
 	kgameplayerdebug.cpp \
 	kgamecelldebug.cpp \
@@ -50,7 +48,6 @@ BOSON_SRC = \
 	kgamedialogcomputerconfig.cpp \
 	bosonpath.cpp \
 	unit.cpp \
-	bosoncommandwidget.cpp \
 	selectbox.cpp \
 	commandinput.cpp \
 	bosoncursor.cpp \
@@ -73,7 +70,12 @@ BOPROFILING_SRC= \
 	boprofilingmain.cpp
 
 boson_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la $(top_builddir)/boson/sound/libbosonsound.la -lkdegames -lqtmcop -lsoundserver_idl -lartskde -lGLU -l3ds $(LIB_KDEUI)
+boson_LDADD = $(top_builddir)/boson/visual/libbosonvisual.la \
+		$(top_builddir)/boson/sound/libbosonsound.la \
+		$(top_builddir)/boson/commandframe/libbosoncommandframe.la \
+		-lkdegames -lqtmcop -lsoundserver_idl -lartskde \
+		-lGLU -l3ds \
+		$(LIB_KDEUI)
 boson_SOURCES = $(BOSON_SRC)
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)
