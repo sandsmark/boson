@@ -1,10 +1,21 @@
-SUBDIRS = facilities game units
-
-# list all files that should be installed here. space separated.
-EXTRA_DIST=main.css index.html about.html faq.html installation.html intr.html started.html credits.html
-
 # the language this directory contains
 KDE_LANG=en
 
-# just the appname. no need to change.
-KDE_DOCS=boson
+# all subdirs that should get processed, too
+SUBDIRS = facilities game units
+
+# please specify the subdirectry here, e.g. "units" or "facilities". leave empty
+# for toplevel directory.
+BO_DOC_DIR=
+
+# list all wml files here
+BO_DOCS=about.wml credits.wml faq.wml index.wml installation.wml intr.wml \
+	started.wml
+
+# list additional data here - these files will get installed
+doc_DATA=main.css 
+
+# Condiguration ends here!
+
+docdir=$(kde_htmldir)/$(KDE_LANG)/boson/$(BO_DOC_DIR)
+
