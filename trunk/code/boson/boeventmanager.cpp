@@ -94,6 +94,8 @@ void BoEventManager::declareEvents()
 
  BO_DECLARE_EVENT(PlayerLost);
 
+ BO_DECLARE_EVENT(Advance);
+
  BO_DECLARE_EVENT(CustomEvent);
  BO_DECLARE_EVENT(CustomStringEvent);
 #undef BO_DECLARE_EVENT

@@ -236,6 +236,10 @@ private:
 void BoAdvance::receiveAdvanceCall()
 {
  BO_CHECK_NULL_RET(mCurrentAdvanceMessageTimes);
+
+ BoEvent* advanceEvent = new BoEvent("Advance");
+ mBoson->queueEvent(advanceEvent);
+
  mCurrentAdvanceMessageTimes->receiveAdvanceCall();
  boDebug(300) << k_funcinfo << advanceCallsCount() << endl;
  bool flag = advanceFlag();
