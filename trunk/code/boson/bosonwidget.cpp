@@ -475,12 +475,15 @@ void BosonWidget::slotLoadMap(const QString& map)
  }
  // load the map into d->mMap
  kdDebug() << "load default map" << endl;
- d->mMap->loadMap(map);
+ if (!d->mMap->loadMap(map)) {
+	return;
+ }
 
  QByteArray buffer;
  QDataStream stream(buffer, IO_WriteOnly);
  stream << QString("earth.png"); // FIXME: don't send a QString!! -> i18n!!
  d->mMap->saveMapGeo(stream);
+ d->mMap->saveCells(stream);
 
  // send the loaded map via network. It will be initialized in slotReceiveMap
  d->mBoson->sendMessage(stream, BosonMessage::InitMap);
@@ -512,6 +515,7 @@ void BosonWidget::slotReceiveMap(const QByteArray& buffer)
 	clearMap();
  }
  d->mMap->loadMapGeo(stream);
+ d->mMap->loadCells(stream);
 
  // load tiles if in editor mode
  kdDebug() << "Editor mode: load tiles" << endl;

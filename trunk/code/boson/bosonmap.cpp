@@ -8,9 +8,8 @@
 
 #include <qfile.h>
 #include <qdatastream.h>
+#include <qdom.h>
 
-#include <kgame/kgamepropertyhandler.h>
-#include <kgame/kgameproperty.h>
 #include <kdebug.h>
 #include <kstandarddirs.h>
 
@@ -30,10 +29,8 @@ public:
 	
 	QString mFileName;
 
-	KGamePropertyHandler mProperties;
-
-	KGameProperty<int> mMapWidth;
-	KGameProperty<int> mMapHeight;
+	int mMapWidth;
+	int mMapHeight;
 	
 	Cell* mCells;
 };
@@ -57,14 +54,6 @@ BosonMap::~BosonMap()
 void BosonMap::init()
 {
  d = new BosonMapPrivate;
- // note we do not register d->mProperties anywhere as we don't use send() or
- // emitSignal from KGameProperty. They are just used for saving the file.
- d->mMapHeight.registerData(IdMapHeight, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "MapHeight");
- d->mMapWidth.registerData(IdMapWidth, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "MapWidth");
- d->mMapWidth.setLocal(0);
- d->mMapHeight.setLocal(0);
 }
 
 QString BosonMap::defaultMap()
@@ -76,38 +65,99 @@ QString BosonMap::defaultMap()
  return locate("data", "boson/map/basic.bpf");
 }
 
-KGamePropertyHandler* BosonMap::dataHandler() const
-{
- return &d->mProperties;
-}
-
 bool BosonMap::loadMap(const QString& fileName)
 {
  kdDebug() << "BosonMap::loadMap " << fileName << endl;
-
+ d->mFileName = fileName; // probably obsolete?
  // open stream 
  QFile f(fileName);
  if (!f.open(IO_ReadOnly)){
 	kdError() << "BosonMap: Can't open file " << fileName << endl;
 	return false;
  }
- QDataStream stream(&f);
- bool ret = loadCompleteMap(stream);
- if (ret) {
-	d->mFileName = fileName;
- }
+ QByteArray buffer = f.readAll();
  f.close();
+ QDataStream stream(buffer, IO_ReadOnly);
+ bool binary = false;
+ if (verifyMap(stream)) { // check if this is binary
+	binary = true;
+ } else {
+	binary = false;
+ }
+ bool ret = loadMap(buffer, binary);
+ if (!ret) {
+	kdError() << "Could not load file " << fileName << endl;
+ }
  return ret;
 }
 
-bool BosonMap::loadCompleteMap(QDataStream& stream)
+bool BosonMap::loadMap(const QByteArray& buffer, bool binary)
 {
- if (!verifyMap (stream)) {
-	kdError() << "Invalid map file" << endl;
+ if (binary) {
+	QDataStream stream(buffer, IO_ReadOnly);
+	if (!verifyMap (stream)) { // we already did this so this cannot fail
+		kdError() << "Invalid map file" << endl;
+		return false;
+	}
+	if (!loadMapGeo(stream)) {
+		kdError() << "Error loading map geo" << endl;
+		return false;
+	}
+	if (!loadCells(stream)) {
+		kdError() << "Error loading map cells" << endl;
+		return false;
+	}
+	saveMap("/home/andi/mmm.xml", false);
+	return true;
+ }
+
+ // load XML file
+ QDomDocument doc("BosonMap");
+ kdDebug() << d->mFileName << endl;
+ QFile f(d->mFileName);
+ f.open(IO_ReadOnly);
+ 
+// if (!doc.setContent(buffer)) {
+ QString errorMsg;
+ int lineNo;
+ int columnNo;
+ if (!doc.setContent(&f, false, &errorMsg, &lineNo, &columnNo)) {
+	kdError() << "Parse error in line " << lineNo << ",column " << columnNo
+			<< " error message: " << errorMsg << endl;
 	return false;
  }
- if (!loadMapGeo(stream)) {
-	kdError() << "Error loading map geo" << endl;
+ f.close();
+ QDomNodeList list;
+ QDomElement root = doc.documentElement();
+ list = root.elementsByTagName("MapGeo");
+ if (list.count() != 1) {
+	kdError() << "XML parsing error: cannot have tag Map Geo " 
+			<< list.count() << " times" << endl;
+	return false;
+ }
+ QDomElement geo = list.item(0).toElement();
+ if (geo.isNull()) {
+	kdError() << "XML parsing error: geo is not an QDomElement" << endl;
+	return false;
+ }
+ if (!loadMapGeo(geo)) {
+	kdError() << "XML parsing error: failed loading map geo" << endl;
+	return false;
+ }
+
+ list = root.elementsByTagName("MapCells");
+ if (list.count() != 1) {
+	kdError() << "XML parsing error: cannot have tag Map Geo " 
+			<< list.count() << " times" << endl;
+	return false;
+ }
+ QDomElement cells = list.item(0).toElement();
+ if (geo.isNull()) {
+	kdError() << "XML parsing error: cells is not an QDomElement" << endl;
+	return false;
+ }
+ if (!loadCells(cells)) {
+	kdError() << "XML parsing error: failed loading map geo" << endl;
 	return false;
  }
 
@@ -123,7 +173,7 @@ bool BosonMap::verifyMap(QDataStream& stream)
  // Qt marshalling for a string is 4-byte-len + data
  stream >> i;
  if (TAG_FIELD_LEN + 1 != i) {
-	kdError() << "BosonMap::loadMap(): Magic doesn't match(len), check file name" << endl;
+//	kdError() << "BosonMap::loadMap(): Magic doesn't match(len), check file name" << endl;
 	return false;
  }
 
@@ -134,10 +184,21 @@ bool BosonMap::verifyMap(QDataStream& stream)
  }
 
  if (strncmp(magic, TAG_FIELD, TAG_FIELD_LEN) ) {
-	kdError() << "BosonMap::loadMap(): Magic doesn't match(string), check file name" << endl;
+//	kdError() << "BosonMap::loadMap(): Magic doesn't match(string), check file name" << endl;
 	return false;
  }
  return true;
+}
+
+void BosonMap::saveValidityHeader(QDataStream& stream)
+{ // TODO: use QString for this
+ // magic 
+ // Qt marshalling for a string is 4-byte-len + data
+ stream << (Q_INT32)(TAG_FIELD_LEN - 1);
+
+ for (int i = 0; i <= TAG_FIELD_LEN; i++) {
+	stream << (Q_INT8)TAG_FIELD[i];
+ }
 }
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
@@ -188,7 +249,15 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 	delete[] d->mCells;
  }
  d->mCells = new Cell[width() * height()];
+ return true;
+}
 
+bool BosonMap::loadCells(QDataStream& stream)
+{
+ if (!d->mCells) {
+	kdError() << "BosonMap::loadCells(): NULL cells" << endl;
+	return false;
+ }
 // load all cells:
  for (int i = 0; i < width(); i++) {
 	for (int j = 0; j < height(); j++) {
@@ -209,39 +278,219 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 		c->makeCell(groundType, version);
 	}
  }
-
  return true;
 }
 
-bool BosonMap::saveMap(const QString& fileName)
+
+bool BosonMap::saveMap(const QString& fileName, bool binary)
 {
- kdDebug() << "BosonMap::saveMap()" << endl;
 // TODO: check if file exists already
- // open stream 
- QFile f(fileName);
- if (!f.open(IO_WriteOnly)){
+ kdDebug() << "BosonMap::saveMap()" << endl;
+ if (!isValid()) {
+	kdError() << "Cannot save invalid file" << endl;
+	return false;
+ }
+ QFile file(fileName);
+ if (binary) { // write a binary file
+	if (!file.open(IO_WriteOnly)){
+		kdError() << "BosonMap: Can't open file " << fileName << endl;
+		return false;
+	}
+	QDataStream stream(&file);
+ 
+	saveValidityHeader(stream);
+	bool ret = saveMapGeo(stream);
+	if (ret) {
+		ret = saveCells(stream);
+	}
+	file.close();
+	kdDebug() << "BosonMap::saveMap() done" << endl;
+	return ret;
+ }
+
+ QDomDocument doc("BosonMap");
+ QDomElement root = doc.createElement("BosonMap");
+ doc.appendChild(root);
+
+ QDomElement geo = doc.createElement("MapGeo");
+ root.appendChild(geo);
+
+ if (!saveMapGeo(geo)) {
+	kdError() << "Could not save map geo to " << fileName << endl;
+	return false;
+ }
+
+ QDomElement cells = doc.createElement("MapCells");
+ root.appendChild(cells);
+
+ if (!saveCells(cells)) {
+	kdError() << "Could not save cells into " << fileName << endl;
+	return false;
+ }
+
+// now save the file
+ if (!file.open(IO_WriteOnly)){
 	kdError() << "BosonMap: Can't open file " << fileName << endl;
 	return false;
  }
- QDataStream stream(&f);
- 
- // magic 
- // Qt marshalling for a string is 4-byte-len + data
- stream << (Q_INT32)(TAG_FIELD_LEN - 1);
+ QString xml = doc.toString();
+ file.writeBlock(xml.data(), xml.length()); // is this ok? is there a better way??
+ file.close();
+ return true;
+}
 
- for (int i = 0; i <= TAG_FIELD_LEN; i++) {
-	stream << (Q_INT8)TAG_FIELD[i];
+bool BosonMap::saveMapGeo(QDomElement& node)
+{
+// TODO: maybe check for validity
+ node.setAttribute("Width", width());
+ node.setAttribute("Height", width());
+ return true;
+}
+
+bool BosonMap::loadMapGeo(QDomElement& node)
+{
+ if (!node.hasAttribute("Width")) {
+	kdError() << "XML parsing: Map width is mandatory!" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("Height")) {
+	kdError() << "XML parsing: Map height is mandatory!" << endl;
+	return false;
+ }
+ Q_INT32 width = node.attribute("Width").toInt();
+ Q_INT32 height = node.attribute("Height").toInt();
+
+// lets use the same function as for loading the binary file:
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << (Q_UINT32)1; // obsolete
+ stream << width;
+ stream << height;
+ stream << (Q_UINT32)1; // obsolete
+ stream << (Q_UINT32)1; // obsolete
+ stream << QString(""); // obsolete
+
+ QDataStream readStream(buffer, IO_ReadOnly);
+ return loadMapGeo(readStream);
+}
+
+bool BosonMap::loadCells(QDomElement& node)
+{
+ QDomNodeList list = node.elementsByTagName("Cell");
+ if ((int)list.count() < width() * height()) {
+	kdError() << "XML error: not enough cells" << endl;
+	return false;
+ }
+ if ((int)list.count() != width() * height()) {
+	kdWarning() << "Cell count doesn't match width * height" 
+			<< endl;
+ }
+ 
+ QByteArray buffer;
+ QDataStream stream(buffer, IO_WriteOnly);
+ int* groundType = new int[width() * height()];
+ unsigned char* version = new unsigned char[width() * height()];
+ for (unsigned int i = 0; i < list.count(); i++) {
+	QDomElement cell = list.item(i).toElement();
+	if (cell.isNull()) {
+		kdError() << "XML error: cell is not an QDomElement" << endl;
+	} else {
+		int x;
+		int y;
+		int g;
+		unsigned char v;
+		if (!loadCell(cell, x, y, g, v)) {
+			kdError() << "XML error: could not load cell" << endl;
+			continue;
+		}
+		groundType[x + y * width()] = g;
+		version[x + y * width()] = v;
+	}
+ }
+ for (int i = 0; i < width(); i++) {
+	for (int j = 0; j < height(); j++) {
+		saveCell(stream, groundType[i + j * width()], 
+				version[i + j * width()]);
+	}
  }
 
- bool ret = saveMapGeo(stream);
- f.close();
- kdDebug() << "BosonMap::saveMap() done" << endl;
- return ret;
+ delete[] groundType;
+ delete[] version;
+
+ QDataStream readStream(buffer, IO_ReadOnly);
+ return loadCells(readStream);
+}
+
+bool BosonMap::loadCell(QDomElement& node, int& x, int& y, int& groundType, unsigned char& version)
+{
+ if (!node.hasAttribute("x")) {
+	kdError() << "XML: attribute x is mandatory!" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("y")) {
+	kdError() << "XML: attribute y is mandatory!" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("GroundType")) {
+	kdError() << "XML: attribute GroundType is mandatory!" << endl;
+	return false;
+ }
+ if (!node.hasAttribute("Version")) {
+	kdError() << "XML: attribute Version is mandatory!" << endl;
+	return false;
+ }
+ x = node.attribute("x").toInt();
+ y = node.attribute("y").toInt();
+ groundType = node.attribute("GroundType").toInt();
+ version = (unsigned char)node.attribute("Version").toInt(); // not nice...
+
+ if (x > width()) {
+	kdError() << "XML: x > width" << endl;
+	return false;
+ }
+ if (y > height()) {
+	kdError() << "XML: y > height" << endl;
+	return false;
+ }
+ return true;
+}
+
+bool BosonMap::saveCells(QDomElement& node)
+{
+ if (!d->mCells) {
+	kdError() << "BosonMap::saveCells(): NULL cells" << endl;
+	return false;
+ }
+ QDomDocument doc = node.ownerDocument();
+ for (int i = 0; i < width(); i++) {
+	for (int j = 0; j < height(); j++) {
+		QDomElement c = doc.createElement("Cell");
+		node.appendChild(c);
+		saveCell(c, i, j, cell(i, j));
+	}
+ }
+ return true;
+}
+
+bool BosonMap::saveCell(QDomElement& node, int x, int y, Cell* cell)
+{
+ if (!cell) {
+	kdError() << "BosonMap::saveCell(): NULL cell" << endl;
+	return false;
+ }
+ QDomDocument doc = node.ownerDocument();
+ node.setAttribute("x", x);
+ node.setAttribute("y", y);
+
+// or should these be separate elements? I doubt this.
+ node.setAttribute("GroundType", cell->groundType());
+ node.setAttribute("Version", cell->version());
+ return true;
 }
 
 bool BosonMap::saveMapGeo(QDataStream& stream)
 {
- if (!isValidGeo()) {
+ if (!isValid()) {
 	kdError() << "Map geo is not valid" << endl;
 	return false;
  }
@@ -252,17 +501,29 @@ bool BosonMap::saveMapGeo(QDataStream& stream)
  stream << (Q_UINT32)1; // obsolete
  stream << (Q_UINT32)1; // obsolete
  stream << QString(""); // obsolete
+ return true;
+}
 
+bool BosonMap::saveCells(QDataStream& stream)
+{
  for (int i = 0; i < width(); i++) {
 	for (int j = 0; j < height(); j++) {
 		Cell* c = cell(i, j);
-		saveCell(stream, c);
+		if (!c) {
+			kdError() << "BosonMap::saveCell(): NULL Cell" << endl;
+			// do not abort - otherwise all clients receiving this
+			// stream are completely broken as we expect
+			// width()*height() cells
+			saveCell(stream, 0, 0);
+		} else {
+			saveCell(stream, c->groundType(), c->version());
+		}
 	}
  }
  return true;
 }
 
-bool BosonMap::isValidGeo() const
+bool BosonMap::isValid() const
 {
  if (width() < 10) {
 	kdError() << "width < 10" << endl;
@@ -278,6 +539,10 @@ bool BosonMap::isValidGeo() const
  }
  if (height() > MAX_MAP_HEIGHT) {
 	kdError() << "mapHeight > " << MAX_MAP_HEIGHT << endl;
+	return false;
+ }
+ if (!d->mCells) {
+	kdError() << "BosonMap::isValid(): NULL cells" << endl;
 	return false;
  }
 
@@ -306,7 +571,8 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  stream >> version;
  if (version > 4) {
 	kdError() << "BosonMap::loadCell(): broken map file!" << endl;
-	kdError() << "invalid cell!" << endl;
+	kdError() << "invalid cell: version >= 4!" << endl;
+	kdDebug() << version << endl;
  }
  groundType = g;
  b = version;
@@ -314,18 +580,11 @@ bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
  return true;
 }
 
-void BosonMap::saveCell(QDataStream& stream, Cell* c)
+void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char version)
 {
- int groundType = 0;
- unsigned char version = 0;
- if (!c) {
-	kdError() << "BosonMap::saveCell(): NULL Cell" << endl;
-	// do not abort - otherwise all clients receiving this
-	// stream are completely broken as we expect
-	// width()*height() cells
- } else {
-	groundType = c->groundType();
-	version = c->version();
+ if (version > 4) {
+	kdWarning() << "Invalid version " << version << endl;
+	version = 0;
  }
  stream << (Q_INT32)TAG_CELL;
  stream << (Q_INT32)groundType;
