@@ -55,6 +55,7 @@ public:
   void destroyFix(destroyedMsg_t &);
 
   void move(moveMsg_t &);
+  void shoot(shootMsg_t &);
   void requestAction(void);
 
 /* concerning contents */

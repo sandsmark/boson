@@ -61,6 +61,7 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 	int ldx, ldy;
 	int vp1, vp2, vp3;
 	int newdir;
+	int range;
 	
 	switch(state){
 		default:
@@ -95,6 +96,11 @@ bool playerMobUnit::getWantedMove(bosonMsgData *msg)
 
 		case MUS_MOVING:
 			ldx = dest_x - x() ; ldy= dest_y - y();
+
+			range = mobileProp[type].range;
+			if (target && range*range > ldx*ldx + ldy*ldy) // we are near enough to shoot at the target
+				return false;
+
 			vp1 = VECT_PRODUCT(getLeft(2));
 			vp2 = VECT_PRODUCT(direction);
 			vp3 = VECT_PRODUCT(getRight(2));
@@ -238,8 +244,11 @@ bool playerMobUnit::getWantedShoot(bosonMsgData *msg)
 	if (range<=0) return false;		// Unit can't shoot
 
 	dx = x() - target->_x(); dy = y() - target->_y();
-
 	if (range*range < dx*dx + dy*dy) return false; // too far
+
+	shoot_timer--;
+	if (shoot_timer<=0) shoot_timer = 30;
+		else return false;		// not yet
 
 	// ok, let's shoot it
 	msg->shoot.target_key = target->key;
@@ -340,7 +349,8 @@ void playerMobUnit::u_attack(Unit *u)
 		disconnect(target, 0, this, 0); // target isn't connected to 'this' anymore
 	}
 
-	target = u;
+	target		= u;
+	shoot_timer	= 30;
 	//puts("assigning target");
 
 	connect( u, SIGNAL(dying(Unit*)), this, SLOT(targetDying(Unit*)) );

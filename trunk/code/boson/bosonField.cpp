@@ -28,6 +28,7 @@
 #include "../common/map.h"
 
 #include "bosonField.h"
+#include "boshot.h"
 #include "game.h" 	// who_am_i
   
 bosonField::bosonField(uint w, uint h, QObject *parent, const char *name=0L)
@@ -131,6 +132,28 @@ void bosonField::requestAction(void)
 		mobIt.current()->getWantedAction();
 	for (fixIt.toFirst(); fixIt; ++fixIt)
 		fixIt.current()->getWantedAction();
+}
+
+void bosonField::shoot(shootMsg_t &m)
+{
+	playerMobUnit	* mob;
+	playerFacility	* fix;
+#if 0
+	static int counter = 5;
+	
+	if (counter<=0) return;
+	counter--;
+#endif
+
+	mob = mobile.find(m.target_key);
+	fix = facility.find(m.target_key);
+	if (!mob && !fix) {
+		logf(LOG_ERROR, "bosonField::shoot : unexpected target_key in shootMsg_t : %d", m.target_key);
+		return;
+	}
+	if (!mob)
+		new boShot(fix->_x(), fix->_y(), fix->z());
+	else	new boShot(mob->_x(), mob->_y(), mob->z());
 }
 
 

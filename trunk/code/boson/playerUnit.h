@@ -80,6 +80,7 @@ signals:
 
 /* attack */
 	Unit 	*target;
+	int	shoot_timer;
 
 };
 
