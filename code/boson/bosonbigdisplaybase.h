@@ -209,6 +209,14 @@ public:
 	 **/
 	void scrollBy(int x, int y);//AB: kind of obsolete, since we don't support QCanvas anymore
 
+	void rotateLeft(float factor = 5);
+	void rotateRight(float factor = 5);
+	void zoomIn(float factor = 5);
+	void zoomOut(float factor = 5);
+
+	void zoom(float delta);
+	void rotate(float delta);
+
 
 	bool boProject(GLfloat x, GLfloat y, GLfloat z, QPoint* pos) const;
 	bool boUnProject(const QPoint& pos, BoVector3* v, float z = -1.0) const;

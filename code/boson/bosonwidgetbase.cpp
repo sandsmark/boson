@@ -602,22 +602,47 @@ void BosonWidgetBase::initKActions()
  QSignalMapper* scrollMapper = new QSignalMapper(this);
  connect(scrollMapper, SIGNAL(mapped(int)), displayManager(), SLOT(slotScroll(int)));
  KAction* a;
- a = new KAction(i18n("Scroll Up"), Qt::Key_Up, scrollMapper,
+ KShortcut scrollUp(Qt::Key_Up);
+ scrollUp.append(KKeySequence(KKey(Qt::Key_W)));
+ a = new KAction(i18n("Scroll Up"), scrollUp, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_up");
  scrollMapper->setMapping(a, BoDisplayManager::ScrollUp);
- a = new KAction(i18n("Scroll Down"), Qt::Key_Down, scrollMapper,
+ KShortcut scrollDown(Qt::Key_Down);
+ scrollDown.append(KKeySequence(KKey(Qt::Key_S)));
+ a = new KAction(i18n("Scroll Down"), scrollDown, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_down");
  scrollMapper->setMapping(a, BoDisplayManager::ScrollDown);
- a = new KAction(i18n("Scroll Left"), Qt::Key_Left, scrollMapper,
+ KShortcut scrollLeft(Qt::Key_Left);
+ scrollLeft.append(KKeySequence(KKey(Qt::Key_A)));
+ a = new KAction(i18n("Scroll Left"), scrollLeft, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_left");
  scrollMapper->setMapping(a, BoDisplayManager::ScrollLeft);
- a = new KAction(i18n("Scroll Right"), Qt::Key_Right, scrollMapper,
+ KShortcut scrollRight(Qt::Key_Right);
+ scrollRight.append(KKeySequence(KKey(Qt::Key_D)));
+ a = new KAction(i18n("Scroll Right"), scrollRight, scrollMapper,
 		SLOT(map()), actionCollection(),
 		"scroll_right");
  scrollMapper->setMapping(a, BoDisplayManager::ScrollRight);
+ KShortcut rotateLeft(Qt::Key_Q);
+ a = new KAction(i18n("Rotate Left"), rotateLeft, displayManager(),
+		SLOT(slotRotateLeft()), actionCollection(),
+		"rotate_left");
+ KShortcut rotateRight(Qt::Key_E);
+ a = new KAction(i18n("Rotate Right"), rotateRight, displayManager(),
+		SLOT(slotRotateRight()), actionCollection(),
+		"rotate_right");
+ KShortcut zoomIn(Qt::Key_F);
+ a = new KAction(i18n("Zoom In"), zoomIn, displayManager(),
+		SLOT(slotZoomIn()), actionCollection(),
+		"zoom_in");
+ KShortcut zoomOut(Qt::Key_V);
+ a = new KAction(i18n("Zoom out"), zoomOut, displayManager(),
+		SLOT(slotZoomOut()), actionCollection(),
+		"zoom_out");
+
 
  // FIXME: the editor should not have a "game" menu, so what to do with this?
  (void)new KAction(i18n("&Reset View Properties"), KShortcut(Qt::Key_R),

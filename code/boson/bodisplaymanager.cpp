@@ -403,6 +403,42 @@ void BoDisplayManager::slotScroll(int dir)
  }
 }
 
+void BoDisplayManager::slotRotateLeft()
+{
+ BosonBigDisplayBase* active = activeDisplay();
+ if (!active) {
+	return;
+ }
+ active->rotateLeft();
+}
+
+void BoDisplayManager::slotRotateRight()
+{
+ BosonBigDisplayBase* active = activeDisplay();
+ if (!active) {
+	return;
+ }
+ active->rotateRight();
+}
+
+void BoDisplayManager::slotZoomIn()
+{
+ BosonBigDisplayBase* active = activeDisplay();
+ if (!active) {
+	return;
+ }
+ active->zoomIn();
+}
+
+void BoDisplayManager::slotZoomOut()
+{
+ BosonBigDisplayBase* active = activeDisplay();
+ if (!active) {
+	return;
+ }
+ active->zoomOut();
+}
+
 void BoDisplayManager::slotAdvance(unsigned int, bool)
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
@@ -760,7 +796,22 @@ void BoDisplayManager::grabMovieFrame()
  bool ok = QPixmap(shot).save(file, "JPEG", 90);
  if (!ok) {
 	boError() << k_funcinfo << "Error saving screenshot to " << file << endl;
+	return;
  }
  boDebug() << k_funcinfo << "Movie frame saved to file " << file << endl;
+
+#if 0
+ static QValueList<QByteArray> allMovieFrames;
+ allMovieFrames.append(shot);
+
+
+ // TODO: use a shortcut for this. do not do this after a certain number of
+ // frames, but when a key was pressed.
+ if (allMovieFrames.count() == 10) {
+	boDebug() << k_funcinfo << "generating " << allMovieFrames.count() << " frames" << endl;
+	d->mActiveDisplay->generateMovieFrames(allMovieFrames, "./11/");
+	allMovieFrames.clear();
+ }
+#endif
 }
 

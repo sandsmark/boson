@@ -132,6 +132,11 @@ public slots:
 	 **/
 	void slotScroll(int direction);
 
+	void slotRotateLeft();
+	void slotRotateRight();
+	void slotZoomIn();
+	void slotZoomOut();
+
 	/**
 	 * Select the specified group to the active display.
 	 * @param number The group to be selected. Must be in range 0..9 where 1
