@@ -201,6 +201,8 @@ void Unit::initStatic()
  addPropertyId(IdBombingPosX, QString::fromLatin1("BombingPosX"));
  addPropertyId(IdBombingPosY, QString::fromLatin1("BombingPosY"));
  addPropertyId(IdMinePlacingCounter, QString::fromLatin1("MinePlacingCounter"));
+ addPropertyId(IdRessourceMineMinerals, QString::fromLatin1("RessourceMineMinerals"));
+ addPropertyId(IdRessourceMineOil, QString::fromLatin1("RessourceMineOil"));
 
  mInitialized = true;
 }

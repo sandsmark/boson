@@ -409,6 +409,19 @@ public:
 	 **/
 	int oil() const;
 
+	void setMinerals(int m);
+	void setOil(int m);
+
+	/**
+	 * @return See @ref RessourceMinePropeties::canProvideMinerals
+	 **/
+	bool canProvideMinerals() const;
+
+	/**
+	 * @return See @ref RessourceMinePropeties::canProvideOil
+	 **/
+	bool canProvideOil() const;
+
 private:
 	KGameProperty<int> mOil;
 	KGameProperty<int> mMinerals;
