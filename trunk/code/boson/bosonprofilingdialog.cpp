@@ -312,9 +312,25 @@ void BosonProfilingDialog::initSlotAdvancePage()
 {
  QWidget* page = addPage(i18n("&Slot Advance"));
  QVBoxLayout* layout = new QVBoxLayout(page, 0, KDialog::spacingHint());
+ QSplitter* splitter = new QSplitter(Vertical, page);
+ layout->addWidget(splitter);
 
- QLabel* slotAdvanceLabel = new QLabel(i18n("Slot advance function:"), page);
- d->mSlotAdvance = new KListView(page);
+ QWidget* slotAdvanceWidget = new QWidget(splitter);
+ initSlotAdvanceWidget(slotAdvanceWidget);
+
+ QWidget* itemAdvanceWidget = new QWidget(splitter);
+ initItemAdvanceWidget(itemAdvanceWidget);
+
+ QPushButton* reset = new QPushButton(i18n("Reset Values"), page);
+ connect(reset, SIGNAL(clicked()), this, SLOT(slotResetSlotAdvancePage()));
+ layout->addWidget(reset);
+}
+
+void BosonProfilingDialog::initSlotAdvanceWidget(QWidget* widget)
+{
+ QVBoxLayout* layout = new QVBoxLayout(widget, 0, KDialog::spacingHint());
+ QLabel* slotAdvanceLabel = new QLabel(i18n("Slot advance function:"), widget);
+ d->mSlotAdvance = new KListView(widget);
  d->mSlotAdvance->setRootIsDecorated(true);
  d->mSlotAdvance->addColumn(i18n("Number"));
  d->mSlotAdvance->addColumn(i18n("Advance Count"));
@@ -323,7 +339,7 @@ void BosonProfilingDialog::initSlotAdvancePage()
  d->mSlotAdvance->addColumn(i18n("Time (ms)"));
  d->mSlotAdvance->addColumn(i18n("Time (s)"));
  d->mSlotAdvance->addColumn(i18n("%"));
- QHBox* slotAdvanceControlBox = new QHBox(page);
+ QHBox* slotAdvanceControlBox = new QHBox(widget);
  d->mSlotAdvanceSummaryOnly = new QCheckBox(i18n("Summary only"), slotAdvanceControlBox);
  d->mSlotAdvanceSummaryOnly->setChecked(true);
  d->mSlotAdvanceSummaryForCount = new QCheckBox(i18n("Summary for AdvanceCount"), slotAdvanceControlBox);
@@ -332,10 +348,13 @@ void BosonProfilingDialog::initSlotAdvancePage()
  layout->addWidget(slotAdvanceLabel);
  layout->addWidget(d->mSlotAdvance);
  layout->addWidget(slotAdvanceControlBox);
- layout->addSpacing(10);
+}
 
- QLabel* itemAdvanceLabel = new QLabel(i18n("Values per item:"), page);
- d->mItemAdvance = new KListView(page);
+void BosonProfilingDialog::initItemAdvanceWidget(QWidget* widget)
+{
+ QVBoxLayout* layout = new QVBoxLayout(widget, 0, KDialog::spacingHint());
+ QLabel* itemAdvanceLabel = new QLabel(i18n("Values per item:"), widget);
+ d->mItemAdvance = new KListView(widget);
  d->mItemAdvance->setRootIsDecorated(true);
  d->mItemAdvance->addColumn(i18n("Rtti"));
  d->mItemAdvance->addColumn(i18n("IsUnit"));
@@ -350,14 +369,10 @@ void BosonProfilingDialog::initSlotAdvancePage()
  layout->addWidget(itemAdvanceLabel);
  layout->addWidget(d->mItemAdvance);
 
- QHBox* controlBox = new QHBox(page);
+ QHBox* controlBox = new QHBox(widget);
  d->mItemAdvanceSummaryOnly = new QCheckBox(i18n("Item Advance Summary Only"), controlBox);
  d->mItemAdvanceSummaryOnly->setChecked(true);
  layout->addWidget(controlBox);
-
- QPushButton* reset = new QPushButton(i18n("Reset Values"), page);
- connect(reset, SIGNAL(clicked()), this, SLOT(slotResetSlotAdvancePage()));
- layout->addWidget(reset);
 }
 
 void BosonProfilingDialog::initEventsPage()
@@ -606,6 +621,13 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 		return;
 	}
  }
+
+ resetSlotAdvanceWidget();
+ resetItemAdvanceWidget();
+}
+
+void BosonProfilingDialog::resetSlotAdvanceWidget()
+{
  d->mSlotAdvance->clear();
  d->mItemAdvance->clear();
  BosonProfilingPrivate* pd = d->data()->d;
@@ -684,16 +706,24 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 	}
  }
 
+}
+
+void BosonProfilingDialog::resetItemAdvanceWidget()
+{
+ d->mItemAdvance->clear();
+ BosonProfilingPrivate* pd = d->data()->d;
+ if (pd->mSlotAdvanceTimes.isEmpty()) {
+	return;
+ }
 
 
-
- QMemArray<unsigned long int> itemAdvanceSums(4); // FIXME hardcoded
+ QMemArray<unsigned long int> itemAdvanceSums(ProfileItemAdvance::names().count());
  int itemAdvanceCount = 0;
  for (unsigned int i = 0; i < itemAdvanceSums.count(); i++) {
 	itemAdvanceSums[i] = 0;
  }
 
- it.toFirst();
+ QPtrListIterator<ProfileSlotAdvance> it(pd->mSlotAdvanceTimes);
  for (; it.current(); ++it) {
 	// values per item for the units, missiles, ...
 	addItemAdvance(it.current());
@@ -708,8 +738,6 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 		itemAdvanceCount++;
 	}
  }
-
-
 
  unsigned int count = pd->mSlotAdvanceTimes.count();
  if (!count) {
@@ -727,6 +755,7 @@ void BosonProfilingDialog::slotResetSlotAdvancePage()
 	initItemAdvanceItemSummary(new QListViewItemNumber(d->mItemAdvance), i18n("Average (%1 items)").arg(itemAdvanceCount), itemAdvanceNames[i], itemAdvanceSums[i] / itemAdvanceCount, itemAdvanceSums[0] / itemAdvanceCount);
  }
  // item advance summary (end)
+
 }
 
 void BosonProfilingDialog::addItemAdvance(ProfileSlotAdvance* slotAdvance)
