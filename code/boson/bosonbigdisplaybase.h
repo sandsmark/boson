@@ -460,6 +460,8 @@ protected:
 	 **/
 	void renderFog();
 
+	void renderBulletTrailEffects();
+
 	/**
 	 * Called by @ref paintGL only to render the fade effects on the screen
 	 **/

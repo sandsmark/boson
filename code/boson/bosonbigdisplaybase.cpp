@@ -821,38 +821,7 @@ void BosonBigDisplayBase::paintGL()
 	glEnd();
  }
 
- // Render bullet trail effects
- QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
- QPtrList<BosonEffectBulletTrail> bulleteffects;
- for (; allIt.current(); ++allIt) {
-	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::BulletTrail) {
-		bulleteffects.append((BosonEffectBulletTrail*)allIt.current());
-	}
- }
- if (!bulleteffects.isEmpty()) {
-	BosonEffectBulletTrail* b;
-	float currentwidth = -1.0f;
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBegin(GL_LINES);
-	QPtrListIterator<BosonEffectBulletTrail> it(bulleteffects);
-	while (it.current()) {
-		b = it.current();
-		if (b->width() != currentwidth) {
-			glEnd();
-			glLineWidth(b->width());
-			currentwidth = b->width();
-			glBegin(GL_LINES);
-		}
-		glColor4fv(b->color().data());
-		glVertex3fv(b->startPoint().data());
-		glVertex3fv(b->endPoint().data());
-		++it;
-	}
-	glEnd();
-	glDisable(GL_BLEND);
-	glColor3ub(255, 255, 255);
- }
+ renderBulletTrailEffects();
  glEnable(GL_TEXTURE_2D);
 
  glDisable(GL_FOG);
@@ -1784,6 +1753,41 @@ void BosonBigDisplayBase::renderFog()
  } else {
 	// Disable fog
 	glDisable(GL_FOG);
+ }
+}
+
+void BosonBigDisplayBase::renderBulletTrailEffects()
+{
+ QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
+ QPtrList<BosonEffectBulletTrail> bulleteffects;
+ for (; allIt.current(); ++allIt) {
+	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::BulletTrail) {
+		bulleteffects.append((BosonEffectBulletTrail*)allIt.current());
+	}
+ }
+ if (!bulleteffects.isEmpty()) {
+	BosonEffectBulletTrail* b;
+	float currentwidth = -1.0f;
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBegin(GL_LINES);
+	QPtrListIterator<BosonEffectBulletTrail> it(bulleteffects);
+	while (it.current()) {
+		b = it.current();
+		if (b->width() != currentwidth) {
+			glEnd();
+			glLineWidth(b->width());
+			currentwidth = b->width();
+			glBegin(GL_LINES);
+		}
+		glColor4fv(b->color().data());
+		glVertex3fv(b->startPoint().data());
+		glVertex3fv(b->endPoint().data());
+		++it;
+	}
+	glEnd();
+	glDisable(GL_BLEND);
+	glColor3ub(255, 255, 255);
  }
 }
 
