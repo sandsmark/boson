@@ -24,7 +24,7 @@ libkgameincludedir=$(includedir)/kgame
 libkgame_la_SOURCES = $(KMESSAGE) $(KGAME) $(DIALOGS) $(LIBKDEGAMES)
 libkgame_la_LIBADD = $(LIB_KDEUI) $(top_builddir)/bodebug/libbodebug.la
 
-libkgameinclude_HEADERS = $(KMESSAGE_H) $(KGAME_H) $(DIALOGS_H) $(LIBKDEGAMES_H)
+noinst_HEADERS = $(KMESSAGE_H) $(KGAME_H) $(DIALOGS_H) $(LIBKDEGAMES_H)
 
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
