@@ -157,6 +157,202 @@
 #define ID_DEBUG_SUB_1000_OIL 6
 
 
+class BoCursorCollection
+{
+public:
+	BoCursorCollection();
+	~BoCursorCollection();
+
+	/**
+	 * @return The current cursor. See @ref changeCursor.
+	 **/
+	BosonCursor* cursor() const
+	{
+		return mCursor;
+	}
+
+	/**
+	 * @param mode This must be either @ref CursorKDE or @ref CursorOpenGL.
+	 * @param cursorDir The directory where to load the data for this cursor
+	 * (e.g. textures). Can be @ref QString::null for e.g. @ref CursorKDE.
+	 **/
+	void changeCursor(int mode, const QString& cursorDir);
+
+	/**
+	 * Called automatically by @ref changeCursor.
+	 *
+	 * This loads the cursor only if required. It is a noop if the cursor
+	 * was loaded previously already.
+	 * @param cursor Where the cursor stores its data files. May be @ref
+	 * QString::null to indicate the default theme.
+	 * @param actualDir This is set to the cursor directory that is actually
+	 * used (it might differ from @p cursorDir).
+	 **/
+	BosonCursor* loadCursor(int mode, const QString& cursorDir, QString& actualDir);
+
+private:
+	QMap<int, QMap<QString, BosonCursor*> > mCursors;
+	BosonCursor* mCursor;
+};
+
+BoCursorCollection::BoCursorCollection()
+{
+ mCursor = 0;
+}
+
+BoCursorCollection::~BoCursorCollection()
+{
+ QMap<int, QMap<QString, BosonCursor*> >::iterator it;
+ for (it = mCursors.begin(); it != mCursors.end(); ++it) {
+	QMap<QString, BosonCursor*>::iterator it2;
+	for (it2 = (*it).begin(); it2 != (*it).end(); ++it2) {
+		delete *it2;
+	}
+ }
+ mCursors.clear();
+}
+
+BosonCursor* BoCursorCollection::loadCursor(int mode, const QString& cursorDir_, QString& cursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+
+ cursorDir = cursorDir_;
+ if (cursorDir.isNull()) {
+	cursorDir = BosonCursor::defaultTheme();
+ }
+
+ BosonCursor* b = (mCursors[mode])[cursorDir_];
+ if (b) {
+	return b;
+ }
+ switch (mode) {
+	case CursorOpenGL:
+		b = new BosonOpenGLCursor;
+		break;
+	default:
+		mode = CursorKDE;
+	case CursorKDE:
+		b = new BosonKDECursor;
+		break;
+ }
+
+ bool ok = true;
+ if (!b->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
+	ok = false;
+ }
+ if (!b->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
+	ok = false;
+ }
+ if (!ok) {
+	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
+	delete b;
+	if (mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
+		// load fallback cursor
+		return loadCursor(CursorKDE, QString::null, cursorDir);
+	}
+	boError() << k_funcinfo << "oops - loading CursorKDE failed. THIS MUST NEVER HAPPEN!" << endl;
+	return 0;
+ }
+
+ return b;
+}
+
+void BoCursorCollection::changeCursor(int mode, const QString& cursorDir)
+{
+ boDebug() << k_funcinfo << endl;
+
+ QString actualCursorDir;
+ BosonCursor* b = loadCursor(mode, cursorDir, actualCursorDir);
+
+ if (b) {
+	mCursor = b;
+	boConfig->setCursorMode(mode);
+	boConfig->setCursorDir(actualCursorDir);
+ } else {
+	// will never happen, as loadCursor() falls back to CursorKDE.
+	boError() << k_funcinfo << "loading cursor failed." << endl;
+ }
+}
+
+
+
+BoCursorEdgeScrolling::BoCursorEdgeScrolling(QObject* parent) : QObject(parent)
+{
+ mCursorEdgeCounter = 0;
+ mCursorEdgeTimer = new QTimer(this);
+ connect(mCursorEdgeTimer, SIGNAL(timeout()),
+		this, SLOT(slotCursorEdgeTimeout()));
+ qApp->installEventFilter(this);
+}
+
+void BoCursorEdgeScrolling::quitGame()
+{
+ mCursorEdgeTimer->stop();
+ mCursorEdgeCounter = 0;
+}
+
+bool BoCursorEdgeScrolling::eventFilter(QObject* o, QEvent* e)
+{
+ switch (e->type()) {
+	case QEvent::MouseMove:
+		if (!mCursorEdgeTimer->isActive()) {
+			slotCursorEdgeTimeout();
+		}
+		break;
+	default:
+		break;
+ }
+ return QObject::eventFilter(o, e);
+}
+
+void BoCursorEdgeScrolling::slotCursorEdgeTimeout()
+{
+ BO_CHECK_NULL_RET(camera());
+ if (!boGame) {
+	return;
+ }
+ if (boGame->gameStatus() == KGame::Init) {
+	// probably startup screen visible
+	return;
+ }
+ float x = 0;
+ float y = 0;
+ const int sensity = boConfig->cursorEdgeSensity();
+ QWidget* w = qApp->mainWidget();
+ BO_CHECK_NULL_RET(w);
+ QPoint pos = w->mapFromGlobal(QCursor::pos());
+
+ const int move = 20; // FIXME hardcoded - use BosonConfig instead
+ if (pos.x() <= sensity && pos.x() > -1) {
+	x = -move;
+ } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
+	x = move;
+ }
+ if (pos.y() <= sensity && pos.y() > -1) {
+	y = -move;
+ } else if (pos.y() >= w->height() - sensity && pos.y() <= w->height()) {
+	y = move;
+ }
+ if (!x && !y || !sensity) {
+	mCursorEdgeTimer->stop();
+	mCursorEdgeCounter = 0;
+ } else {
+	GLfloat dx, dy;
+	Bo3dTools::mapDistance(matrices()->modelviewMatrix(), matrices()->projectionMatrix(), matrices()->viewport(),
+			(int)x, (int)y, &dx, &dy);
+	if (!mCursorEdgeTimer->isActive()) {
+		mCursorEdgeTimer->start(20);
+	}
+	mCursorEdgeCounter++;
+	if (mCursorEdgeCounter > 30) {
+		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
+	}
+ }
+}
+
 
 class BoVisibleEffects
 {
@@ -188,16 +384,14 @@ static void updateEffects(BoVisibleEffects& v);
 class BosonCanvasRendererPrivate
 {
 public:
-	BosonCanvasRendererPrivate(const BoMatrix& modelview)
-		: mModelviewMatrix(modelview)
+	BosonCanvasRendererPrivate(const BoGLMatrices& gameMatrices)
+		: mGameMatrices(gameMatrices)
 	{
 		mRenderItemList = 0;
 		mSelectBoxData = 0;
 
 		mCamera = 0;
 		mLocalPlayerIO = 0;
-		mViewFrustum = 0;
-		mViewport = 0;
 	}
 	BoItemList* mRenderItemList;
 	SelectBoxData* mSelectBoxData;
@@ -210,18 +404,14 @@ public:
 	int mTextureBindsWater;
 	int mTextureBindsParticles;
 
-	const BoMatrix& mModelviewMatrix;
-	GLfloat* mViewFrustum;
-	GLint* mViewport;
+	const BoGLMatrices& mGameMatrices;
 	BoGameCamera* mCamera;
 	PlayerIO* mLocalPlayerIO;
 };
 
-BosonCanvasRenderer::BosonCanvasRenderer(const BoMatrix& modelviewMatrix, GLfloat* viewFrustum, GLint* viewport)
+BosonCanvasRenderer::BosonCanvasRenderer(const BoGLMatrices& gameMatrices)
 {
- d = new BosonCanvasRendererPrivate(modelviewMatrix);
- d->mViewFrustum = viewFrustum;
- d->mViewport = viewport;
+ d = new BosonCanvasRendererPrivate(gameMatrices);
  d->mRenderItemList = new BoItemList(1, false);
  d->mRenderedItems = 0;
  d->mRenderedCells = 0;
@@ -266,9 +456,9 @@ PlayerIO* BosonCanvasRenderer::localPlayerIO() const
  return d->mLocalPlayerIO;
 }
 
-GLfloat* BosonCanvasRenderer::viewFrustum() const
+const GLfloat* BosonCanvasRenderer::viewFrustum() const
 {
- return d->mViewFrustum;
+ return d->mGameMatrices.viewFrustum();
 }
 
 unsigned int BosonCanvasRenderer::renderedItems() const
@@ -376,7 +566,7 @@ void BosonCanvasRenderer::paintGL(const BosonCanvas* canvas)
  glMatrixMode(GL_PROJECTION);
  glPushMatrix();
  glLoadIdentity();
- gluOrtho2D(0.0, (GLfloat)d->mViewport[2], 0.0, (GLfloat)d->mViewport[3]);
+ gluOrtho2D(0.0, (GLfloat)d->mGameMatrices.viewport()[2], 0.0, (GLfloat)d->mGameMatrices.viewport()[3]);
  glMatrixMode(GL_MODELVIEW);
  glPushMatrix();
  glLoadIdentity();
@@ -794,8 +984,9 @@ void BosonCanvasRenderer::renderParticles(BoVisibleEffects& visible)
  }
 
  // Matrix stuff for aligned particles
- BoVector3Fixed x(d->mModelviewMatrix[0], d->mModelviewMatrix[4], d->mModelviewMatrix[8]);
- BoVector3Fixed y(d->mModelviewMatrix[1], d->mModelviewMatrix[5], d->mModelviewMatrix[9]);
+ const BoMatrix& modelview = d->mGameMatrices.modelviewMatrix();
+ BoVector3Fixed x(modelview[0], modelview[4], modelview[8]);
+ BoVector3Fixed y(modelview[1], modelview[5], modelview[9]);
 
  // Some cache variables
  int blendfunc = -1;
@@ -923,8 +1114,8 @@ void BosonCanvasRenderer::renderFadeEffects(BoVisibleEffects& visible)
 	//  top-right corner
 //	glScalef(1 / (GLfloat)d->mViewport[2], 1 / (GLfloat)d->mViewport[3], 1);
 	// FIXME!!!
-	float xscale = (GLfloat)d->mViewport[2];
-	float yscale = (GLfloat)d->mViewport[3];
+	float xscale = (GLfloat)d->mGameMatrices.viewport()[2];
+	float yscale = (GLfloat)d->mGameMatrices.viewport()[3];
 	glEnable(GL_BLEND);
 	boTextureManager->disableTexturing();
 	QPtrListIterator<BosonEffectFade> it(visible.mFadeEffects);
@@ -986,6 +1177,13 @@ public:
 	{
 		mVisible = v;
 	}
+
+	void quitGame()
+	{
+		setVisible(false);
+		setEndWidgetPos(startPos());
+	}
+
 private:
 	QPoint mStartPos;
 	QPoint mEndPos;
@@ -1105,7 +1303,14 @@ public:
 		mMouseIO = 0;
 		mInput = 0;
 
+		mCursorCollection = 0;
+		mCursorEdgeScrolling = 0;
+
 		mCanvasRenderer = 0;
+
+		mCamera = 0;
+
+		mGameGLMatrices = 0;
 
 		mDefaultFont = 0;
 
@@ -1145,8 +1350,8 @@ public:
 	BosonBigDisplayInputBase* mInput;
 	QIntDict<BoSelection> mSelectionGroups;
 
-	QTimer mCursorEdgeTimer;
-	int mCursorEdgeCounter;
+	BoCursorCollection* mCursorCollection;
+	BoCursorEdgeScrolling* mCursorEdgeScrolling;
 
 	BosonCanvasRenderer* mCanvasRenderer;
 
@@ -1156,6 +1361,7 @@ public:
 	BoMatrix mProjectionMatrix;
 	BoMatrix mModelviewMatrix;
 	GLfloat mViewFrustum[6 * 4];
+	BoGLMatrices* mGameGLMatrices;
 
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
@@ -1244,8 +1450,9 @@ BosonBigDisplayBase::~BosonBigDisplayBase()
  delete d->mCanvasRenderer;
  delete d->mUfoGameWidget;
  SpeciesData::clearSpeciesData();
+ delete d->mCursorCollection;
+ delete d->mGameGLMatrices;
  delete d;
- delete mCursor;
  boDebug() << k_funcinfo << "done" << endl;
 }
 
@@ -1254,12 +1461,15 @@ void BosonBigDisplayBase::init()
  d = new BosonBigDisplayBasePrivate;
  setSendEventsToUfo(false); // we handle libufo events manually
  mCanvas = 0;
- mCursor = 0;
- d->mCursorEdgeCounter = 0;
  d->mUpdateInterval = 0;
  d->mInputInitialized = false;
  d->mFovY = 60.0f;
  d->mGrabMovie = false;
+ d->mGameGLMatrices = new BoGLMatrices(d->mModelviewMatrix, d->mProjectionMatrix, d->mViewFrustum, d->mViewport, d->mFovY, d->mAspect);
+ d->mCursorCollection = new BoCursorCollection();
+ d->mCursorEdgeScrolling = new BoCursorEdgeScrolling(this);
+ d->mCursorEdgeScrolling->setCamera(camera());
+ d->mCursorEdgeScrolling->setMatrices(d->mGameGLMatrices);
 
  d->mScriptConnector = new BosonBigDisplayScriptConnector(this);
 
@@ -1272,7 +1482,7 @@ void BosonBigDisplayBase::init()
  connect(mSelection, SIGNAL(signalSelectionChanged(BoSelection*)),
 		this, SIGNAL(signalSelectionChanged(BoSelection*)));
  d->mToolTips = new BoGLToolTip(this);
- d->mCanvasRenderer = new BosonCanvasRenderer(d->mModelviewMatrix, d->mViewFrustum, d->mViewport);
+ d->mCanvasRenderer = new BosonCanvasRenderer(*d->mGameGLMatrices);
  d->mGLMiniMap = new BosonGLMiniMap(this);
  connect(boGame, SIGNAL(signalCellChanged(int,int)),
 		d->mGLMiniMap, SLOT(slotUpdateCell(int,int)));
@@ -1304,9 +1514,6 @@ void BosonBigDisplayBase::init()
 
  connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdateGL()));
 
- connect(&d->mCursorEdgeTimer, SIGNAL(timeout()),
-		this, SLOT(slotCursorEdgeTimeout()));
-
  connect(BosonPathVisualization::pathVisualization(),
 		SIGNAL(signalAddLineVisualization( const QValueList<BoVector3Fixed>&, const BoVector4Float&, bofixed, int, bofixed)),
 		this,
@@ -1318,10 +1525,9 @@ void BosonBigDisplayBase::init()
  qApp->installEventFilter(this);
 }
 
-void BosonBigDisplayBase::setCursor(BosonCursor* cursor)
+BosonCursor* BosonBigDisplayBase::cursor() const
 {
- delete mCursor;
- mCursor = cursor;
+ return d->mCursorCollection->cursor();
 }
 
 void BosonBigDisplayBase::setLocalPlayerScript(BosonScript* script)
@@ -2875,7 +3081,6 @@ void BosonBigDisplayBase::quitGame()
  // these are the important things - they *must* be cleared in order to avoid
  // crashes
  d->mToolTips->hideTip();
- setCursor(0);
  selection()->clear();
  d->mPlacementPreview.clear();
  d->mCanvasRenderer->reset();
@@ -2887,12 +3092,10 @@ void BosonBigDisplayBase::quitGame()
  setCanvas(0);
 
  // these are rather cosmetic. we won't crash if we don't clear
- d->mCursorEdgeTimer.stop();
- d->mCursorEdgeCounter = 0;
+ d->mCursorEdgeScrolling->quitGame();
  d->mFps = 0;
  d->mFrameCount = 0;
- d->mSelectionRect.setVisible(false);
- d->mSelectionRect.setEndWidgetPos(d->mSelectionRect.startPos());
+ d->mSelectionRect.quitGame();
  d->mMouseMoveDiff.stop();
 // setCamera(BoGameCamera()); do not do this! it calls cameraChanged() which generates cell list and all that stuff
  d->mCamera = BoGameCamera(canvas());
@@ -2909,11 +3112,6 @@ void BosonBigDisplayBase::quitGame()
 bool BosonBigDisplayBase::eventFilter(QObject* o, QEvent* e)
 {
  switch (e->type()) {
-	case QEvent::MouseMove:
-		if (!d->mCursorEdgeTimer.isActive()) {
-			slotCursorEdgeTimeout();
-		}
-		break;
 	case QEvent::KeyPress:
 	case QEvent::KeyRelease:
 		d->mControlPressed = (((QKeyEvent*)e)->stateAfter() & Qt::ControlButton);
@@ -3142,51 +3340,6 @@ void BosonBigDisplayBase::addChatMessage(const QString& message)
 {
  d->mUfoGameWidget->addChatMessage(message);
 }
-
-void BosonBigDisplayBase::slotCursorEdgeTimeout()
-{
- BO_CHECK_NULL_RET(camera());
- if (!boGame) {
-	return;
- }
- if (boGame->gameStatus() == KGame::Init) {
-	// probably startup screen visible
-	return;
- }
- float x = 0;
- float y = 0;
- const int sensity = boConfig->cursorEdgeSensity();
- QWidget* w = qApp->mainWidget();
- BO_CHECK_NULL_RET(w);
- QPoint pos = w->mapFromGlobal(QCursor::pos());
-
- const int move = 20; // FIXME hardcoded - use BosonConfig instead
- if (pos.x() <= sensity && pos.x() > -1) {
-	x = -move;
- } else if (pos.x() >= w->width() - sensity && pos.x() <= w->width()) {
-	x = move;
- }
- if (pos.y() <= sensity && pos.y() > -1) {
-	y = -move;
- } else if (pos.y() >= w->height() - sensity && pos.y() <= w->height()) {
-	y = move;
- }
- if (!x && !y || !sensity) {
-	d->mCursorEdgeTimer.stop();
-	d->mCursorEdgeCounter = 0;
- } else {
-	GLfloat dx, dy;
-	mapDistance((int)x, (int)y, &dx, &dy);
-	if (!d->mCursorEdgeTimer.isActive()) {
-		d->mCursorEdgeTimer.start(20);
-	}
-	d->mCursorEdgeCounter++;
-	if (d->mCursorEdgeCounter > 30) {
-		camera()->changeLookAt(BoVector3Float(dx, dy, 0));
-	}
- }
-}
-
 
 void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
@@ -5448,56 +5601,16 @@ void BosonBigDisplayBase::slotUpdateOpenGLSettings()
  updateOpenGLSettings();
 }
 
-void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir_)
+void BosonBigDisplayBase::slotChangeCursor(int mode, const QString& cursorDir)
 {
- BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
- if (!boGame->gameMode()) {
-	// editor mode
-	mode = CursorKDE;
- }
- BosonCursor* b;
- switch (mode) {
-	case CursorOpenGL:
-		b = new BosonOpenGLCursor;
-		break;
-	case CursorKDE:
-	default:
-		b = new BosonKDECursor;
-		mode = CursorKDE; // in case we had an unknown/invalid mode
-		break;
- }
-
- QString cursorDir = cursorDir_;
- if (cursorDir.isNull()) {
-	cursorDir = BosonCursor::defaultTheme();
- }
-
- bool ok = true;
- if (!b->insertMode(CursorMove, cursorDir, QString::fromLatin1("move"))) {
-	ok = false;
- }
- if (!b->insertMode(CursorAttack, cursorDir, QString::fromLatin1("attack"))) {
-	ok = false;
- }
- if (!b->insertMode(CursorDefault, cursorDir, QString::fromLatin1("default"))) {
-	ok = false;
- }
- if (!ok) {
-	boError() << k_funcinfo << "Could not load cursor mode " << mode << " from " << cursorDir << endl;
-	delete b;
-	if (!cursor() && mode != CursorKDE) { // loading *never* fails for CursorKDE. we check here anyway.
-		// load fallback cursor
-		slotChangeCursor(CursorKDE, QString::null);
-		return;
+ if (boGame) {
+	if (!boGame->gameMode()) {
+		// editor mode
+		mode = CursorKDE;
 	}
-	// continue to use the old cursor
-	return;
  }
- setCursor(b);
-
- boConfig->setCursorMode(mode);
- boConfig->setCursorDir(cursorDir);
+ d->mCursorCollection->changeCursor(mode, cursorDir);
 }
 
 void BosonBigDisplayBase::slotUnfogAll(Player* pl)
