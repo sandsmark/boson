@@ -163,7 +163,7 @@ void BosonNewEditorWidget::slotNetStart()
 
 	QByteArray b;
 	QDataStream stream(b, IO_WriteOnly);
-	map->saveMap(stream);
+	map->saveCompleteMap(stream);
 
 	// WARNING: this is a hack! the message should contain the *map* only,
 	// not the scenario. I do not yet know how the scenario will be handled

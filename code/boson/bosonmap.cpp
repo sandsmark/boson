@@ -79,7 +79,7 @@ bool BosonMap::loadMapFromFile(QDataStream& stream)
 }
 
 
-bool BosonMap::loadMap(QDataStream& stream)
+bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
  if (!loadMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not load map geo" << endl;
@@ -265,8 +265,11 @@ bool BosonMap::saveMapToFile(QDataStream& stream)
  return true;
 }
 
-bool BosonMap::saveMap(QDataStream& stream)
+bool BosonMap::saveCompleteMap(QDataStream& stream)
 {
+ // AB: we may have a problem here - this stream is meant to be sent through
+ // network, but it is very big! (sometimes several MB)
+ // we should compress it!
  if (!saveMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;

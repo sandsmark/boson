@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -398,7 +398,7 @@ bool BosonPlayField::loadMap(QDataStream& stream)
 {
  delete mMap;
  mMap = new BosonMap(this);
- if (!mMap->loadMap(stream)) {
+ if (!mMap->loadCompleteMap(stream)) {
 	boError() << k_funcinfo << "Unable to load map from stream" << endl;
 	return false;
  }
@@ -412,7 +412,7 @@ void BosonPlayField::saveMap(QDataStream& stream)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return;
  }
- if (!mMap->saveMap(stream)) {
+ if (!mMap->saveCompleteMap(stream)) {
 	boError() << k_funcinfo << "Unable to save map" << endl;
 	return;
  }
