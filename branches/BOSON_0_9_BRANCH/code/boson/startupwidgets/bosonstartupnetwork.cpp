@@ -150,8 +150,16 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const 
 		return false;
 	}
 	data = field->loadFromDiskToStream();
+	if (data.size() == 0) {
+		boError() << k_funcinfo << "no data - saving to stream failed" << endl;
+		return false;
+	}
  } else {
 	data = *newPlayField;
+	if (data.size() == 0) {
+		boError() << k_funcinfo << "no data provided" << endl;
+		return false;
+	}
  }
  if (editor) {
 	mGame->sendMessage(data, BosonMessage::IdNewEditor);
