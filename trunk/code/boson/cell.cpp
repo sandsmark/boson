@@ -241,7 +241,14 @@ int Cell::smallTileNumber(int smallNo, TransType trans, bool inverted)
 int Cell::moveCost() const
 {
  int cost = 0;
- switch (groundType()) {
+ int g = groundType();
+ if (!isPlain(g)) {
+	TransType t = (TransType)getTransRef(g);
+	int g1 = from(t);
+	int g2 = to(t);
+	g = (g1 > g2) ? g1 : g2;
+ }
+ switch (g) {
 	case GroundDeepWater:
 		cost = 0;
 		break;
