@@ -602,16 +602,16 @@ void BosonShotMissile::advanceMoveInternal()
     return;
   }
 
-  boDebug() << k_funcinfo << id() << ": target pos: (" << mTarget->x() << "; " << mTarget->y() << "; " << mTarget->z() << ")" << endl;
-  boDebug() << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
+  //boDebug() << k_funcinfo << id() << ": target pos: (" << mTarget->centerX() << "; " << mTarget->centerY() << "; " << mTarget->z() << ")" << endl;
+  //boDebug() << k_funcinfo << id() << ": my pos: (" << x() << "; " << y() << "; " << z() << ")" << endl;
   // Calculate velocity
   // Missile always moves towards it's target
-  BoVector3Fixed totarget(mTarget->x() - x(), mTarget->y() - y(), mTarget->z() - z());
+  BoVector3Fixed totarget(mTarget->centerX() - x(), mTarget->centerY() - y(), mTarget->z() - z());
   bofixed totargetlen = totarget.length();
   // We need check this here to avoid division by 0 later
   if(totargetlen <= speed())
   {
-    boDebug() << k_funcinfo << id() << ": near target (totargetlen = " << totargetlen << "), exploding" << endl;
+    //boDebug() << k_funcinfo << id() << ": near target (totargetlen = " << totargetlen << "), exploding" << endl;
     explode();
     return;
   }
@@ -624,7 +624,7 @@ void BosonShotMissile::advanceMoveInternal()
   bofixed difflen = diff.length();
   if(difflen != 0)
   {
-    boDebug() << k_funcinfo << id() << ": difflen = " << difflen << endl;
+    //boDebug() << k_funcinfo << id() << ": difflen = " << difflen << endl;
     // Missile is not flying towards the target atm
     // Calculate new velocity vector
     if(mProp->turningSpeed() < difflen)
