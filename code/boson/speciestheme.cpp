@@ -36,7 +36,7 @@
 #include <qdir.h>
 
 /**
- * * By any reason QPixmap uses the alpha mask if existing, even if a custom 
+ * By any reason QPixmap uses the alpha mask if existing, even if a custom 
  * mask using setMask() is supplied. We use this hack to delete the alpha mask 
  * if existing, so we can use our custom mask in 
  * BosonCommandWidget::advanceProduction()
