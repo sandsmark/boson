@@ -120,18 +120,21 @@ ModelPreview::~ModelPreview()
 
 void ModelPreview::initializeGL()
 {
+ makeCurrent();
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+ setUpdatesEnabled(false);
  mUpdateTimer->start(50);
  slotResetView();
 }
 
 void ModelPreview::resizeGL(int w, int h)
 {
+ makeCurrent();
  glViewport(0, 0, w, h);
  glMatrixMode(GL_PROJECTION);
  glLoadIdentity();
@@ -167,6 +170,8 @@ void ModelPreview::paintGL()
 
  glEnable(GL_TEXTURE_2D);
  glEnable(GL_DEPTH_TEST);
+ glEnableClientState(GL_VERTEX_ARRAY);
+ glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 #warning FIXME?
  // AB: fi these are enabled we can't use triangle strips by any reason.
@@ -191,7 +196,12 @@ void ModelPreview::paintGL()
 			}
 			glColor4ub(r, g, b, a);
 		}
-		glCallList(f->displayList());
+
+		// FIXME: this isn't good here...
+		glVertexPointer(3, GL_FLOAT, 5  * sizeof(float), mModel->pointArray());
+		glTexCoordPointer(2, GL_FLOAT, 5 * sizeof(float), mModel->pointArray() + 3);
+
+		f->renderFrame();
 		if (mPlacementPreview) {
 			// AB: do not reset the actual color - if it will get
 			// used it will be set again anyway.
@@ -203,6 +213,8 @@ void ModelPreview::paintGL()
 	}
  }
 
+ glDisableClientState(GL_VERTEX_ARRAY);
+ glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  glDisable(GL_CULL_FACE);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
@@ -354,6 +366,7 @@ RenderMain::RenderMain()
 RenderMain::~RenderMain()
 {
  mSpecies.clear();
+ delete mIface;
 }
 
 void RenderMain::connectBoth(QObject* o1, QObject* o2, const char* signal, const char* slot)
@@ -672,6 +685,7 @@ int main(int argc, char **argv)
 
  BosonConfig::initBosonConfig();
  BosonProfiling::initProfiling();
+ boConfig->setDisableSound(true);
  BosonMusic::initBosonMusic(); // TODO: completely disable music in BosonConfig
 
  RenderMain* main = new RenderMain();

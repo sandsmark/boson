@@ -184,7 +184,7 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
 
  boMesh->setTextured(!textureName.isEmpty()); // this may get changed if BosonModel::cleanTextureName() can't find our texture
 
- boMesh->allocatePoints(mesh->points, mesh->texels != 0);
+ boMesh->allocatePoints(mesh->points);
  loadVertices(boMesh, mesh);
  loadTexels(boMesh, mesh, Bo3DSLoad::material(mesh, m3ds));
 

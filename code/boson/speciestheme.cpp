@@ -76,6 +76,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mCanChangeTeamColor = true;
  mSound = 0;
  mData = 0;
+ boDebug() << "teamcolor: " << teamColor.red() << " " << teamColor.green() << " " << teamColor.blue() << endl;
 
  // this MUST be called in c'tor, as it initializes mData!
  if (!loadTheme(speciesDir, teamColor)) {

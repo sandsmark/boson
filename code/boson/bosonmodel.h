@@ -111,6 +111,8 @@ public:
 	//the same mesh, but 4 different positions)
 	int meshCount() const { return mMeshCount; }
 
+	void renderFrame();
+
 private:
 	void init();
 
@@ -177,18 +179,18 @@ public:
 	/**
 	 * Cleanup some variables. Deletes e.g. the 3ds file and the teamcolor
 	 * object. Note that you must not call e.g. @ref loadModel or @ref
-	 * generateConstructionLists after this!
+	 * generateConstructionFrames after this!
 	 *
 	 * You can continue using the generated display lists.
 	 **/
 	void finishLoading();
 
 	/**
-	 * Generate display lists for steps construction steps. The unit will
+	 * Generate frames for construction steps. The unit will
 	 * display more and more objects of the final model, when being
 	 * constructed.
 	 **/
-	void generateConstructionLists();
+	void generateConstructionFrames();
 
 	/**
 	 * @return The frame @p frame that resideds in the .3ds file. These are
@@ -256,6 +258,14 @@ public:
 	 **/
 	QString file() const;
 
+	/**
+	 * @return A pointer to the points (vertices and texture coordinates)
+	 * for this model. You must call @ref mergeArraysbefore you can use
+	 * this.
+	 **/
+	float* pointArray() const;
+
+
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 
@@ -264,7 +274,7 @@ protected:
 
 	/**
 	 * Generate the "normal" display lists, for all frames. This includes
-	 * all nodes of the file. See also @ref generateConstructionLists, which
+	 * all nodes of the file. See also @ref generateConstructionFrames, which
 	 * doesn't use all nodes.
 	 **/
 	void createDisplayLists();
@@ -298,6 +308,16 @@ protected:
 	 * directory
 	 **/
 	const QString& baseDirectory() const;
+
+	/**
+	 * @ref BoMesh allocates its own array(s) for vertices and texture
+	 * coordinates. It is more efficient to maintain a single array that
+	 * contains all of them. This does this.
+	 *
+	 * We might do the same for *all* models, so that we have a single array
+	 * for all models in the game.
+	 **/
+	void mergeArrays();
 
 public:
 	/**

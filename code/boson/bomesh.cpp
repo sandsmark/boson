@@ -213,8 +213,8 @@ public:
 
 		mTeamColor = 0;
 
-		mTexels = 0;
-		mVertices = 0;
+		mAllocatedPoints = 0;
+		mPoints = 0;
 	}
 	int mType;
 	BoNode* mFaces;
@@ -227,11 +227,9 @@ public:
 
 	QPtrList<BoNode> mAllNodes;
 
-	//  TODO: combine with vertex data into a single array! we can optimize
-	//  vertex arrays this way!
-	unsigned int mPoints;
-	float* mTexels;
-	float* mVertices;
+	unsigned int mPointCount;
+	float* mPoints;
+	float* mAllocatedPoints;
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -246,8 +244,9 @@ BoMesh::~BoMesh()
 	glDeleteLists(d->mDisplayList, 1);
  }
  d->mAllNodes.clear();
- delete[] d->mTexels;
- delete[] d->mVertices;
+ delete[] d->mAllocatedPoints;
+ d->mPoints = 0; // do NOT delete!
+ delete d->mTeamColor;
  delete d;
 }
 
@@ -260,7 +259,7 @@ void BoMesh::init()
  d->mIsTeamColor = false;
  d->mTexture = 0;
  d->mDisplayList = 0;
- d->mPoints = 0;
+ d->mPointCount = 0;
 }
 
 void BoMesh::createNodes(unsigned int faces)
@@ -665,48 +664,95 @@ GLuint BoMesh::textureObject() const
  return d->mTexture;
 }
 
-void BoMesh::allocatePoints(unsigned int points, bool texels)
+void BoMesh::allocatePoints(unsigned int points)
 {
- if (d->mVertices) {
-	boError() << k_funcinfo << "vertices already allocated!" << endl;
-	delete[] d->mVertices;
+ if (d->mAllocatedPoints) {
+	boError() << k_funcinfo << "points already allocated!" << endl;
+	if (d->mPoints == d->mAllocatedPoints) {
+		d->mPoints = 0;
+	}
+	delete[] d->mAllocatedPoints;
+	d->mAllocatedPoints = 0;
  }
- if (d->mTexels) {
-	boError() << k_funcinfo << "texels already allocated!" << endl;
-	delete[] d->mTexels;
+ if (d->mPoints) {
+	boError() << k_funcinfo << "non-NULL points array!" << endl;
+	d->mPoints = 0;
  }
- d->mPoints = points;
- // AB: we should merge them into a single array.
- d->mVertices = new float[d->mPoints * 3];
- if (texels) {
-	d->mTexels = new float[d->mPoints * 2];
+ d->mPointCount = points;
+ // note that some space is wasted - some objects are not textured. but we can
+ // render more efficient this way.
+ d->mAllocatedPoints = new float[d->mPointCount * 5];
+ d->mPoints = d->mAllocatedPoints;
+
+ // AB: we initialize the array elements now. this is close to useless since we
+ // overwrite it later anyway. but valgrind complains for meshes that don't use
+ // textures (since we copy uninitialized values around).
+ for (unsigned int i = 0; i < points * 5; i++) {
+	d->mPoints[i] = 0.0f;
  }
 }
 
 void BoMesh::setVertex(unsigned int index, const BoVector3& vertex)
 {
- BO_CHECK_NULL_RET(d->mVertices);
+ BO_CHECK_NULL_RET(d->mPoints);
  if (index >= points()) {
 	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- d->mVertices[index * 3] = vertex[0];
- d->mVertices[index * 3 + 1] = vertex[1];
- d->mVertices[index * 3 + 2] = vertex[2];
+ d->mPoints[index * 5 + 0] = vertex[0];
+ d->mPoints[index * 5 + 1] = vertex[1];
+ d->mPoints[index * 5 + 2] = vertex[2];
 }
 
 void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
 {
- BO_CHECK_NULL_RET(d->mTexels);
+ BO_CHECK_NULL_RET(d->mPoints);
  if (index >= points()) {
 	boError() << k_funcinfo << "invalid index " << index << " max=" << points() << endl;
  }
- d->mTexels[index * 2] = texel[0];
- d->mTexels[index * 2 + 1] = texel[1];
+ d->mPoints[index * 5 + 3] = texel[0];
+ d->mPoints[index * 5 + 4] = texel[1];
 }
 
 void BoMesh::renderMesh()
 {
- BO_CHECK_NULL_RET(d->mVertices);
+ // AB: it would be better to do most of this in BosonModel instead. we could
+ // group several meshes into a single glBegin()/glEnd() pair
+
+ bool resetColor = false; // needs to be true after we changed the current color
+
+ // AB: we have *lots* of faces! in numbers the maximum i found
+ // so far (only a short look) was about 25 toplevel nodes and
+ // rarely child nodes. sometimes 2 child nodes or so - maybe 10
+ // per model (if at all).
+ // but we have up to (short look only) 116 faces *per node*
+ // usually it's about 10-20 faces (minimum) per node!
+ //
+ // so optimization should happen here - if possible at all...
+
+ if (!textured()) {
+	if (d->mTeamColor) {
+		glPushAttrib(GL_CURRENT_BIT);
+		glColor3ub(d->mTeamColor->red(), d->mTeamColor->green(), d->mTeamColor->blue());
+		resetColor = true;
+	}
+ } else {
+	glBindTexture(GL_TEXTURE_2D, textureObject());
+ }
+
+ glBegin(type());
+ renderMeshPoints();
+ glEnd();
+
+ if (resetColor) {
+	// we need to reset the color (mainly for the placement preview)
+	glPopAttrib();
+	resetColor = false;
+ }
+}
+
+void BoMesh::renderMeshPoints()
+{
+ BO_CHECK_NULL_RET(d->mPoints);
  BoNode* node = faces();
  if (!node) {
 	boError() << k_funcinfo << "NULL node" << endl;
@@ -716,6 +762,7 @@ void BoMesh::renderMesh()
 	return;
  }
  if (type() == GL_TRIANGLE_STRIP && false) {
+	boWarning() << k_funcinfo << "obsolete - TODO: use vertex arrays" << endl;
 	boDebug() << "painting _STRIP" << endl;
 	if (!node->next()) {
 		boError() << k_funcinfo << "less than 2 faces in mesh! this is not supported" << endl;
@@ -741,27 +788,23 @@ void BoMesh::renderMesh()
 		renderPoint(node->pointIndex()[point]);
 	}
  } else {
+//	int* indices = new int[points() * 3];
 	for (; node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
-			renderPoint(node->pointIndex()[i]);
+			glArrayElement(node->pointIndex()[i]);
 		}
 	}
+//	delete[] indices;
  }
 }
 
 void BoMesh::renderPoint(int point)
 {
- if (point < 0 || (unsigned int)point >= points()) {
-	boError() << k_funcinfo << "invalid point " << point << endl;
-	return;
+boWarning() << k_funcinfo << "obsolete!" << endl;
+ if (textured()) {
+	glTexCoord2fv(d->mPoints + 5 * point + 3);
  }
-
- if (d->mTexels) {
-	 // basiclly this is a
-	 // glTexCoord2f(d->mTexels[point*2], d->mTexels[point*2+1])
-	glTexCoord2fv(d->mTexels + 2 * point);
- }
- glVertex3fv(d->mVertices + 3 * point);
+ glVertex3fv(d->mPoints + 5 * point);
 }
 
 // there MUST be a valid context set already!!
@@ -786,44 +829,16 @@ void BoMesh::loadDisplayList(bool reload)
 		return;
 	}
  }
+ boDebug() << k_funcinfo << endl;
+
  glNewList(d->mDisplayList, GL_COMPILE);
-
- bool resetColor = false; // needs to be true after we changed the current color
- // AB: we have *lots* of faces! in numbers the maximum i found
- // so far (only a short look) was about 25 toplevel nodes and
- // rarely child nodes. sometimes 2 child nodes or so - maybe 10
- // per model (if at all).
- // but we have up to (short look only) 116 faces *per node*
- // usually it's about 10-20 faces (minimum) per node!
- //
- // so optimization should happen here - if possible at all...
-
- if (!textured()) {
-	if (d->mTeamColor) {
-		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub(d->mTeamColor->red(), d->mTeamColor->green(), d->mTeamColor->blue());
-		resetColor = true;
-	}
- } else {
-	glBindTexture(GL_TEXTURE_2D, textureObject());
- }
-
- glBegin(type());
  renderMesh();
- glEnd();
-
- if (resetColor) {
-	// we need to reset the color (mainly for the placement preview)
-	glPopAttrib();
-	resetColor = false;
- }
-
  glEndList();
 }
 
 unsigned int BoMesh::points() const
 {
- return d->mPoints;
+ return d->mPointCount;
 }
 
 BoVector3 BoMesh::point(unsigned int p) const
@@ -832,7 +847,7 @@ BoVector3 BoMesh::point(unsigned int p) const
 	boError() << k_funcinfo << "invalid point " << p << endl;
 	return BoVector3();
  }
- return BoVector3(&d->mVertices[p * 3]);
+ return BoVector3(&d->mPoints[p * 5]);
 }
 
 bool BoMesh::isTeamColor() const
@@ -855,5 +870,34 @@ void BoMesh::setTeamColor(const QColor& c)
 {
  delete d->mTeamColor;
  d->mTeamColor = new QColor(c);
+}
+
+void BoMesh::movePoints(float* array, int index)
+{
+ if (!d->mAllocatedPoints) {
+	boError() << k_funcinfo << "no points allocated" << endl;
+	return;
+ }
+ // first of all we fix the indices of all nodes.
+ QPtrListIterator<BoNode> it(d->mAllNodes);
+ for (; it.current(); ++it) {
+	const int* orig = it.current()->pointIndex();
+	int p[3];
+	p[0] = index + orig[0];
+	p[1] = index + orig[1];
+	p[2] = index + orig[2];
+	it.current()->setFace(p);
+ }
+ // now we move the vertices and texture coordinates to the new array
+ for (unsigned int i = 0; i < points(); i++) {
+	array[(index + i) * 5 + 0] = d->mPoints[i * 5 + 0];
+	array[(index + i) * 5 + 1] = d->mPoints[i * 5 + 1];
+	array[(index + i) * 5 + 2] = d->mPoints[i * 5 + 2];
+	array[(index + i) * 5 + 3] = d->mPoints[i * 5 + 3];
+	array[(index + i) * 5 + 4] = d->mPoints[i * 5 + 4];
+ }
+ delete[] d->mAllocatedPoints;
+ d->mAllocatedPoints = 0;
+ d->mPoints = array;
 }
 
