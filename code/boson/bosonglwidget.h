@@ -81,7 +81,7 @@ public:
 	BosonGLWidget(QWidget* parent);
 	~BosonGLWidget();
 
-	virtual void paintGL() = 0;
+	virtual void paintGL() {}
 	bool isValid() const;
 
 	BoContext* context() const;
@@ -107,8 +107,8 @@ public slots:
 
 protected:
 	void initGL();
-	virtual void initializeGL() = 0;
-	virtual void resizeGL(int width, int height) = 0;
+	virtual void initializeGL() {}
+	virtual void resizeGL(int width, int height) { Q_UNUSED(width); Q_UNUSED(height); }
 	bool isInitialized() const { return mInitialized; }
 	void setContext(BoContext*);
 
