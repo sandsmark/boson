@@ -69,7 +69,7 @@ def explore():
             expl = -1
   pos = BoScript.unitPosition(expl)
   boprint("debug", "explore, expl %s, pos %s" % (expl,pos))
-  BoScript.moveUnit(player, expl,randint(pos[0]-1000,pos[0]+1000) ,randint(pos[1]-1000,pos[1]+1000))
+  BoScript.moveUnit(player, expl,randint(pos[0]-50,pos[0]+50) ,randint(pos[1]-50,pos[1]+50))
   if not BoScript.isUnitAlive(expl):
     expl = -1
 
@@ -164,27 +164,27 @@ def spawnSomeUnits():
   for x in range(4):
     BoScript.spawnUnit(player, 10035, 5, 5 + x * 2)
 
-def mine():  
+def mine():
   global player
   units = BoScript.allPlayerUnits(player)
   for u in units:
     if BoScript.canUnitMineOil(u) and BoScript.unitWork(u)==0:
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestOilLocations(player,pos[0]/48,pos[1]/48,0,150)
+      oil=BoScript.nearestOilLocations(player,pos[0],pos[1],0,150)
       boprint("debug", "Mine oil  %s" % oil)
       if oil:
-        BoScript.moveUnit(player, u, oil[0][0]*48, oil[0][1]*48)
-        BoScript.mineUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
+        BoScript.mineUnit(player, u, oil[0][0], oil[0][1])
         boprint("debug", "Mine oil done")
     elif BoScript.canUnitMineMinerals(u) and BoScript.unitWork(u)==0 :
       boprint("debug", "id %s" % u)
       pos=BoScript.unitPosition(u)
-      oil=BoScript.nearestMineralLocations(player,pos[0]/48,pos[1]/48,0,150)
+      oil=BoScript.nearestMineralLocations(player,pos[0],pos[1],0,150)
       boprint("debug", "Mine mineral %s" % oil)
       if oil:
-        BoScript.moveUnit(player, u, oil[0][0]*48, oil[0][1]*48)
-        BoScript.mineUnit(player, u, oil[0][0]*48, oil[0][1]*48)
+        BoScript.moveUnit(player, u, oil[0][0], oil[0][1])
+        BoScript.mineUnit(player, u, oil[0][0], oil[0][1])
         boprint("debug", "Mine  minerals done")
 
 
@@ -205,11 +205,11 @@ def produce():
         boprint("debug", "production set to %s type %s " % (len(prod),BoScript.unitType(u)))
         boprint("debug", "production types %s, type %s, count %s" % (prod,p,newProd[u]))
         newProd[u] = newProd[u] + 1
-        if BoScript.canUnitTypeMineMinerals(player,p)==0 and BoScript.canUnitTypeMineOil(player,p)==0: 
+        if BoScript.canUnitTypeMineMinerals(player,p)==0 and BoScript.canUnitTypeMineOil(player,p)==0:
           BoScript.produceUnit(player,u,p)
-        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineMinerals(player,p): 
+        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineMinerals(player,p):
           BoScript.produceUnit(player,u,p)
-        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineOil(player,p): 
+        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineOil(player,p):
           BoScript.produceUnit(player,u,p)
       else:
         boprint("debug", "newProd %s " % newProd[u])
