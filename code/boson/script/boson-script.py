@@ -2,6 +2,7 @@ print "BoScriptAI: - [INFO] Loading Python script for AI..."
 
 from sys import exit
 from utils import boprint
+from random import randint
 
 # This is just to be able to test the syntax whith you
 # Python interpreter on the console
@@ -16,7 +17,8 @@ player = -1
 
 
 def init(id):
-  global player,newProd
+  global player,newProd,expl
+  expl = -1
   newProd = {0:0}
   boprint("debug", "Init called")
   player = id
@@ -27,12 +29,14 @@ def advance():
   global cycle
   global player
   cycle = cycle + 1
-  if (cycle % 20) == 0 and BoScript.minerals(player)>500 and BoScript.oil(player)>500:
+  if (cycle % 100) == 0 and BoScript.minerals(player)>500 and BoScript.oil(player)>500:
     boprint("debug", "produced method called, cycle: %s" % cycle)
     produce()
   if (cycle % 100) == 0:
     boprint("debug", "mine method called, cycle: %s" % cycle)
     mine()
+  if (cycle % 200) == 0:
+    explore()
 #if (cycle % 20) == 0:
 	#   spawnSomeUnits()
   boprint("debug", "hi! advance")
@@ -41,6 +45,33 @@ def advance():
 
 def myfunc():
   boprint("info", "hi! this is myfunc")
+
+def explore():
+  global player,expl
+  units = BoScript.allPlayerUnits(player)
+  unit = -1
+  if expl == -1 :
+    attacker = -1
+    while attacker == -1:
+      unit = unit + 1
+      if unit >= len(units):
+        unit = -1
+        boprint("info", "No units found, returning")
+        return
+      u = units[unit]
+      if BoScript.isUnitMobile(u):
+        if BoScript.canUnitShoot(u):
+          attacker = u
+          expl = u
+          pos = BoScript.unitPosition(expl)
+          if pos[0] == -1:
+            attacker = -1
+            expl = -1
+  pos = BoScript.unitPosition(expl)
+  boprint("debug", "explore, expl %s, pos %s" % (expl,pos))
+  BoScript.moveUnit(player, expl,randint(pos[0]-1000,pos[0]+1000) ,randint(pos[1]-1000,pos[1]+1000))
+  if not BoScript.isUnitAlive(expl):
+    expl = -1
 
 def printUnitInfo():
   units = BoScript.unitsInRect(0, 0, 1000, 1000)
@@ -96,7 +127,7 @@ def oldAIAdvance():
       return
     u = units[aiunit]
     if BoScript.isUnitMobile(u):
-      if BoScript.canUnitShoot(u):
+      if BoScript.canUnitShoot(u) and u != expl:
         attacker = u
         boprint("debug", "attacker set to %s" % attacker)
         boprint("debug", "Sending %s unit with id %s to attack" % (aiunit, attacker))
@@ -174,11 +205,11 @@ def produce():
         boprint("debug", "production set to %s type %s " % (len(prod),BoScript.unitType(u)))
         boprint("debug", "production types %s, type %s, count %s" % (prod,p,newProd[u]))
         newProd[u] = newProd[u] + 1
-        if p !=10002 and p != 10003 : 
+        if BoScript.canUnitTypeMineMinerals(player,p)==0 and BoScript.canUnitTypeMineOil(player,p)==0: 
           BoScript.produceUnit(player,u,p)
-        elif BoScript.playerUnitsOfTypeCount(player,10002)<3 and p ==10002: 
+        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineMinerals(player,p): 
           BoScript.produceUnit(player,u,p)
-        elif BoScript.playerUnitsOfTypeCount(player,10003)<3 and p ==10003: 
+        elif BoScript.playerUnitsOfTypeCount(player,p)<3 and BoScript.canUnitTypeMineOil(player,p): 
           BoScript.produceUnit(player,u,p)
       else:
         boprint("debug", "newProd %s " % newProd[u])
