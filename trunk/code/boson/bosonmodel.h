@@ -29,6 +29,7 @@ class BoVector3;
 class BoMatrix;
 class BoMesh;
 class BoMaterial;
+class BosonModelLoaderData;
 template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 template<class T> class QIntDict;
@@ -197,31 +198,12 @@ public:
 	void allocateMaterials(unsigned int count);
 
 	/**
-	 * Set the material object at @p index (see @ref allocateMaterials) to
-	 * @p mat
-	 **/
-	void setMaterial(unsigned int index, const BoMaterial& mat);
-
-	/**
-	 * @return The materian object at @p index (see @ref allocateMaterials)
+	 * @return The material object at @p index.
 	 **/
 	BoMaterial* material(unsigned int index) const;
+	unsigned int materialCount() const;
 
-	/**
-	 * Add a mesh. This class takes ownership of that mesh, i.e. will delete
-	 * it when this class gets deleted.
-	 **/
-	void addMesh(BoMesh* mesh);
-
-	/**
-	 * Add @p count frames. You need to give them useful data using @ref
-	 * frame
-	 * @return The offset after which the frames where added. E.g. you can
-	 * retrive the first newly added frame using frame(offset + 0)
-	 **/
-	int addFrames(int count);
-
-	BoMesh* mesh(int index) const;
+	BoMesh* mesh(unsigned int index) const;
 	unsigned int meshCount() const;
 	QIntDict<BoMesh> allMeshes() const;
 
@@ -335,6 +317,10 @@ protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 
 protected:
+	/**
+	 * Load the data from @p data into this class.
+	 **/
+	bool loadModelData(BosonModelLoaderData* data);
 	void loadTextures(const QStringList& textures);
 
 	/**

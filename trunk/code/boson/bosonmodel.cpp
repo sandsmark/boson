@@ -23,7 +23,7 @@
 #include "bosonmodeltextures.h"
 #include "bosonprofiling.h"
 #include "bo3dtools.h"
-#include "bo3dsload.h"
+#include "bosonmodelloader.h"
 #include "bosonglwidget.h"
 #include "bodebug.h"
 #include "bomesh.h"
@@ -38,6 +38,7 @@
 #include <qvaluelist.h>
 #include <qintdict.h>
 #include <qvaluevector.h>
+#include <qptrvector.h>
 
 // use GL_TRIANGLE_STRIP ? (experimental and not working!)
 // AB: there are 2 different optimizing approaches. one is to use
@@ -579,10 +580,10 @@ public:
 		mPoints = 0;
 	}
 
-	QIntDict<BoMesh> mMeshes;
-	QIntDict<BoFrame> mFrames;
+	QPtrVector<BoMesh> mMeshes;
+	QPtrVector<BoFrame> mFrames;
 
-	QValueVector<BoMaterial> mAllMaterials;
+	QPtrVector<BoMaterial> mAllMaterials;
 
 	QValueList<GLuint> mNodeDisplayLists;
 	QIntDict<BoFrame> mConstructionSteps;
@@ -591,7 +592,7 @@ public:
 	QString mDirectory;
 	QString mFile;
 
-	// consits of vertices and texture coordinates:
+	// consists of vertices and texture coordinates:
 	float* mPoints;
 };
 
@@ -613,6 +614,7 @@ void BosonModel::init()
  d->mFrames.setAutoDelete(true);
  d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
+ d->mAllMaterials.setAutoDelete(true);
 
  // add the default mode 0
  insertAnimationMode(0, 0, 1, 1);
@@ -640,26 +642,14 @@ BosonModel::~BosonModel()
  boDebug(100) << k_funcinfo << "done" << endl;
 }
 
-void BosonModel::allocateMaterials(unsigned int count)
-{
- if (count < 1) {
-	boError() << k_funcinfo << "no materials in model" << endl;
-	return;
- }
- if (d->mAllMaterials.count() > 0) {
-	boWarning() << k_funcinfo << "materials already allocated" << endl;
- }
- d->mAllMaterials.resize(count);
-}
-
-void BosonModel::setMaterial(unsigned int index, const BoMaterial& mat)
-{
- d->mAllMaterials[index] = mat;
-}
-
 BoMaterial* BosonModel::material(unsigned int index) const
 {
- return &d->mAllMaterials[index];
+ return d->mAllMaterials[index];
+}
+
+unsigned int BosonModel::materialCount() const
+{
+ return d->mAllMaterials.count();
 }
 
 const QString& BosonModel::baseDirectory() const
@@ -700,37 +690,45 @@ void BosonModel::loadModel()
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
 	return;
  }
- boMem->startCatching();
  BosonProfiler profiler(BosonProfiling::LoadModel);
 
- // we need to create on heap cause of the startCatching() call. it would be
- // inaccurate otherwise
- Bo3DSLoad* loader = new Bo3DSLoad(d->mDirectory, d->mFile, this);
+ BosonModelLoader loader(d->mDirectory, d->mFile, this);
 
  // TODO: add a profiling entry for this
- loader->loadModel();
+ if (!loader.loadModel()) {
+	boError() << k_funcinfo << "model " << d->mFile << " could not be loaded!" << endl;
+	return;
+ }
 
- QStringList modelTextures = loader->textures();
+ BosonModelLoaderData* data = loader.data();
+ if (!data) {
+	BO_NULL_ERROR(data);
+	return;
+ }
 
- // delete the loader before we have a chance to return from the function
- delete loader;
- loader = 0;
+ if (!loadModelData(data)) {
+	boError() << k_funcinfo << "unable to load model data for " << d->mFile << endl;
+	return;
+ }
+
 
  if (frames() == 0) {
 	boError() << k_funcinfo << "0 frames loaded for model " << d->mFile << endl;
-	boMem->stopCatching("BosonModel::loadModel()");
 	return;
  }
  if (meshCount() == 0) {
 	boError() << k_funcinfo << "0 meshes loaded for model " << d->mFile << endl;
-	boMem->stopCatching("BosonModel::loadModel()");
 	return;
  }
 
  boDebug(100) << k_funcinfo << "calculate normals" << endl;
- QIntDictIterator<BoMesh> meshIt(d->mMeshes);
- for (; meshIt.current(); ++meshIt) {
-	meshIt.current()->calculateNormals();
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	m->calculateNormals();
  }
 
  boDebug(100) << k_funcinfo << "generating LODs for meshes" << endl;
@@ -745,6 +743,17 @@ void BosonModel::loadModel()
  applyMasterScale();
  computeBoundingObjects();
 
+ QStringList modelTextures;
+ for (unsigned int i = 0; i < materialCount(); i++) {
+	BoMaterial* mat = material(i);
+	if (!mat) {
+		BO_NULL_ERROR(mat);
+		continue;
+	}
+	QString tex = cleanTextureName(mat->textureName());
+	modelTextures.append(tex);
+ }
+
  boProfiling->start(BosonProfiling::LoadModelTextures);
  loadTextures(modelTextures);
  boProfiling->stop(BosonProfiling::LoadModelTextures);
@@ -754,7 +763,7 @@ void BosonModel::loadModel()
 	return;
  }
 
- for (unsigned int i = 0; i < d->mAllMaterials.count(); i++) {
+ for (unsigned int i = 0; i < materialCount(); i++) {
 	BoMaterial* mat = material(i);
 	if (!mat) {
 		BO_NULL_ERROR(mat);
@@ -768,20 +777,76 @@ void BosonModel::loadModel()
 	mat->setTextureObject(myTex);
  }
 
- QIntDictIterator<BoMesh> it(d->mMeshes);
- for (; it.current(); ++it) {
-	BoMesh* mesh = it.current();
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
 #if USE_STRIP
-	mesh->connectNodes();
+	m->connectNodes();
 #else
-	mesh->addNodes();
+	m->addNodes();
 #endif
-	mesh->createPointCache();
+	m->createPointCache();
  }
 
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
+}
 
- boMem->stopCatching("BosonModel::loadModel()");
+bool BosonModel::loadModelData(BosonModelLoaderData* data)
+{
+ if (!data) {
+	BO_NULL_ERROR(data);
+	return false;
+ }
+
+ // AB: note that we must copy the pointers, not just the data.
+ // the objects might reference each other through their pointers.
+ // AB: also note that when we copy a pointer, we take ownership and delete it
+ // when the model is deleted
+
+ if (data->meshCount() == 0) {
+	boError() << k_funcinfo << "no mesh in model!" << endl;
+	return false;
+ }
+ if (d->mMeshes.count() != 0) {
+	boWarning() << k_funcinfo << "meshes already loaded?? deleting existing meshes - this might crash if the pointers are still used!" << endl;
+	d->mMeshes.resize(0);
+ }
+ d->mMeshes.resize(data->meshCount());
+ for (unsigned int i = 0; i < data->meshCount(); i++) {
+	d->mMeshes.insert(i, data->mesh(i));
+ }
+ data->clearMeshes(false);
+
+ if (data->frameCount() == 0) {
+	boError() << k_funcinfo << "no frame in model" << endl;
+	return false;
+ }
+ if (d->mFrames.count() != 0) {
+	boWarning() << k_funcinfo << "frames already loaded?? deleting existing frames - this might crash if the pointers are still used!" << endl;
+	d->mFrames.resize(0);
+ }
+ d->mFrames.resize(data->frameCount());
+ for (unsigned int i = 0; i < data->frameCount(); i++) {
+	d->mFrames.insert(i, data->frame(i));
+ }
+ data->clearFrames(false);
+
+ if (data->materialCount() != 0) {
+	if (d->mAllMaterials.count() != 0) {
+		boWarning() << k_funcinfo << "materials already loaded?! deleting them - this might crash when they are still needed" << endl;
+		d->mAllMaterials.resize(0);
+	}
+	d->mAllMaterials.resize(data->materialCount());
+	for (unsigned int i = 0; i < data->materialCount(); i++) {
+		d->mAllMaterials.insert(i, data->material(i));
+	}
+ }
+ data->clearMaterials(false);
+
+ return true;
 }
 
 void BosonModel::createDisplayLists(const QColor* teamColor)
@@ -811,10 +876,14 @@ void BosonModel::createDisplayLists(const QColor* teamColor)
  // single display list per frame containing all of the data. this would save
  // several glCallLists() calls and might be faster - but takes a lot more
  // memory for many frames
- boDebug(100) << k_funcinfo << "creating lists for " << d->mMeshes.count() << " meshes" << endl;
- QIntDictIterator<BoMesh> it(d->mMeshes);
- for (; it.current(); ++it) {
-	it.current()->loadDisplayList(teamColor);
+ boDebug(100) << k_funcinfo << "creating lists for " << meshCount() << " meshes" << endl;
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	m->loadDisplayList(teamColor);
  }
 
  boDebug(100) << k_funcinfo << "creating " << d->mFrames.count() << " lists" << endl;
@@ -956,20 +1025,9 @@ BosonAnimation* BosonModel::animation(int mode) const
 
 
 
-
-void BosonModel::addMesh(BoMesh* mesh)
-{
- d->mMeshes.insert(d->mMeshes.count(), mesh);
-}
-
-BoMesh* BosonModel::mesh(int index) const
+BoMesh* BosonModel::mesh(unsigned int index) const
 {
  return d->mMeshes[index];
-}
-
-QIntDict<BoMesh> BosonModel::allMeshes() const
-{
- return d->mMeshes;
 }
 
 unsigned int BosonModel::meshCount() const
@@ -977,14 +1035,18 @@ unsigned int BosonModel::meshCount() const
  return d->mMeshes.count();
 }
 
-int BosonModel::addFrames(int count)
+QIntDict<BoMesh> BosonModel::allMeshes() const
 {
- int offset = d->mFrames.count();
- for (int i = 0; i < count; i++) {
-	BoFrame* f = new BoFrame;
-	d->mFrames.insert(offset + i, f);
+ QIntDict<BoMesh> meshes;
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	meshes.insert(i, m);
  }
- return offset;
+ return meshes;
 }
 
 BoFrame* BosonModel::frame(unsigned int index) const
@@ -1080,9 +1142,13 @@ void BosonModel::computeBoundingObjects()
 
 void BosonModel::generateLOD()
 {
- QIntDictIterator<BoMesh> it(d->mMeshes);
- for (; it.current(); ++it) {
-	it.current()->generateLOD();
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	m->generateLOD();
  }
 }
 
@@ -1096,16 +1162,24 @@ void BosonModel::mergeArrays()
  }
  // count the points in the meshes first.
  unsigned int size = 0;
- QIntDictIterator<BoMesh> it(d->mMeshes);
- for (; it.current(); ++it) {
-	size += it.current()->points() * BoMesh::pointSize();
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	size += m->points() * BoMesh::pointSize();
  }
 
  d->mPoints = new float[size];
- it.toFirst();
  int index = 0;
- for (; it.current(); ++it) {
-	unsigned int pointsMoved = it.current()->movePoints(d->mPoints, index);
+ for (unsigned int i = 0; i < meshCount(); i++) {
+	BoMesh* m = mesh(i);
+	if (!m) {
+		BO_NULL_ERROR(m);
+		continue;
+	}
+	unsigned int pointsMoved = m->movePoints(d->mPoints, index);
 	index += pointsMoved;
  }
 }
@@ -1114,18 +1188,26 @@ void BosonModel::mergeMeshesInFrames()
 {
 #ifdef AB_TEST
 // boDebug() << k_funcinfo << file() << endl;
- QIntDictIterator<BoFrame> it(d->mFrames);
- for (; it.current(); ++it) {
-	it.current()->mergeMeshes();
+ for (unsigned int i = 0; i < frames(); i++) {
+	BoFrame* f = frame(i);
+	if (!f) {
+		BO_NULL_ERROR(i);
+		continue;
+	}
+	f->mergeMeshes();
  }
 #endif
 }
 
 void BosonModel::sortByDepth()
 {
- QIntDictIterator<BoFrame> it(d->mFrames);
- for (; it.current(); ++it) {
-	it.current()->sortByDepth();
+ for (unsigned int i = 0; i < frames(); i++) {
+	BoFrame* f = frame(i);
+	if (!f) {
+		BO_NULL_ERROR(i);
+		continue;
+	}
+	f->sortByDepth();
  }
 }
 

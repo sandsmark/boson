@@ -24,6 +24,7 @@
 #include "bomesh.h"
 #include "bomaterial.h"
 #include "bosonmodel.h"
+#include "bosonmodelloader.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
@@ -41,7 +42,7 @@
 #include <lib3ds/vector.h>
 #include <lib3ds/material.h>
 
-Bo3DSLoad::Bo3DSLoad(const QString& dir, const QString& file, BosonModel* data)
+Bo3DSLoad::Bo3DSLoad(const QString& dir, const QString& file, BosonModelLoaderData* data)
 {
  init();
  mDirectory = dir;
@@ -98,41 +99,50 @@ QStringList Bo3DSLoad::textures(Lib3dsFile* file)
  return list;
 }
 
-void Bo3DSLoad::loadModel()
+bool Bo3DSLoad::loadModel()
 {
  boDebug(100) << k_funcinfo << endl;
  if (mFile.isEmpty() || mDirectory.isEmpty()) {
 	boError(100) << k_funcinfo << "No file has been specified for loading" << endl;
-	return;
+	return false;
+ }
+ if (!mData) {
+	BO_NULL_ERROR(mData);
+	return false;
  }
  m3ds = lib3ds_file_load(file());
  if (!m3ds) {
 	boError(100) << k_funcinfo << "Can't load " << file() << endl;
-	return;
+	return false;
  }
 
- loadMaterials(mData, m3ds->materials);
+ if (!loadMaterials(mData, m3ds->materials)) {
+	boError() << k_funcinfo << "unable to load materials" << endl;
+	return false;
+ }
 
  Lib3dsNode* node = m3ds->nodes;;
  if (!node) {
 	boError(100) << k_funcinfo << "Could not load file " << file() << " correctly" << endl;
-	return;
+	return false;
  }
  if (m3ds->frames < 1) {
 	boError(100) << k_funcinfo << "No frames in " << file() << endl;
-	return;
+	return false;
  }
  for (; node; node = node->next) {
 	loadMesh(node);
  }
- if (mData->addFrames(m3ds->frames) != 0) {
-	boError() << "offset != 0 is not supported here" << endl;
-	return;
- }
  for (int i = 0; i < m3ds->frames; i++) {
+	int index = (int)mData->addFrame();
+	if (index != i) {
+		boError() << k_funcinfo << "frame " << i << " has unexpected index " << index << endl;
+		return false;
+	}
 	loadFrame(i);
  }
  boDebug(100) << k_funcinfo << "loaded from " << file() << endl;
+ return true;
 }
 
 void Bo3DSLoad::loadMesh(Lib3dsNode* node)
@@ -212,7 +222,7 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
  loadFaces(boMesh, mesh);
 }
 
-void Bo3DSLoad::loadFrame(int frame)
+bool Bo3DSLoad::loadFrame(int frame)
 {
  // A .3ds file can contain several frames. A different frame of the same file
  // looks slightly differnt - e.g. useful for animation (mainly even).
@@ -223,7 +233,10 @@ void Bo3DSLoad::loadFrame(int frame)
  lib3ds_file_eval(m3ds, frame);
  m3ds->current_frame = frame;
  BoFrame* f = mData->frame(frame);
- BO_CHECK_NULL_RET(f);
+ if (!f) {
+	BO_NULL_ERROR(f);
+	return false;
+ }
 
  int nodes = 0;
  Lib3dsNode* node;
@@ -238,6 +251,7 @@ void Bo3DSLoad::loadFrame(int frame)
  for (node = m3ds->nodes; node; node = node->next) {
 	loadFrameNode(f, &index, node);
  }
+ return true;
 }
 
 void Bo3DSLoad::countNodes(Lib3dsNode* node, int* nodes)
@@ -598,27 +612,35 @@ void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
  }
 }
 
-void Bo3DSLoad::loadMaterials(BosonModel* model, Lib3dsMaterial* firstMaterial)
+bool Bo3DSLoad::loadMaterials(BosonModelLoaderData* modelData, Lib3dsMaterial* firstMaterial)
 {
- BO_CHECK_NULL_RET(model);
- BO_CHECK_NULL_RET(firstMaterial);
+ if (!modelData) {
+	BO_NULL_ERROR(modelData);
+	return false;
+ }
+ if (!firstMaterial) {
+	BO_NULL_ERROR(firstMaterial);
+	return false;
+ }
  Lib3dsMaterial* m = firstMaterial;
- unsigned int count = 0;
+ if (modelData->materialCount() != 0) {
+	boError() << k_funcinfo << "materials already loaded" << endl;
+	return false;
+ }
  while (m) {
-	count++;
+	modelData->addMaterial();
 	m = m->next;
  }
- model->allocateMaterials(count);
  m = firstMaterial;
- for (unsigned int i = 0; i < count; i++, m = m->next) {
-	BoMaterial* mat = model->material(i);
+ for (unsigned int i = 0; i < modelData->materialCount(); i++, m = m->next) {
+	BoMaterial* mat = modelData->material(i);
 	if (!mat) {
 		boError() << k_funcinfo << "NULL mat at index=" << i << endl;
-		return;
+		return false;
 	}
 	if (!m) {
 		boError() << k_funcinfo << "NULL m at index=" << i << endl;
-		return;
+		return false;
 	}
 
 	mat->setName(QString(m->name));
@@ -649,5 +671,6 @@ void Bo3DSLoad::loadMaterials(BosonModel* model, Lib3dsMaterial* firstMaterial)
 	// AB: we don't set all the other textures, as I have no idea what they
 	// are for.
  }
+ return true;
 }
 

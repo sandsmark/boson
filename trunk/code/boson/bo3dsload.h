@@ -33,8 +33,8 @@ class BoVector3;
 class BoMatrix;
 class BoMesh;
 class BoFrame;
-class BosonModel;
-template<class T> class QPtrList; //hmm is this working for all compilers? can templates be forwarded safely?
+class BosonModelLoaderData;
+template<class T> class QPtrList;
 template<class T, class T2> class QMap;
 
 /**
@@ -43,10 +43,10 @@ template<class T, class T2> class QMap;
 class Bo3DSLoad
 {
 public:
-	Bo3DSLoad(const QString& dir, const QString& file, BosonModel* data);
+	Bo3DSLoad(const QString& dir, const QString& file, BosonModelLoaderData* data);
 	~Bo3DSLoad();
 
-	void loadModel();
+	bool loadModel();
 
 	void finishLoading();
 
@@ -69,13 +69,13 @@ public:
 
 protected:
 	void loadMesh(Lib3dsNode* node);
-	void loadFrame(int frame);
+	bool loadFrame(int frame);
 	void countNodes(Lib3dsNode* node, int* count);
 	void loadFrameNode(BoFrame* frame, int* index, Lib3dsNode* node);
 	void loadVertices(BoMesh* mesh, Lib3dsMesh* mesh);
 	void loadTexels(BoMesh* mesh, Lib3dsMesh* mesh, Lib3dsMaterial* material);
 	void loadFaces(BoMesh* mesh, Lib3dsMesh* mesh);
-	void loadMaterials(BosonModel* model, Lib3dsMaterial* firstMaterial);
+	bool loadMaterials(BosonModelLoaderData* data, Lib3dsMaterial* firstMaterial);
 
 	/**
 	 * Render the specified node according to the values for the current
@@ -126,7 +126,7 @@ private:
 	Lib3dsFile* m3ds;
 	QString mDirectory;
 	QString mFile;
-	BosonModel* mData;
+	BosonModelLoaderData* mData;
 
 	QPtrDict<BoMesh> mMesh2Mesh; // Lib3dsMesh to BoMesh
 };
