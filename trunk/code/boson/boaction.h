@@ -34,16 +34,19 @@ class BosonWeaponProperties;
 
 
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BoAction
 {
   public:
     BoAction(KSimpleConfig* cfg, const QString& name, SpeciesData* theme);
     BoAction(const QString& name, QPixmap* pixmap, const QString& text/*, hotkey*/);
 
-    const QString& id() const { return mId; };
-    int hotkey() const { return mHotkey; };
-    QPixmap* pixmap() const { return mPixmap; };
-    const QString& text() const { return mText; };
+    const QString& id() const { return mId; }
+    int hotkey() const { return mHotkey; }
+    QPixmap* pixmap() const { return mPixmap; }
+    const QString& text() const { return mText; }
 
   private:
     QString mId;  // Id aka name
@@ -52,6 +55,9 @@ class BoAction
     QString mText;  // Full text to show in tooltip
 };
 
+/**
+ * @author Rivo Laks <rivolaks@hot.ee>
+ **/
 class BoSpecificAction
 {
   public:
@@ -59,45 +65,59 @@ class BoSpecificAction
     BoSpecificAction();
 
     // These are meant to be used by commandframe only
-    long unsigned int productionId() const  { return mProdId; };
-    void setProductionId(long unsigned int id)  { mProdId = id; };
-    Player* productionOwner() const  { return mProdOwner; };
-    void setProductionOwner(Player* owner)  { mProdOwner = owner; };
-    Unit* unit() const  { return mUnit; };
+    long unsigned int productionId() const  { return mProductionId; }
+    void setProductionId(long unsigned int id)  { mProductionId = id; }
+    Player* productionOwner() const  { return mProductionOwner; }
+    void setProductionOwner(Player* owner)  { mProductionOwner = owner; }
+
+    Unit* unit() const  { return mUnit; }
     // Production owner is also set to u->owner()
     void setUnit(Unit* u);
-    BosonWeaponProperties* weapon() const  { return mWeapon; };
-    void setWeapon(BosonWeaponProperties* w)  { mWeapon = w; };
 
-    UnitAction type() const  { return mType; };
-    void setType(UnitAction type)  { mType = type; };
+    BosonWeaponProperties* weapon() const  { return mWeapon; }
+    void setWeapon(BosonWeaponProperties* w)  { mWeapon = w; }
+
+    UnitAction type() const  { return mType; }
+    void setType(UnitAction type)  { mType = type; }
 
     ProductionType productionType() const;
 
-    bool isUnitAction() const  { return mType >= ActionUnitStart && mType <= ActionUnitEnd; };
-    bool isWeaponAction() const  { return mType >= ActionWeaponStart && mType <= ActionWeaponEnd; };
-    bool isProduceAction() const  { return mType >= ActionProduceStart && mType <= ActionProduceEnd; };
+    bool isUnitAction() const
+    {
+      return mType >= ActionUnitStart && mType <= ActionUnitEnd;
+    }
+    bool isWeaponAction() const
+    {
+      return mType >= ActionWeaponStart && mType <= ActionWeaponEnd;
+    }
+    bool isProduceAction() const
+    {
+      return mType >= ActionProduceStart && mType <= ActionProduceEnd;
+    }
 
-    bool ok() const  { return mOk; };
+    bool ok() const  { return mOk; }
     void reset();
     void operator=(const BoSpecificAction& a);
 
-    BoAction* action() const  { return mAction; };
-    const QString& id() const { return mAction->id(); };
-    int hotkey() const { return mAction->hotkey(); };
-    QPixmap* pixmap() const { return mAction->pixmap(); };
-    const QString& text() const { return mAction->text(); };
+    BoAction* action() const  { return mAction; }
+    const QString& id() const { return mAction->id(); }
+    int hotkey() const { return mAction->hotkey(); }
+    QPixmap* pixmap() const { return mAction->pixmap(); }
+    const QString& text() const { return mAction->text(); }
 
 
   private:
     BoAction* mAction;
-    long unsigned int mProdId;
+    long unsigned int mProductionId;
     UnitAction mType;
     Unit* mUnit;
-    Player* mProdOwner;
+    Player* mProductionOwner;
     BosonWeaponProperties* mWeapon;
     bool mOk;
 };
 
-
 #endif // BOACTION_H
+
+/*
+ * vim: et sw=2
+ */

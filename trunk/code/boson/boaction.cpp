@@ -68,7 +68,7 @@ BoSpecificAction::BoSpecificAction()
 void BoSpecificAction::reset()
 {
   mAction = 0;
-  mProdId = 0;
+  mProductionId = 0;
   mType = ActionInvalid;
   mUnit = 0;
   mWeapon = 0;
@@ -95,7 +95,7 @@ void BoSpecificAction::setUnit(Unit* u)
 {
   mUnit = u;
   if(mUnit) {
-    mProdOwner = mUnit->owner();
+    mProductionOwner = mUnit->owner();
   }
   // Don't reset owner if unit is 0 (needed for editor)
 }
@@ -103,11 +103,14 @@ void BoSpecificAction::setUnit(Unit* u)
 void BoSpecificAction::operator=(const BoSpecificAction& a)
 {
   mAction = a.mAction;
-  mProdId = a.mProdId;
-  mProdOwner = a.mProdOwner;
+  mProductionId = a.mProductionId;
+  mProductionOwner = a.mProductionOwner;
   mType = a.mType;
   mUnit = a.mUnit;
   mWeapon = a.mWeapon;
   mOk = a.mOk;
 }
 
+/*
+ * vim: et sw=2
+ */
