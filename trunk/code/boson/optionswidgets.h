@@ -269,6 +269,25 @@ private:
 	QComboBox* mMeshRenderer;
 };
 
+class WaterOptions : public QVBox, public OptionsWidget
+{
+	Q_OBJECT
+public:
+	WaterOptions(QWidget* parent);
+	~WaterOptions();
+
+	virtual void apply();
+	virtual void setDefaults();
+	virtual void load();
+
+private:
+	QCheckBox* mWaves;
+	QCheckBox* mReflections;
+	QCheckBox* mTranslucency;
+	QCheckBox* mBumpmapping;
+	QCheckBox* mAnimatedBumpmaps;
+};
+
 class ChatOptions : public QVBox, public OptionsWidget
 {
 	Q_OBJECT

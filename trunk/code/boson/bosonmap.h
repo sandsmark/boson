@@ -697,6 +697,7 @@ public:
 
 
 	QByteArray saveMapToFile();
+	QByteArray saveWaterToFile();
 
 
 	/**
@@ -705,6 +706,8 @@ public:
 	 * are in a different file.
 	 **/
 	bool loadMapFromFile(const QByteArray& map);
+
+	bool loadWaterFromFile(const QByteArray& water);
 
 	/**
 	 * Load the complete map, even those data that are stored in different
@@ -825,7 +828,7 @@ protected:
 	 * These values are based on the alpha values in the textures at all 4
 	 * corners of the cell.
 	 *
-	 * This should be called on map construction only (see @ref 
+	 * This should be called on map construction only (see @ref
 	 * generateCellsFromTexMap), except in editor mode.
 	 *
 	 * Also note that the calculated values for this cell are <em>not</em>

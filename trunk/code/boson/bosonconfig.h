@@ -183,7 +183,7 @@ class BoConfigIntListEntry; // forwarding, since i dont want to #include <qvalue
 /**
  * Boson has two different types of config entries, you can find both of them in
  * BosonConfig.
- * 
+ *
  * The first type is stored in this class - you can read it with the usual KDE
  * get functions (like @ref sound and @ref music). These entries can be saved to
  * the config file using @ref save. As the value is stored in BosonConfig you
@@ -320,6 +320,17 @@ public:
 	bool useLOD() const { return mUseLOD->value(); }
 	void setUseVBO(bool use) { mUseVBO->setValue(use); }
 	bool useVBO() const { return mUseVBO->value(); }
+	void setWaterWaves(bool on) { mWaterWaves->setValue(on); }
+	bool waterWaves() const { return mWaterWaves->value(); }
+	void setWaterReflections(bool on) { mWaterReflections->setValue(on); }
+	bool waterReflections() const { return mWaterReflections->value(); }
+	void setWaterTranslucency(bool on) { mWaterTranslucency->setValue(on); }
+	bool waterTranslucency() const { return mWaterTranslucency->value(); }
+	void setWaterBumpmapping(bool on) { mWaterBumpmapping->setValue(on); }
+	bool waterBumpmapping() const { return mWaterBumpmapping->value(); }
+	void setWaterAnimatedBumpmaps(bool on) { mWaterAnimatedBumpmaps->setValue(on); }
+	bool waterAnimatedBumpmaps() const { return mWaterAnimatedBumpmaps->value(); }
+
 
 	void setUnitSoundActivated(UnitSoundEvent e, bool activated);
 	bool unitSoundActivated(UnitSoundEvent e) const;
@@ -477,7 +488,7 @@ public:
 	void setDebugMode(DebugMode m) { mDebugMode = m; }
 
 	/**
-	 * Disable sound loading and playing. Note that this value is 
+	 * Disable sound loading and playing. Note that this value is
 	 * <em>not</em> saved into the config file (it is a command line arg)!
 	 **/
 	void setDisableSound(bool d) { mDisableSound = d; }
@@ -594,6 +605,11 @@ private:
 	BoConfigIntEntry* mGameLogInterval;
 	BoConfigBoolEntry* mUseLOD;
 	BoConfigBoolEntry* mUseVBO;
+	BoConfigBoolEntry* mWaterWaves;
+	BoConfigBoolEntry* mWaterReflections;
+	BoConfigBoolEntry* mWaterTranslucency;
+	BoConfigBoolEntry* mWaterBumpmapping;
+	BoConfigBoolEntry* mWaterAnimatedBumpmaps;
 
 	// NOT stored to config file!
 	bool mDisableSound;

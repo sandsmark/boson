@@ -41,6 +41,7 @@
 #include "boeventlistener.h"
 #include "bosonpropertyxml.h"
 #include "bosonpath.h"
+#include "bowater.h"
 
 #include <klocale.h>
 #include <kgame/kgamepropertyhandler.h>
@@ -172,7 +173,11 @@ void BoCanvasAdvance::advance(const QPtrList<BosonItem> animItems, unsigned int 
 
  boProfiling->advanceEffects(true);
  updateEffects(0.05);  // With default game speed, delay between advance messages is 1.0 / 20 = 0.05 sec
+ boProfiling->advanceWater(true);
  boProfiling->advanceEffects(false);
+ boWaterManager->update(0.05);
+ boProfiling->advanceWater(false);
+#warning FIXME!!! is this ok here?
 
  /*
   * This contains some things that need to be done "sometimes" only - currently

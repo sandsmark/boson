@@ -214,10 +214,11 @@ public:
 
 protected:
 	bool loadDescriptionFromFile(const QByteArray& xml);
-	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap);
+	bool loadMapFromFile(const QByteArray& xml, const QByteArray& heightMapImage, const QByteArray& texMap, const QByteArray& waterXML);
 
 	QString saveDescriptionToFile();
 	QByteArray saveMapToFile();
+	QByteArray saveWaterToFile();
 	QByteArray saveTexMapToFile();
 
 	/**
@@ -234,7 +235,7 @@ protected:
 	 * conversion.
 	 *
 	 * Here you are meant to place the actual conversion code.
-	 * @param set to TRUE when the @p version has been recognized and (!)
+	 * @param handled set to TRUE when the @p version has been recognized and (!)
 	 * used to convert the files to a new format (i.e. at least changed
 	 * the version number). Otherwise set to FALSE (i.e. if the files have
 	 * not been touched at all).

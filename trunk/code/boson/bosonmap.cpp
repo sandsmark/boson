@@ -27,6 +27,7 @@
 #include "bodebug.h"
 #include "bosondata.h"
 #include "bosontexturearray.h"
+#include "bowater.h"
 
 #include <qdatastream.h>
 #include <qimage.h>
@@ -480,6 +481,26 @@ bool BosonMap::loadMapFromFile(const QByteArray& mapXML)
  return true;
 }
 
+bool BosonMap::loadWaterFromFile(const QByteArray& waterXML)
+{
+ boDebug(270) << k_funcinfo << endl;
+ QDomDocument doc(QString::fromLatin1("Water"));
+ QString errorMsg;
+ int line, column;
+ if (!doc.setContent(QString(waterXML), &errorMsg, &line, &column)) {
+	boError(270) << k_funcinfo << "unable to load from waterXML (error in line " << line << ", column " << column << ", msg=" << errorMsg << ")" << endl;
+	return false;
+ }
+ QDomElement root = doc.documentElement();
+ if (root.isNull()) {
+	boError(270) << k_funcinfo << "no root element" << endl;
+	return false;
+ }
+ boWaterManager->setMap(this);
+ boWaterManager->loadFromXML(root);
+ return true;
+}
+
 
 bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
@@ -753,6 +774,15 @@ QByteArray BosonMap::saveMapToFile()
  geometry.setAttribute(QString::fromLatin1("Height"), height());
  root.setAttribute(QString::fromLatin1("GroundTheme"), groundTheme()->identifier());
 
+ return doc.toCString();
+}
+
+QByteArray BosonMap::saveWaterToFile()
+{
+ QDomDocument doc(QString::fromLatin1("Water"));
+ QDomElement root = doc.createElement(QString::fromLatin1("Water"));
+ doc.appendChild(root);
+ boWaterManager->saveToXML(root);
  return doc.toCString();
 }
 

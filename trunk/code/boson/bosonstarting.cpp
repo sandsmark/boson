@@ -36,6 +36,7 @@
 #include "bosonsaveload.h"
 #include "boevent.h"
 #include "bosoneffectproperties.h"
+#include "bowater.h"
 
 #include <klocale.h>
 #include <kgame/kmessageserver.h>
@@ -197,6 +198,9 @@ bool BosonStarting::start()
 	boGame->unlock();
 	return false;
  }
+ emit signalLoadingType(BosonLoadingWidget::LoadWater);
+ boWaterManager->initOpenGL();
+
  emit signalLoadingType(BosonLoadingWidget::InitGame); // obsolete
  emit signalLoadingType(BosonLoadingWidget::StartingGame);
  if (!startScenario(files)) {

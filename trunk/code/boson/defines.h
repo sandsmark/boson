@@ -112,6 +112,11 @@
 #define DEFAULT_TOOLTIP_CREATOR 1 // FIXME: should be BoToolTipCreator::Extended, but I don't want to include the file here
 #define DEFAULT_USE_LOD true
 #define DEFAULT_USE_VBO false  // Nvidia drivers doesn't properly support VBOs :-(
+#define DEFAULT_WATER_WAVES true
+#define DEFAULT_WATER_REFLECTIONS true
+#define DEFAULT_WATER_TRANSLUCENCY true
+#define DEFAULT_WATER_BUMPMAPPING true
+#define DEFAULT_WATER_ANIMATED_BUMPMAPS true
 
 // not in BosonConfig (not necessarily in OptionsDialog):
 #define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)

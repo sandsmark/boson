@@ -77,6 +77,7 @@ protected:
 	void initScrollingPage();
 	void initSoundsPage();
 	void initOpenGLPage();
+	void initWaterPage();
 	void initChatPage();
 	void initToolTipPage();
 

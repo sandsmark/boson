@@ -290,6 +290,11 @@ BosonConfig::BosonConfig(KConfig* conf)
  mGameLogInterval = new BoConfigIntEntry(this, "GameLogInterval", 10);
  mUseLOD = new BoConfigBoolEntry(this, "UseLOD", DEFAULT_USE_LOD);
  mUseVBO = new BoConfigBoolEntry(this, "UseVBO", DEFAULT_USE_VBO);
+ mWaterWaves = new BoConfigBoolEntry(this, "WaterWaves", DEFAULT_WATER_WAVES);
+ mWaterReflections = new BoConfigBoolEntry(this, "WaterReflections", DEFAULT_WATER_REFLECTIONS);
+ mWaterTranslucency = new BoConfigBoolEntry(this, "WaterTranslucency", DEFAULT_WATER_TRANSLUCENCY);
+ mWaterBumpmapping = new BoConfigBoolEntry(this, "WaterBumpmapping", DEFAULT_WATER_BUMPMAPPING);
+ mWaterAnimatedBumpmaps = new BoConfigBoolEntry(this, "WaterAnimatedBumpmaps", DEFAULT_WATER_ANIMATED_BUMPMAPS);
 
  mDebugMode = DebugNormal;
 

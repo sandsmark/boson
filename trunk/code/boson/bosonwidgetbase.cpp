@@ -56,6 +56,7 @@
 #ifdef BOSON_USE_BOMEMORY
 #include "bomemory/bomemorydialog.h"
 #endif
+#include "bowater.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -937,6 +938,7 @@ void BosonWidgetBase::setLocalPlayer(Player* p)
  if (d->mChat) {
 	d->mChat->chatWidget()->setFromPlayer(localPlayer());
  }
+ boWaterManager->setLocalPlayerIO(localPlayer()->playerIO());
 }
 
 void BosonWidgetBase::slotGrabScreenshot()
