@@ -26,7 +26,7 @@
 #include "defines.h"
 #include "bodebug.h"
 #include "bogltooltip.h"
-#include "bogroundrenderer.h"
+#include "bogroundrenderermanager.h"
 #include "bo3dtools.h"
 #include "bofullscreen.h"
 #include "bomeshrenderermanager.h"
@@ -531,12 +531,8 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
 
  hbox = new QHBox(mAdvanced);
- (void)new QLabel(i18n("Ground rendering method"), hbox);
+ (void)new QLabel(i18n("Ground render:"), hbox);
  mGroundRenderer = new QComboBox(hbox);
- for (int i = 0; i < BoGroundRenderer::Last; i++) {
-	mGroundRenderer->insertItem(BoGroundRenderer::rttiToName(i));
- }
- mGroundRenderer->setCurrentItem(0);
 
  mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
@@ -550,7 +546,7 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  mSmoothShading->setChecked(true);
  hbox = new QHBox(mAdvanced);
  (void)new QLabel(i18n("Mesh renderer:"), hbox);
- mMeshRenderer= new QComboBox(hbox);
+ mMeshRenderer = new QComboBox(hbox);
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -611,7 +607,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
-		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
@@ -625,7 +622,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
-		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+		setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(0);
 		mSmoothShading->setChecked(true);
@@ -638,7 +636,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		setMipmapMinificationFilter(GL_NEAREST);
 		mUseLight->setChecked(false);
 		mUseMaterials->setChecked(false);
-		mGroundRenderer->setCurrentItem(BoGroundRenderer::Fast);
+		setCurrentGroundRenderer("BoFastGroundRenderer");
+		setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
 		setUseLOD(true);
 		setDefaultLOD(5000);
 		mSmoothShading->setChecked(false);
@@ -714,9 +713,6 @@ void OpenGLOptions::apply()
 	}
  }
 
- boConfig->setUIntValue("GroundRenderer", mGroundRenderer->currentItem());
- emit signalGroundRendererChanged(mGroundRenderer->currentItem());
-
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
  boConfig->setUseLight(mUseLight->isChecked());
  boConfig->setUseMaterials(mUseMaterials->isChecked());
@@ -754,21 +750,21 @@ void OpenGLOptions::apply()
  }
  mResolution->setCurrentItem(0);
 
- QString currentRenderer = BoMeshRendererManager::manager()->currentRendererName();
- if (currentRenderer.compare(mMeshRenderer->currentText()) != 0) {
-	int r = KMessageBox::questionYesNo(this, i18n("Changing the mesh renderer will take some time. Do you really want to do that?"));
-	if (r == KMessageBox::Yes) {
-		if (!BoMeshRendererManager::manager()->makeRendererCurrent(mMeshRenderer->currentText())) {
-			KMessageBox::sorry(this, i18n("Failed at making mesh renderer %1 current. Trying to use a default renderer (expect a crash, if we fail)...").arg(mMeshRenderer->currentText()));
-			if (!BoMeshRendererManager::manager()->makeRendererCurrent(QString::null)) {
-				KMessageBox::sorry(this, i18n("Failed at setting a default mesh renderer. Quitting now"));
-				kapp->exit(1);
-			}
-		} else {
-			boConfig->setStringValue("MeshRenderer", BoMeshRendererManager::manager()->currentRendererName());
-		}
+ if (!BoMeshRendererManager::manager()->makeRendererCurrent(mMeshRenderer->currentText())) {
+	KMessageBox::sorry(this, i18n("Failed at making mesh renderer %1 current. Trying to use a default renderer (expect a crash, if we fail)...").arg(mMeshRenderer->currentText()));
+	if (!BoMeshRendererManager::manager()->makeRendererCurrent(QString::null)) {
+		KMessageBox::sorry(this, i18n("Failed at setting a default mesh renderer. Quitting now"));
+		kapp->exit(1);
 	}
  }
+ if (!BoGroundRendererManager::manager()->makeRendererCurrent(mGroundRenderer->currentText())) {
+	KMessageBox::sorry(this, i18n("Failed at making ground renderer %1 current. Trying to use a default renderer (expect a crash, if we fail)...").arg(mGroundRenderer->currentText()));
+	if (!BoGroundRendererManager::manager()->makeRendererCurrent(QString::null)) {
+		KMessageBox::sorry(this, i18n("Failed at setting a default ground renderer. Quitting now"));
+		kapp->exit(1);
+	}
+ }
+
 
  emit signalOpenGLSettingsUpdated();
 
@@ -788,7 +784,8 @@ void OpenGLOptions::setDefaults()
  setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
- mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
+ setCurrentGroundRenderer(DEFAULT_GROUND_RENDERER);
+ setCurrentMeshRenderer(DEFAULT_MESH_RENDERER);
  setUseLOD(DEFAULT_USE_LOD);
  setDefaultLOD(0);
  mSmoothShading->setChecked(true);
@@ -806,7 +803,6 @@ void OpenGLOptions::load()
  setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
  mUseLight->setChecked(boConfig->useLight());
  mUseMaterials->setChecked(boConfig->useMaterials());
- mGroundRenderer->setCurrentItem(boConfig->uintValue("GroundRenderer"));
  setUseLOD(boConfig->useLOD());
  setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
  mEnableATIDepthWorkaround->setChecked(boConfig->boolValue("EnableATIDepthWorkaround"));
@@ -820,10 +816,8 @@ void OpenGLOptions::load()
  mFontChanged = false;
  mResolution->setCurrentItem(0);
 
- mMeshRenderer->clear();
- QStringList renderers = BoMeshRendererManager::manager()->availableRenderers();
- mMeshRenderer->insertStringList(renderers);
- mMeshRenderer->setCurrentItem(renderers.findIndex(BoMeshRendererManager::manager()->currentRendererName()));
+ setCurrentMeshRenderer(BoMeshRendererManager::manager()->currentRendererName());
+ setCurrentGroundRenderer(BoGroundRendererManager::manager()->currentRendererName());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -977,6 +971,33 @@ void OpenGLOptions::slotEnableATIDepthWorkaround(bool e)
 void OpenGLOptions::slotATIDepthWorkaroundDefaultValue()
 {
  mATIDepthWorkaroundValue->setText(QString::number(0.00390625));
+}
+
+void OpenGLOptions::setCurrentMeshRenderer(const QString& renderer)
+{
+ mMeshRenderer->clear();
+ QStringList renderers = BoMeshRendererManager::manager()->availableRenderers();
+ mMeshRenderer->insertStringList(renderers);
+
+ for (int i = 0; i < mMeshRenderer->count(); i++) {
+	if (mMeshRenderer->text(i) == renderer) {
+		mMeshRenderer->setCurrentItem(i);
+		return;
+	}
+ }
+}
+
+void OpenGLOptions::setCurrentGroundRenderer(const QString& renderer)
+{
+ mGroundRenderer->clear();
+ QStringList renderers = BoGroundRendererManager::manager()->availableRenderers();
+ mGroundRenderer->insertStringList(renderers);
+ for (int i = 0; i < mGroundRenderer->count(); i++) {
+	if (mGroundRenderer->text(i) == renderer) {
+		mGroundRenderer->setCurrentItem(i);
+		return;
+	}
+ }
 }
 
 //////////////////////////////////////////////////////////////////////

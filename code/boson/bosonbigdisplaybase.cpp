@@ -3123,7 +3123,6 @@ void BosonBigDisplayBase::updateOpenGLSettings()
 	initGL();
  }
  makeCurrent();
- changeGroundRenderer(boConfig->uintValue("GroundRenderer", DEFAULT_GROUND_RENDERER));
 
  // AB: note there seems to be hardly a difference between flat and smooth
  // shading (in both quality and speed)
