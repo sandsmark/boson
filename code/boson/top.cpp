@@ -642,6 +642,7 @@ void TopWidget::reinitGame()
  d->mActionStatusbar->setChecked(false);
  slotToggleStatusbar();
  enableGameActions(false);
+ showHideMenubar();
 }
 
 void TopWidget::slotGameOver()
