@@ -135,7 +135,10 @@ class BoVector3
      **/
     inline void normalize()
     {
-      scale(1 / length());
+      float l = length();
+      if (l != 0.0f) {
+        scale(1.0f / l);
+      }
     }
 
     /**
