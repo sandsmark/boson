@@ -318,6 +318,14 @@ void Unit::moveBy(float moveX, float moveY, float moveZ)
 
  BosonItem::moveBy(moveX, moveY, moveZ);
  canvas()->unitMoved(this, oldX, oldY);
+ if(activeParticleSystems()->count() > 0) {
+	BoVector3 move(moveX, moveY, moveZ);
+	move.canvasToOGL();
+	QPtrListIterator<BosonParticleSystem> it(*activeParticleSystems());
+	for (; it.current(); ++it) {
+		it.current()->setPosition(it.current()->position() + move);
+	}
+ }
  /*if (smokeParticleSystem()) {
 	 smokeParticleSystem()->moveParticles(BoVector3(moveX / BO_TILE_SIZE, -moveY / BO_TILE_SIZE, moveZ / BO_TILE_SIZE));
  }*/

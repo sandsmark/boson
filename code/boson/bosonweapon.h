@@ -101,8 +101,10 @@ class BosonWeaponProperties : public PluginProperties
     BoVector3 offset() const  { return mOffset;};
     /**
      * @return Height of parable that shot of this weapon flies along
+     * Note that this is height per cell, it should be multiplied by distance of
+     * shot to get final height.
      **/
-    float maxHeight() const  { return mMaxHeight; };
+    float height() const  { return mHeight; };
 
     inline BosonModel* model() const  { return mModel; };
 
@@ -156,7 +158,7 @@ class BosonWeaponProperties : public PluginProperties
     void setFlyParticleSystemIds(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
     void setHitParticleSystemIds(QValueList<unsigned long int> ids)  { mHitParticleSystemIds = ids; };
     void setOffset(BoVector3 o)  { mOffset = o; };
-    void setMaxHeight(float maxheight)  { mMaxHeight = maxheight; };
+    void setHeight(float height)  { mHeight = height; };
     void setSound(int event, QString filename);
 
     void reset();
@@ -172,7 +174,7 @@ class BosonWeaponProperties : public PluginProperties
     bool mCanShootAtLandUnits;
     unsigned int mReload;
     unsigned long int mSpeed;
-    float mMaxHeight;
+    float mHeight;
     BosonModel* mModel;
     QString mModelFileName;
     QString mName;
