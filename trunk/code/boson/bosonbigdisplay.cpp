@@ -29,11 +29,11 @@
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
+#include <kcursor.h>
 
 #include <qptrlist.h>
 #include <qpoint.h>
 #include <qpainter.h>
-#include <qcursor.h>
 #include <qbitmap.h>
 
 #include "bosonbigdisplay.moc"
@@ -135,7 +135,7 @@ void BosonBigDisplay::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseEvent
 			Unit* unit = ((BosonCanvas*)canvas())->findUnitAt(pos);
 			if (unit) {
 				if (unit->owner() == d->mLocalPlayer) {
-					setCursor(QCursor());
+					setCursor(KCursor::arrowCursor());
 				} else {
 					setCursor(QCursor(d->mCursorAttack));
 				}
@@ -244,7 +244,7 @@ void BosonBigDisplay::clearSelection()
 	++it;
  }
  d->mSelectionList.clear();
- setCursor(QCursor());
+ setCursor(KCursor::arrowCursor());
 }
 
 void BosonBigDisplay::addUnitSelection(Unit* unit)
