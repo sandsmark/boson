@@ -62,60 +62,60 @@ echo "
 /** Add screenshots here!
 **  To add screenshot, call
 **  draw_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
-**  Note that filenames do not contain directory
+**  Note that filenames do not contain directory and that files are in JPG AND NOT IN PNG because of the size
 **/
 draw_screenshot("Blowing up Command center of the enemy",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-1-thumb.png", "0.7-1.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-1-thumb.jpg", "0.7-1.jpg");
 draw_screenshot("Smoking wreckages after a failed attack",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-2-thumb.png", "0.7-2.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-2-thumb.jpg", "0.7-2.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("Here you can see much smoke from wreckages and missiles and new camera system",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-3-thumb.png", "0.7-3.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-3-thumb.jpg", "0.7-3.jpg");
 draw_screenshot("",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-4-thumb.png", "0.7-4.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-4-thumb.jpg", "0.7-4.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-5-thumb.png", "0.7-5.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-5-thumb.jpg", "0.7-5.jpg");
 draw_screenshot("Outer defenses of an enemy being taken out",
-    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.png", "0.7-6.png");
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.jpg", "0.7-6.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("Here you can see an attack of an aircraft while rotating the
     camera. Also, you can see the new particle effects.",
-    "09. Sep. 2002 (CVS)", "thumb_war1.png", "war1.png");
+    "09. Sep. 2002 (CVS)", "thumb_war1.jpg", "war1.jpg");
 draw_screenshot("The Big War - showing more particle effects, units and gameplay.",
-    "09. Sep. 2002 (CVS)", "thumb_war2.png", "war2.png");
+    "09. Sep. 2002 (CVS)", "thumb_war2.jpg", "war2.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("This shows the new OpenGL support and camera rotation.",
-    "17. Aug. 2002 (CVS)", "thumb_gl1.png", "gl_boson1.png");
+    "17. Aug. 2002 (CVS)", "thumb_gl1.jpg", "gl_boson1.jpg");
 draw_screenshot("Buildings are getting constructed.",
-    "17. Aug. 2002 (CVS)", "thumb_gl2.png", "gl_boson2.png");
+    "17. Aug. 2002 (CVS)", "thumb_gl2.jpg", "gl_boson2.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("This screenshot shows a running game in Boson. You can see many
     units and a commandframe on the left showing selected unit's properties.",
-    "11. June 2002 (Boson 0.6)", "thumb1.png", "boson1.png");
+    "11. June 2002 (Boson 0.6)", "thumb1.jpg", "boson1.jpg");
 draw_screenshot("This is Boson's startup screen. Currently, here are only
     buttons to start a new game or quit Boson.",
-    "11. June 2002 (Boson 0.6)", "thumb2.png", "boson2.png");
+    "11. June 2002 (Boson 0.6)", "thumb2.jpg", "boson2.jpg");
 echo "
 </tr>
 <tr>";
 draw_screenshot("Screenshot of the \"Start new game\" page. You can choose your name,
     color, species and map here, add computer players and even chat with other connected players.",
-    "11. June 2002 (Boson 0.6)", "thumb3.png", "boson3.png");
+    "11. June 2002 (Boson 0.6)", "thumb3.jpg", "boson3.jpg");
 draw_screenshot("Another screenshot of a running game. You can see some moving
     units here. In the lower part of the window is a chat widget, you can chat
     with other players during the game.",
-    "11. June 2002 (Boson 0.6)", "thumb4.png", "boson4.png");
+    "11. June 2002 (Boson 0.6)", "thumb4.jpg", "boson4.jpg");
 echo "
 </tr>";
 draw_bigbox_end();
