@@ -432,6 +432,47 @@ bool BosonPlayField::loadPlayField(const QString& file)
  return true;
 }
 
+// AB: correct (i.e. current) file format assumed. must be converted before this
+// is called.
+bool BosonPlayField::loadPlayField(const QMap<QString, QByteArray>& files)
+{
+ if (!files.contains("map/map.xml")) {
+	boError() << k_funcinfo << "no map.xml found" << endl;
+	return false;
+ }
+ if (!files.contains("map/heightmap.png")) {
+	boError() << k_funcinfo << "no heightmap found" << endl;
+	return false;
+ }
+ if (!files.contains("map/texmap")) {
+	boError() << k_funcinfo << "no texmap found" << endl;
+	return false;
+ }
+
+ // AB: C/description.xml is mandatory. all other languages are optional.
+ if (!files.contains("C/description.xml")) {
+	boError() << k_funcinfo << "no default description.xml found" << endl;
+	return false;
+ }
+
+ if (!loadMapFromFile(files["map/map.xml"], files["map/heightmap.png"], files["map/texmap"])) {
+	boError() << k_funcinfo << "error loading the map" << endl;
+	return false;
+ }
+ if (!loadDescriptionFromFile(files["C/description.xml"])) {
+	boError() << k_funcinfo << "error loading the default description" << endl;
+	return false;
+ }
+
+ // here we might parse files for keys that end with "description.xml". all
+ // languages should be added that are present.
+
+ // when we have winning conditions one day (probably in "scenario.xml"), we
+ // should load it here as well.
+
+ return true;
+}
+
 bool BosonPlayField::loadDescriptionFromFile(const QByteArray& xml)
 {
  if (xml.size() == 0) {
@@ -977,5 +1018,161 @@ QStringList BosonPlayField::findPlayFieldsOfCampaign(const QString& campaign)
 	list = BosonData::availableFiles(QString::fromLatin1("maps/%1/*.bpf").arg(campaign));
  }
  return list;
+}
+
+// load from harddisk to virtual files in the QMap.
+bool BosonPlayField::loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles)
+{
+ if (!destFiles.isEmpty()) {
+	boError() << k_funcinfo << "destFiles must be empty" << endl;
+	return false;
+ }
+ if (!isPreLoaded()) {
+	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
+	return false;
+ }
+ if (!mFile) {
+	boWarning() << k_funcinfo << "NULL file - recreating file pointer" << endl;
+	mFile = new BPFFile(mFileName, true);
+ }
+ QByteArray heightMap = mFile->heightMapData();
+ QByteArray texMap = mFile->texMapData();
+ QByteArray mapXML = mFile->mapXMLData();
+ QByteArray playersXML = mFile->playersData();
+ QByteArray canvasXML = mFile->canvasData();
+ if (!mFile->hasMapDirectory()) {
+	boWarning() << k_funcinfo << "need to convert from an old file" << endl;
+	BosonFileConverter converter;
+
+	// convert map first
+	if (texMap.size() == 0) {
+		if (!converter.convertMapFile_From_0_8_To_0_9(mFile->mapData(), &mapXML, &texMap)) {
+			boError() << k_funcinfo << "failed converting from boson 0.8" << endl;
+			return false;
+		}
+	} else {
+		if (!converter.convertMapFile_From_0_8_128_To_0_9(mFile->mapData(), &mapXML)) {
+			boError() << k_funcinfo << "failed converting from boson 0.8.128" << endl;
+			return false;
+		}
+	}
+
+	// convert scenario
+	QByteArray scenario = mFile->scenarioData();
+	converter.convertScenario_From_0_8_To_0_9(scenario, &playersXML, &canvasXML);
+	boDebug() << k_funcinfo << "conversion completed" << endl;
+ }
+
+ if (texMap.size() == 0) {
+	boError() << k_funcinfo << "empty texmap" << endl;
+	return false;
+ }
+ if (heightMap.size() == 0) {
+	boError() << k_funcinfo << "empty heightMap" << endl;
+	return false;
+ }
+ if (mapXML.size() == 0) {
+	boError() << k_funcinfo << "empty mapXML" << endl;
+	return false;
+ }
+
+ // FIXME: the should load the default description only! i.e. C/description.xml
+ QByteArray descriptionXML = mFile->descriptionData();
+ if (descriptionXML.size() == 0) {
+	boError() << k_funcinfo << "empty default description.xml" << endl;
+	return false;
+ }
+
+ QByteArray externalXML;
+ QByteArray kgameXML;
+#if 0
+ // TODO: not yet suported. will be.
+ externalXML = mFile->externalData();
+ kgameXML = mFile->kgameData();
+#endif
+ destFiles.insert("map/texmap", texMap);
+ destFiles.insert("map/heightmap.png", heightMap);
+ destFiles.insert("map/map.xml", mapXML);
+ destFiles.insert("players.xml", playersXML);
+ destFiles.insert("canvas.xml", canvasXML);
+ destFiles.insert("C/description.xml", descriptionXML);
+ if (externalXML.size() != 0) {
+	// AB: externalXML is optional only. only for loading games.
+	destFiles.insert("external.xml", externalXML);
+ }
+ if (kgameXML.size() != 0) {
+	// AB: kgameXML is optional only. only for loading games.
+	destFiles.insert("kgame.xml", kgameXML);
+ }
+
+
+ if (destFiles.isEmpty()) {
+	boWarning() << k_funcinfo << "failed loading playfield from file" << endl;
+	return false;
+ }
+ return true;
+}
+
+QByteArray BosonPlayField::loadFromDiskToStream(QMap<QString, QByteArray>* destFiles)
+{
+ if (destFiles && !destFiles->isEmpty()) {
+	boError() << k_funcinfo << "destFiles must be empty" << endl;
+	return QByteArray();
+ }
+ if (!isPreLoaded()) {
+	boError() << k_funcinfo << "playfield not yet preloaded" << endl;
+	return QByteArray();
+ }
+ QMap<QString, QByteArray> files;
+ if (!loadFromDiskToFiles(files)) {
+	boError() << k_funcinfo << "could not load playfield from disk" << endl;
+	return QByteArray();
+ }
+
+ if (destFiles) {
+	*destFiles = files;
+ }
+ return streamFiles(files);
+}
+
+QByteArray BosonPlayField::streamFiles(const QMap<QString, QByteArray>& files)
+{
+ QByteArray buffer;
+ if (files.isEmpty()) {
+	boError() << k_funcinfo << "nothing to stream" << endl;
+	return buffer;
+ }
+ QDataStream stream(buffer, IO_WriteOnly);
+ stream << QCString("boplayfield");
+ stream << (Q_UINT32)0x00; // version tag. probably not needed AB: maybe use BO_ADMIN_STREAM_VERSION
+ stream << files;
+ stream << QCString("boplayfield_end");
+ return buffer;
+}
+
+bool BosonPlayField::unstreamFiles(QMap<QString, QByteArray>& files, const QByteArray& buffer)
+{
+ QDataStream stream(buffer, IO_ReadOnly);
+ // magic cookie
+ QCString magic;
+ QCString magicEnd;
+ Q_UINT32 version;
+ stream >> magic;
+ if (magic != QCString("boplayfield")) {
+	boError() << k_funcinfo << "magic cookie does not match" << endl;
+	return false;
+ }
+ stream >> version;
+ if (version != 0x00) {
+	boError() << k_funcinfo << "invalid version" << endl;
+	return false;
+ }
+ stream >> files;
+ stream >> magicEnd;
+ if (magicEnd != QCString("boplayfield_end")) {
+	boError() << k_funcinfo << "magic end-cookie does not match" << endl;
+	return false;
+ }
+ return true;
 }
 

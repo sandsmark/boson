@@ -33,6 +33,7 @@ class KArchiveFile;
 class QDomDocument;
 class QDomElement;
 class QDataStream;
+template<class T, class T2> class QMap;
 
 /**
  * CLass that provides information about the playfield, such as map size and
@@ -91,6 +92,14 @@ public:
 	BosonPlayField(QObject* parent = 0);
 	~BosonPlayField();
 
+	bool loadFromDiskToFiles(QMap<QString, QByteArray>& destFiles);
+	QByteArray loadFromDiskToStream(QMap<QString, QByteArray>* destFiles = 0);
+	/**
+	 * Stream all (virtual) files in @p files.
+	 **/
+	static QByteArray streamFiles(const QMap<QString, QByteArray>& files);
+	static bool unstreamFiles(QMap<QString, QByteArray>& destFiles, const QByteArray& buffer);
+
 	/**
 	 * Load the important data (description for example) from the playField.
 	 * Use @ref loadPlayField to load <em>all</em> data. preLoadPlayField is
@@ -112,6 +121,8 @@ public:
 	 * is true.
 	 **/
 	bool loadPlayField(const QString& file);
+
+	bool loadPlayField(const QMap<QString, QByteArray>& files);
 
 	bool importHeightMapImage(const QImage& image);
 

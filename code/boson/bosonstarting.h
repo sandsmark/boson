@@ -24,6 +24,8 @@
 
 class BosonPlayField;
 class Player;
+class Boson;
+class BosonCanvas;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>

@@ -152,12 +152,14 @@ bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor)
 		return false;
 	}
  }
- QByteArray data;
+ QByteArray data;/*
  QDataStream stream(data, IO_WriteOnly);
  if (!field->saveAdminPlayField(stream)) {
 	boError() << k_funcinfo << "could not save the playfield to a stream" << endl;
 	return false;
  }
+ */
+ data = field->loadFromDiskToStream();
  if (editor) {
 	mGame->sendMessage(data, BosonMessage::IdNewEditor);
  } else {

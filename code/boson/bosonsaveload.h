@@ -210,6 +210,8 @@ signals:
 	void signalInitMap(const QByteArray& map);
 
 protected:
+	friend class BosonStarting;
+	// TODO: move relevant stuff to BosonStarting.
 	/**
 	 * @param files A list of all relevant files in the @ref BSGFile object.
 	 * The kgame.xml _MUST_ be the _FIRST_ entry in this list!
