@@ -23,6 +23,7 @@
 #include "bo3dtools.h"
 #include "bosonglwidget.h"
 #include "bomesh.h"
+#include "bomaterial.h"
 #include "bodebug.h"
 #include "bosonmodel.h"
 
@@ -110,6 +111,9 @@ void Bo3DSLoad::loadModel()
 	boError(100) << k_funcinfo << "Can't load " << file() << endl;
 	return;
  }
+
+ loadMaterials(mData, m3ds->materials);
+
  Lib3dsNode* node = m3ds->nodes;;
  if (!node) {
 	boError(100) << k_funcinfo << "Could not load file " << file() << " correctly" << endl;
@@ -179,10 +183,28 @@ void Bo3DSLoad::loadMesh(Lib3dsNode* node)
  BoMesh* boMesh = new BoMesh(mesh->faces);
  mMesh2Mesh.insert(mesh, boMesh);
  mData->addMesh(boMesh);
- boMesh->setIsTeamColor(Bo3DSLoad::isTeamColor(mesh));
- mData->setTexture(boMesh, textureName);
 
- boMesh->setTextured(!textureName.isEmpty()); // this may get changed if BosonModel::cleanTextureName() can't find our texture
+ Lib3dsMaterial* mat = Bo3DSLoad::material(mesh, m3ds);
+ BoMaterial* material = 0;
+ if (mat) {
+	unsigned int i = 0;
+	Lib3dsMaterial* m = m3ds->materials;
+	while (m && m != mat) {
+		i++;
+		m = m->next;
+	}
+	if (!m) {
+		// we must use one valid index.
+		i = 0;
+	}
+	material = mData->material(i);
+ } else {
+	// the mesh has no material. most probably a teamcolor object.
+	material = 0;
+ }
+ boMesh->setMaterial(material);
+
+ boMesh->setIsTeamColor(Bo3DSLoad::isTeamColor(mesh));
 
  boMesh->allocatePoints(mesh->points);
  loadVertices(boMesh, mesh);
@@ -569,6 +591,59 @@ void Bo3DSLoad::loadFaces(BoMesh* boMesh, Lib3dsMesh* mesh)
 	points[2] = f->points[2];
 	face.setPointIndex(points);
 	boMesh->setFace(i, face);
+ }
+}
+
+void Bo3DSLoad::loadMaterials(BosonModel* model, Lib3dsMaterial* firstMaterial)
+{
+ BO_CHECK_NULL_RET(model);
+ BO_CHECK_NULL_RET(firstMaterial);
+ Lib3dsMaterial* m = firstMaterial;
+ unsigned int count = 0;
+ while (m) {
+	count++;
+	m = m->next;
+ }
+ model->allocateMaterials(count);
+ m = firstMaterial;
+ for (unsigned int i = 0; i < count; i++, m = m->next) {
+	BoMaterial* mat = model->material(i);
+	if (!mat) {
+		boError() << k_funcinfo << "NULL mat at index=" << i << endl;
+		return;
+	}
+	if (!m) {
+		boError() << k_funcinfo << "NULL m at index=" << i << endl;
+		return;
+	}
+
+	mat->setName(QString(m->name));
+
+	mat->setAmbient(BoVector4(m->ambient));
+	mat->setDiffuse(BoVector4(m->diffuse));
+	mat->setSpecular(BoVector4(m->specular));
+	mat->setShininess(m->shininess);
+
+	mat->setShinStrength(m->shin_strength);
+	mat->setBlur(m->blur);
+	mat->setTransparency(m->transparency);
+	mat->setFallOff(m->falloff);
+	mat->setAdditive(m->additive);
+	mat->setUseFallOff(m->use_falloff);
+	mat->setSelfIllum(m->self_illum);
+	mat->setShading(m->shading);
+	mat->setSoften(m->soften);
+	mat->setFaceMap(m->face_map);
+	mat->setTwoSided(m->two_sided);
+	mat->setMapDecal(m->map_decal);
+	mat->setUseWire(m->use_wire);
+	mat->setUseWireAbs(m->use_wire_abs);
+	mat->setWireSize(m->wire_size);
+
+	// now the texture relevant things:
+	mat->setTextureName(QString(m->texture1_map.name));
+	// AB: we don't set all the other textures, as I have no idea what they
+	// are for.
  }
 }
 

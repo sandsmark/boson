@@ -466,6 +466,11 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
 
  mUseLight = new QCheckBox(this);
  mUseLight->setText(i18n("Enable light"));
+
+ mUseMaterials = new QCheckBox(this);
+ mUseMaterials->setText(i18n("Use materials"));
+ QToolTip::add(mUseMaterials, i18n("Materials influence the way in which models (like units) are lighted. You can disable them to gain some performance."));
+
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -519,6 +524,7 @@ void OpenGLOptions::apply()
 
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
  boConfig->setUseLight(mUseLight->isChecked());
+ boConfig->setUseMaterials(mUseMaterials->isChecked());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -531,6 +537,7 @@ void OpenGLOptions::setDefaults()
  setMipmapMinificationFilter(DEFAULT_MIPMAP_MINIFICATION_FILTER);
  setAlignSelectionBoxes(DEFAULT_ALIGN_SELECTION_BOXES);
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
+ mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 }
 
 void OpenGLOptions::load()
@@ -542,6 +549,7 @@ void OpenGLOptions::load()
  setMipmapMinificationFilter(boConfig->mipmapMinificationFilter());
  setAlignSelectionBoxes(boConfig->alignSelectionBoxes());
  mUseLight->setChecked(boConfig->useLight());
+ mUseMaterials->setChecked(boConfig->useMaterials());
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)

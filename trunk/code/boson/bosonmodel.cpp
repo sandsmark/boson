@@ -27,6 +27,7 @@
 #include "bosonglwidget.h"
 #include "bodebug.h"
 #include "bomesh.h"
+#include "bomaterial.h"
 #include "bomemorytrace.h"
 
 #include <ksimpleconfig.h>
@@ -37,6 +38,7 @@
 #include <qstringlist.h>
 #include <qvaluelist.h>
 #include <qintdict.h>
+#include <qvaluevector.h>
 
 // use GL_TRIANGLE_STRIP ? (experimental and not working!)
 // AB: there are 2 different optimizing approaches. one is to use
@@ -543,7 +545,8 @@ public:
 
 	QIntDict<BoMesh> mMeshes;
 	QIntDict<BoFrame> mFrames;
-	QMap<BoMesh*, QString> mTextures;
+
+	QValueVector<BoMaterial> mAllMaterials;
 
 	QValueList<GLuint> mNodeDisplayLists;
 	QIntDict<BoFrame> mConstructionSteps;
@@ -603,6 +606,28 @@ BosonModel::~BosonModel()
  delete[] d->mPoints;
  delete d;
  boDebug(100) << k_funcinfo << "done" << endl;
+}
+
+void BosonModel::allocateMaterials(unsigned int count)
+{
+ if (count < 1) {
+	boError() << k_funcinfo << "no materials in model" << endl;
+	return;
+ }
+ if (d->mAllMaterials.count() > 0) {
+	boWarning() << k_funcinfo << "materials already allocated" << endl;
+ }
+ d->mAllMaterials.resize(count);
+}
+
+void BosonModel::setMaterial(unsigned int index, const BoMaterial& mat)
+{
+ d->mAllMaterials[index] = mat;
+}
+
+BoMaterial* BosonModel::material(unsigned int index) const
+{
+ return &d->mAllMaterials[index];
 }
 
 const QString& BosonModel::baseDirectory() const
@@ -686,19 +711,23 @@ void BosonModel::loadModel()
 	return;
  }
 
- QMap<BoMesh*, QString>::Iterator it = d->mTextures.begin();
- for (; it != d->mTextures.end(); ++it) {
-	BoMesh* mesh = it.key();
-	QString tex = cleanTextureName(it.data());
-	GLuint myTex;
-	if (tex.isEmpty()) {
-		myTex = 0;
-	} else {
+ for (unsigned int i = 0; i < d->mAllMaterials.count(); i++) {
+	BoMaterial* mat = material(i);
+	if (!mat) {
+		BO_NULL_ERROR(mat);
+		continue;
+	}
+	QString tex = cleanTextureName(mat->textureName());
+	GLuint myTex = 0;
+	if (!tex.isEmpty()) {
 		myTex = mModelTextures->texture(tex);
 	}
-	mesh->setTextureObject(myTex);
-	mesh->setTextured(myTex != 0);
+	mat->setTextureObject(myTex);
+ }
 
+ QIntDictIterator<BoMesh> it(d->mMeshes);
+ for (; it.current(); ++it) {
+	BoMesh* mesh = it.current();
 #if USE_STRIP
 	mesh->connectNodes();
 #else
@@ -913,11 +942,6 @@ QIntDict<BoMesh> BosonModel::allMeshes() const
 unsigned int BosonModel::meshCount() const
 {
  return d->mMeshes.count();
-}
-
-void BosonModel::setTexture(BoMesh* mesh, const QString& texture)
-{
- d->mTextures.insert(mesh, texture);
 }
 
 int BosonModel::addFrames(int count)

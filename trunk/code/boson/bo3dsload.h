@@ -89,6 +89,7 @@ protected:
 	void loadVertices(BoMesh* mesh, Lib3dsMesh* mesh);
 	void loadTexels(BoMesh* mesh, Lib3dsMesh* mesh, Lib3dsMaterial* material);
 	void loadFaces(BoMesh* mesh, Lib3dsMesh* mesh);
+	void loadMaterials(BosonModel* model, Lib3dsMaterial* firstMaterial);
 
 	/**
 	 * Render the specified node according to the values for the current
