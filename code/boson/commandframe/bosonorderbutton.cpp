@@ -41,8 +41,6 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 
-#include <ufo/events/umouseevent.hpp>
-
 #define BAR_WIDTH 10 // FIXME hardcoded value
 
 
@@ -81,9 +79,9 @@ void BoOrderButtonButton::setProductionCount(int c)
  BoUfoPushButton::setIcon(p);
 }
 
-void BoOrderButtonButton::slotMouseReleaseEvent(ufo::UMouseEvent* e)
+void BoOrderButtonButton::slotMouseReleaseEvent(QMouseEvent* e)
 {
- if (e->getButton() == ufo::UMod::RightButton) {
+ if (e->button() == Qt::RightButton) {
 	emit rightClicked();
  }
 }
