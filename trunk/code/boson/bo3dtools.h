@@ -142,7 +142,7 @@ class BoVector3
      * @return TRUE when @p v is at the same position (x,y,z are all equal).
      * Otherwise FALSE.
      **/
-    bool isEqual(BoVector3 v) const { return v.mData[0] == mData[0] && v.mData[1] == mData[1] && v.mData[2] == mData[2]; }
+    bool isEqual(const BoVector3& v) const { return v.mData[0] == mData[0] && v.mData[1] == mData[1] && v.mData[2] == mData[2]; }
 
     /**
      * @overload
