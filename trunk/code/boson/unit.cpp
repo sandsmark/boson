@@ -589,10 +589,13 @@ void Unit::moveTo(const QPoint& pos, bool attack)
  } else {
 	setWork(WorkNone);
  }
+ boDebug() << k_funcinfo << "unit " << id() << ": DONE, work: " << work() << endl;
 }
 
 bool Unit::moveTo(float x, float y, int range, bool attack)
 {
+ boDebug() << k_funcinfo << "unit " << id() << ": x: " << x << "; y: " << y << "; range: " << range << "; attack: " << attack << endl;
+
  stopMoving();
 
  if (range == -1) {
@@ -601,11 +604,12 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
  if (!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
 	Cell* c = canvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
 	if (!c) {
-		boError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
+		boError() << k_funcinfo << "unit " << id() << ": NULL cell at " << x << "," << y << endl;
 		return false;
 	}
 	// No pathfinding if goal not reachable or occupied and we can see it
 	if (!c->canGo(unitProperties())) {
+		boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
 		return false;
 	}
  }
@@ -624,12 +628,13 @@ bool Unit::moveTo(float x, float y, int range, bool attack)
 	d->mMoveAttacking = 0;
  }
 
+ boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
  return true;
 }
 
 void Unit::newPath()
 {
- boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << "unit " << id() << endl;
  if (!owner()->isFogged(d->mMoveDestX / BO_TILE_SIZE, d->mMoveDestY / BO_TILE_SIZE)) {
 	Cell* destCell = canvas()->cell(d->mMoveDestX / BO_TILE_SIZE,
 			d->mMoveDestY / BO_TILE_SIZE);
@@ -637,6 +642,7 @@ void Unit::newPath()
 		// If we can't move to destination, then we add waypoint with coordinates
 		//  -1; -1 and in MobileUnit::advanceMove(), if currentWaypoint()'s
 		//  coordinates are -1; -1 then we stop moving.
+		boDebug() << k_funcinfo << "unit " << id() << ": Null cell or can't go to " << d->mMoveDestX << "," << d->mMoveDestY << endl;
 		clearWaypoints();
 		addWaypoint(QPoint(-1, -1));
 		return;
@@ -908,6 +914,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 
 void Unit::setAdvanceWork(WorkType w)
 {
+ boDebug() << k_funcinfo << "unit " << id() << endl;
  // velicities should be 0 anyway - this is the final fallback in case it was 
  // missing by any reason
  setVelocity(0.0, 0.0);
@@ -920,6 +927,7 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceNone, owner()->advanceFlag());
 		break;
 	case WorkMove:
+		boDebug() << k_funcinfo << "unit " << id() << ": setting work to WorkMove" << endl;
 		setAdvanceFunction(&Unit::advanceMove, owner()->advanceFlag());
 		break;
 	case WorkAttack:
@@ -941,10 +949,13 @@ void Unit::setAdvanceWork(WorkType w)
 		setAdvanceFunction(&Unit::advanceTurn, owner()->advanceFlag());
 		break;
  }
+ boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 {
+ boDebug() << k_funcinfo << "unit " << id() << endl;
+ boDebug() << k_funcinfo << "unit " << id() << ": advanceFlag: " << advanceFlag << "; canvas()->advanceFunctionLocked(): " << canvas()->advanceFunctionLocked() << "; func: " << func << endl;
  if (canvas()->advanceFunctionLocked()) {
 	if (advanceFlag) {
 		mAdvanceFunction = func;
@@ -955,6 +966,7 @@ void Unit::setAdvanceFunction(MemberFunction func, bool advanceFlag)
 	mAdvanceFunction = func;
 	mAdvanceFunction2 = func;
  }
+ boDebug() << k_funcinfo << "unit " << id() << ": DONE" << endl;
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -1086,12 +1098,13 @@ MobileUnit::~MobileUnit()
 void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be called for every advanceCount.
 {
  if (speed() == 0) {
-	boWarning(401) << k_funcinfo << "speed == 0" << endl;
+	boWarning(401) << k_funcinfo << "unit " << id() << ": speed == 0" << endl;
 	stopMoving();
 	return;
  }
 
  if (mSearchPath) {
+	boDebug(401) << k_funcinfo << "unit " << id() << ": searching new path and returning" << endl;
 	newPath();
 	mSearchPath = false;
 	return;
@@ -1101,18 +1114,18 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	// Waypoints were PolicyClean previously but are now PolicyLocal so they
 	//  should arrive immediately. If there are no waypoints but advanceMove is
 	//  called, then probably there's an error somewhere
-	boError(401) << k_funcinfo << "No waypoints" << endl;
+	boError(401) << k_funcinfo << "unit " << id() << ": No waypoints" << endl;
 	stopMoving();
 	return;
  }
 
- boDebug(401) << k_funcinfo << endl;
+ boDebug(401) << k_funcinfo << "unit " << id() << endl;
  if (advanceWork() != work()) {
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
 		if (inRange(activeWeapon()->properties()->range(), target())) {
-			boDebug(401) << k_funcinfo << "target is in range now" << endl;
+			boDebug(401) << k_funcinfo << "unit " << id() << ": target is in range now" << endl;
 			stopMoving();
 			return;
 		}
@@ -1122,7 +1135,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
  } else if (moveAttacking()) {
 	// Check for any enemy units in range
 	if (attackEnemyUnitsInRange()) {
-		boDebug() << k_funcinfo << "Enemy units found in range, attacking" << endl;
+		boDebug() << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;
 		return;
 	}
  }
@@ -1143,11 +1156,11 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 
  // First check if we're at waypoint
  if ((x == wp.x()) && (y == wp.y())) {
-	boDebug(401) << k_funcinfo << "unit is at waypoint" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at waypoint" << endl;
 	waypointDone();
 
 	if (waypointCount() == 0) {
-		boDebug(401) << k_funcinfo << "no more waypoints. Stopping moving" << endl;
+		boDebug(401) << k_funcinfo << "unit " << id() << ": no more waypoints. Stopping moving" << endl;
 		stopMoving();
 		if (work() == WorkNone) {
 			// Turn a bit
@@ -1203,18 +1216,18 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 void MobileUnit::advanceMoveCheck()
 {
  if (!canvas()->onCanvas(boundingRectAdvanced().topLeft())) {
-	boDebug(401) << k_funcinfo << "not on canvas" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (topLeft)" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
  if (!canvas()->onCanvas(boundingRectAdvanced().bottomRight())) {
-	boDebug(401) << k_funcinfo << "not on canvas" << endl;
+	boDebug(401) << k_funcinfo << "unit " << id() << ": not on canvas (bottomRight)" << endl;
 	stopMoving();
 	setWork(WorkNone);
 	return;
  }
- boDebug(401) << k_funcinfo << "unit: " << id() << endl;
+ boDebug(401) << k_funcinfo << "unit " << id() << endl;
  if (canvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	boDebug(401) << k_funcinfo << "collisions" << endl;
@@ -1234,7 +1247,7 @@ void MobileUnit::advanceMoveCheck()
 		return;
 	}
 	if (d->mMovingFailed >= recalculate) {
-		boDebug(401) << "unit: " << id() << ": recalculating path" << endl;
+		boDebug(401) << "unit " << id() << ": recalculating path" << endl;
 		// you must not do anything that changes local variables directly here!
 		// all changed of variables with PolicyClean are ok, as they are sent
 		// over network and do not take immediate effect.
@@ -1247,7 +1260,7 @@ void MobileUnit::advanceMoveCheck()
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
- boDebug(401) << k_funcinfo << "unit: " << id() << ": done" << endl;
+ boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
 }
 
 void MobileUnit::setSpeed(float speed)
