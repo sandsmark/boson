@@ -200,18 +200,18 @@ done
 
 # create the packages
 cd $DEST_ALL/../
-tar cjvf boson-all-$BO_VERSION.tar.bz2 boson/ > /dev/null || exit 1
+tar cjvf boson-all-$BO_VERSION.tar.bz2 boson-all-$BO_VERSION/ > /dev/null || exit 1
 mv boson-all-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_CODE/../
-tar cjvf boson-code-$BO_VERSION.tar.bz2 code/ > /dev/null || exit 1
+tar cjvf boson-code-$BO_VERSION.tar.bz2 boson-code-$BO_VERSION/ > /dev/null || exit 1
 mv boson-code-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_DATA/../
-tar cjvf boson-data-$BO_VERSION.tar.bz2 data/ > /dev/null || exit 1
+tar cjvf boson-data-$BO_VERSION.tar.bz2 boson-data-$BO_VERSION/ > /dev/null || exit 1
 mv boson-data-$BO_VERSION.tar.bz2 $DEST_BASE/
 
 cd $DEST_MUSIC/../
-tar cjvf boson-music-$BO_VERSION.tar.bz2 music/ > /dev/null || exit 1
+tar cjvf boson-music-$BO_VERSION.tar.bz2 boson-music-$BO_VERSION/ > /dev/null || exit 1
 mv boson-music-$BO_VERSION.tar.bz2 $DEST_BASE/
 
