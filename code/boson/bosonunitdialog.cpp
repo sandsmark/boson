@@ -42,6 +42,7 @@
 #include <qlineedit.h>
 #include <qvaluelist.h>
 #include <qscrollview.h>
+#include <qwhatsthis.h>
 
 #include "bosonunitdialog.moc"
 
@@ -218,6 +219,7 @@ void BosonUnitDialog::initPropertiesPage()
  (void)new QRadioButton(i18n("Is Mobile"), d->mUnitType);
  d->mUnitType->setRadioButtonExclusive(true);
  connect(d->mUnitType, SIGNAL(pressed(int)), this, SLOT(slotTypeChanged(int)));
+ QWhatsThis::add(d->mUnitType, i18n("The type of the unit - either a facility or a mobile unit (like ships, aircrafts or normal ground units). You <b>must</b> choose one."));
 
  d->mUnitProperties = new QWidget(page);
  QGridLayout* layout = new QGridLayout(d->mUnitProperties, -1, 2, marginHint(), spacingHint());
@@ -227,48 +229,66 @@ void BosonUnitDialog::initPropertiesPage()
  d->mUnitId = new KIntNumInput(d->mUnitProperties);
  d->mUnitId->setLabel(i18n("Unique (!) ID of this unit"), AlignVCenter);
  layout->addMultiCellWidget(d->mUnitId, 0, 0, 0, 1);
+ QWhatsThis::add(d->mUnitId, i18n("<p>The ID of the unit type, as used by the map file for example. Note that the ID <b>must</b> be unique for the species theme! You must not have the same ID twice in a single theme!</p>"
+		"<p>The ID should be the same for comparable units in different species theme, e.g. an aircraft of a new theme should have the same ID as the aircraft of the basic theme (ID=10004).</p>"
+		"<p>Not that except of these restrictions you can use just any positive number (unsigned integer).</p>"));
  
  QLabel* unitNameLabel = new QLabel(i18n("Name of the unit"), d->mUnitProperties);
  layout->addWidget(unitNameLabel, 1, 0);
  d->mUnitName = new QLineEdit(d->mUnitProperties);
  layout->addWidget(d->mUnitName, 1, 1);
+ QWhatsThis::add(d->mUnitName, i18n("<p>The name of your unit. The name should be in english - so that it can be translated using one of the standard KDE tools (like kbabel). Keep it short :-)</p>"));
  
  d->mHealth = new KIntNumInput(100, d->mUnitProperties);
  d->mHealth->setLabel(i18n("Health/Power of the unit"), AlignVCenter);
  layout->addMultiCellWidget(d->mHealth, 2, 2, 0, 1);
+ QWhatsThis::add(d->mHealth, i18n("<p>Health, power simply how much your unit can take during battle. Higher values mean (surprise) your unit can take more - 0 means your unit is destroyed (so don't use this ;-)).</p>"));
 
  d->mArmor = new KIntNumInput(0, d->mUnitProperties);
  d->mArmor->setLabel(i18n("Armor of the unit (unused)"), AlignVCenter);
  layout->addMultiCellWidget(d->mArmor, 3, 3, 0, 1);
+ QWhatsThis::add(d->mArmor, i18n("<p>Armor is not yet used by Boson. But you can already set a value here - it won't hurt (simply ignored). </p>"));
 
  d->mShield= new KIntNumInput(0, d->mUnitProperties);
  d->mShield->setLabel(i18n("Shield of the unit (unsupported)"), AlignVCenter);
  layout->addMultiCellWidget(d->mShield, 4, 4, 0, 1);
+ QWhatsThis::add(d->mShield, i18n("<p>Shields are not yet used by Boson. But you can already set a value here - it won't hurt (simply ignored). </p>"));
 
  d->mMineralCosts = new KIntNumInput(d->mUnitProperties);
  d->mMineralCosts->setLabel(i18n("Mineral Costs"), AlignVCenter);
  layout->addMultiCellWidget(d->mMineralCosts, 5, 5, 0, 1);
+ QWhatsThis::add(d->mMineralCosts, i18n("<p>How many minerals a player has to pay to produce this unit.</p>"));
 
  d->mOilCosts = new KIntNumInput(d->mUnitProperties);
  d->mOilCosts->setLabel(i18n("Oil Costs"), AlignVCenter);
  layout->addMultiCellWidget(d->mOilCosts, 6, 6, 0, 1);
+ QWhatsThis::add(d->mOilCosts, i18n("<p>How much oil a player has to pay to produce this unit.</p>"));
  
  d->mWeaponRange = new KIntNumInput(d->mUnitProperties);
  d->mWeaponRange->setLabel(i18n("Weapon Range"), AlignVCenter);
  layout->addMultiCellWidget(d->mWeaponRange, 7, 7, 0, 1);
+ QWhatsThis::add(d->mWeaponRange, i18n("<p>How far can your unit shoot? This is a pixel value. Use a value > 0 if your unit can shoot.</p>"
+			"<p>Please note that repairing is also some kind of shooting (with negative damage). Repairing is not yet supported - but you can already specify a value here.</p>"));
 
  d->mSightRange = new KIntNumInput(d->mUnitProperties);
  d->mSightRange->setLabel(i18n("Sight Range"), AlignVCenter);
  layout->addMultiCellWidget(d->mSightRange, 8, 8, 0, 1);
+ QWhatsThis::add(d->mSightRange, i18n("<p>How far can your unit see?</p>"
+			"<p>Please note that this is <b>not</b> a pixel value, but a <b>cell number</b>, or tile number! A value of 1 means that 1 field of fog of war is removed around your unit, 2 means 2 fields of fog of war are removed and so on.</p>"
+			"<p>A value of 5 (default) is ok - use higher values for rangers</p>"));
 
  d->mWeaponDamage = new KIntNumInput(d->mUnitProperties);
  d->mWeaponDamage->setLabel(i18n("Damage this unit causes"), AlignVCenter);
  layout->addMultiCellWidget(d->mWeaponDamage, 9, 9, 0, 1);
+ QWhatsThis::add(d->mWeaponDamage, i18n("<p>This defines how much damages causes to other unit when shooting at them. Use higher values for better weapons - but you should also increase the <i>Weapon Realod</i> time then!</p>"
+			 "<p>You can also use negative values, so that your unit will be ablee to repair (note that this is currently not yet supported)</p>"));
  
  d->mWeaponReload = new KIntNumInput(d->mUnitProperties);
  d->mWeaponReload->setLabel(i18n("Weapon reload"), AlignVCenter);
  layout->addMultiCellWidget(d->mWeaponReload, 10, 10, 0, 1);
+ QWhatsThis::add(d->mWeaponReload, i18n("<p>The time your unit needs to reload. This is the number of advance calls which are needed until a unit can shoot again. It is very hard to say how long this actually is as it depends on the game speed.</p>"));
 
+ // TODO: change the cangoon[water|land] values when this is changed!
  QLabel* terrainTypeLabel = new QLabel(i18n("Terrain"), d->mUnitProperties);
  layout->addWidget(terrainTypeLabel, 11, 0);
  d->mTerrainType = new QComboBox(d->mUnitProperties);
@@ -276,20 +296,25 @@ void BosonUnitDialog::initPropertiesPage()
  d->mTerrainType->insertItem(i18n("Water"));
  d->mTerrainType->insertItem(i18n("Air"));
  layout->addWidget(d->mTerrainType, 11, 1);
+ QWhatsThis::add(d->mTerrainType, i18n("<p>The main terrain your unit is thought to use. You can use only one. For facilities the terrain type is the only terrain it can be placed on. Mobile units use rather the <i>Can go on Land</i> / <i>Can go on Water</i> values.</p>"));
 
  d->mProductionTime = new KIntNumInput(d->mUnitProperties);
  d->mProductionTime->setLabel(i18n("Production Time"), AlignVCenter);
  layout->addMultiCellWidget(d->mProductionTime, 12, 12, 0, 1);
+ QWhatsThis::add(d->mProductionTime, i18n("<p>The numbere of advance calls your unit takes until it is produced. How long this actually is is hard to say, as it depends on your game speed.</p>"));
 
  QLabel* shootAirLabel = new QLabel(i18n("Can Shoot at Air Units"), d->mUnitProperties);
  layout->addWidget(shootAirLabel, 13, 0);
  d->mCanShootAtAir = new QCheckBox(d->mUnitProperties);
  layout->addWidget(d->mCanShootAtAir, 13, 1);
+ QWhatsThis::add(d->mCanShootAtAir, i18n("<p>Defines whether the unit can shoot at air units. This should usually be checked if your unit is an aircraft (except for bombers) or when it is an air defense (like a samsite).</p>"
+			"<p>It is not a good idea to use this for every unit, as the aircrafts would loose their advantage then.</p>"));
 
  QLabel* shootLandLabel = new QLabel(i18n("Can Shoot at Land Units"), d->mUnitProperties);
  layout->addWidget(shootLandLabel, 14, 0);
  d->mCanShootAtLand = new QCheckBox(d->mUnitProperties);
  layout->addWidget(d->mCanShootAtLand, 14, 1);
+ QWhatsThis::add(d->mCanShootAtLand, i18n("<p>Whether your unit can shoot at land units. This also means that your unit can shoot at water units</p>"));
 
  QLabel* producerLabel = new QLabel(i18n("Producer"), d->mUnitProperties);
  layout->addWidget(producerLabel, 15, 0);
@@ -299,11 +324,13 @@ void BosonUnitDialog::initPropertiesPage()
  d->mProducer->insertItem(i18n("%1 (Airport)").arg(2));
  d->mProducer->insertItem(i18n("%1 (Command Bunker)").arg(10));
  layout->addWidget(d->mProducer, 15, 1);
+ QWhatsThis::add(d->mProducer, i18n("<p>Which type of unit can be used to produce your unit. You can use just any number - just make sure that the factory that is meant to produce this unit has the same number in its <i>Producer List</i>.</p>"));
 
  QLabel* miniMapLabel = new QLabel(i18n("Supports Mini Map"), d->mUnitProperties);
  layout->addWidget(miniMapLabel, 16, 0);
  d->mSupportMiniMap= new QCheckBox(d->mUnitProperties);
  layout->addWidget(d->mSupportMiniMap, 16, 1);
+ QWhatsThis::add(d->mSupportMiniMap, i18n("<p>When this is checked your unit has some kind of radar. You need at least one unit/facility of this type to get a mini map. If the last unit with this option is destroyed you'll loose the mini map again.</p>"));
 
  
  initMobileProperties(specialProperties);
@@ -311,6 +338,7 @@ void BosonUnitDialog::initPropertiesPage()
 
 
  d->mCreateUnit = new QPushButton(i18n("Create Unit"), topPage);
+ QWhatsThis::add(d->mCreateUnit, i18n("<p>This generates the index.desktop file in the specified directory (at the <i>Directories and Files</i> page) using the specified properties (at the <i>Properties</i> page).</p>"));
  connect(d->mCreateUnit, SIGNAL(pressed()), this, SLOT(slotCreateUnit()));
 }
 
@@ -325,31 +353,44 @@ void BosonUnitDialog::initMobileProperties(QWidget* page)
  d->mSpeed->setLabel(i18n("Speed"), AlignVCenter);
  d->mSpeed->setRange(0.0, 100.0);
  layout->addMultiCellWidget(d->mSpeed, 0, 0, 0, 1);
+ QWhatsThis::add(d->mSpeed, i18n("<p>The number of pixels that a unit moves forward in every advance call. Don't use too high values and remember that the actual speed depends on the game speed!</p>"));
 
  QLabel* canGoLandLabel = new QLabel(i18n("Can Go on Land"), d->mUnitMobileProperties);
  layout->addWidget(canGoLandLabel, 1, 0);
  d->mCanGoOnLand = new QCheckBox(d->mUnitMobileProperties);
  layout->addWidget(d->mCanGoOnLand, 1, 1);
+ QWhatsThis::add(d->mCanGoOnLand, i18n("<p>Whether this unit can cross land tiles (grass, desert, ...</p>"));
 
  QLabel* canGoWaterLabel = new QLabel(i18n("Can Go on Water"), d->mUnitMobileProperties);
  layout->addWidget(canGoWaterLabel, 2, 0);
  d->mCanGoOnWater = new QCheckBox(d->mUnitMobileProperties);
  layout->addWidget(d->mCanGoOnWater, 2, 1);
+ QWhatsThis::add(d->mCanGoOnWater, i18n("<p>Whether this unit can cross water tiles.</p>"));
 
+ // TODO: setEnabled(false) when d->mCanMineOil is checked
  QLabel* canMineMineralsLabel = new QLabel(i18n("Can Mine Minerals"), d->mUnitMobileProperties);
  layout->addWidget(canMineMineralsLabel, 3, 0);
  d->mCanMineMinerals= new QCheckBox(d->mUnitMobileProperties);
  layout->addWidget(d->mCanMineMinerals, 3, 1);
+ QWhatsThis::add(d->mCanMineMinerals, i18n("<p>Whether this unit mine minerals. You usually need only one unit per species theme that can mine minerals (the mineral harvester).</p>"
+			"<p>Please note that this cannot be checked if <i>Can Mine Oil</i> was checked!</p>"));
 
+ // TODO: setEnabled(false) when d->mCanMineMinerals is checked
  QLabel* canMineOilLabel = new QLabel(i18n("Can Mine Oil"), d->mUnitMobileProperties);
  layout->addWidget(canMineOilLabel, 3, 0);
  d->mCanMineOil = new QCheckBox(d->mUnitMobileProperties);
  layout->addWidget(d->mCanMineOil, 3, 1);
+ QWhatsThis::add(d->mCanMineOil, i18n("<p>Whether this unit mine oil. You usually need only one unit per species theme that can mine oil (the oil harvester).</p>"
+			"<p>Please note that this cannot be checked if <i>Can Mine Minerals</i> was checked!</p>"));
 
+ // TODO setEnabled(false) if d->mCanMineMinerals and d->mCanMineMinerals are
+ // unchecked!
  d->mMaxResources = new KIntNumInput(d->mUnitMobileProperties);
  d->mMaxResources->setLabel(i18n("Max Resources"), AlignVCenter);
  d->mMaxResources->setRange(0, 10000);
  layout->addMultiCellWidget(d->mMaxResources, 0, 0, 0, 1);
+ QWhatsThis::add(d->mMaxResources, i18n("<p>The number of resources your unit can mine before it has to return to a refinery.</p>"
+			"<p>This can not be checked if neither <i>Can Mine Minerals</i> nor <i>Can Mine Oil</i> is checked</p>"));
 
 }
 
@@ -364,11 +405,14 @@ void BosonUnitDialog::initFacilityProperties(QWidget* page)
  layout->addWidget(canProduceLabel, 0, 0);
  d->mCanProduce = new QCheckBox(d->mUnitFacilityProperties);
  layout->addWidget(d->mCanProduce, 0, 1);
+ QWhatsThis::add(d->mCanProduce, i18n("<p>Whether this facility can produce other units/facilities (i.e. is a factory).</p>"));
 
  QLabel* producerListLabel = new QLabel(i18n("Producer List (comma separated)"), d->mUnitFacilityProperties);
  layout->addWidget(producerListLabel, 1, 0);
  d->mProducerList = new QLineEdit(d->mUnitFacilityProperties);
  layout->addWidget(d->mProducerList, 1, 1);
+ QWhatsThis::add(d->mProducerList, i18n("<p>A comma separated list of <i>Producer</i> numbers that this factory can produce.</p>"
+			"<p>Usually this is only a single number, e.g. simply &quot;10&quot; for the Command Bunker.</p>"));
 }
 
 void BosonUnitDialog::initPixmapsPage()
