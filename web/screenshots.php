@@ -212,14 +212,27 @@ add_screenshot("Battle between Leopard tanks and Grizzlies",
     "4. Aug. 2003 (CVS)", "0308-6-thumb.jpg", "0308-6.jpg");
 add_screenshot("War at night showing unit lighting. Smoke is probably too light,
     it should be darker.",
-    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-1-thumb.jpg", "0310-1.jpg");
+    "17. Oct. 2003 (CVS)", "0310-1-thumb.jpg", "0310-1.jpg");
 add_screenshot("War at night. You can see units being lit correctly",
-    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-2-thumb.jpg", "0310-2.jpg");
+    "17. Oct. 2003 (CVS)", "0310-2-thumb.jpg", "0310-2.jpg");
 add_screenshot("Looking down from the top of the mountain...",
-    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-3-thumb.jpg", "0310-3.jpg");
+    "17. Oct. 2003 (CVS)", "0310-3-thumb.jpg", "0310-3.jpg");
 add_screenshot("New lighting and terrain rendering code in action. Note that
     camera is very high, so large area is visible",
-    "<b>NEW:</b> 17. Oct. 2003 (CVS)", "0310-4-thumb.jpg", "0310-4.jpg");
+    "17. Oct. 2003 (CVS)", "0310-4-thumb.jpg", "0310-4.jpg");
+add_screenshot("Updated game starting page",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-1-thumb.jpg", "0.9-1.jpg");
+add_screenshot("Some units attacking enemy",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-2-thumb.jpg", "0.9-2.jpg");
+add_screenshot("Fragments flying around after an aircraft was blown up",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-3-thumb.jpg", "0.9-3.jpg");
+add_screenshot("DaisyCutter bomb dropped by Transall bomber",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-4-thumb.jpg", "0.9-4.jpg");
+add_screenshot("Close-up of some fighting units",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-5-thumb.jpg", "0.9-5.jpg");
+add_screenshot("Many units fighting. You can also see tooltip, showing name and
+    health of unit under cursor",
+    "<b>NEW:</b> 5. Nov. 2003 (Boson 0.9)", "0.9-6-thumb.jpg", "0.9-6.jpg");
 
 $ss_count = count($screens);
 
