@@ -79,7 +79,7 @@ public:
 	 * Make sure to call @ref loadShot before!
 	 * @return The animation of a normal shot.
 	 **/
-	QCanvasPixmapArray* shot() const;
+	QCanvasPixmapArray* shot() const { return mShot; }
 	
 	/**
 	 * Make sure to call @ref loadBigShot before!
@@ -105,7 +105,7 @@ public:
 	 * @return The color of the team of this player. Can only be changed
 	 * on construction!
 	 **/
-	QRgb teamColor() const;
+	QRgb teamColor() const { return mTeamColor; }
 
 	/**
 	 * @return A default color. This color differs after every call.
@@ -204,6 +204,8 @@ private:
 	SpeciesThemePrivate* d;
 
 	QString mThemePath;
+	QRgb mTeamColor;
+	QCanvasPixmapArray* mShot;
 };
 
 #endif

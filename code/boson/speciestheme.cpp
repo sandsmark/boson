@@ -23,12 +23,11 @@
 #include "defines.h"
 
 #include <kstandarddirs.h>
-#include <kdebug.h>
 #include <ksimpleconfig.h>
+#include <kdebug.h>
 
 #include <qcanvas.h>
 #include <qpixmap.h>
-#include <qvaluelist.h>
 #include <qimage.h>
 #include <qbitmap.h>
 #include <qintdict.h>
@@ -39,23 +38,15 @@ class SpeciesTheme::SpeciesThemePrivate
 public:
 	SpeciesThemePrivate()
 	{
-		mShot = 0;
 	}
-
-
-	QRgb mTeamColor;
 
 	QIntDict<UnitProperties> mUnitProperties;
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<QCanvasPixmapArray> mSprite;
 
-	QCanvasPixmapArray* mShot;
 	QIntDict<QCanvasPixmapArray> mFacilityBigShot;
 	QIntDict<QCanvasPixmapArray> mMobileBigShot;
-
-	unsigned int mMobileCount;
-	unsigned int mFacilityCount;
 };
 
 static int defaultColorIndex = 0;
@@ -81,6 +72,7 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, QRgb teamColor)
  d->mSmallOverview.setAutoDelete(true);
  d->mBigOverview.setAutoDelete(true);
  d->mSprite.setAutoDelete(true);
+ mShot = 0;
  
  if (!loadTheme(speciesDir, teamColor)) {
 	kdError() << "Theme " << speciesDir << " not properly loaded" << endl;
@@ -96,23 +88,16 @@ SpeciesTheme::~SpeciesTheme()
 
 void SpeciesTheme::reset()
 {
- d->mMobileCount = 0;
- d->mFacilityCount = 0;
  d->mSprite.clear();
  d->mSmallOverview.clear();
  d->mBigOverview.clear();
  d->mUnitProperties.clear();
  d->mFacilityBigShot.clear();
  d->mMobileBigShot.clear();
- if (d->mShot) {
-	delete d->mShot;
-	d->mShot = 0;
+ if (mShot) {
+	delete mShot;
+	mShot = 0;
  }
-}
-
-QRgb SpeciesTheme::teamColor() const
-{
- return d->mTeamColor;
 }
 
 QRgb SpeciesTheme::defaultColor()
@@ -124,9 +109,9 @@ QRgb SpeciesTheme::defaultColor()
 bool SpeciesTheme::loadTheme(const QString& speciesDir, QRgb teamColor)
 {
  if (teamColor == qRgb(0,0,0)) { // no color specified
-	d->mTeamColor = defaultColor();
+	mTeamColor = defaultColor();
  } else {
-	d->mTeamColor = teamColor;
+	mTeamColor = teamColor;
  }
  mThemePath = speciesDir;
  kdDebug() << "theme path: " << themePath() << endl;
@@ -445,14 +430,11 @@ void SpeciesTheme::readUnitConfigs()
  }
  for (QStringList::ConstIterator it = list.begin(); it != list.end(); ++it) {
 	UnitProperties* prop = new UnitProperties(*it);
-	if (d->mUnitProperties.find(prop->typeId())) {
+	if (!d->mUnitProperties.find(prop->typeId())) {
+		d->mUnitProperties.insert(prop->typeId(), prop);
+	} else {
 		kdError() << "UnitType " << prop->typeId() << "already there!" 
 				<< endl;
-	} else {
-		d->mUnitProperties.insert(prop->typeId(), prop);
-		if (prop->isFacility()) {
-			d->mMobileCount++;
-		}
 	}
  }
 }
@@ -507,7 +489,7 @@ QValueList<int> SpeciesTheme::allMobiles() const
 
 bool SpeciesTheme::loadShot()
 {
- if (d->mShot) {
+ if (mShot) {
 	return true;
  }
  QString fileName = themePath() + "explosions/shots/shot.00.%1.bmp"; // FIXME: shot.00 is hardcoded. is .01, .02 ... possible?
@@ -527,7 +509,7 @@ bool SpeciesTheme::loadShot()
 	points.setPoint(i, p.width() >> 1, p.height() >> 1);
  }
 
- d->mShot = new QCanvasPixmapArray(pixList, points);
+ mShot = new QCanvasPixmapArray(pixList, points);
  return true;
 }
 
@@ -571,11 +553,6 @@ bool SpeciesTheme::loadBigShot(bool isFacility, unsigned int version)
 	d->mMobileBigShot.insert(version, array);
  }
  return true;
-}
-
-QCanvasPixmapArray* SpeciesTheme::shot() const
-{
- return d->mShot;
 }
 
 QCanvasPixmapArray* SpeciesTheme::bigShot(bool isFacility, unsigned int version) const
