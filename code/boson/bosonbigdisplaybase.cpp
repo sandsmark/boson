@@ -78,6 +78,18 @@ static float lightPos[] = {-6000.0, 3000.0, 10000.0, 1.0};
 
 #include <GL/glu.h>
 
+
+// this will get removed once I add my PlayerIO class. atm i need it so that I
+// don't have to remove all changes for PlayerIO when I commit a different patch
+// for this file.
+#define PLAYERIO 0
+
+#if !PLAYERIO
+#define localPlayerIO localPlayer
+#else
+#include "playerio.h"
+#endif
+
 float textureUpperLeft[2] = { 0.0f, 1.0f };
 float textureLowerLeft[2] = { 0.0f, 0.0f };
 float textureLowerRight[2] = { 1.0f, 0.0f };
@@ -634,7 +646,7 @@ void BosonBigDisplayBase::paintGL()
  if (boGame->gameStatus() == KGame::Init) {
 	return;
  }
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(displayInput());
 
  if (checkError()) {
@@ -949,7 +961,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	d->mPlacementPreview.model()->enablePointer();
-	f->renderFrame(&localPlayer()->teamColor());
+	f->renderFrame(&localPlayerIO()->teamColor());
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
  } else if (groundPreview) {
@@ -1023,13 +1035,13 @@ void BosonBigDisplayBase::renderSelectionRect()
 
 void BosonBigDisplayBase::renderText()
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  glListBase(d->mDefaultFont->displayList());
  const int border = 5;
 
  // first the resource display
- QString minerals = i18n("Minerals: %1").arg(localPlayer()->minerals());
- QString oil = i18n("Oil:      %1").arg(localPlayer()->oil());
+ QString minerals = i18n("Minerals: %1").arg(localPlayerIO()->minerals());
+ QString oil = i18n("Oil:      %1").arg(localPlayerIO()->oil());
  QString text = QString::fromLatin1("%1\n%2").arg(minerals).arg(oil);
 
  int w = QMAX(d->mDefaultFont->width(minerals), d->mDefaultFont->width(oil));
@@ -1226,7 +1238,7 @@ void BosonBigDisplayBase::renderCells()
 	generateCellList();
  }
 
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(map->heightMap());
  BO_CHECK_NULL_RET(map->groundTheme());
@@ -1243,7 +1255,7 @@ void BosonBigDisplayBase::renderCells()
  int cellsCount = 0;
  for (int i = 0; i < d->mRenderCellsCount; i++) {
 	Cell* c = d->mRenderCells[i];
-	if (localPlayer()->isFogged(c->x(), c->y())) {
+	if (localPlayerIO()->isFogged(c->x(), c->y())) {
 		// don't draw anything at all. the cell will just be black,
 		// because of the glClear() call.
 		continue;
@@ -1365,7 +1377,7 @@ void renderCellsNow(Cell** cells, int count, int cornersWidth, float* heightMap,
 
 void BosonBigDisplayBase::renderParticles()
 {
- BO_CHECK_NULL_RET(localPlayer());
+ BO_CHECK_NULL_RET(localPlayerIO());
  // Return if there aren't any particle systems
  if (canvas()->particleSystemsCount() == 0) {
 	return;
@@ -1382,7 +1394,7 @@ void BosonBigDisplayBase::renderParticles()
 #warning FIXME
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
 		if (canvas()->cell(s->x(), s->y())) {
-			if (!localPlayer()->isFogged(s->x(), s->y())) {
+			if (!localPlayerIO()->isFogged(s->x(), s->y())) {
 				visible.append(s);
 			}
 		} else {
@@ -1861,7 +1873,11 @@ void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoMo
 		// currently!
 		bool replace = !event.controlButton();
 		bool onScreenOnly = !event.shiftButton();
+#if PLAYERIO
+		Unit* unit = localPlayerIO()->findUnitAt(event.canvasVector());
+#else
 		Unit* unit = canvas()->findUnitAt(event.canvasVector());
+#endif
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << "TODO: select only those that are currently on the screen!" << endl;
@@ -1948,9 +1964,20 @@ Player* BosonBigDisplayBase::localPlayer() const
  return d->mLocalPlayer;
 }
 
+#if PLAYERIO
+PlayerIO* BosonBigDisplayBase::localPlayerIO() const
+{
+ if (!d->mLocalPlayer) {
+	return 0;
+ }
+ return d->mLocalPlayer->playerIO();
+}
+#endif
+
 void BosonBigDisplayBase::slotCenterHomeBase()
 {
  boDebug() << k_funcinfo << endl;
+#if !PLAYERIO
  BO_CHECK_NULL_RET(localPlayer());
  //TODO
  // find the command center of the local player
@@ -1979,6 +2006,10 @@ void BosonBigDisplayBase::slotCenterHomeBase()
  pos = QPoint((int)commandCenter->x() / BO_TILE_SIZE, (int)commandCenter->y() / BO_TILE_SIZE);
 
  slotReCenterDisplay(pos);
+#else
+ BO_CHECK_NULL_RET(localPlayerIO());
+ slotReCenterDisplay(localPlayerIO()->homeBase());
+#endif
 }
 
 void BosonBigDisplayBase::slotResetViewProperties()
@@ -2151,6 +2182,10 @@ void BosonBigDisplayBase::moveSelectionRect(const QPoint& widgetPos)
 void BosonBigDisplayBase::removeSelectionRect(bool replace)
 {
  BO_CHECK_NULL_RET(displayInput());
+#if PLAYERIO
+ BO_CHECK_NULL_RET(localPlayerIO());
+#warning FIXME: move to PlayerIO
+#endif
  // only PlayerIO should be allowed to select units! there we should always
  // check whether a unit is fogged or not before selecting it!
  if (d->mSelectionRect.isVisible()) {
@@ -2162,7 +2197,11 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	d->mSelectionRect.setVisible(false);
 	if (!selection()->isEmpty()) {
 		Unit* u = selection()->leader();
+#if PLAYERIO
+		if (localPlayerIO()->ownsUnit(u)) {
+#else
 		if (u->owner() == localPlayer()) {
+#endif
 			// TODO: do not play sound here
 			// instead make virtual and play in derived class
 			u->playSound(SoundOrderSelect);
@@ -2185,7 +2224,7 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 	// this is not good: isFogged() should get checked *everywhere* where a
 	// player tries to select a unit!
 	// maybe in selectSingle() or so.
-	if (!localPlayer()->isFogged((int)(canvasVector.x() / BO_TILE_SIZE), (int)(canvasVector.y() / BO_TILE_SIZE))) {
+	if (!localPlayerIO()->isFogged((int)(canvasVector.x() / BO_TILE_SIZE), (int)(canvasVector.y() / BO_TILE_SIZE))) {
 		unit = canvas()->collisions()->findUnitAt(canvasVector);
 	}
 	if (unit) {
@@ -2193,7 +2232,11 @@ void BosonBigDisplayBase::removeSelectionRect(bool replace)
 		displayInput()->selectSingle(unit, replace);
 		// cannot be placed into selection() cause we don't have localPlayer
 		// there
+#if PLAYERIO
+		if (localPlayerIO()->ownsUnit(unit)) {
+#else
 		if (unit->owner() == localPlayer()) {
+#endif
 			unit->playSound(SoundOrderSelect);
 		}
 	} else {
@@ -2331,7 +2374,11 @@ BoItemList* BosonBigDisplayBase::selectionRectItems()
 	i++;
  }
 
+#if PLAYERIO
+ return localPlayerIO()->unitsAtCells(&cellVector);
+#else
  return canvas()->collisions()->collisionsAtCells(&cellVector, 0, true);
+#endif
 }
 
 void BosonBigDisplayBase::setKGameChat(KGameChat* chat)
@@ -2437,7 +2484,7 @@ void BosonBigDisplayBase::createRenderItemList()
 			boError() << k_funcinfo << i << " is no valid cell!" << endl;
 			continue;
 		}
-		if (!localPlayer()->isFogged(c->x(), c->y())) {
+		if (!localPlayerIO()->isFogged(c->x(), c->y())) {
 			visible = true;
 			// ugly but faster than placing this into the loop
 			// condition
