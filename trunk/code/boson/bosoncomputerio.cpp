@@ -84,19 +84,26 @@ void BosonComputerIO::reaction()
 Unit* BosonComputerIO::findTarget()
 {
  QPtrListIterator<KPlayer> it(*(boPlayer()->game()->playerList()));
+ Unit* u = 0l;
  for (; it.current(); ++it) {
 	Player* p = (Player*)it.current();
 	if (boPlayer()->isEnemy(p)) {
 		QPtrListIterator<Unit> it(*(p->allUnits()));
 		// First try to find enemy's command center
 		for (; it.current(); ++it) {
+			if (it.current()->isDestroyed()) {
+				continue;
+			}
 			// FIXME: command center id is hardcoded
-			if(it.current()->unitProperties()->typeId() == 5) {
+			if (it.current()->unitProperties()->typeId() == 5) {
 				return it.current();
+			}
+			if (!u) {
+				u = it.current();
 			}
 		}
 		// if there's no command center, find any other unit
-		return it.toFirst();
+		return u;
 	}
  }
  return 0l;

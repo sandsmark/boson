@@ -474,20 +474,63 @@ QPixmap* SpeciesData::upgradePixmapByName(const QString& name)
  return d->mUpgradePixmaps[name];
 }
 
-BosonModel* SpeciesData::objectModel(const QString& file, const QColor& color)
+BosonModel* SpeciesData::objectModel(const QString& name, const QColor& color)
 {
  TeamColorData* data = teamColorData(color);
  if (!data) {
 	boError() << k_funcinfo << "NULL teamcolor data" << endl;
 	return 0;
  }
- if (!data->mObjectModels[file]) {
-	// Model isn't loaded yet. Load it now
-	BosonModel* m = new BosonModel(themePath() + QString::fromLatin1("/objects/"), file, 0.4, 0.4);
-	m->setTeamColor(color);
-	m->loadModel();
-	data->mObjectModels.insert(file, m);
+ if (!data->mObjectModels[name]) {
+	boError() << k_funcinfo << "No object with name " << name << endl;
+	return 0;
  }
- return data->mObjectModels[file];
+ return data->mObjectModels[name];
 }
 
+void SpeciesData::loadObjects(const QColor& teamColor)
+{
+ QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
+ if (!KStandardDirs::exists(fileName)) {
+	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
+	// We assume that this theme has no objects and don't complain
+	return;
+ }
+
+ KSimpleConfig cfg(fileName);
+ QStringList objects = cfg.groupList();
+ if (objects.isEmpty()) {
+	boWarning() << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
+	return;
+ }
+
+ TeamColorData* data = teamColorData(teamColor);
+ if (!data) {
+	boError() << k_funcinfo << "NULL teamcolor data" << endl;
+	return;
+ }
+
+ boDebug() << k_funcinfo << "Loading " << objects.count()
+		<< " objects from config file" << endl;
+ QStringList::Iterator it;
+ for (it = objects.begin(); it != objects.end(); ++it) {
+	boDebug() << k_funcinfo << "Loading object from group " << *it << endl;
+
+	cfg.setGroup(*it);
+	float width, height;
+	QString file;
+	width = (float)cfg.readDoubleNumEntry("Width", 1.0);
+	height = (float)cfg.readDoubleNumEntry("Height", 1.0);
+	file = cfg.readEntry("File", "missile.3ds");
+
+	BosonModel* m = new BosonModel(themePath() + QString::fromLatin1("/objects/"), file, width, height);
+	m->setTeamColor(teamColor);
+	m->loadModel();
+
+	if (!data->mObjectModels.find(*it)) {
+		data->mObjectModels.insert(*it, m);
+	} else {
+		boError() << k_funcinfo << "object with id " << *it << " already there!" << endl;
+	}
+ }
+}

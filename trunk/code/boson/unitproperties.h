@@ -413,6 +413,8 @@ protected:
 
 	friend class BoUnitEditor;
 	template<class TYPE> friend class UpgradePropertiesValue;
+	friend class UpgradePropertiesUIntValue;
+	friend class UpgradePropertiesFloatValue;
 
 private:
 	void init();

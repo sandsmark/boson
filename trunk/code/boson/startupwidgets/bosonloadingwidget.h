@@ -31,6 +31,7 @@ class BosonLoadingWidget : public QWidget
         LoadUnitConfigs,  // Loading unit config files for a player
         LoadUnits,  // Loading unit models and textures for a player
         LoadTechnologies,  // Loading technologies for a player
+        LoadObjects,  // Loading objects for a player
         LoadGeneralData,  // General data loaded only once per game (only general sounds for now)
         LoadSavedGameHeader,  // Loading header of saved game file
         LoadSavedGame,  // Loading saved game data (map and KGame stuff)

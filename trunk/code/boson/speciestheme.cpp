@@ -227,6 +227,12 @@ bool SpeciesTheme::loadTechnologies()
  return true;
 }
 
+void SpeciesTheme::loadObjects()
+{
+ finalizeTeamColor();
+ mData->loadObjects(teamColor());
+}
+
 QString SpeciesTheme::unitModelFile()
 {
  return SpeciesData::unitModelFile();
@@ -415,11 +421,21 @@ QValueList<const UnitProperties*> SpeciesTheme::allUnits() const
  return list;
 }
 
-QStringList SpeciesTheme::allObjectModels() const
+QStringList SpeciesTheme::allObjects() const
 {
- QDir dir(themePath());
- dir.cd(QString::fromLatin1("objects"));
- return dir.entryList(QString::fromLatin1("*.3ds"), QDir::Files | QDir::Readable);
+ QString fileName = themePath() + QString::fromLatin1("objects/objects.boson");
+ if (!KStandardDirs::exists(fileName)) {
+	boDebug() << k_funcinfo << "no objects.boson file found" << endl;
+	// We assume that this theme has no objects and don't complain
+	return QStringList();
+ }
+
+ KSimpleConfig cfg(fileName);
+ QStringList objects = cfg.groupList();
+ if (objects.isEmpty()) {
+	boWarning() << k_funcinfo << "No objects found in objects file (" << fileName << ")" << endl;
+ }
+ return objects;
 }
 
 QValueList<unsigned long int> SpeciesTheme::productions(QValueList<unsigned long int> producers) const
@@ -611,10 +627,10 @@ const BosonParticleSystemProperties* SpeciesTheme::particleSystemProperties(unsi
  return mData->particleSystemProperties(id);
 }
 
-BosonModel* SpeciesTheme::objectModel(const QString& file)
+BosonModel* SpeciesTheme::objectModel(const QString& name)
 {
  finalizeTeamColor();
- return mData->objectModel(file, teamColor());
+ return mData->objectModel(name, teamColor());
 }
 
 void SpeciesTheme::finalizeTeamColor()
