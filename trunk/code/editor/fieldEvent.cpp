@@ -19,12 +19,13 @@
  ***************************************************************************/
 
 #include <qpainter.h>
+#include <qpopupmenu.h>
 
 #include "../common/log.h"
 #include "../map/map.h"
 
 #include "viewMap.h"
-#include "fieldMap.h"
+#include "editorFieldMap.h"
 //#include "orderWin.h"
 #include "editorMap.h"
 
@@ -35,7 +36,13 @@
 static int selectX, selectY;
 static int oldX, oldY;
 
+/* ugly orzel hack......*/
 void fieldMap::mousePressEvent(QMouseEvent *e)
+{
+}
+
+
+void editorFieldMap::mousePressEvent(QMouseEvent *e)
 {
 int x, y;
 
@@ -47,7 +54,7 @@ y = e->y();
 if (e->button() & RightButton) {
 	emit relativeReCenterView( x/BO_TILE_SIZE , y/BO_TILE_SIZE);
 	return;
-	}
+}
 
 if (e->button() & LeftButton) {	
 	/* Here we transpose coo into the map referential */
@@ -57,12 +64,12 @@ if (e->button() & LeftButton) {
 	if (SELECT_MOVE == view->getSelectionMode()) {
 		view->leftClicked( x, y);
 		return;
-		}
+	}
 
 	/* Control -> multiselection, else... */
 	if (! (e->state()&ControlButton)) {
 		unSelectAll();
-		}
+	}
 
 	QIntDictIterator<visualMobUnit> mobIt(mobileList);
 	QIntDictIterator<visualFacility> fixIt(facilityList);
@@ -84,8 +91,8 @@ if (e->button() & LeftButton) {
 			view->selectFix(f);
 			found = TRUE;
 			break;
-			}
 		}
+	}
 
 	for (mobIt.toFirst(); mobIt; ++mobIt) {
 		m = mobIt.current();
@@ -103,8 +110,8 @@ if (e->button() & LeftButton) {
 			else
 				view->selectMob(mobIt.currentKey(), m);
 			found = TRUE;
-			}
 		}
+	}
 
 	if (!found) {
 	// Here, we have to draw a "selection box"...
@@ -112,8 +119,13 @@ if (e->button() & LeftButton) {
 		oldX = selectX = e->x();
 		oldY = selectY = e->y();
 		unSelectFix();
-		}
 	}
+} /* left button */
+
+if (e->button() & MidButton) {
+	popup->exec(QCursor::pos());
+	return;
+}
 }
 
 void fieldMap::mouseMoveEvent(QMouseEvent *e)
