@@ -66,6 +66,7 @@ Code : (Orzel)
 #108 f: add a menu on the leftframe (quit, configure, music on/off, fullscreen)
 #110 b: fix 'attacking' on ground segfaults, how to stop a fix to attack ?
 #111 f: add server option : name of the map to use (default=basic.bpf)
+#112 f: when building something, change the overview pixmap
 
 
 Graphics : (ben)
@@ -93,6 +94,14 @@ any other sound you may think of :
 	win
 	lost
 	a 'characteristic' sound for every mobile ("sir, yes sir", "bzzz" for plane, "ok", "ready")
+
+new sounds:
+===========
+different sound for different units/fixed selections
+different sound for different units/fixed moves
+"why are you keeping on touching me"
+background
+actions "emptying harvester", "harvesting", ""
 
 
 
