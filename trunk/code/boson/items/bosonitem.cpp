@@ -47,7 +47,8 @@ BosonItem::BosonItem(BosonModel* model, BosonCanvas* canvas)
  mYVelocity = 0.0;
 
  mCurrentAnimation = 0;
- mBoundingSphereRadius = 1.0; // TODO: can we extract this from the model? this probably needs to change with different frames!
+ // 1.732 == sqrt(3) i.e. lenght of vector whose all components are 1
+ mBoundingSphereRadius = 1.732; // TODO: can we extract this from the model? this probably needs to change with different frames!
 
  mIsAnimated = false;
  mSelectBox = 0;
