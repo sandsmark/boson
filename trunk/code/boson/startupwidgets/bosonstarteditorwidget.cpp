@@ -92,7 +92,7 @@ BosonStartEditorWidget::BosonStartEditorWidget(TopWidget* top, QWidget* parent)
  QLabel* mapSizeLabel = new QLabel(i18n("Map Size:"), map);
  QHBox* mapSize = new QHBox(map);
  mMapWidth = new KIntNumInput(mapSize);
- (void)new QLabel(i18n("x"), mapSize);
+ (void)new QLabel(" X ", mapSize);
  mMapHeight = new KIntNumInput(mapSize);
  mMapWidth->setRange(10, MAX_MAP_WIDTH);
  mMapHeight->setRange(10, MAX_MAP_HEIGHT);
