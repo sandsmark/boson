@@ -300,7 +300,6 @@ protected slots:
 private:
 	void initDisplayManager();
 	void initBoson();
-	void initCanvas();
 	void initPlayer();
 	void initKActions();
 	void initStatusBar();

@@ -373,11 +373,6 @@ void TopWidget::initPlayer()
  slotChangeLocalPlayer(p);
 }
 
-void TopWidget::initCanvas()
-{
- boGame->createCanvas();
-}
-
 void TopWidget::initStatusBar()
 {
  KStatusBar* bar = statusBar();
@@ -436,7 +431,7 @@ void TopWidget::initBosonWidget()
  }
  BO_CHECK_NULL_RET(d->mDisplayManager);
  BO_CHECK_NULL_RET(boGame);
- BO_CHECK_NULL_RET(boGame->canvas());
+// BO_CHECK_NULL_RET(boGame->canvas());
  if (boGame->gameMode()) {
 	BosonWidget* w = new BosonWidget(mMainDock);
 	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
@@ -481,6 +476,7 @@ void TopWidget::initBosonWidget()
 	// it is not)
  }
  changeLocalPlayer(boGame->localPlayer(), false);
+
  d->mBosonWidget->init(d->mChatDock, d->mCommandFrameDock); // this depends on several virtual methods and therefore can't be called in the c'tor
 
  factory()->addClient(d->mBosonWidget); // XMLClient-stuff. needs to be called *after* creation of KAction objects, so outside BosonWidget might be a good idea :-)
@@ -508,25 +504,28 @@ void TopWidget::slotStartNewGame()
 	boError() << k_funcinfo << "NULL startup widget" << endl;
 	return;
  }
- boDebug() << k_funcinfo << endl;
+ boDebug(270) << k_funcinfo << endl;
 
  // Save initial dock config
  saveInitialDockConfig();
 
  d->mStartup->showLoadingWidget();
 
- initCanvas();
  initGameDockWidgets(false); // dock the widgets to their default location and hide them
+
  initBosonWidget();
 
  changeLocalPlayer(boGame->localPlayer());
  d->mBosonWidget->initPlayer();
+
+ boGame->createCanvas();
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
  // start the game. Once it's done it'll send IdGameIsStarted (see
  // Boson::signalGameStarted())
  d->mStarting->startNewGame();
+ d->mBosonWidget->setCanvas(boGame->canvasNonConst());
 }
 
 void TopWidget::slotLoadGame(const QString& fileName)

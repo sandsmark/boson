@@ -107,6 +107,8 @@ public:
 
 	void setLocalPlayer(Player* p, bool init);
 
+	void setCanvas(BosonCanvas* canvas);
+
 	BosonCanvas* canvas() const;
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
 	Player* localPlayer() const { return mLocalPlayer; }
