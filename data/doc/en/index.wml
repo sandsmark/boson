@@ -74,11 +74,13 @@
             <dl>
               <dt>4.1 <a href="units/mineral_harvester.html">Mineral harvester</a></dt>
               <dt>4.2 <a href="units/oil_harvester.html">Oil harvester</a></dt>
-              <dt>4.3 <a href="units/quad.html">Quad</a></dt>
-              <dt>4.4 <a href="units/batzen.html">Batzen</a></dt>
-	      <dt>4.5 <a href="units/tank.html">Tank</a></dt>
-              <dt>4.6 <a href="units/ship.html">Ship</a></dt>
-              <dt>4.7 <a href="units/aircraft.html">Aircraft</a></dt>
+              <dt>4.3 <a href="units/grizzly.html">Grizzly</a></dt>
+              <dt>4.4 <a href="units/leopard.html">Leopard</a></dt>
+              <dt>4.5 <a href="units/panther.html">Panther</a></dt>
+              <dt>4.6 <a href="units/piranha.html">Piranha</a></dt>
+              <dt>4.7 <a href="units/tiger.html">Tiger</a></dt>
+              <dt>4.8 <a href="units/ship.html">Ship</a></dt>
+              <dt>4.9 <a href="units/tornado.html">Tornado</a></dt>
             </dl>
           </dd>
           <dd>&nbsp;</dd>
