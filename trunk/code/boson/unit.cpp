@@ -1460,21 +1460,21 @@ bool Unit::slowDownAtDestination() const
  return pathInfo()->slowDownAtDest;
 }
 
-float Unit::distance(const Unit* u) const
+bofixed Unit::distance(const Unit* u) const
 {
  // !!! This method returns square of actual distance. You may want to use sqrt() !!!
- float dx = centerX() - u->centerX();
- float dy = centerY() - u->centerY();
- float dz = centerZ() - u->centerZ();
+ bofixed dx = centerX() - u->centerX();
+ bofixed dy = centerY() - u->centerY();
+ bofixed dz = centerZ() - u->centerZ();
  return dx*dx + dy*dy + dz*dz;
 }
 
-float Unit::distance(const BoVector3Fixed& pos) const
+bofixed Unit::distance(const BoVector3Fixed& pos) const
 {
  // !!! This method returns square of actual distance. You may want to use sqrt() !!!
- float dx = pos.x() - centerX();
- float dy = pos.y() - centerY();
- float dz = pos.z() - centerZ();
+ bofixed dx = pos.x() - centerX();
+ bofixed dy = pos.y() - centerY();
+ bofixed dz = pos.z() - centerZ();
  return dx*dx + dy*dy + dz*dz;
 }
 
