@@ -1,0 +1,54 @@
+
+AC_LANG_SAVE
+AC_LANG_CPLUSPLUS
+
+dnl ----------------------------------------------------------------------
+dnl --
+dnl -- Check for libraries
+dnl --
+
+AC_CHECK_LIB(m, sqrt)
+
+dnl ----------------------------------------------------------------------
+dnl --
+dnl -- Check for header files that we'll need
+dnl --
+
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h)
+AC_CHECK_HEADERS(unistd.h)
+
+dnl -- OpenGL Extension headers
+AC_CHECK_HEADERS(GL/glext.h)
+AC_CHECK_HEADERS(GL/glxext.h)
+AC_CHECK_HEADERS(GL/wglext.h)
+
+dnl -- STL headers that aren't always available
+AC_CHECK_HEADERS(hash_map)
+AC_CHECK_HEADERS(hash_set)
+AC_CHECK_HEADERS(ext/hash_map)
+AC_CHECK_HEADERS(ext/hash_set)
+AC_CHECK_HEADERS(valarray)
+AC_CHECK_HEADERS(sstream)
+AC_CHECK_HEADERS(strstream)
+
+dnl ----------------------------------------------------------------------
+dnl --
+dnl -- Check for typedefs, declarations, and compiler characteristics
+dnl --
+
+AC_C_CONST
+AC_C_INLINE
+
+AC_MSG_CHECKING(for type bool)
+AC_TRY_COMPILE([],
+	[bool x; x;],
+        [AC_MSG_RESULT(yes)
+	 AC_DEFINE(HAVE_BOOL, 1, [Defines if 'bool' datatype is available])],
+        AC_MSG_RESULT(no))
+
+
+AC_FUNC_ALLOCA
+AC_CHECK_FUNCS(rint getrusage times random getopt getopt_long)
+
+AC_LANG_RESTORE
