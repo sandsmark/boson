@@ -536,7 +536,7 @@ public:
 	GLint mViewport[4]; // x,y,w,h of the viewport. see setViewport
 	BoMatrix mProjectionMatrix;
 	BoMatrix mModelviewMatrix;
-	GLdouble mFrustumMatrix[6][4];
+	GLdouble mViewFrustum[6][4];
 
 	GLfloat mFovY; // see gluPerspective
 	GLfloat mAspect; // see gluPerspective
@@ -636,7 +636,7 @@ void BosonBigDisplayBase::init()
  }
  for (int i = 0; i < 6; i++) {
 	for (int j = 0; j < 4; j++) {
-		d->mFrustumMatrix[i][j] = 0.0;
+		d->mViewFrustum[i][j] = 0.0;
 	}
  }
 
@@ -2975,94 +2975,94 @@ void BosonBigDisplayBase::extractFrustum()
 		model[15] * proj[15];
 
  // Extract the numbers for the RIGHT plane
- d->mFrustumMatrix[0][0] = clip[3] - clip[0];
- d->mFrustumMatrix[0][1] = clip[7] - clip[4];
- d->mFrustumMatrix[0][2] = clip[11] - clip[8];
- d->mFrustumMatrix[0][3] = clip[15] - clip[12];
+ d->mViewFrustum[0][0] = clip[3] - clip[0];
+ d->mViewFrustum[0][1] = clip[7] - clip[4];
+ d->mViewFrustum[0][2] = clip[11] - clip[8];
+ d->mViewFrustum[0][3] = clip[15] - clip[12];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[0][0] * d->mFrustumMatrix[0][0] +
-		d->mFrustumMatrix[0][1] * d->mFrustumMatrix[0][1] +
-		d->mFrustumMatrix[0][2] * d->mFrustumMatrix[0][2]);
- d->mFrustumMatrix[0][0] /= t;
- d->mFrustumMatrix[0][1] /= t;
- d->mFrustumMatrix[0][2] /= t;
- d->mFrustumMatrix[0][3] /= t;
+ t = sqrt(d->mViewFrustum[0][0] * d->mViewFrustum[0][0] +
+		d->mViewFrustum[0][1] * d->mViewFrustum[0][1] +
+		d->mViewFrustum[0][2] * d->mViewFrustum[0][2]);
+ d->mViewFrustum[0][0] /= t;
+ d->mViewFrustum[0][1] /= t;
+ d->mViewFrustum[0][2] /= t;
+ d->mViewFrustum[0][3] /= t;
 
  // Extract the numbers for the LEFT plane
- d->mFrustumMatrix[1][0] = clip[3] + clip[0];
- d->mFrustumMatrix[1][1] = clip[7] + clip[4];
- d->mFrustumMatrix[1][2] = clip[11] + clip[8];
- d->mFrustumMatrix[1][3] = clip[15] + clip[12];
+ d->mViewFrustum[1][0] = clip[3] + clip[0];
+ d->mViewFrustum[1][1] = clip[7] + clip[4];
+ d->mViewFrustum[1][2] = clip[11] + clip[8];
+ d->mViewFrustum[1][3] = clip[15] + clip[12];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[1][0] * d->mFrustumMatrix[1][0] +
-		d->mFrustumMatrix[1][1] * d->mFrustumMatrix[1][1] +
-		d->mFrustumMatrix[1][2] * d->mFrustumMatrix[1][2]);
- d->mFrustumMatrix[1][0] /= t;
- d->mFrustumMatrix[1][1] /= t;
- d->mFrustumMatrix[1][2] /= t;
- d->mFrustumMatrix[1][3] /= t;
+ t = sqrt(d->mViewFrustum[1][0] * d->mViewFrustum[1][0] +
+		d->mViewFrustum[1][1] * d->mViewFrustum[1][1] +
+		d->mViewFrustum[1][2] * d->mViewFrustum[1][2]);
+ d->mViewFrustum[1][0] /= t;
+ d->mViewFrustum[1][1] /= t;
+ d->mViewFrustum[1][2] /= t;
+ d->mViewFrustum[1][3] /= t;
 
  // Extract the BOTTOM plane
- d->mFrustumMatrix[2][0] = clip[3] + clip[1];
- d->mFrustumMatrix[2][1] = clip[7] + clip[5];
- d->mFrustumMatrix[2][2] = clip[11] + clip[9];
- d->mFrustumMatrix[2][3] = clip[15] + clip[13];
+ d->mViewFrustum[2][0] = clip[3] + clip[1];
+ d->mViewFrustum[2][1] = clip[7] + clip[5];
+ d->mViewFrustum[2][2] = clip[11] + clip[9];
+ d->mViewFrustum[2][3] = clip[15] + clip[13];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[2][0] * d->mFrustumMatrix[2][0] +
-		d->mFrustumMatrix[2][1] * d->mFrustumMatrix[2][1] +
-		d->mFrustumMatrix[2][2] * d->mFrustumMatrix[2][2]);
- d->mFrustumMatrix[2][0] /= t;
- d->mFrustumMatrix[2][1] /= t;
- d->mFrustumMatrix[2][2] /= t;
- d->mFrustumMatrix[2][3] /= t;
+ t = sqrt(d->mViewFrustum[2][0] * d->mViewFrustum[2][0] +
+		d->mViewFrustum[2][1] * d->mViewFrustum[2][1] +
+		d->mViewFrustum[2][2] * d->mViewFrustum[2][2]);
+ d->mViewFrustum[2][0] /= t;
+ d->mViewFrustum[2][1] /= t;
+ d->mViewFrustum[2][2] /= t;
+ d->mViewFrustum[2][3] /= t;
 
  // Extract the TOP plane
- d->mFrustumMatrix[3][0] = clip[3] - clip[1];
- d->mFrustumMatrix[3][1] = clip[7] - clip[5];
- d->mFrustumMatrix[3][2] = clip[11] - clip[9];
- d->mFrustumMatrix[3][3] = clip[15] - clip[13];
+ d->mViewFrustum[3][0] = clip[3] - clip[1];
+ d->mViewFrustum[3][1] = clip[7] - clip[5];
+ d->mViewFrustum[3][2] = clip[11] - clip[9];
+ d->mViewFrustum[3][3] = clip[15] - clip[13];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[3][0] * d->mFrustumMatrix[3][0] +
-		d->mFrustumMatrix[3][1] * d->mFrustumMatrix[3][1] +
-		d->mFrustumMatrix[3][2] * d->mFrustumMatrix[3][2]);
- d->mFrustumMatrix[3][0] /= t;
- d->mFrustumMatrix[3][1] /= t;
- d->mFrustumMatrix[3][2] /= t;
- d->mFrustumMatrix[3][3] /= t;
+ t = sqrt(d->mViewFrustum[3][0] * d->mViewFrustum[3][0] +
+		d->mViewFrustum[3][1] * d->mViewFrustum[3][1] +
+		d->mViewFrustum[3][2] * d->mViewFrustum[3][2]);
+ d->mViewFrustum[3][0] /= t;
+ d->mViewFrustum[3][1] /= t;
+ d->mViewFrustum[3][2] /= t;
+ d->mViewFrustum[3][3] /= t;
 
  // Extract the FAR plane
-d->mFrustumMatrix[4][0] = clip[3] - clip[2];
-d->mFrustumMatrix[4][1] = clip[7] - clip[6];
-d->mFrustumMatrix[4][2] = clip[11] - clip[10];
-d->mFrustumMatrix[4][3] = clip[15] - clip[14];
+d->mViewFrustum[4][0] = clip[3] - clip[2];
+d->mViewFrustum[4][1] = clip[7] - clip[6];
+d->mViewFrustum[4][2] = clip[11] - clip[10];
+d->mViewFrustum[4][3] = clip[15] - clip[14];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[4][0] * d->mFrustumMatrix[4][0] +
-		d->mFrustumMatrix[4][1] * d->mFrustumMatrix[4][1] +
-		d->mFrustumMatrix[4][2] * d->mFrustumMatrix[4][2]);
- d->mFrustumMatrix[4][0] /= t;
- d->mFrustumMatrix[4][1] /= t;
- d->mFrustumMatrix[4][2] /= t;
- d->mFrustumMatrix[4][3] /= t;
+ t = sqrt(d->mViewFrustum[4][0] * d->mViewFrustum[4][0] +
+		d->mViewFrustum[4][1] * d->mViewFrustum[4][1] +
+		d->mViewFrustum[4][2] * d->mViewFrustum[4][2]);
+ d->mViewFrustum[4][0] /= t;
+ d->mViewFrustum[4][1] /= t;
+ d->mViewFrustum[4][2] /= t;
+ d->mViewFrustum[4][3] /= t;
 
  // Extract the NEAR plane
- d->mFrustumMatrix[5][0] = clip[3] + clip[2];
- d->mFrustumMatrix[5][1] = clip[7] + clip[6];
- d->mFrustumMatrix[5][2] = clip[11] + clip[10];
- d->mFrustumMatrix[5][3] = clip[15] + clip[14];
+ d->mViewFrustum[5][0] = clip[3] + clip[2];
+ d->mViewFrustum[5][1] = clip[7] + clip[6];
+ d->mViewFrustum[5][2] = clip[11] + clip[10];
+ d->mViewFrustum[5][3] = clip[15] + clip[14];
 
  // Normalize the result
- t = sqrt(d->mFrustumMatrix[5][0] * d->mFrustumMatrix[5][0] +
-		d->mFrustumMatrix[5][1] * d->mFrustumMatrix[5][1] +
-		d->mFrustumMatrix[5][2] * d->mFrustumMatrix[5][2]);
- d->mFrustumMatrix[5][0] /= t;
- d->mFrustumMatrix[5][1] /= t;
- d->mFrustumMatrix[5][2] /= t;
- d->mFrustumMatrix[5][3] /= t;
+ t = sqrt(d->mViewFrustum[5][0] * d->mViewFrustum[5][0] +
+		d->mViewFrustum[5][1] * d->mViewFrustum[5][1] +
+		d->mViewFrustum[5][2] * d->mViewFrustum[5][2]);
+ d->mViewFrustum[5][0] /= t;
+ d->mViewFrustum[5][1] /= t;
+ d->mViewFrustum[5][2] /= t;
+ d->mViewFrustum[5][3] /= t;
 }
 
 float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) const
@@ -3071,8 +3071,8 @@ float BosonBigDisplayBase::sphereInFrustum(const BoVector3& pos, float radius) c
  // inline. We call it pretty often!
  float distance;
  for (int p = 0; p < 6; p++) {
-	distance = d->mFrustumMatrix[p][0] * pos[0] + d->mFrustumMatrix[p][1] * pos[1] +
-			d->mFrustumMatrix[p][2] * pos[2] + d->mFrustumMatrix[p][3];
+	distance = d->mViewFrustum[p][0] * pos[0] + d->mViewFrustum[p][1] * pos[1] +
+			d->mViewFrustum[p][2] * pos[2] + d->mViewFrustum[p][3];
 	if (distance <= -radius){
 		return 0;
 	}
