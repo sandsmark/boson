@@ -20,7 +20,7 @@
    <Unit x="11" y="13" UnitType="6" />
    <Unit x="17" y="10" UnitType="6" />
    <Unit x="17" y="4" UnitType="6" />
-   <Unit x="1" y="4" UnitType="3" />
+   <Unit x="1" y="4" UnitType="3" ConstructionCompleted="1" />
    <Unit x="13" y="7" UnitType="10001" />
    <Unit x="14" y="7" UnitType="10001" />
    <Unit x="18" y="2" UnitType="10002" />
@@ -63,7 +63,7 @@
    <Unit x="32" y="46" UnitType="0" />
    <Unit x="34" y="46" UnitType="1" />
    <Unit x="36" y="46" UnitType="2" />
-   <Unit x="46" y="42" UnitType="3" />
+   <Unit x="46" y="42" UnitType="3" ConstructionCompleted="1" />
    <Unit x="46" y="40" UnitType="4" />
    <Unit x="46" y="38" UnitType="8" />
    <Unit x="39" y="42" UnitType="9" />
