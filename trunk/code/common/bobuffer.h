@@ -21,10 +21,12 @@
 #ifndef BOBUFFER_H 
 #define BOBUFFER_H 
 
+#define BOSON_BUFFER_SIZE	(5*1024)
+
 class boBuffer {
 
 public:
-	boBuffer(int socket, unsigned int size);
+	boBuffer(int socket, unsigned int size=BOSON_BUFFER_SIZE);
 
 	void reset(void) { pos = 0; };
 	void flush(void);

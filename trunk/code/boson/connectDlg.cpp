@@ -155,7 +155,7 @@ void connectDlg::tryServer(void)
 
 
 	/* buffer creation */
-	buffer = new boBuffer(Socket->socket(), BOSON_BUFFER_SIZE );
+	buffer = new boBuffer(Socket->socket() );
 	socketState = PSS_INIT;
 	
 	/* KSocket configuration */

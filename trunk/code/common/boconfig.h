@@ -33,7 +33,6 @@
 #define BOSON_MAX_PLAYERS	BOSON_MAX_CONNECTION ///orzel : to clean up
 #define BOSON_DEFAULT_PORT	(5454)
 #define BOSON_DEFAULT_PORT_CHAR	"5454"
-#define BOSON_BUFFER_SIZE	(5*1024)
 
 #define BOSON_SERVER_LAUNCHED	"Boson server launched"
 
