@@ -100,10 +100,38 @@ class BoSpecificAction
     void operator=(const BoSpecificAction& a);
 
     BoAction* action() const  { return mAction; }
-    const QString& id() const { return mAction->id(); }
-    int hotkey() const { return mAction->hotkey(); }
-    QPixmap* pixmap() const { return mAction->pixmap(); }
-    const QString& text() const { return mAction->text(); }
+    const QString& id() const
+    {
+      if (!mAction)
+      {
+        return QString::null;
+      }
+      return mAction->id();
+    }
+    int hotkey() const
+    {
+      if (!mAction)
+      {
+        return 0;
+      }
+      return mAction->hotkey();
+    }
+    QPixmap* pixmap() const
+    {
+      if (!mAction)
+      {
+        return 0;
+      }
+      return mAction->pixmap();
+    }
+    const QString& text() const
+    {
+      if (!mAction)
+      {
+        return QString::null;
+      }
+      return mAction->text();
+    }
 
 
   private:
