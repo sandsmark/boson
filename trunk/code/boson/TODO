@@ -1,18 +1,26 @@
+Game TODOs
 - waypoints
-- constructing - maybe use Boson::slotDelayedAddUnit() or so?
-- unit editor (should be quite easy cause of config files)
+- constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
+- make player color selectable in the new game dialog
+- use different cursors for moving, attacking, ...
+- fog of war (long time TODO)
+
+
+Editor (map, unit, scenario) TODOs
+- don't place units on invalid tiles (e.g. ship on grass)
+- unit editor (should be quite easy cause of config files) - mostly done
+- map editor: big tiles are currently placed as small ones only
+- unit editor: check if images are in the directory, provide possibility to copy
+  them
+
+
+General TODOs
 - zooming (QCanvas::setWorldMatrix())
 - rename Unit->UnitBase ; VisualUnit->Unit
 - SpeciesTheme loads all pixmaps into memory - share it between different
   players (if they have the same themes)
-
 - bosoncommandframe: a qgridlayout with a orderbutton count of (16?) - must be dividable by 3. the
   bottom 3 buttons are: left is a down (aka next page) , middle is free, right
   is a up (aka previous page) button. SO we can add any number of pixmaps with
   this limited number of orderbuttons.
-- map editor: big tiles are currently placed as small ones only
-- unit editor: check if images are in the directory, provide possibility to copy
-  them
-- make player color selectable in the new game dialog
-- use different cursors for moving, attacking, ...
-- fog of war (long time TODO)
+
