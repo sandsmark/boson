@@ -283,14 +283,14 @@ bool BosonMap::loadCells(QDomElement& node)
 			boError() << k_funcinfo << "XML error: could not load cell" << endl;
 			continue;
 		}
-		groundType[x + y * width()] = g;
-		version[x + y * width()] = v;
+		groundType[cellArrayPos(x, y)] = g;
+		version[cellArrayPos(x, y)] = v;
 	}
  }
  for (unsigned int i = 0; i < width(); i++) {
 	for (unsigned int j = 0; j < height(); j++) {
-		saveCell(stream, groundType[i + j * width()],
-				version[i + j * width()]);
+		saveCell(stream, groundType[cellArrayPos(i, j)],
+				version[cellArrayPos(i, j)]);
 	}
  }
 
@@ -597,7 +597,7 @@ Cell* BosonMap::cell(int x, int y) const
  if (y < 0 || (unsigned int)y >= height()) {
 	return 0;
  }
- return &mCells[ x + y * width() ];
+ return mCells + cellArrayPos(x, y);
 }
 
 void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)

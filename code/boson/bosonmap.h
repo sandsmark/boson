@@ -67,14 +67,34 @@ public:
 	inline unsigned int width() const { return mMapWidth; }
 
 	/**
-	 * @return The cell at x,y (in cell positions!) or NULL if the
-	 * coordinates have been invalid.
+	 * This function does error checking on @p x, @p y and will return NULL
+	 * if they are invalid. If you don't want this error checking you can
+	 * use @ref cells + @ref cellArrayPos instead, but you should prefer
+	 * this one!
 	 * @param x x-coordinate of the requested cell. Must be 0 < x < @ref
 	 * width
 	 * @param y y-coordinate of the requested cell. Must be 0 < y < @ref
 	 * height
+	 * @return The cell at x,y (in cell positions!) or NULL if the
+	 * coordinates have been invalid.
 	 **/
 	Cell* cell(int x, int y) const;
+
+	/**
+	 * If you <em>really</em> need some speedup and can't use @ref cell you
+	 * may want to use this one. @ref cells + cellArrayPos(x,y) will return
+	 * the same cell as @ref cell as long as @p x and @p y are valid for
+	 * this map. You need to ensure that on your own.
+	 *
+	 * You are meant to prefer @ref cell.
+	 * @return The position of the cell at @p x, @p y in the array @p cells
+	 * if valid. Note that NO error checking will be done!! You should
+	 * prefer @ref cell if possible
+	 **/
+	inline int cellArrayPos(int x, int y) const
+	{
+		return x + y * width();
+	}
 
 	bool loadMap(QDomElement& node);
 	bool loadHeightMapImage(const QByteArray&);
