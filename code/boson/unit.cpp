@@ -289,9 +289,7 @@ int Unit::currentPluginType() const
 void Unit::updateSelectBox()
 {
  if (selectBox()) {
-	unsigned long int maxHealth = unitProperties()->health();
-	double div = (double)health() / maxHealth;
-	selectBox()->update(div);
+	selectBox()->update((float)health() / unitProperties()->health());
  }
 }
 
@@ -490,7 +488,6 @@ bool Unit::attackEnemyUnitsInRange()
  }
 
  return true;
-
 }
 
 Unit* Unit::bestEnemyUnitInRange()
@@ -629,8 +626,9 @@ void Unit::advanceAttack(unsigned int advanceCount)
  // Shoot at target with as many weapons as possible
  boDebug(300) << "    " << k_funcinfo << "shooting at target" << endl;
  BoPointerIterator<BosonWeapon> wit(d->mWeapons);
+ BosonWeapon* w;
  for (; *wit; ++wit) {
-	BosonWeapon* w = *wit;
+	w = *wit;
 	if (w->reloaded() && w->canShootAt(target()) && inRange(w->properties()->range(), target())) {
 		shootAt(w, target());
 		if (target()->isDestroyed()) {
@@ -1414,6 +1412,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// Attack any enemy units in range
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
+  // TODO: Maybe check for enemies every time waypoint is reached instead?
 	if (target() || (advanceCount % 20 == 0)) {
 		if (attackEnemyUnitsInRange()) {
 			boDebug(401) << k_funcinfo << "unit " << id() << ": Enemy units found in range, attacking" << endl;

@@ -390,6 +390,9 @@ void BosonItem::moveParticleSystems(float x, float y, float z)
 
 void BosonItem::rotateParticleSystems(float angle, float x, float y, float z)
 {
+ if (angle == 0.0) {
+	return;
+ }
  if (particleSystems() && particleSystems()->count() > 0) {
 	QPtrListIterator<BosonParticleSystem> it(*particleSystems());
 	for (; it.current(); ++it) {
