@@ -29,6 +29,7 @@
 
 BosonGLFont::BosonGLFont(const QString& family)
 {
+ boDebug() << k_funcinfo << "creating font for " << family << endl;
  if (!BoContext::currentContext()) {
 	boError() << k_funcinfo << "NULL current context" << endl;
 	mFontMetrics = 0;
@@ -40,6 +41,7 @@ BosonGLFont::BosonGLFont(const QString& family)
  // FIXME: i18n() support!
  mFontDisplayList = glGenLists(256);
  glXUseXFont((Font)mFont.handle(), 0, 256, mFontDisplayList);
+ boDebug() << k_funcinfo << family << " font created" << endl;
 }
 
 BosonGLFont::~BosonGLFont()
