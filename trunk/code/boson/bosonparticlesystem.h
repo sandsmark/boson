@@ -218,7 +218,7 @@ class BosonParticleSystem
     /**
      * @return Radius of bounding sphere of this system. This can be used for culling
      **/
-//    float boundingSphereRadius()  { return mRadius; };
+    float boundingSphereRadius() const { return mRadius; };
 
     /**
      * @return Whether this system is active
