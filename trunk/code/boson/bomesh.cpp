@@ -45,6 +45,11 @@ BoNode::~BoNode()
 {
 }
 
+void BoNode::setFace(Lib3dsFace* face)
+{
+ mFace = face;
+}
+
 void BoNode::setPrevious(BoNode* previous)
 {
  mPrevious = previous;
@@ -111,29 +116,23 @@ BoMesh::BoMesh()
 
 BoMesh::~BoMesh()
 {
- if (d->mFaces) {
-	BoNode* first = d->mFaces;
-	while (first->previous()) {
-		// WARNING: we mustn't have any node appear two times in the
-		// list, otherwise we have an infinite loop here
-		first = first->previous();
-	}
-	BoNode* next = first;
-	do {
-		BoNode* current = next;
-		next = current->next();
-		delete current;
-	} while (next);
- }
+ deleteFaces();
  delete d;
 }
 
 void BoMesh::addFaces(Lib3dsMesh* mesh)
 {
  BO_CHECK_NULL_RET(mesh);
+ if (d->mFaces) {
+	deleteFaces();
+ }
+ if (mesh->faces < 1) {
+	boWarning() << k_funcinfo << "no faces in " << mesh->name << endl;
+	return;
+ }
  d->mFaces = new BoNode();
+ d->mFaces->setFace(&mesh->faceL[0]);
  BoNode* node = d->mFaces;
- node->setFace(&mesh->faceL[0]);
  for (unsigned int face = 1; face < mesh->faces; face++) {
 	Lib3dsFace* f = &mesh->faceL[face];
 	BoNode* next = new BoNode(node);
@@ -146,12 +145,23 @@ void BoMesh::addFaces(Lib3dsMesh* mesh)
 void BoMesh::connectFaces(Lib3dsMesh* mesh)
 {
  BO_CHECK_NULL_RET(mesh);
+ if (d->mFaces) {
+	deleteFaces();
+ }
+ if (mesh->faces < 1) {
+	boWarning() << k_funcinfo << "no faces in " << mesh->name << endl;
+	return;
+ }
  boDebug() << "trying to connect faces for " << mesh->name << endl;
 
  // first we contruct a list of all faces
  QPtrList<Lib3dsFace> allFaces;
  for (unsigned int p = 0; p < mesh->faces; p++) {
 	allFaces.append(&mesh->faceL[p]);
+ }
+ if (allFaces.count() == 0) {
+	boError() << k_funcinfo << "no faces" << endl;
+	return;
  }
 
  // now we need to connect them if possible.
@@ -327,3 +337,20 @@ BoNode* BoMesh::faces() const
  return d->mFaces;
 }
 
+void BoMesh::deleteFaces()
+{
+ if (d->mFaces) {
+	BoNode* first = d->mFaces;
+	while (first->previous()) {
+		// WARNING: we mustn't have any node appear two times in the
+		// list, otherwise we have an infinite loop here
+		first = first->previous();
+	}
+	BoNode* next = first;
+	do {
+		BoNode* current = next;
+		next = current->next();
+		delete current;
+	} while (next);
+ }
+}
