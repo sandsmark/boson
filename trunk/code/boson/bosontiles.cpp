@@ -115,10 +115,11 @@ int BosonTiles::big_y(int g)
  return ((g / big_w()) * BO_TILE_SIZE);
 }
 
-bool BosonTiles::loadTiles(const QString& dir)
+bool BosonTiles::loadTiles(const QString& dir, bool debug)
 {
  // dir is e.g. /opt/kde3/share/apps/boson/themes/grounds/earth/ -> "earth" is
  // the important part!
+ mDebug = debug;
  mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
 
  for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
@@ -177,7 +178,6 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 {
 // AB it seems that this copies the image p into the image (and if _debug is
 // true puts some extra information on it)
- bool _debug = false; //TODO
  int x = BosonTiles::big_x(z);
  int y = BosonTiles::big_y(z);
 
@@ -194,7 +194,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 	SETPIXEL2(2*(x), 2*(y)+1);	\
 	SETPIXEL2(2*(x)+1, 2*(y)+1)
  
- if (_debug) {
+ if (mDebug) {
 	int i;
 	for(i = 0; i < BO_TILE_SIZE; i++) {
 		SETPIXEL(0,i);
