@@ -4,7 +4,7 @@ TerrainType=0
 Name=Mineral Harvester
 Id=10003
 Health=100
-Prize=100
+MineralCost=100
 
 [Boson Mobile Unit]
 Speed=3

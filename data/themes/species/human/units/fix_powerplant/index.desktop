@@ -4,4 +4,4 @@ TerrainType=0
 Name=Power Plant
 Id=2
 Health=100
-Prize=100
+MineralCost=100

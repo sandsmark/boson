@@ -4,4 +4,4 @@ TerrainType=0
 Name=Comsat
 Id=0
 Health=100
-Prize=100
+MineralCost=100
