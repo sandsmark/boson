@@ -183,7 +183,7 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   mAge = (float)(cfg->readDoubleNumEntry("SystemLife", mAge));
   mAlign = cfg->readBoolEntry("Align", mAlign);
-  QString mTextureName = cfg->readEntry("Texture", mTextureName);
+  mTextureName = cfg->readEntry("Texture", mTextureName);
 }
 
 BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, float rotation) const
@@ -239,6 +239,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
   {
     particle->velo.scale(getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
+  //particle->velo += wind();
 }
 
 void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const
