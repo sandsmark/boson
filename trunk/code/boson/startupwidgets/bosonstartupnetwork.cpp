@@ -128,26 +128,31 @@ void BosonStartupNetwork::slotPlayerLeftGame(KPlayer* p)
  emit signalPlayerLeftGame(p);
 }
 
-bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor)
+bool BosonStartupNetwork::sendNewGame(BosonPlayField* field, bool editor, const QByteArray* newPlayField)
 {
  if (!mGame) {
 	BO_NULL_ERROR(mGame);
 	return false;
  }
- if (!field) {
+ if (!field && !newPlayField) {
 	BO_NULL_ERROR(field);
+	BO_NULL_ERROR(newPlayField);
 	return false;
  }
  if (!mGame->isAdmin()) {
 	boError() << k_funcinfo << "only ADMIN is allowed to send this message" << endl;
 	return false;
  }
- if (!field->isPreLoaded()) {
-	boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
-	return false;
- }
  QByteArray data;
- data = field->loadFromDiskToStream();
+ if (field) {
+	if (!field->isPreLoaded()) {
+		boError() << k_funcinfo << "playfield " << field->identifier() << " has not yet been preloaded" << endl;
+		return false;
+	}
+	data = field->loadFromDiskToStream();
+ } else {
+	data = *newPlayField;
+ }
  if (editor) {
 	mGame->sendMessage(data, BosonMessage::IdNewEditor);
  } else {
