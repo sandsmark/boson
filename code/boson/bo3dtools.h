@@ -56,6 +56,17 @@ class Bo3dTools
      * @author Rivo Laks <rivolaks@hot.ee>
      **/
     static void pointByRotation(float* x, float* y, const float angle, const float radius);
+
+    /**
+     * Convert @p deg, given in degree, into radians.
+     * @return @p deg as radians.
+     **/
+    static float deg2rad(float deg);
+    /**
+     * Convert @p rad, given in radians, into degree.
+     * @return @p rad as degree.
+     **/
+    static float rad2deg(float rad);
 };
 
 

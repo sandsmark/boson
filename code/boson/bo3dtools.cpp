@@ -133,6 +133,15 @@ void Bo3dTools::pointByRotation(float* x, float* y, const float angle, const flo
   }
 }
 
+float Bo3dTools::deg2rad(float deg)
+{
+  return deg * DEG2RAD;
+}
+
+float Bo3dTools::rad2deg(float rad)
+{
+  return rad * RAD2DEG;
+}
 
 /*****  BoVector*  *****/
 

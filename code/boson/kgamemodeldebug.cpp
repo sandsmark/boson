@@ -526,30 +526,25 @@ protected:
 		// now convert that matrix to euler angles.
 		// see also http://www.j3d.org/matrix_faq/matrfaq_latest.html
 
-		// AB: umm... the algorithms uses this, but never defines it
-		// anywhere. I think it is the RAD2DEG one, that we use in
-		// bo3dtools.cpp, as we want to convert to degrees.
-		// still needs to be verified!
-#define RADIANS (180.0 / M_PI)
 		float angle_x, angle_y, angle_z;
 		float D;
 		angle_y = D =  asin(mat[2]); // Calculate Y-axis angle
 		float C = cos(angle_y);
-		angle_y *= RADIANS;
+		angle_y = Bo3dTools::rad2deg(angle_y);
 
 		float tr_x, tr_y;
 		if (fabs(C) > 0.005) {
 			tr_x =  mat[10] / C; // get X-axis angle
 			tr_y = -mat[6]  / C;
-			angle_x = atan2(tr_y, tr_x) * RADIANS;
+			angle_x = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
 			tr_x =  mat[0] / C; // Get Z-axis angle
 			tr_y = -mat[1] / C;
-			angle_z  = atan2(tr_y, tr_x) * RADIANS;
+			angle_z  = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
 		} else { // gimball lock
 			angle_x = 0; // Set X-axis angle to zero
 			tr_x = mat[5]; // And calculate Z-axis angle
 			tr_y = mat[4];
-			angle_z = atan2(tr_y, tr_x) * RADIANS;
+			angle_z = Bo3dTools::rad2deg(atan2(tr_y, tr_x));
 		}
 
 		// return only positive angles in [0,360]
