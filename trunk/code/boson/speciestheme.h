@@ -246,6 +246,8 @@ public:
 
 	void upgradeResearched(unsigned long int unitType, UpgradeProperties* upgrade);
 
+	void loadUnitModel(const UnitProperties* prop);
+
 protected:
 	bool loadUnitGraphics(const UnitProperties* prop);
 
@@ -268,7 +270,6 @@ protected:
 	void readUnitConfigs();
 
 	void loadUnitTextures(unsigned long int type, QValueList<QImage> list);
-	void loadUnitModel(const UnitProperties* prop);
 	GLuint createDisplayList(unsigned long int typeId);
 
 private:

@@ -579,7 +579,7 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
 void SpeciesTheme::readUnitConfigs()
 {
  if (d->mUnitProperties.count() != 0) {
-	kdError() << "Cannot read unit configs again. Returning untouched..." 
+	kdError() << "Cannot read unit configs again. Returning untouched..."
 			<< endl;
 	return;
  }
@@ -592,13 +592,13 @@ void SpeciesTheme::readUnitConfigs()
 			dirList[i] == QString::fromLatin1(".")) {
 		continue;
 	}
-	QString file = dir.path() + QString::fromLatin1("/") + dirList[i] + 
+	QString file = dir.path() + QString::fromLatin1("/") + dirList[i] +
 			QString::fromLatin1("/index.desktop");
 	if (QFile::exists(file)) {
 		list.append(file);
 	}
  }
- 
+
  if (list.isEmpty()) {
 	kdError() << "No Units found in this theme" << endl;
 	return;
@@ -608,7 +608,7 @@ void SpeciesTheme::readUnitConfigs()
 	if (!d->mUnitProperties.find(prop->typeId())) {
 		d->mUnitProperties.insert(prop->typeId(), prop);
 	} else {
-		kdError() << "UnitType " << prop->typeId() << "already there!" 
+		kdError() << "UnitType " << prop->typeId() << "already there!"
 				<< endl;
 	}
  }
