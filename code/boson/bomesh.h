@@ -32,10 +32,7 @@ public:
 	void setPrevious(BoNode* previous);
 	void setNext(BoNode* next);
 
-	void setFace(Lib3dsFace* f)
-	{
-		mFace = f;
-	}
+	void setFace(Lib3dsFace* f);
 
 	Lib3dsFace* face() const
 	{
@@ -92,6 +89,8 @@ public:
 	 * should prefer @ref connectFaces usually.
 	 **/
 	void addFaces(Lib3dsMesh* mesh);
+
+	void deleteFaces();
 
 	int type() const;
 
