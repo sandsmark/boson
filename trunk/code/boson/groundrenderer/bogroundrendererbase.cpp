@@ -20,6 +20,7 @@
 #include "bogroundrendererbase.h"
 #include "bogroundrendererbase.moc"
 
+#include "boquadtreenode.h"
 #include "../bosonmap.h"
 #include "../bosonprofiling.h"
 #include "../defines.h"
@@ -40,115 +41,7 @@
 
 static int g_cellsVisibleCalls = 0;
 
-class CellTreeNode;
-static float distanceFromPlane(const float* plane, const BoVector3Float& pos);
-static float distanceFromPlane(const float* plane, const CellTreeNode* node, const BosonMap* map);
-
-
-// a quadtree of the cells on the map
-class CellTreeNode
-{
-public:
-	/**
-	 * @param l The left side of the rect (i.e. the x coordinate of the
-	 * most-left cell).
-	 * @param t The top side of the rect (i.e. the y coordinate of the
-	 * most-top cell).
-	 * @param r The right side of the rect (i.e. the x coordinate of the
-	 * most-right cell). This eqals @p l, if width of the rect is 1.
-	 * @param b The bottom side of the rect (i.e. the y coordinate of the
-	 * most-bottom cell). This equals @p t if the height of the rect is 1.
-	 **/
-	CellTreeNode(int l, int t, int r, int b)
-	{
-		mTopLeft = 0;
-		mTopRight = 0;
-		mBottomLeft = 0;
-		mBottomRight = 0;
-		mLeft = l;
-		mTop = t;
-		mRight = r;
-		mBottom = b;
-		mCellsCount = (r - l + 1) * (b - t + 1);
-		if (mRight < mLeft || mBottom < mTop) {
-			boError() << k_funcinfo << "invalid coordinates" << endl;
-			mCellsCount = 1;
-		}
-	}
-	~CellTreeNode()
-	{
-		delete mTopLeft;
-		delete mTopRight;
-		delete mBottomLeft;
-		delete mBottomRight;
-	}
-	void createChilds(const BosonMap* map);
-
-
-	// AB: note that we cannot easily save additional information such as
-	// maxheight or texmap information here, because we use the tree in
-	// editor mode as well, and there these information may change at any
-	// time without letting the tree know.
-//	bool mIsLeaf;
-	int mLeft;
-	int mTop;
-	int mRight;
-	int mBottom;
-	int mCellsCount;
-	CellTreeNode* mTopLeft;
-	CellTreeNode* mTopRight;
-	CellTreeNode* mBottomLeft;
-	CellTreeNode* mBottomRight;
-};
-
-void CellTreeNode::createChilds(const BosonMap* map)
-{
- const int l = mLeft;
- const int t = mTop;
- const int r = mRight;
- const int b = mBottom;
-
- if (l == r && b == t) {
-	// we are a leaf
-	return;
- }
- if (l > r || t > b || l < 0 || t < 0) {
-	boError() << k_funcinfo << "invalid values: left="
-			<< l << ", top=" << t
-			<< ", right=" << r
-			<< ", bottom=" << b << endl;
-	return;
- }
- if (r >= (int)map->width()) {
-	boError() << k_funcinfo << "right side is too high: " << r << ", map width: " << map->width() << endl;
-	return;
- }
- if (b >= (int)map->height()) {
-	boError() << k_funcinfo << "bottom side is too high: " << b << ", map height: " << map->height() << endl;
-	return;
- }
- int hmid = l + (r - l) / 2;
- int vmid = t + (b - t) / 2;
-
- mTopLeft = new CellTreeNode(l, t, hmid, vmid);
- mTopLeft->createChilds(map);
-
- if (vmid + 1 <= b) {
-	// (t != b) => we have a bottom rect.
-	mBottomLeft = new CellTreeNode(l, vmid + 1, hmid, b);
-	mBottomLeft->createChilds(map);
- }
- if (hmid + 1 <= r) {
-	// (l != r) => we have a right rect
-	mTopRight = new CellTreeNode(hmid + 1, t, r, vmid);
-	mTopRight->createChilds(map);
- }
- if (vmid + 1 <= b && hmid + 1 <= r) {
-	// ((l != r) && (t != b)) => we have a bottom-right rect
-	mBottomRight = new CellTreeNode(hmid + 1, vmid + 1, r, b);
-	mBottomRight->createChilds(map);
- }
-}
+static float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map);
 
 
 
@@ -192,11 +85,7 @@ public:
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount) = 0;
 
 protected:
-	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map)
-	{
-		Q_UNUSED(heightMap);
-		Q_UNUSED(map);
-	}
+	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map) = 0;
 
 protected:
 	int mMinX;
@@ -233,7 +122,7 @@ public:
 	virtual int* generateCellList(const BosonMap* map, int* renderCells, int* renderCellsSize, unsigned int* renderCellsCount);
 
 
-	QMemArray< QPtrList<const CellTreeNode>* > mLeafs;
+	QMemArray< QPtrList<const BoQuadTreeNode>* > mLeafs;
 
 protected:
 	/**
@@ -241,7 +130,7 @@ protected:
 	 * whether the cells in ((x,y),(x2,y2)) are visible and adds all visible
 	 * cells to @p cells.
 	 **/
-	void addVisibleCells(int* cells, const CellTreeNode* node, int depth = 0);
+	void addVisibleCells(int* cells, const BoQuadTreeNode* node, int depth = 0);
 
 	/**
 	 * @return Whether the cells in the rect of the node are visible.
@@ -250,12 +139,12 @@ protected:
 	 * cell is visible (i.e. this returns FALSE) @p partially is set to
 	 * FALSE.
 	 **/
-	bool cellsVisible(const CellTreeNode* node, bool* partially) const;
+	bool cellsVisible(const BoQuadTreeNode* node, bool* partially) const;
 
 	/**
 	 * Add all cells in the rect of the node to @p cells
 	 **/
-	void addCells(int* cells, const CellTreeNode* node, int depth);
+	void addCells(int* cells, const BoQuadTreeNode* node, int depth);
 
 	void recreateTree(const BosonMap* map);
 
@@ -265,7 +154,7 @@ protected:
 	 * only, or if the distance from the player is high enough for this
 	 * level of detail.
 	 **/
-	bool doLOD(const CellTreeNode* node) const;
+	bool doLOD(const BoQuadTreeNode* node) const;
 
 	virtual void copyCustomHeightMap(float* heightMap, const BosonMap* map);
 
@@ -274,66 +163,8 @@ private:
 	const BosonMap* mMap;
 	unsigned int mCount;
 
-	CellTreeNode* mRoot;
+	BoQuadTreeNode* mRoot;
 };
-
-BoGroundRendererBase::BoGroundRendererBase()
-{
- mCellListBuilder = 0;
- mMap = 0;
- mHeightMap2 = 0;
- mCellListBuilder = new CellListBuilderTree();
-}
-
-BoGroundRendererBase::~BoGroundRendererBase()
-{
- boDebug() << k_funcinfo << endl;
- delete mCellListBuilder;
-#if FIX_EDGES
- delete[] mHeightMap2;
-#endif
-}
-
-void BoGroundRendererBase::generateCellList(const BosonMap* map)
-{
- // we need to regenerate the cell list whenever the modelview or the projection
- // matrix changes. then the displayed cells have most probably changed.
-
- if (!map) {
-	setRenderCells(0, 0);
-	setRenderCellsCount(0);
-	return;
- }
-
- if (boGame->gameStatus() == KGame::Init) {
-	// we construct the display before the map is received
-	return;
- }
- if (mMap != map) {
-#if FIX_EDGES
-	delete[] mHeightMap2;
-	mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
-#else
-	mHeightMap2 = (float*)map->heightMap();
-#endif
- }
- mMap = map;
- int renderCellsSize = 0;
- unsigned int renderCellsCount = 0;
- int* originalList = renderCells();
- mCellListBuilder->setViewFrustum(viewFrustum());
- mCellListBuilder->setViewport(viewport());
- int* renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
- if (renderCells != originalList) {
-	setRenderCells(renderCells, renderCellsSize);
- }
- setRenderCellsCount(renderCellsCount);
-#if FIX_EDGES
- if (renderCellsCount > 0) {
-	mCellListBuilder->copyHeightMap(mHeightMap2, map);
- }
-#endif
-}
 
 void CellListBuilder::copyHeightMap(float* heightMap, const BosonMap* map)
 {
@@ -372,23 +203,23 @@ void CellListBuilderTree::copyCustomHeightMap(float* heightMap, const BosonMap* 
 	return;
  }
  for (int i = (int)mLeafs.size() - 1; i >= 0; i--) {
-	QPtrList<const CellTreeNode>* list = mLeafs[i];
+	QPtrList<const BoQuadTreeNode>* list = mLeafs[i];
 	if (!list || list->isEmpty()) {
 		continue;
 	}
-	QPtrListIterator<const CellTreeNode> it(*list);
+	QPtrListIterator<const BoQuadTreeNode> it(*list);
 	while (it.current()) {
-		const CellTreeNode* node = it.current();
+		const BoQuadTreeNode* node = it.current();
 		++it;
 #if FIX_EDGES_1
-		if (node->mCellsCount == 1) {
+		if (node->mNodeSize == 1) {
 			continue;
 		}
 #endif
-		const int l = node->mLeft;
-		const int r = node->mRight;
-		const int t = node->mTop;
-		const int b = node->mBottom;
+		const int l = node->left();
+		const int r = node->right();
+		const int t = node->top();
+		const int b = node->bottom();
 		const float tl = map->heightAtCorner(l, t);
 		const float bl = map->heightAtCorner(l, b + 1);
 		const float tr = map->heightAtCorner(r + 1, t);
@@ -450,7 +281,7 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  mCount = 0;
 
  for (int i = 0; i < (int)mLeafs.size(); i++) {
-	QPtrList<const CellTreeNode>* list = mLeafs[i];
+	QPtrList<const BoQuadTreeNode>* list = mLeafs[i];
 	if (list) {
 		list->clear();
 	}
@@ -466,12 +297,12 @@ int* CellListBuilderTree::generateCellList(const BosonMap* map, int* origRenderC
  return renderCells;
 }
 
-bool CellListBuilderTree::doLOD(const CellTreeNode* node) const
+bool CellListBuilderTree::doLOD(const BoQuadTreeNode* node) const
 {
  if (!node) {
 	return false;
  }
- const int count = node->mCellsCount;
+ const int count = node->nodeSize();
  if (count == 1) {
 	return true;
  }
@@ -491,15 +322,15 @@ bool CellListBuilderTree::doLOD(const CellTreeNode* node) const
  return false;
 }
 
-void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node, int depth)
+void CellListBuilderTree::addCells(int* cells, const BoQuadTreeNode* node, int depth)
 {
  if (!node) {
 	return;
  }
- const int l = node->mLeft;
- const int t = node->mTop;
- const int r = node->mRight;
- const int b = node->mBottom;
+ const int l = node->left();
+ const int t = node->top();
+ const int r = node->right();
+ const int b = node->bottom();
  if (doLOD(node)) {
 	BoGroundRenderer::setCell(cells, mCount, l, t, r - l + 1, b - t + 1);
 	mCount++;
@@ -507,7 +338,7 @@ void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node, int dep
 		int s = mLeafs.size();
 		mLeafs.resize(depth + 1);
 		for (int i = s; i < (int)mLeafs.size(); i++) {
-			mLeafs[i] = new QPtrList<const CellTreeNode>();
+			mLeafs[i] = new QPtrList<const BoQuadTreeNode>();
 		}
 	}
 	mLeafs[depth]->append(node);
@@ -524,24 +355,24 @@ void CellListBuilderTree::addCells(int* cells, const CellTreeNode* node, int dep
 		mMaxY = b;
 	}
  } else {
-	addCells(cells, node->mTopLeft, depth + 1);
-	addCells(cells, node->mTopRight, depth + 1);
-	addCells(cells, node->mBottomLeft, depth + 1);
-	addCells(cells, node->mBottomRight, depth + 1);
+	addCells(cells, node->topLeftNode(), depth + 1);
+	addCells(cells, node->topRightNode(), depth + 1);
+	addCells(cells, node->bottomLeftNode(), depth + 1);
+	addCells(cells, node->bottomRightNode(), depth + 1);
  }
 }
 
-bool CellListBuilderTree::cellsVisible(const CellTreeNode* node, bool* partially) const
+bool CellListBuilderTree::cellsVisible(const BoQuadTreeNode* node, bool* partially) const
 {
  g_cellsVisibleCalls++;
  if (!node) {
 	*partially = false;
 	return false;
  }
- const int x = node->mLeft;
- const int x2 = node->mRight;
- const int y = node->mTop;
- const int y2 = node->mBottom;
+ const int x = node->left();
+ const int x2 = node->right();
+ const int y = node->top();
+ const int y2 = node->bottom();
 
  int w = (x2 + 1) - x; // + 1 because we need the right border of the cell!
  int h = (y2 + 1) - y;
@@ -589,7 +420,7 @@ bool CellListBuilderTree::cellsVisible(const CellTreeNode* node, bool* partially
  return true;
 }
 
-void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node, int depth)
+void CellListBuilderTree::addVisibleCells(int* cells, const BoQuadTreeNode* node, int depth)
 {
  if (!node) {
 	return;
@@ -600,10 +431,10 @@ void CellListBuilderTree::addVisibleCells(int* cells, const CellTreeNode* node, 
 		// all cells visible
 		addCells(cells, node, depth);
 	} else {
-		addVisibleCells(cells, node->mTopLeft, depth + 1);
-		addVisibleCells(cells, node->mTopRight, depth + 1);
-		addVisibleCells(cells, node->mBottomLeft, depth + 1);
-		addVisibleCells(cells, node->mBottomRight, depth + 1);
+		addVisibleCells(cells, node->topLeftNode(), depth + 1);
+		addVisibleCells(cells, node->topRightNode(), depth + 1);
+		addVisibleCells(cells, node->bottomLeftNode(), depth + 1);
+		addVisibleCells(cells, node->bottomRightNode(), depth + 1);
 	}
  }
 }
@@ -613,36 +444,91 @@ void CellListBuilderTree::recreateTree(const BosonMap* map)
  BO_CHECK_NULL_RET(map);
 
  delete mRoot;
- mRoot = new CellTreeNode(0, 0, map->width() - 1, map->height() - 1);
- mRoot->createChilds(map);
+ mRoot = BoQuadTreeNode::createTree(map->width(), map->height());
 }
 
-static float distanceFromPlane(const float* plane, const BoVector3Float& pos)
+static float distanceFromPlane(const float* plane, const BoQuadTreeNode* node, const BosonMap* map)
 {
- return pos.x() * plane[0] + pos.y() * plane[1] + pos.z() * plane[2] + plane[3];
-}
-static float distanceFromPlane(const float* plane, const CellTreeNode* node, const BosonMap* map)
-{
- const int l = node->mLeft;
- const int t = node->mTop;
- const int r = node->mRight;
- const int b = node->mBottom;
- const float x = (float)node->mLeft;
- const float y = (float)-node->mTop;
- const float x2 = ((float)node->mRight) + 1.0f;
- const float y2 = ((float)-node->mBottom) - 1.0f;
+ const int l = node->left();
+ const int t = node->top();
+ const int r = node->right();
+ const int b = node->bottom();
+ const float x = (float)l;
+ const float y = (float)-t;
+ const float x2 = ((float)r) + 1.0f;
+ const float y2 = ((float)-b) - 1.0f;
  const float zTopLeft = map->heightAtCorner(l, t);
  const float zTopRight = map->heightAtCorner(r + 1, t);
  const float zBottomLeft = map->heightAtCorner(l, b + 1);
  const float zBottomRight = map->heightAtCorner(r + 1, b + 1);
- const float d1 = distanceFromPlane(plane, BoVector3Float(x, y, zTopLeft));
- const float d2 = distanceFromPlane(plane, BoVector3Float(x2, y, zTopRight));
- const float d3 = distanceFromPlane(plane, BoVector3Float(x, y2, zBottomLeft));
- const float d4 = distanceFromPlane(plane, BoVector3Float(x2, y2, zBottomRight));
+ const float d1 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x, y, zTopLeft));
+ const float d2 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x2, y, zTopRight));
+ const float d3 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x, y2, zBottomLeft));
+ const float d4 = Bo3dTools::distanceFromPlane(plane, BoVector3Float(x2, y2, zBottomRight));
  float d = QMAX(d1, d2);
  d = QMAX(d, d3);
  d = QMAX(d, d4);
  return d;
+}
+
+
+
+BoGroundRendererBase::BoGroundRendererBase()
+{
+ mCellListBuilder = 0;
+ mMap = 0;
+ mHeightMap2 = 0;
+ mCellListBuilder = new CellListBuilderTree();
+}
+
+BoGroundRendererBase::~BoGroundRendererBase()
+{
+ boDebug() << k_funcinfo << endl;
+ delete mCellListBuilder;
+#if FIX_EDGES
+ delete[] mHeightMap2;
+#endif
+}
+
+void BoGroundRendererBase::generateCellList(const BosonMap* map)
+{
+ // we need to regenerate the cell list whenever the modelview or the projection
+ // matrix changes. then the displayed cells have most probably changed.
+
+ if (!map) {
+	setRenderCells(0, 0);
+	setRenderCellsCount(0);
+	return;
+ }
+
+ if (boGame->gameStatus() == KGame::Init) {
+	// we construct the display before the map is received
+	return;
+ }
+ if (mMap != map) {
+#if FIX_EDGES
+	delete[] mHeightMap2;
+	mHeightMap2 = new float[map->cornerArrayPos(map->width(), map->height()) + 1];
+#else
+	mHeightMap2 = (float*)map->heightMap();
+#endif
+ }
+ mMap = map;
+ int renderCellsSize = 0;
+ unsigned int renderCellsCount = 0;
+ int* originalList = renderCells();
+ mCellListBuilder->setViewFrustum(viewFrustum());
+ mCellListBuilder->setViewport(viewport());
+ int* renderCells = mCellListBuilder->generateCellList(map, originalList, &renderCellsSize, &renderCellsCount);
+ if (renderCells != originalList) {
+	setRenderCells(renderCells, renderCellsSize);
+ }
+ setRenderCellsCount(renderCellsCount);
+#if FIX_EDGES
+ if (renderCellsCount > 0) {
+	mCellListBuilder->copyHeightMap(mHeightMap2, map);
+ }
+#endif
 }
 
 QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) const
@@ -675,9 +561,9 @@ QString BoGroundRendererBase::debugStringForPoint(const BoVector3Fixed& pos) con
 
  s += QString("\n");
 
-// s += QString("distance from BOTTOM plane: %1\n").arg(distanceFromPlane(bottomPlane, pos), 6, 'f', 3);
- s += QString("distance from NEAR plane: %1\n").arg(distanceFromPlane(nearPlane, pos.toFloat()), 6, 'f', 3);
-// s += QString("distance from FAR plane: %1\n").arg(distanceFromPlane(farPlane, pos), 6, 'f', 3);
+// s += QString("distance from BOTTOM plane: %1\n").arg(Bo3dTools::distanceFromPlane(bottomPlane, pos), 6, 'f', 3);
+ s += QString("distance from NEAR plane: %1\n").arg(Bo3dTools::distanceFromPlane(nearPlane, pos.toFloat()), 6, 'f', 3);
+// s += QString("distance from FAR plane: %1\n").arg(Bo3dTools::distanceFromPlane(farPlane, pos), 6, 'f', 3);
 
  return s;
 }
