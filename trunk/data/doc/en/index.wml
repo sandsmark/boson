@@ -40,9 +40,10 @@
               <dt>2.4 <a href="game/buildfac.html">Building facilities</a></dt>
               <dt>2.5 <a href="game/buildunit.html">Building units</a></dt>
               <dt>2.6 <a href="game/moving.html">Selecting and moving Units</a></dt>
-              <dt>2.7 <a href="game/attacking.html">Attacking</a></dt>
-              <dt>2.8 <a href="game/repairing.html">Repairing</a></dt>
-	      <dt>2.9 <a href="game/technologies.html">Technologies</a></dt>
+              <dt>2.7 <a href="game/equipment.html">Unit equipment</a></dt>
+              <dt>2.8 <a href="game/attacking.html">Attacking</a></dt>
+              <dt>2.9 <a href="game/repairing.html">Repairing</a></dt>
+	      <dt>2.10 <a href="game/technologies.html">Technologies</a></dt>
             </dl>
           </dd>
           
@@ -51,16 +52,16 @@
           <dd>
             <dl>
 	      <dt>3.1 <a href="facilities/map.html">Facilities dependency tree</a></dt>
-              <dt>3.2 <a href="facilities/bunker.html">Command bunker</a></dt>
-	      <dt>3.3 <a href="facilities/mineralrefinery.html">Mineral refinery</a></dt>
-	      <dt>3.4 <a href="facilities/refinery.html">Oil refinery</a></dt>
-              <dt>3.5 <a href="facilities/oiltower.html">Oil tower</a></dt>
-              <dt>3.6 <a href="facilities/powerplant.html">Powerplant</a></dt>
+              <dt>3.2 <a href="facilities/bunker.html">Command Bunker</a></dt>
+	      <dt>3.3 <a href="facilities/mineralrefinery.html">Mineral Refinery</a></dt>
+	      <dt>3.4 <a href="facilities/refinery.html">Oil Refinery</a></dt>
+              <dt>3.5 <a href="facilities/oiltower.html">Oil Tower</a></dt>
+              <dt>3.6 <a href="facilities/powerplant.html">Power Plant</a></dt>
               <dt>3.7 <a href="facilities/barracks.html">Barracks</a></dt>
-              <dt>3.8 <a href="facilities/warfactory.html">War factory</a></dt>
+              <dt>3.8 <a href="facilities/warfactory.html">War Factory</a></dt>
               <dt>3.9 <a href="facilities/comsat.html">Comsat</a></dt>
-              <dt>3.10 <a href="facilities/techcenter.html">Tech Center</a></dt>
-              <dt>3.11 <a href="facilities/repairpad.html">Repair pad</a></dt>
+              <dt>3.10 <a href="facilities/techcenter.html">Techcenter</a></dt>
+              <dt>3.11 <a href="facilities/repairpad.html">Repair Pad</a></dt>
               <dt>3.12 <a href="facilities/prison.html">Prison</a></dt>
               <dt>3.13 <a href="facilities/helipad.html">Helipad</a></dt>
               <dt>3.14 <a href="facilities/turret.html">Turret</a></dt>
@@ -72,8 +73,8 @@
           <dt>4 <a href="units/index.html">Units</a></dt>
           <dd>
             <dl>
-              <dt>4.1 <a href="units/mineral_harvester.html">Mineral harvester</a></dt>
-              <dt>4.2 <a href="units/oil_harvester.html">Oil harvester</a></dt>
+              <dt>4.1 <a href="units/mineral_harvester.html">Mineral Harvester</a></dt>
+              <dt>4.2 <a href="units/oil_harvester.html">Oil Harvester</a></dt>
               <dt>4.3 <a href="units/grizzly.html">Grizzly</a></dt>
               <dt>4.4 <a href="units/leopard.html">Leopard</a></dt>
               <dt>4.5 <a href="units/panther.html">Panther</a></dt>

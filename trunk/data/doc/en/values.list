@@ -1,8 +1,11 @@
 Name
-Health
 MineralCost
 OilCost
+Health
+Armor
+Shield
 Speed
+SightRange
 Weapon
 Range
 Reload

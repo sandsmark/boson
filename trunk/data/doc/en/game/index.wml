@@ -15,9 +15,10 @@
 		<dt>2.4 <a href="buildfac.html">Building facilities</a></dt>
 		<dt>2.5 <a href="buildunit.html">Building units</a></dt>
 		<dt>2.6 <a href="moving.html">Selecting and moving Units</a></dt>
-		<dt>2.7 <a href="game/attacking.html">Attacking</a></dt>
-		<dt>2.8 <a href="game/repairing.html">Repairing</a></dt>
-		<dt>2.9 <a href="technologies.html">Technologies</a></dt>
+                <dt>2.7 <a href="equipment.html">Unit equipment</a></dt>
+                <dt>2.8 <a href="attacking.html">Attacking</a></dt>
+		<dt>2.9 <a href="repairing.html">Repairing</a></dt>
+		<dt>2.10 <a href="technologies.html">Technologies</a></dt>
 
         </dl>
       </dd>

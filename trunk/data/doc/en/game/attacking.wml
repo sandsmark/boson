@@ -12,5 +12,5 @@
     Attacking an <a href="../units/aircraft.html">aircraft</a> with a <a href="../units/quad.html">Quad</a> doesn't help.
     </p>
     
-#include "nav.wml" before_url="moving.html" before_text="Selecting and moving units" after_url="repairing.html" after_text="Repairing" up_url="index.html"
+#include "nav.wml" before_url="equipment.html" before_text="Unit equipment" after_url="repairing.html" after_text="Repairing" up_url="index.html"
 #include "footer.wml"
