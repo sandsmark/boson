@@ -244,6 +244,9 @@ void UBoBoxLayout::layoutContainer(const UWidget* parent)
 			continue;
 		}
 		int h = widget->getHeightForWidth(minW);
+		if (h <= 0) {
+			h = widget->getMinimumSize().h;
+		}
 #if DO_DEBUG
 		printf("height for width %d of widget %d: %d\n", minW, i, h);
 #endif
@@ -329,7 +332,7 @@ int UBoBoxLayout::getLayoutHeightForWidth(const UWidget* parent, int width) cons
 	int h = w->getHeightForWidth(width);
 	if (h <= 0) {
 		// AB: preferred size? minimum size? something else?
-		const UDimension& s = w->getMinimumSize();
+		const UDimension& s = w->getPreferredSize();
 		h = s.h;
 	} else {
 		used = true;
