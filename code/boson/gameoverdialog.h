@@ -24,6 +24,10 @@
 class Player;
 class Boson;
 
+/**
+ * @short Dialog that displays who won/lost and statistics about the players
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class GameOverDialog : public KDialogBase
 {
 	Q_OBJECT
@@ -42,6 +46,10 @@ private:
 	GameOverDialogPrivate* d;
 };
 
+/**
+ * @short A PlayerBox represents a player in the @ref GameOverDialog
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class GameOverDialog::PlayerBox : public QFrame
 {
 	Q_OBJECT

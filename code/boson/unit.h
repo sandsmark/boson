@@ -260,6 +260,9 @@ private:
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
 // Player::save() won't work correctly! - if you add non KGameProperties adjust
 // UnitBase::save() and unit::load()
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class MobileUnit : public Unit
 {
 public:
@@ -311,6 +314,9 @@ private:
 
 // if you add class members - ONLY KGameProperties!! otherwise Player::load and
 // Player::save() won't work correctly!
+/**
+ * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
+ **/
 class Facility : public Unit
 {
 public:
