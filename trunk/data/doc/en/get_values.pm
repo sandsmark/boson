@@ -101,7 +101,11 @@ sub getval() {
         #print @weapon3;
 
 
-
+        my %boson_unit_hash;
+        my %weapon1_hash;
+        my %weapon2_hash;
+        my %weapon3_hash;
+        
         if (@boson_unit >= 1) {
             print "<tr><td colspan=\"2\"><b>Unit Properties</b></td></tr>\n";
             foreach $line (@boson_unit) {
@@ -110,13 +114,21 @@ sub getval() {
                     $line2 =~ tr/\n//d;
                     if ($line =~ /^$line2=\s*(.*)/ ) {
                         $value = $1;
-                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                        if ($value ne "") {
+                            %boson_unit_hash = (%boson_unit_hash, $line2, $value);
+                        }
                     }
                 }
             }
+            foreach $line2 (@CONTENT2) {
+                if ($boson_unit_hash{$line2} ne "") {
+                    print "<tr><td width=\"110\">$line2</td><td>$boson_unit_hash{$line2}</td></tr>\n";
+                }
+            }
         }
+
         if (@weapon1 >= 1) {
-            print "</table></td><td><table>";
+            print "</table><td><table>";
             print "<tr><td colspan=\"2\"><b>Weapon 1</b></td></tr>\n";
             foreach $line (@weapon1) {
                 foreach $line2 (@CONTENT2) {
@@ -124,13 +136,21 @@ sub getval() {
                     $line2 =~ tr/\n//d;
                     if ($line =~ /^$line2=\s*(.*)/ ) {
                         $value = $1;
-                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                        if ($value ne "") {
+                            %weapon1_hash = (%weapon1_hash, $line2, $value);
+                        }
                     }
                 }
             }
+            foreach $line2 (@CONTENT2) {
+                if ($weapon1_hash{$line2} ne "") {
+                    print "<tr><td width=\"110\">$line2</td><td>$weapon1_hash{$line2}</td></tr>\n";
+                }
+            }
         }
-        if (@weapon2 >= 1) {
-            print "</table></td><td><table>";
+
+        if (@weapon1 >= 1) {
+            print "</table><td><table>";
             print "<tr><td colspan=\"2\"><b>Weapon 2</b></td></tr>\n";
             foreach $line (@weapon2) {
                 foreach $line2 (@CONTENT2) {
@@ -138,13 +158,21 @@ sub getval() {
                     $line2 =~ tr/\n//d;
                     if ($line =~ /^$line2=\s*(.*)/ ) {
                         $value = $1;
-                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                        if ($value ne "") {
+                            %weapon2_hash = (%weapon2_hash, $line2, $value);
+                        }
                     }
                 }
             }
+            foreach $line2 (@CONTENT2) {
+                if ($weapon2_hash{$line2} ne "") {
+                    print "<tr><td width=\"110\">$line2</td><td>$weapon2_hash{$line2}</td></tr>\n";
+                }
+            }
         }
+
         if (@weapon3 >= 1) {
-            print "</table></td><td><table>";
+            print "</table><td><table>";
             print "<tr><td colspan=\"2\"><b>Weapon 3</b></td></tr>\n";
             foreach $line (@weapon3) {
                 foreach $line2 (@CONTENT2) {
@@ -152,8 +180,15 @@ sub getval() {
                     $line2 =~ tr/\n//d;
                     if ($line =~ /^$line2=\s*(.*)/ ) {
                         $value = $1;
-                        print "<tr><td width=\"110\">$line2</td><td>$value</td></tr>\n";
+                        if ($value ne "") {
+                            %weapon3_hash = (%weapon3_hash, $line2, $value);
+                        }
                     }
+                }
+            }
+            foreach $line2 (@CONTENT2) {
+                if ($weapon3_hash{$line2} ne "") {
+                    print "<tr><td width=\"110\">$line2</td><td>$weapon3_hash{$line2}</td></tr>\n";
                 }
             }
         }
@@ -218,9 +253,6 @@ __END__
 
 # TODO
 
-- The current parser is not good, it looks in every line and if it finds a new group a new <table> is created.
-  It should be group based: foreach line in each group parse line
-- The values.list file needs groups, so we can say don't give me the name for the unit, but the name for the weapons
 - Allow translations in the values.list, we than don't read a value from a line, we read a value (which will be searched in the config file) and a translation
   Also the hard coded headers for the tables should go to values.list file
 
