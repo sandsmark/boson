@@ -799,11 +799,19 @@ void BosonBigDisplay::addChatMessage(const QString& message)
 
 void BosonBigDisplay::enterEvent(QEvent*)
 {
+ if (!d->mCursor) {
+	kdError() << k_funcinfo << "NULL cursor!!" << endl;
+	return;
+ }
  d->mCursor->showCursor();
 }
 
 void BosonBigDisplay::leaveEvent(QEvent*)
 {
+ if (!d->mCursor) {
+	kdError() << k_funcinfo << "NULL cursor!!" << endl;
+	return;
+ }
  d->mCursor->hideCursor();
 }
 
@@ -921,6 +929,10 @@ BoSelection* BosonBigDisplay::selection() const
 
 void BosonBigDisplay::updateCursor()
 {
+ if (!d->mCursor) {
+	kdError() << k_funcinfo << "NULL cursor!!" << endl;
+	return;
+ }
  QPoint pos = viewportToContents(mapFromGlobal(QCursor::pos()));
 
  if (!d->mSelection->isEmpty()) {

@@ -513,7 +513,7 @@ void BosonExperimentalCursor::setCursor(int mode)
 		if (a->count() > 1) {
 			d->mAnimateTimer.start(100);
 //			d->mAnimateTimer.start(1000);
-			}
+		}
 		slotAdvance();
 		d->mCursor->show();
 	} else {
