@@ -20,7 +20,7 @@
 #ifndef BOSONGLFONTCHOOSER_H
 #define BOSONGLFONTCHOOSER_H
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qdialog.h> // for checing for QDialog::Accepted in getFont()
 

@@ -17,7 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "bogl.h"
+#include <bogl.h>
 
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplaybase.moc"
@@ -107,9 +107,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-
-#include <GL/glu.h>
 
 
 /**

@@ -19,6 +19,7 @@
 
 #include "boglquerystates.h"
 
+#include <bogl.h>
 #include <bodebug.h>
 
 #include <klocale.h>
@@ -27,7 +28,6 @@
 #include <qmap.h>
 #include <qlistview.h>
 
-#include <GL/gl.h>
 #include <stdlib.h>
 
 /**

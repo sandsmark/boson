@@ -20,6 +20,12 @@
 #ifndef BOGL_H
 #define BOGL_H
 
+class QString;
+class QStringList;
+
+// macro that is used for versions returned by bogl (such as OpenGL version)
+#define MAKE_VERSION_BOGL(a,b,c) ( ((a) << 16) | ((b) << 8) | (c) )
+
 // Defines
 #define GL_GLEXT_LEGACY
 
@@ -37,9 +43,9 @@
 // Include OpenGL headers
 #include <GL/gl.h>
 #include <GL/glu.h>
+// TODO: glx
 
 #undef GLsizeiptrARB
-
 
 
 // bogl variables
@@ -47,6 +53,14 @@ extern bool bogl_inited;
 
 // bogl functions
 void boglInit();
+unsigned int boglGetOpenGLVersion();
+QString boglGetOpenGLVersionString();
+QString boglGetOpenGLVendorString();
+QString boglGetOpenGLRendererString();
+QStringList boglGetOpenGLExtensions();
+QString boglGetGLUVersionString();
+QStringList boglGetGLUExtensions();
+
 
 
 // Typedefs

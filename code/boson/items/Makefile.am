@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes)
 
 noinst_LTLIBRARIES = libbosonitems.la
 

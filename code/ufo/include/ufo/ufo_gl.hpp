@@ -37,10 +37,5 @@
 #include <windows.h>
 #endif // WIN32
 
-#if defined(__APPLE__) && defined(__MACH__) 
-#include <OpenGL/gl.h> 
-#include <OpenGL/glu.h>
-#else 
-#include <GL/gl.h> 
-#include <GL/glu.h>
-#endif
+// AB: ufo code replaced by our own
+#include <bogl.h>

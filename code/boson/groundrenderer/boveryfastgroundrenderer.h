@@ -20,8 +20,7 @@
 #define BOVERYFASTGROUNDRENDERER_H
 
 #include "bogroundrendererbase.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 class BosonMap;
 class BosonGroundTheme;

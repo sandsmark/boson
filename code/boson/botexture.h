@@ -20,7 +20,7 @@
 #ifndef BOTEXTURE_H
 #define BOTEXTURE_H
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qptrlist.h>
 #include <qvaluevector.h>

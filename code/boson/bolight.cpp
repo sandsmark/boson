@@ -20,8 +20,7 @@
 #include "bolight.h"
 
 #include "bodebug.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qvaluevector.h>
 

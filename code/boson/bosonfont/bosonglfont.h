@@ -20,7 +20,7 @@
 #ifndef BOSONGLFONT_H
 #define BOSONGLFONT_H
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qfontmetrics.h>
 

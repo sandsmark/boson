@@ -19,6 +19,7 @@
 
 #include "bo3dtools.h"
 #include "bodebug.h"
+#include <bogl.h>
 
 #include <qstring.h>
 #include <qptrlist.h>
@@ -26,7 +27,6 @@
 #include <qdom.h>
 
 #include <math.h>
-#include <GL/glu.h>
 
 // Degrees to radians conversion (AB: from mesa/src/macros.h)
 #define DEG2RAD (M_PI/180.0)

@@ -30,7 +30,7 @@
 
 #include "fakedsg.h"
 
-#include <GL/gl.h>
+#include <bogl.h>
 
 
 #define FNTMAX_CHAR  256

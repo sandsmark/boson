@@ -4,6 +4,9 @@ Patches applied currently (this list may not be complete):
 - Patch to uboboxlayout.cpp to make multiline labels work
 - Patch to utexturefont.cpp to return the correct face in listFonts()
 - Patch to uwidget.cpp: call invalidate() in setFont()
+- Patch to include/ufo/ufo_gl.hpp and usysteminfo.hpp to include bogl.h instead
+  of gl.h and glu.h
+- Patch to uthemelookandfeel.cpp to include bogl.h before glx.h
 
 Use
  make_ufo_dir.sh ufo_dir code/ufo

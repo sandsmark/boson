@@ -52,6 +52,7 @@
 #include "bosonfont/bosonglfont.h"
 #include "bosonfont/bosonglfontchooser.h"
 #endif
+#include <bogl.h>
 
 #include <kcmdlineargs.h>
 #include <kaboutdata.h>
@@ -67,7 +68,6 @@
 #include <qlayout.h>
 #include <qinputdialog.h>
 
-#include <GL/glu.h>
 #include <math.h>
 #include <stdlib.h>
 

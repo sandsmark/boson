@@ -29,6 +29,7 @@
 #include "../bosonconfig.h" // WARNING: groundrenderer needs to be re-installed if bosonconfig.h changes!
 #include "../botexture.h"
 #include "../playerio.h"
+#include <bogl.h>
 #include <bodebug.h>
 
 // not nice in this file. we need it for boGame->status() == KGame::Init
@@ -36,7 +37,6 @@
 // class
 #include "../boson.h"
 
-#include <GL/gl.h>
 #include <math.h>
 
 #define FIX_EDGES 1

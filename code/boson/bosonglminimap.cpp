@@ -35,6 +35,7 @@
 #include "botexture.h"
 #include "bosonglwidget.h"
 #include "bowater.h"
+#include <bogl.h>
 
 #include <klocale.h>
 #include <kstandarddirs.h>
@@ -46,9 +47,6 @@
 #include <qfileinfo.h>
 #include <qptrvector.h>
 #include <qgl.h>
-
-#include <GL/glu.h>
-#include <GL/gl.h>
 
 #define COLOR_UNKNOWN Qt::black // fog of war
 #define ZOOM_STEP 0.5

@@ -25,7 +25,6 @@
 #include "bogl.h"
 
 #include "bodebug.h"
-#include "info/boinfo.h"
 
 #include <qstringlist.h>
 
@@ -60,8 +59,8 @@ void boglInit()
 #ifdef GLX_ARB_get_proc_address
   // Get pointers to supported opengl functions
   boDebug() << k_funcinfo << "Checking for OpenGL extensions..." << endl;
-  QStringList extensions = BoInfo::boInfo()->openGLExtensions();
-  unsigned int openglversion = BoInfo::boInfo()->openGLVersion();
+  QStringList extensions = boglGetOpenGLExtensions();
+  unsigned int openglversion = boglGetOpenGLVersion();
 
   // Blendcolor
   if(extensions.contains("GL_ARB_imaging"))
@@ -86,7 +85,7 @@ void boglInit()
   // TODO: check for OpenGL 2.0
 
   // Textures
-  if(openglversion >= MAKE_VERSION(1,3,0))
+  if(openglversion >= MAKE_VERSION_BOGL(1,3,0))
   {
     boglActiveTexture = (_boglActiveTexture)glXGetProcAddressARB((const GLubyte*)"glActiveTexture");
   }
@@ -103,3 +102,61 @@ void boglInit()
   // Done
   bogl_inited = true;
 }
+
+QStringList boglGetOpenGLExtensions()
+{
+ QString extensions = (const char*)glGetString(GL_EXTENSIONS);
+ return QStringList::split(" ", extensions);
+}
+
+QStringList boglGetGLUExtensions()
+{
+ QString extensions = (const char*)gluGetString(GLU_EXTENSIONS);
+ return QStringList::split(" ", extensions);
+}
+
+unsigned int boglGetOpenGLVersion()
+{
+ // Find out OpenGL version
+ QString oglversionstring = QString((const char*)glGetString(GL_VERSION));
+ unsigned int oglversionmajor = 0, oglversionminor = 0, oglversionrelease = 0;
+ int oglversionlength = oglversionstring.find(' ');
+ if (oglversionlength == -1) {
+	oglversionlength = oglversionstring.length();
+ }
+
+ QString versionstr = oglversionstring.left(oglversionlength);
+ QStringList versioninfo = QStringList::split(QChar('.'), oglversionstring.left(oglversionlength));
+ if (versioninfo.count() < 2 || versioninfo.count() > 3) {
+	boError() << k_funcinfo << "versioninfo has " << versioninfo.count() <<
+			" entries (version string: '" << oglversionstring << "')" << endl;
+ } else {
+	oglversionmajor = versioninfo[0].toUInt();
+	oglversionminor = versioninfo[1].toUInt();
+	if (versioninfo.count() == 3) {
+		oglversionrelease = versioninfo[2].toUInt();
+	}
+ }
+ return MAKE_VERSION_BOGL(oglversionmajor, oglversionminor, oglversionrelease);
+}
+
+QString boglGetOpenGLVersionString()
+{
+ return QString::fromLatin1((const char*)glGetString(GL_VERSION));
+}
+
+QString boglGetOpenGLVendorString()
+{
+ return QString::fromLatin1((const char*)glGetString(GL_VENDOR));
+}
+
+QString boglGetOpenGLRendererString()
+{
+ return QString::fromLatin1((const char*)glGetString(GL_RENDERER));
+}
+
+QString boglGetGLUVersionString()
+{
+ return QString::fromLatin1((const char*)gluGetString(GLU_VERSION));
+}
+

@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/boson/script -I$(top_srcdir)/bodebug $(all_includes) $(PYTHONINC)
+INCLUDES = -I$(top_srcdir)/boson/script -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes) $(PYTHONINC)
 
 noinst_LTLIBRARIES = libbosonscript.la
 

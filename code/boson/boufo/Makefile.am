@@ -1,6 +1,6 @@
 SUBDIRS = bouic .
 
-INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug $(all_includes) -I$(top_srcdir)/boson
+INCLUDES = $(UFO_INCLUDES) -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl $(all_includes) -I$(top_srcdir)/boson
 
 noinst_LTLIBRARIES = libboufo.la
 bin_PROGRAMS = boufodesigner boufotest
@@ -16,6 +16,9 @@ libboufo_la_SOURCES = \
 	ubolabelui.cpp \
 	uboprogress.cpp \
 	uboprogressui.cpp
+#	ubotable.cpp 
+#	ubotableui.cpp
+#	uboboxlayout.cpp 
 
 libboufo_la_LIBADD = \
 		$(top_builddir)/boson/bosonfont/libbosonfont.la \

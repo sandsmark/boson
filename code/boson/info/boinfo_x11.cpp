@@ -22,13 +22,12 @@
 #include "boinfo.h"
 #include "bodebug.h"
 #include "boglquerystates.h"
+#include <bogl.h>
 
 #include <qwidget.h>
 #include <qregexp.h>
 #include <qstringlist.h>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include <GL/glx.h>
 #include <X11/Xlib.h>
 
@@ -36,38 +35,13 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
 {
  // OpenGL (warning: we don't have compile-time versions here!)
  QString extensions;
- QString oglversionstring = QString((const char*)glGetString(GL_VERSION));
- insert(BoInfo::OpenGLVersionString, oglversionstring.latin1());
- insert(BoInfo::OpenGLVendorString, (const char*)glGetString(GL_VENDOR));
- insert(BoInfo::OpenGLRendererString, (const char*)glGetString(GL_RENDERER));
- extensions = (const char*)glGetString(GL_EXTENSIONS);
- extensions.replace(QRegExp(" "), "\n");
- insert(BoInfo::OpenGLExtensionsString, extensions);
-
- // Find out OpenGL version
- unsigned int oglversionmajor = 0, oglversionminor = 0, oglversionrelease = 0;
- int oglversionlength = oglversionstring.find(' ');
- if (oglversionlength == -1) {
-	oglversionlength = oglversionstring.length();
- }
- QString versionstr = oglversionstring.left(oglversionlength);
- QStringList versioninfo = QStringList::split(QChar('.'), oglversionstring.left(oglversionlength));
- if (versioninfo.count() < 2 || versioninfo.count() > 3) {
-	boError() << k_funcinfo << "versioninfo has " << versioninfo.count() <<
-			" entries (version string: '" << oglversionstring << "')" << endl;
- } else {
-	oglversionmajor = versioninfo[0].toUInt();
-	oglversionminor = versioninfo[1].toUInt();
-	if (versioninfo.count() == 3) {
-		oglversionrelease = versioninfo[2].toUInt();
-	}
- }
- insert(BoInfo::OpenGLVersion, MAKE_VERSION(oglversionmajor, oglversionminor, oglversionrelease));
-
- insert(BoInfo::GLUVersionString, (const char*)gluGetString(GLU_VERSION));
- extensions = (const char*)gluGetString(GLU_EXTENSIONS);
- extensions.replace(QRegExp(" "), "\n");
- insert(BoInfo::GLUExtensionsString, extensions);
+ insert(BoInfo::OpenGLVersionString, boglGetOpenGLVersionString());
+ insert(BoInfo::OpenGLVendorString, boglGetOpenGLVendorString());
+ insert(BoInfo::OpenGLRendererString, boglGetOpenGLRendererString());
+ insert(BoInfo::OpenGLExtensionsString, boglGetOpenGLExtensions().join("\n"));
+ insert(BoInfo::OpenGLVersion, boglGetOpenGLVersion());
+ insert(BoInfo::GLUVersionString, boglGetGLUVersionString());
+ insert(BoInfo::GLUExtensionsString, boglGetGLUExtensions().join("\n"));
 
  GLXContext context = glXGetCurrentContext();
  if (!context) {

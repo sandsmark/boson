@@ -17,7 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "../bogl.h"
+#include <bogl.h>
 
 #include "boquickgroundrenderer.h"
 #include "boquickgroundrenderer.moc"

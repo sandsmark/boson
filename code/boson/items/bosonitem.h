@@ -21,8 +21,7 @@
 
 #include "../defines.h"
 #include "../bomath.h"
-
-#include <GL/gl.h>
+#include <bogl.h>
 
 #include <qglobal.h>
 

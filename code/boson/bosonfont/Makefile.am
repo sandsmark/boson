@@ -1,4 +1,4 @@
-INCLUDES = -I$(top_srcdir)/bodebug -I$(top_builddir)/boson/ $(all_includes)
+INCLUDES = -I$(top_srcdir)/bodebug -I$(top_srcdir)/bogl -I$(top_builddir)/boson/ $(all_includes)
 
 noinst_LTLIBRARIES = libbosonfont.la
 

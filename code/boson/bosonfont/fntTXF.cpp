@@ -24,11 +24,11 @@
 #define QT_CLEAN_NAMESPACE
 
 #include "fntLocal.h"
+#include <bogl.h>
 
 #include <bodebug.h>
 
 #include <GL/glx.h>
-#include <GL/gl.h>
 
 static bool glIsValidContext( void )
 {

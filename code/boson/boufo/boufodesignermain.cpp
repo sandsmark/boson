@@ -20,6 +20,7 @@
 #include <ufo/ufo.hpp>
 #include <ufo/ux/ux.hpp>
 #include "boufo.h"
+#include <bogl.h>
 
 #include "boufodesignermain.h"
 #include "boufodesignermain.moc"
@@ -42,7 +43,6 @@
 #include <qfiledialog.h>
 #include <qpushbutton.h>
 
-#include <GL/glu.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -959,6 +959,8 @@ void BoPropertiesWidget::slotItemRenamed(QListViewItem* item, int col)
  QString value = item->text(1);
  mWidgetElement.setAttribute(name, value);
  emit signalChanged(mWidgetElement);
+
+ // TODO: if the name of the widget was changed: update the widget tree!
 }
 
 BoUfoDesignerMain::BoUfoDesignerMain()

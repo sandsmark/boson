@@ -28,12 +28,12 @@
 #include <kmessagebox.h>
 #include <klocale.h>
 
+#include <bogl.h>
 #include <qgl.h> // convertToGLFormat()
 #include <qimage.h> // convertToGLFormat()
 #include <qpaintdevicemetrics.h>
 #include <qintdict.h>
 
-#include <GL/gl.h>
 #include <GL/glx.h>
 
 #include <X11/Xlib.h>
