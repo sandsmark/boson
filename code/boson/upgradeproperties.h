@@ -131,6 +131,8 @@ class UpgradeProperties
         const QString& data, UpgradeType type, int weaponid = -1);
     void applyPropertyToUnits(float oldvalue, unsigned long int typeId,
         Player* player, UpgradeType type);
+
+
     unsigned long int applyValue(const QString& data, unsigned long int oldvalue);
     float applyValue(const QString& data, float oldvalue);
     void parseEntry(const QString& entry, ValueType& type, QString& value);
@@ -138,6 +140,21 @@ class UpgradeProperties
     class UpgradePropertiesPrivate;
     UpgradePropertiesPrivate* d;
 
+  private:
+    /**
+     * Note: you are meant to use primitive data (int, uint, float, ...) only
+     * here!
+     * You should avoid classes
+     *
+     * @param oldvalue The initial value
+     * @param value The change-value. What this actually does depends on the
+     * @ref ValueType of the value.
+     * @return The new value, i.e. @p oldValue changed by @p value according to
+     * @p data.
+     **/
+    template<class T> T applyValueInternal(ValueType type, T oldvalue, T value);
+
+  private:
     bool mResearched;
     unsigned long int mId;
     QString mName;
