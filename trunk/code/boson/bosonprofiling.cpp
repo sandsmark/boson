@@ -81,6 +81,7 @@ QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t)
  s << t.mWater;
  s << t.mFOW;
  s << t.mText;
+ s << t.mUfo;
  s << t.mFunction;
  return s;
 }
@@ -98,6 +99,7 @@ QDataStream& operator>>(QDataStream& s, RenderGLTimes& t)
  s >> t.mWater;
  s >> t.mFOW;
  s >> t.mText;
+ s >> t.mUfo;
  s >> t.mFunction;
  return s;
 }
@@ -290,6 +292,11 @@ void BosonProfiling::renderFOW(bool start)
 void BosonProfiling::renderText(bool start)
 {
  d->mCurrentRenderTimes->mText.getTime(start);
+}
+
+void BosonProfiling::renderUfo(bool start)
+{
+ d->mCurrentRenderTimes->mUfo.getTime(start);
 }
 
 unsigned int BosonProfiling::renderEntries() const

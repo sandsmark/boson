@@ -76,6 +76,7 @@ public:
 		values.append(mWater.diff());
 		values.append(mFOW.diff());
 		values.append(mText.diff());
+		values.append(mUfo.diff());
 		return values;
 	}
 	static QValueList<QString> names()
@@ -92,6 +93,7 @@ public:
 		names.append(i18n("Water"));
 		names.append(i18n("FOW"));
 		names.append(i18n("Text"));
+		names.append(i18n("Ufo"));
 		return names;
 	}
 
@@ -104,6 +106,7 @@ public:
 	unsigned long int dWater() const { return mWater.diff(); }
 	unsigned long int dFOW() const { return mFOW.diff(); }
 	unsigned long int dText() const { return mText.diff(); }
+	unsigned long int dUfo() const { return mUfo.diff(); }
 
 	// we use array of size 2 - the first is the start time, the second the
 	// stop time. the difference of both is the consumed time then.
@@ -119,6 +122,7 @@ public:
 	ProfilingEntry mWater;
 	ProfilingEntry mFOW;
 	ProfilingEntry mText;
+	ProfilingEntry mUfo;
 	unsigned int mUnitCount;
 };
 
