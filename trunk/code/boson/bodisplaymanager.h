@@ -52,7 +52,12 @@ class BoDisplayManager : public QWidget
 {
 	Q_OBJECT
 public:
-	BoDisplayManager(QCanvas* canvas, QWidget* parent);
+	/**
+	 * @param gameMode controls whether to create @ref BosonBigDisplay or
+	 * @ref EditorBigDisplay widgets in @ref addDisplay. @ref
+	 * BosonBigDisplay widgets are the default (TRUE)
+	 **/
+	BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode = true);
 	~BoDisplayManager();
 
 	BosonBigDisplayBase* addInitialDisplay();
@@ -136,6 +141,8 @@ private:
 private:
 	class BoDisplayManagerPrivate;
 	BoDisplayManagerPrivate* d;
+
+	bool mGameMode;
 };
 
 #endif

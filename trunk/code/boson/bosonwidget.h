@@ -27,6 +27,7 @@ class KPlayer;
 class KGamePropertyBase;
 class KActionCollection;
 
+class BosonCursor;
 class BosonCanvas;
 class BosonCommandFrame;
 class BosonBigDisplay;
@@ -81,8 +82,8 @@ public:
 	virtual ~BosonWidget();
 
 	inline BosonCanvas* canvas() const;
-	inline BosonMiniMap* minimap() const;
-	inline BoDisplayManager* displaymanager() const;
+	inline BosonMiniMap* minimap() const { return mMiniMap; }
+	inline BoDisplayManager* displaymanager() const { return mDisplayManager; }
 	inline Boson* game() const;
 	inline BosonPlayField* map() const;
 	inline Player* player() const;
@@ -205,19 +206,11 @@ protected slots:
 protected:
 	void addChatSystemMessage(const QString& fromName, const QString& text);
 	
-	void sendChangeTeamColor(Player* player, const QColor& color);
-	void changeSpecies(const QString& species);
-	void addLocalPlayer();
-
-	void addDummyComputerPlayer(const QString& name); // used by editor only
-
-	void quitGame();
-
-
-	void normalizeVPositions();
-	void normalizeHPositions(int vpos);
-
 	void initBigDisplay(BosonBigDisplayBase*);
+
+private:
+	void init();
+	void initChat();
 
 	void initMap();
 	void initMiniMap();
@@ -227,13 +220,21 @@ protected:
 	void initGameCommandFrame();
 	void initLayout();
 
-private:
-	void init();
-	void initChat();
 
 private:
 	class BosonWidgetPrivate;
 	BosonWidgetPrivate* d;
+
+	BosonCursor* mCursor;
+	QString mCursorTheme; // path to cursor pixmaps
+
+	TopWidget* mTop;
+	BosonMiniMap* mMiniMap;
+	BoDisplayManager* mDisplayManager;
+
+	// for performance:
+	int mMobilesCount;
+	int mFacilitiesCount;
 };
 
 #endif

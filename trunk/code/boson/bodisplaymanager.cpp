@@ -22,6 +22,7 @@
 
 #include "bosonbigdisplaybase.h"
 #include "bosonbigdisplay.h"
+#include "editorbigdisplay.h"
 #include "bosonconfig.h"
 #include "player.h"
 #include "defines.h"
@@ -119,12 +120,13 @@ public:
 	QVBoxLayout* mLayout;
 };
 
-BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent) : QWidget(parent, "bosondisplaymanager")
+BoDisplayManager::BoDisplayManager(QCanvas* canvas, QWidget* parent, bool gameMode) : QWidget(parent, "bosondisplaymanager")
 {
  d = new BoDisplayManagerPrivate;
  d->mDisplayList.setAutoDelete(true);
  d->mBoxList.setAutoDelete(true);
  d->mCanvas = canvas;
+ mGameMode = gameMode;
 }
 
 BoDisplayManager::~BoDisplayManager()
@@ -277,7 +279,12 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
  }
  kdDebug() << k_funcinfo << endl;
  //TODO: what about editor widgets??
- BosonBigDisplayBase* b = new BosonBigDisplay(d->mCanvas, parent);
+ BosonBigDisplayBase* b = 0;
+ if (mGameMode) {
+	b = new BosonBigDisplay(d->mCanvas, parent);
+ } else {
+	b = new EditorBigDisplay(d->mCanvas, parent);
+ }
  d->mDisplayList.append(b);
  connect(b, SIGNAL(signalMakeActive(BosonBigDisplayBase*)), 
 		this, SLOT(slotMakeActiveDisplay(BosonBigDisplayBase*)));
@@ -287,20 +294,26 @@ BosonBigDisplayBase* BoDisplayManager::addDisplay(QWidget* parent)
 
 void BoDisplayManager::slotEditorWillPlaceCell(int c)
 {
+ if (mGameMode) {
+	return;
+ }
+ kdWarning() << k_funcinfo << "obsolete function call!" << endl;
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-#warning FIXME
-//	it.current()->slotWillPlaceCell(c);
+//	((EditorBigDisplay*)it.current())->slotWillPlaceCell(c);
 	++it;
  }
 }
 
 void BoDisplayManager::slotEditorWillPlaceUnit(int type, UnitBase* fac, KPlayer* p)
 {
+ if (mGameMode) {
+	return;
+ }
+ kdWarning() << k_funcinfo << "obsolete function call!" << endl;
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
  while (it.current()) {
-#warning FIXME
-//	it.current()->slotWillConstructUnit(type, fac, p);
+//	((EditorBigDisplay*)it.current())->slotWillConstructUnit(type, fac, p);
 	++it;
  }
 }
