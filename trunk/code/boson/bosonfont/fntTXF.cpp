@@ -21,6 +21,7 @@
      $Id$
 */
 
+#define QT_CLEAN_NAMESPACE
 
 #include "fntLocal.h"
 
