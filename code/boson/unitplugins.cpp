@@ -302,7 +302,6 @@ bool ProductionPlugin::saveAsXML(QDomElement& root) const
  // AB: we don't use a KGamePropertyList here, cause it is a bit more difficult
  // with the QPair I guess. simply saving this by hand.
  QStringList list;
- QValueList< QPair<ProductionType, unsigned long int> >::Iterator it;
  for (unsigned int i = 0; i < mProductions.count(); i++) {
 	unsigned int type = (unsigned int)(mProductions[i].first);
 	unsigned int id = mProductions[i].second;
@@ -331,7 +330,6 @@ bool ProductionPlugin::loadFromXML(const QDomElement& root)
 	return true;
  }
  QStringList list = QStringList::split(QString::fromLatin1(","), s);
- QValueList< QPair<ProductionType, unsigned long int> >::Iterator it;
  for (unsigned int i = 0; i < list.count(); i++) {
 	QStringList l = QStringList::split(" ", list[i]);
 	if (l.count() != 2) {
