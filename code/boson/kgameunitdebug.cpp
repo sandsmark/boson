@@ -36,6 +36,7 @@
 #include <qlabel.h>
 #include <qvgroupbox.h>
 #include <qvbox.h>
+#include <qpointarray.h>
 
 #include "kgameunitdebug.moc"
 
@@ -47,6 +48,10 @@ public:
 		mBoson = 0;
 		mUnitList = 0;
 		mWaypoints = 0;
+		mProduction = 0;
+		mUnitsInRange = 0;
+		mUnitCollisions = 0;
+		mCells = 0;
 	}
 
 	Boson* mBoson;
@@ -56,6 +61,7 @@ public:
 	KListView* mProduction;
 	KListView* mUnitsInRange;
 	KListView* mUnitCollisions;
+	KListView* mCells;
 
 	QIntDict<Unit> mUnits;
 	QPtrDict<QListViewItem> mItems;
@@ -129,10 +135,16 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
  connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateUnitsInRange(QListViewItem*)));
  QVBox* unitCollisionsWidget = new QVBox(collisionsBox);
  (void)new QLabel(i18n("UnitCollisions:"), unitCollisionsWidget);
- d->mUnitCollisions = new KListView(inRangeWidget);
+ d->mUnitCollisions = new KListView(unitCollisionsWidget);
  d->mUnitCollisions->addColumn(i18n("ID"));
  d->mUnitCollisions->addColumn(i18n("Exact"));
  connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateUnitCollisions(QListViewItem*)));
+
+ d->mCells = new KListView(this);
+ layout->addWidget(d->mCells);
+ d->mCells->addColumn(i18n("X"));
+ d->mCells->addColumn(i18n("Y"));
+ connect(d->mUnitList, SIGNAL(selectionChanged(QListViewItem*)), this, SLOT(updateCells(QListViewItem*)));
  
 
 /*
@@ -148,6 +160,13 @@ KGameUnitDebug::KGameUnitDebug(QWidget* parent) : QWidget(parent)
 
 KGameUnitDebug::~KGameUnitDebug()
 {
+ d->mUnits.clear();
+ d->mItems.clear();
+ d->mWaypoints->clear();
+ d->mProduction->clear();
+ d->mUnitsInRange->clear();
+ d->mUnitCollisions->clear();
+ d->mCells->clear();
  delete d;
 }
 
@@ -166,6 +185,8 @@ void KGameUnitDebug::slotUpdate()
  d->mWaypoints->clear();
  d->mProduction->clear();
  d->mUnitsInRange->clear();
+ d->mUnitCollisions->clear();
+ d->mCells->clear();
  if (!d->mBoson) {
 	return;
  }
@@ -363,4 +384,25 @@ void KGameUnitDebug::updateUnitCollisions(QListViewItem* item)
 	}
  }
 }
+
+void KGameUnitDebug::updateCells(QListViewItem* item)
+{
+ d->mCells->clear();
+ if (!item) {
+	return;
+ }
+ int id = item->text(0).toInt();
+ Unit* unit = d->mUnits[id];
+ if (!unit) {
+	kdWarning() << k_lineinfo << "id " << id << " not found" << endl;
+	return;
+ }
+ QPointArray cells = unit->cells();
+ for (unsigned int i = 0; i < cells.count(); i++) {
+	QListViewItem* item = new QListViewItem(d->mCells);
+	item->setText(0, QString::number(cells[i].x()));
+	item->setText(1, QString::number(cells[i].y()));
+ }
+}
+
 
