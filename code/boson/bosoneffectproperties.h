@@ -112,6 +112,14 @@ class BosonEffectProperties
 
 
     /**
+     * @return Delay of the effect.
+     * If this is >0, then effect will be delayed, which means that nothing
+     *  happens for delay() seconds, and then effect will be started.
+     **/
+    float delay() const  { return mDelay; }
+
+
+    /**
      * Static helper method for getting list of effect properties.
      * @return List of BosonEffectProperties with ids loaded from given kconfig
      *  object.
@@ -144,6 +152,7 @@ class BosonEffectProperties
 
   protected:
     unsigned long int mId;
+    float mDelay;
 };
 
 
@@ -166,6 +175,12 @@ class BosonEffectPropertiesFog : public BosonEffectProperties
 
 
     virtual BosonEffect* newEffect(const BoVector3& pos, const BoVector3& rot = BoVector3()) const;
+
+
+    const BoVector4& color() const  { return mColor; }
+    float start() const  { return mStart; }
+    float end() const  { return mEnd; }
+    float radius() const  { return mRadius; }
 
 
   protected:

@@ -61,26 +61,58 @@ float BosonEffect::getFloat(float min, float max)
 }
 
 
-BosonEffect::BosonEffect()
+BosonEffect::BosonEffect(const BosonEffectProperties* prop)
 {
+  mGeneralProperties = prop;
   mActive = true;
+  mStarted = false;
+  mDelay = 0.0f;
+  if(prop)
+  {
+    mDelay = prop->delay();
+  }
 }
 
 BosonEffect::~BosonEffect()
 {
 }
 
+void BosonEffect::update(float elapsed)
+{
+  // If effect is delayed, decrease delay
+  if(!hasStarted())
+  {
+    mDelay -= elapsed;
+    if(mDelay <= 0.0f)
+    {
+      mDelay = 0.0f;
+      start();
+    }
+  }
+}
+
+void BosonEffect::start()
+{
+  mStarted = true;
+}
+
 
 
 /*****  BosonEffectFog  *****/
 
-/*BosonEffectFog::BosonEffectFog(BosonEffectPropertiesFog* prop) : BosonEffect()
+BosonEffectFog::BosonEffectFog(const BosonEffectPropertiesFog* prop) : BosonEffect(prop)
 {
-}*/
+  mProperties = prop;
+  mColor = prop->color();
+  mStart = prop->start();
+  mEnd = prop->end();
+  mRadius = prop->radius();
+}
 
 BosonEffectFog::BosonEffectFog(const BoVector4& color, float start, float end, float radius) :
     BosonEffect()
 {
+  mProperties = 0;
   mColor = color;
   mStart = start;
   mRadius = radius;
@@ -101,7 +133,7 @@ bool BosonEffectFog::loadFromXML(const QDomElement& root)
 
 /*****  BosonEffectFade  *****/
 
-BosonEffectFade::BosonEffectFade(const BosonEffectPropertiesFade* prop) : BosonEffect()
+BosonEffectFade::BosonEffectFade(const BosonEffectPropertiesFade* prop) : BosonEffect(prop)
 {
   mProperties = prop;
   mTimeLeft = prop->time();
@@ -113,6 +145,12 @@ BosonEffectFade::BosonEffectFade(const BosonEffectPropertiesFade* prop) : BosonE
 
 void BosonEffectFade::update(float elapsed)
 {
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
+
   mTimeLeft -= elapsed;
   if(mTimeLeft <= 0)
   {
@@ -146,26 +184,11 @@ bool BosonEffectFade::loadFromXML(const QDomElement& root)
 
 /*****  BosonEffectLight  *****/
 
-BosonEffectLight::BosonEffectLight(const BosonEffectPropertiesLight* prop) : BosonEffect()
+BosonEffectLight::BosonEffectLight(const BosonEffectPropertiesLight* prop) : BosonEffect(prop)
 {
   mProperties = prop;
   mTimeLeft = prop->life();
-
-  mLight = new BoLight();
-  if(mLight->id() == -1)
-  {
-    // Id -1 means that light could not be created. Probably maximum number of
-    //  lights is already in use
-    delete mLight;
-    mLight = 0;
-    mActive = false;
-    mTimeLeft = 0.0f;
-  }
-  if(mLight)
-  {
-    mLight->setEnabled(true);
-    mLight->setDirectional(false);
-  }
+  mLight = 0;
 }
 
 BosonEffectLight::~BosonEffectLight()
@@ -175,6 +198,12 @@ BosonEffectLight::~BosonEffectLight()
 
 void BosonEffectLight::update(float elapsed)
 {
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
+
   mTimeLeft -= elapsed;
   if(mTimeLeft <= 0)
   {
@@ -199,6 +228,28 @@ void BosonEffectLight::update(float elapsed)
   mLight->setDiffuse(diffuse);
   mLight->setSpecular(specular);
   mLight->setAttenuation(attenuation);
+}
+
+void BosonEffectLight::start()
+{
+  BosonEffect::start();
+
+  mLight = new BoLight();
+  if(mLight->id() == -1)
+  {
+    // Id -1 means that light could not be created. Probably maximum number of
+    //  lights is already in use
+    delete mLight;
+    mLight = 0;
+    mActive = false;
+    mTimeLeft = 0.0f;
+  }
+  if(mLight)
+  {
+    mLight->setEnabled(true);
+    mLight->setDirectional(false);
+    mLight->setPosition3(position());
+  }
 }
 
 void BosonEffectLight::setPosition(const BoVector3& pos)

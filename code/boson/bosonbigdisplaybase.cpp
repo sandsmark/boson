@@ -1463,7 +1463,7 @@ void BosonBigDisplayBase::renderParticles()
  QPtrList<BosonEffectParticle> visible;
  BosonEffectParticle* s = 0;
  for (; allIt.current(); ++allIt) {
-	if (allIt.current()->type() > BosonEffect::Particle) {
+	if (allIt.current()->hasStarted() && allIt.current()->type() > BosonEffect::Particle) {
 		// This is a particle effect
 		s = (BosonEffectParticle*)allIt.current();
 		//boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
@@ -1631,7 +1631,7 @@ void BosonBigDisplayBase::renderFog()
  QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
  QPtrList<BosonEffectFog> fogeffects;
  for (; allIt.current(); ++allIt) {
-	if (allIt.current()->type() == BosonEffect::Fog) {
+	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::Fog) {
 		fogeffects.append((BosonEffectFog*)allIt.current());
 	}
  }
@@ -1654,7 +1654,7 @@ void BosonBigDisplayBase::renderFadeEffects()
  QPtrListIterator<BosonEffect> allIt(*(canvas()->effects()));
  QPtrList<BosonEffectFade> fadeeffects;
  for (; allIt.current(); ++allIt) {
-	if (allIt.current()->type() == BosonEffect::Fade) {
+	if (allIt.current()->hasStarted() && allIt.current()->type() == BosonEffect::Fade) {
 		fadeeffects.append((BosonEffectFade*)allIt.current());
 	}
  }

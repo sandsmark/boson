@@ -123,6 +123,7 @@ BosonEffectProperties* BosonEffectPropertiesFactory::newParticleEffectProperties
 BosonEffectProperties::BosonEffectProperties()
 {
   mId = 0;
+  mDelay = 0;
 }
 
 BosonEffectProperties::~BosonEffectProperties()
@@ -143,6 +144,8 @@ bool BosonEffectProperties::load(KSimpleConfig* cfg, const QString& group, bool 
       return false;  // Loading failed
     }
   }
+
+  mDelay = (float)(cfg->readDoubleNumEntry("Delay", mDelay));
 
   // Load inherited properties, if any
   QString inherits = cfg->readEntry("Inherits", QString::null);
@@ -261,7 +264,7 @@ bool BosonEffectPropertiesFog::load(KSimpleConfig* cfg, const QString& group, bo
 
 BosonEffect* BosonEffectPropertiesFog::newEffect(const BoVector3& pos, const BoVector3&) const
 {
-  BosonEffectFog* fog = new BosonEffectFog(mColor, mStart, mEnd);
+  BosonEffectFog* fog = new BosonEffectFog(this);
   fog->setPosition(pos);
   return fog;
 }
@@ -429,6 +432,8 @@ QPtrList<BosonEffect> BosonEffectPropertiesCollection::newEffectsList(const BoVe
   {
     // We can't just do 'list.append(it.current()->newEffect(pos, rot));'
     //  because it.current() may also be effects collection.
+    // TODO: support delay!
+    //  maybe increase delay of created effect by delay of collection effect
     QPtrList<BosonEffect> e = newEffects(it.current(), pos, rot);
     if(e.count() == 1)
     {

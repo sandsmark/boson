@@ -201,7 +201,6 @@ BosonEffect* BosonEffectPropertiesParticleGeneric::newEffect(const BoVector3& po
     e->setRotation(rot);
   }
   e->setMoveParticlesWithSystem(mMoveParticlesWithSystem);
-  e->createParticles(mInitNum);
 
   return e;
 }

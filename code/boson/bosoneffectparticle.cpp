@@ -29,7 +29,7 @@
 
 /*****  BosonEffectParticle  *****/
 
-BosonEffectParticle::BosonEffectParticle(const BosonEffectPropertiesParticle* prop) : BosonEffect()
+BosonEffectParticle::BosonEffectParticle(const BosonEffectPropertiesParticle* prop) : BosonEffect(prop)
 {
   mProperties = prop;
   mBoundingSphereRadius = 0;
@@ -85,6 +85,11 @@ BosonEffectParticleGeneric::~BosonEffectParticleGeneric()
 
 void BosonEffectParticleGeneric::update(float elapsed)
 {
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
 /*  boDebug(150) << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; rate: " << mRate <<
       "; createCache: " << mCreateCache << "; will add " << elapsed * mRate <<
       " to create cache (total will be = " << mCreateCache + (elapsed * mRate) << ")" << endl;*/
@@ -148,6 +153,12 @@ void BosonEffectParticleGeneric::update(float elapsed)
   // Particle update and init methods set mRadius to dot product for performance
   //  reasons. Convert it here.
   mBoundingSphereRadius = sqrt(mBoundingSphereRadius) + mMaxParticleSize;
+}
+
+void BosonEffectParticleGeneric::start()
+{
+  BosonEffect::start();
+  createParticles(((BosonEffectPropertiesParticleGeneric*)properties())->initialParticles());
 }
 
 void BosonEffectParticleGeneric::setRotation(const BoVector3& rotation)
@@ -330,6 +341,11 @@ BosonEffectParticleTrail::~BosonEffectParticleTrail()
 
 void BosonEffectParticleTrail::update(float elapsed)
 {
+  BosonEffect::update(elapsed);
+  if(!hasStarted())
+  {
+    return;
+  }
 /*  boDebug(150) << k_funcinfo << " UPDATING; elapsed: " << elapsed << "; rate: " << mRate <<
       "; createCache: " << mCreateCache << "; will add " << elapsed * mRate <<
       " to create cache (total will be = " << mCreateCache + (elapsed * mRate) << ")" << endl;*/

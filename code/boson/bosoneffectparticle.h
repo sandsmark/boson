@@ -251,6 +251,8 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
      **/
     virtual void update(float elapsed);
 
+    virtual void start();
+
 
     virtual BosonParticle* particle(unsigned int i)  { return &mParticles[i]; }
 
@@ -325,10 +327,11 @@ class BosonEffectParticleGeneric : public BosonEffectParticle
     /**
      * @return Whether this system is active
      * Active means that either this system has at least 1 living (active)
-     * particle or it's age is not 0 (can create more particles)
+     *  particle or it's age is not 0 (can create more particles) or it's
+     *  delayed (not yet started)
      * Only active systems have to be updated.
      **/
-    virtual bool isActive() const  { return ((mNum > 0) || (mAge != 0)); }
+    virtual bool isActive() const  { return ((mNum > 0) || (mAge != 0) || (!hasStarted())); }
 
     /**
      * Sets OpenGL blending function of this system. This function is used in
