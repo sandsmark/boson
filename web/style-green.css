@@ -152,6 +152,10 @@ td.sidebarboxcell {
   font-weight: bold;
 }
 
+.newsauthor {
+  font-size: smaller;
+}
+
 .newsdate {
   font-style: italic;
 }

@@ -8,26 +8,34 @@ class Article
 {
     var $date;
     var $title;
+    var $author;
+    var $authorlink;
     var $text;
     var $id;
     function Article()
     {
         $this->date="";
         $this->title="";
+        $this->author="";
+        $this->authorlink="";
         $this->text="";
         $this->id=-1;
     }
 
     /*
-    function Article($title, $date, $text)
+    function Article($title, $author, $authorlink, $date, $text)
     {
         $this->date=$date;
         $this->title=$title;
+        $this->author=$author;
+        $this->authorlink=$authorlink;
         $this->text=$text;
     }
     */
     function set_date($arg) { $this->date = $arg; }
     function set_title($arg) { $this->title = $arg; }
+    function set_author($arg) { $this->author = $arg; }
+    function set_authorlink($arg) { $this->authorlink = $arg; }
     function set_text($arg) { $this->text = $arg; }
     function set_id($arg) { $this->id = $arg; }
     function append_text($arg) { $this->text .= $arg; }
@@ -38,7 +46,21 @@ class Article
             <tr>
                 <td class=\"bigboxsubheadercell\">
                 <a name=\"$this->id\"></a>
-                    <font class=\"newstitle\">&nbsp;$this->title</font><font class=\"newsdate\">&nbsp;&nbsp;$this->date</font>
+                    <font class=\"newstitle\">&nbsp;$this->title</font><font class=\"newsdate\">&nbsp;&nbsp;$this->date</font>";
+        if($this->author != "")
+        {
+          if($this->authorlink != "")
+          {
+            echo "
+                    <font class=\"newsauthor\">&nbsp;&nbsp;&nbsp;(posted by: <a href=\"$this->authorlink\" class=\"newsauthorlink\">$this->author</a>)</font>";
+          }
+          else
+          {
+            echo "
+                    <font class=\"newsauthor\">&nbsp;&nbsp;&nbsp;(posted by: $this->author)</font>";
+          }
+        }
+        echo "
                 </td>
             </tr>";
         draw_bigbox_text($this->text, "newstext");
@@ -52,17 +74,6 @@ class Article
 
 }
 
-
-function news_article($title, $date, $fulltext)
-{
-echo "
-      <!-- News item with title $title -->";
-echo "
-      <tr><td class=\"bigboxsubheadercell\">
-        <font class=\"newstitle\">&nbsp;$title</font><font class=\"newsdate\">&nbsp;&nbsp;$date</font>
-      </td></tr>";
-draw_bigbox_text($fulltext, "newstext");
-}
 
 function news_box_begin()
 {
@@ -112,6 +123,14 @@ function get_article_array($max_num_articles = 10)
             else if($split_arr[0] == "title")
             {
                 $current_article->set_title($split_arr[1]);
+            }
+            else if($split_arr[0] == "author")
+            {
+                $current_article->set_author($split_arr[1]);
+            }
+            else if($split_arr[0] == "authorlink")
+            {
+                $current_article->set_authorlink($split_arr[1]);
             }
             else if($split_arr[0] == "text")
             {
