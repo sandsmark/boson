@@ -229,6 +229,18 @@ class BosonParticleSystem
     void setAge(float a) { mAge = a; };
 
     /**
+     * Return mass of the particles of this particle system.
+     * It defines how much the wind affects particles.
+     **/
+    inline float mass()  { return mMass; };
+
+    /**
+     * Set the mass of the particles of this system
+     * @see mass
+     **/
+     void setMass(float m)  { mMass = m; };
+
+    /**
      * @return Current creation rate of particles (per second)
      **/
 //    float createRate() const { return mCreateRate; };
@@ -305,6 +317,7 @@ class BosonParticleSystem
     BoVector3 mPos;
     bool mRotated;
     float mAge;
+    float mMass;
     int mBlendFunc[2];
 
     const BosonParticleSystemProperties* mProp;

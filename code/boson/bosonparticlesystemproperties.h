@@ -92,7 +92,7 @@ class BosonParticleSystemProperties
 
     inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; }
 
-    inline static BoVector3 wind()  { return BoVector3(0.05, 0.02, 0); };
+    inline static BoVector3 wind()  { return BoVector3(0.2, 0.1, 0); };
 
     virtual void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 
@@ -125,7 +125,7 @@ class BosonParticleSystemProperties
     float mMinLife, mMaxLife;
     int mMaxNum, mInitNum;
     int mGLBlendFunc;
-    float mRate, mStartSize, mEndSize, mAge;
+    float mRate, mStartSize, mEndSize, mAge, mMass;
     bool mAlign;
     bool mMoveParticlesWithSystem;
     QString mTextureName;

@@ -95,6 +95,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum,
   mAlign = align;
   mTextures = textures;
   mAge = 3600;
+  mMass = 1.0;
   mProp = prop;
   mMoveParticlesWithSystem = false;
 

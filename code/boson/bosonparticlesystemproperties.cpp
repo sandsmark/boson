@@ -122,6 +122,7 @@ void BosonParticleSystemProperties::reset()
   mStartSize = 1;
   mEndSize = 1;
   mAge = 0;
+  mMass = 1.0;
   mAlign = true;
   mMoveParticlesWithSystem = false;
   mTextureName = "explosion";
@@ -183,6 +184,7 @@ void BosonParticleSystemProperties::load(KSimpleConfig* cfg, const QString& grou
   mStartSize = (float)(cfg->readDoubleNumEntry("StartSize", mStartSize));
   mEndSize = (float)(cfg->readDoubleNumEntry("EndSize", mEndSize));
   mAge = (float)(cfg->readDoubleNumEntry("SystemLife", mAge));
+  mMass = (float)(cfg->readDoubleNumEntry("Mass", mMass));
   mAlign = cfg->readBoolEntry("Align", mAlign);
   mMoveParticlesWithSystem = cfg->readBoolEntry("MoveParticlesWithSystem", mMoveParticlesWithSystem);
   mTextureName = cfg->readEntry("Texture", mTextureName);
@@ -195,6 +197,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, flo
   pos.canvasToWorld();
   s->setPosition(pos);
   s->setAge(mAge);
+  s->setMass(mMass);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
   if(rotation != 0.0)
   {
@@ -242,7 +245,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
   {
     particle->velo.scale(getFloat(mMinVeloScale, mMaxVeloScale) / particle->velo.length());
   }
-  particle->velo += wind();
+  particle->velo += (wind() * s->mass());
 }
 
 void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const
