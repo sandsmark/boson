@@ -21,7 +21,8 @@
 #ifndef BOSON_H 
 #define BOSON_H 
  
-// include files for QT
+// include files for Qt
+#include <qlist.h>
 // include files for KDE 
 #include <kapp.h> 
 #include <kaction.h>
@@ -83,8 +84,9 @@ private:
 	void init(void); // internal
 
 	KActionCollection m_actions;
-
 	QString		filename;
+
+	QList<editorTopLevel>	topLevels;
 };
 
 #endif // BOSON_H

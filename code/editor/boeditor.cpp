@@ -99,7 +99,10 @@ void BoEditorApp::init()
 
 void BoEditorApp::slot_newWindow()
 {
-	( new editorTopLevel(this) )->show();
+	editorTopLevel *btl = new editorTopLevel(this);
+	btl->show();
+	if (!filename.isNull()) btl->setCaption(filename);
+	topLevels.append(btl);
 }
 
 void BoEditorApp::slot_openNew()
@@ -156,11 +159,16 @@ void BoEditorApp::do_open(QString name)
 	
 	// actually read the file
 	boAssert(ecanvas);
-	if (ecanvas->Load(filename)) return;
+	if (!ecanvas->Load(filename)) {
+		// it failed : turning back to nothing
+		logf(LOG_ERROR, "haven't been abled to open %s", name.latin1() );
+		filename = QString::null;
+		return;
+	}
 
-	// it failed : turning back to nothing
-	logf(LOG_ERROR, "haven't been abled to open %s", name.latin1() );
-	filename = QString::null;
+	// set captions on TopLevel windows
+	for ( editorTopLevel *btl=topLevels.first(); btl != 0; btl=topLevels.next() )
+		btl->setCaption(name);
 }
 
 bool BoEditorApp::slot_close()
