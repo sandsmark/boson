@@ -84,6 +84,7 @@ bool editorField::load(QString filename)
 	// ok, it's all right
 	Close();
 	modified = false;
+	update();
 	return isOk();
 }
 

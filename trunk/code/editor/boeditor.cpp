@@ -148,6 +148,8 @@ void BoEditorApp::initMenuBar()
 	for (uint i = 0; i < recentList->count(); i++)
 		file_menu_recent->insertItem(recentList->at(i));
 
+	connect( file_menu_recent, SIGNAL(activated(int)), SLOT(slotFileOpenRecent(int)) );
+
 
   ///////////////////////////////////////////////////////////////////
   // menuBar entry file_menu
@@ -475,11 +477,14 @@ void BoEditorApp::slotFileOpen()
 
 void BoEditorApp::slotFileOpenRecent(int id_)
 {
-//	if(!doc->saveModified())
-//		return;
 
-//	doc->openDocument(recentList->at(id_));
-//	setCaption(kapp->appName()+": "+doc->getTitle());
+	if(field->isModified()) {
+  		KMsgBox::message(this, i18n("Warning"),	i18n("Present file isn't saved"));	
+		return;
+	}
+
+	field->load(recentList->at(id_));
+	setCaption(kapp->appName()+": "+recentList->at(id_));
 }
 
 void BoEditorApp::slotFileSave()
@@ -542,7 +547,6 @@ BEGIN_CMD(BoEditorApp)
   ON_CMD(ID_FILE_NEW_WINDOW,		slotFileNewWindow(),	i18n("Opening a new view of the map..."))
   ON_CMD(ID_FILE_NEW       ,		slotFileNew(),		i18n("Creating a new map..."))
   ON_CMD(ID_FILE_OPEN      ,		slotFileOpen(),		i18n("Opening a file..."))
-//  ON_CMD(ID_FILE_RECENT    ,		slotFile(),		i18n(""))
 
   ON_CMD(ID_FILE_SAVE      ,		slotFileSave(),		i18n("Saving the map"))
   ON_CMD(ID_FILE_SAVE_AS   ,		slotFileSaveAs(),	i18n("Saving the map under a new name..."))
