@@ -55,6 +55,9 @@
 #include <lib3ds/mesh.h>
 #include <lib3ds/material.h>
 #include <lib3ds/vector.h>
+#include <lib3ds/quat.h>
+
+#include <math.h>
 
 /**
  * Display a matrix. We use a @ref QGrid here, in order to display it like this:
@@ -351,8 +354,15 @@ public:
 
 		mPos = (QLabel*)addWidget(i18n("Position"), new QLabel(this));
 		QToolTip::add(mPos, i18n("The position of the node in this frame. The matrix of the node has already been translated by this value."));
-		mRot = (QLabel*)addWidget(i18n("Rotation"), new QLabel(this));
-		QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value."));
+		mRot = (QLabel*)addWidget(i18n("Rotation (quaternion)"), new QLabel(this));
+		QToolTip::add(mRot, i18n("The rotation of the node in this frame. The matrix of the node has already been rotated by this value. These 4 values (the quaternion) are the actually stored values."));
+#if 0
+		mRotAngle = (QLabel*)addWidget(i18n("Axis Rotation (x,y,z) -> degree)"), new QLabel(this));
+		QToolTip::add(mRotAngle, i18n("The rotation in readable angles, calculated from the quaternion.\nFirst you see the axis (x,y,z) that is rotated around and then the angle."));
+#endif
+		mRotX = (QLabel*)addWidget(i18n("X Rotation"), new QLabel(this));
+		mRotY = (QLabel*)addWidget(i18n("Y Rotation"), new QLabel(this));
+		mRotZ = (QLabel*)addWidget(i18n("Z Rotation"), new QLabel(this));
 		mScl = (QLabel*)addWidget(i18n("Scale"), new QLabel(this));
 		QToolTip::add(mScl, i18n("The scale factor of the node in this frame. The matrix of the node has already been scaled by this value."));
 
@@ -370,6 +380,12 @@ public:
 		QString bboxMax;
 		QString pos;
 		QString rot;
+#if 0
+		QString rotAngle;
+#endif
+		QString rotX;
+		QString rotY;
+		QString rotZ;
 		QString scl;
 		QString morphSmooth;
 		QString morph;
@@ -382,6 +398,17 @@ public:
 			bboxMax = QString("(%1,%2,%3)").arg(d->bbox_max[0]).arg(d->bbox_max[1]).arg(d->bbox_max[2]);
 			pos = QString("(%1,%2,%3)").arg(d->pos[0]).arg(d->pos[1]).arg(d->pos[2]);
 			rot = QString("(%1,%2,%3,%4)").arg(d->rot[0]).arg(d->rot[1]).arg(d->rot[2]).arg(d->rot[3]);
+
+			float rX = 0.0f, rY = 0.0f, rZ = 0.0f, angle = 0.0f;
+#if 0
+			quatToAxisRotation(d->rot, &rX, &rY, &rZ, &angle);
+			rotAngle = QString("(%1,%2,%3) -> %4 degrees").arg(rX).arg(rY).arg(rZ).arg(angle);
+#endif
+			quatToEulerAngles(d->rot, &rX, &rY, &rZ);
+			rotX = QString::number(rX);
+			rotY = QString::number(rY);
+			rotZ = QString::number(rZ);
+
 			scl = QString("(%1,%2,%3)").arg(d->scl[0]).arg(d->scl[1]).arg(d->scl[2]);
 			morphSmooth = QString::number(d->morph_smooth);
 			morphSmooth = QString(d->morph_smooth);
@@ -394,6 +421,12 @@ public:
 		mBBoxMax->setText(bboxMax);
 		mPos->setText(pos);
 		mRot->setText(rot);
+#if 0
+		mRotAngle->setText(rotAngle);
+#endif
+		mRotX->setText(rotX);
+		mRotY->setText(rotY);
+		mRotZ->setText(rotZ);
 		mScl->setText(scl);
 		mMorphSmooth->setText(morphSmooth);
 		mMorph->setText(morph);
@@ -413,6 +446,155 @@ protected:
 		return w;
 	}
 
+#if 0
+	// AB: this functions doesn't work how i expect it.
+	// i used the algorithms from the site mentioned below, but i haven't
+	// found out what exactly it calculates (e.g. whether the angle is in
+	// radians or degree, ...)
+	// i am very sure that it does not calculate the rotation axis and it's
+	// angle. or if it does, this implementation has a bug.
+	// disabled, because it isn't important anymore - we use
+	// quatToEulerAngles() instead, which is far more what we need.
+
+	// convert quaternion to a rotation around an axis.
+	void quatToAxisRotation(Lib3dsQuat _q, float* _x, float* _y, float* _z, float* _angle)
+	{
+		if (!_x || !_y || !_z || !_angle) {
+			return;
+		}
+		// see e.g. http://www.j3d.org/matrix_faq/matrfaq_latest.html
+		// for some useful information on quaternions (this algorithm is
+		// from there!)
+		Lib3dsQuat q;
+		lib3ds_quat_copy(q, _q);
+		lib3ds_quat_normalize(q);
+		float cos_a = q[3]; // cos_a = w
+		float angle = acos(cos_a) * 2;
+		float sin_a = sqrt(1.0f - cos_a * cos_a);
+		if (fabs(sin_a) < 0.0005) {
+			sin_a = 1;
+		}
+
+
+		// the axis where we rotate
+		*_x = q[0] / sin_a;
+		*_y = q[1] / sin_a;
+		*_z = q[2] / sin_a;
+
+		// the angle that is used on the above axis
+		*_angle = angle;
+	}
+#endif
+
+	void quatToRotationMatrix(Lib3dsQuat _q, float* mat)
+	{
+		// note: mat is *NOT* a Lib3dsMatrix. it is a 16 element array,
+		// in the format used by OpenGL.
+		// see also http://www.j3d.org/matrix_faq/matrfaq_latest.html
+		if (!mat) {
+			return;
+		}
+
+		Lib3dsQuat q; // I am assuming this is of form (X,Y,Z,W), is that true?
+		lib3ds_quat_copy(q, _q);
+		lib3ds_quat_normalize(q);
+
+		float xx = q[0] * q[0];
+		float xy = q[0] * q[1];
+		float xz = q[0] * q[2];
+		float xw = q[0] * q[3];
+
+		float yy = q[1] * q[1];
+		float yz = q[1] * q[2];
+		float yw = q[1] * q[3];
+
+		float zz = q[2] * q[2];
+		float zw = q[2] * q[3];
+
+		mat[0] = 1.0f - 2.0f * ( yy + zz );
+		mat[1] = 2.0f * ( xy - zw );
+		mat[2] = 2.0f * ( xz + yw );
+		mat[3] = 0.0f;
+
+		mat[4] = 2.0f * ( xy + zw );
+		mat[5] = 1.0f - 2.0f * ( xx + zz );
+		mat[6] = 2.0f * ( yz - xw );
+		mat[7] = 0.0f;
+
+		mat[8] = 2.0f * ( xz - yw );
+		mat[9] = 2.0f * ( yz + xw );
+		mat[10] = 1.0f - 2.0f * ( xx + yy );
+		mat[11] = 0.0f;
+
+		mat[12] = 0.0f;
+		mat[13] = 0.0f;
+		mat[14] = 0.0f;
+		mat[15] = 1.0f;
+	}
+
+	// convert a quaternion to so-called euler angles.
+	// euler angles are angles around one of [x,y,z] axis. i.i
+	// (1,0,0) or (0,1,0) or (0,0,1) in OpenGL's glRotate()
+	void quatToEulerAngles(Lib3dsQuat _q, float* _x, float* _y, float* _z)
+	{
+		// hm
+		// I cannot use quaternions properly so I am using docs only. I
+		// have not yet found any docs that do this conversion directly,
+		// so we convert to a rotation matrix first, then to euler
+		// angles.
+
+		Lib3dsQuat q; // I am assuming this is of form (X,Y,Z,W), is that true?
+		lib3ds_quat_copy(q, _q);
+
+		float mat[16];
+		quatToRotationMatrix(q, mat);
+
+		// now convert that matrix to euler angles.
+		// see also http://www.j3d.org/matrix_faq/matrfaq_latest.html
+
+		// AB: umm... the algorithms uses this, but never defines it
+		// anywhere. I think it is the RAD2DEG one, that we use in
+		// bo3dtools.cpp, as we want to convert to degrees.
+		// still needs to be verified!
+#define RADIANS (180.0 / M_PI)
+		float angle_x, angle_y, angle_z;
+		float D;
+		angle_y = D =  asin(mat[2]); // Calculate Y-axis angle
+		float C = cos(angle_y);
+		angle_y *= RADIANS;
+
+		float tr_x, tr_y;
+		if (fabs(C) > 0.005) {
+			tr_x =  mat[10] / C; // get X-axis angle
+			tr_y = -mat[6]  / C;
+			angle_x = atan2(tr_y, tr_x) * RADIANS;
+			tr_x =  mat[0] / C; // Get Z-axis angle
+			tr_y = -mat[1] / C;
+			angle_z  = atan2(tr_y, tr_x) * RADIANS;
+		} else { // gimball lock
+			angle_x = 0; // Set X-axis angle to zero
+			tr_x = mat[5]; // And calculate Z-axis angle
+			tr_y = mat[4];
+			angle_z = atan2(tr_y, tr_x) * RADIANS;
+		}
+
+		// return only positive angles in [0,360]
+		if (angle_x < 0) {
+			angle_x += 360;
+		}
+		if (angle_y < 0) {
+			angle_y += 360;
+		}
+		if (angle_z < 0) {
+			angle_z += 360;
+		}
+
+
+		*_x = angle_x;
+		*_y = angle_y;
+		*_z = angle_z;
+	}
+
 private:
 	QVBoxLayout* mLayout;
 
@@ -422,6 +604,12 @@ private:
 	QLabel* mBBoxMax;
 	QLabel* mPos;
 	QLabel* mRot;
+#if 0
+	QLabel* mRotAngle;
+#endif
+	QLabel* mRotX;
+	QLabel* mRotY;
+	QLabel* mRotZ;
 	QLabel* mScl;
 	QLabel* mMorphSmooth;
 	QLabel* mMorph;
