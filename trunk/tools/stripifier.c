@@ -42,6 +42,7 @@ void optimizePoints(Lib3dsMesh* mesh);
 void optimizeFaces(Lib3dsMesh* mesh);
 void dumpFace(Lib3dsFace* face, int newline);
 void dumpMesh(Lib3dsMesh* mesh);
+void createAdjacencyLists(Lib3dsMesh* mesh, struct Face* faces);
 void stripify(struct Face* faces, int facesCount);
 void makeStrip(struct Face* face, struct Face* prev, struct Face* prev2, struct List* strip);
 
@@ -285,15 +286,9 @@ int hasPoint(Lib3dsFace* face, int point)
 
 void parseMesh(Lib3dsMesh* mesh)
 {
- unsigned int face = 0;
- unsigned int face2 = 0;
- Lib3dsFace* l3ds_f = 0;
- Lib3dsFace* l3ds_f2 = 0;
- int match = 0;
  int i = 0;
  int j = 0;
  struct Face* faces = 0;
- struct Face* f = 0;
  struct List* l = 0;
 
  if (!mesh) {
@@ -313,6 +308,31 @@ void parseMesh(Lib3dsMesh* mesh)
  }
 
  faces = (struct Face*)malloc(sizeof(struct Face) * mesh->faces);
+ createAdjacencyLists(mesh, faces);
+
+ if (debug >= 3) {
+	dumpAdjacent(mesh, faces, mesh->faces);
+ }
+
+ stripify(faces, mesh->faces);
+
+ for (i = 0; i < mesh->faces; i++) {
+	free_list_item(faces[i].f1);
+	free_list_item(faces[i].f2);
+	free_list_item(faces[i].f3);
+ }
+ free(faces);
+}
+
+void createAdjacencyLists(Lib3dsMesh* mesh, struct Face* faces)
+{
+ Lib3dsFace* l3ds_f = 0;
+ Lib3dsFace* l3ds_f2 = 0;
+ unsigned int face = 0;
+ unsigned int face2 = 0;
+ int match = 0;
+ struct Face* f = 0;
+ int i = 0;
 
  // naive implementation is sufficient.
  for (face = 0; face < mesh->faces; face++) {
@@ -395,19 +415,6 @@ void parseMesh(Lib3dsMesh* mesh)
 	}
 #endif
  }
-
- if (debug >= 3) {
-	dumpAdjacent(mesh, faces, mesh->faces);
- }
-
- stripify(faces, mesh->faces);
-
- for (i = 0; i < mesh->faces; i++) {
-	free_list_item(faces[i].f1);
-	free_list_item(faces[i].f2);
-	free_list_item(faces[i].f3);
- }
- free(faces);
 }
 
 void dumpMesh(Lib3dsMesh* mesh)
