@@ -128,7 +128,7 @@ void BosonParticleSystem::init(int initialnum)
 
 void BosonParticleSystem::createParticles(int count)
 {
-  if(count > mMaxNum) 
+  if(count > mMaxNum)
   {
     count = mMaxNum;
   }

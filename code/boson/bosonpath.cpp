@@ -487,7 +487,7 @@ bool BosonPath::findSlowPath()
   marking(node.x, node.y).f = node.g + node.h;
   marking(node.x, node.y).g = node.g;
   marking(node.x, node.y).level = 0; // same as node.level
-  
+
   // Create second node
   PathNode n2;
 
@@ -531,7 +531,7 @@ bool BosonPath::findSlowPath()
       mGoaly = node.y;
       break;
     }
-    
+
     // Check if we've gone too long with searching
     if(mNodesRemoved >= ABORTPATH)
     {
@@ -628,7 +628,7 @@ bool BosonPath::findSlowPath()
                 break;
               }
             }
-            if (find == open.end()) 
+            if (find == open.end())
             {
               boError(500) << "find == open.end()" << endl;
               break; // or what?
@@ -659,7 +659,7 @@ bool BosonPath::findSlowPath()
     mPathCost = node.g;
     // Temporary array - needed because path is first stored from goal to start
     QValueList<QPoint> temp;
-    
+
     // Construct waypoint and set it's pos to goal
     QPoint wp;
     int x, y;
@@ -686,7 +686,7 @@ bool BosonPath::findSlowPath()
       wp.setX(x * BO_TILE_SIZE + mUnit->width() / 2);
       wp.setY(y * BO_TILE_SIZE + mUnit->height() / 2);
     }
-    if (counter >= 100) 
+    if (counter >= 100)
     {
       boWarning(500) << k_lineinfo << "oops - counter >= 100" << endl;
     }
@@ -699,7 +699,7 @@ bool BosonPath::findSlowPath()
       path.append(wp);
     }
 
-#ifdef VISUALIZE_PATHS  
+#ifdef VISUALIZE_PATHS
   if(mDisplay && mCanvas)
   {
     float x, y;
@@ -1871,7 +1871,7 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     tm_copypath = pr.elapsed();
 
 
-#ifdef VISUALIZE_PATHS  
+#ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
     if(mDisplay && mCanvas)
     {
@@ -2747,7 +2747,7 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
     info->destRegion = n.region;
     tm_copypath = pr.elapsed();
 
-#ifdef VISUALIZE_PATHS  
+#ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
     if(mDisplay && mCanvas)
     {
