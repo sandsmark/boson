@@ -170,8 +170,7 @@ void bosonCanvas::destroyFix(destroyedMsg_t &msg)
 		logf(LOG_ERROR, "bosonCanvas::destroyFix : can't find msg.key");
 		return;
 	}
-	boCheck(msg.x, f->x());
-	boCheck(msg.y, f->y());
+	boCheck( QPoint(msg.x, msg.y), gridRect().topLeft() );
 
 	QPoint p = f->center();
 	new boShot ( p.x(), p.y(), f->z(), boShot::SHOT_FACILITY);
