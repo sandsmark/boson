@@ -171,7 +171,7 @@ bool BosonPath::findPath()
   if(findFastPath())
   {
     gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (fast method): " << time2.tv_usec - time1.tv_usec << " microsec." << endl;
     pathFast++;
     return true;
   }
@@ -180,13 +180,13 @@ bool BosonPath::findPath()
     if(rangeCheck())
     {
       gettimeofday(&time2, 0);
-      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (range method): " << time2.tv_usec - time1.tv_usec << " microsec." << endl;
       pathRange++;
       return false;
     }
     bool a = findSlowPath();
     gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << "microsec. nodes removed: " << mNodesRemoved << endl;
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << " microsec. nodes removed: " << mNodesRemoved << endl;
     pathSlow++;
     return a;
   }
