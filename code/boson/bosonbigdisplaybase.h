@@ -460,8 +460,6 @@ protected:
 	int renderTextAdvanceCalls(int x, int y);
 	void renderTextGamePaused();
 
-	void renderMiniMap();
-
 	/**
 	 * Called by @ref paintGL only to render the cells on the screen
 	 **/
