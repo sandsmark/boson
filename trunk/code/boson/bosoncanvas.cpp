@@ -286,6 +286,9 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 				skip = true;
 			}
 			break;
+		case (int)UnitBase::WorkNone:
+			skip = true;
+			break;
 		case (int)UnitBase::WorkMove:
 			skip = false;
 			break;
@@ -322,6 +325,7 @@ void BoCanvasAdvance::advanceFunctionAndMove(unsigned int advanceCallsCount, boo
 	if (skip) {
 		continue;
 	}
+//	boDebug() << "advancing " << (*it).count() << " items with advanceWork=" << work << endl;
 	QPtrListIterator<BosonItem> itemIt(*it);
 	for (; itemIt.current(); ++itemIt) {
 		unsigned int id;

@@ -219,11 +219,19 @@ public:
 	virtual void advanceFollow(unsigned int) { }
 
 	/**
+	 * This is called when the unit is supposed to do nothing.
+	 *
+	 * Note that the game may decide _not_ to call this advance function at
+	 * all, as it is a noop anyway. Do NOT implement anything here.
+	 **/
+	virtual void advanceNone(unsigned int advanceCallsCount);
+
+	/**
 	 * This is called when there is nothing else to do for this unit.
 	 * Usually the unit will check for enemy units in range and fire at
 	 * them.
 	 **/
-	virtual void advanceNone(unsigned int advanceCallsCount);
+	virtual void advanceIdle(unsigned int advanceCallsCount);
 
 	/**
 	 * Move the construction animation one step forward. Does nothing by
@@ -525,7 +533,7 @@ private:
 	// now we come to the interesting slightly hackish performance part :-)
 	// we store a pointer to the advance*() method that is currently used.
 	// we do NULL checking on this pointer - but it *must not* happen, that
-	// this pointer is null (advanceNone instead).
+	// this pointer is null (advanceIdle instead).
 	// we store 2 pointers - see advanceFunction2() on this.
 	MemberFunction mAdvanceFunction;
 	MemberFunction mAdvanceFunction2;

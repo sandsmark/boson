@@ -265,12 +265,12 @@ public:
 	void repair(Unit* unit);
 
 	/**
-	 * Called from @ref Unit::advanceNone. Repair the next unit that is in
+	 * Called from @ref Unit::advanceIdle. Repair the next unit that is in
 	 * range. An alternative name might be "advance", just like in @ref
 	 * ProducePlugin but since we don't have a WorkRepair in @ref Unit there
 	 * is no advance call for it from @ref BosonCanvas::slotAdvance either.
 	 *
-	 * @ref Unit::advanceNone is used for it instead.
+	 * @ref Unit::advanceIdle is used for it instead.
 	 **/
 	void repairInRange();
 
