@@ -147,6 +147,8 @@ EditorBigDisplay::EditorBigDisplay(BosonCanvas* c, QWidget* parent)
 void EditorBigDisplay::init()
 {
  d = new EditorBigDisplayPrivate;
+ d->mActionLocked = false;
+ d->mActionType = ActionBuild; // unused at this point. just a dummy initialization
 }
 
 EditorBigDisplay::~EditorBigDisplay()
