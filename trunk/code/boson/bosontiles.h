@@ -110,7 +110,15 @@ protected:
 	static QString trans_ext(int t);
 
 signals:
-	void signalTilesLoading(int);
+	/**
+	 * Emitted whenever 10 tiles have been loaded.
+	 * @param tiles The number of tiles that have been loading by now.
+	 **/
+	void signalTilesLoading(int tiles);
+
+	/**
+	 * Emitted when tile loading has been completed.
+	 **/
 	void signalTilesLoaded();
 
 private:
