@@ -139,6 +139,8 @@ public:
 	QString soundShoot() const;
 
 protected:
+	void shootAt(Unit* target);
+
 	/**
 	 * @return a list of interesting collisions, i.e. no non-units, no
 	 * destryed units, ...

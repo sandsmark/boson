@@ -227,7 +227,11 @@ void Unit::advance(int phase)
 	} else if (work() == WorkConstructed) {
 		advanceConstruction();
 	} else if (work() == WorkNone) {
-		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
+//		kdDebug() << k_funcinfo << ": work==WorkNone" << endl;
+		QCanvasItemList list = enemyUnitsInRange();
+		if (!list.isEmpty()) {
+			shootAt((Unit*)list[0]);
+		}
 	} else {
 		kdError() << "work: " << work() << endl;
 	}
@@ -305,7 +309,9 @@ void Unit::stopMoving()
  kdDebug() << "stopMoving" << endl;
  clearWaypoints();
  setWork(WorkNone);
- setAnimated(false); // do not call advance() anymore - is more efficient
+ setXVelocity(0);
+ setYVelocity(0);
+// setAnimated(false); // do not call advance() anymore - is more efficient
 
  // in theory all units move on all clients the same - i.e. a playerInput() is
  // transmitted to all clients and all variables should always have the same
@@ -424,20 +430,24 @@ void Unit::attackUnit(Unit* target)
  if (waypointCount() > 0) {
 	clearWaypoints();
  }
- if (d->mReloadState != 0) {
-//	kdDebug() << "gotta reload first" << endl;
-	return;
- }
- kdDebug() << "shoot at unit " << target->id() << endl;
  setXVelocity(0);
  setYVelocity(0);
- ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
- d->mReloadState = reload();
+ shootAt(target);
  if (target->isDestroyed()) {
 	stopAttacking();
  }
 }
 
+void Unit::shootAt(Unit* target)
+{
+ if (d->mReloadState != 0) {
+//	kdDebug() << "gotta reload first" << endl;
+	return;
+ }
+ kdDebug() << "shoot at unit " << target->id() << endl;
+ ((BosonCanvas*)canvas())->shootAtUnit(target, this, damage());
+ d->mReloadState = reload();
+}
 
 QCanvasItemList Unit::unitsInRange() const
 {
@@ -451,6 +461,7 @@ QCanvasItemList Unit::unitsInRange() const
  r.setLeft((r.left() > (int)range()) ? r.left() - range() : 0);
 
  QCanvasItemList items = canvas()->collisions(r);
+ items.remove((QCanvasItem*)this);
  QCanvasItemList inRange;
  QCanvasItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
