@@ -2789,19 +2789,17 @@ See http:://objprelink.sourceforge.net for details:
   fi
 ])
 
-AC_DEFUN(KDE_CHECK_LIB64,
+AC_DEFUN([KDE_CHECK_LIB64],
 [
-    kdelibsuff=none
+    kdelibsuff=no
     AC_ARG_ENABLE(libsuffix,
         AC_HELP_STRING([--enable-libsuffix],
-            [/lib directory suffix (64,32,none)]),
+            [/lib directory suffix (64,32,none[=default])]),
             kdelibsuff=$enableval)
-    if test "$kdelibsuff" = "none"; then
-        if test -d /lib64 ; then
-            kdelibsuff=64
-        else
-            kdelibsuff=
-        fi
+    # TODO: add an auto case that compiles a little C app to check
+    # where the glibc is
+    if test "$kdelibsuff" = "no"; then
+       kdelibsuff=
     fi
     if test -z "$kdelibsuff"; then
         AC_MSG_RESULT([not using lib directory suffix])
