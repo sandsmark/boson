@@ -1,5 +1,6 @@
 # Add all maps here
 maps_DATA = \
+	a10-test.bpf \
 	basic.bpf \
 	basic2.bpf \
 	basic3.bpf \
