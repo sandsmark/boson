@@ -28,6 +28,9 @@ template<class T1, class T2> class QMap;
 class QDomElement;
 
 class BoInfoPrivate;
+
+#define MAKE_VERSION(a,b,c) ( ((a) << 16) | ((b) << 8) | (c) )
+
 /**
  * There has always been one problem in boson: speed. But not because boson is
  * so slow (yes it is - but less than 1 FPS is <em>not</em> boson's fault) but
@@ -98,6 +101,7 @@ public:
 		OpenGLRendererString = 22,
 		OpenGLExtensionsString = 23,
 		OpenGLValuesString = 24,
+		OpenGLVersion = 25,
 		GLUVersionString = 30,
 		GLUExtensionsString = 31,
 		GLXClientVersionString = 40,
@@ -289,6 +293,27 @@ public:
 	}
 
 	/**
+	 * @return Runtime OpenGL version which is encoded using MAKE_VERSION macro.
+	 **/
+	unsigned int openGLVersion() const;
+
+	/**
+	 * @return Whether runtime OpenGL version is equal or greater than given
+	 *  version.
+	 * vesion must be encoded using MAKE_VERSION macro.
+	 **/
+	bool hasOpenGLVersion(unsigned int version) const;
+
+	/**
+	 * @return Whether runtime OpenGL version is equal or greater than given
+	 *  version.
+	 **/
+	bool hasOpenGLVersion(unsigned int major, unsigned int minor, unsigned int release) const
+	{
+		return hasOpenGLVersion(MAKE_VERSION(major, minor, release));
+	}
+
+	/**
 	 * @return A string containing the vendor of the installed OpenGL
 	 * version (runtime). Usually mesa or nvidia.
 	 **/
@@ -378,7 +403,7 @@ public:
 	{
 		return getInt(BoInfo::XProtocolVersion);
 	}
-	
+
 	/**
 	 * @return The revision of the X protocol. Probably we don't need this.
 	 **/
@@ -493,7 +518,7 @@ public:
 	{
 		return getString(BoInfo::KernelModuleTDFXString);
 	}
-	
+
 	/**
 	 * @return If the OS was recognized AND the kernel module is loaded this
 	 * returns the string that made us believe the kernel module was loaded.
@@ -590,7 +615,7 @@ public:
 	//   that.
 	//   // AB: we need the LoadModule() stuff *only*. if GLX isn't loaded,
 	//   then it is not listed in the extensions list.
-	// 
+	//
 protected:
 	void insert(int key, int value);
 	void insert(int key, unsigned int value);

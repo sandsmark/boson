@@ -246,11 +246,8 @@ void BoInfo::update(QWidget* widget)
  insert(BosonVersionString, BOSON_VERSION_STRING);
 
  // kde
-#warning assumption!
- // KDE::version is a proposal only!
 #if KDE_VERSION >= KDE_MAKE_VERSION (3,2,0)
  // for KDE < 3.2 we don't have a runtime version available
- // AB: does this actually exist??
  insert(KDEVersion, (unsigned int)KDE::version());
 #endif
  insert(CompileOffset + KDEVersion, (unsigned int)KDE_VERSION);
@@ -491,6 +488,9 @@ QString BoInfo::keyToName(int key)
 		break;
 	case OpenGLValuesString:
 		string = i18n("OpenGL Values String");
+		break;
+	case OpenGLVersion:
+		string = i18n("OpenGL Version");
 		break;
 	case GLUVersionString:
 		string = i18n("GLU Version String");
@@ -870,5 +870,15 @@ QString BoInfo::makeCharacterDeviceErrorString(int ret) const
 QMap<int, QVariant> BoInfo::completeData() const
 {
  return d->mInfos;
+}
+
+bool BoInfo::hasOpenGLVersion(unsigned int version) const
+{
+ return (getUInt(OpenGLVersion) >= version);
+}
+
+unsigned int BoInfo::openGLVersion() const
+{
+ return getUInt(OpenGLVersion);
 }
 

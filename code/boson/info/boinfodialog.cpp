@@ -57,6 +57,7 @@ public:
 
 		mOGHaveData = 0;
 		mOGRuntimeVersionString = 0;
+		mOGRuntimeVersionCode = 0;
 		mOGVendorString = 0;
 		mOGRendererString = 0;
 		mOGExtensions = 0;
@@ -122,6 +123,7 @@ public:
 
 	QLabel* mOGHaveData;
 	QLabel* mOGRuntimeVersionString;
+	QLabel* mOGRuntimeVersionCode;
 	QLabel* mOGVendorString;
 	QLabel* mOGRendererString;
 	KListBox* mOGExtensions;
@@ -253,6 +255,9 @@ void BoInfoDialog::initOpenGLPage()
  hbox = new QHBox(vbox);
  (void)new QLabel(i18n("Runtime OpenGL version string:"), hbox);
  d->mOGRuntimeVersionString = new QLabel(hbox);
+ hbox = new QHBox(vbox);
+ (void)new QLabel(i18n("Runtime OpenGL version code:"), hbox);
+ d->mOGRuntimeVersionCode = new QLabel(hbox);
  hbox = new QHBox(vbox);
  (void)new QLabel(i18n("OpenGL vendor string:"), hbox);
  d->mOGVendorString = new QLabel(hbox);
@@ -451,6 +456,7 @@ void BoInfoDialog::resetOpenGLPage()
  bool og = d->data()->haveOpenGLData();
  d->mOGHaveData->setText(og ? i18n("Yes") : i18n("No"));
  d->mOGRuntimeVersionString->setText(og ? d->data()->openGLVersionString() : QString(""));
+ d->mOGRuntimeVersionCode->setText("0x" + QString::number(d->data()->openGLVersion(), 16));
  d->mOGVendorString->setText(og ? d->data()->openGLVendorString() : QString(""));
  d->mOGRendererString->setText(og ? d->data()->openGLRendererString() : QString(""));
  // TODO: OG extensions
