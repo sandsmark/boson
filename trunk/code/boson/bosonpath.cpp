@@ -34,6 +34,8 @@
 #include <qpoint.h>
 //#include <sys/time.h> // only for debug
 
+#include <math.h>
+
 
 // this should be highest of all costs. If cell's cost is at least ERROR_COST,
 //  there's no way unit can go to that cell
@@ -1536,7 +1538,7 @@ void BosonPath2::findHighLevelPath(BosonPathInfo* info)
 
 void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 {
-  long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath, tm_viz, tm_uninit;
+  long int tm_initarea, tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
   boDebug(510) << k_funcinfo << "HL path has " << info->hlpath->path.count() << " steps, using step " << info->hlstep << " atm" << endl;
   BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'l' + 'o');
   BosonPathRegion* currentregion = info->hlpath->path[info->hlstep];
@@ -1777,8 +1779,8 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
     {
       // Take next region
 //      boDebug(510) << k_funcinfo << "parent direction is " << PARENTDIR(p.x(), p.y()) << endl;
-      x += xoffsets[PARENTDIR(p.x(), p.y())];
-      y += yoffsets[PARENTDIR(p.x(), p.y())];
+      x += xoffsets[(int)PARENTDIR(p.x(), p.y())];
+      y += yoffsets[(int)PARENTDIR(p.x(), p.y())];
       p.setX(x);
       p.setY(y);
       canvas.setX(p.x() * BO_TILE_SIZE + BO_TILE_SIZE / 2);
@@ -2490,7 +2492,7 @@ void BosonPath2::addCachedHighLevelPath(BosonPathHighLevelPath* path)
 void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 {
   boDebug(510) << k_funcinfo << endl;
-  long int tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath, tm_viz, tm_uninit;
+  long int tm_initmaps, tm_initmisc, tm_mainloop, tm_copypath = 0, tm_viz = 0, tm_uninit;
   BosonProfiler pr('P' + 'F' + '_' + 'T' + 'N' + 'G' + ' ' + 'h' + 'i');
   // List of open nodes
   BosonPathHeap<BosonPathHighLevelNode> open;
