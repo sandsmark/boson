@@ -63,7 +63,8 @@ Top::Top()
 {
  d = new TopPrivate;
 
- d->mBosonWidget= new BosonWidget(this);
+ d->mBosonWidget = new BosonWidget(this);
+ d->mBosonWidget->addGameCommandFrame();
 
  // tell the KMainWindow that this is indeed the main widget
  setCentralWidget(d->mBosonWidget);

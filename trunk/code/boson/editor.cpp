@@ -128,7 +128,8 @@ Editor::Editor()
 {
  d = new EditorPrivate;
 
- d->mBosonWidget= new BosonWidget(this, true);
+ d->mBosonWidget = new BosonWidget(this);
+ d->mBosonWidget->addEditorCommandFrame();
  connect(d->mBosonWidget, SIGNAL(signalPlayerJoinedGame(KPlayer*)), 
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(d->mBosonWidget, SIGNAL(signalPlayerLeftGame(KPlayer*)), 
