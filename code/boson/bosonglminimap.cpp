@@ -727,10 +727,8 @@ void BosonGLMiniMapRenderer::renderLogo()
 	boError() << k_funcinfo << "logo height != minimap height" << endl;
 	return;
  }
- boProfiling->start(555);
  glRasterPos2i(mPosX, mPosY);
  glDrawPixels(d->mLogo.width(), d->mLogo.height(), GL_RGBA, GL_UNSIGNED_BYTE, d->mLogo.bits());
- boProfiling->stop(555);
 }
 
 void BosonGLMiniMapRenderer::renderMiniMap()
