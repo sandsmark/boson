@@ -12,6 +12,7 @@ apidox-am-yes:
 		fi ;\
 		cp $(top_srcdir)/admin/Doxyfile.global Doxyfile; \
 		echo "PROJECT_NAME           = \"$(subdir) Library\"" >> Doxyfile; \
+		echo "PROJECT_NUMBER         = \"Version $(VERSION)\"" >> Doxyfile; \
 		echo "INPUT                  = $(srcdir)" >> Doxyfile; \
 		echo "IMAGE_PATH             = $(top_srcdir)/doc/api" >> Doxyfile ;\
 		echo "OUTPUT_DIRECTORY       = $(top_builddir)/apidocs" >> Doxyfile; \
@@ -45,7 +46,6 @@ apidox-am-yes:
 			fi ;\
 		done ;\
 		echo "GENERATE_TAGFILE       = $(top_builddir)/apidocs/$(subdir)/$(subdir).tag" >> Doxyfile ;\
-		echo "IGNORE_PREFIX          = K" >> Doxyfile ;\
 		echo "HAVE_DOT = $(KDE_HAVE_DOT)" >> Doxyfile ;\
 		$(DOXYGEN) Doxyfile ;\
 	fi
