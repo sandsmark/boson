@@ -43,10 +43,10 @@ boson-cvs@lists.sourceforge.net is only meant for CVS logs, please do not post t
 boson-bugs@lists.sourceforge.net is also not meant for posting, bug reports are sent there. See below on how to report bugs.<br><br>");
 
 draw_bigbox_subheader("IRC");
-draw_bigbox_text("We also have an IRC channel. If you have questions/bugs/problems/compile errors, you can just go to #boson on openprojects (e.g. irc.openprojects.net).<br><br>");
+draw_bigbox_text("We also have an IRC channel. If you have questions/problems/compile errors, you can just go to #boson on openprojects (e.g. irc.openprojects.net).<br><br>");
 
 draw_bigbox_subheader("Reporting bugs");
-draw_bigbox_text("You can report bugs using <a href=\"http://bugs.kde.org/\">KDE's bug tracking system</a> or the 'report bug' feature in boson.");
+draw_bigbox_text("You can report bugs using <a href=\"http://bugs.kde.org/\">KDE's bug tracking system</a> or the 'report bug' feature in boson's help menu.");
 
 draw_bigbox_end();
 

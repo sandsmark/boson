@@ -37,8 +37,8 @@ main_area_begin();
 draw_bigbox_begin("About Boson");
 echo "<tr><td>Boson is an OpenGL real-time strategy game, with the
 	feeling of Command&amp;Conquer(tm) or StarCraft(tm).
-	It is designed to run on Unix (Linux) computers, and is built on top of the libkdegames,
-	kde and Qt libraries.<br> A minimum of two players is required,
+	It is designed to run on Unix (Linux) computers, and is built on top of the 
+	KDE, Qt and kdegames libraries.<br> A minimum of two players is required,
 	since there is no artificial intelligence yet.<br><br></td></tr>";
 draw_bigbox_end();
 
@@ -52,34 +52,33 @@ news_article("More eyecandy", "September 10th 2002 20:00",
     "Boson now has particle effects! This means that shots and explosions work
     again! Also, we have smoke clouds for destroyed units and flames for
     half-destroyed facilities. Go to <a href=\"screenshots.php\">screenshots
-    page</a> and check out new screenshots showing explosions and smoke! Or even
-    better, update your CVS copy. If you don't have CVS copy, go to
-    <a href=\"download.php#cvs\">download page</a> for instructions on how to get
-    one!<br>
+    page</a> and check out the new screenshots showing explosions and smoke! Or even
+    better, update your CVS copy. If you don't have a CVS copy, go to
+    <a href=\"download.php#cvs\">the download page</a> for instructions on how to get one!<br>
     Also, here are some updates to this page (mostly style) by Ben.<br>
     We hope you like it!<br><br>");
 news_article("New features!", "September 2nd 2002 18:08",
     "I promised to add new features and here comes the first one: you can now
-    change style of this homepage. Just go to <a href=\"options.php\">options
-    page</a> and select style you like most!<br>
+    change the style of this homepage. Just go to the <a href=\"options.php\">options
+    page</a> and select the style you like most!<br>
     Currently, there are only two different styles, but if you want more, you
-    can write one yourself! All you need to do is to write new stylesheet that
-    specifies colors used. It's not hard! You can use style-blue.css as
+    can write them yourself! All you need to do is to write a new stylesheet that
+    specifies the used colors. It's not hard! You can use style-blue.css as
     template. When you're done, send them to
     <a href=\"mailto:rivolaks@hot.ee\">me</a>, I'm happy to put them up here!<br><br>");
 news_article("New homepage", "September 1st 2002 19:22",
-    "Boson has now new homepage! This homepage should be much better than old
+    "Boson has a new homepage! This homepage should be much better than the old
     one, but it's new, so it may contain some errors (I hope it doesn't though).
-    If you find an error, please report it to
-    <a href=\"mailto:boson-devel@lists.sourceforge.net\">our mailinglist</a><br>
-    This is not modification of our old homepage, it's written from scratch in
+    If you find an error, please report it to <a href=\"mailto:boson-devel@lists.sourceforge.net\">our mailinglist</a><br>
+    This is not a modification of our old homepage, it's written from scratch in
     PHP, which hopefully makes it easier to maintain than the old one.<br>
-    What has changed compared to the old page? It has new look which reminds
-    look of <a href=\"http://www.kde.org/\">KDE homepage</a>. Also, we have
-    couple of new pages (<a href=\"install.php\">page with installation
-    instructions</a>, <a href=\"info.php\">information page</a> and
-    <a href=\"links.php\">links page</a>) and all pages have now valid HTML and
-    CSS.<br>
+    What has changed compared to the old page? It has a new look which reminds
+    the look of the <a href=\"http://www.kde.org/\">KDE homepage</a>. Also, we have
+    a couple of new pages: <br>
+    <ul><li><a href=\"install.php\">Install</a></li>
+    <li><a href=\"info.php\">More information</a></li>
+    <li><a href=\"links.php\">Related links</a></li></ul>
+    and all pages now have valid HTML and CSS.<br>
     This page is still under development and we're adding new features, so come
     back soon!<br><br>");
 news_box_end();

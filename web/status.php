@@ -34,7 +34,11 @@ main_area_begin();
 
 // Contacts
 draw_bigbox_begin("Status");
-draw_bigbox_text("Boson is currently still under heavy development.<br><br>In the latest CVS version, the biggest changes, compared to latest stable release ($latestversion), are OpenGL support (Boson is now 3D), support for upgrades, nicer commandframe and many other little modifications. Also, a large number of bugs have been fixed.<br><br>We're currently heading for release of version 0.7 which will probably be released late 2002 or early 2003 (Note that these dates are <b>not</b> official and may change).");
+draw_bigbox_text("Boson is currently still under heavy development.
+	<br><br>In the latest CVS version, the biggest changes, compared to latest stable release ($latestversion),
+	are OpenGL support (Boson is now 3D), support for upgrades, a nicer commandframe and many other little modifications.
+	Also, a large number of bugs have been fixed.<br><br>We're currently heading for release of version 0.7
+	which will probably be released late 2002 or early 2003 (Note that these dates are <b>not</b> official and may change).");
 draw_bigbox_end();
 //"
 
