@@ -104,7 +104,7 @@ public:
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
 	 * All it does is to create new @ref BosonMissile and play shooting sound
 	 **/
-	void shootAtUnit(Unit* target, Unit* damagedBy);
+	void newShot(BosonShot* shot);
 
 	/**
 	 * Called when missile explodes. This iterates through all unit in damage
@@ -214,6 +214,8 @@ public:
 	int particleSystemsCount();
 	void updateParticleSystems(float elapsed);
 	QPtrList<BosonParticleSystem>* particleSystems();
+	void addParticleSystem(BosonParticleSystem* s);
+	void addParticleSystems(const QPtrList<BosonParticleSystem> systems);
 
 public slots:
 	/**

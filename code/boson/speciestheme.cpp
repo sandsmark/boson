@@ -29,6 +29,8 @@
 #include "sound/bosonsound.h"
 #include "upgradeproperties.h"
 #include "bosonparticlemanager.h"
+#include "items/bosonshot.h"
+#include "bosonweapon.h"
 
 #include <kstandarddirs.h>
 #include <ksimpleconfig.h>
@@ -71,10 +73,13 @@ public:
 	QIntDict<QPixmap> mSmallOverview;
 	QIntDict<QPixmap> mBigOverview;
 	QIntDict<BosonModel> mUnitModels;
-	QIntDict<BosonModel> mObjectModels;
+	QDict<BosonModel> mObjectModels;
 
 	QIntDict<QPixmap> mActionPixmaps;
 
+	QIntDict<BosonParticleSystemProperties> mParticleProps;
+	QIntDict<BosonShotProperties> mShotProps;
+	QIntDict<BosonWeaponProperties> mWeaponProps;
 
 	bool mCanChangeTeamColor;
 
@@ -105,6 +110,9 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
  d->mActionPixmaps.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
+ d->mParticleProps.setAutoDelete(true);
+ d->mShotProps.setAutoDelete(true);
+ d->mWeaponProps.setAutoDelete(true);
  d->mCanChangeTeamColor = true;
  mSound = 0;
 
@@ -131,6 +139,9 @@ void SpeciesTheme::reset()
  d->mUnitProperties.clear();
  d->mTechnologies.clear();
  d->mActionPixmaps.clear();
+ d->mParticleProps.clear();
+ d->mShotProps.clear();
+ d->mWeaponProps.clear();
 }
 
 QColor SpeciesTheme::defaultColor()
@@ -152,7 +163,7 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  mSound = boMusic->addSounds(themePath());
 
  // the initial values for the units - config files :-)
- readUnitConfigs();
+ //readUnitConfigs();
 
  // action pixmaps - it doesn't hurt
  if (!loadActionGraphics()) {
@@ -162,12 +173,6 @@ bool SpeciesTheme::loadTheme(const QString& speciesDir, const QColor& teamColor)
  // don't preload units here as the species can still be changed in new game
  // dialog 
  return true;
-}
-
-void SpeciesTheme::loadParticles()
-{
- // Load particle textures
- BosonParticleManager::loadTextures(themePath() + "/particles");
 }
 
 bool SpeciesTheme::loadUnitGraphics(const UnitProperties* prop)
@@ -568,8 +573,8 @@ void SpeciesTheme::loadNewUnit(UnitBase* unit)
  unit->setHealth(prop->health());
  unit->setArmor(prop->armor());
  unit->setShields(prop->shields());
- unit->setWeaponRange(prop->weaponRange()); // seems to cause a KGame error sometimes
- unit->setWeaponDamage(prop->weaponDamage());
+// unit->setWeaponRange(prop->weaponRange()); // seems to cause a KGame error sometimes
+// unit->setWeaponDamage(prop->weaponDamage());
  unit->setSightRange(prop->sightRange());
 
  if (prop->isMobile()) {
@@ -619,7 +624,7 @@ void SpeciesTheme::readUnitConfigs()
 
 const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) const
 {
- if (unitType <= 0) {
+ if (unitType == 0) {
 	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
@@ -632,7 +637,7 @@ const UnitProperties* SpeciesTheme::unitProperties(unsigned long int unitType) c
 
 UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType) const
 {
- if (unitType <= 0) {
+ if (unitType == 0) {
 	kdError() << k_funcinfo << "invalid unit type " << unitType << endl;
 	return 0;
  }
@@ -645,7 +650,7 @@ UnitProperties* SpeciesTheme::nonConstUnitProperties(unsigned long int unitType)
 
 TechnologyProperties* SpeciesTheme::technology(unsigned long int techType) const
 {
- if (techType <= 0) {
+ if (techType == 0) {
 	kdError() << k_funcinfo << "invalid technology type " << techType << endl;
 	return 0;
  }
@@ -873,21 +878,141 @@ void SpeciesTheme::upgradeResearched(unsigned long int unitType, UpgradeProperti
  d->mUnitProperties[unitType]->upgradeResearched(upgrade);
 }
 
-void SpeciesTheme::loadObjectModels()
+BosonModel* SpeciesTheme::objectModel(QString file)
 {
- // FIXME: hardcoded stuff
- kdDebug() << k_funcinfo << "LOADING OBJECT MODELS!" << endl;
- BosonModel* m = new BosonModel(themePath() + "/objects/", "missile.3ds", 0.3, 0.3);
- m->setTeamColor(teamColor());
- m->loadModel();
- kdDebug() << k_funcinfo << "DONE" << endl;
- d->mObjectModels.insert(ObjectShot, m);
+ if(!d->mObjectModels[file]) {
+	// Model isn't loaded yet. Load it now
+	BosonModel* m = new BosonModel(themePath() + "/objects/", file, 0.3, 0.3);
+	m->setTeamColor(teamColor());
+	m->loadModel();
+	d->mObjectModels.insert(file, m);
+ }
+ return d->mObjectModels[file];
 }
 
-BosonModel* SpeciesTheme::objectModel(ObjectType type)
+void SpeciesTheme::loadParticleSystems()
 {
- if(!d->mObjectModels[type]) {
-	kdError() << k_funcinfo << "No object of type " << type << "found!!!" << endl;
+ BosonParticleSystemProperties::init(themePath() + "/particles");
+ QFile f(themePath() + "particles/particles.boson");
+ if(!f.exists()) {
+	kdWarning() << k_funcinfo << "Particle systems file (" << f.name() << ") does not exists. No particle systems loaded!" << endl;
+	// We assume that this theme has no particles and still return true
+	return;
  }
- return d->mObjectModels[type];
+ KSimpleConfig cfg(f.name());
+ QStringList particles = cfg.groupList();
+ if(particles.isEmpty()) {
+	kdWarning() << k_funcinfo << "No particle systems found in particles file (" << f.name() << ")" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << "Loading " << particles.count() << " particle systems from config file" << endl;
+ QStringList::Iterator it;
+ for(it = particles.begin(); it != particles.end(); ++it) {
+	kdDebug() << k_funcinfo << "Loading particle system from group " << *it << endl;
+	cfg.setGroup(*it);
+	BosonParticleSystemProperties* particleprop = new BosonParticleSystemProperties(&cfg);
+	if (!d->mParticleProps.find(particleprop->id())) {
+		d->mParticleProps.insert(particleprop->id(), particleprop);
+	} else {
+		kdError() << k_funcinfo << "particle system with id " << particleprop->id() << " already there!" << endl;
+	}
+ }
+ return;
+}
+
+void SpeciesTheme::loadShots()
+{
+ QFile f(themePath() + "shots.boson");
+ if(!f.exists()) {
+	kdWarning() << k_funcinfo << "Shots file (" << f.name() << ") does not exists. No shots loaded!" << endl;
+	// We assume that this theme has no shots and still return true
+	return;
+ }
+ KSimpleConfig cfg(f.name());
+ QStringList shots = cfg.groupList();
+ if(shots.isEmpty()) {
+	kdWarning() << k_funcinfo << "No shots found in shots file (" << f.name() << ")" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << "Loading " << shots.count() << " shots from config file" << endl;
+ QStringList::Iterator it;
+ for(it = shots.begin(); it != shots.end(); ++it) {
+	kdDebug() << k_funcinfo << "Loading shot from group " << *it << endl;
+	cfg.setGroup(*it);
+	BosonShotProperties* shotprop = new BosonShotProperties(this, &cfg);
+	if (!d->mShotProps.find(shotprop->id())) {
+		d->mShotProps.insert(shotprop->id(), shotprop);
+	} else {
+		kdError() << k_funcinfo << "shot with id " << shotprop->id() << " already there!" << endl;
+	}
+ }
+ return;
+}
+
+void SpeciesTheme::loadWeapons()
+{
+ QFile f(themePath() + "weapons.boson");
+ if(!f.exists()) {
+	kdWarning() << k_funcinfo << "Weapons file (" << f.name() << ") does not exists. No weapons loaded!" << endl;
+	// We assume that this theme has no weapons and still return true
+	return;
+ }
+ KSimpleConfig cfg(f.name());
+ QStringList weapons = cfg.groupList();
+ if(weapons.isEmpty()) {
+	kdWarning() << k_funcinfo << "No weapons found in weapons file (" << f.name() << ")" << endl;
+	return;
+ }
+ kdDebug() << k_funcinfo << "Loading " << weapons.count() << " weapons from config file" << endl;
+ QStringList::Iterator it;
+ for(it = weapons.begin(); it != weapons.end(); ++it) {
+	kdDebug() << k_funcinfo << "Loading weapon from group " << *it << endl;
+	cfg.setGroup(*it);
+	BosonWeaponProperties* weaponprop = new BosonWeaponProperties(&cfg, this);
+	if (!d->mWeaponProps.find(weaponprop->id())) {
+		d->mWeaponProps.insert(weaponprop->id(), weaponprop);
+	} else {
+		kdError() << k_funcinfo << "weapon with id " << weaponprop->id() << " already there!" << endl;
+	}
+ }
+ return;
+}
+
+BosonParticleSystemProperties* SpeciesTheme::particleSystemProperties(unsigned long int id)
+{
+ if (id == 0) {
+	// We don't print error here because 0 means "none" in configurations
+	return 0;
+ }
+ if (!d->mParticleProps[id]) {
+	kdError() << k_funcinfo << "oops - no particle system properties for " << id << endl;
+	return 0;
+ }
+ return d->mParticleProps[id];
+}
+
+BosonShotProperties* SpeciesTheme::shotProperties(unsigned long int id)
+{
+ if (id == 0) {
+	kdError() << k_funcinfo << "Invalid shot id!" << endl;
+	return 0;
+ }
+ if (!d->mShotProps[id]) {
+	kdError() << k_funcinfo << "oops - no shot properties for " << id << endl;
+	return 0;
+ }
+ return d->mShotProps[id];
+}
+
+BosonWeaponProperties* SpeciesTheme::weaponProperties(unsigned long int id)
+{
+ if (id == 0) {
+	kdError() << k_funcinfo << "Invalid weapon id!" << endl;
+	return 0;
+ }
+ if (!d->mWeaponProps[id]) {
+	kdError() << k_funcinfo << "oops - no weapon properties for " << id << endl;
+	return 0;
+ }
+ return d->mWeaponProps[id];
 }

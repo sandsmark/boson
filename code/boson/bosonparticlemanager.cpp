@@ -23,19 +23,20 @@
 #include <qimage.h>
 
 #include <kdebug.h>
+#include <ksimpleconfig.h>
 
 #include <GL/gl.h>
 
 #include "bosonparticlesystem.h"
 #include "bosontexturearray.h"
+#include "bosonconfig.h"
+#include "bo.h"
+#include "defines.h"
 
-class BosonParticleData
-{
-  public:
-    float maxage;
-};
 
-BosonTextureArray* BosonParticleManager::mTextures = 0;
+/*****  BosonParticleManager  *****/
+
+/*BosonTextureArray* BosonParticleManager::mTextures = 0;
 KRandomSequence* BosonParticleManager::mRandom = 0;
 
 void BosonParticleManager::loadTextures(QString texdir)
@@ -52,7 +53,7 @@ void BosonParticleManager::loadTextures(QString texdir)
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   mTextures = new BosonTextureArray(images, false);
-  
+
   mRandom = new KRandomSequence(9376594);
 }
 
@@ -61,7 +62,7 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
   //cout << "PARTICLE: " << k_funcinfo << "called, type: " << type << endl;
   int maxnum = 0, initnum = 3, blendfunc = GL_ONE_MINUS_SRC_ALPHA;
   float rate = 0, size = 0, age = 0;
-  BosonParticleSystem::ExternalFunction initfunc = 0, updatefunc = &updateFadeOutParticle;
+  BosonParticleSystem::OldExternalFunction initfunc = 0, updatefunc = &updateFadeOutParticle;
 
   if(type == Explosion)
   {
@@ -154,7 +155,8 @@ void BosonParticleManager::initSmallSmokeParticle(BosonParticleSystem*, BosonPar
   particle->maxage = particle->life;
   particle->velo = BoVector3(getFloat(0.05, 0.55), getFloat(-0.15, 0.45), getFloat(0.4, 1.0));
   //particle->color = BoVector4(0.7, 0.7, 0.7, 0.25);
-  particle->pos = BoVector3(getFloat(-0.1, 0.1), getFloat(-0.1, 0.1), getFloat(0.5, 0.6));
+//  particle->pos = BoVector3(getFloat(-0.1, 0.1), getFloat(-0.1, 0.1), getFloat(0.5, 0.6));
+  particle->pos = BoVector3(getFloat(-0.15, 0.15), getFloat(-0.15, 0.15), getFloat(0.5, 0.65));
 }
 
 void BosonParticleManager::initShotParticle(BosonParticleSystem*, BosonParticle* particle)
@@ -219,4 +221,141 @@ void BosonParticleManager::updateExplosionParticle(BosonParticleSystem*, BosonPa
     particle->color.setZ(0.2 * factor);
     particle->color.setW(0.3 - 0.3 * factor);  // Alpha
   }
+}*/
+
+
+/*****  BosonParticleSystemProperties  *****/
+
+/// Start of static initialization stuff
+KRandomSequence* BosonParticleSystemProperties::mRandom = 0;
+QMap<QString, GLuint> BosonParticleSystemProperties::mTextures;
+QString BosonParticleSystemProperties::mTexturePath;
+
+void BosonParticleSystemProperties::addTexture(QString name)
+{
+  if(!mTextures.contains(name))
+  {
+    kdDebug() << k_funcinfo << "Adding texture with name " << name << " to textures map" << endl;
+    GLuint tex;
+    glGenTextures(1, &tex);
+    QImage image(mTexturePath + "/" + name);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    BosonTextureArray::createTexture(image, tex, boConfig->modelTexturesMipmaps());
+    mTextures.insert(name, tex);
+  }
+}
+
+GLuint BosonParticleSystemProperties::texture(QString name)
+{
+  return mTextures[name];
+}
+
+void BosonParticleSystemProperties::init(QString texdir)
+{
+  mTexturePath = texdir;
+  mRandom = new KRandomSequence(123456789);
+}
+/// End of static initialization stuff (below this is real code ;-))
+
+
+BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
+{
+  // Load all values
+  mId = cfg->readUnsignedLongNumEntry("Id", 0);
+  if(mId == 0)
+  {
+    kdError() << k_funcinfo << "Invalid id in group " << cfg->group() << endl;
+  }
+  /** Veeery ugly code
+  mMinXVelo = (float)(cfg->readDoubleNumEntry("MinXVelo", 0));
+  mMinYVelo = (float)(cfg->readDoubleNumEntry("MinYVelo", 0));
+  mMinZVelo = (float)(cfg->readDoubleNumEntry("MinZVelo", 0));
+  mMaxXVelo = (float)(cfg->readDoubleNumEntry("MaxXVelo", 0));
+  mMaxYVelo = (float)(cfg->readDoubleNumEntry("MaxYVelo", 0));
+  mMaxZVelo = (float)(cfg->readDoubleNumEntry("MaxZVelo", 0));
+  mStartColor = BoVector4((float)(cfg->readDoubleNumEntry("StartColorR", 0)), (float)(cfg->readDoubleNumEntry("StartColorG", 0)),
+      (float)(cfg->readDoubleNumEntry("StartColorB", 0)), (float)(cfg->readDoubleNumEntry("StartColorA", 0)));
+  mEndColor = BoVector4((float)(cfg->readDoubleNumEntry("EndColorR", 0)), (float)(cfg->readDoubleNumEntry("EndColorG", 0)),
+      (float)(cfg->readDoubleNumEntry("EndColorB", 0)), (float)(cfg->readDoubleNumEntry("EndColorA", 0)));
+  */
+  mMinVelo = Bo::readBoVector3(cfg, "MinVelo");
+  mMaxVelo = Bo::readBoVector3(cfg, "MaxVelo");
+  mMinPos = Bo::readBoVector3(cfg, "MinPos");
+  mMaxPos = Bo::readBoVector3(cfg, "MaxPos");
+  mNormalize = cfg->readBoolEntry("Normalize", false);
+  if(mNormalize)
+  {
+    mMinScale = (float)(cfg->readDoubleNumEntry("MinScale", 1));
+    mMaxScale = (float)(cfg->readDoubleNumEntry("MaxScale", 1));
+  }
+  mStartColor = Bo::readBoVector4(cfg, "StartColor");
+  mEndColor = Bo::readBoVector4(cfg, "EndColor");
+  mMinLife = (float)(cfg->readDoubleNumEntry("MinLife", 0));
+  mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", 0));
+  mMaxNum = cfg->readNumEntry("MaxNum", 100);
+  mInitNum = cfg->readNumEntry("InitNum", 0);
+  if(mInitNum == 0)
+  {
+    mInitNum = 10;  // Needed because of stupid bug
+  }
+  QString mGLBlendFuncStr = cfg->readEntry("BlendFunc", "GL_ONE_MINUS_SRC_ALPHA");
+  if(mGLBlendFuncStr == "GL_ONE_MINUS_SRC_ALPHA")
+  {
+    mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+  }
+  else if(mGLBlendFuncStr == "GL_ONE")
+  {
+    mGLBlendFunc = GL_ONE;
+  }
+  else
+  {
+    kdError() << k_funcinfo << "Invalid BlendFunc entry in config file: " << mGLBlendFuncStr << endl;
+    mGLBlendFunc = GL_ONE_MINUS_SRC_ALPHA;
+  }
+  mRate = (float)(cfg->readDoubleNumEntry("Rate", 0));
+  mSize = (float)(cfg->readDoubleNumEntry("Size", 1));
+  mAge = (float)(cfg->readDoubleNumEntry("Age", 0));
+  mAlign = cfg->readBoolEntry("Align", true);
+  mTextureName = cfg->readEntry("Texture", "default.png");
+  addTexture(mTextureName);
+}
+
+BosonParticleSystemProperties::~BosonParticleSystemProperties()
+{
+}
+
+BosonParticleSystem* BosonParticleSystemProperties::newSystem(float x, float y, float z)
+{
+  BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
+      5, texture(mTextureName), this);
+  s->setPosition(BoVector3(x / BO_TILE_SIZE, -(y / BO_TILE_SIZE), z / BO_TILE_SIZE));
+  s->setSize(mSize);
+  s->setAge(mAge);
+  s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
+  s->createParticles(mInitNum);
+
+  return s;
+}
+
+void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonParticle* particle)
+{
+  particle->life = getFloat(mMinLife, mMaxLife);
+  particle->maxage = particle->life;
+  particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
+      getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
+  if(mNormalize)
+  {
+    particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
+  }
+  particle->color = mStartColor;
+  // Note that particle's position is relative to position of particle system
+  particle->pos = BoVector3(getFloat(mMinPos[0], mMaxPos[0]),
+      getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
+}
+
+void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle)
+{
+  float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
+  particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);
 }

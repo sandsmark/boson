@@ -61,7 +61,9 @@ BOSON_SRC = \
 	upgradeproperties.cpp \
 	bosonparticlesystem.cpp \
 	bosonparticlemanager.cpp \
-	bosonstarting.cpp
+	bosonstarting.cpp \
+	bosonweapon.cpp \
+	bo.cpp
 
 BOPROFILING_SRC= \
 	bosonprofilingdialog.cpp \

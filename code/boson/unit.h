@@ -35,6 +35,7 @@ class ProductionPlugin;
 class UnitPlugin;
 class RepairPlugin;
 class BosonParticleSystem;
+class BosonWeapon;
 
 class KGameUnitDebug;
 
@@ -247,7 +248,7 @@ public:
 	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
-	bool inRange(Unit* unit) const;
+	bool inRange(BosonWeapon* w, Unit* unit) const;
 
 // waypoint stuff: // also in facility - produced units receive this initial waypoint
 	/**
@@ -328,12 +329,12 @@ public:
 	 * @return All units except this that are in @ref weaponRange of this
 	 * unit.
 	 **/
-	BoItemList unitsInRange() const;
+	BoItemList unitsInRange(BosonWeapon* w) const;
 
 	/**
 	 * @return Just like @ref unitsInRange but only enemy units.
 	 **/
-	BoItemList enemyUnitsInRange() const;
+	BoItemList enemyUnitsInRange(BosonWeapon* w) const;
 
 	/**
 	 * Calls @ref BosonCanvas setWorkChanged
@@ -355,8 +356,12 @@ public:
 	BosonParticleSystem* smokeParticleSystem() const;
 	void setSmokeParticleSystem(BosonParticleSystem* s);
 
+	void loadWeapons();
+
+	bool canShootAt(Unit* u);
+
 protected:
-	void shootAt(Unit* target);
+	void shootAt(BosonWeapon* w, Unit* target);
 
 	/**
 	 * @return a list of interesting collisions, i.e. no non-units, no
@@ -385,6 +390,8 @@ protected:
 	 * calculated by @ref advanceMove was actually valid.
 	 **/
 	virtual void advanceMoveCheck() { }
+
+	BosonWeapon* activeWeapon();
 
 protected:
 	bool mSearchPath;

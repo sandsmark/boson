@@ -21,6 +21,8 @@
 #define BOSONPARTICLEMANAGER_H
 
 #include <krandomsequence.h>
+#include <qmap.h>
+#include <GL/gl.h>
 
 #include "bo3dtools.h"
 
@@ -28,8 +30,9 @@ class BosonTextureArray;
 class BosonParticleSystem;
 class BosonParticle;
 class QString;
+class KSimpleConfig;
 
-class BosonParticleManager
+/*class BosonParticleManager
 {
   public:
     static void loadTextures(QString texdir);
@@ -56,11 +59,57 @@ class BosonParticleManager
     static void updateFireParticle(BosonParticleSystem* system, BosonParticle* particle);
     static void updateExplosionParticle(BosonParticleSystem* system, BosonParticle* particle);
 
-    inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; };
+    inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
   protected:
     static BosonTextureArray* mTextures;
+   static KRandomSequence* mRandom;
+};*/
+
+
+class BosonParticleSystemProperties
+{
+  public:
+    BosonParticleSystemProperties(KSimpleConfig* cfg);
+    ~BosonParticleSystemProperties();
+
+    BosonParticleSystem* newSystem(float x, float y, float z);
+
+    inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
+
+    inline static BoVector3 wind()  { return BoVector3(0.25, 0.15, 0); };
+
+    void initParticle(BosonParticleSystem* system, BosonParticle* particle);
+
+    void updateParticle(BosonParticleSystem* system, BosonParticle* particle);
+    
+    static void init(QString texdir);
+    
+    unsigned long int id()  { return mId; };
+
+  protected:
+    static void addTexture(QString name);
+    static GLuint texture(QString name);
+
+    static QMap<QString, GLuint> mTextures;
     static KRandomSequence* mRandom;
+    static QString mTexturePath;
+
+  private:
+    /*float mMinXVelo, mMinYVelo, mMinZVelo;
+    float mMaxXVelo, mMaxYVelo, mMaxZVelo;*/
+    BoVector3 mMinVelo, mMaxVelo;
+    BoVector3 mMinPos, mMaxPos;
+    bool mNormalize;
+    float mMinScale, mMaxScale;
+    BoVector4 mStartColor, mEndColor;
+    float mMinLife, mMaxLife;
+    int mMaxNum, mInitNum;
+    int mGLBlendFunc;
+    float mRate, mSize, mAge;
+    bool mAlign;
+    QString mTextureName;
+    unsigned long int mId;
 };
 
 #endif // BOSONPARTICLEMANAGER_H

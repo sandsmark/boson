@@ -46,18 +46,12 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Shields");
  mId.registerData(IdId, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "ID"); // perhaps use dataHandler()->id() instead
- mWeaponRange.registerData(IdWeaponRange, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "WeaponRange");
- mSightRange.registerData(IdSightRange, dataHandler(), 
+ mSightRange.registerData(IdSightRange, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "SightRange");
- mWeaponDamage.registerData(IdWeaponDamage, dataHandler(), 
-		KGamePropertyBase::PolicyLocal, "WeaponDamage");
- mWork.registerData(IdWork, dataHandler(), 
+ mWork.registerData(IdWork, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "Work");
- mAdvanceWork.registerData(IdAdvanceWork, dataHandler(), 
+ mAdvanceWork.registerData(IdAdvanceWork, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "AdvanceWork");
- mReloadState.registerData(IdReloadState, dataHandler(),
-		KGamePropertyBase::PolicyLocal, "ReloadState");
  mDeletionTimer.registerData(IdDeletionTimer, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "DeletionTimer");
  mDeletionTimer.setEmittingSignal(false);
@@ -69,10 +63,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mShields.setLocal(0); // doesn't have any shields
  mArmor.setLocal(0); // doesn't have any armor
  mId.setLocal(0);
- mWeaponDamage.setLocal(0);
- mWeaponRange.setLocal(0);
  mSightRange.setLocal(0);
- mReloadState.setLocal(0);
  mDeletionTimer.setLocal(0);
 }
 
@@ -186,26 +177,8 @@ unsigned int UnitBase::deletionTimer() const
  return mDeletionTimer;
 }
 
-unsigned int UnitBase::reloadState() const
-{
- return mReloadState;
-}
-
-void UnitBase::reloadWeapon()
-{
- if (mReloadState > 0) {
-	mReloadState = mReloadState - 1;
- }
-}
-
-void UnitBase::resetReload()
-{
- mReloadState = unitProperties()->reload();
-}
-
 const PluginProperties* UnitBase::properties(int pluginType) const
 {
  return unitProperties()->properties(pluginType);
 }
-
 

@@ -66,7 +66,8 @@ protected:
 			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
 		} else if (w == (QWidget*)commandWidget()->mReload && commandWidget()->unit()) {
 			Unit* u = commandWidget()->unit();
-			text = i18n("%1\nId: %2\nReloadState: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->reloadState());
+//			text = i18n("%1\nId: %2\nReloadState: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->reloadState());
+			text = i18n("%1\nId: %2\n").arg(u->unitProperties()->name()).arg(u->id());
 		} else {
 			text = mainTip();
 		}
@@ -508,8 +509,8 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
  }
  mHealth->setValue((int)h);
 
- double r = 100 - ((double)unit->reloadState() * 100 / (double)unit->unitProperties()->reload());
- mReload->setValue((int)r);
+// double r = 100 - ((double)unit->reloadState() * 100 / (double)unit->unitProperties()->reload());
+// mReload->setValue((int)r);
 }
 
 

@@ -433,20 +433,20 @@ bool BosonScenario::saveUnit(QDomElement& node, Unit* unit)
  if (unit->work() != UnitBase::WorkNone) {
 	node.setAttribute("Work", (unsigned int)unit->work());
  }
- if (unit->reloadState() != 0) {
+/* if (unit->reloadState() != 0) {
 	node.setAttribute("ReloadState", (unsigned int)unit->reloadState());
- }
+ }*/
 
  // these entries are *meant* to be changeable during the game.
  // but currently they are not. they will never appear in the xml
  // file, as they don't differ from the default (howver if that
  // ever gets implemented it can be used immediately)
- if (unit->weaponDamage() != prop->weaponDamage()) {
+/* if (unit->weaponDamage() != prop->weaponDamage()) {
 	node.setAttribute("WeaponDamage", (int)unit->weaponDamage());
  }
  if (unit->weaponRange() != prop->weaponRange()) {
 	node.setAttribute("WeaponRange", (unsigned int)unit->weaponRange());
- }
+ }*/
  if (unit->sightRange() != prop->sightRange()) {
 	node.setAttribute("SightRange", (unsigned int)unit->sightRange());
  }
@@ -525,7 +525,7 @@ bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
 	}
  }
 
- if (node.hasAttribute("WeaponDamage")) {
+/* if (node.hasAttribute("WeaponDamage")) {
 	int v = node.attribute("WeaponDamage").toInt(&ok);
 	if (!ok) {
 		kdError() << k_funcinfo << "Invalid value for WeaponDamage" << endl;
@@ -543,7 +543,7 @@ bool BosonScenario::loadUnit(QDomElement& node, Unit* unit)
 	} else if (unit) {
 		unit->setWeaponRange(v);
 	}
- }
+ }*/
 
  if (node.hasAttribute("SightRange")) {
 	unsigned int v = node.attribute("SightRange").toUInt(&ok);

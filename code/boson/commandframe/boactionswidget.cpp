@@ -129,7 +129,7 @@ void BoActionsWidget::showUnitActions(Unit* unit)
 	button++;
  }
 
- if(unit->unitProperties()->canShoot() && unit->weaponDamage() > 0) {
+ if(unit->unitProperties()->canShoot()) {
 	// It can shoot
 	resetButton(d->mOrderButton[button]);
 	d->mOrderButton[button]->setAction(ActionAttack, unit->owner());

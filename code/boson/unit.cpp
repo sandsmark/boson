@@ -34,6 +34,7 @@
 //#include "kspritetooltip.h" // FIXME
 #include "boson.h"
 #include "bosonparticlesystem.h"
+#include "bosonweapon.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -53,6 +54,7 @@ public:
 		mTarget = 0;
 		shieldReloadCounter = 0;
 		mSmokeParticleSystem = 0;
+		mActiveWeapon = 0;
 	}
 	KGamePropertyInt mDirection;
 
@@ -71,8 +73,11 @@ public:
 	int wantedDirection;
 
 	QPtrList<UnitPlugin> mPlugins; // you don't need to save/load this - gets constructed in the c'tor anyway.
-  
+
 	BosonParticleSystem* mSmokeParticleSystem;
+
+	QPtrList<BosonWeapon> mWeapons;
+	BosonWeapon* mActiveWeapon;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
@@ -137,6 +142,7 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 //	d->mPlugins.append(new RefinePlugin(this));
  }
 
+ loadWeapons();
 }
 
 Unit::~Unit()
@@ -179,6 +185,7 @@ Unit* Unit::target() const
 
 void Unit::setTarget(Unit* target)
 {
+ kdDebug() << k_funcinfo << endl;
  d->mTarget = target;
  if (!d->mTarget) {
 	return;
@@ -186,6 +193,20 @@ void Unit::setTarget(Unit* target)
  if (d->mTarget->isDestroyed()) {
 	 d->mTarget = 0;
  }
+ // Find weapon
+ if(d->mTarget) {
+ kdDebug() << k_funcinfo << "Target's there, searching for weapon" << endl;
+	QPtrListIterator<BosonWeapon> it(d->mWeapons);
+	while (it.current()) {
+		if(it.current()->canShootAt(target)) {
+			kdDebug() << k_funcinfo << "Found weapon that can shoot at target, setting active weapon and returning" << endl;
+			d->mActiveWeapon = it.current();
+			return;
+		}
+	}
+ }
+ kdDebug() << k_funcinfo << "No weapon found, setting active weapon to NULL" << endl;
+ d->mActiveWeapon = 0;
 }
 
 void Unit::setHealth(unsigned long int h)
@@ -294,7 +315,12 @@ void Unit::advance(unsigned int advanceCount)
  if (isDestroyed()) {
 	return;
  }
- reloadWeapon();
+ // Reload weapons
+ QPtrListIterator<BosonWeapon> it(d->mWeapons);
+ while (it.current()) {
+	it.current()->reload();
+	++it;
+ }
 // Reload shields
  if (d->shieldReloadCounter >= 10) {
 	if (shields() < unitProperties()->shields()) {
@@ -316,28 +342,44 @@ void Unit::advanceNone(unsigned int advanceCount)
 	return;
  }
 
- if (weaponDamage() > 0) {
-	BoItemList list = enemyUnitsInRange();
-	if (list.count() > 0) {
-		BoItemList::Iterator it = list.begin();
-		for (; it != list.end(); ++it) {
-			if (((Unit*)*it)->unitProperties()->canShoot()) {
-				shootAt((Unit*)*it);
-				break;
+ if (unitProperties()->canShoot()) {
+	// FIXME: isn't there any better way to do this than to iterate through all
+	//  weapons? Maybe cache maximal range of weapons and check if units are in
+	//  range of this...
+	BosonWeapon* w;
+	QPtrListIterator<BosonWeapon> wit(d->mWeapons);
+	while (( w = wit.current()) != 0) {
+		++wit;
+		BoItemList list = enemyUnitsInRange(w);
+		if (list.count() > 0) {
+			BoItemList::Iterator it = list.begin();
+			// First check if we have any military units in range
+			for (; it != list.end(); ++it) {
+				if (((Unit*)*it)->unitProperties()->canShoot()) {
+					if (w->canShootAt((Unit*)*it)) {
+						shootAt(w, (Unit*)*it);
+						break;
+					}
+				}
+			}
+			// Then check for non-military units
+			if (it == list.end()) {
+				for (it = list.begin(); it != list.end(); ++it) {
+					if (w->canShootAt((Unit*)*it)) {
+						shootAt(w, (Unit*)*it);
+						break;
+					}
+				}
 			}
 		}
-		if (it != list.end()) {
-			// no military unit (i.e. unit that can shoot) found
-			shootAt((Unit*)*it);
-		}
 	}
- } else if (weaponDamage() < 0) {
+ }/* else if (weaponDamage() < 0) {
 	if (!repairPlugin()) {
 		kdWarning() << k_funcinfo << "weaponDamage < 0 but no repair plugin??" << endl;
 		return;
 	}
 	repairPlugin()->repairInRange();
- } else {
+ }*/ else {
 	// weaponDamage() == 0 - what can be done here?
  }
 }
@@ -353,26 +395,34 @@ void Unit::advanceAttack(unsigned int advanceCount)
 	stopAttacking();
 	return;
  }
+ if (!d->mActiveWeapon) {
+	kdError() << k_funcinfo << "Attacking, but no active weapon!" << endl;
+	stopAttacking();
+	return;
+ }
  if (target()->isDestroyed()) {
 	kdDebug() << "Target is destroyed!" << endl;
 	stopAttacking();
 	return;
  }
- if (!inRange(target())) {
+ kdDebug() << "    " << k_funcinfo << "checking if unit's in range" << endl;
+ if (!inRange(d->mActiveWeapon, target())) {
 	if (!canvas()->allBosonItems().contains(target())) {
 		kdDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
 	kdDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
-	if (!moveTo(target()->x(), target()->y(), weaponRange())) {
+	if (!moveTo(target()->x(), target()->y(), d->mActiveWeapon->properties()->range())) {
 		setWork(WorkNone);
 	} else {
 		setAdvanceWork(WorkMove);
 	}
 	return;
  }
- shootAt(target());
+ kdDebug() << "    " << k_funcinfo << "shooting at target" << endl;
+ shootAt(d->mActiveWeapon, target());
+ kdDebug() << "    " << k_funcinfo << "done shooting" << endl;
  if (target()->isDestroyed()) {
 	stopAttacking();
  }
@@ -573,6 +623,7 @@ void Unit::stopAttacking()
  stopMoving(); // FIXME not really intuitive... nevertheless its currently useful.
  setTarget(0);
  setWork(WorkNone);
+ d->mActiveWeapon = 0l;
 }
 
 bool Unit::save(QDataStream& stream)
@@ -615,51 +666,46 @@ bool Unit::load(QDataStream& stream)
  return true;
 }
 
-bool Unit::inRange(Unit* target) const
+bool Unit::inRange(BosonWeapon* w, Unit* target) const
 {
  // maybe we should use an own algorithm here - can be faster than this generic
  // one
- return unitsInRange().contains(target);
+ return unitsInRange(w).contains(target);
 }
 
-void Unit::shootAt(Unit* target)
+void Unit::shootAt(BosonWeapon* w, Unit* target)
 {
- if (reloadState() != 0) {
+ if (!w->reloaded()) {
 //	kdDebug() << "gotta reload first" << endl;
 	return;
  }
- if (target->isFlying()) {
-	if (!unitProperties()->canShootAtAirUnits()) {
-		return;
-	}
- } else {
-	if (!unitProperties()->canShootAtLandUnits()) {
-		return;
-	}
+ if(!w->canShootAt(target)) {
+	kdDebug() << k_funcinfo << "can't shoot at target!" << endl;
+	return;
  }
  if (target->isDestroyed()) {
 	kdWarning() << k_funcinfo << target->id() << " is already destroyed" << endl;
 	return;
  }
  kdDebug() << id() << " shoots at unit " << target->id() << endl;
- ((BosonCanvas*)canvas())->shootAtUnit(target, this);
+ w->shoot(target);
  owner()->statistics()->increaseShots();
- resetReload();
 }
 
-BoItemList Unit::unitsInRange() const
+BoItemList Unit::unitsInRange(BosonWeapon* w) const
 {
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
 
  QPointArray cells;
+ int range = w->properties()->range();
  int left, right, top, bottom;
  leftTopCell(&left, &top);
  rightBottomCell(&right, &bottom);
- left = QMAX(left - (int)weaponRange(), 0);
- top = QMAX(top - (int)weaponRange(), 0);
- right = QMIN(right + (int)weaponRange(), QMAX((int)canvas()->mapWidth() - 1, 0));
- bottom = QMIN(bottom + (int)weaponRange(), QMAX((int)canvas()->mapHeight() - 1, 0));
+ left = QMAX(left - range, 0);
+ top = QMAX(top - range, 0);
+ right = QMIN(right + range, QMAX((int)canvas()->mapWidth() - 1, 0));
+ bottom = QMIN(bottom + range, QMAX((int)canvas()->mapHeight() - 1, 0));
  int size = (right - left + 1) * (bottom - top + 1);
  if (size <= 0) {
 	return BoItemList();
@@ -668,7 +714,9 @@ BoItemList Unit::unitsInRange() const
  int n = 0;
  for (int i = left; i <= right; i++) { 
 	for (int j = top; j <= bottom; j++) {
-		cells[n++] = QPoint(i, j);
+///		if (!owner()->isFogged(i, j)) {
+			cells[n++] = QPoint(i, j);
+//		}
 	}
  }
 
@@ -690,9 +738,9 @@ BoItemList Unit::unitsInRange() const
  return inRange;
 }
 
-BoItemList Unit::enemyUnitsInRange() const
+BoItemList Unit::enemyUnitsInRange(BosonWeapon* w) const
 {
- BoItemList units = unitsInRange();
+ BoItemList units = unitsInRange(w);
  BoItemList enemy;
  BoItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
@@ -793,7 +841,7 @@ bool Unit::isNextTo(Unit* target) const
  if (QABS(rightEdge() - target->leftEdge()) <= r ||
 		QABS(leftEdge() - target->rightEdge()) <= r ||
 		rightEdge() <= target->rightEdge() && leftEdge() <= target->leftEdge()// will never happen with current pixmaps
-		) { 
+		) {
 	if (QABS(topEdge() - target->bottomEdge() <= r) ||
 			QABS(bottomEdge() - target->topEdge()) <= r||
 			topEdge() <= target->topEdge() && bottomEdge() <= target->bottomEdge()// will never happen with current pixmaps
@@ -827,6 +875,32 @@ BosonParticleSystem* Unit::smokeParticleSystem() const
 void Unit::setSmokeParticleSystem(BosonParticleSystem* s)
 {
  d->mSmokeParticleSystem = s;
+}
+
+void Unit::loadWeapons()
+{
+ QPtrListIterator<BosonWeaponProperties> it(*(unitProperties()->weaponsList()));
+ while (it.current()) {
+	d->mWeapons.append(new BosonWeapon(it.current(), this));
+	++it;
+ }
+}
+
+bool Unit::canShootAt(Unit *u)
+{
+ QPtrListIterator<BosonWeapon> it(d->mWeapons);
+ while (it.current()) {
+	if(it.current()->canShootAt(u)) {
+		return true;
+	}
+	++it;
+ }
+ return false;
+}
+
+BosonWeapon* Unit::activeWeapon()
+{
+ return d->mActiveWeapon;
 }
 
 
@@ -904,7 +978,7 @@ void MobileUnit::advanceMoveInternal(unsigned int) // this actually needs to be 
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
 		// just check if unit is in range now.
-		if (inRange(target())) {
+		if (inRange(activeWeapon(), target())) {
 			kdDebug() << k_funcinfo << "target is in range now" << endl;
 			stopMoving();
 			return;
@@ -1228,9 +1302,9 @@ Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canva
 		KGamePropertyBase::PolicyLocal, "Construction State");
  d->mConstructionState.setLocal(0);
 
- if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
+/* if (unitProperties()->weaponDamage() < 0) { // TODO use a property plugin
 	d->mRepairPlugin = new RepairPlugin(this);
- }
+ }*/
  setWork(WorkConstructed);
 }
 

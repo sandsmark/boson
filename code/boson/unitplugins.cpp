@@ -371,7 +371,7 @@ void RepairPlugin::repairInRange()
 
  // TODO: once we started repairing a unit also repair it in the next call,
  // until it isn't in range anymore or is repaired
- BoItemList list = unit()->unitsInRange();
+/* BoItemList list = unit()->unitsInRange();
  for (unsigned int i = 0; i < list.count(); i++) {
 	Unit* u = (Unit*)list[i];
 	if (u->health() >= u->unitProperties()->health()) {
@@ -383,16 +383,16 @@ void RepairPlugin::repairInRange()
 		if (diff > 0) {
 			kdError() << k_funcinfo << "health > maxhealth" << endl;
 			continue;
-		}
-		if (diff < unit()->weaponDamage()) {
+		}*/
+/*		if (diff < unit()->weaponDamage()) {
 			// usually the case
 			u->setHealth(u->health() - unit()->weaponDamage());
 		} else {
 			u->setHealth(u->health() - diff);
-		}
-		return; // only one unit at once
+		}*/
+		/*return; // only one unit at once
 	}
- }
+ }*/
 }
 
 HarvesterPlugin::HarvesterPlugin(Unit* unit)

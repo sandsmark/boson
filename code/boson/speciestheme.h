@@ -35,6 +35,9 @@ class UnitProperties;
 class UnitBase;
 class TechnologyProperties;
 class UpgradeProperties;
+class BosonParticleSystemProperties;
+class BosonShotProperties;
+class BosonWeaponProperties;
 
 class QPixmap;
 class QStringList;
@@ -98,9 +101,13 @@ public:
 	 **/
 	bool loadTechnologies();
 
-	void loadParticles();
+	void loadParticleSystems();
+	void loadShots();
+	void loadWeapons();
 
-	void loadObjectModels();
+	BosonParticleSystemProperties* particleSystemProperties(long unsigned int id);
+	BosonShotProperties* shotProperties(long unsigned int id);
+	BosonWeaponProperties* weaponProperties(long unsigned int id);
 
 	/**
 	 * @return Pixmap for the specified action
@@ -113,7 +120,7 @@ public:
 
 	BosonModel* unitModel(unsigned long int unitType);
 
-	BosonModel* objectModel(ObjectType type);
+	BosonModel* objectModel(QString file);
 
 	/**
 	 * @return The big overview pixmap (the one that is displayed when the
@@ -252,6 +259,13 @@ public:
 
 	void loadUnitModel(const UnitProperties* prop);
 
+	/**
+	 * Read the config files for all units available on this computer. The
+	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
+	 * have to load the config file theirselves.
+	 **/
+	void readUnitConfigs();
+
 protected:
 	bool loadUnitGraphics(const UnitProperties* prop);
 
@@ -262,16 +276,9 @@ protected:
 	 *
 	 * @param fileName The path to load the pixmap from. Should be an abolute
 	 * filename.
-	 * @param pix The pixmap that is loaded. 
+	 * @param pix The pixmap that is loaded.
 	 **/
 	bool loadUnitImage(const QString& fileName, QImage &image, bool withMask = true, bool withTeamColor = true);
-
-	/**
-	 * Read the config files for all units available on this computer. The
-	 * values are used by @ref loadNewUnit and @ref loadEntry - they don't
-	 * have to load the config file theirselves.
-	 **/
-	void readUnitConfigs();
 
 	void loadUnitTextures(unsigned long int type, QValueList<QImage> list);
 	GLuint createDisplayList(unsigned long int typeId);
