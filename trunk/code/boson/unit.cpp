@@ -31,7 +31,6 @@
 #include "boitemlist.h"
 #include "bosonmodel.h"
 #include "pluginproperties.h"
-#include "bogltooltip.h"
 #include "boson.h"
 #include "bosonparticlesystem.h"
 #include "bosonweapon.h"
@@ -116,7 +115,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  d->mWantedRotation.setLocal(0);
  d->mMoveAttacking.setLocal(0);
 
- BoGLToolTip::add(rtti(), unitProperties()->name());
  if (!model()) {
 	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
@@ -145,7 +143,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
 
 Unit::~Unit()
 {
- BoGLToolTip::remove(this);
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();

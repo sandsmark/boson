@@ -1221,65 +1221,12 @@ void BosonBigDisplayBase::renderText()
 	glCallLists(pause.length(), GL_UNSIGNED_BYTE, (GLubyte*)pause.latin1());
  }
  if (d->mToolTips->showTip()) {
-	renderToolTip();
+	QPoint pos = mapFromGlobal(QCursor::pos());
+	d->mToolTips->renderToolTip(pos.x(), pos.y(), d->mViewport, d->mDefaultFont);
  }
 
  glColor3ub(255, 255, 255);
  glDisable(GL_BLEND);
-}
-
-void BosonBigDisplayBase::renderToolTip()
-{
- const int cursorOffset = 15;
- const int minTooltipWidth = 100;
-// const int minTooltipHeight = 100;
- QPoint pos = mapFromGlobal(QCursor::pos());
- // AB: glListBase() must already be valid and the raster pos must be at the
- // correct position.
- BosonGLFont* font = d->mDefaultFont;
- BO_CHECK_NULL_RET(font);
- QString tip = d->mToolTips->currentTip();
- int tipWidth = font->width(tip);
- tipWidth = QMIN(tipWidth, minTooltipWidth);
- int x;
- int y;
- int w = 0;
- // we try to show the tip to the right of the cursor, if we have at least
- // tipWidth space, otherwise to the left if we have enough space there.
- // if both doesn't apply, we just pick the direction where we have most space
- if (width() - (pos.x() + cursorOffset) >= tipWidth) {
-	// to the right of the cursor
-	x = pos.x() + cursorOffset;
-	w = width() - x;
- } else if (pos.x() - cursorOffset >= tipWidth) {
-	// to the left of the cursor
-	x = pos.x() - cursorOffset - tipWidth;
-	w = tipWidth;
- } else {
-	// not enough space anyway - pick where we can get most space
-	if (pos.x() > width() / 2) {
-		x = pos.x() + cursorOffset;
-		w = width() - x;
-	} else {
-		x = QMAX(0, pos.x() - cursorOffset - tipWidth);
-		w = pos.x() - cursorOffset;
-	}
- }
-
- int h = font->height(tip, w);
- if (pos.y() + cursorOffset + h < height()) {
-	y = d->mViewport[3] - (pos.y() + cursorOffset);
- } else if (pos.y() >= h + cursorOffset) {
-	y = d->mViewport[3] - (pos.y() - (cursorOffset + h));
- } else {
-	if (pos.y() < height() / 2) {
-		y = d->mViewport[3] - (pos.y() + cursorOffset);
-	} else {
-		y = d->mViewport[3] - (pos.y() - (cursorOffset + h));
-	}
- }
-
- font->renderText(x, y, tip, w);
 }
 
 void BosonBigDisplayBase::renderCells()

@@ -20,102 +20,85 @@
 #include "bogltooltip.moc"
 
 #include "bodebug.h"
-#include "items/bosonitem.h"
+#include "rtti.h"
 #include "bosonbigdisplaybase.h"
 #include "bosoncanvas.h"
+#include "bosonconfig.h"
+#include "bosonglfont.h"
+#include "items/bosonitem.h"
+#include "unit.h"
 
 #include <qmap.h>
 #include <qtimer.h>
 
 #include <kapplication.h>
+#include <klocale.h>
 
 #define TOOLTIP_DELAY 600
 
-class BoTipManager
+class BoToolTip
 {
 public:
-	void add(int rtti, const QString& tip)
-	{
-		if (mRttiList.contains(rtti)) {
-			return;
-		}
-		mRttiList.insert(rtti, tip);
-	}
-	void add(BosonItem* item, const QString& tip)
-	{
-		if (mItemList.contains(item)) {
-			return;
-		}
-		mItemList.insert(item, tip);
-	}
-	void remove(BosonItem* item)
-	{
-		mItemList.remove(item);
-	}
-	void remove(int rtti)
-	{
-		mRttiList.remove(rtti);
-	}
-	void ignore(int rtti)
-	{
-		if (mIgnoreRTTIList.contains(rtti)) {
-			return;
-		}
-		mIgnoreRTTIList.append(rtti);
-	}
-	void ignore(BosonItem* item)
-	{
-		if (mIgnoreItemList.contains(item)) {
-			return;
-		}
-		mIgnoreItemList.append(item);
-	}
-	void unignore(int rtti)
-	{
-		mIgnoreRTTIList.remove(rtti);
-	}
-	void unignore(BosonItem* item)
-	{
-		mIgnoreItemList.remove(item);
-	}
+	BoToolTip();
+	~BoToolTip();
 
-	bool testIgnore(BosonItem* item) const
-	{
-		bool i = mIgnoreItemList.contains(item);
-		if (i) {
-			return i;
-		}
-		return mIgnoreRTTIList.contains(item->rtti());
-	}
+	void clear();
+	void setItem(BosonItem* item);
+	void update();
 
-	QString tip(BosonItem* item)
-	{
-		QString text;
-		// look first if there is a tip for this special item. if not look for a tip
-		// for this rtti
-		QMap<BosonItem*, QString>::iterator it = mItemList.find(item);
-		if (it != mItemList.end()) {
-			text = it.data();
-		} else {
-			QMap<int, QString>::iterator rttiIt = mRttiList.find(item->rtti());
-			if (rttiIt != mRttiList.end()) {
-				text = rttiIt.data();
-			}
-		}
-		return text;
-	}
+	inline bool isEmpty() const { return (mTip.isNull() || !mItem); }
+
+	const QString& tip() const { return mTip; }
 
 private:
-	QMap<int, QString> mRttiList;
-	QMap<BosonItem*, QString> mItemList;
-
-	// the ignore-lists are relevant for BoGLToolTip::maybeTip()
-	QValueList<int> mIgnoreRTTIList;
-	QValueList<BosonItem*> mIgnoreItemList;
+	BosonItem* mItem;
+	QString mTip;
 };
 
-static BoTipManager* tipManager = 0;
+BoToolTip::BoToolTip()
+{
+ mItem = 0;
+}
 
+BoToolTip::~BoToolTip()
+{
+}
+
+void BoToolTip::setItem(BosonItem* item)
+{
+ if (mItem == item) {
+	// nothing to do.
+	return;
+ }
+ mItem = item;
+ update();
+}
+
+void BoToolTip::clear()
+{
+ setItem(0);
+ mTip = QString::null;
+}
+
+void BoToolTip::update()
+{
+ if (!mItem) {
+	mTip = QString::null;
+	return;
+ }
+ if (!RTTI::isUnit(mItem->rtti())) {
+	mTip = QString::null;
+	return;
+ }
+
+ // AB: not sure about this. we could add a virutal method BosonItem::tooltip()
+ // and make each item generate its own tooltip. we could avoid includign unit.h
+ // that way.
+ // but once we have configurable tooltips we would have to include
+ // bosonconfig.h in unit.cpp and maybe in bosonitem.cpp which I like even less.
+ Unit* u = (Unit*)mItem;
+ mTip = i18n("%1\nHealth: %2").arg(u->name()).arg(u->health());
+}
 
 class BoGLToolTipPrivate
 {
@@ -124,18 +107,24 @@ public:
 	{
 	}
 	QTimer mTimer;
+	QTimer mUpdateTimer;
+	BoToolTip mToolTip;
 
 };
 
 BoGLToolTip::BoGLToolTip(BosonBigDisplayBase* v) : QObject(v)
 {
- initTipManager();
  d = new BoGLToolTipPrivate;
  mView = v;
  mShowTip = false;
+ mUpdatePeriod = 0;
+
  kapp->setGlobalMouseTracking(true);
  kapp->installEventFilter(this);
  connect(&d->mTimer, SIGNAL(timeout()), this, SLOT(slotTimeOut()));
+ connect(&d->mUpdateTimer, SIGNAL(timeout()), this, SLOT(slotUpdate()));
+
+ setUpdatePeriod(DEFAULT_TOOLTIP_UPDATE_PERIOD);
 }
 
 BoGLToolTip::~BoGLToolTip()
@@ -174,78 +163,25 @@ void BoGLToolTip::slotTimeOut()
 {
  BO_CHECK_NULL_RET(mView);
  BO_CHECK_NULL_RET(mView->canvas());
+ BO_CHECK_NULL_RET(mView->canvas()->collisions());
  if (!mView->hasMouse()) {
 	hideTip();
 	return;
  }
  mShowTip = true;
 
- BosonCanvas* c = mView->canvas();
+ BosonCollisions* c = mView->canvas()->collisions();
  BosonItem* item = c->findItemAt(mView->cursorCanvasVector());
  if (!item) {
 	hideTip();
 	return;
  }
  boDebug() << k_funcinfo << endl;
- mCurrentTip = tipManager->tip(item);
- if (mCurrentTip.isNull()) {
-	// we should hide it. but for testing...
+ d->mToolTip.setItem(item);
+ if (d->mToolTip.isEmpty()) {
 	hideTip();
 	return;
  }
-}
-
-void BoGLToolTip::initTipManager()
-{
- if (tipManager) {
-	return;
- }
- tipManager = new BoTipManager;
-}
-
-
-void BoGLToolTip::add(int rtti, const QString& tip)
-{
- initTipManager();
- tipManager->add(rtti, tip);
-}
-
-void BoGLToolTip::add(BosonItem* item, const QString& tip)
-{
- initTipManager();
- tipManager->add(item, tip);
-}
-
-void BoGLToolTip::remove(BosonItem* item)
-{
- if (!tipManager) {
-	return;
- }
- tipManager->remove(item);
-}
-
-void BoGLToolTip::remove(int rtti)
-{
- if (!tipManager) {
-	return;
- }
- tipManager->remove(rtti);
-}
-
-void BoGLToolTip::ignore(int rtti)
-{
- if (!tipManager) {
-	return;
- }
- tipManager->ignore(rtti);
-}
-
-void BoGLToolTip::ignore(BosonItem* item)
-{
- if (!tipManager) {
-	return;
- }
- tipManager->ignore(item);
 }
 
 int BoGLToolTip::toolTipDelay()
@@ -256,6 +192,79 @@ int BoGLToolTip::toolTipDelay()
 void BoGLToolTip::hideTip()
 {
  mShowTip = false;
- mCurrentTip = QString::null;
+ d->mToolTip.clear();
+}
+
+void BoGLToolTip::renderToolTip(int cursorX, int cursorY, int* viewport, BosonGLFont* font)
+{
+ const int cursorOffset = 15;
+ const int minToolTipWidth = 100;
+ const int viewportWidth = viewport[2];
+ const int viewportHeight = viewport[3];
+ QString tip = d->mToolTip.tip();
+ if (tip.isNull()) {
+	return;
+ }
+ BO_CHECK_NULL_RET(font);
+
+ int tipWidth = font->width(tip);
+ tipWidth = QMIN(tipWidth, minToolTipWidth);
+ int x;
+ int y;
+
+ int w = 0;
+ // we try to show the tip to the right of the cursor, if we have at least
+ // tipWidth space, otherwise to the left if we have enough space there.
+ // if both doesn't apply, we just pick the direction where we have most space
+ if (viewportWidth - (cursorX + cursorOffset) >= tipWidth) {
+	// to the right of the cursor
+	x = cursorX + cursorOffset;
+	w = viewportWidth - x;
+ } else if (cursorX - cursorOffset >= tipWidth) {
+	// to the left of the cursor
+	x = cursorX - cursorOffset - tipWidth;
+	w = tipWidth;
+ } else {
+	// not enough space anyway - pick where we can get most space
+	if (cursorX > viewportWidth / 2) {
+		x = cursorX + cursorOffset;
+		w = viewportWidth - x;
+	} else {
+		x = QMAX(0, cursorX - cursorOffset - tipWidth);
+		w = cursorX - cursorOffset;
+	}
+ }
+
+ int h = font->height(tip, w);
+ if (cursorY + cursorOffset + h < viewportHeight) {
+	y = viewportHeight - (cursorY + cursorOffset);
+ } else if (cursorY >= h + cursorOffset) {
+	y = viewportHeight - (cursorY - (cursorOffset + h));
+ } else {
+	if (cursorY < viewportHeight / 2) {
+		y = viewportHeight - (cursorY + cursorOffset);
+	} else {
+		y = viewportHeight - (cursorY - (cursorOffset + h));
+	}
+ }
+
+ font->renderText(x, y, tip, w);
+}
+
+void BoGLToolTip::slotUpdate()
+{
+ d->mToolTip.update();
+}
+
+void BoGLToolTip::setUpdatePeriod(int ms)
+{
+ if (ms < 1) {
+	// 0 would be dangerous concerning performance. 1 is bad enough already.
+	boError() << k_funcinfo << "period must be greater than 1" << endl;
+	return;
+ }
+ mUpdatePeriod = ms;
+ d->mUpdateTimer.stop();
+ d->mUpdateTimer.start(ms);
 }
 

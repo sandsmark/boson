@@ -360,7 +360,6 @@ protected:
 	 * Called by @ref paintGL only to render text on the screen
 	 **/
 	void renderText();
-	void renderToolTip();
 
 	/**
 	 * Called by @ref paintGL only to render the cells on the screen
