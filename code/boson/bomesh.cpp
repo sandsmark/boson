@@ -1631,7 +1631,7 @@ unsigned int BoMesh::movePoints(float* vertexarray, float* normalarray, float* t
 	boDebug() << k_funcinfo << "Got " << lodi << " vertices for lod " << j << " at " << lod << "; indices at: " << lod->arrayIndex() << endl;
  }
 
- boDebug() << k_funcinfo << "Total points used: " << i << endl;
+// boDebug() << k_funcinfo << "Total points used: " << i << endl;
  return i;
 }
 
