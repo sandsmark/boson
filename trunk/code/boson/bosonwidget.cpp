@@ -84,8 +84,6 @@ public:
 		mTopLayout = 0;
 		mViewLayout = 0;
 
-		mMusic = 0;
-
 		mChat = 0;
 	}
 	
@@ -107,8 +105,6 @@ public:
 	int mCommandPos;
 	int mChatPos;
 
-	BosonMusic* mMusic;
-	
 	// performance variables:
 	int mMobilesCount;
 	int mFacilitiesCount;
@@ -124,8 +120,8 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
- d->mMusic->setSound(boConfig->sound());
- d->mMusic->setMusic(boConfig->music());
+ boMusic->setSound(boConfig->sound());
+ boMusic->setMusic(boConfig->music());
 
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
@@ -148,6 +144,7 @@ void BosonWidget::init()
  d->mFacilitiesCount = 0;
 
  BosonConfig::initBosonConfig(); // initialize global config
+ BosonMusic::initBosonMusic(); 
 
  d->mCanvas = new BosonCanvas(this);
 
@@ -217,9 +214,8 @@ void BosonWidget::init()
 
  initChat();
 
- d->mMusic = new BosonMusic(this);
  connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
-		d->mMusic, SLOT(slotPlaySound(const QString&)));
+		boMusic, SLOT(slotPlaySound(const QString&)));
 
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
@@ -287,6 +283,7 @@ BosonWidget::~BosonWidget()
  if (d->mScenario) {
 	delete d->mScenario;
  }
+ 
  delete d;
  kdDebug() << k_funcinfo << "done" << endl;
 }
@@ -512,7 +509,7 @@ void BosonWidget::slotStartScenario()
 	return;
  }
  d->mScenario->startScenario(d->mBoson);
- d->mMusic->startLoop();
+ boMusic->startLoop();
 
  // TODO as soon as it is implemented the map file should also contain the
  // species of the player. The NewGameDialog should enable the player to choose
@@ -979,24 +976,24 @@ void BosonWidget::recreateLayout(int chatPos)
 
 bool BosonWidget::sound() const
 {
- return d->mMusic->sound();
+ return boMusic->sound();
 }
 
 bool BosonWidget::music() const
 {
- return d->mMusic->music();
+ return boMusic->music();
 }
 
 void BosonWidget::slotToggleSound()
 {
- d->mMusic->setSound(!d->mMusic->sound());
- boConfig->setSound(d->mMusic->sound());
+ boMusic->setSound(!boMusic->sound());
+ boConfig->setSound(boMusic->sound());
 }
 
 void BosonWidget::slotToggleMusic()
 {
- d->mMusic->setMusic(!d->mMusic->music());
- boConfig->setMusic(d->mMusic->music());
+ boMusic->setMusic(!boMusic->music());
+ boConfig->setMusic(boMusic->music());
 }
 
 void BosonWidget::displayAllItems(bool display)

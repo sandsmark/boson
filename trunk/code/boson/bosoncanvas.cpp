@@ -25,6 +25,7 @@
 #include "bosonmap.h"
 #include "unitproperties.h"
 #include "boshot.h"
+#include "bosonmusic.h"
 
 #include <kdebug.h>
 #include <klocale.h>
@@ -347,17 +348,12 @@ void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 		// what about e.g. a wreckage?
 		d->mDestroyUnits.append(target);
 		(void) new BoShot(target, attackedBy, this, true);
-		play(target->sound(Unit::SoundReportDestroyed));
+		boMusic->playSound(target->sound(Unit::SoundReportDestroyed));
 	}
  } else {
 	(void) new BoShot(target, attackedBy, this);
  }
- play(attackedBy->sound(Unit::SoundShoot));
-}
-
-void BosonCanvas::play(const QString& fileName)
-{
- emit signalPlaySound(fileName);
+ boMusic->playSound(attackedBy->sound(Unit::SoundShoot));
 }
 
 Cell* BosonCanvas::cellAt(Unit* unit) const
