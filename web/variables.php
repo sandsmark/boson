@@ -1,8 +1,8 @@
 <?php
 
 /*****  Some variables  *****/
-$latestversion="0.6.1";
-$latestversiondate="9th July 2002";
+$latestversion="0.7";
+$latestversiondate="10th November 2002";
 
 $counter_file="counter";
 $news_file="news.text";

@@ -104,7 +104,7 @@ ago.
 base.<br />
 &lt;Andi&gt; Excellent. Are they trembling?<br />
 &lt;Felix&gt; No sir.<br />
-&lt;Andi&gt; What do you mean "No sir."? Why not?<br />
+&lt;Andi&gt; What do you mean \"No sir.\"? Why not?<br />
 &lt;Scott&gt; General, the enemy infantry and armored divisions haven't fired a single shot at us. They don't even
 seem to care that we are attacking them!<br />
 &lt;Andi&gt; They will pay dearly for this..<br />

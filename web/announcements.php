@@ -43,6 +43,7 @@ draw_bigbox_text("All Boson announcements:
     <li><a href=\"http://www.kdenews.org/972864519/\">Boson 0.5 announcement</a></li>
     <li><a href=\"announces/boson-0.6.php\">Boson 0.6 press release</a></li>
     <li><a href=\"announces/boson-0.6.1.php\">Boson 0.6.1 press release</a></li>
+    <li><a href=\"announces/boson-0.7.php\">Boson 0.7 press release</a></li>
     </ul>");
 draw_bigbox_end();
 

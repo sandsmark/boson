@@ -36,13 +36,12 @@ main_area_begin();
 draw_bigbox_begin("More information");
 
 draw_bigbox_subheader("Licencing");
-draw_bigbox_text("Boson's code, graphics and sounds are published under the GNU General Public License (GPL).<br><br>");
+draw_bigbox_text("Boson's code, graphics and sounds are published under the GNU
+  General Public License (GPL).<br><br>");
 
 draw_bigbox_subheader("Requirements");
-draw_bigbox_text("<b>Notice:</b> These requirements apply to the current development (CVS) version.<br><br>
-
-    The latest stable release ($latestversion) probably runs on slower systems and 
-    it doesn't require a 3D accelerator card. Also, it doesn't need lib3ds or OpenGL.<br><br>
+draw_bigbox_text("These requirements apply to the latest stable release
+    ($latestversion)<br><br>
 
     <b>Minimum hardware requirements:</b><br>
     Note: If you have an older graphics card like a TNT2 you will need a fast CPU.<br>
@@ -65,7 +64,7 @@ draw_bigbox_text("<b>Notice:</b> These requirements apply to the current develop
 draw_bigbox_subheader("<a name=\"compiler\"></a>Compiler requirements");
 draw_bigbox_text("To compile Boson (you don't need a compiler if you're downloading a binary version),
     you need <a href=\"http://gcc.gnu.org/\" target=\"_blank\">Gcc</a> version 2.95.3 or 3.1.x or 3.2.
-    <b>Gcc 3.0.x</b> is untested and <b>may not work</b>. <b>Gcc 2.96 won't work</b> either."); //'
+    <b>Gcc 3.0.x</b> is untested and <b>may not work</b>. <b>Gcc 2.96 won't work</b> either.");
 
 draw_bigbox_end();
 

@@ -64,11 +64,32 @@ echo "
 **  draw_screenshot(<description>, <date added>, <thumbnail filename>, <big version filename>);
 **  Note that filenames do not contain directory
 **/
+draw_screenshot("Blowing up Command center of the enemy",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-1-thumb.png", "0.7-1.png");
+draw_screenshot("Smoking wreckages after a failed attack",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-2-thumb.png", "0.7-2.png");
+echo "
+</tr>
+<tr>";
+draw_screenshot("Here you can see much smoke from wreckages and missiles and new camera system",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-3-thumb.png", "0.7-3.png");
+draw_screenshot("",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-4-thumb.png", "0.7-4.png");
+echo "
+</tr>
+<tr>";
+draw_screenshot("",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-5-thumb.png", "0.7-5.png");
+draw_screenshot("Outer defenses of an enemy being taken out",
+    "NEW: 10. Nov. 2002 (Boson 0.7)", "0.7-6-thumb.png", "0.7-6.png");
+echo "
+</tr>
+<tr>";
 draw_screenshot("Here you can see an attack of an aircraft while rotating the
     camera. Also, you can see the new particle effects.",
-    "NEW: 09. Sep. 2002 (CVS)", "thumb_war1.png", "war1.png");
+    "09. Sep. 2002 (CVS)", "thumb_war1.png", "war1.png");
 draw_screenshot("The Big War - showing more particle effects, units and gameplay.",
-    "NEW: 09. Sep. 2002 (CVS)", "thumb_war2.png", "war2.png");
+    "09. Sep. 2002 (CVS)", "thumb_war2.png", "war2.png");
 echo "
 </tr>
 <tr>";
