@@ -302,7 +302,7 @@ bool BosonPath::findSlowPath()
   mPathLength = 0;
   mPathCost = 0;
   PathStyle pathfound = NoPath;
-#ifdef USE_STL
+#if USE_STL
   vector<PathNode> open;
 #else
   QValueList<PathNode> open;
@@ -382,7 +382,7 @@ bool BosonPath::findSlowPath()
     {
       boDebug(500) << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
       // Pick best node from OPEN
-#ifdef USE_STL
+#if USE_STL
       for(vector<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
 #else
       for(QValueList<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
@@ -456,7 +456,7 @@ bool BosonPath::findSlowPath()
         marking(n2.x, n2.y).level = n2.level;
         // Push node to OPEN
         open.push_back(n2);
-#ifdef USE_STL
+#if USE_STL
         push_heap(open.begin(), open.end(), comp);
 #else
         qHeapSort(open);
@@ -473,7 +473,7 @@ bool BosonPath::findSlowPath()
             // Our current node has lower cost than the one, that was here, so
             //  we modify the path
             // First, find this node in OPEN
-#ifdef USE_STL
+#if USE_STL
             vector<PathNode>::iterator find = open.begin();
 #else
             QValueList<PathNode>::iterator find = open.begin();
@@ -499,7 +499,7 @@ bool BosonPath::findSlowPath()
             // Replace cost and level of node that was in OPEN
             (*find).g = n2.g;
             (*find).level = n2.level;
-#ifdef USE_STL
+#if USE_STL
             push_heap(open.begin(), find + 1, comp);
 #else
             qHeapSort(open.begin(), ++find);
@@ -791,14 +791,14 @@ float BosonPath::cost(int x, int y)
   return co;
 }
 
-#ifdef USE_STL
+#if USE_STL
 void BosonPath::getFirst(vector<PathNode>& v, PathNode& n)
 #else
 void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
 #endif
 {
   n = v.front();
-#ifdef USE_STL
+#if USE_STL
   pop_heap(v.begin(), v.end(), comp);
   v.pop_back();
 #else
