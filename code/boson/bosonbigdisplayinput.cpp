@@ -257,6 +257,8 @@ bool BosonBigDisplayInput::actionHarvest(const BoVector3& canvasVector)
 		boDebug() << k_funcinfo << u->id() << " will harvest at " << resource->unit()->id() << "," << canvasVector.y() << " which is " << h->unit()->id() << endl;
 		localPlayerInput()->harvest(h, resource);
 		taken = true;
+	} else {
+		boDebug() << k_funcinfo << u->id() << " cannot mine at " << resourceUnit->id() << endl;
 	}
  }
  return taken;
