@@ -63,6 +63,8 @@ public:
 	void productionAdvanced(Unit* factory, double percentage);
 
 	void initEditor();
+	void hideCellConfigWidgets();
+	void showCellConfigWidgets();
 	void setCellType(CellType type);
 	void setTileSet(BosonTiles* tileSet);
 
