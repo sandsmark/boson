@@ -61,6 +61,8 @@ void BosonStartupNetwork::setGame(Boson* game)
 		this, SLOT(slotPlayFieldChanged(const QString&)));
  connect(mGame, SIGNAL(signalStartGameClicked()),
 		this, SIGNAL(signalStartGameClicked()));
+ connect(mGame, SIGNAL(signalAdminStatusChanged(bool)),
+		this, SIGNAL(signalSetAdmin(bool)));
 
  QPtrList<KPlayer> list = *mGame->playerList();
  QPtrListIterator<KPlayer> it(list);;

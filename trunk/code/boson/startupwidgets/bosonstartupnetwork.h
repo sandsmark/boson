@@ -75,6 +75,7 @@ signals:
 	void signalPlayFieldChanged(BosonPlayField*);
 	void signalStartGameClicked();
 	void signalSetLocalPlayer(Player* p);
+	void signalSetAdmin(bool isAdmin);
 
 private:
 	Boson* mGame;
