@@ -91,7 +91,7 @@ bool boFile::openRead(const char *filename)
 	boAssert (nbMobiles	> 1 );
 	boAssert (nbFacilities	> 1 );
 
-	boAssert (nbPlayer	< 4 );
+	boAssert (nbPlayer	< BOSON_MAX_PLAYERS );
 	boAssert (map_width	< 500 );
 	boAssert (map_height	< 500 );
 	boAssert (nbMobiles	< 50 );
