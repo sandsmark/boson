@@ -61,25 +61,6 @@ Boson* Boson::mBoson = 0;
 
 #define ADVANCE_INTERVAL 250 // ms
 
-// Saving format version
-#define BOSON_SAVEGAME_FORMAT_VERSION_MAJOR 0x00
-#define BOSON_SAVEGAME_FORMAT_VERSION_MINOR 0x01
-#define BOSON_SAVEGAME_FORMAT_VERSION_RELEASE 0x12
-#define BOSON_MAKE_SAVEGAME_FORMAT_VERSION( a,b,c ) ( ((a) << 16) | ((b) << 8) | (c) )
-#define BOSON_SAVEGAME_FORMAT_VERSION \
-	BOSON_MAKE_SAVEGAME_FORMAT_VERSION \
-		( \
-		BOSON_SAVEGAME_FORMAT_VERSION_MAJOR, \
-		BOSON_SAVEGAME_FORMAT_VERSION_MINOR, \
-		BOSON_SAVEGAME_FORMAT_VERSION_RELEASE \
-		)
-
-// version from boson 0.8
-#define BOSON_SAVEGAME_FORMAT_VERSION_0_8 \
-	( BOSON_MAKE_SAVEGAME_FORMAT_VERSION (0x00, 0x01, 0x12) )
-
-#define BOSON_SAVEGAME_END_COOKIE 1718
-
 class BoMessage
 {
 public:
@@ -1878,7 +1859,7 @@ bool Boson::savegame(QDataStream& stream, bool network, bool saveplayers)
  // Magic cookie
  stream << (Q_INT32)cookie();
  // Version information (for future format changes and backwards compatibility)
- stream << (Q_UINT32)BOSON_SAVEGAME_FORMAT_VERSION;
+ stream << (Q_UINT32)BosonSaveLoad::latestSavegameVersion();
 
  // Players count for loading progressbar
  stream << (Q_UINT32)playerList()->count();
