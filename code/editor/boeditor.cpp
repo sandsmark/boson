@@ -210,7 +210,12 @@ bool BoEditorApp::slot_save()
 		return slot_saveAs();
 
 	/* actual saving */
-	return ecanvas->Save(filename);
+	if (ecanvas->Save(filename))
+			return true;
+
+	KMessageBox::sorry(0, i18n("Saving of the file failed"), i18n("Save failed") );
+
+	return false;
 }
 
 bool BoEditorApp::slot_saveAs()
