@@ -20,6 +20,7 @@
 #define BOSONMODEL_H
 
 #include <qmap.h>
+#include <qvaluelist.h>
 #include <qintdict.h>
 #include <GL/gl.h>
 
