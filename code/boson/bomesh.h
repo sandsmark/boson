@@ -227,7 +227,6 @@ public:
 	bool textured() const;
 
 	void renderMesh(const QColor* color);
-	void renderPoint(int index);
 
 	void loadDisplayList(const QColor* teamColor, bool reload = false);
 	GLuint displayList() const;
@@ -284,6 +283,11 @@ public:
 protected:
 	void createNodes(unsigned int faces);
 	bool connectFaces(const BoAdjacentDataBase* database, const QPtrList<BoNode>& faces, QPtrList<BoNode>* found, BoNode* node) const;
+
+
+	// this is meant to check whether the something on the screen will
+	// change if we draw this mesh now.
+	bool checkVisible();
 
 private:
 	void init();

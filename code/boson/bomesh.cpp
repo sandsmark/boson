@@ -20,11 +20,157 @@
 #include "bomesh.h"
 #include "bodebug.h"
 #include "bo3dtools.h"
+#include "bomemorytrace.h"
 
 #include <qptrlist.h>
 #include <qcolor.h>
 
 #include <GL/gl.h>
+
+class BoundingObject
+{
+public:
+	BoundingObject()
+	{
+	}
+	virtual ~BoundingObject()
+	{
+	}
+
+	virtual void render() = 0;
+};
+class BoundingBox : public BoundingObject
+{
+public:
+	BoundingBox() : BoundingObject()
+	{
+	}
+	~BoundingBox()
+	{
+	}
+	virtual void render()
+	{
+		glBegin(GL_QUADS);
+			renderQuad(0);
+			renderQuad(4);
+			renderQuad(8);
+			renderQuad(12);
+			renderQuad(16);
+			renderQuad(20);
+		glEnd();
+	}
+	void setVertex(int i, float* coords)
+	{
+		mVectors[i].set(coords);
+	}
+
+protected:
+	inline void renderQuad(int startVertex)
+	{
+		glVertex3fv(mVectors[startVertex].data());
+		glVertex3fv(mVectors[startVertex + 1].data());
+		glVertex3fv(mVectors[startVertex + 2].data());
+		glVertex3fv(mVectors[startVertex + 3].data());
+	}
+
+private:
+	BoVector3 mVectors[24];
+};
+
+// this should be able to generate bounding boxes, spheres or maybe just
+// bounding polygons.
+// it can be used to check visibility, i.e. so that we do not render the mesh if
+// it is behind other meshes/units/whatever.
+class BoundingObjectBuilder
+{
+public:
+	BoundingObjectBuilder()
+	{
+	}
+	~BoundingObjectBuilder()
+	{
+	}
+
+	/**
+	 * @return A new'ed object (you are responsible of deleting it!) - the
+	 * best kind of object should be chosen.
+	 **/
+	BoundingObject* generateBoundingObject(BoMesh* mesh)
+	{
+		// we support bounding boxes only :-(
+		return (BoundingObject*)generateBoundingBox(mesh);
+	}
+
+	BoundingBox* generateBoundingBox(BoMesh* mesh)
+	{
+		BoundingBox* box = new BoundingBox();
+
+		// note: we use a very naive algorithm, which constructs boxes
+		// that are always parallel to the x/y/z axis. this means we
+		// have bad bounding boxes - they could easily be smaller.
+		// but that would be harder to code...
+		float v[3];
+		mesh->calculateMaxMin(); // probably redundant! we need to ensure that these values are final!
+
+		v[0] = mesh->maxX();
+		v[1] = mesh->maxY();
+		v[2] = mesh->maxZ();
+		box->setVertex(0, v);
+		box->setVertex(4, v);
+		box->setVertex(8, v);
+
+		v[0] = mesh->maxX();
+		v[1] = mesh->maxY();
+		v[2] = mesh->minZ();
+		box->setVertex(1, v);
+		box->setVertex(11, v);
+		box->setVertex(12, v);
+
+		v[0] = mesh->maxX();
+		v[1] = mesh->minY();
+		v[2] = mesh->maxZ();
+		box->setVertex(3, v);
+		box->setVertex(5, v);
+		box->setVertex(16, v);
+
+		v[0] = mesh->maxX();
+		v[1] = mesh->minY();
+		v[2] = mesh->minZ();
+		box->setVertex(2, v);
+		box->setVertex(15, v);
+		box->setVertex(17, v);
+
+		v[0] = mesh->minX();
+		v[1] = mesh->maxY();
+		v[2] = mesh->maxZ();
+		box->setVertex(9, v);
+		box->setVertex(7, v);
+		box->setVertex(20, v);
+
+		v[0] = mesh->minX();
+		v[1] = mesh->maxY();
+		v[2] = mesh->minZ();
+		box->setVertex(23, v);
+		box->setVertex(10, v);
+		box->setVertex(13, v);
+
+		v[0] = mesh->minX();
+		v[1] = mesh->minY();
+		v[2] = mesh->maxZ();
+		box->setVertex(6, v);
+		box->setVertex(19, v);
+		box->setVertex(21, v);
+
+		v[0] = mesh->minX();
+		v[1] = mesh->minY();
+		v[2] = mesh->minZ();
+		box->setVertex(14, v);
+		box->setVertex(18, v);
+		box->setVertex(22, v);
+
+		return box;
+	}
+};
 
 class BoAdjacentDataBase
 {
@@ -94,6 +240,7 @@ private:
 };
 
 
+#define BO_NODE_BYTE_SIZE ((1 + 1 + 1 + 3) * 4) // 2 pointer, one int, one 3-int array, each 4 bytes
 BoNode::BoNode(BoNode* previous)
 {
  init();
@@ -107,6 +254,7 @@ BoNode::BoNode()
 
 BoNode::~BoNode()
 {
+ boMem->subBytes(BO_NODE_BYTE_SIZE);
 }
 
 void BoNode::setFace(const int* points)
@@ -167,6 +315,7 @@ void BoNode::init()
  mPointIndex[0] = -1;
  mPointIndex[1] = -1;
  mPointIndex[2] = -1;
+ boMem->addBytes(BO_NODE_BYTE_SIZE);
 }
 
 bool BoNode::isAdjacent(BoNode* f1, BoNode* f2)
@@ -216,6 +365,8 @@ public:
 
 		mPointsCache = 0;
 		mPointsCacheCount = 0;
+
+		mBoundingObject = 0;
 	}
 	int mType;
 	BoNode* mFaces;
@@ -243,6 +394,8 @@ public:
 	float mMaxY;
 	float mMinZ;
 	float mMaxZ;
+
+	BoundingObject* mBoundingObject;
 };
 
 BoMesh::BoMesh(unsigned int faces)
@@ -257,8 +410,9 @@ BoMesh::~BoMesh()
 	glDeleteLists(d->mDisplayList, 1);
  }
  d->mAllNodes.clear();
- delete[] d->mAllocatedPoints;
+ boMem->freeFloatArray(d->mAllocatedPoints);
  d->mPoints = 0; // do NOT delete!
+ delete d->mBoundingObject;
  delete d;
 }
 
@@ -695,7 +849,7 @@ void BoMesh::allocatePoints(unsigned int points)
 	if (d->mPoints == d->mAllocatedPoints) {
 		d->mPoints = 0;
 	}
-	delete[] d->mAllocatedPoints;
+	boMem->freeFloatArray(d->mAllocatedPoints);
 	d->mAllocatedPoints = 0;
  }
  if (d->mPoints) {
@@ -705,7 +859,7 @@ void BoMesh::allocatePoints(unsigned int points)
  d->mPointCount = points;
  // note that some space is wasted - some objects are not textured. but we can
  // render more efficient this way.
- d->mAllocatedPoints = new float[d->mPointCount * 5];
+ d->mAllocatedPoints = boMem->allocateFloatArray(d->mPointCount * 5);
  d->mPoints = d->mAllocatedPoints;
 
  // AB: we initialize the array elements now. this is close to useless since we
@@ -764,11 +918,23 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	glBindTexture(GL_TEXTURE_2D, textureObject());
  }
 
-
- if (!d->mPointsCache || d->mPointsCacheCount == 0) {
-	boError() << k_funcinfo << "no point cache!" << endl;
- } else {
-	glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+#define USE_OCCLUSION_CULLING 0
+ if (!d->mBoundingObject) {
+	// AB: FIXME: construct this once the mesh is completely loaded
+	// (including point moving)
+	BoundingObjectBuilder builder;
+	d->mBoundingObject = builder.generateBoundingObject(this);
+ }
+#if USE_OCCLUSION_CULLING
+ if (checkVisible())
+#endif
+ {
+//	boDebug() << k_funcinfo << "not culled" << endl;
+	if (!d->mPointsCache || d->mPointsCacheCount == 0) {
+		boError() << k_funcinfo << "no point cache!" << endl;
+	} else {
+		glDrawElements(type(), d->mPointsCacheCount, GL_UNSIGNED_INT, d->mPointsCache);
+	}
  }
 
 
@@ -777,15 +943,6 @@ void BoMesh::renderMesh(const QColor* teamColor)
 	glPopAttrib();
 	resetColor = false;
  }
-}
-
-void BoMesh::renderPoint(int point)
-{
-boWarning() << k_funcinfo << "obsolete!" << endl;
- if (textured()) {
-	glTexCoord2fv(d->mPoints + 5 * point + 3);
- }
- glVertex3fv(d->mPoints + 5 * point);
 }
 
 // there MUST be a valid context set already!!
@@ -878,7 +1035,7 @@ void BoMesh::movePoints(float* array, int index)
  // but remember that the array that is actually used (d->mPoints) is allocated
  // only once per model - so at this point there is no memory fragmentation (and
  // this is the important place)
- delete[] d->mAllocatedPoints;
+ boMem->freeFloatArray(d->mAllocatedPoints);
  d->mAllocatedPoints = 0;
  d->mPoints = array + index * 5;
  if (d->mPointsCache) {
@@ -889,8 +1046,7 @@ void BoMesh::movePoints(float* array, int index)
 
 void BoMesh::createPointCache()
 {
- delete[] d->mPointsCache;
- d->mPointsCache = 0;
+ boMem->freeUIntArray(d->mPointsCache);
  d->mPointsCacheCount = 0;
  BoNode* node = faces();
  if (!node) {
@@ -932,7 +1088,7 @@ void BoMesh::createPointCache()
 
 	// 3 basic points + one point per remaining face
 	d->mPointsCacheCount = 3 + (facesCount - 3) * 1;
-	d->mPointsCache = new unsigned int[d->mPointsCacheCount];
+	d->mPointsCache = boMem->allocateUIntArray(d->mPointsCacheCount);
 
 	d->mPointsCache[0] = (unsigned int)node->pointIndex()[firstPoint];
 	d->mPointsCache[1] = (unsigned int)node->pointIndex()[secondPoint];
@@ -953,7 +1109,7 @@ void BoMesh::createPointCache()
  } else if (type() == GL_TRIANGLES) {
 	// 3 points per face
 	d->mPointsCacheCount = facesCount * 3;
-	d->mPointsCache = new unsigned int[d->mPointsCacheCount];
+	d->mPointsCache = boMem->allocateUIntArray(d->mPointsCacheCount);
 	int element = 0;
 	for (; node; node = node->next()) {
 		for (int i = 0; i < 3; i++) {
@@ -1024,5 +1180,34 @@ float BoMesh::minZ() const
 float BoMesh::maxZ() const
 {
  return d->mMaxZ;
+}
+
+bool BoMesh::checkVisible()
+{
+ GLboolean result;
+#if 1
+ glDisable(GL_TEXTURE_2D);
+ glDisable(GL_DEPTH_TEST);
+#else
+ glDepthMask(GL_FALSE);
+ glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+#endif
+ glEnable(GL_OCCLUSION_TEST_HP);
+
+ d->mBoundingObject->render();
+
+ glGetBooleanv(GL_OCCLUSION_TEST_RESULT_HP, &result);
+
+ glDisable(GL_OCCLUSION_TEST_HP);
+#if 1
+ // AB: we should NOT do this! it might have been disabled before already!
+ // (think about rendering a wireframe only!)
+ glEnable(GL_TEXTURE_2D);
+ glEnable(GL_DEPTH_TEST);
+#else
+ glDepthMask(GL_TRUE);
+ glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+#endif
+ return result;
 }
 
