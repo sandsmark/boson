@@ -805,13 +805,11 @@ void Unit::newPath()
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
  }
- if ((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2))
- {
+ if ((currentWaypoint().x() == x() + width() / 2) && (currentWaypoint().y() == y() + height() / 2)) {
 	boDebug() << k_funcinfo << "!!!!! First waypoint is unit's current pos! Removing" << endl;
 	waypointDone();
  }
- if (waypointCount() == 0)
- {
+ if (waypointCount() == 0) {
 	// Pathfinder now adds -1; -1 itself, so this shouldn't be reached
 	boError() << k_funcinfo << "!!!!! No valid points in path !!!!! Fix pathfinder !!!!!" << endl;
 	addWaypoint(QPoint(-1, -1));
