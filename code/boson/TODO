@@ -3,7 +3,6 @@ Game TODOs
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
 - BosonPath doesn't honor fog of war
-- remove wreckages after a certain timeout
 - left dbl-click should select ALL units of that type
 - auto-attacking when unit is in range
 - end of game - winner ; statistics
@@ -60,6 +59,7 @@ General TODOs
 - make cursors themeable again (quite easy cause we use BosonCursor for all of
   this)
 - remove QFile from unit.cpp
+- decrease game speed ; increase unit speed. Saves cpu power
 
 Data TODOs
 - general sound (e.g. speech)

@@ -45,6 +45,7 @@ public:
 	KGameProperty<unsigned long int> mArmor;
 	KGameProperty<unsigned long int> mShields;
 	KGameProperty<unsigned long int> mId; // is a KGameProperty clever here?
+	KGameProperty<unsigned int> mDeletionTimer;
 };
 
 
@@ -71,6 +72,9 @@ UnitBase::UnitBase(const UnitProperties* prop)
 		KGamePropertyBase::PolicyLocal, "Damage");
  mWork.registerData(IdWork, dataHandler(), 
 		KGamePropertyBase::PolicyLocal, "Work");
+ d->mDeletionTimer.registerData(IdDeletionTimer, dataHandler(), 
+		KGamePropertyBase::PolicyLocal, "DeletionTimer");
+ d->mDeletionTimer.setEmittingSignal(false);
 
 
  mWork.setLocal((int)WorkNone);
@@ -81,6 +85,7 @@ UnitBase::UnitBase(const UnitProperties* prop)
  mDamage.setLocal(0);
  mRange.setLocal(0);
  mSightRange.setLocal(0);
+ d->mDeletionTimer.setLocal(0);
 }
 
 UnitBase::~UnitBase()
@@ -182,3 +187,12 @@ inline bool UnitBase::isFlying() const
  return (unitProperties() ? unitProperties()->isAircraft() : false);
 }
 
+void UnitBase::increaseDeletionTimer()
+{
+ d->mDeletionTimer = d->mDeletionTimer + 1;
+}
+
+unsigned int UnitBase::deletionTimer() const
+{
+ return d->mDeletionTimer;
+}
