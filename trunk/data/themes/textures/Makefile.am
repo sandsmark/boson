@@ -126,7 +126,8 @@ texture_DATA = \
 	wall7.jpg \
 	wall8.jpg \
 	wall9.jpg \
-	window3.jpg
+	window3.jpg \
+	brick1.jpg
 
 # no further editing need here
 
