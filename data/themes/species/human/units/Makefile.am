@@ -32,7 +32,7 @@ install-data-local:
 			rm -rf $(DESTDIR)$(unitsdir)/$$i;\
 		fi ;\
 		echo "installing $$i" ;\
-		mkdir $(DESTDIR)$(unitsdir)/$$i ;\
+		mkdir -p $(DESTDIR)$(unitsdir)/$$i ;\
 		files=`cd $(srcdir)/$$i && ls -1d *` ;\
 		for f in $$files; do \
 			if test -f $(srcdir)/$$i/$$f; then \
