@@ -251,6 +251,7 @@ void BosonProfilingDialog::resetRenderPage()
  long int aClear = 0;
  long int aCells = 0;
  long int aUnits = 0;
+ unsigned int aUnitCount = 0; // hmm average for this does not really make sense
  long int aFOW = 0;
  long int aText = 0;
  long int aFunction = 0;
@@ -265,7 +266,8 @@ void BosonProfilingDialog::resetRenderPage()
 	aClear += (*it).mClear;
 	initRenderItem(new QListViewItemNumber(item), i18n("Cells"), (*it).mCells, func);
 	aCells += (*it).mCells;
-	initRenderItem(new QListViewItemNumber(item), i18n("Units"), (*it).mUnits, func);
+	initRenderItem(new QListViewItemNumber(item), i18n("Units (%1)").arg((*it).mUnitCount), (*it).mUnits, func);
+	aUnitCount += (*it).mUnitCount;
 	aUnits += (*it).mUnits;
 	initRenderItem(new QListViewItem(item), i18n("FOW"), (*it).mFOW, func);
 	aFOW += (*it).mFOW;
@@ -284,7 +286,7 @@ void BosonProfilingDialog::resetRenderPage()
  initRenderItem(average, i18n("Function"), aFunction / count, func);
  initRenderItem(new QListViewItemNumber(average), i18n("Clearing"), aClear / count, func);
  initRenderItem(new QListViewItemNumber(average), i18n("Cells"), aCells / count, func);
- initRenderItem(new QListViewItemNumber(average), i18n("Units"), aUnits / count, func);
+ initRenderItem(new QListViewItemNumber(average), i18n("Units (%1)").arg(aUnitCount / count), aUnits / count, func);
  initRenderItem(new QListViewItem(average), i18n("FOW"), aFOW / count, func);
  initRenderItem(new QListViewItem(average), i18n("Text"), aText / count, func);
  average->setOpen(true);

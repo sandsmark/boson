@@ -37,6 +37,7 @@ public:
 		mClear = 0;
 		mCells = 0;
 		mUnits = 0;
+		mUnitCount = 0;
 		mFOW = 0;
 		mText = 0;
 		mFunction = 0;
@@ -50,6 +51,7 @@ public:
 		mClear = c.mClear;
 		mCells = c.mCells;
 		mUnits = c.mUnits;
+		mUnitCount = c.mUnitCount;
 		mFOW = c.mFOW;
 		mText = c.mText;
 		mFunction = c.mFunction;
@@ -62,10 +64,10 @@ public:
 	long int mClear;
 	long int mCells;
 	long int mUnits;
+	unsigned int mUnitCount;
 	long int mFOW;
 	long int mText;
 	long int mFunction;
-
 };
 
 // note that there are several workarounds in this class to reduce the number of
@@ -107,7 +109,7 @@ public:
 	void render(bool start); // always call this first, before any other render*()
 	void renderClear(bool start);
 	void renderCells(bool start);
-	void renderUnits(bool start);
+	void renderUnits(bool start, unsigned int number = 0);
 	void renderFOW(bool start);
 	void renderText(bool start);
 	void debugRender();
