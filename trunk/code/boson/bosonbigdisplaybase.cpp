@@ -606,7 +606,7 @@ void BosonBigDisplayBase::paintGL()
 	// BosonPrite::isFogged() and check it there.
 	QPointArray cells = item->cells();
 	bool visible = false;
-	for (int i = 0; i < cells.count(); i++) {
+	for (unsigned int i = 0; i < cells.count(); i++) {
 		if (!localPlayer()->isFogged(cells[i].x(), cells[i].y())) {
 			visible = true;
 			// ugly but faster than placing this into the loop
