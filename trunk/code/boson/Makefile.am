@@ -54,6 +54,7 @@ libboson_la_SOURCES = \
 	bosoncampaign.cpp \
 	boson.cpp \
 	bomessage.cpp \
+	boeventloop.cpp \
 	bosoncanvas.cpp \
 	bosoncanvasstatistics.cpp \
 	bosoncollisions.cpp \
@@ -115,6 +116,7 @@ libboson_la_SOURCES = \
 	boeventmanager.cpp \
 	bocondition.cpp \
 	boconditionwidget.cpp \
+	bodebuglogdialog.cpp \
 	bowater.cpp \
 	botexture.cpp
 
@@ -162,7 +164,6 @@ boson_SOURCES = \
 		kgameplayerdebug.cpp \
 		kgamecelldebug.cpp \
 		gameoverdialog.cpp \
-		bodebuglogdialog.cpp \
 		main.cpp
 
 bounit_LDFLAGS = $(KDE_RPATH) $(all_libraries)

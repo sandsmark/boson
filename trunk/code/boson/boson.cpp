@@ -42,6 +42,7 @@
 #include "bomessage.h"
 #include "bosonplayerinput.h"
 #include "bosonnetworksynchronizer.h"
+#include "boeventloop.h"
 
 #include <klocale.h>
 #include <kdeversion.h>
@@ -58,6 +59,7 @@
 #include <qtextstream.h>
 #include <qcstring.h>
 #include <qfile.h>
+#include <qapplication.h>
 
 #include <stdlib.h>
 #include <sys/time.h>
@@ -127,7 +129,8 @@ void BoAdvanceMessageTimes::receiveAdvanceCall()
  * movement and friends occur.
  *
  * In this class the precise process, how advance calls are made and how many
- * calls happen after a advance message is defined.
+ * calls happen after a advance message was defined, now that is made in @ref
+ * BoEventLoop.
  *
  * An advance message is received by @ref receiveAdvanceMessage. This will
  * result in an immediate advance call, and also in a certain number of
@@ -143,10 +146,6 @@ public:
 	BoAdvance(Boson* boson)
 	{
 		mBoson = boson;
-
-		mAdvanceDividerCount = 0;
-		mAdvanceDivider = 1;
-		mAdvanceMessageSent = false;
 
 		initProperties(mBoson->dataHandler());
 
@@ -186,38 +185,23 @@ public:
 
 	void receiveAdvanceMessage(int gameSpeed)
 	{
-		mAdvanceMessageSent = false;
-		mAdvanceDivider = gameSpeed;
-		mAdvanceDividerCount = 0;
+		// we lock message delivery - only after all advance calls have
+		// been made, user input is allowed.
+		// this is important to keep network in sync
 		mBoson->lock();
+
 		boDebug(300) << "Advance - speed (calls per " << advanceMessageInterval()
-				<< "ms)=" << gameSpeed << " elapsed: "
-				<< mAdvanceReceived.elapsed() << endl;
-		mAdvanceReceived.restart();
-		mBoson->slotReceiveAdvance();
+				<< "ms)=" << gameSpeed << endl;
 
 		mCurrentAdvanceMessageTimes = new BoAdvanceMessageTimes(gameSpeed);
 		mAdvanceMessageTimes.append(mCurrentAdvanceMessageTimes);
+		((BoEventLoop*)qApp->eventLoop())->receivedAdvanceMessage(gameSpeed);
 	}
 
 	void sendAdvance() // slot?
 	{
-		// If advance message has been sent, but not yet received, don't send another
-		//  one, because it would get delayed.
-		// Note that this is for single-player only, it would probably break network
-		if (mAdvanceMessageSent && !mBoson->isNetwork()) {
-			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " message has already been sent, returning" << endl;
-			return;
-		}
-		// Also don't send advance message if we're in locked() state.
-		// Otherwise, scripted sequences may broke
-		if (mBoson->isLocked() && !mBoson->isNetwork()) {
-			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " message delivery locked, returning" << endl;
-			return;
-		}
 		boDebug(300) << k_funcinfo << "advanceCallsCount=" << mBoson->advanceCallsCount() << " sending advance msg" << endl;
 		mBoson->sendMessage(0, BosonMessage::AdvanceN);
-		mAdvanceMessageSent = true;
 	}
 
 	/**
@@ -226,22 +210,9 @@ public:
 	 * This does the central advance call mechanism in Boson, most
 	 * importantly it will make @ref Boson emit @ref Boson::signalAdvance.
 	 *
-	 * Once the signal is emitted, this function is meant to calculate the
-	 * time until the next advanceCall should be made, if there are any
-	 * calls left from the last advance message. If this was the last
-	 * advance call for the advance message, we are done and wait for the
-	 * next message.
-	 *
-	 * In an optimal case, the time until the next advance call should be
-	 * made is exactly message_interval / calls_per_message. E.g. when we
-	 * send an advance message ever second and want 10 calls per message, we
-	 * do an advance call every 0.6 seconds. But in practice this won't
-	 * work, due to several unpredictable delays at about every place. So we
-	 * need to do some magic here.
-	 *
-	 * Therefore this is a <em>complex</em> method! This can be improved
-	 * greatly, but you can also do a lot wrong here (e.g. concerning
-	 * networking). Take care when you change something here.
+	 * However the important task of calculating when the next advance call
+	 * is being made, is not done here anymore. That is now done in the @ref
+	 * BoEventLoop.
 	 **/
 	void receiveAdvanceCall();
 
@@ -253,17 +224,10 @@ public:
 private:
 	Boson* mBoson;
 
-	QTime mAdvanceReceived; // when the last advance *message* was received
-	int mAdvanceDivider; // pretty much exactly gameSpeed()
-	int mAdvanceDividerCount; // how many advance *calls* have been made since the last advance *message*
-	bool mAdvanceMessageSent;
-
 	QPtrList<BoAdvanceMessageTimes> mAdvanceMessageTimes;
 	BoAdvanceMessageTimes* mCurrentAdvanceMessageTimes;
 
-
 	KGamePropertyInt mAdvanceFlag;
-
 	KGameProperty<unsigned int> mAdvanceCallsCount;
 };
 
@@ -286,45 +250,6 @@ void BoAdvance::receiveAdvanceCall()
  mBoson->eventManager()->advance();
 
  mAdvanceCallsCount = mAdvanceCallsCount + 1;
-
- // we also have "mAdvanceDividerCount". the mAdvanceCallsCount is important in Unit,
- // mAdvanceDividerCount is limited to boson only. some explanations:
- // Only a single advance message is sent over network every ADVANCE_INTERVAL
- // ms, independant from the game speed.
- // This single advance message results in a certain number of advance calls
- // (btw: in codes, comments, logs and so on I always make a different between
- // "advance message" and "advance calls" as explained here). mAdvanceDivider is
- // this number of advance calls to-be-generated and is reset to the gameSpeed()
- // when the message is received.
- // The mAdvanceDividerCount is reset to 0 once the advance message is received.
- //
- // The code below tries to make one advance call every
- // ADVANCE_INTERVAL/mAdvanceDivider ms. This means in the ideal case all
- // advance calls from this and from the next advance message would be in the
- // same interval.
- //
- // Please remember that there are several additional tasks that need to be done
- // - e.g. unit moving, OpenGL rendering, ... so
- if (mAdvanceDividerCount + 1 == mAdvanceDivider)  {
-	boDebug(300) << k_funcinfo << "delayed messages: "
-			<< mBoson->delayedMessageCount() << endl;
-	mBoson->unlock();
- } else if (mAdvanceDividerCount + 1 < mAdvanceDivider) {
-	int next;
-	if (mBoson->delayedAdvanceMessageCount() == 0) {
-		int t = advanceMessageInterval() * mAdvanceDividerCount / mAdvanceDivider;// time that should have been elapsed
-		int diff = QMAX(5, mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
-		next = QMAX(0, advanceMessageInterval() / mAdvanceDivider - diff);
-	} else {
-		// we have delayed advance messages already, so we should flush
-		// the remaining calls for the current message asap
-		next = 0;
-	}
-	QTimer::singleShot(next, mBoson, SLOT(slotReceiveAdvance()));
-	mAdvanceDividerCount++;
- } else {
-	boError() << k_funcinfo << "count > divider --> This must never happen!!" << endl;
- }
 }
 
 
@@ -435,10 +360,14 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 	debugLog->setEmitSignal(BoDebug::KDEBUG_ERROR, true);
 	debugLog->setEmitSignal(BoDebug::KDEBUG_WARN, true);
  }
+
+ ((BoEventLoop*)qApp->eventLoop())->setAdvanceMessageInterval(ADVANCE_INTERVAL);
+ ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(this);
 }
 
 Boson::~Boson()
 {
+ ((BoEventLoop*)qApp->eventLoop())->setAdvanceObject(0);
  KCrash::setEmergencySaveFunction(NULL);
  delete d->mNetworkSynchronizer;
  delete d->mPlayerInputHandler;
@@ -488,6 +417,18 @@ const BosonCanvas* Boson::canvas() const
 
 bool Boson::event(QEvent* e)
 {
+ switch (e->type()) {
+	case QEvent::User + QtEventAdvanceCall:
+		slotReceiveAdvance();
+		return true;
+	case QEvent::User + QtEventAdvanceMessageCompleted:
+		boDebug(300) << k_funcinfo << "delayed messages: "
+				<< delayedMessageCount() << endl;
+		unlock();
+		return true;
+	default:
+		break;
+ }
  return KGame::event(e);
 }
 
@@ -552,9 +493,6 @@ void Boson::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 , Q_UI
 	{
 		d->mNetworkSynchronizer->receiveAdvanceMessage(d->mCanvas);
 		d->mAdvance->receiveAdvanceMessage(gameSpeed());
-		if (delayedMessageCount() > 20) {
-			boWarning() << k_funcinfo << "more than 20 messages delayed!!" << endl;
-		}
 		break;
 	}
 	case BosonMessage::ChangeMap:

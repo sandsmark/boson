@@ -145,6 +145,11 @@ enum ScrollDirection {
 	ScrollLeft = 3
 };
 
+// these are added to QEvent::User
+enum BoQtEvent {
+	QtEventAdvanceCall = 1,
+	QtEventAdvanceMessageCompleted = 2
+};
 
 #endif
 
