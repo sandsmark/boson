@@ -196,7 +196,11 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	return false;
  }
 
+ mFileName = file;
  mPreLoaded = true;
+
+ delete mFile;
+ mFile = 0;
 
  // we have a problem.
  // the minimap for the startupwidgets requires the cells to be loaded which
@@ -228,6 +232,18 @@ bool BosonPlayField::loadPlayField(const QString& file)
  if (!preLoadPlayField(file)) {
 	return false;
  }
+ if (!file.isNull()) {
+	if (file != mFileName) {
+		boError() << k_funcinfo << "file " << mFileName
+				<< " was preloaded - but we are trying to load "
+				<< file << " now!" << endl;
+		return false;
+	}
+ }
+
+ delete mFile;
+ mFile = new BPFFile(mFileName, true);
+
  if (!mFile) {
 	boError() << k_funcinfo << "NULL file" << endl;
 	return false;
