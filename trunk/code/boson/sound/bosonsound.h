@@ -57,13 +57,14 @@ public:
 	void addUnitSounds(const QString& speciesPath, const QStringList& sounds);
 
 	/**
-	 * Add a sound. This is not a unit specific sound but something
+	 * Add general sounds. These are not unit specific sounds but something
 	 * independant. Examples may be status reports ("you are under attack")
 	 * or a radar sound or something like this.
-	 * @param file Absolute (!) filename
-	 * @param id unique id for this sound
+	 * @param speciesPath Path to the species directory. See @ref
+	 * SpeciesTheme::themePath
+	 * @param sounds A list of id<->sound name pairs.
 	 **/
-	void addSound(int id, const QString& file);
+	void addSounds(const QString& speciesPath, QMap<int, QString> sounds);
 
 	/**
 	 * @return boMusic->server(); see @ref BosonMusic::server

@@ -296,7 +296,7 @@ void BosonSound::addUnitSounds(const QString& speciesPath, const QStringList& so
  }
 }
 
-void BosonSound::addSound(int id, const QString& file)
+void BosonSound::addSounds(const QString& speciesPath, QMap<int, QString> sounds)
 {
 #if KDE_VERSION < 301
  return;
@@ -304,17 +304,46 @@ void BosonSound::addSound(int id, const QString& file)
  if (boConfig->disableSound()) {
 	return;
  }
- if (d->mSounds.find(id)) {
+ QString path = speciesPath;
+ if (path.right(1) != QString::fromLatin1("/")) {
+	path += QString::fromLatin1("/");
+ }
+ path += QString::fromLatin1("sounds/");
+
+ // TODO: support for different versions
+ // currently we support only a single version per sound here. let's do it just
+ // like for unit sounds and add _n.ogg to the sound names!
+ QDir directory(path);
+ directory.setNameFilter(QString("*.ogg;*.wav"));
+ QStringList allFiles = directory.entryList();
+ if (allFiles.isEmpty()) {
+	kdWarning() << k_funcinfo << "no sound files found - is the data module installed?" << endl;
 	return;
  }
- kdDebug() << k_funcinfo << "loading " << file << endl;
- BoPlayObject* playObject = new BoPlayObject(this, file);
- if (!playObject->isNull()) {
-	d->mSounds.insert(id, playObject);
- } else {
-	kdWarning() << k_funcinfo << "NULL sound " << file << endl;
-	delete playObject;
+ QMap<int, QString>::Iterator it = sounds.begin();
+ for (; it != sounds.end(); ++it) {
+	if (d->mSounds.find(it.key())) {
+		continue;
+	}
+//	QStringList list = list.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(*it))); // support for _n.ogg
+	QStringList list = allFiles.grep(QRegExp(QString("^%1\\....").arg(*it))); // support for .ogg only
+	if (list.isEmpty()) {
+		continue;
+	}
+	QString file = path + list.first();
+
+	BoPlayObject* playObject = new BoPlayObject(this, file);
+	if (!playObject->isNull()) {
+		d->mSounds.insert(it.key(), playObject);
+	} else {
+		kdWarning() << k_funcinfo << "NULL sound " << file << endl;
+		delete playObject;
+	}
+
  }
+
+
+
 }
 
 void BosonSound::addEvent(const QString& dir, const QString& name)
@@ -324,7 +353,7 @@ void BosonSound::addEvent(const QString& dir, const QString& name)
  QStringList list = directory.entryList();
  // for "oder_select" we'd also get "order_select_cmdbunker_0.wav" which is
  // wrong. so:
- list = list.grep(QRegExp(QString("%1_[0-9]{1,2}\\....").arg(name)));
+ list = list.grep(QRegExp(QString("^%1_[0-9]{1,2}\\....").arg(name)));
  for (unsigned int i = 0; i < list.count(); i++) {
 	addEventSound(name, directory.absPath() + QString::fromLatin1("/") + list[i]);
  }

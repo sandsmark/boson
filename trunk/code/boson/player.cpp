@@ -190,6 +190,7 @@ void Player::unitDestroyed(Unit* unit)
 	d->mMobilesCount--;
  }
  if (!hasMiniMap()) {
+	speciesTheme()->playSound(SoundReportMinimapDeactivated);
 	emit signalShowMiniMap(false);
  }
 }
@@ -499,6 +500,7 @@ void Player::facilityCompleted(Facility* fac)
 	return;
  }
  if (fac->unitProperties()->supportMiniMap()) {
+	speciesTheme()->playSound(SoundReportMinimapActivated);
 	emit signalShowMiniMap(true);
  }
 }

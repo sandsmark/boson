@@ -192,6 +192,13 @@ public:
 	 **/
 	void playSound(UnitBase* unit, UnitSoundEvent event);
 
+	void loadGeneralSounds();
+
+	/**
+	 * Play the specified sound event
+	 **/
+	void playSound(SoundEvent event);
+
 	/**
 	 * @return A list of all possible species. Note that the list contains
 	 * the index.dektop files - so remove index.desktop from every entry to

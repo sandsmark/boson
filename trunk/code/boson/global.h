@@ -88,6 +88,10 @@ enum UnitSoundEvent {
 	SoundReportUnderAttack = 6
 };
 
+enum SoundEvent {
+	SoundReportMinimapActivated = 0,
+	SoundReportMinimapDeactivated = 1
+};
 
 
 #endif
