@@ -350,7 +350,7 @@ int Unit::currentPluginType() const
 void Unit::updateSelectBox()
 {
  if (selectBox()) {
-	selectBox()->setFactor((float)health() / unitProperties()->health());
+	selectBox()->setFactor(healthPercentage());
  }
 }
 
@@ -1157,7 +1157,7 @@ bool Unit::loadFromXML(const QDomElement& root)
 	return false;
  }
  if (health() > unitProperties()->health()) {
-	boWarning(260) << k_funcinfo << "Unit with Id " << id() << " (Type=" << type() << ") wants health=" << health() << " but only " << unitProperties()->health() << " is possible for that type according to index.unit file. decreasing health to maximum." << endl;
+	boError(260) << k_funcinfo << "Unit with Id " << id() << " (Type=" << type() << ") wants health=" << health() << " but only " << unitProperties()->health() << " is possible for that type according to index.unit file. decreasing health to maximum." << endl;
 	setHealth(unitProperties()->health());
  }
  bool ok = false;

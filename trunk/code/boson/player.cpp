@@ -186,7 +186,7 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 			KGameMessage::extractPropertyCommand(stream2, propertyId, cmd);
 			switch (propertyId) {
 				case Unit::IdWaypoints:
-					// waypoints have PolicyClean, so they 
+					// waypoints have PolicyClean, so they
 					// send a message which is handled here.
 					break;
 				default:
@@ -277,7 +277,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
 
  bool emitSignalUnitChanged = false;
  switch (prop->id()) {
-	case UnitBase::IdHealth:
+	case UnitBase::IdHealthPercentage:
 	case UnitBase::IdArmor:
 	case UnitBase::IdShields:
 	case UnitBase::IdSightRange:
