@@ -21,7 +21,6 @@ BOSON_COMMON_SRC = \
 	bosonmap.cpp \
 	bosonfileconverter.cpp \
 	bosoncampaign.cpp \
-	bosonscenario.cpp \
 	bosonplayfield.cpp \
 	bosoncanvas.cpp \
 	bosoncanvasstatistics.cpp \

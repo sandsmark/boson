@@ -21,7 +21,6 @@
 
 #include "bosonmap.h"
 #include "bosonfileconverter.h"
-#include "bosonscenario.h"
 #include "bosondata.h"
 #include "bodebug.h"
 #include "bofile.h"
@@ -228,7 +227,6 @@ bool BosonPlayFieldInformation::loadMapInformation(const QByteArray& xml)
 BosonPlayField::BosonPlayField(QObject* parent) : QObject(parent, "BosonPlayField")
 {
  mMap = 0;
- mScenario = 0;
  mFile = 0;
  mPreLoaded = false;
  mLoaded = false;
@@ -241,7 +239,6 @@ BosonPlayField::~BosonPlayField()
  boDebug() << k_funcinfo << endl;
  emit signalNewMap(0);
  delete mMap;
- delete mScenario;
  delete mDescription;
  delete mFile;
  delete mPlayFieldInformation;
@@ -354,10 +351,6 @@ bool BosonPlayField::preLoadPlayField(const QString& file)
 	return false;
  }
  mIdentifier = mFile->identifier();
- if (!loadScenarioFromFile(mFile->scenarioData())) {
-	boError() << k_funcinfo << "Error loading scenario from " << file << endl;
-	return false;
- }
 
  mFileName = file;
  mPreLoaded = true;
@@ -577,17 +570,6 @@ bool BosonPlayField::loadMapFromFile(const QByteArray& mapXML, const QByteArray&
  return ret;
 }
 
-bool BosonPlayField::loadScenarioFromFile(const QByteArray& xml)
-{
- if (xml.size() == 0) {
-	boError() << k_funcinfo << "empty byte array" << endl;
-	return false;
- }
- delete mScenario;
- mScenario = new BosonScenario();
- return mScenario->loadScenarioFromDocument(QString(xml));
-}
-
 bool BosonPlayField::savePlayField(const QString& fileName)
 {
  // TODO: use KMessageBox here? or maybe add an errorMessage parameter which can
@@ -596,10 +578,8 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "NULL map" << endl;
 	return false;
  }
- if (!mScenario) {
-	boError() << k_funcinfo << "NULL scenario" << endl;
-	return false;
- }
+ boError() << k_funcinfo << "saving to files is broken at the moment!" << endl;
+ return false;
  QFileInfo fileInfo(fileName);
 
  if (!mDescription) {
@@ -619,11 +599,16 @@ bool BosonPlayField::savePlayField(const QString& fileName)
 	boError() << k_funcinfo << "Unable to save map" << endl;
 	return false;
  }
- QString scenario = saveScenarioToFile();
+ boError() << k_funcinfo << "scenario saving is broken currently!" << endl;
+ return false;
+ QString scenario;
+#if 0
+ scenario = saveScenarioToFile();
  if (scenario.isEmpty()) {
 	boError() << k_funcinfo << "Unable to save scenario" << endl;
 	return false;
  }
+#endif
  boDebug() << k_funcinfo << "Save height map" << endl;
  QByteArray heightMap = mMap->saveHeightMapImage();
  if (heightMap.size() == 0) {
@@ -645,7 +630,6 @@ bool BosonPlayField::savePlayField(const QString& fileName)
  f.writeFile(QString::fromLatin1("description.xml"), description, QString::fromLatin1("C"));
 
  mMap->setModified(false);
- mScenario->setModified(false);
  return true;
 }
 
@@ -682,15 +666,6 @@ QByteArray BosonPlayField::saveTexMapToFile()
  return file;
 }
 
-QString BosonPlayField::saveScenarioToFile()
-{
- if (!mScenario) {
-	boError() << k_funcinfo << "NULL scenario" << endl;
-	return QString::null;
- }
- return mScenario->saveScenarioToDocument();
-}
-
 bool BosonPlayField::loadMap(QDataStream& stream)
 {
  boDebug() << k_funcinfo << endl;
@@ -701,108 +676,6 @@ bool BosonPlayField::loadMap(QDataStream& stream)
 	return false;
  }
  emit signalNewMap(mMap);
- return true;
-}
-
-// called by the ADMIN before game starts. this stream is sent to all clients,
-// which initiate the game starting process with it.
-bool BosonPlayField::saveAdminPlayField(QDataStream& stream) const
-{
- if (stream.device()->mode() != IO_WriteOnly) {
-	boError() << k_funcinfo << "no write stream" << endl;
-	return false;
- }
- if (!isLoaded()) {
-	boError() << k_funcinfo << "playfield " << identifier()
-			<< " has not yet been loaded completely" << endl;
-	return false;
- }
-
- // start with a magic cookie. this is going to be a complex stream, so it's a
- // good idea.
- stream << QCString("bostart");
-
- // continue with a version...
- stream << (Q_UINT32)BO_ADMIN_STREAM_VERSION;
-
- // save map and description
- // AB: do we have to use savePlayFieldForRemote() as a separate function? the
- // naming scheme sucks... I'd prefer this method to be
- // savePlayFieldFroRemote(), not saveAdminPlayField()!
- savePlayFieldForRemote(stream);
-
-
- // another magic cookie
- stream << QCString("scenario");
-
- // the scenario
- QString scenarioString;
- if (!scenario()) {
-	// FIXME: AB: this is totally _valid_ for new maps(?) and for loading games!
-	BO_NULL_ERROR(scenario());
-	return false;
- } else {
-	scenarioString = scenario()->saveScenarioToDocument();
-	if (scenarioString.isEmpty()) {
-		// AB: maybe this is valid for new maps in editor mode?
-		boError() << k_funcinfo << "empty scenario" << endl;
-		return false;
-	}
- }
- stream << scenarioString;
-
- return true;
-}
-
-bool BosonPlayField::loadPlayFieldFromAdmin(QDataStream& stream)
-{
- if (stream.device()->mode() != IO_ReadOnly) {
-	boError() << k_funcinfo << "no read stream" << endl;
-	return false;
- }
- if (scenario()) {
-	boError() << k_funcinfo << "scenario is not NULL!" << endl;
-	return false;
- }
- QCString magic;
- stream >> magic;
- if (magic != QCString("bostart")) {
-	boError() << k_funcinfo << "invalid magic cookie in stream" << endl;
-	return false;
- }
-
- Q_UINT32 version;
- stream >> version;
- if (version != BO_ADMIN_STREAM_VERSION) {
-	boError() << k_funcinfo << "network stream from ADMIN has version " << version << " we need version " << BO_ADMIN_STREAM_VERSION << endl;
-	return false;
- }
-
- if (!loadPlayFieldFromRemote(stream)) {
-	boError() << k_funcinfo << "loadPlayFieldFromRemote() failed." << endl;
-	return false;
- }
-
- stream >> magic;
- if (magic != QCString("scenario")) {
-	boError() << k_funcinfo << "invalid magic cookie for scenario" << endl;
-	return false;
- }
- QString scenarioString;
- stream >> scenarioString;
-
- if (!scenarioString.isEmpty()) {
-	boDebug() << k_funcinfo << "loading scenario" << endl;
-	BosonScenario* s = new BosonScenario;
-	if (!s->loadScenarioFromDocument(scenarioString)) {
-		boError() << k_funcinfo << "received scenario string, but could not load it!" << endl;
-		delete s;
-		return false;
-	}
-	changeScenario(s);
-	boDebug() << k_funcinfo << "loaded scenario successfully" << endl;
- }
-
  return true;
 }
 
@@ -879,21 +752,6 @@ void BosonPlayField::quit()
  emit signalNewMap(0);
  delete mMap;
  mMap = 0;
- delete mScenario;
- mScenario = 0;
-}
-
-void BosonPlayField::applyScenario(Boson* boson)
-{
- delete mScenario;
- mScenario = new BosonScenario();
- mScenario->applyScenario(boson);
-}
-
-void BosonPlayField::changeScenario(BosonScenario* s)
-{
- delete mScenario;
- mScenario = s;
 }
 
 void BosonPlayField::changeMap(BosonMap* m)
@@ -912,9 +770,6 @@ void BosonPlayField::changeDescription(BPFDescription* d)
 bool BosonPlayField::modified() const
 {
  if (mMap && mMap->modified()) {
-	return true;
- }
- if (mScenario && mScenario->modified()) {
 	return true;
  }
  return false;
