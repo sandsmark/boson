@@ -48,14 +48,46 @@ PlayerIO::~PlayerIO()
  delete d;
 }
 
+bool PlayerIO::hasRtti(int rtti) const
+{
+ return player()->hasRtti(rtti);
+}
+
+KGameIO* PlayerIO::findRttiIO(int rtti) const
+{
+ return player()->findRttiIO(rtti);
+}
+
+bool PlayerIO::addGameIO(KGameIO* io)
+{
+ return player()->addGameIO(io);
+}
+
+SpeciesTheme* PlayerIO::speciesTheme() const
+{
+ return player()->speciesTheme();
+}
+
+const UnitProperties* PlayerIO::unitProperties(unsigned long int type) const
+{
+ return player()->unitProperties(type);
+}
+
+QPtrList<Unit>* PlayerIO::allMyUnits() const
+{
+ return player()->allUnits();
+}
+
 const QColor& PlayerIO::teamColor() const
 {
  return player()->teamColor();
 }
+
 unsigned long int PlayerIO::minerals() const
 {
  return player()->minerals();
 }
+
 unsigned long int PlayerIO::oil() const
 {
  return player()->oil();
@@ -77,6 +109,11 @@ bool PlayerIO::isFogged(const Cell* c) const
 	return true;
  }
  return isFogged(c->x(), c->y());
+}
+
+bool PlayerIO::isFogged(const BoVector3& vector) const
+{
+ return isFogged((int)(vector.x() / BO_TILE_SIZE), (int)(vector.y() / BO_TILE_SIZE));
 }
 
 bool PlayerIO::canSee(BosonItem* item) const
@@ -101,17 +138,48 @@ bool PlayerIO::ownsUnit(const Unit* unit) const
  return (unit->owner() == player());
 }
 
+bool PlayerIO::hasMiniMap() const
+{
+ return player()->hasMiniMap();
+}
+
 bool PlayerIO::isEnemy(Player* p) const
 {
  return player()->isEnemy(p);
 }
 
-bool PlayerIO::isEnemyUnit(const Unit* unit) const
+bool PlayerIO::isEnemy(const Unit* unit) const
 {
  if (!unit) {
 	return false;
  }
  return isEnemy(unit->owner());
+}
+
+bool PlayerIO::isNeutral(const Player* p) const
+{
+ return player()->isNeutral(p);
+}
+
+bool PlayerIO::isNeutral(const Unit* unit) const
+{
+ if (!unit) {
+	return false;
+ }
+ return isNeutral(unit->owner());
+}
+
+bool PlayerIO::isAllied(const Player* p) const
+{
+ return player()->Allied(p);
+}
+
+bool PlayerIO::isAllied(const Unit* unit) const
+{
+ if (!unit) {
+	return false;
+ }
+ return isAllied(unit->owner());
 }
 
 QPoint PlayerIO::homeBase() const
@@ -140,18 +208,14 @@ QPoint PlayerIO::homeBase() const
 		(int)commandCenter->y() / BO_TILE_SIZE);
 }
 
-#if 0
-Unit* PlayerIO::findUnitAt(const BoVector3& canvasVector) const
+Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3& canvasVector) const
 {
-#warning FIXME
- BosonCanvas* canvas = 0;
- return 0;
+ BO_CHECK_NULL_RET0(canvas);
  if (canSee(canvasVector)) {
 	return canvas->findUnitAt(canvasVector);
  }
  return 0;
 }
-#endif
 
 BoItemList* PlayerIO::unitsAtCells(const QPtrVector<Cell>* cells) const
 {
@@ -240,5 +304,15 @@ Cell* PlayerIO::cell(int x, int y, bool* valid) const
 	*valid = v;
  }
  return c;
+}
+
+bool PlayerIO::connect(const char* signal, const QObject* receiver, const char* member)
+{
+ return QObject::connect(player(), signal, receiver, member);
+}
+
+bool PlayerIO::disconnect(const char* signal, const QObject* receiver, const char* member)
+{
+ return QObject::disconnect(player(), signal, receiver, member);
 }
 
