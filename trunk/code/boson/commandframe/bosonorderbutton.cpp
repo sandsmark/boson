@@ -65,10 +65,6 @@ protected:
 		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
 			Unit* u = commandWidget()->unit();
 			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
-		} else if (w == (QWidget*)commandWidget()->mReload && commandWidget()->unit()) {
-			Unit* u = commandWidget()->unit();
-//			text = i18n("%1\nId: %2\nReloadState: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->reloadState());
-			text = i18n("%1\nId: %2\n").arg(u->unitProperties()->name()).arg(u->id());
 		} else {
 			text = mainTip();
 		}
@@ -289,16 +285,9 @@ BosonOrderButton::BosonOrderButton(QWidget* parent) : QWidget(parent)
  mHealth->setFixedWidth(BAR_WIDTH);
  displayLayout->addWidget(mHealth);
 
- mReload = new BoProgress(display);
- mReload->setOrientation(Vertical);
- mReload->setTextEnabled(false);
- mReload->setFixedWidth(BAR_WIDTH);
- displayLayout->addWidget(mReload);
-
  d->mTip = new BoToolTip(this);
 
  mHealth->setValue(0);
- mReload->setValue(0);
  
  mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -328,11 +317,6 @@ void BosonOrderButton::setUnit(Unit* unit)
 
  show();
  mHealth->show();
- if (mUnit->unitProperties()->canShoot()) {
-	mReload->show();
- } else {
-	mReload->hide();
- }
 
  setProductionCount(0);
  setGrayOut(false);
@@ -360,7 +344,6 @@ void BosonOrderButton::setProduction(ProductionType type, unsigned long int id, 
  }
 
  mHealth->hide();
- mReload->hide();
 
  show();
  // note: setGrayOut() and setProductionCount() are handled in 
@@ -379,7 +362,6 @@ void BosonOrderButton::setAction(UnitAction action, Player* owner)
  setPixmap(*owner->speciesTheme()->actionPixmap(action));
 
  mHealth->hide();
- mReload->hide();
 
  show();
 }
@@ -400,7 +382,6 @@ void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
  setPixmap(tileSet->tile(mTileNumber));
 
  mHealth->hide();
- mReload->hide();
 
  show();
  setProductionCount(0);
@@ -509,9 +490,6 @@ void BosonOrderButton::slotUnitChanged(Unit* unit)
 	boWarning() << k_lineinfo << "health > possible health" << endl;
  }
  mHealth->setValue((int)h);
-
-// double r = 100 - ((double)unit->reloadState() * 100 / (double)unit->unitProperties()->reload());
-// mReload->setValue((int)r);
 }
 
 
