@@ -12,21 +12,22 @@ Boson's Code and Graphics are published under the GNU General Public License (GP
 
 Minimum hardware requirements:
  Note: If you have a older graphics card like a TNT2 you will need a fast CPU.
-	500 MHz ix86 Prozessor (don't know anything about other machines)
-	256 MB RAM
-	3D accelerator card (this is the most important part!!)
-	Optional: Sound card
+        500 MHz ix86 Prozessor (don't know anything about other machines)
+        256 MB RAM
+        3D accelerator card
+                A driver from the vendor is recommended because they are those which give the best performance
+        Optional: Sound card
 
 Minimum software requirements:
-	XFree 4.x server (with OpenGL support) - see http://www.xfree86.org
-	QT (at least version 3) - see http://www.trolltech.com
-	KDE (at least version 3.0) - see http://www.kde.org
-	kdegames/libkdegames - usually shipped with KDE
-	kdemultimedia - also shipped with KDE
-	libvorbis (for sound and music) - see http://www.vorbis.com
-	lib3ds (Units and building rendering) - see http://lib3ds.sf.net
-	OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
-	wml - Optional, for the handbook - see http://www.thewml.org
+        XFree 4.x server (with OpenGL support) - see http://www.xfree86.org
+        QT (at least version 3) - see http://www.trolltech.com
+        KDE (at least version 3.0) - see http://www.kde.org
+        kdegames/libkdegames - usually shipped with KDE
+        kdemultimedia - also shipped with KDE
+        libvorbis (for sound and music) - see http://www.vorbis.com
+        lib3ds (Units and building rendering) - see http://lib3ds.sf.net
+        OpenGL - The OpenGL library (should be included in your XFree Server or graphics card driver)
+        wml - Optional, for the handbook - see http://www.thewml.org
 
 
 Installation:
@@ -37,6 +38,6 @@ Go to ../data/doc/en/start.html, there you will find something under "Getting st
 
 Also check the website for more info :
 
-		http://boson.eu.org/
+                http://boson.eu.org/
 
 
