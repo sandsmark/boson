@@ -68,9 +68,6 @@ bool Cell::canGo(const UnitProperties* prop, GroundType ground)
  switch (ground) {
 	case GroundGrass:
 	case GroundDesert:
-		if (prop->isFacility()) {
-			return true;
-		}
 		return prop->canGoOnLand();
 	case GroundGrassMineral:
 	case GroundGrassOil:
