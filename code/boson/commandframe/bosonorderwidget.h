@@ -77,7 +77,6 @@ signals:
 	void signalProduceUnit(unsigned long int unitType);
 	void signalStopProduction(unsigned long int unitType);
 	void signalPlaceCell(int groundType);
-	void signalAction(int actionType);
 
 private:
 	class BosonOrderWidgetPrivate;
