@@ -23,6 +23,8 @@
 #include "bosontexturearray.h"
 #include "bosonprofiling.h"
 
+#include <kglobal.h>
+#include <kstandarddirs.h>
 #include <kdebug.h>
 
 #include <qimage.h>
@@ -114,7 +116,7 @@ BosonModel::~BosonModel()
 
 QString BosonModel::textureDirectory() const
 {
- return baseDirectory() + QString::fromLatin1("textures/"); 
+ return KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/wheel.jpg") + QString::fromLatin1("boson/themes/textures/");
 }
 
 QString BosonModel::cleanTextureName(const char* name)
