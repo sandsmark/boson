@@ -184,8 +184,10 @@ void UnitBase::setOwner(Player* owner)
 bool UnitBase::saveAsXML(QDomElement& root)
 {
  QDomDocument doc = root.ownerDocument();
- root.setAttribute(QString::fromLatin1("UnitType"), (unsigned int)type());
+ root.setAttribute(QString::fromLatin1("Type"), (unsigned int)type());
  root.setAttribute(QString::fromLatin1("Id"), (unsigned int)id());
+ root.setAttribute(QString::fromLatin1("Group"), 0);
+ root.setAttribute(QString::fromLatin1("GroupType"), 0);
 
  // the data handler
  BosonCustomPropertyXML propertyXML;
