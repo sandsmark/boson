@@ -17,7 +17,7 @@ orzel.clean : maintainer-clean
 	rm -f `find -name boson-server.log`
 #	cd .. && tar cvf /work/save/boson/
 
-AUTOMAKE_OPTIONS = foreign 
+AUTOMAKE_OPTIONS = foreign  1.4
 
 tags:
 	ctags `find * -name '*.h' -o -name '*.cpp' | grep -v moc | grep /`
