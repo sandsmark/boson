@@ -448,7 +448,16 @@ void BosonCommandWidget::advanceProduction(double percentage)
 	kdError() << k_funcinfo << "NULL owner" << endl;
 	return;
  }
- QPixmap small(*d->mOwner->speciesTheme()->smallOverview(d->mUnitType));
+ if (d->mUnitType < 0) {
+	kdError() << k_funcinfo << "unitType: " << d->mUnitType << endl;
+	return;
+ }
+ QPixmap* smallOverview = d->mOwner->speciesTheme()->smallOverview(d->mUnitType);
+ if (!smallOverview) {
+	kdError() << k_funcinfo << "NULL smalloverview for " << d->mUnitType << endl;
+	return;
+ }
+ QPixmap small(*smallOverview);
  if (percentage == 100) {
 	setPixmap(small);
 	return;
