@@ -80,12 +80,6 @@ void BosonStartupWidget::init()
 
  d->mBackgroundPix = new QPixmap(locate("data", "boson/pics/boson-startup-bg.png"));
  d->mLogoPix = new QPixmap(locate("data", "boson/pics/boson-startup-logo.png"));
- if (d->mBackgroundPix->isNull() || d->mLogoPix->isNull()) {
-        KMessageBox::error(this, i18n("You seem not to have Boson data files installed!\n"
-			"Please install data package of Boson and restart Boson."), i18n("Data files not found!"));
-	exit(1);  // Evil, but if we'd call qApp->exit(1); then we would return to event loop
-	return;
- }
 
  setBackgroundMode(FixedPixmap);
  setPaletteBackgroundPixmap(*d->mBackgroundPix);

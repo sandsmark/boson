@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,6 +61,21 @@ public:
 	 * Default Destructor
 	 **/
 	~TopWidget();
+
+	/**
+	 * Check the installation. The implementation of this method is free to
+	 * pre-load some data (e.g. parts of the playfields) while checking for
+	 * existence.
+	 *
+	 * This method is supposed to find out whether the data files are
+	 * installed in the expected path. A check for a single file should be
+	 * sufficient for this.
+	 *
+	 * @return An i18n'ed error string describing what went wrong (to be
+	 * displayed in a message box for example), or QString::null if no
+	 * problem was found.
+	 **/
+	static QString checkInstallation();
 
 	BosonPlayField* playField() const { return mPlayField; }
 

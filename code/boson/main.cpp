@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <kaboutdata.h>
 #include <kcmdlineargs.h>
 #include <klocale.h>
+#include <kmessagebox.h>
 
 // sound is enabled by default atm
 #define HARDCODE_NOSOUND 0
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
 		version,
 		description,
 		KAboutData::License_GPL,
-		"(C) 1999-2000,2001-2003 The Boson team",
+		"(C) 1999-2000,2001-2004 The Boson team",
 		0,
 		"http://boson.eu.org");
  about.addAuthor("Thomas Capricelli", I18N_NOOP("Initial Game Design & Coding"),
@@ -97,6 +98,15 @@ int main(int argc, char **argv)
 
     // register ourselves as a dcop client
 //    app.dcopClient()->registerAs(app.name(), false);
+
+ // make sure the data files are installed at the correct location
+ QString errorMessage = TopWidget::checkInstallation();
+ if (!errorMessage.isNull()) {
+	boError() << k_funcinfo << errorMessage << endl;
+	boError() << k_funcinfo << "check your installation!" << endl;
+	KMessageBox::sorry(0, errorMessage, i18n("Check your installation"));
+	return 1;
+ }
 
  TopWidget *top = new TopWidget;
  app.setMainWidget(top);
