@@ -2,7 +2,7 @@
 KDE_LANG=en
 
 # all subdirs that should get processed, too
-SUBDIRS = facilities game units
+SUBDIRS = facilities game units editor
 
 # please specify the subdirectry here, e.g. "units" or "facilities". leave empty
 # for toplevel directory.

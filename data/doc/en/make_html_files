@@ -4,20 +4,21 @@
 export PERLLIB=`pwd`
 export TOP_SRCDIR=`pwd`/../../
 
+
 case "$1" in
  help|-help|--help)
 	echo "$0 -f file - Make only one file, don't add a .wml to the filename"
 	echo "$0 -d dir - Make only one directory"
 	;;
  -f)	
-	wmk -f $2.wml --include `pwd`/includes
+	wmk -D basedir~`pwd`/ -f $2.wml --include `pwd`/includes
 	;;
  -d)
 	clear
 	echo "Generating html files from wml source"
 	echo "*************************************"
 	echo ""
-	wmk $2 -F includes -a --include `pwd`/includes
+	wmk -D basedir~`pwd`/ $2 -F includes -a --include `pwd`/includes
 	echo ""
 	echo "*************************************"
 	;;
@@ -26,7 +27,7 @@ case "$1" in
 	echo "Generating html files from wml source"
 	echo "*************************************"
 	echo ""
-	wmk -D basedir~./ -F includes -a --include `pwd`/includes
+	wmk -D basedir~`pwd`/ -F includes -a --include `pwd`/includes
 	echo ""
 	echo "*************************************"
 	;;
