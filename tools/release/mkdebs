@@ -9,11 +9,10 @@ DATE=`date +%y%m%d`
 CODEDIR=boson-code-$DATE
 DATADIR=boson-data-$DATE
 
-if [ ! -x fakeroot ]; then
+if [ ! `which fakeroot` ]; then
   echo "ERROR: fakeroot not installed!"
   exit 1
 fi
-
 
 echo "*** Generating the Boson deb files"
 rm -f boson-code*.tar.gz
