@@ -96,6 +96,7 @@ typedef unsigned int uint;
 // 32123
 // 43334
 int	boDist(int, int);
+int	boGridDist(int, int);
 
 
 

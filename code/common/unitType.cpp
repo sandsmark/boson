@@ -80,6 +80,11 @@ const int mobilePropNb = (sizeof(mobileProp)/sizeof(mobileProp [0]));
 // 43334
 int	boDist(int a, int b)
 {
+	return boGridDist(a/BO_TILE_SIZE, b/BO_TILE_SIZE);
+}
+
+int	boGridDist(int a, int b)
+{
 	// abs
 	if (a<0) a=-a;
 	if (b<0) b=-b;
