@@ -123,6 +123,10 @@ public:
 		initProperties(mBoson->dataHandler());
 	}
 
+	static int advanceMessageInterval()
+	{
+		return ADVANCE_INTERVAL;
+	}
 	unsigned int advanceCount() const
 	{
 		return mAdvanceCount;
@@ -163,7 +167,7 @@ public:
 		mAdvanceDivider = gameSpeed;
 		mAdvanceDividerCount = 0;
 		mBoson->lock();
-		boDebug(300) << "Advance - speed (calls per " << ADVANCE_INTERVAL
+		boDebug(300) << "Advance - speed (calls per " << advanceMessageInterval()
 				<< "ms)=" << gameSpeed << " elapsed: "
 				<< mAdvanceReceived.elapsed() << endl;
 		mAdvanceReceived.restart();
@@ -176,16 +180,16 @@ public:
 		//  one, because it would get delayed.
 		// Note that this is for single-player only, it would probably break network
 		if (mAdvanceMessageSent && !mBoson->isNetwork()) {
-			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "message has already been sent, returning" << endl;
+			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " message has already been sent, returning" << endl;
 			return;
 		}
 		// Also don't send advance message if we're in locked() state.
 		// Otherwise, scripted sequences may broke
 		if (mBoson->isLocked() && !mBoson->isNetwork()) {
-			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "message delivery locked, returning" << endl;
+			boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " message delivery locked, returning" << endl;
 			return;
 		}
-		boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << "sending advance msg" << endl;
+		boDebug(300) << k_funcinfo << mBoson->advanceCallsCount() << " sending advance msg" << endl;
 		mBoson->sendMessage(0, BosonMessage::AdvanceN);
 		mAdvanceMessageSent = true;
 	}
@@ -278,9 +282,9 @@ void BoAdvance::receiveAdvanceCall()
  } else if (mAdvanceDividerCount + 1 < mAdvanceDivider) {
 	int next;
 	if (mBoson->delayedAdvanceMessageCount() == 0) {
-		int t = ADVANCE_INTERVAL * mAdvanceDividerCount / mAdvanceDivider;// time that should have been elapsed
+		int t = advanceMessageInterval() * mAdvanceDividerCount / mAdvanceDivider;// time that should have been elapsed
 		int diff = QMAX(5, mAdvanceReceived.elapsed() - t + 5); // we are adding 5ms "safety" diff
-		next = QMAX(0, ADVANCE_INTERVAL / mAdvanceDivider - diff);
+		next = QMAX(0, advanceMessageInterval() / mAdvanceDivider - diff);
 	} else {
 		// we have delayed advance messages already, so we should flush
 		// the remaining calls for the current message asap
@@ -740,6 +744,11 @@ KPlayer* Boson::createPlayer(int , int , bool ) // AB: we don't use these params
  return p;
 }
 
+int Boson::advanceMessageInterval()
+{
+ return BoAdvance::advanceMessageInterval();
+}
+
 int Boson::gameSpeed() const
 {
  return d->mGameSpeed;
@@ -789,9 +798,9 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 			} else {
 				if (!d->mGameTimer->isActive() && !gamePaused()) {
 					boDebug() << "start timer - ms="
-							<< ADVANCE_INTERVAL
+							<< advanceMessageInterval()
 							<< endl;
-					d->mGameTimer->start(ADVANCE_INTERVAL);
+					d->mGameTimer->start(advanceMessageInterval());
 				}
 			}
 		}
@@ -809,7 +818,7 @@ void Boson::slotPropertyChanged(KGamePropertyBase* p)
 		} else if (d->mGameSpeed > 0) {
 			boDebug() << k_funcinfo << "starting timer again" << endl;
 			slotAddChatSystemMessage(i18n("The game is not paused anymore"));
-			d->mGameTimer->start(ADVANCE_INTERVAL);
+			d->mGameTimer->start(advanceMessageInterval());
 		}
 		if (gamePaused()) {
 			boProfiling->setGameSpeed(0);

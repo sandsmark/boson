@@ -119,6 +119,8 @@ public:
 
 	void quitGame();
 
+	static int advanceMessageInterval();
+
 	int gameSpeed() const;
 	bool gamePaused() const;
 
