@@ -52,19 +52,43 @@ public:
 	 * For changing color/species/... of a player or something else use @ref
 	 * BosonStartupNetork or @ref networkInterface instead!
 	 **/
-	void addDummyComputerPlayer();
+	void addAIPlayer();
+
+public slots:
+	/**
+	 * This is used to enable or disable some widgets when user's admin
+	 * status changes
+	 **/
+	void slotSetAdmin(bool);
+
+	virtual void slotCancel();
+	virtual void slotStartGame();
+	virtual void slotNetworkOptions();
+
+	/**
+	 * Called when server has been intied and is offering connections
+	 **/
+	void slotOfferingConnections();
+	/**
+	 * Called before trying to connect to server
+	 **/
+	void slotConnectingToServer();
+	/**
+	 * Called when you have successfully connected to server
+	 **/
+	void slotConnectedToServer();
 
 protected slots: // implementations for the .ui slots
 	// these slots describe actions that the local player has executed in
 	// his widget. nearly all must be transferred over network before the
 	// actual action is performed!
-	virtual void slotLocalPlayerNameChanged();
-	virtual void slotLocalPlayerColorChanged(int);
-	virtual void slotLocalPlayerPlayFieldChanged(QListViewItem*);
-	virtual void slotLocalPlayerSpeciesChanged(int);
-	virtual void slotLocalPlayerAddedComputerPlayer();
-	virtual void slotLocalPlayerRemovedPlayer();
-	virtual void slotLocalPlayerHighlightedPlayer(QListBoxItem*);
+	virtual void slotPlayerNameChanged();
+	virtual void slotPlayerColorChanged(int);
+	virtual void slotPlayFieldSelected(QListViewItem*);
+	virtual void slotPlayerSpeciesChanged(int);
+	virtual void slotAddComputerPlayer();
+	virtual void slotRemovePlayer();
+	virtual void slotPlayerSelected(QListBoxItem*);
 
 private slots:
 	void slotNetStart();
@@ -108,6 +132,22 @@ private slots:
 	 **/
 	void slotNetSetAdmin(bool);
 
+	/**
+	 * This is called when connection to server is broken. It displays chat
+	 * message
+	 **/
+	void slotNetConnectionBroken();
+
+signals:
+	void signalShowNetworkOptions();
+//	void signalSetLocalPlayer(Player* player);
+
+	/**
+	 * Emitted when the player clicks on cancel. The widget should get
+	 * hidden now. (back to welcome widget)
+	 **/
+	void signalCancelled();
+
 protected:
 	// AB: do NOT move to public!
 	Player* localPlayer() const;
@@ -118,14 +158,18 @@ private:
 	void initPlayFields();
 	void initPlayFields(BosonCampaign*, QListViewItem*);
 	void initSpecies();
-	void initColors();
+	void updateColors();
+
+	void playersChanged();
+	void playerCountChanged();
 
 private:
 	BosonNewGameWidgetPrivate* d;
-	KPlayer* mHighlightedPlayer;
-	QColor mPlayerColor;
-	int mMinPlayers;
-	int mMaxPlayers;
+	Player* mSelectedPlayer;
+	QColor mLocalPlayerColor;
+	unsigned int mMinPlayers;
+	unsigned int mMaxPlayers;
+	bool mInited;
 
 	BosonStartupNetwork* mNetworkInterface;
 };

@@ -22,7 +22,7 @@
 
 #include "bosonwelcomewidget.h"
 #include "bosonloadingwidget.h"
-#include "bosonstartgamewidget.h"
+#include "bosonnewgamewidget.h"
 #include "bosonneweditorwidget.h"
 #include "bosonnetworkoptionswidget.h"
 #include "kloadsavegamewidget.h"
@@ -149,7 +149,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
  if (!args) {
 	return;
  }
- BosonStartGameWidget* w = (BosonStartGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ BosonNewGameWidget* w = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (!w) {
 	boError() << k_funcinfo << "Oops - NULL newgame widget" << endl;
 	return;
@@ -187,7 +187,7 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 
 
  if (args->isSet("start")) {
-	w->slotStartGameClicked();
+	w->slotStartGame();
  }
 }
 
@@ -267,7 +267,7 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 	}
 	case IdNewGame:
 	{
-		BosonStartGameWidget* startGame = new BosonStartGameWidget(networkInterface(), this);
+		BosonNewGameWidget* startGame = new BosonNewGameWidget(networkInterface(), this);
 		connect(startGame, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
 		connect(startGame, SIGNAL(signalShowNetworkOptions()),
@@ -287,6 +287,12 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 		BosonNetworkOptionsWidget* networkOptions = new BosonNetworkOptionsWidget(this);
 		connect(networkOptions, SIGNAL(signalOkClicked()),
 				this, SLOT(slotHideNetworkOptions()));
+		connect(networkOptions, SIGNAL(signalOfferingConnections()),
+				this, SLOT(slotOfferingConnections()));
+		connect(networkOptions, SIGNAL(signalConnectingToServer()),
+				this, SLOT(slotConnectingToServer()));
+		connect(networkOptions, SIGNAL(signalConnectedToServer()),
+				this, SLOT(slotConnectedToServer()));
 
 		w = networkOptions;
 		break;
@@ -394,7 +400,7 @@ void BosonStartupWidget::slotShowNetworkOptions()
 
 void BosonStartupWidget::slotHideNetworkOptions()
 {
- BosonStartGameWidget* startGame = (BosonStartGameWidget*)d->mWidgetStack->widget(IdNewGame);
+ BosonNewGameWidget* startGame = (BosonNewGameWidget*)d->mWidgetStack->widget(IdNewGame);
  if (!startGame) {
 	// strange as network widget gets shown for newgame widget only
 	boError() << k_funcinfo << "NULL new game widget??" << endl;
@@ -494,5 +500,35 @@ void BosonStartupWidget::removeWidget(WidgetId widgetId)
 BosonStartupNetwork* BosonStartupWidget::networkInterface() const
 {
  return d->mNetworkInterface;
+}
+
+void BosonStartupWidget::slotOfferingConnections()
+{
+ QWidget* w = d->mWidgetStack->widget(IdNewGame);
+ if (!w) {
+	boError() << k_funcinfo << "No new game widget!!!" << endl;
+	return;
+ }
+ ((BosonNewGameWidget*)w)->slotOfferingConnections();
+}
+
+void BosonStartupWidget::slotConnectingToServer()
+{
+ QWidget* w = d->mWidgetStack->widget(IdNewGame);
+ if (!w) {
+	boError() << k_funcinfo << "No new game widget!!!" << endl;
+	return;
+ }
+ ((BosonNewGameWidget*)w)->slotConnectingToServer();
+}
+
+void BosonStartupWidget::slotConnectedToServer()
+{
+ QWidget* w = d->mWidgetStack->widget(IdNewGame);
+ if (!w) {
+	boError() << k_funcinfo << "No new game widget!!!" << endl;
+	return;
+ }
+ ((BosonNewGameWidget*)w)->slotConnectedToServer();
 }
 

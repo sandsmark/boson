@@ -141,6 +141,10 @@ protected slots:
 	void slotShowNetworkOptions();
 	void slotHideNetworkOptions();
 
+	void slotOfferingConnections();
+	void slotConnectingToServer();
+	void slotConnectedToServer();
+
 private:
 	void init();
 	void initBackgroundOrigin(QWidget* w);
