@@ -361,15 +361,18 @@ void BosonNewEditorWidget::slotNewMapToggled(bool isNewMap)
 	const BosonPlayFieldInformation* information = d->mSelectedMap->information();
 	BPFDescription* description = d->mSelectedMap->description();
 
+	BO_CHECK_NULL_RET(information);
+	BO_CHECK_NULL_RET(description);
+
 	if (description->comment().isEmpty()) {
 		mMapDescription->setText(i18n("There is no comment for this map available"));
 	} else {
 		mMapDescription->setText(description->comment());
 	}
-	mWidth->setValue(map->width());
-	mWidthNum->setValue(map->width());
-	mHeight->setValue(map->height());
-	mHeightNum->setValue(map->height());
+	mWidth->setValue(information->mapWidth());
+	mWidthNum->setValue(information->mapWidth());
+	mHeight->setValue(information->mapHeight());
+	mHeightNum->setValue(information->mapHeight());
 	mGroundTheme->setCurrentItem(0); // TODO - we do not yet support more than one :(
 	mMaxPlayers->setValue(information->maxPlayers());
 	mMaxPlayersNum->setValue(information->maxPlayers());
