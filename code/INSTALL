@@ -19,6 +19,10 @@ Making the game :
 You should _not_ be root to make the game.
 
 Enter the code dir by typing 'cd code'
+Remember to set $KDEDIR correctly before starting configure. On most systems 
+this should be /opt/kde or /opt/kde3. Some systems might use /usr though.. so on
+my system this would read:
+	export KDEDIR=/opt/kde3
 Configure the whole stuff by entering 'make -f Makefile.cvs && ./configure'
 	(try 'bash configure' if './configure' doesn't work)
 compile the game by typing 'make'
