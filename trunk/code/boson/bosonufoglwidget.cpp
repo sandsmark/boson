@@ -42,6 +42,7 @@ void BosonUfoGLWidget::initUfo()
 	return;
  }
 
+ makeCurrent();
  mUfoManager = new BoUfoManager(width(), height());
 }
 
@@ -55,8 +56,8 @@ void BosonUfoGLWidget::makeCurrent()
 
 void BosonUfoGLWidget::resizeGL(int w, int h)
 {
- makeCurrent();
  if (mUfoManager) {
+	makeCurrent();
 	mUfoManager->postResizeEvent(width(), height());
 
 	// AB: is this necessary? if so then it should be in postResizeEvent() !
