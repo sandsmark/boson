@@ -24,10 +24,10 @@
 #include "fntLocal.h"
 #include <bodebug.h>
 
-fntFont::fntFont() {}
-fntFont::~fntFont() {}
+BofntFont::BofntFont() {}
+BofntFont::~BofntFont() {}
 
-int fntTexFont::load( const char *fname, GLenum mag, GLenum min )
+int BofntTexFont::load( const char *fname, GLenum mag, GLenum min )
 {
   const char *p ;
 
@@ -49,7 +49,7 @@ int fntTexFont::load( const char *fname, GLenum mag, GLenum min )
 
 
 
-float fntTexFont::low_putch( sgVec3 curpos, float pointsize,
+float BofntTexFont::low_putch( sgVec3 curpos, float pointsize,
                                float italic, char c )
 {
   unsigned int cc = (unsigned char) c;
@@ -122,7 +122,7 @@ float fntTexFont::low_putch( sgVec3 curpos, float pointsize,
 
 
 #include <math.h>
-void fntTexFont::setGlyph( char c, float wid,
+void BofntTexFont::setGlyph( char c, float wid,
         float tex_left, float tex_right,
         float tex_bot , float tex_top  ,
         float vtx_left, float vtx_right,
@@ -146,7 +146,7 @@ void fntTexFont::setGlyph( char c, float wid,
 }
 
 
-int fntTexFont::getGlyph( char c, float* wid,
+int BofntTexFont::getGlyph( char c, float* wid,
         float *tex_left, float *tex_right,
         float *tex_bot , float *tex_top  ,
         float *vtx_left, float *vtx_right,
@@ -172,7 +172,7 @@ int fntTexFont::getGlyph( char c, float* wid,
 }
 
 
-void fntTexFont::getBBox( const char *s,
+void BofntTexFont::getBBox( const char *s,
                            float pointsize, float italic,
                            float *left, float *right,
                            float *bot , float *top  )
@@ -243,7 +243,7 @@ void fntTexFont::getBBox( const char *s,
 }
 
 
-void fntTexFont::puts( sgVec3 curpos, float pointsize, float italic, const char *s )
+void BofntTexFont::puts( sgVec3 curpos, float pointsize, float italic, const char *s )
 {
   SGfloat origx = curpos[0];
 

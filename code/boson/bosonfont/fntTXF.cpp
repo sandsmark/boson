@@ -164,7 +164,7 @@ static void tex_make_mip_maps( GLubyte *image, int xsize,
 
 
 
-int fntTexFont::loadTXF( const char *fname, GLenum mag, GLenum min )
+int BofntTexFont::loadTXF( const char *fname, GLenum mag, GLenum min )
 {
   if ( ! glIsValidContext() )
   {

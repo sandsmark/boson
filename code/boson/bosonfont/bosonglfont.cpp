@@ -26,6 +26,8 @@
 #include "bodebug.h"
 
 #include <klocale.h>
+#include <kglobal.h>
+#include <kstandarddirs.h>
 
 #include <GL/glx.h>
 #include <X11/Xlib.h>
@@ -33,6 +35,30 @@
 
 #include <qfont.h>
 #include <qstringlist.h>
+
+BoFontInfo::BoFontInfo()
+{
+ mBold = false;
+ mItalic = false;
+ mPointSize = 10;
+ mFixedPitch = false;
+ mUnderline = false;
+ mStrikeOut = false;
+ mTextured = true;
+
+ QStringList list = KGlobal::dirs()->findAllResources("data", "boson/fonts/*.txf");
+ if (!list.isEmpty()) {
+	QStringList list2 = list.grep("AvantGarde-Demi.txf");
+	if (!list2.isEmpty()) {
+		mName = list2[0];
+	} else {
+		mName = list[0];
+	}
+ } else {
+	mTextured = false;
+	mName = QString::null;
+ }
+}
 
 QString BoFontInfo::toString() const
 {
@@ -259,7 +285,7 @@ public:
 	}
 
 private:
-	fntTexFont* mFont;
+	BofntTexFont* mFont;
 	float mPointSize;
 	bool mItalic;
 };
@@ -271,7 +297,7 @@ BoTXFFont::~BoTXFFont()
 
 bool BoTXFFont::loadFont(const QString& fileName)
 {
- mFont = new fntTexFont();
+ mFont = new BofntTexFont();
  if (mFont->load(fileName.latin1()) != FNT_TRUE) {
 	boError() << k_funcinfo << "could not load txf font " << fileName << endl;
 	return false;
