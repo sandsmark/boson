@@ -26,6 +26,7 @@
 #include <qptrdict.h>
 #include <qintdict.h>
 #include <qvaluelist.h>
+#include <qpushbutton.h>
 
 #include <kmainwindow.h>
 #include <knuminput.h>
@@ -120,6 +121,8 @@ signals:
 
 	void signalMaxFramesChanged(int);
 
+	void signalMeshSelected(int);
+
 public slots:
 	void slotResetView();
 	void slotFovYChanged(float f)
@@ -144,6 +147,10 @@ public slots:
 		mWireFrame = on;
 	}
 	void slotConstructionChanged(bool on);
+
+	void slotHideSelectedMesh();
+	void slotHideUnSelectedMeshes();
+	void slotUnHideAllMeshes();
 
 protected:
 	virtual bool eventFilter(QObject* o, QEvent* e);
@@ -171,6 +178,16 @@ protected:
 	void updateCamera(const BoVector3& cameraPos, const BoQuaternion& q);
 	void updateCamera(const BoVector3& cameraPos, const BoMatrix& rotationMatrix);
 	void updateCamera(const BoVector3& cameraPos, const BoVector3& lookAt, const BoVector3& up);
+
+	/**
+	 * Use -1 to select nothing.
+	 **/
+	void selectMesh(int mesh);
+
+	/**
+	 * Hide @p mesh in all frames
+	 **/
+	void hideMesh(unsigned int mesh, bool hide = true);
 
 	/**
 	 * Update the text that displays information on what is under the cursor
@@ -219,9 +236,13 @@ signals:
 	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
 	void signalWireFrameChanged(bool);
 	void signalConstructionChanged(bool);
+	void signalHideMesh();
+	void signalHideOthers();
+	void signalUnHideAll();
 
 public slots:
 	void slotCameraChanged();
+	void slotMeshSelected(int);
 
 protected slots:
 	void slotFovYChanged(float f) { mFovY->setValue(f); }
@@ -234,6 +255,9 @@ private:
 	KMyFloatNumInput* mFovY;
 	KIntNumInput* mFrame;
 	KIntNumInput* mLOD;
+	QPushButton* mHideMesh;
+	QPushButton* mHideOthers;
+	QPushButton* mUnHideAll;
 	QCheckBox* mPlacementPreview;
 	QCheckBox* mDisallowPlacement;
 	QCheckBox* mWireFrame;
