@@ -161,3 +161,8 @@ void BoLight::setEnabled(bool e)
   }
 }
 
+void BoLight::refreshPosition()
+{
+  glLightfv(GL_LIGHT0 + mId, GL_POSITION, mPos.data());
+}
+

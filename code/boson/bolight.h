@@ -71,6 +71,8 @@ class BoLight
 
     int id()  { return mId; }
 
+    void refreshPosition();
+
   private:
     BoVector4 mAmbient;
     BoVector4 mDiffuse;

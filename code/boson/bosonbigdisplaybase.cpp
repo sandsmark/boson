@@ -2325,6 +2325,12 @@ void BosonBigDisplayBase::cameraChanged()
 
  d->mParticlesDirty = true;
 
+ QIntDictIterator<BoLight> it(d->mLights);
+ while (it.current()) {
+	it.current()->refreshPosition();
+	++it;
+ }
+
  QPoint cellTL; // topleft cell
  QPoint cellTR; // topright cell
  QPoint cellBL; // bottomleft cell
