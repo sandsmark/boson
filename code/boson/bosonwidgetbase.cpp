@@ -292,11 +292,6 @@ void BosonWidgetBase::initGameMode()//FIXME: rename! we don't have a difference 
 #ifdef PATHFINDER_TNG
  // FIXME: this isn't correct I suppose. But atm it's only used for debugging
  //  anyway (and I don't intend to use it for anything else)
- BosonPath::setDisplay(displayManager()->displayList()->first());
- BosonPath::setCanvas(canvas());
- boDebug() << k_funcinfo << "Setting display and canvas for pathfinder" << endl;
- canvas()->pathfinder()->setDisplay(displayManager()->displayList()->first());
- canvas()->pathfinder()->setCanvas(canvas());
  boDebug() << k_funcinfo << "Trying searching sample path" << endl;
  BosonPathInfo i;
  i.start = QPoint(5 * BO_TILE_SIZE, 5 * BO_TILE_SIZE);

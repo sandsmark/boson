@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2004 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 #include "bosonpath.h"
+#include "bosonpath.moc"
 
 #include "cell.h"
 #include "unit.h"
@@ -31,9 +32,8 @@
 
 #include <qptrqueue.h>
 
+#include <kstaticdeleter.h>
 
-#include "bosonbigdisplaybase.h"
-#include "bosoncanvas.h"
 
 #include <qpoint.h>
 //#include <sys/time.h> // only for debug
@@ -78,8 +78,9 @@
 //#define VISUALIZE_PATHS
 
 
-BosonBigDisplayBase* BosonPath::mDisplay = 0;
-BosonCanvas* BosonPath::mCanvas = 0;
+BosonPathVisualization* BosonPathVisualization::mPathVisualization = 0;
+
+static KStaticDeleter<BosonPathVisualization> sd;
 
 static long int totalelapsed = 0;
 static int totalcalls = 0;
@@ -704,21 +705,20 @@ bool BosonPath::findSlowPath()
     }
 
 #ifdef VISUALIZE_PATHS
-  if(mDisplay && mCanvas)
   {
-    float x, y;
-    BoLineVisualization viz;
-    viz.pointsize = 2;
-    viz.timeout = 100;
-    viz.color.set(0.5f, 0.5f, 0.5f, 1.0f);
+    QValueList<BoVector3> points;
     QValueList<QPoint>::iterator it;
     for(it = path.begin(); it != path.end(); ++it)
     {
-      x = (*it).x() / (float)BO_TILE_SIZE;
-      y = (*it).y() / (float)BO_TILE_SIZE;
-      viz.points.append(BoVector3(x, -y, mCanvas->heightAtPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE) + 0.2));
+      float x = (*it).x() / (float)BO_TILE_SIZE;
+      float y = (*it).y() / (float)BO_TILE_SIZE;
+      points.append(BoVector3(x, -y, 0.0f));
     }
-    mDisplay->addLineVisualization(viz);
+    BoVector4 color(0.5f, 0.5f, 0.5f, 1.0f);
+    float pointSize = 2.0f;
+    int timeout = 100;
+    float zOffset = 0.5f;
+    BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
   }
 #endif
 
@@ -1897,22 +1897,20 @@ void BosonPath2::findLowLevelPath(BosonPathInfo* info)
 
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
-    if(mDisplay && mCanvas)
     {
-      float x, y;
-      BoLineVisualization viz;
-      viz.pointsize = 3;
-      viz.timeout = 100;
-      // Orange color
-      viz.color.set(1.0f, 0.5f, 0.0f, 0.8f);
+      QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        x = info->llpath[point].x() / BO_TILE_SIZE;
-        y = info->llpath[point].y() / BO_TILE_SIZE;
+        float x = info->llpath[point].x() / BO_TILE_SIZE;
+        float y = info->llpath[point].y() / BO_TILE_SIZE;
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
-        viz.points.append(BoVector3(x, -y, mCanvas->heightAtPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE) + 0.5));
+        points.append(BoVector3(x, -y, 0.0f));
       }
-      mDisplay->addLineVisualization(viz);
+      float pointSize = 3.0f;
+      int timeout = 100;
+      float zOffset = 0.5f;
+      BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
+      BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
     tm_viz = pr.elapsed();
@@ -2244,22 +2242,20 @@ void BosonPath2::findFlyingUnitPath(BosonPathInfo* info)
 
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
-    if(mDisplay && mCanvas)
     {
-      float x, y;
-      BoLineVisualization viz;
-      viz.pointsize = 3;
-      viz.timeout = 100;
-      // Orange color
-      viz.color.set(1.0f, 0.5f, 0.0f, 0.8f);
+      QValueList<BoVector3> points;
       for(unsigned int point = 0; point < info->llpath.count(); point++)
       {
-        x = info->llpath[point].x() / BO_TILE_SIZE;
-        y = info->llpath[point].y() / BO_TILE_SIZE;
+        float x = info->llpath[point].x() / BO_TILE_SIZE;
+        float y = info->llpath[point].y() / BO_TILE_SIZE;
 //        boDebug(510) << "  " << k_funcinfo << "Adding lineviz for point (" << x << "; " << y << ")" << endl;
-        viz.points.append(BoVector3(x, -y, mCanvas->heightAtPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE) + 0.5));
+        points.append(BoVector3(x, -y, 0.0f));
       }
-      mDisplay->addLineVisualization(viz);
+      float pointSize = 3.0f;
+      int timeout = 100;
+      float zOffset = 0.5f;
+      BoVector4 color(1.0f, 0.5f, 0.0f, 0.8f); // orange
+      BosonPathVisualization::pathVisualization()->addLineVisualization(points, color, pointSize, timeout, zOffset);
     }
 #endif
     tm_viz = pr.elapsed();
@@ -3227,19 +3223,18 @@ void BosonPath2::searchHighLevelPath(BosonPathInfo* info)
 
 #ifdef VISUALIZE_PATHS
     // Add LineVisualization stuff
-    if(mDisplay && mCanvas)
     {
-      float x, y;
-      BoLineVisualization viz;
-      viz.pointsize = 5;
-      viz.timeout = 200;
+      QValueList<BoVector3> points;
       for(unsigned int point = 0; point < path->path.count(); point++)
       {
-        x = path->path[point]->centerx;
-        y = path->path[point]->centery;
-        viz.points.append(BoVector3(x, -y, mCanvas->heightAtPoint(x * BO_TILE_SIZE, y * BO_TILE_SIZE) + 0.5));
+        float x = path->path[point]->centerx;
+        float y = path->path[point]->centery;
+        points.append(BoVector3(x, -y, 0.0f));
       }
-      mDisplay->addLineVisualization(viz);
+      float pointSize = 5.0f;
+      int timeout = 200;
+      float zOffset = 0.5f;
+      BosonPathVisualization::pathVisualization()->addLineVisualization(points, pointSize, timeout, zOffset);
     }
 #endif
     tm_viz = pr.elapsed();
@@ -3507,10 +3502,41 @@ void BosonPath2::removeRegion(BosonPathRegion* r)
 }
 
 
+
 /*****  BosonPathInfo  *****/
 
 
+/*****  BosonPathVisualization  *****/
 
+BosonPathVisualization::BosonPathVisualization(QObject* parent) : QObject(parent)
+{
+
+}
+
+BosonPathVisualization::~BosonPathVisualization()
+{
+
+}
+
+BosonPathVisualization* BosonPathVisualization::pathVisualization()
+{
+  if (mPathVisualization)
+  {
+    return mPathVisualization;
+  }
+  sd.setObject(mPathVisualization, new BosonPathVisualization(0));
+  return mPathVisualization;
+}
+
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset)
+{
+  emit signalAddLineVisualization(points, color, pointSize, timeout, zOffset);
+}
+
+void BosonPathVisualization::addLineVisualization(const QValueList<BoVector3>& points, float pointSize, int timeout, float zOffset)
+{
+  addLineVisualization(points, BoVector4(1.0f, 1.0f, 1.0f, 1.0f), pointSize, timeout, zOffset);
+}
 /*
  * vim: et sw=2
  */

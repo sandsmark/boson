@@ -358,6 +358,8 @@ protected slots:
 
 	void slotInitMiniMapFogOfWar();
 
+	void slotAddLineVisualization(const QValueList<BoVector3>& points, const BoVector4& color, float pointSize, int timeout, float zOffset);
+
 protected:
 	/**
 	 * Here the defined action for a wheel event should happen. See
