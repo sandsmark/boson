@@ -145,12 +145,12 @@ void BosonProfilingDialog::initEventsPage()
  d->mEvents->addColumn(i18n("Time (s)"));
  BosonProfiling::BosonProfilingPrivate* pd = boProfiling->d;
  QMap<BosonProfiling::ProfilingEvent, BosonProfiling::BosonProfilingPrivate::TimesList>::Iterator it = pd->mTimes.begin(); // now *that* is an ugly line! ggg
- int i = 0;
- for (; it != pd->mTimes.end(); ++it, i++) {
+ for (; it != pd->mTimes.end(); ++it) {
 	QListViewItem* event = new QListViewItem(d->mEvents);
 	event->setText(0, profilingName(it.key()));
 	BosonProfiling::BosonProfilingPrivate::TimesList::Iterator timesIt = (*it).begin();
-	for (; timesIt != (*it).end(); ++timesIt) {
+	int i = 0;
+	for (; timesIt != (*it).end(); ++timesIt, i++) {
 		QListViewItem* item = new QListViewItem(event);
 		item->setText(0, QString::number(i));
 		QString num;
