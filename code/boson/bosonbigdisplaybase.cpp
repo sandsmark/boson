@@ -921,7 +921,7 @@ void BosonBigDisplayBase::paintGL()
 		y /= BO_TILE_SIZE;
 		glTranslatef(x, -y, z);
 		d->mPlacementPreviewModel->enablePointer();
-		f->renderFrame();
+		f->renderFrame(&localPlayer()->teamColor());
 		glTranslatef(-x, y, -z);
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);

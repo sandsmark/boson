@@ -1301,6 +1301,11 @@ int Unit::distance(const BoVector3& pos) const
  return dx*dx + dy*dy + dz*dz;
 }
 
+const QColor* Unit::teamColor() const
+{
+ return &owner()->teamColor();
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit

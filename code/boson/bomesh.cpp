@@ -211,8 +211,6 @@ public:
 	{
 		mFaces = 0;
 
-		mTeamColor = 0;
-
 		mAllocatedPoints = 0;
 		mPoints = 0;
 
@@ -226,7 +224,6 @@ public:
 
 	GLuint mTexture;
 	GLuint mDisplayList;
-	QColor* mTeamColor;
 
 	QPtrList<BoNode> mAllNodes;
 
@@ -262,7 +259,6 @@ BoMesh::~BoMesh()
  d->mAllNodes.clear();
  delete[] d->mAllocatedPoints;
  d->mPoints = 0; // do NOT delete!
- delete d->mTeamColor;
  delete d;
 }
 
@@ -736,7 +732,7 @@ void BoMesh::setTexel(unsigned int index, const BoVector3& texel)
  d->mPoints[index * 5 + 4] = texel[1];
 }
 
-void BoMesh::renderMesh()
+void BoMesh::renderMesh(const QColor* teamColor)
 {
  // AB: it would be better to do most of this in BosonModel instead. we could
  // group several meshes into a single glBegin()/glEnd() pair
@@ -753,9 +749,10 @@ void BoMesh::renderMesh()
  // so optimization should happen here - if possible at all...
 
  if (!textured()) {
-	if (d->mTeamColor) {
+	glBindTexture(GL_TEXTURE_2D, 0);
+	if (teamColor) {
 		glPushAttrib(GL_CURRENT_BIT);
-		glColor3ub(d->mTeamColor->red(), d->mTeamColor->green(), d->mTeamColor->blue());
+		glColor3ub(teamColor->red(), teamColor->green(), teamColor->blue());
 		resetColor = true;
 	}
  } else {
@@ -787,7 +784,7 @@ boWarning() << k_funcinfo << "obsolete!" << endl;
 }
 
 // there MUST be a valid context set already!!
-void BoMesh::loadDisplayList(bool reload)
+void BoMesh::loadDisplayList(const QColor* teamColor, bool reload)
 {
  // AB: it would be better to do most of this in BosonModel instead. we could
  // group several meshes into a single glBegin()/glEnd() pair
@@ -811,7 +808,7 @@ void BoMesh::loadDisplayList(bool reload)
  boDebug() << k_funcinfo << endl;
 
  glNewList(d->mDisplayList, GL_COMPILE);
- renderMesh();
+ renderMesh(teamColor);
  glEndList();
 }
 
@@ -843,12 +840,6 @@ void BoMesh::setIsTeamColor(bool c)
 GLuint BoMesh::displayList() const
 {
  return d->mDisplayList;
-}
-
-void BoMesh::setTeamColor(const QColor& c)
-{
- delete d->mTeamColor;
- d->mTeamColor = new QColor(c);
 }
 
 void BoMesh::movePoints(float* array, int index)

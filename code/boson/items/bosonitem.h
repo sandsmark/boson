@@ -34,6 +34,7 @@ class BoFrame;
 class QRect;
 class Cell;
 class BosonParticleSystem;
+class QColor;
 template<class T> class QPtrList;
 
 
@@ -158,6 +159,8 @@ public:
 	/**
 	 * Render the item. This assumes the modelview matrix was already
 	 * translated and rotated to the correct position.
+	 * @param teamColor The color that should get used for teamcolored areas
+	 * of the mode. Use NULL if you don't want a team-colored object.
 	 **/
 	void renderItem();
 
@@ -355,6 +358,15 @@ public:
 	 * Unselect the unit, i.e. delete the select box.
 	 **/
 	virtual void unselect();
+
+protected:
+	/**
+	 * @return The team color this item should get rendered with. This
+	 * should be the @ref Player::teamColor of the owner, if applicable. For
+	 * some items you might want to return simply NULL (which is perfectly
+	 * valid)
+	 **/
+	virtual const QColor* teamColor() const = 0;
 
 private:
 	/**

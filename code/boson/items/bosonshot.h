@@ -85,6 +85,9 @@ class BosonShot : public BosonItem
 
     virtual QPtrList<BosonParticleSystem>* particleSystems() const  { return mFlyParticleSystems; };
 
+  protected:
+    virtual const QColor* teamColor() const;
+
   private:
     BoVector3 mVelo;
     unsigned int mStep;

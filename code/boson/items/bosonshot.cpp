@@ -23,6 +23,7 @@
 #include "../bosoncanvas.h"
 #include "../bosonparticlesystem.h"
 #include "../bosonweapon.h"
+#include "../player.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
@@ -155,6 +156,11 @@ void BosonShot::advanceMoveCheck()
     }
   }
   setVelocity(velocityX, velocityY, zVelocity());
+}
+
+const QColor* BosonShot::teamColor() const
+{
+ return mOwner ? &mOwner->teamColor() : 0;
 }
 
 void BosonShot::save(QDataStream& stream)

@@ -285,6 +285,11 @@ void BosonItem::setCurrentFrame(BoFrame* frame)
  // the following values cache values from BoFrame, so that we can use them in
  // inline functions (or with direct access). otherwise we'd have to #include
  // bosonmodel.h in bosonitem.h (-> bad)
+
+
+ // TODO: BoFrame should support display lists with teamcolor! we call
+ // frame->displayList(teamColor()) and BoFrame returns the list for the desired
+ // color.
  setDisplayList(frame->displayList());
  setGLDepthMultiplier(frame->depthMultiplier());
 }
@@ -356,9 +361,13 @@ void BosonItem::renderItem()
 {
  mModel->enablePointer();
  if (displayList() != 0) {
+#warning FIXME: displaylists and teamcolor!
+	// AB: we should pick the correct displaylist from a map
+	// teamcolor->displaylist!
+	// not here, but in setDisplayList() or friends
 	glCallList(displayList());
  } else {
-	mCurrentFrame->renderFrame();
+	mCurrentFrame->renderFrame(teamColor());
  }
 }
 

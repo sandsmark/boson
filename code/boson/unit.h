@@ -418,8 +418,8 @@ protected:
 	 **/
 	void updateZ(float moveByX, float moveByY, float* moveZ, float* rotateX, float* rotateY);
 
-protected:
-	bool mSearchPath;
+	virtual const QColor* teamColor() const;
+
 
 private:
 	typedef void (Unit::*MemberFunction)(unsigned int advanceCount);
@@ -442,6 +442,13 @@ private:
 
 	// will save us some trouble :)
 	friend class KGameUnitDebug;
+
+
+protected:
+	// FIXME: do we really need this? should it be a KGameProperty?
+	// if we really need it we should write get/set methods and not use this
+	// directly.
+	bool mSearchPath;
 };
 
 

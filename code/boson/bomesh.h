@@ -220,15 +220,11 @@ public:
 	GLuint textureObject() const;
 	bool textured() const;
 
-	void renderMesh();
+	void renderMesh(const QColor* color);
 	void renderPoint(int index);
 
-	// AB: these are bad. we should remove then - then we could load the
-	// meshes only once and reuse them for every player who shares this
-	// species.
-	void loadDisplayList(bool reload = false);
+	void loadDisplayList(const QColor* teamColor, bool reload = false);
 	GLuint displayList() const;
-	void setTeamColor(const QColor&);
 
 
 	/**
