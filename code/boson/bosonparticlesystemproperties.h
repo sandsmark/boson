@@ -23,6 +23,7 @@
 #include <kapplication.h>
 
 #include <qstring.h>
+#include <qdict.h>
 
 #include <GL/gl.h>
 
@@ -47,11 +48,16 @@ template<class T> class QValueList;
 class BosonParticleTextureArray
 {
   public:
+    BosonParticleTextureArray(unsigned int count)
+    {
+      mTextureCount = count;
+      mTextureIds = new GLuint[mTextureCount];
+    }
     ~BosonParticleTextureArray()
     {
       delete[] mTextureIds;
     }
-    int mTextureCount;
+    unsigned int mTextureCount;
     GLuint* mTextureIds;
 };
 
@@ -99,11 +105,11 @@ class BosonParticleSystemProperties
     static QPtrList<BosonParticleSystemProperties> loadParticleSystemProperties(QValueList<unsigned long int> ids, SpeciesTheme* theme);
 
   protected:
-    static QMap<QString, BosonParticleTextureArray> mTextureArrays;
+    static QDict<BosonParticleTextureArray> mTextureArrays;
     static QString mTexturePath;
 
   protected:
-    static BosonParticleTextureArray getTextures(const QString& name);
+    static const BosonParticleTextureArray* getTextures(const QString& name);
 
   private:
     /*float mMinXVelo, mMinYVelo, mMinZVelo;
@@ -118,7 +124,7 @@ class BosonParticleSystemProperties
     int mGLBlendFunc;
     float mRate, mStartSize, mEndSize, mAge;
     bool mAlign;
-    BosonParticleTextureArray mTextures;
+    const BosonParticleTextureArray* mTextures;
     unsigned long int mId;
 };
 
