@@ -1513,12 +1513,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 1; // no effect, btw
 		}
-		camera()->changeZ(delta);
-		z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
-		if (camera()->z() < z + BoGameCamera::minCameraZ()) {
-			camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
-		}
-		cameraChanged();
+		zoom(delta);
 		break;
 	case CameraRotate:
 		if (boEvent.controlButton()) {
@@ -1526,8 +1521,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		} else {
 			delta *= 10;
 		}
-		camera()->changeRotation(delta);
-		cameraChanged();
+		rotate(delta);
 		break;
 	default:
 	{
@@ -2199,9 +2193,60 @@ void BosonBigDisplayBase::slotCursorEdgeTimeout()
 
 void BosonBigDisplayBase::scrollBy(int dx, int dy)
 {
+ BO_CHECK_NULL_RET(camera());
  GLfloat x, y;
  mapDistance(dx, dy, &x, &y);
  camera()->changeLookAt(BoVector3(x, y, 0));
+ cameraChanged();
+}
+
+void BosonBigDisplayBase::rotateLeft(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+ rotate(factor);
+}
+
+void BosonBigDisplayBase::rotateRight(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+ rotate(-factor);
+}
+
+void BosonBigDisplayBase::rotate(float delta)
+{
+ camera()->changeRotation(delta);
+ cameraChanged();
+}
+
+void BosonBigDisplayBase::zoomIn(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = factor; // ?
+
+ zoom(-delta);
+}
+
+void BosonBigDisplayBase::zoomOut(float factor)
+{
+ BO_CHECK_NULL_RET(camera());
+
+ float delta = factor; // ?
+
+ zoom(delta);
+}
+
+void BosonBigDisplayBase::zoom(float delta)
+{
+ BO_CHECK_NULL_RET(camera());
+ BO_CHECK_NULL_RET(canvas());
+ BO_CHECK_NULL_RET(canvas()->map());
+
+ camera()->changeZ(delta);
+ float z = canvas()->map()->cellAverageHeight((int)(camera()->lookAt().x()), (int)-(camera()->lookAt().y()));
+ if (camera()->z() < z + BoGameCamera::minCameraZ()) {
+	camera()->changeZ(z + BoGameCamera::minCameraZ() - camera()->z());
+ }
  cameraChanged();
 }
 
