@@ -818,7 +818,19 @@ Unit* Boson::addUnit(QDomElement& node, Player* p)
  if (node.hasAttribute("Shields")) {
 	unit->setShields(node.attribute("Shields").toUInt());
  }
- 
+ if (unit->isFacility()) {
+	Facility* fac = (Facility*)unit;
+	if (node.hasAttribute("ConstructionCompleted")) {
+		fac->setConstructionStep(fac->constructionSteps() - 1);
+	} else if (node.hasAttribute("ConstructionStep")) {
+		fac->setConstructionStep(node.attribute("ConstructionStep").toUInt());
+	}
+ } else {
+	MobileUnit* mob = (MobileUnit*)unit;
+	if (node.hasAttribute("Speed")) {
+		((MobileUnit*)unit)->setSpeed(node.attribute("Speed").toDouble());
+	}
+ }
  
  emit signalAddUnit(unit, x, y);
  return unit;
