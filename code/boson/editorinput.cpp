@@ -47,7 +47,6 @@ bool EditorInput::eventFilter(QObject* o, QEvent* e)
 		bool eatevent = false;
 		emit signalMouseEvent((QMouseEvent*)e, &eatevent);
 		return eatevent;
-		break;
 	}
 	default:
 		break;
