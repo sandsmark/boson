@@ -174,17 +174,18 @@ public:
 	 * @return If the player is already "destroyed", i.e. doesn't have the
 	 * right to do anything. Note that this doesn't check if the player has
 	 * units left or something, but simply returns what was checked before.
-	 * Use @ref checkOutOfGame if you need an up-to-date information!
+	 * See also @ref setOutOfGame
 	 **/
 	bool isOutOfGame() const { return mOutOfGame; }
 
 	/**
-	 * Check if the player still fullfills the scenario conditions. If not
-	 * the player will be out of the game - i.e. from this point on @ref
-	 * isOutOfGame will always return true.
-	 * @return @ref isOutOfGame after it was updated.
+	 * This is called by the global @ref BoCanvasEventListener to indicate
+	 * that the player has lost the game.
+	 *
+	 * The concrete moment of when this is called depends on the winning
+	 * conditions of the current map.
 	 **/
-	bool checkOutOfGame();
+	void setOutOfGame();
 
 	BosonStatistics* statistics() const;
 

@@ -29,7 +29,7 @@
 #include "unitproperties.h"
 #include "script/bosonscript.h"
 #include "speciestheme.h"
-#include <kgame/kplayer.h> // KPlayer::id()
+#include "player.h"
 
 #include <klocale.h>
 
@@ -206,14 +206,18 @@ BoCanvasEventListener::~BoCanvasEventListener()
 void BoCanvasEventListener::processEvent(const BoEvent* event)
 {
  if (event->name() == "AllUnitsDestroyed") {
+	// AB: atm the player loses when all of his units are destroyed.
+	//     will change when we support winning conditions
+	BoEvent* lost = new BoEvent("PlayerLost");
+	lost->setPlayerId(event->playerId());
+	boGame->queueEvent(lost);
+ } else if (event->name() == "PlayerLost") {
 	Player* p = (Player*)boGame->findPlayer(event->playerId());
 	if (!p) {
 		boError(360) << k_funcinfo << "could not find specified player " << event->playerId() << endl;
 		return;
 	}
-
-	// AB: atm the player loses when all of his units are destroyed.
-	//     will change when we support winning conditions
+	p->setOutOfGame();
 	boGame->killPlayer(p);
  } else if (event->name() == "CustomStringEvent") {
 	boGame->slotAddChatSystemMessage(i18n("Received CustomStringEvent - parameter1: %1").arg(event->data1()));

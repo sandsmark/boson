@@ -89,6 +89,8 @@ void BoEventManager::declareEvents()
  BO_DECLARE_EVENT(UnitWithIdUnfogged);
  BO_DECLARE_EVENT(UnitsWithTypeUnfogged);
 
+ BO_DECLARE_EVENT(PlayerLost);
+
  BO_DECLARE_EVENT(CustomEvent);
  BO_DECLARE_EVENT(CustomStringEvent);
 #undef BO_DECLARE_EVENT
