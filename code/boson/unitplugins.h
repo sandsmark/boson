@@ -112,12 +112,12 @@ public:
 	virtual void itemRemoved(BosonItem* item) = 0;
 
 	/**
-	 * @param advanceCount See @ref BosonCanvas::slotAdvance. You can use
+	 * @param advanceCallsCount See @ref BosonCanvas::slotAdvance. You can use
 	 * this to do expensive calculations only as seldom as possible. Note
 	 * that there is still some overhead, since this advance method still
 	 * gets called!
 	 **/
-	virtual void advance(unsigned int advanceCount) = 0;
+	virtual void advance(unsigned int advanceCallsCount) = 0;
 
 	/**
 	 * Save the plugin into @p root. You must implement this in derived
@@ -424,7 +424,7 @@ public:
 
 	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool saveAsXML(QDomElement& root) const;
-	virtual void advance(unsigned int advanceCount);
+	virtual void advance(unsigned int advanceCallsCount);
 
 	bool isUsableTo(const HarvesterPlugin* harvester) const;
 
@@ -489,7 +489,7 @@ public:
 
 	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool saveAsXML(QDomElement& root) const;
-	virtual void advance(unsigned int advanceCount);
+	virtual void advance(unsigned int advanceCallsCount);
 
 	bool isUsableTo(const HarvesterPlugin* harvester) const;
 

@@ -211,7 +211,7 @@ Cell* BosonCanvas::cells() const
  return d->mMap->cells();
 }
 
-void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
+void BosonCanvas::slotAdvance(unsigned int advanceCallsCount, bool advanceFlag)
 {
  static int profilingSlotAdvance = boProfiling->requestEventId("Advance: slotAdvance()");
  static int profilingAdvance = boProfiling->requestEventId("Advance: BosonItem::advance()");
@@ -221,7 +221,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 #define DO_ITEM_PROFILING 0
  BosonProfiler profiler(profilingSlotAdvance);
 
- boProfiling->advance(true, advanceCount);
+ boProfiling->advance(true, advanceCallsCount);
  QPtrListIterator<BosonItem> animIt(d->mAnimList);
  lockAdvanceFunction();
  boProfiling->advanceFunction(true);
@@ -248,7 +248,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	boProfiling->advanceItemStart(s->rtti(), id, work);
 	boProfiling->advanceItem(true);
 #endif
-	s->advance(advanceCount);
+	s->advance(advanceCallsCount);
 #if DO_ITEM_PROFILING
 	boProfiling->advanceItem(false);
 	boProfiling->advanceItemStop();
@@ -272,7 +272,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			skip = false;
 			break;
 		case (int)UnitBase::WorkNone:
-			if (advanceCount % 10 != 0) {
+			if (advanceCallsCount % 10 != 0) {
 				skip = true;
 			}
 			break;
@@ -280,12 +280,12 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			skip = false;
 			break;
 		case (int)UnitBase::WorkAttack:
-			if (advanceCount % 5 != 0) {
+			if (advanceCallsCount % 5 != 0) {
 				skip = true;
 			}
 			break;
 		case (int)UnitBase::WorkConstructed:
-			if (advanceCount % 20 != 0) {
+			if (advanceCallsCount % 20 != 0) {
 				skip = true;
 			}
 			break;
@@ -293,7 +293,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 			skip = false;
 			break;
 		case (int)UnitBase::WorkFollow:
-			if (advanceCount % 5 != 0) {
+			if (advanceCallsCount % 5 != 0) {
 				skip = true;
 			}
 			break;
@@ -329,9 +329,9 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		boProfiling->advanceItemFunction(true);
 #endif
 		if (advanceFlag) { // bah - inside the loop..
-			s->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+			s->advanceFunction(advanceCallsCount); // once this was called this object is allowed to change its advanceFunction()
 		} else {
-			s->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+			s->advanceFunction2(advanceCallsCount); // once this was called this object is allowed to change its advanceFunction()
 		}
 #if DO_ITEM_PROFILING
 		boProfiling->advanceItemFunction(false);
@@ -398,7 +398,8 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 
  boProfiling->start(profilingMaxAdvanceCount);
  boProfiling->advanceMaximalAdvanceCount(true);
- if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
+ const unsigned int MAXIMAL_ADVANCE_COUNT = 39;
+ if (advanceCallsCount == MAXIMAL_ADVANCE_COUNT) {
 	static int profilingMaxAdvanceCountSum = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: all tasks");
 	static int profilingDeletionList = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: construction of item deletion list");
 	static int profilingRemoveFromDestroyed = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: update destroyed lsit");
@@ -406,13 +407,6 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 	static int profilingDeleteShots = boProfiling->requestEventId("Advance MAXIMAL_ADVANCE_COUNT: deleteUnusedShots()");
 	BosonProfiler profiler2(profilingMaxAdvanceCountSum);
 	boDebug(300) << "MAXIMAL_ADVANCE_COUNT" << endl;
-	// there are 2 different timers for deletion of canvas items.
-	// The first is done in BosonCanvas - we only delete anything when
-	// advanceCount == MAXIMAL_ADVANCE_COUNT.
-	// The second is unit based. every MAXIMAL_ADVANCE_COUNT advance calls
-	// we increase the deletion timer of the unit and delete it when
-	// REMOVE_WRECKAGES_TIME is reached. This way we don't see all wreckages
-	// diappear at once...
 	QPtrListIterator<Unit> deletionIt(d->mDestroyedUnits);
 	QPtrList<BosonItem> deleteList;
 	boProfiling->start(profilingDeletionList);
@@ -446,7 +440,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
  }
  boProfiling->advanceMaximalAdvanceCount(false);
  boProfiling->stop(profilingMaxAdvanceCount);
- boProfiling->advance(false, advanceCount);
+ boProfiling->advance(false, advanceCallsCount);
 }
 
 bool BosonCanvas::canGo(const UnitProperties* prop, const QRect& rect) const

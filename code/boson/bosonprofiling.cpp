@@ -131,7 +131,7 @@ QDataStream& operator>>(QDataStream& s, ProfileItemAdvance& t)
 
 QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t)
 {
- s << (Q_UINT32)t.mAdvanceCount;
+ s << (Q_UINT32)t.mAdvanceCallsCount;
  s << t.mFunction;
  s << t.mAdvanceFunction;
  s << t.mDeleteUnusedShots;
@@ -149,9 +149,9 @@ QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t)
 
 QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t)
 {
- Q_UINT32 advanceCount;
- s >> advanceCount;
- t.mAdvanceCount = advanceCount;
+ Q_UINT32 advanceCallsCount;
+ s >> advanceCallsCount;
+ t.mAdvanceCallsCount = advanceCallsCount;
  s >> t.mFunction;
  s >> t.mAdvanceFunction;
  s >> t.mDeleteUnusedShots;
@@ -288,14 +288,14 @@ unsigned int BosonProfiling::renderEntries() const
  return d->mRenderTimes.count();
 }
 
-void BosonProfiling::advance(bool start, unsigned int advanceCount)
+void BosonProfiling::advance(bool start, unsigned int advanceCallsCount)
 {
  if (start) {
 	if (d->mCurrentSlotAdvanceTimes) {
 		boError() << k_funcinfo << "current SlotAdvanceTime object is non-NULL" << endl;
 		delete d->mCurrentSlotAdvanceTimes;
 	}
-	d->mCurrentSlotAdvanceTimes = new ProfileSlotAdvance(advanceCount);
+	d->mCurrentSlotAdvanceTimes = new ProfileSlotAdvance(advanceCallsCount);
 	d->mCurrentSlotAdvanceTimes->mFunction.start();
  } else {
 	d->mCurrentSlotAdvanceTimes->mFunction.stop();
@@ -306,10 +306,10 @@ void BosonProfiling::advance(bool start, unsigned int advanceCount)
 	if (d->mSlotAdvanceTimes.count() > MAX_PROFILING_ENTRIES) {
 		d->mSlotAdvanceTimes.removeFirst();
 	}
-	if (d->mCurrentSlotAdvanceTimes->mAdvanceCount != advanceCount) {
+	if (d->mCurrentSlotAdvanceTimes->mAdvanceCallsCount != advanceCallsCount) {
 		// the profiling data will be useless
-		boError() << k_funcinfo << "Internal advance profiling error!! - advance count differs from expected advancecount!" << endl;
-		d->mCurrentSlotAdvanceTimes->mAdvanceCount = advanceCount;
+		boError() << k_funcinfo << "Internal advance profiling error!! - advance count differs from expected advancecallscount!" << endl;
+		d->mCurrentSlotAdvanceTimes->mAdvanceCallsCount = advanceCallsCount;
 	}
 	d->mCurrentSlotAdvanceTimes = 0;
  }
@@ -521,7 +521,7 @@ bool BosonProfiling::load(QDataStream& stream)
  Q_UINT32 slotAdvanceTimesCount;
  stream >> slotAdvanceTimesCount;
  for (unsigned int i = 0; i < slotAdvanceTimesCount; i++) {
-	ProfileSlotAdvance* t = new ProfileSlotAdvance(MAXIMAL_ADVANCE_COUNT + 10); // invalid number - will get replaced below
+	ProfileSlotAdvance* t = new ProfileSlotAdvance(0);
 	stream >> *t;
 	d->mSlotAdvanceTimes.append(t);
  }

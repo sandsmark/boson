@@ -144,9 +144,8 @@ public:
 	 *
 	 * Please note that the @ref UnitPlugin::advance methods get called
 	 * here, too!
-	 * @param advanceCount Used by @ref UnitPlugin::advance
 	 **/
-	virtual void advance(unsigned int advanceCount);
+	virtual void advance(unsigned int advanceCallsCount);
 
 	/**
 	 * Call the advance*() function that is currently used. The advance
@@ -159,9 +158,9 @@ public:
 	 * for a lot of units and with this we avoid any switch on @ref
 	 * advanceWork
 	 **/
-	inline virtual void advanceFunction(unsigned int advanceCount)
+	inline virtual void advanceFunction(unsigned int advanceCallsCount)
 	{
-		(this->*mAdvanceFunction)(advanceCount);
+		(this->*mAdvanceFunction)(advanceCallsCount);
 	}
 
 	/**
@@ -173,9 +172,9 @@ public:
 	 *
 	 * See also @ref Boson::advanceFlag and @ref Boson::toggleAdvanceFlag
 	 **/
-	inline virtual void advanceFunction2(unsigned int advanceCount)
+	inline virtual void advanceFunction2(unsigned int advanceCallsCount)
 	{
-		(this->*mAdvanceFunction2)(advanceCount);
+		(this->*mAdvanceFunction2)(advanceCallsCount);
 	}
 
 
@@ -207,9 +206,9 @@ public:
 	 * be called after @ref advanceMoveInternal, so you should never call @ref
 	 * advanceMoveInternal directly, but rather use this.
 	 **/
-	void advanceMove(unsigned int advanceCount)
+	void advanceMove(unsigned int advanceCallsCount)
 	{
-		advanceMoveInternal(advanceCount);
+		advanceMoveInternal(advanceCallsCount);
 		advanceMoveCheck();
 	}
 
@@ -217,7 +216,7 @@ public:
 	/**
 	 * Attack a unit. The target was set before using @ref setTarget
 	 **/
-	virtual void advanceAttack(unsigned int advanceCount);
+	virtual void advanceAttack(unsigned int advanceCallsCount);
 
 	/**
 	 * Follow another unit.
@@ -230,7 +229,7 @@ public:
 	 * Usually the unit will check for enemy units in range and fire at
 	 * them.
 	 **/
-	virtual void advanceNone(unsigned int advanceCount);
+	virtual void advanceNone(unsigned int advanceCallsCount);
 
 	/**
 	 * Move the construction animation one step forward. Does nothing by
@@ -244,12 +243,12 @@ public:
 	 *
 	 * Should do - just like all advance*() methods - as little as possible.
 	 **/
-	virtual void advanceDestroyed(unsigned int advanceCount);
+	virtual void advanceDestroyed(unsigned int advanceCallsCount);
 
 	/**
 	 * Call the @ref UnitPlugin::advance method of the @ref currentPlugin
 	 **/
-	virtual void advancePlugin(unsigned int advanceCount);
+	virtual void advancePlugin(unsigned int advanceCallsCount);
 
 	/**
 	 * Called when unit has to turn to some direction. It smootly turns unit
@@ -519,7 +518,7 @@ protected:
 
 
 private:
-	typedef void (Unit::*MemberFunction)(unsigned int advanceCount);
+	typedef void (Unit::*MemberFunction)(unsigned int advanceCallsCount);
 	void setAdvanceFunction(MemberFunction, bool advanceFlag);
 
 private:
@@ -568,7 +567,7 @@ public:
 	void turnTo();
 
 
-	virtual void advanceFollow(unsigned int advanceCount);
+	virtual void advanceFollow(unsigned int advanceCallsCount);
 
 
 	/**
@@ -604,7 +603,7 @@ public:
 	bool checkPathPoint(const QPoint& p);
 
 protected:
-	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path
+	virtual void advanceMoveInternal(unsigned int advanceCallsCount); // move one step futher to path
 
 	/**
 	 * Note: this is not actually an advance*() method, like @ref
@@ -685,7 +684,7 @@ public:
 	 * placing the unit until the construction is completed. See @ref
 	 * isConstructionComplete
 	 **/
-	virtual void advanceConstruction(unsigned int advanceCount);
+	virtual void advanceConstruction(unsigned int advanceCallsCount);
 
 	/**
 	 * @return NULL if the facility has not yet been fully constructed,

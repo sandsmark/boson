@@ -127,10 +127,6 @@ public:
 	{
 		return ADVANCE_INTERVAL;
 	}
-	unsigned int advanceCount() const
-	{
-		return mAdvanceCount;
-	}
 	unsigned int advanceCallsCount() const
 	{
 		return mAdvanceCallsCount;
@@ -146,17 +142,13 @@ public:
 
 	void initProperties(KGamePropertyHandler* dataHandler)
 	{
-		mAdvanceCount.registerData(Boson::IdAdvanceCount, dataHandler,
-				KGamePropertyBase::PolicyLocal, "AdvanceCount");
 		mAdvanceFlag.registerData(Boson::IdAdvanceFlag, dataHandler,
 				KGamePropertyBase::PolicyLocal, "AdvanceFlag");
 		mAdvanceCallsCount.registerData(Boson::IdAdvanceCallsCount, dataHandler,
 				KGamePropertyBase::PolicyLocal, "AdvanceCallsCount");
 
-		mAdvanceCount.setLocal(0);
 		mAdvanceFlag.setLocal(0);
 		mAdvanceCallsCount.setLocal(0);
-		mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 		mAdvanceCallsCount.setEmittingSignal(false);
 		mAdvanceFlag.setEmittingSignal(false);
 	}
@@ -228,8 +220,6 @@ private:
 	bool mAdvanceMessageSent;
 
 
-	KGameProperty<unsigned int> mAdvanceCount;
-
 	KGamePropertyInt mAdvanceFlag;
 
 	KGameProperty<unsigned int> mAdvanceCallsCount;
@@ -245,19 +235,15 @@ void BoAdvance::receiveAdvanceCall()
  // currently used function, but to the other one.
  toggleAdvanceFlag();
 
- emit mBoson->signalAdvance(advanceCount(), flag);
+ emit mBoson->signalAdvance(advanceCallsCount(), flag);
  // AB: do _not_ connect to the signal!
  // -> slots may be called in random order, but we need well defined order
  // (otherwise network may get broken soon)
  mBoson->eventManager()->advance();
 
  mAdvanceCallsCount = mAdvanceCallsCount + 1;
- mAdvanceCount = mAdvanceCount + 1;
- if (mAdvanceCount > MAXIMAL_ADVANCE_COUNT) {
-	mAdvanceCount = 0;
- }
 
- // we also have "mAdvanceDividerCount". the mAdvanceCount is important in Unit,
+ // we also have "mAdvanceDividerCount". the mAdvanceCallsCount is important in Unit,
  // mAdvanceDividerCount is limited to boson only. some explanations:
  // Only a single advance message is sent over network every ADVANCE_INTERVAL
  // ms, independant from the game speed.
@@ -917,7 +903,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  ensureComputerIOListValid(this, d->mComputerIOList);
 }
 
-void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/, bool /*advanceFlag*/)
+void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCallsCount*/, bool /*advanceFlag*/)
 {
  // we use this to "advance" the computer player. This is a completely new concept
  // introduced to KGameIO just for boson. See KGaneComputerIO documentation for

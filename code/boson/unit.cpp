@@ -450,10 +450,10 @@ void Unit::updateZ(float moveByX, float moveByY, float* moveByZ, float* rotateX,
  *moveByZ = newZ - z();
 }
 
-void Unit::advance(unsigned int advanceCount)
+void Unit::advance(unsigned int advanceCallsCount)
 { // time critical function !!!
 // Mostly animation:
- BosonItem::advance(advanceCount);
+ BosonItem::advance(advanceCallsCount);
 
  if (isDestroyed()) {
 	return;
@@ -462,7 +462,7 @@ void Unit::advance(unsigned int advanceCount)
  if (d->mWeapons[0]) {
 	BosonWeapon** w = &d->mWeapons[0];
 	for (; *w; w++) {
-		(*w)->advance(advanceCount);
+		(*w)->advance(advanceCallsCount);
 	}
  }
 
@@ -472,16 +472,16 @@ void Unit::advance(unsigned int advanceCount)
  }
 }
 
-void Unit::advanceNone(unsigned int advanceCount)
+void Unit::advanceNone(unsigned int advanceCallsCount)
 {
 // this is called when the unit has nothing specific to do. Usually we just want
 // to fire at every enemy in range.
 
  if (!target()) {
-	if (advanceCount != 10) {
+	if (advanceCallsCount % 40 != 10) {
 		return;
 	}
- } else if (advanceCount % 10 != 0) {
+ } else if (advanceCallsCount % 10 != 0) {
 	return;
  }
 
@@ -634,9 +634,9 @@ Unit* Unit::bestEnemyUnitInRange()
  return best;
 }
 
-void Unit::advanceAttack(unsigned int advanceCount)
+void Unit::advanceAttack(unsigned int advanceCallsCount)
 {
- if (advanceCount % 5 != 0) {
+ if (advanceCallsCount % 5 != 0) {
 	return;
  }
 
@@ -714,25 +714,27 @@ void Unit::advanceAttack(unsigned int advanceCount)
  boDebug(300) << "    " << k_funcinfo << "done shooting" << endl;
 }
 
-void Unit::advanceDestroyed(unsigned int advanceCount)
+void Unit::advanceDestroyed(unsigned int advanceCallsCount)
 {
  // note: the unit/wreckage will get deleted pretty soon
- if (advanceCount % 10 != 0) {
+ if (advanceCallsCount % 10 != 0) {
 	return;
  }
  if (isVisible()) {
 	// Make unit slowly sink into ground
+#define MAXIMAL_ADVANCE_COUNT 19
 	setVelocity(0, 0, -(depth() / (REMOVE_WRECKAGES_TIME * MAXIMAL_ADVANCE_COUNT)) * 1.2);
+#undef MAXIMAL_ADVANCE_COUNT
  }
 }
 
-void Unit::advancePlugin(unsigned int advanceCount)
+void Unit::advancePlugin(unsigned int advanceCallsCount)
 {
  if (!currentPlugin()) {
 	boWarning() << k_funcinfo << "NULL plugin!" << endl;
 	setWork(WorkNone);
  } else {
-	currentPlugin()->advance(advanceCount);
+	currentPlugin()->advance(advanceCallsCount);
  }
 }
 
@@ -1587,7 +1589,7 @@ bool MobileUnit::init()
  return true;
 }
 
-void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
+void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this actually needs to be called for every advanceCallsCount.
 {
  //boDebug(401) << k_funcinfo << endl;
 
@@ -1665,7 +1667,7 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually
 	// Don't check for enemies every time (if we don't have a target) because it
 	//  slows things down
 #ifndef CHECK_ENEMIES_ONLY_AT_WAYPOINT
-	if (target() || (advanceCount % 10 == 0)) {
+	if (target() || (advanceCallsCount % 10 == 0)) {
 		if (attackEnemyUnitsInRangeWhileMoving()) {
 			return;
 		}
@@ -2060,9 +2062,9 @@ void MobileUnit::turnTo()
  }
 }
 
-void MobileUnit::advanceFollow(unsigned int advanceCount)
+void MobileUnit::advanceFollow(unsigned int advanceCallsCount)
 {
- if (advanceCount % 5 != 0) {
+ if (advanceCallsCount % 5 != 0) {
 	return;
  }
  if (!target()) {
@@ -2293,9 +2295,9 @@ unsigned int Facility::constructionSteps() const
  return unitProperties()->constructionSteps();
 }
 
-void Facility::advanceConstruction(unsigned int advanceCount)
+void Facility::advanceConstruction(unsigned int advanceCallsCount)
 {
- if (advanceCount % 20 != 0) {
+ if (advanceCallsCount % 20 != 0) {
 	return;
  }
  if (isDestroyed()) {
