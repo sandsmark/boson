@@ -245,6 +245,8 @@ class BosonPath2
 
     void findFlyingUnitPath(BosonPathInfo* info);
 
+    bool rangeCheck(BosonPathInfo* info);
+
 
     void cellsOccupiedStatusChanged(int x1, int y1, int x2, int y2);
 
