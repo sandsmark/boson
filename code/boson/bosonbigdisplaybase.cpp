@@ -587,12 +587,13 @@ void BosonBigDisplayBase::paintGL()
 	// AB: note units are rendered in the *center* point of their
 	// width/height.
 	// but concerning z-position they are rendered from bottom to top!
-	glTranslatef(x, y, z);
 
 	if (item->displayList() == 0) {
 		kdWarning() << k_funcinfo << "NULL display list for item rtti=" << item->rtti() << endl;
 		continue;
 	}
+	glTranslatef(x, y, z);
+
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
 	glCallList(item->displayList());
