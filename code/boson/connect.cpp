@@ -39,6 +39,7 @@
 void BosonApp::connectionLost(KSocket *s)
 {
 	boAssert ( s == Socket);
+	logf(LOG_ERROR, "connectionLost called");
 
 	delete Socket;
 
@@ -120,10 +121,7 @@ playerState oldState = State;
 
 if ( tag>MSG_END_DIALOG_LAYER )
 	if ( PS_PLAYING == State) {
-
-		if ( MSG_DLG_END == tag)
-			gameEnd( data->end.endReason);
-		else	handleGameMessage(tag,blen,data);
+		handleGameMessage(tag,blen,data);
 		return;
 	}
 	else {
@@ -135,6 +133,14 @@ if ( ! (tag>MSG_END_SOCKET_LAYER && tag<MSG_END_DIALOG_LAYER)) {
 	logf(LOG_ERROR, "handleDialogMessage : unexpected tag received(1), ignored");
 	return;
 	}
+
+
+if ( MSG_DLG_END == tag) {
+	boAssert(PS_PLAYING == State);
+	logf(LOG_ERROR, "peer-client died");
+	gameEnd( data->end.endReason);
+	return;
+}
 
 switch(State) {
 	default:
@@ -320,6 +326,7 @@ switch(tag) {
 
 void BosonApp::gameEnd( endMsg_t::endReasonType reason)
 {
+	logf(LOG_ERROR, "gameEnd called");
 	if ( endMsg_t::playerDiedEnd != reason) {
 		logf(LOG_ERROR, "unknown reason for gameEnd from server");
 	}
