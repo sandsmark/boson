@@ -73,3 +73,20 @@ void visualField::setCell(int i, int j, groundType g)
 	emit newCell(i,j,g);
 }
 
+
+
+QwSpriteFieldGraphic * visualField::findUnitAt(int x, int y)
+{
+	Pix p;
+	QwSpriteFieldGraphic *u;
+
+	for( p = topAt(x,y); p; next(p))
+		if (IS_UNIT(at(p)->rtti()) && exact(p))  {
+			u =  at(p);
+			end(p);
+			return u;
+		}
+
+	return NULL;
+}
+

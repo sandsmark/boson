@@ -27,9 +27,15 @@
 #define	S_GROUND	(S_BASE+100)
 #define	S_MOBILE	(S_BASE+200)
 #define	S_FACILITY	(S_BASE+300)
+#define	S_END		(S_BASE+400)
 
 #define Z_MOBILE	(+100)
 #define Z_FACILITY	(+50)
 #define Z_GROUND	(+10)
+
+
+#define IS_MOBILE(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_FACILITY) )
+#define IS_FACILITY(rtti)	( ((rtti) >= S_FACILITY)  && ((rtti) < S_END     ) )
+#define IS_UNIT(rtti)		( ((rtti) >= S_MOBILE  )  && ((rtti) < S_END     ) )
 
 #endif // SPRITES_H

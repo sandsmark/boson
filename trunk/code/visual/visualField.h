@@ -23,7 +23,7 @@
 
 
 #include <qobject.h>
-//#include <qintdict.h>
+#include <qintdict.h>
 
 #include <QwSpriteField.h>
 
@@ -32,7 +32,7 @@
 //#include "../common/unitType.h"
 //#include "../common/unit.h"	// Facility
 
-//#include "visualUnit.h"		// visualMobUnit
+#include "visualUnit.h"		// visualMobUnit
 #include "visualCell.h"
 
 class QRect;
@@ -60,16 +60,9 @@ public:
 	int		maxX, maxY;	// size of the map
 ///orzel should be maxX * BO_TILE_SIZE = width(), maxY * BO_TILE_SIZE
 
-/* modify contents */
 	void setCell(int i, int j, groundType g);
-
-/*
-  void createMob(mobileMsg_t &);
-  void destroyMob(destroyedMsg_t &);
-
-  void createFix(facilityMsg_t &);
-  void destroyFix(destroyedMsg_t &);
-*/
+	/** find the unit at this position */
+	QwSpriteFieldGraphic *findUnitAt(int x, int y);
 
 signals:
 	void newCell(int,int, groundType g);

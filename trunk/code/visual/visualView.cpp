@@ -123,7 +123,8 @@ void visualView::unSelectAll(void)
 
 void visualView::selectFix(visualFacility *f)
 {
-	fixSelected = f; fixSelected->select();
+	fixSelected = f;
+	fixSelected->select();
 	emit setSelected( vpp.species[f->who]->getBigOverview(f));
 	logf(LOG_GAME_LOW, "select facility");
 }
@@ -149,4 +150,37 @@ void visualView::selectMob(long key, visualMobUnit *m)
 	emit setSelected( vpp.species[m->who]->getBigOverview(m));
 	logf(LOG_GAME_LOW, "select mobile");
 }
+
+
+
+void visualView::selectArea(int x1, int y1, int x2, int y2)
+{
+	Pix p;
+	visualMobUnit *u;
+	int t;
+ 
+	/* ensure that (x1<=x2 && y1<=y2) */
+	if (x2<x1) {
+		t  = x1; 
+		x1 = x2;
+		x2 = t ;
+        }
+
+	if (y2<y1) {
+		t  = y1; 
+		y1 = y2;
+		y2 = t ;
+        }
+
+	/* selection */
+	for( p = field->lookIn(x1,y1,x2-x1,y2-y1); p; field->next(p))
+		if (IS_MOBILE(field->at(p)->rtti()) )  { //found one
+//		if (IS_MOBILE(field->at(p)->rtti()) && field->exact(p))  { //found one
+//			puts("hop");
+			u =  ((visualMobUnit *) field->at(p));
+			if (!mobSelected.find(u->key))			// already selected ?
+				selectMob(u->key, u); //, puts("bof");
+		}
+}
+
 
