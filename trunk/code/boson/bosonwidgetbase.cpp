@@ -809,6 +809,7 @@ void BosonWidgetBase::slotStartScenario()
 		boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
 	}
  }
+ displayManager()->slotCenterHomeBase();
 
  #warning FIXME
  // this is a strange bug: we need to resize the widget once it is shown - otherwise we'll have a VERY slot frame rate.
