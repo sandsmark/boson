@@ -53,6 +53,7 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg)
   mDamageRange = (float)(cfg->readDoubleNumEntry("DamageRange", 1));
   mCanShootAtAirUnits = cfg->readBoolEntry("CanShootAtAirUnits", false);
   mCanShootAtLandUnits = cfg->readBoolEntry("CanShootAtLandUnits", false);
+  mMaxHeight = (float)(cfg->readDoubleNumEntry("MaxHeight", 1));
   mShootParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "ShootParticles", speciesTheme());
   mFlyParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "FlyParticles", speciesTheme());
   mHitParticleSystems = BosonParticleSystemProperties::loadParticleSystemProperties(cfg, "HitParticles", speciesTheme());
