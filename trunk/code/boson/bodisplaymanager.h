@@ -50,30 +50,11 @@ public:
 	~BoDisplayManager();
 
 	BosonBigDisplayBase* addInitialDisplay();
-
-	/**
-	 * @return The currently active display. Use @ref
-	 * BosonBigDisplayBase::makeActive to change it
-	 **/
 	BosonBigDisplayBase* activeDisplay() const;
 
-	/**
-	 * Make the displaymanager use this canvas (e.g. the selections need
-	 * this).
-	 *
-	 * WARNING: this is NOT applied to the displays!
-	 **/
 	void setCanvas(BosonCanvas* canvas);
 
 	void quitGame();
-
-	/**
-	 * See @ref BosonBigDisplayInputBase::unlockAction
-	 **/
-	void unlockAction();
-
-	void setToolTipCreator(int type);
-	void setToolTipUpdatePeriod(int ms);
 
 	void saveAsXML(QDomElement& root);
 	void loadFromXML(const QDomElement& root);
@@ -106,29 +87,6 @@ public slots:
 	 **/
 	void slotClearGroup(int number);
 
-	/**
-	 * Editor mode only: specifies the unitType that will be placed on the
-	 * map when the user clicks the next time
-	 **/
-	void slotPlaceUnit(unsigned long int unitType, Player* owner);
-
-	/**
-	 * Editor mode only: specifies the texture values that will be placed on the
-	 * map when the user clicks the next time
-	 **/
-	void slotPlaceGround(unsigned int textureCount, unsigned char* alpha);
-
-	void slotShowPlaceFacilities(Player*);
-	void slotShowPlaceMobiles(Player*);
-	void slotShowPlaceGround();
-
-	/**
-	 * Editor mode only: delete all currently selected units.
-	 **/
-	void slotDeleteSelectedUnits();
-
-	void slotUpdateIntervalChanged(unsigned int);
-
 	void slotUnitRemoved(Unit* u);
 
 	/**
@@ -145,32 +103,11 @@ public slots:
 	 **/
 	void slotAdvance(unsigned int, bool);
 
-	/**
-	 * Move the selection of the @ref activeDisplay to the cell at (x,y).
-	 * See also @ref BosonBigDisplayInputBase::slotMoveSelection
-	 **/
-	void slotMoveActiveSelection(int x, int y);
-
-	/**
-	 * Select the a single unit in the @ref activeDisplay. See also @ref
-	 * BoSelection::slotSelectSingleUnit
-	 **/
-	void slotActiveSelectSingleUnit(Unit*);
-
 	void slotAction(const BoSpecificAction&);
-
-	void slotUpdateOpenGLSettings();
-
-	void slotChangeFont(const BoFontInfo& font);
 
 	void slotSetGrabMovie(bool grab);
 
 signals:
-	/**
-	 * See @ref BosonBigDisplayInputBase::signalLockAction
-	 **/
-	void signalLockAction(bool);
-
 	/**
 	 * This signal is emitted when the selection of a display changes, see
 	 * @ref BosonBigDisplayBase::signalSelectionChanged. One day this might

@@ -148,12 +148,6 @@ void BoDisplayManager::slotAdvance(unsigned int, bool)
  grabMovieFrame();
 }
 
-void BoDisplayManager::slotUpdateIntervalChanged(unsigned int ms)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->setUpdateInterval(ms);
-}
-
 void BoDisplayManager::slotSelectGroup(int number)
 {
  if (number < 0 || number >= 10) {
@@ -201,91 +195,11 @@ void BoDisplayManager::slotClearGroup(int number)
  d->mSelectionGroups[number]->clear();
 }
 
-void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
-{
- BO_CHECK_NULL_RET(activeDisplay());
- BO_CHECK_NULL_RET(activeDisplay()->displayInput());
-
- activeDisplay()->displayInput()->placeUnit(unitType, owner);
-}
-
-void BoDisplayManager::slotPlaceGround(unsigned int textureCount, unsigned char* alpha)
-{
- BO_CHECK_NULL_RET(activeDisplay());
- BO_CHECK_NULL_RET(activeDisplay()->displayInput());
-
- activeDisplay()->displayInput()->placeGround(textureCount, alpha);
-}
-
-void BoDisplayManager::slotShowPlaceFacilities(Player* p)
-{
- BO_CHECK_NULL_RET(activeDisplay());
-
- activeDisplay()->slotShowPlaceFacilities(p);
-}
-
-void BoDisplayManager::slotShowPlaceMobiles(Player* p)
-{
- BO_CHECK_NULL_RET(activeDisplay());
-
- activeDisplay()->slotShowPlaceMobiles(p);
-}
-
-void BoDisplayManager::slotShowPlaceGround()
-{
- BO_CHECK_NULL_RET(activeDisplay());
-
- activeDisplay()->slotShowPlaceGround();
-}
-
-void BoDisplayManager::slotMoveActiveSelection(int x, int y)
-{
- BO_CHECK_NULL_RET(activeDisplay());
- BO_CHECK_NULL_RET(activeDisplay()->displayInput());
-
- activeDisplay()->displayInput()->slotMoveSelection(x, y); // FIXME: not a slot anymore
-}
-
-void BoDisplayManager::slotActiveSelectSingleUnit(Unit* unit)
-{
- BO_CHECK_NULL_RET(activeDisplay());
- BO_CHECK_NULL_RET(activeDisplay()->selection());
-
- activeDisplay()->selection()->slotSelectSingleUnit(unit);
-}
-
-void BoDisplayManager::slotDeleteSelectedUnits()
-{
- if (!activeDisplay()) {
-	boError() << k_funcinfo << "NULL active display" << endl;
-	return;
- }
- activeDisplay()->displayInput()->deleteSelectedUnits();
-}
-
 void BoDisplayManager::slotUnitRemoved(Unit* u)
 {
  for(int i = 0; i < 10; i++) {
 	d->mSelectionGroups[i]->removeUnit(u);
  }
-}
-
-void BoDisplayManager::unlockAction()
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->displayInput()->unlockAction();
-}
-
-void BoDisplayManager::setToolTipUpdatePeriod(int ms)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->setToolTipUpdatePeriod(ms);
-}
-
-void BoDisplayManager::setToolTipCreator(int type)
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->setToolTipCreator(type);
 }
 
 void BoDisplayManager::loadFromXML(const QDomElement& root)
@@ -383,19 +297,6 @@ void BoDisplayManager::slotAction(const BoSpecificAction& action)
  BO_CHECK_NULL_RET(activeDisplay()->displayInput());
 
  activeDisplay()->displayInput()->action(action);
-}
-
-void BoDisplayManager::slotUpdateOpenGLSettings()
-{
- BO_CHECK_NULL_RET(d->mActiveDisplay);
- d->mActiveDisplay->updateOpenGLSettings();
-}
-
-void BoDisplayManager::slotChangeFont(const BoFontInfo& font)
-{
- BO_CHECK_NULL_RET(activeDisplay());
-
- activeDisplay()->setFont(font);
 }
 
 void BoDisplayManager::slotSetGrabMovie(bool grab)
