@@ -30,10 +30,12 @@
 #include <kmessagebox.h>
 
 #include <qlabel.h>
+#include <qlayout.h>
 #include <qvbox.h>
 #include <qhbox.h>
 #include <qpushbutton.h>
 #include <qcheckbox.h>
+#include <qdatetime.h>
 
 #warning workaround only!
 // FIXME: these should not be in this file at all (not even in the class). maybe
@@ -96,6 +98,92 @@ public:
 	}
 };
 
+class RenderSummary : public QWidget
+{
+public:
+	RenderSummary(QWidget* parent) : QWidget(parent, "RenderSummary")
+	{
+		QGridLayout* topLayout = new QGridLayout(this);
+		int row = 0;
+		int column = 0;
+		QLabel* label = new QLabel(i18n("First profiled frame at:"), this);
+		mStartLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mStartLabel, 0, column);
+		column++;
+
+		label = new QLabel(i18n("Last profiled frame at:"), this);
+		mEndLabel = new QLabel(this);
+		topLayout->addWidget(label, 0, column);
+		column++;
+		topLayout->addWidget(mEndLabel, 0, column);
+
+		row++;
+		column = 0;
+		label = new QLabel(i18n("Elapsed seconds: "), this);
+		mSeconds = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mSeconds, row, column);
+
+		row++;
+		column = 0;
+		label = new QLabel(i18n("Frame count in this time: "), this);
+		mCountLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mCountLabel, row, column);
+		column++;
+
+		label = new QLabel(i18n("FPS: "), this);
+		mFPSLabel = new QLabel(this);
+		topLayout->addWidget(label, row, column);
+		column++;
+		topLayout->addWidget(mFPSLabel, row, column);
+		column++;
+	}
+	~RenderSummary()
+	{
+	}
+
+	void clear()
+	{
+		mStartLabel->setText("");
+		mEndLabel->setText("");
+		mSeconds->setText("");
+		mCountLabel->setText("");
+		mFPSLabel->setText("");
+	}
+
+	void set(struct timeval* start, struct timeval* end, int count)
+	{
+		if (!start || !end || count == 0) {
+			clear();
+			return;
+		}
+		QDateTime s, e;
+		s.setTime_t(start->tv_sec);
+		e.setTime_t(end->tv_sec);
+		mStartLabel->setText(s.time().toString());
+		mEndLabel->setText(e.time().toString());
+		mCountLabel->setText(QString::number(count));
+
+		double diff = (end->tv_sec - start->tv_sec) * 1000000 + (end->tv_usec - start->tv_usec);
+		diff /= 1000000;
+		mSeconds->setText(QString::number(diff));
+		double fps = ((double)count) / diff;
+		mFPSLabel->setText(QString::number(fps));
+	}
+
+private:
+	QLabel* mStartLabel;
+	QLabel* mEndLabel;
+	QLabel* mSeconds;
+	QLabel* mCountLabel;
+	QLabel* mFPSLabel;
+};
+
 class BosonProfilingDialog::BosonProfilingDialogPrivate
 {
 public:
@@ -103,6 +191,7 @@ public:
 	{
 		mUnits = 0;
 		mRender = 0;
+		mRenderSummary = 0;
 		mSlotAdvance = 0;
 		mItemAdvance = 0;
 		mCreateItemAdvanceSummaryOnly = 0;
@@ -116,6 +205,7 @@ public:
 
 	KListView* mUnits;
 	KListView* mRender;
+	RenderSummary* mRenderSummary;
 	KListView* mSlotAdvance;
 	KListView* mItemAdvance;
 	QCheckBox* mCreateItemAdvanceSummaryOnly;
@@ -178,6 +268,8 @@ void BosonProfilingDialog::initRenderPage()
  d->mRender->addColumn(i18n("Time (ms)"));
  d->mRender->addColumn(i18n("Time (s)"));
  d->mRender->addColumn(i18n("%"));
+
+ d->mRenderSummary = new RenderSummary(vbox);
 }
 
 void BosonProfilingDialog::initSlotAdvancePage()
@@ -316,6 +408,7 @@ void BosonProfilingDialog::resetLoadUnitPage()
 void BosonProfilingDialog::resetRenderPage()
 {
  d->mRender->clear();
+ d->mRenderSummary->clear();
  BosonProfiling::BosonProfilingPrivate* pd = d->data()->d;
  QPtrListIterator<RenderGLTimes> it(pd->mRenderTimes);
  int i = 0;
@@ -356,6 +449,7 @@ void BosonProfilingDialog::resetRenderPage()
 
  unsigned int count = pd->mRenderTimes.count();
  if (!count) {
+	d->mRenderSummary->set(0, 0, 0);
 	return;
  }
  unsigned long int func = aFunction / count;
@@ -370,6 +464,11 @@ void BosonProfilingDialog::resetRenderPage()
  initRenderItem(new QListViewItemNumber(average), i18n("FOW"), aFOW / count, func);
  initRenderItem(new QListViewItemNumber(average), i18n("Text"), aText / count, func);
  average->setOpen(true);
+
+
+ d->mRenderSummary->set(&pd->mRenderTimes.first()->mFunction.mData[0],
+		&pd->mRenderTimes.last()->mFunction.mData[1],
+		pd->mRenderTimes.count());
 }
 
 void BosonProfilingDialog::slotResetSlotAdvancePage()
