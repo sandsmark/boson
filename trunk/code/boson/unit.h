@@ -157,6 +157,7 @@ protected:
 	 * MobileUnit
 	 **/
 	virtual void advanceMove() { }
+	virtual void advanceMoveCheck() { }
 
 	/**
 	 * Move the construction animation one step forward. Does nothing by
@@ -201,6 +202,7 @@ public:
 
 protected:
 	virtual void advanceMove(); // move one step futher to path
+	virtual void advanceMoveCheck();
 	/** Finds new path to destination
 	  * Destination must have been set before in variables movedestx and movedesty
 	  * @return true if path was found, false otherwise

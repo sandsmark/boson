@@ -160,29 +160,20 @@ void Unit::updateSelectBox()
 void Unit::moveBy(double moveX, double moveY)
 {
 // time critical function
+
+ // QCanvasItem::moveBy() is called from QCanvasItem::advance(1). I finally
+ // found out why it is a bad idea (tm) to do collision detection here.
+ // QCanvas::collisions() (and all other collisions()) use imageAdvanced() for
+ // collision detection.
+ // collision detection of item A may found none - so it is moved. but item B
+ // may find item A as collision candidate. but it now tests for the *next*
+ // advance() pahse, as A has already been moved. so it may happen that item B
+ // is ok, too, as item A won't be in the way in the next phase.
+ // This means that be will be moved, too, but it mustn't be moved - we have a
+ // collision.
  double oldX = x();
  double oldY = y();
  QCanvasSprite::moveBy(moveX, moveY);
-/*
-// FIXME 
- QCanvasItemList list = collisions(true);
- if (!list.isEmpty()) {
-	QCanvasItemList::Iterator it;
-	for (it = list.begin(); it != list.end(); ++it) {
-		if (RTTI::isUnit((*it)->rtti())) {
-			if (!((Unit*)*it)->isDestroyed()) {
-				kdWarning() << "collided with " << list.count() 
-						<< " units" << endl;
-				kdWarning() << "moving back and stop moving" << endl;
-				QCanvasSprite::moveBy(-moveX, -moveY);
-				stopMoving();
-				return; // No need to move select boxes by zero
-			}
-		}
-	}
- }*/
-
-
  if (d->mSelectBox) {
 	d->mSelectBox->moveBy(moveX, moveY);
  }
@@ -204,6 +195,7 @@ void Unit::advance(int phase)
 	// but we would need a setAnimated(true) for all units then :-(
 	if (work() == WorkMove) {
 		advanceMove(); // move one step
+		advanceMoveCheck(); // safety check for advanceMove(). see comments in moveBy()
 	} else if (work() == WorkAttack) {
 		attackUnit(target());
 	} else if (work() == WorkProduce) {
@@ -224,9 +216,10 @@ void Unit::advance(int phase)
 	if (d->mReloadState > 0) {
 		d->mReloadState = d->mReloadState - 1;
 	}
-	QCanvasSprite::advance(phase); // does nothing for phase == 0
  } else { // phase == 1
-	QCanvasSprite::advance(phase); // actually move
+	// QCanvasSprite::advance() just moves for phase == 1 ; let's do it
+	// here, too
+	moveBy(xVelocity(), yVelocity());
  }
 }
 
@@ -652,13 +645,11 @@ void MobileUnit::advanceMove()
  turnTo();
 
  // Check for units on way
- QValueList<Unit*> collisionList = unitCollisions();
+ QValueList<Unit*> collisionList = unitCollisions(true); // also tests using collidesWith()
  for (int unsigned i = 0; i < collisionList.count(); i++) {
-	if (collidesWith(collisionList[i])) {
-		kdWarning() << id() << " colliding with unit" << endl;
-		/// TODO: wait some time before searching new path
-		mPathrecalc = 0;
-	}
+	kdWarning() << id() << " colliding with unit" << endl;
+	/// TODO: wait some time before searching new path
+	mPathrecalc = 0;
  }
 /* QCanvasItemList collisionList = collisions(exact);
  if(! collisionList.isEmpty())
@@ -691,6 +682,23 @@ void MobileUnit::advanceMove()
 		}
 	}
  }*/
+}
+
+void MobileUnit::advanceMoveCheck()
+{
+ QValueList<Unit*> l = unitCollisions(true);
+ if (!l.isEmpty()) {
+//	kdWarning() << k_funcinfo << ": " << id() << " -> " << l.first()->id() 
+//		<< " (count=" << l.count() <<")"  << endl;
+	// do not move at all. Moving is not stopped completely!
+	// work() is still workMove() so we'll continue moving in the next
+	// advanceMove() call
+
+	 // AB: perhaps we need to increase the "wait" timer
+	setXVelocity(0);
+	setYVelocity(0);
+	return;
+ }
 }
 
 void MobileUnit::setSpeed(double speed)
