@@ -21,8 +21,6 @@
 
 #include <Python.h>
 
-#include <signal.h>
-
 #include <qstring.h>
 #include <qfileinfo.h>
 
@@ -106,7 +104,7 @@ PythonScript::PythonScript(Player* p) : BosonScript(p)
   PyThreadState_Swap(0);
   PyEval_ReleaseLock();
 
-  signal(SIGINT, SIG_DFL);
+  PyOS_FiniInterrupts();
 
   mDict = 0;
   mScriptInstances++;
