@@ -19,6 +19,8 @@
 #include "bosontiles.h"
 #include "bosontiles.moc"
 
+#include "bosontexturearray.h"
+
 #include "defines.h"
 
 #include <kdebug.h>
@@ -27,16 +29,21 @@
 #include <qapplication.h>
 #include <qpixmap.h>
 
+#include <qgl.h>
+
+
 BosonTiles::BosonTiles() : QObject()
 {
  mTilesImage = new QImage(big_w() * BO_TILE_SIZE, big_h() * BO_TILE_SIZE, 32);
+ mTextures = 0;
 }
 
 BosonTiles::~BosonTiles()
 {
  delete mTilesImage;
+ delete mTextures;
 }
-
+/*
 QPixmap BosonTiles::plainTile(Cell::GroundType type)
 {
  if (type <= Cell::GroundUnknown || type >= Cell::GroundLast) {
@@ -60,7 +67,8 @@ QPixmap BosonTiles::small(int smallNo, Cell::TransType trans, bool inverted)
 {
  return tile(Cell::smallTileNumber(smallNo, trans, inverted));
 }
-	
+*/
+
 QPixmap BosonTiles::tile(int g)
 {
  QPixmap p;
@@ -121,8 +129,14 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
  mDebug = debug;
  // Variables for progress information
  mLoaded = 0;
- mSignalCounter = 0;
  mTilesImage->fill(0x00000000); // black filling, FOW _is_ black
+
+
+ // AB: note that most of the texture-loading code is a hack here. this class
+ // was never meant to use textures...
+ // we simply place every image to mTextureImages in putOn(). Then we init
+ // mTextures.
+ mTextureImages.clear();
 
  for (int i = 0; i < Cell::GroundLast; i++)    {       // load non-transitions
 	if (!loadGround(i, dir + groundType2Name((Cell::GroundType)i))) {
@@ -142,8 +156,23 @@ bool BosonTiles::loadTiles(QString dir, bool debug)
 		}
 	}
  }
+
+ delete mTextures;
+
+ // AB: tiles are loaded - but the texturs cannot yet be generated! must be done
+ // after construction of the gl-context, aka the QGLWidget
  emit signalTilesLoaded();
  return true;
+}
+
+void BosonTiles::generateTextures()
+{
+ QValueList<QImage> images;
+ for (unsigned int i = 0; i < mTextureImages.count(); i++) {
+	images.append(mTextureImages[i]);
+ }
+ mTextures = new BosonTextureArray(images);
+ mTextureImages.clear(); // free some space - we won't need it anymore, except for reloading the game/map.
 }
 
 bool BosonTiles::save(const QString& fileName)
@@ -176,10 +205,7 @@ bool BosonTiles::loadGround(int j, const QString& path)
 		mLoaded += 3;
 	}
  }
- mSignalCounter++;
- if((mSignalCounter % 10) == 0)
- {
-	mSignalCounter = 0;
+ if((mLoaded % 10) == 0) {
 	emit signalTilesLoading(mLoaded);
  }
  return true;
@@ -187,10 +213,15 @@ bool BosonTiles::loadGround(int j, const QString& path)
 
 void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 {
-// AB it seems that this copies the image p into the image (and if _debug is
-// true puts some extra information on it)
+// AB: copy the image p to the big pixmap (used by e.g. the map editor and the QCanvas version) abd to the texture images list (used by OpenGL only)
+// TODO: remove the big pixmap for non-QCanvas version. the image list can provide the same functionality in Editor mode
+// TODO: clear the image list in non-editor mode once the textures were generated
  int x = BosonTiles::big_x(z);
  int y = BosonTiles::big_y(z);
+
+ QImage small(BO_TILE_SIZE, BO_TILE_SIZE, 32);
+ bitBlt(&small, 0, 0, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
+ mTextureImages.insert(z, small);
 
  
  #define SETPIXEL(x,y) p.setPixel( xoffset+(x) , yoffset+(y) , 0x00ff0000 )
@@ -274,7 +305,7 @@ void BosonTiles::putOne(int z, QImage& p, int xoffset, int yoffset)
 
  bitBlt(mTilesImage, x, y, &p, xoffset, yoffset, BO_TILE_SIZE, BO_TILE_SIZE);
  if (qApp->hasPendingEvents()) {
-	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
+//	kdDebug() << "process events; mLoaded = " << mLoaded << endl;
 	qApp->processEvents(10);
  }
 }

@@ -158,7 +158,7 @@ public:
 	 * @return The speed of the mobiel unit. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
-	double speed() const;
+	float speed() const;
 
 	/**
 	 * @return Whether this unit can go over land
@@ -252,10 +252,9 @@ public:
 	/**
 	 * The time that a unit needs to be produced
 	 * 
-	 * Note that in contrary to @ref Facility::constructionDelay which influences the
-	 * construction of a building after if was placed on the map the
-	 * productionTime is the time that is needed to <em>build</em> the unit,
-	 * so <em>before</em> it is being placed on the map.
+	 * Note that productionTime is the time that is needed to 
+	 * <em>build</em> the unit, * so <em>before</em> it is being placed on
+	 * the map.
 	 *
 	 * The production time may be influenced by the facility which produces
 	 * the unit and maybe th number of facilities (to name 2 examples).
@@ -269,6 +268,11 @@ public:
 	 * minimap, otherwise FALSE.
 	 **/
 	bool supportMiniMap() const { return mSupportMiniMap; }
+
+	/**
+	 * @return the number of frames for the construction animation
+	 **/
+	unsigned int constructionSteps() const;
 
 	/**
 	 * @return list with types of units player must have before he can build unit

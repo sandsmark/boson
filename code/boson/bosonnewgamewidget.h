@@ -180,6 +180,7 @@ class BosonNewGameWidget : public QWidget
     Player* player() const;
     BosonPlayField* playField() const;
 
+  private:
     QPtrDict<KPlayer> mItem2Player;
     KPlayer* mHighlightedPlayer;
     TopWidget* mTop;

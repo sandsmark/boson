@@ -21,15 +21,18 @@
 
 #include <config.h>
 
-#define NO_OPENGL
+//#define NO_OPENGL
 //#define NO_EDITOR
+
+#define BO_TILE_SIZE 48
+#define BO_GL_CELL_SIZE 1.0
+
 
 // undefine this to enable experimental canvastext. baaad performance!
 #define NO_BOSON_CANVASTEXT
 
 #define BOSON_COOKIE 992
 
-#define BO_TILE_SIZE 48
 
 #define PIXMAP_PER_MOBILE 9 // 8 different directions + 1 "destroyed" pix
 #define PIXMAP_PER_FIX 5 // number of construction steps + 1 "destroyed" pix

@@ -20,13 +20,63 @@
 #ifndef SELECTBOX_H
 #define SELECTBOX_H
 
+#include "defines.h"
+
+class BosonSprite;
+class BosonCanvas;
+
+#if 1
+
+#include <GL/gl.h>
+#include <qmap.h>
+
+class BosonTextureArray;
+
+class SelectBoxData
+{
+public:
+	SelectBoxData();
+	~SelectBoxData();
+
+	/**
+	 * @param factor Should be health/maxHealth of the unit
+	 **/
+	GLuint list(double factor);
+
+protected:
+	void loadBoxes();
+	static void drawCube();
+	static void drawHealthBar(int frame);
+
+private:
+	QMap<int, GLuint> mDisplayLists;
+	BosonTextureArray* mTextures;
+};
+
+class SelectBox
+{
+public :
+	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false);
+	~SelectBox();
+	void update(double);
+	void setVisible(bool) {}
+	void moveBy(float dx, float dy, float dz) {}
+
+	inline GLuint displayList() const { return mDisplayList; }
+
+private:
+	GLuint mDisplayList;
+	static SelectBoxData* mBoxData;
+};
+
+#else
 #include <qcanvas.h>
 #include "rtti.h"
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
  **/
-class SelectBox : public QCanvasSprite
+class SelectBox
 {
 public:
 	/**
@@ -38,12 +88,21 @@ public:
 	 * selectbox will be higher!
 	 * @param z See @ref Unit::z
 	 **/
-	SelectBox(double x, double y, int width, int height, double z, QCanvas* canvas, bool groupLeader = false);
+	SelectBox(BosonSprite*, BosonCanvas* canvas, bool groupLeader = false);
+
+	void setVisible(bool);
+	void setZ(float z);
+	void setFrame(int);
+#ifdef NO_OPENGL
+	void moveBy(float dx, float dy, float dz);
 
 	virtual int rtti() const 
 	{ 
 		return RTTI::SelectPart;
 	}
+
+	virtual bool collidesWith(const QCanvasItem* item) const;
+#endif
 
 	/**
 	 * @return How many frames does a SelectPart have
@@ -55,8 +114,6 @@ public:
 	 * - 1. Should be health/maxHealth.
 	 **/
 	void update(double factor);
-
-	virtual bool collidesWith(const QCanvasItem* item) const;
 
 protected:
 	QCanvasPixmapArray* initPixmapArray();
@@ -98,6 +155,8 @@ private:
 
 	bool mLeader;
 };
+
+#endif // !NO_OPENGL
 
 #endif
 

@@ -30,6 +30,8 @@
 #include "bosonstatistics.h"
 #include "kspritetooltip.h"
 #include "unitplugins.h"
+#include "boitemlist.h"
+#include "bosonmodel.h"
 
 #include <kgame/kgamepropertylist.h>
 #include <kgame/kgame.h>
@@ -60,8 +62,13 @@ public:
 	SelectBox* mSelectBox;
 };
 
-Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas) 
-		: UnitBase(prop), QCanvasSprite(owner->pixmapArray(prop->typeId()), canvas)
+Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
+		: UnitBase(prop), 
+#ifndef NO_OPENGL
+		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
+#else
+		BosonSprite(owner->speciesTheme() ? owner->speciesTheme()->pixmapArray(prop->typeId()) : 0, canvas)
+#endif
 {
  d = new UnitPrivate;
  setOwner(owner);
@@ -83,36 +90,36 @@ Unit::Unit(const UnitProperties* prop, Player* owner, QCanvas* canvas)
  d->mMoveDestY.setLocal(0);
  d->mMoveRange.setLocal(0);
 
+ // TODO: the tooltips do not yet work with OpenGL!!
+#ifdef NO_OPENGL
  KSpriteToolTip::add(rtti(), unitProperties()->name());
+#else
+ if (!model()) {
+	kdError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
+	return;
+ }
+ model()->setFrame(0);
+#endif
 }
 
 Unit::~Unit()
 {
+#ifdef NO_OPENGL
  KSpriteToolTip::remove(this);
+#endif
  d->mWaypoints.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  d->mWaypoints.clear();
  unselect();
  delete d;
 }
 
-void Unit::select()
+void Unit::select(bool markAsLeader)
 {
  if (isDestroyed()) {
 	return; // shall we really return?
  }
- if (d->mSelectBox) {
-	// the box was already created
-	return;
- }
-// put the selection box on the same canvas as the unit and around the unit
- d->mSelectBox = new SelectBox(x(), y(), width(), height(), z(), canvas(), false); // FIXME: false is replacement for d->mLeader which is obsolete
+ BosonSprite::select(markAsLeader);
  updateSelectBox();
-}
-
-void Unit::unselect()
-{
- delete d->mSelectBox;
- d->mSelectBox = 0;
 }
 
 int Unit::destinationX() const
@@ -172,19 +179,19 @@ void Unit::setHealth(unsigned long int h)
 
 void Unit::updateSelectBox()
 {
- if (d->mSelectBox) {
+ if (selectBox()) {
 	unsigned long int maxHealth = unitProperties()->health();
 	double div = (double)health() / maxHealth;
-	d->mSelectBox->update(div);
-	d->mSelectBox->show();
+	selectBox()->update(div);
+	selectBox()->setVisible(true);
  }
 }
 
-void Unit::moveBy(double moveX, double moveY)
+void Unit::moveBy(float moveX, float moveY, float moveZ)
 {
 // time critical function
 
- if (!moveX && !moveY) {
+ if (!moveX && !moveY && !moveZ) {
 	return;
  }
 
@@ -198,13 +205,16 @@ void Unit::moveBy(double moveX, double moveY)
  // is ok, too, as item A won't be in the way in the next phase.
  // This means that be will be moved, too, but it mustn't be moved - we have a
  // collision.
- double oldX = x();
- double oldY = y();
+ float oldX = x();
+ float oldY = y();
  boCanvas()->removeFromCells(this);
- QCanvasSprite::moveBy(moveX, moveY);
- if (d->mSelectBox) {
-	d->mSelectBox->moveBy(moveX, moveY);
+ BosonSprite::moveBy(moveX, moveY, moveZ);
+#ifdef NO_OPENGL
+ if (selectBox()) {
+	// im pretty sure we won't need moveZ in the select box.. not yet ;)
+	selectBox()->moveBy(moveX, moveY, 0.0);
  }
+#endif
  boCanvas()->addToCells(this);
  boCanvas()->unitMoved(this, oldX, oldY);
 }
@@ -221,7 +231,9 @@ void Unit::advance(int phase)
 	// QCanvasSprite::advance() just moves for phase == 1 ; let's do it
 	// here, too. Collision detection is done is phase == 0 - in all of the
 	// other advance*() functions.
-	moveBy(xVelocity(), yVelocity());
+	if (xVelocity() || yVelocity()) {
+		moveBy(xVelocity(), yVelocity(), 0.0);
+	}
  }
 }
 
@@ -231,9 +243,9 @@ void Unit::advanceNone()
 // to fire at every enemy in range.
 
  if (weaponDamage() > 0) {
-	QCanvasItemList list = enemyUnitsInRange();
+	BoItemList list = enemyUnitsInRange();
 	if (list.count() > 0) {
-		QCanvasItemList::Iterator it = list.begin();
+		BoItemList::Iterator it = list.begin();
 		for (; it != list.end(); ++it) {
 			if (((Unit*)*it)->unitProperties()->canShoot()) {
 				shootAt((Unit*)*it);
@@ -270,12 +282,12 @@ void Unit::advanceAttack()
 	return;
  }
  if (!inRange(target())) {
-	if (!canvas()->allItems().contains(target())) {
+	if (!boCanvas()->allBosonItems().contains(target())) {
 		kdDebug() << "Target seems to be destroyed!" << endl;
 		stopAttacking();
 		return;
 	}
-	kdDebug() << "unit not in range - moving..." << endl;
+	kdDebug() << "unit (" << target()->id() << ") not in range - moving..." << endl;
 	if (!moveTo(target()->x(), target()->y(), weaponRange())) {
 		setWork(WorkNone);
 	} else {
@@ -320,7 +332,7 @@ void Unit::moveTo(const QPoint& pos)
  }
 }
 
-bool Unit::moveTo(double x, double y, int range)
+bool Unit::moveTo(float x, float y, int range)
 {
  stopMoving();
 
@@ -328,8 +340,13 @@ bool Unit::moveTo(double x, double y, int range)
 	range = d->mMoveRange;
  }
  if(!owner()->isFogged((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))) {
+	Cell* c = boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE));
+	if (!c) {
+		kdError() << k_funcinfo << "NULL cell at " << x << "," << y << endl;
+		return false;
+	}
 	// No pathfinding if goal not reachable or occupied and we can see it
-	if(!boCanvas()->cell((int)(x / BO_TILE_SIZE), (int)(y / BO_TILE_SIZE))->canGo(unitProperties())) {
+	if(!c->canGo(unitProperties())) {
 		return false;
 	}
  }
@@ -338,6 +355,8 @@ bool Unit::moveTo(double x, double y, int range)
  d->mMoveDestY = (int)y;
  d->mMoveRange = range;
 
+ // AB: FIXME: UnitGroups doesn't exist anymore! maybe we can search path here,
+ // now?
  // Do not find path here!!! It would break pathfinding for groups. Instead, we
  //  set mSearchPath to true and find path in MobileUnit::advanceMove()
  // AB: UnitGroup is obsolete - can we search path here now?
@@ -418,9 +437,9 @@ bool Unit::save(QDataStream& stream)
 	kdError() << "Unit not saved properly" << endl;
 	return false;
  }
- stream << (double)x();
- stream << (double)y();
- stream << (double)z();
+ stream << (float)x();
+ stream << (float)y();
+ stream << (float)z();
  stream << (Q_INT8)isVisible();
  stream << (Q_INT32)frame();
  return true;
@@ -432,9 +451,9 @@ bool Unit::load(QDataStream& stream)
 	kdError() << "Unit not loaded properly" << endl;
 	return false;
  }
- double x;
- double y;
- double z;
+ float x;
+ float y;
+ float z;
  Q_INT8 visible;
  Q_INT32 frame;
  
@@ -495,28 +514,35 @@ void Unit::shootAt(Unit* target)
  resetReload();
 }
 
-QCanvasItemList Unit::unitsInRange() const
+BoItemList Unit::unitsInRange() const
 {
  // TODO: we use a *rect* for the range this is extremely bad.
  // ever heard about pythagoras ;-) ?
- 
- QRect r = boundingRect();
- int wrange = (int)weaponRange() * BO_TILE_SIZE;
- r.setTop((r.top() > wrange) ? r.top() - wrange : 0);
-// qt bug (confirmed). will be fixed in 3.1
-#if QT_VERSION >= 310
- r.setBottom(r.bottom() + wrange);
- r.setRight(r.right() + wrange);
-#else
- r.setBottom(r.bottom() + wrange - 1);
- r.setRight(r.right() + wrange - 1);
-#endif
- r.setLeft((r.left() > wrange) ? r.left() - wrange : 0);
 
- QCanvasItemList items = canvas()->collisions(r);
- items.remove((QCanvasItem*)this);
- QCanvasItemList inRange;
- QCanvasItemList::Iterator it = items.begin();
+ QPointArray cells;
+ int left, right, top, bottom;
+ leftTopCell(&left, &top);
+ rightBottomCell(&right, &bottom);
+ left = QMAX(left - (int)weaponRange(), 0);
+ top = QMAX(top - (int)weaponRange(), 0);
+ right = QMIN(right + (int)weaponRange(), QMAX((int)boCanvas()->mapWidth() - 1, 0));
+ bottom = QMIN(bottom + (int)weaponRange(), QMAX((int)boCanvas()->mapHeight() - 1, 0));
+ int size = (right - left + 1) * (bottom - top + 1);
+ if (size <= 0) {
+	return BoItemList();
+ }
+ cells.resize(size);
+ int n = 0;
+ for (int i = left; i <= right; i++) { 
+	for (int j = top; j <= bottom; j++) {
+		cells[n++] = QPoint(i, j);
+	}
+ }
+
+ BoItemList items = boCanvas()->bosonCollisions(cells, (BosonSprite*)this, false);
+ items.remove((BosonSprite*)this);
+ BoItemList inRange;
+ BoItemList::Iterator it = items.begin();
  for (; it != items.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
@@ -531,11 +557,11 @@ QCanvasItemList Unit::unitsInRange() const
  return inRange;
 }
 
-QCanvasItemList Unit::enemyUnitsInRange() const
+BoItemList Unit::enemyUnitsInRange() const
 {
- QCanvasItemList units = unitsInRange();
- QCanvasItemList enemy;
- QCanvasItemList::Iterator it = units.begin();
+ BoItemList units = unitsInRange();
+ BoItemList enemy;
+ BoItemList::Iterator it = units.begin();
  for (; it != units.end(); ++it) {
 	Unit* u = (Unit*)*it;
 	if (owner()->isEnemy(u->owner())) {
@@ -551,12 +577,13 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
  if (isFlying()) { // flying units never collide - different altitudes
 	return units;
  }
- QCanvasItemList collisionList = collisions(exact);
+ kdDebug() << k_funcinfo << endl;
+ BoItemList collisionList = boCanvas()->bosonCollisions(cells(), (BosonSprite*)this, exact);
  if (collisionList.isEmpty()) {
 	return units;
  }
  
- QCanvasItemList::Iterator it;
+ BoItemList::Iterator it;
  for (it = collisionList.begin(); it != collisionList.end(); ++it) {
 	if (!RTTI::isUnit((*it)->rtti())) {
 		continue;
@@ -583,51 +610,6 @@ void Unit::setAdvanceWork(WorkType w)
 	boCanvas()->setWorkChanged(this);
  }
  UnitBase::setAdvanceWork(w);
-}
-
-bool Unit::collidesWith(const QCanvasItem* item) const
-{
- // New collision-check method for units
-
- if(!RTTI::isUnit(item->rtti())) {
-	// Never collide with selectpart, shot or fog of war
-	if(item->rtti() == RTTI::SelectPart || item->rtti() == RTTI::BoShot || item->rtti() == RTTI::FogOfWar) {
-		return false;
-	}
-	if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
-		QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
-		return itemrect.intersects(boundingRectAdvanced());
-	}
-	return QCanvasSprite::collidesWith(item);
- }
-
- // I use centers of units as positions here
- double myx, myy, itemx, itemy;
- QRect r = boundingRectAdvanced();
- QRect r2 = item->boundingRectAdvanced();
- myx = r.center().x();
- myy = r.center().y();
- itemx = r2.center().x();
- itemy = r2.center().y();
-
- double itemw, itemh;
- itemw = r2.width();
- itemh = r2.height();
-
- if(itemw <= BO_TILE_SIZE && itemh <= BO_TILE_SIZE) {
-	double dist = QABS(itemx - myx) + QABS(itemy - myy);
-	return (dist < BO_TILE_SIZE);
- } else {
-	for(int i = 0; i < itemw; i += BO_TILE_SIZE) {
-		for(int j = 0; j < itemh; j += BO_TILE_SIZE) {
-			double dist = QABS((itemx + i) - myx) + QABS((itemy + j) - myy);
-			if(dist < BO_TILE_SIZE) {
-				return true;
-			}
-		}
-	}
-	return false;
- }
 }
 
 bool Unit::isNextTo(Unit* target) const
@@ -673,7 +655,7 @@ public:
 		mTargetCellMarked = false;
 	}
 
-	KGameProperty<double> mSpeed;
+	KGameProperty<float> mSpeed;
 	KGameProperty<unsigned int> mMovingFailed;
 	KGameProperty<unsigned int> mPathRecalculated;
 
@@ -681,7 +663,7 @@ public:
 	bool mTargetCellMarked;
 };
 
-MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
+MobileUnit::MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new MobileUnitPrivate;
  d->mSpeed.registerData(IdSpeed, dataHandler(), 
@@ -719,7 +701,6 @@ MobileUnit::~MobileUnit()
 
 void MobileUnit::advanceMove()
 {
-// kdDebug() << k_funcinfo << endl;
  if (speed() == 0) {
 	kdWarning() << "speed == 0" << endl;
 	stopMoving();
@@ -742,6 +723,7 @@ void MobileUnit::advanceMove()
 	return;
  }
 
+ kdDebug() << k_funcinfo << endl;
  if (advanceWork() != work()) {
 	if (work() == WorkAttack) {
 		// no need to move to the position of the unit...
@@ -770,8 +752,6 @@ void MobileUnit::advanceMove()
 	return;
  }
 
- // If both waypoint's coordinates are -2, then it means that path was partial
- //  and we have to search new one
  // FIXME: as path is now recalculated every time waypoint is reached, this
  //  should never be called
  if((wp.x() == -2) &&(wp.y() == -2)) {
@@ -780,10 +760,16 @@ void MobileUnit::advanceMove()
 	return;
  }
 
+ /*
  int x = (int)(QCanvasSprite::x() + width() / 2);
  int y = (int)(QCanvasSprite::y() + height() / 2);
- double xspeed = 0;
- double yspeed = 0;
+ */
+#warning FIXME!!
+ int x = (int)(BosonSprite::x() + width() / 2);
+ int y = (int)(BosonSprite::y() + height() / 2);
+
+ float xspeed = 0;
+ float yspeed = 0;
 
  // First check if we're at waypoint
  if((x == wp.x()) && (y == wp.y())) {
@@ -862,6 +848,7 @@ void MobileUnit::advanceMoveCheck()
 	setWork(WorkNone);
 	return;
  }
+ kdDebug() << k_funcinfo << endl;
  if (boCanvas()->cellOccupied(currentWaypoint().x() / BO_TILE_SIZE,
 		currentWaypoint().y() / BO_TILE_SIZE, this, false)) {
 //	kdDebug() << k_funcinfo << "collisions" << endl;
@@ -899,14 +886,15 @@ void MobileUnit::advanceMoveCheck()
  }
  d->mMovingFailed = 0;
  d->mPathRecalculated = 0;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
-void MobileUnit::setSpeed(double speed)
+void MobileUnit::setSpeed(float speed)
 {
  d->mSpeed = speed;
 }
 
-double MobileUnit::speed() const
+float MobileUnit::speed() const
 {
  return d->mSpeed;
 }
@@ -922,8 +910,8 @@ void MobileUnit::turnTo(Direction direction)
 
 void MobileUnit::turnTo()
 {
- double xspeed = xVelocity();
- double yspeed = yVelocity();
+ float xspeed = xVelocity();
+ float yspeed = yVelocity();
  // Set correct frame
  if((xspeed == 0) && (yspeed < 0)) { // North
  	turnTo(North);
@@ -1135,7 +1123,7 @@ QRect MobileUnit::boundingRect() const
 // we simply return a boundingrect which has size BO_TILE_SIZE
  if (width() < BO_TILE_SIZE || height() < BO_TILE_SIZE) {
 	kdWarning() << "width or height  < BO_TILE_SIZE - not supported!!" << endl;
-	return QCanvasSprite::boundingRect();
+	return BosonSprite::boundingRect();
  }
  return QRect((int)x(), (int)y(), BO_TILE_SIZE, BO_TILE_SIZE);
 }
@@ -1184,12 +1172,12 @@ public:
 		mProductionPlugin = 0;
 	}
 
-	KGamePropertyInt mConstructionState; // state of *this* unit
+	KGameProperty<unsigned int> mConstructionState; // state of *this* unit
 	ProductionPlugin* mProductionPlugin;
 	RepairPlugin* mRepairPlugin;
 };
 
-Facility::Facility(const UnitProperties* prop, Player* owner, QCanvas* canvas) : Unit(prop, owner, canvas)
+Facility::Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) : Unit(prop, owner, canvas)
 {
  d = new FacilityPrivate;
  d->mConstructionState.registerData(IdFix_ConstructionState, dataHandler(), 
@@ -1210,9 +1198,9 @@ Facility::~Facility()
  delete d;
 }
 
-int Facility::constructionSteps()
+unsigned int Facility::constructionSteps() const
 {
- return FACILITY_CONSTRUCTION_STEPS;
+ return unitProperties()->constructionSteps();
 }
 
 void Facility::advanceConstruction()
@@ -1221,11 +1209,9 @@ void Facility::advanceConstruction()
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
+ if (d->mConstructionState < constructionSteps() - 1) {
 	d->mConstructionState = d->mConstructionState + 1;
-	if (d->mConstructionState % constructionDelay() == 0) {
-		setFrame(d->mConstructionState / constructionDelay());
-	}
+	setFrame(d->mConstructionState);
  } else {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
@@ -1253,7 +1239,7 @@ bool Facility::isConstructionComplete() const
  if (work() == WorkConstructed) {
 	return false;
  }
- if (d->mConstructionState < (constructionSteps() - 1) * constructionDelay()) {
+ if (d->mConstructionState < constructionSteps() - 1) {
 	return false;
  }
  return true;
@@ -1261,7 +1247,7 @@ bool Facility::isConstructionComplete() const
 
 double Facility::constructionProgress() const
 {
- unsigned int constructionTime = (constructionSteps() - 1) * constructionDelay();
+ unsigned int constructionTime = constructionSteps() - 1;
  double percentage = (double)(d->mConstructionState * 100) / (double)constructionTime;
  return percentage;
 }
@@ -1275,7 +1261,7 @@ void Facility::setTarget(Unit* u)
  Unit::setTarget(u);
 }
 
-void Facility::moveTo(double x, double y, int range)
+void Facility::moveTo(float x, float y, int range)
 {
  if (!isConstructionComplete()) {
 	kdWarning() << "not yet constructed completely" << endl;
@@ -1284,23 +1270,18 @@ void Facility::moveTo(double x, double y, int range)
  Unit::moveTo(x, y, range);
 }
 
-int Facility::constructionDelay()
-{
- return 5;
-}
-
 void Facility::setConstructionStep(unsigned int step)
 {
  if (isDestroyed()) {
 	kdError() << k_funcinfo << "unit is already destroyed" << endl;
 	return;
  }
- if ((int)step >= constructionSteps()) {
+ if (step >= constructionSteps()) {
 	step = PIXMAP_FIX_DESTROYED - 1;
  }
  setFrame(step);
- d->mConstructionState = step * constructionDelay();
- if ((int)step == constructionSteps() - 1) {
+ d->mConstructionState = step;
+ if (step == constructionSteps() - 1) {
 	setWork(WorkNone);
 	owner()->facilityCompleted(this);
  }
@@ -1308,6 +1289,6 @@ void Facility::setConstructionStep(unsigned int step)
 
 unsigned int Facility::currentConstructionStep() const
 {
- return (unsigned int)frame();
+ return d->mConstructionState;
 }
 

@@ -19,6 +19,264 @@
 
 #include "selectbox.h"
 
+#ifndef NO_OPENGL
+
+#include "bosontexturearray.h"
+
+#include <kdebug.h>
+#include <kimageeffect.h>
+
+#include <qimage.h>
+#include <qgl.h>
+
+#define POWER_LEVELS 15
+
+SelectBoxData* SelectBox::mBoxData = 0;
+
+SelectBoxData::SelectBoxData()
+{
+ mTextures = 0;
+}
+
+SelectBoxData::~SelectBoxData()
+{
+ // TODO: free the display lists?
+}
+
+GLuint SelectBoxData::list(double factor)
+{
+ int list = (int)((POWER_LEVELS - 1) * factor);
+ if (!mDisplayLists.contains(list)) {
+	loadBoxes();
+	if (!mDisplayLists.contains(list)) {
+		kdError() << k_funcinfo << "Unable to generate a SelectBox for " << factor << endl;
+		return 0;
+	}
+	return mDisplayLists[list];
+ }
+ return mDisplayLists[list];
+}
+
+void SelectBoxData::loadBoxes()
+{
+ // TODO: we might want to use mipmaps here - interesting for big units, as well as for zooming
+ GLuint list = glGenLists(POWER_LEVELS);
+ if (mTextures) {
+	kdWarning() << k_funcinfo << "textures loaded before" << endl;
+	delete mTextures;
+	mTextures = 0;
+ }
+ QValueList<QImage> textureImages;
+ glEnable(GL_TEXTURE_2D); // should already be enabled, cause we need it for units. just to be sure...
+
+// AB: the size is hardcoded. mipmaps might be VERY useful here!
+// FIXME: Qt::red simply doesn't work - we need to use Qt::blue .. why???
+// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::red, Qt::green, KImageEffect::HorizontalGradient);
+// QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), QColor(255,0,0), Qt::green, KImageEffect::HorizontalGradient);
+ QImage image = KImageEffect::gradient(QSize(BO_TILE_SIZE, 6), Qt::blue, Qt::green, KImageEffect::HorizontalGradient);
+ image = QGLWidget::convertToGLFormat(image);
+ textureImages.append(image);
+
+ mTextures = new BosonTextureArray(textureImages);
+ if (!mTextures->texture(0)) {
+	kdWarning() << k_funcinfo << "textures got loaded improperly" << endl;
+ }
+
+ for (unsigned int i = 0; i < POWER_LEVELS; i++) {
+	glNewList(list + i, GL_COMPILE);
+		drawCube();
+		glBindTexture(GL_TEXTURE_2D, mTextures->texture(0));
+		drawHealthBar(i);
+	glEndList();
+	mDisplayLists.insert(i, list+i);
+ }
+}
+
+void SelectBoxData::drawCube()
+{
+ glDisable(GL_TEXTURE_2D);
+ glDisable(GL_BLEND);
+ glLineWidth(2.0);
+		
+ const float s = 0.3; // size (width or height depending on direction) of a line
+ glBegin(GL_LINES);
+	// bottom quad
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(s, 0.0, 0.0);
+	glVertex3f(1.0 - s, 0.0, 0.0); glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0); glVertex3f(1.0, s, 0.0);
+	glVertex3f(1.0, 1.0 - s, 0.0); glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(1.0 - s, 1.0, 0.0); glVertex3f(1.0, 1.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(s, 1.0, 0.0);
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(0.0, 1.0 - s, 0.0);
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(0.0, s, 0.0);
+
+	// top quad
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(s, 0.0, 1.0);
+	glVertex3f(1.0 - s, 0.0, 1.0); glVertex3f(1.0, 0.0, 1.0);
+	glVertex3f(1.0, 0.0, 1.0); glVertex3f(1.0, s, 1.0);
+	glVertex3f(1.0, 1.0 - s, 1.0); glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(1.0 - s, 1.0, 1.0); glVertex3f(1.0, 1.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(s, 1.0, 1.0);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(0.0, 1.0 - s, 1.0);
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(0.0, s, 1.0);
+
+	// front quad
+	glVertex3f(0.0, 0.0, 0.0); glVertex3f(0.0, 0.0, s);
+	glVertex3f(0.0, 0.0, 1.0); glVertex3f(0.0, 0.0, 1.0 - s);
+	glVertex3f(1.0, 0.0, 0.0); glVertex3f(1.0, 0.0, s);
+	glVertex3f(1.0, 0.0, 1.0); glVertex3f(1.0, 0.0, 1.0 - s);
+
+	// back quad
+	glVertex3f(0.0, 1.0, 0.0); glVertex3f(0.0, 1.0, s);
+	glVertex3f(0.0, 1.0, 1.0); glVertex3f(0.0, 1.0, 1.0 - s);
+	glVertex3f(1.0, 1.0, 0.0); glVertex3f(1.0, 1.0, s);
+	glVertex3f(1.0, 1.0, 1.0); glVertex3f(1.0, 1.0, 1.0 - s);
+
+	// left quad
+	// right quad
+	// --> no need to since, that'll be the same lines as in the other quads
+ glEnd();
+
+ glLineWidth(1.0);
+ glEnable(GL_TEXTURE_2D);
+ glEnable(GL_BLEND);
+}
+
+void SelectBoxData::drawHealthBar(int frame)
+{
+ GLfloat texLength = ((float)frame) / (float)(POWER_LEVELS - 1);
+// double factor = (double)frame / (frames() - 1);
+// return (int)(boxWidth() * factor - 2); // -2: the white frame around the box
+ GLfloat length = 1.0 * texLength; // y-direction
+ GLfloat hy = 0.15; // height in y-direction
+ GLfloat hz = 0.15; // height in z-direction
+ GLfloat depth = 0.15;
+ glDisable(GL_BLEND);
+// FIXME: a lot of redundant vertices here!
+ glTranslatef(0.0, 1.0 - hy, 1.0 - hz);
+
+ glBegin(GL_QUADS);
+	// bottom
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, 0.0);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, 0.0);
+ 
+	// top
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, hz);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, hz);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, hz);
+
+	// front
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, 0.0, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, 0.0, hz);
+
+	// back
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, 0.0);
+	glTexCoord2f(texLength, 0.0); glVertex3f(length, hy, hz);
+	glTexCoord2f(0.0, 0.0); glVertex3f(0.0, hy, hz);
+
+	// left
+	glTexCoord2f(0.0, 0.0);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, hz);
+	glTexCoord2f(0.0, 1.0);
+	glVertex3f(0.0, hy, hz);
+	glVertex3f(0.0, hy, 0.0);
+
+	//right
+	glTexCoord2f(texLength, 0.0);
+	glVertex3f(length, 0.0, 0.0);
+	glVertex3f(length, 0.0, hz);
+	glTexCoord2f(texLength, 1.0);
+	glVertex3f(length, hy, hz);
+	glVertex3f(length, hy, 0.0);
+ glEnd();
+
+ glDisable(GL_TEXTURE_2D);
+ // bottom
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, hy, 0.0);
+	glVertex3f(0.0, hy, 0.0);
+ glEnd();
+
+ // top 
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, hz);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(0.0, hy, hz);
+ glEnd();
+
+ // front
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(0.0, 0.0, hz);
+ glEnd();
+
+ // back
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, hy, 0.0);
+	glVertex3f(1.0, hy, 0.0);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(0.0, hy, hz);
+ glEnd();
+
+ // left
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(0.0, 0.0, 0.0);
+	glVertex3f(0.0, 0.0, hz);
+	glVertex3f(0.0, hy, hz);
+	glVertex3f(0.0, hy, 0.0);
+ glEnd();
+
+ // right
+ glBegin(GL_LINE_STRIP);
+	glVertex3f(1.0, 0.0, 0.0);
+	glVertex3f(1.0, 0.0, hz);
+	glVertex3f(1.0, hy, hz);
+	glVertex3f(1.0, hy, 0.0);
+ glEnd();
+
+ glTranslatef(0.0, hy - 1.0, hz - 1.0);
+ glColor3f(1.0, 1.0, 1.0);
+ glEnable(GL_BLEND);
+ glEnable(GL_TEXTURE_2D);
+}
+
+SelectBox::SelectBox(BosonSprite*, BosonCanvas*, bool groupLeader)
+{
+ mDisplayList = 0;
+ if (!mBoxData) {
+	mBoxData = new SelectBoxData;
+ }
+}
+
+SelectBox::~SelectBox()
+{
+}
+
+void SelectBox::update(double div)
+{
+ mDisplayList = mBoxData->list(div);
+}
+
+#else
+
+ // TODO
+
+#endif // !NO_OPENGL
+
+
+#if 0
 #include <qpainter.h>
 #include <qbitmap.h>
 
@@ -37,9 +295,11 @@
 #define POWER_LEVELS 15// AB: is from common/unit.h - the number of frames for the SelectBox, each with less power
 #define PART_NB (POWER_LEVELS)
 
-SelectBox::SelectBox(double x, double y, int width, int height, double z, QCanvas* canvas, bool leader)
-	: QCanvasSprite(0, canvas)
+//SelectBox::SelectBox(float x, float y, int width, int height, float z, QCanvas* canvas, bool leader)
+SelectBox::SelectBox(BosonSprite* item, BosonCanvas* canvas, bool groupLeader)
+//	: QCanvasSprite(0, canvas)
 {
+ mSprite = new QCanvasSprite(0, canvas);
  mWidth = width + 2 * SP_H_DISTANCE;
  mHeight = height + 2 * SP_V_DISTANCE;
  setZ(z + 1);
@@ -198,10 +458,26 @@ int SelectBox::cornerLength() const
  */
 }
 
-bool SelectBox::collidesWith(const QCanvasItem*) const
+void SelectBox::setVisible(bool v)
 {
- // the selection rect never collides with anything
- return false;
+ if (mSprite) {
+	mSprite->setVisible(v);
+ }
 }
 
-	
+void SelectBox::setZ(float z)
+{
+ if (mSprite) {
+	mSprite->setZ((double)z);
+ }
+}
+
+void SelectBox::setFrame(int f)
+{
+ if (mSprite) {
+	mSprite->setFrame(f);
+ }
+}
+
+
+#endif // 0

@@ -55,6 +55,7 @@ BosonConfig::BosonConfig(KConfig* conf)
  mRMBMove = true;
  mMMBMove = true;
  mCursorEdgeSensity = 20;
+ mUpdateInterval = 50;
 
  mDisableSound = false;
 
@@ -340,6 +341,19 @@ int BosonConfig::commandButtonsPerRow() const
  return d->mCommandButtonsPerRow;
 }
 
+void BosonConfig::saveUpdateInterval(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ conf->writeEntry("GLUpdateInterval", updateInterval());
+}
+
+unsigned int BosonConfig::readUpdateInterval(KConfig* conf)
+{
+ conf->setGroup("Boson");
+ unsigned int i = conf->readUnsignedNumEntry("GLUpdateInterval", updateInterval());
+ return i;
+}
+
 void BosonConfig::reset(KConfig* conf)
 {
  if (!conf) {
@@ -357,6 +371,7 @@ void BosonConfig::reset(KConfig* conf)
  setRMBMove(readRMBMove(conf));
  setMMBMove(readMMBMove(conf));
  setCursorEdgeSensity(readCursorEdgeSensity(conf));
+ setUpdateInterval(readUpdateInterval(conf));
 
  conf->setGroup(oldGroup);
 }
@@ -378,6 +393,7 @@ void BosonConfig::save(bool editor, KConfig* conf)
  saveRMBMove(conf);
  saveMMBMove(conf);
  saveCursorEdgeSensity(conf);
+ saveUpdateInterval(conf);
  if (!editor) {
 	// place configs here that should not be saved in editor mode
  }

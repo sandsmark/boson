@@ -235,8 +235,8 @@ bool BosonPath::findFastPath()
     {
       // Path can't be found using fast method
       gettimeofday(&time2, 0);
-      kdDebug() << k_funcinfo << "Can't find path using fast method. Time elapsed: " <<
-          time2.tv_usec - time1.tv_usec << "microsec." << endl;
+      kdDebug() << k_funcinfo << "Can't find path using fast method. Time elapsed: " 
+          << time2.tv_usec - time1.tv_usec << " microsec." << endl;
       return false;
     }
   }

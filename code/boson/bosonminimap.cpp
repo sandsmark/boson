@@ -248,8 +248,6 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 
 void BosonMiniMap::slotMoveRect(int x, int y)
 {
- x /= BO_TILE_SIZE;
- y /= BO_TILE_SIZE;
  if((x != d->mSelectionPos.x()) || (y != d->mSelectionPos.y())) {
 	d->mSelectionPos = QPoint(x, y);
 	d->mPixmap->repaint(false);
@@ -295,7 +293,7 @@ void BosonMiniMap::initMap()
  mUseFog = oldFog;
 }
 
-void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
+void BosonMiniMap::slotMoveUnit(Unit* unit, float oldX, float oldY)
 {
  if (!mMap) {
 	kdError() << k_funcinfo << "NULL map" << endl;
@@ -467,7 +465,8 @@ bool BosonMiniMap::eventFilter(QObject* o, QEvent* e)
  }
  // Using bitBlt() is MUCH faster than using QPainter::drawPixmap(), especially
  //  when you scale QPainter (difference may be hundreds of times)
- bitBlt(d->mPixmap, 0, 0, ground(), -(d->mPainterMoveX * scale() * zoom()), -(d->mPainterMoveY * scale() * zoom()),
+ bitBlt(d->mPixmap, 0, 0, ground(), (int)-(d->mPainterMoveX * scale() * zoom()), 
+		(int)-(d->mPainterMoveY * scale() * zoom()),
 		d->mPixmap->width(), d->mPixmap->height());
  
  // the little rectangle
@@ -489,7 +488,7 @@ void BosonMiniMap::createGround()
  if(mGround) {
 	delete mGround;
  }
- mGround = new QPixmap(mapWidth() * zoom() * scale(), mapHeight() * zoom() * scale());
+ mGround = new QPixmap((int)(mapWidth() * zoom() * scale()), (int)(mapHeight() * zoom() * scale()));
  QPainter p;
  p.begin(mGround);
  p.scale(zoom() * scale(), zoom() * scale());

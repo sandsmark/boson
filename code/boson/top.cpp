@@ -35,6 +35,11 @@
 #include "bosonmessage.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
+#include "bosonprofiling.h"
+#ifndef NO_OPENGL
+#include "bodisplaymanager.h"
+#include "bosonbigdisplaybase.h"
+#endif
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -53,7 +58,6 @@
 
 #include <qwidgetstack.h>
 #include <qtimer.h>
-#include <qwmatrix.h>
 #include <qhbox.h>
 #include <qptrdict.h>
 #include <qobjectlist.h>
@@ -105,6 +109,10 @@ public:
 
 	QPtrDict<KPlayer> mPlayers; // needed for debug only
 
+#ifndef NO_OPENGL
+	QTimer mFpstimer;
+#endif
+
 #if KDE_VERSION < 310
 	bool mLoadingDockConfig;
 #endif
@@ -134,6 +142,7 @@ TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
  setMainDockWidget(mMainDock);
 
  BosonConfig::initBosonConfig();
+ BosonProfiling::initProfiling();
 
  setMinimumWidth(640);
  setMinimumHeight(480);
@@ -218,6 +227,8 @@ void TopWidget::initActions()
  // Debug - no i18n!
  (void)new KAction("Debug", KShortcut(), this,
 		SLOT(slotDebug()), d->mGameActions, "debug_kgame");
+ (void)new KAction("Profiling", KShortcut(), this,
+		SLOT(slotProfiling()), d->mGameActions, "debug_profiling");
  (void)new KAction("Unfog", KShortcut(), this,
 		SLOT(slotUnfogAll()), d->mGameActions, "debug_unfog");
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), d->mGameActions, "debug_mode");
@@ -236,10 +247,12 @@ void TopWidget::initActions()
  items.append(QString::number(50));
  items.append(QString::number(100));
  items.append(QString::number(150));
+ items.append(i18n("Free Zoom"));
  d->mActionZoom->setItems(items);
 
  // Display
  // note: the icons for these action need to have konqueror installed!
+#ifdef NO_OPENGL
  (void)new KAction(i18n( "Split Display &Left/Right"), "view_left_right",
 		   CTRL+SHIFT+Key_L, this, SLOT(slotSplitDisplayHorizontal()),
 		   d->mGameActions, "splitviewh");
@@ -249,6 +262,7 @@ void TopWidget::initActions()
  (void)new KAction(i18n("&Remove Active Display"), "view_remove",
 		  CTRL+SHIFT+Key_R, this, SLOT(slotRemoveActiveDisplay()),
 		  d->mGameActions, "removeview");
+#endif
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
@@ -317,6 +331,15 @@ void TopWidget::initStatusBar()
  QLabel* oilLabel = new QLabel(QString::number(0), resources);
  connect(this, SIGNAL(signalOilUpdated(int)), oilLabel, SLOT(setNum(int)));
  bar->addWidget(resources);
+
+#ifndef NO_OPENGL
+kdDebug() << k_funcinfo << endl;
+ QHBox* fps = new QHBox(bar);
+ (void)new QLabel(i18n("FPS: "), fps);
+ QLabel* fpsLabel = new QLabel(QString::number(0.0), fps);
+ connect(this, SIGNAL(signalFPSUpdated(double)), fpsLabel, SLOT(setNum(double)));
+ bar->addWidget(fps);
+#endif
 
  bar->hide();
 }
@@ -571,6 +594,7 @@ void TopWidget::loadGameData1() // FIXME rename!
  // If game is loaded, we disable progressbar in loading widget, but still set
  //  steps and progress to make code less messy (it's better than having
  //  if(!mLoading) { ... }  everywhere)
+ boProfiling->start(BosonProfiling::LoadGameData1);
  d->mLoading->setSteps(3400 + mBoson->playerCount() * UNITDATAS_LOADINGFACTOR);
  d->mLoading->setProgress(0);
  checkEvents();
@@ -642,9 +666,9 @@ void TopWidget::loadGameData1() // FIXME rename!
 
 		// Then return to welcome screen
 		showWelcomeWidget();
-		return;
 	}
  }
+ boProfiling->stop(BosonProfiling::LoadGameData1);
 }
 
 void TopWidget::loadGameData2() //FIXME rename!
@@ -655,6 +679,7 @@ void TopWidget::loadGameData2() //FIXME rename!
  //  has already returned, if we're loading saved game, then it hasn't, because
  //  map is initialized immediately when it's loaded from file
 
+ boProfiling->start(BosonProfiling::LoadGameData2);
  // Init canvas
  d->mLoading->setLoading(BosonLoadingWidget::InitClasses);
  checkEvents();
@@ -676,10 +701,15 @@ void TopWidget::loadGameData2() //FIXME rename!
  //  still non-blocking though, because qApp->processEvents() is called while
  //  loading tiles
  mCanvas->loadTiles(QString("earth"), false);
+
+ // also loads the cursor and the map display list!
+ d->mBosonWidget->addInitialDisplay();
+ boProfiling->stop(BosonProfiling::LoadGameData2);
 }
 
 void TopWidget::loadGameData3() // FIXME rename!
 {
+ boProfiling->start(BosonProfiling::LoadGameData3);
  // If we're loading saved game, local player isn't set and inited, because it
  //  was not known (not loaded) when BosonWidget was constructed. Set and init
  //  it now
@@ -741,6 +771,10 @@ void TopWidget::loadGameData3() // FIXME rename!
  enableGameActions(true);
  initDebugPlayersMenu();
  checkDockStatus();
+#ifndef NO_OPENGL
+ d->mFpstimer.start(1000);
+ connect(&d->mFpstimer, SIGNAL(timeout()), this, SLOT(slotUpdateFPS()));
+#endif
 
  connect(d->mBosonWidget, SIGNAL(signalChatDockHidden()), this, SLOT(slotChatDockHidden()));
  connect(d->mBosonWidget, SIGNAL(signalCmdFrameDockHidden()), this, SLOT(slotCmdFrameDockHidden()));
@@ -761,6 +795,7 @@ void TopWidget::loadGameData3() // FIXME rename!
  // mGame indicates that game is running (and BosonWidget shown and game game
  //  actions enabled etc.)
  mGame = true;
+ boProfiling->stop(BosonProfiling::LoadGameData3);
 }
 
 void TopWidget::slotCanvasTilesLoading(int progress)
@@ -881,11 +916,9 @@ void TopWidget::slotDebugMode(int index)
 void TopWidget::slotZoom(int index)
 {
 kdDebug() << "zoom index=" << index << endl;
- double percent = d->mActionZoom->items()[index].toDouble(); // bahh!!! 
- double factor = (double)percent / 100;
- QWMatrix m;
- m.scale(factor, factor);
- d->mBosonWidget->zoom(m);
+ float percent = d->mActionZoom->items()[index].toFloat(); // bahh!!! 
+ float factor = (float)percent / 100;
+ d->mBosonWidget->setZoomFactor(factor);
 }
 
 void TopWidget::slotToggleFullScreen()
@@ -909,9 +942,14 @@ void TopWidget::slotEndGame()
 
 void TopWidget::endGame()
 {
+ kdDebug() << k_funcinfo << endl;
  if (d->mBosonWidget) {
 	d->mBosonWidget->slotEndGame();
 	disconnect(d->mBosonWidget, 0, 0, 0);
+#ifndef NO_OPENGL
+	d->mFpstimer.stop();
+	disconnect(&d->mFpstimer, 0, 0, 0);
+#endif
 	saveGameDockConfig();
  }
  // Delete all objects
@@ -923,6 +961,7 @@ void TopWidget::endGame()
  mCanvas = 0;
  delete mPlayField;
  mPlayField = 0;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void TopWidget::reinitGame()
@@ -930,7 +969,7 @@ void TopWidget::reinitGame()
  initBoson();
  initPlayer();
  initPlayField();
- 
+
  // Change menus and show welcome widget
  mGame = false;
  d->mActionStatusbar->setChecked(false);
@@ -952,26 +991,49 @@ void TopWidget::slotGamePreferences()
 
 void TopWidget::slotDebug()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotDebug();
+}
+
+void TopWidget::slotProfiling()
+{
+ if (!d->mBosonWidget) {
+	return;
+ }
+ d->mBosonWidget->slotProfiling();
 }
 
 void TopWidget::slotUnfogAll()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotUnfogAll();
 }
 
 void TopWidget::slotSplitDisplayHorizontal()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotSplitDisplayHorizontal();
 }
 
 void TopWidget::slotSplitDisplayVertical()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotSplitDisplayVertical();
 }
 
 void TopWidget::slotRemoveActiveDisplay()
 {
+ if (!d->mBosonWidget) {
+	return;
+ }
  d->mBosonWidget->slotRemoveActiveDisplay();
 }
 
@@ -1160,3 +1222,11 @@ void TopWidget::slotSaveGame()
  mBoson->save(s, true);
  f.close();
 }
+
+void TopWidget::slotUpdateFPS()
+{
+#ifndef NO_OPENGL
+ emit signalFPSUpdated(d->mBosonWidget->displayManager()->activeDisplay()->fps());// damn this call sucks!
+#endif
+}
+

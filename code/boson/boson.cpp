@@ -50,7 +50,7 @@
 // debug output from it in bug reports, so please do not define this.
 // on the other hand i often need to test a few things where i don't need those
 // messages. defining this lets easily disable the debug output.
-//#define NO_ADVANCE_DEBUG
+#define NO_ADVANCE_DEBUG
 
 // Saving format version (000005 = 00.00.05)
 #define BOSON_SAVEGAME_FORMAT_VERSION 000005

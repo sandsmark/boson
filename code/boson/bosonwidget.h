@@ -92,7 +92,7 @@ public:
 
 	void saveConfig(bool editor = false);
 
-	void zoom(const QWMatrix&);
+	void setZoomFactor(float factor);
 
 	bool sound() const;
 	bool music() const;
@@ -118,9 +118,19 @@ public:
 	void setChatVisible(bool visible);
 	void setCmdFrameVisible(bool visible);
 
+	/**
+	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
+	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
+	 * and @ref BosonCanvas::loadTiles
+	 *
+	 * Note that this also calls @ref slotChangeCursor in order to load the
+	 * initial cursor.
+	 **/
+	void addInitialDisplay();
 
 public slots:
 	void slotDebug();
+	void slotProfiling();
 	void slotGamePreferences();
 	void slotEndGame();
 
@@ -141,6 +151,7 @@ public slots:
 	void slotRemoveActiveDisplay();
 
 	void slotInitFogOfWar();
+	void slotHack1();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor (and debug)

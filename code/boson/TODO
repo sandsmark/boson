@@ -34,7 +34,8 @@ Game TODOs
   QPainter to paint it to pixmap)
 - Do not start game before all players has loaded their data
 - BosonTiles::mTilesImage is unused in game mode. free memory
-- UnitGroups (i.e. selection groups)
+- mark selected units, i.e. display the group number in the selectbox (and also
+  in the cmd frame for every unit)
 - maybe provide UnitGroups without keyboard, too. select units, click on a
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
@@ -55,9 +56,6 @@ Editor (map, unit, scenario) TODOs
   support editor anymore
 
 General TODOs
-- zooming (QCanvas::setWorldMatrix()) - mostly done
-- SpeciesTheme loads all pixmaps into memory - share it between different
-  players (if they have the same themes)
 - find out whether signalUnitPropertyChanged() is a good thing at all. Might
   save some performance if we don't use it.
 - use typeId = 0 as invalid (NOT -1!)
@@ -82,22 +80,17 @@ General TODOs
 - sometimes when splitting displays (maybe only when splitting vertically) it
   happens that no mouse IO is being added (and is therefore unusable and
   unremovable
-- canvas text: we want a static non-moving text in the upper right corner
-  displaying the resources of the player. up to now all implementations flicker
-  in any way...  update: do we need it anyway? We have same labels on statusbar
-  and they're ok for me...
 - use KDock for the dispalys
 - color combobox should have same width as other comboboxes
 - hostname lineedit in BosonNetworkOptionsWidget seems to have wrong
   BackgroundOrigin  update: it's not wrong, it's disabled-color
-- BsoonPath::PathNode needs to be public to compile in gcc 2.96
-  Why? It is used internally only... Failing e.g. here:
-  inline bool operator<(const BosonPath::PathNode& a, const BosonPath::PathNode& b)
 - pixmaps on startup widgets should be centered horizontally
 - Use KMD5 to calculate checksum of map and unitProperties at the beginning of
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
+- support different hotspot for different cursor mode (attack,move,...) but
+  *not* for different frames in a single frame
 
 Data TODOs
 - sound for minimap activated/deactivated
@@ -112,3 +105,7 @@ Data TODOs
   QPainter to paint on it?
 - can we use a coded gradient instead of the startup-bg pix? would allow every
   size then
+- background story - especially descriptions of the units
+- maps
+- other species
+

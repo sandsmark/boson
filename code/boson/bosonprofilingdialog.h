@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,47 +16,48 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef KGAMEUNITDEBUG_H
-#define KGAMEUNITDEBUG_H
+#ifndef BOSONPROFILINGDIALOG_H
+#define BOSONPROFILINGDIALOG_H
 
-#include <qwidget.h>
+#include <kdialogbase.h>
+
+#include "global.h"
 
 class QListViewItem;
-
-class KGamePropertyBase;
-
-class Boson;
-class Unit;
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class KGameUnitDebug : public QWidget
+class BosonProfilingDialog : public KDialogBase
 {
 	Q_OBJECT
 public:
-	KGameUnitDebug(QWidget* parent);
-	~KGameUnitDebug();
-
-	void setBoson(Boson*);
+	BosonProfilingDialog(QWidget* parent, bool modal = false);
+	~BosonProfilingDialog();
 
 protected:
-	void addUnit(Unit* unit);
-	void update(QListViewItem*, Unit*);
+	void initLoadUnitPage();
+	void initRenderPage();
+	void initEventsPage();
+	void initFilesPage();
+
+	void reset();
+	void resetLoadUnitPage();
+	void resetRenderPage();
+	void resetEventsPage();
+	void resetFilesPage();
+
+	void createRenderItem(QListViewItem* parent, const QString& type, long int time);
+	QString profilingName(int profilingEvent) const;
 
 protected slots:
 	void slotUpdate();
-	void updateWaypoints(QListViewItem*);
-	void updateProduction(QListViewItem*);
-	void updateUnitsInRange(QListViewItem*);
-	void updateUnitCollisions(QListViewItem*);
-	void updateCells(QListViewItem*);
-
-	void slotUnitPropertyChanged(KGamePropertyBase*);
+	void slotSaveToFile();
+	void slotLoadFromFile();
 
 private:
-	class KGameUnitDebugPrivate;
-	KGameUnitDebugPrivate* d;
+	class BosonProfilingDialogPrivate;
+	BosonProfilingDialogPrivate* d;
 };
 
 #endif

@@ -239,8 +239,8 @@ public:
 	 * @return The speed of the unit. Must be replaced in derived classes to
 	 * be of use as this just return 0.
 	 **/
-	inline virtual double speed() const { return 0.0; }
-	virtual void setSpeed(double ) { }
+	inline virtual float speed() const { return 0.0; }
+	virtual void setSpeed(float ) { }
 
 	/**
 	 * Save the unit to a stream. You can use @ref load to load the same
@@ -303,9 +303,9 @@ public:
 	/**
 	 * @return true if unit is moving (work() == WorkMove)
 	 **/
-	inline bool isMoving() 
-	{ 
-		return (work() == WorkMove); 
+	inline bool isMoving()
+	{
+		return (work() == WorkMove);
 	}
 
 	/**
@@ -323,7 +323,6 @@ public:
 	 * Set @ref reloadState to @ref UnitProperties::reload
 	 **/
 	void resetReload();
-
 
 private:
 	class UnitBasePrivate;

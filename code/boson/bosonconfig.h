@@ -19,11 +19,10 @@
 #ifndef BOSONCONFIG_H
 #define BOSONCONFIG_H
 
-#include <qstring.h>
-#include <qcolor.h>
-
 #include "global.h"
 
+class QColor;
+class QString;
 class KConfig;
 
 #define boConfig BosonConfig::bosonConfig()
@@ -101,6 +100,8 @@ public:
 	bool rmbMove() const { return mRMBMove; }
 	void setMMBMove(bool m) { mMMBMove = m; }
 	bool mmbMove() const { return mMMBMove; }
+	void setUpdateInterval(unsigned int i) { mUpdateInterval = i; }
+	unsigned int updateInterval() const { return mUpdateInterval; }
 
 	/**
 	 * @param m How "sensitive" the edge is. I.e. the number the cursor must
@@ -159,6 +160,9 @@ protected:
 	void saveCursorEdgeSensity(KConfig* conf);
 	unsigned int readCursorEdgeSensity(KConfig* conf);
 
+	unsigned int readUpdateInterval(KConfig* conf);
+	void saveUpdateInterval(KConfig* conf);
+
 private:
 	static BosonConfig* mBosonConfig;
 	
@@ -174,6 +178,7 @@ private:
 	bool mRMBMove;
 	bool mMMBMove;
 	unsigned int mCursorEdgeSensity;
+	unsigned int mUpdateInterval;
 };
 
 #endif
