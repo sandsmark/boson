@@ -368,7 +368,7 @@ public:
 		mChat = 0;
 		mMouseIO = 0;
 
-		mFramecount = 0;
+		mFrameCount = 0;
 		mFps = 0;
 		mFpsTime = 0;
 		mDefaultFont = 0;
@@ -401,7 +401,7 @@ public:
 
 	long long int mFpsTime;
 	double mFps;
-	int mFramecount;
+	unsigned int mFrameCount;
 
 	bool mEvenFlag; // this is used for a nice trick to avoid clearing the depth 
 	                // buffer - see http://www.mesa3d.org/brianp/sig97/perfopt.htm
@@ -628,6 +628,7 @@ void BosonBigDisplayBase::paintGL()
  }
  boProfiling->render(true);
  d->mUpdateTimer.stop();
+ d->mFrameCount++;
 //boDebug() << k_funcinfo << endl;
  // TODO: use 0,0 as lower left, instead of top left
  // AB: I've dalayed this. since we still use canvas-coordinates it is easier
@@ -1364,6 +1365,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	case QEvent::MouseButtonPress:
 		makeActive();
 		if (e->button() == LeftButton) {
+			d->mSelectionRect.setStart(posX, posY, posZ);
 			if (actionLocked()) {
 				// If action is locked then it means that user clicked on an action
 				// button and wants to perform specific action
@@ -1379,7 +1381,6 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 					*eatevent = true;
 				}
 			} else {
-				d->mSelectionRect.setStart(posX, posY, posZ);
 			}
 		} else if (e->button() == MidButton) {
 			if (boConfig->mmbMove()) {
@@ -2038,24 +2039,19 @@ void BosonBigDisplayBase::setUpdateInterval(unsigned int ms)
  QTimer::singleShot(d->mUpdateInterval, this, SLOT(slotUpdateGL()));
 }
 
-float BosonBigDisplayBase::calcFPS()
+void BosonBigDisplayBase::calcFPS()
 {
- float elapsed;
  static long long int now = 0;
  struct timeval time;
  gettimeofday(&time, 0);
- elapsed = (time.tv_sec * 1000000 + time.tv_usec) - now;
- elapsed /= 1000000;
  now = time.tv_sec * 1000000 + time.tv_usec;
  // FPS is updated once per second
  if ((now - d->mFpsTime) >= 1000000) {
-	d->mFps = d->mFramecount / ((now - d->mFpsTime) / 1000000.0);
+	d->mFps = d->mFrameCount / ((now - d->mFpsTime) / 1000000.0);
 	d->mFpsTime = now;
-	d->mFramecount = 0;
+	d->mFrameCount = 0;
 //	boDebug() << k_funcinfo << "FPS: " << d->mFps << endl;
  }
- d->mFramecount++;
- return elapsed;
 }
 
 double BosonBigDisplayBase::fps() const
