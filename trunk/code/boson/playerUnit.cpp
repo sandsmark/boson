@@ -18,7 +18,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdlib.h>	// int abs(int);
 #include <assert.h>
 
 #include "common/map.h"
@@ -30,6 +29,7 @@
 #include "game.h"
 
 
+#define b_fabs(a) ( ((a)< 0.)?-(a):(a) )
 
 /*
  *  bosonUnit
@@ -173,7 +173,7 @@ bool playerMobUnit::getWantedMove(state_t &wstate)
 			asked_state = MUS_MOVING;
 			if (checkMove( asked)) return true;
 
-			if ( fabs(xVelocity() ) > fabs(yVelocity() ) )  {
+			if ( b_fabs(xVelocity() ) > b_fabs(yVelocity() ) )  {
 				/* we are going mainly along x axis, so try that first*/
 				wstate.y = y();
 				if (checkMove(wstate)) return true;
