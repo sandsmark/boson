@@ -21,6 +21,7 @@
 
 #include "boinfo.h"
 #include "bodebug.h"
+#include "boglquerystates.h"
 
 #include <qwidget.h>
 #include <qregexp.h>
@@ -73,6 +74,15 @@ void BoInfo::updateOpenGLInfo(QWidget* widget)
  extensions = (const char*)glXQueryServerString(widget->x11Display(), widget->x11Screen(), GLX_EXTENSIONS);
  insert(GLXServerExtensionsString, extensions);
  insert(BoInfo::IsDirect, (bool)glXIsDirect(widget->x11Display(), context));
+
+ BoGLQueryStates glStates;
+ glStates.init();
+ QStringList implementationValueList = glStates.implementationValueList();
+ QString implementationValues;
+ for (unsigned int i = 0; i < implementationValueList.count(); i++) {
+	implementationValues += implementationValueList[i] + "\n";
+ }
+ insert(BoInfo::OpenGLValuesString, implementationValues);
 
  insert(BoInfo::HaveOpenGLData, (bool)true);
 }

@@ -399,6 +399,11 @@ QStringList BoInfo::openGLExtensions() const
  return QStringList::split('\n', getString(OpenGLExtensionsString));
 }
 
+QStringList BoInfo::openGLValues() const
+{
+ return QStringList::split('\n', getString(OpenGLValuesString));
+}
+
 QStringList BoInfo::gluExtensions() const
 {
  return QStringList::split('\n', getString(GLUExtensionsString));
@@ -483,6 +488,9 @@ QString BoInfo::keyToName(int key)
 		break;
 	case OpenGLExtensionsString:
 		string = i18n("OpenGL Extensions String");
+		break;
+	case OpenGLValuesString:
+		string = i18n("OpenGL Values String");
 		break;
 	case GLUVersionString:
 		string = i18n("GLU Version String");

@@ -244,6 +244,7 @@ protected slots:
 	void slotDebugToggleWireFrames(bool);
 	void slotGrabScreenshot();
 	void slotGrabProfiling();
+	void slotShowGLStates();
 
 	void slotCmdBackgroundChanged(const QString& file);
 
