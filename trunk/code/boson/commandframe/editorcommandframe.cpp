@@ -57,8 +57,8 @@ void EditorCommandFrame::init()
  orderWidget()->initEditor();
 
 // the order buttons
- connect(orderWidget(), SIGNAL(signalProduceUnit(unsigned long int)),
-		this, SLOT(slotPlaceUnit(unsigned long int)));
+ connect(orderWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
+		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
  connect(orderWidget(), SIGNAL(signalPlaceCell(int)),
 		this, SIGNAL(signalPlaceCell(int)));
 }

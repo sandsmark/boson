@@ -243,10 +243,14 @@ void BosonCommandFrameBase::setLocalPlayer(Player* p)
  d->mOwner = p;
 }
 
-void BosonCommandFrameBase::slotPlaceUnit(unsigned long int unitType)
+void BosonCommandFrameBase::slotPlaceUnit(ProductionType t, unsigned long int unitType)
 {
  if (!d->mOwner) {
 	kdError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (t != ProduceUnit) {
+	kdError() << k_funcinfo << "Only ProduceUnit supported" << endl;
 	return;
  }
  emit signalPlaceUnit(unitType, d->mOwner);

@@ -173,7 +173,7 @@ protected slots:
 	/**
 	 * Editor mode only. Emit @ref signalPlaceUnit.
 	 **/
-	void slotPlaceUnit(unsigned long int unitType);
+	void slotPlaceUnit(ProductionType, unsigned long int unitType);
 
 	virtual void slotUpdate();
 
