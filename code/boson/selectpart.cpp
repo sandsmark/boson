@@ -37,11 +37,34 @@ static void drawSelectBox(QPainter &painter, bool bw, int power = 0);
 QCanvasPixmapArray * SelectPart::mPartUp = 0l;
 QCanvasPixmapArray * SelectPart::mPartDown = 0l;
 
-/*
- *  selectPart
- */
+SelectPart::SelectPart(int z, SelectPartType type, QCanvas* canvas)
+	: QCanvasSprite(0, canvas)
+{
+ init(type);
+ setZ (z + 1);
+ setFrame(PART_NB - 1);
+ // do not yet show
+}
+
 SelectPart::SelectPart(int frame, int z, SelectPartType type, QCanvas* canvas)
 	: QCanvasSprite(0, canvas)
+{
+ init(type);
+
+ // no segfault with buggy values for frame
+ if (frame < 0) {
+	frame = 0;
+ }
+ if (frame >= PART_NB) {
+	frame = PART_NB - 1;
+ }
+ // actually do it
+ setFrame(frame);
+ setZ (z + 1);
+ show();
+}
+
+void SelectPart::init(SelectPartType type)
 {
  if (PartDown == type) {
 	if (!mPartDown) {
@@ -54,18 +77,6 @@ SelectPart::SelectPart(int frame, int z, SelectPartType type, QCanvas* canvas)
 	}
 	setSequence(mPartUp);
  }
- // no segfault with buggy values for frame
- if (frame < 0) {
-	frame = 0;
- }
- if (frame >= PART_NB) {
-	frame = PART_NB-1;
- }
- // actually do it
- setFrame(frame);
- setZ (z + 1);
-
- show();
 }
 
 int SelectPart::frames()
