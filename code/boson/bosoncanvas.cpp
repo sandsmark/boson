@@ -3,7 +3,7 @@
 #include "boson.h"
 #include "player.h"
 #include "cell.h"
-#include "visualunit.h"
+#include "unit.h"
 #include "bosonmap.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
@@ -30,8 +30,8 @@ public:
 	
 	QPixmap mPix;
 	QPtrList<QCanvasItem> mAnimList; // see BosonCanvas::advance()
-	QPtrList<VisualUnit> mDestroyUnits;
-	QPtrList<VisualUnit> mDestroyedUnits;
+	QPtrList<Unit> mDestroyUnits;
+	QPtrList<Unit> mDestroyedUnits;
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
@@ -106,7 +106,7 @@ Cell* BosonCanvas::cell(int x, int y) const
  return d->mMap->cell(x, y);
 }
 
-void BosonCanvas::slotAddUnit(VisualUnit* unit, int x, int y)
+void BosonCanvas::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit!" << endl;
@@ -128,14 +128,14 @@ void BosonCanvas::slotAddUnit(VisualUnit* unit, int x, int y)
  update();
 }
 
-VisualUnit* BosonCanvas::findUnitAt(const QPoint& pos)
+Unit* BosonCanvas::findUnitAt(const QPoint& pos)
 {
  QCanvasItemList list = collisions(pos);
  QCanvasItemList::Iterator it;
 
  for (it = list.begin(); it != list.end(); ++it) {
 	if (RTTI::isUnit((*it)->rtti())) {
-		return (VisualUnit*)*it;
+		return (Unit*)*it;
 	}
  }
  return 0;
@@ -163,9 +163,9 @@ void BosonCanvas::advance()
  // a unit must not be deleted in QCanvasItem::advance (see QT docs). Therefore
  // we add them to d->mDestroyUnits and delete them all here now.
  if (!d->mDestroyUnits.isEmpty()) {
-	QPtrListIterator<VisualUnit> destroyedIt(d->mDestroyUnits);
+	QPtrListIterator<Unit> destroyedIt(d->mDestroyUnits);
 	while (destroyedIt.current()) {
-		VisualUnit* unit = destroyedIt.current();
+		Unit* unit = destroyedIt.current();
 		kdDebug() << "destroy unit " << unit->id() << endl;
 		emit signalUnitDestroyed(unit); // currently unused
 		unit->owner()->unitDestroyed(unit); // remove from player without deleting
@@ -248,7 +248,7 @@ void BosonCanvas::removeAnimation(QCanvasItem* item)
  d->mAnimList.removeRef(item);
 }
 
-void BosonCanvas::unitMoved(VisualUnit* unit, double oldX, double oldY)
+void BosonCanvas::unitMoved(Unit* unit, double oldX, double oldY)
 {
 // test if any unit has this unit as target. If sou then adjust the destination. 
 //TODO 
@@ -257,7 +257,7 @@ void BosonCanvas::unitMoved(VisualUnit* unit, double oldX, double oldY)
  emit signalUnitMoved(unit, oldX, oldY);
 }
 
-void BosonCanvas::shootAtUnit(VisualUnit* target, VisualUnit* attackedBy, long int damage)
+void BosonCanvas::shootAtUnit(Unit* target, Unit* attackedBy, long int damage)
 {
  if (!target) {
 	kdError() << k_funcinfo << ": NULL target" << endl;
@@ -276,7 +276,7 @@ void BosonCanvas::shootAtUnit(VisualUnit* target, VisualUnit* attackedBy, long i
  
  if (target->isDestroyed()) {
 	// we cannot delete it here!
-	// called from VisualUnit::advance() so we must delay
+	// called from Unit::advance() so we must delay
 	if (!d->mDestroyUnits.contains(target)) {
 		// dunno if this is correct - should it be delete immediately?
 		// what about e.g. a wreckage?
@@ -298,7 +298,7 @@ void BosonCanvas::play(const QString& fileName)
  d->mSoundServer->play(fileName.latin1());
 }
 
-Cell* BosonCanvas::cellAt(VisualUnit* unit) const
+Cell* BosonCanvas::cellAt(Unit* unit) const
 {
  if (!unit) {
 	return 0;
@@ -311,3 +311,7 @@ Cell* BosonCanvas::cellAt(double x, double y) const
  return cell(x / BO_TILE_SIZE, y / BO_TILE_SIZE);
 }
 
+BosonMap* BosonCanvas::map() const
+{
+ return d->mMap;
+}

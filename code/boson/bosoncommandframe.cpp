@@ -1,7 +1,7 @@
 
 #include "bosoncommandframe.h"
 
-#include "visualunit.h"
+#include "unit.h"
 #include "player.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
@@ -87,7 +87,7 @@ public:
 	BosonCommandFrame::OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
 	Player* mOwner;
-	VisualUnit* mFactory; // the unit that is producing
+	Unit* mFactory; // the unit that is producing
 
 	QMap<int, int> mOrder2Type; // map order button -> unitType
 };
@@ -189,7 +189,7 @@ void BosonCommandFrame::initOrderButtons(unsigned int no)
 }
 
 
-void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
+void BosonCommandFrame::slotShowSingleUnit(Unit* unit)
 {
  if (!unit) {
 	// display nothing
@@ -219,7 +219,7 @@ void BosonCommandFrame::slotShowSingleUnit(VisualUnit* unit)
  d->mUnitView->setUnit(unit);
 }
 
-void BosonCommandFrame::slotSetConstruction(VisualUnit* unit)
+void BosonCommandFrame::slotSetConstruction(Unit* unit)
 {
  hideOrderButtons(); // this makes sure that they are even hidden if the unit 
                      // cannot produce

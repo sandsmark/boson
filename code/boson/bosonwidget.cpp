@@ -6,7 +6,7 @@
 #include "bosoncanvas.h"
 #include "boson.h"
 #include "player.h"
-#include "visualunit.h"
+#include "unit.h"
 #include "speciestheme.h"
 #include "unitproperties.h"
 #include "kspritetooltip.h"
@@ -135,12 +135,12 @@ void BosonWidget::init()
  d->mBoson->slotSetGameSpeed(BosonConfig::gameSpeed());
  connect(d->mBoson, SIGNAL(signalAdvance()),
 		d->mCanvas, SLOT(advance()));
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
-		d->mCanvas, SLOT(slotAddUnit(VisualUnit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
-		d->mMiniMap, SLOT(slotAddUnit(VisualUnit*, int, int)));
- connect(d->mBoson, SIGNAL(signalAddUnit(VisualUnit*, int, int)),
-		this, SLOT(slotAddUnit(VisualUnit*, int, int)));
+ connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
+		d->mCanvas, SLOT(slotAddUnit(Unit*, int, int))); // needs a QCanvas - we need to call Boson::setCanvas for this
+ connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
+		d->mMiniMap, SLOT(slotAddUnit(Unit*, int, int)));
+ connect(d->mBoson, SIGNAL(signalAddUnit(Unit*, int, int)),
+		this, SLOT(slotAddUnit(Unit*, int, int)));
  connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
 		this, SIGNAL(signalPlayerJoinedGame(KPlayer*)));
  connect(d->mBoson, SIGNAL(signalPlayerJoinedGame(KPlayer*)),
@@ -167,12 +167,12 @@ void BosonWidget::init()
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
 
- connect(d->mCanvas, SIGNAL(signalUnitMoved(VisualUnit*, double, double)),
-		d->mMiniMap, SLOT(slotMoveUnit(VisualUnit*, double, double)));
-// connect(d->mCanvas, SIGNAL(signalUnitDestroyed(VisualUnit*)), 
-//		d->mBigDisplay, SLOT(slotUnitDestroyed(VisualUnit*)));
- connect(d->mCanvas, SIGNAL(signalUnitDestroyed(VisualUnit*)), 
-		d->mMiniMap, SLOT(slotUnitDestroyed(VisualUnit*)));
+ connect(d->mCanvas, SIGNAL(signalUnitMoved(Unit*, double, double)),
+		d->mMiniMap, SLOT(slotMoveUnit(Unit*, double, double)));
+// connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
+//		d->mBigDisplay, SLOT(slotUnitDestroyed(Unit*)));
+ connect(d->mCanvas, SIGNAL(signalUnitDestroyed(Unit*)), 
+		d->mMiniMap, SLOT(slotUnitDestroyed(Unit*)));
 
 
 
@@ -239,8 +239,8 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* p)
  // BosonBigDisplay knows whether a unit was selected. If a unit changed forward
  // the signal to the big display and let it decide whether the
  // signalSingleUnitSelected should be emitted
- connect(p, SIGNAL(signalUnitChanged(VisualUnit*)), 
-		d->mBigDisplay, SLOT(slotUnitChanged(VisualUnit*)));
+ connect(p, SIGNAL(signalUnitChanged(Unit*)), 
+		d->mBigDisplay, SLOT(slotUnitChanged(Unit*)));
 }
 
 void BosonWidget::keyReleaseEvent(QKeyEvent* e)
@@ -397,7 +397,7 @@ void BosonWidget::slotGamePreferences()
  dlg->show();
 }
 
-void BosonWidget::slotAddUnit(VisualUnit* unit, int, int)
+void BosonWidget::slotAddUnit(Unit* unit, int, int)
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;
@@ -458,10 +458,10 @@ void BosonWidget::addEditorCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, true);
 
- connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,VisualUnit*, Player*)), 
-		d->mBigDisplay, SLOT(slotWillConstructUnit(int, VisualUnit*, Player*))); // in addEditorCommandFrame()
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)), 
-		d->mCommandFrame, SLOT(slotShowSingleUnit(VisualUnit*)));
+ connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,Unit*, Player*)), 
+		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
+ connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)), 
+		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
  connect(d->mCommandFrame, SIGNAL(signalCellSelected(int,unsigned char)), 
 		d->mBigDisplay, SLOT(slotWillPlaceCell(int, unsigned char))); // in addEditorCommandFrame()
 
@@ -471,12 +471,12 @@ void BosonWidget::addGameCommandFrame()
 { // remember to call this *after* init() - otherwise connect()s won't work
  d->mCommandFrame = new BosonCommandFrame(this, false);
 
- connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,VisualUnit*, Player*)),
-		d->mBigDisplay, SLOT(slotWillConstructUnit(int, VisualUnit*, Player*))); // in addEditorCommandFrame()
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)),
-		d->mCommandFrame, SLOT(slotShowSingleUnit(VisualUnit*)));
- connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(VisualUnit*)),
-		d->mCommandFrame, SLOT(slotSetConstruction(VisualUnit*)));
+ connect(d->mCommandFrame, SIGNAL(signalUnitSelected(int,Unit*, Player*)),
+		d->mBigDisplay, SLOT(slotWillConstructUnit(int, Unit*, Player*))); // in addEditorCommandFrame()
+ connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
+		d->mCommandFrame, SLOT(slotShowSingleUnit(Unit*)));
+ connect(d->mBigDisplay, SIGNAL(signalSingleUnitSelected(Unit*)),
+		d->mCommandFrame, SLOT(slotSetConstruction(Unit*)));
 }
 
 void BosonWidget::startEditor()

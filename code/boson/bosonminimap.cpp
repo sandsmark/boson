@@ -3,10 +3,10 @@
 
 #include "cell.h"
 #include "defines.h"
-#include "unit.h"
+#include "unitbase.h"
 #include "player.h"
 #include "speciestheme.h"
-#include "visualunit.h"
+#include "unit.h"
 #include "bosonmap.h"
 #include "unitproperties.h"
 
@@ -158,7 +158,7 @@ void BosonMiniMap::mousePressEvent(QMouseEvent *e)
  }
 }
 
-void BosonMiniMap::slotAddUnit(VisualUnit* unit, int x, int y)
+void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": NULL unit" << endl;
@@ -228,7 +228,7 @@ void BosonMiniMap::initMap()
  }
 }
 
-void BosonMiniMap::slotMoveUnit(VisualUnit* unit, double oldX, double oldY)
+void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
 {
  if (!d->mMap) {
 	kdError() << k_funcinfo << ": NULL map" << endl;
@@ -251,7 +251,7 @@ void BosonMiniMap::slotMoveUnit(VisualUnit* unit, double oldX, double oldY)
  slotAddUnit(unit, x, y);
 }
 
-void BosonMiniMap::slotUnitDestroyed(VisualUnit* unit)
+void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 {
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;

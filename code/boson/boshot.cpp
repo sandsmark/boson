@@ -1,7 +1,7 @@
 #include "boshot.h"
 
 #include "speciestheme.h"
-#include "visualunit.h"
+#include "unit.h"
 
 #include "defines.h"
 
@@ -21,7 +21,7 @@ public:
 	int mDelay;
 };
 
-BoShot::BoShot(VisualUnit* target, VisualUnit* attacker, QCanvas* canvas, bool destroyed)
+BoShot::BoShot(Unit* target, Unit* attacker, QCanvas* canvas, bool destroyed)
 		: QCanvasSprite(0, canvas)
 {
  d = new BoShotPrivate;

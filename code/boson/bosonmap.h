@@ -5,7 +5,7 @@
 #include <qdatastream.h>
 
 class Cell;
-class Unit;
+class UnitBase;
 class Boson;
 class QDomElement;
 class QStringList;

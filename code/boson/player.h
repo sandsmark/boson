@@ -6,7 +6,7 @@
 #include <qcolor.h>
 
 class QCanvasPixmapArray;
-class VisualUnit;
+class Unit;
 class SpeciesTheme;
 class UnitProperties;
 
@@ -27,11 +27,11 @@ public:
 
 	void loadTheme(const QString& species, const QRgb& teamColor);
 
-	void addUnit(VisualUnit* unit);
-	void unitDestroyed(VisualUnit* unit);
+	void addUnit(Unit* unit);
+	void unitDestroyed(Unit* unit);
 	SpeciesTheme* speciesTheme() const;
 
-	VisualUnit* findUnit(unsigned long int unitId) const;
+	Unit* findUnit(unsigned long int unitId) const;
 
 	virtual bool load(QDataStream& stream);
 	virtual bool save(QDataStream& stream);
@@ -40,14 +40,14 @@ public:
 	 * @return <em>All</em> units of this player. Please don't use this as
 	 * it is very unclean. This is meant for KGameUnitDebug only.
 	 **/
-	QPtrList<VisualUnit> allUnits() const;
+	QPtrList<Unit> allUnits() const;
 
 	/**
-	 * Called by @ref VisualUnit to sync the positions of the units on
+	 * Called by @ref Unit to sync the positions of the units on
 	 * several clients. Shouldn't be necessary if it was implemented
 	 * cleanly!!
 	 **/
-	void sendStopMoving(VisualUnit* unit);
+	void sendStopMoving(Unit* unit);
 
 	/**
 	 * Convenience method for theme()->unitProperties()
@@ -55,10 +55,10 @@ public:
 	const UnitProperties* unitProperties(int unitType) const;
 
 signals:
-	void signalCreateUnit(VisualUnit*& unit, int unitType, Player* owner); // obsolete
+	void signalCreateUnit(Unit*& unit, int unitType, Player* owner); // obsolete
 	void signalLoadUnit(int unitType, unsigned long int id, Player* owner);
 
-	void signalUnitChanged(VisualUnit* unit);
+	void signalUnitChanged(Unit* unit);
 
 public slots:
 	void slotUnitPropertyChanged(KGamePropertyBase* prop);

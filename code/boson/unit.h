@@ -1,198 +1,164 @@
 #ifndef __UNIT_H__
 #define __UNIT_H__
 
-#include "rtti.h"
+#include "unitbase.h"
 
-#include <qstring.h>
-#include <qdatastream.h>
-
-#include <kgame/kgameproperty.h>
-
-class KGamePropertyHandler;
-
-class QPoint;
-class QRect;
+#include <qcanvas.h>
 
 class Player;
+class BosonCanvas;
 class UnitProperties;
-class SpeciesTheme;
 
 class UnitPrivate;
-class Unit
+
+/**
+ * Implementation of the visual parts of a unit. As far as possible all stuff
+ * should go to UnitBase directly - except the visual stuff.
+ *
+ * Probably most things here can be moved to UnitBase. is a FIXME
+ *
+ * Not that Unit does <em>not</em> inherit @ref QObject! Signals/Slots are
+ * therefore not possible!
+ **/
+class Unit : public UnitBase, public QCanvasSprite
 {
 public:
 	enum PropertyIds {
-		IdHealth = KGamePropertyBase::IdUser + 0,
-		IdArmor = KGamePropertyBase::IdUser + 1,
-		IdShields = KGamePropertyBase::IdUser + 2,
-		IdId = KGamePropertyBase::IdUser + 3, // useful? perhaps use dataHandler()->id() instead
-		IdCost = KGamePropertyBase::IdUser + 4,
-		IdType = KGamePropertyBase::IdUser + 5,
-		IdWork = KGamePropertyBase::IdUser + 6,
-		IdSpeed = KGamePropertyBase::IdUser + 7,
-		IdDamage = KGamePropertyBase::IdUser + 8,
-		IdRange = KGamePropertyBase::IdUser + 9,
-		IdReload = KGamePropertyBase::IdUser + 10,
-		//...
-		IdLast
-	};
+		IdDirection = UnitBase::IdLast + 1,
+		IdWaypoints = UnitBase::IdLast + 2,
+		IdFix_ConstructionState = UnitBase::IdLast + 3,
+		IdFix_ConstructionDelay = UnitBase::IdLast + 4,
+		IdReloadState = UnitBase::IdLast + 5,
+		IdFix_Constructions = UnitBase::IdLast + 6
 
-	/**
-	 * What is this unit currently doing
-	 *
-	 * Possible value are
-	 * @li WorkNone - The unit does nothing
-	 * @li WorkProduce - a facility is producing something
-	 * @li WorkMove A unit is currently moving
-	 * @li WorkMine - a mining unit is working...
-	 * @li WorkAttack - Currently attacks a unit
-	 * @li WorkConstructed - Is <em>being</em> constructed
-	 **/
-	enum WorkType {
-		WorkNone = 0,
-		WorkProduce = 1,
-		WorkMove = 2,
-		WorkMine = 3,
-		WorkAttack = 4,
-		WorkConstructed = 5 
 	};
-	
-	Unit(int type);
+	Unit(int type, Player* owner, QCanvas* canvas);
 	virtual ~Unit();
 
-	void setWork(WorkType w);
+	virtual int rtti() const { return UnitBase::rtti(); }
 
-	WorkType work() const;
-
-	/**
-	 * @return Guess what?
-	 **/
-	const QString& name() const; // FIXME: NOT HERE! is in UnitProperties!!! // woule take too much memory (100 * unitType_1 would be 100 * 1 name...)
-
-	/**
-	 * Health aka hitpoints
-	 *
-	 * 0 means destroyed.
-	 *
-	 * This could be replaced in derived classes for mobile units which can
-	 * change into a facility. Then they could have more health? Or just
-	 * armor?
-	 * @return The health of the unit.
-	 **/
-	virtual unsigned long int health() const;
+	void turnTo(int direction);
 
 	virtual void setHealth(unsigned long int h);
 
-	bool isDestroyed() const
-	{
-		return (health() == 0);
-	}
+	BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
+
+	void select();
+	void unselect();
+
+	virtual void moveBy(double x, double y);
+
+	virtual void advance(int phase);
+
+	void attackUnit(Unit* target);
+	
+	/**
+	 * Move the unit. By default this does nothing. Reimplemented in @ref
+	 * MobileUnit
+	 **/
+	virtual void advanceMove() { }
 
 	/**
-	 * @return The owner (player) of the unit
+	 * Move the construction animation one step forward. Does nothing by
+	 * default - reimplemented in Facility
 	 **/
-	Player* owner() const;
-	void setOwner(Player* owner);
+	virtual void beConstructed() { }
 
-	KGamePropertyHandler* dataHandler() const;
+	Unit* target() const;
+	void setTarget(Unit* target);
+	bool inRange(Unit* unit) const;
 
-	/**
-	 * The ID of the unit. This ID is unique for this game.
-	 * @return The uniuque ID of the unit
-	 **/
-	unsigned long int id() const;
-
-	void setId(unsigned long int id);
-
-	unsigned long int shields() const;
-	void setShields(unsigned long int shields);
-
-	unsigned long int armor() const;
-	void setArmor(unsigned long int armor);
-
-	/**
-	 * @return The price of the unit. It can be changed using @ref setCost
-	 * but this shouldn't be necessary very often (beside the initial
-	 * creation).
-	 **/
-	virtual unsigned long int cost() const; // we don't need this. in UnitProperties it's enough!
-
-	/**
-	 * Change the price of the unit. This usually doesn't change often
-	 * within a game but it is at least possible...
-	 **/
-	void setCost(unsigned long int price);
-
-	/**
-	 * The type of the unit as described in the index.desktop file of this
-	 * unit. See also @ref UnitProperties::typeId
-	 **/
-	virtual int type() const;
-
-	virtual int rtti() const { return RTTI::UnitStart + (int)type(); }
-
-	/*
-	 * For mobile units this means where the unit is currently moving to.
-	 * For a facility this means where produced units shall be placed.
-	 *
-	 * Must be reimplemented in derived classes.
-	 **/
-//	virtual const QPoint& destination() const = 0; // TODO
-
-	long int damage() const; // not unsigned - can also repair :-)
-	void setDamage(long int d); // not unsigned - can also repair :-)
-	unsigned long int range() const;
-	void setRange(unsigned long int r);
-	unsigned int reload() const; // number of advance() calls until reloaded
-	void setReload(unsigned int r);
-
-	// TODO: ONLY mobile units!
-	// I dont want to have classes Unit, MobileUnit, FixUnit, VisualUnit,
-	// VisualMobileUnit and VisualFixUnit.
-	// Should the speed stay in Unit - memory overhead for facilities
-	// or should it go to VisualMobileUnit - kind of unclean?
-	// Or will we use the speed for something else as well (facilities)?
-	// E.g. produce speed?
-	double speed() const;
-	void setSpeed(double s);
-
+// waypoint stuff: // also in facility - produced units receive this initial waypoint
+	void addWaypoint(const QPoint& pos);
+	const QPoint& currentWaypoint() const;
+	unsigned int waypointCount() const;
+	void clearWaypoints();
+	void waypointDone();
+	void moveTo(const QPoint& pos);
+	void stopMoving(bool send = true);
+	void stopAttacking();
 
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
-	/**
-	 * These are <em>not</em> the @ref KGameProperties! See @ref dataHandler
-	 * for these.
-	 *
-	 * The @ref UnitProperties describes a unit type generally. This
-	 * includes the name of tha unit as well as all initial values.
-	 *
-	 * Note that the @ref UnitProperties class is a property of @ref
-	 * SpeciesTheme and therefore of the @ref owner of this unit. If this
-	 * unit does not yet have an owner this always returns 0!!
-	 **/
-	const UnitProperties* unitProperties() const;
+	void updateSelectBox();
 
-	/**
-	 * Convenience method for owner()->speciesTheme().
-	 * See @ref Player::speciesTheme
-	 * @return The @ref SpeciesTheme of the owner of this unit.
-	 **/
-	SpeciesTheme* speciesTheme() const;
 
+	QCanvasItemList unitsInRange() const;
+	QCanvasItemList enemyUnitsInRange() const;
+
+protected:
 	/**
-	 * Cenvenience method for unitProperties()->isFacility().
-	 * See @ref UnitProperties::isFacility
+	 * @return a list of interesting collisions, i.e. no non-units, no
+	 * destryed units, ...
 	 **/
-	bool isFacility() const;
-	/**
-	 * Cenvenience method for unitProperties()->isMobile().
-	 * See @ref UnitProperties::isMobile
-	 **/
-	bool isMobile() const;
-	
+	QValueList<Unit*> unitCollisions(bool exact = false) const;
+
 private:
 	UnitPrivate* d;
+
+};
+
+
+// a d pointer is probably not very good here - far too much memory consumption
+// same apllies to Unit and UnitBase. But it speeds up compiling as we don't
+// have to change the headers every time...
+class MobileUnitPrivate; 
+// if you add class members - ONLY KGameProperties!! otherwise Player::load and
+// Player::save() won't work correctly! - if you add non KGameProperties adjust
+// UnitBase::save() and unit::load()
+class MobileUnit : public Unit
+{
+public:
+	MobileUnit(int type, Player* owner, QCanvas* canvas);
+	virtual ~MobileUnit();
+
+	virtual void advanceMove(); // move one step futher to path
+	
+private:
+	MobileUnitPrivate* d;
+};
+
+class FacilityPrivate;
+// if you add class members - ONLY KGameProperties!! otherwise Player::load and
+// Player::save() won't work correctly!
+class Facility : public Unit
+{
+public:
+	Facility(int type, Player* owner, QCanvas* canvas);
+	virtual ~Facility();
+
+	/**
+	 * @return The number of available construction steps for a facility.
+	 **/
+	static int constructionSteps();
+
+	/**
+	 * @return The number of @ref advance calls to achieve another
+	 * construction step. See @ref constructionSteps
+	 **/
+	int constructionDelay() const;
+
+	/**
+	 * Change the number of @ref advance calls needed to achieve another
+	 * construction step. See @ref constructionDelay
+	 **/
+	void setConstructionDelay(int delay);
+	
+	virtual void beConstructed();
+
+	/**
+	 * @return Whether there are any constructions pending for this unit
+	 **/
+	bool hasConstruction() const;
+
+	int completedConstruction() const;
+
+	void removeConstruction(); // removes first item
+	void addConstruction(int unitType);
+
+private:
+	FacilityPrivate* d;
 };
 
 #endif

@@ -4,7 +4,7 @@
 #include <qwidget.h>
 
 class Player;
-class VisualUnit;
+class Unit;
 class BosonMap;
 
 class QPixmap;
@@ -42,13 +42,13 @@ public slots:
 	  * @param b Unused
 	  **/
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
-	void slotAddUnit(VisualUnit* unit, int x, int y);
+	void slotAddUnit(Unit* unit, int x, int y);
 
 	void slotMoveRect(int x, int y);
 	void slotResizeRect(int w, int h);
 
-	void slotMoveUnit(VisualUnit* unit, double oldX, double oldY);
-	void slotUnitDestroyed(VisualUnit* unit);
+	void slotMoveUnit(Unit* unit, double oldX, double oldY);
+	void slotUnitDestroyed(Unit* unit);
 
 protected:
 	void setPoint(int x, int y, const QColor& color);

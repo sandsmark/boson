@@ -1,7 +1,7 @@
 
 #include "bosonmap.h"
 
-#include "unit.h"
+#include "unitbase.h"
 #include "cell.h"
 #include "player.h"
 #include "boson.h"

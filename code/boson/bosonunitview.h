@@ -3,7 +3,7 @@
 
 #include <qframe.h>
 
-class VisualUnit;
+class Unit;
 
 class BosonUnitViewPrivate;
 class BosonUnitView : public QFrame
@@ -16,7 +16,7 @@ public:
 	/**
 	 * @param unit The unit to be shown or 0 for none
 	 **/
-	void setUnit(VisualUnit* unit);
+	void setUnit(Unit* unit);
 
 protected:
 

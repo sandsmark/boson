@@ -6,7 +6,7 @@
 
 class KGameIO;
 
-class VisualUnit;
+class Unit;
 class Player;
 
 class BosonBigDisplayPrivate;
@@ -37,11 +37,11 @@ public slots:
 	 * Mark the unitType for construction. Inform boson about this and place
 	 * the unit on the screen if in editor mode - otherwise delay.
 	 **/
-	void slotWillConstructUnit(int unitType, VisualUnit* facility, Player* owner);
+	void slotWillConstructUnit(int unitType, Unit* facility, Player* owner);
 
 	void slotWillPlaceCell(int groundType, unsigned char version);
 
-	void slotUnitChanged(VisualUnit* unit);
+	void slotUnitChanged(Unit* unit);
 
 	virtual void resizeContents(int w, int h);
 
@@ -52,7 +52,7 @@ signals:
 	 *
 	 * If this is a factory the order buttons also should be changed.
 	 **/
-	void signalSingleUnitSelected(VisualUnit* unit);
+	void signalSingleUnitSelected(Unit* unit);
 
 	/**
 	 * Emitted by @ref resizeEvent
@@ -63,7 +63,7 @@ signals:
 //	void signalEditorConstruction(int unitType, Player* owner);
 	void signalAddCell(int x, int y, int groundType, unsigned char version);
 	
-	void signalConstructUnit(int type, VisualUnit* facility, Player* owner);
+	void signalConstructUnit(int type, Unit* facility, Player* owner);
 	void signalConstructUnit(int type, int x, int y, Player* owner); // editor mode only
 
 protected:
@@ -95,7 +95,7 @@ protected:
 	/**
 	 * @return The currently selected units. See also @ref addUnitSelection
 	 **/
-	QPtrList<VisualUnit>& selection() const;
+	QPtrList<Unit>& selection() const;
 
 	/**
 	 * @return The selection mode. See @ref setSelectionMode
@@ -105,7 +105,7 @@ protected:
 	/**
 	 * Add a unit to the selection list
 	 **/
-	void addUnitSelection(VisualUnit* unit);
+	void addUnitSelection(Unit* unit);
 
 	/**
 	 * Draw the selection rect from @ref selectionStart to @ref selectionEnd

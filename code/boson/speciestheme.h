@@ -9,7 +9,7 @@ class QPixmap;
 class QCanvasPixmapArray;
 class QStringList;
 class UnitProperties;
-class Unit;
+class UnitBase;
 
 class SpeciesThemePrivate;
 class SpeciesTheme
@@ -93,9 +93,9 @@ public:
 	 * one), don't use it if values will differ from the defaults (although
 	 * it wouldn't hurt if you would still use this)
 	 **/
-	void loadNewUnit(Unit* unit);
+	void loadNewUnit(UnitBase* unit);
 
-	const UnitProperties* unitProperties(Unit* unit) const;
+	const UnitProperties* unitProperties(UnitBase* unit) const;
 	const UnitProperties* unitProperties(int unitType) const;
 
 	/**

@@ -2,8 +2,8 @@
 #include "player.h"
 
 #include "speciestheme.h"
+#include "unit.h"
 #include "bosonmessage.h"
-#include "visualunit.h"
 
 #include <kgame/kgamepropertyhandler.h>
 #include <kgame/kgame.h>
@@ -25,7 +25,7 @@ public:
 
 	SpeciesTheme* mSpecies;
 
-	QPtrList<VisualUnit> mUnits;
+	QPtrList<Unit> mUnits;
 
 	int mUnitPropID; // used for KGamePropertyHandler
 };
@@ -68,11 +68,11 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
  }
 // kdDebug() << "slotNetworkData" << endl;
 // first check if the message is a property of a unit
- QPtrListIterator<VisualUnit> it(d->mUnits);
+ QPtrListIterator<Unit> it(d->mUnits);
  while(it.current() && !it.current()->dataHandler()->processMessage(stream, msgid, issender)) {
 	++it;
  }
- VisualUnit* unit = it.current();
+ Unit* unit = it.current();
 
  if (unit) { // this was a unit property
 	// note this part is completely obsolete!
@@ -82,16 +82,16 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 	kdDebug() << "unit property" << endl;
 
 	switch (propertyId) { // arghh - ID of datahandler()
-		case Unit::IdWork:
-		case VisualUnit::IdDirection:
-		case VisualUnit::IdWaypoints:
+		case UnitBase::IdWork:
+		case Unit::IdDirection:
+		case Unit::IdWaypoints:
 			break;
-		case Unit::IdSpeed:
-		case Unit::IdHealth:
-		case Unit::IdArmor:
-		case Unit::IdShields:
-		case Unit::IdType: //? Can this change at all?
-		case Unit::IdCost: // can change during the game, too!!
+		case UnitBase::IdSpeed:
+		case UnitBase::IdHealth:
+		case UnitBase::IdArmor:
+		case UnitBase::IdShields:
+		case UnitBase::IdType: //? Can this change at all?
+		case UnitBase::IdCost: // can change during the game, too!!
 			// currently unused - nevertheless display the value if
 			// selected
 			kdDebug() << "emit unit changed" << endl;
@@ -117,12 +117,12 @@ void Player::slotNetworkData(int msgid, const QByteArray& buffer, Q_UINT32 sende
 		stream >> y;
 		stream >> z;
 
-		VisualUnit* unit = findUnit(id);
+		Unit* unit = findUnit(id);
 		if (!unit) {
 			kdError() << "Unit " << id << " not found" << endl;
 			break;
 		}
-		if (unit->work() != Unit::WorkNone) {
+		if (unit->work() != UnitBase::WorkNone) {
 			kdWarning() << "work != WorkNone" << endl;
 		}
 		unit->stopMoving(false); // do not send again
@@ -156,11 +156,11 @@ QCanvasPixmapArray* Player::pixmapArray(int unitType) const
 }
 
 
-void Player::addUnit(VisualUnit* unit)
+void Player::addUnit(Unit* unit)
 {
  d->mUnitPropID++;// used for ID of KGamePropertyHandler
  d->mUnits.append(unit);
- unit->setOwner(this); // already done in c'tor of VisualUnit
+ unit->setOwner(this); // already done in c'tor of Unit
  unit->dataHandler()->registerHandler(BosonMessage::UnitPropertyHandler + d->mUnitPropID, this,
 		SLOT(sendProperty(int, QDataStream&, bool*)),
 		SLOT(emitSignal(KGamePropertyBase*)));
@@ -169,7 +169,7 @@ void Player::addUnit(VisualUnit* unit)
 
 }
 
-void Player::unitDestroyed(VisualUnit* unit)
+void Player::unitDestroyed(Unit* unit)
 {
  if (!unit) {
 	kdError() << k_funcinfo << ": Cannot remove NULL unit" << endl;
@@ -191,7 +191,7 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
 // VERY EVIL HACK!!!
- VisualUnit* unit;
+ Unit* unit;
  bool found = false;
  for (unit = d->mUnits.first(); unit && !found; unit = d->mUnits.next()) {
 	if (unit->dataHandler() == (KGamePropertyHandler*)sender()) {
@@ -211,24 +211,24 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 
  switch(prop->id()) {
-	case Unit::IdWork:
-	case Unit::IdId:
-	case Unit::IdDamage:
-	case Unit::IdReload:
-	case VisualUnit::IdDirection:
-	case VisualUnit::IdWaypoints:
-	case VisualUnit::IdFix_ConstructionState:
-	case VisualUnit::IdFix_ConstructionDelay:
+	case UnitBase::IdWork:
+	case UnitBase::IdId:
+	case UnitBase::IdDamage:
+	case UnitBase::IdReload:
+	case Unit::IdDirection:
+	case Unit::IdWaypoints:
+	case Unit::IdFix_ConstructionState:
+	case Unit::IdFix_ConstructionDelay:
 		// these IDs are not to be displayed in BosonUnitView.
 		break;
-	case Unit::IdHealth:
-	case Unit::IdArmor:
-	case Unit::IdShields:
-	case Unit::IdSpeed:
-	case Unit::IdType: // FIXME: can this change at all? (currently not)
-	case Unit::IdCost:
-	case Unit::IdRange:
-	case VisualUnit::IdReloadState:
+	case UnitBase::IdHealth:
+	case UnitBase::IdArmor:
+	case UnitBase::IdShields:
+	case UnitBase::IdSpeed:
+	case UnitBase::IdType: // FIXME: can this change at all? (currently not)
+	case UnitBase::IdCost:
+	case UnitBase::IdRange:
+	case Unit::IdReloadState:
 		// update BosonUnitView if the unit is selected.
 		// not all of these IDs are displayed there. But perhaps they
 		// will one day.
@@ -241,9 +241,9 @@ void Player::slotUnitPropertyChanged(KGamePropertyBase* prop)
  }
 }
 
-VisualUnit* Player::findUnit(unsigned long int unitId) const
+Unit* Player::findUnit(unsigned long int unitId) const
 {
- QPtrListIterator<VisualUnit> it(d->mUnits);
+ QPtrListIterator<Unit> it(d->mUnits);
  while (it.current()) {
 	if (it.current()->id() == unitId) {
 		return it.current();
@@ -264,7 +264,7 @@ bool Player::save(QDataStream& stream)
  stream << unitCount;
  for (unsigned int i = 0; i < unitCount; i++) {
 //	kdDebug() << "save unit " << i << endl;
-	VisualUnit* unit = d->mUnits.at(i);
+	Unit* unit = d->mUnits.at(i);
 	// we need the type first!
 	stream << (int)unit->type();
 	stream << (unsigned long int)unit->id();
@@ -297,18 +297,18 @@ bool Player::load(QDataStream& stream)
 	stream >> id;
 
 	emit signalLoadUnit(type, id, this);
-	VisualUnit* unit = findUnit(id);
+	Unit* unit = findUnit(id);
 	unit->load(stream);
  }
  return true;
 }
 
-QPtrList<VisualUnit> Player::allUnits() const
+QPtrList<Unit> Player::allUnits() const
 {
  return d->mUnits;
 }
 
-void Player::sendStopMoving(VisualUnit* unit)
+void Player::sendStopMoving(Unit* unit)
 {
  if (!game()) {
 	return;
