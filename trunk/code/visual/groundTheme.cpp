@@ -21,7 +21,7 @@
 #include <assert.h>
 
 #include <qpixmap.h>
-#include <qprogressdialog.h>
+#include <qbitarray.h>
 
 #include <QwSpriteField.h>
 
@@ -33,61 +33,40 @@
 #include "groundTheme.h"
 
 
-#define PROGRESS_N (groundPropNb + TILES_PER_TRANSITION * groundTransPropNb)
-
 groundTheme::groundTheme(char *themeName)
 {
-int i ; 
-QProgressDialog progress("Loading ground theme...", 0, PROGRESS_N, NULL, "progress.groundTheme", true);
-QString path(kapp->kde_datadir() + "/boson/themes/grounds/" + themeName + "/" );
-QString transS;
+	int i ; 
 
-allLoaded = true;
-progress.setProgress(0);
-progress.show();
-for (i=0; i< groundPropNb; i++)
-	if (!loadGround(i, path + groundProp[i].name, progress))
-		allLoaded = false;
+	assert (GROUND_LAST == groundPropNb);
+	assert (TRANS_LAST  == groundTransPropNb);
 
-for (i=0; i< groundTransPropNb; i++) {
+	groundPix	= new (QwSpritePixmapSequence *)[NB_GROUND_TILES];
+	themePath	= new QString(kapp->kde_datadir() + "/boson/themes/grounds/" + themeName + "/" );
+	transitions	= new QBitArray(TRANS_LAST);
 
-	assert(groundTransProp[i].from>=0);
-	assert(groundTransProp[i].from<GROUND_LAST);
-	assert(groundTransProp[i].to>=0);
-	assert(groundTransProp[i].to<GROUND_LAST);
+	boAssert ( transitions->fill(false) );
 
-	transS	= groundProp[groundTransProp[i].from].name;
-	transS += "_";
-	transS += groundProp[groundTransProp[i].to].name;
-
-	if (!loadTransition(GROUND_LAST + i * TILES_PER_TRANSITION ,
-		path + transS + "/" + transS ,
-		progress ))
-	     allLoaded = false;
-	}
-
-progress.setProgress(PROGRESS_N);
-
-if (!allLoaded) logf(LOG_ERROR, "groundTheme : not all loaded !");
-	else logf(LOG_INFO, "groundTheme loaded : %d ground tiles, %d transition tileset",
-		groundPropNb, groundTransPropNb);
+	for (i=0; i< groundPropNb; i++)
+		loadGround(i, *themePath + groundProp[i].name);
 
 }
 
-bool groundTheme::loadGround(int i, const QString &path, QProgressDialog &progress)
+bool groundTheme::loadGround(int i, const QString &path)
 {
   	groundPix[i] = new QwSpritePixmapSequence(path+".%.2d.bmp",0l, 4);
 /*	boAssert(BO_TILE_SIZE == pixmap[i]->width());
 	boAssert(BO_TILE_SIZE == pixmap[i]->height()); */
 ///orzel : do some boAssert with QwSpritePixmapSequence sizes... 
-	progress.setProgress(i);
-	if (groundPix[i]->image(0)->isNull()) return false;
+	if (groundPix[i]->image(0)->isNull()) {
+		fprintf(stderr, "groundTheme : Can't load %s.XX.bmp ...\n", (const char *)path);
+		return false;
+	}
 	return true;
 }
 
-bool groundTheme::loadTransition(int i, const QString &path, QProgressDialog &progress)
+bool groundTheme::loadTransition(int ref)
 {
-	int j;
+	int i, j;
 	bool ret = true;
 	static const char *trans_ext[TILES_PER_TRANSITION] = {
 		".01", ".03", ".07", ".05",	// 48x48 transitions
@@ -98,9 +77,38 @@ bool groundTheme::loadTransition(int i, const QString &path, QProgressDialog &pr
 		".21", ".22", ".23", ".24",
 		".25", ".26", ".27", ".28",
 		};
+	QString transS;
+	QString	path(*themePath);
+
+	i = GROUND_LAST + ref * TILES_PER_TRANSITION;
+
+	transS	 = groundProp[groundTransProp[ref].from].name;
+	transS	+= "_";
+	transS	+= groundProp[groundTransProp[ref].to].name;
+
+	path = *themePath + transS + "/" + transS;
 
 	for (j=0; j<TILES_PER_TRANSITION; j++)
-		if (!loadGround(i+j, path + trans_ext[j], progress ))
+		if (!loadGround(i+j, path + trans_ext[j] ))
 			ret = false;
+
+	if (ret) transitions->setBit(ref);
 	return ret;
 }
+
+
+QwSpritePixmapSequence *groundTheme::getPixmap(groundType gt)
+{
+
+	if (IS_TRANS(gt)) {
+		int ref = GET_TRANS_REF(gt);
+		if (!transitions->testBit(ref))
+			loadTransition(ref);
+	
+		boAssert(transitions->testBit(ref));
+	}
+
+	return groundPix[gt];
+}
+
+
