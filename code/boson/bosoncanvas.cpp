@@ -321,7 +321,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	++animIt;
  }
 
- if (d->mWorkNone.count() > 0 && (advanceCount % 50) == 0) {
+ if (d->mWorkNone.count() > 0 && (advanceCount % 10) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkNone);
 	while (it.current()) {
 		it.current()->advanceNone();
@@ -360,7 +360,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 		++it;
 	}
  }
- if (d->mWorkAttack.count() > 0 && (advanceCount % 40) == 0) {
+ if (d->mWorkAttack.count() > 0 && (advanceCount % 5) == 0) {
 	QPtrListIterator<Unit> it(d->mWorkAttack);
 	while (it.current()) {
 		if (!it.current()->isDestroyed()) {
