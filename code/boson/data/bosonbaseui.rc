@@ -16,6 +16,7 @@
     <Action name="debug_wireframes" />
     <Action name="debug_boundingboxes" />
     <Action name="debug_fps" />
+    <Action name="debug_gamelog" />
   </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_show_chat" append="show_merge" />
