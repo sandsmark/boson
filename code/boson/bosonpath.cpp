@@ -993,7 +993,6 @@ bool BosonPath::inRange(int x, int y)
 
 
 
-#ifdef PATHFINDER_TNG
 /***********************************************************
 *****           N E W   P A T H F I N D E R
 ***********************************************************/
@@ -1443,6 +1442,10 @@ BosonPath2::BosonPath2(BosonMap* map)
   mMap = map;
   mSectors = 0;
   boDebug(510) << k_funcinfo << "END" << endl;
+}
+
+BosonPath2::~BosonPath2()
+{
 }
 
 void BosonPath2::init()
@@ -2961,8 +2964,6 @@ void BosonPath2::removeRegion(BosonPathRegion* r)
 
 /*****  BosonPathInfo  *****/
 
-
-#endif // PATHFINDER_TNG
 
 
 /*
