@@ -46,8 +46,10 @@ void Cell::setGround(groundType g)
 			break;
 		default:
 			ground = g_unknown;
-			break;
+			unsetFlag(known_f);
+			return;
 	}
+	setFlag(known_f);
 }
 
 bool Cell::canGo(mobType type )
