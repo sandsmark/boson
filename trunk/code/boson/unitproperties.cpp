@@ -275,8 +275,8 @@ void UnitProperties::loadAllPluginProperties(KSimpleConfig* conf)
 	boDebug() << k_funcinfo << "loading refinery plugin properties" << endl;
 	loadPluginProperties(new RefineryProperties(this), conf);
  }
- if (conf->hasGroup(RessourceMineProperties::propertyGroup())) {
-	loadPluginProperties(new RessourceMineProperties(this), conf);
+ if (conf->hasGroup(ResourceMineProperties::propertyGroup())) {
+	loadPluginProperties(new ResourceMineProperties(this), conf);
  }
 }
 
