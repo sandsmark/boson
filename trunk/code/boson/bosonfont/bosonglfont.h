@@ -242,8 +242,11 @@ protected:
 	int makeLine(const GLubyte* string, int len, int width) const;
 
 	/**
-	 * @return The position in @p string where to wrap. Currently this
-	 * implementation will wrap at length, i.e. the last char.
+	 * @return A position in @p string where wrapping should occur. This
+	 * tries to find spaces in order to avoid wrapping at a word.
+	 *
+	 * @param string The string to wrap. It should not contain newlines
+	 * ('\n').
 	 **/
 	int wrapAtPos(const GLubyte* string, int length) const;
 

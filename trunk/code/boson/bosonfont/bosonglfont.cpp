@@ -122,13 +122,45 @@ public:
 	}
 	virtual void begin() = 0;
 
+	/**
+	 * newlines ('\n') are not allowed in @p string.
+	 **/
 	virtual int renderString(int x, int y, const GLubyte* string, unsigned int len) = 0;
 
+	/**
+	 * @return The width of the widest char
+	 **/
 	virtual int widestChar() const = 0;
-	virtual int width(const QString& text) const = 0;
+
+	/**
+	 * @return The width of @p text. Any occurances of newlines ('\n') in @p
+	 * text are ignored.
+	 **/
+	int width(const QString& text) const
+	{
+		return width((GLubyte*)text.latin1(), text.length());
+	}
+	/**
+	 * @return The width of @p string . Any occurances of newlines ('\n') in @p
+	 * string are ignored.
+	 * @param len The length of @p string.
+	 **/
+	virtual int width(const GLubyte* string, int len) const = 0;
+
+	/**
+	 * @return The height of a line.
+	 **/
 	virtual int height() const = 0;
+
 	virtual void setPointSize(int s) = 0;
 	virtual void setItalic(bool i) = 0;
+
+	/**
+	 * @return The maximal position of a char in @p string where the width
+	 * of the string is still <= maxWidth. @p string can be rendered up to
+	 * that position without exceeding @p maxWidth.
+	 **/
+	virtual int maxWidthPos(const GLubyte* string, int len, int maxWidth) const = 0;
 };
 
 class BoGLXFont : public BoFont{
@@ -158,9 +190,10 @@ public:
 		return mFontMetrics->maxWidth();
 	}
 
-	virtual int width(const QString& text) const
+	virtual int width(const GLubyte* string, int len) const
 	{
-		return text.length() * widestChar();
+		Q_UNUSED(string);
+		return len * widestChar();
 	}
 	virtual int height() const
 	{
@@ -173,6 +206,16 @@ public:
 	virtual void setItalic(bool i)
 	{
 		Q_UNUSED(i);
+	}
+
+	virtual int maxWidthPos(const GLubyte* string, int len, int maxWidth) const
+	{
+		// AB: note that width(string, len) == len * widestChar() !
+		int pos = (maxWidth / widestChar()) - 1;
+		if (pos >= len) {
+			pos = len - 1;
+		}
+		return pos;
 	}
 
 private:
@@ -248,18 +291,21 @@ public:
 	// string must not contain \0 or \n!
 	virtual int renderString(int x, int y, const GLubyte* string, unsigned int len);
 
-	// '\n's are disallowed in text!
-	virtual int width(const QString& text) const
+	// '\n's are disallowed in string!
+	virtual int width(const GLubyte* string, int len) const
 	{
 		if (!mFont) {
 			return 0;
 		}
 		float w = 0.0f;
-		for (unsigned int i = 0; i < text.length(); i++) {
-			char c = text[i];
+		for (int i = 0; i < len; i++) {
+			char c = string[i];
 			w += mFont->getWidth(c, mPointSize);
 			if (c != ' ') {
 				w += mFont->getGap() * mPointSize;
+			}
+			if (c == '\n') {
+				boWarning() << k_funcinfo << "\\n is not allowed in the text parameter" << endl;
 			}
 		}
 		return (int)ceilf(w);
@@ -284,6 +330,16 @@ public:
 		mItalic = i;
 	}
 
+	virtual int maxWidthPos(const GLubyte* string, int len, int maxWidth) const
+	{
+		for (int pos = len - 1; pos > 0; pos--) {
+			int w = width(string, pos + 1);
+			if (w <= maxWidth) {
+				return pos;
+			}
+		}
+		return 1; // render _always_ at least one char per line, no matter what maxWidth is. avoids dangerous infinite loops.
+	}
 private:
 	BofntTexFont* mFont;
 	float mPointSize;
@@ -451,23 +507,31 @@ int BosonGLFont::width(const QString& text)
 
 int BosonGLFont::wrapAtPos(const GLubyte* string, int length) const
 {
- return length;
+ for (int i = length - 1; i > 0; i--) {
+	if (string[i] == ' ') {
+		return i;
+	}
+ }
+ return length - 1; // could not find a good place to wrap. wrap at the maximum width.
 }
 
-int BosonGLFont::makeLine(const GLubyte* string, int len, int width) const
+// return a len, so that width(string[0]..string[len-1]) <= maxWidth.
+// string must not contain '\n'
+int BosonGLFont::makeLine(const GLubyte* string, int len, int maxWidth) const
 {
- int maxW = widestChar();
- if (maxW == 0) {
-	// returning 0 could result in infinite loops...
-	// 30 is a random value. 1 would suck (only 1 char per line) and result
-	// in long loops.
-	return 30;
+ // maxPos is the maximal length of the string with width < maxWidth
+ int maxPos = mFont->maxWidthPos(string, len, maxWidth);
+
+ int wrapPos;
+ if (maxPos < len - 1) {
+	// try to wrap after a ' ' or so (not inside a word)
+	wrapPos = wrapAtPos(string, maxPos + 1);
+ } else {
+	// we won't wrap at all
+	wrapPos = maxPos;
  }
- if (len * maxW < width) {
-	return len;
- }
- // TODO: search a white space in the text where we can wrap
- return width / maxW;
+
+ return wrapPos + 1; // return a length, not a pos.
 }
 
 int BosonGLFont::widestChar() const
@@ -496,16 +560,13 @@ int BosonGLFont::height(const QString& text, int maxWidth)
  int pos = 0;
  int lines = 0;
  while (pos < len) {
-	// we can always render at least maxPos chars per line.
-	int maxPos = maxWidth / widestChar();
-	int wrapPos;
-	if (maxPos > len - pos) {
-		maxPos = len - pos;
-		wrapPos = maxPos;
-	} else {
-		wrapPos = wrapAtPos(string + pos, maxPos);
+	int l = makeLine(string + pos, len - pos, maxWidth);
+	if (l == 0) {
+		// we cannot display a single char in this line?!
+		boWarning() << k_funcinfo << "unable to process whole string. makeLine() returned 0." << endl;
+		return lines;
 	}
-	pos += wrapPos;
+	pos += l;
 	lines++;
  }
  return lines * height();
@@ -541,6 +602,9 @@ int BosonGLFont::height() const
 int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, bool background)
 {
  int w = width(text);
+ if (w >= maxWidth) {
+	w = maxWidth;
+ }
  const int len = text.length();
  GLubyte* string = (GLubyte*)text.latin1();
  // we must never ever use more height than height(..) claims we do
