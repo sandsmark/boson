@@ -97,7 +97,7 @@ protected:
   /** resizeEvent for the main view */
   virtual void resizeEvent(QResizeEvent *evt);
   /** add filename to the recentList */
-  void addRecent(const char *filename);
+//  void addRecent(const char *filename);
   /** method asks the modified flag and creates a modified dialog for saving */
   void dlgModified();
   /** overloaded for Message box on last window exit */
@@ -117,9 +117,9 @@ protected:
     /** exits the application */
     void slotAppExit();
     /** toggle the toolbar*/
-    void slotViewToolBar_0(); 
+//    void slotViewToolBar_0(); 
     /** toggle the statusbar*/
-    void slotViewStatusBar(); 
+//    void slotViewStatusBar(); 
     /** change the status message to text */
     void slotStatusMsg(const char *text);
     /** change the status message of the whole statusbar temporary */
