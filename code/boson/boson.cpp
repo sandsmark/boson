@@ -100,6 +100,8 @@ public:
 
 	KGameProperty<unsigned long int> mNextUnitId;
 	KGameProperty<unsigned int> mAdvanceCount;
+	KGamePropertyInt mAdvanceFlag;
+
 	Boson::LoadingStatus mLoadingStatus;
 };
 
@@ -128,8 +130,8 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		this, SLOT(slotPlayerJoinedGame(KPlayer*)));
  connect(this, SIGNAL(signalPlayerLeftGame(KPlayer*)),
 		this, SLOT(slotPlayerLeftGame(KPlayer*)));
- connect(this, SIGNAL(signalAdvance(unsigned int)),
-		this, SLOT(slotAdvanceComputerPlayers(unsigned int)));
+ connect(this, SIGNAL(signalAdvance(unsigned int, bool)),
+		this, SLOT(slotAdvanceComputerPlayers(unsigned int, bool)));
  connect(dataHandler(), SIGNAL(signalPropertyChanged(KGamePropertyBase*)),
 		this, SLOT(slotPropertyChanged(KGamePropertyBase*)));
  d->mGameSpeed.registerData(IdGameSpeed, dataHandler(),
@@ -138,9 +140,12 @@ Boson::Boson(QObject* parent) : KGame(BOSON_COOKIE, parent)
 		KGamePropertyBase::PolicyLocal, "NextUnitId");
  d->mAdvanceCount.registerData(IdAdvanceCount, dataHandler(),
 		KGamePropertyBase::PolicyLocal, "AdvanceCount");
+ d->mAdvanceFlag.registerData(IdAdvanceFlag, dataHandler(),
+		KGamePropertyBase::PolicyLocal, "AdvanceFlag");
  d->mNextUnitId.setLocal(0);
  d->mAdvanceCount.setLocal(0);
- d->mGameSpeed.setLocal(0); 
+ d->mGameSpeed.setLocal(0);
+ d->mAdvanceFlag.setLocal(0);
  d->mAdvanceCount.setEmittingSignal(false); // wo don't need it and it would be bad for performance.
 }
 
@@ -1169,7 +1174,7 @@ void Boson::slotPlayerLeftGame(KPlayer* p)
  }
 }
 
-void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/)
+void Boson::slotAdvanceComputerPlayers(unsigned int /*advanceCount*/, bool /*advanceFlag*/)
 {
  // we use this to "advance" the computer player. This is a completely new concept
  // introduced to KGameIO just for boson. See KGaneComputerIO documentation for
@@ -1198,7 +1203,13 @@ QValueList<QColor> Boson::availableTeamColors() const
 
 void Boson::slotReceiveAdvance()
 {
- emit signalAdvance(d->mAdvanceCount);
+ bool flag = advanceFlag();
+ // we need to toggle the flag *now*, in case one of the Unit::advance*()
+ // methods changes the advance function. this change must not appear to the
+ // currently used function, but to the other one.
+ toggleAdvanceFlag();
+ emit signalAdvance(d->mAdvanceCount, flag);
+
  d->mAdvanceCount = d->mAdvanceCount + 1;
  if (d->mAdvanceCount >= MAXIMAL_ADVANCE_COUNT) {
 	d->mAdvanceCount = 0;
@@ -1416,3 +1427,14 @@ Boson::LoadingStatus Boson::loadingStatus()
 {
  return d->mLoadingStatus;
 }
+
+void Boson::toggleAdvanceFlag()
+{
+ d->mAdvanceFlag = !d->mAdvanceFlag;
+}
+
+bool Boson::advanceFlag() const
+{
+ return d->mAdvanceFlag;
+}
+

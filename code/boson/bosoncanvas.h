@@ -183,9 +183,6 @@ public:
 
 	void quitGame();
 
-	void setWorkChanged(Unit* u);
-
-
 	/**
 	 * Called from another threead to set the tileset. Note that until this
 	 * was called there is <em>no</em> cell and <em>no</em> tile on the
@@ -227,15 +224,7 @@ public:
 		return x >= 0 && y >= 0 && x < width() && y < height();
 	}
 
-	/**
-	 * A @ref Unit must not change its @ref Unit::currentPlugin while the
-	 * plugins are locked. This is the case at the beginning of @ref
-	 * slotAdvance.
-	 *
-	 * In other words: @ref UnitPlugin::advance must not change any current
-	 * plugin of any unit.
-	 **/
-	bool unitPluginsLocked() const { return mUnitPluginsLocked; }
+	bool advanceFunctionLocked() const { return mAdvanceFunctionLocked; }
 
 public slots:
 	/**
@@ -247,7 +236,7 @@ public slots:
 	/**
 	 * @param See @ref Boson::signalAdvance
 	 **/
-	void slotAdvance(unsigned int advanceCount);
+	void slotAdvance(unsigned int advanceCount, bool advanceFlag);
 	
 	void slotAddCell(int x, int y, int groundType, unsigned char b);
 
@@ -258,19 +247,6 @@ signals:
 	void signalTilesLoading(int);
 	void signalTilesLoaded();
 
-protected:
-	/**
-	 * Change the work of all units which have called @ref setWork using
-	 * @ref Unit::setWork. This is used to increase the speed of @ref
-	 * slotAdvance
-	 * @param oldWork See @ref UnitBase::WorkType
-	 **/
-	void changeWork();
-
-	void lockUnitPlugins() { mUnitPluginsLocked = true; }
-	void unlockUnitPlugins() { mUnitPluginsLocked = false; }
-
-
 protected slots:
 	/**
 	 * ad the tileset that has been specified using @ref loadTiles. We use
@@ -278,6 +254,9 @@ protected slots:
 	 **/
 	void slotLoadTiles();
 
+protected:
+	void lockAdvanceFunction() { mAdvanceFunctionLocked = true; }
+	void unlockAdvanceFunction() { mAdvanceFunctionLocked = false; }
 
 private:
 	void init();
@@ -286,7 +265,7 @@ private:
 	class BosonCanvasPrivate;
 	BosonCanvasPrivate* d;
 
-	bool mUnitPluginsLocked;
+	bool mAdvanceFunctionLocked;
 
 	int mWidth;
 	int mHeight;

@@ -81,8 +81,8 @@ void BosonWidget::initConnections()
 		this, SLOT(slotOutOfGame(Player*)));
 
  // this does the actual game. note that editor must not have this!
- connect(game(), SIGNAL(signalAdvance(unsigned int)),
-		canvas(), SLOT(slotAdvance(unsigned int)));
+ connect(game(), SIGNAL(signalAdvance(unsigned int, bool)),
+		canvas(), SLOT(slotAdvance(unsigned int, bool)));
 
  connect(game(), SIGNAL(signalInitFogOfWar()),
 		this, SLOT(slotInitFogOfWar()));

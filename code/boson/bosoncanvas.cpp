@@ -133,14 +133,7 @@ public:
 
 	BosonMap* mMap; // just a pointer - no memory allocated
 
-	QPtrList<Unit> mWorkChanged; // Unit::setAdvanceWork() has been called on these units.
-
 	QPtrList<BosonSprite> mAnimList; // see BosonCanvas::slotAdvance()
-	QPtrList<Unit> mWorkNone;
-	QPtrList<Unit> mWorkMove;
-	QPtrList<Unit> mWorkAttack;
-	QPtrList<Unit> mWorkFollow;
-	QPtrList<Unit> mWorkConstructed;
 
 	BoItemList mAllItems;
 
@@ -158,11 +151,10 @@ void BosonCanvas::init()
  d = new BosonCanvasPrivate;
  d->mDestroyedUnits.setAutoDelete(false);
  d->mDeleteShot.setAutoDelete(true);
+ mAdvanceFunctionLocked = false;
 
  d->mLoader = new TileLoader(this);
  connect(d->mLoader->tileSet(), SIGNAL(signalTilesLoading(int)), this, SIGNAL(signalTilesLoading(int)));
-
- mUnitPluginsLocked = false;
 }
 
 BosonCanvas::~BosonCanvas()
@@ -179,12 +171,6 @@ void BosonCanvas::quitGame()
  deleteDestroyed(); // already called before
  d->mAnimList.clear();
  d->mDeleteShot.clear();
-
- d->mWorkNone.clear();
- d->mWorkMove.clear();
- d->mWorkAttack.clear();
- d->mWorkFollow.clear();
- d->mWorkConstructed.clear();
 }
 
 void BosonCanvas::deleteDestroyed()
@@ -269,84 +255,29 @@ Unit* BosonCanvas::findUnitAt(const QPoint& pos)
  return 0;
 }
 
-void BosonCanvas::slotAdvance(unsigned int advanceCount)
+void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 {
-// we cannot use QCanvas::advance() as it advances the animated items in an
-// internal "animDict". this is sorted by pointer addresses and therefore the
-// members differ on every client. So we implement our own advance() as well as
-// addAnimation()/removeAnimation(). We create our own animDict which is sorted
-// by id :-)
-// why does QCanvas use a QPtrDict? we use a QPtrList...
-
-// update (02/03/14): for performance reasons we use several lists now. Every
-// UnitBase::WorkType has an own list which is iterated and the units are
-// advanced according to advanceCount. E.g. we don't need to call
-// advanceProduce() *every* advance call but we *need* to call advanceMove()
-// every advance call (if the unit is moving). Their lists must not be changed
-// while they are iterated. So we test if the advanceWork() was changed and if so we add
-// the unit to the workChanged list and after all of the advance calls we change
-// the lists.
-	
  QPtrListIterator<BosonSprite> animIt(d->mAnimList);
- lockUnitPlugins(); // plugins must not change while their advance() methods get called
- while (animIt.current()) {
-	// the only thing done here is to increase the reload counter. perhaps
-	// we should add a separate list containing all units which are
-	// realoading instead? would save a lot of function calls...
-	// UPDATE: now we also call the UnitPlugin::advance() here, if work() ==
-	// WorkPlugin && currentPlugin() != 0
-	animIt.current()->advance(advanceCount);
-	++animIt;
+ lockAdvanceFunction();
+ if (advanceFlag) {
+	// note: the advance methods must not change the advanceFunction()s
+	// here!
+	while (animIt.current()) {
+		animIt.current()->advance(advanceCount);
+		animIt.current()->advanceFunction(advanceCount); // once this was called this object is allowed to change its advanceFunction()
+		++animIt;
+	}
+ } else {
+	// note: the advance methods must not change the advanceFunction2()s
+	// here!
+	while (animIt.current()) {
+		animIt.current()->advance(advanceCount);
+		animIt.current()->advanceFunction2(advanceCount); // once this was called this object is allowed to change its advanceFunction2()
+		++animIt;
+	}
  }
- unlockUnitPlugins();
+ unlockAdvanceFunction();
 
- if (d->mWorkNone.count() > 0 && (advanceCount % 10) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkNone);
-	while (it.current()) {
-		it.current()->advanceNone();
-		++it;
-	}
- }
-
- if ((d->mWorkMove.count() > 0) && (advanceCount % 1) == 0) { // always true
-	QPtrListIterator<Unit> it(d->mWorkMove);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceMove(); // move
-			it.current()->advanceMoveCheck(); // safety check for advanceMove(). See comments in Unit::moveBy()
-		}
-		++it;
-	}
- }
- if (d->mWorkAttack.count() > 0 && (advanceCount % 5) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkAttack);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceAttack();
-		}
-		++it;
-	}
- }
-
- if (d->mWorkFollow.count() > 0 && (advanceCount % 5) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkFollow);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceFollow();
-		}
-		++it;
-	}
- }
-
- if (d->mWorkConstructed.count() > 0 && (advanceCount % 20) == 0) {
-	QPtrListIterator<Unit> it(d->mWorkConstructed);
-	while (it.current()) {
-		if (!it.current()->isDestroyed()) {
-			it.current()->advanceConstruction();
-		}
-		++it;
-	}
- }
  animIt.toFirst();
  while (animIt.current()) {
 	// now move *without* collision detection. collision detection should
@@ -360,10 +291,7 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount)
 	++animIt;
  }
 
- changeWork();
-
  if (advanceCount == MAXIMAL_ADVANCE_COUNT) {
-//TODO: ensure that these units are in *no* list!
 	kdDebug() << "MAXIMAL_ADVANCE_COUNT" << endl;
 	// there are 2 different timers for deletion of canvas items.
 	// The first is done in BosonCanvas - we only delete anything when
@@ -707,64 +635,6 @@ bool BosonCanvas::cellsOccupied(const QRect& rect, Unit* unit, bool excludeMovin
 	}
  }
  return false;
-}
-
-void BosonCanvas::setWorkChanged(Unit* u)
-{
- if (d->mWorkChanged.contains(u)) {
-	d->mWorkChanged.remove(u);
- }
- d->mWorkChanged.append(u);
-}
-
-void BosonCanvas::changeWork()
-{
- if (d->mWorkChanged.count() == 0) {
-	return;
- }
- QPtrListIterator<Unit> it(d->mWorkChanged);
- for (; it.current(); ++it) {
-	Unit* u = it.current();
-
-	// remove from all lists.
-	d->mWorkNone.removeRef(u);
-	d->mWorkMove.removeRef(u);
-	d->mWorkAttack.removeRef(u);
-	d->mWorkFollow.removeRef(u);
-	d->mWorkConstructed.removeRef(u);
-
-	if (d->mDestroyedUnits.contains(u)) {
-		continue;
-	}
-	if (u->isDestroyed() || u->advanceWork() == UnitBase::WorkDestroyed) {
-		kdWarning() << k_funcinfo << "is already destroyed" << endl;
-		continue;
-	}
-	switch (u->advanceWork()) {
-		case UnitBase::WorkNone:
-			d->mWorkNone.append(u);
-			break;
-		case UnitBase::WorkMove:
-			d->mWorkMove.append(u);
-			break;
-		case UnitBase::WorkAttack:
-			d->mWorkAttack.append(u);
-			break;
-		case UnitBase::WorkFollow:
-			d->mWorkFollow.append(u);
-			break;
-		case UnitBase::WorkConstructed:
-			d->mWorkConstructed.append(u);
-			break;
-		case UnitBase::WorkPlugin:
-			// nothing to do here. handled in Unit::advance()
-			break;
-		case UnitBase::WorkDestroyed:
-			// nothing to do here. is in d->mDestroyedUnits
-			break;
-	}
- }
- d->mWorkChanged.clear();
 }
 
 void BosonCanvas::deleteShot(BoShot* s)

@@ -563,3 +563,8 @@ bool Player::hasUnitWithType(unsigned long int type) const
  return false;
 }
 
+bool Player::advanceFlag() const
+{
+ return ((Boson*)game())->advanceFlag();
+}
+

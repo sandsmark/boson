@@ -51,6 +51,11 @@ public:
 	SpeciesTheme* speciesTheme() const { return mSpecies; }
 
 	/**
+	 * Convenience method for ((Boson*)game()->advanceFlag
+	 **/
+	bool advanceFlag() const;
+
+	/**
 	 * @return @ref SpeciesTheme::teamColor
 	 **/
 	const QColor& teamColor() const;
