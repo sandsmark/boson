@@ -19,7 +19,8 @@ MiniMapColor=4278190335
 
 [Texture_3]
 File=mud.jpg
-AmountOfWater=180
+AmountOfWater=100
+AmountOfLand=130
 MiniMapColor=4278190335
 
 [Texture_4]
