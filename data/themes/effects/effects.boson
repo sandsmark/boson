@@ -215,7 +215,7 @@ MinLife=2
 MaxLife=3
 StartSize=0.1
 EndSize=0.3
-MaxSpeed=30
+MaxSpeed=8
 Spacing=10
 Texture=smoke
 
@@ -234,7 +234,7 @@ MaxLife=0.25
 BlendFunc=GL_ONE
 StartSize=0.07
 EndSize=0.2
-MaxSpeed=30
+MaxSpeed=8
 Spacing=5
 Texture=explosion-old
 
