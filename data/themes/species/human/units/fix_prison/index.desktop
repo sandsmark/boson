@@ -7,3 +7,5 @@ Health=200
 MineralCost=250
 Producer=10
 Requirements=5,2
+UnitWidth=2.0
+UnitHeight=2.0

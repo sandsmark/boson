@@ -7,6 +7,8 @@ Health=100
 MineralCost=100
 Producer=10
 Requirements=5,2
+UnitWidth=2.0
+UnitHeight=2.0
 
 [Boson Facility]
 CanRefineMinerals=true

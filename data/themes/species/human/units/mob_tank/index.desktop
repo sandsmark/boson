@@ -18,5 +18,6 @@ CanGoOnLand=true
 CanGoOnWater=false
 
 [Textures]
+Textures=metal3.jpg
 metal3.jpg=hhroofgray.jpg
 

@@ -7,6 +7,8 @@ Health=250
 MineralCost=300
 Producer=10
 Requirements=5
+UnitWidth=2.0
+UnitHeight=2.0
 
 [Boson Facility]
 

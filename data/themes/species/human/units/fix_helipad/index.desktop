@@ -9,7 +9,7 @@ Producer=10
 Requirements=4,5,3
 
 [Textures]
-Textures=rome_str.jpg,airportr.jpg,elecpane.jpg
-airportr.jpg=airportroadcorner2.jpg
-rome_str.jpg=rome_streets1.jpg
-elecpane.jpg=elecpanelstwo.jpg
+Textures=concrt1.jpg,concrt2.jpg
+concrt1.jpg=rome_streets1.jpg
+concrt2.jpg=docktopside.jpg
+

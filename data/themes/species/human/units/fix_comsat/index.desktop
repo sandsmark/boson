@@ -8,3 +8,5 @@ MineralCost=200
 Producer=10
 SupportMiniMap=true
 Requirements=5,2,12
+UnitWidth=2.0
+UnitHeight=2.0
