@@ -32,12 +32,16 @@
 
 #include <ksimpleconfig.h>
 #include <kconfig.h>
+#include <kstaticdeleter.h>
 
 #include <GL/gl.h>
 
 /// Start of static initialization stuff
+KRandomSequence* BosonParticleSystemProperties::mRandom = 0;
 QDict<BosonParticleTextureArray> BosonParticleSystemProperties::mTextureArrays;
 QString BosonParticleSystemProperties::mTexturePath;
+static KStaticDeleter<KRandomSequence> sd;
+
 
 const BosonParticleTextureArray* BosonParticleSystemProperties::getTextures(const QString& name)
 {
@@ -71,6 +75,13 @@ const BosonParticleTextureArray* BosonParticleSystemProperties::getTextures(cons
 
 void BosonParticleSystemProperties::initStatic(const QString& texdir)
 {
+  if (mRandom)
+  {
+    boError(150) << k_funcinfo << "called twice" << endl;
+    return;
+  }
+  mRandom = new KRandomSequence(123456789);
+  sd.setObject(mRandom);
   mTexturePath = texdir;
 }
 /// End of static initialization stuff (below this is real code ;-))
@@ -184,7 +195,7 @@ void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonPa
   // Note that we use our own texture array here, not the one stored in
   //  BosonParticleSystem (which is only used for drawing). It doesn't matter,
   //  because they are identical (in theory ;-)) anyway.
-  int t = (int)((1.0 - factor) * (mTextures->mTextureCount + 1)); // +1 for last texture to be shown
+  int t = (int)((1.0 - factor) * ((int)mTextures->mTextureCount + 1)); // +1 for last texture to be shown
   if(t >= (int)mTextures->mTextureCount)
   {
     t = mTextures->mTextureCount - 1;
@@ -207,3 +218,7 @@ QPtrList<BosonParticleSystemProperties> BosonParticleSystemProperties::loadParti
   }
   return props;
 }
+
+/*
+ * vim: et sw=2
+ */
