@@ -3,12 +3,12 @@ CXXFLAGS = -pipe -Wall  -g # -O2
 #MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
 #CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
-boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp
-boserver_LDADD   = ../map/libbomap.la ../common/libboson.la  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
+boserver_SOURCES = boserver.cpp main.cpp connect.cpp serverUnit.cpp serverMap.cpp player.cpp serverCell.cpp
+boserver_LDADD   = ../common/libboson.la  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
 
 SUBDIRS = 
 
-EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp
+EXTRA_DIST = main.cpp boserver.cpp boserver.h connect.h connect.cpp serverUnit.cpp serverUnit.h serverMap.cpp player.cpp serverCell.h serverCell.cpp
 
 install-data-local:
 	$(mkinstalldirs) $(kde_appsdir)/

@@ -22,14 +22,15 @@
 
 #include <qpainter.h>
 
-#include "../map/serverCell.h"
 #include "../map/map.h"
-#include "../map/playField.h"
+#include "serverCell.h"
 #include "boserver.h"
 #include "serverUnit.h"
 
+
 void BosonServer::initMap(const char *mapfile)
 {
+int i,j;
 playField field(mapfile);
 
 mobile.resize(149);
@@ -39,8 +40,33 @@ facility.setAutoDelete(TRUE);
 key = 127; // why not ?
 
 assert(true == field.load() );
+///orzel, was ugly.. should handle load()==false correctly 
 
-map	= field.map;
+map.width = field.map.width;
+map.height = field.map.height;
+
+/* creation of the ground map */
+map.cells = new (serverCell *)[map.width];
+for (i=0; i< map.width; i++)
+	map.cells[i] = new (serverCell)[map.height];
+
+/* initialisation */
+for (i=0; i< map.width; i++)
+	for (j=0; j< map.height; j++)
+		map.cells[i][j].setGroundType( field.map.cells[i][j]);
+
+
+/* freeing of field.map.cells */
+for (i=0; i< map.width; i++)
+	delete [] field.map.cells[i];
+delete [] field.map.cells;
+
+/* checking */
+for (int i=0; i< 3; i++)
+	for (int j=0; j< 3; j++)
+		boAssert(map.cells[i][j].known == 0l);
+
+
 people	= field.people;
 nbPlayer= field.nbPlayer;
 
