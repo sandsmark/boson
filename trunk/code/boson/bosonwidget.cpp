@@ -586,6 +586,7 @@ void BosonWidget::quitGame()
  d->mIOList.clear();
  d->mCanvas->quitGame();
  d->mBoson->quitGame();
+ d->mCanvas->update();
  
  
  d->mLocalPlayer = 0;

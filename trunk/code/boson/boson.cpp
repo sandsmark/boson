@@ -113,9 +113,9 @@ void Boson::quitGame()
 
  // remove all players from game
  QPtrList<KPlayer> list = *playerList();
- while (list.count() > 0) {
-	removePlayer(list.take(0)); // might not be necessary - sends remove over network
-	systemRemovePlayer(list.take(0), true); // remove immediately, even befroe network removing is received.
+ for (unsigned int i = 0; i < list.count(); i++) {
+	removePlayer(list.at(i)); // might not be necessary - sends remove over network
+	systemRemovePlayer(list.at(i), true); // remove immediately, even before network removing is received.
  }
 // kdDebug() << k_funcinfo << " done" <<  endl;
 }
