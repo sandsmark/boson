@@ -95,7 +95,7 @@ private:
 
 BosonWidgetsPlugin::BosonWidgetsPlugin()
 {
- addBosonWidget("BoGameChat", "bosonwidgets/bogamechat.h", "Boson's KGame chat widget (with fixed message id!)", QString::null, QString::null);
+ addBosonWidget("BoGameChatWidget", "bosonwidgets/bogamechat.h", "Boson's KGame chat widget (with fixed message id!)", QString::null, QString::null);
  addBosonWidget("BosonMiniMap", "bosonminimap.h", "Mini map widget", QString::null, QString::null);
  addBosonWidget("BosonPlayFieldView", "bosonwidgets/bosonplayfieldview.h", "PlayField view", QString::null, QString::null);
  addBosonWidget("BoIntNumInput", "bosonwidgets/bonuminput.h", "Boson's int num input", QString::null, QString::null);
@@ -125,8 +125,8 @@ void BosonWidgetsPlugin::addBosonWidget(const QString& className, const QString&
 QWidget* BosonWidgetsPlugin::create(const QString& key, QWidget* parent, const char* name)
 {
  kdDebug() << k_funcinfo << key << endl;
- if (key == "BoGameChat") {
-	return new BoGameChat(parent, name);
+ if (key == "BoGameChatWidget") {
+	return new BoGameChatWidget(parent, name);
  } else if (key == "BosonMiniMap") {
 	// we cannot create an actual minimap widget, as it depends on Unit,
 	// Player, ...

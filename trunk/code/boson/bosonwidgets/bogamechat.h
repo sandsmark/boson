@@ -24,14 +24,14 @@
 #include <qwidget.h>
 
 class KGameChat;
-class BoGameChatPrivate;
+class BoGameChatWidgetPrivate;
 
-class BoGameChat : public QWidget
+class BoGameChatWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoGameChat(QWidget* parent, const char* name);
-	~BoGameChat();
+	BoGameChatWidget(QWidget* parent, const char* name);
+	~BoGameChatWidget();
 
 	KGameChat* chatWidget() const { return mKGameChat; }
 
@@ -46,7 +46,7 @@ public:
 
 private:
 	KGameChat* mKGameChat;
-	BoGameChatPrivate* d;
+	BoGameChatWidgetPrivate* d;
 };
 
 #endif

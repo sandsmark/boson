@@ -30,10 +30,10 @@
 #include <qlayout.h>
 #include <qlabel.h>
 
-class BoGameChatPrivate
+class BoGameChatWidgetPrivate
 {
 public:
-	BoGameChatPrivate()
+	BoGameChatWidgetPrivate()
 	{
 		mLayout = 0;
 		mDesignerLabel = 0;
@@ -43,9 +43,9 @@ public:
 	QLabel* mDesignerLabel;
 };
 
-BoGameChat::BoGameChat(QWidget* parent, const char* name) : QWidget(parent, name)
+BoGameChatWidget::BoGameChatWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
- d = new BoGameChatPrivate;
+ d = new BoGameChatWidgetPrivate;
  d->mInitialized = false;
  if (!kapp) {
 	// we are in Qt designer. create some dummy widgets, to show that this
@@ -54,19 +54,19 @@ BoGameChat::BoGameChat(QWidget* parent, const char* name) : QWidget(parent, name
 	// uses kapp and that is not allowed in Qt designer. Sometimes it works,
 	// but KDE breaks compatibility in that class very often (e.g. when it
 	// comes to completion settings).
-	d->mDesignerLabel = new QLabel("This is a (dummy) BoGameChat widget", this);
+	d->mDesignerLabel = new QLabel("This is a (dummy) BoGameChatWidget", this);
 	d->mDesignerLabel->resize(d->mDesignerLabel->sizeHint());
  } else {
 	initWidget();
  }
 }
 
-BoGameChat::~BoGameChat()
+BoGameChatWidget::~BoGameChatWidget()
 {
  delete d;
 }
 
-void BoGameChat::initWidget()
+void BoGameChatWidget::initWidget()
 {
  if (d->mInitialized) {
 	return;
