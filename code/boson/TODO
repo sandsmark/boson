@@ -18,6 +18,7 @@ Game TODOs
 - display how many (and which) units are still in queue for production
 - connect to Boson::signalNotEnough[Minerals|Oild]() and give some visual
   feedback
+- fix this evil BosonBigDisplay::test() hack
 
 
 Editor (map, unit, scenario) TODOs
@@ -46,6 +47,9 @@ General TODOs
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
 - Use BosonCanvas::unitCollisionsInRange() wherever useful
+- transmit everything on startup over network (== map, unitProperties). This
+  saves us from a cheating player who (maybe just accidently) changed the files
+  (units/*/index.desktop especially).
 
 
 Data TODOs

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -190,7 +190,6 @@ void BosonWidget::init()
  connect(d->mBoson, SIGNAL(signalGameStarted()),
 		this, SIGNAL(signalGameStarted()));
 
-
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
 		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)), // only EDITOR signal
@@ -310,6 +309,9 @@ void BosonWidget::slotPlayerJoinedGame(KPlayer* player)
 		this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
  if (d->mMap) {
 	p->initMap(d->mMap);
+ }
+ if (player == d->mLocalPlayer) {
+	changeLocalPlayer(d->mLocalPlayer); // now with a KGame object
  }
 }
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "cell.h"
 #include "bosonmessage.h"
 #include "defines.h"
+#include "kgamecanvaschat.h"
 
 #include <kgame/kgameio.h>
 #include <kdebug.h>
@@ -36,6 +37,7 @@
 #include <qpoint.h>
 #include <qpainter.h>
 #include <qbitmap.h>
+#include <qtimer.h>
 
 #include "bosonbigdisplay.moc"
 
@@ -64,6 +66,8 @@ public:
 		mIsRMBMove = false;
 
 		mLocalPlayer = 0;
+
+		mChat = 0;
 	}
 
 	BosonBigDisplay::SelectionMode mSelectionMode;
@@ -85,6 +89,9 @@ public:
 	QCanvasText* mOil;
 
 	bool mIsModified; // for editor mode
+
+
+	KGameCanvasChat* mChat;
 };
 
 BosonBigDisplay::BosonBigDisplay(QCanvas* c, QWidget* parent) : QCanvasView(c, parent)
@@ -113,17 +120,22 @@ void BosonBigDisplay::init()
 		this, SLOT(slotContentsMoving(int, int)));
 
  d->mMinerals = new QCanvasText(canvas());
- d->mMinerals->setZ(Z_RESOURCES);
+ d->mMinerals->setZ(Z_CANVASTEXT);
  d->mMinerals->setColor(white);
  d->mMinerals->show();
  d->mOil = new QCanvasText(canvas());
- d->mOil->setZ(Z_RESOURCES);
+ d->mOil->setZ(Z_CANVASTEXT);
  d->mOil->setColor(white);
  d->mOil->show();
+
+ d->mChat = new KGameCanvasChat(this, BosonMessage::IdChat);
+ d->mChat->setCanvas(canvas());
+ d->mChat->setZ(Z_CANVASTEXT);
 }
 
 BosonBigDisplay::~BosonBigDisplay()
 {
+ delete d->mChat;
  delete d;
 }
 
@@ -452,6 +464,9 @@ void BosonBigDisplay::actionClicked(const QPoint& pos, QDataStream& stream, bool
 void BosonBigDisplay::setLocalPlayer(Player* p)
 {
  d->mLocalPlayer = p;
+ if (p) {
+	d->mChat->setFromPlayer(p);
+ }
 }
 
 void BosonBigDisplay::resizeEvent(QResizeEvent* e)
@@ -634,9 +649,20 @@ void BosonBigDisplay::slotUpdateOil(int oil)
 
 void BosonBigDisplay::slotContentsMoving(int x, int y)
 {
+ viewport()->setUpdatesEnabled(false);
  d->mMinerals->move(x + visibleWidth() - 5 - d->mMinerals->boundingRect().width(), y + 5);
  d->mOil->move     (x + visibleWidth() - 5 - d->mOil->boundingRect().width(), y + 5 + d->mMinerals->boundingRect().height());
+ QTimer::singleShot(0, this, SLOT(test()));
+
+ d->mChat->move(x + 10, y + visibleWidth() - 10); // FIXME: hardcoded!
 }
+
+void BosonBigDisplay::test()
+{
+ viewport()->setUpdatesEnabled(true);
+ viewport()->update();
+}
+
 
 bool BosonBigDisplay::isModified() const
 {
