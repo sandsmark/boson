@@ -47,6 +47,7 @@ void BosonParticleManager::loadTextures(QString texdir)
   images.append(QImage(texdir + "/explosion.png"));
   images.append(QImage(texdir + "/explosion.png"));
   images.append(QImage(texdir + "/smoke.png"));
+  images.append(QImage(texdir + "/explosion.png"));
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -107,6 +108,14 @@ BosonParticleSystem* BosonParticleManager::newSystem(BoVector3 pos, Type type)
     age = 3600 * 24 * 30;
     initfunc = &initSmallSmokeParticle;
   }
+  else if(type == ShockWave)
+  {
+    maxnum = 500;
+    initnum = 500;
+    size = 1.0;
+    initfunc = &initShockWaveParticle;
+    blendfunc = GL_ONE;
+  }
 
   BosonParticleSystem* s = new BosonParticleSystem(maxnum, rate, true,
       2, mTextures->texture((int)type - 1), initfunc, updatefunc);
@@ -139,7 +148,7 @@ void BosonParticleManager::initSmokeParticle(BosonParticleSystem*, BosonParticle
   particle->pos = BoVector3(getFloat(-0.2, 0.2), getFloat(-0.2, 0.2), getFloat(-0.1, 0.25));
 }
 
-void BosonParticleManager::initSmallSmokeParticle(BosonParticleSystem* s, BosonParticle* particle)
+void BosonParticleManager::initSmallSmokeParticle(BosonParticleSystem*, BosonParticle* particle)
 {
   particle->life = getFloat(1.5, 2.3);
   particle->maxage = particle->life;
@@ -171,6 +180,18 @@ void BosonParticleManager::updateFireParticle(BosonParticleSystem*, BosonParticl
   particle->color.setY(0.3 * (particle->life / particle->maxage));  // Green - makes fire more yellow
   particle->color.setZ(0.15 * (particle->life / particle->maxage));  // Blue - makes fire more white
   particle->color.setW(0.3 * (particle->life / particle->maxage));  // Alpha
+}
+
+void BosonParticleManager::initShockWaveParticle(BosonParticleSystem*, BosonParticle* particle)
+{
+  particle->life = getFloat(0.3, 0.5);
+  particle->maxage = particle->life;
+  BoVector3 velo(getFloat(-1, 1), getFloat(-1, 1), getFloat(-0.2, 0.2));  // Extremely big velocity
+  velo.normalize();
+  velo.scale(getFloat(4, 5));
+  particle->velo = velo;
+  particle->color = BoVector4(1.0, 0.4, 0.01, 0.25);
+  particle->pos = BoVector3(0, 0, getFloat(0.2, 0.7));
 }
 
 void BosonParticleManager::updateFadeOutParticle(BosonParticleSystem*, BosonParticle* particle)

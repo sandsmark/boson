@@ -419,6 +419,11 @@ void BosonCanvas::destroyUnit(Unit* unit)
 			unit->z() * BO_GL_CELL_SIZE / BO_TILE_SIZE);
 	d->mParticles.append(BosonParticleManager::newExplosion(pos));
 	d->mParticles.append(BosonParticleManager::newSmoke(pos));
+	// For tank, we want bigger explosion
+	// Note that this is harcoded and extremely bad at the moment
+	if(unit->type() == 10005) {
+		d->mParticles.append(BosonParticleManager::newShockWave(pos));
+	}
 	emit signalUnitDestroyed(unit);
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
