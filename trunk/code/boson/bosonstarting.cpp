@@ -60,38 +60,6 @@ void BosonStarting::setNewGameData(const QByteArray& data)
 
 void BosonStarting::setEditorMap(const QByteArray& buffer)
 {
-#if 0
- boDebug() << k_funcinfo << endl;
- QDataStream stream(buffer, IO_ReadOnly);
- delete mNewPlayField;
- mNewPlayField = new BosonPlayField(this);
- BosonMap* map = new BosonMap(mNewPlayField);
- map->loadCompleteMap(stream);
- mNewPlayField->changeMap(map);
-
- // WARNING: this is a hack. See BosonNewEditorWidget class!
- // this message should contain the map only, *not* the scenario!
- Q_INT32 maxPlayers;
- Q_INT32 minPlayers;
- QString name;
- QString comment;
- stream >> maxPlayers;
- stream >> minPlayers;
- BosonScenario* scenario = new BosonScenario();
- scenario->setPlayers(minPlayers, maxPlayers);
- scenario->initializeScenario();
- mNewPlayField->changeScenario(scenario);
-
- stream >> name;
- stream >> comment;
- BPFDescription* description = new BPFDescription();
- description->setName(name);
- description->setComment(comment);
- mNewPlayField->changeDescription(description);
-
- mNewPlayField->finalizeLoading(); // do not preload anything or so
-
-#endif
 }
 
 void BosonStarting::startNewGame()
@@ -168,20 +136,6 @@ bool BosonStarting::start()
 
  boGame->setPlayField(mDestPlayField);
  emit signalAssignMap(); // for the BosonWidgetBase
-
- // If we're loading saved game, local player isn't set and inited, because it
- //  was not known (not loaded) when BosonWidgetBase was constructed. Set and init
- //  it now
- if (mLoading) {
-	boDebug() << k_funcinfo << "set local player for loaded games now" << endl;
-	if (!boGame->localPlayer()) {
-		boWarning() << k_funcinfo << "NULL player" << endl;
-		return false;
-	}
-#warning FIXME for LOADING code
-//	slotChangeLocalPlayer(boGame->localPlayer());
-	mPlayer = boGame->localPlayer();
- }
 
  boGame->lock();
  if (!loadTiles()) {
