@@ -197,11 +197,6 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
  if (!args) {
 	return;
  }
- BosonStartEditorWidget* w = (BosonStartEditorWidget*)d->mWidgetStack->widget(IdStartEditor);
- if (!w) {
-	boError() << k_funcinfo << "Oops - NULL start editor widget" << endl;
-	return;
- }
  // here we can check for some things like --playfield and call the functions
  // e.g.:
  if (args->isSet("playfield")) {
@@ -214,7 +209,7 @@ void BosonStartupWidget::slotStartEditor(KCmdLineArgs* args)
 
 
  if (args->isSet("start")) {
-	w->slotStartGameClicked();
+	d->mNetworkInterface->sendStartGameClicked();
  }
 }
 
@@ -301,10 +296,6 @@ void BosonStartupWidget::initWidget(WidgetId widgetId)
 		BosonStartEditorWidget* startEditor = new BosonStartEditorWidget(d->mNetworkInterface, this);
 		connect(startEditor, SIGNAL(signalCancelled()),
 				this, SLOT(slotShowWelcomeWidget()));
-		connect(startEditor, SIGNAL(signalSetLocalPlayer(Player*)),
-				this, SIGNAL(signalSetLocalPlayer(Player*)));
-
-		// AB: ensure that the local player actually gets assigned!
 
 		w = startEditor;
 		break;
