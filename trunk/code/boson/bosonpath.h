@@ -534,7 +534,7 @@ template<class T> class BosonPathHeap : public QValueList<T>
 class BosonPathInfo
 {
   public:
-    BosonPathInfo()  { reset(); range = 0; waiting = 0; }
+    BosonPathInfo()  { reset(); range = 0; waiting = 0; pathrecalced = 0; }
     void reset()
     {
       unit = 0;
@@ -592,9 +592,14 @@ class BosonPathInfo
 
 
     // Are these ok here???
+    // If true, then unit attacks enemies in sight while moving
     bool moveAttacking;
+    // If true, unit will decelerate before reaching destination
     bool slowDownAtDest;
+    // How many advance calls unit has been waiting since path was last recalced
     int waiting;
+    // How many times path has been recalculated for unit (while waiting)
+    int pathrecalced;
 };
 
 class BosonPathHighLevelPath
