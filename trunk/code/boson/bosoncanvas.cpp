@@ -1157,6 +1157,7 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
 	}
  }
  root.appendChild(shots);
+ return true;
 }
 
 void BosonCanvas::changeAdvanceList(BosonItem* item)
