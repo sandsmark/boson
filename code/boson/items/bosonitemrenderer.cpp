@@ -114,16 +114,16 @@ void BosonItemRenderer::renderItem(unsigned int lod)
 	glVertex3f(w, h, 0.0f);
 
 	// front
-	glVertex3f(0.0f, h, 0.0f);
-	glVertex3f(w, h, 0.0f);
+	glVertex3f(0.0f, 0.0f, depth);
+	glVertex3f(w, 0.0f, depth);
 	glVertex3f(w, 0.0f, 0.0f);
 	glVertex3f(0.0f, 0.0f, 0.0f);
 
 	// back
 	glVertex3f(0.0f, h, depth);
 	glVertex3f(w, h, depth);
-	glVertex3f(w, 0.0f, depth);
-	glVertex3f(0.0f, 0.0f, depth);
+	glVertex3f(w, h, 0.0f);
+	glVertex3f(0.0f, h, 0.0f);
  glEnd();
  glTranslatef(w/2, h/2, 0.0f);
 }
