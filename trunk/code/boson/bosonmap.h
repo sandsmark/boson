@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,14 +63,24 @@ public:
 	 * @return vertical cell count
 	 **/
 	inline unsigned int height() const { return mMapHeight; }
-	
+
 	/**
-	 * @return Horizonatal cell count
+	 * @return Horizontal cell count
 	 **/
 	inline unsigned int width() const { return mMapWidth; }
 
+	/**
+	 * @return The cell at x,y (in cell positions!) or NULL if the
+	 * coordinates have been invalid.
+	 * @param x x-coordinate of the requested cell. Must be 0 < x < @ref
+	 * width
+	 * @param y y-coordinate of the requested cell. Must be 0 < y < @ref
+	 * height
+	 **/
+	Cell* cell(int x, int y) const;
+
 	bool loadMap(QDomElement& node);
-	
+
 	/**
 	 * Read the map geo from stream. This only reads map size, playercount
 	 * and something like this. Use @ref loadCells to load the cells.
@@ -108,8 +118,6 @@ public:
 	 * savely using @ref saveMapGeo
 	 **/
 	bool isValid() const;
-
-	Cell* cell(int x, int y) const;
 
 	/**
 	 * You should rather use @ref cell ! If you use this, you need to ensure
@@ -181,22 +189,6 @@ protected:
 	bool loadCells(QDomElement&);
 	bool loadCell(QDomElement&, int& x, int& y, int& groundType, unsigned char& b);
 
-
-	bool loadMap(const QByteArray& buffer, bool binary);
-
-	/**
-	 * Read the magic string from stream.
-	 * @return TRUE if the magic string matches the expected value.
-	 * Otherwise FALSE (not a boson map file)
-	 **/
-	bool verifyMap(QDataStream& stream);
-
-	/**
-	 * Write the validity string to the stream. @ref verifyMap reads this
-	 * string, so a binary map loaded from a file should first contain the
-	 * validity string/header.
-	 **/
-	void saveValidityHeader(QDataStream& stream);
 
 protected slots:
 	/**
