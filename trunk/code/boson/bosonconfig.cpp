@@ -76,7 +76,7 @@ int BosonConfig::commandFramePosition(KConfig* conf)
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int pos = conf->readNumEntry("CommandFramePosition", 0);
+ int pos = conf->readNumEntry("CommandFramePosition", Qt::DockLeft);
  conf->setGroup(oldGroup);
  return pos;
 }

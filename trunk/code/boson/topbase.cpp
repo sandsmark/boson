@@ -19,6 +19,7 @@
 #include "topbase.h"
 
 #include "bosonwidget.h"
+#include "bosonconfig.h"
 
 #include <klocale.h>
 #include <kmenubar.h>
@@ -54,6 +55,7 @@ public:
 	KToggleAction* mChatAction;
 	KSelectAction* mZoomAction;
 
+	QToolBar* mCommandBar;
 	QVBox* mCommandFrame; // kind of.. also contains the minimap
 };
 
@@ -70,18 +72,34 @@ TopBase::TopBase()
  initKAction();
  initStatusBar();
 
- QToolBar* bar = new QToolBar(i18n("CommandFrame"), this, QMainWindow::Left); // FIXME: config (left)
- d->mCommandFrame = new QVBox(bar);
+ d->mCommandBar = new QToolBar(i18n("CommandFrame"), this, QMainWindow::Left);
+ d->mCommandFrame = new QVBox(d->mCommandBar);
  mBosonWidget->addMiniMap(d->mCommandFrame);
 
- setDockEnabled(bar, DockTop, false);
- setDockEnabled(bar, DockBottom, false);
+ setDockEnabled(d->mCommandBar, DockTop, false);
+ setDockEnabled(d->mCommandBar, DockBottom, false);
+ connect(mBosonWidget, SIGNAL(signalMoveCommandFrame(int)),
+		this, SLOT(slotMoveCommandFrame(int)));
+ slotMoveCommandFrame(BosonConfig::commandFramePosition());
  
  showMaximized();
 }
 
 TopBase::~TopBase()
 {
+ int pos;
+/* if (!d->mCommandBar->area()) {
+	pos = DockUnmanaged; // not yet supported for startup
+ } else */
+ if (d->mCommandBar->area() == rightDock()) {
+	pos = DockRight;
+ } else {
+	pos = DockLeft;
+ }
+ BosonConfig::saveCommandFramePosition(pos);
+
+ delete d->mCommandFrame;
+ delete d->mCommandBar;
  delete d;
 }
 
@@ -232,3 +250,11 @@ QFrame* TopBase::commandFrame() const
  return d->mCommandFrame;
 }
 
+void TopBase::slotMoveCommandFrame(int pos)
+{
+ if (pos == DockUnmanaged) {
+	d->mCommandBar->undock();
+ } else {
+	moveDockWindow(d->mCommandBar, (Dock)pos);
+ }
+}

@@ -68,6 +68,7 @@ private slots:
 	void slotShowStatusbar();
 	void slotShowChat();
 	void slotConfigureToolbars();
+	void slotMoveCommandFrame(int pos);
 
 private:
 	void initStatusBar();

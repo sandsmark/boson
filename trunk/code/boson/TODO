@@ -53,7 +53,7 @@ General TODOs
 - transmit everything on startup over network (== map, unitProperties). This
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
-
+- OptionsDialog: default position of commandframe
 
 Data TODOs
 - replace .bmp files by .png ones

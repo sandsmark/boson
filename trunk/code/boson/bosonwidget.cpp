@@ -81,7 +81,6 @@ public:
 		mUnitTips = 0;
 
 		mTopLayout = 0;
-		mFrameLayout = 0;
 		mViewLayout = 0;
 
 		mMusic = 0;
@@ -103,7 +102,6 @@ public:
 	KSpriteToolTip* mUnitTips;
 
 	QHBoxLayout* mTopLayout;
-	QVBoxLayout* mFrameLayout; // minimap and command frame
 	QVBoxLayout* mViewLayout; // chat and bigdisplay
 	int mCommandPos;
 	int mChatPos;
@@ -125,7 +123,6 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
-// slotCommandFramePosition(BosonConfig::commandFramePosition());
  d->mMusic->setSound(BosonConfig::sound());
  d->mMusic->setMusic(BosonConfig::music());
 
@@ -274,10 +271,9 @@ void BosonWidget::initChat()
 
 BosonWidget::~BosonWidget()
 {
+ kdDebug() << k_funcinfo << endl;
  delete d->mUnitTips;
- delete d->mMiniMap;
  delete d->mBigDisplay;
- delete d->mCommandFrame;
 
 // delete the destroyed units first
  d->mCanvas->deleteDestroyed();
@@ -293,6 +289,7 @@ BosonWidget::~BosonWidget()
 	delete d->mScenario;
  }
  delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::addLocalPlayer()
@@ -663,7 +660,6 @@ void BosonWidget::addEditorCommandFrame(QWidget* parent)
 		d->mCommandFrame, SLOT(slotShowUnit(Unit*)));
 
 
-// slotCommandFramePosition(BosonConfig::commandFramePosition());
  slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
@@ -685,7 +681,6 @@ void BosonWidget::addGameCommandFrame(QWidget* parent)
  connect(d->mBoson, SIGNAL(signalCompletedProduction(Facility*)),
 		d->mCommandFrame, SLOT(slotProductionCompleted(Facility*)));
  
-// slotCommandFramePosition(BosonConfig::commandFramePosition());
  slotChatFramePosition(BosonConfig::chatFramePosition());
 }
 
@@ -843,10 +838,10 @@ void BosonWidget::saveConfig()
  kdDebug() << k_funcinfo << endl;
  BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
- BosonConfig::saveCommandFramePosition(d->mCommandPos);
  BosonConfig::saveChatFramePosition(d->mChatPos);
  BosonConfig::saveSound(sound());
  BosonConfig::saveMusic(music());
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void BosonWidget::slotSendChangeSpecies(const QString& species)
@@ -939,31 +934,32 @@ void BosonWidget::slotInitFogOfWar()
 
 void BosonWidget::slotCommandFramePosition(int pos)
 {
- recreateLayout(pos, d->mChatPos);
+ if (pos == OptionsDialog::Right) {
+	emit signalMoveCommandFrame(DockRight);
+ } else if (pos == OptionsDialog::Undocked) {
+	emit signalMoveCommandFrame(DockUnmanaged);
+ } else {
+	emit signalMoveCommandFrame(DockLeft);
+ }
+ d->mCommandPos = pos;
 }
 
 void BosonWidget::slotChatFramePosition(int chatPos)
 {
- recreateLayout(d->mCommandPos, chatPos);
+ recreateLayout(chatPos);
 }
 
-void BosonWidget::recreateLayout(int commandPos, int chatPos)
+void BosonWidget::recreateLayout(int chatPos)
 {
  if (d->mViewLayout) {
 	delete d->mViewLayout;
 	d->mViewLayout = 0;
- }
- if (d->mFrameLayout) {
-	delete d->mFrameLayout;
  }
  if (d->mTopLayout) {
 	delete d->mTopLayout;
  }
 // redo layout
  d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
- d->mFrameLayout = new QVBoxLayout();
-// d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
-// d->mFrameLayout->addWidget(d->mCommandFrame);
  d->mViewLayout = new QVBoxLayout();
 
  if (chatPos == OptionsDialog::Top) {
@@ -973,15 +969,9 @@ void BosonWidget::recreateLayout(int commandPos, int chatPos)
 	d->mViewLayout->addWidget(d->mBigDisplay);
 	d->mViewLayout->addWidget(d->mChat);
  }
- 
- if (commandPos == OptionsDialog::Right) {
-	d->mTopLayout->addLayout(d->mViewLayout);
-//	d->mTopLayout->addLayout(d->mFrameLayout);
- } else {
-//	d->mTopLayout->addLayout(d->mFrameLayout);
-	d->mTopLayout->addLayout(d->mViewLayout);
- }
- d->mCommandPos = commandPos;
+
+ d->mTopLayout->addLayout(d->mViewLayout);
+
  d->mChatPos = chatPos;
  d->mTopLayout->activate();
 }
