@@ -1,0 +1,7 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Helipad
+Id=1
+Health=100
+Prize=100

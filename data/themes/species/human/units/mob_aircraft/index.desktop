@@ -1,0 +1,15 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=2
+Name=Aircraft
+Id=10004
+Health=100
+Prize=100
+Range=100
+Damage=10
+Reload=30
+
+[Boson Mobile Unit]
+Speed=6
+CanGoOnLand=true
+CanGoOnWater=true

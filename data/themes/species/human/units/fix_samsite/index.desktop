@@ -1,0 +1,10 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Sam Site
+Id=6
+Health=100
+Prize=100
+Range=100
+Damage=30
+Reload=30

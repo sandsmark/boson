@@ -1,0 +1,7 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Power Plant
+Id=2
+Health=100
+Prize=100

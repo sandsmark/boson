@@ -1,0 +1,7 @@
+[Boson Unit]
+IsFacility=true
+TerrainType=0
+Name=Barracks
+Id=4
+Health=100
+Prize=100

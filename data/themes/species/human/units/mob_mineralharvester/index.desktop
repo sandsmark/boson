@@ -1,0 +1,12 @@
+[Boson Unit]
+IsFacility=false
+TerrainType=0
+Name=Mineral Harvester
+Id=10003
+Health=100
+Prize=100
+
+[Boson Mobile Unit]
+Speed=3
+CanGoOnLand=true
+CanGoOnWater=false
