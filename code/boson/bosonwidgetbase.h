@@ -30,7 +30,6 @@ class QDataStream;
 class QDomElement;
 
 class BosonCursor;
-class BosonCanvas;
 class BosonBigDisplay;
 class BosonBigDisplayBase;
 class Unit;
@@ -80,133 +79,15 @@ public:
 	 **/
 	void setDisplayManager(BoDisplayManager* displayManager);
 
-	void setLocalPlayer(Player* p);
-
-	void setCanvas(BosonCanvas* canvas);
-
-	BosonCanvas* canvas() const;
 	inline BoDisplayManager* displayManager() const { return mDisplayManager; }
-	Player* localPlayer() const { return mLocalPlayer; }
-	PlayerIO* localPlayerIO() const;
 
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame
 	 **/
 	void initGameMode();
 
-	virtual void saveConfig();
-
-	bool sound() const;
-	bool music() const;
-
-	void setShowChat(bool s);
-
-	/**
-	 * Add and initialize the first @ref BosonBigDisplayBase. Note that at
-	 * this point all tiles have to be loaded. See @ref BosonMap::tileSet
-	 * and @ref BosonCanvas::loadTiles
-	 **/
-	void addInitialDisplay();
-
-	void init(KDockWidget* chatDock);
-	virtual void initPlayer();
-	virtual void quitGame();
-
-
-public slots:
-	/**
-	 * Unfogs the map for the specified player
-	 * @param player The player that shall see the map or NULL for all
-	 * players
-	 **/
-	void slotUnfogAll(Player* player = 0);
-
-	/**
-	 * Sends signals to update mobiles/facilities count for player p
-	 **/
-	void slotUnitCountChanged(Player* p);
-
-protected slots:
-	// These are used to save/load camera, unit groups etc.
-	void slotLoadExternalStuffFromXML(const QDomElement& root);
-	void slotSaveExternalStuffAsXML(QDomElement& root);
-
-	// AB: this isn't really nice in the widget class. a dedicated
-	// scriptmanager class would be nicer.
-	void slotRunScriptLine(const QString& line);
-
-signals:
-	/**
-	 * Emitted when the number of units of the local player changes.
-	 **/
-	void signalMobilesCount(int mobileUnits);
-
-	/**
-	 * Emitted when the number of units of the local player changes.
-	 **/
-	void signalFacilitiesCount(int facilities);
-
-	void signalMineralsUpdated(int);
-	void signalOilUpdated(int);
-
-	void signalMoveCommandFrame(int);
-
-	/**
-	 * Emitted when the user wants to quit the game and has confirmed the
-	 * "are you sure" messagebox.
-	 **/
-	void signalQuit();
-	void signalEndGame();
-	void signalSaveGame();
-
-	void signalChangeLocalPlayer(Player* p);
-
-protected slots:
-	void slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*);
-
-	void slotItemAdded(BosonItem*);
-	void slotUnitRemoved(Unit* unit);
-
-	/**
-	 * Directly adds a chat message (without sending to netowrk). If @p
-	 * forPlayer is non-NULL, the message is displayed only, if it equals
-	 * the local player.
-	 **/
-	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer = 0);
-
-
-protected:
-	void initBigDisplay(BosonBigDisplayBase*);
-
-	virtual void initDisplayManager();
-	virtual void initConnections();
-
-	/**
-	 * Called by @ref slotStartScenario and the equivalent for loading games
-	 * (remember that we can't use @ref slotStartScenario for loading
-	 * games).
-	 *
-	 * This will actually start scenario and game, send @ref
-	 * BosonMessage::IdGameIsStarted and so on.
-	 *
-	 * Derived classes should e.g. set the game speed.
-	 **/
-	virtual void startScenarioAndGame();
-
 private:
-	void initChat(KDockWidget* chatDock);
-
-	void initLayout();
-	void initScripts();
-
-private:
-	class BosonWidgetBasePrivate;
-	BosonWidgetBasePrivate* d;
-
-	Player* mLocalPlayer;
-
 	BoDisplayManager* mDisplayManager;
-	BosonLocalPlayerInput* mLocalPlayerInput;
 };
 
 #endif

@@ -50,7 +50,7 @@ public:
 BosonUfoChat::BosonUfoChat() : BoUfoWidget()
 {
  d = new BosonUfoChatPrivate;
- mChat = 0;
+ mMessageId = -1;
  mGame = 0;
  d->mTimes.setAutoDelete(true);
  connect(&d->mRemoveTimer, SIGNAL(timeout()), this, SLOT(slotTimeout()));
@@ -68,30 +68,21 @@ BosonUfoChat::~BosonUfoChat()
  delete d;
 }
 
-void BosonUfoChat::setChat(KGameChat* chat)
+void BosonUfoChat::setMessageId(int msgid)
 {
- mChat = chat;
- if (!mChat) {
-	setKGame(0);
-	return;
- }
- if (!mChat->game()) {
-	boError() << k_funcinfo << "oops! the chat widget has no KGame!" << endl;
-	return;
- }
- setKGame(mChat->game());
+ mMessageId = msgid;
 }
 
 int BosonUfoChat::messageId() const
 {
- if (mChat) {
-	return mChat->messageId();
- }
- return -1;
+ return mMessageId;
 }
 
-void BosonUfoChat::setKGame(KGame* g)
+void BosonUfoChat::setKGame(KGame* g, int msgid)
 {
+ if (msgid >= 0) {
+	setMessageId(msgid);
+ }
  if (g == mGame) {
 	return;
  }
@@ -113,6 +104,7 @@ void BosonUfoChat::slotUnsetKGame()
 	return;
  }
  disconnect(mGame, 0, this, 0);
+ mGame = 0;
 }
 
 void BosonUfoChat::slotReceiveMessage(int msgid, const QByteArray& buffer, Q_UINT32, Q_UINT32 sender)
@@ -145,9 +137,6 @@ void BosonUfoChat::addMessage(KPlayer* p, const QString& text)
  if (!p) {
 	boError() << k_funcinfo << "NULL player" << endl;
 	return;
- }
- if (!mChat) {
-	boError() << k_funcinfo << "NULL chat" << endl;
  }
  addMessage(i18n("%1: %2").arg(p->name()).arg(text));
 }

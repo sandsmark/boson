@@ -32,6 +32,9 @@
 #include "bosonmessage.h"
 #include "speciestheme.h"
 #include "bodisplaymanager.h"
+#include "bosonbigdisplaybase.h"
+#include "bosonbigdisplayinput.h"
+#include "editorbigdisplayinput.h"
 #include "bosonstarting.h"
 #include "rtti.h"
 #include "bodebug.h"
@@ -41,6 +44,7 @@
 #include "bosondata.h"
 #include "bosongroundtheme.h"
 #include "bosonlocalplayerinput.h"
+#include "unit.h"
 
 #include <kgameio.h>
 
@@ -54,6 +58,7 @@
 #include <qtimer.h>
 #include <qhbox.h>
 #include <qvbox.h>
+#include <qguardedptr.h>
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -73,6 +78,8 @@ public:
 		mStarting = 0;
 
 		mIface = 0;
+
+		mLocalPlayer = 0;
 	}
 
 	BosonStartupWidget* mStartup;
@@ -85,6 +92,8 @@ public:
 	BosonStarting* mStarting;
 
 	BoDebugDCOPIface* mIface;
+
+	QGuardedPtr<Player> mLocalPlayer;
 };
 
 TopWidget::TopWidget() : KDockMainWindow(0, "topwindow")
@@ -169,6 +178,18 @@ void TopWidget::initDisplayManager()
  // have to load the textures several times.
  d->mDisplayManager->addInitialDisplay();
 
+ BosonBigDisplayBase* display = d->mDisplayManager->activeDisplay();
+ BO_CHECK_NULL_RET(display);
+ connect(display, SIGNAL(signalEditorChangeLocalPlayer(Player*)),
+		this, SLOT(slotChangeLocalPlayer(Player*)));
+ connect(display, SIGNAL(signalEndGame()),
+		this, SLOT(slotEndGame()));
+ connect(display, SIGNAL(signalQuit()),
+		this, SLOT(close()));
+ connect(display, SIGNAL(signalSaveGame()),
+		this, SLOT(slotSaveGame()));
+
+
  d->mDisplayManager->hide();
 }
 
@@ -210,6 +231,15 @@ void TopWidget::initBoson()
  // is emitted and we start here
  connect(boGame, SIGNAL(signalStartNewGame()), this, SLOT(slotStartNewGame()));
  connect(boGame, SIGNAL(signalGameStarted()), this, SLOT(slotGameStarted()));
+
+ connect(boGame, SIGNAL(signalAdvance(unsigned int, bool)),
+		d->mDisplayManager, SLOT(slotAdvance(unsigned int, bool)));
+ connect(boGame, SIGNAL(signalLoadExternalStuffFromXML(const QDomElement&)),
+		this, SLOT(slotLoadExternalStuffFromXML(const QDomElement&)));
+ connect(boGame, SIGNAL(signalSaveExternalStuffAsXML(QDomElement&)),
+		this, SLOT(slotSaveExternalStuffAsXML(QDomElement&)));
+ connect(boGame, SIGNAL(signalAddChatSystemMessage(const QString&, const QString&, const Player*)),
+		this, SLOT(slotAddChatSystemMessage(const QString&, const QString&, const Player*)));
 
  // for editor (new maps)
  connect(boGame, SIGNAL(signalEditorNewMap(const QByteArray&)),
@@ -267,35 +297,11 @@ void TopWidget::initBosonWidget()
  }
  BO_CHECK_NULL_RET(d->mDisplayManager);
  BO_CHECK_NULL_RET(boGame);
- if (boGame->gameMode()) {
-	BosonWidget* w = new BosonWidget(mMainDock);
-	connect(w, SIGNAL(signalSaveGame()), this, SLOT(slotSaveGame()));
-	d->mBosonWidget = w;
- } else {
-	EditorWidget* w = new EditorWidget(mMainDock);
-	d->mBosonWidget = w;
- }
 
- // signalChangeLocalPlayer() is used in editor mode
- connect(d->mBosonWidget, SIGNAL(signalChangeLocalPlayer(Player*)),
-		this, SLOT(slotChangeLocalPlayer(Player*)));
-
- connect(d->mBosonWidget, SIGNAL(signalEndGame()),
-		this, SLOT(slotEndGame()));
- connect(d->mBosonWidget, SIGNAL(signalQuit()),
-		this, SLOT(close()));
- connect(d->mBosonWidget, SIGNAL(signalMobilesCount(int)),
-		this, SIGNAL(signalSetMobilesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalFacilitiesCount(int)),
-		this, SIGNAL(signalSetFacilitiesCount(int)));
- connect(d->mBosonWidget, SIGNAL(signalOilUpdated(int)),
-		this, SIGNAL(signalOilUpdated(int)));
- connect(d->mBosonWidget, SIGNAL(signalMineralsUpdated(int)),
-		this, SIGNAL(signalMineralsUpdated(int)));
-
+ d->mBosonWidget = new BosonWidgetBase(mMainDock);
  d->mBosonWidget->setDisplayManager(d->mDisplayManager);
 
- d->mBosonWidget->init(0); // this depends on several virtual methods and therefore can't be called in the c'tor
+ setFocusPolicy(StrongFocus);
 
 }
 
@@ -321,10 +327,6 @@ void TopWidget::slotStartNewGame()
  d->mStartup->showLoadingWidget();
 
  initBosonWidget();
-
- if (d->mBosonWidget->localPlayer()) {
-	boWarning(270) << k_funcinfo << "localPlayer should be NULL until game is started!" << endl;
- }
 
  // this will take care of all data loading, like models, textures and so. this
  // also initializes the map and will send IdStartScenario - in short this will
@@ -431,10 +433,10 @@ void TopWidget::endGame()
  if (d->mDisplayManager) {
 	d->mDisplayManager->quitGame();
  }
- if (d->mBosonWidget) {
-	d->mBosonWidget->quitGame();
-	d->mStatusBarTimer.stop();
+ if (boGame) {
+	boGame->quitGame();
  }
+ d->mStatusBarTimer.stop();
  delete d->mBosonWidget;
  d->mBosonWidget = 0;
  Boson::deleteBoson();  // Easiest way to reset game info
@@ -523,9 +525,8 @@ bool TopWidget::queryExit()
  if (boGame->gameStatus() != KGame::Init) {
 	// note that even a startup widget might be on top here (e.g. when
 	// saving a game)!
-	d->mBosonWidget->saveConfig();
-	d->mDisplayManager->quitGame();
-	d->mBosonWidget->quitGame();
+	saveConfig();
+	endGame();
 	return true;
  }
  if (mMainDock->getWidget() != d->mStartup) {
@@ -540,8 +541,6 @@ bool TopWidget::queryExit()
 
 void TopWidget::slotUpdateStatusBar()
 {
- BO_CHECK_NULL_RET(d->mBosonWidget);
- BO_CHECK_NULL_RET(d->mBosonWidget->displayManager());
  const BosonCanvas* canvas = boGame->canvas();
  BO_CHECK_NULL_RET(canvas);
  BosonCanvasStatistics* stat = canvas->canvasStatistics();
@@ -571,8 +570,21 @@ void TopWidget::changeLocalPlayer(Player* p)
 	boError() << k_funcinfo << "NULL game object" << endl;
 	return;
  }
- if (d->mBosonWidget) {
-	d->mBosonWidget->setLocalPlayer(p);
+ if (d->mLocalPlayer) {
+	KGameIO* oldIO = d->mLocalPlayer->findRttiIO(BosonLocalPlayerInput::LocalPlayerInputRTTI);
+	if (oldIO) {
+		d->mLocalPlayer->removeGameIO(oldIO);
+	}
+ }
+ d->mLocalPlayer = p;
+ if (d->mLocalPlayer) {
+	BosonLocalPlayerInput* input = new BosonLocalPlayerInput();
+	connect(input, SIGNAL(signalAction(const BoSpecificAction&)),
+			d->mDisplayManager, SLOT(slotAction(const BoSpecificAction&)));
+	d->mLocalPlayer->addGameIO(input);
+	d->mDisplayManager->activeDisplay()->setLocalPlayerIO(d->mLocalPlayer->playerIO());
+ } else {
+	d->mDisplayManager->activeDisplay()->setLocalPlayerIO(0);
  }
 
  // AB: note: the startup widgets don't need to know the new local player
@@ -632,6 +644,13 @@ void TopWidget::slotGameStarted()
  Player* localPlayer = 0;
  for (unsigned int i = 0; i < boGame->playerCount(); i++) {
 	Player* p = (Player*)boGame->playerList()->at(i);
+	disconnect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
+			this, 0);
+	connect(p, SIGNAL(signalPropertyChanged(KGamePropertyBase*,KPlayer*)),
+			this, SLOT(slotPlayerPropertyChanged(KGamePropertyBase*, KPlayer*)));
+ }
+ for (unsigned int i = 0; i < boGame->playerCount(); i++) {
+	Player* p = (Player*)boGame->playerList()->at(i);
 	if (!p->isVirtual()) {
 		// a non-virtual player is a player that is running on this host
 		// (either the local player or a computer player - never a
@@ -680,20 +699,15 @@ void TopWidget::slotGameStarted()
 	boError(270) << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- if (d->mBosonWidget->localPlayer()) {
-	boWarning(270) << k_funcinfo << "localPlayer should ne NULL here!" << endl;
- }
  slotChangeLocalPlayer(localPlayer);
- d->mBosonWidget->initPlayer();
+ emit signalMineralsUpdated(localPlayer->minerals());
+ emit signalOilUpdated(localPlayer->oil());
+ slotUnitCountChanged(localPlayer);
 
- if (d->mBosonWidget->canvas()) {
-	boWarning(270) << k_funcinfo << "BosonWidget::canvas() is non-NULL ("
-			<< d->mBosonWidget->canvas()
-			<< ")! This is very unexpected!" << endl;
-	boWarning(270) << k_funcinfo << "setting it to " << d->mBosonWidget->canvas() << endl;
-
- }
- d->mBosonWidget->setCanvas(boGame->canvasNonConst());
+ connect(boGame->canvas(), SIGNAL(signalUnitRemoved(Unit*)),
+		this, SLOT(slotUnitRemoved(Unit*)));
+ connect(boGame->canvas(), SIGNAL(signalItemAdded(BosonItem*)),
+		this, SLOT(slotItemAdded(BosonItem*)));
 
  d->mDisplayManager->setCanvas(boGame->canvasNonConst());
 
@@ -711,7 +725,41 @@ void TopWidget::slotGameStarted()
 
  // Init some stuff
  d->mStatusBarTimer.start(1000);
- d->mBosonWidget->initGameMode();
+ BosonBigDisplayBase* display = d->mDisplayManager->activeDisplay();
+ if (display->isInputInitialized()) {
+	boWarning() << k_funcinfo << "display input is already initialized?! probably quitGame() was not called" << endl;
+ } else {
+	if (boGame->gameMode()) {
+		display->setDisplayInput(new BosonBigDisplayInput(display));
+	} else {
+		display->setDisplayInput(new EditorBigDisplayInput(display));
+	}
+	connect(display->displayInput(), SIGNAL(signalLockAction(bool)),
+			d->mDisplayManager, SIGNAL(signalLockAction(bool)));
+	display->setInputInitialized(true);
+ }
+ display->setLocalPlayerIO(d->mLocalPlayer->playerIO());
+ display->show();
+
+ // Center home base if new game was started. If game is loaded, camera was
+ //  already loaded as well
+ // FIXME: this is hackish but I don't know any other way of checking if game
+ //  is loaded or new one here. Feel free to improve
+ if (boGame->loadingStatus() != BosonSaveLoad::LoadingCompleted) {
+	display->slotCenterHomeBase();
+ }
+
+ if (boGame->gameMode()) {
+	if (boGame->isAdmin()) {
+		if (boGame->gameSpeed() == 0) {
+			// don't do this if gameSpeed() != 0, as it was set already
+			// (e.g. due to a savegame)
+			boGame->slotSetGameSpeed(BosonConfig::readGameSpeed());
+		}
+	}
+	boMusic->startLoop();
+ }
+ d->mBosonWidget->initGameMode(); // just does initLayout(), can be removed
 }
 
 void TopWidget::slotResetGame()
@@ -863,4 +911,98 @@ void TopWidget::slotChangeLocalPlayer(Player* p)
  changeLocalPlayer(p);
 }
 
+void TopWidget::slotUnitCountChanged(Player* p)
+{
+ emit signalSetMobilesCount(p->mobilesCount());
+ emit signalSetFacilitiesCount(p->facilitiesCount());
+}
+
+void TopWidget::slotItemAdded(BosonItem* item)
+{
+ if (!item) {
+	boError() << k_funcinfo << "NULL item" << endl;
+	return;
+ }
+ if (!RTTI::isUnit(item->rtti())) {
+	return;
+ }
+ Unit* unit = (Unit*)item;
+ Player* p = unit->owner();
+ if (!p) {
+	boError() << k_funcinfo << "NULL owner" << endl;
+	return;
+ }
+ if (p != d->mLocalPlayer) {
+	return;
+ }
+
+ slotUnitCountChanged(p);
+}
+
+void TopWidget::slotUnitRemoved(Unit* unit)
+{
+ if (unit->owner() != d->mLocalPlayer) {
+	return;
+ }
+
+ slotUnitCountChanged(unit->owner());
+}
+
+void TopWidget::slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p)
+{
+ if (p != d->mLocalPlayer) {
+	// not yet used
+	return;
+ }
+ switch (prop->id()) {
+	case Player::IdMinerals:
+		emit signalMineralsUpdated(d->mLocalPlayer->minerals());
+		break;
+	case Player::IdOil:
+		emit signalOilUpdated(d->mLocalPlayer->oil());
+		break;
+	default:
+		break;
+ }
+
+}
+
+void TopWidget::slotLoadExternalStuffFromXML(const QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ // TODO: load camera
+ // TODO: load unitgroups
+ d->mDisplayManager->loadFromXML(root);
+}
+
+void TopWidget::slotSaveExternalStuffAsXML(QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+ // TODO: save camera  (BosonBigDisplayBase?)
+ // TODO: save unitgroups  (BoDisplayManager?)
+ d->mDisplayManager->saveAsXML(root);
+}
+
+void TopWidget::slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer)
+{
+ if (forPlayer && forPlayer != d->mLocalPlayer) {
+	return;
+ }
+ d->mDisplayManager->activeDisplay()->addChatMessage(i18n("--- %1: %2").arg(fromName).arg(text));
+}
+
+void TopWidget::saveConfig()
+{
+ if (!boGame) {
+	return;
+ }
+ if (!d->mLocalPlayer) {
+	return;
+ }
+ if (boGame->gameMode()) {
+	BosonConfig::saveLocalPlayerName(d->mLocalPlayer->name());
+	BosonConfig::saveGameSpeed(boGame->gameSpeed());
+ } else {
+ }
+}
 

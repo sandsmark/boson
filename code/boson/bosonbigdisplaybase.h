@@ -266,7 +266,6 @@ public:
 	bool isInputInitialized();
 	void setInputInitialized(bool initialized);
 
-	void setKGameChat(KGameChat* chat);
 	void addChatMessage(const QString& message);
 
 	void setUpdateInterval(unsigned int ms);
@@ -403,7 +402,6 @@ signals:
 	void signalSelectionChanged(BoSelection* selection);
 
 	void signalToggleChatVisible();
-	void signalUnfogAll();
 	void signalSetGrabMovie(bool);
 	void signalToggleStatusbar(bool);
 	void signalSaveGame();
@@ -443,6 +441,7 @@ protected slots:
 	void slotDebugKGame();
 	void slotUpdateOpenGLSettings();
 	void slotChangeCursor(int, const QString&);
+	void slotUnfogAll(Player* pl = 0);
 	void slotEditorSavePlayFieldAs();
 	void slotEditorChangeLocalPlayer(int);
 	void slotEditorDeleteSelectedUnits();

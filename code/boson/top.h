@@ -24,11 +24,15 @@
 
 class QString;
 class Boson;
+class KPlayer;
 class Player;
+class Unit;
+class BosonItem;
 class BosonCanvas;
 class BosonWidgetBase;
 class KCmdLineArgs;
 class KDialogBase;
+class KGamePropertyBase;
 
 /**
  * @author Thomas Capricelli <capricel@email.enst.fr>, Andreas Beckermann <b_mann@gmx.de>
@@ -155,6 +159,7 @@ protected:
 	void reinitGame();
 
 	void changeLocalPlayer(Player* p);
+	void saveConfig();
 
 protected slots:
 	void slotChangeLocalPlayer(Player* p);
@@ -185,6 +190,14 @@ protected slots:
 	void slotEditorNewMap(const QByteArray&);
 
 	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
+
+	void slotUnitCountChanged(Player*);
+	void slotItemAdded(BosonItem*);
+	void slotUnitRemoved(Unit*);
+	void slotPlayerPropertyChanged(KGamePropertyBase* prop, KPlayer* p);
+	void slotSaveExternalStuffAsXML(QDomElement& root);
+	void slotLoadExternalStuffFromXML(const QDomElement& root);
+	void slotAddChatSystemMessage(const QString& fromName, const QString& text, const Player* forPlayer);
 
 private:
 	void initDisplayManager();
