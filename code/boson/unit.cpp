@@ -1694,13 +1694,20 @@ void MobileUnit::advanceMoveInternal(unsigned int advanceCallsCount) // this act
 	// Move towards it
 	dist -= moveTowardsPoint(pp, x + xspeed, y + yspeed, dist, xspeed, yspeed);
 
+	boDebug(401) << k_funcinfo << "Moving from (" << x << "; " << y <<
+			") to (" << x + xspeed << "; " << y + yspeed <<
+			"); pp: (" << (float)pp.x() << "; " << (float)pp.y() <<
+			"); dist: " << dist << "/" << speed() << endl;
 	// Check if we reached that pathpoint
 	if ((x + xspeed == (float)pp.x()) && (y + yspeed == (float)pp.y())) {
 		// Unit has reached pathpoint
 		boDebug(401) << k_funcinfo << "unit " << id() << ": unit is at pathpoint" << endl;
 		pathPointDone();
+		QPoint nextpp = currentPathPoint();
+		boDebug(401) << k_funcinfo << "next pathpoint is (" << nextpp.x() << "; " << nextpp.y() << ")" << endl;
 		// Check for enemies
 		if (attackEnemyUnitsInRangeWhileMoving()) {
+			boDebug(401) << k_funcinfo << "enemies found in range, breaking" << endl;
 			break;
 		}
 	}
@@ -1897,6 +1904,22 @@ void MobileUnit::advanceMoveCheck()
  if (canvas()->cellOccupied(currentPathPoint().x() / BO_TILE_SIZE,
 		currentPathPoint().y() / BO_TILE_SIZE, this, false)) {
 #endif
+	boDebug(401) << k_funcinfo << "Next pathpoint is occupied, waiting" << endl;
+	const BoItemList* items = canvas()->cell(currentPathPoint().x() / BO_TILE_SIZE,
+			currentPathPoint().y() / BO_TILE_SIZE)->items();
+	bool flying = isFlying();
+	for (BoItemList::ConstIterator it = items->begin(); it != items->end(); it++) {
+		if (RTTI::isUnit((*it)->rtti())) {
+			Unit* u = (Unit*)*it;
+			if (this == u) {
+				continue;
+			}
+			if (u->isFlying() != flying) {
+				continue;
+			}
+			boDebug(401) << k_funcinfo << "Unit " << u->id() << " found on occupied cell" << endl;
+		}
+	}
 	// If we'd continue moving with set velocity, we'd collide with something.
 	// Stop.
 
