@@ -322,6 +322,7 @@ bool BoAutoGameCamera::advance2()
 
 void BoAutoGameCamera::resetDifferences()
 {
+  BoAutoCamera::resetDifferences();
   mPosZDiff = 0;
   mRotationDiff = 0;
   mRadiusDiff = 0;
