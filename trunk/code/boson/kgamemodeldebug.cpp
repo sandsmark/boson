@@ -406,6 +406,9 @@ public:
 		mUnconnectedFacesList = 0;
 		mMeshMatrix = 0;
 
+		mFacesCountLabel = 0;
+		mVertexCountLabel = 0;
+
 		m3ds = 0;
 	}
 
@@ -429,6 +432,9 @@ public:
 	BoFaceView* mConnectedFacesList;
 	BoFaceView* mUnconnectedFacesList;
 	BoMatrixWidget* mMeshMatrix;
+
+	QLabel* mFacesCountLabel;
+	QLabel* mVertexCountLabel;
 
 	int mCurrentItem;
 	Lib3dsFile* m3ds;
@@ -518,7 +524,13 @@ void KGameModelDebug::initMeshPage()
  d->mMeshView->addColumn(i18n("Flags count"), metrics.width(QString::number(11)));
  d->mMeshView->addColumn(i18n("Max point index"), metrics.width(QString::number(11)));
  connect(d->mMeshView, SIGNAL(executed(QListViewItem*)), this, SLOT(slotDisplayMesh(QListViewItem*)));
- d->mMeshView->resize(d->mMeshView->height(), 150);
+ QVBox* modelInfo = new QVBox(meshView); // actually it doesn't fit to "meshView", but rather display info about the model
+ QHBox* faces = new QHBox(modelInfo);
+ (void)new QLabel(i18n("Faces: "), faces);
+ d->mFacesCountLabel = new QLabel(faces);
+ QHBox* vertices = new QHBox(modelInfo);
+ (void)new QLabel(i18n("Vertices (Faces * 3): "), vertices);
+ d->mVertexCountLabel = new QLabel(vertices);
 
  QVBox* faceView = new QVBox(splitter);
  d->mFaceList = new BoFaceView(faceView);
@@ -588,6 +600,20 @@ void KGameModelDebug::slotUpdate()
 
  updateMaterialPage();
  updateMeshPage();
+
+ if (!d->m3ds) {
+	return;
+ }
+ int faces = 0;
+ Lib3dsMesh* mesh = d->m3ds->meshes;
+ for (; mesh; mesh = mesh->next) {
+	faces += mesh->faces;
+ }
+ d->mFacesCountLabel->setText(QString::number(faces));
+ d->mVertexCountLabel->setText(QString::number(faces * 3));
+ //TODO: we could also display how many points will actually get rendered. could
+ //be interesting in case we ever use triangle strips. currently those values
+ //would be exactly the same.
 }
 
 void KGameModelDebug::updateMaterialPage()
