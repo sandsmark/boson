@@ -38,7 +38,12 @@ public:
 	BoSelection(QObject* parent);
 	~BoSelection();
 
-	void copy(BoSelection* selection);
+	/**
+	 * Warning: this function does not emit any signal!
+	 * @param replace If TRUE (default) then the current selection is
+	 * replaced. If FALSE, the new units are added to the selection instead.
+	 **/
+	void copy(BoSelection* selection, bool replace = true);
 
 	/**
 	 * Clear the selection and unselect all units.
@@ -50,17 +55,20 @@ public:
 
 	/**
 	 * Select a list of units
+	 * @param replace If TRUE (default) then the current selection is
+	 * replaced. If FALSE, the new units are added to the selection instead.
 	 **/
-	void selectUnits(QPtrList<Unit> list);
+	void selectUnits(QPtrList<Unit> list, bool replace = true);
 
 	/**
-	 * Select a single unit
+	 * Select a single unit.
+	 * @param replace If TRUE (default) then the current selection is
+	 * replaced. If FALSE, the new unit is added to the selection instead.
 	 **/
-	void selectUnit(Unit*);
+	void selectUnit(Unit*, bool replace = true);
 
 	/**
-	 * Remove unit from this selection and unselect unit. Also emit @ref
-	 * signalUnselectUnit
+	 * Remove unit from this selection and unselect unit.
 	 **/
 	void removeUnit(Unit* unit);
 

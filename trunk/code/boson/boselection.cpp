@@ -33,10 +33,12 @@ BoSelection::~BoSelection()
 {
 }
 
-void BoSelection::copy(BoSelection* selection)
+void BoSelection::copy(BoSelection* selection, bool replace)
 {
  // this function does not emit any signal!
- clear(false);
+ if (replace) {
+	clear(false);
+ }
  if (!selection) {
 	return;
  }
@@ -84,26 +86,30 @@ void BoSelection::add(Unit* unit)
  unit->select();
 }
 
-void BoSelection::selectUnit(Unit* unit)
+void BoSelection::selectUnit(Unit* unit, bool replace)
 {
  if (!unit) {
 	kdError() << k_funcinfo << "NULL unit" << endl;
  }
- clear(false);
+ if (replace) {
+	clear(false);
+ }
  add(unit);
  emit signalSelectionChanged(this);
 }
 
-void BoSelection::selectUnits(QPtrList<Unit> list)
+void BoSelection::selectUnits(QPtrList<Unit> list, bool replace)
 {
  if (!list.count()) {
 	return;
  }
  if (list.count() == 1) {
-	selectUnit(list.first());
+	selectUnit(list.first(), replace);
 	return;
  }
- clear(false);
+ if (replace) {
+	clear(false);
+ }
  Player* p = 0;
  QPtrListIterator<Unit> it(list);
  while (it.current() && it.current()->owner()) {

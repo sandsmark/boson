@@ -262,12 +262,12 @@ protected:
 
 	void calcFPS();
 
-	bool selectAll(const UnitProperties* prop);
+	bool selectAll(const UnitProperties* prop, bool replace);
 
 	/**
 	 * Select units in the curren selection rect
 	 **/
-	void selectArea();
+	void selectArea(bool replace);
 
 	/**
 	 * Start the selection at x,y,z. Either select the unit at this position
@@ -282,9 +282,13 @@ protected:
 	void moveSelectionRect(GLfloat x, GLfloat y, GLfloat z);
 
 	/**
-	 * Remove a currently drawn selection rect.
+	 * Remove a currently drawn selection rect and select all units inside
+	 * this rect.
+	 * @param replace If TRUE the current selection is replaced, otherwise
+	 * the selected units are added to the selection.
+	 * Usually when the player holds the shift key down while selecting.
 	 **/
-	void removeSelectionRect();
+	void removeSelectionRect(bool replace);
 
 	void selectionStart(GLfloat* x, GLfloat* y, GLfloat* z) const;
 	void selectionEnd(GLfloat* x, GLfloat* y, GLfloat* z) const;
