@@ -77,6 +77,8 @@ public:
 	ProductionProperties(const UnitProperties* parent);
 	~ProductionProperties();
 
+	static QString propertyGroup();
+
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Production; }
@@ -93,6 +95,8 @@ public:
 	RepairProperties(const UnitProperties* parent);
 	~RepairProperties();
 
+	static QString propertyGroup();
+
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);
 	virtual int pluginType() const { return Repair; }
@@ -105,6 +109,8 @@ class HarvesterProperties : public PluginProperties
 public:
 	HarvesterProperties(const UnitProperties* parent);
 	~HarvesterProperties();
+
+	static QString propertyGroup();
 
 	virtual QString name() const;
 	virtual void loadPlugin(KSimpleConfig* config);

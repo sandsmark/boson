@@ -50,6 +50,11 @@ RepairProperties::~RepairProperties()
 {
 }
 
+QString RepairProperties::propertyGroup()
+{
+ return QString::fromLatin1("RepairPlugin");
+}
+
 QString RepairProperties::name() const
 {
  return i18n("Repair Plugin");
@@ -57,6 +62,11 @@ QString RepairProperties::name() const
 
 void RepairProperties::loadPlugin(KSimpleConfig* config)
 {
+ if (!config->hasGroup(propertyGroup())) {
+	kdError() << k_funcinfo << "unit has no repair plugin" << endl;
+	return;
+ }
+ config->setGroup(propertyGroup());
 }
 
 
@@ -69,6 +79,11 @@ ProductionProperties::~ProductionProperties()
 {
 }
 
+QString ProductionProperties::propertyGroup()
+{
+ return QString::fromLatin1("ProductionPlugin");
+}
+
 QString ProductionProperties::name() const
 {
  return i18n("Production Plugin");
@@ -76,11 +91,11 @@ QString ProductionProperties::name() const
 
 void ProductionProperties::loadPlugin(KSimpleConfig* config)
 {
- if (!config->hasGroup("ProductionPlugin")) {
+ if (!config->hasGroup(propertyGroup())) {
 	kdError() << k_funcinfo << "unit has no production plugin" << endl;
 	return;
  }
- config->setGroup("ProductionPlugin");
+ config->setGroup(propertyGroup());
  mProducerList = config->readIntListEntry("ProducerList");
 }
 
@@ -96,6 +111,11 @@ HarvesterProperties::~HarvesterProperties()
 {
 }
 
+QString HarvesterProperties::propertyGroup()
+{
+ return QString::fromLatin1("HarvesterPlugin");
+}
+
 QString HarvesterProperties::name() const
 {
  return i18n("Harvester Plugin");
@@ -103,10 +123,11 @@ QString HarvesterProperties::name() const
 
 void HarvesterProperties::loadPlugin(KSimpleConfig* config)
 {
- if (!config->hasGroup("HarvesterPlugin")) {
+ if (!config->hasGroup(propertyGroup())) {
 	kdError() << k_funcinfo << "unit has no harvester plugin" << endl;
 	return;
  }
+ config->setGroup(propertyGroup());
  config->setGroup("HarvesterPlugin");
  mCanMineMinerals = config->readBoolEntry("CanMineMinerals", false);
  mCanMineOil = config->readBoolEntry("CanMineOil", false);
@@ -116,5 +137,4 @@ void HarvesterProperties::loadPlugin(KSimpleConfig* config)
  }
  mMaxResources= config->readUnsignedNumEntry("MaxResources", 100);
 }
-
 
