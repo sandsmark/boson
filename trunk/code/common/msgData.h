@@ -205,7 +205,7 @@ enum bosonMsgTag {
 /* ilen is for integer-lenght */
 /* blen is for byte-lenght */
 
-int	sendMsg  (boBuffer *, bosonMsgTag tag, int blen, bosonMsgData *data);
-int	recvMsg  (boBuffer *, bosonMsgTag &tag, int &blen, bosonMsgData *data);
+int	sendMsg  (boBuffer *, bosonMsgTag tag, int blen, void *data);
+int	recvMsg  (boBuffer *, bosonMsgTag &tag, int &blen, void *data);
 
 #endif // MSGDATA_H

@@ -30,15 +30,14 @@
  *  KNOWN_BY
  */
 
-void knownBy::sendToKnown(bosonMsgTag tag, int blen, bosonMsgData *data)
+void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 {
 	int i;
 	ulong	k = known;
 
 	for ( i=0; k; i++,k>>=1) {
 		boAssert(i<3);
-		if (k&1l) sendMsg (
-			player[i].buffer, tag, blen, data);
+		if (k&1l) sendMsg ( player[i].buffer, tag, blen, data);
 		}
 }
 
@@ -71,28 +70,28 @@ void serverMobUnit::r_moveBy(moveMsg_t &msg, int playerId, boBuffer * buffer)
 
 void serverMobUnit::reportCreated(int i)
 {
-	bosonMsgData	data;
+	mobileMsg_t     mobile;
 		
-	data.mobile.who = who; 
-	data.mobile.key = key;
-	data.mobile.x = __x;
-	data.mobile.y = __y;
-	data.mobile.type = type;
+	mobile.who = who; 
+	mobile.key = key;
+	mobile.x = __x;
+	mobile.y = __y;
+	mobile.type = type;
 
-	sendMsg ( player[i].buffer, MSG_MOBILE_CREATED, sizeof(data.mobile), &data);
+	sendMsg ( player[i].buffer, MSG_MOBILE_CREATED, sizeof(mobile), &mobile);
 }
 
 void serverMobUnit::reportDestroyed(int i)
 {
-	bosonMsgData	data;
+	destroyedMsg_t  destroyed;
 
-	data.destroyed.key = key;
-	data.destroyed.x = __x;
-	data.destroyed.y = __y;
+	destroyed.key = key;
+	destroyed.x = __x;
+	destroyed.y = __y;
 	
 	logf(LOG_WARNING, "MSG_MOBILE_ is %d MOBILE_DESTROYED sent : __x is %d", MSG_MOBILE_DESTROYED, __x);
 
-	sendMsg ( player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( player[i].buffer, MSG_MOBILE_DESTROYED, sizeof(destroyed), &destroyed);
 }
 
 
@@ -128,29 +127,29 @@ void serverFacility::getWantedAction()
 
 void serverFacility::reportCreated(int i)
 {
-	bosonMsgData	data;
+	facilityMsg_t   facility; 
 		
-	data.facility.who = who; 
-	data.facility.key = key;
-	data.facility.x = __x;
-	data.facility.y = __y;
-	data.facility.type = type;
-	data.facility.state = state;
+	facility.who = who; 
+	facility.key = key;
+	facility.x = __x;
+	facility.y = __y;
+	facility.type = type;
+	facility.state = state;
 
-	sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(data.facility), &data);
+	sendMsg ( player[i].buffer, MSG_FACILITY_CREATED, sizeof(facility), &facility);
 }
 
 
 void serverFacility::reportDestroyed(int i)
 {
-	bosonMsgData	data;
+	destroyedMsg_t  destroyed;
 
-	data.destroyed.key = key;
-	data.destroyed.x = __x;
-	data.destroyed.y = __y;
+	destroyed.key = key;
+	destroyed.x = __x;
+	destroyed.y = __y;
 
 	logf(LOG_WARNING, "MSG_FACILITY_ is %d FACILITY_DESTROYED sent : __x is %d", MSG_FACILITY_DESTROYED, __x);
-	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(data.destroyed), &data);
+	sendMsg ( player[i].buffer, MSG_FACILITY_DESTROYED, sizeof(destroyed), &destroyed);
 }
 
 

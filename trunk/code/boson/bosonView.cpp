@@ -168,12 +168,12 @@ void bosonView::object_put(int x, int y)
 		case OT_FACILITY:
 			construct.x = X() + (x / BO_TILE_SIZE) ;
 			construct.y = Y() + (y / BO_TILE_SIZE) ;
-			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
+			sendMsg(buffer, MSG_FACILITY_CONSTRUCT, sizeof(construct), &construct);
 			break;
 		case OT_MOBILE:
 			construct.x = X() * BO_TILE_SIZE + x;
 			construct.y = Y() * BO_TILE_SIZE + y;
-			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, sizeof(construct), (bosonMsgData*)&construct);
+			sendMsg(buffer, MSG_MOBILE_CONSTRUCT, sizeof(construct), &construct);
 			break;
 		default:
 			logf(LOG_ERROR, "object_put : unexpected \"orderType\" value");

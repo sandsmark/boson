@@ -51,7 +51,7 @@ void  BosonServer::checkUnitVisibility(Unit *u)
 {
 int		i,j, im,jm, iM,jM;
 serverCell	*c;
-bosonMsgData	data;
+cooMsg_t        coo;
 int		dist = u->getVisibility();
 ulong		mask = getPlayerMask(u->who);
 
@@ -76,14 +76,14 @@ for (i=im ; i<=iM; i++)
 		if ( ! c->isKnownBy(mask)) {
 			c->setKnown(mask);
 			/* here, send a message for every changed state */
-			data.coo.x = i+x;
-			data.coo.y = j+y;
-			data.coo.g = c->getGroundType();
-			if (GROUND_UNKNOWN != data.coo.g)
+			coo.x = i+x;
+			coo.y = j+y;
+			coo.g = c->getGroundType();
+			if (GROUND_UNKNOWN != coo.g)
 				sendMsg (
 					player[u->who].buffer,
 					MSG_MAP_DISCOVERED,
-					sizeof(data.coo), &data  );
+					sizeof(coo), &coo  );
 			}
 		}
 }
