@@ -19,50 +19,18 @@
  ***************************************************************************/
 
 #include "cell.h"
+#include "log.h"
 
 /*
  *  BOSON CELLs
  */
-void Cell::setGround(groundType g)
-{
 
-	switch(g) {
-		case GROUND_DEEP_WATER:
-			ground = g_dwater;
-			break;
-
-		case GROUND_WATER:
-		case GROUND_WATER_OIL:
-			ground = g_water;
-			break;
-
-		case GROUND_GRASS:
-		case GROUND_GRASS_OIL:
-			ground = g_grass;
-			break;
-
-		case GROUND_DESERT:
-			ground = g_desert;
-			break;
-		default:
-			ground = g_unknown;
-			unsetFlag(known_f);
-			return;
-	}
-	setFlag(known_f);
-}
-
-bool Cell::canGo(uint goFlag)
+bool Cell::canGo(uint goFlag, groundType g)
 {
 
 	if (flags&request_f) {
 	//	printf("requested cell\n");
 		return false;
-	}
-
-	if (!isKnown()) {
-		printf("unknown cell(1)\n");
-		return true;
 	}
 
 	// ... in the air
@@ -78,30 +46,39 @@ bool Cell::canGo(uint goFlag)
 	}
 
 	//  nothing ? depends on the ground
-	switch(ground) {
-		case g_unknown:
-			printf("unknown cell\n");
-			return true;
-			break;
-		case g_dwater:
-		//	printf("dwater\n");
+	if (IS_PLAIN(g))
+		return canGoOnGround(g,goFlag);
+
+	if (IS_TRANS(g)) {
+		int trans = GET_TRANS_REF(g);
+		return
+			canGoOnGround( groundTransProp[trans].from, goFlag ) && 
+			canGoOnGround( groundTransProp[trans].to, goFlag );
+	}
+	return false;
+}
+
+
+bool Cell::canGoOnGround( groundType g, uint goFlag)
+{
+       	switch(g) {
+		case GROUND_DEEP_WATER:
+		//	printf("deep water\n");
 			return goFlag & BO_GO_DEEP_WATER;
-			break;
-		case g_water:
+		case GROUND_WATER:
+		case GROUND_WATER_OIL:
 		//	printf("water\n");
 			return goFlag & BO_GO_WATER;
-			break;
-		case g_grass:
+		case GROUND_GRASS:
+		case GROUND_GRASS_OIL:
 		//	printf("grass\n");
 			return goFlag & BO_GO_GRASS;
-			break;
-		case g_desert:
+		case GROUND_DESERT:
 		//	printf("desert\n");
 			return goFlag & BO_GO_DESERT;
-			break;
+		default:
+			logf(LOG_ERROR, "canGoOnGround : unhandled groundType");
+			return false;
 	}
-	// dead code to prevent a warning
-	logf(LOG_ERROR, "Cell:canGo, unknown ground, returned true");
-	return true;
 }
 
