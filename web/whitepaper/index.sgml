@@ -29,7 +29,7 @@ related topic.
 
 <itemize>
 	<item>The <tt/common/ directory is the one with all common definition/declaration, such
-as network messages tags, and common class for units/facilities.
+as network messages tags, and common classes for units/facilities.
 	<item>The <tt/server/ directory : guess it.
 	<item>The <tt/visual/ directory is the common rendering code, shared between boson and the editor.
 	<item>The <tt/boson/ directory is the client.
