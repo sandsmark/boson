@@ -759,6 +759,10 @@ void Unit::addWaypoint(const QPoint& pos)
 
 void Unit::waypointDone()
 {
+ if (d->mWaypoints.count() == 0) {
+	boError() << k_funcinfo << "no waypoints" << endl;
+	return;
+ }
  d->mWaypoints.remove(d->mWaypoints.at(0));
 }
 
@@ -941,6 +945,10 @@ void Unit::clearPathPoints()
 
 void Unit::pathPointDone()
 {
+ if (d->mPathPoints.count() == 0) {
+	boError() << k_funcinfo << "no pathpoints" << endl;
+	return;
+ }
  d->mPathPoints.pop_front();
 }
 
