@@ -60,8 +60,6 @@ public slots:
 	void reCenterView(QPoint p);
 	void relativeReCenterView(QPoint p) {reCenterView(p+viewPos);}
 	void reSizeView(QSize s);
-//	void mobileDestroyed(int);
-//	void fixDestroyed(int);
 
 public:
 	void relativeMoveView(QPoint );
@@ -73,8 +71,8 @@ public:
 	/*
          * selection handling
          */
-	selectionMode_t	getSelectionMode(void) {return selectionMode;}
-	void		setSelectionMode(selectionMode_t t) {selectionMode=t;}
+	selectionMode_t	selectionMode(void) {return _selectionMode;}
+	void		setSelectionMode(selectionMode_t t) {_selectionMode=t;}
 	void		selectFix(visualFacility *);
 	void		selectMob(long key, visualMobUnit *);
 	visualFacility	*unSelectFix(void);
@@ -92,10 +90,9 @@ public: ///orzel : bof...
 	QIntDict<visualMobUnit>	mobSelected;
 	int			selectionWho; // -1 is nobody
 protected:
-//	void		putSomething(void);
 	QPoint			viewPos;
 	QSize			viewSize;
-	selectionMode_t		selectionMode;
+	selectionMode_t		_selectionMode;
 	virtual void		updateViews(void)=0;
 
 };

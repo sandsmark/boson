@@ -29,7 +29,7 @@ visualTopLevel::visualTopLevel( const char *name, WFlags f)
 	,fixSelected( 0L )
 	,viewPos(0,0)
 	,viewSize(6,6) ///orzel : senseless, will be set by mainMap later
-	,selectionMode(SELECT_NONE)
+	,_selectionMode(SELECT_NONE)
 {
 
 //	connect(vcanvas, SIGNAL(mobileDestroyed(int)), this, SLOT(mobileDestroyed(int)));
