@@ -185,6 +185,14 @@ public:
 	}
 };
 
+/**
+ * Helper class thaz provides information about whether two faces are adjacent or
+ * not. This is used by some GL_TRIANGLE_STRIP experiments.
+ *
+ * Since STRIPs are basically not applicable for us, this class can probably be
+ * ignored completely. It isn't removed so that we can continue to do some
+ * experiments
+ **/
 class BoAdjacentDataBase
 {
 public:
@@ -253,6 +261,19 @@ private:
 };
 
 
+/**
+ * This class takes care about whether (and how) faces are connected.
+ *
+ * In GL_TRIANGLES rendering mode, simply @ref addNodes is called meaning the
+ * faces are in a simple linear linked list. No special connection takes place.
+ *
+ * When you want to use GL_TRIANGLE_STRIP on the other hand, you will use @ref
+ * connectNodes instead. adjacent faces get connected to a strip then.
+ *
+ * Note that since we do not support GL_TRIANGLE_STRIP (that code is here for
+ * experiments only! we will probably never support them!) only @ref addNodes is
+ * used here.
+ **/
 class BoFaceConnector
 {
 public:
@@ -262,7 +283,7 @@ public:
 	static void disconnectNodes(const QPtrList<BoFaceNode>& allNodes, BoFaceNode*& first)
 	{
 		QPtrListIterator<BoFaceNode> it(allNodes);
-		for (; 	it.current(); ++it) {
+		for (; it.current(); ++it) {
 			it.current()->setNext(0);
 			it.current()->setPrevious(0);
 		}
@@ -297,6 +318,20 @@ public:
 		return GL_TRIANGLES;
 	}
 
+	// AB: there are several problems concerning GL_TRIANGLE_STRIP in boson.
+	// one of them is that it is very hard to create such a strip from our
+	// models - most meshes don't contain stripable data, so we would have
+	// to insert quite a lot of "dummy" vertices (which is more difficult to
+	// code).
+	// Also strips cannot have vertex normals, i.e. we can't have smooth (i
+	// hope thats the correct word now) surfaces with them. Strips must use
+	// face normals (we can provide one normal per vertex only and in strips
+	// every new vertex is a new face).
+	// More problems occur with backface culling. It is possible to create
+	// strips that work with backface culling, but it is more difficult to
+	// code (again).
+	// I think the speed gain would not be worth the effort (and I believe
+	// more problems would come up, especially concerning backface culling)
 	/**
 	 * @return The OpenGL-type of what has been created. That is
 	 * GL_TRIANGLE_STRIP on success and @ref addNodes on failure.
