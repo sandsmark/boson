@@ -39,7 +39,7 @@ CanRefineOil=true
 [Sounds]
 OrderAttack=order_attack
 OrderMove=order_move
-OrderSelect=order_select
+OrderSelect=order_select_factory
 ReportDestroyed=report_destroyed
 ReportProduced=report_produced
 ReportUnderAttack=report_underattack
