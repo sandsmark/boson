@@ -379,6 +379,7 @@ void EditorBigDisplayInput::deleteSelectedUnits()
 {
  BO_CHECK_NULL_RET(selection());
  BO_CHECK_NULL_RET(canvas());
+#if 0
  if (selection()->isEmpty()) {
 	boDebug() << k_funcinfo << "no unit selected" << endl;
 	return;
@@ -389,7 +390,11 @@ void EditorBigDisplayInput::deleteSelectedUnits()
  for (; it.current(); ++it) {
 	canvas()->removeUnit(it.current());
  }
+
+ // AB: do NOT call this directly. send a message - probably destroy the units,
+ // dont delete them directly.
  canvas()->deleteUnits(&units);
+#endif
 }
 
 void EditorBigDisplayInput::updatePlacementPreviewData()
