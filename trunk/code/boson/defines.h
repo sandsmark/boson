@@ -107,6 +107,7 @@
 #define DEFAULT_USE_MIPMAPS_FOR_MODELS true
 #define DEFAULT_TOOLTIP_UPDATE_PERIOD 300
 #define DEFAULT_TOOLTIP_CREATOR 1 // FIXME: should be BoToolTipCreator::Extended, but I don't want to include the file here
+#define DEFAULT_USE_LOD true
 
 // not in BosonConfig (not necessarily in OptionsDialog):
 #define DEFAULT_CHEAT_MODE true // by default cheating is *enabled* (debugging)

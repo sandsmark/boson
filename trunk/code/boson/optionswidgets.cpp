@@ -497,12 +497,14 @@ OpenGLOptions::OpenGLOptions(QWidget* parent) : QVBox(parent), OptionsWidget()
  }
  mGroundRenderer->setCurrentItem(0);
 
+ mUseLOD = new QCheckBox(i18n("Use level of detail"), mAdvanced);
  hbox = new QHBox(mAdvanced);
- (void)new QLabel(i18n("Level of detail"), hbox);
- mLOD = new QComboBox(hbox);
- mLOD->insertItem(i18n("All details (default)"));
- mLOD->insertItem(i18n("Lowest details"));
- mLOD->setCurrentItem(0);
+ (void)new QLabel(i18n("Default level of detail"), hbox);
+ mDefaultLOD = new QComboBox(hbox);
+ mDefaultLOD->insertItem(i18n("All details (default)"));
+ mDefaultLOD->insertItem(i18n("Lowest details"));
+ mDefaultLOD->setCurrentItem(0);
+ connect(mUseLOD, SIGNAL(toggled(bool)), hbox, SLOT(setEnabled(bool)));
 }
 
 OpenGLOptions::~OpenGLOptions()
@@ -564,7 +566,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
-		setLOD(0);
+		setUseLOD(true);
+		setDefaultLOD(0);
 	case BestQuality:
 		// we mostly use defaults here.
 		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
@@ -575,7 +578,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(DEFAULT_USE_LIGHT);
 		mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
 		mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
-		setLOD(0);
+		setUseLOD(true);
+		setDefaultLOD(0);
 		break;
 	case Fastest:
 		setUpdateInterval(DEFAULT_UPDATE_INTERVAL);
@@ -586,7 +590,8 @@ void OpenGLOptions::setRenderingSpeed(int speed)
 		mUseLight->setChecked(false);
 		mUseMaterials->setChecked(false);
 		mGroundRenderer->setCurrentItem(BoGroundRenderer::Fast);
-		setLOD(5000);
+		setUseLOD(true);
+		setDefaultLOD(5000);
 		break;
 	
  }
@@ -654,7 +659,8 @@ void OpenGLOptions::apply()
  boConfig->setAlignSelectionBoxes(mAlignSelectBoxes->isChecked());
  boConfig->setUseLight(mUseLight->isChecked());
  boConfig->setUseMaterials(mUseMaterials->isChecked());
- boConfig->setUIntValue("UseLOD", lod());
+ boConfig->setUseLOD(useLOD());
+ boConfig->setUIntValue("DefaultLOD", defaultLOD());
  boDebug(210) << k_funcinfo << "done" << endl;
 }
 
@@ -672,7 +678,8 @@ void OpenGLOptions::setDefaults()
  mUseLight->setChecked(DEFAULT_USE_LIGHT);
  mUseMaterials->setChecked(DEFAULT_USE_MATERIALS);
  mGroundRenderer->setCurrentItem(DEFAULT_GROUND_RENDERER);
- setLOD(0);
+ setUseLOD(DEFAULT_USE_LOD);
+ setDefaultLOD(0);
 }
 
 void OpenGLOptions::load()
@@ -687,7 +694,8 @@ void OpenGLOptions::load()
  mUseLight->setChecked(boConfig->useLight());
  mUseMaterials->setChecked(boConfig->useMaterials());
  mGroundRenderer->setCurrentItem(boConfig->uintValue("GroundRenderer"));
- setLOD(boConfig->uintValue("UseLOD", 0));
+ setUseLOD(boConfig->useLOD());
+ setDefaultLOD(boConfig->uintValue("DefaultLOD", 0));
 }
 
 void OpenGLOptions::setUpdateInterval(int ms)
@@ -797,9 +805,19 @@ void OpenGLOptions::setAlignSelectionBoxes(bool align)
  mAlignSelectBoxes->setChecked(align);
 }
 
-unsigned int OpenGLOptions::lod() const
+bool OpenGLOptions::useLOD() const
 {
- switch (mLOD->currentItem()) {
+ return mUseLOD->isChecked();
+}
+
+void OpenGLOptions::setUseLOD(bool use)
+{
+ mUseLOD->setChecked(use);
+}
+
+unsigned int OpenGLOptions::defaultLOD() const
+{
+ switch (mDefaultLOD->currentItem()) {
 	case 0:
 		return 0;
 	default:
@@ -811,14 +829,14 @@ unsigned int OpenGLOptions::lod() const
  return 0;
 }
 
-void OpenGLOptions::setLOD(unsigned int l)
+void OpenGLOptions::setDefaultLOD(unsigned int l)
 {
  switch (l) {
 	case 0:
-		mLOD->setCurrentItem(0);
+		mDefaultLOD->setCurrentItem(0);
 		break;
 	default:
-		mLOD->setCurrentItem(1);
+		mDefaultLOD->setCurrentItem(1);
 		break;
  }
 }

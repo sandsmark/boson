@@ -95,8 +95,6 @@ static QString planeDebugString(const float* plane)
 }
 
 
-//#define TEST_LOD
-
 float textureUpperLeft[2] = { 0.0f, 1.0f };
 float textureLowerLeft[2] = { 0.0f, 0.0f };
 float textureLowerRight[2] = { 1.0f, 0.0f };
@@ -750,7 +748,18 @@ void BosonBigDisplayBase::renderItems()
  // better.
  createRenderItemList(); // AB: this is very fast. < 1.5ms on experimental5 for me
 
- unsigned int defaultLOD = boConfig->uintValue("UseLOD", 0);
+ // FIXME: this should be somewhere else, maybe add static BoMesh::lodLevels()
+#define LOD_LEVELS 5
+
+ bool useLOD = boConfig->useLOD();
+ unsigned int defaultLOD = boConfig->uintValue("DefaultLOD", 0);
+
+ // LOD distance levels
+ // If distance between item and camera is less than LODLevels[x], lod level
+ //  x is used
+ static const float LODLevels[] = { 7.5f, 15.0f, 22.5f, 35.0f, 1000.0f };
+
+ unsigned int lod = 0;
 
  BoItemList::Iterator it = d->mRenderItemList->begin();
  for (; it != d->mRenderItemList->end(); ++it) {
@@ -771,16 +780,12 @@ void BosonBigDisplayBase::renderItems()
 	glRotatef(item->xRotation(), 1.0, 0.0, 0.0);
 	glRotatef(item->yRotation(), 0.0, 1.0, 0.0);
 
-	unsigned int lod = defaultLOD;
 	// TODO: change lod according to distance from the camera
 
 	// FIXME: performance: we could create a displaylist that contains the selectbox and simply change item->displayList()
 	// when the item is selected/unselected
 	// Units will be tinted accordingly to how much health they have left
 	if (RTTI::isUnit(item->rtti())) {
-#ifdef TEST_LOD
-		lod = ((Unit*)item)->id() % 5;
-#endif
 		if (((Unit*)item)->isDestroyed()) {
 			glColor3f(0.4f, 0.4f, 0.4f);
 		} else {
@@ -790,8 +795,19 @@ void BosonBigDisplayBase::renderItems()
 	} else {
 		glColor3ub(255, 255, 255);
 	}
-	// FIXME the LOD should also depend on the distance of the item to the
-	// camera
+	if (useLOD) {
+		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
+		lod = defaultLOD;
+		while (lod < (LOD_LEVELS - 1)) {
+			if (dist > LODLevels[lod]) {
+				// Object is too far for this lod
+				lod++;
+			} else {
+				// Use this lod
+				break;
+			}
+		}
+	}
 	item->renderItem(lod);
 	glColor3ub(255, 255, 255);
 	glPopMatrix();
@@ -2982,7 +2998,7 @@ BoLight* BosonBigDisplayBase::light(int id) const
 BoLight* BosonBigDisplayBase::newLight()
 {
  BoLight* light = new BoLight;
- if(light->id()) {
+ if(light->id() == -1) {
 	// Light could not be created
 	delete light;
 	return 0;
