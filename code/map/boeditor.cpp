@@ -34,6 +34,7 @@
 #define PF_NAME		"basic.bpf"
 
 void createSeaMap(int width, int height);
+void fillRect(int x, int y, int width, int height, groundType g);
 void createIsland(int x, int y, int trans, int width=1, int height=1, bool inverted=false);
 
 /* global variable */
@@ -95,10 +96,15 @@ Cell	c;
 boFile *field = new boFile(); /// basic BosonPlayField...
 
 printf("\nMap creation...\n");
+
 createSeaMap( MAP_WIDTH, MAP_HEIGHT);
 createIsland( 12, 15, TRANS_GW, 15, 20);
 createIsland( 15, 23, TRANS_GD, 2, 3, true);
 createIsland( 30, 15, TRANS_GW);
+
+/* oil field */
+fillRect(3,3,3,3, GROUND_WATER_OIL);
+fillRect(22,25,3,5, GROUND_GRASS_OIL);
 
 /* fill header */
 field->nbPlayer		= 2;
@@ -222,37 +228,47 @@ printf("\tFilling the area with water\n");
 
 void createIsland(int x, int y, int trans, int width, int height, bool inverted)
 {
-int i, j;
+	int i, j;
+	
+	printf("\tDrawing \'rectangle\' in %d,%d, size %dx%d, %s %s\n",
+		x, y, width, height,
+		groundTransProp[trans].name,
+		inverted?"(inverted)":""
+		);
 
-printf("\tDrawing \'rectangle\' in %d,%d, size %dx%d, %s %s\n",
-	x, y, width, height,
-	groundTransProp[trans].name,
-	inverted?"(inverted)":""
-	);
-
-/* corners */
-cells[x-1][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL);
-cells[x+width][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR);
-
-cells[x-1][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL);
-cells[x+width][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR);
-
-/* horizontal borders */
-for (i=0; i<width; i++) {
-	cells[x+i][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP);
-	cells[x+i][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN);
-	}
-
-/* vertical borders */
-for (j=0; j<height; j++) {
-	cells[x-1][y+j] = GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT);
-	cells[x+width][y+j] = GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT);
-	}
-
-/* filling inside */
-groundType plain = inverted?groundTransProp[trans].to:groundTransProp[trans].from;
-//printf("filling with %d\n", plain);
-for (i=0; i<width; i++)
-	for (j=0; j<height; j++)
-		cells[x+i][y+j] = plain;
+	/* corners */
+	cells[x-1][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_ULI:TRANS_UL);
+	cells[x+width][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_URI:TRANS_UR);
+	
+	cells[x-1][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_DLI:TRANS_DL);
+	cells[x+width][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_DRI:TRANS_DR);
+	
+	/* horizontal borders */
+	for (i=0; i<width; i++) {
+		cells[x+i][y-1] = GET_TRANS_NUMBER(trans, inverted?TRANS_DOWN:TRANS_UP);
+		cells[x+i][y+height] = GET_TRANS_NUMBER(trans, inverted?TRANS_UP:TRANS_DOWN);
+		}
+	
+	/* vertical borders */
+	for (j=0; j<height; j++) {
+		cells[x-1][y+j] = GET_TRANS_NUMBER(trans, inverted?TRANS_RIGHT:TRANS_LEFT);
+		cells[x+width][y+j] = GET_TRANS_NUMBER(trans, inverted?TRANS_LEFT:TRANS_RIGHT);
+		}
+	
+	/* filling inside */
+	groundType plain = inverted?groundTransProp[trans].to:groundTransProp[trans].from;
+	//printf("filling with %d\n", plain);
+	fillRect(x,y,width,height,plain);
 }
+
+void fillRect(int x, int y, int width, int height, groundType g)
+{
+	int i, j;
+
+	for (i=0; i<width; i++)
+		for (j=0; j<height; j++)
+			cells[x+i][y+j] = g;
+}
+
+
+
