@@ -218,34 +218,40 @@ void BoFrame::sortByDepth()
  // about speed of the algorithms (it is called once per model on startup only).
 
  QPtrList<BoMesh> meshes;
- QMap<BoMesh*, BoMatrix*> matrices;
+ QPtrList<BoMatrix> matrices;
  for (int i = 0; i < meshCount(); i++) {
-	// do some necessary calculations
-	mMeshes[i]->calculateMaxMin();
-	matrices.insert(mMeshes[i], mMatrices[i]);
+	BoMesh* mesh = mMeshes[i];
+	BoMatrix* matrix = mMatrices[i];
 
-	float z = mMeshes[i]->maxZ();
+	// do some necessary calculations
+	mesh->calculateMaxMin();
+
+	float z = mesh->maxZ();
 	bool found = false;
 	for (unsigned int j = 0; j < meshes.count() && !found; j++) {
 		if (z >= meshes.at(j)->maxZ()) {
-			meshes.insert(j, mMeshes[i]);
+			meshes.insert(j, mesh);
+			matrices.insert(j, matrix);
 			found = true;
 		}
 	}
 	if (!found) {
-		meshes.append(mMeshes[i]);
-
+		meshes.append(mesh);
+		matrices.append(matrix);
 	}
  }
 
  // meshes is now sorted by maxZ.
- int current = 0;
  QPtrListIterator<BoMesh> it(meshes);
- for (; it.current(); ++it) {
-	BoMesh* mesh = it.current();
-	mMeshes[current] = mesh;
-	mMatrices[current] = matrices[mesh];
-	current++;
+ for (int i = 0; it.current(); ++it) {
+	BoMesh* mesh = meshes.at(i);
+	BoMatrix* matrix = matrices.at(i);
+	if (!mesh || !matrix) {
+		boError() << k_funcinfo << "oops" << endl;
+		continue;
+	}
+	mMeshes[i] = mesh;
+	mMatrices[i] = matrix;
  }
 }
 
