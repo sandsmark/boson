@@ -44,7 +44,12 @@ public:
 
 	// usually withing a game
 		AddUnit = 30, // whenever a unit is added
-		ChangeMap = 40, // editor only (but comparable to AddUnit)
+		ChangeMap = 31, // editor only (but comparable to AddUnit)
+
+	// debug/cheat messages
+		IdModifyMinerals = 40, // change minerals of a player
+		IdModifyOil = 41, // change oil of a player
+		IdKillPlayer = 42,
 
 		// advance messages (still the "within a game" section)
 		AdvanceN = 50, // call BosonCanvas::advance() N times

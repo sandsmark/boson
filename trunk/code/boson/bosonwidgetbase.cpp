@@ -67,6 +67,10 @@
 #include "bosonwidgetbase.moc"
 
 #define ID_DEBUG_KILLPLAYER 0
+#define ID_DEBUG_ADD_1000_MINERALS 1
+#define ID_DEBUG_SUB_1000_MINERALS 2
+#define ID_DEBUG_ADD_1000_OIL 3
+#define ID_DEBUG_SUB_1000_OIL 4
 
 class BosonWidgetBase::BosonWidgetBasePrivate
 {
@@ -601,12 +605,6 @@ void BosonWidgetBase::slotSetActiveDisplay(BosonBigDisplayBase* active, BosonBig
 		active, SLOT(slotUnitChanged(Unit*)));
 }
 
-void BosonWidgetBase::debugKillPlayer(KPlayer* p)
-{
- canvas()->killPlayer((Player*)p);
- boGame->slotAddChatSystemMessage(i18n("Debug"), i18n("Killed player %1 - %2").arg(p->id()).arg(p->name()));
-}
-
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 {
  if (file == QString::null) {
@@ -910,9 +908,28 @@ void BosonWidgetBase::slotDebugPlayer(int index)
 	return;
  }
 
+ QByteArray b;
+ QDataStream stream(b, IO_WriteOnly);
+ stream << (Q_UINT32)p->id();
  switch (index) {
 	case ID_DEBUG_KILLPLAYER:
-		debugKillPlayer(p);
+		boGame->sendMessage(b, BosonMessage::IdKillPlayer);
+		break;
+	case ID_DEBUG_ADD_1000_MINERALS:
+		stream << (Q_INT32)1000;
+		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+		break;
+	case ID_DEBUG_SUB_1000_MINERALS:
+		stream << (Q_INT32)-1000;
+		boGame->sendMessage(b, BosonMessage::IdModifyMinerals);
+		break;
+	case ID_DEBUG_ADD_1000_OIL:
+		stream << (Q_INT32)1000;
+		boGame->sendMessage(b, BosonMessage::IdModifyOil);
+		break;
+	case ID_DEBUG_SUB_1000_OIL:
+		stream << (Q_INT32)-1000;
+		boGame->sendMessage(b, BosonMessage::IdModifyOil);
 		break;
 	default:
 		boError() << k_funcinfo << "unknown index " << index << endl;
@@ -946,7 +963,11 @@ void BosonWidgetBase::slotPlayerJoinedGame(KPlayer* player)
 
  connect(menu->popupMenu(), SIGNAL(activated(int)),
 		this, SLOT(slotDebugPlayer(int)));
- menu->popupMenu()->insertItem("Kill Player", ID_DEBUG_KILLPLAYER);
+ menu->popupMenu()->insertItem(i18n("Kill Player"), ID_DEBUG_KILLPLAYER);
+ menu->popupMenu()->insertItem(i18n("Minerals += 1000"), ID_DEBUG_ADD_1000_MINERALS);
+ menu->popupMenu()->insertItem(i18n("Minerals -= 1000"), ID_DEBUG_SUB_1000_MINERALS);
+ menu->popupMenu()->insertItem(i18n("Oil += 1000"), ID_DEBUG_ADD_1000_OIL);
+ menu->popupMenu()->insertItem(i18n("Oil -= 1000"), ID_DEBUG_SUB_1000_OIL);
 
  d->mActionDebugPlayers->insert(menu);
  d->mPlayers.insert(menu, player);
