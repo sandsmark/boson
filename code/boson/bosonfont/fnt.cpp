@@ -24,6 +24,8 @@
 #include "fntLocal.h"
 #include <bodebug.h>
 
+#define DO_LIBUFO 1
+
 BofntFont::BofntFont() {}
 BofntFont::~BofntFont() {}
 
@@ -88,12 +90,20 @@ float BofntTexFont::low_putch( sgVec3 curpos, float pointsize,
   }
 
   glBegin( GL_TRIANGLE_STRIP ) ;
+#if DO_LIBUFO
+    // AB: libufo uses a different projection (origin in top-left, not
+    // bottom-right as with usual OpenGL)
+    const float bottom = curpos[1] + pointsize - v_bot[cc] * pointsize;
+    const float top    = curpos[1] + pointsize -  v_top[cc] * pointsize;
+#else
+    // original plib code:
     const float bottom = curpos[1] + v_bot[cc] * pointsize;
-    const float top = curpos[1] + v_top[cc]  * pointsize;
-    const float left_bottom = curpos[0] + v_left[cc] * pointsize;
-    const float right_bottom = curpos[0] + v_right[cc] * pointsize;
-    const float left_top = curpos[0] + (italic + v_left[cc]) * pointsize;
-    const float right_top = curpos[0] + (italic + v_right[cc]) * pointsize;
+    const float top    = curpos[1] + v_top[cc] * pointsize;
+#endif
+    const float left_bottom  = curpos[0] + v_left[cc]             * pointsize;
+    const float right_bottom = curpos[0] + v_right[cc]            * pointsize;
+    const float left_top     = curpos[0] + (italic + v_left[cc])  * pointsize;
+    const float right_top    = curpos[0] + (italic + v_right[cc]) * pointsize;
     glTexCoord2f( t_left[cc], t_bot[cc] ) ;
     glVertex3f(left_bottom,
                    bottom,
