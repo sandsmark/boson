@@ -3342,7 +3342,7 @@ void BosonBigDisplayBase::changeGroundRenderer(int renderer)
 	if (r) {
 		KMessageBox::sorry(this, i18n("Unable to load renderer with id=%1. Continue with old renderer.").arg(renderer));
 	} else {
- 		BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
+		BoGroundRendererManager::manager()->makeRendererCurrent(QString::null);
 		r = BoGroundRendererManager::manager()->currentRenderer();
 		if (!r) {
 			KMessageBox::sorry(this, i18n("Unable to load any ground renderer, check your installation! Quitting now."));
