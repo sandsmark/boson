@@ -147,6 +147,17 @@ to performs all of those steps.
 
 <sect>Questions and Answers<p>
 
+<sect2>Nothing happens when I click on the K-menu/Games/boson item.
+<p>
+	If you haven't installed the boson-pics-0.1 package, boson will die as soon as launched.
+Install the package. If it's still won't be launched, do it in a terminal emulator (kvt, konsole, xterm)
+and send me 
+<itemize>
+	<item>The output of the program before dying
+	<item>The file <tt/boson-client.log/ that should be in the directory where you typed <tt/boson/
+</itemize>
+<p>
+
 Please contact :
 <htmlurl url="mailto:capricel@enst.fr" name="Thomas Capricelli"> if
 you have any questions, we will be happy to add it here if it's a frequently 
