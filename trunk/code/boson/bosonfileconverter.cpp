@@ -753,11 +753,12 @@ bool BosonFileConverter::convertPlayField_From_0_10_To_0_11(QMap<QString, QByteA
 	matching.appendChild(event);
 	events.appendChild(matching);
 
-	// FIXME: we should use a separate "Action" tag, which can be an event,
-	// a chat message, a script function, ...
-	// -> just a name of an event is insufficient, as we will need at least
-	// a parameter.
-	cond.setAttribute("EventCaused", "Foobar");
+	QDomElement action = canvasDoc.createElement("Action");
+	cond.appendChild(action);
+	QDomElement actionEvent = event.cloneNode().toElement();
+	actionEvent.setAttribute("Name", "CustomStringEvent");
+	actionEvent.setAttribute("Data1", "Foobar");
+	action.appendChild(actionEvent);
 }
 
  QDomElement effects = canvasDoc.createElement("Effects");

@@ -34,6 +34,7 @@ class KIntNumInput;
 
 class BoOneConditionWidget;
 class BoEventMatching;
+class BoEventMatchingWidget;
 
 class BoConditionWidgetPrivate;
 
@@ -100,7 +101,7 @@ private:
 	KListBox* mEventMatchings;
 	QPushButton* mAddMatching;
 	QPushButton* mRemoveMatching;
-	QLineEdit* mAction;
+	BoEventMatchingWidget* mAction;
 
 	QDomDocument* mConditionDocument;
 };
@@ -109,16 +110,25 @@ class BoEventMatchingWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	BoEventMatchingWidget(QWidget* parent);
+	/**
+	 * @param eventMatching If TRUE (default) this widget edits an
+	 * eventMatching. If FALSE, this widget edits an event only.
+	 **/
+	BoEventMatchingWidget(QWidget* parent = 0, bool eventMatching = true);
 	~BoEventMatchingWidget();
 
-	void display(const QDomElement& matching);
+	bool displayEventMatching(const QDomElement& matching);
+	bool displayEvent(const QDomElement& event);
+
+	QDomElement event() const;
+	QDomElement eventMatching() const;
 
 public slots:
 	void slotClear();
 	void slotApply();
 
 signals:
+	void signalEvent(const QDomElement&);
 	void signalEventMatching(const QDomElement&);
 
 protected slots:
@@ -128,6 +138,7 @@ protected slots:
 	void slotIgnoreData2Changed(bool on);
 
 private:
+	bool mIsEventMatching;
 	QLineEdit* mName;
 	KIntNumInput* mUnitId;
 	QCheckBox* mIgnoreUnitId;

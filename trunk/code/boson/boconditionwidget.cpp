@@ -35,6 +35,7 @@
 #include <qvgroupbox.h>
 #include <qcheckbox.h>
 #include <qdom.h>
+#include <qtooltip.h>
 
 #include <klistbox.h>
 #include <klocale.h>
@@ -80,11 +81,13 @@ BoConditionWidget::BoConditionWidget(QWidget* parent) : QWidget(parent)
  QPushButton* less = new QPushButton(i18n("Fewer"), moreLessWidget);
  connect(less, SIGNAL(clicked()), this, SLOT(slotRemoveCondition()));
 
- d->mEventMatchingWidget = new BoEventMatchingWidget(this);
- layout->addWidget(d->mEventMatchingWidget);
+ QVGroupBox* eventMatchingBox = new QVGroupBox(i18n("Current event matching"), this);
+ layout->addWidget(eventMatchingBox);
+ d->mEventMatchingWidget = new BoEventMatchingWidget(eventMatchingBox);
  connect(d->mEventMatchingWidget, SIGNAL(signalEventMatching(const QDomElement&)),
 		this, SLOT(slotEventMatchingUpdated(const QDomElement&)));
  d->mEventMatchingWidget->setEnabled(false);
+ QToolTip::add(d->mEventMatchingWidget, i18n("Edit the currently selected event matching here"));
 
 
  slotAddCondition();
@@ -129,7 +132,7 @@ void BoConditionWidget::slotEditEventMatching(BoOneConditionWidget* c, int index
 	++it;
  }
 
- d->mEventMatchingWidget->display(m);
+ d->mEventMatchingWidget->displayEventMatching(m);
  d->mCurrentEventMatchingCondition = c;
  d->mCurrentEventMatchingIndex = index;
 }
@@ -211,6 +214,7 @@ BoOneConditionWidget::BoOneConditionWidget(QWidget* parent) : QWidget(parent)
  mEventMatchings = new KListBox(this);
  connect(mEventMatchings, SIGNAL(highlighted(int)),
 		this, SLOT(slotSelectedEventMatching(int)));
+ QToolTip::add(mEventMatchings, i18n("A list of events that need to be matched before the action fires.\nALL of these events have to matched."));
 
  QVBox* eventMatchingButtonsBox = new QVBox(this);
  mAddMatching = new QPushButton(i18n("Add"), eventMatchingButtonsBox);
@@ -222,7 +226,8 @@ BoOneConditionWidget::BoOneConditionWidget(QWidget* parent) : QWidget(parent)
 
  // atm we will always emit "CustomStringEvent" with one parameter
  // LABEL: Action (parameter to event)
- mAction = new QLineEdit(this);
+ mAction = new BoEventMatchingWidget(this, false);
+ QToolTip::add(mAction, i18n("This is the action that will be fired once the condition is met.\nCurrently only an event is supported."));
 
  layout->addWidget(mForPlayer);
  layout->addWidget(mEventMatchings);
@@ -269,7 +274,11 @@ void BoOneConditionWidget::updateEventMatching(const QDomElement& root, int inde
 QDomElement BoOneConditionWidget::element()
 {
  QDomElement root = mConditionDocument->documentElement();
- root.setAttribute("EventCaused", mAction->text());
+ 
+ QDomElement action = root.ownerDocument().createElement("Action");
+ root.appendChild(action);
+ QDomElement actionEvent = mAction->event();
+ action.appendChild(actionEvent);
  return root;
 }
 
@@ -440,21 +449,38 @@ void BoOneConditionWidget::clearXML()
 
 bool BoOneConditionWidget::loadCondition(const QDomElement& condition)
 {
+ if (condition.isNull()) {
+	return false;
+ }
+ if (condition.namedItem("Events").toElement().isNull()) {
+	return false;
+ }
+ if (condition.namedItem("Action").toElement().isNull()) {
+	boError() << k_funcinfo << "no Action tag" << endl;
+	return false;
+ }
  clearXML();
  QDomElement root = mConditionDocument->documentElement();
  QDomElement events = root.namedItem("Events").toElement();
- mAction->setText(condition.attribute("EventCaused"));
  QDomNodeList list = condition.namedItem("Events").toElement().elementsByTagName("EventMatching");
  for (unsigned int i = 0; i < list.count(); i++) {
 	events.appendChild(list.item(i).cloneNode());
  }
  reloadEventMatchings();
+
+ if (!mAction->displayEvent(condition.namedItem("Action").namedItem("Event").toElement())) {
+	boError() << k_funcinfo << "cannot display Action Event" << endl;
+	return false;
+ }
+// mAction->setText(condition.attribute("EventCaused"));
  return true;
 }
 
 
-BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent) : QWidget(parent)
+BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent, bool eventMatching) : QWidget(parent)
 {
+ mIsEventMatching = eventMatching;
+
  QGridLayout* layout = new QGridLayout(this, 3, 5);
 
  QLabel* label;
@@ -501,21 +527,55 @@ BoEventMatchingWidget::BoEventMatchingWidget(QWidget* parent) : QWidget(parent)
  layout->addWidget(mData2, 1, 4);
  layout->addWidget(mIgnoreData2, 2, 4);
 
- display(QDomElement());
+ if (!mIsEventMatching) {
+	mIgnoreUnitId->hide();
+	mIgnorePlayerId->hide();
+	mIgnoreData1->hide();
+	mIgnoreData2->hide();
+ }
+
+ if (mIsEventMatching) {
+	displayEventMatching(QDomElement());
+ } else {
+	// display a default event
+	BoEvent e("CustomStringEvent", "Foobar");
+	QDomDocument doc;
+	QDomElement event = doc.createElement("Event");
+	e.save(event, 0);
+	displayEvent(event);
+ }
 }
 
 BoEventMatchingWidget::~BoEventMatchingWidget()
 {
 }
 
-void BoEventMatchingWidget::display(const QDomElement& matching)
+bool BoEventMatchingWidget::displayEvent(const QDomElement& root)
+{
+ boDebug() << k_funcinfo << endl;
+
+ if (root.isNull()) {
+	setEnabled(false);
+	return false;
+ }
+ QDomElement matching = root.ownerDocument().createElement("EventMatching");
+ matching.setAttribute("IgnoreUnitId", false);
+ matching.setAttribute("IgnorePlayerId", false);
+ matching.setAttribute("IgnoreData1", false);
+ matching.setAttribute("IgnoreData2", false);
+ matching.appendChild(root);
+ return displayEventMatching(matching);
+}
+
+bool BoEventMatchingWidget::displayEventMatching(const QDomElement& matching)
 {
  boDebug() << k_funcinfo << endl;
  slotClear();
+
  BoEventMatching m;
  if (matching.isNull() || !m.load(matching)) {
 	setEnabled(false);
-	return;
+	return false;
  }
  setEnabled(true);
  mName->setText(m.event()->name());
@@ -533,6 +593,7 @@ void BoEventMatchingWidget::display(const QDomElement& matching)
  slotIgnorePlayerIdChanged(mIgnorePlayerId->isChecked());
  slotIgnoreData1Changed(mIgnoreData1->isChecked());
  slotIgnoreData2Changed(mIgnoreData2->isChecked());
+ return true;
 }
 
 void BoEventMatchingWidget::slotIgnoreUnitIdChanged(bool on)
@@ -563,10 +624,10 @@ void BoEventMatchingWidget::slotClear()
  mData1->setText("");
  mData2->setText("");
 
- mIgnoreUnitId->setChecked(true);
- mIgnorePlayerId->setChecked(true);
- mIgnoreData1->setChecked(true);
- mIgnoreData2->setChecked(true);
+ mIgnoreUnitId->setChecked(mIsEventMatching);
+ mIgnorePlayerId->setChecked(mIsEventMatching);
+ mIgnoreData1->setChecked(mIsEventMatching);
+ mIgnoreData2->setChecked(mIsEventMatching);
 
  slotIgnoreUnitIdChanged(mIgnoreUnitId->isChecked());
  slotIgnorePlayerIdChanged(mIgnorePlayerId->isChecked());
@@ -574,9 +635,18 @@ void BoEventMatchingWidget::slotClear()
  slotIgnoreData2Changed(mIgnoreData2->isChecked());
 }
 
-void BoEventMatchingWidget::slotApply()
+QDomElement BoEventMatchingWidget::event() const
 {
- boDebug() << k_funcinfo << endl;
+ QDomElement m = eventMatching();
+ if (m.isNull()) {
+	return m;
+ }
+ QDomElement event = m.namedItem("Event").toElement();
+ return event;
+}
+
+QDomElement BoEventMatchingWidget::eventMatching() const
+{
  QDomDocument doc;
  QDomElement root = doc.createElement("EventMatching");
  root.setAttribute("IsLeft", QString::number(1));
@@ -591,7 +661,8 @@ void BoEventMatchingWidget::slotApply()
  root.appendChild(event);
  BoEvent* saveEvent = new BoEvent(QCString(mName->text()), mData1->text(), mData2->text());
  saveEvent->setUnitId(mUnitId->value()); // even if mIgnoreUnitId is checked!
- if (!mIgnorePlayerId->isChecked()) {
+ if (!mIgnorePlayerId->isChecked() && mPlayerId->value() != 0) {
+	// note that 0 is an invalid ID!
 	saveEvent->setPlayerId(mPlayerId->value());
  }
  bool success = saveEvent->save(event, 0);
@@ -599,8 +670,7 @@ void BoEventMatchingWidget::slotApply()
  saveEvent = 0;
  if (!success) {
 	boError() << k_funcinfo << "could not save event" << endl;
-	KMessageBox::sorry(this, i18n("An error occured while saving the event of the event matching"));
-	return;
+	return QDomElement();
  }
 
  BoEventMatching* test = new BoEventMatching();
@@ -609,10 +679,30 @@ void BoEventMatchingWidget::slotApply()
  test = 0;
  if (!success) {
 	boError() << k_funcinfo << "could not load event matching" << endl;
+	return QDomElement();
+ }
+
+ return root;
+}
+
+void BoEventMatchingWidget::slotApply()
+{
+ boDebug() << k_funcinfo << endl;
+
+ QDomElement root = eventMatching();
+ if (root.isNull()) {
+	boError() << k_funcinfo << "null element" << endl;
 	KMessageBox::sorry(this, i18n("An error occured while saving the event matching"));
 	return;
  }
+ QDomElement event = root.namedItem("Event").toElement();
+ if (event.isNull()) {
+	boError() << k_funcinfo << "EventMatching has no Event tag" << endl;
+	KMessageBox::sorry(this, i18n("An error occured while saving the event matching. No event was saved."));
+	return;
+ }
 
+ emit signalEvent(event);
  emit signalEventMatching(root);
 }
 

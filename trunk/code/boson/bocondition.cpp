@@ -99,6 +99,7 @@ BoCondition::BoCondition()
  d->mAlternatives.setAutoDelete(true);
  d->mEvents.setAutoDelete(true);
  d->mStatusConditions.setAutoDelete(true);
+ mEventCaused = 0;
 }
 
 BoCondition::~BoCondition()
@@ -107,6 +108,7 @@ BoCondition::~BoCondition()
  d->mEventsLeft.clear();
  d->mEvents.clear();
  d->mStatusConditions.clear();
+ delete mEventCaused;
  delete d;
 }
 
@@ -171,7 +173,16 @@ bool BoCondition::save(QDomElement& root, const QMap<int, int>* playerId2Index) 
 	++statIt;
  }
 
- root.setAttribute("EventCaused", mEventCaused);
+ QDomElement action = doc.createElement("Action");
+ root.appendChild(action);
+ if (mEventCaused) {
+	QDomElement actionEvent = doc.createElement("Event");
+	action.appendChild(actionEvent);
+	if (!mEventCaused->save(actionEvent, playerId2Index)) {
+		boError() << k_funcinfo << "cannot save event that is caused by condition" << endl;
+		return false;
+	}
+ }
 
  return true;
 }
@@ -226,11 +237,23 @@ bool BoCondition::load(const QDomElement& root)
 	d->mStatusConditions.append(stat);
  }
 
- if (!root.hasAttribute("EventCaused")) {
-	boError() << k_funcinfo << "no EventCaused attribute" << endl;
+ QDomElement action = root.namedItem("Action").toElement();
+ if (action.isNull()) {
+	boError() << k_funcinfo << "no Action tag" << endl;
 	return false;
  }
- mEventCaused = root.attribute("EventCaused");
+ delete mEventCaused;
+ mEventCaused = 0;
+ QDomElement actionEvent = action.namedItem("Event").toElement();
+ if (!actionEvent.isNull()) {
+	mEventCaused = new BoEvent();
+	if (!mEventCaused->load(actionEvent)) {
+		boError() << k_funcinfo << "cannot load event that is caused by condition" << endl;
+		delete mEventCaused;
+		mEventCaused = 0;
+		return false;
+	}
+ }
 
  return true;
 }
@@ -276,12 +299,21 @@ bool BoCondition::thisConditionDone(BosonScript* script) const
 
 void BoCondition::fireAction()
 {
+ BO_CHECK_NULL_RET(mEventCaused);
  boDebug() << k_funcinfo << endl;
- // the "eventCaused()" is actually the parameter of the event.
- // TODO: use an action class instead, probably BoConditionalAction.
- // -> this could be an even (including parameters), a chat message, a script
- // function, ...
- BoEvent* e = new BoEvent("CustomStringEvent", eventCaused());
+ // atm only events are supported. this will change in the future (support
+ // calling functions in scripts)
+ QDomDocument doc;
+ QDomElement root = doc.createElement("Event");
+ if (!mEventCaused->save(root, 0)) {
+	boError() << k_funcinfo << "could not save event that is caused by condition" << endl;
+	return;
+ }
+ BoEvent* e = new BoEvent();
+ if (!e->load(root)) {
+	boError() << k_funcinfo << "could not load event that is caused by condition" << endl;
+	return;
+ }
  boGame->queueEvent(e);
 }
 
