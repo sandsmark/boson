@@ -37,7 +37,7 @@
 #include "bosonsaveload.h"
 #include "bosonconfig.h"
 #include "bosonstarting.h"
-//#include "boevent.h"
+#include "boevent.h"
 #include "boeventmanager.h"
 #include "startupwidgets/bosonloadingwidget.h"
 
@@ -2059,6 +2059,12 @@ bool Boson::buildProducedUnit(ProductionPlugin* factory, unsigned long int unitT
  } else {
 	p->statistics()->addProducedMobileUnit((MobileUnit*)unit, factory);
  }
+
+ BoGenericULongEvent* productionPlaced = new BoGenericULongEvent("ProducedUnitWithTypePlaced", unit->type());
+ productionPlaced->setUnitId(unit->id());
+ productionPlaced->setUnitId(unit->owner()->id());
+ productionPlaced->setLocation(BoVector3(unit->x(), unit->y(), unit->z()));
+ boGame->queueEvent(productionPlaced);
 
  // the current production is done.
  factory->removeProduction();
