@@ -194,8 +194,6 @@ void BosonWidgetBase::initMiniMap()
  minimap()->setCanvas(canvas());
  minimap()->setBackgroundOrigin(WindowOrigin);
 
- connect(boGame, SIGNAL(signalAddUnit(Unit*, int, int)),
-		minimap(), SLOT(slotAddUnit(Unit*, int, int)));
  connect(canvas(), SIGNAL(signalUnitMoved(Unit*, float, float)),
 		minimap(), SLOT(slotMoveUnit(Unit*, float, float)));
  connect(canvas(), SIGNAL(signalUnitRemoved(Unit*)),
