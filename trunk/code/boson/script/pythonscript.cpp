@@ -127,6 +127,11 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"setRandomSeed", py_setRandomSeed, METH_VARARGS, 0 },
   { (char*)"findPath", py_findPath, METH_VARARGS, 0 },
   { (char*)"addEffect", py_addEffect, METH_VARARGS, 0 },
+  { (char*)"addEffectToUnit", py_addEffectToUnit, METH_VARARGS, 0 },
+  { (char*)"advanceEffects", py_advanceEffects, METH_VARARGS, 0 },
+  { (char*)"unfogPlayer", py_unfogPlayer, METH_VARARGS, 0 },
+  { (char*)"unfogAllPlayers", py_unfogAllPlayers, METH_VARARGS, 0 },
+  { (char*)"setAcceptUserInput", py_setAcceptUserInput, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -1758,6 +1763,66 @@ PyObject* PythonScript::py_addEffect(PyObject*, PyObject* args)
   Py_INCREF(Py_None);
   return Py_None;
 }
+
+PyObject* PythonScript::py_addEffectToUnit(PyObject*, PyObject* args)
+{
+  int unitid, effectid;
+  float x = 0, y = 0, z = 0, zrot = 0;
+  if(!PyArg_ParseTuple(args, (char*)"ii|(fff)f", &unitid, &effectid, &x, &y, &z, &zrot))
+  {
+    return 0;
+  }
+  BosonScript::addEffectToUnit(unitid, effectid, BoVector3Fixed(x, y, z), zrot);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_advanceEffects(PyObject*, PyObject* args)
+{
+  int ticks;
+  if(!PyArg_ParseTuple(args, (char*)"i", &ticks))
+  {
+    return 0;
+  }
+  BosonScript::advanceEffects(ticks);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_unfogPlayer(PyObject*, PyObject* args)
+{
+  int playerid;
+  if(!PyArg_ParseTuple(args, (char*)"i", &playerid))
+  {
+    return 0;
+  }
+  BosonScript::unfogPlayer(playerid);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_unfogAllPlayers(PyObject*, PyObject*)
+{
+  BosonScript::unfogAllPlayers();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_setAcceptUserInput(PyObject*, PyObject* args)
+{
+  BO_CHECK_NULL_RET0(currentScript());
+  int accept;
+  if(!PyArg_ParseTuple(args, (char*)"i", &accept))
+  {
+    return 0;
+  }
+
+  currentScript()->setAcceptUserInput(accept);
+
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
 
 /*****  Non-script functions  *****/
 

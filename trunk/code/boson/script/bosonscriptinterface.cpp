@@ -227,4 +227,8 @@ void BosonScriptInterface::commitCameraChanges(int ticks)
   emit signalCommitCameraChanges(ticks);
 }
 
+void BosonScriptInterface::setAcceptUserInput(bool accept)
+{
+  emit signalSetAcceptUserInput(accept);
+}
 

@@ -629,6 +629,7 @@ protected slots:
 	void slotSetCameraZ(float);
 	void slotSetCameraMoveMode(int);
 	void slotCommitCameraChanges(int);
+	void slotSetAcceptUserInput(bool);
 
 protected:
 	void reconnect(const QObject*, const char*, const QObject*, const char*);

@@ -73,6 +73,7 @@
 #include "bosonlocalplayerinput.h"
 
 #include <kgame/kgameio.h>
+#include <kgame/kplayer.h>
 
 #include <klocale.h>
 #include <kmessagebox.h>
@@ -672,9 +673,9 @@ void BosonBigDisplayBase::initializeGL()
 // glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 
- BoVector4Float lightDif(1.0f, 1.0f, 1.0f, 1.0f);
- BoVector4Float lightAmb(0.5f, 0.5f, 0.5f, 1.0f);
- BoVector3Float lightPos(-6000.0, 3000.0, 10000.0);
+ BoVector4Float lightDif(0.644f, 0.644f, 0.644f, 1.0f);
+ BoVector4Float lightAmb(0.502f, 0.502f, 0.502f, 1.0f);
+ BoVector3Float lightPos(1545.0, 4755.0, 2600.0);
 
  BoLight* l = newLight();
  // This is the "main" light, i.e. the Sun. It should always have id 0
@@ -684,7 +685,7 @@ void BosonBigDisplayBase::initializeGL()
  l->setAmbient(lightAmb);
  l->setDiffuse(lightDif);
  l->setSpecular(lightDif);
- l->setDirectional(false); // AB: actually we would want TRUE here, as it is the sun!
+ l->setDirectional(true);
  l->setPosition3(lightPos);
 
  l->setEnabled(true);
@@ -3905,8 +3906,8 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotGetCameraZ(float*)));
  reconnect(i, SIGNAL(signalSetUseCameraLimits(bool)),
 		this, SLOT(slotSetUseCameraLimits(bool)));
- reconnect(i, SIGNAL(signalSetCameraMoveMode(int)),
-		this, SLOT(slotSetCameraMoveMode(int)));
+ reconnect(i, SIGNAL(signalSetCameraFreeMovement(bool)),
+		this, SLOT(slotSetCameraFreeMovement(bool)));
  reconnect(i, SIGNAL(signalSetCameraPos(const BoVector3Float&)),
 		this, SLOT(slotSetCameraPos(const BoVector3Float&)));
  reconnect(i, SIGNAL(signalSetCameraLookAt(const BoVector3Float&)),
@@ -3923,6 +3924,8 @@ void BosonBigDisplayScriptConnector::connectToScript(BosonScript* script)
 		this, SLOT(slotSetCameraMoveMode(int)));
  reconnect(i, SIGNAL(signalCommitCameraChanges(int)),
 		this, SLOT(slotCommitCameraChanges(int)));
+ reconnect(i, SIGNAL(signalSetAcceptUserInput(bool)),
+		this, SLOT(slotSetAcceptUserInput(bool)));
 }
 
 void BosonBigDisplayScriptConnector::slotAddLight(int* id)
@@ -4172,6 +4175,16 @@ void BosonBigDisplayScriptConnector::slotCommitCameraChanges(int ticks)
 {
  BO_CHECK_NULL_RET(mDisplay->autoCamera());
  mDisplay->autoCamera()->commitChanges(ticks);
+}
+
+void BosonBigDisplayScriptConnector::slotSetAcceptUserInput(bool accept)
+{
+ QPtrList<KGameIO>* iolist = mDisplay->localPlayerIO()->ioList();
+ QPtrListIterator<KGameIO> it(*iolist);
+ while (it.current()) {
+	(*it)->blockSignals(!accept);
+	++it;
+ }
 }
 
 void BosonBigDisplayBase::makeVisibleEffectsList(BoVisibleEffects* v)
