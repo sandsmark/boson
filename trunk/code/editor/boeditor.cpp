@@ -41,6 +41,7 @@
 visualCanvas		*vcanvas = 0;
 speciesTheme		*species[BOSON_MAX_PLAYERS] = {0l, 0l};
 uint			nb_player;
+QString			*dataPath;
 
 extern editorCanvas	*ecanvas;
 
@@ -144,7 +145,7 @@ void BoEditorApp::slot_open()
 {
 	if (!filename.isNull() && !slot_close()) return;
 
-	QString name = KFileDialog::getOpenFileName( "/opt/be/share/apps/boson/map", "*.bpf" , 0 ); //XXX path still hardcoded
+	QString name = KFileDialog::getOpenFileName( "", "*.bpf" , 0 );
 	if ( name.isEmpty() ) return;
 
 	do_open(name);

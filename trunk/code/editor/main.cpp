@@ -64,12 +64,16 @@ int main(/*int argc, char* argv[] */)
 	//BoEditorApp* boEditor = new BoEditorApp( (argc>1)?argv[1]:0l);
 
 
+	/* find dataPath */
+	QString path = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf") + "boson/";
+	dataPath = &path;	 // local variable to main are 'almost' global
+
 	/* XXX orzel : temp, until GUI is really functionnal */
-	QString themePath = KGlobal::instance()->dirs()->findResourceDir("data", "boson/map/basic.bpf");
-	themePath	+= "boson/themes/grounds/earth.png";
+	QString themePath = *dataPath +  "themes/grounds/earth.png";
 	printf("loading groundTheme : %s\n", themePath.latin1() );
 	bigBackground = new QPixmap(themePath);
 	if (bigBackground->isNull() ) {
+		logf(LOG_ERROR, "can't load earth.png");
 		printf("can't load earth.png\n");
 		exit(1);
 	}
@@ -83,7 +87,7 @@ int main(/*int argc, char* argv[] */)
 	app.slot_newWindow();
 
 	/// XXX,orzel :  not be...... but $KDEDIR and so on
-	app.do_open("/opt/be/share/apps/boson/map/basic.bpf");
+	app.do_open( *dataPath + "map/basic.bpf");
 
 	return app.exec();
 }  
