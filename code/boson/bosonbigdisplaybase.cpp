@@ -1873,10 +1873,10 @@ void BosonBigDisplayBase::initUfoEditorActions()
 		SLOT(slotEditorEditMapDescription()), actionCollection,
 		"editor_map_description");
  (void)new BoUfoAction(i18n("Edit &Minerals"), KShortcut(), this,
-		SIGNAL(slotEditorEditPlayerMinerals()), actionCollection,
+		SLOT(slotEditorEditPlayerMinerals()), actionCollection,
 		"editor_player_minerals");
  (void)new BoUfoAction(i18n("Edit &Oil"), KShortcut(), this,
-		SIGNAL(slotEditorEditPlayerOil()), actionCollection,
+		SLOT(slotEditorEditPlayerOil()), actionCollection,
 		"editor_player_oil");
  d->mActionEditorChangeHeight = new BoUfoToggleAction(i18n("Edit &Height"),
 		KShortcut(), this, 0, actionCollection, "editor_height");
@@ -2693,6 +2693,7 @@ void BosonBigDisplayBase::setLocalPlayerIO(PlayerIO* io)
 
  PlayerIO* previousPlayerIO = localPlayerIO();
  d->mLocalPlayerIO = io;
+ boDebug() << k_funcinfo << "d-mLocalPlayerIO now: " << d->mLocalPlayerIO << endl;
 
  BoGroundRendererManager::manager()->setLocalPlayerIO(localPlayerIO());
 
@@ -5137,6 +5138,7 @@ void BosonBigDisplayBase::slotEditorChangeLocalPlayer(int index)
  p = (Player*)d->mEditorPlayers.at(index);
  if (p) {
 	emit signalEditorChangeLocalPlayer((Player*)p);
+	BO_CHECK_NULL_RET(d->mActionEditorPlace);
 	if (d->mActionEditorPlace->currentItem() >= 0) {
 		slotEditorPlace(d->mActionEditorPlace->currentItem());
 	}
