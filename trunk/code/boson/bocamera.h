@@ -76,8 +76,6 @@ class BoCamera
     int remainingTime()  { return mRemainingTime; }
     float movedAmount()  { return mMovedAmount; }
 
-    void resetDifferences();
-
 
     BoCamera& operator=(const BoCamera& c);
 
@@ -176,6 +174,7 @@ class BoCamera
     * be automatically called by @ref cameraPos and @ref up, if it's dirty.
     **/
     void updatePosition();
+    void resetDifferences();
 
     void checkRotation();
 
