@@ -750,7 +750,7 @@ function counter2_get_browser($ua)
   {
     return "Dillo";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(msnbot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
   {
     return "SearchBot";
   }
@@ -842,7 +842,7 @@ function counter2_get_os($ua)
   {
     return "UNIX";
   }
-  else if(eregi("(nuhk)|(Googlebot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
+  else if(eregi("(nuhk)|(Googlebot)|(msnbot)|(Yammybot)|(Openbot)|(Slurp/cat)|(crawler)|(ContentHarvester)|(ia_archiver)|(Sniffer)|(grub)|(Pompos)|(SpiderKU)|(ZyBorg)|(Bot)|(Microsoft URL Control)|(Ask Jeeves)|(Infoseek SideWinder)|(Scooter)|(WebCopier)|(W3C_Validator)|(Zeus)", $ua))
   {
     return "SearchBot";
   }
