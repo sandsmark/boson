@@ -213,6 +213,98 @@ bool BoTexMap::load(QDataStream& stream)
  return true;
 }
 
+bool BoTexMap::importTexMap(const QImage* img)
+{
+ // AB: we could use more than 1 texture per component - e.g. use 0-127 for
+ // texture 1 and 128-255 for texture 2.
+ // but since we support importing multiple texmaps i think that would be too
+ // unhandy for the designers anyway.
+ if (!img) {
+	BO_NULL_ERROR(img);
+	return false;
+ }
+ if (img->isNull()) {
+	boError() << k_funcinfo << "null image" << endl;
+	return false;
+ }
+ if (img->depth() != 32) {
+	boError() << k_funcinfo << "only 32 bits per pixel are supported! image has: "
+			<< img->depth() << endl;
+	return false;
+ }
+ if (textureCount() < 3) {
+	boError() << k_funcinfo << "cannot import an image into an array with less than 3 textures. textureCount() == " << textureCount() << endl;
+	return false;
+ }
+ bool useAlpha = img->hasAlphaBuffer();
+ if (useAlpha && textureCount() < 4) {
+	boWarning() << k_funcinfo << "won't import alpha buffer" << endl;
+	useAlpha = false;
+ }
+ if ((unsigned int)img->width() != width()) {
+	boError() << k_funcinfo << "image width must be "
+			<< width() << ", is: " << img->width() << endl;
+	return false;
+ }
+ if ((unsigned int)img->height() != height()) {
+	boError() << k_funcinfo << "image height must be "
+			<< height() << ", is: " << img->height() << endl;
+	return false;
+ }
+ if (!mTexMap) {
+	BO_NULL_ERROR(mTexMap);
+	return false;
+ }
+
+ boDebug() << k_funcinfo << endl;
+
+ for (unsigned int y = 0; y < height(); y++) {
+	QRgb* line = (QRgb*)img->scanLine(y);
+	for (unsigned int x = 0; x < width(); x++) {
+		QRgb pixel = line[x];
+		setTexMapAlpha(0, x, y, qRed(pixel));
+		setTexMapAlpha(1, x, y, qGreen(pixel));
+		setTexMapAlpha(2, x, y, qBlue(pixel));
+	}
+ }
+ if (useAlpha) {
+	for (unsigned int y = 0; y < height(); y++) {
+		QRgb* line = (QRgb*)img->scanLine(y);
+		for (unsigned int x = 0; x < width(); x++) {
+			QRgb pixel = line[x];
+			setTexMapAlpha(3, x, y, qAlpha(pixel));
+		}
+	}
+ }
+
+ return true;
+}
+
+bool BoTexMap::copyTexture(unsigned int dstTexture, const BoTexMap* src, unsigned int srcTexture)
+{
+ if (!src) {
+	BO_NULL_ERROR(src);
+	return false;
+ }
+ if (src->width() != width() || src->height() != height()) {
+	boError() << k_funcinfo << "src and dst must be of the same size!" << endl;
+	return false;
+ }
+ if (srcTexture >= src->textureCount()) {
+	boError() << k_funcinfo << "src does not have a texture " << srcTexture << endl;
+	return false;
+ }
+ if (dstTexture >= textureCount()) {
+	boError() << k_funcinfo << "we don't have a texture " << dstTexture << endl;
+	return false;
+ }
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned int y = 0; y < height(); y++) {
+		setTexMapAlpha(dstTexture, x, y, src->texMapAlpha(srcTexture, x, y));
+	}
+ }
+ return true;
+}
 
 
 class BosonMap::BosonMapPrivate
@@ -897,90 +989,6 @@ float BosonMap::cellAverageHeight(int x, int y)
  }
 
  return (minz + maxz) / 2.0f;
-}
-
-bool BosonMap::importTexMap(const QString& file, int texturesPerComponent, bool useAlpha)
-{
- QImage* img = new QImage(file);
- if (img->isNull()) {
-	boError() << k_funcinfo << "could not load from " << file << endl;
-	delete img;
-	return false;
- }
- boDebug() << k_funcinfo << "importing from " << file << endl;
- bool ret = importTexMap(img, texturesPerComponent, useAlpha);
- delete img;
- return ret;
-}
-
-bool BosonMap::importTexMap(const QImage* img, int texturesPerComponent, bool useAlpha)
-{
- boWarning() << k_funcinfo << "this function is mos probably broken at the moment!" << endl;
- if (!img) {
-	BO_NULL_ERROR(img);
-	return false;
- }
- if (img->isNull()) {
-	boError() << k_funcinfo << "null image" << endl;
-	return false;
- }
- if (img->depth() != 32) {
-	boError() << k_funcinfo << "only 32 bits per pixel are supported! image has: "
-			<< img->depth() << endl;
-	return false;
- }
- if (useAlpha && !img->hasAlphaBuffer()) {
-	boError() << k_funcinfo << "cannot use alpha, as image doesn't have alpha buffer!" << endl;
-	return false;
- }
- if ((unsigned int)img->width() != width() + 1) {
-	boError() << k_funcinfo << "image width must be "
-			<< width() + 1 << ", is: " << img->width() << endl;
-	return false;
- }
- if ((unsigned int)img->height() != height() + 1) {
-	boError() << k_funcinfo << "image height must be "
-			<< height() + 1 << ", is: " << img->height() << endl;
-	return false;
- }
- if (texturesPerComponent <= 0  || texturesPerComponent > 8) {
-	boError() << k_funcinfo << "invalid texturesPerComponent: " << texturesPerComponent << endl;
-	return false;
- }
- if (!groundTheme()) {
-	BO_NULL_ERROR(groundTheme());
- }
- if ((unsigned int)texturesPerComponent * (useAlpha ? 4 : 3) > groundTheme()->textureCount()) {
-	boWarning() << k_funcinfo << "this map doesn't have " 
-			<< texturesPerComponent * (useAlpha ? 4 : 3)
-			<< " textures. reset to " << groundTheme()->textureCount() << " textures, i.e. "
-			<< groundTheme()->textureCount() / (useAlpha ? 4 : 3) 
-			<< " textures per component" << endl;
-	texturesPerComponent = groundTheme()->textureCount() / (useAlpha ? 4 : 3);
- }
-
- if (texturesPerComponent != 1) {
-	boError() << k_funcinfo << "currently we are supporting only 1 texture per component!" << endl;
-	return false;
- }
- if (!mTexMap) {
-	BO_NULL_ERROR(mTexMap);
-	return false;
- }
-
-boDebug() << k_funcinfo << endl;
- for (unsigned int y = 0; y < height() + 1; y++) {
-	QRgb* line = (QRgb*)img->scanLine(y);
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		QRgb pixel = line[x];
-//		for (int i = 0; i < texturesPerComponent; i++) {
-			setTexMapAlpha(0, x, y, qRed(pixel));
-			setTexMapAlpha(1, x, y, qGreen(pixel));
-			setTexMapAlpha(2, x, y, qBlue(pixel));
-//		}
-	}
- }
- return true;
 }
 
 bool BosonMap::generateCellsFromTexMap()
