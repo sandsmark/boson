@@ -1,5 +1,5 @@
 from sys import exit
-from utils import boprint
+from utils import *
 from random import randint
 
 # This is just to be able to test the syntax whith you
@@ -12,18 +12,53 @@ except ImportError:
 
 cycle = 0
 player = -1
+  
+def unitDestroyed(unitid, ownerid, pos):
+  boprint("debug","unit with id %s destroyed" % unitid)
 
+def unitProduced(ownerid, pos, type, factorid):
+  boprint("debug","unit with id %s produced" % type)
+  if(BoScript.isUnitTypeMobile(int(ownerid),int(type)) == False):
+    boprint("debug", "Ok , building")
+    pos = BoScript.unitPosition(int(factorid))
+    x = int(pos[0])
+    y = int(pos[1])
+    i = 0
+    tmpx = randint(x-i, x+i)
+    tmpy = randint(y-i, y+i)
+    if(tmpx < 0):
+      tmpx = x
+    if(tmpy < 0):
+      tmpy = y
+    while (BoScript.cellOccupied( tmpx,tmpy) == True):
+      tmpx = randint(x-i, x+i)
+      tmpy = randint(y-i, y+i)
+      if(tmpx < 0):
+        tmpx = x
+      if(tmpy < 0):
+        tmpy = y
+      i = i + 1
+    boprint("debug","placed tmpx %s,tmpy %s " % (tmpx,tmpy))
+    BoScript.placeProduction(int(ownerid), int(factorid), tmpx, tmpy)
+ 
+
+def unitPlaced(unitid,ownerid, pos, type):
+  boprint("debug","unit with id %s and type  %s placed " % (unitid,type))
+    
 
 def init(id):
   global newProd,expl
+  #boprint_setDebugLevel("debug")
   boprint("debug", "AI Init called")
   setPlayerId(id)
+  BoScript.addEventHandler("UnitWithTypeDestroyed", "ai.unitDestroyed", "upl")
+  BoScript.addEventHandler("UnitWithTypeProduced", "ai.unitProduced", "plab")
+  BoScript.addEventHandler("ProducedUnitWithTypePlaced", "ai.unitPlaced", "upla")
 
   expl = -1
   newProd = {0:0}
 
   oldAIInit()
-
 
 def setPlayerId(id):
   global player
@@ -44,7 +79,7 @@ def advance():
     explore()
 #if (cycle % 20) == 0:
 	#   spawnSomeUnits()
-  boprint("debug", "hi! advance")
+	#boprint("debug", "hi! advance")
   oldAIAdvance()
 
 
