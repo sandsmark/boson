@@ -181,14 +181,14 @@ void BosonWidget::init()
 		this, SLOT(slotLoadScenario(const QString&)));
 
 
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
+		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
+ connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)), // only EDITOR signal
+		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
  connect(d->mBigDisplay, SIGNAL(contentsMoving(int, int)),
 		d->mMiniMap, SLOT(slotMoveRect(int, int)));
  connect(d->mBigDisplay, SIGNAL(signalSizeChanged(int, int)),
 		d->mMiniMap, SLOT(slotResizeRect(int, int)));
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mCanvas, SLOT(slotAddCell(int, int, int, unsigned char)));
- connect(d->mBigDisplay, SIGNAL(signalAddCell(int,int, int, unsigned char)),
-		d->mMiniMap, SLOT(slotAddCell(int, int, int, unsigned char)));
 		
  connect(d->mMiniMap, SIGNAL(signalReCenterView(const QPoint&)),
 		d->mBigDisplay, SLOT(slotReCenterView(const QPoint&)));
@@ -646,6 +646,7 @@ void BosonWidget::changeLocalPlayer(Player* localPlayer)
  d->mLocalPlayer = localPlayer; // is this used?
  d->mBigDisplay->setLocalPlayer(d->mLocalPlayer);
  d->mCommandFrame->setLocalPlayer(d->mLocalPlayer);
+ d->mCanvas->setLocalPlayer(d->mLocalPlayer);
 }
 
 void BosonWidget::slotAddComputerPlayer(Player* computer)

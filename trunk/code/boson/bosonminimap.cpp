@@ -32,7 +32,7 @@
 
 #include "bosonminimap.moc"
 
-#define COLOR_UNKNOWN black // should never appear
+#define COLOR_UNKNOWN black // fog of war
 
 class BosonMiniMap::BosonMiniMapPrivate
 {
@@ -94,7 +94,7 @@ void BosonMiniMap::slotCreateMap(int w, int h)
  d->mMapWidth = w;
  d->mMapHeight = h;
  d->mGround = new QPixmap(mapWidth(), mapHeight());
- d->mGround->fill(black);
+ d->mGround->fill(COLOR_UNKNOWN);
 
  setMinimumWidth(mapWidth() + 5);
  setMinimumHeight(mapHeight() + 5);
@@ -128,7 +128,7 @@ void BosonMiniMap::slotAddCell(int x, int y, int groundType, unsigned char)
 		setPoint(x, y, darkYellow);
 		break;
 	default:
-		setPoint(x, y, black);
+		setPoint(x, y, COLOR_UNKNOWN);
 		break;
  }
 // repaint(false);// performance - units will be added and therefore repaint()
@@ -179,6 +179,14 @@ void BosonMiniMap::slotAddUnit(Unit* unit, int x, int y)
 	kdError() << k_funcinfo << ": NULL unit" << endl;
 	return;
  }
+ Cell* c = d->mMap->cell(x, y);
+ if (!c) {
+	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
+	return;
+ }
+ if (c->isFogged()) {
+	return;
+ }
  SpeciesTheme* theme = unit->speciesTheme();
  QColor color;
  if (!theme) {
@@ -222,6 +230,7 @@ void BosonMiniMap::initMap()
 	return;
  }
  slotCreateMap(d->mMap->width(), d->mMap->height());
+ return;
  for (unsigned int i = 0; i < d->mMap->width(); i++) {
 	for (unsigned int j = 0; j < d->mMap->height(); j++) {
 		Cell* c = d->mMap->cell(i, j);
@@ -246,7 +255,9 @@ void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
  int y = (int)(oldY / BO_TILE_SIZE);
  Cell* c = d->mMap->cell(x, y);
  if (c) {
-	slotAddCell(x, y, c->groundType(), c->version()); // FIXME not yet fully working
+	if (!c->isFogged()) {
+		slotAddCell(x, y, c->groundType(), c->version());
+	}
  } else {
 	kdWarning() << k_funcinfo << ": NULL cell" << endl;
  }
@@ -273,9 +284,22 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 
 void BosonMiniMap::slotUnfog(int x, int y)
 {
+ Cell* c = d->mMap->cell(x, y);
+ if (!c) {
+	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
+	return;
+ }
+ slotAddCell(x, y, c->groundType(), c->version());
+ //TODO units at this point/cell!!
 }
 
 void BosonMiniMap::slotFog(int x, int y)
 {
+ Cell* c = d->mMap->cell(x, y);
+ if (!c) {
+	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
+	return;
+ }
+ setPoint(x, y, COLOR_UNKNOWN);
 }
 

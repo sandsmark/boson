@@ -3,9 +3,11 @@ Game TODOs
 - constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
 - make player color selectable in the new game dialog
 - use different cursors for moving, attacking, ...
-- fog of war (long time TODO)
 - unit accelleration: units should slowly start to accelerate and to brake when
   moving
+- selectpart/cell: static memory should be deleted
+- BosonPath doesn't honor fog of war
+- MiniMap does not know about units when removing fog of war
 
 Editor (map, unit, scenario) TODOs
 - don't place units on invalid tiles (e.g. ship on grass)
