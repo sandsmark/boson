@@ -332,6 +332,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	// AB: warning: from Qt docs: "If you are accessing 16-bpp image data,
 	// you must handle endianness yourself."
 	// do we have to care about this? (since we are using 16bpp)
+	// AB: we use 32bpp (qt doesnt support 16bpp on X11)
 	unsigned char* line = map.scanLine(y);
 	for (unsigned int x = 0; x < height() + 1; x++) {
 		mHeightMap[y * (width() + 1) + x] = pixelToHeight(line[x]);
@@ -469,26 +470,27 @@ QByteArray BosonMap::saveHeightMapImage()
 	boError() << k_funcinfo << "Cannot save empty map" << endl;
 	return QByteArray();
  }
- QImage image(width() + 1, height() + 1, 16);
- int* map = new int[(width() + 1) * (height() + 1)];
+ QImage image;
+ if (!image.create(width() + 1, height() + 1, 32, 0)) { // AB: 16bpp isnt available for X11 (only for qt embedded)
+	boError() << k_funcinfo << "Unable to create height map!" << endl;
+	return QByteArray();
+ }
+ boDebug() << k_funcinfo << "heightmap: " << image.width() << "x" << image.height() << endl;
  if (!mHeightMap) {
-	for (unsigned int x = 0; x < width() + 1; x++) {
-		for (unsigned int y = 0; y < height() + 1; y++) {
-			int l = heightToPixel(0.0f);
-			map[y * (width() + 1) + x] = l;
+	boDebug() << k_funcinfo << "dummy height map..." << endl;
+	int l = heightToPixel(0.0f);
+	image.fill(l);
+ } else {
+	boDebug() << k_funcinfo << "real height map" << endl;
+	// AB: this *might* be correct, but i am not sure about this. (02/11/22)
+	for (int y = 0; y < image.height(); y++) {
+		uint* p = (uint*)image.scanLine(y);
+		for (int x = 0; x < image.width(); x++) {
+			float value = mHeightMap[y * (width() + 1) + x];
+			int v = heightToPixel(value);
+			*p = v;
+			p++;
 		}
-	}
- }
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		float value = mHeightMap[y * (width() + 1) + x];
-		map[y * (width() + 1) + x] = heightToPixel(value);
-	}
- }
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		int v = map[(y * width() + 1) + x];
-		image.setColor(image.pixelIndex(x, y), qRgb(v, v, v));
 	}
  }
 
