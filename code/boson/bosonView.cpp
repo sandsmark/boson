@@ -27,6 +27,7 @@
 bosonView::bosonView(visualField *p, QObject *parent, const char *name=0L)
 	:visualView(p,parent,name)
 {
+	connect(p, SIGNAL(reCenterView(int,int)), SLOT(reCenterView(int,int)));
 }
 
 

@@ -43,9 +43,9 @@ class Unit;
   */
 class bosonField : public visualField 
 {
-  Q_OBJECT
+	Q_OBJECT
 
- public:
+public:
   bosonField(uint l, uint h, QObject *parent=0, const char *name=0L);
 
   void createMob(mobileMsg_t &);
@@ -63,6 +63,9 @@ class bosonField : public visualField
 //private :
   QIntDict<playerMobUnit>	mobile;
   QIntDict<playerFacility>	facility;
+  
+signals:
+	void reCenterView(int x, int y);
 
 };
 
