@@ -19,9 +19,7 @@
 #ifndef __BOSONSTATISTICS_H__
 #define __BOSONSTATISTICS_H__
 
-class Unit;
-class Facility;
-class MobileUnit;
+class UnitBase;
 
 /**
  * Whenever a unit shoots its weapon or whenever a new unit is produced we need
@@ -45,13 +43,16 @@ public:
 	void increaseShots();
 	unsigned long int shots() const;
 
+	void addLostMobileUnit(UnitBase* unit);
+	void addLostFacility(UnitBase* unit);
+
 	/**
 	 * Increase the value returned by @ref destroyedMobileUnits.
 	 * @param destroyed Unused - might get used to show which unit destroyed
 	 * most enemies, or to check whether an enemy or a friend was destroyed
 	 * @param destroyedBy Unused (see above)
 	 **/
-	void addDestroyedMobileUnit(MobileUnit* destroyed, Unit* destroyedBy);
+	void addDestroyedMobileUnit(UnitBase* destroyed, UnitBase* destroyedBy);
 
 	/**
 	 * Increase the value returned by @ref destroyedFacilities.
@@ -59,7 +60,7 @@ public:
 	 * most enemies, or to check whether an enemy or a friend was destroyed
 	 * @param destroyedBy Unused (see above)
 	 **/
-	void addDestroyedFacility(Facility* destroyed, Unit* destroyedBy);
+	void addDestroyedFacility(UnitBase* destroyed, UnitBase* destroyedBy);
 			
 	/**
 	 * Increase the value returned by @producedFacility
@@ -67,7 +68,7 @@ public:
 	 * has been produced most by this player
 	 * @param producer Unused (see above)
 	 **/
-	void addProducedFacility(Facility* produced, Facility* produced);
+	void addProducedFacility(UnitBase* produced, UnitBase* producedBy);
 
 	/**
 	 * Increase the value returned by @producedFacility
@@ -75,7 +76,7 @@ public:
 	 * has been produced most by this player
 	 * @param producer Unused (see above)
 	 **/
-	void addProducedMobileUnit(MobileUnit* produced, Facility* produced);
+	void addProducedMobileUnit(UnitBase* produced, UnitBase* producedBy);
 
 	void increaseMinedMinerals(unsigned int increaseBy  = 1);
 	void increaseMinedOil(unsigned int increaseBy  = 1);
@@ -91,9 +92,50 @@ public:
 	unsigned long int minedOil() const { return mMinedOil; }
 	unsigned long int refinedMinerals() const { return mRefinedMinerals; }
 	unsigned long int refinedOil() const { return mRefinedOil; }
-	unsigned long int destroyedMobileUnits() { return mDestroyedMobileUnits; }
-	unsigned long int destroyedFacilities() { return mDestroyedFacilities; }
-	unsigned long int destroyedUnits() { return destroyedMobileUnits() + destroyedFacilities(); }
+
+	unsigned long int lostMobileUnits() const { return mLostMobileUnits; }
+	unsigned long int lostFacilities() const { return mLostFacilities; }
+	unsigned long int lostUnits() const { return lostMobileUnits() + lostFacilities(); }
+	
+	unsigned long int destroyedMobileUnits() const { return mDestroyedMobileUnits; }
+	unsigned long int destroyedFacilities() const { return mDestroyedFacilities; }
+	unsigned long int destroyedUnits() const { return destroyedMobileUnits() + destroyedFacilities(); }
+	unsigned long int destroyedOwnMobileUnits() const { return mDestroyedOwnMobileUnits; }
+	unsigned long int destroyedOwnFacilities() const { return mDestroyedOwnFacilities; }
+	unsigned long int destroyedOwnUnits() const { return destroyedOwnMobileUnits() + destroyedOwnFacilities(); }
+
+	/**
+	 * Note that one part of the points are calculated immediately, e.g. in
+	 * @ref addDestroyedFacility the points are added immediately, but in
+	 * @ref increaseRefinedMinerals the points are not touched. These 
+	 * points are added "on-the-fly" when @ref points is called only
+	 *
+	 * Even negative values are possible here!
+	 * @return How many points this player receives. Note that the "winning"
+	 * factory is not yet taken into account! A winning player must get more
+	 * points (<em>way</em> more) than a defeated player
+	 **/
+	long int points() const;
+
+
+	static unsigned int winningPoints();
+
+protected:
+	static float pointsPerRefinedMinerals();
+	static float pointsPerRefinedOil();
+
+	static unsigned int pointsPerDestroyedMobileUnit();
+	static unsigned int pointsPerDestroyedFacility();
+	static unsigned int pointsPerProducedMobileUnit();
+	static unsigned int pointsPerProducedFacility();
+
+	static int pointsPerLostMobileUnit();
+	static int pointsPerLostFacility();
+	/**
+	 * Note: the @ref pointsPerLostMobileUnit is <em>also</em> called!
+	 **/
+	static int pointsPerDestroyedOwnMobileUnit();
+	static int pointsPerDestroyedOwnFacility();
 
 private:
 	unsigned long int mShots; // note: the unsigned is important here! long is about 2 billion, but that's really not much for shots!
@@ -105,8 +147,12 @@ private:
 	unsigned long int mProducedFacilities;
 	unsigned long int mDestroyedMobileUnits;
 	unsigned long int mDestroyedFacilities;
-	
+	unsigned long int mDestroyedOwnMobileUnits;
+	unsigned long int mDestroyedOwnFacilities;
+	unsigned long int mLostMobileUnits;
+	unsigned long int mLostFacilities;
 
+	long int mPoints;
 };
 
 #endif

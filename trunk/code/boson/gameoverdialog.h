@@ -37,11 +37,13 @@ public:
 
 	void createStatistics(Boson* boson, Player* winner, Player* localPlayer);
 	
-protected:
-	void addPlayer(Player* p);
-
 private:
 	class PlayerBox;
+
+protected:
+	PlayerBox* addPlayer(Player* p);
+
+private:
 	class GameOverDialogPrivate;
 	GameOverDialogPrivate* d;
 };
@@ -67,8 +69,13 @@ private:
 	QLabel* mProducedUnits;
 	QLabel* mShots;
 	QLabel* mDestroyedUnits;
+	QLabel* mDestroyedOwnUnits;
+	QLabel* mLostUnits;
 	QLabel* mStatus;
+
+	QLabel* mPoints;
 	Player* mPlayer;
+	bool mIsWinner;
 	
 };
 

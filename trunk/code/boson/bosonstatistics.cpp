@@ -19,6 +19,8 @@
 
 #include "bosonstatistics.h"
 
+#include "unitbase.h"
+
 BosonStatistics::BosonStatistics()
 {
  mShots = 0;
@@ -30,6 +32,12 @@ BosonStatistics::BosonStatistics()
  mProducedFacilities = 0;
  mDestroyedMobileUnits = 0;
  mDestroyedFacilities= 0;
+ mDestroyedOwnMobileUnits = 0;
+ mDestroyedOwnFacilities= 0;
+ mLostMobileUnits = 0;
+ mLostFacilities= 0;
+
+ mPoints = 0;
 }
 
 BosonStatistics::~BosonStatistics()
@@ -75,23 +83,120 @@ void BosonStatistics::increaseRefinedOil(unsigned int increaseBy)
  mRefinedOil += increaseBy;
 }
 
-void BosonStatistics::addDestroyedMobileUnit(MobileUnit*, Unit*)
+void BosonStatistics::addDestroyedMobileUnit(UnitBase* destroyed, UnitBase* destroyedBy)
 {
+ if (destroyed->owner() == destroyedBy->owner()) {
+	mDestroyedOwnMobileUnits++;
+	mPoints += pointsPerDestroyedOwnMobileUnit();
+	return;
+ }
  mDestroyedMobileUnits++;
+ mPoints += pointsPerDestroyedMobileUnit();
 }
 
-void BosonStatistics::addDestroyedFacility(Facility*, Unit*)
+void BosonStatistics::addDestroyedFacility(UnitBase* destroyed, UnitBase* destroyedBy)
 {
+ if (destroyed->owner() == destroyedBy->owner()) {
+	mDestroyedOwnFacilities++;
+	mPoints += pointsPerDestroyedOwnFacility();
+	return;
+ }
  mDestroyedFacilities++;
+ mPoints += pointsPerDestroyedFacility();
 }
 
-void BosonStatistics::addProducedMobileUnit(MobileUnit*, Facility*)
+void BosonStatistics::addLostMobileUnit(UnitBase*)
+{
+ mLostMobileUnits++;
+ mPoints += pointsPerLostMobileUnit();
+}
+
+void BosonStatistics::addLostFacility(UnitBase*)
+{
+ mLostFacilities++;
+ mPoints += pointsPerLostFacility();
+}
+
+void BosonStatistics::addProducedMobileUnit(UnitBase*, UnitBase*)
 {
  mProducedMobileUnits++;
+ mPoints += pointsPerProducedMobileUnit();
 }
 
-void BosonStatistics::addProducedFacility(Facility*, Facility*)
+void BosonStatistics::addProducedFacility(UnitBase*, UnitBase*)
 {
  mProducedFacilities++;
+ mPoints += pointsPerProducedFacility();
+}
+
+long int BosonStatistics::points() const
+{
+ long int points = mPoints;
+
+// I'm not sure if shot's should get points at all!
+// Probably it's better to use an inverse here. less shots is better, more shots
+// are worse. but perhaps we simply don't give shots at all.
+// points += (unsigned long int)(shots() * 0.001);
+
+ points += (unsigned long int)(refinedMinerals() * pointsPerRefinedMinerals());
+ points += (unsigned long int)(refinedOil() * pointsPerRefinedOil());
+
+ return points;
+}
+
+
+float BosonStatistics::pointsPerRefinedMinerals()
+{
+ return 0.1;
+}
+
+float BosonStatistics::pointsPerRefinedOil()
+{
+ return 0.1;
+}
+
+unsigned int BosonStatistics::pointsPerDestroyedMobileUnit()
+{
+ return 2;
+}
+
+unsigned int BosonStatistics::pointsPerDestroyedFacility()
+{
+ return 5;
+}
+
+int BosonStatistics::pointsPerDestroyedOwnMobileUnit()
+{
+ return -2;
+}
+
+int BosonStatistics::pointsPerDestroyedOwnFacility()
+{
+ return -5;
+}
+
+unsigned int BosonStatistics::pointsPerProducedMobileUnit()
+{
+ return 5;
+}
+
+unsigned int BosonStatistics::pointsPerProducedFacility()
+{
+ return 10;
+}
+
+int BosonStatistics::pointsPerLostMobileUnit()
+{
+ return -6;
+}
+
+int BosonStatistics::pointsPerLostFacility()
+{
+ return -12;
+}
+
+unsigned int BosonStatistics::winningPoints()
+{
+ return 5000;
 }
 
