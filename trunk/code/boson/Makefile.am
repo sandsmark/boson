@@ -44,7 +44,6 @@ libboson_la_SOURCES = \
 	boitemlisthandler.cpp \
 	boselection.cpp \
 	botooltipcreator.cpp \
-	bogltooltip.cpp \
 	bosonplayfield.cpp \
 	bosonmap.cpp \
 	bosongroundtheme.cpp \
@@ -90,6 +89,7 @@ libboson_la_SOURCES = \
 	\
 	bogameproperty.cpp \
 	bosonglchat.cpp \
+	bosonufochat.cpp \
 	bosonprofiling.cpp \
 	bosonprofilingdialog.cpp \
 	bosonmodeltextures.cpp \
@@ -152,6 +152,7 @@ boson_SOURCES = \
 		bosonbigdisplayinputbase.cpp \
 		bosonbigdisplayinput.cpp \
 		editorbigdisplayinput.cpp \
+		bogltooltip.cpp \
 		optionsdialog.cpp \
 		optionswidgets.cpp \
 		bogroundrenderer.cpp \
