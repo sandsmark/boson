@@ -37,6 +37,7 @@ static KCmdLineOptions options[] =
     { "new", I18N_NOOP("Skip Welcome Widget and display the New Game screen"), 0 },
     { "editor", I18N_NOOP("Skip Welcome Widget and display the Start Editor screen"), 0 },
     { "playfield <identifier>", I18N_NOOP("Playfield identifier for newgame/start editor widget"), 0 },
+    { "computer <count>", I18N_NOOP("Add (currently dummy) computer player"), 0 },
     { "start", I18N_NOOP("Start the game"), 0},
     { 0, 0, 0 }
 };

@@ -479,9 +479,7 @@ void BosonNewGameWidget::slotStart()
 
 void BosonNewGameWidget::slotAddAIPlayer()
 {
- if(!boGame) {
-	return;
- }
+ BO_CHECK_NULL_RET(boGame);
  boDebug() << k_funcinfo << endl;
  Player* p = new Player();
  p->setName(mAddAIName->text());

@@ -28,6 +28,7 @@
 #include "kloadsavegamewidget.h"
 #include "bodebug.h"
 #include "../boson.h"
+#include "../defines.h"
 
 #include <kmainwindow.h> // AB: urghs
 #include <kstandarddirs.h>
@@ -153,6 +154,27 @@ void BosonStartupWidget::slotNewGame(KCmdLineArgs* args)
 		identifier = identifier + QString::fromLatin1(".bpf");
 	}
 	w->sendPlayFieldChanged(identifier);
+ }
+ if (args->isSet("computer")) {
+	QString count = args->getOption("computer");
+	bool ok = true;
+	int c = count.toInt(&ok);
+	if (!ok) {
+		boError() << k_funcinfo << "computer player count was not a valid number" << endl;
+		return;
+	}
+	if (c >= BOSON_MAX_PLAYERS) {
+		boWarning() << k_funcinfo << "Cannot add " << c << " players" << endl;
+		boDebug() << k_funcinfo << "changing to " << BOSON_MAX_PLAYERS - 1<< endl;
+		c = BOSON_MAX_PLAYERS - 1;
+	}
+	
+	for (int i = 0; i < c; i++) {
+		// note: we don't have to care about which playfield was loaded,
+		// as we can *always* add unlimited players. player number is
+		// checked when starting game only
+		w->slotAddAIPlayer();
+	}
  }
 
 
