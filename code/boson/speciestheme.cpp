@@ -111,9 +111,11 @@ SpeciesTheme::SpeciesTheme(const QString& speciesDir, const QColor& teamColor)
 
 SpeciesTheme::~SpeciesTheme()
 {
+ kdDebug() << k_funcinfo << endl;
  reset();
 
  delete d;
+ kdDebug() << k_funcinfo << "done" << endl;
 }
 
 void SpeciesTheme::reset()
