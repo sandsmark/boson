@@ -99,7 +99,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  mCurrentPlugin = 0;
  mAdvanceFunction = &Unit::advanceNone;
  mAdvanceFunction2 = &Unit:: advanceNone;
- setOwner(owner);
  d->mPlugins.setAutoDelete(true);
  d->mPlugins.clear();
 

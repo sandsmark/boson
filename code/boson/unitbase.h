@@ -169,20 +169,9 @@ public:
 	}
 
 	/**
-	 * @return The owner (player) of the unit
-	 **/
-	inline Player* owner() const { return mOwner; }
-
-	/**
 	 * @return owner()->playerIO()
 	 **/
 	PlayerIO* ownerIO() const;
-
-	/**
-	 * Set the owner of this unit. Note that this should be done on
-	 * construction only! We do not yet support changing the owner!
-	 **/
-	void setOwner(Player* owner);
 
 	/**
 	 * @return The @ref KGamePropertyHandler for weapon properties. The
@@ -307,7 +296,6 @@ private:
 	static void initStatic();
 
 private:
-	Player* mOwner;
 	bool mIsMoving;
 
 	KGameProperty<unsigned long int> mArmor;
