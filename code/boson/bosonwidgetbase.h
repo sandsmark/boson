@@ -205,10 +205,8 @@ protected slots:
 	void slotChatDockHidden();
 	void slotCmdFrameDockHidden();
 
-	void slotDebug();
 	void slotDebugMode(int);
 	void slotDebugPlayer(int);
-	void slotProfiling();
 	void slotToggleCmdFrameVisible();
 	void slotToggleChatVisible();
 	void slotGrabScreenshot();
@@ -226,8 +224,6 @@ protected slots:
 
 	void slotAddUnit(Unit* unit, int x, int y);
 	void slotRemoveUnit(Unit* unit);
-
-	void slotDebugRequestIdName(int msgid, bool userid, QString& name);
 
 	/**
 	 * Directly add a chat message from the system (i.e. the game)

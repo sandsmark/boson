@@ -22,7 +22,6 @@
 #include "defines.h"
 #include "cell.h"
 #include "bosonmap.h"
-#include "bosoncanvas.h"
 #include "bosonconfig.h"
 #include "boitemlist.h"
 #include "unit.h"
@@ -83,7 +82,7 @@ BosonMiniMap::BosonMiniMap(QWidget* parent, const char* name) : QWidget(parent, 
  mGround = 0;
  mUnZoomedGround = 0;
  mLocalPlayer = 0;
- mCanvas = 0;
+ mMap = 0;
  mUseFog = false;
  d->mScale = 1.0;
  d->mZoom = 1.0;
@@ -167,8 +166,8 @@ void BosonMiniMap::slotChangeCell(int x, int y, int groundType, unsigned char ve
 	boError() << k_funcinfo << "map not yet created" << endl;
 	return;
  }
- BO_CHECK_NULL_RET(mCanvas);
- Cell* c = mCanvas->cell(x, y);
+ BO_CHECK_NULL_RET(map());
+ Cell* c = map()->cell(x, y);
  if (!c) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
@@ -289,7 +288,6 @@ void BosonMiniMap::moveUnit(Unit* unit, const QPtrVector<Cell>* newCells, const 
  // stuff can be undefined at this point! especially when adding units
  // (oldX==oldY==-1)!
  BO_CHECK_NULL_RET(mLocalPlayer);
- BO_CHECK_NULL_RET(mCanvas);
  BO_CHECK_NULL_RET(unit);
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(newCells);
@@ -357,7 +355,6 @@ void BosonMiniMap::updateCell(int x, int y)
 {
  BO_CHECK_NULL_RET(map());
  BO_CHECK_NULL_RET(ground());
- BO_CHECK_NULL_RET(mCanvas);
  if (!map()->cell(x, y)) {
 	boError() << k_funcinfo << x << "," << y << " is no valid cell!" << endl;
 	return;
@@ -401,17 +398,17 @@ void BosonMiniMap::slotMoveRect(const QPoint& topLeft, const QPoint& topRight, c
  repaintMiniMapPixmap();
 }
 
-void BosonMiniMap::setCanvas(BosonCanvas* c)
+void BosonMiniMap::setMap(BosonMap* m)
 {
- mCanvas = c;
+ if (!m) {
+	boWarning() << k_funcinfo << "NULL map" << endl;
+ }
+ mMap = m;
 }
 
 BosonMap* BosonMiniMap::map() const
 {
- if (!mCanvas) {
-	return 0;
- }
- return mCanvas->map();
+ return mMap;
 }
 
 void BosonMiniMap::initMap()
@@ -640,7 +637,7 @@ void BosonMiniMap::makeCellList(QPtrVector<Cell>* cells, const Unit* unit, float
  BosonItem::rightBottomCell(&right, &bottom, x + unit->width() - 1, y + unit->height() - 1);
  right = QMIN(right, QMAX((int)mapWidth() - 1, 0));
  bottom = QMIN(bottom, QMAX((int)mapHeight() - 1, 0));
- return BosonItem::makeCells(mCanvas, cells, left, right, top, bottom);
+ return BosonItem::makeCells(map()->cells(), cells, left, right, top, bottom, map()->width(), map()->height());
 }
 
 void BosonMiniMap::setPixmapTheme(const QString& theme)

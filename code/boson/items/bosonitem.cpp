@@ -99,9 +99,7 @@ QPtrVector<Cell>* BosonItem::cells()
 	int left, right, top, bottom;
 	leftTopCell(&left, &top);
 	rightBottomCell(&right, &bottom);
-	right = QMIN(right, QMAX((int)canvas()->mapWidth() - 1, 0));
-	bottom = QMIN(bottom, QMAX((int)canvas()->mapHeight() - 1, 0));
-	makeCells(canvas(), mCells, left, right, top, bottom);
+	makeCells(canvas()->cells(), mCells, left, right, top, bottom, canvas()->mapWidth(), canvas()->mapHeight());
 	mCellsDirty = false;
  }
  return mCells;
@@ -112,31 +110,37 @@ QPtrVector<Cell>* BosonItem::cellsConst() const
  return mCells;
 }
 
-void BosonItem::makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom)
+void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int right, int top, int bottom, int mapWidth, int mapHeight)
 {
+ BO_CHECK_NULL_RET(allCells);
  left = QMAX(left, 0);
  top = QMAX(top, 0);
  right = QMAX(left, right);
  bottom = QMAX(top, bottom);
+
+ right = QMIN(right, QMAX(mapWidth - 1, 0));
+ bottom = QMIN(bottom, QMAX(mapHeight - 1, 0));
+ left = QMIN(left, right);
+ top = QMIN(top, bottom);
+
+ // AB: WARNING: we do direct array/pointer calculations here, so
+ // right/bottom/left/top MUST be valid for the allCells array!
+ // it is WAY MORE IMPORTANT to ensure valid values here than making it fast!!
+
 
  int size = (right - left + 1) * (bottom - top + 1);
  cells->resize(size);
  if (size == 0) {
 	return;
  }
+
  int n = 0;
  for (int i = left; i <= right; i++) {
 	for (int j = top; j <= bottom; j++) {
-		// AB: canvas->cell() is not really efficient here. we should
-		// prefer direct access on BosonMap::cells() using
-		// BosonMap::cellArrayPos(). But we would have to include
-		// bosonmap.h for this, so we do it this way.
-		// we may want to replace if it turns out that we need more
-		// speed (i dont think so, btw).
-		Cell* c = canvas->cell(i, j);
-		if (!c) {
-			continue;
-		}
+		// note: we calculate the cell in the array on our own here,
+		// because a) it's a bit faster than map->cell() and b) (more
+		// important) we don't have to include bosonmap.h
+		Cell* c = allCells + i + j * mapWidth;
 		cells->insert(n, c);
 		n++;
 	}

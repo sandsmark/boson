@@ -1,5 +1,5 @@
 <!DOCTYPE kpartgui SYSTEM "kpartgui.dtd">
-<kpartgui name="boson" version="4">
+<kpartgui name="boson" version="5">
 <MenuBar>
   <DefineGroup name="filemenu" />
   <DefineGroup name="editormenu" />
@@ -7,7 +7,10 @@
   <DefineGroup name="settingsmenu" />
   <DefineGroup name="windowmenu" />
   <DefineGroup name="viewmenu" />
-  <DefineGroup name="debugmenu" />
+  <Menu name="debug" group="debugmenu"><text>&amp;Debug</text>
+    <Action name="debug_kgame" />
+    <Action name="debug_profiling" />
+  </Menu>
   <Menu name="settings" group="settingsmenu"><text>&amp;Settings</text>
     <Action name="options_sound" append="show_merge" />
     <Action name="options_music" append="show_merge" />

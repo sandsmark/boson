@@ -238,7 +238,7 @@ public:
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
 	 **/
-	static void makeCells(const BosonCanvas* canvas, QPtrVector<Cell>* cells, int left, int right, int top, int bottom);
+	static void makeCells(Cell* allCells, QPtrVector<Cell>* cells, int left, int right, int top, int bottom, int mapWidth, int mapHeight);
 
 	bool bosonCollidesWith(BosonItem* item) const;
 

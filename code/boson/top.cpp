@@ -39,6 +39,10 @@
 #include "startupwidgets/bosonstartupwidget.h"
 #include "sound/bosonmusic.h"
 #include "info/boinfo.h"
+#include "kgameunitdebug.h"
+#include "kgameplayerdebug.h"
+#include "kgamecelldebug.h"
+#include "bosonprofilingdialog.h"
 
 #include <kapplication.h>
 #include <klocale.h>
@@ -53,11 +57,13 @@
 #include <kstandarddirs.h>
 #include <kfiledialog.h>
 #include <kglobal.h>
+#include <kgame/kgamedebugdialog.h>
 
 #include <qcursor.h>
 #include <qwidgetstack.h>
 #include <qtimer.h>
 #include <qhbox.h>
+#include <qvbox.h>
 
 #include <config.h>
 
@@ -226,6 +232,12 @@ void TopWidget::initKActions()
  d->mActionFullScreen = new KToggleAction(i18n("&Fullscreen Mode"), CTRL+SHIFT+Key_F,
 		this, SLOT(slotToggleFullScreen()), actionCollection(), "window_fullscreen");
  d->mActionFullScreen->setChecked(false);
+
+ // Debug
+ (void)new KAction(i18n("&Profiling"), KShortcut(), this,
+		SLOT(slotProfiling()), actionCollection(), "debug_profiling");
+ (void)new KAction(i18n("&Debug KGame"), KShortcut(), this,
+		SLOT(slotDebugKGame()), actionCollection(), "debug_kgame");
 
  createGUI("topui.rc", false);
 
@@ -1055,5 +1067,110 @@ void TopWidget::slotStartEditor(KCmdLineArgs* args)
 	return;
  }
  d->mStartup->slotStartEditor(args);
+}
+
+void TopWidget::slotDebugKGame()
+{
+ if (!boGame) {
+	boError() << k_funcinfo << "NULL game" << endl;
+	return;
+ }
+ KGameDebugDialog* dlg = new KGameDebugDialog(boGame, this, false);
+
+ QVBox* b = dlg->addVBoxPage(i18n("Debug &Units"));
+ KGameUnitDebug* units = new KGameUnitDebug(b);
+ units->setBoson(boGame);
+
+ b = dlg->addVBoxPage(i18n("Debug &Boson Players"));
+ KGamePlayerDebug* player = new KGamePlayerDebug(b);
+ player->setBoson(boGame);
+
+ if (boGame->playField()) {
+	BosonMap* map = boGame->playField()->map();
+	if (!map) {
+		boError() << k_funcinfo << "NULL map" << endl;
+		return;
+	}
+	b = dlg->addVBoxPage(i18n("Debug &Cells"));
+	KGameCellDebug* cells = new KGameCellDebug(b);
+	cells->setMap(map);
+ }
+
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+ connect(dlg, SIGNAL(signalRequestIdName(int,bool,QString&)),
+		this, SLOT(slotDebugRequestIdName(int,bool,QString&)));
+ dlg->show();
+}
+
+void TopWidget::slotProfiling()
+{
+ BosonProfilingDialog* dlg = new BosonProfilingDialog(this, false); // note that dialog won't get updated while it is running, even if its non-modal!
+ connect(dlg, SIGNAL(finished()), dlg, SLOT(deleteLater()));
+ dlg->show();
+}
+
+void TopWidget::slotDebugRequestIdName(int msgid, bool , QString& name)
+{
+ // we don't use i18n() for debug messages... not worth the work
+ switch (msgid) {
+	case BosonMessage::InitMap:
+		name = "Init Map";
+		break;
+	case BosonMessage::ChangeSpecies:
+		name = "Change Species";
+		break;
+	case BosonMessage::ChangePlayField:
+		name = "Change PlayField";
+		break;
+	case BosonMessage::ChangeTeamColor:
+		name = "Change TeamColor";
+		break;
+	case BosonMessage::IdInitFogOfWar:
+		name = "Init Fog of War";
+		break;
+	case BosonMessage::IdStartScenario:
+		name = "Start Scenario";
+		break;
+	case BosonMessage::AddUnit:
+		name = "Add Unit";
+		break;
+	case BosonMessage::AddUnitsXML:
+		name = "Add Units from XML";
+		break;
+	case BosonMessage::AdvanceN:
+		name = "Advance";
+		break;
+	case BosonMessage::IdChat:
+		name = "Chat Message";
+		break;
+	case BosonMessage::IdGameIsStarted:
+		name = "Game is started";
+		break;
+	case BosonMessage::MoveMove:
+		name = "PlayerInput: Move";
+		break;
+	case BosonMessage::MoveAttack:
+		name = "PlayerInput: Attack";
+		break;
+	case BosonMessage::MoveBuild:
+		name = "PlayerInput: Build";
+		break;
+	case BosonMessage::MoveProduce:
+		name = "PlayerInput: Produce";
+		break;
+	case BosonMessage::MoveProduceStop:
+		name = "PlayerInput: Produce Stop";
+		break;
+	case BosonMessage::MoveMine:
+		name = "PlayerInput: Mine";
+		break;
+	case BosonMessage::UnitPropertyHandler:
+	default:
+		// a unit property was changed
+		// all ids > UnitPropertyHandler will be a unit property. we
+		// don't check further...
+		break;
+ }
+// boDebug() << name << endl;
 }
 
