@@ -27,11 +27,9 @@
 
 #include <qlabel.h>
 #include <qlayout.h>
+#include <qvbox.h>
 
 #include "bosonunitview.moc"
-
-//#define OVERVIEW_WIDTH 180
-//#define OVERVIEW_HEIGHT 110
 
 class BosonUnitView::BosonUnitViewPrivate
 {
@@ -57,13 +55,11 @@ public:
 BosonUnitView::BosonUnitView(QWidget* parent) : BosonCommandWidget(parent)
 {
  d = new BosonUnitViewPrivate;
-// setFrameStyle(QFrame::Raised | QFrame::Panel);
-// setLineWidth(5);
-
- d->mName = new QLabel(this);
- d->mHealth = new QLabel(this);
- d->mOwner = new QLabel(this);
- d->mId = new QLabel(this);
+ QVBox* v = new QVBox(this);
+ d->mName = new QLabel(v);
+ d->mHealth = new QLabel(v);
+ d->mOwner = new QLabel(v);
+ d->mId = new QLabel(v);
 
  setUnit(0);
 }

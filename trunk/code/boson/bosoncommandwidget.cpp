@@ -157,7 +157,7 @@ public:
 
 	CommandType mCommandType;
 
-	QVBoxLayout* mTopLayout;
+	QHBoxLayout* mTopLayout;
 
 	BoProgress* mHealth;
 	BoProgress* mReload;
@@ -168,7 +168,7 @@ public:
 BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
 {
  d = new BosonCommandWidgetPrivate;
- d->mTopLayout = new QVBoxLayout(this);
+ d->mTopLayout = new QHBoxLayout(this);
  d->mTopLayout->setAutoAdd(true);
 
  QWidget* display = new QWidget(this);
