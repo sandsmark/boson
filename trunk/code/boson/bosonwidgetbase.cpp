@@ -497,6 +497,10 @@ void BosonWidgetBase::slotUnfogAll(Player* pl)
 
 void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 {
+ // AB: this has been disabled for now. once the commandframe has been ported to
+ // OpenGL, we will support backgrounds again (I hope), but it will work in a
+ // different way, we won't be able to use this code anymore.
+#if 0
  if (file.isNull()) {
 	cmdFrame()->unsetPalette();
 	return;
@@ -508,6 +512,7 @@ void BosonWidgetBase::slotCmdBackgroundChanged(const QString& file)
 	return;
  }
  cmdFrame()->setPaletteBackgroundPixmap(p);
+#endif
 }
 
 void BosonWidgetBase::initKActions()
