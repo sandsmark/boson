@@ -38,7 +38,7 @@
 
 BosonCursor::BosonCursor()
 {
- mMode = 0;
+ mMode = -1;
 }
 
 BosonCursor::~BosonCursor()
@@ -47,7 +47,7 @@ BosonCursor::~BosonCursor()
 
 void BosonCursor::setCursor(int mode)
 {
- mMode = (int)mode;
+ mMode = mode;
 }
 
 QCursor BosonCursor::cursor() const
