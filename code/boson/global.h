@@ -92,9 +92,4 @@ enum ProductionType {
 	ProduceTech = 2
 };
 
-enum ObjectType {
-	ObjectShot = 0
-};
-
-
 #endif
