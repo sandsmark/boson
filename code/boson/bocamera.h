@@ -59,6 +59,12 @@ public:
 	static float maxCameraRadius();
 
 	/**
+	 * Set the gluLookAt() paremeters directly. Note that when you use
+	 * this @ref radius and @ref rotation will remain undefined.
+	 **/
+	void setGluLookAt(const BoVector3& lookAt, const BoVector3& cameraPos, const BoVector3& up);
+
+	/**
 	 * @param pos The point to look at, as used in gluLookAt().
 	 **/
 	void setLookAt(const BoVector3& pos);
@@ -72,12 +78,14 @@ public:
 		return mLookAt;
 	}
 	/**
-	 * @return The eye vector, as it can get used by gluLookAt().
+	 * @return The eye vector (camera position), as it can get used by
+	 * gluLookAt().
 	 **/
-	const BoVector3& eye() const
+	const BoVector3& cameraPos() const
 	{
-		return mEye;
+		return mCameraPos;
 	}
+
 	/**
 	 * @return The up vector, as it can get used by gluLookAt(). The up
 	 * vector is the vector pointing straight "up" from the position of the
@@ -111,7 +119,7 @@ public:
 		mPosZ = z;
 	}
 
-	// these will change the up and eye vectors!
+	// these will change the up and cameraPos vectors!
 	// TODO: document what they actually do
 	void setRotation(GLfloat r);
 	void setRadius(GLfloat r);
@@ -130,17 +138,14 @@ public:
 		return mRadius;
 	}
 
-	const BoVector3& cameraPos() const
-	{
-		return mCameraPos;
-	}
 
 protected:
 	void checkPosition();
 
 	/**
-	 * Update the parameters for gluLookAt() (@ref lookAt, @ref eye and @ref
-	 * up) according to the new values from @ref radius and @ref rotation.
+	 * Update the parameters for gluLookAt() (@ref lookAt, @ref cameraPos
+	 * and @ref * up) according to the new values from @ref radius and
+	 * @ref rotation.
 	 *
 	 * Note that the @ref lookAt vector isn't changed here, as the kind of
 	 * BoCamera's rotation and radius don't influence it.
@@ -153,7 +158,6 @@ private:
 
 private:
 	BoVector3 mLookAt;
-	BoVector3 mEye;
 	BoVector3 mUp;
 
 	GLfloat mPosZ;
