@@ -38,7 +38,10 @@ BoMaterial::BoMaterial()
  mWireSize = 1.0f;
 
  // defaults from OpenGL:
- mAmbient = BoVector4(0.2f, 0.2f, 0.2f, 1.0f);
+// mAmbient = BoVector4(0.2f, 0.2f, 0.2f, 1.0f);
+ // 0.2 for ambient is way too little, you totally depend only on diffuse light
+ //  then. So we use 0.8 (same as diffuse)
+ mAmbient = BoVector4(0.8f, 0.8f, 0.8f, 1.0f);
  mDiffuse = BoVector4(0.8f, 0.8f, 0.8f, 1.0f);
  mSpecular = BoVector4(0.0f, 0.0f, 0.0f, 1.0f);
  mShininess = 0.0f;
