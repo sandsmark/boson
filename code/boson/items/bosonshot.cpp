@@ -26,9 +26,14 @@
 #include "../player.h"
 #include "../unitproperties.h"
 #include "../boitemlist.h"
+#include "../bosonparticlesystemproperties.h"
+#include "../boson.h"
+#include "../speciestheme.h"
+#include "../unitproperties.h"
 #include "bodebug.h"
 
 #include <ksimpleconfig.h>
+#include <krandomsequence.h>
 
 #include <qptrlist.h>
 #include <qdom.h>
@@ -42,9 +47,33 @@
 BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop) :
     BosonItem(prop ? prop->model() : 0, canvas)
 {
-  boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   mOwner = owner;
   mProp = prop;
+
+  init();
+}
+
+BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, BosonModel* model) :
+    BosonItem(model, canvas)
+{
+  mOwner = owner;
+  mProp = 0;
+
+  init();
+}
+
+BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
+    BosonItem(0, canvas)
+{
+  mOwner = owner;
+  mProp = 0;
+
+  init();
+}
+
+void BosonShot::init()
+{
+  boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
   // FIXME: can't we use values from objects config file here?
   setSize(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2, BO_GL_CELL_SIZE / 2); // AB: pretty much a random value
 
@@ -59,7 +88,7 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas, const BosonWeaponProper
     setActive(false);
     return;
   }
-  if(!canvas)
+  if(!canvas())
   {
     boError(350) << k_funcinfo << "NULL canvas" << endl;
     setActive(false);
@@ -189,17 +218,17 @@ void BosonShot::explode()
 
 long int BosonShot::damage() const
 {
-  return properties()->damage();
+  return properties() ? properties()->damage() : 0;
 };
 
 float BosonShot::damageRange() const
 {
-  return properties()->damageRange();
+  return properties() ? properties()->damageRange() : 0;
 };
 
 float BosonShot::fullDamageRange() const
 {
-  return properties()->fullDamageRange();
+  return properties() ? properties()->fullDamageRange() : 0;
 };
 
 
@@ -487,7 +516,7 @@ void BosonShotMissile::moveToTarget()
 /*****  BosonShotExplosion  *****/
 
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVector3 pos, long int damage, float damagerange, float fulldamagerange, int delay) :
-    BosonShot(owner, canvas, 0)
+    BosonShot(owner, canvas)
 {
   mDamage = damage;
   mDamageRange = damagerange;
@@ -497,7 +526,7 @@ BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas, BoVec
 }
 
 BosonShotExplosion::BosonShotExplosion(Player* owner, BosonCanvas* canvas) :
-    BosonShot(owner, canvas, 0)
+    BosonShot(owner, canvas)
 {
 }
 
@@ -813,6 +842,184 @@ void BosonShotBomb::advanceMoveInternal()
       "); speed is now: " << speed() << "; z: " << z() << endl;
   setVelocity(0, 0, -speed());
 }
+
+
+
+/*****  BosonShotFragment  *****/
+
+#define FRAGMENT_MIN_SPEED 2
+#define FRAGMENT_MAX_SPEED 3.5
+#define FRAGMENT_MIN_Z_SPEED 0.02
+#define FRAGMENT_MAX_Z_SPEED 0.06
+#define FRAGMENT_GRAVITY -0.003
+
+BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, BoVector3 pos,
+    const UnitProperties* unitproperties) :
+    BosonShot(owner, canvas, model)
+{
+  boDebug() << k_funcinfo << "New FRGAMENT" << endl;
+  mUnitProperties = unitproperties;
+
+  KRandomSequence* r = owner->game()->random();
+  mVelo.set(r->getDouble() - 0.5, r->getDouble() - 0.5, 0);
+  mVelo.normalize();
+  mVelo.scale(FRAGMENT_MIN_SPEED + (r->getDouble() * (FRAGMENT_MAX_SPEED - FRAGMENT_MIN_SPEED)));
+  mVelo.setZ(FRAGMENT_MIN_Z_SPEED + (r->getDouble() * (FRAGMENT_MAX_Z_SPEED - FRAGMENT_MIN_Z_SPEED)));
+  boDebug() << k_funcinfo << "Velo is: (" << mVelo.x() << "; " << mVelo.y() << "; " << mVelo.z() << ")" << endl;
+
+  mParticleSystems = new QPtrList<BosonParticleSystem>(mUnitProperties->newExplodingFragmentFlyParticleSystems(BoVector3()));
+  canvas->addParticleSystems(*mParticleSystems);
+
+  move(pos.x(), pos.y(), pos.z() + 0.7);  // +0.7 prevents immediate contact with the terrain
+  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  setVisible(true);
+}
+
+BosonShotFragment::BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model) :
+    BosonShot(owner, canvas, model)
+{
+}
+
+bool BosonShotFragment::saveAsXML(QDomElement& root)
+{
+  if(!BosonShot::saveAsXML(root))
+  {
+    boError() << k_funcinfo << "Error while saving BosonShot" << endl;
+    return false;
+  }
+
+  root.setAttribute("Velox", mVelo.x());
+  root.setAttribute("Veloy", mVelo.y());
+  root.setAttribute("Veloz", mVelo.z());
+  root.setAttribute("UnitProperties", (unsigned int)mUnitProperties->typeId());
+
+  return true;
+}
+
+bool BosonShotFragment::loadFromXML(const QDomElement& root)
+{
+  if(!BosonShot::loadFromXML(root))
+  {
+    boError() << k_funcinfo << "Error loading BosonShot" << endl;
+    return false;
+  }
+
+  bool ok;
+  float velox, veloy, veloz;
+  unsigned int props;
+
+  velox = root.attribute("Velox").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Velox tag" << endl;
+    return false;
+  }
+  veloy = root.attribute("Veloy").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Veloy tag" << endl;
+    return false;
+  }
+  veloz = root.attribute("Veloz").toFloat(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for Veloz tag" << endl;
+    return false;
+  }
+
+  props = root.attribute("UnitProperties").toUInt(&ok);
+  if(!ok)
+  {
+    boError() << k_funcinfo << "Invalid value for UnitProperties tag" << endl;
+    return false;
+  }
+
+  mVelo.set(velox, veloy, veloz);
+  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  mUnitProperties = owner()->speciesTheme()->unitProperties((unsigned long int)props);
+  if(!mUnitProperties)
+  {
+    boError() << k_funcinfo << "NULL properties for " << props << endl;
+    return false;
+  }
+
+  setVisible(true);
+
+  return true;
+}
+
+void BosonShotFragment::save(QDataStream& stream)
+{
+  BosonShot::save(stream);
+
+  stream << mVelo.x();
+  stream << mVelo.y();
+  stream << mVelo.z();
+  stream << (Q_UINT32)mUnitProperties->typeId();
+}
+
+void BosonShotFragment::load(QDataStream& stream)
+{
+  BosonShot::load(stream);
+
+  float velox, veloy, veloz;
+  unsigned long int props;
+
+  stream >> velox;
+  stream >> veloy;
+  stream >> veloz;
+  stream >> props;
+
+
+  mVelo.set(velox, veloy, veloz);
+  setRotation(rotationToPoint(mVelo.x(), mVelo.y()));
+  mUnitProperties = owner()->speciesTheme()->unitProperties(props);
+  if(!mUnitProperties)
+  {
+    boError() << k_funcinfo << "NULL properties for " << props << endl;
+    return;
+  }
+  setVisible(true);
+}
+
+void BosonShotFragment::advanceMoveInternal()
+{
+  // TODO: maybe put item/terrain collison check to generic BosonItem method
+  if(z() <= canvas()->heightAtPoint(x() + width() / 2, y() + height() / 2))
+  {
+    boDebug() << "FRAGMENT: " << k_funcinfo << "terrain contact. BOOM" << endl;
+    explode();
+    return;
+  }
+  // Check for items too?
+
+  mVelo.setZ(mVelo.z() + FRAGMENT_GRAVITY);
+  setVelocity(mVelo.x(), mVelo.y(), mVelo.z());
+}
+
+void BosonShotFragment::explode()
+{
+  BosonShot::explode();
+
+  BoVector3 pos(x() + width() / 2, y() + height() / 2, z());
+  canvas()->addParticleSystems(mUnitProperties->newExplodingFragmentHitParticleSystems(pos));
+}
+
+long int BosonShotFragment::damage() const
+{
+  return mUnitProperties->explodingFragmentDamage();
+}
+
+float BosonShotFragment::damageRange() const
+{
+  return mUnitProperties->explodingFragmentDamageRange();
+}
+
+float BosonShotFragment::fullDamageRange() const
+{
+  return 0.25 * damageRange();
+}
+
 
 
 /*

@@ -701,6 +701,7 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// This stops everything
 	unit->stopAttacking();
 
+	// Stop particle emitting for all systems this unit has
 	if (unit->particleSystems() && unit->particleSystems()->count() > 0) {
 		QPtrListIterator<BosonParticleSystem> it(*(unit->particleSystems()));
 		for (; it.current(); ++it) {
@@ -716,11 +717,19 @@ void BosonCanvas::destroyUnit(Unit* unit)
 	// Pos is center of unit
 	BoVector3 pos(unit->x() + unit->width() / 2, unit->y() + unit->height() / 2, unit->z());
 	//pos += unit->unitProperties()->hitPoint();
+	// Add destroyed particle systems
 	addParticleSystems(unit->unitProperties()->newDestroyedParticleSystems(pos[0], pos[1], pos[2]));
-	if(unit->unitProperties()->explodingDamage() > 0) {
+	// Make explosion if needed
+	if (unit->unitProperties()->explodingDamage() > 0) {
 		// Do we want ability to set fullDamageRange here?
 		new BosonShotExplosion(unit->owner(), this, pos, unit->unitProperties()->explodingDamage(), unit->unitProperties()->explodingDamageRange(), 0, 10);
 	}
+	// Add explosion fragments
+	for (unsigned int i = 0; i < unit->unitProperties()->explodingFragmentCount(); i++) {
+		new BosonShotFragment(unit->owner(), this, unit->speciesTheme()->objectModel("fragment"),
+				pos, unit->unitProperties());
+	}
+	// Check if owner is out of game
 	if (owner->checkOutOfGame()) {
 		killPlayer(owner);
 	}
