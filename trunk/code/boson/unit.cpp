@@ -372,7 +372,7 @@ void Unit::stopAttacking()
 
 bool Unit::save(QDataStream& stream)
 {
- if (!Unit::save(stream)) {
+ if (!UnitBase::save(stream)) {
 	kdError() << "Unit not saved properly" << endl;
 	return false;
  }
