@@ -45,7 +45,7 @@ HitParticles=2001
 FlyParticles=5001
 
 [Weapon_2]
-Name=God killer
+Name=Big missile
 Model=missile.3ds
 Range=6
 Reload=900
