@@ -22,7 +22,6 @@
 #include "../common/map.h"
 
 #include "editorBigDisplay.h"
-#include "visualView.h"
 #include "visualCell.h"
 #include "editorField.h"
 
@@ -31,6 +30,7 @@ editorBigDisplay::editorBigDisplay(visualView *v, QWidget *p, const char *n, WFl
 {
 
 	g = GROUND_UNKNOWN;
+	otype = OT_NONE;
 }
 
 void editorBigDisplay::actionClicked(int mx, int my)
@@ -39,23 +39,69 @@ void editorBigDisplay::actionClicked(int mx, int my)
 	int	x		= mx / BO_TILE_SIZE,
 		y		= my / BO_TILE_SIZE;
 
-	view->setSelectionMode( SELECT_FILL) ;
 
 	boAssert(x>=0);
 	boAssert(x<field->width());
 	boAssert(y>=0);
 	boAssert(y<field->height());
 
-	if (GROUND_UNKNOWN == g) return; // no ground is selected
-
-	if (IS_BIG_TRANS(g) )
-	       if ( x+1>=field->maxX || y+1>=field->maxY) return;
-
 	
-	field->deleteCell(x,y);
-	field->setCell(x,y,g);
+	switch (otype){
+		case OT_NONE:
+			return; // nothing is selected
+			break;
+
+		case OT_GROUND:
+			if ( IS_BIG_TRANS(g) )
+			       if ( x+1>=field->maxX || y+1>=field->maxY) return;
+			field->deleteCell(x,y);
+			field->setCell(x,y,g);
+
+			view->setSelectionMode( SELECT_FILL);
+			break;
+
+		case OT_FACILITY:
+			facilityMsg_t	fix;
+			fix.who 	= 0;
+			fix.x		= x;
+			fix.y		= y;
+			fix.state	= CONSTRUCTION_STEP-1;
+			fix.type	= f; 
+			field->createFixUnit(fix);
+			view->setSelectionMode( SELECT_PUT);
+			break;
+
+		case OT_UNIT:
+			mobileMsg_t	mob;
+			mob.who		= 0;
+			mob.x		= mx;
+			mob.y		= my;
+			mob.type	= m;
+			field->createMobUnit(mob);
+			view->setSelectionMode( SELECT_PUT);
+			break;
+	}
 
 	view->field->update();
+}
+
+void editorBigDisplay::setSelectedObject(object_type t, int n)
+{
+	otype = t;
+	switch (t){
+		default:
+		case OT_NONE:
+			break;
+		case OT_GROUND:
+			g = (groundType) n;
+			break;
+		case OT_FACILITY:
+			f = (facilityType)n;
+			break;
+		case OT_UNIT:
+			m = (mobType)n;
+			break;
+	}
 }
 
 

@@ -22,6 +22,7 @@
 #define EDITORBIGDISPLAY_H 
 
 #include "visualBigDisplay.h"
+#include "editorView.h"
 
 class QPopupMenu;
 class visualCell;
@@ -40,11 +41,13 @@ public:
 	virtual void actionClicked(int, int);		// selecting, moving...
 
 private slots:
-	void setSelectedTile(groundType _g) { g =  _g ;}
+	void setSelectedObject(object_type, int);
 
 private:
 	groundType	g;
-
+	mobType		m;
+	facilityType	f;
+	object_type	otype;
 };
 
 #endif // EDITORBIGDISPLAY_H

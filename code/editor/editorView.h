@@ -35,6 +35,17 @@ class QScrollView;
 class QVBoxLayout;
 class QComboBox;
 
+#define	TILES_NB	(11)	
+#define	BIG_TILES_NB	(4)
+
+
+enum object_type {
+	OT_NONE,
+	OT_GROUND,
+	OT_FACILITY,
+	OT_UNIT,
+};
+
 class editorView : public visualView
 {
 
@@ -47,7 +58,7 @@ public:
 	virtual void setOrders(int what , int who=-1);
 
 signals:
-	void setSelectedTile(groundType);
+	void setSelectedObject(object_type , int);
 
 private slots:
 	void setTransRef(int);
@@ -63,6 +74,9 @@ private slots:
 	void bc6(void) { handleButton(6); } // button clicked
 	void bc7(void) { handleButton(7); } // button clicked
 	void bc8(void) { handleButton(8); } // button clicked
+	void bc9(void) { handleButton(9); } // button clicked
+	void bc10(void) { handleButton(10); } // button clicked
+//	void bc11(void) { handleButton(11); } // button clicked
 
 protected:
 	virtual void object_put(int, int){}; // not useful for the editor yet
@@ -79,11 +93,18 @@ private:
 
 /* tiles selection */
 	QComboBox	*qcb_transRef, *qcb_which;
-	QPushButton	*tiles[9];
-	QPushButton	*bigTiles[4];
+	QPushButton	*tiles[TILES_NB];
+	QPushButton	*bigTiles[BIG_TILES_NB];
 	bool		inverted;
 	int		trans;
-	int		which;
+	enum which_t {
+		W_SMALL_GROUND,
+		W_BIG_GROUND_1,
+		W_BIG_GROUND_2,
+		W_FACILITIES,
+		W_UNITS
+	} which;
+	object_type	otype;
 };
 
 
