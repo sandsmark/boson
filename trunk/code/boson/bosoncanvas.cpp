@@ -380,10 +380,16 @@ void BosonCanvas::slotAdvance(unsigned int advanceCount, bool advanceFlag)
 		deletionIt.current()->increaseDeletionTimer();
 		if (deletionIt.current()->deletionTimer() >= REMOVE_WRECKAGES_TIME) {
 			deleteList.append(deletionIt.current());
-			d->mDestroyedUnits.removeRef(deletionIt.current());
 		}
 		++deletionIt;
 	}
+
+	QPtrListIterator<BosonItem> destroyedIt(deleteList);
+	while (destroyedIt.current()) {
+		d->mDestroyedUnits.removeRef((Unit*)destroyedIt.current());
+		++destroyedIt;
+	}
+
 
 	deleteItems(deleteList);
 
@@ -439,12 +445,17 @@ void BosonCanvas::addAnimation(BosonItem* item)
 
 	// by default it goes to "work" == -1. units will change this.
 	d->mWork2AdvanceList[-1].append(item);
+ } else {
+	boError() << k_funcinfo << item << " has been added before! id=" << item->id() << endl;
  }
 }
 
 void BosonCanvas::removeAnimation(BosonItem* item)
 {
- d->mAnimList.removeRef(item);
+ bool ok = d->mAnimList.removeRef(item);
+ if (!ok) {
+	boError() << k_funcinfo << "could not remove animation for " << item << " == " << item->id() << " which is not in the list!" << endl;
+ }
 
  // remove from all advance lists
  QMap<int, QPtrList<BosonItem> >::Iterator it;
@@ -964,13 +975,18 @@ void BosonCanvas::updateEffects(float elapsed)
 
 void BosonCanvas::deleteUnusedShots()
 {
+ QPtrList<BosonItem> unusedShots;
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
 	if (RTTI::isShot(i->rtti())) {
 		BosonShot* shot = (BosonShot*)i;
 		if (!shot->isActive()) {
-			deleteItem(i);
+			unusedShots.append(i);
 		}
 	}
+ }
+ while (!unusedShots.isEmpty()) {
+	BosonItem* i = unusedShots.take(0);
+	deleteItem(i);
  }
 }
 
@@ -1481,12 +1497,16 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  if (item) {
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
+	addAnimation(item);
 	if (RTTI::isUnit(rtti)) {
 		// We also need to recalc occupied status for cells that unit is on.
 		// FIXME: this is hackish
 		unitMovingStatusChanges((Unit*)item, UnitBase::Moving, UnitBase::Standing);
 	}
 	emit signalItemAdded(item);
+ }
+ if (d->mAnimList.count() != d->mAllItems.count()) {
+	boError() << k_funcinfo << "animlist.count() (" << d->mAnimList.count() << ") != allitems.count() (" << d->mAllItems.count() << ")" << endl;
  }
  return item;
 }

@@ -69,6 +69,10 @@ BosonShot::BosonShot(Player* owner, BosonCanvas* canvas) :
   mProp = 0;
 }
 
+BosonShot::~BosonShot()
+{
+}
+
 void BosonShot::init()
 {
   boDebug(350) << "MISSILE: " << k_funcinfo << "Creating new shot" << endl;
@@ -95,7 +99,6 @@ void BosonShot::init()
 
   // Initialization
   mActive = true;
-  setAnimated(true);
 }
 
 //AB: note this this is primary optimized for SAFETY, NOT for performance. it is
@@ -198,8 +201,6 @@ bool BosonShot::loadFromXML(const QDomElement& root)
   mActive = true; // Inactive shots won't be saved
   move(x, y, z);
 
-  // Is it ok to do this here?
-  setAnimated(true);
   return true;
 }
 

@@ -119,8 +119,6 @@ Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
  registerData(&d->mWantedRotation, IdWantedRotation);
  d->mWantedRotation.setLocal(0);
 
- setAnimated(true);
-
  if (!model()) {
 	boError() << k_funcinfo << "NULL model - this will most probably crash!" << endl;
 	return;
