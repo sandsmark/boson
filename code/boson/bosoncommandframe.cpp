@@ -100,7 +100,7 @@ public:
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
 
-	BosonCommandFrame::OrderType mOrderType; // plain tiles, facilities, mob units, ...
+	OrderType mOrderType; // plain tiles, facilities, mob units, ...
 
 	Player* mOwner;
 	Unit* mFactory; // the unit that is producing
@@ -271,9 +271,9 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
  connect(d->mFactory->owner(), SIGNAL(signalProductionAdvanced(Unit*, double)),
 		this, SLOT(slotProductionAdvanced(Unit*, double)));
  
- d->mOrderType = Mobiles; // kind of FIXME: it doesn't matter whether this is
-                          // Mobiles or Facilities. The difference is only in 
-                          // editor.cpp for the KActions.
+ d->mOrderType = OrderMobiles; // kind of FIXME: it doesn't matter whether this
+                          // is OrderMobiles or OrderFacilities. The difference
+			  // is only in editor.cpp for the KActions.
 }
 
 void BosonCommandFrame::hideOrderButtons()
@@ -336,18 +336,18 @@ void BosonCommandFrame::slotEditorConstruction(int index, Player* owner)
 	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return;
  }
- d->mOrderType = (OrderType)index;
+ d->mOrderType = index;
  switch (d->mOrderType) {
-	case PlainTiles:
-	case Small:
-	case Big1:
-	case Big2:
+	case OrderPlainTiles:
+	case OrderSmall:
+	case OrderBig1:
+	case OrderBig2:
 		slotRedrawTiles(); // rename: redrawtiles
 		break;
-	case Mobiles:
+	case OrderMobiles:
 		setOrderButtons(theme->allMobiles(), owner);
 		break;
-	case Facilities:
+	case OrderFacilities:
 		setOrderButtons(theme->allFacilities(), owner);
 		break;
 	default:
@@ -373,7 +373,7 @@ void BosonCommandFrame::slotRedrawTiles()
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
  switch (d->mOrderType) {
-	case PlainTiles:
+	case OrderPlainTiles:
 		hideOrderButtons();
 		initOrderButtons(Cell::GroundLast - 1);
 		for (int i = 0; i < 5; i++) {
@@ -381,7 +381,7 @@ void BosonCommandFrame::slotRedrawTiles()
 			d->mOrderButton[i]->setCell(groundType, d->mTiles);
 		}
 		break;
-	case Small:
+	case OrderSmall:
 		hideOrderButtons();
 		initOrderButtons(9);
 		for (int i = 0; i < 9; i++) {
@@ -389,7 +389,7 @@ void BosonCommandFrame::slotRedrawTiles()
 			d->mOrderButton[i]->setCell(tile, d->mTiles);
 		}
 		break;
-	case Big1:
+	case OrderBig1:
 		hideOrderButtons();
 		initOrderButtons(4);
 		for (int i = 0; i < 4; i++) {
@@ -398,7 +398,7 @@ void BosonCommandFrame::slotRedrawTiles()
 					d->mTiles);
 		}
 		break;
-	case Big2:
+	case OrderBig2:
 		hideOrderButtons();
 		initOrderButtons(4);
 		for (int i = 0; i < 4; i++) {
@@ -407,9 +407,9 @@ void BosonCommandFrame::slotRedrawTiles()
 					d->mTiles);
 		}
 		break;
-	case Facilities:
+	case OrderFacilities:
 		break;
-	case Mobiles:
+	case OrderMobiles:
 		break;
 	default:
 		kdError() << "unexpected construction index " << index << endl;

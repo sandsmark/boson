@@ -178,14 +178,14 @@ TopBase::TopBase()
 
 TopBase::~TopBase()
 {
- int pos;
+ CommandFramePosition pos;
 /* if (!d->mCommandBar->area()) {
 	pos = DockUnmanaged; // not yet supported for startup
  } else */
  if (d->mCommandBar->area() == rightDock()) {
-	pos = DockRight;
+	pos = CmdFrameRight;
  } else {
-	pos = DockLeft;
+	pos = CmdFrameLeft;
  }
  BosonConfig::saveCommandFramePosition(pos);
 
@@ -277,7 +277,7 @@ kdDebug() << k_funcinfo << endl;
  d->mCommandBar->setTitle(i18n("Command Frame"));
  d->mCommandBar->setEnableContextMenu(false);
  d->mCommandFrame = new QVBox(d->mCommandBar);
- mBosonWidget->addMiniMap(d->mCommandFrame);
+ mBosonWidget->reparentMiniMap(d->mCommandFrame);
 
  setDockEnabled(d->mCommandBar, DockTop, false);
  setDockEnabled(d->mCommandBar, DockBottom, false);

@@ -39,8 +39,8 @@
 class BosonPath::Marking
 {
   public:
-    Marking() { dir = BosonPath::DirNone; f = -1; g = -1; }
-    BosonPath::Direction dir;
+    Marking() { dir = DirNone; f = -1; g = -1; }
+    Direction dir;
     float f;
     float g;
 };
@@ -388,19 +388,19 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
 
 inline void BosonPath::neighbor(int& x, int& y, Direction d)
 {
-  if((d == DirNE) || (d == DirNorth) || (d == DirNW))
+  if((d == NorthEast) || (d == North) || (d == NorthWest))
   {
     y--;
   }
-  else if((d == DirSE) || (d == DirSouth) || (d == DirSW))
+  else if((d == SouthEast) || (d == South) || (d == SouthWest))
   {
     y++;
   }
-  if((d == DirNW) || (d == DirWest) || (d == DirSW))
+  if((d == NorthWest) || (d == West) || (d == SouthWest))
   {
     x--;
   }
-  else if((d == DirNE) || (d == DirEast) || (d == DirSE))
+  else if((d == NorthEast) || (d == East) || (d == SouthEast))
   {
     x++;
   }
@@ -474,7 +474,7 @@ inline void BosonPath::getFirst(QValueList<PathNode>& v, PathNode& n)
 #endif
 }
 
-inline BosonPath::Direction BosonPath::reverseDir(Direction d)
+inline Direction BosonPath::reverseDir(Direction d)
 {
   return (Direction)(((int)d + 4) % 8);
 }

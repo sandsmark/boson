@@ -22,8 +22,7 @@
 #include "bosonwidget.h"
 #include "player.h"
 #include "bosontiles.h"
-
-#include "bosoncommandframe.h" // necessary cause of BosonCommandFrame::OrderType
+#include "global.h"
 
 #include <kapplication.h>
 #include <kcmdlineargs.h>
@@ -405,42 +404,42 @@ void Editor::slotChangeEdit(int e)
 void Editor::slotPlaceFacilities()
 {
  if (!d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Facilities);
+	bosonWidget()->slotEditorConstructionChanged(OrderFacilities);
  }
 }
 
 void Editor::slotPlaceMobiles()
 {
  if (!d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Mobiles);
+	bosonWidget()->slotEditorConstructionChanged(OrderMobiles);
  }
 }
 
 void Editor::slotPlaceCellSmall()
 {
  if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Small);
+	bosonWidget()->slotEditorConstructionChanged(OrderSmall);
  }
 }
 
 void Editor::slotPlaceCellPlain()
 {
  if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Plain);
+	bosonWidget()->slotEditorConstructionChanged(OrderPlainTiles);
  }
 }
 
 void Editor::slotPlaceCellBig1()
 {
  if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Big1);
+	bosonWidget()->slotEditorConstructionChanged(OrderBig1);
  }
 }
 
 void Editor::slotPlaceCellBig2()
 {
  if (d->mMapMode) {
-	bosonWidget()->slotEditorConstructionChanged(BosonCommandFrame::Big2);
+	bosonWidget()->slotEditorConstructionChanged(OrderBig2);
  }
 }
 

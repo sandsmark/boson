@@ -19,8 +19,8 @@
 #include "bosonunitdialog.h"
 
 #include "unitproperties.h"
-#include "unit.h" // for Directions
 
+#include "global.h"
 #include "defines.h"
 
 #include <klocale.h>
@@ -383,29 +383,29 @@ void BosonUnitDialog::slotTypeChanged(int id)
 		if (i < PIXMAP_PER_MOBILE - 1) {
 			d->mUnitPixmaps.at(i)->show();
 			QString text;
-			switch ((Unit::Direction)i) {
-				case Unit::North:
+			switch ((Direction)i) {
+				case North:
 					text = i18n("North");
 					break;
-				case Unit::NorthEast:
+				case NorthEast:
 					text = i18n("NorthEast");
 					break;
-				case Unit::East:
+				case East:
 					text = i18n("East");
 					break;
-				case Unit::SouthEast:
+				case SouthEast:
 					text = i18n("SouthEast");
 					break;
-				case Unit::South:
+				case South:
 					text = i18n("South");
 					break;
-				case Unit::SouthWest:
+				case SouthWest:
 					text = i18n("SouthWest");
 					break;
-				case Unit::West:
+				case West:
 					text = i18n("West");
 					break;
-				case Unit::NorthWest:
+				case NorthWest:
 					text = i18n("NorthWest");
 					break;
 				default:

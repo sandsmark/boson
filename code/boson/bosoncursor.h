@@ -29,6 +29,9 @@ class QWidget;
 class QCursor;
 
 /**
+ * UPDATE (02/03/09): the documentation is kind of obsolete. We use derived
+ * classes now
+ * 
  * This is the cursor class for boson. There are two different types of cursors.
  * First of all the default x/qt-cursors. They are used by every KDE/QT program.
  * You can use it by calling @ref QWidget::setCursor for example.
@@ -95,72 +98,57 @@ class BosonCursor : public QObject
 {
 	Q_OBJECT
 public:
-	enum CursorMode {
-		Attack = 0,
-		Move = 1,
-		Default = 2,
-		
-		Hide // this MUST be the last entry!
-	};
-	BosonCursor();
-	~BosonCursor();
 
-	int cursorMode() const;
+	BosonCursor();
+	virtual ~BosonCursor();
+
+	int cursorMode() const { return mMode; }
 
 	/**
 	 * Change the current cursor. You probably want to call setWidget Cursor(this)
 	 * from your widget, too in order to get the @ref QCanvas cursor (if it
 	 * is used)
+	 *
+	 * You MUST reimplement this in derived classes! Also call the original
+	 * implementation!
 	 * @param mode A previously added mode - see @ref insertMode or -1 to
 	 * hide the cursor
 	 **/
-	void setCursor(int mode);
+	virtual void setCursor(int mode);
 	
 	/**
 	 * Change the @ref QCursor cursor of the specified widget. This function
 	 * uses @ref QWidget::setCursor if the feature is compiled in. Note that
-	 * boson uses currently a #define to decide whether to use it or not.
+	 * this should do nothing if you don't use @ref BosonNormalCursor
 	 **/
-	void setWidgetCursor(QWidget* w);
+	virtual void setWidgetCursor(QWidget* w) = 0;
 
 	/**
-	 * @return The current @ref QCursor according to @ref cursorMode
+	 * @return The current @ref QCursor according to @ref cursorMode. This
+	 * does only something useful for @ref BosonNormalCursor but if
+	 * everything else fails you might want to use this cursor.
 	 **/
-	QCursor cursor() const;
-	QCanvasSprite* cursorSprite() const;
+	virtual QCursor cursor() const;
 
 	/**
-	 * Set the canvas for the pixmap cursor. There are currently two
-	 * different cursors, on @ref QCursor (see @ref cursor) and one @ref
-	 * QCanvasSprite. The latter would be <em>far</em> nicer but also is
-	 * slower and maybe it is not working at all. You need to call setCanvas
-	 * for this experimental cursor.
-	 * @param mode The initial mode. See @ref insertMode
-	 **/
-	void setCanvas(QCanvas* canvas, int mode, int z = 100000);
-
-	/**
-	 * Move the @ref QCanvasSprite cursor.
+	 * Move the @ref QCanvasSprite cursor. Note that this currently does
+	 * only something useful if you use @ref BosonSpriteCursor.
+	 *
+	 * Reimplement this if it makes sense in your cursor class.
 	 * @param x x-coordinate on the @ref QCanvas
 	 * @param y y-coordinate on the @ref QCanvas
 	 **/
-	void move(double x, double y);
+	virtual void move(double x, double y);
 
 	/**
-	 * Load the cursor pixmaps for both types, the @ref QCanvasSprite
-	 * cursors and the @ref QCursor cursors.
-	 *
-	 * Automatically called by @ref setCanvas
-	 **/
-	void loadCursors(const QString& dir);
-
-	/**
-	 * Insert an mode to the internal dictionary. You can load your
+	 * Insert a mode to the internal dictionary. You can load your
 	 * cursors using this function. You probably want to use an enum in your
 	 * game for the mode id, like "Attack" and "Move" and so on.
 	 *
 	 * The two QString parameters specify the location of the files to be
 	 * loaded. 
+	 *
+	 * You must implement this in your cursor class.
 	 * @param mode The ID of the inserted mode 
 	 * @param baseDir specifies the directory where the file are to be
 	 * searched. 
@@ -168,19 +156,11 @@ public:
 	 * sprite-cursors or the filename for normal-cursors. See class
 	 * documentation for more information.
 	 **/
-	void insertMode(int mode, QString baseDir, QString cursor);
+	virtual void insertMode(int mode, QString baseDir, QString cursor) = 0;
 
 	/**
-	 * Like the above function, but doesn't load the pixmaps but take
-	 * already allocated ones.
-	 *
-	 * Please note that these must be created using new and must no be
-	 * deleted! This class takes care of deletion.
-	 **/
-	void insertMode(int mode, QCanvasPixmapArray* pixmaps, QCursor* cursor);
-
-	/**
-	 * Hides the cursor. Equivalent to calling cursorSprite()->hide().
+	 * Hides the cursor. Does nothing if the cursor is no @ref
+	 * BosonSpriteCursor.
 	 *
 	 * Note that the current cursor settings does not change, e.g. if you
 	 * use setCursor(-1) then your cursor does not display anything and will
@@ -188,28 +168,130 @@ public:
 	 * simply hides it.
 	 *
 	 * You may use it in your @ref QWidget::leaveEvent implementation.
+	 * Note that this isn't useful for @ref BosonNormalCursor as there is no
+	 * need for implementing @ref QWidget::leaveEvent or something like
+	 * this. Nevertheless if you want to use this you probably need to store
+	 * the @ref QWidget pointer in your @ref setWidgetCursor implementation
 	 **/
-	void hideCursor();
+	virtual void hideCursor() {}
 
 	/**
-	 * Show the cursor again. Equivalent to calling cursorSprite()->show().
+	 * Show the cursor again.
 	 *
 	 * You may use it in your @ref QWidget::enterEvent implementation.
 	 * See also @ref hideCursor
 	 **/
-	void showCursor();
+	virtual void showCursor() {}
 
+
+// Note: these do not belong here!
+	virtual void paintCursor(QPainter* , const QPoint& ) {}
+	virtual void removeOldCursor() {}
+	inline virtual QRect oldCursor() const;
+
+
+private:
+	int mMode;
+};
+
+class BosonNormalCursor : public BosonCursor
+{
+public:
+	BosonNormalCursor();
+	virtual ~BosonNormalCursor();
+	
+	virtual void setCursor(int mode);
+	virtual void setWidgetCursor(QWidget* w);
+	void insertMode(int mode, QCursor* cursor);
+	virtual QCursor cursor() const;
+
+	virtual void insertMode(int mode, QString baseDir, QString cursor);
 
 protected:
 	QCursor* loadQCursor(QString baseDir, QString cursor);
-	QCanvasPixmapArray* loadSpriteCursor(QString baseDir, QString cursor);
+
+private:
+	class BosonNormalCursorPrivate;
+	BosonNormalCursorPrivate* d;
+};
+
+class BosonSpriteCursor : public BosonCursor
+{
+	Q_OBJECT
+public:
+	BosonSpriteCursor();
+	virtual ~BosonSpriteCursor();
+	
+	virtual void setCursor(int mode);
+	virtual void setWidgetCursor(QWidget* w);
+	QCanvasSprite* cursorSprite() const;
+
+	/**
+	 * Set the canvas for the sprite cursor. 
+	 * @param mode The initial mode. See @ref insertMode
+	 * @param z The z-coordinate of the sprite. Should be as high as
+	 * possible.
+	 **/
+	void setCanvas(QCanvas* canvas, int mode, int z = 100000);
+
+	virtual void move(double x, double y);
+
+	void insertMode(int mode, QCanvasPixmapArray* pixmaps);
+
+	virtual void hideCursor();
+
+	virtual void showCursor();
+
+	virtual void insertMode(int mode, QString baseDir, QString cursor);
 
 protected slots:
 	void slotAdvance();
 
+protected:
+	QCanvasPixmapArray* loadSpriteCursor(QString baseDir, QString cursor);
+
 private:
-	class BosonCursorPrivate;
-	BosonCursorPrivate* d;
+	class BosonSpriteCursorPrivate;
+	BosonSpriteCursorPrivate* d;
+};
+
+class BosonExperimentalCursor : public BosonCursor
+{
+	Q_OBJECT
+public:
+	BosonExperimentalCursor();
+	virtual ~BosonExperimentalCursor();
+
+	virtual void setCursor(int mode);
+	virtual void setWidgetCursor(QWidget* w);
+
+	virtual void move(double x, double y);
+	void insertMode(int mode, QCanvasPixmapArray* pixmaps);
+
+	virtual void hideCursor();
+
+	virtual void showCursor();
+
+	virtual void insertMode(int mode, QString baseDir, QString cursor);
+
+
+	virtual void removeOldCursor();
+	virtual void paintCursor(QPainter* p, const QPoint& origin);
+	inline virtual QRect oldCursor() const;
+
+
+protected slots:
+	void slotAdvance();
+
+protected:
+	QCanvasPixmapArray* loadCursor(QString baseDir, QString cursor);
+
+private:
+	void init();
+
+private:
+	class BosonExperimentalCursorPrivate;
+	BosonExperimentalCursorPrivate* d;
 };
 
 #endif

@@ -115,50 +115,74 @@ int BosonConfig::readGameSpeed(KConfig* conf)
  return speed;
 }
 
-int BosonConfig::readCommandFramePosition(KConfig* conf)
+CommandFramePosition BosonConfig::readCommandFramePosition(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int pos = conf->readNumEntry("CommandFramePosition", Qt::DockLeft);
+ int pos = conf->readNumEntry("CommandFramePosition", CmdFrameLeft);
  conf->setGroup(oldGroup);
- return pos;
+ return (CommandFramePosition)pos;
 }
 
-void BosonConfig::saveCommandFramePosition(int pos, KConfig* conf)
+void BosonConfig::saveCommandFramePosition(CommandFramePosition pos, KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- conf->writeEntry("CommandFramePosition", pos);
- conf->setGroup(oldGroup);
-}
-
-void BosonConfig::saveChatFramePosition(int pos, KConfig* conf)
-{
- if (!conf) {
-	conf = kapp->config();
- }
- QString oldGroup = conf->group();
- conf->setGroup("Boson");
- conf->writeEntry("ChatFramePosition", pos);
+ conf->writeEntry("CommandFramePosition", (int)pos);
  conf->setGroup(oldGroup);
 }
 
-int BosonConfig::readChatFramePosition(KConfig* conf)
+CursorMode BosonConfig::readCursorMode(KConfig* conf)
 {
  if (!conf) {
 	conf = kapp->config();
  }
  QString oldGroup = conf->group();
  conf->setGroup("Boson");
- int pos = conf->readNumEntry("ChatFramePosition", 0);
+ int mode = conf->readNumEntry("CursorMode", CursorSprite);
  conf->setGroup(oldGroup);
- return pos;
+ return (CursorMode)mode;
+}
+
+void BosonConfig::saveCursorMode(CursorMode mode, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("CursorMode", (int)mode);
+ conf->setGroup(oldGroup);
+}
+
+
+void BosonConfig::saveChatFramePosition(ChatFramePosition pos, KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ conf->writeEntry("ChatFramePosition", (int)pos);
+ conf->setGroup(oldGroup);
+}
+
+ChatFramePosition BosonConfig::readChatFramePosition(KConfig* conf)
+{
+ if (!conf) {
+	conf = kapp->config();
+ }
+ QString oldGroup = conf->group();
+ conf->setGroup("Boson");
+ int pos = conf->readNumEntry("ChatFramePosition", ChatFrameBottom);
+ conf->setGroup(oldGroup);
+ return (ChatFramePosition)pos;
 }
 
 void BosonConfig::saveSound(KConfig* conf)

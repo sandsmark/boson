@@ -19,7 +19,6 @@
 
 #include "commandinput.h"
 
-//#include "bosoncommandwidget.h"
 #include "bosoncommandframe.h"
 #include "bosonmessage.h"
 #include "unitbase.h"
