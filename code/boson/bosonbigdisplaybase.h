@@ -214,6 +214,27 @@ protected:
 	 **/
 	void setViewport(int x, int y, GLsizei w, GLsizei h);
 
+	/**
+	 * Extract the frustum from both, modelview and projection matrices.
+	 * Credits for this function go to Mark Morley - see
+	 * http://www.markmorley.com/opengl/frustumculling.html
+	 *
+	 * We use pretty much of his code examples here so let me quote from the
+	 * article: "[...] Unless otherwise noted, you may use any and all code
+	 * examples provided herein in any way you want. [...]"
+	 **/
+	void extractFrustum();
+
+	/**
+	 * See @ref extractFrustum for more information about this stuff.
+	 *
+	 * We use a bounding spere so that we can easily rotate it.
+	 * @return 0 if the object is not in the frustum (i.e. is not visible)
+	 * otherwise the distance from the near plane. We might use this for the
+	 * level of detail.
+	 **/
+	float sphereInFrustum(float x, float y, float z, float radius) const;
+
 	void setCamera(const Camera& c);
 	GLfloat cameraX() const;
 	GLfloat cameraY() const;

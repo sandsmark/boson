@@ -120,6 +120,16 @@ public:
 		return model()->displayList();
 	}
 
+	/**
+	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
+	 * OpenGL! Especially not in pathfinding!
+	 * @ return The radius of the bounding sphere. See @ref
+	 * BosonBigDisplayBase::sphereInFrustum
+	 **/
+	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
+
+	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
+
 private:
 	// FIXME: use KGameProperty here. We can do so, since we don't use
 	// QCanvasSprite anymore.
@@ -131,6 +141,13 @@ private:
 	float mXVelocity;
 	float mYVelocity;
 	BosonModel* mModel;
+
+	// these are for OpenGL performance only. no need to store on save() and
+	// don't use for anything except OpenGL!
+//	float mCenterX;
+//	float mCenterY;
+//	float mCenterZ;
+	float mBoundingSphereRadius;
 };
 
 #endif // GLUNIT_H

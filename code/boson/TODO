@@ -43,6 +43,8 @@ Game TODOs
   on the map. Currently the player has to click on the cmd bunker only (not on
   the order button) to start placement
 - Make shield reloading speed configurable
+- fix minimap-zooming. there are a few bugs when the viewport is not at top left
+  of the map and we therefore have to call QPainter::translate().
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
@@ -88,6 +90,8 @@ General TODOs
   game and transfer only needed things over network. Saves some traffic
 - Minimap doesn't support units with width or height not equal to BO_TILE_SIZE
 - Click+Move in minimap should move the rectangle (aka the screen position)
+- remove zooming support. maybe replace it by simple cameraZ position changes.
+  especially remove BosonBigDisplayBase::setZoomFactor() and the menu entry.
 
 Data TODOs
 - sound for minimap activated/deactivated
