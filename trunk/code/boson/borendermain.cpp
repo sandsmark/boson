@@ -23,6 +23,7 @@
 #include "speciestheme.h"
 #include "bosonconfig.h"
 #include "bosonmodel.h"
+#include "bosonglfont.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
 #include "kgamemodeldebug.h"
@@ -110,6 +111,8 @@ ModelPreview::ModelPreview(QWidget* parent) : BosonGLWidget(parent)
  mDisallowPlacement = false;
  mWireFrame = false;
 
+ mDefaultFont = 0;
+
  connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
  connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
  connect(this, SIGNAL(signalRotateZChanged(float)), this, SLOT(slotRotateZChanged(float)));
@@ -132,6 +135,7 @@ ModelPreview::~ModelPreview()
 void ModelPreview::initializeGL()
 {
  makeCurrent();
+ mDefaultFont = new BosonGLFont(QString::fromLatin1("fixed"));
  glClearColor(0.0, 0.0, 0.0, 0.0);
  glShadeModel(GL_FLAT);
  glDisable(GL_DITHER);
@@ -168,6 +172,7 @@ void ModelPreview::paintGL()
  glColor3f(1.0f, 1.0f, 1.0f);
 
  renderModel();
+// renderGrid();
 
  glDisable(GL_DEPTH_TEST);
 
@@ -240,6 +245,152 @@ void ModelPreview::renderModel()
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
 
+}
+
+void ModelPreview::renderGrid()
+{
+ if (!haveModel()) {
+	return;
+ }
+ glDisable(GL_TEXTURE_2D);
+ glEnable(GL_DEPTH_TEST);
+ float w = mModel->width();
+ float h = mModel->height();
+ if ((float)((int)w) != w) {
+	w = (float)((int)w + 1);
+ }
+ if ((float)((int)h) != h) {
+	h = (float)((int)h + 1);
+ }
+ if ((int)w % 2 != 0) {
+	w += 1.0f;
+ }
+ if ((int)h % 2 != 0) {
+	h += 1.0f;
+ }
+ // depth doesn't have to be mod 2 == 0. we render from bottom (0.0) to
+ // top (depth), not from -depth/2 to depth/2
+ float depth = 1.0f;
+
+ const float xyz = 0.05f; // FIXME: name
+ glBegin(GL_LINES);
+	// bottom
+	glVertex3f(-(w / 2), -(h / 2 + xyz), 0.0f);
+	glVertex3f(-(w / 2), (h / 2 + xyz), 0.0f);
+
+	glVertex3f(-(w / 2 + xyz), -(h / 2), 0.0f);
+	glVertex3f((w / 2 + xyz), -(h / 2), 0.0f);
+
+	glVertex3f((w / 2), -(h / 2 + xyz), 0.0f);
+	glVertex3f((w / 2), (h / 2 + xyz), 0.0f);
+
+	glVertex3f(-(w / 2 + xyz), (h / 2), 0.0f);
+	glVertex3f((w / 2 + xyz), (h / 2), 0.0f);
+
+	// top
+	glVertex3f(-(w / 2), -(h / 2 + xyz), depth);
+	glVertex3f(-(w / 2), (h / 2 + xyz), depth);
+
+	glVertex3f(-(w / 2 + xyz), -(h / 2), depth);
+	glVertex3f((w / 2 + xyz), -(h / 2), depth);
+
+	glVertex3f((w / 2), -(h / 2 + xyz), depth);
+	glVertex3f((w / 2), (h / 2 + xyz), depth);
+
+	glVertex3f(-(w / 2 + xyz), (h / 2), depth);
+	glVertex3f((w / 2 + xyz), (h / 2), depth);
+
+	const float marker = 0.025f;
+	for (float i = -(w / 2) + 1.0f; i < w / 2; i += 1.0f) {
+		glVertex3f(i, (h / 2 - marker), 0.0f);
+		glVertex3f(i, (h / 2 + marker), 0.0f);
+
+		glVertex3f(i, -(h / 2 - marker), 0.0f);
+		glVertex3f(i, -(h / 2 + marker), 0.0f);
+
+		glVertex3f(i, -(h / 2 - marker), depth);
+		glVertex3f(i, -(h / 2 + marker), depth);
+
+		glVertex3f(i, (h / 2 - marker), depth);
+		glVertex3f(i, (h / 2 + marker), depth);
+	}
+	for (float i = -(h / 2) + 1.0f; i < h / 2; i += 1.0f) {
+		glVertex3f((h / 2 - marker), i, 0.0f);
+		glVertex3f((h / 2 + marker), i, 0.0f);
+
+		glVertex3f(-(h / 2 - marker), i, 0.0f);
+		glVertex3f(-(h / 2 + marker), i, 0.0f);
+
+		glVertex3f(-(h / 2 - marker), i, depth);
+		glVertex3f(-(h / 2 + marker), i, depth);
+
+		glVertex3f((h / 2 - marker), i, depth);
+		glVertex3f((h / 2 + marker), i, depth);
+	}
+
+	// bottom-to-top
+	glVertex3f((w / 2), -(h / 2), -xyz);
+	glVertex3f((w / 2), -(h / 2), depth + xyz);
+
+	glVertex3f((w / 2), (h / 2), -xyz);
+	glVertex3f((w / 2), (h / 2), depth + xyz);
+
+	glVertex3f(-(w / 2), (h / 2), -xyz);
+	glVertex3f(-(w / 2), (h / 2), depth + xyz);
+
+	glVertex3f(-(w / 2), -(h / 2), -xyz);
+	glVertex3f(-(w / 2), -(h / 2), depth + xyz);
+
+	// TODO: markers for depth, just like for w and h above.
+	// not yet important, as depth is 1.0 always
+ glEnd();
+
+ // mark the origin
+ // (AB: maybe use a different color? if yes then use that for z-axis, too,
+ // which is rendered above!
+ glEnable(GL_LINE_STIPPLE);
+ glLineStipple(1, 0x00FF);
+ glBegin(GL_LINES);
+	glVertex3f(0.0f, -(h / 2 + xyz), 0.0f);
+	glVertex3f(0.0f, (h / 2 + xyz), 0.0f);
+
+	glVertex3f(-(w / 2 + xyz), 0.0f, 0.0f);
+	glVertex3f((w / 2 + xyz), 0.0f, 0.0f);
+
+	glVertex3f(0.0f, -(h / 2 + xyz), depth);
+	glVertex3f(0.0f, (h / 2 + xyz), depth);
+
+	glVertex3f(-(w / 2 + xyz), 0.0f, depth);
+	glVertex3f((w / 2 + xyz), 0.0f, depth);
+
+ glEnd();
+ glDisable(GL_LINE_STIPPLE);
+
+#if 0
+ glListBase(mDefaultFont->displayList());
+
+ glRasterPos3f(0.0f, 0.0f, 0.0f);
+ glTranslatef((w / 2), 0.0f, 0.0f);
+ mDefaultFont->renderString(QString::fromLatin1("X-Axis"));
+ glTranslatef(-(w / 2), 0.0f, 0.0f);
+
+ glRasterPos3f(0.0f, 0.0f, 0.0f);
+ glTranslatef(0.0f, (h / 2), 0.0f);
+ mDefaultFont->renderString(QString::fromLatin1("Y-Axis"));
+ glTranslatef(0.0f, -(h / 2), 0.0f);
+
+ glRasterPos3f(0.0f, 0.0f, 0.0f);
+ glTranslatef(0.0f, 0.0f, depth / 2);
+ mDefaultFont->renderString(QString::fromLatin1("Z-Axis"));
+ glTranslatef(0.0f, 0.0f, -depth / 2);
+
+ glRasterPos3f(0.0f, 0.0f, 0.0f);
+#endif
+ // TODO: write texts to every axis: "X-Axis", "Y-Axis", "Z-Axis". Also numbers
+ // indicating the units would be nice, i.e. -w/2,-h/2,0.0 at the start of an
+ // axis and w/2,h/2,depth at the end of an axis.
+ // we cannot easily do that with the code above (BosonGLFont), as normal fonts
+ // can't be rotated,scaled,... we need to use textured fonts.
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)

@@ -46,6 +46,7 @@
 class SpeciesTheme;
 class UnitProperties;
 class BosonModel;
+class BosonGLFont;
 class QCheckBox;
 
 class KMyFloatNumInput : public KDoubleNumInput
@@ -181,6 +182,7 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent*);
 
 	void renderModel();
+	void renderGrid();
 
 	bool haveModel() const
 	{
@@ -196,6 +198,8 @@ private:
 	BosonModel* mModel;
 	int mCurrentFrame;
 	int mCurrentLOD;
+
+	BosonGLFont* mDefaultFont;
 
 	float mFovY; // we allow real zooming here!
 	float mCameraX, mCameraY, mCameraZ;
