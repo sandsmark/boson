@@ -30,6 +30,7 @@
 #define BOSON_MAGIC_LENGHT	(sizeof(BOSON_MAGIC)/sizeof(char))
 
 #define BOSON_MAX_CONNECTION	(5)
+#define BOSON_MAX_PLAYERS	BOSON_MAX_CONNECTION ///orzel : to clean up
 #define BOSON_DEFAULT_PORT	(5454)
 #define BOSON_BUFFER_SIZE	(5*1024)
 
