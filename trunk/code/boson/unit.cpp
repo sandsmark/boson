@@ -1073,7 +1073,7 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
  BoItemList* items = collisions()->collisionsAtCells(rect, (BosonItem*)this, false);
  items->remove((BosonItem*)this);
 
- BoItemList* inRange = new BoItemList();
+ BoItemList* units = new BoItemList();
  BoItemList::Iterator it = items->begin();
  Unit* u;
  for (; it != items->end(); ++it) {
@@ -1087,11 +1087,14 @@ BoItemList* Unit::unitsInRange(unsigned long int range) const
 	if (!ownerIO()->canSee(u)) {
 		continue;
 	}
+	if (!inRange(range, u)) {
+		continue;
+	}
 	// TODO: remove the items from inRange which are not actually in range (hint:
 	// pythagoras)
-	inRange->append(*it);
+	units->append(*it);
  }
- return inRange;
+ return units;
 }
 
 BoItemList* Unit::enemyUnitsInRange(unsigned long int range) const
