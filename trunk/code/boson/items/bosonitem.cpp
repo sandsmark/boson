@@ -36,7 +36,7 @@
 #include <kstaticdeleter.h>
 
 QMap<int, QString>* BosonItemProperties::mPropertyMap = 0;
-KStaticDeleter< QMap<int, QString> > sd;
+static KStaticDeleter< QMap<int, QString> > sd;
 
 BosonItemProperties::BosonItemProperties()
 {
