@@ -49,4 +49,4 @@ Range=5
 Reload=1
 ShootEffects=
 Speed=0
-Type=0
+Type=Bullet

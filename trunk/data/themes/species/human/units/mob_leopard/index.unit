@@ -62,3 +62,4 @@ SoundHit=hit
 SoundShoot=shoot
 Speed=6
 Model=bullet
+Type=Missile

@@ -66,5 +66,5 @@ ShootEffects=
 SoundFly=missile_fly
 SoundShoot=shoot
 Speed=0.6
-Type=4
+Type=Bomb
 AutoUse=false

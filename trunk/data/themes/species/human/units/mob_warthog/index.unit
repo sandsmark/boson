@@ -67,7 +67,7 @@ SoundFly=
 SoundHit=hit
 SoundShoot=shoot
 Speed=0
-Type=0
+Type=Bullet
 
 [Weapon_1]
 CanShootAtAirUnits=false
@@ -89,3 +89,4 @@ SoundFly=missile_fly
 SoundHit=hit
 SoundShoot=shoot
 Speed=6
+Type=Missile
