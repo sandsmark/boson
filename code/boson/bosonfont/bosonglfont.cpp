@@ -313,9 +313,10 @@ int BoTXFFont::renderString(int x, int y, const GLubyte* string, unsigned int le
  }
  glPushAttrib(GL_COLOR_BUFFER_BIT);
  glEnable(GL_ALPHA_TEST);
-// glEnable(GL_BLEND);
+ glEnable(GL_BLEND);
  glAlphaFunc(GL_GREATER, 0.1f);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
  float pos[3] = { (float)x, (float)y, 0.0f };
  for (unsigned int i = 0; i < len; i++) {
 	mFont->putch(pos, mPointSize, mItalic ? 1.0f : 0.0f, (char)string[i]);
@@ -545,12 +546,11 @@ int BosonGLFont::renderLine(int x, int y, const QString& text, int maxWidth, boo
  // we must never ever use more height than height(..) claims we do
  int maxHeight = height(text, maxWidth);
  if (background) {
-	glPushAttrib(GL_ENABLE_BIT);
+	glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT);
 	glEnable(GL_BLEND);
 	glDisable(GL_TEXTURE_2D);
 	glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
 	glRecti(x, y - maxHeight, x + w, y);
-	glColor3ub(255, 255, 255);
 	glPopAttrib();
  }
  if (w < maxWidth) {
