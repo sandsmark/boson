@@ -130,11 +130,6 @@ class BosonPath
 
     Unit* mUnit;
 
-    float mModifier;
-    float mCrossDivider;
-    float mMinCost;
-    int mAbortPath;
-
     int mNodesRemoved;
     int mPathLength;
     float mPathCost;

@@ -29,11 +29,30 @@
 #include <qpoint.h>
 #include <sys/time.h> // only for debug
 
+
+// this should be highest of all costs. If cell's cost is at least ERROR_COST,
+//  there's no way unit can go to that cell
 #define ERROR_COST 100000
+// If path's cost is more than MAX_PATH_COST, searching is aborted
 #define MAX_PATH_COST 5000
+// This will be added to cell's cost if cell is fogged
 #define FOGGED_COST 3
+// This will be added to cell's cost if cell is occupied by a moving unit
+#define OCCUPIED_BY_MOVING_COST 7
+// This will be added to cell's cost if cell is occupied by a non-moving unit
+#define OCCUPIED_BY_NONMOVING_COST ERROR_COST
+// If cell's cost is more than this, path won't be handled by fast pathfinder
+#define MAX_FAST_PF_COST 10
+// This will be added to all costs
+#define BASE_COST 5
+// This will be multiplied by manhattan distance between goal and cell in dist()
+#define DIST_MODIFIER 7
+#define CROSSDIVIDER 100
+#define ABORTPATH (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1)
+
 
 #define marking(x, y) mark[x - mStartx + SEARCH_STEPS][y - mStarty + SEARCH_STEPS]
+
 
 // If you uncomment next line, you will enable in-line moving style.
 //  With this moving style, unit movement is less agressive and units
@@ -41,6 +60,8 @@
 //  This is useful when moving big group of units through narrow places
 //  on map, but in general, default style is better IMO
 #define MOVE_IN_LINE
+
+#define NEWER_PF_STYLE
 
 class PathNode
 {
@@ -105,10 +126,6 @@ BosonPath::BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, i
   mGoaly = goaly;
   mRange = range;
   /// TODO: those variables needs tuning and *lots* of testing!
-  mModifier = 6;
-  mCrossDivider = 100;
-  mMinCost = 3;
-  mAbortPath = (SEARCH_STEPS * 2 + 1) * (SEARCH_STEPS * 2 + 1);
 
   //boDebug(500) << k_funcinfo << "start: " << mStartx << "," << mStarty << " goal: " << mGoalx << "," << mGoaly << " range: " << mRange << endl;
 }
@@ -169,7 +186,7 @@ bool BosonPath::findPath()
     }
     bool a = findSlowPath();
     gettimeofday(&time2, 0);
-    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << "microsec." << endl;
+    boDebug(500) << k_funcinfo << "TOTAL TIME ELAPSED (slow method): " << time2.tv_usec - time1.tv_usec << "microsec. nodes removed: " << mNodesRemoved << endl;
     pathSlow++;
     return a;
   }
@@ -186,6 +203,8 @@ bool BosonPath::findFastPath()
   int tox, toy;
   bool movebyx, movebyy;
   int steps;
+  // Find path inside unit's sight range only, but at least 4 steps
+  // FIXME: this may couse trouble in certain situations
   int length = QMAX(4, mUnit->unitProperties()->sightRange());
 
   lastx = mStartx;
@@ -255,7 +274,9 @@ bool BosonPath::findFastPath()
     y[steps] = lasty;
 
     // Check if we can move to waypoint
-    if(cost(lastx, lasty) == ERROR_COST)
+    // If cost is bigger than MAX_FAST_PF_COST, then we return false and it will
+    //  be handled in slow pathfinder instead.
+    if(cost(lastx, lasty) > MAX_FAST_PF_COST)
     {
       // Path can't be found using fast method
       //gettimeofday(&time2, 0);
@@ -378,9 +399,9 @@ bool BosonPath::findSlowPath()
     }
     
     // Check if we've gone too long with searching
-    if(mNodesRemoved >= mAbortPath)
+    if(mNodesRemoved >= ABORTPATH)
     {
-      boDebug(500) << k_funcinfo << "mNodesRemoved >= mAbortPath" << endl;
+      boDebug(500) << k_funcinfo << "mNodesRemoved >= ABORTPATH" << endl;
       // Pick best node from OPEN
 #if USE_STL
       for(vector<PathNode>::iterator i = open.begin(); i != open.end(); ++i)
@@ -422,7 +443,7 @@ bool BosonPath::findSlowPath()
       // Calculate costs of node
       float nodecost = cost(n2.x, n2.y);
       // If cost is ERROR_COST, then we can't go there
-      if(nodecost == ERROR_COST)
+      if(nodecost >= ERROR_COST)
       {
         /// TODO: this may lead to problems when all cells in range have ERROR_COST
         if(n2.x == mGoalx && n2.y == mGoaly && mRange == 0)
@@ -627,7 +648,7 @@ bool BosonPath::rangeCheck()
   }
   if(mRange == 0)
   {
-    if(cost(mGoalx, mGoaly) != ERROR_COST)
+    if(cost(mGoalx, mGoaly) < ERROR_COST)
     {
       return false;
     }
@@ -657,12 +678,12 @@ bool BosonPath::rangeCheck()
       {
         continue;
       }
-      if(cost(x, mGoaly - range) != ERROR_COST)
+      if(cost(x, mGoaly - range) < ERROR_COST)
       {
         mRange = QMAX(mRange, range);
         return false;
       }
-      if(cost(x, mGoaly + range) != ERROR_COST)
+      if(cost(x, mGoaly + range) < ERROR_COST)
       {
         mRange = QMAX(mRange, range);
         return false;
@@ -675,12 +696,12 @@ bool BosonPath::rangeCheck()
       {
         continue;
       }
-      if(cost(mGoalx - range, y) != ERROR_COST)
+      if(cost(mGoalx - range, y) < ERROR_COST)
       {
         mRange = QMAX(mRange, range);
         return false;
       }
-      if(cost(mGoalx + range, y) != ERROR_COST)
+      if(cost(mGoalx + range, y) < ERROR_COST)
       {
         mRange = QMAX(mRange, range);
         return false;
@@ -704,8 +725,8 @@ float BosonPath::dist(int ax, int ay, int bx, int by)
     cross = -cross;
   }
   
-  float dist = float(cross / mCrossDivider);
-  dist += mModifier * QMAX(QABS(ax - bx), QABS(ay - by));
+  float dist = float(cross / CROSSDIVIDER);
+  dist += DIST_MODIFIER * QMAX(QABS(ax - bx), QABS(ay - by));
   return dist;
 }
 
@@ -742,7 +763,7 @@ float BosonPath::cost(int x, int y)
   if(mUnit->owner()->isFogged(x, y))
   {
     //boDebug() << "Tile at (" << x << ", " << y << ") is fogged, returning FOGGED_COST" << endl;
-    co = FOGGED_COST + mMinCost;
+    co = FOGGED_COST + BASE_COST;
   }
   else
   {
@@ -764,6 +785,7 @@ float BosonPath::cost(int x, int y)
       }
       else
       {
+#ifndef NEWER_PF_STYLE
 #ifndef MOVE_IN_LINE
         // If we are close to our starting point or to our goal, then consider cell
         //  to be occupied even if only moving units are on it (we assume they can't
@@ -775,15 +797,38 @@ float BosonPath::cost(int x, int y)
         }
         if(c->isOccupied(mUnit, includeMoving))
 #else
-        if(c->isOccupied(mUnit, true))
-#endif
+        if(c->isOccupied(mUnit, false))
+#endif  // MOVE_IN_LINE
         {
           co = ERROR_COST;
         }
         else
         {
-          co = c->moveCost() + mMinCost;
+          co = c->moveCost() + BASE_COST;
         }
+#else  // NEWER_PF_STYLE
+        co = c->moveCost() + BASE_COST;
+        // Modify cost if cell is occupied
+        bool hasany, hasmoving;
+        c->isOccupied(mUnit, hasmoving, hasany);
+        if(hasany)
+        {
+          if(!hasmoving)
+          {
+            // Cell is occupied by non-moving unit
+            // TODO: non-moving here doesn't necessarily mean that unit won't
+            //  move away from there. We also set moving status to non-moving
+            //  for units which are attacking the enemy while moving, but after
+            //  enemy is dead, they'll move on.
+            co += OCCUPIED_BY_NONMOVING_COST;
+          }
+          else
+          {
+            // Cell is occupied by moving unit.
+            co += OCCUPIED_BY_MOVING_COST;
+          }
+        }
+#endif  // NEWER_PF_STYLE
       }
     }
   }

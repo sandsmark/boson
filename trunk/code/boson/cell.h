@@ -186,6 +186,7 @@ public:
 	 **/
 	inline bool isOccupied(Unit* forUnit, bool includeMoving = true) const { return mItems.isOccupied(forUnit, includeMoving); }
 	inline bool isOccupied(bool includeMoving = true) const { return mItems.isOccupied(includeMoving); }
+	inline void isOccupied(Unit* forUnit, bool& hasmoving, bool& hasany) const { mItems.isOccupied(forUnit, hasmoving, hasany); }
 
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
