@@ -48,7 +48,7 @@ void BosonModelTextures::init()
  // we cache the texture path. only a *very* slightly speedup and that only on
  // startup, but since this class has only a single object the extra variable
  // doesn't matter at all.
- mTexturePath = KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/wheel.jpg"); // FIXME: we depend on existence of this texture!
+ mTexturePath = KGlobal::dirs()->findResourceDir("data", "boson/themes/textures/concrt1.jpg"); // FIXME: we depend on existence of this texture!
  mTexturePath += QString::fromLatin1("boson/themes/textures/");
  d = new BosonModelTexturesPrivate;
 }
