@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,13 +24,16 @@
 #include <qpair.h>
 
 #include "../global.h"
+#include "../boaction.h"
 
 class Unit;
 class Facility;
 class Player;
 class BosonOrderButton;
 class BosonGroundTheme;
+
 template<class T> class QPtrList;
+template<class T> class QValueList;
 
 /**
  * This is scrollable widget in the commandframe that contains buttons of unit
@@ -70,26 +73,12 @@ public:
 	/**
 	 * This function is used to display production options (e.g. when the
 	 * unit has a @ref ProductionPlugin or in editor mode units should get
-	 * placed). The list contains pairs, where the first element of the @ref
-	 * QPair specifies whether the id is a unit or a technology. See @ref
-	 * ProductionType. The second element of the pair specifies the id that
-	 * fits the @ref ProductionType.
-	 * @param produceList A list of production options (or placement options
-	 * in editor mode) which all have a @ref ProductionType assigned which
-	 * specifies which kind of production option the id is.
+	 * placed). The list contains actions that will be shown
 	 *
 	 * See also @ref hideOrderButtons, @ref showUnits and @ref
 	 * setOrderButtonsGround
 	 **/
-	void setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory = 0);
-
-	/**
-	 * @overloaded
-	 *
-	 * This creates a list of @ref QPair where all elements of @p idList
-	 * share the type @p type. See @ref setOrderButtons above.
-	 **/
-	void setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory = 0);
+	void setOrderButtons(QValueList<BoSpecificAction> actions);
 
 	/**
 	 * Use the @ref BosonGroundTheme, for the order buttons, i.e. allow
@@ -112,10 +101,10 @@ public:
 	void setGroundTheme(BosonGroundTheme* theme);
 
 	/**
-	 * @return TRUE if the widget display production options (.e. order
+	 * @return TRUE if the widget display production options (i.e. order
 	 * buttons), otherwise FALSE
 	 **/
-	OrderType orderType() const;
+	bool isProduceAction() const;
 
 	/**
 	 * Resets button by setting it's production count to 0 and making it
@@ -143,8 +132,7 @@ protected slots:
 	void slotPlaceGround(unsigned int texture);
 
 signals:
-	void signalProduce(ProductionType type, unsigned long int id);
-	void signalStopProduction(ProductionType type, unsigned long int id);
+	void signalAction(BoSpecificAction action);
 
 	/**
 	 * @param textureCount See @ref BosonGroundTheme::textureCount
@@ -153,7 +141,7 @@ signals:
 	 * @p textureCount.
 	 **/
 	void signalPlaceGround(unsigned int textureCount, unsigned char* alpha);
-	
+
 	/**
 	 * This unit should become the only selected unit. See @ref
 	 * BosonOrderButton::signalSelectUnit

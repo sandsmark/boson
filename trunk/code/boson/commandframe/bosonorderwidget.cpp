@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,6 +39,10 @@
 #include <qcombobox.h>
 #include <qcheckbox.h>
 #include <qtimer.h>
+#include <qvaluelist.h>
+#include <qptrlist.h>
+#include <qstring.h>
+
 
 class BosonOrderWidget::BosonOrderWidgetPrivate
 {
@@ -58,15 +62,14 @@ public:
 	BosonGroundTheme* mGroundTheme;
 
 	CellType mCellType; // plain tiles, small tiles, ...
-
-	OrderType mOrderType;
+	bool mIsProduceAction;
 };
 
 BosonOrderWidget::BosonOrderWidget(QWidget* parent, const char* name) : QWidget(parent, name)
 {
  d = new BosonOrderWidgetPrivate;
  d->mCellType = CellPlain;
- d->mOrderType = OrderNothing;
+ d->mIsProduceAction = false;
 }
 
 BosonOrderWidget::~BosonOrderWidget()
@@ -87,10 +90,8 @@ void BosonOrderWidget::ensureButtons(unsigned int number)
 		d->mOrderButton.insert(i, b);
 		connect(b, SIGNAL(signalPlaceGround(unsigned int)),
 				this, SLOT(slotPlaceGround(unsigned int)));
-		connect(b, SIGNAL(signalProduce(ProductionType, unsigned long int)),
-				this, SIGNAL(signalProduce(ProductionType, unsigned long int)));
-		connect(b, SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
-				this, SIGNAL(signalStopProduction(ProductionType, unsigned long int)));
+		connect(b, SIGNAL(signalAction(BoSpecificAction)),
+				this, SIGNAL(signalAction(BoSpecificAction)));
 		connect(b, SIGNAL(signalSelectUnit(Unit*)),
 				this, SIGNAL(signalSelectUnit(Unit*)));
 	}
@@ -121,27 +122,19 @@ void BosonOrderWidget::setButtonsPerRow(int b)
  resetLayout();
 }
 
-void BosonOrderWidget::setOrderButtons(ProductionType type, QValueList<unsigned long int> idList, Player* owner, Facility* factory)
+void BosonOrderWidget::setOrderButtons(QValueList<BoSpecificAction> actions)
 {
- QValueList<QPair<ProductionType, unsigned long int> > produceList;
- QPair<ProductionType, unsigned long int> pair;
- pair.first = type;
- QValueList<unsigned long int>::Iterator it;
- for(it = idList.begin(); it != idList.end(); it++) {
-	pair.second = *it;
-	produceList.append(pair);
- }
- setOrderButtons(produceList, owner, factory);
-}
+ boDebug() << k_funcinfo << actions.count() << " actions" << endl;
 
-void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned long int> > produceList, Player* owner, Facility* factory)
-{
  hideCellConfigWidgets();
- ensureButtons(produceList.count());
+ ensureButtons(actions.count());
  hideOrderButtons();
+
  unsigned long int id = 0;
  ProductionType type = ProduceNothing;
  ProductionPlugin* production = 0;
+
+ Unit* factory = actions.first().unit();
  if (factory) {
 	production = (ProductionPlugin*)factory->plugin(UnitPlugin::Production);
 	if (!production) {
@@ -151,15 +144,16 @@ void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned
 		id = production->currentProductionId();
 	}
  }
- for (unsigned int i = 0; i < produceList.count(); i++) {
-	d->mOrderButton[i]->setProduction(produceList[i].first, produceList[i].second, owner);
+
+ QPair<ProductionType, long unsigned int> pair;
+ for (unsigned int i = 0; i < actions.count(); i++) {
+	d->mOrderButton[i]->setAction(actions[i]);
 	d->mTopLayout->activate();
 	if (id > 0 && production) {
-		int count = production->productionList().contains(produceList[i]);
-		if ((produceList[i].first != type) || (produceList[i].second != id)) {
-			d->mOrderButton[i]->setProductionCount(count);
-			d->mOrderButton[i]->setGrayOut(true);
-		} else {
+		pair.first = actions[i].productionType();
+		pair.second = actions[i].productionId();
+		int count = production->productionList().contains(pair);
+		if((actions[i].productionType() == type) && (actions[i].productionId() == id)) {
 			d->mOrderButton[i]->advanceProduction(production->productionProgress());
 			if (factory->currentPluginType() != UnitPlugin::Production) {
 				d->mOrderButton[i]->setProductionCount(-1);
@@ -167,12 +161,16 @@ void BosonOrderWidget::setOrderButtons(QValueList<QPair<ProductionType, unsigned
 				d->mOrderButton[i]->setProductionCount(count);
 			}
 			d->mOrderButton[i]->setGrayOut(false);
+		} else {
+			d->mOrderButton[i]->setProductionCount(count);
+			d->mOrderButton[i]->setGrayOut(true);
 		}
 	} else {
 		resetButton(d->mOrderButton[i]);
 	}
  }
- d->mOrderType = OrderProduce;
+
+ d->mIsProduceAction = true;
 }
 
 void BosonOrderWidget::hideOrderButtons()
@@ -182,7 +180,6 @@ void BosonOrderWidget::hideOrderButtons()
 	it.current()->setUnit(0);
 	++it;
  }
- d->mOrderType = OrderNothing;
 }
 
 void BosonOrderWidget::setOrderButtonsGround()
@@ -194,8 +191,6 @@ void BosonOrderWidget::setOrderButtonsGround()
  for (unsigned int i = 0; i < d->mGroundTheme->textureCount(); i++) {
 	d->mOrderButton[i]->setGround(i, d->mGroundTheme);
  }
-
- d->mOrderType = OrderCell;
 }
 
 void BosonOrderWidget::setCellType(CellType index)
@@ -230,17 +225,15 @@ void BosonOrderWidget::showUnits(QPtrList<Unit> units)
  i = 0;
  QPtrListIterator<Unit> it(units);
  for (; it.current(); ++it, i++) {
-	if (d->mOrderButton[i]->orderType() == OrderUnitSelected) {
-		if (d->mOrderButton[i]->unit() == it.current()) {
-			boDebug() << "unit already displayed - update..." << endl;
-			d->mOrderButton[i]->slotUnitChanged(it.current());
-		}
+	if ((d->mOrderButton[i]->type() == BosonOrderButton::ShowUnit) && (d->mOrderButton[i]->unit() == it.current())) {
+		boDebug() << "unit already displayed - update..." << endl;
+		d->mOrderButton[i]->slotUnitChanged(it.current());
 	} else {
 //		boDebug() << "show unit at " << i << endl;
 		d->mOrderButton[i]->setUnit(it.current());
 	}
  }
- d->mOrderType = OrderUnitSelected;
+ d->mIsProduceAction = false;
 }
 
 void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
@@ -260,7 +253,7 @@ void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
  for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
 	BosonOrderButton* c = d->mOrderButton[i];
-	if (c->orderType() == OrderProduce) {
+	if (c->type() == BosonOrderButton::ShowAction && c->action().isProduceAction()) {
 		if ((c->productionType() == production->currentProductionType()) && (c->productionId() == production->currentProductionId())) {
 			c->advanceProduction(percentage);
 		}
@@ -279,9 +272,9 @@ void BosonOrderWidget::resetButton(BosonOrderButton* button)
  button->setGrayOut(false);
 }
 
-OrderType BosonOrderWidget::orderType() const
+bool BosonOrderWidget::isProduceAction() const
 {
- return d->mOrderType;
+ return d->mIsProduceAction;
 }
 
 void BosonOrderWidget::slotPlaceGround(unsigned int texture)

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include "unitplugins.h"
 #include "cell.h"
 #include "bodebug.h"
+#include "boaction.h"
+#include "bosonlocalplayerinput.h"
 
 #include <klocale.h>
 #include <kapplication.h>
@@ -159,7 +161,7 @@ public:
 EditorBigDisplayInput::EditorBigDisplayInput(BosonBigDisplayBase* parent) : BosonBigDisplayInputBase(parent)
 {
  d = new EditorBigDisplayInputPrivate;
- setActionType(ActionBuild); // dummy initialization
+ setActionType(ActionPlacementPreview); // dummy initialization
 }
 
 EditorBigDisplayInput::~EditorBigDisplayInput()
@@ -167,29 +169,25 @@ EditorBigDisplayInput::~EditorBigDisplayInput()
  delete d;
 }
 
-void EditorBigDisplayInput::actionClicked(const BoAction& action, QDataStream& stream, bool* send)
+void EditorBigDisplayInput::actionClicked(const BoMouseEvent& event)
 {
  boDebug() << k_funcinfo << endl;
  BO_CHECK_NULL_RET(canvas());
- if (!canvas()->onCanvas(action.canvasVector())) {
+ if (!canvas()->onCanvas(event.canvasVector())) {
 	return;
  }
  if (actionLocked()) {
-	if (actionType() == ActionBuild) {
-		if (actionPlace(stream, action.canvasVector())) {
-			*send = true;
-		}
+	if (actionType() == ActionPlacementPreview) {
+		actionPlace(event.canvasVector());
 		return;
 	} else if (actionType() == ActionChangeHeight) {
-		bool up = !action.controlButton();
-		if (actionChangeHeight(stream, action.canvasVector(), up)) {
-			*send = true;
-		}
+		bool up = !event.controlButton();
+		actionChangeHeight(event.canvasVector(), up);
 	}
  }
 }
 
-bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& canvasVector)
+bool EditorBigDisplayInput::actionPlace(const BoVector3& canvasVector)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -223,12 +221,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 	} else {
 		boDebug() << "place unit " << d->mPlacement.unitType() << endl;
 
-		stream << (Q_UINT32)BosonMessage::MoveEditor;
-		stream << (Q_UINT32)BosonMessage::MovePlaceUnit;
-		stream << (Q_INT32)d->mPlacement.owner()->id();
-		stream << (Q_INT32)d->mPlacement.unitType();
-		stream << (Q_INT32)x;
-		stream << (Q_INT32)y;
+		localPlayerInput()->placeUnit(d->mPlacement.owner(), d->mPlacement.unitType(), x, y);
 		ret = true;
 	}
  } else if (d->mPlacement.isGround()) {
@@ -277,6 +270,13 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 		return false;
 	}
 
+	// I find it more comfortable to put everything to stream here and use
+	//  localPlayerInput()->sendInput() rather than to add method with many many
+	//  parameters to localPlayerInput
+	QByteArray b;
+	QDataStream stream(b, IO_WriteOnly);
+
+
 	stream << (Q_UINT32)BosonMessage::MoveEditor;
 	stream << (Q_UINT32)BosonMessage::MoveChangeTexMap;
 
@@ -296,6 +296,8 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
 			stream << (Q_UINT8)alpha;
 		}
 	}
+	QDataStream msg(b, IO_ReadOnly);
+	localPlayerInput()->sendInput(msg);
 	ret = true;
  }
  if (ret) {
@@ -305,7 +307,7 @@ bool EditorBigDisplayInput::actionPlace(QDataStream& stream, const BoVector3& ca
  return ret;
 }
 
-bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const BoVector3& canvasVector, bool up)
+bool EditorBigDisplayInput::actionChangeHeight(const BoVector3& canvasVector, bool up)
 {
  boDebug() << k_funcinfo << endl;
  if (!canvas()) {
@@ -341,12 +343,7 @@ bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const BoVect
  } else {
 	height -= 0.5f;
  }
- stream << (Q_UINT32)BosonMessage::MoveEditor;
- stream << (Q_UINT32)BosonMessage::MoveChangeHeight;
- stream << (Q_UINT32)1; // we change one corner only
- stream << (Q_INT32)cornerX;
- stream << (Q_INT32)cornerY;
- stream << (float)height;
+ localPlayerInput()->changeHeight(cornerX, cornerY, height);
  return true;
 }
 
@@ -354,6 +351,7 @@ bool EditorBigDisplayInput::actionChangeHeight(QDataStream& stream, const BoVect
 // selected.
 void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
 {
+ boDebug() << k_funcinfo << endl;
  if (!owner) {
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
@@ -368,6 +366,7 @@ void EditorBigDisplayInput::placeUnit(unsigned long int unitType, Player* owner)
 
 void EditorBigDisplayInput::placeGround(unsigned int textureCount, unsigned char* alpha)
 {
+ boDebug() << k_funcinfo << endl;
  QString s;
  for (unsigned int i = 0; i < textureCount; i++) {
 	s += QString::number(alpha[i]) + QString(" ");
@@ -425,13 +424,13 @@ void EditorBigDisplayInput::updatePlacementPreviewData()
  }
 }
 
-void EditorBigDisplayInput::unitAction(int actionType)
+void EditorBigDisplayInput::action(BoSpecificAction action)
 {
- boDebug() << k_funcinfo << actionType << endl;
- switch (actionType) {
-	case ActionBuild:
+ boDebug() << k_funcinfo << action.type() << endl;
+ switch (action.type()) {
+	case ActionPlacementPreview:
 	case ActionChangeHeight:
-		setActionType((UnitAction)actionType);
+		setActionType(action.type());
 		lockAction();
 		break;
 	default:
@@ -468,17 +467,10 @@ void EditorBigDisplayInput::slotMoveSelection(int cellX, int cellY)
  if (selection()->isEmpty()) {
 	return;
  }
- QByteArray buffer;
- QDataStream stream(buffer, IO_WriteOnly);
- bool send = false;
- BoAction action;
- action.setCanvasVector(BoVector3((float)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2),
+ BoMouseEvent event;
+ event.setCanvasVector(BoVector3((float)(cellX * BO_TILE_SIZE + BO_TILE_SIZE / 2),
 		(float)(cellY * BO_TILE_SIZE + BO_TILE_SIZE / 2),
 		0.0f));
- actionClicked(action, stream, &send);
- if (send) {
-	QDataStream msg(buffer, IO_ReadOnly);
-	localPlayer()->forwardInput(msg, true);
- }
+ actionClicked(event);
 }
 

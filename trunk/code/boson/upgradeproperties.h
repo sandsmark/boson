@@ -19,12 +19,16 @@
 #ifndef UPGRADEPROPERTIES_H
 #define UPGRADEPROPERTIES_H
 
-#include "pluginproperties.h"
+#include <qstring.h>
 
 class Player;
+class UnitProperties;
+class BoAction;
+class SpeciesTheme;
+
 class QString;
 class KSimpleConfig;
-class UnitProperties;
+
 template<class T> class QValueList;
 
 
@@ -44,7 +48,7 @@ class UpgradeProperties
      * Constructs UpgradeProperties
      * You should call @ref load after that.
      **/
-    UpgradeProperties();
+    UpgradeProperties(SpeciesTheme* theme);
     virtual ~UpgradeProperties();
 
     /**
@@ -103,9 +107,9 @@ class UpgradeProperties
      **/
     unsigned int productionTime() const { return mProductionTime; };
     /**
-     * @return Filename of pixmap of this upgrade
+     * @return Action to produce this upgrade
      **/
-    const QString& pixmapName() const { return mPixmapName; };
+    BoAction* produceAction() const { return mProduceAction; };
     /**
      * @return List of units required by this upgrade
      **/
@@ -141,9 +145,10 @@ class UpgradeProperties
     unsigned long int mOilCost;
     unsigned int mProducer;
     unsigned int mProductionTime;
-    QString mPixmapName;
     bool mApplyToFacilities;
     bool mApplyToMobiles;
+    BoAction* mProduceAction;
+    SpeciesTheme* mTheme;
 };
 
 #endif // UPGRADEPROPERTIES_H

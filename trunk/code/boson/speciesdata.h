@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ class UnitProperties;
 class UnitBase;
 class BosonParticleSystemProperties;
 class BosonWeaponProperties;
+class BoAction;
 
 class QPixmap;
 class QStringList;
@@ -85,12 +86,6 @@ public:
 	void removeTeamColor(const QColor& color);
 
 	/**
-	 * Load the action (move, mine, attack, ...) pixmaps.
-	 * @return TRUE if successful, otherwise FALSE
-	 **/
-	bool loadActionPixmaps();
-
-	/**
 	 * Load the model for the specified unit @p prop and the color @p
 	 * teamColor.
 	 **/
@@ -115,6 +110,11 @@ public:
 	void loadObjects(const QColor& teamColor);
 
 	/**
+	 * Load the actions specified in $speciesdir/actions.boson
+	 **/
+	void loadActions();
+
+	/**
 	 * @return The unit model for @p unitType. Will <em>not</em> load the
 	 * model - see @ref loadUnitModel
 	 **/
@@ -125,11 +125,17 @@ public:
 	 **/
 	BosonModel* objectModel(const QString& file) const;
 
-	QPixmap* actionPixmap(UnitAction action) const;
 	QPixmap* bigOverview(unsigned long int unitType, const QColor& teamColor) const;
 	QPixmap* smallOverview(unsigned long int unitType, const QColor& teamColor) const;
 	const BosonParticleSystemProperties* particleSystemProperties(unsigned long int id) const;
-	QPixmap* upgradePixmapByName(const QString& name);
+	BoAction* action(const QString& name) const;
+
+	/**
+	 * @return Pixmap with name @name from the pixmap cache
+	 * If there is no such pixmap in the cache, it will be loaded and inserted
+	 * there. Pixmaps will be searched from $speciesdir/pixmaps/
+	 **/
+	QPixmap* pixmap(const QString& name);
 
 	/**
 	 * @return The absolute path to the species directory

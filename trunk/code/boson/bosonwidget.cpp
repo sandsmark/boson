@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "global.h"
-#include "commandinput.h"
 #include "gameoverdialog.h"
 #include "bodebug.h"
 #include "commandframe/bosoncommandframe.h"
@@ -49,12 +48,8 @@ class BosonWidget::BosonWidgetPrivate
 public:
 	BosonWidgetPrivate()
 	{
-		mCmdInput = 0;
-
 		mGameOverDialog = 0;
 	}
-
-	CommandInput* mCmdInput;
 
 	GameOverDialog* mGameOverDialog;
 };
@@ -99,12 +94,6 @@ void BosonWidget::initPlayer()
 	boError() << k_funcinfo << "NULL local player" << endl;
 	return;
  }
- if (!d->mCmdInput) {
-	boError() << k_funcinfo << "NULL command input" << endl;
- } else {
-	localPlayer()->removeGameIO(d->mCmdInput, false); // in case it was added before
-	localPlayer()->addGameIO(d->mCmdInput);
- }
 
  connect(localPlayer(), SIGNAL(signalUnfog(int, int)),
 		this, SLOT(slotUnfog(int, int)));
@@ -124,9 +113,6 @@ BosonCommandFrameBase* BosonWidget::createCommandFrame(QWidget* parent)
  connect(boGame, SIGNAL(signalUpdateProductionOptions()),
 		frame, SLOT(slotUpdateProductionOptions()));
 
- //AB: can we use the same input for the editor?
- d->mCmdInput = new CommandInput;
- d->mCmdInput->setCommandFrame(frame);
  return frame;
 }
 

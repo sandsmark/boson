@@ -369,6 +369,11 @@ public:
 	 **/
 	int distance(const BoVector3& pos) const;
 
+	/**
+	 * @return Weapon with given id for this unit. 0 if it doesn't exist.
+	 **/
+	BosonWeapon* weapon(unsigned long int id) const;
+
 
 protected:
 	void shootAt(BosonWeapon* w, Unit* target);

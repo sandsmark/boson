@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "bosonmodel.h"
 #include "bosonparticlesystemproperties.h"
 #include "bodebug.h"
+#include "boaction.h"
 
 #include <qintdict.h>
 #include <qdict.h>
@@ -116,10 +117,10 @@ public:
 	// current OpenGL context!
 	// we should separate our OpenGL context from BosonBigDisplay first
 	QString mThemePath;
-	QIntDict<QPixmap> mActionPixmaps;
 	QIntDict<TeamColorData> mTeamData;
 	QIntDict<BosonParticleSystemProperties> mParticleProperties;
-	QDict<QPixmap> mUpgradePixmaps;
+	QDict<BoAction> mActions;
+	QDict<QPixmap> mPixmaps;
 
 	QIntDict<BosonModel> mUnitModels;
 	QDict<BosonModel> mObjectModels;
@@ -153,22 +154,24 @@ SpeciesData::SpeciesData(const QString& speciesPath)
 	return;
  }
  d = new SpeciesDataPrivate;
- d->mActionPixmaps.setAutoDelete(true);
  d->mParticleProperties.setAutoDelete(true);
  d->mTeamData.setAutoDelete(true);
  d->mUnitModels.setAutoDelete(true);
  d->mObjectModels.setAutoDelete(true);
+ d->mActions.setAutoDelete(true);
+ d->mPixmaps.setAutoDelete(true);
  d->mThemePath = speciesPath;
 }
 
 SpeciesData::~SpeciesData()
 {
  boDebug() << k_funcinfo << endl;
- d->mActionPixmaps.clear();
  d->mParticleProperties.clear();
  d->mTeamData.clear();
  d->mUnitModels.clear();
  d->mObjectModels.clear();
+ d->mActions.clear();
+ d->mPixmaps.clear();
  delete d;
  boDebug() << k_funcinfo << "done" << endl;
 }
@@ -198,72 +201,6 @@ SpeciesData* SpeciesData::speciesData(const QString& speciesDir)
 QString SpeciesData::themePath() const
 {
  return d->mThemePath;
-}
-
-bool SpeciesData::loadActionPixmaps()
-{
- if (d->mActionPixmaps.count() > 0) {
-	return true;
- }
- // Keep this code in sync with UnitAction enum in global.h!
- // TODO: make this configurable (introduce index.boson or ui.boson in
- // theme path)
- QString actionPath = KGlobal::dirs()->findResourceDir("data", "boson/themes/ui/standard/attack.png");
- actionPath += "boson/themes/ui/standard/";
- boDebug() << k_funcinfo << "action Path: " << actionPath << endl;
- QPixmap* attack = new QPixmap(actionPath + "attack.png");
- if (attack->isNull()) {
-	boError() << k_funcinfo << "NULL attack pixmap!" << endl;
-	delete attack;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionAttack, attack);
-
- QPixmap* move = new QPixmap(actionPath + "move.png");
- if (move->isNull()) {
-	boError() << k_funcinfo << "NULL move pixmap!" << endl;
-	delete move;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionMove, move);
-
- QPixmap* stop = new QPixmap(actionPath + "stop.png");
- if (stop->isNull()) {
-	boError() << k_funcinfo << "NULL stop pixmap!" << endl;
-	delete stop;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionStop, stop);
-
- QPixmap* follow = new QPixmap(actionPath + "follow.png");
- if (follow->isNull()) {
-	boError() << k_funcinfo << "NULL follow pixmap!" << endl;
-	delete follow;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionFollow, follow);
-
- QPixmap* mine = new QPixmap(actionPath + "mine.png");
- if (mine->isNull()) {
-	boError() << k_funcinfo << "NULL mine pixmap!" << endl;
-	delete mine;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionMine, mine);
-
- QPixmap* repair = new QPixmap(actionPath + "repair.png");
- if (repair->isNull()) {
-	boError() << k_funcinfo << "NULL repair pixmap!" << endl;
-	delete repair;
-	return false;
- }
- d->mActionPixmaps.insert((int)ActionRepair, repair);
- return true;
-}
-
-QPixmap* SpeciesData::actionPixmap(UnitAction action) const
-{
- return d->mActionPixmaps[action];
 }
 
 void SpeciesData::loadUnitModel(const UnitProperties* prop, const QColor& teamColor)
@@ -488,17 +425,14 @@ const BosonParticleSystemProperties* SpeciesData::particleSystemProperties(unsig
  return d->mParticleProperties[id];
 }
 
-QPixmap* SpeciesData::upgradePixmapByName(const QString& name)
+BoAction* SpeciesData::action(const QString& name) const
 {
- if (!d->mUpgradePixmaps[name]) {
-	QPixmap* p = new QPixmap(themePath() + QString::fromLatin1("pixmaps/") + name);
-	if (p->isNull()) {
-		boError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
-		// Will crash?
-	}
-	d->mUpgradePixmaps.insert(name, p);
+ BoAction* action = d->mActions[name];
+ if (!action) {
+	boError() << k_funcinfo << "No action with name " << name << endl;
+	return 0;
  }
- return d->mUpgradePixmaps[name];
+ return action;
 }
 
 BosonModel* SpeciesData::objectModel(const QString& name) const
@@ -546,5 +480,52 @@ void SpeciesData::loadObjects(const QColor& teamColor)
 	}
 	m->createDisplayLists(&teamColor);
  }
+}
+
+void SpeciesData::loadActions()
+{
+ if (d->mActions.count() > 0) {
+	// already loaded, probably for another player
+	return;
+ }
+
+ QString fileName = themePath() + QString::fromLatin1("actions.boson");
+ if (!KStandardDirs::exists(fileName)) {
+	boDebug() << k_funcinfo << "no actions.boson file found at " << fileName << endl;
+	return;
+ }
+
+ KSimpleConfig cfg(fileName);
+ QStringList actions = cfg.groupList();
+ if (actions.isEmpty()) {
+	boWarning() << k_funcinfo << "No actions found in objects file (" << fileName << ")" << endl;
+	return;
+ }
+
+ boDebug() << k_funcinfo << "Loading " << actions.count()
+		<< " actions from config file" << endl;
+ QStringList::Iterator it;
+ for (it = actions.begin(); it != actions.end(); ++it) {
+	boDebug() << k_funcinfo << "Loading action from group " << *it << endl;
+	BoAction* action = new BoAction(&cfg, *it, this);
+	if (!d->mActions.find(action->id())) {
+		d->mActions.insert(action->id(), action);
+	} else {
+		boError() << k_funcinfo << "action with id " << action->id() << " already there!" << endl;
+	}
+ }
+}
+
+QPixmap* SpeciesData::pixmap(const QString& name)
+{
+ if (!d->mPixmaps[name]) {
+	QPixmap* p = new QPixmap(themePath() + QString::fromLatin1("pixmaps/") + name);
+	if (p->isNull()) {
+		boError() << k_funcinfo << "Cannot find pixmap with name " << name << endl;
+		return 0;
+	}
+	d->mPixmaps.insert(name, p);
+ }
+ return d->mPixmaps[name];
 }
 

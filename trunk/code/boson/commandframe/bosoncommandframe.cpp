@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 #include "../boselection.h"
 #include "../defines.h"
 #include "../upgradeproperties.h"
+#include "../boaction.h"
+#include "../unitproperties.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -178,12 +180,10 @@ void BosonCommandFrame::init()
 
  initPlugins();
 
- connect(selectionWidget(), SIGNAL(signalProduce(ProductionType, unsigned long int)),
-		this, SLOT(slotProduce(ProductionType, unsigned long int)));
- connect(selectionWidget(), SIGNAL(signalStopProduction(ProductionType, unsigned long int)),
-		this, SLOT(slotStopProduction(ProductionType, unsigned long int)));
- connect(d->mUnitActions, SIGNAL(signalAction(int)),
-		this, SIGNAL(signalAction(int)));
+ connect(selectionWidget(), SIGNAL(signalAction(BoSpecificAction)),
+		this, SLOT(slotProduce(BoSpecificAction)));
+ connect(d->mUnitActions, SIGNAL(signalAction(BoSpecificAction)),
+		this, SIGNAL(signalAction(BoSpecificAction)));
 }
 
 BosonCommandFrame::~BosonCommandFrame()
@@ -265,7 +265,7 @@ void BosonCommandFrame::setProduction(Unit* unit)
 	boError() << k_funcinfo << "no production properties!" << endl;
 	return;
  }
- QValueList<QPair<ProductionType, unsigned long int> > produceList;
+ QValueList<BoSpecificAction> actions;
 
  // Add units to production list
  QValueList<unsigned long int> unitsList = speciesTheme->productions(pp->producerList());
@@ -274,10 +274,11 @@ void BosonCommandFrame::setProduction(Unit* unit)
  it = unitsList.begin();
  for (; it != unitsList.end(); ++it) {
 	if (owner->canBuild(*it)) {
-		QPair<ProductionType, unsigned long int> pair;
-		pair.first = ProduceUnit;
-		pair.second = *it;
-		produceList.append(pair);
+		BoSpecificAction a(speciesTheme->unitProperties(*it)->produceAction());
+		a.setType(ActionProduceUnit);
+		a.setProductionId(*it);
+    a.setUnit(unit);
+		actions.append(a);
 	}
  }
 
@@ -287,15 +288,16 @@ void BosonCommandFrame::setProduction(Unit* unit)
  QValueList<unsigned long int>::Iterator tit;  // tit = Technology ITerator ;-)
  for (tit = techList.begin(); tit != techList.end(); tit++) {
 	if ((!speciesTheme->technology(*tit)->isResearched()) && (owner->canResearchTech(*tit))) {
-		QPair<ProductionType, unsigned long int> pair;
-		pair.first = ProduceTech;
-		pair.second = *tit;
-		produceList.append(pair);
+		BoSpecificAction a(speciesTheme->technology(*tit)->produceAction());
+		a.setType(ActionProduceTech);
+		a.setProductionId(*tit);
+    a.setUnit(unit);
+		actions.append(a);
 	}
  }
 
  // Set buttons
- selectionWidget()->setOrderButtons(produceList, owner, (Facility*)unit);
+ selectionWidget()->setOrderButtons(actions);
  selectionWidget()->show();
 
  startStopUpdateTimer();

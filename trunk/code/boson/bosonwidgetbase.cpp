@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,8 @@
 #include "bodebug.h"
 #include "bosonprofiling.h"
 #include "optionsdialog.h"
+#include "boaction.h"
+#include "bosonlocalplayerinput.h"
 #include "commandframe/bosoncommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -112,7 +114,7 @@ BosonWidgetBase::BosonWidgetBase(TopWidget* top, QWidget* parent)
  mDisplayManager = 0;
  mCursor = 0;
  mLocalPlayer = 0;
-
+ mLocalPlayerInput = 0;
 }
 
 BosonWidgetBase::~BosonWidgetBase()
@@ -257,8 +259,6 @@ void BosonWidgetBase::initDisplayManager()
 #warning do NOT do these connections here!
  // dont do the connect()s here, as some objects might not be deleted and
  // therefore we do the same connect twice if an endgame() occurs!
- connect(cmdFrame(), SIGNAL(signalAction(int)),
-		displayManager(), SLOT(slotUnitAction(int)));
  connect(mDisplayManager, SIGNAL(signalSelectionChanged(BoSelection*)),
 		d->mCommandFrame, SLOT(slotSelectionChanged(BoSelection*)));
  connect(mDisplayManager, SIGNAL(signalChangeActiveViewport(
@@ -276,6 +276,10 @@ void BosonWidgetBase::initDisplayManager()
 
  connect(localPlayer(), SIGNAL(signalUnitChanged(Unit*)),
 		mDisplayManager, SLOT(slotUnitChanged(Unit*)));
+
+ connect(localPlayerInput(), SIGNAL(signalAction(BoSpecificAction)),
+		mDisplayManager, SLOT(slotAction(BoSpecificAction)));
+ displayManager()->setLocalPlayerInput(localPlayerInput());
 }
 
 void BosonWidgetBase::addInitialDisplay()
@@ -309,6 +313,13 @@ void BosonWidgetBase::initPlayer()
 	return;
  }
 
+ if (!localPlayerInput()) {
+	boError() << k_funcinfo << "NULL local player input" << endl;
+ } else {
+	localPlayer()->removeGameIO(localPlayerInput(), false); // in case it was added before
+	localPlayer()->addGameIO(localPlayerInput());
+ }
+
  setLocalPlayerRecursively(localPlayer());
 
  connect(localPlayer(), SIGNAL(signalPropertyChanged(KGamePropertyBase*, KPlayer*)),
@@ -335,9 +346,13 @@ void BosonWidgetBase::initBigDisplay(BosonBigDisplayBase* b)
  }
  BO_CHECK_NULL_RET(boGame);
  if (boGame->gameMode()) {
-	b->setDisplayInput(new BosonBigDisplayInput(b));
+	BosonBigDisplayInput* i = new BosonBigDisplayInput(b);
+	i->setLocalPlayerInput(localPlayerInput());
+	b->setDisplayInput(i);
  } else {
-	b->setDisplayInput(new EditorBigDisplayInput(b));
+	EditorBigDisplayInput* i = new EditorBigDisplayInput(b);
+	i->setLocalPlayerInput(localPlayerInput());
+	b->setDisplayInput(i);
  }
  connect(b->displayInput(), SIGNAL(signalLockAction(bool)),
 		mDisplayManager, SIGNAL(signalLockAction(bool)));
@@ -359,12 +374,11 @@ void BosonWidgetBase::initCommandFrame()
  d->mCommandFrameDock->setWidget(d->mCommandFrame);
  d->mCommandFrame->reparentMiniMap(minimap());
 
+ mLocalPlayerInput = new BosonLocalPlayerInput();
+ localPlayerInput()->setCommandFrame(d->mCommandFrame);
+
  connect(d->mCommandFrameDock, SIGNAL(iMBeingClosed()), this, SLOT(slotCmdFrameDockHidden()));
  connect(d->mCommandFrameDock, SIGNAL(hasUndocked()), this, SLOT(slotCmdFrameDockHidden()));
-
- // can we use the same input for the editor?
-// d->mCmdInput = new CommandInput;
-// d->mCmdInput->setCommandFrame(d->mCommandFrame);
 }
 
 void BosonWidgetBase::initLayout()

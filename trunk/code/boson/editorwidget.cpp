@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,10 +28,11 @@
 #include "bosoncursor.h"
 #include "bodisplaymanager.h"
 #include "global.h"
-#include "commandinput.h"
 #include "bodebug.h"
 #include "bpfdescriptiondialog.h"
 #include "optionsdialog.h"
+#include "boaction.h"
+#include "bosonlocalplayerinput.h"
 #include "commandframe/editorcommandframe.h"
 #include "sound/bosonmusic.h"
 
@@ -53,14 +54,14 @@ class EditorWidget::EditorWidgetPrivate
 public:
 	EditorWidgetPrivate()
 	{
-		mCmdInput = 0;
+		mLocalPlayerInput = 0;
 
 		mPlayerAction = 0;
 		mPlaceAction = 0;
 		mChangeHeight = 0;
 	}
 
-	CommandInput* mCmdInput;
+	BosonLocalPlayerInput* mLocalPlayerInput;
 
 	KSelectAction* mPlayerAction;
 	KSelectAction* mPlaceAction;
@@ -85,10 +86,11 @@ EditorWidget::~EditorWidget()
 void EditorWidget::initDisplayManager()
 {
  BosonWidgetBase::initDisplayManager();
- connect(cmdFrame(), SIGNAL(signalPlaceUnit(unsigned long int, Player*)),
-		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
+ // FIXME: do it with actions
  connect(cmdFrame(), SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		displayManager(), SLOT(slotPlaceGround(unsigned int, unsigned char*)));
+ connect(cmdFrame(), SIGNAL(signalPlaceUnit(unsigned long int, Player*)),
+		displayManager(), SLOT(slotPlaceUnit(unsigned long int, Player*)));
 
  connect(displayManager(), SIGNAL(signalLockAction(bool)),
 		this, SLOT(slotLockAction(bool)));
@@ -136,13 +138,6 @@ void EditorWidget::initMap()
 void EditorWidget::initPlayer()
 {
  BosonWidgetBase::initPlayer();
- /*
- if (!d->mCmdInput) {
-	boError() << k_funcinfo << "NULL command input" << endl;
- } else {
-	localPlayer()->addGameIO(d->mCmdInput);
- }
- */
 
  minimap()->slotShowMap(true);
 }
@@ -153,8 +148,6 @@ BosonCommandFrameBase* EditorWidget::createCommandFrame(QWidget* parent)
 // connect(boGame, SIGNAL(signalUpdateProduction(Unit*)),
 //		frame, SLOT(slotUpdateProduction(Unit*)));
 
-// d->mCmdInput = new EditorCommandInput;
-// d->mCmdInput->setCommandFrame(frame);
  return frame;
 }
 
@@ -292,6 +285,7 @@ void EditorWidget::slotChangeLocalPlayer(int index)
 
 void EditorWidget::slotPlace(int index)
 {
+ boDebug() << k_funcinfo << "index: " << index << endl;
  EditorCommandFrame* cmd = editorCmdFrame();
  if (!cmd) {
 	boError() << k_funcinfo << "NULL cmd frame" << endl;
@@ -458,8 +452,9 @@ void EditorWidget::slotEditPlayerOil()
 void EditorWidget::slotEditHeight(bool on)
 {
  if (on) {
-	// "unit"action is not a good name anymore...
-	displayManager()->slotUnitAction(ActionChangeHeight);
+	BoSpecificAction action;
+  action.setType(ActionChangeHeight);
+	displayManager()->slotAction(action);
  } else {
 	displayManager()->unlockAction();
  }

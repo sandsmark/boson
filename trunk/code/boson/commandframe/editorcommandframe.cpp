@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 1999-2000,2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 1999-2000,2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "../pluginproperties.h"
 #include "../boselection.h"
 #include "../defines.h"
+#include "../unitproperties.h"
 #include "bodebug.h"
 
 #include <klocale.h>
@@ -70,8 +71,9 @@ void EditorCommandFrame::init()
  initPlugins();
 
 // the order buttons
- connect(d->mPlacementWidget, SIGNAL(signalProduce(ProductionType, unsigned long int)),
-		this, SLOT(slotPlaceUnit(ProductionType, unsigned long int)));
+// FIXME: why cannot selectionWidget() be used here instead of d->mPlacementWidget ???
+ connect(d->mPlacementWidget, SIGNAL(signalAction(BoSpecificAction)),
+		this, SLOT(slotPlaceUnit(BoSpecificAction)));
  connect(d->mPlacementWidget, SIGNAL(signalPlaceGround(unsigned int, unsigned char*)),
 		this, SLOT(slotPlaceGround(unsigned int, unsigned char*)));
 }
@@ -165,6 +167,7 @@ void EditorCommandFrame::placeGround()
 
 void EditorCommandFrame::placeMobiles(Player* owner)
 {
+ boDebug() << k_funcinfo << endl;
  if (!owner) {
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
@@ -174,11 +177,22 @@ void EditorCommandFrame::placeMobiles(Player* owner)
 	boError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- d->mPlacementWidget->setOrderButtons(ProduceUnit, theme->allMobiles(), owner);
+ QValueList<long unsigned int> units = theme->allMobiles();
+ QValueList<long unsigned int>::iterator it;
+ QValueList<BoSpecificAction> actions;
+ for (it = units.begin(); it != units.end(); ++it) {
+	BoSpecificAction a(owner->speciesTheme()->unitProperties(*it)->produceAction());
+	a.setType(ActionPlacementPreview);
+	a.setProductionId(*it);
+	a.setProductionOwner(owner);
+	actions.append(a);
+ }
+ d->mPlacementWidget->setOrderButtons(actions);
 }
 
 void EditorCommandFrame::placeFacilities(Player* owner)
 {
+ boDebug() << k_funcinfo << endl;
  if (!owner) {
 	boError() << k_funcinfo << "NULL owner" << endl;
 	return;
@@ -188,7 +202,17 @@ void EditorCommandFrame::placeFacilities(Player* owner)
 	boError() << k_funcinfo << "NULL speciestheme" << endl;
 	return;
  }
- d->mPlacementWidget->setOrderButtons(ProduceUnit, theme->allFacilities(), owner);
+ QValueList<long unsigned int> units = theme->allFacilities();
+ QValueList<long unsigned int>::iterator it;
+ QValueList<BoSpecificAction> actions;
+ for (it = units.begin(); it != units.end(); ++it) {
+	BoSpecificAction a(owner->speciesTheme()->unitProperties(*it)->produceAction());
+	a.setType(ActionPlacementPreview);
+	a.setProductionId(*it);
+	a.setProductionOwner(owner);
+	actions.append(a);
+ }
+ d->mPlacementWidget->setOrderButtons(actions);
 }
 
 void EditorCommandFrame::slotUpdateUnitConfig()

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 class BosonBigDisplayBase;
 class BoSelection;
 class BoVector3;
+class BoSpecificAction;
 
 class BosonBigDisplayInput : public BosonBigDisplayInputBase
 {
@@ -32,9 +33,9 @@ public:
 	BosonBigDisplayInput(BosonBigDisplayBase* parent);
 	~BosonBigDisplayInput();
 
-	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
+	virtual void actionClicked(const BoMouseEvent& event);
 	virtual void updatePlacementPreviewData();
-	virtual void unitAction(int);
+	virtual void action(BoSpecificAction action);
 	virtual void updateCursor();
 
 	virtual bool selectAll(const UnitProperties* prop, bool replace);
@@ -43,15 +44,15 @@ public slots:
 	virtual void slotMoveSelection(int cellX, int cellY);
 
 protected:
-	//AB: use BoAction as 2nd parameter
-	bool actionMoveWithAttack(QDataStream& stream, const BoVector3& pos);
-	bool actionMoveWithoutAttack(QDataStream& stream, const BoVector3& pos);
-	bool actionAttack(QDataStream& stream, const BoVector3& pos);
-	bool actionBuild(QDataStream& stream, const BoVector3& pos);
-	bool actionFollow(QDataStream& stream, const BoVector3& pos);
-	bool actionRepair(QDataStream& stream, const BoVector3& pos);
-	bool actionRefine(QDataStream& stream, const BoVector3& pos);
-	bool actionMine(QDataStream& stream, const BoVector3& pos);
+	//AB: use BoMouseEvent as 1st parameter
+	bool actionMoveWithAttack(const BoVector3& pos);
+	bool actionMoveWithoutAttack(const BoVector3& pos);
+	bool actionAttack(const BoVector3& pos);
+	bool actionBuild(const BoVector3& pos);
+	bool actionFollow(const BoVector3& pos);
+	bool actionRepair(const BoVector3& pos);
+	bool actionRefine(const BoVector3& pos);
+	bool actionHarvest(const BoVector3& pos);
 
 	CanSelectUnit canSelect(Unit* unit) const;
 

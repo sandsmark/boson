@@ -1094,7 +1094,7 @@ void BosonBigDisplayBase::renderPlacementPreview()
  if (!displayInput()->actionLocked()) {
 	return;
  }
- if (displayInput()->actionType() != ActionBuild) {
+ if (displayInput()->actionType() != ActionPlacementPreview) {
 	return;
  }
  if (!d->mPlacementPreview.hasPreview()) {
@@ -1733,20 +1733,20 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  BoVector3 canvasVector;
  worldToCanvas(posX, posY, posZ, &canvasVector);
 
- BoAction action;
- action.setCanvasVector(canvasVector);
- action.setWorldPos(posX, posY, posZ);
+ BoMouseEvent event;
+ event.setCanvasVector(canvasVector);
+ event.setWorldPos(posX, posY, posZ);
  if (e->type() != QEvent::Wheel) {
-	action.setWidgetPos(e->pos());
-	action.setControlButton(e->state() & ControlButton);
-	action.setShiftButton(e->state() & ShiftButton);
-	action.setAltButton(e->state() & AltButton);
+	event.setWidgetPos(e->pos());
+	event.setControlButton(e->state() & ControlButton);
+	event.setShiftButton(e->state() & ShiftButton);
+	event.setAltButton(e->state() & AltButton);
  } else {
 	QWheelEvent* w = (QWheelEvent*)e;
-	action.setWidgetPos(w->pos());
-	action.setControlButton(w->state() & ControlButton);
-	action.setShiftButton(w->state() & ShiftButton);
-	action.setAltButton(w->state() & AltButton);
+	event.setWidgetPos(w->pos());
+	event.setControlButton(w->state() & ControlButton);
+	event.setShiftButton(w->state() & ShiftButton);
+	event.setAltButton(w->state() & AltButton);
  }
 
  // our actions are done on Button*Release*, not Press. That conflicts with
@@ -1760,7 +1760,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 		QWheelEvent* wheel = (QWheelEvent*)e;
 		bool send = false;
 		float delta = -wheel->delta() / 120;//120: see QWheelEvent::delta()
-		mouseEventWheel(delta, wheel->orientation(), action, stream, &send);
+		mouseEventWheel(delta, wheel->orientation(), event, stream, &send);
 		if (send) {
 			*eatevent = true;
 		}
@@ -1771,7 +1771,7 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	{
 		bool send = false;
 		isDoubleClick = NoButton; // when the mouse was pressed twice but the second press is hold down and moved then it isn't a double click anymore.
-		mouseEventMove(e->state(), action, stream, &send);
+		mouseEventMove(e->state(), event, stream, &send);
 		if (send) {
 			*eatevent = true;
 		}
@@ -1808,9 +1808,9 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
 	{
 		bool send = false;
 		if (e->button() == isDoubleClick) {
-			mouseEventReleaseDouble(e->button(), action, stream, &send);
+			mouseEventReleaseDouble(e->button(), event, stream, &send);
 		} else {
-			mouseEventRelease(e->button(), action, stream, &send);
+			mouseEventRelease(e->button(), event, stream, &send);
 		}
 		if (send) {
 			*eatevent = true;
@@ -1825,10 +1825,10 @@ void BosonBigDisplayBase::slotMouseEvent(KGameIO* , QDataStream& stream, QMouseE
  }
 }
 
-void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoAction& boAction, QDataStream&, bool*)
+void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, const BoMouseEvent& boEvent, QDataStream&, bool*)
 {
  int action;
- if (boAction.shiftButton()) {
+ if (boEvent.shiftButton()) {
 	action = boConfig->mouseWheelShiftAction();
  } else {
 	action = boConfig->mouseWheelAction();
@@ -1837,7 +1837,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 	case CameraMove:
 	{
 		int scrollX, scrollY;
-		if (boAction.controlButton()) {
+		if (boEvent.controlButton()) {
 			scrollX = width();
 			scrollY = height();
 		} else {
@@ -1857,7 +1857,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 	}
 	case CameraZoom:
 		float z;
-		if (boAction.controlButton()) {
+		if (boEvent.controlButton()) {
 			delta *= 3;
 		} else {
 			delta *= 1; // no effect, btw
@@ -1870,7 +1870,7 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
 		cameraChanged();
 		break;
 	case CameraRotate:
-		if (boAction.controlButton()) {
+		if (boEvent.controlButton()) {
 			delta *= 30;
 		} else {
 			delta *= 10;
@@ -1886,12 +1886,12 @@ void BosonBigDisplayBase::mouseEventWheel(float delta, Orientation orientation, 
  }
 }
 
-void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action, QDataStream&, bool*)
+void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoMouseEvent& event, QDataStream&, bool*)
 {
  float posX, posY, posZ;
- action.worldPos(&posX, &posY, &posZ);
- d->mMouseMoveDiff.moveToPos(action.widgetPos());
- if (action.altButton()) {
+ event.worldPos(&posX, &posY, &posZ);
+ d->mMouseMoveDiff.moveToPos(event.widgetPos());
+ if (event.altButton()) {
 	// The Alt button is the camera modifier in boson.
 	// Better don't do important stuff (like unit movement
 	// or selections) here, since a single push on Alt gives
@@ -1916,7 +1916,7 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
 		// selection rect gets drawn.
 		// other modifiers are ignored
 		d->mSelectionRect.setVisible(true);
-		moveSelectionRect(action.widgetPos());
+		moveSelectionRect(event.widgetPos());
 	}
  } else if (buttonState & RIGHT_BUTTON) {
 	// RMB+MouseMove does *not* depend on CTRL or Shift. the
@@ -1975,19 +1975,19 @@ void BosonBigDisplayBase::mouseEventMove(int buttonState, const BoAction& action
  displayInput()->updateCursor();
 }
 
-void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& action, QDataStream& stream, bool* send)
+void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoMouseEvent& event, QDataStream&, bool*)
 {
  switch (button) {
 	case LEFT_BUTTON:
 	{
 		if (displayInput()->actionLocked()) {
 			// basically the same as a normal RMB
-			displayInput()->actionClicked(action, stream, send);
-		} else if (action.shiftButton()) {
+			displayInput()->actionClicked(event);
+		} else if (event.shiftButton()) {
 			BoItemList* items = selectionRectItems();
 			displayInput()->unselectArea(items);
 			d->mSelectionRect.setVisible(false);
-		} else if (action.controlButton()) {
+		} else if (event.controlButton()) {
 			removeSelectionRect(false);
 		} else {
 			// select the unit(s) below the cursor/inside the
@@ -2001,7 +2001,7 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
 		// we ignore all modifiers here, currently.
 		if (boConfig->mmbMove()) {
 			float posX, posY, posZ;
-			action.worldPos(&posX, &posY, &posZ);
+			event.worldPos(&posX, &posY, &posZ);
 			int cellX, cellY;
 			cellX = (int)(posX / BO_GL_CELL_SIZE);
 			cellY = (int)(-posY / BO_GL_CELL_SIZE);
@@ -2018,7 +2018,7 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
 			displayInput()->unlockAction();
 			displayInput()->updateCursor();
 		} else {
-			displayInput()->actionClicked(action, stream, send);
+			displayInput()->actionClicked(event);
 		}
 		break;
 	}
@@ -2028,16 +2028,16 @@ void BosonBigDisplayBase::mouseEventRelease(ButtonState button,const BoAction& a
  }
 }
 
-void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoAction& action, QDataStream& , bool* )
+void BosonBigDisplayBase::mouseEventReleaseDouble(ButtonState button, const BoMouseEvent& event, QDataStream& , bool* )
 {
  switch (button) {
 	case LEFT_BUTTON:
 	{
 		// we ignore UnitAction is locked here
 		// currently!
-		bool replace = !action.controlButton();
-		bool onScreenOnly = !action.shiftButton();
-		Unit* unit = canvas()->findUnitAt(action.canvasVector());
+		bool replace = !event.controlButton();
+		bool onScreenOnly = !event.shiftButton();
+		Unit* unit = canvas()->findUnitAt(event.canvasVector());
 		if (unit) {
 			if (onScreenOnly) {
 				boDebug() << "TODO: select only those that are currently on the screen!" << endl;

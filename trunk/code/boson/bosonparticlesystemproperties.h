@@ -92,7 +92,7 @@ class BosonParticleSystemProperties
 
     inline static float getFloat(float min, float max) { return ((float)(mRandom->getDouble())) * (max - min) + min; }
 
-    inline static BoVector3 wind()  { return BoVector3(0.25, 0.15, 0); };
+    inline static BoVector3 wind()  { return BoVector3(0.05, 0.02, 0); };
 
     virtual void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 

@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,8 +23,10 @@
 
 class BosonBigDisplayBase;
 class BoSelection;
+class BoSpecificAction;
 
 class EditorBigDisplayInputPrivate;
+
 
 class EditorBigDisplayInput : public BosonBigDisplayInputBase
 {
@@ -52,17 +54,13 @@ public:
 	 * Called when the user right-clicks on the big display.
 	 * 
 	 * Should e.g. move a unit
-	 * @param action Contains information about the mouse event (position,
+	 * @param event Contains information about the mouse event (position,
 	 * additional buttons, ...)
-	 * @param stream The move should be placed here. A move should
-	 * <em>not</em> be done in this method but rather sent to @ref KGame
-	 * which performs the move on every client
-	 * @param send Set to true if you actually want to send the stream
 	 **/
-	virtual void actionClicked(const BoAction& action, QDataStream& stream, bool* send);
+	virtual void actionClicked(const BoMouseEvent& event);
 
 	virtual void updatePlacementPreviewData();
-	virtual void unitAction(int);
+	virtual void action(BoSpecificAction action);
 
 	/**
 	 * In editor mode this does just nothing.
@@ -75,9 +73,9 @@ public slots:
 	virtual void slotMoveSelection(int cellX, int cellY);
 
 protected:
-	//AB: use BoAction as 2nd parameter
-	bool actionPlace(QDataStream& stream, const BoVector3& pos);
-	bool actionChangeHeight(QDataStream& stream, const BoVector3& pos, bool up);
+	//AB: use BoMouseEvent as 1st parameter
+	bool actionPlace(const BoVector3& pos);
+	bool actionChangeHeight(const BoVector3& pos, bool up);
 
 	/**
 	 * Editor mode can select just everything, even destroyed units

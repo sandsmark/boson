@@ -39,81 +39,6 @@
 #include <qvaluelist.h>
 #include <qtooltip.h>
 
-class ActionPixmapView : public QWidget
-{
-public:
-	ActionPixmapView(QWidget* parent) : QWidget(parent, "actionpixmapview")
-	{
-		mTopLayout = new QGridLayout(this, 1, 4);
-
-		// 4 actions per row!
-		addAction((int)ActionAttack);
-		addAction((int)ActionMove);
-		addAction((int)ActionStop);
-		addAction((int)ActionFollow);
-		addAction((int)ActionMine);
-		addAction((int)ActionRepair);
-		addAction((int)ActionBuild);
-		addAction((int)ActionChangeHeight);
-	}
-	~ActionPixmapView()
-	{
-	}
-
-	void update(SpeciesTheme* s)
-	{
-		updateAction(s, (int)ActionAttack);
-		updateAction(s, (int)ActionMove);
-		updateAction(s, (int)ActionStop);
-		updateAction(s, (int)ActionFollow);
-		updateAction(s, (int)ActionMine);
-		updateAction(s, (int)ActionRepair);
-		updateAction(s, (int)ActionBuild);
-		updateAction(s, (int)ActionChangeHeight);
-	}
-
-private:
-	void addAction(int key)
-	{
-		// 4 actions per row
-		addAction(key, key / 4, key % 4);
-	}
-
-	void addAction(int key, int row, int column)
-	{
-		QVBox* box = new QVBox(this);
-		QLabel* action = new QLabel(box);
-		QLabel* label = new QLabel(box);
-		label->setText(i18n("%1 (%2)").arg(SpeciesTheme::unitActionName((UnitAction)key)).arg(key));
-		mTopLayout->addWidget(box, row, column);
-		mActions.insert(key, action);
-
-	}
-	void updateAction(SpeciesTheme* species, int key)
-	{
-		QLabel* action = mActions[key];
-		if (!action) {
-			boError() << k_funcinfo << "NULL action label: " << key << endl;
-			return;
-		}
-		if (!species) {
-			action->setText("");
-			action->setPixmap(QPixmap());
-		} else {
-			QPixmap* pixmap = species->actionPixmap((UnitAction)key);
-			if (!pixmap) {
-				action->setText(i18n("No pixmap"));
-				return;
-			}
-			action->setText("");
-			action->setPixmap(*pixmap);
-		}
-	}
-
-private:
-	QGridLayout* mTopLayout;
-	QIntDict<QLabel> mActions;
-};
 
 class BosonModelsView : public QWidget
 {
@@ -403,12 +328,10 @@ public:
 		mSpecies = 0;
 
 		mModelsView = 0;
-		mActionPixmapView = 0;
 	}
 	SpeciesTheme* mSpecies;
 
 	BosonModelsView* mModelsView;
-	ActionPixmapView* mActionPixmapView;
 };
 
 SpeciesView::SpeciesView(QWidget* parent) : QWidget(parent, "speciesview")
@@ -420,11 +343,6 @@ SpeciesView::SpeciesView(QWidget* parent) : QWidget(parent, "speciesview")
 
  d->mModelsView = new BosonModelsView(tabWidget);
  tabWidget->addTab(d->mModelsView, i18n("&Models"));
-
- d->mActionPixmapView = new ActionPixmapView(tabWidget);
- tabWidget->addTab(d->mActionPixmapView, i18n("&Action pixmaps"));
-
-
 }
 
 SpeciesView::~SpeciesView()
@@ -441,7 +359,6 @@ void SpeciesView::setSpecies(SpeciesTheme* species)
 void SpeciesView::update()
 {
  boDebug() << k_funcinfo << endl;
- d->mActionPixmapView->update(d->mSpecies);
  d->mModelsView->update();
 }
 
@@ -495,6 +412,7 @@ void KGameSpeciesDebug::loadSpecies()
 	SpeciesTheme* s = new SpeciesTheme((*it).left((*it).length() - QString::fromLatin1("index.desktop").length()), red); // dummy color - don't use QColor(0,0,0)
 	s->loadObjects();
 	s->loadParticleSystems();
+	s->loadActions();
 	s->readUnitConfigs();
 	QValueList<unsigned long int> units = s->allFacilities();
 	units += s->allMobiles();

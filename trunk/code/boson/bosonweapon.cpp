@@ -28,6 +28,7 @@
 #include "bodebug.h"
 #include "bosonconfig.h"
 #include "unitproperties.h"
+#include "boaction.h"
 
 #include <ksimpleconfig.h>
 
@@ -49,6 +50,7 @@ QString BosonWeaponProperties::name() const
 
 void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
 {
+  // FIXME: don't load all values for all weapon types
   mName = cfg->readEntry("Name", "");
   mShotType = (BosonShot::Type)(cfg->readNumEntry("Type", (int)BosonShot::Missile));
   mRange = cfg->readUnsignedLongNumEntry("Range", 0);
@@ -93,6 +95,11 @@ void BosonWeaponProperties::loadPlugin(KSimpleConfig* cfg, bool full)
   mSounds.insert(SoundWeaponShoot, cfg->readEntry("SoundShoot", "shoot"));
   mSounds.insert(SoundWeaponFly, cfg->readEntry("SoundFly", "missile_fly"));
   mSounds.insert(SoundWeaponHit, cfg->readEntry("SoundHit", "hit"));
+  //loadAction(ActionAttackGround, cfg, "ActionAttackGround");
+  if(shotType() == BosonShot::Mine)
+  {
+    loadAction(ActionLayMine, cfg, "ActionLayMine", true);
+  }
 }
 
 void BosonWeaponProperties::savePlugin(KSimpleConfig* cfg)
@@ -239,6 +246,15 @@ QMap<int, QString> BosonWeaponProperties::sounds() const
   return mSounds;
 }
 
+void BosonWeaponProperties::loadAction(UnitAction type, KSimpleConfig* cfg, const QString& key, bool useDefault)
+{
+  if(!cfg->hasKey(key) && !useDefault)
+  {
+    return;
+  }
+  mActions.insert(type, speciesTheme()->action(cfg->readEntry(key, key)));
+}
+
 
 /*****  BosonWeapon  *****/
 BosonWeapon::BosonWeapon(int weaponNumber, BosonWeaponProperties* prop, Unit* _unit) : UnitPlugin(_unit)
@@ -324,11 +340,34 @@ void BosonWeapon::shoot(const BoVector3& target)
     boError() << k_funcinfo << "NULL unit" << endl;
     return;
   }
-  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z());
+  shoot(BoVector3(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, unit()->z()), target);
+}
+
+void BosonWeapon::shoot(const BoVector3& pos, const BoVector3& target)
+{
+  if (!unit())
+  {
+    boError() << k_funcinfo << "NULL unit" << endl;
+    return;
+  }
   mProp->newShot(unit(), pos, target);
   canvas()->addParticleSystems(mProp->newShootParticleSystems(pos, unit()->rotation()));
   mProp->playSound(SoundWeaponShoot);
   mReloadCounter = mProp->reloadingTime();
+}
+
+bool BosonWeapon::layMine()
+{
+  boDebug() << k_funcinfo << "" << endl;
+  if (properties()->shotType() != BosonShot::Mine || !reloaded()) {
+    boDebug() << k_funcinfo << "weapon is not minelayer or not reloaded" << endl;
+    return false;
+  }
+  BoVector3 pos(unit()->x() + unit()->width() / 2, unit()->y() + unit()->height() / 2, 0);
+  pos.setZ(unit()->canvas()->heightAtPoint(pos.x(), pos.y()));
+  shoot(pos, pos);
+  boDebug() << k_funcinfo << "done" << endl;
+  return true;
 }
 
 /*

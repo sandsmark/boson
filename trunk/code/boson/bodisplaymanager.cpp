@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 */
 
 #include "bodisplaymanager.h"
-#include "bodisplaymanager.moc"
 
 #include "defines.h"
 #include "bosonbigdisplaybase.h"
@@ -26,6 +25,7 @@
 #include "bosonconfig.h"
 #include "boselection.h"
 #include "bodebug.h"
+#include "boaction.h"
 
 #include <klocale.h>
 
@@ -34,6 +34,9 @@
 #include <qvbox.h>
 #include <qintdict.h>
 #include <qdom.h>
+
+#include "bodisplaymanager.moc"
+
 
 class BoBox : public QWidget
 {
@@ -471,14 +474,6 @@ void BoDisplayManager::slotClearGroup(int number)
  d->mSelectionGroups[number]->clear();
 }
 
-void BoDisplayManager::slotUnitAction(int action)
-{
- BO_CHECK_NULL_RET(activeDisplay());
- BO_CHECK_NULL_RET(activeDisplay()->displayInput());
-
- activeDisplay()->displayInput()->unitAction(action);
-}
-
 void BoDisplayManager::slotPlaceUnit(unsigned long int unitType, Player* owner)
 {
  BO_CHECK_NULL_RET(activeDisplay());
@@ -751,4 +746,20 @@ void BoDisplayManager::slotChangeViewport(BosonBigDisplayBase* display, const QP
  emit signalChangeActiveViewport(topLeft, topRight, bottomLeft, bottomRight);
 }
 
+void BoDisplayManager::slotAction(BoSpecificAction action)
+{
+ BO_CHECK_NULL_RET(activeDisplay());
+ BO_CHECK_NULL_RET(activeDisplay()->displayInput());
+
+ activeDisplay()->displayInput()->action(action);
+}
+
+void BoDisplayManager::setLocalPlayerInput(BosonLocalPlayerInput* input)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->displayInput()->setLocalPlayerInput(input);
+	++it;
+ }
+}
 

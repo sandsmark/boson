@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2001-2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2001-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #include <qwidget.h>
 #include <qpushbutton.h>
 #include "../global.h"
+#include "../boaction.h"
 
 class Unit;
 class Player;
@@ -37,6 +38,16 @@ class BosonOrderButton : public QWidget
 {
 	Q_OBJECT
 public:
+	/**
+	 * What this button is showing ATM
+	 * @li Nothing - it's an empty button. Nothing is shown
+	 * @li Unit - a unit is shown (with health bar)
+	 * @li Action - an action is shown
+	 * @li Cell - cell is shown (for placement)
+	 **/
+	enum ShowingType { ShowNothing = 0, ShowUnit, ShowAction, ShowCell };
+
+
 	BosonOrderButton(QWidget* parent);
 	~BosonOrderButton();
 
@@ -47,17 +58,7 @@ public:
 	 **/
 	virtual void setUnit(Unit* unit);
 
-	/**
-	 * Shows only small overview pixmap of unit with type unitType
-	 * This is used to show units that factory can produce
-	 **/
-	void setProduction(ProductionType type, unsigned long int id, Player* owner);
-
-	/**
-	 * Shows pixmap of action
-	 * This is used to show available unit actions (such as attack, move or stop)
-	 **/
-	void setAction(UnitAction action, Player* owner);
+	void setAction(BoSpecificAction action);
 
 	void setGround(unsigned int texture, BosonGroundTheme* theme);
 
@@ -67,30 +68,21 @@ public:
 	 **/
 	Unit* unit() const
 	{
-		return (orderType() == OrderUnitSelected) ? mUnit : 0;
+		return mUnit;
 	}
 
 	/**
 	 * @return The production id that is displayed or 0 if none. See also @ref
 	 * texture and @ref unit
 	 **/
-	unsigned long int productionId() const
-	{
-		return (orderType() == OrderProduce) ? mProductionId : 0;
-	}
+	unsigned long int productionId() const;
 
-	ProductionType productionType() const
-	{
-		return (orderType() == OrderProduce) ? mProductionType : ProduceNothing;
-	}
+	ProductionType productionType() const;
 
 	/**
-	 * @return The displayed action or -1 if none
+	 * @return The displayed action
 	 **/
-	int action() const
-	{
-		return (orderType() == OrderAction) ? mAction : -1;
-	}
+	BoSpecificAction action() const { return mAction; }
 
 	/**
 	 * Only valid if @ref unitType is > 0! If @ref unitType is 0 then this
@@ -99,21 +91,16 @@ public:
 	 * entry (i.e. an order button) then it is the player that produces
 	 * here.
 	 **/
-	Player* productionOwner() const
-	{
-		return (orderType() == OrderProduce) ? mProductionOwner : 0;
-	}
+	Player* productionOwner() const;
 
 	/**
-	 * @return The displayed texturenumber or -1 if none is displayed. See also
+	 * @return The displayed texturenumber or 0 if none is displayed. See also
 	 * @ref unit and @ref unitType
 	 **/
-	int texture() const
+	unsigned int texture() const
 	{
-		return (orderType() == OrderCell) ? (int)mTextureNumber : -1;
+		return (type() == ShowCell) ? mTextureNumber : 0;
 	}
-
-	OrderType orderType() const { return mOrderType; }
 
 	void unset();
 
@@ -136,6 +123,8 @@ public:
 	 **/
 	void setProductionCount(int count);
 
+	ShowingType type() const { return mType; }
+
 public slots:
 	void slotUnitChanged(Unit*);
 
@@ -146,21 +135,9 @@ signals:
 	void signalPlaceGround(unsigned int textureNumber);
 
 	/**
-	 * Emitted when the player clicks on this widget and it is an order
-	 * button. See @ref setUnit.
-	 *
-	 * The player will expect the unitType to be produced by the currently
-	 * selected factory (aka facility).
-	 * @param unitType The unit type that is to be produced
-	 **/
-	void signalProduce(ProductionType type, unsigned long int id);
-
-	void signalStopProduction(ProductionType type, unsigned long int id);
-
-	/**
 	 * Emitted when the player clicks on the action
 	 **/
-	void signalAction(int);
+	void signalAction(BoSpecificAction action);
 
 	/**
 	 * Emitted when there are several units selected and the player clicks
@@ -171,7 +148,6 @@ signals:
 protected:
 	virtual void displayUnitPixmap(Unit* unit);
 	virtual void displayUnitPixmap(unsigned long int unitType, Player* owner);
-	virtual void displayTechPixmap(unsigned long int techType, Player* owner);
 
 	void setPixmap(const QPixmap& pixmap);
 
@@ -188,13 +164,10 @@ private:
 
 	Unit* mUnit;
 	// FIXME: use only one int for all order modes
-	unsigned long int mProductionId;
-	ProductionType mProductionType;
 	unsigned int mTextureNumber;
-	int mAction;
-	OrderType mOrderType;
+	BoSpecificAction mAction;
 
-	Player* mProductionOwner;
+	ShowingType mType;
 
 	BoButton* mPixmap;
 	BoProgress* mHealth;

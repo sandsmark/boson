@@ -1,6 +1,6 @@
 /*
     This file is part of the Boson game
-    Copyright (C) 2002 The Boson Team (boson-devel@lists.sourceforge.net)
+    Copyright (C) 2002-2003 The Boson Team (boson-devel@lists.sourceforge.net)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@ class Player;
 class Unit;
 class BosonCanvas;
 class BoSelection;
+class BoSpecificAction;
+class BosonLocalPlayerInput;
 
 class KPlayer;
 class QDomElement;
@@ -96,6 +98,8 @@ public:
 	 **/
 	void setCanvas(BosonCanvas* canvas);
 
+	void setLocalPlayerInput(BosonLocalPlayerInput* input);
+
 	void quitGame();
 
 	void removeActiveDisplay();
@@ -149,13 +153,6 @@ public slots:
 	 * is the first group and 0 the 10th group.
 	 **/
 	void slotClearGroup(int number);
-
-	/**
-	 * Game mode only: specifies the action (move, attack, mine, ...) that
-	 * will be used for the current selection when the player clicks on the
-	 * map the next time.
-	 **/
-	void slotUnitAction(int action);
 
 	/**
 	 * Editor mode only: specifies the unitType that will be placed on the
@@ -212,6 +209,8 @@ public slots:
 	 * BoSelection::slotSelectSingleUnit
 	 **/
 	void slotActiveSelectSingleUnit(Unit*);
+
+	void slotAction(BoSpecificAction);
 
 	void slotSetDebugMapCoordinates(bool);
 	void slotSetDebugShowCellGrid(bool);

@@ -1329,6 +1329,17 @@ void Unit::setSearchPath(int search)
  d->mSearchPath = search;
 }
 
+BosonWeapon* Unit::weapon(unsigned long int id) const
+{
+ BoPointerIterator<BosonWeapon> it(d->mWeapons);
+ for (; *it; ++it) {
+	if ((*it)->properties()->id() == id) {
+		return *it;
+	}
+ }
+ return 0;
+}
+
 
 /////////////////////////////////////////////////
 // MobileUnit
