@@ -618,6 +618,15 @@ void BoDisplayManager::slotSetDebugRenderCounts(bool debug)
  }
 }
 
+void BoDisplayManager::slotSetDebugBoundingBoxes(bool debug)
+{
+ QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);
+ while (it.current()) {
+	it.current()->setDebugBoundingBoxes(debug);
+	++it;
+ }
+}
+
 void BoDisplayManager::unlockAction()
 {
  QPtrListIterator<BosonBigDisplayBase> it(d->mDisplayList);

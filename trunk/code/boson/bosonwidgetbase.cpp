@@ -660,6 +660,11 @@ void BosonWidgetBase::initKActions()
  connect(wireFrames, SIGNAL(toggled(bool)), this, SLOT(slotDebugToggleWireFrames(bool)));
  wireFrames->setChecked(false);
  slotDebugToggleWireFrames(false);
+ KToggleAction* boundingboxes = new KToggleAction(i18n("Render item's bounding boxes"),
+		KShortcut(), 0, 0, actionCollection(), "debug_boundingboxes");
+ boundingboxes->setChecked(false);
+ connect(boundingboxes, SIGNAL(toggled(bool)),
+		displayManager(), SLOT(slotSetDebugBoundingBoxes(bool)));
 
 
  KSelectAction* debugMode = new KSelectAction("Mode", KShortcut(), actionCollection(), "debug_mode");

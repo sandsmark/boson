@@ -198,6 +198,7 @@ public:
 	void setDebugItemWorks(bool debug);
 	void setDebugCamera(bool debug);
 	void setDebugRenderCounts(bool debug);
+	void setDebugBoundingBoxes(bool debug);
 
 	/**
 	 * Scroll by a certain distance.
