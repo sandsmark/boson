@@ -313,6 +313,7 @@ sub processMakefile ($)
 
     tag_POFILES ();             # language rules for po directory
     tag_DOCFILES ();            # language rules for doc directories
+    tag_BOSONDOCFILES();
     tag_LOCALINSTALL();         # add $(DESTDIR) before all kde_ dirs
     tag_ICON();
     tag_SUBDIRS();
@@ -1683,6 +1684,89 @@ sub tag_DOCFILES ()
 
   nodocs:
     appendLines("docs-am:\n");
+    return 1;
+}
+
+sub tag_BOSONDOCFILES ()
+{
+    $target_adds{"all"} .= "boson-docs ";
+
+    my $lookup = 'BO_DOCS\s*=\s*([^\n]*)';
+    goto nodocs    if ($MakefileData !~ /\n$lookup/o);
+    print STDOUT "BO_DOCS processing <$1>\n"   if ($verbose);
+
+    my $files = $1;
+    $files =~ s/\034//g; # continuation lines
+    my $appname = "boson"; # uahh! hardcoded!
+
+    goto nodocs if (!$files);        # Nothing to do
+
+    my $bodocdir;
+    if ($MakefileData =~ /\nBO_DOC_DIR\s*=\s*(\S*)\s*\n/) {
+        $bodocdir= '$(BO_DOC_DIR)';
+    } else {
+        $bodocdir= ".";
+    }
+    print("docdir: $bodocdir\n");
+
+    my @filelist = split(' ', $files);
+    my @wmlfiles;
+    my @htmlfiles;
+    foreach (@filelist) {
+        if ($_ =~ /\.wml$/) {
+	    my $file = $_;
+	    push(@wmlfiles, $file);
+	    $file =~ s/\.wml$/\.html/;
+            push(@htmlfiles, $file);
+	}
+    }
+    my $lines = "";
+    $lines .= "boson-docs: ";
+    foreach (@htmlfiles) {
+        $lines .= $_." ";
+    }
+    $lines .= "\n\n";
+ #   $lines .= "install-docs: boson-docs install-nls\n";# FIXME what about install-nls?
+    $lines .= "install-docs: boson-docs\n";
+    $lines .= "\t\$(mkinstalldirs) \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir\n";
+
+    foreach (@htmlfiles) {
+        $lines .= "\t\$(INSTALL_DATA) $_ \$(DESTDIR)\$(kde_htmldir)/$kdelang/$appname/$bodocdir\n";
+    }
+
+    $lines .= "\n";
+    $lines .= "uninstall-docs:\n";
+    $lines .= "\t-rm -rf \$(kde_htmldir)/$kdelang/$appname\n";
+    $lines .= "\n";
+    $lines .= "clean-docs:\n";
+    foreach (@htmlfiles) {
+        $lines .= "\t-rm -f $_\n";
+    }
+    $lines .= "\n";
+
+    # TODO find a way to execute this for make. currently its in make install
+    # only
+    # now the make rules for all .html files:
+    foreach (@htmlfiles) {
+        my $htmlfile = $_;
+        my $wmlfile = shift(@wmlfiles);
+        $lines .= "\n$htmlfile:\n";
+        $lines .= "\t\@if test -x \"\$(WML)\"; then \\\n";
+        $lines .= "\t  \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\t  echo \$(WML) -I \"\$(top_srcdir)/doc/$kdelang/includes\" -o $htmlfile \$(srcdir)/$wmlfile ;\\\n";
+        $lines .= "\tfi\n";
+        $lines .= "\n";
+    }
+    $lines .= "\n";
+
+    $target_adds{"install-data-am"} .= "install-docs ";
+    $target_adds{"uninstall"} .= "uninstall-docs ";
+    $target_adds{"clean-am"} .= "clean-docs ";
+    appendLines($lines);
+
+
+  nodocs:
+    appendLines("boson-docs:\n");
     return 1;
 }
 
