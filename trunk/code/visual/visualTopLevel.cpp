@@ -155,10 +155,12 @@ void visualTopLevel::unSelectAll(void)
 
 void visualTopLevel::selectFix(visualFacility *f)
 {
+	if (f->isDestroyed()) return;
+
 	fixSelected = f;
 	fixSelected->select();
 	emit setSelected( species[f->who]->getBigOverview(f));
-	
+
 	switch (f->getType()) {
 		case FACILITY_CMDBUNKER:
 			emit setOrders(10, f->who);

@@ -42,6 +42,7 @@ public:
 	void	updateContain(uint c) { contain = c;}
 	void	doHide();
 	void	doShow();
+	bool	isDestroyed(void) {return _destroyed; }
 
 protected:
 	int		power;
