@@ -146,6 +146,8 @@ BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
  mRenderer = 0;
 
  if (!boConfig->disableModelLoading()) {
+	mRenderer = new BosonItemModelRenderer(this);
+ } else {
 	mRenderer = new BosonItemRenderer(this);
  }
 }

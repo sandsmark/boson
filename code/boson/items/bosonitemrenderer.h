@@ -35,37 +35,26 @@ class BosonItem;
 class QColor;
 class QString;
 
+/**
+ * Base class for @ref BosonItemModelRenderer. You can use this class directly,
+ * however it does not use @ref BosonModel and therefore it is useful for
+ * debugging only (i.e. when you don't want to load any models, but still want
+ * to see the location of the units)
+ **/
 class BosonItemRenderer
 {
 public:
 	BosonItemRenderer(BosonItem* item);
 	virtual ~BosonItemRenderer();
 
-	bool setModel(BosonModel* model);
-
-	inline BosonModel* model() const { return mModel; }
+	virtual bool setModel(BosonModel*) { return true; }
 
 	/**
-	 * Render the item. This assumes the modelview matrix was already
-	 * translated and rotated to the correct position.
-	 * @param lod See @ref BoFrame::renderFrame
+	 * See @ref glDepthMultiplier. Note that the depth of the unit
+	 * (i.e. the height in z-direction) is allowed to change for
+	 * different frames, but the depth multiplier not!
 	 **/
-	void renderItem(unsigned int lod = 0);
-
-	/**
-	 * Set the animation mode. Only possible if the construction of the unit
-	 * is completed (i.e. the construction step is greater or equal to @ref
-	 * glConstructionSteps).
-	 *
-	 * See @ref BosonModel::animation for more information about @p mode.
-	 **/
-	void setAnimationMode(int mode);
-
-	/**
-	 * Increase the animation timer and once it exceeds the @ref
-	 * BoAnimation::speed set a new frame.
-	 **/
-	void animate();
+	void setGLDepthMultiplier(float d);
 
 	/**
 	 * @return The factor you need to multiply BO_GL_CELL_SIZE with to
@@ -76,11 +65,95 @@ public:
 	inline float glDepthMultiplier() const { return mGLDepthMultiplier; }
 
 	/**
-	 * See @ref glDepthMultiplier. Note that the depth of the unit
-	 * (i.e. the height in z-direction) is allowed to change for
-	 * different frames, but the depth multiplier not!
+	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
+	 * OpenGL! Especially not in pathfinding!
+	 * @ return The radius of the bounding sphere. See @ref
+	 * BosonBigDisplayBase::sphereInFrustum
 	 **/
-	void setGLDepthMultiplier(float d);
+	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
+
+	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
+
+	virtual void setShowGLConstructionSteps(bool s)
+	{
+		mShowGLConstructionSteps = s;
+	}
+	bool showGLConstructionSteps() const
+	{
+		return mShowGLConstructionSteps;
+	}
+
+	virtual void setGLConstructionStep(unsigned int unitConstructionStep, unsigned int totalUnitConstructionSteps)
+	{
+		Q_UNUSED(unitConstructionStep);
+		Q_UNUSED(totalUnitConstructionSteps);
+	}
+
+	virtual unsigned int preferredLod(float distanceFromCamera) const
+	{
+		Q_UNUSED(distanceFromCamera);
+		return 0;
+	}
+	
+	virtual void setAnimationMode(int ) { }
+
+	virtual void animate() { }
+
+	/**
+	 * Render the item. This assumes the modelview matrix was already
+	 * translated and rotated to the correct position.
+	 * @param lod See @ref BoFrame::renderFrame
+	 **/
+	virtual void renderItem(unsigned int lod = 0);
+
+	/**
+	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
+	 **/
+	bool itemInFrustum(const float* frustum) const;
+
+protected:
+	const QColor* teamColor() const;
+
+private:
+	BosonItem* mItem;
+
+	bool mShowGLConstructionSteps;
+	float mGLDepthMultiplier;
+
+	float mBoundingSphereRadius;
+};
+
+class BosonItemModelRenderer : public BosonItemRenderer
+{
+public:
+	BosonItemModelRenderer(BosonItem* item);
+	virtual ~BosonItemModelRenderer();
+
+	virtual bool setModel(BosonModel* model);
+
+	inline BosonModel* model() const { return mModel; }
+
+	/**
+	 * Render the item. This assumes the modelview matrix was already
+	 * translated and rotated to the correct position.
+	 * @param lod See @ref BoFrame::renderFrame
+	 **/
+	virtual void renderItem(unsigned int lod = 0);
+
+	/**
+	 * Set the animation mode. Only possible if the construction of the unit
+	 * is completed (i.e. the construction step is greater or equal to @ref
+	 * glConstructionSteps).
+	 *
+	 * See @ref BosonModel::animation for more information about @p mode.
+	 **/
+	virtual void setAnimationMode(int mode);
+
+	/**
+	 * Increase the animation timer and once it exceeds the @ref
+	 * BoAnimation::speed set a new frame.
+	 **/
+	virtual void animate();
 
 	/**
 	 * Set the @ref BosonModel construction step that corresponds to the @p
@@ -90,7 +163,7 @@ public:
 	 * @param totalUnitConstructionStep The total number of construction
 	 * steps that the facility has, i.e. @ref Facility::constructionSteps.
 	 **/
-	void setGLConstructionStep(unsigned int unitConstructionStep, unsigned int totalUnitConstructionSteps)
+	virtual void setGLConstructionStep(unsigned int unitConstructionStep, unsigned int totalUnitConstructionSteps)
 	{
 		unsigned int modelStep = 0;
 		if (unitConstructionStep >= totalUnitConstructionSteps) {
@@ -108,21 +181,7 @@ public:
 	 **/
 	unsigned int glConstructionSteps() const;
 
-	void setShowGLConstructionSteps(bool show);
-	bool showGLConstructionSteps() const
-	{
-		return mShowGLConstructionSteps;
-	}
-
-	/**
-	 * For OpenGL performance <em>only</em>! Do <em>not</em> use outside
-	 * OpenGL! Especially not in pathfinding!
-	 * @ return The radius of the bounding sphere. See @ref
-	 * BosonBigDisplayBase::sphereInFrustum
-	 **/
-	inline float boundingSphereRadius() const { return mBoundingSphereRadius; }
-
-	void setBoundingSphereRadius(float r) { mBoundingSphereRadius = r; }
+	virtual void setShowGLConstructionSteps(bool show);
 
 	/**
 	 * @return See @ref BosonModel::lodCount.
@@ -132,15 +191,7 @@ public:
 	/**
 	 * @return See @ref BosonModel::PreferredLod
 	 **/
-	unsigned int preferredLod(float distanceFromCamera) const;
-
-	/**
-	 * @return TRUE if this item is in the @p frustum, otherwise FALSE.
-	 **/
-	bool itemInFrustum(const float* frustum) const;
-
-protected:
-	const QColor* teamColor() const;
+	virtual unsigned int preferredLod(float distanceFromCamera) const;
 
 private:
 	/**
@@ -160,18 +211,14 @@ private:
 	void setCurrentFrame(BoFrame* frame);
 
 private:
-	BosonItem* mItem;
 	BosonModel* mModel;
 	BosonAnimation* mCurrentAnimation;
 
-	float mGLDepthMultiplier;
 	BoFrame* mCurrentFrame;
-	bool mShowGLConstructionSteps;
 	unsigned int mGLConstructionStep;
 	unsigned int mFrame;
 	unsigned int mAnimationCounter;
 
-	float mBoundingSphereRadius;
 };
 
 #endif
