@@ -47,6 +47,8 @@ public:
 
 		mMap = 0;
 		mLocalPlayer = 0;
+
+		mUseFog = false;
 	}
 
 	QPixmap* mGround;
@@ -58,6 +60,8 @@ public:
 
 	BosonMap* mMap;
 	Player* mLocalPlayer;
+
+	bool mUseFog;
 };
 
 BosonMiniMap::BosonMiniMap(QWidget* parent) : QWidget(parent)
@@ -229,6 +233,14 @@ void BosonMiniMap::initMap()
 	return;
  }
  slotCreateMap(d->mMap->width(), d->mMap->height());
+ bool oldFog = d->mUseFog;
+ d->mUseFog = true;
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+		slotUnfog(i, j);
+	}
+ }
+ d->mUseFog = oldFog;
 }
 
 void BosonMiniMap::slotMoveUnit(Unit* unit, double oldX, double oldY)
@@ -274,6 +286,9 @@ void BosonMiniMap::slotUnitDestroyed(Unit* unit)
 
 void BosonMiniMap::slotUnfog(int x, int y)
 {
+ if (!d->mUseFog) {
+	return;
+ }
  Cell* c = d->mMap->cell(x, y);
  if (!c) {
 	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
@@ -285,6 +300,9 @@ void BosonMiniMap::slotUnfog(int x, int y)
 
 void BosonMiniMap::slotFog(int x, int y)
 {
+ if (!d->mUseFog) {
+	return;
+ }
  Cell* c = d->mMap->cell(x, y);
  if (!c) {
 	kdError() << k_funcinfo << "invalid cell " << x << "," << y << endl;
@@ -297,3 +315,18 @@ void BosonMiniMap::setLocalPlayer(Player* p)
 {
  d->mLocalPlayer = p;
 }
+
+void BosonMiniMap::initFogOfWar(Player* p)
+{
+ d->mUseFog = true;
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+		if (p && p->isFogged(i, j)) {
+			slotFog(i, j);
+		} else {
+			slotUnfog(i, j);
+		}
+	}
+ }
+}
+

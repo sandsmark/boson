@@ -95,31 +95,14 @@ void BosonCanvas::init()
  }
  d->mDestroyedUnits.setAutoDelete(true);
  d->mFogOfWar.setAutoDelete(true);
-
- QString fogPath = locate("data", "boson/themes/fow.xpm");
- d->mFogPixmap = new QCanvasPixmapArray(fogPath);
- if (!d->mFogPixmap->image(0) || 
-		d->mFogPixmap->image(0)->width() != (BO_TILE_SIZE * 2) ||
-		d->mFogPixmap->image(0)->height() != (BO_TILE_SIZE * 2)) {
-	kdError() << k_funcinfo << "Cannot load fow.xpm" << endl;
-	delete d->mFogPixmap;
-	d->mFogPixmap = 0;
-	return;
- }
- QBitmap mask(fogPath);
- if (mask.width() != (BO_TILE_SIZE * 2) || mask.height() != (BO_TILE_SIZE * 2)) {
-	kdError() << k_funcinfo << "Can't create fow mask" << endl;
-	delete d->mFogPixmap;
-	d->mFogPixmap = 0;
-	return;
- }
- d->mFogPixmap->image(0)->setMask(mask);
- d->mFogPixmap->image(0)->setOffset(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2);
 }
 
 BosonCanvas::~BosonCanvas()
 {
 // kdDebug() << k_funcinfo << endl;
+// if (d->mFogPixmap) {
+//	delete d->mFogPixmap;
+// }
  d->mDestroyUnits.clear();
  d->mDestroyedUnits.clear();
  d->mAnimList.clear();
@@ -127,7 +110,6 @@ BosonCanvas::~BosonCanvas()
  delete d->mSoundServer;
  delete d;
 }
-
 
 void BosonCanvas::loadTiles(const QString& name)
 {
@@ -426,5 +408,41 @@ void BosonCanvas::fogLocal(int x, int y)
 void BosonCanvas::unfogLocal(int x, int y)
 {
  d->mFogOfWar.remove(cell(x, y));
+}
+
+void BosonCanvas::initFogOfWar(Player* p)
+{
+ if (!d->mFogPixmap) {
+	QString fogPath = locate("data", "boson/themes/fow.xpm");
+	d->mFogPixmap = new QCanvasPixmapArray(fogPath);
+	if (!d->mFogPixmap->image(0) || 
+			d->mFogPixmap->image(0)->width() != (BO_TILE_SIZE * 2) ||
+			d->mFogPixmap->image(0)->height() != (BO_TILE_SIZE * 2)) {
+		kdError() << k_funcinfo << "Cannot load fow.xpm" << endl;
+		delete d->mFogPixmap;
+		d->mFogPixmap = 0;
+		return;
+	}
+	QBitmap mask(fogPath);
+	if (mask.width() != (BO_TILE_SIZE * 2) || mask.height() != (BO_TILE_SIZE * 2)) {
+		kdError() << k_funcinfo << "Can't create fow mask" << endl;
+		delete d->mFogPixmap;
+		d->mFogPixmap = 0;
+		return;
+	}
+	d->mFogPixmap->image(0)->setMask(mask);
+	d->mFogPixmap->image(0)->setOffset(BO_TILE_SIZE / 2, BO_TILE_SIZE / 2);
+ }
+
+// now put the fow wherever necessary to meet the players sight
+ for (unsigned int i = 0; i < d->mMap->width(); i++) {
+	for (unsigned int j = 0; j < d->mMap->height(); j++) {
+		if (p->isFogged(i, j)) {
+			fogLocal(i, j);
+		} else {
+			unfogLocal(i, j);
+		}
+	}
+ }
 }
 

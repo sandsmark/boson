@@ -398,6 +398,8 @@ void BosonWidget::slotStartGame()
 	return;
  }
 
+ d->mCanvas->initFogOfWar(d->mLocalPlayer); //could be used for editor as well - to see what a player can see
+ d->mMiniMap->initFogOfWar(d->mLocalPlayer);
  d->mBoson->sendMessage(0, BosonMessage::IdStartScenario);
 }
 

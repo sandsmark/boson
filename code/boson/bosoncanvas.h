@@ -21,8 +21,6 @@
 
 #include <qcanvas.h>
 
-#include <qpixmap.h>
-
 class BosonMap;
 class Cell;
 class KPlayer;
@@ -104,6 +102,15 @@ public:
 
 	void fogLocal(int x, int y);
 	void unfogLocal(int x, int y);
+
+	/**
+	 * Initialize the fog of war. If you don't call this the fow pixmap is
+	 * not created at all and therefore neithere @ref fogLocal nor
+	 * unfogLocal do anything. 
+	 * @param player Whose sight shall be shown. If 0 create the fow pixmap
+	 * only - fog is put on the map by @ref fogLocal only.
+	 **/
+	void initFogOfWar(Player* player);
 
 public slots:
 	/**
