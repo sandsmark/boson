@@ -32,6 +32,7 @@
 #include "upgradeproperties.h"
 
 #include <kdebug.h>
+#include <klocale.h>
 
 UnitPlugin::UnitPlugin(Unit* unit)
 {
@@ -70,6 +71,14 @@ KGamePropertyHandler* UnitPlugin::dataHandler() const
 BosonCanvas* UnitPlugin::canvas() const
 {
  return unit()->canvas();
+}
+
+Boson* UnitPlugin::game() const
+{
+ if (!player()) {
+	return 0;
+ }
+ return (Boson*)player()->game();
 }
 
 
@@ -260,18 +269,22 @@ void ProductionPlugin::advance(unsigned int)
 		// facility's lower-left tile, are tested counter-clockwise. Unit is placed
 		// to first free tile.
 		// No auto-placing for facilities
-		if(!speciesTheme()->unitProperties(id)) {
+		const UnitProperties* prop = speciesTheme()->unitProperties(id);
+		if (!prop) {
 			kdError() << k_lineinfo << "Unknown id " << id << endl;
 			return;
 		}
-		if(speciesTheme()->unitProperties(id)->isFacility()) {
+		if (speciesTheme()->unitProperties(id)->isFacility()) {
+			game()->slotAddChatSystemMessage(i18n("A %1 has been produced - place it on the map to start construction!").arg(prop->name()));
 			return;
+		} else {
+			game()->slotAddChatSystemMessage(i18n("A %1 has been produced and will be placed on the map now").arg(prop->name()));
 		}
 		int tilex, tiley; // Position of lower-left corner of facility in tiles
 		int theight, twidth; // height and width of facility in tiles
 		int currentx, currenty; // Position of tile currently tested
 		theight = unit()->height() / BO_TILE_SIZE;
-		twidth =unit()-> width() / BO_TILE_SIZE;
+		twidth = unit()-> width() / BO_TILE_SIZE;
 		tilex = (int)(unit()->x() / BO_TILE_SIZE);
 		tiley = (int)(unit()->y() / BO_TILE_SIZE + theight);
 		int tries; // Tiles to try for free space
@@ -297,7 +310,7 @@ void ProductionPlugin::advance(unsigned int)
 				//TODO: use BosonCanvas::canPlaceUnitAt()
 //				if(canvas()->cellOccupied(currentx, currenty)) {
 //				FIXME: should not depend on Facility*
-				if(canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), this)) {
+				if (canvas()->canPlaceUnitAt(speciesTheme()->unitProperties(id), QPoint(currentx * BO_TILE_SIZE, currenty * BO_TILE_SIZE), this)) {
 					// Free cell - place unit at it
 					mProductionState = mProductionState + 1;
 					//FIXME: buildProduction should not
@@ -308,6 +321,7 @@ void ProductionPlugin::advance(unsigned int)
 			}
 		}
 		kdDebug() << "Cannot find free cell around facility :-(" << endl;
+		game()->slotAddChatSystemMessage(i18n("%1 could not be placed on the map - no free cell found. Place it manuall!").arg(prop->name()));
 	} else {
 		mProductionState = mProductionState + 1;
 	}
