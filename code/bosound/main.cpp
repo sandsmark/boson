@@ -86,6 +86,12 @@ int main(int argc, char **argv)
 	while (readFile.atEnd()) {
 		usleep(500);
 	}
+	if (!readFile.isOpen()) {
+		exit(0);
+	}
+	if (!writeFile.isOpen()) {
+		exit(0);
+	}
 	if (buffer.length() > 2048) {
 		// a command of 2 KB? no, I don't believe this!
 		fprintf(stderr, "command too long\n");
