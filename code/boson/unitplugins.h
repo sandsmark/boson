@@ -28,6 +28,7 @@ class ProductionPlugin
 {
 public:
 	ProductionPlugin(Unit* unit);
+	~ProductionPlugin();
 
 	inline Unit* unit() const { return mUnit; }
 
@@ -105,6 +106,7 @@ class RepairPlugin
 {
 public:
 	RepairPlugin(Unit* owner);
+	~RepairPlugin();
 
 	Unit* unit() const { return mUnit; }
 

@@ -44,6 +44,10 @@ ProductionPlugin::ProductionPlugin(Unit* unit)
  mProductionState.setEmittingSignal(false); // called quite often - not emitting will increase speed a little bit
 }
 
+ProductionPlugin::~ProductionPlugin()
+{
+}
+
 unsigned long int ProductionPlugin::completedProduction() const
 {
  if (!hasProduction()) {
@@ -227,6 +231,10 @@ RepairPlugin::RepairPlugin(Unit* unit)
  mRepairList.setEmittingSignal(false); // just to prevent warning in Player::slotUnitPropertyChanged()
  */
 
+}
+
+RepairPlugin::~RepairPlugin()
+{
 }
 
 void RepairPlugin::repair(Unit* u)
