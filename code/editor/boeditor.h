@@ -60,6 +60,9 @@ public:
   /** destructor */
   ~BoEditorApp();
 
+signals:
+	void	destroyObjects(void);
+
  public slots:
   /** open a new application window by creating a new instance of BoEditorApp */
   void slotFileNewWindow();
@@ -75,6 +78,8 @@ public:
   void slotFileSaveAs();
   /** asks for saving if the file is modified, then closes the actual file and window*/
   void slotFileClose();
+  /** destroy selected object */
+  void slotEditDestroy();
 
 
 
