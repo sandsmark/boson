@@ -1078,7 +1078,7 @@ bool BosonCanvas::canPlaceUnitAt(const UnitProperties* prop, const BoVector2Fixe
  if (!onCanvas(pos)) {
 	return false;
  }
- BoRectFixed r(pos, BoVector2Fixed(width, height));
+ BoRectFixed r(pos, BoVector2Fixed(pos.x() + width, pos.y() + height));
  if (!canGo(prop, r)) {
 	return false;
  }
