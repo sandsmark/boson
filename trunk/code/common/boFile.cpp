@@ -195,7 +195,8 @@ void boFile::load(Cell &c)
 	}
 	
 	*stream >> g;
-	boAssert( IS_VALID_GROUND(g));
+	boAssert( IS_VALID_GROUND(g) || GROUND_UNKNOWN == g);
+		// GROUND_UNKNOWN are thoes cell behind big transitions (2x2)
 	c.setGroundType((groundType)g);
 
 	*stream >> b;
