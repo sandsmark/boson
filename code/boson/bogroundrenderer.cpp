@@ -141,6 +141,7 @@ unsigned int BoGroundRenderer::renderCells(const BosonMap* map)
 	// this happens either when we have to generate the list first or if no
 	// cell is visible at all. The latter case isn't speed relevant, so we
 	// can simply re-generate then.
+	boDebug() << k_funcinfo << "generating cell list" << endl;
 	generateCellList(map);
  }
 
@@ -493,12 +494,6 @@ void BoGroundRenderer::calculateWorldRect(const QRect& rect, int mapWidth, int m
 				// mEnd must be replaced by intersection
 				l->mEnd = intersection;
 				line[newLine].mPrevious = l;
-				if (!l) {
-					return;
-				}
-				if (!l->mNext) {
-					return;
-				}
 				line[newLine].mNext = l->mNext;
 				line[newLine].mEnd = l->mNext->mStart;
 				line[newLine].mStart = intersection;
