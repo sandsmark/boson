@@ -42,6 +42,7 @@
 #include <qhbox.h>
 #include <qlayout.h>
 #include <qpushbutton.h>
+#include <qcheckbox.h>
 
 #define NEAR 1.0
 #define FAR 100.0
@@ -92,6 +93,8 @@ ModelPreview::ModelPreview(QWidget* parent) : QGLWidget(parent)
  mMouseDiffY = 0;
 
  mRotateX = mRotateY = mRotateZ = 0.0;
+ mPlacementPreview = false;
+ mDisallowPlacement = false;
 
  connect(this, SIGNAL(signalRotateXChanged(float)), this, SLOT(slotRotateXChanged(float)));
  connect(this, SIGNAL(signalRotateYChanged(float)), this, SLOT(slotRotateYChanged(float)));
@@ -118,6 +121,7 @@ void ModelPreview::initializeGL()
  glDisable(GL_DITHER);
  glEnable(GL_BLEND);
  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
  mUpdateTimer->start(50);
  slotResetView();
 }
@@ -152,7 +156,28 @@ void ModelPreview::paintGL()
  if (mModel && mCurrentFrame >= 0) {
 	BoFrame* f = mModel->frame(mCurrentFrame);
 	if (f) {
-	glCallList(f->displayList());
+		if (mPlacementPreview) {
+			glEnable(GL_BLEND);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+			unsigned char r, g, b, a;
+			a = PLACEMENTPREVIEW_ALPHA;
+			r = 255;
+			if (mDisallowPlacement) {
+				g = PLACEMENTPREVIEW_DISALLOW_COLOR;
+				b = PLACEMENTPREVIEW_DISALLOW_COLOR;
+			} else {
+				g = 255;
+				b = 255;
+			}
+			glColor4ub(r, g, b, a);
+		}
+		glCallList(f->displayList());
+		if (mPlacementPreview) {
+			// AB: do not reset the actual color - if it will get
+			// used it will be set again anyway.
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glColor4ub(255, 255, 255, 255);
+		}
 	} else {
 		boError() << k_funcinfo << "NULL frame" << endl;
 	}
@@ -161,6 +186,10 @@ void ModelPreview::paintGL()
  glDisable(GL_CULL_FACE);
  glDisable(GL_TEXTURE_2D);
  glDisable(GL_DEPTH_TEST);
+ GLenum e = glGetError();
+ if (e != GL_NO_ERROR) {
+	boError() << k_funcinfo << "OpenGL error: " << (int)e << endl;
+ }
 }
 
 void ModelPreview::load(SpeciesTheme* s, const UnitProperties* prop)
@@ -275,6 +304,8 @@ RenderMain::RenderMain()
  connectBoth(mConfig, mPreview, SIGNAL(signalFrameChanged(int)), SLOT(slotFrameChanged(int)));
  connect(mConfig, SIGNAL(signalResetDefaults()), mPreview, SLOT(slotResetView()));
  connect(mPreview, SIGNAL(signalMaxFramesChanged(int)), mConfig, SLOT(slotMaxFramesChanged(int)));
+ connect(mConfig, SIGNAL(signalPlacementPreviewChanged(bool)), mPreview, SLOT(slotPlacementPreviewChanged(bool)));
+ connect(mConfig, SIGNAL(signalDisallowPlacementChanged(bool)), mPreview, SLOT(slotDisallowPlacementChanged(bool)));
 
  mPreview->slotResetView();
 
@@ -491,8 +522,20 @@ PreviewConfig::PreviewConfig(QWidget* parent) : QWidget(parent)
  topLayout->addWidget(mFrame);
  topLayout->addStretch(1);
 
+ QWidget* placement = new QWidget(this);
+ QHBoxLayout* placementLayout = new QHBoxLayout(placement);
+ mPlacementPreview = new QCheckBox(i18n("Show placement preview"), placement);
+ connect(mPlacementPreview, SIGNAL(toggled(bool)), this, SIGNAL(signalPlacementPreviewChanged(bool)));
+ placementLayout->addWidget(mPlacementPreview);
+ mDisallowPlacement = new QCheckBox(i18n("Disallow placement"), placement);
+ connect(mDisallowPlacement, SIGNAL(toggled(bool)), this, SIGNAL(signalDisallowPlacementChanged(bool)));
+ placementLayout->addWidget(mDisallowPlacement);
+ topLayout->addWidget(placement);
+
  QPushButton* defaults = new QPushButton(i18n("Reset Defaults"), this);
  connect(defaults, SIGNAL(clicked()), this, SIGNAL(signalResetDefaults()));
+ topLayout->addStretch(1);
+ topLayout->addSpacing(10);
  topLayout->addWidget(defaults);
 }
 

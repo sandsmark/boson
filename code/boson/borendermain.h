@@ -46,6 +46,7 @@
 class SpeciesTheme;
 class UnitProperties;
 class BosonModel;
+class QCheckBox;
 class KMyFloatNumInput : public KDoubleNumInput
 {
 	Q_OBJECT
@@ -157,6 +158,14 @@ public slots:
 		}
 	}
 	void slotFrameChanged(int f);
+	void slotPlacementPreviewChanged(bool on)
+	{
+		mPlacementPreview = on;
+	}
+	void slotDisallowPlacementChanged(bool on)
+	{
+		mDisallowPlacement = on;
+	}
 
 protected:
 	virtual void mouseMoveEvent(QMouseEvent*);
@@ -172,6 +181,9 @@ private:
 	float mFovY; // we allow real zooming here!
 	float mCameraX, mCameraY, mCameraZ;
 	float mRotateX, mRotateY, mRotateZ;
+
+	bool mPlacementPreview;
+	bool mDisallowPlacement;
 
 	// mouse move:
 	int* mMouseDiffX;
@@ -195,6 +207,8 @@ signals:
 	void signalCameraZChanged(float);
 	void signalFrameChanged(int);
 	void signalResetDefaults();
+	void signalPlacementPreviewChanged(bool); // display preview placement - if false display normal model
+	void signalDisallowPlacementChanged(bool); // only valid of placementpreview is also on. if true display the model that is shown when the unit can't be placed - otherwise the model that is shown if it can be placed.
 
 protected slots:
 	void slotFovYChanged(float f) { mFovY->setValue(f); }
@@ -217,6 +231,8 @@ private:
 	KMyFloatNumInput* mCameraY;
 	KMyFloatNumInput* mCameraZ;
 	KIntNumInput* mFrame;
+	QCheckBox* mPlacementPreview;
+	QCheckBox* mDisallowPlacement;
 };
 
 /**
