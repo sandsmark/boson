@@ -1,21 +1,21 @@
 [Boson Mobile Unit]
 CanGoOnLand=true
 CanGoOnWater=true
-Speed=15
+Speed=10
 
 [Boson Unit]
-Armor=0
+Armor=5
 DestroyedParticles=1001,3001
 ExplodingDamage=0
 ExplodingDamageRange=0
-Health=140
+Health=250
 Id=10004
 IsFacility=false
-MineralCost=350
-Name=Tornado
-OilCost=150
+MineralCost=500
+Name=Bomber
+OilCost=250
 Producer=2
-ProductionTime=300
+ProductionTime=500
 Requirements=1,14
 Shield=0
 SightRange=6
@@ -24,7 +24,7 @@ TerrainType=2
 UnitDepth=1
 UnitHeight=1.5
 UnitWidth=1.5
-Weapons=2
+Weapons=1
 
 [Sounds]
 OrderAttack=order_attack
@@ -36,32 +36,17 @@ ReportUnderAttack=report_underattack
 Shoot=shoot
 
 [Weapon_0]
-CanShootAtAirUnits=true
+CanShootAtAirUnits=false
 CanShootAtLandUnits=true
-Damage=10
-DamageRange=1
-FlyParticles=
-HitParticles=2002
-MaxHeight=1
-Name=Cannon
+Damage=600
+DamageRange=7
+FullDamageRange=3
+FlyParticles=11110,11120
+HitParticles=11025,11030,11040,11010
+Height=0.25
+Name=DaisyCutter
 Offset=0,0,0
-Range=4
-Reload=10
+Range=15
+Reload=190
 ShootParticles=
-Speed=0
-
-[Weapon_1]
-CanShootAtAirUnits=true
-CanShootAtLandUnits=true
-Damage=25
-DamageRange=2
-FlyParticles=5001
-HitParticles=2001
-MaxHeight=1
-Model=missile.3ds
-Name=Missiles
-Offset=0.7,0,0
-Range=6
-Reload=30
-ShootParticles=
-Speed=15
+Speed=12
