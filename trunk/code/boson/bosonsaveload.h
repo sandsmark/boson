@@ -160,15 +160,9 @@ public:
 	// AB: temporary function only, for the scenario-code-replacing process.
 	bool loadNewGame(const QByteArray& playersXML, const QByteArray& canvasXML);
 
-	/**
-	 * You are meant to use @ref Boson::loadFromFile instead, so that @ref
-	 * Boson::loadingStatus will be valid.
-	 **/
-	bool loadFromFile(const QString& file);
-
 	bool saveToFile(Player* localPlayer, const QString& file);
 	bool saveToFiles(QMap<QString, QByteArray>& files, Player* localPlayer);
-	bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
+	static bool saveToFile(const QMap<QString, QByteArray>& files, const QString& file);
 
 	LoadingStatus loadingStatus() const;
 
@@ -211,11 +205,6 @@ signals:
 protected:
 	friend class BosonStarting;
 	// TODO: move relevant stuff to BosonStarting.
-	/**
-	 * @param files A list of all relevant files in the @ref BSGFile object.
-	 * The kgame.xml _MUST_ be the _FIRST_ entry in this list!
-	 **/
-	bool loadFromFile(const QMap<QString, QByteArray>& files);
 
 	QCString saveKGameAsXML();
 	QCString savePlayersAsXML(Player* localPlayer);

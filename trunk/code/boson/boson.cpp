@@ -1916,16 +1916,6 @@ bool Boson::saveToFile(const QString& file)
  return ret;
 }
 
-bool Boson::loadFromFile(const QString& file)
-{
- boDebug(260) << k_funcinfo << endl;
- BosonSaveLoad* load = new BosonSaveLoad(this);
- bool ret = load->loadFromFile(file);
- d->mLoadingStatus = load->loadingStatus();
- delete load;
- return ret;
-}
-
 bool Boson::save(QDataStream& stream, bool saveplayers)
 {
 #if HAVE_KGAME_SAVEGAME
@@ -2003,7 +1993,7 @@ bool Boson::loadgame(QDataStream& stream, bool network, bool reset)
  // 2. initializing a newly connected player
  //
  // 1. is not used by boson. we use loadFromFile() for this.
- // so for use only 2. is relevant.
+ // so for us only 2. is relevant.
  // it would be great if we could one day support that players can join even if
  // the game already started. but as we do not yet support this, we can keep
  // this as simple as possible
