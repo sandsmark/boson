@@ -24,6 +24,7 @@
 #include <kpixmapeffect.h>
 
 #include <qpixmap.h>
+#include <qbitmap.h>
 #include <qpainter.h>
 #include <qtooltip.h>
 #include <qlabel.h>
@@ -95,6 +96,8 @@ public:
 
 		mHealth = 0;
 		mReload = 0;
+
+		mOwner = 0;
 	}
 
 	BoButton * mPixmap;
@@ -109,6 +112,8 @@ public:
 
 	BoProgress* mHealth;
 	BoProgress* mReload;
+
+	Player* mOwner; // kind of a workaround: we need this to display the progress of production
 };
 
 BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
@@ -154,11 +159,7 @@ BosonCommandWidget::~BosonCommandWidget()
 void BosonCommandWidget::setUnit(Unit* unit)
 {
  if (!unit) {
-	if (d->mUnit) {
-		disconnect(d->mUnit->owner(), 0, this, 0);
-	}
-	d->mUnit = 0;
-	d->mCommandType = CommandNothing;
+	unset();
 	hide();
 	return;
  }
@@ -182,7 +183,7 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 	return;
  }
  if (d->mUnit) {
-	disconnect(d->mUnit->owner(), 0, this, 0);
+	unset();
  }
  d->mUnit = 0;
  displayUnitPixmap(unitType, owner);
@@ -196,6 +197,7 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  setToolTip(prop->name());
  
  d->mUnitType = unitType;
+ d->mOwner = owner;
  d->mCommandType = CommandUnit;
  
  d->mHealth->hide();
@@ -207,7 +209,7 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
 void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
 {
  if (d->mUnit) {
-	disconnect(d->mUnit->owner(), 0, this, 0);
+	unset();
  }
  d->mUnit = 0;
 
@@ -344,4 +346,56 @@ Unit* BosonCommandWidget::unit() const
 BosonCommandWidget::CommandType BosonCommandWidget::commandType() const
 {
  return d->mCommandType;
+}
+
+void BosonCommandWidget::unset()
+{
+ if (d->mUnit) {
+	disconnect(d->mUnit->owner(), 0, this, 0);
+ }
+ d->mUnit = 0;
+ d->mCommandType = CommandNothing;
+ d->mOwner = 0;
+}
+
+void BosonCommandWidget::advanceProduction(double percentage)
+{
+ kdDebug() << k_funcinfo << percentage << endl;
+ if (!d->mOwner) {
+	kdError() << k_funcinfo << "NULL owner" << endl;
+ }
+ QPixmap small = *d->mOwner->speciesTheme()->smallOverview(d->mUnitType);
+ if (percentage == 100) {
+	setPixmap(small);
+	return;
+ }
+
+ KPixmap progress(small);
+ KPixmapEffect::intensity(progress, 1.4);
+
+ QBitmap mask(progress.width(), progress.height());
+ mask.fill(Qt::color1);
+ QPainter p;
+ p.begin(&mask);
+ p.setBrush(Qt::color0);
+ 
+ // this stuff (sizes) is evil and probably not working with other pixmap sizes.
+ // I'm too lazy to do it right
+
+ // well, according to the QPoint documentation this is called 
+ // "mahattan length" -> it would be correct to use 
+ // sqrt(pow(mask.width(),2) + pow(mask.height(), 2)),
+ // but this is faster.
+ int pieSize = mask.width() + mask.height(); 
+ p.drawPie((mask.width()-pieSize)/2, (mask.height() - pieSize)/2, pieSize, 
+		pieSize, 16*90, -16*360*(percentage/100));
+ p.end();
+
+ progress.setMask(mask);
+
+ p.begin(&small);
+ p.drawPixmap(0, 0, progress);
+ p.end();
+
+ setPixmap(small);
 }

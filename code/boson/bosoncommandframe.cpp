@@ -61,7 +61,9 @@ public:
 		setVScrollBarMode(QScrollView::AlwaysOn);
 	}
 
-	~OrderScrollView() {}
+	~OrderScrollView() 
+	{
+	}
 	
 protected:
 
@@ -243,24 +245,25 @@ void BosonCommandFrame::slotSetConstruction(Unit* unit)
  }
 
  const UnitProperties* prop = unit->unitProperties();
- if (!prop) {
-	kdError() << k_funcinfo << ": NULL unitProperties" << endl;
-	return;
- }
  if (!prop->canProduce()) {
 	return;
  }
  QValueList<int> produceList = prop->produceList();
  setOrderButtons(produceList, owner);
  d->mFactory = unit;
+ connect(d->mFactory->owner(), SIGNAL(signalProductionAdvanced(Unit*, double)),
+		this, SLOT(slotProductionAdvanced(Unit*, double)));
  
  d->mOrderType = Mobiles; // kind of FIXME: it doesn't matter whether this is
                           // Mobiles or Facilities. The difference is only in 
-			  // editor.cpp for the KActions.
+                          // editor.cpp for the KActions.
 }
 
 void BosonCommandFrame::hideOrderButtons()
 {
+ if (d->mFactory) {
+	disconnect(d->mFactory->owner(), 0, this, 0);
+ }
  d->mFactory = 0;
  QIntDictIterator<BosonCommandWidget> it(d->mOrderButton);
  while (it.current()) {
@@ -404,3 +407,23 @@ void BosonCommandFrame::slotShowUnit(Unit* unit)
  d->mOrderButton[d->mOrderButton.count() - 1]->setUnit(unit);
 }
 
+void BosonCommandFrame::slotProductionAdvanced(Unit* factory, double percentage)
+{
+ if (d->mFactory != factory) {
+	kdError() << "Receive signal from obsolete factory!" << endl;
+	return;
+ }
+ if (!factory->isFacility()) {
+	kdError() << k_lineinfo << "NOT factory" << endl;
+	return;
+ }
+ for (unsigned int i = 0; i < d->mOrderButton.count(); i++) {
+	BosonCommandWidget* c = d->mOrderButton[i];
+	if (c->commandType() == BosonCommandWidget::CommandUnit) {
+		if (c->unitType() == ((Facility*)factory)->currentProduction()) {
+			c->advanceProduction(percentage);
+		}
+	}
+ }
+
+}

@@ -331,6 +331,12 @@ const UnitProperties* Player::unitProperties(int unitType) const
 	kdError() << k_funcinfo << ": NULL theme" << endl;
 	return 0;
  }
+
+ // TODO: remove this check as soon as the reason for the current crash on
+ // building-placing (02/01/12) is found and fixed
+ if (!speciesTheme()->unitProperties(unitType)) {
+	kdError() << k_lineinfo << "NULL unit properties (VERY EVIL BUG!!)" << endl;
+ }
  return speciesTheme()->unitProperties(unitType);
 }
 
@@ -395,3 +401,7 @@ void Player::setMinerals(unsigned long int m)
  d->mMinerals = m;
 }
 
+void Player::productionAdvanced(Unit* factory, double percentage)
+{
+ emit signalProductionAdvanced(factory, percentage);
+}

@@ -11,13 +11,14 @@ Game TODOs
 - end of game - winner ; statistics
 - fullscreen mode
 - scroll if cursor at the edge of the window
-- constructing - maybe use Boson::slotDelayedAddUnit() or so? - partially done
 - don't allow to build units when player has not enough minerals/oil
 - auto positioning of produced units
-- display progress of unit production
 - rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units and
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
+- gray the other order-buttons out when a unit is being produced
+- display how many (and which) units are still in queue for production
+- sometimes (always?) boson crashes when placing a new building
 
 
 Editor (map, unit, scenario) TODOs

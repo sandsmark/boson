@@ -116,6 +116,8 @@ protected slots:
 
 	void slotProduceUnit(int unitType);
 
+	void slotProductionAdvanced(Unit* factory, double percentage);
+
 protected:
 	/**
 	 * Set the orderbuttons to containt a list of producable units.

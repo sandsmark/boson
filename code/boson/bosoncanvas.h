@@ -89,12 +89,12 @@ public:
 	 **/
 	void unitMoved(Unit* unit, double oldX, double oldY);
 
-	void updateSight(Unit*, double oldX, double oldY);
-
 	/**
 	 * Called by @ref Unit. One unit damages/shoots at another unit.
 	 **/
 	void shootAtUnit(Unit* target, Unit* damagedBy, long int damage);
+
+	void updateSight(Unit*, double oldX, double oldY);
 
 	Cell* cellAt(Unit* unit) const;
 	Cell* cellAt(double x, double y) const;
