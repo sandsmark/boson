@@ -59,7 +59,17 @@ protected:
 	{
 		//TODO: do not re-display if already displayed and text didn't
 		//change
-		QString text = mainTip();
+		QString text;
+		QWidget* w = (commandWidget()->commandType() == BosonCommandWidget::CommandUnitSelected) ? commandWidget()->childAt(pos) : 0;
+		if (w == (QWidget*)commandWidget()->mHealth && commandWidget()->unit()) {
+			Unit* u = commandWidget()->unit();
+			text = i18n("%1\nId: %2\nHealth: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->health());
+		} else if (w == (QWidget*)commandWidget()->mReload && commandWidget()->unit()) {
+			Unit* u = commandWidget()->unit();
+			text = i18n("%1\nId: %2\nReloadState: %3\n").arg(u->unitProperties()->name()).arg(u->id()).arg(u->reloadState());
+		} else {
+			text = mainTip();
+		}
 
 		if (text == QString::null) {
 			return;
@@ -222,16 +232,10 @@ public:
 	{
 		mPixmap = 0;
 
-		mHealth = 0;
-		mReload = 0;
-
 		mTip = 0;
 	}
 
 	BoButton * mPixmap;
-
-	BoProgress* mHealth;
-	BoProgress* mReload;
 
 	BoToolTip* mTip;
 };
@@ -255,22 +259,22 @@ BosonCommandWidget::BosonCommandWidget(QWidget* parent) : QWidget(parent)
  connect(mPixmap, SIGNAL(rightClicked()), this, SLOT(slotRightClicked()));
  displayLayout->addWidget(mPixmap);
 
- d->mHealth = new BoProgress(display);
- d->mHealth->setOrientation(Vertical);
- d->mHealth->setTextEnabled(false);
- d->mHealth->setFixedWidth(BAR_WIDTH);
- displayLayout->addWidget(d->mHealth);
+ mHealth = new BoProgress(display);
+ mHealth->setOrientation(Vertical);
+ mHealth->setTextEnabled(false);
+ mHealth->setFixedWidth(BAR_WIDTH);
+ displayLayout->addWidget(mHealth);
 
- d->mReload = new BoProgress(display);
- d->mReload->setOrientation(Vertical);
- d->mReload->setTextEnabled(false);
- d->mReload->setFixedWidth(BAR_WIDTH);
- displayLayout->addWidget(d->mReload);
+ mReload = new BoProgress(display);
+ mReload->setOrientation(Vertical);
+ mReload->setTextEnabled(false);
+ mReload->setFixedWidth(BAR_WIDTH);
+ displayLayout->addWidget(mReload);
 
  d->mTip = new BoToolTip(this);
 
- d->mHealth->setValue(0);
- d->mReload->setValue(0);
+ mHealth->setValue(0);
+ mReload->setValue(0);
  
  mPixmap->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
  setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
@@ -299,11 +303,11 @@ void BosonCommandWidget::setUnit(Unit* unit)
  slotUnitChanged(mUnit);
 
  show();
- d->mHealth->show();
+ mHealth->show();
  if (mUnit->unitProperties()->canShoot()) {
-	d->mReload->show();
+	mReload->show();
  } else {
-	d->mReload->hide();
+	mReload->hide();
  }
 
  setProductionCount(0);
@@ -326,8 +330,8 @@ void BosonCommandWidget::setUnit(int unitType, Player* owner)
  
  displayUnitPixmap(unitType, owner);
 
- d->mHealth->hide();
- d->mReload->hide();
+ mHealth->hide();
+ mReload->hide();
 
  show();
  // note: setGrayOut() and setProductionCount() are handled in 
@@ -345,8 +349,8 @@ void BosonCommandWidget::setCell(int tileNo, BosonTiles* tileSet)
  mCommandType = CommandCell;
  setPixmap(tileSet->tile(mTileNumber));
 
- d->mHealth->hide();
- d->mReload->hide();
+ mHealth->hide();
+ mReload->hide();
 
  show();
  setProductionCount(0);
@@ -439,10 +443,10 @@ void BosonCommandWidget::slotUnitChanged(Unit* unit)
  if (unit->health() > unit->unitProperties()->health()) {
 	kdWarning() << k_lineinfo << "health > possible health" << endl;
  }
- d->mHealth->setValue(h);
+ mHealth->setValue(h);
 
  double r = 100 - ((double)unit->reloadState() * 100 / (double)unit->unitProperties()->reload());
- d->mReload->setValue(r);
+ mReload->setValue(r);
 }
 
 

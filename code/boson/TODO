@@ -29,7 +29,7 @@ Game TODOs
 - pause
 - display "filling" status of harvesters instead of firepower. use different
   colors!
-
+- TopWidget::slotNewGame() is broken
 
 Editor (map, unit, scenario) TODOs
 - totally broken, currently
