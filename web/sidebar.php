@@ -66,9 +66,8 @@ echo "
 
 function draw_extended_link($title, $href, $params, $style = "sidebarboxlink")
 {
-global $basedir;
 echo "
-&nbsp;&nbsp;<a class=\"$style\" href=\"$basedir$href\" $params>$title</a><br>";
+&nbsp;&nbsp;<a class=\"$style\" href=\"$href\" $params>$title</a><br>";
 }
 
 function sidebar_links_box()
