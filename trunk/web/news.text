@@ -1,4 +1,12 @@
 [article]
+date=December 16th 2002 20:40
+title=Handbook available online
+text=The Boson handbook is now available online. You can have a look at
+    it <a href="http://www.freehackers.org/boson/handbook/" target="_blank">here</a>.
+    This is a the cvs version from the handbook and it will be rebuild every night.
+    <br><br>
+
+[article]
 date=November 15th 2002 12:45
 title=IMPORTANT: Problem found in 0.7, fix available
 text=Many users who downloaded 0.7 reported problems when using 24bpp depth
