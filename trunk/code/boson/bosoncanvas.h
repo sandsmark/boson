@@ -24,7 +24,7 @@ public:
 	/**
 	 * Create the @ref Cell array
 	 **/
-	void createCells(int w, int y);
+	void createCells(int w, int h);
 
 	/**
 	 * Initialize this @ref Cell.
@@ -74,6 +74,9 @@ public:
 	 * Called by @ref VisualUnit. One unit damages/shoots at another unit.
 	 **/
 	void shootAtUnit(VisualUnit* target, VisualUnit* damagedBy, long int damage);
+
+	Cell* cellAt(VisualUnit* unit) const;
+	Cell* cellAt(double x, double y) const;
 
 public slots:
 	/**
