@@ -91,7 +91,10 @@ kdDebug() << k_funcinfo << endl;
  d->mBosonSound.clear();
  delete d->mTicker;
  if (d->mPlayObject) {
-	d->mPlayObject->halt();
+	if (!d->mPlayObject->isNull()) {
+		kdDebug() << "halting music file" << endl;
+		d->mPlayObject->halt();
+	}
 	delete d->mPlayObject;
  }
  delete d;
