@@ -556,11 +556,15 @@ void RenderMain::initKAction()
 {
  KStdAction::quit(this, SLOT(close()), actionCollection());
 
+ KActionMenu* modelMenu = new KActionMenu(i18n("&Model"),
+		 actionCollection(), "model");
  QPtrListIterator<SpeciesTheme> it(mSpecies);
  for (; it.current(); ++it) {
 	SpeciesTheme* s = it.current();
 	KActionMenu* menu = new KActionMenu(s->identifier(), actionCollection(),
-			"view_species");
+			QString("model_species_%1").arg(s->identifier()));
+	modelMenu->insert(menu);
+
 	KSelectAction* selectUnit = new KSelectAction(i18n("&Units"), 0, this, SLOT(slotUnitChanged(int)));
 	KSelectAction* selectObject = new KSelectAction(i18n("&Objects"), 0, this, SLOT(slotUnitChanged(int)));
 	menu->insert(selectUnit);
