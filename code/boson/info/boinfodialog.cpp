@@ -343,7 +343,7 @@ void BoInfoDialog::initXPage()
 void BoInfoDialog::initNVidiaPage()
 {
  QVBox* vbox = addVBoxPage(i18n("&NVidia"));
- (void)new QLabel(i18n("This page is relevant for users of the proprietary NVidia driver only. All errors listed here are actuyll GOOD for all other people."), vbox);
+ (void)new QLabel(i18n("This page is relevant for users of the proprietary NVidia driver only. All errors listed here are actually GOOD for all other people."), vbox);
  d->mNVidiaErrors = new KListBox(vbox);
 }
 
