@@ -640,6 +640,7 @@ void TopWidget::loadGameData1() // FIXME rename!
 
 		// Then return to welcome screen
 		showWelcomeWidget();
+		mLoading = false;
 	}
  }
  boProfiling->stop(BosonProfiling::LoadGameData1);
