@@ -47,7 +47,6 @@ class BosonScript
 
     static BosonScript* newScriptParser(Language lang);
 
-    BosonScript();
     virtual ~BosonScript();
 
     static BosonScript* bosonScript() { return mScript; }
@@ -112,6 +111,9 @@ class BosonScript
     float cameraRotation() const;
     float cameraRadius() const;
     float cameraZ() const;
+
+  protected:
+    BosonScript();
 
   protected:
     void sendInput(QDataStream& stream);
