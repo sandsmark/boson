@@ -449,11 +449,13 @@ void BosonCanvas::initFogOfWar(Player* p)
 
 QValueList<Unit*> BosonCanvas::unitCollisionsInRange(const QPoint& pos, int radius)
 {
+// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
+// qcanvas::collisions() treats width==height==10 as width==height==11
  QCanvasItemList l = collisions(QRect(
 		(pos.x() - radius > 0) ? pos.x() - radius : 0,
 		(pos.y() - radius > 0) ? pos.y() - radius : 0,
-		pos.x() + radius,
-		pos.y() + radius));
+		pos.x() + radius - 1,
+		pos.y() + radius - 1));
 		
 			
  QValueList<Unit*> list;
@@ -486,8 +488,10 @@ QValueList<Unit*> BosonCanvas::unitsAtCell(int x, int y)
  if (!cell(x, y)) {
 	return list;
  }
+// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
+// qcanvas::collisions() treats width==height==10 as width==height==11
  QCanvasItemList l = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-			BO_TILE_SIZE, BO_TILE_SIZE));
+			BO_TILE_SIZE-1, BO_TILE_SIZE-1));
  for (unsigned int i = 0; i < l.count(); i++) {
 	if (!RTTI::isUnit(l[i]->rtti())) {
 		// this item is not important for us here
@@ -511,8 +515,10 @@ bool BosonCanvas::cellOccupied(int x, int y)
  return !(unitsAtCell(x, y).isEmpty());
  // alternative version (faster but duplicated code):
  /*
+// FIXME: QT bug ? the height and width of the qrect must be -= 1 !
+// qcanvas::collisions() treats width==height==10 as width==height==11
  QCanvasItemList list = collisions(QRect(x * BO_TILE_SIZE, y * BO_TILE_SIZE,
-		BO_TILE_SIZE, BO_TILE_SIZE));
+		BO_TILE_SIZE-1, BO_TILE_SIZE-1));
  if(list.isEmpty()) {
 	return false;
  }

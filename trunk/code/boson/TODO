@@ -9,7 +9,6 @@ Game TODOs
 - end of game - winner ; statistics
 - fullscreen mode
 - scroll if cursor at the edge of the window
-- auto positioning of produced units
 - rewrite fog of war (QCanvas suckz): use QCanvasSprite::hide() on all units and
   let the Cell display black. Don't use a QCanvasSprite for the fog of war.
   Terrible performance.
@@ -54,6 +53,11 @@ General TODOs
   saves us from a cheating player who (maybe just accidently) changed the files
   (units/*/index.desktop especially).
 - OptionsDialog: default position of commandframe
+- QCanvas::collisions(QRect(x,y,w,h)); returns a wrong list! it returns the
+  collisions on the rect QRect(x,y,w+1,h+1). This is fixed all over boson by
+  using collisions(QRect(x,y,w-1,h-1)) ; a bug report has been sent. Remember to
+  change this again if that is (a) really a qt bug and (b) it is fixed in a
+  released version. also remember to add a configure check for the fixed version
 
 Data TODOs
 - general sound (e.g. speech)
