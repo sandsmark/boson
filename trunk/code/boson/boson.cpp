@@ -1704,6 +1704,7 @@ void Boson::slotProcessDelayed() // TODO: rename: processDelayed()
 bool Boson::saveToFile(const QString& file)
 {
  boDebug() << k_funcinfo << file << endl;
+ BosonProfiler profiler(BosonProfiling::SaveGameToXML);
  if (playerCount() < 1) {
 	boError() << k_funcinfo << "no players in game. cannot save" << endl;
 	return false;
@@ -1716,12 +1717,16 @@ bool Boson::saveToFile(const QString& file)
 	BO_NULL_ERROR(d->mPlayField);
 	return false;
  }
+ boProfiling->start(BosonProfiling::SaveKGameToXML);
  QString kgameXML = saveKGameAsXML();
+ boProfiling->stop(BosonProfiling::SaveKGameToXML);
  if (kgameXML.isNull()) {
 	return false;
  }
 
+ boProfiling->start(BosonProfiling::SavePlayersToXML);
  QString playersXML = savePlayersAsXML();
+ boProfiling->stop(BosonProfiling::SavePlayersToXML);
  if (playersXML.isNull()) {
 	return false;
  }
@@ -1731,9 +1736,12 @@ bool Boson::saveToFile(const QString& file)
  // and load.
  QByteArray map;
  QDataStream stream(map, IO_WriteOnly);
+ boProfiling->start(BosonProfiling::SavePlayFieldToXML);
  d->mPlayField->saveMap(stream);
  d->mPlayField->saveDescription(stream);
+ boProfiling->stop(BosonProfiling::SavePlayFieldToXML);
 
+ BosonProfiler writeProfiler(BosonProfiling::SaveGameToXMLWriteFile);
  BSGFile f(file, false);
  if (!f.writeFile(QString::fromLatin1("kgame.xml"), kgameXML)) {
 	boError() << k_funcinfo << "Could not write kgame.xml to " << file << endl;
@@ -1747,6 +1755,7 @@ bool Boson::saveToFile(const QString& file)
 	boError() << k_funcinfo << "Could not write map to " << file << endl;
 	return false;
  }
+ writeProfiler.stop(); // in case we add something below one day :)
 
  return true;
 }
