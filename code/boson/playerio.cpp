@@ -229,7 +229,7 @@ Unit* PlayerIO::findUnitAt(const BosonCanvas* canvas, const BoVector3Fixed& canv
  return 0;
 }
 
-BoItemList* PlayerIO::unitsAtCells(const QPtrVector<Cell>* cells) const
+BoItemList* PlayerIO::unitsAtCells(const QPtrVector<const Cell>* cells) const
 {
  BoItemList* collisions = new BoItemList(); // will get deleted by BoItemListHandler
  const BoItemList* cellItems;
@@ -239,7 +239,7 @@ BoItemList* PlayerIO::unitsAtCells(const QPtrVector<Cell>* cells) const
 	return collisions;
  }
  for (unsigned int i = 0; i < cells->count(); i++) {
-	Cell* c = cells->at(i);
+	const Cell* c = cells->at(i);
 	if (!c) {
 		boError() << "invalid cell at " << i << endl;
 		continue;
