@@ -3,13 +3,14 @@ This is about how to install the *CVS* version of boson!
 
 Well.. basically, you need
 
-	code/
-	data/
+    code/
+    data/
+    tools/
 
 from boson CVS.
 see
 
-	http://sourceforge.net/projects/boson
+    http://sourceforge.net/projects/boson
 
 for more info about how to get the CVS modules.
 
@@ -18,15 +19,17 @@ Making the game :
 
 You should _not_ be root to make the game.
 
-Enter the code dir by typing 'cd code'
+Enter the code dir (cd code) and link the admin/ dir from the tools dir:
+	ln -s ../tools/admin admin
+(you have to adjust the path if tools is not in ..)
 Remember to set $KDEDIR correctly before starting configure. On most systems 
 this should be /opt/kde or /opt/kde3. Some systems might use /usr though.. so on
 my system this would read:
-	export KDEDIR=/opt/kde3
+    export KDEDIR=/opt/kde3
 Configure the whole stuff by entering 'make -f Makefile.cvs && ./configure'
-	(try 'bash configure' if './configure' doesn't work)
+    (try 'bash configure' if './configure' doesn't work)
 compile the game by typing 'make'
-	This step is the one that is long to finish
+    This step is the one that is long to finish
 
 
 Installing the game :
@@ -40,9 +43,9 @@ Installing data :
 
 Data are in the CVS module "data/"
 
-First enter the data dir (cd data) and link the admin/ dir from the code:
-	ln -s ../code/admin admin
-(you have to adjust the path if th code is not in ..)
+Enter the data dir (cd data) and link the admin/ dir from the tools dir:
+	ln -s ../tools/admin admin
+(you have to adjust the path if tools is not in ..)
 Now do the same steps as above:
 	make -f Makefile.cvs && ./configure && make
 	make install
