@@ -21,8 +21,7 @@ noinst_LTLIBRARIES = \
 		libborender.la \
 		libboinfo.la \
 		libbo3dsdebug.la
-bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo
-#bo3dsdebug
+bin_PROGRAMS = boson borender bounit boprofiling bocursor boinfo bo3dsdebug
 
 INCLUDES = -I$(top_srcdir)/bodebug $(all_includes)
 
@@ -144,9 +143,6 @@ boson_LDADD = \
 		$(top_builddir)/boson/libboson.la \
 		$(LIB_BOMEMORY)
 boson_SOURCES = \
-		bosonwidgetbase.cpp \
-		bosonwidget.cpp \
-		editorwidget.cpp \
 		bodisplaymanager.cpp \
 		bosonbigdisplaybase.cpp \
 		bosonbigdisplayinputbase.cpp \
@@ -240,20 +236,21 @@ boinfo_SOURCES = \
 libbo3dsdebug_la_SOURCES = \
 		boapplication.cpp \
 		boglobal.cpp \
+		bomath.cpp \
 		bo3dtools.cpp \
 		kgamemodeldebug.cpp \
 		bomatrixwidget.cpp
-#bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
-#bo3dsdebug_LDADD = \
-#		$(top_builddir)/boson/libbo3dsdebug.la \
-#		$(top_builddir)/bodebug/libbodebug.la \
-#		$(top_builddir)/boson/bopui/libbopui.la \
-#		$(LIB_BOMEMORY) \
-#		-l3ds \
-#		$(GLLIB) \
-#		-lkio $(LIB_KDEUI)
-#bo3dsdebug_SOURCES = \
-#		bo3dsdebugmain.cpp
+bo3dsdebug_LDFLAGS = $(KDE_RPATH) $(all_libraries)
+bo3dsdebug_LDADD = \
+		$(top_builddir)/boson/libbo3dsdebug.la \
+		$(top_builddir)/bodebug/libbodebug.la \
+		$(top_builddir)/boson/boufo/libboufo.la \
+		$(LIB_BOMEMORY) \
+		-l3ds \
+		$(GLLIB) \
+		-lkio $(LIB_KDEUI)
+bo3dsdebug_SOURCES = \
+		bo3dsdebugmain.cpp
 
 METASOURCES = AUTO
 
