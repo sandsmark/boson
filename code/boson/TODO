@@ -28,11 +28,6 @@ Game TODOs
 - maybe provide UnitGroups without keyboard, too. select units, click on a
   (empty) button to store that group. another click on that button restores the
   group. rmb on that button deletes it
-- make clear that "building mode" is enabled. maybe replace the cursor by the
-  facility that should get built.
-- display on the map where a facility can be placed. maybe change the cursor to
-  the facility when user clicks on the completed facility in the cmd panel (see
-  above) and gray the cursor out or so when you cant place the building there.
 - cmd bunker should display "completed" for completed facilities in the cmd
   frame. player should left click this then in order to select it for placement
   on the map. Currently the player has to click on the cmd bunker only (not on
