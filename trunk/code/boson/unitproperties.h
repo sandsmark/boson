@@ -92,7 +92,8 @@ public:
 	unsigned long int oilCost() const;
 
 	/**
-	 * @return The weapon range of this unit.
+	 * @return The weapon range of this unit. It's a number of cells, so multiply
+	 * with BO_TILE_SIZE to use it on the canvas.
 	 **/
 	unsigned long int range() const { return mRange; }
 

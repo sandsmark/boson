@@ -59,7 +59,7 @@ class BosonPath
      * @param goalx x-coordinate of goal point
      * @param goaly y-coordinate of goal point
      */
-    BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly);
+    BosonPath(Unit* unit, int startx, int starty, int goalx, int goaly, int range = 0);
     ~BosonPath();
     
     /**
@@ -74,7 +74,7 @@ class BosonPath
      * @param goalx the x <em>coordinate</em> of the goal. Not the cell!
      * @param goaly the y <em>coordinate</em> of the goal. Not the cell!
      **/
-    static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly);
+    static QValueList<QPoint> findPath(Unit* unit, int goalx, int goaly, int range = 0);
     
     /**
      * In this list are waypoints of path
@@ -107,6 +107,7 @@ class BosonPath
 #endif
     inline void neighbor(int& x, int& y, Direction d);
     inline Direction reverseDir(Direction d);
+    inline bool inRange(int x, int y);
 
     void debug() const;
   
@@ -126,6 +127,7 @@ class BosonPath
     int mNodesRemoved;
     int mPathLength;
     float mPathCost;
+    int mRange;
 };
 
 

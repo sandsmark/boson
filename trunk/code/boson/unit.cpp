@@ -356,7 +356,11 @@ void Unit::newPath()
 		return;
 	}
  }
- QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY);
+ int range = 0;
+ // Only go until enemy is in range if we are attacking
+ if(work() == WorkAttack)
+	range = weaponRange();
+ QValueList<QPoint> path = BosonPath::findPath(this, d->mMoveDestX, d->mMoveDestY, range);
  clearWaypoints(true); // send it over network. the list is cleared just before the addWaypoints() below take effect
  for (int unsigned i = 0; i < path.count(); i++) {
 	addWaypoint(path[i]);
@@ -498,16 +502,17 @@ QCanvasItemList Unit::unitsInRange() const
  // ever heard about pythagoras ;-) ?
  
  QRect r = boundingRect();
- r.setTop((r.top() > (int)weaponRange()) ? r.top() - weaponRange() : 0);
+ int wrange = (int)weaponRange() * BO_TILE_SIZE;
+ r.setTop((r.top() > wrange) ? r.top() - wrange : 0);
 // qt bug (confirmed). will be fixed in 3.1
 #if QT_VERSION >= 310
- r.setBottom(r.bottom() + weaponRange());
- r.setRight(r.right() + weaponRange());
+ r.setBottom(r.bottom() + wrange);
+ r.setRight(r.right() + wrange);
 #else
- r.setBottom(r.bottom() + weaponRange() - 1);
- r.setRight(r.right() + weaponRange() - 1);
+ r.setBottom(r.bottom() + wrange - 1);
+ r.setRight(r.right() + wrange - 1);
 #endif
- r.setLeft((r.left() > (int)weaponRange()) ? r.left() - weaponRange() : 0);
+ r.setLeft((r.left() > wrange) ? r.left() - wrange : 0);
 
  QCanvasItemList items = canvas()->collisions(r);
  items.remove((QCanvasItem*)this);
@@ -592,9 +597,11 @@ void Unit::setGroupLeader(bool leader)
 bool Unit::collidesWith(const QCanvasItem* item) const
 {
  // New collision-check method for units
- // It should be fully working, but if you encounter any problems and want to
- // use default QCanvasSprite's collision check, then uncomment next line
- //return QCanvasSprite::collidesWith(item);
+
+ if(item->rtti() == QCanvasItem::Rtti_Rectangle) {
+	QRect itemrect = ((QCanvasRectangle*)item)->boundingRectAdvanced();
+	return itemrect.intersects(boundingRectAdvanced());
+ }
 
  if(! RTTI::isUnit(item->rtti())) {
 	return QCanvasSprite::collidesWith(item);

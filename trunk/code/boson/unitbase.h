@@ -219,12 +219,13 @@ public:
 	void setWeaponDamage(long int d) { mWeaponDamage = d; }
 	
 	/**
-	 * @return The weapon range of this unit
+	 * @return The weapon range of this unit. This is a number of cells, so you
+	 * must *= BO_TILE_SIZE to use this on the canvas.
 	 **/
 	inline unsigned long int weaponRange() const { return mWeaponRange; }
 
 	/**
-	 * Change the weapong range of this unit
+	 * Change the weapong range of this unit. This is number of cells.
 	 **/
 	void setWeaponRange(unsigned long int r) { mWeaponRange = r; }
 	
