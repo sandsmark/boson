@@ -43,7 +43,6 @@ class Unit::UnitPrivate
 public:
 	UnitPrivate()
 	{
-		mSelectBox = 0;
 		mTarget = 0;
 	}
 	KGamePropertyInt mDirection;
@@ -59,7 +58,6 @@ public:
 	// network game.
 	Unit* mTarget;
 
-	SelectBox* mSelectBox;
 };
 
 Unit::Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas) 
