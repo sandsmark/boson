@@ -177,7 +177,7 @@ void BosonServer::checkFixKnown(serverFacility *f)
 	i=0; // 'i' is now the player index
 	k2 = f->known;
 	while ( k != k2) {
-		boAssert(i<3);
+		boAssert(i<BOSON_MAX_PLAYERS);
 		/* until the state is coherent between unit and ground */
 		if ( (k&1l) == (k2&1l) ) {
 			/* same state for user i, it's ok*/
@@ -212,7 +212,7 @@ void BosonServer::checkMobileKnown(serverMobUnit *m)
 	i=0;
 	k2 = m->known;
 	while ( k != k2) {
-		boAssert(i<3);
+		boAssert(i<BOSON_MAX_PLAYERS);
 		/* until the state is coherent between unit and ground */
 		if ( (k&1l) == (k2&1l) ) {
 			/* same state for user i, it's ok*/

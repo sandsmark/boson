@@ -36,7 +36,7 @@ void knownBy::sendToKnown(bosonMsgTag tag, int blen, void *data)
 	ulong	k = known;
 
 	for ( i=0; k; i++,k>>=1) {
-		boAssert(i<3);
+		boAssert(i<BOSON_MAX_PLAYERS);
 		if (k&1l) sendMsg ( player[i].buffer, tag, blen, data);
 	}
 }
