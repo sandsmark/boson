@@ -16,6 +16,13 @@ Game TODOs
 - display how many (and which) units are still in queue for production
 - BosonPath needs to be improved greatly
 - AI
+- BosonCanvas::unitsAtCell() uses QCanvas::collisions() and is therefore quite
+  slow. it is used by BosonPath which is not (yet) time critical but it can be
+  improved. *maybe* we'll add a QPtrList to all cells which contains all units
+  at this cell. So we'd have to use collisions() only to check *which* parts
+  (coordinates, rect, whatever) of the cell(s) is occupied by the unit. This
+  would improve the speed heavily but adding a QPtrList to every cell would be
+  terrible for memory usage... it *might* be worth...
 
 
 Editor (map, unit, scenario) TODOs
@@ -38,6 +45,7 @@ General TODOs
   differ then deny connection. This ensures that all clients are at the smae
   version. We need the revision number of each file - how to do add this
   automatically?
+  We can do this using static const char filename_id = "$Id:";
 - BosonTiles: use KPixmapSplitter (kdelibs/kdefx)
 - IdReloadState also makes Player emit signalUnitChanged() - this might become a
   performance problem!! we need it for BosonCommandWidget
