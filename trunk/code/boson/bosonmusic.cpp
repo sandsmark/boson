@@ -26,11 +26,11 @@
 #include <kstandarddirs.h>
 #include <kapplication.h>
 #include <kdebug.h>
-#include <kplayobject.h>
-#include <kplayobjectfactory.h>
+#include <arts/kplayobject.h>
+#include <arts/kplayobjectfactory.h>
 #ifndef BEFORE_BETA2
-#include <kartsserver.h>
-#include <kartsdispatcher.h>
+#include <arts/kartsserver.h>
+#include <arts/kartsdispatcher.h>
 #endif
 
 #include <qtimer.h>
