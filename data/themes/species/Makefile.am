@@ -1,1 +1,1 @@
-SUBDIRS=human
+SUBDIRS=human neutral
