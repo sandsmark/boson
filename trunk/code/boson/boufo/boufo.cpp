@@ -1094,6 +1094,11 @@ void BoUfoWidget::setVisible(bool v)
  invalidate(); // AB: libufo fails to do so
 }
 
+bool BoUfoWidget::isVisible() const
+{
+ return widget()->isVisible();
+}
+
 void BoUfoWidget::loadPropertiesFromXML(const QDomNamedNodeMap& map)
 {
  QMap<QString, QString> properties;
