@@ -123,8 +123,15 @@ public:
 	 *
 	 * Note that the search always takes place in the group "data" and will
 	 * prepend "boson/" to @p searchPattern.
+	 *
+	 * @param recursive If TRUE then all "*" in @p searchPattern will be
+	 * extended to subdirectories as well. I.e. "boson/ * /file.png" (remove
+	 * spaces - necessary because of c++ comments.. any way around this?)
+	 * will _also_ expand to "boson/foo/bar/file.png", whereas with
+	 * recursive=FALSE it would expand to "boson/foo2/file.png" _only_
+	match
 	 **/
-	static QStringList availableFiles(const QString& searchPattern);
+	static QStringList availableFiles(const QString& searchPattern, bool recursive = false);
 
 //protected:
 	// protected, so that noone can make an object except for ourselves.
