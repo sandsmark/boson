@@ -463,7 +463,7 @@ void Unit::shootAt(Unit* target)
 		return;
 	}
  }
- kdDebug() << "shoot at unit " << target->id() << endl;
+ kdDebug() << id() << " shoots at unit " << target->id() << endl;
  ((BosonCanvas*)canvas())->shootAtUnit(target, this, weaponDamage());
  reloadWeapon();
 }
@@ -544,7 +544,7 @@ QValueList<Unit*> Unit::unitCollisions(bool exact) const
 
 void Unit::setWork(WorkType w)
 {
- if (w != work()) {
+ if (w != work() || isDestroyed()) {
 	boCanvas()->setWorkChanged(this, work());
  }
  UnitBase::setWork(w);
