@@ -484,7 +484,7 @@ BosonGLWidget::BosonGLWidget(QWidget* parent, const char* name, bool direct)
 #if QT_VERSION >= 0x030200
 	: QWidget(parent, name, Qt::WNoAutoErase)
 #else
-	: QWidget(parent, name)
+	: QWidget(parent, name, Qt::WRepaintNoErase)
 #endif
 {
  boDebug() << k_funcinfo << endl;
