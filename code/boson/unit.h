@@ -84,7 +84,7 @@ public:
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
 
-	inline virtual void setHealth(unsigned long int h);
+	virtual void setHealth(unsigned long int h);
 
 	inline BosonCanvas* boCanvas() const { return (BosonCanvas*)canvas(); }
 
@@ -160,7 +160,7 @@ public:
 	virtual ProductionPlugin* productionPlugin() const { return 0; }
 	virtual RepairPlugin* repairPlugin() const { return 0; }
 
-	inline Unit* target() const;
+	Unit* target() const;
 	virtual void setTarget(Unit* target);
 
 	bool inRange(Unit* unit) const;
@@ -309,18 +309,18 @@ public:
 	virtual ~MobileUnit();
 
 	virtual void setSpeed(double s);
-	inline virtual double speed() const;
+	virtual double speed() const;
 
 	/**
 	 * Turn to direction. This sets a new frame according to the new
 	 * direction.
 	 **/
-	inline void turnTo(Direction direction);
+	void turnTo(Direction direction);
 
 	/**
 	 * Call turnTo according to the current speed (you want to use this!)
 	 **/
-	inline void turnTo();
+	void turnTo();
 
 	void leaderMoved(double x, double y);
 
@@ -375,7 +375,7 @@ public:
 	 * we return NULL
 	 * @return NULL if no valid refinery is set, otherwise the refinery.
 	 **/
-	inline Facility* refinery() const;
+	Facility* refinery() const;
 	virtual QRect boundingRect() const;
 
 	virtual void clearWaypoints(bool send = false);
@@ -419,9 +419,9 @@ public:
 	 * productions of a facility!
 	 * @return If this unit has been built (constructed) completely
 	 **/
-	inline bool isConstructionComplete() const;
+	bool isConstructionComplete() const;
 
-	inline double constructionProgress() const;
+	double constructionProgress() const;
 
 	/**
 	 * Used by to initialize the scenario. A scenario file can specify that
