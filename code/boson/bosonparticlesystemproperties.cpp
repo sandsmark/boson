@@ -103,10 +103,10 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mMaxLife = (float)(cfg->readDoubleNumEntry("MaxLife", 0));
   mMaxNum = cfg->readNumEntry("MaxNum", 100);
   mInitNum = cfg->readNumEntry("InitNum", 0);
-  if(mInitNum == 0)
+/*  if(mInitNum == 0)
   {
     mInitNum = 10;  // Needed because of stupid bug
-  }
+  }*/
   QString mGLBlendFuncStr = cfg->readEntry("BlendFunc", "GL_ONE_MINUS_SRC_ALPHA");
   if(mGLBlendFuncStr == "GL_ONE_MINUS_SRC_ALPHA")
   {
@@ -128,11 +128,6 @@ BosonParticleSystemProperties::BosonParticleSystemProperties(KSimpleConfig* cfg)
   mAlign = cfg->readBoolEntry("Align", true);
   QString textureName = cfg->readEntry("Texture", "explosion");
   mTextures = getTextures(textureName);
-  boDebug(150) << k_funcinfo << "Number of textures found: " << mTextures.mTextureCount << endl;
-  for(int i = 0; i < mTextures.mTextureCount; i++)
-  {
-    boDebug(150) << "    " << k_funcinfo << "OGL name of texture[" << i << "]: " << mTextures.mTextureIds[i] << endl;
-  }
 }
 
 BosonParticleSystemProperties::~BosonParticleSystemProperties()
@@ -141,13 +136,9 @@ BosonParticleSystemProperties::~BosonParticleSystemProperties()
 
 BosonParticleSystem* BosonParticleSystemProperties::newSystem(BoVector3 pos, float rotation) const
 {
-  /// FIXME: 5 is radius of bounding sphere of particle system. This MUST be
-  //  calculated, not hardcoded. And for some systems (e.g. missile's trails),
-  //  we can't use it because it can't be precalculated (not here at least)
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
-      5, mTextures, this);
+      mTextures, this);
   s->setPosition(BoVector3(pos[0] / BO_TILE_SIZE, -(pos[1] / BO_TILE_SIZE), pos[2] / BO_TILE_SIZE));
-  s->setSize(1.0);
   s->setAge(mAge);
   s->setBlendFunc(GL_SRC_ALPHA, mGLBlendFunc);
   if(rotation != 0.0)
@@ -163,10 +154,6 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
 {
   particle->life = getFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
-  if(mNormalize)
-  {
-    particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
-  }
   particle->color = mStartColor;
   particle->size = mStartSize;
   if(s->isRotated())
@@ -176,7 +163,8 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
     BoVector3 velo(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
     s->matrix().transform(&pos, &pos);
-    s->matrix().transform(&velo, &velo);
+    particle->pos += pos;
+    s->matrix().transform(&(particle->velo), &velo);
   }
   else
   {
@@ -184,6 +172,10 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem* s, BosonPa
         getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
     particle->velo = BoVector3(getFloat(mMinVelo[0], mMaxVelo[0]),
         getFloat(mMinVelo[1], mMaxVelo[1]), getFloat(mMinVelo[2], mMaxVelo[2]));
+  }
+  if(mNormalize)
+  {
+    particle->velo.scale(getFloat(mMinScale, mMaxScale) / particle->velo.length());
   }
 }
 

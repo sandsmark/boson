@@ -133,7 +133,7 @@ void pointByRotation(float &x, float &y, const float angle, const float radius)
 
 float BoVector3::length() const
 {
- return sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]);
+ return sqrt(dotProduct());
 }
 
 BoVector3 BoVector3::load(KConfig* cfg, QString key)

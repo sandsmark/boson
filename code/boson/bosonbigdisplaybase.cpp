@@ -1068,22 +1068,11 @@ void BosonBigDisplayBase::renderParticles()
  BosonParticleSystem* s;
  while ((s = it.current()) != 0) {
 	++it;
+	boDebug(150) << k_funcinfo << "System: " << s << "; radius: " << s->boundingSphereRadius() << endl;
 	if (sphereInFrustum(s->position(), s->boundingSphereRadius())) {
 #warning FIXME
-		// BosonParticleSystem uses *OpenGL* coordinates for
-		// position, not cell/canvas coordinates.
-		// this is a bug imho, although they are often pretty
-		// similar. the class should do
-		// a) maintain two coordinates (cell and opengl)
-		// b) provide cell values with position() or better with
-		// x() and y() as the rest does (esp. BosonItem)
-		//
-		// cell-coordinates only is not an option, as the
-		// accuracy of opengl coordinates is needed.
-		int cellX = (int)s->position()[0];
-		int cellY = -((int)s->position()[1]);
 		// FIXME: this is wrong: parts of particle system may be visible even if it's center point isn't
-		if (canvas()->onCanvas(cellX, cellY) && !localPlayer()->isFogged(cellX, cellY)) {
+		if (canvas()->onCanvas(s->x(), s->y()) && !localPlayer()->isFogged(s->x(), s->y())) {
 			visible.append(s);
 		}
 	}
