@@ -82,7 +82,7 @@ int main(/*int argc, char* argv[] */)
 	(new editorTopLevel(&app))->show();
 
 	/// XXX,orzel :  not be...... but $KDEDIR and so on
-	assert (true == ecanvas->Load("/opt/be/share/apps/boson/map/basic.bpf"));
+	app.do_open("/opt/be/share/apps/boson/map/basic.bpf");
 
 	return app.exec();
 }  
