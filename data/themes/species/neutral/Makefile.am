@@ -1,4 +1,4 @@
-SUBDIRS=objects
+SUBDIRS=objects units
 
 # this is not (yet?) a real species, so we don't have additional data here.
 species_DATA = index.species
