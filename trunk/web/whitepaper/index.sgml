@@ -34,7 +34,7 @@ as network messages tags, and common classes for units/facilities.
 	<item>The <tt/visual/ directory is the common rendering code, shared between boson and the editor.
 	<item>The <tt/boson/ directory is the client.
 	<item>The <tt/editor/ directory is the code for the editor.
-	<item>The <tt/map/ directory is the former place to generate maps, and is now use for test suites.
+	<item>The <tt/map/ directory is the former place to generate maps, and is now used for test suites.
 </itemize>
 
 <sect>The network layer
@@ -81,8 +81,8 @@ send a MSG_TIME_CONFIRM message.
 value and the algorithm can loop.
 </itemize>
 
-	Those who are curious will have noticed a usleep() call before the algorithm actually loop. This
-is to prevent a network overload that would be the consequence of to much
+	Those who are curious will have noticed a usleep() call before the algorithm actually loops. This
+is to prevent a network overload that would be the consequence of too much
 MSG_TIME_INCREASE/MSG_TIME_CONFIRM messages on a quite quick network (typically local networks).
 
 
