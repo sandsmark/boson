@@ -218,38 +218,38 @@ void BoCamera::loadFromXML(const QDomElement& root)
   lookatx = root.attribute("LookAtX").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for LookAtX tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for LookAtX tag" << endl;
     lookatx = 0.0f;
   }
   lookaty = root.attribute("LookAtY").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for LookAtY tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for LookAtY tag" << endl;
     lookaty = 0.0f;
   }
   lookatz = root.attribute("LookAtZ").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for LookAtZ tag" << endl;
     mPosZ = 0.0f;
   }
   mPosZ = root.attribute("PosZ").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for PosZ tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for PosZ tag" << endl;
     mPosZ = 0.0f;
   }
   float rotation = root.attribute("Rotation").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Rotation tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for Rotation tag" << endl;
     rotation = 0.0f;
   }
   mRotation = rotation;
   float radius = root.attribute("Radius").toFloat(&ok);
   if(!ok)
   {
-    boError() << k_funcinfo << "Invalid value for Radius tag" << endl;
+    boError(230) << k_funcinfo << "Invalid value for Radius tag" << endl;
     radius = 0.0f;
   }
   mRadius = radius;
@@ -378,7 +378,7 @@ void BoCamera::setRadius(GLfloat r, bool now)
 
 void BoCamera::setRotation(GLfloat r, bool now)
 {
-  boDebug() << k_funcinfo << endl;
+  boDebug(230) << k_funcinfo << endl;
   if(now)
   {
     mRotation = r;
@@ -388,7 +388,7 @@ void BoCamera::setRotation(GLfloat r, bool now)
   else
   {
     mRotationDiff = r - mRotation;
-    boDebug() << k_funcinfo << "rotation diff set to: " << mRotationDiff << endl;
+    boDebug(230) << k_funcinfo << "rotation diff set to: " << mRotationDiff << endl;
   }
 }
 
@@ -421,7 +421,7 @@ void BoCamera::setZ(GLfloat z, bool now)
 
 void BoCamera::setMoveRect(GLfloat minX, GLfloat maxX, GLfloat minY, GLfloat maxY)
 {
-  boDebug() << k_funcinfo << "(" << minX << "; " << maxX << ";  " << minY << "; " << maxY << ")" << endl;
+  boDebug(230) << k_funcinfo << "(" << minX << "; " << maxX << ";  " << minY << "; " << maxY << ")" << endl;
   mMinX = minX;
   mMaxX = maxX;
   mMinY = minY;
@@ -444,7 +444,7 @@ void BoCamera::commitChanges(int ticks)
 
 void BoCamera::setMoveMode(MoveMode mode)
 {
-  boDebug() << k_funcinfo << "mode: " << mode << endl;
+  boDebug(230) << k_funcinfo << "mode: " << mode << endl;
   mMoveMode = mode;
 }
 
@@ -455,7 +455,7 @@ void BoCamera::advance()
     return;
   }
 
-  boDebug() << k_funcinfo << "mRemainingTime: " << mRemainingTime << endl;
+  boDebug(230) << k_funcinfo << "mRemainingTime: " << mRemainingTime << endl;
 
   // How much of differences to add
   float factor;
@@ -463,15 +463,15 @@ void BoCamera::advance()
   {
     // FIXME: make this more simple!
     factor = (-cos((mCommitTime - mRemainingTime + 1) / (float)mCommitTime * M_PI) + 1) / 2 - mMovedAmount;
-    boDebug() << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+    boDebug(230) << k_funcinfo << "Sinusoidal movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
   }
   else
   {
     factor = 1.0 / mCommitTime;
-    boDebug() << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
+    boDebug(230) << k_funcinfo << "Linear movement; mCommitTime: " << mCommitTime << "; factor: " << factor << endl;
   }
   mMovedAmount += factor;
-  boDebug() << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
+  boDebug(230) << k_funcinfo << "factor: " << factor << ";  movedAmount: " << mMovedAmount << endl;
   bool changed = false;
 
   if(!mLookAtDiff.isNull())
@@ -508,7 +508,7 @@ void BoCamera::advance()
 
   if(!changed)
   {
-//    boError() << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
+//    boError(230) << k_funcinfo << "remainingTime: " << mRemainingTime << ", but no changes ?!" << endl;
     mRemainingTime = 0;
     mCommitTime = 0;
     mMovedAmount = 0.0f;
