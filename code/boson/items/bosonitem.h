@@ -225,6 +225,15 @@ public:
 	QPtrVector<Cell>* cells();
 
 	/**
+	 * This does <em>not</em> recalculate the cells, as @ref cells does when
+	 * the data is not valid anymore. It can be used when you need a const
+	 * function where you don't have to depend on the data to be current (do
+	 * not use in collision detection or pathfinder code! rather for
+	 * tooltips and that kind)
+	 **/
+	QPtrVector<Cell>* cellsConst() const;
+
+	/**
 	 * This is a more generic version of the above method. You can use it to
 	 * calculate which cells the unit would occupy if it was at a certain
 	 * position.
