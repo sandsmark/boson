@@ -197,6 +197,23 @@ public:
 	virtual bool save(QDataStream& stream);
 	virtual bool load(QDataStream& stream);
 
+	/**
+	 * Import the @p image into this array. @ref textureCount must be at
+	 * least 3, if you want the alpha buffer to be imported then at least 4.
+	 *
+	 * The red component is applied to the first texture, green to the second
+	 * and blue to the third. If the image has an alpha component and @ref
+	 * textureCount is at least 4, then alpha is applied to the fourth
+	 * texture.
+	 **/
+	bool importTexMap(const QImage* image);
+
+	/**
+	 * Copy the texmap for @p dstTexture from the BoTexMap object @p src.
+	 * The texture is named @p srcTexture in @p src.
+	 **/
+	bool copyTexture(unsigned int dstTexture, const BoTexMap* src, unsigned int srcTexture);
+
 	unsigned int textureCount() const
 	{
 		return mTextureCount;
@@ -255,6 +272,7 @@ public:
 		mTexMap[texMapArrayPos(texture, x, y)] = value;
 	}
 
+
 	/**
 	 * Fill the texMap with 100% of texture @p texture.
 	 **/
@@ -266,7 +284,6 @@ public:
 		initialize(texture, 255);
 	}
 
-protected:
 	/**
 	 * Initialize (fill) the @p texture (at all coordinates) with @p alpha. If @p texture
 	 * is negative then <em>all</em>textures (i.e. the complete texMap) are
@@ -448,6 +465,14 @@ public:
 	 **/
 	void fill(unsigned int texture);
 
+	void resetTexMap(unsigned int texture, unsigned char alpha)
+	{
+		if (!mTexMap) {
+			return;
+		}
+		mTexMap->initialize(texture, alpha);
+	}
+
 	inline float* heightMap() const { return mHeightMap->heightMap(); }
 
 	/**
@@ -503,6 +528,18 @@ public:
 	}
 
 	/**
+	 * See @ref BoTexMap::copyTexture
+	 **/
+	bool copyTexMapTexture(unsigned int dstTexture, const BoTexMap* src, unsigned int srcTexture)
+	{
+		if (mTexMap) {
+			return mTexMap->copyTexture(dstTexture, src, srcTexture);
+		}
+		return false;
+	}
+
+
+	/**
 	 * @return @ref BosonGroundTheme::miniMapColor
 	 **/
 	QRgb miniMapColor(unsigned int texture) const;
@@ -542,12 +579,6 @@ public:
 	 **/
 	bool loadTexMap(QDataStream& stream);
 	bool saveTexMap(QDataStream& stream);
-
-	/**
-	 * Import a texmap from an image.
-	 **/
-	bool importTexMap(const QImage* image, int texturesPerComponent = 1, bool useAlpha = false);
-	bool importTexMap(const QString& file, int texturesPerComponent = 1, bool useAlpha = false);
 
 	bool generateCellsFromTexMap();
 
