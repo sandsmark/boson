@@ -38,6 +38,11 @@ BosonStartupNetwork::~BosonStartupNetwork()
 {
 }
 
+void BosonStartupNetwork::slotUnsetKGame()
+{
+ setGame(0);
+}
+
 void BosonStartupNetwork::setGame(Boson* game)
 {
  if (mGame) {
@@ -63,6 +68,8 @@ void BosonStartupNetwork::setGame(Boson* game)
 		this, SIGNAL(signalStartGameClicked()));
  connect(mGame, SIGNAL(signalAdminStatusChanged(bool)),
 		this, SIGNAL(signalSetAdmin(bool)));
+ connect(mGame, SIGNAL(destroyed()),
+		this, SLOT(slotUnsetKGame()));
 
  QPtrList<KPlayer> list = *mGame->playerList();
  QPtrListIterator<KPlayer> it(list);;
