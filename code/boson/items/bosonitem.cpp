@@ -112,7 +112,7 @@ QString BosonItemProperties::propertyName(int id)
 }
 
 
-BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
+BosonItem::BosonItem(Player* owner, BosonCanvas* canvas)
 	: BosonItemProperties()
 {
  mOwner = owner;
@@ -150,10 +150,6 @@ BosonItem::BosonItem(Player* owner, BosonModel* model, BosonCanvas* canvas)
 	BO_NULL_ERROR(mCanvas);
  }
 
- if (!mRenderer->setModel(model)) {
-	boError() << k_funcinfo << "oops - setModel() failed. must not happen currently" << endl;
-	return;
- }
 }
 
 BosonItem::~BosonItem()

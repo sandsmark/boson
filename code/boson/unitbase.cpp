@@ -34,7 +34,7 @@
 #include <qmap.h>
 
 UnitBase::UnitBase(const UnitProperties* prop, Player* owner, BosonCanvas* canvas)
-	: BosonItem(owner, owner->speciesTheme() ? owner->speciesTheme()->unitModel(prop->typeId()) : 0, canvas)
+	: BosonItem(owner, canvas)
 {
  initStatic();
  mWeaponProperties = 0; // created on the fly in weaponDataHandler()
@@ -78,6 +78,14 @@ UnitBase::~UnitBase()
  }
  delete mWeaponProperties;
 // boDebug() << k_funcinfo << " done" << endl;
+}
+
+BosonModel* UnitBase::getModelForItem() const
+{
+ BO_CHECK_NULL_RET0(owner());
+ BO_CHECK_NULL_RET0(owner()->speciesTheme());
+ BO_CHECK_NULL_RET0(unitProperties());
+ return owner()->speciesTheme()->unitModel(unitProperties()->typeId());
 }
 
 void UnitBase::initStatic()

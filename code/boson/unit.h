@@ -80,6 +80,8 @@ public:
 	Unit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Unit();
 
+	virtual bool init();
+
 	static void initStatic();
 
 	inline virtual int rtti() const { return UnitBase::rtti(); }
@@ -552,6 +554,8 @@ public:
 	MobileUnit(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~MobileUnit();
 
+	virtual bool init();
+
 	/**
 	 * Turn to direction. This sets a new frame according to the new
 	 * direction.
@@ -629,6 +633,8 @@ class Facility : public Unit
 public:
 	Facility(const UnitProperties* prop, Player* owner, BosonCanvas* canvas);
 	virtual ~Facility();
+
+	virtual bool init();
 
 	/**
 	 * The construction steps are the number of frames until the complete

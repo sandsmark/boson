@@ -1646,6 +1646,25 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
 	item->setId(id);
 	item->move(pos.x(), pos.y(), pos.z());
 	addAnimation(item);
+	if (!boGame->gameMode()) {
+		// editor won't display the construction but always completed
+		// facilities. otherwise it's hard to recognize where they were actually
+		// placed
+		item->itemRenderer()->setShowGLConstructionSteps(false);
+		item->itemRenderer()->setAnimationMode(UnitAnimationIdle);
+	}
+	if (!item->itemRenderer()->setModel(item->getModelForItem())) {
+		boError() << k_funcinfo << "setModel() failed. cannot create item." << endl;
+		deleteItem(item);
+		item = 0;
+	}
+	if (item && !item->init()) {
+		boError() << k_funcinfo << "item initialization failed. cannot create item." << endl;
+		deleteItem(item);
+		item = 0;
+	}
+ }
+ if (item) {
 	if (RTTI::isUnit(rtti)) {
 		// We also need to recalc occupied status for cells that unit is on.
 		// FIXME: this is hackish
@@ -1655,13 +1674,6 @@ BosonItem* BosonCanvas::createItem(int rtti, Player* owner, const ItemType& type
  }
  if (d->mAnimList.count() != d->mAllItems.count()) {
 	boError() << k_funcinfo << "animlist.count() (" << d->mAnimList.count() << ") != allitems.count() (" << d->mAllItems.count() << ")" << endl;
- }
- if (!boGame->gameMode()) {
-	// editor won't display the construction but always completed
-	// facilities. otherwise it's hard to recognize where they were actually
-	// placed
-	item->itemRenderer()->setShowGLConstructionSteps(false);
-	item->itemRenderer()->setAnimationMode(UnitAnimationIdle);
  }
  return item;
 }
@@ -1745,11 +1757,7 @@ BosonShot* BosonCanvas::createShot(Player* owner, unsigned long int shotType, un
 	}
 	case BosonShot::Fragment:
 	{
-		SpeciesTheme* t = owner->speciesTheme();
-		BO_CHECK_NULL_RET0(t);
-		BosonModel* model = t->objectModel("fragment");
-		BO_CHECK_NULL_RET0(model);
-		s = (BosonShot*)new BosonShotFragment(owner, this, model);
+		s = (BosonShot*)new BosonShotFragment(owner, this);
 		break;
 	}
 	default:

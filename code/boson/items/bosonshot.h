@@ -75,6 +75,9 @@ class BosonShot : public BosonItem
     BosonShot(Player* owner, BosonCanvas* canvas);
     ~BosonShot();
 
+    virtual BosonModel* getModelForItem() const;
+    virtual bool init();
+
     /**
      * @return Weapon properties of this shot if it has one.
      * Note that it's perfectly legal to return NULL pointer here, so you should
@@ -153,9 +156,6 @@ class BosonShot : public BosonItem
 
     virtual void moveToTarget() {}
 
-  private:
-    void init();
-
     bool mActive;
     const BosonWeaponProperties* mProp;
 };
@@ -171,8 +171,8 @@ class BosonShot : public BosonItem
 class BosonShotBullet : public BosonShot
 {
   public:
-    BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& target);
     BosonShotBullet(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
+    virtual bool init();
 
     // Bullets won't be saved becaused they will immediately "explode" and
     //  become inactive
@@ -207,7 +207,6 @@ class BosonShotBullet : public BosonShot
 class BosonShotMissile : public BosonShot
 {
   public:
-    BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos, const BoVector3& target);
     BosonShotMissile(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
     ~BosonShotMissile();
 
@@ -246,7 +245,6 @@ class BosonShotMissile : public BosonShot
 class BosonShotExplosion : public BosonShot
 {
   public:
-    BosonShotExplosion(Player* owner, BosonCanvas* canvas, const BoVector3& pos, long int damage, float damagerange, float fulldamagerange, int delay);
     BosonShotExplosion(Player* owner, BosonCanvas* canvas);
 
     void activate(const BoVector3& pos, long int damange, float damageRange, float fulldamagerange, int delay);
@@ -282,7 +280,6 @@ class BosonShotExplosion : public BosonShot
 class BosonShotMine : public BosonShot
 {
   public:
-    BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos);
     BosonShotMine(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
     virtual bool saveAsXML(QDomElement& root);
@@ -311,7 +308,6 @@ class BosonShotMine : public BosonShot
 class BosonShotBomb : public BosonShot
 {
   public:
-    BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop, const BoVector3& pos);
     BosonShotBomb(Player* owner, BosonCanvas* canvas, const BosonWeaponProperties* prop);
 
     virtual bool saveAsXML(QDomElement& root);
@@ -339,10 +335,10 @@ class BosonShotBomb : public BosonShot
 class BosonShotFragment : public BosonShot
 {
   public:
-    BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model, const BoVector3& pos,
-        const UnitProperties* unitproperties);
-    BosonShotFragment(Player* owner, BosonCanvas* canvas, BosonModel* model);
+    BosonShotFragment(Player* owner, BosonCanvas* canvas);
     ~BosonShotFragment();
+
+    virtual BosonModel* getModelForItem() const;
 
     void activate(const BoVector3& pos, const UnitProperties* unitProperties);
 
