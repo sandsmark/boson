@@ -62,7 +62,7 @@ Boson* Boson::mBoson = 0;
 #define ADVANCE_INTERVAL 250 // ms
 
 // Saving format version (000005 = 00.00.05)
-#define BOSON_SAVEGAME_FORMAT_VERSION 0x000041
+#define BOSON_SAVEGAME_FORMAT_VERSION 0x000110
 
 #define BOSON_SAVEGAME_END_COOKIE 1718
 

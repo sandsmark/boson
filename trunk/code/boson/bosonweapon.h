@@ -86,9 +86,13 @@ class BosonWeaponProperties : public PluginProperties
      **/
     float fullDamageRange() const  { return mFullDamageRange; };
     /**
-     * @return Speed of missile of this unit (per second) or 0 if speed is infinite
+     * @return Maximum speed that missile of this weapon can have or 0 if speed is infinite
      **/
-    unsigned long int speed() const  { return mSpeed; };
+    float speed() const  { return mSpeed; };
+    /**
+     * @return Acceleration speed of missile of this unit
+     **/
+    float accelerationSpeed() const  { return mAccelerationSpeed; };
     /**
      * @return Filename of 3d model of shot of this weapon.
      * Only used in unit editor
@@ -158,7 +162,8 @@ class BosonWeaponProperties : public PluginProperties
     void setRange(unsigned long int range)  { mRange = range; };
     void setCanShootAtAirUnits(bool can)  { mCanShootAtAirUnits = can; };
     void setCanShootAtLandUnits(bool can)  { mCanShootAtLandUnits = can; };
-    void setSpeed(unsigned long int speed)  { mSpeed = speed; };
+    void setSpeed(float speed)  { mSpeed = speed; };
+    void setAccelerationSpeed(float speed)  { mAccelerationSpeed = speed; };
     void setModelFileName(QString file)  { mModelFileName = file; };
     void setShootParticleSystemIds(QValueList<unsigned long int> ids)  { mShootParticleSystemIds = ids; };
     void setFlyParticleSystemIds(QValueList<unsigned long int> ids)  { mFlyParticleSystemIds = ids; };
@@ -181,7 +186,8 @@ class BosonWeaponProperties : public PluginProperties
     bool mCanShootAtAirUnits;
     bool mCanShootAtLandUnits;
     unsigned int mReload;
-    unsigned long int mSpeed;
+    float mSpeed;
+    float mAccelerationSpeed;
     float mHeight;
     BosonModel* mModel;
     QString mModelFileName;

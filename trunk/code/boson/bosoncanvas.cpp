@@ -1014,6 +1014,9 @@ bool BosonCanvas::save(QDataStream& stream)
 	if (RTTI::isShot(i->rtti())) {
 		boDebug() << k_funcinfo << "Saving shot" << endl;
 		s = (BosonShot*)i;
+		if (!s->isActive()) {
+			continue;
+		}
 		stream << (Q_UINT32)s->owner()->id();
 		stream << (Q_UINT32)s->properties()->unitProperties()->typeId();
 		stream << (Q_UINT32)s->properties()->id();
@@ -1142,6 +1145,9 @@ bool BosonCanvas::saveAsXML(QDomElement& root)
  for (BosonItem* i = d->mAnimList.first(); i; i = d->mAnimList.next()) {
 	if (RTTI::isShot(i->rtti())) {
 		s = (BosonShot*)i;
+		if (!s->isActive()) {
+			continue;
+		}
 		QDomElement shot = doc.createElement(QString::fromLatin1("Shot"));
 		if (!s->saveAsXML(shot)) {
 			boError() << k_funcinfo << "Could not save shot " << s << endl;

@@ -182,10 +182,22 @@ public:
 	bool isFacility() const;
 
 	/**
-	 * @return The speed of the mobiel unit. 0 if this is a facility. See
+	 * @return Maximal speed of the mobile unit. 0 if this is a facility. See
 	 * @ref isFacility
 	 **/
 	float speed() const;
+
+	/**
+	 * @return How fast this mobile unit accelerates. 0 if this is a facility. See
+	 * @ref isFacility
+	 **/
+	float accelerationSpeed() const;
+
+	/**
+	 * @return How fast this mobile unit decelerates. 0 if this is a facility. See
+	 * @ref isFacility
+	 **/
+	float decelerationSpeed() const;
 
 	/**
 	 * @return Whether this unit can go over land
@@ -372,6 +384,8 @@ protected:
 	// These only have effect if there is mobile or facility properties
 	void setConstructionSteps(unsigned int steps);
 	void setSpeed(float speed);
+	void setAccelerationSpeed(float speed);
+	void setDecelerationSpeed(float speed);
 	void setCanGoOnLand(bool c);
 	void setCanGoOnWater(bool c);
 

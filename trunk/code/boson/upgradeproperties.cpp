@@ -399,8 +399,8 @@ void UpgradeProperties::applyProperty(QValueList<unsigned long int>* typeIds,
         }
         case WeaponSpeed:
         {
-          oldvalueuint = wep->speed();
-          wep->setSpeed(applyValue(data, oldvalueuint));
+          oldvaluef = wep->speed();
+          wep->setSpeed(applyValue(data, oldvaluef));
           break;
         }
         default:
