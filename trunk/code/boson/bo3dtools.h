@@ -615,8 +615,6 @@ class BoVector3
 
   private:
     friend class BoMatrix;
-    friend QDataStream& operator<<(QDataStream& s, const BoVector3& v);
-    friend QDataStream& operator>>(QDataStream& s, BoVector3& v);
 
     GLfloat mData[3];
 };
@@ -851,8 +849,6 @@ class BoVector4
 
   private:
     friend class BoMatrix;
-    friend QDataStream& operator<<(QDataStream& s, const BoVector4& v);
-    friend QDataStream& operator>>(QDataStream& s, BoVector4& v);
     GLfloat mData[4];
 };
 

@@ -170,16 +170,14 @@ bool BoVector3::loadFromXML(const QDomElement& root, const QString& name)
 
 QDataStream& operator<<(QDataStream& s, const BoVector3& v)
 {
-  return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2];
+  return s << (float)v[0] << (float)v[1] << (float)v[2];
 }
 
 QDataStream& operator>>(QDataStream& s, BoVector3& v)
 {
   float x, y, z;
   s >> x >> y >> z;
-  v.mData[0] = x;
-  v.mData[1] = y;
-  v.mData[2] = z;
+  v.set(x, y, z);
   return s;
 }
 
@@ -250,17 +248,14 @@ bool BoVector4::loadFromXML(const QDomElement& root, const QString& name)
 
 QDataStream& operator<<(QDataStream& s, const BoVector4& v)
 {
-  return s << (float)v.mData[0] << (float)v.mData[1] << (float)v.mData[2] << (float)v.mData[3];
+  return s << (float)v[0] << (float)v[1] << (float)v[2] << (float)v[3];
 }
 
 QDataStream& operator>>(QDataStream& s, BoVector4& v)
 {
   float x, y, z, w;
   s >> x >> y >> z >> w;
-  v.mData[0] = x;
-  v.mData[1] = y;
-  v.mData[2] = z;
-  v.mData[3] = w;
+  v.set(x, y, z, w);
   return s;
 }
 
