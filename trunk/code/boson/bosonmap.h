@@ -270,9 +270,17 @@ public:
 
 	/**
 	 * Set the alpha value for @p texture at @p x, @p y to @p value.
+	 *
+	 * This function is safe, i.e. we won't crash for invalid x or y values.
 	 **/
 	void setTexMapAlpha(unsigned int texture, int x, int y, unsigned char value)
 	{
+		if (x < 0 || y < 0) {
+			return;
+		}
+		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
+			return;
+		}
 		mTexMap[texMapArrayPos(texture, x, y)] = value;
 	}
 
@@ -340,8 +348,8 @@ public:
 	}
 
 	// Normal maps won't be saved/loaded (they're auto-generated)
-	virtual bool save(QDataStream&) { return true; };
-	virtual bool load(QDataStream&) { return true; };
+	virtual bool save(QDataStream&) { return true; }
+	virtual bool load(QDataStream&) { return true; }
 
 	inline BoVector3* normalMap() const { return mNormalMap; }
 
@@ -349,18 +357,24 @@ public:
 	 * @return The height at @p x, @þ y. This function is safe, i.e. if @þ x
 	 * or @p y are invalid we won't crash.
 	 **/
-	BoVector3 normalAt(int x, int y) const
+	const BoVector3& normalAt(int x, int y) const
 	{
 		if (x < 0 || y < 0) {
-			return BoVector3(0.0f, 0.0f, 1.0f);
+			// AB: the very first normal in the array is returned. it will
+			// be invalid anyway, no matter what we return.
+			x = 0;
+			y = 0;
 		}
 		if ((unsigned int)x >= width() || (unsigned int)y >= height()) {
-			return BoVector3(0.0f, 0.0f, 1.0f);
+			// AB: the very first normal in the array is returned. it will
+			// be invalid anyway, no matter what we return.
+			x = 0;
+			y = 0;
 		}
 		return mNormalMap[arrayPos(x, y)];
 	}
 
-	void setNormalAt(int x, int y, BoVector3 n)
+	void setNormalAt(int x, int y, const BoVector3& n)
 	{
 		if (x < 0 || y < 0) {
 			return;
