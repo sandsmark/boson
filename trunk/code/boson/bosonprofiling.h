@@ -25,6 +25,7 @@ class QString;
 class QDataStream;
 class BosonProfilingDialog;
 class RenderGLTimes;
+class ProfileSlotAdvance;
 struct timeval;
 
 // note that there are several workarounds in this class to reduce the number of
@@ -48,7 +49,6 @@ public:
 		LoadModelTextures,
 		LoadModelDisplayLists,
 		LoadModelDummy,
-		SlotAdvance,
 
 		ProfilingEnd // must remain the last entry!
 	};
@@ -86,6 +86,9 @@ public:
 	void loadUnit();
 	void loadUnitDone(unsigned long int typeId);
 
+	// WARNING: do !NOT! call render*() or advance*() before you called
+	// render(true)/advance(true) or after render(false)/advance(false) !
+	// that would crash! (no NULL check in favor of performance)
 	void render(bool start); // always call this first, before any other render*()
 	// note that you must NOT use nested calls of render*()! e.g.
 	// renderCells(true); renderUnits(true); renderUnits(false); renderCells(false);
@@ -98,10 +101,33 @@ public:
 	void renderFOW(bool start);
 	void renderText(bool start);
 
+	// AB: the syntax of these is the same as for render() above. e.g. you
+	// mustn't call the advance*() stuff here recursive or so
+	void advance(bool start, unsigned int advanceCount);
+	void advanceFunction(bool start);
+	void advanceDeleteUnusedShots(bool start);
+	void advanceParticles(bool start);
+	void advanceMaximalAdvanceCount(bool start); // in MAXIMAL_ADVANCE_COUNT we do some interesting stuff (especially deleting unused stuff - e.g. wreckages
+
+	/**
+	 * Save The current profiling data to @p fileName.
+	 **/
 	bool saveToFile(const QString& fileName);
+
+	/**
+	 * Save The current profiling data from @p fileName.
+	 **/
 	bool loadFromFile(const QString& fileName);
 
+	/**
+	 * Save the current profiling data to @p stream
+	 **/
 	bool save(QDataStream& stream) const;
+
+	/**
+	 * Load the current profiling data from @p stream, which must have been
+	 * saved using @ref save
+	 **/
 	bool load(QDataStream& stream);
 
 private:
@@ -113,10 +139,13 @@ private:
 };
 
 unsigned long int compareTimes(const struct timeval& t1, const struct timeval& t2);
+unsigned long int compareTimes2(const struct timeval* t1); // takes an array of 2 and compares them
 QDataStream& operator<<(QDataStream& s, const struct timeval& t);
 QDataStream& operator>>(QDataStream& s, struct timeval& t);
 QDataStream& operator<<(QDataStream& s, const RenderGLTimes& t);
 QDataStream& operator>>(QDataStream& s, RenderGLTimes& t);
+QDataStream& operator<<(QDataStream& s, const ProfileSlotAdvance& t);
+QDataStream& operator>>(QDataStream& s, ProfileSlotAdvance& t);
 
 
 

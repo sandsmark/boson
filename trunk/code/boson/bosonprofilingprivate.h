@@ -21,6 +21,7 @@
 #define BOSONPROFILINGPRIVATE_H
 
 #include "bosonprofiling.h"
+#include "defines.h"
 
 #include <qmap.h>
 #include <qvaluelist.h>
@@ -54,22 +55,20 @@ public:
 		}
 		mUnitCount = 0;
 	}
-	unsigned long int dFunction() const { return compareTimes(mFunction[0], mFunction[1]); }
-	unsigned long int dClear() const { return compareTimes(mClear[0], mClear[1]); }
-	unsigned long int dCells() const { return compareTimes(mCells[0], mCells[1]); }
-	unsigned long int dUnits() const { return compareTimes(mUnits[0], mUnits[1]); }
-	unsigned long int dMissiles() const { return compareTimes(mMissiles[0], mMissiles[1]); }
-	unsigned long int dParticles() const { return compareTimes(mParticles[0], mParticles[1]); }
-	unsigned long int dFOW() const { return compareTimes(mFOW[0], mFOW[1]); }
-	unsigned long int dText() const { return compareTimes(mText[0], mText[1]); }
+	unsigned long int dFunction() const { return compareTimes2(mFunction); }
+	unsigned long int dClear() const { return compareTimes2(mClear); }
+	unsigned long int dCells() const { return compareTimes2(mCells); }
+	unsigned long int dUnits() const { return compareTimes2(mUnits); }
+	unsigned long int dMissiles() const { return compareTimes2(mMissiles); }
+	unsigned long int dParticles() const { return compareTimes2(mParticles); }
+	unsigned long int dFOW() const { return compareTimes2(mFOW); }
+	unsigned long int dText() const { return compareTimes2(mText); }
 
 	// we use array of size 2 - the first is the start time, the second the
 	// stop time. the difference of both is the consumed time then.
 
 	// remember to update operator>>() and operator<<() in the .cpp file if
 	// you change something here!
-	// something!
-	// also update operator>>() and operator<<() below!
 	struct timeval mFunction[2];
 	struct timeval mClear[2];
 	struct timeval mCells[2];
@@ -81,6 +80,37 @@ public:
 	unsigned int mUnitCount;
 };
 
+class ProfileSlotAdvance
+{
+public:
+	ProfileSlotAdvance(unsigned int advanceCount)
+	{
+		for (int i = 0; i < 2; i++) {
+			timerclear(&mFunction[i]);
+			timerclear(&mAdvanceFunction[i]);
+			timerclear(&mDeleteUnusedShots[i]);
+			timerclear(&mParticles[i]);
+			timerclear(&mMaximalAdvanceCount[i]);
+		}
+		mAdvanceCount = advanceCount;
+	}
+	unsigned long int dFunction() const { return compareTimes2(mFunction); }
+	unsigned long int dAdvanceFunction() const { return compareTimes2(mAdvanceFunction); }
+	unsigned long int dDeleteUnusedShots() const { return compareTimes2(mDeleteUnusedShots); }
+	unsigned long int dParticles() const { return compareTimes2(mParticles); }
+	unsigned long int dMaximalAdvanceCount() const { return compareTimes2(mMaximalAdvanceCount); }
+
+
+	// remember to update operator>>() and operator<<() in the .cpp file if
+	// you change something here!
+	struct timeval mFunction[2]; // the entire slotAdvance() function
+	struct timeval mAdvanceFunction[2]; // the advanceFunction()/advanceFunction2() stuff
+	struct timeval mDeleteUnusedShots[2];
+	struct timeval mParticles[2];
+	struct timeval mMaximalAdvanceCount[2];
+	unsigned int mAdvanceCount;
+};
+
 
 class BosonProfiling::BosonProfilingPrivate
 {
@@ -88,6 +118,7 @@ public:
 	BosonProfilingPrivate()
 	{
 		mCurrentRenderTimes = 0;
+		mCurrentSlotAdvanceTimes = 0;
 	}
 	typedef QValueList<long int> TimesList;
 
@@ -97,6 +128,9 @@ public:
 
 	QPtrList<RenderGLTimes> mRenderTimes;
 	RenderGLTimes* mCurrentRenderTimes;
+
+	QPtrList<ProfileSlotAdvance> mSlotAdvanceTimes;
+	ProfileSlotAdvance* mCurrentSlotAdvanceTimes;
 
 	QMap<ProfilingEvent, struct timeval> mProfilingTimes;
 	QMap<int, TimesList> mTimes;
