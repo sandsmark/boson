@@ -21,8 +21,6 @@
 
 #include "unitbase.h"
 #include "global.h"
-#warning FIXME!!!!!! REMOVE THIS!!! (PF_TNG include)
-#include "bosonpath.h"
 
 class Player;
 class BosonCanvas;
@@ -35,6 +33,7 @@ class UnitPlugin;
 class RepairPlugin;
 class BosonParticleSystem;
 class BosonWeapon;
+class BosonPathInfo;
 class BoVector3;
 template<class T> class QValueList;
 template<class T> class QPtrList;
@@ -314,38 +313,17 @@ public:
 	 **/
 	virtual void moveTo(const QPoint& pos, bool attack = false);
 
-#ifndef PATHFINDER_TNG
+
+	// TODO: maybe make this protected?
 	/**
-	 * Nearly similar to the above version (actually this is called by the
-	 * above) but any previous @ref work is <em>not</em> cleared. This way
-	 * you can call this while e.g. a unit is being attacked and actually
-	 * start to attack as soon as the unit is in range. We also assume that
-	 * the @ref setAnimated was already called.
-	 * @param x The destination x-coordinate on the canvas
-	 * @param y The destination y-coordinate on the canvas
-	 * @param range Number of tiles around the destination the unit is
-	 * allowed to go to. You must use range > 0 e.g. if destination is
-	 * occupied and you should use e.g. @ref weaponRange if the unit should
-	 * attack. -1 keeps the previously set range.
-	 * @param attack Whether to stop and attack any enemy units in range while moving
-	 * @param slowDownAtDetination Whether to slow down before reaching detination point
-	 * @return true if unit can go to destination, false otherwise
-	 **/
-	bool moveTo(float x, float y, int range = 0, bool attack = false, bool slowDownAtDetination = true);
-#else
-	/**
-	 * Internal moving method.
-	 * This is the most central method for having unit starting moving to specific
-	 * point. You shouldn't use this directly, but instead use 'client methods',
-	 * which will then call this one.
+	 * AB: docs are obsolete. The new pathfinder uses this method in a
+	 * different way than the old one did, so the behavior of this method is
+	 * totally undefined. Avoid calling it!
 	 *
-	 * Moves unit's _center_ exactly to given position. If range is not 0, unit
-	 * will move until it's less that range _cells_ away from destination.
-	 * Destination is in canvas coords.
+	 * @param attack Unused by the new pathfinder
+	 * @param slowDownAtDestination Unused by the new pathfinder
 	 **/
-	// TODO: maybe make it protected?
-	bool moveTo(float x, float y, int range = 0);
-#endif
+	bool moveTo(float x, float y, int range = 0, bool attack = false, bool slowDownAtDestination = true);
 
 	/**
 	 * Turns unit smoothly to given degrees
@@ -622,11 +600,8 @@ public:
 	 * Check if pathpoint p marks end of the path. If yes, then it stops unit,
 	 * turns to random direction and true, otherwise returns false.
 	 **/
-#ifdef PATHFINDER_TNG
 	bool checkPathPoint(const QPoint& p);
-#else
 	bool checkWaypoint(const QPoint& wp);
-#endif
 
 protected:
 	virtual void advanceMoveInternal(unsigned int advanceCount); // move one step futher to path

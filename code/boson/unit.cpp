@@ -790,60 +790,6 @@ unsigned int Unit::waypointCount() const
  return d->mWaypoints.count();
 }
 
-#ifdef PATHFINDER_TNG
-
-bool Unit::moveTo(float x, float y, int range)
-{
- // Range -1 means to use previously set range
- if (range == -1) {
-	range = d->mPathInfo.range;
- }
-
- // Find destination cell
- int cellX = (int)(x / BO_TILE_SIZE);
- int cellY = (int)(y / BO_TILE_SIZE);
- Cell* cell = canvas()->cell(cellX, cellY);
- if (!cell) {
-	boError() << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
-			x << "; " << y << ") is not valid!" << endl;
-	return false;
- }
-
- // Check if unit can go to destination cell.
- // FIXME: this doesn't support units which occupy multiple cells!
- //  We could iterate through all the cells unit would occupy, but that would be
- //  too slow...
- if (range == 0) {
-	if (ownerIO()->canSee(cell)) {
-		if (!ownerIO()->canGo(this, cell)) {
-			// No pathfinding if goal not reachable or occupied and we can see it
-			boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
-			return false;
-		}
-	}
- }
-
- // Update path info
- resetPathInfo();
- d->mPathInfo.dest.setX((int)x);
- d->mPathInfo.dest.setY((int)y);
- d->mPathInfo.range = range;
-
- // Remove old way/pathpoints
- // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
- //  from there...
- clearWaypoints();
- clearPathPoints();
-
-
- // Path is not searched here (it would break pathfinding for groups). Instead,
- //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
- //  is searched for.
- setMovingStatus(MustSearch);
-
- return true;
-}
-
 void Unit::resetPathInfo()
 {
  if(pathInfo()->hlpath) {
@@ -856,12 +802,12 @@ void Unit::resetPathInfo()
  d->mPathInfo.canMoveOnWater = unitProperties()->canGoOnWater();
 }
 
-#endif
 
-#ifdef PATHFINDER_TNG
 void Unit::moveTo(const QPoint& pos, bool attack)
 {
  d->mTarget = 0;
+
+#ifdef PATHFINDER_TNG
  // We want unit's center point to be in the middle of the cell after moving.
  float x = pos.x() / BO_TILE_SIZE * BO_TILE_SIZE + (BO_TILE_SIZE / 2);
  float y = pos.y() / BO_TILE_SIZE * BO_TILE_SIZE + (BO_TILE_SIZE / 2);
@@ -876,19 +822,14 @@ void Unit::moveTo(const QPoint& pos, bool attack)
 	setWork(WorkNone);
 	stopMoving();
  }
-}
 #else
-void Unit::moveTo(const QPoint& pos, bool attack)
-{
- d->mTarget = 0;
-
  if (moveTo(pos.x(), pos.y(), 0, attack)) {
 	setWork(WorkMove);
  } else {
 	setWork(WorkNone);
  }
+#endif // PATHFINDER_TNG
 }
-#endif
 
 #ifndef PATHFINDER_TNG
 
@@ -994,6 +935,58 @@ void Unit::newPath()
 
 #else // ! PATHFINDER_TNG
 
+bool Unit::moveTo(float x, float y, int range, bool /*attack*/, bool /*slowDownAtDest*/)
+{
+ // Range -1 means to use previously set range
+ if (range == -1) {
+	range = d->mPathInfo.range;
+ }
+
+ // Find destination cell
+ int cellX = (int)(x / BO_TILE_SIZE);
+ int cellY = (int)(y / BO_TILE_SIZE);
+ Cell* cell = canvas()->cell(cellX, cellY);
+ if (!cell) {
+	boError() << k_funcinfo << "unit " << id() << ": Cell (" << cellX << "; " << cellY << ") at (" <<
+			x << "; " << y << ") is not valid!" << endl;
+	return false;
+ }
+
+ // Check if unit can go to destination cell.
+ // FIXME: this doesn't support units which occupy multiple cells!
+ //  We could iterate through all the cells unit would occupy, but that would be
+ //  too slow...
+ if (range == 0) {
+	if (ownerIO()->canSee(cell)) {
+		if (!ownerIO()->canGo(this, cell)) {
+			// No pathfinding if goal not reachable or occupied and we can see it
+			boDebug() << k_funcinfo << "unit " << id() << ": Can't go to " << x << "," << y << endl;
+			return false;
+		}
+	}
+ }
+
+ // Update path info
+ resetPathInfo();
+ d->mPathInfo.dest.setX((int)x);
+ d->mPathInfo.dest.setY((int)y);
+ d->mPathInfo.range = range;
+
+ // Remove old way/pathpoints
+ // TODO: maybe call stopMoving() instead and remove setMovingStatus(Standing)
+ //  from there...
+ clearWaypoints();
+ clearPathPoints();
+
+
+ // Path is not searched here (it would break pathfinding for groups). Instead,
+ //  moving status is set to MustSearch and in MobileUnit::advanceMove(), path
+ //  is searched for.
+ setMovingStatus(MustSearch);
+
+ return true;
+}
+
 void Unit::newPath()
 {
  // Update our start position
@@ -1050,7 +1043,6 @@ const QPoint& Unit::currentWaypoint() const
  return d->mWaypoints[0];
 }
 
-#ifdef PATHFINDER_TNG
 void Unit::addPathPoint(const QPoint& pos)
 {
  d->mPathPoints.append(pos);
@@ -1080,8 +1072,6 @@ const QValueList<QPoint>& Unit::pathPointList() const
 {
  return d->mPathPoints;
 }
-#endif
-
 
 #ifdef PATHFINDER_TNG
 void Unit::stopMoving()
@@ -1124,7 +1114,7 @@ void Unit::stopMoving()
  setMoving(false);
  setVelocity(0.0, 0.0, 0.0);
 }
-#endif
+#endif // PATHFINDER_TNG
 
 void Unit::stopAttacking()
 {
@@ -2078,7 +2068,9 @@ void MobileUnit::advanceMoveCheck()
 
  //boDebug(401) << k_funcinfo << "unit " << id() << ": done" << endl;
 }
+
 #else // PATHFINDER_TNG
+
 void MobileUnit::advanceMoveInternal(unsigned int advanceCount) // this actually needs to be called for every advanceCount.
 {
  if (maxSpeed() == 0) {
@@ -2536,9 +2528,9 @@ void MobileUnit::newPath()
 #endif
 }
 
-#ifdef PATHFINDER_TNG
 bool MobileUnit::checkPathPoint(const QPoint& p)
 {
+#ifdef PATHFINDER_TNG
  boDebug(401) << k_funcinfo << "p: (" << p.x() << "; " << p.y() << ")" << endl;
  // Check for special codes in path point
  if (p.x() != p.y()) {
@@ -2608,11 +2600,13 @@ bool MobileUnit::checkPathPoint(const QPoint& p)
  }
 
  // No special code was found (this is ok, e.g. if point was (5; 5) or so)
+#endif // PATHFINDER_TNG
  return false;
 }
-#else // PATHFINDER_TNG
+
 bool MobileUnit::checkWaypoint(const QPoint& wp)
 {
+#ifndef PATHFINDER_TNG
  // If both waypoint's coordinates are -1, then it means that either path to
  //  destination can't be found or that we're already at the goal point. Either
  //  way, we stop moving
@@ -2635,9 +2629,9 @@ bool MobileUnit::checkWaypoint(const QPoint& wp)
 	}
 	return true;
  }
+#endif // PATHFINDER_TNG
  return false;
 }
-#endif // PATHFINDER_TNG
 
 
 /////////////////////////////////////////////////
