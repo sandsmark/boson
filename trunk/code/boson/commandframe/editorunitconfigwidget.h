@@ -47,11 +47,11 @@ protected:
 	virtual bool display(Unit* unit);
 	void displayProductionPlugin(Unit* unit);
 	void displayHarvesterPlugin(Unit* unit);
-	void displayRessourceMinePlugin(Unit* unit);
+	void displayResourceMinePlugin(Unit* unit);
 
 	void updateProductionPlugin(Unit* unit);
 	void updateHarvesterPlugin(Unit* unit);
-	void updateRessourceMinePlugin(Unit* unit);
+	void updateResourceMinePlugin(Unit* unit);
 
 	virtual bool useUpdateTimer() const { return false; }
 

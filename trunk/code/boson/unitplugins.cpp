@@ -454,7 +454,7 @@ HarvesterPlugin::HarvesterPlugin(Unit* unit)
  mHarvestingType.setLocal(0);
 
  mRefinery = 0;
- mRessourceMine = 0;
+ mResourceMine = 0;
 }
 
 HarvesterPlugin::~HarvesterPlugin()
@@ -480,11 +480,11 @@ bool HarvesterPlugin::saveAsXML(QDomElement& root) const
  if (mRefinery) {
 	refineryId = mRefinery->id();
  }
- if (mRessourceMine) {
-	mine = mRessourceMine->unit()->id();
+ if (mResourceMine) {
+	mine = mResourceMine->unit()->id();
  }
  root.setAttribute(QString::fromLatin1("Refinery"), refineryId);
- root.setAttribute(QString::fromLatin1("RessourceMine"), mine);
+ root.setAttribute(QString::fromLatin1("ResourceMine"), mine);
  return true;
 }
 
@@ -495,14 +495,14 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
  bool ok = false;
 
  mRefinery = 0;
- mRessourceMine = 0;
+ mResourceMine = 0;
 
  refineryId = root.attribute(QString::fromLatin1("Refinery")).toUInt(&ok);
  if (!ok) {
 	boError() << k_funcinfo << "Invalid number for Refinery attribute" << endl;
 	return false;
  }
- mineId = root.attribute(QString::fromLatin1("RessourceMine")).toUInt(&ok);
+ mineId = root.attribute(QString::fromLatin1("ResourceMine")).toUInt(&ok);
  if (refineryId != 0) {
 	// AB: retrieving from Boson is not 100% nice, but definitely necessary
 	// and valid at this point. we need to get the pointer, even if the
@@ -513,11 +513,11 @@ bool HarvesterPlugin::loadFromXML(const QDomElement& root)
  if (mineId != 0) {
 	Unit* u = game()->findUnit(mineId, 0);
 	if (!u) {
-		boError() << k_funcinfo << "cannot find ressource mine " << mineId << endl;
+		boError() << k_funcinfo << "cannot find resource mine " << mineId << endl;
 	} else {
-		mRessourceMine = (RessourceMinePlugin*)u->plugin(UnitPlugin::RessourceMine);
-		if (!mRessourceMine) {
-			boError() << k_funcinfo << "unit " << mineId << " is not a ressource mine" << endl;
+		mResourceMine = (ResourceMinePlugin*)u->plugin(UnitPlugin::ResourceMine);
+		if (!mResourceMine) {
+			boError() << k_funcinfo << "unit " << mineId << " is not a resource mine" << endl;
 		}
 	}
  }
@@ -529,9 +529,9 @@ bool HarvesterPlugin::canMine(Unit* unit) const
  if (!unit) {
 	return false;
  }
- return canMine((RessourceMinePlugin*)unit->plugin(UnitPlugin::RessourceMine));
+ return canMine((ResourceMinePlugin*)unit->plugin(UnitPlugin::ResourceMine));
 }
-bool HarvesterPlugin::canMine(RessourceMinePlugin* p) const
+bool HarvesterPlugin::canMine(ResourceMinePlugin* p) const
 {
  if (!p) {
 	return false;
@@ -564,8 +564,8 @@ void HarvesterPlugin::advanceMine()
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
- if (!canMine(mRessourceMine)) {
-	// TODO: search a new ressource mine
+ if (!canMine(mResourceMine)) {
+	// TODO: search a new resource mine
 	boDebug() << k_funcinfo << "cannot mine there" << endl;
 	unit()->setWork(Unit::WorkNone);
 	return;
@@ -1067,30 +1067,30 @@ bool MiningPlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
-RessourceMinePlugin::RessourceMinePlugin(Unit* unit)
+ResourceMinePlugin::ResourceMinePlugin(Unit* unit)
 		: UnitPlugin(unit)
 {
- unit->registerData(&mMinerals, Unit::IdRessourceMineMinerals);
- unit->registerData(&mOil, Unit::IdRessourceMineOil);
+ unit->registerData(&mMinerals, Unit::IdResourceMineMinerals);
+ unit->registerData(&mOil, Unit::IdResourceMineOil);
  mMinerals.setLocal(0);
  mOil.setLocal(0);
 }
 
-RessourceMinePlugin::~RessourceMinePlugin()
+ResourceMinePlugin::~ResourceMinePlugin()
 {
 }
 
-bool RessourceMinePlugin::saveAsXML(QDomElement& root) const
+bool ResourceMinePlugin::saveAsXML(QDomElement& root) const
 {
  // everything is saved using KGameProperty
  Q_UNUSED(root);
  return true;
 }
 
-bool RessourceMinePlugin::loadFromXML(const QDomElement& root)
+bool ResourceMinePlugin::loadFromXML(const QDomElement& root)
 {
  // everything is already loaded using KGameProperty - we do safety checks here
- RessourceMineProperties* prop = (RessourceMineProperties*)properties(PluginProperties::RessourceMine);
+ ResourceMineProperties* prop = (ResourceMineProperties*)properties(PluginProperties::ResourceMine);
  if (!prop) {
 	BO_NULL_ERROR(prop);
 	return false;
@@ -1110,29 +1110,29 @@ bool RessourceMinePlugin::loadFromXML(const QDomElement& root)
  return true;
 }
 
-void RessourceMinePlugin::advance(unsigned int)
+void ResourceMinePlugin::advance(unsigned int)
 {
 }
 
-bool RessourceMinePlugin::canProvideMinerals() const
+bool ResourceMinePlugin::canProvideMinerals() const
 {
- const RessourceMineProperties* prop = (RessourceMineProperties*)unit()->properties(PluginProperties::RessourceMine);
+ const ResourceMineProperties* prop = (ResourceMineProperties*)unit()->properties(PluginProperties::ResourceMine);
  if (!prop) {
 	return false;
  }
  return prop->canProvideMinerals();
 }
 
-bool RessourceMinePlugin::canProvideOil() const
+bool ResourceMinePlugin::canProvideOil() const
 {
- const RessourceMineProperties* prop = (RessourceMineProperties*)unit()->properties(PluginProperties::RessourceMine);
+ const ResourceMineProperties* prop = (ResourceMineProperties*)unit()->properties(PluginProperties::ResourceMine);
  if (!prop) {
 	return false;
  }
  return prop->canProvideOil();
 }
 
-void RessourceMinePlugin::setMinerals(int m)
+void ResourceMinePlugin::setMinerals(int m)
 {
  if (!canProvideMinerals()) {
 	mMinerals = m;
@@ -1141,7 +1141,7 @@ void RessourceMinePlugin::setMinerals(int m)
  mMinerals = m;
 }
 
-void RessourceMinePlugin::setOil(int o)
+void ResourceMinePlugin::setOil(int o)
 {
  if (!canProvideOil()) {
 	mOil = 0;
@@ -1150,17 +1150,17 @@ void RessourceMinePlugin::setOil(int o)
  mOil = o;
 }
 
-int RessourceMinePlugin::minerals() const
+int ResourceMinePlugin::minerals() const
 {
  return mMinerals;
 }
 
-int RessourceMinePlugin::oil() const
+int ResourceMinePlugin::oil() const
 {
  return mOil;
 }
 
-void RessourceMinePlugin::itemRemoved(BosonItem*)
+void ResourceMinePlugin::itemRemoved(BosonItem*)
 {
 }
 

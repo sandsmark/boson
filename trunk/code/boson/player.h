@@ -192,7 +192,7 @@ public:
 	/**
 	 * A player is neutral to another player if it is neither an enemy nor
 	 * an allied. When two players are neutral to each other they are meant
-	 * not to shoot at each other, but they won't share their ressources
+	 * not to shoot at each other, but they won't share their resources
 	 * (sight range, repair units, refineries, ...) either.
 	 * @return TRUE if @p p is neutral to this player, i.e. neither an
 	 * allied nor an enemy player, otherwise FALSE. See also @ref isAllied
@@ -201,7 +201,7 @@ public:
 	bool isNeutral(const Player* p) const;
 
 	/**
-	 * An allied player will share some of their ressources, such as sight
+	 * An allied player will share some of their resources, such as sight
 	 * ranges of units (they will see the map of each other), maybe
 	 * refineries and so on. Also they won't shoot at each other.
 	 * @return TRUE if the player @p p is allied with this this player. See

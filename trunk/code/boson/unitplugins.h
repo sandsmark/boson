@@ -53,7 +53,7 @@ public:
 		Weapon = 4, // note: this won't end up in Unit::plugin()! weapons are stored separately. also note that rtti==Weapon is *not* unique! they have their own class and rttis - see BosonWeapon
 		Bombing = 5,
 		Mining = 6, // placing mine (the exploding ones)
-		RessourceMine = 7,
+		ResourceMine = 7,
 
 		PluginEnd // MUST be the last entry!
 	};
@@ -283,7 +283,7 @@ private:
 /*
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class RessourceMinePlugin;
+class ResourceMinePlugin;
 class HarvesterPlugin : public UnitPlugin
 {
 public:
@@ -307,7 +307,7 @@ public:
 
 	bool canMine(Cell* cell) const; // obsolete
 	bool canMine(Unit*) const;
-	bool canMine(RessourceMinePlugin*) const;
+	bool canMine(ResourceMinePlugin*) const;
 
 	inline Unit* refinery() const { return mRefinery; }
 
@@ -349,7 +349,7 @@ private:
 	KGameProperty<int> mHarvestingType; // either mining or refining
 
 	Unit* mRefinery;
-	RessourceMinePlugin* mRessourceMine;
+	ResourceMinePlugin* mResourceMine;
 };
 
 /**
@@ -412,13 +412,13 @@ private:
  * @short Plugin for mineral/oil mines
  * @author Andreas Beckermann <b_mann@gmx.de>
  **/
-class RessourceMinePlugin : public UnitPlugin
+class ResourceMinePlugin : public UnitPlugin
 {
 public:
-	RessourceMinePlugin(Unit* owner);
-	~RessourceMinePlugin();
+	ResourceMinePlugin(Unit* owner);
+	~ResourceMinePlugin();
 
-	virtual int pluginType() const { return RessourceMine; }
+	virtual int pluginType() const { return ResourceMine; }
 
 	virtual bool loadFromXML(const QDomElement& root);
 	virtual bool saveAsXML(QDomElement& root) const;
@@ -438,12 +438,12 @@ public:
 	void setOil(int m);
 
 	/**
-	 * @return See @ref RessourceMinePropeties::canProvideMinerals
+	 * @return See @ref ResourceMinePropeties::canProvideMinerals
 	 **/
 	bool canProvideMinerals() const;
 
 	/**
-	 * @return See @ref RessourceMinePropeties::canProvideOil
+	 * @return See @ref ResourceMinePropeties::canProvideOil
 	 **/
 	bool canProvideOil() const;
 
