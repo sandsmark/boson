@@ -364,5 +364,6 @@ void OptionsDialog::slotSetDefaults()
  setCursor(CursorSprite);
  slotCursorChanged((int)CursorSprite);
  setCursorEdgeSensity(20);
+ setUpdateInterval(25);
 }
 
