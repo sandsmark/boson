@@ -206,6 +206,7 @@ bool BosonPlayField::loadPlayField(const QString& file)
  }
  mFile->close();
  delete mFile;
+ mFile = 0;
  mLoaded = true;
  return true;
 }
