@@ -69,9 +69,7 @@ text=We have a new poll finally: How often should Boson be released?<br>
     of the voters chose AI. Second place went to better graphics.<br><br>
     About AI, unfortunately we won't have any intelligent AI in 0.9 (it will
     still have same dummy AI that 0.8 had), but there is already scripting
-    support and once it has evolved far enough, we'll start developing AI. So,
-    there is possibility that 0.10 (that's right, after 0.9 will come 0.10, not
-    1.0) will have AI.<br>
+    support and once it has evolved far enough, we'll start developing AI.<br>
     We'll use <a href="http://www.python.org">Python</a> as scripting language,
     so in case you have any experience with either this or AI and if you're
     willing to help us, write to our
