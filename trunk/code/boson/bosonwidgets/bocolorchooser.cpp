@@ -76,6 +76,7 @@ void BoColorChooser::init()
 
  QPtrListIterator<QLabel> it(d->mLabels);
  while (it.current()) {
+	it.current()->installEventFilter(this);
 	d->mTaken.insert(it.current(), false);
 	++it;
  }
@@ -124,7 +125,11 @@ void BoColorChooser::applyColors()
  QPtrListIterator<QLabel> labelIt(d->mLabels);
  while (labelIt.current() && colorIt != d->mColors.end()) {
 	QLabel* label = labelIt.current();
-	label->setPaletteBackgroundColor(*colorIt);
+	if (d->mTaken[label]) {
+		label->setPaletteBackgroundColor(takenColor());
+	} else {
+		label->setPaletteBackgroundColor(*colorIt);
+	}
 	++colorIt;
 	++labelIt;
  }
@@ -154,12 +159,9 @@ void BoColorChooser::setTaken(const QColor& color, bool taken)
  QLabel* label = 0;
  QPtrListIterator<QLabel> labelIt(d->mLabels);
  QValueList<QColor>::Iterator colorIt = d->mColors.begin();
- kdDebug() << d->mColors.count() << endl;
  while (labelIt.current() && colorIt != d->mColors.end() && !label) {
 	if (*colorIt == color) {
 		label = labelIt.current();
-	} else {
-		kdDebug() << "have: " << (*colorIt).rgb() << " want: " << color.rgb() << endl;
 	}
 	++labelIt;
 	++colorIt;
@@ -169,5 +171,64 @@ void BoColorChooser::setTaken(const QColor& color, bool taken)
 	return;
  }
  d->mTaken.replace(label, taken);
+
+ applyColors();
+}
+
+bool BoColorChooser::eventFilter(QObject* o, QEvent* e)
+{
+ if (e->type() != QEvent::MouseButtonRelease) {
+	return BoColorChooserBase::eventFilter(o, e);
+ }
+ if (o == this || !o->isA("QLabel")) {
+	return BoColorChooserBase::eventFilter(o, e);
+ }
+ QLabel* label = (QLabel*)o;
+ if (!d->mLabels.contains(label)) {
+	return BoColorChooserBase::eventFilter(o, e);
+ }
+
+ // label is in d->mLabels and e is a MouseButtonRelease event at this point.
+ if (d->mTaken[label]) {
+	kdDebug() << k_funcinfo << "color is taken" << endl;
+	// do nothing - color is already gone.
+	return true;
+ }
+ int index = d->mLabels.find(label);
+ if (index < 0 || (unsigned int)index >= d->mColors.count()) {
+	kdDebug() << k_funcinfo << "no color found for index " << index << endl;
+	return true;
+ }
+ QColor c = d->mColors[index];
+
+ highlightColor(c);
+ emit signalColorSelected(c);
+ emit signalColorSelected(index);
+
+ return true;
+}
+
+void BoColorChooser::highlightColor(const QColor& color)
+{
+ QPtrListIterator<QLabel> it(d->mLabels);
+ while (it.current()) {
+	it.current()->setFrameStyle(QFrame::NoFrame | QFrame::Plain);
+	++it;
+ }
+
+ if (!d->mColors.contains(color)) {
+	kdError() << k_funcinfo << "dont know color " << color.rgb() << endl;
+	return;
+ }
+ int index = d->mColors.findIndex(color);
+ if (index < 0 || (unsigned int)index >= d->mLabels.count()) {
+	return;
+ }
+ QLabel* label = d->mLabels.at(index);
+ if (!label) {
+	kdError() << k_funcinfo << "NULL label" << endl;
+	return;
+ }
+ label->setFrameStyle(QFrame::Box | QFrame::Plain);
 }
 

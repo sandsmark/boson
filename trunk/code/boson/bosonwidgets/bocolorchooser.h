@@ -28,6 +28,10 @@ template<class T> class QPtrList;
 
 class BoColorChooserPrivate;
 
+/**
+ * @short Allow to select one out of 10 available colors.
+ * @author Andreas Beckermann <b_mann@gmx.de>
+ **/
 class BoColorChooser : public BoColorChooserBase
 {
 	Q_OBJECT
@@ -39,7 +43,15 @@ public:
 	BoColorChooser(QWidget* parent = 0, const char* name = 0);
 	~BoColorChooser();
 
+	/**
+	 * Mark a color as "taken" and display the @ref takenColor at this
+	 * point. A color that is taken is not available for selection anymore.
+	 **/
 	void setTaken(const QColor& color, bool taken = true);
+
+	/**
+	 * Call @ref setTaken for all colors in the widget.
+	 **/
 	void setAllTaken(bool taken = true);
 
 	/**
@@ -49,6 +61,24 @@ public:
 	 **/
 	void setColors(const QValueList<QColor>& colors);
 
+	void highlightColor(const QColor& color);
+
+signals:
+	/**
+	 * Emitted when an available color is clicked.
+	 *
+	 * When the color is already taken (see @ref setTaken) this is
+	 * <em>not</em> emitted.
+	 **/
+	void signalColorSelected(const QColor& color);
+
+	/**
+	 * @overload
+	 * Same as above, but the index of the color in the list given to @ref
+	 * setColors is emitted.
+	 **/
+	void signalColorSelected(int index);
+
 protected:
 	void applyColors();
 
@@ -57,6 +87,8 @@ protected:
 	 * taken.
 	 **/
 	QColor takenColor() const;
+
+	virtual bool eventFilter(QObject* o, QEvent* e);
 
 private:
 	void init();
