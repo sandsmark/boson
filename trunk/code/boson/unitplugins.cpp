@@ -972,17 +972,15 @@ void BombingPlugin::bomb(int weaponId, float x, float y)
 
 void BombingPlugin::advance(unsigned int)
 {
- boDebug() << k_funcinfo << endl;
-
  // Check if we're at the drop point
  // Unit's center point
  float unitx = unit()->x() + unit()->width() / 2;
  float unity = unit()->y() + unit()->height() / 2;
  float dist = QMAX(QABS(unitx - mPosX), QABS(unity - mPosY));
- boDebug() << k_funcinfo << "dist: " << dist << endl;
- boDebug() << k_funcinfo << "my pos is: (" << unitx << "; " << unity << ");  drop-point is: (" << mPosX << "; " << mPosY << ")" << endl;
+// boDebug() << k_funcinfo << "dist: " << dist << endl;
+// boDebug() << k_funcinfo << "my pos is: (" << unitx << "; " << unity << ");  drop-point is: (" << mPosX << "; " << mPosY << ")" << endl;
  if ((unitx != mPosX) || (unity != mPosY)) {
-	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
+//	boDebug() << k_funcinfo << "not at drop point - moving..." << endl;
 	if (!unit()->moveTo(mPosX, mPosY, 0)) {
 		boWarning() << k_funcinfo << "Moving failed. Now what?" << endl;
 		unit()->setWork(Unit::WorkNone);
@@ -1102,13 +1100,11 @@ void MiningPlugin::mine(int weaponId)
 
 void MiningPlugin::advance(unsigned int)
 {
- boDebug() << k_funcinfo << endl;
-
  // Lay the mine
  if (mWeapon->reloaded()) {
 	// Don't place the mine immediately
 	if (mPlacingCounter > 0) {
-		boDebug() << k_funcinfo << "mPlacingCounter: " << mPlacingCounter << endl;
+//		boDebug() << k_funcinfo << "mPlacingCounter: " << mPlacingCounter << endl;
 		mPlacingCounter = mPlacingCounter - 1;
 		return;
 	}
@@ -1172,7 +1168,7 @@ void MiningPlugin::advance(unsigned int)
 	boDebug() << k_funcinfo << "returning" << endl;
 	return;
  } else {
-	boDebug() << k_funcinfo << "Weapon not yet reloaded" << endl;
+//	boDebug() << k_funcinfo << "Weapon not yet reloaded" << endl;
  }
 }
 
