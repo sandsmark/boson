@@ -169,8 +169,8 @@ libbocursor_la_SOURCES = \
 bocursor_LDFLAGS = $(KDE_RPATH) $(all_libraries)
 bocursor_LDADD = \
 		$(top_builddir)/bodebug/libbodebug.la \
-		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(top_builddir)/boson/libbocursor.la \
+		$(top_builddir)/boson/info/libbosoninfo.la \
 		$(LIB_KDEUI) \
 		$(LIB_KIO) \
 		$(GLLIB)
