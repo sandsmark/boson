@@ -80,6 +80,9 @@ PyMethodDef PythonScript::mCallbacks[] = {
   { (char*)"cameraZ", py_cameraZ, METH_VARARGS, 0 },
   // AI
   { (char*)"aiDelay", py_aiDelay, METH_VARARGS, 0 },
+  // Other
+  { (char*)"startBenchmark", py_startBenchmark, METH_VARARGS, 0 },
+  { (char*)"endBenchmark", py_endBenchmark, METH_VARARGS, 0 },
   //{ (char*)"", py_, METH_VARARGS, 0 },
   { 0, 0, 0, 0 }
 };
@@ -753,6 +756,22 @@ PyObject* PythonScript::py_aiDelay(PyObject*, PyObject*)
   return Py_BuildValue((char*)"f", BosonScript::aiDelay());
 }
 
+/*****  Other functions  *****/
+PyObject* PythonScript::py_startBenchmark(PyObject* self, PyObject* args)
+{
+  BosonScript::startBenchmark();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+PyObject* PythonScript::py_endBenchmark(PyObject* self, PyObject* args)
+{
+  BosonScript::endBenchmark();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+/*****  Non-script functions  *****/
 
 PyObject* PythonScript::QValueListToPyList(QValueList<int>* list)
 {

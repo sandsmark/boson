@@ -246,6 +246,12 @@ class BosonScript
     // AI
     static float aiDelay();
 
+
+    // Other
+    static void startBenchmark();
+    static void endBenchmark();
+
+
   protected:
     BosonScript(Player* p);
 
