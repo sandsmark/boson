@@ -30,6 +30,7 @@ class QString;
 template<class T> class QValueList;
 template<class T> class QPtrList;
 template<class T1, class T2> class QMap;
+template<class TYPE> class UpgradePropertiesValue;
 
 class KSimpleConfig;
 
@@ -411,15 +412,10 @@ protected:
 	TerrainType terrainType() const  { return mTerrain; };
 
 	friend class BoUnitEditor;
+	template<class TYPE> friend class UpgradePropertiesValue;
 
 private:
 	void init();
-
-private:
-	// AB: i consider this as a design problem. direct access to private
-	// members shouldn't be allowed - direct access to private method would
-	// be fine
-	friend class UpgradePropertiesBase; // UpgradePropertiesBase::apply() modifies our private vars
 
 private:
 	class UnitPropertiesPrivate;

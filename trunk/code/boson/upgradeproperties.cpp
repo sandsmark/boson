@@ -24,6 +24,7 @@
 #include "speciestheme.h"
 #include "unit.h"
 #include "bodebug.h"
+#include "bosonconfig.h"
 
 #include <ksimpleconfig.h>
 #include <klocale.h>
@@ -95,7 +96,7 @@ bool UpgradePropertiesBase::canBeResearched(Player* player)
 
 void UpgradePropertiesBase::load(KSimpleConfig* cfg)
 {
-//  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
+  boDebug() << k_funcinfo << "Loading; isTech: " << isTechnology() << "; id: " << id() << "" << endl;
   // Load basic stuff
   if(mTechnology)
   {
@@ -110,8 +111,8 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
     mProducer = cfg->readUnsignedNumEntry("Producer", 0);
     mProductionTime = cfg->readUnsignedNumEntry("ProductionTime", 100);
     mPixmapName = cfg->readEntry("Pixmap", "none.png");
-    d->mRequireUnits = readUIntList(cfg, "RequireUnits");
-    d->mApplyToTypes = readUIntList(cfg, "ApplyToTypes");
+    d->mRequireUnits = BosonConfig::readUnsignedLongNumList(cfg, "RequireUnits");
+    d->mApplyToTypes = BosonConfig::readUnsignedLongNumList(cfg, "ApplyToTypes");
     mApplyToFacilities = cfg->readBoolEntry("ApplyToFacilities", false);
     mApplyToMobiles = cfg->readBoolEntry("ApplyToMobiles", false);
   }
@@ -124,113 +125,20 @@ void UpgradePropertiesBase::load(KSimpleConfig* cfg)
     }
     cfg->setGroup(QString("Upgrade_%1").arg(mId));
   }
-  d->mRequireTechnologies = readUIntList(cfg, "RequireTechnologies");
+  d->mRequireTechnologies = BosonConfig::readUnsignedLongNumList(cfg, "RequireTechnologies");
 
+  boDebug() << "    " << k_funcinfo << "Loading upgrade properties" << endl;
   // Load upgrade properties
-  mHealthSpecified = cfg->hasKey("Health");
-  if(mHealthSpecified)
-  {
-    mHealth = cfg->readUnsignedLongNumEntry("Health", 100);
-  }
-  mWeaponRangeSpecified = cfg->hasKey("WeaponRange");
-  if(mWeaponRangeSpecified)
-  {
-    mWeaponRange = cfg->readUnsignedLongNumEntry("WeaponRange", 0);
-  }
-  mSightRangeSpecified = cfg->hasKey("SightRange");
-  if(mSightRangeSpecified)
-  {
-    mSightRange = cfg->readUnsignedNumEntry("SightRange", 5);
-  }
-  mWeaponDamageSpecified = cfg->hasKey("WeaponDamage");
-  if(mWeaponDamageSpecified)
-  {
-    mWeaponDamage = cfg->readLongNumEntry("WeaponDamage", 0);
-  }
-  mReloadSpecified = cfg->hasKey("Reload");
-  if(mReloadSpecified)
-  {
-    mReload = cfg->readUnsignedNumEntry("Reload", 0);
-  }
-  mUnitProductionTimeSpecified = cfg->hasKey("UnitProductionTime");
-  if(mUnitProductionTimeSpecified)
-  {
-    mUnitProductionTime = cfg->readUnsignedNumEntry("UnitProductionTime", 0);
-  }
-  mUnitMineralCostSpecified = cfg->hasKey("UnitMineralCost");
-  if(mUnitMineralCostSpecified)
-  {
-    mUnitMineralCost = cfg->readUnsignedLongNumEntry("UnitMineralCost", 100);
-  }
-  mUnitOilCostSpecified = cfg->hasKey("UnitOilCost");
-  if(mUnitOilCostSpecified)
-  {
-    mUnitOilCost = cfg->readUnsignedLongNumEntry("UnitOilCost", 0);
-  }
-  mArmorSpecified = cfg->hasKey("Armor");
-  if(mArmorSpecified)
-  {
-    mArmor = cfg->readUnsignedLongNumEntry("Armor", 0);
-  }
-  mShieldsSpecified = cfg->hasKey("Shield");
-  if(mShieldsSpecified)
-  {
-    mShields = cfg->readUnsignedLongNumEntry("Shield", 0);
-  }
-  mSpeedSpecified = cfg->hasKey("Speed");
-  if(mSpeedSpecified)
-  {
-    mSpeed = cfg->readDoubleNumEntry("Speed", 0);
-  }
-  mMaxResourcesSpecified = cfg->hasKey("MaxResources");
-  if(mMaxResourcesSpecified)
-  {
-    mMaxResources = cfg->readUnsignedLongNumEntry("MaxResources", 100);
-  }
+  mHealth.loadValue(cfg, "Health");
+  mArmor.loadValue(cfg, "Armor");
+  mShields.loadValue(cfg, "Shields");
+  mUnitMineralCost.loadValue(cfg, "UnitMineralCost");
+  mUnitOilCost.loadValue(cfg, "UnitOilCost");
+  mSightRange.loadValue(cfg, "SightRange");
+  mUnitProductionTime.loadValue(cfg, "UnitProductionTime");
+  mSpeed.loadValue(cfg, "Speed");
 }
 
-QValueList<unsigned long int> UpgradePropertiesBase::readUIntList(KSimpleConfig* cfg, const char* key) const
-{
-  QValueList<unsigned long int> list;
-  QValueList<int> tmplist = cfg->readIntListEntry(key);
-  QValueList<int>::Iterator it;
-  for(it = tmplist.begin(); it != tmplist.end(); it++) {
-    list.append((unsigned long int)(*it));
-  }
-  return list;
-}
-
-#warning FIXME
-// AB: I HATE macros
-
-// I do not usually like macros, but this is one place where I feel that macros
-//  are good. Parameters:
-// list: property will be applied to all unitproperties in list
-// player: pointer to owner of UnitProperties
-// myvar: name of variable in this class
-// upvar: name of variable in UnitProperties
-#define applyProperty(list,player,myvar,upvar,name) { \
-  QValueList<unsigned long int>::Iterator it; \
-  for(it = list.begin(); it != list.end(); it++) \
-  { \
-    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it); \
-    prop->upvar = myvar; \
-  } \
-}
-
-// Like above, but also changes unitvar to myvar in all units whose id is
-//  in list
-#define applyPropertyToUnits(list,player,myvar,upvar,unitvar,name) { \
-  applyProperty(list,player,myvar,upvar,name); \
-  QPtrListIterator<Unit> uit(player->allUnits()); \
-  while(uit.current()) \
-  { \
-    if(list.contains(uit.current()->id())) \
-    { \
-      uit.current()->unitvar = myvar; \
-    } \
-  } \
-}
 
 void UpgradePropertiesBase::apply(Player* player)
 {
@@ -253,78 +161,24 @@ void UpgradePropertiesBase::apply(Player* player)
       list += player->speciesTheme()->allMobiles();
     }
   }
+  QValueList<unsigned long int>::Iterator it;
+  QString addingTo = "Adding to types:";
+  for(it = list.begin(); it != list.end(); it++)
+  {
+    addingTo += " ";
+    addingTo += QString::number(*it);
+  }
+  boDebug() << "  " << k_funcinfo << addingTo << endl;
+  // TODO: check for double typeIDs
 
-  if(mHealthSpecified)
-  {
-    applyPropertyToUnits(list, player, mHealth, mHealth, mHealth, "mHealth");
-    applyProperty(list, player, mHealth, mHealth, "mHealth");
-    QPtrListIterator<Unit> uit(player->allUnits());
-    while(uit.current())
-    {
-      if(list.contains(uit.current()->id()))
-      {
-        uit.current()->mHealth = mHealth - (uit.current()->unitProperties()->health() - uit.current()->mHealth);
-      }
-    }
-  }
-/*  if(mWeaponRangeSpecified)
-  {
-    applyPropertyToUnits(list, player, mWeaponRange, mWeaponRange, mWeaponRange, "mWeaponRange");
-  }*/
-  if(mSightRangeSpecified)
-  {
-    applyPropertyToUnits(list, player, mSightRange, mSightRange, mSightRange, "mSightRange");
-  }
-/*  if(mWeaponDamageSpecified)
-  {
-    applyPropertyToUnits(list, player, mWeaponDamage, mWeaponDamage, mWeaponDamage, "mWeaponDamage");
-  }
-  if(mReloadSpecified)
-  {
-    applyProperty(list, player, mReload, mReload, "mReload");
-  }*/
-  if(mUnitProductionTimeSpecified)
-  {
-    applyProperty(list, player, mUnitProductionTime, mProductionTime, "mProductionTime");
-  }
-  if(mUnitMineralCostSpecified)
-  {
-    applyProperty(list, player, mUnitMineralCost, mMineralCost, "mMineralCost");
-  }
-  if(mUnitOilCostSpecified)
-  {
-    applyProperty(list, player, mUnitOilCost, mOilCost, "mOilCost");
-  }
-  if(mArmorSpecified)
-  {
-    applyPropertyToUnits(list, player, mArmor, mArmor, mArmor, "mArmor");
-  }
-  if(mShieldsSpecified)
-  {
-    applyPropertyToUnits(list, player, mShields, mShields, mShields, "mShields");
-  }
-  if(mSpeedSpecified)
-  {
-    // This is tricky one
-    QValueList<unsigned long int>::Iterator it;
-    for(it = list.begin(); it != list.end(); it++)
-    {
-      UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
-      prop->setSpeed(mSpeed);
-    }
-    QPtrListIterator<Unit> uit(player->allUnits());
-    while(uit.current())
-    {
-      if(list.contains(uit.current()->id()))
-      {
-        uit.current()->setSpeed(mSpeed);
-      }
-    }
-  }
-/*  if(mMaxResourcesSpecified)
-  {
-    applyProperty(list, player, mHealth, mHealth, "mHealth");
-  }*/
+  mHealth.applyProperty(&list, player, Health);
+  mArmor.applyProperty(&list, player, Armor);
+  mShields.applyProperty(&list, player, Shields);
+  mUnitMineralCost.applyProperty(&list, player, MineralCost);
+  mUnitOilCost.applyProperty(&list, player, OilCost);
+  mSightRange.applyProperty(&list, player, SightRange);
+  mUnitProductionTime.applyProperty(&list, player, ProductionTime);
+  mSpeed.applyProperty(&list, player, Speed);
 }
 
 
@@ -339,6 +193,148 @@ QValueList<unsigned long int> UpgradePropertiesBase::requiredTechnologies() cons
   return d->mRequireTechnologies;
 }
 
+/**********  UpgradeProperties*Value  **********/
+
+template<class TYPE> QString UpgradePropertiesValue<TYPE>::loadBaseValue(KSimpleConfig* cfg, QString key)
+{
+  QString str;
+  specified = cfg->hasKey(key);
+  if(specified)
+  {
+    str = cfg->readEntry(key, "0");
+    boDebug() << "          " << k_funcinfo << "Loaded string: '" << str << "' (key was: " << key << ")" << endl;
+    if(str.left(1) == "+" || str.left(1) == "-")
+    {
+      type = Relative;
+    }
+    else if(str.right(1) == "%")
+    {
+      type = Percent;
+      str = str.left(str.length() - 1);
+    }
+    else
+    {
+      type = Absolute;
+    }
+  }
+  return str;
+}
+
+void UpgradePropertiesUIntValue::loadValue(KSimpleConfig* cfg, QString key)
+{
+  QString str = loadBaseValue(cfg, key);
+  boDebug() << "      " << k_funcinfo << "Key: " << key << "; was specified: " << specified << endl;
+  if(specified)
+  {
+    value = str.toULong();
+    boDebug() << "        " << k_funcinfo << "Value as string: " << str << "; converted: " << value << "; type: " << type << endl;
+  }
+}
+
+void UpgradePropertiesFloatValue::loadValue(KSimpleConfig* cfg, QString key)
+{
+  QString str = loadBaseValue(cfg, key);
+  boDebug() << k_funcinfo << "Key: " << key << "; was specified: " << specified << endl;
+  if(specified)
+  {
+    value = str.toFloat();
+    boDebug() << "    " << k_funcinfo << "Value as string: " << str << "; converted: " << value << "; type: " << type << endl;
+  }
+}
+
+template<class TYPE> void UpgradePropertiesValue<TYPE>::applyProperty(QValueList<unsigned long int>* typeIds,
+    Player* player, UpgradeType type)
+{
+  if(!specified)
+  {
+    return;
+  }
+  boDebug() << "  " << k_funcinfo << "Applying property (type: " << type << ") to " << typeIds->count() << " props" << endl;
+  QValueList<unsigned long int>::Iterator it;
+  for(it = typeIds->begin(); it != typeIds->end(); it++)
+  {
+    boDebug() << "    " << k_funcinfo << "Applying to prop with id " << *it << endl;
+    UnitProperties* prop = player->speciesTheme()->nonConstUnitProperties(*it);
+    boDebug() << "      " << k_funcinfo << "Unit id: " << prop->id() << "; name: " << prop->name() << endl;
+    switch(type)
+    {
+      case Health:
+      {
+        boDebug() << "        " << k_funcinfo << "Applying health; old value: " << prop->health() << endl;
+        prop->setHealth(applyValue(prop->health()));
+        boDebug() << "        " << k_funcinfo << "New value: " << prop->health() << endl;
+        break;
+      }
+      case Armor:
+      {
+        prop->setArmor(applyValue(prop->armor()));
+        break;
+      }
+      case Shields:
+      {
+        prop->setShields(applyValue(prop->shields()));
+        break;
+      }
+      case MineralCost:
+      {
+        prop->setMineralCost(applyValue(prop->mineralCost()));
+        break;
+      }
+      case OilCost:
+      {
+        prop->setOilCost(applyValue(prop->oilCost()));
+        break;
+      }
+      case SightRange:
+      {
+        prop->setSightRange(applyValue(prop->sightRange()));
+        break;
+      }
+      case ProductionTime:
+      {
+        prop->setProductionTime(applyValue(prop->productionTime()));
+        break;
+      }
+      case Speed:
+      {
+        prop->setSpeed(applyValue(prop->speed()));
+        break;
+      }
+    }
+  }
+}
+
+template<class TYPE> TYPE UpgradePropertiesValue<TYPE>::applyValue(TYPE applyTo)
+{
+  if(!specified)
+  {
+    boError() << "    " << k_funcinfo << "Shouldn't call applyValue() when value isn't specified!!!" << endl;
+    return applyTo;
+  }
+  TYPE newvalue;
+  if(type == Absolute)
+  {
+    newvalue = value;
+  }
+  else if(type == Relative)
+  {
+    newvalue = applyTo + value;
+  }
+  else if(type == Percent)
+  {
+    newvalue = (TYPE)(((float)value) * applyTo / 100.0);
+  }
+  else
+  {
+    // Shouldn't happen
+    boError() << k_funcinfo << "Invalid type: " << type << endl;
+    newvalue = applyTo;
+  }
+  boDebug() << "        " << k_funcinfo << "Applied " << value << " (type " << type << ") to " << applyTo << "; result: " << newvalue << endl;
+  return newvalue;
+}
+
+            
 /**********  UpgradeProperties  **********/
 
 UpgradeProperties::UpgradeProperties(const UnitProperties* parent, unsigned long int id) :
