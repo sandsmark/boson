@@ -40,8 +40,9 @@ protected:
 	void loadConfig(const QString& file);
 
 private:
-	void initDirectories();
-	void initProperties();
+	void initDirectoriesPage();
+	void initPropertiesPage();
+	void initPixmapsPage();
 
 private:
 	class BosonUnitDialogPrivate;
