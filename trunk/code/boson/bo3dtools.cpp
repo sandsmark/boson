@@ -708,25 +708,25 @@ bool Bo3dTools::mapDistance(const BoMatrix& modelviewMatrix, const BoMatrix& pro
   GLfloat moveZ; // unused
   GLfloat moveX1, moveY1;
   GLfloat moveX2, moveY2;
-  if(windx >= viewport[1]) // viewport[1] == width
+  if(windx >= viewport[2]) // viewport[2] == width
   {
-    boError() << k_funcinfo << "windx (" << windx <<") must be < " << viewport[1] << endl;
+    boError() << k_funcinfo << "windx (" << windx <<") must be < " << viewport[2] << endl;
     return false;
   }
-  if(windy >= viewport[3]) // viewport[3] == width
+  if(windy >= viewport[3]) // viewport[3] == height
   {
     boError() << k_funcinfo << "windy (" << windy <<") must be < " << viewport[3] << endl;
     return false;
   }
   if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
-              QPoint(viewport[1] / 2 - windx / 2, viewport[3] / 2 - windy / 2),
+              QPoint(viewport[2] / 2 - windx / 2, viewport[3] / 2 - windy / 2),
               &moveX1, &moveY1, &moveZ, false))
   {
     boError() << k_funcinfo << "Cannot map coordinates" << endl;
     return false;
   }
   if(!mapCoordinates(modelviewMatrix, projectionMatrix, viewport,
-              QPoint(viewport[1] / 2 + windx / 2, viewport[3] / 2 + windy / 2),
+              QPoint(viewport[2] / 2 + windx / 2, viewport[3] / 2 + windy / 2),
               &moveX2, &moveY2, &moveZ, false))
   {
     boError() << k_funcinfo << "Cannot map coordinates" << endl;
