@@ -41,11 +41,72 @@ class BoLight;
 class BoFontInfo;
 class BosonScript;
 class BoVisibleEffects;
+class BosonMap;
+class BosonEffect;
 
 class KGameChat;
 class KGameIO;
 class QDomElement;
 template<class T> class QPtrList;
+
+class BosonCanvasRendererPrivate;
+/**
+ * @short This class renders everything that is actually "part of the game".
+ *
+ * The canvas renderer basically renders the canvas. That means it renders the
+ * ground and everything on it (items/units, effects, ...), i.e. everything that
+ * is "part of the game".
+ *
+ * It does <em>not</em> render anything that is used to control the game -
+ * cmdframe, labels, cursor, ... These things are handled elsewhere.
+ *
+ * @author Andreas Beckermann <b_mann@gmx.de
+ **/
+class BosonCanvasRenderer
+{
+public:
+	BosonCanvasRenderer(const BoMatrix& modelviewMatrix, GLfloat* viewFrustum, GLint* viewport);
+	~BosonCanvasRenderer();
+
+	void setCamera(BoGameCamera* camera);
+	void setLocalPlayerIO(PlayerIO* io);
+
+	void setParticlesDirty(bool dirty);
+
+	void reset();
+	void initGL();
+	void paintGL(const BosonCanvas* canvas);
+	unsigned int renderedItems() const;
+	unsigned int renderedCells() const;
+	unsigned int renderedParticles() const;
+	int textureBindsCells() const;
+	int textureBindsItems() const;
+	int textureBindsWater() const;
+	int textureBindsParticles() const;
+
+	BoGameCamera* camera() const;
+	PlayerIO* localPlayerIO() const;
+	GLfloat* viewFrustum() const;
+
+protected:
+	void renderGround(const BosonMap*);
+	void renderItems(const BoItemList* allCanvasItems);
+	void renderSelections(const BoItemList* selectedItems);
+	void renderWater();
+	void renderFog(BoVisibleEffects&);
+	void renderParticles(BoVisibleEffects&);
+	void renderBulletTrailEffects(BoVisibleEffects& visible);
+	void renderFadeEffects(BoVisibleEffects& visible);
+	void createRenderItemList(BoItemList* renderItemList, const BoItemList* allItems);
+	void createSelectionsList(BoItemList* selections, const BoItemList* relevantItems);
+	void createVisibleEffectsList(BoVisibleEffects*, const QPtrList<BosonEffect>& allEffects, unsigned int mapWidth, unsigned int mapHeight);
+
+	void renderBoundingBox(const BosonItem* item);
+	void renderBoundingBox(const BoVector3Float& c1, const BoVector3Float& c2);
+
+private:
+	BosonCanvasRendererPrivate* d;
+};
 
 /**
  * @author Andreas Beckermann <b_mann@gmx.de
@@ -458,7 +519,6 @@ protected:
 
 	void createRenderItemList();
 
-	void renderItems();
 	/**
 	 * @param isFlying If TRUE, the provided z value is always used, which
 	 * is expected to be higher than any cells. Otherwise the z value of
@@ -481,38 +541,6 @@ protected:
 	void updateUfoLabelRenderCounts();
 	void updateUfoLabelAdvanceCalls();
 	void updateUfoLabelTextureMemory();
-
-	/**
-	 * Called by @ref paintGL only to render the cells on the screen
-	 **/
-	void renderCells();
-
-	/**
-	 * Called by @ref paintGL only to render the particle effects on the screen
-	 **/
-	void renderParticles(BoVisibleEffects&);
-
-	/**
-	 * Called by @ref paintGL only to render the fog effects on the screen
-	 **/
-	void renderFog(BoVisibleEffects&);
-
-	void renderBulletTrailEffects(BoVisibleEffects&);
-
-	/**
-	 * Called by @ref paintGL only to render the fade effects on the screen
-	 **/
-	void renderFadeEffects(BoVisibleEffects&);
-
-	/**
-	 * @param y The <em>top</em> of the text to-be rendered. See also @ref
-	 * BosonGLFont::renderText
-	 * @return The height of the rendered text (see @ref
-	 * BosonGLFont::renderText)
-	 **/
-	int renderMatrix(int x, int y, const BoMatrix* matrix, const QString& text);
-
-	void makeVisibleEffectsList(BoVisibleEffects* v);
 
 	virtual void enterEvent(QEvent*);
 	virtual void leaveEvent(QEvent*);
