@@ -72,19 +72,6 @@ public:
 	void checkEvents();
 	
 signals:
-	/**
-	 * Loading has been completed once this signal is emitted. The big
-	 * display should be shown now.
-	 *
-	 * Note that at this point the <em>scenario</em> has <em>not</em> yet
-	 * started. A message starting the scenario has been sent, but it will
-	 * be received after this signal only. This also means that @ref
-	 * Boson::gameStatus is still @ref KGame::Init
-	 * @param playFieldId The playfield in case that a scenario should be
-	 * started. QString::null if no scenario should get started.
-	 **/
-	void signalStartGame(const QString& playFieldId);
-
 	void signalStartingFailed();
 
 	/**
@@ -141,6 +128,8 @@ protected:
 
 	void loadPlayerData();
 	void loadUnitDatas(Player* p);
+	void startScenario();
+	void startGame();
 
 private:
 	BosonPlayField* mPlayField;

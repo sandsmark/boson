@@ -495,6 +495,8 @@ void BosonBigDisplayBase::init()
 		d->mFrustumMatrix[i][j] = 0.0;
 	}
  }
+
+ setUpdatesEnabled(false);
  slotResetViewProperties();
 
  if (!isValid()) {
@@ -1657,9 +1659,33 @@ Player* BosonBigDisplayBase::localPlayer() const
 
 void BosonBigDisplayBase::slotCenterHomeBase()
 {
+ boDebug() << k_funcinfo << endl;
+ BO_CHECK_NULL_RET(localPlayer());
  //TODO
  // find the command center of the local player
  QPoint pos(0, 0); // note: we use *cell* coordinates!
+ Player* p = localPlayer();
+ QPtrList<Unit> units = p->allUnits();
+ QPtrListIterator<Unit> it(units);
+ Unit* commandCenter = 0;
+ for (; it.current() && !commandCenter; ++it) {
+	// now we have a problem. what do we need to check for?
+	// checking for Unit::type() isn't nice. maybe we need a
+	// UnitProperties::isCommandCenter() or so?
+	//
+	// so for now we get around this problem by picking the first unit and
+	// then exiting the loop.
+	commandCenter = it.current();
+ }
+ if (!commandCenter) {
+	commandCenter = units.getFirst();
+ }
+ if (!commandCenter) {
+	boWarning() << k_funcinfo << "cannot find a unit for localplayer" << endl;
+	// no units for player
+	return;
+ }
+ pos = QPoint(commandCenter->x() / BO_TILE_SIZE, commandCenter->y() / BO_TILE_SIZE);
 
  slotReCenterDisplay(pos);
 }

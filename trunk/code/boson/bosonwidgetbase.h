@@ -85,7 +85,7 @@ public:
 	/**
 	 * @param playFieldId See @ref Top::slotStartGame
 	 **/
-	void initGameMode(const QString& playFieldId);
+	void initGameMode();
 
 	virtual void saveConfig();
 
@@ -244,8 +244,6 @@ protected:
 	virtual void initDisplayManager();
 	virtual void initConnections();
 	virtual void setBosonXMLFile();
-
-	virtual void startScenario(const QString& playFieldId);
 
 	/**
 	 * Called by @ref slotStartScenario and the equivalent for loading games
