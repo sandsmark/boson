@@ -46,6 +46,7 @@
 #include "bo3dtools.h"
 #include "bosonbigdisplayinputbase.h"
 #include "bogltooltip.h"
+#include "bosongroundtheme.h"
 #include "info/boinfo.h"
 
 #include <kgame/kgameio.h>
@@ -1414,9 +1415,11 @@ void BosonBigDisplayBase::renderCells()
  BO_CHECK_NULL_RET(localPlayer());
  BO_CHECK_NULL_RET(map->texMap());
  BO_CHECK_NULL_RET(map->heightMap());
+ BO_CHECK_NULL_RET(map->groundTheme());
+ BosonGroundTheme* groundTheme = map->groundTheme();
  float* heightMap = map->heightMap();
 
- if (map->textureCount() != 3) {
+ if (groundTheme->textureCount() != 3) {
 	boError() << k_funcinfo << "only 3 texturemaps supported!" << endl;
 	return;
  }
@@ -1451,11 +1454,11 @@ void BosonBigDisplayBase::renderCells()
  // the first objects we render.
  glDisable(GL_DEPTH_TEST);
 
- for (unsigned int i = 0; i < map->textureCount(); i++) {
+ for (unsigned int i = 0; i < groundTheme->textureCount(); i++) {
 	GLuint tex = textures->texture(i);
 	if (i == 1) {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	} else if (i == map->textureCount() - 1) {
+	} else if (i == groundTheme->textureCount() - 1) {
 		glEnable(GL_DEPTH_TEST);
 	}
 	glBindTexture(GL_TEXTURE_2D, tex);
@@ -3175,7 +3178,7 @@ void BosonBigDisplayBase::setPlacementCellPreviewData(unsigned int textureCount,
  BO_CHECK_NULL_RET(canvas()->map());
  BO_CHECK_NULL_RET(canvas()->map()->texMap());
  BO_CHECK_NULL_RET(canvas()->map()->groundTheme());
- if (textureCount != canvas()->map()->textureCount()) {
+ if (textureCount != canvas()->map()->groundTheme()->textureCount()) {
 	boError() << k_funcinfo << "texture count is invalid - doesn't fit to groundTheme" << endl;
 	return;
  }

@@ -23,6 +23,7 @@
 #include "cell.h"
 #include "bosonmap.h"
 #include "bosonconfig.h"
+#include "bosongroundtheme.h"
 #include "boitemlist.h"
 #include "unit.h"
 #include "player.h"
@@ -201,7 +202,7 @@ void BosonMiniMap::calculateGround(int x, int y)
 	int cornerRed = 0;
 	int cornerGreen = 0;
 	int cornerBlue = 0;
-	for (unsigned int i = 0; i < map()->textureCount(); i++) {
+	for (unsigned int i = 0; i < map()->groundTheme()->textureCount(); i++) {
 		int alpha = (int)map()->texMapAlpha(i, cornerX[j], cornerY[j]);
 		alphaSum += alpha;
 
