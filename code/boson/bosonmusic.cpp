@@ -30,6 +30,7 @@
 #include <kplayobjectfactory.h>
 #ifndef BEFORE_BETA2
 #include <kartsserver.h>
+#include <kartsdispatcher.h>
 #endif
 
 #include <qtimer.h>
@@ -48,6 +49,7 @@ public:
 	}
 
 #ifndef BEFORE_BETA2
+	KArtsDispatcher mDispatcher;
 	KArtsServer mServer;// FIXME we also have one in bosoncanvas.cpp!!!
 #else
 	Arts::SoundServerV2 mServer; // FIXME remove when next beta arrived
@@ -58,6 +60,9 @@ public:
 
 	QStringList mFiles;
 	bool mLoop;
+
+	bool mMusic;
+	bool mSound;
 };
 
 //AB: interesting question: we have sounds and we have music. is it better to
@@ -67,10 +72,13 @@ public:
 BosonMusic::BosonMusic(QObject* parent) : QObject(parent)
 {
  d = new BosonMusicPrivate;
+ d->mMusic = true;
+ d->mSound = true;
  d->mTicker = new QTimer(this);
  connect(d->mTicker, SIGNAL(timeout()), this, SLOT(slotUpdateTicker()));
  d->mLoop = false;
 #ifdef BEFORE_BETA2
+ (void) new Arts::Dispatcher();
  d->mServer = Arts::Reference("global:Arts_SoundServerV2");
 #endif
 }
@@ -82,11 +90,19 @@ BosonMusic::~BosonMusic()
 
 void BosonMusic::play()
 {
- if (!d->mPlayObject) {
+ if (!d->mPlayObject || d->mPlayObject->isNull()) {
 	return;
  }
  d->mPlayObject->play();
  d->mTicker->start(TICKER_VALUE);
+}
+
+void BosonMusic::stop()
+{
+ if (d->mPlayObject && !d->mPlayObject->isNull()) {
+	d->mPlayObject->pause(); // AB: or halt() ??
+ }
+ d->mTicker->stop();
 }
 
 bool BosonMusic::load(const QString& file)
@@ -110,7 +126,9 @@ bool BosonMusic::load(const QString& file)
 	d->mPlayObject = 0;
 	return false;
  }
- play();
+ if (music()) {
+	play();
+ }
  return true;
 }
 
@@ -173,3 +191,55 @@ bool BosonMusic::isLoop() const
 {
  return d->mLoop;
 }
+
+void BosonMusic::slotPlaySound(const QString& file)
+{
+ if (d->mServer.isNull()) {
+	return;
+ }
+ if (!sound()) {
+	return;
+ }
+ kdDebug() << k_funcinfo << file << endl;
+
+#ifdef BEFORE_BETA2
+ if (d->mServer.isNull() || d->mServer.error()) {
+	return;
+ }
+#endif
+ KPlayObjectFactory factory(d->mServer);
+ KPlayObject* sound = factory.createPlayObject(file, true);
+ sound->play();
+}
+
+bool BosonMusic::sound() const
+{
+ return d->mSound;
+}
+
+bool BosonMusic::music() const
+{
+ return d->mMusic;
+}
+
+void BosonMusic::setMusic(bool music_)
+{
+ if (music() == music_) {
+	return;
+ }
+ d->mMusic = music_;
+ if (music()) {
+	play();
+ } else {
+	stop();
+ }
+}
+
+void BosonMusic::setSound(bool sound_)
+{
+ if (sound() == sound_) {
+	return;
+ }
+ d->mSound = sound_;
+}
+

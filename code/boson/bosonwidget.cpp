@@ -115,14 +115,9 @@ BosonWidget::BosonWidget(QWidget* parent)
 {
  init();
 
- /*
- d->mTopLayout = new QHBoxLayout(this, 5); // FIXME: 5 is hardcoded
- d->mFrameLayout = new QVBoxLayout();
- d->mTopLayout->addWidget(d->mBigDisplay);
- d->mTopLayout->addLayout(d->mFrameLayout);
- d->mFrameLayout->addWidget(d->mMiniMap, 0, AlignHCenter);
- */
  slotCommandFramePosition(BosonConfig::commandFramePosition());
+ d->mMusic->setSound(BosonConfig::sound());
+ d->mMusic->setMusic(BosonConfig::music());
 
 // the map is also found here. This is currently only used on startup to load
 // the cells (aka map - they contain the groundtypes) and the initial units.
@@ -223,6 +218,8 @@ void BosonWidget::init()
 
 
  d->mMusic = new BosonMusic(this);
+ connect(d->mCanvas, SIGNAL(signalPlaySound(const QString&)), 
+		d->mMusic, SLOT(slotPlaySound(const QString&)));
 
 // tooltips - added in slotAddUnit
  d->mUnitTips = new KSpriteToolTip(d->mBigDisplay);
@@ -753,6 +750,8 @@ void BosonWidget::saveConfig()
  BosonConfig::saveGameSpeed(d->mBoson->gameSpeed());
  BosonConfig::saveCommandFramePosition((d->mTopLayout->findWidget(d->mBigDisplay) == 0) ?
 		 (int)OptionsDialog::Right : (int)OptionsDialog::Left);
+ BosonConfig::saveSound(sound());
+ BosonConfig::saveMusic(music());
 }
 
 void BosonWidget::slotSendChangeSpecies(const QString& species)
@@ -846,3 +845,24 @@ void BosonWidget::slotCommandFramePosition(int pos)
  }
  d->mTopLayout->activate();
 }
+
+bool BosonWidget::sound() const
+{
+ return d->mMusic->sound();
+}
+
+bool BosonWidget::music() const
+{
+ return d->mMusic->music();
+}
+
+void BosonWidget::slotToggleSound()
+{
+ d->mMusic->setSound(!d->mMusic->sound());
+}
+
+void BosonWidget::slotToggleMusic()
+{
+ d->mMusic->setMusic(!d->mMusic->music());
+}
+

@@ -128,6 +128,7 @@ public slots:
 signals:
 	void signalUnitMoved(Unit* unit, double oldX, double oldY);
 	void signalUnitDestroyed(Unit* unit);
+	void signalPlaySound(const QString& file);
 
 protected:
 	void loadTiles(const QString&);

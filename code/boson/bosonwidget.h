@@ -83,6 +83,9 @@ public:
 	void addEditorCommandFrame();
 	void addGameCommandFrame();
 
+	bool sound() const;
+	bool music() const;
+
 public slots:
 	void slotDebug();
 	void slotNewGame();
@@ -101,6 +104,9 @@ public slots:
 
 	void slotEditorSaveMap(const QString& fileName);
 	void slotEditorSaveScenario(const QString& fileName);
+
+	void slotToggleSound();
+	void slotToggleMusic();
 
 signals:
 	void signalPlayerJoinedGame(KPlayer* p); // used by the map editor

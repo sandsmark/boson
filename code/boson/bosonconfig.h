@@ -41,6 +41,12 @@ public:
 	static void saveCommandFramePosition(int pos, KConfig* conf = 0);
 	static int commandFramePosition(KConfig* conf = 0);
 
+	static bool sound(KConfig* conf = 0);
+	static void saveSound(bool sound, KConfig* conf = 0);
+
+	static bool music(KConfig* conf = 0);
+	static void saveMusic(bool sound, KConfig* conf = 0);
+
 protected:
 	static void changeGroupGeneral(KConfig* conf);
 };
