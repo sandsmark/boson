@@ -24,6 +24,7 @@
 #include "bosonconfig.h"
 #include "bosonmodel.h"
 #include "bomesh.h"
+#include "bomaterial.h"
 #include "bosonglfont.h"
 #include "bosonprofiling.h"
 #include "unitproperties.h"
@@ -441,9 +442,12 @@ void ModelPreview::renderMeshSelection()
  glMultMatrixf(matrix->data());
  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
  glColor3ub(0, 255, 0);
+ glDisable(GL_TEXTURE_2D);
  mesh->renderBoundingObject();
  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+ glEnable(GL_TEXTURE_2D);
  glPopMatrix();
+ glColor3ub(255, 255, 255);
 }
 
 void ModelPreview::renderText()
@@ -483,6 +487,31 @@ void ModelPreview::renderText()
  }
  QString text = i18n("Mesh under cursor: %1").arg(meshName);
  y -= mDefaultFont->renderText(border, y, text, width() - 2 * border);
+
+ if (mSelectedMesh >= 0) {
+	BoMesh* mesh = 0;
+	if (mModel && mCurrentFrame >= 0) {
+		BoFrame* f = mModel->frame(mCurrentFrame);
+		if ((unsigned int)mSelectedMesh < f->meshCount()) {
+			mesh = f->mesh(mSelectedMesh);
+		}
+	}
+	if (mesh) {
+		QString name = mesh->name();
+		QString material;
+		if (mesh->material()) {
+			material = mesh->material()->name();
+		} else {
+			material = i18n("(None)");
+		}
+		QString text = i18n("Selected mesh: %1 points: %2 material: %3")
+				.arg(name)
+				.arg(mesh->points())
+				.arg(material);
+		y -= mDefaultFont->renderText(border, y, text,
+				width() - 2 * border);
+	}
+ }
 
  glMatrixMode(GL_PROJECTION);
  glPopMatrix();
