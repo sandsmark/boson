@@ -86,3 +86,5 @@ Data TODOs
 - rewrite installation code:
   -> when a dir is renamed currently the old remains on disk and therefore is
      read by the game
+- the text on the startup pixmap should be translatable. maybe we can use a
+  QPainter to paint on it?
