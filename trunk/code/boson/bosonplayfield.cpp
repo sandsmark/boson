@@ -162,6 +162,7 @@ bool BosonPlayFieldInformation::loadInformation(BPFFile* file)
 	boError() << k_funcinfo << "file format not supported" << endl;
 	return false;
  } else {
+	// file format is >= boson 0.9
 	boDebug() << k_funcinfo << "file format is current" << endl;
 	mapXML = file->mapXMLData();
 	playersXML = file->playersData();
@@ -195,7 +196,16 @@ bool BosonPlayFieldInformation::loadPlayersInformation(const QByteArray& xml)
  // winning conditions) yet. so we use 1 as default.
  mMinPlayers = 1;
 
- mMaxPlayers = root.elementsByTagName("Player").count();
+ // count the Player tags that don't have a IsNeutral attribute (maximal one
+ // exists - exactly one for files created with boson >= 0.10)
+ mMaxPlayers = 0;
+ QDomNodeList list = root.elementsByTagName("Player");
+ for (unsigned int i = 0; i < list.count(); i++) {
+	if (list.item(i).toElement().hasAttribute("IsNeutral")) {
+		continue;
+	}
+	mMaxPlayers++;
+ }
 
 
  return true;
