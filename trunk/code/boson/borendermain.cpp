@@ -138,6 +138,8 @@ ModelPreview::ModelPreview(const QPtrList<SpeciesTheme>& species, QWidget* paren
  mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
+ mMeshUnderMouseLabel = 0;
+ mSelectedMeshLabel = 0;
 
  mMouseMoveDiff = new BoMouseMoveDiff;
 
@@ -245,6 +247,8 @@ void ModelPreview::initUfoGUI()
  mUfoManager->contentWidget()->addWidget(topWidget);
 
 
+ mMeshUnderMouseLabel = new BoUfoLabel();
+ mSelectedMeshLabel = new BoUfoLabel();
  BoUfoNumInput* fovy = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
  BoUfoNumInput* frame = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
  BoUfoNumInput* lod = (BoUfoNumInput*)BoUfoFactory::createWidget("BoUfoNumInput");
@@ -312,7 +316,8 @@ void ModelPreview::initUfoGUI()
  connect(defaults, SIGNAL(signalClicked()), this, SLOT(slotResetView()));
 
  topWidget->addSpacing(10); // TODO: add spacinghint and marginhint to layouts
- topWidget->addSpacing(60); // distance from "mesh under cursor" text
+ topWidget->addWidget(mMeshUnderMouseLabel);
+ topWidget->addWidget(mSelectedMeshLabel);
 
  topWidget->addWidget(fovy);
  topWidget->addWidget(frame);
@@ -333,6 +338,7 @@ void ModelPreview::initUfoGUI()
 #endif
  topWidget->addWidget(defaults);
 
+ updateMeshUnderMouseLabel();
 
 
 
@@ -737,75 +743,6 @@ void ModelPreview::renderMeshSelection()
 void ModelPreview::renderText()
 {
  BO_CHECK_NULL_RET(mDefaultFont);
-
- glColor3f(0.0, 0.0, 0.0);
-
- glMatrixMode(GL_PROJECTION);
- glPushMatrix();
- glLoadIdentity();
- gluOrtho2D(0.0f, (GLfloat)width(), 0.0f, (GLfloat)height());
- glMatrixMode(GL_MODELVIEW);
- glPushMatrix();
- glLoadIdentity();
-
- mDefaultFont->begin();
- const int border = 5;
- int y = height() - border;
-
- glColor3ub(255, 255, 255);
- QString meshName;
- if (mMeshUnderMouse >= 0) {
-	BoMesh* mesh = 0;
-	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = frame(mCurrentFrame);
-		if (f) {
-			if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
-				f = 0;
-			} else {
-				mesh = f->mesh(mMeshUnderMouse);
-			}
-		}
-	}
-	if (mesh) {
-		meshName = mesh->name();
-	}
- }
- if (meshName.isNull()) {
-	meshName = i18n("(no mesh under cursor)");
- }
- QString text = i18n("Mesh under cursor: %1").arg(meshName);
- y -= mDefaultFont->renderText(border, y, text, width() - 2 * border);
-
- if (mSelectedMesh >= 0) {
-	BoMesh* mesh = 0;
-	if (mModel && mCurrentFrame >= 0) {
-		BoFrame* f = frame(mCurrentFrame);
-		if ((unsigned int)mSelectedMesh < f->meshCount()) {
-			mesh = f->mesh(mSelectedMesh);
-		}
-	}
-	if (mesh) {
-		QString name = mesh->name();
-		QString material;
-		if (mesh->material()) {
-			material = mesh->material()->name();
-		} else {
-			material = i18n("(None)");
-		}
-		QString text = i18n("Selected mesh: %1 points: %2 material: %3")
-				.arg(name)
-				.arg(mesh->points())
-				.arg(material);
-		y -= mDefaultFont->renderText(border, y, text,
-				width() - 2 * border);
-	}
- }
-
- glMatrixMode(GL_PROJECTION);
- glPopMatrix();
- glMatrixMode(GL_MODELVIEW);
- glPopMatrix();
-
 }
 
 BoFrame* ModelPreview::frame(unsigned int f) const
@@ -946,6 +883,64 @@ void ModelPreview::resetModel()
  mCurrentLOD = 0;
  mMeshUnderMouse = -1;
  mSelectedMesh = -1;
+ updateMeshUnderMouseLabel();
+}
+
+void ModelPreview::updateMeshUnderMouseLabel()
+{
+ BO_CHECK_NULL_RET(mMeshUnderMouseLabel);
+ BO_CHECK_NULL_RET(mSelectedMeshLabel);
+ QString meshUnderCursor;
+ QString selectedMeshText;
+ if (mMeshUnderMouse >= 0) {
+	BoMesh* mesh = 0;
+	if (mModel && mCurrentFrame >= 0) {
+		BoFrame* f = frame(mCurrentFrame);
+		if (f) {
+			if ((unsigned int)mMeshUnderMouse >= f->meshCount()) {
+				f = 0;
+			} else {
+				mesh = f->mesh(mMeshUnderMouse);
+			}
+		}
+	}
+	if (mesh) {
+		meshUnderCursor = mesh->name();
+	}
+ }
+ if (meshUnderCursor.isNull()) {
+	meshUnderCursor = i18n("(no mesh under cursor)");
+ }
+ if (mSelectedMesh >= 0) {
+	BoMesh* mesh = 0;
+	if (mModel && mCurrentFrame >= 0) {
+		BoFrame* f = frame(mCurrentFrame);
+		if ((unsigned int)mSelectedMesh < f->meshCount()) {
+			mesh = f->mesh(mSelectedMesh);
+		}
+	}
+	if (mesh) {
+		QString name = mesh->name();
+		QString material;
+		if (mesh->material()) {
+			material = mesh->material()->name();
+		} else {
+			material = i18n("(None)");
+		}
+		selectedMeshText = i18n("Selected mesh: %1 points: %2 material: %3")
+				.arg(name)
+				.arg(mesh->points())
+				.arg(material);
+	}
+ }
+ mMeshUnderMouseLabel->setText(i18n("Mesh under cursor: %1").arg(meshUnderCursor));
+ if (selectedMeshText.isEmpty()) {
+	mSelectedMeshLabel->hide();
+	mSelectedMeshLabel->setText("");
+ } else {
+	mSelectedMeshLabel->show();
+	mSelectedMeshLabel->setText(selectedMeshText);
+ }
 }
 
 void ModelPreview::updateCursorDisplay(const QPoint& pos)
@@ -967,6 +962,7 @@ void ModelPreview::updateCursorDisplay(const QPoint& pos)
 	return;
  }
  mMeshUnderMouse = picked;
+ updateMeshUnderMouseLabel();
 }
 
 int ModelPreview::pickObject(const QPoint& cursor)
@@ -1100,6 +1096,7 @@ void ModelPreview::mouseReleaseEvent(QMouseEvent* e)
 void ModelPreview::selectMesh(int mesh)
 {
  mSelectedMesh = mesh;
+ updateMeshUnderMouseLabel();
  emit signalMeshSelected(mesh);
 }
 
