@@ -19,7 +19,7 @@
  ***************************************************************************/
 
 #include "unitType.h"
-#include "map.h"
+#include "bomap.h"
 
 /*
 	char 	*name;		// The name of the funny thing...

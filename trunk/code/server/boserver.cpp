@@ -29,7 +29,6 @@
 
 #include "common/bobuffer.h"
 #include "common/unitType.h"
-#include "common/map.h"	 ///orzel: temp, pour la creation...
 
 #include "boserver.h"
 #include "game.h"

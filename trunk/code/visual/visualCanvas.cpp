@@ -24,7 +24,7 @@
 
 #include "common/log.h"
 #include "common/boconfig.h"
-#include "common/map.h"
+#include "common/bomap.h"
 
 #include "speciesTheme.h"
 #include "visual.h"

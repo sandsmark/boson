@@ -21,7 +21,7 @@
 #include <qpainter.h>
 #include <qpixmap.h>
 
-#include "common/map.h"
+#include "common/bomap.h"
 
 #include "visualMiniDisplay.h"
 #include "visualUnit.h"

@@ -33,7 +33,7 @@
 #include <kstdaction.h>
 
 #include "common/log.h"
-#include "common/map.h"
+#include "common/bomap.h"
 
 #include "editorTopLevel.h"
 #include "editorCanvas.h"

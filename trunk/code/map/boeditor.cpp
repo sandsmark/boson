@@ -25,7 +25,7 @@
 #include "common/msgData.h"
 //#include "common/cell.h"
 
-#include "map.h"
+#include "bomap.h"
 
 
 #define MAP_WIDTH	200
