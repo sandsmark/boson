@@ -160,7 +160,7 @@ QValueList<QPoint> BosonPath::findLocations(Player* player, int x, int y, int n,
   }
 #define VISITED(nx, ny)  visited[(ny - y + radius) * (2 * radius + 1) + (nx - x + radius)]
 
-  BosonCanvas* canvas = boGame->canvas(); // FIXME: is this good?
+  const BosonCanvas* canvas = boGame->canvas(); // FIXME: is this good?
 
   node.x = x;
   node.y = y;
