@@ -37,6 +37,7 @@ BoApplication::BoApplication(bool allowStyles, bool enableGUI)
  // AB: in KDE 3.2 there is a bug that overwrites custom resourceDir settings
  // (e.g. on debian config points to /etc/kde3) when calling addPrefix(). work
  // around this.
+#if !BOSON_LINK_STATIC
  QStringList config = KGlobal::dirs()->resourceDirs("config");
  KGlobal::dirs()->addPrefix(BOSON_PREFIX);
  QStringList config2 = KGlobal::dirs()->resourceDirs("config");
@@ -45,6 +46,15 @@ BoApplication::BoApplication(bool allowStyles, bool enableGUI)
 		KGlobal::dirs()->addResourceDir("config", config[i]);
 	}
  }
+#else
+ // AB: for static binaries we don't care about system settings of KDEDIR[S].
+ //     all data that belongs to boson are in the same directory where the
+ //     static boson binary resides.
+ //     note that BOSON_PREFIX needs to be ignored as well, as nothing will get
+ //     installed there!
+ qDebug(QString("Using prefix: %1").arg(applicationDirPath())); // do NOT use boDebug() here. we need to have the prefix before using that
+ KGlobal::dirs()->addPrefix(applicationDirPath());
+#endif
 
  BoGlobal::initStatic();
  BoGlobal::boGlobal()->initGlobalObjects();
