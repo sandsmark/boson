@@ -651,8 +651,6 @@ void TopWidget::reinitGame()
 			d->mStartup, SLOT(slotLoadingUnitsCount(int)));
  connect(d->mStarting, SIGNAL(signalLoadingUnit(int)),
 			d->mStartup, SLOT(slotLoadingUnit(int)));
- connect(d->mStarting, SIGNAL(signalLoadingTile(int)),
-			d->mStartup, SLOT(slotLoadingTile(int)));
  connect(d->mStarting, SIGNAL(signalLoadingShowProgressBar(bool)),
 			d->mStartup, SLOT(slotLoadingShowProgressBar(bool)));
 

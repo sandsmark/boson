@@ -38,7 +38,7 @@ class BoDisplayManager;
 class Boson;
 class BosonMiniMap;
 class BosonPlayField;
-class BosonTiles;
+class BosonGroundTheme;
 
 /**
  * This is the actual main widget of boson for the game
@@ -87,7 +87,7 @@ protected slots:
 
 	void slotOutOfGame(Player* p);
 
-	void slotTileSetChanged(BosonTiles*);
+	void slotGroundThemeChanged(BosonGroundTheme*);
 
 	void slotSavePlayFieldAs();
 	void slotSavePlayField();

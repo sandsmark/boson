@@ -25,7 +25,7 @@
 
 class Unit;
 class Player;
-class BosonTiles;
+class BosonGroundTheme;
 class BoButton;
 class BoProgress;
 class BoToolTip;
@@ -59,7 +59,7 @@ public:
 	 **/
 	void setAction(UnitAction action, Player* owner);
 
-	void setCell(int tileNo, BosonTiles* tileSet);
+	void setCell(int tileNo, BosonGroundTheme* theme);
 
 	/**
 	 * @return The displayed unit or 0 if no unit is displayed. See also

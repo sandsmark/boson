@@ -26,7 +26,7 @@
 #include "../player.h"
 #include "../unitproperties.h"
 #include "../cell.h"
-#include "../bosontiles.h"
+#include "../bosongroundtheme.h"
 #include "../bosonconfig.h"
 #include "../defines.h"
 #include "bodebug.h"
@@ -50,7 +50,7 @@ public:
 
 		mTransRef = 0;
 		mInverted = 0;
-		mTiles = 0;
+		mGroundTheme = 0;
 	}
 
 	QIntDict<BosonOrderButton> mOrderButton;
@@ -59,7 +59,7 @@ public:
 	
 	QComboBox* mTransRef;
 	QCheckBox* mInverted;
-	BosonTiles* mTiles;
+	BosonGroundTheme* mGroundTheme;
 
 	CellType mCellType; // plain tiles, small tiles, ...
 
@@ -198,20 +198,25 @@ void BosonOrderWidget::hideOrderButtons()
 void BosonOrderWidget::slotRedrawTiles()
 {
  showCellConfigWidgets();
- bool inverted = d->mInverted->isChecked();
+// bool inverted = d->mInverted->isChecked();
  boDebug() << k_funcinfo << endl;
+#if 0
  Cell::TransType trans = (Cell::TransType)d->mTransRef->currentItem();
+#endif
  // trans is one of TRANS_GW, TRANS_GD, TRANS_DW, TRANS_DWD ans specifies the
  // tile type (desert/water and so on)
  switch (d->mCellType) {
 	case CellPlain:
 		hideOrderButtons();
 		ensureButtons(Cell::GroundLast - 1);
+#if 0
 		for (int i = 0; i < 5; i++) {
 			int groundType = i + 1;
 			d->mOrderButton[i]->setCell(groundType, d->mTiles);
 		}
+#endif
 		break;
+#if 0
 	case CellSmall:
 		hideOrderButtons();
 		ensureButtons(9);
@@ -238,6 +243,7 @@ void BosonOrderWidget::slotRedrawTiles()
 					d->mTiles);
 		}
 		break;
+#endif
 	default:
 		boError() << "unexpected production index " << d->mCellType << endl;
 		break;
@@ -253,15 +259,19 @@ void BosonOrderWidget::setCellType(CellType index)
 void BosonOrderWidget::initEditor()
 {
  d->mTransRef = new QComboBox(this);
+#if 0
  connect(d->mTransRef, SIGNAL(activated(int)), this, SLOT(slotRedrawTiles()));
  d->mTransRef->insertItem(i18n("Grass/Water"), (int)Cell::TransGrassWater);
  d->mTransRef->insertItem(i18n("Grass/Desert"), (int)Cell::TransGrassDesert);
  d->mTransRef->insertItem(i18n("Desert/Water"), (int)Cell::TransDesertWater);
  d->mTransRef->insertItem(i18n("Deep Water"), (int)Cell::TransDeepWater);
+#endif
 
  d->mInverted = new QCheckBox(this);
+#if 0
  d->mInverted->setText(i18n("Invert"));
  connect(d->mInverted, SIGNAL(toggled(bool)), this, SLOT(slotRedrawTiles()));
+#endif
 }
 
 void BosonOrderWidget::hideCellConfigWidgets()
@@ -334,9 +344,9 @@ void BosonOrderWidget::productionAdvanced(Unit* factory, double percentage)
  }
 }
 
-void BosonOrderWidget::setTileSet(BosonTiles* tiles)
+void BosonOrderWidget::setGroundTheme(BosonGroundTheme* theme)
 {
- d->mTiles = tiles;
+ d->mGroundTheme = theme;
 }
 
 void BosonOrderWidget::resetButton(BosonOrderButton* button)

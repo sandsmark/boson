@@ -28,7 +28,7 @@ class Facility;
 class Player;
 class BosonOrderButton;
 class BoSelection;
-class BosonTiles;
+class BosonGroundTheme;
 
 class KPlayer;
 
@@ -44,12 +44,13 @@ public:
 	EditorCommandFrame(QWidget* parent);
 	~EditorCommandFrame();
 
-	void setTileSet(BosonTiles* t);
+	void setGroundTheme(BosonGroundTheme* theme);
 
 	/**
 	 * @param owner necessary for units (mobile and facilities) only.
 	 **/
-	void placeCells(CellType type);
+	void placeCells(CellType type);// obsolete
+	void placeGround();
 
 	void placeMobiles(Player* owner);
 	void placeFacilities(Player* owner);

@@ -41,30 +41,6 @@ public:
 
 		GroundLast = 7
 	};
-        enum TransType {
-		TransGrassWater = 0,
-		TransGrassDesert,
-		TransDesertWater,
-		TransDeepWater,
-		TransLast
-	};
-	enum Transition {
-		TransUpLeft = 0,
-		TransUpRight,
-		TransDownLeft,
-		TransDownRight,
-
-		TransUp,
-		TransDown,
-		TransLeft,
-	       	TransRight,
-		
-		TransUpLeftInverted,
-		TransUpRightInverted,
-		TransDownLeftInverted,
-		TransDownRightInverted
-	};
-
 
 	Cell();
 	~Cell();
@@ -78,14 +54,17 @@ public:
 	 * the game (when creating the map). In the editor this is called
 	 * whenever the cell changes.
 	 **/
-	void makeCell(int groundType, unsigned char version);
+	void makeCell(unsigned char amountOfLand, unsigned char amountOfWater);
+
+
+	inline unsigned char amountOfLand() const { return mAmountOfLand; }
+	inline unsigned char amountOfWater() const { return mAmountOfWater; }
 
 	/**
 	 * @return Whether the specified unit can go over this ground. Note
 	 * that this does <em>not</em> check whether the cell is occupied.
 	 **/
 	bool canGo(const UnitProperties* unit) const;
-	static bool canGo(const UnitProperties* unit, GroundType ground);
 
 	/**
 	 * The moving cost of a cell is the value that should influence the
@@ -114,63 +93,6 @@ public:
 		return mVersion;
 	}
 
-	inline int tile() const
-	{
-		return tile(groundType(), version());
-	}
-		
-
-	/**
-	 * @return The number of the tile in the tile file (earth.png)
-	 **/
-	static int tile(int groundType, unsigned char version)
-	{
-		return (groundType << 2 | (version & 0x3) );
-	}
-
-	/**
-	 * @return Whether ground is a plain tile
-	 **/
-	static bool isPlain(int ground);
-	static bool isValidGround(int ground);
-	static bool isTrans(int ground);
-	static bool isSmallTrans(int g);
-	static bool isBigTrans(int g);
-
-	/**
-	 * @return How many tiles of every transition exist.
-	 **/
-	static int tilesPerTransition();
-	static int groundTilesNumber();
-	static int bigTilesPerTransition();
-	static int smallTilesPerTransition();
-
-	static int getTransRef(int g); // does this return a @ref TransType ??
-
-	/**
-	 * @return The tile number with transRef and transTile
-	 **/
-	static int getTransNumber(TransType transRef, int transTile);
-	
-	/**
-	 * @return The number of the big tile with transRef and transTile
-	 **/
-	static int getBigTransNumber(TransType transRef, int transTile);
-
-	static int smallTileNumber(int smallNo, TransType trans, bool inverted);
-
-	/**
-	 * @return With which groundtype this transition starts.
-	 **/
-	static GroundType from(TransType trans);
-
-	/**
-	 * @return With which groundtype this transition ends.
-	 **/
-	static GroundType to(TransType trans);
-
-	static int getTransTile(int g);
-
 	inline void addItem(BosonItem* u) { mItems.appendItem(u); }
 
 	/**
@@ -198,6 +120,7 @@ public:
 	inline const BoItemList* items() const { return &mItems; }
 	unsigned int unitCount() const { return mItems.count(); }
 
+
 protected:
 	void setVersion(unsigned char v)
 	{
@@ -213,6 +136,10 @@ private:
 	int mY;
 
 	BoItemList mItems;
+
+	// specify the amount of water/land on this tile. 0==0%, 127==50%, 255==100%
+	unsigned char mAmountOfLand;
+	unsigned char mAmountOfWater;
 };
 
 #endif

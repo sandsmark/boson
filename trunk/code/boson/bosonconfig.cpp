@@ -221,7 +221,6 @@ BosonConfig::BosonConfig(KConfig* conf)
  mDebugMode = DebugNormal;
 
  mDisableSound = false;
- mLoadTiles = true;
  mAIDelay = 3.0;
  mWantDirect = true;
 

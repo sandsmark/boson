@@ -115,10 +115,11 @@ void EditorWidget::initMap()
 	boError() << k_funcinfo << endl;
 	return;
  }
- connect(boGame->playField()->map(), SIGNAL(signalTileSetChanged(BosonTiles*)),
-		this, SLOT(slotTileSetChanged(BosonTiles*)));
- connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
-		boGame->playField()->map(), SLOT(slotChangeCell(int,int,int,unsigned char)));
+ BosonMap* map = boGame->playField()->map();
+ connect(map, SIGNAL(signalGroundThemeChanged(BosonGroundTheme*)),
+		this, SLOT(slotGroundThemeChanged(BosonGroundTheme*)));
+ connect(boGame, SIGNAL(signalChangeCellCorner(int,int,int,unsigned char,unsigned char)),
+		map, SLOT(slotChangeCellCorner(int,int,int,unsigned char, unsigned char)));
  connect(boGame, SIGNAL(signalChangeCell(int,int,int,unsigned char)),
 		minimap(), SLOT(slotChangeCell(int,int,int,unsigned char)));
 }
@@ -173,10 +174,7 @@ void EditorWidget::initKActions()
  QStringList list;
  list.append(i18n("&Facilities"));
  list.append(i18n("&Mobiles"));
- list.append(i18n("&Small"));
- list.append(i18n("&Plain"));
- list.append(i18n("&Big1"));
- list.append(i18n("B&ig1"));
+ list.append(i18n("&Ground"));
  d->mPlaceAction = new KSelectAction(i18n("Place"), KShortcut(), actionCollection(), "editor_place");
  connect(d->mPlaceAction, SIGNAL(activated(int)),
 		this, SLOT(slotPlace(int)));
@@ -298,16 +296,7 @@ void EditorWidget::slotPlace(int index)
 		cmd->placeMobiles(localPlayer());
 		break;
 	case 2:
-		cmd->placeCells(CellSmall);
-		break;
-	case 3:
-		cmd->placeCells(CellPlain);
-		break;
-	case 4:
-		cmd->placeCells(CellBig1);
-		break;
-	case 5:
-		cmd->placeCells(CellBig2);
+		cmd->placeGround();
 		break;
 	default:
 		boError() << k_funcinfo << "Invalid index " << index << endl;
@@ -369,12 +358,10 @@ void EditorWidget::slotPlayerLeftGame(KPlayer* player)
  d->mPlayerAction->setItems(players);
 }
 
-void EditorWidget::slotTileSetChanged(BosonTiles* t)
+void EditorWidget::slotGroundThemeChanged(BosonGroundTheme* theme)
 {
- if (!editorCmdFrame()) {
-	return;
- }
- editorCmdFrame()->setTileSet(t);
+ BO_CHECK_NULL_RET(editorCmdFrame());
+ editorCmdFrame()->setGroundTheme(theme);
 }
 
 void EditorWidget::slotGameStarted()
@@ -513,15 +500,7 @@ void EditorWidget::slotImportHeightMap()
 	KMessageBox::sorry(this, i18n("%1 is not a greyscale image").arg(fileName));
 	return;
  }
- QByteArray b;
- QDataStream s(b, IO_WriteOnly);
- QImageIO io;
- io.setIODevice(s.device());
- io.setFormat("PNG");
- io.setImage(image);
- io.write();
- map->loadHeightMapImage(b);
-
+ boGame->playField()->importHeightMapImage(image);
  // TODO: update unit positions!
 }
 

@@ -71,7 +71,7 @@ public:
 	// Player Input in Editor mode
 		MoveEditor = 200, // all editor moves/inputs are prefixed with this
 		MovePlaceUnit = 201,
-		MovePlaceCell = 202,
+		MoveChangeTexMap = 202,
 		MoveChangeHeight = 203,
 
 

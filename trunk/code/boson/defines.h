@@ -34,6 +34,12 @@
 #define BOSON_COOKIE 992
 #define BOSON_PORT 5454
 
+
+// magic cookies for binary files
+#define BOSONMAP_MAP_MAGIC_COOKIE QString::fromLatin1("BosonMap")
+#define BOSONMAP_TEXMAP_MAGIC_COOKIE QString::fromLatin1("BoTexMap")
+
+
 #define MAXIMAL_ADVANCE_COUNT 19 // maximal value of advanceCount param emitted by Boson::signalAdvance
 
 #define BOSON_MAX_PLAYERS 10 // test if this is working - 2 is tested

@@ -20,7 +20,7 @@
 #include "bosonorderbutton.h"
 #include "bosonorderbutton.moc"
 
-#include "../bosontiles.h"
+#include "../bosongroundtheme.h"
 #include "../unit.h"
 #include "../player.h"
 #include "../speciestheme.h"
@@ -349,20 +349,23 @@ void BosonOrderButton::setAction(UnitAction action, Player* owner)
  show();
 }
 
-void BosonOrderButton::setCell(int tileNo, BosonTiles* tileSet)
+void BosonOrderButton::setCell(int tileNo, BosonGroundTheme* theme)
 {
  if (mUnit) {
 	unset();
  }
- if (!tileSet) {
-	boError() << k_funcinfo << "NULL tileset" << endl;
+ if (!theme) {
+	boError() << k_funcinfo << "NULL ground theme" << endl;
 	return;
  }
  mUnit = 0;
 
  mTileNumber = tileNo;
  mOrderType = OrderCell;
+#warning TODO
+#if 0
  setPixmap(tileSet->tile(mTileNumber));
+#endif
 
  mHealth->hide();
 

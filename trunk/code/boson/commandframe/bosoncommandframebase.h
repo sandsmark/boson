@@ -218,7 +218,8 @@ protected slots:
 	/**
 	 * Editor mode only. Emit @ref signalPlaceCell.
 	 **/
-	void slotPlaceCell(int groundType);
+	void slotPlaceCell(int groundType); // obsolete
+	void slotPlaceGround();
 
 	virtual void slotUpdate();
 

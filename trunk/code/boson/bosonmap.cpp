@@ -22,17 +22,31 @@
 
 #include "defines.h"
 #include "cell.h"
-#include "bosontiles.h"
+#include "bosongroundtheme.h"
+#include "boson.h" // for an ugly boGame->gameMode() hack!
 #include "bodebug.h"
 
 #include <qtimer.h>
 #include <qdatetime.h>
 #include <qdatastream.h>
 #include <qimage.h>
+#include <qvaluevector.h>
 
 #include <kapplication.h>
 #include <kglobal.h>
 #include <kstandarddirs.h>
+
+#define BOSONMAP_VERSION 0x01 // current version
+
+struct TextureGroundType
+{
+	int mGroundType; // AB: we need a groundType enum for this. of any kind... this variable mustn't depend on that enum though.
+	unsigned char mAmountOfLand;
+	unsigned char mAmountOfWater;
+
+	// AB: maybe add a minimap color here!
+	QRgb mMiniMapColor;
+};
 
 class BosonMap::BosonMapPrivate
 {
@@ -40,7 +54,7 @@ public:
 	BosonMapPrivate()
 	{
 	}
-	QString mTilesDir;
+	QValueVector<TextureGroundType> mTextureGroundType;
 };
 
 BosonMap::BosonMap(QObject* parent) : QObject(parent)
@@ -50,9 +64,10 @@ BosonMap::BosonMap(QObject* parent) : QObject(parent)
 
 BosonMap::~BosonMap()
 {
- delete mTiles;
+ delete mGroundTheme;
  delete[] mCells;
  delete[] mHeightMap;
+ delete[] mTexMap;
  delete d;
 }
 
@@ -61,36 +76,72 @@ void BosonMap::init()
  d = new BosonMapPrivate;
  mCells = 0;
  mHeightMap = 0;
- mTiles = 0;
+ mGroundTheme = 0;
+ mTexMap = 0;
+ mTextureCount = 0;
+ mMapWidth = 0;
+ mMapHeight = 0;
  setModified(false);
 }
 
-bool BosonMap::loadMapFromFile(QDataStream& stream)
+bool BosonMap::loadMapFromFile(const QByteArray& map)
 {
+ boDebug() << k_funcinfo << endl;
+ QDataStream stream(map, IO_ReadOnly);
+ QString magic;
+ stream >> magic;
+ if (magic != BOSONMAP_MAP_MAGIC_COOKIE) {
+	boError() << k_funcinfo << "invalid magic cookie" << endl;
+	return false;
+ }
+ Q_UINT32 version;
+ stream >> version;
+ if (version != BOSONMAP_VERSION) {
+	boError() << k_funcinfo << "version " << version << " not supported" << endl;
+	return false;
+ }
  if (!loadMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not load map geo" << endl;
 	return false;
  }
+ if (!stream.atEnd()) {
+	boWarning() << k_funcinfo << "stream is not at end after map geo!" << endl;
+ }
+ return true;
+ // AB: cells are NOT loaded here anymore!
+#if 0
  if (!loadCells(stream)) {
 	boError() << k_funcinfo << "Could not load map cells" << endl;
 	return false;
  }
  return true;
+#endif
 }
 
 
 bool BosonMap::loadCompleteMap(QDataStream& stream)
 {
+ boDebug() << k_funcinfo << endl;
  if (!loadMapGeo(stream)) {
 	boError() << k_funcinfo << "Could not load map geo" << endl;
 	return false;
  }
- if (!loadCells(stream)) {
-	boError() << k_funcinfo << "Could not load map cells" << endl;
-	return false;
- }
  if (!loadHeightMap(stream)) {
 	boError() << k_funcinfo << "Could not load height map" << endl;
+	return false;
+ }
+ if (stream.atEnd()) {
+	// do NOT try to generate a texmap. here we are loading a remote stream,
+	// which must contain the correct texmap.
+	boError() << k_funcinfo << "stream has no texmap! must not happen here!" << endl;
+	return false;
+ }
+ if (!loadTexMap(stream)) {
+	boError() << k_funcinfo << "Could not load texmap" << endl;
+	return false;
+ }
+ if (!loadCells(stream)) {
+	boError() << k_funcinfo << "Could not load map cells" << endl;
 	return false;
  }
  return true;
@@ -98,8 +149,8 @@ bool BosonMap::loadCompleteMap(QDataStream& stream)
 
 bool BosonMap::loadMapGeo(QDataStream& stream)
 {
- Q_INT32 mapWidth;
- Q_INT32 mapHeight;
+ Q_UINT32 mapWidth;
+ Q_UINT32 mapHeight;
 
  stream >> mapWidth;
  stream >> mapHeight;
@@ -130,16 +181,14 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
  mMapWidth = mapWidth; // horizontal cell count
  mMapHeight = mapHeight; // vertical cell count
 
- if (mCells) {
-//	boDebug() << "cells created before!! try to delete..." << endl;
-	delete[] mCells;
- }
- if (mHeightMap) {
-	delete[] mHeightMap;
- }
+ delete[] mCells;
+ delete[] mHeightMap;
+ delete[] mTexMap;
 
+ boDebug() << k_funcinfo << endl;
  mCells = new Cell[width() * height()];
  mHeightMap = new float[(width() + 1) * (height() + 1)];
+ mTexMap = 0; // it is NOT loaded here
  for (unsigned int x = 0; x < width(); x++) {
 	for (unsigned y = 0; y < height(); y++) {
 		Cell* c = cell(x, y);
@@ -150,7 +199,9 @@ bool BosonMap::loadMapGeo(QDataStream& stream)
 		c->setPosition(x, y);
 	}
  }
- return loadHeightMapImage(QByteArray());
+ // AB: is it clever to load a height map here? we have to allocate a lot of
+ // memory for it - even when preloading maps that will never get used
+ return true;
 }
 
 bool BosonMap::loadCells(QDataStream& stream)
@@ -162,36 +213,39 @@ bool BosonMap::loadCells(QDataStream& stream)
 // load all cells:
  for (unsigned int i = 0; i < width(); i++) {
 	for (unsigned int j = 0; j < height(); j++) {
-		int groundType = 0;
-		unsigned char version = 0;
-		if (!loadCell(stream, groundType, version)) {
+		unsigned char amountOfLand = 0;
+		unsigned char amountOfWater = 0;
+		if (!loadCell(stream, &amountOfLand, &amountOfWater)) {
 			return false;
 		}
-		slotChangeCell(i, j, groundType, version);
+		slotChangeCell(i, j, amountOfLand, amountOfWater);
 	}
  }
  return true;
 }
 
-bool BosonMap::loadHeightMap(QDataStream& stream)
+bool BosonMap::importHeightMapImage(const QImage& image)
 {
- if (!mHeightMap) {
-	boError() << k_funcinfo << "NULL heightmap" << endl;
+ if (image.isNull()) {
 	return false;
  }
- boDebug() << k_funcinfo << "loading height map from network stream" << endl;
- for (unsigned int x = 0; x < width() + 1; x++) {
-	for (unsigned int y = 0; y < height() + 1; y++) {
-		stream >> mHeightMap[y * (width() + 1) + x];
-	}
+ if ((unsigned int)image.width() != width() + 1 ||
+		(unsigned int)image.height() != height() + 1) {
+	return false;
  }
-
- return true;
+ QByteArray b;
+ QDataStream s(b, IO_WriteOnly);
+ QImageIO io;
+ io.setIODevice(s.device());
+ io.setFormat("PNG");
+ io.setImage(image);
+ io.write();
+ return loadHeightMapImage(b);
 }
 
 bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 {
-// boDebug() << k_funcinfo << endl;
+ boDebug() << k_funcinfo << endl;
  if (heightMap.size() == 0) {
 	// initialize the height map with 0.0
 //	boDebug() << k_funcinfo << "loading dummy height map" << endl;
@@ -202,7 +256,7 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 	}
 	return true;
  }
-// boDebug() << k_funcinfo << "loading real height map" << endl;
+ boDebug() << k_funcinfo << "loading real height map" << endl;
  QImage map(heightMap);
  if (!map.isGrayscale()) {
 	// we load a valid height map (i.e. a dummy height map) but still return
@@ -249,6 +303,130 @@ bool BosonMap::loadHeightMapImage(const QByteArray& heightMap)
 
  // No need to recalculate cell values here since actual values will be loaded
  //  from network stream later... right?
+ boDebug() << k_funcinfo << "done" << endl;
+ return true;
+}
+
+bool BosonMap::loadHeightMap(QDataStream& stream)
+{
+ if (!mHeightMap) {
+	boError() << k_funcinfo << "NULL heightmap" << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "loading height map from network stream" << endl;
+ for (unsigned int x = 0; x < width() + 1; x++) {
+	for (unsigned int y = 0; y < height() + 1; y++) {
+		stream >> mHeightMap[y * (width() + 1) + x];
+	}
+ }
+ return true;
+}
+
+bool BosonMap::loadTexMap(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ if (stream.atEnd()) {
+	boError() << k_funcinfo << "empty stream" << endl;
+	return false;
+ }
+ if (mTexMap) {
+	boWarning() << k_funcinfo << "already a texmap present - deleting..." << endl;
+	delete[] mTexMap;
+	mTexMap = 0;
+ }
+ if (width() * height() <= 0) {
+	boError() << k_funcinfo << "width=" << width() << " height=" << height() << endl;
+	return false;
+ }
+ boDebug() << k_funcinfo << "loading texmap from stream" << endl;
+ QString cookie;
+ Q_UINT32 version;
+ stream >> cookie;
+ if (cookie != BOSONMAP_TEXMAP_MAGIC_COOKIE) {
+	boError() << k_funcinfo << "invalid cookie" << endl;
+	return false;
+ }
+ stream >> version;
+ if (version != BOSONMAP_VERSION) {
+	boError() << k_funcinfo << "version " << version << " not supported" << endl;
+	return false;
+ }
+ Q_UINT32 textures;
+ stream >> textures;
+ mTextureCount = textures;
+ if (mTextureCount < 1) {
+	boError() << k_funcinfo << textures << " textures is not possible" << endl;
+	return false;
+ }
+ if (stream.atEnd()) {
+	boError() << k_funcinfo << "stream at end" << endl;
+	return false;
+ }
+ mTexMap = new unsigned char[texMapArrayPos(mTextureCount - 1, width(), height())];
+ for (unsigned int i = 0; i < mTextureCount; i++) {
+	Q_INT32 groundType; //AB: note this is NOT Cell::groundType()! although it means the same thing! but it operates on different numbers
+	QRgb miniMapColor;
+	Q_UINT8 amountOfLand;
+	Q_UINT8 amountOfWater;
+	stream >> groundType;
+	stream >> miniMapColor;
+	stream >> amountOfLand;
+	stream >> amountOfWater;
+	setTextureGroundType(i, groundType, miniMapColor, amountOfLand, amountOfWater);
+	for (unsigned int x = 0; x < width() + 1; x++) {
+		for (unsigned int y = 0; y < height() + 1; y++) {
+			Q_UINT8 c;
+			stream >> c;
+			mTexMap[texMapArrayPos(i, x, y)] = c;
+		}
+	}
+ }
+ boDebug() << "done" << endl;
+ return true;
+}
+
+bool BosonMap::saveTexMap(QDataStream& stream)
+{
+ boDebug() << k_funcinfo << endl;
+ if (!mTexMap) {
+	BO_NULL_ERROR(mTexMap);
+	return false;
+ }
+ if (mTextureCount > 100) {
+	// this *cant* be true (would be > 100*500*500 bytes on a 500x500 map)
+	boError() << k_funcinfo << "texture count > 100: " << mTextureCount << " - won't save anything." << endl;
+	return false;
+ }
+ if (textureCount()< 1) {
+	boError() << k_funcinfo << "need at least one texture!" << endl;
+	return false;
+ }
+ if (d->mTextureGroundType.count() < textureCount()) {
+	boError() << k_funcinfo << "groundType information for "
+			<< d->mTextureGroundType.count()
+			<< " groundTypes available only. need "
+			<< textureCount() << endl;
+	return false;
+ }
+ stream << BOSONMAP_TEXMAP_MAGIC_COOKIE;
+ stream << (Q_UINT32)BOSONMAP_VERSION;
+ stream << (Q_UINT32)mTextureCount;
+ for (unsigned int i = 0; i < mTextureCount; i++) {
+	// which type of ground is this (grass, desert, water, vulcan, ...)
+	stream << (Q_INT32)groundType(i);
+	stream << (QRgb)miniMapColor(i);
+
+	// amount of land/water of this texture
+	stream << (Q_UINT8)amountOfLand(i);
+	stream << (Q_UINT8)amountOfWater(i);
+
+	// now the actual texmap for this texture
+	for (unsigned int x = 0; x < width() + 1; x++) {
+		for (unsigned int y = 0; y < height() + 1; y++) {
+			stream << (Q_UINT8)mTexMap[texMapArrayPos(i, x, y)];
+		}
+	}
+ }
  return true;
 }
 
@@ -258,10 +436,13 @@ bool BosonMap::saveMapToFile(QDataStream& stream)
 	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
  }
+#if 0
+ // obsolete.
  if (!saveCells(stream)) {
 	boError() << k_funcinfo << "Could not save map cells" << endl;
 	return false;
  }
+#endif
  return true;
 }
 
@@ -274,12 +455,15 @@ bool BosonMap::saveCompleteMap(QDataStream& stream)
 	boError() << k_funcinfo << "Could not save map geo" << endl;
 	return false;
  }
- if (!saveCells(stream)) {
-	boError() << k_funcinfo << "Could not save map cells" << endl;
-	return false;
- }
  if (!saveHeightMap(stream)) {
 	boError() << k_funcinfo << "Could not save height map" << endl;
+	return false;
+ }
+ if (!saveTexMap(stream)) {
+	boError() << k_funcinfo << "Could not save texmap" << endl;
+ }
+ if (!saveCells(stream)) {
+	boError() << k_funcinfo << "Could not save map cells" << endl;
 	return false;
  }
  return true;
@@ -309,7 +493,7 @@ bool BosonMap::saveCells(QDataStream& stream)
 			// width()*height() cells
 			saveCell(stream, 0, 0);
 		} else {
-			saveCell(stream, c->groundType(), c->version());
+			saveCell(stream, c->amountOfLand(), c->amountOfWater());
 		}
 	}
  }
@@ -355,7 +539,7 @@ QByteArray BosonMap::saveHeightMapImage()
  boDebug() << k_funcinfo << "heightmap: " << image.width() << "x" << image.height() << endl;
  if (!mHeightMap) {
 	boDebug() << k_funcinfo << "dummy height map..." << endl;
-	int l = heightToPixel(0.0f);
+	int l = BosonMap::heightToPixel(0.0f);
 	image.fill(l);
  } else {
 	boDebug() << k_funcinfo << "real height map" << endl;
@@ -364,7 +548,7 @@ QByteArray BosonMap::saveHeightMapImage()
 		uint* p = (uint*)image.scanLine(y);
 		for (int x = 0; x < image.width(); x++) {
 			float value = mHeightMap[y * (width() + 1) + x];
-			int v = heightToPixel(value);
+			int v = BosonMap::heightToPixel(value);
 			*p = qRgb(v, v, v);
 			p++;
 		}
@@ -418,36 +602,22 @@ bool BosonMap::isValid() const
  return true;
 }
 
-bool BosonMap::loadCell(QDataStream& stream, int& groundType, unsigned char& b)
+bool BosonMap::loadCell(QDataStream& stream, unsigned char* amountOfLand, unsigned char* amountOfWater) const
 {
- Q_INT32 g;
- Q_INT8 version;
+ Q_UINT8 land;
+ Q_UINT8 water;
+ stream >> land;
+ stream >> water;
 
- stream >> g;
- if (!Cell::isValidGround(g)) { 
-	return false; 
- }
-
- stream >> version;
- if (version > 4) {
-	boError() << k_funcinfo << "broken map file!" << endl;
-	boError() << "invalid cell: version >= 4!" << endl;
-	boDebug() << version << endl;
- }
- groundType = g;
- b = version;
-
+ (*amountOfLand) = land;
+ (*amountOfWater) = water;
  return true;
 }
 
-void BosonMap::saveCell(QDataStream& stream, int groundType, unsigned char version)
+void BosonMap::saveCell(QDataStream& stream, unsigned char amountOfLand, unsigned char amountOfWater)
 {
- if (version > 4) {
-	boWarning() << k_funcinfo << "Invalid version " << version << endl;
-	version = 0;
- }
- stream << (Q_INT32)groundType;
- stream << (Q_INT8)version;
+ stream << (Q_UINT8)amountOfLand;
+ stream << (Q_UINT8)amountOfWater;
 }
 
 Cell* BosonMap::cell(int x, int y) const
@@ -480,7 +650,7 @@ float BosonMap::heightAtCorner(int x, int y) const
  if (y < 0 || (unsigned int)(y + 1) >= height()) {
 	return 1.0f;
  }
- return mHeightMap[y * (width() + 1) + x];
+ return mHeightMap[cornerArrayPos(x, y)];
 }
 
 void BosonMap::setHeightAtCorner(int x, int y, float h)
@@ -499,7 +669,7 @@ void BosonMap::setHeightAtCorner(int x, int y, float h)
  mHeightMap[y * (width() + 1) + x] = h;
 }
 
-void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
+void BosonMap::slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater)
 {
 //boDebug() << x << " -> " << y << endl;
 //boDebug() << width() << " " << height() << endl;
@@ -508,43 +678,24 @@ void BosonMap::slotChangeCell(int x, int y, int groundType, unsigned char b)
 	boError() << k_funcinfo << "Invalid cell x=" << x << ",y=" << y << endl;
 	return;
  }
- if ((Cell::GroundType)groundType == Cell::GroundUnknown) {
-	boWarning() << k_funcinfo << "Unknown ground?! x=" << x << ",y=" << y
-			<< endl;
+ if ((int)amountOfLand + (int)amountOfWater > 255) {
+	boWarning() << k_funcinfo << "invalid amounts of land/water: " << amountOfLand << "/" << amountOfWater << endl;
+	// we do not return - we have to keep in sync with network
  }
- c->makeCell(groundType, b);
+ c->makeCell(amountOfLand, amountOfWater);
 }
 
-void BosonMap::loadTiles(const QString& tiles, bool withtimer)
+void BosonMap::loadGroundTheme(const QString& theme)
 {
- delete mTiles;
- mTiles = new BosonTiles(this);
- connect(mTiles, SIGNAL(signalTilesLoading(int)),
-		this, SIGNAL(signalTilesLoading(int)));
- connect(mTiles, SIGNAL(signalTilesLoaded()),
-		this, SIGNAL(signalTilesLoaded()));
- QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.ground").arg(tiles)) + QString("boson/themes/grounds/%1").arg(tiles);
+ delete mGroundTheme;
+ mGroundTheme = new BosonGroundTheme();
+ QString dir = KGlobal::dirs()->findResourceDir("data", QString("boson/themes/grounds/%1/index.ground").arg(theme));
  if (dir.isNull()) {
-	boError() << k_funcinfo << "Cannot find tileset " << tiles << endl;
+	boError() << k_funcinfo << "Cannot find tileset " << theme << endl;
 	return;
  }
- d->mTilesDir = dir;
- if (withtimer) {
-	QTimer::singleShot(0, this, SLOT(slotLoadTiles()));
- } else {
-	slotLoadTiles();
- }
-}
-
-void BosonMap::slotLoadTiles()
-{
- boDebug() << k_funcinfo << endl;
- QTime time;
- time.start();
- mTiles->loadTiles(d->mTilesDir);
- boDebug() << k_funcinfo << "loading took: " << time.elapsed() << endl;
-
- emit signalTileSetChanged(mTiles);
+ dir += QString("boson/themes/grounds/%1/").arg(theme);
+ mGroundTheme->loadGroundTheme(this, dir);
 }
 
 void BosonMap::resize(unsigned int width, unsigned int height)
@@ -571,20 +722,140 @@ void BosonMap::resize(unsigned int width, unsigned int height)
  loadMapGeo(readStream);
 }
 
-void BosonMap::fill(int ground)
+BosonTextureArray* BosonMap::textures() const
+{
+ BO_CHECK_NULL_RET0(mGroundTheme);
+ return mGroundTheme->textures();
+}
+
+
+void BosonMap::fill(unsigned int texture)
 {
  if (!mCells) {
 	boError() << k_funcinfo << "NULL cells" << endl;
 	return;
  }
- for (unsigned int i = 0; i < width(); i++) {
-	for (unsigned int j = 0; j < height(); j++) {
-		int version = kapp->random() % 4; // note: this is a bad thing for network (although version doesn't influence game logic)
-		slotChangeCell(i, j, ground, version);
+ BO_CHECK_NULL_RET(mTexMap);
+ if (texture >= textureCount()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	return;
+ }
+
+ // initialize to 0 first
+ for (unsigned int x = 0; x < width() + 1; x++) {
+	for (unsigned int y = 0; y < height() + 1; y++) {
+		for (unsigned int i = 0; i < textureCount(); i++) {
+			mTexMap[texMapArrayPos(0, x, y)] = 0;
+		}
+	}
+ }
+ for (unsigned int x = 0; x < width() + 1; x++) {
+	for (unsigned int y = 0; y < height() + 1; y++) {
+		mTexMap[texMapArrayPos(texture, x, y)] = 255;
 	}
  }
 }
 
+float BosonMap::cellAverageHeight(int x, int y)
+{
+ Cell* c = cell(x, y);
+ if (!c) {
+	return 0;
+ }
+
+ float minz = 1000.0f;
+ float maxz = -1000.0f;
+
+ for (int i = x; i <= x + 1; i++) {
+	for (int j = y; j <= y + 1; j++) {
+		minz = QMIN(minz, heightAtCorner(i, j));
+		maxz = QMAX(maxz, heightAtCorner(i, j));
+	}
+ }
+
+ return (minz + maxz) / 2.0f;
+}
+
+bool BosonMap::importTexMap(const QString& file, int texturesPerComponent, bool useAlpha)
+{
+ QImage* img = new QImage(file);
+ if (img->isNull()) {
+	boError() << k_funcinfo << "could not load from " << file << endl;
+	delete img;
+	return false;
+ }
+ boDebug() << k_funcinfo << "importing from " << file << endl;
+ bool ret = importTexMap(img, texturesPerComponent, useAlpha);
+ delete img;
+ return ret;
+}
+
+bool BosonMap::importTexMap(const QImage* img, int texturesPerComponent, bool useAlpha)
+{
+ boWarning() << k_funcinfo << "this function is mos probably broken at the moment!" << endl;
+ if (!img) {
+	BO_NULL_ERROR(img);
+	return false;
+ }
+ if (img->isNull()) {
+	boError() << k_funcinfo << "null image" << endl;
+	return false;
+ }
+ if (img->depth() != 32) {
+	boError() << k_funcinfo << "only 32 bits per pixel are supported! image has: "
+			<< img->depth() << endl;
+	return false;
+ }
+ if (useAlpha && !img->hasAlphaBuffer()) {
+	boError() << k_funcinfo << "cannot use alpha, as image doesn't have alpha buffer!" << endl;
+	return false;
+ }
+ if ((unsigned int)img->width() != width() + 1) {
+	boError() << k_funcinfo << "image width must be "
+			<< width() + 1 << ", is: " << img->width() << endl;
+	return false;
+ }
+ if ((unsigned int)img->height() != height() + 1) {
+	boError() << k_funcinfo << "image height must be "
+			<< height() + 1 << ", is: " << img->height() << endl;
+	return false;
+ }
+ if (texturesPerComponent <= 0  || texturesPerComponent > 8) {
+	boError() << k_funcinfo << "invalid texturesPerComponent: " << texturesPerComponent << endl;
+	return false;
+ }
+ if ((unsigned int)texturesPerComponent * (useAlpha ? 4 : 3)> textureCount()) {
+	boWarning() << k_funcinfo << "this map doesn't have " 
+			<< texturesPerComponent * (useAlpha ? 4 : 3)
+			<< " textures. reset to " << textureCount() << " textures, i.e. "
+			<< textureCount() / (useAlpha ? 4 : 3) 
+			<< " textures per component" << endl;
+	texturesPerComponent = textureCount() / (useAlpha ? 4 : 3);
+ }
+
+ if (texturesPerComponent != 1) {
+	boError() << k_funcinfo << "currently we are supporting only 1 texture per component!" << endl;
+	return false;
+ }
+ if (!mTexMap) {
+	boError() << k_funcinfo << "NULL texmap" << endl;
+	return false;
+ }
+
+boDebug() << k_funcinfo << endl;
+ for (unsigned int y = 0; y < height() + 1; y++) {
+	QRgb* line = (QRgb*)img->scanLine(y);
+	for (unsigned int x = 0; x < width() + 1; x++) {
+		QRgb pixel = line[x];
+//		for (int i = 0; i < texturesPerComponent; i++) {
+			mTexMap[texMapArrayPos(0, x, y)] = qRed(pixel);
+			mTexMap[texMapArrayPos(1, x, y)] = qGreen(pixel);
+			mTexMap[texMapArrayPos(2, x, y)] = qBlue(pixel);
+//		}
+	}
+ }
+ return true;
+}
 
 float BosonMap::pixelToHeight(int p)
 {
@@ -603,22 +874,212 @@ int BosonMap::heightToPixel(float height)
  return (int)(height * 10 + 105);
 }
 
-float BosonMap::cellAverageHeight(int x, int y)
+bool BosonMap::generateCellsFromTexMap()
 {
- Cell* c = cell(x, y);
- if (!c) {
-	return 0;
+ boDebug() << k_funcinfo << endl;
+ if (width() * height() <= 0) {
+	boError() << k_funcinfo << "invalid map size - width=" << width() << " height=" << height() << endl;
+	return false;
  }
-
- float minz = 1000;
- float maxz = -1000;
-
- for (int i = x; i <= x + 1; i++) {
-	for (int j = y; j <= y + 1; j++) {
-		minz = QMIN(minz, heightAtCorner(i, j));
-		maxz = QMAX(maxz, heightAtCorner(i, j));
+ if (textureCount() == 0) {
+	boError() << k_funcinfo << "0 textures in map" << endl;
+	return false;
+ }
+ if (d->mTextureGroundType.count() < textureCount()) {
+	boError() << k_funcinfo << "have groundType information on " << d->mTextureGroundType.count() << " groundTypes only, need " << textureCount() << endl;
+	return false;
+ }
+ for (unsigned int x = 0; x < width(); x++) {
+	for (unsigned int y = 0; y < height(); y++) {
+		recalculateCell(x, y);
 	}
  }
-
- return (minz + maxz) / 2;
+ return true;
 }
+
+void BosonMap::setTextureGroundType(unsigned int texture, int groundType, QRgb miniMapColor, unsigned char amountOfLand, unsigned char amountOfWater)
+{
+ struct TextureGroundType type;
+ type.mGroundType = groundType;
+ type.mMiniMapColor = miniMapColor;
+ type.mAmountOfLand = amountOfLand;
+ type.mAmountOfWater = amountOfWater;
+ if (d->mTextureGroundType.count() < texture + 1) {
+	d->mTextureGroundType.resize(texture + 1);
+ }
+ d->mTextureGroundType[texture] = type;
+}
+
+unsigned char BosonMap::amountOfLand(unsigned int texture) const
+{
+ if (texture >= d->mTextureGroundType.count()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	return 0;
+ }
+ return d->mTextureGroundType[texture].mAmountOfLand;
+}
+
+unsigned char BosonMap::amountOfWater(unsigned int texture) const
+{
+ if (texture >= d->mTextureGroundType.count()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	return 0;
+ }
+ return d->mTextureGroundType[texture].mAmountOfWater;
+}
+
+int BosonMap::groundType(unsigned int texture) const
+{
+ if (texture >= d->mTextureGroundType.count()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	return 0;
+ }
+ return d->mTextureGroundType[texture].mGroundType;
+}
+
+void BosonMap::recalculateCell(int x, int y)
+{
+ Cell* c = cell(x, y);
+ BO_CHECK_NULL_RET(c);
+ BO_CHECK_NULL_RET(mTexMap);
+ if (x < 0 || (uint)x >= width()) {
+	boError() << k_funcinfo << "invalid x: " << x << endl;
+	return;
+ }
+ if (y < 0 || (uint)y >= height()) {
+	boError() << k_funcinfo << "invalid y: " << y << endl;
+	return;
+ }
+
+ // how much land/water is on the cell. maximum is 255 per corner, i.e. 255*4
+ // sum of both must be <= 4*255
+ int land = 0;
+ int water = 0;
+
+ // every (!) cell has exactly 4 corners. every corner has
+ // textureCount() alpha values.
+ int* alpha = new int[4 * textureCount()];
+ for (unsigned int i = 0; i < textureCount(); i++) {
+	// top-left corner
+	alpha[4 * i] = (int)texMapAlpha(i, x, y);
+	// top-right corner
+	alpha[4 * i + 1] = (int)texMapAlpha(i, x + 1, y);
+	// bottom-left corner
+	alpha[4 * i + 2] = (int)texMapAlpha(i, x, y + 1);
+	// bottom-right corener
+	alpha[4 * i + 3] = (int)texMapAlpha(i, x + 1, y + 1);
+	for (int j = 0; j < 4; j++) {
+		int a = alpha[4 * i + j];
+		if (a == 0) {
+			// no need to do anything.
+			continue;
+		}
+		int l = (int)amountOfLand(i);
+		int w = (int)amountOfWater(i);
+		if (l != 0) {
+			land += (int)(l * a / 255);
+		}
+		if (w != 0) {
+			water += (int)(w * a / 255);
+		}
+	}
+ }
+ delete[] alpha;
+ alpha = 0;
+
+ if (land + water == 0) {
+	boWarning() << k_funcinfo << "land + water == 0 for cell at "
+			<< x << "," << y << endl;
+	land = 0;
+	water = 4 * 255;
+ }
+
+ // in the optimal case sum should be 4 * 255 (as of 4 corners).
+ // but we can't be 100% sure (bugs, rounding errors).
+ // also we have to scale the numbers down (4*255 to 255)
+ int sum = land + water;
+ unsigned char amountOfLand = (unsigned char)(land * 255 / sum);
+ unsigned char amountOfWater = (unsigned char)(water * 255 / sum);
+
+ // amountOfLand + amountOfWater must be 255.
+ amountOfLand += (255 - amountOfLand - amountOfWater);
+ c->makeCell(amountOfLand, amountOfWater);
+}
+
+void BosonMap::slotChangeTexMap(int x, int y, unsigned int texture, unsigned char alpha)
+{
+ // AB: this is an ugly hack, we shouldn't connect any signals in game mode to
+ // this slot at all.
+ // but i am sure one day noone will read the comments/docs for this and start
+ // to use it in gamemode, so we forbid this here.
+ // (we also shouldn't call this on construction, as it is slow when many points
+ // are changed)
+ if (boGame->gameMode()) {
+	boError() << k_funcinfo << "must not be called in gameMode" << endl;
+	return;
+ }
+ if (x < 0 || (uint)x >= width()) {
+	boError() << k_funcinfo << "invalid x coordinate: " << x << endl;
+	return;
+ }
+ if (y < 0 || (uint)y >= height()) {
+	boError() << k_funcinfo << "invalid y coordinate: " << y << endl;
+	return;
+ }
+ if (texture >= textureCount()) {
+	boError() << k_funcinfo << "invalid texture " << texture << " must be < " << textureCount() << endl;
+	return;
+ }
+ mTexMap[texMapArrayPos(texture, x, y)] = alpha;
+
+ // now we update up to 4 cells.
+ if (x == 0) { // left border
+	if (y == 0) { // top border
+		recalculateCell(x, y);
+	} else if ((uint)y == height()) { // bottom border
+		recalculateCell(x, y - 1);
+	} else { // somewhere between top and bottom
+		recalculateCell(x, y);
+		recalculateCell(x, y - 1);
+	}
+ } else if ((uint)x == width()) { // right border
+	if (y == 0) { // top border
+		recalculateCell(x - 1, y);
+	} else if ((uint)y == height()) { // bottom border
+		recalculateCell(x - 1, y - 1);
+	} else { // somewhere between top and bottom
+		recalculateCell(x - 1, y);
+		recalculateCell(x - 1, y - 1);
+	}
+ } else if (y == 0) {
+	// top border (can't be left or right border)
+	recalculateCell(x, y);
+	recalculateCell(x - 1, y);
+ } else if ((uint)y == height()) {
+	// bottom border (can't be left or right border)
+	recalculateCell(x, y - 1);
+	recalculateCell(x - 1, y - 1);
+ } else {
+	// no border at all. 4 cells are adjacent.
+	recalculateCell(x, y);
+	recalculateCell(x, y - 1);
+	recalculateCell(x - 1, y);
+	recalculateCell(x - 1, y - 1);
+ }
+}
+
+// AB: maybe this should be in BosonGroundTheme!
+QRgb BosonMap::miniMapColor(unsigned int texture) const
+{
+ if (texture >= d->mTextureGroundType.count()) {
+	boError() << k_funcinfo << "invalid texture " << texture << endl;
+	return 0;
+ }
+ return d->mTextureGroundType[texture].mMiniMapColor;
+}
+
+int BosonMap::mapFileFormatVersion()
+{
+ return BOSONMAP_VERSION;
+}
+

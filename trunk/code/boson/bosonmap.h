@@ -26,7 +26,8 @@ class UnitBase;
 class Boson;
 class QStringList;
 class QDataStream;
-class BosonTiles;
+class BosonGroundTheme;
+class BosonTextureArray;
 
 /**
  * This class represents a boson map. It is part of a @ref BosonPlayField (a
@@ -105,7 +106,17 @@ public:
 		return true;
 	}
 
-	bool loadHeightMapImage(const QByteArray&);
+	/**
+	 * Load an image from @p buffer and convert it to the internal
+	 * heightmap format of @ref BosonMap.
+	 *
+	 * This function can be used to import a height map in the editor or
+	 * (more important) to load the heightmap from a .bpf file (where it is
+	 * stored as a png image).
+	 **/
+	bool loadHeightMapImage(const QByteArray& buffer);
+
+	bool importHeightMapImage(const QImage& image);
 
 	bool saveMapToFile(QDataStream& stream);
 
@@ -123,7 +134,7 @@ public:
 	 * the file on disk. This will not load things such as height map, which
 	 * are in a different file.
 	 **/
-	bool loadMapFromFile(QDataStream& stream);
+	bool loadMapFromFile(const QByteArray& map);
 
 	/**
 	 * Load the complete map, even those data that are stored in different
@@ -153,23 +164,15 @@ public:
 	bool modified() const { return mModified; }
 
 	/**
-	 * Tiles are loaded externally, so they need to be placed into the map.
+	 * Load a @ref groundTheme - see @ref BosonGroundTheme. The groundTheme
+	 * contains the actual textures used by the @ref texMap.
 	 *
-	 * See BosonCanvas, where tile loading takes place (currently)
+	 * @param theme The groundTheme to be loaded, such as "earth"
 	 **/
-	void setTileSet(BosonTiles* t);
-	BosonTiles* tileSet() const { return mTiles; }
+	void loadGroundTheme(const QString& theme);
+	BosonGroundTheme* groundTheme() const { return mGroundTheme; }
 
-	/**
-	 * Load the tileset - see @ref BosonTiles
-	 *
-	 * Note that the actual loading happens in @ref slotLoadTiles using
-	 * a @ref QTimer::singleShot. This gives us a non-blocking UI as we can
-	 * use @ref QApplication::processEvents
-	 * @param tiles currently always "earth.png", currently
-	 * @param withtimer whether to use timer
-	 **/
-	void loadTiles(const QString& tiles, bool withtimer = true);
+	BosonTextureArray* textures() const;
 
 	/**
 	 * Resize the map. Currently this works only if the cells have
@@ -178,23 +181,16 @@ public:
 	void resize(unsigned int width, unsigned int height);
 
 	/**
-	 * Fill all cells with @p ground.
-	 * @param ground See @ref Cell::GroundType
+	 * Fill the @ref texMap with 100% of @p texture.
 	 **/
-	void fill(int ground);
+	void fill(unsigned int texture);
 
 	inline float* heightMap() const { return mHeightMap; }
 
 	/**
 	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
-	 * I.e. if you do this
-	 * <pre>
-	 * heightAtCorner(width(), height())
-	 * </pre>
-	 * it will be valid (althought cell() would return NULL). This example
-	 * would return the height of the <em>lower right</em> corner of the
-	 * cell at (width()-1, height()-1), i.e. the cell in the lower right
-	 * corner of the map.
+	 * See also @ref cornerArrayPos for detailed description of possible
+	 * values.
 	 * @return The height of the upper left corner of the cell at @p x, @p
 	 * y or 1.0 if invalid coordinates were specified.
 	 **/
@@ -203,26 +199,156 @@ public:
 
 	float cellAverageHeight(int x, int y);
 
+	/**
+	 * @return The number of different textures used in this map. See also
+	 * @ref texMap
+	 **/
+	unsigned int textureCount() const { return mTextureCount; }
+
+	/**
+	 * @return The internal texmap array, which defines how much percent
+	 * of every texture (see also @ref textureCount) are used in the corners
+	 * of the cells.
+	 * @param texture This defines which values should be returned. Use 0
+	 * for the entire texMap, or use a value less than @ref textureCount
+	 * to get the values for a certain texture (0 is also the first
+	 * texture).
+	 **/
+	inline unsigned char* texMap(int texture = 0) const
+	{
+		return (mTexMap + texture * (width() + 1) * (height() + 1));
+	}
+
+	/**
+	 * @param x The x-coordinate of the left corner that is wanted.
+	 * @param y The y-coordinate of the top corner that is wanted.
+	 * @param texture The index/number of the texture (grass, desert, water,
+	 * ...) that is wanted.
+	 **/
+	inline int texMapArrayPos(unsigned int texture, int x, int y) const
+	{
+		return ((texture) * (width() + 1) * (height() + 1) + cornerArrayPos(x, y));
+	}
+
+	inline unsigned char texMapAlpha(unsigned int texture, int x, int y) const
+	{
+		return mTexMap[texMapArrayPos(texture, x, y)];
+	}
+	QRgb miniMapColor(unsigned int texture) const;
+
+	/**
+	 * Note that you can specify (width() + 1) * (height() + 1) corners here!
+	 * I.e. if you do this
+	 * <pre>
+	 * int pos = cornerArrayPos(width(), height())
+	 * </pre>
+	 * it will be valid (althought cell() would return NULL). This example
+	 * would return the position of the <em>lower right</em> corner of the
+	 * cell at (width()-1, height()-1), i.e. the cell in the lower right
+	 * corner of the map.
+	 *
+	 * @param x The x-coordinate of the wanted corner. Note that counting
+	 * begins at top-left, i.e. 0 is the left corner of the leftmost cell
+	 * and @ref width is the right corner of the rightmost cell.
+	 * @param y The y-coordinate of the wanted corner. Note that counting
+	 * begins at top-left, i.e. 0 is the top corner of the topmost cell
+	 * and @ref height is the bottom corner of the bottom cell.
+	 * @return The array-coordinates of the corner at x,y. This array
+	 * position can be used for all map-arrays which are based on corners
+	 * (currently that are height map and texmap).
+	 **/
+	inline int cornerArrayPos(int x, int y) const
+	{
+		return x + y * (width() + 1);
+	}
+
+	/**
+	 * Load the @ref texMap from @p stream.
+	 *
+	 * If there is no data in this stream then this function will (try to)
+	 * generate a texmap according to the @ref Cell::groundType of the
+	 * already loaded cells. The default number of textures is used then.
+	 **/
+	bool loadTexMap(QDataStream& stream);
+	bool saveTexMap(QDataStream& stream);
+
+	/**
+	 * Import a texmap from an image.
+	 **/
+	bool importTexMap(const QImage* image, int texturesPerComponent = 1, bool useAlpha = false);
+	bool importTexMap(const QString& file, int texturesPerComponent = 1, bool useAlpha = false);
+
+	static float pixelToHeight(int p);
+	static int heightToPixel(float height);
+
+	bool generateCellsFromTexMap();
+
+	/**
+	 * This value is intended for the @ref Cell::canGo check. E.g. units
+	 * that can go on cells with amountOfLand >= 130 can't go on a cell with
+	 * amountOfLand = 30. The amount of land/water are mixed together, based
+	 * on the 4 corners of a cell. This value specifies the amountOfLand
+	 * that would get used for a cell texture if there is 100% (i.e.
+	 * alpha=255) with this texture.
+	 *
+	 * @return The amount of land on cells that are textured with @p
+	 * texture. Note that this value is dependable for pathfindinding! It
+	 * will be generated by the ADMIN client and sent through network for
+	 * all other clients, so it will always have the same value on all
+	 * clients.
+	 **/
+	unsigned char amountOfLand(unsigned int texture) const;
+
+	/**
+	 * @return The amount of water on cells that are textured with @p
+	 * texture. See @ref amountOfLand for further information.
+	 **/
+	unsigned char amountOfWater(unsigned int texture) const;
+
+	/**
+	 * This value is intended for the texturing code only (although it could
+	 * be used for pathfinding, too - see below). We need the type of the
+	 * ground in order to pick the correct texture. amount of land/water is
+	 * not sufficient for that, as e.g. desert and water both have
+	 * amountOfLand=255, amountOfWater=0.
+	 *
+	 * @return The type of ground at cells with @p texture. Note that this
+	 * type is dependable for pathfinding in the same way as @ref
+	 * amountOfLand. Also note that textures are mixed in boson, so there
+	 * can (and probably will) be different groundTypes on a single cell!
+	 **/
+	int groundType(unsigned int texture) const;
+
+	/**
+	 * @return The file format version of the map, that is used when
+	 * saving a map file (see @ref saveMapToFile).
+	 **/
+	static int mapFileFormatVersion();
+
 public slots:
-	void slotChangeCell(int x, int y, int groundType, unsigned char b);
+	void slotChangeCell(int x, int y, unsigned char amountOfLand, unsigned char amountOfWater);
+
+	/**
+	 * Change the alpha value of the texmap at @þ x, @p y for @þ texture.
+	 *
+	 * This should <em>not</em> be used when initializing the map, as it
+	 * will also update all 4 adjacent cells.
+	 *
+	 * Also note that it must <em>no</em> (!!!) be called in gameMode at
+	 * all, also because the 4 adjacent cells are updated (see @ref
+	 * recalculateCell).
+	 *
+	 * This slot is meant for editor use only.
+	 **/
+	void slotChangeTexMap(int x, int y, unsigned int texture, unsigned char alpha);
 
 signals:
-	void signalTileSetChanged(BosonTiles*);
-
-	/**
-	 * See @ref BosonTiles::signalTilesLoading
-	 **/
-	void signalTilesLoading(int tiles);
-
-	/**
-	 * See @ref BosonTiles::signalTilesLoaded
-	 **/
-	void signalTilesLoaded();
+	void signalGroundThemeChanged(BosonGroundTheme*);
 
 protected:
-	bool loadCell(QDataStream& stream, int& groundType, unsigned char& b);
+	bool loadCell(QDataStream& stream, unsigned char* amountOfLand, unsigned char* amountOfLand) const;
 
-	void saveCell(QDataStream& stream, int groundType, unsigned char b);
+	void saveCell(QDataStream& stream, unsigned char amountOfLand, unsigned char amountOfWater);
 
 	/**
 	 * Save the map geo into stream. This creates a stream in the format
@@ -257,16 +383,32 @@ protected:
 
 	bool loadHeightMap(QDataStream& stream);
 
-
-	static float pixelToHeight(int p);
-	static int heightToPixel(float height);
-
-protected slots:
 	/**
-	 * Load the tileset that has been specified using @ref loadTiles. We use
-	 * this slot to provide a non-blocking tile loading.
+	 * Called when loading the @ref texMap - see @ref loadTexMap.
+	 *
+	 * This specifies what kind of ground is used, i.e.
+	 * grass/desert/water/whatever. The values must "fit", i.e. for
+	 * groundType = grass you must not use amountOfLand=0 ;
+	 * amountOfWater=255.
 	 **/
-	void slotLoadTiles();
+	void setTextureGroundType(unsigned int texture, int groundType, QRgb miniMapColor, unsigned char amountOfLand, unsigned char amountOfWater);
+
+
+	/**
+	 * Recalculate the amountOfLand/Water values for the cell at @þ x,@p y.
+	 *
+	 * These values are based on the alpha values in the textures at all 4
+	 * corners of the cell.
+	 *
+	 * This should be called on map construction only (see @ref 
+	 * generateCellsFromTexMap), except in editor mode.
+	 *
+	 * Also note that the calculated values for this cell are <em>not</em>
+	 * fully network safe! The ADMIN will calculate these values and send
+	 * them out through network (see @ref loadCompleteMap), so that all
+	 * clients will use the same values.
+	 **/
+	void recalculateCell(int x, int y);
 
 private:
 	void init();
@@ -276,12 +418,14 @@ private:
 	BosonMapPrivate* d;
 	Cell* mCells;
 	float* mHeightMap;
+	unsigned int mTextureCount;
+	unsigned char* mTexMap;
 	bool mModified;
 
 	unsigned int mMapWidth;
 	unsigned int mMapHeight;
 
-	BosonTiles* mTiles;
+	BosonGroundTheme* mGroundTheme;
 };
 
 #endif
