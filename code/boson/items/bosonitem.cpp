@@ -197,7 +197,7 @@ void BosonItem::makeCells(Cell* allCells, QPtrVector<Cell>* cells, const BoRectF
  // it is WAY MORE IMPORTANT to ensure valid values here than making it fast!!
 
 
- int size = (right - left + 1) * (bottom - top + 1);
+ int size = (right - left) * (bottom - top);
  cells->resize(size);
  if (size == 0) {
 	return;
