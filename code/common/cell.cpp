@@ -22,9 +22,10 @@
 
 Cell::Cell(groundType g)
 {
-ground = g;
-destroyed = DESTROYED_NONE ;
+	ground = g;
+	destroyed = DESTROYED_NONE ;
 }
+
 
 Cell::~Cell()
 {

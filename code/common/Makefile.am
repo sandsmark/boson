@@ -3,12 +3,12 @@ CXXFLAGS = -pipe -Wall -g # -O2
 #MY_HOST :=  $(shell hostname | tr '[a-z]' '[A-Z]')_$(shell domainname | tr '[a-z]' '[A-Z]')
 #CXXFLAGS += -D$(MY_HOST)
 LDFLAGS =  -s 
-libboson_la_SOURCES = boconnect.cpp log.cpp unit.cpp cell.cpp bobuffer.cpp unitType.cpp groundType.cpp
+libboson_la_SOURCES = boconnect.cpp log.cpp unit.cpp cell.cpp bobuffer.cpp unitType.cpp groundType.cpp playField.cpp
 #libboson_la_LIBADD   =  -lkfile -lkfm -lkdeui -lkdecore -lqt -lXext -lX11 $(LIBSOCKET)
 
 SUBDIRS = 
 
-EXTRA_DIST = boconnect.cpp msgData.h log.h log.cpp unit.cpp unit.h cell.cpp cell.h ground.h bobuffer.cpp unitType.h unitType.cpp groundType.h groundType.cpp
+EXTRA_DIST = boconnect.cpp msgData.h log.h log.cpp unit.cpp unit.h cell.cpp cell.h ground.h bobuffer.cpp unitType.h unitType.cpp groundType.h groundType.cpp playField.h playField.cpp
 
 ####### kdevelop will overwrite this part!!! (end)############
 # this 10 paths are KDE specific. Use them:
