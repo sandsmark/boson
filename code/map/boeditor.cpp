@@ -66,6 +66,7 @@ facilityMsg_t facility[] = {
 	{1,	1, 20, 20, 0, FACILITY_REPAIRPAD}, 
 	{1,	1, 20, 17, 0, FACILITY_TURRET}, 
 	{1,	1, 23, 17, 0, FACILITY_TURRET}, 
+	{1,	0, 23, 19, 0, FACILITY_CMDBUNKER},
 	};
 
 /* 0 is red, 1 is blue*/
