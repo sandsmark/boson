@@ -537,7 +537,7 @@ bool BosonSaveLoad::loadPlayersFromXML(const QString& playersXML)
 		bool ok = false;
 		unsigned int id = e.attribute(QString::fromLatin1("PlayerId")).toUInt(&ok);
 		if (!ok) {
-			boError(270) << k_funcinfo << "missing or invalid Id attribute for Player tag " << j << endl;
+			boError(270) << k_funcinfo << "missing or invalid PlayerId attribute for Player tag " << j << endl;
 			continue;
 		}
 		if (p->id() != id) {
@@ -602,6 +602,7 @@ bool BosonSaveLoad::loadExternalFromXML(const QString& xml)
 
  return true;
 }
+
 bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 {
  // now we remove / change what does not belong there
@@ -635,15 +636,15 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	bool ok = false;
 	unsigned int id = p.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "invalid value for Id attribute of Player tag" << endl;
+		boError() << k_funcinfo << "invalid value for PlayerId attribute of Player tag" << endl;
 		return false;
 	}
 	if (id >= playerList.count()) {
-		boError() << k_funcinfo << "invalid Id for Player tag!" << endl;
+		boError() << k_funcinfo << "invalid PlayerId for Player tag!" << endl;
 		return false;
 	}
 	if (id != i) {
-		boError() << k_funcinfo << "unexpected Id " << id << " for Player tag - expected " << i << endl;
+		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Player tag - expected " << i << endl;
 	}
 	QDomElement handler = p.namedItem("DataHandler").toElement();
 	if (handler.isNull()) {
@@ -668,15 +669,15 @@ bool BosonSaveLoad::convertSaveGameToPlayField(QMap<QString, QByteArray>& files)
 	bool ok = false;
 	unsigned int id = items.attribute("PlayerId").toUInt(&ok);
 	if (!ok) {
-		boError() << k_funcinfo << "invalid value for Id attribute of Items tag" << endl;
+		boError() << k_funcinfo << "invalid value for PlayerId attribute of Items tag" << endl;
 		return false;
 	}
 	if (id >= itemsList.count()) {
-		boError() << k_funcinfo << "invalid Id for Items tag: " << id << endl;
+		boError() << k_funcinfo << "invalid PlayerId for Items tag: " << id << endl;
 		return false;
 	}
 	if (id != i) {
-		boError() << k_funcinfo << "unexpected Id " << id << " for Items tag - expected " << i << endl;
+		boError() << k_funcinfo << "unexpected PlayerId " << id << " for Items tag - expected " << i << endl;
 		return false;
 	}
 	QDomNodeList itemList = items.elementsByTagName("Item");
