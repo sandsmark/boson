@@ -103,7 +103,7 @@ class BosonParticleSystem
     BosonParticleSystem(int maxnum, int initialnum, float size,
         float createrate, bool align, float maxradius, int texture,
         BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-        BosonParticleSystemProperties* prop = 0);
+        const BosonParticleSystemProperties* prop = 0);
     /**
      * Constructs new BosonParticleSystem. This constructor is often enough if
      * you use functions for initing and updating particles.
@@ -118,7 +118,7 @@ class BosonParticleSystem
      * @param updateFunc This function, if specified, is called every time particle is updated
      **/
     BosonParticleSystem(int maxnum, float createrate,
-        bool align, float maxradius, int texture, BosonParticleSystemProperties* prop);
+        bool align, float maxradius, int texture, const BosonParticleSystemProperties* prop);
     /**
      * Destructs BosonParticleSystem. This deleted all particles
      **/
@@ -271,7 +271,7 @@ class BosonParticleSystem
     BoVector4 mColor;  // Color of particle
     float mParticleAge;  // How many seconds particles live
 
-    BosonParticleSystemProperties* mProp;
+    const BosonParticleSystemProperties* mProp;
 };
 
 #endif // BOSONPARTICLESYSTEM_H

@@ -83,15 +83,15 @@ class BosonParticleSystemProperties
     BosonParticleSystemProperties(KSimpleConfig* cfg);
     ~BosonParticleSystemProperties();
 
-    BosonParticleSystem* newSystem(float x, float y, float z);
+    BosonParticleSystem* newSystem(float x, float y, float z) const;
 
     inline static float getFloat(float min, float max)  { return ((float)(mRandom->getDouble())) * (max - min) + min; };
 
     inline static BoVector3 wind()  { return BoVector3(0.25, 0.15, 0); };
 
-    void initParticle(BosonParticleSystem* system, BosonParticle* particle);
+    void initParticle(BosonParticleSystem* system, BosonParticle* particle) const;
 
-    void updateParticle(BosonParticleSystem* system, BosonParticle* particle);
+    void updateParticle(BosonParticleSystem* system, BosonParticle* particle) const;
     
     static void init(QString texdir);
     

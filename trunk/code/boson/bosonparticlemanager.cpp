@@ -325,7 +325,7 @@ BosonParticleSystemProperties::~BosonParticleSystemProperties()
 {
 }
 
-BosonParticleSystem* BosonParticleSystemProperties::newSystem(float x, float y, float z)
+BosonParticleSystem* BosonParticleSystemProperties::newSystem(float x, float y, float z) const
 {
   BosonParticleSystem* s = new BosonParticleSystem(mMaxNum, mRate, mAlign,
       5, texture(mTextureName), this);
@@ -338,7 +338,7 @@ BosonParticleSystem* BosonParticleSystemProperties::newSystem(float x, float y, 
   return s;
 }
 
-void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonParticle* particle)
+void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonParticle* particle) const
 {
   particle->life = getFloat(mMinLife, mMaxLife);
   particle->maxage = particle->life;
@@ -355,7 +355,7 @@ void BosonParticleSystemProperties::initParticle(BosonParticleSystem*, BosonPart
       getFloat(mMinPos[1], mMaxPos[1]), getFloat(mMinPos[2], mMaxPos[2]));
 }
 
-void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle)
+void BosonParticleSystemProperties::updateParticle(BosonParticleSystem*, BosonParticle* particle) const
 {
   float factor = particle->life / particle->maxage;  // This is 1 when particle is born and will be 0 by the time when it dies
   particle->color.setBlended(mStartColor, factor, mEndColor, 1.0 - factor);

@@ -69,7 +69,7 @@ void BosonParticle::update(float elapsed)
 BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
     float createrate, bool align, float maxradius, int texture,
     BoVector4 color, float particleage, float age, BoVector3 pos, BoVector3 velo,
-    BosonParticleSystemProperties* prop)
+    const BosonParticleSystemProperties* prop)
 {
   // Set some variables first
   mMaxNum = maxnum;
@@ -94,7 +94,7 @@ BosonParticleSystem::BosonParticleSystem(int maxnum, int initialnum, float size,
 
 BosonParticleSystem::BosonParticleSystem(int maxnum,
     float createrate, bool align, float maxradius, int texture,
-    BosonParticleSystemProperties* prop)
+    const BosonParticleSystemProperties* prop)
 {
   //cout << k_funcinfo << "CREATING PARTICLE SYSTEM.  maxnum: " <<  maxnum <<
       //"; createrate: " << createrate << endl;
@@ -308,7 +308,10 @@ void BosonParticleSystem::initParticle(BosonParticle* particle)
 
 void BosonParticleSystem::updateParticle(BosonParticle* particle)
 {
-  if(mProp) mProp->updateParticle(this, particle);
+  if(mProp)
+  {
+    mProp->updateParticle(this, particle);
+  }
 }
 
 void BosonParticleSystem::moveParticles(BoVector3 v)
@@ -323,3 +326,7 @@ void BosonParticleSystem::moveParticles(BoVector3 v)
     }
   }
 }
+
+/*
+ * vim: et sw=2
+ */

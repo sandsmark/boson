@@ -127,7 +127,7 @@ void pointByRotation(float &x, float &y, const float angle, const float radius)
 
 /*****  BoVector*  *****/
 
-float BoVector3::length()
+float BoVector3::length() const
 {
  return sqrt(mData[0] * mData[0] + mData[1] * mData[1] + mData[2] * mData[2]);
 }
