@@ -388,14 +388,17 @@ void HarvesterPlugin::advanceMine()
 	unit()->setWork(Unit::WorkNone);
 	return;
  }
+ // Check if unit is at mining location. If not, go there
  if((mResourcesX / BO_TILE_SIZE != unit()->x() / BO_TILE_SIZE) || (mResourcesY / BO_TILE_SIZE != unit()->y() / BO_TILE_SIZE))
  {
 	unit()->moveTo(mResourcesX, mResourcesY);
 	unit()->setAdvanceWork(Unit::WorkMove);
 	return;
  }
+ // Check if we should harvest more
  if (resourcesMined() < prop->maxResources()) {
 	if (canMine(canvas()->cellAt(unit()))) {
+		// How much more to harvest
 		const int step = (resourcesMined() + miningSpeed() <= prop->maxResources()) ? miningSpeed() : prop->maxResources() - resourcesMined();
 		mResourcesMined = resourcesMined() + step;
 		if (prop->canMineMinerals()) {
@@ -405,12 +408,14 @@ void HarvesterPlugin::advanceMine()
 		}
 		boDebug() << "resources mined: " << resourcesMined() << endl;
 	} else {
+		// This unit cannot mine at this cell
 		boDebug() << k_funcinfo << "cannot mine here" << endl;
 		unit()->setWork(Unit::WorkNone);
 		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
 	}
  } else {
+	// Back to refinery
 	boDebug() << k_funcinfo << "Maximal amount of resources mined." << endl;
 	mHarvestingType = 2; // refining
  }
@@ -418,6 +423,7 @@ void HarvesterPlugin::advanceMine()
 
 void HarvesterPlugin::advanceRefine()
 {
+ // This is the second step of harvesting: returning to refinery and unloading
  boDebug() << k_funcinfo << endl;
  if (resourcesMined() == 0) {
 	boDebug() << k_funcinfo << "refining done" << endl;
@@ -430,6 +436,7 @@ void HarvesterPlugin::advanceRefine()
 	return;
  }
  if (!refinery()) {
+	// Refinery is not yet set. Find the closest one.
 	QPtrListIterator<Unit> it(*(player()->allUnits()));
 	const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
 	if (!prop) {
@@ -438,19 +445,24 @@ void HarvesterPlugin::advanceRefine()
 		unit()->setAdvanceWork(Unit::WorkNone);
 		return;
 	}
-	Facility* ref = 0; // FIXME: must not depend on Facility! Use a RefineryPlugin
+	Unit* ref = 0;
 	float refdist = 0;
+	RefineryProperties* rprop;
+	boDebug() << k_funcinfo << "going throught units list. count: " << it.count() << endl;
 	while (it.current()) {
-		const UnitProperties* unitProp = it.current()->unitProperties();
-		if (!it.current()->isFacility()) {
+		boDebug() << k_funcinfo << "        testing unit " << it.current()->id() << endl;
+		rprop = (RefineryProperties*)it.current()->properties(PluginProperties::Refinery);
+		if (!rprop) {
 			++it;
 			continue;
 		}
-		if ((prop->canMineMinerals() && unitProp->canRefineMinerals()) || (prop->canMineOil() && unitProp->canRefineOil())) {
+		boDebug() << k_funcinfo << "    unit " << it.current()->id() << " has refinery props" << endl;
+		if ((prop->canMineMinerals() && rprop->canRefineMinerals()) || (prop->canMineOil() && rprop->canRefineOil())) {
+			boDebug() << k_funcinfo << "    unit " << it.current()->id() << " would be suitable..." << endl;
 			float dist = QMAX(QABS(unit()->x() - it.current()->x()), QABS(unit()->y() - it.current()->y()));
 			if((dist < refdist) || (refdist == 0)) {
 				refdist = dist;
-				ref = (Facility*)it.current();
+				ref = it.current();
 			}
 		}
 		++it;
@@ -465,6 +477,7 @@ void HarvesterPlugin::advanceRefine()
 	}
 	return;
  } else {
+	// Refinery is set
 	if (unit()->isNextTo(refinery())) {
 		const int step = (resourcesMined() >= unloadingSpeed()) ? unloadingSpeed() : resourcesMined();
 		mResourcesMined = resourcesMined() - step;
@@ -482,6 +495,7 @@ void HarvesterPlugin::advanceRefine()
 			player()->statistics()->increaseRefinedOil(step);
 		}
 	} else {
+		// Move next to refinery
 		if (!unit()->moveTo(refinery()->x(), refinery()->y(), 1)) {
 			boDebug() << k_funcinfo << "Cannot find way to refinery" << endl;
 			unit()->setWork(Unit::WorkNone);
@@ -513,9 +527,13 @@ void HarvesterPlugin::refineAt(Unit* refinery)
 	boError() << k_funcinfo << "NULL refinery" << endl;
 	return;
  }
- if (!refinery->unitProperties()->canRefineMinerals() &&
-		!refinery->unitProperties()->canRefineOil()) {
-	boError() << k_funcinfo << refinery->id() << " not a refinery" << endl;
+ RefineryProperties* prop = (RefineryProperties*)refinery->properties(PluginProperties::Refinery);
+ if (!prop) {
+	boError() << k_funcinfo << refinery->id() << " doesn't have refinery properties" << endl;
+	return;
+ }
+ if (!(canMineMinerals() && prop->canRefineMinerals()) && !(canMineOil() && prop->canRefineOil())) {
+	boError() << k_funcinfo << refinery->id() << " not a suitable refinery" << endl;
  }
  boDebug() << k_funcinfo << endl;
  setRefinery(refinery);
@@ -538,16 +556,7 @@ void HarvesterPlugin::setRefinery(Unit* refinery)
  if (!refinery || refinery->isDestroyed()) {
 	return;
  }
- const HarvesterProperties* prop = (HarvesterProperties*)unit()->properties(PluginProperties::Harvester);
- if (!prop) {
-	return;
- }
- const UnitProperties* refProp = refinery->unitProperties(); // TODO: replace by pluginProperties
- if (prop->canMineMinerals() && refProp->canRefineMinerals()) {
-	mRefinery = refinery;
- } else if (prop->canMineOil() && refProp->canRefineOil()) {
-	mRefinery = refinery;
- }
+ mRefinery = refinery;
 }
 
 bool HarvesterPlugin::canMine(Cell* cell) const
@@ -555,6 +564,7 @@ bool HarvesterPlugin::canMine(Cell* cell) const
  if (canMineMinerals() && cell->groundType() == Cell::GroundGrassMineral) {
 	return true;
  }
+ // FIXME: there's no "oil cells" anymore
  if (canMineOil() && cell->groundType() == Cell::GroundGrassOil) {
 	return true;
  }

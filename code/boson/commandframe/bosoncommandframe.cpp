@@ -327,6 +327,7 @@ void BosonCommandFrame::slotUpdate()
 //	slotUpdateProduction(selectedUnit());
 	selectionWidget()->productionAdvanced(selectedUnit(), production->productionProgress());
  }
+ d->mMinerWidget->showUnit(selectedUnit());
 }
 
 bool BosonCommandFrame::checkUpdateTimer() const

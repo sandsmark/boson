@@ -41,9 +41,8 @@ public:
 		Production = 0,
 		Repair = 1,
 		Harvester = 2,
-		Refine = 3,
-		Upgrade = 4,
-		Weapon = 5
+		Refinery = 3,
+		Weapon = 4
 	};
 	PluginProperties(const UnitProperties* parent);
 	virtual ~PluginProperties();
@@ -162,6 +161,41 @@ private:
 	unsigned int mMaxResources;
 	unsigned int mMiningSpeed;
 	unsigned int mUnloadingSpeed;
+};
+
+
+class RefineryProperties : public PluginProperties
+{
+public:
+	RefineryProperties(const UnitProperties* parent);
+	~RefineryProperties();
+
+	static QString propertyGroup();
+
+	virtual QString name() const;
+	virtual void loadPlugin(KSimpleConfig* config);
+	virtual void savePlugin(KSimpleConfig* config);
+	virtual int pluginType() const { return PluginProperties::Refinery; }
+
+	/**
+	 * @return TRUE if the unit can mine minerals, otherwise FALSE.
+	 **/
+	inline bool canRefineMinerals() const { return mCanRefineMinerals; }
+
+	/**
+	 * @return TRUE if the unit can mine oil, otherwise FALSE.
+	 **/
+	inline bool canRefineOil() const { return mCanRefineOil; }
+
+	
+protected:
+	friend class BoUnitEditor;
+	void setCanRefineMinerals(bool canRefineMinerals)  { mCanRefineMinerals = canRefineMinerals; };
+	void setCanRefineOil(bool canRefineOil)  { mCanRefineOil = canRefineOil; };
+
+private:
+	bool mCanRefineMinerals;
+	bool mCanRefineOil;
 };
 
 #endif
