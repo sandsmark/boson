@@ -12,6 +12,7 @@ maps_DATA = \
 	experimental4.bpf \
 	experimental5.bpf \
 	just_for_fun.bpf \
+	lod-test.bpf \
 	oneunit.bpf \
 	the_pass.bpf \
 	units-test.bpf \
