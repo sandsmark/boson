@@ -584,6 +584,8 @@ public:
 
 	// consists of vertices and texture coordinates:
 	float* mPoints;
+
+	unsigned int mLODCount;
 };
 
 BosonModel::BosonModel(const QString& dir, const QString& file, float width, float height)
@@ -605,6 +607,7 @@ void BosonModel::init()
  d->mConstructionSteps.setAutoDelete(true);
  d->mAnimations.setAutoDelete(true);
  d->mAllMaterials.setAutoDelete(true);
+ d->mLODCount = 1;
 
  // add the default mode 0
  insertAnimationMode(0, 0, 1, 1);
@@ -1065,13 +1068,20 @@ void BosonModel::computeBoundingObjects()
 
 void BosonModel::generateLOD()
 {
+ unsigned int lodCount = defaultLodCount();
+ if (lodCount == 0) {
+	boWarning() << k_funcinfo << "LOD count of 0 is not allowed" << endl;
+	lodCount = 1;
+ }
+
+ d->mLODCount = lodCount;
  for (unsigned int i = 0; i < meshCount(); i++) {
 	BoMesh* m = mesh(i);
 	if (!m) {
 		BO_NULL_ERROR(m);
 		continue;
 	}
-	m->generateLOD();
+	m->generateLOD(lodCount);
  }
 }
 
@@ -1156,6 +1166,11 @@ void BosonModel::enablePointer()
 
 unsigned int BosonModel::defaultLodCount()
 {
- return BoMesh::defaultLodCount();
+ return 5;
+}
+
+unsigned int BosonModel::lodCount() const
+{
+ return d->mLODCount;
 }
 

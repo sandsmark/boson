@@ -886,7 +886,7 @@ void BosonBigDisplayBase::renderItems()
 	if (useLOD) {
 		float dist = (camera()->cameraPos() - BoVector3(x, y, z)).length();
 		lod = defaultLOD;
-		while (lod < (BosonModel::defaultLodCount() - 1)) {
+		while (lod < (item->lodCount() - 1)) {
 			if (dist > LODLevels[lod]) {
 				// Object is too far for this lod
 				lod++;

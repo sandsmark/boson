@@ -304,6 +304,11 @@ public:
 	 */
 	static unsigned int defaultLodCount();
 
+	/**
+	 * @return How many LOD levels this model has
+	 **/
+	unsigned int lodCount() const;
+
 protected:
 	class BoHelper; // for computing width,height,.. of the model. this is a hack!
 

@@ -1143,11 +1143,6 @@ int BoMesh::texelPos()
  return BoMeshPoints::texelPos();
 }
 
-unsigned int BoMesh::defaultLodCount()
-{
- return 5;
-}
-
 void BoMesh::setMaterial(BoMaterial* mat)
 {
  d->mMaterial = mat;
@@ -1666,13 +1661,11 @@ void BoMesh::computeBoundingObject()
  d->mBoundingObject = builder.generateBoundingObject(this);
 }
 
-void BoMesh::generateLOD()
+void BoMesh::generateLOD(unsigned int LODCount)
 {
- // how many LODs should be generated. maybe use a parameter for this?
- // these numbers can be used by renderMesh() (or indirectly by renderFrame())
- // to choose which LOD should be rendered at. 0 is always the default, i.e.
- // render all points and faces.
- unsigned int LODCount = defaultLodCount(); // must be at least 1, as we have at leas the full-detailed version
+ // LODCount must ALWAYS be greate or equal to 1, as 0 is the default (full
+ // detailed) LOD, which must always be present.
+
 
  unsigned int oldCount = d->mLODCount;
  if (LODCount < oldCount) {
